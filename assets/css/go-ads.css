@@ -239,3 +239,34 @@ body.go-verge .go-ad-slot.go-article-sidebar__ad--sticky:not([data-go-ad-sticky-
 @media(max-width:767px){
   .go-article-sidebar__ad--stacked[data-go-ad-requested="1"]{margin-block:24px 0;padding-block-start:8px}
 }
+
+/* Multiplex na fronteira de recirculação.
+ *
+ * A grade se dimensiona pelo container, não pela viewport — por isso o renderer
+ * já omite data-full-width-responsive aqui. O que ela precisa é de largura útil
+ * e de nenhum `contain`, senão o iframe da grade fica preso na altura errada.
+ * Mesmo contrato de rodapé dos outros hosts: zero até ser solicitado. */
+.go-post-content-multiplex{
+  display:block;
+  inline-size:100%;
+  max-inline-size:100%;
+  min-width:0;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+.go-post-content-multiplex[data-go-ad-requested="1"]{
+  margin-block:clamp(30px,4.5vw,46px);
+  padding-block:12px 0;
+  border-block-start:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent);
+}
+.go-post-content-multiplex > ins.adsbygoogle{
+  display:block;
+  inline-size:100%;
+  max-inline-size:none;
+  margin-inline:auto;
+}
+@media(max-width:767px){
+  .go-post-content-multiplex[data-go-ad-requested="1"]{margin-block:26px;padding-block-start:10px}
+}

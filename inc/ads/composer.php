@@ -457,6 +457,36 @@ function go_verge_ads_render_post_content_unit( $anchor ) {
 	}
 	$spent[ $anchor ] = true;
 
+	/*
+	 * The recirculation boundary prefers the Multiplex grid.
+	 *
+	 * Not because it is bigger, but because it is a different auction. Multiplex
+	 * draws on native/recirculation demand that does not bid on the responsive
+	 * Display unit the listing pool would have put here, so this is the page
+	 * entering a second marketplace rather than running the same one twice. It
+	 * is also the only boundary where a grid of related items is the native
+	 * shape of the moment instead of an interruption of it.
+	 *
+	 * It REPLACES the pool unit at this anchor; it is not added on top. The
+	 * grid is tall, and stacking a banner against it is exactly the density the
+	 * rest of this engine exists to prevent. If the unit is ever disabled or
+	 * rolled back, the anchor falls through to the pool with no other change.
+	 */
+	if ( 'after-recirculation' === $anchor && function_exists( 'go_verge_adsense_unit_markup' ) ) {
+		$markup = go_verge_adsense_unit_markup(
+			'post-content-multiplex',
+			array(
+				'tag'   => 'aside',
+				'class' => 'go-listing-revenue-slot go-listing-revenue-slot--post-content-' . $anchor . ' go-post-content-multiplex',
+				'data'  => array( 'ad-surface' => 'post-content-' . $anchor ),
+			)
+		);
+		if ( '' !== $markup ) {
+			echo $markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built and escaped by the renderer.
+			return true;
+		}
+	}
+
 	return go_verge_ads_render_listing_unit( 'post-content-' . $anchor, 0 );
 }
 

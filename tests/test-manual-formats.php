@@ -30,8 +30,40 @@ go_test_section( 'Nenhum formato troca de tipo por constante' );
 go_test_ok( ! defined( 'GO_VERGE_ADS_ARTICLE_A3_DISPLAY_SLOT' ), 'A constante do experimento Display de A3 não existe mais' );
 go_test_ok( ! defined( 'GO_VERGE_ADS_ARTICLE_END_MULTIPLEX_SLOT' ), 'A constante do experimento Multiplex não existe mais' );
 $source = file_get_contents( GO_VERGE_DIR . '/inc/ads/config.php' );
-go_test_ok( false === strpos( $source, 'multiplex' ), 'O contrato não contém mais um caminho Multiplex' );
-go_test_ok( false === strpos( $source, 'autorelaxed' ), 'O contrato não contém mais um formato autorelaxed' );
+
+/*
+ * A regra é sobre TROCA DE TIPO POR CONSTANTE, não sobre a palavra.
+ *
+ * Até 5.5.3 este arquivo bastava procurar por "multiplex" no contrato, porque o
+ * único caminho Multiplex que existia era o experimento proibido: uma constante
+ * do wp-config trocando o tipo do Article End, que é uma unidade VIVA, por trás
+ * do relatório dela. A checagem por substring descrevia aquele caso, não a
+ * regra — e o docblock deste arquivo já diz qual é a regra e qual é o caminho
+ * seguro: "três unidades NOVAS, declaradas com o formato que realmente são".
+ *
+ * 5.5.4 usa exatamente esse caminho seguro para entrar no leilão de Multiplex,
+ * que é demanda que o contrato não estava disputando. Então a checagem passa a
+ * afirmar a regra de verdade: nenhum placement pode ter seu TIPO decidido por
+ * uma constante. Um ID pode vir de constante (é rollback); sizing, format e
+ * ad_layout, nunca.
+ */
+$declared_types = array();
+foreach ( $inventory as $key => $unit ) {
+	$declared_types[ $key ] = array(
+		'sizing'    => (string) ( $unit['sizing'] ?? '' ),
+		'format'    => (string) ( $unit['format'] ?? '' ),
+		'ad_layout' => (string) ( $unit['ad_layout'] ?? '' ),
+	);
+}
+/* Nenhum literal de tipo aparece no mesmo statement que um defined()/constante.
+ * Captura a forma do experimento antigo: sizing/format escolhidos por um ternário
+ * sobre uma constante. */
+foreach ( array( 'sizing', 'format', 'ad_layout' ) as $field ) {
+	go_test_ok(
+		! preg_match( '/\x27' . $field . '\x27\s*=>\s*[^,\n]*(?:defined\s*\(|GO_VERGE_ADS_[A-Z0-9_]+|\?)/', $source ),
+		'Nenhum placement decide ' . $field . ' por constante ou condicional'
+	);
+}
 
 go_test_section( 'O corpo do artigo é um formato só' );
 /*
@@ -53,6 +85,23 @@ foreach ( $body as $key ) {
 $slots = array_map( static function ( $key ) use ( $inventory ) { return (string) $inventory[ $key ]['slot']; }, $body );
 foreach ( array( '6368539121', '7554015324', '6240933652' ) as $retired ) {
 	go_test_ok( ! in_array( $retired, $slots, true ), 'A unidade In-article aposentada ' . $retired . ' não é mais servida' );
+}
+
+/* O corpo do artigo continua sendo um formato só, seja qual for o resto do
+ * inventário — é isso que torna as oito posições comparáveis entre si. */
+foreach ( $body as $key ) {
+	go_test_equals( 'responsive', $declared_types[ $key ]['sizing'], $key . ': tipo declarado é Display responsivo' );
+	go_test_equals( '', $declared_types[ $key ]['ad_layout'], $key . ': tipo declarado não carrega ad_layout' );
+}
+/* O Multiplex que existe é um placement próprio, com ID próprio, e não toca em
+ * nenhuma unidade viva da escada do corpo. */
+$multiplex = array_filter( $inventory, static function ( $unit ) { return 'multiplex' === ( $unit['sizing'] ?? '' ); } );
+go_test_ok( count( $multiplex ) <= 1, 'No máximo um placement Multiplex no contrato' );
+foreach ( $multiplex as $key => $unit ) {
+	go_test_equals( 'autorelaxed', (string) $unit['format'], $key . ': Multiplex declara autorelaxed' );
+	go_test_ok( empty( $unit['full_width'] ), $key . ': Multiplex nunca pede full-width' );
+	go_test_ok( ! in_array( $key, $body, true ), $key . ': Multiplex não é posição da escada do corpo' );
+	go_test_ok( ! in_array( (string) $unit['slot'], $slots, true ), $key . ': Multiplex não reutiliza unidade da escada do corpo' );
 }
 /* Qualquer unidade, em qualquer lugar do inventário: formato e forma nunca
  * discordam. É o descasamento que faz um criativo fluid ser pedido para uma

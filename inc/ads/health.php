@@ -55,6 +55,7 @@ function go_verge_ads_default_slot_ids() {
 		'home-mid'             => '6795467428',
 		'article-end'          => '5798080525',
 		'home-mid-2'           => '6925750357',
+		'post-content-multiplex' => '1889487031',
 	);
 }
 

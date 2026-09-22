@@ -68,14 +68,20 @@ go_test_equals( '', $repeat, 'A repeated anchor emits no markup' );
 
 list( $second_result, $second ) = go_test_pc_render( 'after-recirculation' );
 go_test_ok( $second_result, 'The second anchor renders an opportunity' );
-go_test_ok( false !== strpos( $second, 'data-go-ad-placement="listing-f2"' ), 'The pool advances to F2' );
+go_test_ok( false !== strpos( $second, 'data-go-ad-placement="post-content-multiplex"' ), 'The recirculation boundary prefers the Multiplex grid' );
+go_test_ok( false !== strpos( $second, 'data-ad-format="autorelaxed"' ), 'It requests the documented Multiplex format' );
+go_test_ok( false !== strpos( $second, 'data-ad-slot="1889487031"' ), 'It requests the publisher\x27s real Multiplex unit' );
+go_test_ok( false === strpos( $second, 'data-full-width-responsive=' ), 'Multiplex never asks for full-width-responsive' );
+go_test_ok( false === strpos( $second, 'data-go-ad-placement="listing-f2"' ), 'Multiplex REPLACES the pool unit here, it is not stacked on top' );
+go_test_equals( 1, substr_count( $second, 'data-ad-slot=' ), 'The boundary emits exactly one unit' );
 
 list( $third_result, $third ) = go_test_pc_render( 'before-comments' );
 go_test_ok( $third_result, 'The third anchor renders an opportunity' );
-go_test_ok( false !== strpos( $third, 'data-go-ad-placement="listing-f3"' ), 'The pool advances to F3' );
+go_test_ok( false !== strpos( $third, 'data-go-ad-placement="listing-f2"' ), 'The pool cursor was not spent by the Multiplex boundary' );
 
 preg_match_all( '/data-ad-slot="([0-9]+)"/', $first . $second . $third, $slots );
 go_test_equals( 3, count( $slots[1] ), 'The zone emitted exactly three provider hosts' );
+go_test_ok( in_array( '1889487031', $slots[1], true ), 'One of the three is the Multiplex unit' );
 go_test_equals( count( $slots[1] ), count( array_unique( $slots[1] ) ), 'No provider slot ID repeats inside the zone' );
 
 go_test_section( 'The body ladder keeps its own pool' );

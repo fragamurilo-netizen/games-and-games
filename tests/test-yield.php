@@ -443,6 +443,7 @@ $account_units = array(
 	'4704776118' => 'GO Listing F5',
 	'6795467428' => 'GO Home M1',
 	'6925750357' => 'GO Home M2',
+	'1889487031' => 'GO Post Content Multiplex',
 );
 $slot_map = go_verge_ads_all_slots();
 $tier_map = go_verge_ads_econ_slot_tiers();

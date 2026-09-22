@@ -47,6 +47,30 @@ if ( ! defined( 'GO_VERGE_ADS_LISTING_F5_SLOT' ) ) {
 }
 
 /*
+ * Post-content Multiplex (native grid).
+ *
+ * The one format this contract was missing against Auto Ads. Multiplex has its
+ * own advertiser demand — native/recirculation buyers who do not bid on a
+ * 300x250 — so adding it here is not another banner competing in the same
+ * auction: it is a second auction the page was not entering at all.
+ *
+ * It lives at the recirculation boundary because that is where the shape is
+ * honest. The reader has finished the story and is choosing what to read next;
+ * a grid of related items is the native form of that moment, which is why the
+ * format prices differently from an interruption between paragraphs.
+ *
+ * This is a NEW unit declared with the format it actually is. It is not, and
+ * must never become, a constant that rewrites some existing unit's type —
+ * that is the hazard tests/test-manual-formats.php exists to prevent, and the
+ * distinction is the whole point of that file's docblock.
+ *
+ * Override exists for rollback only; the default is the live unit.
+ */
+if ( ! defined( 'GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT' ) ) {
+	define( 'GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT', '1889487031' );
+}
+
+/*
  * The article rail below the desktop breakpoint, OFF until an ad unit exists.
  *
  * `sidebar-desktop` is desktop_only, which is correct for a 300px sticky rail.
@@ -416,6 +440,37 @@ function go_verge_ads_config() {
 				'enabled'           => true,
 			),
 			/*
+			 * GO Post Content Multiplex — native grid at the recirculation break.
+			 *
+			 * `autorelaxed` is the documented Multiplex format. The renderer
+			 * already omits `data-full-width-responsive` for multiplex, because
+			 * the grid sizes itself from its container rather than from the
+			 * viewport, so `full_width` stays false here to match.
+			 *
+			 * measurement_tier is `standard`, not `premium`: the position is deep
+			 * and is reached late. Calling it premium would move it up the request
+			 * order ahead of positions with more reach, which is exactly the
+			 * mistake the tiering exists to prevent.
+			 */
+			'post-content-multiplex' => array(
+				'name'              => 'GO Post Content Multiplex',
+				'slot'              => go_verge_ads_optional_slot( GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT ),
+				'sizing'            => 'multiplex',
+				'format'            => 'autorelaxed',
+				'full_width'        => false,
+				'near_viewport'     => 1000,
+				'near_viewport_max' => 1500,
+				'predictive'        => true,
+				'safety_ms'         => 550,
+				'measurement_tier'  => 'standard',
+				'requested_size'    => 'multiplex autorelaxed grid',
+				'collapse_unfilled' => true,
+				'templates'         => array( 'single_post' ),
+				'reserve'           => array( 'mobile' => 0, 'desktop' => 0 ),
+				'enabled'           => '' !== go_verge_ads_optional_slot( GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT ),
+			),
+
+			/*
 			 * GO Article Rail Mobile — the stacked rail below 1101px, opt-in.
 			 *
 			 * `deep` rather than `premium`: on a phone this block sits under the
@@ -714,7 +769,7 @@ function go_verge_ads_config() {
 	$config['account_formats']['vignette'] = 'on';
 	$config['account_formats']['side_rails'] = 'off';
 	if ( defined( 'GO_ADS_V3_ENABLED' ) && ! GO_ADS_V3_ENABLED ) { $config['enabled'] = false; }
-	$allowed = array_fill_keys( array( 'topscroll', 'site-masthead', 'home-masthead', 'article-hero-overlay', 'game-hub-mid', 'sidebar-desktop', 'article-rail-mobile', 'article-prime', 'article-a1', 'article-a2', 'article-a3', 'article-a4', 'article-a5', 'article-a6', 'article-end', 'listing-f1', 'listing-f2', 'listing-f3', 'listing-f4', 'listing-f5', 'home-mid', 'home-mid-2' ), true );
+	$allowed = array_fill_keys( array( 'topscroll', 'site-masthead', 'home-masthead', 'article-hero-overlay', 'game-hub-mid', 'sidebar-desktop', 'article-rail-mobile', 'post-content-multiplex', 'article-prime', 'article-a1', 'article-a2', 'article-a3', 'article-a4', 'article-a5', 'article-a6', 'article-end', 'listing-f1', 'listing-f2', 'listing-f3', 'listing-f4', 'listing-f5', 'home-mid', 'home-mid-2' ), true );
 	$config['inventory'] = array_intersect_key( (array) ( $config['inventory'] ?? array() ), $allowed );
 
 	return $config;
