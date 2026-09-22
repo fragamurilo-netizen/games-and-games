@@ -255,9 +255,9 @@ s_ok(strpos($assets_php, "go_verge_ads_serve_full_runtime") !== false,
     'A escolha da cópia tem filtro de rollback');
 s_ok(strpos(file_get_contents($root.'/inc/ads/assets.php'), 'go_verge_ads_runtime_path') !== false,
     'O tema escolhe entre fonte e cópia de produção em um único lugar');
-s_ok(strpos($style, 'Version: 5.5.3') !== false, 'Versão pública do tema é 5.5.3');
+s_ok(strpos($style, 'Version: 5.5.4') !== false, 'Versão pública do tema é 5.5.4');
 $functions = file_get_contents($root.'/functions.php');
-s_ok(strpos($functions, "define( 'GO_VERGE_VERSION', '5.5.3' );") !== false, 'GO_VERGE_VERSION acompanha a versão pública 5.5.3');
+s_ok(strpos($functions, "define( 'GO_VERGE_VERSION', '5.5.4' );") !== false, 'GO_VERGE_VERSION acompanha a versão pública 5.5.4');
 s_ok(strpos($yield, 'go_ads_yield_decision_v12') !== false, 'Deploy usa transient v12 para separar o diagnóstico financeiro da política fixa');
 
 s_ok((bool) preg_match('/[\"\']version[\"\']\s*=>\s*[\"\']9\.1\.1-fixed-manual-policy[\"\']/', $yield), 'Autoridade de yield expõe a versão da política manual fixa');
