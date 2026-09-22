@@ -110,3 +110,33 @@ list( $blocked_result, $blocked ) = go_test_pc_render( 'after-recirculation' );
 go_test_equals( false, $blocked_result, 'An unmonetizable request renders no post-content unit' );
 go_test_equals( '', $blocked, 'An unmonetizable request emits no markup' );
 $GLOBALS['go_test_pc_monetize'] = true;
+
+go_test_section( 'The stacked article rail is declared, gated and off until an ad unit exists' );
+
+$inventory = go_verge_ads_inventory();
+go_test_ok( isset( $inventory['article-rail-mobile'] ), 'article-rail-mobile survives the allow-list' );
+
+$rail = $inventory['article-rail-mobile'];
+go_test_equals( '', (string) $rail['slot'], 'No ad unit id is invented for it' );
+go_test_equals( false, (bool) $rail['enabled'], 'It stays disabled while no unit exists' );
+go_test_equals( 1100, (int) $rail['max_viewport'], 'It is gated one pixel below the desktop breakpoint' );
+go_test_equals( 'responsive', (string) $rail['sizing'], 'It is a Display responsive unit, like the rest of the contract' );
+
+ob_start();
+go_verge_render_adsense_unit( 'article-rail-mobile', array( 'tag' => 'div', 'class' => 'go-article-sidebar__ad go-article-sidebar__ad--stacked' ) );
+$rail_markup = (string) ob_get_clean();
+go_test_equals( '', $rail_markup, 'A disabled rail placement renders nothing at all' );
+
+$desktop = $inventory['sidebar-desktop'];
+go_test_ok( ! empty( $desktop['desktop_only'] ), 'sidebar-desktop stays desktop-only' );
+go_test_ok(
+	(int) $rail['max_viewport'] < absint( go_verge_ads_config()['breakpoints']['desktop_min'] ),
+	'The two rail placements can never both request in one document'
+);
+go_test_ok( $rail['slot'] !== $desktop['slot'], 'The stacked rail never reuses the sticky rail ad unit' );
+
+/* The gate the renderer will put on BOTH the display rule and the request once
+ * an ad unit exists. This is the part that must be right before the id is,
+ * because it is what keeps one cached document correct for every user agent. */
+go_test_equals( '(max-width:1100px)', go_verge_ads_unit_media_query( $rail ), 'The rail requests only below the desktop breakpoint' );
+go_test_equals( '(min-width:1101px)', go_verge_ads_unit_media_query( $desktop ), 'The sticky rail requests only at and above it' );

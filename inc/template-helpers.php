@@ -5353,6 +5353,30 @@ function go_verge_article_sidebar( $post_id = null ) {
 					'data'  => array( 'ad-surface' => 'article-sidebar' ),
 				)
 			);
+			/*
+			 * The same rail below 1101px, where it is no longer a rail.
+			 *
+			 * single-clean.css collapses .go-single__layout to `display:block`
+			 * there, so everything above renders full width under the article
+			 * instead of disappearing — offers, story groups, "Continue no
+			 * Overdrive" — and none of it carried inventory, on the device that
+			 * carries most of the audience.
+			 *
+			 * Both hosts are emitted into one cached document on purpose. Their
+			 * viewport gates are complementary (desktop_only against
+			 * max_viewport 1100), the renderer puts that gate on the request as
+			 * well as on the display rule, and the runtime requests neither
+			 * until its own media query matches. One HTML response therefore
+			 * stays correct for every user agent and every cache layer.
+			 */
+			go_verge_render_adsense_unit(
+				'article-rail-mobile',
+				array(
+					'tag'   => 'div',
+					'class' => 'go-article-sidebar__ad go-article-sidebar__ad--stacked',
+					'data'  => array( 'ad-surface' => 'article-rail-mobile' ),
+				)
+			);
 		}
 		?>
 		</div>

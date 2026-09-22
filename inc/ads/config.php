@@ -46,6 +46,35 @@ if ( ! defined( 'GO_VERGE_ADS_LISTING_F5_SLOT' ) ) {
 	define( 'GO_VERGE_ADS_LISTING_F5_SLOT', '4704776118' );
 }
 
+/*
+ * The article rail below the desktop breakpoint, OFF until an ad unit exists.
+ *
+ * `sidebar-desktop` is desktop_only, which is correct for a 300px sticky rail.
+ * What that left unsaid is what happens to the rail itself: at 1100px and below
+ * single-clean.css turns .go-single__layout into `display:block`, so the whole
+ * sidebar — offers, story groups, "Continue no Overdrive" — renders as a
+ * full-width block under the article instead of disappearing. On the device
+ * that carries most of this site's audience, that entire column is publisher
+ * content with no inventory anywhere in it.
+ *
+ * This is a separate placement rather than a viewport tweak on sidebar-desktop
+ * because the two are different products: a 300px sticky rail and a full-width
+ * block are not the same unit measured at two widths, and merging them would
+ * make their reporting unreadable. The gate is `max_viewport`, which the
+ * renderer emits as a media query on both the display rule and the request, so
+ * one cached HTML document stays correct for every user agent.
+ *
+ * There is no default id, because inventing one would request a slot this
+ * account does not own. Create a responsive Display unit in AdSense, then:
+ *
+ *     define( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT', '0000000000' );
+ *
+ * Until then the placement declares itself, stays disabled and renders nothing.
+ */
+if ( ! defined( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT' ) ) {
+	define( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT', '' );
+}
+
 /**
  * An optional ad unit id from wp-config.php, or nothing.
  *
@@ -386,6 +415,34 @@ function go_verge_ads_config() {
 				'reserve'           => array( 'mobile' => 0, 'desktop' => 632 ),
 				'enabled'           => true,
 			),
+			/*
+			 * GO Article Rail Mobile — the stacked rail below 1101px, opt-in.
+			 *
+			 * `deep` rather than `premium`: on a phone this block sits under the
+			 * whole article and its recirculation, so it is reached late. Calling
+			 * it premium would move it up the request order ahead of positions
+			 * with real reach, which is the mistake the tiering exists to prevent.
+			 */
+			'article-rail-mobile' => array(
+				'name'              => 'GO Article Rail Mobile',
+				'slot'              => go_verge_ads_optional_slot( GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT ),
+				'sizing'            => 'responsive',
+				'format'            => 'auto',
+				'full_width'        => true,
+				'near_viewport'     => 1000,
+				'near_viewport_max' => 1500,
+				'predictive'        => true,
+				'safety_ms'         => 500,
+				'measurement_tier'  => 'deep',
+				'requested_size'    => 'responsive-auto full-width inside the stacked article rail',
+				'collapse_unfilled' => true,
+				'templates'         => array( 'single_post', 'single_game' ),
+				/* One below the desktop breakpoint, so this and sidebar-desktop can
+				 * never both request in the same document. */
+				'max_viewport'      => 1100,
+				'reserve'           => array( 'mobile' => 0, 'desktop' => 0 ),
+				'enabled'           => '' !== go_verge_ads_optional_slot( GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT ),
+			),
 			'article-prime' => array(
 				'name'              => 'GO Article Prime P1',
 				'slot'              => '5223365459',
@@ -657,7 +714,7 @@ function go_verge_ads_config() {
 	$config['account_formats']['vignette'] = 'on';
 	$config['account_formats']['side_rails'] = 'off';
 	if ( defined( 'GO_ADS_V3_ENABLED' ) && ! GO_ADS_V3_ENABLED ) { $config['enabled'] = false; }
-	$allowed = array_fill_keys( array( 'topscroll', 'site-masthead', 'home-masthead', 'article-hero-overlay', 'game-hub-mid', 'sidebar-desktop', 'article-prime', 'article-a1', 'article-a2', 'article-a3', 'article-a4', 'article-a5', 'article-a6', 'article-end', 'listing-f1', 'listing-f2', 'listing-f3', 'listing-f4', 'listing-f5', 'home-mid', 'home-mid-2' ), true );
+	$allowed = array_fill_keys( array( 'topscroll', 'site-masthead', 'home-masthead', 'article-hero-overlay', 'game-hub-mid', 'sidebar-desktop', 'article-rail-mobile', 'article-prime', 'article-a1', 'article-a2', 'article-a3', 'article-a4', 'article-a5', 'article-a6', 'article-end', 'listing-f1', 'listing-f2', 'listing-f3', 'listing-f4', 'listing-f5', 'home-mid', 'home-mid-2' ), true );
 	$config['inventory'] = array_intersect_key( (array) ( $config['inventory'] ?? array() ), $allowed );
 
 	return $config;
