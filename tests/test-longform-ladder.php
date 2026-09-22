@@ -21,7 +21,10 @@ if ( 'cli' !== PHP_SAPI ) { exit; }
  */
 $go_ladder_gap = '1' === (string) getenv( 'GO_TEST_LADDER_GAP' );
 if ( $go_ladder_gap ) {
-	/* A8 declared, A7 missing: a misconfiguration, not a longer ladder. */
+	/* A8 declared, A7 blanked: a misconfiguration, not a longer ladder. An empty
+	 * constant is how a publisher rolls one rung back without editing the theme,
+	 * so this is the real shape of the mistake, not an artificial one. */
+	define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '' );
 	define( 'GO_VERGE_ADS_ARTICLE_A8_SLOT', '2222222222' );
 } else {
 	define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '1111111111' );

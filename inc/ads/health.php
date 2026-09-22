@@ -47,6 +47,8 @@ function go_verge_ads_default_slot_ids() {
 		'article-a4'           => '6568236715',
 		'article-a5'           => '8238832024',
 		'article-a6'           => '5255155049',
+		'article-a7'           => '1805726556',
+		'article-a8'           => '6305400886',
 		'listing-f1'           => '4927851985',
 		'listing-f2'           => '3996334686',
 		'listing-f3'           => '2880273141',
@@ -56,6 +58,7 @@ function go_verge_ads_default_slot_ids() {
 		'article-end'          => '5798080525',
 		'home-mid-2'           => '6925750357',
 		'post-content-multiplex' => '1889487031',
+		'article-rail-mobile'  => '9492644884',
 	);
 }
 

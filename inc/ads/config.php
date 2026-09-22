@@ -85,20 +85,17 @@ if ( ! defined( 'GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT' ) ) {
  * leaves every one of those ratios where it was. This adds reach on articles
  * that earned it, not pressure on articles that did not.
  *
- * There are no default ids. Create two responsive Display units in AdSense —
- * the same product as A1..A6, so the ladder stays one format — then:
- *
- *     define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '0000000000' );
- *     define( 'GO_VERGE_ADS_ARTICLE_A8_SLOT', '0000000000' );
- *
- * Until both exist the ladder's ceiling stays at seven and nothing changes.
- * Defining only A7 raises it to eight; the ceiling follows the contract.
+ * Both units are Display responsive — the same product as A1..A6, so the ladder
+ * stays one format and the difference between its rungs remains depth rather
+ * than product. A wp-config constant may still override either id, which keeps
+ * an emergency rollback possible without editing theme files; setting one to ''
+ * lowers the ceiling back, because the ceiling follows the contract.
  */
 if ( ! defined( 'GO_VERGE_ADS_ARTICLE_A7_SLOT' ) ) {
-	define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '' );
+	define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '1805726556' );
 }
 if ( ! defined( 'GO_VERGE_ADS_ARTICLE_A8_SLOT' ) ) {
-	define( 'GO_VERGE_ADS_ARTICLE_A8_SLOT', '' );
+	define( 'GO_VERGE_ADS_ARTICLE_A8_SLOT', '6305400886' );
 }
 
 /*
@@ -119,15 +116,13 @@ if ( ! defined( 'GO_VERGE_ADS_ARTICLE_A8_SLOT' ) ) {
  * renderer emits as a media query on both the display rule and the request, so
  * one cached HTML document stays correct for every user agent.
  *
- * There is no default id, because inventing one would request a slot this
- * account does not own. Create a responsive Display unit in AdSense, then:
- *
- *     define( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT', '0000000000' );
- *
- * Until then the placement declares itself, stays disabled and renders nothing.
+ * Display responsive, like the rest of the contract. Override for rollback only.
+ * Its AdSense report will be entirely mobile/tablet by construction, because
+ * the unit is never requested at or above 1101px — that is the design, not a
+ * delivery fault.
  */
 if ( ! defined( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT' ) ) {
-	define( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT', '' );
+	define( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT', '9492644884' );
 }
 
 /**

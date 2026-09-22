@@ -444,6 +444,9 @@ $account_units = array(
 	'6795467428' => 'GO Home M1',
 	'6925750357' => 'GO Home M2',
 	'1889487031' => 'GO Post Content Multiplex',
+	'1805726556' => 'GO Article A7',
+	'6305400886' => 'GO Article A8',
+	'9492644884' => 'GO Article Rail Mobile',
 );
 $slot_map = go_verge_ads_all_slots();
 $tier_map = go_verge_ads_econ_slot_tiers();
@@ -481,14 +484,29 @@ foreach ( array( 'delivery_reference_pv', 'success_page_rpm', 'irpm_healthy', 'i
 	go_test_ok( isset( $frontier[ $key ] ), 'A referência econômica preserva ' . $key );
 }
 
+/*
+ * O teto é o CONTRATO, não um literal.
+ *
+ * Este teste afirmava `<= 7` e `3000 palavras === 7`. Sete era quantas unidades
+ * de corpo a conta tinha (P1 + A1..A6) — a mesma constante mágica que estava
+ * compilada em seis pontos do planner. Repetir o número aqui fazia o teste
+ * proteger a contagem antiga em vez da regra: declarar A7 na conta quebrava a
+ * suíte sem que nada estivesse errado.
+ *
+ * As propriedades que importam são estas três, e elas valem para qualquer
+ * tamanho de escada: monotônica, nunca acima do que o contrato consegue servir,
+ * e nota curta sem inventário nenhum.
+ */
+$cap = go_verge_ads_planner_contract_capacity();
 $previous = 0;
 foreach ( array( 200, 260, 320, 480, 600, 800, 1000, 1400, 3000 ) as $words ) {
 	$rung = go_verge_ads_planner_capacity_from_words( $words );
 	go_test_ok( $rung >= $previous, 'Escada do planner é monotônica em ' . $words . ' palavras' );
-	go_test_ok( $rung <= 7, 'Escada do planner respeita o teto de sete posições no corpo' );
+	go_test_ok( $rung <= $cap, 'Escada do planner respeita o teto do contrato em ' . $words . ' palavras', 'teto=' . $cap . ' obtido=' . $rung );
 	$previous = $rung;
 }
-go_test_equals( 7, go_verge_ads_planner_capacity_from_words( 3000 ), 'Longform satura o corpo em sete posições' );
+go_test_equals( $cap, go_verge_ads_planner_capacity_from_words( 12000 ), 'Longform muito longo satura no teto do contrato' );
+go_test_ok( go_verge_ads_planner_capacity_from_words( 3000 ) >= 7, 'Uma matéria de 3000 palavras recebe ao menos as sete posições de antes' );
 go_test_equals( 0, go_verge_ads_planner_capacity_from_words( 200 ), 'Nota curta não recebe inventário no corpo' );
 
 /* The browser rule table must arrive complete: every threshold has exactly one

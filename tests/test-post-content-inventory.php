@@ -117,21 +117,28 @@ go_test_equals( false, $blocked_result, 'An unmonetizable request renders no pos
 go_test_equals( '', $blocked, 'An unmonetizable request emits no markup' );
 $GLOBALS['go_test_pc_monetize'] = true;
 
-go_test_section( 'The stacked article rail is declared, gated and off until an ad unit exists' );
+go_test_section( 'The stacked article rail is live, and gated so it can never collide' );
 
 $inventory = go_verge_ads_inventory();
 go_test_ok( isset( $inventory['article-rail-mobile'] ), 'article-rail-mobile survives the allow-list' );
 
 $rail = $inventory['article-rail-mobile'];
-go_test_equals( '', (string) $rail['slot'], 'No ad unit id is invented for it' );
-go_test_equals( false, (bool) $rail['enabled'], 'It stays disabled while no unit exists' );
+go_test_equals( '9492644884', (string) $rail['slot'], 'It serves the publisher\x27s real rail unit' );
+go_test_equals( true, (bool) $rail['enabled'], 'It is enabled' );
 go_test_equals( 1100, (int) $rail['max_viewport'], 'It is gated one pixel below the desktop breakpoint' );
 go_test_equals( 'responsive', (string) $rail['sizing'], 'It is a Display responsive unit, like the rest of the contract' );
+go_test_equals( 'auto', (string) $rail['format'], 'It requests data-ad-format auto' );
 
 ob_start();
 go_verge_render_adsense_unit( 'article-rail-mobile', array( 'tag' => 'div', 'class' => 'go-article-sidebar__ad go-article-sidebar__ad--stacked' ) );
 $rail_markup = (string) ob_get_clean();
-go_test_equals( '', $rail_markup, 'A disabled rail placement renders nothing at all' );
+go_test_ok( false !== strpos( $rail_markup, 'data-ad-slot="9492644884"' ), 'It renders its own unit' );
+go_test_ok( false !== strpos( $rail_markup, 'data-full-width-responsive="true"' ), 'It keeps full-width responsive' );
+/* The gate must land on the REQUEST, not only on the display rule: a unit
+ * hidden by CSS that still pushes is a request with availableWidth 0, which
+ * burns the one request that slot gets on the page. */
+go_test_ok( false !== strpos( $rail_markup, '&quot;media&quot;:&quot;(max-width:1100px)&quot;' ), 'The viewport gate travels with the request options' );
+go_test_ok( false !== strpos( $rail_markup, '@media(min-width:1101px)' ), 'And with the display rule, so one cached document serves every user agent' );
 
 $desktop = $inventory['sidebar-desktop'];
 go_test_ok( ! empty( $desktop['desktop_only'] ), 'sidebar-desktop stays desktop-only' );
