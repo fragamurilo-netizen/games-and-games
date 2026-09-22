@@ -189,8 +189,19 @@ add_filter( 'rank_math/opengraph/image_sizes', 'go_verge_rank_math_og_image_size
 function go_verge_og_image_format_supported( $url ) {
 	$path = (string) wp_parse_url( (string) $url, PHP_URL_PATH );
 	$ext  = strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) );
+	if ( '' === $ext ) {
+		return false;
+	}
+	/* Arrival first: a file this server answers with the wrong Content-Type is
+	 * not a share image on any network, whatever the extension would allow.
+	 * This also removes SVG and TIFF, which passed the list below because the
+	 * list was written about AVIF and never revisited — an SVG og:image is a
+	 * silent no-preview, and no crawler here renders TIFF. */
+	if ( function_exists( 'go_verge_image_format_deliverable' ) && ! go_verge_image_format_deliverable( $url ) ) {
+		return false;
+	}
 	$blocked = (array) apply_filters( 'go_verge_og_image_blocked_formats', array( 'avif', 'jxl', 'heic', 'heif' ) );
-	return '' !== $ext && ! in_array( $ext, $blocked, true );
+	return ! in_array( $ext, $blocked, true );
 }
 
 /** Resolve the MIME type from the selected file, not from its original upload. */

@@ -28,6 +28,10 @@ function go_verge_register_discover_cwv_health( $tests ) {
 		'label' => __( 'Captura de audiência', 'go-verge' ),
 		'test'  => 'go_verge_audience_measurement_health_test',
 	);
+	$tests['direct']['go_verge_discover_legacy_images'] = array(
+		'label' => __( 'Imagens do acervo elegíveis ao Discover', 'go-verge' ),
+		'test'  => 'go_verge_discover_legacy_image_health_test',
+	);
 	$tests['async']['go_verge_avif_delivery'] = array(
 		'label'     => __( 'Entrega de imagens AVIF', 'go-verge' ),
 		'test'      => 'go_verge_avif_delivery_health_test',
@@ -196,14 +200,137 @@ function go_verge_discover_dimensions_16x9_ready( $width, $height ) {
 		&& abs( ( $width / $height ) - ( 16 / 9 ) ) <= 0.045;
 }
 
-/** Require a real >=1200 px source; exact 16:9 is a separate quality signal. */
+/**
+ * Require a real >=1200 px source; exact 16:9 is a separate quality signal.
+ *
+ * Pixels are necessary and not sufficient. A 3000x1688 AVIF clears every
+ * dimension test in this file and is still not a Discover asset on this server,
+ * because the file is answered as `text/plain` and has no sub-sizes. Reporting
+ * that attachment as "ready" is worse than reporting nothing: it is the signal
+ * the newsroom checks before concluding the problem must be elsewhere.
+ *
+ * Deliverability is therefore part of readiness, using the same shared answer
+ * as og:image and Article.image.
+ */
 function go_verge_discover_image_ready( $image_id ) {
-	$intermediate = image_get_intermediate_size( absint( $image_id ), 'go_discover_16x9' );
+	$image_id = absint( $image_id );
+	$intermediate = image_get_intermediate_size( $image_id, 'go_discover_16x9' );
 	if ( is_array( $intermediate ) && ! empty( $intermediate['file'] ) && go_verge_discover_dimensions_ready( $intermediate['width'] ?? 0, $intermediate['height'] ?? 0 ) ) {
-		return true;
+		if ( ! function_exists( 'go_verge_image_format_deliverable' ) || go_verge_image_format_deliverable( (string) ( $intermediate['url'] ?? $intermediate['file'] ) ) ) {
+			return true;
+		}
 	}
-	$metadata = wp_get_attachment_metadata( absint( $image_id ) );
-	return is_array( $metadata ) && go_verge_discover_dimensions_ready( $metadata['width'] ?? 0, $metadata['height'] ?? 0 );
+	$metadata = wp_get_attachment_metadata( $image_id );
+	if ( ! is_array( $metadata ) || ! go_verge_discover_dimensions_ready( $metadata['width'] ?? 0, $metadata['height'] ?? 0 ) ) {
+		return false;
+	}
+	if ( function_exists( 'go_verge_image_format_deliverable' ) ) {
+		$source = (string) ( $metadata['file'] ?? '' );
+		if ( '' === $source ) {
+			$source = (string) wp_get_attachment_url( $image_id );
+		}
+		return go_verge_image_format_deliverable( $source );
+	}
+	return true;
+}
+
+/**
+ * Published posts whose featured image this server cannot deliver to Google.
+ *
+ * The upload block added on 18/08/2026 protects new stories only. Everything
+ * published before it keeps its original attachment, so the newsroom can be
+ * doing everything right and still have a back catalogue that is structurally
+ * ineligible for a large preview. Nothing in the theme reported that, which is
+ * why it stayed invisible while Discover impressions fell.
+ *
+ * @param int $limit How many recent posts to inspect.
+ * @return array{checked:int,broken:int,samples:array<int,array{id:int,title:string,url:string,ext:string}>}
+ */
+function go_verge_discover_undeliverable_featured_images( $limit = 120 ) {
+	$out = array( 'checked' => 0, 'broken' => 0, 'samples' => array() );
+	if ( ! function_exists( 'go_verge_image_format_deliverable' ) ) {
+		return $out;
+	}
+
+	$posts = get_posts(
+		array(
+			'post_type'              => 'post',
+			'post_status'            => 'publish',
+			'posts_per_page'         => max( 1, min( 500, absint( $limit ) ) ),
+			'orderby'                => 'date',
+			'order'                  => 'DESC',
+			'fields'                 => 'ids',
+			'no_found_rows'          => true,
+			'update_post_term_cache' => false,
+		)
+	);
+
+	foreach ( $posts as $post_id ) {
+		$attachment_id = absint( get_post_thumbnail_id( $post_id ) );
+		if ( ! $attachment_id ) {
+			continue;
+		}
+		$out['checked']++;
+		$url = (string) wp_get_attachment_url( $attachment_id );
+		if ( '' === $url || go_verge_image_format_deliverable( $url ) ) {
+			continue;
+		}
+		$out['broken']++;
+		if ( count( $out['samples'] ) < 8 ) {
+			$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+			$out['samples'][] = array(
+				'id'    => (int) $post_id,
+				'title' => (string) get_the_title( $post_id ),
+				'url'   => (string) get_permalink( $post_id ),
+				'ext'   => strtolower( (string) pathinfo( $path, PATHINFO_EXTENSION ) ),
+			);
+		}
+	}
+
+	return $out;
+}
+
+/** Report the back catalogue that can never earn a large Discover preview. */
+function go_verge_discover_legacy_image_health_test() {
+	$badge = array( 'label' => __( 'Discover', 'go-verge' ), 'color' => 'blue' );
+	$state = go_verge_discover_undeliverable_featured_images( 120 );
+
+	if ( $state['broken'] < 1 ) {
+		return array(
+			'label'       => __( 'As matérias recentes usam formatos de imagem que o Google consegue buscar', 'go-verge' ),
+			'status'      => 'good',
+			'badge'       => $badge,
+			'description' => '<p>' . esc_html(
+				sprintf(
+					/* translators: %d: posts inspected. */
+					__( '%d matérias publicadas com imagem em destaque foram inspecionadas e nenhuma usa um formato que este servidor entrega com o Content-Type errado.', 'go-verge' ),
+					(int) $state['checked']
+				)
+			) . '</p>',
+			'test'        => 'go_verge_discover_legacy_images',
+		);
+	}
+
+	$list = array();
+	foreach ( $state['samples'] as $sample ) {
+		$list[] = '<li><a href="' . esc_url( $sample['url'] ) . '">' . esc_html( $sample['title'] ) . '</a> <code>.' . esc_html( $sample['ext'] ) . '</code></li>';
+	}
+
+	return array(
+		'label'       => __( 'Há matérias publicadas sem imagem elegível para o Discover', 'go-verge' ),
+		'status'      => 'critical',
+		'badge'       => $badge,
+		'description' => '<p>' . esc_html(
+			sprintf(
+				/* translators: 1: broken posts, 2: posts inspected. */
+				__( '%1$d de %2$d matérias inspecionadas têm imagem em destaque num formato que este servidor não entrega corretamente a um consumidor que lê o Content-Type. Essas matérias saem sem og:image e sem imagem representativa utilizável, e o Discover não distribui uma história sem imagem grande.', 'go-verge' ),
+				(int) $state['broken'],
+				(int) $state['checked']
+			)
+		) . '</p><ul>' . implode( '', $list ) . '</ul><p>' . esc_html__( 'O bloqueio de upload adicionado em 18/08/2026 impede novos casos, mas não corrige os antigos. Correção definitiva: adicionar "AddType image/avif .avif" ao .htaccess da raiz, fora do bloco # BEGIN WordPress. Enquanto isso, reenvie a imagem em JPEG ou PNG nessas matérias — o site gera os recortes em WebP sozinho.', 'go-verge' ) . '</p>',
+		'actions'     => '',
+		'test'        => 'go_verge_discover_legacy_images',
+	);
 }
 
 /** Whether the preferred generated 16:9 share crop physically exists. */

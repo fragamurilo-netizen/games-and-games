@@ -32,7 +32,31 @@ function go_verge_search_published_iso( $post_id ) {
 		return gmdate( 'c', $ts );
 	}
 	$legacy = get_post_time( 'c', true, $post_id );
-	return $legacy ? (string) $legacy : gmdate( 'c' );
+	if ( $legacy ) {
+		return (string) $legacy;
+	}
+	/*
+	 * No stored first-publication time and no post date.
+	 *
+	 * This used to answer gmdate('c') — the moment of the request. That is not a
+	 * missing date, it is a WRONG one, and it is wrong differently on every
+	 * crawl: two fetches of the same URL an hour apart returned two different
+	 * datePublished values, both "now". A news surface reads that as a story
+	 * that keeps republishing itself.
+	 *
+	 * The honest answer for a post with no resolvable date is the post's own
+	 * recorded date, however imperfect, and an empty string when even that is
+	 * gone. Callers already treat '' as "omit the field", which is a correct
+	 * graph; an invented clock is not.
+	 */
+	$raw_date = (string) get_post_field( 'post_date_gmt', $post_id );
+	if ( '' !== $raw_date && '0000-00-00 00:00:00' !== $raw_date ) {
+		$fallback = strtotime( $raw_date . ' UTC' );
+		if ( $fallback ) {
+			return gmdate( 'c', $fallback );
+		}
+	}
+	return '';
 }
 
 /** Unix first-publication time for visible relative-date components. */
@@ -70,6 +94,11 @@ function go_verge_search_freshness_rank_math_graph( $data ) {
 	$site_name = function_exists( 'go_verge_seo_site_name' ) ? go_verge_seo_site_name() : 'Game Overdrive';
 	$alternate = function_exists( 'go_verge_seo_alternate_name_value' ) ? go_verge_seo_alternate_name_value() : null;
 
+	/* An unresolvable clock leaves the plugin's own value alone: overwriting a
+	 * plausible date with an empty string is a worse graph than not running. */
+	$published_iso = $post_id ? go_verge_search_published_iso( $post_id ) : '';
+	$modified_iso  = $post_id ? go_verge_search_consistent_modified_iso( $post_id ) : '';
+
 	foreach ( $data as $key => $node ) {
 		if ( ! is_array( $node ) ) { continue; }
 		if ( go_verge_schema_node_matches_url( $node, $home, array( 'WebSite' ) ) ) {
@@ -84,14 +113,14 @@ function go_verge_search_freshness_rank_math_graph( $data ) {
 			$data[ $key ]['url']  = $home;
 		}
 		if ( $post_id && go_verge_schema_node_matches_url( $node, $current_url, array( 'Article', 'NewsArticle', 'BlogPosting', 'Review' ) ) ) {
-			$data[ $key ]['datePublished'] = go_verge_search_published_iso( $post_id );
-			$data[ $key ]['dateModified']  = go_verge_search_consistent_modified_iso( $post_id );
+			if ( '' !== $published_iso ) { $data[ $key ]['datePublished'] = $published_iso; }
+			if ( '' !== $modified_iso ) { $data[ $key ]['dateModified'] = $modified_iso; }
 		}
 		if ( $post_id && go_verge_schema_node_matches_url( $node, $current_url, array( 'WebPage' ) ) ) {
 			/* This node describes the same document as Article and its visible
 			 * byline. Do not let the plugin's draft/technical clock disagree. */
-			if ( isset( $node['datePublished'] ) ) { $data[ $key ]['datePublished'] = go_verge_search_published_iso( $post_id ); }
-			if ( isset( $node['dateModified'] ) ) { $data[ $key ]['dateModified'] = go_verge_search_consistent_modified_iso( $post_id ); }
+			if ( isset( $node['datePublished'] ) && '' !== $published_iso ) { $data[ $key ]['datePublished'] = $published_iso; }
+			if ( isset( $node['dateModified'] ) && '' !== $modified_iso ) { $data[ $key ]['dateModified'] = $modified_iso; }
 		}
 	}
 	/* This filter is intentionally late; consolidate any same-origin WebSite that

@@ -3432,6 +3432,15 @@ function go_verge_explain_blocked_avif( $file ) {
 }
 add_filter( 'wp_handle_upload_prefilter', 'go_verge_explain_blocked_avif', 20 );
 
+/*
+ * The shared answer to "can this server deliver this image format to Google?"
+ * lives in inc/image-deliverability.php, next to nothing else, because the
+ * og:image chain, the schema chain and Site Health all need it and all three
+ * used to answer it differently. Required here so it is defined before any
+ * inc/ module that calls it.
+ */
+require_once GO_VERGE_DIR . '/inc/image-deliverability.php';
+
 /**
  * Slightly richer WebP quality than core's default.
  *

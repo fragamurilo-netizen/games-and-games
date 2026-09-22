@@ -443,15 +443,34 @@ function go_verge_seo_attachment_image( $attachment_id, $fallback_alt = '' ) {
 /**
  * Whether an image URL uses a format Google Images can currently process.
  *
- * This is deliberately broader than the Open Graph allow-list. AVIF and SVG
- * are valid Google Images inputs even though social crawlers are less
- * consistent with them. Keeping the two policies separate avoids deleting a
- * valid Article image merely because it is not an ideal social-card asset.
+ * This is deliberately broader than the Open Graph allow-list: a social crawler
+ * that will not render WebP is no reason to delete a perfectly valid Article
+ * image, so the two policies stay separate.
+ *
+ * What the two policies may NOT disagree about is whether the file arrives at
+ * all. AVIF and SVG used to be accepted here on the reasoning that both are
+ * valid Google Images inputs in general. On this server they are not:
+ * `go_verge_image_format_deliverable()` documents the measured `text/plain`
+ * response and the missing sub-sizes. The result was an article with no
+ * og:image (that chain already refused AVIF) AND an `Article.image` naming a
+ * file Google's image pipeline drops — which is the same as having no
+ * representative image, and a Discover story without a large image is not
+ * distributed.
+ *
+ * Deliverability is now decided in one place for both chains. The allow-list
+ * below keeps its separate, broader job: which formats Google Images accepts
+ * at all.
  */
 function go_verge_schema_image_format_supported( $url ) {
-	$path = function_exists( 'wp_parse_url' ) ? wp_parse_url( (string) $url, PHP_URL_PATH ) : parse_url( (string) $url, PHP_URL_PATH );
+	$path = function_exists( 'wp_parse_url' ) ? wp_parse_url( (string) $url, PHP_URL_PATH ) : parse_url( (string) $url, PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 	$ext  = strtolower( (string) pathinfo( (string) $path, PATHINFO_EXTENSION ) );
-	return in_array( $ext, array( 'bmp', 'gif', 'jpg', 'jpeg', 'png', 'webp', 'svg', 'avif' ), true );
+	if ( ! in_array( $ext, array( 'bmp', 'gif', 'jpg', 'jpeg', 'png', 'webp', 'svg', 'avif' ), true ) ) {
+		return false;
+	}
+	if ( function_exists( 'go_verge_image_format_deliverable' ) && ! go_verge_image_format_deliverable( $url ) ) {
+		return false;
+	}
+	return true;
 }
 
 /**
