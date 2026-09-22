@@ -61,24 +61,17 @@ function go_verge_ads_resource_hints( $urls, $relation_type ) {
 add_filter( 'wp_resource_hints', 'go_verge_ads_resource_hints', 20, 2 );
 
 /**
- * The runtime file to inline: the generated production copy when it is current.
+ * The runtime file to inline: always a generated production copy.
  *
- * `go-ads-runtime.min.js` is the documented source with comments and
- * indentation removed (see tests/build-runtime-min.js). It is roughly a quarter
- * smaller, and since the runtime is inlined into every HTML document that is a
- * saving on every pageview rather than once per cache lifetime.
- * `go-ads-runtime.lean.js` is that same file without the operator diagnostic
+ * `go-ads-runtime.min.js` is the documented source minified by
+ * tools/build-runtime.js (terser), about 55% smaller; since the runtime is
+ * inlined into every HTML document that is a saving on every pageview.
+ * `go-ads-runtime.lean.js` is that same build without the operator diagnostic
  * surface, and is what an anonymous reader receives.
- *
- * It is used ONLY when its modification time is at least as new as the source's.
- * A developer who edits the runtime and forgets to rebuild therefore ships the
- * documented file — slightly larger, always correct — instead of silently
- * serving yesterday's logic. The test suite fails on that drift as well.
  *
  * @return string Absolute path, or '' when no runtime is readable.
  */
 function go_verge_ads_runtime_path() {
-	$source = GO_VERGE_DIR . '/assets/js/go-ads-runtime.js';
 
 	/*
 	 * Who is reading decides which generated copy is served.
@@ -105,17 +98,43 @@ function go_verge_ads_runtime_path() {
 	$built = GO_VERGE_DIR . '/assets/js/go-ads-runtime' . ( $operator ? '.min.js' : '.lean.js' );
 	if ( ! is_readable( $built ) ) {
 		/* A missing lean copy must never cost the operator surface AND the
-		 * smaller file: fall back to the full generated copy, then to source. */
+		 * smaller file: fall back to the full generated copy. */
 		$built = GO_VERGE_DIR . '/assets/js/go-ads-runtime.min.js';
 	}
-	if ( is_readable( $built ) ) {
-		$built_time  = (int) @filemtime( $built );
-		$source_time = is_readable( $source ) ? (int) @filemtime( $source ) : 0;
-		if ( $built_time > 0 && $built_time >= $source_time ) {
-			return $built;
-		}
-	}
-	return is_readable( $source ) ? $source : '';
+	/*
+	 * The generated copy is always preferred. Upload tools (FTP, hPanel file
+	 * manager, unzip) routinely rewrite mtimes in arbitrary order, so "source
+	 * is newer" is not evidence that the generated file is stale — and the
+	 * documented source is 150 KB of comments that must never be inlined. Drift
+	 * is caught by `node tools/build-runtime.js --check`, not at request time.
+	 */
+	return is_readable( $built ) ? $built : '';
+}
+
+/**
+ * Whether a script body can be printed inline without being rewritten by an
+ * HTML post-processor.
+ *
+ * Plugins that filter the final HTML with regular expressions do not know where
+ * a <script> starts. Burst Statistics appends its attributes to the first
+ * "<body" it finds: the 5.5.14 runtime contained `…<bodyBudget()`, so every
+ * public page shipped a runtime with `data-burst_id="…"` written into the middle
+ * of it — a SyntaxError that left delivery to the footer recovery. Any "<"
+ * followed by a letter, "/", "!" or "?" is a target for some filter, so such a
+ * body is never inlined.
+ *
+ * @param string $js Script source.
+ * @return bool
+ */
+function go_verge_ads_inline_script_is_safe( $js ) {
+	return is_string( $js ) && '' !== $js && ! preg_match( '~<[a-z!/?]~i', $js );
+}
+
+/** Public URL of a theme runtime file, versioned by content. */
+function go_verge_ads_runtime_url( $path ) {
+	$digest  = @hash_file( 'sha256', $path );
+	$version = defined( 'GO_VERGE_VERSION' ) ? GO_VERGE_VERSION : 'runtime';
+	return GO_VERGE_URI . '/assets/js/' . basename( $path ) . '?ver=' . rawurlencode( $version . '-' . substr( (string) $digest, 0, 16 ) );
 }
 
 /**
@@ -149,9 +168,16 @@ function go_verge_ads_print_manual_runtime() {
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- config is server-owned and JSON-encoded.
 	echo wp_json_encode( $yield, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
 	echo ';</script>' . "\n";
+	$js = (string) file_get_contents( $path );
+	if ( ! go_verge_ads_inline_script_is_safe( $js ) ) {
+		/* Never inline a body an HTML filter could corrupt. A synchronous
+		 * external copy keeps the per-slot mount calls working in order. */
+		echo '<script id="go-ads-manual-runtime" src="' . esc_url( go_verge_ads_runtime_url( $path ) ) . '" data-cfasync="false" data-no-optimize="1" data-no-defer="1"></script>' . "\n";
+		return;
+	}
 	echo '<script id="go-ads-manual-runtime" data-cfasync="false" data-no-optimize="1" data-no-defer="1">';
-	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- local static JavaScript, no user input.
-	echo file_get_contents( $path );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- local static JavaScript, no user input, checked above.
+	echo $js;
 	echo "</script>\n";
 }
 add_action( 'wp_head', 'go_verge_ads_print_manual_runtime', 4 );
@@ -166,22 +192,21 @@ add_action( 'wp_head', 'go_verge_ads_print_manual_runtime', 4 );
  *
  * Check actual emitted hosts at the footer, not the first generated PHP markup:
  * the composer may discard that markup or keep it in an inert listing reserve.
- * The normal head path adds no network request. Recovery loads the documented
- * source once, avoiding a stale generated copy, and delegates all mounting,
- * consent, geometry and provider requests to that same engine.
+ * The normal head path adds no network request. Recovery loads the same
+ * generated copy once and delegates all mounting, consent, geometry and
+ * provider requests to that engine.
  */
 function go_verge_ads_print_manual_runtime_recovery() {
 	if ( ! empty( $GLOBALS['go_verge_ads_runtime_recovery_printed'] ) ) { return; }
 	if ( function_exists( 'go_verge_ads_manual_delivery_enabled' ) && ! go_verge_ads_manual_delivery_enabled() ) { return; }
 	if ( ! go_verge_ads_context_has_inventory() ) { return; }
-	$path = GO_VERGE_DIR . '/assets/js/go-ads-runtime.js';
-	if ( ! is_readable( $path ) ) { $path = go_verge_ads_runtime_path(); }
-	if ( '' === $path ) { return; }
-	$digest = hash_file( 'sha256', $path );
-	if ( false === $digest ) { return; }
-	$version = defined( 'GO_VERGE_VERSION' ) ? GO_VERGE_VERSION : 'runtime';
+	/* The generated copy is smaller than the documented source by two thirds;
+	 * the source is only a last resort when no generated copy exists. */
+	$path = go_verge_ads_runtime_path();
+	if ( '' === $path ) { $path = GO_VERGE_DIR . '/assets/js/go-ads-runtime.js'; }
+	if ( ! is_readable( $path ) ) { return; }
 	$payload = array(
-		'src' => GO_VERGE_URI . '/assets/js/' . basename( $path ) . '?ver=' . rawurlencode( $version . '-' . substr( $digest, 0, 16 ) ),
+		'src' => go_verge_ads_runtime_url( $path ),
 		'config' => isset( $GLOBALS['go_verge_ads_runtime_yield'] )
 			? $GLOBALS['go_verge_ads_runtime_yield']
 			: ( function_exists( 'go_verge_ads_yield_config' ) ? go_verge_ads_yield_config() : array() ),

@@ -1,0 +1,13 @@
+{
+  "name": "overdrive-theme-tools",
+  "private": true,
+  "description": "Build and verification tools for the Overdrive theme (not shipped in the theme ZIP).",
+  "scripts": {
+    "build:runtime": "node build-runtime.js",
+    "check:runtime": "node build-runtime.js --check"
+  },
+  "devDependencies": {
+    "acorn": "^8.14.0",
+    "terser": "^5.36.0"
+  }
+}

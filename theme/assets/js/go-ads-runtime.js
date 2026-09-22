@@ -32,7 +32,7 @@
   'use strict';
   if (w.GOAdsRuntime) return;
 
-  var VERSION = '12.7.0-context-paint-gate', LABEL_BAND = 32, DAY = 86400000;
+  var VERSION = '13.0.0-value-first', LABEL_BAND = 32, DAY = 86400000;
   var YIELD = w.GOAdsYieldConfig || {};
   var DELIVERY = YIELD.delivery_v2 || {};
   var diagnosticRate = Math.max(0, Math.min(1, Number(DELIVERY.diagnostic_sample_rate) || 0));
@@ -49,8 +49,8 @@
     max_local_ad_ratio: 0.45, max_ad_to_content_ratio: 0.45, min_stream_gap_px: 380,
     rest_lead_vh: { reach: 1.00, premium: 0.90, standard: 0.75, deep: 0.60, completion: 0.52 },
     rest_lead_min_px: 260, rest_lead_max_px: 1100,
-    max_lookahead_vh: 3.0, flick_vh_s: 2.0, request_spacing_ms: 90,
-    engage_scroll_vh: 0.07, engage_dwell_ms: 1500
+    max_lookahead_vh: 1.8, flick_vh_s: 2.0, request_spacing_ms: 90,
+    engage_scroll_vh: 0.07, engage_dwell_ms: 1500, fling_tau_s: 0.35
   };
   var DEFAULT_GOVERNOR = {
     expansion_depth: 0.40, expansion_dwell_ms: 18000, expansion_deep_depth: 0.58,
@@ -118,7 +118,8 @@
     out.max_units_in_window = Math.round(clamp(out.max_units_in_window, 1, 6));
     out.max_local_ad_ratio = clamp(out.max_local_ad_ratio, 0.20, 0.60);
     out.max_ad_to_content_ratio = clamp(out.max_ad_to_content_ratio, 0.20, 0.60);
-    out.max_lookahead_vh = clamp(out.max_lookahead_vh, 1.0, 5.0);
+    out.max_lookahead_vh = clamp(out.max_lookahead_vh, 1.0, 2.5);
+    out.fling_tau_s = clamp(out.fling_tau_s, 0.15, 0.8);
     out.flick_vh_s = clamp(out.flick_vh_s, 1.0, 6.0);
     out.request_spacing_ms = clamp(out.request_spacing_ms, 0, 400);
     out.engage_scroll_vh = clamp(out.engage_scroll_vh, 0.04, 0.40);
@@ -1559,14 +1560,25 @@
 
     if (rec.options.predictive && distance > 0 && approaching && speed > 80) {
       arrival = Math.round((distance / speed) * 1000);
-      var safety = Math.max(250, num(rec.options.safetyMs, 600));
-      var lead = responseEstimateFor(rec) + safety;
-      /* Bounded, evidence-led widening: a strong local fill/latency pulse and
-       * the daypart prior may extend the runway, never shrink it. */
-      lead *= clamp(num(currentProfile().lookahead_scale, 1), 1.00, 1.15)
-        * (auctionSignal() === 'strong' ? 1.08 : 1)
-        * networkLeadScale();
-      near = clamp(Math.max(near, speed * (lead / 1000)), near, ceiling);
+      /*
+       * Where the reader will STOP, not where the flick is heading.
+       *
+       * 12.7 multiplied the instantaneous velocity by the whole provider
+       * latency (~1.6 s). A mobile flick peaks at 2,000-4,000 px/s and decays
+       * in about a third of a second, so that projection asked for units two
+       * to three screens past the point where the reader actually stopped.
+       * Measured on live articles, those units were filled and never seen:
+       * impressions that count against Active View and the price of every
+       * other impression on the page, for no revenue of their own.
+       *
+       * A fling decelerates exponentially; the distance it still covers is
+       * about velocity x time constant. The resting lead then applies from
+       * that stopping point, exactly as it does for a reader who is not
+       * moving, and a slower network widens the lead a little.
+       */
+      var travel = speed * RULES.fling_tau_s;
+      var restFromStop = near * networkLeadScale();
+      near = clamp(Math.max(near, travel + restFromStop), near, ceiling);
     }
 
     /* A missed slot stays inert behind a downward reader. On the way back up,

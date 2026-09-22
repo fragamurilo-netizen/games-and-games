@@ -93,6 +93,7 @@ function go_verge_ads_trial_tunable_keys() {
 			'rest_lead_min_px',
 			'rest_lead_max_px',
 			'max_lookahead_vh',
+			'fling_tau_s',
 			'flick_vh_s',
 			'request_spacing_ms',
 			'engage_scroll_vh',

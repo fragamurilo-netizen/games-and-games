@@ -1,3 +1,5 @@
+> **Versão vigente: 5.6.0** (runtime `13.0.0-value-first`, planner `20.0.0-value-first`). Leia primeiro `CHANGELOG-5.6.0-VALOR-POR-IMPRESSAO.md`: corrige o runtime inline que o Burst Statistics corrompia em produção, reduz impressões não vistas em rolagem rápida (`max_lookahead_vh` 1,8/1,6 e `fling_tau_s`) e posiciona a escada P1+A1–A6 por cadência de leitura em matérias longas. O restante deste guia descreve a 5.5.13/5.5.14 e continua válido onde não conflitar.
+
 # Overdrive — motor manual 5.5.13
 
 Esta é a configuração vigente. Os guias com versões anteriores registram o histórico e não devem orientar a configuração desta versão.

@@ -477,21 +477,43 @@ function go_verge_ads_planner_structural_headroom( $metrics, $candidates, $ladde
 	return 1;
 }
 
-/** Editorial depth targets for A-slots, with or without a Prime candidate. */
-function go_verge_ads_planner_targets( $capacity ) {
+/**
+ * Words of article between two consecutive body opportunities on long reads.
+ *
+ * About 1.8 phone screens of prose. Short and medium articles never reach it —
+ * their proportional targets below are already tighter — so this only changes
+ * where a long article's fixed ladder sits, never how many units it has.
+ *
+ * @return int
+ */
+function go_verge_ads_planner_reach_spacing_words() {
+	return max( 120, min( 600, absint( apply_filters( 'go_verge_ads_planner_reach_spacing_words', 240 ) ) ) );
+}
+
+/**
+ * Editorial depth targets for A-slots, with or without a Prime candidate.
+ *
+ * Reach-weighted since 20.0. The ladder has a fixed number of units, and a unit
+ * earns only when a reader gets to it: readers leave steadily as an article
+ * goes on, so the same seven units are worth most where most readers still are.
+ * 19.x spread them over proportional depths, which on a 3,600-word guide left
+ * the first fifth of the article — about five phone screens, read by nearly
+ * everyone — with Prime alone, and parked A4–A6 past the half, where few
+ * readers arrive. Each target is now the EARLIER of its proportional depth and
+ * a steady reading-distance cadence from the first opportunity. Articles below
+ * roughly 1,600 words resolve to the proportional depths exactly as before.
+ *
+ * @param int $capacity        A-slots wanted.
+ * @param int $editorial_words Article editorial words (0 = proportional only).
+ * @param int $base_words      Words before the opportunity A1 follows (Prime).
+ * @return float[]
+ */
+function go_verge_ads_planner_targets( $capacity, $editorial_words = 0, $base_words = 0 ) {
 	/*
-	 * Prefer earlier editorial boundaries while retaining deeper alternatives.
-	 *
 	 * The fractions below are targets within the article's editorial word count,
-	 * not measured readership, viewability or revenue. When Prime is present,
-	 * its clearance constrains the first A-slot. Candidate scores, editorial
-	 * boundaries and spacing can select a different depth from these targets.
-	 *
-	 * Browser checks still apply before a request. Current runtime defaults use
-	 * 240px mobile / 300px desktop editorial clearance, a 45% article density
-	 * ceiling and 45% mobile / 42% desktop local viewport-band density ceilings.
-	 * These are configurable theme safeguards, not universal Google policy
-	 * thresholds or permission to exceed the rendered page's usable capacity.
+	 * not measured readership, viewability or revenue. Candidate scores,
+	 * editorial boundaries and spacing can select a different depth. Browser
+	 * checks still apply before a request.
 	 */
 	$map = array(
 		1 => array( .38 ),
@@ -502,12 +524,23 @@ function go_verge_ads_planner_targets( $capacity ) {
 		6 => array( .22, .32, .42, .52, .63, .76 ),
 	);
 	$capacity = max( 1, min( go_verge_ads_planner_contract_capacity() - 1, absint( $capacity ) ) );
-	if ( isset( $map[ $capacity ] ) ) { return $map[ $capacity ]; }
-	/* Preserve shorter-article targets; spread earned long-form units to 82%.
-	 * Reusing the six-entry map would leave later scoring indices undefined. */
-	$targets = array();
-	for ( $i = 0; $i < $capacity; $i++ ) {
-		$targets[] = round( .20 + .62 * $i / max( 1, $capacity - 1 ), 4 );
+	if ( isset( $map[ $capacity ] ) ) {
+		$targets = $map[ $capacity ];
+	} else {
+		/* Preserve shorter-article targets; spread earned long-form units to 82%. */
+		$targets = array();
+		for ( $i = 0; $i < $capacity; $i++ ) {
+			$targets[] = round( .20 + .62 * $i / max( 1, $capacity - 1 ), 4 );
+		}
+	}
+	$editorial_words = absint( $editorial_words );
+	if ( $editorial_words > 0 ) {
+		$spacing = go_verge_ads_planner_reach_spacing_words();
+		$base = $base_words > 0 ? absint( $base_words ) : (int) round( $spacing * 0.6 );
+		foreach ( $targets as $i => $target ) {
+			$cadence = ( $base + ( $base_words > 0 ? $i + 1 : $i ) * $spacing ) / $editorial_words;
+			$targets[ $i ] = round( min( (float) $target, $cadence ), 4 );
+		}
 	}
 	return $targets;
 }
@@ -587,13 +620,19 @@ function go_verge_ads_planner_prime_candidate( $candidates, $total_capacity ) {
  * avoiding a quadratic candidate scan. There is no fill-rate/history feedback
  * and no request-device branch, so one cached article has a stable inventory.
  */
-function go_verge_ads_planner_select( $candidates, $capacity, $prime, $gap_words, $gap_height ) {
+function go_verge_ads_planner_select( $candidates, $capacity, $prime, $gap_words, $gap_height, $editorial_words = 0 ) {
 	$candidates = array_values( array_filter( $candidates, static function ( $candidate ) {
 		return $candidate['beforeWords'] >= 60 && $candidate['afterWords'] >= 60;
 	} ) );
 	$count = count( $candidates );
 	for ( $wanted = min( go_verge_ads_planner_contract_capacity() - 1, $capacity, $count ); $wanted >= 1; $wanted-- ) {
-		$targets = go_verge_ads_planner_targets( $wanted );
+		$targets = go_verge_ads_planner_targets( $wanted, $editorial_words, $prime ? absint( $prime['beforeWords'] ?? 0 ) : 0 );
+		/* Where the reading cadence binds, a miss is judged in words of reading,
+		 * not in fractions of a long article: 115 words is a whole phone screen
+		 * whether the article has 900 words or 3,600. Proportional targets keep
+		 * the original penalty, so shorter articles select exactly as before. */
+		$proportional = go_verge_ads_planner_targets( $wanted );
+		$spacing = go_verge_ads_planner_reach_spacing_words();
 		$previous_states = array();
 		for ( $n = 1; $n <= $wanted; $n++ ) {
 			$states = array();
@@ -626,7 +665,12 @@ function go_verge_ads_planner_select( $candidates, $capacity, $prime, $gap_words
 					}
 					$state = $best_previous;
 				}
-				$candidate['score'] = round( $candidate['baseScore'] + 30 - abs( $candidate['depth'] - $targets[ $n - 1 ] ) * 130, 2 );
+				$miss = abs( $candidate['depth'] - $targets[ $n - 1 ] );
+				$penalty = $miss * 130;
+				if ( $editorial_words > 0 && $targets[ $n - 1 ] < $proportional[ $n - 1 ] ) {
+					$penalty = max( $penalty, $miss * $editorial_words / $spacing * 45 );
+				}
+				$candidate['score'] = round( $candidate['baseScore'] + 30 - $penalty, 2 );
 				$candidate['placement'] = 'article-a' . $n;
 				$state['score'] += $candidate['score'];
 				$state['path'][] = $candidate;
@@ -952,10 +996,10 @@ function go_verge_ads_plan_article( $html, $article_type = '' ) {
 	 * reach/value first break. Runtime still enforces actual pixel density. */
 	$a_slots = go_verge_ads_planner_contract_capacity() - 1;
 	$a_capacity_with_prime = min( $a_slots, max( 0, $total_capacity - ( $prime ? 1 : 0 ) ) );
-	$selected_with_prime = go_verge_ads_planner_select( $candidates, $a_capacity_with_prime, $prime, $gap_words, $gap_height );
+	$selected_with_prime = go_verge_ads_planner_select( $candidates, $a_capacity_with_prime, $prime, $gap_words, $gap_height, $metrics['editorialWords'] );
 	$planned_with_prime = count( $selected_with_prime ) + ( $prime ? 1 : 0 );
 
-	$selected_without_prime = go_verge_ads_planner_select( $candidates, min( $a_slots, $total_capacity ), null, $gap_words, $gap_height );
+	$selected_without_prime = go_verge_ads_planner_select( $candidates, min( $a_slots, $total_capacity ), null, $gap_words, $gap_height, $metrics['editorialWords'] );
 	$planned_without_prime = count( $selected_without_prime );
 	if ( $planned_without_prime > $planned_with_prime ) {
 		$prime = null;
@@ -1014,7 +1058,7 @@ function go_verge_ads_plan_article( $html, $article_type = '' ) {
 		'plannedCount'  => $planned_count,
 		'renderedCount' => $rendered_count,
 		'reserveCount'  => count( $reserves ),
-		'version'       => '19.1.1-rpm-guard',
+		'version'       => '20.0.0-value-first',
 		'capacity'      => $a_capacity,
 		'prime'         => $prime,
 		'reserve'       => $reserve,

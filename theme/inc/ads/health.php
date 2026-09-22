@@ -427,6 +427,50 @@ function go_verge_ads_single_loader_health_test() {
 	);
 }
 
+/**
+ * The inline delivery runtime must reach readers byte-for-byte.
+ *
+ * HTML post-processors (analytics, optimizers, lazy-loaders) rewrite the final
+ * document with regular expressions. In 5.5.14 Burst Statistics wrote its
+ * `data-burst_*` attributes into the middle of the inline runtime, which then
+ * failed with a SyntaxError on every public page: ads only started after the
+ * footer recovery downloaded a second copy. This reads the anonymous home page
+ * and compares the inline body with the file the theme printed.
+ */
+function go_verge_ads_runtime_integrity_health_test() {
+	$test     = 'go_verge_ads_runtime_integrity';
+	$response = go_verge_ads_health_fetch( add_query_arg( 'go_ads_integrity', (string) time(), home_url( '/' ) ) );
+	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+		return go_verge_ads_health_result( __( 'Não foi possível ler a home para conferir o runtime de anúncios', 'go-verge' ), 'recommended',
+			is_wp_error( $response ) ? $response->get_error_message() : sprintf( 'HTTP %d', (int) wp_remote_retrieve_response_code( $response ) ), $test );
+	}
+	$body = (string) wp_remote_retrieve_body( $response );
+	if ( ! preg_match( '~<script id="go-ads-manual-runtime"([^>]*)>(.*?)</script>~s', $body, $match ) ) {
+		return go_verge_ads_health_result( __( 'O runtime de anúncios não está no HTML da home', 'go-verge' ), 'recommended',
+			__( 'A home consultada não contém o runtime manual. Confira a chave global, o cache e se a página é monetizável.', 'go-verge' ), $test );
+	}
+	if ( false !== strpos( $match[1], 'src=' ) ) {
+		return go_verge_ads_health_result( __( 'O runtime de anúncios está sendo servido como arquivo externo', 'go-verge' ), 'recommended',
+			__( 'A cópia gerada não passou na verificação de segurança para inline (sequência "<" seguida de letra). Rode node tools/build-runtime.js e reenvie o tema; enquanto isso a entrega funciona, com uma requisição a mais.', 'go-verge' ), $test );
+	}
+	$lean     = GO_VERGE_DIR . '/assets/js/go-ads-runtime.lean.js';
+	$expected = is_readable( $lean ) ? (string) file_get_contents( $lean ) : '';
+	$served   = $match[2];
+	$first_body = stripos( $body, '<body' );
+	$real_body  = preg_match( '~<body[\s>]~i', $body, $body_tag, PREG_OFFSET_CAPTURE ) ? (int) $body_tag[0][1] : -1;
+	if ( '' !== $expected && $served !== $expected ) {
+		$hint = preg_match( '~data-[a-z_]+=~i', $served ) ? __( ' Há atributos HTML injetados dentro do JavaScript — sinal de um plugin que reescreve o HTML (ex.: Burst Statistics, otimizadores).', 'go-verge' ) : '';
+		return go_verge_ads_health_result( __( 'O runtime de anúncios chega alterado aos leitores', 'go-verge' ), 'critical',
+			__( 'O JavaScript inline publicado difere do arquivo do tema. Um runtime alterado pode falhar por completo e atrasar todos os anúncios.', 'go-verge' ) . $hint . __( ' Limpe o cache de página; se persistir, exclua o script go-ads-manual-runtime da otimização do plugin responsável.', 'go-verge' ), $test );
+	}
+	if ( false !== $first_body && $first_body !== $real_body ) {
+		return go_verge_ads_health_result( __( 'Há uma sequência "<body" antes da tag body real', 'go-verge' ), 'recommended',
+			__( 'Algum script inline da página contém "<body". Plugins que procuram a primeira tag body podem corromper esse script.', 'go-verge' ), $test );
+	}
+	return go_verge_ads_health_result( __( 'O runtime de anúncios chega intacto aos leitores', 'go-verge' ), 'good',
+		__( 'O JavaScript inline publicado na home é idêntico à cópia pública do tema e nenhum filtro de HTML o alterou.', 'go-verge' ), $test );
+}
+
 /** The publisher line has to be reachable at /ads.txt or the demand thins out. */
 function go_verge_ads_txt_health_test() {
 	$response = go_verge_ads_health_fetch( home_url( '/ads.txt' ) );

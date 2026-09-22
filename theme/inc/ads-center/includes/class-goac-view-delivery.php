@@ -47,7 +47,7 @@ final class GOAC_View_Delivery {
 
 	/** Testes que fazem requisição HTTP ao próprio site; executados só sob demanda. */
 	private static function remote_tests() {
-		return array( 'go_verge_ads_single_loader_health_test', 'go_verge_ads_txt_health_test' );
+		return array( 'go_verge_ads_runtime_integrity_health_test', 'go_verge_ads_single_loader_health_test', 'go_verge_ads_txt_health_test' );
 	}
 
 	/** Handler admin-post: executa os testes remotos e guarda o resultado por 30 minutos. */

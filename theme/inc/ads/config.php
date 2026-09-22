@@ -228,8 +228,15 @@ function go_verge_ads_delivery_rules() {
 				'rest_lead_min_px'        => 260,
 				'rest_lead_max_px'        => 1100,
 				/* Absolute ceiling for the predictive window. However fast the
-				 * reader moves, nothing is requested more than this far ahead. */
-				'max_lookahead_vh'        => 3.0,
+				 * reader moves, nothing is requested more than this far ahead.
+				 * 13.0 lowered it from 3.0: on live articles the units requested
+				 * two to three screens ahead of a flick were filled and never
+				 * seen, which costs Active View and therefore price. */
+				'max_lookahead_vh'        => 1.8,
+				/* Time constant of a touch fling's deceleration. A flick still
+				 * travels about velocity x this before the reader stops; the
+				 * resting lead is applied from that stopping point. */
+				'fling_tau_s'             => 0.35,
 				/* Above this scroll speed the reader is flicking, not reading: a
 				 * creative delivered into that motion is unlikely to be seen for
 				 * long enough to count. Reach/premium are exempt. */
@@ -257,7 +264,9 @@ function go_verge_ads_delivery_rules() {
 				'rest_lead_vh'            => array( 'reach' => 0.85, 'premium' => 0.78, 'standard' => 0.65, 'deep' => 0.55, 'completion' => 0.50 ),
 				'rest_lead_min_px'        => 280,
 				'rest_lead_max_px'        => 1200,
-				'max_lookahead_vh'        => 2.6,
+				'max_lookahead_vh'        => 1.6,
+				/* Wheel and trackpad momentum decays faster than a touch fling. */
+				'fling_tau_s'             => 0.30,
 				/* A mouse wheel moves in discrete jumps, so the honest flick
 				 * threshold is higher than on a touch surface. */
 				'flick_vh_s'              => 2.4,
@@ -328,7 +337,7 @@ function go_verge_ads_config() {
 	$masthead_mobile   = ! defined( 'GO_VERGE_ADS_MASTHEAD_MOBILE' ) || (bool) GO_VERGE_ADS_MASTHEAD_MOBILE;
 
 	$config = array(
-		'version'   => '19.1.1-rpm-guard',
+		'version'   => '20.0.0-value-first',
 		'delivery_mode' => 'manual_overlays',
 		/* Intended account state only, never an API confirmation. The fixed
 		 * manual contract is restored after filters; official overlays stay on. */
