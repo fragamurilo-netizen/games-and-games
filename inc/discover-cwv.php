@@ -147,18 +147,52 @@ function go_verge_avif_delivery_health_test() {
 	$is_image = in_array( $status, array( 200, 206 ), true ) && 'image/avif' === $content_type;
 
 	if ( $is_image ) {
+		$measured = '<p>' . esc_html(
+			sprintf(
+				/* translators: 1: HTTP status, 2: Content-Type header value. */
+				__( 'A imagem AVIF mais recente responde HTTP %1$d com Content-Type: %2$s.', 'go-verge' ),
+				$status,
+				$content_type
+			)
+		) . '</p>';
+
+		/*
+		 * O servidor foi consertado e o tema ainda não sabe.
+		 *
+		 * Esta verificação dizia apenas "está certo" e parava. Mas o tema trata
+		 * AVIF como indeliverable enquanto go_verge_allow_avif_uploads for
+		 * falso — que é o padrão, e com razão, porque o padrão foi escrito para
+		 * um servidor quebrado. O resultado é a pior armadilha possível: o
+		 * operador conserta o .htaccess, vê verde aqui, e nada muda. og:image
+		 * continua vazio, Article.image continua sem AVIF, e o acervo continua
+		 * inelegível — por uma decisão do tema que ninguém mandou revisar.
+		 *
+		 * Enquanto os dois discordarem, esta verificação não é "boa": é uma
+		 * pendência com um passo exato.
+		 */
+		$theme_still_blocks = function_exists( 'go_verge_image_format_deliverable' )
+			&& ! go_verge_image_format_deliverable( 'exemplo.avif' );
+
+		if ( ! $theme_still_blocks ) {
+			return array(
+				'label'       => __( 'O servidor entrega AVIF com o tipo correto', 'go-verge' ),
+				'status'      => 'good',
+				'badge'       => $badge,
+				'description' => $measured,
+				'test'        => 'go_verge_avif_delivery',
+			);
+		}
+
 		return array(
-			'label'       => __( 'O servidor entrega AVIF com o tipo correto', 'go-verge' ),
-			'status'      => 'good',
+			'label'       => __( 'O servidor já entrega AVIF, mas o tema ainda está recusando', 'go-verge' ),
+			'status'      => 'recommended',
 			'badge'       => $badge,
-			'description' => '<p>' . esc_html(
-				sprintf(
-					/* translators: 1: HTTP status, 2: Content-Type header value. */
-					__( 'A imagem AVIF mais recente responde HTTP %1$d com Content-Type: %2$s.', 'go-verge' ),
-					$status,
-					$content_type
-				)
-			) . '</p>',
+			'description' => $measured
+				. '<p>' . esc_html__( 'O tema trata AVIF como formato que este servidor não entrega, e essa decisão foi tomada quando ele realmente não entregava. Enquanto ela valer, matéria com capa AVIF continua saindo sem og:image e sem imagem representativa — mesmo agora que o servidor está correto.', 'go-verge' ) . '</p>'
+				. '<p>' . esc_html__( 'Para liberar, adicione uma linha em wp-config.php (antes de "That\'s all, stop editing") ou num mu-plugin:', 'go-verge' ) . '</p>'
+				. '<p><code>add_filter( \'go_verge_allow_avif_uploads\', \'__return_true\' );</code></p>'
+				. '<p>' . esc_html__( 'Isso reabre junto: upload de AVIF, AVIF como og:image, AVIF como imagem de schema e a leitura de prontidão do Discover. Confirme esta verificação em verde e a de acervo antes de considerar resolvido.', 'go-verge' ) . '</p>'
+				. '<p>' . esc_html__( 'Atenção: o segundo defeito continua de pé. Este servidor não gera sub-tamanhos de AVIF, então uma capa AVIF não tem recorte 16:9 nem srcset — ela serve o arquivo original em qualquer largura. Para capas novas, JPEG ou PNG continua sendo melhor: o site converte os recortes para WebP sozinho.', 'go-verge' ) . '</p>',
 			'test'        => 'go_verge_avif_delivery',
 		);
 	}
