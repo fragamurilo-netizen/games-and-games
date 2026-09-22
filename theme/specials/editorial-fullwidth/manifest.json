@@ -1,0 +1,9 @@
+{
+  "id": "editorial-fullwidth",
+  "name": "Especial livre — tela cheia",
+  "version": "1.0.0",
+  "description": "Base reutilizável para novos especiais: usa o conteúdo do post, mas elimina o layout padrão, sidebar e largura de artigo.",
+  "content_mode": "post_content",
+  "style": "style.css",
+  "auto_slugs": []
+}

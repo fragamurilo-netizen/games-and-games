@@ -1,0 +1,502 @@
+/* ========================================================================== */
+/* GAME OVERDRIVE — GTA VI SPECIAL                                            */
+/* Linguagem: blocos sólidos, escala, fotografia oficial e tipografia editorial. */
+/* Sem glassmorphism, sem UI de dashboard, sem bibliotecas ou fontes externas. */
+/* ========================================================================== */
+.go-gta6-special {
+  --go-gta6-ink:#090909;
+  --go-gta6-ink-2:#151515;
+  --go-gta6-paper:#f4efe5;
+  --go-gta6-white:#fff;
+  --go-gta6-pink:#ff4f91;
+  --go-gta6-orange:#ff6b32;
+  --go-gta6-sun:#ffd156;
+  --go-gta6-sky:#6ec9e0;
+  --go-gta6-muted:#aaa59d;
+  --go-gta6-line:rgba(255,255,255,.18);
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  background:var(--go-gta6-ink);
+  color:var(--go-gta6-white);
+  font-family:var(--od471-body, "Source Sans 3"), Arial, Helvetica, sans-serif;
+  font-size:18px;
+  line-height:1.66;
+  text-rendering:optimizeLegibility;
+}
+.go-gta6-special * { box-sizing:border-box; }
+.go-gta6-special img { display:block; width:100%; height:auto; }
+.go-gta6-special a { color:inherit; text-decoration-thickness:2px; text-underline-offset:3px; }
+.go-gta6-special a:focus-visible { outline:3px solid var(--go-gta6-sun); outline-offset:4px; }
+.go-gta6-special p { margin:0 0 1.35em; }
+.go-gta6-special strong { font-weight:900; }
+.go-gta6-special h1,
+.go-gta6-special h2,
+.go-gta6-special h3,
+.go-gta6-special h4 {
+  font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif;
+  letter-spacing:-.025em;
+  line-height:.96;
+  margin:0;
+  text-wrap:balance;
+}
+.go-gta6-shell { width:min(1180px, calc(100% - 40px)); margin:0 auto; }
+.go-gta6-copy { width:min(780px, calc(100% - 40px)); margin:0 auto; }
+.go-gta6-wide { width:min(1380px, calc(100% - 40px)); margin:0 auto; }
+.go-gta6-kicker {
+  display:inline-block;
+  font-size:.76rem;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  padding:.65rem .8rem;
+  background:var(--go-gta6-white);
+  color:var(--go-gta6-ink);
+}
+.go-gta6-status {
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.go-gta6-status::before { content:""; width:.9rem; height:2px; flex:0 0 .9rem; background:currentColor; border-radius:0; }
+.go-gta6-status--confirmed { color:#65d889; }
+.go-gta6-status--evidence { color:var(--go-gta6-sun); }
+.go-gta6-status--reported { color:var(--go-gta6-sky); }
+.go-gta6-status--unknown { color:#c0b9ad; }
+.go-gta6-status--rumor { color:#ff7b7b; }
+
+/* HERO */
+.go-gta6-hero { min-height:92svh; position:relative; display:grid; align-items:end; background:#000; }
+.go-gta6-hero__media { position:absolute; inset:0; }
+.go-gta6-hero__media::after {
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(0,0,0,.08) 20%, rgba(0,0,0,.28) 52%, #090909 96%);
+}
+.go-gta6-hero__media img { width:100%; height:100%; object-fit:cover; object-position:center 34%; }
+.go-gta6-hero__inner { position:relative; z-index:2; padding:clamp(120px, 20vh, 250px) 0 52px; }
+.go-gta6-hero__logo { width:min(300px, 54vw)!important; margin-bottom:28px; filter:drop-shadow(0 8px 18px rgba(0,0,0,.35)); }
+.go-gta6-hero h1 { max-width:1050px; font-size:clamp(3.1rem, 8.2vw, 8.4rem); text-transform:uppercase; }
+.go-gta6-hero__dek { max-width:860px; margin:24px 0 20px!important; font-size:clamp(1.08rem, 2vw, 1.5rem); font-weight:700; line-height:1.35; }
+.go-gta6-hero__meta { display:flex; flex-wrap:wrap; gap:10px 20px; font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#ddd; }
+.go-gta6-hero__cta { display:inline-block; margin-top:26px; padding:14px 18px; border:2px solid #fff; text-decoration:none!important; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+.go-gta6-hero__cta:hover { background:#fff; color:#000; }
+
+/* NAV */
+/* Chapter rail: physically hugs the Overdrive masthead in both header states. */
+.go-gta6-nav {
+  position:sticky;
+  top:104px;
+  z-index:59;
+  width:100%;
+  background:#080808;
+  border:0;
+  border-bottom:1px solid rgba(255,255,255,.18);
+  box-shadow:0 1px 0 rgba(0,0,0,.7);
+  transition:top .16s ease-out;
+}
+.go-gta6-nav__inner {
+  width:min(1380px, 100%);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:stretch;
+}
+.go-gta6-nav__brand {
+  display:flex;
+  align-items:center;
+  gap:.24rem;
+  min-width:92px;
+  padding:0 18px;
+  border-right:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif;
+  font-size:1.08rem;
+  font-weight:900;
+  letter-spacing:.02em;
+  line-height:1;
+  text-decoration:none!important;
+  text-transform:uppercase;
+}
+.go-gta6-nav__brand b { color:var(--go-gta6-pink); font:inherit; }
+.go-gta6-nav__scroll {
+  min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  white-space:nowrap;
+  overscroll-behavior-inline:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.go-gta6-nav__scroll::-webkit-scrollbar { display:none; width:0; height:0; }
+.go-gta6-nav__list { display:flex; width:max-content; min-width:100%; gap:0; list-style:none; padding:0; margin:0; }
+.go-gta6-nav__list a {
+  position:relative;
+  display:flex;
+  align-items:center;
+  min-height:52px;
+  padding:0 16px;
+  border-right:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif;
+  font-size:.82rem;
+  font-weight:800;
+  letter-spacing:.055em;
+  line-height:1;
+  text-transform:uppercase;
+  text-decoration:none!important;
+}
+.go-gta6-nav__list a::after {
+  content:"";
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:0;
+  height:3px;
+  background:var(--go-gta6-sun);
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform .14s ease;
+}
+.go-gta6-nav__list a:hover,
+.go-gta6-nav__list a:focus-visible { background:#171717; color:#fff; }
+.go-gta6-nav__list a:hover::after,
+.go-gta6-nav__list a:focus-visible::after { transform:scaleX(1); }
+.go-gta6-special section[id] { scroll-margin-top:118px; }
+
+/* The Overdrive desktop masthead collapses from 104px to 48px after scroll. */
+body.go-special-active .go-header--471.is-od471-scrolled ~ .go-site .go-gta6-nav { top:48px; }
+body.admin-bar.go-special-active .go-gta6-nav { top:136px; }
+body.admin-bar.go-special-active .go-header--471.is-od471-scrolled ~ .go-site .go-gta6-nav { top:80px; }
+
+/* OPENING */
+.go-gta6-opening { padding:82px 0 90px; background:var(--go-gta6-paper); color:#111; }
+.go-gta6-opening__lede { font-family:Georgia, "Times New Roman", serif; font-size:clamp(1.45rem, 2.7vw, 2.15rem); line-height:1.42; letter-spacing:-.02em; }
+
+/* CHAPTER SYSTEM */
+.go-gta6-chapter { padding:100px 0; border-top:1px solid var(--go-gta6-line); }
+.go-gta6-chapter--paper { background:var(--go-gta6-paper); color:#111; border-top:0; }
+.go-gta6-chapter--sun { background:var(--go-gta6-sun); color:#111; border-top:0; }
+.go-gta6-chapter--pink { background:var(--go-gta6-pink); color:#090909; border-top:0; }
+.go-gta6-chapter h2 { font-size:clamp(3.2rem, 8vw, 8rem); text-transform:uppercase; margin:.15em 0 .16em; }
+.go-gta6-chapter__standfirst { max-width:820px; font-size:clamp(1.1rem, 2vw, 1.45rem); line-height:1.45; font-weight:700; margin-bottom:48px!important; }
+.go-gta6-subhead { font-size:clamp(2rem, 4.2vw, 4.2rem); text-transform:uppercase; margin:1.6em 0 .45em!important; }
+.go-gta6-rule { border:0; border-top:1px solid currentColor; opacity:.25; margin:52px 0; }
+
+/* FACT GRID */
+.go-gta6-facts { display:grid; grid-template-columns:repeat(4,1fr); border-top:3px solid currentColor; border-left:1px solid currentColor; margin-top:34px; }
+.go-gta6-fact { min-height:155px; padding:20px; border-right:1px solid currentColor; border-bottom:1px solid currentColor; }
+.go-gta6-fact dt { font-size:.65rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; opacity:.66; margin-bottom:14px; }
+.go-gta6-fact dd { margin:0; font-size:1.1rem; font-weight:900; line-height:1.23; }
+.go-gta6-fact small { display:block; margin-top:9px; font-size:.72rem; line-height:1.35; opacity:.72; }
+
+/* CALLOUT */
+.go-gta6-chapter--paper .go-gta6-callout,
+.go-gta6-chapter--sun .go-gta6-callout,
+.go-gta6-chapter--pink .go-gta6-callout { background:#111; color:#fff; }
+
+/* TIMELINE */
+.go-gta6-timeline { list-style:none; padding:0; margin:48px 0 0; border-left:5px solid currentColor; }
+.go-gta6-timeline li { position:relative; padding:0 0 48px 34px; }
+.go-gta6-timeline li::before { content:""; position:absolute; left:-12px; top:.45rem; width:19px; height:19px; background:currentColor; border:4px solid var(--go-gta6-paper); border-radius:50%; }
+.go-gta6-chapter:not(.go-gta6-chapter--paper) .go-gta6-timeline li::before { border-color:var(--go-gta6-ink); }
+.go-gta6-timeline time { display:block; font-weight:900; text-transform:uppercase; font-size:.73rem; letter-spacing:.12em; margin-bottom:7px; }
+.go-gta6-timeline h3 { font-size:clamp(1.6rem, 3vw, 2.8rem); margin-bottom:12px; }
+
+/* PERSON CARDS */
+.go-gta6-people { display:grid; grid-template-columns:repeat(2,1fr); gap:2px; background:#333; margin-top:42px; }
+.go-gta6-person { background:#0e0e0e; }
+.go-gta6-person figure { margin:0; aspect-ratio:16/10; background:#222; }
+.go-gta6-person figure img { height:100%; object-fit:cover; }
+.go-gta6-person__body { padding:28px; }
+.go-gta6-person h3 { font-size:clamp(2rem, 4.3vw, 4.2rem); text-transform:uppercase; margin-bottom:13px; }
+.go-gta6-person__role { font-size:.73rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--go-gta6-sun); }
+.go-gta6-person p { color:#e8e8e8; }
+
+/* POSTCARDS / PLACES */
+.go-gta6-postcards { display:grid; grid-template-columns:repeat(2,1fr); gap:26px; margin-top:48px; }
+.go-gta6-postcard { background:#e9dfcc; color:#151515; padding:12px 12px 26px; box-shadow:0 7px 0 rgba(0,0,0,.15); }
+.go-gta6-postcard figure { margin:0; }
+.go-gta6-postcard img { aspect-ratio:16/10; object-fit:cover; filter:saturate(.95) contrast(1.02); }
+.go-gta6-postcard h3 { font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:clamp(1.8rem,3.8vw,3.8rem); line-height:1; margin:20px 12px 10px; }
+.go-gta6-postcard p { margin:0 12px; font-size:.92rem; line-height:1.5; }
+
+/* TABLES */
+.go-gta6-table-wrap { overflow-x:auto; margin:36px 0 50px; border-top:4px solid currentColor; }
+.go-gta6-table { width:100%; border-collapse:collapse; min-width:760px; font-size:.9rem; }
+.go-gta6-table th,.go-gta6-table td { padding:15px 14px; text-align:left; vertical-align:top; border-bottom:1px solid currentColor; }
+.go-gta6-table th { font-size:.65rem; letter-spacing:.12em; text-transform:uppercase; font-weight:900; }
+.go-gta6-table td:first-child { font-weight:900; }
+
+/* MEDIA */
+.go-gta6-fullbleed { margin:0; background:#000; }
+.go-gta6-fullbleed img { width:100%; max-height:88vh; object-fit:cover; }
+.go-gta6-fullbleed figcaption,
+.go-gta6-figure figcaption { padding:12px 20px 18px; color:#bdbdbd; background:#0a0a0a; text-align:center; font-size:.72rem; line-height:1.4; }
+.go-gta6-figure { margin:52px 0; }
+.go-gta6-figure img { aspect-ratio:16/9; object-fit:cover; }
+.go-gta6-image-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin:42px 0; }
+.go-gta6-image-grid figure { margin:0; background:#111; }
+.go-gta6-image-grid img { aspect-ratio:16/10; height:100%; object-fit:cover; }
+.go-gta6-image-grid figcaption { padding:12px; font-size:.68rem; color:#bbb; }
+
+/* SHOP CARDS */
+.go-gta6-shops { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:#2f2f2f; margin:42px 0; }
+.go-gta6-shop { background:#101010; color:#fff; }
+.go-gta6-shop img { aspect-ratio:16/11; object-fit:cover; }
+.go-gta6-shop__body { padding:19px; }
+.go-gta6-shop h3 { font-size:1.7rem; text-transform:uppercase; margin-bottom:9px; }
+.go-gta6-shop p { font-size:.84rem; line-height:1.5; color:#d2d2d2; }
+
+/* QUOTE / BREATHER */
+.go-gta6-breather { min-height:62vh; display:grid; place-items:center; padding:80px 20px; background:var(--go-gta6-orange); color:#070707; text-align:center; }
+.go-gta6-breather p { max-width:1100px; margin:0!important; font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif; font-size:clamp(3.2rem,10vw,10rem); line-height:.88; text-transform:uppercase; }
+
+/* LINK CARDS */
+.go-gta6-readmore { margin-top:46px; border-top:5px solid currentColor; }
+.go-gta6-readmore__title { padding:16px 0 10px; font-size:.67rem; font-weight:900; letter-spacing:.15em; text-transform:uppercase; }
+.go-gta6-readmore a { display:grid; grid-template-columns:1fr auto; gap:20px; padding:15px 0; border-top:1px solid currentColor; text-decoration:none; font-weight:900; }
+.go-gta6-readmore a::after { content:"↗"; }
+.go-gta6-readmore a:hover { opacity:.65; }
+
+
+/* -------------------------------------------------------------------------
+   EDITORIAL LONGFORM COMPONENTS — deliberately flat, photographic and print-like.
+   No glass cards, no rounded dashboard UI, no decorative gradients.
+   ------------------------------------------------------------------------- */
+.go-gta6-editorial-split {
+  display:grid;
+  grid-template-columns:minmax(0, 1.65fr) minmax(220px, .72fr);
+  gap:clamp(34px, 5vw, 74px);
+  align-items:start;
+  margin:42px 0 54px;
+}
+.go-gta6-editorial-split__lead > :first-child { margin-top:0; }
+.go-gta6-margin-note {
+  margin:0;
+  padding:16px 0 18px;
+  border-top:5px solid currentColor;
+  border-bottom:1px solid currentColor;
+  font-size:.88rem;
+  line-height:1.45;
+}
+.go-gta6-margin-note strong {
+  display:block;
+  margin-bottom:8px;
+  font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif;
+  font-size:1.45rem;
+  line-height:1;
+  letter-spacing:-.01em;
+  text-transform:uppercase;
+}
+.go-gta6-photo-strip {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:2px;
+  margin:48px 0 56px;
+  background:#000;
+}
+.go-gta6-photo-strip figure { margin:0; min-width:0; background:#0b0b0b; color:#fff; }
+.go-gta6-photo-strip img { aspect-ratio:4/5; height:100%; max-height:530px; object-fit:cover; }
+.go-gta6-photo-strip figcaption {
+  min-height:62px;
+  padding:12px 13px 14px;
+  border-top:1px solid rgba(255,255,255,.16);
+  font-size:.7rem;
+  line-height:1.35;
+  color:#cfcfcf;
+}
+.go-gta6-vehicle-gallery {
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  grid-template-rows:repeat(2, minmax(210px, 1fr));
+  gap:2px;
+  margin:48px 0 54px;
+  background:#050505;
+}
+.go-gta6-vehicle-gallery figure { margin:0; min-width:0; position:relative; overflow:hidden; background:#111; }
+.go-gta6-vehicle-gallery__hero { grid-row:1 / span 2; }
+.go-gta6-vehicle-gallery img { width:100%; height:100%; min-height:100%; object-fit:cover; }
+.go-gta6-vehicle-gallery figcaption {
+  position:absolute;
+  left:0; right:0; bottom:0;
+  padding:34px 14px 12px;
+  color:#fff;
+  background:linear-gradient(180deg, transparent, rgba(0,0,0,.82));
+  font-size:.7rem;
+  line-height:1.25;
+}
+.go-gta6-vehicle-index {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  border-top:4px solid currentColor;
+  border-left:1px solid currentColor;
+  margin:36px 0 58px;
+}
+.go-gta6-vehicle-index > div {
+  min-height:138px;
+  padding:18px 16px;
+  border-right:1px solid currentColor;
+  border-bottom:1px solid currentColor;
+}
+.go-gta6-vehicle-index strong {
+  display:block;
+  margin-bottom:8px;
+  font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif;
+  font-size:clamp(1.25rem,2.1vw,1.85rem);
+  line-height:.96;
+  text-transform:uppercase;
+}
+.go-gta6-vehicle-index span { display:block; font-size:.76rem; line-height:1.4; opacity:.72; }
+.go-gta6-shotstory {
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-auto-rows:clamp(210px, 26vw, 420px);
+  gap:2px;
+  margin:48px 0 34px;
+  background:#090909;
+}
+.go-gta6-shotstory figure { grid-column:span 4; margin:0; min-width:0; position:relative; overflow:hidden; background:#111; }
+.go-gta6-shotstory__wide { grid-column:span 8!important; }
+.go-gta6-shotstory__tall { grid-row:span 2; }
+.go-gta6-shotstory img { width:100%; height:100%; object-fit:cover; transition:transform .45s cubic-bezier(.2,.7,.2,1); }
+.go-gta6-shotstory figure:hover img { transform:scale(1.015); }
+.go-gta6-shotstory figcaption {
+  position:absolute;
+  left:0; right:0; bottom:0;
+  padding:44px 15px 13px;
+  background:linear-gradient(180deg, transparent, rgba(0,0,0,.86));
+  color:#fff;
+  font-size:.72rem;
+  line-height:1.32;
+}
+.go-gta6-after-gallery {
+  width:min(860px, calc(100% - 40px));
+  margin:36px auto 0;
+  font-size:1.02rem;
+}
+.go-gta6-after-gallery > :last-child { margin-bottom:0; }
+.go-gta6-chapter--cyber {
+  background:#0a0a0a;
+  color:#f3f0e8;
+  border-top:10px solid #d8534f;
+}
+.go-gta6-cyber-facts {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  margin:44px 0 52px;
+  border-top:1px solid #5a5a5a;
+  border-bottom:1px solid #5a5a5a;
+}
+.go-gta6-cyber-facts > div { padding:20px 22px 22px 0; border-right:1px solid #3c3c3c; }
+.go-gta6-cyber-facts > div + div { padding-left:22px; }
+.go-gta6-cyber-facts > div:last-child { border-right:0; }
+.go-gta6-cyber-facts span {
+  display:block;
+  margin-bottom:8px;
+  color:#e26762;
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.go-gta6-cyber-facts strong {
+  display:block;
+  font-family:var(--od471-heading, "Barlow Condensed"), "Arial Narrow", Arial, sans-serif;
+  font-size:clamp(1.25rem,2.4vw,2rem);
+  line-height:1;
+  text-transform:uppercase;
+}
+.go-gta6-media-note {
+  width:min(780px, 100%);
+  margin:34px 0 0;
+  padding-top:18px;
+  border-top:1px solid currentColor;
+  font-size:.88rem;
+  opacity:.82;
+}
+
+/* SOURCES */
+.go-gta6-sources { background:#0b0b0b; color:#fff; padding:90px 0 120px; }
+.go-gta6-sources h2 { font-size:clamp(3rem,7vw,6.5rem); text-transform:uppercase; margin-bottom:40px; }
+.go-gta6-sources h3 { font-size:1.8rem; text-transform:uppercase; margin:38px 0 12px; }
+.go-gta6-sources ul { padding-left:1.2em; }
+.go-gta6-sources li { margin:.72em 0; }
+.go-gta6-disclaimer { font-size:.75rem; color:#aaa; border-top:1px solid #333; margin-top:55px; padding-top:20px; }
+
+@media (max-width:980px){
+  .go-gta6-facts{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-shops{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-image-grid{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-photo-strip{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-vehicle-index{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-shotstory figure{grid-column:span 6}
+  .go-gta6-shotstory__wide{grid-column:span 12!important}
+  .go-gta6-shotstory__tall{grid-row:span 1}
+}
+@media (max-width:782px) and (min-width:768px){
+  body.admin-bar.go-special-active .go-gta6-nav{top:150px}
+  body.admin-bar.go-special-active .go-header--471.is-od471-scrolled ~ .go-site .go-gta6-nav{top:94px}
+}
+@media (max-width:767px){
+  .go-gta6-special{font-size:17px}
+  .go-gta6-shell,.go-gta6-wide,.go-gta6-copy{width:min(100% - 28px, 1180px)}
+  .go-gta6-hero{min-height:82svh}
+  .go-gta6-hero__inner{padding-bottom:34px}
+  .go-gta6-hero__media img{object-position:58% center}
+  .go-gta6-nav{top:56px;z-index:59}
+  body.go-special-active .go-header--471.is-od471-scrolled ~ .go-site .go-gta6-nav{top:56px}
+  body.admin-bar.go-special-active .go-gta6-nav,
+  body.admin-bar.go-special-active .go-header--471.is-od471-scrolled ~ .go-site .go-gta6-nav{top:102px}
+  .go-gta6-nav__inner{grid-template-columns:auto minmax(0,1fr)}
+  .go-gta6-nav__brand{min-width:70px;padding:0 12px;font-size:.92rem}
+  .go-gta6-nav__list a{min-height:46px;padding:0 12px;font-size:.74rem}
+  .go-gta6-nav__list a::after{left:12px;right:12px}
+  .go-gta6-special section[id]{scroll-margin-top:112px}
+  .go-gta6-opening,.go-gta6-chapter{padding:68px 0}
+  .go-gta6-facts{grid-template-columns:1fr 1fr}
+  .go-gta6-fact{min-height:130px;padding:15px}
+  .go-gta6-people,.go-gta6-postcards,.go-gta6-shops{grid-template-columns:1fr}
+  .go-gta6-person__body{padding:22px}
+  .go-gta6-image-grid{grid-template-columns:1fr 1fr}
+  .go-gta6-callout{padding:22px 20px}
+  .go-gta6-editorial-split{grid-template-columns:1fr;gap:26px}
+  .go-gta6-margin-note{max-width:none}
+  .go-gta6-photo-strip{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-photo-strip img{aspect-ratio:16/12;max-height:none}
+  .go-gta6-vehicle-gallery{grid-template-columns:1fr 1fr;grid-template-rows:auto;}
+  .go-gta6-vehicle-gallery__hero{grid-column:1 / -1;grid-row:auto;aspect-ratio:16/9}
+  .go-gta6-vehicle-gallery figure:not(.go-gta6-vehicle-gallery__hero){aspect-ratio:4/3}
+  .go-gta6-vehicle-index{grid-template-columns:repeat(2,1fr)}
+  .go-gta6-shotstory{grid-template-columns:1fr 1fr;grid-auto-rows:clamp(210px,55vw,340px)}
+  .go-gta6-shotstory figure,.go-gta6-shotstory__wide{grid-column:auto!important;grid-row:auto!important}
+  .go-gta6-shotstory__wide{grid-column:1 / -1!important}
+  .go-gta6-after-gallery{width:min(100% - 28px,860px)}
+  .go-gta6-cyber-facts{grid-template-columns:1fr}
+  .go-gta6-cyber-facts>div,.go-gta6-cyber-facts>div+div{padding:16px 0;border-right:0;border-bottom:1px solid #3c3c3c}
+  .go-gta6-cyber-facts>div:last-child{border-bottom:0}
+}
+@media (max-width:430px){
+  .go-gta6-facts{grid-template-columns:1fr}
+  .go-gta6-image-grid{grid-template-columns:1fr}
+  .go-gta6-photo-strip{grid-template-columns:1fr}
+  .go-gta6-photo-strip img{aspect-ratio:16/10}
+  .go-gta6-vehicle-gallery{grid-template-columns:1fr}
+  .go-gta6-vehicle-gallery figure:not(.go-gta6-vehicle-gallery__hero){aspect-ratio:16/10}
+  .go-gta6-vehicle-index{grid-template-columns:1fr}
+  .go-gta6-shotstory{grid-template-columns:1fr;grid-auto-rows:70vw}
+  .go-gta6-shotstory__wide{grid-column:auto!important}
+  .go-gta6-hero h1{font-size:2.9rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .go-gta6-special *{scroll-behavior:auto!important;transition:none!important}
+}
+
+/* WordPress/Overdrive special-template integration */
+body.go-special-active { overflow-x:hidden; }
+body.go-special-active .go-special-page { width:100%; max-width:none; margin:0; padding:0; }
+body.go-special-active .go-gta6-special { margin-left:0; }

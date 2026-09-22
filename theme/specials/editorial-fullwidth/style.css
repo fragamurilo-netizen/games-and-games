@@ -1,0 +1,32 @@
+/* Overdrive — base de Especial livre. */
+body.go-special-active { overflow-x:hidden; }
+body.go-special-active .go-special-page {
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0;
+  background:var(--go-bg, #111015);
+}
+.go-special-free {
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0;
+}
+.go-special-free > *:not(.alignfull):not(.alignwide) {
+  width:min(820px, calc(100% - 40px));
+  margin-left:auto;
+  margin-right:auto;
+}
+.go-special-free > .alignwide {
+  width:min(1240px, calc(100% - 40px));
+  max-width:none;
+  margin-left:auto;
+  margin-right:auto;
+}
+.go-special-free > .alignfull {
+  width:100%;
+  max-width:none;
+  margin-left:0;
+  margin-right:0;
+}

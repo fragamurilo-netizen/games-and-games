@@ -1,0 +1,10 @@
+{
+  "id": "fifa-historia",
+  "name": "FC 27 está chegando: a história de FIFA a EA Sports FC",
+  "version": "1.5.9",
+  "description": "Especial histórico da série FIFA / EA Sports FC com gancho editorial no lançamento de EA Sports FC 27 em 25 de setembro de 2026, jukebox contínua de 24 faixas, mini player compacto, seletor de tópicos e montador de Ultimate Team.",
+  "content_mode": "file",
+  "content": "content.html",
+  "style": "style.css",
+  "auto_slugs": []
+}

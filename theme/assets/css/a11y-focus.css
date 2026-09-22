@@ -1,0 +1,17 @@
+body.go-verge :is(
+	a[href],
+	button,
+	input,
+	select,
+	textarea,
+	summary,
+	[tabindex]:not([tabindex="-1"])
+):focus-visible{outline:2px solid var(--focus,#C6A3FF);outline-offset:2px}@media (forced-colors: active){body.go-verge :is(
+		a[href],
+		button,
+		input,
+		select,
+		textarea,
+		summary,
+		[tabindex]:not([tabindex="-1"])
+	):focus-visible{outline:2px solid Highlight}}

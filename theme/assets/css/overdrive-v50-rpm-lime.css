@@ -1,0 +1,7 @@
+body.go-verge .go-hero-visual__feature .go-tile:not(.go-tile--noimage) .go-tile__title a:hover,
+body.go-verge .go-hero-visual__feature .go-tile:not(.go-tile--noimage) .go-tile__title a:focus-visible,
+body.go-verge .go-hero-visual__feature .go-tile:not(.go-tile--noimage):hover .go-tile__title a,
+body.go-verge .go-tile--feature:not(.go-tile--noimage) .go-tile__title a:hover,
+body.go-verge .go-tile--feature:not(.go-tile--noimage) .go-tile__title a:focus-visible,
+body.go-verge .go-tile--feature:not(.go-tile--noimage):hover .go-tile__title a{color:var(--lime,#C6A3FF)!important;-webkit-text-fill-color:var(--lime,#C6A3FF)!important}body.go-verge .go-hero-visual__feature .go-tile__title a:focus-visible,
+body.go-verge .go-tile--feature .go-tile__title a:focus-visible{outline:2px solid var(--lime,#C6A3FF);outline-offset:3px}

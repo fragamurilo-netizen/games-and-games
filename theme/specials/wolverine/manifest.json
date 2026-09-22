@@ -1,0 +1,11 @@
+{
+  "id": "wolverine",
+  "name": "Wolverine — A vida por trás das garras",
+  "version": "1.0.1",
+  "description": "Especial ilustrado corrigido para o tema news-magazine-x: lançamento, HQs, variantes, games, filmes e animações.",
+  "content_mode": "file",
+  "content": "content.html",
+  "style": "style.css",
+  "script": "script.js",
+  "auto_slugs": []
+}

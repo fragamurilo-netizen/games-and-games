@@ -1,0 +1,11 @@
+{
+  "id": "fatal-frame",
+  "name": "Fatal Frame: a história da franquia",
+  "version": "2.0.0",
+  "description": "Especial visual com imagens locais, linha do tempo interativa e galeria ampliável.",
+  "content_mode": "file",
+  "content": "content.html",
+  "style": "style.css",
+  "script": "script.js",
+  "auto_slugs": []
+}

@@ -1,0 +1,31 @@
+body.go-verge :is(
+  .go-container,
+  .go-article-layout,
+  .go-article__main,
+  .go-article__content,
+  .go-article__sidebar,
+  .go-recirc,
+  .go-after-article__section,
+  .go-explore-overdrive,
+  .go-stream,
+  .go-tile,
+  .go-tile__body,
+  .go-recirc__copy
+){min-inline-size:0}body.go-verge:not(.go-single-clean) .entry-content :is(img,picture,video,canvas,svg),
+body.go-verge .go-article__content :is(img,picture,video,canvas,svg),
+body.go-verge:not(.go-single-clean) .entry-content :is(iframe,embed,object):not([id^="google_ads_iframe"]):not([id^="aswift_"]):not(:where(.google-auto-placed *, .adsbygoogle-noablate *, ins.adsbygoogle *)),
+body.go-verge .go-article__content :is(iframe,embed,object):not([id^="google_ads_iframe"]):not([id^="aswift_"]):not(:where(.google-auto-placed *, .adsbygoogle-noablate *, ins.adsbygoogle *)){max-inline-size:100%}body.go-verge:not(.go-single-clean) .entry-content :is(img,video),
+body.go-verge .go-article__content :is(img,video){block-size:auto}body.go-verge:not(.go-single-clean) .entry-content :is(pre,code),
+body.go-verge .go-article__content :is(pre,code){max-inline-size:100%}body.go-verge:not(.go-single-clean) .entry-content pre,
+body.go-verge .go-article__content pre{overflow:auto;overscroll-behavior-inline:contain}body.go-verge:not(.go-single-clean) .entry-content :is(.wp-block-table,.go-table-scroll),
+body.go-verge .go-article__content :is(.wp-block-table,.go-table-scroll){max-inline-size:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain}body.go-verge:not(.go-single-clean) .entry-content :is(a,p,li,td,th,figcaption),
+body.go-verge .go-article__content :is(a,p,li,td,th,figcaption){overflow-wrap:break-word}body.go-verge :is(.wp-block-embed-youtube,.wp-block-embed-vimeo,.wp-block-video) iframe,
+body.go-verge .wp-block-embed__wrapper > iframe[src*="youtube"],
+body.go-verge .wp-block-embed__wrapper > iframe[src*="vimeo"]{inline-size:100%;aspect-ratio:16/9;block-size:auto}@supports (content-visibility: auto){body.single-post.go-verge :is(
+    .go-recirc,
+    .go-after-article__section,
+    .go-explore-overdrive--single,
+    .go-single-comments-wrap
+  ){content-visibility:auto;contain-intrinsic-size:auto 720px}body.single-post.go-verge .go-single-comments-wrap{contain-intrinsic-size:auto 980px}}@media (max-width: 767px){body.go-verge :is(.go-explore-overdrive__rail,.go-latest-filters,.go-chips--filter){max-inline-size:100%;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}}@media (prefers-reduced-motion: reduce){body.go-verge *,
+  body.go-verge *::before,
+  body.go-verge *::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}

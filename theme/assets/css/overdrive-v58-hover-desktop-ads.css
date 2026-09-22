@@ -1,0 +1,165 @@
+html[data-theme="light-mode"] body.go-verge,
+html[data-theme="light"] body.go-verge{--go-interaction-hover:#7900FF;--go-card-hover:#7900FF;--go-editorial-card-hover:#7900FF;--go-cluster-hover:#7900FF;--link-hover:#7900FF}html[data-theme="light-mode"] body.go-verge .go-hero-visual :where(
+	.go-tile:not(.go-tile--overlay):not(.go-tile--feature),
+	.go-stream__card,
+	.go-archive-row,
+	.go-aside-item,
+	.go-v21-next article,
+	.go-platform-story
+):hover :where(a, .go-tile__title a, .go-stream__title a, .go-archive-row__title a, .go-aside-item__title a),
+html[data-theme="light"] body.go-verge .go-hero-visual :where(
+	.go-tile:not(.go-tile--overlay):not(.go-tile--feature),
+	.go-stream__card,
+	.go-archive-row,
+	.go-aside-item,
+	.go-v21-next article,
+	.go-platform-story
+):hover :where(a, .go-tile__title a, .go-stream__title a, .go-archive-row__title a, .go-aside-item__title a){color:#7900FF!important;-webkit-text-fill-color:#7900FF!important;text-decoration-color:#7900FF!important;text-shadow:none!important}html[data-theme="light-mode"] body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-share-more__native,
+	.go-product-action--save,
+	.go-load-more,
+	.go-topicbar__actions a,
+	.go-topic-hub-v21__pagination a
+):hover,
+html[data-theme="light-mode"] body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-share-more__native,
+	.go-product-action--save,
+	.go-load-more,
+	.go-topicbar__actions a,
+	.go-topic-hub-v21__pagination a
+):focus-visible,
+html[data-theme="light"] body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-share-more__native,
+	.go-product-action--save,
+	.go-load-more,
+	.go-topicbar__actions a,
+	.go-topic-hub-v21__pagination a
+):hover,
+html[data-theme="light"] body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-share-more__native,
+	.go-product-action--save,
+	.go-load-more,
+	.go-topicbar__actions a,
+	.go-topic-hub-v21__pagination a
+):focus-visible{color:#7900FF!important;-webkit-text-fill-color:#7900FF!important;border-color:color-mix(in srgb,#7900FF 34%,var(--border-strong,transparent))!important}html[data-theme="dark-mode"] body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-share-more__native,
+	.go-product-action--save,
+	.go-load-more,
+	.go-topicbar__actions a,
+	.go-topic-hub-v21__pagination a
+):is(:hover, :focus-visible),
+html[data-theme="dark"] body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-share-more__native,
+	.go-product-action--save,
+	.go-load-more,
+	.go-topicbar__actions a,
+	.go-topic-hub-v21__pagination a
+):is(:hover, :focus-visible){color:#C6A3FF!important;-webkit-text-fill-color:#C6A3FF!important}body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-product-action--save,
+	.go-load-more
+):is(:hover, :focus-visible) svg{color:currentColor!important}body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-product-action--save,
+	.go-load-more
+):is(:hover, :focus-visible) svg [stroke]:not([stroke="none"]){stroke:currentColor!important}body.go-verge .go-site :where(
+	.go-iconbtn,
+	.go-theme-toggle,
+	.go-scored-masthead__action,
+	.go-share-more__toggle,
+	.go-product-action--save,
+	.go-load-more
+):is(:hover, :focus-visible) svg [fill]:not([fill="none"]){fill:currentColor!important}html[data-theme] body.go-verge :where(
+	.go-hero-visual__feature .go-tile:not(.go-tile--noimage),
+	.go-tile--overlay,
+	.go-tile--feature:not(.go-tile--noimage),
+	.go-scored-masthead,
+	.figure-overlay
+) :where(a, button):is(:hover, :focus-visible){color:#C6A3FF!important;-webkit-text-fill-color:#C6A3FF!important;text-decoration-color:#C6A3FF!important}@media (min-width: 1101px){body.single-post.go-verge .go-ad-slot--sidebar-desktop{inline-size:300px;max-inline-size:300px;min-inline-size:300px;margin-inline:auto;overflow:visible;contain:none}body.single-post.go-verge .go-ad-slot--sidebar-desktop > ins.go-ad-unit{display:block;inline-size:100%;min-inline-size:1px;max-inline-size:100%;margin-inline:auto}}body.go-verge .go-header--471 :where(.go-iconbtn, .go-theme-toggle):is(:hover, :focus-visible),
+body.go-verge .go-header--editorial :where(.go-iconbtn, .go-theme-toggle):is(:hover, :focus-visible){color:#111015!important;-webkit-text-fill-color:#111015!important;border-color:rgba(16,18,23,.28)!important}body.go-verge .go-header--471 :where(.go-iconbtn, .go-theme-toggle):is(:hover, :focus-visible) svg,
+body.go-verge .go-header--editorial :where(.go-iconbtn, .go-theme-toggle):is(:hover, :focus-visible) svg{color:currentColor!important}body.go-verge .go-offcanvas :where(.go-iconbtn, .go-theme-toggle):is(:hover, :focus-visible){color:#C6A3FF!important;-webkit-text-fill-color:#C6A3FF!important;border-color:color-mix(in srgb,#C6A3FF 42%,transparent)!important}html[data-theme="light-mode"] body.go-verge .rt-news-ticker .ticker-content a:hover,
+html[data-theme="light"] body.go-verge .rt-news-ticker .ticker-content a:hover{color:#7900FF!important;-webkit-text-fill-color:#7900FF!important}html[data-theme="light-mode"] body.go-verge .go-site :where(
+	.go-ui-arrow,
+	.go-topic-card__arrow,
+	.go-home-platform__arrow,
+	.go-release-agenda__arrow,
+	.go-after-card__arrow,
+	.go-context-links__arrow,
+	.go-inline-related__arrow,
+	.go-search-suggestion__arrow
+):is(:hover, :focus-visible),
+html[data-theme="light"] body.go-verge .go-site :where(
+	.go-ui-arrow,
+	.go-topic-card__arrow,
+	.go-home-platform__arrow,
+	.go-release-agenda__arrow,
+	.go-after-card__arrow,
+	.go-context-links__arrow,
+	.go-inline-related__arrow,
+	.go-search-suggestion__arrow
+):is(:hover, :focus-visible){color:#7900FF!important;-webkit-text-fill-color:#7900FF!important;border-color:color-mix(in srgb,#7900FF 38%,transparent)!important}html[data-theme="light-mode"] body.go-verge .go-site :where(
+	.go-topic-card,
+	.go-home-platform,
+	.go-release-agenda,
+	.go-after-card,
+	.go-context-links li,
+	.go-inline-related__item,
+	.go-search-suggestion
+):hover :where(
+	.go-ui-arrow,
+	.go-topic-card__arrow,
+	.go-home-platform__arrow,
+	.go-release-agenda__arrow,
+	.go-after-card__arrow,
+	.go-context-links__arrow,
+	.go-inline-related__arrow,
+	.go-search-suggestion__arrow
+),
+html[data-theme="light"] body.go-verge .go-site :where(
+	.go-topic-card,
+	.go-home-platform,
+	.go-release-agenda,
+	.go-after-card,
+	.go-context-links li,
+	.go-inline-related__item,
+	.go-search-suggestion
+):hover :where(
+	.go-ui-arrow,
+	.go-topic-card__arrow,
+	.go-home-platform__arrow,
+	.go-release-agenda__arrow,
+	.go-after-card__arrow,
+	.go-context-links__arrow,
+	.go-inline-related__arrow,
+	.go-search-suggestion__arrow
+){color:#7900FF!important;-webkit-text-fill-color:#7900FF!important}

@@ -1,0 +1,130 @@
+/* Overdrive / Wolverine — estilos isolados; trilho editorial em fluxo normal. */
+@font-face{font-family:WX Barlow;src:url('assets/barlow.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:WX Source;src:url('assets/source-sans.woff2') format('woff2');font-weight:200 900;font-style:normal;font-display:swap}
+#go-wolverine.go-wolverine{--wx-bg:#faf8f6;--wx-ink:#19171d;--wx-muted:#67616d;--wx-line:#d9d3dc;--wx-surface:#f0ebf4;--wx-purple:#6200ce;--wx-yellow:#ffdf35;--wx-rail:750px;--wx-wide:1160px;--wx-offset:110px;display:block;position:relative;width:100%;max-width:1440px!important;margin:0 auto!important;padding:0!important;background:var(--wx-bg);color:var(--wx-ink);font:400 20px/1.75 'WX Source','Source Sans 3',Arial,sans-serif;text-align:left;isolation:auto;overflow:visible!important;contain:none!important;content-visibility:visible!important}
+html[data-theme='dark-mode'] #go-wolverine.go-wolverine,html[data-theme='dark'] #go-wolverine.go-wolverine,body.dark-mode #go-wolverine.go-wolverine,#go-wolverine.go-wolverine[data-wx-theme='dark']{--wx-bg:#111015;--wx-ink:#f9f7f4;--wx-muted:#bfb6ca;--wx-line:#453c4e;--wx-surface:#24212b;--wx-purple:#c6a3ff;color-scheme:dark}
+html[data-theme='light-mode'] #go-wolverine.go-wolverine,html[data-theme='light'] #go-wolverine.go-wolverine,#go-wolverine.go-wolverine[data-wx-theme='light']{--wx-bg:#faf8f6;--wx-ink:#19171d;--wx-muted:#67616d;--wx-line:#d9d3dc;--wx-surface:#f0ebf4;--wx-purple:#6200ce;color-scheme:light}
+#go-wolverine.go-wolverine,#go-wolverine.go-wolverine :where(header,section,nav,div,figure,figcaption,p,h1,h2,h3,ol,ul,li,a,span,table,th,td,form,label,input,select,button,details,summary,footer,dl,dt,dd){box-sizing:border-box}
+#go-wolverine.go-wolverine :where(h1,h2,h3,p,figure,ol,ul,dl,dd){margin:0;padding:0}
+#go-wolverine.go-wolverine :where(h1,h2,h3){font-family:'WX Barlow','Barlow Condensed',Impact,sans-serif;font-weight:700;color:inherit;text-wrap:balance;letter-spacing:-.025em}
+#go-wolverine.go-wolverine a{color:var(--wx-purple);text-decoration:none!important;border:0;background:none;box-shadow:none;transition:color .15s}
+#go-wolverine.go-wolverine a:hover{color:var(--wx-ink);text-decoration:none!important}
+#go-wolverine.go-wolverine :where(button,input,select){font:inherit}
+#go-wolverine.go-wolverine :where(a,button,input,select,summary):focus-visible{outline:3px solid var(--wx-purple);outline-offset:5px}
+#go-wolverine.go-wolverine :where(p,li,td,th){overflow-wrap:break-word}
+#go-wolverine.go-wolverine :where(img){display:block;max-width:100%;height:auto;margin:0;box-shadow:none;border:0}
+#go-wolverine.go-wolverine [hidden]{display:none!important}
+#go-wolverine.go-wolverine :where(section[id],nav[id]){scroll-margin-top:var(--wx-offset)}
+#go-wolverine.go-wolverine ::selection{background:#7900ff;color:#fff}
+#go-wolverine.go-wolverine .wx-masthead{display:flex;justify-content:space-between;align-items:center;gap:20px;background:#111015;color:#fff;padding:21px 40px;font-size:12px;text-transform:uppercase;letter-spacing:.14em;border-bottom:3px solid #7900ff}
+#go-wolverine.go-wolverine .wx-logo{width:180px;height:auto}
+#go-wolverine.go-wolverine .wx-masthead a{color:#fff}
+#go-wolverine.go-wolverine .wx-masthead .wx-mark{font-size:12px;color:#c6a3ff}
+#go-wolverine.go-wolverine .wx-hero{background:#ffdf35;color:#171510;max-width:none;padding:0}
+#go-wolverine.go-wolverine .wx-hero-type{padding:34px 4.5% 24px}
+#go-wolverine.go-wolverine .wx-kicker{font-size:13px;font-weight:750;letter-spacing:.16em;text-transform:uppercase;line-height:1.4}
+#go-wolverine.go-wolverine .wx-hero h1{font-size:clamp(74px,13.6vw,190px);line-height:.98;letter-spacing:-.035em;margin:8px 0 20px;color:#171510;text-transform:uppercase}
+#go-wolverine.go-wolverine .wx-hero-sub{display:flex;gap:20px;justify-content:space-between;align-items:end}
+#go-wolverine.go-wolverine .wx-hero-deck{font:700 clamp(24px,3.7vw,46px)/1.1 'WX Barlow',sans-serif;max-width:670px;letter-spacing:-.015em}
+#go-wolverine.go-wolverine .wx-hero-years{font-size:14px;font-weight:700;white-space:nowrap;line-height:1.5}
+#go-wolverine.go-wolverine .wx-hero-image{width:100%;aspect-ratio:1600/598;object-fit:cover}
+#go-wolverine.go-wolverine .wx-hero-credit{background:#111015;color:#bfb6ca;font-size:11px;line-height:1.5;padding:9px 4.5%;text-align:right}
+#go-wolverine.go-wolverine .wx-hero-credit a{color:#c6a3ff}
+#go-wolverine.go-wolverine .wx-standfirst{max-width:950px;margin:0 auto;padding:44px 28px 35px}
+#go-wolverine.go-wolverine .wx-standfirst>p{font-size:clamp(24px,3vw,31px);font-weight:550;line-height:1.4;letter-spacing:-.015em}
+#go-wolverine.go-wolverine .wx-meta{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;margin-top:26px;color:var(--wx-muted);font-size:13px;line-height:1.5}
+#go-wolverine.go-wolverine .wx-meta strong{color:var(--wx-ink)}
+#go-wolverine.go-wolverine .wx-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:20px}
+#go-wolverine.go-wolverine .wx-btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;border:1px solid var(--wx-line);border-radius:3px;background:transparent;color:var(--wx-ink);padding:9px 15px;font-size:14px;line-height:1.4;font-weight:650;cursor:pointer;min-height:42px}
+#go-wolverine.go-wolverine .wx-btn:hover{border-color:var(--wx-purple);color:var(--wx-purple)}
+#go-wolverine.go-wolverine .wx-btn--solid{background:var(--wx-purple);color:var(--wx-bg);border-color:var(--wx-purple)}
+#go-wolverine.go-wolverine .wx-btn--solid:hover{background:var(--wx-ink);color:var(--wx-bg)}
+#go-wolverine.go-wolverine .wx-status{font-size:13px;color:var(--wx-muted)}
+#go-wolverine.go-wolverine .wx-index{max-width:var(--wx-wide);margin:0 auto 58px;padding:30px 28px;background:var(--wx-surface)}
+#go-wolverine.go-wolverine .wx-index>summary{font:700 27px/1.2 'WX Barlow',sans-serif;cursor:pointer;list-style-position:inside}
+#go-wolverine.go-wolverine .wx-index-intro{font-size:14px;color:var(--wx-muted);margin:12px 0 20px}
+#go-wolverine.go-wolverine .wx-index ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 26px;list-style:none}
+#go-wolverine.go-wolverine .wx-index li{margin:0;border-top:1px solid var(--wx-line)}
+#go-wolverine.go-wolverine .wx-index a{display:flex;align-items:baseline;gap:10px;padding:11px 0;font-size:15px;font-weight:600;line-height:1.3;color:var(--wx-ink)}
+#go-wolverine.go-wolverine .wx-index a:hover{color:var(--wx-purple)}
+#go-wolverine.go-wolverine .wx-index-num{font-size:12px;color:var(--wx-purple);font-variant-numeric:tabular-nums}
+/* O conteúdo não é um grid: parágrafos e seções são blocos estáticos. */
+#go-wolverine.go-wolverine .go-special-reading{display:block!important;position:static;overflow:visible!important;width:100%;max-width:none;height:auto;max-height:none;contain:none!important;content-visibility:visible!important;columns:auto}
+#go-wolverine.go-wolverine .go-special-section{display:block!important;position:static;overflow:visible!important;margin:74px 0 0;padding:0;height:auto;contain:none!important;content-visibility:visible!important}
+#go-wolverine.go-wolverine .go-special-reading>p,#go-wolverine.go-wolverine .go-special-section>p,#go-wolverine.go-wolverine .go-special-section>h3,#go-wolverine.go-wolverine .wx-sectionhead{display:block;max-width:var(--wx-rail);width:calc(100% - 48px);margin-left:auto;margin-right:auto}
+#go-wolverine.go-wolverine .go-special-reading>p,#go-wolverine.go-wolverine .go-special-section>p{font-size:20px;line-height:1.8;margin-top:23px;color:var(--wx-ink)}
+#go-wolverine.go-wolverine .go-special-reading>p+p,#go-wolverine.go-wolverine .go-special-section>p+p{margin-top:1.25em}
+#go-wolverine.go-wolverine .wx-sectionhead{padding-top:12px;margin-bottom:25px}
+#go-wolverine.go-wolverine .wx-chapter-label{display:flex;align-items:center;gap:13px;color:var(--wx-purple);font-size:12px;line-height:1.4;font-weight:750;letter-spacing:.13em;text-transform:uppercase;margin-bottom:17px}
+#go-wolverine.go-wolverine .wx-chapter-label span{font-size:15px;border-bottom:3px solid var(--wx-purple);padding-bottom:3px}
+#go-wolverine.go-wolverine .wx-sectionhead h2{font-size:clamp(36px,4.3vw,54px);line-height:1.05;margin:0;color:var(--wx-ink)}
+#go-wolverine.go-wolverine .go-special-section>h3{font-size:30px;line-height:1.15;margin-top:42px;margin-bottom:15px}
+#go-wolverine.go-wolverine .wx-image{max-width:1000px;width:calc(100% - 48px);margin:40px auto}
+#go-wolverine.go-wolverine .wx-image img{width:100%;border-radius:3px}
+#go-wolverine.go-wolverine .wx-image figcaption{font-size:13px;line-height:1.5;color:var(--wx-muted);padding:12px 0 0;max-width:820px}
+#go-wolverine.go-wolverine .wx-image figcaption a{white-space:nowrap}
+#go-wolverine.go-wolverine .wx-facts{max-width:950px;width:calc(100% - 48px);margin:36px auto;background:var(--wx-surface);padding:25px 28px;border-left:4px solid var(--wx-purple)}
+#go-wolverine.go-wolverine .wx-facts h3{font-size:29px;line-height:1.1;margin:0 0 21px}
+#go-wolverine.go-wolverine .wx-facts dl{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+#go-wolverine.go-wolverine .wx-facts dt{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--wx-muted)}
+#go-wolverine.go-wolverine .wx-facts dd{font-size:18px;font-weight:650;line-height:1.3;margin-top:4px}
+#go-wolverine.go-wolverine .wx-facts p{font-size:13px;margin-top:20px;color:var(--wx-muted)}
+#go-wolverine.go-wolverine .wx-timeline{max-width:var(--wx-wide);width:calc(100% - 48px);margin:45px auto;background:#111015;color:#fff;padding:34px;border-radius:3px}
+#go-wolverine.go-wolverine .wx-timeline h3{font-size:39px;margin:4px 0 26px;color:#ffdf35;line-height:1.1}
+#go-wolverine.go-wolverine .wx-timeline ol{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:25px;list-style:none}
+#go-wolverine.go-wolverine .wx-timeline li{border-top:2px solid #5b4e62;padding-top:12px;margin:0}
+#go-wolverine.go-wolverine .wx-timeline time{font:700 36px/1.1 'WX Barlow',sans-serif;color:#ffdf35}
+#go-wolverine.go-wolverine .wx-timeline strong{display:block;font-size:17px;line-height:1.2;margin:9px 0}
+#go-wolverine.go-wolverine .wx-timeline p{font-size:14px;line-height:1.5;color:#bfb6ca}
+#go-wolverine.go-wolverine .wx-book{max-width:1000px;width:calc(100% - 48px);margin:40px auto;display:grid;grid-template-columns:minmax(180px,.8fr) 1.2fr;align-items:center;gap:35px;padding:36px 8%;background:#19151d;color:#faf8f6;border-radius:3px}
+#go-wolverine.go-wolverine .wx-book img{height:auto;width:100%;max-width:240px;max-height:420px;object-fit:contain;justify-self:center;box-shadow:12px 16px 0 #ffffff12;transform:rotate(-3deg)}
+#go-wolverine.go-wolverine .wx-book h3{font-size:clamp(35px,4vw,58px);line-height:.98;color:#ffdf35;margin:10px 0 18px}
+#go-wolverine.go-wolverine .wx-book p{font-size:22px;line-height:1.25;max-width:400px}
+#go-wolverine.go-wolverine .wx-book small{display:block;font-size:13px;line-height:1.5;color:#c6b9d1;margin-top:17px}
+#go-wolverine.go-wolverine .wx-book figcaption{min-width:0}
+#go-wolverine.go-wolverine .wx-book a{display:inline-block;font-size:13px;margin-top:14px;color:#c6a3ff}
+#go-wolverine.go-wolverine .wx-catalog{max-width:var(--wx-wide);width:calc(100% - 48px);margin:40px auto}
+#go-wolverine.go-wolverine .wx-catalog h3{font-size:34px;line-height:1.1;margin-bottom:12px}
+#go-wolverine.go-wolverine .wx-catalog-intro{font-size:15px;line-height:1.5;color:var(--wx-muted);margin-bottom:18px}
+#go-wolverine.go-wolverine .wx-filter{display:flex;gap:18px;align-items:end;background:var(--wx-surface);padding:18px;margin:22px 0}
+#go-wolverine.go-wolverine .wx-filter label{font-size:13px;font-weight:650;display:block;flex:1;line-height:1.4;min-width:0}
+#go-wolverine.go-wolverine .wx-filter :where(input,select){display:block;width:100%;max-width:100%;padding:10px;margin-top:6px;min-height:44px;border:1px solid var(--wx-line);background:var(--wx-bg);color:var(--wx-ink);border-radius:3px;font-size:16px}
+#go-wolverine.go-wolverine .wx-count{font-size:13px;color:var(--wx-muted);margin-bottom:10px}
+#go-wolverine.go-wolverine .wx-booklist{list-style:none;border-top:2px solid var(--wx-ink)}
+#go-wolverine.go-wolverine .wx-bookrow{display:grid;grid-template-columns:65px minmax(0,1fr) minmax(0,.9fr);gap:20px;padding:21px 0;border-bottom:1px solid var(--wx-line);margin:0}
+#go-wolverine.go-wolverine .wx-bookrow time{font:700 26px/1.15 'WX Barlow',sans-serif;color:var(--wx-purple)}
+#go-wolverine.go-wolverine .wx-bookrow h4{font:700 21px/1.25 'WX Source',sans-serif;margin:0;color:var(--wx-ink);letter-spacing:-.025em}
+#go-wolverine.go-wolverine .wx-bookrow small{display:block;font-size:13px;line-height:1.5;color:var(--wx-muted);margin-top:6px}
+#go-wolverine.go-wolverine .wx-bookrow p{font-size:16px;line-height:1.5;margin:0}
+#go-wolverine.go-wolverine .wx-table-wrap{overflow-x:auto;border-top:2px solid var(--wx-ink);margin:18px 0}
+#go-wolverine.go-wolverine table{width:100%;border-collapse:collapse;font-size:15px;line-height:1.5;background:transparent;border:0;table-layout:auto;margin:0}
+#go-wolverine.go-wolverine :where(th,td){padding:15px 14px;text-align:left;border:0;border-bottom:1px solid var(--wx-line);vertical-align:top;background:transparent;color:var(--wx-ink)}
+#go-wolverine.go-wolverine th{font-size:11px;text-transform:uppercase;letter-spacing:.09em;background:var(--wx-surface);font-weight:750}
+#go-wolverine.go-wolverine td strong{font-weight:700}
+#go-wolverine.go-wolverine .wx-games-table{min-width:740px}
+#go-wolverine.go-wolverine .wx-movies-table{min-width:640px}
+#go-wolverine.go-wolverine .wx-variant-table td:first-child{font-weight:700;width:23%}
+#go-wolverine.go-wolverine .wx-variant-table td:nth-of-type(2){color:var(--wx-purple);width:24%;font-size:13px;font-weight:650}
+#go-wolverine.go-wolverine .wx-animationlist{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+#go-wolverine.go-wolverine .wx-animationlist li{border-top:2px solid var(--wx-line);padding:18px 0;margin:0}
+#go-wolverine.go-wolverine .wx-animationlist time{color:var(--wx-purple);font-size:13px;font-weight:700}
+#go-wolverine.go-wolverine .wx-animationlist h4{font:700 24px/1.2 'WX Barlow',sans-serif;margin:8px 0;color:var(--wx-ink)}
+#go-wolverine.go-wolverine .wx-animationlist p{font-size:16px;line-height:1.5}
+#go-wolverine.go-wolverine .wx-sources{width:calc(100% - 48px);max-width:var(--wx-wide);margin:70px auto 0;padding:30px 0;border-top:2px solid var(--wx-purple)}
+#go-wolverine.go-wolverine .wx-sources h2{font-size:36px;margin:0 0 18px;line-height:1.1}
+#go-wolverine.go-wolverine .wx-sources :where(p,li){font-size:14px;line-height:1.6}
+#go-wolverine.go-wolverine .wx-sources ul{padding-left:18px;columns:2;column-gap:40px;margin:20px 0}
+#go-wolverine.go-wolverine .wx-sources li{break-inside:avoid;margin:0 0 12px}
+#go-wolverine.go-wolverine .wx-end{margin-top:40px;padding:35px 28px;background:#111015;color:#fff;display:flex;align-items:center;gap:20px;justify-content:space-between;font-size:13px}
+#go-wolverine.go-wolverine .wx-end a{color:#c6a3ff}
+#go-wolverine.go-wolverine .wx-end img{width:165px}
+#go-wolverine.go-wolverine .wx-skip{position:absolute;left:20px;top:8px;transform:translateY(-200%);background:#fff;color:#111015;padding:8px 15px;z-index:10}
+#go-wolverine.go-wolverine .wx-skip:focus{transform:translateY(0)}
+/* Ajustes apenas no contêiner deste especial. Sem seletores de ins ou wrappers de anúncios. */
+body.go-special-wolverine .go-special-page{padding:0;max-width:none;width:100%}
+#go-wolverine.go-wolverine.entry-content.go-single__content.go-article__content{max-width:1440px!important;display:block!important;font-family:'WX Source','Source Sans 3',Arial,sans-serif}
+@media(min-width:1600px){#go-wolverine.go-wolverine{max-width:1440px!important}}
+@media(max-width:800px){#go-wolverine.go-wolverine .wx-index ol{grid-template-columns:1fr 1fr}#go-wolverine.go-wolverine .wx-timeline ol{grid-template-columns:1fr 1fr}#go-wolverine.go-wolverine .wx-book{padding:28px;gap:25px}#go-wolverine.go-wolverine .wx-bookrow{grid-template-columns:55px 1fr}#go-wolverine.go-wolverine .wx-bookrow>p{grid-column:2}#go-wolverine.go-wolverine .wx-facts dl{grid-template-columns:1fr 1fr}#go-wolverine.go-wolverine .wx-sources ul{columns:auto}}
+@media(max-width:540px){#go-wolverine.go-wolverine .wx-masthead{padding:17px 22px}#go-wolverine.go-wolverine .wx-logo{width:150px}#go-wolverine.go-wolverine .wx-masthead .wx-mark{font-size:10px;letter-spacing:.05em}#go-wolverine.go-wolverine .wx-hero-type{padding:27px 22px 24px}#go-wolverine.go-wolverine .wx-kicker{font-size:10px;letter-spacing:.11em}#go-wolverine.go-wolverine .wx-hero h1{font-size:clamp(57px,15.4vw,83px);margin:10px 0 15px}#go-wolverine.go-wolverine .wx-hero-sub{display:block}#go-wolverine.go-wolverine .wx-hero-deck{font-size:29px;max-width:290px}#go-wolverine.go-wolverine .wx-hero-years{font-size:11px;margin-top:15px}#go-wolverine.go-wolverine .wx-hero-image{aspect-ratio:1.45;object-position:66% center}#go-wolverine.go-wolverine .wx-hero-credit{font-size:10px;padding:9px 22px}#go-wolverine.go-wolverine .wx-standfirst{padding:30px 24px}#go-wolverine.go-wolverine .wx-standfirst>p{font-size:25px}#go-wolverine.go-wolverine .wx-meta{gap:8px 18px;font-size:12px}#go-wolverine.go-wolverine .wx-index{margin-bottom:40px;padding:25px 24px}#go-wolverine.go-wolverine .wx-index ol{grid-template-columns:1fr}#go-wolverine.go-wolverine .wx-index a{padding:12px 0;font-size:15px}#go-wolverine.go-wolverine .go-special-reading>p,#go-wolverine.go-wolverine .go-special-section>p{font-size:19px;line-height:1.75}#go-wolverine.go-wolverine .go-special-section{margin-top:56px}#go-wolverine.go-wolverine .wx-sectionhead h2{font-size:37px}#go-wolverine.go-wolverine .wx-chapter-label{font-size:10px}#go-wolverine.go-wolverine .wx-book{grid-template-columns:1fr;padding:30px 24px;gap:28px}#go-wolverine.go-wolverine .wx-book img{max-width:190px}#go-wolverine.go-wolverine .wx-book h3{font-size:41px}#go-wolverine.go-wolverine .wx-book p{font-size:22px}#go-wolverine.go-wolverine .wx-timeline{padding:25px}#go-wolverine.go-wolverine .wx-timeline ol{gap:20px}#go-wolverine.go-wolverine .wx-timeline h3{font-size:32px}#go-wolverine.go-wolverine .wx-timeline strong{font-size:15px}#go-wolverine.go-wolverine .wx-timeline p{font-size:13px}#go-wolverine.go-wolverine .wx-filter{display:block;padding:16px}#go-wolverine.go-wolverine .wx-filter label+label{margin-top:15px}#go-wolverine.go-wolverine .wx-variant-table{min-width:650px}#go-wolverine.go-wolverine .wx-bookrow{gap:12px;grid-template-columns:45px 1fr}#go-wolverine.go-wolverine .wx-bookrow h4{font-size:18px}#go-wolverine.go-wolverine .wx-bookrow p{font-size:15px}#go-wolverine.go-wolverine .wx-bookrow time{font-size:23px}#go-wolverine.go-wolverine .wx-animationlist{grid-template-columns:1fr}#go-wolverine.go-wolverine .wx-end{display:block}#go-wolverine.go-wolverine .wx-end p{margin-top:18px}#go-wolverine.go-wolverine .wx-facts{padding:20px}#go-wolverine.go-wolverine .wx-facts dd{font-size:16px}}
+@media(prefers-reduced-motion:reduce){#go-wolverine.go-wolverine *{scroll-behavior:auto!important;transition:none!important}}
+@media print{#go-wolverine.go-wolverine{--wx-bg:white;--wx-ink:black;--wx-muted:#444;--wx-purple:#333}#go-wolverine.go-wolverine .wx-toolbar,#go-wolverine.go-wolverine .wx-filter,#go-wolverine.go-wolverine .wx-index{display:none!important}#go-wolverine.go-wolverine .go-special-section{break-before:auto}#go-wolverine.go-wolverine .wx-sectionhead{break-after:avoid}#go-wolverine.go-wolverine .wx-table-wrap{overflow:visible}#go-wolverine.go-wolverine :where(table){min-width:0;font-size:11px}#go-wolverine.go-wolverine .go-special-reading>p,#go-wolverine.go-wolverine .go-special-section>p{font-size:12pt;line-height:1.5}#go-wolverine.go-wolverine .wx-bookrow[hidden]{display:grid!important}}

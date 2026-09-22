@@ -1,0 +1,23 @@
+/* Publisher framing only. Never style, clip, scale or overlay a provider creative. */
+html[data-theme] body.go-verge .go-ad-slot {
+ --go-ad-label-color:var(--text-muted,#aaa3b5);
+ --go-ad-label-font:600 10px/1.4 "Source Sans 3",Arial,sans-serif;
+ border-image:none!important;box-shadow:none!important;
+}
+html[data-theme] body.go-verge .go-ad-slot::before,
+html[data-theme] body.go-verge .go-ad-slot::after {display:none!important;content:none!important}
+html[data-theme] body.go-verge .go-ad-slot > .go-ad-slot__label {
+ padding:3px 0;border:0;border-radius:0;background:none;box-shadow:none;
+ color:var(--go-ad-label-color);font:var(--go-ad-label-font);letter-spacing:.07em;
+ opacity:1;text-transform:uppercase;cursor:default;
+}
+/* Keep the existing reserved geometry and close-button clearance. */
+html[data-theme] body.go-verge .go-ad-slot--topscroll {
+ background:color-mix(in srgb,var(--surface-2,#24212b) 25%,transparent);
+ border:0!important;border-bottom:1px solid var(--od-editorial-rule,#ffffff14)!important;
+}
+html[data-theme] body.go-verge .go-ad-slot--topscroll > .go-ad-slot__label {inset-block-start:6px}
+html[data-theme] body.go-verge .go-ad-slot__dismiss {border-radius:6px;background:var(--canvas,#111015);border-color:var(--od-editorial-rule,#ffffff20)}
+html[data-theme] body.go-verge .go-ad-slot:is(.go-article-prime-slot,.go-article-revenue-slot,.go-article-end-revenue-slot) {background:transparent;border-color:var(--od-editorial-rule,#ffffff14)!important}
+html[data-theme=light-mode] body.go-verge .go-ad-slot {--go-ad-label-color:#6a6372}
+@media(forced-colors:active) {html[data-theme] body.go-verge .go-ad-slot > .go-ad-slot__label {color:CanvasText}}

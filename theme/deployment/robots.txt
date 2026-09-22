@@ -1,0 +1,10 @@
+# Overdrive — modelo físico opcional.
+# Use somente se o servidor/host exigir um robots.txt real na raiz.
+# Se este arquivo for copiado para a raiz, ele substitui o robots.txt virtual do WordPress.
+User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+
+Sitemap: https://gameoverdrive.com.br/sitemap.xml
+Sitemap: https://gameoverdrive.com.br/sitemap-fresh.xml
+Sitemap: https://gameoverdrive.com.br/news-sitemap.xml

@@ -1,0 +1,5 @@
+<?php /** Template Name: Popular agora */ if(!defined('ABSPATH')){exit;} get_header();
+$ids=function_exists('go_product_get_popular_ids')?go_product_get_popular_ids(24,20,array('post')):array();
+if(!$ids){$ids=get_posts(array('post_type'=>'post','post_status'=>'publish','posts_per_page'=>20,'fields'=>'ids','orderby'=>'comment_count','order'=>'DESC','date_query'=>array(array('after'=>'7 days ago'))));}
+$q=new WP_Query(array('post_type'=>'post','post_status'=>'publish','post__in'=>$ids?:array(0),'orderby'=>'post__in','posts_per_page'=>20,'ignore_sticky_posts'=>true)); ?>
+<main id="primary" class="go-main"><div class="go-container go-pagehead"><?php go_verge_breadcrumbs(); ?><h1 class="go-pagehead__title">Popular agora</h1></div><div class="go-container go-section"><div class="go-stream"><?php while($q->have_posts()):$q->the_post();go_verge_archive_list_item(get_the_ID(),array('show_excerpt'=>true,'show_type'=>false,'show_score'=>false));endwhile;wp_reset_postdata(); ?></div></div></main><?php get_footer();
