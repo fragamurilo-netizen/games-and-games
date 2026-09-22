@@ -171,3 +171,42 @@ body.single-post.go-verge .go-article__content .go-article-prime-slot > .go-ad-s
  * hiding or resizing provider content. Keep the configured top value so its
  * computed offset remains measurable while the wrapper is static. */
 body.go-verge .go-ad-slot.go-article-sidebar__ad--sticky:not([data-go-ad-sticky-fit="1"]){position:static!important}
+
+/* Post-content zone on a single post: the author card, recirculation, topic bar
+ * and comments. These slots are direct children of the article column, so they
+ * carry no grid placement of their own.
+ *
+ * Geometry follows the same contract as every other host in this file: zero
+ * height, zero margin and no border until the runtime has actually requested
+ * the position. A zone that offers three opportunities and fills one must not
+ * leave two gaps in the page where the other two would have been. */
+.go-listing-revenue-slot--post-content-after-author,
+.go-listing-revenue-slot--post-content-after-recirculation,
+.go-listing-revenue-slot--post-content-before-comments{
+  display:block;
+  inline-size:100%;
+  max-inline-size:100%;
+  min-width:0;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+.go-listing-revenue-slot--post-content-after-author[data-go-ad-requested="1"],
+.go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-requested="1"],
+.go-listing-revenue-slot--post-content-before-comments[data-go-ad-requested="1"]{
+  margin-block:clamp(26px,4vw,42px);
+  padding-block:10px 0;
+  border-block-start:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent);
+}
+.go-listing-revenue-slot--post-content-after-author > ins.adsbygoogle,
+.go-listing-revenue-slot--post-content-after-recirculation > ins.adsbygoogle,
+.go-listing-revenue-slot--post-content-before-comments > ins.adsbygoogle{
+  inline-size:100%;
+  margin-inline:auto;
+}
+@media(max-width:767px){
+  .go-listing-revenue-slot--post-content-after-author[data-go-ad-requested="1"],
+  .go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-requested="1"],
+  .go-listing-revenue-slot--post-content-before-comments[data-go-ad-requested="1"]{margin-block:24px;padding-block-start:8px}
+}

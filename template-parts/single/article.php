@@ -119,11 +119,20 @@ $od_work = $c['is_critique'] ? $c['work_name'] : $c['review_game_name'];
 				<?php if ( $c['topics'] ) : ?><div class="go-tags" aria-label="<?php esc_attr_e( 'Assuntos da matéria', 'go-verge' ); ?>"><span class="go-tags__label"><?php esc_html_e( 'Assuntos', 'go-verge' ); ?></span><?php foreach ( $c['topics'] as $topic ) : $role = sanitize_html_class( (string) ( $topic['role'] ?? 'related' ) ); ?><a class="go-tag go-tag--<?php echo esc_attr( $role ); ?>" data-go-topic-role="<?php echo esc_attr( $role ); ?>" href="<?php echo esc_url( $topic['url'] ); ?>"><?php echo esc_html( $topic['label'] ); ?></a><?php endforeach; ?></div><?php endif; ?>
 				<?php if ( ! empty( $c['follow'] ) && function_exists( 'go_verge_product_follow_button' ) ) : ?><div class="go-product-actions"><?php go_verge_product_follow_button( $c['follow']['id'], $c['follow']['type'] ); ?></div><?php endif; ?>
 				<?php go_verge_author_card( $c['post_id'] ); ?>
+
+				<?php /* Post-content inventory. Three editorial boundaries below the prose,
+				 * each offering at most one unit from the shared listing pool. The zone
+				 * they cover is several screens of scrolled content on a phone and had
+				 * none before. The runtime applies the usual stream spacing and density
+				 * rules, so a short story still ends up with fewer than three. */ ?>
+				<?php if ( function_exists( 'go_verge_ads_render_post_content_unit' ) ) { go_verge_ads_render_post_content_unit( 'after-author' ); } ?>
 				<?php if ( function_exists( 'go_verge_v21_render_contextual_next' ) ) { go_verge_v21_render_contextual_next( $c['post_id'] ); } ?>
 				<?php if ( function_exists( 'go_verge_render_post_content_recirculation' ) ) { go_verge_render_post_content_recirculation( $c['post_id'] ); } ?>
+				<?php if ( function_exists( 'go_verge_ads_render_post_content_unit' ) ) { go_verge_ads_render_post_content_unit( 'after-recirculation' ); } ?>
 				<?php if ( function_exists( 'go_verge_render_more_reviews_by_author' ) ) { go_verge_render_more_reviews_by_author( $c['post_id'] ); } ?>
 				<?php if ( function_exists( 'go_verge_render_game_content_cluster' ) ) { go_verge_render_game_content_cluster( $c['post_id'] ); } ?>
 				<?php if ( function_exists( 'go_verge_render_topic_bar' ) ) { go_verge_render_topic_bar( $c['post_id'] ); } ?>
+				<?php if ( function_exists( 'go_verge_ads_render_post_content_unit' ) ) { go_verge_ads_render_post_content_unit( 'before-comments' ); } ?>
 				<?php if ( comments_open() || get_comments_number() ) : ?><div class="go-single-comments-wrap go-single-comments-wrap--inline"><?php comments_template(); ?></div><?php endif; ?>
 			</div>
 			<?php go_verge_article_sidebar( $c['post_id'] ); ?>

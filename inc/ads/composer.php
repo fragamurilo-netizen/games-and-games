@@ -402,6 +402,65 @@ function go_verge_ads_render_listing_unit( $surface = 'listing', $index = 0 ) {
 }
 
 /**
+ * Ordered anchors of the article's post-content zone, in reading order.
+ *
+ * @return string[]
+ */
+function go_verge_ads_post_content_anchors() {
+	return (array) apply_filters(
+		'go_verge_ads_post_content_anchors',
+		array( 'after-author', 'after-recirculation', 'before-comments' )
+	);
+}
+
+/**
+ * Inventory for the part of an article that came after the last ad unit.
+ *
+ * A single_post document used to end its advertising at `article-end`, which
+ * sits immediately after the prose. Everything below it — the author card, the
+ * contextual next link, "Leia também", more reviews by the author, the game
+ * cluster, the topic bar, the comments and the explore rail — carried none. On
+ * a phone that is several screens of real, scrolled publisher content with no
+ * inventory in it, and it is content a Discover reader reaches often, because
+ * arriving at one story and continuing into another is what that audience does.
+ *
+ * This does not add an ad unit to the account. The listing pool (F1..F5) is
+ * created, live and simply unspent on this template: the body ladder is a
+ * different pool, so nothing here competes with P1/A1..A6 or article-end for a
+ * slot id. The pool stays finite and ordered, so the zone can offer at most
+ * what the pool still holds, and each anchor takes at most one.
+ *
+ * As everywhere else, this renders an OPPORTUNITY. Whether it becomes a request
+ * is decided by the runtime against the same stream spacing, density window and
+ * ad-to-content ratio every other position obeys, which is what keeps three
+ * anchors from becoming three ads on a short story.
+ *
+ * @param string $anchor One of go_verge_ads_post_content_anchors().
+ * @return bool True when an opportunity was printed.
+ */
+function go_verge_ads_render_post_content_unit( $anchor ) {
+	if ( function_exists( 'go_verge_ads_manual_delivery_enabled' ) && ! go_verge_ads_manual_delivery_enabled() ) { return false; }
+	if ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) { return false; }
+	if ( ! function_exists( 'is_singular' ) || ! is_singular( 'post' ) ) { return false; }
+	if ( ! function_exists( 'go_verge_ads_is_monetizable_request' ) || ! go_verge_ads_is_monetizable_request() ) { return false; }
+
+	$anchor = sanitize_key( (string) $anchor );
+	if ( '' === $anchor || ! in_array( $anchor, go_verge_ads_post_content_anchors(), true ) ) {
+		return false;
+	}
+
+	/* One opportunity per anchor per document, even if a template part that
+	 * renders it is included twice. */
+	static $spent = array();
+	if ( isset( $spent[ $anchor ] ) ) {
+		return false;
+	}
+	$spent[ $anchor ] = true;
+
+	return go_verge_ads_render_listing_unit( 'post-content-' . $anchor, 0 );
+}
+
+/**
  * Backwards-compatible entry point for templates that schedule their own rows.
  *
  * The cadence argument is now read only for the row numbers it names; which
