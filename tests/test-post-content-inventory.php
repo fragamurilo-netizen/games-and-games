@@ -153,3 +153,32 @@ go_test_ok( $rail['slot'] !== $desktop['slot'], 'The stacked rail never reuses t
  * because it is what keeps one cached document correct for every user agent. */
 go_test_equals( '(max-width:1100px)', go_verge_ads_unit_media_query( $rail ), 'The rail requests only below the desktop breakpoint' );
 go_test_equals( '(min-width:1101px)', go_verge_ads_unit_media_query( $desktop ), 'The sticky rail requests only at and above it' );
+
+go_test_section( 'Surface names decide spacing, so they are load-bearing' );
+/*
+ * go-ads-runtime.js picks prose spacing (min_gap_px) or stream spacing
+ * (min_stream_gap_px) from whether the surface starts with "article":
+ *
+ *     function usesStreamSpacing(rec) { return !/^article/.test(rec.surface || ''); }
+ *
+ * Every host this auditoria added sits among story cards, offer tiles and
+ * recirculation grids — never between paragraphs — so all of them must land on
+ * the wider stream gap. A name is not a label here; it buys a spacing rule.
+ */
+$stream_spacing = static function ( $surface ) { return 1 !== preg_match( '/^article/', (string) $surface ); };
+foreach ( go_verge_ads_post_content_anchors() as $anchor ) {
+	go_test_ok( $stream_spacing( 'post-content-' . $anchor ), 'post-content-' . $anchor . ' takes stream spacing' );
+}
+go_test_ok( $stream_spacing( 'rail-stacked-mobile' ), 'rail-stacked-mobile takes stream spacing' );
+go_test_equals( false, $stream_spacing( 'article-rail-mobile' ), 'The rejected name would have bought prose spacing' );
+
+/* And the template really passes the corrected name. */
+$helpers = (string) file_get_contents( GO_VERGE_DIR . '/inc/template-helpers.php' );
+go_test_ok( false !== strpos( $helpers, "'ad-surface' => 'rail-stacked-mobile'" ), 'The article rail emits the stream-spaced surface' );
+go_test_ok( false === strpos( $helpers, "'ad-surface' => 'article-rail-mobile'" ), 'The prose-spaced name is gone from the template' );
+
+/* The body ladder keeps prose spacing, which is the whole reason the rule is
+ * written as a prefix test rather than a list. */
+foreach ( array( 'article', 'article-prime', 'article-completion' ) as $surface ) {
+	go_test_equals( false, $stream_spacing( $surface ), $surface . ' keeps prose spacing' );
+}

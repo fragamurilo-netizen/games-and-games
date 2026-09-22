@@ -172,17 +172,37 @@ body.single-post.go-verge .go-article__content .go-article-prime-slot > .go-ad-s
  * computed offset remains measurable while the wrapper is static. */
 body.go-verge .go-ad-slot.go-article-sidebar__ad--sticky:not([data-go-ad-sticky-fit="1"]){position:static!important}
 
-/* Post-content zone on a single post: the author card, recirculation, topic bar
- * and comments. These slots are direct children of the article column, so they
- * carry no grid placement of their own.
+/* ==========================================================================
+ * 5.5.4 — inventory below the prose.
  *
- * Geometry follows the same contract as every other host in this file: zero
- * height, zero margin and no border until the runtime has actually requested
- * the position. A zone that offers three opportunities and fills one must not
- * leave two gaps in the page where the other two would have been. */
+ * Three hosts in the post-content zone, one Multiplex grid at the
+ * recirculation break, and the article rail once it stops being a rail.
+ *
+ * They all share the article body's visual language, because they are read in
+ * the same column and a reader should not be able to tell that one break was
+ * planned by the body ladder and another by the listing pool:
+ *
+ *   - nothing at all until the runtime has actually requested the position:
+ *     zero height, zero margin, no rule. A zone that offers three and fills
+ *     one must not leave two gaps;
+ *   - a hairline ABOVE on request, marking the break as advertising without
+ *     drawing a card around a creative the publisher does not control;
+ *   - a lighter hairline BELOW only once a creative is really present, so an
+ *     unfilled unit never closes a box around empty space.
+ *
+ * `--go-ad-break` keeps the two rules in one place; go-ads.css already uses
+ * the same color-mix pair for .go-article-revenue-slot above.
+ * ========================================================================== */
+body.go-verge{
+  --go-ad-break-top:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent);
+  --go-ad-break-bottom:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 42%,transparent);
+}
+
 .go-listing-revenue-slot--post-content-after-author,
 .go-listing-revenue-slot--post-content-after-recirculation,
-.go-listing-revenue-slot--post-content-before-comments{
+.go-listing-revenue-slot--post-content-before-comments,
+.go-post-content-multiplex,
+.go-article-sidebar__ad--stacked{
   display:block;
   inline-size:100%;
   max-inline-size:100%;
@@ -194,79 +214,79 @@ body.go-verge .go-ad-slot.go-article-sidebar__ad--sticky:not([data-go-ad-sticky-
 }
 .go-listing-revenue-slot--post-content-after-author[data-go-ad-requested="1"],
 .go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-requested="1"],
-.go-listing-revenue-slot--post-content-before-comments[data-go-ad-requested="1"]{
+.go-listing-revenue-slot--post-content-before-comments[data-go-ad-requested="1"],
+.go-post-content-multiplex[data-go-ad-requested="1"],
+.go-article-sidebar__ad--stacked[data-go-ad-requested="1"]{
   margin-block:clamp(26px,4vw,42px);
   padding-block:10px 0;
-  border-block-start:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent);
+  border-block-start:var(--go-ad-break-top);
+}
+.go-listing-revenue-slot--post-content-after-author[data-go-ad-present="1"],
+.go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-present="1"],
+.go-listing-revenue-slot--post-content-before-comments[data-go-ad-present="1"],
+.go-post-content-multiplex[data-go-ad-present="1"],
+.go-article-sidebar__ad--stacked[data-go-ad-present="1"]{
+  padding-block-end:8px;
+  border-block-end:var(--go-ad-break-bottom);
+}
+.go-listing-revenue-slot--post-content-after-author > .go-ad-slot__label,
+.go-listing-revenue-slot--post-content-after-recirculation > .go-ad-slot__label,
+.go-listing-revenue-slot--post-content-before-comments > .go-ad-slot__label,
+.go-post-content-multiplex > .go-ad-slot__label,
+.go-article-sidebar__ad--stacked > .go-ad-slot__label{
+  margin-block-end:8px;
 }
 .go-listing-revenue-slot--post-content-after-author > ins.adsbygoogle,
 .go-listing-revenue-slot--post-content-after-recirculation > ins.adsbygoogle,
-.go-listing-revenue-slot--post-content-before-comments > ins.adsbygoogle{
+.go-listing-revenue-slot--post-content-before-comments > ins.adsbygoogle,
+.go-article-sidebar__ad--stacked > ins.adsbygoogle{
   inline-size:100%;
   margin-inline:auto;
 }
-@media(max-width:767px){
-  .go-listing-revenue-slot--post-content-after-author[data-go-ad-requested="1"],
-  .go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-requested="1"],
-  .go-listing-revenue-slot--post-content-before-comments[data-go-ad-requested="1"]{margin-block:24px;padding-block-start:8px}
-}
 
-/* The article rail below 1101px, where single-clean.css has already collapsed
- * .go-single__layout to `display:block` and the rail is a full-width block.
- *
- * Never sticky: the desktop rail is sticky because it has a tall column to
- * travel down beside, and this one has nothing under it to travel past. Same
- * zero-footprint contract as every other host here — no height, no margin and
- * no border until the runtime has actually requested the position. */
-.go-article-sidebar__ad--stacked{
-  display:block;
-  inline-size:100%;
-  max-inline-size:100%;
-  min-width:0;
-  margin-block:0;
-  padding-block:0;
-  overflow:visible;
-  contain:none;
-}
-.go-article-sidebar__ad--stacked[data-go-ad-requested="1"]{
-  margin-block:clamp(28px,4vw,40px) 0;
-  padding-block:10px 0;
-  border-block-start:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent);
-}
-@media(min-width:1101px){
-  body.go-verge .go-article-sidebar__ad--stacked:not([data-go-ad-requested="1"]){display:none;min-block-size:0;margin-block:0;padding-block:0}
-}
-@media(max-width:767px){
-  .go-article-sidebar__ad--stacked[data-go-ad-requested="1"]{margin-block:24px 0;padding-block-start:8px}
-}
-
-/* Multiplex na fronteira de recirculação.
- *
- * A grade se dimensiona pelo container, não pela viewport — por isso o renderer
- * já omite data-full-width-responsive aqui. O que ela precisa é de largura útil
- * e de nenhum `contain`, senão o iframe da grade fica preso na altura errada.
- * Mesmo contrato de rodapé dos outros hosts: zero até ser solicitado. */
-.go-post-content-multiplex{
-  display:block;
-  inline-size:100%;
-  max-inline-size:100%;
-  min-width:0;
-  margin-block:0;
-  padding-block:0;
-  overflow:visible;
-  contain:none;
-}
-.go-post-content-multiplex[data-go-ad-requested="1"]{
-  margin-block:clamp(30px,4.5vw,46px);
-  padding-block:12px 0;
-  border-block-start:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent);
-}
+/* The Multiplex grid sizes itself from its container rather than from the
+ * viewport, which is why the renderer omits data-full-width-responsive for it.
+ * What it needs from us is real width and no `contain`, or the grid's iframe
+ * settles at the wrong height. */
 .go-post-content-multiplex > ins.adsbygoogle{
   display:block;
   inline-size:100%;
   max-inline-size:none;
   margin-inline:auto;
 }
+
+/* The article rail below 1101px, where single-clean.css has already collapsed
+ * .go-single__layout to `display:block` and the rail is a full-width block.
+ *
+ * Never sticky: the desktop rail is sticky because it has a tall column to
+ * travel down beside, and this one has nothing under it to travel past. The
+ * stacked rail already opens with the theme's own separator, so this host
+ * carries no top rule of its own — two hairlines a few pixels apart read as a
+ * mistake. */
+.go-article-sidebar__ad--stacked{
+  position:static;
+}
+.go-article-sidebar__ad--stacked[data-go-ad-requested="1"]{
+  margin-block:clamp(28px,4vw,40px) 0;
+  padding-block:0;
+  border-block-start:0;
+}
+.go-article-sidebar__ad--stacked[data-go-ad-present="1"]{
+  padding-block-end:0;
+  border-block-end:0;
+}
+@media(min-width:1101px){
+  body.go-verge .go-article-sidebar__ad--stacked:not([data-go-ad-requested="1"]){display:none;min-block-size:0;margin-block:0;padding-block:0}
+}
+
 @media(max-width:767px){
-  .go-post-content-multiplex[data-go-ad-requested="1"]{margin-block:26px;padding-block-start:10px}
+  .go-listing-revenue-slot--post-content-after-author[data-go-ad-requested="1"],
+  .go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-requested="1"],
+  .go-listing-revenue-slot--post-content-before-comments[data-go-ad-requested="1"],
+  .go-post-content-multiplex[data-go-ad-requested="1"]{margin-block:24px;padding-block-start:8px}
+  .go-listing-revenue-slot--post-content-after-author[data-go-ad-present="1"],
+  .go-listing-revenue-slot--post-content-after-recirculation[data-go-ad-present="1"],
+  .go-listing-revenue-slot--post-content-before-comments[data-go-ad-present="1"],
+  .go-post-content-multiplex[data-go-ad-present="1"]{padding-block-end:6px}
+  .go-article-sidebar__ad--stacked[data-go-ad-requested="1"]{margin-block:22px 0}
 }

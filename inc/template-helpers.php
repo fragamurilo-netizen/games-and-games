@@ -5369,12 +5369,24 @@ function go_verge_article_sidebar( $post_id = null ) {
 			 * until its own media query matches. One HTML response therefore
 			 * stays correct for every user agent and every cache layer.
 			 */
+			/*
+			 * The surface name is load-bearing, not a label.
+			 *
+			 * The runtime picks prose spacing (min_gap_px, 240px) or stream
+			 * spacing (min_stream_gap_px, 380px) from whether the surface starts
+			 * with "article" — see usesStreamSpacing() in go-ads-runtime.js. This
+			 * host is a full-width block sitting among story cards and offer
+			 * tiles, which are far taller than a paragraph, so it needs the
+			 * wider stream gap to read as an editorial break instead of as
+			 * another card. Naming it "article-…" would have quietly bought it
+			 * the narrow prose gap.
+			 */
 			go_verge_render_adsense_unit(
 				'article-rail-mobile',
 				array(
 					'tag'   => 'div',
 					'class' => 'go-article-sidebar__ad go-article-sidebar__ad--stacked',
-					'data'  => array( 'ad-surface' => 'article-rail-mobile' ),
+					'data'  => array( 'ad-surface' => 'rail-stacked-mobile' ),
 				)
 			);
 		}
