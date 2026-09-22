@@ -147,108 +147,130 @@ no Overdrive" — passa a renderizar em largura total embaixo do artigo, em vez 
 sumir. No aparelho que carrega a maior parte da audiência, essa coluna inteira
 era conteúdo do publisher sem nenhum inventário.
 
-### 2.2 Implementado
+**O leilão de Multiplex, inteiro.** O contrato não tinha nenhuma unidade
+Multiplex. Não é "mais um banner": é demanda de comprador de nativo e
+recirculação, que não dá lance num 300x250. A página simplesmente não estava
+entrando nesse leilão.
+
+**Matéria longa.** A escada do corpo parava em sete posições e parava de crescer
+em 1200 palavras. Um guia de 3000 palavras recebia o mesmo que um de 1200,
+carregando duas vezes e meia mais conteúdo entre as mesmas sete unidades. É a
+diferença mais clara em relação ao Auto Ads, que continua colocando enquanto a
+matéria continua.
+
+### 2.2 Implementado e ativo agora
 
 **Zona pós-conteúdo — sem unidade nova na conta.** Três âncoras em fronteiras
 editoriais (depois do card do autor, depois de "Leia também", antes dos
 comentários), servidas pelo pool de listagens F1–F5, que já existe, está ativo e
 simplesmente não era gasto neste template. A escada do corpo usa outro pool,
-então nada disputa slot com P1/A1–A6 nem com `article-end`. Cada âncora gasta no
-máximo uma unidade e apenas uma vez por documento.
+então nada disputa slot com P1/A1–A6 nem com `article-end`.
 
-Como em todo o resto do motor, o template oferece a **oportunidade**; quem
-decide pedir é o runtime, contra o mesmo espaçamento de stream (380px no
-celular), janela de densidade e relação anúncio/conteúdo que as outras posições
-obedecem. Por isso uma matéria curta continua terminando com menos de três.
+**Multiplex na fronteira de recirculação — unidade `1889487031`.** O formato que
+faltava contra o Auto Ads. Fica na âncora do meio porque é onde a forma é
+honesta: o leitor terminou a matéria e está escolhendo o que ler em seguida, e
+uma grade de itens relacionados é a forma nativa desse momento — é por isso que
+o formato precifica diferente de uma interrupção entre parágrafos.
 
-**Coluna lateral empilhada — placement novo, desligado.** `article-rail-mobile`,
-com portão `max_viewport: 1100`. É placement próprio e não um ajuste de viewport
-no `sidebar-desktop` porque um trilho fixo de 300px e um bloco de largura total
-são produtos diferentes, e juntar os dois deixaria o relatório dos dois
-ilegível. O portão é emitido pelo renderer como media query tanto na regra de
-exibição quanto na solicitação, então um único HTML cacheado continua correto
-para qualquer user agent, e os dois nunca solicitam no mesmo documento.
+Ele **substitui** a unidade do pool naquela âncora, não soma em cima: a grade é
+alta, e empilhar banner contra ela é exatamente a densidade que o resto do motor
+existe para evitar. O cursor do pool não é gasto ali, então "antes dos
+comentários" continua recebendo F2.
 
-Não foi inventado nenhum ID de unidade. Crie uma unidade Display responsiva no
-AdSense e ligue com:
+Entrou como placement do contrato, não como HTML solto no template. HTML solto
+carregaria um segundo `adsbygoogle.js` (o tema já imprime um), faria `push()` no
+parse ignorando o gate de consentimento, e ficaria fora da janela de densidade e
+do diagnóstico. O `<ins>` emitido é idêntico ao snippet — mesmo client, mesmo
+slot, mesmo `autorelaxed`.
 
-```php
-define( 'GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT', '0000000000' );
-```
+`tests/test-manual-formats.php` proibia a palavra `multiplex` no contrato. A
+regra que o docblock dele descreve é mais estreita: o perigo é **uma constante
+do wp-config trocar o TIPO de uma unidade VIVA** por trás do relatório dela, e o
+próprio docblock diz que o caminho seguro é "unidades NOVAS, declaradas com o
+formato que realmente são" — que é exatamente este caso. A checagem passou a
+afirmar a regra de verdade: nenhum placement decide `sizing`, `format` ou
+`ad_layout` por constante ou condicional. Foi verificado que a guarda nova casa
+com as três formas do experimento antigo e não dá falso positivo no caminho
+seguro.
 
-Até lá o placement se declara, fica desabilitado e não renderiza nada.
+**O teto do corpo deixou de ser o número 7.** Sete nunca foi regra sobre leitura
+nem densidade: era quantas unidades de corpo a conta tinha, escrita como literal
+em seis pontos do planner — por isso criar A7 no AdSense não mudava nada.
+`go_verge_ads_planner_contract_capacity()` passa a ler do contrato. Os degraus
+acima de 1200 palavras continuam a mesma curva em vez de terminá-la: 1800 abre o
+oitavo, 2600 abre o nono, sempre limitados pelo que o contrato consegue servir.
 
-O CSS dos dois segue o contrato dos outros hosts do arquivo: altura zero, margem
-zero e sem borda até a posição ser efetivamente solicitada, para que uma zona que
-oferece três e preenche uma não deixe dois buracos na página.
+Isso **não mexe em densidade**, e esse é o ponto: relação anúncio/conteúdo,
+parcela local e teto por janela são medidos contra altura renderizada, então uma
+unidade adicionada porque existem mais 600 palavras de artigo deixa as três
+exatamente onde estavam. Adiciona alcance em matéria que ganhou isso, não
+pressão em matéria que não ganhou.
 
-40 asserções novas em `tests/test-post-content-inventory.php`.
+### 2.3 Pronto no código, esperando você criar a unidade
 
-### 2.3 Recomendado, não implementado — precisa de decisão sua
+Nenhum ID foi inventado. Os três abaixo se declaram, ficam desabilitados e não
+renderizam nada até a constante existir — e enquanto isso o comportamento é
+idêntico ao de hoje.
 
-**Multiplex (grade nativa) na fronteira de recirculação.** O renderer suporta
-`sizing => 'multiplex'` desde que a arquitetura manual existe e **nenhuma
-unidade jamais usou**. A zona abaixo do artigo é o único lugar do site onde uma
-grade de itens relacionados é a forma nativa da superfície, e não uma
-interrupção dela: o leitor já está escolhendo o que ler em seguida, o que é uma
-transação diferente de um banner entre parágrafos e precifica diferente no
-leilão. Para um site de notícias com audiência majoritariamente móvel, essa
-costuma ser a adição de maior RPM que não acrescenta mais um banner.
+| Constante | O que liga |
+|---|---|
+| `GO_VERGE_ADS_ARTICLE_RAIL_MOBILE_SLOT` | A coluna lateral empilhada abaixo de 1101px, hoje sem nenhum inventário |
+| `GO_VERGE_ADS_ARTICLE_A7_SLOT` | Oitava posição do corpo, só em matéria ≥1800 palavras |
+| `GO_VERGE_ADS_ARTICLE_A8_SLOT` | Nona posição do corpo, só em matéria ≥2600 palavras |
 
-**Foi implementado e depois revertido**, de propósito.
-`tests/test-manual-formats.php` proíbe a palavra `multiplex` em
-`inc/ads/config.php`, com a justificativa registrada de que "ambos os
-experimentos sumiram e devem continuar sumidos". Lendo o docblock, a regra que
-ele descreve é mais estreita do que o teste implementa: o perigo documentado é
-**uma constante do wp-config trocar o TIPO de uma unidade viva** (Article End de
-Display para Multiplex), porque o tipo faz parte da identidade de relatório da
-unidade. O docblock diz explicitamente que o caminho seguro é o oposto —
-"três unidades NOVAS, declaradas com o formato que realmente são".
+A7/A8 devem ser **Display responsivo**, o mesmo produto de A1–A6, para a escada
+continuar sendo um formato só — é isso que torna as posições comparáveis entre
+si. Definir só A7 eleva o teto para oito; o teto segue o contrato.
 
-Um placement novo, com ID próprio, desligado por padrão e incapaz de alterar o
-tipo de qualquer outra unidade honra a regra descrita. Mas afrouxar em silêncio
-uma guarda que alguém escreveu com a palavra "devem continuar sumidos" é decisão
-sua, não minha — e não dá para saber, pelo código, se o experimento anterior foi
-removido pelo risco de troca de tipo ou porque rendeu mal. Se a decisão for
-seguir, o caminho é: criar a unidade Multiplex no AdSense, declarar
-`post-content-multiplex` com `sizing => 'multiplex'` e `format => 'autorelaxed'`
-e ID vindo de constante (padrão vazio, igual a F4/F5), preferi-la na âncora
-`after-recirculation` com queda para o pool quando ausente, e **estreitar o teste
-para o que ele de fato quer proibir** — troca de tipo por constante — em vez de
-proibir a palavra.
+Um buraco na escada (A8 definido sem A7) é tratado como configuração errada, não
+como escada maior: só o prefixo contínuo conta. Senão o planner entregaria a um
+candidato o id `article-a7`, que não renderiza nada, e a oportunidade se perderia
+em silêncio.
 
-### 2.4 Sobre "RPM de impressões, venda e leilão"
+### 2.4 Sobre "venda e leilão", com honestidade
 
-Vale ser direto: o tema não muda o que o Google paga. O `data-full-width-responsive="true"`,
-o Display responsivo e o `format: auto` já estão corretos em todo o inventário; a
-camada de markup não tem folga.
+O tema não muda o que o Google paga. `data-full-width-responsive="true"`, Display
+responsivo e `format: auto` já estavam corretos em todo o inventário; a camada de
+markup não tinha folga.
 
-O que o código controla é **quantas impressões acontecem e em que condição**, e é
-por aí que o RPM de impressão se move — não somando posições, mas mudando a razão
-entre impressões e impressões realmente vistas. As duas adições acima seguem essa
-lógica: são posições profundas, tier `deep`/`standard`, em superfície que o
-leitor alcança por escolha própria, onde o runtime já decide sozinho se vale
-pedir. Somar unidade rasa acima da dobra faria o contrário — mais impressões,
-cada uma valendo menos, e com custo do lado do Discover.
+O que o código controla é **em quantos leilões a página entra e em que
+condição**. As mudanças acima atacam as duas pontas:
 
-E há uma tensão que precisa ser dita, porque os dois pedidos puxam em direções
-opostas: o Top Scroll abre **acima do cabeçalho**, com reserva de
-`max(308px, min(83.334vw,360px) + 58px)` — cerca de 383px num telefone de 390px
-de largura, mais 106px de masthead. São ~489px antes de qualquer conteúdo
-editorial. Isso é caro em LCP e é exatamente o tipo de densidade acima da dobra
-que pesa em avaliação de experiência de página. Não foi mexido, porque é uma
-decisão de publisher explícita e documentada e porque mexer nela sem dado de
-campo seria chute. Mas se o objetivo é recuperar o Discover, essa é a posição que
-eu revisaria primeiro — e é medível pelo teste por dia de calendário que o
-próprio motor já tem (`go_verge_ads_trials`), que é a única forma honesta de
-comparar as duas configurações sem confundir com mix de tráfego.
+- **Mais leilões diferentes** — Multiplex traz demanda que não disputava nada
+  aqui. Isso é aumento de receita sem custo de densidade, que é o tipo raro.
+- **Mais posições onde o conteúdo paga por elas** — a escada longa adiciona
+  inventário proporcional ao tamanho do artigo, deixando todas as razões de
+  densidade intactas.
 
----
+O que eu **não** fiz, de propósito: subir `max_ad_to_content_ratio` (0,45),
+`max_local_ad_ratio` (0,45) ou `max_units_in_window` (3). Ali é onde mora o risco
+de experiência de página, e vocês querem o Discover de volta — subir esses
+números é a forma mais rápida de ganhar impressão hoje e perder distribuição
+depois.
+
+E há uma tensão que precisa ser dita: o Top Scroll abre **acima do cabeçalho**,
+com reserva de `max(308px, min(83.334vw,360px) + 58px)` — cerca de 383px num
+telefone de 390px, mais 106px de masthead. São ~489px antes de qualquer conteúdo
+editorial. É caro em LCP e é exatamente o tipo de densidade acima da dobra que
+pesa em avaliação de experiência de página. Não foi mexido, porque é decisão de
+publisher explícita e documentada, e mexer sem dado de campo seria chute. Se o
+objetivo é recuperar o Discover, é a posição que eu revisaria primeiro — e é
+medível pelo teste por dia de calendário que o próprio motor já tem
+(`go_verge_ads_trials`), que é a única forma honesta de comparar duas
+configurações sem confundir com mix de tráfego.
+
+**Nada disso prova receita.** Os testes provam lógica, contrato e markup. Fill,
+Active View, RPM e receita só aparecem na navegação publicada, e a comparação
+confiável é por dia fechado, não antes/depois.
 
 ## 3. Validação
 
-- Suíte completa (`php tests/run.php`): **todas as suítes passaram**, incluindo
-  as 93 asserções novas.
+- Suíte completa (`php tests/run.php`): **todas as suítes passaram** —
+  147.742 asserções PHP, incluindo as 131 novas desta auditoria.
+- A escada longa foi exercitada **com A7/A8 ligados** num processo próprio, e o
+  buraco de escada (A8 sem A7) num segundo processo. Provar que o caminho
+  desligado não muda nada não prova que o ligado funciona; os dois foram
+  testados.
 - `php -l` em todos os arquivos PHP do tema: sem erros.
 - Nenhuma solicitação real de anúncio foi feita. Nenhuma alteração de conta
   AdSense, de servidor ou de publicação foi executada.
@@ -256,14 +278,20 @@ comparar as duas configurações sem confundir com mix de tráfego.
   contrato e markup — não provam preenchimento, Active View, receita ou Core Web
   Vitals.
 
+
 ## 4. Ordem sugerida
 
-1. `AddType image/avif .avif` no `.htaccess` da raiz. É a causa, e é uma linha.
+1. `AddType image/avif .avif` no `.htaccess` da raiz, fora do `# BEGIN WordPress`.
+   É a causa técnica do lado do Discover, e é uma linha.
 2. Instalar o tema e abrir **Ferramentas → Saúde do site**. A verificação nova
    diz quantas matérias do acervo estão em estado quebrado e quais.
 3. Reenviar as capas dessas matérias em JPEG/PNG (ou regenerar as miniaturas,
    depois que o servidor estiver servindo AVIF corretamente).
 4. Verificar Ações Manuais e Problemas de Segurança no Search Console antes de
    concluir que a causa era técnica.
-5. Criar a unidade de `article-rail-mobile` e definir a constante.
-6. Decidir sobre o Multiplex (seção 2.3).
+5. Conferir o Multiplex numa matéria publicada: abrir "Anúncios: diagnóstico" e
+   confirmar `post-content-multiplex` com estado `filled` ou `unfilled` — não
+   `template`. O `unfilled` é normal nos primeiros dias de uma unidade nova.
+6. Criar as três unidades da seção 2.3 e definir as constantes.
+7. Só depois disso, e com pelo menos duas semanas de dias fechados, avaliar o
+   Top Scroll pelo teste por dia de calendário.
