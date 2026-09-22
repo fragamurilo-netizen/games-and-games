@@ -1,0 +1,101 @@
+{
+  "suite": "diagnostics-position-review",
+  "jsdom": "26.1.0",
+  "scenarios": 22,
+  "passed": 22,
+  "failed": 0,
+  "browserLayout": false,
+  "geometry": "stub, not measured",
+  "realNetworkRequests": 0,
+  "realAdRequests": 0,
+  "results": [
+    {
+      "name": "Boot installs only the on-demand function; no scan, geometry, network, storage or DOM mutation",
+      "passed": true
+    },
+    {
+      "name": "Read-only collection separates prose, auxiliary, manual-host and outside markers and ignores lookalike class names",
+      "passed": true
+    },
+    {
+      "name": "Exact support class is counted separately and does not match a prefix/suffix",
+      "passed": true
+    },
+    {
+      "name": "No article root remains an explicit null result, including an author archive containing the support class",
+      "passed": true
+    },
+    {
+      "name": "Nested root selectors do not duplicate paragraphs and samples are bounded",
+      "passed": true
+    },
+    {
+      "name": "AdSense loader observation strips client/query values and distinguishes lazy script type",
+      "passed": true
+    },
+    {
+      "name": "Even and odd paragraph medians describe lengths without including auxiliary copy",
+      "passed": true
+    },
+    {
+      "name": "The requested panel preserves article collection if manual inspect throws or returns a nonobject",
+      "passed": true
+    },
+    {
+      "name": "Published comparator CTA and editorial poll components are auxiliary rather than prose",
+      "passed": true
+    },
+    {
+      "name": "DOM order separates before, between and after without using equal fixture rectangles",
+      "passed": true
+    },
+    {
+      "name": "Auxiliary paragraphs before and after prose cannot invent editorial boundaries",
+      "passed": true
+    },
+    {
+      "name": "Auxiliary, manual and outside markers cannot become between even with surrounding prose",
+      "passed": true
+    },
+    {
+      "name": "Separate editorial wrappers still establish previous and next paragraph identities",
+      "passed": true
+    },
+    {
+      "name": "A marker inserted dynamically inside an editorial P is inside-p rather than between",
+      "passed": true
+    },
+    {
+      "name": "Empty and advertising paragraphs are not prose boundaries; textless article remains explicit no-p",
+      "passed": true
+    },
+    {
+      "name": "Filled, optimized, unfilled and done-only INS stay independent of the same between position",
+      "passed": true
+    },
+    {
+      "name": "Counts and state totals cover every marker while geometry details stop at the sample limit",
+      "passed": true
+    },
+    {
+      "name": "Nested Google markers own unique INS statuses without double counting and INS markers can own themselves",
+      "passed": true
+    },
+    {
+      "name": "The panel reports total markers, structural positions and literal statuses rather than sampled paid ads",
+      "passed": true
+    },
+    {
+      "name": "Repeated manual captures observe a changed status without refresh, mutation or cached counts",
+      "passed": true
+    },
+    {
+      "name": "Manual startup distinguishes inert hosts and a present script from an initialized API without triggering recovery",
+      "passed": true
+    },
+    {
+      "name": "Manual INS outcomes remain separate from templates and automatic marker counters",
+      "passed": true
+    }
+  ]
+}

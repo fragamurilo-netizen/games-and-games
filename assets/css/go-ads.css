@@ -1,0 +1,173 @@
+:root{--go-ad-label-color:var(--text-secondary,#5d6375);--go-ad-label-font:600 10px/1.3 var(--font-sans,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif);--go-ad-gap:clamp(24px,4vw,40px)}.go-ad-slot,.go-ad-slot__label,.go-ad-slot__dismiss{box-sizing:border-box}.go-ad-slot{clear:both;inline-size:100%;max-inline-size:100%;min-block-size:var(--go-ad-resolved-reserve,var(--go-ad-reserve-mobile,0px));margin:0;padding:0;border:0;background:transparent;color:inherit;text-align:center}@media(min-width:768px){.go-ad-slot{min-block-size:var(--go-ad-resolved-reserve,var(--go-ad-reserve-desktop,0px))}}.go-ad-slot.go-container{margin-inline:auto}.go-ad-slot,
+.go-ad-slot > ins.adsbygoogle,
+body.single-post.go-verge .go-single__sidebar,
+body.single-post.go-verge :is(.entry-content.go-single__content,.go-article__content){content-visibility:visible!important;contain:none!important}.go-ad-slot:not([data-go-ad-sizing="fixed"]) > ins.adsbygoogle{display:block;inline-size:100%;min-inline-size:1px;margin-inline:auto}.go-ad-slot:not([data-go-ad-sizing="fixed"]) > ins.adsbygoogle[data-full-width-responsive="true"]{max-inline-size:none}.go-ad-slot:not([data-go-ad-sizing="fixed"]) > ins.adsbygoogle[data-full-width-responsive="false"]{max-inline-size:100%}.go-ad-slot[data-go-ad-sizing="fixed"] > ins.adsbygoogle{display:block;margin-inline:auto;max-inline-size:none}.go-ad-slot__label{display:table;inline-size:auto;max-inline-size:calc(100% - 24px);margin:0 auto 10px;padding:3px 9px;border:1px solid color-mix(in srgb,var(--go-ad-label-color) 24%,transparent);border-radius:999px;background:color-mix(in srgb,var(--surface-2,transparent) 76%,transparent);color:var(--go-ad-label-color);font:var(--go-ad-label-font);letter-spacing:.035em;text-align:center;text-transform:none;visibility:hidden}.go-ad-slot[data-go-ad-present="1"] > .go-ad-slot__label{visibility:visible}@media(min-width:768px){body.go-verge .go-ad-slot--mobile-only:not([data-go-ad-requested="1"]){display:none;min-block-size:0}}@media(max-width:767px){body.go-verge .go-ad-slot--tablet-up:not([data-go-ad-requested="1"]){display:none;min-block-size:0;margin-block:0}}@media(max-width:1100px){body.go-verge .go-ad-slot--desktop-only:not([data-go-ad-requested="1"]){display:none;min-block-size:0}}.go-ad-slot--topscroll{position:relative;margin:0;padding:44px 0 14px;background:var(--surface-2,transparent);min-block-size:var(--go-ad-resolved-reserve,max(308px,calc(min(83.334vw,360px) + 58px)))}.go-ad-slot--topscroll[data-go-ad-sizing="fixed"]{min-block-size:var(--go-ad-resolved-reserve,var(--go-ad-reserve-mobile,132px))}.go-ad-slot--topscroll > .go-ad-slot__label{position:absolute;inset-block-start:3px;inset-inline-start:50%;transform:translateX(-50%);margin:0;pointer-events:none}.go-ad-slot--dismissible{position:relative}.go-ad-slot__dismiss{position:absolute;inset-block-start:0;inset-inline-end:max(6px,env(safe-area-inset-right));z-index:2;display:inline-flex;align-items:center;justify-content:center;inline-size:32px;block-size:32px;padding:0;border:1px solid var(--border,rgba(128,128,128,.38));border-radius:50%;background:var(--canvas,#111015);color:inherit;opacity:.72;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .15s ease,border-color .15s ease}.go-ad-slot__dismiss:hover,.go-ad-slot__dismiss:focus-visible{opacity:1;border-color:currentColor}.go-ad-slot__dismiss:focus-visible{outline:2px solid currentColor;outline-offset:2px}.go-ad-slot--dismissible > .go-ad-slot__dismiss{visibility:hidden}.go-ad-slot--dismissible[data-go-ad-present="1"] > .go-ad-slot__dismiss{visibility:visible}.go-ad-slot--site-masthead{margin-block:clamp(26px,3vw,36px)}body.single-post.go-single-clean .go-ad-slot--article-hero-overlay{inline-size:100%;max-inline-size:970px;margin:30px auto 36px;padding:0;background:transparent}@media(min-width:768px) and (max-width:819px){body.single-post.go-single-clean .go-ad-slot--article-hero-overlay{min-block-size:var(--go-ad-resolved-reserve,132px)}}@media(min-width:1101px){body.single-post.go-single-clean .go-ad-slot--article-hero-overlay{min-block-size:var(--go-ad-resolved-reserve,282px)}}@media(min-width:1101px){.go-article-sidebar__ad--sticky{position:sticky;inset-block-start:calc(var(--go-header-height,76px) + var(--wp-admin--admin-bar--height,0px) + 12px);z-index:1;margin-block:clamp(32px,4vw,44px) 0;overflow:visible;contain:none}body.single-post.go-verge .go-ad-slot.go-article-sidebar__ad--sticky{position:sticky!important;top:calc(var(--go-header-height,76px) + var(--wp-admin--admin-bar--height,0px) + 12px)!important}}.go-article__content > .go-ad-slot{margin-inline:auto;margin-block:var(--go-ad-gap)}@media(max-width:767px){.go-site-masthead-ad{padding-inline:0}.go-ad-slot--site-masthead,
+ body.single-post.go-single-clean .go-ad-slot--article-hero-overlay{margin-block:24px 28px}}@media(max-width:820px){body.single-post.go-verge .go-article__content :is(.wp-block-table,.go-table-scroll,.go-guide-table-wrap){scrollbar-gutter:auto!important}body.single-post.go-verge .go-article__content :where(
+  .wp-block-table > table.go-editorial-table,
+  .go-table-scroll > table.go-editorial-table,
+  .go-guide-table-wrap > table.go-editorial-table,
+  table.go-editorial-table
+ ){display:table!important;width:100%!important;inline-size:100%!important;min-width:100%!important;min-inline-size:100%!important;max-width:100%!important;max-inline-size:100%!important;table-layout:fixed!important;overflow:visible!important}body.single-post.go-verge.go-single-clean #primary .entry-content.go-single__content :is(
+  .wp-block-table,.go-table-scroll,.go-guide-table-wrap
+ ) > table.go-editorial-table,
+ body.single-post.go-verge.go-single-clean #primary .entry-content.go-single__content > table.go-editorial-table{display:table!important;width:100%!important;inline-size:100%!important;min-width:100%!important;min-inline-size:100%!important;max-width:100%!important;max-inline-size:100%!important;table-layout:fixed!important;overflow:visible!important}}body.single-post.go-verge .go-article__content > .go-ad-slot[data-go-ad-empty="1"],
+body.go-verge .go-ad-slot[data-go-ad-empty="1"],
+body.go-verge .go-ad-slot[hidden]{display:none;min-block-size:0;margin-block:0;padding-block:0}@media print{body.go-verge .go-ad-slot{display:none}}
+body.single-post.go-verge .go-article__content .go-article-revenue-slot{inline-size:100%;max-inline-size:100%;margin-block:0;padding-block:0;overflow:visible;contain:none}body.single-post.go-verge .go-article__content .go-article-revenue-slot[data-go-ad-requested="1"]{margin-block:clamp(30px,5vw,48px)}body.single-post.go-verge .go-article__content .go-article-revenue-slot > ins.adsbygoogle{inline-size:100%;margin-inline:auto}.go-archive-list > .go-listing-revenue-slot,.go-author-feed > .go-listing-revenue-slot{grid-column:1/-1;inline-size:100%;max-inline-size:100%;margin-block:0;padding-block:0;overflow:visible;contain:none}.go-archive-list > .go-listing-revenue-slot[data-go-ad-requested="1"],.go-author-feed > .go-listing-revenue-slot[data-go-ad-requested="1"]{margin-block:clamp(24px,4vw,38px)}.go-home-mid-revenue-slot{inline-size:100%;max-inline-size:var(--go-content-max,1280px);margin-block:0;padding-inline:0;overflow:visible;contain:none}.go-home-mid-revenue-slot[data-go-ad-requested="1"]{margin-block:clamp(30px,5vw,52px)}@media(max-width:767px){body.single-post.go-verge .go-article__content .go-article-revenue-slot[data-go-ad-requested="1"]{margin-block:30px}.go-archive-list > .go-listing-revenue-slot[data-go-ad-requested="1"],.go-author-feed > .go-listing-revenue-slot[data-go-ad-requested="1"]{margin-block:26px}.go-home-mid-revenue-slot[data-go-ad-requested="1"]{margin-block:30px}}
+/* In-body inventory: compact, clearly disclosed, in normal flow.
+ *
+ * The rules above set a generic margin for every revenue slot; these override
+ * it with the tighter editorial rhythm the body ladder uses. The hairline rule
+ * marks the break as advertising without drawing a card around the creative. */
+body.single-post.go-verge .go-article__content .go-article-revenue-slot[data-go-ad-requested="1"]{margin-block:clamp(24px,3.6vw,36px);padding-block:10px 0;border-block-start:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 62%,transparent)}
+body.single-post.go-verge .go-article__content .go-article-revenue-slot[data-go-ad-present="1"]{padding-block-end:8px;border-block-end:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 42%,transparent)}
+body.single-post.go-verge .go-article__content .go-article-revenue-slot > .go-ad-slot__label{margin-block-end:8px}
+@media(max-width:767px){body.single-post.go-verge .go-article__content .go-article-revenue-slot[data-go-ad-requested="1"]{margin-block:22px;padding-block-start:8px}body.single-post.go-verge .go-article__content .go-article-revenue-slot[data-go-ad-present="1"]{padding-block-end:6px}}
+
+/* Monetization surfaces outside standard posts. */
+:is(.go-stream,.od-game-coverage__feed,.od-game-catalog,.go-v7-library__grid) > .go-listing-revenue-slot{
+  grid-column:1/-1;
+  inline-size:100%;
+  max-inline-size:100%;
+  min-width:0;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+:is(.go-stream,.od-game-coverage__feed,.od-game-catalog,.go-v7-library__grid) > .go-listing-revenue-slot[data-go-ad-requested="1"]{
+  margin-block:clamp(24px,4vw,40px);
+}
+.od-game-revenue-slot{
+  inline-size:100%;
+  max-inline-size:100%;
+  margin-block:0;
+  overflow:visible;
+  contain:none;
+}
+.od-game-revenue-slot[data-go-ad-requested="1"]{
+  margin-block:clamp(30px,4vw,46px);
+  padding-block:10px;
+  border-block:1px solid color-mix(in srgb,var(--od-games-line,var(--border)) 62%,transparent);
+}
+.go-game-sidebar-revenue{
+  inline-size:100%;
+  max-inline-size:300px;
+  margin-inline:auto;
+}
+@media(max-width:1100px){
+  .go-game-sidebar-revenue:not([data-go-ad-requested="1"]){display:none!important;min-block-size:0!important;margin:0!important}
+}
+@media(max-width:767px){
+  :is(.go-stream,.od-game-coverage__feed,.od-game-catalog,.go-v7-library__grid) > .go-listing-revenue-slot[data-go-ad-requested="1"]{margin-block:26px}
+  .od-game-revenue-slot[data-go-ad-requested="1"]{margin-block:26px;padding-block:8px}
+}
+
+/* Platform directory: module-boundary inventory between dense editorial groups. */
+.go-platforms-content > .go-platforms-revenue-slot,
+.go-platforms-editorial-sections > .go-platforms-revenue-slot{
+  inline-size:100%;
+  max-inline-size:100%;
+  min-width:0;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+.go-platforms-content > .go-platforms-revenue-slot[data-go-ad-requested="1"],
+.go-platforms-editorial-sections > .go-platforms-revenue-slot[data-go-ad-requested="1"]{
+  margin-block:clamp(28px,4vw,44px);
+}
+@media(max-width:767px){
+  .go-platforms-content > .go-platforms-revenue-slot[data-go-ad-requested="1"],
+  .go-platforms-editorial-sections > .go-platforms-revenue-slot[data-go-ad-requested="1"]{
+    margin-block:26px;
+  }
+}
+
+/* Completion inventory and the second home module boundary. */
+.go-article-end-revenue-slot{
+  inline-size:100%;
+  max-inline-size:100%;
+  min-width:0;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+.go-article-end-revenue-slot[data-go-ad-requested="1"]{
+  margin-block:clamp(30px,4.5vw,46px);
+  padding-block:12px 10px;
+  border-block:1px solid color-mix(in srgb,var(--border,rgba(128,128,128,.28)) 54%,transparent);
+}
+.go-article-end-revenue-slot[data-go-ad-present="1"]{
+  background:color-mix(in srgb,var(--surface-2,transparent) 24%,transparent);
+}
+.go-article-end-revenue-slot > .go-ad-slot__label{margin-block-end:8px}
+.go-home-mid-revenue-slot--m2[data-go-ad-requested="1"]{
+  margin-block:clamp(28px,4.5vw,48px);
+}
+@media(max-width:767px){
+  .go-article-end-revenue-slot[data-go-ad-requested="1"]{margin-block:26px;padding-block:10px 8px}
+  .go-home-mid-revenue-slot--m2[data-go-ad-requested="1"]{margin-block:28px}
+}
+
+
+
+/* Prime P1 — the first high-reach in-content opportunity.
+ *
+ * It occupies no visual gap until armed. Once requested it reads as a quiet
+ * editorial break, NOT as a card: Google may render rich responsive creatives
+ * here (including suggestion-style "Descobrir mais" units), and nesting those
+ * inside a bordered publisher shell makes one card look like two.
+ *
+ * Two earlier passes fought over exactly this. V13 gave the slot a border and a
+ * tinted background; the pass after it set border, background and padding back
+ * to neutral in a second rule block further down the file. Both shipped, so the
+ * cascade decided. There is one rule now, and it is the neutral one. */
+body.single-post.go-verge .go-article__content .go-article-prime-slot{
+  inline-size:100%;
+  max-inline-size:100%;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+body.single-post.go-verge .go-article__content .go-article-prime-slot[data-go-ad-requested="1"]{
+  margin-block:clamp(26px,4vw,40px);
+  padding-block:6px 4px;
+  border-block:0;
+  background:transparent;
+}
+body.single-post.go-verge .go-article__content .go-article-prime-slot > .go-ad-slot__label{
+  margin-block-end:8px;
+  padding:2px 7px;
+  border-color:color-mix(in srgb,var(--go-ad-label-color) 18%,transparent);
+  background:transparent;
+  opacity:.78;
+}
+@media(max-width:767px){
+  body.single-post.go-verge .go-article__content .go-article-prime-slot[data-go-ad-requested="1"]{
+    margin-block:24px 28px;
+  }
+}
+
+/* Accidental-click safety for the first mobile screen.
+ * The close control sits 8px clear of the Top Scroll creative, and a 14px gap
+ * separates the creative from the masthead Menu/Search buttons below it. */
+.go-ad-slot--topscroll > .go-ad-slot__dismiss{inset-block-start:4px}
+
+/* Desktop home Top Display keeps the masthead rhythm of the internals. */
+@media(min-width:1101px){.go-ad-slot--home-masthead{margin-block:clamp(26px,3vw,36px)}}
+
+/* Preserve AdSense responsive sizing. Body INS elements inherit the full-width
+ * true/false rules above without a stronger 100% maximum; Google owns any
+ * viewport expansion. A game sidebar requested on desktop stays in normal
+ * flow after resize, while an unrequested desktop host remains ineligible. */
+
+/* The wrapper starts in normal flow. The runtime grants sticky only when the
+ * complete measured creative and disclosure fit in a desktop viewport. When
+ * it stops fitting, normal flow preserves every pixel without clipping,
+ * hiding or resizing provider content. Keep the configured top value so its
+ * computed offset remains measurable while the wrapper is static. */
+body.go-verge .go-ad-slot.go-article-sidebar__ad--sticky:not([data-go-ad-sticky-fit="1"]){position:static!important}

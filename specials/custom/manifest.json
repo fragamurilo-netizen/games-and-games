@@ -1,0 +1,9 @@
+{
+  "id": "custom",
+  "name": "Especial personalizado — colar HTML + CSS",
+  "version": "1.0.0",
+  "description": "Para novos especiais sem editar o tema: cole HTML, CSS e JavaScript opcional diretamente na edição da matéria.",
+  "content_mode": "custom_meta",
+  "style": "style.css",
+  "auto_slugs": []
+}

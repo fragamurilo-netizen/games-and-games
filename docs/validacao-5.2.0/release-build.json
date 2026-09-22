@@ -1,0 +1,13 @@
+{
+  "command": [
+    "node",
+    "/tmp/go-discovery-build-d5v4gfjd/tests/build-runtime-min.js"
+  ],
+  "returncode": 0,
+  "seconds": 0.08,
+  "log": "release-build.log",
+  "source_sha256": "7a003aa3cc95c1ba4076a09ef5f606eabc877a23ccbd6f3dccfe2d1ef45191c3",
+  "production_sha256": "617d697a7417567b1484526637395525760e679153869508e690c52049e9228d",
+  "rebuilt_sha256": "617d697a7417567b1484526637395525760e679153869508e690c52049e9228d",
+  "byte_identical": true
+}

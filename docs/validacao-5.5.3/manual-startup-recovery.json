@@ -1,0 +1,79 @@
+{
+  "suite": "manual-startup-recovery",
+  "passed": 17,
+  "failed": 0,
+  "browserLayout": false,
+  "geometry": "deterministic fixture, not measured",
+  "realNetworkRequests": 0,
+  "realAdRequests": 0,
+  "results": [
+    {
+      "name": "PHP reuses policy, prints recovery once and keeps global disable absolute",
+      "passed": true
+    },
+    {
+      "name": "Baseline missing head: PHP inert hosts remain unrequested after readiness and time",
+      "passed": true
+    },
+    {
+      "name": "Missing head recovers with source runtime and exact PHP policy; one eligible request",
+      "passed": true
+    },
+    {
+      "name": "Missing head recovers with min runtime and exact PHP policy; one eligible request",
+      "passed": true
+    },
+    {
+      "name": "Missing head recovers with lean runtime and exact PHP policy; one eligible request",
+      "passed": true
+    },
+    {
+      "name": "Normal PHP head makes footer a no-op with no additional runtime fetch",
+      "passed": true
+    },
+    {
+      "name": "PHP footer reconstructs policy when the head emitter never ran",
+      "passed": true
+    },
+    {
+      "name": "Recovery mounts all hosts and requests the next body unit as the reader reaches it",
+      "passed": true
+    },
+    {
+      "name": "Delayed normal head race normal-first retains one API and one request per host",
+      "passed": true
+    },
+    {
+      "name": "Delayed normal head race recovery-first retains one API and one request per host",
+      "passed": true
+    },
+    {
+      "name": "Consent-gated missing-head recovery stays inert until grant, then requests once",
+      "passed": true
+    },
+    {
+      "name": "Desktop-only sidebar remains inert on mobile after recovery",
+      "passed": true
+    },
+    {
+      "name": "Mobile-only Top Scroll remains inert on desktop after recovery",
+      "passed": true
+    },
+    {
+      "name": "Load failure records error, leaves units inert, and does not retry",
+      "passed": true
+    },
+    {
+      "name": "Recovery load error after delayed normal startup keeps successful ready state",
+      "passed": true
+    },
+    {
+      "name": "No publisher host means no fetch; a later declarative host can recover",
+      "passed": true
+    },
+    {
+      "name": "Incomplete existing API is reported without replacing a foreign runtime",
+      "passed": true
+    }
+  ]
+}

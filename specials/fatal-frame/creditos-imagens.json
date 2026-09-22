@@ -1,0 +1,155 @@
+{
+  "hero": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/crimson-re/assets/img/index/header-kv_pc.jpg",
+    "size": [
+      1920,
+      1113
+    ],
+    "file": "hero.webp",
+    "bytes": 249186
+  },
+  "remake-scene": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/crimson-re/assets/img/system/ss1_1a.jpg",
+    "size": [
+      1000,
+      563
+    ],
+    "file": "remake-scene.webp",
+    "bytes": 33812
+  },
+  "remake-camera": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/crimson-re/assets/img/system/ss1_9b_en.jpg",
+    "size": [
+      1000,
+      563
+    ],
+    "file": "remake-camera.webp",
+    "bytes": 26826
+  },
+  "remake-hands": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/crimson-re/assets/img/system/ss1_8b.jpg",
+    "size": [
+      1000,
+      563
+    ],
+    "file": "remake-hands.webp",
+    "bytes": 49302
+  },
+  "mio": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/crimson-re/assets/img/index/chara1.png",
+    "size": [
+      882,
+      1000
+    ],
+    "file": "mio.webp",
+    "bytes": 142458
+  },
+  "mayu": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/crimson-re/assets/img/index/chara2.png",
+    "size": [
+      882,
+      1000
+    ],
+    "file": "mayu.webp",
+    "bytes": 128848
+  },
+  "ff1": {
+    "url": "https://blog.playstation.com/tachyon/2013/05/fatal-frame.jpg",
+    "size": [
+      554,
+      341
+    ],
+    "file": "ff1.webp",
+    "bytes": 38318
+  },
+  "ff2": {
+    "url": "https://blog.playstation.com/tachyon/2013/05/FatalFrame2Crimson_ButterflyFI.jpg",
+    "size": [
+      554,
+      341
+    ],
+    "file": "ff2.webp",
+    "bytes": 19810
+  },
+  "ff3": {
+    "url": "https://blog.playstation.com/tachyon/2013/10/Fatal-Frame-Promo-Image.jpg",
+    "size": [
+      554,
+      341
+    ],
+    "file": "ff3.webp",
+    "bytes": 40674
+  },
+  "mask": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mask/img/top/kvbg02.jpg",
+    "size": [
+      2200,
+      2128
+    ],
+    "file": "mask.webp",
+    "bytes": 118922
+  },
+  "mask-corridor": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mask/system/img/sys-1-04.jpg",
+    "size": [
+      1920,
+      1080
+    ],
+    "file": "mask-corridor.webp",
+    "bytes": 238550
+  },
+  "mask-camera": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mask/system/img/sys-2-03.jpg",
+    "size": [
+      1920,
+      1080
+    ],
+    "file": "mask-camera.webp",
+    "bytes": 305532
+  },
+  "mask-torch": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mask/system/img/sys-5-01.jpg",
+    "size": [
+      1920,
+      1080
+    ],
+    "file": "mask-torch.webp",
+    "bytes": 305654
+  },
+  "water": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mobw/img/top/header_pc.jpg",
+    "size": [
+      1500,
+      1550
+    ],
+    "file": "water.webp",
+    "bytes": 118704
+  },
+  "yuri": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mobw/img/top/chara1-pc.jpg",
+    "size": [
+      1920,
+      1130
+    ],
+    "file": "yuri.webp",
+    "bytes": 178654
+  },
+  "anniversary": {
+    "url": "https://www.koeitecmoamerica.com/fatalframe/mobw/img/wallpaper/zero20th_wallpaper.png",
+    "size": [
+      1573,
+      2060
+    ],
+    "file": "anniversary.webp",
+    "bytes": 294174
+  },
+  "opening": {
+    "url": "https://www.koeitecmoamerica.com/wp-content/uploads/2026/03/Demo_01_Opening03-scaled.jpg",
+    "size": [
+      2560,
+      1440
+    ],
+    "file": "opening.webp",
+    "bytes": 436256
+  }
+}

@@ -1,0 +1,4 @@
+WhatsApp and Reddit paths in inc/template-helpers.php: Simple Icons, CC0 1.0.
+Source: https://github.com/simple-icons/simple-icons
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Downloaded 2026-09-09; brand marks remain subject to their owners' brand guidelines.

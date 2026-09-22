@@ -1,0 +1,13 @@
+{
+  "command": [
+    "node",
+    "/tmp/go-ready-build-6akaf5sv/tests/build-runtime-min.js"
+  ],
+  "returncode": 0,
+  "seconds": 0.074,
+  "log": "release-build.log",
+  "source_sha256": "5e20ac54798f7e230d8603971ce94852430efc4d3937094258efe065c7f4acef",
+  "production_sha256": "0ef1455326ff3244ddcbc28e5a5454b0b232f2b87d43abb43b07678ed965c4ad",
+  "rebuilt_sha256": "0ef1455326ff3244ddcbc28e5a5454b0b232f2b87d43abb43b07678ed965c4ad",
+  "byte_identical": true
+}

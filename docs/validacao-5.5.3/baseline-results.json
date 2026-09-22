@@ -1,0 +1,188 @@
+[
+  {
+    "suite": "test-delivery-mode.php",
+    "code": 0,
+    "tail": [
+      "",
+      "========================================================================",
+      "25 asserções passaram, 0 falharam",
+      "========================================================================",
+      "",
+      "========================================================================",
+      "9 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "test-unified-loader.php",
+    "code": 0,
+    "tail": [
+      "",
+      "========================================================================",
+      "17 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "test-manual-formats.php",
+    "code": 0,
+    "tail": [
+      "",
+      "------------------------------------------------------------------------",
+      "Markup emitido",
+      "------------------------------------------------------------------------",
+      "",
+      "========================================================================",
+      "90 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "test-composer.php",
+    "code": 0,
+    "tail": [
+      "",
+      "------------------------------------------------------------------------",
+      "O pool de listagem entrega uma unidade por vez, em ordem",
+      "------------------------------------------------------------------------",
+      "",
+      "========================================================================",
+      "19 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "test-composer-rendered-inventory.php",
+    "code": 0,
+    "tail": [
+      "",
+      "------------------------------------------------------------------------",
+      "Composer actual inventory: primary-disabled-with-reserve",
+      "------------------------------------------------------------------------",
+      "",
+      "========================================================================",
+      "20 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "test-manual-financial-decoupling.php",
+    "code": 0,
+    "tail": [
+      "        \"today\": 0",
+      "    },",
+      "    \"store_calls_after_admin\": {",
+      "        \"intraday\": 1,",
+      "        \"range\": 0,",
+      "        \"today\": 1",
+      "    }",
+      "}"
+    ]
+  },
+  {
+    "suite": "test-article-empty-paragraph-integrity.php",
+    "code": 0,
+    "tail": [
+      "PASS malformed protected block fails open",
+      "PASS malformed protected block fails open",
+      "PASS malformed protected block fails open",
+      "PASS malformed protected block fails open",
+      "PASS malformed protected block fails open",
+      "PASS invalid UTF-8 fails open",
+      "PASS long blank paragraph preserves prose",
+      "20 passed, 0 failed"
+    ]
+  },
+  {
+    "suite": "static-integrity.php",
+    "code": 0,
+    "tail": [
+      "",
+      "========================================================================",
+      "169 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "loader-gate.test.js",
+    "code": 0,
+    "tail": [
+      "PASS Denied hard gate remains closed on readiness and repeated consent notifications",
+      "PASS Late consent inserts exactly one canonical script across every event source",
+      "PASS An existing official provider suppresses insertion after consent",
+      "PASS WP marketing consent fallback releases once without an experiment API",
+      "PASS CMP exception is handled without fetching provider",
+      "PASS Ready document with consent inserts once immediately",
+      "PASS Consent revocation and regrant do not create a second provider",
+      "loader-gate: 8 passed, 0 failed; DOM double only, zero network requests"
+    ]
+  },
+  {
+    "suite": "runtime.test.js",
+    "code": 0,
+    "tail": [
+      "",
+      "------------------------------------------------------------------------",
+      "A altura útil desconta a âncora da conta",
+      "------------------------------------------------------------------------",
+      "",
+      "========================================================================",
+      "60 asserções passaram, 0 falharam",
+      "========================================================================"
+    ]
+  },
+  {
+    "suite": "runtime-lean-parity.test.js",
+    "code": 0,
+    "tail": [
+      "------------------------------------------------------------------------",
+      "E a cópia pública não carrega a superfície do operador",
+      "------------------------------------------------------------------------",
+      "PASS A completa carrega o diagnóstico do operador",
+      "PASS A enxuta não carrega o diagnóstico do operador",
+      "PASS Os marcadores de build não vazam para a cópia gerada",
+      "",
+      "{\"suite\":\"runtime-lean-parity\",\"passed\":14,\"failed\":0,\"realAdRequests\":0}"
+    ]
+  },
+  {
+    "suite": "runtime-manual-baseline.test.js",
+    "code": 0,
+    "tail": [
+      "PASS Predictive lead follows the same local motion/latency geometry under every global regime",
+      "PASS A legacy REST endpoint in cached HTML never causes a per-page GET or a delivery update",
+      "PASS Missing, sampleless, stale and distant-future unit models fall back to neutral values without blocking a visible ad",
+      "PASS Valid historical unit priors expire after 24h without a request refresh or a network lookup",
+      "PASS A retained safe reserve can request when reached even if every primary host was rejected by the composer",
+      "PASS Reserve-only output remains cold away from the reader and cannot bypass missing plan telemetry or capacity",
+      "PASS A reached reserve with no primary still obeys density and delayed consent without duplicate requests",
+      "{\"suite\":\"runtime-manual-baseline\",\"passed\":10,\"failed\":0,\"realAdRequests\":0}"
+    ]
+  },
+  {
+    "suite": "runtime-context-paint-gate.test.js",
+    "code": 0,
+    "tail": [
+      "O braço do dia é repassado, nunca escolhido",
+      "------------------------------------------------------------------------",
+      "PASS O runtime reporta o braço que o servidor mandou",
+      "PASS E a unidade de atribuição declarada",
+      "PASS Outro documento com a mesma carga reporta o mesmo braço",
+      "PASS Sem teste no servidor, o runtime não inventa um braço",
+      "",
+      "{\"suite\":\"runtime-context-paint-gate\",\"passed\":70,\"failed\":0,\"realAdRequests\":0}"
+    ]
+  },
+  {
+    "suite": "runtime-final-regressions.test.js",
+    "code": 0,
+    "tail": [
+      "PASS Optimized empty critical units do not masquerade as a strong fill signal",
+      "PASS Filled responses retain their strong signal and mixed empty responses remain neutral",
+      "PASS A past unit-window excess after viewport growth does not veto a distant safe body opportunity",
+      "PASS A candidate that adds a fourth unit to an existing window remains blocked",
+      "PASS Materializing one manual host reconciles changed flow before a silent provider answers",
+      "{\"suite\":\"runtime-final-regressions\",\"scenarios\":5,\"passed\":5,\"failed\":0,\"realAdRequests\":0}"
+    ]
+  }
+]

@@ -1,0 +1,255 @@
+{
+  "theme": "discovery/work",
+  "integrated": {
+    "command": [
+      "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+      "/workspace/scratch/6fbbb9a59182/discovery/work/tests/run.php"
+    ],
+    "returncode": 0,
+    "seconds": 33.47,
+    "log": "release-suite.log",
+    "suites": [
+      "test-planner.php",
+      "stress-planner.php",
+      "fuzz-quotes-500.php",
+      "fuzz-atomic-text-500.php",
+      "fuzz-planner-600.php",
+      "fuzz-yield-600.php",
+      "planner-structure-1000.php",
+      "planner-layouts-5000.php",
+      "economics-regime-3000.php",
+      "test-economics-contract.php",
+      "test-economics-readiness.php",
+      "test-headroom-rollback.php",
+      "test-composer.php",
+      "test-listing-fallback.php",
+      "test-listing-continuation.php",
+      "test-account-controls.php",
+      "test-unified-loader.php",
+      "test-topscroll-unified.php",
+      "test-active-view-aggregation.php",
+      "test-manual-formats.php",
+      "test-manual-formats-invalid.php",
+      "test-yield.php",
+      "test-sitemap-indexing.php",
+      "test-seo-delivery.php",
+      "test-technology-channel.php",
+      "static-integrity.php",
+      "loader-gate.test.js",
+      "runtime.test.js",
+      "runtime-topscroll-smart.test.js",
+      "runtime-audit-regressions.test.js",
+      "runtime-evolution.test.js",
+      "runtime-responsive-geometry.test.js",
+      "runtime-governor-600.test.js",
+      "runtime-density-1000.test.js",
+      "runtime-viewport-700.test.js",
+      "runtime-critical-release-1000.test.js",
+      "runtime-sessions-1200.test.js"
+    ],
+    "suite_count": 37,
+    "php_suites": 26,
+    "javascript_suites": 11,
+    "success_footer": true
+  },
+  "php_lint": {
+    "files": 260,
+    "passed": 260,
+    "failures": []
+  },
+  "sql": {
+    "command": [
+      "python3",
+      "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-active-view-sql.py"
+    ],
+    "returncode": 0,
+    "seconds": 0.024,
+    "log": "active-view-sql.log"
+  },
+  "topscroll_custom_default": {
+    "command": [
+      "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+      "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-topscroll-unified.php",
+      "--custom-default"
+    ],
+    "returncode": 0,
+    "seconds": 0.012,
+    "log": "topscroll-custom-default.log"
+  },
+  "runtime_unified_min": {
+    "command": [
+      "node",
+      "/workspace/scratch/6fbbb9a59182/discovery/work/tests/runtime-evolution.test.js"
+    ],
+    "returncode": 0,
+    "seconds": 0.136,
+    "log": "runtime-unified-min.log"
+  },
+  "runtime_audit_min": {
+    "command": [
+      "node",
+      "/workspace/scratch/6fbbb9a59182/discovery/work/tests/runtime-audit-regressions.test.js"
+    ],
+    "returncode": 0,
+    "seconds": 0.096,
+    "log": "runtime-audit-min.log"
+  },
+  "runtime_geometry_min": {
+    "command": [
+      "node",
+      "/workspace/scratch/6fbbb9a59182/discovery/work/tests/runtime-responsive-geometry.test.js"
+    ],
+    "returncode": 0,
+    "seconds": 0.118,
+    "log": "runtime-geometry-min.log"
+  },
+  "sitemap_variants": [
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--provider=rank-math"
+      ],
+      "returncode": 0,
+      "seconds": 0.019,
+      "log": "sitemap-provider-rank-math.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--provider=none"
+      ],
+      "returncode": 0,
+      "seconds": 0.015,
+      "log": "sitemap-provider-none.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--endpoint=news"
+      ],
+      "returncode": 0,
+      "seconds": 0.013,
+      "log": "sitemap-endpoint-news.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--endpoint=fresh-ims"
+      ],
+      "returncode": 0,
+      "seconds": 0.017,
+      "log": "sitemap-endpoint-fresh-ims.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--endpoint=fresh-etag"
+      ],
+      "returncode": 0,
+      "seconds": 0.013,
+      "log": "sitemap-endpoint-fresh-etag.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--endpoint=changed-etag"
+      ],
+      "returncode": 0,
+      "seconds": 0.013,
+      "log": "sitemap-endpoint-changed-etag.log"
+    },
+    {
+      "command": [
+        "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/tests/test-sitemap-indexing.php",
+        "--endpoint=stable-ims"
+      ],
+      "returncode": 0,
+      "seconds": 0.024,
+      "log": "sitemap-endpoint-stable-ims.log"
+    }
+  ],
+  "cta_integration": {
+    "command": [
+      "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+      "/workspace/scratch/6fbbb9a59182/discovery/validation/cta-adjacency-review.php"
+    ],
+    "returncode": 0,
+    "seconds": 0.023,
+    "log": "cta-adjacency-review.log"
+  },
+  "late_anchor": {
+    "command": [
+      "node",
+      "/workspace/scratch/6fbbb9a59182/discovery/validation/late-anchor-review.cjs"
+    ],
+    "returncode": 0,
+    "seconds": 0.077,
+    "log": "late-anchor-review.log"
+  },
+  "late_anchor_min": {
+    "command": [
+      "node",
+      "/workspace/scratch/6fbbb9a59182/discovery/validation/late-anchor-review.cjs"
+    ],
+    "returncode": 0,
+    "seconds": 0.081,
+    "log": "late-anchor-review-min.log"
+  },
+  "discovery": {
+    "command": [
+      "node",
+      "/workspace/scratch/6fbbb9a59182/discovery/validation/dom-scan-review.cjs",
+      "/workspace/scratch/6fbbb9a59182/discovery/work"
+    ],
+    "returncode": 0,
+    "seconds": 0.077,
+    "log": "dom-scan-review.log"
+  },
+  "build": {
+    "command": [
+      "node",
+      "/tmp/go-discovery-build-d5v4gfjd/tests/build-runtime-min.js"
+    ],
+    "returncode": 0,
+    "seconds": 0.08,
+    "log": "release-build.log",
+    "source_sha256": "7a003aa3cc95c1ba4076a09ef5f606eabc877a23ccbd6f3dccfe2d1ef45191c3",
+    "production_sha256": "617d697a7417567b1484526637395525760e679153869508e690c52049e9228d",
+    "rebuilt_sha256": "617d697a7417567b1484526637395525760e679153869508e690c52049e9228d",
+    "byte_identical": true
+  },
+  "js_syntax": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/assets/js/go-ads-runtime.js"
+      ],
+      "returncode": 0,
+      "seconds": 0.055,
+      "log": "syntax-go-ads-runtime.js.log"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "/workspace/scratch/6fbbb9a59182/discovery/work/assets/js/go-ads-runtime.min.js"
+      ],
+      "returncode": 0,
+      "seconds": 0.053,
+      "log": "syntax-go-ads-runtime.min.js.log"
+    }
+  ],
+  "experimental_execution_absent": true,
+  "production_unchanged_during_validation": true,
+  "real_ad_requests": 0,
+  "browser_page_scenarios_executed": 0,
+  "passed": true
+}

@@ -1,0 +1,8 @@
+{
+  "checks": {
+    "inc/ads/experiment.php": true,
+    "assets/js/go-ads-experiment.js": true,
+    "tests/test-experiment-config.php": true
+  },
+  "static_exit": 0
+}

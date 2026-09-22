@@ -1,0 +1,13 @@
+{
+  "command": [
+    "node",
+    "/tmp/go-final-build-nt2xjlqc/tests/build-runtime-min.js"
+  ],
+  "returncode": 0,
+  "seconds": 0.079,
+  "log": "release-build.log",
+  "source_sha256": "9fc0e1d4edff8195f63c45de932003d25180e13efe55b690a827bbbf81259216",
+  "production_sha256": "9a73e55aa104824af85369f97aa4753319fdfd8c05099f6db6ce3680d52affa4",
+  "rebuilt_sha256": "9a73e55aa104824af85369f97aa4753319fdfd8c05099f6db6ce3680d52affa4",
+  "byte_identical": true
+}

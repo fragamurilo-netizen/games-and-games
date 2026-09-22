@@ -1,0 +1,56 @@
+{
+  "base": "ultimo.zip",
+  "baseSha256": "52d8e4b68f8ff49dddf12f753744068a5d64a6f31192d503f01a167e051dc624",
+  "themeVersion": "5.5.3",
+  "runtimeVersion": "12.7.0-context-paint-gate",
+  "changedOriginalFiles": [
+    {
+      "path": "style.css",
+      "beforeSha256": "f67abf74d52188088f2becb33f40c2373c7c83b2a5c86bf78766bce058628114",
+      "afterSha256": "adbbdfcb6ed6927b0be743b4ba2a41ea4d99345e553da6d3159ffaf04e07b172"
+    },
+    {
+      "path": "assets/js/go-ads-recovery-diagnostics.js",
+      "beforeSha256": "5d3f6e9d265c3eb61db2401b6b94bba9eb28a730dd3901a1a7c70e6def213564",
+      "afterSha256": "eac6aef53c179295198c26348b89729c982a20c1a175f2cdde5087f54512c5bf"
+    },
+    {
+      "path": "tests/static-integrity.php",
+      "beforeSha256": "01eac0bfede84ddcd27bf4213dbc15a0fb73bba320802c39d09f1e9a1e818b57",
+      "afterSha256": "9dcf6805bb5ffe7f4abf6c9f97448b38ae3e89397e297895652d24b80f58c918"
+    },
+    {
+      "path": "tests/diagnostics-position-review.cjs",
+      "beforeSha256": "24ebd01c708730d67a1cae1c0245c77be5d39082248d5358eb46be256a31918e",
+      "afterSha256": "f6c27cd79f04213a88da17210913979e98223976b8cd1839494e487ebcbf62b0"
+    },
+    {
+      "path": "functions.php",
+      "beforeSha256": "bf3ccd718a6016521708a4502c71a737817a2e9f73c2ec2ab5b1e64691fd1cce",
+      "afterSha256": "c667f91730d721891e0b9f573107b0e5d4977d9e27920b112c15472c5d9e46c6"
+    },
+    {
+      "path": "inc/ads/assets.php",
+      "beforeSha256": "3c028e327ae7fcf1f86c07063c3602b61ac7d112c8db90310a624ae8bd4f5cc1",
+      "afterSha256": "0d64f990042eb1e2ea9bbd5b4cd2eba68fac594d96351b38b8b96aa04af21329"
+    }
+  ],
+  "addedFiles": [
+    "CHANGELOG-5.5.3.md",
+    "docs/validacao-5.5.3/baseline-results.json",
+    "docs/validacao-5.5.3/diagnostics.json",
+    "docs/validacao-5.5.3/manual-startup-recovery.json",
+    "tests/manual-startup-fixture.php",
+    "tests/manual-startup.test.cjs"
+  ],
+  "unchangedOriginalFiles": 651,
+  "validation": {
+    "startupScenarios": 17,
+    "startupFailed": 0,
+    "diagnosticScenarios": 22,
+    "diagnosticFailed": 0,
+    "referenceSuites": 14,
+    "realAdRequests": 0,
+    "browserLayoutMeasured": false
+  }
+}

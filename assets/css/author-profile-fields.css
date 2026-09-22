@@ -1,0 +1,7 @@
+.go-author-profile-editor{max-width:1180px;margin:28px 0 36px;color:#1d2327}.go-author-profile-editor__intro{margin-bottom:18px;padding:22px 24px;border-left:4px solid #7900FF;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}.go-author-profile-editor__intro h2,
+.go-author-profile-editor__intro p,
+.go-author-profile-group__head h3,
+.go-author-profile-group__head p{margin:0}.go-author-profile-editor__intro p,
+.go-author-profile-group__head p{margin-top:6px;color:#646970}.go-author-profile-group{margin-top:16px;padding:22px 24px 26px;border:1px solid #dcdcde;border-radius:8px;background:#fff}.go-author-profile-group__head{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e7e7e9}.go-author-profile-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px}.go-author-profile-field{min-width:0}.go-author-profile-field--wide{grid-column:1/-1}.go-author-profile-field > label{display:block;margin-bottom:7px;font-weight:650}.go-author-profile-field input,
+.go-author-profile-field textarea{width:100%;max-width:none}.go-author-profile-field textarea{min-height:104px;resize:vertical}.go-author-profile-field .description{margin:6px 0 0}@media (max-width: 782px){.go-author-profile-editor__intro,
+	.go-author-profile-group{padding:18px}.go-author-profile-fields{grid-template-columns:minmax(0,1fr)}.go-author-profile-field--wide{grid-column:auto}}

@@ -1,0 +1,95 @@
+{
+  "theme": "ready/work",
+  "theme_version": "5.1.1",
+  "runtime_version": "12.3.0-unified-manual",
+  "passed": true,
+  "suite_status": "33 suites approved after physical removal of the three obsolete experimental files and targeted admin validation",
+  "integrated_run": {
+    "suites": 33,
+    "passed": 32,
+    "failed": 1,
+    "php_suites": 23,
+    "javascript_suites": 10,
+    "log": "release-suite.log",
+    "failure_suite": "static-integrity.php",
+    "reason": "The package still contained the two orphan experimental production files; the dedicated experimental test was also removed before final packaging."
+  },
+  "targeted_retry": {
+    "returncode": 0,
+    "assertions_passed": 109,
+    "assertions_failed": 0,
+    "log": "static-integrity-root.log"
+  },
+  "final_suites_passed": 33,
+  "php_suites": 23,
+  "javascript_suites": 10,
+  "topscroll_final": {
+    "returncode": 0,
+    "log": "topscroll-final.log",
+    "command": [
+      "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+      "/workspace/scratch/6fbbb9a59182/ready/work/tests/test-topscroll-unified.php"
+    ],
+    "assertions_passed": 72,
+    "assertions_failed": 0
+  },
+  "topscroll_custom_default": {
+    "returncode": 0,
+    "log": "topscroll-custom-default-final.log",
+    "command": [
+      "/workspace/scratch/6fbbb9a59182/audit/validation/php",
+      "/workspace/scratch/6fbbb9a59182/ready/work/tests/test-topscroll-unified.php",
+      "--custom-default"
+    ],
+    "assertions_passed": 6,
+    "assertions_failed": 0
+  },
+  "php_lint": {
+    "files": 257,
+    "passed": 257,
+    "failures": []
+  },
+  "additional": {
+    "sql_checks": 14,
+    "runtime_unified_min_scenarios": 15,
+    "runtime_audit_min_scenarios": 9,
+    "loader_php_assertions": 17,
+    "loader_javascript_scenarios": 8,
+    "listing_continuation_assertions": 216,
+    "listing_continuation_scenarios": 18,
+    "discovery_scroll_events": 25,
+    "browser_page_scenarios_executed": 0
+  },
+  "build": {
+    "command": [
+      "node",
+      "/tmp/go-ready-build-6akaf5sv/tests/build-runtime-min.js"
+    ],
+    "returncode": 0,
+    "seconds": 0.074,
+    "log": "release-build.log",
+    "source_sha256": "5e20ac54798f7e230d8603971ce94852430efc4d3937094258efe065c7f4acef",
+    "production_sha256": "0ef1455326ff3244ddcbc28e5a5454b0b232f2b87d43abb43b07678ed965c4ad",
+    "rebuilt_sha256": "0ef1455326ff3244ddcbc28e5a5454b0b232f2b87d43abb43b07678ed965c4ad",
+    "byte_identical": true
+  },
+  "experimental_execution_absent": true,
+  "production_after_integrated_run": {
+    "modified": [
+      "inc/ads/topscroll-admin.php"
+    ],
+    "deleted": [
+      "assets/js/go-ads-experiment.js",
+      "inc/ads/experiment.php"
+    ],
+    "added": []
+  },
+  "only_documented_targeted_changes": true,
+  "actual_ad_requests_in_tests": 0,
+  "notes": [
+    "The initial integrated failure is preserved in release-suite.log and release-validation-final-initial.json.",
+    "After the integrated run, only the obsolete-file removals and admin legacy-constant display changed production; the full runtime matrix was not needlessly repeated.",
+    "Top Scroll PHP assertions were rerun after adding rendered-admin checks: 72/72 plus 6/6 with a custom default.",
+    "Chrome was not retried: prior launch failed on socket EPERM. No browser page, production page, real fill, Active View, revenue or field Core Web Vitals was measured."
+  ]
+}

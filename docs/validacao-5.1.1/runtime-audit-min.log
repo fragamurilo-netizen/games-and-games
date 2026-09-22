@@ -1,0 +1,11 @@
+PASS Late anchor appearance and dismissal update the useful viewport without a resize
+PASS A host fully covered by the bottom anchor is not already in range when near=0
+PASS Delayed consent reads the stored reader prior; revocation returns a neutral prior
+PASS Explicit request consent gate releases once after consent and never duplicates a request
+PASS Late consent opens Top Scroll session even after its first request, without backfilling active time
+PASS BFcache checkpoints update this document without counting it twice; clocks pause while away
+PASS A hidden interval beyond Top Scroll session idle clears old engagement on return
+PASS A provider response after timeout keeps the original request and admits no refresh
+PASS Diagnostic waits accumulate foreground duration and identify density subrule without network
+
+9 passed; 0 failed. Simulation only.

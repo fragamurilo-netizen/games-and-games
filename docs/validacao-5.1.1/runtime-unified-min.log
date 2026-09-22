@@ -1,0 +1,16 @@
+PASS The sole delivery policy admits a safe reached reserve on mobile and desktop
+PASS Reached mode does not release cold reserves or exceed structural capacity
+PASS Reached mode preserves real spacing, consent and background gates
+PASS Reached mode anticipates one imminent safe reserve before the reader reaches a blank host
+PASS Reached admission does not depend on storage or a bootstrap and ignores stale mode flags
+PASS Reached admission requires an actual body plan even if malformed metadata declares spare capacity
+PASS Compatible consented session latency is available on the next page before its first fill
+PASS Latency memory ignores expired, incompatible, malformed and nonconsented storage
+PASS Latency memory changes profile on a viewport breakpoint without refreshing delivered units
+PASS Only foreground filled latency is learned and saved; empty and optimized are excluded
+PASS Pending priority uses geometry from this sweep, not last sweep distance
+PASS F4/F5 materialize only after real card boundaries, strip scripts before insertion, and mount once
+PASS Continuation rejects a slot already registered instead of recycling it
+PASS Continuation binds only the initial feed and initial manifest
+PASS Sampled diagnostics are bounded local objects/events and distinguish opportunities from fills
+{"suite":"runtime-unified","scenarios":15,"passed":15,"failed":0,"realAdRequests":0}
