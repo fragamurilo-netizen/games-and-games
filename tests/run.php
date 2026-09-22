@@ -77,7 +77,8 @@ $node = trim( (string) shell_exec( 'node --version 2>&1' ) );
 if ( 0 === strpos( $node, 'v' ) ) {
 	putenv( 'GO_TEST_PHP=' . PHP_BINARY );
 	foreach ( array(
-		'loader-gate.test.js',
+		'diagnostico-receita.test.cjs',
+	'loader-gate.test.js',
 		'runtime.test.js',
 		'runtime-manual-baseline.test.js',
 		'runtime-topscroll-smart.test.js',
