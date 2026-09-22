@@ -71,6 +71,37 @@ if ( ! defined( 'GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT' ) ) {
 }
 
 /*
+ * Long-form body extension A7/A8, OFF until the ad units exist.
+ *
+ * The word ladder stops at seven opportunities and stops growing at 1200 words.
+ * A 3000-word guide therefore gets exactly what a 1200-word one gets, while
+ * carrying two and a half times the content between the same seven units. That
+ * is the clearest single gap against Auto Ads, which keeps placing as the
+ * article keeps going.
+ *
+ * Closing it costs nothing in density, and that is the point: the ad-to-content
+ * ratio, the local ratio and the per-window unit cap are all measured against
+ * rendered height, so a unit added because there are 600 more words of article
+ * leaves every one of those ratios where it was. This adds reach on articles
+ * that earned it, not pressure on articles that did not.
+ *
+ * There are no default ids. Create two responsive Display units in AdSense —
+ * the same product as A1..A6, so the ladder stays one format — then:
+ *
+ *     define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '0000000000' );
+ *     define( 'GO_VERGE_ADS_ARTICLE_A8_SLOT', '0000000000' );
+ *
+ * Until both exist the ladder's ceiling stays at seven and nothing changes.
+ * Defining only A7 raises it to eight; the ceiling follows the contract.
+ */
+if ( ! defined( 'GO_VERGE_ADS_ARTICLE_A7_SLOT' ) ) {
+	define( 'GO_VERGE_ADS_ARTICLE_A7_SLOT', '' );
+}
+if ( ! defined( 'GO_VERGE_ADS_ARTICLE_A8_SLOT' ) ) {
+	define( 'GO_VERGE_ADS_ARTICLE_A8_SLOT', '' );
+}
+
+/*
  * The article rail below the desktop breakpoint, OFF until an ad unit exists.
  *
  * `sidebar-desktop` is desktop_only, which is correct for a 300px sticky rail.
@@ -618,6 +649,48 @@ function go_verge_ads_config() {
 				'enabled'           => true,
 			),
 
+			/*
+			 * A7/A8 — the same Display responsive product as A1..A6, opt-in.
+			 *
+			 * Declared with `deep` tier: they only ever exist on long articles,
+			 * where they sit past the point most readers stop, so they must never
+			 * outrank a shallower position in the request order.
+			 */
+			'article-a7' => array(
+				'name'              => 'GO Article A7',
+				'slot'              => go_verge_ads_optional_slot( GO_VERGE_ADS_ARTICLE_A7_SLOT ),
+				'sizing'            => 'responsive',
+				'format'            => 'auto',
+				'full_width'        => true,
+				'near_viewport'     => 1050,
+				'near_viewport_max' => 2050,
+				'predictive'        => true,
+				'safety_ms'         => 450,
+				'measurement_tier'  => 'deep',
+				'requested_size'    => 'responsive-auto full-width',
+				'collapse_unfilled' => true,
+				'templates'         => array( 'single_post' ),
+				'reserve'           => array( 'mobile' => 0, 'desktop' => 0 ),
+				'enabled'           => '' !== go_verge_ads_optional_slot( GO_VERGE_ADS_ARTICLE_A7_SLOT ),
+			),
+			'article-a8' => array(
+				'name'              => 'GO Article A8',
+				'slot'              => go_verge_ads_optional_slot( GO_VERGE_ADS_ARTICLE_A8_SLOT ),
+				'sizing'            => 'responsive',
+				'format'            => 'auto',
+				'full_width'        => true,
+				'near_viewport'     => 1050,
+				'near_viewport_max' => 2050,
+				'predictive'        => true,
+				'safety_ms'         => 450,
+				'measurement_tier'  => 'deep',
+				'requested_size'    => 'responsive-auto full-width',
+				'collapse_unfilled' => true,
+				'templates'         => array( 'single_post' ),
+				'reserve'           => array( 'mobile' => 0, 'desktop' => 0 ),
+				'enabled'           => '' !== go_verge_ads_optional_slot( GO_VERGE_ADS_ARTICLE_A8_SLOT ),
+			),
+
 			'article-end' => array(
 				'name'              => 'GO Article End D1',
 				'slot'              => '5798080525',
@@ -769,7 +842,7 @@ function go_verge_ads_config() {
 	$config['account_formats']['vignette'] = 'on';
 	$config['account_formats']['side_rails'] = 'off';
 	if ( defined( 'GO_ADS_V3_ENABLED' ) && ! GO_ADS_V3_ENABLED ) { $config['enabled'] = false; }
-	$allowed = array_fill_keys( array( 'topscroll', 'site-masthead', 'home-masthead', 'article-hero-overlay', 'game-hub-mid', 'sidebar-desktop', 'article-rail-mobile', 'post-content-multiplex', 'article-prime', 'article-a1', 'article-a2', 'article-a3', 'article-a4', 'article-a5', 'article-a6', 'article-end', 'listing-f1', 'listing-f2', 'listing-f3', 'listing-f4', 'listing-f5', 'home-mid', 'home-mid-2' ), true );
+	$allowed = array_fill_keys( array( 'topscroll', 'site-masthead', 'home-masthead', 'article-hero-overlay', 'game-hub-mid', 'sidebar-desktop', 'article-rail-mobile', 'post-content-multiplex', 'article-prime', 'article-a1', 'article-a2', 'article-a3', 'article-a4', 'article-a5', 'article-a6', 'article-a7', 'article-a8', 'article-end', 'listing-f1', 'listing-f2', 'listing-f3', 'listing-f4', 'listing-f5', 'home-mid', 'home-mid-2' ), true );
 	$config['inventory'] = array_intersect_key( (array) ( $config['inventory'] ?? array() ), $allowed );
 
 	return $config;

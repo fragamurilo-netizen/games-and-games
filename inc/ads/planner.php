@@ -247,6 +247,56 @@ function go_verge_ads_planner_transparent_container( $opening ) {
 }
 
 /**
+ * How many in-body opportunities the CONTRACT allows, Prime included.
+ *
+ * This used to be the literal 7 repeated in six places. Seven was never a rule
+ * about reading or density — it was simply how many body units the account had:
+ * P1 plus A1..A6. Writing it as a number meant that creating A7 in AdSense and
+ * declaring it in the contract changed nothing, because the planner had the old
+ * count compiled into it in half a dozen spots that had to agree.
+ *
+ * Reading it from the contract makes the contract authoritative, which is what
+ * it claims to be. With no A7/A8 configured this returns 7 and every decision
+ * below is bit-for-bit what it was.
+ *
+ * The density rules are untouched and remain the real limit: this is a ceiling
+ * on how many opportunities may EXIST, never a target, and the runtime still
+ * refuses any host that breaks local ratio, window count or ad-to-content.
+ *
+ * @return int
+ */
+function go_verge_ads_planner_contract_capacity() {
+	static $cap = null;
+	if ( null !== $cap ) {
+		return $cap;
+	}
+	/* Prime replaces the earliest body opportunity rather than adding one, so
+	 * the ceiling is the number of A-rungs the account can actually serve. */
+	$rungs = 0;
+	if ( function_exists( 'go_verge_adsense_units' ) ) {
+		foreach ( array_keys( go_verge_adsense_units() ) as $placement ) {
+			if ( preg_match( '/^article-a([1-9][0-9]*)$/', (string) $placement, $m ) ) {
+				$rungs = max( $rungs, (int) $m[1] );
+			}
+		}
+	}
+	/* A gap in the ladder is a misconfiguration, not a smaller ladder: the
+	 * planner names placements article-a1..aN in order, so a missing rung would
+	 * silently hand a candidate an id that renders nothing. Count only the
+	 * unbroken prefix. */
+	$contiguous = 0;
+	for ( $i = 1; $i <= $rungs; $i++ ) {
+		$unit = function_exists( 'go_verge_adsense_unit_config' ) ? go_verge_adsense_unit_config( 'article-a' . $i ) : array();
+		if ( empty( $unit['slot'] ) ) {
+			break;
+		}
+		$contiguous = $i;
+	}
+	$cap = max( 1, min( 12, $contiguous ?: 6 ) ) + 1;
+	return $cap;
+}
+
+/**
  * Total in-content opportunity ladder, INCLUDING Prime P1.
  *
  * P1 replaces the earliest body opportunity instead of simply adding one more ad
@@ -288,7 +338,18 @@ function go_verge_ads_planner_capacity_from_words( $words, $article_type = '' ) 
 	elseif ( $words < 680 ) { $rung = 4; }
 	elseif ( $words < 900 ) { $rung = 5; }
 	elseif ( $words < 1200 ) { $rung = 6; }
-	else { $rung = 7; }
+	/*
+	 * Above 1200 words the ladder used to stop growing, so a 3000-word guide and
+	 * a 1200-word one were handed the same seven opportunities across very
+	 * different amounts of article. These rungs continue the same curve instead
+	 * of ending it, and they are clamped to what the contract can actually serve
+	 * immediately below — with no A7/A8 configured, all three collapse to seven
+	 * and this is exactly the previous behaviour.
+	 */
+	elseif ( $words < 1800 ) { $rung = 7; }
+	elseif ( $words < 2600 ) { $rung = 8; }
+	else { $rung = 9; }
+	$rung = min( $rung, go_verge_ads_planner_contract_capacity() );
 
 	/*
 	 * Article type is a reading-behaviour signal, not a length signal.
@@ -306,7 +367,7 @@ function go_verge_ads_planner_capacity_from_words( $words, $article_type = '' ) 
 	 */
 	$type = sanitize_key( (string) $article_type );
 	if ( in_array( $type, array( 'guide', 'ranking', 'list' ), true ) && $rung >= 3 ) {
-		$rung = min( 7, $rung + 1 );
+		$rung = min( go_verge_ads_planner_contract_capacity(), $rung + 1 );
 	}
 
 	return $rung;
@@ -383,7 +444,7 @@ function go_verge_ads_planner_structural_headroom( $metrics, $candidates, $ladde
 
 	/* Below 480 words there is no room for another reachable position, and at
 	 * the top rung the ladder is already at the contract maximum. */
-	if ( $words < 480 || $ladder < 3 || $ladder >= 7 ) {
+	if ( $words < 480 || $ladder < 3 || $ladder >= go_verge_ads_planner_contract_capacity() ) {
 		return 0;
 	}
 	if ( $safe <= $ladder || $substantial < 4 ) {
@@ -407,7 +468,7 @@ function go_verge_ads_planner_structural_headroom( $metrics, $candidates, $ladde
 		&& $safe >= $ladder + 2
 		&& $substantial >= 6
 		&& $media_share <= .38 ) {
-		return min( 2, 7 - $ladder );
+		return min( 2, go_verge_ads_planner_contract_capacity() - $ladder );
 	}
 
 	return 1;
@@ -856,7 +917,7 @@ function go_verge_ads_plan_article( $html, $article_type = '' ) {
 	 */
 	$ladder = min( go_verge_ads_planner_capacity_from_words( $metrics['bodyWords'], $article_type ), count( $candidates ) );
 	$headroom = go_verge_ads_planner_structural_headroom( $metrics, $candidates, $ladder );
-	$total_capacity = min( 7, count( $candidates ), $ladder + $headroom );
+	$total_capacity = min( go_verge_ads_planner_contract_capacity(), count( $candidates ), $ladder + $headroom );
 	/*
 	 * Short editorial stories are not categorically zeroed. A single safe
 	 * opportunity is allowed from 240 words when there is one substantial
@@ -899,7 +960,7 @@ function go_verge_ads_plan_article( $html, $article_type = '' ) {
 	 * real depth and dwell. They are never budget on their own — the browser
 	 * only reaches them in EXPANSION, and every density rule still applies.
 	 */
-	$reserve_limit = min( 2, max( 0, $total_capacity - $planned_count ) + ( $total_capacity > 0 ? 1 : 0 ), max( 0, 7 - $planned_count ) );
+	$reserve_limit = min( 2, max( 0, $total_capacity - $planned_count ) + ( $total_capacity > 0 ? 1 : 0 ), max( 0, go_verge_ads_planner_contract_capacity() - $planned_count ) );
 	$reserves = go_verge_ads_planner_reserve_candidates( $candidates, $prime, $selected, $gap_words, $gap_height, $reserve_limit );
 	$reserve = $reserves ? $reserves[0] : null;
 	$decisions = array();
@@ -918,7 +979,7 @@ function go_verge_ads_plan_article( $html, $article_type = '' ) {
 	 * STANDARD budget. Word length is a ceiling, not proof that N usable hosts
 	 * exist, so capacity is never reported above what was rendered.
 	 */
-	$structural_capacity = min( 7, $rendered_count );
+	$structural_capacity = min( go_verge_ads_planner_contract_capacity(), $rendered_count );
 	if ( $planned_count < $total_capacity ) {
 		$decisions[] = array(
 			'placement' => 'article',

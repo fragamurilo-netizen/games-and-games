@@ -49,6 +49,7 @@ foreach ( array(
 	'test-active-view-aggregation.php',
 	'test-manual-formats.php',
 	'test-manual-formats-invalid.php',
+	'test-longform-ladder.php',
 	'test-yield.php',
 	'test-calendar-trials.php',
 	'test-daypart-delivery.php',
