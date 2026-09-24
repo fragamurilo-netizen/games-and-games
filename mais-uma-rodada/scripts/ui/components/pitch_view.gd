@@ -6,6 +6,7 @@ extends Control
 ##   b = largura, 0 = lado esquerdo do mandante → 1 = lado direito
 ## Orientação vertical (escalação: ataque para cima) ou horizontal (partida: ataque para a direita).
 ## Modos: "lineup" (fichas tocáveis de um time → slot_tapped) e "match" (22 jogadores + bola).
+## Na partida, `swapped` espelha o desenho: no segundo tempo o mandante ataca para a esquerda.
 
 signal slot_tapped(index: int)
 
@@ -45,6 +46,15 @@ var flash := 0.0
 var flash_color := Color(1, 0.85, 0.3)
 var net_shake := 0.0
 var net_side := 1
+## Times trocados de lado (2º tempo e 2º tempo da prorrogação). Tudo continua em coordenadas
+## canônicas; só a conversão para a tela espelha.
+var swapped: bool = false:
+	set(v):
+		swapped = v
+		queue_redraw()
+## Siglas mostradas no fundo de cada campo de defesa (quem defende aquele gol).
+var home_label: String = ""
+var away_label: String = ""
 var _t := 0.0
 
 
@@ -111,6 +121,9 @@ func pitch_rect() -> Rect2:
 
 ## Canônico (a, b) → tela.
 func P(a: float, b: float, r: Rect2) -> Vector2:
+	if swapped and mode == "match":
+		a = 1.0 - a
+		b = 1.0 - b
 	if horizontal:
 		return r.position + Vector2(a * r.size.x, b * r.size.y)
 	return r.position + Vector2(b * r.size.x, (1.0 - a) * r.size.y)
@@ -171,10 +184,11 @@ func _draw_pitch(r: Rect2) -> void:
 		# Meia-lua
 		var arc_r := _wid_px(r) * 0.12
 		var base_angle := 0.0
+		var near_end: bool = home_end != (swapped and mode == "match") # gol do lado esquerdo/de baixo da tela
 		if horizontal:
-			base_angle = 0.0 if home_end else PI
+			base_angle = 0.0 if near_end else PI
 		else:
-			base_angle = -PI / 2 if home_end else PI / 2
+			base_angle = -PI / 2 if near_end else PI / 2
 		draw_arc(spot, arc_r, base_angle - 0.95, base_angle + 0.95, 16, lc, lw, true)
 		# Gol (com a rede tremendo após gol)
 		var depth := 0.022
@@ -234,6 +248,7 @@ func _draw_match(r: Rect2) -> void:
 	var rad := _wid_px(r) * 0.042
 	var font := get_theme_font(&"font", &"Stat")
 	var fs := int(rad * 1.05)
+	_draw_end_labels(r, font, int(rad * 0.85))
 	for side in 2:
 		var slots: Array = home_slots if side == 0 else away_slots
 		var c1 := home_color if side == 0 else away_color
@@ -256,6 +271,21 @@ func _draw_match(r: Rect2) -> void:
 	draw_circle(bp + Vector2(1.5, 2.5), rad * 0.5, Color(0, 0, 0, 0.35))
 	draw_circle(bp, rad * 0.5, Color.WHITE)
 	draw_circle(bp, rad * 0.2, Color(0.15, 0.15, 0.15))
+
+
+## Sigla de cada time junto ao gol que defende, com a cor do uniforme (mostra a troca de lado).
+func _draw_end_labels(r: Rect2, font: Font, fs: int) -> void:
+	for side in 2:
+		var txt := home_label if side == 0 else away_label
+		if txt == "":
+			continue
+		var col := home_color if side == 0 else away_color
+		if col.get_luminance() < 0.12:
+			col = home_color2 if side == 0 else away_color2
+		var a_goal := 0.07 if side == 0 else 0.93
+		var p := P(a_goal, 0.07, r)
+		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		draw_string(font, p + Vector2(-tw * 0.5, fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(col.r, col.g, col.b, 0.55))
 
 
 func _gui_input(event: InputEvent) -> void:

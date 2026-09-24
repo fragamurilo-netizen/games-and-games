@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_run("modo rápido = motor completo (médias)", _test_quick_calibration)
 	_run("partida ao vivo = partida instantânea", _test_live_equals_instant)
 	_run("mata-mata: prorrogação e pênaltis", _test_knockout)
+	_run("troca de formação durante a partida", _test_formation_change)
 	_run("temporada completa, copas e Mundial", _test_season_cycle)
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
 	_run("ranking de clubes, finanças e eventos do mundo", _test_ranking_economy)
@@ -318,6 +319,44 @@ func _goal_log(sim: MatchSimulation) -> String:
 		if ev["t"] == MatchSimulation.EV_GOAL or ev["t"] == MatchSimulation.EV_OWN_GOAL:
 			out += "%d:%d:%d;" % [ev["m"], ev["s"], ev["p"]]
 	return out
+
+
+## Mudar o desenho no meio do jogo mantém os mesmos 11 em campo, o goleiro no gol e não gasta troca.
+func _test_formation_change() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	var cl := w.clubs_in_league("ENG2")
+	var h: Club = cl[2]
+	var a: Club = cl[3]
+	var hs := ClubAI.prepare_ai_sheet(w, h, a, true)
+	var as_ := ClubAI.prepare_ai_sheet(w, a, h, false)
+	var ctx := {"derby": false, "importance": 0.3, "attendance": 10000, "competition": "F"}
+	var sim := MatchSimulation.new()
+	sim.setup(w, h, a, hs, as_, ctx, 77, true)
+	while sim.minute < 30:
+		sim.step()
+	var t: MatchTeam = sim.teams[0]
+	var before: Array = []
+	for mp: MatchPlayer in t.slots:
+		if mp != null:
+			before.append(mp.p.id)
+	var gk := t.goalkeeper()
+	var target := "3-4-3" if t.formation_name != "3-4-3" else "4-4-2"
+	check(sim.set_formation(0, target), "troca de formação recusada")
+	check(t.formation_name == target, "formação não mudou")
+	check(t.goalkeeper() == gk, "goleiro saiu do gol")
+	check(t.subs_used == 0, "troca de formação gastou substituição")
+	var after: Array = []
+	for i in t.slots.size():
+		var mp: MatchPlayer = t.slots[i]
+		if mp != null:
+			after.append(mp.p.id)
+			check(mp.slot == i and mp.pos == int(t.formation["slots"][i]["pos"]), "vaga desencontrada: %s" % mp.p.display_name())
+	before.sort()
+	after.sort()
+	check(before == after, "jogadores em campo mudaram")
+	check(not sim.set_formation(0, target), "mesma formação deveria ser ignorada")
+	sim.run_to_end()
+	check(sim.finished and not sim.pressure.is_empty(), "partida não terminou ou sem gráfico de pressão")
 
 
 ## Jogo que decide confronto nunca termina empatado no agregado.

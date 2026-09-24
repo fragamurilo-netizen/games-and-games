@@ -76,6 +76,8 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var slots: Array = DatabaseManager.formation(sheet.formation)["slots"]
 	var norms := DatabaseManager.formation_norms()
 	var team_f := float(tac["i_perf"]) * (0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet) * home_f
+	# Dia do time (mesmo sorteio do MatchSimulation.DAY_SIGMA).
+	team_f *= clampf(rng.randfn(1.0, MatchSimulation.DAY_SIGMA), 0.93, 1.07)
 	var pl: Array = [] # [Player, slot_pos, f, w_def, w_att, shoot_w, assist_w, foul_w, rating, c_fin]
 	var d := 0.0
 	var dw := 0.0

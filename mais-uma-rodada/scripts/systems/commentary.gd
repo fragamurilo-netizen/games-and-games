@@ -55,7 +55,7 @@ func _fill(text: String, ev: Dictionary) -> String:
 	var out := text
 	out = out.replace("{p}", _name(side, int(ev.get("p", -1))))
 	var p2_side := side
-	if int(ev.get("t", -1)) == MatchSimulation.EV_FOUL or int(ev.get("t", -1)) == MatchSimulation.EV_PENALTY_AWARDED:
+	if int(ev.get("t", -1)) in [MatchSimulation.EV_FOUL, MatchSimulation.EV_PENALTY_AWARDED, MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_VAR]:
 		p2_side = 1 - side
 	out = out.replace("{p2}", _name(p2_side, int(ev.get("p2", -1))))
 	out = out.replace("{gk}", gk_name)
@@ -70,6 +70,13 @@ func _fill(text: String, ev: Dictionary) -> String:
 	out = out.replace("{min}", Fmt.minute(int(ev.get("m", 0)), int(ev.get("h", 1))))
 	out = out.replace("{stadium}", stadium)
 	out = out.replace("{n}", str(x.get("n", "")))
+	out = out.replace("{f}", str(x.get("formation", "")))
+	out = out.replace("{line}", _name(1 - side, int(x.get("line", -1))))
+	out = out.replace("{txt}", str(x.get("txt", "")))
+	if x.has("style"):
+		var styles: Array = DatabaseManager.tactics()["styles"]
+		var st := int(x["style"])
+		out = out.replace("{st}", String(styles[st]["name"]).to_lower() if st >= 0 and st < styles.size() else "")
 	return out
 
 
@@ -159,7 +166,9 @@ func lines_for(ev: Dictionary) -> Array:
 			var ct2 := int(x.get("ct", -1))
 			out.append(_line(_pick(_build_cat(ct2, int(ev.get("p2", -1)) >= 0)), ev, "chance", 0.0))
 			var cat2: String = {MatchSimulation.EV_SAVE: "save", MatchSimulation.EV_MISS: "miss", MatchSimulation.EV_POST: "post", MatchSimulation.EV_BLOCK: "block"}[t]
-			out.append(_line(_pick(cat2), ev, "chance" if t == MatchSimulation.EV_POST else "normal", 0.5))
+			if t == MatchSimulation.EV_BLOCK and x.has("line"):
+				cat2 = "block_line"
+			out.append(_line(_pick(cat2), ev, "chance" if t == MatchSimulation.EV_POST or cat2 == "block_line" else "normal", 0.5))
 		MatchSimulation.EV_PEN_SAVE:
 			out.append(_line(_pick("build_penalty"), ev, "chance", 0.0))
 			out.append(_line(_pick("pen_save"), ev, "big", 0.6))
@@ -179,7 +188,23 @@ func lines_for(ev: Dictionary) -> Array:
 		MatchSimulation.EV_SUB:
 			out.append(_line(_pick("sub"), ev, "sub", 0.0))
 		MatchSimulation.EV_OFFSIDE:
-			out.append(_line(_pick("offside"), ev, "normal", 0.0))
+			if x.get("goal", false):
+				out.append(_line(_pick("offside_goal"), ev, "big", 0.0))
+			else:
+				out.append(_line(_pick("offside"), ev, "normal", 0.0))
+		MatchSimulation.EV_SKILL:
+			out.append(_line(_pick("skill"), ev, "normal", 0.0))
+		MatchSimulation.EV_TACKLE:
+			out.append(_line(_pick("tackle"), ev, "normal", 0.0))
+		MatchSimulation.EV_KEEPER:
+			out.append(_line(_pick("keeper"), ev, "normal", 0.0))
+		MatchSimulation.EV_KNOCK:
+			out.append(_line(_pick("knock"), ev, "normal", 0.0))
+		MatchSimulation.EV_CROWD:
+			out.append(_line(_pick("crowd_" + String(x.get("kind", "home"))), ev, "crowd", 0.0))
+		MatchSimulation.EV_VAR:
+			var vk := String(x.get("kind", ""))
+			out.append(_line(_pick("var_pen" if vk == "pen_ok" else "var_goal"), ev, "var", 1.2 if vk == "goal_ok" else 0.4))
 		MatchSimulation.EV_CORNER:
 			out.append(_line(_pick("corner"), ev, "normal", 0.0))
 		MatchSimulation.EV_FREEKICK:
@@ -187,11 +212,15 @@ func lines_for(ev: Dictionary) -> Array:
 		MatchSimulation.EV_TACTIC:
 			var m := int(x.get("mentality", -1))
 			var cat3 := "tactic_other"
-			if m >= 3:
+			if x.has("formation"):
+				cat3 = "tactic_formation"
+			elif x.has("style"):
+				cat3 = "tactic_style"
+			elif m >= 3:
 				cat3 = "tactic_attack"
 			elif m >= 0 and m <= 1:
 				cat3 = "tactic_defend"
-			out.append(_line(_pick(cat3), ev, "info", 0.0))
+			out.append(_line(_pick(cat3), ev, "tactic" if x.has("formation") else "info", 0.0))
 	return out
 
 
@@ -200,6 +229,15 @@ func _line(text: String, ev: Dictionary, style: String, delay: float) -> Diction
 		"text": _fill(I18n.t(text), ev), "style": style, "side": ev.get("s", -1), "delay": delay,
 		"minute": Fmt.minute(int(ev.get("m", 0)), int(ev.get("h", 1))) if int(ev.get("t", -1)) not in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF] else "",
 	}
+
+
+## Linha avulsa (clima, troca de lado, gols de outros jogos): {txt} já vem pronto em `extra`.
+func extra_line(cat: String, style: String, minute: int, half: int, extra: Dictionary = {}) -> Dictionary:
+	var ev := {"t": -1, "m": minute, "h": half, "s": -1, "x": extra}
+	var l := _line(_pick(cat), ev, style, 0.0)
+	if minute <= 0:
+		l["minute"] = ""
+	return l
 
 
 func stoppage_line(n: int, half: int) -> Dictionary:
