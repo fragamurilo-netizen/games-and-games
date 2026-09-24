@@ -553,7 +553,7 @@ func _look_card(p: Player) -> Control:
 		refresh())
 	card.add_child(sl)
 	card.add_child(UIKit.label("Olhos", "Small"))
-	card.add_child(_look_chips(p, "ey", ["Castanho-escuro", "Castanho", "Mel", "Verde", "Azul", "Cinza"], int(feats["eye_i"])))
+	card.add_child(_look_chips(p, "ey", FaceGen.EYE_NAMES, int(feats["eye_i"])))
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.button("Rosto aleatório", "", func():
 		var keep_photo := String(p.look.get("photo", ""))

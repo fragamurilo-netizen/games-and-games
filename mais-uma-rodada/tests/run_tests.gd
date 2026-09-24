@@ -738,12 +738,35 @@ func _test_faces() -> void:
 	check(float(old["gray"]) >= float(a["gray"]) and float(old["wrinkles"]) > float(a["wrinkles"]), "rosto não envelhece")
 	var styles := {}
 	var beards := {}
-	for i in 400:
-		var f := FaceGen.features(i * 7919, i % 9, 18 + i % 20)
+	var eths := {}
+	for i in 1500:
+		var f := FaceGen.features(i * 7919, i % FaceGen.ETH_COUNT, 16 + i % 30)
 		styles[int(f["style"])] = true
 		beards[int(f["beard"])] = true
-	check(styles.size() >= 14, "pouca variedade de penteados (%d)" % styles.size())
-	check(beards.size() >= 7, "pouca variedade de barbas (%d)" % beards.size())
+		eths[int(f["eth"])] = true
+	check(styles.size() >= 32, "pouca variedade de penteados (%d)" % styles.size())
+	check(beards.size() >= 17, "pouca variedade de barbas (%d)" % beards.size())
+	check(eths.size() == FaceGen.ETH_COUNT, "etnias sem rosto (%d)" % eths.size())
+	check(FaceGen.ETH_COUNT == DatabaseManager.ethnicities().size(), "FaceGen e nations.json com etnias diferentes")
+	# Barba só depois da puberdade, e nem todo adulto tem
+	var teen_beards := 0
+	var adult_none := 0
+	var adult_full := 0
+	for i in 300:
+		var teen := FaceGen.features(i * 104729, i % FaceGen.ETH_COUNT, 15)
+		if int(teen["beard"]) not in [FaceGen.B_NONE, FaceGen.B_WISPY]:
+			teen_beards += 1
+		var adult := FaceGen.features(i * 104729, i % FaceGen.ETH_COUNT, 31)
+		if int(adult["beard"]) == FaceGen.B_NONE:
+			adult_none += 1
+		if int(adult["beard"]) in [FaceGen.B_FULL, FaceGen.B_SHORT, FaceGen.B_BOXED, FaceGen.B_LONG]:
+			adult_full += 1
+	check(teen_beards <= 6, "barba demais aos 15 anos (%d)" % teen_beards)
+	check(adult_none >= 40 and adult_full >= 25, "barbas adultas sem variedade (sem %d, cheias %d)" % [adult_none, adult_full])
+	# O mesmo jogador envelhece com a mesma genética: a barba possível só cresce
+	var young := FaceGen.features(4242, 3, 17)
+	var grown := FaceGen.features(4242, 3, 30)
+	check(float(grown["beard_cap"]) >= float(young["beard_cap"]), "barba regrediu com a idade")
 	var lk := FaceGen.features(99, 1, 30, {"hs": FaceGen.H_MOHAWK, "bd": FaceGen.B_FULL, "hc": 6})
 	check(int(lk["style"]) == FaceGen.H_MOHAWK and int(lk["beard"]) == FaceGen.B_FULL and int(lk["hair_i"]) == 6, "editor não fixa a aparência")
 	# Overrides de clube aplicados na geração
