@@ -116,7 +116,10 @@ func _comp_options(w: GameWorld) -> Array:
 	var confed := String(DatabaseManager.nation(nat).get("confed", ""))
 	for cid in DatabaseManager.cups_cfg():
 		var cfg := DatabaseManager.cup_cfg(cid)
-		if String(cfg.get("confed", "")) == confed or String(cfg.get("confed", "")) == "" or cid == "CWC":
+		if CupManager.is_state(cid):
+			if String(cfg.get("nation", "")) == nat:
+				out.append([cid, String(cfg.get("short", cid))])
+		elif String(cfg.get("confed", "")) == confed or String(cfg.get("confed", "")) == "" or cid == "CWC":
 			out.append([cid, String(cfg.get("short", cid))])
 	for id in ["ENG1", "ESP1", "ITA1", "GER1", "FRA1", "BRA1", "ARG1"]:
 		if DatabaseManager.has_league(id) and not DatabaseManager.leagues_of_nation(nat).has(id):

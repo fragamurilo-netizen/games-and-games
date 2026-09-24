@@ -55,18 +55,19 @@ static func sibling_fixtures(w: GameWorld, f: Fixture) -> Array:
 ## Texto de um evento de copa do relatório para o usuário (ou "" se não for sobre ele).
 static func cup_event_text(w: GameWorld, ev: Dictionary) -> String:
 	var cup_name := CupManager.cup_name(String(ev.get("cup", "")))
+	var da := "do" if CupManager.is_state(String(ev.get("cup", ""))) and not cup_name.begins_with("Copa") else "da"
 	var club := int(ev.get("club", -1))
 	match String(ev.get("t", "")):
 		"champion":
 			if w.is_user_club(club):
-				return "CAMPEÃO da %s!" % cup_name
-			return "%s é o campeão da %s." % [w.club(club).short_name, cup_name]
+				return "CAMPEÃO %s %s!" % [da, cup_name]
+			return "%s é o campeão %s %s." % [w.club(club).short_name, da, cup_name]
 		"advance":
 			if w.is_user_club(club):
-				return "Classificado! Seu time passou da %s na %s." % [String(ev.get("stage", "")).to_lower(), cup_name]
+				return "Classificado! Seu time passou da %s %s %s." % [String(ev.get("stage", "")).to_lower(), "no" if da == "do" else "na", cup_name]
 		"out":
 			if w.is_user_club(club):
-				return "Eliminado na %s da %s." % [String(ev.get("stage", "")).to_lower(), cup_name]
+				return "Eliminado na %s %s %s." % [String(ev.get("stage", "")).to_lower(), da, cup_name]
 		"cwc":
 			if ev.get("clubs", []).has(w.user_club_id):
 				return "Seu time está no Mundial de Clubes!"

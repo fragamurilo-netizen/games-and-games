@@ -119,6 +119,15 @@ func _run() -> void:
 	_screen().refresh()
 	await _frames(6)
 	await _shot("16_rodadas")
+	# Estadual do clube do usuário (clube brasileiro no passeio), ou o Paulistão.
+	var state_id := "SPE"
+	for cid in CupManager.state_ids():
+		if w.season.cups.has(cid) and w.season.cups[cid].has_club(w.user_club_id):
+			state_id = cid
+	if w.season.cups.has(state_id):
+		UIManager.goto("table", {"cup": state_id})
+		await _frames(8)
+		await _shot("16b_estadual")
 	UIManager.goto("market")
 	await _frames(8)
 	await _shot("17_mercado")

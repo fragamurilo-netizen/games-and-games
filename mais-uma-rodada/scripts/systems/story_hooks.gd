@@ -79,7 +79,7 @@ static func for_next_match(world: GameWorld) -> Array:
 	for p in world.squad(user):
 		if p.contract_end <= world.year:
 			expiring += 1
-	if expiring > 0 and world.season.day >= 28:
+	if expiring > 0 and world.season.day >= 38:
 		out.append({"text": "%d contrato(s) terminam no fim da temporada" % expiring, "kind": "contract", "priority": 30 + world.season.day / 2})
 	var offers := TransferManager.pending_offers(world).size()
 	if offers > 0:

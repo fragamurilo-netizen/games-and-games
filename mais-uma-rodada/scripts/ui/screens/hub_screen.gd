@@ -378,7 +378,7 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 		items.append(["cross", UIColors.RED, "Lesionados: " + ", ".join(injured.slice(0, 3)) + (" e mais %d" % (injured.size() - 3) if injured.size() > 3 else ""), func(): UIManager.goto("squad")])
 	if not suspended.is_empty():
 		items.append(["card", UIColors.ORANGE, "Suspenso(s) no próximo jogo: " + ", ".join(suspended), func(): UIManager.goto("squad")])
-	if expiring > 0 and w.season.day >= 10:
+	if expiring > 0 and w.season.day >= 14:
 		items.append(["clock", UIColors.ORANGE, "%d contrato(s) terminam no fim da temporada — renove quem você quer manter" % expiring, func(): UIManager.goto("squad", {"sort": "contract"})])
 	var rules := DatabaseManager.squad_rules()
 	if club.player_ids.size() < int(rules["min_players"]):

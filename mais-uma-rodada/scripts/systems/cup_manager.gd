@@ -3,6 +3,8 @@ extends RefCounted
 ## Copas continentais (Liga dos Campeões, Libertadores, CONCACAF, África, Ásia) e Mundial de Clubes:
 ## classificação pelas ligas, sorteio de grupos (evitando clubes do mesmo país), mata-mata em ida e
 ## volta com prorrogação e pênaltis, final única em campo neutro, premiação por fase e títulos.
+## Também os estaduais brasileiros (kind = "state" no continental.json): grupos em turno único nas
+## datas E1..E7, semifinal em jogo único na casa do melhor campanha e final em ida e volta.
 
 const ROUND_NAMES := {"r16": "Oitavas de final", "qf": "Quartas de final", "sf": "Semifinal", "f": "Final"}
 const KO_SLOTS := {"r16": ["C7", "C8"], "qf": ["C9", "C10"], "sf": ["C11", "C12"], "f": ["C13"]}
@@ -23,6 +25,35 @@ static func continental_ids() -> Array:
 		if DatabaseManager.cup_cfg(id).has("alloc"):
 			out.append(id)
 	return out
+
+
+## Estaduais (e regionais) brasileiros, na ordem dos dados.
+static func state_ids() -> Array:
+	var out: Array = []
+	for id in DatabaseManager.cups_cfg():
+		if is_state(id):
+			out.append(id)
+	return out
+
+
+static func is_state(id: String) -> bool:
+	return String(cfg(id).get("kind", "")) == "state"
+
+
+static var _uf_cache: Dictionary = {}
+
+
+## Estado (uf) de um clube brasileiro autoral, pelos dados (a chave do clube é estável).
+static func uf_of(c: Club) -> String:
+	if _uf_cache.is_empty():
+		for d in DatabaseManager.club_data("BRA"):
+			_uf_cache[String(d.get("key", ""))] = String(d.get("uf", ""))
+	return String(_uf_cache.get(c.key, ""))
+
+
+## Categoria de notícia de copa: "copa_campeao" ou, nos estaduais, "estadual_campeao".
+static func news_cat(id: String, what: String) -> String:
+	return ("estadual_" if is_state(id) else "copa_") + what
 
 
 static func cup_of_nation(nation: String) -> String:
@@ -54,6 +85,8 @@ static func cup_short(id: String) -> String:
 ## Fases do mata-mata de uma copa, pelo número de classificados.
 static func ko_plan(id: String) -> Array:
 	var c := cfg(id)
+	if c.has("ko_plan"):
+		return Array(c["ko_plan"])
 	var groups := int(c.get("groups", 0))
 	var n := groups * 2 if groups > 0 else int(c.get("teams", 8))
 	if n >= 16:
@@ -72,6 +105,8 @@ static func _round_key(cup: Cup, r: int) -> String:
 
 static func _round_slots(cup: Cup, r: int) -> Array:
 	var key := _round_key(cup, r)
+	if cfg(cup.id).has("ko_slots"):
+		return Array(cfg(cup.id)["ko_slots"][key])
 	return CWC_SLOTS[key] if cup.id == CWC else KO_SLOTS[key]
 
 
@@ -87,7 +122,7 @@ static func stage_importance(world: GameWorld, f: Fixture) -> float:
 	var cup: Cup = world.season.cups.get(f.comp, null) if world.season != null else null
 	if cup == null:
 		return 0.6
-	var imp: float = STAGE_IMPORTANCE.get(_round_key(cup, f.round), 0.6)
+	var imp: float = STAGE_IMPORTANCE.get(_round_key(cup, f.round), 0.6) * float(cfg(cup.id).get("importance", 1.0))
 	if f.leg == 1:
 		imp += 0.05
 	return clampf(imp, 0.0, 1.0)
@@ -236,6 +271,52 @@ static func setup_season(world: GameWorld, s: SeasonState) -> void:
 			_create_ko_round(world, s, cup, 0, _seeded_pairs(world, list))
 		s.cups[id] = cup
 	world.stats.erase("qualified")
+	_setup_state_cups(world, s)
+
+
+## Estaduais: todos os clubes brasileiros do(s) estado(s), divididos em grupos equilibrados por reputação.
+static func _setup_state_cups(world: GameWorld, s: SeasonState) -> void:
+	for id in state_ids():
+		var c := cfg(id)
+		var ufs: Array = c.get("ufs", [])
+		var list: Array = []
+		for club: Club in world.clubs:
+			if club.nation == String(c.get("nation", "BRA")) and ufs.has(uf_of(club)):
+				list.append(club.id)
+		if list.size() < int(c.get("qualify", 4)):
+			continue
+		list.sort_custom(func(a, b): return world.club(a).reputation > world.club(b).reputation or (world.club(a).reputation == world.club(b).reputation and a < b))
+		var cup := Cup.new()
+		cup.id = id
+		cup.name = cup_name(id)
+		cup.short_name = cup_short(id)
+		cup.club_ids = list
+		for k in ko_plan(id):
+			cup.round_names.append(ROUND_NAMES[k])
+		var n_groups := ceili(float(list.size()) / float(int(c.get("group_max", 8))))
+		for g in n_groups:
+			cup.groups.append({"n": GROUP_LETTERS[g], "clubs": [], "table": {}})
+		# Distribuição em serpentina: 1º no A, 2º no B, ..., e volta.
+		for i in list.size():
+			var lap := i / n_groups
+			var gi := i % n_groups if lap % 2 == 0 else n_groups - 1 - i % n_groups
+			cup.groups[gi]["clubs"].append(list[i])
+		var slots: Array = c.get("group_slots", [])
+		for g in cup.groups:
+			for cid in g["clubs"]:
+				g["table"][cid] = CompetitionManager.empty_row()
+			var rounds := FixtureManager.round_robin(world.rng, g["clubs"], int(c.get("group_legs", 1)))
+			for r in mini(rounds.size(), slots.size()):
+				for pair in rounds[r]:
+					var f := Fixture.new()
+					f.home = pair[0]
+					f.away = pair[1]
+					f.comp = id
+					f.stage = Fixture.STAGE_GROUP
+					f.round = r
+					f.slot = s.slot_of(String(slots[r]))
+					cup.fixtures.append(f)
+		s.cups[id] = cup
 
 
 static func _coef(world: GameWorld, cid: int) -> float:
@@ -319,7 +400,7 @@ static func _create_ko_round(world: GameWorld, s: SeasonState, cup: Cup, r: int,
 			f.round = r
 			f.leg = leg
 			f.slot = s.slot_of(slots[leg])
-			f.neutral = slots.size() == 1
+			f.neutral = slots.size() == 1 and bool(cfg(cup.id).get("neutral_single", true))
 			cup.fixtures.append(f)
 		# Premiação por alcançar a fase (a fase de grupos paga no primeiro jogo).
 		var prize := int(cfg(cup.id).get("prize", {}).get(key, 0))
@@ -362,7 +443,16 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 		if cup.finished:
 			continue
 		# Fim da fase de grupos → mata-mata
-		if not cup.groups.is_empty() and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1):
+		if not cup.groups.is_empty() and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1) and is_state(id):
+			var seeds := state_qualified(cup)
+			for cid in cup.club_ids:
+				if not seeds.has(cid):
+					events.append({"t": "out", "cup": id, "club": cid, "stage": "Primeira fase"})
+			for cid in seeds:
+				events.append({"t": "advance", "cup": id, "club": cid, "stage": "Primeira fase", "first": cid == seeds[0]})
+			# Semifinal: 1º x 4º e 2º x 3º, jogo único na casa da melhor campanha.
+			_create_ko_round(world, s, cup, 0, [[seeds[0], seeds[3]], [seeds[1], seeds[2]]])
+		elif not cup.groups.is_empty() and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1):
 			var winners: Array = []
 			var runners: Array = []
 			for g in cup.groups:
@@ -416,7 +506,7 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 	if not s.cups.has(CWC) and s.slot_type(slot) == "C13":
 		var all_done := true
 		for id in s.cups:
-			if not s.cups[id].finished:
+			if not s.cups[id].finished and not is_state(id):
 				all_done = false
 		if all_done:
 			var cwc := _setup_club_world_cup(world, s)
@@ -463,6 +553,13 @@ static func _knockout_draw(world: GameWorld, cup: Cup, winners: Array, runners: 
 
 ## Fases seguintes: sorteio livre (copas continentais) ou chaveamento fixo (Mundial).
 static func _next_pairs(world: GameWorld, cup: Cup, winners: Array) -> Array:
+	if is_state(cup.id):
+		# Final em ida e volta: a melhor campanha da primeira fase decide em casa (jogo de volta).
+		var order_s := CompetitionManager.sort_table(winners, _merged_table(cup))
+		var out: Array = []
+		for i in range(0, order_s.size() - 1, 2):
+			out.append([order_s[i + 1], order_s[i]])
+		return out
 	var order: Array = winners.duplicate()
 	if cup.id != CWC:
 		RngUtil.shuffle(world.rng, order)
@@ -470,6 +567,31 @@ static func _next_pairs(world: GameWorld, cup: Cup, winners: Array) -> Array:
 	for i in range(0, order.size() - 1, 2):
 		pairs.append([order[i], order[i + 1]])
 	return pairs
+
+
+## Classificados de um estadual, em ordem de campanha: líderes dos grupos e depois os melhores dos demais.
+static func state_qualified(cup: Cup) -> Array:
+	var table := _merged_table(cup)
+	var leaders: Array = []
+	var rest: Array = []
+	for g in cup.groups:
+		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
+		leaders.append(order[0])
+		rest.append_array(order.slice(1))
+	var n := int(cfg(cup.id).get("qualify", 4))
+	var out := CompetitionManager.sort_table(leaders, table).slice(0, n)
+	for cid in CompetitionManager.sort_table(rest, table):
+		if out.size() >= n:
+			break
+		out.append(cid)
+	return CompetitionManager.sort_table(out, table)
+
+
+static func _merged_table(cup: Cup) -> Dictionary:
+	var table := {}
+	for g in cup.groups:
+		table.merge(g["table"])
+	return table
 
 
 static func _tie_winner(world: GameWorld, t: Dictionary, fx: Array) -> int:
@@ -498,10 +620,10 @@ static func _crown(world: GameWorld, cup: Cup, final_tie: Dictionary) -> void:
 	cup.runner_up = int(final_tie["a"]) if cup.champion == int(final_tie["b"]) else int(final_tie["b"])
 	cup.finished = true
 	var champ := world.club(cup.champion)
-	champ.add_title(("W:" if cup.id == CWC else "C:") + cup.id)
+	champ.add_title(("W:" if cup.id == CWC else ("S:" if is_state(cup.id) else "C:")) + cup.id)
 	champ.add_ledger("premiacao", int(cfg(cup.id).get("prize", {}).get("champion", 0)))
-	champ.reputation = clampf(champ.reputation + (4.0 if cup.id == CWC else 3.0), 5.0, 99.0)
-	champ.fan_mood = clampf(champ.fan_mood + 15.0, 0.0, 100.0)
+	champ.reputation = clampf(champ.reputation + float(cfg(cup.id).get("rep_bonus", 4.0 if cup.id == CWC else 3.0)), 5.0, 99.0)
+	champ.fan_mood = clampf(champ.fan_mood + float(cfg(cup.id).get("fan_bonus", 15.0)), 0.0, 100.0)
 	for pid in champ.player_ids:
 		var p := world.player(pid)
 		if p != null and p.cup_stats.has(cup.id):

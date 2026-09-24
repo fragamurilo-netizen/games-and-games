@@ -1,6 +1,6 @@
 {
 	"nation": "NED",
-	"_doc": "Holanda (liga de 10; clubes restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"_doc": "Holanda (liga de 18). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "NED_AMS",
@@ -155,6 +155,251 @@
 			},
 			"rivals": [
 				"NED_AMS"
+			]
+		},
+		{
+			"key": "NED_GAE",
+			"name": "Go Ahead Eagles",
+			"short": "Go Ahead",
+			"abbr": "GAE",
+			"nick": "Eagles",
+			"city": "Deventer",
+			"founded": 1902,
+			"league": "NED1",
+			"rep": 60,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "De Adelaarshorst",
+			"capacity": 10400,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "NED_NEC",
+			"name": "N.E.C. Nijmegen",
+			"short": "NEC",
+			"abbr": "NEC",
+			"nick": "Nijmegenaren",
+			"city": "Nijmegen",
+			"founded": 1900,
+			"league": "NED1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#006A3A"
+			],
+			"stadium": "Goffertstadion",
+			"capacity": 12500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "NED_HEE",
+			"name": "SC Heerenveen",
+			"short": "Heerenveen",
+			"abbr": "HEE",
+			"nick": "Superfriezen",
+			"city": "Heerenveen",
+			"founded": 1920,
+			"league": "NED1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Abe Lenstra Stadion",
+			"capacity": 26100,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "NED_SPA",
+			"name": "Sparta Rotterdam",
+			"short": "Sparta",
+			"abbr": "SPA",
+			"nick": "Kasteelheren",
+			"city": "Rotterdam",
+			"founded": 1888,
+			"league": "NED1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Het Kasteel",
+			"capacity": 11000,
+			"kit": "stripes_v",
+			"rivals": [
+				"NED_EXC",
+				"NED_ROT"
+			]
+		},
+		{
+			"key": "NED_GRO",
+			"name": "FC Groningen",
+			"short": "Groningen",
+			"abbr": "GRO",
+			"nick": "Trots van het Noorden",
+			"city": "Groningen",
+			"founded": 1971,
+			"league": "NED1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Euroborg",
+			"capacity": 22500,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "NED_FOR",
+			"name": "Fortuna Sittard",
+			"short": "Fortuna",
+			"abbr": "FOR",
+			"nick": "Fortunezen",
+			"city": "Sittard",
+			"founded": 1968,
+			"league": "NED1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Fortuna Sittard Stadion",
+			"capacity": 12500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NED_PEC",
+			"name": "PEC Zwolle",
+			"short": "PEC Zwolle",
+			"abbr": "PEC",
+			"nick": "Blauwvingers",
+			"city": "Zwolle",
+			"founded": 1910,
+			"league": "NED1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "MAC³PARK Stadion",
+			"capacity": 14000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NED_HER",
+			"name": "Heracles Almelo",
+			"short": "Heracles",
+			"abbr": "HER",
+			"nick": "Heraclieden",
+			"city": "Almelo",
+			"founded": 1903,
+			"league": "NED1",
+			"rep": 53,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Erve Asito",
+			"capacity": 12080,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "NED_NAC",
+			"name": "NAC Breda",
+			"short": "NAC",
+			"abbr": "NAC",
+			"nick": "Parel van het Zuiden",
+			"city": "Breda",
+			"founded": 1912,
+			"league": "NED1",
+			"rep": 55,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Rat Verlegh Stadion",
+			"capacity": 19000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NED_TEL",
+			"name": "SC Telstar",
+			"short": "Telstar",
+			"abbr": "TEL",
+			"nick": "Witte Leeuwen",
+			"city": "Velsen",
+			"founded": 1963,
+			"league": "NED1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "BUKO Stadion",
+			"capacity": 5000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NED_VOL",
+			"name": "FC Volendam",
+			"short": "Volendam",
+			"abbr": "VOL",
+			"nick": "Palingboeren",
+			"city": "Volendam",
+			"founded": 1977,
+			"league": "NED1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Kras Stadion",
+			"capacity": 7400,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NED_EXC",
+			"name": "Excelsior Rotterdam",
+			"short": "Excelsior",
+			"abbr": "EXC",
+			"nick": "Kralingers",
+			"city": "Rotterdam",
+			"founded": 1902,
+			"league": "NED1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Van Donge & De Roo Stadion",
+			"capacity": 4500,
+			"kit": "stripes_v",
+			"rivals": [
+				"NED_SPA"
 			]
 		}
 	]

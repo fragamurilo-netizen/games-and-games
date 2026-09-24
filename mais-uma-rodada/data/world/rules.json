@@ -1,5 +1,5 @@
 {
-	"_doc": "Regras globais. calendar.slots: sequência da temporada (W liga, Cn data continental, Xn Mundial de Clubes). windows: faixas de datas (índices) com janela de transferências aberta. money: escala econômica — valor de mercado = value_base × value_growth^(overall-40); salário = wage_base × wage_growth^(overall-40) × escala da liga; receita típica de um clube = revenue_per_wage × salário do nível × escala da liga.",
+	"_doc": "Regras globais. calendar.slots: sequência da temporada (W liga, Cn data continental, En data dos estaduais (meio de semana), Xn Mundial de Clubes). windows: faixas de datas (índices) com janela de transferências aberta. money: escala econômica — valor de mercado = value_base × value_growth^(overall-40); salário = wage_base × wage_growth^(overall-40) × escala da liga; receita típica de um clube = revenue_per_wage × salário do nível × escala da liga.",
 	"start_year": 2026,
 	"points_win": 3,
 	"points_draw": 1,
@@ -14,27 +14,37 @@
 	"calendar": {
 		"slots": [
 			"W",
+			"E1",
 			"W",
+			"E2",
 			"W",
 			"C1",
 			"W",
+			"E3",
 			"W",
 			"C2",
 			"W",
+			"E4",
 			"W",
 			"C3",
 			"W",
+			"E5",
 			"W",
 			"C4",
 			"W",
+			"E6",
 			"W",
 			"C5",
 			"W",
+			"E7",
 			"W",
 			"C6",
 			"W",
+			"E8",
 			"W",
+			"E9",
 			"W",
+			"E10",
 			"W",
 			"W",
 			"W",
@@ -71,17 +81,17 @@
 		"windows": [
 			[
 				0,
-				3
+				5
 			],
 			[
-				22,
-				26
+				32,
+				36
 			]
 		],
-		"retire_announce": 38,
+		"retire_announce": 48,
 		"start_month": 8,
 		"start_day": 15,
-		"winter_break_after": 21,
+		"winter_break_after": 31,
 		"winter_break_days": 14
 	},
 	"money": {
