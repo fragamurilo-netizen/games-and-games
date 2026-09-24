@@ -22,6 +22,8 @@ var style: int = 0
 var intensity: int = 1
 var line: int = 1
 var pressing: int = 1
+## Situação do placar em que o plano de jogo agiu por último (-1 = ainda não agiu).
+var plan_state: int = -1
 
 var cohesion_f: float = 1.0
 ## Ajuste de setor pelo foco de treino da semana (só no time do usuário).

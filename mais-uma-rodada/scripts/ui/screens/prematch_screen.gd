@@ -22,6 +22,7 @@ func on_show() -> void:
 	var w := world()
 	var club := w.user_club()
 	_notes = ClubAI.validate_user_sheet(w, club)
+	TacticsManager.ensure(club)
 	refresh()
 
 
@@ -41,6 +42,7 @@ func refresh() -> void:
 	UIKit.clear(c)
 	if f != null and not _edit:
 		c.add_child(_opponent_card(w, f))
+		c.add_child(_assistant_card(w, f))
 	for n in _notes:
 		c.add_child(UIKit.colored(n, UIColors.ORANGE, "Small"))
 	# Campo
@@ -58,11 +60,24 @@ func refresh() -> void:
 	hint.add_child(UIKit.spacer())
 	hint.add_child(UIKit.label("Força do time: %d" % int(round(strength)), "H3"))
 	c.add_child(hint)
+	var tools := UIKit.hbox(8)
 	var auto := UIKit.button("Escalação automática", "GhostButton", func():
 		club.sheet = ClubAI.auto_sheet(w, club, sheet.formation)
 		UIManager.toast("Melhores disponíveis escalados.")
 		refresh(), "bolt")
-	c.add_child(auto)
+	auto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(auto)
+	var rest := UIKit.button("Poupar cansados", "GhostButton", func():
+		var msgs := SquadManager.rest_tired(w, club, sheet)
+		if msgs.is_empty():
+			UIManager.toast("Ninguém cansado com substituto à altura.")
+		else:
+			_notes = msgs
+			UIManager.toast("%d titular(es) poupado(s)." % msgs.size())
+		refresh(), "heart")
+	rest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(rest)
+	c.add_child(tools)
 	# Formação
 	c.add_child(UIKit.section("Formação"))
 	var gf := ButtonGroup.new()
@@ -72,6 +87,7 @@ func refresh() -> void:
 		fl.add_child(UIKit.chip(fn, fn == sheet.formation, gf, func(): _set_formation(fn)))
 	c.add_child(fl)
 	c.add_child(UIKit.label(String(DatabaseManager.formation(sheet.formation)["desc"]), "Small", true))
+	c.add_child(_fam_row("Entrosamento com o %s" % sheet.formation, TacticsManager.formation_fam(club, sheet.formation)))
 	# Mentalidade
 	var tac := DatabaseManager.tactics()
 	c.add_child(UIKit.section("Mentalidade"))
@@ -97,6 +113,9 @@ func refresh() -> void:
 	var st: Dictionary = tac["styles"][sheet.style]
 	c.add_child(UIKit.label(String(st["desc"]), "Small", true))
 	c.add_child(_style_fit_label(w, sheet, st))
+	c.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
+	if TacticsManager.sheet_fam(club, sheet) < 45.0:
+		c.add_child(UIKit.colored("O time ainda não conhece bem esta ideia de jogo. Rende menos até pegar o jeito (treino tático acelera).", UIColors.ORANGE, "Small", true))
 	# Ajustes finos
 	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes: intensidade, linha, pressão", "GhostButton", func():
 		_extras_open = not _extras_open
@@ -112,6 +131,7 @@ func refresh() -> void:
 		auto_subs.button_pressed = sheet.auto_subs
 		auto_subs.toggled.connect(func(v): sheet.auto_subs = v)
 		c.add_child(auto_subs)
+	_plan_section(c, sheet)
 	# Bola parada
 	c.add_child(UIKit.section("Capitão e bola parada"))
 	for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
@@ -151,7 +171,87 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 	if opp_sheet != null:
 		var tac := DatabaseManager.tactics()
 		card.add_child(UIKit.label("Costuma jogar no %s, %s." % [opp_sheet.formation, String(tac["styles"][opp_sheet.style]["name"]).to_lower()], "Small"))
+	card.add_child(UIKit.label("Filosofia: " + ClubPhilosophy.summary(opp), "Small", true))
+	var stars: Array = w.squad(opp).duplicate()
+	stars.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+	var names: Array = []
+	for p: Player in stars.slice(0, 3):
+		names.append("%s (%s)" % [p.display_name(), PlayStyle.of(p).to_lower()])
+	if not names.is_empty():
+		card.add_child(UIKit.label("De olho em: " + ", ".join(names) + ".", "Small", true))
 	return UIKit.card_panel(card)
+
+
+func _fam_row(title: String, v: float) -> Control:
+	var row := UIKit.hbox(8)
+	row.add_child(UIKit.label(title, "Small"))
+	row.add_child(UIKit.spacer())
+	var bar := UIKit.bar(v, 100.0, TacticsManager.fam_color(v), 8)
+	bar.custom_minimum_size.x = 120
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(bar)
+	var l := UIKit.colored(TacticsManager.fam_label(v), TacticsManager.fam_color(v), "Small")
+	l.custom_minimum_size.x = 110
+	row.add_child(l)
+	return row
+
+
+## Leitura do auxiliar: sugestão de mentalidade e estilo contra o próximo rival.
+func _assistant_card(w: GameWorld, f: Fixture) -> Control:
+	var club := w.user_club()
+	var opp := w.club(f.opponent_of(club.id))
+	var sug := TacticsManager.suggest(w, club, opp, f.home == club.id)
+	var tac := DatabaseManager.tactics()
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.label("Leitura do auxiliar", "Caps"))
+	for r in sug["reasons"]:
+		card.add_child(UIKit.label("• " + String(r), "Small", true))
+	var m: int = sug["mentality"]
+	var st: int = sug["style"]
+	var sheet := _sheet()
+	if m == sheet.mentality and st == sheet.style:
+		card.add_child(UIKit.colored("Sua tática já segue essa ideia.", UIColors.GREEN, "Small"))
+	else:
+		card.add_child(UIKit.button("Aplicar: %s, %s" % [String(tac["mentalities"][m]["name"]), String(tac["styles"][st]["short"]).to_lower()], "GhostButton", func():
+			sheet.mentality = m
+			sheet.style = st
+			UIManager.toast("Sugestão do auxiliar aplicada.")
+			refresh(), "tactics"))
+	return UIKit.card_panel(card)
+
+
+## Plano de jogo: o que fazer sozinho a partir de certo minuto conforme o placar.
+func _plan_section(c: VBoxContainer, sheet: TeamSheet) -> void:
+	var tac := DatabaseManager.tactics()
+	c.add_child(UIKit.section("Plano de jogo"))
+	c.add_child(UIKit.label("O time muda a mentalidade sozinho conforme o placar. Empatando, volta ao que você escolheu.", "Small", true))
+	var minutes := [60, 70, 80]
+	c.add_child(UIKit.label("A partir do minuto", "Caps"))
+	var gmin := ButtonGroup.new()
+	var mrow := UIKit.hbox(8)
+	for mn in minutes:
+		var mv: int = mn
+		var chip := UIKit.chip("%d'" % mv, sheet.plan_minute == mv, gmin, func():
+			sheet.plan_minute = mv
+			refresh())
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		mrow.add_child(chip)
+	c.add_child(mrow)
+	for item in [["Se estiver perdendo", "plan_losing", [-1, TeamSheet.MENT_OFENSIVA, TeamSheet.MENT_TUDO]],
+			["Se estiver vencendo", "plan_winning", [-1, TeamSheet.MENT_DEFENSIVA, TeamSheet.MENT_RETRANCA]]]:
+		c.add_child(UIKit.label(String(item[0]), "Caps"))
+		var key: String = item[1]
+		var g := ButtonGroup.new()
+		var row := UIKit.hbox(8)
+		for opt in item[2]:
+			var ov: int = opt
+			var name := "Não mexer" if ov < 0 else String(tac["mentalities"][ov]["name"])
+			var chip := UIKit.chip(name, int(sheet.get(key)) == ov, g, func():
+				sheet.set(key, ov)
+				refresh())
+			chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(chip)
+		c.add_child(row)
 
 
 func _style_fit_label(w: GameWorld, sheet: TeamSheet, st: Dictionary) -> Label:
