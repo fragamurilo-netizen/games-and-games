@@ -7,8 +7,6 @@ const STATUS_ASK: Array[float] = [1.55, 1.25, 1.05, 0.9, 1.3] # estrela, titular
 const MAX_BIDS_PER_DAY := 3
 const OFFER_DAYS := 2 # prazo das propostas, em jogos do usuário
 const BAND := 4.0 # largura das faixas de nível do índice do mercado
-const DOMESTIC_SHARE := 0.55 # chance de procurar primeiro no próprio país
-const CANDIDATES := 40 # candidatos avaliados por tentativa de contratação
 
 # Famílias de posição para carências de elenco: [posições, mínimo]
 const FAMILIES: Array = [
@@ -356,6 +354,7 @@ static func _move_loan(world: GameWorld, p: Player, owner: Club, borrower: Club)
 
 ## Fim de temporada: emprestados voltam para casa.
 static func return_loans(world: GameWorld) -> Array:
+	MarketAI.exercise_loan_options(world)
 	var back: Array = []
 	for p: Player in world.players.values():
 		if p.loan.is_empty() or int(p.loan.get("until", 0)) > world.year:
@@ -586,24 +585,10 @@ static func respond_offer(world: GameWorld, o: TransferOffer, action: String, co
 # IA de mercado (a cada dia de jogo)
 # ---------------------------------------------------------------------------
 
-## Processa mercado da IA. Retorna Array de Transfer realizadas.
+## Processa mercado da IA (MarketAI) e as propostas pelo elenco do usuário. Retorna as Transfer feitas.
 static func process_matchday(world: GameWorld) -> Array:
-	var done: Array = []
-	var window := world.transfer_window_open()
-	var index := _build_index(world)
-	var order: Array = []
-	for c in world.clubs:
-		if not world.is_user_club(c.id):
-			order.append(c)
-	RngUtil.shuffle(world.rng, order)
-	for c: Club in order:
-		var p_active := 0.4 if window else 0.08
-		if world.rng.randf() >= p_active:
-			continue
-		var t := _ai_turn(world, c, index, window)
-		if t != null:
-			done.append(t)
-	if window:
+	var done := MarketAI.matchday(world)
+	if world.transfer_window_open():
 		_generate_offers_for_user(world)
 	_expire_offers(world)
 	return done
@@ -632,22 +617,6 @@ static func _build_index(world: GameWorld) -> Dictionary:
 			nat[n] = arr
 		nat[n][f].append(p)
 	return {"band": band, "nat": nat}
-
-
-## Sorteia um candidato de uma família perto da faixa desejada (ou do próprio país).
-static func _draw_candidate(world: GameWorld, index: Dictionary, club: Club, fam: int, min_rating: float) -> Player:
-	if world.rng.randf() < DOMESTIC_SHARE:
-		var arr: Array = index["nat"].get(club.nation, [])
-		if not arr.is_empty() and not arr[fam].is_empty():
-			return arr[fam][world.rng.randi_range(0, arr[fam].size() - 1)]
-	var bands: Dictionary = index["band"][fam]
-	var b0 := int(min_rating / BAND)
-	for _t in 3:
-		var b := b0 + world.rng.randi_range(0, 2)
-		if bands.has(b) and not bands[b].is_empty():
-			var arr2: Array = bands[b]
-			return arr2[world.rng.randi_range(0, arr2.size() - 1)]
-	return null
 
 
 static func _family_of(pos: int) -> int:
@@ -690,105 +659,6 @@ static func squad_needs(world: GameWorld, club: Club) -> Array:
 			out.append({"fam": i, "urgency": urgency, "best": best[i], "count": counts[i]})
 	out.sort_custom(func(a, b): return a["urgency"] > b["urgency"])
 	return out
-
-
-static func _ai_turn(world: GameWorld, club: Club, index: Dictionary, window: bool) -> Transfer:
-	var rules := DatabaseManager.squad_rules()
-	var size := club.player_ids.size()
-	# Enxuga elenco inchado.
-	if size > int(rules["max_players"]) - 1:
-		_ai_release_weakest(world, club)
-		return null
-	var arch := club.arch()
-	# Endividado: coloca alguém à venda para fazer caixa.
-	if window and club.balance < 0 and world.rng.randf() < 0.35:
-		_ai_list_for_sale(world, club)
-	var mismanaged := world.rng.randf() < float(arch.get("mismanagement", 0.0)) * 0.25
-	var level := PlayerGenerator.club_level(club)
-	var budget := club.transfer_budget
-	var wage_room := club.wage_budget - FinanceManager.wage_bill(world, club)
-	# Define o alvo: carência urgente > reforço da posição mais fraca do time titular.
-	var needs := squad_needs(world, club)
-	var fam := -1
-	var target_pos := -1
-	var min_rating := 0.0
-	var urgent := false
-	if not needs.is_empty() and int(needs[0]["count"]) < int(FAMILIES[int(needs[0]["fam"])][1]):
-		fam = needs[0]["fam"]
-		urgent = true
-		min_rating = level - 9.0
-	elif window and (budget > 0 or wage_room > 0) and size < int(rules["max_players"]) - 2:
-		var weak := _weakest_starter(world, club)
-		if not weak.is_empty() and float(weak["rating"]) < level + 4.0:
-			target_pos = weak["pos"]
-			fam = _family_of(target_pos)
-			min_rating = float(weak["rating"]) + 2.5
-	elif not needs.is_empty():
-		fam = needs[0]["fam"]
-		min_rating = float(needs[0]["best"]) + 1.0
-	if mismanaged and fam < 0:
-		fam = world.rng.randi_range(0, FAMILIES.size() - 1)
-	if fam < 0:
-		return null
-	if wage_room <= 0 and not mismanaged and not urgent:
-		return null
-	var ages: Array = arch.get("target_age", [20, 30])
-	var pot_w := float(arch.get("potential_weight", 0.4))
-	var best: Player = null
-	var best_score := -1e9
-	var free_only := not window
-	for _k in CANDIDATES:
-		var p: Player = _draw_candidate(world, index, club, fam, min_rating)
-		if p == null:
-			continue
-		if p.club_id == club.id or p.retiring or p.injury_weeks > 4:
-			continue
-		if free_only and p.club_id >= 0:
-			continue
-		if p.club_id >= 0 and (not window or world.is_user_club(p.club_id)):
-			continue
-		var age := p.age(world.year)
-		var rating := p.rating_at(target_pos) if target_pos >= 0 else p.ovr_f
-		var eff := rating + (float(p.potential) - rating) * pot_w * (0.6 if age <= 23 else 0.0)
-		if eff < min_rating and not mismanaged:
-			continue
-		var price := asking_price(world, p) if p.club_id >= 0 else 0
-		if price > budget * (1.3 if mismanaged else 1.0):
-			continue
-		var wage := Valuation.wage_demand(p, club, world.year)
-		var wage_delta := wage
-		if wage_delta > maxi(wage_room, 0) * (1.5 if mismanaged else 1.0) and not (urgent and wage <= club.wage_budget * 0.08):
-			continue
-		var score := eff - min_rating
-		if age < int(ages[0]) - 1 or age > int(ages[1]) + 1:
-			score -= 3.0 + absf(age - clampi(age, int(ages[0]), int(ages[1]))) * 1.5
-		score -= float(price) / maxf(50000.0, float(budget) + 1.0) * 2.5
-		if p.transfer_listed:
-			score += 1.5
-		if mismanaged:
-			score = world.rng.randf_range(-5.0, 5.0) + (rating - level) * 0.3
-		if score > best_score:
-			best_score = score
-			best = p
-	if best == null:
-		return null
-	var i := interest(world, best, club)
-	if world.rng.randf() > i:
-		return null
-	var wage2 := wage_ask(world, best, club)
-	if best.club_id < 0:
-		return complete_transfer(world, best, club, 0, wage2, preferred_years(world, best))
-	var ask := asking_price(world, best)
-	var offer := Valuation.round_value(ask * world.rng.randf_range(0.9, 1.05) * (1.15 if mismanaged else 1.0))
-	if offer < ask:
-		offer = Valuation.round_value(ask) # sobe até o pedido
-	if offer > budget * (1.3 if mismanaged else 1.0):
-		return null
-	var seller := world.club(best.club_id)
-	# O vendedor não pode ficar sem ninguém na posição.
-	if _family_count(world, seller, best.position) <= _family_min(best.position):
-		return null
-	return complete_transfer(world, best, club, offer, wage2, preferred_years(world, best))
 
 
 ## Vaga do time titular com o pior rendimento (alvo de reforço).
@@ -871,6 +741,7 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 			chance += 0.04
 		if p.squad_status == Player.STATUS_STAR:
 			chance += 0.02
+		chance += MarketAI.extra_offer_chance(world, p)
 		if world.rng.randf() >= chance:
 			continue
 		var already := false
@@ -882,8 +753,8 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 		var buyer := _find_buyer(world, p)
 		if buyer == null:
 			continue
-		var base := float(asking_price(world, p)) if p.transfer_listed else float(p.value)
-		var fee := Valuation.round_value(base * world.rng.randf_range(0.8, 1.1))
+		var bids := MarketAI.bids_for_user_player(world, buyer, p)
+		var fee: int = bids[0]
 		var o := TransferOffer.new()
 		o.id = world.next_offer_id
 		world.next_offer_id += 1
@@ -891,7 +762,7 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 		o.buyer_id = buyer.id
 		o.seller_id = user.id
 		o.fee = fee
-		o.max_fee = Valuation.round_value(minf(buyer.transfer_budget, fee * world.rng.randf_range(1.05, 1.3)))
+		o.max_fee = bids[1]
 		o.created_day = world.current_turn()
 		o.expires_day = world.current_turn() + OFFER_DAYS
 		world.offers.append(o)
@@ -902,20 +773,7 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 
 
 static func _find_buyer(world: GameWorld, p: Player) -> Club:
-	var best: Club = null
-	var best_v := -1e9
-	for _k in 30:
-		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
-		if world.is_user_club(c.id) or c.transfer_budget < p.value * 0.8:
-			continue
-		var level := PlayerGenerator.club_level(c)
-		if p.ovr_f < level - 4.0:
-			continue
-		var v := c.reputation - absf(p.ovr_f - level) * 2.0 + world.rng.randf_range(0.0, 10.0)
-		if v > best_v:
-			best_v = v
-			best = c
-	return best
+	return MarketAI.find_buyer_for(world, p)
 
 
 static func _expire_offers(world: GameWorld) -> void:
@@ -960,6 +818,9 @@ static func process_expiring_contracts(world: GameWorld) -> Array:
 			chance = 0.6 if club.player_ids.size() <= int(DatabaseManager.squad_rules()["ideal_players"]) else 0.35
 		else:
 			chance = 0.25
+		# Ambicioso bom demais para o clube recusa renovar e sai de graça (lei Bosman).
+		if p.trait_sum("ambition") >= 20.0 and p.ovr_f >= level + 5.0 and age <= 30:
+			chance *= 0.35
 		var wage := Valuation.wage_demand(p, club, world.year)
 		# A folha precisa caber no orçamento (clube endividado perde jogadores caros).
 		var bill := FinanceManager.wage_bill(world, club) - p.wage + wage
