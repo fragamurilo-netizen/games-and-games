@@ -151,6 +151,10 @@ static func goal_of(world: GameWorld, club_id: int) -> Array:
 static func begin_matchday(world: GameWorld) -> Dictionary:
 	var md := {"day": world.season.day, "entries": [], "user": {}, "notes": []}
 	for f: Fixture in world.season.fixtures_at(world.season.day):
+		if not f.played and (world.is_user_club(f.home) or world.is_user_club(f.away)):
+			SponsorManager.close_preseason(world) # primeiro jogo: uniforme e patrocínios travados
+			break
+	for f: Fixture in world.season.fixtures_at(world.season.day):
 		if f.played:
 			continue
 		var entry := {"f": f, "seed": world.rng.randi(), "ctx": MatchEngine.context_for(world, f), "sim": null, "res": {}}
@@ -363,6 +367,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
 		club.push_result(result)
+		if result == "V" and world.is_user_club(club.id):
+			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
 		# Torcida
 		var patience := float(club.arch().get("fan_patience", 50))
@@ -701,6 +707,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		Valuation.update_value(p, world.year)
 	world.reset_indexes()
 	compute_goals(world)
+	SponsorManager.open_preseason(world)
 	if world.has_user():
 		var goal := goal_of(world, world.user_club_id)
 		NewsManager.post(world, "temporada", {"year": world.year, "club": world.user_club().short_name, "goal": String(goal[0]).to_lower()}, world.user_club_id, -1, NewsEvent.IMP_HIGH)

@@ -133,15 +133,62 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	# Elenco curto na posição: pede mais.
 	if _family_count(world, seller, p.position) <= _family_min(p.position):
 		ask = int(ask * 1.25)
-	var value := deal_value(fee, deal)
+	var swaps := swap_players(world, deal)
+	for sp: Player in swaps:
+		if sp.club_id != user.id or not sp.loan.is_empty():
+			return {"result": "rejected", "fee": 0, "msg": "%s não pode entrar na troca." % sp.display_name()}
+		if interest(world, sp, seller) < 0.2:
+			return {"result": "rejected", "fee": 0, "msg": "%s não aceita se mudar para o %s. Tire-o da troca." % [sp.display_name(), seller.short_name]}
+	var swap_total := swap_value(world, swaps, seller)
+	var value := deal_value(fee, deal) + swap_total
+	var with_swap := "" if swaps.is_empty() else " (com a troca)"
 	if value >= ask:
-		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta!" % seller.short_name}
+		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!" % [seller.short_name, with_swap]}
 	if value >= ask * 0.8:
-		var ratio := float(fee) / maxf(1.0, value)
-		var counter := Valuation.round_value(((value + ask) * 0.5 if value >= ask * 0.92 else float(ask)) * ratio)
+		# Quanto de dinheiro a mais cobre a diferença (a parte da troca já está contada).
+		var target := (value + ask) * 0.5 if value >= ask * 0.92 else float(ask)
+		var cash_f := maxf(0.5, deal_value(1_000_000, deal) / 1_000_000.0)
+		var counter := Valuation.round_value(fee + (target - value) / cash_f)
 		counter = maxi(counter, fee + 1000)
-		return {"result": "counter", "fee": counter, "msg": "%s pede %s." % [seller.short_name, Fmt.money(counter)]}
-	return {"result": "rejected", "fee": 0, "msg": "Proposta recusada: muito abaixo do esperado (%s pediria algo perto de %s)." % [seller.short_name, Fmt.money(Valuation.round_value(ask * 1.05))]}
+		return {"result": "counter", "fee": counter, "msg": "%s pede %s%s." % [seller.short_name, Fmt.money(counter), with_swap]}
+	return {"result": "rejected", "fee": 0, "msg": "Proposta recusada: muito abaixo do esperado (%s pediria algo perto de %s%s)." % [seller.short_name, Fmt.money(Valuation.round_value(maxf(0.0, ask * 1.05 - swap_total))), with_swap]}
+
+
+## Jogadores do usuário oferecidos como parte do pagamento (deal["swap"] = [ids]).
+static func swap_players(world: GameWorld, deal: Dictionary) -> Array:
+	var out: Array = []
+	for pid in deal.get("swap", []):
+		var sp := world.player(int(pid))
+		if sp != null:
+			out.append(sp)
+	return out
+
+
+## Quanto o clube vendedor acha que um jogador oferecido na troca vale para ele.
+static func swap_worth(world: GameWorld, sp: Player, seller: Club) -> int:
+	var f := 0.85
+	if _family_count(world, seller, sp.position) <= _family_min(sp.position):
+		f = 1.0 # precisa de alguém na posição
+	var level := PlayerGenerator.club_level(seller)
+	if sp.ovr_f < level - 8.0:
+		f *= 0.4 # não serviria nem de reserva
+	elif sp.ovr_f < level - 4.0:
+		f *= 0.7
+	var age := sp.age(world.year)
+	if age >= 32:
+		f *= 0.7
+	elif age <= 22 and sp.potential >= sp.overall + 6:
+		f *= 1.1
+	if sp.contract_years_left(world.year) <= 0:
+		f *= 0.8
+	return Valuation.round_value(sp.value * f)
+
+
+static func swap_value(world: GameWorld, swaps: Array, seller: Club) -> float:
+	var total := 0.0
+	for sp: Player in swaps:
+		total += swap_worth(world, sp, seller)
+	return total
 
 
 ## Termos pessoais. Retorna {result: "accepted"|"counter"|"rejected", wage, msg}.
@@ -478,14 +525,26 @@ static func user_sign(world: GameWorld, p: Player, fee: int, wage: int, years: i
 	var user := world.user_club()
 	if upfront_cost(fee, deal) > user.transfer_budget:
 		return {"ok": false, "msg": "Orçamento insuficiente."}
-	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
+	var swaps := swap_players(world, deal)
+	if user.player_ids.size() - swaps.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio (máximo %d)." % int(DatabaseManager.squad_rules()["max_players"])}
+	for sp: Player in swaps:
+		if sp.club_id != user.id or not sp.loan.is_empty():
+			return {"ok": false, "msg": "%s não está mais disponível para a troca." % sp.display_name()}
 	var r := user_terms(world, p, wage, years, deal)
 	if r["result"] != "accepted":
 		return {"ok": false, "msg": r["msg"], "wage": r.get("wage", 0), "result": r["result"]}
 	var seller_id := p.club_id
+	var seller := world.club(seller_id)
 	complete_transfer(world, p, user, fee, wage, years)
 	apply_deal(world, p, user, seller_id, fee, deal)
+	var names: Array = []
+	for sp: Player in swaps:
+		var sw := maxi(sp.wage, Valuation.wage_demand(sp, seller, world.year))
+		complete_transfer(world, sp, seller, 0, sw, preferred_years(world, sp))
+		names.append(sp.display_name())
+	if not names.is_empty():
+		return {"ok": true, "msg": "%s é o novo reforço do %s! %s vai para o %s na troca." % [p.display_name(), user.short_name, " e ".join(names), seller.short_name]}
 	return {"ok": true, "msg": "%s é o novo reforço do %s!" % [p.display_name(), user.short_name]}
 
 
@@ -553,7 +612,12 @@ static func pending_offers(world: GameWorld) -> Array:
 	return out
 
 
+const MAX_COUNTERS := 3 # rodadas de contraproposta antes de o comprador desistir
+
+
 ## Resposta do usuário: "accept", "reject" ou "counter" (pede mais). Retorna mensagem.
+## Na contraproposta, o comprador aceita se couber no teto dele; se não, sobe um pouco
+## (até MAX_COUNTERS rodadas) ou desiste quando o pedido é absurdo.
 static func respond_offer(world: GameWorld, o: TransferOffer, action: String, counter_fee: int = 0) -> String:
 	var p := world.player(o.player_id)
 	var buyer := world.club(o.buyer_id)
@@ -573,12 +637,27 @@ static func respond_offer(world: GameWorld, o: TransferOffer, action: String, co
 			p.morale = clampf(p.morale - (6.0 if p.trait_sum("ambition") >= 25.0 else 1.0), 0.0, 100.0)
 			return "Proposta recusada."
 		"counter":
-			if o.raised or counter_fee > o.max_fee:
+			if o.raised or o.rounds >= MAX_COUNTERS:
 				o.status = TransferOffer.WITHDRAWN
-				return "%s desistiu da negociação." % buyer.short_name
-			o.fee = counter_fee
-			o.raised = true
-			return "%s aceitou pagar %s. Confirme a venda!" % [buyer.short_name, Fmt.money(counter_fee)]
+				return "%s cansou de negociar e desistiu." % buyer.short_name
+			o.rounds += 1
+			if counter_fee <= o.max_fee:
+				o.fee = counter_fee
+				o.raised = true
+				return "%s aceitou pagar %s. Confirme a venda!" % [buyer.short_name, Fmt.money(counter_fee)]
+			if counter_fee > o.max_fee * 1.6:
+				o.status = TransferOffer.WITHDRAWN
+				return "%s achou o pedido absurdo e desistiu." % buyer.short_name
+			# Sobe em direção ao teto, sem revelá-lo de uma vez.
+			var step := 0.5 if o.rounds == 1 else 0.8
+			var nf := Valuation.round_value(o.fee + (o.max_fee - o.fee) * step)
+			if nf <= o.fee:
+				o.status = TransferOffer.WITHDRAWN
+				return "%s não pode pagar mais e desistiu." % buyer.short_name
+			o.fee = nf
+			o.expires_day = maxi(o.expires_day, world.current_turn() + 1)
+			var last := o.rounds >= MAX_COUNTERS
+			return "%s subiu a oferta para %s.%s" % [buyer.short_name, Fmt.money(nf), " É a última palavra deles." if last else ""]
 	return ""
 
 
@@ -899,6 +978,54 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 		pending += 1
 		if pending >= 4:
 			return
+
+
+## Usuário oferece um jogador do elenco aos clubes: quem tiver interesse faz proposta na hora.
+## Uma vez por jogador a cada rodada. Retorna {ok, n, msg}.
+static func shop_player(world: GameWorld, p: Player) -> Dictionary:
+	var user := world.user_club()
+	if p.club_id != user.id or not p.loan.is_empty():
+		return {"ok": false, "n": 0, "msg": "Só dá para oferecer jogadores do seu elenco."}
+	if not world.transfer_window_open():
+		return {"ok": false, "n": 0, "msg": "A janela de transferências está fechada."}
+	var shop: Dictionary = world.stats.get("shop", {})
+	if int(shop.get(str(p.id), -99)) == world.current_turn():
+		return {"ok": false, "n": 0, "msg": "Você já ofereceu %s nesta rodada. Espere o próximo jogo." % p.display_name()}
+	shop[str(p.id)] = world.current_turn()
+	world.stats["shop"] = shop
+	var tried := {}
+	var n := 0
+	var base := float(asking_price(world, p)) if p.transfer_listed else float(p.value)
+	for _k in 6:
+		var buyer := _find_buyer(world, p)
+		if buyer == null or tried.has(buyer.id):
+			continue
+		tried[buyer.id] = true
+		var already := false
+		for o: TransferOffer in world.offers:
+			if o.player_id == p.id and o.buyer_id == buyer.id and o.is_pending():
+				already = true
+		if already or world.rng.randf() > interest(world, p, buyer) + 0.15:
+			continue
+		# Quem oferece mostra pressa: as propostas vêm um pouco abaixo do valor.
+		var fee := Valuation.round_value(base * world.rng.randf_range(0.7, 0.98))
+		var o := TransferOffer.new()
+		o.id = world.next_offer_id
+		world.next_offer_id += 1
+		o.player_id = p.id
+		o.buyer_id = buyer.id
+		o.seller_id = user.id
+		o.fee = fee
+		o.max_fee = Valuation.round_value(minf(buyer.transfer_budget, fee * world.rng.randf_range(1.05, 1.3)))
+		o.created_day = world.current_turn()
+		o.expires_day = world.current_turn() + OFFER_DAYS
+		world.offers.append(o)
+		n += 1
+		if n >= 3:
+			break
+	if n == 0:
+		return {"ok": true, "n": 0, "msg": "Nenhum clube se interessou por %s agora." % p.display_name()}
+	return {"ok": true, "n": n, "msg": "%d clube(s) fizeram proposta por %s." % [n, p.display_name()]}
 
 
 static func _find_buyer(world: GameWorld, p: Player) -> Club:

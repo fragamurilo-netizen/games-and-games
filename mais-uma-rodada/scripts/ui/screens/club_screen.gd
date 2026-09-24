@@ -95,6 +95,9 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	st.add_child(UIKit.label("Ingresso: %s" % Fmt.money(FinanceManager.ticket_price(club)), "Small"))
 	kits.add_child(st)
 	card.add_child(kits)
+	if _own():
+		var pre := SponsorManager.is_preseason(w)
+		card.add_child(UIKit.button("Uniformes e patrocínios" + (" (pré-temporada)" if pre else ""), "PrimaryButton" if pre else "GhostButton", func(): UIManager.push("kit"), "shirt"))
 	var rivals: Array = []
 	for rid in club.rivals.slice(0, 3):
 		if int(rid) >= 0:
@@ -184,7 +187,28 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	else:
 		var net: int = int(fin["income"]) - int(fin["expense"])
 		card.add_child(UIKit.kv("Resultado", ("+" if net >= 0 else "−") + Fmt.money(absi(net)), UIColors.GREEN if net >= 0 else UIColors.RED))
+	_sponsor_lines(w, club, card)
 	return UIKit.card_panel(card)
+
+
+## Contratos de patrocínio e material esportivo que compõem a receita de patrocínio.
+func _sponsor_lines(w: GameWorld, club: Club, card: VBoxContainer) -> void:
+	card.add_child(UIKit.separator())
+	card.add_child(UIKit.label("Patrocínios (por ano)", "Caps"))
+	var total := 0
+	for b: Dictionary in SponsorManager.breakdown(club):
+		var cap := String(b["name"])
+		if String(b["slot"]) != "":
+			cap += " · %s até %d" % [String(b["slot"]).to_lower(), int(b["y"])]
+		var val := "+" + Fmt.money(int(b["v"]))
+		if int(b["e"]) > 0:
+			val += " (+%s bônus)" % Fmt.money(int(b["e"]))
+		card.add_child(UIKit.kv(cap, val, UIColors.GREEN))
+		total += int(b["v"]) + int(b["e"])
+	card.add_child(UIKit.kv("Total de patrocínio", Fmt.money(total), UIColors.GREEN))
+	if club.sponsors.size() < SponsorManager.SLOTS.size():
+		var hint := "Espaços livres no uniforme: feche contratos na pré-temporada." if SponsorManager.is_preseason(w) else "Espaços livres no uniforme podem ser vendidos na próxima pré-temporada."
+		card.add_child(UIKit.button(hint, "GhostButton", func(): UIManager.push("kit"), "money"))
 
 
 func _structure_card(w: GameWorld, club: Club) -> Control:

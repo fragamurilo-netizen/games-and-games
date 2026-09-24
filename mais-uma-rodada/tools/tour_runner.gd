@@ -70,6 +70,63 @@ func _run() -> void:
 	UIManager.push("player", {"id": star.id})
 	await _frames(8)
 	await _shot("06_perfil")
+	# Pré-temporada: uniformes e patrocínios
+	UIManager.push("kit")
+	await _frames(8)
+	await _shot("06a_uniforme")
+	_screen().set("_part", "shorts")
+	_screen().refresh()
+	await _frames(4)
+	await _shot("06b_uniforme_calcao")
+	var ks := _screen().scroll()
+	ks.scroll_vertical = 100000
+	await _frames(4)
+	await _shot("06c_patrocinios")
+	SponsorManager.sign(w, "master", 0)
+	_screen().refresh()
+	await _frames(4)
+	ks.scroll_vertical = 0
+	await _frames(4)
+	await _shot("06d_uniforme_master")
+	for sl in ["fornecedor", "manga", "costas", "calcao"]:
+		SponsorManager.sign(w, sl, 0)
+	_screen().refresh()
+	await _frames(4)
+	await _shot("06d2_uniforme_todos")
+	_screen().set("_back", true)
+	_screen().refresh()
+	await _frames(4)
+	await _shot("06d3_uniforme_costas")
+	UIManager.back()
+	# Proposta com troca por um jogador de outro clube
+	var other: Club = w.club(w.user_club().main_rival())
+	var tgt: Player = w.squad(other)[2]
+	UIManager.push("player", {"id": tgt.id})
+	await _frames(8)
+	await _shot("06e_perfil_rival")
+	var neg_swap := {"swap": [w.squad(w.user_club())[4].id]}
+	Negotiation.open(w, tgt, "buy", Callable())
+	await _frames(6)
+	await _shot("06f_proposta")
+	UIManager.close_all_modals()
+	var n2 := Negotiation.new()
+	n2.w = w
+	n2.p = tgt
+	n2.mode = "buy"
+	n2._init_values()
+	n2.deal["swap"] = neg_swap["swap"]
+	n2.box = UIKit.vbox(14)
+	n2.box.custom_minimum_size.x = 600
+	n2._render()
+	UIManager.show_modal(n2.box, true)
+	await _frames(6)
+	await _shot("06g_proposta_troca")
+	n2.picking_swap = true
+	n2._render()
+	await _frames(6)
+	await _shot("06h_escolher_troca")
+	UIManager.close_all_modals()
+	UIManager.back()
 	UIManager.goto("hub")
 	UIManager.push("prematch")
 	await _frames(8)
@@ -132,6 +189,9 @@ func _run() -> void:
 	UIManager.goto("club")
 	await _frames(8)
 	await _shot("19_clube")
+	_screen().scroll().scroll_vertical = 1400
+	await _frames(4)
+	await _shot("19b_clube_financas")
 	var rival := w.user_club().main_rival()
 	if rival >= 0:
 		UIManager.push("club", {"id": rival})
