@@ -1133,7 +1133,8 @@ func _test_persona_trophies() -> void:
 	# Veterano rodado vira cascudo com o tempo
 	var vet: Player = null
 	for p: Player in w.players.values():
-		if p.age(w.year) >= 31 and p.traits.size() == 1 and not p.has_trait("inseguro") and not p.has_trait("timido"):
+		if p.age(w.year) >= 31 and p.traits.size() == 1 and not p.has_trait("inseguro") and not p.has_trait("timido") \
+				and not p.has_trait("cascudo") and not p.has_trait("mentor") and not p.has_trait("lider") and not p.has_trait("idolo"):
 			vet = p
 			break
 	check(vet != null, "sem veterano para testar")

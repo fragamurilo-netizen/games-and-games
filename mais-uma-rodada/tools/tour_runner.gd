@@ -28,11 +28,42 @@ func _shot(shot_name: String) -> void:
 	await _wait(0.3) # transições de tela e de modal terminarem
 	count += 1
 	print("[tela] ", shot_name)
+	_check_overflow(shot_name)
 	if not shots:
 		return
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
 	img.save_png("%s/%s.png" % [out_dir, shot_name])
+
+
+## Conteúdo mais largo que a tela empurra o layout inteiro para fora do viewport: no celular
+## parece que a tela "deu zoom" e ficou assim. Aponta a raiz e os controles culpados.
+func _check_overflow(shot_name: String) -> void:
+	var vp := get_viewport().get_visible_rect().size
+	var worst: Array = []
+	_scan_overflow(get_tree().root, vp.x, worst)
+	if worst.is_empty():
+		return
+	worst.sort_custom(func(a, b): return a[1] > b[1])
+	var lines: Array = []
+	for w in worst.slice(0, 4):
+		lines.append("%s (%.0f px)" % [w[0], w[1]])
+	push_warning("[%s] layout mais largo que a tela (%.0f px): %s" % [shot_name, vp.x, ", ".join(lines)])
+
+
+func _scan_overflow(n: Node, vw: float, out: Array) -> void:
+	if n is CanvasItem and not (n as CanvasItem).visible:
+		return
+	if n is ScrollContainer and (n as ScrollContainer).horizontal_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED:
+		return # rolagem lateral: o conteúdo pode ser mais largo
+	if n is Control and not (n is Window):
+		var c := n as Control
+		var r := c.get_global_rect()
+		var need := c.get_combined_minimum_size().x
+		if (r.end.x > vw + 2.0 or need > vw + 2.0) and c.get_child_count() <= 3:
+			out.append([str(c.get_path()).get_slice("/", -1) + ":" + c.get_class(), maxf(r.end.x, need)])
+	for ch in n.get_children():
+		_scan_overflow(ch, vw, out)
 
 
 func _screen() -> BaseScreen:
