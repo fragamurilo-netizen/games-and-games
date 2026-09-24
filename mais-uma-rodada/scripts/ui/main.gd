@@ -14,6 +14,7 @@ var _safe := Rect2()
 
 func _ready() -> void:
 	UIManager.register_main(self)
+	add_child(TouchScroll.new())
 	get_viewport().size_changed.connect(_update_safe_area)
 	_update_safe_area()
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
