@@ -3,6 +3,8 @@ extends SceneTree
 ## xvfb-run godot --path . --resolution 1220x1220 --script res://tools/face_sheet.gd -- --out=/tmp/faces.png
 ## Opções: --size=N (lado de cada retrato), --cols=N, --seed=N, --eth=a,b,c, --ages=16,20,…
 ## --aging: cada linha é a mesma pessoa envelhecendo pelas idades das colunas.
+## --catalog=hs ou --catalog=bd: um retrato por penteado ou por barba, na ordem da lista.
+## --beauty: com --aging, as colunas vão da pessoa mais feia à mais bonita.
 
 var _out := "user://faces.png"
 
@@ -14,6 +16,8 @@ func _initialize() -> void:
 	var eths: Array = range(13)
 	var ages: Array = [15, 17, 19, 21, 23, 26, 29, 32, 35, 38, 42, 48, 58]
 	var aging := false
+	var beauty := false
+	var catalog := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
@@ -25,6 +29,10 @@ func _initialize() -> void:
 			seed_base = int(a.substr(7))
 		elif a.begins_with("--eth="):
 			eths = Array(a.substr(6).split(",")).map(func(x): return int(x))
+		elif a.begins_with("--catalog="):
+			catalog = a.substr(10)
+		elif a == "--beauty":
+			beauty = true
 		elif a == "--aging":
 			aging = true
 		elif a.begins_with("--ages="):
@@ -43,6 +51,12 @@ func _initialize() -> void:
 			v.face_seed = seed_base + e * 97 + (r * 131 if aging else k * 7919)
 			v.eth = e
 			v.age = ages[k % ages.size()]
+			if catalog != "":
+				v.look = {catalog: r * cols + k}
+				v.eth = [1, 7, 3, 4, 8, 6, 2][(r * cols + k) % 7]
+				v.age = 30
+			if beauty:
+				v.look = {"bt": float(k) / maxf(1.0, cols - 1.0)}
 			v.shirt_color = Color.from_hsv(fmod((0 if aging else k) * 0.13 + r * 0.07, 1.0), 0.7, 0.7)
 			v.trim_color = Color.WHITE
 			v.bg_color = v.shirt_color.darkened(0.6)

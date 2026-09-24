@@ -93,6 +93,17 @@ const STYLE_P: Array = [
 	{"tp": 0.08, "sd": 0.0, "fd": 2, "fr": "shaved_part"}, # degradê com risco
 	{"tp": 0.14, "sd": 0.06, "tx": "wavy", "gl": 0.2}, # ondulado para trás
 	{"tp": 0.2, "sd": 0.05, "fd": 1, "tx": "coil", "fr": "locs_top"}, # locs curtos
+	{"tp": 0.16, "sd": 0.0, "fd": 4}, # burst fade
+	{"tp": 0.36, "sd": 0.0, "fd": 2, "sp": 3, "tx": "coil"}, # afro com degradê
+	{"tp": 0.16, "sd": 0.12, "sb": 0.18, "gl": 0.25, "tx": "wavy", "fr": "locks", "lk": 0.32}, # flow para trás
+	{"tp": 0.16, "sd": 0.03, "fd": 1, "sp": 5, "fl": 1}, # topete bagunçado
+	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.62, "fr": "design"}, # máquina com desenho
+	{"tp": 0.04, "sd": 0.0, "fd": 2, "tx": "braid", "op": 0.8}, # nagô com degradê
+	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "tx": "curl"}, # moicano cacheado
+	{"tp": 0.14, "sd": 0.1, "hl": 0.2, "fd": 1, "fr": "fringe", "fl": 2, "sb": 0.05}, # liso médio
+	{"tp": 0.14, "sd": 0.05, "hl": 0.1, "fd": 2, "fr": "side_fringe", "fl": 1}, # franja lateral
+	{"tp": 0.2, "sd": 0.1, "tx": "locs", "fr": "locs_top", "sb": 0.05}, # freeform
+	{"tp": 0.07, "sd": 0.02, "fd": 1, "fl": 1, "fr": "part", "op": 0.95}, # degradê social
 ]
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
@@ -116,6 +127,7 @@ var _M := 0.0
 var _NW := 0.0
 var _BW := 0.0
 var _MW := 0.0
+var _ND := 0.0
 var _skin := Color.WHITE
 var _beard_p: Dictionary = {}
 var _shadow_p: Dictionary = {}
@@ -261,7 +273,9 @@ func _setup(c: Vector2, s: float) -> void:
 		float(f["deep"]), float(f["ridge"]), 1.0 if bool(f["aquiline"]) else 0.0, float(f["bridge"]),
 		float(f["nose_tip"]), 0.025 + 0.09 * ag + 0.04 * maxf(0.0, float(f["smile"])), float(f["cheekbone"]),
 		0.07 * float(f["cheekbone"]) * (1.0 - float(f["fat"])), float(f["lip_l"]), 1.0 if bool(f["chin_cleft"]) else 0.0,
-		ag, float(f["rosy"]), shadow, 0.05 + clampf(float(f["skin_i"]) / 9.0, 0.0, 1.0) * 0.1])
+		ag, float(f["rosy"]), shadow, 0.05 + clampf(float(f["skin_i"]) / 9.0, 0.0, 1.0) * 0.1,
+		float(f.get("dark_circles", 0.0))])
+	_ND = float(f.get("nose_dx", 0.0))
 	_blotches.clear()
 	var br := RandomNumberGenerator.new()
 	br.seed = int(f["blotch_seed"])
@@ -387,6 +401,11 @@ func _px(u: float, v: float) -> Vector2:
 	return _hc + Vector2(u * _fw, v * _fh)
 
 
+## Ponto do nariz (acompanha o desvio de um nariz torto).
+func _pxn(u: float, v: float) -> Vector2:
+	return _px(u + _ND * smoothstep(_E - 0.05, _N, v), v)
+
+
 ## Aplica luminância com sombras mais quentes (o vermelho some por último).
 static func _shade(base: Color, lum: float) -> Color:
 	var l := maxf(lum, 0.0)
@@ -500,30 +519,31 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	b = (v + 0.28) / 0.22
 	lum -= 0.05 * exp(-a * a - b * b)
 	# Nariz: dorso claro, lateral direita na sombra, ponta, asas e sombra embaixo
+	var un := u - _ND * smoothstep(E - 0.05, N, v)
 	var wv := smoothstep(E - 0.06, E + 0.1, v) * (1.0 - smoothstep(N - 0.1, N - 0.01, v))
 	var ridge_hl := 0.0
 	if wv > 0.0:
-		a = (u + 0.03) / BW
+		a = (un + 0.03) / BW
 		ridge_hl = exp(-a * a) * wv
 		var hump := 0.0
 		if k[2] > 0.0:
 			b = (v - (E + N) * 0.5) / 0.06
 			hump = 0.05 * exp(-b * b)
 		lum += (0.1 * k[3] + hump) * ridge_hl
-		a = (u - BW * 1.7) / (BW * 0.9)
+		a = (un - BW * 1.7) / (BW * 0.9)
 		lum -= 0.2 * k[3] * exp(-a * a) * wv
-		a = (u + BW * 1.9) / (BW * 0.9)
+		a = (un + BW * 1.9) / (BW * 0.9)
 		lum -= 0.05 * k[3] * exp(-a * a) * wv
 	if v > N - 0.25 and v < N + 0.12:
-		a = (u + 0.02) / (NW * 0.45 * k[4])
+		a = (un + 0.02) / (NW * 0.45 * k[4])
 		b = (v - (N - 0.07)) / 0.05
 		lum += 0.09 * exp(-a * a - b * b)
 		b = (v - (N - 0.035)) / 0.055
 		bb = b * b
-		a = (u - NW * 0.85) / (NW * 0.3)
-		a2 = (u + NW * 0.85) / (NW * 0.3)
+		a = (un - NW * 0.85) / (NW * 0.3)
+		a2 = (un + NW * 0.85) / (NW * 0.3)
 		lum -= 0.14 * (exp(-a * a - bb) + exp(-a2 * a2 - bb) * 0.6)
-		a = (u - 0.02) / (NW * 0.8)
+		a = (un - 0.02) / (NW * 0.8)
 		b = (v - (N + 0.035)) / 0.034
 		lum -= 0.28 * exp(-a * a - b * b)
 	# Sulco nasolabial (mais marcado com a idade e o sorriso)
@@ -564,6 +584,10 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		a = (au - MW * 1.3) / 0.12
 		b = (v - 0.8) / 0.1
 		lum -= 0.05 * k[10] * exp(-a * a - b * b)
+	if k[14] > 0.05:
+		a = (au - X * 0.9) / 0.2
+		b = (v - (E + 0.11)) / 0.045
+		lum -= 0.09 * k[14] * exp(-a * a - b * b)
 	# Manchas de tom (pele não é uniforme)
 	for bl: Array in _blotches:
 		a = (u - float(bl[0])) / float(bl[2])
@@ -653,6 +677,30 @@ func _marks(rng: RandomNumberGenerator) -> void:
 			var u := sx * rng.randf_range(0.0, 0.62)
 			var v := rng.randf_range(-0.05, 0.3) - (0.12 if absf(u) < 0.2 else 0.0)
 			_r_circle(_px(u, v), maxf(0.5, _s * rng.randf_range(0.0025, 0.0045)), Color(_skin.darkened(0.3).lerp(Color("#8A4A2A"), 0.3), rng.randf_range(0.25, 0.55)))
+	# Marcas de acne e poros abertos
+	var bl: float = float(f.get("blemish", 0.0))
+	if bl > 0.05:
+		for i in int(30 * bl * clampf(_det, 0.4, 1.5)):
+			var u := rng.randf_range(-0.75, 0.75)
+			var v := rng.randf_range(-0.6, 0.75)
+			if absf(u) < 0.45 and v > -0.1 and v < 0.25:
+				u = signf(u) * rng.randf_range(0.45, 0.75)
+			var p := _px(u, v)
+			var r := maxf(0.5, _s * rng.randf_range(0.003, 0.006))
+			if rng.randf() < 0.5:
+				_r_circle(p, r, Color(0.7, 0.25, 0.2, rng.randf_range(0.12, 0.25)))
+			else:
+				_r_circle(p, r, Color(_skin.darkened(0.25), 0.25))
+				_r_circle(p + Vector2(-r * 0.3, -r * 0.3), r * 0.5, Color(_skin.lightened(0.2), 0.2))
+	# Papada
+	var fat: float = f["fat"]
+	if fat > 0.62:
+		var amt := (fat - 0.62) / 0.38
+		var pts := PackedVector2Array()
+		for i in 11:
+			var t := float(i) / 10.0
+			pts.append(_px(lerpf(-0.5, 0.5, t), 1.02 + 0.07 * sin(PI * t)))
+		_r_polyline(pts, Color(_skin.darkened(0.4), 0.3 * amt), maxf(0.8, _s * 0.007), true)
 	if bool(f["mole"]):
 		var mp: Vector2 = f["mole_pos"]
 		_r_circle(_px(mp.x, mp.y), maxf(0.7, _s * 0.005), _skin.darkened(0.5))
@@ -786,7 +834,7 @@ func _eyes() -> void:
 	var asym: float = f["asym"]
 	for sx: float in [-1.0, 1.0]:
 		var cx := _hc.x + sx * _X * _fw
-		var cy := _hc.y + _E * _fh + sx * asym * _fh * 0.006
+		var cy := _hc.y + _E * _fh + sx * asym * _fh * 0.012
 		var inner := Vector2(cx - sx * ew, cy + tilt * 0.35 + (eh * 0.12 if mono else 0.0))
 		var outer := Vector2(cx + sx * ew, cy - tilt)
 		var upper := PackedVector2Array()
@@ -875,7 +923,7 @@ func _brows(rng: RandomNumberGenerator) -> void:
 	var asym: float = f["asym"]
 	for sx: float in [-1.0, 1.0]:
 		var cx := _hc.x + sx * _X * _fw
-		var by := _hc.y + (_E - float(f["brow_gap"])) * _fh - sx * asym * _fh * 0.01
+		var by := _hc.y + (_E - float(f["brow_gap"])) * _fh - sx * asym * _fh * 0.018
 		var x0 := cx - sx * ew * 1.05
 		var path := PackedVector2Array()
 		var thick := PackedFloat32Array()
@@ -922,21 +970,21 @@ func _nose() -> void:
 	var lw := maxf(0.8, _s * 0.007)
 	var dark := _skin.darkened(0.62)
 	for sx: float in [-1.0, 1.0]:
-		var nc := _px(sx * _NW * 0.45, _N + 0.004)
+		var nc := _pxn(sx * _NW * 0.45, _N + 0.004)
 		var rx := _NW * _fw * 0.2
 		var ry := _fh * 0.02
 		_fill(_ellipse(nc, rx * 1.6, ry * 1.6, 12), Color(dark, 0.14))
 		_fill(_ellipse(nc + Vector2(sx * rx * 0.1, 0), rx, ry, 12), Color(dark, 0.62))
 		# Asa do nariz
-		var wc := _px(sx * _NW * 0.82, _N - 0.03)
+		var wc := _pxn(sx * _NW * 0.82, _N - 0.03)
 		var a0 := PI * 0.5 - sx * 0.6
 		_r_arc(wc, _NW * _fw * 0.28, a0 - sx * PI * 0.9, a0 + sx * 0.2, 10, Color(_skin.darkened(0.4), 0.28 if sx < 0 else 0.4), lw, true)
-	var side := PackedVector2Array([_px(_BW * 1.1, _E + 0.1), _px(_BW * 1.3, (_E + _N) * 0.5), _px(_NW * 0.75, _N - 0.07)])
+	var side := PackedVector2Array([_pxn(_BW * 1.1, _E + 0.1), _pxn(_BW * 1.3, (_E + _N) * 0.5), _pxn(_NW * 0.75, _N - 0.07)])
 	_r_polyline(side, Color(_skin.darkened(0.45), 0.14), lw * 1.2, true)
 	var tip := PackedVector2Array()
 	for i in 9:
 		var t := float(i) / 8.0
-		tip.append(_px(lerpf(-_NW * 0.35, _NW * 0.35, t), _N + 0.018 + sin(PI * t) * 0.012))
+		tip.append(_pxn(lerpf(-_NW * 0.35, _NW * 0.35, t), _N + 0.018 + sin(PI * t) * 0.012))
 	_r_polyline(tip, Color(_skin.darkened(0.4), 0.25), lw, true)
 
 
@@ -1056,7 +1104,7 @@ func _beard_dens(u: float, v: float, P: Dictionary) -> float:
 		var bottom := 1.02 + ln * 0.9
 		var cy := (top + bottom) * 0.5
 		var ry := (bottom - top) * 0.5 + 0.02
-		var rx := _MW * (0.45 + cn * 0.6)
+		var rx := _MW * (0.45 + cn * 0.6) * (1.0 + float(P.get("rd", 0.0)) * 0.45)
 		var e := sqrt(pow(u / rx, 2.0) + pow((v - cy) / ry, 2.0))
 		d = maxf(d, 1.0 - smoothstep(1.0 - soft * 3.0, 1.0 + soft, e))
 	# Bigode
@@ -1067,7 +1115,10 @@ func _beard_dens(u: float, v: float, P: Dictionary) -> float:
 		if mu == 2:
 			top_y = _M - lip_u - 0.045
 			bot_y = _M - lip_u * 0.6
-		var wx := _MW * (0.95 if mu == 2 else 1.08)
+		elif mu == 4:
+			top_y = _N + 0.025
+			bot_y = _M - lip_u * 0.15
+		var wx := _MW * (0.95 if mu == 2 else (1.16 if mu == 4 else 1.08))
 		var yr := smoothstep(top_y - soft, top_y + soft, v) * (1.0 - smoothstep(bot_y - soft * 0.5, bot_y + soft * 0.5, v + au * 0.1))
 		var xr := 1.0 - smoothstep(wx - soft, wx + soft, au)
 		var dm := yr * xr
@@ -1079,6 +1130,10 @@ func _beard_dens(u: float, v: float, P: Dictionary) -> float:
 			var bar := (1.0 - smoothstep(0.07, 0.07 + soft, absf(au - _MW * 1.12))) * smoothstep(_N + 0.06, _N + 0.1, v) * (1.0 - smoothstep(0.93, 1.0, th))
 			dm = maxf(dm, bar)
 		d = maxf(d, dm)
+	# Cavanhaque fechado: ligação dos cantos da boca ao queixo
+	if float(P.get("ci", 0.0)) > 0.0:
+		var ring := (1.0 - smoothstep(0.05, 0.05 + soft, absf(au - _MW * 1.04))) * smoothstep(_M - 0.06, _M - 0.02, v) * (1.0 - smoothstep(_M + lip_l + 0.1, _M + lip_l + 0.16, v))
+		d = maxf(d, ring)
 	# Mosca
 	var so: float = P["so"]
 	if so > 0.0:
@@ -1092,6 +1147,10 @@ func _beard_dens(u: float, v: float, P: Dictionary) -> float:
 	if th > 1.0:
 		var reach := 0.035 + ln * 0.9
 		d *= 1.0 - smoothstep(reach * 0.5, reach, (th - 1.0) * (0.6 if v > 0.6 else 2.5))
+	# Barba degradê: afina em direção às costeletas
+	var fdb: float = float(P.get("fd", 0.0))
+	if fdb > 0.0:
+		d *= lerpf(1.0, 0.2, fdb * (1.0 - smoothstep(0.05, 0.4, v)) * smoothstep(0.55, 0.85, au))
 	# Nunca sobre os lábios
 	var lip_c := _M + (lip_l - lip_u) * 0.5
 	var le := sqrt(pow(u / (_MW * 1.0), 2.0) + pow((v - lip_c) / ((lip_u + lip_l) * 0.62), 2.0))
@@ -1129,7 +1188,10 @@ func _beard_mesh() -> void:
 		if dens <= 0.0:
 			return Color(col, 0.0)
 		var lum := 0.95 - 0.22 * clampf(q.x, -1.0, 1.0) - 0.2 * smoothstep(0.6, 1.3, q.y) + 0.12 * _g2(q.x + 0.3, q.y - 0.5, 0.3, 0.2)
+		lum += 0.05 * sin(q.x * 23.0 + q.y * 7.0) * sin(q.y * 19.0 - q.x * 5.0)
 		var c := col.lerp(Color.BLACK, (1.0 - lum) * 0.6) if lum < 1.0 else col.lerp(col.lightened(0.3), lum - 1.0)
+		# Pontas mais claras e mais quentes no queixo e nas bochechas
+		c = c.lerp(col.lightened(0.18).lerp(Color("#8A5A3A"), 0.15), 0.25 * smoothstep(0.7, 1.2, q.y) + 0.1 * smoothstep(0.4, 0.8, absf(q.x)))
 		return Color(c, dens * op))
 
 
@@ -1151,7 +1213,7 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 			cand.append(i)
 	if cand.is_empty():
 		return
-	var n := int((240 if tx == 0 else 170) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6))
+	var n := int((420 if tx == 0 else 220 + ln * 300.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6))
 	var w := maxf(0.6, _s * 0.0036)
 	var jit := _fw * 0.05
 	for k in n:
@@ -1163,7 +1225,9 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 		if (p - _c).length() > _R - 1.0:
 			continue
 		if tx == 0:
-			_r_circle(p, maxf(0.45, _s * rng.randf_range(0.0025, 0.0038)), Color(col.darkened(0.15), rng.randf_range(0.25, 0.5) * (0.5 + op)))
+			# Pelos curtos: tracinhos finos e claros, não pontos grossos
+			var dd := Vector2(rng.randf_range(-0.3, 0.3), 1.0).normalized() * _s * rng.randf_range(0.003, 0.006)
+			_r_line(p, p + dd, Color(col.darkened(0.1), rng.randf_range(0.18, 0.38) * (0.5 + op)), maxf(0.5, _s * 0.0022), true)
 			continue
 		var u := (p.x - _hc.x) / _fw
 		var v := (p.y - _hc.y) / _fh
@@ -1218,6 +1282,8 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 			a *= lerpf(0.1, 1.0, smoothstep(0.35, 0.72, h))
 		3:
 			a *= lerpf(0.16, 1.0, smoothstep(0.62, 0.7, h))
+		4: # burst: raspado em volta da orelha, cheio no alto e na nuca
+			a *= lerpf(0.1, 1.0, maxf(smoothstep(0.3, 0.55, h), 1.0 - smoothstep(0.55, 0.8, absf(q.x))))
 	if int(_hs("sp", 0)) == 4:
 		a *= lerpf(0.14, 1.0, 1.0 - smoothstep(0.22, 0.3, absf(q.x)))
 	var crown: float = f["crown"]
@@ -1325,6 +1391,15 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 	_front_piece(rng, String(_hs("fr", "")), hair, gloss)
 	# Silhueta espetada / crista
 	match int(_hs("sp", 0)):
+		5:
+			for i in 16:
+				var t := 0.1 + 0.8 * i / 15.0
+				var base := _cap_pt(t, 0.75)
+				var tip := _cap_pt(t + rng.randf_range(-0.04, 0.04), 1.0)
+				tip += (tip - _hc).normalized().rotated(rng.randf_range(-0.5, 0.5)) * _fw * rng.randf_range(0.05, 0.13)
+				var side := (tip - base).orthogonal().normalized() * _fw * rng.randf_range(0.06, 0.1)
+				var tc := _hair_col(tip, 0.95, t, 0.1)
+				_r_polygon(PackedVector2Array([_cl(base - side), _cl(tip), _cl(base + side)]), PackedColorArray([tc.darkened(0.25), tc.lightened(0.08), tc.darkened(0.15)]))
 		2:
 			for i in 11:
 				var t := 0.12 + 0.76 * i / 10.0
@@ -1566,24 +1641,54 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 		"part":
 			var px := float(f["part_side"]) * 0.36
 			_r_line(_px(px, hl - 0.03), _px(px * 0.75, -1.0), Color(hair.lightened(0.3).lerp(_skin, 0.4), 0.55), maxf(0.8, _s * 0.006), true)
+		"design":
+			var sx := float(f["part_side"])
+			var lw := maxf(0.8, _s * 0.006)
+			for k in 2:
+				var pts := PackedVector2Array()
+				for i in 9:
+					var t := float(i) / 8.0
+					pts.append(_cl(_px(sx * (0.62 + 0.12 * t + k * 0.1), -0.55 - 0.3 * t + 0.08 * sin(PI * t * 2.0) + k * 0.06)))
+				_r_polyline(pts, Color(_skin.lightened(0.05), 0.85), lw, true)
+		"side_fringe":
+			var sx := float(f["part_side"])
+			var lower := PackedVector2Array()
+			var upper := PackedVector2Array()
+			for i in 12:
+				var t := float(i) / 11.0
+				var u := sx * lerpf(0.55, -0.95, t)
+				var vl := hl - 0.14 + 0.24 * t + 0.05 * sin(PI * t)
+				lower.append(_px(u, vl))
+				upper.append(_px(u * 0.98, vl - lerpf(0.34, 0.14, t)))
+			_strip(lower, upper, 3, func(p: Vector2, t: float, ww: float) -> Color:
+				return _hair_col(p, 0.5 + ww * 0.45, t, gloss))
+			for j in int(14 * clampf(_det, 0.3, 1.6)):
+				var ww := rng.randf_range(0.1, 0.9)
+				var pts := PackedVector2Array()
+				for k in 12:
+					pts.append(_cl(lower[k].lerp(upper[k], ww)))
+				_r_polyline(pts, Color(hair.lightened(0.22) if j % 2 == 0 else hair.darkened(0.3), 0.35), w, true)
 		"shaved_part":
 			var px := float(f["part_side"]) * 0.52
 			_r_line(_px(px, hl - 0.02), _px(px * 0.85, -0.95), Color(_skin.lightened(0.05), 0.85), maxf(0.8, _s * 0.007), true)
 		"twists", "locs_top":
-			var n := 13
+			# Mechas curtas torcidas, caindo a partir do alto da cabeça
+			var n := int(22 * clampf(_det, 0.5, 1.4))
+			var th := _fw * (0.12 if kind == "twists" else 0.1)
 			for i in n:
-				var t := 0.1 + 0.8 * i / (n - 1)
-				var base := _cap_pt(t, 0.4)
-				var tip := _cap_pt(t + rng.randf_range(-0.02, 0.02), 1.0)
-				tip += (tip - _hc).normalized() * _fw * rng.randf_range(0.08, 0.18)
-				_r_line(_cl(base), _cl(tip), hair.darkened(0.1), _fw * 0.11, true)
-				_r_circle(_cl(tip), _fw * 0.055, hair.darkened(0.1))
-				var segs := 4
-				for k in segs:
-					var a := base.lerp(tip, float(k) / segs)
-					var b := base.lerp(tip, float(k + 1) / segs)
-					var side := (b - a).orthogonal().normalized() * _fw * 0.045
-					_r_line(_cl(a - side), _cl(b + side), Color(hair.lightened(0.28), 0.5), w * 1.2, true)
+				var t := rng.randf_range(0.08, 0.92)
+				var ww := rng.randf_range(0.45, 0.95)
+				var base := _cap_pt(t, ww)
+				var out := (base - _px(0.0, -0.3)).normalized()
+				var tip := base + (out * 0.6 + Vector2(0, 0.5)).normalized() * _fw * rng.randf_range(0.1, 0.2)
+				var bc := _hair_col(base, ww, t, 0.05)
+				_r_line(_cl(base), _cl(tip), bc.darkened(0.15), th, true)
+				_r_circle(_cl(tip), th * 0.5, bc.darkened(0.15))
+				for k in 3:
+					var a := base.lerp(tip, float(k) / 3.0)
+					var b2 := base.lerp(tip, float(k + 1) / 3.0)
+					var side := (b2 - a).orthogonal().normalized() * th * 0.35
+					_r_line(_cl(a - side), _cl(b2 + side), Color(bc.lightened(0.18), 0.35), w * 1.1, true)
 
 
 func _back_hair(rng: RandomNumberGenerator) -> void:

@@ -744,8 +744,8 @@ func _test_faces() -> void:
 		styles[int(f["style"])] = true
 		beards[int(f["beard"])] = true
 		eths[int(f["eth"])] = true
-	check(styles.size() >= 32, "pouca variedade de penteados (%d)" % styles.size())
-	check(beards.size() >= 17, "pouca variedade de barbas (%d)" % beards.size())
+	check(styles.size() >= 42, "pouca variedade de penteados (%d)" % styles.size())
+	check(beards.size() >= 24, "pouca variedade de barbas (%d)" % beards.size())
 	check(eths.size() == FaceGen.ETH_COUNT, "etnias sem rosto (%d)" % eths.size())
 	check(FaceGen.ETH_COUNT == DatabaseManager.ethnicities().size(), "FaceGen e nations.json com etnias diferentes")
 	# Barba só depois da puberdade, e nem todo adulto tem
