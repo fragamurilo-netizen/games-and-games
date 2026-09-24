@@ -739,13 +739,21 @@ func _test_faces() -> void:
 	var styles := {}
 	var beards := {}
 	var eths := {}
-	for i in 1500:
+	var eyes := {}
+	for i in 2000:
 		var f := FaceGen.features(i * 7919, i % FaceGen.ETH_COUNT, 16 + i % 30)
 		styles[int(f["style"])] = true
 		beards[int(f["beard"])] = true
 		eths[int(f["eth"])] = true
-	check(styles.size() >= 42, "pouca variedade de penteados (%d)" % styles.size())
-	check(beards.size() >= 24, "pouca variedade de barbas (%d)" % beards.size())
+		eyes[int(f["eye_i"])] = true
+	check(styles.size() >= 52, "pouca variedade de penteados (%d)" % styles.size())
+	check(beards.size() >= 28, "pouca variedade de barbas (%d)" % beards.size())
+	check(eyes.size() == FaceGen.EYE_COLORS.size(), "cores de olho que nunca aparecem (%d)" % eyes.size())
+	check(FaceGen.EYE_NAMES.size() == FaceGen.EYE_COLORS.size(), "nomes e cores de olho não batem")
+	check(FaceGen.STYLE_TEX_W.size() == FaceGen.HAIR_STYLES.size() and PortraitView.STYLE_P.size() == FaceGen.HAIR_STYLES.size(), "penteado sem parâmetros")
+	check(FaceGen.BEARD_PARTS.size() == FaceGen.BEARDS.size() and FaceGen.BEARD_MIN_CAP.size() == FaceGen.BEARDS.size() and FaceGen.BEARD_POP.size() == FaceGen.BEARDS.size(), "barba sem parâmetros")
+	for e in FaceGen.ETH_COUNT:
+		check((FaceGen.ETH_EYES[e] as Array).size() == FaceGen.EYE_COLORS.size(), "pesos de olho da etnia %d incompletos" % e)
 	check(eths.size() == FaceGen.ETH_COUNT, "etnias sem rosto (%d)" % eths.size())
 	check(FaceGen.ETH_COUNT == DatabaseManager.ethnicities().size(), "FaceGen e nations.json com etnias diferentes")
 	# Barba só depois da puberdade, e nem todo adulto tem

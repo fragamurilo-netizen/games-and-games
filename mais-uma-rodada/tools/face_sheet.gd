@@ -17,6 +17,8 @@ func _initialize() -> void:
 	var ages: Array = [15, 17, 19, 21, 23, 26, 29, 32, 35, 38, 42, 48, 58]
 	var aging := false
 	var beauty := false
+	var kits := false
+	var offset := 0
 	var catalog := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
@@ -31,6 +33,10 @@ func _initialize() -> void:
 			eths = Array(a.substr(6).split(",")).map(func(x): return int(x))
 		elif a.begins_with("--catalog="):
 			catalog = a.substr(10)
+		elif a.begins_with("--offset="):
+			offset = int(a.substr(9))
+		elif a == "--kits":
+			kits = true
 		elif a == "--beauty":
 			beauty = true
 		elif a == "--aging":
@@ -52,13 +58,18 @@ func _initialize() -> void:
 			v.eth = e
 			v.age = ages[k % ages.size()]
 			if catalog != "":
-				v.look = {catalog: r * cols + k}
+				v.look = {catalog: offset + r * cols + k}
 				v.eth = [1, 7, 3, 4, 8, 6, 2][(r * cols + k) % 7]
 				v.age = 30
 			if beauty:
 				v.look = {"bt": float(k) / maxf(1.0, cols - 1.0)}
 			v.shirt_color = Color.from_hsv(fmod((0 if aging else k) * 0.13 + r * 0.07, 1.0), 0.7, 0.7)
 			v.trim_color = Color.WHITE
+			if kits:
+				var i := r * cols + k
+				v.trim_color = Color.from_hsv(fmod(i * 0.37, 1.0), 0.6, 0.9) if i % 3 == 0 else Color.WHITE
+				v.kit_collar = ["round", "v", "polo", ""][i % 4]
+				v.kit_pattern = ["plain", "stripes_v", "plain", "halves", "stripes_h", "faixa", "diagonal"][i % 7]
 			v.bg_color = v.shirt_color.darkened(0.6)
 			if k == cols - 1 and r % 4 == 3:
 				v.suit = true
