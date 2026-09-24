@@ -7,6 +7,9 @@ var side: int = 0
 var club: Club
 var sheet: TeamSheet
 var formation: Dictionary
+var formation_name: String = "4-4-2"
+## Formação trocada durante o jogo (a IA muda no máximo uma vez).
+var formation_changed: bool = false
 var slots: Array[MatchPlayer] = [] # por vaga (null = vaga vazia após expulsão/lesão sem troca)
 var bench: Array[MatchPlayer] = []
 var all: Array[MatchPlayer] = [] # titulares + banco
@@ -26,10 +29,19 @@ var pressing: int = 1
 var plan_state: int = -1
 
 var cohesion_f: float = 1.0
+## Parte do entrosamento que vem do elenco (sem a familiaridade com formação/estilo).
+var cohesion_base: float = 1.0
 ## Ajuste de setor pelo foco de treino da semana (só no time do usuário).
 var train_att: float = 1.0
 var train_def: float = 1.0
 var home_f: float = 1.0
+## Dia do time (inspirado ou apagado), sorteado antes do jogo: dá variação real aos resultados.
+var day_f: float = 1.0
+## Efeito do placar: quem perde pressiona (mais chances, piores), quem vence recua e sai no
+## contra-ataque (menos chances, melhores). Recalculado a cada gol e ao longo do jogo.
+var g_rate: float = 1.0
+var g_quality: float = 1.0
+var g_poss: float = 0.0
 
 # --- Números táticos cacheados (evita dicionários no laço quente) ---
 var m_att: float = 1.0
