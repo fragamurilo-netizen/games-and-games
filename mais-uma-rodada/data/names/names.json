@@ -1,0 +1,118 @@
+{
+  "_doc": "Culturas de nomes e nacionalidades. weight = frequência entre estrangeiros. Valdora (VAL) é o país do jogo; seus nomes usam a cultura luso.",
+  "nationalities": [
+    {"code": "VAL", "name": "Valdora", "culture": "luso", "weight": 0},
+    {"code": "BRA", "name": "Brasil", "culture": "luso", "weight": 9},
+    {"code": "ARG", "name": "Argentina", "culture": "hispano", "weight": 10},
+    {"code": "URU", "name": "Uruguai", "culture": "hispano", "weight": 8},
+    {"code": "COL", "name": "Colômbia", "culture": "hispano", "weight": 7},
+    {"code": "PAR", "name": "Paraguai", "culture": "hispano", "weight": 6},
+    {"code": "CHI", "name": "Chile", "culture": "hispano", "weight": 4},
+    {"code": "PER", "name": "Peru", "culture": "hispano", "weight": 3},
+    {"code": "EQU", "name": "Equador", "culture": "hispano", "weight": 3},
+    {"code": "VEN", "name": "Venezuela", "culture": "hispano", "weight": 2},
+    {"code": "ESP", "name": "Espanha", "culture": "hispano", "weight": 2},
+    {"code": "POR", "name": "Portugal", "culture": "luso", "weight": 4},
+    {"code": "ANG", "name": "Angola", "culture": "lusoafricano", "weight": 3},
+    {"code": "CPV", "name": "Cabo Verde", "culture": "lusoafricano", "weight": 2},
+    {"code": "MOZ", "name": "Moçambique", "culture": "lusoafricano", "weight": 2},
+    {"code": "NGA", "name": "Nigéria", "culture": "africano", "weight": 4},
+    {"code": "GHA", "name": "Gana", "culture": "africano", "weight": 3},
+    {"code": "SEN", "name": "Senegal", "culture": "africano", "weight": 3},
+    {"code": "CIV", "name": "Costa do Marfim", "culture": "africano", "weight": 2},
+    {"code": "CMR", "name": "Camarões", "culture": "africano", "weight": 2},
+    {"code": "SRB", "name": "Sérvia", "culture": "eslavo", "weight": 2},
+    {"code": "CRO", "name": "Croácia", "culture": "eslavo", "weight": 2},
+    {"code": "ITA", "name": "Itália", "culture": "italiano", "weight": 2},
+    {"code": "FRA", "name": "França", "culture": "frances", "weight": 2}
+  ],
+  "foreign_share_by_division": [0.13, 0.08, 0.045, 0.02],
+  "cultures": {
+    "luso": {
+      "known_by": {"nickname": 0.2, "first": 0.3, "last": 0.28, "full": 0.22},
+      "suffix_chance": 0.05,
+      "suffixes": ["Júnior", "Filho", "Neto"],
+      "compound_chance": 0.14,
+      "first": ["Adriano", "Alan", "Alef", "Alex", "Alexandre", "Alisson", "Anderson", "André", "Antônio", "Arthur", "Artur", "Augusto", "Benício", "Bernardo", "Breno", "Bruno", "Caio", "Calebe", "Carlos", "Cássio", "Cauã", "Cauê", "César", "Christian", "Cláudio", "Clayton", "Cleber", "Cristiano", "Daniel", "Danilo", "Davi", "Deivid", "Denis", "Diego", "Diogo", "Douglas", "Edson", "Eduardo", "Elias", "Élton", "Emanuel", "Emerson", "Enzo", "Érico", "Erick", "Everton", "Ewerton", "Fabiano", "Fábio", "Fagner", "Fausto", "Felipe", "Fernando", "Filipe", "Flávio", "Francisco", "Gabriel", "Gean", "Geovane", "Gerson", "Gilberto", "Gilson", "Giovani", "Giuliano", "Guilherme", "Gustavo", "Heitor", "Hélio", "Henrique", "Hugo", "Humberto", "Iago", "Igor", "Isaque", "Ismael", "Ítalo", "Jadson", "Jair", "Jean", "Jefferson", "Jhonatan", "João", "Joel", "Jonas", "Jonathan", "Jorge", "José", "Josué", "Juan", "Juliano", "Júlio", "Kaio", "Kauã", "Kelvin", "Kevin", "Kleber", "Lázaro", "Leandro", "Leonardo", "Lindomar", "Luan", "Lucas", "Luciano", "Luís", "Luiz", "Maicon", "Manoel", "Marcelo", "Márcio", "Marcos", "Mário", "Marlon", "Mateus", "Matheus", "Maurício", "Maxwell", "Michel", "Miguel", "Moisés", "Murilo", "Natan", "Nathan", "Nicolas", "Nílton", "Osvaldo", "Otávio", "Pablo", "Patrick", "Paulo", "Pedro", "Pietro", "Rafael", "Railan", "Ramon", "Raul", "Reinaldo", "Renan", "Renato", "Rhuan", "Ricardo", "Richard", "Robson", "Rodrigo", "Rogério", "Rômulo", "Ruan", "Rubens", "Ryan", "Samuel", "Sandro", "Sérgio", "Sidnei", "Silas", "Tales", "Téo", "Thiago", "Tiago", "Tomás", "Valdir", "Vanderlei", "Victor", "Vinícius", "Vitor", "Wagner", "Walace", "Wallace", "Wanderson", "Washington", "Wellington", "Wendel", "Wesley", "Weverton", "William", "Willian", "Wilson", "Yago", "Yan", "Yuri"],
+      "compound": ["João Pedro", "João Victor", "João Paulo", "João Gabriel", "João Lucas", "Pedro Henrique", "Pedro Lucas", "Luiz Felipe", "Luiz Henrique", "Luiz Gustavo", "Luiz Otávio", "Carlos Eduardo", "Carlos Henrique", "Paulo Henrique", "Paulo Victor", "José Carlos", "José Roberto", "Marcos Vinícius", "Gabriel Henrique", "Matheus Henrique", "Vitor Hugo", "Luís Fernando", "Caio Henrique", "Davi Lucas", "Arthur Gabriel"],
+      "last": ["Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes", "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida", "Lopes", "Soares", "Fernandes", "Vieira", "Barbosa", "Rocha", "Dias", "Nascimento", "Andrade", "Moreira", "Nunes", "Marques", "Machado", "Mendes", "Freitas", "Cardoso", "Ramos", "Gonçalves", "Santana", "Teixeira", "Araújo", "Moraes", "Correia", "Pinto", "Cunha", "Campos", "Monteiro", "Moura", "Batista", "Pires", "Farias", "Duarte", "Rezende", "Brandão", "Siqueira", "Tavares", "Xavier", "Macedo", "Figueiredo", "Coelho", "Bezerra", "Cavalcanti", "Leite", "Paiva", "Nogueira", "Sampaio", "Prado", "Queiroz", "Aguiar", "Borges", "Fontes", "Guimarães", "Maciel", "Medeiros", "Meireles", "Pacheco", "Peixoto", "Sales", "Seixas", "Toledo", "Valente", "Vasconcelos", "Viana", "Assis", "Bastos", "Bittencourt", "Brito", "Caldeira", "Camargo", "Castilho", "Coutinho", "Dantas", "Esteves", "Fagundes", "Galvão", "Godoy", "Jardim", "Lacerda", "Leal", "Lemos", "Lobo", "Magalhães", "Matos", "Mello", "Miranda", "Nóbrega", "Novaes", "Pimentel", "Porto", "Quaresma", "Rangel", "Rebouças", "Serrano", "Valadares", "Veloso", "Vilela", "Amaral", "Antunes", "Azevedo", "Barros", "Becker", "Bento", "Bispo", "Braga", "Cabral", "Calado", "Carneiro", "Cerqueira", "Chaves", "Conceição", "Cordeiro", "Couto", "Cruz", "Diniz", "Domingues", "Estrela", "Faria", "Felix", "Fonseca", "Franco", "Frota", "Gama", "Garcia", "Gouveia", "Hora", "Jesus", "Lins", "Loureiro", "Lucena", "Luz", "Maia", "Malta", "Mattos", "Menezes", "Mesquita", "Mota", "Neves", "Nobre", "Paixão", "Paz", "Pedrosa", "Pessoa", "Pimenta", "Portela", "Prates", "Quintela", "Reis", "Ribas", "Rios", "Sá", "Sabino", "Salgado", "Sena", "Serra", "Simões", "Sobral", "Tenório", "Torres", "Trindade", "Uchôa", "Valverde", "Vale", "Veiga", "Ventura", "Vidal", "Vilar", "Zanetti", "Schmidt", "Kruger", "Hoffmann", "Weber", "Rossi", "Bianchi", "Colombo", "Nakamura", "Tanaka", "Sato", "Haddad", "Nassar", "Salomão", "Khoury", "Ferraz", "Arruda", "Aragão", "Belo", "Bragança", "Brum", "Caetano", "Damasceno", "Evangelista", "Feitosa", "Freire", "Honorato", "Jordão", "Lustosa", "Marinho", "Magno", "Nepomuceno", "Rosário", "Sardinha", "Teles", "Timbó", "Urbano", "Varela"],
+      "diminutives": {
+        "Pedro": ["Pedrinho"], "João": ["Joãozinho"], "Lucas": ["Lucão", "Luquinhas"], "Gabriel": ["Biel", "Gabi"],
+        "Rafael": ["Rafinha"], "Eduardo": ["Dudu", "Edu"], "Carlos": ["Carlinhos", "Cacá"], "Paulo": ["Paulinho"],
+        "Marcos": ["Marquinhos"], "José": ["Zé", "Zezinho", "Zeca"], "Guilherme": ["Gui"], "Henrique": ["Rique"],
+        "Matheus": ["Matheuzinho"], "Luiz": ["Luizinho"], "Diego": ["Dieguinho"], "Thiago": ["Thiaguinho"],
+        "Fernando": ["Nando"], "Leonardo": ["Léo"], "Vinícius": ["Vini", "Vinição"], "Alexandre": ["Xandão", "Alex"],
+        "Antônio": ["Toninho"], "Francisco": ["Chico", "Kiko"], "Rodrigo": ["Digão"], "Gustavo": ["Guga"],
+        "Daniel": ["Dani"], "Bruno": ["Bruninho"], "Felipe": ["Lipe"], "Samuel": ["Samuca"], "Mário": ["Marinho"],
+        "Sérgio": ["Serginho"], "Renato": ["Renatinho"], "Ricardo": ["Ricardinho"], "Cláudio": ["Claudinho"],
+        "Wellington": ["Tom"], "Anderson": ["Andinho"], "Robson": ["Robinho"], "William": ["Willzinho"],
+        "Marcelo": ["Marcelinho"], "Júlio": ["Julinho"], "Augusto": ["Guto"], "Alisson": ["Lili"], "Kauã": ["Kauãzinho"]
+      },
+      "descriptive": {
+        "tall": ["Gigante", "Torre", "Girafa"],
+        "short": ["Baixinho", "Formiga", "Pequeno"],
+        "left": ["Canhoto", "Canhotinha"],
+        "fast": ["Foguete", "Bala", "Flecha", "Jato"],
+        "keeper": ["Paredão", "Muralha", "Gato"],
+        "defender": ["Xerife", "Zagueirão", "Delegado"],
+        "destroyer": ["Pitbull", "Carrapato", "Cão"],
+        "playmaker": ["Maestro", "Professor", "Cérebro"],
+        "strong": ["Tanque", "Trator", "Touro"],
+        "skill": ["Mágico", "Bruxo", "Malabarista"],
+        "generic": ["Magrão", "Alemão", "Russo", "Cabeção", "Gordinho", "Pardal", "Galo", "Tatu", "Sorriso", "Caju", "Pimenta", "Bolacha", "Tiziu", "Mosquito", "Parrudo"]
+      },
+      "regional": {
+        "Planalto": ["Planaltino", "Candango"],
+        "Litoral": ["Praiano", "Marujo"],
+        "Sul": ["Pampeiro", "Gaudério"],
+        "Norte": ["Nortista", "Ribeirinho"],
+        "Sertão": ["Sertanejo", "Vaqueiro"],
+        "Serra": ["Serrano", "Montanhês"],
+        "Interior": ["Interiorano", "Colono"]
+      }
+    },
+    "hispano": {
+      "known_by": {"nickname": 0.06, "first": 0.12, "last": 0.72, "full": 0.1},
+      "compound_chance": 0.1,
+      "first": ["Agustín", "Alejandro", "Alexis", "Andrés", "Ángel", "Bautista", "Benjamín", "Brian", "Brayan", "Camilo", "Carlos", "Cristian", "Damián", "Daniel", "Diego", "Duván", "Edinson", "Eduardo", "Emiliano", "Enzo", "Esteban", "Facundo", "Federico", "Felipe", "Fernando", "Franco", "Gabriel", "Gastón", "Gonzalo", "Guillermo", "Gustavo", "Héctor", "Hernán", "Ignacio", "Iván", "Javier", "Jhon", "Joaquín", "Jorge", "José", "Juan", "Julián", "Kevin", "Lautaro", "Leandro", "Lisandro", "Lorenzo", "Luciano", "Luis", "Manuel", "Marcelo", "Marcos", "Mariano", "Martín", "Matías", "Mauricio", "Maximiliano", "Miguel", "Nahuel", "Nicolás", "Óscar", "Pablo", "Patricio", "Pedro", "Rafael", "Ramiro", "Raúl", "Ricardo", "Rodrigo", "Rubén", "Santiago", "Sebastián", "Sergio", "Thiago", "Tomás", "Valentín", "Walter", "Wilmar", "Yeison"],
+      "compound": ["Juan Pablo", "Juan Manuel", "Juan Cruz", "José Luis", "Juan Ignacio", "Luis Miguel", "Juan Carlos", "Miguel Ángel", "Juan Martín", "Juan Sebastián"],
+      "last": ["González", "Rodríguez", "Gómez", "Fernández", "López", "Díaz", "Martínez", "Pérez", "García", "Sánchez", "Romero", "Sosa", "Torres", "Álvarez", "Ruiz", "Ramírez", "Flores", "Acosta", "Benítez", "Medina", "Herrera", "Suárez", "Aguirre", "Pereyra", "Gutiérrez", "Giménez", "Molina", "Castro", "Rojas", "Ortiz", "Núñez", "Luna", "Juárez", "Cabrera", "Ríos", "Ferreyra", "Godoy", "Morales", "Domínguez", "Moreno", "Peralta", "Vega", "Carrizo", "Quiroga", "Castillo", "Ledesma", "Muñoz", "Ojeda", "Ponce", "Vera", "Vázquez", "Villalba", "Cardozo", "Navarro", "Coronel", "Figueroa", "Correa", "Cáceres", "Vargas", "Arias", "Mendoza", "Ibáñez", "Valdez", "Barrios", "Bustos", "Paredes", "Escobar", "Zapata", "Mosquera", "Valencia", "Palacios", "Cuesta", "Arboleda", "Caicedo", "Bravo", "Salas", "Aránguiz", "Isla", "Fuenzalida", "Guerrero", "Cueva", "Enciso", "Almirón", "Alderete", "Gamarra", "Balbuena", "Riveros", "Olivera", "Pintos", "Viera", "Rolán", "Echeverría", "Maidana", "Insaurralde", "Galeano", "Montiel", "Lugo", "Saravia", "Bentancur", "Méndez"],
+      "descriptive": {
+        "tall": ["Torre"], "short": ["Enano"], "left": ["Zurdo"], "fast": ["Rayo"], "keeper": ["Muralla"],
+        "defender": ["Mariscal"], "destroyer": ["Perro"], "playmaker": ["Mago"], "strong": ["Toro"], "skill": ["Pibe"],
+        "generic": ["Chino", "Flaco", "Gringo", "Pato", "Tucu", "Colo", "Cholo", "Negro", "Ruso"]
+      }
+    },
+    "lusoafricano": {
+      "known_by": {"nickname": 0.15, "first": 0.3, "last": 0.45, "full": 0.1},
+      "first": ["Adilson", "Ary", "Bruno", "Carlos", "Clóvis", "Dário", "Djalma", "Edmilson", "Felisberto", "Gelson", "Hélder", "Hélio", "Ivanilson", "Ivo", "Jamiro", "Jerson", "Laércio", "Mateus", "Nelson", "Nuno", "Osvaldo", "Patrício", "Ricardo", "Rúben", "Rui", "Sérgio", "Tiago", "Vladimir", "Wilson", "Zeferino", "Anilton", "Cláudio", "Dany", "Elvis", "Garry", "Kenny", "Lisandro", "Mário", "Stélvio", "Yannick"],
+      "last": ["Fortes", "Semedo", "Tavares", "Varela", "Monteiro", "Lopes", "Mendes", "Pina", "Rodrigues", "Fernandes", "Gomes", "Cabral", "Veiga", "Barros", "Évora", "Delgado", "Santos", "Cassule", "Kiala", "Mabiala", "Nzuzi", "Bango", "Chissano", "Machava", "Mondlane", "Cumbe", "Mussa", "Sitoe", "Macuácua", "Nhaca", "Andrade", "Borges", "Correia", "Duarte", "Livramento", "Rocha", "Sanches", "Teixeira", "Vaz", "Zinga"],
+      "descriptive": {
+        "generic": ["Kiko", "Djô", "Nené", "Tchutchu", "Béto", "Mimi", "Zito"]
+      }
+    },
+    "africano": {
+      "known_by": {"nickname": 0.04, "first": 0.2, "last": 0.7, "full": 0.06},
+      "first": ["Ahmed", "Abdoulaye", "Aliou", "Amadou", "Babajide", "Bakary", "Boubacar", "Cheikh", "Chidi", "Chinedu", "Chukwuemeka", "Daniel", "Ebere", "Emeka", "Emmanuel", "Fodé", "Gbenga", "Gervais", "Godfrey", "Ibrahim", "Idrissa", "Ikechukwu", "Ismaila", "Jonathan", "Joseph", "Kehinde", "Kelechi", "Kofi", "Kwabena", "Kwame", "Lamine", "Mamadou", "Moses", "Moussa", "Nnamdi", "Obinna", "Olumide", "Oumar", "Ousmane", "Pape", "Paul", "Peter", "Samuel", "Sékou", "Serigne", "Seydou", "Souleymane", "Taiwo", "Tunde", "Uche", "Victor", "Wilfried", "Yaw", "Yves"],
+      "last": ["Adeyemi", "Okafor", "Okonkwo", "Eze", "Nwosu", "Obi", "Ogunleye", "Adebayo", "Balogun", "Olatunji", "Ibe", "Uzo", "Mensah", "Asante", "Boateng", "Owusu", "Appiah", "Osei", "Agyemang", "Addo", "Diallo", "Ndiaye", "Sarr", "Diop", "Faye", "Sow", "Cissé", "Koné", "Touré", "Traoré", "Coulibaly", "Bamba", "Kouassi", "Yao", "Konaté", "Fofana", "Camara", "Sylla", "Sané", "Mbaye", "Gueye", "Diouf", "Keita", "Dembélé", "Sissoko", "Mbarga", "Nkoulou", "Abena", "Nyom", "Tchami", "Ekambi", "Onyekachi", "Akinola", "Danso", "Quaye", "Amankwah", "Seck", "Badji", "Doumbia", "Zoro"],
+      "descriptive": {
+        "generic": ["Papis", "Jojo", "Kobby", "Didi"]
+      }
+    },
+    "eslavo": {
+      "known_by": {"nickname": 0.0, "first": 0.1, "last": 0.85, "full": 0.05},
+      "first": ["Aleksandar", "Ante", "Bojan", "Branislav", "Darko", "Dejan", "Domagoj", "Dragan", "Duje", "Dušan", "Filip", "Goran", "Igor", "Ivan", "Josip", "Luka", "Mario", "Marko", "Mateo", "Milan", "Miloš", "Mirko", "Nemanja", "Nikola", "Petar", "Predrag", "Sergej", "Srđan", "Stefan", "Toni", "Tomislav", "Uroš", "Vladimir", "Zoran"],
+      "last": ["Jovanović", "Petrović", "Nikolić", "Marković", "Đorđević", "Stojanović", "Ilić", "Stanković", "Pavlović", "Milošević", "Popović", "Živković", "Kovačević", "Tomić", "Babić", "Horvat", "Kovačić", "Jurić", "Knežević", "Vuković", "Marić", "Petković", "Radić", "Lukić", "Šimić", "Perić", "Matić", "Kostić", "Savić", "Mitrović", "Vidović", "Rakić", "Grgić", "Pavić", "Barišić"]
+    },
+    "italiano": {
+      "known_by": {"nickname": 0.0, "first": 0.12, "last": 0.8, "full": 0.08},
+      "first": ["Alessandro", "Andrea", "Antonio", "Carlo", "Christian", "Daniele", "Davide", "Emanuele", "Fabio", "Federico", "Filippo", "Francesco", "Gabriele", "Giacomo", "Gianluca", "Giorgio", "Giovanni", "Giuseppe", "Leonardo", "Lorenzo", "Luca", "Marco", "Mattia", "Matteo", "Michele", "Nicolò", "Paolo", "Pietro", "Riccardo", "Roberto", "Salvatore", "Simone", "Stefano", "Tommaso", "Vincenzo"],
+      "last": ["Rossi", "Russo", "Ferrari", "Esposito", "Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco", "Bruno", "Gallo", "Conti", "De Luca", "Mancini", "Giordano", "Rizzo", "Lombardi", "Moretti", "Barbieri", "Fontana", "Santoro", "Mariani", "Rinaldi", "Caruso", "Ferrara", "Galli", "Martini", "Leone", "Longo", "Gentile", "Martinelli", "Vitale", "Coppola", "De Santis", "D'Angelo", "Marchetti", "Parisi", "Villa"]
+    },
+    "frances": {
+      "known_by": {"nickname": 0.0, "first": 0.15, "last": 0.75, "full": 0.1},
+      "first": ["Adrien", "Alexandre", "Antoine", "Arthur", "Baptiste", "Benjamin", "Clément", "Corentin", "Damien", "Dylan", "Enzo", "Florian", "Hugo", "Ilyes", "Jérémy", "Julien", "Karim", "Kévin", "Lucas", "Mathieu", "Maxime", "Mehdi", "Moussa", "Nicolas", "Olivier", "Pierre", "Quentin", "Rayan", "Rémi", "Romain", "Sébastien", "Théo", "Thomas", "Valentin", "Yann"],
+      "last": ["Martin", "Bernard", "Dubois", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Michel", "David", "Bertrand", "Roux", "Vincent", "Fournier", "Morel", "Girard", "Mercier", "Dupont", "Lambert", "Bonnet", "François", "Legrand", "Garnier", "Faure", "Rousseau", "Blanc", "Guérin", "Henry", "Roussel", "Perrin", "Morin", "Gauthier", "Dumont", "Fontaine", "Chevalier", "Robin", "Masson", "Benali", "Belkacem", "Diakité"]
+    }
+  }
+}

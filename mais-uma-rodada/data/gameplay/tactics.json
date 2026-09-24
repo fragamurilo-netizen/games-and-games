@@ -1,0 +1,73 @@
+{
+  "_doc": "Modificadores táticos do motor de partidas. Valores moderados: talento decide, tática desempata. poss = deslocamento na posse (fração). rate = multiplicador da taxa de chances. quality = multiplicador do xG. fit = atributos que tornam o estilo mais eficiente para o elenco.",
+  "home_advantage": 0.05,
+  "mentalities": [
+    {"name": "Retranca", "desc": "Todos atrás da linha da bola. Sofre pouco, cria quase nada.", "att": 0.8, "def": 1.16, "poss": -0.06},
+    {"name": "Defensiva", "desc": "Prioriza a segurança e sai com cuidado.", "att": 0.9, "def": 1.07, "poss": -0.03},
+    {"name": "Equilibrada", "desc": "Nem tanto ao mar, nem tanto à terra.", "att": 1.0, "def": 1.0, "poss": 0.0},
+    {"name": "Ofensiva", "desc": "Mais gente no ataque, mais espaço atrás.", "att": 1.1, "def": 0.93, "poss": 0.03},
+    {"name": "Tudo ou nada", "desc": "Abafa o adversário. Perfeito para buscar o resultado no fim.", "att": 1.22, "def": 0.83, "poss": 0.05}
+  ],
+  "styles": [
+    {
+      "name": "Posse de bola", "short": "Posse",
+      "desc": "Troca passes, cansa o rival e espera a brecha certa.",
+      "poss": 0.08, "rate": 0.92, "quality": 1.12, "fatigue": 0.95,
+      "types": {"through": 1.3, "cross": 0.8, "long": 0.7, "dribble": 1.1, "counter": 0.6, "scramble": 0.9},
+      "fit": ["PAS", "TEC", "VIS"]
+    },
+    {
+      "name": "Jogo direto", "short": "Direto",
+      "desc": "Verticaliza rápido e finaliza muito, mesmo sem a jogada perfeita.",
+      "poss": -0.03, "rate": 1.12, "quality": 0.88, "fatigue": 1.0,
+      "types": {"through": 1.1, "cross": 1.0, "long": 1.4, "dribble": 0.9, "counter": 1.0, "scramble": 1.1},
+      "fit": ["FIN", "VEL", "FOR"]
+    },
+    {
+      "name": "Contra-ataque", "short": "Contra-ataque",
+      "desc": "Cede a bola e mata no espaço. Letal contra times que se lançam.",
+      "poss": -0.08, "rate": 0.86, "quality": 1.05, "fatigue": 0.95,
+      "types": {"through": 1.2, "cross": 0.8, "long": 0.8, "dribble": 1.0, "counter": 2.6, "scramble": 0.8},
+      "fit": ["VEL", "DEC", "PAS"],
+      "vs_open_bonus": 0.15
+    },
+    {
+      "name": "Pressão alta", "short": "Pressão",
+      "desc": "Sufoca a saída de bola e rouba perto do gol. Cansa mais e expõe a zaga.",
+      "poss": 0.03, "rate": 1.08, "quality": 1.0, "fatigue": 1.3,
+      "types": {"through": 1.0, "cross": 0.9, "long": 0.8, "dribble": 1.0, "counter": 1.2, "scramble": 1.5},
+      "fit": ["RES", "VEL", "MAR"]
+    },
+    {
+      "name": "Jogo pelos lados", "short": "Pelos lados",
+      "desc": "Abre o campo, busca a linha de fundo e cruza. Ótimo contra times estreitos.",
+      "poss": 0.0, "rate": 1.03, "quality": 0.97, "fatigue": 1.05,
+      "types": {"through": 0.8, "cross": 2.2, "long": 0.8, "dribble": 1.1, "counter": 0.9, "scramble": 1.0},
+      "fit": ["CRU", "VEL", "CAB"],
+      "vs_narrow_bonus": 0.08
+    },
+    {
+      "name": "Bola longa", "short": "Bola longa",
+      "desc": "Ligação direta para o centroavante brigar lá na frente. Ignora a pressão.",
+      "poss": -0.1, "rate": 1.0, "quality": 0.93, "fatigue": 0.95,
+      "types": {"through": 0.9, "cross": 1.5, "long": 1.0, "dribble": 0.6, "counter": 1.0, "scramble": 1.6},
+      "fit": ["CAB", "FOR", "CRU"],
+      "ignores_press": true
+    }
+  ],
+  "intensity": [
+    {"name": "Baixa", "desc": "Poupa energia e evita faltas.", "perf": 0.975, "fatigue": 0.78, "fouls": 0.8},
+    {"name": "Normal", "desc": "Ritmo padrão.", "perf": 1.0, "fatigue": 1.0, "fouls": 1.0},
+    {"name": "Alta", "desc": "Mais disputa em cada lance. Cansa e gera cartões.", "perf": 1.025, "fatigue": 1.3, "fouls": 1.3}
+  ],
+  "line": [
+    {"name": "Baixa", "desc": "Protege a área: poucas chances claras, mais pressão sofrida.", "opp_rate": 1.05, "opp_quality": 0.9, "offside": 0.6, "poss": -0.03},
+    {"name": "Normal", "desc": "Posicionamento padrão.", "opp_rate": 1.0, "opp_quality": 1.0, "offside": 1.0, "poss": 0.0},
+    {"name": "Alta", "desc": "Compacta o time e força impedimentos. Perigosa contra atacantes rápidos.", "opp_rate": 0.93, "opp_quality": 1.06, "offside": 1.7, "poss": 0.02}
+  ],
+  "pressing": [
+    {"name": "Baixa", "desc": "Espera o adversário no próprio campo.", "poss": -0.02, "fatigue": 0.9, "opp_rate": 1.03, "fouls": 0.9},
+    {"name": "Média", "desc": "Pressiona em momentos-chave.", "poss": 0.0, "fatigue": 1.0, "opp_rate": 1.0, "fouls": 1.0},
+    {"name": "Alta", "desc": "Marca em cima o tempo todo.", "poss": 0.03, "fatigue": 1.2, "opp_rate": 0.96, "fouls": 1.15}
+  ]
+}

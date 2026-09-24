@@ -1,0 +1,127 @@
+{
+  "country": {
+    "name": "Valdora",
+    "adjective": "valdorense",
+    "currency": "$"
+  },
+  "start_year": 2026,
+  "points_win": 3,
+  "points_draw": 1,
+  "league_rounds_per_team": 2,
+  "transfer_windows": [
+    [
+      0,
+      4
+    ],
+    [
+      19,
+      23
+    ]
+  ],
+  "squad": {
+    "min_players": 18,
+    "ideal_players": 25,
+    "max_players": 32,
+    "bench_size": 7,
+    "max_subs": 5,
+    "yellow_limit": 3
+  },
+  "divisions": [
+    {
+      "name": "Primeira Divisão",
+      "short": "1ª Divisão",
+      "teams": 20,
+      "promoted": 0,
+      "relegated": 4,
+      "tv_money": 2500000,
+      "prize_first": 1500000,
+      "prize_last": 150000,
+      "promotion_bonus": 0,
+      "ticket_price": 8,
+      "rep_range": [
+        55,
+        92
+      ],
+      "level_range": [
+        63,
+        76
+      ],
+      "attendance_base": 0.55
+    },
+    {
+      "name": "Segunda Divisão",
+      "short": "2ª Divisão",
+      "teams": 20,
+      "promoted": 4,
+      "relegated": 4,
+      "tv_money": 800000,
+      "prize_first": 400000,
+      "prize_last": 40000,
+      "promotion_bonus": 300000,
+      "ticket_price": 6,
+      "rep_range": [
+        38,
+        66
+      ],
+      "level_range": [
+        55,
+        66
+      ],
+      "attendance_base": 0.45
+    },
+    {
+      "name": "Terceira Divisão",
+      "short": "3ª Divisão",
+      "teams": 20,
+      "promoted": 4,
+      "relegated": 4,
+      "tv_money": 350000,
+      "prize_first": 120000,
+      "prize_last": 12000,
+      "promotion_bonus": 100000,
+      "ticket_price": 4,
+      "rep_range": [
+        22,
+        50
+      ],
+      "level_range": [
+        48,
+        58
+      ],
+      "attendance_base": 0.38
+    },
+    {
+      "name": "Quarta Divisão",
+      "short": "4ª Divisão",
+      "teams": 20,
+      "promoted": 4,
+      "relegated": 0,
+      "tv_money": 200000,
+      "prize_first": 50000,
+      "prize_last": 5000,
+      "promotion_bonus": 50000,
+      "ticket_price": 3,
+      "rep_range": [
+        8,
+        34
+      ],
+      "level_range": [
+        41,
+        51
+      ],
+      "attendance_base": 0.32
+    }
+  ],
+  "sponsor_factor": 150,
+  "debt_interest": 0.08,
+  "maintenance": {
+    "per_seat": 8,
+    "per_facility_point": 1500,
+    "division_scale": [
+      1.0,
+      0.5,
+      0.25,
+      0.12
+    ]
+  }
+}
