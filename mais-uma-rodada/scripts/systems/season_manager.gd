@@ -761,6 +761,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 		p.retiring = false
 		Valuation.update_value(p, world.year)
 	world.reset_indexes()
+	# Mercado das férias: os outros clubes fazem a maior parte dos negócios antes da bola rolar.
+	MarketAI.offseason(world)
 	compute_goals(world)
 	SponsorManager.open_preseason(world)
 	if world.has_user():

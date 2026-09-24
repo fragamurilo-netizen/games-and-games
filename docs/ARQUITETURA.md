@@ -314,10 +314,21 @@ dificuldade. A dificuldade nunca dá bônus de força à IA.
 - Valor de mercado: exponencial no overall × idade × potencial × contrato.
 - Salário pedido: valor, reputação do clube, personalidade (mercenário pede mais, leal aceita menos).
 - Negociação do usuário: proposta → aceita / contraproposta / recusa → termos pessoais → assinatura.
-- IA↔IA: durante a janela, clubes avaliam carências por setor, filtram candidatos por estratégia do
-  arquétipo (idade, potencial, reputação, preço), fazem proposta; o vendedor responde pelo status do
-  jogador e pela própria situação financeira; o jogador aceita ou não (reputação, salário, minutos, traços).
-- IA→usuário: propostas por jogadores em destaque chegam como notificações com prazo.
+- IA↔IA (`MarketAI`, perfis por país em `data/gameplay/market.json`): quando a janela abre, cada clube
+  planeja quantos reforços busca (grandes 3 a 6, pequenos 1 a 3, inverno só remendos), anuncia quem sobra
+  e empresta promessas sem espaço. A busca segue as rotas reais de talento (próprio país, países de
+  garimpo, mercado mundial por nível) e a estratégia do arquétipo. Negociação clube × clube com proposta,
+  contraproposta e recusa: o poder econômico da liga manda (ágio da liga inglesa, clube grande não vende
+  titular para menor, pequeno não segura quem recebe proposta de gigante), multa rescisória paga à vista,
+  e quem vende um titular vai atrás de reposição. Jogador cobiçado vira leilão (outro clube pode dar o
+  "chapéu"), formadores guardam % da revenda, o comprador pode incluir um jogador na troca, negociações
+  que ficam perto do acordo viram novela nas semanas seguintes (o comprador sobe a oferta, o vendedor
+  cede) e quem não tem dinheiro pega emprestado com opção de compra, exercida no fim da temporada. Veteranos atraídos por Golfo, EUA e volta para casa.
+  A maior parte dos negócios de meio de ano acontece nas férias (`MarketAI.offseason`); o último fim de
+  semana da janela tem correria e preços mais altos. Recém-contratado não é revendido na mesma temporada.
+- IA→usuário: propostas por jogadores em destaque chegam como notificações com prazo; quem precisa da
+  posição e tem mais dinheiro faz a proposta, promessas atraem ágio.
+- `tests/market_report.gd`: raio-x do mercado (fluxos entre regiões, maiores vendas, idades, empréstimos).
 
 ---
 
