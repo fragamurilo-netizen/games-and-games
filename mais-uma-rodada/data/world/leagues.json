@@ -173,7 +173,33 @@
 			],
 			"wage": 0.95,
 			"att": 0.9,
-			"ticket": 35
+			"ticket": 35,
+			"down": 3
+		},
+		{
+			"id": "ITA2",
+			"nation": "ITA",
+			"tier": 2,
+			"name": "Serie B",
+			"short": "Serie B",
+			"colors": [
+				"#0B7B3E",
+				"#FFFFFF"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 3,
+			"level": [
+				62,
+				70
+			],
+			"rep": [
+				44,
+				64
+			],
+			"wage": 0.35,
+			"att": 0.7,
+			"ticket": 18
 		},
 		{
 			"id": "FRA1",
@@ -247,7 +273,33 @@
 			],
 			"wage": 0.55,
 			"att": 0.8,
-			"ticket": 20
+			"ticket": 20,
+			"down": 2
+		},
+		{
+			"id": "POR2",
+			"nation": "POR",
+			"tier": 2,
+			"name": "Liga Portugal 2",
+			"short": "Liga Portugal 2",
+			"colors": [
+				"#1D3F91",
+				"#FFCC00"
+			],
+			"teams": 18,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				56,
+				64
+			],
+			"rep": [
+				38,
+				56
+			],
+			"wage": 0.18,
+			"att": 0.5,
+			"ticket": 8
 		},
 		{
 			"id": "NED1",
@@ -349,7 +401,7 @@
 			"id": "GRE1",
 			"nation": "GRE",
 			"tier": 1,
-			"name": "Super League Grécia",
+			"name": "Stoiximan Super League",
 			"short": "Super League",
 			"colors": [
 				"#0D5EAF",
@@ -373,7 +425,7 @@
 			"id": "AUT1",
 			"nation": "AUT",
 			"tier": 1,
-			"name": "Bundesliga Austríaca",
+			"name": "Admiral Bundesliga",
 			"short": "Bundesliga AUT",
 			"colors": [
 				"#ED2939",
@@ -397,8 +449,8 @@
 			"id": "SUI1",
 			"nation": "SUI",
 			"tier": 1,
-			"name": "Super League Suíça",
-			"short": "Super League",
+			"name": "Brack.ch Super League",
+			"short": "Super League SUI",
 			"colors": [
 				"#1F1F1F",
 				"#DA291C"
@@ -421,7 +473,7 @@
 			"id": "UKR1",
 			"nation": "UKR",
 			"tier": 1,
-			"name": "Premier League Ucraniana",
+			"name": "VBET Liha",
 			"short": "UPL",
 			"colors": [
 				"#005BBB",
@@ -445,7 +497,7 @@
 			"id": "CRO1",
 			"nation": "CRO",
 			"tier": 1,
-			"name": "HNL",
+			"name": "SuperSport HNL",
 			"short": "HNL",
 			"colors": [
 				"#171796",
@@ -469,8 +521,8 @@
 			"id": "SRB1",
 			"nation": "SRB",
 			"tier": 1,
-			"name": "Superliga Sérvia",
-			"short": "Superliga",
+			"name": "Mozzart Bet Superliga",
+			"short": "Superliga SRB",
 			"colors": [
 				"#0C4076",
 				"#C6363C"
@@ -517,8 +569,8 @@
 			"id": "DEN1",
 			"nation": "DEN",
 			"tier": 1,
-			"name": "Superliga Dinamarquesa",
-			"short": "Superliga",
+			"name": "3F Superliga",
+			"short": "Superliga DEN",
 			"colors": [
 				"#C8102E",
 				"#FFFFFF"
@@ -693,8 +745,8 @@
 			"id": "URU1",
 			"nation": "URU",
 			"tier": 1,
-			"name": "Liga AUF Uruguaya",
-			"short": "Uruguai",
+			"name": "Campeonato Uruguayo",
+			"short": "Campeonato Uruguayo",
 			"colors": [
 				"#5CBFEB",
 				"#111111"
@@ -742,7 +794,7 @@
 			"nation": "CHI",
 			"tier": 1,
 			"name": "Liga de Primera",
-			"short": "Chile",
+			"short": "Primera Chile",
 			"colors": [
 				"#D52B1E",
 				"#0039A6"
@@ -789,7 +841,7 @@
 			"id": "PER1",
 			"nation": "PER",
 			"tier": 1,
-			"name": "Liga 1 Perú",
+			"name": "Liga 1",
 			"short": "Liga 1",
 			"colors": [
 				"#D91023",
@@ -813,8 +865,8 @@
 			"id": "PAR1",
 			"nation": "PAR",
 			"tier": 1,
-			"name": "Primera División Paraguaia",
-			"short": "Paraguai",
+			"name": "Copa de Primera",
+			"short": "Copa de Primera",
 			"colors": [
 				"#0038A8",
 				"#D52B1E"
@@ -838,7 +890,7 @@
 			"nation": "BOL",
 			"tier": 1,
 			"name": "División Profesional",
-			"short": "Bolívia",
+			"short": "División Profesional",
 			"colors": [
 				"#007934",
 				"#F9E300"
@@ -933,8 +985,8 @@
 			"id": "EGY1",
 			"nation": "EGY",
 			"tier": 1,
-			"name": "Premier League Egípcia",
-			"short": "Egito",
+			"name": "Egyptian Premier League",
+			"short": "EPL Egito",
 			"colors": [
 				"#CE1126",
 				"#111111"
@@ -982,7 +1034,7 @@
 			"nation": "TUN",
 			"tier": 1,
 			"name": "Ligue Professionnelle 1",
-			"short": "Tunísia",
+			"short": "Ligue 1 TUN",
 			"colors": [
 				"#E70013",
 				"#FFFFFF"
@@ -1053,8 +1105,8 @@
 			"id": "SEN1",
 			"nation": "SEN",
 			"tier": 1,
-			"name": "Ligue 1 Senegalesa",
-			"short": "Senegal",
+			"name": "Ligue 1 Sénégal",
+			"short": "Ligue 1 SEN",
 			"colors": [
 				"#00853F",
 				"#FDEF42"

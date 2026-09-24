@@ -53,6 +53,86 @@
 			"rivals": [
 				"UKR_HIR"
 			]
+		},
+		{
+			"key": "UKR_POL",
+			"name": "FC Polissya Zhytomyr",
+			"short": "Polissya",
+			"abbr": "POL",
+			"nick": "Vovky",
+			"city": "Zhytomyr",
+			"founded": 2016,
+			"league": "UKR1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Tsentralnyi Stadion Zhytomyr",
+			"capacity": 5900,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UKR_KRY",
+			"name": "FC Kryvbas Kryvyi Rih",
+			"short": "Kryvbas",
+			"abbr": "KRY",
+			"nick": "Ruda",
+			"city": "Kryvyi Rih",
+			"founded": 1959,
+			"league": "UKR1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Hirnyk",
+			"capacity": 2500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UKR_ZOR",
+			"name": "FC Zorya Luhansk",
+			"short": "Zorya",
+			"abbr": "ZOR",
+			"nick": "Myronosci",
+			"city": "Luhansk",
+			"founded": 1923,
+			"league": "UKR1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Slavutych-Arena",
+			"capacity": 11600,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UKR_OLE",
+			"name": "FC Oleksandriya",
+			"short": "Oleksandriya",
+			"abbr": "OLE",
+			"nick": "Mistiany",
+			"city": "Oleksandriya",
+			"founded": 1948,
+			"league": "UKR1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Nika Stadion",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

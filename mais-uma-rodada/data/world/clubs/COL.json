@@ -181,6 +181,106 @@
 			"rivals": [
 				"COL_ESC"
 			]
+		},
+		{
+			"key": "COL_ONC",
+			"name": "Once Caldas",
+			"short": "Once Caldas",
+			"abbr": "ONC",
+			"nick": "Blanco Blanco",
+			"city": "Manizales",
+			"founded": 1961,
+			"league": "COL1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Palogrande",
+			"capacity": 36500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "COL_TOL",
+			"name": "Deportes Tolima",
+			"short": "Tolima",
+			"abbr": "TOL",
+			"nick": "Pijao",
+			"city": "Ibagué",
+			"founded": 1954,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Estadio Manuel Murillo Toro",
+			"capacity": 28000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "COL_BUC",
+			"name": "Atlético Bucaramanga",
+			"short": "Bucaramanga",
+			"abbr": "BUC",
+			"nick": "Leopardo",
+			"city": "Bucaramanga",
+			"founded": 1949,
+			"league": "COL1",
+			"rep": 58,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Estadio Américo Montanini",
+			"capacity": 28000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "COL_PER",
+			"name": "Deportivo Pereira",
+			"short": "Pereira",
+			"abbr": "PER",
+			"nick": "Matecaña",
+			"city": "Pereira",
+			"founded": 1944,
+			"league": "COL1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio Hernán Ramírez Villegas",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "COL_PAS",
+			"name": "Deportivo Pasto",
+			"short": "Pasto",
+			"abbr": "PAS",
+			"nick": "Volcánicos",
+			"city": "Pasto",
+			"founded": 1949,
+			"league": "COL1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Departamental Libertad",
+			"capacity": 20000,
+			"kit": "halves",
+			"rivals": []
 		}
 	]
 }

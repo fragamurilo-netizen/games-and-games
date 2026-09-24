@@ -53,6 +53,86 @@
 			"rivals": [
 				"SRB_CZV"
 			]
+		},
+		{
+			"key": "SRB_TSC",
+			"name": "FK TSC Bačka Topola",
+			"short": "TSC",
+			"abbr": "TSC",
+			"nick": "Plavo-beli",
+			"city": "Bačka Topola",
+			"founded": 1913,
+			"league": "SRB1",
+			"rep": 58,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "TSC Arena",
+			"capacity": 4500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SRB_VOJ",
+			"name": "FK Vojvodina",
+			"short": "Vojvodina",
+			"abbr": "VOJ",
+			"nick": "Voša",
+			"city": "Novi Sad",
+			"founded": 1914,
+			"league": "SRB1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Karađorđe",
+			"capacity": 14500,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "SRB_CUK",
+			"name": "FK Čukarički",
+			"short": "Čukarički",
+			"abbr": "CUK",
+			"nick": "Brđani",
+			"city": "Beograd",
+			"founded": 1926,
+			"league": "SRB1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Stadion Čukarički",
+			"capacity": 4000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "SRB_RAD",
+			"name": "FK Radnički Niš",
+			"short": "Radnički Niš",
+			"abbr": "RNI",
+			"nick": "Real sa Nišave",
+			"city": "Niš",
+			"founded": 1923,
+			"league": "SRB1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Stadion Čair",
+			"capacity": 18000,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }

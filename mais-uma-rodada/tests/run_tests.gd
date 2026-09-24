@@ -114,6 +114,7 @@ func _test_generation() -> void:
 	var abbrs := {}
 	for c: Club in w.clubs:
 		check(not keys.has(c.key), "chave repetida %s" % c.key)
+		check(not (c.key.substr(4, 1) == "P" and c.key.substr(5).is_valid_int()), "clube fictício %s (%s): toda liga deve ter só clubes reais" % [c.key, c.league_id])
 		keys[c.key] = true
 		var ak := c.nation + c.abbr
 		check(not abbrs.has(ak), "sigla repetida %s em %s" % [c.abbr, c.nation])

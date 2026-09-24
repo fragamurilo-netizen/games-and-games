@@ -396,6 +396,366 @@
 			"capacity": 8500,
 			"kit": "plain",
 			"rivals": []
+		},
+		{
+			"key": "POR_MAR",
+			"name": "CS Marítimo",
+			"short": "Marítimo",
+			"abbr": "MAR",
+			"nick": "Leões do Almirante Reis",
+			"city": "Funchal",
+			"founded": 1910,
+			"league": "POR2",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#00843D",
+				"#E30613"
+			],
+			"stadium": "Estádio do Marítimo",
+			"capacity": 10600,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_VIZ",
+			"name": "FC Vizela",
+			"short": "Vizela",
+			"abbr": "VIZ",
+			"nick": "Vizelenses",
+			"city": "Vizela",
+			"founded": 1939,
+			"league": "POR2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do FC Vizela",
+			"capacity": 6000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_ACV",
+			"name": "Académico de Viseu FC",
+			"short": "Académico Viseu",
+			"abbr": "ACV",
+			"nick": "Viriatos",
+			"city": "Viseu",
+			"founded": 1914,
+			"league": "POR2",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Fontelo",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_CHA",
+			"name": "GD Chaves",
+			"short": "Chaves",
+			"abbr": "CHA",
+			"nick": "Flavienses",
+			"city": "Chaves",
+			"founded": 1949,
+			"league": "POR2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estádio Municipal Eng. Manuel Branco Teixeira",
+			"capacity": 8400,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_LEI",
+			"name": "Leixões SC",
+			"short": "Leixões",
+			"abbr": "LEI",
+			"nick": "Bebés do Mar",
+			"city": "Matosinhos",
+			"founded": 1907,
+			"league": "POR2",
+			"rep": 48,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Mar",
+			"capacity": 9800,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_FEI",
+			"name": "CD Feirense",
+			"short": "Feirense",
+			"abbr": "FEI",
+			"nick": "Fogaceiros",
+			"city": "Santa Maria da Feira",
+			"founded": 1918,
+			"league": "POR2",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Marcolino de Castro",
+			"capacity": 5400,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_PEN",
+			"name": "FC Penafiel",
+			"short": "Penafiel",
+			"abbr": "PEN",
+			"nick": "Durienses",
+			"city": "Penafiel",
+			"founded": 1951,
+			"league": "POR2",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Municipal 25 de Abril",
+			"capacity": 5200,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_OLI",
+			"name": "UD Oliveirense",
+			"short": "Oliveirense",
+			"abbr": "OLI",
+			"nick": "Unionistas",
+			"city": "Oliveira de Azeméis",
+			"founded": 1922,
+			"league": "POR2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio Carlos Osório",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_PTM",
+			"name": "Portimonense SC",
+			"short": "Portimonense",
+			"abbr": "PTM",
+			"nick": "Alvinegros",
+			"city": "Portimão",
+			"founded": 1914,
+			"league": "POR2",
+			"rep": 50,
+			"arch": "vendedor",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Municipal de Portimão",
+			"capacity": 9500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_TOR",
+			"name": "SCU Torreense",
+			"short": "Torreense",
+			"abbr": "TOR",
+			"nick": "Galos",
+			"city": "Torres Vedras",
+			"founded": 1917,
+			"league": "POR2",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#E30613"
+			],
+			"stadium": "Estádio Manuel Marques",
+			"capacity": 2500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_ULE",
+			"name": "UD Leiria",
+			"short": "União de Leiria",
+			"abbr": "ULE",
+			"nick": "Lis",
+			"city": "Leiria",
+			"founded": 1966,
+			"league": "POR2",
+			"rep": 48,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Dr. Magalhães Pessoa",
+			"capacity": 23800,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_PAC",
+			"name": "FC Paços de Ferreira",
+			"short": "Paços de Ferreira",
+			"abbr": "PAC",
+			"nick": "Castores",
+			"city": "Paços de Ferreira",
+			"founded": 1950,
+			"league": "POR2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Estádio Capital do Móvel",
+			"capacity": 9000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_FAR",
+			"name": "SC Farense",
+			"short": "Farense",
+			"abbr": "FAR",
+			"nick": "Leões de Faro",
+			"city": "Faro",
+			"founded": 1910,
+			"league": "POR2",
+			"rep": 50,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de São Luís",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_LOU",
+			"name": "Lusitânia FC Lourosa",
+			"short": "Lourosa",
+			"abbr": "LOU",
+			"nick": "Lusitanos",
+			"city": "Lourosa",
+			"founded": 1924,
+			"league": "POR2",
+			"rep": 42,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Lusitânia",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_FEL",
+			"name": "FC Felgueiras 1932",
+			"short": "Felgueiras",
+			"abbr": "FEL",
+			"nick": "Felgueirenses",
+			"city": "Felgueiras",
+			"founded": 1932,
+			"league": "POR2",
+			"rep": 42,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estádio Dr. Machado de Matos",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_BOA",
+			"name": "Boavista FC",
+			"short": "Boavista",
+			"abbr": "BFC",
+			"nick": "Axadrezados",
+			"city": "Porto",
+			"founded": 1903,
+			"league": "POR2",
+			"rep": 52,
+			"arch": "dinheiro_gestao_ruim",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Bessa",
+			"capacity": 28200,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "POR_BEL",
+			"name": "CF Os Belenenses",
+			"short": "Belenenses",
+			"abbr": "BEL",
+			"nick": "Pastéis",
+			"city": "Lisboa",
+			"founded": 1919,
+			"league": "POR2",
+			"rep": 46,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Restelo",
+			"capacity": 19800,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_AAC",
+			"name": "Associação Académica de Coimbra",
+			"short": "Académica",
+			"abbr": "AAC",
+			"nick": "Estudantes",
+			"city": "Coimbra",
+			"founded": 1887,
+			"league": "POR2",
+			"rep": 46,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Cidade de Coimbra",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

@@ -49,6 +49,86 @@
 				"symbol": "star"
 			},
 			"rivals": []
+		},
+		{
+			"key": "SEN_TEU",
+			"name": "Teungueth FC",
+			"short": "Teungueth",
+			"abbr": "TFC",
+			"nick": "Rufisquois",
+			"city": "Rufisque",
+			"founded": 2010,
+			"league": "SEN1",
+			"rep": 50,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade Ngalandou Diouf",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SEN_PIK",
+			"name": "AS Pikine",
+			"short": "AS Pikine",
+			"abbr": "ASP",
+			"nick": "Pikinois",
+			"city": "Pikine",
+			"founded": 1973,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Alassane Djigo",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SEN_GOR",
+			"name": "US Gorée",
+			"short": "US Gorée",
+			"abbr": "USG",
+			"nick": "Insulaires",
+			"city": "Dakar",
+			"founded": 1933,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Demba Diop",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SEN_CAS",
+			"name": "Casa Sports",
+			"short": "Casa Sports",
+			"abbr": "CAS",
+			"nick": "Ziguinchorois",
+			"city": "Ziguinchor",
+			"founded": 1960,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Stade Aline Sitoe Diatta",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

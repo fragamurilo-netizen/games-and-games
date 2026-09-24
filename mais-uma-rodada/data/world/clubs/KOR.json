@@ -101,6 +101,86 @@
 				"symbol": "letter"
 			},
 			"rivals": []
+		},
+		{
+			"key": "KOR_GAN",
+			"name": "Gangwon FC",
+			"short": "Gangwon",
+			"abbr": "GAN",
+			"nick": "Gangwon",
+			"city": "Gangneung",
+			"founded": 2008,
+			"league": "KOR1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#1B3A8C"
+			],
+			"stadium": "Gangneung Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KOR_SUW",
+			"name": "Suwon FC",
+			"short": "Suwon FC",
+			"abbr": "SUW",
+			"nick": "Suwon",
+			"city": "Suwon",
+			"founded": 2003,
+			"league": "KOR1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Suwon Sports Complex",
+			"capacity": 11800,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KOR_DAE",
+			"name": "Daejeon Hana Citizen",
+			"short": "Daejeon",
+			"abbr": "DAE",
+			"nick": "Purple",
+			"city": "Daejeon",
+			"founded": 1997,
+			"league": "KOR1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#5E2A84",
+				"#00843D"
+			],
+			"stadium": "Daejeon World Cup Stadium",
+			"capacity": 40500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KOR_GIM",
+			"name": "Gimcheon Sangmu FC",
+			"short": "Gimcheon",
+			"abbr": "GIM",
+			"nick": "Sangmu",
+			"city": "Gimcheon",
+			"founded": 2021,
+			"league": "KOR1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Gimcheon Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

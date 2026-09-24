@@ -9,9 +9,9 @@ vem da própria simulação.
 
 ## O que já dá para jogar (versão 0.1.0 · MVP 1)
 
-- **Mundo vivo**: 80 clubes em 4 divisões (20 cada), ~2.000 jogadores procedurais com 15 atributos,
+- **Mundo vivo**: 672 clubes reais em 53 ligas de 43 países (nenhum clube inventado), ~16 mil jogadores procedurais com 15 atributos,
   potencial oculto (mostrado como estimativa), curvas de carreira, personalidades e histórico.
-  Mundo padrão (seed fixo) ou aleatório (clubes e cidades novos).
+  Mundo padrão (seed fixo) ou aleatório (reputações, perfis e jogadores novos).
 - **Clubes com identidade**: 15 arquétipos (gigante endividado, rico recém-promovido, clube formador,
   tradição em crise...) que mudam finanças, base, IA de mercado e paciência da torcida. Escudos,
   uniformes e rostos gerados proceduralmente.
@@ -19,7 +19,8 @@ vem da própria simulação.
   acesso e rebaixamento (4/4), premiação e virada de ano.
 - **Estaduais**: Paulistão, Carioca, Mineiro, Gauchão, Paranaense, Catarinense, Cearense e Goianão, mais Copa do
   Nordeste e Copa Verde para os estados menores. Primeira fase em grupos no meio de semana, semifinal em jogo
-  único e final em ida e volta. Holanda, Portugal, Turquia e Arábia Saudita com ligas de 18 clubes reais.
+  único e final em ida e volta. Holanda, Portugal, Turquia e Arábia Saudita com ligas de 18 clubes reais,
+  mais Serie B italiana e Liga Portugal 2 com acesso e rebaixamento.
 - **Motor de partidas estatístico** minuto a minuto: setores, táticas, estilos, mando, clássicos, fadiga,
   cartões, lesões, pênaltis, substituições e acréscimos. Zebras existem, mas são raras.
 - **Partida ao vivo** em campo 2D com narração procedural, placar dos outros jogos, velocidade

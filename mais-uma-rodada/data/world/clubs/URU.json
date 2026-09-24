@@ -101,6 +101,166 @@
 				"symbol": "star"
 			},
 			"rivals": []
+		},
+		{
+			"key": "URU_LIV",
+			"name": "Liverpool Fútbol Club",
+			"short": "Liverpool",
+			"abbr": "LIV",
+			"nick": "Negriazules",
+			"city": "Montevideo",
+			"founded": 1915,
+			"league": "URU1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#0055A4"
+			],
+			"stadium": "Estadio Belvedere",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "URU_WAN",
+			"name": "Montevideo Wanderers FC",
+			"short": "Wanderers",
+			"abbr": "MWA",
+			"nick": "Bohemios",
+			"city": "Montevideo",
+			"founded": 1902,
+			"league": "URU1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Alfredo Víctor Viera",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "URU_CER",
+			"name": "Club Atlético Cerro",
+			"short": "Cerro",
+			"abbr": "CER",
+			"nick": "Villeros",
+			"city": "Montevideo",
+			"founded": 1922,
+			"league": "URU1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#E30613"
+			],
+			"stadium": "Estadio Luis Tróccoli",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "URU_RAC",
+			"name": "Racing Club de Montevideo",
+			"short": "Racing",
+			"abbr": "RAC",
+			"nick": "Cervecero",
+			"city": "Montevideo",
+			"founded": 1919,
+			"league": "URU1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#00843D"
+			],
+			"stadium": "Parque Osvaldo Roberto",
+			"capacity": 8500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "URU_PLA",
+			"name": "Club Plaza Colonia",
+			"short": "Plaza Colonia",
+			"abbr": "PLA",
+			"nick": "Pata Blanca",
+			"city": "Colonia del Sacramento",
+			"founded": 1917,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Profesor Alberto Suppici",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "URU_BRI",
+			"name": "Boston River",
+			"short": "Boston River",
+			"abbr": "BRI",
+			"nick": "Sastre",
+			"city": "Montevideo",
+			"founded": 1939,
+			"league": "URU1",
+			"rep": 52,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Campeones Olímpicos",
+			"capacity": 5000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "URU_PRO",
+			"name": "Club Atlético Progreso",
+			"short": "Progreso",
+			"abbr": "PRO",
+			"nick": "Gaucho del Pantanoso",
+			"city": "Montevideo",
+			"founded": 1917,
+			"league": "URU1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Parque Abraham Paladino",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "URU_CLA",
+			"name": "Club Deportivo Cerro Largo",
+			"short": "Cerro Largo",
+			"abbr": "CLA",
+			"nick": "Arachanes",
+			"city": "Melo",
+			"founded": 2002,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio Arquitecto Antonio Ubilla",
+			"capacity": 9000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

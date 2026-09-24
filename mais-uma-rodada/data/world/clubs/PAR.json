@@ -101,6 +101,126 @@
 				"symbol": "sun"
 			},
 			"rivals": []
+		},
+		{
+			"key": "PAR_NAC",
+			"name": "Club Nacional",
+			"short": "Nacional",
+			"abbr": "NAC",
+			"nick": "Tricolor",
+			"city": "Asunción",
+			"founded": 1904,
+			"league": "PAR1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Estadio Arsenio Erico",
+			"capacity": 4000,
+			"kit": "stripes_h",
+			"rivals": []
+		},
+		{
+			"key": "PAR_LUQ",
+			"name": "Club Sportivo Luqueño",
+			"short": "Sportivo Luqueño",
+			"abbr": "LUQ",
+			"nick": "Chanchos",
+			"city": "Luque",
+			"founded": 1921,
+			"league": "PAR1",
+			"rep": 52,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio Feliciano Cáceres",
+			"capacity": 24000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "PAR_TRI",
+			"name": "Club Sportivo Trinidense",
+			"short": "Trinidense",
+			"abbr": "TRI",
+			"nick": "Tricolor",
+			"city": "Asunción",
+			"founded": 1935,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Martín Torres",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PAR_DDM",
+			"name": "Club 2 de Mayo",
+			"short": "2 de Mayo",
+			"abbr": "DDM",
+			"nick": "Gallo del Norte",
+			"city": "Pedro Juan Caballero",
+			"founded": 1935,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Río Parapití",
+			"capacity": 25000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "PAR_AME",
+			"name": "Club Sportivo Ameliano",
+			"short": "Ameliano",
+			"abbr": "AME",
+			"nick": "Ameliano",
+			"city": "Asunción",
+			"founded": 1936,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio José Tomás Silva",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PAR_TAC",
+			"name": "Club Tacuary",
+			"short": "Tacuary",
+			"abbr": "TAC",
+			"nick": "Albinegro de Jara",
+			"city": "Asunción",
+			"founded": 1923,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Toribio Vargas",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }

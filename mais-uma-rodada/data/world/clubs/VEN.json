@@ -77,6 +77,146 @@
 				"symbol": "letter"
 			},
 			"rivals": []
+		},
+		{
+			"key": "VEN_LGU",
+			"name": "Deportivo La Guaira FC",
+			"short": "La Guaira",
+			"abbr": "DLG",
+			"nick": "Naranja",
+			"city": "Caracas",
+			"founded": 2008,
+			"league": "VEN1",
+			"rep": 52,
+			"arch": "rico_promovido",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Estadio Olímpico de la UCV",
+			"capacity": 24000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "VEN_CAB",
+			"name": "Carabobo FC",
+			"short": "Carabobo",
+			"abbr": "CAB",
+			"nick": "Granates",
+			"city": "Valencia",
+			"founded": 1997,
+			"league": "VEN1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Misael Delgado",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "VEN_APC",
+			"name": "Academia Puerto Cabello",
+			"short": "Puerto Cabello",
+			"abbr": "APC",
+			"nick": "Porteños",
+			"city": "Puerto Cabello",
+			"founded": 2014,
+			"league": "VEN1",
+			"rep": 50,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio La Bombonerita",
+			"capacity": 7500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "VEN_EME",
+			"name": "Estudiantes de Mérida FC",
+			"short": "Estudiantes",
+			"abbr": "EME",
+			"nick": "Académicos",
+			"city": "Mérida",
+			"founded": 1971,
+			"league": "VEN1",
+			"rep": 46,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano de Mérida",
+			"capacity": 42000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "VEN_ZAM",
+			"name": "Zamora FC",
+			"short": "Zamora",
+			"abbr": "ZAM",
+			"nick": "Blanquinegros",
+			"city": "Barinas",
+			"founded": 1977,
+			"league": "VEN1",
+			"rep": 48,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Agustín Tovar",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "VEN_MET",
+			"name": "Metropolitanos FC",
+			"short": "Metropolitanos",
+			"abbr": "MET",
+			"nick": "Violetas",
+			"city": "Caracas",
+			"founded": 2011,
+			"league": "VEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Brígido Iriarte",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "VEN_UCV",
+			"name": "Universidad Central de Venezuela FC",
+			"short": "UCV",
+			"abbr": "UCV",
+			"nick": "Universitarios",
+			"city": "Caracas",
+			"founded": 1950,
+			"league": "VEN1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Olímpico de la UCV",
+			"capacity": 24000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

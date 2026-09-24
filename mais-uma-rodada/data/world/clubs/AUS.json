@@ -79,6 +79,66 @@
 			"rivals": [
 				"AUS_SSK"
 			]
+		},
+		{
+			"key": "AUS_MCY",
+			"name": "Melbourne City FC",
+			"short": "Melbourne City",
+			"abbr": "MCY",
+			"nick": "City",
+			"city": "Melbourne",
+			"founded": 2009,
+			"league": "AUS1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#6CABDD",
+				"#FFFFFF"
+			],
+			"stadium": "AAMI Park",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "AUS_CCM",
+			"name": "Central Coast Mariners FC",
+			"short": "Central Coast",
+			"abbr": "CCM",
+			"nick": "Mariners",
+			"city": "Gosford",
+			"founded": 2004,
+			"league": "AUS1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#FFD100",
+				"#1B3A8C"
+			],
+			"stadium": "Industree Group Stadium",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "AUS_ADL",
+			"name": "Adelaide United FC",
+			"short": "Adelaide United",
+			"abbr": "ADL",
+			"nick": "Reds",
+			"city": "Adelaide",
+			"founded": 2003,
+			"league": "AUS1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Coopers Stadium",
+			"capacity": 16500,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

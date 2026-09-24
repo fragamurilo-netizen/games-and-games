@@ -77,6 +77,66 @@
 				"symbol": "letter"
 			},
 			"rivals": []
+		},
+		{
+			"key": "CZE_BAN",
+			"name": "FC Baník Ostrava",
+			"short": "Baník Ostrava",
+			"abbr": "BAN",
+			"nick": "Chachaři",
+			"city": "Ostrava",
+			"founded": 1922,
+			"league": "CZE1",
+			"rep": 60,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Městský stadion Ostrava",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CZE_LIB",
+			"name": "FC Slovan Liberec",
+			"short": "Slovan Liberec",
+			"abbr": "LIB",
+			"nick": "Slovan",
+			"city": "Liberec",
+			"founded": 1958,
+			"league": "CZE1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion u Nisy",
+			"capacity": 9900,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CZE_SIG",
+			"name": "SK Sigma Olomouc",
+			"short": "Sigma Olomouc",
+			"abbr": "SIG",
+			"nick": "Sigmáci",
+			"city": "Olomouc",
+			"founded": 1919,
+			"league": "CZE1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Andrův stadion",
+			"capacity": 12500,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

@@ -128,6 +128,146 @@
 				"symbol": "sun"
 			},
 			"rivals": []
+		},
+		{
+			"key": "PER_CUS",
+			"name": "Cusco FC",
+			"short": "Cusco FC",
+			"abbr": "CUS",
+			"nick": "Dorados",
+			"city": "Cusco",
+			"founded": 2009,
+			"league": "PER1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Inca Garcilaso de la Vega",
+			"capacity": 42000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_ADT",
+			"name": "Asociación Deportiva Tarma",
+			"short": "ADT",
+			"abbr": "ADT",
+			"nick": "Celeste de Tarma",
+			"city": "Tarma",
+			"founded": 1929,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Unión Tarma",
+			"capacity": 9000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_HUA",
+			"name": "Club Sport Huancayo",
+			"short": "Sport Huancayo",
+			"abbr": "SHU",
+			"nick": "Rojo Matador",
+			"city": "Huancayo",
+			"founded": 2007,
+			"league": "PER1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Huancayo",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_GRA",
+			"name": "Club Atlético Grau",
+			"short": "Atlético Grau",
+			"abbr": "GRA",
+			"nick": "Albos",
+			"city": "Piura",
+			"founded": 1919,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Campeones del 36",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_GAR",
+			"name": "Deportivo Garcilaso",
+			"short": "Garcilaso",
+			"abbr": "GAR",
+			"nick": "Celeste Imperial",
+			"city": "Cusco",
+			"founded": 1957,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Inca Garcilaso de la Vega",
+			"capacity": 42000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_CHA",
+			"name": "Los Chankas CYC",
+			"short": "Los Chankas",
+			"abbr": "LCH",
+			"nick": "Guerreros",
+			"city": "Andahuaylas",
+			"founded": 2018,
+			"league": "PER1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Los Chankas",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_AAT",
+			"name": "Club Alianza Atlético",
+			"short": "Alianza Atlético",
+			"abbr": "AAT",
+			"nick": "Vendaval Churre",
+			"city": "Sullana",
+			"founded": 1920,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Estadio Campeones del 36",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }
