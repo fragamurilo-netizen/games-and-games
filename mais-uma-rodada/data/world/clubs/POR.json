@@ -1,12 +1,12 @@
 {
 	"nation": "POR",
-	"_doc": "Portugal (liga de 10; clubes restantes gerados).",
+	"_doc": "Portugal (liga de 10; clubes restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "POR_ENC",
-			"name": "Lisboa Encarnado",
-			"short": "Encarnados",
-			"abbr": "ENC",
+			"name": "Sport Lisboa e Benfica",
+			"short": "Benfica",
+			"abbr": "SLB",
 			"nick": "Águias",
 			"city": "Lisboa",
 			"founded": 1904,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio da Estrada da Luz",
+			"stadium": "Estádio da Luz",
 			"capacity": 65000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "POR_LEO",
-			"name": "Lisboa Leões",
-			"short": "Leões",
-			"abbr": "LEO",
+			"name": "Sporting Clube de Portugal",
+			"short": "Sporting",
+			"abbr": "SCP",
 			"nick": "Leões",
 			"city": "Lisboa",
 			"founded": 1906,
@@ -44,7 +44,7 @@
 				"#008057",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio de Alvalade",
+			"stadium": "Estádio José Alvalade",
 			"capacity": 50000,
 			"kit": "stripes_h",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "POR_DRA",
-			"name": "Porto Dragões",
-			"short": "Dragões",
-			"abbr": "DRA",
+			"name": "Futebol Clube do Porto",
+			"short": "Porto",
+			"abbr": "FCP",
 			"nick": "Dragões",
 			"city": "Porto",
 			"founded": 1893,
@@ -71,7 +71,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio das Antas",
+			"stadium": "Estádio do Dragão",
 			"capacity": 50000,
 			"kit": "stripes_v",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "POR_BRG",
-			"name": "Braga Arsenalistas",
-			"short": "Arsenalistas",
-			"abbr": "BRG",
+			"name": "Sporting Clube de Braga",
+			"short": "Braga",
+			"abbr": "SCB",
 			"nick": "Guerreiros do Minho",
 			"city": "Braga",
 			"founded": 1921,
@@ -98,7 +98,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio da Pedreira",
+			"stadium": "Estádio Municipal de Braga",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -111,9 +111,9 @@
 		},
 		{
 			"key": "POR_GMR",
-			"name": "Guimarães Conquistadores",
-			"short": "Conquistadores",
-			"abbr": "GMR",
+			"name": "Vitória Sport Clube",
+			"short": "Vitória SC",
+			"abbr": "VSC",
 			"nick": "Vimaranenses",
 			"city": "Guimarães",
 			"founded": 1922,
@@ -124,7 +124,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estádio do Castelo",
+			"stadium": "Estádio D. Afonso Henriques",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {

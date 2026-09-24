@@ -1,12 +1,12 @@
 {
 	"nation": "PAR",
-	"_doc": "Paraguai (liga de 10).",
+	"_doc": "Paraguai (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "PAR_DEC",
-			"name": "Asunción Decano",
-			"short": "Decanos",
-			"abbr": "DEC",
+			"name": "Club Olimpia",
+			"short": "Olimpia",
+			"abbr": "OLI",
 			"nick": "Franjeados",
 			"city": "Asunción",
 			"founded": 1902,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio de Para Uno",
+			"stadium": "Estadio Manuel Ferreira",
 			"capacity": 22000,
 			"kit": "faixa",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "PAR_CIC",
-			"name": "Asunción Ciclón",
-			"short": "Ciclón",
-			"abbr": "CIC",
+			"name": "Club Cerro Porteño",
+			"short": "Cerro Porteño",
+			"abbr": "CCP",
 			"nick": "Azulgranas",
 			"city": "Asunción",
 			"founded": 1912,
@@ -43,7 +43,7 @@
 				"#1D3F91",
 				"#E30613"
 			],
-			"stadium": "Estadio de Barrio Obrero",
+			"stadium": "Estadio La Nueva Olla",
 			"capacity": 45000,
 			"kit": "stripes_v",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "PAR_GUM",
-			"name": "Asunción Gumarelo",
-			"short": "Gumarelos",
-			"abbr": "GUM",
+			"name": "Club Libertad",
+			"short": "Libertad",
+			"abbr": "LIB",
 			"nick": "Gumarelos",
 			"city": "Asunción",
 			"founded": 1905,
@@ -69,7 +69,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Tuyucuá",
+			"stadium": "Estadio La Huerta",
 			"capacity": 10000,
 			"kit": "stripes_v",
 			"crest": {
@@ -80,9 +80,9 @@
 		},
 		{
 			"key": "PAR_ABO",
-			"name": "Asunción Aborigen",
-			"short": "Aborígenes",
-			"abbr": "ABO",
+			"name": "Club Guaraní",
+			"short": "Guaraní",
+			"abbr": "GUA",
 			"nick": "Aborígenes",
 			"city": "Asunción",
 			"founded": 1903,
@@ -93,7 +93,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estadio de Dos Bocas",
+			"stadium": "Estadio Rogelio Livieres",
 			"capacity": 8000,
 			"kit": "stripes_v",
 			"crest": {

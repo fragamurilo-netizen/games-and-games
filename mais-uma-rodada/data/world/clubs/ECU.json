@@ -1,12 +1,12 @@
 {
 	"nation": "ECU",
-	"_doc": "Equador (liga de 12).",
+	"_doc": "Equador (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "ECU_ALQ",
-			"name": "Quito Albo",
-			"short": "Albos Quito",
-			"abbr": "ALQ",
+			"name": "Liga Deportiva Universitaria de Quito",
+			"short": "LDU Quito",
+			"abbr": "LDU",
 			"nick": "Albos",
 			"city": "Quito",
 			"founded": 1930,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Estadio de Ponceano",
+			"stadium": "Estadio Rodrigo Paz Delgado",
 			"capacity": 41500,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "ECU_TOR",
-			"name": "Guayaquil Amarillo",
-			"short": "Toreros",
-			"abbr": "TOR",
+			"name": "Barcelona Sporting Club",
+			"short": "Barcelona SC",
+			"abbr": "BSC",
 			"nick": "Toreros",
 			"city": "Guayaquil",
 			"founded": 1925,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estadio del Salado",
+			"stadium": "Estadio Monumental Banco Pichincha",
 			"capacity": 57000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "ECU_ELE",
-			"name": "Guayaquil Eléctrico",
-			"short": "Eléctricos",
-			"abbr": "ELE",
+			"name": "Club Sport Emelec",
+			"short": "Emelec",
+			"abbr": "EME",
 			"nick": "Bombillo",
 			"city": "Guayaquil",
 			"founded": 1929,
@@ -69,7 +69,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Astillero",
+			"stadium": "Estadio George Capwell",
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
@@ -82,9 +82,9 @@
 		},
 		{
 			"key": "ECU_RAY",
-			"name": "Sangolquí Rayado",
-			"short": "Rayados",
-			"abbr": "RAY",
+			"name": "Independiente del Valle",
+			"short": "Ind. del Valle",
+			"abbr": "IDV",
 			"nick": "Rayados",
 			"city": "Sangolquí",
 			"founded": 1958,
@@ -95,7 +95,7 @@
 				"#111111",
 				"#1D5BBF"
 			],
-			"stadium": "Estadio del Valle",
+			"stadium": "Estadio Banco Guayaquil",
 			"capacity": 12000,
 			"kit": "stripes_v",
 			"crest": {
@@ -106,9 +106,9 @@
 		},
 		{
 			"key": "ECU_ORI",
-			"name": "Quito Oriental",
-			"short": "Orientales",
-			"abbr": "ORI",
+			"name": "Sociedad Deportiva Aucas",
+			"short": "Aucas",
+			"abbr": "AUC",
 			"nick": "Papá Aucas",
 			"city": "Quito",
 			"founded": 1945,
@@ -119,7 +119,7 @@
 				"#E30613",
 				"#FFD100"
 			],
-			"stadium": "Estadio del Sur de Quito",
+			"stadium": "Estadio Gonzalo Pozo Ripalda",
 			"capacity": 36000,
 			"kit": "plain",
 			"crest": {

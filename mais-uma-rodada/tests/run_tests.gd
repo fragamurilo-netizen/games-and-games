@@ -419,7 +419,10 @@ func _test_end_season() -> void:
 	var rules := DatabaseManager.squad_rules()
 	var owner := {}
 	for c: Club in w.clubs:
-		check(c.player_ids.size() >= int(rules["min_players"]) and c.player_ids.size() <= int(rules["max_players"]), "%s com %d jogadores" % [c.short_name, c.player_ids.size()])
+		# A IA completa os elencos na virada (TransferManager.balance_squads); o clube do usuário não é
+		# mexido e pode ficar abaixo do mínimo (o painel avisa "Elenco curto"), mas sempre dá para escalar.
+		var min_n := 11 if w.is_user_club(c.id) else int(rules["min_players"])
+		check(c.player_ids.size() >= min_n and c.player_ids.size() <= int(rules["max_players"]), "%s com %d jogadores" % [c.short_name, c.player_ids.size()])
 		for pid in c.player_ids:
 			check(not owner.has(pid), "jogador %d em dois clubes" % pid)
 			owner[pid] = c.id

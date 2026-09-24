@@ -48,7 +48,7 @@ func refresh() -> void:
 func _picker_row(w: GameWorld) -> Control:
 	var row := UIKit.hbox(10)
 	if _cup_id != "":
-		row.add_child(UIKit.icon_rect("trophy", 36, UIColors.ACCENT))
+		row.add_child(UIKit.comp_logo(_cup_id, 42))
 		var cup: Cup = w.season.cups[_cup_id]
 		var l := UIKit.label(cup.name, "H2")
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -58,6 +58,7 @@ func _picker_row(w: GameWorld) -> Control:
 	else:
 		var cfg := DatabaseManager.league_cfg(_league_id)
 		row.add_child(UIKit.flag(String(cfg.get("nation", "")), 42))
+		row.add_child(UIKit.comp_logo(_league_id, 42))
 		var l := UIKit.label(String(cfg.get("name", _league_id)), "H2")
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -66,6 +67,7 @@ func _picker_row(w: GameWorld) -> Control:
 	row.add_child(UIKit.button("Trocar", "GhostButton", func(): _open_picker(w), "table"))
 	var v := UIKit.vbox(8)
 	v.add_child(row)
+	v.add_child(UIKit.comp_stripe(_cup_id if _cup_id != "" else _league_id))
 	# Divisões do país (liga) ou abas (copa)
 	if _cup_id == "":
 		var nation: String = DatabaseManager.league_cfg(_league_id).get("nation", "")

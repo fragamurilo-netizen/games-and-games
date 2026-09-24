@@ -50,7 +50,7 @@ func refresh() -> void:
 	var card4 := UIKit.card("Card", 8)
 	card4.add_child(UIKit.section("Sobre"))
 	card4.add_child(UIKit.label("Mais Uma Rodada · versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "H3"))
-	card4.add_child(UIKit.label("Todos os clubes, jogadores e o país de Valdora são fictícios. Qualquer semelhança com a realidade é coincidência.", "Small", true))
+	card4.add_child(UIKit.label("Clubes, estádios e ligas usam os nomes reais apenas como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
 	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
 	card4.add_child(UIKit.label("Tudo roda offline; nenhum dado sai do aparelho.", "Small", true))
 	c.add_child(UIKit.card_panel(card4))

@@ -1,11 +1,11 @@
 {
 	"nation": "KOR",
-	"_doc": "Coreia do Sul (liga de 8).",
+	"_doc": "Coreia do Sul (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "KOR_ULS",
-			"name": "Ulsan Tigers",
-			"short": "Ulsan",
+			"name": "Ulsan HD FC",
+			"short": "Ulsan HD",
 			"abbr": "ULS",
 			"nick": "Horangi",
 			"city": "Ulsan",
@@ -17,7 +17,7 @@
 				"#1D3F91",
 				"#FFD100"
 			],
-			"stadium": "Munsu Stadium",
+			"stadium": "Munsu Football Stadium",
 			"capacity": 44000,
 			"kit": "plain",
 			"crest": {
@@ -30,8 +30,8 @@
 		},
 		{
 			"key": "KOR_JEO",
-			"name": "Jeonju Green Motors",
-			"short": "Jeonju Green",
+			"name": "Jeonbuk Hyundai Motors FC",
+			"short": "Jeonbuk",
 			"abbr": "JEO",
 			"nick": "Green Warriors",
 			"city": "Jeonju",
@@ -43,7 +43,7 @@
 				"#006437",
 				"#FFD100"
 			],
-			"stadium": "Jeonju World Cup Park",
+			"stadium": "Jeonju World Cup Stadium",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
@@ -54,8 +54,8 @@
 		},
 		{
 			"key": "KOR_POH",
-			"name": "Pohang Steel",
-			"short": "Steelers",
+			"name": "Pohang Steelers",
+			"short": "Pohang",
 			"abbr": "POH",
 			"nick": "Steelers",
 			"city": "Pohang",
@@ -80,8 +80,8 @@
 		},
 		{
 			"key": "KOR_SEO",
-			"name": "Seoul Red Black",
-			"short": "Seoul",
+			"name": "FC Seoul",
+			"short": "FC Seoul",
 			"abbr": "SEO",
 			"nick": "Seoul",
 			"city": "Seoul",
@@ -93,7 +93,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Mapo World Cup Park",
+			"stadium": "Seoul World Cup Stadium",
 			"capacity": 66700,
 			"kit": "stripes_v",
 			"crest": {

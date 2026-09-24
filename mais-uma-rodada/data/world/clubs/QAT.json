@@ -1,12 +1,12 @@
 {
 	"nation": "QAT",
-	"_doc": "Catar (liga de 6).",
+	"_doc": "Catar (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "QAT_ZAE",
-			"name": "Doha Al Zaeem",
-			"short": "Al Zaeem",
-			"abbr": "ZAE",
+			"name": "Al Sadd SC",
+			"short": "Al Sadd",
+			"abbr": "SAD",
 			"nick": "Líderes",
 			"city": "Doha",
 			"founded": 1969,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estádio Jassim",
+			"stadium": "Estádio Jassim bin Hamad",
 			"capacity": 12900,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "QAT_KNI",
-			"name": "Doha Knights",
-			"short": "Knights",
-			"abbr": "KNI",
+			"name": "Al Duhail SC",
+			"short": "Al Duhail",
+			"abbr": "DUH",
 			"nick": "Cavaleiros Vermelhos",
 			"city": "Doha",
 			"founded": 2009,

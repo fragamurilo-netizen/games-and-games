@@ -1,12 +1,12 @@
 {
 	"nation": "CZE",
-	"_doc": "Tchéquia (liga de 6).",
+	"_doc": "Tchéquia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "CZE_SES",
-			"name": "Praha Sešívaní",
-			"short": "Sešívaní",
-			"abbr": "SES",
+			"name": "SK Slavia Praha",
+			"short": "Slavia Praha",
+			"abbr": "SLA",
 			"nick": "Sešívaní",
 			"city": "Praha",
 			"founded": 1892,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Eden Praha",
+			"stadium": "Fortuna Arena",
 			"capacity": 19300,
 			"kit": "halves",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "CZE_LET",
-			"name": "Praha Letná",
-			"short": "Letná",
-			"abbr": "LET",
+			"name": "AC Sparta Praha",
+			"short": "Sparta Praha",
+			"abbr": "SPA",
 			"nick": "Rudí",
 			"city": "Praha",
 			"founded": 1893,
@@ -43,7 +43,7 @@
 				"#A51A3A",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion na Letné",
+			"stadium": "epet Arena",
 			"capacity": 18900,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "CZE_VIK",
-			"name": "Plzeň Viktoriáni",
-			"short": "Viktoriáni",
-			"abbr": "VIK",
+			"name": "FC Viktoria Plzeň",
+			"short": "Viktoria Plzeň",
+			"abbr": "VPL",
 			"nick": "Viktoriáni",
 			"city": "Plzeň",
 			"founded": 1911,
@@ -69,7 +69,7 @@
 				"#E30613",
 				"#1D5BBF"
 			],
-			"stadium": "Stadion Štruncovy sady",
+			"stadium": "Doosan Arena",
 			"capacity": 11700,
 			"kit": "halves",
 			"crest": {

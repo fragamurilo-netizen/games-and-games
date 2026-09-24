@@ -1,12 +1,12 @@
 {
 	"nation": "GRE",
-	"_doc": "Grécia (liga de 6).",
+	"_doc": "Grécia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "GRE_PIR",
-			"name": "Piraeus Erythrolefkoi",
-			"short": "Piraeus",
-			"abbr": "PIR",
+			"name": "Olympiacos FC",
+			"short": "Olympiacos",
+			"abbr": "OLY",
 			"nick": "Thrylos",
 			"city": "Piraeus",
 			"founded": 1925,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio Faliro",
+			"stadium": "Estádio Georgios Karaiskakis",
 			"capacity": 32100,
 			"kit": "stripes_v",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "GRE_ATH",
-			"name": "Athens Trifylli",
-			"short": "Trifylli",
-			"abbr": "ATH",
+			"name": "Panathinaikos FC",
+			"short": "Panathinaikos",
+			"abbr": "PAO",
 			"nick": "Trifylli",
 			"city": "Athens",
 			"founded": 1908,
@@ -44,7 +44,7 @@
 				"#007A33",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio Alexandras",
+			"stadium": "Estádio Apostolos Nikolaidis",
 			"capacity": 16000,
 			"kit": "plain",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "GRE_AEN",
-			"name": "Athens Enosi",
-			"short": "Enosi",
-			"abbr": "AEN",
+			"name": "AEK Athens FC",
+			"short": "AEK",
+			"abbr": "AEK",
 			"nick": "Enosi",
 			"city": "Athens",
 			"founded": 1924,
@@ -71,7 +71,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Stadio Nea Filadelfeia",
+			"stadium": "OPAP Arena",
 			"capacity": 32500,
 			"kit": "plain",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "GRE_DIK",
-			"name": "Thessaloniki Dikefalos",
-			"short": "Dikefalos",
-			"abbr": "DIK",
+			"name": "PAOK FC",
+			"short": "PAOK",
+			"abbr": "PAOK",
 			"nick": "Dikefalos",
 			"city": "Thessaloniki",
 			"founded": 1926,
@@ -98,7 +98,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio Toumba",
+			"stadium": "Estádio Toumba",
 			"capacity": 28700,
 			"kit": "stripes_v",
 			"crest": {

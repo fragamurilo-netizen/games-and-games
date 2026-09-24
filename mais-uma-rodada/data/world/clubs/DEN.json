@@ -1,12 +1,12 @@
 {
 	"nation": "DEN",
-	"_doc": "Dinamarca (liga de 6).",
+	"_doc": "Dinamarca (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "DEN_LOV",
-			"name": "København Løverne",
-			"short": "Løverne",
-			"abbr": "LOV",
+			"name": "F.C. København",
+			"short": "FC København",
+			"abbr": "FCK",
 			"nick": "Løverne",
 			"city": "København",
 			"founded": 1992,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Stadion Østerbro",
+			"stadium": "Parken",
 			"capacity": 38000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "DEN_DRE",
-			"name": "Vestegnen Drengene",
-			"short": "Drengene",
-			"abbr": "DRE",
+			"name": "Brøndby IF",
+			"short": "Brøndby",
+			"abbr": "BIF",
 			"nick": "Drengene",
 			"city": "Brøndby",
 			"founded": 1964,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#1D5BBF"
 			],
-			"stadium": "Stadion Vestegnen",
+			"stadium": "Brøndby Stadion",
 			"capacity": 28000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "DEN_ULV",
-			"name": "Herning Ulvene",
-			"short": "Ulvene",
-			"abbr": "ULV",
+			"name": "FC Midtjylland",
+			"short": "Midtjylland",
+			"abbr": "FCM",
 			"nick": "Ulvene",
 			"city": "Herning",
 			"founded": 1999,
@@ -69,7 +69,7 @@
 				"#111111",
 				"#E30613"
 			],
-			"stadium": "Stadion Herning",
+			"stadium": "MCH Arena",
 			"capacity": 11800,
 			"kit": "plain",
 			"crest": {

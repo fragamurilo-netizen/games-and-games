@@ -1,12 +1,12 @@
 {
 	"nation": "UAE",
-	"_doc": "Emirados Árabes (liga de 6).",
+	"_doc": "Emirados Árabes (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "UAE_BOS",
-			"name": "Al Ain Boss",
+			"name": "Al Ain FC",
 			"short": "Al Ain",
-			"abbr": "BOS",
+			"abbr": "AIN",
 			"nick": "Boss",
 			"city": "Al Ain",
 			"founded": 1968,
@@ -17,7 +17,7 @@
 				"#5E2A84",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio Hazza",
+			"stadium": "Estádio Hazza bin Zayed",
 			"capacity": 22700,
 			"kit": "plain",
 			"crest": {
@@ -28,9 +28,9 @@
 		},
 		{
 			"key": "UAE_DUB",
-			"name": "Dubai Knights",
-			"short": "Dubai",
-			"abbr": "DUB",
+			"name": "Shabab Al Ahli Club",
+			"short": "Shabab Al Ahli",
+			"abbr": "SAH",
 			"nick": "Cavaleiros",
 			"city": "Dubai",
 			"founded": 1958,

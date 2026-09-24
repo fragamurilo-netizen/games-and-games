@@ -1,12 +1,12 @@
 {
 	"nation": "VEN",
-	"_doc": "Venezuela (liga de 10).",
+	"_doc": "Venezuela (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "VEN_ROJ",
-			"name": "Caracas Rojo",
-			"short": "Rojos",
-			"abbr": "ROJ",
+			"name": "Caracas Fútbol Club",
+			"short": "Caracas",
+			"abbr": "CFC",
 			"nick": "Rojos del Ávila",
 			"city": "Caracas",
 			"founded": 1967,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Ávila",
+			"stadium": "Estadio Olímpico de la UCV",
 			"capacity": 24000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "VEN_CAR",
-			"name": "Táchira Aurinegro",
-			"short": "Carrusel",
-			"abbr": "CAR",
+			"name": "Deportivo Táchira FC",
+			"short": "Táchira",
+			"abbr": "TAC",
 			"nick": "Carrusel Aurinegro",
 			"city": "San Cristóbal",
 			"founded": 1974,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estadio de Pueblo Nuevo",
+			"stadium": "Estadio Polideportivo de Pueblo Nuevo",
 			"capacity": 38000,
 			"kit": "stripes_v",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "VEN_AZG",
-			"name": "Maturín Azulgrana",
-			"short": "Azulgranas",
-			"abbr": "AZG",
+			"name": "Monagas Sport Club",
+			"short": "Monagas",
+			"abbr": "MON",
 			"nick": "Azulgranas",
 			"city": "Maturín",
 			"founded": 1987,
@@ -69,7 +69,7 @@
 				"#1D3F91",
 				"#E30613"
 			],
-			"stadium": "Estadio de Maturín",
+			"stadium": "Estadio Monumental de Maturín",
 			"capacity": 51000,
 			"kit": "stripes_v",
 			"crest": {

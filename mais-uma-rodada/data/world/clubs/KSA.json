@@ -1,12 +1,12 @@
 {
 	"nation": "KSA",
-	"_doc": "Arábia Saudita (liga de 10).",
+	"_doc": "Arábia Saudita (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "KSA_AZR",
-			"name": "Riyadh Al Azraq",
-			"short": "Al Azraq",
-			"abbr": "AZR",
+			"name": "Al Hilal SFC",
+			"short": "Al Hilal",
+			"abbr": "HIL",
 			"nick": "Líder",
 			"city": "Riyadh",
 			"founded": 1957,
@@ -17,7 +17,7 @@
 				"#0055A5",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio do Reino",
+			"stadium": "Kingdom Arena",
 			"capacity": 68000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "KSA_ALM",
-			"name": "Riyadh Al Aalami",
-			"short": "Al Aalami",
-			"abbr": "ALM",
+			"name": "Al Nassr FC",
+			"short": "Al Nassr",
+			"abbr": "NAS",
 			"nick": "Global",
 			"city": "Riyadh",
 			"founded": 1955,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#0055A5"
 			],
-			"stadium": "Estádio Al Awwal",
+			"stadium": "Al-Awwal Park",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "KSA_AMD",
-			"name": "Jeddah Al Ameed",
-			"short": "Al Ameed",
-			"abbr": "AMD",
+			"name": "Al Ittihad Club",
+			"short": "Al Ittihad",
+			"abbr": "ITT",
 			"nick": "Tigres",
 			"city": "Jeddah",
 			"founded": 1927,
@@ -69,7 +69,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estádio da Joia",
+			"stadium": "King Abdullah Sports City",
 			"capacity": 62000,
 			"kit": "stripes_v",
 			"crest": {
@@ -82,9 +82,9 @@
 		},
 		{
 			"key": "KSA_RAQ",
-			"name": "Jeddah Al Raqi",
-			"short": "Al Raqi",
-			"abbr": "RAQ",
+			"name": "Al Ahli Saudi FC",
+			"short": "Al Ahli",
+			"abbr": "AHL",
 			"nick": "Real",
 			"city": "Jeddah",
 			"founded": 1937,
@@ -95,7 +95,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio da Joia",
+			"stadium": "King Abdullah Sports City",
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {

@@ -94,6 +94,9 @@ static func from_data(_world: GameWorld, rng: RandomNumberGenerator, data: Dicti
 	c.capacity = int(data.get("capacity", 0))
 	_make_kits(rng, c, data.get("kit", ""))
 	_make_crest(rng, c, data.get("crest", {}))
+	# Clubes reais: as letras do escudo saem do nome curto ("Real Madrid" → RM, "Flamengo" → FLA),
+	# não do nome oficial ("Club de Regatas do Flamengo" daria CRF).
+	c.crest["initials"] = String(data.get("initials", _short_initials(c)))
 	return c
 
 
@@ -328,6 +331,17 @@ static func _make_crest(rng: RandomNumberGenerator, c: Club, hint: Dictionary) -
 		"initials": _initials(c),
 		"stripes": rng.randf() < 0.35,
 	}
+
+
+static func _short_initials(c: Club) -> String:
+	var out := ""
+	for w in c.short_name.replace("-", " ").replace(".", " ").split(" ", false):
+		if w.substr(0, 1).is_valid_int():
+			continue
+		out += _ascii_upper(w.substr(0, 1))
+		if out.length() >= 3:
+			break
+	return out if out.length() >= 2 else c.abbr.substr(0, 3)
 
 
 static func _initials(c: Club) -> String:

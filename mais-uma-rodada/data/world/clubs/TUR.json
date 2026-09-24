@@ -1,12 +1,12 @@
 {
 	"nation": "TUR",
-	"_doc": "Turquia (liga de 10; clubes restantes gerados).",
+	"_doc": "Turquia (liga de 10; clubes restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "TUR_IAS",
-			"name": "İstanbul Aslanlar",
-			"short": "Aslanlar",
-			"abbr": "IAS",
+			"name": "Galatasaray SK",
+			"short": "Galatasaray",
+			"abbr": "GS",
 			"nick": "Cimbom",
 			"city": "İstanbul",
 			"founded": 1905,
@@ -17,7 +17,7 @@
 				"#A90432",
 				"#FDB912"
 			],
-			"stadium": "Seyrantepe Stadyumu",
+			"stadium": "RAMS Park",
 			"capacity": 52000,
 			"kit": "halves",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "TUR_IKN",
-			"name": "İstanbul Kanaryalar",
-			"short": "Kanaryalar",
-			"abbr": "IKN",
+			"name": "Fenerbahçe SK",
+			"short": "Fenerbahçe",
+			"abbr": "FB",
 			"nick": "Sarı Kanaryalar",
 			"city": "İstanbul",
 			"founded": 1907,
@@ -44,7 +44,7 @@
 				"#FFED00",
 				"#002D72"
 			],
-			"stadium": "Kadıköy Stadyumu",
+			"stadium": "Ülker Stadyumu",
 			"capacity": 47800,
 			"kit": "stripes_v",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "TUR_IKR",
-			"name": "İstanbul Kartallar",
-			"short": "Kartallar",
-			"abbr": "IKR",
+			"name": "Beşiktaş JK",
+			"short": "Beşiktaş",
+			"abbr": "BJK",
 			"nick": "Kara Kartallar",
 			"city": "İstanbul",
 			"founded": 1903,
@@ -71,7 +71,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Dolmabahçe Stadyumu",
+			"stadium": "Tüpraş Stadyumu",
 			"capacity": 42000,
 			"kit": "stripes_v",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "TUR_FIR",
-			"name": "Karadeniz Fırtınası",
-			"short": "Fırtına",
-			"abbr": "FIR",
+			"name": "Trabzonspor",
+			"short": "Trabzonspor",
+			"abbr": "TS",
 			"nick": "Bordo-Mavililer",
 			"city": "Trabzon",
 			"founded": 1967,
@@ -98,7 +98,7 @@
 				"#8A1538",
 				"#4FA8DE"
 			],
-			"stadium": "Akyazı Stadyumu",
+			"stadium": "Papara Park",
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
@@ -109,9 +109,9 @@
 		},
 		{
 			"key": "TUR_BSK",
-			"name": "İstanbul Başak",
-			"short": "Başak",
-			"abbr": "BSK",
+			"name": "İstanbul Başakşehir FK",
+			"short": "Başakşehir",
+			"abbr": "IBFK",
 			"nick": "Turuncu-Lacivertliler",
 			"city": "İstanbul",
 			"founded": 1990,
@@ -122,7 +122,7 @@
 				"#F07F13",
 				"#0D2A5C"
 			],
-			"stadium": "Başak Arena",
+			"stadium": "Başakşehir Fatih Terim Stadyumu",
 			"capacity": 17300,
 			"kit": "plain",
 			"crest": {

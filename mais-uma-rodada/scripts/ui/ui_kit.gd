@@ -226,6 +226,57 @@ static func icon_rect(name: String, px: int, tint: Color = Color.WHITE) -> Textu
 	return t
 
 
+## Logo de uma competição: a imagem importada no editor ou um selo com as cores da liga/copa.
+static func comp_logo(comp: String, px: int) -> Control:
+	var tex := Overrides.logo_of(comp)
+	if tex != null:
+		var tr := TextureRect.new()
+		tr.texture = tex
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.custom_minimum_size = Vector2(px, px)
+		tr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return tr
+	var cols := CompText.colors(comp)
+	var p := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = cols[0]
+	box.border_color = cols[1]
+	box.set_border_width_all(maxi(2, px / 16))
+	box.set_corner_radius_all(px / 4)
+	p.add_theme_stylebox_override(&"panel", box)
+	p.custom_minimum_size = Vector2(px, px)
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tint: Color = cols[1]
+	if absf(tint.get_luminance() - cols[0].get_luminance()) < 0.25:
+		tint = UIColors.on_color(cols[0])
+	var ic := icon_rect("trophy", int(px * 0.6), tint)
+	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	p.add_child(ic)
+	return p
+
+
+## Faixa fina com as duas cores de uma competição (abaixo de cabeçalhos).
+static func comp_stripe(comp: String, h: int = 6) -> Control:
+	var cols := CompText.colors(comp)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override(&"separation", 0)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for i in 2:
+		var r := ColorRect.new()
+		r.color = cols[i]
+		r.custom_minimum_size = Vector2(0, h)
+		r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		r.size_flags_stretch_ratio = 3.0 if i == 0 else 1.0
+		r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(r)
+	return row
+
+
 static func clear(node: Node) -> void:
 	for c in node.get_children():
 		node.remove_child(c)

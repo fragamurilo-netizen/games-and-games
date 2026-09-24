@@ -1,12 +1,12 @@
 {
 	"nation": "GER",
-	"_doc": "Alemanha: 1ª e 2ª divisão.",
+	"_doc": "Alemanha: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "GER_MUR",
-			"name": "München Rot",
-			"short": "München Rot",
-			"abbr": "MUR",
+			"name": "FC Bayern München",
+			"short": "Bayern",
+			"abbr": "FCB",
 			"nick": "Die Roten",
 			"city": "München",
 			"founded": 1900,
@@ -17,7 +17,7 @@
 				"#DC052D",
 				"#FFFFFF"
 			],
-			"stadium": "Fröttmaning Arena",
+			"stadium": "Allianz Arena",
 			"capacity": 75000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "GER_DOR",
-			"name": "Dortmund Schwarzgelb",
-			"short": "Schwarzgelb",
-			"abbr": "DOR",
+			"name": "Borussia Dortmund",
+			"short": "Dortmund",
+			"abbr": "BVB",
 			"nick": "Borussen",
 			"city": "Dortmund",
 			"founded": 1909,
@@ -44,7 +44,7 @@
 				"#FDE100",
 				"#111111"
 			],
-			"stadium": "Westfalenpark Stadion",
+			"stadium": "Signal Iduna Park",
 			"capacity": 81000,
 			"kit": "plain",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "GER_LEV",
-			"name": "Leverkusen Werkself",
-			"short": "Werkself",
-			"abbr": "LEV",
+			"name": "Bayer 04 Leverkusen",
+			"short": "Leverkusen",
+			"abbr": "B04",
 			"nick": "Werkself",
 			"city": "Leverkusen",
 			"founded": 1904,
@@ -71,7 +71,7 @@
 				"#E32221",
 				"#111111"
 			],
-			"stadium": "Stadion am Rhein",
+			"stadium": "BayArena",
 			"capacity": 30200,
 			"kit": "plain",
 			"crest": {
@@ -84,8 +84,8 @@
 		},
 		{
 			"key": "GER_RBL",
-			"name": "Leipzig Rasenball",
-			"short": "Rasenball",
+			"name": "RB Leipzig",
+			"short": "RB Leipzig",
 			"abbr": "RBL",
 			"nick": "Roten Bullen",
 			"city": "Leipzig",
@@ -97,7 +97,7 @@
 				"#FFFFFF",
 				"#DD0741"
 			],
-			"stadium": "Zentralstadion Leipzig",
+			"stadium": "Red Bull Arena",
 			"capacity": 47000,
 			"kit": "plain",
 			"crest": {
@@ -108,9 +108,9 @@
 		},
 		{
 			"key": "GER_FFM",
-			"name": "Frankfurt Adler",
-			"short": "Adler",
-			"abbr": "FFM",
+			"name": "Eintracht Frankfurt",
+			"short": "Frankfurt",
+			"abbr": "SGE",
 			"nick": "Adlerträger",
 			"city": "Frankfurt",
 			"founded": 1899,
@@ -121,7 +121,7 @@
 				"#E1000F",
 				"#111111"
 			],
-			"stadium": "Waldstadion Frankfurt",
+			"stadium": "Deutsche Bank Park",
 			"capacity": 58000,
 			"kit": "plain",
 			"crest": {
@@ -132,9 +132,9 @@
 		},
 		{
 			"key": "GER_STU",
-			"name": "Stuttgart Weißrot",
-			"short": "Schwaben",
-			"abbr": "STU",
+			"name": "VfB Stuttgart",
+			"short": "Stuttgart",
+			"abbr": "VFB",
 			"nick": "Schwaben",
 			"city": "Stuttgart",
 			"founded": 1893,
@@ -145,7 +145,7 @@
 				"#FFFFFF",
 				"#E32219"
 			],
-			"stadium": "Neckarpark Stadion",
+			"stadium": "MHPArena",
 			"capacity": 60000,
 			"kit": "faixa",
 			"crest": {
@@ -158,9 +158,9 @@
 		},
 		{
 			"key": "GER_MGL",
-			"name": "Gladbach Fohlen",
-			"short": "Fohlen",
-			"abbr": "MGL",
+			"name": "Borussia Mönchengladbach",
+			"short": "Gladbach",
+			"abbr": "BMG",
 			"nick": "Fohlen",
 			"city": "Mönchengladbach",
 			"founded": 1900,
@@ -171,7 +171,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Nordpark Stadion",
+			"stadium": "Borussia-Park",
 			"capacity": 54000,
 			"kit": "plain",
 			"crest": {
@@ -184,8 +184,8 @@
 		},
 		{
 			"key": "GER_WOB",
-			"name": "Wolfsburg Grün",
-			"short": "Wölfe",
+			"name": "VfL Wolfsburg",
+			"short": "Wolfsburg",
 			"abbr": "WOB",
 			"nick": "Wölfe",
 			"city": "Wolfsburg",
@@ -197,7 +197,7 @@
 				"#65B32E",
 				"#FFFFFF"
 			],
-			"stadium": "Allerpark Arena",
+			"stadium": "Volkswagen Arena",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -208,9 +208,9 @@
 		},
 		{
 			"key": "GER_FRB",
-			"name": "Freiburg Breisgau",
-			"short": "Breisgau",
-			"abbr": "FRB",
+			"name": "Sport-Club Freiburg",
+			"short": "Freiburg",
+			"abbr": "SCF",
 			"nick": "Breisgauer",
 			"city": "Freiburg",
 			"founded": 1904,
@@ -221,7 +221,7 @@
 				"#111111",
 				"#E30613"
 			],
-			"stadium": "Stadion am Flugplatz",
+			"stadium": "Europa-Park Stadion",
 			"capacity": 34700,
 			"kit": "plain",
 			"crest": {
@@ -232,9 +232,9 @@
 		},
 		{
 			"key": "GER_HOF",
-			"name": "Kraichgau Blau",
-			"short": "Kraichgau",
-			"abbr": "HOF",
+			"name": "TSG 1899 Hoffenheim",
+			"short": "Hoffenheim",
+			"abbr": "TSG",
 			"nick": "Kraichgauer",
 			"city": "Sinsheim",
 			"founded": 1899,
@@ -245,7 +245,7 @@
 				"#1961B5",
 				"#FFFFFF"
 			],
-			"stadium": "Arena Sinsheim",
+			"stadium": "PreZero Arena",
 			"capacity": 30100,
 			"kit": "plain",
 			"crest": {
@@ -256,9 +256,9 @@
 		},
 		{
 			"key": "GER_MAI",
-			"name": "Mainz Rheinhessen",
-			"short": "Rheinhessen",
-			"abbr": "MAI",
+			"name": "1. FSV Mainz 05",
+			"short": "Mainz 05",
+			"abbr": "M05",
 			"nick": "Nullfünfer",
 			"city": "Mainz",
 			"founded": 1905,
@@ -269,7 +269,7 @@
 				"#C3141E",
 				"#FFFFFF"
 			],
-			"stadium": "Bruchweg Arena",
+			"stadium": "Mewa Arena",
 			"capacity": 33300,
 			"kit": "plain",
 			"crest": {
@@ -280,9 +280,9 @@
 		},
 		{
 			"key": "GER_BRE",
-			"name": "Bremen Grünweiß",
-			"short": "Grünweiß",
-			"abbr": "BRE",
+			"name": "SV Werder Bremen",
+			"short": "Werder Bremen",
+			"abbr": "SVW",
 			"nick": "Werderaner",
 			"city": "Bremen",
 			"founded": 1899,
@@ -293,7 +293,7 @@
 				"#1D9053",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion an der Weser",
+			"stadium": "Weserstadion",
 			"capacity": 42100,
 			"kit": "plain",
 			"crest": {
@@ -306,9 +306,9 @@
 		},
 		{
 			"key": "GER_AUG",
-			"name": "Augsburg Fuggerstädter",
-			"short": "Fuggerstädter",
-			"abbr": "AUG",
+			"name": "FC Augsburg",
+			"short": "Augsburg",
+			"abbr": "FCA",
 			"nick": "Fuggerstädter",
 			"city": "Augsburg",
 			"founded": 1907,
@@ -319,7 +319,7 @@
 				"#BA3733",
 				"#46714D"
 			],
-			"stadium": "Arena Augsburg",
+			"stadium": "WWK Arena",
 			"capacity": 30600,
 			"kit": "plain",
 			"crest": {
@@ -330,9 +330,9 @@
 		},
 		{
 			"key": "GER_UNI",
-			"name": "Berlin Eisern",
-			"short": "Eiserne",
-			"abbr": "UNI",
+			"name": "1. FC Union Berlin",
+			"short": "Union Berlin",
+			"abbr": "FCU",
 			"nick": "Eiserne",
 			"city": "Berlin",
 			"founded": 1966,
@@ -343,7 +343,7 @@
 				"#D4011D",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Köpenick",
+			"stadium": "Stadion An der Alten Försterei",
 			"capacity": 22000,
 			"kit": "plain",
 			"crest": {
@@ -356,9 +356,9 @@
 		},
 		{
 			"key": "GER_PAU",
-			"name": "Hamburg Kiezkicker",
-			"short": "Kiezkicker",
-			"abbr": "PAU",
+			"name": "FC St. Pauli",
+			"short": "St. Pauli",
+			"abbr": "STP",
 			"nick": "Kiezkicker",
 			"city": "Hamburg",
 			"founded": 1910,
@@ -369,7 +369,7 @@
 				"#624839",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion am Heiligengeistfeld",
+			"stadium": "Millerntor-Stadion",
 			"capacity": 29500,
 			"kit": "plain",
 			"crest": {
@@ -382,9 +382,9 @@
 		},
 		{
 			"key": "GER_HEI",
-			"name": "Heidenheim Brenz",
-			"short": "Brenz",
-			"abbr": "HEI",
+			"name": "1. FC Heidenheim 1846",
+			"short": "Heidenheim",
+			"abbr": "HDH",
 			"nick": "Brenzer",
 			"city": "Heidenheim",
 			"founded": 1846,
@@ -395,7 +395,7 @@
 				"#E3000F",
 				"#003B79"
 			],
-			"stadium": "Stadion auf dem Schlossberg",
+			"stadium": "Voith-Arena",
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
@@ -406,8 +406,8 @@
 		},
 		{
 			"key": "GER_KOE",
-			"name": "Köln Geißböcke",
-			"short": "Geißböcke",
+			"name": "1. FC Köln",
+			"short": "Köln",
 			"abbr": "KOE",
 			"nick": "Geißböcke",
 			"city": "Köln",
@@ -419,7 +419,7 @@
 				"#FFFFFF",
 				"#ED1C24"
 			],
-			"stadium": "Müngersdorf Stadion",
+			"stadium": "RheinEnergieStadion",
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
@@ -434,9 +434,9 @@
 		},
 		{
 			"key": "GER_HAM",
-			"name": "Hamburg Rothosen",
-			"short": "Rothosen",
-			"abbr": "HAM",
+			"name": "Hamburger SV",
+			"short": "Hamburger SV",
+			"abbr": "HSV",
 			"nick": "Rothosen",
 			"city": "Hamburg",
 			"founded": 1887,
@@ -447,7 +447,7 @@
 				"#FFFFFF",
 				"#0A3F86"
 			],
-			"stadium": "Stadion am Volkspark",
+			"stadium": "Volksparkstadion",
 			"capacity": 57000,
 			"kit": "plain",
 			"crest": {
@@ -461,9 +461,9 @@
 		},
 		{
 			"key": "GER_BER",
-			"name": "Berlin Westend",
-			"short": "Westend",
-			"abbr": "BER",
+			"name": "Hertha BSC",
+			"short": "Hertha",
+			"abbr": "BSC",
 			"nick": "Alte Dame",
 			"city": "Berlin",
 			"founded": 1892,
@@ -474,7 +474,7 @@
 				"#005CA9",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion am Olympiapark",
+			"stadium": "Olympiastadion",
 			"capacity": 74000,
 			"kit": "stripes_v",
 			"crest": {
@@ -487,9 +487,9 @@
 		},
 		{
 			"key": "GER_GEL",
-			"name": "Gelsenkirchen Knappen",
-			"short": "Knappen",
-			"abbr": "GEL",
+			"name": "FC Schalke 04",
+			"short": "Schalke 04",
+			"abbr": "S04",
 			"nick": "Knappen",
 			"city": "Gelsenkirchen",
 			"founded": 1904,
@@ -500,7 +500,7 @@
 				"#004D9D",
 				"#FFFFFF"
 			],
-			"stadium": "Berger Feld Arena",
+			"stadium": "Veltins-Arena",
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
@@ -513,8 +513,8 @@
 		},
 		{
 			"key": "GER_BOC",
-			"name": "Bochum Revier",
-			"short": "Revier",
+			"name": "VfL Bochum 1848",
+			"short": "Bochum",
 			"abbr": "BOC",
 			"nick": "Unabsteigbaren",
 			"city": "Bochum",
@@ -526,7 +526,7 @@
 				"#005BA9",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion an der Castroper Straße",
+			"stadium": "Vonovia Ruhrstadion",
 			"capacity": 26000,
 			"kit": "plain",
 			"crest": {
@@ -540,9 +540,9 @@
 		},
 		{
 			"key": "GER_KIE",
-			"name": "Kiel Störche",
-			"short": "Störche",
-			"abbr": "KIE",
+			"name": "Holstein Kiel",
+			"short": "Holstein Kiel",
+			"abbr": "KSV",
 			"nick": "Störche",
 			"city": "Kiel",
 			"founded": 1900,
@@ -553,7 +553,7 @@
 				"#004B9C",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion am Westring",
+			"stadium": "Holstein-Stadion",
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
@@ -564,9 +564,9 @@
 		},
 		{
 			"key": "GER_DAR",
-			"name": "Darmstadt Lilien",
-			"short": "Lilien",
-			"abbr": "DAR",
+			"name": "SV Darmstadt 98",
+			"short": "Darmstadt",
+			"abbr": "D98",
 			"nick": "Lilien",
 			"city": "Darmstadt",
 			"founded": 1898,
@@ -577,7 +577,7 @@
 				"#004C99",
 				"#FFFFFF"
 			],
-			"stadium": "Lilienstadion",
+			"stadium": "Merck-Stadion am Böllenfalltor",
 			"capacity": 17800,
 			"kit": "plain",
 			"crest": {
@@ -588,9 +588,9 @@
 		},
 		{
 			"key": "GER_LAU",
-			"name": "Pfalz Lautern",
-			"short": "Lautern",
-			"abbr": "LAU",
+			"name": "1. FC Kaiserslautern",
+			"short": "Kaiserslautern",
+			"abbr": "FCK",
 			"nick": "Rote Teufel",
 			"city": "Kaiserslautern",
 			"founded": 1900,
@@ -601,7 +601,7 @@
 				"#E4003A",
 				"#FFFFFF"
 			],
-			"stadium": "Betzenberg Stadion",
+			"stadium": "Fritz-Walter-Stadion",
 			"capacity": 49800,
 			"kit": "plain",
 			"crest": {
@@ -614,9 +614,9 @@
 		},
 		{
 			"key": "GER_HAN",
-			"name": "Hannover Roten",
-			"short": "Die Roten",
-			"abbr": "HAN",
+			"name": "Hannover 96",
+			"short": "Hannover 96",
+			"abbr": "H96",
 			"nick": "Die Roten",
 			"city": "Hannover",
 			"founded": 1896,
@@ -627,7 +627,7 @@
 				"#C3001E",
 				"#111111"
 			],
-			"stadium": "Maschsee Stadion",
+			"stadium": "Heinz von Heiden Arena",
 			"capacity": 49000,
 			"kit": "plain",
 			"crest": {
@@ -640,9 +640,9 @@
 		},
 		{
 			"key": "GER_NUR",
-			"name": "Franken Club Nürnberg",
-			"short": "Glubb",
-			"abbr": "NUR",
+			"name": "1. FC Nürnberg",
+			"short": "Nürnberg",
+			"abbr": "FCN",
 			"nick": "Der Club",
 			"city": "Nürnberg",
 			"founded": 1900,
@@ -653,7 +653,7 @@
 				"#AA1124",
 				"#111111"
 			],
-			"stadium": "Stadion am Dutzendteich",
+			"stadium": "Max-Morlock-Stadion",
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
@@ -666,9 +666,9 @@
 		},
 		{
 			"key": "GER_PAD",
-			"name": "Ostwestfalen Paderborn",
-			"short": "Ostwestfalen",
-			"abbr": "PAD",
+			"name": "SC Paderborn 07",
+			"short": "Paderborn",
+			"abbr": "SCP",
 			"nick": "Paderborner",
 			"city": "Paderborn",
 			"founded": 1907,
@@ -679,7 +679,7 @@
 				"#1D4E96",
 				"#111111"
 			],
-			"stadium": "Stadion Paderborn",
+			"stadium": "Home Deluxe Arena",
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
@@ -692,9 +692,9 @@
 		},
 		{
 			"key": "GER_KAR",
-			"name": "Karlsruhe Wildpark",
-			"short": "Wildpark",
-			"abbr": "KAR",
+			"name": "Karlsruher SC",
+			"short": "Karlsruhe",
+			"abbr": "KSC",
 			"nick": "Badener",
 			"city": "Karlsruhe",
 			"founded": 1894,
@@ -705,7 +705,7 @@
 				"#0059A5",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion im Wildpark",
+			"stadium": "BBBank Wildpark",
 			"capacity": 34300,
 			"kit": "plain",
 			"crest": {
@@ -718,9 +718,9 @@
 		},
 		{
 			"key": "GER_DUS",
-			"name": "Düsseldorf Flingern",
-			"short": "Flingern",
-			"abbr": "DUS",
+			"name": "Fortuna Düsseldorf",
+			"short": "Düsseldorf",
+			"abbr": "F95",
 			"nick": "Flingeraner",
 			"city": "Düsseldorf",
 			"founded": 1895,
@@ -731,7 +731,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Arena am Rhein",
+			"stadium": "Merkur Spiel-Arena",
 			"capacity": 54600,
 			"kit": "plain",
 			"crest": {
@@ -745,9 +745,9 @@
 		},
 		{
 			"key": "GER_MAG",
-			"name": "Magdeburg Elbe",
-			"short": "Elbestädter",
-			"abbr": "MAG",
+			"name": "1. FC Magdeburg",
+			"short": "Magdeburg",
+			"abbr": "FCM",
 			"nick": "Elbestädter",
 			"city": "Magdeburg",
 			"founded": 1965,
@@ -758,7 +758,7 @@
 				"#004B9C",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion an der Elbe",
+			"stadium": "Avnet Arena",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -769,9 +769,9 @@
 		},
 		{
 			"key": "GER_SAA",
-			"name": "Saar Elversberg",
-			"short": "Saarland",
-			"abbr": "SAA",
+			"name": "SV 07 Elversberg",
+			"short": "Elversberg",
+			"abbr": "SVE",
 			"nick": "Elversberger",
 			"city": "Spiesen-Elversberg",
 			"founded": 1907,
@@ -782,7 +782,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion an der Kaiserlinde",
+			"stadium": "Ursapharm-Arena",
 			"capacity": 10000,
 			"kit": "plain",
 			"crest": {
@@ -795,9 +795,9 @@
 		},
 		{
 			"key": "GER_BSW",
-			"name": "Braunschweig Löwen",
-			"short": "Löwen",
-			"abbr": "BSW",
+			"name": "Eintracht Braunschweig",
+			"short": "Braunschweig",
+			"abbr": "EBS",
 			"nick": "Löwen",
 			"city": "Braunschweig",
 			"founded": 1895,
@@ -808,7 +808,7 @@
 				"#FFD400",
 				"#1D5AA8"
 			],
-			"stadium": "Stadion an der Hamburger Straße",
+			"stadium": "Eintracht-Stadion",
 			"capacity": 23300,
 			"kit": "plain",
 			"crest": {
@@ -821,9 +821,9 @@
 		},
 		{
 			"key": "GER_FUE",
-			"name": "Fürth Kleeblatt",
-			"short": "Kleeblatt",
-			"abbr": "FUE",
+			"name": "SpVgg Greuther Fürth",
+			"short": "Greuther Fürth",
+			"abbr": "SGF",
 			"nick": "Kleeblätter",
 			"city": "Fürth",
 			"founded": 1903,
@@ -834,7 +834,7 @@
 				"#009A44",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion am Ronhof",
+			"stadium": "Sportpark Ronhof",
 			"capacity": 16600,
 			"kit": "plain",
 			"crest": {
@@ -847,9 +847,9 @@
 		},
 		{
 			"key": "GER_MUE",
-			"name": "Münster Preußen",
-			"short": "Preußen",
-			"abbr": "MUE",
+			"name": "SC Preußen Münster",
+			"short": "Preußen Münster",
+			"abbr": "PRM",
 			"nick": "Adlerträger",
 			"city": "Münster",
 			"founded": 1906,
@@ -860,7 +860,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion an der Hammer Straße",
+			"stadium": "Preußenstadion",
 			"capacity": 14300,
 			"kit": "plain",
 			"crest": {
@@ -871,9 +871,9 @@
 		},
 		{
 			"key": "GER_BIE",
-			"name": "Teutoburger Arminen",
-			"short": "Arminen",
-			"abbr": "BIE",
+			"name": "DSC Arminia Bielefeld",
+			"short": "Arminia",
+			"abbr": "DSC",
 			"nick": "Arminen",
 			"city": "Bielefeld",
 			"founded": 1905,
@@ -884,7 +884,7 @@
 				"#004E95",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion auf der Alm",
+			"stadium": "SchücoArena",
 			"capacity": 26500,
 			"kit": "plain",
 			"crest": {
@@ -897,9 +897,9 @@
 		},
 		{
 			"key": "GER_DRE",
-			"name": "Dresden Elbflorenz",
-			"short": "Elbflorenz",
-			"abbr": "DRE",
+			"name": "SG Dynamo Dresden",
+			"short": "Dynamo Dresden",
+			"abbr": "SGD",
 			"nick": "Schwarz-Gelben",
 			"city": "Dresden",
 			"founded": 1953,
@@ -910,7 +910,7 @@
 				"#FFD400",
 				"#111111"
 			],
-			"stadium": "Stadion am Großen Garten",
+			"stadium": "Rudolf-Harbig-Stadion",
 			"capacity": 32000,
 			"kit": "plain",
 			"crest": {

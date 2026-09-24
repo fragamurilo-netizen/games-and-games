@@ -4,7 +4,8 @@ Simulador de gestão de futebol para **Android**, feito em **Godot 4.7** — off
 para aquele "só mais uma rodada" honesto: sem energia, sem timers, sem loot boxes. A vontade de continuar
 vem da própria simulação.
 
-> Todos os clubes, jogadores e o país de **Valdora** são fictícios.
+> Clubes, estádios e ligas usam os **nomes reais** apenas como referência, sem vínculo oficial.
+> Todos os jogadores são fictícios.
 
 ## O que já dá para jogar (versão 0.1.0 · MVP 1)
 

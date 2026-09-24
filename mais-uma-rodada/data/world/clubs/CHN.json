@@ -1,12 +1,12 @@
 {
 	"nation": "CHN",
-	"_doc": "China (liga de 8).",
+	"_doc": "China (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "CHN_SHH",
-			"name": "Shanghai Harbour",
-			"short": "Harbour",
-			"abbr": "SHH",
+			"name": "Shanghai Port FC",
+			"short": "Shanghai Port",
+			"abbr": "SHP",
 			"nick": "Red Eagles",
 			"city": "Shanghai",
 			"founded": 2005,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Pudong Stadium",
+			"stadium": "Pudong Football Stadium",
 			"capacity": 37000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "CHN_JIN",
-			"name": "Jinan Taishan",
-			"short": "Taishan",
-			"abbr": "JIN",
+			"name": "Shandong Taishan FC",
+			"short": "Shandong Taishan",
+			"abbr": "SDT",
 			"nick": "Taishan",
 			"city": "Jinan",
 			"founded": 1988,
@@ -43,7 +43,7 @@
 				"#F07F13",
 				"#FFFFFF"
 			],
-			"stadium": "Jinan Olympic Park",
+			"stadium": "Jinan Olympic Sports Center",
 			"capacity": 56800,
 			"kit": "plain",
 			"crest": {
@@ -54,9 +54,9 @@
 		},
 		{
 			"key": "CHN_BEI",
-			"name": "Beijing Imperial",
-			"short": "Imperial",
-			"abbr": "BEI",
+			"name": "Beijing Guoan FC",
+			"short": "Beijing Guoan",
+			"abbr": "BGA",
 			"nick": "Imperial",
 			"city": "Beijing",
 			"founded": 1992,
@@ -67,7 +67,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Workers Stadium Park",
+			"stadium": "Workers' Stadium",
 			"capacity": 68000,
 			"kit": "plain",
 			"crest": {
@@ -78,9 +78,9 @@
 		},
 		{
 			"key": "CHN_SHS",
-			"name": "Shanghai Shenhua Blue",
-			"short": "Shanghai Blue",
-			"abbr": "SHS",
+			"name": "Shanghai Shenhua FC",
+			"short": "Shanghai Shenhua",
+			"abbr": "SSH",
 			"nick": "Blue Devils",
 			"city": "Shanghai",
 			"founded": 1993,
@@ -91,7 +91,7 @@
 				"#1D3F91",
 				"#FFFFFF"
 			],
-			"stadium": "Hongkou Park",
+			"stadium": "Hongkou Football Stadium",
 			"capacity": 33000,
 			"kit": "plain",
 			"crest": {

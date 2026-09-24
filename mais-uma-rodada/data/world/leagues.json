@@ -1,12 +1,16 @@
 {
-	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money).",
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money).",
 	"leagues": [
 		{
 			"id": "ENG1",
 			"nation": "ENG",
 			"tier": 1,
-			"name": "Primeira Liga Inglesa",
-			"short": "Inglaterra 1",
+			"name": "Premier League",
+			"short": "Premier League",
+			"colors": [
+				"#3D195B",
+				"#00FF85"
+			],
 			"teams": 20,
 			"rr": 2,
 			"down": 3,
@@ -26,8 +30,12 @@
 			"id": "ENG2",
 			"nation": "ENG",
 			"tier": 2,
-			"name": "Segunda Liga Inglesa",
-			"short": "Inglaterra 2",
+			"name": "EFL Championship",
+			"short": "Championship",
+			"colors": [
+				"#0B1C3F",
+				"#D4AF37"
+			],
 			"teams": 20,
 			"rr": 2,
 			"up": 3,
@@ -47,8 +55,12 @@
 			"id": "ESP1",
 			"nation": "ESP",
 			"tier": 1,
-			"name": "Liga Espanhola",
-			"short": "Espanha 1",
+			"name": "LaLiga",
+			"short": "LaLiga",
+			"colors": [
+				"#FF4B44",
+				"#1B1B1B"
+			],
 			"teams": 20,
 			"rr": 2,
 			"down": 3,
@@ -68,8 +80,12 @@
 			"id": "ESP2",
 			"nation": "ESP",
 			"tier": 2,
-			"name": "Segunda Divisão Espanhola",
-			"short": "Espanha 2",
+			"name": "LaLiga Hypermotion",
+			"short": "LaLiga 2",
+			"colors": [
+				"#1B1B1B",
+				"#00D0FF"
+			],
 			"teams": 20,
 			"rr": 2,
 			"up": 3,
@@ -89,8 +105,12 @@
 			"id": "GER1",
 			"nation": "GER",
 			"tier": 1,
-			"name": "Liga Alemã",
-			"short": "Alemanha 1",
+			"name": "Bundesliga",
+			"short": "Bundesliga",
+			"colors": [
+				"#D20515",
+				"#FFFFFF"
+			],
 			"teams": 18,
 			"rr": 2,
 			"down": 2,
@@ -110,8 +130,12 @@
 			"id": "GER2",
 			"nation": "GER",
 			"tier": 2,
-			"name": "Segunda Liga Alemã",
-			"short": "Alemanha 2",
+			"name": "2. Bundesliga",
+			"short": "2. Bundesliga",
+			"colors": [
+				"#111111",
+				"#D20515"
+			],
 			"teams": 18,
 			"rr": 2,
 			"up": 2,
@@ -131,8 +155,12 @@
 			"id": "ITA1",
 			"nation": "ITA",
 			"tier": 1,
-			"name": "Liga Italiana",
-			"short": "Itália",
+			"name": "Serie A",
+			"short": "Serie A",
+			"colors": [
+				"#0A2E6E",
+				"#00B2E3"
+			],
 			"teams": 20,
 			"rr": 2,
 			"level": [
@@ -151,8 +179,12 @@
 			"id": "FRA1",
 			"nation": "FRA",
 			"tier": 1,
-			"name": "Liga Francesa",
-			"short": "França 1",
+			"name": "Ligue 1",
+			"short": "Ligue 1",
+			"colors": [
+				"#091C3E",
+				"#DAE025"
+			],
 			"teams": 18,
 			"rr": 2,
 			"down": 2,
@@ -172,8 +204,12 @@
 			"id": "FRA2",
 			"nation": "FRA",
 			"tier": 2,
-			"name": "Segunda Liga Francesa",
-			"short": "França 2",
+			"name": "Ligue 2",
+			"short": "Ligue 2",
+			"colors": [
+				"#0E3B7D",
+				"#F28C28"
+			],
 			"teams": 18,
 			"rr": 2,
 			"up": 2,
@@ -193,8 +229,12 @@
 			"id": "POR1",
 			"nation": "POR",
 			"tier": 1,
-			"name": "Liga Portuguesa",
-			"short": "Portugal",
+			"name": "Liga Portugal",
+			"short": "Liga Portugal",
+			"colors": [
+				"#00205B",
+				"#00C1D5"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -213,8 +253,12 @@
 			"id": "NED1",
 			"nation": "NED",
 			"tier": 1,
-			"name": "Liga Holandesa",
-			"short": "Holanda",
+			"name": "Eredivisie",
+			"short": "Eredivisie",
+			"colors": [
+				"#F36C21",
+				"#1B1B1B"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -233,8 +277,12 @@
 			"id": "TUR1",
 			"nation": "TUR",
 			"tier": 1,
-			"name": "Liga Turca",
-			"short": "Turquia",
+			"name": "Süper Lig",
+			"short": "Süper Lig",
+			"colors": [
+				"#E30A17",
+				"#FFFFFF"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -253,8 +301,12 @@
 			"id": "BEL1",
 			"nation": "BEL",
 			"tier": 1,
-			"name": "Liga Belga",
-			"short": "Bélgica",
+			"name": "Jupiler Pro League",
+			"short": "Pro League",
+			"colors": [
+				"#E4002B",
+				"#111111"
+			],
 			"teams": 8,
 			"rr": 4,
 			"level": [
@@ -273,8 +325,12 @@
 			"id": "SCO1",
 			"nation": "SCO",
 			"tier": 1,
-			"name": "Liga Escocesa",
-			"short": "Escócia",
+			"name": "Scottish Premiership",
+			"short": "Premiership",
+			"colors": [
+				"#4B2C83",
+				"#E6E6E6"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -293,8 +349,12 @@
 			"id": "GRE1",
 			"nation": "GRE",
 			"tier": 1,
-			"name": "Liga Grega",
-			"short": "Grécia",
+			"name": "Super League Grécia",
+			"short": "Super League",
+			"colors": [
+				"#0D5EAF",
+				"#FFFFFF"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -313,8 +373,12 @@
 			"id": "AUT1",
 			"nation": "AUT",
 			"tier": 1,
-			"name": "Liga Austríaca",
-			"short": "Áustria",
+			"name": "Bundesliga Austríaca",
+			"short": "Bundesliga AUT",
+			"colors": [
+				"#ED2939",
+				"#FFFFFF"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -333,8 +397,12 @@
 			"id": "SUI1",
 			"nation": "SUI",
 			"tier": 1,
-			"name": "Liga Suíça",
-			"short": "Suíça",
+			"name": "Super League Suíça",
+			"short": "Super League",
+			"colors": [
+				"#1F1F1F",
+				"#DA291C"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -353,8 +421,12 @@
 			"id": "UKR1",
 			"nation": "UKR",
 			"tier": 1,
-			"name": "Liga Ucraniana",
-			"short": "Ucrânia",
+			"name": "Premier League Ucraniana",
+			"short": "UPL",
+			"colors": [
+				"#005BBB",
+				"#FFD500"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -373,8 +445,12 @@
 			"id": "CRO1",
 			"nation": "CRO",
 			"tier": 1,
-			"name": "Liga Croata",
-			"short": "Croácia",
+			"name": "HNL",
+			"short": "HNL",
+			"colors": [
+				"#171796",
+				"#FF0000"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -393,8 +469,12 @@
 			"id": "SRB1",
 			"nation": "SRB",
 			"tier": 1,
-			"name": "Liga Sérvia",
-			"short": "Sérvia",
+			"name": "Superliga Sérvia",
+			"short": "Superliga",
+			"colors": [
+				"#0C4076",
+				"#C6363C"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -413,8 +493,12 @@
 			"id": "CZE1",
 			"nation": "CZE",
 			"tier": 1,
-			"name": "Liga Tcheca",
-			"short": "Tchéquia",
+			"name": "Chance Liga",
+			"short": "Chance Liga",
+			"colors": [
+				"#11457E",
+				"#D7141A"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -433,8 +517,12 @@
 			"id": "DEN1",
 			"nation": "DEN",
 			"tier": 1,
-			"name": "Liga Dinamarquesa",
-			"short": "Dinamarca",
+			"name": "Superliga Dinamarquesa",
+			"short": "Superliga",
+			"colors": [
+				"#C8102E",
+				"#FFFFFF"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -453,8 +541,12 @@
 			"id": "BRA1",
 			"nation": "BRA",
 			"tier": 1,
-			"name": "Brasileiro Série A",
-			"short": "Brasil A",
+			"name": "Brasileirão Série A",
+			"short": "Série A",
+			"colors": [
+				"#00A859",
+				"#FFCC29"
+			],
 			"teams": 20,
 			"rr": 2,
 			"down": 4,
@@ -474,8 +566,12 @@
 			"id": "BRA2",
 			"nation": "BRA",
 			"tier": 2,
-			"name": "Brasileiro Série B",
-			"short": "Brasil B",
+			"name": "Brasileirão Série B",
+			"short": "Série B",
+			"colors": [
+				"#1C3F94",
+				"#FFCC29"
+			],
 			"teams": 20,
 			"rr": 2,
 			"up": 4,
@@ -496,8 +592,12 @@
 			"id": "BRA3",
 			"nation": "BRA",
 			"tier": 3,
-			"name": "Brasileiro Série C",
-			"short": "Brasil C",
+			"name": "Brasileirão Série C",
+			"short": "Série C",
+			"colors": [
+				"#D35400",
+				"#FFFFFF"
+			],
 			"teams": 20,
 			"rr": 2,
 			"up": 4,
@@ -518,8 +618,12 @@
 			"id": "BRA4",
 			"nation": "BRA",
 			"tier": 4,
-			"name": "Brasileiro Série D",
-			"short": "Brasil D",
+			"name": "Brasileirão Série D",
+			"short": "Série D",
+			"colors": [
+				"#7B2D8E",
+				"#FFFFFF"
+			],
 			"teams": 20,
 			"rr": 2,
 			"up": 4,
@@ -539,8 +643,12 @@
 			"id": "ARG1",
 			"nation": "ARG",
 			"tier": 1,
-			"name": "Liga Argentina",
-			"short": "Argentina 1",
+			"name": "Liga Profesional Argentina",
+			"short": "Liga Profesional",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
 			"teams": 20,
 			"rr": 2,
 			"down": 2,
@@ -560,8 +668,12 @@
 			"id": "ARG2",
 			"nation": "ARG",
 			"tier": 2,
-			"name": "Segunda Divisão Argentina",
-			"short": "Argentina 2",
+			"name": "Primera Nacional",
+			"short": "Primera Nacional",
+			"colors": [
+				"#1D3F91",
+				"#75AADB"
+			],
 			"teams": 16,
 			"rr": 2,
 			"up": 2,
@@ -581,8 +693,12 @@
 			"id": "URU1",
 			"nation": "URU",
 			"tier": 1,
-			"name": "Liga Uruguaia",
+			"name": "Liga AUF Uruguaya",
 			"short": "Uruguai",
+			"colors": [
+				"#5CBFEB",
+				"#111111"
+			],
 			"teams": 12,
 			"rr": 3,
 			"level": [
@@ -601,8 +717,12 @@
 			"id": "COL1",
 			"nation": "COL",
 			"tier": 1,
-			"name": "Liga Colombiana",
-			"short": "Colômbia",
+			"name": "Liga BetPlay",
+			"short": "Liga BetPlay",
+			"colors": [
+				"#FCD116",
+				"#003893"
+			],
 			"teams": 12,
 			"rr": 3,
 			"level": [
@@ -621,8 +741,12 @@
 			"id": "CHI1",
 			"nation": "CHI",
 			"tier": 1,
-			"name": "Liga Chilena",
+			"name": "Liga de Primera",
 			"short": "Chile",
+			"colors": [
+				"#D52B1E",
+				"#0039A6"
+			],
 			"teams": 12,
 			"rr": 3,
 			"level": [
@@ -641,8 +765,12 @@
 			"id": "ECU1",
 			"nation": "ECU",
 			"tier": 1,
-			"name": "Liga Equatoriana",
-			"short": "Equador",
+			"name": "LigaPro",
+			"short": "LigaPro",
+			"colors": [
+				"#FFD100",
+				"#034EA2"
+			],
 			"teams": 12,
 			"rr": 3,
 			"level": [
@@ -661,8 +789,12 @@
 			"id": "PER1",
 			"nation": "PER",
 			"tier": 1,
-			"name": "Liga Peruana",
-			"short": "Peru",
+			"name": "Liga 1 Perú",
+			"short": "Liga 1",
+			"colors": [
+				"#D91023",
+				"#FFFFFF"
+			],
 			"teams": 12,
 			"rr": 3,
 			"level": [
@@ -681,8 +813,12 @@
 			"id": "PAR1",
 			"nation": "PAR",
 			"tier": 1,
-			"name": "Liga Paraguaia",
+			"name": "Primera División Paraguaia",
 			"short": "Paraguai",
+			"colors": [
+				"#0038A8",
+				"#D52B1E"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -701,8 +837,12 @@
 			"id": "BOL1",
 			"nation": "BOL",
 			"tier": 1,
-			"name": "Liga Boliviana",
+			"name": "División Profesional",
 			"short": "Bolívia",
+			"colors": [
+				"#007934",
+				"#F9E300"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -721,8 +861,12 @@
 			"id": "VEN1",
 			"nation": "VEN",
 			"tier": 1,
-			"name": "Liga Venezuelana",
-			"short": "Venezuela",
+			"name": "Liga FUTVE",
+			"short": "Liga FUTVE",
+			"colors": [
+				"#CF142B",
+				"#FFCC00"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -741,8 +885,12 @@
 			"id": "MEX1",
 			"nation": "MEX",
 			"tier": 1,
-			"name": "Liga Mexicana",
-			"short": "México",
+			"name": "Liga MX",
+			"short": "Liga MX",
+			"colors": [
+				"#0A2240",
+				"#C5A572"
+			],
 			"teams": 18,
 			"rr": 2,
 			"level": [
@@ -761,8 +909,12 @@
 			"id": "USA1",
 			"nation": "USA",
 			"tier": 1,
-			"name": "Liga Norte-Americana",
-			"short": "EUA",
+			"name": "Major League Soccer",
+			"short": "MLS",
+			"colors": [
+				"#001F5B",
+				"#E03A3E"
+			],
 			"teams": 20,
 			"rr": 2,
 			"level": [
@@ -781,8 +933,12 @@
 			"id": "EGY1",
 			"nation": "EGY",
 			"tier": 1,
-			"name": "Liga Egípcia",
+			"name": "Premier League Egípcia",
 			"short": "Egito",
+			"colors": [
+				"#CE1126",
+				"#111111"
+			],
 			"teams": 8,
 			"rr": 4,
 			"level": [
@@ -801,8 +957,12 @@
 			"id": "MAR1",
 			"nation": "MAR",
 			"tier": 1,
-			"name": "Liga Marroquina",
-			"short": "Marrocos",
+			"name": "Botola Pro",
+			"short": "Botola Pro",
+			"colors": [
+				"#C1272D",
+				"#006233"
+			],
 			"teams": 8,
 			"rr": 4,
 			"level": [
@@ -821,8 +981,12 @@
 			"id": "TUN1",
 			"nation": "TUN",
 			"tier": 1,
-			"name": "Liga Tunisiana",
+			"name": "Ligue Professionnelle 1",
 			"short": "Tunísia",
+			"colors": [
+				"#E70013",
+				"#FFFFFF"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -841,8 +1005,12 @@
 			"id": "RSA1",
 			"nation": "RSA",
 			"tier": 1,
-			"name": "Liga Sul-Africana",
-			"short": "África do Sul",
+			"name": "Betway Premiership",
+			"short": "Premiership SA",
+			"colors": [
+				"#007749",
+				"#FFB81C"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -861,8 +1029,12 @@
 			"id": "NGA1",
 			"nation": "NGA",
 			"tier": 1,
-			"name": "Liga Nigeriana",
-			"short": "Nigéria",
+			"name": "NPFL",
+			"short": "NPFL",
+			"colors": [
+				"#008751",
+				"#FFFFFF"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -881,8 +1053,12 @@
 			"id": "SEN1",
 			"nation": "SEN",
 			"tier": 1,
-			"name": "Liga Senegalesa",
+			"name": "Ligue 1 Senegalesa",
 			"short": "Senegal",
+			"colors": [
+				"#00853F",
+				"#FDEF42"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -901,8 +1077,12 @@
 			"id": "KSA1",
 			"nation": "KSA",
 			"tier": 1,
-			"name": "Liga Saudita",
-			"short": "Arábia Saudita",
+			"name": "Saudi Pro League",
+			"short": "Saudi Pro League",
+			"colors": [
+				"#0B6E4F",
+				"#FFFFFF"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -921,8 +1101,12 @@
 			"id": "JPN1",
 			"nation": "JPN",
 			"tier": 1,
-			"name": "Liga Japonesa",
-			"short": "Japão",
+			"name": "J1 League",
+			"short": "J1 League",
+			"colors": [
+				"#E60012",
+				"#1B1B1B"
+			],
 			"teams": 10,
 			"rr": 4,
 			"level": [
@@ -941,8 +1125,12 @@
 			"id": "KOR1",
 			"nation": "KOR",
 			"tier": 1,
-			"name": "Liga Sul-Coreana",
-			"short": "Coreia do Sul",
+			"name": "K League 1",
+			"short": "K League 1",
+			"colors": [
+				"#0047A0",
+				"#CD2E3A"
+			],
 			"teams": 8,
 			"rr": 4,
 			"level": [
@@ -961,8 +1149,12 @@
 			"id": "QAT1",
 			"nation": "QAT",
 			"tier": 1,
-			"name": "Liga Catariana",
-			"short": "Catar",
+			"name": "Qatar Stars League",
+			"short": "QSL",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -981,8 +1173,12 @@
 			"id": "UAE1",
 			"nation": "UAE",
 			"tier": 1,
-			"name": "Liga dos Emirados",
-			"short": "Emirados",
+			"name": "UAE Pro League",
+			"short": "UAE Pro League",
+			"colors": [
+				"#00732F",
+				"#FF0000"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [
@@ -1001,8 +1197,12 @@
 			"id": "CHN1",
 			"nation": "CHN",
 			"tier": 1,
-			"name": "Liga Chinesa",
-			"short": "China",
+			"name": "Chinese Super League",
+			"short": "CSL",
+			"colors": [
+				"#DE2910",
+				"#FFDE00"
+			],
 			"teams": 8,
 			"rr": 4,
 			"level": [
@@ -1021,8 +1221,12 @@
 			"id": "AUS1",
 			"nation": "AUS",
 			"tier": 1,
-			"name": "Liga Australiana",
-			"short": "Austrália",
+			"name": "A-League Men",
+			"short": "A-League",
+			"colors": [
+				"#FF6B00",
+				"#1B1B1B"
+			],
 			"teams": 6,
 			"rr": 6,
 			"level": [

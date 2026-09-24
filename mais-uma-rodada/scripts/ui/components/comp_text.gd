@@ -3,7 +3,7 @@ extends RefCounted
 ## Textos de competição reutilizados pelas telas (título do jogo, nome curto, fase da copa).
 
 
-## "Rodada 5 de 38 · Brasil A", "Libertadores · Grupo C · 2ª rodada" ou "Campeões · Semifinal (volta)".
+## "Rodada 5 de 38 · Série A", "Libertadores · Grupo C · 2ª rodada" ou "Campeões · Semifinal (volta)".
 static func fixture_title(w: GameWorld, f: Fixture) -> String:
 	if f.is_league():
 		var league := w.league(f.comp)
@@ -24,6 +24,15 @@ static func comp_short(w: GameWorld, comp: String) -> String:
 	if DatabaseManager.has_league(comp):
 		return w.league_short(comp)
 	return CupManager.cup_short(comp)
+
+
+## Cores [principal, destaque] de uma liga ou copa (já com as personalizações do editor).
+static func colors(comp: String) -> Array[Color]:
+	var cfg: Dictionary = DatabaseManager.league_cfg(comp) if DatabaseManager.has_league(comp) else DatabaseManager.cup_cfg(comp)
+	var hex: Array = cfg.get("colors", [])
+	if hex.size() < 2:
+		return [UIColors.ACCENT, UIColors.ON_ACCENT]
+	return [Color(String(hex[0])), Color(String(hex[1]))]
 
 
 ## Jogos da mesma competição e fase disputados na mesma data do jogo `f` (o "resto da rodada").

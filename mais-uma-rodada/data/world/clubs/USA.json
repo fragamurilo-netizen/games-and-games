@@ -1,12 +1,12 @@
 {
 	"nation": "USA",
-	"_doc": "Estados Unidos/Canadá (liga fechada de 20).",
+	"_doc": "Estados Unidos/Canadá (liga fechada de 20). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "USA_LAS",
-			"name": "Los Angeles Stars",
-			"short": "LA Stars",
-			"abbr": "LAS",
+			"name": "LA Galaxy",
+			"short": "LA Galaxy",
+			"abbr": "LA",
 			"nick": "Stars",
 			"city": "Los Angeles",
 			"founded": 1994,
@@ -17,7 +17,7 @@
 				"#00245D",
 				"#FFD200"
 			],
-			"stadium": "Carson Stadium",
+			"stadium": "Dignity Health Sports Park",
 			"capacity": 27000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "USA_LAG",
-			"name": "Los Angeles Black & Gold",
-			"short": "LA Gold",
-			"abbr": "LAG",
+			"name": "Los Angeles FC",
+			"short": "LAFC",
+			"abbr": "LAFC",
 			"nick": "Black & Gold",
 			"city": "Los Angeles",
 			"founded": 2014,
@@ -44,7 +44,7 @@
 				"#111111",
 				"#C39E6D"
 			],
-			"stadium": "Exposition Park Stadium",
+			"stadium": "BMO Stadium",
 			"capacity": 22000,
 			"kit": "plain",
 			"crest": {
@@ -57,8 +57,8 @@
 		},
 		{
 			"key": "USA_MIA",
-			"name": "Miami Flamingos",
-			"short": "Flamingos",
+			"name": "Inter Miami CF",
+			"short": "Inter Miami",
 			"abbr": "MIA",
 			"nick": "Garzas",
 			"city": "Miami",
@@ -70,7 +70,7 @@
 				"#F7B5CD",
 				"#231F20"
 			],
-			"stadium": "Fort Lauderdale Stadium",
+			"stadium": "Chase Stadium",
 			"capacity": 21000,
 			"kit": "plain",
 			"crest": {
@@ -83,8 +83,8 @@
 		},
 		{
 			"key": "USA_SEA",
-			"name": "Seattle Sound",
-			"short": "Sound",
+			"name": "Seattle Sounders FC",
+			"short": "Seattle",
 			"abbr": "SEA",
 			"nick": "Sound",
 			"city": "Seattle",
@@ -96,7 +96,7 @@
 				"#5D9741",
 				"#236192"
 			],
-			"stadium": "Pioneer Square Stadium",
+			"stadium": "Lumen Field",
 			"capacity": 37700,
 			"kit": "plain",
 			"crest": {
@@ -110,9 +110,9 @@
 		},
 		{
 			"key": "USA_ATA",
-			"name": "Atlanta Five Stripes",
-			"short": "Five Stripes",
-			"abbr": "ATA",
+			"name": "Atlanta United FC",
+			"short": "Atlanta Utd",
+			"abbr": "ATL",
 			"nick": "Five Stripes",
 			"city": "Atlanta",
 			"founded": 2014,
@@ -123,7 +123,7 @@
 				"#80000A",
 				"#221F1F"
 			],
-			"stadium": "Downtown Atlanta Dome",
+			"stadium": "Mercedes-Benz Stadium",
 			"capacity": 42500,
 			"kit": "stripes_v",
 			"crest": {
@@ -134,9 +134,9 @@
 		},
 		{
 			"key": "USA_PDX",
-			"name": "Portland Timber",
-			"short": "Timber",
-			"abbr": "PDX",
+			"name": "Portland Timbers",
+			"short": "Portland",
+			"abbr": "POR",
 			"nick": "Timber",
 			"city": "Portland",
 			"founded": 2009,
@@ -147,7 +147,7 @@
 				"#004812",
 				"#EBE72B"
 			],
-			"stadium": "Goose Hollow Stadium",
+			"stadium": "Providence Park",
 			"capacity": 25200,
 			"kit": "plain",
 			"crest": {
@@ -161,9 +161,9 @@
 		},
 		{
 			"key": "USA_NYS",
-			"name": "New York Sky",
-			"short": "NY Sky",
-			"abbr": "NYS",
+			"name": "New York City FC",
+			"short": "NYCFC",
+			"abbr": "NYC",
 			"nick": "Pigeons",
 			"city": "New York",
 			"founded": 2013,
@@ -174,7 +174,7 @@
 				"#6CACE4",
 				"#041E42"
 			],
-			"stadium": "Bronx Stadium",
+			"stadium": "Yankee Stadium",
 			"capacity": 28000,
 			"kit": "plain",
 			"crest": {
@@ -187,9 +187,9 @@
 		},
 		{
 			"key": "USA_NJR",
-			"name": "New Jersey Red",
-			"short": "NJ Red",
-			"abbr": "NJR",
+			"name": "New York Red Bulls",
+			"short": "NY Red Bulls",
+			"abbr": "RBNY",
 			"nick": "Bulls",
 			"city": "Harrison",
 			"founded": 1994,
@@ -200,7 +200,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Harrison Arena",
+			"stadium": "Sports Illustrated Stadium",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -213,8 +213,8 @@
 		},
 		{
 			"key": "USA_CLB",
-			"name": "Columbus Workers",
-			"short": "Workers",
+			"name": "Columbus Crew",
+			"short": "Columbus",
 			"abbr": "CLB",
 			"nick": "Crew",
 			"city": "Columbus",
@@ -226,7 +226,7 @@
 				"#FEF200",
 				"#111111"
 			],
-			"stadium": "Arena District Stadium",
+			"stadium": "Lower.com Field",
 			"capacity": 20400,
 			"kit": "plain",
 			"crest": {
@@ -239,8 +239,8 @@
 		},
 		{
 			"key": "USA_CIN",
-			"name": "Cincinnati Orange",
-			"short": "Cincy",
+			"name": "FC Cincinnati",
+			"short": "Cincinnati",
 			"abbr": "CIN",
 			"nick": "Orange & Blue",
 			"city": "Cincinnati",
@@ -252,7 +252,7 @@
 				"#F05323",
 				"#263B80"
 			],
-			"stadium": "West End Stadium",
+			"stadium": "TQL Stadium",
 			"capacity": 26000,
 			"kit": "plain",
 			"crest": {
@@ -265,8 +265,8 @@
 		},
 		{
 			"key": "USA_PHI",
-			"name": "Philadelphia Liberty",
-			"short": "Liberty",
+			"name": "Philadelphia Union",
+			"short": "Philadelphia",
 			"abbr": "PHI",
 			"nick": "Liberty",
 			"city": "Philadelphia",
@@ -278,7 +278,7 @@
 				"#071B2C",
 				"#B19B69"
 			],
-			"stadium": "Chester Riverfront Stadium",
+			"stadium": "Subaru Park",
 			"capacity": 18500,
 			"kit": "plain",
 			"crest": {
@@ -291,8 +291,8 @@
 		},
 		{
 			"key": "USA_ORL",
-			"name": "Orlando Purple",
-			"short": "Purple",
+			"name": "Orlando City SC",
+			"short": "Orlando City",
 			"abbr": "ORL",
 			"nick": "Lions",
 			"city": "Orlando",
@@ -304,7 +304,7 @@
 				"#633492",
 				"#FFFFFF"
 			],
-			"stadium": "Downtown Orlando Stadium",
+			"stadium": "Inter&Co Stadium",
 			"capacity": 25500,
 			"kit": "plain",
 			"crest": {
@@ -317,7 +317,7 @@
 		},
 		{
 			"key": "USA_NSH",
-			"name": "Nashville Coyotes",
+			"name": "Nashville SC",
 			"short": "Nashville",
 			"abbr": "NSH",
 			"nick": "Coyotes",
@@ -330,7 +330,7 @@
 				"#ECE83A",
 				"#1F1646"
 			],
-			"stadium": "Fairgrounds Stadium",
+			"stadium": "Geodis Park",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -341,8 +341,8 @@
 		},
 		{
 			"key": "USA_ATX",
-			"name": "Austin Verde",
-			"short": "Austin",
+			"name": "Austin FC",
+			"short": "Austin FC",
 			"abbr": "ATX",
 			"nick": "Verde",
 			"city": "Austin",
@@ -354,7 +354,7 @@
 				"#00B140",
 				"#111111"
 			],
-			"stadium": "North Austin Stadium",
+			"stadium": "Q2 Stadium",
 			"capacity": 20700,
 			"kit": "plain",
 			"crest": {
@@ -367,7 +367,7 @@
 		},
 		{
 			"key": "USA_HOU",
-			"name": "Houston Oilmen",
+			"name": "Houston Dynamo FC",
 			"short": "Houston",
 			"abbr": "HOU",
 			"nick": "Orange",
@@ -380,7 +380,7 @@
 				"#F4911E",
 				"#101820"
 			],
-			"stadium": "East Downtown Stadium",
+			"stadium": "Shell Energy Stadium",
 			"capacity": 22000,
 			"kit": "plain",
 			"crest": {
@@ -393,9 +393,9 @@
 		},
 		{
 			"key": "USA_KCB",
-			"name": "Kansas City Blue",
-			"short": "KC Blue",
-			"abbr": "KCB",
+			"name": "Sporting Kansas City",
+			"short": "Sporting KC",
+			"abbr": "SKC",
 			"nick": "Blue",
 			"city": "Kansas City",
 			"founded": 1995,
@@ -406,7 +406,7 @@
 				"#91B0D5",
 				"#002F65"
 			],
-			"stadium": "Kansas Speedway Stadium",
+			"stadium": "Children's Mercy Park",
 			"capacity": 18500,
 			"kit": "plain",
 			"crest": {
@@ -417,8 +417,8 @@
 		},
 		{
 			"key": "USA_MIN",
-			"name": "Minnesota Loons",
-			"short": "Loons",
+			"name": "Minnesota United FC",
+			"short": "Minnesota",
 			"abbr": "MIN",
 			"nick": "Loons",
 			"city": "Saint Paul",
@@ -430,7 +430,7 @@
 				"#8CD2F4",
 				"#231F20"
 			],
-			"stadium": "Midway Stadium",
+			"stadium": "Allianz Field",
 			"capacity": 19400,
 			"kit": "plain",
 			"crest": {
@@ -441,9 +441,9 @@
 		},
 		{
 			"key": "USA_SLC",
-			"name": "Salt Lake Royals",
-			"short": "Royals",
-			"abbr": "SLC",
+			"name": "Real Salt Lake",
+			"short": "Real Salt Lake",
+			"abbr": "RSL",
 			"nick": "Royals",
 			"city": "Sandy",
 			"founded": 2004,
@@ -454,7 +454,7 @@
 				"#B30838",
 				"#013A81"
 			],
-			"stadium": "Sandy Stadium",
+			"stadium": "America First Field",
 			"capacity": 20200,
 			"kit": "plain",
 			"crest": {
@@ -465,7 +465,7 @@
 		},
 		{
 			"key": "USA_VAN",
-			"name": "Vancouver Waves",
+			"name": "Vancouver Whitecaps FC",
 			"short": "Vancouver",
 			"abbr": "VAN",
 			"nick": "Caps",
@@ -478,7 +478,7 @@
 				"#FFFFFF",
 				"#00245E"
 			],
-			"stadium": "False Creek Stadium",
+			"stadium": "BC Place",
 			"capacity": 54500,
 			"kit": "plain",
 			"crest": {
@@ -492,9 +492,9 @@
 		},
 		{
 			"key": "USA_SDG",
-			"name": "San Diego Sun",
-			"short": "San Diego",
-			"abbr": "SDG",
+			"name": "San Diego FC",
+			"short": "San Diego FC",
+			"abbr": "SD",
 			"nick": "Sun",
 			"city": "San Diego",
 			"founded": 2023,
@@ -505,7 +505,7 @@
 				"#111111",
 				"#F1A7C9"
 			],
-			"stadium": "Mission Valley Stadium",
+			"stadium": "Snapdragon Stadium",
 			"capacity": 35000,
 			"kit": "plain",
 			"crest": {
