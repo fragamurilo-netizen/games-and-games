@@ -566,6 +566,8 @@ func _look_card(p: Player) -> Control:
 		p.look["bt"] = bs.value
 		refresh())
 	card.add_child(bs)
+	card.add_child(UIKit.label("Formato do rosto", "Small"))
+	card.add_child(_look_chips(p, "fs", FaceGen.FACE_SHAPES, int(feats["face_shape"])))
 	card.add_child(UIKit.label("Olhos", "Small"))
 	card.add_child(_look_chips(p, "ey", FaceGen.EYE_NAMES, int(feats["eye_i"])))
 	var row := UIKit.hbox(8)
