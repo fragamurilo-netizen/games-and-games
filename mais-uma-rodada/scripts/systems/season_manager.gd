@@ -23,6 +23,7 @@ static func _time(key: String, t0: int) -> int:
 
 static func setup_first_season(world: GameWorld) -> void:
 	world.season = build_season(world)
+	NationalTeamManager.start_season(world)
 	for c in world.clubs:
 		c.reset_season_state()
 		FinanceManager.set_budgets(world, c)
@@ -277,6 +278,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		report["youth"] = YouthManager.play_slot(world, slot)
 		report["transfers"] = TransferManager.process_matchday(world)
 		tt = _time("mercado", tt)
+		report["intl"] = NationalTeamManager.after_weekend(world, _weekend_index(s, slot))
+		tt = _time("selecoes", tt)
 		if _weekend_index(s, slot) % 4 == 3:
 			for p: Player in world.players.values():
 				Valuation.update_value(p, world.year)
@@ -583,6 +586,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 			scorer = {"id": sp.id, "name": sp.display_name(), "club": world.club(sp.club_id).short_name if sp.club_id >= 0 else "", "goals": sp.cup_stats[cid][Player.C_GOALS]}
 		summary["cups"].append({"id": cid, "name": cup.name, "champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer})
 		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer}
+	# Seleções: torneios de verão (Copa do Mundo, Eurocopa, Copa América...)
+	summary["intl"] = NationalTeamManager.play_summer(world)
 	# Resumo do usuário
 	if world.has_user():
 		var u := world.user_club()
@@ -680,6 +685,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	TransferManager.balance_squads(world)
 	# Nova temporada
 	world.season = build_season(world)
+	NationalTeamManager.start_season(world)
 	YouthManager.build_league(world)
 	world.transfer_log = world.transfer_log.filter(func(t): return t.year >= world.year - 1)
 	world.offers.clear()
