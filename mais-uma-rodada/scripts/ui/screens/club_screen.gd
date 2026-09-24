@@ -276,15 +276,12 @@ func _squad_card(w: GameWorld, club: Club) -> Control:
 func _history_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("Títulos e história"))
-	var titles := UIKit.flow(8)
-	var keys: Array = club.titles.keys()
-	keys.sort_custom(func(a, b): return _title_rank(a) < _title_rank(b))
-	for k in keys:
-		var n := club.title_count(k)
-		if n > 0:
-			titles.add_child(UIKit.pill(_title_text(w, String(k), n), _title_color(String(k)), 17))
-	if titles.get_child_count() > 0:
-		card.add_child(titles)
+	var any_title := false
+	for k in club.titles:
+		if club.title_count(k) > 0:
+			any_title = true
+	if any_title:
+		card.add_child(TrophyView.cabinet(w, club, 64))
 	else:
 		card.add_child(UIKit.label("Nenhum título registrado desde %d. Ainda." % DatabaseManager.start_year(), "Muted"))
 	if club.history.is_empty():

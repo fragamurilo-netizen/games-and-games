@@ -26,6 +26,8 @@ static func setup_first_season(world: GameWorld) -> void:
 	for c in world.clubs:
 		c.reset_season_state()
 		FinanceManager.set_budgets(world, c)
+	for p: Player in world.players.values():
+		p.ovr_start = p.overall
 	compute_goals(world)
 
 
@@ -236,6 +238,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			var home := world.club(f.home)
 			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
+	WeeklyAwards.after_matchday(world, md, slot)
 	tt = _time("aplicar", tt)
 	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube
 	var sus := world.suspended()
@@ -439,6 +442,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			if inj > 0:
 				p.injury_weeks = maxi(p.injury_weeks, inj)
 				p.injury_name = InjuryTable.name_for(inj, p.id + world.season.day)
+				PlayerDevelopment.injury_setback(world.rng, p, inj, p.age(world.year))
 				NewsManager.on_injury(world, p)
 			# Moral
 			var vol := p.trait_mult("morale_volatility")
@@ -563,15 +567,35 @@ static func end_season(world: GameWorld) -> Dictionary:
 				NewsManager.post(world, "rebaixamento", {"club": world.club(cid).short_name, "division": world.league_name(lower), "pos": ids.find(cid) + 1},
 					cid, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(cid) else NewsEvent.IMP_NORMAL)
 	# Prêmios individuais
+	var weekly := WeeklyAwards.season_close(world)
+	summary["months"] = weekly["months"]
+	summary["totw_most"] = WeeklyAwards.most_selected(weekly["totw_n"])
+	var bo_rank := AwardManager.ballon_ranking(world, 10)
+	summary["ballon_rank"] = bo_rank
 	var awards := AwardManager.league_awards(world)
 	var ballon := AwardManager.world_player(world)
-	AwardManager.credit(world, awards, ballon)
+	var extra := {"teams": AwardManager.teams_of_season(world), "cups": AwardManager.cup_awards(world),
+		"world_young": AwardManager.world_young(world), "boot": AwardManager.golden_boot(world),
+		"club": AwardManager.club_player(world, world.user_club_id) if world.has_user() else {}}
+	AwardManager.credit(world, awards, ballon, extra)
 	for id in hist_leagues:
 		hist_leagues[id]["awards"] = awards.get(id, {})
+		if extra["teams"].has(id):
+			hist_leagues[id]["team"] = extra["teams"][id]
 	summary["awards"] = awards.get(world.user_league_id(), {})
+	summary["team"] = extra["teams"].get(world.user_league_id(), [])
 	summary["ballon"] = ballon
+	summary["world_young"] = extra["world_young"]
+	summary["boot"] = extra["boot"]
+	summary["club_player"] = extra["club"]
+	summary["cup_awards"] = extra["cups"]
+	if not extra["boot"].is_empty():
+		var bt: Dictionary = extra["boot"]
+		NewsManager.post_raw(world, "%s leva a Chuteira de Ouro" % bt["name"],
+			"Com %d gols pelo %s, %s foi o artilheiro mais valioso do mundo em %d." % [int(bt["goals"]), bt["club"], bt["name"], world.year],
+			-1, int(bt["id"]), NewsEvent.IMP_NORMAL, "premio")
 	if not ballon.is_empty():
-		NewsManager.post_raw(world, "%s é o melhor jogador do mundo" % ballon["name"],
+		NewsManager.post_raw(world, "%s ganha a Bola de Ouro" % ballon["name"],
 			"%s, do %s, foi eleito o melhor jogador do planeta em %d: %d gols em %d jogos." % [ballon["full"], ballon["club"], world.year, int(ballon["goals"]), int(ballon["apps"])],
 			-1, int(ballon["id"]), NewsEvent.IMP_HIGH, "premio")
 	var ua: Dictionary = summary["awards"]
@@ -588,7 +612,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			var sp: Player = top[0]
 			scorer = {"id": sp.id, "name": sp.display_name(), "club": world.club(sp.club_id).short_name if sp.club_id >= 0 else "", "goals": sp.cup_stats[cid][Player.C_GOALS]}
 		summary["cups"].append({"id": cid, "name": cup.name, "champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer})
-		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer}
+		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer, "mvp": extra["cups"].get(cid, {})}
 	# Resumo do usuário
 	if world.has_user():
 		var u := world.user_club()
@@ -626,12 +650,29 @@ static func end_season(world: GameWorld) -> Dictionary:
 		if int(tot[0]) > 0 and p.club_id >= 0:
 			p.history.append({"y": world.year, "c": p.club_id, "cn": world.club(p.club_id).short_name, "l": world.club(p.club_id).league_id,
 				"a": p.stats[Player.S_APPS], "g": p.stats[Player.S_GOALS], "as": p.stats[Player.S_ASSISTS], "r": snappedf(p.avg_rating(), 0.01),
-				"ca": int(tot[0]) - p.stats[Player.S_APPS], "cg": int(tot[1]) - p.stats[Player.S_GOALS]})
+				"ca": int(tot[0]) - p.stats[Player.S_APPS], "cg": int(tot[1]) - p.stats[Player.S_GOALS],
+				"cas": int(tot[2]) - p.stats[Player.S_ASSISTS], "mi": p.minutes_season, "st": p.stats[Player.S_STARTS],
+				"mo": p.stats[Player.S_MOTM], "cs": p.stats[Player.S_CLEAN], "yc": p.stats[Player.S_YELLOWS], "rc": p.stats[Player.S_REDS],
+				"o": p.overall, "o0": p.ovr_start if p.ovr_start >= 0 else p.overall})
 			if p.history.size() > 25:
 				p.history = p.history.slice(p.history.size() - 25)
 	var yl_sum: Dictionary = summary.get("youth_league", {})
 	world.history.append({"y": world.year, "leagues": hist_leagues, "cups": hist_cups, "user": summary["user"], "ballon": ballon,
-		"club": world.user_club_id, "yl": yl_sum})
+		"club": world.user_club_id, "yl": yl_sum, "wy": extra["world_young"], "boot": extra["boot"], "cp": extra["club"],
+		"arch": SeasonArchive.snapshot_leagues(world), "sq": SeasonArchive.snapshot_squad(world),
+		"bo": bo_rank, "months": weekly["months"], "tw": summary["totw_most"]})
+	# Evolução do elenco do usuário no ano (quem subiu e quem caiu)
+	if world.has_user():
+		summary["evolution"] = PlayerDevelopment.squad_evolution(world, world.user_club_id)
+	# Personalidade: traços que surgem ou somem com a idade, os prêmios e o momento
+	var persona := PlayerDevelopment.personality_review(world)
+	summary["persona"] = []
+	for ch in persona:
+		var cp: Player = ch["p"]
+		if cp.club_id >= 0 and world.is_user_club(cp.club_id):
+			summary["persona"].append({"id": cp.id, "name": cp.display_name(), "t": ch["t"], "add": ch["add"], "why": ch["why"]})
+			NewsManager.post_raw(world, "%s: %s" % [cp.display_name(), PlayerDevelopment.persona_headline(ch)],
+				String(ch["why"]), world.user_club_id, cp.id, NewsEvent.IMP_NORMAL, "personalidade")
 	# Âncora de talento do mundo (antes da revisão anual e da nova base)
 	PlayerDevelopment.update_talent_drift(world)
 	# Revisão anual de potencial (explosões / estagnações)

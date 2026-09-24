@@ -68,6 +68,7 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5) / weeks
 	var year := world.year
 	var clubs := world.clubs
+	var mentors := _mentor_bonus(world)
 	for p: Player in world.players.values():
 		if p.id % 2 != parity:
 			continue
@@ -97,7 +98,11 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				var play_f := 1.25 if mins >= 60 else (1.05 if mins > 0 else (0.85 if cid >= 0 else 0.7))
 				var fac_f: float = (0.85 + clubs[cid].facilities * 0.003) if cid >= 0 else 0.7
 				var train_f := TrainingManager.growth_mult(world, p) if cid == world.user_club_id else 1.0
-				p.dev_acc += g * play_f * growth_f * fac_f * train_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
+				# Quem joga bem cresce mais; quem vive de notas baixas trava.
+				var perf_f := performance_factor(p) if mins > 0 else 1.0
+				# Jovens ao lado de um mentor aprendem mais rápido.
+				var mentor_f := 1.0 + float(mentors.get(cid, 0.0)) if age <= 22 and cid >= 0 and not p.has_trait("mentor") else 1.0
+				p.dev_acc += g * play_f * growth_f * fac_f * train_f * perf_f * mentor_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
 				if p.dev_acc >= 0.15:
 					var before := p.overall
 					apply_growth(world, p, p.dev_acc, TrainingManager.bias_for(world, p) if cid == world.user_club_id else [])
@@ -107,12 +112,187 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				# Experiência: veteranos ficam mais inteligentes mesmo sem crescer fisicamente.
 				_experience(rng, p)
 		else:
-			var expected := (5.0 + (age - dstart) * 4.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f
+			# Cada corpo envelhece de um jeito (fixo por jogador) e a carga de jogos pesa depois dos 30.
+			var body_f := aging_factor(p)
+			var load_f := 1.0
+			if age >= 30:
+				var mins: int = minutes.get(p.id, 0)
+				load_f = 1.08 if mins >= 80 else (0.95 if mins == 0 else 1.0)
+			var expected := (5.0 + (age - dstart) * 4.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
 			while expected > 0.0:
 				if rng.randf() < minf(1.0, expected):
 					apply_decline(rng, p)
 				expected -= 1.0
+			# A cabeça ainda aprende: veteranos ganham leitura de jogo enquanto o físico cai.
+			if rng.randf() < 0.035 * p.trait_mult("dev_mult"):
+				_wisdom(rng, p)
 	return notable
+
+
+## Multiplicador de crescimento pela forma recente (notas das últimas partidas).
+static func performance_factor(p: Player) -> float:
+	if p.recent_ratings.is_empty():
+		return 1.0
+	return clampf(1.0 + (p.form() - 6.6) * 0.22, 0.82, 1.22)
+
+
+## Ritmo de envelhecimento próprio do jogador (0,8 a 1,2), estável ao longo da carreira.
+static func aging_factor(p: Player) -> float:
+	return 1.0 + RngUtil.noise(p.id, 911, p.birth_year) * 0.2
+
+
+## Bônus de desenvolvimento que os mentores de cada clube dão aos jovens: {club_id: bônus}.
+static func _mentor_bonus(world: GameWorld) -> Dictionary:
+	var out := {}
+	for p: Player in world.players.values():
+		if p.club_id >= 0 and p.injury_weeks <= 0 and p.has_trait("mentor"):
+			out[p.club_id] = minf(0.16, float(out.get(p.club_id, 0.0)) + float(DatabaseManager.trait_data("mentor").get("mentor", 0.08)))
+	return out
+
+
+## Veterano em declínio ganha um ponto mental, sem teto do potencial.
+static func _wisdom(rng: RandomNumberGenerator, p: Player) -> void:
+	var mental: int = [Attr.INT, Attr.DEC, Attr.POS, Attr.VIS][rng.randi_range(0, 3)]
+	if p.attrs[mental] < 95:
+		p.set_attr(mental, p.attrs[mental] + 1)
+		p.recompute_overall()
+
+
+## Lesão grave cobra um preço físico, maior com a idade. Retorna os pontos perdidos.
+static func injury_setback(rng: RandomNumberGenerator, p: Player, weeks: int, age: int) -> int:
+	if weeks < 8:
+		return 0
+	var expected := (weeks - 6) * 0.18 * (1.0 + maxf(0.0, age - 27.0) * 0.12) * p.trait_mult("injury_loss_mult")
+	var lost := 0
+	while expected > 0.0:
+		if rng.randf() < minf(1.0, expected):
+			var i: int = Attr.PHYSICAL[rng.randi_range(0, Attr.PHYSICAL.size() - 1)]
+			if p.attrs[i] > 20:
+				p.attrs[i] -= 1
+				lost += 1
+		expected -= 1.0
+	if lost > 0:
+		p._pos_cache_dirty = true
+		p.recompute_overall()
+	return lost
+
+
+## Quem mais evoluiu e quem mais caiu no elenco durante a temporada.
+## Retorna {"up": [{id, name, from, to, age}], "down": [...]} (até 3 de cada).
+static func squad_evolution(world: GameWorld, club_id: int) -> Dictionary:
+	var c := world.club(club_id)
+	var rows: Array = []
+	if c != null:
+		for pid in c.player_ids:
+			var p := world.player(pid)
+			if p == null or p.ovr_start < 0:
+				continue
+			var d := p.season_delta()
+			if d != 0:
+				rows.append({"id": p.id, "name": p.display_name(), "from": p.ovr_start, "to": p.overall, "age": p.age(world.year), "d": d})
+	rows.sort_custom(func(a, b): return int(a["d"]) > int(b["d"]) if a["d"] != b["d"] else int(a["id"]) < int(b["id"]))
+	var up: Array = rows.filter(func(r): return int(r["d"]) > 0).slice(0, 3)
+	var down_all: Array = rows.filter(func(r): return int(r["d"]) < 0)
+	down_all.reverse()
+	return {"up": up, "down": down_all.slice(0, 3)}
+
+
+# ---------------------------------------------------------------------------
+# Personalidade viva
+# ---------------------------------------------------------------------------
+
+const MAX_TRAITS := 3
+
+
+## Revisão anual de personalidade: a idade, os prêmios, a fase e o clube mudam as pessoas.
+## No máximo uma mudança por jogador por ano. Retorna [{p, t, add, why}].
+static func personality_review(world: GameWorld) -> Array:
+	var rng := world.rng
+	var out: Array = []
+	var year := world.year
+	var full := FinanceManager.WEEKS * 90.0
+	var conflicts: Array = DatabaseManager.personalities().get("conflicts", [])
+	for p: Player in world.players.values():
+		var age := p.age(year)
+		var share := p.minutes_season / full
+		var avg := p.avg_rating()
+		var won: Array = p.awards_in(year)
+		var big_award := false
+		for k in won:
+			if AwardManager.award_weight(k) >= 3:
+				big_award = true
+		var ch := {}
+		# Perdas: amadurecimento e confiança
+		if p.has_trait("inseguro") and share >= 0.45 and avg >= 7.1 and rng.randf() < 0.35:
+			ch = {"t": "inseguro", "add": false, "why": "Uma temporada de alto nível acabou com a insegurança."}
+		elif p.has_trait("timido") and big_award and rng.randf() < 0.6:
+			ch = {"t": "timido", "add": false, "why": "O prêmio deu a confiança que faltava."}
+		elif p.has_trait("festeiro") and age >= 29 and rng.randf() < 0.18:
+			ch = {"t": "festeiro", "add": false, "why": "Sossegou: agora cuida mais do corpo."}
+		elif p.has_trait("temperamental") and age >= 31 and rng.randf() < 0.14:
+			ch = {"t": "temperamental", "add": false, "why": "A idade trouxe calma dentro de campo."}
+		elif p.has_trait("acomodado") and age <= 27 and share >= 0.6 and avg >= 7.0 and rng.randf() < 0.3:
+			ch = {"t": "acomodado", "add": false, "why": "Voltou a ter fome de bola depois de um grande ano."}
+		elif p.has_trait("rebelde") and age >= 30 and rng.randf() < 0.12:
+			ch = {"t": "rebelde", "add": false, "why": "Aprendeu a conviver com o vestiário."}
+		# Ganhos: experiência, idolatria, ego, liderança, rebeldia
+		elif age >= 30 and p.career_apps >= 280 and rng.randf() < 0.22:
+			ch = {"t": "cascudo", "add": true, "why": "Mais de %d jogos na carreira: já viu de tudo." % p.career_apps}
+		elif p.club_id >= 0 and _club_years(p, year) >= 6 and _club_apps(p) >= 150 and rng.randf() < 0.3:
+			ch = {"t": "idolo", "add": true, "why": "%d temporadas e %d jogos pelo clube: virou ídolo da torcida." % [_club_years(p, year), _club_apps(p)]}
+		elif age >= 29 and p.career_apps >= 250 and p.consistency >= 12 and rng.randf() < 0.08:
+			ch = {"t": "lider", "add": true, "why": "A experiência fez dele uma voz ativa no vestiário."}
+		elif age >= 31 and p.career_apps >= 300 and rng.randf() < 0.07:
+			ch = {"t": "mentor", "add": true, "why": "Passou a adotar os garotos do elenco."}
+		elif age <= 24 and big_award and rng.randf() < 0.18:
+			ch = {"t": "estrela", "add": true, "why": "O sucesso precoce subiu à cabeça."}
+		elif p.unhappy_weeks >= 8 and rng.randf() < 0.25:
+			ch = {"t": "rebelde", "add": true, "why": "Meses de insatisfação mudaram o humor dele."}
+		elif age <= 21 and p.traits.size() < 2 and rng.randf() < 0.12:
+			var ids := DatabaseManager.trait_ids()
+			var t: String = ids[RngUtil.weighted_index(rng, DatabaseManager.trait_weights())]
+			ch = {"t": t, "add": true, "why": "A personalidade está se formando."}
+		if ch.is_empty():
+			continue
+		var t: String = ch["t"]
+		if ch["add"]:
+			if p.has_trait(t) or p.traits.size() >= MAX_TRAITS or DatabaseManager.trait_data(t).is_empty():
+				continue
+			var blocked := false
+			for other in p.traits:
+				if PlayerGenerator._conflicts(conflicts, String(other), t):
+					blocked = true
+			if blocked:
+				continue
+			var nt: Array = p.traits.duplicate()
+			nt.append(t)
+			p.set_traits(nt)
+		else:
+			var nt: Array = p.traits.duplicate()
+			nt.erase(t)
+			if nt.is_empty():
+				continue # todo mundo tem ao menos um traço
+			p.set_traits(nt)
+		p.persona_log.append({"y": year, "t": t, "add": ch["add"], "why": ch["why"]})
+		ch["p"] = p
+		out.append(ch)
+	return out
+
+
+static func persona_headline(ch: Dictionary) -> String:
+	var name := String(DatabaseManager.trait_data(String(ch["t"])).get("name", ch["t"]))
+	return ("agora é %s" % name.to_lower()) if ch["add"] else ("deixou de ser %s" % name.to_lower())
+
+
+static func _club_years(p: Player, year: int) -> int:
+	return year - p.joined_year + 1 if p.joined_year > 0 else 0
+
+
+static func _club_apps(p: Player) -> int:
+	if p.spells.is_empty():
+		return 0
+	var s: Dictionary = p.spells[p.spells.size() - 1]
+	return int(s.get("a", 0)) if int(s.get("c", -1)) == p.club_id else 0
 
 
 static func _experience(rng: RandomNumberGenerator, p: Player) -> void:

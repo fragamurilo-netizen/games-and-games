@@ -305,6 +305,36 @@ func _run() -> void:
 	_screen().refresh()
 	await _frames(6)
 	await _shot("45_historia_carreira")
+	_screen().set("_tab", "seasons")
+	_screen().refresh()
+	await _frames(6)
+	await _shot("46_historia_temporadas")
+	for view in ["sc", "rt", "aw"]:
+		_screen().set("_arch_view", view)
+		_screen().refresh()
+		await _frames(4)
+		await _shot("47_historia_temporadas_" + view)
+	_screen().set("_tab", "club")
+	_screen().refresh()
+	await _frames(6)
+	await _shot("48_historia_trofeus")
+	var champ_club := -1
+	var last: Dictionary = GameManager.world.history[GameManager.world.history.size() - 1]
+	for lid in last.get("leagues", {}):
+		champ_club = int(last["leagues"][lid]["champion"])
+		break
+	if champ_club >= 0:
+		UIManager.push("club", {"id": champ_club})
+		await _frames(8)
+		await _shot("49_clube_campeao_trofeus")
+	var veteran: Player = null
+	for q: Player in GameManager.world.squad(GameManager.world.user_club()):
+		if q.history.size() >= 1 and (veteran == null or q.overall > veteran.overall):
+			veteran = q
+	if veteran != null:
+		UIManager.push("player", {"id": veteran.id})
+		await _frames(8)
+		await _shot("50_perfil_temporadas")
 	print("TOUR OK: %d telas, temporada %d, rodadas %d" % [count, GameManager.world.year, rounds])
 	GameManager.close_career()
 	SaveManager.delete_slot(5)

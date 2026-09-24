@@ -237,6 +237,13 @@ func _personality(p: Player, own: bool) -> Control:
 		card.add_child(UIKit.label(String(d.get("desc", "")), "Muted", true))
 	if own:
 		card.add_child(UIKit.label("Consistência: %s · Propensão a lesões: %s" % [_level(p.consistency, false), _level(p.injury_prone, true)], "Small", true))
+	if not p.persona_log.is_empty():
+		card.add_child(UIKit.label("Como ele mudou", "Caps"))
+		for i in range(p.persona_log.size() - 1, maxi(-1, p.persona_log.size() - 6), -1):
+			var e: Dictionary = p.persona_log[i]
+			var nm := String(DatabaseManager.trait_data(String(e["t"])).get("name", e["t"]))
+			var line := "%d · %s %s. %s" % [int(e["y"]), "Virou" if e.get("add", false) else "Deixou de ser", nm.to_lower(), String(e.get("why", ""))]
+			card.add_child(UIKit.colored(line, UIColors.GREEN if e.get("add", false) else UIColors.MUTED, "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -259,6 +266,21 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	row.add_child(UIKit.stat(Fmt.rating(p.avg_rating()) if p.stats[Player.S_APPS] > 0 else "—", "nota"))
 	row.add_child(UIKit.stat("%d/%d" % [p.stats[Player.S_YELLOWS], p.stats[Player.S_REDS]], "cartões"))
 	card.add_child(row)
+	var row_b := UIKit.hbox(4)
+	var mins := p.stats[Player.S_MINUTES]
+	row_b.add_child(UIKit.stat(str(p.stats[Player.S_STARTS]), "titular"))
+	row_b.add_child(UIKit.stat(str(mins), "minutos"))
+	row_b.add_child(UIKit.stat(str(p.stats[Player.S_MOTM]), "craque jogo"))
+	if Pos.group(p.position) <= Pos.G_DEF:
+		row_b.add_child(UIKit.stat(str(p.stats[Player.S_CLEAN]), "sem sofrer"))
+	else:
+		row_b.add_child(UIKit.stat("%.2f" % ((p.stats[Player.S_GOALS] + p.stats[Player.S_ASSISTS]) * 90.0 / mins) if mins >= 90 else "—", "G+A /90"))
+	var d := p.season_delta()
+	row_b.add_child(UIKit.stat(("+%d" % d) if d > 0 else str(d), "overall no ano", UIColors.GREEN if d > 0 else (UIColors.RED if d < 0 else UIColors.TEXT)))
+	card.add_child(row_b)
+	var tot := p.season_totals()
+	if int(tot[0]) > p.stats[Player.S_APPS]:
+		card.add_child(UIKit.label("Com as copas: %d jogos, %d gols e %d assistências." % [int(tot[0]), int(tot[1]), int(tot[2])], "Small", true))
 	card.add_child(UIKit.section("Carreira"))
 	var row2 := UIKit.hbox(4)
 	row2.add_child(UIKit.stat(str(p.career_apps), "jogos"))
@@ -271,8 +293,10 @@ func _stats(w: GameWorld, p: Player) -> Control:
 		var af := UIKit.flow(8)
 		for i in range(p.awards.size() - 1, -1, -1):
 			var a: Dictionary = p.awards[i]
-			var where := "" if String(a.get("l", "")) == "" else " · " + w.league_short(String(a["l"]))
-			af.add_child(UIKit.pill("%s %d%s" % [AwardManager.award_name(String(a["k"])), int(a["y"]), where], UIColors.ACCENT, 16))
+			var wh := AwardManager.award_where(w, a)
+			var where := "" if wh == "" else " · " + wh
+			var big := AwardManager.award_weight(String(a["k"])) >= 5
+			af.add_child(UIKit.pill("%s %d%s" % [AwardManager.award_name(String(a["k"])), int(a["y"]), where], UIColors.ACCENT if big else UIColors.BLUE, 16))
 		card.add_child(af)
 	if not p.spells.is_empty():
 		card.add_child(UIKit.section("Clubes"))
@@ -289,18 +313,56 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			line.add_child(UIKit.label("%d j · %d g" % [int(s.get("a", 0)), int(s.get("g", 0))], "Muted"))
 			card.add_child(line)
 	if not p.history.is_empty():
-		card.add_child(UIKit.section("Histórico"))
-		for i in range(p.history.size() - 1, maxi(-1, p.history.size() - 9), -1):
+		card.add_child(UIKit.section("Temporada a temporada"))
+		var chart := EvolutionChart.new()
+		chart.custom_minimum_size = Vector2(0, 150)
+		chart.setup(p, w.year)
+		card.add_child(chart)
+		var hdr := UIKit.hbox(8)
+		var hl := UIKit.label("Ano  Clube", "Caps")
+		hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hdr.add_child(hl)
+		hdr.add_child(UIKit.label("J  G  A  NOTA  OVR", "Caps"))
+		card.add_child(hdr)
+		for i in range(p.history.size() - 1, -1, -1):
 			var h: Dictionary = p.history[i]
-			var line := UIKit.hbox(10)
+			var line := UIKit.hbox(8)
 			var y := UIKit.label(str(h.get("y", "")), "Mono")
 			y.custom_minimum_size.x = 64
 			line.add_child(y)
 			var cn := UIKit.label(String(h.get("cn", "")), "")
 			cn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			line.add_child(cn)
-			line.add_child(UIKit.label("%d j · %d g · %d a · nota %s" % [int(h.get("a", 0)), int(h.get("g", 0)), int(h.get("as", 0)), Fmt.rating(float(h.get("r", 0.0)))], "Small"))
+			var apps := int(h.get("a", 0)) + int(h.get("ca", 0))
+			var goals := int(h.get("g", 0)) + int(h.get("cg", 0))
+			var ast := int(h.get("as", 0)) + int(h.get("cas", 0))
+			line.add_child(UIKit.label("%d  %d  %d  %s" % [apps, goals, ast, Fmt.rating(float(h.get("r", 0.0)))], "Mono"))
+			var o := int(h.get("o", 0))
+			var ol := UIKit.label("—" if o <= 0 else str(o), "Mono")
+			ol.custom_minimum_size.x = 84
+			ol.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			if o > 0 and h.has("o0"):
+				var dd := o - int(h["o0"])
+				if dd != 0:
+					ol.text = "%d %s%d" % [o, "+" if dd > 0 else "", dd]
+					ol.add_theme_color_override(&"font_color", UIColors.GREEN if dd > 0 else UIColors.RED)
+			line.add_child(ol)
 			card.add_child(line)
+			var extra: Array = []
+			if int(h.get("mo", 0)) > 0:
+				extra.append("%d× craque do jogo" % int(h["mo"]))
+			if int(h.get("cs", 0)) > 0 and Pos.group(p.position) <= Pos.G_DEF:
+				extra.append("%d jogos sem sofrer gol" % int(h["cs"]))
+			for k in p.awards_in(int(h.get("y", 0))):
+				if k != "team":
+					extra.append(AwardManager.award_name(k))
+			if p.awards_in(int(h.get("y", 0))).has("team"):
+				extra.append(AwardManager.award_name("team"))
+			if not extra.is_empty():
+				var el := UIKit.label("      " + " · ".join(extra), "Small", true)
+				el.add_theme_color_override(&"font_color", UIColors.ACCENT)
+				card.add_child(el)
 	return UIKit.card_panel(card)
 
 
