@@ -33,6 +33,8 @@ func _initialize() -> void:
 	_run("treino, base e liga sub-20", _test_training_youth)
 	_run("empréstimos, parcelas e cláusulas", _test_deals)
 	_run("rostos e personalização", _test_faces)
+	_run("trocas, oferecer jogador e contrapropostas", _test_trades)
+	_run("patrocínios e uniformes da pré-temporada", _test_sponsors)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -678,6 +680,82 @@ func _test_training_youth() -> void:
 	check(not Array(turn["new"]).is_empty(), "nenhum garoto novo na virada")
 	for q: Player in w.academy.values():
 		check(q.age(w.year) <= YouthManager.MAX_AGE, "garoto acima da idade ficou na base")
+
+
+func _test_trades() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	c.transfer_budget = 80_000_000
+	w.season.day = 0 # janela aberta no início
+	check(w.transfer_window_open(), "janela deveria estar aberta")
+	var seller: Club = w.clubs_in_league("BRA1")[10]
+	var target: Player = w.squad(seller)[3]
+	var mine: Array = w.squad(c).duplicate()
+	mine.sort_custom(func(a, b): return a.value > b.value)
+	var sp: Player = mine[2]
+	var deal := {"inst": 1, "sell_on": 0.0, "swap": [sp.id]}
+	var cash_only := TransferManager.user_bid(w, target, Valuation.round_value(target.value * 0.5), {"inst": 1})
+	w.stats.erase("neg")
+	var with_swap := TransferManager.user_bid(w, target, Valuation.round_value(target.value * 0.5), deal)
+	check(TransferManager.swap_worth(w, sp, seller) > 0, "jogador da troca sem valor")
+	check(cash_only["result"] != "accepted" or with_swap["result"] == "accepted", "troca não melhorou a proposta")
+	# Fecha com troca: o jogador oferecido vai para o vendedor
+	var n0 := c.player_ids.size()
+	var r := TransferManager.user_sign(w, target, target.value, TransferManager.wage_ask(w, target, c) * 2, 3, deal)
+	check(r["ok"], "contratação com troca falhou: %s" % r.get("msg", ""))
+	if r["ok"]:
+		check(target.club_id == c.id and sp.club_id == seller.id, "troca não moveu os dois jogadores")
+		check(c.player_ids.size() == n0, "elenco deveria ficar do mesmo tamanho")
+	# Oferecer jogador aos clubes
+	var off: Player = mine[5]
+	var sh := TransferManager.shop_player(w, off)
+	check(sh["ok"], "oferecer falhou: %s" % sh["msg"])
+	var again := TransferManager.shop_player(w, off)
+	check(not again["ok"], "oferecer duas vezes na mesma rodada deveria ser bloqueado")
+	# Contraproposta em rodadas: comprador sobe sem passar do teto
+	var o := TransferOffer.new()
+	o.id = 999
+	o.player_id = mine[6].id
+	o.buyer_id = w.clubs_in_league("ENG1")[0].id
+	o.seller_id = c.id
+	o.fee = 1_000_000
+	o.max_fee = 1_500_000
+	o.expires_day = w.current_turn() + 2
+	w.offers.append(o)
+	var msg := TransferManager.respond_offer(w, o, "counter", 2_000_000)
+	check(o.is_pending() and o.fee > 1_000_000 and o.fee <= o.max_fee, "comprador deveria subir a oferta (%s)" % msg)
+	TransferManager.respond_offer(w, o, "counter", 1_400_000)
+	check(o.is_pending() and o.raised and o.fee == 1_400_000, "pedido dentro do teto deveria ser aceito")
+	var d := o.to_dict()
+	check(TransferOffer.from_dict(d).rounds == 2, "rodadas não salvas")
+
+
+func _test_sponsors() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	SponsorManager.open_preseason(w)
+	check(SponsorManager.is_preseason(w), "pré-temporada não abriu")
+	for s in SponsorManager.SLOTS:
+		check(SponsorManager.offers_for(w, s[0]).size() == 3, "espaço %s sem 3 propostas" % s[0])
+	var base := c.income_sponsor
+	var r := SponsorManager.sign(w, "master", 0)
+	check(r["ok"], "assinar master falhou")
+	check(c.income_sponsor > base, "master não aumentou a receita")
+	check(String(c.kit_home.get("sp", {}).get("n", "")) == String(c.sponsors["master"]["n"]), "logo do master fora da camisa")
+	check(not SponsorManager.sign(w, "master", 1)["ok"], "espaço ocupado aceitou outro contrato")
+	r = SponsorManager.sign(w, "manga", 1) # por vitória
+	var b0 := c.balance
+	SponsorManager.on_win(w, c)
+	check(c.balance - b0 == int(c.sponsors["manga"]["b"]) and int(c.sponsors["manga"]["b"]) > 0, "bônus por vitória não pago")
+	var signed := SponsorManager.close_preseason(w)
+	check(signed.size() == 2 and c.sponsors.size() == 4, "diretoria não fechou os espaços vazios")
+	check(not SponsorManager.is_preseason(w), "pré-temporada não fechou")
+	var c2 := Club.from_dict(c.to_dict())
+	check(c2.sponsors.size() == 4, "patrocínios não salvos")
+	# Receita total com todos os espaços fica perto da receita típica
+	var typical := FinanceManager.sponsor_income(c)
+	check(c.income_sponsor > typical * 0.75 and c.income_sponsor < typical * 1.25, "receita de patrocínio desbalanceada (%d vs %d)" % [c.income_sponsor, typical])
+	check(KitView.style_combinations() >= 100, "poucas combinações de uniforme")
 
 
 func _test_deals() -> void:

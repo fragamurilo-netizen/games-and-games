@@ -353,6 +353,8 @@ static func _team_morale(w: GameWorld, club: Club) -> float:
 
 func _alerts_card(w: GameWorld, club: Club) -> Control:
 	var items: Array = []
+	if SponsorManager.is_preseason(w):
+		items.append(["shirt", UIColors.ACCENT, "Pré-temporada: desenhe o uniforme e feche os patrocínios antes do primeiro jogo", func(): UIManager.push("kit")])
 	var offers := TransferManager.pending_offers(w)
 	if not offers.is_empty():
 		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])

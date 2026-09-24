@@ -16,8 +16,11 @@ var counter_wage: int = -1
 var box: VBoxContainer
 var on_done: Callable
 ## Condições: parcelas, % de revenda (compra), luvas e multa rescisória (contrato).
-var deal: Dictionary = {"inst": 1, "sell_on": 0.0, "bonus": 0, "clause": 3}
+var deal: Dictionary = {"inst": 1, "sell_on": 0.0, "bonus": 0, "clause": 3, "swap": []}
 var loan_mode := false
+## Escolhendo jogadores do elenco para incluir na troca.
+var picking_swap := false
+const MAX_SWAP := 2
 
 
 static func open(world: GameWorld, player: Player, kind: String, done: Callable) -> void:
@@ -83,6 +86,9 @@ func _render() -> void:
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
 	box.add_child(head)
 	var user := w.user_club()
+	if picking_swap:
+		_render_swap_picker()
+		return
 	match mode:
 		"buy":
 			if agreed_fee < 0:
@@ -154,6 +160,7 @@ func _render_fee(caption: String, hint: String) -> void:
 		box.add_child(_choice("Pagamento", [["À vista", 1], ["2 parcelas", 2], ["3 parcelas", 3]], int(deal["inst"]), func(v): deal["inst"] = int(v)))
 		box.add_child(_choice("Revenda para o %s" % w.club(p.club_id).short_name, [["0%", 0.0], ["10%", 0.1], ["20%", 0.2]], float(deal["sell_on"]), func(v): deal["sell_on"] = float(v)))
 		box.add_child(UIKit.label("Sai do caixa agora: %s (1ª parcela + 5%% do empresário). Parcelar deixa a oferta menos atraente; dar %% de revenda deixa mais." % Fmt.money(TransferManager.upfront_cost(fee, deal)), "Small", true))
+		_render_swap_summary()
 	if counter_fee > 0 and mode == "buy":
 		box.add_child(UIKit.button("Aceitar contraproposta de %s" % Fmt.money(counter_fee), "", func():
 			fee = counter_fee
@@ -167,6 +174,20 @@ func _render_fee(caption: String, hint: String) -> void:
 			UIManager.close_modal()
 			UIManager.toast("%s está à venda por %s." % [p.display_name(), Fmt.money(fee)])
 			_done()))
+		var shop := UIKit.button("OFERECER AOS CLUBES AGORA", "", func():
+			var r := TransferManager.shop_player(w, p)
+			if int(r["n"]) > 0:
+				UIManager.close_modal()
+				UIManager.toast(r["msg"], UIColors.GREEN)
+				GameManager.save_now()
+				UIManager.goto("market", {"tab": "offers"})
+				return
+			message = r["msg"]
+			message_color = UIColors.RED if not r["ok"] else UIColors.MUTED
+			_render(), "swap")
+		shop.disabled = not w.transfer_window_open()
+		box.add_child(shop)
+		box.add_child(UIKit.label("Oferecer é mais rápido que anunciar: quem tiver interesse responde na hora, mas propostas de quem é procurado costumam vir abaixo do valor.", "Small", true))
 
 
 ## Linha de opções mutuamente exclusivas.
@@ -185,6 +206,70 @@ func _choice(caption: String, opts: Array, current: Variant, cb: Callable) -> Co
 		row.add_child(chip)
 	v.add_child(row)
 	return v
+
+
+## Resumo da troca na proposta de compra: jogadores incluídos e quanto o vendedor vê neles.
+func _render_swap_summary() -> void:
+	var seller := w.club(p.club_id)
+	var swaps := TransferManager.swap_players(w, deal)
+	box.add_child(UIKit.section("Troca (opcional)"))
+	if swaps.is_empty():
+		box.add_child(UIKit.label("Inclua até %d jogadores do seu elenco para baixar o dinheiro da proposta." % MAX_SWAP, "Small", true))
+	for sp: Player in swaps:
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.pos_badge(sp.position))
+		var nl := UIKit.label(sp.display_name(), "H3")
+		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(nl)
+		row.add_child(UIKit.label("vale %s p/ eles" % Fmt.money(TransferManager.swap_worth(w, sp, seller)), "Small"))
+		var sid := sp.id
+		row.add_child(UIKit.icon_button("close", func():
+			(deal["swap"] as Array).erase(sid)
+			counter_fee = -1
+			_render()))
+		box.add_child(row)
+	if swaps.size() < MAX_SWAP:
+		box.add_child(UIKit.button("Incluir jogador na troca", "GhostButton", func():
+			picking_swap = true
+			_render(), "plus"))
+
+
+func _render_swap_picker() -> void:
+	var seller := w.club(p.club_id)
+	box.add_child(UIKit.section("Quem vai para o %s?" % seller.short_name))
+	box.add_child(UIKit.label("Valor que o %s enxerga em cada um (depende da carência deles na posição, idade e nível)." % seller.short_name, "Small", true))
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size.y = 560
+	var list := UIKit.vbox(6)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	var squad: Array = w.squad(w.user_club()).duplicate()
+	squad.sort_custom(func(a, b): return a.value > b.value)
+	var chosen: Array = deal["swap"]
+	for sp: Player in squad:
+		if not sp.loan.is_empty() or chosen.has(sp.id):
+			continue
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.pos_badge(sp.position))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(sp.display_name(), "H3"))
+		var willing := TransferManager.interest(w, sp, seller) >= 0.2
+		col.add_child(UIKit.label("%d anos · ovr %d%s" % [sp.age(w.year), sp.overall, "" if willing else " · não quer ir"], "Small"))
+		row.add_child(col)
+		row.add_child(UIKit.colored(Fmt.money(TransferManager.swap_worth(w, sp, seller)), UIColors.ACCENT if willing else UIColors.MUTED, "H3"))
+		var sid := sp.id
+		list.add_child(UIKit.tap_row(row, func():
+			chosen.append(sid)
+			counter_fee = -1
+			picking_swap = false
+			_render()))
+	box.add_child(scroll)
+	box.add_child(UIKit.button("Voltar", "GhostButton", func():
+		picking_swap = false
+		_render(), "back"))
 
 
 func _render_loan() -> void:

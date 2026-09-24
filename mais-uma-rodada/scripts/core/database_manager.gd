@@ -14,6 +14,7 @@ const PATHS := {
 	"personalities": "res://data/gameplay/personalities.json",
 	"formations": "res://data/gameplay/formations.json",
 	"tactics": "res://data/gameplay/tactics.json",
+	"sponsors": "res://data/gameplay/sponsors.json",
 	"commentary": "res://data/text/commentary.json",
 	"news": "res://data/text/news.json",
 }
@@ -114,6 +115,10 @@ static func nation(code: String) -> Dictionary:
 
 static func has_nation(code: String) -> bool:
 	return nations().has(code)
+
+
+static func sponsor_brands() -> Array:
+	return _load_json("sponsors").get("brands", [])
 
 
 static func nation_name(code: String) -> String:

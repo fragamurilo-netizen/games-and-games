@@ -1,0 +1,29 @@
+{
+  "_doc": "Marcas fictícias de patrocinadores. tier: 1 local, 2 nacional, 3 global (clubes com mais reputação atraem marcas maiores). c: cor de fundo do logo, t: cor do texto.",
+  "brands": [
+    {"n": "Padaria Estrela", "tier": 1, "c": "#F2A900", "t": "#3E2723"},
+    {"n": "Auto Peças Rodão", "tier": 1, "c": "#C8102E", "t": "#FFFFFF"},
+    {"n": "Farmácia Bem-Estar", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF"},
+    {"n": "Construtora Alicerce", "tier": 1, "c": "#8D99AE", "t": "#111111"},
+    {"n": "Supermercado Cesta", "tier": 1, "c": "#E4572E", "t": "#FFFFFF"},
+    {"n": "Café Serrano", "tier": 1, "c": "#3E2723", "t": "#F2C14E"},
+    {"n": "Móveis Lar Doce", "tier": 1, "c": "#FFFFFF", "t": "#7B3F00"},
+    {"n": "Transportes Vento Sul", "tier": 1, "c": "#0033A0", "t": "#FFFFFF"},
+    {"n": "Banco Horizonte", "tier": 2, "c": "#0B6E4F", "t": "#FFFFFF"},
+    {"n": "Voa Linhas Aéreas", "tier": 2, "c": "#4EA8DE", "t": "#FFFFFF"},
+    {"n": "Telefônica Onda", "tier": 2, "c": "#5B2C83", "t": "#FFFFFF"},
+    {"n": "Cerveja Garoa", "tier": 2, "c": "#FFD100", "t": "#C8102E"},
+    {"n": "Energia Faísca", "tier": 2, "c": "#F58220", "t": "#111111"},
+    {"n": "Seguros Âncora", "tier": 2, "c": "#1B3A8C", "t": "#FFD100"},
+    {"n": "Leite Campo Verde", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32"},
+    {"n": "Pneus Trilho", "tier": 2, "c": "#111111", "t": "#FFD100"},
+    {"n": "Loja Veloz", "tier": 2, "c": "#E91E63", "t": "#FFFFFF"},
+    {"n": "Nexa Tech", "tier": 3, "c": "#111111", "t": "#00A86B"},
+    {"n": "Orbita Motors", "tier": 3, "c": "#8B0000", "t": "#FFFFFF"},
+    {"n": "Aurum Bank", "tier": 3, "c": "#B5A642", "t": "#111111"},
+    {"n": "Zenith Airways", "tier": 3, "c": "#004D40", "t": "#FFFFFF"},
+    {"n": "Pulso Energy", "tier": 3, "c": "#00838F", "t": "#FFFFFF"},
+    {"n": "Kora Sports", "tier": 3, "c": "#FFFFFF", "t": "#111111"},
+    {"n": "Vértice Mobile", "tier": 3, "c": "#6CACE4", "t": "#111111"}
+  ]
+}
