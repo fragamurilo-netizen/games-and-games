@@ -2,7 +2,7 @@ class_name EventManager
 extends RefCounted
 ## Eventos da carreira: dilemas com escolhas (aumento, minutos, patrocínio, imprensa, torcida,
 ## investimentos, indisciplina, sondagens, departamento médico, amistosos, vestiário, ingressos,
-## empresários, joias da base) e acontecimentos sem escolha (lesão no treino, homenagens...).
+## empresários, joias da base, proposta de compra do clube, ampliação do estádio) e acontecimentos sem escolha (lesão no treino, homenagens...).
 ##
 ## Um evento pendente é um dicionário salvo em world.events:
 ##   {id, k (tipo), turn (criado), exp (expira no jogo), p (jogador), p2 (outro jogador), d (dados)}
@@ -28,6 +28,8 @@ const KINDS := {
 	"tickets": {"w": 0.5, "icon": "money", "color": "BLUE"},
 	"agent": {"w": 0.8, "icon": "search", "color": "BLUE"},
 	"prodigy": {"w": 0.8, "icon": "star", "color": "GREEN"},
+	"takeover": {"w": 0.25, "icon": "money", "color": "GREEN"},
+	"stadium": {"w": 0.4, "icon": "shield", "color": "BLUE"},
 }
 
 
@@ -224,6 +226,21 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			if kid == null or Array(world.stats.get("ev_skip", [])).has(kid.id):
 				return {}
 			ev["p"] = kid.id
+		"takeover":
+			# Raro: investidores só aparecem de tempos em tempos e não logo depois de uma troca de dono.
+			var own := WorldEvents.owner_of(world, club.id)
+			if turn < 4 or rng.randf() > 0.25 or (not own.is_empty() and world.year - int(own.get("y", 0)) < WorldEvents.OWNER_COOLDOWN):
+				return {}
+			var revenue := float(FinanceManager.expected_revenue(club))
+			ev["d"] = {"who": RngUtil.pick(rng, WorldEvents.INVESTORS), "money": Valuation.round_value(revenue * rng.randf_range(0.8, 1.8) + maxi(0, -club.balance))}
+		"stadium":
+			if club.fan_base < club.capacity or world.stats.has("stadium_work"):
+				return {}
+			var seats := maxi(1000, int(club.capacity * 0.2 / 500.0) * 500)
+			var cost := WorldEvents.stadium_cost(club, seats)
+			if club.balance < cost * 1.2:
+				return {}
+			ev["d"] = {"seats": seats, "cost": cost}
 	return ev
 
 
@@ -339,6 +356,22 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 				"options": [
 					{"t": "Subir para o elenco", "hint": "Entra no time principal"},
 					{"t": "Manter na base mais um tempo", "hint": "Segue evoluindo com a base"}]}
+		"takeover":
+			var saf := club.nation == "BRA"
+			return {"title": "Proposta de compra do clube", "def": 1,
+				"body": "%s quer comprar o %s%s e promete %s em investimentos. Antes da votação no conselho, o presidente quer ouvir o treinador." % [
+					d.get("who", "Um investidor"), club.short_name, " e transformá-lo em SAF" if saf else "", Fmt.money(int(d.get("money", 0)))],
+				"options": [
+					{"t": "Apoiar a venda", "hint": "Dinheiro novo e dívida quitada · o dono vai cobrar títulos"},
+					{"t": "Ficar neutro", "hint": "O conselho decide sozinho (metade das vezes aprova)"},
+					{"t": "Ser contra", "hint": "Venda barrada · a torcida gosta, a diretoria nem tanto"}]}
+		"stadium":
+			return {"title": "Ampliar o estádio?", "def": 1,
+				"body": "O %s vive lotado e a diretoria estuda ampliar: +%d lugares por %s. As obras ficam prontas na próxima temporada." % [
+					club.stadium, int(d.get("seats", 0)), Fmt.money(int(d.get("cost", 0)))],
+				"options": [
+					{"t": "Aprovar a ampliação", "hint": "Paga agora · mais público e bilheteria no ano que vem"},
+					{"t": "Adiar", "hint": "Caixa intacto"}]}
 	return {"title": "Evento", "body": "", "options": [{"t": "OK", "hint": ""}], "def": 0}
 
 
@@ -542,6 +575,25 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 					skip.append(p.id)
 					world.stats["ev_skip"] = skip
 				msg = "Ele segue na base."
+		"takeover":
+			var sold := opt == 0 or (opt == 1 and world.rng.randf() < 0.5)
+			if sold:
+				var paid := WorldEvents.takeover(world, club, String(d.get("who", "Investidor")))
+				msg = "Venda aprovada: %s entram no clube e a verba para contratações subiu." % Fmt.money(paid)
+			elif opt == 2:
+				club.fan_mood = clampf(club.fan_mood + 5.0, 0.0, 100.0)
+				club.board_confidence = clampf(club.board_confidence - 3.0, 0.0, 100.0)
+				msg = "O conselho barrou a venda. A torcida aplaudiu sua posição."
+			else:
+				msg = "O conselho recusou a proposta."
+		"stadium":
+			var cost := int(d.get("cost", 0))
+			if opt == 0 and club.balance >= cost:
+				club.add_ledger("investimentos", -cost)
+				world.stats["stadium_work"] = int(d.get("seats", 0))
+				msg = "Obras aprovadas: +%d lugares na próxima temporada." % int(d.get("seats", 0))
+			else:
+				msg = "Ampliação adiada."
 	return msg
 
 

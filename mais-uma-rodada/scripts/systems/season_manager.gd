@@ -279,6 +279,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		for c: Club in world.clubs:
 			FinanceManager.process_week(world, c)
 			c.fan_mood = clampf(c.fan_mood + (60.0 - c.fan_mood) * 0.03, 0.0, 100.0)
+		WorldEvents.weekly(world)
 		tt = _time("financas", tt)
 		TrainingManager.weekly(world)
 		YouthManager.weekly(world)
@@ -313,6 +314,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	if now_open and not was_open:
 		report["window_opened"] = true
 		NewsManager.on_window(world, true)
+		if s.day > 5:
+			for c: Club in world.clubs:
+				FinanceManager.mid_season_review(world, c)
 	elif was_open and not now_open:
 		report["window_closed"] = true
 		NewsManager.on_window(world, false)
@@ -519,6 +523,9 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var fans0 := world.user_club().fan_base if world.has_user() else 0
 	# Vagas continentais do ano que vem (antes das mudanças de divisão)
 	world.stats["qualified"] = CupManager.compute_qualified(world)
+	# Ranking mundial de clubes: arquiva a temporada antes que tabelas e copas sejam desfeitas
+	ClubRanking.close_season(world)
+	ClubRanking.season_news(world)
 	var moves := {} # club_id -> nova liga
 	var hist_leagues := {}
 	for id in s.league_order:
@@ -745,8 +752,12 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.transfer_log = world.transfer_log.filter(func(t): return t.year >= world.year - 1)
 	world.offers.clear()
 	world.stats.erase("neg")
+	var taxes := FinanceManager.season_taxes(world)
+	WorldEvents.season_start(world)
 	for c: Club in world.clubs:
 		c.reset_season_state()
+		if taxes.has(c.id):
+			c.add_ledger("impostos", -int(taxes[c.id]))
 		c.cohesion = maxf(35.0, c.cohesion - 8.0)
 		FinanceManager.set_budgets(world, c)
 		if not world.is_user_club(c.id):

@@ -68,6 +68,10 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	stars.star_size = 22.0
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
 	col.add_child(stars)
+	var rpos := ClubRanking.world_position(w, club.id)
+	if rpos > 0:
+		var rk := UIKit.label("%dº no ranking mundial" % rpos, "Small")
+		col.add_child(UIKit.tap_row(rk, func(): UIManager.goto("table", {"rank": ""}), "CardFlat"))
 	row.add_child(col)
 	card.add_child(row)
 	var arch := club.arch()
@@ -172,6 +176,17 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(row)
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
 	card.add_child(UIKit.kv("Folha salarial (mês)", "%s / %s" % [Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])], UIColors.RED if over else UIColors.TEXT))
+	var share := float(fin["wage_bill"]) * 12.0 / maxf(1.0, float(fin["expected_revenue"]))
+	card.add_child(UIKit.kv("Folha consome da receita", "%d%%" % int(round(share * 100.0)), UIColors.RED if share > 0.85 else (UIColors.ORANGE if share > 0.7 else UIColors.TEXT)))
+	var proj := FinanceManager.projected_balance(w, club)
+	card.add_child(UIKit.kv("Caixa previsto no fim da temporada", Fmt.money(proj), UIColors.RED if proj < 0 else UIColors.TEXT))
+	var deal := FinanceManager.tv_deal(w, club.league_id)
+	card.add_child(UIKit.kv("Cota de TV (ano)", "%s%s" % [Fmt.money(club.income_tv), "" if absf(deal - 1.0) < 0.01 else " · contrato %s%d%%" % ["+" if deal > 1.0 else "−", int(round(absf(deal - 1.0) * 100.0))]]))
+	var own := WorldEvents.owner_of(w, club.id)
+	if not own.is_empty():
+		card.add_child(UIKit.kv("Dono", "%s (desde %d)" % [own.get("who", ""), int(own.get("y", 0))]))
+	if club.balance < 0:
+		card.add_child(UIKit.colored("Com o caixa no vermelho, a diretoria não libera contratações e paga juros sobre a dívida.", UIColors.ORANGE, "Small", true))
 	card.add_child(UIKit.separator())
 	card.add_child(UIKit.label("Temporada %d" % w.year, "Caps"))
 	var any := false

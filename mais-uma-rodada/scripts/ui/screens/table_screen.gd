@@ -1,6 +1,6 @@
 extends BaseScreen
 ## Tabelas do mundo inteiro: ligas de qualquer país (classificação, artilharia, assistências, rodadas)
-## e as copas da temporada (grupos, mata-mata e artilharia).
+## e as copas da temporada (grupos, mata-mata e artilharia), além do ranking mundial de clubes.
 
 const LEAGUE_TABS := [["table", "Tabela"], ["scorers", "Artilharia"], ["assists", "Assist."], ["rounds", "Rodadas"]]
 const CUP_TABS := [["groups", "Grupos"], ["ko", "Mata-mata"], ["scorers", "Artilharia"]]
@@ -9,6 +9,9 @@ var _league_id := ""
 var _cup_id := ""
 var _tab := "table"
 var _round := -1
+## Ranking de clubes: ativo quando _rank_scope != "-" ("" mundo, "C:<confed>", "N:<nação>").
+var _rank_scope := "-"
+const RANK_SHOW := 50
 
 
 func _init() -> void:
@@ -22,6 +25,7 @@ func setup(p: Dictionary) -> void:
 	_cup_id = p.get("cup", "")
 	_tab = p.get("tab", "groups" if _cup_id != "" else "table")
 	_round = -1
+	_rank_scope = String(p.get("rank", "-"))
 
 
 func refresh() -> void:
@@ -36,6 +40,10 @@ func refresh() -> void:
 		_tab = "table"
 	var c := content()
 	UIKit.clear(c)
+	if _rank_scope != "-":
+		_rank_view(c, w)
+		UIManager.refresh_chrome()
+		return
 	c.add_child(_picker_row(w))
 	if _cup_id != "":
 		_cup_view(c, w, w.season.cups[_cup_id])
@@ -117,6 +125,7 @@ func _open_picker(w: GameWorld) -> void:
 		if CupManager.is_state(id) and not w.season.cups[id].has_club(w.user_club_id):
 			continue
 		mine.add_child(UIKit.button(w.season.cups[id].short_name, "", func(): _pick_cup(id), "trophy"))
+	mine.add_child(UIKit.button("Ranking de clubes", "", func(): _pick_rank(""), "star"))
 	v.add_child(UIKit.section("Atalhos"))
 	v.add_child(mine)
 	var states := UIKit.flow(8)
@@ -149,6 +158,7 @@ func _open_picker(w: GameWorld) -> void:
 
 func _pick_league(id: String) -> void:
 	UIManager.close_modal()
+	_rank_scope = "-"
 	_league_id = id
 	_cup_id = ""
 	if not LEAGUE_TABS.any(func(t): return t[0] == _tab):
@@ -159,6 +169,7 @@ func _pick_league(id: String) -> void:
 
 func _pick_cup(id: String) -> void:
 	UIManager.close_modal()
+	_rank_scope = "-"
 	_cup_id = id
 	if not CUP_TABS.any(func(t): return t[0] == _tab):
 		_tab = "groups"
@@ -424,3 +435,93 @@ func _cup_scorers(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 			last_v = v
 		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(st[Player.C_APPS], "jogo", "jogos")]))
 	c.add_child(UIKit.card_panel(card))
+
+
+# ---------------------------------------------------------------------------
+# Ranking mundial de clubes
+# ---------------------------------------------------------------------------
+
+func _pick_rank(scope: String) -> void:
+	UIManager.close_modal()
+	_rank_scope = scope
+	refresh()
+
+
+func _rank_view(c: VBoxContainer, w: GameWorld) -> void:
+	screen_subtitle = "Ranking de clubes · %d" % w.year
+	var head := UIKit.hbox(10)
+	head.add_child(UIKit.icon_rect("star", 36, UIColors.ACCENT))
+	var l := UIKit.label("Ranking de clubes", "H2")
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(l)
+	head.add_child(UIKit.button("Trocar", "GhostButton", func(): _open_picker(w), "table"))
+	c.add_child(head)
+	var u := w.user_club() if w.has_user() else null
+	var scopes: Array = [["", "Mundo"]]
+	if u != null:
+		var confed := String(DatabaseManager.nation(u.nation).get("confed", ""))
+		scopes.append(["C:" + confed, {"UEFA": "Europa", "CONMEBOL": "Am. do Sul", "CONCACAF": "Am. do Norte", "CAF": "África", "AFC": "Ásia"}.get(confed, confed)])
+		scopes.append(["N:" + u.nation, DatabaseManager.nation_name(u.nation)])
+	var g := ButtonGroup.new()
+	var trow := UIKit.hbox(8)
+	for sc in scopes:
+		var key: String = sc[0]
+		var chip := UIKit.chip(sc[1], key == _rank_scope, g, func():
+			_rank_scope = key
+			refresh())
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		chip.add_theme_font_size_override(&"font_size", 18)
+		trow.add_child(chip)
+	c.add_child(trow)
+	var table := ClubRanking.table(w, _rank_scope)
+	var card := UIKit.card("Card", 2)
+	var user_shown := false
+	for i in mini(RANK_SHOW, table.size()):
+		card.add_child(_rank_row(w, table[i], i + 1))
+		if u != null and int(table[i]["id"]) == u.id:
+			user_shown = true
+	if u != null and not user_shown:
+		for i in table.size():
+			if int(table[i]["id"]) == u.id:
+				card.add_child(UIKit.separator())
+				card.add_child(_rank_row(w, table[i], i + 1))
+				break
+	c.add_child(UIKit.card_panel(card))
+	c.add_child(UIKit.label("Soma das últimas %d temporadas, contando a atual: posição na liga (pesa mais nas ligas fortes) e campanhas continentais e no Mundial. A seta compara com o ranking ao fim da temporada passada." % ClubRanking.SEASONS, "Small", true))
+
+
+func _rank_row(w: GameWorld, entry: Dictionary, pos: int) -> Control:
+	var cl := w.club(int(entry["id"]))
+	var is_user := w.is_user_club(cl.id)
+	var h := UIKit.hbox(8)
+	var pl := UIKit.label(str(pos), "H3")
+	pl.custom_minimum_size.x = 44
+	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(pl)
+	h.add_child(UIKit.crest(cl, 32))
+	var col := UIKit.vbox(0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var n := UIKit.label(cl.short_name, "H3")
+	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if is_user:
+		n.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	col.add_child(n)
+	var sub := UIKit.hbox(6)
+	sub.add_child(UIKit.flag(cl.nation, 22))
+	sub.add_child(UIKit.label(w.league_short(cl.league_id), "Small"))
+	col.add_child(sub)
+	h.add_child(col)
+	# Movimento em relação ao fim da temporada passada (só faz sentido no ranking mundial)
+	if _rank_scope == "" and cl.rank_prev > 0 and cl.rank_prev != pos:
+		var up := cl.rank_prev > pos
+		h.add_child(UIKit.colored(("▲" if up else "▼") + str(absi(cl.rank_prev - pos)), UIColors.GREEN if up else UIColors.RED, "Small"))
+	var v := UIKit.label("%.1f" % float(entry["pts"]), "Stat")
+	v.custom_minimum_size.x = 96
+	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(v)
+	var cid := cl.id
+	return UIKit.tap_row(h, func():
+		if w.is_user_club(cid):
+			UIManager.goto("club")
+		else:
+			UIManager.push("club", {"id": cid}), "CardFlat")

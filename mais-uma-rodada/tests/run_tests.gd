@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_run("mata-mata: prorrogação e pênaltis", _test_knockout)
 	_run("temporada completa, copas e Mundial", _test_season_cycle)
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
+	_run("ranking de clubes, finanças e eventos do mundo", _test_ranking_economy)
 	_run("avanço até o próximo jogo do usuário", _test_advance)
 	_run("save/load (ida e volta, backup e determinismo)", _test_save_load)
 	_run("negociações do usuário", _test_transfers)
@@ -495,6 +496,78 @@ func _test_end_season() -> void:
 			owner[pid] = c.id
 			var p := w.player(pid)
 			check(p != null and p.club_id == c.id, "vínculo inconsistente do jogador %d" % pid)
+
+
+func _test_ranking_economy() -> void:
+	# Ranking: depois da virada, todo clube arquivou a temporada e tem posição
+	var w := _season_world
+	if w == null:
+		check(false, "sem mundo da temporada")
+		return
+	var table := ClubRanking.table(w)
+	check(table.size() == w.clubs.size(), "ranking sem todos os clubes")
+	for i in table.size() - 1:
+		check(float(table[i]["pts"]) >= float(table[i + 1]["pts"]), "ranking fora de ordem")
+		if float(table[i]["pts"]) < float(table[i + 1]["pts"]):
+			break
+	var top := w.club(int(table[0]["id"]))
+	check(top.tier == 1 and int(DatabaseManager.nation(top.nation).get("coef", 0)) >= 80, "líder do ranking improvável: %s" % top.short_name)
+	var positions := {}
+	for c: Club in w.clubs:
+		check(c.rank_hist.size() == 1 and c.rank_prev > 0, "%s sem temporada arquivada no ranking" % c.short_name)
+		positions[c.rank_prev] = true
+	check(positions.size() == w.clubs.size(), "posições repetidas no ranking")
+	var bra := ClubRanking.table(w, "N:BRA")
+	check(not bra.is_empty() and bra.all(func(e): return w.club(int(e["id"])).nation == "BRA"), "filtro por país do ranking")
+	var back := Club.from_dict(top.to_dict())
+	check(back.rank_hist == top.rank_hist and back.rank_prev == top.rank_prev, "ranking não sobrevive ao save")
+	# TV: a divisão por mérito e audiência mantém a média da liga
+	var cw := _career_world()
+	for lid in ["ENG1", "BRA1", "BRA3"]:
+		var sum := 0.0
+		var clubs := cw.clubs_in_league(lid)
+		for c: Club in clubs:
+			sum += FinanceManager.tv_factor(c)
+		check(absf(sum / clubs.size() - 1.0) < 0.15, "%s: cota média de TV %.2f" % [lid, sum / clubs.size()])
+	# Loja rende mais com a torcida feliz
+	var u := cw.user_club()
+	u.fan_mood = 90.0
+	var happy := FinanceManager.merch_mood(u)
+	u.fan_mood = 20.0
+	check(FinanceManager.merch_mood(u) < happy, "loja ignora o humor da torcida")
+	# Clube endividado: orçamento de contratações zerado e folha mais curta
+	var debtor: Club = cw.clubs_in_league("ENG1")[4]
+	FinanceManager.set_budgets(cw, debtor)
+	var healthy_wb := debtor.wage_budget
+	debtor.balance = -FinanceManager.expected_revenue(debtor)
+	FinanceManager.set_budgets(cw, debtor)
+	check(debtor.transfer_budget == 0 and debtor.wage_budget < healthy_wb, "dívida não aperta o orçamento")
+	check(FinanceManager.projected_balance(cw, u) != 0, "projeção de caixa vazia")
+	# Compra do clube: dívida quitada, dono registrado, perfil de novo rico
+	var paid := WorldEvents.takeover(cw, debtor, "Grupo Teste")
+	check(paid > 0 and debtor.balance > 0, "compra não quitou a dívida")
+	check(debtor.archetype == "rico_promovido" and String(WorldEvents.owner_of(cw, debtor.id).get("who", "")) == "Grupo Teste", "novo dono não registrado")
+	check(not WorldEvents._can_be_bought(cw, debtor), "clube recém-comprado já pode ser vendido de novo")
+	# Proposta de compra do clube do usuário (dilema): apoiar → vendido
+	var ev := {"id": 900, "k": "takeover", "p": -1, "p2": -1, "d": {"who": "Fundo Teste", "money": 1000000}}
+	cw.events.append(ev)
+	var bal := u.balance
+	EventManager.resolve(cw, ev, 0)
+	check(u.balance > bal and not WorldEvents.owner_of(cw, u.id).is_empty(), "venda do clube do usuário não aconteceu")
+	# Virada: contratos de TV renegociados dentro dos limites e imposto sobre lucro
+	for i in FinanceManager.TV_DEAL_YEARS:
+		cw.year += 1
+		FinanceManager.renegotiate_tv(cw)
+	var deals: Dictionary = cw.stats.get("tv_deals", {})
+	check(deals.size() == DatabaseManager.league_ids().size(), "nem toda liga renegociou a TV em %d anos" % FinanceManager.TV_DEAL_YEARS)
+	for id in deals:
+		check(float(deals[id]) >= FinanceManager.TV_DEAL_RANGE[0] and float(deals[id]) <= FinanceManager.TV_DEAL_RANGE[1], "contrato de TV fora dos limites")
+	u.ledger = {"bilheteria": 1000000, "salarios": -400000}
+	check(int(FinanceManager.season_taxes(cw).get(u.id, 0)) == int(600000 * FinanceManager.PROFIT_TAX), "imposto sobre lucro errado")
+	# Semanas do mundo rodam sem quebrar
+	for i in 200:
+		WorldEvents.weekly(cw)
+	WorldEvents.season_start(cw)
 
 
 ## Depois do jogo do usuário, o mundo anda sozinho até o próximo compromisso dele — sem pular nenhum.
