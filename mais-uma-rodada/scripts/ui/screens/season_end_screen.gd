@@ -70,6 +70,9 @@ func refresh() -> void:
 	var aw := _awards_card(w)
 	if aw != null:
 		c.add_child(aw)
+	var ev := _evolution_card(w)
+	if ev != null:
+		c.add_child(ev)
 	for cu in _summary.get("cups", []):
 		c.add_child(_cup_card(w, cu))
 	var nat := w.user_nation()
@@ -129,7 +132,7 @@ func _division_card(w: GameWorld, d: Dictionary) -> Control:
 	card.add_child(UIKit.section(String(d["name"])))
 	var champ := w.club(int(d["champion"]))
 	var row := UIKit.hbox(12)
-	row.add_child(UIKit.icon_rect("trophy", 34, UIColors.ACCENT))
+	row.add_child(TrophyView.make("L:" + String(d["id"]), 52, w))
 	row.add_child(UIKit.crest(champ, 48))
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -161,7 +164,7 @@ func _cup_card(w: GameWorld, cu: Dictionary) -> Control:
 		card.add_child(UIKit.label("Sem campeão.", "Muted"))
 		return UIKit.card_panel(card)
 	var row := UIKit.hbox(12)
-	row.add_child(UIKit.icon_rect("trophy", 34, UIColors.ACCENT))
+	row.add_child(TrophyView.make(("W:" if String(cu["id"]) == CupManager.CWC else "C:") + String(cu["id"]), 52, w))
 	row.add_child(UIKit.crest(champ, 48))
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -179,6 +182,9 @@ func _cup_card(w: GameWorld, cu: Dictionary) -> Control:
 	var sc: Dictionary = cu.get("scorer", {})
 	if not sc.is_empty():
 		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc.get("name", ""), sc.get("club", ""), int(sc.get("goals", 0))], "Small", true))
+	var mvp: Dictionary = _summary.get("cup_awards", {}).get(String(cu["id"]), {})
+	if not mvp.is_empty():
+		card.add_child(UIKit.label("Craque da copa: %s (%s) · %s" % [mvp["name"], mvp["club"], mvp.get("v", "")], "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -196,27 +202,98 @@ func _awards_card(w: GameWorld) -> Control:
 		row.add_child(UIKit.icon_rect("star", 34, UIColors.ACCENT))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label("Melhor jogador do mundo", "Caps"))
+		col.add_child(UIKit.label("Bola de Ouro", "Caps"))
 		col.add_child(UIKit.label("%s (%s) · %d gols" % [ballon["name"], ballon["club"], int(ballon.get("goals", 0))], "H3", true))
 		row.add_child(col)
 		row.add_child(UIKit.flag(String(ballon.get("nat", "")), 40))
 		card.add_child(row)
-	for k in ["mvp", "young", "gk", "assist"]:
-		if not aw.has(k):
-			continue
-		var a: Dictionary = aw[k]
+	var rank: Array = _summary.get("ballon_rank", [])
+	if rank.size() > 1:
+		var podium: Array = []
+		for i in range(1, mini(5, rank.size())):
+			podium.append("%dº %s (%s) %d pts" % [i + 1, rank[i]["name"], rank[i]["club"], int(rank[i]["pts"])])
+		card.add_child(UIKit.label(" · ".join(podium), "Small", true))
+	var rows: Array = []
+	for wk in ["world_young", "boot"]:
+		var wd: Dictionary = _summary.get(wk, {})
+		if not wd.is_empty():
+			rows.append([wk, wd, "%d gols" % int(wd["goals"]) if wk == "boot" else ""])
+	for k in AwardManager.LEAGUE_KEYS:
+		if aw.has(k):
+			rows.append([k, aw[k], String(aw[k].get("v", ""))])
+	var cp: Dictionary = _summary.get("club_player", {})
+	if not cp.is_empty():
+		rows.append(["club", cp, String(cp.get("v", ""))])
+	for r in rows:
+		var a: Dictionary = r[1]
 		var row := UIKit.hbox(10)
-		var kl := UIKit.label(AwardManager.award_name(k), "Small")
+		var kl := UIKit.label(AwardManager.award_name(String(r[0])), "Small")
 		kl.custom_minimum_size.x = 170
 		row.add_child(kl)
 		var nl := UIKit.label("%s (%s)" % [a["name"], a["club"]], "", true)
+		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if w.player(int(a["id"])) != null and w.is_user_club(w.player(int(a["id"])).club_id):
+			nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
 		row.add_child(nl)
-		row.add_child(UIKit.label(String(a.get("v", "")), "Small"))
+		row.add_child(UIKit.label(String(r[2]), "Small"))
 		card.add_child(row)
+	var tw: Array = _summary.get("totw_most", [])
+	if not tw.is_empty():
+		var twp := w.player(int(tw[0]))
+		if twp != null:
+			card.add_child(UIKit.kv("Mais vezes na seleção da rodada", "%s · %d" % [twp.display_name(), int(tw[1])]))
+	var months: Array = _summary.get("months", [])
+	if not months.is_empty():
+		var mb: Array = []
+		for m: Dictionary in months:
+			var mp := w.player(int(m["best"]))
+			mb.append("%s: %s" % [WeeklyAwards.MONTHS[(int(m["m"]) - 1) % 12].substr(0, 3), mp.display_name() if mp != null else "—"])
+		card.add_child(UIKit.label("Craques do mês", "Caps"))
+		card.add_child(UIKit.label(" · ".join(mb), "Small", true))
+	var team: Array = _summary.get("team", [])
+	if team.size() == 11:
+		card.add_child(UIKit.label(AwardManager.award_name("team"), "Caps"))
+		var names: Array = []
+		for pid in team:
+			var p := w.player(int(pid))
+			names.append(p.display_name() if p != null else "—")
+		card.add_child(UIKit.label("%s · %s · %s · %s" % [names[0], ", ".join(names.slice(1, 5)), ", ".join(names.slice(5, 8)), ", ".join(names.slice(8, 11))], "Small", true))
 	if not yl.is_empty():
 		var champ := w.club(int(yl.get("champion", -1)))
 		if champ != null:
 			card.add_child(UIKit.kv(String(yl.get("name", "Sub-20")), "%s · seu time %dº" % [champ.short_name, int(yl.get("user_pos", 0))], UIColors.ACCENT if w.is_user_club(champ.id) else UIColors.TEXT))
+	return UIKit.card_panel(card)
+
+
+## Quem evoluiu e quem caiu no elenco, e as mudanças de personalidade do ano.
+func _evolution_card(w: GameWorld) -> Control:
+	var ev: Dictionary = _summary.get("evolution", {})
+	var persona: Array = _summary.get("persona", [])
+	var up: Array = ev.get("up", [])
+	var down: Array = ev.get("down", [])
+	if up.is_empty() and down.is_empty() and persona.is_empty():
+		return null
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Evolução do elenco"))
+	for pair in [[up, "Maiores evoluções", UIColors.GREEN], [down, "Maiores quedas", UIColors.RED]]:
+		var list: Array = pair[0]
+		if list.is_empty():
+			continue
+		card.add_child(UIKit.label(String(pair[1]), "Caps"))
+		for r: Dictionary in list:
+			var row := UIKit.hbox(10)
+			var nl := UIKit.label("%s (%d anos)" % [r["name"], int(r["age"])], "")
+			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(nl)
+			row.add_child(UIKit.label("%d → %d" % [int(r["from"]), int(r["to"])], "Mono"))
+			var d := int(r["d"])
+			row.add_child(UIKit.colored(("+%d" % d) if d > 0 else str(d), pair[2], "H3"))
+			var pid := int(r["id"])
+			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid})))
+	if not persona.is_empty():
+		card.add_child(UIKit.label("Personalidade", "Caps"))
+		for ch: Dictionary in persona:
+			card.add_child(UIKit.label("%s %s. %s" % [ch["name"], PlayerDevelopment.persona_headline(ch), ch["why"]], "Small", true))
 	return UIKit.card_panel(card)
 
 

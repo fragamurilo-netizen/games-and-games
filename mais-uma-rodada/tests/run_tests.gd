@@ -33,6 +33,7 @@ func _initialize() -> void:
 	_run("treino, base e liga sub-20", _test_training_youth)
 	_run("empréstimos, parcelas e cláusulas", _test_deals)
 	_run("rostos e personalização", _test_faces)
+	_run("personalidade, lesões graves e troféus", _test_persona_trophies)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -391,7 +392,30 @@ func _test_end_season() -> void:
 	var old_league := {}
 	for c: Club in w.clubs:
 		old_league[c.id] = c.league_id
+	# Seleção da rodada e do mês foram montadas durante a temporada
+	check(not Dictionary(w.stats.get("totw", {})).is_empty() and Array(w.stats["totw"]["ids"]).size() == 11, "seleção da rodada não montada")
+	check(Array(w.stats.get("totm_list", [])).size() >= 5, "poucas seleções do mês (%d)" % Array(w.stats.get("totm_list", [])).size())
 	var summary := SeasonManager.end_season(w)
+	# Prêmios, Bola de Ouro, arquivo da temporada
+	var aw: Dictionary = summary["awards"]
+	for k in ["mvp", "scorer", "assist", "young", "gk", "def", "mid", "att"]:
+		check(aw.has(k), "prêmio %s ausente na liga do usuário" % k)
+	check((summary["team"] as Array).size() == 11, "seleção do campeonato incompleta")
+	check((summary["ballon_rank"] as Array).size() == 10 and int(summary["ballon_rank"][0]["pts"]) == 1000, "votação da Bola de Ouro inválida")
+	check(not Dictionary(summary["boot"]).is_empty() and not Dictionary(summary["world_young"]).is_empty(), "Chuteira de Ouro / revelação mundial ausentes")
+	var hist: Dictionary = w.history[w.history.size() - 1]
+	var arch: Dictionary = hist.get("arch", {})
+	check(arch.has("BRA1") and (arch["BRA1"]["tb"] as Array).size() == 20 and (arch["BRA1"]["sc"] as Array).size() == 10, "arquivo da temporada incompleto")
+	check(not (hist.get("sq", []) as Array).is_empty() and not (hist.get("months", []) as Array).is_empty(), "elenco/meses não arquivados")
+	check(w.stats.get("totw", {}).is_empty(), "seleção da rodada não foi limpa na virada")
+	var mvp := w.player(int(aw["mvp"]["id"]))
+	check(mvp == null or mvp.awards_in(year).has("mvp"), "craque sem o prêmio no currículo")
+	var with_hist := 0
+	for p: Player in w.players.values():
+		if not p.history.is_empty() and p.history[p.history.size() - 1].has("o"):
+			with_hist += 1
+		check(p.ovr_start == p.overall, "overall inicial da temporada não registrado")
+	check(with_hist > 1000, "histórico anual sem overall (%d)" % with_hist)
 	check(w.year == year + 1, "ano não avançou")
 	check(not w.season.finished and w.season.day == 0, "nova temporada não foi montada")
 	for id in DatabaseManager.league_ids():
@@ -755,3 +779,45 @@ func _test_faces() -> void:
 	Overrides.apply_club(c)
 	Overrides.data()["clubs"].erase("__teste__")
 	check(c.name == "Editado" and c.color1 == "#112233" and String(c.crest.get("c1", "")) == "#112233", "personalização de clube não aplicada")
+
+
+func _test_persona_trophies() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	# Veterano rodado vira cascudo com o tempo
+	var vet: Player = null
+	for p: Player in w.players.values():
+		if p.age(w.year) >= 31 and p.traits.size() == 1 and not p.has_trait("inseguro") and not p.has_trait("timido"):
+			vet = p
+			break
+	check(vet != null, "sem veterano para testar")
+	if vet != null:
+		vet.career_apps = 400
+		var got := false
+		for _i in 40:
+			PlayerDevelopment.personality_review(w)
+			if vet.has_trait("cascudo") or vet.has_trait("mentor") or vet.has_trait("lider") or vet.has_trait("idolo"):
+				got = true
+				break
+		check(got and not vet.persona_log.is_empty(), "veterano não ganhou traço de experiência")
+		check(vet.traits.size() <= PlayerDevelopment.MAX_TRAITS, "traços demais")
+		var d := Player.from_dict(vet.to_dict())
+		check(d.persona_log.size() == vet.persona_log.size() and d.traits == vet.traits, "personalidade não sobreviveu ao save")
+	# Lesão grave custa físico; lesão leve não
+	var p2: Player = w.players.values()[10]
+	var phys := p2.attrs[Attr.VEL] + p2.attrs[Attr.RES] + p2.attrs[Attr.FOR]
+	check(PlayerDevelopment.injury_setback(w.rng, p2, 3, 30) == 0, "lesão leve tirou físico")
+	var lost := 0
+	for _i in 5:
+		lost += PlayerDevelopment.injury_setback(w.rng, p2, 20, 32)
+	check(lost > 0 and p2.attrs[Attr.VEL] + p2.attrs[Attr.RES] + p2.attrs[Attr.FOR] == phys - lost, "lesão grave sem efeito físico")
+	# Troféus: cada liga resolve para um desenho e um nome
+	var styles := {}
+	for id in DatabaseManager.league_ids():
+		var tv := TrophyView.make("L:" + id, 64, w)
+		styles[tv._style] = true
+		check(TrophyView.trophy_name("L:" + id, w).begins_with("Taça "), "troféu sem nome: %s" % id)
+		tv.free()
+	check(styles.size() >= 4, "troféus pouco variados (%d formatos)" % styles.size())
+	var cwc := TrophyView.make("W:CWC", 64, w)
+	check(cwc._style == TrophyView.STYLE_GLOBE, "Mundial sem o troféu do globo")
+	cwc.free()

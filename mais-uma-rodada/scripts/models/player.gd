@@ -109,6 +109,8 @@ var ovr_f: float = 50.0
 var overall: int = 50
 var dev_acc: float = 0.0
 var minutes_season: int = 0
+## Overall no início da temporada (para medir evolução/piora no ano).
+var ovr_start: int = -1
 
 # Estatísticas e memória
 var stats: PackedInt32Array = PackedInt32Array() # liga (temporada)
@@ -119,8 +121,10 @@ var career_apps: int = 0
 var career_goals: int = 0
 var career_assists: int = 0
 var titles: int = 0
-## Prêmios individuais: [{y, k (mvp|young|gk|assist|ballon), l (liga)}]
+## Prêmios individuais: [{y, k (ver AwardManager.award_name), l (liga ou copa)}]
 var awards: Array = []
+## Mudanças de personalidade ao longo da carreira: [{y, t (traço), add (bool), why}]
+var persona_log: Array = []
 
 # Cache (não salvo)
 var _pos_cache: PackedFloat32Array = PackedFloat32Array()
@@ -281,6 +285,21 @@ func reset_season_stats() -> void:
 	stats.fill(0)
 	cup_stats.clear()
 	minutes_season = 0
+	ovr_start = overall
+
+
+## Variação do overall desde o início da temporada.
+func season_delta() -> int:
+	return overall - (ovr_start if ovr_start >= 0 else overall)
+
+
+## Prêmios de um ano (chaves).
+func awards_in(year: int) -> Array:
+	var out: Array = []
+	for a in awards:
+		if int(a.get("y", 0)) == year:
+			out.append(String(a.get("k", "")))
+	return out
 
 
 func cup_add(cup_id: String, mins: int, goals: int, assists: int, rating: float) -> void:
@@ -404,7 +423,7 @@ func to_dict() -> Dictionary:
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
-		"acc": dev_acc, "min": minutes_season,
+		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
 		"stats": stats, "cs": cup_stats, "hist": history, "spells": spells,
 		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards,
 	}
@@ -474,5 +493,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.career_assists = int(d.get("cas", 0))
 	p.titles = int(d.get("tt", 0))
 	p.awards = Array(d.get("aw", []))
+	p.persona_log = Array(d.get("pl", []))
 	p.recompute_overall()
+	p.ovr_start = int(d.get("o0", p.overall))
 	return p
