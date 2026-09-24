@@ -69,8 +69,8 @@ static func subtitle(w: GameWorld, p: Player, mode: String) -> String:
 	var age := p.age(w.year)
 	if mode == "market":
 		var cname := "Livre" if p.club_id < 0 else w.club(p.club_id).short_name
-		return "%d anos · %s" % [age, cname]
-	var parts: Array = ["%d anos" % age]
+		return "%d anos · %s · %s" % [age, PlayStyle.of(p), cname]
+	var parts: Array = ["%d anos" % age, PlayStyle.of(p)]
 	if p.injury_weeks > 0:
 		parts.append("lesionado (%d sem.)" % p.injury_weeks)
 	elif p.suspension > 0:

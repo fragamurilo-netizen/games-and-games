@@ -148,13 +148,13 @@ static func pick_set_pieces(world: GameWorld, sheet: TeamSheet) -> void:
 
 ## Formação ideal entre as preferidas do arquétipo (levemente favorecendo a primeira).
 static func choose_formation(world: GameWorld, club: Club) -> String:
-	var prefs: Array = club.arch().get("formations", ["4-4-2"])
+	var prefs: Array = ClubPhilosophy.formations(club)
 	var best_f: String = prefs[0]
 	var best_v := -1.0
 	for i in prefs.size():
 		var fname: String = prefs[i]
 		var ids := best_eleven(world, club, fname)
-		var v := lineup_strength(world, fname, ids) * (1.02 if i == 0 else 1.0)
+		var v := lineup_strength(world, fname, ids) * (1.04 if i == 0 else (1.015 if i == 1 else 1.0))
 		if v > best_v:
 			best_v = v
 			best_f = fname
@@ -211,23 +211,7 @@ static func prepare_ai_sheet(world: GameWorld, club: Club, opponent: Club, is_ho
 		sheet.starters = best_eleven(world, club, sheet.formation)
 		sheet.bench = pick_bench(world, club, sheet.starters)
 		pick_set_pieces(world, sheet)
-	var arch := club.arch()
-	sheet.style = int(arch.get("style", 0))
-	var base := int(arch.get("mentality", 2))
-	var mine := team_strength(world, club)
-	var theirs := team_strength(world, opponent) if opponent != null else mine
-	var diff := mine - theirs + (1.5 if is_home else -1.5)
-	var m := base
-	if diff >= 6.0:
-		m = maxi(base, 3)
-	elif diff <= -6.0:
-		m = mini(base, 1)
-	elif diff <= -3.0:
-		m = mini(base, 2)
-	sheet.mentality = clampi(m, 0, 4)
-	sheet.intensity = 1
-	sheet.pressing = 2 if sheet.style == TeamSheet.STYLE_PRESSAO else 1
-	sheet.line = 2 if sheet.style == TeamSheet.STYLE_PRESSAO else (0 if sheet.mentality <= 1 else 1)
+	ClubPhilosophy.apply_match_plan(world, club, opponent, is_home, sheet)
 	sheet.auto_subs = true
 	club.sheet = sheet
 	return sheet
@@ -365,7 +349,7 @@ static func auto_sheet(world: GameWorld, club: Club, fname: String) -> TeamSheet
 		sheet.formation = fname
 	elif old == null:
 		sheet.formation = choose_formation(world, club)
-		sheet.style = int(club.arch().get("style", 0))
+		sheet.style = int(ClubPhilosophy.of(club).get("style", 0))
 		sheet.mentality = 2
 	sheet.starters = best_eleven(world, club, sheet.formation)
 	sheet.bench = pick_bench(world, club, sheet.starters)
