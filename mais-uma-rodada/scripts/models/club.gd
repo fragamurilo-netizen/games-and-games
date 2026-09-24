@@ -57,6 +57,9 @@ var last_lineup: Array = []
 var history: Array = []
 ## Títulos por chave: "L:BRA1" campeão da liga, "P:BRA2" acesso conquistado, "C:UCL" continental, "W:CWC" mundial.
 var titles: Dictionary = {}
+## Ranking mundial: pontos das últimas temporadas (mais recente no fim) e posição ao fim da anterior.
+var rank_hist: Array = []
+var rank_prev: int = 0
 ## Sequências da temporada atual
 var streak_unbeaten: int = 0
 var streak_wins: int = 0
@@ -168,6 +171,7 @@ func to_dict() -> Dictionary:
 		"coh": cohesion, "ll": last_lineup, "afk": ai_formation_key,
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
+		"rk": rank_hist, "rkp": rank_prev,
 	}
 
 
@@ -222,4 +226,6 @@ static func from_dict(d: Dictionary) -> Club:
 	c.streak_winless = int(d.get("swl", 0))
 	c.streak_losses = int(d.get("sl", 0))
 	c.results = d.get("res", "")
+	c.rank_hist = Array(d.get("rk", []))
+	c.rank_prev = int(d.get("rkp", 0))
 	return c
