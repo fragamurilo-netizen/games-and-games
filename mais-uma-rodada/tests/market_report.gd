@@ -39,6 +39,7 @@ func _initialize() -> void:
 	for t: Transfer in w.transfer_log:
 		if t.year == w.year:
 			all.append(t)
+	print("Leilões: %d · trocas: %d · empréstimos com opção: %d (compras exercidas: %d) · novelas retomadas: %d" % [int(w.stats.get("auctions", 0.0)), int(w.stats.get("swaps", 0.0)), int(w.stats.get("loans_opt", 0.0)), int(w.stats.get("options_exercised", 0.0)), int(w.stats.get("talks", 0.0))])
 	print("Mercado em %d temporada(s), seed %d — %.1f s" % [seasons, seed_value, (Time.get_ticks_msec() - t0) / 1000.0])
 	_report(w, all, loans, seasons)
 	quit(0)

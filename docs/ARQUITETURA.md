@@ -320,7 +320,10 @@ dificuldade. A dificuldade nunca dá bônus de força à IA.
   garimpo, mercado mundial por nível) e a estratégia do arquétipo. Negociação clube × clube com proposta,
   contraproposta e recusa: o poder econômico da liga manda (ágio da liga inglesa, clube grande não vende
   titular para menor, pequeno não segura quem recebe proposta de gigante), multa rescisória paga à vista,
-  e quem vende um titular vai atrás de reposição. Veteranos atraídos por Golfo, EUA e volta para casa.
+  e quem vende um titular vai atrás de reposição. Jogador cobiçado vira leilão (outro clube pode dar o
+  "chapéu"), formadores guardam % da revenda, o comprador pode incluir um jogador na troca, negociações
+  que ficam perto do acordo viram novela nas semanas seguintes (o comprador sobe a oferta, o vendedor
+  cede) e quem não tem dinheiro pega emprestado com opção de compra, exercida no fim da temporada. Veteranos atraídos por Golfo, EUA e volta para casa.
   A maior parte dos negócios de meio de ano acontece nas férias (`MarketAI.offseason`); o último fim de
   semana da janela tem correria e preços mais altos. Recém-contratado não é revendido na mesma temporada.
 - IA→usuário: propostas por jogadores em destaque chegam como notificações com prazo; quem precisa da

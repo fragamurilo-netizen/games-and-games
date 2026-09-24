@@ -767,7 +767,7 @@ func _test_market_ai() -> void:
 	var small: Club = w.clubs_in_league("BRA2")[5]
 	small.transfer_budget = 900_000_000
 	if star != null:
-		check(MarketAI.negotiate(w, small, star, 1.0, false).is_empty(), "estrela vendida para clube pequeno")
+		check(not MarketAI.negotiate(w, small, star, 1.0, false).has("fee"), "estrela vendida para clube pequeno")
 	# Rico inglês paga ágio por uma promessa brasileira.
 	var seller: Club = w.clubs_in_league("BRA1")[8]
 	var prospect: Player = null
@@ -777,10 +777,31 @@ func _test_market_ai() -> void:
 	big.transfer_budget = 900_000_000
 	if prospect != null:
 		var deal := MarketAI.negotiate(w, big, prospect, 1.0, false)
-		check(not deal.is_empty() and int(deal["fee"]) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		check(deal.has("fee") and int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
 		var bids := MarketAI.bids_for_user_player(w, big, prospect)
 		check(int(bids[0]) <= int(bids[1]) and int(bids[0]) > 0, "proposta acima do teto do comprador")
 	check(MarketAI.power(big) > MarketAI.power(seller) * 2.0, "liga inglesa deveria ter muito mais poder de compra")
+	if star != null:
+		check(float(MarketAI.negotiate(w, small, star, 1.0, false).get("gap", -1.0)) >= 0.0, "negociação travada sem informar a distância")
+	# Empréstimo com opção de compra: quem se firmou é comprado no fim da temporada.
+	var owner: Club = w.clubs_in_league("ESP1")[2]
+	var borrower: Club = w.clubs_in_league("ESP1")[15]
+	var loanee: Player = null
+	for q: Player in w.squad(owner):
+		if q.loan.is_empty() and q.age(w.year) >= 22 and q.age(w.year) <= 29:
+			loanee = q
+	if loanee != null:
+		TransferManager._move_loan(w, loanee, owner, borrower)
+		loanee.loan["opt"] = loanee.value
+		loanee.squad_status = Player.STATUS_STARTER
+		borrower.transfer_budget = loanee.value * 3
+		var ok := false
+		for _k in 10:
+			MarketAI.exercise_loan_options(w)
+			if loanee.loan.is_empty():
+				ok = true
+				break
+		check(ok and loanee.club_id == borrower.id and not owner.player_ids.has(loanee.id), "opção de compra não exercida")
 
 
 func _test_faces() -> void:

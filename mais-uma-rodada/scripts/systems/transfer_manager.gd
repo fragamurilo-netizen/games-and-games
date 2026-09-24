@@ -354,6 +354,7 @@ static func _move_loan(world: GameWorld, p: Player, owner: Club, borrower: Club)
 
 ## Fim de temporada: emprestados voltam para casa.
 static func return_loans(world: GameWorld) -> Array:
+	MarketAI.exercise_loan_options(world)
 	var back: Array = []
 	for p: Player in world.players.values():
 		if p.loan.is_empty() or int(p.loan.get("until", 0)) > world.year:
