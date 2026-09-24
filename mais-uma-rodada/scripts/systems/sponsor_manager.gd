@@ -128,7 +128,7 @@ static func apply_to_kits(club: Club) -> void:
 			if m.is_empty():
 				k.erase(key)
 			else:
-				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"]}
+				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"], "logo": m.get("logo", "")}
 
 
 ## Bônus por vitória (contratos "por vitória").
@@ -185,7 +185,7 @@ static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
 				bi += 1
 			# Marcas maiores pagam um pouco mais.
 			var v := base * rng.randf_range(0.9, 1.08) * (1.0 + (int(b.get("tier", 1)) - tier) * 0.08)
-			var o := {"n": b["n"], "c": b["c"], "t": b["t"], "kind": kind, "yrs": 1, "v": 0, "b": 0}
+			var o := {"n": b["n"], "c": b["c"], "t": b["t"], "logo": b.get("logo", ""), "kind": kind, "yrs": 1, "v": 0, "b": 0}
 			match kind:
 				"fixo":
 					o["v"] = Valuation.round_value(v)

@@ -1,5 +1,5 @@
 {
-  "_doc": "Marcas fictícias de patrocinadores. tier: 1 local, 2 nacional, 3 global (clubes com mais reputação atraem marcas maiores). c: cor de fundo do logo, t: cor do texto. suppliers: fornecedores de material esportivo (logo pequeno no peito).",
+  "_doc": "Marcas fictícias de patrocinadores. tier: 1 local, 2 nacional, 3 global (clubes com mais reputação atraem marcas maiores). c: cor de fundo do logo, t: cor do texto. suppliers: fornecedores de material esportivo (logo pequeno no peito). logo: forma genérica desenhada no peito (curva, barras, triangulo, raio, asas, diamante, trevo, estrela, chevron).",
   "brands": [
     {
       "n": "Padaria Estrela",
@@ -145,55 +145,64 @@
       "n": "Kora",
       "tier": 3,
       "c": "#FFFFFF",
-      "t": "#111111"
+      "t": "#111111",
+      "logo": "curva"
     },
     {
       "n": "Veloce",
       "tier": 3,
       "c": "#111111",
-      "t": "#FFFFFF"
+      "t": "#FFFFFF",
+      "logo": "barras"
     },
     {
       "n": "Striker",
       "tier": 3,
       "c": "#C8102E",
-      "t": "#FFFFFF"
+      "t": "#FFFFFF",
+      "logo": "raio"
     },
     {
       "n": "Olimpo",
       "tier": 2,
       "c": "#F2C14E",
-      "t": "#111111"
+      "t": "#111111",
+      "logo": "asas"
     },
     {
       "n": "Ataque",
       "tier": 2,
       "c": "#0033A0",
-      "t": "#FFFFFF"
+      "t": "#FFFFFF",
+      "logo": "diamante"
     },
     {
       "n": "Pampa Sport",
       "tier": 2,
       "c": "#2E7D32",
-      "t": "#FFFFFF"
+      "t": "#FFFFFF",
+      "logo": "trevo"
     },
     {
       "n": "Rinha",
       "tier": 1,
       "c": "#E4572E",
-      "t": "#FFFFFF"
+      "t": "#FFFFFF",
+      "logo": "estrela"
     },
     {
       "n": "Gol Norte",
       "tier": 1,
       "c": "#4EA8DE",
-      "t": "#111111"
+      "t": "#111111",
+      "logo": "chevron"
     },
     {
       "n": "Tramela",
       "tier": 1,
       "c": "#FFFFFF",
-      "t": "#5B2C83"
+      "t": "#5B2C83",
+      "logo": "triangulo"
     }
   ]
 }
