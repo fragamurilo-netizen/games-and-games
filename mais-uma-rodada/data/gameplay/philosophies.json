@@ -1,0 +1,118 @@
+{
+  "_doc": "Filosofias de jogo dos clubes. Cada clube recebe uma (sorteio estável pelo perfil do clube e pela escola do país) e a IA monta a tática a partir dela. style/style2 = índices de tactics.json (0 posse, 1 direto, 2 contra-ataque, 3 pressão, 4 pelos lados, 5 bola longa). mentality 0..4; pressing/line/intensity 0..2. adapt 0..1 = pragmatismo: o quanto o clube muda o plano conforme o adversário. squad = atributos que o clube valoriza no elenco.",
+  "philosophies": {
+    "posicional": {
+      "name": "Jogo de posição", "desc": "Posse paciente, triângulos e linhas altas. Quer a bola o tempo todo.",
+      "formations": ["4-3-3", "4-2-3-1", "3-4-3"], "style": 0, "style2": 3, "mentality": 3,
+      "pressing": 2, "line": 2, "intensity": 1, "adapt": 0.2, "squad": ["PAS", "TEC", "VIS"]
+    },
+    "pressao": {
+      "name": "Pressão sufocante", "desc": "Perde a bola e caça em segundos. Intenso, vertical e cansativo.",
+      "formations": ["4-3-3", "4-2-3-1", "3-4-3", "4-4-2"], "style": 3, "style2": 1, "mentality": 3,
+      "pressing": 2, "line": 2, "intensity": 2, "adapt": 0.25, "squad": ["RES", "VEL", "MAR"]
+    },
+    "ferrolho": {
+      "name": "Ferrolho", "desc": "Bloco baixo, cinco atrás se preciso, e uma bola para decidir.",
+      "formations": ["5-3-2", "4-1-4-1", "3-5-2", "4-4-2"], "style": 2, "style2": 5, "mentality": 1,
+      "pressing": 0, "line": 0, "intensity": 1, "adapt": 0.4, "squad": ["MAR", "POS", "FOR"]
+    },
+    "contragolpe": {
+      "name": "Contra-ataque letal", "desc": "Cede a bola de propósito e mata na velocidade.",
+      "formations": ["4-4-2", "4-2-3-1", "4-1-4-1", "5-3-2"], "style": 2, "style2": 1, "mentality": 2,
+      "pressing": 1, "line": 0, "intensity": 1, "adapt": 0.45, "squad": ["VEL", "FIN", "DEC"]
+    },
+    "direto": {
+      "name": "Jogo direto", "desc": "Bola na área, segunda bola e muita disputa física.",
+      "formations": ["4-4-2", "4-3-3", "4-1-4-1"], "style": 5, "style2": 1, "mentality": 2,
+      "pressing": 1, "line": 1, "intensity": 2, "adapt": 0.35, "squad": ["CAB", "FOR", "CRU"]
+    },
+    "pontas": {
+      "name": "Jogo pelas pontas", "desc": "Amplitude total, laterais que apoiam e cruzamento na área.",
+      "formations": ["4-4-2", "4-3-3", "3-4-3", "3-5-2"], "style": 4, "style2": 1, "mentality": 3,
+      "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.3, "squad": ["CRU", "VEL", "CAB"]
+    },
+    "toque": {
+      "name": "Futebol arte", "desc": "Toque de bola, drible e liberdade para os craques criarem.",
+      "formations": ["4-3-1-2", "4-2-3-1", "4-3-3", "4-4-2"], "style": 0, "style2": 4, "mentality": 3,
+      "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.3, "squad": ["TEC", "VIS", "PAS"]
+    },
+    "vertical": {
+      "name": "Transição vertical", "desc": "Recupera e acelera. Poucos toques até o gol.",
+      "formations": ["4-2-3-1", "4-3-3", "4-4-2"], "style": 1, "style2": 2, "mentality": 2,
+      "pressing": 2, "line": 1, "intensity": 2, "adapt": 0.4, "squad": ["VEL", "FIN", "PAS"]
+    },
+    "pragmatico": {
+      "name": "Pragmático", "desc": "Sem dogmas: lê o adversário e muda o plano jogo a jogo.",
+      "formations": ["4-4-2", "4-2-3-1", "4-3-3", "5-3-2"], "style": 1, "style2": 2, "mentality": 2,
+      "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.9, "squad": ["DEC", "POS", "INT"]
+    },
+    "tres_zagueiros": {
+      "name": "Linha de três", "desc": "Três zagueiros, alas que voam e meio povoado.",
+      "formations": ["3-4-3", "3-5-2", "5-3-2"], "style": 4, "style2": 0, "mentality": 2,
+      "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.35, "squad": ["RES", "CRU", "MAR"]
+    }
+  },
+  "base": {"posicional": 1.0, "pressao": 1.0, "ferrolho": 0.8, "contragolpe": 1.2, "direto": 0.8, "pontas": 1.0, "toque": 0.8, "vertical": 1.0, "pragmatico": 1.3, "tres_zagueiros": 0.6},
+  "archetype_bias": {
+    "gigante_endividado": {"posicional": 1.8, "toque": 1.6, "ferrolho": 0.3},
+    "rico_promovido": {"vertical": 1.8, "pressao": 1.5, "ferrolho": 0.4},
+    "tradicional_decadente": {"pontas": 1.8, "pragmatico": 1.5},
+    "formador": {"posicional": 2.0, "toque": 1.6, "direto": 0.4},
+    "vendedor": {"contragolpe": 1.8, "vertical": 1.6},
+    "defensivo": {"ferrolho": 3.5, "contragolpe": 2.0, "posicional": 0.2, "pressao": 0.3},
+    "torcida_impaciente": {"pressao": 2.5, "pontas": 1.4, "ferrolho": 0.3},
+    "projeto_jovem": {"pressao": 2.2, "vertical": 1.8, "ferrolho": 0.3},
+    "veteranos": {"toque": 1.8, "pragmatico": 1.8, "pressao": 0.3},
+    "azarao": {"contragolpe": 2.5, "ferrolho": 1.8, "posicional": 0.3},
+    "cidade_pequena": {"direto": 2.5, "ferrolho": 1.4, "posicional": 0.4},
+    "estadio_enorme": {"pontas": 2.0, "pressao": 1.5},
+    "base_sem_dinheiro": {"toque": 2.0, "posicional": 1.5},
+    "dinheiro_gestao_ruim": {"vertical": 1.5, "direto": 1.4, "pragmatico": 0.6},
+    "tradicional_equilibrado": {"pragmatico": 1.5, "pontas": 1.2}
+  },
+  "nation_bias": {
+    "BRA": {"toque": 2.5, "pontas": 1.5, "direto": 0.5},
+    "ARG": {"toque": 1.6, "pressao": 1.4, "pragmatico": 1.4},
+    "URU": {"ferrolho": 1.8, "contragolpe": 1.6, "pragmatico": 1.3},
+    "PAR": {"ferrolho": 1.6, "direto": 1.4},
+    "CHI": {"pressao": 1.8, "tres_zagueiros": 1.5},
+    "COL": {"toque": 1.6, "contragolpe": 1.3},
+    "ECU": {"vertical": 1.5, "pontas": 1.3},
+    "PER": {"toque": 1.5},
+    "BOL": {"direto": 1.4, "pressao": 1.2},
+    "VEN": {"contragolpe": 1.4},
+    "MEX": {"toque": 1.4, "tres_zagueiros": 1.3},
+    "USA": {"pressao": 1.5, "vertical": 1.4},
+    "ENG": {"direto": 1.8, "pressao": 1.6, "pontas": 1.4},
+    "SCO": {"direto": 2.2, "pontas": 1.3},
+    "ESP": {"posicional": 3.0, "toque": 1.3, "direto": 0.3},
+    "ITA": {"ferrolho": 2.2, "pragmatico": 1.8, "tres_zagueiros": 2.0},
+    "GER": {"pressao": 2.8, "vertical": 1.8},
+    "AUT": {"pressao": 2.5, "vertical": 1.5},
+    "SUI": {"pressao": 1.4, "pragmatico": 1.3},
+    "NED": {"posicional": 2.2, "pontas": 1.8, "ferrolho": 0.4},
+    "BEL": {"vertical": 1.4, "tres_zagueiros": 1.4},
+    "FRA": {"contragolpe": 1.6, "vertical": 1.5, "pragmatico": 1.3},
+    "POR": {"posicional": 1.5, "pragmatico": 1.6, "contragolpe": 1.3},
+    "GRE": {"ferrolho": 2.2, "contragolpe": 1.5},
+    "TUR": {"pontas": 1.5, "vertical": 1.4},
+    "CRO": {"toque": 1.5, "pragmatico": 1.4},
+    "SRB": {"direto": 1.4, "pragmatico": 1.3},
+    "CZE": {"direto": 1.6, "pontas": 1.4},
+    "DEN": {"pressao": 1.4, "tres_zagueiros": 1.5},
+    "UKR": {"contragolpe": 1.5, "posicional": 1.2},
+    "JPN": {"posicional": 1.7, "vertical": 1.4},
+    "KOR": {"pressao": 1.6, "vertical": 1.4},
+    "CHN": {"direto": 1.4, "contragolpe": 1.3},
+    "AUS": {"direto": 1.5, "pressao": 1.4},
+    "KSA": {"contragolpe": 1.5, "pontas": 1.3},
+    "QAT": {"posicional": 1.5},
+    "UAE": {"contragolpe": 1.4},
+    "EGY": {"contragolpe": 1.6, "ferrolho": 1.4},
+    "MAR": {"contragolpe": 1.7, "pragmatico": 1.4},
+    "TUN": {"ferrolho": 1.5, "contragolpe": 1.4},
+    "NGA": {"vertical": 1.7, "direto": 1.4},
+    "SEN": {"vertical": 1.6, "direto": 1.3},
+    "RSA": {"pontas": 1.4, "vertical": 1.3}
+  }
+}

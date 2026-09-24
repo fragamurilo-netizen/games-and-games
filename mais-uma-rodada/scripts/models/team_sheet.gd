@@ -29,6 +29,11 @@ var intensity: int = 1
 var line: int = 1
 var pressing: int = 1
 var auto_subs: bool = true
+## Plano de jogo automático (-1 = não mexer): mentalidade se estiver perdendo / vencendo
+## a partir de plan_minute. Empatando, volta para a mentalidade escolhida no pré-jogo.
+var plan_losing: int = -1
+var plan_winning: int = -1
+var plan_minute: int = 70
 
 
 func duplicate_sheet() -> TeamSheet:
@@ -48,6 +53,7 @@ func to_dict() -> Dictionary:
 		"f": formation, "s": starters.duplicate(), "b": bench.duplicate(),
 		"cap": captain, "pen": penalty_taker, "fk": freekick_taker, "ck": corner_taker,
 		"m": mentality, "st": style, "i": intensity, "l": line, "p": pressing, "as": auto_subs,
+		"pl": plan_losing, "pw": plan_winning, "pm": plan_minute,
 	}
 
 
@@ -66,4 +72,7 @@ static func from_dict(d: Dictionary) -> TeamSheet:
 	t.line = int(d.get("l", 1))
 	t.pressing = int(d.get("p", 1))
 	t.auto_subs = bool(d.get("as", true))
+	t.plan_losing = int(d.get("pl", -1))
+	t.plan_winning = int(d.get("pw", -1))
+	t.plan_minute = int(d.get("pm", 70))
 	return t

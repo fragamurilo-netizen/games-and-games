@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_run("modo rápido = motor completo (médias)", _test_quick_calibration)
 	_run("partida ao vivo = partida instantânea", _test_live_equals_instant)
 	_run("mata-mata: prorrogação e pênaltis", _test_knockout)
+	_run("troca de formação durante a partida", _test_formation_change)
 	_run("temporada completa, copas e Mundial", _test_season_cycle)
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
 	_run("avanço até o próximo jogo do usuário", _test_advance)
@@ -33,6 +34,8 @@ func _initialize() -> void:
 	_run("treino, base e liga sub-20", _test_training_youth)
 	_run("empréstimos, parcelas e cláusulas", _test_deals)
 	_run("rostos e personalização", _test_faces)
+	_run("táticas: entrosamento, plano de jogo e filosofias", _test_tactics)
+	_run("elenco: papéis, profundidade e rodízio", _test_squad_mgmt)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -244,7 +247,7 @@ func _test_quick_calibration() -> void:
 	rng.seed = 7
 	var ids := DatabaseManager.league_ids()
 	var acc := {true: [0.0, 0.0, 0, 0], false: [0.0, 0.0, 0, 0]}
-	for i in 300:
+	for i in 600:
 		var cl := w.clubs_in_league(ids[i % ids.size()])
 		var a: Club = cl[rng.randi_range(0, cl.size() - 1)]
 		var b: Club = cl[rng.randi_range(0, cl.size() - 1)]
@@ -298,6 +301,44 @@ func _goal_log(sim: MatchSimulation) -> String:
 		if ev["t"] == MatchSimulation.EV_GOAL or ev["t"] == MatchSimulation.EV_OWN_GOAL:
 			out += "%d:%d:%d;" % [ev["m"], ev["s"], ev["p"]]
 	return out
+
+
+## Mudar o desenho no meio do jogo mantém os mesmos 11 em campo, o goleiro no gol e não gasta troca.
+func _test_formation_change() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	var cl := w.clubs_in_league("ENG2")
+	var h: Club = cl[2]
+	var a: Club = cl[3]
+	var hs := ClubAI.prepare_ai_sheet(w, h, a, true)
+	var as_ := ClubAI.prepare_ai_sheet(w, a, h, false)
+	var ctx := {"derby": false, "importance": 0.3, "attendance": 10000, "competition": "F"}
+	var sim := MatchSimulation.new()
+	sim.setup(w, h, a, hs, as_, ctx, 77, true)
+	while sim.minute < 30:
+		sim.step()
+	var t: MatchTeam = sim.teams[0]
+	var before: Array = []
+	for mp: MatchPlayer in t.slots:
+		if mp != null:
+			before.append(mp.p.id)
+	var gk := t.goalkeeper()
+	var target := "3-4-3" if t.formation_name != "3-4-3" else "4-4-2"
+	check(sim.set_formation(0, target), "troca de formação recusada")
+	check(t.formation_name == target, "formação não mudou")
+	check(t.goalkeeper() == gk, "goleiro saiu do gol")
+	check(t.subs_used == 0, "troca de formação gastou substituição")
+	var after: Array = []
+	for i in t.slots.size():
+		var mp: MatchPlayer = t.slots[i]
+		if mp != null:
+			after.append(mp.p.id)
+			check(mp.slot == i and mp.pos == int(t.formation["slots"][i]["pos"]), "vaga desencontrada: %s" % mp.p.display_name())
+	before.sort()
+	after.sort()
+	check(before == after, "jogadores em campo mudaram")
+	check(not sim.set_formation(0, target), "mesma formação deveria ser ignorada")
+	sim.run_to_end()
+	check(sim.finished and not sim.pressure.is_empty(), "partida não terminou ou sem gráfico de pressão")
 
 
 ## Jogo que decide confronto nunca termina empatado no agregado.
@@ -755,3 +796,141 @@ func _test_faces() -> void:
 	Overrides.apply_club(c)
 	Overrides.data()["clubs"].erase("__teste__")
 	check(c.name == "Editado" and c.color1 == "#112233" and String(c.crest.get("c1", "")) == "#112233", "personalização de clube não aplicada")
+
+
+func _test_tactics() -> void:
+	var w := WorldGenerator.generate(777, "padrao")
+	# Filosofias: estáveis, válidas e variadas.
+	var seen := {}
+	for c: Club in w.clubs:
+		var id := ClubPhilosophy.id_of(c)
+		seen[id] = int(seen.get(id, 0)) + 1
+		check(ClubPhilosophy.ids().has(id), "filosofia inválida: %s" % id)
+		check(ClubPhilosophy.pick_for(c) == id, "filosofia não é estável para %s" % c.short_name)
+	check(seen.size() >= 8, "filosofias pouco variadas: %s" % str(seen))
+	var top := 0
+	for k in seen:
+		top = maxi(top, seen[k])
+	check(top < w.clubs.size() * 0.35, "uma filosofia domina o mundo: %s" % str(seen))
+	for code in ["ESP", "ITA", "GER", "BRA"]:
+		var by := {}
+		for c: Club in w.clubs:
+			if c.nation == code:
+				by[c.philosophy] = int(by.get(c.philosophy, 0)) + 1
+		check(by.size() >= 3, "%s com filosofias pouco variadas: %s" % [code, str(by)])
+	# Tática da IA varia conforme o adversário (favorito × azarão).
+	var cl := w.clubs_in_league("ENG1")
+	cl.sort_custom(func(a, b): return ClubAI.team_strength(w, a) > ClubAI.team_strength(w, b))
+	var strong: Club = cl[0]
+	var weak: Club = cl[cl.size() - 1]
+	var s1 := ClubAI.prepare_ai_sheet(w, weak, strong, false).duplicate_sheet()
+	check(s1.mentality <= int(ClubPhilosophy.of(weak)["mentality"]), "azarão não se protegeu")
+	var s2 := ClubAI.prepare_ai_sheet(w, strong, weak, true)
+	check(s2.mentality >= 3, "favorito em casa não foi para cima (%d)" % s2.mentality)
+	var styles := {}
+	var forms := {}
+	for c: Club in w.clubs:
+		var opp: Club = w.clubs[(c.id + 7) % w.clubs.size()]
+		var sh := ClubAI.prepare_ai_sheet(w, c, opp, true)
+		styles[sh.style] = true
+		forms[sh.formation] = true
+	check(styles.size() == 6, "a IA não usa todos os estilos: %s" % str(styles.keys()))
+	check(forms.size() >= 7, "a IA usa poucas formações: %s" % str(forms.keys()))
+	# Entrosamento: aprende o que usa, esquece o resto, e pesa no jogo.
+	var c := strong
+	c.tactic_fam = {}
+	TacticsManager.ensure(c)
+	var f0 := c.sheet.formation
+	var other := "3-5-2" if f0 != "3-5-2" else "4-4-2"
+	check(TacticsManager.formation_fam(c, other) == TacticsManager.FAM_FLOOR, "formação nova deveria começar do zero")
+	var sh2 := c.sheet.duplicate_sheet()
+	sh2.formation = other
+	var low := TacticsManager.fam_factor(c, sh2)
+	for i in 12:
+		TacticsManager.after_match(c, sh2)
+	check(TacticsManager.formation_fam(c, other) > 70.0, "formação não aprendida em 12 jogos (%.1f)" % TacticsManager.formation_fam(c, other))
+	check(TacticsManager.formation_fam(c, f0) < TacticsManager.FAM_START, "formação antiga não foi esquecida")
+	check(TacticsManager.fam_factor(c, sh2) > low, "entrosamento não melhora o time")
+	var d := Club.from_dict(c.to_dict())
+	check(d.tactic_fam == c.tactic_fam and d.philosophy == c.philosophy, "entrosamento/filosofia não sobrevivem ao save")
+	# Plano de jogo do usuário muda a mentalidade sozinho e o ao vivo segue igual ao instantâneo.
+	var h: Club = cl[3]
+	var a: Club = cl[4]
+	w.user_club_id = h.id
+	var changed := 0
+	for s in 12:
+		var hs := ClubAI.prepare_ai_sheet(w, h, a, true).duplicate_sheet()
+		hs.mentality = TeamSheet.MENT_EQUILIBRADA
+		hs.plan_losing = TeamSheet.MENT_TUDO
+		hs.plan_winning = TeamSheet.MENT_RETRANCA
+		hs.plan_minute = 60
+		var as_ := ClubAI.prepare_ai_sheet(w, a, h, false)
+		var ctx := {"derby": false, "importance": 0.3, "attendance": 10000, "competition": "F", "ko": false, "agg": [0, 0]}
+		var m1 := MatchSimulation.new()
+		m1.setup(w, h, a, hs, as_, ctx, 500 + s, true)
+		var steps := 0
+		while not m1.finished and steps < 600:
+			m1.step()
+			steps += 1
+		var m2 := MatchSimulation.new()
+		m2.setup(w, h, a, hs, as_, ctx, 500 + s, false)
+		m2.run_to_end()
+		check(m1.score == m2.score and _goal_log(m1) == _goal_log(m2), "plano: ao vivo ≠ instantâneo (seed %d)" % (500 + s))
+		var t: MatchTeam = m2.teams[0]
+		var diff: int = m2.score[0] - m2.score[1]
+		if diff < 0:
+			check(t.mentality == TeamSheet.MENT_TUDO, "perdendo e o plano não foi para o tudo ou nada")
+			changed += 1
+		elif diff > 0 and t.plan_state >= 0:
+			check(t.mentality == TeamSheet.MENT_RETRANCA, "vencendo e o plano não fechou o time")
+			changed += 1
+	check(changed > 0, "plano de jogo nunca agiu")
+	w.user_club_id = -1
+	# Leitura do auxiliar e estilos de jogadores.
+	var sug := TacticsManager.suggest(w, weak, strong, false)
+	check(int(sug["mentality"]) <= TeamSheet.MENT_EQUILIBRADA and not Array(sug["reasons"]).is_empty(), "auxiliar sugeriu atacar como azarão")
+	var ps := {}
+	for p: Player in w.players.values():
+		ps[PlayStyle.of(p)] = true
+	check(ps.size() >= 25, "poucos estilos de jogador (%d)" % ps.size())
+
+
+func _test_squad_mgmt() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var squad := w.squad(c)
+	squad.sort_custom(func(a, b): return a.ovr_f < b.ovr_f)
+	var p: Player = squad[squad.size() - 1]
+	# Rebaixar um titular derruba a moral; promover anima.
+	p.squad_status = Player.STATUS_STARTER
+	p.morale = 70.0
+	check(SquadManager.set_status(w, c, p, Player.STATUS_BACKUP) == "", "rebaixamento recusado")
+	check(p.morale < 60.0 and p.squad_status == Player.STATUS_BACKUP, "rebaixar não mexeu na moral (%.1f)" % p.morale)
+	var m0 := p.morale
+	SquadManager.set_status(w, c, p, Player.STATUS_STARTER)
+	check(p.morale > m0, "promover não animou")
+	# Limite de estrelas e promessas só para jovens.
+	for q: Player in squad:
+		q.squad_status = Player.STATUS_STAR if q != squad[0] and squad.find(q) >= squad.size() - SquadManager.MAX_STARS else q.squad_status
+	check(SquadManager.set_status(w, c, squad[0], Player.STATUS_STAR) != "", "passou do limite de estrelas")
+	var old: Player = null
+	for q: Player in squad:
+		if q.age(w.year) > 25:
+			old = q
+			break
+	if old != null:
+		check(SquadManager.set_status(w, c, old, Player.STATUS_PROSPECT) != "", "veterano virou promessa")
+	# Profundidade cobre todas as linhas.
+	var dep := SquadManager.depth(w, c)
+	check(dep.size() == SquadManager.DEPTH_ROWS.size(), "profundidade incompleta")
+	check(not Array(dep[0]["best"]).is_empty(), "sem goleiro na profundidade")
+	# Poupar cansados troca só quem está esgotado.
+	c.sheet = ClubAI.auto_sheet(w, c, "")
+	var tired: Player = w.player(c.sheet.starters[5])
+	tired.condition = 55.0
+	var msgs := SquadManager.rest_tired(w, c, c.sheet, 80.0, 30.0)
+	check(not c.sheet.starters.has(tired.id) and msgs.size() >= 1, "cansado não foi poupado")
+	var ids := {}
+	for pid in c.sheet.starters:
+		check(not ids.has(pid), "jogador repetido na escalação depois do rodízio")
+		ids[pid] = true
