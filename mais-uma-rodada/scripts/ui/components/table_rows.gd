@@ -83,10 +83,9 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 static func legend(league: League) -> HFlowContainer:
 	var f := UIKit.flow(14)
 	f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_TITLE), "Campeão"))
-	var spots := CupManager.continental_spots(league)
-	if spots > 0:
-		var cup := CupManager.cup_short(CupManager.cup_of_nation(league.nation))
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_CONTINENTAL), "%s (%d)" % [cup, spots]))
+	for band in CupManager.qualification_bands(league):
+		var zone := CompetitionManager.zone_of(league, int(band["from"])) if int(band["from"]) > 1 else CompetitionManager.ZONE_CONTINENTAL
+		f.add_child(_legend_item(CompetitionManager.zone_color(zone), "%s (%d)" % [CupManager.cup_short(band["cup"]), int(band["to"]) - int(band["from"]) + 1]))
 	if league.promoted_count() > 0:
 		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION), "Acesso (%d)" % league.promoted_count()))
 	if league.relegated_count() > 0:

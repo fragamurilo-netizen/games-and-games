@@ -9,6 +9,7 @@ const PATHS := {
 	"nations": "res://data/world/nations.json",
 	"leagues": "res://data/world/leagues.json",
 	"continental": "res://data/world/continental.json",
+	"international": "res://data/world/international.json",
 	"names": "res://data/names/names.json",
 	"archetypes": "res://data/gameplay/archetypes.json",
 	"personalities": "res://data/gameplay/personalities.json",
@@ -175,6 +176,15 @@ static func cups_cfg() -> Dictionary:
 
 static func cup_cfg(id: String) -> Dictionary:
 	return cups_cfg().get(id, {})
+
+
+## Futebol de seleções: datas FIFA e torneios (international.json).
+static func international_cfg() -> Dictionary:
+	return get_data("international")
+
+
+static func tournament_cfg(id: String) -> Dictionary:
+	return international_cfg().get("tournaments", {}).get(id, {})
 
 
 ## Clubes autorais de uma nação (arquivos em data/world/clubs).

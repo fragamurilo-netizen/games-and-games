@@ -7,6 +7,8 @@ const ZONE_TITLE := 1
 const ZONE_PROMOTION := 2
 const ZONE_RELEGATION := 3
 const ZONE_CONTINENTAL := 4
+const ZONE_CONTINENTAL_2 := 5 # Europa League, Sul-Americana
+const ZONE_CONTINENTAL_3 := 6 # Conference League
 
 
 static func empty_row() -> Dictionary:
@@ -105,8 +107,9 @@ static func zone_of(league: League, position: int) -> int:
 	var down := int(cfg.get("down", 0))
 	if down > 0 and position > teams - down:
 		return ZONE_RELEGATION
-	if position <= CupManager.continental_spots(league):
-		return ZONE_CONTINENTAL
+	var cup := CupManager.cup_for_position(league, position)
+	if cup != "":
+		return [ZONE_CONTINENTAL, ZONE_CONTINENTAL, ZONE_CONTINENTAL_2, ZONE_CONTINENTAL_3][clampi(CupManager.cup_level(cup), 1, 3)]
 	return ZONE_NONE
 
 
@@ -120,6 +123,10 @@ static func zone_color(zone: int) -> Color:
 			return Color("#E5484D")
 		ZONE_CONTINENTAL:
 			return Color("#3D8BFD")
+		ZONE_CONTINENTAL_2:
+			return Color("#F28C28")
+		ZONE_CONTINENTAL_3:
+			return Color("#2BB3A3")
 	return Color(0, 0, 0, 0)
 
 
