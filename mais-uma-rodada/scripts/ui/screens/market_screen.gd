@@ -23,6 +23,8 @@ func _init() -> void:
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_tab = p.get("tab", "search")
+	_group = int(p.get("group", 0))
+	_upgrades = bool(p.get("upgrades", false))
 
 
 func refresh() -> void:
