@@ -53,7 +53,7 @@ func goto(name: String, params: Dictionary = {}) -> void:
 	for s in stack:
 		s.queue_free()
 	stack.clear()
-	_show(_instance(name, params))
+	_show(_instance(name, params), 0.0)
 
 
 ## Empilha uma tela (perfil, negociação...). "Voltar" retorna à anterior.
@@ -63,7 +63,7 @@ func push(name: String, params: Dictionary = {}) -> void:
 	if cur != null:
 		cur.visible = false
 		cur.on_hide()
-	_show(_instance(name, params))
+	_show(_instance(name, params), 56.0)
 
 
 ## Substitui a tela do topo (fluxos lineares: pré-jogo → partida → resultados).
@@ -73,7 +73,7 @@ func replace(name: String, params: Dictionary = {}) -> void:
 	if cur != null:
 		stack.pop_back()
 		cur.queue_free()
-	_show(_instance(name, params))
+	_show(_instance(name, params), 24.0)
 
 
 func back() -> bool:
@@ -88,14 +88,27 @@ func back() -> bool:
 	prev.visible = true
 	_apply_chrome(prev)
 	prev.on_show()
+	_animate_in(prev, -40.0)
 	return true
 
 
-func _show(screen: BaseScreen) -> void:
+func _show(screen: BaseScreen, from_x: float) -> void:
 	stack.append(screen)
 	main.screen_host.add_child(screen)
 	_apply_chrome(screen)
 	screen.on_show()
+	_animate_in(screen, from_x)
+
+
+## Transição curta: a tela entra deslizando do lado de onde veio (avançar = da direita,
+## voltar = da esquerda) enquanto aparece. Trocar de aba é só um fade rápido.
+func _animate_in(screen: Control, from_x: float) -> void:
+	screen.modulate.a = 0.0
+	screen.position.x = from_x
+	var tw := screen.create_tween().set_parallel()
+	tw.tween_property(screen, "modulate:a", 1.0, 0.16 if from_x != 0.0 else 0.12)
+	if from_x != 0.0:
+		tw.tween_property(screen, "position:x", 0.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 func _apply_chrome(screen: BaseScreen) -> void:
@@ -162,13 +175,16 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	panel.theme_type_variation = "Sheet" if as_sheet else "Dialog"
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	box.add_child(panel)
+	# Conteúdo maior que a tela rola dentro do modal em vez de vazar para fora dela.
+	var reserved := safe.position.y + 60.0 + (safe.size.y if as_sheet else safe.size.y + 60.0)
+	var body := _fit_to_screen(content, layer, panel, reserved)
 	if as_sheet:
 		var inner := MarginContainer.new()
 		inner.add_theme_constant_override(&"margin_bottom", int(safe.size.y))
-		inner.add_child(content)
+		inner.add_child(body)
 		panel.add_child(inner)
 	else:
-		panel.add_child(content)
+		panel.add_child(body)
 		var bottom_spacer := Control.new()
 		bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		bottom_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -178,10 +194,39 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 				close_modal())
 	_modals.append(dim)
-	panel.modulate.a = 0.0
-	var tw := panel.create_tween()
-	tw.tween_property(panel, "modulate:a", 1.0, 0.12)
+	# Entrada: o fundo escurece e o painel sobe um pouco (a folha inferior vem de baixo).
+	dim.modulate.a = 0.0
+	holder.position.y = 90.0 if as_sheet else 24.0
+	var tw := dim.create_tween().set_parallel()
+	tw.tween_property(dim, "modulate:a", 1.0, 0.14)
+	tw.tween_property(holder, "position:y", 0.0, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	return dim
+
+
+## Limita a altura do conteúdo do modal ao espaço da tela. Se o conteúdo já é uma rolagem
+## (listas longas), só limita sua altura; senão, embrulha num ScrollContainer que cresce
+## junto com o conteúdo até o limite e então passa a rolar.
+func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, reserved: float) -> Control:
+	var max_h := func() -> float:
+		var style := panel.get_theme_stylebox(&"panel")
+		var pad := style.get_minimum_size().y if style != null else 0.0
+		return maxf(200.0, layer.get_viewport_rect().size.y - reserved - pad)
+	if content is ScrollContainer:
+		var want := content.custom_minimum_size.y
+		content.custom_minimum_size.y = minf(want, max_h.call()) if want > 0.0 else want
+		return content
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.scroll_deadzone = 14
+	sc.follow_focus = true
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(content)
+	var fit := func() -> void:
+		if is_instance_valid(sc) and is_instance_valid(content):
+			sc.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, max_h.call())
+	content.minimum_size_changed.connect(fit)
+	sc.ready.connect(fit)
+	return sc
 
 
 func close_modal() -> void:

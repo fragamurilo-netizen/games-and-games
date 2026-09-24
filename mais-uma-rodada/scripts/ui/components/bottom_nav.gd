@@ -30,6 +30,7 @@ func _ready() -> void:
 		b.custom_minimum_size = Vector2(0, 92)
 		b.toggle_mode = true
 		b.focus_mode = Control.FOCUS_NONE
+		UIKit.press_fx(b, null, 0.92)
 		var tab: String = t[0]
 		b.pressed.connect(func():
 			AudioManager.click()

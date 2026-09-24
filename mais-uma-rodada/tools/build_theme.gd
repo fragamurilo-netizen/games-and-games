@@ -242,8 +242,8 @@ func _inputs(th: Theme) -> void:
 
 
 func _scroll(th: Theme) -> void:
-	var grab := sb(Color(1, 1, 1, 0.14), 4, Color(0, 0, 0, 0), 0, 3, 3)
-	var grab_hi := sb(Color(1, 1, 1, 0.24), 4, Color(0, 0, 0, 0), 0, 3, 3)
+	var grab := sb(Color(1, 1, 1, 0.22), 4, Color(0, 0, 0, 0), 0, 3, 3)
+	var grab_hi := sb(Color(1, 1, 1, 0.36), 4, Color(0, 0, 0, 0), 0, 3, 3)
 	var track := StyleBoxEmpty.new()
 	for n in ["VScrollBar", "HScrollBar"]:
 		th.set_stylebox(&"scroll", n, track)

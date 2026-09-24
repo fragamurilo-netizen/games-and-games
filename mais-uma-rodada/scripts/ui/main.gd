@@ -10,16 +10,74 @@ extends Control
 @onready var toast_host: VBoxContainer = $Overlay/ToastBox/ToastHost
 
 var _safe := Rect2()
+var _shadow: TextureRect
+var _fade: TextureRect
 
 
 func _ready() -> void:
 	UIManager.register_main(self)
+	add_child(TouchScroll.new())
+	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
+	_fade = _edge(Color(UIColors.BG, 0.0), Color(UIColors.BG, 0.92))
+	# Tocar na barra superior leva a tela de volta ao topo.
+	top_bar.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+			var cur := UIManager.current()
+			if cur != null:
+				cur.scroll_to_top())
 	get_viewport().size_changed.connect(_update_safe_area)
 	_update_safe_area()
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
 	UIManager.goto("menu")
+
+
+## Bordas da área rolável: uma sombra sob a barra superior quando o conteúdo rolou por
+## baixo dela, e um esmaecido no pé quando ainda há conteúdo abaixo (sinal de que dá para
+## descer).
+func _edge(from: Color, to: Color) -> TextureRect:
+	var g := Gradient.new()
+	g.set_color(0, from)
+	g.set_color(1, to)
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill_from = Vector2(0, 0)
+	tex.fill_to = Vector2(0, 1)
+	tex.width = 4
+	tex.height = 32
+	var r := TextureRect.new()
+	r.texture = tex
+	r.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	r.stretch_mode = TextureRect.STRETCH_SCALE
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	r.z_index = 5
+	r.modulate.a = 0.0
+	screen_host.add_child(r)
+	return r
+
+
+func _process(_delta: float) -> void:
+	var cur := UIManager.current()
+	var sc: ScrollContainer = cur.scroll() if cur != null else null
+	var top := 0.0
+	var bottom := 0.0
+	if sc != null and sc.is_visible_in_tree():
+		var area := Rect2(sc.get_global_rect().position - screen_host.global_position, sc.size)
+		_shadow.position = area.position
+		_shadow.size = Vector2(area.size.x, 18)
+		_fade.position = Vector2(area.position.x, area.end.y - 56)
+		_fade.size = Vector2(area.size.x, 56)
+		var bar := sc.get_v_scroll_bar()
+		top = 1.0 if top_bar.visible and sc.scroll_vertical > 4 else 0.0
+		bottom = 1.0 if bar.max_value - bar.page - sc.scroll_vertical > 8 else 0.0
+	_ease_alpha(_shadow, top)
+	_ease_alpha(_fade, bottom)
+
+
+func _ease_alpha(r: TextureRect, want: float) -> void:
+	if not is_equal_approx(r.modulate.a, want):
+		r.modulate.a = move_toward(r.modulate.a, want, 0.15)
 
 
 func _on_tab(tab: String) -> void:

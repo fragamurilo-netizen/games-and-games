@@ -56,7 +56,11 @@ func scroll() -> ScrollContainer:
 	return get_node_or_null("Body/Scroll") as ScrollContainer
 
 
+## Volta ao topo deslizando (tocar de novo na aba atual ou no título da barra superior).
 func scroll_to_top() -> void:
 	var s := scroll()
-	if s != null:
-		s.scroll_vertical = 0
+	if s == null or s.scroll_vertical == 0:
+		return
+	var tw := s.create_tween()
+	tw.tween_property(s, "scroll_vertical", 0, clampf(s.scroll_vertical / 4000.0, 0.15, 0.35)) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

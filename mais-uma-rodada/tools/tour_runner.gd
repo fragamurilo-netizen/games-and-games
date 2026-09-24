@@ -24,6 +24,7 @@ func _wait(sec: float) -> void:
 
 func _shot(shot_name: String) -> void:
 	await _frames(3)
+	await _wait(0.3) # transições de tela e de modal terminarem
 	count += 1
 	print("[tela] ", shot_name)
 	if not shots:
