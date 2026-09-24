@@ -356,6 +356,9 @@ func _season(w: GameWorld) -> void:
 func _test_season_cycle() -> void:
 	var w := WorldGenerator.generate(777, "padrao")
 	_with_user(w, w.clubs_in_league("BRA1")[3].id)
+	var titles_before := {}
+	for c: Club in w.clubs:
+		titles_before[c.id] = c.titles.duplicate()
 	_season(w)
 	_season_world = w
 	check(w.season.finished and w.season.day == w.season.calendar.size(), "temporada não terminou (%d)" % w.season.day)
@@ -387,7 +390,7 @@ func _test_season_cycle() -> void:
 			check(f.played, "%s: jogo não disputado" % cid)
 		var last := cup.ties_of_round(cup.round_names.size() - 1)
 		check(last.size() == 1 and int(last[0]["w"]) == cup.champion, "%s: final inconsistente" % cid)
-		check(w.club(cup.champion).title_count("C:" + cid) == 1, "%s: título não registrado" % cid)
+		check(w.club(cup.champion).title_count("C:" + cid) == int(titles_before[cup.champion].get("C:" + cid, 0)) + 1, "%s: título não registrado" % cid)
 	# Estaduais: todos os 80 clubes brasileiros em exatamente um, com campeão e sem choque de datas.
 	var in_state := {}
 	for cid in CupManager.state_ids():
@@ -396,7 +399,7 @@ func _test_season_cycle() -> void:
 			continue
 		var st: Cup = w.season.cups[cid]
 		check(st.finished and st.champion >= 0, "%s sem campeão" % cid)
-		check(w.club(st.champion).title_count("S:" + cid) == 1, "%s: título não registrado" % cid)
+		check(w.club(st.champion).title_count("S:" + cid) == int(titles_before[st.champion].get("S:" + cid, 0)) + 1, "%s: título não registrado" % cid)
 		for c in st.club_ids:
 			check(not in_state.has(c), "%s em dois estaduais" % w.club(c).short_name)
 			in_state[c] = true
@@ -409,7 +412,7 @@ func _test_season_cycle() -> void:
 		var cwc: Cup = w.season.cups["CWC"]
 		check(cwc.club_ids.size() == 8 and cwc.finished and cwc.champion >= 0, "Mundial incompleto")
 		check(cwc.club_ids.has(w.season.cups["UCL"].champion) and cwc.club_ids.has(w.season.cups["LIB"].champion), "campeões continentais fora do Mundial")
-		check(w.club(cwc.champion).title_count("W:CWC") == 1, "título mundial não registrado")
+		check(w.club(cwc.champion).title_count("W:CWC") == int(titles_before[cwc.champion].get("W:CWC", 0)) + 1, "título mundial não registrado")
 	# Estatísticas de copa separadas das de liga
 	var top := CupManager.scorers(w, "UCL", 1)
 	check(not top.is_empty() and top[0].cup_stats["UCL"][Player.C_GOALS] > 0, "artilharia da Liga dos Campeões vazia")
@@ -973,6 +976,24 @@ func _test_persona_trophies() -> void:
 		check(TrophyView.trophy_name("L:" + id, w).begins_with("Taça "), "troféu sem nome: %s" % id)
 		tv.free()
 	check(styles.size() >= 4, "troféus pouco variados (%d formatos)" % styles.size())
+	# Passado real: campeões e títulos de antes do jogo
+	var pre := 0
+	for h in w.history:
+		if h.get("pre", false):
+			pre += 1
+	check(pre >= 20, "passado anterior ao jogo curto (%d temporadas)" % pre)
+	var liv := w.club_by_key("ENG_MSR")
+	var rma := w.club_by_key("ESP_MBL")
+	check(liv != null and liv.title_count("L:ENG1") == 20, "Liverpool sem os 20 títulos ingleses")
+	check(rma != null and rma.title_count("C:UCL") == 15, "Real Madrid sem as 15 Champions")
+	var h24: Dictionary = {}
+	for h in w.history:
+		if int(h["y"]) == 2024:
+			h24 = h
+	check(not h24.is_empty() and int(h24["leagues"]["ENG1"]["champion"]) == liv.id, "campeão inglês de 2024/25 errado")
+	check(not h24.is_empty() and h24["leagues"].has("JPN1"), "liga sem dados reais sem passado gerado")
+	var r1 := WorldGenerator.generate(4242, "padrao")
+	check(_fingerprint(r1) == _fingerprint(WorldGenerator.generate(4242, "padrao")) and str(r1.history) == str(WorldGenerator.generate(4242, "padrao").history), "passado não determinístico")
 	var cwc := TrophyView.make("W:CWC", 64, w)
 	check(cwc._style == TrophyView.STYLE_GLOBE, "Mundial sem o troféu do globo")
 	cwc.free()

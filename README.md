@@ -45,6 +45,10 @@ vem da própria simulação.
   mês e os números do seu elenco em cada ano. No perfil, a carreira temporada a temporada com gráfico do overall.
 - **Personalidade viva**: traços novos (mentor, resiliente, perfeccionista, cascudo, ídolo da torcida) e traços
   que surgem ou somem com a idade, os prêmios, a fase e o tempo de clube.
+- **Passado real**: o mundo padrão já começa com os campeões reais desde 2005 (Premier League, LaLiga,
+  Serie A, Bundesliga, Ligue 1, Liga Portugal, Eredivisie, Süper Lig, Escócia, Brasileirão, MLS, Champions,
+  Libertadores, Concachampions, África, Ásia e Mundial) e os títulos de todos os tempos dos clubes na sala de
+  troféus (`data/world/history.json`). Ligas sem dados reais ganham um passado gerado pela reputação.
 - **Evolução e declínio**: quem joga bem cresce mais, mentores aceleram os jovens, lesões graves custam físico,
   cada corpo envelhece no seu ritmo e veteranos ganham leitura de jogo enquanto o físico cai.
 

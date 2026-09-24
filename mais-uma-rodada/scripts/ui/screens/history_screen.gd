@@ -25,7 +25,11 @@ func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
-	screen_subtitle = "%d temporada(s) no save" % w.history.size()
+	var played := 0
+	for h in w.history:
+		if not h.get("pre", false):
+			played += 1
+	screen_subtitle = "%d temporada(s) no save" % played
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -172,7 +176,32 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 	var arch: Dictionary = h.get("arch", {})
 	if arch.is_empty():
 		var old := UIKit.card("Card", 6)
-		old.add_child(UIKit.label("Esta temporada foi jogada antes do arquivo de estatísticas existir: só campeões e prêmios foram guardados.", "Muted", true))
+		if h.get("pre", false):
+			old.add_child(UIKit.section("Antes do seu início"))
+			var lines: Array = []
+			for lid in h.get("leagues", {}):
+				var champ := w.club(int(h["leagues"][lid]["champion"]))
+				if champ != null and (DatabaseManager.league_cfg(String(lid)).get("tier", 1) == 1 or DatabaseManager.league_cfg(String(lid)).get("nation", "") == w.user_nation()):
+					lines.append([w.league_short(String(lid)), champ, "L:" + String(lid)])
+			for cid in h.get("cups", {}):
+				var champ := w.club(int(h["cups"][cid]["champion"]))
+				if champ != null:
+					lines.append([CupManager.cup_short(String(cid)), champ, ("W:" if cid == CupManager.CWC else "C:") + String(cid)])
+			for ln in lines:
+				var row := UIKit.hbox(10)
+				row.add_child(TrophyView.make(String(ln[2]), 34, w))
+				var ll := UIKit.label(String(ln[0]), "Small")
+				ll.custom_minimum_size.x = 170
+				row.add_child(ll)
+				row.add_child(UIKit.crest(ln[1], 28))
+				var nl := UIKit.label((ln[1] as Club).name, "", true)
+				if w.is_user_club((ln[1] as Club).id):
+					nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+				row.add_child(nl)
+				old.add_child(row)
+			old.add_child(UIKit.label("Temporada anterior ao início do jogo: ficam registrados só os campeões.", "Muted", true))
+		else:
+			old.add_child(UIKit.label("Esta temporada foi jogada antes do arquivo de estatísticas existir: só campeões e prêmios foram guardados.", "Muted", true))
 		c.add_child(UIKit.card_panel(old))
 	else:
 		if not arch.has(_arch_league):
@@ -485,6 +514,8 @@ func _awards(w: GameWorld) -> Control:
 	var any := false
 	for i in range(w.history.size() - 1, -1, -1):
 		var h: Dictionary = w.history[i]
+		if h.get("pre", false):
+			continue
 		var card := UIKit.card("Card", 6)
 		card.add_child(UIKit.section("Temporada %d" % int(h["y"])))
 		var ballon: Dictionary = h.get("ballon", {})
