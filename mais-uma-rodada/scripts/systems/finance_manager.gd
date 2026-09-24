@@ -13,9 +13,9 @@ const CAT_NAMES := {
 	"bilheteria": "Bilheteria", "tv": "Direitos de TV", "patrocinio": "Patrocínio", "premiacao": "Premiação",
 	"vendas": "Venda de jogadores", "salarios": "Salários", "compras": "Compra de jogadores",
 	"manutencao": "Manutenção", "juros": "Juros da dívida", "rescisoes": "Rescisões", "luvas": "Luvas",
-	"investimentos": "Investimentos",
+	"investimentos": "Investimentos", "bonus_patrocinio": "Bônus de patrocínio",
 }
-const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "premiacao", "vendas"]
+const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "premiacao", "vendas"]
 const EXPENSE_CATS: Array[String] = ["salarios", "compras", "manutencao", "juros", "rescisoes", "luvas", "investimentos"]
 ## Rodadas de fim de semana por temporada: salários, TV e patrocínio são pagos nelas.
 const WEEKS := 38.0

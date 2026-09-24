@@ -809,6 +809,8 @@ func _test_sponsors() -> void:
 	var b0 := c.balance
 	SponsorManager.on_win(w, c)
 	check(c.balance - b0 == int(c.sponsors["manga"]["b"]) and int(c.sponsors["manga"]["b"]) > 0, "bônus por vitória não pago")
+	check(int(c.ledger.get("bonus_patrocinio", 0)) == int(c.sponsors["manga"]["b"]), "bônus fora das finanças")
+	check(SponsorManager.breakdown(c).size() == 3 and int(SponsorManager.breakdown(c)[2]["e"]) > 0, "detalhamento de patrocínio incompleto")
 	var signed := SponsorManager.close_preseason(w)
 	check(signed.size() == 3 and c.sponsors.size() == 5, "diretoria não fechou os espaços vazios")
 	check(not SponsorManager.is_preseason(w), "pré-temporada não fechou")

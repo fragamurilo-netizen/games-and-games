@@ -214,6 +214,9 @@ func _run() -> void:
 	UIManager.goto("club")
 	await _frames(8)
 	await _shot("19_clube")
+	_screen().scroll().scroll_vertical = 1400
+	await _frames(4)
+	await _shot("19b_clube_financas")
 	var rival := w.user_club().main_rival()
 	if rival >= 0:
 		UIManager.push("club", {"id": rival})

@@ -48,6 +48,8 @@ static func open_preseason(world: GameWorld) -> void:
 	for slot in club.sponsors.keys():
 		if int(club.sponsors[slot].get("y", 0)) < world.year:
 			club.sponsors.erase(slot)
+		else:
+			club.sponsors[slot]["e"] = 0 # bônus por vitória recomeçam na temporada
 	apply_to_kits(club)
 	world.stats["sponsor_pre"] = world.year
 	world.stats["sp_offers"] = _make_offers(world, club)
@@ -128,16 +130,30 @@ static func apply_to_kits(club: Club) -> void:
 			if m.is_empty():
 				k.erase(key)
 			else:
-				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"]}
+				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"], "logo": m.get("logo", "")}
 
 
 ## Bônus por vitória (contratos "por vitória").
 static func on_win(world: GameWorld, club: Club) -> void:
 	var bonus := 0
 	for slot in club.sponsors:
-		bonus += int(club.sponsors[slot].get("b", 0))
+		var b := int(club.sponsors[slot].get("b", 0))
+		if b > 0:
+			club.sponsors[slot]["e"] = int(club.sponsors[slot].get("e", 0)) + b
+			bonus += b
 	if bonus > 0:
-		club.add_ledger("patrocinio", bonus)
+		club.add_ledger("bonus_patrocinio", bonus)
+
+
+## Receita de patrocínio por fonte, para as finanças: [{name, slot, v (por ano), e (bônus ganhos), y}].
+## A primeira linha é a base (placas e licenciamento), sem contrato.
+static func breakdown(club: Club) -> Array:
+	var out: Array = [{"name": "Placas e licenciamento", "slot": "", "v": int(FinanceManager.sponsor_income(club) * BASE_SHARE), "e": 0, "y": 0}]
+	for s in SLOTS:
+		var c: Dictionary = club.sponsors.get(s[0], {})
+		if not c.is_empty():
+			out.append({"name": String(c["n"]), "slot": String(s[1]), "v": int(c.get("v", 0)), "e": int(c.get("e", 0)), "y": int(c.get("y", 0))})
+	return out
 
 
 static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
@@ -185,7 +201,7 @@ static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
 				bi += 1
 			# Marcas maiores pagam um pouco mais.
 			var v := base * rng.randf_range(0.9, 1.08) * (1.0 + (int(b.get("tier", 1)) - tier) * 0.08)
-			var o := {"n": b["n"], "c": b["c"], "t": b["t"], "kind": kind, "yrs": 1, "v": 0, "b": 0}
+			var o := {"n": b["n"], "c": b["c"], "t": b["t"], "logo": b.get("logo", ""), "kind": kind, "yrs": 1, "v": 0, "b": 0}
 			match kind:
 				"fixo":
 					o["v"] = Valuation.round_value(v)
