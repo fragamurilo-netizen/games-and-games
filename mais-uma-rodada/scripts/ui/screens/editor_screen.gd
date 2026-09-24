@@ -552,8 +552,19 @@ func _look_card(p: Player) -> Control:
 		p.look["sk"] = sl.value
 		refresh())
 	card.add_child(sl)
+	card.add_child(UIKit.label("Beleza", "Small"))
+	var bs := HSlider.new()
+	bs.min_value = 0.0
+	bs.max_value = 1.0
+	bs.step = 0.05
+	bs.value = float(feats["beauty"])
+	bs.custom_minimum_size.y = 48
+	bs.drag_ended.connect(func(_changed: bool):
+		p.look["bt"] = bs.value
+		refresh())
+	card.add_child(bs)
 	card.add_child(UIKit.label("Olhos", "Small"))
-	card.add_child(_look_chips(p, "ey", ["Castanho-escuro", "Castanho", "Mel", "Verde", "Azul", "Cinza"], int(feats["eye_i"])))
+	card.add_child(_look_chips(p, "ey", FaceGen.EYE_NAMES, int(feats["eye_i"])))
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.button("Rosto aleatório", "", func():
 		var keep_photo := String(p.look.get("photo", ""))

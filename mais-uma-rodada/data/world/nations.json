@@ -1,5 +1,5 @@
 {
-	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas), w = peso. youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
+	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas, sas = sul-asiático, hae = chifre da África, pac = polinésio, sea = sudeste asiático), w = peso. youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
 	"ethnicities": [
 		"nor",
 		"eur",
@@ -9,7 +9,11 @@
 		"and",
 		"mix",
 		"afr",
-		"eas"
+		"eas",
+		"sas",
+		"hae",
+		"pac",
+		"sea"
 	],
 	"nations": {
 		"ENG": {
@@ -32,7 +36,9 @@
 						"nor": 50,
 						"eur": 22,
 						"mix": 13,
-						"afr": 15
+						"afr": 15,
+						"sas": 4,
+						"hae": 2
 					}
 				},
 				{
@@ -1248,7 +1254,8 @@
 						"nor": 15,
 						"med": 10,
 						"mix": 10,
-						"afr": 5
+						"afr": 5,
+						"sea": 2
 					}
 				},
 				{
@@ -1769,7 +1776,8 @@
 						"nor": 55,
 						"eur": 25,
 						"mix": 10,
-						"afr": 10
+						"afr": 10,
+						"sea": 2
 					}
 				},
 				{
@@ -4210,7 +4218,8 @@
 					"w": 88,
 					"eth": {
 						"nor": 95,
-						"eur": 5
+						"eur": 5,
+						"hae": 3
 					}
 				},
 				{
@@ -4267,7 +4276,8 @@
 					"w": 80,
 					"eth": {
 						"nor": 95,
-						"eur": 5
+						"eur": 5,
+						"hae": 3
 					}
 				},
 				{
@@ -6832,7 +6842,9 @@
 						"nor": 45,
 						"eur": 25,
 						"afr": 20,
-						"mix": 10
+						"mix": 10,
+						"sea": 2,
+						"pac": 1
 					}
 				},
 				{
@@ -7118,7 +7130,9 @@
 						"nor": 50,
 						"eur": 25,
 						"afr": 15,
-						"mix": 10
+						"mix": 10,
+						"sas": 5,
+						"sea": 2
 					}
 				},
 				{
@@ -8429,7 +8443,8 @@
 					"w": 100,
 					"eth": {
 						"arb": 85,
-						"afr": 15
+						"afr": 15,
+						"hae": 4
 					}
 				}
 			],
@@ -8895,7 +8910,9 @@
 					"w": 100,
 					"eth": {
 						"arb": 75,
-						"afr": 25
+						"afr": 25,
+						"hae": 6,
+						"sas": 3
 					}
 				}
 			],
@@ -8991,7 +9008,9 @@
 					"w": 100,
 					"eth": {
 						"arb": 75,
-						"afr": 25
+						"afr": 25,
+						"hae": 4,
+						"sas": 4
 					}
 				}
 			],
@@ -9265,7 +9284,9 @@
 						"eur": 25,
 						"afr": 8,
 						"mix": 5,
-						"eas": 2
+						"eas": 2,
+						"sea": 3,
+						"pac": 3
 					}
 				},
 				{
@@ -9497,7 +9518,8 @@
 						"nor": 70,
 						"eur": 15,
 						"mix": 10,
-						"afr": 5
+						"afr": 5,
+						"pac": 14
 					}
 				}
 			]
