@@ -90,13 +90,40 @@
       "name": "Jogador de jogos grandes", "weight": 3,
       "desc": "Clássico, final, estádio lotado: é ali que ele aparece.",
       "big_game": 0.06
+    },
+    "mentor": {
+      "name": "Mentor", "weight": 2,
+      "desc": "Adota os garotos do elenco: jovens que treinam ao lado dele evoluem mais rápido.",
+      "mentor": 0.08, "leadership": 15, "loyalty": 10, "morale_volatility": 0.85
+    },
+    "resiliente": {
+      "name": "Resiliente", "weight": 5,
+      "desc": "Volta de lesões inteiro e não se abala com fase ruim.",
+      "injury_loss_mult": 0.4, "morale_volatility": 0.75, "decline_mult": 0.95
+    },
+    "perfeccionista": {
+      "name": "Perfeccionista", "weight": 4,
+      "desc": "Obcecado por detalhes: evolui mais, mas sofre demais com as críticas.",
+      "dev_mult": 1.08, "consistency": 1, "morale_volatility": 1.3, "card_mult": 0.9
+    },
+    "cascudo": {
+      "name": "Cascudo", "weight": 0,
+      "desc": "Já viu de tudo. Não treme em jogo grande e ajuda a segurar o vestiário. Surge com a experiência.",
+      "big_game": 0.03, "leadership": 15, "morale_volatility": 0.8, "card_mult": 0.9
+    },
+    "idolo": {
+      "name": "Ídolo da torcida", "weight": 0,
+      "desc": "Anos de clube e a torcida canta o nome dele. Dificilmente quer sair. Surge com o tempo de casa.",
+      "loyalty": 35, "big_game": 0.02, "greed": 0.92, "ambition": -10
     }
   },
   "conflicts": [
     ["leal", "mercenario"], ["timido", "provocador"], ["timido", "estrela"], ["disciplinado", "temperamental"],
     ["disciplinado", "rebelde"], ["profissional", "festeiro"], ["profissional", "acomodado"],
     ["esforcado", "acomodado"], ["lider", "inseguro"], ["competitivo", "acomodado"], ["timido", "jogos_grandes"],
-    ["inseguro", "decisivo"], ["leal", "ambicioso"]
+    ["inseguro", "decisivo"], ["leal", "ambicioso"],
+    ["idolo", "mercenario"], ["cascudo", "inseguro"], ["cascudo", "timido"], ["perfeccionista", "acomodado"],
+    ["perfeccionista", "festeiro"], ["resiliente", "inseguro"], ["mentor", "rebelde"], ["mentor", "estrela"]
   ],
   "secondary_chance": 0.45
 }

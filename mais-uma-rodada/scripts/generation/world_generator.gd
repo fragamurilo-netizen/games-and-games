@@ -35,6 +35,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	Valuation.refresh_shift(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
+	PreHistory.build(w)
 	SeasonManager.setup_first_season(w)
 	return w
 
