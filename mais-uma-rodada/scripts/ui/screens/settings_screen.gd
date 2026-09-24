@@ -1,5 +1,5 @@
 extends BaseScreen
-## Opções do aparelho: som, vibração, velocidade padrão das partidas, dicas e créditos.
+## Opções do aparelho: idioma, som, vibração, velocidade padrão das partidas, dicas e créditos.
 
 
 func _init() -> void:
@@ -12,6 +12,25 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	var card0 := UIKit.card("Card", 12)
+	card0.add_child(UIKit.section("Idioma"))
+	var lg := ButtonGroup.new()
+	var lrow := UIKit.hbox(8)
+	for i in I18n.LANGS.size():
+		var code := I18n.LANGS[i]
+		var lchip := UIKit.chip(I18n.LANG_NAMES[i], code == AppSettings.language, lg, func():
+			if code == AppSettings.language:
+				return
+			AppSettings.language = code
+			AppSettings.save_settings()
+			I18n.apply(code)
+			refresh.call_deferred())
+		# O nome de cada idioma aparece sempre na própria língua.
+		lchip.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		lchip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lrow.add_child(lchip)
+	card0.add_child(lrow)
+	c.add_child(UIKit.card_panel(card0))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
 	card.add_child(_toggle("Efeitos sonoros e torcida", AppSettings.sound, func(v: bool):

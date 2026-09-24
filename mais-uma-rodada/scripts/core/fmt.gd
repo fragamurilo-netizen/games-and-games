@@ -1,6 +1,6 @@
 class_name Fmt
 extends RefCounted
-## Formatação de textos exibidos ao usuário (pt-BR).
+## Formatação de textos exibidos ao usuário (pt-BR; inglês e espanhol via I18n.lang).
 
 
 ## Dinheiro compacto: $ 850, $ 12 mil, $ 1,2 mi, $ -3,4 mi.
@@ -10,16 +10,16 @@ static func money(v: float) -> String:
 	var s := ""
 	if a >= 1_000_000.0:
 		var m := a / 1_000_000.0
-		s = _decimal(m, 1 if m < 100.0 else 0) + " mi"
+		s = _decimal(m, 1 if m < 100.0 else 0) + (" mi" if I18n.lang == "pt" else "M")
 	elif a >= 1_000.0:
-		s = str(int(round(a / 1_000.0))) + " mil"
+		s = str(int(round(a / 1_000.0))) + ("K" if I18n.lang == "en" else " mil")
 	else:
 		s = str(int(round(a)))
 	return ("-$ " if neg else "$ ") + s
 
 
 static func money_month(v: float) -> String:
-	return money(v) + "/mês"
+	return money(v) + {"en": "/mo", "es": "/mes"}.get(I18n.lang, "/mês")
 
 
 static func _decimal(x: float, places: int) -> String:
@@ -28,12 +28,12 @@ static func _decimal(x: float, places: int) -> String:
 	var txt := ("%." + str(places) + "f") % x
 	if txt.ends_with(".0"):
 		txt = txt.substr(0, txt.length() - 2)
-	return txt.replace(".", ",")
+	return txt if I18n.lang == "en" else txt.replace(".", ",")
 
 
 ## Nota de partida sempre com uma casa: 7,0 / 6,4.
 static func rating(r: float) -> String:
-	return ("%.1f" % r).replace(".", ",")
+	return "%.1f" % r if I18n.lang == "en" else ("%.1f" % r).replace(".", ",")
 
 
 static func thousands(v: int) -> String:
@@ -41,12 +41,17 @@ static func thousands(v: int) -> String:
 	var s := str(absi(v))
 	var out := ""
 	while s.length() > 3:
-		out = "." + s.substr(s.length() - 3) + out
+		out = ("," if I18n.lang == "en" else ".") + s.substr(s.length() - 3) + out
 		s = s.substr(0, s.length() - 3)
 	return ("-" if neg else "") + s + out
 
 
 static func ordinal(n: int) -> String:
+	if I18n.lang == "en":
+		var suf := "th"
+		if n % 100 < 11 or n % 100 > 13:
+			suf = ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][n % 10]
+		return str(n) + suf
 	return str(n) + "º"
 
 
@@ -76,7 +81,7 @@ static func minute(m: int, half: int = 0) -> String:
 
 
 static func plural(n: int, singular: String, plural_form: String) -> String:
-	return str(n) + " " + (singular if n == 1 else plural_form)
+	return str(n) + " " + I18n.t(singular if n == 1 else plural_form)
 
 
 ## Cor de destaque para um overall (vermelho → cinza → verde → dourado).

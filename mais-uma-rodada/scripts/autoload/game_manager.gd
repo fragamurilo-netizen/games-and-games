@@ -21,6 +21,7 @@ var _gen_callback: Callable
 func _ready() -> void:
 	DatabaseManager.load_all()
 	AppSettings.load_settings()
+	I18n.apply(AppSettings.language)
 	get_tree().set_auto_accept_quit(false)
 
 

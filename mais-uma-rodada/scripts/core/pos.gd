@@ -22,6 +22,10 @@ const G_MID := 2
 const G_ATT := 3
 
 const CODES: Array[String] = ["GOL", "LD", "ZAG", "LE", "VOL", "MC", "MEI", "MD", "ME", "PD", "PE", "ATA"]
+const CODES_I18N: Dictionary = {
+	"en": ["GK", "RB", "CB", "LB", "DM", "CM", "AM", "RM", "LM", "RW", "LW", "ST"],
+	"es": ["POR", "LD", "DFC", "LI", "MCD", "MC", "MCO", "MD", "MI", "ED", "EI", "DC"],
+}
 const NAMES: Array[String] = [
 	"Goleiro", "Lateral-direito", "Zagueiro", "Lateral-esquerdo", "Volante", "Meio-campista",
 	"Meia-armador", "Meia-direita", "Meia-esquerda", "Ponta-direita", "Ponta-esquerda", "Centroavante"
@@ -72,11 +76,13 @@ const FAMILIARITY_GK_SWAP := 0.25
 
 
 static func code(p: int) -> String:
-	return CODES[p] if p >= 0 and p < COUNT else "?"
+	if p < 0 or p >= COUNT:
+		return "?"
+	return CODES_I18N[I18n.lang][p] if CODES_I18N.has(I18n.lang) else CODES[p]
 
 
 static func name_of(p: int) -> String:
-	return NAMES[p] if p >= 0 and p < COUNT else "?"
+	return I18n.t(NAMES[p]) if p >= 0 and p < COUNT else "?"
 
 
 static func group(p: int) -> int:
