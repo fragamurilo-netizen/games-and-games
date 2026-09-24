@@ -1,8 +1,9 @@
 class_name BoardManager
 extends RefCounted
 ## Diretoria: confiança no treinador a partir da meta da temporada, resultados, clássicos,
-## torcida e finanças. A demissão só acontece no fim da temporada (nunca no meio de uma
-## sequência ruim sem aviso): abaixo de 30 a diretoria dá um ultimato visível no hub.
+## torcida e finanças, filtrada pelo perfil do presidente (People). Abaixo de 30 a diretoria dá
+## um ultimato visível no hub; a demissão vem no balanço da temporada ou, no normal e no difícil,
+## no meio dela se o ultimato não for respondido (People._check_job).
 
 const ULTIMATUM := 30.0
 const FIRE_LIMIT: Array[float] = [-1.0, 12.0, 20.0] # por dificuldade (fácil nunca demite)
@@ -43,6 +44,7 @@ static func after_match(world: GameWorld, club: Club, res: String, derby: bool) 
 		d -= 0.3
 	if FinanceManager.wage_bill(world, club) > int(club.wage_budget * 1.02):
 		d -= 0.4
+	d = People.board_delta(world, club, d, derby)
 	var before := club.board_confidence
 	club.board_confidence = clampf(club.board_confidence + d, 0.0, 100.0)
 	if before >= ULTIMATUM and club.board_confidence < ULTIMATUM:
@@ -63,8 +65,11 @@ static func season_review(world: GameWorld, club: Club, user: Dictionary) -> Dic
 		d -= 16.0
 	if user.get("relegated", false):
 		d -= 22.0
+	d += People.pledge_delta(world, bool(user.get("goal_met", false)))
 	var conf := clampf(club.board_confidence + d, 0.0, 100.0)
 	var limit: float = FIRE_LIMIT[clampi(world.difficulty, 0, 2)]
+	if limit >= 0.0:
+		limit += People.fire_shift(world, club)
 	var fired := conf < limit
 	var out := {"delta": d, "fired": fired, "offers": []}
 	if fired:
@@ -112,6 +117,8 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	var c := world.club(club_id)
 	if c == null:
 		return
+	var old_id := world.user_club_id
+	var mid := bool(world.stats.get("fired", {}).get("mid", false)) or (world.season != null and not world.season.finished and world.current_turn() > 0)
 	world.user_club_id = club_id
 	world.stats.erase("fired")
 	c.board_confidence = 60.0
@@ -124,4 +131,8 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	world.promises.clear()
 	YouthManager.ensure_academy(world)
 	YouthManager.build_league(world)
+	People.on_new_job(world, old_id)
 	NewsManager.post(world, "novo_tecnico", {"club": c.short_name, "manager": world.manager_name}, c.id, -1, NewsEvent.IMP_HEADLINE)
+	# No meio da temporada o calendário segue: joga as datas até o próximo jogo do clube novo.
+	if mid and world.season != null and not world.season.finished:
+		SeasonManager.advance_to_user(world)

@@ -581,10 +581,12 @@ static func _check_promises(world: GameWorld, turn: int, result: String) -> void
 		if starts >= int(pr["need"]):
 			world.promises.erase(pr)
 			_morale(p, 6.0)
+			People.add_trust(world, p, 8.0)
 			NewsManager.post_raw(world, "Promessa cumprida", "%s ganhou as chances prometidas e está satisfeito." % p.display_name(), world.user_club_id, p.id, NewsEvent.IMP_NORMAL)
 		elif turn >= int(pr["until"]):
 			world.promises.erase(pr)
 			_morale(p, -22.0)
+			People.add_trust(world, p, -18.0)
 			p.unhappy_weeks += 4
 			NewsManager.post_raw(world, "Promessa quebrada", "%s não recebeu as chances prometidas e perdeu a confiança no treinador." % p.display_name(), world.user_club_id, p.id, NewsEvent.IMP_HIGH)
 	var bold := int(world.stats.get("press_bold", -1))

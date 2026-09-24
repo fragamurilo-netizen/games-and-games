@@ -147,7 +147,7 @@ func _board_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(row)
 	card.add_child(UIKit.bar(conf, 100.0, BoardManager.color(conf), 12))
 	if conf < BoardManager.ULTIMATUM:
-		card.add_child(UIKit.colored("Ultimato: sem reação até o fim da temporada, a diretoria pode trocar o treinador.", UIColors.RED, "Small"))
+		card.add_child(UIKit.colored("Ultimato: sem reação, a diretoria pode trocar o treinador a qualquer momento.", UIColors.RED, "Small"))
 	var frow := UIKit.hbox(10)
 	frow.add_child(UIKit.label("Torcida", "Muted"))
 	frow.add_child(UIKit.spacer())
@@ -155,6 +155,9 @@ func _board_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(frow)
 	card.add_child(UIKit.bar(club.fan_mood, 100.0, UIColors.morale_color(club.fan_mood), 12))
 	card.add_child(UIKit.label("A diretoria olha a meta, os clássicos e as contas. A torcida sente cada resultado — e cobra mais nos clássicos.", "Small", true))
+	var pr := People.president(w, club.id)
+	card.add_child(UIKit.kv("Presidente", "%s (%s)" % [String(pr["n"]), String(People.pres_style(w, club.id)["name"]).to_lower()]))
+	card.add_child(UIKit.button("Relações: presidente, comissão, torcida e imprensa", "GhostButton", func(): UIManager.push("relations", {"tab": "board"}), "heart"))
 	return UIKit.card_panel(card)
 
 
@@ -269,6 +272,13 @@ func _season_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(fd)
 	var goal := SeasonManager.goal_of(w, club.id)
 	card.add_child(UIKit.kv("Meta da diretoria", String(goal[0])))
+	var co := People.coach_of(w, club.id)
+	if not co.is_empty():
+		card.add_child(UIKit.kv("Técnico", "%s (%s)" % [String(co["n"]), People.style_name(String(co["st"])).to_lower()]))
+		var rel := People.coach_rel(w, int(co["id"]))
+		if absf(rel) >= 12.0:
+			card.add_child(UIKit.kv("Relação com você", People.coach_rel_label(rel), UIColors.GREEN if rel > 0 else UIColors.RED))
+	card.add_child(UIKit.kv("Presidente", String(People.president(w, club.id)["n"])))
 	if club.sheet != null:
 		var tac := DatabaseManager.tactics()
 		card.add_child(UIKit.kv("Jeito de jogar", "%s · %s" % [club.sheet.formation, String(tac["styles"][club.sheet.style]["name"])]))

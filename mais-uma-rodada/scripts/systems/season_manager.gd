@@ -301,8 +301,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var cup_events := CupManager.after_slot(world, slot)
 	report["cups"] = cup_events
 	NewsManager.on_cup_events(world, cup_events)
-	# Notícias da data
+	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
+	People.after_matchday(world, md["entries"])
 	tt = _time("copas_noticias", tt)
 	# Avança o calendário
 	s.day += 1
@@ -323,6 +324,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		report["user"] = {"fixture": f, "result": f.result_for(world.user_club_id), "pos_before": user_pos_before,
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
 		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
+		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
 	return report
 
 
@@ -654,6 +656,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["user"]["board"] = u.board_confidence
 		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
+	People.on_season_end(world, summary)
 	# Arquivo individual da temporada
 	for p: Player in world.players.values():
 		var tot := p.season_totals()
