@@ -61,6 +61,8 @@ var secondary: Array = []
 var shirt: int = 0
 var hometown: String = ""
 var face_seed: int = 0
+## Aparência fixada pelo editor: {hs penteado, hc cor do cabelo, bd barba, sk pele, ey olhos, photo arquivo}.
+var look: Dictionary = {}
 
 # Atributos 1..100
 var attrs: PackedByteArray = PackedByteArray()
@@ -385,7 +387,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "ft": foot, "pos": position,
-		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed,
+		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
 		"tr": traits, "sn": scout_noise,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
@@ -415,6 +417,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.shirt = int(d.get("sh", 0))
 	p.hometown = d.get("ht", "")
 	p.face_seed = int(d.get("fs", p.id))
+	p.look = d.get("lk", {})
 	var at: Variant = d.get("at", null)
 	if at is PackedByteArray and at.size() == Attr.COUNT:
 		p.attrs = at
