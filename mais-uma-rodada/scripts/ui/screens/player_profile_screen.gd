@@ -36,6 +36,8 @@ func refresh() -> void:
 	c.add_child(_fit_card(w, p, own))
 	c.add_child(_attributes(w, p, own))
 	c.add_child(_personality(p, own))
+	if own:
+		c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
 	c.add_child(_stats(w, p))
 	_actions(w, p, own)
 

@@ -210,6 +210,25 @@ func _run() -> void:
 	await _frames(6)
 	await _shot("42_negociacao")
 	UIManager.close_all_modals()
+	# Relações: todas as abas e uma conversa de cada tipo
+	var tabs: Array = ["squad", "staff", "board", "fans", "press", "coaches"]
+	for i in tabs.size():
+		UIManager.goto("hub")
+		UIManager.push("relations", {"tab": tabs[i]})
+		await _frames(6)
+		await _shot("%d_relacoes_%s" % [50 + i, tabs[i]])
+	var talker: Player = w.squad(w.user_club())[3]
+	TalkDialog.open("player", talker.id)
+	await _frames(6)
+	await _shot("56_conversa_jogador")
+	UIManager.close_all_modals()
+	var pc := Talks.start(w, "press")
+	while not pc["done"]:
+		Talks.choose(w, pc, "0")
+	TalkDialog.open("board")
+	await _frames(6)
+	await _shot("57_conversa_presidente")
+	UIManager.close_all_modals()
 	UIManager.goto("menu")
 	UIManager.push("load")
 	await _frames(6)

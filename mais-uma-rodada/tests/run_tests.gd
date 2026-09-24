@@ -33,6 +33,9 @@ func _initialize() -> void:
 	_run("treino, base e liga sub-20", _test_training_youth)
 	_run("empréstimos, parcelas e cláusulas", _test_deals)
 	_run("rostos e personalização", _test_faces)
+	_run("técnicos, comissão, presidente e relações", _test_people)
+	_run("conversas e coletiva de imprensa", _test_talks)
+	_run("demissão no meio da temporada e troca de técnicos", _test_mid_season_firing)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -755,3 +758,175 @@ func _test_faces() -> void:
 	Overrides.apply_club(c)
 	Overrides.data()["clubs"].erase("__teste__")
 	check(c.name == "Editado" and c.color1 == "#112233" and String(c.crest.get("c1", "")) == "#112233", "personalização de clube não aplicada")
+
+
+func _test_people() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	People.ensure(w)
+	var missing := 0
+	for cl: Club in w.clubs:
+		if w.is_user_club(cl.id):
+			continue
+		if People.coach_of(w, cl.id).is_empty():
+			missing += 1
+	check(missing == 0, "%d clube(s) sem técnico" % missing)
+	check(People.coach_of(w, c.id).is_empty(), "o clube do usuário não deveria ter outro técnico")
+	check(not People.president(w, c.id).is_empty(), "clube sem presidente")
+	check(People.staff(w).size() == People.STAFF_ORDER.size(), "comissão incompleta (%d)" % People.staff(w).size())
+	check(People.journalists(w).size() == 5, "deveria haver 5 jornalistas")
+	for p: Player in w.squad(c):
+		var t := People.trust_of(w, p)
+		check(t >= 0.0 and t <= 100.0, "confiança fora da faixa")
+	check(People.staff_wage_bill(w) <= People.staff_budget(w) * 1.5, "comissão inicial cara demais")
+	# Contratar da lista de candidatos
+	var cand: Dictionary = People.candidates(w, "medico")[2]
+	var err := People.hire_staff(w, "medico", int(cand["id"]))
+	check(err == "" and int(People.staff(w)["medico"]["id"]) == int(cand["id"]), "contratação da comissão falhou: %s" % err)
+	# Troca de técnico na IA
+	var ai: Club = w.clubs_in_league("BRA1")[0]
+	if w.is_user_club(ai.id):
+		ai = w.clubs_in_league("BRA1")[1]
+	var old := People.coach_of(w, ai.id)
+	var nc := People.replace_coach(w, ai, "resultados")
+	check(int(nc["c"]) == ai.id and int(nc["id"]) != int(old["id"]), "troca de técnico não aconteceu")
+	var in_free := false
+	for f: Dictionary in People.data(w)["free"]:
+		if int(f["id"]) == int(old["id"]):
+			in_free = true
+	check(in_free, "técnico demitido deveria ir para a lista de livres")
+	# Sai um amigo, o outro sente
+	var sq := w.squad(c)
+	var a: Player = sq[0]
+	var b: Player = sq[1]
+	People.data(w)["bonds"].append({"a": a.id, "b": b.id, "k": People.BOND_FRIEND, "v": 60.0})
+	var tb := People.trust_of(w, b)
+	People.data(w)["squad"] = c.player_ids.duplicate()
+	c.player_ids.erase(a.id)
+	People._squad_changes(w, People.rng(w))
+	c.player_ids.append(a.id)
+	check(People.trust_of(w, b) < tb, "saída do amigo não afetou a confiança")
+	# Save/load preserva as pessoas
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(var_to_str(w2.people) == var_to_str(w.people), "pessoas não sobrevivem ao save")
+	# Ligar o sistema não muda os sorteios do mundo
+	var st := w.rng.state
+	People.after_matchday(w, [])
+	Talks.start(w, "press")
+	check(w.rng.state == st, "People/Talks consumiram o sorteio do mundo")
+
+
+func _test_talks() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	w.season.turn = 10
+	People.ensure(w)
+	var sq := w.squad(c)
+	var n := 0
+	for p: Player in sq.slice(0, 6):
+		var conv := Talks.start(w, "player", p.id)
+		for o in conv["opts"]:
+			var topic := String(o["id"])
+			if topic == "bye":
+				continue
+			People.data(w)["talk"].clear()
+			var cv := Talks.start(w, "player", p.id)
+			Talks.choose(w, cv, topic)
+			check(not cv["done"] and Array(cv["opts"]).size() >= 2, "tópico %s sem opções" % topic)
+			for tone in cv["opts"]:
+				var cv2 := cv.duplicate(true)
+				Talks.choose(w, cv2, String(tone["id"]))
+				check(cv2["done"] and String(cv2["lines"].back()[1]) != "", "conversa %s/%s sem desfecho" % [topic, tone["id"]])
+				n += 1
+	check(n >= 40, "poucas combinações de conversa (%d)" % n)
+	for topic in ["verba", "folha", "facilities", "youth", "staff", "cargo"]:
+		for tone in ["a", "b", "c"]:
+			People.data(w)["talk"].clear()
+			var cv := Talks.start(w, "board")
+			Talks.choose(w, cv, topic)
+			if not cv["done"]:
+				Talks.choose(w, cv, tone)
+			check(cv["done"], "reunião %s não terminou" % topic)
+	c.board_confidence = 25.0
+	People.data(w)["reqs"] = [{"k": "board", "t": -1, "until": 99, "summon": true}]
+	var sm := Talks.start(w, "board")
+	check(sm["d"]["summon"], "convocação do presidente não reconhecida")
+	Talks.choose(w, sm, "a")
+	check(sm["done"], "convocação não terminou")
+	for i in People.STAFF_ORDER.size():
+		var cv := Talks.start(w, "staff", i)
+		check(Array(cv["lines"]).size() >= 1, "relatório vazio da comissão")
+		Talks.choose(w, cv, "a")
+	var fans := Talks.start(w, "fans")
+	Talks.choose(w, fans, "b")
+	check(fans["done"], "conversa com a torcida não terminou")
+	var rival: Club = w.club(c.main_rival()) if c.main_rival() >= 0 else w.clubs_in_league(c.league_id)[0]
+	var co := Talks.start(w, "coach", rival.id)
+	Talks.choose(w, co, "b")
+	check(People.coach_rel(w, int(People.coach_of(w, rival.id)["id"])) < 0.0, "provocação não esfriou a relação")
+	c.streak_losses = 3
+	var press := Talks.start(w, "press")
+	var guard := 0
+	while not press["done"] and guard < 5:
+		Talks.choose(w, press, "0")
+		guard += 1
+	check(press["done"] and guard >= 1, "coletiva não terminou")
+
+
+func _test_mid_season_firing() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	w.difficulty = GameWorld.DIFF_HARD
+	People.ensure(w)
+	w.season.turn = 12
+	c.board_confidence = 4.0
+	People.data(w)["ult"] = 5
+	People.data(w)["fans"]["support"] = 30.0
+	for i in 30:
+		if w.stats.has("fired"):
+			break
+		People._check_job(w, People.rng(w))
+	check(w.stats.has("fired") and bool(w.stats["fired"].get("mid", false)), "diretoria deveria demitir no meio da temporada")
+	var offers := BoardManager.pending_job_offers(w)
+	check(not offers.is_empty(), "sem propostas após a demissão")
+	if offers.is_empty():
+		return
+	var old_id := c.id
+	BoardManager.take_job(w, int(offers[0]))
+	check(w.user_club_id == int(offers[0]), "não assumiu o clube novo")
+	check(int(People.data(w)["uc"]) == w.user_club_id, "relações não migraram para o clube novo")
+	check(not People.coach_of(w, old_id).is_empty(), "clube antigo ficou sem técnico")
+	check(People.coach_of(w, w.user_club_id).is_empty(), "clube novo continua com o técnico antigo")
+	# Com carência (pedido de tempo aceito) não há demissão
+	var w2 := _career_world()
+	w2.difficulty = GameWorld.DIFF_HARD
+	var c2 := w2.user_club()
+	w2.season.turn = 12
+	c2.board_confidence = 4.0
+	People.data(w2)["ult"] = 5
+	People.data(w2)["grace"] = 20
+	for i in 30:
+		People._check_job(w2, People.rng(w2))
+	check(not w2.stats.has("fired"), "demitiu durante a carência")
+	# No fácil nunca
+	var w3 := _career_world()
+	w3.difficulty = GameWorld.DIFF_EASY
+	w3.season.turn = 12
+	w3.user_club().board_confidence = 1.0
+	People.data(w3)["ult"] = 1
+	for i in 30:
+		People._check_job(w3, People.rng(w3))
+	check(not w3.stats.has("fired"), "no fácil ninguém é demitido")
+	# Temporada inteira: técnicos da IA caem e presidentes seguem no lugar
+	var w4 := _career_world()
+	People.ensure(w4)
+	var before := {}
+	for cl: Club in w4.clubs:
+		before[cl.id] = int(People.coach_of(w4, cl.id).get("id", -1))
+	_season(w4)
+	var changes := 0
+	for cl: Club in w4.clubs:
+		if int(People.coach_of(w4, cl.id).get("id", -1)) != int(before[cl.id]):
+			changes += 1
+	print("   técnicos trocados na temporada: %d de %d clubes" % [changes, w4.clubs.size()])
+	check(changes > 0 and changes < w4.clubs.size() / 3, "trocas de técnico fora do esperado (%d)" % changes)

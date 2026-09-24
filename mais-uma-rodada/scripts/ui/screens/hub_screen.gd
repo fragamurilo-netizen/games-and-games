@@ -37,6 +37,7 @@ func refresh() -> void:
 	var decisions := _decisions_card(w)
 	if decisions != null:
 		c.add_child(decisions)
+	c.add_child(RelationsScreen.pending_card(w, func(): refresh(), true))
 	c.add_child(_status_card(w, club))
 	c.add_child(_shortcuts_card(w))
 	var cups := _cups_card(w, club)
@@ -381,7 +382,7 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 	if bill > club.wage_budget:
 		items.append(["money", UIColors.RED, "Folha salarial acima do limite da diretoria", func(): UIManager.goto("club")])
 	if club.board_confidence < BoardManager.ULTIMATUM:
-		items.append(["info", UIColors.RED, "Ultimato da diretoria: é preciso reagir até o fim da temporada", func(): UIManager.goto("club")])
+		items.append(["info", UIColors.RED, "Ultimato da diretoria: sem reação, o cargo pode cair a qualquer momento", func(): UIManager.push("relations", {"tab": "board"})])
 	if items.is_empty():
 		return null
 	var card := UIKit.card("Card", 8)

@@ -38,6 +38,8 @@ var academy: Dictionary = {}
 var youth_league: Dictionary = {}
 ## Estatísticas agregadas usadas pelo relatório de balanceamento.
 var stats: Dictionary = {}
+## Técnicos, presidentes, comissão, torcida, imprensa e relações (People).
+var people: Dictionary = {}
 
 # Índices em memória (não salvos): reconstruídos sob demanda.
 var _free_agents_cache: Array = []
@@ -310,6 +312,7 @@ func to_dict() -> Dictionary:
 		"history": history, "news": nw, "offers": of, "tlog": tl, "retired": retired,
 		"mstats": manager_stats, "stats": stats, "events": events, "promises": promises,
 		"academy": academy.values().map(func(p: Player): return p.to_dict()), "yl": youth_league,
+		"people": people,
 	}
 
 
@@ -352,6 +355,7 @@ static func from_dict(d: Dictionary) -> GameWorld:
 		var ap := Player.from_dict(pd)
 		w.academy[ap.id] = ap
 	w.youth_league = d.get("yl", {})
+	w.people = d.get("people", {})
 	w._free_agents_dirty = true
 	w._club_by_key.clear()
 	return w

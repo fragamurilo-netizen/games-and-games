@@ -55,7 +55,7 @@ static func growth_mult(world: GameWorld, p: Player) -> float:
 	if not _is_user(world, p.club_id):
 		return 1.0
 	var c := world.club(p.club_id)
-	return float(focus_of(c)["growth"]) * float(intensity_of(c)["growth"])
+	return float(focus_of(c)["growth"]) * float(intensity_of(c)["growth"]) * People.growth_mult(world, p)
 
 
 ## Atributos favorecidos na evolução: foco do time + foco individual.
@@ -76,14 +76,14 @@ static func recovery_mult(world: GameWorld, club_id: int) -> float:
 	if not _is_user(world, club_id):
 		return 1.0
 	var c := world.club(club_id)
-	return float(focus_of(c)["recovery"]) * float(intensity_of(c)["recovery"])
+	return float(focus_of(c)["recovery"]) * float(intensity_of(c)["recovery"]) * People.recovery_mult(world)
 
 
 static func injury_mult(world: GameWorld, club_id: int) -> float:
 	if not _is_user(world, club_id):
 		return 1.0
 	var c := world.club(club_id)
-	return float(focus_of(c)["injury"]) * float(intensity_of(c)["injury"])
+	return float(focus_of(c)["injury"]) * float(intensity_of(c)["injury"]) * People.injury_mult(world)
 
 
 ## [ataque, defesa] do foco da semana (só no clube do usuário).
@@ -99,7 +99,7 @@ static func youth_mult(world: GameWorld) -> float:
 	if not world.has_user():
 		return 1.0
 	var c := world.user_club()
-	return float(intensity_of(c)["growth"]) * (0.8 if String(c.training.get("focus", "")) == "recuperacao" else 1.0)
+	return float(intensity_of(c)["growth"]) * (0.8 if String(c.training.get("focus", "")) == "recuperacao" else 1.0) * People.youth_mult(world)
 
 
 ## Semana de treino do usuário: entrosamento, moral pela intensidade e aprendizado de posição.
