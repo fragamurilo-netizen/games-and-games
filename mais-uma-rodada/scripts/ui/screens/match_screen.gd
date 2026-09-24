@@ -228,10 +228,36 @@ func _build() -> void:
 
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
+	# Placar com a cara da competição (cores da liga/copa, faixa com o nome e a rodada).
+	var th := ScoreboardTheme.for_competition(world(), _fx.comp)
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = "TopBar"
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = th["bg"]
+	sb.border_color = th["accent"]
+	sb.border_width_bottom = 4
+	sb.content_margin_left = 16
+	sb.content_margin_right = 16
+	sb.content_margin_top = 10
+	sb.content_margin_bottom = 8
+	panel.add_theme_stylebox_override(&"panel", sb)
 	var v := UIKit.vbox(2)
 	panel.add_child(v)
+	var strip := PanelContainer.new()
+	var ss := StyleBoxFlat.new()
+	ss.bg_color = th["bg2"]
+	ss.set_corner_radius_all(8)
+	ss.content_margin_left = 10
+	ss.content_margin_right = 10
+	ss.content_margin_top = 3
+	ss.content_margin_bottom = 3
+	strip.add_theme_stylebox_override(&"panel", ss)
+	var comp_lbl := UIKit.label(CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO", "Caps")
+	comp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	comp_lbl.clip_text = true
+	comp_lbl.add_theme_color_override(&"font_color", th["caps"])
+	strip.add_child(comp_lbl)
+	v.add_child(strip)
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.crest(home, 58))
 	_home_name = UIKit.label(home.short_name, "H2")
@@ -239,11 +265,23 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	_home_name.clip_text = true
 	row.add_child(_home_name)
 	var mid := UIKit.vbox(0)
+	var score_box := PanelContainer.new()
+	var sbx := StyleBoxFlat.new()
+	sbx.bg_color = th["bg2"]
+	sbx.border_color = th["accent"]
+	sbx.set_border_width_all(2)
+	sbx.set_corner_radius_all(10)
+	sbx.content_margin_left = 14
+	sbx.content_margin_right = 14
+	score_box.add_theme_stylebox_override(&"panel", sbx)
 	_score_lbl = UIKit.label("0 – 0", "Score")
 	_score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mid.add_child(_score_lbl)
+	_score_lbl.add_theme_color_override(&"font_color", th["text"])
+	score_box.add_child(_score_lbl)
+	mid.add_child(score_box)
 	_clock_lbl = UIKit.label("0'", "Accent")
 	_clock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_clock_lbl.add_theme_color_override(&"font_color", th["accent"])
 	mid.add_child(_clock_lbl)
 	row.add_child(mid)
 	_away_name = UIKit.label(away.short_name, "H2")
