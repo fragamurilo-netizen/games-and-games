@@ -4,6 +4,7 @@ extends Node
 
 var out_dir := ""
 var shots := false
+var lang := ""
 var count := 0
 
 
@@ -40,6 +41,8 @@ func _screen() -> BaseScreen:
 
 func _run() -> void:
 	await _frames(2)
+	if lang != "":
+		I18n.apply(lang)
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	await _frames(10)

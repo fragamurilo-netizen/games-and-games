@@ -5,6 +5,15 @@ extends RefCounted
 ## Cn = data continental (meio de semana), Xn = Mundial de Clubes.
 
 const MONTHS: Array[String] = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+const MONTHS_I18N: Dictionary = {
+	"en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+	"es": ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+}
+const WEEKDAYS_I18N: Dictionary = {
+	"pt": ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"],
+	"en": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+	"es": ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
+}
 
 var year: int = 2026
 var leagues: Dictionary = {} # id -> League
@@ -83,9 +92,9 @@ func date_label(slot: int, with_weekday: bool = true) -> String:
 	var doy: int = calendar[slot]["d"]
 	var unix := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1}) + doy * 86400
 	var dt := Time.get_datetime_dict_from_unix_time(unix)
-	var s := "%d %s" % [int(dt["day"]), MONTHS[int(dt["month"]) - 1]]
+	var s := "%d %s" % [int(dt["day"]), MONTHS_I18N.get(I18n.lang, MONTHS)[int(dt["month"]) - 1]]
 	if with_weekday:
-		s = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][int(dt["weekday"])] + " " + s
+		s = WEEKDAYS_I18N.get(I18n.lang, WEEKDAYS_I18N["pt"])[int(dt["weekday"])] + " " + s
 	return s
 
 

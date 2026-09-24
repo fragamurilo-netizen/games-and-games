@@ -9,7 +9,7 @@ static func _tpl(cat: String) -> Dictionary:
 
 
 static func _fill(text: String, data: Dictionary) -> String:
-	var out := text
+	var out := I18n.t(text)
 	for k in data:
 		out = out.replace("{" + str(k) + "}", str(data[k]))
 	return out
