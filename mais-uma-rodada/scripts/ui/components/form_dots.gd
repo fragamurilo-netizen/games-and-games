@@ -34,5 +34,7 @@ func _draw() -> void:
 			continue
 		var r := form[i]
 		draw_circle(c, dot * 0.5, UIColors.result_color(r))
+		if I18n.lang == "en":
+			r = {"V": "W", "E": "D", "D": "L"}.get(r, r)
 		var w := font.get_string_size(r, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, c + Vector2(-w * 0.5, fs * 0.36), r, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#0E1621"))

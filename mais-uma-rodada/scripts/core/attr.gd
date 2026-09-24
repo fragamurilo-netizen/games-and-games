@@ -41,4 +41,4 @@ const MENTAL: Array[int] = [POS, VIS, INT, DEC, DIS]
 
 
 static func name_of(a: int) -> String:
-	return NAMES[a]
+	return I18n.t(NAMES[a])

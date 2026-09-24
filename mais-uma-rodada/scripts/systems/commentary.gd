@@ -51,7 +51,7 @@ func _fill(text: String, ev: Dictionary) -> String:
 		gk_name = _name(1 - side, int(x["gk"]))
 	if gk_name == "":
 		var gk := opp.goalkeeper()
-		gk_name = gk.p.display_name() if gk != null else "o goleiro"
+		gk_name = gk.p.display_name() if gk != null else I18n.t("o goleiro")
 	var out := text
 	out = out.replace("{p}", _name(side, int(ev.get("p", -1))))
 	var p2_side := side
@@ -197,7 +197,7 @@ func lines_for(ev: Dictionary) -> Array:
 
 func _line(text: String, ev: Dictionary, style: String, delay: float) -> Dictionary:
 	return {
-		"text": _fill(text, ev), "style": style, "side": ev.get("s", -1), "delay": delay,
+		"text": _fill(I18n.t(text), ev), "style": style, "side": ev.get("s", -1), "delay": delay,
 		"minute": Fmt.minute(int(ev.get("m", 0)), int(ev.get("h", 1))) if int(ev.get("t", -1)) not in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF] else "",
 	}
 
