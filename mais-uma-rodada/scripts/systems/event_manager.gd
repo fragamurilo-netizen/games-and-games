@@ -207,12 +207,12 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			if world.season.day < 6:
 				return {}
 		"agent":
-			var need := TransferManager.squad_needs(world, club)
+			var need_fams: Array = TransferManager.squad_needs(world, club).map(func(n): return int(n["fam"]))
 			var best: Player = null
 			for p: Player in world.free_agents():
 				if p.age(world.year) > 32:
 					continue
-				var fits := need.is_empty() or need.has(p.position)
+				var fits := need_fams.is_empty() or need_fams.has(TransferManager._family_of(p.position))
 				if fits and (best == null or p.overall > best.overall):
 					best = p
 			if best == null or club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):

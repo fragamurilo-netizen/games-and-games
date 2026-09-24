@@ -65,6 +65,8 @@ func check(cond: bool, msg: String) -> void:
 
 
 ## Impressão digital compacta do mundo (estado que importa para o determinismo).
+
+
 func _fingerprint(w: GameWorld) -> String:
 	var parts: Array = [w.rng.state, w.year, w.season.day if w.season != null else -1, w.next_player_id]
 	for c: Club in w.clubs:
@@ -246,6 +248,8 @@ func _test_engine() -> void:
 
 ## O modo rápido (resto do mundo) precisa produzir as mesmas médias do minuto a minuto
 ## (usado nos jogos do usuário), senão o usuário jogaria outro esporte.
+
+
 func _test_quick_calibration() -> void:
 	var w := WorldGenerator.generate(606, "padrao")
 	var rng := RandomNumberGenerator.new()
@@ -277,6 +281,8 @@ func _test_quick_calibration() -> void:
 
 
 ## A partida assistida usa exatamente a mesma simulação da instantânea.
+
+
 func _test_live_equals_instant() -> void:
 	var w := WorldGenerator.generate(4242, "padrao")
 	var cl := w.clubs_in_league("ENG2")
@@ -309,6 +315,8 @@ func _goal_log(sim: MatchSimulation) -> String:
 
 
 ## Jogo que decide confronto nunca termina empatado no agregado.
+
+
 func _test_knockout() -> void:
 	var w := WorldGenerator.generate(1313, "padrao")
 	var cl := w.clubs_in_league("ESP1")
@@ -482,6 +490,8 @@ func _test_end_season() -> void:
 
 
 ## Depois do jogo do usuário, o mundo anda sozinho até o próximo compromisso dele — sem pular nenhum.
+
+
 func _test_advance() -> void:
 	var w := WorldGenerator.generate(2468, "padrao")
 	var user := _with_user(w, w.clubs_in_league("POR1")[0].id)
@@ -952,6 +962,8 @@ func _test_persona_trophies() -> void:
 	var cwc := TrophyView.make("W:CWC", 64, w)
 	check(cwc._style == TrophyView.STYLE_GLOBE, "Mundial sem o troféu do globo")
 	cwc.free()
+
+
 func _test_tactics() -> void:
 	var w := WorldGenerator.generate(777, "padrao")
 	# Filosofias: estáveis, válidas e variadas.
@@ -1088,6 +1100,8 @@ func _test_squad_mgmt() -> void:
 	for pid in c.sheet.starters:
 		check(not ids.has(pid), "jogador repetido na escalação depois do rodízio")
 		ids[pid] = true
+
+
 func _test_preseason() -> void:
 	var w := _season_world
 	if w == null:
@@ -1126,12 +1140,16 @@ func _test_preseason() -> void:
 	check(PreseasonManager.is_active(w2) and String(PreseasonManager.state(w2)["camp"]) == "tatica", "pré-temporada perdida no save")
 	PreseasonManager.finish(w)
 	check(not PreseasonManager.is_active(w), "pré-temporada não encerrou")
+
+
 func _test_second_cups() -> void:
 	var w := WorldGenerator.generate(4242, "padrao")
 	for cid in ["UEL", "UECL", "SUD"]:
 		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == 32, "%s sem 32 clubes" % cid)
 	var seen := {}
 	for cid in w.season.cups:
+		if CupManager.is_state(cid):
+			continue
 		for club in w.season.cups[cid].club_ids:
 			check(not seen.has(club), "clube em duas copas continentais")
 			seen[club] = true

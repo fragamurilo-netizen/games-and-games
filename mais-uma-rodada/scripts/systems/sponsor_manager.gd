@@ -37,7 +37,7 @@ static func _share(slot: String) -> float:
 
 ## A pré-temporada (uniforme e patrocínios liberados) vai até o primeiro jogo do usuário.
 static func is_preseason(world: GameWorld) -> bool:
-	return world.has_user() and int(world.stats.get("pre", -1)) == world.year
+	return world.has_user() and int(world.stats.get("sponsor_pre", -1)) == world.year
 
 
 ## Abre a pré-temporada: encerra contratos vencidos e gera propostas para os espaços livres.
@@ -49,7 +49,7 @@ static func open_preseason(world: GameWorld) -> void:
 		if int(club.sponsors[slot].get("y", 0)) < world.year:
 			club.sponsors.erase(slot)
 	apply_to_kits(club)
-	world.stats["pre"] = world.year
+	world.stats["sponsor_pre"] = world.year
 	world.stats["sp_offers"] = _make_offers(world, club)
 	apply_income(world, club)
 
@@ -70,7 +70,7 @@ static func close_preseason(world: GameWorld) -> Array:
 			continue
 		_sign(world, club, slot, list[0])
 		signed.append("%s (%s)" % [String(list[0]["n"]), slot_name(slot).to_lower()])
-	world.stats["pre"] = -1
+	world.stats["sponsor_pre"] = -1
 	world.stats.erase("sp_offers")
 	if not signed.is_empty():
 		NewsManager.post_raw(world, "Diretoria fecha patrocínios", "Sem escolha do treinador, a diretoria acertou com: %s." % ", ".join(signed), club.id, -1, NewsEvent.IMP_NORMAL)
