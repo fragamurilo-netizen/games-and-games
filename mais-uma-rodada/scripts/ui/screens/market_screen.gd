@@ -233,17 +233,21 @@ func _offer_card(w: GameWorld, o: TransferOffer) -> Control:
 	card.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
 	if p.trait_sum("ambition") >= 25.0 and buyer.reputation > w.user_club().reputation:
 		card.add_child(UIKit.colored("%s é ambicioso: recusar a chance de ir para um clube maior vai abalar a moral dele." % p.display_name(), UIColors.ORANGE, "Small"))
+	if not o.raised and o.rounds < TransferManager.MAX_COUNTERS:
+		var left := TransferManager.MAX_COUNTERS - o.rounds
+		card.add_child(UIKit.label("Contraproposta (%s):" % Fmt.plural(left, "rodada restante", "rodadas restantes"), "Small"))
+		var crow := UIKit.hbox(8)
+		for m in [1.1, 1.25, 1.5]:
+			var ask := Valuation.round_value(o.fee * m)
+			var more := UIKit.button(Fmt.money(ask), "ChipButton", func(): _respond(o, "counter", ask), "up")
+			more.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			crow.add_child(more)
+		card.add_child(crow)
 	var row := UIKit.hbox(8)
 	var accept := UIKit.button("Aceitar", "PrimaryButton", func(): _respond(o, "accept", 0), "check")
 	accept.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	accept.add_theme_font_size_override(&"font_size", 24)
 	row.add_child(accept)
-	if not o.raised:
-		var ask := Valuation.round_value(o.fee * 1.2)
-		var more := UIKit.button("Pedir %s" % Fmt.money(ask), "", func(): _respond(o, "counter", ask), "up")
-		more.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		more.add_theme_font_size_override(&"font_size", 20)
-		row.add_child(more)
 	var reject := UIKit.button("Recusar", "GhostButton", func(): _respond(o, "reject", 0), "close")
 	reject.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(reject)

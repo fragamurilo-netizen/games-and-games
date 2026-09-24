@@ -59,6 +59,11 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	r1.add_child(UIKit.label(Pos.name_of(p.position) + sec, "Small", true))
 	col.add_child(r1)
 	var nat := NameGenerator.nationality_name(p.nationality)
+	if p.nationality != "":
+		var nrow := UIKit.hbox(8)
+		nrow.add_child(UIKit.flag(p.nationality, 36))
+		nrow.add_child(UIKit.label(nat, "Small"))
+		col.add_child(nrow)
 	var born := p.hometown if p.hometown != "" else nat
 	col.add_child(UIKit.label("%d anos · %s · %s · pé %s" % [p.age(w.year), Fmt.height(p.height), born, Player.FOOT_NAMES[p.foot].to_lower()], "Small", true))
 	if club != null:

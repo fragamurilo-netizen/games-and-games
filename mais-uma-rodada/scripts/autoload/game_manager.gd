@@ -67,6 +67,7 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 	world.difficulty = difficulty
 	var c := world.user_club()
 	FinanceManager.set_budgets(world, c)
+	SponsorManager.open_preseason(world)
 	c.sheet = ClubAI.auto_sheet(world, c, "")
 	for p in world.squad(c):
 		p.scout_noise = int(p.scout_noise * 0.3) # você conhece melhor o próprio elenco
