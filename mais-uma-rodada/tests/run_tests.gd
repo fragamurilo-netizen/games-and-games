@@ -32,6 +32,7 @@ func _initialize() -> void:
 	_run("eventos com escolhas e promessas", _test_events)
 	_run("treino, base e liga sub-20", _test_training_youth)
 	_run("empréstimos, parcelas e cláusulas", _test_deals)
+	_run("mercado da IA (negociação, rotas reais, empréstimos)", _test_market_ai)
 	_run("rostos e personalização", _test_faces)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
@@ -728,6 +729,58 @@ func _test_deals() -> void:
 	var m2: Player = w2.player(mine.id)
 	check(int(m2.look.get("hs", -1)) == 3 and String(m2.train.get("f", "")) == "fisico", "save perdeu aparência/treino")
 	check(w2.player(p.id).release_clause == p.release_clause, "save perdeu a multa")
+
+
+func _test_market_ai() -> void:
+	var w := _season_world
+	if w == null:
+		w = WorldGenerator.generate(777, "padrao")
+		_season(w)
+	# Ninguém é revendido na mesma temporada em que chegou.
+	var buys := {}
+	var export_routes := 0
+	for t: Transfer in w.transfer_log:
+		if t.year != w.year or t.kind != Transfer.KIND_BUY:
+			continue
+		buys[t.player_id] = int(buys.get(t.player_id, 0)) + 1
+		var from := w.club(t.from_id)
+		var to := w.club(t.to_id)
+		if ["BRA", "ARG", "URU", "COL"].has(from.nation) and ["ENG", "ESP", "GER", "ITA", "FRA", "POR", "NED"].has(to.nation):
+			export_routes += 1
+	var repeated := 0
+	for pid in buys:
+		if int(buys[pid]) > 1:
+			repeated += 1
+	check(repeated == 0, "%d jogador(es) vendido(s) mais de uma vez na temporada" % repeated)
+	check(export_routes >= 3, "quase ninguém saiu da América do Sul para a Europa (%d)" % export_routes)
+	check(float(w.stats.get("loans", 0.0)) > 20.0, "a IA quase não emprestou jovens")
+	var max_players := int(DatabaseManager.squad_rules()["max_players"])
+	for c: Club in w.clubs:
+		if not w.is_user_club(c.id):
+			check(c.player_ids.size() <= max_players + 1, "%s com elenco inchado (%d)" % [c.short_name, c.player_ids.size()])
+	# Clube grande não vende a estrela para um clube pequeno, nem com o cofre cheio.
+	var big: Club = w.clubs_in_league("ENG1")[0]
+	var star: Player = null
+	for q: Player in w.squad(big):
+		if q.squad_status == Player.STATUS_STAR and q.loan.is_empty():
+			star = q
+	var small: Club = w.clubs_in_league("BRA2")[5]
+	small.transfer_budget = 900_000_000
+	if star != null:
+		check(MarketAI.negotiate(w, small, star, 1.0, false).is_empty(), "estrela vendida para clube pequeno")
+	# Rico inglês paga ágio por uma promessa brasileira.
+	var seller: Club = w.clubs_in_league("BRA1")[8]
+	var prospect: Player = null
+	for q: Player in w.squad(seller):
+		if q.age(w.year) <= 22 and q.loan.is_empty() and (prospect == null or q.potential > prospect.potential):
+			prospect = q
+	big.transfer_budget = 900_000_000
+	if prospect != null:
+		var deal := MarketAI.negotiate(w, big, prospect, 1.0, false)
+		check(not deal.is_empty() and int(deal["fee"]) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		var bids := MarketAI.bids_for_user_player(w, big, prospect)
+		check(int(bids[0]) <= int(bids[1]) and int(bids[0]) > 0, "proposta acima do teto do comprador")
+	check(MarketAI.power(big) > MarketAI.power(seller) * 2.0, "liga inglesa deveria ter muito mais poder de compra")
 
 
 func _test_faces() -> void:
