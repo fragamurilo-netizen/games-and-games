@@ -24,6 +24,8 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	w.year = DatabaseManager.start_year()
 	var rng := w.rng
 	ClubGenerator.build_all(w, rng, world_type == "aleatorio")
+	for c in w.clubs:
+		Overrides.apply_club(c)
 	var used_names := {}
 	for c in w.clubs:
 		PlayerGenerator.create_squad(w, rng, c, PlayerGenerator.club_level(c), used_names)

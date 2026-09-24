@@ -17,6 +17,10 @@ const SCREENS := {
 	"load": "res://scenes/screens/load_game.tscn",
 	"news": "res://scenes/screens/news.tscn",
 	"settings": "res://scenes/screens/settings.tscn",
+	"training": "res://scenes/screens/training.tscn",
+	"academy": "res://scenes/screens/academy.tscn",
+	"history": "res://scenes/screens/history.tscn",
+	"editor": "res://scenes/screens/editor.tscn",
 }
 const TABS := ["hub", "squad", "market", "table", "club"]
 

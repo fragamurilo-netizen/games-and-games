@@ -96,10 +96,11 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				var mins: int = minutes.get(p.id, -1)
 				var play_f := 1.25 if mins >= 60 else (1.05 if mins > 0 else (0.85 if cid >= 0 else 0.7))
 				var fac_f: float = (0.85 + clubs[cid].facilities * 0.003) if cid >= 0 else 0.7
-				p.dev_acc += g * play_f * growth_f * fac_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
+				var train_f := TrainingManager.growth_mult(world, p) if cid == world.user_club_id else 1.0
+				p.dev_acc += g * play_f * growth_f * fac_f * train_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
 				if p.dev_acc >= 0.15:
 					var before := p.overall
-					apply_growth(world, p, p.dev_acc)
+					apply_growth(world, p, p.dev_acc, TrainingManager.bias_for(world, p) if cid == world.user_club_id else [])
 					if p.overall >= before + 2:
 						notable.append(p)
 			elif age >= 27 and rng.randf() < 0.04:
@@ -144,10 +145,16 @@ static func _growth_weights(pos: int, young: bool) -> Array:
 	return _growth_w[pos][1 if young else 0]
 
 
-static func apply_growth(world: GameWorld, p: Player, budget: float) -> void:
+## `bias`: [[atributo, multiplicador], ...] do treino (foco do time e individual).
+static func apply_growth(world: GameWorld, p: Player, budget: float, bias: Array = []) -> void:
 	var rng := world.rng
 	var target := minf(p.ovr_f + budget, float(p.potential) + 0.4)
 	var weights := _growth_weights(p.position, p.age(world.year) <= 21)
+	if not bias.is_empty():
+		weights = weights.duplicate()
+		for b in bias:
+			var i: int = b[0]
+			weights[i] = maxf(float(weights[i]), 0.04) * float(b[1])
 	var guard := 0
 	while p.ovr_f < target - 0.05 and guard < 60:
 		var i := RngUtil.weighted_index(rng, weights)
@@ -306,6 +313,8 @@ static func youth_intake(world: GameWorld) -> Dictionary:
 	var out := {}
 	var used := WorldGenerator.used_names_of(world)
 	for c: Club in world.clubs:
+		if c.id == world.user_club_id:
+			continue # a base do usuário tem garotos de verdade (YouthManager)
 		var n := 1 + (1 if c.youth_level >= 55 else 0) + (1 if c.youth_level >= 85 else 0) + (1 if world.rng.randf() < 0.35 else 0)
 		var arr: Array = []
 		for _i in n:

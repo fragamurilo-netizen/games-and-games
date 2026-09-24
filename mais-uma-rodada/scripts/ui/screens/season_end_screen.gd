@@ -67,6 +67,9 @@ func refresh() -> void:
 		_footer(w)
 		return
 	c.add_child(_user_card(w, year))
+	var aw := _awards_card(w)
+	if aw != null:
+		c.add_child(aw)
 	for cu in _summary.get("cups", []):
 		c.add_child(_cup_card(w, cu))
 	var nat := w.user_nation()
@@ -179,6 +182,44 @@ func _cup_card(w: GameWorld, cu: Dictionary) -> Control:
 	return UIKit.card_panel(card)
 
 
+## Prêmios da liga do usuário, melhor do mundo e o sub-20.
+func _awards_card(w: GameWorld) -> Control:
+	var aw: Dictionary = _summary.get("awards", {})
+	var ballon: Dictionary = _summary.get("ballon", {})
+	var yl: Dictionary = _summary.get("youth_league", {})
+	if aw.is_empty() and ballon.is_empty() and yl.is_empty():
+		return null
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Prêmios da temporada"))
+	if not ballon.is_empty():
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.icon_rect("star", 34, UIColors.ACCENT))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label("Melhor jogador do mundo", "Caps"))
+		col.add_child(UIKit.label("%s (%s) · %d gols" % [ballon["name"], ballon["club"], int(ballon.get("goals", 0))], "H3", true))
+		row.add_child(col)
+		row.add_child(UIKit.flag(String(ballon.get("nat", "")), 40))
+		card.add_child(row)
+	for k in ["mvp", "young", "gk", "assist"]:
+		if not aw.has(k):
+			continue
+		var a: Dictionary = aw[k]
+		var row := UIKit.hbox(10)
+		var kl := UIKit.label(AwardManager.award_name(k), "Small")
+		kl.custom_minimum_size.x = 170
+		row.add_child(kl)
+		var nl := UIKit.label("%s (%s)" % [a["name"], a["club"]], "", true)
+		row.add_child(nl)
+		row.add_child(UIKit.label(String(a.get("v", "")), "Small"))
+		card.add_child(row)
+	if not yl.is_empty():
+		var champ := w.club(int(yl.get("champion", -1)))
+		if champ != null:
+			card.add_child(UIKit.kv(String(yl.get("name", "Sub-20")), "%s · seu time %dº" % [champ.short_name, int(yl.get("user_pos", 0))], UIColors.ACCENT if w.is_user_club(champ.id) else UIColors.TEXT))
+	return UIKit.card_panel(card)
+
+
 ## Campeões das primeiras divisões dos outros países.
 func _world_card(w: GameWorld, leagues: Array) -> Control:
 	var card := UIKit.card("Card", 4)
@@ -229,8 +270,11 @@ func _club_card(w: GameWorld) -> Control:
 	if not left.is_empty():
 		card.add_child(UIKit.label("Saíram com o fim do contrato: %s." % ", ".join(PackedStringArray(left)), "", true))
 	if not youth.is_empty():
-		card.add_child(UIKit.label("Subiram da base: %s." % ", ".join(PackedStringArray(youth)), "", true))
-		card.add_child(UIKit.label("Os jovens já estão no elenco. O potencial é uma estimativa: alguns explodem, outros não.", "Small", true))
+		card.add_child(UIKit.label("Chegaram à base: %s." % ", ".join(PackedStringArray(youth)), "", true))
+		card.add_child(UIKit.label("Acompanhe os garotos em Central do clube → Base. O potencial é uma estimativa: alguns explodem, outros não.", "Small", true))
+	var yleft: Array = _summary.get("youth_left", [])
+	if not yleft.is_empty():
+		card.add_child(UIKit.label("Deixaram a base (idade limite): %s." % ", ".join(PackedStringArray(yleft)), "Small", true))
 	return UIKit.card_panel(card)
 
 

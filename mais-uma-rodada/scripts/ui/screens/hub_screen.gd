@@ -34,7 +34,11 @@ func refresh() -> void:
 		c.add_child(_season_over_card(w))
 	else:
 		c.add_child(_next_match_card(w, club))
+	var decisions := _decisions_card(w)
+	if decisions != null:
+		c.add_child(decisions)
 	c.add_child(_status_card(w, club))
+	c.add_child(_shortcuts_card(w))
 	var cups := _cups_card(w, club)
 	if cups != null:
 		c.add_child(cups)
@@ -140,8 +144,8 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	var lineup := UIKit.button("Escalação e tática", "GhostButton", func(): UIManager.push("prematch", {"edit": true}), "tactics")
 	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sub.add_child(lineup)
-	var quick := UIKit.button("Simular", "GhostButton", _instant, "fast")
-	quick.tooltip_text = "Joga a rodada sem assistir"
+	var quick := UIKit.button("Simular", "GhostButton", func(): SimDialog.open(func(): refresh()), "fast")
+	quick.tooltip_text = "Joga um ou vários jogos sem assistir"
 	sub.add_child(quick)
 	card.add_child(sub)
 	return UIKit.card_panel(card)
@@ -156,6 +160,67 @@ func _instant() -> void:
 	if report.is_empty():
 		return
 	UIManager.push("results", {"report": report})
+
+
+## Decisões pendentes (eventos da carreira).
+func _decisions_card(w: GameWorld) -> Control:
+	var evs := EventManager.pending(w)
+	if evs.is_empty():
+		return null
+	var card := UIKit.card("CardHighlight", 8)
+	card.add_child(UIKit.section("Decisões pendentes (%d)" % evs.size()))
+	for ev in evs:
+		var d := EventManager.describe(w, ev)
+		var row := UIKit.hbox(12)
+		row.add_child(UIKit.icon_rect(String(EventManager.KINDS.get(String(ev["k"]), {}).get("icon", "info")), 32, EventDialog.color_of(ev)))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(String(d["title"]), "H3", true))
+		var left := maxi(1, int(ev["exp"]) - w.current_turn())
+		col.add_child(UIKit.label("Responda em até %d jogo(s)" % left, "Small"))
+		row.add_child(col)
+		row.add_child(UIKit.label("›", "H2"))
+		var e: Dictionary = ev
+		card.add_child(UIKit.tap_row(row, func(): EventDialog.open(e, func(): refresh()), "Card"))
+	return UIKit.card_panel(card)
+
+
+## Atalhos para o dia a dia do clube.
+func _shortcuts_card(w: GameWorld) -> Control:
+	var card := UIKit.card("Card", 10)
+	card.add_child(UIKit.section("Central do clube"))
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override(&"h_separation", 10)
+	grid.add_theme_constant_override(&"v_separation", 10)
+	var yl_pos := YouthManager.sorted_table(w).find(w.user_club_id) + 1
+	var items: Array = [
+		["tactics", "Treino", TrainingManager.focus_of(w.user_club())["name"], func(): UIManager.push("training")],
+		["up", "Base", "%d garotos%s" % [w.academy.size(), (" · %dº" % yl_pos) if yl_pos > 0 and YouthManager.has_league(w) and int(w.youth_league["table"][w.user_club_id]["pl"]) > 0 else ""], func(): UIManager.push("academy")],
+		["money", "Finanças", Fmt.money(w.user_club().balance), func(): UIManager.goto("club")],
+		["trophy", "História", "Campeões e prêmios", func(): UIManager.push("history")],
+		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
+		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
+	]
+	for it in items:
+		var v := UIKit.vbox(4)
+		v.alignment = BoxContainer.ALIGNMENT_CENTER
+		var ic := UIKit.icon_rect(String(it[0]), 40, UIColors.ACCENT)
+		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(ic)
+		var t := UIKit.label(String(it[1]), "H3")
+		t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(t)
+		var s := UIKit.label(String(it[2]), "Small")
+		s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		s.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		v.add_child(s)
+		var tile := UIKit.tap_row(v, it[3], "CardFlat")
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tile.custom_minimum_size.y = 128
+		grid.add_child(tile)
+	card.add_child(grid)
+	return UIKit.card_panel(card)
 
 
 ## Depois de uma demissão: escolher o próximo clube (não dá para jogar sem clube).

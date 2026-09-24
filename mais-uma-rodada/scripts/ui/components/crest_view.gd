@@ -21,6 +21,10 @@ func _draw() -> void:
 	if s <= 2.0:
 		return
 	var off := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
+	var img := CustomAssets.texture(String(crest.get("img", "")))
+	if img != null:
+		draw_texture_rect(img, Rect2(off, Vector2(s, s)), false)
+		return
 	var c1 := Color(crest.get("c1", "#1B3A8C"))
 	var c2 := Color(crest.get("c2", "#FFFFFF"))
 	var shape := unit_shape(crest.get("shape", "shield"))

@@ -66,6 +66,16 @@ func fixtures_at(slot: int) -> Array:
 	return out
 
 
+## Mês (1..12) e ano de um slot, para "simular até o fim do mês".
+func month_of(slot: int) -> int:
+	if slot < 0 or slot >= calendar.size():
+		return 0
+	var doy: int = calendar[slot]["d"]
+	var unix := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1}) + doy * 86400
+	var dt := Time.get_datetime_dict_from_unix_time(unix)
+	return int(dt["year"]) * 12 + int(dt["month"])
+
+
 ## Data legível de um slot: "sáb 15 ago".
 func date_label(slot: int, with_weekday: bool = true) -> String:
 	if slot < 0 or slot >= calendar.size():

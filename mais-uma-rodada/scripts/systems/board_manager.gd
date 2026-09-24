@@ -120,4 +120,8 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	for p in world.squad(c):
 		p.scout_noise = int(p.scout_noise * 0.3)
 	world.offers.clear()
+	world.events.clear()
+	world.promises.clear()
+	YouthManager.ensure_academy(world)
+	YouthManager.build_league(world)
 	NewsManager.post(world, "novo_tecnico", {"club": c.short_name, "manager": world.manager_name}, c.id, -1, NewsEvent.IMP_HEADLINE)

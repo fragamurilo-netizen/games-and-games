@@ -41,6 +41,7 @@ func refresh() -> void:
 	new_btn.custom_minimum_size.y = 96 if latest <= 0 else 84
 	c.add_child(new_btn)
 	c.add_child(UIKit.button("Carregar jogo", "", func(): UIManager.push("load"), "save"))
+	c.add_child(UIKit.button("Editor", "", func(): UIManager.push("editor"), "shield"))
 	c.add_child(UIKit.button("Opções", "GhostButton", func(): UIManager.push("settings"), "gear"))
 	c.add_child(UIKit.gap(40))
 	var ver := UIKit.label("versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "Small")

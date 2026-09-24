@@ -48,6 +48,7 @@ static func load_all() -> void:
 	_prepare_leagues()
 	_prepare_clubs()
 	_loaded = true
+	Overrides.apply_db()
 
 
 static func _load_json(key: String) -> Variant:

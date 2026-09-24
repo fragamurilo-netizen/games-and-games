@@ -91,3 +91,9 @@ func refresh() -> void:
 			c.add_child(UIKit.section(Pos.GROUP_NAMES[last_group]))
 		var pid := p.id
 		c.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
+	var out := TransferManager.loaned_out(w)
+	if not out.is_empty():
+		c.add_child(UIKit.section("Emprestados (voltam no fim da temporada)"))
+		for p: Player in out:
+			var pid := p.id
+			c.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))

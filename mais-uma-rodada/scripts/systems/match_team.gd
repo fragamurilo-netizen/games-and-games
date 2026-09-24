@@ -24,6 +24,9 @@ var line: int = 1
 var pressing: int = 1
 
 var cohesion_f: float = 1.0
+## Ajuste de setor pelo foco de treino da semana (só no time do usuário).
+var train_att: float = 1.0
+var train_def: float = 1.0
 var home_f: float = 1.0
 
 # --- Números táticos cacheados (evita dicionários no laço quente) ---
@@ -194,9 +197,9 @@ func recompute_units() -> void:
 			fit_sum += mp.style_fit_value(style, s_fit_attrs)
 		ovr_sum += mp.slot_rating
 	on_pitch_count = n + (1 if slots.size() > 0 and slots[0] != null else 0)
-	u_def = (d / maxf(0.01, dw)) * sqrt(dw / norm_def) if dw > 0.0 else 10.0
+	u_def = ((d / maxf(0.01, dw)) * sqrt(dw / norm_def) if dw > 0.0 else 10.0) * train_def
 	u_mid = (m / maxf(0.01, mw)) * sqrt(mw / norm_mid) if mw > 0.0 else 10.0
-	u_att = (a / maxf(0.01, aw)) * sqrt(aw / norm_att) if aw > 0.0 else 10.0
+	u_att = ((a / maxf(0.01, aw)) * sqrt(aw / norm_att) if aw > 0.0 else 10.0) * train_att
 	width = wsum
 	aer.sort()
 	aer.reverse()

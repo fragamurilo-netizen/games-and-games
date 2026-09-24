@@ -70,6 +70,8 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 	c.sheet = ClubAI.auto_sheet(world, c, "")
 	for p in world.squad(c):
 		p.scout_noise = int(p.scout_noise * 0.3) # você conhece melhor o próprio elenco
+	YouthManager.ensure_academy(world)
+	YouthManager.build_league(world)
 	slot = save_slot if save_slot > 0 else SaveManager.first_free_slot()
 	if slot <= 0:
 		slot = 1

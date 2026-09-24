@@ -115,6 +115,11 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 		card.add_child(UIKit.colored("Anunciou que vai se aposentar ao fim da temporada.", UIColors.ACCENT, "Small"))
 	if p.transfer_listed:
 		card.add_child(UIKit.colored("À venda por %s." % Fmt.money(TransferManager.asking_price(w, p)), UIColors.GREEN, "Small"))
+	if p.release_clause > 0 and p.club_id >= 0:
+		card.add_child(UIKit.colored("Multa rescisória: %s." % Fmt.money(p.release_clause), UIColors.MUTED, "Small"))
+	if not p.loan.is_empty():
+		var owner := w.club(int(p.loan.get("from", -1)))
+		card.add_child(UIKit.colored("Emprestado pelo %s até o fim de %d." % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year))], UIColors.BLUE, "Small"))
 	return UIKit.card_panel(card)
 
 
@@ -256,6 +261,14 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	row2.add_child(UIKit.stat(str(p.career_assists), "assist."))
 	row2.add_child(UIKit.stat(str(p.titles), "títulos"))
 	card.add_child(row2)
+	if not p.awards.is_empty():
+		card.add_child(UIKit.section("Prêmios"))
+		var af := UIKit.flow(8)
+		for i in range(p.awards.size() - 1, -1, -1):
+			var a: Dictionary = p.awards[i]
+			var where := "" if String(a.get("l", "")) == "" else " · " + w.league_short(String(a["l"]))
+			af.add_child(UIKit.pill("%s %d%s" % [AwardManager.award_name(String(a["k"])), int(a["y"]), where], UIColors.ACCENT, 16))
+		card.add_child(af)
 	if not p.spells.is_empty():
 		card.add_child(UIKit.section("Clubes"))
 		for i in range(p.spells.size() - 1, -1, -1):
@@ -290,7 +303,40 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 	var f := footer()
 	UIKit.clear(f)
 	var refresh_cb := func(): refresh()
+	if w.academy.has(p.id):
+		var arow := UIKit.hbox(10)
+		var up := UIKit.button("SUBIR AO PROFISSIONAL", "PrimaryButton", func():
+			UIManager.toast(YouthManager.promote(w, p))
+			GameManager.save_now()
+			refresh(), "up")
+		up.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		arow.add_child(up)
+		arow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
+		f.add_child(arow)
+		return
+	if own and not p.loan.is_empty():
+		var owner := w.club(int(p.loan.get("from", -1)))
+		f.add_child(UIKit.label("Emprestado pelo %s até o fim da temporada." % (owner.short_name if owner != null else "clube"), "Small", true))
+		var tb := UIKit.button("Treino individual", "", func(): TrainingSheet.open(p, refresh_cb), "tactics")
+		f.add_child(tb)
+		return
+	if not own and not p.loan.is_empty() and w.is_user_club(int(p.loan.get("from", -1))):
+		f.add_child(UIKit.label("Seu jogador, emprestado até o fim da temporada. Volta ao clube na virada do ano.", "Small", true))
+		return
 	if own:
+		var trow := UIKit.hbox(10)
+		var tr := UIKit.button("Treino individual", "", func(): TrainingSheet.open(p, refresh_cb), "tactics")
+		tr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		trow.add_child(tr)
+		trow.add_child(UIKit.button("Emprestar", "", func():
+			UIManager.confirm("Emprestar %s?" % p.display_name(), "Ele vai para um clube onde deve jogar mais, até o fim da temporada. O salário fica por conta do outro clube.", "Emprestar", func():
+				var r := TransferManager.loan_out(w, p)
+				UIManager.toast(r["msg"], UIColors.GREEN if r["ok"] else UIColors.RED)
+				if r["ok"]:
+					GameManager.save_now()
+					UIManager.back()), "swap"))
+		trow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
+		f.add_child(trow)
 		var row := UIKit.hbox(10)
 		var renew := UIKit.button("Renovar", "", func(): Negotiation.open(w, p, "renew", refresh_cb), "clock")
 		renew.size_flags_horizontal = Control.SIZE_EXPAND_FILL

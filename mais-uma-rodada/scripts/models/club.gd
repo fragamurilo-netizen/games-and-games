@@ -33,6 +33,10 @@ var ledger: Dictionary = {} # receitas/despesas da temporada por categoria
 var income_tv: int = 0
 var income_sponsor: int = 0
 var cost_upkeep: int = 0
+## Multiplicador do preço do ingresso escolhido pelo clube (1 = preço da liga).
+var ticket_mult: float = 1.0
+## Treino (só o usuário mexe): {focus, int (0 leve, 1 normal, 2 intensa)}.
+var training: Dictionary = {}
 
 var youth_level: int = 50 # 1..100
 var facilities: int = 50 # 1..100
@@ -156,7 +160,7 @@ func to_dict() -> Dictionary:
 		"rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
 		"rivals": rivals, "stadium": stadium, "cap": capacity,
 		"bal": balance, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
-		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep,
+		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
 		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "crest": crest,
 		"players": player_ids,
@@ -195,6 +199,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.income_tv = int(d.get("itv", 0))
 	c.income_sponsor = int(d.get("isp", 0))
 	c.cost_upkeep = int(d.get("cup", 0))
+	c.ticket_mult = float(d.get("tm", 1.0))
+	c.training = d.get("trn", {})
 	c.youth_level = int(d.get("youth", 50))
 	c.facilities = int(d.get("fac", 50))
 	c.archetype = d.get("arch", "tradicional_equilibrado")

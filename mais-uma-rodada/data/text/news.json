@@ -241,8 +241,8 @@
 	},
 	"base": {
 		"t": [
-			"{club} promove {n} jovens da base",
-			"Base do {club} revela {n} novos talentos"
+			"{n} garotos chegam à base do {club}",
+			"Base do {club} recebe {n} novos talentos"
 		],
 		"b": [
 			"O destaque é {player}, {pos} de {age} anos, avaliado como \"{potential}\"."

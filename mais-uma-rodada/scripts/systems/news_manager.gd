@@ -24,6 +24,13 @@ static func post(world: GameWorld, cat: String, data: Dictionary, club_id: int =
 	return n
 
 
+## Notícia com texto já pronto (eventos, promessas, base...).
+static func post_raw(world: GameWorld, title: String, body: String, club_id: int = -1, player_id: int = -1, imp: int = NewsEvent.IMP_NORMAL, cat: String = "clube") -> NewsEvent:
+	var n := NewsEvent.make(world.year, world.current_day(), cat, title, body, club_id, player_id, imp)
+	world.add_news(n)
+	return n
+
+
 static func _in_user_league(world: GameWorld, club_id: int) -> bool:
 	if not world.has_user():
 		return false

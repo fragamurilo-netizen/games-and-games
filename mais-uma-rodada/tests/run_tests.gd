@@ -29,6 +29,10 @@ func _initialize() -> void:
 	_run("diretoria: ultimato, demissão e novo clube", _test_board)
 	_run("valores e salários", _test_valuation)
 	_run("notícias com dados reais", _test_news)
+	_run("eventos com escolhas e promessas", _test_events)
+	_run("treino, base e liga sub-20", _test_training_youth)
+	_run("empréstimos, parcelas e cláusulas", _test_deals)
+	_run("rostos e personalização", _test_faces)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -571,3 +575,183 @@ func _test_news() -> void:
 		if n.title.contains("{") or n.body.contains("{") or n.title.strip_edges() == "":
 			broken += 1
 	check(broken == 0, "%d notícias com texto não preenchido" % broken)
+
+
+# ---------------------------------------------------------------------------
+# Sistemas da carreira (eventos, treino, base, negócios, rostos)
+# ---------------------------------------------------------------------------
+
+func _career_world() -> GameWorld:
+	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	_with_user(w, w.clubs_in_league("BRA1")[5].id)
+	YouthManager.ensure_academy(w)
+	YouthManager.build_league(w)
+	return w
+
+
+func _test_events() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	c.streak_winless = 5
+	w.season.turn = 10
+	var squad := w.squad(c)
+	squad[3].injury_weeks = 4
+	squad[4].injury_weeks = 3
+	var built := 0
+	for k in EventManager.KINDS:
+		var ev := EventManager._build(w, k)
+		if ev.is_empty():
+			continue
+		built += 1
+		var d := EventManager.describe(w, ev)
+		check(String(d["title"]) != "" and String(d["body"]) != "", "evento %s sem texto" % k)
+		check(Array(d["options"]).size() >= 2, "evento %s com menos de 2 opções" % k)
+		for i in Array(d["options"]).size():
+			var e2 := ev.duplicate(true)
+			e2["id"] = 100 + i
+			w.events.append(e2)
+			var msg := EventManager.resolve(w, e2, i)
+			check(msg != "", "evento %s opção %d sem resposta" % [k, i])
+			check(not w.events.has(e2), "evento %s não saiu da lista" % k)
+	check(built >= 10, "poucos tipos de evento disponíveis (%d)" % built)
+	# Promessa de minutos quebrada derruba a moral
+	var p: Player = squad[10]
+	p.morale = 70.0
+	w.promises.clear()
+	w.promises.append({"k": "minutes", "p": p.id, "until": w.current_turn(), "need": 2, "s0": p.stat(Player.S_STARTS)})
+	EventManager._check_promises(w, w.current_turn(), "V")
+	check(p.morale < 60.0 and w.promises.is_empty(), "promessa quebrada sem consequência")
+	# Expiração aplica a opção padrão
+	var ev := EventManager._build(w, "sponsor")
+	ev["id"] = 555
+	ev["exp"] = w.current_turn()
+	w.events.append(ev)
+	EventManager._expire(w, w.current_turn())
+	check(not w.events.has(ev), "evento expirado continua pendente")
+
+
+func _test_training_youth() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	c.training = {"focus": "fisico", "int": 2}
+	var p: Player = w.squad(c)[8]
+	p.train = {"f": "finalizacao"}
+	var bias := TrainingManager.bias_for(w, p)
+	check(bias.size() == 5, "foco do time + individual deveria dar 5 pesos (%d)" % bias.size())
+	check(TrainingManager.injury_mult(w, c.id) > 1.3, "treino intenso sem risco maior")
+	var other: Club = w.clubs_in_league("BRA1")[0]
+	check(TrainingManager.bias_for(w, w.squad(other)[0]).is_empty(), "IA não deveria usar o treino do usuário")
+	var target := Pos.DM if p.position != Pos.DM else Pos.CM
+	p.secondary.erase(target)
+	p.train["pos"] = target
+	for i in 40:
+		TrainingManager.weekly(w)
+	check(p.secondary.has(target), "posição não aprendida em 40 semanas")
+	# Base e sub-20
+	check(w.academy.size() >= 8, "base com poucos garotos (%d)" % w.academy.size())
+	var kid: Player = YouthManager.academy(w)[0]
+	check(w.player(kid.id) == kid, "garoto da base não encontrado por id")
+	var n_before := c.player_ids.size()
+	var msg := YouthManager.promote(w, kid)
+	check(c.player_ids.size() == n_before + 1 and not w.academy.has(kid.id) and w.players.has(kid.id), "promoção falhou: %s" % msg)
+	var ovr0 := 0.0
+	for q: Player in w.academy.values():
+		ovr0 += q.ovr_f
+	for slot in w.season.calendar.size():
+		if w.season.is_weekend(slot):
+			w.season.day = slot
+			YouthManager.play_slot(w, slot)
+			YouthManager.weekly(w)
+	var ovr1 := 0.0
+	for q: Player in w.academy.values():
+		ovr1 += q.ovr_f
+	check(ovr1 > ovr0, "a base não evoluiu")
+	var yl := w.youth_league
+	var n: int = yl["clubs"].size()
+	for cid in yl["clubs"]:
+		check(int(yl["table"][cid]["pl"]) == n - 1, "sub-20: %s com %d jogos" % [w.club(cid).short_name, int(yl["table"][cid]["pl"])])
+	check(not YouthManager.top_scorers(w, 3).is_empty(), "sub-20 sem artilheiros")
+	var fin := YouthManager.finish_league(w)
+	check(int(fin.get("champion", -1)) >= 0, "sub-20 sem campeão")
+	w.year += 1
+	var turn := YouthManager.season_turnover(w)
+	check(not Array(turn["new"]).is_empty(), "nenhum garoto novo na virada")
+	for q: Player in w.academy.values():
+		check(q.age(w.year) <= YouthManager.MAX_AGE, "garoto acima da idade ficou na base")
+
+
+func _test_deals() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var demand := 100000
+	check(TransferManager.adjust_demand(demand, 3, {"bonus": 1200000, "clause": 3}) < demand, "luvas não reduziram o salário pedido")
+	check(TransferManager.adjust_demand(demand, 3, {"clause": 2}) < TransferManager.adjust_demand(demand, 3, {"clause": 5}), "multa baixa deveria baratear o salário")
+	check(TransferManager.deal_value(1000000, {"inst": 3}) < TransferManager.deal_value(1000000, {}), "parcelas deveriam valer menos")
+	check(TransferManager.deal_value(1000000, {"sell_on": 0.2}) > TransferManager.deal_value(1000000, {}), "revenda deveria valer mais")
+	check(TransferManager.upfront_cost(900000, {"inst": 3}) < 900000, "primeira parcela deveria ser menor que o total")
+	# Compra parcelada com revenda e multa
+	var seller: Club = w.clubs_in_league("BRA1")[12]
+	var p: Player = w.squad(seller)[15]
+	c.transfer_budget = 50_000_000
+	var bal0 := c.balance
+	var fee := p.value
+	TransferManager.complete_transfer(w, p, c, fee, p.wage, 3)
+	TransferManager.apply_deal(w, p, c, seller.id, fee, {"inst": 3, "sell_on": 0.1, "clause": 2})
+	check(Array(w.stats.get("installments", [])).size() == 2, "parcelas não agendadas")
+	check(int(p.clauses.get("so", -1)) == seller.id, "cláusula de revenda não registrada")
+	check(p.release_clause > 0, "multa rescisória não registrada")
+	check(bal0 - c.balance < fee, "compra parcelada cobrou tudo de uma vez")
+	w.year += 2
+	TransferManager.pay_installments(w)
+	check(Array(w.stats.get("installments", [])).is_empty(), "parcelas não pagas")
+	w.year -= 2
+	# Revenda: o clube antigo recebe sua parte
+	var buyer: Club = w.clubs_in_league("ENG1")[0]
+	var sbal := seller.balance
+	TransferManager.complete_transfer(w, p, buyer, 2_000_000, p.wage, 3)
+	check(seller.balance - sbal == 200000, "revenda de 10%% não paga (%d)" % (seller.balance - sbal))
+	# Empréstimo de ida e volta
+	var mine: Player = w.squad(c)[18]
+	var r := TransferManager.loan_out(w, mine)
+	check(r["ok"], "empréstimo recusado: %s" % r["msg"])
+	if r["ok"]:
+		check(not c.player_ids.has(mine.id) and mine.club_id != c.id, "emprestado continua no elenco")
+		check(TransferManager.loaned_out(w).has(mine), "emprestado fora da lista")
+		var back := TransferManager.return_loans(w)
+		check(back.has(mine) and c.player_ids.has(mine.id) and mine.loan.is_empty(), "emprestado não voltou")
+	# Save guarda os campos novos
+	w.events.append({"id": 1, "k": "sponsor", "turn": 0, "exp": 3, "p": -1, "p2": -1, "d": {"lump": 1, "bonus": 2, "brand": "X"}})
+	mine.look = {"hs": 3, "bd": 2}
+	mine.train = {"f": "fisico"}
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(w2.events.size() == 1 and w2.academy.size() == w.academy.size() and not w2.youth_league.is_empty(), "save perdeu eventos/base/sub-20")
+	var m2: Player = w2.player(mine.id)
+	check(int(m2.look.get("hs", -1)) == 3 and String(m2.train.get("f", "")) == "fisico", "save perdeu aparência/treino")
+	check(w2.player(p.id).release_clause == p.release_clause, "save perdeu a multa")
+
+
+func _test_faces() -> void:
+	var a := FaceGen.features(1234, 7, 25)
+	var b := FaceGen.features(1234, 7, 25)
+	check(var_to_str(a) == var_to_str(b), "rosto não é determinístico")
+	var old := FaceGen.features(1234, 7, 38)
+	check(float(old["gray"]) >= float(a["gray"]) and float(old["wrinkles"]) > float(a["wrinkles"]), "rosto não envelhece")
+	var styles := {}
+	var beards := {}
+	for i in 400:
+		var f := FaceGen.features(i * 7919, i % 9, 18 + i % 20)
+		styles[int(f["style"])] = true
+		beards[int(f["beard"])] = true
+	check(styles.size() >= 14, "pouca variedade de penteados (%d)" % styles.size())
+	check(beards.size() >= 7, "pouca variedade de barbas (%d)" % beards.size())
+	var lk := FaceGen.features(99, 1, 30, {"hs": FaceGen.H_MOHAWK, "bd": FaceGen.B_FULL, "hc": 6})
+	check(int(lk["style"]) == FaceGen.H_MOHAWK and int(lk["beard"]) == FaceGen.B_FULL and int(lk["hair_i"]) == 6, "editor não fixa a aparência")
+	# Overrides de clube aplicados na geração
+	var c := Club.new()
+	c.key = "__teste__"
+	c.name = "Original"
+	c.crest = {"shape": "round"}
+	Overrides.data()["clubs"]["__teste__"] = {"name": "Editado", "c1": "#112233", "c2": "#FFFFFF"}
+	Overrides.apply_club(c)
+	Overrides.data()["clubs"].erase("__teste__")
+	check(c.name == "Editado" and c.color1 == "#112233" and String(c.crest.get("c1", "")) == "#112233", "personalização de clube não aplicada")

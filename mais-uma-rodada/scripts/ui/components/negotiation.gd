@@ -15,6 +15,9 @@ var counter_fee: int = -1
 var counter_wage: int = -1
 var box: VBoxContainer
 var on_done: Callable
+## Condições: parcelas, % de revenda (compra), luvas e multa rescisória (contrato).
+var deal: Dictionary = {"inst": 1, "sell_on": 0.0, "bonus": 0, "clause": 3}
+var loan_mode := false
 
 
 static func open(world: GameWorld, player: Player, kind: String, done: Callable) -> void:
@@ -83,7 +86,21 @@ func _render() -> void:
 	match mode:
 		"buy":
 			if agreed_fee < 0:
-				_render_fee("Sua proposta ao %s" % club.short_name, "Orçamento para contratações: %s" % Fmt.money(user.transfer_budget))
+				var g := ButtonGroup.new()
+				var mrow := UIKit.hbox(8)
+				for m in [[false, "Compra"], [true, "Empréstimo"]]:
+					var lm: bool = m[0]
+					var chip := UIKit.chip(String(m[1]), lm == loan_mode, g, func():
+						loan_mode = lm
+						message = ""
+						_render())
+					chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+					mrow.add_child(chip)
+				box.add_child(mrow)
+				if loan_mode:
+					_render_loan()
+				else:
+					_render_fee("Sua proposta ao %s" % club.short_name, "Orçamento para contratações: %s" % Fmt.money(user.transfer_budget))
 			else:
 				_render_terms("Taxa acertada: %s. Agora, o contrato:" % Fmt.money(agreed_fee))
 		"free":
@@ -132,6 +149,11 @@ func _render_fee(caption: String, hint: String) -> void:
 		quick.add_child(b)
 	box.add_child(quick)
 	box.add_child(UIKit.label(hint, "Small", true))
+	if mode == "buy":
+		box.add_child(UIKit.section("Condições"))
+		box.add_child(_choice("Pagamento", [["À vista", 1], ["2 parcelas", 2], ["3 parcelas", 3]], int(deal["inst"]), func(v): deal["inst"] = int(v)))
+		box.add_child(_choice("Revenda para o %s" % w.club(p.club_id).short_name, [["0%", 0.0], ["10%", 0.1], ["20%", 0.2]], float(deal["sell_on"]), func(v): deal["sell_on"] = float(v)))
+		box.add_child(UIKit.label("Sai do caixa agora: %s (1ª parcela + 5%% do empresário). Parcelar deixa a oferta menos atraente; dar %% de revenda deixa mais." % Fmt.money(TransferManager.upfront_cost(fee, deal)), "Small", true))
 	if counter_fee > 0 and mode == "buy":
 		box.add_child(UIKit.button("Aceitar contraproposta de %s" % Fmt.money(counter_fee), "", func():
 			fee = counter_fee
@@ -147,8 +169,47 @@ func _render_fee(caption: String, hint: String) -> void:
 			_done()))
 
 
+## Linha de opções mutuamente exclusivas.
+func _choice(caption: String, opts: Array, current: Variant, cb: Callable) -> Control:
+	var v := UIKit.vbox(4)
+	if caption != "":
+		v.add_child(UIKit.label(caption, "Small"))
+	var g := ButtonGroup.new()
+	var row := UIKit.hbox(8)
+	for o in opts:
+		var val: Variant = o[1]
+		var chip := UIKit.chip(String(o[0]), val == current, g, func():
+			cb.call(val)
+			_render())
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(chip)
+	v.add_child(row)
+	return v
+
+
+func _render_loan() -> void:
+	var r := TransferManager.loan_in_terms(w, p)
+	box.add_child(UIKit.section("Empréstimo até o fim da temporada"))
+	box.add_child(UIKit.kv("Taxa de empréstimo", Fmt.money(TransferManager.loan_fee(p))))
+	box.add_child(UIKit.kv("Salário (pago por você)", Fmt.money_month(p.wage)))
+	box.add_child(UIKit.label(String(r["msg"]), "Small", true))
+	var b := UIKit.button("PEDIR EMPRESTADO", "PrimaryButton", func():
+		var res := TransferManager.loan_in(w, p)
+		if res["ok"]:
+			UIManager.close_modal()
+			AudioManager.play("sign")
+			UIManager.toast(res["msg"], UIColors.GREEN)
+			_done()
+		else:
+			message = res["msg"]
+			message_color = UIColors.RED
+			_render(), "swap")
+	b.disabled = not r["ok"]
+	box.add_child(b)
+
+
 func _send_bid() -> void:
-	var r := TransferManager.user_bid(w, p, fee)
+	var r := TransferManager.user_bid(w, p, fee, deal)
 	message = r["msg"]
 	match r["result"]:
 		"accepted":
@@ -182,6 +243,12 @@ func _render_terms(caption: String) -> void:
 		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		yrow.add_child(chip)
 	box.add_child(yrow)
+	box.add_child(UIKit.section("Luvas (pagas na assinatura)"))
+	var monthly := maxi(wage, 1)
+	box.add_child(_choice("", [["Nenhuma", 0], ["3 salários", monthly * 3], ["6 salários", monthly * 6], ["12 salários", monthly * 12]], int(deal["bonus"]), func(v): deal["bonus"] = int(v)))
+	box.add_child(UIKit.label("Luvas reduzem o salário pedido: dinheiro agora em troca de uma folha mais leve.", "Small", true))
+	box.add_child(_choice("Multa rescisória", [["Sem multa", 0], ["2× valor", 2], ["3× valor", 3], ["5× valor", 5]], int(deal["clause"]), func(v): deal["clause"] = int(v)))
+	box.add_child(UIKit.label("Multa baixa agrada o jogador, mas um clube rico pode pagá-la e levá-lo.", "Small", true))
 	var fin := FinanceManager.summary(w, w.user_club())
 	var bill: int = fin["wage_bill"] - (p.wage if mode == "renew" else 0) + wage
 	var fits: bool = bill <= int(fin["wage_budget"] * 1.02)
@@ -199,13 +266,14 @@ func _send_terms() -> void:
 	var r: Dictionary
 	match mode:
 		"buy":
-			r = TransferManager.user_sign(w, p, agreed_fee, wage, years)
+			r = TransferManager.user_sign(w, p, agreed_fee, wage, years, deal)
 		"free":
-			r = TransferManager.user_sign_free(w, p, wage, years)
+			r = TransferManager.user_sign_free(w, p, wage, years, deal)
 		"renew":
-			var rr := TransferManager.renewal_terms(w, p, wage, years)
+			var rr := TransferManager.renewal_terms(w, p, wage, years, deal)
 			if rr["result"] == "accepted":
 				TransferManager.apply_renewal(w, p, wage, years)
+				TransferManager.apply_deal(w, p, w.user_club(), -1, 0, deal)
 				r = {"ok": true, "msg": "%s renovou até %d!" % [p.display_name(), p.contract_end]}
 			else:
 				r = {"ok": false, "msg": rr["msg"], "wage": rr.get("wage", 0), "result": rr["result"]}

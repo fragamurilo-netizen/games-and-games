@@ -30,6 +30,12 @@ var offers: Array = [] # TransferOffer envolvendo o usuário
 var transfer_log: Array = [] # Transfer da temporada atual e anterior
 var retired: Array = [] # registros compactos de aposentados notáveis
 var manager_stats: Dictionary = {"games": 0, "w": 0, "d": 0, "l": 0, "titles": 0, "promotions": 0, "seasons": 0}
+## Decisões pendentes do usuário (EventManager) e promessas feitas aos jogadores.
+var events: Array = []
+var promises: Array = []
+## Categorias de base do usuário (id → Player; fora de `players`) e a liga sub-20 da temporada.
+var academy: Dictionary = {}
+var youth_league: Dictionary = {}
 ## Estatísticas agregadas usadas pelo relatório de balanceamento.
 var stats: Dictionary = {}
 
@@ -54,7 +60,10 @@ func club(id: int) -> Club:
 
 
 func player(id: int) -> Player:
-	return players.get(id, null)
+	var p: Player = players.get(id, null)
+	if p == null:
+		p = academy.get(id, null)
+	return p
 
 
 func user_club() -> Club:
@@ -299,7 +308,8 @@ func to_dict() -> Dictionary:
 		"user": user_club_id, "manager": manager_name, "diff": difficulty,
 		"season": season.to_dict() if season != null else {},
 		"history": history, "news": nw, "offers": of, "tlog": tl, "retired": retired,
-		"mstats": manager_stats, "stats": stats,
+		"mstats": manager_stats, "stats": stats, "events": events, "promises": promises,
+		"academy": academy.values().map(func(p: Player): return p.to_dict()), "yl": youth_league,
 	}
 
 
@@ -336,6 +346,12 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	for k in ms:
 		w.manager_stats[k] = ms[k]
 	w.stats = d.get("stats", {})
+	w.events = Array(d.get("events", []))
+	w.promises = Array(d.get("promises", []))
+	for pd in d.get("academy", []):
+		var ap := Player.from_dict(pd)
+		w.academy[ap.id] = ap
+	w.youth_league = d.get("yl", {})
 	w._free_agents_dirty = true
 	w._club_by_key.clear()
 	return w

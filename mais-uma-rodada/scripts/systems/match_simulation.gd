@@ -169,6 +169,10 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.line = sheet.line
 	t.pressing = sheet.pressing
 	t.cohesion_f = 0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08
+	var um := TrainingManager.unit_mults(world, club)
+	t.train_att = float(um[0])
+	t.train_def = float(um[1])
+	var inj_m := TrainingManager.injury_mult(world, club.id)
 	var norms := DatabaseManager.formation_norms()
 	t.norm_def = float(norms["def"])
 	t.norm_mid = float(norms["mid"])
@@ -181,7 +185,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		if pl == null:
 			t.slots.append(null)
 			continue
-		var mp := _make_mp(pl, big)
+		var mp := _make_mp(pl, big, inj_m)
 		_assign_slot(mp, i, fslots[i])
 		mp.on_pitch = true
 		mp.used = true
@@ -193,14 +197,14 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		var pl: Player = world.player(pid)
 		if pl == null or t.by_id.has(pid):
 			continue
-		var mp := _make_mp(pl, big)
+		var mp := _make_mp(pl, big, inj_m)
 		t.bench.append(mp)
 		t.all.append(mp)
 		t.by_id[pid] = mp
 	return t
 
 
-func _make_mp(pl: Player, big: bool) -> MatchPlayer:
+func _make_mp(pl: Player, big: bool, inj_m: float = 1.0) -> MatchPlayer:
 	var mp := MatchPlayer.new()
 	mp.p = pl
 	mp.cond = pl.condition
@@ -209,7 +213,7 @@ func _make_mp(pl: Player, big: bool) -> MatchPlayer:
 	mp.ctx = 1.0 + (pl.trait_sum("big_game") if big else 0.0)
 	mp.card_mult = pl.trait_mult("card_mult")
 	mp.clutch = pl.trait_sum("clutch")
-	mp.injury_f = (1.0 + pl.injury_prone / 10.0) * pl.trait_mult("injury_mult")
+	mp.injury_f = (1.0 + pl.injury_prone / 10.0) * pl.trait_mult("injury_mult") * inj_m
 	mp.prepare()
 	return mp
 

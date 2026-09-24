@@ -63,6 +63,8 @@ var hometown: String = ""
 var face_seed: int = 0
 ## Aparência fixada pelo editor: {hs penteado, hc cor do cabelo, bd barba, sk pele, ey olhos, photo arquivo}.
 var look: Dictionary = {}
+## Treino individual: {f foco, pos posição em aprendizado, prog progresso 0..1}.
+var train: Dictionary = {}
 
 # Atributos 1..100
 var attrs: PackedByteArray = PackedByteArray()
@@ -83,6 +85,12 @@ var squad_status: int = STATUS_ROTATION
 var transfer_listed: bool = false
 var asking_price: int = 0
 var joined_year: int = 0
+## Multa rescisória (0 = sem multa): quem pagar leva o jogador.
+var release_clause: int = 0
+## Cláusulas herdadas de negócios: {so: clube com % de revenda, pct}.
+var clauses: Dictionary = {}
+## Empréstimo em andamento: {from: dono, until: ano de volta}.
+var loan: Dictionary = {}
 var value: int = 0
 
 # Condição
@@ -111,6 +119,8 @@ var career_apps: int = 0
 var career_goals: int = 0
 var career_assists: int = 0
 var titles: int = 0
+## Prêmios individuais: [{y, k (mvp|young|gk|assist|ballon), l (liga)}]
+var awards: Array = []
 
 # Cache (não salvo)
 var _pos_cache: PackedFloat32Array = PackedFloat32Array()
@@ -387,16 +397,16 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "ft": foot, "pos": position,
-		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look,
+		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
 		"tr": traits, "sn": scout_noise,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
-		"ask": asking_price, "jy": joined_year, "val": value,
+		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "min": minutes_season,
 		"stats": stats, "cs": cup_stats, "hist": history, "spells": spells,
-		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles,
+		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards,
 	}
 
 
@@ -418,6 +428,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.hometown = d.get("ht", "")
 	p.face_seed = int(d.get("fs", p.id))
 	p.look = d.get("lk", {})
+	p.train = d.get("trn", {})
 	var at: Variant = d.get("at", null)
 	if at is PackedByteArray and at.size() == Attr.COUNT:
 		p.attrs = at
@@ -434,6 +445,9 @@ static func from_dict(d: Dictionary) -> Player:
 	p.transfer_listed = bool(d.get("tl", false))
 	p.asking_price = int(d.get("ask", 0))
 	p.joined_year = int(d.get("jy", 0))
+	p.release_clause = int(d.get("rc", 0))
+	p.clauses = d.get("cl", {})
+	p.loan = d.get("loan", {})
 	p.value = int(d.get("val", 0))
 	p.condition = float(d.get("cond", 100.0))
 	p.morale = float(d.get("mor", 65.0))
@@ -459,5 +473,6 @@ static func from_dict(d: Dictionary) -> Player:
 	p.career_goals = int(d.get("cg", 0))
 	p.career_assists = int(d.get("cas", 0))
 	p.titles = int(d.get("tt", 0))
+	p.awards = Array(d.get("aw", []))
 	p.recompute_overall()
 	return p
