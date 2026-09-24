@@ -43,6 +43,7 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 			cb.call())
 	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
 	b.focus_mode = Control.FOCUS_NONE
+	press_fx(b)
 	return b
 
 
@@ -54,6 +55,7 @@ static func icon_button(icon_name: String, cb: Callable, tip: String = "") -> Bu
 	b.custom_minimum_size = Vector2(64, 64)
 	b.tooltip_text = tip
 	b.focus_mode = Control.FOCUS_NONE
+	press_fx(b, null, 0.9)
 	if cb.is_valid():
 		b.pressed.connect(func():
 			AudioManager.click()
@@ -71,11 +73,29 @@ static func chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 	b.button_pressed = pressed
 	b.custom_minimum_size.y = 52
 	b.focus_mode = Control.FOCUS_NONE
+	press_fx(b, null, 0.94)
 	if cb.is_valid():
 		b.pressed.connect(func():
 			AudioManager.click()
 			cb.call())
 	return b
+
+
+## Resposta ao toque: o alvo (o próprio botão, ou o card/linha que ele cobre) encolhe um
+## pouco enquanto está pressionado e volta ao soltar ou quando o toque vira rolagem.
+static func press_fx(b: BaseButton, target: Control = null, amount: float = 0.96) -> void:
+	var t: Control = target if target != null else b
+	b.button_down.connect(func(): _press_scale(t, amount))
+	b.button_up.connect(func(): _press_scale(t, 1.0))
+	b.mouse_exited.connect(func(): _press_scale(t, 1.0))
+
+
+static func _press_scale(t: Control, s: float) -> void:
+	if not is_instance_valid(t) or not t.is_inside_tree() or t.scale.x == s:
+		return
+	t.pivot_offset = t.size / 2.0
+	var tw := t.create_tween()
+	tw.tween_property(t, "scale", Vector2(s, s), 0.07 if s < 1.0 else 0.12)
 
 
 static func hbox(sep: int = 12) -> HBoxContainer:
@@ -267,6 +287,7 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	b.focus_mode = Control.FOCUS_NONE
 	b.toggle_mode = toggle
 	b.name = "Tap"
+	press_fx(b, p, 0.98)
 	if cb.is_valid():
 		b.pressed.connect(func():
 			AudioManager.click()
