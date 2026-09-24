@@ -49,6 +49,12 @@ extends Control
 	set(v):
 		kit_pattern = v
 		_invalidate()
+## Uniforme do clube, no mesmo formato do KitView (pattern, c1, c2, c3, collar, sleeve, sp, sup).
+## Tem prioridade sobre shirt_color/trim_color/kit_collar/kit_pattern.
+var kit: Dictionary = {}:
+	set(v):
+		kit = v
+		_invalidate()
 
 var look: Dictionary = {}:
 	set(v):
@@ -125,6 +131,14 @@ const STYLE_P: Array = [
 	{"tp": 0.14, "sd": 0.0, "fd": 2, "tx": "locs", "bk": "dreads"}, # dreads com degradê
 	{"tp": 0.24, "sd": 0.05, "hl": 0.12, "fd": 2, "sp": 3, "tx": "curl", "fr": "curl_fringe"}, # franja cacheada
 	{"tp": 0.12, "sd": 0.0, "fd": 2, "gl": 0.35}, # para trás com degradê
+	{"tp": 0.04, "sd": 0.02, "tx": "braid", "bk": "bun", "op": 0.8}, # tranças com coque
+	{"tp": 0.1, "sd": 0.0, "fd": 2, "fr": "quiff", "fr2": "shaved_part"}, # topete com risco
+	{"tp": 0.1, "sd": 0.06, "sb": 0.2, "bk": "long", "gl": 0.35}, # longo para trás
+	{"tp": 0.16, "sd": 0.1, "hl": 0.2, "tx": "wavy", "fr": "fringe", "fl": 2, "sb": 0.08}, # ondulado com franja
+	{"tp": 0.12, "sd": 0.03, "sp": 2, "fd": 2, "gl": 0.45}, # espetado com gel
+	{"tp": 0.32, "sd": 0.24, "sp": 3, "tx": "curl", "sb": 0.15}, # cachos médios
+	{"tp": 0.02, "sd": 0.0, "fd": 3, "tx": "braid", "op": 0.85}, # moicano trançado
+	{"tp": 0.14, "sd": 0.0, "fd": 3, "fr": "side_fringe", "fl": 1}, # sidecut
 ]
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
@@ -185,8 +199,7 @@ func set_player(p: Player, club: Club, year: int) -> void:
 		shirt_color = club.primary_color()
 		trim_color = club.secondary_color()
 		bg_color = club.primary_color().darkened(0.6)
-		kit_collar = String(club.kit_home.get("collar", ""))
-		kit_pattern = String(club.kit_home.get("pattern", ""))
+		kit = club.kit_home
 	queue_redraw()
 
 
@@ -220,7 +233,7 @@ func _draw() -> void:
 	if _dirty or _f.is_empty():
 		_f = FaceGen.features(face_seed, eth, age, look)
 		_dirty = false
-	var key := hash([face_seed, eth, age, look, size, shirt_color, trim_color, bg_color, suit, kit_collar, kit_pattern])
+	var key := hash([face_seed, eth, age, look, size, shirt_color, trim_color, bg_color, suit, kit_collar, kit_pattern, kit])
 	if _cmd_cache.has(key):
 		_replay(_cmd_cache[key])
 		return
@@ -848,6 +861,10 @@ func _neckline(kind: int) -> PackedVector2Array:
 			for i in n + 1:
 				var a := PI - PI * float(i) / n
 				out.append(Vector2(x0 + rx * cos(a), y0 - s * 0.03 + (_ynotch - y0 - s * 0.02) * sin(a)))
+		4: # careca larga
+			for i in n + 1:
+				var a := PI - PI * float(i) / n
+				out.append(Vector2(x0 + rx * 1.12 * cos(a), y0 + (_ynotch - y0 + s * 0.02) * sin(a)))
 		_: # redonda
 			for i in n + 1:
 				var a := PI - PI * float(i) / n
@@ -953,26 +970,51 @@ func _kit_band_pts(pattern: String) -> Array:
 	return out
 
 
+## Cor do uniforme (c1 principal, c2 secundária, c3 detalhes), com as cores do retrato como reserva.
+func _kit_col(key: String, fallback: Color) -> Color:
+	var v: Variant = kit.get(key, "")
+	if v is Color:
+		return v
+	if String(v) != "":
+		return Color(String(v))
+	return fallback
+
+
 func _body() -> void:
 	var f := _f
 	var s := _s
 	_body_setup()
 	var layers := 4 if s < 90.0 else 7
+	# Gola: a do uniforme do clube (mesmas chaves do KitView) ou a sorteada
 	var collar := int(f["collar"])
-	match kit_collar:
+	var henley := false
+	var ck := String(kit.get("collar", kit_collar))
+	match ck:
 		"v":
 			collar = 0
 		"round":
 			collar = 1
+		"wide":
+			collar = 4
+		"henley":
+			collar = 1
+			henley = true
 		"polo":
 			collar = 2
+		"mandarin":
+			collar = 3
 	if suit:
 		_suit_body(layers)
 		return
 	var line := _neckline(collar)
 	var neck_low := line[line.size() / 2].y
-	var body_col := shirt_color
-	var trim := trim_color if not trim_color.is_equal_approx(shirt_color) else shirt_color.darkened(0.35)
+	var body_col := _kit_col("c1", shirt_color)
+	var c2 := _kit_col("c2", trim_color)
+	var trim := _kit_col("c3", c2)
+	if trim.is_equal_approx(body_col):
+		trim = body_col.darkened(0.35)
+	var pattern := String(kit.get("pattern", kit_pattern))
+	var sleeve := String(kit.get("sleeve", ""))
 	# Parte de dentro da gola, atrás do pescoço
 	if collar == 2 or collar == 3:
 		var back := PackedVector2Array()
@@ -997,34 +1039,129 @@ func _body() -> void:
 	var t0 := 0.06
 	_drape(_torso_top(t0, false, line), layers, func(p: Vector2, _t: float, _w: float) -> Color:
 		return _shade(body_col, _cloth_lum(p, neck_low)))
-	if kit_pattern != "" and kit_pattern != "plain":
-		var shirt := _torso_top(t0, false, line)
-		shirt.append(Vector2(_hc.x + _sw * 1.1, _c.y + s * 0.6))
-		shirt.append(Vector2(_hc.x - _sw * 1.1, _c.y + s * 0.6))
-		for band: PackedVector2Array in _kit_band_pts(kit_pattern):
-			for piece in Geometry2D.intersect_polygons(band, shirt):
-				var cols := PackedColorArray()
-				for i in piece.size():
-					piece[i] = _cl(piece[i])
-					cols.append(_shade(trim_color, _cloth_lum(piece[i], neck_low)))
-				if not Geometry2D.triangulate_polygon(piece).is_empty():
-					_r_polygon(piece, cols)
-	# Costura do ombro
+	var shirt := _torso_top(t0, false, line)
+	shirt.append(Vector2(_hc.x + _sw * 1.1, _c.y + s * 0.6))
+	shirt.append(Vector2(_hc.x - _sw * 1.1, _c.y + s * 0.6))
+	var panels: Array = []
+	if pattern != "" and pattern != "plain":
+		panels.append_array(_kit_band_pts(pattern))
+	# Mangas de outra cor: raglan (costura do pescoço à axila) ou manga contrastante no ombro
+	if sleeve == "contrast" or sleeve == "raglan":
+		for sx: float in [-1.0, 1.0]:
+			var sp := PackedVector2Array()
+			if sleeve == "raglan":
+				sp = PackedVector2Array([Vector2(_nwt * 1.2, _ynb - s * 0.03), Vector2(_sw * 1.3, _ynb - s * 0.05), Vector2(_sw * 1.3, _c.y + s * 0.6 - _hc.y), Vector2(_sw * 0.86, _c.y + s * 0.6 - _hc.y)])
+			else:
+				sp = PackedVector2Array([Vector2(_sw * 0.8, _ysp - s * 0.06), Vector2(_sw * 1.3, _ysp - s * 0.06), Vector2(_sw * 1.3, _c.y + s * 0.6 - _hc.y), Vector2(_sw * 0.9, _c.y + s * 0.6 - _hc.y)])
+			var poly := PackedVector2Array()
+			var n := sp.size()
+			for i in n:
+				for k in 6:
+					var q := sp[i].lerp(sp[(i + 1) % n], k / 6.0)
+					poly.append(Vector2(_hc.x + sx * q.x, _hc.y + q.y))
+			panels.append(poly)
+	for band: PackedVector2Array in panels:
+		for piece in Geometry2D.intersect_polygons(band, shirt):
+			var cols := PackedColorArray()
+			for i in piece.size():
+				piece[i] = _cl(piece[i])
+				cols.append(_shade(c2, _cloth_lum(piece[i], neck_low)))
+			if not Geometry2D.triangulate_polygon(piece).is_empty():
+				_r_polygon(piece, cols)
+	# Costura do ombro (ou as três listras da manga)
 	for sx: float in [-1.0, 1.0]:
 		var a := Vector2(_hc.x + sx * _nwt * 1.25, _ynb - s * 0.004)
 		var b := Vector2(_hc.x + sx * _sw * 0.92, _ysp + s * 0.012)
-		_r_line(_cl(a), _cl(b), Color(0, 0, 0, 0.1), maxf(0.6, s * 0.004), true)
+		if sleeve == "stripes":
+			for k in 3:
+				var d := Vector2(0, s * 0.012 * (k - 1))
+				_r_line(_cl(a.lerp(b, 0.35) + d), _cl(b + Vector2(sx * _sw * 0.12, s * 0.02) + d), trim, maxf(0.8, s * 0.007), true)
+		else:
+			_r_line(_cl(a), _cl(b), Color(0, 0, 0, 0.1), maxf(0.6, s * 0.004), true)
+	# Escudo, fornecedor e patrocinador no peito
+	_chest_marks(body_col, c2, trim, neck_low)
 	# Gola
 	var lw := s * 0.02
 	match collar:
-		0, 1:
-			_band(line, lw * (1.1 if collar == 0 else 1.0), trim)
+		0, 1, 4:
+			_band(line, lw * (1.1 if collar == 0 else (1.35 if collar == 4 else 1.0)), trim)
+			if henley:
+				_placket(line[line.size() / 2], trim, body_col, 3)
 		3:
 			_band(line, s * 0.035, trim, true)
 			var bx := _hc.x
 			_r_circle(Vector2(bx, neck_low - s * 0.012), maxf(0.8, s * 0.007), trim.darkened(0.35))
 		2:
 			_polo_collar(line, trim, body_col)
+
+
+## Escudo do clube (lado do coração), marca de material e patrocinador master (se houver).
+func _chest_marks(body_col: Color, c2: Color, trim: Color, neck_low: float) -> void:
+	var s := _s
+	if s < 70.0:
+		return
+	var y := _ynotch + s * 0.085
+	# Escudo genérico nas cores do clube
+	var ec := Vector2(_hc.x + _sw * 0.34, y)
+	var r := s * 0.028
+	var shield := PackedVector2Array([ec + Vector2(-r, -r), ec + Vector2(r, -r), ec + Vector2(r, r * 0.25), ec + Vector2(0, r * 1.25), ec + Vector2(-r, r * 0.25)])
+	if (ec - _c).length() < _R - r * 1.5:
+		var edge := c2 if absf(c2.get_luminance() - body_col.get_luminance()) > 0.2 else trim
+		_fill(shield, edge)
+		var inner := PackedVector2Array()
+		for p in shield:
+			inner.append(ec + (p - ec) * 0.72)
+		_fill(inner, body_col.lerp(edge, 0.35))
+		_r_line(ec + Vector2(-r * 0.5, -r * 0.2), ec + Vector2(r * 0.5, -r * 0.2), Color(edge, 0.9), maxf(0.6, s * 0.004), true)
+	# Fornecedor: logo pequeno do outro lado
+	var sup: Dictionary = kit.get("sup", {})
+	if not sup.is_empty():
+		var sc := Vector2(_hc.x - _sw * 0.34, y - r * 0.1)
+		if (sc - _c).length() < _R - r * 1.5:
+			var ink := _ink_on(sup, body_col)
+			_r_arc(sc, r * 0.75, PI * 0.15, PI * 1.15, 10, ink, maxf(0.8, s * 0.006), true)
+			_r_circle(sc + Vector2(r * 0.25, -r * 0.1), maxf(0.6, r * 0.22), ink)
+	# Patrocinador master no peito (o que couber no retrato)
+	var sp: Dictionary = kit.get("sp", {})
+	var name := String(sp.get("n", "")).to_upper()
+	if name != "" and s >= 90.0:
+		var font := get_theme_font(&"font", &"Big")
+		if font == null:
+			font = ThemeDB.fallback_font
+		var fs := int(s * 0.05)
+		var tw := font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var maxw := _sw * 1.0
+		if tw > maxw:
+			fs = int(fs * maxw / tw)
+			tw = font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var pos := Vector2(_hc.x - tw * 0.5, _ynotch + s * 0.2)
+		if fs >= 6 and pos.y < _c.y + _R * 0.95:
+			var ink := _ink_on(sp, body_col)
+			_r_string(font, pos + Vector2(s * 0.003, s * 0.004), name, fs, Color(0, 0, 0, 0.15))
+			_r_string(font, pos, name, fs, Color(ink, 0.92))
+
+
+static func _ink_on(sp: Dictionary, bg: Color) -> Color:
+	for key in ["t", "c"]:
+		var c := Color(String(sp.get(key, "#FFFFFF")))
+		if absf(c.get_luminance() - bg.get_luminance()) > 0.35:
+			return c
+	return Color.WHITE if bg.get_luminance() < 0.55 else Color("#15171B")
+
+
+func _placket(bot: Vector2, trim: Color, body_col: Color, buttons: int) -> void:
+	var s := _s
+	var pw := s * 0.016
+	var plk := PackedVector2Array([bot + Vector2(-pw, -s * 0.004), bot + Vector2(pw, -s * 0.004), bot + Vector2(pw, s * 0.08), bot + Vector2(-pw, s * 0.08)])
+	var pc := PackedColorArray()
+	for i in plk.size():
+		pc.append(_shade(trim, _cloth_lum(plk[i], bot.y)))
+		plk[i] = _cl(plk[i])
+	_r_polygon(plk, pc)
+	for k in buttons:
+		var bp := bot + Vector2(0, s * (0.015 + 0.025 * k))
+		if (bp - _c).length() < _R - 2.0:
+			_r_circle(bp, maxf(0.6, s * 0.005), body_col.lightened(0.25))
 
 
 func _polo_collar(line: PackedVector2Array, trim: Color, body_col: Color) -> void:
@@ -1560,6 +1697,7 @@ func _beard_mesh() -> void:
 		if q.y > 0.0:
 			ext = (0.05 + ln * 1.05 * pow(q.y, 1.5)) * smoothstep(0.0, 0.4, q.y)
 			ext *= 1.0 + float(P.get("sq", 0.0)) * (0.9 * smoothstep(0.15, 0.55, absf(q.x)) - 0.25 * (1.0 - smoothstep(0.0, 0.2, absf(q.x))))
+			ext *= 1.0 - float(P.get("pp", 0.0)) * 0.65 * smoothstep(0.05, 0.45, absf(q.x))
 		var dir := (p - _hc).normalized()
 		grown.append(p + Vector2(dir.x * _fw, dir.y * _fh) * ext + Vector2(0, _fh * ext * 0.6 * float(q.y > 0.5)))
 	_beard_data = _radial(_hc, grown, _rings(13), func(p: Vector2, _t: float, _i: int) -> Color:
@@ -2326,6 +2464,12 @@ func _r_colored_polygon(pts: PackedVector2Array, col: Color, uvs: PackedVector2A
 		_rec.append([6, pts, col, uvs, tex])
 
 
+func _r_string(font: Font, pos: Vector2, text: String, fs: int, col: Color) -> void:
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+	if _recording:
+		_rec.append([8, font, pos, text, fs, col])
+
+
 func _r_tri(idx: PackedInt32Array, pts: PackedVector2Array, cols: PackedColorArray) -> void:
 	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols)
 	if _recording:
@@ -2352,6 +2496,8 @@ func _replay(cmds: Array) -> void:
 				draw_colored_polygon(c[1], c[2], c[3], c[4])
 			7:
 				RenderingServer.canvas_item_add_triangle_array(ci, c[1], c[2], c[3])
+			8:
+				draw_string(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5])
 
 
 # ---------------------------------------------------------------------------

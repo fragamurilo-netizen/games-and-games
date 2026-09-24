@@ -68,8 +68,16 @@ func _initialize() -> void:
 			if kits:
 				var i := r * cols + k
 				v.trim_color = Color.from_hsv(fmod(i * 0.37, 1.0), 0.6, 0.9) if i % 3 == 0 else Color.WHITE
-				v.kit_collar = ["round", "v", "polo", ""][i % 4]
-				v.kit_pattern = ["plain", "stripes_v", "plain", "halves", "stripes_h", "faixa", "diagonal"][i % 7]
+				var c1 := v.shirt_color
+				var c2 := Color.WHITE if i % 3 != 0 else Color.from_hsv(fmod(i * 0.37, 1.0), 0.6, 0.9)
+				v.kit = {
+					"pattern": ["plain", "stripes_v", "plain", "halves", "stripes_h", "faixa", "diagonal"][i % 7],
+					"c1": c1.to_html(false), "c2": c2.to_html(false), "c3": (c2 if i % 2 == 0 else c1.darkened(0.4)).to_html(false),
+					"collar": ["round", "v", "polo", "wide", "henley", "mandarin"][i % 6],
+					"sleeve": ["same", "contrast", "raglan", "stripes", "cuff"][i % 5],
+					"sp": {"n": ["Banco Norte", "Aero Sul", "Nuvem", "Frigo Max"][i % 4], "c": "#FFFFFF", "t": "#FFFFFF"} if i % 2 == 0 else {},
+					"sup": {"n": "Marca", "c": "#FFFFFF", "logo": "curva"},
+				}
 			v.bg_color = v.shirt_color.darkened(0.6)
 			if k == cols - 1 and r % 4 == 3:
 				v.suit = true

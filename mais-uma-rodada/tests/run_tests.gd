@@ -740,14 +740,17 @@ func _test_faces() -> void:
 	var beards := {}
 	var eths := {}
 	var eyes := {}
+	var shapes := {}
 	for i in 2000:
 		var f := FaceGen.features(i * 7919, i % FaceGen.ETH_COUNT, 16 + i % 30)
 		styles[int(f["style"])] = true
 		beards[int(f["beard"])] = true
 		eths[int(f["eth"])] = true
 		eyes[int(f["eye_i"])] = true
-	check(styles.size() >= 52, "pouca variedade de penteados (%d)" % styles.size())
-	check(beards.size() >= 28, "pouca variedade de barbas (%d)" % beards.size())
+		shapes[int(f["face_shape"])] = true
+	check(styles.size() >= 60, "pouca variedade de penteados (%d)" % styles.size())
+	check(beards.size() >= 32, "pouca variedade de barbas (%d)" % beards.size())
+	check(shapes.size() == FaceGen.FACE_SHAPES.size(), "formatos de rosto que nunca aparecem (%d)" % shapes.size())
 	check(eyes.size() == FaceGen.EYE_COLORS.size(), "cores de olho que nunca aparecem (%d)" % eyes.size())
 	check(FaceGen.EYE_NAMES.size() == FaceGen.EYE_COLORS.size(), "nomes e cores de olho não batem")
 	check(FaceGen.STYLE_TEX_W.size() == FaceGen.HAIR_STYLES.size() and PortraitView.STYLE_P.size() == FaceGen.HAIR_STYLES.size(), "penteado sem parâmetros")
