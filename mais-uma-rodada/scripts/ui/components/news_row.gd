@@ -3,6 +3,7 @@ extends RefCounted
 ## Linha de notícia reutilizável (hub e tela de notícias).
 
 const CAT_ICON := {
+	"selecao": "shield",
 	"goleada": "ball", "zebra": "bolt", "classico_vitoria": "bolt", "classico_empate": "bolt", "lider": "trophy",
 	"sequencia_vitorias": "up", "sequencia_derrotas": "down", "sem_vencer": "down", "hattrick": "ball",
 	"primeiro_gol": "star", "artilheiro": "ball", "lesao_grave": "cross", "transferencia": "swap",

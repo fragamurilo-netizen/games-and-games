@@ -1,7 +1,7 @@
 class_name CupManager
 extends RefCounted
-## Copas continentais (Liga dos Campeões, Libertadores, CONCACAF, África, Ásia) e Mundial de Clubes:
-## classificação pelas ligas, sorteio de grupos (evitando clubes do mesmo país), mata-mata em ida e
+## Copas continentais (Liga dos Campeões, Europa League, Conference League, Libertadores,
+## Sul-Americana, CONCACAF, África, Ásia) e Mundial de Clubes: classificação pelas ligas, sorteio de grupos (evitando clubes do mesmo país), mata-mata em ida e
 ## volta com prorrogação e pênaltis, final única em campo neutro, premiação por fase e títulos.
 ## Também os estaduais brasileiros (kind = "state" no continental.json): grupos em turno único nas
 ## datas E1..E7, semifinal em jogo único na casa do melhor campanha e final em ida e volta.
@@ -56,22 +56,65 @@ static func news_cat(id: String, what: String) -> String:
 	return ("estadual_" if is_state(id) else "copa_") + what
 
 
-static func cup_of_nation(nation: String) -> String:
+## Nível da copa: 1 = principal, 2 = Europa League / Sul-Americana, 3 = Conference League.
+static func cup_level(id: String) -> int:
+	return int(cfg(id).get("level", 1))
+
+
+## Copas continentais da confederação de uma nação, da principal para a menor.
+static func cups_of_nation(nation: String) -> Array:
 	var confed: String = DatabaseManager.nation(nation).get("confed", "")
+	var out: Array = []
 	for id in continental_ids():
 		if cfg(id).get("confed", "") == confed:
-			return id
-	return ""
+			out.append(id)
+	out.sort_custom(func(a, b): return cup_level(a) < cup_level(b))
+	return out
 
 
-## Vagas continentais de uma liga (só a primeira divisão classifica).
+## Copa principal da confederação de uma nação.
+static func cup_of_nation(nation: String) -> String:
+	var ids := cups_of_nation(nation)
+	return ids[0] if not ids.is_empty() else ""
+
+
+## Vagas de uma nação numa copa.
+static func nation_spots(id: String, nation: String) -> int:
+	return int(cfg(id).get("alloc", {}).get(nation, 0))
+
+
+## Vagas na copa principal de uma liga (só a primeira divisão classifica).
 static func continental_spots(league: League) -> int:
 	if league == null or league.tier != 1:
 		return 0
 	var id := cup_of_nation(league.nation)
 	if id == "":
 		return 0
-	return int(cfg(id).get("alloc", {}).get(league.nation, 0))
+	return nation_spots(id, league.nation)
+
+
+## Faixas de classificação de uma liga: [{cup, from, to}] (posições 1-based), da copa principal
+## para a menor. Vazio fora da primeira divisão.
+static func qualification_bands(league: League) -> Array:
+	var out: Array = []
+	if league == null or league.tier != 1:
+		return out
+	var pos := 1
+	for id in cups_of_nation(league.nation):
+		var n := nation_spots(id, league.nation)
+		if n <= 0:
+			continue
+		out.append({"cup": id, "from": pos, "to": pos + n - 1})
+		pos += n
+	return out
+
+
+## Copa (qualquer nível) que a posição final dá na liga, ou "".
+static func cup_for_position(league: League, position: int) -> String:
+	for b in qualification_bands(league):
+		if position >= int(b["from"]) and position <= int(b["to"]):
+			return b["cup"]
+	return ""
 
 
 static func cup_name(id: String) -> String:
@@ -195,50 +238,109 @@ static func scorers(world: GameWorld, cup_id: String, count: int) -> Array:
 # ---------------------------------------------------------------------------
 
 ## Classificados para as copas da próxima temporada pela tabela final das primeiras divisões.
-## O campeão da copa garante vaga para defender o título.
+## Cada nação preenche as vagas em ordem de nível (principal, depois 2ª e 3ª copas). O campeão da
+## copa principal garante vaga para defender o título; o campeão de uma copa menor sobe para a principal.
 static func compute_qualified(world: GameWorld) -> Dictionary:
-	var out := {}
+	var ranked := {}
+	for nation in _alloc_nations():
+		var league := world.league(DatabaseManager.league_at(nation, 1))
+		if league != null:
+			ranked[nation] = CompetitionManager.sorted_ids(league)
+	var out := _fill_by_level(world, ranked)
+	# Vagas de campeão: [clube, copa de destino]
+	var holders: Array = []
 	for id in continental_ids():
-		var alloc: Dictionary = cfg(id)["alloc"]
-		var list: Array = []
-		for nation in alloc:
-			var lid := DatabaseManager.league_at(nation, 1)
-			var league := world.league(lid)
-			if league == null:
-				continue
-			list.append_array(CompetitionManager.sorted_ids(league).slice(0, int(alloc[nation])))
 		var cup: Cup = world.season.cups.get(id, null)
-		if cup != null and cup.champion >= 0 and not list.has(cup.champion):
-			_insert_holder(world, list, cup.champion)
-		out[id] = list
+		if cup == null or cup.champion < 0:
+			continue
+		var dest: String = id if cup_level(id) == 1 else _top_cup_of_confed(String(cfg(id).get("confed", "")))
+		holders.append([cup.champion, dest])
+	for h in holders:
+		_place_holder(world, out, int(h[0]), String(h[1]))
 	return out
 
 
 ## Primeira temporada: não há tabela anterior — classificam os de maior reputação de cada país.
 static func initial_qualified(world: GameWorld) -> Dictionary:
-	var out := {}
+	var ranked := {}
+	for nation in _alloc_nations():
+		var lid := DatabaseManager.league_at(nation, 1)
+		var ids: Array = []
+		for c in world.clubs_in_league(lid):
+			ids.append(c.id)
+		ids.sort_custom(func(a, b): return world.club(a).reputation > world.club(b).reputation or (world.club(a).reputation == world.club(b).reputation and a < b))
+		ranked[nation] = ids
+	return _fill_by_level(world, ranked)
+
+
+## Nações com vaga em alguma copa continental.
+static func _alloc_nations() -> Array:
+	var out: Array = []
 	for id in continental_ids():
-		var alloc: Dictionary = cfg(id)["alloc"]
-		var list: Array = []
-		for nation in alloc:
-			var lid := DatabaseManager.league_at(nation, 1)
-			var ids: Array = []
-			for c in world.clubs_in_league(lid):
-				ids.append(c.id)
-			ids.sort_custom(func(a, b): return world.club(a).reputation > world.club(b).reputation or (world.club(a).reputation == world.club(b).reputation and a < b))
-			list.append_array(ids.slice(0, int(alloc[nation])))
-		out[id] = list
+		for nation in cfg(id)["alloc"]:
+			if not out.has(nation):
+				out.append(nation)
 	return out
 
 
-static func _insert_holder(world: GameWorld, list: Array, holder: int) -> void:
+static func _top_cup_of_confed(confed: String) -> String:
+	for id in continental_ids():
+		if cfg(id).get("confed", "") == confed and cup_level(id) == 1:
+			return id
+	return ""
+
+
+## Distribui os clubes de cada nação (já ordenados) pelas copas, do nível 1 para o 3.
+static func _fill_by_level(_world: GameWorld, ranked: Dictionary) -> Dictionary:
+	var out := {}
+	var ids := continental_ids()
+	ids.sort_custom(func(a, b): return cup_level(a) < cup_level(b))
+	for id in ids:
+		out[id] = []
+	var used := {} # nação -> quantos já classificados
+	for id in ids:
+		var alloc: Dictionary = cfg(id)["alloc"]
+		for nation in alloc:
+			if not ranked.has(nation):
+				continue
+			var list: Array = ranked[nation]
+			var start := int(used.get(nation, 0))
+			out[id].append_array(list.slice(start, start + int(alloc[nation])))
+			used[nation] = start + int(alloc[nation])
+	# Mantém a ordem dos dados (continental_ids) no dicionário de saída.
+	var ordered := {}
+	for id in continental_ids():
+		ordered[id] = out[id]
+	return ordered
+
+
+## Garante `holder` na copa `dest`: sai de onde estiver; na copa de destino ocupa o lugar do último
+## classificado do seu país (que desce para a copa de nível seguinte, se houver).
+static func _place_holder(world: GameWorld, out: Dictionary, holder: int, dest: String) -> void:
+	if dest == "" or not out.has(dest) or out[dest].has(holder):
+		return
+	for id in out:
+		out[id].erase(holder)
+	var list: Array = out[dest]
 	var nation := world.club(holder).nation
+	var displaced := -1
 	for i in range(list.size() - 1, -1, -1):
 		if world.club(list[i]).nation == nation:
+			displaced = list[i]
 			list[i] = holder
+			break
+	if displaced < 0:
+		if list.is_empty():
+			list.append(holder)
 			return
-	if not list.is_empty():
+		displaced = list[list.size() - 1]
 		list[list.size() - 1] = holder
+	var next := ""
+	for id in out:
+		if cfg(id).get("confed", "") == cfg(dest).get("confed", "") and cup_level(id) == cup_level(dest) + 1:
+			next = id
+	if next != "":
+		out[next].push_front(displaced)
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,207 @@
+{
+	"_doc": "Futebol de seleções. fifa_dates: após quais fins de semana da temporada (índice do fim de semana, a partir de 0) há data FIFA; cada data FIFA joga uma ou mais rodadas das eliminatórias em andamento. tournaments: every = intervalo em anos, first = primeira edição no jogo, teams/groups = formato da fase final (grupos de 4, os dois primeiros e os melhores terceiros avançam), hosts = sedes por ordem de edição (a sede entra direto), entry = vagas por confederação, guests = convidados de outra confederação (os melhores do ranking), playoff = vagas decididas na repescagem intercontinental (jogo único entre os melhores não classificados fora da UEFA). qualifying = eliminatórias por confederação: seasons = temporadas de duração, groups = número de grupos (1 = pontos corridos). Sem entrada em qualifying, a confederação classifica pelo ranking.",
+	"fifa_dates": [
+		3,
+		8,
+		13,
+		19,
+		27,
+		34
+	],
+	"tournaments": {
+		"WC": {
+			"name": "Copa do Mundo",
+			"short": "Copa do Mundo",
+			"every": 4,
+			"first": 2030,
+			"teams": 48,
+			"groups": 12,
+			"hosts": [
+				"ESP",
+				"KSA",
+				"USA",
+				"BRA",
+				"ENG",
+				"JPN",
+				"ARG",
+				"GER"
+			],
+			"entry": {
+				"UEFA": 16,
+				"CAF": 9,
+				"AFC": 7,
+				"CONMEBOL": 6,
+				"CONCACAF": 6,
+				"OFC": 1
+			},
+			"playoff": 3,
+			"qualifying": {
+				"seasons": 2,
+				"UEFA": {
+					"groups": 12
+				},
+				"CAF": {
+					"groups": 5
+				},
+				"CONMEBOL": {
+					"groups": 1
+				},
+				"CONCACAF": {
+					"groups": 1
+				},
+				"AFC": {
+					"groups": 1
+				}
+			},
+			"colors": [
+				"#8A6D1D",
+				"#F7E7A6"
+			]
+		},
+		"EURO": {
+			"name": "Eurocopa",
+			"short": "Eurocopa",
+			"every": 4,
+			"first": 2028,
+			"teams": 24,
+			"groups": 6,
+			"hosts": [
+				"ENG",
+				"ITA",
+				"FRA",
+				"POR",
+				"NED",
+				"GER",
+				"ESP",
+				"SUI"
+			],
+			"entry": {
+				"UEFA": 24
+			},
+			"qualifying": {
+				"seasons": 2,
+				"UEFA": {
+					"groups": 7
+				}
+			},
+			"colors": [
+				"#143CDB",
+				"#DCE4FF"
+			]
+		},
+		"CA": {
+			"name": "Copa América",
+			"short": "Copa América",
+			"every": 4,
+			"first": 2028,
+			"teams": 16,
+			"groups": 4,
+			"hosts": [
+				"BRA",
+				"ARG",
+				"USA",
+				"COL",
+				"CHI",
+				"URU",
+				"MEX",
+				"PER"
+			],
+			"entry": {
+				"CONMEBOL": 10
+			},
+			"guests": {
+				"CONCACAF": 6
+			},
+			"colors": [
+				"#0B2A5B",
+				"#E3C15A"
+			]
+		},
+		"AFCON": {
+			"name": "Copa Africana de Nações",
+			"short": "Copa Africana",
+			"every": 2,
+			"first": 2027,
+			"teams": 16,
+			"groups": 4,
+			"hosts": [
+				"MAR",
+				"NGA",
+				"EGY",
+				"SEN",
+				"CIV",
+				"RSA",
+				"ALG",
+				"CMR",
+				"GHA",
+				"TUN"
+			],
+			"entry": {
+				"CAF": 16
+			},
+			"qualifying": {
+				"seasons": 1,
+				"CAF": {
+					"groups": 5
+				}
+			},
+			"colors": [
+				"#0B6E4F",
+				"#F2C14E"
+			]
+		},
+		"ASIAN": {
+			"name": "Copa da Ásia",
+			"short": "Copa da Ásia",
+			"every": 4,
+			"first": 2027,
+			"teams": 8,
+			"groups": 2,
+			"hosts": [
+				"KSA",
+				"JPN",
+				"QAT",
+				"KOR",
+				"AUS",
+				"CHN",
+				"UAE",
+				"IRN"
+			],
+			"entry": {
+				"AFC": 8
+			},
+			"colors": [
+				"#6A1B9A",
+				"#E0C3FC"
+			]
+		},
+		"GOLD": {
+			"name": "Copa Ouro",
+			"short": "Copa Ouro",
+			"every": 2,
+			"first": 2027,
+			"teams": 8,
+			"groups": 2,
+			"hosts": [
+				"USA",
+				"MEX",
+				"CAN",
+				"USA",
+				"CRC",
+				"MEX",
+				"JAM",
+				"USA"
+			],
+			"entry": {
+				"CONCACAF": 7
+			},
+			"guests": {
+				"AFC": 1
+			},
+			"colors": [
+				"#1F3A93",
+				"#F2C14E"
+			]
+		}
+	}
+}

@@ -216,6 +216,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["up", "Base", "%d garotos%s" % [w.academy.size(), (" · %dº" % yl_pos) if yl_pos > 0 and YouthManager.has_league(w) and int(w.youth_league["table"][w.user_club_id]["pl"]) > 0 else ""], func(): UIManager.push("academy")],
 		["money", "Finanças", Fmt.money(w.user_club().balance), func(): UIManager.goto("club")],
 		["trophy", "História", "Campeões e prêmios", func(): UIManager.push("history")],
+		["shield", "Seleções", "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())], func(): UIManager.push("national")],
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
 	]

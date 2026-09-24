@@ -39,6 +39,8 @@ func _initialize() -> void:
 	_run("táticas: entrosamento, plano de jogo e filosofias", _test_tactics)
 	_run("elenco: papéis, profundidade e rodízio", _test_squad_mgmt)
 	_run("pré-temporada e balanço da temporada", _test_preseason)
+	_run("copas continentais de 2º e 3º nível", _test_second_cups)
+	_run("seleções: eliminatórias, torneios e ranking", _test_national_teams)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -1124,3 +1126,74 @@ func _test_preseason() -> void:
 	check(PreseasonManager.is_active(w2) and String(PreseasonManager.state(w2)["camp"]) == "tatica", "pré-temporada perdida no save")
 	PreseasonManager.finish(w)
 	check(not PreseasonManager.is_active(w), "pré-temporada não encerrou")
+func _test_second_cups() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	for cid in ["UEL", "UECL", "SUD"]:
+		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == 32, "%s sem 32 clubes" % cid)
+	var seen := {}
+	for cid in w.season.cups:
+		for club in w.season.cups[cid].club_ids:
+			check(not seen.has(club), "clube em duas copas continentais")
+			seen[club] = true
+	# O melhor brasileiro vai para a Libertadores; o 8º (depois das 7 vagas) para a Sul-Americana.
+	var bra := w.league("BRA1")
+	var bands := CupManager.qualification_bands(bra)
+	check(bands.size() == 2 and bands[0]["cup"] == "LIB" and int(bands[1]["from"]) == 8 and int(bands[1]["to"]) == 13, "faixas do Brasileirão erradas")
+	check(CupManager.cup_for_position(w.league("ENG1"), 6) == "UEL" and CupManager.cup_for_position(w.league("ENG1"), 7) == "UECL", "faixas da Premier League erradas")
+	# Campeão da Europa League sobe para a Liga dos Campeões no ano seguinte.
+	var uel: Cup = w.season.cups["UEL"]
+	uel.champion = uel.club_ids[0]
+	var q := CupManager.compute_qualified(w)
+	check(q["UCL"].has(uel.champion) and not q["UEL"].has(uel.champion), "campeão da Europa League fora da Liga dos Campeões")
+	var all := {}
+	for cid in q:
+		for club in q[cid]:
+			check(not all.has(club), "classificado em duas copas")
+			all[club] = true
+
+
+func _test_national_teams() -> void:
+	var w := WorldGenerator.generate(9090, "padrao")
+	_with_user(w, w.clubs_in_league("BRA1")[0].id)
+	var dates: Array = DatabaseManager.international_cfg()["fifa_dates"]
+	var elo_before := NationalTeamManager.elo_of(w, "BRA")
+	var tours := {}
+	for y in range(2026, 2030):
+		w.year = y
+		NationalTeamManager.start_season(w)
+		for d in dates:
+			NationalTeamManager.after_weekend(w, int(d))
+		for camp in NationalTeamManager.data(w)["camps"]:
+			if int(camp["end"]) == y:
+				check(bool(camp["done"]), "%s não terminou na temporada" % camp["name"])
+				check((camp["q"] as Array).size() == int(camp["spots"]), "%s: %d classificados (esperado %d)" % [camp["name"], (camp["q"] as Array).size(), int(camp["spots"])])
+		for rec in NationalTeamManager.play_summer(w):
+			tours[String(rec["t"]) + str(rec["y"])] = rec
+	for key in ["AFCON2027", "ASIAN2027", "GOLD2027", "EURO2028", "CA2028", "AFCON2029", "GOLD2029", "WC2030"]:
+		check(tours.has(key), "torneio %s não foi disputado" % key)
+	if tours.has("WC2030"):
+		var wc: Dictionary = tours["WC2030"]
+		check((wc["teams"] as Array).size() == 48 and wc["teams"].has("ESP"), "Copa do Mundo sem 48 seleções ou sem a sede")
+		check((wc["ko"] as Array).size() == 5 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "", "mata-mata da Copa incompleto")
+		var uefa := 0
+		for t in wc["teams"]:
+			if DatabaseManager.nation(t).get("confed", "") == "UEFA":
+				uefa += 1
+		check(uefa == 16, "Europa com %d vagas na Copa" % uefa)
+		check(not (wc["scorer"] as Dictionary).is_empty(), "Copa sem artilheiro")
+	if tours.has("EURO2028"):
+		var eu: Dictionary = tours["EURO2028"]
+		check((eu["teams"] as Array).size() == 24 and eu["teams"].has("ENG"), "Eurocopa sem 24 seleções ou sem a sede")
+	if tours.has("CA2028"):
+		check((tours["CA2028"]["teams"] as Array).size() == 16, "Copa América sem 16 seleções")
+	check(NationalTeamManager.elo_of(w, "BRA") != elo_before, "ranking não se mexeu")
+	var r := NationalTeamManager.ranking(w)
+	check(r.size() == DatabaseManager.nations().size() and float(r[0][1]) >= float(r[r.size() - 1][1]), "ranking incompleto")
+	var capped := 0
+	for p: Player in w.players.values():
+		if NationalTeamManager.caps_of(w, p.id)[0] > 0:
+			capped += 1
+	check(capped > 500, "poucos jogadores com jogos pela seleção (%d)" % capped)
+	# Save/load preserva o futebol de seleções.
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(NationalTeamManager.data(w2)["tours"].size() == NationalTeamManager.data(w)["tours"].size(), "save perdeu os torneios")

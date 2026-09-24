@@ -288,6 +288,20 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	row2.add_child(UIKit.stat(str(p.career_assists), "assist."))
 	row2.add_child(UIKit.stat(str(p.titles), "títulos"))
 	card.add_child(row2)
+	var caps := NationalTeamManager.caps_of(w, p.id)
+	var nt_titles := NationalTeamManager.player_titles(w, p.id)
+	if caps[0] > 0 or NationalTeamManager.is_called(w, p):
+		card.add_child(UIKit.section("Seleção · %s" % DatabaseManager.nation_name(p.nationality)))
+		var row3 := UIKit.hbox(4)
+		row3.add_child(UIKit.stat(str(caps[0]), "jogos"))
+		row3.add_child(UIKit.stat(str(caps[1]), "gols"))
+		row3.add_child(UIKit.stat("Sim" if NationalTeamManager.is_called(w, p) else "Não", "convocado", UIColors.GREEN if NationalTeamManager.is_called(w, p) else UIColors.MUTED))
+		card.add_child(row3)
+		if not nt_titles.is_empty():
+			var tf := UIKit.flow(8)
+			for t in nt_titles:
+				tf.add_child(UIKit.pill("%s %d" % [String(NationalTeamManager.tcfg(t[0]).get("short", t[0])), int(t[1])], UIColors.ACCENT, 16))
+			card.add_child(tf)
 	if not p.awards.is_empty():
 		card.add_child(UIKit.section("Prêmios"))
 		var af := UIKit.flow(8)

@@ -1,5 +1,5 @@
 {
-	"_doc": "Competições continentais e o Mundial de Clubes. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra. Estaduais (kind = state): clubes brasileiros pelo uf do clube; grupos de até group_max em turno único nas datas E1..E7, os qualify melhores vão à semifinal (jogo único na casa do melhor) e à final em ida e volta (E9/E10).",
+	"_doc": "Competições continentais e o Mundial de Clubes. level: 1 = principal (Campeões, Libertadores...), 2 = segunda (Europa League, Sul-Americana), 3 = terceira (Conference League); as vagas de cada nação são preenchidas em ordem de nível, pela classificação da liga (quem já foi para um nível acima pula para o próximo). O campeão de uma copa de nível 2 ou 3 ganha vaga na copa principal do ano seguinte. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra. Estaduais (kind = state): clubes brasileiros pelo uf do clube; grupos de até group_max em turno único nas datas E1..E7, os qualify melhores vão à semifinal (jogo único na casa do melhor) e à final em ida e volta (E9/E10).",
 	"cups": {
 		"UCL": {
 			"name": "Liga dos Campeões",
@@ -39,7 +39,94 @@
 				"#0B1F4B",
 				"#C9D6EA"
 			],
-			"trophy": "orelhuda"
+			"trophy": "orelhuda",
+			"level": 1
+		},
+		"UEL": {
+			"name": "UEFA Europa League",
+			"short": "Europa League",
+			"confed": "UEFA",
+			"level": 2,
+			"teams": 32,
+			"groups": 8,
+			"alloc": {
+				"ENG": 2,
+				"ESP": 2,
+				"GER": 2,
+				"ITA": 2,
+				"FRA": 2,
+				"POR": 2,
+				"NED": 2,
+				"TUR": 2,
+				"BEL": 2,
+				"AUT": 2,
+				"SUI": 2,
+				"UKR": 2,
+				"CZE": 2,
+				"DEN": 2,
+				"SCO": 1,
+				"GRE": 1,
+				"CRO": 1,
+				"SRB": 1
+			},
+			"prize": {
+				"group": 4300000,
+				"win": 630000,
+				"draw": 210000,
+				"r16": 1800000,
+				"qf": 2600000,
+				"sf": 3900000,
+				"final": 6000000,
+				"champion": 8000000
+			},
+			"colors": [
+				"#F26B0F",
+				"#1B1B1B"
+			],
+			"trophy": "taca_prata"
+		},
+		"UECL": {
+			"name": "UEFA Conference League",
+			"short": "Conference",
+			"confed": "UEFA",
+			"level": 3,
+			"teams": 32,
+			"groups": 8,
+			"alloc": {
+				"ENG": 2,
+				"ESP": 1,
+				"GER": 1,
+				"ITA": 1,
+				"FRA": 1,
+				"POR": 2,
+				"NED": 2,
+				"TUR": 2,
+				"BEL": 2,
+				"SCO": 2,
+				"GRE": 2,
+				"AUT": 2,
+				"SUI": 2,
+				"UKR": 2,
+				"CRO": 2,
+				"SRB": 2,
+				"CZE": 2,
+				"DEN": 2
+			},
+			"prize": {
+				"group": 3000000,
+				"win": 500000,
+				"draw": 166000,
+				"r16": 800000,
+				"qf": 1300000,
+				"sf": 2000000,
+				"final": 3000000,
+				"champion": 5000000
+			},
+			"colors": [
+				"#00A650",
+				"#0A2E1F"
+			],
+			"trophy": "taca_verde"
 		},
 		"LIB": {
 			"name": "Copa Libertadores",
@@ -73,7 +160,43 @@
 				"#0A0A0A",
 				"#E3B23C"
 			],
-			"trophy": "taca_prata"
+			"trophy": "taca_prata",
+			"level": 1
+		},
+		"SUD": {
+			"name": "Copa Sul-Americana",
+			"short": "Sul-Americana",
+			"confed": "CONMEBOL",
+			"level": 2,
+			"teams": 32,
+			"groups": 8,
+			"alloc": {
+				"BRA": 6,
+				"ARG": 6,
+				"COL": 3,
+				"URU": 3,
+				"CHI": 3,
+				"ECU": 3,
+				"PER": 2,
+				"PAR": 2,
+				"BOL": 2,
+				"VEN": 2
+			},
+			"prize": {
+				"group": 900000,
+				"win": 100000,
+				"draw": 35000,
+				"r16": 500000,
+				"qf": 700000,
+				"sf": 1000000,
+				"final": 2500000,
+				"champion": 6000000
+			},
+			"colors": [
+				"#003DA5",
+				"#F5C400"
+			],
+			"trophy": "taca_dourada"
 		},
 		"CCC": {
 			"name": "Copa dos Campeões da CONCACAF",
@@ -99,7 +222,8 @@
 				"#1F3A93",
 				"#F2F2F2"
 			],
-			"trophy": "taca_dourada"
+			"trophy": "taca_dourada",
+			"level": 1
 		},
 		"CAF": {
 			"name": "Liga dos Campeões da África",
@@ -129,7 +253,8 @@
 				"#0B6E4F",
 				"#F2C14E"
 			],
-			"trophy": "taca_dourada"
+			"trophy": "taca_dourada",
+			"level": 1
 		},
 		"AFC": {
 			"name": "Liga dos Campeões da Ásia",
@@ -160,7 +285,8 @@
 				"#6A1B9A",
 				"#E0C3FC"
 			],
-			"trophy": "taca_prata"
+			"trophy": "taca_prata",
+			"level": 1
 		},
 		"CWC": {
 			"name": "Mundial de Clubes",

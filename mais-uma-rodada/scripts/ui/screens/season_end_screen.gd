@@ -86,6 +86,8 @@ func refresh() -> void:
 		c.add_child(ev)
 	for cu in _summary.get("cups", []):
 		c.add_child(_cup_card(w, cu))
+	for rec in _summary.get("intl", []):
+		c.add_child(_intl_card(w, rec))
 	var nat := w.user_nation()
 	var others: Array = []
 	for d in _summary.get("leagues", []):
@@ -164,6 +166,30 @@ func _division_card(w: GameWorld, d: Dictionary) -> Control:
 	var sc: Dictionary = d.get("scorer", {})
 	if not sc.is_empty():
 		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc.get("name", ""), sc.get("club", ""), int(sc.get("goals", 0))], "Small", true))
+	return UIKit.card_panel(card)
+
+
+## Torneio de seleções disputado no verão (Copa do Mundo, Eurocopa, Copa América...).
+func _intl_card(w: GameWorld, rec: Dictionary) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("%s %d" % [rec["name"], int(rec["y"])]))
+	var row := UIKit.hbox(12)
+	row.add_child(UIKit.icon_rect("trophy", 34, UIColors.ACCENT))
+	row.add_child(UIKit.flag(rec["champion"], 48))
+	var col := UIKit.vbox(0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_child(UIKit.label("Campeã", "Caps"))
+	var cn := UIKit.label(DatabaseManager.nation_name(rec["champion"]), "H3", true)
+	if rec["champion"] == w.user_nation():
+		cn.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	col.add_child(cn)
+	col.add_child(UIKit.label("Vice: %s" % DatabaseManager.nation_name(rec["runner_up"]), "Small"))
+	row.add_child(col)
+	var id := String(rec["t"])
+	card.add_child(UIKit.tap_row(row, func(): UIManager.push("national", {"tab": "tours", "tour": id}), "CardFlat"))
+	var sc: Dictionary = rec.get("scorer", {})
+	if not sc.is_empty():
+		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc["name"], DatabaseManager.nation_name(sc["nation"]), int(sc["goals"])], "Small", true))
 	return UIKit.card_panel(card)
 
 
