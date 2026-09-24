@@ -14,6 +14,7 @@ const PALETTE: Array[String] = [
 
 var _which := "home" # "home" | "away"
 var _part := "shirt" # "shirt" | "shorts" | "socks"
+var _back := false # prévia de costas
 
 
 func _init() -> void:
@@ -42,6 +43,14 @@ func refresh() -> void:
 		UIManager.back(), "check"))
 
 
+## Nome do camisa 10 do elenco, para a prévia de costas.
+func _ten_name() -> String:
+	for p in world().squad(world().user_club()):
+		if p.shirt == 10:
+			return p.display_name()
+	return ""
+
+
 func _kit() -> Dictionary:
 	var club := world().user_club()
 	return club.kit_home if _which == "home" else club.kit_away
@@ -57,6 +66,16 @@ func _changed() -> void:
 
 func _preview_card(club: Club, pre: bool) -> Control:
 	var card := UIKit.card("CardHighlight", 10)
+	var vg := ButtonGroup.new()
+	var vrow := UIKit.hbox(8)
+	for vb in [[false, "Frente"], [true, "Costas"]]:
+		var is_back: bool = vb[0]
+		var chip := UIKit.chip(String(vb[1]), is_back == _back, vg, func():
+			_back = is_back
+			_changed())
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		vrow.add_child(chip)
+	card.add_child(vrow)
 	var row := UIKit.hbox(12)
 	for k in [["home", "Titular", club.kit_home], ["away", "Reserva", club.kit_away]]:
 		var key: String = k[0]
@@ -66,7 +85,9 @@ func _preview_card(club: Club, pre: bool) -> Control:
 		kv.full = true
 		kv.kit = k[2]
 		kv.number = 10
-		kv.custom_minimum_size = Vector2(200, 300)
+		kv.back = _back
+		kv.back_name = _ten_name()
+		kv.custom_minimum_size = Vector2(240, 430)
 		kv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		var inner := UIKit.vbox(4)

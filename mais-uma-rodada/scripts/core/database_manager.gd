@@ -121,6 +121,10 @@ static func sponsor_brands() -> Array:
 	return _load_json("sponsors").get("brands", [])
 
 
+static func kit_suppliers() -> Array:
+	return _load_json("sponsors").get("suppliers", [])
+
+
 static func nation_name(code: String) -> String:
 	return nation(code).get("name", code)
 

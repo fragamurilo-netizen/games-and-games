@@ -748,10 +748,12 @@ func _test_sponsors() -> void:
 	SponsorManager.on_win(w, c)
 	check(c.balance - b0 == int(c.sponsors["manga"]["b"]) and int(c.sponsors["manga"]["b"]) > 0, "bônus por vitória não pago")
 	var signed := SponsorManager.close_preseason(w)
-	check(signed.size() == 2 and c.sponsors.size() == 4, "diretoria não fechou os espaços vazios")
+	check(signed.size() == 3 and c.sponsors.size() == 5, "diretoria não fechou os espaços vazios")
 	check(not SponsorManager.is_preseason(w), "pré-temporada não fechou")
+	for key in ["sp", "sup", "sp_m", "sp_c", "sp_s"]:
+		check(c.kit_home.has(key) and c.kit_away.has(key), "logo %s fora do uniforme" % key)
 	var c2 := Club.from_dict(c.to_dict())
-	check(c2.sponsors.size() == 4, "patrocínios não salvos")
+	check(c2.sponsors.size() == 5, "patrocínios não salvos")
 	# Receita total com todos os espaços fica perto da receita típica
 	var typical := FinanceManager.sponsor_income(c)
 	check(c.income_sponsor > typical * 0.75 and c.income_sponsor < typical * 1.25, "receita de patrocínio desbalanceada (%d vs %d)" % [c.income_sponsor, typical])

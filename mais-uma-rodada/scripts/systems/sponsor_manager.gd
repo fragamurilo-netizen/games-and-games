@@ -7,11 +7,14 @@ extends RefCounted
 
 ## [chave, nome, fatia da receita de patrocínio típica do clube]
 const SLOTS: Array = [
-	["master", "Master (peito)", 0.5],
-	["manga", "Manga", 0.12],
-	["costas", "Costas", 0.1],
-	["calcao", "Calção", 0.08],
+	["master", "Master (peito)", 0.45],
+	["fornecedor", "Material esportivo", 0.1],
+	["manga", "Manga", 0.1],
+	["costas", "Costas", 0.08],
+	["calcao", "Calção", 0.07],
 ]
+## Chave do logo de cada espaço no dicionário do uniforme (KitView).
+const KIT_KEYS := {"master": "sp", "fornecedor": "sup", "manga": "sp_m", "costas": "sp_c", "calcao": "sp_s"}
 ## Placas, licenciamento e patrocínios menores: entram sempre, sem contrato.
 const BASE_SHARE := 0.2
 const KINDS: Array = ["fixo", "vitoria", "longo"]
@@ -45,6 +48,7 @@ static func open_preseason(world: GameWorld) -> void:
 	for slot in club.sponsors.keys():
 		if int(club.sponsors[slot].get("y", 0)) < world.year:
 			club.sponsors.erase(slot)
+	apply_to_kits(club)
 	world.stats["pre"] = world.year
 	world.stats["sp_offers"] = _make_offers(world, club)
 	apply_income(world, club)
@@ -89,6 +93,8 @@ static func sign(world: GameWorld, slot: String, index: int) -> Dictionary:
 		return {"ok": false, "msg": "Proposta indisponível."}
 	var o: Dictionary = list[index]
 	_sign(world, club, slot, o)
+	if slot == "fornecedor":
+		return {"ok": true, "msg": "%s vai fornecer o material esportivo do %s!" % [String(o["n"]), club.short_name]}
 	var where := {"master": "master", "manga": "da manga", "costas": "das costas", "calcao": "do calção"}
 	return {"ok": true, "msg": "%s é o novo patrocinador %s do %s!" % [String(o["n"]), String(where.get(slot, slot)), club.short_name]}
 
@@ -98,8 +104,7 @@ static func _sign(world: GameWorld, club: Club, slot: String, o: Dictionary) -> 
 	c["y"] = world.year + int(o.get("yrs", 1)) - 1
 	club.sponsors[slot] = c
 	apply_income(world, club)
-	if slot == "master":
-		apply_to_kits(club)
+	apply_to_kits(club)
 	NewsManager.post_raw(world, "%s fecha com %s" % [club.short_name, String(o["n"])],
 		"Acordo de patrocínio (%s) por %s/ano%s, até %d." % [slot_name(slot).to_lower(), Fmt.money(int(o["v"])),
 		(" + %s por vitória" % Fmt.money(int(o["b"]))) if int(o.get("b", 0)) > 0 else "", int(c["y"])],
@@ -114,14 +119,16 @@ static func apply_income(world: GameWorld, club: Club) -> void:
 	club.income_sponsor = total
 
 
-## Logo do patrocinador master nas camisas (titular e reserva).
+## Logos dos patrocinadores nos uniformes (titular e reserva): peito, fornecedor, manga, costas e calção.
 static func apply_to_kits(club: Club) -> void:
-	var m: Dictionary = club.sponsors.get("master", {})
-	for k: Dictionary in [club.kit_home, club.kit_away]:
-		if m.is_empty():
-			k.erase("sp")
-		else:
-			k["sp"] = {"n": m["n"], "c": m["c"], "t": m["t"]}
+	for slot in KIT_KEYS:
+		var key: String = KIT_KEYS[slot]
+		var m: Dictionary = club.sponsors.get(slot, {})
+		for k: Dictionary in [club.kit_home, club.kit_away]:
+			if m.is_empty():
+				k.erase(key)
+			else:
+				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"]}
 
 
 ## Bônus por vitória (contratos "por vitória").
@@ -142,6 +149,11 @@ static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
 		tier = 3
 	elif club.reputation >= 50.0:
 		tier = 2
+	var suppliers: Array = []
+	for b in DatabaseManager.kit_suppliers():
+		if absi(int(b.get("tier", 1)) - tier) <= 1:
+			suppliers.append(b)
+	RngUtil.shuffle(rng, suppliers)
 	var brands: Array = []
 	var used := {}
 	for s in club.sponsors.values():
@@ -159,11 +171,18 @@ static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
 			continue
 		var base := target * float(s[2])
 		var list: Array = []
+		var pool: Array = suppliers if slot == "fornecedor" else brands
+		var si := 0
 		for kind in KINDS:
-			if brands.is_empty():
+			if pool.is_empty():
 				break
-			var b: Dictionary = brands[bi % brands.size()]
-			bi += 1
+			var b: Dictionary
+			if slot == "fornecedor":
+				b = pool[si % pool.size()]
+				si += 1
+			else:
+				b = pool[bi % pool.size()]
+				bi += 1
 			# Marcas maiores pagam um pouco mais.
 			var v := base * rng.randf_range(0.9, 1.08) * (1.0 + (int(b.get("tier", 1)) - tier) * 0.08)
 			var o := {"n": b["n"], "c": b["c"], "t": b["t"], "kind": kind, "yrs": 1, "v": 0, "b": 0}

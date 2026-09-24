@@ -5,7 +5,8 @@ extends Control
 ## Chaves do dicionário do uniforme (todas opcionais, com padrão sensato):
 ##   pattern, c1 (principal), c2 (secundária), c3 (detalhes: gola, punhos, frisos),
 ##   collar, sleeve, shorts / shorts2 / shorts_style, socks / socks2 / socks_style,
-##   sp = {n, c, t} (patrocinador master no peito).
+##   sp = {n, c, t} (patrocinador master no peito), sp_m (manga), sp_c (costas), sp_s (calção),
+##   sup = {n, c, t} (fornecedor de material esportivo, logo pequeno no peito).
 
 @export var kit: Dictionary = {"pattern": "stripes_v", "c1": "#B3122E", "c2": "#F2C14E", "collar": "round", "sleeve": "same"}:
 	set(v):
@@ -18,6 +19,15 @@ extends Control
 @export var full: bool = false:
 	set(v):
 		full = v
+		queue_redraw()
+## Vista de costas: patrocinador das costas, nome e número grande.
+@export var back: bool = false:
+	set(v):
+		back = v
+		queue_redraw()
+@export var back_name: String = "":
+	set(v):
+		back_name = v
 		queue_redraw()
 
 ## [chave, nome] — a ordem é a do editor.
@@ -34,12 +44,13 @@ const SLEEVES: Array = [["same", "Iguais"], ["contrast", "Contraste"], ["cuff", 
 const SHORTS_STYLES: Array = [["plain", "Liso"], ["side_stripe", "Faixa lateral"], ["hem", "Barra"], ["two_tone", "Duas cores"], ["stripes3", "Três listras"]]
 const SOCKS_STYLES: Array = [["plain", "Liso"], ["hoops", "Listrado"], ["top_band", "Punho"], ["two_tone", "Duas cores"], ["stripes3", "Frisos"]]
 
-const BODY := [Vector2(0.3, 0.06), Vector2(0.4, 0.1), Vector2(0.5, 0.12), Vector2(0.6, 0.1), Vector2(0.7, 0.06),
-	Vector2(0.77, 0.3), Vector2(0.77, 0.95), Vector2(0.23, 0.95), Vector2(0.23, 0.3)]
-const SLEEVE_R := [Vector2(0.7, 0.06), Vector2(0.96, 0.2), Vector2(0.88, 0.4), Vector2(0.77, 0.34), Vector2(0.77, 0.3)]
-const SLEEVE_L := [Vector2(0.3, 0.06), Vector2(0.23, 0.3), Vector2(0.23, 0.34), Vector2(0.12, 0.4), Vector2(0.04, 0.2)]
-## Proporção largura/altura do uniforme completo.
-const FULL_ASPECT := 0.62
+const BODY := [Vector2(0.31, 0.07), Vector2(0.4, 0.1), Vector2(0.5, 0.12), Vector2(0.6, 0.1), Vector2(0.69, 0.07),
+	Vector2(0.75, 0.28), Vector2(0.74, 0.95), Vector2(0.26, 0.95), Vector2(0.25, 0.28)]
+const SLEEVE_R := [Vector2(0.69, 0.07), Vector2(0.9, 0.2), Vector2(0.845, 0.37), Vector2(0.75, 0.33), Vector2(0.75, 0.28)]
+const SLEEVE_L := [Vector2(0.31, 0.07), Vector2(0.25, 0.28), Vector2(0.25, 0.33), Vector2(0.155, 0.37), Vector2(0.1, 0.2)]
+## Proporção largura/altura do uniforme completo e altura da camisa nele.
+const FULL_ASPECT := 0.55
+const FULL_SHIRT := 0.5
 
 
 ## Número de combinações de estilo (sem contar cores).
@@ -55,7 +66,8 @@ func _draw() -> void:
 			return
 		var r := Rect2((size.x - w) * 0.5, (size.y - h) * 0.5, w, h)
 		_draw_legs(r)
-		_draw_shirt(w, r.position)
+		var s := h * FULL_SHIRT
+		_draw_shirt(s, r.position + Vector2((w - s) * 0.5, 0.0))
 	else:
 		var s := minf(size.x, size.y)
 		if s <= 2.0:
@@ -84,32 +96,56 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 			draw_colored_polygon(piece, c2)
 	match sleeve:
 		"cuff":
-			draw_line(off + Vector2(0.925, 0.26) * s, off + Vector2(0.875, 0.39) * s, c3, maxf(1.5, s * 0.04))
-			draw_line(off + Vector2(0.075, 0.26) * s, off + Vector2(0.125, 0.39) * s, c3, maxf(1.5, s * 0.04))
+			draw_line(off + Vector2(0.887, 0.235) * s, off + Vector2(0.843, 0.36) * s, c3, maxf(1.5, s * 0.035))
+			draw_line(off + Vector2(0.113, 0.235) * s, off + Vector2(0.157, 0.36) * s, c3, maxf(1.5, s * 0.035))
 		"stripes":
 			for i in 3:
-				var d := (i - 1) * 0.022
-				draw_line(off + Vector2(0.7 + d * 0.3, 0.07 + d) * s, off + Vector2(0.93 + d * 0.3, 0.26 + d) * s, c3, maxf(1.0, s * 0.012))
-				draw_line(off + Vector2(0.3 - d * 0.3, 0.07 + d) * s, off + Vector2(0.07 - d * 0.3, 0.26 + d) * s, c3, maxf(1.0, s * 0.012))
+				var d := (i - 1) * 0.02
+				draw_line(off + Vector2(0.7, 0.085 + d) * s, off + Vector2(0.88 + d * 0.3, 0.215 + d) * s, c3, maxf(1.0, s * 0.011))
+				draw_line(off + Vector2(0.3, 0.085 + d) * s, off + Vector2(0.12 - d * 0.3, 0.215 + d) * s, c3, maxf(1.0, s * 0.011))
 		"raglan":
-			draw_line(off + Vector2(0.4, 0.1) * s, off + Vector2(0.23, 0.32) * s, c3, maxf(1.0, s * 0.014))
-			draw_line(off + Vector2(0.6, 0.1) * s, off + Vector2(0.77, 0.32) * s, c3, maxf(1.0, s * 0.014))
+			draw_line(off + Vector2(0.4, 0.1) * s, off + Vector2(0.25, 0.3) * s, c3, maxf(1.0, s * 0.014))
+			draw_line(off + Vector2(0.6, 0.1) * s, off + Vector2(0.75, 0.3) * s, c3, maxf(1.0, s * 0.014))
+	var show_logos := s >= 56.0
+	if back:
+		# Costas: só a gola arredondada por trás, patrocinador, nome e número.
+		draw_polyline(_xf([Vector2(0.38, 0.07), Vector2(0.5, 0.1), Vector2(0.62, 0.07)], s, off), c3 if c3 != c1 else c1.darkened(0.4), maxf(1.5, s * 0.03), true)
+		var bo := body.duplicate()
+		bo.append(body[0])
+		draw_polyline(bo, Color(0, 0, 0, 0.35), maxf(1.0, s * 0.012), true)
+		var fg := UIColors.on_color(c1)
+		if show_logos:
+			var spc: Dictionary = kit.get("sp_c", {})
+			if not spc.is_empty():
+				_draw_patch(Rect2(off + Vector2(0.34, 0.14) * s, Vector2(0.32, 0.08) * s), spc)
+			if back_name != "":
+				_draw_text_centered(back_name.to_upper(), off + Vector2(0.5, 0.3) * s, s * 0.44, int(s * 0.075), fg, &"Caps")
+		if number > 0:
+			_draw_text_centered(str(number), off + Vector2(0.5, 0.62) * s, s * 0.44, int(s * 0.34), fg, &"Big")
+		return
 	_draw_collar(s, off, c1, c3)
 	# Contorno sutil
 	var outline := body.duplicate()
 	outline.append(body[0])
 	draw_polyline(outline, Color(0, 0, 0, 0.35), maxf(1.0, s * 0.012), true)
 	var sp: Dictionary = kit.get("sp", {})
-	if not sp.is_empty() and s >= 56.0:
-		_draw_sponsor(s, off, sp)
+	var has_master := not sp.is_empty() and show_logos
+	if show_logos:
+		if has_master:
+			_draw_patch(Rect2(off + Vector2(0.31, 0.36) * s, Vector2(0.38, 0.12) * s), sp)
+		var sup: Dictionary = kit.get("sup", {})
+		if not sup.is_empty():
+			# Fornecedor no peito direito do jogador (esquerda de quem olha).
+			_draw_patch(Rect2(off + Vector2(0.28, 0.2) * s, Vector2(0.16, 0.05) * s), sup)
+		var spm: Dictionary = kit.get("sp_m", {})
+		if not spm.is_empty():
+			_draw_patch(Rect2(off + Vector2(0.77, 0.17) * s, Vector2(0.11, 0.06) * s), spm)
 	if number > 0:
-		var font := get_theme_font(&"font", &"Big")
-		var fs := int(s * (0.22 if not sp.is_empty() and s >= 56.0 else 0.3))
-		var txt := str(number)
-		var w := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var fg := UIColors.on_color(c1)
-		var y := 0.84 if not sp.is_empty() and s >= 56.0 else 0.62
-		draw_string(font, off + Vector2(0.5 * s - w * 0.5, y * s), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, fg)
+		if has_master:
+			_draw_text_centered(str(number), off + Vector2(0.5, 0.68) * s, s * 0.3, int(s * 0.2), fg, &"Big")
+		else:
+			_draw_text_centered(str(number), off + Vector2(0.5, 0.52) * s, s * 0.4, int(s * 0.3), fg, &"Big")
 
 
 func _draw_collar(s: float, off: Vector2, c1: Color, c3: Color) -> void:
@@ -139,22 +175,37 @@ func _draw_collar(s: float, off: Vector2, c1: Color, c3: Color) -> void:
 	draw_polyline(neck, col, width, true)
 
 
-func _draw_sponsor(s: float, off: Vector2, sp: Dictionary) -> void:
-	var r := Rect2(off + Vector2(0.3, 0.36) * s, Vector2(0.4, 0.14) * s)
+## Logo de patrocinador: retângulo na cor da marca com o nome ajustado à largura.
+func _draw_patch(r: Rect2, sp: Dictionary) -> void:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(String(sp.get("c", "#FFFFFF")))
-	sb.set_corner_radius_all(int(maxf(2.0, s * 0.02)))
+	sb.set_corner_radius_all(int(maxf(1.0, r.size.y * 0.15)))
 	draw_style_box(sb, r)
-	var font := get_theme_font(&"font", &"Caps")
-	var txt := String(sp.get("n", "")).to_upper()
-	var fs := int(s * 0.1)
+	var name := String(sp.get("n", "")).to_upper()
+	var fg := Color(String(sp.get("t", "#111111")))
+	if not _draw_text_centered(name, r.get_center(), r.size.x * 0.92, int(r.size.y * 0.7), fg, &"Caps"):
+		# Espaço pequeno (manga, calção): só as iniciais da marca.
+		var ini := ""
+		for word in name.split(" ", false):
+			ini += word.substr(0, 1)
+		_draw_text_centered(ini, r.get_center(), r.size.x * 0.92, int(r.size.y * 0.7), fg, &"Caps")
+
+
+## Texto centrado em `center`, encolhido até caber em `max_w`.
+func _draw_text_centered(txt: String, center: Vector2, max_w: float, size_px: int, color: Color, variation: StringName) -> bool:
+	var font := get_theme_font(&"font", variation)
+	var fs := maxi(4, size_px)
 	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	while tw > r.size.x * 0.92 and fs > 6:
+	var min_fs := 6
+	while tw > max_w and fs > min_fs:
 		fs -= 1
 		tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	if tw > max_w or fs < 5:
+		return false
 	var asc := font.get_ascent(fs)
 	var desc := font.get_descent(fs)
-	draw_string(font, Vector2(r.get_center().x - tw * 0.5, r.get_center().y + (asc - desc) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(String(sp.get("t", "#111111"))))
+	draw_string(font, Vector2(center.x - tw * 0.5, center.y + (asc - desc) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, color)
+	return true
 
 
 ## Calção, pernas e meiões (modo completo). Desenhado antes da camisa, que cobre a cintura.
@@ -168,48 +219,51 @@ func _draw_legs(r: Rect2) -> void:
 	var outline := Color(0, 0, 0, 0.35)
 	var lw := maxf(1.0, r.size.x * 0.012)
 	# Pernas (pele entre o calção e os meiões)
-	for x0 in [0.29, 0.57]:
-		draw_rect(_fr(r, x0 + 0.02, 0.74, 0.1, 0.08), skin)
-	# Calção
-	var shorts := _fx(r, [Vector2(0.25, 0.54), Vector2(0.75, 0.54), Vector2(0.79, 0.77), Vector2(0.53, 0.79), Vector2(0.5, 0.69), Vector2(0.47, 0.79), Vector2(0.21, 0.77)])
+	for x0 in [0.3, 0.56]:
+		draw_rect(_fr(r, x0 + 0.02, 0.6, 0.1, 0.13), skin)
+	# Calção (a camisa cobre a cintura)
+	var shorts := _fx(r, [Vector2(0.27, 0.44), Vector2(0.73, 0.44), Vector2(0.78, 0.64), Vector2(0.53, 0.655), Vector2(0.5, 0.57), Vector2(0.47, 0.655), Vector2(0.22, 0.64)])
 	draw_colored_polygon(shorts, sh)
 	var st: String = kit.get("shorts_style", "plain")
 	var bands: Array = []
 	match st:
 		"side_stripe":
-			bands = [[Vector2(0.23, 0.54), Vector2(0.28, 0.54), Vector2(0.27, 0.78), Vector2(0.21, 0.78)], [Vector2(0.72, 0.54), Vector2(0.77, 0.54), Vector2(0.79, 0.78), Vector2(0.73, 0.78)]]
+			bands = [[Vector2(0.24, 0.44), Vector2(0.3, 0.44), Vector2(0.28, 0.66), Vector2(0.21, 0.66)], [Vector2(0.7, 0.44), Vector2(0.76, 0.44), Vector2(0.79, 0.66), Vector2(0.72, 0.66)]]
 		"hem":
-			bands = [[Vector2(0, 0.74), Vector2(1, 0.74), Vector2(1, 0.8), Vector2(0, 0.8)]]
+			bands = [[Vector2(0, 0.615), Vector2(1, 0.615), Vector2(1, 0.67), Vector2(0, 0.67)]]
 		"two_tone":
-			bands = [[Vector2(0.5, 0.5), Vector2(1, 0.5), Vector2(1, 0.8), Vector2(0.5, 0.8)]]
+			bands = [[Vector2(0.5, 0.4), Vector2(1, 0.4), Vector2(1, 0.7), Vector2(0.5, 0.7)]]
 		"stripes3":
 			for i in 3:
 				var d := i * 0.018
-				bands.append([Vector2(0.25 - d + 0.005, 0.54), Vector2(0.25 - d + 0.013, 0.54), Vector2(0.23 - d + 0.013, 0.78), Vector2(0.23 - d + 0.005, 0.78)])
-				bands.append([Vector2(0.735 + d, 0.54), Vector2(0.743 + d, 0.54), Vector2(0.763 + d, 0.78), Vector2(0.755 + d, 0.78)])
+				bands.append([Vector2(0.275 - d, 0.44), Vector2(0.283 - d, 0.44), Vector2(0.24 - d, 0.66), Vector2(0.232 - d, 0.66)])
+				bands.append([Vector2(0.717 + d, 0.44), Vector2(0.725 + d, 0.44), Vector2(0.768 + d, 0.66), Vector2(0.76 + d, 0.66)])
 	for b in bands:
 		for piece in Geometry2D.intersect_polygons(_fx(r, b), shorts):
 			draw_colored_polygon(piece, sh2)
+	var sps: Dictionary = kit.get("sp_s", {})
+	if not sps.is_empty() and r.size.y >= 120.0 and not back:
+		_draw_patch(_fr(r, 0.54, 0.525, 0.2, 0.045), sps)
 	var so_line := shorts.duplicate()
 	so_line.append(shorts[0])
 	draw_polyline(so_line, outline, lw, true)
 	# Meiões e chuteiras
 	var ss: String = kit.get("socks_style", "plain")
-	for x0 in [0.29, 0.57]:
-		var sock := _fx(r, [Vector2(x0, 0.8), Vector2(x0 + 0.14, 0.8), Vector2(x0 + 0.13, 0.95), Vector2(x0 + 0.01, 0.95)])
+	for x0 in [0.3, 0.56]:
+		var sock := _fx(r, [Vector2(x0, 0.71), Vector2(x0 + 0.14, 0.71), Vector2(x0 + 0.125, 0.93), Vector2(x0 + 0.015, 0.93)])
 		draw_colored_polygon(sock, so)
 		var sb: Array = []
 		match ss:
 			"hoops":
 				for i in 3:
-					sb.append(_fr(r, x0, 0.815 + i * 0.04, 0.14, 0.018))
+					sb.append(_fr(r, x0, 0.73 + i * 0.05, 0.14, 0.022))
 			"top_band":
-				sb.append(_fr(r, x0, 0.8, 0.14, 0.035))
+				sb.append(_fr(r, x0, 0.71, 0.14, 0.04))
 			"two_tone":
-				sb.append(_fr(r, x0, 0.875, 0.14, 0.08))
+				sb.append(_fr(r, x0, 0.82, 0.14, 0.11))
 			"stripes3":
 				for i in 3:
-					sb.append(_fr(r, x0, 0.81 + i * 0.014, 0.14, 0.007))
+					sb.append(_fr(r, x0, 0.72 + i * 0.016, 0.14, 0.008))
 		for rr: Rect2 in sb:
 			var poly := PackedVector2Array([rr.position, rr.position + Vector2(rr.size.x, 0), rr.end, rr.position + Vector2(0, rr.size.y)])
 			for piece in Geometry2D.intersect_polygons(poly, sock):
@@ -217,7 +271,8 @@ func _draw_legs(r: Rect2) -> void:
 		var sk := sock.duplicate()
 		sk.append(sock[0])
 		draw_polyline(sk, outline, lw, true)
-		var bt := _fx(r, [Vector2(x0 + 0.005, 0.945), Vector2(x0 + 0.135, 0.945), Vector2(x0 + 0.17, 0.985), Vector2(x0 + 0.005, 0.985)])
+		var toe := 0.05 if x0 > 0.5 else -0.05
+		var bt := _fx(r, [Vector2(x0 + 0.01, 0.925), Vector2(x0 + 0.13, 0.925), Vector2(x0 + 0.13 + maxf(0.0, toe), 0.975), Vector2(x0 + 0.01 + minf(0.0, toe), 0.975)])
 		draw_colored_polygon(bt, boot)
 
 
