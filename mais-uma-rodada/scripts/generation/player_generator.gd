@@ -157,6 +157,14 @@ static func _height_shift(eth: int) -> float:
 			return -2.0 # lat, and
 		8:
 			return -2.5 # eas
+		9:
+			return -1.5 # sas
+		10:
+			return 1.0 # hae
+		11:
+			return 2.0 # pac
+		12:
+			return -3.0 # sea
 	return 0.0
 
 
