@@ -1,12 +1,12 @@
 {
 	"nation": "CRO",
-	"_doc": "Croácia (liga de 6).",
+	"_doc": "Croácia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "CRO_MOD",
-			"name": "Zagreb Modri",
-			"short": "Modri",
-			"abbr": "MOD",
+			"name": "GNK Dinamo Zagreb",
+			"short": "Dinamo Zagreb",
+			"abbr": "DIN",
 			"nick": "Modri",
 			"city": "Zagreb",
 			"founded": 1945,
@@ -17,7 +17,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Maksimir Sjever",
+			"stadium": "Stadion Maksimir",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "CRO_BIL",
-			"name": "Split Bili",
-			"short": "Bili",
-			"abbr": "BIL",
+			"name": "HNK Hajduk Split",
+			"short": "Hajduk Split",
+			"abbr": "HAJ",
 			"nick": "Bili",
 			"city": "Split",
 			"founded": 1911,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Stadion Poljud Jug",
+			"stadium": "Stadion Poljud",
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {

@@ -1,12 +1,12 @@
 {
 	"nation": "MAR",
-	"_doc": "Marrocos (liga de 8).",
+	"_doc": "Marrocos (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "MAR_WYR",
-			"name": "Casablanca Rouge",
-			"short": "Rouge",
-			"abbr": "WYR",
+			"name": "Wydad Athletic Club",
+			"short": "Wydad",
+			"abbr": "WAC",
 			"nick": "Wydadis",
 			"city": "Casablanca",
 			"founded": 1937,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade d'Anfa",
+			"stadium": "Stade Mohammed V",
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "MAR_RVE",
-			"name": "Casablanca Vert",
-			"short": "Vert Casa",
-			"abbr": "RVE",
+			"name": "Raja Club Athletic",
+			"short": "Raja",
+			"abbr": "RCA",
 			"nick": "Aigles Verts",
 			"city": "Casablanca",
 			"founded": 1949,
@@ -43,7 +43,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Stade d'Anfa",
+			"stadium": "Stade Mohammed V",
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "MAR_ARF",
-			"name": "Rabat Militaire",
-			"short": "Militaires",
-			"abbr": "ARF",
+			"name": "AS FAR",
+			"short": "FAR Rabat",
+			"abbr": "FAR",
 			"nick": "Militaires",
 			"city": "Rabat",
 			"founded": 1958,
@@ -69,7 +69,7 @@
 				"#111111",
 				"#E30613"
 			],
-			"stadium": "Stade de la Capitale",
+			"stadium": "Stade Prince Moulay Abdellah",
 			"capacity": 52000,
 			"kit": "plain",
 			"crest": {

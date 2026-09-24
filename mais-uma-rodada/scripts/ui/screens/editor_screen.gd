@@ -1,6 +1,6 @@
 extends BaseScreen
 ## Editor: nomes, cores e escudos de clubes (com imagem importada), jogadores (nome, posição,
-## aparência, foto, atributos e personalidade), nomes e logos de competições e o treinador.
+## aparência, foto, atributos e personalidade), nomes, logos e cores de competições e o treinador.
 ##
 ## Com uma carreira aberta, clubes e jogadores do save mudam na hora; o que for marcado como
 ## "padrão" também vale para novas carreiras (Overrides). Sem carreira, edita só o padrão.
@@ -86,7 +86,7 @@ func _home(c: VBoxContainer) -> void:
 	items.append(["search", "Clubes", "Qualquer clube do mundo" + ("" if has_career() else " (padrão das novas carreiras)"), func(): _go("pick_club")])
 	if has_career():
 		items.append(["shirt", "Jogadores", "Nome, posição, aparência, foto, atributos e personalidade", func(): _go("pick_player")])
-	items.append(["trophy", "Competições", "Nomes e logos de ligas e copas", func(): _go("pick_comp")])
+	items.append(["trophy", "Competições", "Nomes, logos e cores de ligas e copas", func(): _go("pick_comp")])
 	if has_career():
 		items.append(["star", "Treinador", "Seu nome na carreira", func(): _manager_name()])
 	for it in items:
@@ -367,7 +367,10 @@ func _field(caption: String, value: String, max_len: int, on_change: Callable) -
 
 func _swatches(current: String, cb: Callable) -> Control:
 	var flow := UIKit.flow(6)
-	for hex in PALETTE:
+	var hexes: Array[String] = PALETTE.duplicate()
+	if current != "" and not PALETTE.any(func(h: String): return Color(h).to_html(false) == Color(current).to_html(false)):
+		hexes.push_front(current)
+	for hex in hexes:
 		var h: String = hex
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(56, 56)
@@ -722,15 +725,7 @@ func _comp_row(kind: String, id: String, name: String) -> Control:
 
 
 static func comp_logo(id: String, px: int) -> Control:
-	var tex := Overrides.logo_of(id)
-	if tex != null:
-		var tr := TextureRect.new()
-		tr.texture = tex
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		tr.custom_minimum_size = Vector2(px, px)
-		return tr
-	return UIKit.icon_rect("trophy", px, UIColors.ACCENT)
+	return UIKit.comp_logo(id, px)
 
 
 func _comp_editor(c: VBoxContainer) -> void:
@@ -744,27 +739,41 @@ func _comp_editor(c: VBoxContainer) -> void:
 	var name_v := [String(cfg.get("name", _comp_id))]
 	var short_v := [String(cfg.get("short", _comp_id))]
 	var logo_v := [String(cfg.get("logo", ""))]
+	var cols := CompText.colors(_comp_id)
+	var colors_v := ["#" + cols[0].to_html(false).to_upper(), "#" + cols[1].to_html(false).to_upper()]
 	card.add_child(_field("Nome", name_v[0], 40, func(t: String): name_v[0] = t.strip_edges()))
 	card.add_child(_field("Nome curto", short_v[0], 20, func(t: String): short_v[0] = t.strip_edges()))
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.button("Importar logo", "", func():
 		ImagePicker.pick("logo", func(file: String):
-			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], file)
+			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], file, colors_v)
 			refresh()), "plus"))
 	if logo_v[0] != "":
 		row.add_child(UIKit.button("Remover logo", "GhostButton", func():
 			CustomAssets.remove(logo_v[0])
-			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], "")
+			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], "", colors_v)
 			refresh()))
 	card.add_child(row)
 	card.add_child(UIKit.label("Os nomes das competições valem para todas as carreiras. Copas já sorteadas nesta temporada mudam de nome na próxima.", "Small", true))
 	c.add_child(UIKit.card_panel(card))
+	var colors := UIKit.card("Card", 8)
+	colors.add_child(UIKit.section("Cores"))
+	colors.add_child(UIKit.comp_stripe(_comp_id, 10))
+	for i in 2:
+		var idx: int = i
+		colors.add_child(UIKit.label("Principal" if idx == 0 else "Destaque", "Small"))
+		colors.add_child(_swatches(colors_v[idx], func(hex: String):
+			colors_v[idx] = hex
+			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], logo_v[0], colors_v)
+			refresh()))
+	colors.add_child(UIKit.label("As cores aparecem no selo da competição, nas tabelas e na próxima partida.", "Small", true))
+	c.add_child(UIKit.card_panel(colors))
 	var f := footer()
 	UIKit.clear(f)
 	f.add_child(UIKit.button("SALVAR", "PrimaryButton", func():
 		if name_v[0] == "" or short_v[0] == "":
 			UIManager.toast("Nome e nome curto não podem ficar vazios.")
 			return
-		Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], logo_v[0])
+		Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], logo_v[0], colors_v)
 		UIManager.toast("Competição atualizada.")
 		_go("pick_comp"), "check"))

@@ -1,12 +1,12 @@
 {
 	"nation": "TUR",
-	"_doc": "Turquia (liga de 10; clubes restantes gerados).",
+	"_doc": "Turquia (liga de 18). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "TUR_IAS",
-			"name": "İstanbul Aslanlar",
-			"short": "Aslanlar",
-			"abbr": "IAS",
+			"name": "Galatasaray SK",
+			"short": "Galatasaray",
+			"abbr": "GS",
 			"nick": "Cimbom",
 			"city": "İstanbul",
 			"founded": 1905,
@@ -17,7 +17,7 @@
 				"#A90432",
 				"#FDB912"
 			],
-			"stadium": "Seyrantepe Stadyumu",
+			"stadium": "RAMS Park",
 			"capacity": 52000,
 			"kit": "halves",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "TUR_IKN",
-			"name": "İstanbul Kanaryalar",
-			"short": "Kanaryalar",
-			"abbr": "IKN",
+			"name": "Fenerbahçe SK",
+			"short": "Fenerbahçe",
+			"abbr": "FB",
 			"nick": "Sarı Kanaryalar",
 			"city": "İstanbul",
 			"founded": 1907,
@@ -44,7 +44,7 @@
 				"#FFED00",
 				"#002D72"
 			],
-			"stadium": "Kadıköy Stadyumu",
+			"stadium": "Ülker Stadyumu",
 			"capacity": 47800,
 			"kit": "stripes_v",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "TUR_IKR",
-			"name": "İstanbul Kartallar",
-			"short": "Kartallar",
-			"abbr": "IKR",
+			"name": "Beşiktaş JK",
+			"short": "Beşiktaş",
+			"abbr": "BJK",
 			"nick": "Kara Kartallar",
 			"city": "İstanbul",
 			"founded": 1903,
@@ -71,7 +71,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Dolmabahçe Stadyumu",
+			"stadium": "Tüpraş Stadyumu",
 			"capacity": 42000,
 			"kit": "stripes_v",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "TUR_FIR",
-			"name": "Karadeniz Fırtınası",
-			"short": "Fırtına",
-			"abbr": "FIR",
+			"name": "Trabzonspor",
+			"short": "Trabzonspor",
+			"abbr": "TS",
 			"nick": "Bordo-Mavililer",
 			"city": "Trabzon",
 			"founded": 1967,
@@ -98,7 +98,7 @@
 				"#8A1538",
 				"#4FA8DE"
 			],
-			"stadium": "Akyazı Stadyumu",
+			"stadium": "Papara Park",
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
@@ -109,9 +109,9 @@
 		},
 		{
 			"key": "TUR_BSK",
-			"name": "İstanbul Başak",
-			"short": "Başak",
-			"abbr": "BSK",
+			"name": "İstanbul Başakşehir FK",
+			"short": "Başakşehir",
+			"abbr": "IBFK",
 			"nick": "Turuncu-Lacivertliler",
 			"city": "İstanbul",
 			"founded": 1990,
@@ -122,13 +122,273 @@
 				"#F07F13",
 				"#0D2A5C"
 			],
-			"stadium": "Başak Arena",
+			"stadium": "Başakşehir Fatih Terim Stadyumu",
 			"capacity": 17300,
 			"kit": "plain",
 			"crest": {
 				"shape": "modern",
 				"symbol": "star"
 			},
+			"rivals": []
+		},
+		{
+			"key": "TUR_SAM",
+			"name": "Samsunspor",
+			"short": "Samsunspor",
+			"abbr": "SAM",
+			"nick": "Kırmızı Şimşekler",
+			"city": "Samsun",
+			"founded": 1965,
+			"league": "TUR1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Samsun 19 Mayıs Stadyumu",
+			"capacity": 33900,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "TUR_GOZ",
+			"name": "Göztepe SK",
+			"short": "Göztepe",
+			"abbr": "GOZ",
+			"nick": "Göz-Göz",
+			"city": "İzmir",
+			"founded": 1925,
+			"league": "TUR1",
+			"rep": 60,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Gürsel Aksel Stadyumu",
+			"capacity": 19700,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "TUR_EYU",
+			"name": "Eyüpspor",
+			"short": "Eyüpspor",
+			"abbr": "EYU",
+			"nick": "Sultanlar",
+			"city": "İstanbul",
+			"founded": 1919,
+			"league": "TUR1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#5E2A84",
+				"#FFD100"
+			],
+			"stadium": "Eyüp Stadyumu",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "TUR_KAS",
+			"name": "Kasımpaşa SK",
+			"short": "Kasımpaşa",
+			"abbr": "KAS",
+			"nick": "Apaçiler",
+			"city": "İstanbul",
+			"founded": 1921,
+			"league": "TUR1",
+			"rep": 55,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Recep Tayyip Erdoğan Stadyumu",
+			"capacity": 14200,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "TUR_KOC",
+			"name": "Kocaelispor",
+			"short": "Kocaelispor",
+			"abbr": "KOC",
+			"nick": "Körfez Ekibi",
+			"city": "Kocaeli",
+			"founded": 1966,
+			"league": "TUR1",
+			"rep": 55,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00843D",
+				"#111111"
+			],
+			"stadium": "Kocaeli Stadyumu",
+			"capacity": 34700,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUR_ANT",
+			"name": "Antalyaspor",
+			"short": "Antalyaspor",
+			"abbr": "ANT",
+			"nick": "Akrepler",
+			"city": "Antalya",
+			"founded": 1966,
+			"league": "TUR1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Corendon Airlines Park",
+			"capacity": 32500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUR_ALA",
+			"name": "Alanyaspor",
+			"short": "Alanyaspor",
+			"abbr": "ALA",
+			"nick": "Turuncu-Yeşilliler",
+			"city": "Alanya",
+			"founded": 1948,
+			"league": "TUR1",
+			"rep": 55,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#00843D"
+			],
+			"stadium": "Alanya Oba Stadyumu",
+			"capacity": 10100,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "TUR_KON",
+			"name": "Konyaspor",
+			"short": "Konyaspor",
+			"abbr": "KON",
+			"nick": "Anadolu Kartalı",
+			"city": "Konya",
+			"founded": 1922,
+			"league": "TUR1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Konya Büyükşehir Stadyumu",
+			"capacity": 42000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUR_GFK",
+			"name": "Gaziantep FK",
+			"short": "Gaziantep",
+			"abbr": "GFK",
+			"nick": "Gazi Şehir",
+			"city": "Gaziantep",
+			"founded": 1988,
+			"league": "TUR1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Kalyon Stadyumu",
+			"capacity": 33500,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "TUR_KAY",
+			"name": "Kayserispor",
+			"short": "Kayserispor",
+			"abbr": "KAY",
+			"nick": "Sarı-Kırmızılılar",
+			"city": "Kayseri",
+			"founded": 1966,
+			"league": "TUR1",
+			"rep": 54,
+			"arch": "dinheiro_gestao_ruim",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "RHG Enertürk Enerji Stadyumu",
+			"capacity": 32800,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUR_RIZ",
+			"name": "Çaykur Rizespor",
+			"short": "Rizespor",
+			"abbr": "RIZ",
+			"nick": "Atmacalar",
+			"city": "Rize",
+			"founded": 1953,
+			"league": "TUR1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#0055A4"
+			],
+			"stadium": "Çaykur Didi Stadyumu",
+			"capacity": 15300,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUR_GEN",
+			"name": "Gençlerbirliği SK",
+			"short": "Gençlerbirliği",
+			"abbr": "GEN",
+			"nick": "Gençler",
+			"city": "Ankara",
+			"founded": 1923,
+			"league": "TUR1",
+			"rep": 53,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Eryaman Stadyumu",
+			"capacity": 20500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUR_FKG",
+			"name": "Fatih Karagümrük SK",
+			"short": "Karagümrük",
+			"abbr": "FKG",
+			"nick": "Karagümrük",
+			"city": "İstanbul",
+			"founded": 1926,
+			"league": "TUR1",
+			"rep": 52,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Atatürk Olimpiyat Stadyumu",
+			"capacity": 76000,
+			"kit": "stripes_v",
 			"rivals": []
 		}
 	]

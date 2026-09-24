@@ -755,7 +755,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		NewsManager.post(world, "temporada", {"year": world.year, "club": world.user_club().short_name, "goal": String(goal[0]).to_lower()}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
 		for cid in world.season.cups:
 			if world.season.cups[cid].has_club(world.user_club_id):
-				NewsManager.post(world, "copa_classificado", {"club": world.user_club().short_name, "cup": world.season.cups[cid].name}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
+				NewsManager.post(world, CupManager.news_cat(cid, "classificado"), {"club": world.user_club().short_name, "cup": world.season.cups[cid].name}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
 	return summary
 
 

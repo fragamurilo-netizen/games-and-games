@@ -1,11 +1,11 @@
 {
 	"nation": "SRB",
-	"_doc": "Sérvia (liga de 6).",
+	"_doc": "Sérvia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "SRB_CZV",
-			"name": "Beograd Crveno-Beli",
-			"short": "Crveno-Beli",
+			"name": "FK Crvena zvezda",
+			"short": "Crvena zvezda",
 			"abbr": "CZV",
 			"nick": "Zvezdaši",
 			"city": "Beograd",
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Marakana Beograd",
+			"stadium": "Stadion Rajko Mitić",
 			"capacity": 51700,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "SRB_CRN",
-			"name": "Beograd Crno-Beli",
-			"short": "Crno-Beli",
-			"abbr": "CRN",
+			"name": "FK Partizan",
+			"short": "Partizan",
+			"abbr": "PAR",
 			"nick": "Grobari",
 			"city": "Beograd",
 			"founded": 1945,
@@ -43,7 +43,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Humska",
+			"stadium": "Stadion Partizana",
 			"capacity": 29800,
 			"kit": "stripes_v",
 			"crest": {

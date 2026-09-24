@@ -1,12 +1,12 @@
 {
 	"nation": "UKR",
-	"_doc": "Ucrânia (liga de 6).",
+	"_doc": "Ucrânia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "UKR_HIR",
-			"name": "Donbass Hirnyky",
-			"short": "Hirnyky",
-			"abbr": "HIR",
+			"name": "FC Shakhtar Donetsk",
+			"short": "Shakhtar",
+			"abbr": "SHA",
 			"nick": "Hirnyky",
 			"city": "Donetsk",
 			"founded": 1936,
@@ -17,7 +17,7 @@
 				"#F07F13",
 				"#111111"
 			],
-			"stadium": "Stadion Donbass",
+			"stadium": "Donbass Arena",
 			"capacity": 52000,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "UKR_BSY",
-			"name": "Kyiv Bilo-Syni",
-			"short": "Bilo-Syni",
-			"abbr": "BSY",
+			"name": "FC Dynamo Kyiv",
+			"short": "Dynamo Kyiv",
+			"abbr": "DYN",
 			"nick": "Bilo-Syni",
 			"city": "Kyiv",
 			"founded": 1927,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#1D5BBF"
 			],
-			"stadium": "Stadion Kyiv Tsentr",
+			"stadium": "Estádio Olímpico de Kiev",
 			"capacity": 16800,
 			"kit": "plain",
 			"crest": {

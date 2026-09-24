@@ -1,12 +1,12 @@
 {
 	"nation": "SCO",
-	"_doc": "Escócia (liga de 6).",
+	"_doc": "Escócia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "SCO_GLE",
-			"name": "Glasgow Emerald",
-			"short": "Emerald",
-			"abbr": "GLE",
+			"name": "Celtic FC",
+			"short": "Celtic",
+			"abbr": "CEL",
 			"nick": "Bhoys",
 			"city": "Glasgow",
 			"founded": 1887,
@@ -17,7 +17,7 @@
 				"#018749",
 				"#FFFFFF"
 			],
-			"stadium": "Parkhead Stadium",
+			"stadium": "Celtic Park",
 			"capacity": 60000,
 			"kit": "stripes_h",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "SCO_GLR",
-			"name": "Glasgow Royal Blue",
-			"short": "Royal Blue",
-			"abbr": "GLR",
+			"name": "Rangers FC",
+			"short": "Rangers",
+			"abbr": "RAN",
 			"nick": "Gers",
 			"city": "Glasgow",
 			"founded": 1872,
@@ -43,7 +43,7 @@
 				"#1B458F",
 				"#FFFFFF"
 			],
-			"stadium": "Govan Stadium",
+			"stadium": "Ibrox Stadium",
 			"capacity": 50800,
 			"kit": "plain",
 			"crest": {
@@ -56,8 +56,8 @@
 		},
 		{
 			"key": "SCO_ABE",
-			"name": "Aberdeen Granite",
-			"short": "Granite City",
+			"name": "Aberdeen FC",
+			"short": "Aberdeen",
 			"abbr": "ABE",
 			"nick": "Dons",
 			"city": "Aberdeen",
@@ -69,7 +69,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Pittodrie Park",
+			"stadium": "Pittodrie Stadium",
 			"capacity": 20900,
 			"kit": "plain",
 			"crest": {
@@ -80,9 +80,9 @@
 		},
 		{
 			"key": "SCO_EDM",
-			"name": "Edinburgh Maroons",
-			"short": "Maroons",
-			"abbr": "EDM",
+			"name": "Heart of Midlothian FC",
+			"short": "Hearts",
+			"abbr": "HEA",
 			"nick": "Jambos",
 			"city": "Edinburgh",
 			"founded": 1874,
@@ -93,7 +93,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Gorgie Park",
+			"stadium": "Tynecastle Park",
 			"capacity": 19800,
 			"kit": "plain",
 			"crest": {
@@ -106,9 +106,9 @@
 		},
 		{
 			"key": "SCO_EDG",
-			"name": "Edinburgh Greens",
-			"short": "Hibees",
-			"abbr": "EDG",
+			"name": "Hibernian FC",
+			"short": "Hibernian",
+			"abbr": "HIB",
 			"nick": "Hibees",
 			"city": "Edinburgh",
 			"founded": 1875,
@@ -119,7 +119,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Easter Road Park",
+			"stadium": "Easter Road",
 			"capacity": 20400,
 			"kit": "plain",
 			"crest": {

@@ -1,12 +1,12 @@
 {
 	"nation": "BEL",
-	"_doc": "Bélgica (liga de 8).",
+	"_doc": "Bélgica (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "BEL_BRU",
-			"name": "Brugge Blauw-Zwart",
-			"short": "Blauw-Zwart",
-			"abbr": "BRU",
+			"name": "Club Brugge KV",
+			"short": "Club Brugge",
+			"abbr": "CLB",
 			"nick": "Blauw-Zwart",
 			"city": "Brugge",
 			"founded": 1891,
@@ -17,7 +17,7 @@
 				"#0072BC",
 				"#111111"
 			],
-			"stadium": "Stadion Sint-Andries",
+			"stadium": "Jan Breydelstadion",
 			"capacity": 29000,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "BEL_BXL",
-			"name": "Brussel Paars-Wit",
-			"short": "Paars-Wit",
-			"abbr": "BXL",
+			"name": "RSC Anderlecht",
+			"short": "Anderlecht",
+			"abbr": "AND",
 			"nick": "Mauves",
 			"city": "Bruxelles",
 			"founded": 1908,
@@ -43,7 +43,7 @@
 				"#4F2D7F",
 				"#FFFFFF"
 			],
-			"stadium": "Astrid Park Stadion",
+			"stadium": "Lotto Park",
 			"capacity": 22500,
 			"kit": "plain",
 			"crest": {
@@ -57,9 +57,9 @@
 		},
 		{
 			"key": "BEL_UNS",
-			"name": "Brussel Unionisten",
-			"short": "Unionisten",
-			"abbr": "UNS",
+			"name": "Royale Union Saint-Gilloise",
+			"short": "Union SG",
+			"abbr": "USG",
 			"nick": "Unionistes",
 			"city": "Bruxelles",
 			"founded": 1897,
@@ -70,7 +70,7 @@
 				"#FFD100",
 				"#1D5BBF"
 			],
-			"stadium": "Stade du Parc Duden",
+			"stadium": "Stade Joseph Marien",
 			"capacity": 9400,
 			"kit": "plain",
 			"crest": {
@@ -83,9 +83,9 @@
 		},
 		{
 			"key": "BEL_LIM",
-			"name": "Limburg Genk",
-			"short": "Limburgers",
-			"abbr": "LIM",
+			"name": "KRC Genk",
+			"short": "Genk",
+			"abbr": "GNK",
 			"nick": "Smurfen",
 			"city": "Genk",
 			"founded": 1988,
@@ -96,7 +96,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Genk",
+			"stadium": "Cegeka Arena",
 			"capacity": 23700,
 			"kit": "plain",
 			"crest": {
@@ -107,9 +107,9 @@
 		},
 		{
 			"key": "BEL_BUF",
-			"name": "Gent Buffalo's",
-			"short": "Buffalo's",
-			"abbr": "BUF",
+			"name": "KAA Gent",
+			"short": "Gent",
+			"abbr": "GNT",
 			"nick": "Buffalo's",
 			"city": "Gent",
 			"founded": 1900,
@@ -120,7 +120,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Arena Ottergemsesteenweg",
+			"stadium": "Planet Group Arena",
 			"capacity": 20000,
 			"kit": "plain",
 			"crest": {
@@ -131,9 +131,9 @@
 		},
 		{
 			"key": "BEL_ROU",
-			"name": "Luik Rouches",
-			"short": "Rouches",
-			"abbr": "ROU",
+			"name": "Standard de Liège",
+			"short": "Standard",
+			"abbr": "STA",
 			"nick": "Rouches",
 			"city": "Liège",
 			"founded": 1898,
@@ -144,7 +144,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Sclessin",
+			"stadium": "Stade Maurice Dufrasne",
 			"capacity": 27600,
 			"kit": "plain",
 			"crest": {

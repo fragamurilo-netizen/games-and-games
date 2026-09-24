@@ -1,12 +1,12 @@
 {
 	"nation": "POR",
-	"_doc": "Portugal (liga de 10; clubes restantes gerados).",
+	"_doc": "Portugal (liga de 18). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "POR_ENC",
-			"name": "Lisboa Encarnado",
-			"short": "Encarnados",
-			"abbr": "ENC",
+			"name": "Sport Lisboa e Benfica",
+			"short": "Benfica",
+			"abbr": "SLB",
 			"nick": "Águias",
 			"city": "Lisboa",
 			"founded": 1904,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio da Estrada da Luz",
+			"stadium": "Estádio da Luz",
 			"capacity": 65000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "POR_LEO",
-			"name": "Lisboa Leões",
-			"short": "Leões",
-			"abbr": "LEO",
+			"name": "Sporting Clube de Portugal",
+			"short": "Sporting",
+			"abbr": "SCP",
 			"nick": "Leões",
 			"city": "Lisboa",
 			"founded": 1906,
@@ -44,7 +44,7 @@
 				"#008057",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio de Alvalade",
+			"stadium": "Estádio José Alvalade",
 			"capacity": 50000,
 			"kit": "stripes_h",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "POR_DRA",
-			"name": "Porto Dragões",
-			"short": "Dragões",
-			"abbr": "DRA",
+			"name": "Futebol Clube do Porto",
+			"short": "Porto",
+			"abbr": "FCP",
 			"nick": "Dragões",
 			"city": "Porto",
 			"founded": 1893,
@@ -71,7 +71,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio das Antas",
+			"stadium": "Estádio do Dragão",
 			"capacity": 50000,
 			"kit": "stripes_v",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "POR_BRG",
-			"name": "Braga Arsenalistas",
-			"short": "Arsenalistas",
-			"abbr": "BRG",
+			"name": "Sporting Clube de Braga",
+			"short": "Braga",
+			"abbr": "SCB",
 			"nick": "Guerreiros do Minho",
 			"city": "Braga",
 			"founded": 1921,
@@ -98,7 +98,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio da Pedreira",
+			"stadium": "Estádio Municipal de Braga",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -111,9 +111,9 @@
 		},
 		{
 			"key": "POR_GMR",
-			"name": "Guimarães Conquistadores",
-			"short": "Conquistadores",
-			"abbr": "GMR",
+			"name": "Vitória Sport Clube",
+			"short": "Vitória SC",
+			"abbr": "VSC",
 			"nick": "Vimaranenses",
 			"city": "Guimarães",
 			"founded": 1922,
@@ -124,7 +124,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estádio do Castelo",
+			"stadium": "Estádio D. Afonso Henriques",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -134,6 +134,268 @@
 			"rivals": [
 				"POR_BRG"
 			]
+		},
+		{
+			"key": "POR_SCL",
+			"name": "CD Santa Clara",
+			"short": "Santa Clara",
+			"abbr": "SCL",
+			"nick": "Açorianos",
+			"city": "Ponta Delgada",
+			"founded": 1921,
+			"league": "POR1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de São Miguel",
+			"capacity": 12500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_FAM",
+			"name": "FC Famalicão",
+			"short": "Famalicão",
+			"abbr": "FAM",
+			"nick": "Famalicenses",
+			"city": "Famalicão",
+			"founded": 1931,
+			"league": "POR1",
+			"rep": 60,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Municipal 22 de Junho",
+			"capacity": 5300,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_GIL",
+			"name": "Gil Vicente FC",
+			"short": "Gil Vicente",
+			"abbr": "GIL",
+			"nick": "Galos",
+			"city": "Barcelos",
+			"founded": 1924,
+			"league": "POR1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estádio Cidade de Barcelos",
+			"capacity": 12500,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "POR_MOR",
+			"name": "Moreirense FC",
+			"short": "Moreirense",
+			"abbr": "MOR",
+			"nick": "Cónegos",
+			"city": "Moreira de Cónegos",
+			"founded": 1938,
+			"league": "POR1",
+			"rep": 55,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Comendador Joaquim de Almeida Freitas",
+			"capacity": 6150,
+			"kit": "plain",
+			"rivals": [
+				"POR_GMR"
+			]
+		},
+		{
+			"key": "POR_EST",
+			"name": "GD Estoril Praia",
+			"short": "Estoril",
+			"abbr": "EST",
+			"nick": "Canarinhos",
+			"city": "Estoril",
+			"founded": 1939,
+			"league": "POR1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estádio António Coimbra da Mota",
+			"capacity": 5100,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_RAV",
+			"name": "Rio Ave FC",
+			"short": "Rio Ave",
+			"abbr": "RAV",
+			"nick": "Vilacondenses",
+			"city": "Vila do Conde",
+			"founded": 1939,
+			"league": "POR1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio dos Arcos",
+			"capacity": 5300,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_CPI",
+			"name": "Casa Pia AC",
+			"short": "Casa Pia",
+			"abbr": "CPI",
+			"nick": "Gansos",
+			"city": "Lisboa",
+			"founded": 1920,
+			"league": "POR1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Pina Manique",
+			"capacity": 5000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_ARO",
+			"name": "FC Arouca",
+			"short": "Arouca",
+			"abbr": "ARO",
+			"nick": "Arouquenses",
+			"city": "Arouca",
+			"founded": 1951,
+			"league": "POR1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estádio Municipal de Arouca",
+			"capacity": 5600,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_NAC",
+			"name": "CD Nacional",
+			"short": "Nacional",
+			"abbr": "NAC",
+			"nick": "Alvinegros",
+			"city": "Funchal",
+			"founded": 1910,
+			"league": "POR1",
+			"rep": 53,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio da Madeira",
+			"capacity": 5500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_EAM",
+			"name": "CF Estrela da Amadora",
+			"short": "Estrela",
+			"abbr": "EAM",
+			"nick": "Tricolores",
+			"city": "Amadora",
+			"founded": 1932,
+			"league": "POR1",
+			"rep": 52,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Estádio José Gomes",
+			"capacity": 9300,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_ALV",
+			"name": "FC Alverca",
+			"short": "Alverca",
+			"abbr": "ALV",
+			"nick": "Ribatejanos",
+			"city": "Alverca do Ribatejo",
+			"founded": 1939,
+			"league": "POR1",
+			"rep": 50,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Complexo Desportivo do FC Alverca",
+			"capacity": 7700,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "POR_TON",
+			"name": "CD Tondela",
+			"short": "Tondela",
+			"abbr": "TON",
+			"nick": "Auriverdes",
+			"city": "Tondela",
+			"founded": 1933,
+			"league": "POR1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Estádio João Cardoso",
+			"capacity": 5000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "POR_AVS",
+			"name": "AVS Futebol SAD",
+			"short": "AVS",
+			"abbr": "AVS",
+			"nick": "Avenses",
+			"city": "Vila das Aves",
+			"founded": 2023,
+			"league": "POR1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do CD Aves",
+			"capacity": 8500,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

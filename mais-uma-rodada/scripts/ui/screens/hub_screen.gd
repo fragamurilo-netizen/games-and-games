@@ -105,7 +105,13 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		return UIKit.card_panel(card)
 	var derby := MatchEngine.is_derby(w, f.home, f.away)
 	var head := UIKit.section("Próxima partida · %s · %s" % [CompText.fixture_title(w, f), w.season.date_label(f.slot)])
-	card.add_child(head)
+	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var head_row := UIKit.hbox(10)
+	head_row.add_child(UIKit.comp_logo(f.comp, 30))
+	head_row.add_child(head)
+	card.add_child(head_row)
+	card.add_child(UIKit.comp_stripe(f.comp, 4))
 	var row := UIKit.hbox(6)
 	row.add_child(_team_block(w, w.club(f.home), f))
 	var mid := UIKit.vbox(2)
@@ -374,7 +380,7 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 		items.append(["cross", UIColors.RED, "Lesionados: " + ", ".join(injured.slice(0, 3)) + (" e mais %d" % (injured.size() - 3) if injured.size() > 3 else ""), func(): UIManager.goto("squad")])
 	if not suspended.is_empty():
 		items.append(["card", UIColors.ORANGE, "Suspenso(s) no próximo jogo: " + ", ".join(suspended), func(): UIManager.goto("squad")])
-	if expiring > 0 and w.season.day >= 10:
+	if expiring > 0 and w.season.day >= 14:
 		items.append(["clock", UIColors.ORANGE, "%d contrato(s) terminam no fim da temporada — renove quem você quer manter" % expiring, func(): UIManager.goto("squad", {"sort": "contract"})])
 	var rules := DatabaseManager.squad_rules()
 	if club.player_ids.size() < int(rules["min_players"]):

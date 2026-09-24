@@ -376,6 +376,22 @@ func _test_season_cycle() -> void:
 		var last := cup.ties_of_round(cup.round_names.size() - 1)
 		check(last.size() == 1 and int(last[0]["w"]) == cup.champion, "%s: final inconsistente" % cid)
 		check(w.club(cup.champion).title_count("C:" + cid) == 1, "%s: título não registrado" % cid)
+	# Estaduais: todos os 80 clubes brasileiros em exatamente um, com campeão e sem choque de datas.
+	var in_state := {}
+	for cid in CupManager.state_ids():
+		check(w.season.cups.has(cid), "%s não foi montado" % cid)
+		if not w.season.cups.has(cid):
+			continue
+		var st: Cup = w.season.cups[cid]
+		check(st.finished and st.champion >= 0, "%s sem campeão" % cid)
+		check(w.club(st.champion).title_count("S:" + cid) == 1, "%s: título não registrado" % cid)
+		for c in st.club_ids:
+			check(not in_state.has(c), "%s em dois estaduais" % w.club(c).short_name)
+			in_state[c] = true
+		for f in st.fixtures:
+			check(f.played and w.season.slot_type(f.slot).begins_with("E"), "%s: jogo fora das datas do estadual" % cid)
+	check(in_state.size() == 80, "%d clubes brasileiros nos estaduais" % in_state.size())
+	check(w.season.cups.has("SPE") and w.season.cups["SPE"].club_ids.size() == 17, "Paulistão sem os 17 clubes paulistas")
 	check(w.season.cups.has("CWC"), "Mundial de Clubes não foi montado")
 	if w.season.cups.has("CWC"):
 		var cwc: Cup = w.season.cups["CWC"]
@@ -447,7 +463,10 @@ func _test_end_season() -> void:
 	var rules := DatabaseManager.squad_rules()
 	var owner := {}
 	for c: Club in w.clubs:
-		check(c.player_ids.size() >= int(rules["min_players"]) and c.player_ids.size() <= int(rules["max_players"]), "%s com %d jogadores" % [c.short_name, c.player_ids.size()])
+		# A IA completa os elencos na virada (TransferManager.balance_squads); o clube do usuário não é
+		# mexido e pode ficar abaixo do mínimo (o painel avisa "Elenco curto"), mas sempre dá para escalar.
+		var min_n := 11 if w.is_user_club(c.id) else int(rules["min_players"])
+		check(c.player_ids.size() >= min_n and c.player_ids.size() <= int(rules["max_players"]), "%s com %d jogadores" % [c.short_name, c.player_ids.size()])
 		for pid in c.player_ids:
 			check(not owner.has(pid), "jogador %d em dois clubes" % pid)
 			owner[pid] = c.id

@@ -1,12 +1,12 @@
 {
 	"nation": "AUS",
-	"_doc": "Austrália (liga de 6).",
+	"_doc": "Austrália (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "AUS_MVB",
-			"name": "Melbourne Navy",
-			"short": "Melbourne",
-			"abbr": "MVB",
+			"name": "Melbourne Victory FC",
+			"short": "Melb. Victory",
+			"abbr": "MVC",
 			"nick": "Victory",
 			"city": "Melbourne",
 			"founded": 2004,
@@ -17,7 +17,7 @@
 				"#0D2A5C",
 				"#FFFFFF"
 			],
-			"stadium": "Docklands Park",
+			"stadium": "AAMI Park",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "AUS_SSK",
-			"name": "Sydney Sky Blue",
-			"short": "Sydney",
-			"abbr": "SSK",
+			"name": "Sydney FC",
+			"short": "Sydney FC",
+			"abbr": "SYD",
 			"nick": "Sky Blues",
 			"city": "Sydney",
 			"founded": 2004,
@@ -43,7 +43,7 @@
 				"#6CABDD",
 				"#0D2A5C"
 			],
-			"stadium": "Moore Park Stadium",
+			"stadium": "Allianz Stadium",
 			"capacity": 42500,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "AUS_PAR",
-			"name": "Parramatta Red & Black",
-			"short": "Parramatta",
-			"abbr": "PAR",
+			"name": "Western Sydney Wanderers FC",
+			"short": "W. Sydney",
+			"abbr": "WSW",
 			"nick": "Wanderers",
 			"city": "Sydney",
 			"founded": 2012,
@@ -69,7 +69,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Parramatta Park Stadium",
+			"stadium": "CommBank Stadium",
 			"capacity": 30000,
 			"kit": "halves",
 			"crest": {

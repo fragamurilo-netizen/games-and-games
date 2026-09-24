@@ -378,5 +378,45 @@
 			"Na final, vitória sobre o {runner_up}. O {club} é o melhor clube do planeta em {year}.",
 			"Título que atravessa gerações: o {club} bate o {runner_up} e conquista o mundo."
 		]
+	},
+	"estadual_classificado": {
+		"t": [
+			"{cup}: {club} começa a temporada no estadual",
+			"Tem estadual! {club} estreia no {cup}"
+		],
+		"b": [
+			"Os primeiros jogos do ano valem taça, rivalidade local e ritmo para o elenco.",
+			"A torcida quer o título do estado logo de cara."
+		]
+	},
+	"estadual_avanca": {
+		"t": [
+			"{cup}: {club} avança",
+			"{club} passa pela {stage} do {cup}"
+		],
+		"b": [
+			"Missão cumprida contra {opponent}: o {club} segue vivo no {cup}.",
+			"Classificação no estadual. A decisão está perto."
+		]
+	},
+	"estadual_eliminado": {
+		"t": [
+			"{cup}: {club} cai na {stage}",
+			"Fim da linha no estadual para o {club}"
+		],
+		"b": [
+			"{opponent} encerrou a campanha do {club} no {cup}.",
+			"A eliminação no estadual incomoda, mas a temporada é longa."
+		]
+	},
+	"estadual_campeao": {
+		"t": [
+			"{club} é campeão do {cup}!",
+			"{cup} {year}: dá {club}"
+		],
+		"b": [
+			"Na decisão, o {club} superou o {runner_up} e levou a taça do estado.",
+			"Festa na cidade: {club} vence o {runner_up} e fica com o {cup}."
+		]
 	}
 }

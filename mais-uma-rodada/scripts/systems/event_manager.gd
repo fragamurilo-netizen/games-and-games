@@ -204,7 +204,7 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			ev["p"] = v.id
 			ev["p2"] = y.id
 		"tickets":
-			if world.season.day < 4:
+			if world.season.day < 6:
 				return {}
 		"agent":
 			var need := TransferManager.squad_needs(world, club)

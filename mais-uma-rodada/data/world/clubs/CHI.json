@@ -1,12 +1,12 @@
 {
 	"nation": "CHI",
-	"_doc": "Chile (liga de 12).",
+	"_doc": "Chile (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "CHI_ALB",
-			"name": "Santiago Albo",
-			"short": "Albos",
-			"abbr": "ALB",
+			"name": "Club Social y Deportivo Colo-Colo",
+			"short": "Colo-Colo",
+			"abbr": "COL",
 			"nick": "Albos",
 			"city": "Santiago",
 			"founded": 1925,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio del Monumental de Macul",
+			"stadium": "Estadio Monumental David Arellano",
 			"capacity": 47000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "CHI_AZU",
-			"name": "Santiago Azul",
-			"short": "Chunchos",
-			"abbr": "AZU",
+			"name": "Club Universidad de Chile",
+			"short": "U. de Chile",
+			"abbr": "UCH",
 			"nick": "Chunchos",
 			"city": "Santiago",
 			"founded": 1927,
@@ -44,7 +44,7 @@
 				"#1D3F91",
 				"#E30613"
 			],
-			"stadium": "Estadio de Ñuñoa",
+			"stadium": "Estadio Nacional",
 			"capacity": 48000,
 			"kit": "plain",
 			"crest": {
@@ -57,9 +57,9 @@
 		},
 		{
 			"key": "CHI_CRU",
-			"name": "Santiago Cruzado",
-			"short": "Cruzados",
-			"abbr": "CRU",
+			"name": "Club Deportivo Universidad Católica",
+			"short": "U. Católica",
+			"abbr": "UCA",
 			"nick": "Cruzados",
 			"city": "Santiago",
 			"founded": 1937,
@@ -70,7 +70,7 @@
 				"#FFFFFF",
 				"#1D5BBF"
 			],
-			"stadium": "Estadio de San Carlos",
+			"stadium": "Claro Arena",
 			"capacity": 14000,
 			"kit": "faixa",
 			"crest": {
@@ -83,9 +83,9 @@
 		},
 		{
 			"key": "CHI_LOA",
-			"name": "Calama Loa",
-			"short": "Loínos",
-			"abbr": "LOA",
+			"name": "Club de Deportes Cobreloa",
+			"short": "Cobreloa",
+			"abbr": "COB",
 			"nick": "Zorros del Desierto",
 			"city": "Calama",
 			"founded": 1977,
@@ -96,7 +96,7 @@
 				"#F07F13",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Desierto",
+			"stadium": "Estadio Zorros del Desierto",
 			"capacity": 12000,
 			"kit": "plain",
 			"crest": {

@@ -1,12 +1,12 @@
 {
 	"nation": "KSA",
-	"_doc": "Arábia Saudita (liga de 10).",
+	"_doc": "Arábia Saudita (liga de 18). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "KSA_AZR",
-			"name": "Riyadh Al Azraq",
-			"short": "Al Azraq",
-			"abbr": "AZR",
+			"name": "Al Hilal SFC",
+			"short": "Al Hilal",
+			"abbr": "HIL",
 			"nick": "Líder",
 			"city": "Riyadh",
 			"founded": 1957,
@@ -17,7 +17,7 @@
 				"#0055A5",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio do Reino",
+			"stadium": "Kingdom Arena",
 			"capacity": 68000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "KSA_ALM",
-			"name": "Riyadh Al Aalami",
-			"short": "Al Aalami",
-			"abbr": "ALM",
+			"name": "Al Nassr FC",
+			"short": "Al Nassr",
+			"abbr": "NAS",
 			"nick": "Global",
 			"city": "Riyadh",
 			"founded": 1955,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#0055A5"
 			],
-			"stadium": "Estádio Al Awwal",
+			"stadium": "Al-Awwal Park",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "KSA_AMD",
-			"name": "Jeddah Al Ameed",
-			"short": "Al Ameed",
-			"abbr": "AMD",
+			"name": "Al Ittihad Club",
+			"short": "Al Ittihad",
+			"abbr": "ITT",
 			"nick": "Tigres",
 			"city": "Jeddah",
 			"founded": 1927,
@@ -69,7 +69,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estádio da Joia",
+			"stadium": "King Abdullah Sports City",
 			"capacity": 62000,
 			"kit": "stripes_v",
 			"crest": {
@@ -82,9 +82,9 @@
 		},
 		{
 			"key": "KSA_RAQ",
-			"name": "Jeddah Al Raqi",
-			"short": "Al Raqi",
-			"abbr": "RAQ",
+			"name": "Al Ahli Saudi FC",
+			"short": "Al Ahli",
+			"abbr": "AHL",
 			"nick": "Real",
 			"city": "Jeddah",
 			"founded": 1937,
@@ -95,7 +95,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio da Joia",
+			"stadium": "King Abdullah Sports City",
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
@@ -105,6 +105,296 @@
 			"rivals": [
 				"KSA_AMD"
 			]
+		},
+		{
+			"key": "KSA_QAD",
+			"name": "Al Qadsiah FC",
+			"short": "Al Qadsiah",
+			"abbr": "QAD",
+			"nick": "Qadsawi",
+			"city": "Khobar",
+			"founded": 1967,
+			"league": "KSA1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estádio Prince Saud bin Jalawi",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": [
+				"KSA_ETT"
+			]
+		},
+		{
+			"key": "KSA_ETT",
+			"name": "Al Ettifaq FC",
+			"short": "Al Ettifaq",
+			"abbr": "ETT",
+			"nick": "Cavaleiros do Golfo",
+			"city": "Dammam",
+			"founded": 1945,
+			"league": "KSA1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#E30613"
+			],
+			"stadium": "Estádio EGO",
+			"capacity": 15000,
+			"kit": "halves",
+			"rivals": [
+				"KSA_QAD"
+			]
+		},
+		{
+			"key": "KSA_SHB",
+			"name": "Al Shabab FC",
+			"short": "Al Shabab",
+			"abbr": "SHB",
+			"nick": "Leões Brancos",
+			"city": "Riyadh",
+			"founded": 1947,
+			"league": "KSA1",
+			"rep": 62,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estádio Al Shabab",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": [
+				"KSA_AZR"
+			]
+		},
+		{
+			"key": "KSA_TAA",
+			"name": "Al Taawoun FC",
+			"short": "Al Taawoun",
+			"abbr": "TAA",
+			"nick": "Sukkari",
+			"city": "Buraidah",
+			"founded": 1956,
+			"league": "KSA1",
+			"rep": 58,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio Rei Abdullah de Buraidah",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_FAT",
+			"name": "Al Fateh SC",
+			"short": "Al Fateh",
+			"abbr": "FAT",
+			"nick": "Modelo",
+			"city": "Al Ahsa",
+			"founded": 1958,
+			"league": "KSA1",
+			"rep": 55,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#0055A4"
+			],
+			"stadium": "Estádio Prince Abdullah bin Jalawi",
+			"capacity": 19500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_KHA",
+			"name": "Al Khaleej FC",
+			"short": "Al Khaleej",
+			"abbr": "KHA",
+			"nick": "Golfinhos",
+			"city": "Saihat",
+			"founded": 1945,
+			"league": "KSA1",
+			"rep": 53,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Estádio Prince Mohamed bin Fahd",
+			"capacity": 26000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_FAY",
+			"name": "Al Fayha FC",
+			"short": "Al Fayha",
+			"abbr": "FAY",
+			"nick": "Laranja",
+			"city": "Al Majmaah",
+			"founded": 1953,
+			"league": "KSA1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "Estádio King Salman Sport City",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_RIY",
+			"name": "Al Riyadh SC",
+			"short": "Al Riyadh",
+			"abbr": "RIY",
+			"nick": "Escola",
+			"city": "Riyadh",
+			"founded": 1954,
+			"league": "KSA1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Prince Faisal bin Fahd",
+			"capacity": 22500,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "KSA_KHO",
+			"name": "Al Kholood Club",
+			"short": "Al Kholood",
+			"abbr": "KHO",
+			"nick": "Kholood",
+			"city": "Al Rass",
+			"founded": 1940,
+			"league": "KSA1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estádio Al Hazm",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": [
+				"KSA_HAZ"
+			]
+		},
+		{
+			"key": "KSA_OKH",
+			"name": "Al Okhdood Club",
+			"short": "Al Okhdood",
+			"abbr": "OKH",
+			"nick": "Okhdood",
+			"city": "Najran",
+			"founded": 1976,
+			"league": "KSA1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estádio Prince Hathloul bin Abdulaziz",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_HAZ",
+			"name": "Al Hazem SC",
+			"short": "Al Hazem",
+			"abbr": "HAZ",
+			"nick": "Hazem",
+			"city": "Al Rass",
+			"founded": 1957,
+			"league": "KSA1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio Al Hazm",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": [
+				"KSA_KHO"
+			]
+		},
+		{
+			"key": "KSA_DAM",
+			"name": "Damac FC",
+			"short": "Damac",
+			"abbr": "DAM",
+			"nick": "Cavaleiros do Sul",
+			"city": "Khamis Mushait",
+			"founded": 1972,
+			"league": "KSA1",
+			"rep": 53,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Prince Sultan bin Abdul Aziz",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_NAJ",
+			"name": "Al Najma SC",
+			"short": "Al Najma",
+			"abbr": "NAJ",
+			"nick": "Estrela",
+			"city": "Unaizah",
+			"founded": 1960,
+			"league": "KSA1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Al Najma",
+			"capacity": 6000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "KSA_NEO",
+			"name": "NEOM SC",
+			"short": "NEOM",
+			"abbr": "NEO",
+			"nick": "NEOM",
+			"city": "Tabuk",
+			"founded": 1955,
+			"league": "KSA1",
+			"rep": 55,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#C5A572"
+			],
+			"stadium": "Estádio King Khalid de Tabuk",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

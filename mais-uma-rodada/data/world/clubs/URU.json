@@ -1,12 +1,12 @@
 {
 	"nation": "URU",
-	"_doc": "Uruguai (liga de 12).",
+	"_doc": "Uruguai (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "URU_MAU",
-			"name": "Montevideo Aurinegro",
-			"short": "Aurinegros",
-			"abbr": "MAU",
+			"name": "Club Atlético Peñarol",
+			"short": "Peñarol",
+			"abbr": "PEN",
 			"nick": "Manyas",
 			"city": "Montevideo",
 			"founded": 1891,
@@ -17,7 +17,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estadio del Siglo",
+			"stadium": "Estadio Campeón del Siglo",
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "URU_BOS",
-			"name": "Montevideo Tricolor",
-			"short": "Bolsos",
-			"abbr": "BOS",
+			"name": "Club Nacional de Football",
+			"short": "Nacional",
+			"abbr": "NAC",
 			"nick": "Bolsos",
 			"city": "Montevideo",
 			"founded": 1899,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Parque Central",
+			"stadium": "Gran Parque Central",
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "URU_VIO",
-			"name": "Montevideo Violeta",
-			"short": "Violetas",
-			"abbr": "VIO",
+			"name": "Defensor Sporting Club",
+			"short": "Defensor",
+			"abbr": "DEF",
 			"nick": "Violetas",
 			"city": "Montevideo",
 			"founded": 1913,
@@ -69,7 +69,7 @@
 				"#5E2A84",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Parque Rodó",
+			"stadium": "Estadio Luis Franzini",
 			"capacity": 18000,
 			"kit": "plain",
 			"crest": {
@@ -80,9 +80,9 @@
 		},
 		{
 			"key": "URU_FRA",
-			"name": "Maroñas Franja",
-			"short": "Franja",
-			"abbr": "FRA",
+			"name": "Danubio Fútbol Club",
+			"short": "Danubio",
+			"abbr": "DAN",
 			"nick": "Franjeados",
 			"city": "Montevideo",
 			"founded": 1932,
@@ -93,7 +93,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio de la Curva",
+			"stadium": "Estadio Jardines del Hipódromo",
 			"capacity": 18000,
 			"kit": "diagonal",
 			"crest": {

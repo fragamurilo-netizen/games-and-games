@@ -1,12 +1,12 @@
 {
 	"nation": "ESP",
-	"_doc": "Espanha: 1ª e 2ª divisão. Nomes genéricos inspirados nos clubes reais.",
+	"_doc": "Espanha: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "ESP_MBL",
-			"name": "Madrid Blanco",
-			"short": "Madrid Blanco",
-			"abbr": "MBL",
+			"name": "Real Madrid CF",
+			"short": "Real Madrid",
+			"abbr": "RMA",
 			"nick": "Merengues",
 			"city": "Madrid",
 			"founded": 1902,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#FEBE10"
 			],
-			"stadium": "Estadio de Chamartín",
+			"stadium": "Santiago Bernabéu",
 			"capacity": 83000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "ESP_BLG",
-			"name": "Barcelona Blaugrana",
-			"short": "Blaugrana",
-			"abbr": "BLG",
+			"name": "FC Barcelona",
+			"short": "Barcelona",
+			"abbr": "BAR",
 			"nick": "Culés",
 			"city": "Barcelona",
 			"founded": 1899,
@@ -44,7 +44,7 @@
 				"#A50044",
 				"#004D98"
 			],
-			"stadium": "Estadi de la Diagonal",
+			"stadium": "Spotify Camp Nou",
 			"capacity": 99000,
 			"kit": "stripes_v",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "ESP_MRB",
-			"name": "Madrid Rojiblanco",
-			"short": "Rojiblancos",
-			"abbr": "MRB",
+			"name": "Club Atlético de Madrid",
+			"short": "Atlético",
+			"abbr": "ATM",
 			"nick": "Colchoneros",
 			"city": "Madrid",
 			"founded": 1903,
@@ -71,7 +71,7 @@
 				"#CB3524",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de San Blas",
+			"stadium": "Riyadh Air Metropolitano",
 			"capacity": 70000,
 			"kit": "stripes_v",
 			"crest": {
@@ -84,9 +84,9 @@
 		},
 		{
 			"key": "ESP_BIL",
-			"name": "Bilbao Leones",
-			"short": "Leones",
-			"abbr": "BIL",
+			"name": "Athletic Club",
+			"short": "Athletic",
+			"abbr": "ATH",
 			"nick": "Leones",
 			"city": "Bilbao",
 			"founded": 1898,
@@ -97,7 +97,7 @@
 				"#EE2523",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Basurto",
+			"stadium": "San Mamés",
 			"capacity": 53000,
 			"kit": "stripes_v",
 			"crest": {
@@ -110,9 +110,9 @@
 		},
 		{
 			"key": "ESP_DON",
-			"name": "Donostia Txuri-Urdin",
-			"short": "Txuri-Urdin",
-			"abbr": "DON",
+			"name": "Real Sociedad de Fútbol",
+			"short": "Real Sociedad",
+			"abbr": "RSO",
 			"nick": "Txuri-Urdin",
 			"city": "San Sebastián",
 			"founded": 1909,
@@ -123,7 +123,7 @@
 				"#0067B1",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Anoeta",
+			"stadium": "Reale Arena",
 			"capacity": 39500,
 			"kit": "stripes_v",
 			"crest": {
@@ -136,9 +136,9 @@
 		},
 		{
 			"key": "ESP_SUB",
-			"name": "Submarino Amarillo",
-			"short": "Submarino",
-			"abbr": "SUB",
+			"name": "Villarreal CF",
+			"short": "Villarreal",
+			"abbr": "VIL",
 			"nick": "Submarino",
 			"city": "Villarreal",
 			"founded": 1923,
@@ -149,7 +149,7 @@
 				"#FFE667",
 				"#005187"
 			],
-			"stadium": "Estadio del Madrigal",
+			"stadium": "Estadio de la Cerámica",
 			"capacity": 23500,
 			"kit": "plain",
 			"crest": {
@@ -162,9 +162,9 @@
 		},
 		{
 			"key": "ESP_VBL",
-			"name": "Sevilla Verdiblanco",
-			"short": "Verdiblancos",
-			"abbr": "VBL",
+			"name": "Real Betis Balompié",
+			"short": "Real Betis",
+			"abbr": "BET",
 			"nick": "Béticos",
 			"city": "Sevilla",
 			"founded": 1907,
@@ -175,7 +175,7 @@
 				"#00954C",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Heliópolis",
+			"stadium": "Estadio Benito Villamarín",
 			"capacity": 60000,
 			"kit": "stripes_v",
 			"crest": {
@@ -188,9 +188,9 @@
 		},
 		{
 			"key": "ESP_NER",
-			"name": "Sevilla Nervión",
-			"short": "Nervión",
-			"abbr": "NER",
+			"name": "Sevilla FC",
+			"short": "Sevilla",
+			"abbr": "SEV",
 			"nick": "Sevillistas",
 			"city": "Sevilla",
 			"founded": 1890,
@@ -201,7 +201,7 @@
 				"#FFFFFF",
 				"#D71A28"
 			],
-			"stadium": "Estadio de Nervión",
+			"stadium": "Ramón Sánchez-Pizjuán",
 			"capacity": 43800,
 			"kit": "plain",
 			"crest": {
@@ -214,9 +214,9 @@
 		},
 		{
 			"key": "ESP_VLC",
-			"name": "Valencia Murciélagos",
-			"short": "Murciélagos",
-			"abbr": "VLC",
+			"name": "Valencia CF",
+			"short": "Valencia",
+			"abbr": "VAL",
 			"nick": "Che",
 			"city": "Valencia",
 			"founded": 1919,
@@ -227,7 +227,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio del Turia",
+			"stadium": "Mestalla",
 			"capacity": 49000,
 			"kit": "plain",
 			"crest": {
@@ -241,9 +241,9 @@
 		},
 		{
 			"key": "ESP_VIG",
-			"name": "Vigo Celeste",
-			"short": "Celestes",
-			"abbr": "VIG",
+			"name": "RC Celta de Vigo",
+			"short": "Celta",
+			"abbr": "CEL",
 			"nick": "Celestes",
 			"city": "Vigo",
 			"founded": 1923,
@@ -254,7 +254,7 @@
 				"#8AC3EE",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Lagares",
+			"stadium": "Abanca-Balaídos",
 			"capacity": 29000,
 			"kit": "plain",
 			"crest": {
@@ -267,8 +267,8 @@
 		},
 		{
 			"key": "ESP_GIR",
-			"name": "Girona Blanquivermell",
-			"short": "Blanquivermell",
+			"name": "Girona FC",
+			"short": "Girona",
 			"abbr": "GIR",
 			"nick": "Gironins",
 			"city": "Girona",
@@ -280,7 +280,7 @@
 				"#CD2534",
 				"#FFFFFF"
 			],
-			"stadium": "Estadi de Montilivi",
+			"stadium": "Estadi Montilivi",
 			"capacity": 14600,
 			"kit": "stripes_v",
 			"crest": {
@@ -294,9 +294,9 @@
 		},
 		{
 			"key": "ESP_PAM",
-			"name": "Pamplona Rojillos",
-			"short": "Rojillos",
-			"abbr": "PAM",
+			"name": "CA Osasuna",
+			"short": "Osasuna",
+			"abbr": "OSA",
 			"nick": "Rojillos",
 			"city": "Pamplona",
 			"founded": 1920,
@@ -307,7 +307,7 @@
 				"#D91A21",
 				"#0A346F"
 			],
-			"stadium": "Estadio de la Milagrosa",
+			"stadium": "El Sadar",
 			"capacity": 23500,
 			"kit": "plain",
 			"crest": {
@@ -321,8 +321,8 @@
 		},
 		{
 			"key": "ESP_MLL",
-			"name": "Mallorca Bermellón",
-			"short": "Bermellones",
+			"name": "RCD Mallorca",
+			"short": "Mallorca",
 			"abbr": "MLL",
 			"nick": "Bermellones",
 			"city": "Palma",
@@ -334,7 +334,7 @@
 				"#E20613",
 				"#111111"
 			],
-			"stadium": "Estadi de Son Moix",
+			"stadium": "Son Moix",
 			"capacity": 23100,
 			"kit": "plain",
 			"crest": {
@@ -345,9 +345,9 @@
 		},
 		{
 			"key": "ESP_VCS",
-			"name": "Vallecas Franjirrojo",
-			"short": "Vallecas",
-			"abbr": "VCS",
+			"name": "Rayo Vallecano",
+			"short": "Rayo Vallecano",
+			"abbr": "RAY",
 			"nick": "Franjirrojos",
 			"city": "Madrid",
 			"founded": 1924,
@@ -372,8 +372,8 @@
 		},
 		{
 			"key": "ESP_GET",
-			"name": "Getafe Azulón",
-			"short": "Azulones",
+			"name": "Getafe CF",
+			"short": "Getafe",
 			"abbr": "GET",
 			"nick": "Azulones",
 			"city": "Getafe",
@@ -385,7 +385,7 @@
 				"#005999",
 				"#FFFFFF"
 			],
-			"stadium": "Coliseo del Sur",
+			"stadium": "Coliseum",
 			"capacity": 16500,
 			"kit": "plain",
 			"crest": {
@@ -398,9 +398,9 @@
 		},
 		{
 			"key": "ESP_VIT",
-			"name": "Vitoria Babazorro",
-			"short": "Babazorros",
-			"abbr": "VIT",
+			"name": "Deportivo Alavés",
+			"short": "Alavés",
+			"abbr": "ALA",
 			"nick": "Babazorros",
 			"city": "Vitoria-Gasteiz",
 			"founded": 1921,
@@ -411,7 +411,7 @@
 				"#0761AF",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Gasteiz",
+			"stadium": "Mendizorroza",
 			"capacity": 19800,
 			"kit": "stripes_v",
 			"crest": {
@@ -424,9 +424,9 @@
 		},
 		{
 			"key": "ESP_PQT",
-			"name": "Barcelona Periquito",
-			"short": "Periquitos",
-			"abbr": "PQT",
+			"name": "RCD Espanyol",
+			"short": "Espanyol",
+			"abbr": "ESP",
 			"nick": "Pericos",
 			"city": "Barcelona",
 			"founded": 1900,
@@ -437,7 +437,7 @@
 				"#007FC8",
 				"#FFFFFF"
 			],
-			"stadium": "Estadi de Cornellà",
+			"stadium": "RCDE Stadium",
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
@@ -450,9 +450,9 @@
 		},
 		{
 			"key": "ESP_GRA",
-			"name": "Valencia Granota",
-			"short": "Granotes",
-			"abbr": "GRA",
+			"name": "Levante UD",
+			"short": "Levante",
+			"abbr": "LEV",
 			"nick": "Granotes",
 			"city": "Valencia",
 			"founded": 1909,
@@ -463,7 +463,7 @@
 				"#004B98",
 				"#B4053F"
 			],
-			"stadium": "Estadio de Orriols",
+			"stadium": "Ciutat de València",
 			"capacity": 26300,
 			"kit": "stripes_v",
 			"crest": {
@@ -476,9 +476,9 @@
 		},
 		{
 			"key": "ESP_ELX",
-			"name": "Elche Franjiverde",
-			"short": "Franjiverdes",
-			"abbr": "ELX",
+			"name": "Elche CF",
+			"short": "Elche",
+			"abbr": "ELC",
 			"nick": "Franjiverdes",
 			"city": "Elche",
 			"founded": 1923,
@@ -489,7 +489,7 @@
 				"#FFFFFF",
 				"#05642C"
 			],
-			"stadium": "Estadio del Altabix",
+			"stadium": "Martínez Valero",
 			"capacity": 31300,
 			"kit": "faixa",
 			"crest": {
@@ -500,8 +500,8 @@
 		},
 		{
 			"key": "ESP_OVI",
-			"name": "Oviedo Carbayón",
-			"short": "Carbayones",
+			"name": "Real Oviedo",
+			"short": "Real Oviedo",
 			"abbr": "OVI",
 			"nick": "Carbayones",
 			"city": "Oviedo",
@@ -513,7 +513,7 @@
 				"#0055A5",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Buenavista",
+			"stadium": "Carlos Tartiere",
 			"capacity": 30500,
 			"kit": "plain",
 			"crest": {
@@ -526,9 +526,9 @@
 		},
 		{
 			"key": "ESP_COR",
-			"name": "Coruña Branquiazul",
-			"short": "Branquiazuis",
-			"abbr": "COR",
+			"name": "RC Deportivo de La Coruña",
+			"short": "Deportivo",
+			"abbr": "DEP",
 			"nick": "Turcos",
 			"city": "A Coruña",
 			"founded": 1906,
@@ -539,7 +539,7 @@
 				"#FFFFFF",
 				"#0066B3"
 			],
-			"stadium": "Estadio de Riazor",
+			"stadium": "Riazor",
 			"capacity": 32600,
 			"kit": "stripes_v",
 			"crest": {
@@ -552,9 +552,9 @@
 		},
 		{
 			"key": "ESP_GIJ",
-			"name": "Gijón Rojiblanco",
-			"short": "Gijón",
-			"abbr": "GIJ",
+			"name": "Real Sporting de Gijón",
+			"short": "Sporting Gijón",
+			"abbr": "SPG",
 			"nick": "Sportinguistas",
 			"city": "Gijón",
 			"founded": 1905,
@@ -565,7 +565,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Viesques",
+			"stadium": "El Molinón",
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
@@ -578,8 +578,8 @@
 		},
 		{
 			"key": "ESP_ZAR",
-			"name": "Zaragoza Maño",
-			"short": "Maños",
+			"name": "Real Zaragoza",
+			"short": "Real Zaragoza",
 			"abbr": "ZAR",
 			"nick": "Maños",
 			"city": "Zaragoza",
@@ -591,7 +591,7 @@
 				"#FFFFFF",
 				"#0A3D8F"
 			],
-			"stadium": "Estadio de la Romareda",
+			"stadium": "La Romareda",
 			"capacity": 33600,
 			"kit": "plain",
 			"crest": {
@@ -604,9 +604,9 @@
 		},
 		{
 			"key": "ESP_SAN",
-			"name": "Santander Verdiblanco",
-			"short": "Santander",
-			"abbr": "SAN",
+			"name": "Real Racing Club de Santander",
+			"short": "Racing",
+			"abbr": "RAC",
 			"nick": "Racinguistas",
 			"city": "Santander",
 			"founded": 1913,
@@ -617,7 +617,7 @@
 				"#FFFFFF",
 				"#00843D"
 			],
-			"stadium": "Estadio de El Sardinero",
+			"stadium": "El Sardinero",
 			"capacity": 22200,
 			"kit": "plain",
 			"crest": {
@@ -628,9 +628,9 @@
 		},
 		{
 			"key": "ESP_GCA",
-			"name": "Gran Canaria Amarillo",
-			"short": "Gran Canaria",
-			"abbr": "GCA",
+			"name": "UD Las Palmas",
+			"short": "Las Palmas",
+			"abbr": "LPA",
 			"nick": "Amarillos",
 			"city": "Las Palmas",
 			"founded": 1949,
@@ -641,7 +641,7 @@
 				"#FFE400",
 				"#0055A5"
 			],
-			"stadium": "Estadio de Siete Palmas",
+			"stadium": "Estadio de Gran Canaria",
 			"capacity": 32400,
 			"kit": "plain",
 			"crest": {
@@ -654,7 +654,7 @@
 		},
 		{
 			"key": "ESP_TEN",
-			"name": "Tenerife Blanquiazul",
+			"name": "CD Tenerife",
 			"short": "Tenerife",
 			"abbr": "TEN",
 			"nick": "Chicharreros",
@@ -667,7 +667,7 @@
 				"#FFFFFF",
 				"#0055A5"
 			],
-			"stadium": "Estadio del Puerto",
+			"stadium": "Heliodoro Rodríguez López",
 			"capacity": 22800,
 			"kit": "plain",
 			"crest": {
@@ -680,9 +680,9 @@
 		},
 		{
 			"key": "ESP_PUC",
-			"name": "Valladolid Pucela",
-			"short": "Pucela",
-			"abbr": "PUC",
+			"name": "Real Valladolid CF",
+			"short": "Valladolid",
+			"abbr": "VLL",
 			"nick": "Pucelanos",
 			"city": "Valladolid",
 			"founded": 1928,
@@ -693,7 +693,7 @@
 				"#921B88",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Pisuerga",
+			"stadium": "José Zorrilla",
 			"capacity": 27800,
 			"kit": "stripes_v",
 			"crest": {
@@ -704,8 +704,8 @@
 		},
 		{
 			"key": "ESP_ALM",
-			"name": "Almería Indálico",
-			"short": "Indálicos",
+			"name": "UD Almería",
+			"short": "Almería",
 			"abbr": "ALM",
 			"nick": "Indálicos",
 			"city": "Almería",
@@ -717,7 +717,7 @@
 				"#EE1119",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Mediterráneo",
+			"stadium": "Power Horse Stadium",
 			"capacity": 17400,
 			"kit": "stripes_v",
 			"crest": {
@@ -728,9 +728,9 @@
 		},
 		{
 			"key": "ESP_NAZ",
-			"name": "Granada Nazarí",
-			"short": "Nazaríes",
-			"abbr": "NAZ",
+			"name": "Granada CF",
+			"short": "Granada",
+			"abbr": "GRA",
 			"nick": "Nazaríes",
 			"city": "Granada",
 			"founded": 1931,
@@ -741,7 +741,7 @@
 				"#C8102E",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Zaidín",
+			"stadium": "Nuevo Los Cármenes",
 			"capacity": 19300,
 			"kit": "stripes_h",
 			"crest": {
@@ -752,8 +752,8 @@
 		},
 		{
 			"key": "ESP_CAD",
-			"name": "Cádiz Gaditano",
-			"short": "Gaditanos",
+			"name": "Cádiz CF",
+			"short": "Cádiz",
 			"abbr": "CAD",
 			"nick": "Cadistas",
 			"city": "Cádiz",
@@ -765,7 +765,7 @@
 				"#FFE400",
 				"#0055A5"
 			],
-			"stadium": "Estadio de la Bahía",
+			"stadium": "Nuevo Mirandilla",
 			"capacity": 20700,
 			"kit": "plain",
 			"crest": {
@@ -776,8 +776,8 @@
 		},
 		{
 			"key": "ESP_EIB",
-			"name": "Eibar Armero",
-			"short": "Armeros",
+			"name": "SD Eibar",
+			"short": "Eibar",
 			"abbr": "EIB",
 			"nick": "Armeros",
 			"city": "Eibar",
@@ -789,7 +789,7 @@
 				"#0E2D5E",
 				"#A61B31"
 			],
-			"stadium": "Estadio del Ego",
+			"stadium": "Ipurua",
 			"capacity": 8100,
 			"kit": "stripes_v",
 			"crest": {
@@ -800,7 +800,7 @@
 		},
 		{
 			"key": "ESP_HUE",
-			"name": "Huesca Azulgrana",
+			"name": "SD Huesca",
 			"short": "Huesca",
 			"abbr": "HUE",
 			"nick": "Oscenses",
@@ -813,7 +813,7 @@
 				"#1F3E7C",
 				"#9B1B30"
 			],
-			"stadium": "Estadio Oscense",
+			"stadium": "El Alcoraz",
 			"capacity": 9100,
 			"kit": "stripes_v",
 			"crest": {
@@ -826,8 +826,8 @@
 		},
 		{
 			"key": "ESP_MIR",
-			"name": "Miranda Rojillo",
-			"short": "Jabatos",
+			"name": "CD Mirandés",
+			"short": "Mirandés",
 			"abbr": "MIR",
 			"nick": "Jabatos",
 			"city": "Miranda de Ebro",
@@ -839,7 +839,7 @@
 				"#E20613",
 				"#111111"
 			],
-			"stadium": "Estadio del Ebro",
+			"stadium": "Anduva",
 			"capacity": 5700,
 			"kit": "plain",
 			"crest": {
@@ -850,9 +850,9 @@
 		},
 		{
 			"key": "ESP_ALC",
-			"name": "Albacete Manchego",
-			"short": "Manchegos",
-			"abbr": "ALC",
+			"name": "Albacete Balompié",
+			"short": "Albacete",
+			"abbr": "ALB",
 			"nick": "Queso Mecánico",
 			"city": "Albacete",
 			"founded": 1940,
@@ -863,7 +863,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Estadio de La Mancha",
+			"stadium": "Carlos Belmonte",
 			"capacity": 17500,
 			"kit": "plain",
 			"crest": {
@@ -874,7 +874,7 @@
 		},
 		{
 			"key": "ESP_BUR",
-			"name": "Burgos Blanquinegro",
+			"name": "Burgos CF",
 			"short": "Burgos",
 			"abbr": "BUR",
 			"nick": "Blanquinegros",
@@ -887,7 +887,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio del Arlanzón",
+			"stadium": "El Plantío",
 			"capacity": 12200,
 			"kit": "plain",
 			"crest": {
@@ -898,9 +898,9 @@
 		},
 		{
 			"key": "ESP_CCF",
-			"name": "Córdoba Califa",
-			"short": "Califas",
-			"abbr": "CCF",
+			"name": "Córdoba CF",
+			"short": "Córdoba",
+			"abbr": "COR",
 			"nick": "Califas",
 			"city": "Córdoba",
 			"founded": 1954,
@@ -911,7 +911,7 @@
 				"#FFFFFF",
 				"#00843D"
 			],
-			"stadium": "Estadio del Guadalquivir",
+			"stadium": "Nuevo Arcángel",
 			"capacity": 21800,
 			"kit": "stripes_v",
 			"crest": {
@@ -922,9 +922,9 @@
 		},
 		{
 			"key": "ESP_MLG",
-			"name": "Málaga Boquerón",
-			"short": "Boquerones",
-			"abbr": "MLG",
+			"name": "Málaga CF",
+			"short": "Málaga",
+			"abbr": "MAL",
 			"nick": "Boquerones",
 			"city": "Málaga",
 			"founded": 1994,
@@ -935,7 +935,7 @@
 				"#0A7BC2",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Martiricos",
+			"stadium": "La Rosaleda",
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
@@ -946,8 +946,8 @@
 		},
 		{
 			"key": "ESP_CAS",
-			"name": "Castellón Albinegro",
-			"short": "Albinegros",
+			"name": "CD Castellón",
+			"short": "Castellón",
 			"abbr": "CAS",
 			"nick": "Orelluts",
 			"city": "Castellón",
@@ -959,7 +959,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Grao",
+			"stadium": "Castalia",
 			"capacity": 15500,
 			"kit": "stripes_v",
 			"crest": {
@@ -970,8 +970,8 @@
 		},
 		{
 			"key": "ESP_LEG",
-			"name": "Leganés Pepinero",
-			"short": "Pepineros",
+			"name": "CD Leganés",
+			"short": "Leganés",
 			"abbr": "LEG",
 			"nick": "Pepineros",
 			"city": "Leganés",
@@ -983,7 +983,7 @@
 				"#FFFFFF",
 				"#004A99"
 			],
-			"stadium": "Estadio del Sur de Madrid",
+			"stadium": "Butarque",
 			"capacity": 12500,
 			"kit": "stripes_v",
 			"crest": {
@@ -996,9 +996,9 @@
 		},
 		{
 			"key": "ESP_LEO",
-			"name": "León Culturalista",
+			"name": "Cultural y Deportiva Leonesa",
 			"short": "Cultural",
-			"abbr": "LEO",
+			"abbr": "CUL",
 			"nick": "Culturalistas",
 			"city": "León",
 			"founded": 1923,
@@ -1009,7 +1009,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio del Bernesga",
+			"stadium": "Reino de León",
 			"capacity": 13400,
 			"kit": "plain",
 			"crest": {

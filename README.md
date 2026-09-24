@@ -4,7 +4,8 @@ Simulador de gestão de futebol para **Android**, feito em **Godot 4.7** — off
 para aquele "só mais uma rodada" honesto: sem energia, sem timers, sem loot boxes. A vontade de continuar
 vem da própria simulação.
 
-> Todos os clubes, jogadores e o país de **Valdora** são fictícios.
+> Clubes, estádios e ligas usam os **nomes reais** apenas como referência, sem vínculo oficial.
+> Todos os jogadores são fictícios.
 
 ## O que já dá para jogar (versão 0.1.0 · MVP 1)
 
@@ -16,6 +17,9 @@ vem da própria simulação.
   uniformes e rostos gerados proceduralmente.
 - **Temporada completa**: 38 rodadas (turno e returno), tabela com desempate, artilharia, assistências,
   acesso e rebaixamento (4/4), premiação e virada de ano.
+- **Estaduais**: Paulistão, Carioca, Mineiro, Gauchão, Paranaense, Catarinense, Cearense e Goianão, mais Copa do
+  Nordeste e Copa Verde para os estados menores. Primeira fase em grupos no meio de semana, semifinal em jogo
+  único e final em ida e volta. Holanda, Portugal, Turquia e Arábia Saudita com ligas de 18 clubes reais.
 - **Motor de partidas estatístico** minuto a minuto: setores, táticas, estilos, mando, clássicos, fadiga,
   cartões, lesões, pênaltis, substituições e acréscimos. Zebras existem, mas são raras.
 - **Partida ao vivo** em campo 2D com narração procedural, placar dos outros jogos, velocidade

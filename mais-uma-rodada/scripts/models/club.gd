@@ -61,7 +61,7 @@ var philosophy: String = ""
 
 ## Memória: [{y, l (liga), p (posição), pts, w, dr, l, gf, ga}]
 var history: Array = []
-## Títulos por chave: "L:BRA1" campeão da liga, "P:BRA2" acesso conquistado, "C:UCL" continental, "W:CWC" mundial.
+## Títulos por chave: "L:BRA1" campeão da liga, "P:BRA2" acesso conquistado, "C:UCL" continental, "S:SPE" estadual, "W:CWC" mundial.
 var titles: Dictionary = {}
 ## Sequências da temporada atual
 var streak_unbeaten: int = 0

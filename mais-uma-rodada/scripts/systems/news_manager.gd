@@ -154,18 +154,18 @@ static func on_cup_events(world: GameWorld, events: Array) -> void:
 			"champion":
 				var c := world.club(int(ev["club"]))
 				var ru := world.club(int(ev.get("runner_up", -1)))
-				var cat := "mundial_campeao" if ev["cup"] == CupManager.CWC else "copa_campeao"
+				var cat := "mundial_campeao" if ev["cup"] == CupManager.CWC else CupManager.news_cat(String(ev["cup"]), "campeao")
 				post(world, cat, {"club": c.short_name, "cup": cup_name, "runner_up": ru.short_name if ru != null else "", "year": world.year},
 					c.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(c.id) else NewsEvent.IMP_HIGH)
 			"advance":
 				if world.is_user_club(int(ev["club"])):
 					var by := world.club(int(ev.get("by", -1)))
-					post(world, "copa_avanca", {"club": user.short_name, "cup": cup_name, "stage": String(ev["stage"]).to_lower(),
+					post(world, CupManager.news_cat(String(ev["cup"]), "avanca"), {"club": user.short_name, "cup": cup_name, "stage": String(ev["stage"]).to_lower(),
 						"opponent": by.short_name if by != null else ""}, user.id, -1, NewsEvent.IMP_HIGH)
 			"out":
 				if world.is_user_club(int(ev["club"])):
 					var by := world.club(int(ev.get("by", -1)))
-					post(world, "copa_eliminado", {"club": user.short_name, "cup": cup_name, "stage": String(ev["stage"]).to_lower(),
+					post(world, CupManager.news_cat(String(ev["cup"]), "eliminado"), {"club": user.short_name, "cup": cup_name, "stage": String(ev["stage"]).to_lower(),
 						"opponent": by.short_name if by != null else "os adversários"}, user.id, -1, NewsEvent.IMP_HIGH)
 			"cwc":
 				if ev["clubs"].has(user.id):
