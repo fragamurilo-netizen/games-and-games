@@ -80,6 +80,11 @@ func _run() -> void:
 	var after_swipe := sc.scroll_vertical
 	_check(after_swipe >= 400, "arrastar sobre as linhas rola a lista (%d px)" % after_swipe)
 	_check(UIManager.current() == screen, "arrastar não abre o jogador sob o dedo")
+	var shrunk := 0
+	for n in screen.find_children("Tap", "Button", true, false):
+		if (n.get_parent() as Control).scale != Vector2.ONE:
+			shrunk += 1
+	_check(shrunk == 0, "a linha tocada volta ao tamanho normal depois do arrasto")
 	await _swipe(mid + Vector2(0, -200), mid + Vector2(0, 100), 6)
 	await _ms(1500)
 	_check(sc.scroll_vertical < after_swipe, "arrastar para baixo sobe a lista (%d px)" % sc.scroll_vertical)
