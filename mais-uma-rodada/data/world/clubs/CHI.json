@@ -1,0 +1,109 @@
+{
+	"nation": "CHI",
+	"_doc": "Chile (liga de 12).",
+	"clubs": [
+		{
+			"key": "CHI_ALB",
+			"name": "Santiago Albo",
+			"short": "Albos",
+			"abbr": "ALB",
+			"nick": "Albos",
+			"city": "Santiago",
+			"founded": 1925,
+			"league": "CHI1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio del Monumental de Macul",
+			"capacity": 47000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"CHI_AZU",
+				"CHI_CRU"
+			]
+		},
+		{
+			"key": "CHI_AZU",
+			"name": "Santiago Azul",
+			"short": "Chunchos",
+			"abbr": "AZU",
+			"nick": "Chunchos",
+			"city": "Santiago",
+			"founded": 1927,
+			"league": "CHI1",
+			"rep": 68,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio de Ñuñoa",
+			"capacity": 48000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"CHI_ALB"
+			]
+		},
+		{
+			"key": "CHI_CRU",
+			"name": "Santiago Cruzado",
+			"short": "Cruzados",
+			"abbr": "CRU",
+			"nick": "Cruzados",
+			"city": "Santiago",
+			"founded": 1937,
+			"league": "CHI1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#1D5BBF"
+			],
+			"stadium": "Estadio de San Carlos",
+			"capacity": 14000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"CHI_ALB"
+			]
+		},
+		{
+			"key": "CHI_LOA",
+			"name": "Calama Loa",
+			"short": "Loínos",
+			"abbr": "LOA",
+			"nick": "Zorros del Desierto",
+			"city": "Calama",
+			"founded": 1977,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Desierto",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		}
+	]
+}

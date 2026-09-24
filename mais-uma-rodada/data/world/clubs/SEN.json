@@ -1,0 +1,54 @@
+{
+	"nation": "SEN",
+	"_doc": "Senegal (liga de 6).",
+	"clubs": [
+		{
+			"key": "SEN_GEN",
+			"name": "Dakar Génération",
+			"short": "Génération",
+			"abbr": "GEN",
+			"nick": "Académiciens",
+			"city": "Dakar",
+			"founded": 2000,
+			"league": "SEN1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stade de Déni Biram",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SEN_JAR",
+			"name": "Dakar Vert et Blanc",
+			"short": "Jaraaf",
+			"abbr": "JAR",
+			"nick": "Vert et Blanc",
+			"city": "Dakar",
+			"founded": 1933,
+			"league": "SEN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de la Médina",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		}
+	]
+}

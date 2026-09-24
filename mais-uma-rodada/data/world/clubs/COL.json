@@ -1,0 +1,186 @@
+{
+	"nation": "COL",
+	"_doc": "Colômbia (liga de 12).",
+	"clubs": [
+		{
+			"key": "COL_VRD",
+			"name": "Medellín Verdolaga",
+			"short": "Verdolagas",
+			"abbr": "VRD",
+			"nick": "Verdolagas",
+			"city": "Medellín",
+			"founded": 1947,
+			"league": "COL1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Poblado",
+			"capacity": 40000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"COL_POD"
+			]
+		},
+		{
+			"key": "COL_EMB",
+			"name": "Bogotá Embajador",
+			"short": "Embajadores",
+			"abbr": "EMB",
+			"nick": "Embajadores",
+			"city": "Bogotá",
+			"founded": 1946,
+			"league": "COL1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Teusaquillo",
+			"capacity": 36000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"COL_CAR"
+			]
+		},
+		{
+			"key": "COL_ESC",
+			"name": "Cali Escarlata",
+			"short": "Escarlatas",
+			"abbr": "ESC",
+			"nick": "Diablos Rojos",
+			"city": "Cali",
+			"founded": 1927,
+			"league": "COL1",
+			"rep": 68,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Pascual",
+			"capacity": 38000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"COL_AZC"
+			]
+		},
+		{
+			"key": "COL_TIB",
+			"name": "Barranquilla Tiburón",
+			"short": "Tiburones",
+			"abbr": "TIB",
+			"nick": "Tiburones",
+			"city": "Barranquilla",
+			"founded": 1924,
+			"league": "COL1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Caribe",
+			"capacity": 46000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": []
+		},
+		{
+			"key": "COL_POD",
+			"name": "Medellín Poderoso",
+			"short": "Poderoso",
+			"abbr": "POD",
+			"nick": "Poderoso",
+			"city": "Medellín",
+			"founded": 1913,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#1D3F91"
+			],
+			"stadium": "Estadio del Poblado",
+			"capacity": 40000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"COL_VRD"
+			]
+		},
+		{
+			"key": "COL_CAR",
+			"name": "Bogotá Cardenal",
+			"short": "Cardenales",
+			"abbr": "CAR",
+			"nick": "Cardenales",
+			"city": "Bogotá",
+			"founded": 1941,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Teusaquillo",
+			"capacity": 36000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"COL_EMB"
+			]
+		},
+		{
+			"key": "COL_AZC",
+			"name": "Cali Azucarero",
+			"short": "Azucareros",
+			"abbr": "AZC",
+			"nick": "Azucareros",
+			"city": "Cali",
+			"founded": 1912,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Palmaseca",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"COL_ESC"
+			]
+		}
+	]
+}

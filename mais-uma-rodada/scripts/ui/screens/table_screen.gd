@@ -1,9 +1,12 @@
 extends BaseScreen
-## Tabelas: classificação, artilharia, assistências e rodadas das quatro divisões.
+## Tabelas do mundo inteiro: ligas de qualquer país (classificação, artilharia, assistências, rodadas)
+## e as copas da temporada (grupos, mata-mata e artilharia).
 
-const TABS := [["table", "Tabela"], ["scorers", "Artilharia"], ["assists", "Assistências"], ["rounds", "Rodadas"]]
+const LEAGUE_TABS := [["table", "Tabela"], ["scorers", "Artilharia"], ["assists", "Assist."], ["rounds", "Rodadas"]]
+const CUP_TABS := [["groups", "Grupos"], ["ko", "Mata-mata"], ["scorers", "Artilharia"]]
 
-var _div := -1
+var _league_id := ""
+var _cup_id := ""
 var _tab := "table"
 var _round := -1
 
@@ -15,39 +18,74 @@ func _init() -> void:
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
-	_div = int(p.get("div", -1))
-	_tab = p.get("tab", "table")
+	_league_id = p.get("league", "")
+	_cup_id = p.get("cup", "")
+	_tab = p.get("tab", "groups" if _cup_id != "" else "table")
+	_round = -1
 
 
 func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
-	if _div < 0:
-		_div = w.user_club().division
-	var league: League = w.season.leagues[_div]
-	if _round < 0:
-		_round = _last_played_round(league)
-	screen_subtitle = "%s · temporada %d" % [w.division_name(_div), w.year]
-	UIManager.refresh_chrome()
+	if _league_id == "" and _cup_id == "":
+		_league_id = w.user_league_id()
+	if _cup_id != "" and not w.season.cups.has(_cup_id):
+		_cup_id = ""
+		_league_id = w.user_league_id()
+		_tab = "table"
 	var c := content()
 	UIKit.clear(c)
-	# Divisões
-	var gd := ButtonGroup.new()
-	var drow := UIKit.hbox(8)
-	for d in w.season.leagues.size():
-		var dd := d
-		var chip := UIKit.chip(w.division_short(d), d == _div, gd, func():
-			_div = dd
-			_round = -1
-			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		drow.add_child(chip)
-	c.add_child(drow)
-	# Abas
+	c.add_child(_picker_row(w))
+	if _cup_id != "":
+		_cup_view(c, w, w.season.cups[_cup_id])
+	else:
+		_league_view(c, w, w.league(_league_id))
+	UIManager.refresh_chrome()
+
+
+## Competição atual + botão para trocar (qualquer liga do mundo ou copa).
+func _picker_row(w: GameWorld) -> Control:
+	var row := UIKit.hbox(10)
+	if _cup_id != "":
+		row.add_child(UIKit.icon_rect("trophy", 36, UIColors.ACCENT))
+		var cup: Cup = w.season.cups[_cup_id]
+		var l := UIKit.label(cup.name, "H2")
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(l)
+		screen_subtitle = "%s · temporada %d" % [cup.name, w.year]
+	else:
+		var cfg := DatabaseManager.league_cfg(_league_id)
+		row.add_child(UIKit.flag(String(cfg.get("nation", "")), 42))
+		var l := UIKit.label(String(cfg.get("name", _league_id)), "H2")
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(l)
+		screen_subtitle = "%s · temporada %d" % [cfg.get("name", _league_id), w.year]
+	row.add_child(UIKit.button("Trocar", "GhostButton", func(): _open_picker(w), "table"))
+	var v := UIKit.vbox(8)
+	v.add_child(row)
+	# Divisões do país (liga) ou abas (copa)
+	if _cup_id == "":
+		var nation: String = DatabaseManager.league_cfg(_league_id).get("nation", "")
+		var ids := DatabaseManager.leagues_of_nation(nation)
+		if ids.size() > 1:
+			var gd := ButtonGroup.new()
+			var drow := UIKit.hbox(8)
+			for lid in ids:
+				var id: String = lid
+				var chip := UIKit.chip(String(DatabaseManager.league_cfg(id).get("short", id)), id == _league_id, gd, func():
+					_league_id = id
+					_round = -1
+					refresh())
+				chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				drow.add_child(chip)
+			v.add_child(drow)
+	var tabs: Array = CUP_TABS if _cup_id != "" else LEAGUE_TABS
 	var gt := ButtonGroup.new()
 	var trow := UIKit.hbox(8)
-	for t in TABS:
+	for t in tabs:
 		var key: String = t[0]
 		var chip := UIKit.chip(t[1], key == _tab, gt, func():
 			_tab = key
@@ -55,12 +93,77 @@ func refresh() -> void:
 		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		chip.add_theme_font_size_override(&"font_size", 18)
 		trow.add_child(chip)
-	c.add_child(trow)
+	v.add_child(trow)
+	return v
+
+
+# ---------------------------------------------------------------------------
+# Seletor de competição
+# ---------------------------------------------------------------------------
+
+func _open_picker(w: GameWorld) -> void:
+	var v := UIKit.vbox(12)
+	v.custom_minimum_size.x = 640
+	v.add_child(UIKit.label("Escolha a competição", "Title"))
+	# Atalhos: minha liga e copas da temporada
+	var mine := UIKit.flow(8)
+	var ul := w.user_league_id()
+	mine.add_child(UIKit.button(w.league_short(ul), "", func(): _pick_league(ul), "table"))
+	for cid in w.season.cups:
+		var id: String = cid
+		mine.add_child(UIKit.button(w.season.cups[id].short_name, "", func(): _pick_cup(id), "trophy"))
+	v.add_child(UIKit.section("Atalhos"))
+	v.add_child(mine)
+	var confeds := {"UEFA": "Europa", "CONMEBOL": "América do Sul", "CONCACAF": "América do Norte", "CAF": "África", "AFC": "Ásia"}
+	for cf in confeds:
+		var flow := UIKit.flow(8)
+		for n in DatabaseManager.league_nations():
+			if DatabaseManager.nation(n).get("confed", "") != cf:
+				continue
+			var code: String = n
+			var inner := UIKit.hbox(8)
+			inner.add_child(UIKit.flag(code, 34))
+			inner.add_child(UIKit.label(DatabaseManager.nation_name(code), "Small"))
+			flow.add_child(UIKit.tap_row(inner, func(): _pick_league(DatabaseManager.leagues_of_nation(code)[0]), "CardFlat"))
+		v.add_child(UIKit.section(confeds[cf]))
+		v.add_child(flow)
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true)
+
+
+func _pick_league(id: String) -> void:
+	UIManager.close_modal()
+	_league_id = id
+	_cup_id = ""
+	if not LEAGUE_TABS.any(func(t): return t[0] == _tab):
+		_tab = "table"
+	_round = -1
+	refresh()
+
+
+func _pick_cup(id: String) -> void:
+	UIManager.close_modal()
+	_cup_id = id
+	if not CUP_TABS.any(func(t): return t[0] == _tab):
+		_tab = "groups"
+	refresh()
+
+
+# ---------------------------------------------------------------------------
+# Ligas
+# ---------------------------------------------------------------------------
+
+func _league_view(c: VBoxContainer, w: GameWorld, league: League) -> void:
+	if league == null:
+		c.add_child(UIKit.label("Liga indisponível.", "Muted"))
+		return
+	if _round < 0:
+		_round = _last_played_round(league)
 	match _tab:
 		"scorers":
-			_ranking(c, w, Player.S_GOALS, "gols", "Artilharia")
+			_ranking(c, w, Player.S_GOALS, "Artilharia")
 		"assists":
-			_ranking(c, w, Player.S_ASSISTS, "assist.", "Assistências")
+			_ranking(c, w, Player.S_ASSISTS, "Assistências")
 		"rounds":
 			_rounds(c, w, league)
 		_:
@@ -85,7 +188,7 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		card.add_child(TableRows.row(w, league, int(ids[i]), i + 1, false))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(TableRows.legend(league))
-	# Curiosidades da divisão
+	# Curiosidades da liga
 	var info := UIKit.card("Card", 6)
 	info.add_child(UIKit.section("Destaques"))
 	var att := CompetitionManager.best_attack(league)
@@ -94,18 +197,31 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		info.add_child(UIKit.kv("Melhor ataque", "%s (%d gols)" % [w.club(att).short_name, int(league.table[att]["gf"])]))
 	if dfn >= 0 and int(league.table[dfn]["pl"]) > 0:
 		info.add_child(UIKit.kv("Melhor defesa", "%s (%d sofridos)" % [w.club(dfn).short_name, int(league.table[dfn]["ga"])]))
-	var top := CompetitionManager.player_ranking(w, _div, Player.S_GOALS, 1)
+	var top := CompetitionManager.player_ranking(w, _league_id, Player.S_GOALS, 1)
 	if not top.is_empty():
 		var p: Player = top[0]
 		info.add_child(UIKit.kv("Artilheiro", "%s (%d)" % [p.display_name(), p.stats[Player.S_GOALS]]))
+	# Últimos campeões
+	var champs: Array = []
+	for i in range(w.history.size() - 1, -1, -1):
+		var h: Dictionary = w.history[i]
+		var hl: Dictionary = h.get("leagues", {}).get(_league_id, {})
+		if not hl.is_empty():
+			var cl := w.club(int(hl["champion"]))
+			if cl != null:
+				champs.append("%d %s" % [int(h["y"]), cl.short_name])
+		if champs.size() >= 3:
+			break
+	if not champs.is_empty():
+		info.add_child(UIKit.kv("Últimos campeões", ", ".join(champs)))
 	if info.get_child_count() > 1:
 		c.add_child(UIKit.card_panel(info))
 
 
-func _ranking(c: VBoxContainer, w: GameWorld, stat: int, unit: String, title: String) -> void:
+func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 	var card := UIKit.card("Card", 4)
 	card.add_child(UIKit.section(title))
-	var list := CompetitionManager.player_ranking(w, _div, stat, 25)
+	var list := CompetitionManager.player_ranking(w, _league_id, stat, 25)
 	if list.is_empty():
 		card.add_child(UIKit.label("Ninguém marcou ainda nesta temporada.", "Muted"))
 	var rank := 0
@@ -125,81 +241,164 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, unit: String, title: St
 func _rounds(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	_round = clampi(_round, 0, league.rounds.size() - 1)
 	var nav := UIKit.hbox(10)
-	var prev := UIKit.icon_button("back", func():
+	nav.add_child(UIKit.icon_button("back", func():
 		_round = maxi(0, _round - 1)
-		refresh())
-	nav.add_child(prev)
-	var t := UIKit.label("Rodada %d de %d" % [_round + 1, league.rounds.size()], "H2")
+		refresh()))
+	var t := UIKit.label("Rodada %d de %d · %s" % [_round + 1, league.rounds.size(), w.season.date_label(league.round_slots[_round], false)], "H2")
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nav.add_child(t)
-	var nxt := UIKit.icon_button("play", func():
+	nav.add_child(UIKit.icon_button("play", func():
 		_round = mini(league.rounds.size() - 1, _round + 1)
-		refresh())
-	nav.add_child(nxt)
+		refresh()))
 	c.add_child(nav)
 	var card := UIKit.card("Card", 4)
 	for f: Fixture in league.fixtures_of_round(_round):
-		var row := UIKit.hbox(8)
-		var hn := UIKit.label(w.club(f.home).short_name, "H3" if f.played and f.hg > f.ag else "")
-		hn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		hn.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		hn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		row.add_child(hn)
-		row.add_child(UIKit.crest(w.club(f.home), 30))
-		var s := UIKit.label("%d – %d" % [f.hg, f.ag] if f.played else "×", "H3")
-		s.custom_minimum_size.x = 80
-		s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		if not f.played:
-			s.add_theme_color_override(&"font_color", UIColors.DIM)
-		row.add_child(s)
-		row.add_child(UIKit.crest(w.club(f.away), 30))
-		var an := UIKit.label(w.club(f.away).short_name, "H3" if f.played and f.ag > f.hg else "")
-		an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		an.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		row.add_child(an)
-		if f.involves(w.user_club_id):
-			hn.add_theme_color_override(&"font_color", UIColors.ACCENT)
-			an.add_theme_color_override(&"font_color", UIColors.ACCENT)
-		var ff := f
-		card.add_child(UIKit.tap_row(row, func(): _fixture_details(w, ff), "CardFlat"))
+		card.add_child(_fixture_row(w, f))
 	c.add_child(UIKit.card_panel(card))
 
 
-func _fixture_details(w: GameWorld, f: Fixture) -> void:
-	var v := UIKit.vbox(12)
-	v.custom_minimum_size.x = 600
-	var home := w.club(f.home)
-	var away := w.club(f.away)
-	var t := UIKit.label("%s %s %s" % [home.short_name, ("%d – %d" % [f.hg, f.ag]) if f.played else "×", away.short_name], "Title", true)
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(t)
-	v.add_child(UIKit.label("%s · %s" % [home.stadium, home.city], "Small"))
+## Linha de jogo (mandante, placar, visitante); toque abre os detalhes.
+func _fixture_row(w: GameWorld, f: Fixture) -> Control:
+	var row := UIKit.hbox(8)
+	var hn := UIKit.label(w.club(f.home).short_name, "H3" if f.played and f.hg > f.ag else "")
+	hn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hn.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	row.add_child(hn)
+	row.add_child(UIKit.crest(w.club(f.home), 30))
+	var score := ("%d – %d" % [f.hg, f.ag]) if f.played else "×"
+	if f.played and f.has_penalties():
+		score += "*"
+	var s := UIKit.label(score, "H3")
+	s.custom_minimum_size.x = 86
+	s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	if not f.played:
-		var lh: Dictionary = w.league_of(home.id).table[home.id]
-		var la: Dictionary = w.league_of(away.id).table[away.id]
-		v.add_child(UIKit.kv("Campanha de %s" % home.short_name, "%d pts, %dV %dE %dD" % [lh["pts"], lh["w"], lh["d"], lh["l"]]))
-		v.add_child(UIKit.kv("Campanha de %s" % away.short_name, "%d pts, %dV %dE %dD" % [la["pts"], la["w"], la["d"], la["l"]]))
-		if MatchEngine.is_derby(w, f.home, f.away):
-			v.add_child(UIKit.colored("Clássico regional.", UIColors.RED, "H3"))
-	else:
-		for side in 2:
-			for g in f.goals:
-				if int(g[1]) != side:
-					continue
-				var p := w.player(int(g[2]))
-				var txt := "%s  %s" % [Fmt.minute(int(g[0]), int(g[4]) if g.size() > 4 else 0), p.display_name() if p != null else "?"]
-				if int(g[3]) == Fixture.GOAL_PENALTY:
-					txt += " (p)"
-				elif int(g[3]) == Fixture.GOAL_OWN:
-					txt += " (contra)"
-				var l := UIKit.label(txt, "")
-				l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if side == 0 else HORIZONTAL_ALIGNMENT_RIGHT
-				v.add_child(l)
-		var motm := w.player(f.motm)
-		if motm != null:
-			v.add_child(UIKit.kv("Craque do jogo", motm.display_name(), UIColors.ACCENT))
-		if f.attendance > 0:
-			v.add_child(UIKit.kv("Público", Fmt.thousands(f.attendance)))
-	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
-	UIManager.show_modal(v)
+		s.add_theme_color_override(&"font_color", UIColors.DIM)
+	row.add_child(s)
+	row.add_child(UIKit.crest(w.club(f.away), 30))
+	var an := UIKit.label(w.club(f.away).short_name, "H3" if f.played and f.ag > f.hg else "")
+	an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	an.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	row.add_child(an)
+	if f.involves(w.user_club_id):
+		hn.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		an.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	var ff := f
+	return UIKit.tap_row(row, func(): TableRows.fixture_details(w, ff), "CardFlat")
+
+
+# ---------------------------------------------------------------------------
+# Copas
+# ---------------------------------------------------------------------------
+
+func _cup_view(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	if cup.champion >= 0:
+		var champ := UIKit.card("CardHighlight", 6)
+		var row := UIKit.hbox(12)
+		row.add_child(UIKit.crest(w.club(cup.champion), 72))
+		var col := UIKit.vbox(2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label("CAMPEÃO %d" % w.year, "Caps"))
+		col.add_child(UIKit.label(w.club(cup.champion).name, "H2", true))
+		if cup.runner_up >= 0:
+			col.add_child(UIKit.label("Vice: %s" % w.club(cup.runner_up).short_name, "Small"))
+		row.add_child(col)
+		champ.add_child(row)
+		c.add_child(UIKit.card_panel(champ))
+	match _tab:
+		"ko":
+			_cup_ko(c, w, cup)
+		"scorers":
+			_cup_scorers(c, w, cup)
+		_:
+			if cup.groups.is_empty():
+				_cup_ko(c, w, cup)
+			else:
+				_cup_groups(c, w, cup)
+
+
+func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	for g in cup.groups:
+		var card := UIKit.card("Card", 2)
+		card.add_child(UIKit.section("Grupo %s" % g["n"]))
+		card.add_child(TableRows.header(true))
+		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
+		for i in order.size():
+			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if i < 2 else Color(0, 0, 0, 0)
+			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, true, zone))
+		# Jogos do grupo com o usuário (ou os próximos) ficam a um toque
+		var mine: Array = []
+		for f: Fixture in cup.fixtures:
+			if f.stage == Fixture.STAGE_GROUP and g["clubs"].has(f.home) and f.involves(w.user_club_id):
+				mine.append(f)
+		for f in mine:
+			card.add_child(_fixture_row(w, f))
+		c.add_child(UIKit.card_panel(card))
+	c.add_child(UIKit.label("Os dois primeiros de cada grupo avançam ao mata-mata.", "Small", true))
+
+
+func _cup_ko(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	if cup.ties.is_empty():
+		var card := UIKit.card("Card", 6)
+		card.add_child(UIKit.label("O mata-mata é sorteado depois da fase de grupos.", "Muted", true))
+		c.add_child(UIKit.card_panel(card))
+		return
+	for r in cup.round_names.size():
+		var ties := cup.ties_of_round(r)
+		if ties.is_empty():
+			continue
+		var card := UIKit.card("Card", 4)
+		card.add_child(UIKit.section(String(cup.round_names[r])))
+		for t in ties:
+			card.add_child(_tie_row(w, cup, t))
+		c.add_child(UIKit.card_panel(card))
+
+
+func _tie_row(w: GameWorld, cup: Cup, t: Dictionary) -> Control:
+	var a := w.club(int(t["a"]))
+	var b := w.club(int(t["b"]))
+	var win := int(t["w"])
+	var row := UIKit.hbox(8)
+	var an := UIKit.label(a.short_name, "H3" if win == a.id else "")
+	an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	an.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	an.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	row.add_child(an)
+	row.add_child(UIKit.crest(a, 30))
+	var summary := CupManager.tie_summary(cup, t)
+	var s := UIKit.label(summary if summary != "" else "×", "Small" if summary.length() > 6 else "H3")
+	s.custom_minimum_size.x = 120
+	s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(s)
+	row.add_child(UIKit.crest(b, 30))
+	var bn := UIKit.label(b.short_name, "H3" if win == b.id else "")
+	bn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	row.add_child(bn)
+	if a.id == w.user_club_id or b.id == w.user_club_id:
+		an.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		bn.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	var fx := cup.fixtures_of_tie(t)
+	return UIKit.tap_row(row, func():
+		if not fx.is_empty():
+			TableRows.fixture_details(w, fx[fx.size() - 1] if fx[fx.size() - 1].played else fx[0]), "CardFlat")
+
+
+func _cup_scorers(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	var card := UIKit.card("Card", 4)
+	card.add_child(UIKit.section("Artilharia"))
+	var list := CupManager.scorers(w, cup.id, 25)
+	if list.is_empty():
+		card.add_child(UIKit.label("Ninguém marcou ainda.", "Muted"))
+	var rank := 0
+	var last_v := -1
+	for i in list.size():
+		var p: Player = list[i]
+		var st: PackedInt32Array = p.cup_stats[cup.id]
+		var v := st[Player.C_GOALS]
+		if v != last_v:
+			rank = i + 1
+			last_v = v
+		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(st[Player.C_APPS], "jogo", "jogos")]))
+	c.add_child(UIKit.card_panel(card))

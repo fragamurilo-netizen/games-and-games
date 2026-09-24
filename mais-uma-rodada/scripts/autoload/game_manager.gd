@@ -9,10 +9,10 @@ signal season_finished(summary: Dictionary)
 
 var world: GameWorld = null
 var slot: int = -1
-var matchday: Dictionary = {} # dia de jogo em andamento (begin_match → finish_match)
+var matchday: Dictionary = {} # data em andamento (begin_match → finish_match)
 var last_report: Dictionary = {}
 var last_summary: Dictionary = {}
-var _ai_queue: Array = []
+var _ai_queue: Array = [] # entradas da data ainda não simuladas (modo rápido, em segundo plano)
 var _gen_task: int = -1
 var _gen_result: GameWorld = null
 var _gen_callback: Callable
@@ -75,8 +75,12 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 		slot = 1
 	var goal := SeasonManager.goal_of(world, c.id)
 	NewsManager.post(world, "temporada", {"year": world.year, "club": c.short_name, "goal": String(goal[0]).to_lower()}, c.id, -1, NewsEvent.IMP_HEADLINE)
+	for cid in world.season.cups:
+		if world.season.cups[cid].has_club(c.id):
+			NewsManager.post(world, "copa_classificado", {"club": c.short_name, "cup": world.season.cups[cid].name}, c.id, -1, NewsEvent.IMP_HIGH)
 	if world.transfer_window_open():
 		NewsManager.on_window(world, true)
+	SeasonManager.advance_to_user(world)
 	save_now()
 	world_changed.emit()
 
@@ -117,26 +121,29 @@ func close_career() -> void:
 # Rodada
 # ---------------------------------------------------------------------------
 
-## Monta o dia de jogo; a partida do usuário volta viva. As demais rodam em segundo plano.
+## Monta a data do próximo jogo do usuário; a partida dele volta viva e as demais rodam em
+## segundo plano (pump_ai) enquanto ele assiste.
 func begin_match() -> Dictionary:
 	if world == null or world.season == null or world.season.finished:
 		return {}
 	if not matchday.is_empty():
 		return matchday
+	SeasonManager.advance_to_user(world)
+	if world.season.finished or not SeasonManager.user_plays_now(world):
+		return {}
 	matchday = SeasonManager.begin_matchday(world)
 	_ai_queue.clear()
 	for e in matchday["entries"]:
 		if e != matchday["user"]:
-			_ai_queue.append(e["sim"])
+			_ai_queue.append(e)
 	return matchday
 
 
-## Simula partidas IA×IA aos poucos (chamado a cada frame pela tela da partida).
+## Simula as partidas do resto do mundo aos poucos (chamado a cada frame pela tela da partida).
 func pump_ai(budget_ms: float) -> void:
 	var t0 := Time.get_ticks_usec()
 	while not _ai_queue.is_empty() and (Time.get_ticks_usec() - t0) < budget_ms * 1000.0:
-		var sim: MatchSimulation = _ai_queue.pop_back()
-		sim.run_to_end()
+		SeasonManager.run_entry(world, _ai_queue.pop_front())
 
 
 func user_sim() -> MatchSimulation:
@@ -151,21 +158,22 @@ func user_fixture() -> Fixture:
 	return matchday["user"]["f"]
 
 
-## Placar parcial de outro jogo da rodada até o minuto atual da partida do usuário.
+## Placar parcial de outro jogo da data até o minuto atual da partida do usuário.
 func live_score(entry: Dictionary, minute: int, half: int) -> Array:
+	var res: Dictionary = entry["res"]
+	if res.is_empty():
+		return [0, 0]
 	var hs := 0
 	var as_ := 0
-	var sim: MatchSimulation = entry["sim"]
-	if not ai_ready() or not sim.finished:
-		return [0, 0]
-	for ev in sim.events:
-		var h: int = ev["h"]
-		var m: int = ev["m"]
-		if h > half or (h == half and m > minute):
-			break
-		if ev["t"] == MatchSimulation.EV_GOAL or ev["t"] == MatchSimulation.EV_OWN_GOAL:
-			hs = ev["hs"]
-			as_ = ev["as"]
+	for g in res["goals"]:
+		var gh: int = g[4]
+		var gm: int = g[0]
+		if gh > half or (gh == half and gm > minute):
+			continue
+		if int(g[1]) == 0:
+			hs += 1
+		else:
+			as_ += 1
 	return [hs, as_]
 
 
@@ -177,6 +185,8 @@ func ai_ready() -> bool:
 	return _ai_queue.is_empty()
 
 
+## Encerra a data do usuário e já joga as datas seguintes em que ele não entra em campo
+## (o relatório traz também as viradas de janela e os eventos de copa dessas datas).
 func finish_match() -> Dictionary:
 	if matchday.is_empty():
 		return {}
@@ -185,6 +195,12 @@ func finish_match() -> Dictionary:
 	var report := SeasonManager.finish_matchday(world, md)
 	report["entries"] = md["entries"]
 	matchday = {}
+	for r in SeasonManager.advance_to_user(world):
+		report["window_opened"] = report["window_opened"] or r["window_opened"]
+		report["window_closed"] = report["window_closed"] or r["window_closed"]
+		report["transfers"].append_array(r["transfers"])
+		report["retiring"].append_array(r["retiring"])
+		report["cups"].append_array(r["cups"])
 	last_report = report
 	save_now()
 	matchday_finished.emit(report)
@@ -205,12 +221,22 @@ func season_over() -> bool:
 	return world != null and world.season != null and world.season.finished
 
 
+## Sem jogos do usuário até o fim da temporada: joga o resto do calendário de uma vez.
+func advance_to_end() -> void:
+	if world == null or world.season == null or not matchday.is_empty():
+		return
+	SeasonManager.advance_to_user(world)
+	save_now()
+	world_changed.emit()
+
+
 func end_season() -> Dictionary:
 	if not season_over():
 		return {}
 	last_summary = SeasonManager.end_season(world)
 	var c := world.user_club()
 	c.sheet = ClubAI.auto_sheet(world, c, c.sheet.formation if c.sheet != null else "")
+	SeasonManager.advance_to_user(world)
 	save_now()
 	season_finished.emit(last_summary)
 	world_changed.emit()

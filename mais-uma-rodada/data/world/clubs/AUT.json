@@ -1,0 +1,106 @@
+{
+	"nation": "AUT",
+	"_doc": "Áustria (liga de 6).",
+	"clubs": [
+		{
+			"key": "AUT_MOZ",
+			"name": "Salzburg Mozartstädter",
+			"short": "Mozartstädter",
+			"abbr": "MOZ",
+			"nick": "Bullen",
+			"city": "Salzburg",
+			"founded": 1933,
+			"league": "AUT1",
+			"rep": 74,
+			"arch": "vendedor",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stadion Wals-Siezenheim",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"symbol": "bolt"
+			},
+			"rivals": []
+		},
+		{
+			"key": "AUT_HUT",
+			"name": "Wien Hütteldorf",
+			"short": "Hütteldorfer",
+			"abbr": "HUT",
+			"nick": "Grün-Weißen",
+			"city": "Wien",
+			"founded": 1899,
+			"league": "AUT1",
+			"rep": 64,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Hütteldorf",
+			"capacity": 28300,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"AUT_VEI"
+			]
+		},
+		{
+			"key": "AUT_VEI",
+			"name": "Wien Veilchen",
+			"short": "Veilchen",
+			"abbr": "VEI",
+			"nick": "Veilchen",
+			"city": "Wien",
+			"founded": 1911,
+			"league": "AUT1",
+			"rep": 60,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Favoriten",
+			"capacity": 17600,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"AUT_HUT"
+			]
+		},
+		{
+			"key": "AUT_GRZ",
+			"name": "Graz Blackies",
+			"short": "Blackies",
+			"abbr": "GRZ",
+			"nick": "Blackies",
+			"city": "Graz",
+			"founded": 1909,
+			"league": "AUT1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Liebenau",
+			"capacity": 16300,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": []
+		}
+	]
+}

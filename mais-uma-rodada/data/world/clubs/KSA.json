@@ -1,0 +1,110 @@
+{
+	"nation": "KSA",
+	"_doc": "Arábia Saudita (liga de 10).",
+	"clubs": [
+		{
+			"key": "KSA_AZR",
+			"name": "Riyadh Al Azraq",
+			"short": "Al Azraq",
+			"abbr": "AZR",
+			"nick": "Líder",
+			"city": "Riyadh",
+			"founded": 1957,
+			"league": "KSA1",
+			"rep": 78,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A5",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Reino",
+			"capacity": 68000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"KSA_ALM"
+			]
+		},
+		{
+			"key": "KSA_ALM",
+			"name": "Riyadh Al Aalami",
+			"short": "Al Aalami",
+			"abbr": "ALM",
+			"nick": "Global",
+			"city": "Riyadh",
+			"founded": 1955,
+			"league": "KSA1",
+			"rep": 76,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#0055A5"
+			],
+			"stadium": "Estádio Al Awwal",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": [
+				"KSA_AZR"
+			]
+		},
+		{
+			"key": "KSA_AMD",
+			"name": "Jeddah Al Ameed",
+			"short": "Al Ameed",
+			"abbr": "AMD",
+			"nick": "Tigres",
+			"city": "Jeddah",
+			"founded": 1927,
+			"league": "KSA1",
+			"rep": 74,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio da Joia",
+			"capacity": 62000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"KSA_RAQ"
+			]
+		},
+		{
+			"key": "KSA_RAQ",
+			"name": "Jeddah Al Raqi",
+			"short": "Al Raqi",
+			"abbr": "RAQ",
+			"nick": "Real",
+			"city": "Jeddah",
+			"founded": 1937,
+			"league": "KSA1",
+			"rep": 72,
+			"arch": "rico_promovido",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio da Joia",
+			"capacity": 62000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"KSA_AMD"
+			]
+		}
+	]
+}

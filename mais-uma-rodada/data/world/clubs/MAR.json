@@ -1,0 +1,82 @@
+{
+	"nation": "MAR",
+	"_doc": "Marrocos (liga de 8).",
+	"clubs": [
+		{
+			"key": "MAR_WYR",
+			"name": "Casablanca Rouge",
+			"short": "Rouge",
+			"abbr": "WYR",
+			"nick": "Wydadis",
+			"city": "Casablanca",
+			"founded": 1937,
+			"league": "MAR1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade d'Anfa",
+			"capacity": 45000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"MAR_RVE"
+			]
+		},
+		{
+			"key": "MAR_RVE",
+			"name": "Casablanca Vert",
+			"short": "Vert Casa",
+			"abbr": "RVE",
+			"nick": "Aigles Verts",
+			"city": "Casablanca",
+			"founded": 1949,
+			"league": "MAR1",
+			"rep": 70,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Stade d'Anfa",
+			"capacity": 45000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"MAR_WYR"
+			]
+		},
+		{
+			"key": "MAR_ARF",
+			"name": "Rabat Militaire",
+			"short": "Militaires",
+			"abbr": "ARF",
+			"nick": "Militaires",
+			"city": "Rabat",
+			"founded": 1958,
+			"league": "MAR1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#E30613"
+			],
+			"stadium": "Stade de la Capitale",
+			"capacity": 52000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "star"
+			},
+			"rivals": []
+		}
+	]
+}

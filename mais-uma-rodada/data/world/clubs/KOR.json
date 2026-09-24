@@ -1,0 +1,106 @@
+{
+	"nation": "KOR",
+	"_doc": "Coreia do Sul (liga de 8).",
+	"clubs": [
+		{
+			"key": "KOR_ULS",
+			"name": "Ulsan Tigers",
+			"short": "Ulsan",
+			"abbr": "ULS",
+			"nick": "Horangi",
+			"city": "Ulsan",
+			"founded": 1983,
+			"league": "KOR1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#1D3F91",
+				"#FFD100"
+			],
+			"stadium": "Munsu Stadium",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"KOR_POH"
+			]
+		},
+		{
+			"key": "KOR_JEO",
+			"name": "Jeonju Green Motors",
+			"short": "Jeonju Green",
+			"abbr": "JEO",
+			"nick": "Green Warriors",
+			"city": "Jeonju",
+			"founded": 1994,
+			"league": "KOR1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#006437",
+				"#FFD100"
+			],
+			"stadium": "Jeonju World Cup Park",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "bolt"
+			},
+			"rivals": []
+		},
+		{
+			"key": "KOR_POH",
+			"name": "Pohang Steel",
+			"short": "Steelers",
+			"abbr": "POH",
+			"nick": "Steelers",
+			"city": "Pohang",
+			"founded": 1973,
+			"league": "KOR1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Pohang Steel Yard",
+			"capacity": 17400,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": [
+				"KOR_ULS"
+			]
+		},
+		{
+			"key": "KOR_SEO",
+			"name": "Seoul Red Black",
+			"short": "Seoul",
+			"abbr": "SEO",
+			"nick": "Seoul",
+			"city": "Seoul",
+			"founded": 1983,
+			"league": "KOR1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Mapo World Cup Park",
+			"capacity": 66700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		}
+	]
+}

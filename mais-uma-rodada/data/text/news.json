@@ -195,7 +195,8 @@
 	"campeao": {
 		"t": [
 			"{club} é campeão da {division}!",
-			"Festa no {club}: título da {division}"
+			"Festa no {club}: título da {division}",
+			"{club} conquista a {division}"
 		],
 		"b": [
 			"Com {pts} pontos, o {club} conquista a {division} {year}.",
@@ -314,6 +315,68 @@
 		"b": [
 			"A diretoria aposta na volta por cima de um treinador com fome de trabalho.",
 			"Apresentado no clube, o novo comandante prometeu trabalho e um time competitivo."
+		]
+	},
+	"copa_classificado": {
+		"t": [
+			"{club} vai disputar a {cup}",
+			"Vaga garantida: {club} na {cup}"
+		],
+		"b": [
+			"O sorteio define os adversários em breve. A torcida já sonha com as noites de copa.",
+			"Calendário cheio e vitrine internacional: a {cup} começa em poucas semanas."
+		]
+	},
+	"copa_avanca": {
+		"t": [
+			"{club} avança na {cup}",
+			"{club} passa pela {stage} da {cup}"
+		],
+		"b": [
+			"Missão cumprida contra {opponent}: o {club} segue vivo na {cup}.",
+			"Classificação com personalidade. A próxima fase promete."
+		]
+	},
+	"copa_eliminado": {
+		"t": [
+			"{club} cai na {stage} da {cup}",
+			"Fim do sonho: {club} eliminado da {cup}"
+		],
+		"b": [
+			"{opponent} encerrou a campanha do {club} na {cup}.",
+			"A eliminação pesa, mas o foco agora é a liga."
+		]
+	},
+	"copa_campeao": {
+		"t": [
+			"{club} é campeão da {cup}!",
+			"A {cup} é do {club}",
+			"{club} conquista a {cup} {year}"
+		],
+		"b": [
+			"Na final, o {club} superou o {runner_up} e levantou a taça mais cobiçada do continente.",
+			"Noite histórica: {club} vence o {runner_up} e é o novo dono da {cup}."
+		]
+	},
+	"mundial_classificado": {
+		"t": [
+			"{club} vai ao Mundial de Clubes",
+			"Rumo ao Mundial: {club} entre os melhores do planeta"
+		],
+		"b": [
+			"Oito clubes, três jogos, uma taça. O {club} vai enfrentar os campeões de todos os continentes.",
+			"O mundo inteiro vai olhar para o {club} no fim da temporada."
+		]
+	},
+	"mundial_campeao": {
+		"t": [
+			"{club} é campeão do mundo!",
+			"O mundo é do {club}",
+			"{club} conquista o Mundial de Clubes"
+		],
+		"b": [
+			"Na final, vitória sobre o {runner_up}. O {club} é o melhor clube do planeta em {year}.",
+			"Título que atravessa gerações: o {club} bate o {runner_up} e conquista o mundo."
 		]
 	}
 }

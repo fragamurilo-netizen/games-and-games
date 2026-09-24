@@ -1,0 +1,113 @@
+{
+	"nation": "GRE",
+	"_doc": "Grécia (liga de 6).",
+	"clubs": [
+		{
+			"key": "GRE_PIR",
+			"name": "Piraeus Erythrolefkoi",
+			"short": "Piraeus",
+			"abbr": "PIR",
+			"nick": "Thrylos",
+			"city": "Piraeus",
+			"founded": 1925,
+			"league": "GRE1",
+			"rep": 74,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Faliro",
+			"capacity": 32100,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GRE_ATH",
+				"GRE_AEN"
+			]
+		},
+		{
+			"key": "GRE_ATH",
+			"name": "Athens Trifylli",
+			"short": "Trifylli",
+			"abbr": "ATH",
+			"nick": "Trifylli",
+			"city": "Athens",
+			"founded": 1908,
+			"league": "GRE1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#007A33",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Alexandras",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"GRE_PIR",
+				"GRE_AEN"
+			]
+		},
+		{
+			"key": "GRE_AEN",
+			"name": "Athens Enosi",
+			"short": "Enosi",
+			"abbr": "AEN",
+			"nick": "Enosi",
+			"city": "Athens",
+			"founded": 1924,
+			"league": "GRE1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Stadio Nea Filadelfeia",
+			"capacity": 32500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"GRE_PIR",
+				"GRE_ATH"
+			]
+		},
+		{
+			"key": "GRE_DIK",
+			"name": "Thessaloniki Dikefalos",
+			"short": "Dikefalos",
+			"abbr": "DIK",
+			"nick": "Dikefalos",
+			"city": "Thessaloniki",
+			"founded": 1926,
+			"league": "GRE1",
+			"rep": 72,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Toumba",
+			"capacity": 28700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"GRE_PIR"
+			]
+		}
+	]
+}

@@ -67,7 +67,7 @@ func _passes(w: GameWorld, n: NewsEvent, user: Club) -> bool:
 			return p != null and p.club_id == user.id
 		"div":
 			var c := w.club(n.club_id) if n.club_id >= 0 else null
-			return c != null and c.division == user.division
+			return c != null and c.league_id == user.league_id
 		"market":
 			return MARKET_CATS.has(n.category)
 	return true

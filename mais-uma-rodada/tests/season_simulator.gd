@@ -6,8 +6,9 @@ extends SceneTree
 ## rebaixamentos, distribuição de overall, inflação de valores, jovens gerados e aposentadorias.
 
 var rows: Array = []
-var champions: Array = [] # por divisão: {club_id: títulos}
+var champions: Dictionary = {} # por liga/copa: {club_id: títulos}
 var lines: Array = []
+const TOP := ["ENG1", "ESP1", "GER1", "ITA1", "FRA1", "POR1", "BRA1", "ARG1", "USA1", "MEX1"]
 
 
 func _initialize() -> void:
@@ -16,12 +17,9 @@ func _initialize() -> void:
 	var seed_value := int(args.get("seed", str(WorldGenerator.DEFAULT_SEED)))
 	var wtype: String = args.get("type", "padrao")
 	var out_path: String = args.get("out", "user://relatorio_simulacao.md")
-	SeasonManager.use_threads = args.get("threads", "1") != "0"
 	var t0 := Time.get_ticks_msec()
 	var w := WorldGenerator.generate(seed_value, wtype)
 	_log("Mundo gerado em %d ms (seed %d, %s): %d clubes, %d jogadores" % [Time.get_ticks_msec() - t0, seed_value, wtype, w.clubs.size(), w.players.size()])
-	for d in DatabaseManager.division_count():
-		champions.append({})
 	var first_value := _avg_value(w)
 	var first_wage := _avg_wage(w)
 	for s in seasons:
@@ -44,17 +42,23 @@ func _initialize() -> void:
 		row["players"] = w.players.size()
 		row["free"] = w.free_agents().size()
 		var champs: Array = []
-		for dv in summary["divisions"]:
+		for dv in summary["leagues"] + summary["cups"]:
 			var cid: int = dv["champion"]
-			champions[dv["div"]][cid] = int(champions[dv["div"]].get(cid, 0)) + 1
-			champs.append(w.club(cid).abbr)
+			var key := String(dv["id"])
+			if cid < 0:
+				continue
+			if not champions.has(key):
+				champions[key] = {}
+			champions[key][cid] = int(champions[key].get(cid, 0)) + 1
+			if int(dv.get("tier", 1)) == 1 and (TOP.has(key) or not DatabaseManager.has_league(key)):
+				champs.append("%s:%s" % [key, w.club(cid).abbr])
 		row["champions"] = champs
 		rows.append(row)
-		_log("%d | gols %.2f | M/E/V %d/%d/%d%% | transf %d (%s) | idade %.1f | ovr D1 %.1f D4 %.1f | 80+ %d | caixa %s (%d no vermelho) | valor médio %s | jovens %d | aposent. %d | jogadores %d (livres %d) | campeões %s | %d ms" % [
+		_log("%d | gols %.2f | M/E/V %d/%d/%d%% | transf %d (%s) | idade %.1f | ovr ENG1 %.1f BRA1 %.1f | 80+ %d | caixa %s (%d no vermelho) | valor médio %s | jovens %d | aposent. %d | jogadores %d (livres %d) | campeões %s | %d ms" % [
 			year, row["goals"], row["home"], row["draw"], row["away"], row["transfers"], Fmt.money(row["fees"]), row["age"],
-			row["ovr_div"][0], row["ovr_div"][3], row["elite"], Fmt.money(row["money"]), row["debt_clubs"], Fmt.money(row["value"]),
+			float(row["ovr_div"].get("ENG1", 0.0)), float(row["ovr_div"].get("BRA1", 0.0)), row["elite"], Fmt.money(row["money"]), row["debt_clubs"], Fmt.money(row["value"]),
 			row["youth"], row["retirements"], row["players"], row["free"], ", ".join(champs), row["ms"]])
-		_log("      idades(n, ovr médio, +potencial): %s | amplitude força D1: %.1f | talento top %d: %.1f (desvio %+.2f, correção %+.2f)" % [row["ages"], row["spread"], PlayerDevelopment.TALENT_TOP, PlayerDevelopment.talent_index(w), float(w.stats.get("talent_raw", 0.0)), PlayerDevelopment.talent_drift(w)])
+		_log("      idades(n, ovr médio, +potencial): %s | amplitude força ENG1: %.1f | talento (%d/clube): %.1f (desvio %+.2f, correção %+.2f)" % [row["ages"], row["spread"], PlayerDevelopment.TALENT_PER_CLUB, PlayerDevelopment.talent_index(w), float(w.stats.get("talent_raw", 0.0)), PlayerDevelopment.talent_drift(w)])
 	var last_value := _avg_value(w)
 	var last_wage := _avg_wage(w)
 	_log("")
@@ -64,7 +68,9 @@ func _initialize() -> void:
 		g += r["goals"]
 	_log("Média de gols: %.2f por jogo" % (g / maxf(1.0, rows.size())))
 	_log("Inflação de valor médio: %s → %s (x%.2f) · salário médio %s → %s (x%.2f)" % [Fmt.money(first_value), Fmt.money(last_value), last_value / maxf(1.0, first_value), Fmt.money(first_wage), Fmt.money(last_wage), last_wage / maxf(1.0, first_wage)])
-	for d in champions.size():
+	for d in champions:
+		if DatabaseManager.has_league(d) and not TOP.has(d):
+			continue
 		var list: Array = []
 		for cid in champions[d]:
 			list.append([cid, champions[d][cid]])
@@ -72,7 +78,7 @@ func _initialize() -> void:
 		var txt: Array = []
 		for e in list.slice(0, 6):
 			txt.append("%s %d" % [w.club(e[0]).short_name, e[1]])
-		_log("Campeões %s: %d clubes diferentes — %s" % [w.division_short(d), list.size(), ", ".join(txt)])
+		_log("Campeões %s: %d clubes diferentes — %s" % [CompText.comp_short(w, d), list.size(), ", ".join(txt)])
 	var f := FileAccess.open(out_path, FileAccess.WRITE)
 	if f != null:
 		f.store_string("\n".join(lines))
@@ -85,7 +91,7 @@ func _season_metrics(w: GameWorld) -> Dictionary:
 	var n := 0
 	var hw := 0
 	var dr := 0
-	for l: League in w.season.leagues:
+	for l: League in w.season.leagues.values():
 		for r in l.rounds:
 			for f: Fixture in r:
 				if not f.played:
@@ -106,9 +112,9 @@ func _season_metrics(w: GameWorld) -> Dictionary:
 		cnt += 1
 		if p.overall >= 80:
 			elite += 1
-	var ovr_div: Array = []
+	var ovr_div: Dictionary = {}
 	var spread_d1 := 0.0
-	for l: League in w.season.leagues:
+	for l: League in w.season.leagues.values():
 		var s := 0.0
 		var vals: Array = []
 		for cid in l.club_ids:
@@ -116,8 +122,8 @@ func _season_metrics(w: GameWorld) -> Dictionary:
 			vals.append(v)
 			s += v
 		var mean := s / l.club_ids.size()
-		ovr_div.append(mean)
-		if l.division == 0:
+		ovr_div[l.id] = mean
+		if l.id == "ENG1":
 			vals.sort()
 			spread_d1 = vals[vals.size() - 1] - vals[0]
 	var buckets := [[17, 20], [21, 24], [25, 28], [29, 32], [33, 45]]

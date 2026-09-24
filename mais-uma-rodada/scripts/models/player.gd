@@ -37,6 +37,14 @@ const S_MOTM := 8
 const S_CLEAN := 9
 const S_COUNT := 10
 
+# --- Estatísticas de copa (PackedInt32Array por copa; as de liga ficam em `stats`) ---
+const C_APPS := 0
+const C_GOALS := 1
+const C_ASSISTS := 2
+const C_RATING := 3 # soma das notas × 10
+const C_MINUTES := 4
+const C_COUNT := 5
+
 # Identidade
 var id: int = 0
 var first_name: String = ""
@@ -44,7 +52,8 @@ var last_name: String = ""
 var nickname: String = ""
 var known_as: String = ""
 var birth_year: int = 2000
-var nationality: String = "VAL"
+var nationality: String = ""
+var eth: int = 1 # etnia (índice em nations.json → ethnicities), usada pelo rosto
 var height: int = 178
 var foot: int = FOOT_RIGHT
 var position: int = Pos.CM
@@ -92,7 +101,8 @@ var dev_acc: float = 0.0
 var minutes_season: int = 0
 
 # Estatísticas e memória
-var stats: PackedInt32Array = PackedInt32Array()
+var stats: PackedInt32Array = PackedInt32Array() # liga (temporada)
+var cup_stats: Dictionary = {} # copa -> PackedInt32Array (temporada)
 var history: Array = [] # [{y, c (club id), cn (nome), a, g, as, r}]
 var spells: Array = [] # passagens por clube [{c, cn, from, to, a, g, as}]
 var career_apps: int = 0
@@ -103,7 +113,8 @@ var titles: int = 0
 # Cache (não salvo)
 var _pos_cache: PackedFloat32Array = PackedFloat32Array()
 var _pos_cache_dirty: bool = true
-var _trait_cache: Dictionary = {}
+var _trait_sum: Dictionary = {}
+var _trait_mult: Dictionary = {}
 
 
 func _init() -> void:
@@ -146,33 +157,32 @@ func has_trait(t: String) -> bool:
 
 ## Soma de um modificador numérico entre os traços (ex.: "loyalty", "big_game"). Cacheado.
 func trait_sum(key: String) -> float:
-	var ck := "s_" + key
-	if _trait_cache.has(ck):
-		return _trait_cache[ck]
+	if _trait_sum.has(key):
+		return _trait_sum[key]
 	var total := 0.0
 	for t in traits:
 		var d: Dictionary = DatabaseManager.trait_data(t)
 		total += float(d.get(key, 0.0))
-	_trait_cache[ck] = total
+	_trait_sum[key] = total
 	return total
 
 
 ## Produto de um multiplicador entre os traços (ex.: "dev_mult", "card_mult"). Cacheado.
 func trait_mult(key: String) -> float:
-	var ck := "m_" + key
-	if _trait_cache.has(ck):
-		return _trait_cache[ck]
+	if _trait_mult.has(key):
+		return _trait_mult[key]
 	var total := 1.0
 	for t in traits:
 		var d: Dictionary = DatabaseManager.trait_data(t)
 		total *= float(d.get(key, 1.0))
-	_trait_cache[ck] = total
+	_trait_mult[key] = total
 	return total
 
 
 func set_traits(new_traits: Array) -> void:
 	traits = new_traits
-	_trait_cache.clear()
+	_trait_sum.clear()
+	_trait_mult.clear()
 
 
 ## Overall bruto (sem familiaridade) calculado com os pesos de uma posição.
@@ -257,7 +267,37 @@ func avg_rating() -> float:
 
 func reset_season_stats() -> void:
 	stats.fill(0)
+	cup_stats.clear()
 	minutes_season = 0
+
+
+func cup_add(cup_id: String, mins: int, goals: int, assists: int, rating: float) -> void:
+	var st: PackedInt32Array
+	if cup_stats.has(cup_id):
+		st = cup_stats[cup_id]
+	else:
+		st = PackedInt32Array()
+		st.resize(C_COUNT)
+		st.fill(0)
+	st[C_APPS] += 1
+	st[C_GOALS] += goals
+	st[C_ASSISTS] += assists
+	st[C_RATING] += int(round(rating * 10.0))
+	st[C_MINUTES] += mins
+	cup_stats[cup_id] = st
+
+
+## Totais da temporada somando liga e copas: [jogos, gols, assistências].
+func season_totals() -> Array:
+	var apps := stats[S_APPS]
+	var goals := stats[S_GOALS]
+	var assists := stats[S_ASSISTS]
+	for k in cup_stats:
+		var st: PackedInt32Array = cup_stats[k]
+		apps += st[C_APPS]
+		goals += st[C_GOALS]
+		assists += st[C_ASSISTS]
+	return [apps, goals, assists]
 
 
 ## Potencial estimado com ruído (o valor real nunca aparece na UI).
@@ -344,7 +384,7 @@ func playstyle() -> String:
 func to_dict() -> Dictionary:
 	return {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
-		"by": birth_year, "nat": nationality, "h": height, "ft": foot, "pos": position,
+		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
 		"tr": traits, "sn": scout_noise,
@@ -353,7 +393,7 @@ func to_dict() -> Dictionary:
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "min": minutes_season,
-		"stats": stats, "hist": history, "spells": spells,
+		"stats": stats, "cs": cup_stats, "hist": history, "spells": spells,
 		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles,
 	}
 
@@ -366,7 +406,8 @@ static func from_dict(d: Dictionary) -> Player:
 	p.nickname = d.get("nn", "")
 	p.known_as = d.get("ka", "")
 	p.birth_year = int(d.get("by", 2000))
-	p.nationality = d.get("nat", "VAL")
+	p.nationality = d.get("nat", "")
+	p.eth = int(d.get("eth", 1))
 	p.height = int(d.get("h", 178))
 	p.foot = int(d.get("ft", FOOT_RIGHT))
 	p.position = int(d.get("pos", Pos.CM))
@@ -405,6 +446,10 @@ static func from_dict(d: Dictionary) -> Player:
 	var st: Variant = d.get("stats", null)
 	if st is PackedInt32Array and st.size() == S_COUNT:
 		p.stats = st
+	var cs: Dictionary = d.get("cs", {})
+	for k in cs:
+		if cs[k] is PackedInt32Array and cs[k].size() == C_COUNT:
+			p.cup_stats[k] = cs[k]
 	p.history = Array(d.get("hist", []))
 	p.spells = Array(d.get("spells", []))
 	p.career_apps = int(d.get("ca", 0))

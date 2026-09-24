@@ -1,9 +1,10 @@
 class_name WorldGenerator
 extends RefCounted
 ## Monta o universo inicial a partir do seed. Mesmo seed + mesmo tipo = mesmo mundo.
+## "padrao": os clubes dos dados com suas reputações; "aleatorio": outra história — reputações
+## e perfis oscilam e todos os jogadores são outros.
 
 const DEFAULT_SEED := 19031911
-const FREE_AGENTS := 90
 
 
 static func random_seed() -> int:
@@ -14,32 +15,36 @@ static func random_seed() -> int:
 
 static func generate(seed_value: int, world_type: String = "padrao") -> GameWorld:
 	DatabaseManager.load_all()
+	Valuation.load_scale()
+	Valuation.shift = 0.0
 	var w := GameWorld.new()
 	w.world_seed = seed_value
 	w.world_type = world_type
 	w.rng.seed = seed_value
-	w.year = int(DatabaseManager.competitions()["start_year"])
+	w.year = DatabaseManager.start_year()
 	var rng := w.rng
-	if world_type == "aleatorio":
-		ClubGenerator.random_clubs(w, rng)
-	else:
-		var datas := DatabaseManager.clubs_default()
-		for i in datas.size():
-			w.clubs.append(ClubGenerator.from_default(w, rng, datas[i], i))
-		ClubGenerator.resolve_rivals(w, datas)
+	ClubGenerator.build_all(w, rng, world_type == "aleatorio")
 	var used_names := {}
 	for c in w.clubs:
-		var level := PlayerGenerator.club_level(c.division, c.reputation, c.arch())
-		PlayerGenerator.create_squad(w, rng, c, level, used_names)
-	for i in FREE_AGENTS:
-		var div := RngUtil.weighted_index(rng, [1.0, 2.0, 3.0, 4.0])
-		var lr: Array = DatabaseManager.division_config(div)["level_range"]
-		PlayerGenerator.create_free_agent(w, rng, (float(lr[0]) + float(lr[1])) * 0.5, used_names)
+		PlayerGenerator.create_squad(w, rng, c, PlayerGenerator.club_level(c), used_names)
+	var n_free := int(w.clubs.size() * float(DatabaseManager.rules().get("free_agents_per_club", 0.5)))
+	for i in n_free:
+		PlayerGenerator.create_free_agent(w, rng, random_league_level(rng), used_names)
 	Valuation.refresh_shift(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
 	SeasonManager.setup_first_season(w)
 	return w
+
+
+## Nível médio de uma liga sorteada pelo número de vagas (para agentes livres).
+static func random_league_level(rng: RandomNumberGenerator) -> float:
+	var ids := DatabaseManager.league_ids()
+	var weights: Array = []
+	for id in ids:
+		weights.append(float(DatabaseManager.league_cfg(id)["teams"]))
+	var cfg := DatabaseManager.league_cfg(ids[RngUtil.weighted_index(rng, weights)])
+	return FinanceManager.league_mid_level(cfg) - 2.0
 
 
 ## Conjunto de nomes completos em uso (para gerar novos jogadores sem repetição).

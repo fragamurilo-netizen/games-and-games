@@ -1,13 +1,20 @@
 class_name SeasonState
 extends RefCounted
-## Estado da temporada corrente: ligas, calendário de dias de jogo e progresso.
+## Estado da temporada corrente: ligas de todas as nações, copas, calendário unificado e progresso.
+## O calendário é uma sequência de datas ("slots"): W = rodada de liga (fim de semana),
+## Cn = data continental (meio de semana), Xn = Mundial de Clubes.
+
+const MONTHS: Array[String] = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
 var year: int = 2026
-var leagues: Array = [] # League por divisão (0 = primeira)
-## Dias de jogo em ordem: {"t": "L", "r": rodada}. A Copa entra como {"t": "C", ...}.
+var leagues: Dictionary = {} # id -> League
+var league_order: Array = [] # ids na ordem dos dados
+var cups: Dictionary = {} # id -> Cup
+## Datas: {"t": "W"|"C1".."C13"|"X1".."X3", "d": dia do ano (0 = 1º de janeiro do ano da temporada)}
 var calendar: Array = []
-var day: int = 0 # próximo dia de jogo a disputar
+var day: int = 0 # próxima data a disputar
 var finished: bool = false
+var turn: int = 0 # jogos do usuário já disputados (prazos de propostas e negociações)
 
 
 func total_days() -> int:
@@ -20,31 +27,80 @@ func current_entry() -> Dictionary:
 	return calendar[day]
 
 
-## Número da próxima rodada da liga (1-based) ou 0 se acabou.
-func next_league_round() -> int:
-	var e := current_entry()
-	if e.is_empty():
-		return 0
-	return int(e.get("r", 0)) + 1
+func slot_type(slot: int) -> String:
+	if slot < 0 or slot >= calendar.size():
+		return ""
+	return calendar[slot]["t"]
 
 
-func league(div: int) -> League:
-	return leagues[div]
+func is_weekend(slot: int) -> bool:
+	return slot_type(slot) == "W"
+
+
+## Índice da data com o código `code` ("C1", "X3"...), ou -1.
+func slot_of(code: String) -> int:
+	for i in calendar.size():
+		if calendar[i]["t"] == code:
+			return i
+	return -1
+
+
+func league(id: String) -> League:
+	return leagues.get(id, null)
+
+
+func cup(id: String) -> RefCounted:
+	return cups.get(id, null)
+
+
+## Todos os jogos de uma data (ligas e copas).
+func fixtures_at(slot: int) -> Array:
+	var out: Array = []
+	for id in league_order:
+		var l: League = leagues[id]
+		var r := l.round_at_slot(slot)
+		if r >= 0:
+			out.append_array(l.rounds[r])
+	for cid in cups:
+		out.append_array(cups[cid].fixtures_at(slot))
+	return out
+
+
+## Data legível de um slot: "sáb 15 ago".
+func date_label(slot: int, with_weekday: bool = true) -> String:
+	if slot < 0 or slot >= calendar.size():
+		return ""
+	var doy: int = calendar[slot]["d"]
+	var unix := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1}) + doy * 86400
+	var dt := Time.get_datetime_dict_from_unix_time(unix)
+	var s := "%d %s" % [int(dt["day"]), MONTHS[int(dt["month"]) - 1]]
+	if with_weekday:
+		s = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][int(dt["weekday"])] + " " + s
+	return s
 
 
 func to_dict() -> Dictionary:
-	var ls: Array = []
-	for l in leagues:
-		ls.append(l.to_dict())
-	return {"year": year, "leagues": ls, "cal": calendar, "day": day, "fin": finished}
+	var ls: Dictionary = {}
+	for id in leagues:
+		ls[id] = leagues[id].to_dict()
+	var cs: Dictionary = {}
+	for id in cups:
+		cs[id] = cups[id].to_dict()
+	return {"year": year, "leagues": ls, "order": league_order, "cups": cs, "cal": calendar, "day": day, "fin": finished, "turn": turn}
 
 
 static func from_dict(d: Dictionary) -> SeasonState:
 	var s := SeasonState.new()
 	s.year = int(d.get("year", 2026))
-	for ld in d.get("leagues", []):
-		s.leagues.append(League.from_dict(ld))
+	var ls: Dictionary = d.get("leagues", {})
+	for id in ls:
+		s.leagues[id] = League.from_dict(ls[id])
+	s.league_order = Array(d.get("order", ls.keys()))
+	var cs: Dictionary = d.get("cups", {})
+	for id in cs:
+		s.cups[id] = Cup.from_dict(cs[id])
 	s.calendar = Array(d.get("cal", []))
 	s.day = int(d.get("day", 0))
 	s.finished = bool(d.get("fin", false))
+	s.turn = int(d.get("turn", 0))
 	return s

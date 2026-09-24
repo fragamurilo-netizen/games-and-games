@@ -101,7 +101,7 @@ func _build() -> void:
 	_entries = GameManager.matchday.get("entries", [])
 	for e in _entries:
 		var f: Fixture = e["f"]
-		if f != _fx and f.division == _fx.division and f.competition == _fx.competition:
+		if f != _fx and f.comp == _fx.comp and f.stage == _fx.stage:
 			_div_entries.append(e)
 	_user_side = 0 if _fx.home == w.user_club_id else 1
 	_pace = 0 if AppSettings.match_speed == AppSettings.SPEED_NORMAL else 1
@@ -529,10 +529,14 @@ func _sync_slots() -> void:
 
 func _update_board() -> void:
 	_score_lbl.text = "%d – %d" % [_sim.score[0], _sim.score[1]]
+	if _sim.shootout or _sim.pen_taken[0] + _sim.pen_taken[1] > 0:
+		_score_lbl.text += "  (%d–%d)" % [_sim.pen_score[0], _sim.pen_score[1]]
 	if _done or _sim.finished:
 		_clock_lbl.text = "Fim de jogo"
 	elif _halftime:
-		_clock_lbl.text = "Intervalo"
+		_clock_lbl.text = "Prorrogação" if _sim.et_pending else "Intervalo"
+	elif _sim.shootout:
+		_clock_lbl.text = "Pênaltis"
 	else:
 		_clock_lbl.text = Fmt.minute(_sim.minute, _sim.half)
 	_home_scorers.text = _scorer_text(0)
@@ -640,9 +644,9 @@ func _update_ticker(delta: float) -> void:
 
 
 func _score_of(e: Dictionary, minute: int, half: int) -> Array:
-	var sim: MatchSimulation = e["sim"]
-	if _done and sim.finished:
-		return [sim.score[0], sim.score[1]]
+	var res: Dictionary = e["res"]
+	if _done and not res.is_empty():
+		return [int(res["hg"]), int(res["ag"])]
 	return GameManager.live_score(e, minute, half)
 
 
@@ -710,20 +714,21 @@ func _skip_to_end() -> void:
 func _show_halftime() -> void:
 	var v := UIKit.vbox(14)
 	v.custom_minimum_size.x = 600
-	v.add_child(UIKit.label("Intervalo", "Title"))
+	var et := _sim.et_pending
+	v.add_child(UIKit.label("Fim do tempo normal · prorrogação" if et else "Intervalo", "Title", true))
 	var sc := UIKit.label("%s  %d – %d  %s" % [_sim.teams[0].club.short_name, _sim.score[0], _sim.score[1], _sim.teams[1].club.short_name], "H2", true)
 	sc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sc)
 	v.add_child(_stats_table(false))
 	v.add_child(_halftime_hint())
-	var others := _other_scores(45, 1)
+	var others := _other_scores(90 if et else 45, 2 if et else 1)
 	if others != null:
 		v.add_child(others)
 	var row := UIKit.vbox(10)
 	row.add_child(UIKit.button("Ajustes táticos e substituições", "", func():
 		UIManager.close_modal()
 		_open_tactics(), "tactics"))
-	row.add_child(UIKit.button("INICIAR 2º TEMPO", "PrimaryButton", _start_second_half, "whistle"))
+	row.add_child(UIKit.button("INICIAR PRORROGAÇÃO" if et else "INICIAR 2º TEMPO", "PrimaryButton", _start_second_half, "whistle"))
 	v.add_child(row)
 	UIManager.show_modal(v, false, false)
 
@@ -790,7 +795,7 @@ func _other_scores(minute: int, half: int) -> VBoxContainer:
 	if _div_entries.is_empty() or not GameManager.ai_ready():
 		return null
 	var v := UIKit.vbox(4)
-	v.add_child(UIKit.section("Outros jogos · %s" % world().division_name(_fx.division)))
+	v.add_child(UIKit.section("Outros jogos · %s" % CompText.comp_short(world(), _fx.comp)))
 	for e in _div_entries:
 		var f: Fixture = e["f"]
 		var sc := _score_of(e, minute, half)

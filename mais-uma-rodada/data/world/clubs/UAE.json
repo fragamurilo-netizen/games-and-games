@@ -1,0 +1,54 @@
+{
+	"nation": "UAE",
+	"_doc": "Emirados Árabes (liga de 6).",
+	"clubs": [
+		{
+			"key": "UAE_BOS",
+			"name": "Al Ain Boss",
+			"short": "Al Ain",
+			"abbr": "BOS",
+			"nick": "Boss",
+			"city": "Al Ain",
+			"founded": 1968,
+			"league": "UAE1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Hazza",
+			"capacity": 22700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": []
+		},
+		{
+			"key": "UAE_DUB",
+			"name": "Dubai Knights",
+			"short": "Dubai",
+			"abbr": "DUB",
+			"nick": "Cavaleiros",
+			"city": "Dubai",
+			"founded": 1958,
+			"league": "UAE1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Rashid",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": []
+		}
+	]
+}

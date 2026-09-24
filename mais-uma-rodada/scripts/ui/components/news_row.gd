@@ -10,13 +10,14 @@ const CAT_ICON := {
 	"aposentadoria_anuncio": "clock", "aposentadoria": "clock", "campeao": "trophy", "acesso": "up", "rebaixamento": "down",
 	"jovem_explode": "star", "contrato_fim": "clock", "base": "star", "janela_abre": "swap", "janela_fecha": "swap",
 	"marco_gols": "trophy", "temporada": "whistle", "diretoria_ultimato": "info", "demissao": "close", "novo_tecnico": "whistle",
+	"copa_classificado": "trophy", "copa_avanca": "trophy", "copa_eliminado": "close", "copa_campeao": "trophy", "mundial_classificado": "trophy", "mundial_campeao": "trophy",
 }
 
 
 static func make(w: GameWorld, n: NewsEvent, compact: bool) -> Control:
 	var row := UIKit.hbox(12)
 	var col := UIColors.ACCENT if n.importance >= NewsEvent.IMP_HIGH else UIColors.MUTED
-	if n.category in ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao"]:
+	if n.category in ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao", "copa_eliminado"]:
 		col = UIColors.RED
 	elif n.category in ["campeao", "acesso", "jovem_explode", "primeiro_gol"]:
 		col = UIColors.GREEN

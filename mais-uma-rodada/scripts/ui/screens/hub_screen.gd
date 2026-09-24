@@ -21,7 +21,7 @@ func refresh() -> void:
 		return
 	var club := w.user_club()
 	screen_title = club.short_name
-	screen_subtitle = "%s · temporada %d" % [w.division_name(club.division), w.year]
+	screen_subtitle = "%s · temporada %d" % [w.league_name(club.league_id), w.year]
 	var jobs := BoardManager.pending_job_offers(w)
 	show_nav = jobs.is_empty()
 	UIManager.refresh_chrome()
@@ -35,6 +35,9 @@ func refresh() -> void:
 	else:
 		c.add_child(_next_match_card(w, club))
 	c.add_child(_status_card(w, club))
+	var cups := _cups_card(w, club)
+	if cups != null:
+		c.add_child(cups)
 	var alerts := _alerts_card(w, club)
 	if alerts != null:
 		c.add_child(alerts)
@@ -42,7 +45,8 @@ func refresh() -> void:
 	c.add_child(_form_card(w, club))
 
 
-func _team_block(w: GameWorld, cl: Club, league: League) -> VBoxContainer:
+## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.
+func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 	var v := UIKit.vbox(6)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -53,14 +57,30 @@ func _team_block(w: GameWorld, cl: Club, league: League) -> VBoxContainer:
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(n)
-	var pos := CompetitionManager.position_of(league, cl.id)
-	var played: int = league.table[cl.id]["pl"]
-	var sub := UIKit.label(("%dº · %d pts" % [pos, league.table[cl.id]["pts"]]) if played > 0 else "Estreia", "Small")
+	var text := ""
+	var form := cl.recent_form(5)
+	if f.is_league():
+		var league := w.league(f.comp)
+		var row: Dictionary = league.table.get(cl.id, {})
+		if not row.is_empty() and int(row["pl"]) > 0:
+			text = "%dº · %d pts" % [CompetitionManager.position_of(league, cl.id), int(row["pts"])]
+			form = row["form"]
+		else:
+			text = "Estreia"
+	else:
+		var cup: Cup = w.season.cups.get(f.comp, null)
+		var g: Dictionary = cup.group_of(cl.id) if cup != null else {}
+		if f.stage == Fixture.STAGE_GROUP and not g.is_empty():
+			var order := CompetitionManager.sort_table(g["clubs"], g["table"])
+			text = "%dº no grupo %s" % [order.find(cl.id) + 1, g["n"]]
+		else:
+			text = "%s · %s" % [DatabaseManager.nation_name(cl.nation), w.league_short(cl.league_id)]
+	var sub := UIKit.label(text, "Small")
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var fd := FormDots.new()
 	fd.dot = 18
-	fd.form = league.table[cl.id]["form"]
+	fd.form = form
 	fd.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(fd)
 	return v
@@ -70,28 +90,34 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	var f := FixtureManager.next_fixture_for(w, club.id)
 	var card := UIKit.card("CardHighlight", 14)
 	if f == null:
-		card.add_child(UIKit.label("Sem jogos pela frente.", "Muted"))
+		card.add_child(UIKit.section("Temporada"))
+		card.add_child(UIKit.label("Seu time não joga mais nesta temporada.", "Title", true))
+		card.add_child(UIKit.label("As outras ligas e as finais das copas ainda estão em andamento. Avance para ver os campeões e o resumo do ano.", "Muted", true))
+		var adv := UIKit.button("AVANÇAR ATÉ O FIM DA TEMPORADA", "PrimaryButton", func():
+			GameManager.advance_to_end()
+			refresh(), "fast")
+		adv.custom_minimum_size.y = 104
+		card.add_child(adv)
 		return UIKit.card_panel(card)
-	var league := w.league_of(club.id)
 	var derby := MatchEngine.is_derby(w, f.home, f.away)
-	var head := UIKit.section("Próxima partida · Rodada %d de %d · %s" % [f.round + 1, league.rounds.size(), w.division_short(club.division)])
+	var head := UIKit.section("Próxima partida · %s · %s" % [CompText.fixture_title(w, f), w.season.date_label(f.slot)])
 	card.add_child(head)
 	var row := UIKit.hbox(6)
-	row.add_child(_team_block(w, w.club(f.home), league))
+	row.add_child(_team_block(w, w.club(f.home), f))
 	var mid := UIKit.vbox(2)
 	mid.alignment = BoxContainer.ALIGNMENT_CENTER
 	var vs := UIKit.label("x", "Big")
 	vs.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vs.add_theme_color_override(&"font_color", UIColors.DIM)
 	mid.add_child(vs)
-	var where := UIKit.label("EM CASA" if f.home == club.id else "FORA", "Caps")
+	var where := UIKit.label("NEUTRO" if f.neutral else ("EM CASA" if f.home == club.id else "FORA"), "Caps")
 	where.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	where.add_theme_color_override(&"font_color", UIColors.GREEN if f.home == club.id else UIColors.ORANGE)
+	where.add_theme_color_override(&"font_color", UIColors.MUTED if f.neutral else (UIColors.GREEN if f.home == club.id else UIColors.ORANGE))
 	mid.add_child(where)
 	row.add_child(mid)
-	row.add_child(_team_block(w, w.club(f.away), league))
+	row.add_child(_team_block(w, w.club(f.away), f))
 	card.add_child(row)
-	var stadium := UIKit.label("%s · %s" % [w.club(f.home).stadium, w.club(f.home).city], "Small")
+	var stadium := UIKit.label(("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city]), "Small")
 	stadium.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	card.add_child(stadium)
 	if derby:
@@ -150,7 +176,7 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(cl.name, "H3", true))
 		var goal := SeasonManager.goal_of(w, cl.id)
-		col.add_child(UIKit.label("%s · %s · meta: %s" % [w.division_short(cl.division), cl.arch().get("tag", ""), String(goal[0]).to_lower()], "Small", true))
+		col.add_child(UIKit.label("%s · %s · meta: %s" % [w.league_short(cl.league_id), cl.arch().get("tag", ""), String(goal[0]).to_lower()], "Small", true))
 		row.add_child(col)
 		var ccid: int = int(cid)
 		card.add_child(UIKit.tap_row(row, func():
@@ -204,6 +230,53 @@ func _status_card(w: GameWorld, club: Club) -> Control:
 	return UIKit.card_panel(card)
 
 
+## Situação do clube nas copas da temporada (grupo, fase atual, eliminação ou título).
+func _cups_card(w: GameWorld, club: Club) -> Control:
+	var rows: Array = []
+	for cid in w.season.cups:
+		var cup: Cup = w.season.cups[cid]
+		if not cup.has_club(club.id):
+			continue
+		var status := ""
+		var color := UIColors.TEXT
+		if cup.champion == club.id:
+			status = "CAMPEÃO"
+			color = UIColors.ACCENT
+		elif not cup.is_alive(club.id):
+			status = "Eliminado"
+			color = UIColors.MUTED
+		elif not cup.ties.is_empty():
+			var r := -1
+			for t in cup.ties:
+				if int(t["a"]) == club.id or int(t["b"]) == club.id:
+					r = maxi(r, int(t["r"]))
+			status = cup.round_names[r] if r >= 0 else "Fase de grupos"
+			color = UIColors.GREEN
+		else:
+			var g := cup.group_of(club.id)
+			if not g.is_empty():
+				var order := CompetitionManager.sort_table(g["clubs"], g["table"])
+				status = "%dº no grupo %s · %d pts" % [order.find(club.id) + 1, g["n"], int(g["table"][club.id]["pts"])]
+			else:
+				status = "Classificado"
+		rows.append([cup, status, color])
+	if rows.is_empty():
+		return null
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Copas"))
+	for r in rows:
+		var cup: Cup = r[0]
+		var row := UIKit.hbox(12)
+		row.add_child(UIKit.icon_rect("trophy", 30, UIColors.ACCENT))
+		var name := UIKit.label(cup.name, "")
+		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(name)
+		row.add_child(UIKit.colored(r[1], r[2], "Small"))
+		var id := cup.id
+		card.add_child(UIKit.tap_row(row, func(): UIManager.goto("table", {"cup": id})))
+	return UIKit.card_panel(card)
+
+
 static func _team_morale(w: GameWorld, club: Club) -> float:
 	var s := 0.0
 	var n := 0
@@ -219,7 +292,7 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 	if not offers.is_empty():
 		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
 	if w.transfer_window_open():
-		items.append(["swap", UIColors.GREEN, "Janela de transferências aberta até a rodada %d" % (w.window_end_day() + 1), func(): UIManager.goto("market")])
+		items.append(["swap", UIColors.GREEN, "Janela de transferências aberta até %s" % w.season.date_label(w.window_end_day(), false), func(): UIManager.goto("market")])
 	var injured: Array = []
 	var suspended: Array = []
 	var expiring := 0

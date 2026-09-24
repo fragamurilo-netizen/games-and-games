@@ -1,0 +1,133 @@
+{
+	"nation": "PER",
+	"_doc": "Peru (liga de 12).",
+	"clubs": [
+		{
+			"key": "PER_CRE",
+			"name": "Lima Crema",
+			"short": "Cremas",
+			"abbr": "CRE",
+			"nick": "Cremas",
+			"city": "Lima",
+			"founded": 1924,
+			"league": "PER1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F5E6C8",
+				"#8A1538"
+			],
+			"stadium": "Estadio de Ate",
+			"capacity": 80000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"PER_INT",
+				"PER_CEL"
+			]
+		},
+		{
+			"key": "PER_INT",
+			"name": "Lima Blanquiazul",
+			"short": "Íntimos",
+			"abbr": "INT",
+			"nick": "Íntimos",
+			"city": "Lima",
+			"founded": 1901,
+			"league": "PER1",
+			"rep": 66,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de La Victoria",
+			"capacity": 34000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"PER_CRE"
+			]
+		},
+		{
+			"key": "PER_CEL",
+			"name": "Rímac Celeste",
+			"short": "Celestes",
+			"abbr": "CEL",
+			"nick": "Celestes",
+			"city": "Lima",
+			"founded": 1955,
+			"league": "PER1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Rímac",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"PER_CRE"
+			]
+		},
+		{
+			"key": "PER_DOM",
+			"name": "Arequipa Dominó",
+			"short": "Dominós",
+			"abbr": "DOM",
+			"nick": "Dominós",
+			"city": "Arequipa",
+			"founded": 1915,
+			"league": "PER1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio de la Ciudad Blanca",
+			"capacity": 40000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "PER_IMP",
+			"name": "Cusco Imperial",
+			"short": "Imperiales",
+			"abbr": "IMP",
+			"nick": "Papá",
+			"city": "Cusco",
+			"founded": 1901,
+			"league": "PER1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Inca",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		}
+	]
+}

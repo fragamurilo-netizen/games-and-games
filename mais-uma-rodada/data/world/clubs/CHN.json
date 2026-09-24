@@ -1,0 +1,106 @@
+{
+	"nation": "CHN",
+	"_doc": "China (liga de 8).",
+	"clubs": [
+		{
+			"key": "CHN_SHH",
+			"name": "Shanghai Harbour",
+			"short": "Harbour",
+			"abbr": "SHH",
+			"nick": "Red Eagles",
+			"city": "Shanghai",
+			"founded": 2005,
+			"league": "CHN1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Pudong Stadium",
+			"capacity": 37000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"CHN_SHS"
+			]
+		},
+		{
+			"key": "CHN_JIN",
+			"name": "Jinan Taishan",
+			"short": "Taishan",
+			"abbr": "JIN",
+			"nick": "Taishan",
+			"city": "Jinan",
+			"founded": 1988,
+			"league": "CHN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Jinan Olympic Park",
+			"capacity": 56800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "CHN_BEI",
+			"name": "Beijing Imperial",
+			"short": "Imperial",
+			"abbr": "BEI",
+			"nick": "Imperial",
+			"city": "Beijing",
+			"founded": 1992,
+			"league": "CHN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Workers Stadium Park",
+			"capacity": 68000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": []
+		},
+		{
+			"key": "CHN_SHS",
+			"name": "Shanghai Shenhua Blue",
+			"short": "Shanghai Blue",
+			"abbr": "SHS",
+			"nick": "Blue Devils",
+			"city": "Shanghai",
+			"founded": 1993,
+			"league": "CHN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Hongkou Park",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"CHN_SHH"
+			]
+		}
+	]
+}

@@ -1,0 +1,159 @@
+{
+	"nation": "BEL",
+	"_doc": "Bélgica (liga de 8).",
+	"clubs": [
+		{
+			"key": "BEL_BRU",
+			"name": "Brugge Blauw-Zwart",
+			"short": "Blauw-Zwart",
+			"abbr": "BRU",
+			"nick": "Blauw-Zwart",
+			"city": "Brugge",
+			"founded": 1891,
+			"league": "BEL1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0072BC",
+				"#111111"
+			],
+			"stadium": "Stadion Sint-Andries",
+			"capacity": 29000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"BEL_BXL"
+			]
+		},
+		{
+			"key": "BEL_BXL",
+			"name": "Brussel Paars-Wit",
+			"short": "Paars-Wit",
+			"abbr": "BXL",
+			"nick": "Mauves",
+			"city": "Bruxelles",
+			"founded": 1908,
+			"league": "BEL1",
+			"rep": 76,
+			"arch": "formador",
+			"colors": [
+				"#4F2D7F",
+				"#FFFFFF"
+			],
+			"stadium": "Astrid Park Stadion",
+			"capacity": 22500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"BEL_BRU",
+				"BEL_ROU"
+			]
+		},
+		{
+			"key": "BEL_UNS",
+			"name": "Brussel Unionisten",
+			"short": "Unionisten",
+			"abbr": "UNS",
+			"nick": "Unionistes",
+			"city": "Bruxelles",
+			"founded": 1897,
+			"league": "BEL1",
+			"rep": 70,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#1D5BBF"
+			],
+			"stadium": "Stade du Parc Duden",
+			"capacity": 9400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"BEL_BXL"
+			]
+		},
+		{
+			"key": "BEL_LIM",
+			"name": "Limburg Genk",
+			"short": "Limburgers",
+			"abbr": "LIM",
+			"nick": "Smurfen",
+			"city": "Genk",
+			"founded": 1988,
+			"league": "BEL1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Genk",
+			"capacity": 23700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BEL_BUF",
+			"name": "Gent Buffalo's",
+			"short": "Buffalo's",
+			"abbr": "BUF",
+			"nick": "Buffalo's",
+			"city": "Gent",
+			"founded": 1900,
+			"league": "BEL1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Arena Ottergemsesteenweg",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BEL_ROU",
+			"name": "Luik Rouches",
+			"short": "Rouches",
+			"abbr": "ROU",
+			"nick": "Rouches",
+			"city": "Liège",
+			"founded": 1898,
+			"league": "BEL1",
+			"rep": 66,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de Sclessin",
+			"capacity": 27600,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"BEL_BXL"
+			]
+		}
+	]
+}

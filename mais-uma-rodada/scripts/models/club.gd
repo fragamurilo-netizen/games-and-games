@@ -3,6 +3,8 @@ extends RefCounted
 ## Clube: identidade, torcida, estádio, finanças, estrutura, visual, elenco e memória.
 
 var id: int = 0
+## Identificador estável entre mundos e versões (ex.: "BRA_RNC"); procedurais: "POR_P03".
+var key: String = ""
 var name: String = ""
 var short_name: String = ""
 var abbr: String = ""
@@ -10,13 +12,15 @@ var nickname: String = ""
 var city: String = ""
 var region: String = ""
 var founded: int = 1920
+var nation: String = ""
+var league_id: String = ""
+var tier: int = 1 # divisão dentro da nação (1 = primeira)
 
-var reputation: float = 50.0 # 1..100
+var reputation: float = 50.0 # 1..100 (escala mundial)
 var fan_base: int = 10000 # torcedores "de estádio" potenciais
 var fan_mood: float = 60.0 # 0..100
 var board_confidence: float = 60.0 # 0..100
-var rival_id: int = -1
-var rival2_id: int = -1
+var rivals: Array = [] # ids de clubes rivais (o primeiro é o maior)
 
 var stadium: String = ""
 var capacity: int = 10000
@@ -25,6 +29,10 @@ var balance: int = 0
 var transfer_budget: int = 0
 var wage_budget: int = 0 # folha mensal máxima
 var ledger: Dictionary = {} # receitas/despesas da temporada por categoria
+## Receitas e custos fixos da temporada (definidos com os orçamentos, pagos a cada semana).
+var income_tv: int = 0
+var income_sponsor: int = 0
+var cost_upkeep: int = 0
 
 var youth_level: int = 50 # 1..100
 var facilities: int = 50 # 1..100
@@ -36,15 +44,14 @@ var kit_home: Dictionary = {}
 var kit_away: Dictionary = {}
 var crest: Dictionary = {}
 
-var division: int = 0
 var player_ids: Array = []
 var sheet: TeamSheet = null
 var cohesion: float = 60.0 # entrosamento 0..100
 var last_lineup: Array = []
 
-## Memória: [{y, d (divisão), p (posição), pts, w, dr, l, gf, ga}]
+## Memória: [{y, l (liga), p (posição), pts, w, dr, l, gf, ga}]
 var history: Array = []
-## Títulos: {"L0": n (campeão 1ª), "L1": ..., "promo": n}
+## Títulos por chave: "L:BRA1" campeão da liga, "P:BRA2" acesso conquistado, "C:UCL" continental, "W:CWC" mundial.
 var titles: Dictionary = {}
 ## Sequências da temporada atual
 var streak_unbeaten: int = 0
@@ -61,6 +68,10 @@ func arch() -> Dictionary:
 	return DatabaseManager.archetype(archetype)
 
 
+func league_cfg() -> Dictionary:
+	return DatabaseManager.league_cfg(league_id)
+
+
 func primary_color() -> Color:
 	return Color(color1)
 
@@ -70,7 +81,11 @@ func secondary_color() -> Color:
 
 
 func is_rival(other_id: int) -> bool:
-	return other_id >= 0 and (other_id == rival_id or other_id == rival2_id)
+	return other_id >= 0 and rivals.has(other_id)
+
+
+func main_rival() -> int:
+	return int(rivals[0]) if not rivals.is_empty() else -1
 
 
 func squad_size() -> int:
@@ -117,24 +132,34 @@ func reset_season_state() -> void:
 	results = ""
 
 
-func title_count(key: String) -> int:
-	return int(titles.get(key, 0))
+func title_count(key_: String) -> int:
+	return int(titles.get(key_, 0))
 
 
-func add_title(key: String) -> void:
-	titles[key] = title_count(key) + 1
+func add_title(key_: String) -> void:
+	titles[key_] = title_count(key_) + 1
+
+
+## Total de títulos de um tipo ("L:" ligas, "C:" continentais, "W:" mundiais).
+func titles_of_kind(prefix: String) -> int:
+	var n := 0
+	for k in titles:
+		if String(k).begins_with(prefix):
+			n += int(titles[k])
+	return n
 
 
 func to_dict() -> Dictionary:
 	return {
-		"id": id, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
-		"city": city, "region": region, "founded": founded,
+		"id": id, "key": key, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
+		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
 		"rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
-		"rival": rival_id, "rival2": rival2_id, "stadium": stadium, "cap": capacity,
+		"rivals": rivals, "stadium": stadium, "cap": capacity,
 		"bal": balance, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
+		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
 		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "crest": crest,
-		"div": division, "players": player_ids,
+		"players": player_ids,
 		"sheet": sheet.to_dict() if sheet != null else {},
 		"coh": cohesion, "ll": last_lineup, "afk": ai_formation_key,
 		"hist": history, "titles": titles,
@@ -145,6 +170,7 @@ func to_dict() -> Dictionary:
 static func from_dict(d: Dictionary) -> Club:
 	var c := Club.new()
 	c.id = int(d.get("id", 0))
+	c.key = d.get("key", "")
 	c.name = d.get("name", "")
 	c.short_name = d.get("short", c.name)
 	c.abbr = d.get("abbr", c.name.substr(0, 3).to_upper())
@@ -152,18 +178,23 @@ static func from_dict(d: Dictionary) -> Club:
 	c.city = d.get("city", "")
 	c.region = d.get("region", "")
 	c.founded = int(d.get("founded", 1920))
+	c.nation = d.get("nat", "")
+	c.league_id = d.get("lg", "")
+	c.tier = int(d.get("tier", 1))
 	c.reputation = float(d.get("rep", 50.0))
 	c.fan_base = int(d.get("fans", 10000))
 	c.fan_mood = float(d.get("mood", 60.0))
 	c.board_confidence = float(d.get("board", 60.0))
-	c.rival_id = int(d.get("rival", -1))
-	c.rival2_id = int(d.get("rival2", -1))
+	c.rivals = Array(d.get("rivals", []))
 	c.stadium = d.get("stadium", "")
 	c.capacity = int(d.get("cap", 10000))
 	c.balance = int(d.get("bal", 0))
 	c.transfer_budget = int(d.get("tb", 0))
 	c.wage_budget = int(d.get("wb", 0))
 	c.ledger = d.get("ledger", {})
+	c.income_tv = int(d.get("itv", 0))
+	c.income_sponsor = int(d.get("isp", 0))
+	c.cost_upkeep = int(d.get("cup", 0))
 	c.youth_level = int(d.get("youth", 50))
 	c.facilities = int(d.get("fac", 50))
 	c.archetype = d.get("arch", "tradicional_equilibrado")
@@ -172,7 +203,6 @@ static func from_dict(d: Dictionary) -> Club:
 	c.kit_home = d.get("kh", {})
 	c.kit_away = d.get("ka", {})
 	c.crest = d.get("crest", {})
-	c.division = int(d.get("div", 0))
 	c.ai_formation_key = int(d.get("afk", -1))
 	c.player_ids = Array(d.get("players", []))
 	var sd: Dictionary = d.get("sheet", {})

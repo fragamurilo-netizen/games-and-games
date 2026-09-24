@@ -1,0 +1,106 @@
+{
+	"nation": "PAR",
+	"_doc": "Paraguai (liga de 10).",
+	"clubs": [
+		{
+			"key": "PAR_DEC",
+			"name": "Asunción Decano",
+			"short": "Decanos",
+			"abbr": "DEC",
+			"nick": "Franjeados",
+			"city": "Asunción",
+			"founded": 1902,
+			"league": "PAR1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio de Para Uno",
+			"capacity": 22000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"PAR_CIC"
+			]
+		},
+		{
+			"key": "PAR_CIC",
+			"name": "Asunción Ciclón",
+			"short": "Ciclón",
+			"abbr": "CIC",
+			"nick": "Azulgranas",
+			"city": "Asunción",
+			"founded": 1912,
+			"league": "PAR1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio de Barrio Obrero",
+			"capacity": 45000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"PAR_DEC"
+			]
+		},
+		{
+			"key": "PAR_GUM",
+			"name": "Asunción Gumarelo",
+			"short": "Gumarelos",
+			"abbr": "GUM",
+			"nick": "Gumarelos",
+			"city": "Asunción",
+			"founded": 1905,
+			"league": "PAR1",
+			"rep": 64,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Tuyucuá",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "PAR_ABO",
+			"name": "Asunción Aborigen",
+			"short": "Aborígenes",
+			"abbr": "ABO",
+			"nick": "Aborígenes",
+			"city": "Asunción",
+			"founded": 1903,
+			"league": "PAR1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio de Dos Bocas",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		}
+	]
+}

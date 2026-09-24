@@ -1,0 +1,161 @@
+{
+	"nation": "NED",
+	"_doc": "Holanda (liga de 10; clubes restantes gerados).",
+	"clubs": [
+		{
+			"key": "NED_AMS",
+			"name": "Amsterdam Godenzonen",
+			"short": "Godenzonen",
+			"abbr": "AMS",
+			"nick": "Godenzonen",
+			"city": "Amsterdam",
+			"founded": 1900,
+			"league": "NED1",
+			"rep": 82,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#D2122E"
+			],
+			"stadium": "Stadion Oost Amsterdam",
+			"capacity": 55000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"NED_ROT",
+				"NED_EIN"
+			]
+		},
+		{
+			"key": "NED_EIN",
+			"name": "Eindhoven Boeren",
+			"short": "Boeren",
+			"abbr": "EIN",
+			"nick": "Boeren",
+			"city": "Eindhoven",
+			"founded": 1913,
+			"league": "NED1",
+			"rep": 82,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion aan de Frederiklaan",
+			"capacity": 35000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"NED_AMS",
+				"NED_ROT"
+			]
+		},
+		{
+			"key": "NED_ROT",
+			"name": "Rotterdam Stadionclub",
+			"short": "Rotterdammers",
+			"abbr": "ROT",
+			"nick": "Stadionclub",
+			"city": "Rotterdam",
+			"founded": 1908,
+			"league": "NED1",
+			"rep": 80,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Zuid",
+			"capacity": 47500,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"NED_AMS",
+				"NED_EIN"
+			]
+		},
+		{
+			"key": "NED_ALK",
+			"name": "Alkmaar Kaaskoppen",
+			"short": "Kaaskoppen",
+			"abbr": "ALK",
+			"nick": "Kaaskoppen",
+			"city": "Alkmaar",
+			"founded": 1967,
+			"league": "NED1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Alkmaar",
+			"capacity": 19500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NED_ENS",
+			"name": "Enschede Tukkers",
+			"short": "Tukkers",
+			"abbr": "ENS",
+			"nick": "Tukkers",
+			"city": "Enschede",
+			"founded": 1965,
+			"league": "NED1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Het Diekman",
+			"capacity": 30200,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NED_UTR",
+			"name": "Utrecht Domstad",
+			"short": "Domstedelingen",
+			"abbr": "UTR",
+			"nick": "Domstedelingen",
+			"city": "Utrecht",
+			"founded": 1970,
+			"league": "NED1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Galgenwaard Oost",
+			"capacity": 23700,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"NED_AMS"
+			]
+		}
+	]
+}

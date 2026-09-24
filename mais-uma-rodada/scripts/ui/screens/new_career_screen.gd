@@ -1,14 +1,20 @@
 extends BaseScreen
-## Nova carreira: mundo (padrão/aleatório + seed), dificuldade, nome e clube.
-## O Mundo padrão já começa a ser gerado ao abrir a tela: escolher o clube leva segundos.
+## Nova carreira: mundo (padrão/aleatório + seed), dificuldade, nome, país, divisão e clube.
+## O mundo começa a ser gerado ao abrir a tela; escolher país e clube acontece enquanto isso.
+
+const CONFEDS: Array = [["UEFA", "Europa"], ["CONMEBOL", "América do Sul"], ["CONCACAF", "América do Norte"], ["CAF", "África"], ["AFC", "Ásia"]]
 
 var _world: GameWorld = null
 var _type := "padrao"
 var _seed := WorldGenerator.DEFAULT_SEED
 var _difficulty := GameWorld.DIFF_NORMAL
-var _division := 3
+var _confed := "CONMEBOL"
+var _nation := "BRA"
+var _league := "BRA1"
 var _selected := -1
 var _manager := "Treinador"
+var _nations_box: HFlowContainer
+var _leagues_row: HBoxContainer
 var _list: VBoxContainer
 var _details: VBoxContainer
 var _status: Label
@@ -18,7 +24,7 @@ var _start_btn: Button
 
 func _init() -> void:
 	screen_title = "Nova carreira"
-	screen_subtitle = "Escolha um clube e comece"
+	screen_subtitle = "Escolha um país, uma divisão e um clube"
 	show_nav = false
 
 
@@ -43,8 +49,7 @@ func _build() -> void:
 	row.add_child(UIKit.chip("Mundo aleatório", false, g, func(): _set_type("aleatorio")))
 	c.add_child(row)
 	var seed_row := UIKit.hbox(10)
-	var seed_lbl := UIKit.label("Seed", "Muted")
-	seed_row.add_child(seed_lbl)
+	seed_row.add_child(UIKit.label("Seed", "Muted"))
 	_seed_edit = LineEdit.new()
 	_seed_edit.text = str(_seed)
 	_seed_edit.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
@@ -56,15 +61,16 @@ func _build() -> void:
 		_seed_edit.text = str(WorldGenerator.random_seed())
 		_apply_seed(), "Seed aleatório"))
 	c.add_child(seed_row)
-	var hint := UIKit.label("Mesmo seed = mesmo universo. O Mundo padrão tem os 80 clubes de Valdora; o aleatório cria clubes e cidades novos.", "Small", true)
-	c.add_child(hint)
+	c.add_child(UIKit.label("Mesmo seed = mesmo universo. 43 países, 51 ligas e 602 clubes com nomes genéricos inspirados nos reais. No mundo aleatório as reputações e os perfis dos clubes mudam e todos os jogadores são outros.", "Small", true))
 	# Dificuldade
 	c.add_child(UIKit.section("Dificuldade"))
 	var gd := ButtonGroup.new()
 	var drow := UIKit.hbox(10)
 	for i in 3:
 		var idx := i
-		drow.add_child(UIKit.chip(GameWorld.DIFF_NAMES[i], i == _difficulty, gd, func(): _difficulty = idx))
+		drow.add_child(UIKit.chip(GameWorld.DIFF_NAMES[i], i == _difficulty, gd, func():
+			_difficulty = idx
+			_update_details()))
 	c.add_child(drow)
 	c.add_child(UIKit.label("A dificuldade muda orçamento, paciência da diretoria e margem nas negociações — nunca a força dos adversários.", "Small", true))
 	# Treinador
@@ -74,18 +80,23 @@ func _build() -> void:
 	name_edit.max_length = 24
 	name_edit.text_changed.connect(func(t): _manager = t)
 	c.add_child(name_edit)
-	# Clubes
-	c.add_child(UIKit.section("Escolha seu clube"))
-	var gdv := ButtonGroup.new()
-	var divrow := UIKit.hbox(8)
-	for d in 4:
-		var dd := d
-		divrow.add_child(UIKit.chip("%dª Divisão" % (d + 1), d == _division, gdv, func():
-			_division = dd
-			_selected = -1
-			_fill_clubs()))
-	c.add_child(divrow)
-	c.add_child(UIKit.label("Começar na 4ª divisão é a jornada mais longa: décadas até o topo.", "Small", true))
+	# País
+	c.add_child(UIKit.section("País"))
+	var gc := ButtonGroup.new()
+	var crow := UIKit.flow(8)
+	for cf in CONFEDS:
+		var code: String = cf[0]
+		crow.add_child(UIKit.chip(cf[1], code == _confed, gc, func():
+			_confed = code
+			_fill_nations()))
+	c.add_child(crow)
+	_nations_box = UIKit.flow(8)
+	c.add_child(_nations_box)
+	# Divisão e clubes
+	c.add_child(UIKit.section("Divisão"))
+	_leagues_row = UIKit.hbox(8)
+	c.add_child(_leagues_row)
+	c.add_child(UIKit.section("Clube"))
 	_status = UIKit.label("Gerando mundo...", "Accent")
 	c.add_child(_status)
 	_list = UIKit.vbox(8)
@@ -98,6 +109,51 @@ func _build() -> void:
 	_start_btn.custom_minimum_size.y = 96
 	_start_btn.disabled = true
 	f.add_child(_start_btn)
+	_fill_nations()
+
+
+func _fill_nations() -> void:
+	UIKit.clear(_nations_box)
+	var codes: Array = []
+	for n in DatabaseManager.league_nations():
+		if DatabaseManager.nation(n).get("confed", "") == _confed:
+			codes.append(n)
+	if not codes.has(_nation):
+		_set_nation(codes[0] if not codes.is_empty() else _nation, false)
+	for n in codes:
+		var code: String = n
+		var inner := UIKit.hbox(8)
+		inner.add_child(UIKit.flag(code, 36))
+		inner.add_child(UIKit.label(DatabaseManager.nation_name(code), "Small"))
+		var tr := UIKit.tap_row(inner, func(): _set_nation(code, true), "RowPanel", true)
+		tr.set_meta("nation", code)
+		UIKit.set_row_selected(tr, code == _nation)
+		_nations_box.add_child(tr)
+	_fill_leagues()
+
+
+func _set_nation(code: String, refill: bool) -> void:
+	_nation = code
+	var ids := DatabaseManager.leagues_of_nation(code)
+	_league = ids[0] if not ids.is_empty() else ""
+	_selected = -1
+	if refill:
+		for tr in _nations_box.get_children():
+			UIKit.set_row_selected(tr, tr.get_meta("nation", "") == code)
+		_fill_leagues()
+
+
+func _fill_leagues() -> void:
+	UIKit.clear(_leagues_row)
+	var g := ButtonGroup.new()
+	for lid in DatabaseManager.leagues_of_nation(_nation):
+		var id: String = lid
+		var cfg := DatabaseManager.league_cfg(id)
+		_leagues_row.add_child(UIKit.chip("%dª divisão" % int(cfg["tier"]), id == _league, g, func():
+			_league = id
+			_selected = -1
+			_fill_clubs()))
+	_fill_clubs()
 
 
 func _set_type(t: String) -> void:
@@ -123,7 +179,7 @@ func _apply_seed() -> void:
 func _generate() -> void:
 	_world = null
 	_selected = -1
-	_status.text = "Gerando mundo (80 clubes, ~2.000 jogadores)..."
+	_status.text = "Gerando o mundo (602 clubes, ~15 mil jogadores)..."
 	_status.visible = true
 	UIKit.clear(_list)
 	_update_details()
@@ -142,11 +198,11 @@ func _fill_clubs() -> void:
 		return
 	UIKit.clear(_list)
 	if _world == null:
+		_update_details()
 		return
-	var clubs: Array = []
-	for cl in _world.clubs:
-		if cl.division == _division:
-			clubs.append(cl)
+	var cfg := DatabaseManager.league_cfg(_league)
+	_list.add_child(UIKit.label("%s · %d clubes" % [cfg.get("name", _league), int(cfg.get("teams", 0))], "Muted"))
+	var clubs := _world.clubs_in_league(_league)
 	clubs.sort_custom(func(a, b): return a.reputation > b.reputation)
 	for cl: Club in clubs:
 		_list.add_child(_club_row(cl))
@@ -165,6 +221,9 @@ func _club_row(cl: Club) -> Control:
 	var goal: Array = SeasonManager.goal_of(_world, cl.id)
 	col.add_child(UIKit.label("%s · %s" % [cl.city, cl.arch().get("tag", "")], "Small"))
 	col.add_child(UIKit.label("Meta: %s" % String(goal[0]).to_lower(), "Small"))
+	for cid in _world.season.cups:
+		if _world.season.cups[cid].has_club(cl.id):
+			col.add_child(UIKit.pill(_world.season.cups[cid].short_name, UIColors.ACCENT, 16))
 	row.add_child(col)
 	var right := UIKit.vbox(4)
 	right.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -181,7 +240,8 @@ func _club_row(cl: Club) -> Control:
 	var tr := UIKit.tap_row(row, func():
 		_selected = cl.id
 		for other in _list.get_children():
-			UIKit.set_row_selected(other, other.get_meta("cid", -1) == cl.id)
+			if other is PanelContainer:
+				UIKit.set_row_selected(other, other.get_meta("cid", -1) == cl.id)
 		_update_details(), "RowPanel", true)
 	tr.set_meta("cid", cl.id)
 	UIKit.set_row_selected(tr, cl.id == _selected)

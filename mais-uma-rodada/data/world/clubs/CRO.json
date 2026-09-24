@@ -1,0 +1,58 @@
+{
+	"nation": "CRO",
+	"_doc": "Croácia (liga de 6).",
+	"clubs": [
+		{
+			"key": "CRO_MOD",
+			"name": "Zagreb Modri",
+			"short": "Modri",
+			"abbr": "MOD",
+			"nick": "Modri",
+			"city": "Zagreb",
+			"founded": 1945,
+			"league": "CRO1",
+			"rep": 70,
+			"arch": "vendedor",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Maksimir Sjever",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"CRO_BIL"
+			]
+		},
+		{
+			"key": "CRO_BIL",
+			"name": "Split Bili",
+			"short": "Bili",
+			"abbr": "BIL",
+			"nick": "Bili",
+			"city": "Split",
+			"founded": 1911,
+			"league": "CRO1",
+			"rep": 66,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Stadion Poljud Jug",
+			"capacity": 34000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"CRO_MOD"
+			]
+		}
+	]
+}

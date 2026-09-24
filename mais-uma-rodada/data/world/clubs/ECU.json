@@ -1,0 +1,134 @@
+{
+	"nation": "ECU",
+	"_doc": "Equador (liga de 12).",
+	"clubs": [
+		{
+			"key": "ECU_ALQ",
+			"name": "Quito Albo",
+			"short": "Albos Quito",
+			"abbr": "ALQ",
+			"nick": "Albos",
+			"city": "Quito",
+			"founded": 1930,
+			"league": "ECU1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Estadio de Ponceano",
+			"capacity": 41500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ECU_ORI"
+			]
+		},
+		{
+			"key": "ECU_TOR",
+			"name": "Guayaquil Amarillo",
+			"short": "Toreros",
+			"abbr": "TOR",
+			"nick": "Toreros",
+			"city": "Guayaquil",
+			"founded": 1925,
+			"league": "ECU1",
+			"rep": 68,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio del Salado",
+			"capacity": 57000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ECU_ELE"
+			]
+		},
+		{
+			"key": "ECU_ELE",
+			"name": "Guayaquil Eléctrico",
+			"short": "Eléctricos",
+			"abbr": "ELE",
+			"nick": "Bombillo",
+			"city": "Guayaquil",
+			"founded": 1929,
+			"league": "ECU1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Astillero",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "bolt"
+			},
+			"rivals": [
+				"ECU_TOR"
+			]
+		},
+		{
+			"key": "ECU_RAY",
+			"name": "Sangolquí Rayado",
+			"short": "Rayados",
+			"abbr": "RAY",
+			"nick": "Rayados",
+			"city": "Sangolquí",
+			"founded": 1958,
+			"league": "ECU1",
+			"rep": 68,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#1D5BBF"
+			],
+			"stadium": "Estadio del Valle",
+			"capacity": 12000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ECU_ORI",
+			"name": "Quito Oriental",
+			"short": "Orientales",
+			"abbr": "ORI",
+			"nick": "Papá Aucas",
+			"city": "Quito",
+			"founded": 1945,
+			"league": "ECU1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio del Sur de Quito",
+			"capacity": 36000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": [
+				"ECU_ALQ"
+			]
+		}
+	]
+}

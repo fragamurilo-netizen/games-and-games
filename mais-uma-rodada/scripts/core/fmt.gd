@@ -68,6 +68,10 @@ static func minute(m: int, half: int = 0) -> String:
 		return "45+" + str(m - 45) + "'"
 	if half == 2 and m > 90:
 		return "90+" + str(m - 90) + "'"
+	if half == 3 and m > 105:
+		return "105+" + str(m - 105) + "'"
+	if half == 4 and m > 120:
+		return "120+" + str(m - 120) + "'"
 	return str(m) + "'"
 
 

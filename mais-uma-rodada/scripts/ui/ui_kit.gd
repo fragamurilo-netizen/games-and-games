@@ -23,8 +23,8 @@ static func label(text: String, variation: String = "", wrap: bool = false) -> L
 	return l
 
 
-static func colored(text: String, color: Color, variation: String = "") -> Label:
-	var l := label(text, variation)
+static func colored(text: String, color: Color, variation: String = "", wrap: bool = false) -> Label:
+	var l := label(text, variation, wrap)
 	l.add_theme_color_override(&"font_color", color)
 	return l
 
@@ -124,6 +124,14 @@ static func crest(c: Club, px: int) -> CrestView:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if c != null:
 		v.set_club(c)
+	return v
+
+
+static func flag(code: String, w: int) -> FlagView:
+	var v := FlagView.new()
+	v.custom_minimum_size = Vector2(w, roundi(w / 1.5))
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.code = code
 	return v
 
 

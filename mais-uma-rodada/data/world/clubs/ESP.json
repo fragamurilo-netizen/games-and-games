@@ -1,0 +1,1022 @@
+{
+	"nation": "ESP",
+	"_doc": "Espanha: 1ª e 2ª divisão. Nomes genéricos inspirados nos clubes reais.",
+	"clubs": [
+		{
+			"key": "ESP_MBL",
+			"name": "Madrid Blanco",
+			"short": "Madrid Blanco",
+			"abbr": "MBL",
+			"nick": "Merengues",
+			"city": "Madrid",
+			"founded": 1902,
+			"league": "ESP1",
+			"rep": 97,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#FEBE10"
+			],
+			"stadium": "Estadio de Chamartín",
+			"capacity": 83000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"ESP_BLG",
+				"ESP_MRB"
+			]
+		},
+		{
+			"key": "ESP_BLG",
+			"name": "Barcelona Blaugrana",
+			"short": "Blaugrana",
+			"abbr": "BLG",
+			"nick": "Culés",
+			"city": "Barcelona",
+			"founded": 1899,
+			"league": "ESP1",
+			"rep": 95,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#A50044",
+				"#004D98"
+			],
+			"stadium": "Estadi de la Diagonal",
+			"capacity": 99000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"ESP_MBL",
+				"ESP_PQT"
+			]
+		},
+		{
+			"key": "ESP_MRB",
+			"name": "Madrid Rojiblanco",
+			"short": "Rojiblancos",
+			"abbr": "MRB",
+			"nick": "Colchoneros",
+			"city": "Madrid",
+			"founded": 1903,
+			"league": "ESP1",
+			"rep": 88,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#CB3524",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de San Blas",
+			"capacity": 70000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"ESP_MBL"
+			]
+		},
+		{
+			"key": "ESP_BIL",
+			"name": "Bilbao Leones",
+			"short": "Leones",
+			"abbr": "BIL",
+			"nick": "Leones",
+			"city": "Bilbao",
+			"founded": 1898,
+			"league": "ESP1",
+			"rep": 82,
+			"arch": "formador",
+			"colors": [
+				"#EE2523",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Basurto",
+			"capacity": 53000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"ESP_DON"
+			]
+		},
+		{
+			"key": "ESP_DON",
+			"name": "Donostia Txuri-Urdin",
+			"short": "Txuri-Urdin",
+			"abbr": "DON",
+			"nick": "Txuri-Urdin",
+			"city": "San Sebastián",
+			"founded": 1909,
+			"league": "ESP1",
+			"rep": 80,
+			"arch": "formador",
+			"colors": [
+				"#0067B1",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Anoeta",
+			"capacity": 39500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"ESP_BIL"
+			]
+		},
+		{
+			"key": "ESP_SUB",
+			"name": "Submarino Amarillo",
+			"short": "Submarino",
+			"abbr": "SUB",
+			"nick": "Submarino",
+			"city": "Villarreal",
+			"founded": 1923,
+			"league": "ESP1",
+			"rep": 78,
+			"arch": "vendedor",
+			"colors": [
+				"#FFE667",
+				"#005187"
+			],
+			"stadium": "Estadio del Madrigal",
+			"capacity": 23500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"ESP_VLC"
+			]
+		},
+		{
+			"key": "ESP_VBL",
+			"name": "Sevilla Verdiblanco",
+			"short": "Verdiblancos",
+			"abbr": "VBL",
+			"nick": "Béticos",
+			"city": "Sevilla",
+			"founded": 1907,
+			"league": "ESP1",
+			"rep": 79,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00954C",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Heliópolis",
+			"capacity": 60000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ESP_NER"
+			]
+		},
+		{
+			"key": "ESP_NER",
+			"name": "Sevilla Nervión",
+			"short": "Nervión",
+			"abbr": "NER",
+			"nick": "Sevillistas",
+			"city": "Sevilla",
+			"founded": 1890,
+			"league": "ESP1",
+			"rep": 78,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#D71A28"
+			],
+			"stadium": "Estadio de Nervión",
+			"capacity": 43800,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"ESP_VBL"
+			]
+		},
+		{
+			"key": "ESP_VLC",
+			"name": "Valencia Murciélagos",
+			"short": "Murciélagos",
+			"abbr": "VLC",
+			"nick": "Che",
+			"city": "Valencia",
+			"founded": 1919,
+			"league": "ESP1",
+			"rep": 76,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio del Turia",
+			"capacity": 49000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "bolt"
+			},
+			"rivals": [
+				"ESP_SUB",
+				"ESP_GRA"
+			]
+		},
+		{
+			"key": "ESP_VIG",
+			"name": "Vigo Celeste",
+			"short": "Celestes",
+			"abbr": "VIG",
+			"nick": "Celestes",
+			"city": "Vigo",
+			"founded": 1923,
+			"league": "ESP1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#8AC3EE",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Lagares",
+			"capacity": 29000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"ESP_COR"
+			]
+		},
+		{
+			"key": "ESP_GIR",
+			"name": "Girona Blanquivermell",
+			"short": "Blanquivermell",
+			"abbr": "GIR",
+			"nick": "Gironins",
+			"city": "Girona",
+			"founded": 1930,
+			"league": "ESP1",
+			"rep": 70,
+			"arch": "rico_promovido",
+			"colors": [
+				"#CD2534",
+				"#FFFFFF"
+			],
+			"stadium": "Estadi de Montilivi",
+			"capacity": 14600,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"ESP_BLG",
+				"ESP_PQT"
+			]
+		},
+		{
+			"key": "ESP_PAM",
+			"name": "Pamplona Rojillos",
+			"short": "Rojillos",
+			"abbr": "PAM",
+			"nick": "Rojillos",
+			"city": "Pamplona",
+			"founded": 1920,
+			"league": "ESP1",
+			"rep": 68,
+			"arch": "defensivo",
+			"colors": [
+				"#D91A21",
+				"#0A346F"
+			],
+			"stadium": "Estadio de la Milagrosa",
+			"capacity": 23500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"ESP_BIL",
+				"ESP_DON"
+			]
+		},
+		{
+			"key": "ESP_MLL",
+			"name": "Mallorca Bermellón",
+			"short": "Bermellones",
+			"abbr": "MLL",
+			"nick": "Bermellones",
+			"city": "Palma",
+			"founded": 1916,
+			"league": "ESP1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E20613",
+				"#111111"
+			],
+			"stadium": "Estadi de Son Moix",
+			"capacity": 23100,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_VCS",
+			"name": "Vallecas Franjirrojo",
+			"short": "Vallecas",
+			"abbr": "VCS",
+			"nick": "Franjirrojos",
+			"city": "Madrid",
+			"founded": 1924,
+			"league": "ESP1",
+			"rep": 64,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#E53027"
+			],
+			"stadium": "Estadio de Vallecas",
+			"capacity": 14700,
+			"kit": "diagonal",
+			"crest": {
+				"shape": "shield",
+				"symbol": "bolt"
+			},
+			"rivals": [
+				"ESP_MBL",
+				"ESP_MRB"
+			]
+		},
+		{
+			"key": "ESP_GET",
+			"name": "Getafe Azulón",
+			"short": "Azulones",
+			"abbr": "GET",
+			"nick": "Azulones",
+			"city": "Getafe",
+			"founded": 1983,
+			"league": "ESP1",
+			"rep": 62,
+			"arch": "defensivo",
+			"colors": [
+				"#005999",
+				"#FFFFFF"
+			],
+			"stadium": "Coliseo del Sur",
+			"capacity": 16500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ESP_LEG"
+			]
+		},
+		{
+			"key": "ESP_VIT",
+			"name": "Vitoria Babazorro",
+			"short": "Babazorros",
+			"abbr": "VIT",
+			"nick": "Babazorros",
+			"city": "Vitoria-Gasteiz",
+			"founded": 1921,
+			"league": "ESP1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0761AF",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Gasteiz",
+			"capacity": 19800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"ESP_BIL"
+			]
+		},
+		{
+			"key": "ESP_PQT",
+			"name": "Barcelona Periquito",
+			"short": "Periquitos",
+			"abbr": "PQT",
+			"nick": "Pericos",
+			"city": "Barcelona",
+			"founded": 1900,
+			"league": "ESP1",
+			"rep": 64,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#007FC8",
+				"#FFFFFF"
+			],
+			"stadium": "Estadi de Cornellà",
+			"capacity": 40000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ESP_BLG"
+			]
+		},
+		{
+			"key": "ESP_GRA",
+			"name": "Valencia Granota",
+			"short": "Granotes",
+			"abbr": "GRA",
+			"nick": "Granotes",
+			"city": "Valencia",
+			"founded": 1909,
+			"league": "ESP1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#004B98",
+				"#B4053F"
+			],
+			"stadium": "Estadio de Orriols",
+			"capacity": 26300,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "wave"
+			},
+			"rivals": [
+				"ESP_VLC"
+			]
+		},
+		{
+			"key": "ESP_ELX",
+			"name": "Elche Franjiverde",
+			"short": "Franjiverdes",
+			"abbr": "ELX",
+			"nick": "Franjiverdes",
+			"city": "Elche",
+			"founded": 1923,
+			"league": "ESP1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#05642C"
+			],
+			"stadium": "Estadio del Altabix",
+			"capacity": 31300,
+			"kit": "faixa",
+			"crest": {
+				"shape": "shield",
+				"symbol": "sun"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_OVI",
+			"name": "Oviedo Carbayón",
+			"short": "Carbayones",
+			"abbr": "OVI",
+			"nick": "Carbayones",
+			"city": "Oviedo",
+			"founded": 1926,
+			"league": "ESP1",
+			"rep": 60,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A5",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Buenavista",
+			"capacity": 30500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"ESP_GIJ"
+			]
+		},
+		{
+			"key": "ESP_COR",
+			"name": "Coruña Branquiazul",
+			"short": "Branquiazuis",
+			"abbr": "COR",
+			"nick": "Turcos",
+			"city": "A Coruña",
+			"founded": 1906,
+			"league": "ESP2",
+			"rep": 62,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#0066B3"
+			],
+			"stadium": "Estadio de Riazor",
+			"capacity": 32600,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"ESP_VIG"
+			]
+		},
+		{
+			"key": "ESP_GIJ",
+			"name": "Gijón Rojiblanco",
+			"short": "Gijón",
+			"abbr": "GIJ",
+			"nick": "Sportinguistas",
+			"city": "Gijón",
+			"founded": 1905,
+			"league": "ESP2",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Viesques",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"ESP_OVI"
+			]
+		},
+		{
+			"key": "ESP_ZAR",
+			"name": "Zaragoza Maño",
+			"short": "Maños",
+			"abbr": "ZAR",
+			"nick": "Maños",
+			"city": "Zaragoza",
+			"founded": 1932,
+			"league": "ESP2",
+			"rep": 58,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#0A3D8F"
+			],
+			"stadium": "Estadio de la Romareda",
+			"capacity": 33600,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"ESP_HUE"
+			]
+		},
+		{
+			"key": "ESP_SAN",
+			"name": "Santander Verdiblanco",
+			"short": "Santander",
+			"abbr": "SAN",
+			"nick": "Racinguistas",
+			"city": "Santander",
+			"founded": 1913,
+			"league": "ESP2",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#00843D"
+			],
+			"stadium": "Estadio de El Sardinero",
+			"capacity": 22200,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_GCA",
+			"name": "Gran Canaria Amarillo",
+			"short": "Gran Canaria",
+			"abbr": "GCA",
+			"nick": "Amarillos",
+			"city": "Las Palmas",
+			"founded": 1949,
+			"league": "ESP2",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFE400",
+				"#0055A5"
+			],
+			"stadium": "Estadio de Siete Palmas",
+			"capacity": 32400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": [
+				"ESP_TEN"
+			]
+		},
+		{
+			"key": "ESP_TEN",
+			"name": "Tenerife Blanquiazul",
+			"short": "Tenerife",
+			"abbr": "TEN",
+			"nick": "Chicharreros",
+			"city": "Santa Cruz de Tenerife",
+			"founded": 1912,
+			"league": "ESP2",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#0055A5"
+			],
+			"stadium": "Estadio del Puerto",
+			"capacity": 22800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"ESP_GCA"
+			]
+		},
+		{
+			"key": "ESP_PUC",
+			"name": "Valladolid Pucela",
+			"short": "Pucela",
+			"abbr": "PUC",
+			"nick": "Pucelanos",
+			"city": "Valladolid",
+			"founded": 1928,
+			"league": "ESP2",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#921B88",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Pisuerga",
+			"capacity": 27800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_ALM",
+			"name": "Almería Indálico",
+			"short": "Indálicos",
+			"abbr": "ALM",
+			"nick": "Indálicos",
+			"city": "Almería",
+			"founded": 1989,
+			"league": "ESP2",
+			"rep": 58,
+			"arch": "rico_promovido",
+			"colors": [
+				"#EE1119",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Mediterráneo",
+			"capacity": 17400,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_NAZ",
+			"name": "Granada Nazarí",
+			"short": "Nazaríes",
+			"abbr": "NAZ",
+			"nick": "Nazaríes",
+			"city": "Granada",
+			"founded": 1931,
+			"league": "ESP2",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C8102E",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Zaidín",
+			"capacity": 19300,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_CAD",
+			"name": "Cádiz Gaditano",
+			"short": "Gaditanos",
+			"abbr": "CAD",
+			"nick": "Cadistas",
+			"city": "Cádiz",
+			"founded": 1910,
+			"league": "ESP2",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFE400",
+				"#0055A5"
+			],
+			"stadium": "Estadio de la Bahía",
+			"capacity": 20700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_EIB",
+			"name": "Eibar Armero",
+			"short": "Armeros",
+			"abbr": "EIB",
+			"nick": "Armeros",
+			"city": "Eibar",
+			"founded": 1940,
+			"league": "ESP2",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0E2D5E",
+				"#A61B31"
+			],
+			"stadium": "Estadio del Ego",
+			"capacity": 8100,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_HUE",
+			"name": "Huesca Azulgrana",
+			"short": "Huesca",
+			"abbr": "HUE",
+			"nick": "Oscenses",
+			"city": "Huesca",
+			"founded": 1960,
+			"league": "ESP2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1F3E7C",
+				"#9B1B30"
+			],
+			"stadium": "Estadio Oscense",
+			"capacity": 9100,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"ESP_ZAR"
+			]
+		},
+		{
+			"key": "ESP_MIR",
+			"name": "Miranda Rojillo",
+			"short": "Jabatos",
+			"abbr": "MIR",
+			"nick": "Jabatos",
+			"city": "Miranda de Ebro",
+			"founded": 1927,
+			"league": "ESP2",
+			"rep": 48,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#E20613",
+				"#111111"
+			],
+			"stadium": "Estadio del Ebro",
+			"capacity": 5700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_ALC",
+			"name": "Albacete Manchego",
+			"short": "Manchegos",
+			"abbr": "ALC",
+			"nick": "Queso Mecánico",
+			"city": "Albacete",
+			"founded": 1940,
+			"league": "ESP2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Estadio de La Mancha",
+			"capacity": 17500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_BUR",
+			"name": "Burgos Blanquinegro",
+			"short": "Burgos",
+			"abbr": "BUR",
+			"nick": "Blanquinegros",
+			"city": "Burgos",
+			"founded": 1985,
+			"league": "ESP2",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio del Arlanzón",
+			"capacity": 12200,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_CCF",
+			"name": "Córdoba Califa",
+			"short": "Califas",
+			"abbr": "CCF",
+			"nick": "Califas",
+			"city": "Córdoba",
+			"founded": 1954,
+			"league": "ESP2",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#00843D"
+			],
+			"stadium": "Estadio del Guadalquivir",
+			"capacity": 21800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_MLG",
+			"name": "Málaga Boquerón",
+			"short": "Boquerones",
+			"abbr": "MLG",
+			"nick": "Boquerones",
+			"city": "Málaga",
+			"founded": 1994,
+			"league": "ESP2",
+			"rep": 56,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#0A7BC2",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Martiricos",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_CAS",
+			"name": "Castellón Albinegro",
+			"short": "Albinegros",
+			"abbr": "CAS",
+			"nick": "Orelluts",
+			"city": "Castellón",
+			"founded": 1922,
+			"league": "ESP2",
+			"rep": 50,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Grao",
+			"capacity": 15500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ESP_LEG",
+			"name": "Leganés Pepinero",
+			"short": "Pepineros",
+			"abbr": "LEG",
+			"nick": "Pepineros",
+			"city": "Leganés",
+			"founded": 1928,
+			"league": "ESP2",
+			"rep": 54,
+			"arch": "defensivo",
+			"colors": [
+				"#FFFFFF",
+				"#004A99"
+			],
+			"stadium": "Estadio del Sur de Madrid",
+			"capacity": 12500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ESP_GET"
+			]
+		},
+		{
+			"key": "ESP_LEO",
+			"name": "León Culturalista",
+			"short": "Cultural",
+			"abbr": "LEO",
+			"nick": "Culturalistas",
+			"city": "León",
+			"founded": 1923,
+			"league": "ESP2",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio del Bernesga",
+			"capacity": 13400,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": []
+		}
+	]
+}

@@ -6,6 +6,8 @@ extends RefCounted
 const DIR := "user://saves"
 const SLOTS := 5
 const MAGIC := "MUR1"
+## Saves anteriores ao mundo multinacional (versão 1, país fictício) não são compatíveis.
+const MIN_VERSION := 2
 
 
 static func _ensure_dir() -> void:
@@ -58,10 +60,12 @@ static func _write_meta(world: GameWorld, slot: int) -> void:
 		"club": u.name if u != null else "",
 		"short": u.short_name if u != null else "",
 		"club_id": world.user_club_id,
-		"division": world.division_name(u.division) if u != null else "",
+		"division": world.league_name(u.league_id) if u != null else "",
+		"nation": u.nation if u != null else "",
 		"year": world.year,
 		"season": world.season_number,
 		"round": world.season.day + 1 if world.season != null else 0,
+		"date": world.season.date_label(mini(world.season.day, world.season.calendar.size() - 1), false) if world.season != null else "",
 		"manager": world.manager_name,
 		"saved_at": Time.get_datetime_string_from_system(false, true),
 		"unix": Time.get_unix_time_from_system(),
@@ -95,6 +99,8 @@ static func load_world(slot: int) -> GameWorld:
 		if not (data is Dictionary) or data.get("magic", "") != MAGIC:
 			continue
 		data = migrate(data)
+		if data.is_empty():
+			continue
 		var w := GameWorld.from_dict(data)
 		if w.clubs.is_empty() or w.season == null:
 			continue
@@ -107,6 +113,9 @@ static func load_world(slot: int) -> GameWorld:
 ## Mudanças de formato (renomear/mover campos) entram aqui como "if v < N: ..." em ordem.
 static func migrate(data: Dictionary) -> Dictionary:
 	var v := int(data.get("version", 1))
+	if v < MIN_VERSION:
+		push_warning("Save da versão %d (mundo antigo) não é compatível com a versão %d." % [v, GameWorld.SAVE_VERSION])
+		return {}
 	if v > GameWorld.SAVE_VERSION:
 		push_warning("Save de uma versão mais nova (%d); abrindo com compatibilidade parcial." % v)
 	data["migrated_from"] = v
@@ -137,10 +146,14 @@ static func latest_slot() -> int:
 	var best_t := -1.0
 	for i in range(1, SLOTS + 1):
 		var m := read_meta(i)
-		if m.is_empty() or not has_save(i):
+		if m.is_empty() or not has_save(i) or not is_compatible(m):
 			continue
 		var t := float(m.get("unix", 0.0))
 		if t > best_t:
 			best_t = t
 			best = i
 	return best
+
+
+static func is_compatible(meta: Dictionary) -> bool:
+	return int(meta.get("version", 1)) >= MIN_VERSION

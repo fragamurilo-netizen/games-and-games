@@ -31,6 +31,10 @@ const EV_TACTIC := 19
 const EV_FREEKICK := 20
 const EV_PENALTY_AWARDED := 21
 const EV_OWN_GOAL := 22
+const EV_EXTRA_TIME := 23 # início da prorrogação (pausa na UI)
+const EV_ET_SECOND := 24 # segundo tempo da prorrogação
+const EV_SHOOTOUT := 25 # início da disputa de pênaltis
+const EV_SHOOT_KICK := 26 # cobrança na disputa: x = {ok, n, ps}
 
 # --- Tipos de chance ---
 const CH_THROUGH := 0
@@ -82,7 +86,16 @@ var half: int = 1
 var started: bool = false
 var finished: bool = false
 var halftime_pending: bool = false
-var stoppage: Array[int] = [0, 0]
+var stoppage: Array[int] = [0, 0, 0, 0]
+## Mata-mata: `agg` são os gols das partidas anteriores do confronto ([mandante, visitante] deste jogo).
+## Empate no agregado ao fim do tempo normal → prorrogação (half 3 e 4) → pênaltis.
+var knockout: bool = false
+var agg: Array[int] = [0, 0]
+var et_pending: bool = false
+var shootout: bool = false
+var pen_score: Array[int] = [0, 0]
+var pen_taken: Array[int] = [0, 0]
+var _pen_order: Array = [[], []]
 var events: Array = []
 var score: Array[int] = [0, 0]
 var momentum: Array[float] = [0.0, 0.0]
@@ -123,6 +136,9 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 	neutral = ctx.get("neutral", false)
 	attendance = ctx.get("attendance", 0)
 	competition = ctx.get("competition", "L")
+	knockout = bool(ctx.get("ko", false))
+	var ag: Array = ctx.get("agg", [0, 0])
+	agg = [int(ag[0]), int(ag[1])]
 	teams = [
 		_build_team(world, 0, home, home_sheet),
 		_build_team(world, 1, away, away_sheet),
@@ -248,22 +264,143 @@ func step() -> Array:
 		if detail:
 			last_phase = {"side": 1, "from": 0.5, "to": 0.5, "ev": EV_SECOND_HALF}
 		return last_events
+	if et_pending:
+		et_pending = false
+		half = 3
+		minute = 90
+		half_events = 0
+		for t: MatchTeam in teams:
+			if t.max_subs < 6:
+				t.max_subs += 1 # a prorrogação libera uma troca extra
+			for mp: MatchPlayer in t.slots:
+				if mp != null:
+					mp.cond = minf(100.0, mp.cond + 3.0)
+			t.recompute_units()
+		_refresh_rates()
+		_emit(EV_EXTRA_TIME, 0, -1)
+		if detail:
+			last_phase = {"side": 0, "from": 0.5, "to": 0.5, "ev": EV_EXTRA_TIME}
+		return last_events
+	if shootout:
+		_shootout_kick()
+		return last_events
 	minute += 1
 	_simulate_minute()
 	if half == 1 and minute == 45:
 		stoppage[0] = clampi(1 + int(round(half_events * 0.35)), 1, 5)
 	if half == 2 and minute == 90:
 		stoppage[1] = clampi(2 + int(round(half_events * 0.3)), 2, 8)
+	if half == 3 and minute == 105:
+		stoppage[2] = 1
+	if half == 4 and minute == 120:
+		stoppage[3] = clampi(1 + int(round(half_events * 0.2)), 1, 3)
 	if half == 1 and stoppage[0] > 0 and minute >= 45 + stoppage[0]:
 		_emit(EV_HALFTIME, -1, -1)
 		halftime_pending = true
 	elif half == 2 and stoppage[1] > 0 and minute >= 90 + stoppage[1]:
-		_finish()
+		if _needs_decision():
+			et_pending = true
+			_emit(EV_HALFTIME, -1, -1, -1, {"et": true})
+		else:
+			_finish()
+	elif half == 3 and stoppage[2] > 0 and minute >= 105 + stoppage[2]:
+		half = 4
+		minute = 105
+		_emit(EV_ET_SECOND, 1, -1)
+	elif half == 4 and stoppage[3] > 0 and minute >= 120 + stoppage[3]:
+		if _needs_decision():
+			_start_shootout()
+		else:
+			_finish()
 	return last_events
 
 
+## Mata-mata empatado no agregado (considera as partidas anteriores do confronto).
+func _needs_decision() -> bool:
+	return knockout and score[0] + agg[0] == score[1] + agg[1]
+
+
+func is_extra_time() -> bool:
+	return half >= 3
+
+
+# ---------------------------------------------------------------------------
+# Disputa de pênaltis (uma cobrança por passo, para a UI acompanhar)
+# ---------------------------------------------------------------------------
+
+func _start_shootout() -> void:
+	shootout = true
+	pen_score = [0, 0]
+	pen_taken = [0, 0]
+	for side in 2:
+		var t: MatchTeam = teams[side]
+		var kickers: Array = []
+		for mp: MatchPlayer in t.slots:
+			if mp != null and mp.on_pitch:
+				kickers.append(mp)
+		kickers.sort_custom(func(a, b): return _pen_skill(a) > _pen_skill(b))
+		# O goleiro bate por último.
+		kickers.sort_custom(func(a, b): return (1 if a.slot == 0 else 0) < (1 if b.slot == 0 else 0))
+		_pen_order[side] = kickers
+	_emit(EV_SHOOTOUT, 0, -1, -1, {"ps": [0, 0]})
+
+
+func _pen_skill(mp: MatchPlayer) -> float:
+	return mp.attr(Attr.FIN) * 0.6 + mp.attr(Attr.DEC) * 0.3 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0
+
+
+func _shootout_kick() -> void:
+	var side := 0 if pen_taken[0] == pen_taken[1] else 1
+	var order: Array = _pen_order[side]
+	if order.is_empty():
+		_end_shootout()
+		return
+	var kicker: MatchPlayer = order[pen_taken[side] % order.size()]
+	var gk := teams[1 - side].goalkeeper()
+	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
+	var p := clampf(0.76 + (kicker.finishing() * kicker.f - gk_val) * 0.004 + kicker.clutch * 0.05, 0.55, 0.9)
+	if pen_taken[side] >= 5:
+		p -= 0.03 # alternadas: pressão máxima
+	var ok := rng.randf() < p
+	pen_taken[side] += 1
+	if ok:
+		pen_score[side] += 1
+		kicker.rating_pts += 0.1
+	else:
+		kicker.rating_pts -= 0.4
+		if gk != null:
+			gk.rating_pts += 0.35
+	_emit(EV_SHOOT_KICK, side, kicker.p.id, gk.p.id if gk != null else -1, {"ok": ok, "n": pen_taken[side], "ps": [pen_score[0], pen_score[1]]})
+	# Decidido?
+	var a := pen_taken[0]
+	var b := pen_taken[1]
+	if a <= 5 and b <= 5:
+		var left_a := 5 - a
+		var left_b := 5 - b
+		if pen_score[0] > pen_score[1] + left_b or pen_score[1] > pen_score[0] + left_a:
+			_end_shootout()
+	elif a == b and pen_score[0] != pen_score[1]:
+		_end_shootout()
+
+
+func _end_shootout() -> void:
+	shootout = false
+	_finish()
+
+
+## Vencedor do jogo decisivo (0 mandante, 1 visitante, -1 sem decisão): agregado e pênaltis.
+func decided_winner() -> int:
+	var h := score[0] + agg[0]
+	var a := score[1] + agg[1]
+	if h != a:
+		return 0 if h > a else 1
+	if pen_score[0] != pen_score[1]:
+		return 0 if pen_score[0] > pen_score[1] else 1
+	return -1
+
+
 func is_halftime_pause() -> bool:
-	return halftime_pending
+	return halftime_pending or et_pending
 
 
 func display_minute() -> String:
@@ -998,6 +1135,35 @@ func _finish() -> void:
 			if mins < 20:
 				r = 6.0 + clampf(pts, -1.0, 1.5) + team_bonus * 0.5
 			mp.final_rating = clampf(snappedf(r, 0.1), 3.0, 10.0)
+
+
+## Resumo no formato comum dos resultados (o mesmo de QuickMatch.play) para aplicar ao mundo.
+func to_result() -> Dictionary:
+	var goals: Array = []
+	for ev in events:
+		var t: int = ev["t"]
+		if t == EV_GOAL or t == EV_OWN_GOAL:
+			var kind := Fixture.GOAL_NORMAL
+			if t == EV_OWN_GOAL:
+				kind = Fixture.GOAL_OWN
+			elif ev.has("x") and int(ev["x"].get("ct", -1)) == CH_PENALTY:
+				kind = Fixture.GOAL_PENALTY
+			goals.append([int(ev["m"]), int(ev["s"]), int(ev["p"]), kind, int(ev["h"])])
+	var lines: Array = [[], []]
+	for t: MatchTeam in teams:
+		for mp: MatchPlayer in t.all:
+			if not mp.used:
+				continue
+			# Mesmo formato de linha do QuickMatch (índices QuickMatch.L_*).
+			lines[t.side].append([mp.p, mp.pos, mp.f, mp.w_def, mp.w_att, 0.0, 0.0, 0.0, mp.slot_rating, mp.c_fin,
+				1 if mp.on_pitch else 0, mp.start_min, mp.end_min, mp.goals, mp.assists, mp.yellow, mp.red,
+				mp.injury_weeks if mp.injured else 0, mp.rating_pts, mp.minutes_played(minute), mp.final_rating, mp.cond,
+				mp.pos == Pos.GK or mp.w_def >= 0.8])
+	var motm := man_of_the_match()
+	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1,
+		"et": half >= 3, "pens": [pen_score[0], pen_score[1]] if pen_taken[0] + pen_taken[1] > 0 else [],
+		"derby": derby, "importance": importance, "yc": [teams[0].yellows, teams[1].yellows], "rc": [teams[0].reds, teams[1].reds],
+		"lines": lines, "poss": possession_pct(0)}
 
 
 ## Craque do jogo: maior nota (desempate: time vencedor).

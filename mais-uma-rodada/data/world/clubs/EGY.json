@@ -1,0 +1,82 @@
+{
+	"nation": "EGY",
+	"_doc": "Egito (liga de 8; restantes gerados).",
+	"clubs": [
+		{
+			"key": "EGY_AHM",
+			"name": "Cairo Al Ahmar",
+			"short": "Al Ahmar",
+			"abbr": "AHM",
+			"nick": "Diabos Vermelhos",
+			"city": "Cairo",
+			"founded": 1907,
+			"league": "EGY1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Nasr City",
+			"capacity": 75000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": [
+				"EGY_ABY"
+			]
+		},
+		{
+			"key": "EGY_ABY",
+			"name": "Giza Al Abyad",
+			"short": "Al Abyad",
+			"abbr": "ABY",
+			"nick": "Cavaleiros Brancos",
+			"city": "Giza",
+			"founded": 1911,
+			"league": "EGY1",
+			"rep": 70,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Estádio de Mit Okba",
+			"capacity": 20000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"EGY_AHM"
+			]
+		},
+		{
+			"key": "EGY_PYR",
+			"name": "Cairo Pirâmides",
+			"short": "Pirâmides",
+			"abbr": "PYR",
+			"nick": "Faraós",
+			"city": "Cairo",
+			"founded": 2008,
+			"league": "EGY1",
+			"rep": 68,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Deserto",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		}
+	]
+}

@@ -5,9 +5,10 @@ extends RefCounted
 ## Chame load_all() uma vez na thread principal antes de usar em threads.
 
 const PATHS := {
-	"competitions": "res://data/world/competitions.json",
-	"clubs_default": "res://data/world/clubs_default.json",
-	"cities": "res://data/world/cities.json",
+	"rules": "res://data/world/rules.json",
+	"nations": "res://data/world/nations.json",
+	"leagues": "res://data/world/leagues.json",
+	"continental": "res://data/world/continental.json",
 	"names": "res://data/names/names.json",
 	"archetypes": "res://data/gameplay/archetypes.json",
 	"personalities": "res://data/gameplay/personalities.json",
@@ -16,6 +17,7 @@ const PATHS := {
 	"commentary": "res://data/text/commentary.json",
 	"news": "res://data/text/news.json",
 }
+const CLUBS_DIR := "res://data/world/clubs/"
 
 const POS_BY_CODE := {
 	"GK": Pos.GK, "RB": Pos.RB, "CB": Pos.CB, "LB": Pos.LB, "DM": Pos.DM, "CM": Pos.CM,
@@ -29,6 +31,11 @@ static var _formations: Dictionary = {}
 static var _formation_order: Array[String] = []
 static var _trait_ids: Array[String] = []
 static var _trait_weights: Array = []
+static var _league_by_id: Dictionary = {}
+static var _league_order: Array[String] = []
+static var _leagues_by_nation: Dictionary = {} # nação -> [ids por divisão]
+static var _league_nations: Array[String] = []
+static var _club_data: Dictionary = {} # nação -> Array de dicionários de clube
 
 
 static func load_all() -> void:
@@ -38,25 +45,28 @@ static func load_all() -> void:
 		_load_json(key)
 	_prepare_formations()
 	_prepare_traits()
+	_prepare_leagues()
+	_prepare_clubs()
 	_loaded = true
 
 
 static func _load_json(key: String) -> Variant:
 	if _cache.has(key):
 		return _cache[key]
-	var path: String = PATHS[key]
-	var data: Variant = {}
-	if FileAccess.file_exists(path):
-		var f := FileAccess.open(path, FileAccess.READ)
-		var parsed: Variant = JSON.parse_string(f.get_as_text())
-		if parsed == null:
-			push_error("DatabaseManager: JSON inválido em " + path)
-		else:
-			data = parsed
-	else:
+	var data: Variant = read_json(PATHS[key])
+	_cache[key] = data if data != null else {}
+	return _cache[key]
+
+
+static func read_json(path: String) -> Variant:
+	if not FileAccess.file_exists(path):
 		push_error("DatabaseManager: arquivo ausente " + path)
-	_cache[key] = data
-	return data
+		return null
+	var f := FileAccess.open(path, FileAccess.READ)
+	var parsed: Variant = JSON.parse_string(f.get_as_text())
+	if parsed == null:
+		push_error("DatabaseManager: JSON inválido em " + path)
+	return parsed
 
 
 static func get_data(key: String) -> Variant:
@@ -65,21 +75,145 @@ static func get_data(key: String) -> Variant:
 	return _cache[key]
 
 
-static func competitions() -> Dictionary:
-	return get_data("competitions")
+# ---------------------------------------------------------------------------
+# Regras globais
+# ---------------------------------------------------------------------------
 
-
-static func division_config(div: int) -> Dictionary:
-	return competitions()["divisions"][div]
-
-
-static func division_count() -> int:
-	return competitions()["divisions"].size()
+static func rules() -> Dictionary:
+	return get_data("rules")
 
 
 static func squad_rules() -> Dictionary:
-	return competitions()["squad"]
+	return rules()["squad"]
 
+
+static func money() -> Dictionary:
+	return rules()["money"]
+
+
+static func calendar_cfg() -> Dictionary:
+	return rules()["calendar"]
+
+
+static func start_year() -> int:
+	return int(rules().get("start_year", 2026))
+
+
+# ---------------------------------------------------------------------------
+# Nações e ligas
+# ---------------------------------------------------------------------------
+
+static func nations() -> Dictionary:
+	return get_data("nations")["nations"]
+
+
+static func nation(code: String) -> Dictionary:
+	return nations().get(code, {})
+
+
+static func has_nation(code: String) -> bool:
+	return nations().has(code)
+
+
+static func nation_name(code: String) -> String:
+	return nation(code).get("name", code)
+
+
+static func nation_adj(code: String) -> String:
+	return nation(code).get("adj", code)
+
+
+static func ethnicities() -> Array:
+	return get_data("nations")["ethnicities"]
+
+
+static func lang(key: String) -> Dictionary:
+	var all: Dictionary = get_data("nations")["lang"]
+	return all.get(key, all["en"])
+
+
+static func league_cfg(id: String) -> Dictionary:
+	load_all()
+	return _league_by_id.get(id, {})
+
+
+static func has_league(id: String) -> bool:
+	load_all()
+	return _league_by_id.has(id)
+
+
+static func league_ids() -> Array[String]:
+	load_all()
+	return _league_order
+
+
+## Ids das ligas de uma nação, da primeira para a última divisão.
+static func leagues_of_nation(code: String) -> Array:
+	load_all()
+	return _leagues_by_nation.get(code, [])
+
+
+## Nações com liga jogável, na ordem dos dados (por confederação).
+static func league_nations() -> Array[String]:
+	load_all()
+	return _league_nations
+
+
+## Liga da divisão `tier` (1 = primeira) de uma nação, ou "" se não existir.
+static func league_at(code: String, tier: int) -> String:
+	for id in leagues_of_nation(code):
+		if int(league_cfg(id)["tier"]) == tier:
+			return id
+	return ""
+
+
+## Copas continentais e Mundial: id -> configuração (continental.json).
+static func cups_cfg() -> Dictionary:
+	return get_data("continental")["cups"]
+
+
+static func cup_cfg(id: String) -> Dictionary:
+	return cups_cfg().get(id, {})
+
+
+## Clubes autorais de uma nação (arquivos em data/world/clubs).
+static func club_data(code: String) -> Array:
+	load_all()
+	return _club_data.get(code, [])
+
+
+static func _prepare_leagues() -> void:
+	_league_by_id.clear()
+	_league_order.clear()
+	_leagues_by_nation.clear()
+	_league_nations.clear()
+	for l in get_data("leagues")["leagues"]:
+		var id: String = l["id"]
+		_league_by_id[id] = l
+		_league_order.append(id)
+		var n: String = l["nation"]
+		if not _leagues_by_nation.has(n):
+			_leagues_by_nation[n] = []
+			_league_nations.append(n)
+		_leagues_by_nation[n].append(id)
+	for n in _leagues_by_nation:
+		_leagues_by_nation[n].sort_custom(func(a, b): return int(_league_by_id[a]["tier"]) < int(_league_by_id[b]["tier"]))
+
+
+static func _prepare_clubs() -> void:
+	_club_data.clear()
+	for n in _league_nations:
+		var path := CLUBS_DIR + n + ".json"
+		if not FileAccess.file_exists(path):
+			_club_data[n] = []
+			continue
+		var d: Variant = read_json(path)
+		_club_data[n] = d.get("clubs", []) if d is Dictionary else []
+
+
+# ---------------------------------------------------------------------------
+# Jogo
+# ---------------------------------------------------------------------------
 
 static func archetypes() -> Dictionary:
 	return get_data("archetypes")
@@ -114,14 +248,6 @@ static func tactics() -> Dictionary:
 
 static func names() -> Dictionary:
 	return get_data("names")
-
-
-static func cities() -> Dictionary:
-	return get_data("cities")
-
-
-static func clubs_default() -> Array:
-	return get_data("clubs_default")["clubs"]
 
 
 static func commentary() -> Dictionary:

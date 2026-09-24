@@ -1,0 +1,82 @@
+{
+	"nation": "CZE",
+	"_doc": "Tchéquia (liga de 6).",
+	"clubs": [
+		{
+			"key": "CZE_SES",
+			"name": "Praha Sešívaní",
+			"short": "Sešívaní",
+			"abbr": "SES",
+			"nick": "Sešívaní",
+			"city": "Praha",
+			"founded": 1892,
+			"league": "CZE1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Eden Praha",
+			"capacity": 19300,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"CZE_LET"
+			]
+		},
+		{
+			"key": "CZE_LET",
+			"name": "Praha Letná",
+			"short": "Letná",
+			"abbr": "LET",
+			"nick": "Rudí",
+			"city": "Praha",
+			"founded": 1893,
+			"league": "CZE1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#A51A3A",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion na Letné",
+			"capacity": 18900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"CZE_SES"
+			]
+		},
+		{
+			"key": "CZE_VIK",
+			"name": "Plzeň Viktoriáni",
+			"short": "Viktoriáni",
+			"abbr": "VIK",
+			"nick": "Viktoriáni",
+			"city": "Plzeň",
+			"founded": 1911,
+			"league": "CZE1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#1D5BBF"
+			],
+			"stadium": "Stadion Štruncovy sady",
+			"capacity": 11700,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		}
+	]
+}

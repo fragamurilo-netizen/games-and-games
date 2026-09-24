@@ -1,0 +1,54 @@
+{
+	"nation": "NGA",
+	"_doc": "Nigéria (liga de 6).",
+	"clubs": [
+		{
+			"key": "NGA_ABA",
+			"name": "Aba Elephants",
+			"short": "Elephants",
+			"abbr": "ABA",
+			"nick": "Elephants",
+			"city": "Aba",
+			"founded": 1976,
+			"league": "NGA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Aba Township Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NGA_ENU",
+			"name": "Enugu Flying Antelopes",
+			"short": "Antelopes",
+			"abbr": "ENU",
+			"nick": "Flying Antelopes",
+			"city": "Enugu",
+			"founded": 1970,
+			"league": "NGA1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#1D5BBF"
+			],
+			"stadium": "Nnamdi Park",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		}
+	]
+}

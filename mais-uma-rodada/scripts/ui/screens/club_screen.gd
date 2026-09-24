@@ -30,7 +30,7 @@ func refresh() -> void:
 		nav_tab = ""
 		show_nav = false
 	screen_title = club.short_name
-	screen_subtitle = "%s · %s" % [w.division_name(club.division), club.city]
+	screen_subtitle = "%s · %s" % [w.league_name(club.league_id), club.city]
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -60,7 +60,10 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	col.add_child(UIKit.label(club.name, "Title", true))
 	if club.nickname != "":
 		col.add_child(UIKit.label("\"%s\"" % club.nickname, "Accent"))
-	col.add_child(UIKit.label("%s, %s · fundado em %d" % [club.city, club.region, club.founded], "Small", true))
+	var place := UIKit.hbox(8)
+	place.add_child(UIKit.flag(club.nation, 30))
+	place.add_child(UIKit.label("%s, %s · fundado em %d" % [club.city, DatabaseManager.nation_name(club.nation), club.founded], "Small", true))
+	col.add_child(place)
 	var stars := StarsView.new()
 	stars.star_size = 22.0
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
@@ -93,7 +96,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	kits.add_child(st)
 	card.add_child(kits)
 	var rivals: Array = []
-	for rid in [club.rival_id, club.rival2_id]:
+	for rid in club.rivals.slice(0, 3):
 		if int(rid) >= 0:
 			rivals.append(w.club(int(rid)))
 	if not rivals.is_empty():
@@ -104,7 +107,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 			var rl := UIKit.label(r.short_name, "H3")
 			rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			rr.add_child(rl)
-			rr.add_child(UIKit.label(w.division_short(r.division), "Small"))
+			rr.add_child(UIKit.label(w.league_short(r.league_id), "Small"))
 			var rid2 := r.id
 			card.add_child(UIKit.tap_row(rr, func(): _open_club(rid2), "CardFlat"))
 	return UIKit.card_panel(card)
@@ -271,29 +274,26 @@ func _history_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("Títulos e história"))
 	var titles := UIKit.flow(8)
-	var any := false
-	for d in 4:
-		var n := club.title_count("L%d" % d)
+	var keys: Array = club.titles.keys()
+	keys.sort_custom(func(a, b): return _title_rank(a) < _title_rank(b))
+	for k in keys:
+		var n := club.title_count(k)
 		if n > 0:
-			any = true
-			titles.add_child(UIKit.pill("%dx campeão %s" % [n, w.division_short(d)], UIColors.ACCENT, 17))
-	for d in range(1, 4):
-		var n := club.title_count("A%d" % d)
-		if n > 0:
-			any = true
-			titles.add_child(UIKit.pill("%dx acesso da %s" % [n, w.division_short(d)], UIColors.GREEN, 17))
-	if any:
+			titles.add_child(UIKit.pill(_title_text(w, String(k), n), _title_color(String(k)), 17))
+	if titles.get_child_count() > 0:
 		card.add_child(titles)
 	else:
-		card.add_child(UIKit.label("Nenhum título registrado desde %d. Ainda." % DatabaseManager.competitions().get("start_year", 2026), "Muted"))
+		card.add_child(UIKit.label("Nenhum título registrado desde %d. Ainda." % DatabaseManager.start_year(), "Muted"))
 	if club.history.is_empty():
 		card.add_child(UIKit.label("A primeira temporada deste save está em andamento.", "Small"))
 		return UIKit.card_panel(card)
 	var best: Dictionary = {}
 	for h in club.history:
-		if best.is_empty() or int(h["d"]) < int(best["d"]) or (int(h["d"]) == int(best["d"]) and int(h["p"]) < int(best["p"])):
+		var tier := int(DatabaseManager.league_cfg(String(h["l"])).get("tier", 9))
+		var btier := int(DatabaseManager.league_cfg(String(best.get("l", ""))).get("tier", 9)) if not best.is_empty() else 99
+		if best.is_empty() or tier < btier or (tier == btier and int(h["p"]) < int(best["p"])):
 			best = h
-	card.add_child(UIKit.kv("Melhor campanha", "%dº na %s (%d)" % [int(best["p"]), w.division_short(int(best["d"])), int(best["y"])]))
+	card.add_child(UIKit.kv("Melhor campanha", "%dº na %s (%d)" % [int(best["p"]), w.league_short(String(best["l"])), int(best["y"])]))
 	card.add_child(UIKit.label("Últimas temporadas", "Caps"))
 	var list: Array = club.history.duplicate()
 	list.reverse()
@@ -303,19 +303,52 @@ func _history_card(w: GameWorld, club: Club) -> Control:
 		var yl := UIKit.label(str(h["y"]), "Mono")
 		yl.custom_minimum_size.x = 72
 		row.add_child(yl)
-		var dl := UIKit.label(w.division_short(int(h["d"])), "Small")
-		dl.custom_minimum_size.x = 56
+		var dl := UIKit.label(w.league_short(String(h["l"])), "Small")
+		dl.custom_minimum_size.x = 120
 		row.add_child(dl)
 		var pl := UIKit.label("%dº" % int(h["p"]), "H3")
 		pl.custom_minimum_size.x = 56
 		if int(h["p"]) == 1:
 			pl.add_theme_color_override(&"font_color", UIColors.ACCENT)
 		row.add_child(pl)
-		var rl := UIKit.label("%d pts · %dV %dE %dD · %d:%d" % [int(h["pts"]), int(h["w"]), int(h["dr"]), int(h["l"]), int(h["gf"]), int(h["ga"])], "Small")
+		var rl := UIKit.label("%d pts · %dV %dE %dD · %d:%d" % [int(h["pts"]), int(h["w"]), int(h["dr"]), int(h["lo"]), int(h["gf"]), int(h["ga"])], "Small")
 		rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(rl)
 		card.add_child(row)
 	return UIKit.card_panel(card)
+
+
+## Ordem dos títulos: mundial, continentais, ligas, acessos.
+static func _title_rank(k: String) -> int:
+	match k.substr(0, 2):
+		"W:":
+			return 0
+		"C:":
+			return 1
+		"L:":
+			return 2 + int(DatabaseManager.league_cfg(k.substr(2)).get("tier", 1))
+	return 9
+
+
+static func _title_text(w: GameWorld, k: String, n: int) -> String:
+	var id := k.substr(2)
+	match k.substr(0, 2):
+		"W:", "C:":
+			return "%dx %s" % [n, CupManager.cup_name(id)]
+		"L:":
+			return "%dx campeão %s" % [n, w.league_short(id)]
+		"P:":
+			return "%dx acesso da %s" % [n, w.league_short(id)]
+	return "%dx %s" % [n, k]
+
+
+static func _title_color(k: String) -> Color:
+	match k.substr(0, 2):
+		"W:", "C:":
+			return UIColors.ACCENT
+		"L:":
+			return UIColors.ACCENT
+	return UIColors.GREEN
 
 
 ## Ídolos: aposentados que marcaram o clube (Hall da Fama do save).

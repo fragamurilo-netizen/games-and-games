@@ -6,23 +6,26 @@ extends Control
 
 const SKIN: Array[Color] = [Color("#F3CDB0"), Color("#E6B48E"), Color("#CC9368"), Color("#A9714A"), Color("#7E5033"), Color("#5B3822")]
 const HAIR: Array[Color] = [Color("#16110E"), Color("#3B2618"), Color("#6A4428"), Color("#B78A4C"), Color("#E0C27A"), Color("#8E3B1E")]
-const CULTURE_SKIN := {
-	"luso": [1.0, 1.4, 1.6, 1.4, 1.0, 0.7],
-	"hispano": [1.0, 1.6, 1.6, 0.8, 0.2, 0.05],
-	"lusoafricano": [0.05, 0.3, 0.9, 1.6, 1.6, 1.2],
-	"africano": [0.0, 0.05, 0.3, 1.0, 1.6, 1.8],
-	"eslavo": [2.0, 1.2, 0.2, 0.0, 0.0, 0.0],
-	"italiano": [1.4, 1.6, 0.6, 0.05, 0.0, 0.0],
-	"frances": [1.3, 1.2, 0.7, 0.5, 0.5, 0.4],
-}
+## Pesos de tom de pele por etnia (índices de nations.json → ethnicities: nor, eur, med, arb, lat, and, mix, afr, eas).
+const ETH_SKIN: Array = [
+	[2.0, 1.2, 0.2, 0.0, 0.0, 0.0],
+	[1.4, 1.6, 0.6, 0.05, 0.0, 0.0],
+	[0.6, 1.6, 1.4, 0.4, 0.05, 0.0],
+	[0.2, 1.0, 1.6, 1.0, 0.3, 0.05],
+	[0.2, 1.0, 1.6, 1.2, 0.4, 0.1],
+	[0.0, 0.3, 1.2, 1.6, 0.8, 0.2],
+	[0.05, 0.3, 0.9, 1.6, 1.4, 0.8],
+	[0.0, 0.05, 0.3, 1.0, 1.6, 1.8],
+	[1.6, 1.6, 0.8, 0.1, 0.0, 0.0],
+]
 
 @export var face_seed: int = 12345:
 	set(v):
 		face_seed = v
 		queue_redraw()
-@export var culture: String = "luso":
+@export var eth: int = 1:
 	set(v):
-		culture = v
+		eth = v
 		queue_redraw()
 @export var age: int = 25:
 	set(v):
@@ -40,7 +43,7 @@ const CULTURE_SKIN := {
 
 func set_player(p: Player, club: Club, year: int) -> void:
 	face_seed = p.face_seed
-	culture = NameGenerator.culture_of(p.nationality)
+	eth = p.eth
 	age = p.age(year)
 	if club != null:
 		shirt_color = club.primary_color()
@@ -58,7 +61,7 @@ func _draw() -> void:
 	var c := o + Vector2(s * 0.5, s * 0.5)
 	# Fundo circular
 	draw_circle(c, s * 0.5, bg_color)
-	var weights: Array = CULTURE_SKIN.get(culture, CULTURE_SKIN["luso"])
+	var weights: Array = ETH_SKIN[clampi(eth, 0, ETH_SKIN.size() - 1)]
 	var skin: Color = SKIN[RngUtil.weighted_index(rng, weights)]
 	var hair_i := rng.randi_range(0, 2) if weights[4] + weights[5] > 1.0 else RngUtil.weighted_index(rng, [3.0, 3.0, 2.0, 1.2, 0.8, 0.5])
 	var hair: Color = HAIR[hair_i]

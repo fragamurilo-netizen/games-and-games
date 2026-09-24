@@ -1,0 +1,82 @@
+{
+	"nation": "VEN",
+	"_doc": "Venezuela (liga de 10).",
+	"clubs": [
+		{
+			"key": "VEN_ROJ",
+			"name": "Caracas Rojo",
+			"short": "Rojos",
+			"abbr": "ROJ",
+			"nick": "Rojos del Ávila",
+			"city": "Caracas",
+			"founded": 1967,
+			"league": "VEN1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Ávila",
+			"capacity": 24000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"VEN_CAR"
+			]
+		},
+		{
+			"key": "VEN_CAR",
+			"name": "Táchira Aurinegro",
+			"short": "Carrusel",
+			"abbr": "CAR",
+			"nick": "Carrusel Aurinegro",
+			"city": "San Cristóbal",
+			"founded": 1974,
+			"league": "VEN1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio de Pueblo Nuevo",
+			"capacity": 38000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"VEN_ROJ"
+			]
+		},
+		{
+			"key": "VEN_AZG",
+			"name": "Maturín Azulgrana",
+			"short": "Azulgranas",
+			"abbr": "AZG",
+			"nick": "Azulgranas",
+			"city": "Maturín",
+			"founded": 1987,
+			"league": "VEN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio de Maturín",
+			"capacity": 51000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		}
+	]
+}

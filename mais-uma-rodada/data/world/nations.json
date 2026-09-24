@@ -1,0 +1,11684 @@
+{
+	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas), w = peso. youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
+	"ethnicities": [
+		"nor",
+		"eur",
+		"med",
+		"arb",
+		"lat",
+		"and",
+		"mix",
+		"afr",
+		"eas"
+	],
+	"nations": {
+		"ENG": {
+			"name": "Inglaterra",
+			"adj": "inglês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "cross",
+				"c": [
+					"#FFFFFF",
+					"#CE1124"
+				]
+			},
+			"coef": 100,
+			"origins": [
+				{
+					"c": "en",
+					"w": 80,
+					"eth": {
+						"nor": 50,
+						"eur": 22,
+						"mix": 13,
+						"afr": 15
+					}
+				},
+				{
+					"c": "gb_celt",
+					"w": 8,
+					"eth": {
+						"nor": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 9,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"FRA": 8.0,
+				"BRA": 7.0,
+				"ESP": 6.0,
+				"POR": 6.0,
+				"ARG": 4.0,
+				"NED": 5.0,
+				"BEL": 5.0,
+				"GER": 4.0,
+				"SCO": 4.0,
+				"WAL": 3.0,
+				"IRL": 4.0,
+				"NOR": 3.0,
+				"DEN": 4.0,
+				"SWE": 2.0,
+				"SEN": 3.0,
+				"CIV": 3.0,
+				"NGA": 3.0,
+				"GHA": 3.0,
+				"ITA": 2.0,
+				"URU": 2.0,
+				"COL": 2.0,
+				"JPN": 2.0,
+				"KOR": 2.0,
+				"USA": 2.0,
+				"SUI": 2.0,
+				"CRO": 2.0,
+				"SRB": 2.0,
+				"POL": 2.0,
+				"UKR": 1.0,
+				"TUR": 1.0,
+				"EGY": 1.0,
+				"MAR": 2.0,
+				"ALG": 1.0,
+				"CMR": 2.0,
+				"MLI": 2.0,
+				"JAM": 2.0,
+				"AUS": 1.0,
+				"MEX": 1.0,
+				"ECU": 1.0,
+				"PAR": 1.0,
+				"CAN": 1.0,
+				"ISL": 1.0,
+				"HUN": 1.0,
+				"ALB": 1.0,
+				"KOS": 1.0,
+				"GEO": 1.0,
+				"COD": 1.0
+			},
+			"foreign": [
+				0.62,
+				0.36
+			],
+			"cities": [
+				[
+					"London",
+					5
+				],
+				[
+					"Manchester",
+					5
+				],
+				[
+					"Liverpool",
+					5
+				],
+				[
+					"Birmingham",
+					5
+				],
+				[
+					"Leeds",
+					4
+				],
+				[
+					"Newcastle",
+					4
+				],
+				[
+					"Sheffield",
+					4
+				],
+				[
+					"Bristol",
+					4
+				],
+				[
+					"Nottingham",
+					4
+				],
+				[
+					"Leicester",
+					4
+				],
+				[
+					"Southampton",
+					3
+				],
+				[
+					"Brighton",
+					3
+				],
+				[
+					"Portsmouth",
+					3
+				],
+				[
+					"Norwich",
+					3
+				],
+				[
+					"Ipswich",
+					3
+				],
+				[
+					"Derby",
+					3
+				],
+				[
+					"Coventry",
+					3
+				],
+				[
+					"Sunderland",
+					3
+				],
+				[
+					"Middlesbrough",
+					3
+				],
+				[
+					"Stoke",
+					3
+				],
+				[
+					"Wolverhampton",
+					3
+				],
+				[
+					"Hull",
+					3
+				],
+				[
+					"Plymouth",
+					3
+				],
+				[
+					"Reading",
+					3
+				],
+				[
+					"Bournemouth",
+					3
+				],
+				[
+					"Bradford",
+					3
+				],
+				[
+					"Blackburn",
+					2
+				],
+				[
+					"Bolton",
+					2
+				],
+				[
+					"Preston",
+					2
+				],
+				[
+					"Burnley",
+					2
+				],
+				[
+					"Watford",
+					2
+				],
+				[
+					"Luton",
+					2
+				],
+				[
+					"Oxford",
+					2
+				],
+				[
+					"Cambridge",
+					2
+				],
+				[
+					"Swindon",
+					2
+				],
+				[
+					"Wigan",
+					2
+				],
+				[
+					"Huddersfield",
+					2
+				],
+				[
+					"York",
+					2
+				],
+				[
+					"Exeter",
+					2
+				],
+				[
+					"Carlisle",
+					2
+				],
+				[
+					"Barnsley",
+					2
+				],
+				[
+					"Rotherham",
+					2
+				],
+				[
+					"Blackpool",
+					2
+				],
+				[
+					"Northampton",
+					2
+				],
+				[
+					"Peterborough",
+					2
+				],
+				[
+					"Milton Keynes",
+					2
+				],
+				[
+					"Doncaster",
+					2
+				],
+				[
+					"Lincoln",
+					2
+				],
+				[
+					"Crewe",
+					1
+				],
+				[
+					"Burton",
+					1
+				],
+				[
+					"Gillingham",
+					1
+				],
+				[
+					"Colchester",
+					1
+				],
+				[
+					"Stevenage",
+					1
+				],
+				[
+					"West Bromwich",
+					3
+				],
+				[
+					"Stoke-on-Trent",
+					3
+				]
+			],
+			"lang": "en"
+		},
+		"ESP": {
+			"name": "Espanha",
+			"adj": "espanhol",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#AA151B",
+					"#F1BF00",
+					"#AA151B"
+				],
+				"w": [
+					1,
+					2,
+					1
+				],
+				"e": {
+					"t": "shield",
+					"c": "#AA151B",
+					"x": 0.3,
+					"y": 0.5,
+					"s": 0.28
+				}
+			},
+			"coef": 95,
+			"origins": [
+				{
+					"c": "es",
+					"w": 88,
+					"eth": {
+						"eur": 80,
+						"med": 12,
+						"nor": 4,
+						"mix": 2,
+						"afr": 2
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 4,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 3,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "latam",
+					"w": 3,
+					"eth": {
+						"lat": 60,
+						"eur": 40
+					}
+				},
+				{
+					"c": "es",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"ARG": 7.0,
+				"BRA": 6.0,
+				"URU": 5.0,
+				"FRA": 6.0,
+				"POR": 5.0,
+				"COL": 3.0,
+				"MEX": 2.0,
+				"ECU": 2.0,
+				"PAR": 2.0,
+				"CHI": 2.0,
+				"VEN": 2.0,
+				"MAR": 4.0,
+				"SEN": 2.0,
+				"CIV": 2.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"CMR": 2.0,
+				"ITA": 2.0,
+				"GER": 1.0,
+				"NED": 2.0,
+				"BEL": 2.0,
+				"SRB": 2.0,
+				"CRO": 3.0,
+				"TUR": 1.0,
+				"JPN": 2.0,
+				"KOR": 1.0,
+				"USA": 1.0,
+				"ALG": 2.0,
+				"GEO": 1.0,
+				"SWE": 1.0,
+				"NOR": 1.0,
+				"DEN": 1.0,
+				"AUT": 1.0,
+				"ENG": 1.0,
+				"HUN": 1.0,
+				"ROU": 1.0,
+				"MLI": 1.0,
+				"GUI": 1.0
+			},
+			"foreign": [
+				0.4,
+				0.24
+			],
+			"cities": [
+				[
+					"Madrid",
+					5
+				],
+				[
+					"Barcelona",
+					5
+				],
+				[
+					"Valencia",
+					4
+				],
+				[
+					"Sevilla",
+					4
+				],
+				[
+					"Bilbao",
+					4
+				],
+				[
+					"Málaga",
+					3
+				],
+				[
+					"Zaragoza",
+					3
+				],
+				[
+					"Palma",
+					3
+				],
+				[
+					"Las Palmas",
+					3
+				],
+				[
+					"Murcia",
+					3
+				],
+				[
+					"Valladolid",
+					3
+				],
+				[
+					"Vigo",
+					3
+				],
+				[
+					"Gijón",
+					3
+				],
+				[
+					"A Coruña",
+					3
+				],
+				[
+					"Granada",
+					3
+				],
+				[
+					"Alicante",
+					3
+				],
+				[
+					"Córdoba",
+					3
+				],
+				[
+					"Vitoria",
+					3
+				],
+				[
+					"San Sebastián",
+					3
+				],
+				[
+					"Pamplona",
+					3
+				],
+				[
+					"Santander",
+					3
+				],
+				[
+					"Oviedo",
+					3
+				],
+				[
+					"Cádiz",
+					3
+				],
+				[
+					"Santa Cruz de Tenerife",
+					3
+				],
+				[
+					"Almería",
+					2
+				],
+				[
+					"Huelva",
+					2
+				],
+				[
+					"Elche",
+					2
+				],
+				[
+					"Castellón",
+					2
+				],
+				[
+					"Getafe",
+					2
+				],
+				[
+					"Leganés",
+					2
+				],
+				[
+					"Tarragona",
+					2
+				],
+				[
+					"Girona",
+					2
+				],
+				[
+					"Lleida",
+					2
+				],
+				[
+					"Burgos",
+					2
+				],
+				[
+					"Salamanca",
+					2
+				],
+				[
+					"León",
+					2
+				],
+				[
+					"Albacete",
+					2
+				],
+				[
+					"Badajoz",
+					2
+				],
+				[
+					"Cartagena",
+					2
+				],
+				[
+					"Jaén",
+					2
+				],
+				[
+					"Logroño",
+					2
+				],
+				[
+					"Ferrol",
+					1
+				],
+				[
+					"Eibar",
+					1
+				],
+				[
+					"Villarreal",
+					1
+				],
+				[
+					"Ponferrada",
+					1
+				],
+				[
+					"Huesca",
+					1
+				],
+				[
+					"Miranda de Ebro",
+					1
+				],
+				[
+					"Lugo",
+					1
+				],
+				[
+					"Vitoria-Gasteiz",
+					3
+				]
+			],
+			"lang": "es"
+		},
+		"GER": {
+			"name": "Alemanha",
+			"adj": "alemão",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#000000",
+					"#DD0000",
+					"#FFCE00"
+				]
+			},
+			"coef": 88,
+			"origins": [
+				{
+					"c": "de",
+					"w": 80,
+					"eth": {
+						"nor": 55,
+						"eur": 40,
+						"afr": 3,
+						"mix": 2
+					}
+				},
+				{
+					"c": "tr",
+					"w": 8,
+					"eth": {
+						"med": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 4,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "west_slav",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 3,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "arab",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"AUT": 6.0,
+				"SUI": 5.0,
+				"FRA": 5.0,
+				"NED": 4.0,
+				"BEL": 3.0,
+				"DEN": 4.0,
+				"POL": 3.0,
+				"CZE": 3.0,
+				"CRO": 3.0,
+				"SRB": 2.0,
+				"BIH": 2.0,
+				"TUR": 3.0,
+				"BRA": 3.0,
+				"ARG": 1.0,
+				"USA": 3.0,
+				"JPN": 4.0,
+				"KOR": 3.0,
+				"SEN": 2.0,
+				"CIV": 2.0,
+				"GHA": 2.0,
+				"CMR": 2.0,
+				"NGA": 2.0,
+				"SWE": 2.0,
+				"NOR": 2.0,
+				"ESP": 1.0,
+				"POR": 1.0,
+				"ITA": 1.0,
+				"ENG": 2.0,
+				"ALB": 1.0,
+				"UKR": 1.0,
+				"HUN": 2.0,
+				"SVK": 2.0,
+				"CAN": 1.0,
+				"MAR": 2.0,
+				"ALG": 1.0,
+				"AUS": 1.0,
+				"ECU": 1.0,
+				"COL": 1.0,
+				"GEO": 1.0,
+				"KOS": 1.0,
+				"SVN": 1.0,
+				"ISL": 1.0,
+				"FIN": 1.0
+			},
+			"foreign": [
+				0.5,
+				0.3
+			],
+			"cities": [
+				[
+					"Berlin",
+					5
+				],
+				[
+					"Hamburg",
+					5
+				],
+				[
+					"München",
+					5
+				],
+				[
+					"Köln",
+					4
+				],
+				[
+					"Frankfurt",
+					4
+				],
+				[
+					"Stuttgart",
+					4
+				],
+				[
+					"Düsseldorf",
+					4
+				],
+				[
+					"Dortmund",
+					4
+				],
+				[
+					"Essen",
+					4
+				],
+				[
+					"Leipzig",
+					4
+				],
+				[
+					"Bremen",
+					4
+				],
+				[
+					"Hannover",
+					4
+				],
+				[
+					"Dresden",
+					3
+				],
+				[
+					"Nürnberg",
+					3
+				],
+				[
+					"Duisburg",
+					3
+				],
+				[
+					"Bochum",
+					3
+				],
+				[
+					"Wuppertal",
+					3
+				],
+				[
+					"Bielefeld",
+					3
+				],
+				[
+					"Bonn",
+					3
+				],
+				[
+					"Münster",
+					3
+				],
+				[
+					"Karlsruhe",
+					3
+				],
+				[
+					"Mannheim",
+					3
+				],
+				[
+					"Augsburg",
+					3
+				],
+				[
+					"Wiesbaden",
+					3
+				],
+				[
+					"Gelsenkirchen",
+					3
+				],
+				[
+					"Mönchengladbach",
+					3
+				],
+				[
+					"Braunschweig",
+					3
+				],
+				[
+					"Kiel",
+					3
+				],
+				[
+					"Chemnitz",
+					2
+				],
+				[
+					"Aachen",
+					2
+				],
+				[
+					"Magdeburg",
+					2
+				],
+				[
+					"Freiburg",
+					2
+				],
+				[
+					"Rostock",
+					2
+				],
+				[
+					"Mainz",
+					2
+				],
+				[
+					"Kaiserslautern",
+					2
+				],
+				[
+					"Paderborn",
+					2
+				],
+				[
+					"Darmstadt",
+					2
+				],
+				[
+					"Regensburg",
+					2
+				],
+				[
+					"Wolfsburg",
+					2
+				],
+				[
+					"Fürth",
+					2
+				],
+				[
+					"Osnabrück",
+					2
+				],
+				[
+					"Ulm",
+					2
+				],
+				[
+					"Leverkusen",
+					2
+				],
+				[
+					"Heidenheim",
+					1
+				],
+				[
+					"Sandhausen",
+					1
+				],
+				[
+					"Sinsheim",
+					1
+				],
+				[
+					"Spiesen-Elversberg",
+					2
+				]
+			],
+			"lang": "de"
+		},
+		"ITA": {
+			"name": "Itália",
+			"adj": "italiano",
+			"confed": "UEFA",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#009246",
+					"#FFFFFF",
+					"#CE2B37"
+				]
+			},
+			"coef": 90,
+			"origins": [
+				{
+					"c": "it",
+					"w": 92,
+					"eth": {
+						"eur": 80,
+						"med": 18,
+						"nor": 2
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 3,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"ARG": 6.0,
+				"BRA": 5.0,
+				"FRA": 4.0,
+				"SRB": 4.0,
+				"CRO": 4.0,
+				"POR": 3.0,
+				"ESP": 3.0,
+				"NED": 3.0,
+				"BEL": 3.0,
+				"URU": 3.0,
+				"COL": 2.0,
+				"NGA": 3.0,
+				"SEN": 3.0,
+				"CIV": 2.0,
+				"GHA": 2.0,
+				"POL": 4.0,
+				"SVK": 2.0,
+				"SWE": 2.0,
+				"DEN": 3.0,
+				"NOR": 2.0,
+				"SUI": 2.0,
+				"AUT": 1.0,
+				"GER": 2.0,
+				"TUR": 2.0,
+				"ALB": 2.0,
+				"BIH": 1.0,
+				"UKR": 1.0,
+				"USA": 1.0,
+				"MAR": 2.0,
+				"ALG": 1.0,
+				"CMR": 1.0,
+				"GRE": 1.0,
+				"GEO": 1.0,
+				"SVN": 1.0,
+				"KOS": 1.0,
+				"ROU": 2.0,
+				"HUN": 1.0,
+				"ENG": 1.0
+			},
+			"foreign": [
+				0.58
+			],
+			"cities": [
+				[
+					"Roma",
+					5
+				],
+				[
+					"Milano",
+					5
+				],
+				[
+					"Napoli",
+					5
+				],
+				[
+					"Torino",
+					4
+				],
+				[
+					"Palermo",
+					4
+				],
+				[
+					"Genova",
+					4
+				],
+				[
+					"Bologna",
+					4
+				],
+				[
+					"Firenze",
+					4
+				],
+				[
+					"Bari",
+					4
+				],
+				[
+					"Catania",
+					3
+				],
+				[
+					"Venezia",
+					3
+				],
+				[
+					"Verona",
+					3
+				],
+				[
+					"Messina",
+					3
+				],
+				[
+					"Padova",
+					3
+				],
+				[
+					"Trieste",
+					3
+				],
+				[
+					"Brescia",
+					3
+				],
+				[
+					"Parma",
+					3
+				],
+				[
+					"Modena",
+					3
+				],
+				[
+					"Reggio Emilia",
+					3
+				],
+				[
+					"Perugia",
+					3
+				],
+				[
+					"Livorno",
+					3
+				],
+				[
+					"Cagliari",
+					3
+				],
+				[
+					"Salerno",
+					3
+				],
+				[
+					"Bergamo",
+					3
+				],
+				[
+					"Lecce",
+					2
+				],
+				[
+					"Udine",
+					2
+				],
+				[
+					"Empoli",
+					2
+				],
+				[
+					"Frosinone",
+					2
+				],
+				[
+					"Cremona",
+					2
+				],
+				[
+					"Como",
+					2
+				],
+				[
+					"Monza",
+					2
+				],
+				[
+					"La Spezia",
+					2
+				],
+				[
+					"Pisa",
+					2
+				],
+				[
+					"Ascoli",
+					2
+				],
+				[
+					"Pescara",
+					2
+				],
+				[
+					"Cosenza",
+					2
+				],
+				[
+					"Terni",
+					2
+				],
+				[
+					"Sassuolo",
+					1
+				],
+				[
+					"Cittadella",
+					1
+				]
+			],
+			"lang": "it"
+		},
+		"FRA": {
+			"name": "França",
+			"adj": "francês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#002395",
+					"#FFFFFF",
+					"#ED2939"
+				]
+			},
+			"coef": 80,
+			"origins": [
+				{
+					"c": "fr",
+					"w": 55,
+					"eth": {
+						"eur": 60,
+						"nor": 15,
+						"med": 10,
+						"mix": 10,
+						"afr": 5
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 25,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 12,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "lusoaf",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "pt",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "es",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 2.5,
+			"imports": {
+				"BRA": 5.0,
+				"POR": 4.0,
+				"SEN": 5.0,
+				"CIV": 5.0,
+				"MLI": 4.0,
+				"CMR": 4.0,
+				"GUI": 3.0,
+				"ALG": 4.0,
+				"MAR": 4.0,
+				"TUN": 2.0,
+				"COD": 3.0,
+				"BFA": 2.0,
+				"GHA": 2.0,
+				"NGA": 2.0,
+				"ARG": 3.0,
+				"BEL": 3.0,
+				"SUI": 2.0,
+				"NED": 2.0,
+				"ESP": 2.0,
+				"ITA": 2.0,
+				"GER": 2.0,
+				"CRO": 1.0,
+				"SRB": 1.0,
+				"USA": 2.0,
+				"CAN": 1.0,
+				"JPN": 2.0,
+				"KOR": 2.0,
+				"ANG": 1.0,
+				"CPV": 1.0,
+				"DEN": 1.0,
+				"NOR": 1.0,
+				"SWE": 1.0,
+				"UKR": 1.0,
+				"POL": 1.0,
+				"COL": 1.0,
+				"ECU": 1.0,
+				"URU": 1.0,
+				"GAB": 1.0
+			},
+			"foreign": [
+				0.42,
+				0.28
+			],
+			"cities": [
+				[
+					"Paris",
+					5
+				],
+				[
+					"Marseille",
+					5
+				],
+				[
+					"Lyon",
+					5
+				],
+				[
+					"Toulouse",
+					4
+				],
+				[
+					"Nice",
+					4
+				],
+				[
+					"Nantes",
+					4
+				],
+				[
+					"Strasbourg",
+					4
+				],
+				[
+					"Montpellier",
+					4
+				],
+				[
+					"Bordeaux",
+					4
+				],
+				[
+					"Lille",
+					4
+				],
+				[
+					"Rennes",
+					3
+				],
+				[
+					"Reims",
+					3
+				],
+				[
+					"Le Havre",
+					3
+				],
+				[
+					"Saint-Étienne",
+					3
+				],
+				[
+					"Toulon",
+					3
+				],
+				[
+					"Grenoble",
+					3
+				],
+				[
+					"Dijon",
+					3
+				],
+				[
+					"Angers",
+					3
+				],
+				[
+					"Nîmes",
+					3
+				],
+				[
+					"Brest",
+					3
+				],
+				[
+					"Le Mans",
+					3
+				],
+				[
+					"Clermont-Ferrand",
+					3
+				],
+				[
+					"Amiens",
+					3
+				],
+				[
+					"Metz",
+					3
+				],
+				[
+					"Caen",
+					3
+				],
+				[
+					"Nancy",
+					3
+				],
+				[
+					"Rouen",
+					3
+				],
+				[
+					"Lorient",
+					2
+				],
+				[
+					"Auxerre",
+					2
+				],
+				[
+					"Sochaux",
+					2
+				],
+				[
+					"Laval",
+					2
+				],
+				[
+					"Troyes",
+					2
+				],
+				[
+					"Bastia",
+					2
+				],
+				[
+					"Ajaccio",
+					2
+				],
+				[
+					"Valenciennes",
+					2
+				],
+				[
+					"Lens",
+					2
+				],
+				[
+					"Annecy",
+					2
+				],
+				[
+					"Pau",
+					2
+				],
+				[
+					"Niort",
+					2
+				],
+				[
+					"Orléans",
+					2
+				],
+				[
+					"Dunkerque",
+					2
+				],
+				[
+					"Guingamp",
+					1
+				],
+				[
+					"Rodez",
+					1
+				],
+				[
+					"Châteauroux",
+					1
+				],
+				[
+					"Monaco",
+					4
+				],
+				[
+					"Saint-Ouen",
+					2
+				],
+				[
+					"Boulogne-sur-Mer",
+					2
+				]
+			],
+			"lang": "fr"
+		},
+		"POR": {
+			"name": "Portugal",
+			"adj": "português",
+			"confed": "UEFA",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#006600",
+					"#FF0000"
+				],
+				"w": [
+					2,
+					3
+				],
+				"e": {
+					"t": "disc",
+					"c": "#FFE000",
+					"x": 0.4,
+					"y": 0.5,
+					"s": 0.34,
+					"c2": "#FF0000"
+				}
+			},
+			"coef": 72,
+			"origins": [
+				{
+					"c": "pt",
+					"w": 85,
+					"eth": {
+						"eur": 80,
+						"med": 10,
+						"mix": 6,
+						"afr": 4
+					}
+				},
+				{
+					"c": "lusoaf",
+					"w": 8,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "br",
+					"w": 4,
+					"eth": {
+						"mix": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "es",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"BRA": 12.0,
+				"ARG": 3.0,
+				"URU": 3.0,
+				"COL": 3.0,
+				"ESP": 3.0,
+				"FRA": 2.0,
+				"CPV": 3.0,
+				"ANG": 3.0,
+				"GNB": 3.0,
+				"MOZ": 2.0,
+				"NGA": 2.0,
+				"SEN": 2.0,
+				"CIV": 2.0,
+				"GHA": 2.0,
+				"CMR": 1.0,
+				"MAR": 2.0,
+				"SRB": 2.0,
+				"CRO": 1.0,
+				"JPN": 2.0,
+				"KOR": 1.0,
+				"USA": 1.0,
+				"MEX": 2.0,
+				"VEN": 2.0,
+				"ECU": 1.0,
+				"PAR": 1.0,
+				"CHI": 1.0,
+				"GRE": 1.0,
+				"UKR": 1.0,
+				"ITA": 1.0,
+				"BEL": 1.0,
+				"NED": 1.0,
+				"GEO": 1.0
+			},
+			"foreign": [
+				0.55
+			],
+			"cities": [
+				[
+					"Lisboa",
+					5
+				],
+				[
+					"Porto",
+					5
+				],
+				[
+					"Braga",
+					3
+				],
+				[
+					"Guimarães",
+					3
+				],
+				[
+					"Coimbra",
+					3
+				],
+				[
+					"Funchal",
+					3
+				],
+				[
+					"Setúbal",
+					3
+				],
+				[
+					"Aveiro",
+					2
+				],
+				[
+					"Faro",
+					2
+				],
+				[
+					"Vila do Conde",
+					2
+				],
+				[
+					"Famalicão",
+					2
+				],
+				[
+					"Barcelos",
+					2
+				],
+				[
+					"Chaves",
+					2
+				],
+				[
+					"Viseu",
+					2
+				],
+				[
+					"Leiria",
+					2
+				],
+				[
+					"Portimão",
+					2
+				],
+				[
+					"Estoril",
+					2
+				],
+				[
+					"Amadora",
+					2
+				],
+				[
+					"Ponta Delgada",
+					2
+				],
+				[
+					"Arouca",
+					1
+				],
+				[
+					"Vizela",
+					1
+				],
+				[
+					"Tondela",
+					1
+				],
+				[
+					"Penafiel",
+					1
+				],
+				[
+					"Covilhã",
+					1
+				],
+				[
+					"Olhão",
+					1
+				],
+				[
+					"Paços de Ferreira",
+					1
+				]
+			],
+			"lang": "pt"
+		},
+		"NED": {
+			"name": "Holanda",
+			"adj": "holandês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#AE1C28",
+					"#FFFFFF",
+					"#21468B"
+				]
+			},
+			"coef": 70,
+			"origins": [
+				{
+					"c": "nl",
+					"w": 82,
+					"eth": {
+						"nor": 55,
+						"eur": 25,
+						"mix": 10,
+						"afr": 10
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 8,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "tr",
+					"w": 3,
+					"eth": {
+						"med": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "lusoaf",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "en",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"BEL": 6.0,
+				"DEN": 4.0,
+				"NOR": 3.0,
+				"SWE": 3.0,
+				"GER": 3.0,
+				"BRA": 3.0,
+				"ARG": 2.0,
+				"MEX": 2.0,
+				"JPN": 3.0,
+				"KOR": 1.0,
+				"USA": 2.0,
+				"SRB": 2.0,
+				"CRO": 2.0,
+				"GHA": 3.0,
+				"NGA": 3.0,
+				"CIV": 2.0,
+				"SEN": 2.0,
+				"MAR": 4.0,
+				"ALG": 1.0,
+				"TUR": 2.0,
+				"POL": 1.0,
+				"CZE": 1.0,
+				"AUT": 1.0,
+				"SUI": 1.0,
+				"ISL": 1.0,
+				"FIN": 1.0,
+				"ENG": 1.0,
+				"SCO": 1.0,
+				"IRL": 1.0,
+				"POR": 1.0,
+				"ESP": 1.0,
+				"ITA": 1.0,
+				"FRA": 2.0,
+				"GRE": 1.0,
+				"URU": 1.0,
+				"COL": 1.0,
+				"ECU": 1.0,
+				"CPV": 1.0
+			},
+			"foreign": [
+				0.42
+			],
+			"cities": [
+				[
+					"Amsterdam",
+					5
+				],
+				[
+					"Rotterdam",
+					5
+				],
+				[
+					"Den Haag",
+					4
+				],
+				[
+					"Utrecht",
+					4
+				],
+				[
+					"Eindhoven",
+					4
+				],
+				[
+					"Groningen",
+					3
+				],
+				[
+					"Tilburg",
+					3
+				],
+				[
+					"Almere",
+					3
+				],
+				[
+					"Breda",
+					3
+				],
+				[
+					"Nijmegen",
+					3
+				],
+				[
+					"Enschede",
+					3
+				],
+				[
+					"Arnhem",
+					3
+				],
+				[
+					"Haarlem",
+					3
+				],
+				[
+					"Zwolle",
+					3
+				],
+				[
+					"Alkmaar",
+					3
+				],
+				[
+					"Heerenveen",
+					2
+				],
+				[
+					"Leeuwarden",
+					2
+				],
+				[
+					"Maastricht",
+					2
+				],
+				[
+					"Venlo",
+					2
+				],
+				[
+					"Deventer",
+					2
+				],
+				[
+					"Sittard",
+					2
+				],
+				[
+					"Kerkrade",
+					2
+				],
+				[
+					"Emmen",
+					2
+				],
+				[
+					"Almelo",
+					2
+				],
+				[
+					"Dordrecht",
+					2
+				],
+				[
+					"Den Bosch",
+					2
+				],
+				[
+					"Waalwijk",
+					1
+				],
+				[
+					"Volendam",
+					1
+				],
+				[
+					"Helmond",
+					1
+				],
+				[
+					"Oss",
+					1
+				]
+			],
+			"lang": "nl"
+		},
+		"TUR": {
+			"name": "Turquia",
+			"adj": "turco",
+			"confed": "UEFA",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#E30A17"
+				],
+				"e": {
+					"t": "crescent",
+					"c": "#FFFFFF",
+					"x": 0.42,
+					"y": 0.5,
+					"s": 0.5
+				}
+			},
+			"coef": 55,
+			"origins": [
+				{
+					"c": "tr",
+					"w": 95,
+					"eth": {
+						"med": 85,
+						"eur": 10,
+						"arb": 5
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "nl",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "de",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"BRA": 5.0,
+				"ARG": 2.0,
+				"URU": 2.0,
+				"COL": 2.0,
+				"POR": 3.0,
+				"ESP": 2.0,
+				"FRA": 3.0,
+				"NED": 3.0,
+				"BEL": 3.0,
+				"GER": 3.0,
+				"SRB": 3.0,
+				"CRO": 3.0,
+				"BIH": 3.0,
+				"ALB": 2.0,
+				"KOS": 2.0,
+				"GRE": 1.0,
+				"UKR": 2.0,
+				"POL": 2.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"SEN": 3.0,
+				"CIV": 3.0,
+				"NGA": 3.0,
+				"CMR": 3.0,
+				"GHA": 2.0,
+				"MAR": 3.0,
+				"ALG": 2.0,
+				"TUN": 1.0,
+				"ITA": 1.0,
+				"ENG": 1.0,
+				"SWE": 1.0,
+				"NOR": 1.0,
+				"DEN": 1.0,
+				"AUT": 1.0,
+				"SUI": 1.0,
+				"GEO": 2.0,
+				"IRN": 1.0,
+				"JPN": 1.0,
+				"KOR": 1.0,
+				"HUN": 1.0,
+				"ROU": 1.0
+			},
+			"foreign": [
+				0.48
+			],
+			"cities": [
+				[
+					"İstanbul",
+					5
+				],
+				[
+					"Ankara",
+					5
+				],
+				[
+					"İzmir",
+					5
+				],
+				[
+					"Bursa",
+					4
+				],
+				[
+					"Antalya",
+					4
+				],
+				[
+					"Konya",
+					4
+				],
+				[
+					"Adana",
+					4
+				],
+				[
+					"Gaziantep",
+					4
+				],
+				[
+					"Kayseri",
+					3
+				],
+				[
+					"Trabzon",
+					3
+				],
+				[
+					"Samsun",
+					3
+				],
+				[
+					"Eskişehir",
+					3
+				],
+				[
+					"Denizli",
+					3
+				],
+				[
+					"Malatya",
+					3
+				],
+				[
+					"Sivas",
+					3
+				],
+				[
+					"Kocaeli",
+					3
+				],
+				[
+					"Sakarya",
+					3
+				],
+				[
+					"Manisa",
+					3
+				],
+				[
+					"Hatay",
+					3
+				],
+				[
+					"Diyarbakır",
+					3
+				],
+				[
+					"Mersin",
+					3
+				],
+				[
+					"Rize",
+					2
+				],
+				[
+					"Erzurum",
+					2
+				],
+				[
+					"Alanya",
+					2
+				],
+				[
+					"Bodrum",
+					1
+				]
+			],
+			"lang": "tr"
+		},
+		"BEL": {
+			"name": "Bélgica",
+			"adj": "belga",
+			"confed": "UEFA",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#000000",
+					"#FAE042",
+					"#ED2939"
+				]
+			},
+			"coef": 60,
+			"origins": [
+				{
+					"c": "nl",
+					"w": 45,
+					"eth": {
+						"nor": 50,
+						"eur": 35,
+						"afr": 10,
+						"mix": 5
+					}
+				},
+				{
+					"c": "fr",
+					"w": 25,
+					"eth": {
+						"eur": 60,
+						"nor": 20,
+						"afr": 10,
+						"mix": 10
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 15,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 10,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "tr",
+					"w": 2,
+					"eth": {
+						"med": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"FRA": 5.0,
+				"NED": 5.0,
+				"DEN": 3.0,
+				"NOR": 3.0,
+				"SWE": 2.0,
+				"COD": 5.0,
+				"CIV": 3.0,
+				"SEN": 3.0,
+				"CMR": 3.0,
+				"GHA": 3.0,
+				"NGA": 3.0,
+				"MLI": 2.0,
+				"GUI": 2.0,
+				"BFA": 2.0,
+				"MAR": 3.0,
+				"ALG": 2.0,
+				"TUN": 1.0,
+				"BRA": 3.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"URU": 1.0,
+				"JPN": 4.0,
+				"KOR": 2.0,
+				"USA": 2.0,
+				"CRO": 2.0,
+				"SRB": 2.0,
+				"BIH": 1.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"POL": 1.0,
+				"UKR": 1.0,
+				"GER": 2.0,
+				"AUT": 1.0,
+				"SUI": 1.0,
+				"ESP": 1.0,
+				"POR": 1.0,
+				"ITA": 1.0,
+				"ENG": 1.0,
+				"IRL": 1.0,
+				"ISL": 1.0,
+				"FIN": 1.0,
+				"GEO": 1.0
+			},
+			"foreign": [
+				0.48
+			],
+			"cities": [
+				[
+					"Bruxelles",
+					5
+				],
+				[
+					"Antwerpen",
+					5
+				],
+				[
+					"Gent",
+					4
+				],
+				[
+					"Charleroi",
+					4
+				],
+				[
+					"Liège",
+					4
+				],
+				[
+					"Brugge",
+					4
+				],
+				[
+					"Namur",
+					3
+				],
+				[
+					"Leuven",
+					3
+				],
+				[
+					"Mons",
+					3
+				],
+				[
+					"Mechelen",
+					3
+				],
+				[
+					"Kortrijk",
+					3
+				],
+				[
+					"Hasselt",
+					3
+				],
+				[
+					"Genk",
+					3
+				],
+				[
+					"Oostende",
+					3
+				],
+				[
+					"Aalst",
+					2
+				],
+				[
+					"Sint-Truiden",
+					2
+				],
+				[
+					"Waregem",
+					2
+				],
+				[
+					"Beveren",
+					2
+				],
+				[
+					"Lokeren",
+					2
+				],
+				[
+					"Mouscron",
+					2
+				],
+				[
+					"Seraing",
+					2
+				],
+				[
+					"Roeselare",
+					2
+				],
+				[
+					"Eupen",
+					1
+				],
+				[
+					"Lommel",
+					1
+				],
+				[
+					"Westerlo",
+					1
+				],
+				[
+					"Tubize",
+					1
+				],
+				[
+					"Deinze",
+					1
+				]
+			],
+			"lang": "nl"
+		},
+		"SCO": {
+			"name": "Escócia",
+			"adj": "escocês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "saltire",
+				"c": [
+					"#005EB8",
+					"#FFFFFF"
+				]
+			},
+			"coef": 50,
+			"origins": [
+				{
+					"c": "gb_celt",
+					"w": 80,
+					"eth": {
+						"nor": 90,
+						"eur": 8,
+						"afr": 2
+					}
+				},
+				{
+					"c": "en",
+					"w": 10,
+					"eth": {
+						"nor": 60,
+						"eur": 20,
+						"afr": 10,
+						"mix": 10
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 4,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "nordic",
+					"w": 1,
+					"eth": {
+						"nor": 1
+					}
+				},
+				{
+					"c": "west_slav",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"ENG": 10.0,
+				"IRL": 6.0,
+				"WAL": 3.0,
+				"AUS": 3.0,
+				"USA": 2.0,
+				"CAN": 2.0,
+				"NOR": 2.0,
+				"DEN": 2.0,
+				"SWE": 2.0,
+				"ISL": 1.0,
+				"FIN": 1.0,
+				"NED": 2.0,
+				"BEL": 1.0,
+				"GER": 1.0,
+				"AUT": 1.0,
+				"FRA": 2.0,
+				"ESP": 2.0,
+				"POR": 1.0,
+				"CRO": 1.0,
+				"SRB": 1.0,
+				"POL": 2.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"GRE": 1.0,
+				"JPN": 3.0,
+				"KOR": 2.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"CIV": 1.0,
+				"SEN": 1.0,
+				"CMR": 1.0,
+				"JAM": 1.0,
+				"BRA": 1.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"CRC": 1.0
+			},
+			"foreign": [
+				0.42
+			],
+			"cities": [
+				[
+					"Glasgow",
+					5
+				],
+				[
+					"Edinburgh",
+					5
+				],
+				[
+					"Aberdeen",
+					4
+				],
+				[
+					"Dundee",
+					4
+				],
+				[
+					"Inverness",
+					3
+				],
+				[
+					"Perth",
+					3
+				],
+				[
+					"Motherwell",
+					3
+				],
+				[
+					"Paisley",
+					3
+				],
+				[
+					"Stirling",
+					2
+				],
+				[
+					"Kilmarnock",
+					2
+				],
+				[
+					"Livingston",
+					2
+				],
+				[
+					"Hamilton",
+					2
+				],
+				[
+					"Dunfermline",
+					2
+				],
+				[
+					"Falkirk",
+					2
+				],
+				[
+					"Ayr",
+					2
+				],
+				[
+					"Greenock",
+					2
+				],
+				[
+					"Kirkcaldy",
+					2
+				],
+				[
+					"Airdrie",
+					2
+				],
+				[
+					"Dumfries",
+					1
+				],
+				[
+					"Arbroath",
+					1
+				],
+				[
+					"Dingwall",
+					1
+				]
+			],
+			"lang": "sco"
+		},
+		"GRE": {
+			"name": "Grécia",
+			"adj": "grego",
+			"confed": "UEFA",
+			"flag": {
+				"p": "stripes",
+				"c": [
+					"#0D5EAF",
+					"#FFFFFF"
+				],
+				"n": 9,
+				"k": {
+					"c": "#0D5EAF",
+					"w": 0.37,
+					"h": 0.56,
+					"e": {
+						"t": "cross_sq",
+						"c": "#FFFFFF",
+						"x": 0.5,
+						"y": 0.5,
+						"s": 0.8
+					}
+				}
+			},
+			"coef": 46,
+			"origins": [
+				{
+					"c": "gr",
+					"w": 90,
+					"eth": {
+						"eur": 50,
+						"med": 50
+					}
+				},
+				{
+					"c": "alb",
+					"w": 4,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "es",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"POR": 4.0,
+				"ESP": 4.0,
+				"ARG": 3.0,
+				"BRA": 4.0,
+				"URU": 2.0,
+				"COL": 2.0,
+				"FRA": 3.0,
+				"BEL": 2.0,
+				"NED": 2.0,
+				"SRB": 3.0,
+				"CRO": 2.0,
+				"BIH": 1.0,
+				"ALB": 3.0,
+				"KOS": 1.0,
+				"POL": 2.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"ITA": 2.0,
+				"GER": 1.0,
+				"SWE": 1.0,
+				"NOR": 1.0,
+				"DEN": 1.0,
+				"NGA": 2.0,
+				"CMR": 2.0,
+				"CIV": 2.0,
+				"SEN": 2.0,
+				"GHA": 2.0,
+				"MAR": 2.0,
+				"ALG": 1.0,
+				"TUN": 1.0,
+				"MLI": 1.0,
+				"GUI": 1.0,
+				"JPN": 1.0,
+				"USA": 1.0,
+				"AUS": 1.0,
+				"ECU": 1.0,
+				"VEN": 1.0,
+				"PAR": 1.0,
+				"CHI": 1.0,
+				"ROU": 1.0,
+				"GEO": 1.0
+			},
+			"foreign": [
+				0.55
+			],
+			"cities": [
+				[
+					"Athens",
+					5
+				],
+				[
+					"Thessaloniki",
+					5
+				],
+				[
+					"Piraeus",
+					4
+				],
+				[
+					"Patras",
+					3
+				],
+				[
+					"Heraklion",
+					3
+				],
+				[
+					"Larissa",
+					3
+				],
+				[
+					"Volos",
+					3
+				],
+				[
+					"Ioannina",
+					2
+				],
+				[
+					"Kalamata",
+					2
+				],
+				[
+					"Trikala",
+					2
+				],
+				[
+					"Xanthi",
+					2
+				],
+				[
+					"Kavala",
+					2
+				],
+				[
+					"Chania",
+					2
+				],
+				[
+					"Rhodes",
+					2
+				],
+				[
+					"Lamia",
+					2
+				],
+				[
+					"Serres",
+					2
+				],
+				[
+					"Veria",
+					2
+				],
+				[
+					"Tripoli",
+					2
+				],
+				[
+					"Agrinio",
+					2
+				],
+				[
+					"Levadia",
+					1
+				],
+				[
+					"Giannitsa",
+					1
+				]
+			],
+			"lang": "gr"
+		},
+		"AUT": {
+			"name": "Áustria",
+			"adj": "austríaco",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#ED2939",
+					"#FFFFFF",
+					"#ED2939"
+				]
+			},
+			"coef": 50,
+			"origins": [
+				{
+					"c": "de",
+					"w": 80,
+					"eth": {
+						"nor": 45,
+						"eur": 45,
+						"afr": 5,
+						"mix": 5
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 8,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "tr",
+					"w": 4,
+					"eth": {
+						"med": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 3,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "west_slav",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "nordic",
+					"w": 1,
+					"eth": {
+						"nor": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"GER": 8.0,
+				"SUI": 3.0,
+				"CRO": 4.0,
+				"SRB": 3.0,
+				"BIH": 4.0,
+				"SVN": 2.0,
+				"HUN": 3.0,
+				"CZE": 2.0,
+				"SVK": 2.0,
+				"POL": 1.0,
+				"DEN": 2.0,
+				"NOR": 2.0,
+				"SWE": 1.0,
+				"ISL": 1.0,
+				"NED": 1.0,
+				"BEL": 1.0,
+				"FRA": 1.0,
+				"ESP": 1.0,
+				"ITA": 1.0,
+				"BRA": 2.0,
+				"ARG": 1.0,
+				"GHA": 2.0,
+				"NGA": 2.0,
+				"CIV": 2.0,
+				"MLI": 3.0,
+				"SEN": 1.0,
+				"CMR": 1.0,
+				"JPN": 3.0,
+				"KOR": 2.0,
+				"USA": 1.0,
+				"AUS": 1.0,
+				"ALB": 1.0,
+				"KOS": 1.0,
+				"GEO": 1.0,
+				"UKR": 1.0,
+				"TUR": 1.0,
+				"ROU": 1.0
+			},
+			"foreign": [
+				0.42
+			],
+			"cities": [
+				[
+					"Wien",
+					5
+				],
+				[
+					"Graz",
+					4
+				],
+				[
+					"Linz",
+					4
+				],
+				[
+					"Salzburg",
+					4
+				],
+				[
+					"Innsbruck",
+					3
+				],
+				[
+					"Klagenfurt",
+					3
+				],
+				[
+					"Villach",
+					2
+				],
+				[
+					"Wels",
+					2
+				],
+				[
+					"St. Pölten",
+					2
+				],
+				[
+					"Steyr",
+					2
+				],
+				[
+					"Wiener Neustadt",
+					2
+				],
+				[
+					"Wolfsberg",
+					1
+				],
+				[
+					"Hartberg",
+					1
+				],
+				[
+					"Ried",
+					1
+				],
+				[
+					"Lustenau",
+					1
+				],
+				[
+					"Altach",
+					1
+				],
+				[
+					"Kapfenberg",
+					1
+				],
+				[
+					"Horn",
+					1
+				]
+			],
+			"lang": "de"
+		},
+		"SUI": {
+			"name": "Suíça",
+			"adj": "suíço",
+			"confed": "UEFA",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#DA291C"
+				],
+				"e": {
+					"t": "cross_sq",
+					"c": "#FFFFFF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.55
+				}
+			},
+			"coef": 48,
+			"origins": [
+				{
+					"c": "de",
+					"w": 55,
+					"eth": {
+						"nor": 50,
+						"eur": 45,
+						"afr": 5
+					}
+				},
+				{
+					"c": "fr",
+					"w": 18,
+					"eth": {
+						"eur": 70,
+						"nor": 15,
+						"afr": 10,
+						"mix": 5
+					}
+				},
+				{
+					"c": "it",
+					"w": 7,
+					"eth": {
+						"eur": 80,
+						"med": 20
+					}
+				},
+				{
+					"c": "alb",
+					"w": 8,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 4,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 6,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "tr",
+					"w": 2,
+					"eth": {
+						"med": 1
+					}
+				},
+				{
+					"c": "pt",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"GER": 5.0,
+				"AUT": 3.0,
+				"FRA": 5.0,
+				"ITA": 3.0,
+				"ESP": 1.0,
+				"POR": 2.0,
+				"BEL": 1.0,
+				"NED": 1.0,
+				"DEN": 2.0,
+				"NOR": 1.0,
+				"SWE": 2.0,
+				"ISL": 1.0,
+				"SRB": 2.0,
+				"CRO": 2.0,
+				"BIH": 2.0,
+				"KOS": 2.0,
+				"ALB": 2.0,
+				"SVN": 1.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"POL": 1.0,
+				"HUN": 1.0,
+				"BRA": 2.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"CIV": 2.0,
+				"SEN": 2.0,
+				"CMR": 2.0,
+				"GHA": 1.0,
+				"NGA": 1.0,
+				"MLI": 1.0,
+				"GUI": 1.0,
+				"COD": 2.0,
+				"MAR": 1.0,
+				"ALG": 1.0,
+				"TUN": 1.0,
+				"JPN": 1.0,
+				"KOR": 1.0,
+				"USA": 1.0
+			},
+			"foreign": [
+				0.45
+			],
+			"cities": [
+				[
+					"Zürich",
+					5
+				],
+				[
+					"Genève",
+					4
+				],
+				[
+					"Basel",
+					4
+				],
+				[
+					"Bern",
+					4
+				],
+				[
+					"Lausanne",
+					3
+				],
+				[
+					"Winterthur",
+					3
+				],
+				[
+					"Luzern",
+					3
+				],
+				[
+					"St. Gallen",
+					3
+				],
+				[
+					"Lugano",
+					3
+				],
+				[
+					"Biel",
+					2
+				],
+				[
+					"Thun",
+					2
+				],
+				[
+					"Sion",
+					2
+				],
+				[
+					"Aarau",
+					2
+				],
+				[
+					"Schaffhausen",
+					2
+				],
+				[
+					"Bellinzona",
+					2
+				],
+				[
+					"Neuchâtel",
+					2
+				],
+				[
+					"Chiasso",
+					1
+				],
+				[
+					"Yverdon",
+					1
+				],
+				[
+					"Wil",
+					1
+				],
+				[
+					"Kriens",
+					1
+				]
+			],
+			"lang": "de"
+		},
+		"UKR": {
+			"name": "Ucrânia",
+			"adj": "ucraniano",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#0057B7",
+					"#FFD700"
+				]
+			},
+			"coef": 45,
+			"origins": [
+				{
+					"c": "east_slav",
+					"w": 95,
+					"eth": {
+						"nor": 45,
+						"eur": 55
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "west_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "ge",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"BRA": 8.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"URU": 1.0,
+				"VEN": 1.0,
+				"ECU": 1.0,
+				"GEO": 3.0,
+				"SRB": 2.0,
+				"CRO": 2.0,
+				"BIH": 1.0,
+				"SVN": 1.0,
+				"MNE": 1.0,
+				"POL": 2.0,
+				"SVK": 1.0,
+				"CZE": 1.0,
+				"HUN": 1.0,
+				"ROU": 1.0,
+				"RUS": 1.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"CMR": 1.0,
+				"CIV": 1.0,
+				"SEN": 1.0,
+				"MLI": 1.0,
+				"POR": 1.0,
+				"ESP": 1.0,
+				"FRA": 1.0,
+				"BEL": 1.0,
+				"NED": 1.0,
+				"JPN": 1.0
+			},
+			"foreign": [
+				0.3
+			],
+			"cities": [
+				[
+					"Kyiv",
+					5
+				],
+				[
+					"Kharkiv",
+					5
+				],
+				[
+					"Odesa",
+					4
+				],
+				[
+					"Dnipro",
+					4
+				],
+				[
+					"Donetsk",
+					4
+				],
+				[
+					"Lviv",
+					4
+				],
+				[
+					"Zaporizhzhia",
+					3
+				],
+				[
+					"Kryvyi Rih",
+					3
+				],
+				[
+					"Mykolaiv",
+					3
+				],
+				[
+					"Luhansk",
+					3
+				],
+				[
+					"Vinnytsia",
+					3
+				],
+				[
+					"Poltava",
+					3
+				],
+				[
+					"Chernihiv",
+					2
+				],
+				[
+					"Cherkasy",
+					2
+				],
+				[
+					"Sumy",
+					2
+				],
+				[
+					"Zhytomyr",
+					2
+				],
+				[
+					"Kherson",
+					2
+				],
+				[
+					"Uzhhorod",
+					2
+				],
+				[
+					"Lutsk",
+					2
+				],
+				[
+					"Kropyvnytskyi",
+					2
+				],
+				[
+					"Ternopil",
+					2
+				],
+				[
+					"Rivne",
+					2
+				],
+				[
+					"Oleksandriya",
+					1
+				]
+			],
+			"lang": "uk"
+		},
+		"CRO": {
+			"name": "Croácia",
+			"adj": "croata",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FF0000",
+					"#FFFFFF",
+					"#171796"
+				],
+				"e": {
+					"t": "checker",
+					"c": "#FF0000",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.36,
+					"c2": "#FFFFFF"
+				}
+			},
+			"coef": 42,
+			"origins": [
+				{
+					"c": "south_slav",
+					"w": 95,
+					"eth": {
+						"eur": 85,
+						"nor": 15
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "alb",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "pt",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 2.5,
+			"imports": {
+				"BIH": 6.0,
+				"SRB": 2.0,
+				"SVN": 3.0,
+				"MNE": 2.0,
+				"MKD": 2.0,
+				"ALB": 2.0,
+				"KOS": 2.0,
+				"AUT": 1.0,
+				"GER": 1.0,
+				"HUN": 1.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"POL": 1.0,
+				"UKR": 1.0,
+				"POR": 2.0,
+				"ESP": 2.0,
+				"ITA": 1.0,
+				"FRA": 1.0,
+				"BEL": 1.0,
+				"NED": 1.0,
+				"BRA": 3.0,
+				"ARG": 2.0,
+				"URU": 1.0,
+				"COL": 1.0,
+				"ECU": 1.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"CIV": 1.0,
+				"SEN": 1.0,
+				"CMR": 1.0,
+				"MLI": 1.0,
+				"GUI": 1.0,
+				"JPN": 2.0,
+				"KOR": 1.0,
+				"USA": 1.0,
+				"GEO": 1.0
+			},
+			"foreign": [
+				0.35
+			],
+			"cities": [
+				[
+					"Zagreb",
+					5
+				],
+				[
+					"Split",
+					4
+				],
+				[
+					"Rijeka",
+					4
+				],
+				[
+					"Osijek",
+					4
+				],
+				[
+					"Zadar",
+					3
+				],
+				[
+					"Pula",
+					3
+				],
+				[
+					"Slavonski Brod",
+					3
+				],
+				[
+					"Karlovac",
+					2
+				],
+				[
+					"Varaždin",
+					2
+				],
+				[
+					"Šibenik",
+					2
+				],
+				[
+					"Sisak",
+					2
+				],
+				[
+					"Velika Gorica",
+					2
+				],
+				[
+					"Vinkovci",
+					2
+				],
+				[
+					"Vukovar",
+					2
+				],
+				[
+					"Dubrovnik",
+					2
+				],
+				[
+					"Koprivnica",
+					2
+				],
+				[
+					"Gorica",
+					1
+				],
+				[
+					"Sesvete",
+					1
+				]
+			],
+			"lang": "hr"
+		},
+		"SRB": {
+			"name": "Sérvia",
+			"adj": "sérvio",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#C6363C",
+					"#0C4076",
+					"#FFFFFF"
+				],
+				"e": {
+					"t": "shield",
+					"c": "#C6363C",
+					"x": 0.35,
+					"y": 0.45,
+					"s": 0.4
+				}
+			},
+			"coef": 42,
+			"origins": [
+				{
+					"c": "south_slav",
+					"w": 95,
+					"eth": {
+						"eur": 85,
+						"nor": 15
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 1,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "east_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "west_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"MNE": 5.0,
+				"BIH": 4.0,
+				"MKD": 3.0,
+				"CRO": 1.0,
+				"SVN": 1.0,
+				"ROU": 1.0,
+				"HUN": 1.0,
+				"UKR": 1.0,
+				"RUS": 1.0,
+				"GRE": 1.0,
+				"POR": 1.0,
+				"ESP": 1.0,
+				"FRA": 1.0,
+				"BRA": 4.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"ECU": 1.0,
+				"VEN": 1.0,
+				"NGA": 3.0,
+				"GHA": 3.0,
+				"CMR": 2.0,
+				"CIV": 2.0,
+				"SEN": 2.0,
+				"MLI": 2.0,
+				"GUI": 1.0,
+				"BFA": 1.0,
+				"GAB": 1.0,
+				"JPN": 1.0
+			},
+			"foreign": [
+				0.35
+			],
+			"cities": [
+				[
+					"Beograd",
+					5
+				],
+				[
+					"Novi Sad",
+					4
+				],
+				[
+					"Niš",
+					4
+				],
+				[
+					"Kragujevac",
+					3
+				],
+				[
+					"Subotica",
+					3
+				],
+				[
+					"Zrenjanin",
+					2
+				],
+				[
+					"Pančevo",
+					2
+				],
+				[
+					"Čačak",
+					2
+				],
+				[
+					"Kraljevo",
+					2
+				],
+				[
+					"Novi Pazar",
+					2
+				],
+				[
+					"Smederevo",
+					2
+				],
+				[
+					"Leskovac",
+					2
+				],
+				[
+					"Kruševac",
+					2
+				],
+				[
+					"Vršac",
+					2
+				],
+				[
+					"Šabac",
+					2
+				],
+				[
+					"Užice",
+					2
+				],
+				[
+					"Sombor",
+					2
+				],
+				[
+					"Valjevo",
+					1
+				],
+				[
+					"Lučani",
+					1
+				],
+				[
+					"Ivanjica",
+					1
+				]
+			],
+			"lang": "sr"
+		},
+		"CZE": {
+			"name": "Tchéquia",
+			"adj": "tcheco",
+			"confed": "UEFA",
+			"flag": {
+				"p": "tri",
+				"c": [
+					"#FFFFFF",
+					"#D7141A"
+				],
+				"t": "#11457E"
+			},
+			"coef": 45,
+			"origins": [
+				{
+					"c": "west_slav",
+					"w": 92,
+					"eth": {
+						"nor": 50,
+						"eur": 50
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "east_slav",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"SVK": 10.0,
+				"POL": 3.0,
+				"UKR": 3.0,
+				"CRO": 2.0,
+				"SRB": 2.0,
+				"BIH": 2.0,
+				"SVN": 1.0,
+				"AUT": 1.0,
+				"GER": 1.0,
+				"HUN": 1.0,
+				"ROU": 1.0,
+				"GEO": 1.0,
+				"NGA": 3.0,
+				"GHA": 3.0,
+				"CIV": 2.0,
+				"SEN": 2.0,
+				"MLI": 2.0,
+				"CMR": 1.0,
+				"GUI": 1.0,
+				"BFA": 1.0,
+				"BRA": 2.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"POR": 1.0,
+				"ESP": 1.0,
+				"FRA": 1.0,
+				"BEL": 1.0,
+				"NED": 1.0,
+				"NOR": 1.0,
+				"DEN": 1.0,
+				"ISL": 1.0,
+				"SWE": 1.0,
+				"JPN": 1.0,
+				"KOR": 1.0
+			},
+			"foreign": [
+				0.3
+			],
+			"cities": [
+				[
+					"Praha",
+					5
+				],
+				[
+					"Brno",
+					4
+				],
+				[
+					"Ostrava",
+					4
+				],
+				[
+					"Plzeň",
+					3
+				],
+				[
+					"Liberec",
+					3
+				],
+				[
+					"Olomouc",
+					3
+				],
+				[
+					"České Budějovice",
+					3
+				],
+				[
+					"Hradec Králové",
+					3
+				],
+				[
+					"Ústí nad Labem",
+					3
+				],
+				[
+					"Pardubice",
+					3
+				],
+				[
+					"Zlín",
+					2
+				],
+				[
+					"Jablonec",
+					2
+				],
+				[
+					"Mladá Boleslav",
+					2
+				],
+				[
+					"Teplice",
+					2
+				],
+				[
+					"Karviná",
+					2
+				],
+				[
+					"Opava",
+					2
+				],
+				[
+					"Příbram",
+					1
+				],
+				[
+					"Uherské Hradiště",
+					1
+				]
+			],
+			"lang": "cs"
+		},
+		"DEN": {
+			"name": "Dinamarca",
+			"adj": "dinamarquês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "nordic",
+				"c": [
+					"#C8102E",
+					"#FFFFFF"
+				]
+			},
+			"coef": 45,
+			"origins": [
+				{
+					"c": "nordic",
+					"w": 85,
+					"eth": {
+						"nor": 90,
+						"eur": 5,
+						"afr": 3,
+						"mix": 2
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 4,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "maghreb",
+					"w": 2,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "tr",
+					"w": 2,
+					"eth": {
+						"med": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "arab",
+					"w": 2,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "persian",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "alb",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"SWE": 6.0,
+				"NOR": 6.0,
+				"ISL": 4.0,
+				"FIN": 3.0,
+				"GER": 3.0,
+				"NED": 2.0,
+				"BEL": 1.0,
+				"AUT": 1.0,
+				"SUI": 1.0,
+				"POL": 2.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"CRO": 2.0,
+				"SRB": 2.0,
+				"BIH": 2.0,
+				"SVN": 1.0,
+				"ENG": 2.0,
+				"SCO": 1.0,
+				"IRL": 1.0,
+				"WAL": 1.0,
+				"USA": 2.0,
+				"CAN": 1.0,
+				"BRA": 2.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"URU": 1.0,
+				"NGA": 3.0,
+				"GHA": 3.0,
+				"CIV": 2.0,
+				"SEN": 2.0,
+				"CMR": 1.0,
+				"MLI": 1.0,
+				"JPN": 3.0,
+				"KOR": 1.0,
+				"AUS": 1.0
+			},
+			"foreign": [
+				0.38
+			],
+			"cities": [
+				[
+					"København",
+					5
+				],
+				[
+					"Aarhus",
+					4
+				],
+				[
+					"Odense",
+					4
+				],
+				[
+					"Aalborg",
+					3
+				],
+				[
+					"Esbjerg",
+					3
+				],
+				[
+					"Randers",
+					2
+				],
+				[
+					"Kolding",
+					2
+				],
+				[
+					"Horsens",
+					2
+				],
+				[
+					"Vejle",
+					2
+				],
+				[
+					"Silkeborg",
+					2
+				],
+				[
+					"Herning",
+					2
+				],
+				[
+					"Viborg",
+					2
+				],
+				[
+					"Brøndby",
+					2
+				],
+				[
+					"Lyngby",
+					2
+				],
+				[
+					"Hillerød",
+					1
+				],
+				[
+					"Næstved",
+					1
+				],
+				[
+					"Hobro",
+					1
+				],
+				[
+					"Helsingør",
+					1
+				]
+			],
+			"lang": "da"
+		},
+		"WAL": {
+			"name": "País de Gales",
+			"adj": "galês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFFFFF",
+					"#00AB39"
+				],
+				"e": {
+					"t": "dragon",
+					"c": "#D30731",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.5
+				}
+			},
+			"origins": [
+				{
+					"c": "gb_celt",
+					"w": 70,
+					"eth": {
+						"nor": 90,
+						"eur": 5,
+						"afr": 3,
+						"mix": 2
+					}
+				},
+				{
+					"c": "en",
+					"w": 30,
+					"eth": {
+						"nor": 70,
+						"eur": 15,
+						"afr": 10,
+						"mix": 5
+					}
+				}
+			]
+		},
+		"IRL": {
+			"name": "Irlanda",
+			"adj": "irlandês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#169B62",
+					"#FFFFFF",
+					"#FF883E"
+				]
+			},
+			"origins": [
+				{
+					"c": "gb_celt",
+					"w": 92,
+					"eth": {
+						"nor": 95,
+						"eur": 3,
+						"afr": 2
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 5,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "en",
+					"w": 3,
+					"eth": {
+						"mix": 1
+					}
+				}
+			]
+		},
+		"NOR": {
+			"name": "Noruega",
+			"adj": "norueguês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "nordic",
+				"c": [
+					"#BA0C2F",
+					"#FFFFFF",
+					"#00205B"
+				]
+			},
+			"origins": [
+				{
+					"c": "nordic",
+					"w": 88,
+					"eth": {
+						"nor": 95,
+						"eur": 5
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 5,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "arab",
+					"w": 2,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "persian",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "alb",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"SWE": {
+			"name": "Suécia",
+			"adj": "sueco",
+			"confed": "UEFA",
+			"flag": {
+				"p": "nordic",
+				"c": [
+					"#006AA7",
+					"#FECC02"
+				]
+			},
+			"origins": [
+				{
+					"c": "nordic",
+					"w": 80,
+					"eth": {
+						"nor": 95,
+						"eur": 5
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 6,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "arab",
+					"w": 4,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 4,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "persian",
+					"w": 2,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "alb",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "tr",
+					"w": 2,
+					"eth": {
+						"med": 1
+					}
+				}
+			]
+		},
+		"ISL": {
+			"name": "Islândia",
+			"adj": "islandês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "nordic",
+				"c": [
+					"#02529C",
+					"#FFFFFF",
+					"#DC1E35"
+				]
+			},
+			"origins": [
+				{
+					"c": "nordic",
+					"w": 100,
+					"eth": {
+						"nor": 1
+					}
+				}
+			]
+		},
+		"FIN": {
+			"name": "Finlândia",
+			"adj": "finlandês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "nordic",
+				"c": [
+					"#FFFFFF",
+					"#002F6C"
+				]
+			},
+			"origins": [
+				{
+					"c": "nordic",
+					"w": 90,
+					"eth": {
+						"nor": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 5,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "alb",
+					"w": 5,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"POL": {
+			"name": "Polônia",
+			"adj": "polonês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFFFFF",
+					"#DC143C"
+				]
+			},
+			"origins": [
+				{
+					"c": "west_slav",
+					"w": 98,
+					"eth": {
+						"nor": 50,
+						"eur": 50
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"SVK": {
+			"name": "Eslováquia",
+			"adj": "eslovaco",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFFFFF",
+					"#0B4EA2",
+					"#EE1C25"
+				],
+				"e": {
+					"t": "shield",
+					"c": "#EE1C25",
+					"x": 0.35,
+					"y": 0.5,
+					"s": 0.42
+				}
+			},
+			"origins": [
+				{
+					"c": "west_slav",
+					"w": 96,
+					"eth": {
+						"nor": 45,
+						"eur": 55
+					}
+				},
+				{
+					"c": "hu",
+					"w": 4,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"SVN": {
+			"name": "Eslovênia",
+			"adj": "esloveno",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFFFFF",
+					"#0000FF",
+					"#FF0000"
+				],
+				"e": {
+					"t": "shield",
+					"c": "#0000FF",
+					"x": 0.3,
+					"y": 0.4,
+					"s": 0.36
+				}
+			},
+			"origins": [
+				{
+					"c": "south_slav",
+					"w": 100,
+					"eth": {
+						"eur": 80,
+						"nor": 20
+					}
+				}
+			]
+		},
+		"HUN": {
+			"name": "Hungria",
+			"adj": "húngaro",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#CD2A3E",
+					"#FFFFFF",
+					"#436F4D"
+				]
+			},
+			"origins": [
+				{
+					"c": "hu",
+					"w": 97,
+					"eth": {
+						"eur": 70,
+						"nor": 30
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 3,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"ROU": {
+			"name": "Romênia",
+			"adj": "romeno",
+			"confed": "UEFA",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#002B7F",
+					"#FCD116",
+					"#CE1126"
+				]
+			},
+			"origins": [
+				{
+					"c": "ro",
+					"w": 97,
+					"eth": {
+						"eur": 90,
+						"med": 10
+					}
+				},
+				{
+					"c": "hu",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"BIH": {
+			"name": "Bósnia",
+			"adj": "bósnio",
+			"confed": "UEFA",
+			"flag": {
+				"p": "tri",
+				"c": [
+					"#002395"
+				],
+				"t": "#FECB00",
+				"e": {
+					"t": "stars_diag",
+					"c": "#FFFFFF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"origins": [
+				{
+					"c": "south_slav",
+					"w": 100,
+					"eth": {
+						"eur": 85,
+						"nor": 15
+					}
+				}
+			]
+		},
+		"MNE": {
+			"name": "Montenegro",
+			"adj": "montenegrino",
+			"confed": "UEFA",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#C40308"
+				],
+				"e": {
+					"t": "eagle",
+					"c": "#D3AE3B",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.45
+				}
+			},
+			"origins": [
+				{
+					"c": "south_slav",
+					"w": 100,
+					"eth": {
+						"eur": 90,
+						"nor": 10
+					}
+				}
+			]
+		},
+		"MKD": {
+			"name": "Macedônia do Norte",
+			"adj": "macedônio",
+			"confed": "UEFA",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#D20000"
+				],
+				"e": {
+					"t": "sun",
+					"c": "#FFE600",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.55
+				}
+			},
+			"origins": [
+				{
+					"c": "south_slav",
+					"w": 75,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "alb",
+					"w": 25,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"ALB": {
+			"name": "Albânia",
+			"adj": "albanês",
+			"confed": "UEFA",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#E41E20"
+				],
+				"e": {
+					"t": "eagle",
+					"c": "#000000",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.55
+				}
+			},
+			"origins": [
+				{
+					"c": "alb",
+					"w": 100,
+					"eth": {
+						"eur": 85,
+						"med": 15
+					}
+				}
+			]
+		},
+		"KOS": {
+			"name": "Kosovo",
+			"adj": "kosovar",
+			"confed": "UEFA",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#244AA5"
+				],
+				"e": {
+					"t": "map",
+					"c": "#D0A650",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.4
+				}
+			},
+			"origins": [
+				{
+					"c": "alb",
+					"w": 95,
+					"eth": {
+						"eur": 85,
+						"med": 15
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 5,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"GEO": {
+			"name": "Geórgia",
+			"adj": "georgiano",
+			"confed": "UEFA",
+			"flag": {
+				"p": "cross",
+				"c": [
+					"#FFFFFF",
+					"#FF0000"
+				]
+			},
+			"origins": [
+				{
+					"c": "ge",
+					"w": 100,
+					"eth": {
+						"eur": 60,
+						"med": 40
+					}
+				}
+			]
+		},
+		"RUS": {
+			"name": "Rússia",
+			"adj": "russo",
+			"confed": "UEFA",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFFFFF",
+					"#0039A6",
+					"#D52B1E"
+				]
+			},
+			"origins": [
+				{
+					"c": "east_slav",
+					"w": 97,
+					"eth": {
+						"nor": 50,
+						"eur": 50
+					}
+				},
+				{
+					"c": "ge",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				}
+			]
+		},
+		"BRA": {
+			"name": "Brasil",
+			"adj": "brasileiro",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "diamond",
+				"c": [
+					"#009B3A",
+					"#FEDF00",
+					"#002776"
+				]
+			},
+			"coef": 85,
+			"origins": [
+				{
+					"c": "br",
+					"w": 100,
+					"eth": {
+						"eur": 38,
+						"mix": 37,
+						"afr": 20,
+						"eas": 2,
+						"arb": 1,
+						"and": 2
+					}
+				}
+			],
+			"youth": 3.0,
+			"imports": {
+				"ARG": 10.0,
+				"URU": 10.0,
+				"COL": 8.0,
+				"PAR": 7.0,
+				"CHI": 4.0,
+				"ECU": 6.0,
+				"PER": 3.0,
+				"BOL": 2.0,
+				"VEN": 4.0,
+				"POR": 3.0,
+				"ESP": 1.0,
+				"ANG": 1.0,
+				"MEX": 1.0,
+				"CPV": 1.0,
+				"USA": 1.0,
+				"JPN": 1.0,
+				"CRC": 1.0,
+				"HON": 1.0,
+				"PAN": 1.0
+			},
+			"foreign": [
+				0.12,
+				0.08,
+				0.05,
+				0.03
+			],
+			"cities": [
+				[
+					"São Paulo",
+					5,
+					"Sudeste"
+				],
+				[
+					"Rio de Janeiro",
+					5,
+					"Sudeste"
+				],
+				[
+					"Belo Horizonte",
+					5,
+					"Sudeste"
+				],
+				[
+					"Porto Alegre",
+					5,
+					"Sul"
+				],
+				[
+					"Salvador",
+					5,
+					"Nordeste"
+				],
+				[
+					"Recife",
+					5,
+					"Nordeste"
+				],
+				[
+					"Fortaleza",
+					5,
+					"Nordeste"
+				],
+				[
+					"Curitiba",
+					5,
+					"Sul"
+				],
+				[
+					"Brasília",
+					4,
+					"Centro-Oeste"
+				],
+				[
+					"Goiânia",
+					4,
+					"Centro-Oeste"
+				],
+				[
+					"Belém",
+					4,
+					"Norte"
+				],
+				[
+					"Manaus",
+					4,
+					"Norte"
+				],
+				[
+					"Campinas",
+					4,
+					"Sudeste"
+				],
+				[
+					"Santos",
+					3,
+					"Sudeste"
+				],
+				[
+					"Florianópolis",
+					3,
+					"Sul"
+				],
+				[
+					"Natal",
+					3,
+					"Nordeste"
+				],
+				[
+					"Maceió",
+					3,
+					"Nordeste"
+				],
+				[
+					"João Pessoa",
+					3,
+					"Nordeste"
+				],
+				[
+					"Teresina",
+					3,
+					"Nordeste"
+				],
+				[
+					"São Luís",
+					3,
+					"Nordeste"
+				],
+				[
+					"Aracaju",
+					3,
+					"Nordeste"
+				],
+				[
+					"Cuiabá",
+					3,
+					"Centro-Oeste"
+				],
+				[
+					"Campo Grande",
+					3,
+					"Centro-Oeste"
+				],
+				[
+					"Vitória",
+					3,
+					"Sudeste"
+				],
+				[
+					"Juiz de Fora",
+					3,
+					"Sudeste"
+				],
+				[
+					"Ribeirão Preto",
+					3,
+					"Sudeste"
+				],
+				[
+					"Londrina",
+					3,
+					"Sul"
+				],
+				[
+					"Caxias do Sul",
+					3,
+					"Sul"
+				],
+				[
+					"Joinville",
+					3,
+					"Sul"
+				],
+				[
+					"Sorocaba",
+					3,
+					"Sudeste"
+				],
+				[
+					"Uberlândia",
+					3,
+					"Sudeste"
+				],
+				[
+					"Feira de Santana",
+					3,
+					"Nordeste"
+				],
+				[
+					"Campina Grande",
+					3,
+					"Nordeste"
+				],
+				[
+					"São José dos Campos",
+					3,
+					"Sudeste"
+				],
+				[
+					"Santo André",
+					3,
+					"Sudeste"
+				],
+				[
+					"Guarulhos",
+					3,
+					"Sudeste"
+				],
+				[
+					"Osasco",
+					3,
+					"Sudeste"
+				],
+				[
+					"Niterói",
+					3,
+					"Sudeste"
+				],
+				[
+					"Duque de Caxias",
+					3,
+					"Sudeste"
+				],
+				[
+					"Nova Iguaçu",
+					3,
+					"Sudeste"
+				],
+				[
+					"Criciúma",
+					2,
+					"Sul"
+				],
+				[
+					"Chapecó",
+					2,
+					"Sul"
+				],
+				[
+					"Pelotas",
+					2,
+					"Sul"
+				],
+				[
+					"Bragança Paulista",
+					2,
+					"Sudeste"
+				],
+				[
+					"Ponta Grossa",
+					2,
+					"Sul"
+				],
+				[
+					"Novo Hamburgo",
+					2,
+					"Sul"
+				],
+				[
+					"Volta Redonda",
+					2,
+					"Sudeste"
+				],
+				[
+					"Macaé",
+					2,
+					"Sudeste"
+				],
+				[
+					"Ipatinga",
+					2,
+					"Sudeste"
+				],
+				[
+					"Anápolis",
+					2,
+					"Centro-Oeste"
+				],
+				[
+					"Porto Velho",
+					2,
+					"Norte"
+				],
+				[
+					"Macapá",
+					2,
+					"Norte"
+				],
+				[
+					"Rio Branco",
+					2,
+					"Norte"
+				],
+				[
+					"Boa Vista",
+					2,
+					"Norte"
+				],
+				[
+					"Palmas",
+					2,
+					"Norte"
+				],
+				[
+					"Petrolina",
+					2,
+					"Nordeste"
+				],
+				[
+					"Mossoró",
+					2,
+					"Nordeste"
+				],
+				[
+					"Juazeiro do Norte",
+					2,
+					"Nordeste"
+				],
+				[
+					"Caruaru",
+					2,
+					"Nordeste"
+				],
+				[
+					"Arapiraca",
+					2,
+					"Nordeste"
+				],
+				[
+					"Santa Maria",
+					2,
+					"Sul"
+				],
+				[
+					"Passo Fundo",
+					2,
+					"Sul"
+				],
+				[
+					"Maringá",
+					2,
+					"Sul"
+				],
+				[
+					"Cascavel",
+					2,
+					"Sul"
+				],
+				[
+					"Piracicaba",
+					2,
+					"Sudeste"
+				],
+				[
+					"São Caetano do Sul",
+					2,
+					"Sudeste"
+				],
+				[
+					"Governador Valadares",
+					2,
+					"Sudeste"
+				],
+				[
+					"Montes Claros",
+					2,
+					"Sudeste"
+				],
+				[
+					"Uberaba",
+					2,
+					"Sudeste"
+				],
+				[
+					"Americana",
+					2,
+					"Sudeste"
+				],
+				[
+					"Limeira",
+					2,
+					"Sudeste"
+				],
+				[
+					"Araraquara",
+					2,
+					"Sudeste"
+				],
+				[
+					"Bauru",
+					2,
+					"Sudeste"
+				],
+				[
+					"Marília",
+					2,
+					"Sudeste"
+				],
+				[
+					"Presidente Prudente",
+					2,
+					"Sudeste"
+				],
+				[
+					"Franca",
+					2,
+					"Sudeste"
+				],
+				[
+					"Itabuna",
+					2,
+					"Nordeste"
+				],
+				[
+					"Vitória da Conquista",
+					2,
+					"Nordeste"
+				],
+				[
+					"Imperatriz",
+					2,
+					"Nordeste"
+				],
+				[
+					"Parnaíba",
+					2,
+					"Nordeste"
+				],
+				[
+					"Sobral",
+					2,
+					"Nordeste"
+				],
+				[
+					"Santarém",
+					2,
+					"Norte"
+				],
+				[
+					"Marabá",
+					2,
+					"Norte"
+				],
+				[
+					"Rondonópolis",
+					2,
+					"Centro-Oeste"
+				],
+				[
+					"Dourados",
+					2,
+					"Centro-Oeste"
+				],
+				[
+					"Rio Verde",
+					2,
+					"Centro-Oeste"
+				],
+				[
+					"Mirassol",
+					1,
+					"Sudeste"
+				],
+				[
+					"Crato",
+					1,
+					"Nordeste"
+				],
+				[
+					"Patos",
+					1,
+					"Nordeste"
+				],
+				[
+					"Serra Talhada",
+					1,
+					"Nordeste"
+				],
+				[
+					"Altamira",
+					1,
+					"Norte"
+				],
+				[
+					"Luziânia",
+					1,
+					"Centro-Oeste"
+				],
+				[
+					"Contagem",
+					3,
+					"Sudeste"
+				],
+				[
+					"São Bernardo do Campo",
+					3,
+					"Sudeste"
+				],
+				[
+					"Itu",
+					2,
+					"Sudeste"
+				],
+				[
+					"Novo Horizonte",
+					1,
+					"Sudeste"
+				],
+				[
+					"Tombos",
+					1,
+					"Sudeste"
+				],
+				[
+					"São João del-Rei",
+					2,
+					"Sudeste"
+				],
+				[
+					"Brusque",
+					2,
+					"Sul"
+				],
+				[
+					"Erechim",
+					2,
+					"Sul"
+				],
+				[
+					"Aparecida de Goiânia",
+					3,
+					"Centro-Oeste"
+				],
+				[
+					"Gama",
+					2,
+					"Centro-Oeste"
+				],
+				[
+					"Itabaiana",
+					2,
+					"Nordeste"
+				]
+			],
+			"lang": "pt_br"
+		},
+		"ARG": {
+			"name": "Argentina",
+			"adj": "argentino",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#74ACDF",
+					"#FFFFFF",
+					"#74ACDF"
+				],
+				"e": {
+					"t": "sun",
+					"c": "#F6B40E",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"coef": 82,
+			"origins": [
+				{
+					"c": "rio",
+					"w": 96,
+					"eth": {
+						"eur": 70,
+						"lat": 25,
+						"mix": 2,
+						"and": 3
+					}
+				},
+				{
+					"c": "latam",
+					"w": 2,
+					"eth": {
+						"lat": 1
+					}
+				},
+				{
+					"c": "arab",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				},
+				{
+					"c": "east_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 3.0,
+			"imports": {
+				"URU": 10.0,
+				"PAR": 10.0,
+				"COL": 6.0,
+				"CHI": 5.0,
+				"BOL": 3.0,
+				"PER": 3.0,
+				"VEN": 4.0,
+				"ECU": 3.0,
+				"BRA": 2.0,
+				"MEX": 1.0,
+				"CRC": 1.0,
+				"ESP": 1.0,
+				"ITA": 1.0
+			},
+			"foreign": [
+				0.14,
+				0.1
+			],
+			"cities": [
+				[
+					"Buenos Aires",
+					5
+				],
+				[
+					"Córdoba",
+					5
+				],
+				[
+					"Rosario",
+					5
+				],
+				[
+					"Mendoza",
+					4
+				],
+				[
+					"La Plata",
+					4
+				],
+				[
+					"Tucumán",
+					4
+				],
+				[
+					"Mar del Plata",
+					3
+				],
+				[
+					"Salta",
+					3
+				],
+				[
+					"Santa Fe",
+					3
+				],
+				[
+					"San Juan",
+					3
+				],
+				[
+					"Resistencia",
+					3
+				],
+				[
+					"Santiago del Estero",
+					3
+				],
+				[
+					"Corrientes",
+					3
+				],
+				[
+					"Bahía Blanca",
+					3
+				],
+				[
+					"Paraná",
+					3
+				],
+				[
+					"Neuquén",
+					3
+				],
+				[
+					"Posadas",
+					2
+				],
+				[
+					"San Luis",
+					2
+				],
+				[
+					"Jujuy",
+					2
+				],
+				[
+					"Río Cuarto",
+					2
+				],
+				[
+					"Rafaela",
+					2
+				],
+				[
+					"Junín",
+					2
+				],
+				[
+					"Pergamino",
+					2
+				],
+				[
+					"Tandil",
+					2
+				],
+				[
+					"Olavarría",
+					2
+				],
+				[
+					"Mendoza Sur",
+					1
+				],
+				[
+					"Villa María",
+					2
+				],
+				[
+					"San Nicolás",
+					2
+				],
+				[
+					"Campana",
+					1
+				],
+				[
+					"Zárate",
+					1
+				],
+				[
+					"Sarandí",
+					1
+				],
+				[
+					"Lanús",
+					3
+				],
+				[
+					"Avellaneda",
+					3
+				],
+				[
+					"Quilmes",
+					3
+				],
+				[
+					"Banfield",
+					2
+				],
+				[
+					"Lomas de Zamora",
+					3
+				],
+				[
+					"Temperley",
+					2
+				],
+				[
+					"Florencio Varela",
+					2
+				],
+				[
+					"San Martín",
+					2
+				],
+				[
+					"Liniers",
+					2
+				],
+				[
+					"Victoria",
+					2
+				],
+				[
+					"San Miguel de Tucumán",
+					2
+				]
+			],
+			"lang": "es"
+		},
+		"URU": {
+			"name": "Uruguai",
+			"adj": "uruguaio",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "stripes",
+				"c": [
+					"#FFFFFF",
+					"#0038A8"
+				],
+				"n": 9,
+				"k": {
+					"c": "#FFFFFF",
+					"w": 0.4,
+					"h": 0.56,
+					"e": {
+						"t": "sun",
+						"c": "#FCD116",
+						"x": 0.5,
+						"y": 0.5,
+						"s": 0.7
+					}
+				}
+			},
+			"coef": 60,
+			"origins": [
+				{
+					"c": "rio",
+					"w": 97,
+					"eth": {
+						"eur": 80,
+						"mix": 8,
+						"afr": 6,
+						"lat": 6
+					}
+				},
+				{
+					"c": "latam",
+					"w": 3,
+					"eth": {
+						"lat": 1
+					}
+				}
+			],
+			"youth": 2.5,
+			"imports": {
+				"ARG": 12.0,
+				"BRA": 4.0,
+				"PAR": 5.0,
+				"COL": 4.0,
+				"CHI": 2.0,
+				"VEN": 3.0,
+				"BOL": 2.0,
+				"PER": 2.0,
+				"ECU": 2.0,
+				"ESP": 1.0
+			},
+			"foreign": [
+				0.15
+			],
+			"cities": [
+				[
+					"Montevideo",
+					5
+				],
+				[
+					"Salto",
+					3
+				],
+				[
+					"Paysandú",
+					3
+				],
+				[
+					"Las Piedras",
+					3
+				],
+				[
+					"Rivera",
+					3
+				],
+				[
+					"Maldonado",
+					3
+				],
+				[
+					"Tacuarembó",
+					2
+				],
+				[
+					"Melo",
+					2
+				],
+				[
+					"Mercedes",
+					2
+				],
+				[
+					"Minas",
+					2
+				],
+				[
+					"Florida",
+					2
+				],
+				[
+					"San José de Mayo",
+					2
+				],
+				[
+					"Colonia",
+					2
+				],
+				[
+					"Durazno",
+					2
+				],
+				[
+					"Artigas",
+					2
+				],
+				[
+					"Treinta y Tres",
+					1
+				],
+				[
+					"Rocha",
+					2
+				],
+				[
+					"Canelones",
+					2
+				],
+				[
+					"Fray Bentos",
+					1
+				]
+			],
+			"lang": "es"
+		},
+		"COL": {
+			"name": "Colômbia",
+			"adj": "colombiano",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FCD116",
+					"#003893",
+					"#CE1126"
+				],
+				"w": [
+					2,
+					1,
+					1
+				]
+			},
+			"coef": 58,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 98,
+					"eth": {
+						"lat": 55,
+						"mix": 20,
+						"afr": 20,
+						"eur": 5
+					}
+				},
+				{
+					"c": "rio",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"ARG": 6.0,
+				"URU": 3.0,
+				"VEN": 6.0,
+				"ECU": 4.0,
+				"PAR": 3.0,
+				"PER": 3.0,
+				"CHI": 2.0,
+				"BOL": 2.0,
+				"BRA": 2.0,
+				"PAN": 3.0,
+				"CRC": 2.0,
+				"HON": 1.0,
+				"MEX": 1.0,
+				"ESP": 1.0
+			},
+			"foreign": [
+				0.12
+			],
+			"cities": [
+				[
+					"Bogotá",
+					5
+				],
+				[
+					"Medellín",
+					5
+				],
+				[
+					"Cali",
+					5
+				],
+				[
+					"Barranquilla",
+					4
+				],
+				[
+					"Cartagena",
+					4
+				],
+				[
+					"Bucaramanga",
+					3
+				],
+				[
+					"Cúcuta",
+					3
+				],
+				[
+					"Pereira",
+					3
+				],
+				[
+					"Manizales",
+					3
+				],
+				[
+					"Ibagué",
+					3
+				],
+				[
+					"Santa Marta",
+					3
+				],
+				[
+					"Pasto",
+					3
+				],
+				[
+					"Neiva",
+					2
+				],
+				[
+					"Villavicencio",
+					2
+				],
+				[
+					"Armenia",
+					2
+				],
+				[
+					"Montería",
+					2
+				],
+				[
+					"Valledupar",
+					2
+				],
+				[
+					"Tunja",
+					2
+				],
+				[
+					"Popayán",
+					2
+				],
+				[
+					"Envigado",
+					2
+				],
+				[
+					"Itagüí",
+					2
+				],
+				[
+					"Palmira",
+					2
+				],
+				[
+					"Rionegro",
+					1
+				],
+				[
+					"Zipaquirá",
+					1
+				]
+			],
+			"lang": "es"
+		},
+		"CHI": {
+			"name": "Chile",
+			"adj": "chileno",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFFFFF",
+					"#D52B1E"
+				],
+				"k": {
+					"c": "#0039A6",
+					"w": 0.34,
+					"h": 0.5,
+					"e": {
+						"t": "star",
+						"c": "#FFFFFF",
+						"x": 0.5,
+						"y": 0.5,
+						"s": 0.5
+					}
+				}
+			},
+			"coef": 50,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 97,
+					"eth": {
+						"lat": 70,
+						"eur": 25,
+						"and": 5
+					}
+				},
+				{
+					"c": "rio",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "arab",
+					"w": 1,
+					"eth": {
+						"arb": 1
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"ARG": 12.0,
+				"URU": 5.0,
+				"PAR": 4.0,
+				"COL": 4.0,
+				"VEN": 4.0,
+				"PER": 2.0,
+				"BOL": 2.0,
+				"ECU": 2.0,
+				"BRA": 2.0,
+				"ESP": 1.0,
+				"USA": 1.0
+			},
+			"foreign": [
+				0.2
+			],
+			"cities": [
+				[
+					"Santiago",
+					5
+				],
+				[
+					"Valparaíso",
+					4
+				],
+				[
+					"Concepción",
+					4
+				],
+				[
+					"Viña del Mar",
+					3
+				],
+				[
+					"Antofagasta",
+					3
+				],
+				[
+					"Temuco",
+					3
+				],
+				[
+					"Rancagua",
+					3
+				],
+				[
+					"Talca",
+					3
+				],
+				[
+					"Arica",
+					3
+				],
+				[
+					"Iquique",
+					3
+				],
+				[
+					"La Serena",
+					3
+				],
+				[
+					"Coquimbo",
+					2
+				],
+				[
+					"Puerto Montt",
+					3
+				],
+				[
+					"Chillán",
+					2
+				],
+				[
+					"Osorno",
+					2
+				],
+				[
+					"Valdivia",
+					2
+				],
+				[
+					"Calama",
+					2
+				],
+				[
+					"Copiapó",
+					2
+				],
+				[
+					"Curicó",
+					2
+				],
+				[
+					"Los Ángeles",
+					2
+				],
+				[
+					"Quillota",
+					2
+				],
+				[
+					"San Felipe",
+					1
+				],
+				[
+					"La Calera",
+					1
+				],
+				[
+					"Talcahuano",
+					2
+				]
+			],
+			"lang": "es"
+		},
+		"ECU": {
+			"name": "Equador",
+			"adj": "equatoriano",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFD100",
+					"#0072CE",
+					"#EF3340"
+				],
+				"w": [
+					2,
+					1,
+					1
+				],
+				"e": {
+					"t": "shield",
+					"c": "#6B4E16",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"coef": 55,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 100,
+					"eth": {
+						"afr": 35,
+						"lat": 40,
+						"mix": 5,
+						"and": 20
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"ARG": 8.0,
+				"COL": 6.0,
+				"URU": 5.0,
+				"VEN": 4.0,
+				"PAR": 3.0,
+				"PER": 2.0,
+				"CHI": 2.0,
+				"BOL": 2.0,
+				"BRA": 2.0,
+				"PAN": 1.0,
+				"CRC": 1.0,
+				"ESP": 1.0
+			},
+			"foreign": [
+				0.15
+			],
+			"cities": [
+				[
+					"Guayaquil",
+					5
+				],
+				[
+					"Quito",
+					5
+				],
+				[
+					"Cuenca",
+					4
+				],
+				[
+					"Santo Domingo",
+					3
+				],
+				[
+					"Machala",
+					3
+				],
+				[
+					"Manta",
+					3
+				],
+				[
+					"Portoviejo",
+					3
+				],
+				[
+					"Ambato",
+					3
+				],
+				[
+					"Riobamba",
+					2
+				],
+				[
+					"Loja",
+					2
+				],
+				[
+					"Esmeraldas",
+					2
+				],
+				[
+					"Ibarra",
+					2
+				],
+				[
+					"Latacunga",
+					2
+				],
+				[
+					"Babahoyo",
+					2
+				],
+				[
+					"Quevedo",
+					2
+				],
+				[
+					"Milagro",
+					2
+				],
+				[
+					"Sangolquí",
+					2
+				],
+				[
+					"Macas",
+					1
+				]
+			],
+			"lang": "es"
+		},
+		"PER": {
+			"name": "Peru",
+			"adj": "peruano",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#D91023",
+					"#FFFFFF",
+					"#D91023"
+				]
+			},
+			"coef": 42,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 99,
+					"eth": {
+						"lat": 50,
+						"eur": 5,
+						"afr": 8,
+						"eas": 2,
+						"and": 35
+					}
+				},
+				{
+					"c": "jp",
+					"w": 1,
+					"eth": {
+						"eas": 1
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"ARG": 10.0,
+				"URU": 6.0,
+				"COL": 5.0,
+				"VEN": 4.0,
+				"PAR": 3.0,
+				"CHI": 2.0,
+				"BOL": 2.0,
+				"ECU": 2.0,
+				"BRA": 2.0,
+				"ESP": 1.0,
+				"PAN": 1.0
+			},
+			"foreign": [
+				0.18
+			],
+			"cities": [
+				[
+					"Lima",
+					5
+				],
+				[
+					"Arequipa",
+					4
+				],
+				[
+					"Trujillo",
+					4
+				],
+				[
+					"Chiclayo",
+					4
+				],
+				[
+					"Piura",
+					3
+				],
+				[
+					"Cusco",
+					3
+				],
+				[
+					"Huancayo",
+					3
+				],
+				[
+					"Iquitos",
+					3
+				],
+				[
+					"Chimbote",
+					3
+				],
+				[
+					"Tacna",
+					3
+				],
+				[
+					"Ica",
+					2
+				],
+				[
+					"Juliaca",
+					2
+				],
+				[
+					"Puno",
+					2
+				],
+				[
+					"Cajamarca",
+					2
+				],
+				[
+					"Pucallpa",
+					2
+				],
+				[
+					"Huánuco",
+					2
+				],
+				[
+					"Ayacucho",
+					2
+				],
+				[
+					"Moquegua",
+					1
+				],
+				[
+					"Tumbes",
+					1
+				],
+				[
+					"Callao",
+					3
+				]
+			],
+			"lang": "es"
+		},
+		"PAR": {
+			"name": "Paraguai",
+			"adj": "paraguaio",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#D52B1E",
+					"#FFFFFF",
+					"#0038A8"
+				],
+				"e": {
+					"t": "disc",
+					"c": "#FFFFFF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.22,
+					"c2": "#0B7A3E"
+				}
+			},
+			"coef": 52,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 98,
+					"eth": {
+						"lat": 80,
+						"eur": 15,
+						"and": 5
+					}
+				},
+				{
+					"c": "rio",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"ARG": 12.0,
+				"URU": 4.0,
+				"BRA": 3.0,
+				"COL": 3.0,
+				"BOL": 3.0,
+				"VEN": 2.0,
+				"CHI": 1.0,
+				"PER": 1.0,
+				"ECU": 1.0
+			},
+			"foreign": [
+				0.12
+			],
+			"cities": [
+				[
+					"Asunción",
+					5
+				],
+				[
+					"Ciudad del Este",
+					4
+				],
+				[
+					"San Lorenzo",
+					3
+				],
+				[
+					"Luque",
+					3
+				],
+				[
+					"Capiatá",
+					3
+				],
+				[
+					"Lambaré",
+					3
+				],
+				[
+					"Fernando de la Mora",
+					3
+				],
+				[
+					"Encarnación",
+					3
+				],
+				[
+					"Pedro Juan Caballero",
+					2
+				],
+				[
+					"Caaguazú",
+					2
+				],
+				[
+					"Coronel Oviedo",
+					2
+				],
+				[
+					"Concepción",
+					2
+				],
+				[
+					"Villarrica",
+					2
+				],
+				[
+					"Itauguá",
+					2
+				],
+				[
+					"Pilar",
+					1
+				],
+				[
+					"Itá",
+					1
+				]
+			],
+			"lang": "es"
+		},
+		"BOL": {
+			"name": "Bolívia",
+			"adj": "boliviano",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#D52B1E",
+					"#F9E300",
+					"#007934"
+				]
+			},
+			"coef": 35,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 100,
+					"eth": {
+						"lat": 40,
+						"eur": 3,
+						"afr": 2,
+						"and": 55
+					}
+				}
+			],
+			"imports": {
+				"ARG": 10.0,
+				"BRA": 5.0,
+				"URU": 4.0,
+				"PAR": 4.0,
+				"COL": 4.0,
+				"VEN": 3.0,
+				"PER": 3.0,
+				"CHI": 2.0,
+				"ECU": 2.0,
+				"ESP": 1.0
+			},
+			"foreign": [
+				0.18
+			],
+			"cities": [
+				[
+					"La Paz",
+					5
+				],
+				[
+					"Santa Cruz de la Sierra",
+					5
+				],
+				[
+					"Cochabamba",
+					4
+				],
+				[
+					"El Alto",
+					4
+				],
+				[
+					"Sucre",
+					3
+				],
+				[
+					"Oruro",
+					3
+				],
+				[
+					"Tarija",
+					3
+				],
+				[
+					"Potosí",
+					3
+				],
+				[
+					"Montero",
+					2
+				],
+				[
+					"Trinidad",
+					2
+				],
+				[
+					"Quillacollo",
+					2
+				],
+				[
+					"Riberalta",
+					1
+				],
+				[
+					"Cobija",
+					1
+				],
+				[
+					"Yacuiba",
+					1
+				]
+			],
+			"lang": "es"
+		},
+		"VEN": {
+			"name": "Venezuela",
+			"adj": "venezuelano",
+			"confed": "CONMEBOL",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#FFCC00",
+					"#00247D",
+					"#CF142B"
+				],
+				"e": {
+					"t": "stars_arc",
+					"c": "#FFFFFF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.36
+				}
+			},
+			"coef": 35,
+			"origins": [
+				{
+					"c": "latam",
+					"w": 100,
+					"eth": {
+						"lat": 55,
+						"mix": 20,
+						"afr": 15,
+						"eur": 10
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"COL": 12.0,
+				"ARG": 5.0,
+				"URU": 3.0,
+				"PAR": 2.0,
+				"BRA": 2.0,
+				"PER": 2.0,
+				"ECU": 2.0,
+				"CHI": 1.0,
+				"BOL": 1.0,
+				"PAN": 1.0,
+				"ESP": 1.0,
+				"POR": 1.0
+			},
+			"foreign": [
+				0.1
+			],
+			"cities": [
+				[
+					"Caracas",
+					5
+				],
+				[
+					"Maracaibo",
+					5
+				],
+				[
+					"Valencia",
+					4
+				],
+				[
+					"Barquisimeto",
+					4
+				],
+				[
+					"Maracay",
+					4
+				],
+				[
+					"Ciudad Guayana",
+					3
+				],
+				[
+					"Barcelona",
+					3
+				],
+				[
+					"Maturín",
+					3
+				],
+				[
+					"Cumaná",
+					3
+				],
+				[
+					"Mérida",
+					3
+				],
+				[
+					"San Cristóbal",
+					3
+				],
+				[
+					"Puerto la Cruz",
+					2
+				],
+				[
+					"Barinas",
+					2
+				],
+				[
+					"Acarigua",
+					2
+				],
+				[
+					"Cabimas",
+					2
+				],
+				[
+					"Puerto Cabello",
+					2
+				],
+				[
+					"El Tigre",
+					1
+				],
+				[
+					"Guanare",
+					1
+				]
+			],
+			"lang": "es"
+		},
+		"MEX": {
+			"name": "México",
+			"adj": "mexicano",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#006847",
+					"#FFFFFF",
+					"#CE1126"
+				],
+				"e": {
+					"t": "eagle",
+					"c": "#8C5A2B",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"coef": 70,
+			"origins": [
+				{
+					"c": "mx",
+					"w": 100,
+					"eth": {
+						"lat": 80,
+						"eur": 12,
+						"afr": 2,
+						"eas": 1,
+						"and": 5
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"ARG": 14.0,
+				"URU": 6.0,
+				"COL": 8.0,
+				"PAR": 4.0,
+				"CHI": 4.0,
+				"ECU": 4.0,
+				"VEN": 3.0,
+				"PER": 2.0,
+				"BOL": 1.0,
+				"BRA": 4.0,
+				"USA": 3.0,
+				"CRC": 2.0,
+				"HON": 2.0,
+				"PAN": 2.0,
+				"JAM": 1.0,
+				"ESP": 2.0,
+				"POR": 1.0,
+				"FRA": 1.0,
+				"NED": 1.0,
+				"BEL": 1.0,
+				"NGA": 1.0,
+				"GHA": 1.0,
+				"CMR": 1.0,
+				"CIV": 1.0
+			},
+			"foreign": [
+				0.36
+			],
+			"cities": [
+				[
+					"Ciudad de México",
+					5
+				],
+				[
+					"Guadalajara",
+					5
+				],
+				[
+					"Monterrey",
+					5
+				],
+				[
+					"Puebla",
+					4
+				],
+				[
+					"Tijuana",
+					4
+				],
+				[
+					"León",
+					4
+				],
+				[
+					"Toluca",
+					3
+				],
+				[
+					"Querétaro",
+					3
+				],
+				[
+					"San Luis Potosí",
+					3
+				],
+				[
+					"Mérida",
+					3
+				],
+				[
+					"Aguascalientes",
+					3
+				],
+				[
+					"Chihuahua",
+					3
+				],
+				[
+					"Torreón",
+					3
+				],
+				[
+					"Morelia",
+					3
+				],
+				[
+					"Veracruz",
+					3
+				],
+				[
+					"Pachuca",
+					3
+				],
+				[
+					"Mazatlán",
+					2
+				],
+				[
+					"Cancún",
+					2
+				],
+				[
+					"Tuxtla Gutiérrez",
+					2
+				],
+				[
+					"Culiacán",
+					2
+				],
+				[
+					"Oaxaca",
+					2
+				],
+				[
+					"Irapuato",
+					2
+				],
+				[
+					"Celaya",
+					2
+				],
+				[
+					"Zacatecas",
+					2
+				],
+				[
+					"San Nicolás de los Garza",
+					4
+				],
+				[
+					"Ciudad Juárez",
+					2
+				]
+			],
+			"lang": "es"
+		},
+		"USA": {
+			"name": "Estados Unidos",
+			"adj": "norte-americano",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "stripes",
+				"c": [
+					"#B22234",
+					"#FFFFFF"
+				],
+				"n": 13,
+				"k": {
+					"c": "#3C3B6E",
+					"w": 0.4,
+					"h": 0.54,
+					"e": {
+						"t": "stars_grid",
+						"c": "#FFFFFF",
+						"x": 0.5,
+						"y": 0.5,
+						"s": 0.8
+					}
+				}
+			},
+			"coef": 65,
+			"origins": [
+				{
+					"c": "en",
+					"w": 72,
+					"eth": {
+						"nor": 45,
+						"eur": 25,
+						"afr": 20,
+						"mix": 10
+					}
+				},
+				{
+					"c": "mx",
+					"w": 18,
+					"eth": {
+						"lat": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 4,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "es",
+					"w": 2,
+					"eth": {
+						"lat": 1
+					}
+				},
+				{
+					"c": "kr",
+					"w": 1,
+					"eth": {
+						"eas": 1
+					}
+				},
+				{
+					"c": "jp",
+					"w": 1,
+					"eth": {
+						"eas": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "de",
+					"w": 1,
+					"eth": {
+						"nor": 1
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"CAN": 6.0,
+				"MEX": 6.0,
+				"ARG": 6.0,
+				"COL": 5.0,
+				"URU": 4.0,
+				"PAR": 3.0,
+				"VEN": 4.0,
+				"ECU": 3.0,
+				"CHI": 2.0,
+				"PER": 2.0,
+				"BRA": 5.0,
+				"CRC": 3.0,
+				"HON": 3.0,
+				"JAM": 3.0,
+				"PAN": 2.0,
+				"ENG": 4.0,
+				"SCO": 2.0,
+				"IRL": 1.0,
+				"WAL": 1.0,
+				"FRA": 3.0,
+				"ESP": 3.0,
+				"GER": 3.0,
+				"ITA": 2.0,
+				"POR": 2.0,
+				"NED": 2.0,
+				"BEL": 1.0,
+				"SUI": 1.0,
+				"AUT": 1.0,
+				"DEN": 2.0,
+				"NOR": 2.0,
+				"SWE": 2.0,
+				"ISL": 1.0,
+				"FIN": 1.0,
+				"POL": 1.0,
+				"SRB": 1.0,
+				"CRO": 1.0,
+				"BIH": 1.0,
+				"GRE": 1.0,
+				"GHA": 3.0,
+				"NGA": 2.0,
+				"CIV": 2.0,
+				"CMR": 2.0,
+				"SEN": 2.0,
+				"JPN": 2.0,
+				"KOR": 2.0,
+				"AUS": 2.0,
+				"NZL": 1.0
+			},
+			"foreign": [
+				0.45
+			],
+			"cities": [
+				[
+					"Los Angeles",
+					5
+				],
+				[
+					"New York",
+					5
+				],
+				[
+					"Chicago",
+					5
+				],
+				[
+					"Houston",
+					5
+				],
+				[
+					"Miami",
+					5
+				],
+				[
+					"Atlanta",
+					4
+				],
+				[
+					"Seattle",
+					4
+				],
+				[
+					"Philadelphia",
+					4
+				],
+				[
+					"Dallas",
+					4
+				],
+				[
+					"Boston",
+					4
+				],
+				[
+					"Washington",
+					4
+				],
+				[
+					"Denver",
+					4
+				],
+				[
+					"Portland",
+					3
+				],
+				[
+					"Kansas City",
+					3
+				],
+				[
+					"Columbus",
+					3
+				],
+				[
+					"Cincinnati",
+					3
+				],
+				[
+					"Nashville",
+					3
+				],
+				[
+					"Charlotte",
+					3
+				],
+				[
+					"Orlando",
+					3
+				],
+				[
+					"Minneapolis",
+					3
+				],
+				[
+					"Salt Lake City",
+					3
+				],
+				[
+					"San Jose",
+					3
+				],
+				[
+					"Austin",
+					3
+				],
+				[
+					"St. Louis",
+					3
+				],
+				[
+					"San Diego",
+					3
+				],
+				[
+					"Detroit",
+					3
+				],
+				[
+					"Phoenix",
+					3
+				],
+				[
+					"Pittsburgh",
+					2
+				],
+				[
+					"Sacramento",
+					2
+				],
+				[
+					"Tampa",
+					2
+				],
+				[
+					"Indianapolis",
+					2
+				],
+				[
+					"Louisville",
+					2
+				],
+				[
+					"Harrison",
+					3
+				],
+				[
+					"Saint Paul",
+					2
+				],
+				[
+					"Sandy",
+					2
+				],
+				[
+					"Vancouver",
+					3
+				]
+			],
+			"lang": "en"
+		},
+		"CAN": {
+			"name": "Canadá",
+			"adj": "canadense",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#FF0000",
+					"#FFFFFF",
+					"#FF0000"
+				],
+				"w": [
+					1,
+					2,
+					1
+				],
+				"e": {
+					"t": "leaf",
+					"c": "#FF0000",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.4
+				}
+			},
+			"origins": [
+				{
+					"c": "en",
+					"w": 70,
+					"eth": {
+						"nor": 50,
+						"eur": 25,
+						"afr": 15,
+						"mix": 10
+					}
+				},
+				{
+					"c": "fr",
+					"w": 15,
+					"eth": {
+						"eur": 90,
+						"afr": 10
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 6,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_fr",
+					"w": 4,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 2,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "pt",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "east_slav",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "kr",
+					"w": 1,
+					"eth": {
+						"eas": 1
+					}
+				}
+			]
+		},
+		"CRC": {
+			"name": "Costa Rica",
+			"adj": "costarriquenho",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#002B7F",
+					"#FFFFFF",
+					"#CE1126",
+					"#FFFFFF",
+					"#002B7F"
+				],
+				"w": [
+					1,
+					1,
+					2,
+					1,
+					1
+				]
+			},
+			"origins": [
+				{
+					"c": "latam",
+					"w": 100,
+					"eth": {
+						"lat": 70,
+						"eur": 20,
+						"afr": 10
+					}
+				}
+			]
+		},
+		"JAM": {
+			"name": "Jamaica",
+			"adj": "jamaicano",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "saltire",
+				"c": [
+					"#000000",
+					"#FED100",
+					"#009B3A",
+					"#000000"
+				]
+			},
+			"origins": [
+				{
+					"c": "en",
+					"w": 100,
+					"eth": {
+						"afr": 90,
+						"mix": 10
+					}
+				}
+			]
+		},
+		"HON": {
+			"name": "Honduras",
+			"adj": "hondurenho",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#0073CF",
+					"#FFFFFF",
+					"#0073CF"
+				],
+				"e": {
+					"t": "stars_grid",
+					"c": "#0073CF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"origins": [
+				{
+					"c": "latam",
+					"w": 100,
+					"eth": {
+						"lat": 60,
+						"afr": 30,
+						"mix": 10
+					}
+				}
+			]
+		},
+		"PAN": {
+			"name": "Panamá",
+			"adj": "panamenho",
+			"confed": "CONCACAF",
+			"flag": {
+				"p": "quarters",
+				"c": [
+					"#FFFFFF",
+					"#DA121A",
+					"#005293",
+					"#FFFFFF"
+				]
+			},
+			"origins": [
+				{
+					"c": "latam",
+					"w": 100,
+					"eth": {
+						"afr": 45,
+						"mix": 35,
+						"lat": 20
+					}
+				}
+			]
+		},
+		"EGY": {
+			"name": "Egito",
+			"adj": "egípcio",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#CE1126",
+					"#FFFFFF",
+					"#000000"
+				],
+				"e": {
+					"t": "eagle",
+					"c": "#C09300",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.26
+				}
+			},
+			"coef": 65,
+			"origins": [
+				{
+					"c": "arab",
+					"w": 100,
+					"eth": {
+						"arb": 90,
+						"afr": 10
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"TUN": 3.0,
+				"MAR": 3.0,
+				"ALG": 2.0,
+				"NGA": 3.0,
+				"GHA": 3.0,
+				"CIV": 2.0,
+				"CMR": 2.0,
+				"SEN": 2.0,
+				"MLI": 3.0,
+				"BFA": 2.0,
+				"GUI": 1.0,
+				"COD": 2.0,
+				"ANG": 1.0,
+				"RSA": 1.0,
+				"BRA": 1.0
+			},
+			"foreign": [
+				0.1
+			],
+			"cities": [
+				[
+					"Cairo",
+					5
+				],
+				[
+					"Alexandria",
+					5
+				],
+				[
+					"Giza",
+					4
+				],
+				[
+					"Port Said",
+					3
+				],
+				[
+					"Suez",
+					3
+				],
+				[
+					"Ismailia",
+					3
+				],
+				[
+					"Mansoura",
+					3
+				],
+				[
+					"Tanta",
+					3
+				],
+				[
+					"Asyut",
+					3
+				],
+				[
+					"Zagazig",
+					2
+				],
+				[
+					"Faiyum",
+					2
+				],
+				[
+					"Damanhur",
+					2
+				],
+				[
+					"Aswan",
+					2
+				],
+				[
+					"Luxor",
+					2
+				],
+				[
+					"Mahalla",
+					2
+				],
+				[
+					"Minya",
+					2
+				],
+				[
+					"Beni Suef",
+					2
+				],
+				[
+					"Sohag",
+					1
+				]
+			],
+			"lang": "ar"
+		},
+		"MAR": {
+			"name": "Marrocos",
+			"adj": "marroquino",
+			"confed": "CAF",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#C1272D"
+				],
+				"e": {
+					"t": "star_o",
+					"c": "#006233",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.4
+				}
+			},
+			"coef": 62,
+			"origins": [
+				{
+					"c": "maghreb",
+					"w": 98,
+					"eth": {
+						"arb": 95,
+						"afr": 5
+					}
+				},
+				{
+					"c": "fr",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "es",
+					"w": 1,
+					"eth": {
+						"eur": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"CIV": 3.0,
+				"SEN": 3.0,
+				"MLI": 3.0,
+				"GUI": 3.0,
+				"BFA": 3.0,
+				"CMR": 2.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"COD": 3.0,
+				"GAB": 1.0,
+				"ALG": 1.0,
+				"TUN": 1.0,
+				"EGY": 1.0,
+				"BRA": 1.0
+			},
+			"foreign": [
+				0.12
+			],
+			"cities": [
+				[
+					"Casablanca",
+					5
+				],
+				[
+					"Rabat",
+					5
+				],
+				[
+					"Fès",
+					4
+				],
+				[
+					"Marrakech",
+					4
+				],
+				[
+					"Tanger",
+					4
+				],
+				[
+					"Agadir",
+					3
+				],
+				[
+					"Meknès",
+					3
+				],
+				[
+					"Oujda",
+					3
+				],
+				[
+					"Kénitra",
+					3
+				],
+				[
+					"Tétouan",
+					3
+				],
+				[
+					"Safi",
+					2
+				],
+				[
+					"El Jadida",
+					2
+				],
+				[
+					"Nador",
+					2
+				],
+				[
+					"Béni Mellal",
+					2
+				],
+				[
+					"Khouribga",
+					2
+				],
+				[
+					"Berkane",
+					2
+				],
+				[
+					"Settat",
+					1
+				],
+				[
+					"Laâyoune",
+					1
+				]
+			],
+			"lang": "mg"
+		},
+		"TUN": {
+			"name": "Tunísia",
+			"adj": "tunisiano",
+			"confed": "CAF",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#E70013"
+				],
+				"e": {
+					"t": "disc",
+					"c": "#FFFFFF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.5,
+					"c2": "#E70013"
+				}
+			},
+			"coef": 55,
+			"origins": [
+				{
+					"c": "maghreb",
+					"w": 100,
+					"eth": {
+						"arb": 95,
+						"afr": 5
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"ALG": 4.0,
+				"MAR": 2.0,
+				"EGY": 1.0,
+				"CIV": 3.0,
+				"SEN": 2.0,
+				"MLI": 3.0,
+				"CMR": 3.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"BFA": 2.0,
+				"GUI": 2.0,
+				"COD": 2.0,
+				"BRA": 1.0
+			},
+			"foreign": [
+				0.14
+			],
+			"cities": [
+				[
+					"Tunis",
+					5
+				],
+				[
+					"Sfax",
+					4
+				],
+				[
+					"Sousse",
+					4
+				],
+				[
+					"Kairouan",
+					3
+				],
+				[
+					"Bizerte",
+					3
+				],
+				[
+					"Gabès",
+					3
+				],
+				[
+					"Ariana",
+					3
+				],
+				[
+					"Gafsa",
+					2
+				],
+				[
+					"Monastir",
+					2
+				],
+				[
+					"Ben Arous",
+					2
+				],
+				[
+					"Kasserine",
+					2
+				],
+				[
+					"Médenine",
+					2
+				],
+				[
+					"Nabeul",
+					2
+				],
+				[
+					"Béja",
+					2
+				],
+				[
+					"Métlaoui",
+					1
+				],
+				[
+					"Hammam-Lif",
+					1
+				]
+			],
+			"lang": "mg"
+		},
+		"RSA": {
+			"name": "África do Sul",
+			"adj": "sul-africano",
+			"confed": "CAF",
+			"flag": {
+				"p": "pall",
+				"c": [
+					"#E03C31",
+					"#001489",
+					"#007749",
+					"#FFFFFF",
+					"#FFB81C",
+					"#000000"
+				]
+			},
+			"coef": 50,
+			"origins": [
+				{
+					"c": "rsa",
+					"w": 90,
+					"eth": {
+						"afr": 80,
+						"mix": 10,
+						"nor": 8,
+						"eur": 2
+					}
+				},
+				{
+					"c": "en",
+					"w": 6,
+					"eth": {
+						"nor": 90,
+						"eur": 10
+					}
+				},
+				{
+					"c": "lusoaf",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				}
+			],
+			"imports": {
+				"ZIM": 3.0,
+				"MOZ": 3.0,
+				"ANG": 2.0,
+				"COD": 3.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"CMR": 1.0,
+				"CIV": 1.0,
+				"MLI": 1.0,
+				"BRA": 1.0,
+				"ARG": 1.0,
+				"COL": 1.0
+			},
+			"foreign": [
+				0.2
+			],
+			"cities": [
+				[
+					"Johannesburg",
+					5
+				],
+				[
+					"Cape Town",
+					5
+				],
+				[
+					"Durban",
+					5
+				],
+				[
+					"Pretoria",
+					5
+				],
+				[
+					"Port Elizabeth",
+					4
+				],
+				[
+					"Bloemfontein",
+					3
+				],
+				[
+					"East London",
+					3
+				],
+				[
+					"Polokwane",
+					3
+				],
+				[
+					"Nelspruit",
+					3
+				],
+				[
+					"Kimberley",
+					2
+				],
+				[
+					"Rustenburg",
+					2
+				],
+				[
+					"Pietermaritzburg",
+					2
+				],
+				[
+					"Soweto",
+					4
+				],
+				[
+					"Tembisa",
+					2
+				],
+				[
+					"Witbank",
+					2
+				],
+				[
+					"Sekhukhune",
+					1
+				],
+				[
+					"Stellenbosch",
+					2
+				]
+			],
+			"lang": "en_af"
+		},
+		"NGA": {
+			"name": "Nigéria",
+			"adj": "nigeriano",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#008751",
+					"#FFFFFF",
+					"#008751"
+				]
+			},
+			"coef": 40,
+			"origins": [
+				{
+					"c": "waf_en",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"GHA": 5.0,
+				"CMR": 3.0,
+				"CIV": 1.0,
+				"SEN": 1.0
+			},
+			"foreign": [
+				0.05
+			],
+			"cities": [
+				[
+					"Lagos",
+					5
+				],
+				[
+					"Kano",
+					5
+				],
+				[
+					"Ibadan",
+					5
+				],
+				[
+					"Abuja",
+					4
+				],
+				[
+					"Port Harcourt",
+					4
+				],
+				[
+					"Benin City",
+					4
+				],
+				[
+					"Kaduna",
+					3
+				],
+				[
+					"Enugu",
+					3
+				],
+				[
+					"Aba",
+					3
+				],
+				[
+					"Jos",
+					3
+				],
+				[
+					"Ilorin",
+					3
+				],
+				[
+					"Onitsha",
+					3
+				],
+				[
+					"Warri",
+					3
+				],
+				[
+					"Owerri",
+					2
+				],
+				[
+					"Uyo",
+					2
+				],
+				[
+					"Abeokuta",
+					2
+				],
+				[
+					"Makurdi",
+					2
+				],
+				[
+					"Katsina",
+					2
+				],
+				[
+					"Lafia",
+					1
+				]
+			],
+			"lang": "en_af"
+		},
+		"SEN": {
+			"name": "Senegal",
+			"adj": "senegalês",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#00853F",
+					"#FDEF42",
+					"#E31B23"
+				],
+				"e": {
+					"t": "star",
+					"c": "#00853F",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"coef": 40,
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			],
+			"youth": 2.0,
+			"imports": {
+				"MLI": 5.0,
+				"GUI": 5.0,
+				"GNB": 3.0,
+				"CIV": 2.0,
+				"BFA": 2.0,
+				"CPV": 1.0
+			},
+			"foreign": [
+				0.08
+			],
+			"cities": [
+				[
+					"Dakar",
+					5
+				],
+				[
+					"Thiès",
+					4
+				],
+				[
+					"Touba",
+					4
+				],
+				[
+					"Rufisque",
+					3
+				],
+				[
+					"Kaolack",
+					3
+				],
+				[
+					"Saint-Louis",
+					3
+				],
+				[
+					"Ziguinchor",
+					3
+				],
+				[
+					"Mbour",
+					3
+				],
+				[
+					"Diourbel",
+					2
+				],
+				[
+					"Louga",
+					2
+				],
+				[
+					"Tambacounda",
+					2
+				],
+				[
+					"Pikine",
+					3
+				],
+				[
+					"Guédiawaye",
+					2
+				],
+				[
+					"Kolda",
+					1
+				]
+			],
+			"lang": "fr"
+		},
+		"GHA": {
+			"name": "Gana",
+			"adj": "ganês",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#CE1126",
+					"#FCD116",
+					"#006B3F"
+				],
+				"e": {
+					"t": "star",
+					"c": "#000000",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"origins": [
+				{
+					"c": "waf_en",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"CIV": {
+			"name": "Costa do Marfim",
+			"adj": "marfinense",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#F77F00",
+					"#FFFFFF",
+					"#009E60"
+				]
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"CMR": {
+			"name": "Camarões",
+			"adj": "camaronês",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#007A5E",
+					"#CE1126",
+					"#FCD116"
+				],
+				"e": {
+					"t": "star",
+					"c": "#FCD116",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.28
+				}
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 85,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 15,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"MLI": {
+			"name": "Mali",
+			"adj": "malinês",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#14B53A",
+					"#FCD116",
+					"#CE1126"
+				]
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"ALG": {
+			"name": "Argélia",
+			"adj": "argelino",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#006233",
+					"#FFFFFF"
+				],
+				"e": {
+					"t": "crescent",
+					"c": "#D21034",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.5
+				}
+			},
+			"origins": [
+				{
+					"c": "maghreb",
+					"w": 100,
+					"eth": {
+						"arb": 95,
+						"afr": 5
+					}
+				}
+			]
+		},
+		"GUI": {
+			"name": "Guiné",
+			"adj": "guineense",
+			"confed": "CAF",
+			"flag": {
+				"p": "v",
+				"c": [
+					"#CE1126",
+					"#FCD116",
+					"#009460"
+				]
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"BFA": {
+			"name": "Burkina Faso",
+			"adj": "burquinense",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#EF2B2D",
+					"#009E49"
+				],
+				"e": {
+					"t": "star",
+					"c": "#FCD116",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.3
+				}
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"COD": {
+			"name": "RD Congo",
+			"adj": "congolês",
+			"confed": "CAF",
+			"flag": {
+				"p": "diag",
+				"c": [
+					"#007FFF",
+					"#F7D618",
+					"#CE1021"
+				],
+				"e": {
+					"t": "star",
+					"c": "#F7D618",
+					"x": 0.18,
+					"y": 0.25,
+					"s": 0.28
+				}
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"GAB": {
+			"name": "Gabão",
+			"adj": "gabonês",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#009E60",
+					"#FCD116",
+					"#3A75C4"
+				]
+			},
+			"origins": [
+				{
+					"c": "waf_fr",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"ANG": {
+			"name": "Angola",
+			"adj": "angolano",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#CC092F",
+					"#000000"
+				],
+				"e": {
+					"t": "gear",
+					"c": "#FFCB00",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.36
+				}
+			},
+			"origins": [
+				{
+					"c": "lusoaf",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"CPV": {
+			"name": "Cabo Verde",
+			"adj": "cabo-verdiano",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#003893",
+					"#FFFFFF",
+					"#CF2027",
+					"#FFFFFF",
+					"#003893"
+				],
+				"w": [
+					6,
+					1,
+					1,
+					1,
+					3
+				],
+				"e": {
+					"t": "stars_ring",
+					"c": "#F7D116",
+					"x": 0.38,
+					"y": 0.6,
+					"s": 0.36
+				}
+			},
+			"origins": [
+				{
+					"c": "lusoaf",
+					"w": 100,
+					"eth": {
+						"mix": 70,
+						"afr": 30
+					}
+				}
+			]
+		},
+		"MOZ": {
+			"name": "Moçambique",
+			"adj": "moçambicano",
+			"confed": "CAF",
+			"flag": {
+				"p": "tri",
+				"c": [
+					"#007168",
+					"#FFFFFF",
+					"#000000",
+					"#FFFFFF",
+					"#FCE100"
+				],
+				"t": "#D21034"
+			},
+			"origins": [
+				{
+					"c": "lusoaf",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"GNB": {
+			"name": "Guiné-Bissau",
+			"adj": "guineense",
+			"confed": "CAF",
+			"flag": {
+				"p": "vband",
+				"c": [
+					"#CE1126",
+					"#FCD116",
+					"#009E49"
+				],
+				"e": {
+					"t": "star",
+					"c": "#000000",
+					"x": 0.17,
+					"y": 0.5,
+					"s": 0.2
+				}
+			},
+			"origins": [
+				{
+					"c": "lusoaf",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"ZIM": {
+			"name": "Zimbábue",
+			"adj": "zimbabuano",
+			"confed": "CAF",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#006400",
+					"#FFD200",
+					"#D40000",
+					"#000000",
+					"#D40000",
+					"#FFD200",
+					"#006400"
+				]
+			},
+			"origins": [
+				{
+					"c": "rsa",
+					"w": 100,
+					"eth": {
+						"afr": 1
+					}
+				}
+			]
+		},
+		"KSA": {
+			"name": "Arábia Saudita",
+			"adj": "saudita",
+			"confed": "AFC",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#006C35"
+				],
+				"e": {
+					"t": "script",
+					"c": "#FFFFFF",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.5
+				}
+			},
+			"coef": 65,
+			"origins": [
+				{
+					"c": "arab",
+					"w": 100,
+					"eth": {
+						"arb": 85,
+						"afr": 15
+					}
+				}
+			],
+			"imports": {
+				"BRA": 10.0,
+				"ARG": 4.0,
+				"COL": 4.0,
+				"URU": 2.0,
+				"CHI": 1.0,
+				"VEN": 1.0,
+				"POR": 5.0,
+				"ESP": 3.0,
+				"FRA": 4.0,
+				"BEL": 1.0,
+				"NED": 2.0,
+				"ITA": 2.0,
+				"ENG": 2.0,
+				"SCO": 1.0,
+				"GER": 1.0,
+				"SRB": 3.0,
+				"CRO": 2.0,
+				"BIH": 1.0,
+				"MNE": 1.0,
+				"ALB": 1.0,
+				"KOS": 1.0,
+				"POL": 1.0,
+				"CZE": 1.0,
+				"SVK": 1.0,
+				"TUR": 1.0,
+				"GRE": 1.0,
+				"MAR": 5.0,
+				"ALG": 4.0,
+				"TUN": 3.0,
+				"EGY": 3.0,
+				"SEN": 4.0,
+				"CIV": 3.0,
+				"NGA": 3.0,
+				"GHA": 2.0,
+				"CMR": 3.0,
+				"MLI": 2.0,
+				"GUI": 1.0,
+				"COD": 1.0,
+				"IRN": 1.0,
+				"KOR": 1.0,
+				"AUS": 1.0,
+				"ROU": 1.0
+			},
+			"foreign": [
+				0.42
+			],
+			"cities": [
+				[
+					"Riyadh",
+					5
+				],
+				[
+					"Jeddah",
+					5
+				],
+				[
+					"Mecca",
+					4
+				],
+				[
+					"Medina",
+					4
+				],
+				[
+					"Dammam",
+					4
+				],
+				[
+					"Taif",
+					3
+				],
+				[
+					"Tabuk",
+					3
+				],
+				[
+					"Buraidah",
+					3
+				],
+				[
+					"Khobar",
+					3
+				],
+				[
+					"Abha",
+					3
+				],
+				[
+					"Hail",
+					2
+				],
+				[
+					"Najran",
+					2
+				],
+				[
+					"Jubail",
+					2
+				],
+				[
+					"Al Ahsa",
+					3
+				],
+				[
+					"Khamis Mushait",
+					2
+				],
+				[
+					"Unaizah",
+					2
+				],
+				[
+					"Al Rass",
+					1
+				],
+				[
+					"Zulfi",
+					1
+				]
+			],
+			"lang": "ar"
+		},
+		"JPN": {
+			"name": "Japão",
+			"adj": "japonês",
+			"confed": "AFC",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#FFFFFF"
+				],
+				"e": {
+					"t": "disc",
+					"c": "#BC002D",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.6
+				}
+			},
+			"coef": 62,
+			"origins": [
+				{
+					"c": "jp",
+					"w": 100,
+					"eth": {
+						"eas": 97,
+						"mix": 2,
+						"afr": 1
+					}
+				}
+			],
+			"youth": 1.5,
+			"imports": {
+				"BRA": 12.0,
+				"KOR": 6.0,
+				"AUS": 2.0,
+				"ESP": 2.0,
+				"POR": 1.0,
+				"SRB": 1.0,
+				"CRO": 1.0,
+				"BIH": 1.0,
+				"SWE": 1.0,
+				"NOR": 1.0,
+				"DEN": 1.0,
+				"NED": 1.0,
+				"BEL": 1.0,
+				"GER": 1.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"URU": 1.0,
+				"NGA": 1.0,
+				"GHA": 1.0,
+				"CMR": 1.0,
+				"USA": 1.0
+			},
+			"foreign": [
+				0.15
+			],
+			"cities": [
+				[
+					"Tokyo",
+					5
+				],
+				[
+					"Yokohama",
+					5
+				],
+				[
+					"Osaka",
+					5
+				],
+				[
+					"Nagoya",
+					5
+				],
+				[
+					"Sapporo",
+					4
+				],
+				[
+					"Fukuoka",
+					4
+				],
+				[
+					"Kobe",
+					4
+				],
+				[
+					"Kawasaki",
+					4
+				],
+				[
+					"Kyoto",
+					4
+				],
+				[
+					"Saitama",
+					4
+				],
+				[
+					"Hiroshima",
+					4
+				],
+				[
+					"Sendai",
+					4
+				],
+				[
+					"Chiba",
+					3
+				],
+				[
+					"Niigata",
+					3
+				],
+				[
+					"Shizuoka",
+					3
+				],
+				[
+					"Kumamoto",
+					3
+				],
+				[
+					"Okayama",
+					3
+				],
+				[
+					"Kagoshima",
+					3
+				],
+				[
+					"Nagasaki",
+					2
+				],
+				[
+					"Oita",
+					2
+				],
+				[
+					"Kofu",
+					2
+				],
+				[
+					"Tokushima",
+					2
+				],
+				[
+					"Matsumoto",
+					2
+				],
+				[
+					"Mito",
+					2
+				],
+				[
+					"Kashiwa",
+					2
+				],
+				[
+					"Iwata",
+					2
+				],
+				[
+					"Tosu",
+					1
+				],
+				[
+					"Machida",
+					2
+				],
+				[
+					"Kashima",
+					3
+				]
+			],
+			"lang": "ja"
+		},
+		"KOR": {
+			"name": "Coreia do Sul",
+			"adj": "sul-coreano",
+			"confed": "AFC",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#FFFFFF"
+				],
+				"e": {
+					"t": "taeguk",
+					"c": "#CD2E3A",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.5,
+					"c2": "#0047A0"
+				}
+			},
+			"coef": 60,
+			"origins": [
+				{
+					"c": "kr",
+					"w": 100,
+					"eth": {
+						"eas": 1
+					}
+				}
+			],
+			"youth": 1.0,
+			"imports": {
+				"BRA": 12.0,
+				"AUS": 3.0,
+				"JPN": 3.0,
+				"SRB": 2.0,
+				"CRO": 2.0,
+				"BIH": 1.0,
+				"MNE": 1.0,
+				"POR": 1.0,
+				"ESP": 1.0,
+				"ARG": 1.0,
+				"COL": 1.0,
+				"URU": 1.0,
+				"NGA": 1.0,
+				"GHA": 1.0,
+				"CMR": 1.0,
+				"CIV": 1.0,
+				"SEN": 1.0,
+				"USA": 1.0,
+				"NED": 1.0
+			},
+			"foreign": [
+				0.15
+			],
+			"cities": [
+				[
+					"Seoul",
+					5
+				],
+				[
+					"Busan",
+					5
+				],
+				[
+					"Incheon",
+					5
+				],
+				[
+					"Daegu",
+					5
+				],
+				[
+					"Daejeon",
+					4
+				],
+				[
+					"Gwangju",
+					4
+				],
+				[
+					"Ulsan",
+					4
+				],
+				[
+					"Suwon",
+					4
+				],
+				[
+					"Changwon",
+					3
+				],
+				[
+					"Seongnam",
+					3
+				],
+				[
+					"Goyang",
+					3
+				],
+				[
+					"Jeonju",
+					3
+				],
+				[
+					"Cheonan",
+					3
+				],
+				[
+					"Pohang",
+					3
+				],
+				[
+					"Gimpo",
+					2
+				],
+				[
+					"Gimcheon",
+					2
+				],
+				[
+					"Ansan",
+					2
+				],
+				[
+					"Bucheon",
+					2
+				],
+				[
+					"Anyang",
+					2
+				],
+				[
+					"Jeju",
+					2
+				],
+				[
+					"Gangneung",
+					2
+				],
+				[
+					"Asan",
+					1
+				]
+			],
+			"lang": "ko"
+		},
+		"QAT": {
+			"name": "Catar",
+			"adj": "catariano",
+			"confed": "AFC",
+			"flag": {
+				"p": "serrated",
+				"c": [
+					"#FFFFFF",
+					"#8A1538"
+				]
+			},
+			"coef": 55,
+			"origins": [
+				{
+					"c": "arab",
+					"w": 100,
+					"eth": {
+						"arb": 75,
+						"afr": 25
+					}
+				}
+			],
+			"imports": {
+				"ALG": 6.0,
+				"MAR": 4.0,
+				"TUN": 3.0,
+				"EGY": 2.0,
+				"SEN": 3.0,
+				"CIV": 2.0,
+				"GHA": 2.0,
+				"NGA": 2.0,
+				"CMR": 2.0,
+				"MLI": 2.0,
+				"BRA": 6.0,
+				"ARG": 2.0,
+				"COL": 2.0,
+				"URU": 1.0,
+				"POR": 2.0,
+				"ESP": 3.0,
+				"FRA": 2.0,
+				"BEL": 1.0,
+				"NED": 1.0,
+				"ITA": 1.0,
+				"ENG": 1.0,
+				"SRB": 1.0,
+				"CRO": 1.0,
+				"IRN": 2.0,
+				"KOR": 2.0,
+				"JPN": 1.0,
+				"AUS": 1.0
+			},
+			"foreign": [
+				0.42
+			],
+			"cities": [
+				[
+					"Doha",
+					5
+				],
+				[
+					"Al Rayyan",
+					4
+				],
+				[
+					"Al Wakrah",
+					3
+				],
+				[
+					"Al Khor",
+					3
+				],
+				[
+					"Umm Salal",
+					2
+				],
+				[
+					"Al Daayen",
+					2
+				],
+				[
+					"Al Shamal",
+					1
+				],
+				[
+					"Mesaieed",
+					1
+				],
+				[
+					"Lusail",
+					2
+				]
+			],
+			"lang": "ar"
+		},
+		"UAE": {
+			"name": "Emirados Árabes",
+			"adj": "emiradense",
+			"confed": "AFC",
+			"flag": {
+				"p": "vband",
+				"c": [
+					"#FF0000",
+					"#00732F",
+					"#FFFFFF",
+					"#000000"
+				]
+			},
+			"coef": 50,
+			"origins": [
+				{
+					"c": "arab",
+					"w": 100,
+					"eth": {
+						"arb": 75,
+						"afr": 25
+					}
+				}
+			],
+			"imports": {
+				"BRA": 8.0,
+				"ARG": 3.0,
+				"COL": 2.0,
+				"URU": 2.0,
+				"VEN": 1.0,
+				"POR": 2.0,
+				"ESP": 2.0,
+				"FRA": 1.0,
+				"ROU": 1.0,
+				"SRB": 2.0,
+				"CRO": 1.0,
+				"MAR": 4.0,
+				"ALG": 2.0,
+				"TUN": 2.0,
+				"EGY": 2.0,
+				"SEN": 2.0,
+				"CIV": 2.0,
+				"NGA": 2.0,
+				"GHA": 2.0,
+				"CMR": 2.0,
+				"MLI": 1.0,
+				"IRN": 3.0,
+				"KOR": 2.0,
+				"JPN": 1.0,
+				"AUS": 1.0
+			},
+			"foreign": [
+				0.42
+			],
+			"cities": [
+				[
+					"Dubai",
+					5
+				],
+				[
+					"Abu Dhabi",
+					5
+				],
+				[
+					"Sharjah",
+					4
+				],
+				[
+					"Al Ain",
+					4
+				],
+				[
+					"Ajman",
+					3
+				],
+				[
+					"Ras Al Khaimah",
+					3
+				],
+				[
+					"Fujairah",
+					2
+				],
+				[
+					"Umm Al Quwain",
+					2
+				],
+				[
+					"Khor Fakkan",
+					1
+				],
+				[
+					"Kalba",
+					1
+				]
+			],
+			"lang": "ar"
+		},
+		"CHN": {
+			"name": "China",
+			"adj": "chinês",
+			"confed": "AFC",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#EE1C25"
+				],
+				"e": {
+					"t": "stars_chn",
+					"c": "#FFFF00",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.5
+				}
+			},
+			"coef": 45,
+			"origins": [
+				{
+					"c": "cn",
+					"w": 100,
+					"eth": {
+						"eas": 1
+					}
+				}
+			],
+			"imports": {
+				"BRA": 12.0,
+				"ARG": 2.0,
+				"COL": 3.0,
+				"URU": 1.0,
+				"VEN": 1.0,
+				"POR": 3.0,
+				"ESP": 2.0,
+				"SRB": 2.0,
+				"CRO": 1.0,
+				"BIH": 1.0,
+				"MNE": 1.0,
+				"NED": 1.0,
+				"BEL": 1.0,
+				"CMR": 3.0,
+				"NGA": 3.0,
+				"GHA": 2.0,
+				"CIV": 2.0,
+				"SEN": 1.0,
+				"MLI": 1.0,
+				"COD": 1.0,
+				"KOR": 3.0,
+				"JPN": 1.0,
+				"AUS": 1.0,
+				"USA": 1.0
+			},
+			"foreign": [
+				0.2
+			],
+			"cities": [
+				[
+					"Shanghai",
+					5
+				],
+				[
+					"Beijing",
+					5
+				],
+				[
+					"Guangzhou",
+					5
+				],
+				[
+					"Shenzhen",
+					5
+				],
+				[
+					"Chengdu",
+					5
+				],
+				[
+					"Chongqing",
+					5
+				],
+				[
+					"Tianjin",
+					5
+				],
+				[
+					"Wuhan",
+					5
+				],
+				[
+					"Hangzhou",
+					4
+				],
+				[
+					"Nanjing",
+					4
+				],
+				[
+					"Xi'an",
+					4
+				],
+				[
+					"Qingdao",
+					4
+				],
+				[
+					"Dalian",
+					4
+				],
+				[
+					"Shenyang",
+					4
+				],
+				[
+					"Jinan",
+					4
+				],
+				[
+					"Changchun",
+					3
+				],
+				[
+					"Zhengzhou",
+					3
+				],
+				[
+					"Kunming",
+					3
+				],
+				[
+					"Changsha",
+					3
+				],
+				[
+					"Meizhou",
+					2
+				],
+				[
+					"Cangzhou",
+					2
+				],
+				[
+					"Nantong",
+					2
+				],
+				[
+					"Haikou",
+					2
+				],
+				[
+					"Taiyuan",
+					2
+				]
+			],
+			"lang": "zh"
+		},
+		"AUS": {
+			"name": "Austrália",
+			"adj": "australiano",
+			"confed": "AFC",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#012169"
+				],
+				"k": {
+					"c": "#012169",
+					"w": 0.5,
+					"h": 0.5,
+					"e": {
+						"t": "union",
+						"c": "#FFFFFF",
+						"x": 0.5,
+						"y": 0.5,
+						"s": 1.0,
+						"c2": "#C8102E"
+					}
+				},
+				"e": {
+					"t": "stars_aus",
+					"c": "#FFFFFF",
+					"x": 0.72,
+					"y": 0.5,
+					"s": 0.45
+				}
+			},
+			"coef": 45,
+			"origins": [
+				{
+					"c": "en",
+					"w": 80,
+					"eth": {
+						"nor": 60,
+						"eur": 25,
+						"afr": 8,
+						"mix": 5,
+						"eas": 2
+					}
+				},
+				{
+					"c": "gb_celt",
+					"w": 5,
+					"eth": {
+						"nor": 1
+					}
+				},
+				{
+					"c": "south_slav",
+					"w": 5,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "gr",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "it",
+					"w": 3,
+					"eth": {
+						"eur": 1
+					}
+				},
+				{
+					"c": "waf_en",
+					"w": 2,
+					"eth": {
+						"afr": 1
+					}
+				},
+				{
+					"c": "kr",
+					"w": 1,
+					"eth": {
+						"eas": 1
+					}
+				},
+				{
+					"c": "jp",
+					"w": 1,
+					"eth": {
+						"eas": 1
+					}
+				}
+			],
+			"youth": 0.5,
+			"imports": {
+				"ENG": 5.0,
+				"SCO": 2.0,
+				"IRL": 1.0,
+				"WAL": 1.0,
+				"NZL": 2.0,
+				"JPN": 4.0,
+				"KOR": 2.0,
+				"BRA": 4.0,
+				"ARG": 2.0,
+				"COL": 1.0,
+				"URU": 1.0,
+				"ESP": 3.0,
+				"POR": 1.0,
+				"FRA": 2.0,
+				"NED": 2.0,
+				"GER": 2.0,
+				"ITA": 1.0,
+				"GRE": 2.0,
+				"SRB": 1.0,
+				"CRO": 2.0,
+				"BIH": 1.0,
+				"NGA": 1.0,
+				"GHA": 1.0,
+				"CIV": 1.0,
+				"SEN": 1.0,
+				"CMR": 1.0,
+				"USA": 1.0,
+				"CAN": 1.0,
+				"POL": 1.0,
+				"DEN": 1.0,
+				"NOR": 1.0,
+				"SWE": 1.0
+			},
+			"foreign": [
+				0.25
+			],
+			"cities": [
+				[
+					"Sydney",
+					5
+				],
+				[
+					"Melbourne",
+					5
+				],
+				[
+					"Brisbane",
+					5
+				],
+				[
+					"Perth",
+					5
+				],
+				[
+					"Adelaide",
+					4
+				],
+				[
+					"Gold Coast",
+					3
+				],
+				[
+					"Newcastle",
+					3
+				],
+				[
+					"Canberra",
+					3
+				],
+				[
+					"Wollongong",
+					3
+				],
+				[
+					"Gosford",
+					2
+				],
+				[
+					"Townsville",
+					2
+				],
+				[
+					"Geelong",
+					2
+				],
+				[
+					"Hobart",
+					2
+				],
+				[
+					"Darwin",
+					2
+				],
+				[
+					"Parramatta",
+					3
+				],
+				[
+					"Campbelltown",
+					2
+				],
+				[
+					"Cairns",
+					1
+				]
+			],
+			"lang": "en_au"
+		},
+		"IRN": {
+			"name": "Irã",
+			"adj": "iraniano",
+			"confed": "AFC",
+			"flag": {
+				"p": "h",
+				"c": [
+					"#239F40",
+					"#FFFFFF",
+					"#DA0000"
+				],
+				"e": {
+					"t": "disc",
+					"c": "#DA0000",
+					"x": 0.5,
+					"y": 0.5,
+					"s": 0.22,
+					"c2": "#FFFFFF"
+				}
+			},
+			"origins": [
+				{
+					"c": "persian",
+					"w": 100,
+					"eth": {
+						"arb": 90,
+						"eur": 10
+					}
+				}
+			]
+		},
+		"NZL": {
+			"name": "Nova Zelândia",
+			"adj": "neozelandês",
+			"confed": "OFC",
+			"flag": {
+				"p": "solid",
+				"c": [
+					"#012169"
+				],
+				"k": {
+					"c": "#012169",
+					"w": 0.5,
+					"h": 0.5,
+					"e": {
+						"t": "union",
+						"c": "#FFFFFF",
+						"x": 0.5,
+						"y": 0.5,
+						"s": 1.0,
+						"c2": "#C8102E"
+					}
+				},
+				"e": {
+					"t": "stars_nzl",
+					"c": "#C8102E",
+					"x": 0.75,
+					"y": 0.5,
+					"s": 0.45
+				}
+			},
+			"origins": [
+				{
+					"c": "en",
+					"w": 100,
+					"eth": {
+						"nor": 70,
+						"eur": 15,
+						"mix": 10,
+						"afr": 5
+					}
+				}
+			]
+		}
+	},
+	"lang": {
+		"pt": {
+			"words": [
+				[
+					"Alvinegro",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Alvirrubro",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Alviverde",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Alviazul",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Rubro-Negro",
+					[
+						"#C1121F",
+						"#111111"
+					]
+				],
+				[
+					"Tricolor",
+					null
+				],
+				[
+					"Grená",
+					[
+						"#7A1C1C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Canarinho",
+					[
+						"#F2C14E",
+						"#0B6E4F"
+					]
+				],
+				[
+					"Leões",
+					null
+				],
+				[
+					"Águias",
+					null
+				],
+				[
+					"Falcões",
+					null
+				],
+				[
+					"Lobos",
+					null
+				],
+				[
+					"Galos",
+					null
+				],
+				[
+					"Operário",
+					null
+				],
+				[
+					"Ferroviário",
+					null
+				],
+				[
+					"Académico",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Desportivo",
+					null
+				],
+				[
+					"Atlético",
+					null
+				],
+				[
+					"União",
+					null
+				],
+				[
+					"Estrela",
+					null
+				],
+				[
+					"Mineiros",
+					null
+				],
+				[
+					"Pescadores",
+					null
+				],
+				[
+					"Guerreiros",
+					null
+				],
+				[
+					"Unidos",
+					null
+				],
+				[
+					"Juventude",
+					null
+				]
+			],
+			"stadium": [
+				"Estádio Municipal de {city}",
+				"Estádio do {word}",
+				"Estádio {person}",
+				"Parque {city}"
+			],
+			"people": [
+				"José Alvalade",
+				"Manuel Mota",
+				"Joaquim Almeida",
+				"António Coimbra",
+				"Rui Barros",
+				"Carlos Osório",
+				"Afonso Henriques"
+			]
+		},
+		"pt_br": {
+			"words": [
+				[
+					"Alvinegro",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Alvirrubro",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Alviverde",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Tricolor",
+					null
+				],
+				[
+					"Rubro-Negro",
+					[
+						"#C1121F",
+						"#111111"
+					]
+				],
+				[
+					"Colorado",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Leão",
+					null
+				],
+				[
+					"Tigre",
+					null
+				],
+				[
+					"Galo",
+					null
+				],
+				[
+					"Carcará",
+					null
+				],
+				[
+					"Operário",
+					null
+				],
+				[
+					"Ferroviário",
+					null
+				],
+				[
+					"União",
+					null
+				],
+				[
+					"Esporte",
+					null
+				],
+				[
+					"Atlético",
+					null
+				],
+				[
+					"Guarani",
+					null
+				],
+				[
+					"Mineiro",
+					null
+				],
+				[
+					"Náutico",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				]
+			],
+			"stadium": [
+				"Estádio Municipal de {city}",
+				"Estádio {person}",
+				"Arena {city}"
+			],
+			"people": [
+				"José Maria",
+				"Antônio Guedes",
+				"Manoel Barros",
+				"Joaquim Siqueira",
+				"Pedro Tavares",
+				"Luiz Fontes"
+			]
+		},
+		"es": {
+			"words": [
+				[
+					"Albo",
+					[
+						"#FFFFFF",
+						"#111111"
+					]
+				],
+				[
+					"Celeste",
+					[
+						"#5DADE2",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Rojo",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Azul",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Verde",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Aurinegro",
+					[
+						"#F2C14E",
+						"#111111"
+					]
+				],
+				[
+					"Albirrojo",
+					[
+						"#FFFFFF",
+						"#C1121F"
+					]
+				],
+				[
+					"Granate",
+					[
+						"#7A1C1C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Canario",
+					[
+						"#F2C14E",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Tricolor",
+					null
+				],
+				[
+					"Leones",
+					null
+				],
+				[
+					"Tigres",
+					null
+				],
+				[
+					"Halcones",
+					null
+				],
+				[
+					"Cóndores",
+					null
+				],
+				[
+					"Pumas",
+					null
+				],
+				[
+					"Toros",
+					null
+				],
+				[
+					"Mineros",
+					null
+				],
+				[
+					"Ferroviarios",
+					null
+				],
+				[
+					"Portuarios",
+					null
+				],
+				[
+					"Obreros",
+					null
+				],
+				[
+					"Estudiantes",
+					null
+				],
+				[
+					"Unidos",
+					null
+				],
+				[
+					"Atlético",
+					null
+				],
+				[
+					"Deportivo",
+					null
+				],
+				[
+					"Juventud",
+					null
+				],
+				[
+					"Unión",
+					null
+				],
+				[
+					"Sportivo",
+					null
+				],
+				[
+					"Progreso",
+					null
+				],
+				[
+					"Defensores",
+					null
+				],
+				[
+					"Fénix",
+					null
+				],
+				[
+					"Cruzados",
+					null
+				],
+				[
+					"Guerreros",
+					null
+				],
+				[
+					"Norte",
+					null
+				],
+				[
+					"Central",
+					null
+				]
+			],
+			"stadium": [
+				"Estadio Municipal de {city}",
+				"Estadio {person}",
+				"Estadio del {word}",
+				"Coliseo {city}"
+			],
+			"people": [
+				"José Amalfitani",
+				"Juan Domingo",
+				"Pedro Bidegain",
+				"Luis Tróccoli",
+				"Carlos Iribarren",
+				"Julio Grondona",
+				"Alberto Armando"
+			]
+		},
+		"en": {
+			"words": [
+				[
+					"Rovers",
+					null
+				],
+				[
+					"United",
+					null
+				],
+				[
+					"City",
+					null
+				],
+				[
+					"Athletic",
+					null
+				],
+				[
+					"Albion",
+					null
+				],
+				[
+					"Wanderers",
+					null
+				],
+				[
+					"Rangers",
+					null
+				],
+				[
+					"Stars",
+					null
+				],
+				[
+					"Lions",
+					null
+				],
+				[
+					"Eagles",
+					null
+				],
+				[
+					"Harriers",
+					null
+				],
+				[
+					"Warriors",
+					null
+				],
+				[
+					"Wolves",
+					null
+				],
+				[
+					"Blues",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Reds",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Town",
+					null
+				],
+				[
+					"Borough",
+					null
+				],
+				[
+					"Villa",
+					null
+				],
+				[
+					"Forest",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Galaxy",
+					null
+				],
+				[
+					"Union",
+					null
+				],
+				[
+					"Republic",
+					null
+				],
+				[
+					"Metros",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Park",
+				"{city} Ground",
+				"{word} Stadium",
+				"{city} Arena",
+				"{person} Field"
+			],
+			"people": [
+				"Robert Hayes",
+				"William Grant",
+				"Thomas Reid",
+				"George Mitchell",
+				"Henry Carter",
+				"Arthur Wells"
+			]
+		},
+		"sco": {
+			"words": [
+				[
+					"Rovers",
+					null
+				],
+				[
+					"United",
+					null
+				],
+				[
+					"City",
+					null
+				],
+				[
+					"Athletic",
+					null
+				],
+				[
+					"Albion",
+					null
+				],
+				[
+					"Thistle",
+					null
+				],
+				[
+					"Academicals",
+					null
+				],
+				[
+					"Wanderers",
+					null
+				],
+				[
+					"Harriers",
+					null
+				],
+				[
+					"Blues",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Saints",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Star",
+					null
+				],
+				[
+					"Hearts",
+					[
+						"#7A1C1C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Queens",
+					null
+				],
+				[
+					"Caley",
+					null
+				],
+				[
+					"Burghers",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Park",
+				"{word} Park",
+				"{city} Ground",
+				"{person} Park"
+			],
+			"people": [
+				"Robert Burns",
+				"William Wallace",
+				"James Watt",
+				"Andrew Carnegie",
+				"Walter Scott"
+			]
+		},
+		"en_au": {
+			"words": [
+				[
+					"United",
+					null
+				],
+				[
+					"City",
+					null
+				],
+				[
+					"Victory",
+					null
+				],
+				[
+					"Wanderers",
+					null
+				],
+				[
+					"Mariners",
+					null
+				],
+				[
+					"Glory",
+					null
+				],
+				[
+					"Jets",
+					null
+				],
+				[
+					"Phoenix",
+					null
+				],
+				[
+					"Stars",
+					null
+				],
+				[
+					"Knights",
+					null
+				],
+				[
+					"Olympic",
+					null
+				],
+				[
+					"Rovers",
+					null
+				],
+				[
+					"Roar",
+					null
+				],
+				[
+					"Heat",
+					null
+				],
+				[
+					"Coast",
+					null
+				],
+				[
+					"Sharks",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Stadium",
+				"{city} Oval",
+				"{word} Park",
+				"{city} Arena"
+			],
+			"people": [
+				"Frank Lowy",
+				"Johnny Warren",
+				"Les Murray",
+				"Joe Marston"
+			]
+		},
+		"en_af": {
+			"words": [
+				[
+					"Stars",
+					null
+				],
+				[
+					"United",
+					null
+				],
+				[
+					"City",
+					null
+				],
+				[
+					"Arrows",
+					null
+				],
+				[
+					"Swallows",
+					null
+				],
+				[
+					"Leopards",
+					null
+				],
+				[
+					"Rovers",
+					null
+				],
+				[
+					"Galaxy",
+					null
+				],
+				[
+					"Royals",
+					null
+				],
+				[
+					"Rangers",
+					null
+				],
+				[
+					"Pillars",
+					null
+				],
+				[
+					"Tornadoes",
+					null
+				],
+				[
+					"Warriors",
+					null
+				],
+				[
+					"Sharks",
+					null
+				],
+				[
+					"Kings",
+					null
+				],
+				[
+					"Dolphins",
+					null
+				],
+				[
+					"Stingers",
+					null
+				],
+				[
+					"Tigers",
+					null
+				],
+				[
+					"Lions",
+					null
+				],
+				[
+					"Eagles",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Stadium",
+				"{person} Stadium",
+				"{city} Township Stadium"
+			],
+			"people": [
+				"Moses Mabhida",
+				"Nelson Mandela",
+				"Samuel Ogbemudia",
+				"Teslim Balogun",
+				"Obafemi Awolowo",
+				"Ahmadu Bello"
+			]
+		},
+		"fr": {
+			"words": [
+				[
+					"Rouge",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Bleus",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Verts",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Canaris",
+					[
+						"#F2C14E",
+						"#0B6E4F"
+					]
+				],
+				[
+					"Aigles",
+					null
+				],
+				[
+					"Lions",
+					null
+				],
+				[
+					"Étoile",
+					null
+				],
+				[
+					"Olympique",
+					null
+				],
+				[
+					"Sporting",
+					null
+				],
+				[
+					"Espoir",
+					null
+				],
+				[
+					"Avenir",
+					null
+				],
+				[
+					"Union",
+					null
+				],
+				[
+					"Renaissance",
+					null
+				],
+				[
+					"Jeunesse",
+					null
+				],
+				[
+					"Gazelles",
+					null
+				],
+				[
+					"Requins",
+					null
+				],
+				[
+					"Faucons",
+					null
+				],
+				[
+					"Guépards",
+					null
+				]
+			],
+			"stadium": [
+				"Stade Municipal de {city}",
+				"Stade {person}",
+				"Stade du {word}"
+			],
+			"people": [
+				"Léopold Senghor",
+				"Demba Diop",
+				"Félix Houphouët",
+				"Jean Bouin",
+				"Pierre Brisson"
+			]
+		},
+		"de": {
+			"words": [
+				[
+					"Blau-Weiß",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Rot-Weiß",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Grün-Weiß",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Schwarz-Weiß",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Schwarz-Gelb",
+					[
+						"#111111",
+						"#F2C14E"
+					]
+				],
+				[
+					"Rot-Schwarz",
+					[
+						"#C1121F",
+						"#111111"
+					]
+				],
+				[
+					"Löwen",
+					null
+				],
+				[
+					"Adler",
+					null
+				],
+				[
+					"Falken",
+					null
+				],
+				[
+					"Knappen",
+					null
+				],
+				[
+					"Kicker",
+					null
+				],
+				[
+					"Wacker",
+					null
+				],
+				[
+					"Union",
+					null
+				],
+				[
+					"Sturm",
+					null
+				],
+				[
+					"Admira",
+					null
+				],
+				[
+					"Juniors",
+					null
+				],
+				[
+					"Blitz",
+					null
+				],
+				[
+					"Hirsche",
+					null
+				],
+				[
+					"Steinböcke",
+					null
+				],
+				[
+					"Eisbären",
+					null
+				]
+			],
+			"stadium": [
+				"Stadion {city}",
+				"{city} Arena",
+				"{person}-Stadion",
+				"Sportpark {city}"
+			],
+			"people": [
+				"Ernst Happel",
+				"Gerhard Hanappi",
+				"Franz Horr",
+				"Karl Rappan",
+				"Hans Walz"
+			]
+		},
+		"it": {
+			"words": [
+				[
+					"Rossoblù",
+					[
+						"#C1121F",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Biancoverdi",
+					[
+						"#FFFFFF",
+						"#0B6E4F"
+					]
+				],
+				[
+					"Granata",
+					[
+						"#7A1C1C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Nerazzurri",
+					[
+						"#111111",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Gialloblù",
+					[
+						"#F2C14E",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Leoni",
+					null
+				],
+				[
+					"Aquile",
+					null
+				],
+				[
+					"Grifoni",
+					null
+				],
+				[
+					"Lupi",
+					null
+				],
+				[
+					"Delfini",
+					null
+				],
+				[
+					"Galletti",
+					null
+				]
+			],
+			"stadium": [
+				"Stadio Comunale di {city}",
+				"Stadio {person}"
+			],
+			"people": [
+				"Giuseppe Meazza",
+				"Vittorio Pozzo",
+				"Renato Dall'Ara",
+				"Luigi Ferraris"
+			]
+		},
+		"nl": {
+			"words": [
+				[
+					"Rood-Wit",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Blauw-Wit",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Geel-Zwart",
+					[
+						"#F2C14E",
+						"#111111"
+					]
+				],
+				[
+					"Groen-Wit",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Zwart-Wit",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Leeuwen",
+					null
+				],
+				[
+					"Adelaars",
+					null
+				],
+				[
+					"Boys",
+					null
+				],
+				[
+					"Sterren",
+					null
+				],
+				[
+					"Kanaries",
+					[
+						"#F2C14E",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Stedelingen",
+					null
+				],
+				[
+					"Zeelieden",
+					null
+				],
+				[
+					"Mijnwerkers",
+					null
+				],
+				[
+					"Wolven",
+					null
+				],
+				[
+					"Valken",
+					null
+				],
+				[
+					"Polderjongens",
+					null
+				]
+			],
+			"stadium": [
+				"Stadion {city}",
+				"{city} Arena",
+				"Sportpark {word}",
+				"{person} Stadion"
+			],
+			"people": [
+				"Abe Lenstra",
+				"Faas Wilkes",
+				"Jan Louwers",
+				"Constant Vanden Stock",
+				"Jules Otten"
+			]
+		},
+		"tr": {
+			"words": [
+				[
+					"Kırmızı-Beyaz",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Yeşil-Beyaz",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Mavi-Beyaz",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Sarı-Lacivert",
+					[
+						"#F2C14E",
+						"#14213D"
+					]
+				],
+				[
+					"Bordo-Mavi",
+					[
+						"#7A1C1C",
+						"#2E86DE"
+					]
+				],
+				[
+					"Aslanlar",
+					null
+				],
+				[
+					"Kaplanlar",
+					null
+				],
+				[
+					"Şimşekler",
+					null
+				],
+				[
+					"Yiğitler",
+					null
+				],
+				[
+					"Gençler",
+					null
+				],
+				[
+					"Timsahlar",
+					null
+				],
+				[
+					"Atmacalar",
+					null
+				],
+				[
+					"Kurtlar",
+					null
+				],
+				[
+					"Boğalar",
+					null
+				],
+				[
+					"Yıldızlar",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Stadyumu",
+				"{person} Stadyumu",
+				"{city} Arena"
+			],
+			"people": [
+				"Atatürk",
+				"Hüseyin Avni",
+				"Ali Sami",
+				"Şükrü Saracoğlu",
+				"İsmet İnönü"
+			]
+		},
+		"gr": {
+			"words": [
+				[
+					"Kyanolefkoi",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Prasinoi",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Kitrinoi",
+					[
+						"#F2C14E",
+						"#111111"
+					]
+				],
+				[
+					"Mavroi",
+					[
+						"#111111",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Aetoi",
+					null
+				],
+				[
+					"Leontes",
+					null
+				],
+				[
+					"Asteras",
+					null
+				],
+				[
+					"Iraklis",
+					null
+				],
+				[
+					"Apollon",
+					null
+				],
+				[
+					"Atromitos",
+					null
+				],
+				[
+					"Ethnikos",
+					null
+				],
+				[
+					"Titanes",
+					null
+				]
+			],
+			"stadium": [
+				"Gipedo {city}",
+				"Dimotiko Gipedo {city}",
+				"Stadio {person}"
+			],
+			"people": [
+				"Georgios Karaiskakis",
+				"Spyros Louis",
+				"Apostolos Nikolaidis",
+				"Kleanthis Vikelidis"
+			]
+		},
+		"uk": {
+			"words": [
+				[
+					"Metalurhy",
+					null
+				],
+				[
+					"Robitnyky",
+					null
+				],
+				[
+					"Zorya",
+					null
+				],
+				[
+					"Sokoly",
+					null
+				],
+				[
+					"Levy",
+					null
+				],
+				[
+					"Chervoni",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Zeleni",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Syni",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Zhovto-Syni",
+					[
+						"#F2C14E",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Kolos",
+					null
+				],
+				[
+					"Rukh",
+					null
+				],
+				[
+					"Karpaty",
+					null
+				],
+				[
+					"Zirka",
+					null
+				],
+				[
+					"Obriy",
+					null
+				]
+			],
+			"stadium": [
+				"Stadion {city}",
+				"Arena {city}",
+				"Stadion {word}"
+			],
+			"people": [
+				"Valeriy Lobanovskyi",
+				"Oleh Blokhin",
+				"Andriy Biba"
+			]
+		},
+		"hr": {
+			"words": [
+				[
+					"Crveni",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Plavi",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Zeleni",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Bijeli",
+					[
+						"#FFFFFF",
+						"#111111"
+					]
+				],
+				[
+					"Rudari",
+					null
+				],
+				[
+					"Željezničari",
+					null
+				],
+				[
+					"Sokoli",
+					null
+				],
+				[
+					"Lavovi",
+					null
+				],
+				[
+					"Orlovi",
+					null
+				],
+				[
+					"Mornari",
+					null
+				],
+				[
+					"Kockasti",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Jadran",
+					null
+				]
+			],
+			"stadium": [
+				"Gradski stadion {city}",
+				"Stadion {city}",
+				"Stadion {word}"
+			],
+			"people": [
+				"Bernard Vukas",
+				"Stjepan Bobek",
+				"Josip Skoblar"
+			]
+		},
+		"sr": {
+			"words": [
+				[
+					"Crveni",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Plavi",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Zeleni",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Beli",
+					[
+						"#FFFFFF",
+						"#111111"
+					]
+				],
+				[
+					"Rudari",
+					null
+				],
+				[
+					"Železničari",
+					null
+				],
+				[
+					"Radnički",
+					null
+				],
+				[
+					"Sokoli",
+					null
+				],
+				[
+					"Lavovi",
+					null
+				],
+				[
+					"Orlovi",
+					null
+				],
+				[
+					"Mladost",
+					null
+				],
+				[
+					"Napredak",
+					null
+				],
+				[
+					"Sloga",
+					null
+				],
+				[
+					"Jedinstvo",
+					null
+				]
+			],
+			"stadium": [
+				"Gradski stadion {city}",
+				"Stadion {city}",
+				"Stadion {word}"
+			],
+			"people": [
+				"Rajko Mitić",
+				"Dragan Džajić",
+				"Milan Galić"
+			]
+		},
+		"cs": {
+			"words": [
+				[
+					"Červení",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Modří",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Zelení",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Bílí",
+					[
+						"#FFFFFF",
+						"#111111"
+					]
+				],
+				[
+					"Horníci",
+					null
+				],
+				[
+					"Železničáři",
+					null
+				],
+				[
+					"Sokolové",
+					null
+				],
+				[
+					"Lvi",
+					null
+				],
+				[
+					"Orli",
+					null
+				],
+				[
+					"Slovan",
+					null
+				],
+				[
+					"Jiskra",
+					null
+				],
+				[
+					"Spartakus",
+					null
+				]
+			],
+			"stadium": [
+				"Městský stadion {city}",
+				"Stadion {city}",
+				"Stadion {person}"
+			],
+			"people": [
+				"Josef Masopust",
+				"Josef Bican",
+				"Antonín Panenka"
+			]
+		},
+		"da": {
+			"words": [
+				[
+					"Røde",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Blå",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Grønne",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Hvide",
+					[
+						"#FFFFFF",
+						"#111111"
+					]
+				],
+				[
+					"Ørne",
+					null
+				],
+				[
+					"Vikinger",
+					null
+				],
+				[
+					"Tigre",
+					null
+				],
+				[
+					"Falke",
+					null
+				],
+				[
+					"Fiskerne",
+					null
+				],
+				[
+					"Bjørne",
+					null
+				],
+				[
+					"Stjerner",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Stadion",
+				"{city} Park",
+				"{word} Arena"
+			],
+			"people": [
+				"Harald Nielsen",
+				"Allan Simonsen",
+				"Morten Olsen"
+			]
+		},
+		"ar": {
+			"words": [
+				[
+					"Al Ahmar",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Al Abyad",
+					[
+						"#FFFFFF",
+						"#111111"
+					]
+				],
+				[
+					"Al Akhdar",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Al Azraq",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Al Asfar",
+					[
+						"#F2C14E",
+						"#111111"
+					]
+				],
+				[
+					"Al Nasr",
+					null
+				],
+				[
+					"Al Ittihad",
+					null
+				],
+				[
+					"Al Wahda",
+					null
+				],
+				[
+					"Al Shabab",
+					null
+				],
+				[
+					"Al Nojoom",
+					null
+				],
+				[
+					"Al Suqoor",
+					null
+				],
+				[
+					"Al Fursan",
+					null
+				],
+				[
+					"Al Nour",
+					null
+				],
+				[
+					"Al Taawon",
+					null
+				],
+				[
+					"Al Raed",
+					null
+				],
+				[
+					"Al Fateh",
+					null
+				],
+				[
+					"Al Khaleej",
+					null
+				],
+				[
+					"Al Sahel",
+					null
+				]
+			],
+			"stadium": [
+				"Estádio {city}",
+				"Cidade Esportiva de {city}",
+				"Estádio Rei {person}"
+			],
+			"people": [
+				"Fahd",
+				"Abdullah",
+				"Khalifa",
+				"Zayed",
+				"Hamad",
+				"Faisal"
+			]
+		},
+		"mg": {
+			"words": [
+				[
+					"Kawkab",
+					null
+				],
+				[
+					"Hassania",
+					null
+				],
+				[
+					"Moghreb",
+					null
+				],
+				[
+					"Renaissance",
+					null
+				],
+				[
+					"Olympique",
+					null
+				],
+				[
+					"Étoile",
+					null
+				],
+				[
+					"Espoir",
+					null
+				],
+				[
+					"Union",
+					null
+				],
+				[
+					"Ittihad",
+					null
+				],
+				[
+					"Nahda",
+					null
+				],
+				[
+					"Chabab",
+					null
+				],
+				[
+					"Difaâ",
+					null
+				],
+				[
+					"Rouge",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Verts",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				]
+			],
+			"stadium": [
+				"Stade Municipal de {city}",
+				"Complexe Sportif de {city}",
+				"Stade {person}"
+			],
+			"people": [
+				"Mohammed V",
+				"Hassan II",
+				"Hédi Chaker",
+				"Moulay Abdellah"
+			]
+		},
+		"ja": {
+			"words": [
+				[
+					"Blaze",
+					null
+				],
+				[
+					"Rising",
+					null
+				],
+				[
+					"Ocean",
+					null
+				],
+				[
+					"Thunder",
+					null
+				],
+				[
+					"Stella",
+					null
+				],
+				[
+					"Rosso",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Blau",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Verde",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Giallo",
+					[
+						"#F2C14E",
+						"#1B3A8C"
+					]
+				],
+				[
+					"Viola",
+					[
+						"#5B2A86",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Fuego",
+					null
+				],
+				[
+					"Ventus",
+					null
+				],
+				[
+					"Sole",
+					null
+				],
+				[
+					"Mare",
+					null
+				],
+				[
+					"Kite",
+					null
+				],
+				[
+					"Samurai",
+					null
+				],
+				[
+					"Albireo",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Stadium",
+				"{city} Athletic Stadium",
+				"{word} Stadium",
+				"{city} Arena"
+			],
+			"people": [
+				"Kunishige Kamamoto",
+				"Yasuhiko Okudera"
+			]
+		},
+		"ko": {
+			"words": [
+				[
+					"Dragons",
+					null
+				],
+				[
+					"Eagles",
+					null
+				],
+				[
+					"Phoenix",
+					null
+				],
+				[
+					"Warriors",
+					null
+				],
+				[
+					"Citizen",
+					null
+				],
+				[
+					"Red",
+					[
+						"#C1121F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Blue",
+					[
+						"#1B3A8C",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Stars",
+					null
+				],
+				[
+					"Horses",
+					null
+				],
+				[
+					"Waves",
+					null
+				],
+				[
+					"Mountain",
+					null
+				],
+				[
+					"Wings",
+					null
+				],
+				[
+					"Knights",
+					null
+				]
+			],
+			"stadium": [
+				"{city} World Cup Stadium",
+				"{city} Stadium",
+				"{city} Sports Complex"
+			],
+			"people": [
+				"Cha Bum-kun",
+				"Hong Myung-bo"
+			]
+		},
+		"zh": {
+			"words": [
+				[
+					"Dragons",
+					null
+				],
+				[
+					"Lions",
+					null
+				],
+				[
+					"Tigers",
+					null
+				],
+				[
+					"Phoenix",
+					null
+				],
+				[
+					"Stars",
+					null
+				],
+				[
+					"Red Star",
+					[
+						"#C1121F",
+						"#F2C14E"
+					]
+				],
+				[
+					"Blue Sky",
+					[
+						"#2E86DE",
+						"#FFFFFF"
+					]
+				],
+				[
+					"River",
+					null
+				],
+				[
+					"Mountain",
+					null
+				],
+				[
+					"Pearl",
+					null
+				],
+				[
+					"Jade",
+					[
+						"#0B6E4F",
+						"#FFFFFF"
+					]
+				],
+				[
+					"Glory",
+					null
+				]
+			],
+			"stadium": [
+				"{city} Olympic Stadium",
+				"{city} Sports Center",
+				"{city} Stadium"
+			],
+			"people": [
+				"Rong Zhihang",
+				"Li Huitang"
+			]
+		}
+	}
+}

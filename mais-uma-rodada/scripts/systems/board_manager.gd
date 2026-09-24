@@ -89,8 +89,10 @@ static func job_offers(world: GameWorld, from_club: Club) -> Array:
 		if c.reputation > from_club.reputation + 3.0:
 			continue
 		var score := -absf(c.reputation - (from_club.reputation - 8.0))
-		if c.division == mini(from_club.division + 1, world.season.leagues.size() - 1):
-			score += 6.0
+		if c.nation == from_club.nation:
+			score += 10.0
+			if c.tier == from_club.tier + 1:
+				score += 6.0
 		score += world.rng.randf() * 6.0
 		cands.append([score, c.id])
 	cands.sort_custom(func(a, b): return a[0] > b[0])

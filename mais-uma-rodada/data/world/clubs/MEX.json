@@ -1,0 +1,455 @@
+{
+	"nation": "MEX",
+	"_doc": "México (liga fechada de 18).",
+	"clubs": [
+		{
+			"key": "MEX_AGU",
+			"name": "Coapa Águilas",
+			"short": "Águilas",
+			"abbr": "AGU",
+			"nick": "Azulcremas",
+			"city": "Ciudad de México",
+			"founded": 1916,
+			"league": "MEX1",
+			"rep": 82,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFE600",
+				"#1D3F91"
+			],
+			"stadium": "Estadio de Santa Úrsula",
+			"capacity": 83000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": [
+				"MEX_GDL",
+				"MEX_CEM",
+				"MEX_FEL"
+			]
+		},
+		{
+			"key": "MEX_GDL",
+			"name": "Guadalajara Rojiblanco",
+			"short": "Rebaño",
+			"abbr": "GDL",
+			"nick": "Rebaño Sagrado",
+			"city": "Guadalajara",
+			"founded": 1906,
+			"league": "MEX1",
+			"rep": 80,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Zapopan",
+			"capacity": 46000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"MEX_AGU",
+				"MEX_ATL"
+			]
+		},
+		{
+			"key": "MEX_CEM",
+			"name": "Cementero Celeste",
+			"short": "Cementeros",
+			"abbr": "CEM",
+			"nick": "Máquina",
+			"city": "Ciudad de México",
+			"founded": 1927,
+			"league": "MEX1",
+			"rep": 78,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Noria",
+			"capacity": 35000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"MEX_AGU"
+			]
+		},
+		{
+			"key": "MEX_FEL",
+			"name": "Universitarios CU",
+			"short": "Felinos",
+			"abbr": "FEL",
+			"nick": "Felinos",
+			"city": "Ciudad de México",
+			"founded": 1954,
+			"league": "MEX1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#0D2A5C",
+				"#C5A572"
+			],
+			"stadium": "Estadio de Ciudad Universitaria",
+			"capacity": 58000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"MEX_AGU"
+			]
+		},
+		{
+			"key": "MEX_AUR",
+			"name": "San Nicolás Auriazul",
+			"short": "Auriazules",
+			"abbr": "AUR",
+			"nick": "Felinos del Norte",
+			"city": "San Nicolás de los Garza",
+			"founded": 1960,
+			"league": "MEX1",
+			"rep": 78,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FDB913",
+				"#1D3F91"
+			],
+			"stadium": "Estadio Universitario del Norte",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"MEX_RAY"
+			]
+		},
+		{
+			"key": "MEX_RAY",
+			"name": "Monterrey Rayado",
+			"short": "Rayados",
+			"abbr": "RAY",
+			"nick": "Pandilla",
+			"city": "Monterrey",
+			"founded": 1945,
+			"league": "MEX1",
+			"rep": 78,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Cerro de la Silla",
+			"capacity": 53500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"MEX_AUR"
+			]
+		},
+		{
+			"key": "MEX_TOL",
+			"name": "Toluca Diablos",
+			"short": "Diablos",
+			"abbr": "TOL",
+			"nick": "Diablos Rojos",
+			"city": "Toluca",
+			"founded": 1917,
+			"league": "MEX1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Valle de Toluca",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_GRR",
+			"name": "Torreón Guerreros",
+			"short": "Guerreros",
+			"abbr": "GRR",
+			"nick": "Guerreros",
+			"city": "Torreón",
+			"founded": 1983,
+			"league": "MEX1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Laguna",
+			"capacity": 30000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_ESM",
+			"name": "León Esmeralda",
+			"short": "Esmeraldas",
+			"abbr": "ESM",
+			"nick": "Panzas Verdes",
+			"city": "León",
+			"founded": 1944,
+			"league": "MEX1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Bajío",
+			"capacity": 31000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_TUZ",
+			"name": "Pachuca Tuzos",
+			"short": "Tuzos",
+			"abbr": "TUZ",
+			"nick": "Tuzos",
+			"city": "Pachuca",
+			"founded": 1901,
+			"league": "MEX1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Bella Airosa",
+			"capacity": 27500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_ATL",
+			"name": "Guadalajara Rojinegro",
+			"short": "Zorros",
+			"abbr": "ATL",
+			"nick": "Zorros",
+			"city": "Guadalajara",
+			"founded": 1916,
+			"league": "MEX1",
+			"rep": 64,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio del Jalisco",
+			"capacity": 55000,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"MEX_GDL"
+			]
+		},
+		{
+			"key": "MEX_RYS",
+			"name": "Aguascalientes Rayos",
+			"short": "Rayos",
+			"abbr": "RYS",
+			"nick": "Rayos",
+			"city": "Aguascalientes",
+			"founded": 1923,
+			"league": "MEX1",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Feria",
+			"capacity": 23800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "bolt"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_PUE",
+			"name": "Puebla Camoteros",
+			"short": "Camoteros",
+			"abbr": "PUE",
+			"nick": "Camoteros",
+			"city": "Puebla",
+			"founded": 1944,
+			"league": "MEX1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Estadio de los Fuertes",
+			"capacity": 51700,
+			"kit": "diagonal",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_GAL",
+			"name": "Querétaro Gallos",
+			"short": "Gallos",
+			"abbr": "GAL",
+			"nick": "Gallos Blancos",
+			"city": "Querétaro",
+			"founded": 1950,
+			"league": "MEX1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#1D5BBF"
+			],
+			"stadium": "Estadio del Cerro",
+			"capacity": 33000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_CAN",
+			"name": "Mazatlán Cañoneros",
+			"short": "Cañoneros",
+			"abbr": "CAN",
+			"nick": "Cañoneros",
+			"city": "Mazatlán",
+			"founded": 2020,
+			"league": "MEX1",
+			"rep": 52,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Puerto",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_XOL",
+			"name": "Tijuana Xolos",
+			"short": "Xolos",
+			"abbr": "XOL",
+			"nick": "Xolos",
+			"city": "Tijuana",
+			"founded": 2007,
+			"league": "MEX1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio de la Frontera",
+			"capacity": 31000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_BRA",
+			"name": "Ciudad Juárez Bravos",
+			"short": "Bravos",
+			"abbr": "BRV",
+			"nick": "Bravos",
+			"city": "Ciudad Juárez",
+			"founded": 2015,
+			"league": "MEX1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#006437",
+				"#E30613"
+			],
+			"stadium": "Estadio del Bravo",
+			"capacity": 19700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MEX_TUN",
+			"name": "Potosí Tuneros",
+			"short": "Tuneros",
+			"abbr": "TUN",
+			"nick": "Tuneros",
+			"city": "San Luis Potosí",
+			"founded": 1957,
+			"league": "MEX1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Altiplano",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		}
+	]
+}

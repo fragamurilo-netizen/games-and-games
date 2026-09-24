@@ -23,13 +23,17 @@ static func header(compact: bool) -> HBoxContainer:
 
 
 static func row(w: GameWorld, league: League, club_id: int, pos: int, compact: bool) -> Control:
-	var r: Dictionary = league.table[club_id]
+	return table_row(w, league.table[club_id], club_id, pos, compact, CompetitionManager.zone_color(CompetitionManager.zone_of(league, pos)))
+
+
+## Linha de classificação a partir de uma linha de tabela (liga ou grupo de copa).
+static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compact: bool, zone: Color) -> Control:
 	var cl := w.club(club_id)
 	var is_user := w.is_user_club(club_id)
 	var h := UIKit.hbox(6)
 	var bar := ColorRect.new()
 	bar.custom_minimum_size = Vector2(5, 0)
-	bar.color = CompetitionManager.zone_color(CompetitionManager.zone_of(league, pos))
+	bar.color = zone
 	h.add_child(bar)
 	var pl := UIKit.label(str(pos), "H3")
 	pl.custom_minimum_size.x = 36
@@ -75,16 +79,18 @@ static func row(w: GameWorld, league: League, club_id: int, pos: int, compact: b
 	return row
 
 
-## Legenda das zonas da divisão (título, acesso, rebaixamento).
+## Legenda das zonas da liga (título, vaga continental, acesso, rebaixamento).
 static func legend(league: League) -> HFlowContainer:
 	var f := UIKit.flow(14)
-	var cfg := DatabaseManager.division_config(league.division)
-	if league.division == 0:
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_TITLE), "Campeão"))
-	if int(cfg["promoted"]) > 0:
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION), "Acesso (%d)" % int(cfg["promoted"])))
-	if int(cfg["relegated"]) > 0:
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % int(cfg["relegated"])))
+	f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_TITLE), "Campeão"))
+	var spots := CupManager.continental_spots(league)
+	if spots > 0:
+		var cup := CupManager.cup_short(CupManager.cup_of_nation(league.nation))
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_CONTINENTAL), "%s (%d)" % [cup, spots]))
+	if league.promoted_count() > 0:
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION), "Acesso (%d)" % league.promoted_count()))
+	if league.relegated_count() > 0:
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % league.relegated_count()))
 	return f
 
 
@@ -120,3 +126,46 @@ static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, capti
 	h.add_child(UIKit.label(value, "Stat"))
 	var pid := p.id
 	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat")
+
+
+## Detalhes de um jogo (gols, craque, público) ou a prévia (campanhas) se ainda não aconteceu.
+static func fixture_details(w: GameWorld, f: Fixture) -> void:
+	var v := UIKit.vbox(12)
+	v.custom_minimum_size.x = 600
+	var home := w.club(f.home)
+	var away := w.club(f.away)
+	var t := UIKit.label("%s %s %s" % [home.short_name, ("%d – %d" % [f.hg, f.ag]) if f.played else "×", away.short_name], "Title", true)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(t)
+	v.add_child(UIKit.label("%s · %s" % ["Campo neutro" if f.neutral else home.stadium, w.season.date_label(f.slot)], "Small"))
+	if not f.played:
+		for cl in [home, away]:
+			var lg := w.league_of(cl.id)
+			if lg != null and lg.table.has(cl.id):
+				var r: Dictionary = lg.table[cl.id]
+				v.add_child(UIKit.kv("%s (%s)" % [cl.short_name, lg.short_name], "%d pts, %dV %dE %dD" % [r["pts"], r["w"], r["d"], r["l"]]))
+		if MatchEngine.is_derby(w, f.home, f.away):
+			v.add_child(UIKit.colored("Clássico.", UIColors.RED, "H3"))
+	else:
+		if f.extra_time:
+			v.add_child(UIKit.label("Decidido na prorrogação" if not f.has_penalties() else "Pênaltis: %d x %d" % [f.pen_h, f.pen_a], "Accent"))
+		for side in 2:
+			for g in f.goals:
+				if int(g[1]) != side:
+					continue
+				var p := w.player(int(g[2]))
+				var txt := "%s  %s" % [Fmt.minute(int(g[0]), int(g[4]) if g.size() > 4 else 0), p.display_name() if p != null else "?"]
+				if int(g[3]) == Fixture.GOAL_PENALTY:
+					txt += " (p)"
+				elif int(g[3]) == Fixture.GOAL_OWN:
+					txt += " (contra)"
+				var l := UIKit.label(txt, "")
+				l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if side == 0 else HORIZONTAL_ALIGNMENT_RIGHT
+				v.add_child(l)
+		var motm := w.player(f.motm)
+		if motm != null:
+			v.add_child(UIKit.kv("Craque do jogo", motm.display_name(), UIColors.ACCENT))
+		if f.attendance > 0:
+			v.add_child(UIKit.kv("Público", Fmt.thousands(f.attendance)))
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v)

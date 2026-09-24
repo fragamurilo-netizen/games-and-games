@@ -52,32 +52,66 @@ const SQUAD_TEMPLATE: Array = [
 	[Pos.ST, 0.0, 0], [Pos.ST, -4.0, 1], [Pos.ST, -10.0, 2],
 ]
 
-static var _city_names: Array = []
-static var _city_weights: Array = []
-static var _city_region: Dictionary = {}
+static var _hometowns: Dictionary = {} # nação -> [nomes, pesos]
+static var _free_pool: Array = [] # [nações, pesos] para agentes livres
 
 
-static func _prepare_cities() -> void:
-	if not _city_names.is_empty():
-		return
-	for c in DatabaseManager.cities()["cities"]:
-		_city_names.append(c["name"])
-		_city_weights.append(float(c["size"]) * float(c["size"]))
-		_city_region[c["name"]] = c["region"]
-	for c in DatabaseManager.cities()["extra_cities"]:
-		_city_region[c["name"]] = c["region"]
+static func _hometown_table(nation: String) -> Array:
+	if not _hometowns.has(nation):
+		var names: Array = []
+		var weights: Array = []
+		for cd in DatabaseManager.nation(nation).get("cities", []):
+			names.append(cd[0])
+			weights.append(float(cd[1]) * float(cd[1]))
+		_hometowns[nation] = [names, weights]
+	return _hometowns[nation]
 
 
-static func region_of_city(city: String) -> String:
-	_prepare_cities()
-	return _city_region.get(city, "")
-
-
-static func pick_hometown(rng: RandomNumberGenerator, club_city: String) -> String:
-	_prepare_cities()
+## Cidade natal: às vezes a cidade do clube (se for do mesmo país), senão uma cidade do país pelo tamanho.
+static func pick_hometown(rng: RandomNumberGenerator, nation: String, club_city: String) -> String:
 	if club_city != "" and rng.randf() < 0.3:
 		return club_city
-	return _city_names[RngUtil.weighted_index(rng, _city_weights)]
+	var t := _hometown_table(nation)
+	if t[0].is_empty():
+		return ""
+	return t[0][RngUtil.weighted_index(rng, t[1])]
+
+
+## Nacionalidade de um jogador de elenco: estrangeiros conforme a divisão, o tamanho do clube e
+## as rotas de importação do país (ingleses compram franceses; sauditas, brasileiros...).
+static func pick_nationality(rng: RandomNumberGenerator, club: Club) -> String:
+	var n := DatabaseManager.nation(club.nation)
+	var shares: Array = n.get("foreign", [0.1])
+	var share := float(shares[clampi(club.tier - 1, 0, shares.size() - 1)])
+	var rr: Array = club.league_cfg().get("rep", [40, 70])
+	var t := clampf((club.reputation - float(rr[0])) / maxf(1.0, float(rr[1]) - float(rr[0])), 0.0, 1.0)
+	share *= 0.7 + 0.6 * t
+	if rng.randf() >= share:
+		return club.nation
+	return pick_import(rng, club.nation)
+
+
+static func pick_import(rng: RandomNumberGenerator, nation: String) -> String:
+	var imports: Dictionary = DatabaseManager.nation(nation).get("imports", {})
+	if imports.is_empty():
+		return nation
+	return RngUtil.weighted_key(rng, imports)
+
+
+## Nacionalidade de um agente livre: um país com liga (pelo número de clubes) ou um de seus "exportadores".
+static func pick_free_nationality(rng: RandomNumberGenerator) -> String:
+	if _free_pool.is_empty():
+		var codes: Array = []
+		var weights: Array = []
+		for code in DatabaseManager.league_nations():
+			var slots := 0
+			for lid in DatabaseManager.leagues_of_nation(code):
+				slots += int(DatabaseManager.league_cfg(lid)["teams"])
+			codes.append(code)
+			weights.append(float(slots))
+		_free_pool = [codes, weights]
+	var base: String = _free_pool[0][RngUtil.weighted_index(rng, _free_pool[1])]
+	return base if rng.randf() < 0.7 else pick_import(rng, base)
 
 
 ## Cria um jogador sem clube. `target` é o overall desejado na posição.
@@ -89,8 +123,10 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.position = pos
 	p.birth_year = world.year - age
 	p.nationality = nationality
+	var origin := NameGenerator.pick_origin(rng, nationality)
+	p.eth = int(origin["eth"])
 	p.foot = _pick_foot(rng, pos)
-	p.height = int(round(RngUtil.gauss(rng, HEIGHT_MEAN[pos], 5.0, 163.0, 203.0)))
+	p.height = int(round(RngUtil.gauss(rng, HEIGHT_MEAN[pos] + _height_shift(p.eth), 5.0, 163.0, 203.0)))
 	_pick_traits(rng, p)
 	_generate_attributes(rng, p, target, age)
 	p.secondary = _pick_secondary(rng, pos)
@@ -100,17 +136,28 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.injury_prone = clampi(int(round(rng.randfn(9.0, 3.5))) + (2 if p.has_trait("festeiro") else 0), 1, 20)
 	p.scout_noise = rng.randi_range(-6, 6)
 	p.morale = rng.randf_range(55.0, 75.0)
-	if nationality == "VAL":
-		p.hometown = pick_hometown(rng, club_city)
-	var names := NameGenerator.generate(rng, nationality, {
+	p.hometown = pick_hometown(rng, nationality, club_city)
+	var names := NameGenerator.generate(rng, origin["c"], {
 		"pos": pos, "height": p.height, "foot": p.foot, "attrs": p.attrs,
-		"region": region_of_city(p.hometown),
+		"region": ClubGenerator.region_of_city(nationality, p.hometown),
 	}, used_names)
 	p.first_name = names["first"]
 	p.last_name = names["last"]
 	p.nickname = names["nickname"]
 	p.known_as = names["known_as"]
 	return p
+
+
+## Diferença média de altura por etnia (cm), só para dar variedade física coerente.
+static func _height_shift(eth: int) -> float:
+	match eth:
+		0:
+			return 2.0 # nor
+		4, 5:
+			return -2.0 # lat, and
+		8:
+			return -2.5 # eas
+	return 0.0
 
 
 static func _pick_foot(rng: RandomNumberGenerator, pos: int) -> int:
@@ -248,10 +295,10 @@ static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> i
 	return clampi(ovr + int(round(gap)), ovr, 96)
 
 
-## Potencial de um jovem da base, influenciado pela qualidade da base do clube.
-static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: int, drift: float = 0.0) -> int:
-	var gap := rng.randfn(5.0 + youth_level * 0.05 - drift * 0.8, 6.5)
-	var gem_chance := 0.004 + youth_level * 0.0002
+## Potencial de um jovem da base, influenciado pela qualidade da base do clube e pela escola do país.
+static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: int, drift: float = 0.0, nation_bonus: float = 0.0) -> int:
+	var gap := rng.randfn(5.0 + youth_level * 0.05 - drift * 0.8 + nation_bonus, 6.5)
+	var gem_chance := 0.004 + youth_level * 0.0002 + nation_bonus * 0.001
 	if rng.randf() < gem_chance:
 		gap += rng.randf_range(12.0, 20.0)
 	return clampi(ovr + int(round(maxf(2.0, gap))), ovr + 2, 95)
@@ -290,8 +337,8 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 			target -= (21 - age) * 1.6
 		elif age >= 33:
 			target -= (age - 32) * 1.0
-		var nat := NameGenerator.pick_nationality(rng, club.division)
-		if nat != "VAL":
+		var nat := pick_nationality(rng, club)
+		if nat != club.nation:
 			target += 1.5
 		target = clampf(target, 25.0, 92.0)
 		var p := create(world, rng, pos, target, age, nat, club.city, used_names)
@@ -388,18 +435,19 @@ static func assign_shirt_numbers(world: GameWorld, club: Club) -> void:
 static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Club, used_names: Dictionary) -> Player:
 	var pos: int = RngUtil.weighted_index(rng, [1.2, 1.0, 1.6, 1.0, 1.0, 1.4, 1.0, 0.6, 0.6, 0.9, 0.9, 1.6])
 	var age := rng.randi_range(16, 18)
-	var div_level := _division_level(club.division, club.reputation)
+	var level := league_level(club)
 	var drift := clampf(float(world.stats.get("talent_drift", 0.0)), -8.0, 8.0)
-	var target := div_level - 17.0 + club.youth_level * 0.06 + rng.randfn(0.0, 4.0) + (age - 16) * 1.5 - drift
-	target = clampf(target, 22.0, 70.0)
-	var nat := "VAL" if rng.randf() < 0.97 else NameGenerator.pick_nationality(rng, 0)
+	var nation_bonus := float(DatabaseManager.nation(club.nation).get("youth", 0.0))
+	var target := level - 17.0 + club.youth_level * 0.06 + rng.randfn(0.0, 4.0) + (age - 16) * 1.5 - drift + nation_bonus * 0.4
+	target = clampf(target, 22.0, 72.0)
+	var nat := club.nation if rng.randf() < 0.95 else pick_import(rng, club.nation)
 	var p := create(world, rng, pos, target, age, nat, club.city, used_names)
-	p.potential = youth_potential(rng, p.overall, club.youth_level, drift)
+	p.potential = youth_potential(rng, p.overall, club.youth_level, drift, nation_bonus)
 	p.squad_status = Player.STATUS_PROSPECT
 	sign_to_club(world, rng, p, club, false)
 	p.contract_end = world.year + 3
-	p.wage = Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6)
-	if p.nationality == "VAL" and rng.randf() < 0.55:
+	p.wage = Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5)))
+	if p.nationality == club.nation and rng.randf() < 0.55:
 		p.hometown = club.city
 	return p
 
@@ -409,8 +457,8 @@ static func create_free_agent(world: GameWorld, rng: RandomNumberGenerator, leve
 	var pos: int = RngUtil.weighted_index(rng, [1.0, 0.8, 1.4, 0.8, 0.9, 1.2, 0.8, 0.5, 0.5, 0.7, 0.7, 1.3])
 	var age := rng.randi_range(19, 35)
 	var target := level + rng.randfn(-4.0, 5.0)
-	var nat := NameGenerator.pick_nationality(rng, 1)
-	var p := create(world, rng, pos, clampf(target, 30.0, 80.0), age, nat, "", used_names)
+	var nat := pick_free_nationality(rng)
+	var p := create(world, rng, pos, clampf(target, 30.0, 82.0), age, nat, "", used_names)
 	p.club_id = -1
 	p.wage = 0
 	p.contract_end = world.year
@@ -420,14 +468,11 @@ static func create_free_agent(world: GameWorld, rng: RandomNumberGenerator, leve
 	return p
 
 
-## Nível típico (overall dos titulares) para uma divisão e reputação.
-static func _division_level(div: int, rep: float) -> float:
-	var cfg: Dictionary = DatabaseManager.division_config(div)
-	var lr: Array = cfg["level_range"]
-	var rr: Array = cfg["rep_range"]
-	var t := clampf((rep - float(rr[0])) / maxf(1.0, float(rr[1]) - float(rr[0])), 0.0, 1.0)
-	return float(lr[0]) + (float(lr[1]) - float(lr[0])) * t
+## Nível típico (overall dos titulares) de um clube na sua liga, sem o arquétipo.
+static func league_level(club: Club) -> float:
+	return FinanceManager.level_of_rep(club.league_cfg(), club.reputation)
 
 
-static func club_level(div: int, rep: float, arch: Dictionary) -> float:
-	return _division_level(div, rep) + float(arch.get("level_mod", 0.0))
+## Nível-alvo do elenco de um clube (liga + reputação + arquétipo).
+static func club_level(club: Club) -> float:
+	return league_level(club) + float(club.arch().get("level_mod", 0.0))

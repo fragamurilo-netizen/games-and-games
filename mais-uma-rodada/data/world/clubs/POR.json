@@ -1,0 +1,139 @@
+{
+	"nation": "POR",
+	"_doc": "Portugal (liga de 10; clubes restantes gerados).",
+	"clubs": [
+		{
+			"key": "POR_ENC",
+			"name": "Lisboa Encarnado",
+			"short": "Encarnados",
+			"abbr": "ENC",
+			"nick": "Águias",
+			"city": "Lisboa",
+			"founded": 1904,
+			"league": "POR1",
+			"rep": 86,
+			"arch": "vendedor",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio da Estrada da Luz",
+			"capacity": 65000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": [
+				"POR_LEO",
+				"POR_DRA"
+			]
+		},
+		{
+			"key": "POR_LEO",
+			"name": "Lisboa Leões",
+			"short": "Leões",
+			"abbr": "LEO",
+			"nick": "Leões",
+			"city": "Lisboa",
+			"founded": 1906,
+			"league": "POR1",
+			"rep": 84,
+			"arch": "formador",
+			"colors": [
+				"#008057",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Alvalade",
+			"capacity": 50000,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"POR_ENC",
+				"POR_DRA"
+			]
+		},
+		{
+			"key": "POR_DRA",
+			"name": "Porto Dragões",
+			"short": "Dragões",
+			"abbr": "DRA",
+			"nick": "Dragões",
+			"city": "Porto",
+			"founded": 1893,
+			"league": "POR1",
+			"rep": 85,
+			"arch": "vendedor",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio das Antas",
+			"capacity": 50000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "bolt"
+			},
+			"rivals": [
+				"POR_ENC",
+				"POR_LEO"
+			]
+		},
+		{
+			"key": "POR_BRG",
+			"name": "Braga Arsenalistas",
+			"short": "Arsenalistas",
+			"abbr": "BRG",
+			"nick": "Guerreiros do Minho",
+			"city": "Braga",
+			"founded": 1921,
+			"league": "POR1",
+			"rep": 74,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio da Pedreira",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"POR_GMR"
+			]
+		},
+		{
+			"key": "POR_GMR",
+			"name": "Guimarães Conquistadores",
+			"short": "Conquistadores",
+			"abbr": "GMR",
+			"nick": "Vimaranenses",
+			"city": "Guimarães",
+			"founded": 1922,
+			"league": "POR1",
+			"rep": 66,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estádio do Castelo",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"POR_BRG"
+			]
+		}
+	]
+}

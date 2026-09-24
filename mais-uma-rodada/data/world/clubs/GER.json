@@ -1,0 +1,923 @@
+{
+	"nation": "GER",
+	"_doc": "Alemanha: 1ª e 2ª divisão.",
+	"clubs": [
+		{
+			"key": "GER_MUR",
+			"name": "München Rot",
+			"short": "München Rot",
+			"abbr": "MUR",
+			"nick": "Die Roten",
+			"city": "München",
+			"founded": 1900,
+			"league": "GER1",
+			"rep": 95,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#DC052D",
+				"#FFFFFF"
+			],
+			"stadium": "Fröttmaning Arena",
+			"capacity": 75000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"GER_DOR",
+				"GER_SEC"
+			]
+		},
+		{
+			"key": "GER_DOR",
+			"name": "Dortmund Schwarzgelb",
+			"short": "Schwarzgelb",
+			"abbr": "DOR",
+			"nick": "Borussen",
+			"city": "Dortmund",
+			"founded": 1909,
+			"league": "GER1",
+			"rep": 88,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FDE100",
+				"#111111"
+			],
+			"stadium": "Westfalenpark Stadion",
+			"capacity": 81000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_GEL",
+				"GER_MUR"
+			]
+		},
+		{
+			"key": "GER_LEV",
+			"name": "Leverkusen Werkself",
+			"short": "Werkself",
+			"abbr": "LEV",
+			"nick": "Werkself",
+			"city": "Leverkusen",
+			"founded": 1904,
+			"league": "GER1",
+			"rep": 86,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E32221",
+				"#111111"
+			],
+			"stadium": "Stadion am Rhein",
+			"capacity": 30200,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"GER_KOE"
+			]
+		},
+		{
+			"key": "GER_RBL",
+			"name": "Leipzig Rasenball",
+			"short": "Rasenball",
+			"abbr": "RBL",
+			"nick": "Roten Bullen",
+			"city": "Leipzig",
+			"founded": 2009,
+			"league": "GER1",
+			"rep": 82,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFFFFF",
+				"#DD0741"
+			],
+			"stadium": "Zentralstadion Leipzig",
+			"capacity": 47000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"symbol": "bolt"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_FFM",
+			"name": "Frankfurt Adler",
+			"short": "Adler",
+			"abbr": "FFM",
+			"nick": "Adlerträger",
+			"city": "Frankfurt",
+			"founded": 1899,
+			"league": "GER1",
+			"rep": 80,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E1000F",
+				"#111111"
+			],
+			"stadium": "Waldstadion Frankfurt",
+			"capacity": 58000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_STU",
+			"name": "Stuttgart Weißrot",
+			"short": "Schwaben",
+			"abbr": "STU",
+			"nick": "Schwaben",
+			"city": "Stuttgart",
+			"founded": 1893,
+			"league": "GER1",
+			"rep": 78,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E32219"
+			],
+			"stadium": "Neckarpark Stadion",
+			"capacity": 60000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": [
+				"GER_KAR"
+			]
+		},
+		{
+			"key": "GER_MGL",
+			"name": "Gladbach Fohlen",
+			"short": "Fohlen",
+			"abbr": "MGL",
+			"nick": "Fohlen",
+			"city": "Mönchengladbach",
+			"founded": 1900,
+			"league": "GER1",
+			"rep": 76,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Nordpark Stadion",
+			"capacity": 54000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_KOE"
+			]
+		},
+		{
+			"key": "GER_WOB",
+			"name": "Wolfsburg Grün",
+			"short": "Wölfe",
+			"abbr": "WOB",
+			"nick": "Wölfe",
+			"city": "Wolfsburg",
+			"founded": 1945,
+			"league": "GER1",
+			"rep": 72,
+			"arch": "rico_promovido",
+			"colors": [
+				"#65B32E",
+				"#FFFFFF"
+			],
+			"stadium": "Allerpark Arena",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_FRB",
+			"name": "Freiburg Breisgau",
+			"short": "Breisgau",
+			"abbr": "FRB",
+			"nick": "Breisgauer",
+			"city": "Freiburg",
+			"founded": 1904,
+			"league": "GER1",
+			"rep": 72,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#E30613"
+			],
+			"stadium": "Stadion am Flugplatz",
+			"capacity": 34700,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_HOF",
+			"name": "Kraichgau Blau",
+			"short": "Kraichgau",
+			"abbr": "HOF",
+			"nick": "Kraichgauer",
+			"city": "Sinsheim",
+			"founded": 1899,
+			"league": "GER1",
+			"rep": 70,
+			"arch": "rico_promovido",
+			"colors": [
+				"#1961B5",
+				"#FFFFFF"
+			],
+			"stadium": "Arena Sinsheim",
+			"capacity": 30100,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_MAI",
+			"name": "Mainz Rheinhessen",
+			"short": "Rheinhessen",
+			"abbr": "MAI",
+			"nick": "Nullfünfer",
+			"city": "Mainz",
+			"founded": 1905,
+			"league": "GER1",
+			"rep": 66,
+			"arch": "vendedor",
+			"colors": [
+				"#C3141E",
+				"#FFFFFF"
+			],
+			"stadium": "Bruchweg Arena",
+			"capacity": 33300,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_BRE",
+			"name": "Bremen Grünweiß",
+			"short": "Grünweiß",
+			"abbr": "BRE",
+			"nick": "Werderaner",
+			"city": "Bremen",
+			"founded": 1899,
+			"league": "GER1",
+			"rep": 72,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1D9053",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion an der Weser",
+			"capacity": 42100,
+			"kit": "plain",
+			"crest": {
+				"shape": "square",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"GER_HAM"
+			]
+		},
+		{
+			"key": "GER_AUG",
+			"name": "Augsburg Fuggerstädter",
+			"short": "Fuggerstädter",
+			"abbr": "AUG",
+			"nick": "Fuggerstädter",
+			"city": "Augsburg",
+			"founded": 1907,
+			"league": "GER1",
+			"rep": 64,
+			"arch": "defensivo",
+			"colors": [
+				"#BA3733",
+				"#46714D"
+			],
+			"stadium": "Arena Augsburg",
+			"capacity": 30600,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_UNI",
+			"name": "Berlin Eisern",
+			"short": "Eiserne",
+			"abbr": "UNI",
+			"nick": "Eiserne",
+			"city": "Berlin",
+			"founded": 1966,
+			"league": "GER1",
+			"rep": 66,
+			"arch": "defensivo",
+			"colors": [
+				"#D4011D",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Köpenick",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": [
+				"GER_BER"
+			]
+		},
+		{
+			"key": "GER_PAU",
+			"name": "Hamburg Kiezkicker",
+			"short": "Kiezkicker",
+			"abbr": "PAU",
+			"nick": "Kiezkicker",
+			"city": "Hamburg",
+			"founded": 1910,
+			"league": "GER1",
+			"rep": 64,
+			"arch": "azarao",
+			"colors": [
+				"#624839",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion am Heiligengeistfeld",
+			"capacity": 29500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"GER_HAM"
+			]
+		},
+		{
+			"key": "GER_HEI",
+			"name": "Heidenheim Brenz",
+			"short": "Brenz",
+			"abbr": "HEI",
+			"nick": "Brenzer",
+			"city": "Heidenheim",
+			"founded": 1846,
+			"league": "GER1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E3000F",
+				"#003B79"
+			],
+			"stadium": "Stadion auf dem Schlossberg",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_KOE",
+			"name": "Köln Geißböcke",
+			"short": "Geißböcke",
+			"abbr": "KOE",
+			"nick": "Geißböcke",
+			"city": "Köln",
+			"founded": 1948,
+			"league": "GER1",
+			"rep": 70,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#ED1C24"
+			],
+			"stadium": "Müngersdorf Stadion",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"GER_LEV",
+				"GER_MGL",
+				"GER_DUS"
+			]
+		},
+		{
+			"key": "GER_HAM",
+			"name": "Hamburg Rothosen",
+			"short": "Rothosen",
+			"abbr": "HAM",
+			"nick": "Rothosen",
+			"city": "Hamburg",
+			"founded": 1887,
+			"league": "GER1",
+			"rep": 72,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#0A3F86"
+			],
+			"stadium": "Stadion am Volkspark",
+			"capacity": 57000,
+			"kit": "plain",
+			"crest": {
+				"shape": "square",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"GER_BRE",
+				"GER_PAU"
+			]
+		},
+		{
+			"key": "GER_BER",
+			"name": "Berlin Westend",
+			"short": "Westend",
+			"abbr": "BER",
+			"nick": "Alte Dame",
+			"city": "Berlin",
+			"founded": 1892,
+			"league": "GER2",
+			"rep": 66,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#005CA9",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion am Olympiapark",
+			"capacity": 74000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_UNI"
+			]
+		},
+		{
+			"key": "GER_GEL",
+			"name": "Gelsenkirchen Knappen",
+			"short": "Knappen",
+			"abbr": "GEL",
+			"nick": "Knappen",
+			"city": "Gelsenkirchen",
+			"founded": 1904,
+			"league": "GER2",
+			"rep": 70,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#004D9D",
+				"#FFFFFF"
+			],
+			"stadium": "Berger Feld Arena",
+			"capacity": 62000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_DOR"
+			]
+		},
+		{
+			"key": "GER_BOC",
+			"name": "Bochum Revier",
+			"short": "Revier",
+			"abbr": "BOC",
+			"nick": "Unabsteigbaren",
+			"city": "Bochum",
+			"founded": 1848,
+			"league": "GER2",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#005BA9",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion an der Castroper Straße",
+			"capacity": 26000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_GEL",
+				"GER_DOR"
+			]
+		},
+		{
+			"key": "GER_KIE",
+			"name": "Kiel Störche",
+			"short": "Störche",
+			"abbr": "KIE",
+			"nick": "Störche",
+			"city": "Kiel",
+			"founded": 1900,
+			"league": "GER2",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#004B9C",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion am Westring",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_DAR",
+			"name": "Darmstadt Lilien",
+			"short": "Lilien",
+			"abbr": "DAR",
+			"nick": "Lilien",
+			"city": "Darmstadt",
+			"founded": 1898,
+			"league": "GER2",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#004C99",
+				"#FFFFFF"
+			],
+			"stadium": "Lilienstadion",
+			"capacity": 17800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_LAU",
+			"name": "Pfalz Lautern",
+			"short": "Lautern",
+			"abbr": "LAU",
+			"nick": "Rote Teufel",
+			"city": "Kaiserslautern",
+			"founded": 1900,
+			"league": "GER2",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E4003A",
+				"#FFFFFF"
+			],
+			"stadium": "Betzenberg Stadion",
+			"capacity": 49800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_SAA"
+			]
+		},
+		{
+			"key": "GER_HAN",
+			"name": "Hannover Roten",
+			"short": "Die Roten",
+			"abbr": "HAN",
+			"nick": "Die Roten",
+			"city": "Hannover",
+			"founded": 1896,
+			"league": "GER2",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C3001E",
+				"#111111"
+			],
+			"stadium": "Maschsee Stadion",
+			"capacity": 49000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_BSW"
+			]
+		},
+		{
+			"key": "GER_NUR",
+			"name": "Franken Club Nürnberg",
+			"short": "Glubb",
+			"abbr": "NUR",
+			"nick": "Der Club",
+			"city": "Nürnberg",
+			"founded": 1900,
+			"league": "GER2",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#AA1124",
+				"#111111"
+			],
+			"stadium": "Stadion am Dutzendteich",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_FUE"
+			]
+		},
+		{
+			"key": "GER_PAD",
+			"name": "Ostwestfalen Paderborn",
+			"short": "Ostwestfalen",
+			"abbr": "PAD",
+			"nick": "Paderborner",
+			"city": "Paderborn",
+			"founded": 1907,
+			"league": "GER2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D4E96",
+				"#111111"
+			],
+			"stadium": "Stadion Paderborn",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": [
+				"GER_BIE"
+			]
+		},
+		{
+			"key": "GER_KAR",
+			"name": "Karlsruhe Wildpark",
+			"short": "Wildpark",
+			"abbr": "KAR",
+			"nick": "Badener",
+			"city": "Karlsruhe",
+			"founded": 1894,
+			"league": "GER2",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#0059A5",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion im Wildpark",
+			"capacity": 34300,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_STU"
+			]
+		},
+		{
+			"key": "GER_DUS",
+			"name": "Düsseldorf Flingern",
+			"short": "Flingern",
+			"abbr": "DUS",
+			"nick": "Flingeraner",
+			"city": "Düsseldorf",
+			"founded": 1895,
+			"league": "GER2",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Arena am Rhein",
+			"capacity": 54600,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_KOE",
+				"GER_MGL"
+			]
+		},
+		{
+			"key": "GER_MAG",
+			"name": "Magdeburg Elbe",
+			"short": "Elbestädter",
+			"abbr": "MAG",
+			"nick": "Elbestädter",
+			"city": "Magdeburg",
+			"founded": 1965,
+			"league": "GER2",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#004B9C",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion an der Elbe",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_SAA",
+			"name": "Saar Elversberg",
+			"short": "Saarland",
+			"abbr": "SAA",
+			"nick": "Elversberger",
+			"city": "Spiesen-Elversberg",
+			"founded": 1907,
+			"league": "GER2",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion an der Kaiserlinde",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"GER_LAU"
+			]
+		},
+		{
+			"key": "GER_BSW",
+			"name": "Braunschweig Löwen",
+			"short": "Löwen",
+			"abbr": "BSW",
+			"nick": "Löwen",
+			"city": "Braunschweig",
+			"founded": 1895,
+			"league": "GER2",
+			"rep": 52,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD400",
+				"#1D5AA8"
+			],
+			"stadium": "Stadion an der Hamburger Straße",
+			"capacity": 23300,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"GER_HAN"
+			]
+		},
+		{
+			"key": "GER_FUE",
+			"name": "Fürth Kleeblatt",
+			"short": "Kleeblatt",
+			"abbr": "FUE",
+			"nick": "Kleeblätter",
+			"city": "Fürth",
+			"founded": 1903,
+			"league": "GER2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#009A44",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion am Ronhof",
+			"capacity": 16600,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"GER_NUR"
+			]
+		},
+		{
+			"key": "GER_MUE",
+			"name": "Münster Preußen",
+			"short": "Preußen",
+			"abbr": "MUE",
+			"nick": "Adlerträger",
+			"city": "Münster",
+			"founded": 1906,
+			"league": "GER2",
+			"rep": 46,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion an der Hammer Straße",
+			"capacity": 14300,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "cross"
+			},
+			"rivals": []
+		},
+		{
+			"key": "GER_BIE",
+			"name": "Teutoburger Arminen",
+			"short": "Arminen",
+			"abbr": "BIE",
+			"nick": "Arminen",
+			"city": "Bielefeld",
+			"founded": 1905,
+			"league": "GER2",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#004E95",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion auf der Alm",
+			"capacity": 26500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"GER_PAD"
+			]
+		},
+		{
+			"key": "GER_DRE",
+			"name": "Dresden Elbflorenz",
+			"short": "Elbflorenz",
+			"abbr": "DRE",
+			"nick": "Schwarz-Gelben",
+			"city": "Dresden",
+			"founded": 1953,
+			"league": "GER2",
+			"rep": 54,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD400",
+				"#111111"
+			],
+			"stadium": "Stadion am Großen Garten",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": []
+		}
+	]
+}

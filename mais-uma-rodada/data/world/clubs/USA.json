@@ -1,0 +1,520 @@
+{
+	"nation": "USA",
+	"_doc": "Estados Unidos/Canadá (liga fechada de 20).",
+	"clubs": [
+		{
+			"key": "USA_LAS",
+			"name": "Los Angeles Stars",
+			"short": "LA Stars",
+			"abbr": "LAS",
+			"nick": "Stars",
+			"city": "Los Angeles",
+			"founded": 1994,
+			"league": "USA1",
+			"rep": 72,
+			"arch": "rico_promovido",
+			"colors": [
+				"#00245D",
+				"#FFD200"
+			],
+			"stadium": "Carson Stadium",
+			"capacity": 27000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"USA_LAG",
+				"USA_SDG"
+			]
+		},
+		{
+			"key": "USA_LAG",
+			"name": "Los Angeles Black & Gold",
+			"short": "LA Gold",
+			"abbr": "LAG",
+			"nick": "Black & Gold",
+			"city": "Los Angeles",
+			"founded": 2014,
+			"league": "USA1",
+			"rep": 74,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#C39E6D"
+			],
+			"stadium": "Exposition Park Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"USA_LAS"
+			]
+		},
+		{
+			"key": "USA_MIA",
+			"name": "Miami Flamingos",
+			"short": "Flamingos",
+			"abbr": "MIA",
+			"nick": "Garzas",
+			"city": "Miami",
+			"founded": 2018,
+			"league": "USA1",
+			"rep": 76,
+			"arch": "rico_promovido",
+			"colors": [
+				"#F7B5CD",
+				"#231F20"
+			],
+			"stadium": "Fort Lauderdale Stadium",
+			"capacity": 21000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": [
+				"USA_ORL"
+			]
+		},
+		{
+			"key": "USA_SEA",
+			"name": "Seattle Sound",
+			"short": "Sound",
+			"abbr": "SEA",
+			"nick": "Sound",
+			"city": "Seattle",
+			"founded": 2007,
+			"league": "USA1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#5D9741",
+				"#236192"
+			],
+			"stadium": "Pioneer Square Stadium",
+			"capacity": 37700,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "wave"
+			},
+			"rivals": [
+				"USA_PDX",
+				"USA_VAN"
+			]
+		},
+		{
+			"key": "USA_ATA",
+			"name": "Atlanta Five Stripes",
+			"short": "Five Stripes",
+			"abbr": "ATA",
+			"nick": "Five Stripes",
+			"city": "Atlanta",
+			"founded": 2014,
+			"league": "USA1",
+			"rep": 70,
+			"arch": "rico_promovido",
+			"colors": [
+				"#80000A",
+				"#221F1F"
+			],
+			"stadium": "Downtown Atlanta Dome",
+			"capacity": 42500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_PDX",
+			"name": "Portland Timber",
+			"short": "Timber",
+			"abbr": "PDX",
+			"nick": "Timber",
+			"city": "Portland",
+			"founded": 2009,
+			"league": "USA1",
+			"rep": 66,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#004812",
+				"#EBE72B"
+			],
+			"stadium": "Goose Hollow Stadium",
+			"capacity": 25200,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"USA_SEA",
+				"USA_VAN"
+			]
+		},
+		{
+			"key": "USA_NYS",
+			"name": "New York Sky",
+			"short": "NY Sky",
+			"abbr": "NYS",
+			"nick": "Pigeons",
+			"city": "New York",
+			"founded": 2013,
+			"league": "USA1",
+			"rep": 68,
+			"arch": "rico_promovido",
+			"colors": [
+				"#6CACE4",
+				"#041E42"
+			],
+			"stadium": "Bronx Stadium",
+			"capacity": 28000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"USA_NJR"
+			]
+		},
+		{
+			"key": "USA_NJR",
+			"name": "New Jersey Red",
+			"short": "NJ Red",
+			"abbr": "NJR",
+			"nick": "Bulls",
+			"city": "Harrison",
+			"founded": 1994,
+			"league": "USA1",
+			"rep": 64,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Harrison Arena",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "bolt"
+			},
+			"rivals": [
+				"USA_NYS"
+			]
+		},
+		{
+			"key": "USA_CLB",
+			"name": "Columbus Workers",
+			"short": "Workers",
+			"abbr": "CLB",
+			"nick": "Crew",
+			"city": "Columbus",
+			"founded": 1994,
+			"league": "USA1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FEF200",
+				"#111111"
+			],
+			"stadium": "Arena District Stadium",
+			"capacity": 20400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": [
+				"USA_CIN"
+			]
+		},
+		{
+			"key": "USA_CIN",
+			"name": "Cincinnati Orange",
+			"short": "Cincy",
+			"abbr": "CIN",
+			"nick": "Orange & Blue",
+			"city": "Cincinnati",
+			"founded": 2015,
+			"league": "USA1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#F05323",
+				"#263B80"
+			],
+			"stadium": "West End Stadium",
+			"capacity": 26000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"USA_CLB"
+			]
+		},
+		{
+			"key": "USA_PHI",
+			"name": "Philadelphia Liberty",
+			"short": "Liberty",
+			"abbr": "PHI",
+			"nick": "Liberty",
+			"city": "Philadelphia",
+			"founded": 2008,
+			"league": "USA1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#071B2C",
+				"#B19B69"
+			],
+			"stadium": "Chester Riverfront Stadium",
+			"capacity": 18500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"USA_NYS"
+			]
+		},
+		{
+			"key": "USA_ORL",
+			"name": "Orlando Purple",
+			"short": "Purple",
+			"abbr": "ORL",
+			"nick": "Lions",
+			"city": "Orlando",
+			"founded": 2010,
+			"league": "USA1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#633492",
+				"#FFFFFF"
+			],
+			"stadium": "Downtown Orlando Stadium",
+			"capacity": 25500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"USA_MIA"
+			]
+		},
+		{
+			"key": "USA_NSH",
+			"name": "Nashville Coyotes",
+			"short": "Nashville",
+			"abbr": "NSH",
+			"nick": "Coyotes",
+			"city": "Nashville",
+			"founded": 2016,
+			"league": "USA1",
+			"rep": 60,
+			"arch": "defensivo",
+			"colors": [
+				"#ECE83A",
+				"#1F1646"
+			],
+			"stadium": "Fairgrounds Stadium",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_ATX",
+			"name": "Austin Verde",
+			"short": "Austin",
+			"abbr": "ATX",
+			"nick": "Verde",
+			"city": "Austin",
+			"founded": 2018,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#00B140",
+				"#111111"
+			],
+			"stadium": "North Austin Stadium",
+			"capacity": 20700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"USA_HOU"
+			]
+		},
+		{
+			"key": "USA_HOU",
+			"name": "Houston Oilmen",
+			"short": "Houston",
+			"abbr": "HOU",
+			"nick": "Orange",
+			"city": "Houston",
+			"founded": 2005,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F4911E",
+				"#101820"
+			],
+			"stadium": "East Downtown Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": [
+				"USA_ATX"
+			]
+		},
+		{
+			"key": "USA_KCB",
+			"name": "Kansas City Blue",
+			"short": "KC Blue",
+			"abbr": "KCB",
+			"nick": "Blue",
+			"city": "Kansas City",
+			"founded": 1995,
+			"league": "USA1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#91B0D5",
+				"#002F65"
+			],
+			"stadium": "Kansas Speedway Stadium",
+			"capacity": 18500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_MIN",
+			"name": "Minnesota Loons",
+			"short": "Loons",
+			"abbr": "MIN",
+			"nick": "Loons",
+			"city": "Saint Paul",
+			"founded": 2015,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8CD2F4",
+				"#231F20"
+			],
+			"stadium": "Midway Stadium",
+			"capacity": 19400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_SLC",
+			"name": "Salt Lake Royals",
+			"short": "Royals",
+			"abbr": "SLC",
+			"nick": "Royals",
+			"city": "Sandy",
+			"founded": 2004,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#B30838",
+				"#013A81"
+			],
+			"stadium": "Sandy Stadium",
+			"capacity": 20200,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_VAN",
+			"name": "Vancouver Waves",
+			"short": "Vancouver",
+			"abbr": "VAN",
+			"nick": "Caps",
+			"city": "Vancouver",
+			"founded": 2009,
+			"league": "USA1",
+			"rep": 62,
+			"arch": "vendedor",
+			"colors": [
+				"#FFFFFF",
+				"#00245E"
+			],
+			"stadium": "False Creek Stadium",
+			"capacity": 54500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": [
+				"USA_SEA",
+				"USA_PDX"
+			]
+		},
+		{
+			"key": "USA_SDG",
+			"name": "San Diego Sun",
+			"short": "San Diego",
+			"abbr": "SDG",
+			"nick": "Sun",
+			"city": "San Diego",
+			"founded": 2023,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#F1A7C9"
+			],
+			"stadium": "Mission Valley Stadium",
+			"capacity": 35000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"symbol": "sun"
+			},
+			"rivals": [
+				"USA_LAS"
+			]
+		}
+	]
+}

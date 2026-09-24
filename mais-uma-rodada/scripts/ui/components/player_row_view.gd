@@ -96,6 +96,6 @@ static func _cond_color(c: float) -> Color:
 ## Jogadores da mesma divisão são mais conhecidos; livres e de longe, menos.
 static func estimate(w: GameWorld, p: Player, value: int) -> int:
 	var err := 3.0
-	if p.club_id >= 0 and w.has_user() and w.club(p.club_id).division == w.user_club().division:
+	if p.club_id >= 0 and w.has_user() and w.club(p.club_id).league_id == w.user_league_id():
 		err = 1.5
 	return clampi(value + int(round(p.scout_noise / 6.0 * err)), 1, 99)

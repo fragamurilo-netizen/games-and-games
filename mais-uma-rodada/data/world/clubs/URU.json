@@ -1,0 +1,106 @@
+{
+	"nation": "URU",
+	"_doc": "Uruguai (liga de 12).",
+	"clubs": [
+		{
+			"key": "URU_MAU",
+			"name": "Montevideo Aurinegro",
+			"short": "Aurinegros",
+			"abbr": "MAU",
+			"nick": "Manyas",
+			"city": "Montevideo",
+			"founded": 1891,
+			"league": "URU1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio del Siglo",
+			"capacity": 40000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"URU_BOS"
+			]
+		},
+		{
+			"key": "URU_BOS",
+			"name": "Montevideo Tricolor",
+			"short": "Bolsos",
+			"abbr": "BOS",
+			"nick": "Bolsos",
+			"city": "Montevideo",
+			"founded": 1899,
+			"league": "URU1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Parque Central",
+			"capacity": 34000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"URU_MAU"
+			]
+		},
+		{
+			"key": "URU_VIO",
+			"name": "Montevideo Violeta",
+			"short": "Violetas",
+			"abbr": "VIO",
+			"nick": "Violetas",
+			"city": "Montevideo",
+			"founded": 1913,
+			"league": "URU1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Parque Rodó",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "URU_FRA",
+			"name": "Maroñas Franja",
+			"short": "Franja",
+			"abbr": "FRA",
+			"nick": "Franjeados",
+			"city": "Montevideo",
+			"founded": 1932,
+			"league": "URU1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio de la Curva",
+			"capacity": 18000,
+			"kit": "diagonal",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		}
+	]
+}

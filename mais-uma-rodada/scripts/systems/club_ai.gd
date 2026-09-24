@@ -164,9 +164,10 @@ static func choose_formation(world: GameWorld, club: Club) -> String:
 static var _strength_cache: Dictionary = {}
 
 
-## Força média dos titulares (para comparar com o adversário). Cacheada por dia de jogo.
+## Força média dos titulares (para comparar com o adversário). Cacheada por algumas datas:
+## muda devagar (lesões e contratações) e é consultada em todos os jogos do mundo.
 static func team_strength(world: GameWorld, club: Club) -> float:
-	var key := world.year * 1000 + (world.season.day if world.season != null else 0)
+	var key := world.year * 1000 + (world.season.day / 4 if world.season != null else 0)
 	var cached: Array = _strength_cache.get(club.id, [])
 	if cached.size() == 2 and cached[0] == key:
 		return cached[1]
@@ -176,27 +177,37 @@ static func team_strength(world: GameWorld, club: Club) -> float:
 
 
 static func _compute_strength(world: GameWorld, club: Club) -> float:
-	var squad := world.squad(club)
-	squad.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
-	var n := mini(11, squad.size())
+	var vals := PackedFloat32Array()
+	for pid in club.player_ids:
+		var p: Player = world.players.get(pid, null)
+		if p != null:
+			vals.append(p.ovr_f)
+	vals.sort()
+	var n := mini(11, vals.size())
 	var s := 0.0
 	for i in n:
-		s += squad[i].ovr_f
+		s += vals[vals.size() - 1 - i]
 	return s / maxf(1.0, n)
 
 
 ## Escalação completa da IA para um jogo.
 static func prepare_ai_sheet(world: GameWorld, club: Club, opponent: Club, is_home: bool) -> TeamSheet:
 	var sheet := club.sheet
-	var key := world.year * 100 + world.season.day / 6
+	# A formação é repensada no início da temporada e depois da janela do meio do ano.
+	var key := world.year * 100 + (1 if world.season != null and world.season.day >= 22 else 0)
 	var fresh := false
 	if sheet == null or club.ai_formation_key != key or not DatabaseManager.has_formation(sheet.formation):
 		sheet = TeamSheet.new()
 		sheet.formation = choose_formation(world, club)
 		club.ai_formation_key = key
 		fresh = true
-	# Reaproveita a escalação anterior se todos seguem disponíveis e descansados.
-	if fresh or not _still_valid(world, club, sheet):
+	# Reaproveita a escalação anterior se todos seguem disponíveis e descansados; se alguns não
+	# puderem jogar, troca só esses. De tempos em tempos (e com muitas baixas) refaz do zero.
+	var day := world.season.day if world.season != null else 0
+	var full := fresh or (day + club.id) % 10 == 0
+	if not full and not _still_valid(world, club, sheet):
+		full = not _repair_sheet(world, club, sheet)
+	if full:
 		sheet.starters = best_eleven(world, club, sheet.formation)
 		sheet.bench = pick_bench(world, club, sheet.starters)
 		pick_set_pieces(world, sheet)
@@ -220,6 +231,66 @@ static func prepare_ai_sheet(world: GameWorld, club: Club, opponent: Club, is_ho
 	sheet.auto_subs = true
 	club.sheet = sheet
 	return sheet
+
+
+## Conserta a escalação anterior trocando só quem não pode jogar (ou está esgotado) pelo melhor
+## disponível para aquela vaga. Retorna false se houver baixas demais (melhor refazer tudo).
+static func _repair_sheet(world: GameWorld, club: Club, sheet: TeamSheet) -> bool:
+	var slots: Array = DatabaseManager.formation(sheet.formation)["slots"]
+	if sheet.starters.size() != slots.size():
+		return false
+	var used := {}
+	var bad: Array = []
+	for i in slots.size():
+		var pid = sheet.starters[i]
+		var p: Player = world.players.get(pid if pid != null else -1, null)
+		if p == null or p.club_id != club.id or not p.is_available() or p.condition < 70.0 or used.has(p.id):
+			bad.append(i)
+		else:
+			used[p.id] = true
+	if bad.size() > 4:
+		return false
+	for i in bad:
+		var pos: int = slots[i]["pos"]
+		var best: Player = null
+		var best_v := -1.0
+		for pid in club.player_ids:
+			if used.has(pid):
+				continue
+			var p: Player = world.players.get(pid, null)
+			if p == null or not p.is_available():
+				continue
+			var v := selection_score(p, pos)
+			if v > best_v:
+				best_v = v
+				best = p
+		if best == null:
+			return false
+		sheet.starters[i] = best.id
+		used[best.id] = true
+	var size: int = DatabaseManager.squad_rules()["bench_size"]
+	var bench: Array = []
+	for pid in sheet.bench:
+		var p: Player = world.players.get(pid, null)
+		if p != null and p.club_id == club.id and p.is_available() and not used.has(pid) and not bench.has(pid):
+			bench.append(pid)
+	while bench.size() < size:
+		var best: Player = null
+		for pid in club.player_ids:
+			if used.has(pid) or bench.has(pid):
+				continue
+			var p: Player = world.players.get(pid, null)
+			if p != null and p.is_available() and (best == null or p.ovr_f > best.ovr_f):
+				best = p
+		if best == null:
+			break
+		bench.append(best.id)
+	sheet.bench = bench
+	for key in ["captain", "penalty_taker", "freekick_taker", "corner_taker"]:
+		if not sheet.starters.has(sheet.get(key)):
+			pick_set_pieces(world, sheet)
+			break
+	return true
 
 
 ## Garante que a escalação do usuário é válida (lesionados/suspensos/vendidos são trocados).

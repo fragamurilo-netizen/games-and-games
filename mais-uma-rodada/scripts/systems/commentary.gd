@@ -111,7 +111,17 @@ func lines_for(ev: Dictionary) -> Array:
 		MatchSimulation.EV_SECOND_HALF:
 			out.append(_line(_pick("second_half"), ev, "info", 0.0))
 		MatchSimulation.EV_HALFTIME:
-			out.append(_line(_pick("halftime"), ev, "info", 0.0))
+			out.append(_line(_pick("halftime_et" if x.get("et", false) else "halftime"), ev, "big" if x.get("et", false) else "info", 0.0))
+		MatchSimulation.EV_EXTRA_TIME:
+			out.append(_line(_pick("extra_time"), ev, "info", 0.0))
+		MatchSimulation.EV_ET_SECOND:
+			out.append(_line(_pick("et_second"), ev, "info", 0.0))
+		MatchSimulation.EV_SHOOTOUT:
+			out.append(_line(_pick("shootout"), ev, "big", 0.0))
+		MatchSimulation.EV_SHOOT_KICK:
+			var ps: Array = x.get("ps", [0, 0])
+			var txt := _pick("shoot_ok" if x.get("ok", false) else "shoot_miss")
+			out.append(_line(txt + "  (%d x %d)" % [int(ps[0]), int(ps[1])], ev, "big", 0.0))
 		MatchSimulation.EV_FULLTIME:
 			out.append(_line(_pick("fulltime"), ev, "big", 0.0))
 		MatchSimulation.EV_POSSESSION:

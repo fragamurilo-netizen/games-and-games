@@ -1,0 +1,662 @@
+{
+	"nation": "ARG",
+	"_doc": "Argentina: 1ª (20) e 2ª (16; restantes gerados).",
+	"clubs": [
+		{
+			"key": "ARG_XEN",
+			"name": "La Boca Xeneize",
+			"short": "Xeneizes",
+			"abbr": "XEN",
+			"nick": "Xeneizes",
+			"city": "Buenos Aires",
+			"founded": 1905,
+			"league": "ARG1",
+			"rep": 88,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#0A3D8F",
+				"#FFD100"
+			],
+			"stadium": "Estadio de La Boca",
+			"capacity": 54000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"ARG_MIL"
+			]
+		},
+		{
+			"key": "ARG_MIL",
+			"name": "Núñez Millonario",
+			"short": "Millonarios",
+			"abbr": "MIL",
+			"nick": "Millonarios",
+			"city": "Buenos Aires",
+			"founded": 1901,
+			"league": "ARG1",
+			"rep": 88,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Estadio de Núñez",
+			"capacity": 85000,
+			"kit": "diagonal",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_XEN"
+			]
+		},
+		{
+			"key": "ARG_ACA",
+			"name": "Avellaneda Académico",
+			"short": "Académicos",
+			"abbr": "ACA",
+			"nick": "Académicos",
+			"city": "Avellaneda",
+			"founded": 1903,
+			"league": "ARG1",
+			"rep": 78,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Cilindro de Avellaneda",
+			"capacity": 51000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_ROJ"
+			]
+		},
+		{
+			"key": "ARG_ROJ",
+			"name": "Avellaneda Rojo",
+			"short": "Diablos Rojos",
+			"abbr": "ROJ",
+			"nick": "Rojos",
+			"city": "Avellaneda",
+			"founded": 1905,
+			"league": "ARG1",
+			"rep": 76,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Doble Visera",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_ACA"
+			]
+		},
+		{
+			"key": "ARG_CUE",
+			"name": "Boedo Azulgrana",
+			"short": "Cuervos",
+			"abbr": "CUE",
+			"nick": "Cuervos",
+			"city": "Buenos Aires",
+			"founded": 1908,
+			"league": "ARG1",
+			"rep": 74,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#1D3F91",
+				"#C8102E"
+			],
+			"stadium": "Estadio del Bajo Flores",
+			"capacity": 47000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_GBO"
+			]
+		},
+		{
+			"key": "ARG_PIN",
+			"name": "La Plata Pincharratas",
+			"short": "Pincharratas",
+			"abbr": "PIN",
+			"nick": "Pinchas",
+			"city": "La Plata",
+			"founded": 1905,
+			"league": "ARG1",
+			"rep": 72,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Calle Uno",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_LOB"
+			]
+		},
+		{
+			"key": "ARG_LOB",
+			"name": "La Plata Lobo",
+			"short": "Triperos",
+			"abbr": "LOB",
+			"nick": "Triperos",
+			"city": "La Plata",
+			"founded": 1887,
+			"league": "ARG1",
+			"rep": 64,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Estadio del Bosque",
+			"capacity": 33000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": [
+				"ARG_PIN"
+			]
+		},
+		{
+			"key": "ARG_FOR",
+			"name": "Liniers Fortín",
+			"short": "Fortineros",
+			"abbr": "FOR",
+			"nick": "Fortineros",
+			"city": "Buenos Aires",
+			"founded": 1910,
+			"league": "ARG1",
+			"rep": 72,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Estadio de Liniers",
+			"capacity": 45000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_RCA",
+			"name": "Rosario Canalla",
+			"short": "Canallas",
+			"abbr": "RCA",
+			"nick": "Canallas",
+			"city": "Rosario",
+			"founded": 1889,
+			"league": "ARG1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#1D3F91"
+			],
+			"stadium": "Estadio de Arroyito",
+			"capacity": 41000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_LEP"
+			]
+		},
+		{
+			"key": "ARG_LEP",
+			"name": "Rosario Leprosos",
+			"short": "Leprosos",
+			"abbr": "LEP",
+			"nick": "Leprosos",
+			"city": "Rosario",
+			"founded": 1903,
+			"league": "ARG1",
+			"rep": 68,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio del Parque Independencia",
+			"capacity": 42000,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_RCA"
+			]
+		},
+		{
+			"key": "ARG_MAT",
+			"name": "Córdoba Matador",
+			"short": "Matadores",
+			"abbr": "MAT",
+			"nick": "Matadores",
+			"city": "Córdoba",
+			"founded": 1913,
+			"league": "ARG1",
+			"rep": 68,
+			"arch": "rico_promovido",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Barrio Jardín",
+			"capacity": 57000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_PTA"
+			]
+		},
+		{
+			"key": "ARG_PTA",
+			"name": "Córdoba Pirata",
+			"short": "Piratas",
+			"abbr": "PTA",
+			"nick": "Piratas",
+			"city": "Córdoba",
+			"founded": 1905,
+			"league": "ARG1",
+			"rep": 64,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Alberdi",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"ARG_MAT"
+			]
+		},
+		{
+			"key": "ARG_GBO",
+			"name": "Parque Patricios Globo",
+			"short": "Globo",
+			"abbr": "GBO",
+			"nick": "Quemeros",
+			"city": "Buenos Aires",
+			"founded": 1908,
+			"league": "ARG1",
+			"rep": 62,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Estadio del Parque Patricios",
+			"capacity": 48000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "ball"
+			},
+			"rivals": [
+				"ARG_CUE"
+			]
+		},
+		{
+			"key": "ARG_LAN",
+			"name": "Lanús Granate",
+			"short": "Granates",
+			"abbr": "LAN",
+			"nick": "Granates",
+			"city": "Lanús",
+			"founded": 1915,
+			"league": "ARG1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Fortaleza",
+			"capacity": 47000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_TAD"
+			]
+		},
+		{
+			"key": "ARG_BIC",
+			"name": "Paternal Bichos Colorados",
+			"short": "Bichos",
+			"abbr": "BIC",
+			"nick": "Bichos",
+			"city": "Buenos Aires",
+			"founded": 1904,
+			"league": "ARG1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de La Paternal",
+			"capacity": 26000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_HAL",
+			"name": "Varela Halcón",
+			"short": "Halcones",
+			"abbr": "HAL",
+			"nick": "Halcones",
+			"city": "Florencio Varela",
+			"founded": 1935,
+			"league": "ARG1",
+			"rep": 58,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#FFD100",
+				"#006437"
+			],
+			"stadium": "Estadio de Varela",
+			"capacity": 20000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_TOM",
+			"name": "Mendoza Tomba",
+			"short": "Tombinos",
+			"abbr": "TOM",
+			"nick": "Tombinos",
+			"city": "Mendoza",
+			"founded": 1921,
+			"league": "ARG1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Parque San Martín",
+			"capacity": 42000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_TAD",
+			"name": "Banfield Taladro",
+			"short": "Taladros",
+			"abbr": "TAD",
+			"nick": "Taladros",
+			"city": "Banfield",
+			"founded": 1896,
+			"league": "ARG1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Sur",
+			"capacity": 34900,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": [
+				"ARG_LAN"
+			]
+		},
+		{
+			"key": "ARG_DEL",
+			"name": "Tigre Delta",
+			"short": "Delta",
+			"abbr": "DEL",
+			"nick": "Matadores del Delta",
+			"city": "Victoria",
+			"founded": 1902,
+			"league": "ARG1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio de Victoria",
+			"capacity": 26000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_TAT",
+			"name": "Santa Fe Tatengue",
+			"short": "Tatengues",
+			"abbr": "TAT",
+			"nick": "Tatengues",
+			"city": "Santa Fe",
+			"founded": 1907,
+			"league": "ARG1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de la Avenida López",
+			"capacity": 22800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_SAB"
+			]
+		},
+		{
+			"key": "ARG_SAB",
+			"name": "Santa Fe Sabalero",
+			"short": "Sabaleros",
+			"abbr": "SAB",
+			"nick": "Sabaleros",
+			"city": "Santa Fe",
+			"founded": 1905,
+			"league": "ARG2",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio del Cementerio de los Elefantes",
+			"capacity": 40000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"ARG_TAT"
+			]
+		},
+		{
+			"key": "ARG_FUN",
+			"name": "San Martín Funebrero",
+			"short": "Funebreros",
+			"abbr": "FUN",
+			"nick": "Funebreros",
+			"city": "San Martín",
+			"founded": 1906,
+			"league": "ARG2",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio de San Martín",
+			"capacity": 20000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_CER",
+			"name": "Quilmes Cervecero",
+			"short": "Cerveceros",
+			"abbr": "CER",
+			"nick": "Cerveceros",
+			"city": "Quilmes",
+			"founded": 1887,
+			"league": "ARG2",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Estadio Centenario Quilmes",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_VER",
+			"name": "Caballito Verdolaga",
+			"short": "Verdolagas",
+			"abbr": "VER",
+			"nick": "Verdolagas",
+			"city": "Buenos Aires",
+			"founded": 1904,
+			"league": "ARG2",
+			"rep": 48,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Caballito",
+			"capacity": 24400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_BOH",
+			"name": "Atlanta Bohemio",
+			"short": "Bohemios",
+			"abbr": "BOH",
+			"nick": "Bohemios",
+			"city": "Buenos Aires",
+			"founded": 1904,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#1D3F91"
+			],
+			"stadium": "Estadio de Villa Crespo",
+			"capacity": 14000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_TUC",
+			"name": "Tucumán Decano",
+			"short": "Decanos",
+			"abbr": "TUC",
+			"nick": "Decanos",
+			"city": "San Miguel de Tucumán",
+			"founded": 1902,
+			"league": "ARG2",
+			"rep": 54,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Monumental del Norte",
+			"capacity": 35000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": []
+		}
+	]
+}

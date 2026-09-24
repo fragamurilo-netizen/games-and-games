@@ -5,7 +5,10 @@ extends RefCounted
 
 const STATUS_ASK: Array[float] = [1.55, 1.25, 1.05, 0.9, 1.3] # estrela, titular, rotação, reserva, promessa
 const MAX_BIDS_PER_DAY := 3
-const OFFER_DAYS := 2
+const OFFER_DAYS := 2 # prazo das propostas, em jogos do usuário
+const BAND := 4.0 # largura das faixas de nível do índice do mercado
+const DOMESTIC_SHARE := 0.55 # chance de procurar primeiro no próprio país
+const CANDIDATES := 40 # candidatos avaliados por tentativa de contratação
 
 # Famílias de posição para carências de elenco: [posições, mínimo]
 const FAMILIES: Array = [
@@ -51,10 +54,16 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 	var amb := 1.0 + p.trait_sum("ambition") / 40.0
 	var v := 0.55 + rep_diff * 0.012 * maxf(0.4, amb)
 	if cur != null:
-		v += (cur.division - buyer.division) * 0.1
+		# Liga mais forte atrai; salário menor afasta (ninguém sai da Inglaterra para ganhar metade).
+		var lv := PlayerGenerator.league_level(buyer) - PlayerGenerator.league_level(cur)
+		v += clampf(lv * 0.025, -0.3, 0.3)
+		var ratio := float(Valuation.wage_demand(p, buyer, world.year)) / maxf(1.0, float(p.wage))
+		v += clampf((ratio - 1.0) * 0.25, -0.3, 0.2)
 		v -= p.trait_sum("loyalty") / 100.0
-		if cur.id == buyer.rival_id or cur.rival_id == buyer.id:
+		if cur.is_rival(buyer.id) or buyer.is_rival(cur.id):
 			v -= 0.15 # ninguém gosta de trocar pelo rival
+	if buyer.nation == p.nationality:
+		v += 0.05 # voltar para casa
 	if p.age(world.year) >= 31:
 		v += 0.1
 	# Minutos: teria espaço no novo time?
@@ -107,10 +116,10 @@ static func user_bid(world: GameWorld, p: Player, fee: int) -> Dictionary:
 	var neg: Dictionary = world.stats.get("neg", {})
 	var key := str(p.id)
 	var n: Dictionary = neg.get(key, {"d": -1, "n": 0})
-	if int(n["d"]) == world.current_day() and int(n["n"]) >= MAX_BIDS_PER_DAY:
-		return {"result": "rejected", "fee": 0, "msg": "O clube encerrou as conversas por hoje. Tente na próxima rodada."}
-	if int(n["d"]) != world.current_day():
-		n = {"d": world.current_day(), "n": 0}
+	if int(n["d"]) == world.current_turn() and int(n["n"]) >= MAX_BIDS_PER_DAY:
+		return {"result": "rejected", "fee": 0, "msg": "O clube encerrou as conversas por hoje. Tente depois do próximo jogo."}
+	if int(n["d"]) != world.current_turn():
+		n = {"d": world.current_turn(), "n": 0}
 	n["n"] = int(n["n"]) + 1
 	neg[key] = n
 	world.stats["neg"] = neg
@@ -259,7 +268,7 @@ static func renewal_terms(world: GameWorld, p: Player, wage: int, years: int) ->
 	var d := Valuation.round_wage(demand)
 	# Ambicioso bom demais para o clube pode recusar.
 	var ambition := p.trait_sum("ambition")
-	var level := PlayerGenerator.club_level(club.division, club.reputation, club.arch())
+	var level := PlayerGenerator.club_level(club)
 	if ambition >= 25.0 and p.ovr_f >= level + 6.0 and p.age(world.year) <= 29:
 		return {"result": "rejected", "wage": d, "msg": "%s quer jogar num clube maior e não pretende renovar." % p.display_name()}
 	if p.morale < 25.0:
@@ -356,7 +365,7 @@ static func process_matchday(world: GameWorld) -> Array:
 			order.append(c)
 	RngUtil.shuffle(world.rng, order)
 	for c: Club in order:
-		var p_active := 0.55 if window else 0.08
+		var p_active := 0.4 if window else 0.08
 		if world.rng.randf() >= p_active:
 			continue
 		var t := _ai_turn(world, c, index, window)
@@ -368,14 +377,45 @@ static func process_matchday(world: GameWorld) -> Array:
 	return done
 
 
-## Índice de jogadores por família de posição (reconstruído por dia de jogo).
-static func _build_index(world: GameWorld) -> Array:
-	var idx: Array = []
+## Índices do mercado (reconstruídos por data): por família de posição × faixa de nível e por
+## família dentro de cada país (clubes compram muito mais no próprio país).
+static func _build_index(world: GameWorld) -> Dictionary:
+	var band: Array = []
 	for _f in FAMILIES:
-		idx.append([])
+		band.append({})
+	var nat := {}
 	for p: Player in world.players.values():
-		idx[_family_of(p.position)].append(p)
-	return idx
+		if p.retiring:
+			continue
+		var f := _family_of(p.position)
+		var b := int(p.ovr_f / BAND)
+		if not band[f].has(b):
+			band[f][b] = []
+		band[f][b].append(p)
+		var n: String = world.clubs[p.club_id].nation if p.club_id >= 0 else p.nationality
+		if not nat.has(n):
+			var arr: Array = []
+			for _k in FAMILIES:
+				arr.append([])
+			nat[n] = arr
+		nat[n][f].append(p)
+	return {"band": band, "nat": nat}
+
+
+## Sorteia um candidato de uma família perto da faixa desejada (ou do próprio país).
+static func _draw_candidate(world: GameWorld, index: Dictionary, club: Club, fam: int, min_rating: float) -> Player:
+	if world.rng.randf() < DOMESTIC_SHARE:
+		var arr: Array = index["nat"].get(club.nation, [])
+		if not arr.is_empty() and not arr[fam].is_empty():
+			return arr[fam][world.rng.randi_range(0, arr[fam].size() - 1)]
+	var bands: Dictionary = index["band"][fam]
+	var b0 := int(min_rating / BAND)
+	for _t in 3:
+		var b := b0 + world.rng.randi_range(0, 2)
+		if bands.has(b) and not bands[b].is_empty():
+			var arr2: Array = bands[b]
+			return arr2[world.rng.randi_range(0, arr2.size() - 1)]
+	return null
 
 
 static func _family_of(pos: int) -> int:
@@ -400,7 +440,7 @@ static func _family_count(world: GameWorld, club: Club, pos: int) -> int:
 
 ## Carências do elenco: [{fam, urgency, best}] ordenado por urgência.
 static func squad_needs(world: GameWorld, club: Club) -> Array:
-	var level := PlayerGenerator.club_level(club.division, club.reputation, club.arch())
+	var level := PlayerGenerator.club_level(club)
 	var counts: Array = []
 	var best: Array = []
 	for _f in FAMILIES:
@@ -420,7 +460,7 @@ static func squad_needs(world: GameWorld, club: Club) -> Array:
 	return out
 
 
-static func _ai_turn(world: GameWorld, club: Club, index: Array, window: bool) -> Transfer:
+static func _ai_turn(world: GameWorld, club: Club, index: Dictionary, window: bool) -> Transfer:
 	var rules := DatabaseManager.squad_rules()
 	var size := club.player_ids.size()
 	# Enxuga elenco inchado.
@@ -432,7 +472,7 @@ static func _ai_turn(world: GameWorld, club: Club, index: Array, window: bool) -
 	if window and club.balance < 0 and world.rng.randf() < 0.35:
 		_ai_list_for_sale(world, club)
 	var mismanaged := world.rng.randf() < float(arch.get("mismanagement", 0.0)) * 0.25
-	var level := PlayerGenerator.club_level(club.division, club.reputation, arch)
+	var level := PlayerGenerator.club_level(club)
 	var budget := club.transfer_budget
 	var wage_room := club.wage_budget - FinanceManager.wage_bill(world, club)
 	# Define o alvo: carência urgente > reforço da posição mais fraca do time titular.
@@ -462,13 +502,16 @@ static func _ai_turn(world: GameWorld, club: Club, index: Array, window: bool) -
 		return null
 	var ages: Array = arch.get("target_age", [20, 30])
 	var pot_w := float(arch.get("potential_weight", 0.4))
-	var cands: Array = index[fam]
 	var best: Player = null
 	var best_score := -1e9
-	var tries := mini(cands.size(), 90)
-	for _k in tries:
-		var p: Player = cands[world.rng.randi_range(0, cands.size() - 1)]
+	var free_only := not window
+	for _k in CANDIDATES:
+		var p: Player = _draw_candidate(world, index, club, fam, min_rating)
+		if p == null:
+			continue
 		if p.club_id == club.id or p.retiring or p.injury_weeks > 4:
+			continue
+		if free_only and p.club_id >= 0:
 			continue
 		if p.club_id >= 0 and (not window or world.is_user_club(p.club_id)):
 			continue
@@ -520,7 +563,15 @@ static func _ai_turn(world: GameWorld, club: Club, index: Array, window: bool) -
 static func _weakest_starter(world: GameWorld, club: Club) -> Dictionary:
 	var fname := club.sheet.formation if club.sheet != null else "4-4-2"
 	var slots: Array = DatabaseManager.formation(fname)["slots"]
-	var xi := ClubAI.best_eleven(world, club, fname)
+	# A escalação do último jogo já é a melhor disponível; só recalcula se ela estiver incompleta.
+	var xi: Array = club.sheet.starters if club.sheet != null and club.sheet.starters.size() == slots.size() else []
+	for pid in xi:
+		var q := world.player(pid if pid != null else -1)
+		if q == null or q.club_id != club.id:
+			xi = []
+			break
+	if xi.is_empty():
+		xi = ClubAI.best_eleven(world, club, fname)
 	var worst := {}
 	for i in slots.size():
 		var pos: int = slots[i]["pos"]
@@ -593,8 +644,8 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 		o.seller_id = user.id
 		o.fee = fee
 		o.max_fee = Valuation.round_value(minf(buyer.transfer_budget, fee * world.rng.randf_range(1.05, 1.3)))
-		o.created_day = world.current_day()
-		o.expires_day = world.current_day() + OFFER_DAYS
+		o.created_day = world.current_turn()
+		o.expires_day = world.current_turn() + OFFER_DAYS
 		world.offers.append(o)
 		NewsManager.on_offer_received(world, o)
 		pending += 1
@@ -605,11 +656,11 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 static func _find_buyer(world: GameWorld, p: Player) -> Club:
 	var best: Club = null
 	var best_v := -1e9
-	for _k in 12:
+	for _k in 30:
 		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
 		if world.is_user_club(c.id) or c.transfer_budget < p.value * 0.8:
 			continue
-		var level := PlayerGenerator.club_level(c.division, c.reputation, c.arch())
+		var level := PlayerGenerator.club_level(c)
 		if p.ovr_f < level - 4.0:
 			continue
 		var v := c.reputation - absf(p.ovr_f - level) * 2.0 + world.rng.randf_range(0.0, 10.0)
@@ -622,9 +673,9 @@ static func _find_buyer(world: GameWorld, p: Player) -> Club:
 static func _expire_offers(world: GameWorld) -> void:
 	var keep: Array = []
 	for o: TransferOffer in world.offers:
-		if o.is_pending() and world.current_day() > o.expires_day:
+		if o.is_pending() and world.current_turn() > o.expires_day:
 			o.status = TransferOffer.EXPIRED
-		if o.is_pending() or world.current_day() - o.expires_day <= 3:
+		if o.is_pending() or world.current_turn() - o.expires_day <= 3:
 			keep.append(o)
 	world.offers = keep
 
@@ -645,7 +696,7 @@ static func process_expiring_contracts(world: GameWorld) -> Array:
 			left_user.append(p)
 			release_free(world, p)
 			continue
-		var level := PlayerGenerator.club_level(club.division, club.reputation, club.arch())
+		var level := PlayerGenerator.club_level(club)
 		var age := p.age(world.year)
 		var useful := p.ovr_f >= level - 3.0 or p.squad_status <= Player.STATUS_STARTER
 		var chance := 0.0
@@ -713,7 +764,7 @@ static func balance_squads(world: GameWorld) -> void:
 				break
 			var fam: int = urgent["fam"] if not urgent.is_empty() else -1
 			var pick: Player = null
-			var level := PlayerGenerator.club_level(c.division, c.reputation, c.arch())
+			var level := PlayerGenerator.club_level(c)
 			for p: Player in free:
 				if p.club_id >= 0:
 					continue
@@ -726,7 +777,7 @@ static func balance_squads(world: GameWorld) -> void:
 			if pick == null:
 				var used := WorldGenerator.used_names_of(world)
 				var pos: int = FAMILIES[fam][0][0] if fam >= 0 else Pos.CM
-				pick = PlayerGenerator.create(world, world.rng, pos, level - 4.0, world.rng.randi_range(20, 30), NameGenerator.pick_nationality(world.rng, c.division), c.city, used)
+				pick = PlayerGenerator.create(world, world.rng, pos, level - 4.0, world.rng.randi_range(20, 30), PlayerGenerator.pick_nationality(world.rng, c), c.city, used)
 				pick.club_id = -1
 				world.add_player(pick)
 			complete_transfer(world, pick, c, 0, Valuation.wage_demand(pick, c, world.year), world.rng.randi_range(1, 2))

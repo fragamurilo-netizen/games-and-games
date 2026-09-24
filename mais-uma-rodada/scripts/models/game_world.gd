@@ -2,7 +2,7 @@ class_name GameWorld
 extends RefCounted
 ## Raiz de todo o estado de uma carreira. É exatamente isto que vai para o save.
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const DIFF_EASY := 0
 const DIFF_NORMAL := 1
 const DIFF_HARD := 2
@@ -36,6 +36,11 @@ var stats: Dictionary = {}
 # Índices em memória (não salvos): reconstruídos sob demanda.
 var _free_agents_cache: Array = []
 var _free_agents_dirty: bool = true
+var _club_by_key: Dictionary = {}
+var _recovering: Dictionary = {} # jogadores com condição abaixo de 100 (recuperação entre datas)
+var _recovering_built: bool = false
+var _suspended: Dictionary = {} # jogadores cumprindo suspensão
+var _suspended_built: bool = false
 
 
 # ---------------------------------------------------------------------------
@@ -92,19 +97,97 @@ func mark_free_agents_dirty() -> void:
 	_free_agents_dirty = true
 
 
+## Jogadores que ainda estão se recuperando fisicamente (índice em memória, refeito ao carregar).
+func recovering() -> Dictionary:
+	if not _recovering_built:
+		_recovering.clear()
+		for p: Player in players.values():
+			if p.condition < 100.0:
+				_recovering[p.id] = true
+		_recovering_built = true
+	return _recovering
+
+
+func mark_tired(p: Player) -> void:
+	if p.condition < 100.0:
+		recovering()[p.id] = true
+
+
+## Jogadores suspensos (índice em memória, refeito ao carregar).
+func suspended() -> Dictionary:
+	if not _suspended_built:
+		_suspended.clear()
+		for p: Player in players.values():
+			if p.suspension > 0:
+				_suspended[p.id] = true
+		_suspended_built = true
+	return _suspended
+
+
+func mark_suspended(p: Player) -> void:
+	if p.suspension > 0:
+		suspended()[p.id] = true
+
+
+## Índices em memória precisam ser refeitos (virada de temporada).
+func reset_indexes() -> void:
+	_recovering_built = false
+	_suspended_built = false
+	_free_agents_dirty = true
+
+
+func club_by_key(key: String) -> Club:
+	if _club_by_key.size() != clubs.size():
+		_club_by_key.clear()
+		for c in clubs:
+			_club_by_key[c.key] = c
+	return _club_by_key.get(key, null)
+
+
 func league_of(club_id: int) -> League:
 	var c := club(club_id)
 	if c == null or season == null:
 		return null
-	return season.leagues[c.division]
+	return season.leagues.get(c.league_id, null)
 
 
-func division_name(div: int) -> String:
-	return DatabaseManager.division_config(div)["name"]
+func league(id: String) -> League:
+	return season.leagues.get(id, null) if season != null else null
 
 
-func division_short(div: int) -> String:
-	return DatabaseManager.division_config(div)["short"]
+func league_name(id: String) -> String:
+	return DatabaseManager.league_cfg(id).get("name", id)
+
+
+func league_short(id: String) -> String:
+	return DatabaseManager.league_cfg(id).get("short", id)
+
+
+func user_league_id() -> String:
+	var u := user_club()
+	return u.league_id if u != null else ""
+
+
+func user_nation() -> String:
+	var u := user_club()
+	return u.nation if u != null else ""
+
+
+## Clubes de uma liga (pelo estado atual dos clubes, não pela temporada).
+func clubs_in_league(id: String) -> Array:
+	var out: Array = []
+	for c in clubs:
+		if c.league_id == id:
+			out.append(c)
+	return out
+
+
+func clubs_of_nation(code: String) -> Array:
+	var out: Array = []
+	for c in clubs:
+		if c.nation == code:
+			out.append(c)
+	return out
 
 
 func new_player_id() -> int:
@@ -146,30 +229,39 @@ func current_day() -> int:
 	return season.day if season != null else 0
 
 
+## Jogos do usuário já disputados na temporada (prazos de propostas e negociações).
+func current_turn() -> int:
+	return season.turn if season != null else 0
+
+
 func transfer_window_open() -> bool:
 	if season == null:
 		return false
-	for w in DatabaseManager.competitions()["transfer_windows"]:
-		if season.day >= int(w[0]) and season.day <= int(w[1]):
+	return window_open_at(season.day)
+
+
+func window_open_at(slot: int) -> bool:
+	for w in DatabaseManager.calendar_cfg()["windows"]:
+		if slot >= int(w[0]) and slot <= int(w[1]):
 			return true
 	return false
 
 
-## Próximo dia em que a janela abre (ou -1 se não abre mais nesta temporada).
+## Próxima data em que a janela abre (ou -1 se não abre mais nesta temporada).
 func next_window_day() -> int:
 	if season == null:
 		return -1
-	for w in DatabaseManager.competitions()["transfer_windows"]:
+	for w in DatabaseManager.calendar_cfg()["windows"]:
 		if int(w[0]) > season.day:
 			return int(w[0])
 	return -1
 
 
-## Último dia da janela aberta atual (ou -1).
+## Última data da janela aberta atual (ou -1).
 func window_end_day() -> int:
 	if season == null:
 		return -1
-	for w in DatabaseManager.competitions()["transfer_windows"]:
+	for w in DatabaseManager.calendar_cfg()["windows"]:
 		if season.day >= int(w[0]) and season.day <= int(w[1]):
 			return int(w[1])
 	return -1
@@ -245,4 +337,5 @@ static func from_dict(d: Dictionary) -> GameWorld:
 		w.manager_stats[k] = ms[k]
 	w.stats = d.get("stats", {})
 	w._free_agents_dirty = true
+	w._club_by_key.clear()
 	return w

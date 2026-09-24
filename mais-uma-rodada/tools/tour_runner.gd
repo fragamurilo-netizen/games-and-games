@@ -49,12 +49,9 @@ func _run() -> void:
 	# Carreira de teste (mundo padrão, clube da 2ª divisão)
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
 	var club_id := -1
-	for c: Club in w.clubs:
-		if c.division == 1 and c.archetype == "tradicional_decadente":
+	for c: Club in w.clubs_in_league("BRA1"):
+		if c.archetype == "tradicional_decadente" or club_id < 0:
 			club_id = c.id
-			break
-	if club_id < 0:
-		club_id = w.season.leagues[1].club_ids[0]
 	AppSettings.tutorial_done = false
 	GameManager.start_career(w, club_id, "Murilo", GameWorld.DIFF_NORMAL, 5)
 	UIManager.goto("hub")
@@ -135,7 +132,7 @@ func _run() -> void:
 	UIManager.goto("club")
 	await _frames(8)
 	await _shot("19_clube")
-	var rival := w.user_club().rival_id
+	var rival := w.user_club().main_rival()
 	if rival >= 0:
 		UIManager.push("club", {"id": rival})
 		await _frames(8)

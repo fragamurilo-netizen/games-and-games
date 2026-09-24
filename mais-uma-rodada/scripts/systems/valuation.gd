@@ -1,14 +1,17 @@
 class_name Valuation
 extends RefCounted
-## Valor de mercado e salários. Escala do dinheiro do jogo:
-## overall 50 ≈ $ 45 mil · 60 ≈ $ 165 mil · 70 ≈ $ 610 mil · 80 ≈ $ 2,3 mi · 90 ≈ $ 8 mi.
+## Valor de mercado e salários (escala mundial, rules.json → money):
+## overall 50 ≈ $ 120 mil · 60 ≈ $ 680 mil · 70 ≈ $ 3,9 mi · 80 ≈ $ 22 mi · 90 ≈ $ 125 mi.
+## O salário pedido ainda é multiplicado pela escala salarial da liga do clube.
 
-const VALUE_BASE := 12000.0
-const VALUE_GROWTH := 1.14
-const WAGE_BASE := 1100.0
-const WAGE_GROWTH := 1.115
 const MIN_VALUE := 5000
-const MARKET_TOP := 600
+## Referência do mercado: média dos melhores jogadores em clubes (MARKET_PER_CLUB por clube).
+const MARKET_PER_CLUB := 8
+
+static var VALUE_BASE := 21000.0
+static var VALUE_GROWTH := 1.19
+static var WAGE_BASE := 1600.0
+static var WAGE_GROWTH := 1.152
 
 ## Deslocamento da escala econômica: quanto o nível do mundo subiu/desceu desde a criação.
 ## Mantém valores e salários ancorados ao talento relativo (evita espirais de inflação).
@@ -26,23 +29,31 @@ static func perceived_rating(p: Player, year: int) -> float:
 	return eff - shift
 
 
-## Nível de referência do mercado: média dos MARKET_TOP melhores jogadores em clubes.
+static func load_scale() -> void:
+	var m := DatabaseManager.money()
+	VALUE_BASE = float(m.get("value_base", 21000))
+	VALUE_GROWTH = float(m.get("value_growth", 1.19))
+	WAGE_BASE = float(m.get("wage_base", 1600))
+	WAGE_GROWTH = float(m.get("wage_growth", 1.152))
+
+
+## Nível de referência do mercado: média dos melhores jogadores em clubes.
 static func market_reference(world: GameWorld) -> float:
-	var arr: Array = []
+	var arr := PackedFloat32Array()
 	for p: Player in world.players.values():
 		if p.club_id >= 0:
 			arr.append(p.ovr_f)
 	arr.sort()
-	arr.reverse()
-	var n := mini(MARKET_TOP, arr.size())
+	var n := mini(world.clubs.size() * MARKET_PER_CLUB, arr.size())
 	var s := 0.0
 	for i in n:
-		s += arr[i]
+		s += arr[arr.size() - 1 - i]
 	return s / maxf(1.0, n)
 
 
 ## Atualiza o deslocamento a partir do mundo (chamar na criação, ao carregar e a cada temporada).
 static func refresh_shift(world: GameWorld) -> void:
+	load_scale()
 	var ref := market_reference(world)
 	if not world.stats.has("mref0"):
 		world.stats["mref0"] = ref
@@ -105,6 +116,11 @@ static func market_value(p: Player, year: int) -> int:
 	return round_value(v)
 
 
+## Valor típico de um jogador de 25 anos com esse overall (referência para notícias e filtros).
+static func market_value_of_rating(rating: float) -> int:
+	return round_value(VALUE_BASE * pow(VALUE_GROWTH, rating - shift - 40.0) * 1.05)
+
+
 static func update_value(p: Player, year: int) -> void:
 	p.value = market_value(p, year)
 
@@ -119,7 +135,9 @@ static func wage_demand(p: Player, club: Club, year: int) -> int:
 	var r := (p.ovr_f - shift) * 0.6 + perceived_rating(p, year) * 0.4
 	var w := base_wage(r)
 	if club != null:
-		w *= 0.8 + club.reputation / 250.0
+		w *= (0.8 + club.reputation / 250.0) * float(club.league_cfg().get("wage", 0.5))
+	else:
+		w *= 0.5
 	w *= p.trait_mult("greed")
 	if age >= 34:
 		w *= 0.8

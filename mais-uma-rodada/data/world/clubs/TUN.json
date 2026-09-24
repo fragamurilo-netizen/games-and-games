@@ -1,0 +1,82 @@
+{
+	"nation": "TUN",
+	"_doc": "Tunísia (liga de 6).",
+	"clubs": [
+		{
+			"key": "TUN_TAR",
+			"name": "Tunis Sang et Or",
+			"short": "Taraji",
+			"abbr": "TAR",
+			"nick": "Taraji",
+			"city": "Tunis",
+			"founded": 1919,
+			"league": "TUN1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Stade de Radès",
+			"capacity": 60000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"TUN_CLU"
+			]
+		},
+		{
+			"key": "TUN_CLU",
+			"name": "Tunis Clubistes",
+			"short": "Clubistes",
+			"abbr": "CLU",
+			"nick": "Clubistes",
+			"city": "Tunis",
+			"founded": 1920,
+			"league": "TUN1",
+			"rep": 60,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de Radès",
+			"capacity": 60000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"TUN_TAR"
+			]
+		},
+		{
+			"key": "TUN_ETO",
+			"name": "Sousse Étoile",
+			"short": "Étoile",
+			"abbr": "ETO",
+			"nick": "Étoilés",
+			"city": "Sousse",
+			"founded": 1925,
+			"league": "TUN1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Olympique de Sousse",
+			"capacity": 28000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		}
+	]
+}

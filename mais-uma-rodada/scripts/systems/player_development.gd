@@ -17,51 +17,19 @@ const CURVES: Array = [
 ## Âncora de talento: o nível médio dos melhores jogadores do mundo não pode subir (ou cair)
 ## indefinidamente ao longo de décadas. O desvio em relação ao mundo recém-criado ajusta,
 ## de forma suave e igual para todos os clubes, a base, o crescimento e o declínio.
-const TALENT_TOP := 1280 # ~16 jogadores por clube: titulares e primeiros reservas
+const TALENT_PER_CLUB := 16 # titulares e primeiros reservas de cada clube
 
 ## Pesos para escolher qual atributo cai com a idade.
 const DECLINE_W: Array = [0.07, 0.05, 0.07, 0.24, 0.1, 0.07, 0.05, 0.02, 0.06, 0.05, 0.2, 0.02, 0.0, 0.0, 0.03]
 
 
-static func curve(p: Player) -> Array:
-	var c: Array = CURVES[clampi(p.dev_curve, 0, CURVES.size() - 1)].duplicate()
-	if p.position == Pos.GK:
-		c[0] += 2
-		c[1] += 3
-	return c
-
-
-## Crescimento esperado de overall em uma temporada (antes de minutos/estrutura/personalidade).
-static func season_growth(p: Player, age: int) -> float:
-	var gap := float(p.potential) - p.ovr_f
-	if gap <= 0.0:
-		return 0.0
-	var c := curve(p)
-	if age >= int(c[1]):
-		return 0.0
-	var t := float(c[0] - age)
-	var rate := clampf(0.06 + t * 0.04, 0.02, 0.32)
-	if p.dev_curve == Player.CURVE_TARDIO and t > 3.0:
-		rate *= 0.8
-	var minimum := 1.2 if t >= 4.0 else (0.6 if t >= 1.0 else 0.0)
-	return minf(gap, maxf(gap * rate, minimum))
-
-
-## Pontos de atributo perdidos por temporada pela idade.
-static func decline_points(p: Player, age: int) -> float:
-	var c := curve(p)
-	if age < int(c[1]):
-		return 0.0
-	return (5.0 + (age - int(c[1])) * 4.0) * float(c[2]) * p.trait_mult("decline_mult")
-
-
-## Overall médio dos TALENT_TOP melhores jogadores do mundo.
+## Overall médio dos melhores jogadores do mundo (TALENT_PER_CLUB por clube).
 static func talent_index(world: GameWorld) -> float:
 	var arr := PackedFloat32Array()
 	for p: Player in world.players.values():
 		arr.append(p.ovr_f)
 	arr.sort()
-	var n := mini(TALENT_TOP, arr.size())
+	var n := mini(world.clubs.size() * TALENT_PER_CLUB, arr.size())
 	var s := 0.0
 	for i in n:
 		s += arr[arr.size() - 1 - i]
@@ -86,87 +54,128 @@ static func talent_drift(world: GameWorld) -> float:
 	return float(world.stats.get("talent_drift", 0.0))
 
 
-static func facilities_factor(world: GameWorld, p: Player) -> float:
-	if p.club_id < 0:
-		return 0.7
-	var c := world.club(p.club_id)
-	return 0.85 + c.facilities / 100.0 * 0.3
-
-
 ## Evolução semanal de todos os jogadores. minutes: {player_id: minutos no jogo desta rodada}.
 ## Retorna jogadores que tiveram salto notável (para notícias).
-static func weekly_tick(world: GameWorld, minutes: Dictionary) -> Array:
+static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dictionary = {}) -> Array:
 	var rng := world.rng
-	var weeks := float(FinanceManager.league_days())
+	# Metade dos jogadores por semana, com o dobro do efeito: mesmo total, metade do custo.
+	var parity := int(world.stats.get("tick_parity", 0))
+	world.stats["tick_parity"] = 1 - parity
+	var weeks := FinanceManager.WEEKS * 0.5
 	var notable: Array = []
 	var drift := talent_drift(world)
-	var growth_f := clampf(1.0 - drift * 0.06, 0.55, 1.3)
-	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5)
+	var growth_f := clampf(1.0 - drift * 0.06, 0.55, 1.3) / weeks
+	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5) / weeks
+	var year := world.year
+	var clubs := world.clubs
 	for p: Player in world.players.values():
-		var age := p.age(world.year)
-		var g := season_growth(p, age)
-		if g > 0.0:
-			var mins: int = minutes.get(p.id, -1)
-			var play_f := 1.25 if mins >= 60 else (1.05 if mins > 0 else (0.85 if p.club_id >= 0 else 0.7))
-			var add := g / weeks * play_f * growth_f * facilities_factor(world, p) * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
-			p.dev_acc += add
-			if p.dev_acc >= 0.15:
-				var before := p.overall
-				apply_growth(world, p, p.dev_acc)
-				if p.overall >= before + 2:
-					notable.append(p)
-		var dcl := decline_points(p, age) * decline_f
-		if dcl > 0.0:
-			var expected := dcl / weeks
+		if p.id % 2 != parity:
+			continue
+		# Moral volta aos poucos ao normal (duas semanas de efeito, como o resto do laço).
+		p.morale += (62.0 - p.morale) * 0.1
+		var cid := p.club_id
+		# Quem ficou fora do jogo da semana: estrelas e titulares reclamam do banco.
+		if cid >= 0 and clubs_played.has(cid) and not minutes.has(p.id) and p.injury_weeks <= 0 and p.suspension <= 0:
+			if p.squad_status <= Player.STATUS_STARTER:
+				p.morale = maxf(0.0, p.morale - 5.0 * p.trait_mult("morale_volatility"))
+			elif p.squad_status == Player.STATUS_PROSPECT and year - p.birth_year >= 19:
+				p.morale = maxf(0.0, p.morale - 1.2)
+		var age := year - p.birth_year
+		var cv: Array = CURVES[p.dev_curve]
+		var gk := p.position == Pos.GK
+		var dstart: int = int(cv[1]) + (3 if gk else 0)
+		if age < dstart:
+			var gap := float(p.potential) - p.ovr_f
+			if gap > 0.0:
+				var t := float(int(cv[0]) + (2 if gk else 0) - age)
+				var rate := clampf(0.06 + t * 0.04, 0.02, 0.32)
+				if p.dev_curve == Player.CURVE_TARDIO and t > 3.0:
+					rate *= 0.8
+				var minimum := 1.2 if t >= 4.0 else (0.6 if t >= 1.0 else 0.0)
+				var g := minf(gap, maxf(gap * rate, minimum))
+				var mins: int = minutes.get(p.id, -1)
+				var play_f := 1.25 if mins >= 60 else (1.05 if mins > 0 else (0.85 if cid >= 0 else 0.7))
+				var fac_f: float = (0.85 + clubs[cid].facilities * 0.003) if cid >= 0 else 0.7
+				p.dev_acc += g * play_f * growth_f * fac_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
+				if p.dev_acc >= 0.15:
+					var before := p.overall
+					apply_growth(world, p, p.dev_acc)
+					if p.overall >= before + 2:
+						notable.append(p)
+			elif age >= 27 and rng.randf() < 0.04:
+				# Experiência: veteranos ficam mais inteligentes mesmo sem crescer fisicamente.
+				_experience(rng, p)
+		else:
+			var expected := (5.0 + (age - dstart) * 4.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f
 			while expected > 0.0:
 				if rng.randf() < minf(1.0, expected):
 					apply_decline(rng, p)
 				expected -= 1.0
-		elif age >= 27 and age <= 33 and rng.randf() < 0.02:
-			# Experiência: veteranos ficam mais inteligentes mesmo sem crescer fisicamente.
-			var mental: int = [Attr.INT, Attr.DEC, Attr.POS, Attr.VIS][rng.randi_range(0, 3)]
-			if p.ovr_f < p.potential:
-				p.set_attr(mental, p.attrs[mental] + 1)
-				p.recompute_overall()
 	return notable
 
 
+static func _experience(rng: RandomNumberGenerator, p: Player) -> void:
+	var mental: int = [Attr.INT, Attr.DEC, Attr.POS, Attr.VIS][rng.randi_range(0, 3)]
+	if p.ovr_f < p.potential:
+		p.set_attr(mental, p.attrs[mental] + 1)
+		p.recompute_overall()
+
+
 ## Converte um orçamento de overall em pontos de atributo (posição dita o que cresce).
+static var _growth_w: Array = [] # [posição][jovem 0/1] -> pesos (pré-calculados)
+
+
+static func _growth_weights(pos: int, young: bool) -> Array:
+	if _growth_w.is_empty():
+		for ps in Pos.COUNT:
+			var pair: Array = []
+			for y in 2:
+				var w: Array = Pos.WEIGHTS[ps]
+				var weights: Array = []
+				for i in Attr.COUNT:
+					var v: float = w[i] + 0.03
+					if i == Attr.DIS or (i == Attr.GOL and ps != Pos.GK):
+						v = 0.0
+					elif y == 1 and (i == Attr.VEL or i == Attr.FOR or i == Attr.RES):
+						v += 0.05
+					weights.append(v)
+				pair.append(weights)
+			_growth_w.append(pair)
+	return _growth_w[pos][1 if young else 0]
+
+
 static func apply_growth(world: GameWorld, p: Player, budget: float) -> void:
 	var rng := world.rng
 	var target := minf(p.ovr_f + budget, float(p.potential) + 0.4)
-	var w: Array = Pos.WEIGHTS[p.position]
-	var young := p.age(world.year) <= 21
-	var weights: Array = []
-	for i in Attr.COUNT:
-		var v: float = w[i] + 0.03
-		if i == Attr.DIS or (i == Attr.GOL and p.position != Pos.GK):
-			v = 0.0
-		elif young and (i == Attr.VEL or i == Attr.FOR or i == Attr.RES):
-			v += 0.05
-		if p.attrs[i] >= 99:
-			v = 0.0
-		weights.append(v)
+	var weights := _growth_weights(p.position, p.age(world.year) <= 21)
 	var guard := 0
 	while p.ovr_f < target - 0.05 and guard < 60:
 		var i := RngUtil.weighted_index(rng, weights)
 		if i < 0:
 			break
+		guard += 1
+		if p.attrs[i] >= 99:
+			continue
 		p.attrs[i] = mini(99, p.attrs[i] + 1)
 		p._pos_cache_dirty = true
 		p.recompute_overall()
-		guard += 1
 	# Débito/crédito para a próxima semana (evita inflação por arredondamento)
 	p.dev_acc = clampf(target - p.ovr_f, -1.0, 1.0)
 
 
+static var _decline_w: Array = [] # por posição (pré-calculado: o laço semanal não aloca)
+
+
 static func apply_decline(rng: RandomNumberGenerator, p: Player) -> void:
 	# Físicos caem primeiro, mas o que a posição exige também se perde com os anos.
-	var pw: Array = Pos.WEIGHTS[p.position]
-	var w: Array = []
-	for k in Attr.COUNT:
-		w.append(float(DECLINE_W[k]) * 0.55 + float(pw[k]) * 0.45)
-	var i := RngUtil.weighted_index(rng, w)
+	if _decline_w.is_empty():
+		for pos in Pos.COUNT:
+			var pw: Array = Pos.WEIGHTS[pos]
+			var w: Array = []
+			for k in Attr.COUNT:
+				w.append(float(DECLINE_W[k]) * 0.55 + float(pw[k]) * 0.45)
+			_decline_w.append(w)
+	var i := RngUtil.weighted_index(rng, _decline_w[p.position])
 	if i < 0:
 		return
 	p.attrs[i] = maxi(1, p.attrs[i] - 1)
@@ -179,7 +188,7 @@ static func apply_decline(rng: RandomNumberGenerator, p: Player) -> void:
 static func yearly_review(world: GameWorld) -> Dictionary:
 	var rng := world.rng
 	var out := {"explosions": [], "busts": []}
-	var full := float(FinanceManager.league_days() * 90)
+	var full := FinanceManager.WEEKS * 90.0
 	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
@@ -235,7 +244,7 @@ static func retirement_chance(world: GameWorld, p: Player) -> float:
 		base *= 1.8
 	else:
 		var c := world.club(p.club_id)
-		var level := PlayerGenerator.club_level(c.division, c.reputation, c.arch())
+		var level := PlayerGenerator.club_level(c)
 		if p.ovr_f >= level + 2.0:
 			base *= 0.6
 	if p.injury_weeks > 10:

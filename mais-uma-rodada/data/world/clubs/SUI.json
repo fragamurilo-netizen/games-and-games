@@ -1,0 +1,106 @@
+{
+	"nation": "SUI",
+	"_doc": "Suíça (liga de 6).",
+	"clubs": [
+		{
+			"key": "SUI_BAS",
+			"name": "Basel Rotblau",
+			"short": "Rotblau",
+			"abbr": "BAS",
+			"nick": "Bebbi",
+			"city": "Basel",
+			"founded": 1893,
+			"league": "SUI1",
+			"rep": 68,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#1D3F91"
+			],
+			"stadium": "Stadion am Rhein Basel",
+			"capacity": 38500,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"SUI_ZUR"
+			]
+		},
+		{
+			"key": "SUI_BRN",
+			"name": "Bern Gelbschwarz",
+			"short": "Gelbschwarz",
+			"abbr": "BRN",
+			"nick": "Gelbschwarze",
+			"city": "Bern",
+			"founded": 1898,
+			"league": "SUI1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Stadion Wankdorf Nord",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SUI_ZUR",
+			"name": "Zürich Letzi",
+			"short": "Zürcher",
+			"abbr": "ZUR",
+			"nick": "Zürcher",
+			"city": "Zürich",
+			"founded": 1896,
+			"league": "SUI1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#1D5BBF"
+			],
+			"stadium": "Stadion Letzigrund Ost",
+			"capacity": 26100,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"SUI_BAS"
+			]
+		},
+		{
+			"key": "SUI_GEN",
+			"name": "Genève Grenat",
+			"short": "Grenats",
+			"abbr": "GEN",
+			"nick": "Grenats",
+			"city": "Genève",
+			"founded": 1890,
+			"league": "SUI1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de la Praille",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "cross"
+			},
+			"rivals": []
+		}
+	]
+}

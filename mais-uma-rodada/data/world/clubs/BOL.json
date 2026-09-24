@@ -1,0 +1,130 @@
+{
+	"nation": "BOL",
+	"_doc": "Bolívia (liga de 10).",
+	"clubs": [
+		{
+			"key": "BOL_ACA",
+			"name": "La Paz Celeste",
+			"short": "Academia",
+			"abbr": "ACA",
+			"nick": "Academia",
+			"city": "La Paz",
+			"founded": 1925,
+			"league": "BOL1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Miraflores",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"BOL_ATI"
+			]
+		},
+		{
+			"key": "BOL_ATI",
+			"name": "La Paz Atigrado",
+			"short": "Atigrados",
+			"abbr": "ATI",
+			"nick": "Atigrados",
+			"city": "La Paz",
+			"founded": 1908,
+			"league": "BOL1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio de Achumani",
+			"capacity": 42000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"BOL_ACA"
+			]
+		},
+		{
+			"key": "BOL_ALT",
+			"name": "El Alto Millonario",
+			"short": "Alteños",
+			"abbr": "ALT",
+			"nick": "Millonarios",
+			"city": "El Alto",
+			"founded": 1933,
+			"league": "BOL1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio de Villa Ingenio",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BOL_AVI",
+			"name": "Cochabamba Aviador",
+			"short": "Aviadores",
+			"abbr": "AVI",
+			"nick": "Aviadores",
+			"city": "Cochabamba",
+			"founded": 1949,
+			"league": "BOL1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#1D3F91"
+			],
+			"stadium": "Estadio del Valle Cochabambino",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BOL_REF",
+			"name": "Santa Cruz Verdolaga",
+			"short": "Refineros",
+			"abbr": "REF",
+			"nick": "Refineros",
+			"city": "Santa Cruz de la Sierra",
+			"founded": 1955,
+			"league": "BOL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio del Oriente",
+			"capacity": 38000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": []
+		}
+	]
+}

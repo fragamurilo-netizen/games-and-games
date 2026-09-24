@@ -1,0 +1,58 @@
+{
+	"nation": "SRB",
+	"_doc": "Sérvia (liga de 6).",
+	"clubs": [
+		{
+			"key": "SRB_CZV",
+			"name": "Beograd Crveno-Beli",
+			"short": "Crveno-Beli",
+			"abbr": "CZV",
+			"nick": "Zvezdaši",
+			"city": "Beograd",
+			"founded": 1945,
+			"league": "SRB1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Marakana Beograd",
+			"capacity": 51700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": [
+				"SRB_CRN"
+			]
+		},
+		{
+			"key": "SRB_CRN",
+			"name": "Beograd Crno-Beli",
+			"short": "Crno-Beli",
+			"abbr": "CRN",
+			"nick": "Grobari",
+			"city": "Beograd",
+			"founded": 1945,
+			"league": "SRB1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Humska",
+			"capacity": 29800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"symbol": "star"
+			},
+			"rivals": [
+				"SRB_CZV"
+			]
+		}
+	]
+}

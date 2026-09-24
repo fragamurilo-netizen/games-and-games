@@ -1,0 +1,188 @@
+{
+	"_doc": "Competições continentais e o Mundial de Clubes. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra.",
+	"cups": {
+		"UCL": {
+			"name": "Liga dos Campeões",
+			"short": "Campeões",
+			"confed": "UEFA",
+			"teams": 32,
+			"groups": 8,
+			"alloc": {
+				"ENG": 4,
+				"ESP": 4,
+				"GER": 4,
+				"ITA": 4,
+				"FRA": 3,
+				"POR": 2,
+				"NED": 2,
+				"TUR": 1,
+				"BEL": 1,
+				"SCO": 1,
+				"GRE": 1,
+				"AUT": 1,
+				"SUI": 1,
+				"UKR": 1,
+				"CRO": 1,
+				"SRB": 1
+			},
+			"prize": {
+				"group": 15000000,
+				"win": 2800000,
+				"draw": 900000,
+				"r16": 9600000,
+				"qf": 10600000,
+				"sf": 12500000,
+				"final": 15500000,
+				"champion": 20000000
+			},
+			"colors": [
+				"#0B1F4B",
+				"#C9D6EA"
+			],
+			"trophy": "orelhuda"
+		},
+		"LIB": {
+			"name": "Copa Libertadores",
+			"short": "Libertadores",
+			"confed": "CONMEBOL",
+			"teams": 32,
+			"groups": 8,
+			"alloc": {
+				"BRA": 7,
+				"ARG": 6,
+				"COL": 4,
+				"URU": 3,
+				"CHI": 3,
+				"ECU": 3,
+				"PER": 2,
+				"PAR": 2,
+				"BOL": 1,
+				"VEN": 1
+			},
+			"prize": {
+				"group": 3000000,
+				"win": 330000,
+				"draw": 110000,
+				"r16": 1250000,
+				"qf": 1700000,
+				"sf": 2300000,
+				"final": 7000000,
+				"champion": 18000000
+			},
+			"colors": [
+				"#0A0A0A",
+				"#E3B23C"
+			],
+			"trophy": "taca_prata"
+		},
+		"CCC": {
+			"name": "Copa dos Campeões da CONCACAF",
+			"short": "CONCACAF",
+			"confed": "CONCACAF",
+			"teams": 8,
+			"groups": 0,
+			"alloc": {
+				"MEX": 4,
+				"USA": 4
+			},
+			"prize": {
+				"group": 0,
+				"win": 0,
+				"draw": 0,
+				"r16": 0,
+				"qf": 600000,
+				"sf": 900000,
+				"final": 1500000,
+				"champion": 5000000
+			},
+			"colors": [
+				"#1F3A93",
+				"#F2F2F2"
+			],
+			"trophy": "taca_dourada"
+		},
+		"CAF": {
+			"name": "Liga dos Campeões da África",
+			"short": "África",
+			"confed": "CAF",
+			"teams": 8,
+			"groups": 0,
+			"alloc": {
+				"EGY": 2,
+				"MAR": 2,
+				"TUN": 1,
+				"RSA": 1,
+				"NGA": 1,
+				"SEN": 1
+			},
+			"prize": {
+				"group": 0,
+				"win": 0,
+				"draw": 0,
+				"r16": 0,
+				"qf": 450000,
+				"sf": 700000,
+				"final": 1200000,
+				"champion": 4000000
+			},
+			"colors": [
+				"#0B6E4F",
+				"#F2C14E"
+			],
+			"trophy": "taca_dourada"
+		},
+		"AFC": {
+			"name": "Liga dos Campeões da Ásia",
+			"short": "Ásia",
+			"confed": "AFC",
+			"teams": 16,
+			"groups": 4,
+			"alloc": {
+				"KSA": 3,
+				"JPN": 3,
+				"KOR": 3,
+				"QAT": 2,
+				"UAE": 2,
+				"CHN": 2,
+				"AUS": 1
+			},
+			"prize": {
+				"group": 1200000,
+				"win": 100000,
+				"draw": 40000,
+				"r16": 0,
+				"qf": 500000,
+				"sf": 800000,
+				"final": 1500000,
+				"champion": 10000000
+			},
+			"colors": [
+				"#6A1B9A",
+				"#E0C3FC"
+			],
+			"trophy": "taca_prata"
+		},
+		"CWC": {
+			"name": "Mundial de Clubes",
+			"short": "Mundial",
+			"confed": "FIFA",
+			"teams": 8,
+			"groups": 0,
+			"prize": {
+				"group": 0,
+				"win": 0,
+				"draw": 0,
+				"r16": 0,
+				"qf": 8000000,
+				"sf": 12000000,
+				"final": 20000000,
+				"champion": 35000000
+			},
+			"colors": [
+				"#B8860B",
+				"#FFF4CC"
+			],
+			"trophy": "globo"
+		}
+	}
+}

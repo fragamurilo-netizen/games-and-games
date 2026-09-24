@@ -1,0 +1,84 @@
+{
+	"nation": "AUS",
+	"_doc": "Austrália (liga de 6).",
+	"clubs": [
+		{
+			"key": "AUS_MVB",
+			"name": "Melbourne Navy",
+			"short": "Melbourne",
+			"abbr": "MVB",
+			"nick": "Victory",
+			"city": "Melbourne",
+			"founded": 2004,
+			"league": "AUS1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Docklands Park",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": [
+				"AUS_MSC"
+			]
+		},
+		{
+			"key": "AUS_SSK",
+			"name": "Sydney Sky Blue",
+			"short": "Sydney",
+			"abbr": "SSK",
+			"nick": "Sky Blues",
+			"city": "Sydney",
+			"founded": 2004,
+			"league": "AUS1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6CABDD",
+				"#0D2A5C"
+			],
+			"stadium": "Moore Park Stadium",
+			"capacity": 42500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": [
+				"AUS_PAR"
+			]
+		},
+		{
+			"key": "AUS_PAR",
+			"name": "Parramatta Red & Black",
+			"short": "Parramatta",
+			"abbr": "PAR",
+			"nick": "Wanderers",
+			"city": "Sydney",
+			"founded": 2012,
+			"league": "AUS1",
+			"rep": 58,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Parramatta Park Stadium",
+			"capacity": 30000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"AUS_SSK"
+			]
+		}
+	]
+}

@@ -6,6 +6,7 @@ const ZONE_NONE := 0
 const ZONE_TITLE := 1
 const ZONE_PROMOTION := 2
 const ZONE_RELEGATION := 3
+const ZONE_CONTINENTAL := 4
 
 
 static func empty_row() -> Dictionary:
@@ -19,11 +20,16 @@ static func init_table(league: League) -> void:
 
 
 static func apply_result(league: League, f: Fixture) -> void:
-	var comp := DatabaseManager.competitions()
-	var pw := int(comp["points_win"])
-	var pd := int(comp["points_draw"])
-	var h: Dictionary = league.table[f.home]
-	var a: Dictionary = league.table[f.away]
+	apply_to_table(league.table, f)
+
+
+## Soma o resultado de um jogo numa tabela {club_id: linha} (ligas e grupos de copa).
+static func apply_to_table(table: Dictionary, f: Fixture) -> void:
+	var rules := DatabaseManager.rules()
+	var pw := int(rules["points_win"])
+	var pd := int(rules["points_draw"])
+	var h: Dictionary = table[f.home]
+	var a: Dictionary = table[f.away]
 	h["pl"] += 1
 	a["pl"] += 1
 	h["gf"] += f.hg
@@ -60,8 +66,11 @@ static func _push_form(row: Dictionary, r: String) -> void:
 
 ## Ids ordenados: pontos, vitórias, saldo, gols pró, menos vermelhos, id.
 static func sorted_ids(league: League) -> Array:
-	var ids: Array = league.club_ids.duplicate()
-	var t := league.table
+	return sort_table(league.club_ids, league.table)
+
+
+static func sort_table(club_ids: Array, t: Dictionary) -> Array:
+	var ids: Array = club_ids.duplicate()
 	ids.sort_custom(func(x, y):
 		var a: Dictionary = t[x]
 		var b: Dictionary = t[y]
@@ -86,14 +95,18 @@ static func position_of(league: League, club_id: int) -> int:
 
 
 static func zone_of(league: League, position: int) -> int:
-	var cfg := DatabaseManager.division_config(league.division)
+	var cfg := league.cfg()
 	var teams := league.club_ids.size()
-	if position == 1 and league.division == 0:
+	if position == 1:
 		return ZONE_TITLE
-	if int(cfg["promoted"]) > 0 and position <= int(cfg["promoted"]):
+	var up := int(cfg.get("up", 0))
+	if up > 0 and position <= up:
 		return ZONE_PROMOTION
-	if int(cfg["relegated"]) > 0 and position > teams - int(cfg["relegated"]):
+	var down := int(cfg.get("down", 0))
+	if down > 0 and position > teams - down:
 		return ZONE_RELEGATION
+	if position <= CupManager.continental_spots(league):
+		return ZONE_CONTINENTAL
 	return ZONE_NONE
 
 
@@ -105,6 +118,8 @@ static func zone_color(zone: int) -> Color:
 			return Color("#3DBE7A")
 		ZONE_RELEGATION:
 			return Color("#E5484D")
+		ZONE_CONTINENTAL:
+			return Color("#3D8BFD")
 	return Color(0, 0, 0, 0)
 
 
@@ -118,19 +133,16 @@ static func remaining_rounds(league: League, club_id: int) -> int:
 	return n
 
 
-## Ranking individual de uma divisão: stat_index = Player.S_GOALS, S_ASSISTS...
-static func player_ranking(world: GameWorld, division: int, stat_index: int, count: int) -> Array:
+## Ranking individual de uma liga: stat_index = Player.S_GOALS, S_ASSISTS...
+static func player_ranking(world: GameWorld, league_id: String, stat_index: int, count: int) -> Array:
 	var out: Array = []
-	for p in world.players.values():
-		if p.club_id < 0:
+	for c in world.clubs:
+		if c.league_id != league_id:
 			continue
-		var c: Club = world.clubs[p.club_id]
-		if c.division != division:
-			continue
-		var v: int = p.stats[stat_index]
-		if v <= 0:
-			continue
-		out.append(p)
+		for pid in c.player_ids:
+			var p: Player = world.players.get(pid, null)
+			if p != null and p.stats[stat_index] > 0:
+				out.append(p)
 	out.sort_custom(func(a, b):
 		if a.stats[stat_index] != b.stats[stat_index]:
 			return a.stats[stat_index] > b.stats[stat_index]

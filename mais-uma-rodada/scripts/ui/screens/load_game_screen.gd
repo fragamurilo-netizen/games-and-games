@@ -49,7 +49,7 @@ func _slot_card(s: int, meta: Dictionary, has: bool) -> Control:
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(String(meta.get("club", "Carreira")) if not meta.is_empty() else "Carreira salva", "H3", true))
 	if not meta.is_empty():
-		col.add_child(UIKit.label("%s · %d · rodada %d" % [meta.get("division", ""), int(meta.get("year", 0)), int(meta.get("round", 0))], "Small"))
+		col.add_child(UIKit.label("%s · %d · %s" % [meta.get("division", ""), int(meta.get("year", 0)), meta.get("date", "")] if SaveManager.is_compatible(meta) else "Versão antiga do jogo (mundo de Valdora): não abre mais", "Small", true))
 		col.add_child(UIKit.label("%s · salvo em %s" % [meta.get("manager", ""), _date(String(meta.get("saved_at", "")))], "Small"))
 	row.add_child(col)
 	var del := UIKit.icon_button("close", func(): _delete(s, meta))

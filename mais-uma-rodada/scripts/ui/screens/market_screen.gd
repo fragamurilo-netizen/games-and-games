@@ -221,8 +221,8 @@ func _offer_card(w: GameWorld, o: TransferOffer) -> Control:
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label("%s quer %s" % [buyer.short_name, p.display_name()], "H3", true))
-	var days_left := maxi(0, o.expires_day - w.current_day())
-	col.add_child(UIKit.label("%s · %s · valor de mercado %s · expira em %s" % [w.division_short(buyer.division), buyer.arch().get("tag", ""), Fmt.money(p.value), Fmt.plural(days_left + 1, "rodada", "rodadas")], "Small", true))
+	var days_left := maxi(0, o.expires_day - w.current_turn())
+	col.add_child(UIKit.label("%s · %s · valor de mercado %s · expira em %s" % [w.league_short(buyer.league_id), buyer.arch().get("tag", ""), Fmt.money(p.value), Fmt.plural(days_left + 1, "jogo", "jogos")], "Small", true))
 	head.add_child(col)
 	card.add_child(head)
 	var fee := UIKit.label(Fmt.money(o.fee), "Big")

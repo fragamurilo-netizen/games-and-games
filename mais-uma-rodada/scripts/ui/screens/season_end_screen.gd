@@ -29,12 +29,19 @@ func _celebrate() -> void:
 	var club := w.user_club()
 	var title := ""
 	var tag := ""
-	if u.get("champion", false):
+	var cup_title := ""
+	for cu in u.get("cups", []):
+		if cu.get("champion", false):
+			cup_title = String(cu["name"])
+	if cup_title != "":
 		title = "CAMPEÃO!"
-		tag = String(_division_name(int(u.get("div", 0)))).to_upper()
+		tag = cup_title.to_upper()
+	elif u.get("champion", false):
+		title = "CAMPEÃO!"
+		tag = String(u.get("league_name", "")).to_upper()
 	elif u.get("promoted", false):
 		title = "ACESSO!"
-		tag = "RUMO À %s" % String(w.division_name(int(u.get("div", 1)) - 1)).to_upper()
+		tag = "RUMO À %s" % w.league_name(club.league_id).to_upper()
 	if title == "":
 		if u.get("relegated", false):
 			AudioManager.play("lose", -4.0)
@@ -44,13 +51,6 @@ func _celebrate() -> void:
 	AudioManager.play("title")
 	AudioManager.vibrate(400)
 	_overlay.play(3, title, club.short_name, tag, "Temporada %d" % int(_summary.get("year", w.year - 1)), club.primary_color(), club.secondary_color(), 1.0)
-
-
-func _division_name(div: int) -> String:
-	for d in _summary.get("divisions", []):
-		if int(d["div"]) == div:
-			return String(d["name"])
-	return world().division_name(div)
 
 
 func refresh() -> void:
@@ -67,8 +67,17 @@ func refresh() -> void:
 		_footer(w)
 		return
 	c.add_child(_user_card(w, year))
-	for d in _summary.get("divisions", []):
-		c.add_child(_division_card(w, d))
+	for cu in _summary.get("cups", []):
+		c.add_child(_cup_card(w, cu))
+	var nat := w.user_nation()
+	var others: Array = []
+	for d in _summary.get("leagues", []):
+		if String(d["nation"]) == nat:
+			c.add_child(_division_card(w, d))
+		elif int(d["tier"]) == 1:
+			others.append(d)
+	if not others.is_empty():
+		c.add_child(_world_card(w, others))
 	var mine := _club_card(w)
 	if mine != null:
 		c.add_child(mine)
@@ -87,8 +96,10 @@ func _user_card(w: GameWorld, year: int) -> Control:
 	row.add_child(UIKit.crest(club, 88))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(club.short_name, "Title"))
-	col.add_child(UIKit.label("%dº lugar na %s" % [int(u.get("pos", 0)), _division_name(int(u.get("div", 0)))], "H3"))
+	col.add_child(UIKit.label(club.short_name, "Title", true))
+	col.add_child(UIKit.label("%dº lugar na %s" % [int(u.get("pos", 0)), String(u.get("league_name", ""))], "H3", true))
+	for cu in u.get("cups", []):
+		col.add_child(UIKit.label("%s: %s" % [cu["name"], cu["stage"]], "Small", true))
 	row.add_child(col)
 	card.add_child(row)
 	var tags := UIKit.flow(8)
@@ -102,7 +113,7 @@ func _user_card(w: GameWorld, year: int) -> Control:
 	card.add_child(tags)
 	card.add_child(UIKit.kv("Meta da diretoria", String(u.get("goal", ""))))
 	if fired:
-		card.add_child(UIKit.colored("A diretoria decidiu trocar o treinador. Clubes interessados esperam sua resposta no hub.", UIColors.RED, "H3"))
+		card.add_child(UIKit.colored("A diretoria decidiu trocar o treinador. Clubes interessados esperam sua resposta no hub.", UIColors.RED, "H3", true))
 	else:
 		var delta := float(u.get("board_delta", 0.0))
 		var conf := float(u.get("board", club.board_confidence))
@@ -135,7 +146,54 @@ func _division_card(w: GameWorld, d: Dictionary) -> Control:
 		card.add_child(_club_list(w, "Rebaixados", relegated, UIColors.RED))
 	var sc: Dictionary = d.get("scorer", {})
 	if not sc.is_empty():
-		card.add_child(UIKit.kv("Artilheiro", "%s (%s) · %d gols" % [sc.get("name", ""), sc.get("club", ""), int(sc.get("goals", 0))]))
+		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc.get("name", ""), sc.get("club", ""), int(sc.get("goals", 0))], "Small", true))
+	return UIKit.card_panel(card)
+
+
+func _cup_card(w: GameWorld, cu: Dictionary) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section(String(cu["name"])))
+	var champ := w.club(int(cu["champion"]))
+	if champ == null:
+		card.add_child(UIKit.label("Sem campeão.", "Muted"))
+		return UIKit.card_panel(card)
+	var row := UIKit.hbox(12)
+	row.add_child(UIKit.icon_rect("trophy", 34, UIColors.ACCENT))
+	row.add_child(UIKit.crest(champ, 48))
+	var col := UIKit.vbox(0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_child(UIKit.label("Campeão · %s" % DatabaseManager.nation_name(champ.nation), "Caps"))
+	var cn := UIKit.label(champ.name, "H3", true)
+	if w.is_user_club(champ.id):
+		cn.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	col.add_child(cn)
+	var ru := w.club(int(cu.get("runner_up", -1)))
+	if ru != null:
+		col.add_child(UIKit.label("Vice: %s" % ru.short_name, "Small"))
+	row.add_child(col)
+	var cid := champ.id
+	card.add_child(UIKit.tap_row(row, func(): _open_club(cid), "CardFlat"))
+	var sc: Dictionary = cu.get("scorer", {})
+	if not sc.is_empty():
+		card.add_child(UIKit.label("Artilheiro: %s (%s) · %d gols" % [sc.get("name", ""), sc.get("club", ""), int(sc.get("goals", 0))], "Small", true))
+	return UIKit.card_panel(card)
+
+
+## Campeões das primeiras divisões dos outros países.
+func _world_card(w: GameWorld, leagues: Array) -> Control:
+	var card := UIKit.card("Card", 4)
+	card.add_child(UIKit.section("Campeões pelo mundo"))
+	for d in leagues:
+		var champ := w.club(int(d["champion"]))
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.flag(String(d["nation"]), 32))
+		row.add_child(UIKit.crest(champ, 32))
+		var l := UIKit.label(champ.short_name, "H3")
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		row.add_child(UIKit.label(w.league_short(String(d["id"])), "Small"))
+		var cid := champ.id
+		card.add_child(UIKit.tap_row(row, func(): _open_club(cid), "CardFlat"))
 	return UIKit.card_panel(card)
 
 

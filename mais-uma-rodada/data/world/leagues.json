@@ -1,0 +1,1041 @@
+{
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money).",
+	"leagues": [
+		{
+			"id": "ENG1",
+			"nation": "ENG",
+			"tier": 1,
+			"name": "Primeira Liga Inglesa",
+			"short": "Inglaterra 1",
+			"teams": 20,
+			"rr": 2,
+			"down": 3,
+			"level": [
+				72,
+				85
+			],
+			"rep": [
+				60,
+				96
+			],
+			"wage": 1.35,
+			"att": 1.3,
+			"ticket": 60
+		},
+		{
+			"id": "ENG2",
+			"nation": "ENG",
+			"tier": 2,
+			"name": "Segunda Liga Inglesa",
+			"short": "Inglaterra 2",
+			"teams": 20,
+			"rr": 2,
+			"up": 3,
+			"level": [
+				64,
+				72
+			],
+			"rep": [
+				50,
+				72
+			],
+			"wage": 0.8,
+			"att": 1.1,
+			"ticket": 35
+		},
+		{
+			"id": "ESP1",
+			"nation": "ESP",
+			"tier": 1,
+			"name": "Liga Espanhola",
+			"short": "Espanha 1",
+			"teams": 20,
+			"rr": 2,
+			"down": 3,
+			"level": [
+				70,
+				85
+			],
+			"rep": [
+				54,
+				98
+			],
+			"wage": 1.0,
+			"att": 1.0,
+			"ticket": 45
+		},
+		{
+			"id": "ESP2",
+			"nation": "ESP",
+			"tier": 2,
+			"name": "Segunda Divisão Espanhola",
+			"short": "Espanha 2",
+			"teams": 20,
+			"rr": 2,
+			"up": 3,
+			"level": [
+				62,
+				70
+			],
+			"rep": [
+				44,
+				64
+			],
+			"wage": 0.35,
+			"att": 0.8,
+			"ticket": 20
+		},
+		{
+			"id": "GER1",
+			"nation": "GER",
+			"tier": 1,
+			"name": "Liga Alemã",
+			"short": "Alemanha 1",
+			"teams": 18,
+			"rr": 2,
+			"down": 2,
+			"level": [
+				70,
+				84
+			],
+			"rep": [
+				56,
+				96
+			],
+			"wage": 1.05,
+			"att": 1.4,
+			"ticket": 35
+		},
+		{
+			"id": "GER2",
+			"nation": "GER",
+			"tier": 2,
+			"name": "Segunda Liga Alemã",
+			"short": "Alemanha 2",
+			"teams": 18,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				62,
+				70
+			],
+			"rep": [
+				44,
+				72
+			],
+			"wage": 0.4,
+			"att": 1.2,
+			"ticket": 22
+		},
+		{
+			"id": "ITA1",
+			"nation": "ITA",
+			"tier": 1,
+			"name": "Liga Italiana",
+			"short": "Itália",
+			"teams": 20,
+			"rr": 2,
+			"level": [
+				70,
+				83
+			],
+			"rep": [
+				54,
+				92
+			],
+			"wage": 0.95,
+			"att": 0.9,
+			"ticket": 35
+		},
+		{
+			"id": "FRA1",
+			"nation": "FRA",
+			"tier": 1,
+			"name": "Liga Francesa",
+			"short": "França 1",
+			"teams": 18,
+			"rr": 2,
+			"down": 2,
+			"level": [
+				68,
+				83
+			],
+			"rep": [
+				54,
+				94
+			],
+			"wage": 0.9,
+			"att": 0.9,
+			"ticket": 30
+		},
+		{
+			"id": "FRA2",
+			"nation": "FRA",
+			"tier": 2,
+			"name": "Segunda Liga Francesa",
+			"short": "França 2",
+			"teams": 18,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				60,
+				68
+			],
+			"rep": [
+				40,
+				68
+			],
+			"wage": 0.35,
+			"att": 0.7,
+			"ticket": 15
+		},
+		{
+			"id": "POR1",
+			"nation": "POR",
+			"tier": 1,
+			"name": "Liga Portuguesa",
+			"short": "Portugal",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				62,
+				78
+			],
+			"rep": [
+				50,
+				88
+			],
+			"wage": 0.55,
+			"att": 0.8,
+			"ticket": 20
+		},
+		{
+			"id": "NED1",
+			"nation": "NED",
+			"tier": 1,
+			"name": "Liga Holandesa",
+			"short": "Holanda",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				62,
+				77
+			],
+			"rep": [
+				52,
+				84
+			],
+			"wage": 0.65,
+			"att": 1.1,
+			"ticket": 25
+		},
+		{
+			"id": "TUR1",
+			"nation": "TUR",
+			"tier": 1,
+			"name": "Liga Turca",
+			"short": "Turquia",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				63,
+				76
+			],
+			"rep": [
+				52,
+				86
+			],
+			"wage": 0.8,
+			"att": 1.0,
+			"ticket": 20
+		},
+		{
+			"id": "BEL1",
+			"nation": "BEL",
+			"tier": 1,
+			"name": "Liga Belga",
+			"short": "Bélgica",
+			"teams": 8,
+			"rr": 4,
+			"level": [
+				62,
+				74
+			],
+			"rep": [
+				52,
+				78
+			],
+			"wage": 0.6,
+			"att": 0.9,
+			"ticket": 22
+		},
+		{
+			"id": "SCO1",
+			"nation": "SCO",
+			"tier": 1,
+			"name": "Liga Escocesa",
+			"short": "Escócia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				58,
+				72
+			],
+			"rep": [
+				50,
+				80
+			],
+			"wage": 0.5,
+			"att": 1.1,
+			"ticket": 25
+		},
+		{
+			"id": "GRE1",
+			"nation": "GRE",
+			"tier": 1,
+			"name": "Liga Grega",
+			"short": "Grécia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				60,
+				72
+			],
+			"rep": [
+				52,
+				76
+			],
+			"wage": 0.5,
+			"att": 0.7,
+			"ticket": 15
+		},
+		{
+			"id": "AUT1",
+			"nation": "AUT",
+			"tier": 1,
+			"name": "Liga Austríaca",
+			"short": "Áustria",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				60,
+				72
+			],
+			"rep": [
+				50,
+				76
+			],
+			"wage": 0.55,
+			"att": 0.8,
+			"ticket": 18
+		},
+		{
+			"id": "SUI1",
+			"nation": "SUI",
+			"tier": 1,
+			"name": "Liga Suíça",
+			"short": "Suíça",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				60,
+				71
+			],
+			"rep": [
+				50,
+				72
+			],
+			"wage": 0.6,
+			"att": 0.8,
+			"ticket": 25
+		},
+		{
+			"id": "UKR1",
+			"nation": "UKR",
+			"tier": 1,
+			"name": "Liga Ucraniana",
+			"short": "Ucrânia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				58,
+				72
+			],
+			"rep": [
+				50,
+				74
+			],
+			"wage": 0.4,
+			"att": 0.6,
+			"ticket": 8
+		},
+		{
+			"id": "CRO1",
+			"nation": "CRO",
+			"tier": 1,
+			"name": "Liga Croata",
+			"short": "Croácia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				57,
+				71
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.35,
+			"att": 0.6,
+			"ticket": 10
+		},
+		{
+			"id": "SRB1",
+			"nation": "SRB",
+			"tier": 1,
+			"name": "Liga Sérvia",
+			"short": "Sérvia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				56,
+				70
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.35,
+			"att": 0.6,
+			"ticket": 8
+		},
+		{
+			"id": "CZE1",
+			"nation": "CZE",
+			"tier": 1,
+			"name": "Liga Tcheca",
+			"short": "Tchéquia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				58,
+				70
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.4,
+			"att": 0.7,
+			"ticket": 12
+		},
+		{
+			"id": "DEN1",
+			"nation": "DEN",
+			"tier": 1,
+			"name": "Liga Dinamarquesa",
+			"short": "Dinamarca",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				59,
+				70
+			],
+			"rep": [
+				48,
+				70
+			],
+			"wage": 0.55,
+			"att": 0.8,
+			"ticket": 20
+		},
+		{
+			"id": "BRA1",
+			"nation": "BRA",
+			"tier": 1,
+			"name": "Brasileiro Série A",
+			"short": "Brasil A",
+			"teams": 20,
+			"rr": 2,
+			"down": 4,
+			"level": [
+				66,
+				77
+			],
+			"rep": [
+				58,
+				94
+			],
+			"wage": 0.45,
+			"att": 0.8,
+			"ticket": 14
+		},
+		{
+			"id": "BRA2",
+			"nation": "BRA",
+			"tier": 2,
+			"name": "Brasileiro Série B",
+			"short": "Brasil B",
+			"teams": 20,
+			"rr": 2,
+			"up": 4,
+			"down": 4,
+			"level": [
+				58,
+				66
+			],
+			"rep": [
+				46,
+				68
+			],
+			"wage": 0.2,
+			"att": 0.6,
+			"ticket": 8
+		},
+		{
+			"id": "BRA3",
+			"nation": "BRA",
+			"tier": 3,
+			"name": "Brasileiro Série C",
+			"short": "Brasil C",
+			"teams": 20,
+			"rr": 2,
+			"up": 4,
+			"down": 4,
+			"level": [
+				51,
+				59
+			],
+			"rep": [
+				40,
+				56
+			],
+			"wage": 0.11,
+			"att": 0.5,
+			"ticket": 5
+		},
+		{
+			"id": "BRA4",
+			"nation": "BRA",
+			"tier": 4,
+			"name": "Brasileiro Série D",
+			"short": "Brasil D",
+			"teams": 20,
+			"rr": 2,
+			"up": 4,
+			"level": [
+				45,
+				52
+			],
+			"rep": [
+				30,
+				46
+			],
+			"wage": 0.07,
+			"att": 0.45,
+			"ticket": 4
+		},
+		{
+			"id": "ARG1",
+			"nation": "ARG",
+			"tier": 1,
+			"name": "Liga Argentina",
+			"short": "Argentina 1",
+			"teams": 20,
+			"rr": 2,
+			"down": 2,
+			"level": [
+				64,
+				75
+			],
+			"rep": [
+				54,
+				90
+			],
+			"wage": 0.3,
+			"att": 1.1,
+			"ticket": 10
+		},
+		{
+			"id": "ARG2",
+			"nation": "ARG",
+			"tier": 2,
+			"name": "Segunda Divisão Argentina",
+			"short": "Argentina 2",
+			"teams": 16,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				55,
+				63
+			],
+			"rep": [
+				40,
+				58
+			],
+			"wage": 0.12,
+			"att": 0.8,
+			"ticket": 5
+		},
+		{
+			"id": "URU1",
+			"nation": "URU",
+			"tier": 1,
+			"name": "Liga Uruguaia",
+			"short": "Uruguai",
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				48,
+				78
+			],
+			"wage": 0.18,
+			"att": 0.7,
+			"ticket": 8
+		},
+		{
+			"id": "COL1",
+			"nation": "COL",
+			"tier": 1,
+			"name": "Liga Colombiana",
+			"short": "Colômbia",
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				60,
+				70
+			],
+			"rep": [
+				50,
+				74
+			],
+			"wage": 0.2,
+			"att": 0.9,
+			"ticket": 8
+		},
+		{
+			"id": "CHI1",
+			"nation": "CHI",
+			"tier": 1,
+			"name": "Liga Chilena",
+			"short": "Chile",
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				58,
+				68
+			],
+			"rep": [
+				48,
+				74
+			],
+			"wage": 0.2,
+			"att": 0.7,
+			"ticket": 10
+		},
+		{
+			"id": "ECU1",
+			"nation": "ECU",
+			"tier": 1,
+			"name": "Liga Equatoriana",
+			"short": "Equador",
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				59,
+				70
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.2,
+			"att": 0.7,
+			"ticket": 8
+		},
+		{
+			"id": "PER1",
+			"nation": "PER",
+			"tier": 1,
+			"name": "Liga Peruana",
+			"short": "Peru",
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				56,
+				66
+			],
+			"rep": [
+				46,
+				68
+			],
+			"wage": 0.15,
+			"att": 0.7,
+			"ticket": 6
+		},
+		{
+			"id": "PAR1",
+			"nation": "PAR",
+			"tier": 1,
+			"name": "Liga Paraguaia",
+			"short": "Paraguai",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				58,
+				68
+			],
+			"rep": [
+				46,
+				70
+			],
+			"wage": 0.15,
+			"att": 0.6,
+			"ticket": 6
+		},
+		{
+			"id": "BOL1",
+			"nation": "BOL",
+			"tier": 1,
+			"name": "Liga Boliviana",
+			"short": "Bolívia",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				54,
+				64
+			],
+			"rep": [
+				44,
+				62
+			],
+			"wage": 0.1,
+			"att": 0.6,
+			"ticket": 5
+		},
+		{
+			"id": "VEN1",
+			"nation": "VEN",
+			"tier": 1,
+			"name": "Liga Venezuelana",
+			"short": "Venezuela",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				52,
+				63
+			],
+			"rep": [
+				42,
+				58
+			],
+			"wage": 0.1,
+			"att": 0.5,
+			"ticket": 4
+		},
+		{
+			"id": "MEX1",
+			"nation": "MEX",
+			"tier": 1,
+			"name": "Liga Mexicana",
+			"short": "México",
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				64,
+				74
+			],
+			"rep": [
+				50,
+				84
+			],
+			"wage": 0.55,
+			"att": 1.0,
+			"ticket": 14
+		},
+		{
+			"id": "USA1",
+			"nation": "USA",
+			"tier": 1,
+			"name": "Liga Norte-Americana",
+			"short": "EUA",
+			"teams": 20,
+			"rr": 2,
+			"level": [
+				62,
+				72
+			],
+			"rep": [
+				54,
+				78
+			],
+			"wage": 0.65,
+			"att": 0.9,
+			"ticket": 35
+		},
+		{
+			"id": "EGY1",
+			"nation": "EGY",
+			"tier": 1,
+			"name": "Liga Egípcia",
+			"short": "Egito",
+			"teams": 8,
+			"rr": 4,
+			"level": [
+				58,
+				70
+			],
+			"rep": [
+				50,
+				78
+			],
+			"wage": 0.2,
+			"att": 0.5,
+			"ticket": 3
+		},
+		{
+			"id": "MAR1",
+			"nation": "MAR",
+			"tier": 1,
+			"name": "Liga Marroquina",
+			"short": "Marrocos",
+			"teams": 8,
+			"rr": 4,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				50,
+				72
+			],
+			"wage": 0.2,
+			"att": 0.6,
+			"ticket": 5
+		},
+		{
+			"id": "TUN1",
+			"nation": "TUN",
+			"tier": 1,
+			"name": "Liga Tunisiana",
+			"short": "Tunísia",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				56,
+				67
+			],
+			"rep": [
+				48,
+				70
+			],
+			"wage": 0.15,
+			"att": 0.5,
+			"ticket": 4
+		},
+		{
+			"id": "RSA1",
+			"nation": "RSA",
+			"tier": 1,
+			"name": "Liga Sul-Africana",
+			"short": "África do Sul",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				56,
+				66
+			],
+			"rep": [
+				48,
+				74
+			],
+			"wage": 0.2,
+			"att": 0.5,
+			"ticket": 5
+		},
+		{
+			"id": "NGA1",
+			"nation": "NGA",
+			"tier": 1,
+			"name": "Liga Nigeriana",
+			"short": "Nigéria",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				50,
+				60
+			],
+			"rep": [
+				40,
+				58
+			],
+			"wage": 0.06,
+			"att": 0.4,
+			"ticket": 2
+		},
+		{
+			"id": "SEN1",
+			"nation": "SEN",
+			"tier": 1,
+			"name": "Liga Senegalesa",
+			"short": "Senegal",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				50,
+				60
+			],
+			"rep": [
+				40,
+				56
+			],
+			"wage": 0.06,
+			"att": 0.4,
+			"ticket": 2
+		},
+		{
+			"id": "KSA1",
+			"nation": "KSA",
+			"tier": 1,
+			"name": "Liga Saudita",
+			"short": "Arábia Saudita",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				62,
+				76
+			],
+			"rep": [
+				52,
+				80
+			],
+			"wage": 1.2,
+			"att": 0.5,
+			"ticket": 8
+		},
+		{
+			"id": "JPN1",
+			"nation": "JPN",
+			"tier": 1,
+			"name": "Liga Japonesa",
+			"short": "Japão",
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				60,
+				70
+			],
+			"rep": [
+				50,
+				70
+			],
+			"wage": 0.45,
+			"att": 0.9,
+			"ticket": 25
+		},
+		{
+			"id": "KOR1",
+			"nation": "KOR",
+			"tier": 1,
+			"name": "Liga Sul-Coreana",
+			"short": "Coreia do Sul",
+			"teams": 8,
+			"rr": 4,
+			"level": [
+				60,
+				69
+			],
+			"rep": [
+				50,
+				68
+			],
+			"wage": 0.35,
+			"att": 0.6,
+			"ticket": 10
+		},
+		{
+			"id": "QAT1",
+			"nation": "QAT",
+			"tier": 1,
+			"name": "Liga Catariana",
+			"short": "Catar",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				48,
+				68
+			],
+			"wage": 0.8,
+			"att": 0.3,
+			"ticket": 5
+		},
+		{
+			"id": "UAE1",
+			"nation": "UAE",
+			"tier": 1,
+			"name": "Liga dos Emirados",
+			"short": "Emirados",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				48,
+				66
+			],
+			"wage": 0.7,
+			"att": 0.3,
+			"ticket": 6
+		},
+		{
+			"id": "CHN1",
+			"nation": "CHN",
+			"tier": 1,
+			"name": "Liga Chinesa",
+			"short": "China",
+			"teams": 8,
+			"rr": 4,
+			"level": [
+				58,
+				68
+			],
+			"rep": [
+				50,
+				66
+			],
+			"wage": 0.6,
+			"att": 0.8,
+			"ticket": 10
+		},
+		{
+			"id": "AUS1",
+			"nation": "AUS",
+			"tier": 1,
+			"name": "Liga Australiana",
+			"short": "Austrália",
+			"teams": 6,
+			"rr": 6,
+			"level": [
+				56,
+				66
+			],
+			"rep": [
+				48,
+				62
+			],
+			"wage": 0.4,
+			"att": 0.6,
+			"ticket": 20
+		}
+	]
+}

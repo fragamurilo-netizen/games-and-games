@@ -1,0 +1,58 @@
+{
+	"nation": "QAT",
+	"_doc": "Catar (liga de 6).",
+	"clubs": [
+		{
+			"key": "QAT_ZAE",
+			"name": "Doha Al Zaeem",
+			"short": "Al Zaeem",
+			"abbr": "ZAE",
+			"nick": "Líderes",
+			"city": "Doha",
+			"founded": 1969,
+			"league": "QAT1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estádio Jassim",
+			"capacity": 12900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"QAT_KNI"
+			]
+		},
+		{
+			"key": "QAT_KNI",
+			"name": "Doha Knights",
+			"short": "Knights",
+			"abbr": "KNI",
+			"nick": "Cavaleiros Vermelhos",
+			"city": "Doha",
+			"founded": 2009,
+			"league": "QAT1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Abdullah bin Khalifa",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"QAT_ZAE"
+			]
+		}
+	]
+}

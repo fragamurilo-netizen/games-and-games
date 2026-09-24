@@ -1,0 +1,158 @@
+{
+	"nation": "JPN",
+	"_doc": "Japão (liga de 10).",
+	"clubs": [
+		{
+			"key": "JPN_KSH",
+			"name": "Kashima Deer",
+			"short": "Deer",
+			"abbr": "KSH",
+			"nick": "Deer",
+			"city": "Kashima",
+			"founded": 1947,
+			"league": "JPN1",
+			"rep": 68,
+			"arch": "formador",
+			"colors": [
+				"#B71234",
+				"#111111"
+			],
+			"stadium": "Kashima Soccer Stadium East",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "chevron"
+			},
+			"rivals": []
+		},
+		{
+			"key": "JPN_SAI",
+			"name": "Saitama Reds",
+			"short": "Saitama Reds",
+			"abbr": "SAI",
+			"nick": "Reds",
+			"city": "Saitama",
+			"founded": 1950,
+			"league": "JPN1",
+			"rep": 68,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#E6002D",
+				"#FFFFFF"
+			],
+			"stadium": "Saitama Stadium Park",
+			"capacity": 63700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "JPN_YKM",
+			"name": "Yokohama Mariners",
+			"short": "Mariners",
+			"abbr": "YKM",
+			"nick": "Mariners",
+			"city": "Yokohama",
+			"founded": 1972,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#003D99",
+				"#FFFFFF"
+			],
+			"stadium": "Yokohama Port Stadium",
+			"capacity": 72000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"JPN_KWS"
+			]
+		},
+		{
+			"key": "JPN_KWS",
+			"name": "Kawasaki Azzurro",
+			"short": "Azzurro",
+			"abbr": "KWS",
+			"nick": "Frontale",
+			"city": "Kawasaki",
+			"founded": 1955,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#1D9AD6",
+				"#111111"
+			],
+			"stadium": "Todoroki Park Stadium",
+			"capacity": 26800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "wave"
+			},
+			"rivals": [
+				"JPN_YKM"
+			]
+		},
+		{
+			"key": "JPN_KOB",
+			"name": "Kobe Crimson",
+			"short": "Crimson",
+			"abbr": "KOB",
+			"nick": "Crimson",
+			"city": "Kobe",
+			"founded": 1966,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Misaki Park Stadium",
+			"capacity": 30100,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "bolt"
+			},
+			"rivals": [
+				"JPN_OSK"
+			]
+		},
+		{
+			"key": "JPN_OSK",
+			"name": "Osaka Blue Black",
+			"short": "Osaka Blue",
+			"abbr": "OSK",
+			"nick": "Gamba",
+			"city": "Osaka",
+			"founded": 1980,
+			"league": "JPN1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#1D3F91",
+				"#111111"
+			],
+			"stadium": "Suita City Stadium",
+			"capacity": 39700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"JPN_KOB"
+			]
+		}
+	]
+}

@@ -1,0 +1,82 @@
+{
+	"nation": "RSA",
+	"_doc": "África do Sul (liga de 6).",
+	"clubs": [
+		{
+			"key": "RSA_BRZ",
+			"name": "Pretoria Yellow",
+			"short": "Brazilians",
+			"abbr": "BRZ",
+			"nick": "Masandawana",
+			"city": "Pretoria",
+			"founded": 1970,
+			"league": "RSA1",
+			"rep": 72,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#006437"
+			],
+			"stadium": "Loftus Park",
+			"capacity": 51000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "sun"
+			},
+			"rivals": []
+		},
+		{
+			"key": "RSA_AMA",
+			"name": "Soweto Amakhosi",
+			"short": "Amakhosi",
+			"abbr": "AMA",
+			"nick": "Amakhosi",
+			"city": "Johannesburg",
+			"founded": 1970,
+			"league": "RSA1",
+			"rep": 64,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Soweto Stadium",
+			"capacity": 94000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"RSA_BUC"
+			]
+		},
+		{
+			"key": "RSA_BUC",
+			"name": "Soweto Buccaneers",
+			"short": "Buccaneers",
+			"abbr": "BUC",
+			"nick": "Bucs",
+			"city": "Johannesburg",
+			"founded": 1937,
+			"league": "RSA1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Orlando Park",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "anchor"
+			},
+			"rivals": [
+				"RSA_AMA"
+			]
+		}
+	]
+}

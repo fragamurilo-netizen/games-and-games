@@ -1,0 +1,58 @@
+{
+	"nation": "UKR",
+	"_doc": "Ucrânia (liga de 6).",
+	"clubs": [
+		{
+			"key": "UKR_HIR",
+			"name": "Donbass Hirnyky",
+			"short": "Hirnyky",
+			"abbr": "HIR",
+			"nick": "Hirnyky",
+			"city": "Donetsk",
+			"founded": 1936,
+			"league": "UKR1",
+			"rep": 72,
+			"arch": "vendedor",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stadion Donbass",
+			"capacity": 52000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"symbol": "gear"
+			},
+			"rivals": [
+				"UKR_BSY"
+			]
+		},
+		{
+			"key": "UKR_BSY",
+			"name": "Kyiv Bilo-Syni",
+			"short": "Bilo-Syni",
+			"abbr": "BSY",
+			"nick": "Bilo-Syni",
+			"city": "Kyiv",
+			"founded": 1927,
+			"league": "UKR1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#1D5BBF"
+			],
+			"stadium": "Stadion Kyiv Tsentr",
+			"capacity": 16800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "letter"
+			},
+			"rivals": [
+				"UKR_HIR"
+			]
+		}
+	]
+}

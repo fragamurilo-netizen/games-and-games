@@ -1,67 +1,84 @@
 class_name NameGenerator
 extends RefCounted
-## Gera nomes coerentes por cultura, apelidos (diminutivos, regionais e descritivos)
-## e o "nome de camisa" (known_as). Evita nomes completos repetidos no mundo.
+## Nomes coerentes por cultura (names.json) a partir da origem de cada nacionalidade (nations.json):
+## o jogador sorteia uma origem — cultura de nome + etnia (usada pelo rosto). Gera apelidos
+## (diminutivos, regionais e descritivos), o nome de camisa (known_as) e nunca repete nomes
+## completos já usados no mundo nem nomes de craques reais.
 
 const MAX_TRIES := 12
 
-static var _nat_codes: Array = []
-static var _nat_weights: Array = []
-static var _nat_by_code: Dictionary = {}
+static var _famous: Dictionary = {}
+static var _eth_index: Dictionary = {}
 
 
 static func _prepare() -> void:
-	if not _nat_codes.is_empty():
+	if not _eth_index.is_empty():
 		return
-	for n in DatabaseManager.names()["nationalities"]:
-		_nat_by_code[n["code"]] = n
-		if float(n["weight"]) > 0.0:
-			_nat_codes.append(n["code"])
-			_nat_weights.append(float(n["weight"]))
+	for n in DatabaseManager.names().get("famous", []):
+		_famous[String(n).to_lower()] = true
+	var eth: Array = DatabaseManager.ethnicities()
+	for i in eth.size():
+		_eth_index[eth[i]] = i
 
 
 static func nationality_name(code: String) -> String:
+	return DatabaseManager.nation_name(code)
+
+
+static func ethnicity_index(key: String) -> int:
 	_prepare()
-	return _nat_by_code.get(code, {}).get("name", code)
+	return int(_eth_index.get(key, 1))
 
 
-static func culture_of(code: String) -> String:
+## Origem de quem nasceu em `nation_code`: {"c": cultura de nome, "eth": índice da etnia}.
+static func pick_origin(rng: RandomNumberGenerator, nation_code: String) -> Dictionary:
 	_prepare()
-	return _nat_by_code.get(code, {}).get("culture", "luso")
+	var origins: Array = DatabaseManager.nation(nation_code).get("origins", [])
+	if origins.is_empty():
+		return {"c": "en", "eth": 1}
+	var weights: Array = []
+	for o in origins:
+		weights.append(float(o["w"]))
+	var o: Dictionary = origins[maxi(0, RngUtil.weighted_index(rng, weights))]
+	var eth_key: Variant = RngUtil.weighted_key(rng, o["eth"])
+	return {"c": o["c"], "eth": int(_eth_index.get(eth_key, 1))}
 
 
-## Sorteia a nacionalidade conforme a divisão (mais estrangeiros no topo).
-static func pick_nationality(rng: RandomNumberGenerator, division: int) -> String:
-	_prepare()
-	var shares: Array = DatabaseManager.names()["foreign_share_by_division"]
-	var share: float = shares[clampi(division, 0, shares.size() - 1)]
-	if rng.randf() >= share:
-		return "VAL"
-	var i := RngUtil.weighted_index(rng, _nat_weights)
-	return _nat_codes[i]
+static func _culture(culture_id: String) -> Dictionary:
+	var cultures: Dictionary = DatabaseManager.names()["cultures"]
+	return cultures.get(culture_id, cultures["en"])
+
+
+static func _is_famous(first: String, main: String, last: String) -> bool:
+	var f := first.to_lower()
+	var m := main.to_lower()
+	return _famous.has(f + " " + m) or _famous.has(f + " " + last.to_lower()) or _famous.has(m + " " + f)
 
 
 ## ctx: {pos, height, foot, attrs (PackedByteArray), region}
 ## used: Dictionary de nomes completos já usados (é atualizado).
-static func generate(rng: RandomNumberGenerator, nationality: String, ctx: Dictionary, used: Dictionary) -> Dictionary:
-	var culture_id := culture_of(nationality)
-	var cultures: Dictionary = DatabaseManager.names()["cultures"]
-	var c: Dictionary = cultures.get(culture_id, cultures["luso"])
+## Retorna {first, last, nickname, known_as}.
+static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictionary, used: Dictionary) -> Dictionary:
+	_prepare()
+	var c := _culture(culture_id)
 	var first := ""
 	var last := ""
+	var main := ""
 	var full := ""
 	for _i in MAX_TRIES:
 		first = _pick_first(rng, c)
-		last = RngUtil.pick(rng, c["last"])
+		var a: String = RngUtil.pick(rng, c["last"])
+		last = a
+		main = a
 		if c.has("suffixes") and rng.randf() < float(c.get("suffix_chance", 0.0)):
-			last += " " + RngUtil.pick(rng, c["suffixes"])
-		elif rng.randf() < 0.25 and culture_id == "luso":
-			# Sobrenome duplo é comum: "Pereira Lima"
-			var extra: String = RngUtil.pick(rng, c["last"])
-			if extra != last:
-				last = extra + " " + last if rng.randf() < 0.5 else last
+			last = a + " " + String(RngUtil.pick(rng, c["suffixes"]))
+		elif rng.randf() < float(c.get("double_last_chance", 0.0)):
+			var b: String = RngUtil.pick(rng, c["last"])
+			if b != a:
+				last = a + " " + b
+				main = a if String(c.get("main_surname", "last")) == "first" else b
 		full = first + " " + last
-		if not used.has(full):
+		if not used.has(full) and not _is_famous(first, main, last):
 			break
 	used[full] = true
 	var nickname := ""
@@ -78,9 +95,14 @@ static func generate(rng: RandomNumberGenerator, nationality: String, ctx: Dicti
 		"first":
 			known = first
 		"full":
-			known = first.get_slice(" ", 0) + " " + _main_surname(last)
+			if bool(c.get("family_first", false)):
+				known = main + " " + first
+			else:
+				known = first.get_slice(" ", 0) + " " + main
 		_:
-			known = _main_surname(last)
+			known = main
+	if _famous.has(known.to_lower()):
+		known = main
 	return {"first": first, "last": last, "nickname": nickname, "known_as": known}
 
 
@@ -88,20 +110,6 @@ static func _pick_first(rng: RandomNumberGenerator, c: Dictionary) -> String:
 	if c.has("compound") and rng.randf() < float(c.get("compound_chance", 0.0)):
 		return RngUtil.pick(rng, c["compound"])
 	return RngUtil.pick(rng, c["first"])
-
-
-static func _is_suffix(last: String) -> bool:
-	return last.ends_with(" Júnior") or last.ends_with(" Filho") or last.ends_with(" Neto")
-
-
-## "Pereira Lima" -> "Lima"; "Silva Júnior" -> "Silva".
-static func _main_surname(last: String) -> String:
-	var parts := last.split(" ")
-	if parts.size() == 1:
-		return last
-	if _is_suffix(last):
-		return parts[parts.size() - 2]
-	return parts[parts.size() - 1]
 
 
 static func _make_nickname(rng: RandomNumberGenerator, c: Dictionary, first: String, last: String, ctx: Dictionary) -> String:
@@ -114,7 +122,7 @@ static func _make_nickname(rng: RandomNumberGenerator, c: Dictionary, first: Str
 	# Júnior -> Juninho
 	if last.ends_with("Júnior") and rng.randf() < 0.6:
 		return "Juninho"
-	# Regional (conforme a cidade natal)
+	# Regional (conforme a região da cidade natal)
 	var regional: Dictionary = c.get("regional", {})
 	var region: String = ctx.get("region", "")
 	if region != "" and regional.has(region) and rng.randf() < 0.3:

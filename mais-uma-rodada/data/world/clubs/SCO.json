@@ -1,0 +1,134 @@
+{
+	"nation": "SCO",
+	"_doc": "Escócia (liga de 6).",
+	"clubs": [
+		{
+			"key": "SCO_GLE",
+			"name": "Glasgow Emerald",
+			"short": "Emerald",
+			"abbr": "GLE",
+			"nick": "Bhoys",
+			"city": "Glasgow",
+			"founded": 1887,
+			"league": "SCO1",
+			"rep": 78,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#018749",
+				"#FFFFFF"
+			],
+			"stadium": "Parkhead Stadium",
+			"capacity": 60000,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "round",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"SCO_GLR"
+			]
+		},
+		{
+			"key": "SCO_GLR",
+			"name": "Glasgow Royal Blue",
+			"short": "Royal Blue",
+			"abbr": "GLR",
+			"nick": "Gers",
+			"city": "Glasgow",
+			"founded": 1872,
+			"league": "SCO1",
+			"rep": 76,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#1B458F",
+				"#FFFFFF"
+			],
+			"stadium": "Govan Stadium",
+			"capacity": 50800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "crown"
+			},
+			"rivals": [
+				"SCO_GLE"
+			]
+		},
+		{
+			"key": "SCO_ABE",
+			"name": "Aberdeen Granite",
+			"short": "Granite City",
+			"abbr": "ABE",
+			"nick": "Dons",
+			"city": "Aberdeen",
+			"founded": 1903,
+			"league": "SCO1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Pittodrie Park",
+			"capacity": 20900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SCO_EDM",
+			"name": "Edinburgh Maroons",
+			"short": "Maroons",
+			"abbr": "EDM",
+			"nick": "Jambos",
+			"city": "Edinburgh",
+			"founded": 1874,
+			"league": "SCO1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Gorgie Park",
+			"capacity": 19800,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"symbol": "diamond"
+			},
+			"rivals": [
+				"SCO_EDG"
+			]
+		},
+		{
+			"key": "SCO_EDG",
+			"name": "Edinburgh Greens",
+			"short": "Hibees",
+			"abbr": "EDG",
+			"nick": "Hibees",
+			"city": "Edinburgh",
+			"founded": 1875,
+			"league": "SCO1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Easter Road Park",
+			"capacity": 20400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"symbol": "tower"
+			},
+			"rivals": [
+				"SCO_EDM"
+			]
+		}
+	]
+}
