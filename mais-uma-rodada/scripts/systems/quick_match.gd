@@ -75,7 +75,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var tac := _tactics(sheet)
 	var slots: Array = DatabaseManager.formation(sheet.formation)["slots"]
 	var norms := DatabaseManager.formation_norms()
-	var team_f := float(tac["i_perf"]) * (0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * home_f
+	var team_f := float(tac["i_perf"]) * (0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet) * home_f
 	var pl: Array = [] # [Player, slot_pos, f, w_def, w_att, shoot_w, assist_w, foul_w, rating, c_fin]
 	var d := 0.0
 	var dw := 0.0

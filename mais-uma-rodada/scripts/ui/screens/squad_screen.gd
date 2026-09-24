@@ -2,10 +2,12 @@ extends BaseScreen
 ## Elenco: filtros por setor, ordenação e acesso rápido a escalação e perfil.
 
 const FILTERS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
+const VIEWS := ["Lista", "Profundidade", "Papéis"]
 const SORTS := [["pos", "Posição"], ["ovr", "Overall"], ["age", "Idade"], ["contract", "Contrato"], ["value", "Valor"]]
 
 var _filter := 0
 var _sort := "pos"
+var _view := 0
 
 
 func _init() -> void:
@@ -44,6 +46,22 @@ func refresh() -> void:
 	bill.add_child(UIKit.spacer())
 	bill.add_child(bl)
 	c.add_child(bill)
+	var gv := ButtonGroup.new()
+	var vrow := UIKit.hbox(8)
+	for i in VIEWS.size():
+		var idx := i
+		var chip := UIKit.chip(VIEWS[i], i == _view, gv, func():
+			_view = idx
+			refresh())
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		vrow.add_child(chip)
+	c.add_child(vrow)
+	if _view == 1:
+		_build_depth(w, club, c)
+		return
+	if _view == 2:
+		_build_roles(w, club, c)
+		return
 	var g := ButtonGroup.new()
 	var frow := UIKit.hbox(8)
 	for i in FILTERS.size():
@@ -97,3 +115,92 @@ func refresh() -> void:
 		for p: Player in out:
 			var pid := p.id
 			c.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+
+
+## Profundidade: os três melhores por posição e onde falta gente boa.
+func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
+	c.add_child(UIKit.label("Os três melhores do elenco em cada posição. Em laranja, onde falta reposição à altura.", "Small", true))
+	for row in SquadManager.depth(w, club):
+		var card := UIKit.card("Card", 4)
+		var head := UIKit.hbox(8)
+		var codes: Array = []
+		for pos in row["pos"]:
+			codes.append(Pos.code(pos))
+		head.add_child(UIKit.label("/".join(codes), "H3"))
+		head.add_child(UIKit.spacer())
+		if row["weak"]:
+			head.add_child(UIKit.colored("Carência", UIColors.ORANGE, "Caps"))
+		card.add_child(head)
+		if row["best"].is_empty():
+			card.add_child(UIKit.colored("Ninguém do elenco joga aqui.", UIColors.RED, "Small"))
+		for item in row["best"]:
+			var p: Player = item[0]
+			var pid := p.id
+			var line := UIKit.hbox(8)
+			var nm := UIKit.label("%s · %s" % [p.display_name(), PlayStyle.of(p)], "Small")
+			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			line.add_child(nm)
+			if not p.is_available():
+				line.add_child(UIKit.icon_rect("cross", 18, UIColors.RED))
+			line.add_child(UIKit.badge(int(round(item[1])), 48, 32, 20))
+			card.add_child(UIKit.tap_row(line, func(): UIManager.push("player", {"id": pid})))
+		c.add_child(UIKit.card_panel(card))
+
+
+## Papéis: o que foi prometido a cada jogador. Mexer aqui mexe na moral.
+func _build_roles(w: GameWorld, club: Club, c: VBoxContainer) -> void:
+	c.add_child(UIKit.label("Toque em um jogador para mudar o papel dele. Promover anima; rebaixar quem se acha titular derruba a moral. Titulares e estrelas reclamam quando ficam fora.", "Small", true))
+	var want := SquadManager.wants_more_minutes(w, club)
+	if not want.is_empty():
+		var names: Array = []
+		for p: Player in want:
+			names.append(p.display_name())
+		c.add_child(UIKit.colored("Querem jogar mais: " + ", ".join(names) + ".", UIColors.ORANGE, "Small", true))
+	var squad := w.squad(club)
+	for st in [Player.STATUS_STAR, Player.STATUS_STARTER, Player.STATUS_ROTATION, Player.STATUS_PROSPECT, Player.STATUS_BACKUP]:
+		var list: Array = []
+		for p: Player in squad:
+			if p.squad_status == st:
+				list.append(p)
+		if list.is_empty():
+			continue
+		list.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+		c.add_child(UIKit.section("%s (%d)" % [Player.STATUS_NAMES[st], list.size()]))
+		for p: Player in list:
+			var pp := p
+			c.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): _pick_status(pp)))
+
+
+func _pick_status(p: Player) -> void:
+	var w := world()
+	var club := w.user_club()
+	var v := UIKit.vbox(8)
+	v.add_child(UIKit.label("Papel de %s" % p.display_name(), "Title"))
+	v.add_child(UIKit.label("Hoje: %s · %s" % [Player.STATUS_NAMES[p.squad_status], UIColors.morale_label(p.morale)], "Small"))
+	for st in Player.STATUS_NAMES.size():
+		var s := st
+		var box := UIKit.vbox(2)
+		var head := UIKit.hbox(8)
+		head.add_child(UIKit.label(Player.STATUS_NAMES[s], "H3"))
+		head.add_child(UIKit.spacer())
+		var react := SquadManager.status_reaction(p, s)
+		if s == p.squad_status:
+			head.add_child(UIKit.colored("atual", UIColors.GREEN, "Caps"))
+		elif react != "":
+			head.add_child(UIKit.colored(react, UIColors.GREEN if react == "Vai gostar." else UIColors.ORANGE, "Small"))
+		box.add_child(head)
+		box.add_child(UIKit.label(SquadManager.STATUS_DESC[s], "Small", true))
+		v.add_child(UIKit.tap_row(box, func():
+			var err := SquadManager.set_status(w, club, p, s)
+			if err != "":
+				UIManager.toast(err, UIColors.RED)
+				return
+			UIManager.close_modal()
+			refresh()))
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.custom_minimum_size = Vector2(0, 760)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(v)
+	UIManager.show_modal(sc, true)

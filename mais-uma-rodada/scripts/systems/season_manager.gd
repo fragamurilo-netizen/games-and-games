@@ -373,6 +373,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 		if result == "V" and world.is_user_club(club.id):
 			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
+		TacticsManager.after_match(club, club.sheet, String(club.training.get("focus", "")) == "tatico")
 		# Torcida
 		var patience := float(club.arch().get("fan_patience", 50))
 		var swing := 1.0 + (50.0 - patience) / 100.0

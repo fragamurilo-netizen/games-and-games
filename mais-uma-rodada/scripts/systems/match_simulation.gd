@@ -168,7 +168,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.intensity = sheet.intensity
 	t.line = sheet.line
 	t.pressing = sheet.pressing
-	t.cohesion_f = 0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08
+	t.cohesion_f = (0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet)
 	var um := TrainingManager.unit_mults(world, club)
 	t.train_att = float(um[0])
 	t.train_def = float(um[1])
@@ -1056,6 +1056,10 @@ func set_style(side: int, st: int) -> void:
 
 
 func _ai_decisions() -> void:
+	if half >= 2:
+		for t: MatchTeam in teams:
+			if t.is_user:
+				_user_plan(t)
 	if half != 2:
 		return
 	for t: MatchTeam in teams:
@@ -1074,6 +1078,27 @@ func _ai_decisions() -> void:
 				target = mini(t.base_mentality, 2)
 			if target != t.mentality:
 				set_mentality(t.side, target)
+
+
+## Plano de jogo do usuário: muda a mentalidade quando o placar muda de situação
+## (perdendo / empatando / vencendo) a partir do minuto escolhido. Só age na mudança,
+## então uma troca manual no meio do jogo é respeitada até o placar mudar de novo.
+func _user_plan(t: MatchTeam) -> void:
+	var sh := t.sheet
+	if (sh.plan_losing < 0 and sh.plan_winning < 0) or minute < sh.plan_minute:
+		return
+	var diff: int = score[t.side] - score[1 - t.side]
+	var state := signi(diff) + 1
+	if state == t.plan_state:
+		return
+	t.plan_state = state
+	var target := t.base_mentality
+	if diff < 0 and sh.plan_losing >= 0:
+		target = sh.plan_losing
+	elif diff > 0 and sh.plan_winning >= 0:
+		target = sh.plan_winning
+	if target != t.mentality:
+		set_mentality(t.side, target)
 
 
 ## Trocas automáticas em janelas: sai quem está mais gasto se o reserva render quase o mesmo.
