@@ -129,6 +129,26 @@
 			"rivals": [
 				"SCO_EDM"
 			]
+		},
+		{
+			"key": "SCO_DUN",
+			"name": "Dundee United FC",
+			"short": "Dundee Utd",
+			"abbr": "DUU",
+			"nick": "The Terrors",
+			"city": "Dundee",
+			"founded": 1909,
+			"league": "SCO1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Tannadice Park",
+			"capacity": 14200,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

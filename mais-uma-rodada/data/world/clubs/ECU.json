@@ -129,6 +129,146 @@
 			"rivals": [
 				"ECU_ALQ"
 			]
+		},
+		{
+			"key": "ECU_UCQ",
+			"name": "Club Deportivo Universidad Católica",
+			"short": "U. Católica",
+			"abbr": "UCQ",
+			"nick": "Trencito Azul",
+			"city": "Quito",
+			"founded": 1963,
+			"league": "ECU1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Olímpico Atahualpa",
+			"capacity": 35000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ECU_CUE",
+			"name": "Club Deportivo Cuenca",
+			"short": "Deportivo Cuenca",
+			"abbr": "CUE",
+			"nick": "Morlaco",
+			"city": "Cuenca",
+			"founded": 1971,
+			"league": "ECU1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Alejandro Serrano Aguilar",
+			"capacity": 16500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ECU_MAC",
+			"name": "Club Social y Deportivo Macará",
+			"short": "Macará",
+			"abbr": "MAC",
+			"nick": "Ídolo Ambateño",
+			"city": "Ambato",
+			"founded": 1939,
+			"league": "ECU1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bellavista",
+			"capacity": 16500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ECU_NAC",
+			"name": "Club Deportivo El Nacional",
+			"short": "El Nacional",
+			"abbr": "ENA",
+			"nick": "Puros Criollos",
+			"city": "Quito",
+			"founded": 1964,
+			"league": "ECU1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Olímpico Atahualpa",
+			"capacity": 35000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ECU_ORE",
+			"name": "Orense Sporting Club",
+			"short": "Orense",
+			"abbr": "ORE",
+			"nick": "Bananeros",
+			"city": "Machala",
+			"founded": 2009,
+			"league": "ECU1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Estadio 9 de Mayo",
+			"capacity": 16500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ECU_DEL",
+			"name": "Delfín Sporting Club",
+			"short": "Delfín",
+			"abbr": "DEL",
+			"nick": "Cetáceo",
+			"city": "Manta",
+			"founded": 1989,
+			"league": "ECU1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estadio Jocay",
+			"capacity": 17000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ECU_MUS",
+			"name": "Mushuc Runa Sporting Club",
+			"short": "Mushuc Runa",
+			"abbr": "MUS",
+			"nick": "Ponchito",
+			"city": "Ambato",
+			"founded": 2003,
+			"league": "ECU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Mushuc Runa",
+			"capacity": 6000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

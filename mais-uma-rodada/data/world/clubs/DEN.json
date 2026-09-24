@@ -77,6 +77,66 @@
 				"symbol": "mountain"
 			},
 			"rivals": []
+		},
+		{
+			"key": "DEN_AGF",
+			"name": "Aarhus Gymnastikforening",
+			"short": "AGF",
+			"abbr": "AGF",
+			"nick": "De Hvide",
+			"city": "Aarhus",
+			"founded": 1880,
+			"league": "DEN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Ceres Park",
+			"capacity": 19400,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "DEN_NOR",
+			"name": "FC Nordsjælland",
+			"short": "Nordsjælland",
+			"abbr": "FCN",
+			"nick": "Tigrene",
+			"city": "Farum",
+			"founded": 1991,
+			"league": "DEN1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Right to Dream Park",
+			"capacity": 10300,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "DEN_SIL",
+			"name": "Silkeborg IF",
+			"short": "Silkeborg",
+			"abbr": "SIF",
+			"nick": "Silkeborg",
+			"city": "Silkeborg",
+			"founded": 1917,
+			"league": "DEN1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "JYSK Park",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

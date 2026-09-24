@@ -101,6 +101,46 @@
 				"symbol": "crown"
 			},
 			"rivals": []
+		},
+		{
+			"key": "AUT_LAS",
+			"name": "LASK",
+			"short": "LASK",
+			"abbr": "LASK",
+			"nick": "Athletiker",
+			"city": "Linz",
+			"founded": 1908,
+			"league": "AUT1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Raiffeisen Arena",
+			"capacity": 19000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "AUT_WAC",
+			"name": "Wolfsberger AC",
+			"short": "Wolfsberg",
+			"abbr": "WAC",
+			"nick": "Wölfe",
+			"city": "Wolfsberg",
+			"founded": 1931,
+			"league": "AUT1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#F07F13"
+			],
+			"stadium": "Lavanttal-Arena",
+			"capacity": 7300,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

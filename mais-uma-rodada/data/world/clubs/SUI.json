@@ -101,6 +101,46 @@
 				"symbol": "cross"
 			},
 			"rivals": []
+		},
+		{
+			"key": "SUI_LUG",
+			"name": "FC Lugano",
+			"short": "Lugano",
+			"abbr": "FCL",
+			"nick": "Bianconeri",
+			"city": "Lugano",
+			"founded": 1908,
+			"league": "SUI1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio di Cornaredo",
+			"capacity": 6300,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "SUI_STG",
+			"name": "FC St. Gallen 1879",
+			"short": "St. Gallen",
+			"abbr": "FCSG",
+			"nick": "Espen",
+			"city": "St. Gallen",
+			"founded": 1879,
+			"league": "SUI1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Kybunpark",
+			"capacity": 19400,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

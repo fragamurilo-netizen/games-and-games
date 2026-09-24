@@ -77,6 +77,66 @@
 			"rivals": [
 				"RSA_AMA"
 			]
+		},
+		{
+			"key": "RSA_STE",
+			"name": "Stellenbosch FC",
+			"short": "Stellenbosch",
+			"abbr": "STB",
+			"nick": "Stellies",
+			"city": "Stellenbosch",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Danie Craven Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "RSA_AMZ",
+			"name": "AmaZulu FC",
+			"short": "AmaZulu",
+			"abbr": "AZU",
+			"nick": "Usuthu",
+			"city": "Durban",
+			"founded": 1932,
+			"league": "RSA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Moses Mabhida Stadium",
+			"capacity": 56000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "RSA_TSG",
+			"name": "TS Galaxy FC",
+			"short": "TS Galaxy",
+			"abbr": "TSG",
+			"nick": "The Rockets",
+			"city": "Mbombela",
+			"founded": 2015,
+			"league": "RSA1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Mbombela Stadium",
+			"capacity": 40000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

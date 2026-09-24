@@ -49,6 +49,86 @@
 				"symbol": "tower"
 			},
 			"rivals": []
+		},
+		{
+			"key": "UAE_WAH",
+			"name": "Al Wahda FC",
+			"short": "Al Wahda",
+			"abbr": "WAH",
+			"nick": "Al Anabi",
+			"city": "Abu Dhabi",
+			"founded": 1974,
+			"league": "UAE1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Al Nahyan",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UAE_JAZ",
+			"name": "Al Jazira Club",
+			"short": "Al Jazira",
+			"abbr": "JAZ",
+			"nick": "Al Fakher",
+			"city": "Abu Dhabi",
+			"founded": 1974,
+			"league": "UAE1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Mohammed bin Zayed",
+			"capacity": 42000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "UAE_SHJ",
+			"name": "Sharjah FC",
+			"short": "Sharjah",
+			"abbr": "SHJ",
+			"nick": "Al Malik",
+			"city": "Sharjah",
+			"founded": 1966,
+			"league": "UAE1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Sharjah",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UAE_WAS",
+			"name": "Al Wasl FC",
+			"short": "Al Wasl",
+			"abbr": "WAS",
+			"nick": "Al Fahood",
+			"city": "Dubai",
+			"founded": 1960,
+			"league": "UAE1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio Zabeel",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

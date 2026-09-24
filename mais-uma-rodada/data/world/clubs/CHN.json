@@ -101,6 +101,86 @@
 			"rivals": [
 				"CHN_SHH"
 			]
+		},
+		{
+			"key": "CHN_CHE",
+			"name": "Chengdu Rongcheng FC",
+			"short": "Chengdu Rongcheng",
+			"abbr": "CDR",
+			"nick": "Rongcheng",
+			"city": "Chengdu",
+			"founded": 2018,
+			"league": "CHN1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Phoenix Hill Football Stadium",
+			"capacity": 50700,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHN_ZHE",
+			"name": "Zhejiang FC",
+			"short": "Zhejiang",
+			"abbr": "ZHE",
+			"nick": "Green Town",
+			"city": "Hangzhou",
+			"founded": 1998,
+			"league": "CHN1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Huanglong Sports Center",
+			"capacity": 51000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHN_TIA",
+			"name": "Tianjin Jinmen Tiger FC",
+			"short": "Tianjin Tiger",
+			"abbr": "TJT",
+			"nick": "Tigres",
+			"city": "Tianjin",
+			"founded": 1951,
+			"league": "CHN1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "TEDA Football Stadium",
+			"capacity": 37500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHN_WUH",
+			"name": "Wuhan Three Towns FC",
+			"short": "Wuhan Three Towns",
+			"abbr": "WTT",
+			"nick": "Três Cidades",
+			"city": "Wuhan",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Wuhan Sports Center",
+			"capacity": 54000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

@@ -77,6 +77,66 @@
 				"symbol": "star"
 			},
 			"rivals": []
+		},
+		{
+			"key": "TUN_CSS",
+			"name": "Club Sportif Sfaxien",
+			"short": "CS Sfaxien",
+			"abbr": "CSS",
+			"nick": "Noir et Blanc",
+			"city": "Sfax",
+			"founded": 1928,
+			"league": "TUN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Taïeb Mhiri",
+			"capacity": 22000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUN_USM",
+			"name": "Union Sportive Monastirienne",
+			"short": "US Monastir",
+			"abbr": "USM",
+			"nick": "Monastiriens",
+			"city": "Monastir",
+			"founded": 1923,
+			"league": "TUN1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Mustapha Ben Jannet",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "TUN_STU",
+			"name": "Stade Tunisien",
+			"short": "Stade Tunisien",
+			"abbr": "ST",
+			"nick": "Bayadha",
+			"city": "Tunis",
+			"founded": 1948,
+			"league": "TUN1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade Hédi Enneifer",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

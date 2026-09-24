@@ -125,6 +125,106 @@
 				"symbol": "gear"
 			},
 			"rivals": []
+		},
+		{
+			"key": "BOL_BLO",
+			"name": "Club Blooming",
+			"short": "Blooming",
+			"abbr": "BLO",
+			"nick": "Academia Cruceña",
+			"city": "Santa Cruz de la Sierra",
+			"founded": 1946,
+			"league": "BOL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ramón Tahuichi Aguilera",
+			"capacity": 38000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_NPO",
+			"name": "Club Atlético Nacional Potosí",
+			"short": "Nacional Potosí",
+			"abbr": "NPO",
+			"nick": "Banda Roja",
+			"city": "Potosí",
+			"founded": 1942,
+			"league": "BOL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Víctor Agustín Ugarte",
+			"capacity": 32000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_TOM",
+			"name": "Club Real Tomayapo",
+			"short": "Real Tomayapo",
+			"abbr": "RTO",
+			"nick": "Chapaco",
+			"city": "Tarija",
+			"founded": 2011,
+			"league": "BOL1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Estadio IV Centenario",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_GUA",
+			"name": "Club Deportivo Guabirá",
+			"short": "Guabirá",
+			"abbr": "GUA",
+			"nick": "Azucarero",
+			"city": "Montero",
+			"founded": 1962,
+			"league": "BOL1",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Gilberto Parada",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_SAB",
+			"name": "Club San Antonio Bulo Bulo",
+			"short": "San Antonio",
+			"abbr": "SAB",
+			"nick": "Cocalero",
+			"city": "Bulo Bulo",
+			"founded": 2013,
+			"league": "BOL1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Carlos Villegas",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

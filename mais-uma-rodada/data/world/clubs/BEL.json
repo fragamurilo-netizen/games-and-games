@@ -154,6 +154,46 @@
 			"rivals": [
 				"BEL_BXL"
 			]
+		},
+		{
+			"key": "BEL_ANT",
+			"name": "Royal Antwerp FC",
+			"short": "Antwerp",
+			"abbr": "RAFC",
+			"nick": "The Great Old",
+			"city": "Antwerpen",
+			"founded": 1880,
+			"league": "BEL1",
+			"rep": 66,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Bosuilstadion",
+			"capacity": 16100,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BEL_MEC",
+			"name": "KV Mechelen",
+			"short": "Mechelen",
+			"abbr": "KVM",
+			"nick": "Malinwa",
+			"city": "Mechelen",
+			"founded": 1904,
+			"league": "BEL1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "AFAS Stadion Achter de Kazerne",
+			"capacity": 16700,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }

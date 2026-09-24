@@ -153,6 +153,86 @@
 			"rivals": [
 				"JPN_KOB"
 			]
+		},
+		{
+			"key": "JPN_HIR",
+			"name": "Sanfrecce Hiroshima",
+			"short": "Sanfrecce",
+			"abbr": "SAN",
+			"nick": "Sanfrecce",
+			"city": "Hiroshima",
+			"founded": 1938,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Edion Peace Wing Hiroshima",
+			"capacity": 28500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "JPN_MAC",
+			"name": "FC Machida Zelvia",
+			"short": "Machida Zelvia",
+			"abbr": "MAC",
+			"nick": "Zelvia",
+			"city": "Machida",
+			"founded": 1989,
+			"league": "JPN1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Machida GION Stadium",
+			"capacity": 15500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "JPN_CER",
+			"name": "Cerezo Osaka",
+			"short": "Cerezo Osaka",
+			"abbr": "CER",
+			"nick": "Cerezo",
+			"city": "Osaka",
+			"founded": 1957,
+			"league": "JPN1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#E91E63",
+				"#0055A4"
+			],
+			"stadium": "Yodoko Sakura Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "JPN_TOK",
+			"name": "FC Tokyo",
+			"short": "FC Tokyo",
+			"abbr": "TOK",
+			"nick": "Gasmen",
+			"city": "Tóquio",
+			"founded": 1935,
+			"league": "JPN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Ajinomoto Stadium",
+			"capacity": 49000,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }

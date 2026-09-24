@@ -657,6 +657,206 @@
 				"symbol": "letter"
 			},
 			"rivals": []
+		},
+		{
+			"key": "ARG_SMT",
+			"name": "Club Atlético San Martín de Tucumán",
+			"short": "San Martín T",
+			"abbr": "SMT",
+			"nick": "Santo",
+			"city": "San Miguel de Tucumán",
+			"founded": 1909,
+			"league": "ARG2",
+			"rep": 50,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Ciudadela",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_ALM",
+			"name": "Club Almirante Brown",
+			"short": "Almirante Brown",
+			"abbr": "ALM",
+			"nick": "La Fragata",
+			"city": "Isidro Casanova",
+			"founded": 1922,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Fragata Presidente Sarmiento",
+			"capacity": 18000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_ALB",
+			"name": "Club Atlético All Boys",
+			"short": "All Boys",
+			"abbr": "ALB",
+			"nick": "Albo",
+			"city": "Buenos Aires",
+			"founded": 1913,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Islas Malvinas",
+			"capacity": 21000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_NCH",
+			"name": "Club Atlético Nueva Chicago",
+			"short": "Nueva Chicago",
+			"abbr": "NCH",
+			"nick": "Torito de Mataderos",
+			"city": "Buenos Aires",
+			"founded": 1911,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00843D",
+				"#111111"
+			],
+			"stadium": "Estadio Republica de Mataderos",
+			"capacity": 28500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_TEM",
+			"name": "Club Atlético Temperley",
+			"short": "Temperley",
+			"abbr": "TEM",
+			"nick": "Gasolero",
+			"city": "Temperley",
+			"founded": 1912,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Alfredo Beranger",
+			"capacity": 19000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_MOR",
+			"name": "Club Deportivo Morón",
+			"short": "Morón",
+			"abbr": "MOR",
+			"nick": "El Gallo",
+			"city": "Morón",
+			"founded": 1947,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Nuevo Francisco Urbano",
+			"capacity": 32000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_AGR",
+			"name": "Club Agropecuario Argentino",
+			"short": "Agropecuario",
+			"abbr": "AGR",
+			"nick": "El Sojero",
+			"city": "Carlos Casares",
+			"founded": 2011,
+			"league": "ARG2",
+			"rep": 42,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ofelia Rosenzuaig",
+			"capacity": 8500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_MAI",
+			"name": "Club Deportivo Maipú",
+			"short": "Deportivo Maipú",
+			"abbr": "DMA",
+			"nick": "El Cruzado",
+			"city": "Maipú",
+			"founded": 1927,
+			"league": "ARG2",
+			"rep": 42,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Omar Higinio Sperdutti",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_AND",
+			"name": "Club Atlético Los Andes",
+			"short": "Los Andes",
+			"abbr": "LAN2",
+			"nick": "El Milrayitas",
+			"city": "Lomas de Zamora",
+			"founded": 1917,
+			"league": "ARG2",
+			"rep": 42,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Eduardo Gallardón",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_BRO",
+			"name": "Club Atlético Brown",
+			"short": "Brown de Adrogué",
+			"abbr": "BRA",
+			"nick": "El Tricolor",
+			"city": "Adrogué",
+			"founded": 1945,
+			"league": "ARG2",
+			"rep": 40,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Lorenzo Arandilla",
+			"capacity": 4500,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }

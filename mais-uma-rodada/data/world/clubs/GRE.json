@@ -108,6 +108,46 @@
 			"rivals": [
 				"GRE_PIR"
 			]
+		},
+		{
+			"key": "GRE_ARI",
+			"name": "Aris Thessaloniki FC",
+			"short": "Aris",
+			"abbr": "ARI",
+			"nick": "Thrylos tou Vorra",
+			"city": "Thessaloniki",
+			"founded": 1914,
+			"league": "GRE1",
+			"rep": 62,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Kleanthis Vikelidis",
+			"capacity": 22800,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "GRE_OFI",
+			"name": "OFI Crete FC",
+			"short": "OFI",
+			"abbr": "OFI",
+			"nick": "Omilos",
+			"city": "Heraklion",
+			"founded": 1925,
+			"league": "GRE1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Theodoros Vardinogiannis",
+			"capacity": 9000,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }
