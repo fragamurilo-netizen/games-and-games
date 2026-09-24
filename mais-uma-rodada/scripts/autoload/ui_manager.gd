@@ -21,6 +21,7 @@ const SCREENS := {
 	"academy": "res://scenes/screens/academy.tscn",
 	"history": "res://scenes/screens/history.tscn",
 	"editor": "res://scenes/screens/editor.tscn",
+	"preseason": "res://scenes/screens/preseason.tscn",
 }
 const TABS := ["hub", "squad", "market", "table", "club"]
 

@@ -499,6 +499,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var s := world.season
 	var summary := {"year": world.year, "leagues": [], "cups": [], "user": {}, "retired": [], "youth": [], "left": []}
 	var user_nation := world.user_nation()
+	var rep0 := world.user_club().reputation if world.has_user() else 0.0
+	var fans0 := world.user_club().fan_base if world.has_user() else 0
 	# Vagas continentais do ano que vem (antes das mudanças de divisão)
 	world.stats["qualified"] = CupManager.compute_qualified(world)
 	var moves := {} # club_id -> nova liga
@@ -614,6 +616,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["user"]["fired"] = review["fired"]
 		summary["user"]["offers"] = review["offers"]
 		summary["user"]["board"] = u.board_confidence
+		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
+		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
 	# Arquivo individual da temporada
 	for p: Player in world.players.values():
 		var tot := p.season_totals()
