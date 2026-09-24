@@ -1,7 +1,7 @@
 class_name Overrides
 extends RefCounted
 ## Personalizações do editor que valem para todas as carreiras (user://custom/overrides.json):
-## nomes, cores e escudos de clubes (pela chave estável do clube) e nomes/logos das competições.
+## nomes, cores e escudos de clubes (pela chave estável do clube) e nomes/logos/cores das competições.
 
 const PATH := "user://custom/overrides.json"
 const CLUB_FIELDS: Array[String] = ["name", "short", "abbr", "nick", "city", "stadium", "c1", "c2", "crest"]
@@ -84,10 +84,12 @@ static func comp(kind: String, id: String) -> Dictionary:
 	return data()[kind].get(id, {})
 
 
-static func store_comp(kind: String, id: String, name: String, short: String, logo: String) -> void:
+static func store_comp(kind: String, id: String, name: String, short: String, logo: String, colors: Array = []) -> void:
 	var e := {"name": name, "short": short}
 	if logo != "":
 		e["logo"] = logo
+	if colors.size() == 2:
+		e["colors"] = colors.duplicate()
 	data()[kind][id] = e
 	save()
 	apply_db()
@@ -98,7 +100,7 @@ static func clear_comp(kind: String, id: String) -> void:
 	save()
 
 
-## Aplica nomes e logos personalizados às configurações carregadas.
+## Aplica nomes, logos e cores personalizados às configurações carregadas.
 static func apply_db() -> void:
 	for id in data()["leagues"]:
 		if DatabaseManager.has_league(id):
@@ -107,6 +109,7 @@ static func apply_db() -> void:
 			cfg["name"] = String(o.get("name", cfg.get("name", id)))
 			cfg["short"] = String(o.get("short", cfg.get("short", id)))
 			cfg["logo"] = String(o.get("logo", ""))
+			_apply_colors(cfg, o)
 	for id in data()["cups"]:
 		var cfg := DatabaseManager.cup_cfg(id)
 		if cfg.is_empty():
@@ -115,6 +118,13 @@ static func apply_db() -> void:
 		cfg["name"] = String(o.get("name", cfg.get("name", id)))
 		cfg["short"] = String(o.get("short", cfg.get("short", id)))
 		cfg["logo"] = String(o.get("logo", ""))
+		_apply_colors(cfg, o)
+
+
+static func _apply_colors(cfg: Dictionary, o: Dictionary) -> void:
+	var cols: Variant = o.get("colors", [])
+	if cols is Array and cols.size() == 2:
+		cfg["colors"] = [String(cols[0]), String(cols[1])]
 
 
 static func logo_of(id: String) -> Texture2D:

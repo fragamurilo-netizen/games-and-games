@@ -61,7 +61,7 @@ func _build() -> void:
 		_seed_edit.text = str(WorldGenerator.random_seed())
 		_apply_seed(), "Seed aleatório"))
 	c.add_child(seed_row)
-	c.add_child(UIKit.label("Mesmo seed = mesmo universo. 43 países, 51 ligas e 602 clubes com nomes genéricos inspirados nos reais. No mundo aleatório as reputações e os perfis dos clubes mudam e todos os jogadores são outros.", "Small", true))
+	c.add_child(UIKit.label("Mesmo seed = mesmo universo. %d países, %d ligas e %d clubes reais. No mundo aleatório" % _world_counts() + " as reputações e os perfis dos clubes mudam e todos os jogadores são outros.", "Small", true))
 	# Dificuldade
 	c.add_child(UIKit.section("Dificuldade"))
 	var gd := ButtonGroup.new()
@@ -176,10 +176,21 @@ func _apply_seed() -> void:
 	_generate()
 
 
+## [países, ligas, clubes] do banco de dados.
+func _world_counts() -> Array:
+	var nations := {}
+	var clubs := 0
+	for id in DatabaseManager.league_ids():
+		var cfg := DatabaseManager.league_cfg(id)
+		nations[cfg["nation"]] = true
+		clubs += int(cfg["teams"])
+	return [nations.size(), DatabaseManager.league_ids().size(), clubs]
+
+
 func _generate() -> void:
 	_world = null
 	_selected = -1
-	_status.text = "Gerando o mundo (602 clubes, ~15 mil jogadores)..."
+	_status.text = "Gerando o mundo (%d clubes, ~%d mil jogadores)..." % [_world_counts()[2], roundi(_world_counts()[2] * 24 / 1000.0)]
 	_status.visible = true
 	UIKit.clear(_list)
 	_update_details()

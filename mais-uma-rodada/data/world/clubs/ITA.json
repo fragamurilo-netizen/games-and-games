@@ -1,11 +1,11 @@
 {
 	"nation": "ITA",
-	"_doc": "Itália: 1ª divisão (liga fechada).",
+	"_doc": "Itália: 1ª divisão (liga fechada). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "ITA_NAP",
-			"name": "Napoli Partenopei",
-			"short": "Partenopei",
+			"name": "SSC Napoli",
+			"short": "Napoli",
 			"abbr": "NAP",
 			"nick": "Azzurri",
 			"city": "Napoli",
@@ -17,7 +17,7 @@
 				"#12A0D7",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio di Fuorigrotta",
+			"stadium": "Stadio Diego Armando Maradona",
 			"capacity": 54700,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "ITA_MNZ",
-			"name": "Milano Nerazzurri",
-			"short": "Nerazzurri",
-			"abbr": "MNZ",
+			"name": "FC Internazionale Milano",
+			"short": "Inter",
+			"abbr": "INT",
 			"nick": "Nerazzurri",
 			"city": "Milano",
 			"founded": 1908,
@@ -44,7 +44,7 @@
 				"#0068A8",
 				"#111111"
 			],
-			"stadium": "Stadio di San Siro",
+			"stadium": "San Siro",
 			"capacity": 75000,
 			"kit": "stripes_v",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "ITA_MRN",
-			"name": "Milano Rossoneri",
-			"short": "Rossoneri",
-			"abbr": "MRN",
+			"name": "AC Milan",
+			"short": "Milan",
+			"abbr": "MIL",
 			"nick": "Diavoli",
 			"city": "Milano",
 			"founded": 1899,
@@ -71,7 +71,7 @@
 				"#FB090B",
 				"#111111"
 			],
-			"stadium": "Stadio di San Siro",
+			"stadium": "San Siro",
 			"capacity": 75000,
 			"kit": "stripes_v",
 			"crest": {
@@ -84,9 +84,9 @@
 		},
 		{
 			"key": "ITA_TBN",
-			"name": "Torino Bianconeri",
-			"short": "Bianconeri",
-			"abbr": "TBN",
+			"name": "Juventus FC",
+			"short": "Juventus",
+			"abbr": "JUV",
 			"nick": "Vecchia Signora",
 			"city": "Torino",
 			"founded": 1897,
@@ -97,7 +97,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Stadio delle Alpi",
+			"stadium": "Allianz Stadium",
 			"capacity": 41500,
 			"kit": "stripes_v",
 			"crest": {
@@ -111,9 +111,9 @@
 		},
 		{
 			"key": "ITA_BER",
-			"name": "Bergamo Dea",
-			"short": "La Dea",
-			"abbr": "BER",
+			"name": "Atalanta BC",
+			"short": "Atalanta",
+			"abbr": "ATA",
 			"nick": "Orobici",
 			"city": "Bergamo",
 			"founded": 1907,
@@ -124,7 +124,7 @@
 				"#1E71B8",
 				"#111111"
 			],
-			"stadium": "Stadio di Bergamo",
+			"stadium": "Gewiss Stadium",
 			"capacity": 25000,
 			"kit": "stripes_v",
 			"crest": {
@@ -135,9 +135,9 @@
 		},
 		{
 			"key": "ITA_RGR",
-			"name": "Roma Giallorossi",
-			"short": "Giallorossi",
-			"abbr": "RGR",
+			"name": "AS Roma",
+			"short": "Roma",
+			"abbr": "ROM",
 			"nick": "Lupi",
 			"city": "Roma",
 			"founded": 1927,
@@ -148,7 +148,7 @@
 				"#8E1F2F",
 				"#F0BC42"
 			],
-			"stadium": "Stadio del Foro Italico",
+			"stadium": "Stadio Olimpico",
 			"capacity": 70600,
 			"kit": "plain",
 			"crest": {
@@ -161,9 +161,9 @@
 		},
 		{
 			"key": "ITA_RBC",
-			"name": "Roma Biancocelesti",
-			"short": "Biancocelesti",
-			"abbr": "RBC",
+			"name": "SS Lazio",
+			"short": "Lazio",
+			"abbr": "LAZ",
 			"nick": "Aquile",
 			"city": "Roma",
 			"founded": 1900,
@@ -174,7 +174,7 @@
 				"#87D8F7",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio del Foro Italico",
+			"stadium": "Stadio Olimpico",
 			"capacity": 70600,
 			"kit": "plain",
 			"crest": {
@@ -187,9 +187,9 @@
 		},
 		{
 			"key": "ITA_FIR",
-			"name": "Firenze Viola",
-			"short": "Viola",
-			"abbr": "FIR",
+			"name": "ACF Fiorentina",
+			"short": "Fiorentina",
+			"abbr": "FIO",
 			"nick": "Viola",
 			"city": "Firenze",
 			"founded": 1926,
@@ -200,7 +200,7 @@
 				"#5E2A84",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio di Campo di Marte",
+			"stadium": "Stadio Artemio Franchi",
 			"capacity": 43000,
 			"kit": "plain",
 			"crest": {
@@ -211,9 +211,9 @@
 		},
 		{
 			"key": "ITA_BGN",
-			"name": "Bologna Rossoblù",
-			"short": "Rossoblù",
-			"abbr": "BGN",
+			"name": "Bologna FC 1909",
+			"short": "Bologna",
+			"abbr": "BOL",
 			"nick": "Felsinei",
 			"city": "Bologna",
 			"founded": 1909,
@@ -224,7 +224,7 @@
 				"#1A2F48",
 				"#A21C26"
 			],
-			"stadium": "Stadio di Bologna",
+			"stadium": "Stadio Renato Dall'Ara",
 			"capacity": 38000,
 			"kit": "stripes_v",
 			"crest": {
@@ -235,8 +235,8 @@
 		},
 		{
 			"key": "ITA_COM",
-			"name": "Como Lariani",
-			"short": "Lariani",
+			"name": "Como 1907",
+			"short": "Como",
 			"abbr": "COM",
 			"nick": "Lariani",
 			"city": "Como",
@@ -248,7 +248,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio del Lago",
+			"stadium": "Stadio Giuseppe Sinigaglia",
 			"capacity": 13600,
 			"kit": "plain",
 			"crest": {
@@ -259,9 +259,9 @@
 		},
 		{
 			"key": "ITA_TGR",
-			"name": "Torino Granata",
-			"short": "Granata",
-			"abbr": "TGR",
+			"name": "Torino FC",
+			"short": "Torino",
+			"abbr": "TOR",
 			"nick": "Toro",
 			"city": "Torino",
 			"founded": 1906,
@@ -272,7 +272,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio di Santa Rita",
+			"stadium": "Stadio Olimpico Grande Torino",
 			"capacity": 28000,
 			"kit": "plain",
 			"crest": {
@@ -285,8 +285,8 @@
 		},
 		{
 			"key": "ITA_UDI",
-			"name": "Udine Friulani",
-			"short": "Friulani",
+			"name": "Udinese Calcio",
+			"short": "Udinese",
 			"abbr": "UDI",
 			"nick": "Zebrette",
 			"city": "Udine",
@@ -298,7 +298,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Stadio del Friuli",
+			"stadium": "Bluenergy Stadium",
 			"capacity": 25100,
 			"kit": "stripes_v",
 			"crest": {
@@ -309,8 +309,8 @@
 		},
 		{
 			"key": "ITA_GEN",
-			"name": "Genova Grifone",
-			"short": "Grifone",
+			"name": "Genoa CFC",
+			"short": "Genoa",
 			"abbr": "GEN",
 			"nick": "Grifoni",
 			"city": "Genova",
@@ -322,7 +322,7 @@
 				"#A31D29",
 				"#002B5C"
 			],
-			"stadium": "Stadio di Marassi",
+			"stadium": "Stadio Luigi Ferraris",
 			"capacity": 36600,
 			"kit": "halves",
 			"crest": {
@@ -333,8 +333,8 @@
 		},
 		{
 			"key": "ITA_VER",
-			"name": "Verona Scaligeri",
-			"short": "Scaligeri",
+			"name": "Hellas Verona FC",
+			"short": "Hellas Verona",
 			"abbr": "VER",
 			"nick": "Gialloblù",
 			"city": "Verona",
@@ -346,7 +346,7 @@
 				"#FFD100",
 				"#1D3F91"
 			],
-			"stadium": "Stadio dell'Adige",
+			"stadium": "Stadio Marcantonio Bentegodi",
 			"capacity": 39200,
 			"kit": "plain",
 			"crest": {
@@ -357,8 +357,8 @@
 		},
 		{
 			"key": "ITA_CAG",
-			"name": "Cagliari Rossoblù Sardi",
-			"short": "Rossoblù Sardi",
+			"name": "Cagliari Calcio",
+			"short": "Cagliari",
 			"abbr": "CAG",
 			"nick": "Isolani",
 			"city": "Cagliari",
@@ -370,7 +370,7 @@
 				"#A51A3A",
 				"#0D2A5C"
 			],
-			"stadium": "Stadio di Sant'Elia",
+			"stadium": "Unipol Domus",
 			"capacity": 16400,
 			"kit": "halves",
 			"crest": {
@@ -381,9 +381,9 @@
 		},
 		{
 			"key": "ITA_PMA",
-			"name": "Parma Crociati",
-			"short": "Crociati",
-			"abbr": "PMA",
+			"name": "Parma Calcio 1913",
+			"short": "Parma",
+			"abbr": "PAR",
 			"nick": "Crociati",
 			"city": "Parma",
 			"founded": 1913,
@@ -394,7 +394,7 @@
 				"#FFFFFF",
 				"#FFD100"
 			],
-			"stadium": "Stadio del Petitot",
+			"stadium": "Stadio Ennio Tardini",
 			"capacity": 22300,
 			"kit": "plain",
 			"crest": {
@@ -405,8 +405,8 @@
 		},
 		{
 			"key": "ITA_LEC",
-			"name": "Lecce Salentini",
-			"short": "Salentini",
+			"name": "US Lecce",
+			"short": "Lecce",
 			"abbr": "LEC",
 			"nick": "Salentini",
 			"city": "Lecce",
@@ -418,7 +418,7 @@
 				"#FFD100",
 				"#C8102E"
 			],
-			"stadium": "Stadio del Salento",
+			"stadium": "Stadio Via del Mare",
 			"capacity": 31500,
 			"kit": "stripes_v",
 			"crest": {
@@ -429,8 +429,8 @@
 		},
 		{
 			"key": "ITA_SAS",
-			"name": "Sassuolo Neroverdi",
-			"short": "Neroverdi",
+			"name": "US Sassuolo Calcio",
+			"short": "Sassuolo",
 			"abbr": "SAS",
 			"nick": "Neroverdi",
 			"city": "Sassuolo",
@@ -442,7 +442,7 @@
 				"#00A752",
 				"#111111"
 			],
-			"stadium": "Stadio di Reggio",
+			"stadium": "Mapei Stadium",
 			"capacity": 21500,
 			"kit": "stripes_v",
 			"crest": {
@@ -453,8 +453,8 @@
 		},
 		{
 			"key": "ITA_PIS",
-			"name": "Pisa Torre",
-			"short": "Pisani",
+			"name": "AC Pisa 1909",
+			"short": "Pisa",
 			"abbr": "PIS",
 			"nick": "Nerazzurri Pisani",
 			"city": "Pisa",
@@ -466,7 +466,7 @@
 				"#111111",
 				"#1D5BBF"
 			],
-			"stadium": "Stadio della Torre",
+			"stadium": "Arena Garibaldi",
 			"capacity": 14000,
 			"kit": "stripes_v",
 			"crest": {
@@ -477,8 +477,8 @@
 		},
 		{
 			"key": "ITA_CRE",
-			"name": "Cremona Grigiorossi",
-			"short": "Grigiorossi",
+			"name": "US Cremonese",
+			"short": "Cremonese",
 			"abbr": "CRE",
 			"nick": "Grigiorossi",
 			"city": "Cremona",
@@ -490,13 +490,413 @@
 				"#9E9E9E",
 				"#C8102E"
 			],
-			"stadium": "Stadio del Po",
+			"stadium": "Stadio Giovanni Zini",
 			"capacity": 16000,
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
 				"symbol": "tower"
 			},
+			"rivals": []
+		},
+		{
+			"key": "ITA_PAL",
+			"name": "Palermo FC",
+			"short": "Palermo",
+			"abbr": "PAL",
+			"nick": "Rosanero",
+			"city": "Palermo",
+			"founded": 1900,
+			"league": "ITA2",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E91E63",
+				"#111111"
+			],
+			"stadium": "Stadio Renzo Barbera",
+			"capacity": 36000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_SAM",
+			"name": "UC Sampdoria",
+			"short": "Sampdoria",
+			"abbr": "SAM",
+			"nick": "Blucerchiati",
+			"city": "Genova",
+			"founded": 1946,
+			"league": "ITA2",
+			"rep": 62,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Luigi Ferraris",
+			"capacity": 36600,
+			"kit": "faixa",
+			"rivals": []
+		},
+		{
+			"key": "ITA_VEN",
+			"name": "Venezia FC",
+			"short": "Venezia",
+			"abbr": "VEN",
+			"nick": "Lagunari",
+			"city": "Venezia",
+			"founded": 1907,
+			"league": "ITA2",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#F07F13"
+			],
+			"stadium": "Stadio Pier Luigi Penzo",
+			"capacity": 11000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_MON",
+			"name": "AC Monza",
+			"short": "Monza",
+			"abbr": "MON",
+			"nick": "Brianzoli",
+			"city": "Monza",
+			"founded": 1912,
+			"league": "ITA2",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "U-Power Stadium",
+			"capacity": 16900,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "ITA_EMP",
+			"name": "Empoli FC",
+			"short": "Empoli",
+			"abbr": "EMP",
+			"nick": "Azzurri",
+			"city": "Empoli",
+			"founded": 1920,
+			"league": "ITA2",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Carlo Castellani",
+			"capacity": 16300,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_FRO",
+			"name": "Frosinone Calcio",
+			"short": "Frosinone",
+			"abbr": "FRO",
+			"nick": "Canarini",
+			"city": "Frosinone",
+			"founded": 1928,
+			"league": "ITA2",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stadio Benito Stirpe",
+			"capacity": 16200,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_BAR",
+			"name": "SSC Bari",
+			"short": "Bari",
+			"abbr": "BAR",
+			"nick": "Galletti",
+			"city": "Bari",
+			"founded": 1908,
+			"league": "ITA2",
+			"rep": 58,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio San Nicola",
+			"capacity": 58000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_SPE",
+			"name": "Spezia Calcio",
+			"short": "Spezia",
+			"abbr": "SPE",
+			"nick": "Aquilotti",
+			"city": "La Spezia",
+			"founded": 1906,
+			"league": "ITA2",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Stadio Alberto Picco",
+			"capacity": 10300,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_MOD",
+			"name": "Modena FC",
+			"short": "Modena",
+			"abbr": "MOD",
+			"nick": "Canarini",
+			"city": "Modena",
+			"founded": 1912,
+			"league": "ITA2",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stadio Alberto Braglia",
+			"capacity": 21000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_CES",
+			"name": "Cesena FC",
+			"short": "Cesena",
+			"abbr": "CES",
+			"nick": "Cavallucci Marini",
+			"city": "Cesena",
+			"founded": 1940,
+			"league": "ITA2",
+			"rep": 54,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Orogel Stadium Dino Manuzzi",
+			"capacity": 23800,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_CAT",
+			"name": "US Catanzaro 1929",
+			"short": "Catanzaro",
+			"abbr": "CTZ",
+			"nick": "Aquile",
+			"city": "Catanzaro",
+			"founded": 1929,
+			"league": "ITA2",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Stadio Nicola Ceravolo",
+			"capacity": 14600,
+			"kit": "halves",
+			"rivals": []
+		},
+		{
+			"key": "ITA_SUD",
+			"name": "FC Südtirol",
+			"short": "Südtirol",
+			"abbr": "SUD",
+			"nick": "Biancorossi",
+			"city": "Bolzano",
+			"founded": 1974,
+			"league": "ITA2",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stadio Druso",
+			"capacity": 5500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_REG",
+			"name": "AC Reggiana 1919",
+			"short": "Reggiana",
+			"abbr": "REG",
+			"nick": "Granata",
+			"city": "Reggio Emilia",
+			"founded": 1919,
+			"league": "ITA2",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Mapei Stadium",
+			"capacity": 21500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_CAR",
+			"name": "Carrarese Calcio",
+			"short": "Carrarese",
+			"abbr": "CAR",
+			"nick": "Marmiferi",
+			"city": "Carrara",
+			"founded": 1908,
+			"league": "ITA2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stadio dei Marmi",
+			"capacity": 9500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ITA_JST",
+			"name": "SS Juve Stabia",
+			"short": "Juve Stabia",
+			"abbr": "JST",
+			"nick": "Vespe",
+			"city": "Castellammare di Stabia",
+			"founded": 1907,
+			"league": "ITA2",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stadio Romeo Menti",
+			"capacity": 12800,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ITA_MAN",
+			"name": "Mantova 1911",
+			"short": "Mantova",
+			"abbr": "MAN",
+			"nick": "Virgiliani",
+			"city": "Mantova",
+			"founded": 1911,
+			"league": "ITA2",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stadio Danilo Martelli",
+			"capacity": 14800,
+			"kit": "faixa",
+			"rivals": []
+		},
+		{
+			"key": "ITA_PAD",
+			"name": "Calcio Padova",
+			"short": "Padova",
+			"abbr": "PAD",
+			"nick": "Biancoscudati",
+			"city": "Padova",
+			"founded": 1910,
+			"league": "ITA2",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stadio Euganeo",
+			"capacity": 32300,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_AVE",
+			"name": "US Avellino 1912",
+			"short": "Avellino",
+			"abbr": "AVE",
+			"nick": "Lupi",
+			"city": "Avellino",
+			"founded": 1912,
+			"league": "ITA2",
+			"rep": 52,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Partenio-Lombardi",
+			"capacity": 26300,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_ENT",
+			"name": "Virtus Entella",
+			"short": "Entella",
+			"abbr": "ENT",
+			"nick": "Diavoli Neri",
+			"city": "Chiavari",
+			"founded": 1914,
+			"league": "ITA2",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Comunale di Chiavari",
+			"capacity": 5500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ITA_PES",
+			"name": "Delfino Pescara 1936",
+			"short": "Pescara",
+			"abbr": "PES",
+			"nick": "Delfini",
+			"city": "Pescara",
+			"founded": 1936,
+			"league": "ITA2",
+			"rep": 52,
+			"arch": "formador",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio Adriatico",
+			"capacity": 20500,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

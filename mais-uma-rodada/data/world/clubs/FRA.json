@@ -1,12 +1,12 @@
 {
 	"nation": "FRA",
-	"_doc": "França: 1ª e 2ª divisão.",
+	"_doc": "França: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "FRA_PCF",
-			"name": "Paris Capitale FC",
-			"short": "Paris Capitale",
-			"abbr": "PCF",
+			"name": "Paris Saint-Germain",
+			"short": "PSG",
+			"abbr": "PSG",
 			"nick": "Parisiens",
 			"city": "Paris",
 			"founded": 1970,
@@ -17,7 +17,7 @@
 				"#004170",
 				"#DA291C"
 			],
-			"stadium": "Stade de la Porte d'Auteuil",
+			"stadium": "Parc des Princes",
 			"capacity": 48000,
 			"kit": "faixa",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "FRA_MRS",
-			"name": "Marseille Phocéen",
-			"short": "Phocéens",
-			"abbr": "MRS",
+			"name": "Olympique de Marseille",
+			"short": "Marseille",
+			"abbr": "OM",
 			"nick": "Olympiens",
 			"city": "Marseille",
 			"founded": 1899,
@@ -44,7 +44,7 @@
 				"#FFFFFF",
 				"#2FAEE0"
 			],
-			"stadium": "Vélodrome du Prado",
+			"stadium": "Orange Vélodrome",
 			"capacity": 67000,
 			"kit": "plain",
 			"crest": {
@@ -58,8 +58,8 @@
 		},
 		{
 			"key": "FRA_MON",
-			"name": "Monaco Principauté",
-			"short": "Principauté",
+			"name": "AS Monaco",
+			"short": "Monaco",
 			"abbr": "MON",
 			"nick": "Monégasques",
 			"city": "Monaco",
@@ -71,7 +71,7 @@
 				"#E5053A",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Fontvieille",
+			"stadium": "Stade Louis-II",
 			"capacity": 18500,
 			"kit": "diagonal",
 			"crest": {
@@ -84,8 +84,8 @@
 		},
 		{
 			"key": "FRA_NIC",
-			"name": "Nice Aiglons",
-			"short": "Aiglons",
+			"name": "OGC Nice",
+			"short": "Nice",
 			"abbr": "NIC",
 			"nick": "Aiglons",
 			"city": "Nice",
@@ -97,7 +97,7 @@
 				"#C8102E",
 				"#111111"
 			],
-			"stadium": "Stade de la Plaine du Var",
+			"stadium": "Allianz Riviera",
 			"capacity": 36000,
 			"kit": "stripes_v",
 			"crest": {
@@ -110,8 +110,8 @@
 		},
 		{
 			"key": "FRA_LIL",
-			"name": "Lille Dogues",
-			"short": "Dogues",
+			"name": "LOSC Lille",
+			"short": "Lille",
 			"abbr": "LIL",
 			"nick": "Dogues",
 			"city": "Lille",
@@ -123,7 +123,7 @@
 				"#E01E13",
 				"#1D2C5E"
 			],
-			"stadium": "Stade de Villeneuve",
+			"stadium": "Stade Pierre-Mauroy",
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
@@ -136,9 +136,9 @@
 		},
 		{
 			"key": "FRA_LYO",
-			"name": "Lyon Gones",
-			"short": "Gones",
-			"abbr": "LYO",
+			"name": "Olympique Lyonnais",
+			"short": "Lyon",
+			"abbr": "OL",
 			"nick": "Gones",
 			"city": "Lyon",
 			"founded": 1950,
@@ -149,7 +149,7 @@
 				"#FFFFFF",
 				"#DA291C"
 			],
-			"stadium": "Stade de Décines",
+			"stadium": "Groupama Stadium",
 			"capacity": 59000,
 			"kit": "plain",
 			"crest": {
@@ -163,9 +163,9 @@
 		},
 		{
 			"key": "FRA_STR",
-			"name": "Strasbourg Alsace",
-			"short": "Alsace",
-			"abbr": "STR",
+			"name": "RC Strasbourg Alsace",
+			"short": "Strasbourg",
+			"abbr": "RCS",
 			"nick": "Alsaciens",
 			"city": "Strasbourg",
 			"founded": 1906,
@@ -187,9 +187,9 @@
 		},
 		{
 			"key": "FRA_LEN",
-			"name": "Lens Sang et Or",
-			"short": "Sang et Or",
-			"abbr": "LEN",
+			"name": "RC Lens",
+			"short": "Lens",
+			"abbr": "RCL",
 			"nick": "Sang et Or",
 			"city": "Lens",
 			"founded": 1906,
@@ -200,7 +200,7 @@
 				"#FFD100",
 				"#E30613"
 			],
-			"stadium": "Stade du Pays Minier",
+			"stadium": "Stade Bollaert-Delelis",
 			"capacity": 38200,
 			"kit": "stripes_v",
 			"crest": {
@@ -213,9 +213,9 @@
 		},
 		{
 			"key": "FRA_BST",
-			"name": "Brest Finistère",
-			"short": "Finistère",
-			"abbr": "BST",
+			"name": "Stade Brestois 29",
+			"short": "Brest",
+			"abbr": "SB29",
 			"nick": "Pirates",
 			"city": "Brest",
 			"founded": 1950,
@@ -226,7 +226,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Kerichen",
+			"stadium": "Stade Francis-Le Blé",
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
@@ -240,9 +240,9 @@
 		},
 		{
 			"key": "FRA_TOU",
-			"name": "Toulouse Violet",
-			"short": "Violets",
-			"abbr": "TOU",
+			"name": "Toulouse FC",
+			"short": "Toulouse",
+			"abbr": "TFC",
 			"nick": "Violets",
 			"city": "Toulouse",
 			"founded": 1970,
@@ -253,7 +253,7 @@
 				"#57227E",
 				"#FFFFFF"
 			],
-			"stadium": "Stadium de l'Île du Ramier",
+			"stadium": "Stadium de Toulouse",
 			"capacity": 33000,
 			"kit": "plain",
 			"crest": {
@@ -264,9 +264,9 @@
 		},
 		{
 			"key": "FRA_AUX",
-			"name": "Auxerre Bourgogne",
-			"short": "Bourgogne",
-			"abbr": "AUX",
+			"name": "AJ Auxerre",
+			"short": "Auxerre",
+			"abbr": "AJA",
 			"nick": "Ajaïstes",
 			"city": "Auxerre",
 			"founded": 1905,
@@ -277,7 +277,7 @@
 				"#FFFFFF",
 				"#0055A4"
 			],
-			"stadium": "Stade de l'Yonne",
+			"stadium": "Stade de l'Abbé-Deschamps",
 			"capacity": 18500,
 			"kit": "plain",
 			"crest": {
@@ -288,9 +288,9 @@
 		},
 		{
 			"key": "FRA_REN",
-			"name": "Rennes Bretagne",
-			"short": "Rennais",
-			"abbr": "REN",
+			"name": "Stade Rennais FC",
+			"short": "Rennes",
+			"abbr": "SRFC",
 			"nick": "Rouge et Noir",
 			"city": "Rennes",
 			"founded": 1901,
@@ -301,7 +301,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Stade de la Route de Lorient",
+			"stadium": "Roazhon Park",
 			"capacity": 29800,
 			"kit": "halves",
 			"crest": {
@@ -315,9 +315,9 @@
 		},
 		{
 			"key": "FRA_NAN",
-			"name": "Nantes Canaris",
-			"short": "Canaris",
-			"abbr": "NAN",
+			"name": "FC Nantes",
+			"short": "Nantes",
+			"abbr": "FCN",
 			"nick": "Canaris",
 			"city": "Nantes",
 			"founded": 1943,
@@ -341,9 +341,9 @@
 		},
 		{
 			"key": "FRA_ANG",
-			"name": "Angers Anjou",
-			"short": "Anjou",
-			"abbr": "ANG",
+			"name": "Angers SCO",
+			"short": "Angers",
+			"abbr": "SCO",
 			"nick": "Scoïstes",
 			"city": "Angers",
 			"founded": 1919,
@@ -354,7 +354,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Stade du Lac de Maine",
+			"stadium": "Stade Raymond-Kopa",
 			"capacity": 18700,
 			"kit": "stripes_v",
 			"crest": {
@@ -365,9 +365,9 @@
 		},
 		{
 			"key": "FRA_HAV",
-			"name": "Havre Ciel et Marine",
-			"short": "Ciel et Marine",
-			"abbr": "HAV",
+			"name": "Le Havre AC",
+			"short": "Le Havre",
+			"abbr": "HAC",
 			"nick": "Havrais",
 			"city": "Le Havre",
 			"founded": 1872,
@@ -378,7 +378,7 @@
 				"#8BBEE8",
 				"#0D2D57"
 			],
-			"stadium": "Stade du Port",
+			"stadium": "Stade Océane",
 			"capacity": 25200,
 			"kit": "halves",
 			"crest": {
@@ -389,9 +389,9 @@
 		},
 		{
 			"key": "FRA_LOR",
-			"name": "Lorient Merlus",
-			"short": "Merlus",
-			"abbr": "LOR",
+			"name": "FC Lorient",
+			"short": "Lorient",
+			"abbr": "FCL",
 			"nick": "Merlus",
 			"city": "Lorient",
 			"founded": 1926,
@@ -402,7 +402,7 @@
 				"#F07F13",
 				"#111111"
 			],
-			"stadium": "Stade de la Rade",
+			"stadium": "Stade du Moustoir",
 			"capacity": 18800,
 			"kit": "plain",
 			"crest": {
@@ -415,9 +415,9 @@
 		},
 		{
 			"key": "FRA_PCT",
-			"name": "Paris Cité FC",
-			"short": "Paris Cité",
-			"abbr": "PCT",
+			"name": "Paris FC",
+			"short": "Paris FC",
+			"abbr": "PFC",
 			"nick": "Parisiens",
 			"city": "Paris",
 			"founded": 1969,
@@ -428,7 +428,7 @@
 				"#1D3F91",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de la Porte de Saint-Cloud",
+			"stadium": "Stade Jean-Bouin",
 			"capacity": 20000,
 			"kit": "plain",
 			"crest": {
@@ -441,9 +441,9 @@
 		},
 		{
 			"key": "FRA_MET",
-			"name": "Metz Grenat",
-			"short": "Grenats",
-			"abbr": "MET",
+			"name": "FC Metz",
+			"short": "Metz",
+			"abbr": "FCM",
 			"nick": "Grenats",
 			"city": "Metz",
 			"founded": 1932,
@@ -454,7 +454,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de l'Île Saint-Symphorien",
+			"stadium": "Stade Saint-Symphorien",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -467,9 +467,9 @@
 		},
 		{
 			"key": "FRA_STE",
-			"name": "Saint-Étienne Verts",
-			"short": "Les Verts",
-			"abbr": "STE",
+			"name": "AS Saint-Étienne",
+			"short": "Saint-Étienne",
+			"abbr": "ASSE",
 			"nick": "Les Verts",
 			"city": "Saint-Étienne",
 			"founded": 1919,
@@ -480,7 +480,7 @@
 				"#009A44",
 				"#FFFFFF"
 			],
-			"stadium": "Stade du Chaudron",
+			"stadium": "Stade Geoffroy-Guichard",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
@@ -493,9 +493,9 @@
 		},
 		{
 			"key": "FRA_MTP",
-			"name": "Montpellier Pailladins",
-			"short": "Pailladins",
-			"abbr": "MTP",
+			"name": "Montpellier HSC",
+			"short": "Montpellier",
+			"abbr": "MHSC",
 			"nick": "Pailladins",
 			"city": "Montpellier",
 			"founded": 1974,
@@ -517,9 +517,9 @@
 		},
 		{
 			"key": "FRA_REI",
-			"name": "Reims Champagne",
-			"short": "Champagne",
-			"abbr": "REI",
+			"name": "Stade de Reims",
+			"short": "Reims",
+			"abbr": "SDR",
 			"nick": "Rémois",
 			"city": "Reims",
 			"founded": 1931,
@@ -530,7 +530,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de la Champagne",
+			"stadium": "Stade Auguste-Delaune",
 			"capacity": 21000,
 			"kit": "halves",
 			"crest": {
@@ -541,9 +541,9 @@
 		},
 		{
 			"key": "FRA_GUI",
-			"name": "Guingamp Armor",
-			"short": "Armor",
-			"abbr": "GUI",
+			"name": "En Avant Guingamp",
+			"short": "Guingamp",
+			"abbr": "EAG",
 			"nick": "Guingampais",
 			"city": "Guingamp",
 			"founded": 1912,
@@ -554,7 +554,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Stade des Côtes-d'Armor",
+			"stadium": "Stade du Roudourou",
 			"capacity": 18400,
 			"kit": "plain",
 			"crest": {
@@ -565,9 +565,9 @@
 		},
 		{
 			"key": "FRA_TRO",
-			"name": "Troyes Aube",
-			"short": "Aube",
-			"abbr": "TRO",
+			"name": "ESTAC Troyes",
+			"short": "Troyes",
+			"abbr": "ETR",
 			"nick": "Troyens",
 			"city": "Troyes",
 			"founded": 1986,
@@ -589,9 +589,9 @@
 		},
 		{
 			"key": "FRA_BAS",
-			"name": "Bastia Corse",
-			"short": "Corse",
-			"abbr": "BAS",
+			"name": "SC Bastia",
+			"short": "Bastia",
+			"abbr": "SCB",
 			"nick": "Bastiais",
 			"city": "Bastia",
 			"founded": 1905,
@@ -602,7 +602,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Furiani",
+			"stadium": "Stade Armand-Cesari",
 			"capacity": 16500,
 			"kit": "plain",
 			"crest": {
@@ -613,9 +613,9 @@
 		},
 		{
 			"key": "FRA_DUN",
-			"name": "Dunkerque Maritime",
-			"short": "Maritime",
-			"abbr": "DUN",
+			"name": "USL Dunkerque",
+			"short": "Dunkerque",
+			"abbr": "USLD",
 			"nick": "Dunkerquois",
 			"city": "Dunkerque",
 			"founded": 1909,
@@ -626,7 +626,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Stade du Littoral",
+			"stadium": "Stade Marcel-Tribut",
 			"capacity": 5000,
 			"kit": "plain",
 			"crest": {
@@ -637,9 +637,9 @@
 		},
 		{
 			"key": "FRA_LAV",
-			"name": "Laval Mayenne",
-			"short": "Lavallois",
-			"abbr": "LAV",
+			"name": "Stade Lavallois",
+			"short": "Laval",
+			"abbr": "SLM",
 			"nick": "Tango",
 			"city": "Laval",
 			"founded": 1902,
@@ -650,7 +650,7 @@
 				"#F07F13",
 				"#111111"
 			],
-			"stadium": "Stade de la Mayenne",
+			"stadium": "Stade Francis-Le Basser",
 			"capacity": 18000,
 			"kit": "plain",
 			"crest": {
@@ -661,8 +661,8 @@
 		},
 		{
 			"key": "FRA_PAU",
-			"name": "Pau Béarn",
-			"short": "Béarnais",
+			"name": "Pau FC",
+			"short": "Pau",
 			"abbr": "PAU",
 			"nick": "Béarnais",
 			"city": "Pau",
@@ -674,7 +674,7 @@
 				"#FFD100",
 				"#1D3F91"
 			],
-			"stadium": "Stade des Pyrénées",
+			"stadium": "Nouste Camp",
 			"capacity": 4000,
 			"kit": "plain",
 			"crest": {
@@ -685,9 +685,9 @@
 		},
 		{
 			"key": "FRA_GRE",
-			"name": "Grenoble Alpes",
-			"short": "Alpins",
-			"abbr": "GRE",
+			"name": "Grenoble Foot 38",
+			"short": "Grenoble",
+			"abbr": "GF38",
 			"nick": "Grenoblois",
 			"city": "Grenoble",
 			"founded": 1892,
@@ -709,9 +709,9 @@
 		},
 		{
 			"key": "FRA_ANN",
-			"name": "Annecy Lac",
-			"short": "Annéciens",
-			"abbr": "ANN",
+			"name": "FC Annecy",
+			"short": "Annecy",
+			"abbr": "FCA",
 			"nick": "Annéciens",
 			"city": "Annecy",
 			"founded": 1927,
@@ -722,7 +722,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Parc des Sports du Lac",
+			"stadium": "Parc des Sports",
 			"capacity": 15600,
 			"kit": "plain",
 			"crest": {
@@ -733,9 +733,9 @@
 		},
 		{
 			"key": "FRA_SOU",
-			"name": "Saint-Ouen Étoile Rouge",
-			"short": "Étoile Rouge",
-			"abbr": "SOU",
+			"name": "Red Star FC",
+			"short": "Red Star",
+			"abbr": "RSF",
 			"nick": "Audoniens",
 			"city": "Saint-Ouen",
 			"founded": 1897,
@@ -746,7 +746,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Saint-Ouen",
+			"stadium": "Stade Bauer",
 			"capacity": 10000,
 			"kit": "plain",
 			"crest": {
@@ -759,9 +759,9 @@
 		},
 		{
 			"key": "FRA_AMI",
-			"name": "Amiens Picardie",
-			"short": "Picards",
-			"abbr": "AMI",
+			"name": "Amiens SC",
+			"short": "Amiens",
+			"abbr": "ASC",
 			"nick": "Picards",
 			"city": "Amiens",
 			"founded": 1901,
@@ -783,9 +783,9 @@
 		},
 		{
 			"key": "FRA_CLE",
-			"name": "Clermont Auvergne",
-			"short": "Auvergnats",
-			"abbr": "CLE",
+			"name": "Clermont Foot 63",
+			"short": "Clermont",
+			"abbr": "CF63",
 			"nick": "Clermontois",
 			"city": "Clermont-Ferrand",
 			"founded": 1990,
@@ -796,7 +796,7 @@
 				"#E30613",
 				"#1D3F91"
 			],
-			"stadium": "Stade des Volcans",
+			"stadium": "Stade Gabriel-Montpied",
 			"capacity": 11900,
 			"kit": "halves",
 			"crest": {
@@ -807,9 +807,9 @@
 		},
 		{
 			"key": "FRA_ROD",
-			"name": "Rodez Aveyron",
-			"short": "Ruthénois",
-			"abbr": "ROD",
+			"name": "Rodez Aveyron Football",
+			"short": "Rodez",
+			"abbr": "RAF",
 			"nick": "Ruthénois",
 			"city": "Rodez",
 			"founded": 1929,
@@ -820,7 +820,7 @@
 				"#E30613",
 				"#FFD100"
 			],
-			"stadium": "Stade de l'Aveyron",
+			"stadium": "Stade Paul-Lignon",
 			"capacity": 5900,
 			"kit": "stripes_v",
 			"crest": {
@@ -831,9 +831,9 @@
 		},
 		{
 			"key": "FRA_BOU",
-			"name": "Boulogne Côte d'Opale",
-			"short": "Boulonnais",
-			"abbr": "BOU",
+			"name": "US Boulogne",
+			"short": "Boulogne",
+			"abbr": "USB",
 			"nick": "Boulonnais",
 			"city": "Boulogne-sur-Mer",
 			"founded": 1898,
@@ -844,7 +844,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Stade de la Côte",
+			"stadium": "Stade de la Libération",
 			"capacity": 14000,
 			"kit": "plain",
 			"crest": {
@@ -855,9 +855,9 @@
 		},
 		{
 			"key": "FRA_NCY",
-			"name": "Nancy Lorraine",
-			"short": "Lorrains",
-			"abbr": "NCY",
+			"name": "AS Nancy Lorraine",
+			"short": "Nancy",
+			"abbr": "ASNL",
 			"nick": "Chardons",
 			"city": "Nancy",
 			"founded": 1967,
@@ -868,7 +868,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Tomblaine",
+			"stadium": "Stade Marcel-Picot",
 			"capacity": 20000,
 			"kit": "plain",
 			"crest": {
@@ -881,9 +881,9 @@
 		},
 		{
 			"key": "FRA_LMS",
-			"name": "Le Mans Sarthe",
-			"short": "Manceaux",
-			"abbr": "LMS",
+			"name": "Le Mans FC",
+			"short": "Le Mans",
+			"abbr": "LMFC",
 			"nick": "Manceaux",
 			"city": "Le Mans",
 			"founded": 1985,
@@ -894,7 +894,7 @@
 				"#E30613",
 				"#FFD100"
 			],
-			"stadium": "Stade de la Sarthe",
+			"stadium": "MMArena",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {

@@ -1,12 +1,12 @@
 {
 	"nation": "AUT",
-	"_doc": "Áustria (liga de 6).",
+	"_doc": "Áustria (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "AUT_MOZ",
-			"name": "Salzburg Mozartstädter",
-			"short": "Mozartstädter",
-			"abbr": "MOZ",
+			"name": "FC Red Bull Salzburg",
+			"short": "RB Salzburg",
+			"abbr": "RBS",
 			"nick": "Bullen",
 			"city": "Salzburg",
 			"founded": 1933,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Stadion Wals-Siezenheim",
+			"stadium": "Red Bull Arena",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -28,9 +28,9 @@
 		},
 		{
 			"key": "AUT_HUT",
-			"name": "Wien Hütteldorf",
-			"short": "Hütteldorfer",
-			"abbr": "HUT",
+			"name": "SK Rapid Wien",
+			"short": "Rapid Wien",
+			"abbr": "RAP",
 			"nick": "Grün-Weißen",
 			"city": "Wien",
 			"founded": 1899,
@@ -41,7 +41,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Hütteldorf",
+			"stadium": "Allianz Stadion",
 			"capacity": 28300,
 			"kit": "plain",
 			"crest": {
@@ -54,9 +54,9 @@
 		},
 		{
 			"key": "AUT_VEI",
-			"name": "Wien Veilchen",
-			"short": "Veilchen",
-			"abbr": "VEI",
+			"name": "FK Austria Wien",
+			"short": "Austria Wien",
+			"abbr": "FAK",
 			"nick": "Veilchen",
 			"city": "Wien",
 			"founded": 1911,
@@ -67,7 +67,7 @@
 				"#5E2A84",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Favoriten",
+			"stadium": "Generali Arena",
 			"capacity": 17600,
 			"kit": "plain",
 			"crest": {
@@ -80,9 +80,9 @@
 		},
 		{
 			"key": "AUT_GRZ",
-			"name": "Graz Blackies",
-			"short": "Blackies",
-			"abbr": "GRZ",
+			"name": "SK Sturm Graz",
+			"short": "Sturm Graz",
+			"abbr": "STU",
 			"nick": "Blackies",
 			"city": "Graz",
 			"founded": 1909,
@@ -93,13 +93,53 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Liebenau",
+			"stadium": "Merkur Arena",
 			"capacity": 16300,
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
 				"symbol": "crown"
 			},
+			"rivals": []
+		},
+		{
+			"key": "AUT_LAS",
+			"name": "LASK",
+			"short": "LASK",
+			"abbr": "LASK",
+			"nick": "Athletiker",
+			"city": "Linz",
+			"founded": 1908,
+			"league": "AUT1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Raiffeisen Arena",
+			"capacity": 19000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "AUT_WAC",
+			"name": "Wolfsberger AC",
+			"short": "Wolfsberg",
+			"abbr": "WAC",
+			"nick": "Wölfe",
+			"city": "Wolfsberg",
+			"founded": 1931,
+			"league": "AUT1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#F07F13"
+			],
+			"stadium": "Lavanttal-Arena",
+			"capacity": 7300,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

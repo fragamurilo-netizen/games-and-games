@@ -1,12 +1,12 @@
 {
 	"nation": "ENG",
-	"_doc": "Inglaterra: 1ª e 2ª divisão. Nomes genéricos inspirados nos clubes reais.",
+	"_doc": "Inglaterra: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "ENG_MSK",
-			"name": "Manchester Sky Blue",
-			"short": "Man Sky",
-			"abbr": "MSK",
+			"name": "Manchester City FC",
+			"short": "Man City",
+			"abbr": "MCI",
 			"nick": "Citizens",
 			"city": "Manchester",
 			"founded": 1880,
@@ -17,7 +17,7 @@
 				"#6CABDD",
 				"#FFFFFF"
 			],
-			"stadium": "Eastlands Stadium",
+			"stadium": "Etihad Stadium",
 			"capacity": 53000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "ENG_MRD",
-			"name": "Manchester Red",
-			"short": "Man Red",
-			"abbr": "MRD",
+			"name": "Manchester United FC",
+			"short": "Man United",
+			"abbr": "MUN",
 			"nick": "Red Devils",
 			"city": "Manchester",
 			"founded": 1878,
@@ -43,7 +43,7 @@
 				"#DA020E",
 				"#FFFFFF"
 			],
-			"stadium": "Trafford Park Stadium",
+			"stadium": "Old Trafford",
 			"capacity": 74000,
 			"kit": "plain",
 			"crest": {
@@ -58,9 +58,9 @@
 		},
 		{
 			"key": "ENG_MSR",
-			"name": "Merseyside Red",
-			"short": "Mersey Red",
-			"abbr": "MSR",
+			"name": "Liverpool FC",
+			"short": "Liverpool",
+			"abbr": "LIV",
 			"nick": "Reds",
 			"city": "Liverpool",
 			"founded": 1892,
@@ -71,7 +71,7 @@
 				"#C8102E",
 				"#FFFFFF"
 			],
-			"stadium": "Anfield Road Arena",
+			"stadium": "Anfield",
 			"capacity": 61000,
 			"kit": "plain",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "ENG_MSB",
-			"name": "Merseyside Blue",
-			"short": "Mersey Blue",
-			"abbr": "MSB",
+			"name": "Everton FC",
+			"short": "Everton",
+			"abbr": "EVE",
 			"nick": "Toffees",
 			"city": "Liverpool",
 			"founded": 1878,
@@ -98,7 +98,7 @@
 				"#003399",
 				"#FFFFFF"
 			],
-			"stadium": "Bramley Dock Stadium",
+			"stadium": "Hill Dickinson Stadium",
 			"capacity": 52000,
 			"kit": "plain",
 			"crest": {
@@ -111,9 +111,9 @@
 		},
 		{
 			"key": "ENG_NLR",
-			"name": "North London Red",
-			"short": "London Red",
-			"abbr": "NLR",
+			"name": "Arsenal FC",
+			"short": "Arsenal",
+			"abbr": "ARS",
 			"nick": "Gunners",
 			"city": "London",
 			"founded": 1886,
@@ -124,7 +124,7 @@
 				"#EF0107",
 				"#FFFFFF"
 			],
-			"stadium": "Holloway Stadium",
+			"stadium": "Emirates Stadium",
 			"capacity": 60000,
 			"kit": "plain",
 			"crest": {
@@ -138,9 +138,9 @@
 		},
 		{
 			"key": "ENG_NLW",
-			"name": "North London White",
-			"short": "London White",
-			"abbr": "NLW",
+			"name": "Tottenham Hotspur FC",
+			"short": "Tottenham",
+			"abbr": "TOT",
 			"nick": "Lilywhites",
 			"city": "London",
 			"founded": 1882,
@@ -151,7 +151,7 @@
 				"#FFFFFF",
 				"#132257"
 			],
-			"stadium": "High Road Stadium",
+			"stadium": "Tottenham Hotspur Stadium",
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
@@ -165,9 +165,9 @@
 		},
 		{
 			"key": "ENG_WLB",
-			"name": "West London Blue",
-			"short": "London Blue",
-			"abbr": "WLB",
+			"name": "Chelsea FC",
+			"short": "Chelsea",
+			"abbr": "CHE",
 			"nick": "Blues",
 			"city": "London",
 			"founded": 1905,
@@ -178,7 +178,7 @@
 				"#034694",
 				"#FFFFFF"
 			],
-			"stadium": "Fulham Road Stadium",
+			"stadium": "Stamford Bridge",
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
@@ -193,9 +193,9 @@
 		},
 		{
 			"key": "ENG_TYN",
-			"name": "Tyneside United",
-			"short": "Tyneside",
-			"abbr": "TYN",
+			"name": "Newcastle United FC",
+			"short": "Newcastle",
+			"abbr": "NEW",
 			"nick": "Magpies",
 			"city": "Newcastle",
 			"founded": 1892,
@@ -206,7 +206,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Gallowgate Park",
+			"stadium": "St James' Park",
 			"capacity": 52000,
 			"kit": "stripes_v",
 			"crest": {
@@ -219,9 +219,9 @@
 		},
 		{
 			"key": "ENG_AST",
-			"name": "Aston Claret",
-			"short": "Aston",
-			"abbr": "AST",
+			"name": "Aston Villa FC",
+			"short": "Aston Villa",
+			"abbr": "AVL",
 			"nick": "Villans",
 			"city": "Birmingham",
 			"founded": 1874,
@@ -232,7 +232,7 @@
 				"#670E36",
 				"#95BFE5"
 			],
-			"stadium": "Witton Lane Stadium",
+			"stadium": "Villa Park",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
@@ -245,9 +245,9 @@
 		},
 		{
 			"key": "ENG_ELI",
-			"name": "East London Irons",
-			"short": "London Irons",
-			"abbr": "ELI",
+			"name": "West Ham United FC",
+			"short": "West Ham",
+			"abbr": "WHU",
 			"nick": "Hammers",
 			"city": "London",
 			"founded": 1895,
@@ -258,7 +258,7 @@
 				"#7A263A",
 				"#1BB1E7"
 			],
-			"stadium": "Stratford Stadium",
+			"stadium": "London Stadium",
 			"capacity": 62500,
 			"kit": "plain",
 			"crest": {
@@ -273,9 +273,9 @@
 		},
 		{
 			"key": "ENG_SSG",
-			"name": "Sussex Seagulls",
-			"short": "Seagulls",
-			"abbr": "SSG",
+			"name": "Brighton & Hove Albion FC",
+			"short": "Brighton",
+			"abbr": "BHA",
 			"nick": "Seagulls",
 			"city": "Brighton",
 			"founded": 1901,
@@ -286,7 +286,7 @@
 				"#0057B8",
 				"#FFFFFF"
 			],
-			"stadium": "Falmer Stadium",
+			"stadium": "Amex Stadium",
 			"capacity": 31800,
 			"kit": "stripes_v",
 			"crest": {
@@ -299,9 +299,9 @@
 		},
 		{
 			"key": "ENG_SLE",
-			"name": "South London Eagles",
-			"short": "Eagles",
-			"abbr": "SLE",
+			"name": "Crystal Palace FC",
+			"short": "Crystal Palace",
+			"abbr": "CRY",
 			"nick": "Eagles",
 			"city": "London",
 			"founded": 1905,
@@ -312,7 +312,7 @@
 				"#1B458F",
 				"#C4122E"
 			],
-			"stadium": "Selhurst Stadium",
+			"stadium": "Selhurst Park",
 			"capacity": 25000,
 			"kit": "stripes_v",
 			"crest": {
@@ -325,9 +325,9 @@
 		},
 		{
 			"key": "ENG_RIV",
-			"name": "Craven Riverside",
-			"short": "Riverside",
-			"abbr": "RIV",
+			"name": "Fulham FC",
+			"short": "Fulham",
+			"abbr": "FUL",
 			"nick": "Cottagers",
 			"city": "London",
 			"founded": 1879,
@@ -338,7 +338,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Stevenage Road Stadium",
+			"stadium": "Craven Cottage",
 			"capacity": 29600,
 			"kit": "plain",
 			"crest": {
@@ -352,9 +352,9 @@
 		},
 		{
 			"key": "ENG_BEE",
-			"name": "West London Bees",
-			"short": "Bees",
-			"abbr": "BEE",
+			"name": "Brentford FC",
+			"short": "Brentford",
+			"abbr": "BRE",
 			"nick": "Bees",
 			"city": "London",
 			"founded": 1889,
@@ -365,7 +365,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Lionel Road Stadium",
+			"stadium": "Gtech Community Stadium",
 			"capacity": 17250,
 			"kit": "stripes_v",
 			"crest": {
@@ -378,9 +378,9 @@
 		},
 		{
 			"key": "ENG_CHE",
-			"name": "Dorset Cherries",
-			"short": "Cherries",
-			"abbr": "CHE",
+			"name": "AFC Bournemouth",
+			"short": "Bournemouth",
+			"abbr": "BOU",
 			"nick": "Cherries",
 			"city": "Bournemouth",
 			"founded": 1899,
@@ -391,7 +391,7 @@
 				"#DA291C",
 				"#111111"
 			],
-			"stadium": "Kings Park Stadium",
+			"stadium": "Vitality Stadium",
 			"capacity": 11300,
 			"kit": "stripes_v",
 			"crest": {
@@ -404,9 +404,9 @@
 		},
 		{
 			"key": "ENG_WLV",
-			"name": "Wolverhampton Gold",
-			"short": "Wolverhampton",
-			"abbr": "WLV",
+			"name": "Wolverhampton Wanderers FC",
+			"short": "Wolves",
+			"abbr": "WOL",
 			"nick": "Wolves",
 			"city": "Wolverhampton",
 			"founded": 1877,
@@ -417,7 +417,7 @@
 				"#FDB913",
 				"#231F20"
 			],
-			"stadium": "Waterloo Road Stadium",
+			"stadium": "Molineux Stadium",
 			"capacity": 31700,
 			"kit": "plain",
 			"crest": {
@@ -430,9 +430,9 @@
 		},
 		{
 			"key": "ENG_NOT",
-			"name": "Nottingham Reds",
-			"short": "Nottingham",
-			"abbr": "NOT",
+			"name": "Nottingham Forest FC",
+			"short": "Nottm Forest",
+			"abbr": "NFO",
 			"nick": "Tricky Trees",
 			"city": "Nottingham",
 			"founded": 1865,
@@ -443,7 +443,7 @@
 				"#DD0000",
 				"#FFFFFF"
 			],
-			"stadium": "Trentside Ground",
+			"stadium": "City Ground",
 			"capacity": 30400,
 			"kit": "plain",
 			"crest": {
@@ -457,9 +457,9 @@
 		},
 		{
 			"key": "ENG_YOR",
-			"name": "Yorkshire Whites",
-			"short": "Yorkshire",
-			"abbr": "YOR",
+			"name": "Leeds United FC",
+			"short": "Leeds",
+			"abbr": "LEE",
 			"nick": "Whites",
 			"city": "Leeds",
 			"founded": 1919,
@@ -470,7 +470,7 @@
 				"#FFFFFF",
 				"#1D428A"
 			],
-			"stadium": "Beeston Stadium",
+			"stadium": "Elland Road",
 			"capacity": 37600,
 			"kit": "plain",
 			"crest": {
@@ -484,9 +484,9 @@
 		},
 		{
 			"key": "ENG_WEA",
-			"name": "Wearside Red",
-			"short": "Wearside",
-			"abbr": "WEA",
+			"name": "Sunderland AFC",
+			"short": "Sunderland",
+			"abbr": "SUN",
 			"nick": "Black Cats",
 			"city": "Sunderland",
 			"founded": 1879,
@@ -497,7 +497,7 @@
 				"#EB172B",
 				"#FFFFFF"
 			],
-			"stadium": "Wearmouth Stadium",
+			"stadium": "Stadium of Light",
 			"capacity": 49000,
 			"kit": "stripes_v",
 			"crest": {
@@ -510,9 +510,9 @@
 		},
 		{
 			"key": "ENG_CLA",
-			"name": "Lancashire Clarets",
-			"short": "Clarets",
-			"abbr": "CLA",
+			"name": "Burnley FC",
+			"short": "Burnley",
+			"abbr": "BUR",
 			"nick": "Clarets",
 			"city": "Burnley",
 			"founded": 1882,
@@ -523,7 +523,7 @@
 				"#6C1D45",
 				"#99D6EA"
 			],
-			"stadium": "Brunshaw Road Stadium",
+			"stadium": "Turf Moor",
 			"capacity": 21900,
 			"kit": "plain",
 			"crest": {
@@ -536,9 +536,9 @@
 		},
 		{
 			"key": "ENG_FOX",
-			"name": "Leicester Foxes",
-			"short": "Foxes",
-			"abbr": "FOX",
+			"name": "Leicester City FC",
+			"short": "Leicester",
+			"abbr": "LEI",
 			"nick": "Foxes",
 			"city": "Leicester",
 			"founded": 1884,
@@ -549,7 +549,7 @@
 				"#003090",
 				"#FDBE11"
 			],
-			"stadium": "Filbert Way Stadium",
+			"stadium": "King Power Stadium",
 			"capacity": 32000,
 			"kit": "plain",
 			"crest": {
@@ -564,9 +564,9 @@
 		},
 		{
 			"key": "ENG_STS",
-			"name": "Hampshire Saints",
-			"short": "Saints",
-			"abbr": "STS",
+			"name": "Southampton FC",
+			"short": "Southampton",
+			"abbr": "SOU",
 			"nick": "Saints",
 			"city": "Southampton",
 			"founded": 1885,
@@ -577,7 +577,7 @@
 				"#D71920",
 				"#FFFFFF"
 			],
-			"stadium": "Britannia Road Stadium",
+			"stadium": "St Mary's Stadium",
 			"capacity": 32000,
 			"kit": "stripes_v",
 			"crest": {
@@ -591,9 +591,9 @@
 		},
 		{
 			"key": "ENG_SUF",
-			"name": "Suffolk Blues",
-			"short": "Suffolk",
-			"abbr": "SUF",
+			"name": "Ipswich Town FC",
+			"short": "Ipswich",
+			"abbr": "IPS",
 			"nick": "Tractor Boys",
 			"city": "Ipswich",
 			"founded": 1878,
@@ -604,7 +604,7 @@
 				"#0044A9",
 				"#FFFFFF"
 			],
-			"stadium": "Portman Road Ground",
+			"stadium": "Portman Road",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -617,9 +617,9 @@
 		},
 		{
 			"key": "ENG_BLD",
-			"name": "Sheffield Blades",
-			"short": "Blades",
-			"abbr": "BLD",
+			"name": "Sheffield United FC",
+			"short": "Sheffield Utd",
+			"abbr": "SHU",
 			"nick": "Blades",
 			"city": "Sheffield",
 			"founded": 1889,
@@ -630,7 +630,7 @@
 				"#EE2737",
 				"#FFFFFF"
 			],
-			"stadium": "Cherry Street Stadium",
+			"stadium": "Bramall Lane",
 			"capacity": 32000,
 			"kit": "stripes_v",
 			"crest": {
@@ -644,9 +644,9 @@
 		},
 		{
 			"key": "ENG_OWL",
-			"name": "Sheffield Owls",
-			"short": "Owls",
-			"abbr": "OWL",
+			"name": "Sheffield Wednesday FC",
+			"short": "Sheffield Wed",
+			"abbr": "SHW",
 			"nick": "Owls",
 			"city": "Sheffield",
 			"founded": 1867,
@@ -657,7 +657,7 @@
 				"#1560BD",
 				"#FFFFFF"
 			],
-			"stadium": "Hillsborough Park Stadium",
+			"stadium": "Hillsborough",
 			"capacity": 39700,
 			"kit": "stripes_v",
 			"crest": {
@@ -670,9 +670,9 @@
 		},
 		{
 			"key": "ENG_TEE",
-			"name": "Teesside Reds",
-			"short": "Teesside",
-			"abbr": "TEE",
+			"name": "Middlesbrough FC",
+			"short": "Middlesbrough",
+			"abbr": "MID",
 			"nick": "Boro",
 			"city": "Middlesbrough",
 			"founded": 1876,
@@ -683,7 +683,7 @@
 				"#E11B22",
 				"#FFFFFF"
 			],
-			"stadium": "Middlehaven Stadium",
+			"stadium": "Riverside Stadium",
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {
@@ -697,9 +697,9 @@
 		},
 		{
 			"key": "ENG_ALB",
-			"name": "Black Country Albion",
-			"short": "Albion",
-			"abbr": "ALB",
+			"name": "West Bromwich Albion FC",
+			"short": "West Brom",
+			"abbr": "WBA",
 			"nick": "Baggies",
 			"city": "West Bromwich",
 			"founded": 1878,
@@ -710,7 +710,7 @@
 				"#122F67",
 				"#FFFFFF"
 			],
-			"stadium": "Halfords Lane Stadium",
+			"stadium": "The Hawthorns",
 			"capacity": 26800,
 			"kit": "stripes_v",
 			"crest": {
@@ -723,9 +723,9 @@
 		},
 		{
 			"key": "ENG_CAN",
-			"name": "Norfolk Canaries",
-			"short": "Canaries",
-			"abbr": "CAN",
+			"name": "Norwich City FC",
+			"short": "Norwich",
+			"abbr": "NOR",
 			"nick": "Canaries",
 			"city": "Norwich",
 			"founded": 1902,
@@ -736,7 +736,7 @@
 				"#FFF200",
 				"#00A650"
 			],
-			"stadium": "Carrow Park",
+			"stadium": "Carrow Road",
 			"capacity": 27000,
 			"kit": "plain",
 			"crest": {
@@ -749,7 +749,7 @@
 		},
 		{
 			"key": "ENG_COV",
-			"name": "Coventry Sky",
+			"name": "Coventry City FC",
 			"short": "Coventry",
 			"abbr": "COV",
 			"nick": "Sky Blues",
@@ -762,7 +762,7 @@
 				"#59CBE8",
 				"#FFFFFF"
 			],
-			"stadium": "Rowleys Green Arena",
+			"stadium": "Coventry Building Society Arena",
 			"capacity": 32600,
 			"kit": "plain",
 			"crest": {
@@ -775,9 +775,9 @@
 		},
 		{
 			"key": "ENG_HOR",
-			"name": "Hertfordshire Hornets",
-			"short": "Hornets",
-			"abbr": "HOR",
+			"name": "Watford FC",
+			"short": "Watford",
+			"abbr": "WAT",
 			"nick": "Hornets",
 			"city": "Watford",
 			"founded": 1881,
@@ -788,7 +788,7 @@
 				"#FBEE23",
 				"#ED2127"
 			],
-			"stadium": "Vicarage Park",
+			"stadium": "Vicarage Road",
 			"capacity": 22200,
 			"kit": "plain",
 			"crest": {
@@ -799,8 +799,8 @@
 		},
 		{
 			"key": "ENG_STK",
-			"name": "Potteries Stripes",
-			"short": "Potters",
+			"name": "Stoke City FC",
+			"short": "Stoke",
 			"abbr": "STK",
 			"nick": "Potters",
 			"city": "Stoke-on-Trent",
@@ -812,7 +812,7 @@
 				"#E03A3E",
 				"#FFFFFF"
 			],
-			"stadium": "Trentham Lakes Stadium",
+			"stadium": "bet365 Stadium",
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
@@ -823,9 +823,9 @@
 		},
 		{
 			"key": "ENG_HUM",
-			"name": "Humberside Tigers",
-			"short": "Tigers",
-			"abbr": "HUM",
+			"name": "Hull City AFC",
+			"short": "Hull City",
+			"abbr": "HUL",
 			"nick": "Tigers",
 			"city": "Hull",
 			"founded": 1904,
@@ -836,7 +836,7 @@
 				"#F5A12D",
 				"#111111"
 			],
-			"stadium": "Walton Street Stadium",
+			"stadium": "MKM Stadium",
 			"capacity": 25400,
 			"kit": "stripes_v",
 			"crest": {
@@ -847,9 +847,9 @@
 		},
 		{
 			"key": "ENG_RAM",
-			"name": "Derbyshire Rams",
-			"short": "Rams",
-			"abbr": "RAM",
+			"name": "Derby County FC",
+			"short": "Derby",
+			"abbr": "DER",
 			"nick": "Rams",
 			"city": "Derby",
 			"founded": 1884,
@@ -860,7 +860,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Pride Park Ground",
+			"stadium": "Pride Park",
 			"capacity": 33000,
 			"kit": "plain",
 			"crest": {
@@ -874,9 +874,9 @@
 		},
 		{
 			"key": "ENG_HOO",
-			"name": "West London Hoops",
-			"short": "Hoops",
-			"abbr": "HOO",
+			"name": "Queens Park Rangers FC",
+			"short": "QPR",
+			"abbr": "QPR",
 			"nick": "Hoops",
 			"city": "London",
 			"founded": 1882,
@@ -887,7 +887,7 @@
 				"#1D5BA4",
 				"#FFFFFF"
 			],
-			"stadium": "South Africa Road Stadium",
+			"stadium": "Loftus Road",
 			"capacity": 18400,
 			"kit": "stripes_h",
 			"crest": {
@@ -901,9 +901,9 @@
 		},
 		{
 			"key": "ENG_LIO",
-			"name": "South London Lions",
-			"short": "Lions",
-			"abbr": "LIO",
+			"name": "Millwall FC",
+			"short": "Millwall",
+			"abbr": "MIL",
 			"nick": "Lions",
 			"city": "London",
 			"founded": 1885,
@@ -914,7 +914,7 @@
 				"#001D5E",
 				"#FFFFFF"
 			],
-			"stadium": "Zampa Road Stadium",
+			"stadium": "The Den",
 			"capacity": 20100,
 			"kit": "plain",
 			"crest": {
@@ -927,9 +927,9 @@
 		},
 		{
 			"key": "ENG_BRS",
-			"name": "Bristol Robins",
-			"short": "Bristol",
-			"abbr": "BRS",
+			"name": "Bristol City FC",
+			"short": "Bristol City",
+			"abbr": "BRC",
 			"nick": "Robins",
 			"city": "Bristol",
 			"founded": 1894,
@@ -940,7 +940,7 @@
 				"#E21A23",
 				"#FFFFFF"
 			],
-			"stadium": "Ashton Gate Park",
+			"stadium": "Ashton Gate",
 			"capacity": 27000,
 			"kit": "plain",
 			"crest": {
@@ -951,9 +951,9 @@
 		},
 		{
 			"key": "ENG_ROV",
-			"name": "Lancashire Rovers",
-			"short": "Rovers",
-			"abbr": "ROV",
+			"name": "Blackburn Rovers FC",
+			"short": "Blackburn",
+			"abbr": "BLB",
 			"nick": "Rovers",
 			"city": "Blackburn",
 			"founded": 1875,
@@ -964,7 +964,7 @@
 				"#009EE0",
 				"#FFFFFF"
 			],
-			"stadium": "Ewood Stadium",
+			"stadium": "Ewood Park",
 			"capacity": 31300,
 			"kit": "halves",
 			"crest": {
@@ -978,9 +978,9 @@
 		},
 		{
 			"key": "ENG_PRE",
-			"name": "Preston Lilywhites",
+			"name": "Preston North End FC",
 			"short": "Preston",
-			"abbr": "PRE",
+			"abbr": "PNE",
 			"nick": "Lilywhites",
 			"city": "Preston",
 			"founded": 1880,
@@ -991,7 +991,7 @@
 				"#FFFFFF",
 				"#001489"
 			],
-			"stadium": "Deepdale Ground",
+			"stadium": "Deepdale",
 			"capacity": 23400,
 			"kit": "plain",
 			"crest": {
@@ -1004,9 +1004,9 @@
 		},
 		{
 			"key": "ENG_POM",
-			"name": "Portsmouth Pompey",
-			"short": "Pompey",
-			"abbr": "POM",
+			"name": "Portsmouth FC",
+			"short": "Portsmouth",
+			"abbr": "POR",
 			"nick": "Pompey",
 			"city": "Portsmouth",
 			"founded": 1898,
@@ -1017,7 +1017,7 @@
 				"#001489",
 				"#FFFFFF"
 			],
-			"stadium": "Fratton Ground",
+			"stadium": "Fratton Park",
 			"capacity": 20900,
 			"kit": "plain",
 			"crest": {
@@ -1030,8 +1030,8 @@
 		},
 		{
 			"key": "ENG_BIR",
-			"name": "Birmingham Blues",
-			"short": "Blues",
+			"name": "Birmingham City FC",
+			"short": "Birmingham",
 			"abbr": "BIR",
 			"nick": "Blues",
 			"city": "Birmingham",
@@ -1043,7 +1043,7 @@
 				"#0000FF",
 				"#FFFFFF"
 			],
-			"stadium": "Small Heath Stadium",
+			"stadium": "St Andrew's",
 			"capacity": 29400,
 			"kit": "plain",
 			"crest": {

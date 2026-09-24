@@ -1,12 +1,12 @@
 {
 	"nation": "COL",
-	"_doc": "Colômbia (liga de 12).",
+	"_doc": "Colômbia (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "COL_VRD",
-			"name": "Medellín Verdolaga",
-			"short": "Verdolagas",
-			"abbr": "VRD",
+			"name": "Atlético Nacional",
+			"short": "Atl. Nacional",
+			"abbr": "NAC",
 			"nick": "Verdolagas",
 			"city": "Medellín",
 			"founded": 1947,
@@ -17,7 +17,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Poblado",
+			"stadium": "Estadio Atanasio Girardot",
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "COL_EMB",
-			"name": "Bogotá Embajador",
-			"short": "Embajadores",
-			"abbr": "EMB",
+			"name": "Millonarios FC",
+			"short": "Millonarios",
+			"abbr": "MIL",
 			"nick": "Embajadores",
 			"city": "Bogotá",
 			"founded": 1946,
@@ -43,7 +43,7 @@
 				"#1D3F91",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Teusaquillo",
+			"stadium": "Estadio El Campín",
 			"capacity": 36000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "COL_ESC",
-			"name": "Cali Escarlata",
-			"short": "Escarlatas",
-			"abbr": "ESC",
+			"name": "América de Cali",
+			"short": "América de Cali",
+			"abbr": "AME",
 			"nick": "Diablos Rojos",
 			"city": "Cali",
 			"founded": 1927,
@@ -69,7 +69,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Pascual",
+			"stadium": "Estadio Pascual Guerrero",
 			"capacity": 38000,
 			"kit": "plain",
 			"crest": {
@@ -82,9 +82,9 @@
 		},
 		{
 			"key": "COL_TIB",
-			"name": "Barranquilla Tiburón",
-			"short": "Tiburones",
-			"abbr": "TIB",
+			"name": "Junior FC",
+			"short": "Junior",
+			"abbr": "JUN",
 			"nick": "Tiburones",
 			"city": "Barranquilla",
 			"founded": 1924,
@@ -95,7 +95,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Caribe",
+			"stadium": "Estadio Metropolitano Roberto Meléndez",
 			"capacity": 46000,
 			"kit": "stripes_v",
 			"crest": {
@@ -106,9 +106,9 @@
 		},
 		{
 			"key": "COL_POD",
-			"name": "Medellín Poderoso",
-			"short": "Poderoso",
-			"abbr": "POD",
+			"name": "Deportivo Independiente Medellín",
+			"short": "DIM",
+			"abbr": "DIM",
 			"nick": "Poderoso",
 			"city": "Medellín",
 			"founded": 1913,
@@ -119,7 +119,7 @@
 				"#E30613",
 				"#1D3F91"
 			],
-			"stadium": "Estadio del Poblado",
+			"stadium": "Estadio Atanasio Girardot",
 			"capacity": 40000,
 			"kit": "halves",
 			"crest": {
@@ -132,9 +132,9 @@
 		},
 		{
 			"key": "COL_CAR",
-			"name": "Bogotá Cardenal",
-			"short": "Cardenales",
-			"abbr": "CAR",
+			"name": "Independiente Santa Fe",
+			"short": "Santa Fe",
+			"abbr": "SFE",
 			"nick": "Cardenales",
 			"city": "Bogotá",
 			"founded": 1941,
@@ -145,7 +145,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Teusaquillo",
+			"stadium": "Estadio El Campín",
 			"capacity": 36000,
 			"kit": "plain",
 			"crest": {
@@ -158,9 +158,9 @@
 		},
 		{
 			"key": "COL_AZC",
-			"name": "Cali Azucarero",
-			"short": "Azucareros",
-			"abbr": "AZC",
+			"name": "Deportivo Cali",
+			"short": "Deportivo Cali",
+			"abbr": "CAL",
 			"nick": "Azucareros",
 			"city": "Cali",
 			"founded": 1912,
@@ -171,7 +171,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Palmaseca",
+			"stadium": "Estadio Deportivo Cali",
 			"capacity": 44000,
 			"kit": "plain",
 			"crest": {
@@ -181,6 +181,106 @@
 			"rivals": [
 				"COL_ESC"
 			]
+		},
+		{
+			"key": "COL_ONC",
+			"name": "Once Caldas",
+			"short": "Once Caldas",
+			"abbr": "ONC",
+			"nick": "Blanco Blanco",
+			"city": "Manizales",
+			"founded": 1961,
+			"league": "COL1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Palogrande",
+			"capacity": 36500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "COL_TOL",
+			"name": "Deportes Tolima",
+			"short": "Tolima",
+			"abbr": "TOL",
+			"nick": "Pijao",
+			"city": "Ibagué",
+			"founded": 1954,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Estadio Manuel Murillo Toro",
+			"capacity": 28000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "COL_BUC",
+			"name": "Atlético Bucaramanga",
+			"short": "Bucaramanga",
+			"abbr": "BUC",
+			"nick": "Leopardo",
+			"city": "Bucaramanga",
+			"founded": 1949,
+			"league": "COL1",
+			"rep": 58,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Estadio Américo Montanini",
+			"capacity": 28000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "COL_PER",
+			"name": "Deportivo Pereira",
+			"short": "Pereira",
+			"abbr": "PER",
+			"nick": "Matecaña",
+			"city": "Pereira",
+			"founded": 1944,
+			"league": "COL1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio Hernán Ramírez Villegas",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "COL_PAS",
+			"name": "Deportivo Pasto",
+			"short": "Pasto",
+			"abbr": "PAS",
+			"nick": "Volcánicos",
+			"city": "Pasto",
+			"founded": 1949,
+			"league": "COL1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Departamental Libertad",
+			"capacity": 20000,
+			"kit": "halves",
+			"rivals": []
 		}
 	]
 }

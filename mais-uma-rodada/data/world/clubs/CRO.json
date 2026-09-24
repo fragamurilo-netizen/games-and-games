@@ -1,12 +1,12 @@
 {
 	"nation": "CRO",
-	"_doc": "Croácia (liga de 6).",
+	"_doc": "Croácia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "CRO_MOD",
-			"name": "Zagreb Modri",
-			"short": "Modri",
-			"abbr": "MOD",
+			"name": "GNK Dinamo Zagreb",
+			"short": "Dinamo Zagreb",
+			"abbr": "DIN",
 			"nick": "Modri",
 			"city": "Zagreb",
 			"founded": 1945,
@@ -17,7 +17,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Stadion Maksimir Sjever",
+			"stadium": "Stadion Maksimir",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "CRO_BIL",
-			"name": "Split Bili",
-			"short": "Bili",
-			"abbr": "BIL",
+			"name": "HNK Hajduk Split",
+			"short": "Hajduk Split",
+			"abbr": "HAJ",
 			"nick": "Bili",
 			"city": "Split",
 			"founded": 1911,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Stadion Poljud Jug",
+			"stadium": "Stadion Poljud",
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {
@@ -53,6 +53,86 @@
 			"rivals": [
 				"CRO_MOD"
 			]
+		},
+		{
+			"key": "CRO_RIJ",
+			"name": "HNK Rijeka",
+			"short": "Rijeka",
+			"abbr": "RIJ",
+			"nick": "Riječki bijeli",
+			"city": "Rijeka",
+			"founded": 1946,
+			"league": "CRO1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Stadion Rujevica",
+			"capacity": 8200,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CRO_OSI",
+			"name": "NK Osijek",
+			"short": "Osijek",
+			"abbr": "OSI",
+			"nick": "Bijelo-plavi",
+			"city": "Osijek",
+			"founded": 1947,
+			"league": "CRO1",
+			"rep": 58,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Opus Arena",
+			"capacity": 13000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CRO_VAR",
+			"name": "NK Varaždin",
+			"short": "Varaždin",
+			"abbr": "VAR",
+			"nick": "Varaždinci",
+			"city": "Varaždin",
+			"founded": 2012,
+			"league": "CRO1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Varteks",
+			"capacity": 9000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CRO_LOK",
+			"name": "NK Lokomotiva Zagreb",
+			"short": "Lokomotiva",
+			"abbr": "LOK",
+			"nick": "Lokosi",
+			"city": "Zagreb",
+			"founded": 1914,
+			"league": "CRO1",
+			"rep": 52,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#0055A4"
+			],
+			"stadium": "Stadion Maksimir",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

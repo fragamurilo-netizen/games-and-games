@@ -10,7 +10,7 @@ const CAT_ICON := {
 	"aposentadoria_anuncio": "clock", "aposentadoria": "clock", "campeao": "trophy", "acesso": "up", "rebaixamento": "down",
 	"jovem_explode": "star", "contrato_fim": "clock", "base": "star", "janela_abre": "swap", "janela_fecha": "swap",
 	"marco_gols": "trophy", "temporada": "whistle", "diretoria_ultimato": "info", "demissao": "close", "novo_tecnico": "whistle",
-	"copa_classificado": "trophy", "copa_avanca": "trophy", "copa_eliminado": "close", "copa_campeao": "trophy", "mundial_classificado": "trophy", "mundial_campeao": "trophy",
+	"copa_classificado": "trophy", "copa_avanca": "trophy", "copa_eliminado": "close", "copa_campeao": "trophy", "estadual_classificado": "trophy", "estadual_avanca": "trophy", "estadual_eliminado": "close", "estadual_campeao": "trophy", "mundial_classificado": "trophy", "mundial_campeao": "trophy",
 }
 
 

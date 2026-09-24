@@ -1,5 +1,5 @@
 {
-	"_doc": "Competições continentais e o Mundial de Clubes. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra.",
+	"_doc": "Competições continentais e o Mundial de Clubes. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra. Estaduais (kind = state): clubes brasileiros pelo uf do clube; grupos de até group_max em turno único nas datas E1..E7, os qualify melhores vão à semifinal (jogo único na casa do melhor) e à final em ida e volta (E9/E10).",
 	"cups": {
 		"UCL": {
 			"name": "Liga dos Campeões",
@@ -183,6 +183,518 @@
 				"#FFF4CC"
 			],
 			"trophy": "globo"
+		},
+		"SPE": {
+			"name": "Campeonato Paulista",
+			"short": "Paulistão",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"SP"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"trophy": "taca_estadual"
+		},
+		"RJE": {
+			"name": "Campeonato Carioca",
+			"short": "Carioca",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"RJ"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"trophy": "taca_estadual"
+		},
+		"MGE": {
+			"name": "Campeonato Mineiro",
+			"short": "Mineiro",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"MG"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#111111",
+				"#E30613"
+			],
+			"trophy": "taca_estadual"
+		},
+		"RSE": {
+			"name": "Campeonato Gaúcho",
+			"short": "Gauchão",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"RS"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#009B3A",
+				"#E30613"
+			],
+			"trophy": "taca_estadual"
+		},
+		"PRE": {
+			"name": "Campeonato Paranaense",
+			"short": "Paranaense",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"PR"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"trophy": "taca_estadual"
+		},
+		"SCE": {
+			"name": "Campeonato Catarinense",
+			"short": "Catarinense",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"SC"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#C8102E",
+				"#FFFFFF"
+			],
+			"trophy": "taca_estadual"
+		},
+		"CEE": {
+			"name": "Campeonato Cearense",
+			"short": "Cearense",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"CE"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#1B3A8C",
+				"#FFFFFF"
+			],
+			"trophy": "taca_estadual"
+		},
+		"GOE": {
+			"name": "Campeonato Goiano",
+			"short": "Goianão",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"GO"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#006437",
+				"#FFD100"
+			],
+			"trophy": "taca_estadual"
+		},
+		"NOR": {
+			"name": "Copa do Nordeste",
+			"short": "Nordestão",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"BA",
+				"PE",
+				"AL",
+				"RN",
+				"SE",
+				"MA",
+				"PB",
+				"PI"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#F07F13",
+				"#1B3A8C"
+			],
+			"trophy": "taca_estadual"
+		},
+		"VER": {
+			"name": "Copa Verde",
+			"short": "Copa Verde",
+			"kind": "state",
+			"nation": "BRA",
+			"ufs": [
+				"PA",
+				"AM",
+				"MT",
+				"MS",
+				"DF",
+				"AC"
+			],
+			"group_max": 8,
+			"group_legs": 1,
+			"qualify": 4,
+			"group_slots": [
+				"E1",
+				"E2",
+				"E3",
+				"E4",
+				"E5",
+				"E6",
+				"E7"
+			],
+			"ko_plan": [
+				"sf",
+				"f"
+			],
+			"ko_slots": {
+				"sf": [
+					"E8"
+				],
+				"f": [
+					"E9",
+					"E10"
+				]
+			},
+			"neutral_single": false,
+			"rep_bonus": 1.0,
+			"fan_bonus": 8.0,
+			"prize": {
+				"group": 250000,
+				"win": 40000,
+				"draw": 15000,
+				"sf": 300000,
+				"f": 600000,
+				"champion": 1500000
+			},
+			"colors": [
+				"#2E7D32",
+				"#FFD100"
+			],
+			"trophy": "taca_estadual"
 		}
 	}
 }

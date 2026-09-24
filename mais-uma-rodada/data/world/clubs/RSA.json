@@ -1,12 +1,12 @@
 {
 	"nation": "RSA",
-	"_doc": "África do Sul (liga de 6).",
+	"_doc": "África do Sul (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "RSA_BRZ",
-			"name": "Pretoria Yellow",
-			"short": "Brazilians",
-			"abbr": "BRZ",
+			"name": "Mamelodi Sundowns FC",
+			"short": "Sundowns",
+			"abbr": "MSU",
 			"nick": "Masandawana",
 			"city": "Pretoria",
 			"founded": 1970,
@@ -17,7 +17,7 @@
 				"#FFD100",
 				"#006437"
 			],
-			"stadium": "Loftus Park",
+			"stadium": "Loftus Versfeld",
 			"capacity": 51000,
 			"kit": "plain",
 			"crest": {
@@ -28,9 +28,9 @@
 		},
 		{
 			"key": "RSA_AMA",
-			"name": "Soweto Amakhosi",
-			"short": "Amakhosi",
-			"abbr": "AMA",
+			"name": "Kaizer Chiefs FC",
+			"short": "Kaizer Chiefs",
+			"abbr": "KAI",
 			"nick": "Amakhosi",
 			"city": "Johannesburg",
 			"founded": 1970,
@@ -41,7 +41,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Soweto Stadium",
+			"stadium": "FNB Stadium",
 			"capacity": 94000,
 			"kit": "plain",
 			"crest": {
@@ -54,9 +54,9 @@
 		},
 		{
 			"key": "RSA_BUC",
-			"name": "Soweto Buccaneers",
-			"short": "Buccaneers",
-			"abbr": "BUC",
+			"name": "Orlando Pirates FC",
+			"short": "Orlando Pirates",
+			"abbr": "OPI",
 			"nick": "Bucs",
 			"city": "Johannesburg",
 			"founded": 1937,
@@ -67,7 +67,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Orlando Park",
+			"stadium": "Orlando Stadium",
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
@@ -77,6 +77,66 @@
 			"rivals": [
 				"RSA_AMA"
 			]
+		},
+		{
+			"key": "RSA_STE",
+			"name": "Stellenbosch FC",
+			"short": "Stellenbosch",
+			"abbr": "STB",
+			"nick": "Stellies",
+			"city": "Stellenbosch",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Danie Craven Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "RSA_AMZ",
+			"name": "AmaZulu FC",
+			"short": "AmaZulu",
+			"abbr": "AZU",
+			"nick": "Usuthu",
+			"city": "Durban",
+			"founded": 1932,
+			"league": "RSA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Moses Mabhida Stadium",
+			"capacity": 56000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "RSA_TSG",
+			"name": "TS Galaxy FC",
+			"short": "TS Galaxy",
+			"abbr": "TSG",
+			"nick": "The Rockets",
+			"city": "Mbombela",
+			"founded": 2015,
+			"league": "RSA1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Mbombela Stadium",
+			"capacity": 40000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

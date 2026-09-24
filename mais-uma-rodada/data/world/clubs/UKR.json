@@ -1,12 +1,12 @@
 {
 	"nation": "UKR",
-	"_doc": "Ucrânia (liga de 6).",
+	"_doc": "Ucrânia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "UKR_HIR",
-			"name": "Donbass Hirnyky",
-			"short": "Hirnyky",
-			"abbr": "HIR",
+			"name": "FC Shakhtar Donetsk",
+			"short": "Shakhtar",
+			"abbr": "SHA",
 			"nick": "Hirnyky",
 			"city": "Donetsk",
 			"founded": 1936,
@@ -17,7 +17,7 @@
 				"#F07F13",
 				"#111111"
 			],
-			"stadium": "Stadion Donbass",
+			"stadium": "Donbass Arena",
 			"capacity": 52000,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "UKR_BSY",
-			"name": "Kyiv Bilo-Syni",
-			"short": "Bilo-Syni",
-			"abbr": "BSY",
+			"name": "FC Dynamo Kyiv",
+			"short": "Dynamo Kyiv",
+			"abbr": "DYN",
 			"nick": "Bilo-Syni",
 			"city": "Kyiv",
 			"founded": 1927,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#1D5BBF"
 			],
-			"stadium": "Stadion Kyiv Tsentr",
+			"stadium": "Estádio Olímpico de Kiev",
 			"capacity": 16800,
 			"kit": "plain",
 			"crest": {
@@ -53,6 +53,86 @@
 			"rivals": [
 				"UKR_HIR"
 			]
+		},
+		{
+			"key": "UKR_POL",
+			"name": "FC Polissya Zhytomyr",
+			"short": "Polissya",
+			"abbr": "POL",
+			"nick": "Vovky",
+			"city": "Zhytomyr",
+			"founded": 2016,
+			"league": "UKR1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Tsentralnyi Stadion Zhytomyr",
+			"capacity": 5900,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UKR_KRY",
+			"name": "FC Kryvbas Kryvyi Rih",
+			"short": "Kryvbas",
+			"abbr": "KRY",
+			"nick": "Ruda",
+			"city": "Kryvyi Rih",
+			"founded": 1959,
+			"league": "UKR1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Hirnyk",
+			"capacity": 2500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UKR_ZOR",
+			"name": "FC Zorya Luhansk",
+			"short": "Zorya",
+			"abbr": "ZOR",
+			"nick": "Myronosci",
+			"city": "Luhansk",
+			"founded": 1923,
+			"league": "UKR1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Slavutych-Arena",
+			"capacity": 11600,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "UKR_OLE",
+			"name": "FC Oleksandriya",
+			"short": "Oleksandriya",
+			"abbr": "OLE",
+			"nick": "Mistiany",
+			"city": "Oleksandriya",
+			"founded": 1948,
+			"league": "UKR1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Nika Stadion",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": []
 		}
 	]
 }

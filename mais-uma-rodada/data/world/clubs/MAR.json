@@ -1,12 +1,12 @@
 {
 	"nation": "MAR",
-	"_doc": "Marrocos (liga de 8).",
+	"_doc": "Marrocos (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "MAR_WYR",
-			"name": "Casablanca Rouge",
-			"short": "Rouge",
-			"abbr": "WYR",
+			"name": "Wydad Athletic Club",
+			"short": "Wydad",
+			"abbr": "WAC",
 			"nick": "Wydadis",
 			"city": "Casablanca",
 			"founded": 1937,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade d'Anfa",
+			"stadium": "Stade Mohammed V",
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "MAR_RVE",
-			"name": "Casablanca Vert",
-			"short": "Vert Casa",
-			"abbr": "RVE",
+			"name": "Raja Club Athletic",
+			"short": "Raja",
+			"abbr": "RCA",
 			"nick": "Aigles Verts",
 			"city": "Casablanca",
 			"founded": 1949,
@@ -43,7 +43,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Stade d'Anfa",
+			"stadium": "Stade Mohammed V",
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "MAR_ARF",
-			"name": "Rabat Militaire",
-			"short": "Militaires",
-			"abbr": "ARF",
+			"name": "AS FAR",
+			"short": "FAR Rabat",
+			"abbr": "FAR",
 			"nick": "Militaires",
 			"city": "Rabat",
 			"founded": 1958,
@@ -69,13 +69,113 @@
 				"#111111",
 				"#E30613"
 			],
-			"stadium": "Stade de la Capitale",
+			"stadium": "Stade Prince Moulay Abdellah",
 			"capacity": 52000,
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
 				"symbol": "star"
 			},
+			"rivals": []
+		},
+		{
+			"key": "MAR_BER",
+			"name": "RS Berkane",
+			"short": "RS Berkane",
+			"abbr": "RSB",
+			"nick": "Laranjas",
+			"city": "Berkane",
+			"founded": 1938,
+			"league": "MAR1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stade Municipal de Berkane",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "MAR_FUS",
+			"name": "FUS de Rabat",
+			"short": "FUS Rabat",
+			"abbr": "FUS",
+			"nick": "Fussistes",
+			"city": "Rabat",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade Moulay Hassan",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "MAR_MAS",
+			"name": "Maghreb Association Sportive de Fès",
+			"short": "MAS Fès",
+			"abbr": "MAS",
+			"nick": "Nemours",
+			"city": "Fès",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 54,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Complexe Sportif de Fès",
+			"capacity": 45000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "MAR_HUS",
+			"name": "Hassania Union Sport d'Agadir",
+			"short": "Hassania Agadir",
+			"abbr": "HUSA",
+			"nick": "Gazelles",
+			"city": "Agadir",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Adrar",
+			"capacity": 45000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "MAR_DHJ",
+			"name": "Difaâ Hassani El Jadidi",
+			"short": "DH El Jadida",
+			"abbr": "DHJ",
+			"nick": "Dokkalis",
+			"city": "El Jadida",
+			"founded": 1956,
+			"league": "MAR1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade El Abdi",
+			"capacity": 8000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

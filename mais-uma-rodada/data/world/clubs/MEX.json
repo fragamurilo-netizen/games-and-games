@@ -1,12 +1,12 @@
 {
 	"nation": "MEX",
-	"_doc": "México (liga fechada de 18).",
+	"_doc": "México (liga fechada de 18). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "MEX_AGU",
-			"name": "Coapa Águilas",
-			"short": "Águilas",
-			"abbr": "AGU",
+			"name": "Club América",
+			"short": "América",
+			"abbr": "AME",
 			"nick": "Azulcremas",
 			"city": "Ciudad de México",
 			"founded": 1916,
@@ -17,7 +17,7 @@
 				"#FFE600",
 				"#1D3F91"
 			],
-			"stadium": "Estadio de Santa Úrsula",
+			"stadium": "Estadio Azteca",
 			"capacity": 83000,
 			"kit": "plain",
 			"crest": {
@@ -32,8 +32,8 @@
 		},
 		{
 			"key": "MEX_GDL",
-			"name": "Guadalajara Rojiblanco",
-			"short": "Rebaño",
+			"name": "Club Deportivo Guadalajara",
+			"short": "Chivas",
 			"abbr": "GDL",
 			"nick": "Rebaño Sagrado",
 			"city": "Guadalajara",
@@ -45,7 +45,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Zapopan",
+			"stadium": "Estadio Akron",
 			"capacity": 46000,
 			"kit": "stripes_v",
 			"crest": {
@@ -59,9 +59,9 @@
 		},
 		{
 			"key": "MEX_CEM",
-			"name": "Cementero Celeste",
-			"short": "Cementeros",
-			"abbr": "CEM",
+			"name": "Cruz Azul",
+			"short": "Cruz Azul",
+			"abbr": "CAZ",
 			"nick": "Máquina",
 			"city": "Ciudad de México",
 			"founded": 1927,
@@ -72,7 +72,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Noria",
+			"stadium": "Estadio Ciudad de los Deportes",
 			"capacity": 35000,
 			"kit": "plain",
 			"crest": {
@@ -85,9 +85,9 @@
 		},
 		{
 			"key": "MEX_FEL",
-			"name": "Universitarios CU",
-			"short": "Felinos",
-			"abbr": "FEL",
+			"name": "Club Universidad Nacional",
+			"short": "Pumas UNAM",
+			"abbr": "PUM",
 			"nick": "Felinos",
 			"city": "Ciudad de México",
 			"founded": 1954,
@@ -98,7 +98,7 @@
 				"#0D2A5C",
 				"#C5A572"
 			],
-			"stadium": "Estadio de Ciudad Universitaria",
+			"stadium": "Estadio Olímpico Universitario",
 			"capacity": 58000,
 			"kit": "plain",
 			"crest": {
@@ -111,9 +111,9 @@
 		},
 		{
 			"key": "MEX_AUR",
-			"name": "San Nicolás Auriazul",
-			"short": "Auriazules",
-			"abbr": "AUR",
+			"name": "Tigres UANL",
+			"short": "Tigres",
+			"abbr": "TIG",
 			"nick": "Felinos del Norte",
 			"city": "San Nicolás de los Garza",
 			"founded": 1960,
@@ -124,7 +124,7 @@
 				"#FDB913",
 				"#1D3F91"
 			],
-			"stadium": "Estadio Universitario del Norte",
+			"stadium": "Estadio Universitario",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
@@ -137,9 +137,9 @@
 		},
 		{
 			"key": "MEX_RAY",
-			"name": "Monterrey Rayado",
-			"short": "Rayados",
-			"abbr": "RAY",
+			"name": "CF Monterrey",
+			"short": "Monterrey",
+			"abbr": "MTY",
 			"nick": "Pandilla",
 			"city": "Monterrey",
 			"founded": 1945,
@@ -150,7 +150,7 @@
 				"#0D2A5C",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Cerro de la Silla",
+			"stadium": "Estadio BBVA",
 			"capacity": 53500,
 			"kit": "stripes_v",
 			"crest": {
@@ -163,8 +163,8 @@
 		},
 		{
 			"key": "MEX_TOL",
-			"name": "Toluca Diablos",
-			"short": "Diablos",
+			"name": "Deportivo Toluca FC",
+			"short": "Toluca",
 			"abbr": "TOL",
 			"nick": "Diablos Rojos",
 			"city": "Toluca",
@@ -176,7 +176,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Valle de Toluca",
+			"stadium": "Estadio Nemesio Díez",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -187,9 +187,9 @@
 		},
 		{
 			"key": "MEX_GRR",
-			"name": "Torreón Guerreros",
-			"short": "Guerreros",
-			"abbr": "GRR",
+			"name": "Club Santos Laguna",
+			"short": "Santos Laguna",
+			"abbr": "SAN",
 			"nick": "Guerreros",
 			"city": "Torreón",
 			"founded": 1983,
@@ -200,7 +200,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Laguna",
+			"stadium": "Estadio Corona",
 			"capacity": 30000,
 			"kit": "halves",
 			"crest": {
@@ -211,9 +211,9 @@
 		},
 		{
 			"key": "MEX_ESM",
-			"name": "León Esmeralda",
-			"short": "Esmeraldas",
-			"abbr": "ESM",
+			"name": "Club León",
+			"short": "León",
+			"abbr": "LEO",
 			"nick": "Panzas Verdes",
 			"city": "León",
 			"founded": 1944,
@@ -224,7 +224,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Bajío",
+			"stadium": "Estadio León",
 			"capacity": 31000,
 			"kit": "plain",
 			"crest": {
@@ -235,9 +235,9 @@
 		},
 		{
 			"key": "MEX_TUZ",
-			"name": "Pachuca Tuzos",
-			"short": "Tuzos",
-			"abbr": "TUZ",
+			"name": "CF Pachuca",
+			"short": "Pachuca",
+			"abbr": "PAC",
 			"nick": "Tuzos",
 			"city": "Pachuca",
 			"founded": 1901,
@@ -248,7 +248,7 @@
 				"#0D2A5C",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Bella Airosa",
+			"stadium": "Estadio Hidalgo",
 			"capacity": 27500,
 			"kit": "stripes_v",
 			"crest": {
@@ -259,9 +259,9 @@
 		},
 		{
 			"key": "MEX_ATL",
-			"name": "Guadalajara Rojinegro",
-			"short": "Zorros",
-			"abbr": "ATL",
+			"name": "Atlas FC",
+			"short": "Atlas",
+			"abbr": "ATS",
 			"nick": "Zorros",
 			"city": "Guadalajara",
 			"founded": 1916,
@@ -272,7 +272,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Estadio del Jalisco",
+			"stadium": "Estadio Jalisco",
 			"capacity": 55000,
 			"kit": "halves",
 			"crest": {
@@ -285,9 +285,9 @@
 		},
 		{
 			"key": "MEX_RYS",
-			"name": "Aguascalientes Rayos",
-			"short": "Rayos",
-			"abbr": "RYS",
+			"name": "Club Necaxa",
+			"short": "Necaxa",
+			"abbr": "NEC",
 			"nick": "Rayos",
 			"city": "Aguascalientes",
 			"founded": 1923,
@@ -298,7 +298,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Feria",
+			"stadium": "Estadio Victoria",
 			"capacity": 23800,
 			"kit": "stripes_v",
 			"crest": {
@@ -309,8 +309,8 @@
 		},
 		{
 			"key": "MEX_PUE",
-			"name": "Puebla Camoteros",
-			"short": "Camoteros",
+			"name": "Club Puebla",
+			"short": "Puebla",
 			"abbr": "PUE",
 			"nick": "Camoteros",
 			"city": "Puebla",
@@ -322,7 +322,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Estadio de los Fuertes",
+			"stadium": "Estadio Cuauhtémoc",
 			"capacity": 51700,
 			"kit": "diagonal",
 			"crest": {
@@ -333,9 +333,9 @@
 		},
 		{
 			"key": "MEX_GAL",
-			"name": "Querétaro Gallos",
-			"short": "Gallos",
-			"abbr": "GAL",
+			"name": "Querétaro FC",
+			"short": "Querétaro",
+			"abbr": "QRO",
 			"nick": "Gallos Blancos",
 			"city": "Querétaro",
 			"founded": 1950,
@@ -346,7 +346,7 @@
 				"#111111",
 				"#1D5BBF"
 			],
-			"stadium": "Estadio del Cerro",
+			"stadium": "Estadio Corregidora",
 			"capacity": 33000,
 			"kit": "stripes_v",
 			"crest": {
@@ -357,9 +357,9 @@
 		},
 		{
 			"key": "MEX_CAN",
-			"name": "Mazatlán Cañoneros",
-			"short": "Cañoneros",
-			"abbr": "CAN",
+			"name": "Mazatlán FC",
+			"short": "Mazatlán",
+			"abbr": "MAZ",
 			"nick": "Cañoneros",
 			"city": "Mazatlán",
 			"founded": 2020,
@@ -370,7 +370,7 @@
 				"#5E2A84",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Puerto",
+			"stadium": "Estadio El Encanto",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -381,9 +381,9 @@
 		},
 		{
 			"key": "MEX_XOL",
-			"name": "Tijuana Xolos",
-			"short": "Xolos",
-			"abbr": "XOL",
+			"name": "Club Tijuana",
+			"short": "Tijuana",
+			"abbr": "TIJ",
 			"nick": "Xolos",
 			"city": "Tijuana",
 			"founded": 2007,
@@ -394,7 +394,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Estadio de la Frontera",
+			"stadium": "Estadio Caliente",
 			"capacity": 31000,
 			"kit": "stripes_v",
 			"crest": {
@@ -405,9 +405,9 @@
 		},
 		{
 			"key": "MEX_BRA",
-			"name": "Ciudad Juárez Bravos",
-			"short": "Bravos",
-			"abbr": "BRV",
+			"name": "FC Juárez",
+			"short": "FC Juárez",
+			"abbr": "JUA",
 			"nick": "Bravos",
 			"city": "Ciudad Juárez",
 			"founded": 2015,
@@ -418,7 +418,7 @@
 				"#006437",
 				"#E30613"
 			],
-			"stadium": "Estadio del Bravo",
+			"stadium": "Estadio Olímpico Benito Juárez",
 			"capacity": 19700,
 			"kit": "plain",
 			"crest": {
@@ -429,9 +429,9 @@
 		},
 		{
 			"key": "MEX_TUN",
-			"name": "Potosí Tuneros",
-			"short": "Tuneros",
-			"abbr": "TUN",
+			"name": "Atlético de San Luis",
+			"short": "San Luis",
+			"abbr": "ASL",
 			"nick": "Tuneros",
 			"city": "San Luis Potosí",
 			"founded": 1957,
@@ -442,7 +442,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Altiplano",
+			"stadium": "Estadio Alfonso Lastras",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {

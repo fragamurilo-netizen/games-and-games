@@ -1,12 +1,12 @@
 {
 	"nation": "SUI",
-	"_doc": "Suíça (liga de 6).",
+	"_doc": "Suíça (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "SUI_BAS",
-			"name": "Basel Rotblau",
-			"short": "Rotblau",
-			"abbr": "BAS",
+			"name": "FC Basel 1893",
+			"short": "Basel",
+			"abbr": "FCB",
 			"nick": "Bebbi",
 			"city": "Basel",
 			"founded": 1893,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#1D3F91"
 			],
-			"stadium": "Stadion am Rhein Basel",
+			"stadium": "St. Jakob-Park",
 			"capacity": 38500,
 			"kit": "halves",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "SUI_BRN",
-			"name": "Bern Gelbschwarz",
-			"short": "Gelbschwarz",
-			"abbr": "BRN",
+			"name": "BSC Young Boys",
+			"short": "Young Boys",
+			"abbr": "YB",
 			"nick": "Gelbschwarze",
 			"city": "Bern",
 			"founded": 1898,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Stadion Wankdorf Nord",
+			"stadium": "Stadion Wankdorf",
 			"capacity": 32000,
 			"kit": "plain",
 			"crest": {
@@ -54,9 +54,9 @@
 		},
 		{
 			"key": "SUI_ZUR",
-			"name": "Zürich Letzi",
-			"short": "Zürcher",
-			"abbr": "ZUR",
+			"name": "FC Zürich",
+			"short": "Zürich",
+			"abbr": "FCZ",
 			"nick": "Zürcher",
 			"city": "Zürich",
 			"founded": 1896,
@@ -67,7 +67,7 @@
 				"#FFFFFF",
 				"#1D5BBF"
 			],
-			"stadium": "Stadion Letzigrund Ost",
+			"stadium": "Letzigrund",
 			"capacity": 26100,
 			"kit": "plain",
 			"crest": {
@@ -80,9 +80,9 @@
 		},
 		{
 			"key": "SUI_GEN",
-			"name": "Genève Grenat",
-			"short": "Grenats",
-			"abbr": "GEN",
+			"name": "Servette FC",
+			"short": "Servette",
+			"abbr": "SFC",
 			"nick": "Grenats",
 			"city": "Genève",
 			"founded": 1890,
@@ -93,13 +93,53 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de la Praille",
+			"stadium": "Stade de Genève",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
 				"symbol": "cross"
 			},
+			"rivals": []
+		},
+		{
+			"key": "SUI_LUG",
+			"name": "FC Lugano",
+			"short": "Lugano",
+			"abbr": "FCL",
+			"nick": "Bianconeri",
+			"city": "Lugano",
+			"founded": 1908,
+			"league": "SUI1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio di Cornaredo",
+			"capacity": 6300,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "SUI_STG",
+			"name": "FC St. Gallen 1879",
+			"short": "St. Gallen",
+			"abbr": "FCSG",
+			"nick": "Espen",
+			"city": "St. Gallen",
+			"founded": 1879,
+			"league": "SUI1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Kybunpark",
+			"capacity": 19400,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

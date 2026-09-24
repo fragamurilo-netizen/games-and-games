@@ -1,12 +1,12 @@
 {
 	"nation": "TUN",
-	"_doc": "Tunísia (liga de 6).",
+	"_doc": "Tunísia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "TUN_TAR",
-			"name": "Tunis Sang et Or",
-			"short": "Taraji",
-			"abbr": "TAR",
+			"name": "Espérance Sportive de Tunis",
+			"short": "Espérance",
+			"abbr": "EST",
 			"nick": "Taraji",
 			"city": "Tunis",
 			"founded": 1919,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFD100"
 			],
-			"stadium": "Stade de Radès",
+			"stadium": "Stade Hammadi Agrebi",
 			"capacity": 60000,
 			"kit": "stripes_v",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "TUN_CLU",
-			"name": "Tunis Clubistes",
-			"short": "Clubistes",
-			"abbr": "CLU",
+			"name": "Club Africain",
+			"short": "Club Africain",
+			"abbr": "CA",
 			"nick": "Clubistes",
 			"city": "Tunis",
 			"founded": 1920,
@@ -43,7 +43,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de Radès",
+			"stadium": "Stade Hammadi Agrebi",
 			"capacity": 60000,
 			"kit": "plain",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "TUN_ETO",
-			"name": "Sousse Étoile",
-			"short": "Étoile",
-			"abbr": "ETO",
+			"name": "Étoile Sportive du Sahel",
+			"short": "Étoile du Sahel",
+			"abbr": "ESS",
 			"nick": "Étoilés",
 			"city": "Sousse",
 			"founded": 1925,
@@ -76,6 +76,66 @@
 				"shape": "round",
 				"symbol": "star"
 			},
+			"rivals": []
+		},
+		{
+			"key": "TUN_CSS",
+			"name": "Club Sportif Sfaxien",
+			"short": "CS Sfaxien",
+			"abbr": "CSS",
+			"nick": "Noir et Blanc",
+			"city": "Sfax",
+			"founded": 1928,
+			"league": "TUN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Taïeb Mhiri",
+			"capacity": 22000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "TUN_USM",
+			"name": "Union Sportive Monastirienne",
+			"short": "US Monastir",
+			"abbr": "USM",
+			"nick": "Monastiriens",
+			"city": "Monastir",
+			"founded": 1923,
+			"league": "TUN1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Mustapha Ben Jannet",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "TUN_STU",
+			"name": "Stade Tunisien",
+			"short": "Stade Tunisien",
+			"abbr": "ST",
+			"nick": "Bayadha",
+			"city": "Tunis",
+			"founded": 1948,
+			"league": "TUN1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade Hédi Enneifer",
+			"capacity": 12000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

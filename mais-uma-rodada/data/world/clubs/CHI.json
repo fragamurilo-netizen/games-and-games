@@ -1,12 +1,12 @@
 {
 	"nation": "CHI",
-	"_doc": "Chile (liga de 12).",
+	"_doc": "Chile (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "CHI_ALB",
-			"name": "Santiago Albo",
-			"short": "Albos",
-			"abbr": "ALB",
+			"name": "Club Social y Deportivo Colo-Colo",
+			"short": "Colo-Colo",
+			"abbr": "COL",
 			"nick": "Albos",
 			"city": "Santiago",
 			"founded": 1925,
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Estadio del Monumental de Macul",
+			"stadium": "Estadio Monumental David Arellano",
 			"capacity": 47000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "CHI_AZU",
-			"name": "Santiago Azul",
-			"short": "Chunchos",
-			"abbr": "AZU",
+			"name": "Club Universidad de Chile",
+			"short": "U. de Chile",
+			"abbr": "UCH",
 			"nick": "Chunchos",
 			"city": "Santiago",
 			"founded": 1927,
@@ -44,7 +44,7 @@
 				"#1D3F91",
 				"#E30613"
 			],
-			"stadium": "Estadio de Ñuñoa",
+			"stadium": "Estadio Nacional",
 			"capacity": 48000,
 			"kit": "plain",
 			"crest": {
@@ -57,9 +57,9 @@
 		},
 		{
 			"key": "CHI_CRU",
-			"name": "Santiago Cruzado",
-			"short": "Cruzados",
-			"abbr": "CRU",
+			"name": "Club Deportivo Universidad Católica",
+			"short": "U. Católica",
+			"abbr": "UCA",
 			"nick": "Cruzados",
 			"city": "Santiago",
 			"founded": 1937,
@@ -70,7 +70,7 @@
 				"#FFFFFF",
 				"#1D5BBF"
 			],
-			"stadium": "Estadio de San Carlos",
+			"stadium": "Claro Arena",
 			"capacity": 14000,
 			"kit": "faixa",
 			"crest": {
@@ -83,9 +83,9 @@
 		},
 		{
 			"key": "CHI_LOA",
-			"name": "Calama Loa",
-			"short": "Loínos",
-			"abbr": "LOA",
+			"name": "Club de Deportes Cobreloa",
+			"short": "Cobreloa",
+			"abbr": "COB",
 			"nick": "Zorros del Desierto",
 			"city": "Calama",
 			"founded": 1977,
@@ -96,13 +96,173 @@
 				"#F07F13",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Desierto",
+			"stadium": "Estadio Zorros del Desierto",
 			"capacity": 12000,
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
 				"symbol": "sun"
 			},
+			"rivals": []
+		},
+		{
+			"key": "CHI_AUD",
+			"name": "Audax Club Sportivo Italiano",
+			"short": "Audax Italiano",
+			"abbr": "AUD",
+			"nick": "Tanos",
+			"city": "Santiago",
+			"founded": 1910,
+			"league": "CHI1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bicentenario de La Florida",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHI_PAL",
+			"name": "Club Deportivo Palestino",
+			"short": "Palestino",
+			"abbr": "PAL",
+			"nick": "Árabes",
+			"city": "Santiago",
+			"founded": 1920,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#00843D",
+				"#E30613"
+			],
+			"stadium": "Estadio Municipal de La Cisterna",
+			"capacity": 12000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "CHI_HUA",
+			"name": "Club Deportivo Huachipato",
+			"short": "Huachipato",
+			"abbr": "HUA",
+			"nick": "Acereros",
+			"city": "Talcahuano",
+			"founded": 1947,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Estadio Huachipato-CAP Acero",
+			"capacity": 10500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "CHI_EVE",
+			"name": "Everton de Viña del Mar",
+			"short": "Everton",
+			"abbr": "EVE",
+			"nick": "Ruleteros",
+			"city": "Viña del Mar",
+			"founded": 1909,
+			"league": "CHI1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estadio Sausalito",
+			"capacity": 22000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHI_UES",
+			"name": "Unión Española",
+			"short": "Unión Española",
+			"abbr": "UES",
+			"nick": "Hispanos",
+			"city": "Santiago",
+			"founded": 1897,
+			"league": "CHI1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio Santa Laura",
+			"capacity": 19000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHI_OHI",
+			"name": "Club Deportivo O'Higgins",
+			"short": "O'Higgins",
+			"abbr": "OHI",
+			"nick": "Capo de Provincia",
+			"city": "Rancagua",
+			"founded": 1955,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio El Teniente",
+			"capacity": 14000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHI_COQ",
+			"name": "Coquimbo Unido",
+			"short": "Coquimbo",
+			"abbr": "COQ",
+			"nick": "Piratas",
+			"city": "Coquimbo",
+			"founded": 1958,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Francisco Sánchez Rumoroso",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "CHI_IQU",
+			"name": "Club de Deportes Iquique",
+			"short": "Deportes Iquique",
+			"abbr": "IQU",
+			"nick": "Dragones Celestes",
+			"city": "Iquique",
+			"founded": 1978,
+			"league": "CHI1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Tierra de Campeones",
+			"capacity": 13000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

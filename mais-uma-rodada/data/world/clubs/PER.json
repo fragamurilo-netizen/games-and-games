@@ -1,12 +1,12 @@
 {
 	"nation": "PER",
-	"_doc": "Peru (liga de 12).",
+	"_doc": "Peru (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "PER_CRE",
-			"name": "Lima Crema",
-			"short": "Cremas",
-			"abbr": "CRE",
+			"name": "Club Universitario de Deportes",
+			"short": "Universitario",
+			"abbr": "UNI",
 			"nick": "Cremas",
 			"city": "Lima",
 			"founded": 1924,
@@ -17,7 +17,7 @@
 				"#F5E6C8",
 				"#8A1538"
 			],
-			"stadium": "Estadio de Ate",
+			"stadium": "Estadio Monumental",
 			"capacity": 80000,
 			"kit": "plain",
 			"crest": {
@@ -31,9 +31,9 @@
 		},
 		{
 			"key": "PER_INT",
-			"name": "Lima Blanquiazul",
-			"short": "Íntimos",
-			"abbr": "INT",
+			"name": "Club Alianza Lima",
+			"short": "Alianza Lima",
+			"abbr": "ALI",
 			"nick": "Íntimos",
 			"city": "Lima",
 			"founded": 1901,
@@ -44,7 +44,7 @@
 				"#1D3F91",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de La Victoria",
+			"stadium": "Estadio Alejandro Villanueva",
 			"capacity": 34000,
 			"kit": "stripes_v",
 			"crest": {
@@ -57,9 +57,9 @@
 		},
 		{
 			"key": "PER_CEL",
-			"name": "Rímac Celeste",
-			"short": "Celestes",
-			"abbr": "CEL",
+			"name": "Club Sporting Cristal",
+			"short": "Sporting Cristal",
+			"abbr": "SCR",
 			"nick": "Celestes",
 			"city": "Lima",
 			"founded": 1955,
@@ -70,7 +70,7 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Rímac",
+			"stadium": "Estadio Alberto Gallardo",
 			"capacity": 18000,
 			"kit": "plain",
 			"crest": {
@@ -83,9 +83,9 @@
 		},
 		{
 			"key": "PER_DOM",
-			"name": "Arequipa Dominó",
-			"short": "Dominós",
-			"abbr": "DOM",
+			"name": "FBC Melgar",
+			"short": "Melgar",
+			"abbr": "MEL",
 			"nick": "Dominós",
 			"city": "Arequipa",
 			"founded": 1915,
@@ -96,7 +96,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Estadio de la Ciudad Blanca",
+			"stadium": "Estadio Monumental de la UNSA",
 			"capacity": 40000,
 			"kit": "halves",
 			"crest": {
@@ -107,9 +107,9 @@
 		},
 		{
 			"key": "PER_IMP",
-			"name": "Cusco Imperial",
-			"short": "Imperiales",
-			"abbr": "IMP",
+			"name": "Club Cienciano",
+			"short": "Cienciano",
+			"abbr": "CIE",
 			"nick": "Papá",
 			"city": "Cusco",
 			"founded": 1901,
@@ -120,13 +120,153 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Inca",
+			"stadium": "Estadio Inca Garcilaso de la Vega",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
 				"symbol": "sun"
 			},
+			"rivals": []
+		},
+		{
+			"key": "PER_CUS",
+			"name": "Cusco FC",
+			"short": "Cusco FC",
+			"abbr": "CUS",
+			"nick": "Dorados",
+			"city": "Cusco",
+			"founded": 2009,
+			"league": "PER1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Inca Garcilaso de la Vega",
+			"capacity": 42000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_ADT",
+			"name": "Asociación Deportiva Tarma",
+			"short": "ADT",
+			"abbr": "ADT",
+			"nick": "Celeste de Tarma",
+			"city": "Tarma",
+			"founded": 1929,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Unión Tarma",
+			"capacity": 9000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_HUA",
+			"name": "Club Sport Huancayo",
+			"short": "Sport Huancayo",
+			"abbr": "SHU",
+			"nick": "Rojo Matador",
+			"city": "Huancayo",
+			"founded": 2007,
+			"league": "PER1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Huancayo",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_GRA",
+			"name": "Club Atlético Grau",
+			"short": "Atlético Grau",
+			"abbr": "GRA",
+			"nick": "Albos",
+			"city": "Piura",
+			"founded": 1919,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Campeones del 36",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_GAR",
+			"name": "Deportivo Garcilaso",
+			"short": "Garcilaso",
+			"abbr": "GAR",
+			"nick": "Celeste Imperial",
+			"city": "Cusco",
+			"founded": 1957,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Inca Garcilaso de la Vega",
+			"capacity": 42000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_CHA",
+			"name": "Los Chankas CYC",
+			"short": "Los Chankas",
+			"abbr": "LCH",
+			"nick": "Guerreros",
+			"city": "Andahuaylas",
+			"founded": 2018,
+			"league": "PER1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Los Chankas",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "PER_AAT",
+			"name": "Club Alianza Atlético",
+			"short": "Alianza Atlético",
+			"abbr": "AAT",
+			"nick": "Vendaval Churre",
+			"city": "Sullana",
+			"founded": 1920,
+			"league": "PER1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Estadio Campeones del 36",
+			"capacity": 12000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

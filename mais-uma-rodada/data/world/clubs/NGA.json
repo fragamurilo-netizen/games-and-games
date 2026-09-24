@@ -1,12 +1,12 @@
 {
 	"nation": "NGA",
-	"_doc": "Nigéria (liga de 6).",
+	"_doc": "Nigéria (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "NGA_ABA",
-			"name": "Aba Elephants",
-			"short": "Elephants",
-			"abbr": "ABA",
+			"name": "Enyimba FC",
+			"short": "Enyimba",
+			"abbr": "ENY",
 			"nick": "Elephants",
 			"city": "Aba",
 			"founded": 1976,
@@ -17,7 +17,7 @@
 				"#1D5BBF",
 				"#FFFFFF"
 			],
-			"stadium": "Aba Township Stadium",
+			"stadium": "Enyimba International Stadium",
 			"capacity": 16000,
 			"kit": "plain",
 			"crest": {
@@ -28,9 +28,9 @@
 		},
 		{
 			"key": "NGA_ENU",
-			"name": "Enugu Flying Antelopes",
-			"short": "Antelopes",
-			"abbr": "ENU",
+			"name": "Rangers International FC",
+			"short": "Enugu Rangers",
+			"abbr": "RAN",
 			"nick": "Flying Antelopes",
 			"city": "Enugu",
 			"founded": 1970,
@@ -41,13 +41,93 @@
 				"#E30613",
 				"#1D5BBF"
 			],
-			"stadium": "Nnamdi Park",
+			"stadium": "Nnamdi Azikiwe Stadium",
 			"capacity": 22000,
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
 				"symbol": "chevron"
 			},
+			"rivals": []
+		},
+		{
+			"key": "NGA_REM",
+			"name": "Remo Stars FC",
+			"short": "Remo Stars",
+			"abbr": "REM",
+			"nick": "Sky Blue Stars",
+			"city": "Ikenne",
+			"founded": 2010,
+			"league": "NGA1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Remo Stars Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NGA_RIV",
+			"name": "Rivers United FC",
+			"short": "Rivers United",
+			"abbr": "RIV",
+			"nick": "Pride of Rivers",
+			"city": "Port Harcourt",
+			"founded": 2016,
+			"league": "NGA1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Adokiye Amiesimaka Stadium",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NGA_KAN",
+			"name": "Kano Pillars FC",
+			"short": "Kano Pillars",
+			"abbr": "KAN",
+			"nick": "Sai Masu Gida",
+			"city": "Kano",
+			"founded": 1990,
+			"league": "NGA1",
+			"rep": 50,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Sani Abacha Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "NGA_SHO",
+			"name": "Shooting Stars SC",
+			"short": "Shooting Stars",
+			"abbr": "3SC",
+			"nick": "Oluyole Warriors",
+			"city": "Ibadan",
+			"founded": 1950,
+			"league": "NGA1",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lekan Salami Stadium",
+			"capacity": 25000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

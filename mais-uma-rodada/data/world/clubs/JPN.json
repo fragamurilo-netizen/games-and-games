@@ -1,12 +1,12 @@
 {
 	"nation": "JPN",
-	"_doc": "Japão (liga de 10).",
+	"_doc": "Japão (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "JPN_KSH",
-			"name": "Kashima Deer",
-			"short": "Deer",
-			"abbr": "KSH",
+			"name": "Kashima Antlers",
+			"short": "Kashima",
+			"abbr": "KAS",
 			"nick": "Deer",
 			"city": "Kashima",
 			"founded": 1947,
@@ -17,7 +17,7 @@
 				"#B71234",
 				"#111111"
 			],
-			"stadium": "Kashima Soccer Stadium East",
+			"stadium": "Mercari Stadium",
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
@@ -28,9 +28,9 @@
 		},
 		{
 			"key": "JPN_SAI",
-			"name": "Saitama Reds",
-			"short": "Saitama Reds",
-			"abbr": "SAI",
+			"name": "Urawa Red Diamonds",
+			"short": "Urawa Reds",
+			"abbr": "URA",
 			"nick": "Reds",
 			"city": "Saitama",
 			"founded": 1950,
@@ -41,7 +41,7 @@
 				"#E6002D",
 				"#FFFFFF"
 			],
-			"stadium": "Saitama Stadium Park",
+			"stadium": "Saitama Stadium 2002",
 			"capacity": 63700,
 			"kit": "plain",
 			"crest": {
@@ -52,9 +52,9 @@
 		},
 		{
 			"key": "JPN_YKM",
-			"name": "Yokohama Mariners",
-			"short": "Mariners",
-			"abbr": "YKM",
+			"name": "Yokohama F. Marinos",
+			"short": "Yokohama FM",
+			"abbr": "YFM",
 			"nick": "Mariners",
 			"city": "Yokohama",
 			"founded": 1972,
@@ -65,7 +65,7 @@
 				"#003D99",
 				"#FFFFFF"
 			],
-			"stadium": "Yokohama Port Stadium",
+			"stadium": "Nissan Stadium",
 			"capacity": 72000,
 			"kit": "plain",
 			"crest": {
@@ -78,9 +78,9 @@
 		},
 		{
 			"key": "JPN_KWS",
-			"name": "Kawasaki Azzurro",
-			"short": "Azzurro",
-			"abbr": "KWS",
+			"name": "Kawasaki Frontale",
+			"short": "Kawasaki",
+			"abbr": "KAW",
 			"nick": "Frontale",
 			"city": "Kawasaki",
 			"founded": 1955,
@@ -91,7 +91,7 @@
 				"#1D9AD6",
 				"#111111"
 			],
-			"stadium": "Todoroki Park Stadium",
+			"stadium": "Uvance Todoroki Stadium",
 			"capacity": 26800,
 			"kit": "stripes_v",
 			"crest": {
@@ -104,9 +104,9 @@
 		},
 		{
 			"key": "JPN_KOB",
-			"name": "Kobe Crimson",
-			"short": "Crimson",
-			"abbr": "KOB",
+			"name": "Vissel Kobe",
+			"short": "Vissel Kobe",
+			"abbr": "VIS",
 			"nick": "Crimson",
 			"city": "Kobe",
 			"founded": 1966,
@@ -117,7 +117,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Misaki Park Stadium",
+			"stadium": "Noevir Stadium Kobe",
 			"capacity": 30100,
 			"kit": "plain",
 			"crest": {
@@ -130,9 +130,9 @@
 		},
 		{
 			"key": "JPN_OSK",
-			"name": "Osaka Blue Black",
-			"short": "Osaka Blue",
-			"abbr": "OSK",
+			"name": "Gamba Osaka",
+			"short": "Gamba Osaka",
+			"abbr": "GAM",
 			"nick": "Gamba",
 			"city": "Osaka",
 			"founded": 1980,
@@ -143,7 +143,7 @@
 				"#1D3F91",
 				"#111111"
 			],
-			"stadium": "Suita City Stadium",
+			"stadium": "Panasonic Stadium Suita",
 			"capacity": 39700,
 			"kit": "stripes_v",
 			"crest": {
@@ -153,6 +153,86 @@
 			"rivals": [
 				"JPN_KOB"
 			]
+		},
+		{
+			"key": "JPN_HIR",
+			"name": "Sanfrecce Hiroshima",
+			"short": "Sanfrecce",
+			"abbr": "SAN",
+			"nick": "Sanfrecce",
+			"city": "Hiroshima",
+			"founded": 1938,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Edion Peace Wing Hiroshima",
+			"capacity": 28500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "JPN_MAC",
+			"name": "FC Machida Zelvia",
+			"short": "Machida Zelvia",
+			"abbr": "MAC",
+			"nick": "Zelvia",
+			"city": "Machida",
+			"founded": 1989,
+			"league": "JPN1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Machida GION Stadium",
+			"capacity": 15500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "JPN_CER",
+			"name": "Cerezo Osaka",
+			"short": "Cerezo Osaka",
+			"abbr": "CER",
+			"nick": "Cerezo",
+			"city": "Osaka",
+			"founded": 1957,
+			"league": "JPN1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#E91E63",
+				"#0055A4"
+			],
+			"stadium": "Yodoko Sakura Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "JPN_TOK",
+			"name": "FC Tokyo",
+			"short": "FC Tokyo",
+			"abbr": "TOK",
+			"nick": "Gasmen",
+			"city": "Tóquio",
+			"founded": 1935,
+			"league": "JPN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Ajinomoto Stadium",
+			"capacity": 49000,
+			"kit": "stripes_v",
+			"rivals": []
 		}
 	]
 }

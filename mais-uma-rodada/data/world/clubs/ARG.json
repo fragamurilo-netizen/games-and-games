@@ -1,12 +1,12 @@
 {
 	"nation": "ARG",
-	"_doc": "Argentina: 1ª (20) e 2ª (16; restantes gerados).",
+	"_doc": "Argentina: 1ª (20) e 2ª (16; restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "ARG_XEN",
-			"name": "La Boca Xeneize",
-			"short": "Xeneizes",
-			"abbr": "XEN",
+			"name": "Club Atlético Boca Juniors",
+			"short": "Boca Juniors",
+			"abbr": "BOC",
 			"nick": "Xeneizes",
 			"city": "Buenos Aires",
 			"founded": 1905,
@@ -17,7 +17,7 @@
 				"#0A3D8F",
 				"#FFD100"
 			],
-			"stadium": "Estadio de La Boca",
+			"stadium": "La Bombonera",
 			"capacity": 54000,
 			"kit": "faixa",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "ARG_MIL",
-			"name": "Núñez Millonario",
-			"short": "Millonarios",
-			"abbr": "MIL",
+			"name": "Club Atlético River Plate",
+			"short": "River Plate",
+			"abbr": "RIV",
 			"nick": "Millonarios",
 			"city": "Buenos Aires",
 			"founded": 1901,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Estadio de Núñez",
+			"stadium": "Estadio Monumental",
 			"capacity": 85000,
 			"kit": "diagonal",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "ARG_ACA",
-			"name": "Avellaneda Académico",
-			"short": "Académicos",
-			"abbr": "ACA",
+			"name": "Racing Club",
+			"short": "Racing",
+			"abbr": "RAC",
 			"nick": "Académicos",
 			"city": "Avellaneda",
 			"founded": 1903,
@@ -69,7 +69,7 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"stadium": "Cilindro de Avellaneda",
+			"stadium": "Estadio Presidente Perón",
 			"capacity": 51000,
 			"kit": "stripes_v",
 			"crest": {
@@ -82,9 +82,9 @@
 		},
 		{
 			"key": "ARG_ROJ",
-			"name": "Avellaneda Rojo",
-			"short": "Diablos Rojos",
-			"abbr": "ROJ",
+			"name": "Club Atlético Independiente",
+			"short": "Independiente",
+			"abbr": "IND",
 			"nick": "Rojos",
 			"city": "Avellaneda",
 			"founded": 1905,
@@ -95,7 +95,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Doble Visera",
+			"stadium": "Estadio Libertadores de América",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
@@ -108,9 +108,9 @@
 		},
 		{
 			"key": "ARG_CUE",
-			"name": "Boedo Azulgrana",
-			"short": "Cuervos",
-			"abbr": "CUE",
+			"name": "Club Atlético San Lorenzo de Almagro",
+			"short": "San Lorenzo",
+			"abbr": "SLO",
 			"nick": "Cuervos",
 			"city": "Buenos Aires",
 			"founded": 1908,
@@ -121,7 +121,7 @@
 				"#1D3F91",
 				"#C8102E"
 			],
-			"stadium": "Estadio del Bajo Flores",
+			"stadium": "Estadio Pedro Bidegain",
 			"capacity": 47000,
 			"kit": "stripes_v",
 			"crest": {
@@ -134,9 +134,9 @@
 		},
 		{
 			"key": "ARG_PIN",
-			"name": "La Plata Pincharratas",
-			"short": "Pincharratas",
-			"abbr": "PIN",
+			"name": "Club Estudiantes de La Plata",
+			"short": "Estudiantes",
+			"abbr": "EST",
 			"nick": "Pinchas",
 			"city": "La Plata",
 			"founded": 1905,
@@ -147,7 +147,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Calle Uno",
+			"stadium": "Estadio Jorge Luis Hirschi",
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
@@ -160,9 +160,9 @@
 		},
 		{
 			"key": "ARG_LOB",
-			"name": "La Plata Lobo",
-			"short": "Triperos",
-			"abbr": "LOB",
+			"name": "Club de Gimnasia y Esgrima La Plata",
+			"short": "Gimnasia LP",
+			"abbr": "GIM",
 			"nick": "Triperos",
 			"city": "La Plata",
 			"founded": 1887,
@@ -173,7 +173,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Estadio del Bosque",
+			"stadium": "Estadio Juan Carmelo Zerillo",
 			"capacity": 33000,
 			"kit": "faixa",
 			"crest": {
@@ -186,9 +186,9 @@
 		},
 		{
 			"key": "ARG_FOR",
-			"name": "Liniers Fortín",
-			"short": "Fortineros",
-			"abbr": "FOR",
+			"name": "Club Atlético Vélez Sarsfield",
+			"short": "Vélez",
+			"abbr": "VEL",
 			"nick": "Fortineros",
 			"city": "Buenos Aires",
 			"founded": 1910,
@@ -199,7 +199,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Estadio de Liniers",
+			"stadium": "Estadio José Amalfitani",
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
@@ -210,9 +210,9 @@
 		},
 		{
 			"key": "ARG_RCA",
-			"name": "Rosario Canalla",
-			"short": "Canallas",
-			"abbr": "RCA",
+			"name": "Club Atlético Rosario Central",
+			"short": "Rosario Central",
+			"abbr": "RCE",
 			"nick": "Canallas",
 			"city": "Rosario",
 			"founded": 1889,
@@ -223,7 +223,7 @@
 				"#FFD100",
 				"#1D3F91"
 			],
-			"stadium": "Estadio de Arroyito",
+			"stadium": "Estadio Gigante de Arroyito",
 			"capacity": 41000,
 			"kit": "stripes_v",
 			"crest": {
@@ -236,9 +236,9 @@
 		},
 		{
 			"key": "ARG_LEP",
-			"name": "Rosario Leprosos",
-			"short": "Leprosos",
-			"abbr": "LEP",
+			"name": "Club Atlético Newell's Old Boys",
+			"short": "Newell's",
+			"abbr": "NOB",
 			"nick": "Leprosos",
 			"city": "Rosario",
 			"founded": 1903,
@@ -249,7 +249,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Estadio del Parque Independencia",
+			"stadium": "Estadio Marcelo Bielsa",
 			"capacity": 42000,
 			"kit": "halves",
 			"crest": {
@@ -262,9 +262,9 @@
 		},
 		{
 			"key": "ARG_MAT",
-			"name": "Córdoba Matador",
-			"short": "Matadores",
-			"abbr": "MAT",
+			"name": "Club Atlético Talleres",
+			"short": "Talleres",
+			"abbr": "TAL",
 			"nick": "Matadores",
 			"city": "Córdoba",
 			"founded": 1913,
@@ -275,7 +275,7 @@
 				"#1D3F91",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Barrio Jardín",
+			"stadium": "Estadio Mario Alberto Kempes",
 			"capacity": 57000,
 			"kit": "stripes_v",
 			"crest": {
@@ -288,9 +288,9 @@
 		},
 		{
 			"key": "ARG_PTA",
-			"name": "Córdoba Pirata",
-			"short": "Piratas",
-			"abbr": "PTA",
+			"name": "Club Atlético Belgrano",
+			"short": "Belgrano",
+			"abbr": "BEL",
 			"nick": "Piratas",
 			"city": "Córdoba",
 			"founded": 1905,
@@ -301,7 +301,7 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Alberdi",
+			"stadium": "Estadio Julio César Villagra",
 			"capacity": 33000,
 			"kit": "plain",
 			"crest": {
@@ -314,9 +314,9 @@
 		},
 		{
 			"key": "ARG_GBO",
-			"name": "Parque Patricios Globo",
-			"short": "Globo",
-			"abbr": "GBO",
+			"name": "Club Atlético Huracán",
+			"short": "Huracán",
+			"abbr": "HUR",
 			"nick": "Quemeros",
 			"city": "Buenos Aires",
 			"founded": 1908,
@@ -327,7 +327,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Estadio del Parque Patricios",
+			"stadium": "Estadio Tomás Adolfo Ducó",
 			"capacity": 48000,
 			"kit": "plain",
 			"crest": {
@@ -340,8 +340,8 @@
 		},
 		{
 			"key": "ARG_LAN",
-			"name": "Lanús Granate",
-			"short": "Granates",
+			"name": "Club Atlético Lanús",
+			"short": "Lanús",
 			"abbr": "LAN",
 			"nick": "Granates",
 			"city": "Lanús",
@@ -353,7 +353,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Fortaleza",
+			"stadium": "Estadio Ciudad de Lanús",
 			"capacity": 47000,
 			"kit": "plain",
 			"crest": {
@@ -366,9 +366,9 @@
 		},
 		{
 			"key": "ARG_BIC",
-			"name": "Paternal Bichos Colorados",
-			"short": "Bichos",
-			"abbr": "BIC",
+			"name": "Asociación Atlética Argentinos Juniors",
+			"short": "Argentinos Jrs",
+			"abbr": "ARJ",
 			"nick": "Bichos",
 			"city": "Buenos Aires",
 			"founded": 1904,
@@ -379,7 +379,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de La Paternal",
+			"stadium": "Estadio Diego Armando Maradona",
 			"capacity": 26000,
 			"kit": "plain",
 			"crest": {
@@ -390,9 +390,9 @@
 		},
 		{
 			"key": "ARG_HAL",
-			"name": "Varela Halcón",
-			"short": "Halcones",
-			"abbr": "HAL",
+			"name": "Club Social y Deportivo Defensa y Justicia",
+			"short": "Defensa",
+			"abbr": "DYJ",
 			"nick": "Halcones",
 			"city": "Florencio Varela",
 			"founded": 1935,
@@ -403,7 +403,7 @@
 				"#FFD100",
 				"#006437"
 			],
-			"stadium": "Estadio de Varela",
+			"stadium": "Estadio Norberto Tomaghello",
 			"capacity": 20000,
 			"kit": "halves",
 			"crest": {
@@ -414,9 +414,9 @@
 		},
 		{
 			"key": "ARG_TOM",
-			"name": "Mendoza Tomba",
-			"short": "Tombinos",
-			"abbr": "TOM",
+			"name": "Club Deportivo Godoy Cruz Antonio Tomba",
+			"short": "Godoy Cruz",
+			"abbr": "GCR",
 			"nick": "Tombinos",
 			"city": "Mendoza",
 			"founded": 1921,
@@ -427,7 +427,7 @@
 				"#1D3F91",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Parque San Martín",
+			"stadium": "Estadio Malvinas Argentinas",
 			"capacity": 42000,
 			"kit": "stripes_v",
 			"crest": {
@@ -438,9 +438,9 @@
 		},
 		{
 			"key": "ARG_TAD",
-			"name": "Banfield Taladro",
-			"short": "Taladros",
-			"abbr": "TAD",
+			"name": "Club Atlético Banfield",
+			"short": "Banfield",
+			"abbr": "BAN",
 			"nick": "Taladros",
 			"city": "Banfield",
 			"founded": 1896,
@@ -451,7 +451,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Sur",
+			"stadium": "Estadio Florencio Sola",
 			"capacity": 34900,
 			"kit": "stripes_v",
 			"crest": {
@@ -464,9 +464,9 @@
 		},
 		{
 			"key": "ARG_DEL",
-			"name": "Tigre Delta",
-			"short": "Delta",
-			"abbr": "DEL",
+			"name": "Club Atlético Tigre",
+			"short": "Tigre",
+			"abbr": "TIG",
 			"nick": "Matadores del Delta",
 			"city": "Victoria",
 			"founded": 1902,
@@ -477,7 +477,7 @@
 				"#1D3F91",
 				"#E30613"
 			],
-			"stadium": "Estadio de Victoria",
+			"stadium": "Estadio José Dellagiovanna",
 			"capacity": 26000,
 			"kit": "faixa",
 			"crest": {
@@ -488,9 +488,9 @@
 		},
 		{
 			"key": "ARG_TAT",
-			"name": "Santa Fe Tatengue",
-			"short": "Tatengues",
-			"abbr": "TAT",
+			"name": "Club Atlético Unión",
+			"short": "Unión",
+			"abbr": "UNI",
 			"nick": "Tatengues",
 			"city": "Santa Fe",
 			"founded": 1907,
@@ -501,7 +501,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de la Avenida López",
+			"stadium": "Estadio 15 de Abril",
 			"capacity": 22800,
 			"kit": "stripes_v",
 			"crest": {
@@ -514,9 +514,9 @@
 		},
 		{
 			"key": "ARG_SAB",
-			"name": "Santa Fe Sabalero",
-			"short": "Sabaleros",
-			"abbr": "SAB",
+			"name": "Club Atlético Colón",
+			"short": "Colón",
+			"abbr": "COL",
 			"nick": "Sabaleros",
 			"city": "Santa Fe",
 			"founded": 1905,
@@ -527,7 +527,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Estadio del Cementerio de los Elefantes",
+			"stadium": "Estadio Brigadier López",
 			"capacity": 40000,
 			"kit": "halves",
 			"crest": {
@@ -540,9 +540,9 @@
 		},
 		{
 			"key": "ARG_FUN",
-			"name": "San Martín Funebrero",
-			"short": "Funebreros",
-			"abbr": "FUN",
+			"name": "Club Atlético Chacarita Juniors",
+			"short": "Chacarita",
+			"abbr": "CHA",
 			"nick": "Funebreros",
 			"city": "San Martín",
 			"founded": 1906,
@@ -553,7 +553,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "Estadio de San Martín",
+			"stadium": "Estadio de Chacarita Juniors",
 			"capacity": 20000,
 			"kit": "stripes_v",
 			"crest": {
@@ -564,9 +564,9 @@
 		},
 		{
 			"key": "ARG_CER",
-			"name": "Quilmes Cervecero",
-			"short": "Cerveceros",
-			"abbr": "CER",
+			"name": "Quilmes Atlético Club",
+			"short": "Quilmes",
+			"abbr": "QUI",
 			"nick": "Cerveceros",
 			"city": "Quilmes",
 			"founded": 1887,
@@ -577,7 +577,7 @@
 				"#FFFFFF",
 				"#1D3F91"
 			],
-			"stadium": "Estadio Centenario Quilmes",
+			"stadium": "Estadio Centenario",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -588,9 +588,9 @@
 		},
 		{
 			"key": "ARG_VER",
-			"name": "Caballito Verdolaga",
-			"short": "Verdolagas",
-			"abbr": "VER",
+			"name": "Club Ferro Carril Oeste",
+			"short": "Ferro",
+			"abbr": "FER",
 			"nick": "Verdolagas",
 			"city": "Buenos Aires",
 			"founded": 1904,
@@ -601,7 +601,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Caballito",
+			"stadium": "Estadio Arquitecto Ricardo Etcheverri",
 			"capacity": 24400,
 			"kit": "plain",
 			"crest": {
@@ -612,9 +612,9 @@
 		},
 		{
 			"key": "ARG_BOH",
-			"name": "Atlanta Bohemio",
-			"short": "Bohemios",
-			"abbr": "BOH",
+			"name": "Club Atlético Atlanta",
+			"short": "Atlanta",
+			"abbr": "ATL",
 			"nick": "Bohemios",
 			"city": "Buenos Aires",
 			"founded": 1904,
@@ -625,7 +625,7 @@
 				"#FFD100",
 				"#1D3F91"
 			],
-			"stadium": "Estadio de Villa Crespo",
+			"stadium": "Estadio Don León Kolbowski",
 			"capacity": 14000,
 			"kit": "stripes_v",
 			"crest": {
@@ -636,9 +636,9 @@
 		},
 		{
 			"key": "ARG_TUC",
-			"name": "Tucumán Decano",
-			"short": "Decanos",
-			"abbr": "TUC",
+			"name": "Club Atlético Tucumán",
+			"short": "Atl. Tucumán",
+			"abbr": "ATU",
 			"nick": "Decanos",
 			"city": "San Miguel de Tucumán",
 			"founded": 1902,
@@ -649,13 +649,213 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"stadium": "Monumental del Norte",
+			"stadium": "Estadio Monumental José Fierro",
 			"capacity": 35000,
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
 				"symbol": "letter"
 			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_SMT",
+			"name": "Club Atlético San Martín de Tucumán",
+			"short": "San Martín T",
+			"abbr": "SMT",
+			"nick": "Santo",
+			"city": "San Miguel de Tucumán",
+			"founded": 1909,
+			"league": "ARG2",
+			"rep": 50,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Ciudadela",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_ALM",
+			"name": "Club Almirante Brown",
+			"short": "Almirante Brown",
+			"abbr": "ALM",
+			"nick": "La Fragata",
+			"city": "Isidro Casanova",
+			"founded": 1922,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Fragata Presidente Sarmiento",
+			"capacity": 18000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_ALB",
+			"name": "Club Atlético All Boys",
+			"short": "All Boys",
+			"abbr": "ALB",
+			"nick": "Albo",
+			"city": "Buenos Aires",
+			"founded": 1913,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Islas Malvinas",
+			"capacity": 21000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_NCH",
+			"name": "Club Atlético Nueva Chicago",
+			"short": "Nueva Chicago",
+			"abbr": "NCH",
+			"nick": "Torito de Mataderos",
+			"city": "Buenos Aires",
+			"founded": 1911,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00843D",
+				"#111111"
+			],
+			"stadium": "Estadio Republica de Mataderos",
+			"capacity": 28500,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_TEM",
+			"name": "Club Atlético Temperley",
+			"short": "Temperley",
+			"abbr": "TEM",
+			"nick": "Gasolero",
+			"city": "Temperley",
+			"founded": 1912,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Alfredo Beranger",
+			"capacity": 19000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_MOR",
+			"name": "Club Deportivo Morón",
+			"short": "Morón",
+			"abbr": "MOR",
+			"nick": "El Gallo",
+			"city": "Morón",
+			"founded": 1947,
+			"league": "ARG2",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Nuevo Francisco Urbano",
+			"capacity": 32000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_AGR",
+			"name": "Club Agropecuario Argentino",
+			"short": "Agropecuario",
+			"abbr": "AGR",
+			"nick": "El Sojero",
+			"city": "Carlos Casares",
+			"founded": 2011,
+			"league": "ARG2",
+			"rep": 42,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ofelia Rosenzuaig",
+			"capacity": 8500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "ARG_MAI",
+			"name": "Club Deportivo Maipú",
+			"short": "Deportivo Maipú",
+			"abbr": "DMA",
+			"nick": "El Cruzado",
+			"city": "Maipú",
+			"founded": 1927,
+			"league": "ARG2",
+			"rep": 42,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Omar Higinio Sperdutti",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_AND",
+			"name": "Club Atlético Los Andes",
+			"short": "Los Andes",
+			"abbr": "LAN2",
+			"nick": "El Milrayitas",
+			"city": "Lomas de Zamora",
+			"founded": 1917,
+			"league": "ARG2",
+			"rep": 42,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Eduardo Gallardón",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": []
+		},
+		{
+			"key": "ARG_BRO",
+			"name": "Club Atlético Brown",
+			"short": "Brown de Adrogué",
+			"abbr": "BRA",
+			"nick": "El Tricolor",
+			"city": "Adrogué",
+			"founded": 1945,
+			"league": "ARG2",
+			"rep": 40,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Lorenzo Arandilla",
+			"capacity": 4500,
+			"kit": "stripes_v",
 			"rivals": []
 		}
 	]

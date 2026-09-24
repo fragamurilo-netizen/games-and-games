@@ -1,12 +1,12 @@
 {
 	"nation": "EGY",
-	"_doc": "Egito (liga de 8; restantes gerados).",
+	"_doc": "Egito (liga de 8; restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "EGY_AHM",
-			"name": "Cairo Al Ahmar",
-			"short": "Al Ahmar",
-			"abbr": "AHM",
+			"name": "Al Ahly SC",
+			"short": "Al Ahly",
+			"abbr": "AHL",
 			"nick": "Diabos Vermelhos",
 			"city": "Cairo",
 			"founded": 1907,
@@ -17,7 +17,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Stadio Nasr City",
+			"stadium": "Estádio Internacional do Cairo",
 			"capacity": 75000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "EGY_ABY",
-			"name": "Giza Al Abyad",
-			"short": "Al Abyad",
-			"abbr": "ABY",
+			"name": "Zamalek SC",
+			"short": "Zamalek",
+			"abbr": "ZAM",
 			"nick": "Cavaleiros Brancos",
 			"city": "Giza",
 			"founded": 1911,
@@ -43,7 +43,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Estádio de Mit Okba",
+			"stadium": "Estádio Internacional do Cairo",
 			"capacity": 20000,
 			"kit": "faixa",
 			"crest": {
@@ -56,8 +56,8 @@
 		},
 		{
 			"key": "EGY_PYR",
-			"name": "Cairo Pirâmides",
-			"short": "Pirâmides",
+			"name": "Pyramids FC",
+			"short": "Pyramids",
 			"abbr": "PYR",
 			"nick": "Faraós",
 			"city": "Cairo",
@@ -69,13 +69,113 @@
 				"#0D2A5C",
 				"#FFFFFF"
 			],
-			"stadium": "Estádio do Deserto",
+			"stadium": "Estádio 30 de Junho",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
 				"shape": "modern",
 				"symbol": "mountain"
 			},
+			"rivals": []
+		},
+		{
+			"key": "EGY_MAS",
+			"name": "Al Masry SC",
+			"short": "Al Masry",
+			"abbr": "MAS",
+			"nick": "Verdes",
+			"city": "Port Said",
+			"founded": 1920,
+			"league": "EGY1",
+			"rep": 60,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Port Said",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "EGY_ISM",
+			"name": "Ismaily SC",
+			"short": "Ismaily",
+			"abbr": "ISM",
+			"nick": "Dervixes",
+			"city": "Ismailia",
+			"founded": 1924,
+			"league": "EGY1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estádio de Ismailia",
+			"capacity": 18500,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "EGY_CER",
+			"name": "Ceramica Cleopatra FC",
+			"short": "Ceramica",
+			"abbr": "CER",
+			"nick": "Cerâmicos",
+			"city": "Cairo",
+			"founded": 2007,
+			"league": "EGY1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Al Salam",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "EGY_ZED",
+			"name": "ZED FC",
+			"short": "ZED",
+			"abbr": "ZED",
+			"nick": "ZED",
+			"city": "Cairo",
+			"founded": 2009,
+			"league": "EGY1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Estádio Petrosport",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "EGY_ITT",
+			"name": "Al Ittihad Alexandria",
+			"short": "Al Ittihad",
+			"abbr": "ITA",
+			"nick": "Zaeem",
+			"city": "Alexandria",
+			"founded": 1914,
+			"league": "EGY1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Alexandria",
+			"capacity": 13600,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

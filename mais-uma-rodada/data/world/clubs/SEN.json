@@ -1,12 +1,12 @@
 {
 	"nation": "SEN",
-	"_doc": "Senegal (liga de 6).",
+	"_doc": "Senegal (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "SEN_GEN",
-			"name": "Dakar Génération",
-			"short": "Génération",
-			"abbr": "GEN",
+			"name": "Génération Foot",
+			"short": "Génération Foot",
+			"abbr": "GFO",
 			"nick": "Académiciens",
 			"city": "Dakar",
 			"founded": 2000,
@@ -17,7 +17,7 @@
 				"#F07F13",
 				"#111111"
 			],
-			"stadium": "Stade de Déni Biram",
+			"stadium": "Stade Déni Biram Ndao",
 			"capacity": 5000,
 			"kit": "plain",
 			"crest": {
@@ -28,7 +28,7 @@
 		},
 		{
 			"key": "SEN_JAR",
-			"name": "Dakar Vert et Blanc",
+			"name": "ASC Jaraaf",
 			"short": "Jaraaf",
 			"abbr": "JAR",
 			"nick": "Vert et Blanc",
@@ -41,13 +41,93 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Stade de la Médina",
+			"stadium": "Stade Demba Diop",
 			"capacity": 20000,
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
 				"symbol": "star"
 			},
+			"rivals": []
+		},
+		{
+			"key": "SEN_TEU",
+			"name": "Teungueth FC",
+			"short": "Teungueth",
+			"abbr": "TFC",
+			"nick": "Rufisquois",
+			"city": "Rufisque",
+			"founded": 2010,
+			"league": "SEN1",
+			"rep": 50,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade Ngalandou Diouf",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SEN_PIK",
+			"name": "AS Pikine",
+			"short": "AS Pikine",
+			"abbr": "ASP",
+			"nick": "Pikinois",
+			"city": "Pikine",
+			"founded": 1973,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Alassane Djigo",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SEN_GOR",
+			"name": "US Gorée",
+			"short": "US Gorée",
+			"abbr": "USG",
+			"nick": "Insulaires",
+			"city": "Dakar",
+			"founded": 1933,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Demba Diop",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "SEN_CAS",
+			"name": "Casa Sports",
+			"short": "Casa Sports",
+			"abbr": "CAS",
+			"nick": "Ziguinchorois",
+			"city": "Ziguinchor",
+			"founded": 1960,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Stade Aline Sitoe Diatta",
+			"capacity": 10000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]

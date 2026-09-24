@@ -48,7 +48,7 @@ func refresh() -> void:
 func _picker_row(w: GameWorld) -> Control:
 	var row := UIKit.hbox(10)
 	if _cup_id != "":
-		row.add_child(UIKit.icon_rect("trophy", 36, UIColors.ACCENT))
+		row.add_child(UIKit.comp_logo(_cup_id, 42))
 		var cup: Cup = w.season.cups[_cup_id]
 		var l := UIKit.label(cup.name, "H2")
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -58,6 +58,7 @@ func _picker_row(w: GameWorld) -> Control:
 	else:
 		var cfg := DatabaseManager.league_cfg(_league_id)
 		row.add_child(UIKit.flag(String(cfg.get("nation", "")), 42))
+		row.add_child(UIKit.comp_logo(_league_id, 42))
 		var l := UIKit.label(String(cfg.get("name", _league_id)), "H2")
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -66,6 +67,7 @@ func _picker_row(w: GameWorld) -> Control:
 	row.add_child(UIKit.button("Trocar", "GhostButton", func(): _open_picker(w), "table"))
 	var v := UIKit.vbox(8)
 	v.add_child(row)
+	v.add_child(UIKit.comp_stripe(_cup_id if _cup_id != "" else _league_id))
 	# Divisões do país (liga) ou abas (copa)
 	if _cup_id == "":
 		var nation: String = DatabaseManager.league_cfg(_league_id).get("nation", "")
@@ -111,9 +113,23 @@ func _open_picker(w: GameWorld) -> void:
 	mine.add_child(UIKit.button(w.league_short(ul), "", func(): _pick_league(ul), "table"))
 	for cid in w.season.cups:
 		var id: String = cid
+		# Estaduais: só o do seu clube aqui; todos aparecem na seção "Estaduais do Brasil".
+		if CupManager.is_state(id) and not w.season.cups[id].has_club(w.user_club_id):
+			continue
 		mine.add_child(UIKit.button(w.season.cups[id].short_name, "", func(): _pick_cup(id), "trophy"))
 	v.add_child(UIKit.section("Atalhos"))
 	v.add_child(mine)
+	var states := UIKit.flow(8)
+	for cid in CupManager.state_ids():
+		var sid: String = cid
+		if w.season.cups.has(sid):
+			var inner := UIKit.hbox(8)
+			inner.add_child(UIKit.comp_logo(sid, 30))
+			inner.add_child(UIKit.label(w.season.cups[sid].short_name, "Small"))
+			states.add_child(UIKit.tap_row(inner, func(): _pick_cup(sid), "CardFlat"))
+	if states.get_child_count() > 0:
+		v.add_child(UIKit.section("Estaduais do Brasil"))
+		v.add_child(states)
 	var confeds := {"UEFA": "Europa", "CONMEBOL": "América do Sul", "CONCACAF": "América do Norte", "CAF": "África", "AFC": "Ásia"}
 	for cf in confeds:
 		var flow := UIKit.flow(8)
@@ -319,13 +335,19 @@ func _cup_view(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 
 
 func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	# Estaduais: avançam os líderes de grupo e os melhores dos demais (não os 2 de cada grupo).
+	var state_q: Array = CupManager.state_qualified(cup) if CupManager.is_state(cup.id) else []
+	if CupManager.is_state(cup.id):
+		var n := int(CupManager.cfg(cup.id).get("qualify", 4))
+		c.add_child(UIKit.label(("Os %d primeiros vão à semifinal." if cup.groups.size() == 1 else "Avançam os líderes dos grupos e os melhores entre os demais, até completar %d semifinalistas.") % n, "Small", true))
 	for g in cup.groups:
 		var card := UIKit.card("Card", 2)
 		card.add_child(UIKit.section("Grupo %s" % g["n"]))
 		card.add_child(TableRows.header(true))
 		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
 		for i in order.size():
-			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if i < 2 else Color(0, 0, 0, 0)
+			var qualifies: bool = state_q.has(order[i]) if CupManager.is_state(cup.id) else i < 2
+			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if qualifies else Color(0, 0, 0, 0)
 			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, true, zone))
 		# Jogos do grupo com o usuário (ou os próximos) ficam a um toque
 		var mine: Array = []

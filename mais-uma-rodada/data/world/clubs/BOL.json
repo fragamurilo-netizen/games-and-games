@@ -1,12 +1,12 @@
 {
 	"nation": "BOL",
-	"_doc": "Bolívia (liga de 10).",
+	"_doc": "Bolívia (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "BOL_ACA",
-			"name": "La Paz Celeste",
-			"short": "Academia",
-			"abbr": "ACA",
+			"name": "Club Bolívar",
+			"short": "Bolívar",
+			"abbr": "BOL",
 			"nick": "Academia",
 			"city": "La Paz",
 			"founded": 1925,
@@ -17,7 +17,7 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Miraflores",
+			"stadium": "Estadio Hernando Siles",
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
@@ -30,9 +30,9 @@
 		},
 		{
 			"key": "BOL_ATI",
-			"name": "La Paz Atigrado",
-			"short": "Atigrados",
-			"abbr": "ATI",
+			"name": "Club The Strongest",
+			"short": "The Strongest",
+			"abbr": "STR",
 			"nick": "Atigrados",
 			"city": "La Paz",
 			"founded": 1908,
@@ -43,7 +43,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estadio de Achumani",
+			"stadium": "Estadio Rafael Mendoza Castellón",
 			"capacity": 42000,
 			"kit": "stripes_v",
 			"crest": {
@@ -56,9 +56,9 @@
 		},
 		{
 			"key": "BOL_ALT",
-			"name": "El Alto Millonario",
-			"short": "Alteños",
-			"abbr": "ALT",
+			"name": "Club Always Ready",
+			"short": "Always Ready",
+			"abbr": "ARE",
 			"nick": "Millonarios",
 			"city": "El Alto",
 			"founded": 1933,
@@ -69,7 +69,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio de Villa Ingenio",
+			"stadium": "Estadio Municipal de El Alto",
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
@@ -80,9 +80,9 @@
 		},
 		{
 			"key": "BOL_AVI",
-			"name": "Cochabamba Aviador",
-			"short": "Aviadores",
-			"abbr": "AVI",
+			"name": "Club Deportivo Jorge Wilstermann",
+			"short": "Wilstermann",
+			"abbr": "WIL",
 			"nick": "Aviadores",
 			"city": "Cochabamba",
 			"founded": 1949,
@@ -93,7 +93,7 @@
 				"#E30613",
 				"#1D3F91"
 			],
-			"stadium": "Estadio del Valle Cochabambino",
+			"stadium": "Estadio Félix Capriles",
 			"capacity": 32000,
 			"kit": "plain",
 			"crest": {
@@ -104,9 +104,9 @@
 		},
 		{
 			"key": "BOL_REF",
-			"name": "Santa Cruz Verdolaga",
-			"short": "Refineros",
-			"abbr": "REF",
+			"name": "Club Deportivo Oriente Petrolero",
+			"short": "Oriente Petrolero",
+			"abbr": "ORP",
 			"nick": "Refineros",
 			"city": "Santa Cruz de la Sierra",
 			"founded": 1955,
@@ -117,13 +117,113 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio del Oriente",
+			"stadium": "Estadio Ramón Tahuichi Aguilera",
 			"capacity": 38000,
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
 				"symbol": "gear"
 			},
+			"rivals": []
+		},
+		{
+			"key": "BOL_BLO",
+			"name": "Club Blooming",
+			"short": "Blooming",
+			"abbr": "BLO",
+			"nick": "Academia Cruceña",
+			"city": "Santa Cruz de la Sierra",
+			"founded": 1946,
+			"league": "BOL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ramón Tahuichi Aguilera",
+			"capacity": 38000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_NPO",
+			"name": "Club Atlético Nacional Potosí",
+			"short": "Nacional Potosí",
+			"abbr": "NPO",
+			"nick": "Banda Roja",
+			"city": "Potosí",
+			"founded": 1942,
+			"league": "BOL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Víctor Agustín Ugarte",
+			"capacity": 32000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_TOM",
+			"name": "Club Real Tomayapo",
+			"short": "Real Tomayapo",
+			"abbr": "RTO",
+			"nick": "Chapaco",
+			"city": "Tarija",
+			"founded": 2011,
+			"league": "BOL1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Estadio IV Centenario",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_GUA",
+			"name": "Club Deportivo Guabirá",
+			"short": "Guabirá",
+			"abbr": "GUA",
+			"nick": "Azucarero",
+			"city": "Montero",
+			"founded": 1962,
+			"league": "BOL1",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Gilberto Parada",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": []
+		},
+		{
+			"key": "BOL_SAB",
+			"name": "Club San Antonio Bulo Bulo",
+			"short": "San Antonio",
+			"abbr": "SAB",
+			"nick": "Cocalero",
+			"city": "Bulo Bulo",
+			"founded": 2013,
+			"league": "BOL1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Carlos Villegas",
+			"capacity": 7000,
+			"kit": "plain",
 			"rivals": []
 		}
 	]
