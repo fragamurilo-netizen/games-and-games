@@ -54,7 +54,7 @@ func _initialize() -> void:
 			year, row["goals"], row["home"], row["draw"], row["away"], row["transfers"], Fmt.money(row["fees"]), row["age"],
 			row["ovr_div"][0], row["ovr_div"][3], row["elite"], Fmt.money(row["money"]), row["debt_clubs"], Fmt.money(row["value"]),
 			row["youth"], row["retirements"], row["players"], row["free"], ", ".join(champs), row["ms"]])
-		_log("      idades(n, ovr médio, +potencial): %s | amplitude força D1: %.1f" % [row["ages"], row["spread"]])
+		_log("      idades(n, ovr médio, +potencial): %s | amplitude força D1: %.1f | talento top %d: %.1f (desvio %+.2f, correção %+.2f)" % [row["ages"], row["spread"], PlayerDevelopment.TALENT_TOP, PlayerDevelopment.talent_index(w), float(w.stats.get("talent_raw", 0.0)), PlayerDevelopment.talent_drift(w)])
 	var last_value := _avg_value(w)
 	var last_wage := _avg_wage(w)
 	_log("")

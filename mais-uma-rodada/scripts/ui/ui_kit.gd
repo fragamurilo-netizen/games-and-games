@@ -36,7 +36,7 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 		b.theme_type_variation = variation
 	if icon_name != "":
 		b.icon = icon(icon_name)
-		b.expand_icon = true
+		b.expand_icon = false # largura limitada por icon_max_width do tema
 	if cb.is_valid():
 		b.pressed.connect(func():
 			AudioManager.click()
@@ -50,7 +50,7 @@ static func icon_button(icon_name: String, cb: Callable, tip: String = "") -> Bu
 	var b := Button.new()
 	b.theme_type_variation = "IconButton"
 	b.icon = icon(icon_name)
-	b.expand_icon = true
+	b.expand_icon = false
 	b.custom_minimum_size = Vector2(64, 64)
 	b.tooltip_text = tip
 	b.focus_mode = Control.FOCUS_NONE

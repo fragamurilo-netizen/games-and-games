@@ -14,6 +14,11 @@ const CURVES: Array = [
 	[26, 33, 0.7], # longevo
 ]
 
+## Âncora de talento: o nível médio dos melhores jogadores do mundo não pode subir (ou cair)
+## indefinidamente ao longo de décadas. O desvio em relação ao mundo recém-criado ajusta,
+## de forma suave e igual para todos os clubes, a base, o crescimento e o declínio.
+const TALENT_TOP := 1280 # ~16 jogadores por clube: titulares e primeiros reservas
+
 ## Pesos para escolher qual atributo cai com a idade.
 const DECLINE_W: Array = [0.07, 0.05, 0.07, 0.24, 0.1, 0.07, 0.05, 0.02, 0.06, 0.05, 0.2, 0.02, 0.0, 0.0, 0.03]
 
@@ -47,7 +52,38 @@ static func decline_points(p: Player, age: int) -> float:
 	var c := curve(p)
 	if age < int(c[1]):
 		return 0.0
-	return (4.0 + (age - int(c[1])) * 3.2) * float(c[2]) * p.trait_mult("decline_mult")
+	return (5.0 + (age - int(c[1])) * 4.0) * float(c[2]) * p.trait_mult("decline_mult")
+
+
+## Overall médio dos TALENT_TOP melhores jogadores do mundo.
+static func talent_index(world: GameWorld) -> float:
+	var arr := PackedFloat32Array()
+	for p: Player in world.players.values():
+		arr.append(p.ovr_f)
+	arr.sort()
+	var n := mini(TALENT_TOP, arr.size())
+	var s := 0.0
+	for i in n:
+		s += arr[arr.size() - 1 - i]
+	return s / maxf(1.0, float(n))
+
+
+## Recalcula o desvio de talento (chamado no fim de cada temporada). Controle proporcional
+## + integral: o termo acumulado corrige tendências lentas que o proporcional sozinho deixaria.
+static func update_talent_drift(world: GameWorld) -> float:
+	var idx := talent_index(world)
+	if not world.stats.has("talent_ref"):
+		world.stats["talent_ref"] = idx
+	var raw := idx - float(world.stats["talent_ref"])
+	var integ := clampf(float(world.stats.get("talent_integ", 0.0)) + raw * 0.25, -5.0, 5.0)
+	world.stats["talent_integ"] = integ
+	world.stats["talent_raw"] = raw
+	world.stats["talent_drift"] = raw + integ
+	return raw + integ
+
+
+static func talent_drift(world: GameWorld) -> float:
+	return float(world.stats.get("talent_drift", 0.0))
 
 
 static func facilities_factor(world: GameWorld, p: Player) -> float:
@@ -63,20 +99,23 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary) -> Array:
 	var rng := world.rng
 	var weeks := float(FinanceManager.league_days())
 	var notable: Array = []
+	var drift := talent_drift(world)
+	var growth_f := clampf(1.0 - drift * 0.06, 0.55, 1.3)
+	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5)
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
 		var g := season_growth(p, age)
 		if g > 0.0:
 			var mins: int = minutes.get(p.id, -1)
 			var play_f := 1.25 if mins >= 60 else (1.05 if mins > 0 else (0.85 if p.club_id >= 0 else 0.7))
-			var add := g / weeks * play_f * facilities_factor(world, p) * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
+			var add := g / weeks * play_f * growth_f * facilities_factor(world, p) * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
 			p.dev_acc += add
 			if p.dev_acc >= 0.15:
 				var before := p.overall
 				apply_growth(world, p, p.dev_acc)
 				if p.overall >= before + 2:
 					notable.append(p)
-		var dcl := decline_points(p, age)
+		var dcl := decline_points(p, age) * decline_f
 		if dcl > 0.0:
 			var expected := dcl / weeks
 			while expected > 0.0:
@@ -141,13 +180,14 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 	var rng := world.rng
 	var out := {"explosions": [], "busts": []}
 	var full := float(FinanceManager.league_days() * 90)
+	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
 		if age > 23:
 			continue
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
-		if share >= 0.5 and avg >= 7.0:
+		if share >= 0.5 and avg >= 7.0 and rng.randf() < boost_chance:
 			p.potential = mini(95, p.potential + rng.randi_range(0, 2))
 		elif p.minutes_season < 300 and age >= 19 and p.club_id >= 0:
 			p.potential = maxi(p.overall, p.potential - rng.randi_range(0, 2))

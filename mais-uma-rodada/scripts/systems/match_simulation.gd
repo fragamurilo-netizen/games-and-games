@@ -72,6 +72,9 @@ const FATIGUE_RATE := 0.17
 ## Janelas de substituição automática: minutos 60, 68, 76 e 84 (ver _ai_decisions).
 
 var rng := RandomNumberGenerator.new()
+## Sorteios só de apresentação (posição da bola, lances sem perigo): usar um gerador separado
+## garante que assistir à partida (detail) nunca muda o resultado em relação ao instantâneo.
+var vis_rng := RandomNumberGenerator.new()
 var detail: bool = false
 var teams: Array[MatchTeam] = [] # [casa, fora]
 var minute: int = 0
@@ -112,6 +115,7 @@ var _poss_base: float = 0.5
 
 func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away_sheet: TeamSheet, ctx: Dictionary, seed_value: int, with_detail: bool) -> void:
 	rng.seed = seed_value
+	vis_rng.seed = seed_value ^ 0x5bd1e995
 	detail = with_detail
 	year = world.year
 	derby = ctx.get("derby", false)
@@ -296,10 +300,10 @@ func _simulate_minute() -> void:
 	elif r < p_chance + p_foul + p_off + p_corner:
 		_corner(att, dfn)
 	elif detail:
-		var z0 := rng.randf_range(0.25, 0.55)
-		last_phase = {"side": s, "from": z0, "to": clampf(z0 + rng.randf_range(-0.1, 0.25), 0.1, 0.8), "ev": -1}
-		if rng.randf() < 0.22:
-			var carrier := _pick_weighted(att, PK_MID)
+		var z0 := vis_rng.randf_range(0.25, 0.55)
+		last_phase = {"side": s, "from": z0, "to": clampf(z0 + vis_rng.randf_range(-0.1, 0.25), 0.1, 0.8), "ev": -1}
+		if vis_rng.randf() < 0.22:
+			var carrier := _pick_weighted(att, PK_MID, vis_rng)
 			_emit(EV_POSSESSION, s, carrier.p.id if carrier != null else -1)
 	for t: MatchTeam in teams:
 		if rng.randf() < INJURY_RATE * t.i_fatigue:
@@ -392,12 +396,12 @@ func _pick_chance_type(att: MatchTeam, dfn: MatchTeam) -> int:
 
 
 ## Escolhe um jogador de campo ponderando por papel e atributo (tabelas pré-calculadas no time).
-func _pick_weighted(t: MatchTeam, mode: int) -> MatchPlayer:
+func _pick_weighted(t: MatchTeam, mode: int, gen: RandomNumberGenerator = null) -> MatchPlayer:
 	var total: float = t.pick_total[mode]
 	if total <= 0.0:
 		return null
 	var arr: PackedFloat32Array = t.pick_w[mode]
-	var r := rng.randf() * total
+	var r := (gen if gen != null else rng).randf() * total
 	for i in arr.size():
 		var v := arr[i]
 		if v <= 0.0:
@@ -495,9 +499,9 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	att.shots += 1
 	att.xg += xg
 	shooter.shots += 1
-	var z_from := rng.randf_range(0.45, 0.7)
+	var z_from := vis_rng.randf_range(0.45, 0.7)
 	if ctype == CH_COUNTER:
-		z_from = rng.randf_range(0.2, 0.4)
+		z_from = vis_rng.randf_range(0.2, 0.4)
 	elif ctype == CH_CORNER:
 		z_from = 0.97
 	if rng.randf() < p_goal:
@@ -540,7 +544,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	if detail:
 		_emit(ev, s, shooter.p.id, assister.p.id if assister != null else -1, {"ct": ctype, "xg": snappedf(xg, 0.01), "gk": gk.p.id if gk != null else -1})
 	if detail:
-		last_phase = {"side": s, "from": z_from, "to": rng.randf_range(0.85, 0.98), "ev": ev, "ct": ctype}
+		last_phase = {"side": s, "from": z_from, "to": vis_rng.randf_range(0.85, 0.98), "ev": ev, "ct": ctype}
 	if (ev == EV_SAVE and rng.randf() < 0.3) or (ev == EV_BLOCK and rng.randf() < 0.4):
 		_corner(att, dfn)
 
@@ -657,9 +661,9 @@ func _resolve_foul(att: MatchTeam, dfn: MatchTeam) -> void:
 	fouler.fouls += 1
 	fouler.rating_pts -= 0.05
 	var dangerous := rng.randf() < 0.3
-	var zone := rng.randf_range(0.35, 0.65)
+	var zone := vis_rng.randf_range(0.35, 0.65)
 	if dangerous:
-		zone = rng.randf_range(0.72, 0.9)
+		zone = vis_rng.randf_range(0.72, 0.9)
 	if detail:
 		last_phase = {"side": att.side, "from": zone - 0.1, "to": zone, "ev": EV_FOUL}
 	if detail:

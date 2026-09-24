@@ -36,6 +36,8 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 		var lr: Array = DatabaseManager.division_config(div)["level_range"]
 		PlayerGenerator.create_free_agent(w, rng, (float(lr[0]) + float(lr[1])) * 0.5, used_names)
 	Valuation.refresh_shift(w)
+	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
+	w.stats["talent_drift"] = 0.0
 	SeasonManager.setup_first_season(w)
 	return w
 

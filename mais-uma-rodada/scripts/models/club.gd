@@ -53,7 +53,7 @@ var streak_winless: int = 0
 var streak_losses: int = 0
 var results: String = "" # "VEDDV..." resultados recentes (mais recente no fim)
 
-# Transitório (não salvo)
+# Controle da IA: quando a formação foi escolhida (salvo para o jogo seguir idêntico após carregar)
 var ai_formation_key: int = -1
 
 
@@ -136,7 +136,7 @@ func to_dict() -> Dictionary:
 		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "crest": crest,
 		"div": division, "players": player_ids,
 		"sheet": sheet.to_dict() if sheet != null else {},
-		"coh": cohesion, "ll": last_lineup,
+		"coh": cohesion, "ll": last_lineup, "afk": ai_formation_key,
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
 	}
@@ -173,6 +173,7 @@ static func from_dict(d: Dictionary) -> Club:
 	c.kit_away = d.get("ka", {})
 	c.crest = d.get("crest", {})
 	c.division = int(d.get("div", 0))
+	c.ai_formation_key = int(d.get("afk", -1))
 	c.player_ids = Array(d.get("players", []))
 	var sd: Dictionary = d.get("sheet", {})
 	c.sheet = TeamSheet.from_dict(sd) if not sd.is_empty() else null

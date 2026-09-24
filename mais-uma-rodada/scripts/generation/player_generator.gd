@@ -249,8 +249,8 @@ static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> i
 
 
 ## Potencial de um jovem da base, influenciado pela qualidade da base do clube.
-static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: int) -> int:
-	var gap := rng.randfn(5.0 + youth_level * 0.05, 6.5)
+static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: int, drift: float = 0.0) -> int:
+	var gap := rng.randfn(5.0 + youth_level * 0.05 - drift * 0.8, 6.5)
 	var gem_chance := 0.004 + youth_level * 0.0002
 	if rng.randf() < gem_chance:
 		gap += rng.randf_range(12.0, 20.0)
@@ -389,11 +389,12 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	var pos: int = RngUtil.weighted_index(rng, [1.2, 1.0, 1.6, 1.0, 1.0, 1.4, 1.0, 0.6, 0.6, 0.9, 0.9, 1.6])
 	var age := rng.randi_range(16, 18)
 	var div_level := _division_level(club.division, club.reputation)
-	var target := div_level - 17.0 + club.youth_level * 0.06 + rng.randfn(0.0, 4.0) + (age - 16) * 1.5
+	var drift := clampf(float(world.stats.get("talent_drift", 0.0)), -8.0, 8.0)
+	var target := div_level - 17.0 + club.youth_level * 0.06 + rng.randfn(0.0, 4.0) + (age - 16) * 1.5 - drift
 	target = clampf(target, 22.0, 70.0)
 	var nat := "VAL" if rng.randf() < 0.97 else NameGenerator.pick_nationality(rng, 0)
 	var p := create(world, rng, pos, target, age, nat, club.city, used_names)
-	p.potential = youth_potential(rng, p.overall, club.youth_level)
+	p.potential = youth_potential(rng, p.overall, club.youth_level, drift)
 	p.squad_status = Player.STATUS_PROSPECT
 	sign_to_club(world, rng, p, club, false)
 	p.contract_end = world.year + 3

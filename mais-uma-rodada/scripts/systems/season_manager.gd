@@ -145,7 +145,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var report := {"day": md["day"], "user": {}, "transfers": [], "retiring": [], "window_opened": false, "window_closed": false}
 	var user_pos_before := 0
 	if world.has_user():
-		user_pos_before = CompetitionManager.position_of(world.league_of(world.user_club_id), world.user_club_id)
+		var ul := world.league_of(world.user_club_id)
+		if int(ul.table[world.user_club_id]["pl"]) > 0:
+			user_pos_before = CompetitionManager.position_of(ul, world.user_club_id)
 	var was_open := world.transfer_window_open()
 	# Lesões antigas avançam uma semana antes de registrar as novas.
 	for p: Player in world.players.values():
@@ -260,6 +262,7 @@ static func _apply_match(world: GameWorld, f: Fixture, sim: MatchSimulation, pla
 			world.manager_stats["games"] = int(world.manager_stats.get("games", 0)) + 1
 			var key := "w" if res == "V" else ("d" if res == "E" else "l")
 			world.manager_stats[key] = int(world.manager_stats.get(key, 0)) + 1
+			BoardManager.after_match(world, club, res, derby)
 		var conceded: int = sim.score[1 - side]
 		for mp: MatchPlayer in tm.all:
 			var p := mp.p
@@ -426,6 +429,11 @@ static func end_season(world: GameWorld) -> Dictionary:
 			world.manager_stats["titles"] = int(world.manager_stats.get("titles", 0)) + 1
 		if summary["user"]["promoted"]:
 			world.manager_stats["promotions"] = int(world.manager_stats.get("promotions", 0)) + 1
+		var review := BoardManager.season_review(world, u, summary["user"])
+		summary["user"]["board_delta"] = review["delta"]
+		summary["user"]["fired"] = review["fired"]
+		summary["user"]["offers"] = review["offers"]
+		summary["user"]["board"] = u.board_confidence
 	# Arquivo individual da temporada
 	for p: Player in world.players.values():
 		if p.stats[Player.S_APPS] > 0 and p.club_id >= 0:
@@ -435,6 +443,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 				p.history = p.history.slice(p.history.size() - 25)
 	world.history.append({"y": world.year, "div": summary["divisions"].map(func(d): return {"champion": d["champion"], "promoted": d["promoted"], "relegated": d["relegated"], "scorer": d["scorer"]}),
 		"user": summary["user"]})
+	# Âncora de talento do mundo (antes da revisão anual e da nova base)
+	PlayerDevelopment.update_talent_drift(world)
 	# Revisão anual de potencial (explosões / estagnações)
 	var review := PlayerDevelopment.yearly_review(world)
 	for p in review["explosions"]:

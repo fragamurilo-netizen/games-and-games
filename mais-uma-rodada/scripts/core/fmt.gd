@@ -31,6 +31,11 @@ static func _decimal(x: float, places: int) -> String:
 	return txt.replace(".", ",")
 
 
+## Nota de partida sempre com uma casa: 7,0 / 6,4.
+static func rating(r: float) -> String:
+	return ("%.1f" % r).replace(".", ",")
+
+
 static func thousands(v: int) -> String:
 	var neg := v < 0
 	var s := str(absi(v))

@@ -24,7 +24,7 @@ func click() -> void:
 func play(name: String, volume_db: float = 0.0) -> void:
 	if not AppSettings.sound:
 		return
-	var stream := _get(name)
+	var stream := _stream(name)
 	if stream == null:
 		return
 	var p := _players[_next]
@@ -49,7 +49,7 @@ func goal(importance: float, ours: bool) -> void:
 		vibrate(60)
 
 
-func _get(name: String) -> AudioStreamWAV:
+func _stream(name: String) -> AudioStreamWAV:
 	if _cache.has(name):
 		return _cache[name]
 	var samples := PackedFloat32Array()

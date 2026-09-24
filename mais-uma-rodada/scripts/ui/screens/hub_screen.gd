@@ -9,6 +9,12 @@ func _init() -> void:
 	nav_tab = "hub"
 
 
+func on_show() -> void:
+	refresh()
+	if BoardManager.pending_job_offers(world()).is_empty():
+		Tutorial.maybe_show()
+
+
 func refresh() -> void:
 	var w := world()
 	if w == null:
@@ -16,9 +22,14 @@ func refresh() -> void:
 	var club := w.user_club()
 	screen_title = club.short_name
 	screen_subtitle = "%s · temporada %d" % [w.division_name(club.division), w.year]
+	var jobs := BoardManager.pending_job_offers(w)
+	show_nav = jobs.is_empty()
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	if not jobs.is_empty():
+		c.add_child(_jobs_card(w, jobs))
+		return
 	if w.season.finished:
 		c.add_child(_season_over_card(w))
 	else:
@@ -121,6 +132,36 @@ func _instant() -> void:
 	UIManager.push("results", {"report": report})
 
 
+## Depois de uma demissão: escolher o próximo clube (não dá para jogar sem clube).
+func _jobs_card(w: GameWorld, jobs: Array) -> Control:
+	var card := UIKit.card("CardHighlight", 12)
+	card.add_child(UIKit.section("Sem clube"))
+	var fired: Dictionary = w.stats.get("fired", {})
+	var old := w.club(int(fired.get("from", -1)))
+	card.add_child(UIKit.label("A diretoria do %s decidiu trocar o comando técnico." % (old.short_name if old != null else "clube"), "Title", true))
+	card.add_child(UIKit.label("Alguns clubes querem conversar. Escolha onde recomeçar — a carreira, os números e a história continuam com você.", "Muted", true))
+	for cid in jobs:
+		var cl := w.club(int(cid))
+		if cl == null:
+			continue
+		var row := UIKit.hbox(12)
+		row.add_child(UIKit.crest(cl, 64))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(cl.name, "H3", true))
+		var goal := SeasonManager.goal_of(w, cl.id)
+		col.add_child(UIKit.label("%s · %s · meta: %s" % [w.division_short(cl.division), cl.arch().get("tag", ""), String(goal[0]).to_lower()], "Small", true))
+		row.add_child(col)
+		var ccid: int = int(cid)
+		card.add_child(UIKit.tap_row(row, func():
+			UIManager.confirm("Assumir o %s?" % cl.short_name, "Você será o novo treinador do clube a partir de agora.", "Assumir", func():
+				BoardManager.take_job(w, ccid)
+				GameManager.save_now()
+				AudioManager.play("sign")
+				UIManager.goto("hub")), "Card"))
+	return UIKit.card_panel(card)
+
+
 func _season_over_card(w: GameWorld) -> Control:
 	var card := UIKit.card("CardHighlight", 14)
 	card.add_child(UIKit.section("Fim de temporada"))
@@ -201,6 +242,8 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 	var bill := FinanceManager.wage_bill(w, club)
 	if bill > club.wage_budget:
 		items.append(["money", UIColors.RED, "Folha salarial acima do limite da diretoria", func(): UIManager.goto("club")])
+	if club.board_confidence < BoardManager.ULTIMATUM:
+		items.append(["info", UIColors.RED, "Ultimato da diretoria: é preciso reagir até o fim da temporada", func(): UIManager.goto("club")])
 	if items.is_empty():
 		return null
 	var card := UIKit.card("Card", 8)

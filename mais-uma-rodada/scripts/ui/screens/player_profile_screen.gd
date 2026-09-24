@@ -100,7 +100,7 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	grid.add_child(_mini(Fmt.money(p.wage) if p.club_id >= 0 else "—", "salário/mês"))
 	grid.add_child(_mini(str(p.contract_end) if p.club_id >= 0 else "Livre", "contrato até", UIColors.ORANGE if own and p.contract_end <= w.year else UIColors.TEXT))
 	var form := p.form()
-	grid.add_child(_mini(Fmt._decimal(form, 1) if not p.recent_ratings.is_empty() else "—", "forma", Fmt.match_rating_color(form) if not p.recent_ratings.is_empty() else UIColors.TEXT))
+	grid.add_child(_mini(Fmt.rating(form) if not p.recent_ratings.is_empty() else "—", "forma", Fmt.match_rating_color(form) if not p.recent_ratings.is_empty() else UIColors.TEXT))
 	grid.add_child(_mini(UIColors.morale_label(p.morale), "moral", UIColors.morale_color(p.morale)))
 	var cond_txt := "%d%%" % int(p.condition)
 	if p.injury_weeks > 0:
@@ -246,7 +246,7 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	row.add_child(UIKit.stat(str(p.stats[Player.S_APPS]), "jogos"))
 	row.add_child(UIKit.stat(str(p.stats[Player.S_GOALS]), "gols"))
 	row.add_child(UIKit.stat(str(p.stats[Player.S_ASSISTS]), "assist."))
-	row.add_child(UIKit.stat(Fmt._decimal(p.avg_rating(), 1) if p.stats[Player.S_APPS] > 0 else "—", "nota"))
+	row.add_child(UIKit.stat(Fmt.rating(p.avg_rating()) if p.stats[Player.S_APPS] > 0 else "—", "nota"))
 	row.add_child(UIKit.stat("%d/%d" % [p.stats[Player.S_YELLOWS], p.stats[Player.S_REDS]], "cartões"))
 	card.add_child(row)
 	card.add_child(UIKit.section("Carreira"))
@@ -281,7 +281,7 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			var cn := UIKit.label(String(h.get("cn", "")), "")
 			cn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			line.add_child(cn)
-			line.add_child(UIKit.label("%d j · %d g · %d a · nota %s" % [int(h.get("a", 0)), int(h.get("g", 0)), int(h.get("as", 0)), Fmt._decimal(float(h.get("r", 0.0)), 1)], "Small"))
+			line.add_child(UIKit.label("%d j · %d g · %d a · nota %s" % [int(h.get("a", 0)), int(h.get("g", 0)), int(h.get("as", 0)), Fmt.rating(float(h.get("r", 0.0)))], "Small"))
 			card.add_child(line)
 	return UIKit.card_panel(card)
 

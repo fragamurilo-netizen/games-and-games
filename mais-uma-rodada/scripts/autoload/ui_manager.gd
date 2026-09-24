@@ -135,11 +135,11 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	var layer: Control = main.modal_host
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.62)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	layer.add_child(dim)
 	var holder := MarginContainer.new()
-	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var safe: Rect2 = main.safe_margins()
 	holder.add_theme_constant_override(&"margin_left", 0 if as_sheet else 28)

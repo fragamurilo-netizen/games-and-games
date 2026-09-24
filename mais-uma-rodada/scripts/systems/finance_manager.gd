@@ -102,7 +102,7 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 		spend = [0.6, 0.45, 0.35][world.difficulty]
 	var current := float(wage_bill(world, club))
 	# Reservas viram poder de fogo salarial (dinheiro parado circula), dívida aperta o cinto.
-	var reserve := maxf(0.0, club.balance) * 0.12
+	var reserve := minf(maxf(0.0, club.balance) * 0.12, revenue * 0.35)
 	var budget := (revenue * ratio + reserve) / 12.0
 	if club.balance >= 0:
 		# Clube saudável pode manter a folha atual mesmo um pouco acima do ideal.
@@ -111,7 +111,12 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 		# Endividado: o teto cai e força cortes (vendas, não renovações).
 		budget *= 0.92
 	club.wage_budget = int(budget)
-	club.transfer_budget = int(maxf(0.0, club.balance * spend))
+	# Teto por temporada: no máximo ~1,5 receita anual para contratações, por mais rico que o clube seja.
+	var cap_mult := 1.4
+	if world.is_user_club(club.id):
+		cap_mult = [2.0, 1.6, 1.3][world.difficulty]
+	var cap := revenue * cap_mult
+	club.transfer_budget = int(clampf(club.balance * spend, 0.0, cap))
 
 
 ## Parte de uma venda que a diretoria libera para novas contratações.

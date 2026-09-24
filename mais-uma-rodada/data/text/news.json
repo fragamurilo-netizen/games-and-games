@@ -1,119 +1,319 @@
 {
-  "_doc": "Modelos de notícias. Placeholders entre chaves são preenchidos com dados reais do save. Cada categoria tem variações de título (t) e corpo (b).",
-  "goleada": {
-    "t": ["{winner} atropela o {loser}: {score}", "Passeio do {winner}: {score} no {loser}", "{winner} não tem piedade e aplica {score}"],
-    "b": ["{scorer} foi o nome do jogo na vitória por {score}.", "Com atuação de gala de {scorer}, o {winner} dominou do início ao fim.", "O {loser} não viu a cor da bola. {scorer} brilhou."]
-  },
-  "zebra": {
-    "t": ["Zebra! {winner} surpreende o {loser}", "{winner} derruba o {loser} e faz a festa", "Ninguém esperava: {winner} vence o {loser}"],
-    "b": ["O {winner}, {pos_w}º colocado, bateu o {loser} ({pos_l}º) por {score}.", "Mesmo longe do favoritismo, o {winner} venceu por {score}. {scorer} decidiu."]
-  },
-  "classico_vitoria": {
-    "t": ["{winner} vence o clássico contra o {loser}", "Clássico é do {winner}: {score}", "{winner} leva a melhor no clássico"],
-    "b": ["{score} no clássico. {scorer} entrou para a história do confronto.", "A cidade é do {winner}, pelo menos até o próximo clássico. Gol de {scorer}."]
-  },
-  "classico_empate": {
-    "t": ["Clássico termina empatado: {home} {score} {away}", "Ninguém sai vencedor no clássico"],
-    "b": ["{home} e {away} ficaram no {score} em jogo de muita disputa."]
-  },
-  "lider": {
-    "t": ["{club} assume a liderança da {division}", "Novo líder: {club} chega ao topo", "{club} dorme na liderança"],
-    "b": ["Com {pts} pontos após {rounds} rodadas, o {club} é o novo líder.", "O {club} ultrapassou os rivais e lidera com {pts} pontos."]
-  },
-  "sequencia_vitorias": {
-    "t": ["{club} chega a {n} vitórias seguidas", "Embalado, {club} emplaca a {n}ª vitória consecutiva"],
-    "b": ["A torcida já sonha alto: são {n} triunfos em sequência.", "Ninguém segura o {club}, que venceu os últimos {n} jogos."]
-  },
-  "sequencia_derrotas": {
-    "t": ["Crise no {club}: {n} derrotas seguidas", "Torcida perde a paciência após {n}ª derrota seguida do {club}", "{club} afunda com {n} derrotas consecutivas"],
-    "b": ["A pressão aumenta nos bastidores. A diretoria cobra reação imediata.", "Vaias no estádio e cobrança nas redes: o momento é delicado."]
-  },
-  "sem_vencer": {
-    "t": ["{club} está há {n} jogos sem vencer", "Jejum do {club} já dura {n} partidas"],
-    "b": ["A última vitória parece distante. O elenco precisa reagir."]
-  },
-  "hattrick": {
-    "t": ["{player} marca três vezes e comanda vitória do {club}", "Noite de hat-trick para {player}", "{player} leva a bola para casa"],
-    "b": ["O camisa {shirt} do {club} fez três gols na vitória por {score}.", "Atuação histórica: três gols de {player} contra o {opponent}."]
-  },
-  "primeiro_gol": {
-    "t": ["Garoto de {age} anos marca o primeiro gol como profissional", "{player}, {age} anos, estreia nas redes", "Nasce uma estrela? {player} marca seu primeiro gol"],
-    "b": ["{player} balançou a rede pela primeira vez com a camisa do {club}.", "A torcida do {club} já canta o nome de {player}, que tem só {age} anos."]
-  },
-  "artilheiro": {
-    "t": ["{player} dispara na artilharia com {n} gols", "{player} lidera a artilharia da {division}"],
-    "b": ["O atacante do {club} soma {n} gols na temporada."]
-  },
-  "lesao_grave": {
-    "t": ["{player} sofre lesão e desfalca o {club} por {weeks} semanas", "Baixa no {club}: {player} vai parar por {weeks} semanas"],
-    "b": ["Diagnóstico: {injury}. O departamento médico prevê retorno em cerca de {weeks} semanas.", "{injury}. Um golpe duro para o {club}."]
-  },
-  "transferencia": {
-    "t": ["{to} contrata {player} por {fee}", "{player} é o novo reforço do {to}", "Negócio fechado: {player} troca o {from} pelo {to}"],
-    "b": ["O {to} pagou {fee} ao {from} pelo {pos} de {age} anos.", "Aos {age} anos, {player} deixa o {from} rumo ao {to} por {fee}."]
-  },
-  "transferencia_rival": {
-    "t": ["Polêmica! {player} deixa o {from} e acerta com o rival {to}", "{player} troca de lado e vai para o rival {to}"],
-    "b": ["A torcida do {from} não vai esquecer tão cedo. O negócio saiu por {fee}.", "Da idolatria à vaia: {player} vestirá a camisa do {to}."]
-  },
-  "transferencia_livre": {
-    "t": ["{player} assina com o {to} sem custos", "{to} acerta com {player}, que estava livre"],
-    "b": ["O {pos} de {age} anos chega de graça ao {to}."]
-  },
-  "venda_usuario": {
-    "t": ["{player} é vendido ao {to} por {fee}", "Adeus, {player}: jogador vai para o {to}"],
-    "b": ["O {from} fatura {fee} com a venda do {pos} de {age} anos."]
-  },
-  "proposta_recebida": {
-    "t": ["{buyer} faz proposta de {fee} por {player}", "{buyer} quer {player} e oferece {fee}"],
-    "b": ["A proposta vale até a rodada {expires}. Responda no Mercado > Propostas."]
-  },
-  "aposentadoria_anuncio": {
-    "t": ["{player}, {age} anos, anuncia que vai se aposentar ao fim da temporada", "Fim de uma era: {player} vai pendurar as chuteiras"],
-    "b": ["São {apps} jogos e {goals} gols na carreira. Os últimos jogos de {player} serão especiais.", "Aos {age} anos, {player} decidiu que esta será sua última temporada."]
-  },
-  "aposentadoria": {
-    "t": ["{player} pendura as chuteiras", "{player} se despede do futebol"],
-    "b": ["Encerra a carreira com {apps} jogos e {goals} gols."]
-  },
-  "campeao": {
-    "t": ["{club} é campeão da {division}!", "Festa no {club}: título da {division}"],
-    "b": ["Com {pts} pontos, o {club} conquista a {division} {year}.", "Temporada inesquecível: {pts} pontos e a taça da {division}."]
-  },
-  "acesso": {
-    "t": ["{club} conquista o acesso à {division}", "Subiu! {club} jogará a {division}"],
-    "b": ["Terminou em {pos}º lugar e comemora o acesso."]
-  },
-  "rebaixamento": {
-    "t": ["{club} é rebaixado para a {division}", "Tristeza no {club}: queda para a {division}"],
-    "b": ["Terminou em {pos}º lugar. Será preciso reconstruir."]
-  },
-  "jovem_explode": {
-    "t": ["{player}, {age} anos, é a sensação do momento", "{player} evolui a olhos vistos no {club}"],
-    "b": ["Os treinadores do {club} não param de elogiar o garoto de {age} anos."]
-  },
-  "contrato_fim": {
-    "t": ["{player} deixa o {club} ao fim do contrato", "Sem renovação, {player} sai do {club}"],
-    "b": ["Após {apps} jogos pelo clube, {player} está livre no mercado."]
-  },
-  "base": {
-    "t": ["{club} promove {n} jovens da base", "Base do {club} revela {n} novos talentos"],
-    "b": ["O destaque é {player}, {pos} de {age} anos, avaliado como \"{potential}\"."]
-  },
-  "janela_abre": {
-    "t": ["Janela de transferências aberta", "Mercado aberto: hora de reforçar o elenco"],
-    "b": ["A janela fica aberta até a rodada {until}. Jogadores livres podem ser contratados a qualquer momento."]
-  },
-  "janela_fecha": {
-    "t": ["Janela de transferências fechada", "Fim da janela: elencos definidos"],
-    "b": ["Até a próxima janela, só jogadores livres podem ser contratados."]
-  },
-  "marco_gols": {
-    "t": ["{player} chega a {n} gols pelo {club}", "Marca histórica: {n} gols de {player} com a camisa do {club}"],
-    "b": ["Um número que coloca {player} entre os grandes nomes do clube."]
-  },
-  "temporada": {
-    "t": ["Começa a temporada {year}", "Bola rolando: temporada {year} começou"],
-    "b": ["Meta da diretoria para o {club}: {goal}."]
-  }
+	"_doc": "Modelos de notícias. Placeholders entre chaves são preenchidos com dados reais do save. Cada categoria tem variações de título (t) e corpo (b).",
+	"goleada": {
+		"t": [
+			"{winner} atropela o {loser}: {score}",
+			"Passeio do {winner}: {score} no {loser}",
+			"{winner} não tem piedade e aplica {score}"
+		],
+		"b": [
+			"{scorer} foi o nome do jogo na vitória por {score}.",
+			"Com atuação de gala de {scorer}, o {winner} dominou do início ao fim.",
+			"O {loser} não viu a cor da bola. {scorer} brilhou."
+		]
+	},
+	"zebra": {
+		"t": [
+			"Zebra! {winner} surpreende o {loser}",
+			"{winner} derruba o {loser} e faz a festa",
+			"Ninguém esperava: {winner} vence o {loser}"
+		],
+		"b": [
+			"O {winner}, {pos_w}º colocado, bateu o {loser} ({pos_l}º) por {score}.",
+			"Mesmo longe do favoritismo, o {winner} venceu por {score}. {scorer} decidiu."
+		]
+	},
+	"classico_vitoria": {
+		"t": [
+			"{winner} vence o clássico contra o {loser}",
+			"Clássico é do {winner}: {score}",
+			"{winner} leva a melhor no clássico"
+		],
+		"b": [
+			"{score} no clássico. {scorer} entrou para a história do confronto.",
+			"A cidade é do {winner}, pelo menos até o próximo clássico. Gol de {scorer}."
+		]
+	},
+	"classico_empate": {
+		"t": [
+			"Clássico termina empatado: {home} {score} {away}",
+			"Ninguém sai vencedor no clássico"
+		],
+		"b": [
+			"{home} e {away} ficaram no {score} em jogo de muita disputa."
+		]
+	},
+	"lider": {
+		"t": [
+			"{club} assume a liderança da {division}",
+			"Novo líder: {club} chega ao topo",
+			"{club} dorme na liderança"
+		],
+		"b": [
+			"Com {pts} pontos após {rounds} rodadas, o {club} é o novo líder.",
+			"O {club} ultrapassou os rivais e lidera com {pts} pontos."
+		]
+	},
+	"sequencia_vitorias": {
+		"t": [
+			"{club} chega a {n} vitórias seguidas",
+			"Embalado, {club} emplaca a {n}ª vitória consecutiva"
+		],
+		"b": [
+			"A torcida já sonha alto: são {n} triunfos em sequência.",
+			"Ninguém segura o {club}, que venceu os últimos {n} jogos."
+		]
+	},
+	"sequencia_derrotas": {
+		"t": [
+			"Crise no {club}: {n} derrotas seguidas",
+			"Torcida perde a paciência após {n}ª derrota seguida do {club}",
+			"{club} afunda com {n} derrotas consecutivas"
+		],
+		"b": [
+			"A pressão aumenta nos bastidores. A diretoria cobra reação imediata.",
+			"Vaias no estádio e cobrança nas redes: o momento é delicado."
+		]
+	},
+	"sem_vencer": {
+		"t": [
+			"{club} está há {n} jogos sem vencer",
+			"Jejum do {club} já dura {n} partidas"
+		],
+		"b": [
+			"A última vitória parece distante. O elenco precisa reagir."
+		]
+	},
+	"hattrick": {
+		"t": [
+			"{player} marca três vezes e comanda vitória do {club}",
+			"Noite de hat-trick para {player}",
+			"{player} leva a bola para casa"
+		],
+		"b": [
+			"O camisa {shirt} do {club} fez três gols na vitória por {score}.",
+			"Atuação histórica: três gols de {player} contra o {opponent}."
+		]
+	},
+	"primeiro_gol": {
+		"t": [
+			"Garoto de {age} anos marca o primeiro gol como profissional",
+			"{player}, {age} anos, estreia nas redes",
+			"Nasce uma estrela? {player} marca seu primeiro gol"
+		],
+		"b": [
+			"{player} balançou a rede pela primeira vez com a camisa do {club}.",
+			"A torcida do {club} já canta o nome de {player}, que tem só {age} anos."
+		]
+	},
+	"artilheiro": {
+		"t": [
+			"{player} dispara na artilharia com {n} gols",
+			"{player} lidera a artilharia da {division}"
+		],
+		"b": [
+			"O atacante do {club} soma {n} gols na temporada."
+		]
+	},
+	"lesao_grave": {
+		"t": [
+			"{player} sofre lesão e desfalca o {club} por {weeks} semanas",
+			"Baixa no {club}: {player} vai parar por {weeks} semanas"
+		],
+		"b": [
+			"Diagnóstico: {injury}. O departamento médico prevê retorno em cerca de {weeks} semanas.",
+			"{injury}. Um golpe duro para o {club}."
+		]
+	},
+	"transferencia": {
+		"t": [
+			"{to} contrata {player} por {fee}",
+			"{player} é o novo reforço do {to}",
+			"Negócio fechado: {player} troca o {from} pelo {to}"
+		],
+		"b": [
+			"O {to} pagou {fee} ao {from} pelo {pos} de {age} anos.",
+			"Aos {age} anos, {player} deixa o {from} rumo ao {to} por {fee}."
+		]
+	},
+	"transferencia_rival": {
+		"t": [
+			"Polêmica! {player} deixa o {from} e acerta com o rival {to}",
+			"{player} troca de lado e vai para o rival {to}"
+		],
+		"b": [
+			"A torcida do {from} não vai esquecer tão cedo. O negócio saiu por {fee}.",
+			"Da idolatria à vaia: {player} vestirá a camisa do {to}."
+		]
+	},
+	"transferencia_livre": {
+		"t": [
+			"{player} assina com o {to} sem custos",
+			"{to} acerta com {player}, que estava livre"
+		],
+		"b": [
+			"O {pos} de {age} anos chega de graça ao {to}."
+		]
+	},
+	"venda_usuario": {
+		"t": [
+			"{player} é vendido ao {to} por {fee}",
+			"Adeus, {player}: jogador vai para o {to}"
+		],
+		"b": [
+			"O {from} fatura {fee} com a venda do {pos} de {age} anos."
+		]
+	},
+	"proposta_recebida": {
+		"t": [
+			"{buyer} faz proposta de {fee} por {player}",
+			"{buyer} quer {player} e oferece {fee}"
+		],
+		"b": [
+			"A proposta vale até a rodada {expires}. Responda no Mercado > Propostas."
+		]
+	},
+	"aposentadoria_anuncio": {
+		"t": [
+			"{player}, {age} anos, anuncia que vai se aposentar ao fim da temporada",
+			"Fim de uma era: {player} vai pendurar as chuteiras"
+		],
+		"b": [
+			"São {apps} jogos e {goals} gols na carreira. Os últimos jogos de {player} serão especiais.",
+			"Aos {age} anos, {player} decidiu que esta será sua última temporada."
+		]
+	},
+	"aposentadoria": {
+		"t": [
+			"{player} pendura as chuteiras",
+			"{player} se despede do futebol"
+		],
+		"b": [
+			"Encerra a carreira com {apps} jogos e {goals} gols."
+		]
+	},
+	"campeao": {
+		"t": [
+			"{club} é campeão da {division}!",
+			"Festa no {club}: título da {division}"
+		],
+		"b": [
+			"Com {pts} pontos, o {club} conquista a {division} {year}.",
+			"Temporada inesquecível: {pts} pontos e a taça da {division}."
+		]
+	},
+	"acesso": {
+		"t": [
+			"{club} conquista o acesso à {division}",
+			"Subiu! {club} jogará a {division}"
+		],
+		"b": [
+			"Terminou em {pos}º lugar e comemora o acesso."
+		]
+	},
+	"rebaixamento": {
+		"t": [
+			"{club} é rebaixado para a {division}",
+			"Tristeza no {club}: queda para a {division}"
+		],
+		"b": [
+			"Terminou em {pos}º lugar. Será preciso reconstruir."
+		]
+	},
+	"jovem_explode": {
+		"t": [
+			"{player}, {age} anos, é a sensação do momento",
+			"{player} evolui a olhos vistos no {club}"
+		],
+		"b": [
+			"Os treinadores do {club} não param de elogiar o garoto de {age} anos."
+		]
+	},
+	"contrato_fim": {
+		"t": [
+			"{player} deixa o {club} ao fim do contrato",
+			"Sem renovação, {player} sai do {club}"
+		],
+		"b": [
+			"Após {apps} jogos pelo clube, {player} está livre no mercado."
+		]
+	},
+	"base": {
+		"t": [
+			"{club} promove {n} jovens da base",
+			"Base do {club} revela {n} novos talentos"
+		],
+		"b": [
+			"O destaque é {player}, {pos} de {age} anos, avaliado como \"{potential}\"."
+		]
+	},
+	"janela_abre": {
+		"t": [
+			"Janela de transferências aberta",
+			"Mercado aberto: hora de reforçar o elenco"
+		],
+		"b": [
+			"A janela fica aberta até a rodada {until}. Jogadores livres podem ser contratados a qualquer momento."
+		]
+	},
+	"janela_fecha": {
+		"t": [
+			"Janela de transferências fechada",
+			"Fim da janela: elencos definidos"
+		],
+		"b": [
+			"Até a próxima janela, só jogadores livres podem ser contratados."
+		]
+	},
+	"marco_gols": {
+		"t": [
+			"{player} chega a {n} gols pelo {club}",
+			"Marca histórica: {n} gols de {player} com a camisa do {club}"
+		],
+		"b": [
+			"Um número que coloca {player} entre os grandes nomes do clube."
+		]
+	},
+	"temporada": {
+		"t": [
+			"Começa a temporada {year}",
+			"Bola rolando: temporada {year} começou"
+		],
+		"b": [
+			"Meta da diretoria para o {club}: {goal}."
+		]
+	},
+	"diretoria_ultimato": {
+		"t": [
+			"Diretoria do {club} dá ultimato ao treinador",
+			"Pressão no {club}: diretoria perde a paciência",
+			"Cargo em risco no {club}"
+		],
+		"b": [
+			"A cúpula lembra que a meta é {goal} e exige reação imediata.",
+			"Nos bastidores, a conversa é uma só: sem reação, o fim da temporada pode marcar a saída do comando. A meta é {goal}."
+		]
+	},
+	"demissao": {
+		"t": [
+			"{manager} não é mais o treinador do {club}",
+			"Fim de ciclo: {club} demite {manager}",
+			"Diretoria do {club} anuncia a saída de {manager}"
+		],
+		"b": [
+			"A campanha ficou abaixo do que a diretoria esperava. O mercado de treinadores já se movimenta.",
+			"Depois de uma temporada abaixo da meta, a diretoria decidiu mudar o comando técnico."
+		]
+	},
+	"novo_tecnico": {
+		"t": [
+			"{manager} é o novo treinador do {club}",
+			"{club} anuncia {manager} para o comando técnico",
+			"Recomeço: {manager} assume o {club}"
+		],
+		"b": [
+			"A diretoria aposta na volta por cima de um treinador com fome de trabalho.",
+			"Apresentado no clube, o novo comandante prometeu trabalho e um time competitivo."
+		]
+	}
 }
