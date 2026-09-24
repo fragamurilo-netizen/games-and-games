@@ -67,6 +67,17 @@ func refresh() -> void:
 		_footer(w)
 		return
 	c.add_child(_user_card(w, year))
+	var rv: Dictionary = _summary.get("review", {})
+	if not rv.is_empty():
+		c.add_child(_grade_card(rv))
+		c.add_child(_numbers_card(w, rv))
+		var stars := _stars_card(w, rv)
+		if stars != null:
+			c.add_child(stars)
+		var ach := _achievements_card(rv)
+		if ach != null:
+			c.add_child(ach)
+		c.add_child(_career_card(w))
 	var aw := _awards_card(w)
 	if aw != null:
 		c.add_child(aw)
@@ -282,5 +293,138 @@ func _footer(w: GameWorld) -> void:
 	var f := footer()
 	UIKit.clear(f)
 	var fired := not BoardManager.pending_job_offers(w).is_empty()
-	var text := "ESCOLHER NOVO CLUBE" if fired else "COMEÇAR TEMPORADA %d" % w.year
-	f.add_child(UIKit.button(text, "PrimaryButton", func(): UIManager.goto("hub"), "play"))
+	if fired:
+		f.add_child(UIKit.button("ESCOLHER NOVO CLUBE", "PrimaryButton", func(): UIManager.goto("hub"), "play"))
+		return
+	f.add_child(UIKit.button("IR PARA A PRÉ-TEMPORADA %d" % w.year, "PrimaryButton", func():
+		UIManager.goto("hub")
+		if PreseasonManager.is_active(world()):
+			UIManager.push("preseason"), "play"))
+
+
+## Nota da temporada: letra grande, rótulo e a manchete do ano.
+func _grade_card(rv: Dictionary) -> Control:
+	var card := UIKit.card("CardHighlight", 8)
+	card.add_child(UIKit.section("Nota da temporada"))
+	var row := UIKit.hbox(18)
+	var color := SeasonReview.grade_color(String(rv["grade"]))
+	var letter := UIKit.label(String(rv["grade"]), "Big")
+	letter.add_theme_font_size_override(&"font_size", 96)
+	letter.add_theme_color_override(&"font_color", color)
+	letter.custom_minimum_size.x = 150
+	letter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(letter)
+	var col := UIKit.vbox(6)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_child(UIKit.colored(String(rv["grade_label"]), color, "H2", true))
+	col.add_child(UIKit.label(String(rv["headline"]), "", true))
+	var bar := UIKit.bar(float(rv["score"]), 100.0, color, 12)
+	col.add_child(bar)
+	col.add_child(UIKit.label("%d de 100 pontos de avaliação" % int(rv["score"]), "Small"))
+	row.add_child(col)
+	card.add_child(row)
+	if bool(rv.get("best_pos", false)):
+		card.add_child(UIKit.colored("Melhor campanha do clube nesta divisão desde que você chegou.", UIColors.ACCENT, "Small", true))
+	return UIKit.card_panel(card)
+
+
+## Campanha em números, dinheiro e o crescimento do clube.
+func _numbers_card(w: GameWorld, rv: Dictionary) -> Control:
+	var rec: Dictionary = rv["record"]
+	var card := UIKit.card("Card", 10)
+	card.add_child(UIKit.section("A campanha em números"))
+	var row := UIKit.hbox(4)
+	row.add_child(UIKit.stat(str(int(rec["w"])), "vitórias", UIColors.GREEN))
+	row.add_child(UIKit.stat(str(int(rec["d"])), "empates", UIColors.MUTED))
+	row.add_child(UIKit.stat(str(int(rec["l"])), "derrotas", UIColors.RED))
+	row.add_child(UIKit.stat("%d%%" % int(rec["aprov"]), "aproveit.", UIColors.ACCENT))
+	card.add_child(row)
+	var row2 := UIKit.hbox(4)
+	row2.add_child(UIKit.stat(str(int(rec["pts"])), "pontos"))
+	row2.add_child(UIKit.stat(str(int(rec["gf"])), "gols pró"))
+	row2.add_child(UIKit.stat(str(int(rec["ga"])), "gols contra"))
+	row2.add_child(UIKit.stat(Fmt.signed(int(rec["gf"]) - int(rec["ga"])), "saldo"))
+	card.add_child(row2)
+	card.add_child(UIKit.separator())
+	card.add_child(UIKit.kv("Premiação pela colocação", Fmt.money(int(rv["prize"])), UIColors.GREEN))
+	var net := int(rv["income"]) - int(rv["expense"])
+	card.add_child(UIKit.kv("Resultado financeiro do ano", Fmt.money(net), UIColors.GREEN if net >= 0 else UIColors.RED))
+	var drep := float(rv["rep1"]) - float(rv["rep0"])
+	card.add_child(UIKit.kv("Reputação do clube", "%d (%s%.1f)" % [int(round(float(rv["rep1"]))), "+" if drep >= 0 else "", drep], UIColors.GREEN if drep >= 0 else UIColors.RED))
+	var f0 := int(rv["fans0"])
+	var f1 := int(rv["fans1"])
+	var pf := 100.0 * (f1 - f0) / maxf(1.0, f0)
+	card.add_child(UIKit.kv("Torcida", "%s (%s%.1f%%)" % [Fmt.thousands(f1), "+" if pf >= 0 else "", pf], UIColors.GREEN if pf >= 0 else UIColors.RED))
+	return UIKit.card_panel(card)
+
+
+## Destaques do elenco no ano, com retrato.
+func _stars_card(w: GameWorld, rv: Dictionary) -> Control:
+	var stars: Dictionary = rv.get("stars", {})
+	if stars.is_empty():
+		return null
+	var club := w.user_club()
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Destaques do seu elenco"))
+	var names := {"scorer": "Artilheiro", "assists": "Garçom", "rating": "Melhor nota", "apps": "Mais jogos", "young": "Revelação"}
+	for k in ["scorer", "assists", "rating", "young", "apps"]:
+		if not stars.has(k):
+			continue
+		var st: Dictionary = stars[k]
+		var row := UIKit.hbox(12)
+		var p := w.player(int(st["id"]))
+		if p != null:
+			row.add_child(UIKit.portrait(p, club, w.year, 60))
+		else:
+			row.add_child(UIKit.pos_badge(int(st.get("pos", 0))))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(String(names[k]).to_upper(), "Caps"))
+		col.add_child(UIKit.label(String(st["name"]), "H3", true))
+		row.add_child(col)
+		row.add_child(UIKit.colored(String(st["text"]), UIColors.ACCENT, "H3"))
+		if p != null:
+			var pid := p.id
+			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
+		else:
+			card.add_child(row)
+	return UIKit.card_panel(card)
+
+
+func _achievements_card(rv: Dictionary) -> Control:
+	var list: Array = rv.get("achievements", [])
+	if list.is_empty():
+		return null
+	var card := UIKit.card("CardHighlight", 8)
+	card.add_child(UIKit.section("Conquistas desbloqueadas"))
+	for k in list:
+		var a: Dictionary = SeasonReview.ACHIEVEMENTS.get(String(k), {})
+		if a.is_empty():
+			continue
+		var row := UIKit.hbox(12)
+		row.add_child(UIKit.icon_rect(String(a["icon"]), 36, UIColors.ACCENT))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.colored(String(a["name"]), UIColors.ACCENT, "H3"))
+		col.add_child(UIKit.label(String(a["desc"]), "Small", true))
+		row.add_child(col)
+		card.add_child(row)
+	return UIKit.card_panel(card)
+
+
+## A carreira do treinador até aqui.
+func _career_card(w: GameWorld) -> Control:
+	var ms := w.manager_stats
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Sua carreira"))
+	var row := UIKit.hbox(4)
+	row.add_child(UIKit.stat(str(int(ms.get("seasons", 0))), "temporadas"))
+	row.add_child(UIKit.stat(str(int(ms.get("games", 0))), "jogos"))
+	row.add_child(UIKit.stat(str(int(ms.get("titles", 0))), "títulos", UIColors.ACCENT))
+	row.add_child(UIKit.stat(str(int(ms.get("promotions", 0))), "acessos", UIColors.GREEN))
+	card.add_child(row)
+	var games := maxi(1, int(ms.get("games", 0)))
+	card.add_child(UIKit.label("%dV %dE %dD · aproveitamento de %d%% · %d de %d conquistas" % [int(ms.get("w", 0)), int(ms.get("d", 0)), int(ms.get("l", 0)),
+		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), SeasonReview.ACH_ORDER.size()], "Small", true))
+	return UIKit.card_panel(card)

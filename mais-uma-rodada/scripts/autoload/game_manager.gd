@@ -82,6 +82,7 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 			NewsManager.post(world, "copa_classificado", {"club": c.short_name, "cup": world.season.cups[cid].name}, c.id, -1, NewsEvent.IMP_HIGH)
 	if world.transfer_window_open():
 		NewsManager.on_window(world, true)
+	PreseasonManager.open(world)
 	SeasonManager.advance_to_user(world)
 	save_now()
 	world_changed.emit()
@@ -236,6 +237,7 @@ func end_season() -> Dictionary:
 	if not season_over():
 		return {}
 	last_summary = SeasonManager.end_season(world)
+	PreseasonManager.open(world)
 	var c := world.user_club()
 	c.sheet = ClubAI.auto_sheet(world, c, c.sheet.formation if c.sheet != null else "")
 	SeasonManager.advance_to_user(world)

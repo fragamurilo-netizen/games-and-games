@@ -33,6 +33,7 @@ func _initialize() -> void:
 	_run("treino, base e liga sub-20", _test_training_youth)
 	_run("empréstimos, parcelas e cláusulas", _test_deals)
 	_run("rostos e personalização", _test_faces)
+	_run("pré-temporada e balanço da temporada", _test_preseason)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -415,6 +416,10 @@ func _test_end_season() -> void:
 	check(w.season.cups["LIB"].has_club(int(bra["champion"])), "campeão brasileiro fora da Libertadores")
 	check(w.season.cups["UCL"].club_ids.size() == 32 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
 	check(not summary["user"].is_empty(), "resumo do usuário vazio")
+	var rv: Dictionary = summary.get("review", {})
+	check(not rv.is_empty() and String(rv.get("grade", "")) != "", "balanço da temporada sem nota")
+	check(int(rv.get("record", {}).get("pl", 0)) > 0, "balanço sem a campanha na liga")
+	check((rv.get("achievements", []) as Array).has("primeira"), "conquista da primeira temporada não desbloqueada")
 	check(float(w.stats.get("youth_generated", 0.0)) > 600, "base não gerou jovens suficientes")
 	var rules := DatabaseManager.squad_rules()
 	var owner := {}
@@ -755,3 +760,43 @@ func _test_faces() -> void:
 	Overrides.apply_club(c)
 	Overrides.data()["clubs"].erase("__teste__")
 	check(c.name == "Editado" and c.color1 == "#112233" and String(c.crest.get("c1", "")) == "#112233", "personalização de clube não aplicada")
+
+
+func _test_preseason() -> void:
+	var w := _season_world
+	if w == null:
+		w = WorldGenerator.generate(4242, "padrao")
+		_with_user(w, w.clubs_in_league("BRA1")[5].id)
+	var club := w.user_club()
+	check(not PreseasonManager.is_active(w) or w.season.turn == 0, "pré-temporada ativa com jogos disputados")
+	PreseasonManager.open(w)
+	check(PreseasonManager.is_active(w), "pré-temporada não abriu")
+	var pre := PreseasonManager.state(w)
+	check((pre["opponents"] as Array).size() == 3, "pré-temporada sem 3 adversários (%d)" % (pre["opponents"] as Array).size())
+	for oid in pre["opponents"]:
+		check(int(oid) != club.id and w.club(int(oid)).league_id != club.league_id, "amistoso contra time da mesma liga")
+	var plan := PreseasonManager.squad_plan(w)
+	check(plan.size() == 4, "raio-x deveria ter 4 setores")
+	for g in plan:
+		check(float(g["quality"]) > 20.0 and float(g["league"]) > 20.0, "raio-x com qualidade inválida no setor %d" % int(g["group"]))
+	var notes := PreseasonManager.squad_notes(w)
+	check(notes.has("expiring") and notes.has("prospects"), "pendências do elenco incompletas")
+	var coh := club.cohesion
+	var out := PreseasonManager.choose_camp(w, "tatica")
+	check(not out.is_empty() and club.cohesion > coh, "intertemporada tática não subiu o entrosamento")
+	check(PreseasonManager.choose_camp(w, "fisica").is_empty(), "segunda intertemporada no mesmo ano")
+	var goals := {}
+	for p in w.squad(club):
+		goals[p.id] = p.stats[Player.S_GOALS]
+	var res := PreseasonManager.play_friendlies(w)
+	check(res.size() == 3, "amistosos: %d resultados" % res.size())
+	check(PreseasonManager.play_friendlies(w).is_empty(), "amistosos jogados duas vezes")
+	for p in w.squad(club):
+		check(p.stats[Player.S_GOALS] == int(goals[p.id]), "amistoso contou gols na liga")
+	check(PreseasonManager.steps(w) == [false, true, true], "passos da pré-temporada")
+	# Sobrevive ao save
+	var d := w.to_dict()
+	var w2 := GameWorld.from_dict(d)
+	check(PreseasonManager.is_active(w2) and String(PreseasonManager.state(w2)["camp"]) == "tatica", "pré-temporada perdida no save")
+	PreseasonManager.finish(w)
+	check(not PreseasonManager.is_active(w), "pré-temporada não encerrou")
