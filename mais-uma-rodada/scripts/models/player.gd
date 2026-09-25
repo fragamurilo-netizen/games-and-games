@@ -86,6 +86,8 @@ var dev_curve: int = CURVE_NORMAL
 var consistency: int = 10 # 1..20
 var injury_prone: int = 10 # 1..20
 var traits: Array = [] # ids de personalidade (String)
+## Personalidade oculta 1..20 (HiddenPersona.KEYS). Vazia = sorteada na primeira leitura.
+var hidden: Dictionary = {}
 var scout_noise: int = 0 # -6..6, ruído estável da avaliação de terceiros
 ## Assinatura (PlayerGenerator.SIGNATURES): o traço que faz o jogador ser único ("" = nenhuma).
 var signature: String = ""
@@ -213,7 +215,7 @@ func has_trait(t: String) -> bool:
 func trait_sum(key: String) -> float:
 	if _trait_sum.has(key):
 		return _trait_sum[key]
-	var total := 0.0
+	var total := HiddenPersona.sum_mod(self, key)
 	for t in traits:
 		var d: Dictionary = DatabaseManager.trait_data(t)
 		total += float(d.get(key, 0.0))
@@ -225,7 +227,7 @@ func trait_sum(key: String) -> float:
 func trait_mult(key: String) -> float:
 	if _trait_mult.has(key):
 		return _trait_mult[key]
-	var total := 1.0
+	var total := HiddenPersona.mult_mod(self, key)
 	for t in traits:
 		var d: Dictionary = DatabaseManager.trait_data(t)
 		total *= float(d.get(key, 1.0))
@@ -235,8 +237,19 @@ func trait_mult(key: String) -> float:
 
 func set_traits(new_traits: Array) -> void:
 	traits = new_traits
+	clear_trait_cache()
+
+
+func clear_trait_cache() -> void:
 	_trait_sum.clear()
 	_trait_mult.clear()
+
+
+## Valor oculto de personalidade (1..20). Ver HiddenPersona.
+func hid(key: String) -> int:
+	if hidden.is_empty():
+		hidden = HiddenPersona.roll(self)
+	return int(hidden.get(key, 10))
 
 
 ## Overall bruto (sem familiaridade) calculado com os pesos de uma posição.
@@ -556,7 +569,7 @@ func to_dict() -> Dictionary:
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
-		"tr": traits, "sn": scout_noise, "hc": heart, "hk": heart_known, "sg": signature,
+		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "sg": signature,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
@@ -597,6 +610,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.consistency = int(d.get("cons", 10))
 	p.injury_prone = int(d.get("inj_p", 10))
 	p.traits = Array(d.get("tr", []))
+	p.hidden = d.get("hid", {})
 	p.scout_noise = int(d.get("sn", 0))
 	p.heart = int(d.get("hc", -2))
 	p.signature = String(d.get("sg", ""))

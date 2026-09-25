@@ -329,7 +329,7 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 				"a":
 					s += 0.1 if bad else (-0.8 if good else -0.2)
 					s += 0.2 if (p.has_trait("profissional") or p.has_trait("lider")) else 0.0
-					s -= 0.5 if p.has_trait("temperamental") else 0.0
+					s -= 0.5 if HiddenPersona.hot_head(p) else 0.0
 					s -= 0.4 if p.has_trait("timido") else 0.0
 				"b":
 					s += 0.5 if bad else (-0.3 if good else 0.2)
@@ -337,7 +337,7 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 				"c":
 					s += 0.2 if bad else (-0.6 if good else -0.1)
 					s += 0.3 if (p.has_trait("esforcado") or p.has_trait("acomodado")) else 0.0
-					s -= 0.4 if p.has_trait("temperamental") else 0.0
+					s -= 0.4 if HiddenPersona.hot_head(p) else 0.0
 			pos_fx = {"morale": 4.0, "trust": 2.0, "team": 1.0 if tone == "a" else 0.0}
 			neu_fx = {"morale": -1.0}
 			neg_fx = {"trust": -8.0, "morale": -6.0, "team": -1.0 if tone == "a" else 0.0}
@@ -375,7 +375,7 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 					"b":
 						s -= 0.1
 						s += 0.4 if p.has_trait("profissional") else 0.0
-						s -= 0.4 if p.has_trait("temperamental") else 0.0
+						s -= 0.4 if HiddenPersona.hot_head(p) else 0.0
 				pos_fx = {"morale": 5.0, "trust": 5.0}
 				neu_fx = {"trust": 1.0}
 				neg_fx = {"trust": -4.0, "morale": -3.0}
@@ -403,7 +403,7 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 			var q := world.player(int(topic.get_slice(":", 1)))
 			match tone:
 				"a":
-					s += 0.2 + (0.3 if p.has_trait("lider") or (q != null and q.has_trait("lider")) else 0.0) - (0.3 if p.has_trait("temperamental") else 0.0)
+					s += 0.2 + (0.3 if p.has_trait("lider") or (q != null and q.has_trait("lider")) else 0.0) - (0.3 if HiddenPersona.hot_head(p) else 0.0)
 				"b":
 					s += 0.3
 				"c":
@@ -455,7 +455,7 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 		fx = neu_fx
 		_say(conv, "npc", neu_line)
 	_apply_player_fx(world, conv, p, fx)
-	if head == "rival" and s < -0.15 and p.has_trait("temperamental"):
+	if head == "rival" and s < -0.15 and HiddenPersona.hot_head(p):
 		_fx(conv, "Ele saiu batendo a porta")
 
 

@@ -236,6 +236,7 @@ static func personality_review(world: GameWorld) -> Array:
 	var full := FinanceManager.WEEKS * 90.0
 	var conflicts: Array = DatabaseManager.personalities().get("conflicts", [])
 	for p: Player in world.players.values():
+		HiddenPersona.age_year(p, year)
 		var age := p.age(year)
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
@@ -296,6 +297,7 @@ static func personality_review(world: GameWorld) -> Array:
 			if nt.is_empty():
 				continue # todo mundo tem ao menos um traço
 			p.set_traits(nt)
+		HiddenPersona.on_trait_change(p, t, ch["add"])
 		p.persona_log.append({"y": year, "t": t, "add": ch["add"], "why": ch["why"]})
 		ch["p"] = p
 		out.append(ch)

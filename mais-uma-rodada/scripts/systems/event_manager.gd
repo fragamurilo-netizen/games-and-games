@@ -161,7 +161,12 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 		"discipline":
 			var pool: Array = []
 			for p: Player in squad:
-				if p.has_trait("festeiro") or p.has_trait("rebelde") or p.has_trait("temperamental") or (p.age(world.year) <= 24 and rng.randf() < 0.1):
+				if HiddenPersona.troublemaker(p) or HiddenPersona.hot_head(p) or (p.age(world.year) <= 24 and rng.randf() < 0.1):
+					pool.append(p)
+					# Quem vive em polêmica aparece mais vezes na lista (e o profissional quase nunca).
+					if p.hid("pol") >= 15:
+						pool.append(p)
+				elif p.hid("pro") <= 5 and rng.randf() < 0.4:
 					pool.append(p)
 			if pool.is_empty():
 				return {}
@@ -247,7 +252,12 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			var pool: Array = []
 			for p: Player in squad:
 				if p.nationality != club.nation and p.morale < 55.0 and (p.age(world.year) <= 24 or world.year - p.joined_year <= 1) and not p.is_injured():
+					# Adaptabilidade oculta: quem se adapta fácil quase nunca sente saudade.
+					if p.hid("ada") >= 15 and rng.randf() < 0.8:
+						continue
 					pool.append(p)
+					if p.hid("ada") <= 6:
+						pool.append(p)
 			if pool.is_empty():
 				return {}
 			var hp: Player = RngUtil.pick(rng, pool)
@@ -299,7 +309,7 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			# Briga no treino: pelo menos um esquentado
 			var hot: Array = []
 			for p: Player in squad:
-				if p.has_trait("temperamental") or p.has_trait("rebelde") or p.has_trait("provocador"):
+				if HiddenPersona.hot_head(p) or p.has_trait("provocador") or p.hid("pol") >= 16:
 					hot.append(p)
 			if hot.is_empty() or squad.size() < 2:
 				return {}

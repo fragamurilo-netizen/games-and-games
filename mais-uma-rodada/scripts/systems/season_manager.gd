@@ -371,6 +371,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			continue
 		var fac: int = world.clubs[p.club_id].facilities if p.club_id >= 0 else 40
 		var rec: float = (16.0 + p.attrs[Attr.RES] * 0.08 + fac * 0.04 - maxf(0.0, p.age(world.year) - 30.0) * 0.8) * dayf
+		rec *= 1.0 + (p.hid("pro") - 10) * 0.012 # quem se cuida (sono, alimentação) volta antes
 		if p.club_id == world.user_club_id and p.club_id >= 0:
 			rec *= TrainingManager.recovery_mult(world, p.club_id)
 		p.condition = minf(100.0, p.condition + rec)

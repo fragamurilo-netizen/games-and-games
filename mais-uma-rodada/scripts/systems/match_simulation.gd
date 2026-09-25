@@ -442,7 +442,7 @@ func _start_shootout() -> void:
 
 
 func _pen_skill(mp: MatchPlayer) -> float:
-	return mp.attr(Attr.FIN) * 0.45 + mp.attr(Attr.FRI) * 0.35 + mp.attr(Attr.DEC) * 0.1 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0
+	return mp.attr(Attr.FIN) * 0.45 + mp.attr(Attr.FRI) * 0.35 + mp.attr(Attr.DEC) * 0.1 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0 + HiddenPersona.penalty_nerve(mp.p) * 60.0
 
 
 func _shootout_kick() -> void:
@@ -454,7 +454,8 @@ func _shootout_kick() -> void:
 	var kicker: MatchPlayer = order[pen_taken[side] % order.size()]
 	var gk := teams[1 - side].goalkeeper()
 	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
-	var p := clampf(0.76 + (kicker.finishing() * kicker.f - gk_val) * 0.004 + kicker.clutch * 0.05, 0.55, 0.9)
+	# Na disputa, os nervos pesam o dobro: quem treme sob pressão erra muito mais.
+	var p := clampf(0.76 + (kicker.finishing() * kicker.f - gk_val) * 0.004 + kicker.clutch * 0.05 + HiddenPersona.penalty_nerve(kicker.p) * 2.0, 0.5, 0.92)
 	if pen_taken[side] >= 5:
 		p -= 0.03 # alternadas: pressão máxima
 	var ok := rng.randf() < p
@@ -882,7 +883,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
 	var p_goal := clampf(xg * exp(EPS * (skill - gk_val)), 0.01, 0.92)
 	if ctype == CH_PENALTY:
-		p_goal = clampf(0.75 + (shooter.finishing() - gk_val) * 0.004, 0.55, 0.9)
+		p_goal = clampf(0.75 + (shooter.finishing() - gk_val) * 0.004 + HiddenPersona.penalty_nerve(shooter.p) * (1.0 + importance), 0.5, 0.92)
 	att.shots += 1
 	att.xg += xg
 	shooter.shots += 1
@@ -982,6 +983,15 @@ func _xr_record(att: MatchTeam, dfn: MatchTeam, ctype: int, lane: int, xg: float
 	return rec
 
 
+## Cada gol muda a cabeça de quem está em campo: os determinados crescem atrás do placar,
+## os que não são se entregam (personalidade oculta).
+func _score_mood() -> void:
+	for side in 2:
+		var diff: int = score[side] - score[1 - side]
+		for mp: MatchPlayer in teams[side].all:
+			mp.sc_f = HiddenPersona.score_factor(mp.p, diff)
+
+
 func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: MatchPlayer, ctype: int, culprit: MatchPlayer) -> void:
 	var s := att.side
 	var before_diff := score[s] - score[1 - s]
@@ -995,6 +1005,7 @@ func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: Match
 			shooter = og
 			assister = null
 	score[s] += 1
+	_score_mood()
 	att.on_target += 1
 	if not own_goal:
 		shooter.goals += 1
@@ -1414,8 +1425,8 @@ func shout(side: int, key: String) -> Dictionary:
 ## Reação de um jogador ao incentivo ou à cobrança: personalidade, moral e placar.
 func _shout_reaction(mp: MatchPlayer, rx: String, diff: int) -> float:
 	var p := mp.p
-	var sensitive := p.has_trait("timido") or p.has_trait("inseguro")
-	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional")
+	var sensitive := p.has_trait("timido") or p.has_trait("inseguro") or p.hid("pre") <= 5
+	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional") or p.hid("det") >= 16
 	var low := p.morale < 45.0
 	if rx == "inc":
 		var d := 0.015
@@ -1432,7 +1443,7 @@ func _shout_reaction(mp: MatchPlayer, rx: String, diff: int) -> float:
 		c = 0.04
 	if sensitive or low:
 		c = -0.035
-	if p.has_trait("temperamental") or p.has_trait("rebelde"):
+	if HiddenPersona.hot_head(p):
 		c = -0.02
 		mp.card_mult *= 1.15 # esquenta
 	if diff > 0:
@@ -1499,8 +1510,8 @@ func team_talk(side: int, key: String) -> Dictionary:
 
 
 func _talk_reaction(p: Player, key: String, diff: int, fav: float) -> float:
-	var sensitive := p.has_trait("timido") or p.has_trait("inseguro")
-	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional")
+	var sensitive := p.has_trait("timido") or p.has_trait("inseguro") or p.hid("pre") <= 5
+	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional") or p.hid("det") >= 16
 	var loose := p.has_trait("acomodado") or p.has_trait("festeiro")
 	var low := p.morale < 45.0
 	var big := importance >= 0.6 or derby
@@ -1534,7 +1545,7 @@ func _talk_reaction(p: Player, key: String, diff: int, fav: float) -> float:
 				d += 0.015
 			if sensitive or low:
 				d = -0.035
-			if p.has_trait("temperamental") or p.has_trait("rebelde"):
+			if HiddenPersona.hot_head(p):
 				d -= 0.015
 	return clampf(d, -0.05, 0.05)
 

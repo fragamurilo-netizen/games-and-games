@@ -554,6 +554,8 @@ static func trust_of(world: GameWorld, p: Player) -> float:
 			t -= 4.0
 		if p.has_trait("temperamental"):
 			t -= 3.0
+		# Por dentro: o leal e o profissional dão crédito; o polêmico desconfia de quem manda.
+		t += (p.hid("lea") - 10) * 0.4 + (p.hid("pro") - 10) * 0.3 - maxf(0.0, p.hid("pol") - 12.0) * 0.6
 		tr[p.id] = clampf(t, 20.0, 80.0)
 	return float(tr[p.id])
 
@@ -648,7 +650,7 @@ static func _refresh_bonds(world: GameWorld, r: RandomNumberGenerator) -> void:
 			elif p.position == q.position and absi(p.overall - q.overall) <= 4 and p.squad_status <= Player.STATUS_ROTATION and q.squad_status <= Player.STATUS_ROTATION and r.randf() < 0.22:
 				kind = BOND_RIVAL
 				v = -r.randf_range(25.0, 55.0)
-			elif p.has_trait("temperamental") and q.has_trait("temperamental") and r.randf() < 0.25:
+			elif HiddenPersona.hot_head(p) and HiddenPersona.hot_head(q) and r.randf() < 0.25:
 				kind = BOND_RIVAL
 				v = -r.randf_range(30.0, 60.0)
 			elif p.nationality == q.nationality and absi(ap - aq) <= 3 and r.randf() < 0.07:
@@ -1097,7 +1099,9 @@ static func _dressing_room(world: GameWorld, club: Club, squad: Array, r: Random
 			if p.morale < 62.0:
 				p.morale = minf(62.0, p.morale + 0.4)
 		elif world.year - p.joined_year <= 1 and p.morale > 50.0:
-			p.morale = maxf(50.0, p.morale - 0.35 * p.trait_mult("morale_volatility"))
+			p.morale = maxf(50.0, p.morale - 0.35 * p.trait_mult("morale_volatility") * HiddenPersona.homesick_mult(p))
+		elif world.year - p.joined_year <= 1 and p.hid("ada") >= 15 and p.morale < 60.0:
+			p.morale = minf(60.0, p.morale + 0.25) # se vira sozinho
 
 
 ## Jogadores que saíram: amigos e pupilos sentem.
