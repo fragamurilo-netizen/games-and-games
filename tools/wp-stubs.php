@@ -29,17 +29,24 @@ function esc_html__( $s ) { return esc_html( $s ); }
 function __( $s ) { return $s; }
 function wp_json_encode( $v, $f = 0 ) { return json_encode( $v, $f ); }
 function wp_parse_args( $a, $d ) { return array_merge( $d, (array) $a ); }
-function get_option( $k, $d = false ) { return $d; }
-function get_transient( $k ) { return false; }
-function set_transient() { return true; }
-function delete_transient() { return true; }
+$GLOBALS['__stub_options'] = array();
+function get_option( $k, $d = false ) { return array_key_exists( $k, $GLOBALS['__stub_options'] ) ? $GLOBALS['__stub_options'][ $k ] : $d; }
+function update_option( $k, $v, $a = null ) { $GLOBALS['__stub_options'][ $k ] = $v; return true; }
+function add_option( $k, $v = '', $d = '', $a = null ) { if ( array_key_exists( $k, $GLOBALS['__stub_options'] ) ) { return false; } $GLOBALS['__stub_options'][ $k ] = $v; return true; }
+function delete_option( $k ) { unset( $GLOBALS['__stub_options'][ $k ] ); return true; }
+function number_format_i18n( $n, $d = 0 ) { return number_format( (float) $n, $d, ',', '.' ); }
+function wp_date( $f, $t = null ) { return gmdate( $f, null === $t ? time() : $t ); }
+function get_current_user_id() { return 1; }
+function get_transient( $k ) { return $GLOBALS['__stub_options'][ '_transient_' . $k ] ?? false; }
+function set_transient( $k, $v, $e = 0 ) { $GLOBALS['__stub_options'][ '_transient_' . $k ] = $v; return true; }
+function delete_transient( $k ) { unset( $GLOBALS['__stub_options'][ '_transient_' . $k ] ); return true; }
 function is_admin() { return false; }
 function is_feed() { return false; }
 function is_404() { return false; }
 function is_preview() { return false; }
 function wp_doing_ajax() { return false; }
 function is_user_logged_in() { return false; }
-function current_user_can() { return false; }
+function current_user_can() { return ! empty( $GLOBALS['__stub_cap'] ); }
 function post_password_required() { return false; }
 function is_privacy_policy() { return false; }
 function is_front_page() { return 'home' === $GLOBALS['__stub_ctx']['context']; }

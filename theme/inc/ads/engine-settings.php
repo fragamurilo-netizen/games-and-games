@@ -15,9 +15,12 @@
  *   - article body: native In-article units in the first ranks. Display in the
  *     body measured US$ 0,13-0,14 per thousand impressions (20-26/08); the
  *     native ranks pulled the ladder average up to US$ 0,20;
- *   - physical spacing: 520 px between creatives on a phone and 600 px on
- *     desktop, and at most 35% of the reading column in advertising (5.6.7 ran
- *     240 px / 45%);
+ *   - density: at most 35% of the reading column in advertising (5.6.7 ran
+ *     45%). 3.53 also required 520 px (phone) / 600 px (desktop) between
+ *     ladder units, but ONLY from rank 10 on: ranks 1-9 were exempt
+ *     (`core_exempt_through_rank`), and the current ladder is P1 + A1..A6. The
+ *     crowding floor for those ranks therefore stays at 5.6.7's 240 / 300 px;
+ *     applying 520 px to them blocked Prime P1 behind the hero unit;
  *   - request timing: a long runway (up to ~1,9 screens for the first ranks).
  *     Short runways produced 26/08 — 3,88 imp/page at 58% Active View and
  *     US$ 2,11 page RPM — while 13/08 and 19/08 (6,9-8,1 imp/page at ~50% Active
@@ -62,8 +65,8 @@ function go_verge_ads_engine_defaults() {
 		/* Article body. */
 		'body_format'            => 'inarticle', // inarticle | display (5.6.7 units)
 		'body_max_rung'          => 6,           // A-rungs after Prime; 7-8 use the A7/A8 Display units
-		'min_gap_mobile'         => 520,
-		'min_gap_desktop'        => 600,
+		'min_gap_mobile'         => 240,
+		'min_gap_desktop'        => 300,
 		'article_ratio'          => 0.35,
 		'units_in_window'        => 3,
 		'stream_gap_mobile'      => 380,
