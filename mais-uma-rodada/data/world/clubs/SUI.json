@@ -21,8 +21,11 @@
 			"capacity": 38500,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "FCB",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"SUI_ZUR"
@@ -48,7 +51,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "bear",
+				"sc": "#111111"
 			},
 			"rivals": []
 		},
@@ -72,7 +77,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "FCZ",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"SUI_BAS"
@@ -97,8 +105,10 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "cross"
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "key",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -120,7 +130,14 @@
 			"stadium": "Stadio di Cornaredo",
 			"capacity": 6300,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FCL",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "SUI_STG",
@@ -140,7 +157,13 @@
 			"stadium": "Kybunpark",
 			"capacity": 19400,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bear",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

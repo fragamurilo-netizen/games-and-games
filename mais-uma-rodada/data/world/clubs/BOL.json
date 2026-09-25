@@ -22,7 +22,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B",
+				"border": "double"
 			},
 			"rivals": [
 				"BOL_ATI"
@@ -47,8 +50,11 @@
 			"capacity": 42000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "diamond"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "TS",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"BOL_ACA"
@@ -74,7 +80,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AR"
 			},
 			"rivals": []
 		},
@@ -98,7 +106,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "W"
 			},
 			"rivals": []
 		},
@@ -121,8 +131,10 @@
 			"capacity": 38000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "gear"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "tower",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -144,7 +156,13 @@
 			"stadium": "Estadio Ramón Tahuichi Aguilera",
 			"capacity": 38000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B"
+			}
 		},
 		{
 			"key": "BOL_NPO",
@@ -164,7 +182,12 @@
 			"stadium": "Estadio Víctor Agustín Ugarte",
 			"capacity": 32000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain"
+			}
 		},
 		{
 			"key": "BOL_TOM",
@@ -184,7 +207,12 @@
 			"stadium": "Estadio IV Centenario",
 			"capacity": 15000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "crown"
+			}
 		},
 		{
 			"key": "BOL_GUA",
@@ -204,7 +232,13 @@
 			"stadium": "Estadio Gilberto Parada",
 			"capacity": 18000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "G"
+			}
 		},
 		{
 			"key": "BOL_SAB",
@@ -224,7 +258,12 @@
 			"stadium": "Estadio Carlos Villegas",
 			"capacity": 7000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "cross_plain"
+			}
 		}
 	]
 }

@@ -1126,6 +1126,21 @@ func _test_faces() -> void:
 	Overrides.apply_club(c)
 	Overrides.data()["clubs"].erase("__teste__")
 	check(c.name == "Editado" and c.color1 == "#112233" and String(c.crest.get("c1", "")) == "#112233", "personalização de clube não aplicada")
+	# Escudos: todos os clubes reais com escudo completo; saves antigos ganham o escudo novo
+	var cw := WorldGenerator.generate(4242, "padrao")
+	var real := 0
+	var fla: Club = null
+	for cl: Club in cw.clubs:
+		check(cl.crest.has("field") and cl.crest.has("symbol") and cl.crest.has("c1"), "escudo incompleto: %s" % cl.name)
+		if not cl.key.contains("_P"):
+			real += 1
+		if cl.key == "BRA_RNC":
+			fla = cl
+	check(real >= 600, "poucos clubes reais (%d)" % real)
+	check(fla != null and String(fla.crest["field"]).begins_with("hoops") and String(fla.crest["initials"]) == "CRF", "escudo do Flamengo não veio do banco")
+	fla.crest = {"shape": "round", "symbol": "star", "c1": fla.color1, "c2": fla.color2}
+	ClubGenerator.upgrade_crests(cw)
+	check(String(fla.crest.get("initials", "")) == "CRF" and fla.crest.has("field"), "save antigo não ganhou o escudo novo")
 
 
 func _test_persona_trophies() -> void:

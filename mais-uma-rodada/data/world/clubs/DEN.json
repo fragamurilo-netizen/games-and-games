@@ -21,8 +21,13 @@
 			"capacity": 38000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "lion",
+				"text": "F.C. KOBENHAVN",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#1D3F91"
 			},
 			"rivals": [
 				"DEN_DRE"
@@ -47,8 +52,14 @@
 			"capacity": 28000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B",
+				"text": "BRONDBY IF",
+				"c1": "#FFD100",
+				"c2": "#1D5BBF",
+				"sc": "#1D5BBF"
 			},
 			"rivals": [
 				"DEN_LOV"
@@ -74,7 +85,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "wolf",
+				"sc": "#E30613"
 			},
 			"rivals": []
 		},
@@ -96,7 +109,14 @@
 			"stadium": "Ceres Park",
 			"capacity": 19400,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AGF",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "DEN_NOR",
@@ -116,7 +136,14 @@
 			"stadium": "Right to Dream Park",
 			"capacity": 10300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCN",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "DEN_SIL",
@@ -136,7 +163,13 @@
 			"stadium": "JYSK Park",
 			"capacity": 10000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SIF"
+			}
 		}
 	]
 }

@@ -22,7 +22,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CA",
+				"sc": "#1D3F91",
+				"border": "double"
 			},
 			"rivals": [
 				"MEX_GDL",
@@ -49,8 +53,13 @@
 			"capacity": 46000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "none",
+				"chief_text": "CDG",
+				"cc": "#1D3F91",
+				"c1": "#FFFFFF",
+				"c2": "#E30613"
 			},
 			"rivals": [
 				"MEX_AGU",
@@ -76,8 +85,13 @@
 			"capacity": 35000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "cross"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "cross_plain",
+				"text": "CRUZ AZUL",
+				"c1": "#FFFFFF",
+				"c2": "#1D5BBF",
+				"sc": "#1D5BBF"
 			},
 			"rivals": [
 				"MEX_AGU"
@@ -103,7 +117,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#C5A572"
 			},
 			"rivals": [
 				"MEX_AGU"
@@ -129,7 +145,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#1D3F91"
 			},
 			"rivals": [
 				"MEX_RAY"
@@ -155,7 +173,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "mountain"
+				"field": "stripes:3",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"MEX_AUR"
@@ -180,8 +200,10 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "devil",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -205,7 +227,10 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "SL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -229,7 +254,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "lion_head",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -253,7 +281,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "gear"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CFP",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -277,7 +308,10 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "A",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"MEX_GDL"
@@ -303,7 +337,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "bolt"
+				"field": "stripes:3",
+				"symbol": "bolt",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -326,8 +362,11 @@
 			"capacity": 51700,
 			"kit": "diagonal",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "P",
+				"sc": "#1D3F91"
 			},
 			"rivals": []
 		},
@@ -350,8 +389,10 @@
 			"capacity": 33000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "sun"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "rooster",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -375,7 +416,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "anchor"
+				"field": "plain",
+				"symbol": "cannon",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -399,7 +442,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "modern",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "wolf",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -423,7 +468,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -447,7 +494,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ASL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		}

@@ -21,8 +21,11 @@
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "iberian",
+				"field": "stripes:4",
+				"symbol": "none",
+				"stars": 5,
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"URU_BOS"
@@ -47,8 +50,13 @@
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "CN",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#E30613"
 			},
 			"rivals": [
 				"URU_MAU"
@@ -74,7 +82,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DSC"
 			},
 			"rivals": []
 		},
@@ -97,8 +107,11 @@
 			"capacity": 18000,
 			"kit": "diagonal",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "DFC",
+				"sc": "#111111"
 			},
 			"rivals": []
 		},
@@ -120,7 +133,14 @@
 			"stadium": "Estadio Belvedere",
 			"capacity": 10000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "LFC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "URU_WAN",
@@ -140,7 +160,14 @@
 			"stadium": "Parque Alfredo Víctor Viera",
 			"capacity": 8000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MW",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "URU_CER",
@@ -160,7 +187,13 @@
 			"stadium": "Estadio Luis Tróccoli",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "URU_RAC",
@@ -180,7 +213,14 @@
 			"stadium": "Parque Osvaldo Roberto",
 			"capacity": 8500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "URU_PLA",
@@ -200,7 +240,13 @@
 			"stadium": "Estadio Profesor Alberto Suppici",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PC"
+			}
 		},
 		{
 			"key": "URU_BRI",
@@ -220,7 +266,14 @@
 			"stadium": "Estadio Campeones Olímpicos",
 			"capacity": 5000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "BR",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "URU_PRO",
@@ -240,7 +293,14 @@
 			"stadium": "Parque Abraham Paladino",
 			"capacity": 8000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CAP",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "URU_CLA",
@@ -260,7 +320,12 @@
 			"stadium": "Estadio Arquitecto Antonio Ubilla",
 			"capacity": 9000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain"
+			}
 		}
 	]
 }

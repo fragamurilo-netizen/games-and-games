@@ -22,7 +22,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "WAC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"MAR_RVE"
@@ -48,7 +51,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"MAR_WYR"
@@ -74,7 +79,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#E30613"
 			},
 			"rivals": []
 		},
@@ -96,7 +103,14 @@
 			"stadium": "Stade Municipal de Berkane",
 			"capacity": 15000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RSB",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "MAR_FUS",
@@ -116,7 +130,13 @@
 			"stadium": "Stade Moulay Hassan",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FUS"
+			}
 		},
 		{
 			"key": "MAR_MAS",
@@ -136,7 +156,14 @@
 			"stadium": "Complexe Sportif de Fès",
 			"capacity": 45000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MAS",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "MAR_HUS",
@@ -156,7 +183,13 @@
 			"stadium": "Stade Adrar",
 			"capacity": 45000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "HUSA"
+			}
 		},
 		{
 			"key": "MAR_DHJ",
@@ -176,7 +209,12 @@
 			"stadium": "Stade El Abdi",
 			"capacity": 8000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "horse"
+			}
 		}
 	]
 }

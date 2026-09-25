@@ -22,7 +22,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "N",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"ITA_RGR",
@@ -49,7 +53,13 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "IM",
+				"c1": "#0068A8",
+				"c2": "#111111",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"ITA_MRN",
@@ -76,7 +86,11 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "oval",
-				"symbol": "cross"
+				"field": "stripes:4",
+				"symbol": "none",
+				"chief_text": "ACM",
+				"cc": "#FFFFFF",
+				"c3": "#111111"
 			},
 			"rivals": [
 				"ITA_MNZ"
@@ -101,8 +115,16 @@
 			"capacity": 41500,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "modern",
-				"symbol": "letter"
+				"shape": "oval",
+				"field": "stripes:3",
+				"symbol": "bull",
+				"chief_text": "JUVENTUS",
+				"cc": "#111111",
+				"c1": "#FFFFFF",
+				"c2": "#111111",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"stars": 3
 			},
 			"rivals": [
 				"ITA_TGR",
@@ -129,7 +151,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "A",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -152,8 +177,12 @@
 			"capacity": 70600,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "crown"
+				"shape": "french",
+				"field": "plain",
+				"symbol": "wolf",
+				"c3": "#F0BC42",
+				"sc": "#F0BC42",
+				"border": "gold"
 			},
 			"rivals": [
 				"ITA_RBC"
@@ -179,7 +208,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "eagle",
+				"chief_text": "LAZIO",
+				"cc": "#FFFFFF",
+				"c3": "#0B2A6B",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ITA_RGR"
@@ -204,8 +238,13 @@
 			"capacity": 43000,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "diamond"
+				"shape": "french",
+				"field": "plain",
+				"symbol": "fleur",
+				"c1": "#FFFFFF",
+				"c2": "#5E2A84",
+				"sc": "#E30613",
+				"border": "thick"
 			},
 			"rivals": []
 		},
@@ -228,8 +267,13 @@
 			"capacity": 38000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "french",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "BFC",
+				"c1": "#A21C26",
+				"c2": "#1A2F48",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -252,8 +296,11 @@
 			"capacity": 13600,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "wave"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "C",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -276,8 +323,10 @@
 			"capacity": 28000,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "mountain"
+				"shape": "french",
+				"field": "plain",
+				"symbol": "bull",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ITA_TBN"
@@ -303,7 +352,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "chevron"
+				"field": "stripes:3",
+				"symbol": "horse",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -327,7 +378,9 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "halves",
+				"symbol": "dragon",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -351,7 +404,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "HV",
+				"c1": "#1D3F91",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -374,8 +432,10 @@
 			"capacity": 16400,
 			"kit": "halves",
 			"crest": {
-				"shape": "shield",
-				"symbol": "cross"
+				"shape": "round",
+				"field": "halves",
+				"symbol": "cross_plain",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -399,7 +459,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "cross",
+				"symbol": "none",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"fc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -423,7 +487,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "sun"
+				"field": "stripes:3",
+				"symbol": "wolf",
+				"sc": "#111111"
 			},
 			"rivals": []
 		},
@@ -447,7 +513,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "S",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -471,7 +540,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "tower"
+				"field": "stripes:3",
+				"symbol": "cross_pattee",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -495,7 +566,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "USC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -517,7 +591,13 @@
 			"stadium": "Stadio Renzo Barbera",
 			"capacity": 36000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "ITA_SAM",
@@ -537,7 +617,13 @@
 			"stadium": "Stadio Luigi Ferraris",
 			"capacity": 36600,
 			"kit": "faixa",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "anchor",
+				"sc": "#E30613"
+			}
 		},
 		{
 			"key": "ITA_VEN",
@@ -557,7 +643,13 @@
 			"stadium": "Stadio Pier Luigi Penzo",
 			"capacity": 11000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#F07F13"
+			}
 		},
 		{
 			"key": "ITA_MON",
@@ -577,7 +669,14 @@
 			"stadium": "U-Power Stadium",
 			"capacity": 16900,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "ACM",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "ITA_EMP",
@@ -597,7 +696,13 @@
 			"stadium": "Stadio Carlo Castellani",
 			"capacity": 16300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "EFC"
+			}
 		},
 		{
 			"key": "ITA_FRO",
@@ -617,7 +722,15 @@
 			"stadium": "Stadio Benito Stirpe",
 			"capacity": 16200,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bird",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "ITA_BAR",
@@ -637,7 +750,15 @@
 			"stadium": "Stadio San Nicola",
 			"capacity": 58000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "rooster",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
+			}
 		},
 		{
 			"key": "ITA_SPE",
@@ -657,7 +778,13 @@
 			"stadium": "Stadio Alberto Picco",
 			"capacity": 10300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "ITA_MOD",
@@ -677,7 +804,13 @@
 			"stadium": "Stadio Alberto Braglia",
 			"capacity": 21000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#0055A4"
+			}
 		},
 		{
 			"key": "ITA_CES",
@@ -697,7 +830,15 @@
 			"stadium": "Orogel Stadium Dino Manuzzi",
 			"capacity": 23800,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "dolphin",
+				"c1": "#FFFFFF",
+				"c2": "#111111",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "ITA_CAT",
@@ -717,7 +858,13 @@
 			"stadium": "Stadio Nicola Ceravolo",
 			"capacity": 14600,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "eagle",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "ITA_SUD",
@@ -737,7 +884,13 @@
 			"stadium": "Stadio Druso",
 			"capacity": 5500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#E30613"
+			}
 		},
 		{
 			"key": "ITA_REG",
@@ -757,7 +910,13 @@
 			"stadium": "Mapei Stadium",
 			"capacity": 21500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AC"
+			}
 		},
 		{
 			"key": "ITA_CAR",
@@ -777,7 +936,14 @@
 			"stadium": "Stadio dei Marmi",
 			"capacity": 9500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "ITA_JST",
@@ -797,7 +963,14 @@
 			"stadium": "Stadio Romeo Menti",
 			"capacity": 12800,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "JS",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "ITA_MAN",
@@ -817,7 +990,12 @@
 			"stadium": "Stadio Danilo Martelli",
 			"capacity": 14800,
 			"kit": "faixa",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "none"
+			}
 		},
 		{
 			"key": "ITA_PAD",
@@ -837,7 +1015,12 @@
 			"stadium": "Stadio Euganeo",
 			"capacity": 32300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "cross",
+				"symbol": "none"
+			}
 		},
 		{
 			"key": "ITA_AVE",
@@ -857,7 +1040,13 @@
 			"stadium": "Stadio Partenio-Lombardi",
 			"capacity": 26300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "wolf",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "ITA_ENT",
@@ -877,7 +1066,13 @@
 			"stadium": "Stadio Comunale di Chiavari",
 			"capacity": 5500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "VE"
+			}
 		},
 		{
 			"key": "ITA_PES",
@@ -897,7 +1092,13 @@
 			"stadium": "Stadio Adriatico",
 			"capacity": 20500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

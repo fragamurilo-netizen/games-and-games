@@ -21,8 +21,11 @@
 			"capacity": 37000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "anchor"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "anchor",
+				"text": "SHANGHAI PORT",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"CHN_SHS"
@@ -48,6 +51,7 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
+				"field": "plain",
 				"symbol": "mountain"
 			},
 			"rivals": []
@@ -71,8 +75,10 @@
 			"capacity": 68000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "dragon",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -96,7 +102,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "rose",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"CHN_SHH"
@@ -120,7 +128,12 @@
 			"stadium": "Phoenix Hill Football Stadium",
 			"capacity": 50700,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise"
+			}
 		},
 		{
 			"key": "CHN_ZHE",
@@ -140,7 +153,12 @@
 			"stadium": "Huanglong Sports Center",
 			"capacity": 51000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves"
+			}
 		},
 		{
 			"key": "CHN_TIA",
@@ -160,7 +178,12 @@
 			"stadium": "TEDA Football Stadium",
 			"capacity": 37500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tiger"
+			}
 		},
 		{
 			"key": "CHN_WUH",
@@ -180,7 +203,12 @@
 			"stadium": "Wuhan Sports Center",
 			"capacity": 54000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle"
+			}
 		}
 	]
 }

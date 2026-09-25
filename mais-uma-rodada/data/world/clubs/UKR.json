@@ -21,8 +21,12 @@
 			"capacity": 52000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "gear"
+				"shape": "ring",
+				"field": "stripes:3",
+				"symbol": "hammers",
+				"text": "SHAKHTAR",
+				"text2": "DONETSK",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"UKR_BSY"
@@ -48,7 +52,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "D",
+				"sc": "#1D5BBF",
+				"border": "thick"
 			},
 			"rivals": [
 				"UKR_HIR"
@@ -72,7 +80,13 @@
 			"stadium": "Tsentralnyi Stadion Zhytomyr",
 			"capacity": 5900,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "P"
+			}
 		},
 		{
 			"key": "UKR_KRY",
@@ -92,7 +106,13 @@
 			"stadium": "Stadion Hirnyk",
 			"capacity": 2500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "K"
+			}
 		},
 		{
 			"key": "UKR_ZOR",
@@ -112,7 +132,13 @@
 			"stadium": "Stadion Slavutych-Arena",
 			"capacity": 11600,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "UKR_OLE",
@@ -132,7 +158,14 @@
 			"stadium": "Nika Stadion",
 			"capacity": 7000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "O",
+				"sc": "#111111"
+			}
 		}
 	]
 }

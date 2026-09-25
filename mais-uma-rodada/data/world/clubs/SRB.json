@@ -21,8 +21,12 @@
 			"capacity": 51700,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "star",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
 			},
 			"rivals": [
 				"SRB_CRN"
@@ -48,7 +52,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "star"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FKP",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"SRB_CZV"
@@ -72,7 +79,13 @@
 			"stadium": "TSC Arena",
 			"capacity": 4500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TSC"
+			}
 		},
 		{
 			"key": "SRB_VOJ",
@@ -92,7 +105,14 @@
 			"stadium": "Stadion Karađorđe",
 			"capacity": 14500,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "V",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "SRB_CUK",
@@ -112,7 +132,14 @@
 			"stadium": "Stadion Čukarički",
 			"capacity": 4000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FKC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "SRB_RAD",
@@ -132,7 +159,14 @@
 			"stadium": "Stadion Čair",
 			"capacity": 18000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RN",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

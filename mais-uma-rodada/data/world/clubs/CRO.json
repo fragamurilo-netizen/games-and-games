@@ -21,8 +21,14 @@
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "D",
+				"text": "GNK DINAMO",
+				"text2": "ZAGREB",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"CRO_BIL"
@@ -47,8 +53,13 @@
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "cross"
+				"shape": "round",
+				"field": "checky",
+				"symbol": "none",
+				"chief_text": "HAJDUK",
+				"cc": "#1D3F91",
+				"c1": "#FFFFFF",
+				"c2": "#E30613"
 			},
 			"rivals": [
 				"CRO_MOD"
@@ -72,7 +83,15 @@
 			"stadium": "Stadion Rujevica",
 			"capacity": 8200,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#0055A4",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "CRO_OSI",
@@ -92,7 +111,13 @@
 			"stadium": "Opus Arena",
 			"capacity": 13000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NKO"
+			}
 		},
 		{
 			"key": "CRO_VAR",
@@ -112,7 +137,12 @@
 			"stadium": "Stadion Varteks",
 			"capacity": 9000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle"
+			}
 		},
 		{
 			"key": "CRO_LOK",
@@ -132,7 +162,13 @@
 			"stadium": "Stadion Maksimir",
 			"capacity": 10000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "gear",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

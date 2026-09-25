@@ -21,8 +21,12 @@
 			"capacity": 41500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "U",
+				"sc": "#E30613",
+				"border": "thick"
 			},
 			"rivals": [
 				"ECU_ORI"
@@ -47,8 +51,12 @@
 			"capacity": 57000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "BSC",
+				"sc": "#111111",
+				"border": "thick"
 			},
 			"rivals": [
 				"ECU_ELE"
@@ -73,8 +81,10 @@
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "bolt"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bolt",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ECU_TOR"
@@ -99,8 +109,11 @@
 			"capacity": 12000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "chevron"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "IDV",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -123,8 +136,13 @@
 			"capacity": 36000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "sun"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SDA",
+				"c1": "#FFD100",
+				"c2": "#E30613",
+				"sc": "#E30613"
 			},
 			"rivals": [
 				"ECU_ALQ"
@@ -148,7 +166,13 @@
 			"stadium": "Estadio Olímpico Atahualpa",
 			"capacity": 35000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "UC"
+			}
 		},
 		{
 			"key": "ECU_CUE",
@@ -168,7 +192,14 @@
 			"stadium": "Estadio Alejandro Serrano Aguilar",
 			"capacity": 16500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "DC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "ECU_MAC",
@@ -188,7 +219,13 @@
 			"stadium": "Estadio Bellavista",
 			"capacity": 16500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "M"
+			}
 		},
 		{
 			"key": "ECU_NAC",
@@ -208,7 +245,13 @@
 			"stadium": "Estadio Olímpico Atahualpa",
 			"capacity": 35000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CDEN"
+			}
 		},
 		{
 			"key": "ECU_ORE",
@@ -228,7 +271,14 @@
 			"stadium": "Estadio 9 de Mayo",
 			"capacity": 16500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OSC",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "ECU_DEL",
@@ -248,7 +298,15 @@
 			"stadium": "Estadio Jocay",
 			"capacity": 17000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "ECU_MUS",
@@ -268,7 +326,12 @@
 			"stadium": "Estadio Mushuc Runa",
 			"capacity": 6000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain"
+			}
 		}
 	]
 }

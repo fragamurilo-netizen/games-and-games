@@ -22,7 +22,11 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "halves",
+				"symbol": "star",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
 			},
 			"rivals": [
 				"CZE_LET"
@@ -48,7 +52,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ACS",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"CZE_SES"
@@ -73,8 +80,11 @@
 			"capacity": 11700,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCVP",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -96,7 +106,12 @@
 			"stadium": "Městský stadion Ostrava",
 			"capacity": 15000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "hammers"
+			}
 		},
 		{
 			"key": "CZE_LIB",
@@ -116,7 +131,13 @@
 			"stadium": "Stadion u Nisy",
 			"capacity": 9900,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SL"
+			}
 		},
 		{
 			"key": "CZE_SIG",
@@ -136,7 +157,13 @@
 			"stadium": "Andrův stadion",
 			"capacity": 12500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SK"
+			}
 		}
 	]
 }

@@ -21,8 +21,13 @@
 			"capacity": 75000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "chevron"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "eagle",
+				"text": "AL AHLY",
+				"year": "1907",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"EGY_ABY"
@@ -47,8 +52,12 @@
 			"capacity": 20000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "Z",
+				"sc": "#E30613",
+				"border": "thick"
 			},
 			"rivals": [
 				"EGY_AHM"
@@ -74,6 +83,7 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "modern",
+				"field": "plain",
 				"symbol": "mountain"
 			},
 			"rivals": []
@@ -96,7 +106,13 @@
 			"stadium": "Estádio de Port Said",
 			"capacity": 18000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MSC"
+			}
 		},
 		{
 			"key": "EGY_ISM",
@@ -116,7 +132,14 @@
 			"stadium": "Estádio de Ismailia",
 			"capacity": 18500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ISC",
+				"sc": "#0055A4"
+			}
 		},
 		{
 			"key": "EGY_CER",
@@ -136,7 +159,13 @@
 			"stadium": "Estádio Al Salam",
 			"capacity": 30000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CC"
+			}
 		},
 		{
 			"key": "EGY_ZED",
@@ -156,7 +185,14 @@
 			"stadium": "Estádio Petrosport",
 			"capacity": 16000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ZED",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "EGY_ITT",
@@ -176,7 +212,13 @@
 			"stadium": "Estádio de Alexandria",
 			"capacity": 13600,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ITT"
+			}
 		}
 	]
 }

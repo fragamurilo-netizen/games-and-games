@@ -22,7 +22,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"VEN_CAR"
@@ -47,8 +49,11 @@
 			"capacity": 38000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "DT",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"VEN_ROJ"
@@ -73,8 +78,11 @@
 			"capacity": 51000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MSC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -96,7 +104,13 @@
 			"stadium": "Estadio Olímpico de la UCV",
 			"capacity": 24000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "VEN_CAB",
@@ -116,7 +130,12 @@
 			"stadium": "Estadio Misael Delgado",
 			"capacity": 10000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "horse"
+			}
 		},
 		{
 			"key": "VEN_APC",
@@ -136,7 +155,13 @@
 			"stadium": "Estadio La Bombonerita",
 			"capacity": 7500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "VEN_EME",
@@ -156,7 +181,12 @@
 			"stadium": "Estadio Metropolitano de Mérida",
 			"capacity": 42000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain"
+			}
 		},
 		{
 			"key": "VEN_ZAM",
@@ -176,7 +206,14 @@
 			"stadium": "Estadio Agustín Tovar",
 			"capacity": 30000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ZFC",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "VEN_MET",
@@ -196,7 +233,13 @@
 			"stadium": "Estadio Brígido Iriarte",
 			"capacity": 10000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "M"
+			}
 		},
 		{
 			"key": "VEN_UCV",
@@ -216,7 +259,13 @@
 			"stadium": "Estadio Olímpico de la UCV",
 			"capacity": 24000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "UCV"
+			}
 		}
 	]
 }

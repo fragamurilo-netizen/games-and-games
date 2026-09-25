@@ -21,8 +21,13 @@
 			"capacity": 75000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "diamond"
+				"shape": "ring",
+				"field": "lozenges",
+				"symbol": "none",
+				"text": "FC BAYERN MUNCHEN",
+				"c1": "#FFFFFF",
+				"c2": "#DC052D",
+				"fc": "#0066B2"
 			},
 			"rivals": [
 				"GER_DOR",
@@ -49,7 +54,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "BVB",
+				"sc": "#111111",
+				"border": "thick"
 			},
 			"rivals": [
 				"GER_GEL",
@@ -75,8 +84,12 @@
 			"capacity": 30200,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "cross"
+				"shape": "french",
+				"field": "halves_h",
+				"symbol": "lion",
+				"c1": "#111111",
+				"c2": "#E32221",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_KOE"
@@ -102,7 +115,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "modern",
-				"symbol": "bolt"
+				"field": "plain",
+				"symbol": "bull_charging",
+				"c1": "#FFFFFF",
+				"c2": "#DD0741",
+				"sc": "#DD0741",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -126,7 +144,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#FFFFFF",
+				"c2": "#E1000F",
+				"sc": "#111111",
+				"border": "thick"
 			},
 			"rivals": []
 		},
@@ -150,7 +173,11 @@
 			"kit": "faixa",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "hoops:2",
+				"symbol": "antlers",
+				"c1": "#FFFFFF",
+				"c2": "#E32219",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"GER_KAR"
@@ -175,8 +202,14 @@
 			"capacity": 54000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "diamond",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B",
+				"c1": "#FFFFFF",
+				"c2": "#111111",
+				"sc": "#00843D",
+				"border": "thick"
 			},
 			"rivals": [
 				"GER_KOE"
@@ -202,7 +235,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "wolf",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": []
 		},
@@ -226,7 +262,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SCF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -250,7 +289,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TSG",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -274,7 +316,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "gear"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "05",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": []
 		},
@@ -297,8 +343,11 @@
 			"capacity": 42100,
 			"kit": "plain",
 			"crest": {
-				"shape": "square",
-				"symbol": "diamond"
+				"shape": "diamond",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "W",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_HAM"
@@ -324,7 +373,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "gear"
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCA",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -348,7 +400,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "gear"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCU",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"GER_BER"
@@ -374,7 +430,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "anchor"
+				"field": "plain",
+				"symbol": "skull",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_HAM"
@@ -400,7 +458,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCH",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -424,7 +485,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "ram",
+				"c1": "#FFFFFF",
+				"c2": "#ED1C24",
+				"sc": "#ED1C24"
 			},
 			"rivals": [
 				"GER_LEV",
@@ -451,8 +516,13 @@
 			"capacity": 57000,
 			"kit": "plain",
 			"crest": {
-				"shape": "square",
-				"symbol": "diamond"
+				"shape": "diamond",
+				"field": "quarters",
+				"symbol": "none",
+				"c1": "#FFFFFF",
+				"c2": "#0A3F86",
+				"fc": "#111111",
+				"border": "thick"
 			},
 			"rivals": [
 				"GER_BRE",
@@ -479,7 +549,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "BSC",
+				"sc": "#005CA9"
 			},
 			"rivals": [
 				"GER_UNI"
@@ -505,7 +578,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "S04",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"GER_DOR"
@@ -531,7 +608,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "VfL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_GEL",
@@ -558,7 +638,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "anchor"
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -582,7 +664,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "diamond"
+				"field": "plain",
+				"symbol": "fleur",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -606,7 +690,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCK",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"GER_SAA"
@@ -632,7 +720,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "96",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_BSW"
@@ -658,7 +749,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCN",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_FUE"
@@ -684,7 +778,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "plain",
+				"symbol": "cross_plain",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_BIE"
@@ -710,7 +806,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "KSC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_STU"
@@ -736,7 +835,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "F95",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_KOE",
@@ -763,7 +865,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCM",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -787,7 +892,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SVE",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_LAU"
@@ -813,7 +921,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#1D5AA8"
 			},
 			"rivals": [
 				"GER_HAN"
@@ -839,7 +949,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "diamond"
+				"field": "plain",
+				"symbol": "clover",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_NUR"
@@ -865,7 +977,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -889,7 +1003,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DSC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_PAD"
@@ -915,7 +1032,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SGD",
+				"sc": "#111111"
 			},
 			"rivals": []
 		}

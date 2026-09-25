@@ -21,8 +21,15 @@
 			"capacity": 53000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "anchor"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "ship",
+				"text": "MANCHESTER CITY",
+				"year": "1894",
+				"c1": "#6CABDD",
+				"c2": "#6CABDD",
+				"c3": "#FFFFFF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_MRD"
@@ -48,7 +55,13 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "devil",
+				"c2": "#111111",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick",
+				"ribbon": "MANCHESTER UNITED"
 			},
 			"rivals": [
 				"ENG_MSK",
@@ -75,8 +88,13 @@
 			"capacity": 61000,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "letter"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "bird",
+				"c2": "#FFFFFF",
+				"c3": "#00A398",
+				"sc": "#FFFFFF",
+				"ribbon": "YNWA"
 			},
 			"rivals": [
 				"ENG_MSB",
@@ -103,7 +121,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF",
+				"ribbon": "NIL SATIS NISI OPTIMUM"
 			},
 			"rivals": [
 				"ENG_MSR"
@@ -129,7 +150,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "cannon",
+				"chief_text": "ARSENAL",
+				"cc": "#0B2A6B",
+				"c2": "#0B2A6B",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"border": "gold"
 			},
 			"rivals": [
 				"ENG_NLW",
@@ -155,8 +183,10 @@
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "star"
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "rooster",
+				"sc": "#132257"
 			},
 			"rivals": [
 				"ENG_NLR",
@@ -182,8 +212,13 @@
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "lion",
+				"text": "CHELSEA FOOTBALL CLUB",
+				"c2": "#FFFFFF",
+				"c3": "#DBA111",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_NLR",
@@ -210,8 +245,11 @@
 			"capacity": 52000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "tower"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "castle",
+				"c3": "#0070C0",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_WEA"
@@ -236,8 +274,13 @@
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "crown"
+				"shape": "french",
+				"field": "plain",
+				"symbol": "lion",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"stars": 1,
+				"border": "thick"
 			},
 			"rivals": [
 				"ENG_BIR"
@@ -263,7 +306,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#F7C240",
+				"border": "thick"
 			},
 			"rivals": [
 				"ENG_NLW",
@@ -291,7 +337,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "wave"
+				"field": "plain",
+				"symbol": "seagull",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"ENG_SLE"
@@ -316,8 +365,10 @@
 			"capacity": 25000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "chevron"
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_SSG"
@@ -343,7 +394,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FFC",
+				"sc": "#111111",
+				"c3": "#E30613"
 			},
 			"rivals": [
 				"ENG_WLB",
@@ -369,8 +424,14 @@
 			"capacity": 17250,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "diamond"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "bee",
+				"text": "BRENTFORD FC",
+				"year": "1889",
+				"c2": "#FFFFFF",
+				"c3": "#FFD100",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ENG_RIV"
@@ -395,8 +456,11 @@
 			"capacity": 11300,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "AFCB",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_STS"
@@ -421,8 +485,10 @@
 			"capacity": 31700,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "mountain"
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "wolf",
+				"sc": "#231F20"
 			},
 			"rivals": [
 				"ENG_ALB"
@@ -448,7 +514,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "tree",
+				"sc": "#FFFFFF",
+				"stars": 2,
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_RAM",
@@ -474,8 +544,14 @@
 			"capacity": 37600,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "rose",
+				"text": "LEEDS UNITED",
+				"c1": "#FFFFFF",
+				"c2": "#1D428A",
+				"c3": "#FFCD00",
+				"sc": "#FFCD00"
 			},
 			"rivals": [
 				"ENG_MRD",
@@ -502,7 +578,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "star"
+				"field": "stripes:3",
+				"symbol": "cat",
+				"sc": "#111111",
+				"border": "thick"
 			},
 			"rivals": [
 				"ENG_TYN"
@@ -528,7 +607,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "chevron"
+				"field": "halves",
+				"symbol": "lion",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ENG_ROV"
@@ -554,7 +635,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "fox",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"ENG_NOT",
@@ -581,8 +665,10 @@
 			"capacity": 32000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "halves_h",
+				"symbol": "tree",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ENG_CHE",
@@ -609,7 +695,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF",
+				"border": "thick"
 			},
 			"rivals": [
 				"ENG_CAN"
@@ -634,8 +723,10 @@
 			"capacity": 32000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "cross"
+				"shape": "round",
+				"field": "plain",
+				"symbol": "swords",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_OWL",
@@ -662,7 +753,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "owl",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_BLD"
@@ -687,8 +780,12 @@
 			"capacity": 34000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"c1": "#FFFFFF",
+				"c2": "#E11B22",
+				"sc": "#E11B22"
 			},
 			"rivals": [
 				"ENG_TYN",
@@ -715,7 +812,8 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "star"
+				"field": "stripes:3",
+				"symbol": "bird"
 			},
 			"rivals": [
 				"ENG_WLV"
@@ -741,7 +839,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "bird",
+				"c1": "#00A650",
+				"c2": "#FFF200",
+				"sc": "#FFF200"
 			},
 			"rivals": [
 				"ENG_SUF"
@@ -766,8 +868,10 @@
 			"capacity": 32600,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "tower"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_FOX"
@@ -792,8 +896,10 @@
 			"capacity": 22200,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "chevron"
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "antlers",
+				"sc": "#ED2127"
 			},
 			"rivals": []
 		},
@@ -816,8 +922,11 @@
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "gear"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SCFC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -841,7 +950,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "diamond"
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#111111"
 			},
 			"rivals": []
 		},
@@ -865,7 +976,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "ram",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"ENG_NOT",
@@ -892,7 +1005,10 @@
 			"kit": "stripes_h",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "QPR",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_WLB",
@@ -918,8 +1034,10 @@
 			"capacity": 20100,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_ELI"
@@ -945,7 +1063,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -968,8 +1088,10 @@
 			"capacity": 31300,
 			"kit": "halves",
 			"crest": {
-				"shape": "shield",
-				"symbol": "wave"
+				"shape": "round",
+				"field": "halves",
+				"symbol": "rose",
+				"sc": "#E30613"
 			},
 			"rivals": [
 				"ENG_CLA",
@@ -995,8 +1117,10 @@
 			"capacity": 23400,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ram",
+				"sc": "#001489"
 			},
 			"rivals": [
 				"ENG_ROV"
@@ -1022,7 +1146,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "crescent",
+				"c3": "#FFD100",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ENG_STS"
@@ -1048,7 +1175,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "ball"
+				"field": "plain",
+				"symbol": "ball",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ENG_AST"

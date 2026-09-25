@@ -21,8 +21,10 @@
 			"capacity": 40000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "chevron"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "antlers",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -45,8 +47,10 @@
 			"capacity": 63700,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "URD"
 			},
 			"rivals": []
 		},
@@ -69,8 +73,12 @@
 			"capacity": 72000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "anchor"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "anchor",
+				"text": "YOKOHAMA F. MARINOS",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"JPN_KWS"
@@ -96,7 +104,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "wave"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "KF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"JPN_YKM"
@@ -122,7 +133,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "bolt"
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"JPN_OSK"
@@ -148,7 +161,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "G",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"JPN_KOB"
@@ -172,7 +188,14 @@
 			"stadium": "Edion Peace Wing Hiroshima",
 			"capacity": 28500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "S",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "JPN_MAC",
@@ -192,7 +215,13 @@
 			"stadium": "Machida GION Stadium",
 			"capacity": 15500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCMZ"
+			}
 		},
 		{
 			"key": "JPN_CER",
@@ -212,7 +241,13 @@
 			"stadium": "Yodoko Sakura Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "rose",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "JPN_TOK",
@@ -232,7 +267,14 @@
 			"stadium": "Ajinomoto Stadium",
 			"capacity": 49000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCT",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

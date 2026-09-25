@@ -272,32 +272,53 @@ func _crest_card(cl: Club) -> Control:
 	card.add_child(row)
 	if img != "":
 		card.add_child(UIKit.label("Usando a imagem importada. As opções abaixo valem para o escudo desenhado.", "Small", true))
-	for group in [["shape", "Formato", ClubGenerator.CREST_SHAPES, ClubGenerator.CREST_SHAPE_NAMES], ["symbol", "Símbolo", ClubGenerator.CREST_SYMBOLS, ClubGenerator.CREST_SYMBOL_NAMES], ["border", "Borda", ClubGenerator.CREST_BORDERS, ["Sem borda", "Fina", "Grossa", "Dupla"]]]:
+	for group in [["shape", "Formato", ClubGenerator.CREST_SHAPES, ClubGenerator.CREST_SHAPE_NAMES],
+			["field", "Campo", ClubGenerator.CREST_FIELDS, ClubGenerator.CREST_FIELD_NAMES],
+			["symbol", "Símbolo", ClubGenerator.CREST_SYMBOLS, ClubGenerator.CREST_SYMBOL_NAMES],
+			["border", "Borda", ClubGenerator.CREST_BORDERS, ClubGenerator.CREST_BORDER_NAMES]]:
 		var key: String = group[0]
 		card.add_child(UIKit.label(String(group[1]), "Small"))
 		var g := ButtonGroup.new()
 		var flow := UIKit.flow(8)
 		var vals: Array = group[2]
 		var labels: Array = group[3]
+		var current := String(CrestView.spec(cl.crest).get(key, "")) if key != "symbol" else String(cl.crest.get(key, ""))
 		for i in vals.size():
 			var val: String = vals[i]
-			flow.add_child(UIKit.chip(String(labels[i]), String(cl.crest.get(key, "")) == val, g, func():
+			flow.add_child(UIKit.chip(String(labels[i]), current == val, g, func():
 				cl.crest[key] = val
+				cl.crest.erase("stripes")
 				_mark("crest")
 				refresh()))
 		card.add_child(flow)
+	# Estrelas de títulos em cima do escudo
 	var st := UIKit.hbox(10)
-	var sl := UIKit.label("Listras", "")
+	var sl := UIKit.label("Estrelas em cima", "")
 	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	st.add_child(sl)
+	var stars := int(cl.crest.get("stars", 0))
+	st.add_child(UIKit.button("−", "GhostButton", func():
+		cl.crest["stars"] = maxi(0, stars - 1)
+		_mark("crest")
+		refresh()))
+	st.add_child(UIKit.label(str(stars), ""))
+	st.add_child(UIKit.button("+", "GhostButton", func():
+		cl.crest["stars"] = mini(7, stars + 1)
+		_mark("crest")
+		refresh()))
+	card.add_child(st)
+	var cw := UIKit.hbox(10)
+	var cwl := UIKit.label("Coroa", "")
+	cwl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cw.add_child(cwl)
 	var cb := CheckButton.new()
-	cb.button_pressed = bool(cl.crest.get("stripes", false))
+	cb.button_pressed = int(cl.crest.get("crown", 0)) > 0
 	cb.toggled.connect(func(on: bool):
-		cl.crest["stripes"] = on
+		cl.crest["crown"] = 1 if on else 0
 		_mark("crest")
 		refresh())
-	st.add_child(cb)
-	card.add_child(st)
+	cw.add_child(cb)
+	card.add_child(cw)
 	return UIKit.card_panel(card)
 
 

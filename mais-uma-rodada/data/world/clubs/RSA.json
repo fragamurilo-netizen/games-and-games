@@ -22,7 +22,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#006437"
 			},
 			"rivals": []
 		},
@@ -46,7 +48,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "KC",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"RSA_BUC"
@@ -72,7 +77,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "anchor"
+				"field": "plain",
+				"symbol": "skull",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"RSA_AMA"
@@ -96,7 +103,14 @@
 			"stadium": "Danie Craven Stadium",
 			"capacity": 16000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SFC",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "RSA_AMZ",
@@ -116,7 +130,13 @@
 			"stadium": "Moses Mabhida Stadium",
 			"capacity": 56000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AZ"
+			}
 		},
 		{
 			"key": "RSA_TSG",
@@ -136,7 +156,12 @@
 			"stadium": "Mbombela Stadium",
 			"capacity": 40000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star"
+			}
 		}
 	]
 }

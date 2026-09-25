@@ -21,8 +21,15 @@
 			"capacity": 47000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CC",
+				"c1": "#FFFFFF",
+				"c2": "#111111",
+				"sc": "#111111",
+				"stars": 1,
+				"c3": "#111111"
 			},
 			"rivals": [
 				"CHI_AZU",
@@ -49,7 +56,13 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "U",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#E30613",
+				"border": "thick"
 			},
 			"rivals": [
 				"CHI_ALB"
@@ -75,7 +88,8 @@
 			"kit": "faixa",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "cross",
+				"symbol": "none"
 			},
 			"rivals": [
 				"CHI_ALB"
@@ -101,7 +115,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -123,7 +140,18 @@
 			"stadium": "Estadio Bicentenario de La Florida",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "tricolor_v",
+				"symbol": "letter",
+				"initials": "AI",
+				"c1": "#00843D",
+				"c2": "#FFFFFF",
+				"fc": "#FFFFFF",
+				"c3": "#E30613",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "CHI_PAL",
@@ -143,7 +171,18 @@
 			"stadium": "Estadio Municipal de La Cisterna",
 			"capacity": 12000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "tricolor_h",
+				"symbol": "letter",
+				"initials": "CDP",
+				"c1": "#111111",
+				"c2": "#FFFFFF",
+				"fc": "#FFFFFF",
+				"c3": "#00843D",
+				"sc": "#E30613"
+			}
 		},
 		{
 			"key": "CHI_HUA",
@@ -163,7 +202,13 @@
 			"stadium": "Estadio Huachipato-CAP Acero",
 			"capacity": 10500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "gear",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "CHI_EVE",
@@ -183,7 +228,16 @@
 			"stadium": "Estadio Sausalito",
 			"capacity": 22000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "E",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "CHI_UES",
@@ -203,7 +257,18 @@
 			"stadium": "Estadio Santa Laura",
 			"capacity": 19000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "UE",
+				"c1": "#E30613",
+				"c2": "#FFD100",
+				"sc": "#E30613",
+				"crown": 1,
+				"c3": "#FFD100"
+			}
 		},
 		{
 			"key": "CHI_OHI",
@@ -223,7 +288,13 @@
 			"stadium": "Estadio El Teniente",
 			"capacity": 14000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OH"
+			}
 		},
 		{
 			"key": "CHI_COQ",
@@ -243,7 +314,13 @@
 			"stadium": "Estadio Francisco Sánchez Rumoroso",
 			"capacity": 18000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "CHI_IQU",
@@ -263,7 +340,13 @@
 			"stadium": "Estadio Tierra de Campeones",
 			"capacity": 13000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dragon",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

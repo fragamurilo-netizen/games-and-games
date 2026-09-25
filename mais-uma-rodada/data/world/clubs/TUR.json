@@ -22,7 +22,13 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GS",
+				"sc": "#FDB912",
+				"stars": 4,
+				"c3": "#FDB912",
+				"border": "thick"
 			},
 			"rivals": [
 				"TUR_IKN",
@@ -48,8 +54,13 @@
 			"capacity": 47800,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "ring",
+				"field": "stripes:3",
+				"symbol": "none",
+				"text": "FENERBAHCE",
+				"text2": "1907",
+				"stars": 5,
+				"c3": "#FFED00"
 			},
 			"rivals": [
 				"TUR_IAS",
@@ -76,7 +87,11 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "square",
-				"symbol": "chevron"
+				"field": "stripes:3",
+				"symbol": "none",
+				"chief_text": "BJK 1903",
+				"cc": "#E30613",
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"TUR_IAS",
@@ -103,7 +118,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "wave"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "TS",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -127,7 +145,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "modern",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "IBFK",
+				"sc": "#0D2A5C"
 			},
 			"rivals": []
 		},
@@ -149,7 +170,13 @@
 			"stadium": "Samsun 19 Mayıs Stadyumu",
 			"capacity": 33900,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bolt",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_GOZ",
@@ -169,7 +196,14 @@
 			"stadium": "Gürsel Aksel Stadyumu",
 			"capacity": 19700,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "G",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_EYU",
@@ -189,7 +223,14 @@
 			"stadium": "Eyüp Stadyumu",
 			"capacity": 3000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "E",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "TUR_KAS",
@@ -209,7 +250,13 @@
 			"stadium": "Recep Tayyip Erdoğan Stadyumu",
 			"capacity": 14200,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_KOC",
@@ -229,7 +276,14 @@
 			"stadium": "Kocaeli Stadyumu",
 			"capacity": 34700,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "K",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_ANT",
@@ -249,7 +303,14 @@
 			"stadium": "Corendon Airlines Park",
 			"capacity": 32500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "A",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_ALA",
@@ -269,7 +330,12 @@
 			"stadium": "Alanya Oba Stadyumu",
 			"capacity": 10100,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "castle"
+			}
 		},
 		{
 			"key": "TUR_KON",
@@ -289,7 +355,13 @@
 			"stadium": "Konya Büyükşehir Stadyumu",
 			"capacity": 42000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_GFK",
@@ -309,7 +381,14 @@
 			"stadium": "Kalyon Stadyumu",
 			"capacity": 33500,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "GFK",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_KAY",
@@ -329,7 +408,13 @@
 			"stadium": "RHG Enertürk Enerji Stadyumu",
 			"capacity": 32800,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_RIZ",
@@ -349,7 +434,14 @@
 			"stadium": "Çaykur Didi Stadyumu",
 			"capacity": 15300,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "R",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_GEN",
@@ -369,7 +461,14 @@
 			"stadium": "Eryaman Stadyumu",
 			"capacity": 20500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GB",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUR_FKG",
@@ -389,7 +488,14 @@
 			"stadium": "Atatürk Olimpiyat Stadyumu",
 			"capacity": 76000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FK",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

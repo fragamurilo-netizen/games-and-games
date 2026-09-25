@@ -22,7 +22,14 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "O",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613",
+				"c3": "#E30613",
+				"laurel": true
 			},
 			"rivals": [
 				"GRE_ATH",
@@ -49,7 +56,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "diamond"
+				"field": "plain",
+				"symbol": "shamrock",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"GRE_PIR",
@@ -76,7 +86,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"GRE_PIR",
@@ -102,8 +114,10 @@
 			"capacity": 28700,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"GRE_PIR"
@@ -127,7 +141,14 @@
 			"stadium": "Kleanthis Vikelidis",
 			"capacity": 22800,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ARIS",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "GRE_OFI",
@@ -147,7 +168,14 @@
 			"stadium": "Theodoros Vardinogiannis",
 			"capacity": 9000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "OFI",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

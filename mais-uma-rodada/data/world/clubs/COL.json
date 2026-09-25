@@ -22,7 +22,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "stripes:4",
+				"symbol": "letter",
+				"initials": "AN",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"COL_POD"
@@ -47,8 +50,13 @@
 			"capacity": 36000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "star",
+				"text": "MILLONARIOS",
+				"text2": "F.C.",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"COL_CAR"
@@ -74,7 +82,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "devil",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"COL_AZC"
@@ -99,8 +109,11 @@
 			"capacity": 46000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "wave"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "J",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -123,8 +136,11 @@
 			"capacity": 40000,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "DIM",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"COL_VRD"
@@ -149,8 +165,10 @@
 			"capacity": 36000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"COL_EMB"
@@ -176,7 +194,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AD"
 			},
 			"rivals": [
 				"COL_ESC"
@@ -200,7 +220,14 @@
 			"stadium": "Estadio Palogrande",
 			"capacity": 36500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OC",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "COL_TOL",
@@ -220,7 +247,14 @@
 			"stadium": "Estadio Manuel Murillo Toro",
 			"capacity": 28000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DT",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "COL_BUC",
@@ -240,7 +274,13 @@
 			"stadium": "Estadio Américo Montanini",
 			"capacity": 28000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#00843D"
+			}
 		},
 		{
 			"key": "COL_PER",
@@ -260,7 +300,14 @@
 			"stadium": "Estadio Hernán Ramírez Villegas",
 			"capacity": 30000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "DP",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "COL_PAS",
@@ -280,7 +327,13 @@
 			"stadium": "Estadio Departamental Libertad",
 			"capacity": 20000,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

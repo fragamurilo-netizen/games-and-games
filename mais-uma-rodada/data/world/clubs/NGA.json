@@ -22,7 +22,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "EFC"
 			},
 			"rivals": []
 		},
@@ -46,7 +48,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "R"
 			},
 			"rivals": []
 		},
@@ -68,7 +72,12 @@
 			"stadium": "Remo Stars Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star"
+			}
 		},
 		{
 			"key": "NGA_RIV",
@@ -88,7 +97,12 @@
 			"stadium": "Adokiye Amiesimaka Stadium",
 			"capacity": 30000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves"
+			}
 		},
 		{
 			"key": "NGA_KAN",
@@ -108,7 +122,12 @@
 			"stadium": "Sani Abacha Stadium",
 			"capacity": 16000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tower"
+			}
 		},
 		{
 			"key": "NGA_SHO",
@@ -128,7 +147,13 @@
 			"stadium": "Lekan Salami Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"border": "double"
+			}
 		}
 	]
 }

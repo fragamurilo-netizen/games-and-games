@@ -22,7 +22,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "crescent",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"KSA_ALM"
@@ -48,7 +51,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AN",
+				"sc": "#0055A5"
 			},
 			"rivals": [
 				"KSA_AZR"
@@ -74,7 +80,11 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "tiger",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"KSA_RAQ"
@@ -100,7 +110,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "crown",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"KSA_AMD"
@@ -126,7 +138,13 @@
 			"kit": "plain",
 			"rivals": [
 				"KSA_ETT"
-			]
+			],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "Q"
+			}
 		},
 		{
 			"key": "KSA_ETT",
@@ -148,7 +166,14 @@
 			"kit": "halves",
 			"rivals": [
 				"KSA_QAD"
-			]
+			],
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "E",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "KSA_SHB",
@@ -170,7 +195,14 @@
 			"kit": "plain",
 			"rivals": [
 				"KSA_AZR"
-			]
+			],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "S",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "KSA_TAA",
@@ -190,7 +222,13 @@
 			"stadium": "Estádio Rei Abdullah de Buraidah",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "T"
+			}
 		},
 		{
 			"key": "KSA_FAT",
@@ -210,7 +248,12 @@
 			"stadium": "Estádio Prince Abdullah bin Jalawi",
 			"capacity": 19500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "crescent"
+			}
 		},
 		{
 			"key": "KSA_KHA",
@@ -230,7 +273,12 @@
 			"stadium": "Estádio Prince Mohamed bin Fahd",
 			"capacity": 26000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves"
+			}
 		},
 		{
 			"key": "KSA_FAY",
@@ -250,7 +298,12 @@
 			"stadium": "Estádio King Salman Sport City",
 			"capacity": 7000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tree"
+			}
 		},
 		{
 			"key": "KSA_RIY",
@@ -270,7 +323,14 @@
 			"stadium": "Estádio Prince Faisal bin Fahd",
 			"capacity": 22500,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "R",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "KSA_KHO",
@@ -292,7 +352,13 @@
 			"kit": "plain",
 			"rivals": [
 				"KSA_HAZ"
-			]
+			],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "K"
+			}
 		},
 		{
 			"key": "KSA_OKH",
@@ -312,7 +378,12 @@
 			"stadium": "Estádio Prince Hathloul bin Abdulaziz",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "castle"
+			}
 		},
 		{
 			"key": "KSA_HAZ",
@@ -334,7 +405,13 @@
 			"kit": "plain",
 			"rivals": [
 				"KSA_KHO"
-			]
+			],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "H"
+			}
 		},
 		{
 			"key": "KSA_DAM",
@@ -354,7 +431,12 @@
 			"stadium": "Estádio Prince Sultan bin Abdul Aziz",
 			"capacity": 20000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain"
+			}
 		},
 		{
 			"key": "KSA_NAJ",
@@ -374,7 +456,12 @@
 			"stadium": "Estádio Al Najma",
 			"capacity": 6000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star"
+			}
 		},
 		{
 			"key": "KSA_NEO",
@@ -394,7 +481,14 @@
 			"stadium": "Estádio King Khalid de Tabuk",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "N",
+				"sc": "#C5A572"
+			}
 		}
 	]
 }

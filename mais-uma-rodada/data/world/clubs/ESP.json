@@ -22,7 +22,15 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "MCF",
+				"crown": 1,
+				"c1": "#FFFFFF",
+				"c2": "#3E3A8A",
+				"c3": "#FEBE10",
+				"sc": "#FEBE10",
+				"border": "gold"
 			},
 			"rivals": [
 				"ESP_BLG",
@@ -48,8 +56,16 @@
 			"capacity": 99000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "cross"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "ball",
+				"chief_text": "FCB",
+				"cc": "#FFD100",
+				"c1": "#004D98",
+				"c2": "#A50044",
+				"c3": "#A50044",
+				"sc": "#FFD100",
+				"border": "gold"
 			},
 			"rivals": [
 				"ESP_MBL",
@@ -75,8 +91,13 @@
 			"capacity": 70000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "diamond"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "tree",
+				"c1": "#FFFFFF",
+				"c2": "#CB3524",
+				"sc": "#272E61",
+				"border": "thick"
 			},
 			"rivals": [
 				"ESP_MBL"
@@ -102,7 +123,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "stripes:3",
+				"symbol": "tree",
+				"sc": "#00843D"
 			},
 			"rivals": [
 				"ESP_DON"
@@ -128,7 +151,11 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "stripes:3",
+				"symbol": "ball",
+				"crown": 1,
+				"c3": "#FFD100",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_BIL"
@@ -153,8 +180,12 @@
 			"capacity": 23500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "anchor"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "VCF",
+				"sc": "#005187",
+				"border": "thick"
 			},
 			"rivals": [
 				"ESP_VLC"
@@ -179,8 +210,13 @@
 			"capacity": 60000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "letter"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RB",
+				"crown": 1,
+				"c3": "#FFD100",
+				"sc": "#00954C"
 			},
 			"rivals": [
 				"ESP_NER"
@@ -205,8 +241,12 @@
 			"capacity": 43800,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "french",
+				"field": "stripes:3",
+				"symbol": "none",
+				"chief_text": "SFC",
+				"cc": "#FFFFFF",
+				"c3": "#D71A28"
 			},
 			"rivals": [
 				"ESP_VBL"
@@ -232,7 +272,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "bolt"
+				"field": "stripes:3",
+				"symbol": "bat",
+				"c1": "#FFD100",
+				"c2": "#E30613",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"ESP_SUB",
@@ -259,7 +303,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "plain",
+				"symbol": "cross_plain",
+				"crown": 1,
+				"c2": "#FFFFFF",
+				"sc": "#E30613",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"ESP_COR"
@@ -284,8 +333,12 @@
 			"capacity": 14600,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GFC",
+				"crown": 1,
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_BLG",
@@ -312,7 +365,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "cross"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CAO",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ESP_BIL",
@@ -338,8 +394,15 @@
 			"capacity": 23100,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "iberian",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "RCD",
+				"crown": 1,
+				"c1": "#E20613",
+				"c2": "#111111",
+				"sc": "#FFD100",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -363,7 +426,9 @@
 			"kit": "diagonal",
 			"crest": {
 				"shape": "shield",
-				"symbol": "bolt"
+				"field": "sash",
+				"symbol": "bolt",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"ESP_MBL",
@@ -390,7 +455,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GCF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_LEG"
@@ -416,7 +484,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "stripes:3",
+				"symbol": "castle",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_BIL"
@@ -441,8 +511,13 @@
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RCDE",
+				"crown": 1,
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"ESP_BLG"
@@ -468,7 +543,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "wave"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "LUD",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_VLC"
@@ -494,7 +572,9 @@
 			"kit": "faixa",
 			"crest": {
 				"shape": "shield",
-				"symbol": "sun"
+				"field": "hoops:2",
+				"symbol": "tree",
+				"sc": "#05642C"
 			},
 			"rivals": []
 		},
@@ -518,7 +598,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "cross_pattee",
+				"crown": 1,
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"ESP_GIJ"
@@ -543,8 +627,13 @@
 			"capacity": 32600,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RCD",
+				"crown": 1,
+				"sc": "#0066B3",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"ESP_VIG"
@@ -569,8 +658,13 @@
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RSG",
+				"crown": 1,
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"ESP_OVI"
@@ -595,8 +689,14 @@
 			"capacity": 33600,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "crown"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "lion",
+				"crown": 1,
+				"c1": "#0A3D8F",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"ESP_HUE"
@@ -621,8 +721,13 @@
 			"capacity": 22200,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "wave"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RRC",
+				"crown": 1,
+				"sc": "#00843D",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -646,7 +751,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "tree",
+				"sc": "#0055A5"
 			},
 			"rivals": [
 				"ESP_TEN"
@@ -671,8 +778,10 @@
 			"capacity": 22800,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "mountain"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#0055A5"
 			},
 			"rivals": [
 				"ESP_GCA"
@@ -697,8 +806,12 @@
 			"capacity": 27800,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "crown"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "castle",
+				"crown": 1,
+				"sc": "#FFD100",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -721,8 +834,11 @@
 			"capacity": 17400,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "sun"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "UDA",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -745,8 +861,12 @@
 			"capacity": 19300,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "iberian",
+				"field": "hoops:3",
+				"symbol": "castle",
+				"crown": 1,
+				"sc": "#FFD100",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -769,8 +889,11 @@
 			"capacity": 20700,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "wave"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CCF",
+				"sc": "#0055A5"
 			},
 			"rivals": []
 		},
@@ -794,7 +917,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "gear"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SDE",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -818,7 +944,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "mountain"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SDH",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_ZAR"
@@ -844,7 +973,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "wave"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CDM",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -867,8 +999,10 @@
 			"capacity": 17500,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "gear"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "bat",
+				"sc": "#E30613"
 			},
 			"rivals": []
 		},
@@ -891,8 +1025,12 @@
 			"capacity": 12200,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "castle",
+				"crown": 1,
+				"sc": "#111111",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -915,8 +1053,11 @@
 			"capacity": 21800,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "tower"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CCF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -939,8 +1080,12 @@
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "crown"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "castle",
+				"crown": 1,
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -963,8 +1108,11 @@
 			"capacity": 15500,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "letter"
+				"shape": "iberian",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CDC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -988,7 +1136,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CDL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_GET"
@@ -1013,8 +1164,12 @@
 			"capacity": 13400,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "crown"
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "lion",
+				"crown": 1,
+				"sc": "#5E2A84",
+				"c3": "#FFD100"
 			},
 			"rivals": []
 		}

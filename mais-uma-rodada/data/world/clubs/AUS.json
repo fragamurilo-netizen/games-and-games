@@ -21,8 +21,9 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "chevron"
+				"shape": "modern",
+				"field": "vee",
+				"symbol": "none"
 			},
 			"rivals": [
 				"AUS_MSC"
@@ -47,8 +48,11 @@
 			"capacity": 42500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "wave"
+				"shape": "modern",
+				"field": "halves_h",
+				"symbol": "letter",
+				"initials": "SFC",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"AUS_PAR"
@@ -74,7 +78,10 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "WSW",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"AUS_SSK"
@@ -98,7 +105,16 @@
 			"stadium": "AAMI Park",
 			"capacity": 30000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MC",
+				"c2": "#0D2A5C",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			}
 		},
 		{
 			"key": "AUS_CCM",
@@ -118,7 +134,14 @@
 			"stadium": "Industree Group Stadium",
 			"capacity": 20000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"c1": "#1B3A8C",
+				"c2": "#FFD100"
+			}
 		},
 		{
 			"key": "AUS_ADL",
@@ -138,7 +161,14 @@
 			"stadium": "Coopers Stadium",
 			"capacity": 16500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AU",
+				"sc": "#FFD100"
+			}
 		}
 	]
 }

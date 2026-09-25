@@ -22,7 +22,8 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "sunrise"
 			},
 			"rivals": []
 		},
@@ -46,6 +47,7 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
+				"field": "plain",
 				"symbol": "star"
 			},
 			"rivals": []
@@ -68,7 +70,13 @@
 			"stadium": "Stade Ngalandou Diouf",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TFC"
+			}
 		},
 		{
 			"key": "SEN_PIK",
@@ -88,7 +96,13 @@
 			"stadium": "Stade Alassane Djigo",
 			"capacity": 8000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ASP"
+			}
 		},
 		{
 			"key": "SEN_GOR",
@@ -108,7 +122,12 @@
 			"stadium": "Stade Demba Diop",
 			"capacity": 15000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship"
+			}
 		},
 		{
 			"key": "SEN_CAS",
@@ -128,7 +147,12 @@
 			"stadium": "Stade Aline Sitoe Diatta",
 			"capacity": 10000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tree"
+			}
 		}
 	]
 }

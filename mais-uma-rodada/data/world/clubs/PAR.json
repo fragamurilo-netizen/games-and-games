@@ -21,8 +21,11 @@
 			"capacity": 22000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "CO",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"PAR_CIC"
@@ -47,8 +50,11 @@
 			"capacity": 45000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CCP",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"PAR_DEC"
@@ -73,8 +79,11 @@
 			"capacity": 10000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -97,8 +106,11 @@
 			"capacity": 8000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "sun"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CG",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -120,7 +132,14 @@
 			"stadium": "Estadio Arsenio Erico",
 			"capacity": 4000,
 			"kit": "stripes_h",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "CN",
+				"sc": "#0055A4"
+			}
 		},
 		{
 			"key": "PAR_LUQ",
@@ -140,7 +159,14 @@
 			"stadium": "Estadio Feliciano Cáceres",
 			"capacity": 24000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CSL",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "PAR_TRI",
@@ -160,7 +186,13 @@
 			"stadium": "Estadio Martín Torres",
 			"capacity": 3000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CST"
+			}
 		},
 		{
 			"key": "PAR_DDM",
@@ -180,7 +212,14 @@
 			"stadium": "Estadio Río Parapití",
 			"capacity": 25000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "2M",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "PAR_AME",
@@ -200,7 +239,13 @@
 			"stadium": "Estadio José Tomás Silva",
 			"capacity": 3000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CSA"
+			}
 		},
 		{
 			"key": "PAR_TAC",
@@ -220,7 +265,14 @@
 			"stadium": "Estadio Toribio Vargas",
 			"capacity": 8000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CT",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

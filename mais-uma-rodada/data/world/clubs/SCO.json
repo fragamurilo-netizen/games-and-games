@@ -21,8 +21,14 @@
 			"capacity": 60000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
-				"symbol": "diamond"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "clover",
+				"text": "THE CELTIC FOOTBALL CLUB",
+				"year": "1888",
+				"c1": "#FFFFFF",
+				"c2": "#018749",
+				"sc": "#018749"
 			},
 			"rivals": [
 				"SCO_GLR"
@@ -48,7 +54,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RFC",
+				"c2": "#E30613",
+				"sc": "#FFFFFF",
+				"stars": 5,
+				"c3": "#FFD100",
+				"ribbon": "READY"
 			},
 			"rivals": [
 				"SCO_GLE"
@@ -74,7 +87,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "A",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -97,8 +113,10 @@
 			"capacity": 19800,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "diamond"
+				"shape": "round",
+				"field": "plain",
+				"symbol": "heart",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"SCO_EDG"
@@ -124,7 +142,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"SCO_EDM"
@@ -148,7 +168,13 @@
 			"stadium": "Tannadice Park",
 			"capacity": 14200,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#111111"
+			}
 		}
 	]
 }

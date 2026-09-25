@@ -104,6 +104,7 @@ static func load_world(slot: int) -> GameWorld:
 		var w := GameWorld.from_dict(data)
 		if w.clubs.is_empty() or w.season == null:
 			continue
+		ClubGenerator.upgrade_crests(w)
 		return w
 	return null
 

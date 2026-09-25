@@ -21,8 +21,13 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "modern",
-				"symbol": "bolt"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "bull_charging",
+				"text": "FC RED BULL SALZBURG",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
 			},
 			"rivals": []
 		},
@@ -45,8 +50,13 @@
 			"capacity": 28300,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "R",
+				"text": "SK RAPID WIEN",
+				"year": "1899",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"AUT_VEI"
@@ -72,7 +82,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FAK",
+				"border": "thick"
 			},
 			"rivals": [
 				"AUT_HUT"
@@ -97,8 +110,9 @@
 			"capacity": 16300,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "french",
+				"field": "halves",
+				"symbol": "cat"
 			},
 			"rivals": []
 		},
@@ -120,7 +134,14 @@
 			"stadium": "Raiffeisen Arena",
 			"capacity": 19000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "LASK",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "AUT_WAC",
@@ -140,7 +161,12 @@
 			"stadium": "Lavanttal-Arena",
 			"capacity": 7300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "wolf"
+			}
 		}
 	]
 }

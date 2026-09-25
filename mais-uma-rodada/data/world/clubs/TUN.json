@@ -21,8 +21,11 @@
 			"capacity": 60000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "EST",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"TUN_CLU"
@@ -48,7 +51,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CA"
 			},
 			"rivals": [
 				"TUN_TAR"
@@ -74,7 +79,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "crescent",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -96,7 +103,14 @@
 			"stadium": "Stade Taïeb Mhiri",
 			"capacity": 22000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CSS",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "TUN_USM",
@@ -116,7 +130,13 @@
 			"stadium": "Stade Mustapha Ben Jannet",
 			"capacity": 20000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "USM"
+			}
 		},
 		{
 			"key": "TUN_STU",
@@ -136,7 +156,13 @@
 			"stadium": "Stade Hédi Enneifer",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ST"
+			}
 		}
 	]
 }

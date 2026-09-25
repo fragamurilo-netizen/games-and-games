@@ -21,8 +21,11 @@
 			"capacity": 29000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"symbol": "letter"
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CB",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"BEL_BXL"
@@ -47,8 +50,15 @@
 			"capacity": 22500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "oval",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RSCA",
+				"crown": 1,
+				"c1": "#FFFFFF",
+				"c2": "#4F2D7F",
+				"sc": "#4F2D7F",
+				"ribbon": "MENS SANA"
 			},
 			"rivals": [
 				"BEL_BRU",
@@ -74,8 +84,11 @@
 			"capacity": 9400,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "USG",
+				"sc": "#1D5BBF"
 			},
 			"rivals": [
 				"BEL_BXL"
@@ -101,7 +114,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "gear"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "KRC"
 			},
 			"rivals": []
 		},
@@ -125,7 +140,8 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "bull"
 			},
 			"rivals": []
 		},
@@ -148,8 +164,11 @@
 			"capacity": 27600,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
-				"symbol": "letter"
+				"shape": "french",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SL",
+				"crown": 1
 			},
 			"rivals": [
 				"BEL_BXL"
@@ -173,7 +192,14 @@
 			"stadium": "Bosuilstadion",
 			"capacity": 16100,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "RAFC",
+				"sc": "#E30613"
+			}
 		},
 		{
 			"key": "BEL_MEC",
@@ -193,7 +219,14 @@
 			"stadium": "AFAS Stadion Achter de Kazerne",
 			"capacity": 16700,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "KVM",
+				"sc": "#111111"
+			}
 		}
 	]
 }

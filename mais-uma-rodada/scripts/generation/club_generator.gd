@@ -6,11 +6,17 @@ extends RefCounted
 
 const KIT_PATTERNS: Array[String] = ["plain", "stripes_v", "stripes_h", "faixa", "diagonal", "halves"]
 const KIT_PATTERN_NAMES: Array[String] = ["Liso", "Listras verticais", "Listras horizontais", "Faixa", "Diagonal", "Duas cores"]
-const CREST_SHAPES: Array[String] = ["shield", "round", "oval", "pennant", "modern", "square"]
-const CREST_SHAPE_NAMES: Array[String] = ["Escudo tradicional", "Redondo", "Oval", "Triangular", "Moderno", "Quadrado"]
-const CREST_SYMBOLS: Array[String] = ["star", "ball", "crown", "bolt", "wave", "sun", "mountain", "tower", "letter", "chevron", "cross", "diamond", "gear", "anchor"]
-const CREST_SYMBOL_NAMES: Array[String] = ["Estrela", "Bola", "Coroa", "Raio", "Ondas", "Sol", "Montanha", "Torre", "Iniciais", "Divisa", "Cruz", "Diamante", "Engrenagem", "Âncora"]
-const CREST_BORDERS: Array[String] = ["none", "thin", "thick", "double"]
+const CREST_SHAPES: Array[String] = ["shield", "heater", "iberian", "french", "swiss", "tall", "notched", "scallop", "modern", "round", "ring", "oval", "oval_ring", "octagon", "diamond", "hexagon", "square", "pennant"]
+const CREST_SHAPE_NAMES: Array[String] = ["Clássico", "Heráldico", "Ibérico", "Francês", "Suíço", "Alongado", "Recortado", "Ondulado", "Moderno", "Redondo", "Anel com nome", "Oval", "Oval com nome", "Octógono", "Losango", "Hexágono", "Quadrado", "Flâmula"]
+const CREST_FIELDS: Array[String] = ["plain", "stripes:3", "stripes:5", "hoops:3", "hoops:2", "halves", "halves_h", "quarters", "sash", "sash_r", "diag", "vee", "chevron", "cross", "saltire", "chief", "pale", "tricolor_v", "tricolor_h", "lozenges", "checky", "bordure"]
+const CREST_FIELD_NAMES: Array[String] = ["Liso", "Listras", "Listras finas", "Faixas", "Faixa central", "Meio a meio", "Meio a meio (horizontal)", "Quartos", "Faixa diagonal", "Diagonal invertida", "Diagonal", "V", "Divisa", "Cruz", "Aspa", "Chefe", "Pala", "Tricolor vertical", "Tricolor horizontal", "Losangos", "Xadrez", "Bordadura"]
+const CREST_SYMBOLS: Array[String] = ["letter", "star", "stars:3", "ball", "crown", "eagle", "lion", "lion_head", "rooster", "wolf", "bull", "bull_charging", "fox", "bird", "seagull", "owl", "bat", "bear", "horse", "ram", "cat", "tiger", "dragon", "devil", "dolphin", "bee", "antlers", "castle", "tower", "ship", "caravel", "anchor", "anchor_oars", "cannon", "hammers", "swords", "trident", "key", "lighthouse", "torch", "tree", "rose", "fleur", "clover", "shamrock", "heart", "cross_pattee", "cross_plain", "crescent", "southern_cross", "sunrise", "mountain", "waves", "bolt", "gear", "skull", "laurel", "none"]
+const CREST_SYMBOL_NAMES: Array[String] = ["Iniciais", "Estrela", "Três estrelas", "Bola", "Coroa", "Águia", "Leão", "Cabeça de leão", "Galo", "Lobo", "Touro", "Touro investindo", "Raposa", "Pássaro", "Gaivota", "Coruja", "Morcego", "Urso", "Cavalo", "Carneiro", "Felino", "Tigre", "Dragão", "Diabo", "Golfinho", "Abelha", "Chifres", "Castelo", "Torre", "Navio", "Caravela", "Âncora", "Âncora e remos", "Canhão", "Martelos", "Espadas", "Tridente", "Chave", "Farol", "Tocha", "Árvore", "Rosa", "Flor-de-lis", "Trevo", "Trevo de três folhas", "Coração", "Cruz pátea", "Cruz", "Lua crescente", "Cruzeiro do Sul", "Sol nascente", "Montanha", "Ondas", "Raio", "Engrenagem", "Caveira", "Louros", "Nenhum"]
+const CREST_BORDERS: Array[String] = ["none", "thin", "thick", "double", "gold"]
+const CREST_BORDER_NAMES: Array[String] = ["Sem borda", "Fina", "Grossa", "Dupla", "Dourada"]
+## Símbolos de clubes gerados, por grupo.
+const _CREST_ANIMALS: Array[String] = ["eagle", "lion", "lion_head", "rooster", "wolf", "bull", "fox", "bird", "owl", "bear", "horse", "ram", "cat", "tiger", "dragon", "dolphin", "bee", "seagull"]
+const _CREST_OBJECTS: Array[String] = ["star", "ball", "castle", "tower", "ship", "anchor", "hammers", "swords", "key", "lighthouse", "torch", "tree", "rose", "fleur", "clover", "cross_pattee", "sunrise", "mountain", "waves", "bolt", "gear", "stars:3"]
 const COLLARS: Array[String] = ["round", "v", "polo"]
 const SLEEVES: Array[String] = ["same", "contrast"]
 
@@ -96,7 +102,8 @@ static func from_data(_world: GameWorld, rng: RandomNumberGenerator, data: Dicti
 	_make_crest(rng, c, data.get("crest", {}))
 	# Clubes reais: as letras do escudo saem do nome curto ("Real Madrid" → RM, "Flamengo" → FLA),
 	# não do nome oficial ("Club de Regatas do Flamengo" daria CRF).
-	c.crest["initials"] = String(data.get("initials", _short_initials(c)))
+	if not (data.get("crest", {}) as Dictionary).has("initials"):
+		c.crest["initials"] = String(data.get("initials", _short_initials(c)))
 	return c
 
 
@@ -322,15 +329,121 @@ static func _make_kits(rng: RandomNumberGenerator, c: Club, hint: String) -> voi
 	}
 
 
+## Saves antigos: escudos no formato antigo (sem "field") viram os novos — os reais pelo banco
+## de dados, os gerados pelo estilo do país. Imagem importada e escudo do editor ficam.
+static func upgrade_crests(world: GameWorld) -> void:
+	var datas := {}
+	for c in world.clubs:
+		if not datas.has(c.nation):
+			var by_key := {}
+			for d in DatabaseManager.club_data(c.nation):
+				by_key[String(d.get("key", ""))] = d
+			datas[c.nation] = by_key
+	for c in world.clubs:
+		if c.crest.has("field") or c.crest.has("img") or not Overrides.club(c.key).get("crest", {}).is_empty():
+			continue
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash(c.key)
+		var data: Dictionary = datas[c.nation].get(c.key, {})
+		var hint: Dictionary = data.get("crest", {})
+		var old: Dictionary = c.crest
+		_make_crest(rng, c, hint)
+		if not hint.has("initials") and old.has("initials"):
+			c.crest["initials"] = old["initials"]
+		# Cores trocadas pelo jogador valem mais que as do banco
+		if not data.is_empty() and Array(data.get("colors", [])).size() >= 2 and (String(data["colors"][0]) != c.color1 or String(data["colors"][1]) != c.color2):
+			c.crest["c1"] = c.color1
+			c.crest["c2"] = c.color2
+
+
+## Escudo do clube: o do banco de dados (clubes reais, formato completo do CrestView) ou um
+## gerado no estilo do país. Dicas antigas (só shape/symbol) viram um escudo gerado com elas.
 static func _make_crest(rng: RandomNumberGenerator, c: Club, hint: Dictionary) -> void:
-	var shape: String = hint.get("shape", CREST_SHAPES[rng.randi_range(0, CREST_SHAPES.size() - 1)])
-	var symbol: String = hint.get("symbol", CREST_SYMBOLS[rng.randi_range(0, CREST_SYMBOLS.size() - 1)])
-	c.crest = {
-		"shape": shape, "symbol": symbol, "c1": c.color1, "c2": c.color2,
-		"border": CREST_BORDERS[RngUtil.weighted_index(rng, [1.0, 3.0, 2.0, 1.5])],
-		"initials": _initials(c),
-		"stripes": rng.randf() < 0.35,
+	if hint.has("field"):
+		c.crest = hint.duplicate(true)
+	else:
+		c.crest = _random_crest(rng, c)
+		if hint.has("shape"):
+			c.crest["shape"] = String(hint["shape"])
+		if hint.has("symbol"):
+			c.crest["symbol"] = String(CrestView.LEGACY.get(String(hint["symbol"]), String(hint["symbol"])))
+	if not c.crest.has("c1"):
+		c.crest["c1"] = c.color1
+	if not c.crest.has("c2"):
+		c.crest["c2"] = c.color2
+	if not c.crest.has("initials"):
+		c.crest["initials"] = _initials(c)
+	var shape := String(c.crest.get("shape", ""))
+	if shape == "ring" or shape == "oval_ring":
+		if String(c.crest.get("text", "")) == "":
+			c.crest["text"] = c.name.to_upper()
+		if String(c.crest.get("text2", "")) == "" and String(c.crest.get("year", "")) == "":
+			c.crest["year"] = str(c.founded)
+
+
+## Escudo gerado com a cara do futebol do país (monogramas na América do Sul, bichos na
+## Inglaterra, redondos com letras na Alemanha, crescente no mundo árabe...).
+static func _random_crest(rng: RandomNumberGenerator, c: Club) -> Dictionary:
+	var lang := String(DatabaseManager.nation(c.nation).get("lang", ""))
+	var shapes := {"shield": 3.0, "round": 3.0, "iberian": 1.0, "french": 1.0, "modern": 1.0, "ring": 0.6, "oval": 0.5, "heater": 0.5}
+	var fields := {"plain": 5.0, "stripes:3": 2.0, "hoops:3": 1.0, "halves": 1.0, "sash": 0.6, "hoops:2": 0.6, "tricolor_v": 0.3, "diag": 0.4, "chief": 0.4}
+	var kinds := {"letter": 3.0, "animal": 2.0, "object": 2.0}
+	match lang:
+		"pt_br", "pt":
+			shapes = {"shield": 5.0, "round": 2.0, "iberian": 1.0, "french": 1.0, "modern": 0.6, "ring": 0.5}
+			fields = {"plain": 4.0, "stripes:3": 3.0, "hoops:3": 2.0, "sash": 0.8, "halves": 0.6, "hoops:2": 0.8, "tricolor_h": 0.3, "chief": 0.6}
+			kinds = {"letter": 6.0, "animal": 1.5, "object": 1.5}
+		"es":
+			shapes = {"shield": 3.0, "iberian": 3.0, "round": 2.0, "french": 1.0, "ring": 0.5}
+			fields = {"plain": 4.0, "stripes:3": 3.0, "hoops:2": 1.0, "hoops:3": 1.0, "halves": 1.0, "sash": 0.8, "chief": 0.6}
+			kinds = {"letter": 5.0, "animal": 1.5, "object": 2.0}
+		"en", "sco", "en_au", "en_af":
+			shapes = {"round": 3.0, "shield": 3.0, "modern": 1.5, "ring": 1.0, "heater": 1.0, "french": 0.6}
+			fields = {"plain": 6.0, "halves": 1.0, "stripes:3": 1.0, "hoops:3": 0.6, "quarters": 0.5, "chevron": 0.5}
+			kinds = {"letter": 1.5, "animal": 5.0, "object": 3.0}
+		"de":
+			shapes = {"round": 5.0, "shield": 2.0, "diamond": 0.6, "french": 0.6, "ring": 0.8}
+			fields = {"plain": 6.0, "halves": 1.0, "hoops:2": 0.8, "stripes:3": 0.8, "diag": 0.5}
+			kinds = {"letter": 5.0, "animal": 2.0, "object": 1.5}
+		"it":
+			shapes = {"shield": 2.0, "french": 2.0, "oval": 1.5, "round": 1.5, "swiss": 0.6}
+			fields = {"plain": 4.0, "stripes:3": 2.5, "halves": 1.0, "cross": 0.6, "sash": 0.5}
+			kinds = {"letter": 2.0, "animal": 3.5, "object": 2.0}
+		"ar", "tr":
+			shapes = {"round": 6.0, "shield": 1.5, "modern": 1.0, "ring": 1.0}
+			fields = {"plain": 6.0, "stripes:3": 1.0, "halves": 1.0}
+			kinds = {"letter": 2.5, "animal": 2.0, "object": 1.5, "crescent": 1.5}
+		"ja", "ko", "zh":
+			shapes = {"round": 4.0, "shield": 2.0, "modern": 2.0}
+			fields = {"plain": 6.0, "stripes:3": 1.0, "halves": 0.8}
+			kinds = {"letter": 2.0, "animal": 3.0, "object": 2.5}
+	var shape := String(RngUtil.pick_weighted(rng, shapes))
+	var field := String(RngUtil.pick_weighted(rng, fields))
+	var kind := String(RngUtil.pick_weighted(rng, kinds))
+	var symbol := "letter"
+	match kind:
+		"animal":
+			symbol = _CREST_ANIMALS[rng.randi_range(0, _CREST_ANIMALS.size() - 1)]
+		"object":
+			symbol = _CREST_OBJECTS[rng.randi_range(0, _CREST_OBJECTS.size() - 1)]
+		"crescent":
+			symbol = "crescent"
+	var cr := {
+		"shape": shape, "field": field, "symbol": symbol, "c1": c.color1, "c2": c.color2,
+		"border": CREST_BORDERS[RngUtil.weighted_index(rng, [0.8, 3.0, 2.0, 1.2, 0.6])],
 	}
+	# Monograma sobre listras fica ilegível sem cor própria: branco ou escuro, o que contrastar.
+	if symbol == "letter" and field != "plain":
+		cr["sc"] = "#FFFFFF" if Color(c.color1).get_luminance() < 0.6 else "#15171B"
+	if field == "chief" and rng.randf() < 0.7:
+		cr["chief_text"] = c.abbr
+		cr["symbol"] = _CREST_ANIMALS[rng.randi_range(0, _CREST_ANIMALS.size() - 1)] if symbol == "letter" else symbol
+	if c.nation == "ESP" and rng.randf() < 0.35:
+		cr["crown"] = 1
+		cr["c3"] = "#E2B84A"
+	if rng.randf() < 0.06:
+		cr["stars"] = rng.randi_range(1, 3)
+	return cr
 
 
 static func _short_initials(c: Club) -> String:

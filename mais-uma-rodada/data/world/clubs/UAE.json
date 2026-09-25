@@ -22,7 +22,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -46,6 +48,7 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
+				"field": "plain",
 				"symbol": "tower"
 			},
 			"rivals": []
@@ -68,7 +71,13 @@
 			"stadium": "Estádio Al Nahyan",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "W"
+			}
 		},
 		{
 			"key": "UAE_JAZ",
@@ -88,7 +97,14 @@
 			"stadium": "Estádio Mohammed bin Zayed",
 			"capacity": 42000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "J",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "UAE_SHJ",
@@ -108,7 +124,13 @@
 			"stadium": "Estádio de Sharjah",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "S"
+			}
 		},
 		{
 			"key": "UAE_WAS",
@@ -128,7 +150,14 @@
 			"stadium": "Estádio Zabeel",
 			"capacity": 18000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "W",
+				"sc": "#111111"
+			}
 		}
 	]
 }

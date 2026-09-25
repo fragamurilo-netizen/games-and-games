@@ -22,7 +22,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "U",
+				"sc": "#8A1538",
+				"border": "thick"
 			},
 			"rivals": [
 				"PER_INT",
@@ -49,7 +53,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "AL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"PER_CRE"
@@ -75,7 +82,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SC",
+				"sc": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"PER_CRE"
@@ -100,8 +111,10 @@
 			"capacity": 40000,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
-				"symbol": "mountain"
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -125,7 +138,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -147,7 +162,13 @@
 			"stadium": "Estadio Inca Garcilaso de la Vega",
 			"capacity": 42000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "PER_ADT",
@@ -167,7 +188,13 @@
 			"stadium": "Estadio Unión Tarma",
 			"capacity": 9000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ADT"
+			}
 		},
 		{
 			"key": "PER_HUA",
@@ -187,7 +214,13 @@
 			"stadium": "Estadio Huancayo",
 			"capacity": 20000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SH"
+			}
 		},
 		{
 			"key": "PER_GRA",
@@ -207,7 +240,14 @@
 			"stadium": "Estadio Campeones del 36",
 			"capacity": 15000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CAG",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "PER_GAR",
@@ -227,7 +267,13 @@
 			"stadium": "Estadio Inca Garcilaso de la Vega",
 			"capacity": 42000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DG"
+			}
 		},
 		{
 			"key": "PER_CHA",
@@ -247,7 +293,13 @@
 			"stadium": "Estadio Los Chankas",
 			"capacity": 10000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LC"
+			}
 		},
 		{
 			"key": "PER_AAT",
@@ -267,7 +319,14 @@
 			"stadium": "Estadio Campeones del 36",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AA",
+				"sc": "#0055A4"
+			}
 		}
 	]
 }

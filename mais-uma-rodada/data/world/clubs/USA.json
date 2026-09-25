@@ -21,8 +21,12 @@
 			"capacity": 27000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "star"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFD200",
+				"border": "gold",
+				"c3": "#FFD200"
 			},
 			"rivals": [
 				"USA_LAG",
@@ -49,7 +53,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LAFC",
+				"sc": "#C39E6D",
+				"border": "gold",
+				"c3": "#C39E6D"
 			},
 			"rivals": [
 				"USA_LAS"
@@ -75,7 +84,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "bird",
+				"c1": "#231F20",
+				"c2": "#F7B5CD",
+				"sc": "#F7B5CD"
 			},
 			"rivals": [
 				"USA_ORL"
@@ -101,7 +114,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "wave"
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"USA_PDX",
@@ -128,7 +143,11 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "A",
+				"c3": "#A19060",
+				"sc": "#A19060"
 			},
 			"rivals": []
 		},
@@ -151,8 +170,10 @@
 			"capacity": 25200,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "mountain"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "tree",
+				"sc": "#EBE72B"
 			},
 			"rivals": [
 				"USA_SEA",
@@ -178,8 +199,13 @@
 			"capacity": 28000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "tower"
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NYC",
+				"text": "NEW YORK CITY FC",
+				"c2": "#041E42",
+				"sc": "#041E42"
 			},
 			"rivals": [
 				"USA_NJR"
@@ -205,7 +231,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "bolt"
+				"field": "plain",
+				"symbol": "bull_charging",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
 			},
 			"rivals": [
 				"USA_NYS"
@@ -231,7 +261,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "gear"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "COL",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"USA_CIN"
@@ -257,7 +290,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "lion_head",
+				"c1": "#263B80",
+				"c2": "#F05323",
+				"sc": "#F05323"
 			},
 			"rivals": [
 				"USA_CLB"
@@ -283,7 +320,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "U",
+				"sc": "#B19B69"
 			},
 			"rivals": [
 				"USA_NYS"
@@ -309,7 +349,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"USA_MIA"
@@ -335,7 +377,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "star"
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#1F1646"
 			},
 			"rivals": []
 		},
@@ -359,7 +403,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "tree",
+				"c1": "#111111",
+				"c2": "#00B140",
+				"sc": "#00B140"
 			},
 			"rivals": [
 				"USA_HOU"
@@ -385,7 +433,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "gear"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "H",
+				"sc": "#101820"
 			},
 			"rivals": [
 				"USA_ATX"
@@ -411,7 +462,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SKC",
+				"sc": "#002F65"
 			},
 			"rivals": []
 		},
@@ -435,7 +489,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "wave"
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#231F20"
 			},
 			"rivals": []
 		},
@@ -459,7 +515,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "mountain"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RSL",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -483,7 +542,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "wave"
+				"field": "plain",
+				"symbol": "mountain",
+				"c1": "#00245E",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"USA_SEA",
@@ -510,7 +573,10 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "modern",
-				"symbol": "sun"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SD",
+				"sc": "#F1A7C9"
 			},
 			"rivals": [
 				"USA_LAS"

@@ -22,7 +22,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "diamond"
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#FFD100"
 			},
 			"rivals": [
 				"KOR_POH"
@@ -47,8 +49,11 @@
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"symbol": "bolt"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "JB",
+				"sc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -72,7 +77,9 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "gear"
+				"field": "stripes:3",
+				"symbol": "gear",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"KOR_ULS"
@@ -97,8 +104,11 @@
 			"capacity": 66700,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"symbol": "letter"
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FCS",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -120,7 +130,12 @@
 			"stadium": "Gangneung Stadium",
 			"capacity": 22000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain"
+			}
 		},
 		{
 			"key": "KOR_SUW",
@@ -140,7 +155,12 @@
 			"stadium": "Suwon Sports Complex",
 			"capacity": 11800,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "castle"
+			}
 		},
 		{
 			"key": "KOR_DAE",
@@ -160,7 +180,14 @@
 			"stadium": "Daejeon World Cup Stadium",
 			"capacity": 40500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DHC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "KOR_GIM",
@@ -180,7 +207,13 @@
 			"stadium": "Gimcheon Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

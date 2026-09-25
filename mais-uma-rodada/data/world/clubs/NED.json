@@ -22,7 +22,11 @@
 			"kit": "faixa",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AJAX",
+				"sc": "#D2122E",
+				"border": "thick"
 			},
 			"rivals": [
 				"NED_ROT",
@@ -49,7 +53,10 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "PSV",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"NED_AMS",
@@ -76,7 +83,13 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "shield",
-				"symbol": "anchor"
+				"field": "halves",
+				"symbol": "none",
+				"chief_text": "FEYENOORD",
+				"cc": "#111111",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"NED_AMS",
@@ -103,7 +116,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AZ"
 			},
 			"rivals": []
 		},
@@ -127,7 +142,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -151,7 +168,10 @@
 			"kit": "halves",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "U",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"NED_AMS"
@@ -175,7 +195,13 @@
 			"stadium": "De Adelaarshorst",
 			"capacity": 10400,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFD100"
+			}
 		},
 		{
 			"key": "NED_NEC",
@@ -195,7 +221,14 @@
 			"stadium": "Goffertstadion",
 			"capacity": 12500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "NEC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "NED_HEE",
@@ -215,7 +248,14 @@
 			"stadium": "Abe Lenstra Stadion",
 			"capacity": 26100,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SCH",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "NED_SPA",
@@ -238,7 +278,14 @@
 			"rivals": [
 				"NED_EXC",
 				"NED_ROT"
-			]
+			],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "S",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "NED_GRO",
@@ -258,7 +305,14 @@
 			"stadium": "Euroborg",
 			"capacity": 22500,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCG",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "NED_FOR",
@@ -278,7 +332,14 @@
 			"stadium": "Fortuna Sittard Stadion",
 			"capacity": 12500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FS",
+				"sc": "#00843D"
+			}
 		},
 		{
 			"key": "NED_PEC",
@@ -298,7 +359,13 @@
 			"stadium": "MAC³PARK Stadion",
 			"capacity": 14000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PEC"
+			}
 		},
 		{
 			"key": "NED_HER",
@@ -318,7 +385,14 @@
 			"stadium": "Erve Asito",
 			"capacity": 12080,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "H",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "NED_NAC",
@@ -338,7 +412,14 @@
 			"stadium": "Rat Verlegh Stadion",
 			"capacity": 19000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NAC",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "NED_TEL",
@@ -358,7 +439,13 @@
 			"stadium": "BUKO Stadion",
 			"capacity": 5000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "NED_VOL",
@@ -378,7 +465,13 @@
 			"stadium": "Kras Stadion",
 			"capacity": 7400,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "NED_EXC",
@@ -400,7 +493,14 @@
 			"kit": "stripes_v",
 			"rivals": [
 				"NED_SPA"
-			]
+			],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "E",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

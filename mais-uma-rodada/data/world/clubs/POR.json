@@ -22,7 +22,12 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "chevron"
+				"field": "plain",
+				"symbol": "eagle",
+				"c2": "#FFFFFF",
+				"c3": "#FFD100",
+				"sc": "#FFFFFF",
+				"ribbon": "E PLURIBUS UNUM"
 			},
 			"rivals": [
 				"POR_LEO",
@@ -48,8 +53,11 @@
 			"capacity": 50000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
-				"symbol": "crown"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"POR_ENC",
@@ -76,7 +84,14 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "shield",
-				"symbol": "bolt"
+				"field": "quarters",
+				"symbol": "letter",
+				"initials": "FCP",
+				"c1": "#1D5BBF",
+				"c2": "#FFFFFF",
+				"sc": "#FFD100",
+				"crown": 1,
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"POR_ENC",
@@ -103,7 +118,11 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "castle",
+				"crown": 1,
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
 			},
 			"rivals": [
 				"POR_GMR"
@@ -129,7 +148,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "tower"
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"POR_BRG"
@@ -153,7 +174,13 @@
 			"stadium": "Estádio de São Miguel",
 			"capacity": 12500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CDSC"
+			}
 		},
 		{
 			"key": "POR_FAM",
@@ -173,7 +200,13 @@
 			"stadium": "Estádio Municipal 22 de Junho",
 			"capacity": 5300,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCF"
+			}
 		},
 		{
 			"key": "POR_GIL",
@@ -193,7 +226,13 @@
 			"stadium": "Estádio Cidade de Barcelos",
 			"capacity": 12500,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "rooster",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_MOR",
@@ -215,7 +254,13 @@
 			"kit": "plain",
 			"rivals": [
 				"POR_GMR"
-			]
+			],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MFC"
+			}
 		},
 		{
 			"key": "POR_EST",
@@ -235,7 +280,14 @@
 			"stadium": "Estádio António Coimbra da Mota",
 			"capacity": 5100,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GDEP",
+				"sc": "#0055A4"
+			}
 		},
 		{
 			"key": "POR_RAV",
@@ -255,7 +307,14 @@
 			"stadium": "Estádio dos Arcos",
 			"capacity": 5300,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RAFC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_CPI",
@@ -275,7 +334,13 @@
 			"stadium": "Estádio Pina Manique",
 			"capacity": 5000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CPAC"
+			}
 		},
 		{
 			"key": "POR_ARO",
@@ -295,7 +360,14 @@
 			"stadium": "Estádio Municipal de Arouca",
 			"capacity": 5600,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCA",
+				"sc": "#0055A4"
+			}
 		},
 		{
 			"key": "POR_NAC",
@@ -315,7 +387,14 @@
 			"stadium": "Estádio da Madeira",
 			"capacity": 5500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CDN",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_EAM",
@@ -335,7 +414,13 @@
 			"stadium": "Estádio José Gomes",
 			"capacity": 9300,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "star",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_ALV",
@@ -355,7 +440,13 @@
 			"stadium": "Complexo Desportivo do FC Alverca",
 			"capacity": 7700,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCA"
+			}
 		},
 		{
 			"key": "POR_TON",
@@ -375,7 +466,14 @@
 			"stadium": "Estádio João Cardoso",
 			"capacity": 5000,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CDT",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_AVS",
@@ -395,7 +493,13 @@
 			"stadium": "Estádio do CD Aves",
 			"capacity": 8500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AVS"
+			}
 		},
 		{
 			"key": "POR_MAR",
@@ -415,7 +519,13 @@
 			"stadium": "Estádio do Marítimo",
 			"capacity": 10600,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "cross_pattee",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_VIZ",
@@ -435,7 +545,13 @@
 			"stadium": "Estádio do FC Vizela",
 			"capacity": 6000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCV"
+			}
 		},
 		{
 			"key": "POR_ACV",
@@ -455,7 +571,13 @@
 			"stadium": "Estádio do Fontelo",
 			"capacity": 7000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AV"
+			}
 		},
 		{
 			"key": "POR_CHA",
@@ -475,7 +597,14 @@
 			"stadium": "Estádio Municipal Eng. Manuel Branco Teixeira",
 			"capacity": 8400,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GDC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_LEI",
@@ -495,7 +624,13 @@
 			"stadium": "Estádio do Mar",
 			"capacity": 9800,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "anchor",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_FEI",
@@ -515,7 +650,13 @@
 			"stadium": "Estádio Marcolino de Castro",
 			"capacity": 5400,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CDF"
+			}
 		},
 		{
 			"key": "POR_PEN",
@@ -535,7 +676,13 @@
 			"stadium": "Estádio Municipal 25 de Abril",
 			"capacity": 5200,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCP"
+			}
 		},
 		{
 			"key": "POR_OLI",
@@ -555,7 +702,14 @@
 			"stadium": "Estádio Carlos Osório",
 			"capacity": 3000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "UDO",
+				"sc": "#111111"
+			}
 		},
 		{
 			"key": "POR_PTM",
@@ -575,7 +729,14 @@
 			"stadium": "Estádio Municipal de Portimão",
 			"capacity": 9500,
 			"kit": "stripes_v",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "PSC",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_TOR",
@@ -595,7 +756,14 @@
 			"stadium": "Estádio Manuel Marques",
 			"capacity": 2500,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SCUT",
+				"sc": "#E30613"
+			}
 		},
 		{
 			"key": "POR_ULE",
@@ -615,7 +783,13 @@
 			"stadium": "Estádio Dr. Magalhães Pessoa",
 			"capacity": 23800,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_PAC",
@@ -635,7 +809,14 @@
 			"stadium": "Estádio Capital do Móvel",
 			"capacity": 9000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCPF",
+				"sc": "#00843D"
+			}
 		},
 		{
 			"key": "POR_FAR",
@@ -655,7 +836,13 @@
 			"stadium": "Estádio de São Luís",
 			"capacity": 7000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_LOU",
@@ -675,7 +862,13 @@
 			"stadium": "Estádio do Lusitânia",
 			"capacity": 3000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LFC"
+			}
 		},
 		{
 			"key": "POR_FEL",
@@ -695,7 +888,14 @@
 			"stadium": "Estádio Dr. Machado de Matos",
 			"capacity": 8000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCF",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_BOA",
@@ -715,7 +915,14 @@
 			"stadium": "Estádio do Bessa",
 			"capacity": 28200,
 			"kit": "halves",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "checky",
+				"symbol": "none",
+				"c1": "#FFFFFF",
+				"c2": "#111111"
+			}
 		},
 		{
 			"key": "POR_BEL",
@@ -735,7 +942,13 @@
 			"stadium": "Estádio do Restelo",
 			"capacity": 19800,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "cross_pattee",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "POR_AAC",
@@ -755,7 +968,14 @@
 			"stadium": "Estádio Cidade de Coimbra",
 			"capacity": 30000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AAC",
+				"sc": "#FFFFFF"
+			}
 		}
 	]
 }

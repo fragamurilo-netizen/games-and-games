@@ -22,7 +22,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"symbol": "letter"
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#111111"
 			},
 			"rivals": [
 				"QAT_KNI"
@@ -48,7 +50,9 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"symbol": "crown"
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF"
 			},
 			"rivals": [
 				"QAT_ZAE"
@@ -72,7 +76,13 @@
 			"stadium": "Estádio Ahmad bin Ali",
 			"capacity": 44000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			}
 		},
 		{
 			"key": "QAT_GHA",
@@ -92,7 +102,13 @@
 			"stadium": "Estádio Thani bin Jassim",
 			"capacity": 21000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#0055A4"
+			}
 		},
 		{
 			"key": "QAT_ARA",
@@ -112,7 +128,13 @@
 			"stadium": "Estádio Grand Hamad",
 			"capacity": 13000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "A"
+			}
 		},
 		{
 			"key": "QAT_WAK",
@@ -132,7 +154,12 @@
 			"stadium": "Estádio Saoud bin Abdulrahman",
 			"capacity": 12000,
 			"kit": "plain",
-			"rivals": []
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship"
+			}
 		}
 	]
 }

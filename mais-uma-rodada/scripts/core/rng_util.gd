@@ -15,6 +15,13 @@ static func pick(rng: RandomNumberGenerator, arr: Array) -> Variant:
 	return arr[rng.randi_range(0, arr.size() - 1)]
 
 
+## Sorteia uma chave de {chave: peso} proporcionalmente aos pesos.
+static func pick_weighted(rng: RandomNumberGenerator, table: Dictionary) -> Variant:
+	var keys := table.keys()
+	var i := weighted_index(rng, table.values())
+	return keys[i] if i >= 0 else null
+
+
 ## Retorna um índice sorteado proporcionalmente aos pesos (pesos <= 0 nunca são sorteados).
 static func weighted_index(rng: RandomNumberGenerator, weights: Array) -> int:
 	var total := 0.0
