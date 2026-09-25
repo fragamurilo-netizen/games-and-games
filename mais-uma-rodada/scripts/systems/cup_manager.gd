@@ -339,6 +339,7 @@ static func compute_qualified(world: GameWorld) -> Dictionary:
 			ranked[nation] = CompetitionManager.sorted_ids(league)
 	var out := _fill_by_level(world, ranked)
 	# Campeões das copas nacionais: vaga na copa indicada se ainda não têm uma igual ou maior.
+	var protected: Array = []
 	for id in domestic_ids():
 		var dest := String(cfg(id).get("qualifies", ""))
 		var dc: Cup = world.season.cups.get(id, null)
@@ -351,7 +352,8 @@ static func compute_qualified(world: GameWorld) -> Dictionary:
 			if out[cid].has(dc.champion) and cup_level(cid) <= cup_level(dest) and cfg(cid).get("confed", "") == cfg(dest).get("confed", ""):
 				already = true
 		if not already:
-			_place_holder(world, out, dc.champion, dest)
+			_place_holder(world, out, dc.champion, dest, protected)
+		protected.append(dc.champion)
 	# Vagas de campeão continental: [clube, copa de destino]
 	var holders: Array = []
 	for id in continental_ids():
@@ -361,7 +363,8 @@ static func compute_qualified(world: GameWorld) -> Dictionary:
 		var dest: String = id if cup_level(id) == 1 else _top_cup_of_confed(String(cfg(id).get("confed", "")))
 		holders.append([cup.champion, dest])
 	for h in holders:
-		_place_holder(world, out, int(h[0]), String(h[1]))
+		_place_holder(world, out, int(h[0]), String(h[1]), protected)
+		protected.append(int(h[0]))
 	return out
 
 
@@ -421,7 +424,8 @@ static func _fill_by_level(_world: GameWorld, ranked: Dictionary) -> Dictionary:
 
 ## Garante `holder` na copa `dest`: sai de onde estiver; na copa de destino ocupa o lugar do último
 ## classificado do seu país (que desce para a copa de nível seguinte, se houver).
-static func _place_holder(world: GameWorld, out: Dictionary, holder: int, dest: String) -> void:
+## protected: clubes com vaga garantida por título (campeões de copa) — nunca são os deslocados.
+static func _place_holder(world: GameWorld, out: Dictionary, holder: int, dest: String, protected: Array = []) -> void:
 	if dest == "" or not out.has(dest) or out[dest].has(holder):
 		return
 	for id in out:
@@ -430,7 +434,7 @@ static func _place_holder(world: GameWorld, out: Dictionary, holder: int, dest: 
 	var nation := world.club(holder).nation
 	var displaced := -1
 	for i in range(list.size() - 1, -1, -1):
-		if world.club(list[i]).nation == nation:
+		if world.club(list[i]).nation == nation and not protected.has(list[i]):
 			displaced = list[i]
 			list[i] = holder
 			break
@@ -438,8 +442,14 @@ static func _place_holder(world: GameWorld, out: Dictionary, holder: int, dest: 
 		if list.is_empty():
 			list.append(holder)
 			return
-		displaced = list[list.size() - 1]
-		list[list.size() - 1] = holder
+		for i in range(list.size() - 1, -1, -1):
+			if not protected.has(list[i]):
+				displaced = list[i]
+				list[i] = holder
+				break
+		if displaced < 0:
+			list.append(holder)
+			return
 	var next := ""
 	for id in out:
 		if cfg(id).get("confed", "") == cfg(dest).get("confed", "") and cup_level(id) == cup_level(dest) + 1:

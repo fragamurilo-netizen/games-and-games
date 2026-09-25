@@ -151,11 +151,12 @@ static func expected_gate(club: Club) -> int:
 	return expected_attendance(club, null, false) * ticket_price(club) * home_games(club.league_id)
 
 
-## Patrocínio: completa a receita típica do nível do clube (cresce com a reputação).
+## Patrocínio: completa a receita típica do nível do clube (cresce com a reputação) e segue o
+## momento comercial do clube (campanhas, títulos, rebaixamento).
 static func sponsor_income(club: Club) -> int:
 	var target := club_revenue_target(club)
 	var rest := target - tv_income(club) - expected_prize(club) - expected_gate(club) - merch_income(club)
-	return int(maxf(target * 0.08, rest))
+	return int(maxf(target * 0.08, rest) * club.commercial)
 
 
 static func maintenance_cost(club: Club) -> int:

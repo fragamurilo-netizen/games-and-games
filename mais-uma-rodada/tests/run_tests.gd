@@ -1401,8 +1401,19 @@ func _test_xray() -> void:
 			rb = int(c.sheet.starters[i])
 		if int(slots[i]["pos"]) == Pos.RW:
 			rw = int(c.sheet.starters[i])
+	# Referência: os mesmos jogos sem a instrução
+	var right0 := 0
+	for k in 60:
+		var foe0: Club = w.clubs_in_league("BRA1")[k % 3]
+		if foe0.id == c.id:
+			foe0 = w.clubs_in_league("BRA1")[3]
+		var sim0 := MatchSimulation.new()
+		sim0.setup(w, c, foe0, c.sheet.duplicate_sheet(), ClubAI.prepare_ai_sheet(w, foe0, c, false), {"competition": "BRA1", "attendance": 20000}, 100 + k, false)
+		sim0.run_to_end()
+		right0 += int(TacticalXRay.analyze(w, sim0)["against"]["lanes"][2])
 	c.sheet.instr[rb] = "avancar"
 	var right := 0
+	var right60 := 0
 	var left := 0
 	var reports := 0
 	var fb_flagged := 0
@@ -1421,6 +1432,8 @@ func _test_xray() -> void:
 		var la: Array = rep["against"]["lanes"]
 		left += int(la[0])
 		right += int(la[2])
+		if k < 60:
+			right60 += int(la[2])
 		var total := 0
 		for ch in rep["chances"]:
 			if not bool(ch["mine"]) and int(ch["ul"]) >= 0:
@@ -1430,7 +1443,7 @@ func _test_xray() -> void:
 		check(total == int(la[0]) + int(la[1]) + int(la[2]), "corredores não somam as chances do adversário")
 		check(not Array(rep["segments"]).is_empty(), "raio-x sem trechos")
 	check(reports == 120, "raio-x não gerado em todas as partidas (%d)" % reports)
-	check(right > left * 1.15, "lado com lateral no ataque não sofreu mais (dir %d × esq %d)" % [right, left])
+	check(right60 > right0 * 1.07, "lateral no ataque não abriu o corredor (dir %d com × %d sem)" % [right60, right0])
 	check(fb_flagged > 0, "raio-x não apontou o lateral no ataque")
 	# Correção: aplicar a sugestão muda a escalação
 	var fix := {"type": "instr", "pid": rb, "instr": "segurar", "label": "segurar"}
@@ -1507,32 +1520,50 @@ func _test_trades() -> void:
 func _test_sponsors() -> void:
 	var w := _career_world()
 	var c := w.user_club()
+	c.sponsors.clear()
 	SponsorManager.open_preseason(w)
 	check(SponsorManager.is_preseason(w), "pré-temporada não abriu")
-	for s in SponsorManager.SLOTS:
-		check(SponsorManager.offers_for(w, s[0]).size() == 3, "espaço %s sem 3 propostas" % s[0])
-	var base := c.income_sponsor
-	var r := SponsorManager.sign(w, "master", 0)
-	check(r["ok"], "assinar master falhou")
-	check(c.income_sponsor > base, "master não aumentou a receita")
-	check(String(c.kit_home.get("sp", {}).get("n", "")) == String(c.sponsors["master"]["n"]), "logo do master fora da camisa")
-	check(not SponsorManager.sign(w, "master", 1)["ok"], "espaço ocupado aceitou outro contrato")
-	r = SponsorManager.sign(w, "manga", 1) # por vitória
-	var b0 := c.balance
-	SponsorManager.on_win(w, c)
-	check(c.balance - b0 == int(c.sponsors["manga"]["b"]) and int(c.sponsors["manga"]["b"]) > 0, "bônus por vitória não pago")
-	check(int(c.ledger.get("bonus_patrocinio", 0)) == int(c.sponsors["manga"]["b"]), "bônus fora das finanças")
-	check(SponsorManager.breakdown(c).size() == 3 and int(SponsorManager.breakdown(c)[2]["e"]) > 0, "detalhamento de patrocínio incompleto")
-	var signed := SponsorManager.close_preseason(w)
-	check(signed.size() == 3 and c.sponsors.size() == 5, "diretoria não fechou os espaços vazios")
-	check(not SponsorManager.is_preseason(w), "pré-temporada não fechou")
+	check(c.sponsors.size() == SponsorManager.SLOTS.size(), "diretoria não fechou todos os espaços (%d)" % c.sponsors.size())
 	for key in ["sp", "sup", "sp_m", "sp_c", "sp_s"]:
 		check(c.kit_home.has(key) and c.kit_away.has(key), "logo %s fora do uniforme" % key)
-	var c2 := Club.from_dict(c.to_dict())
-	check(c2.sponsors.size() == 5, "patrocínios não salvos")
-	# Receita total com todos os espaços fica perto da receita típica
+	check(String(c.kit_home.get("sp", {}).get("n", "")) == String(c.sponsors["master"]["n"]), "logo do master fora da camisa")
 	var typical := FinanceManager.sponsor_income(c)
 	check(c.income_sponsor > typical * 0.75 and c.income_sponsor < typical * 1.25, "receita de patrocínio desbalanceada (%d vs %d)" % [c.income_sponsor, typical])
+	check(SponsorManager.breakdown(c).size() == 6, "detalhamento de patrocínio incompleto")
+	var c2 := Club.from_dict(c.to_dict())
+	check(c2.sponsors.size() == 5 and is_equal_approx(c2.commercial, c.commercial), "patrocínios não salvos")
+	SponsorManager.close_preseason(w)
+	check(not SponsorManager.is_preseason(w), "pré-temporada não fechou")
+	# Momento comercial: clube em alta recebe propostas maiores e a diretoria trava por mais tempo
+	c.commercial = 1.3
+	c.sponsors.clear()
+	SponsorManager.open_preseason(w)
+	var hi := c.income_sponsor
+	var hi_yrs := int(c.sponsors["master"]["yrs"])
+	c.commercial = 0.8
+	c.sponsors.clear()
+	SponsorManager.open_preseason(w)
+	check(c.income_sponsor < hi * 0.8, "momento comercial não mexeu no valor (%d vs %d)" % [c.income_sponsor, hi])
+	check(int(c.sponsors["master"]["yrs"]) < hi_yrs, "diretoria deveria fechar curto em baixa e longo em alta")
+	# Cláusulas: título paga bônus; rebaixamento corta contratos em vigor
+	for slot in c.sponsors:
+		c.sponsors[slot]["y"] = w.year + 1
+	var b0 := c.balance
+	var v0 := int(c.sponsors["master"]["v"])
+	SponsorManager._clauses(w, c, 1, true, false)
+	check(c.balance > b0 and int(c.ledger.get("bonus_patrocinio", 0)) > 0, "bônus por título não pago")
+	SponsorManager._clauses(w, c, 0, false, true)
+	check(int(c.sponsors["master"]["v"]) < v0, "rebaixamento não cortou o contrato")
+	# Fim de temporada mexe no momento de todos os clubes
+	var before := {}
+	for cl: Club in w.clubs:
+		before[cl.id] = cl.commercial
+	SponsorManager.season_close(w, {})
+	var moved := 0
+	for cl: Club in w.clubs:
+		if not is_equal_approx(before[cl.id], cl.commercial):
+			moved += 1
+	check(moved > w.clubs.size() / 2, "momento comercial parado no fim da temporada")
 	check(KitView.style_combinations() >= 100, "poucas combinações de uniforme")
 
 

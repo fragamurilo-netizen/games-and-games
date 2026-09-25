@@ -289,9 +289,8 @@ func _sponsor_lines(w: GameWorld, club: Club, card: VBoxContainer) -> void:
 		card.add_child(UIKit.kv(cap, val, UIColors.GREEN))
 		total += int(b["v"]) + int(b["e"])
 	card.add_child(UIKit.kv("Total de patrocínio", Fmt.money(total), UIColors.GREEN))
-	if club.sponsors.size() < SponsorManager.SLOTS.size():
-		var hint := "Espaços livres no uniforme: feche contratos na pré-temporada." if SponsorManager.is_preseason(w) else "Espaços livres no uniforme podem ser vendidos na próxima pré-temporada."
-		card.add_child(UIKit.button(hint, "GhostButton", func(): UIManager.push("kit"), "money"))
+	var mk := SponsorManager.market_label(club)
+	card.add_child(UIKit.kv("Momento comercial", String(mk[0]), mk[1]))
 
 
 func _structure_card(w: GameWorld, club: Club) -> Control:

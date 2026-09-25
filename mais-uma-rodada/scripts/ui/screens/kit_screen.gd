@@ -530,35 +530,28 @@ func _randomize(k: Dictionary, club: Club) -> void:
 # Patrocínios
 # ---------------------------------------------------------------------------
 
-func _sponsors_card(w: GameWorld, club: Club, pre: bool) -> Control:
+func _sponsors_card(w: GameWorld, club: Club, _pre: bool) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Patrocínios"))
+	var mk := SponsorManager.market_label(club)
 	card.add_child(UIKit.kv("Receita de patrocínio na temporada", Fmt.money(club.income_sponsor), UIColors.GREEN))
-	if pre:
-		card.add_child(UIKit.label("Escolha uma proposta para cada espaço. Valor fixo é garantido; por vitória paga menos de base e um bônus a cada vitória; longo prazo trava o valor por 3 temporadas. O que ficar vazio, a diretoria fecha com o valor fixo no primeiro jogo.", "Small", true))
+	card.add_child(UIKit.kv("Momento comercial", String(mk[0]), mk[1]))
+	card.add_child(UIKit.label("Contratos negociados pela diretoria. Campanhas fortes e títulos valorizam as próximas renovações.", "Small", true))
 	for s in SponsorManager.SLOTS:
 		var slot: String = s[0]
 		card.add_child(UIKit.label(String(s[1]).to_upper(), "Caps"))
 		var cur: Dictionary = club.sponsors.get(slot, {})
-		if not cur.is_empty():
-			card.add_child(_sponsor_row(cur, "Contrato até %d" % int(cur.get("y", w.year)), Callable()))
+		if cur.is_empty():
+			card.add_child(UIKit.label("Espaço livre: a diretoria negocia na próxima pré-temporada.", "Muted", true))
 			continue
-		var offers := SponsorManager.offers_for(w, slot) if pre else []
-		if offers.is_empty():
-			card.add_child(UIKit.label("Sem patrocinador neste espaço." if not pre else "Nenhuma proposta.", "Muted"))
-			continue
-		for i in offers.size():
-			var idx := i
-			var o: Dictionary = offers[i]
-			card.add_child(_sponsor_row(o, String(SponsorManager.KIND_NAMES.get(String(o.get("kind", "")), "")), func():
-				UIManager.confirm("Fechar com %s?" % String(o["n"]), "%s por %s/ano%s, por %s." % [SponsorManager.slot_name(slot), Fmt.money(int(o["v"])),
-					(" + %s por vitória" % Fmt.money(int(o["b"]))) if int(o.get("b", 0)) > 0 else "", Fmt.plural(int(o.get("yrs", 1)), "temporada", "temporadas")], "Assinar", func():
-					var r := SponsorManager.sign(w, slot, idx)
-					UIManager.toast(r["msg"], UIColors.GREEN if r["ok"] else UIColors.RED)
-					if r["ok"]:
-						AudioManager.play("sign")
-						GameManager.save_now()
-					_changed())))
+		var terms: Array = ["até %d" % int(cur.get("y", w.year))]
+		if float(cur.get("tb", 0.0)) > 0.0:
+			terms.append("+%d%% por título" % int(round(float(cur["tb"]) * 100)))
+		if float(cur.get("qb", 0.0)) > 0.0:
+			terms.append("+%d%% com vaga continental" % int(round(float(cur["qb"]) * 100)))
+		if float(cur.get("rc", 0.0)) > 0.0:
+			terms.append("−%d%% se cair" % int(round(float(cur["rc"]) * 100)))
+		card.add_child(_sponsor_row(cur, " · ".join(terms), Callable()))
 	return UIKit.card_panel(card)
 
 

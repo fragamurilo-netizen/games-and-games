@@ -739,6 +739,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 			scorer = {"id": sp.id, "name": sp.display_name(), "club": world.club(sp.club_id).short_name if sp.club_id >= 0 else "", "goals": sp.cup_stats[cid][Player.C_GOALS]}
 		summary["cups"].append({"id": cid, "name": cup.name, "champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer})
 		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer, "mvp": extra["cups"].get(cid, {})}
+	# Patrocínio: momento comercial de cada clube e cláusulas dos contratos do usuário
+	summary["sponsor"] = SponsorManager.season_close(world, moves)
 	# Seleções: torneios de verão (Copa do Mundo, Eurocopa, Copa América...)
 	summary["intl"] = NationalTeamManager.play_summer(world)
 	# Prêmios mundiais: júri de jornalistas de cada país, com a temporada e o verão na conta

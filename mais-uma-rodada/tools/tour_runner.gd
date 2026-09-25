@@ -174,14 +174,11 @@ func _run() -> void:
 	ks.scroll_vertical = 100000
 	await _frames(4)
 	await _shot("06c_patrocinios")
-	SponsorManager.sign(w, "master", 0)
 	_screen().refresh()
 	await _frames(4)
 	ks.scroll_vertical = 0
 	await _frames(4)
 	await _shot("06d_uniforme_master")
-	for sl in ["fornecedor", "manga", "costas", "calcao"]:
-		SponsorManager.sign(w, sl, 0)
 	_screen().refresh()
 	await _frames(4)
 	await _shot("06d2_uniforme_todos")

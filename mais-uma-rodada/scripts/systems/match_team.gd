@@ -304,9 +304,12 @@ func _recompute_lanes() -> void:
 		var l := lane_of(mp)
 		var att := mp.c_att * mp.f * mp.w_att
 		var dfv := mp.c_def * mp.f * mp.w_def
+		# Quem sobe deixa o corredor aberto na perda da bola (só no corredor: a defesa geral já
+		# levou o ajuste da instrução).
+		var lane_dfv := dfv * (1.0 - float(mp.instr.get("gap", 0.0)))
 		if l == 1:
 			la[1] += att
-			ld[1] += dfv
+			ld[1] += lane_dfv
 			# Quem joga por dentro ainda cobre um pouco os lados.
 			ld[0] += dfv * 0.2
 			ld[2] += dfv * 0.2
@@ -314,7 +317,7 @@ func _recompute_lanes() -> void:
 			la[2] += att * 0.1
 		else:
 			la[l] += att + mp.c_att * mp.f * mp.w_wide * 0.3
-			ld[l] += dfv
+			ld[l] += lane_dfv
 			ld[1] += dfv * 0.15
 	for i in 3:
 		lane_att[i] = maxf(5.0, la[i])

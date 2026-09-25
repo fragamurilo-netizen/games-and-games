@@ -16,7 +16,7 @@ const LIFETIME := 3 # jogos para decidir
 const KINDS := {
 	"raise": {"w": 1.2, "icon": "money", "color": "ORANGE"},
 	"minutes": {"w": 1.0, "icon": "clock", "color": "ORANGE"},
-	"sponsor": {"w": 0.8, "icon": "money", "color": "GREEN"},
+	"sponsor": {"w": 0.0, "icon": "money", "color": "GREEN"}, # patrocínio é da diretoria (fica só para saves antigos)
 	"press": {"w": 1.2, "icon": "news", "color": "BLUE"},
 	"fans": {"w": 1.0, "icon": "heart", "color": "RED"},
 	"invest": {"w": 0.6, "icon": "shield", "color": "GREEN"},

@@ -170,8 +170,8 @@ static func on_new_job(world: GameWorld) -> void:
 		{"k": "screen", "s": "relations", "args": {"tab": "board"}}, -1, c.id)
 	_squad_intro(world)
 	if SponsorManager.is_preseason(world):
-		send(world, "futebol", "Pré-temporada: uniforme e patrocínios",
-			"Antes da estreia precisamos fechar o uniforme da temporada e os contratos de patrocínio. Os amistosos da pré-temporada também estão abertos para marcar.",
+		send(world, "futebol", "Pré-temporada: uniforme da temporada",
+			"Antes da estreia precisamos definir o uniforme da temporada. Os patrocínios ficam com a diretoria. Os amistosos da pré-temporada também estão abertos para marcar.",
 			{"k": "screen", "s": "kit"})
 
 
@@ -228,8 +228,8 @@ static func on_new_season(world: GameWorld) -> void:
 			BoardManager.label(c.board_confidence).to_lower()],
 		{"k": "screen", "s": "relations", "args": {"tab": "board"}}, -1, c.id)
 	if SponsorManager.is_preseason(world):
-		send(world, "futebol", "Pré-temporada: uniforme e patrocínios",
-			"Nova temporada, uniforme novo. Precisamos fechar o modelo e os patrocínios antes da estreia.",
+		send(world, "futebol", "Pré-temporada: uniforme da temporada",
+			"Nova temporada, uniforme novo. Precisamos fechar o modelo antes da estreia.",
 			{"k": "screen", "s": "kit"})
 
 
