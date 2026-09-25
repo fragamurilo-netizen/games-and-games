@@ -18,6 +18,7 @@ $words = max( 200, (int) ( $argv[3] ?? 700 ) );
 define( 'GO_VERGE_DIR', $theme );
 define( 'GO_VERGE_URI', 'https://example.test/wp-content/themes/overdrive' );
 $GLOBALS['__stub_ctx'] = array( 'context' => 'single_post', 'singular' => 'post', 'page_slug' => '' );
+if ( is_readable( $theme . '/inc/ads/engine-settings.php' ) ) { require $theme . '/inc/ads/engine-settings.php'; }
 foreach ( array( 'mode', 'config', 'calendar-trials', 'economics', 'yield', 'context', 'consent', 'renderer', 'planner', 'composer', 'topscroll' ) as $m ) {
 	require $theme . '/inc/ads/' . $m . '.php';
 }

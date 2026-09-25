@@ -13,6 +13,7 @@ require __DIR__ . '/wp-stubs.php';
 $theme = rtrim( $argv[1] ?? '', '/' );
 if ( '' === $theme || ! is_dir( $theme . '/inc/ads' ) ) { fwrite( STDERR, "usage: php plan-bench.php <theme-dir>\n" ); exit( 2 ); }
 define( 'GO_VERGE_DIR', $theme );
+if ( is_readable( $theme . '/inc/ads/engine-settings.php' ) ) { require $theme . '/inc/ads/engine-settings.php'; }
 require $theme . '/inc/ads/config.php';
 require $theme . '/inc/ads/planner.php';
 

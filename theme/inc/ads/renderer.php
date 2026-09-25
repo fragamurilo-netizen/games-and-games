@@ -94,6 +94,20 @@ function go_verge_ads_viewport_variant( $unit, $viewport, $placement ) {
 	if ( 'tablet-up' === $viewport ) {
 		$unit['min_viewport'] = max( $phone_max + 1, absint( $unit['min_viewport'] ?? 0 ) );
 		unset( $unit['mobile_only'] );
+		/*
+		 * 5.8.0: the 3.53 fixed geometry. A responsive request from this host
+		 * resolves to a ~90px leaderboard; the 970x250 billboard this position
+		 * exists to sell is only asked for when it is requested by size. The
+		 * runtime picks the widest declared size that fits the host, so tablets
+		 * get 728x90. go-ads.css reserves the billboard height from first paint
+		 * at desktop width.
+		 */
+		if ( function_exists( 'go_verge_ads_engine_setting' ) && go_verge_ads_engine_setting( 'masthead_billboard' ) ) {
+			$unit['sizing']         = 'fixed';
+			$unit['fixed_sizes']    = array( array( 970, 250 ), array( 728, 90 ) );
+			$unit['requested_size'] = 'exact 970x250 / 728x90 from 768px';
+			$unit['collapse_unfilled'] = true;
+		}
 		return $unit;
 	}
 	$sizes = array();

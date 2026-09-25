@@ -1,5 +1,5 @@
 /**
- * Overdrive 13.3 — manual inventory with account-managed Auto Ads.
+ * Overdrive 13.2 — manual inventory with account-managed Auto Ads.
  *
  * DELIVERY MODEL
  * Publisher inventory retains its own planner. Auto Ads placement and formats
@@ -15,9 +15,7 @@
  *   1. geometry   — real rendered pixels, never a server estimate;
  *   2. arrival    — predicted time until the reader reaches the slot;
  *   3. exposure   — predicted time the creative would be on screen;
- *   4. governor   — pacing and advance supply from observed reader behaviour;
- *   5. viewability — each unit's measured seven-day Active View, and whether
- *                    the reader is reading or skimming (13.3).
+ *   4. governor   — pacing and advance supply from observed reader behaviour.
  *
  * WHAT IT WILL NEVER DO
  * - refresh, retry or re-request a placement (one request per placement, per
@@ -34,7 +32,7 @@
   'use strict';
   if (w.GOAdsRuntime) return;
 
-  var VERSION = '13.3.0-viewability-first', LABEL_BAND = 32, DAY = 86400000;
+  var VERSION = '13.2.0-premium-order', LABEL_BAND = 32, DAY = 86400000;
   var YIELD = w.GOAdsYieldConfig || {};
   var DELIVERY = YIELD.delivery_v2 || {};
   var diagnosticRate = Math.max(0, Math.min(1, Number(DELIVERY.diagnostic_sample_rate) || 0));
@@ -49,16 +47,16 @@
   var DEFAULT_PROFILE = {
     min_gap_px: 300, density_window_vh: 0.90, max_units_in_window: 3,
     max_local_ad_ratio: 0.45, max_ad_to_content_ratio: 0.45, min_stream_gap_px: 380,
-    rest_lead_vh: { reach: 0.62, premium: 0.55, standard: 0.48, deep: 0.42, completion: 0.38 },
-    rest_lead_min_px: 240, rest_lead_max_px: 700,
-    max_lookahead_vh: 1.25, flick_vh_s: 2.0, request_spacing_ms: 90,
+    rest_lead_vh: { reach: 1.00, premium: 0.90, standard: 0.75, deep: 0.60, completion: 0.52 },
+    rest_lead_min_px: 260, rest_lead_max_px: 1100,
+    max_lookahead_vh: 1.8, flick_vh_s: 2.0, request_spacing_ms: 90,
     engage_scroll_vh: 0.07, engage_dwell_ms: 1500, fling_tau_s: 0.35,
     critical_stage_ms: 0
   };
   var DEFAULT_GOVERNOR = {
     expansion_depth: 0.40, expansion_dwell_ms: 18000, expansion_deep_depth: 0.58,
     expansion_prior_depth: 0.70, expansion_prior_floor: 0.35,
-    warmup_lookahead_vh: 0.62, conservative_lookahead_vh: 0.90,
+    warmup_lookahead_vh: 1.15, conservative_lookahead_vh: 1.25,
     spacing_scale: { warmup: 1, standard: 1, conservative: 1.20, expansion: 0.94 }
   };
 
@@ -77,23 +75,6 @@
    */
   var trialSignal = (function (value) { return (value && typeof value === 'object') ? value : null; })(YIELD.trial);
   function clamp(n, min, max) { n = Number(n); return isFinite(n) ? Math.max(min, Math.min(max, n)) : min; }
-  /* Active View band the per-unit controller steers toward (inc/ads/yield.php,
-   * go_verge_ads_viewability_policy). Bounded here like every other rule. */
-  var VIEW_POLICY = (function (raw) {
-    raw = (raw && typeof raw === 'object') ? raw : {};
-    return {
-      enabled: raw.enabled !== false,
-      target: clamp(num(raw.target, 0.62), 0.40, 0.85),
-      healthy_margin: clamp(num(raw.healthy_margin, 0.08), 0, 0.30),
-      healthy_scale: clamp(num(raw.healthy_scale, 1.08), 1, 1.30),
-      floor: clamp(num(raw.floor, 0.50), 0.30, 1),
-      flick_guard_below: clamp(num(raw.flick_guard_below, 0.45), 0, 0.85),
-      min_lead_px: clamp(num(raw.min_lead_px, 140), 60, 400),
-      skim_vh: clamp(num(raw.skim_vh, 1.5), 0, 6),
-      skim_window_ms: clamp(num(raw.skim_window_ms, 2500), 800, 8000),
-      skim_settle_ms: clamp(num(raw.skim_settle_ms, 800), 0, 2000)
-    };
-  })(YIELD.viewability);
 
   function resolveRules() {
     var table = (YIELD.rules && typeof YIELD.rules === 'object') ? YIELD.rules : {};
@@ -174,7 +155,7 @@
   var watchedAnchors = new Set(), watchedInPage = new Map(), inPageRects = [], inPageFrame = -1;
   var providerSelector = 'ins.adsbygoogle[data-anchor-status], .google-auto-placed ins.adsbygoogle';
   var now = function () { return Math.round(w.performance && w.performance.now ? w.performance.now() : Date.now()); };
-  var motion = { y: w.pageYOffset || d.documentElement.scrollTop || 0, t: 0, velocity: 0, direction: 0, paceVh: 0, trail: [], lastScrollT: -100000 };
+  var motion = { y: w.pageYOffset || d.documentElement.scrollTop || 0, t: 0, velocity: 0, direction: 0, paceVh: 0 };
   var profileCache = { minute: -1, name: '', hour: null, weekday: '' };
   motion.t = now();
 
@@ -190,7 +171,7 @@
     profileName: '', profileHour: null, profileWeekday: '',
     auctionSignal: 'neutral',
     governor: 'warmup', governorSince: 0, governorReason: 'page-load', governorLog: [],
-    releasedStuck: 0, skimTravelVh: 0,
+    releasedStuck: 0,
     reserveVh: 0, reservePx: null, reserveFrame: -1, anchorFrame: -1, anchorViewport: '', anchorRects: [], clockReserve: -1
   };
 
@@ -1349,31 +1330,7 @@
      * rather than an instantaneous sample, so one wheel tick cannot flip a
      * state and a genuine flick cannot be averaged away. */
     motion.paceVh = motion.paceVh * 0.72 + (Math.abs(raw) / Math.max(1, viewportHeight())) * 0.28;
-    /* Travel memory for the skim gate: absolute distance per scroll sample. */
-    motion.trail.push({ t: t, dy: Math.abs(y - motion.y) });
-    while (motion.trail.length && t - motion.trail[0].t > VIEW_POLICY.skim_window_ms) motion.trail.shift();
-    motion.lastScrollT = t;
     motion.y = y; motion.t = t;
-  }
-  /**
-   * Skimming: more than `skim_vh` screens travelled in the last
-   * `skim_window_ms`, pauses included.
-   *
-   * The flick test above sees only instantaneous speed, and the settle timer
-   * zeroes it 170ms after every stop, so a reader who flicks a screen, glances
-   * for half a second and flicks again looked "still" at every pause. Each
-   * pause released the units ahead; the creative arrived about a second later,
-   * after the reader had gone. Served, counted, never viewable — and on Google
-   * Ads display demand a non-viewable impression is also nearly unpaid, because
-   * CPM campaigns there bid on viewable impressions. This window remembers the
-   * rhythm across the pauses.
-   */
-  function skimming() {
-    if (!VIEW_POLICY.enabled || !(VIEW_POLICY.skim_vh > 0)) return false;
-    var t = now(), travel = 0;
-    for (var i = motion.trail.length - 1; i >= 0 && t - motion.trail[i].t <= VIEW_POLICY.skim_window_ms; i--) travel += motion.trail[i].dy;
-    engine.skimTravelVh = Math.round((travel / Math.max(1, viewportHeight())) * 100) / 100;
-    return travel > viewportHeight() * VIEW_POLICY.skim_vh;
   }
   function percentile(values, p) {
     if (!values || !values.length) return null;
@@ -1681,43 +1638,9 @@
     if (!configured) return 0;
     var tier = tierOf(rec);
     var lead = clamp(usableViewportHeight() * RULES.rest_lead_vh[tier], RULES.rest_lead_min_px, RULES.rest_lead_max_px);
-    lead = Math.max(VIEW_POLICY.min_lead_px, lead * viewabilityLeadScale(rec));
+    var view = slotViewability(rec);
+    if (view != null) lead *= (view < 0.35 ? 0.85 : (view >= 0.60 ? 1.08 : 1));
     return Math.min(configured, Math.round(lead));
-  }
-
-  /**
-   * Active View controller, one ad unit at a time.
-   *
-   * The seven-day Active View of every unit arrives with the page (the Ads
-   * Center syncs it; the model is refreshed every three hours and ignored once
-   * it is a day old). Until 13.3 it moved the resting lead by at most -15% for
-   * units under 35%, so a unit sitting at 30% kept asking for a creative most
-   * of a screen before a reader who, more often than not, never arrived.
-   * Those impressions are served, counted and not viewable: they pull the
-   * site's Active View down, and Google prices every later impression of that
-   * unit on the viewability it predicts from them.
-   *
-   * Now the lead is proportional to how far the unit is from the target band:
-   * a unit at half the target asks from half the distance (never closer than
-   * `floor`, never under `min_lead_px`). A unit inside the band keeps the table
-   * value, and one comfortably above it may prepare slightly earlier. As the
-   * unit's measured Active View rises the next model gives it its lead back,
-   * so each unit settles inside the band instead of oscillating around one
-   * global setting. Timing only: no unit is removed, refreshed or re-asked.
-   * With no fresh model the scale is 1 and the table alone decides.
-   */
-  function viewabilityLeadScale(rec) {
-    var view = slotViewability(rec);
-    if (view == null || !VIEW_POLICY.enabled) return 1;
-    var target = VIEW_POLICY.target;
-    if (view >= target + VIEW_POLICY.healthy_margin) return VIEW_POLICY.healthy_scale;
-    if (view >= target) return 1;
-    return clamp(view / target, VIEW_POLICY.floor, 1);
-  }
-  /** A unit measured well below the band never asks during a flick, whatever its tier. */
-  function viewabilityFlickGuard(rec) {
-    var view = slotViewability(rec);
-    return VIEW_POLICY.enabled && view != null && view < VIEW_POLICY.flick_guard_below;
   }
   /**
    * Geometry and timing for one placement, computed once per sweep.
@@ -1821,20 +1744,8 @@
   function exposureAllows(rec) {
     if (rec.critical) return true;
     var tier = tierOf(rec);
+    if (tier === 'reach' || tier === 'premium') return true;
     var info = rangeFor(rec), rect = info && info.rect;
-    /* A skimming reader gets no look-ahead at any tier: a unit is asked for only
-     * once it is on screen AND the reader has actually stopped there. Once the
-     * travel window drains, the ordinary lead-based delivery resumes. */
-    if (skimming()) {
-      rec.exposureReason = 'skimming';
-      if (!inView(rect)) { armPace(Math.round(VIEW_POLICY.skim_window_ms / 2)); return false; }
-      var still = now() - motion.lastScrollT;
-      if (still < VIEW_POLICY.skim_settle_ms) { armPace(VIEW_POLICY.skim_settle_ms - still + 10); return false; }
-      rec.exposureReason = 'skimming-settled';
-      return true;
-    }
-    rec.exposureReason = '';
-    if ((tier === 'reach' || tier === 'premium') && !viewabilityFlickGuard(rec)) return true;
     if (inView(rect)) return true;
     if (motion.paceVh <= RULES.flick_vh_s) return true;
     armPace(180);
@@ -1989,7 +1900,6 @@
     motion.velocity = 0;
     motion.direction = 0;
     motion.paceVh = 0;
-    motion.trail = [];
     motion.y = scrollY();
     motion.t = now();
   }
@@ -2888,7 +2798,7 @@
         return { placement: r.placement, slot: r.slot, tier: r.tier, priority: r.critical ? 'critical' : 'normal', surface: r.surface,
           state: r.state, status: r.providerStatus,
           economics: { slotValue: Math.round(slotValue(r) * 1000) / 1000, coverage: Math.round(slotCoverage(r) * 1000) / 1000,
-            historicViewability: slotViewability(r), viewabilityLeadScale: Math.round(viewabilityLeadScale(r) * 1000) / 1000, exposureReason: r.exposureReason || null,
+            historicViewability: slotViewability(r),
             reachProbability: Math.round(reachProbability(r) * 1000) / 1000,
             expectedValue: Math.round(expectedValue(r) * 1000) / 1000,
             valueAtRequest: r.valueAtRequest == null ? null : r.valueAtRequest,

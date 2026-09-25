@@ -33,6 +33,16 @@ function go_verge_ads_health_result( $label, $status, $description, $test ) {
  * delivery card: one implementation, two surfaces.
  */
 function go_verge_ads_default_slot_ids() {
+	$ids = go_verge_ads_default_slot_ids_base();
+	if ( function_exists( 'go_verge_ads_engine_body_units' ) ) {
+		foreach ( go_verge_ads_engine_body_units() as $placement => $unit ) {
+			$ids[ $placement ] = $unit['slot'];
+		}
+	}
+	return $ids;
+}
+
+function go_verge_ads_default_slot_ids_base() {
 	return array(
 		'topscroll'            => '7792311754',
 		'site-masthead'        => '3572313419',

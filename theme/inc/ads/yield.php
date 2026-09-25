@@ -353,64 +353,6 @@ function go_verge_ads_cwv_guards() {
 }
 
 /**
- * The Active View band the browser steers every manual unit toward.
- *
- * AdSense prices an impression on the viewability it predicts for the unit,
- * and that prediction is learned from the unit's own history. A unit that asks
- * for creatives a screen before readers who mostly never arrive earns a low
- * Active View, and then a low price on the impressions readers DO see. The
- * runtime therefore reads each unit's seven-day Active View (synced by the Ads
- * Center, shipped in `decision.slot_viewability`) and shortens the unit's
- * request distance in proportion to how far below `target` it sits:
- *
- *   lead x max( floor, viewability / target )   below the target;
- *   lead x 1                                    inside the band;
- *   lead x healthy_scale                        above target + healthy_margin.
- *
- * Units under `flick_guard_below` also stop asking during a fast flick, even at
- * reach/premium tier. And a reader who travels more than `skim_vh` screens in
- * `skim_window_ms` (pauses included) is skimming: no unit is asked for ahead of
- * them, and one on screen only after they have been still for `skim_settle_ms`. Nothing is removed, refreshed or requested twice; this
- * is timing only, and it converges because a unit that recovers gets its lead
- * back from the next model (refreshed every three hours, ignored after 24h).
- *
- * The target sits in the middle of the 50-70% band the publisher wants. Tune:
- *   add_filter( 'go_verge_ads_viewability_policy', function ( $p ) { $p['target'] = 0.65; return $p; } );
- *
- * @return array<string,mixed>
- */
-function go_verge_ads_viewability_policy() {
-	$policy = (array) apply_filters(
-		'go_verge_ads_viewability_policy',
-		array(
-			'enabled'           => true,
-			'target'            => 0.62,
-			'healthy_margin'    => 0.08,
-			'healthy_scale'     => 1.08,
-			'floor'             => 0.50,
-			'flick_guard_below' => 0.45,
-			'min_lead_px'       => 140,
-			'skim_vh'           => 1.5,
-			'skim_window_ms'    => 2500,
-			'skim_settle_ms'    => 800,
-		)
-	);
-	return array(
-		'enabled'           => ! empty( $policy['enabled'] ),
-		'target'            => round( go_verge_ads_econ_clamp( $policy['target'] ?? 0.62, 0.40, 0.85 ), 3 ),
-		'healthy_margin'    => round( go_verge_ads_econ_clamp( $policy['healthy_margin'] ?? 0.08, 0, 0.30 ), 3 ),
-		'healthy_scale'     => round( go_verge_ads_econ_clamp( $policy['healthy_scale'] ?? 1.08, 1, 1.30 ), 3 ),
-		'floor'             => round( go_verge_ads_econ_clamp( $policy['floor'] ?? 0.50, 0.30, 1 ), 3 ),
-		'flick_guard_below' => round( go_verge_ads_econ_clamp( $policy['flick_guard_below'] ?? 0.45, 0, 0.85 ), 3 ),
-		'min_lead_px'       => (int) go_verge_ads_econ_clamp( $policy['min_lead_px'] ?? 140, 60, 400 ),
-		/* 0 turns the skim gate off. */
-		'skim_vh'           => round( go_verge_ads_econ_clamp( $policy['skim_vh'] ?? 1.5, 0, 6 ), 3 ),
-		'skim_window_ms'    => (int) go_verge_ads_econ_clamp( $policy['skim_window_ms'] ?? 2500, 800, 8000 ),
-		'skim_settle_ms'    => (int) go_verge_ads_econ_clamp( $policy['skim_settle_ms'] ?? 800, 0, 2000 ),
-	);
-}
-
-/**
  * Whether seven-day coverage says requests are not turning into matched
  * requests. Absolute rates, not relative: a comparison against the median only
  * measures dispersion and stays silent when every unit fails together.
@@ -814,7 +756,7 @@ function go_verge_ads_yield_config() {
 	}
 
 	$config = array(
-		'version'  => '9.2.0-viewability-first',
+		'version'  => '9.1.1-fixed-manual-policy',
 		/* One definition of the reporting clock: dayparts here and calendar
 		 * trials in calendar-trials.php must agree on where a day ends. */
 		'timezone' => function_exists( 'go_verge_ads_timezone' ) ? go_verge_ads_timezone() : 'America/Sao_Paulo',
@@ -867,8 +809,6 @@ function go_verge_ads_yield_config() {
 		'cwv'             => go_verge_ads_cwv_guards(),
 		/* Reserve the height a slot is actually served (see the runtime). */
 		'height_memory'   => go_verge_ads_height_memory(),
-		/* Per-unit Active View controller (see go_verge_ads_viewability_policy). */
-		'viewability'     => go_verge_ads_viewability_policy(),
 		/* Which arm of a running calendar trial today belongs to. Identical for
 		 * every reader that day; absent when no trial is enabled. */
 		'trial'           => function_exists( 'go_verge_ads_trial_public_signal' ) ? go_verge_ads_trial_public_signal() : null,

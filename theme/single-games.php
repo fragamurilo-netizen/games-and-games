@@ -199,15 +199,6 @@ while ( have_posts() ) : the_post();
 					<aside class="od-game-sidebar" aria-label="<?php esc_attr_e( 'Informações do jogo', 'go-verge' ); ?>">
 						<?php include GO_VERGE_DIR . '/template-parts/games/facts.php'; ?>
 						<?php if ( function_exists( 'go_verge_render_adsense_unit' ) ) { go_verge_render_adsense_unit( 'sidebar-desktop', array( 'tag' => 'aside', 'class' => 'go-game-sidebar-revenue go-article-sidebar__ad--sticky', 'data' => array( 'ad-surface' => 'game-sidebar' ) ) ); } ?>
-						<?php
-						/* The same sidebar below 1101px, where it stacks under the game's
-						 * content. `article-rail-mobile` has always listed single_game in
-						 * its templates but was only ever printed by the article sidebar,
-						 * so game pages carried no unit here on phones. Complementary
-						 * viewport gates (desktop_only vs max_viewport 1100) keep it to
-						 * one request per pageview in one cached document. */
-						if ( function_exists( 'go_verge_render_adsense_unit' ) ) { go_verge_render_adsense_unit( 'article-rail-mobile', array( 'tag' => 'div', 'class' => 'go-article-sidebar__ad go-article-sidebar__ad--stacked', 'data' => array( 'ad-surface' => 'game-rail-stacked-mobile' ) ) ); }
-						?>
 					</aside>
 				<?php endif; ?>
 			</div>

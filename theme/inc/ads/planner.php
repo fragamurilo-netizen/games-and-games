@@ -292,7 +292,8 @@ function go_verge_ads_planner_contract_capacity() {
 		}
 		$contiguous = $i;
 	}
-	$policy_max = defined( 'GO_VERGE_ADS_ARTICLE_MAX_RUNG' ) ? absint( GO_VERGE_ADS_ARTICLE_MAX_RUNG ) : 6;
+	$policy_max = defined( 'GO_VERGE_ADS_ARTICLE_MAX_RUNG' ) ? absint( GO_VERGE_ADS_ARTICLE_MAX_RUNG )
+		: ( function_exists( 'go_verge_ads_engine_setting' ) ? absint( go_verge_ads_engine_setting( 'body_max_rung' ) ) : 6 );
 	$policy_max = max( 1, min( 12, $policy_max ) );
 	$effective_rungs = min( $policy_max, $contiguous ?: 6 );
 	$cap = max( 1, $effective_rungs ) + 1;

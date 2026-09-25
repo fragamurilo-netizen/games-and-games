@@ -19,6 +19,7 @@ $GLOBALS['__stub_ctx'] = array(
 	'page_slug' => '',
 );
 function is_user_logged_in_stub() { return false; }
+if ( is_readable( $theme . '/inc/ads/engine-settings.php' ) ) { require $theme . '/inc/ads/engine-settings.php'; }
 foreach ( array( 'mode', 'config', 'calendar-trials', 'context', 'consent', 'renderer', 'planner', 'composer', 'topscroll' ) as $m ) {
 	require $theme . '/inc/ads/' . $m . '.php';
 }

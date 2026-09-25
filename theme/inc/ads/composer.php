@@ -407,20 +407,13 @@ function go_verge_ads_render_listing_unit( $surface = 'listing', $index = 0 ) {
  * @return string[]
  */
 function go_verge_ads_post_content_anchors() {
-	/*
-	 * 5.7.0 adds the two boundaries below the comments. On a single post the
-	 * body ladder and the three original anchors spend P1/A1..A8, F1, the
-	 * Multiplex and F2; F3..F5 were created, live and never requested on this
-	 * template. `after-comments` closes a real discussion (it is only printed
-	 * when the comments block exists) and `after-article-sections` sits between
-	 * "Leia também" and "Explore o Overdrive", the page's last recirculation
-	 * choice. Both are deep, lazily requested and subject to the same stream
-	 * spacing and density rules, so a reader who stops earlier costs nothing.
-	 */
-	return (array) apply_filters(
-		'go_verge_ads_post_content_anchors',
-		array( 'after-author', 'after-recirculation', 'before-comments', 'after-comments', 'after-article-sections' )
-	);
+	/* 5.8.0: off by default (engine setting `surface_post_content`). These deep
+	 * Display positions did not exist in the 3.53 engine, and Display below the
+	 * prose measured US$ 0,11-0,14 per thousand impressions on this account. */
+	$anchors = ( ! function_exists( 'go_verge_ads_engine_setting' ) || go_verge_ads_engine_setting( 'surface_post_content' ) )
+		? array( 'after-author', 'after-recirculation', 'before-comments' )
+		: array();
+	return (array) apply_filters( 'go_verge_ads_post_content_anchors', $anchors );
 }
 
 /**
@@ -445,24 +438,10 @@ function go_verge_ads_post_content_anchors() {
  * ad-to-content ratio every other position obeys, which is what keeps three
  * anchors from becoming three ads on a short story.
  *
- * @param string $anchor  One of go_verge_ads_post_content_anchors().
- * @param string $wrapper Optional classes for a wrapping div, printed only
- *                        around a unit that actually rendered (anchors that
- *                        sit outside the article column need the site
- *                        container, and an empty wrapper must not exist).
+ * @param string $anchor One of go_verge_ads_post_content_anchors().
  * @return bool True when an opportunity was printed.
  */
-function go_verge_ads_render_post_content_unit( $anchor, $wrapper = '' ) {
-	$wrapper = trim( implode( ' ', array_map( 'sanitize_html_class', preg_split( '/\s+/', (string) $wrapper ) ) ) );
-	if ( '' !== $wrapper ) {
-		ob_start();
-		$printed = go_verge_ads_render_post_content_unit( $anchor );
-		$markup  = (string) ob_get_clean();
-		if ( $printed && '' !== $markup ) {
-			echo '<div class="' . esc_attr( $wrapper ) . '">' . $markup . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- renderer output, escaped there.
-		}
-		return $printed;
-	}
+function go_verge_ads_render_post_content_unit( $anchor ) {
 	if ( function_exists( 'go_verge_ads_manual_delivery_enabled' ) && ! go_verge_ads_manual_delivery_enabled() ) { return false; }
 	if ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) { return false; }
 	if ( ! function_exists( 'is_singular' ) || ! is_singular( 'post' ) ) { return false; }
@@ -513,48 +492,6 @@ function go_verge_ads_render_post_content_unit( $anchor, $wrapper = '' ) {
 
 	return go_verge_ads_render_listing_unit( 'post-content-' . $anchor, 0 );
 }
-
-/**
- * The Multiplex grid at the end of every other template.
- *
- * Until 5.7.0 the grid existed only on single posts. Home, archives, hubs,
- * search and the game / production / entity pages all end the same way — the
- * reader has run out of the page and is choosing where to go next — and none of
- * them entered the native auction at all. This prints the same live unit in
- * that position, between </main> and the footer, once per document.
- *
- * It never duplicates the article grid: the renderer claims each slot id once
- * per response, and on a single post the recirculation anchor has already
- * claimed it, so this call renders nothing there. Like every other host it is
- * an OPPORTUNITY; the runtime's stream spacing keeps it from landing on top of
- * the last listing unit, and an unreached page end never requests.
- *
- * Rollback: add_filter( 'go_verge_ads_page_end_multiplex', '__return_false' ).
- *
- * @return void
- */
-function go_verge_ads_render_page_end_multiplex() {
-	if ( function_exists( 'go_verge_ads_manual_delivery_enabled' ) && ! go_verge_ads_manual_delivery_enabled() ) { return; }
-	if ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) { return; }
-	if ( ! function_exists( 'go_verge_ads_is_monetizable_request' ) || ! go_verge_ads_is_monetizable_request() ) { return; }
-	if ( ! (bool) apply_filters( 'go_verge_ads_page_end_multiplex', true ) ) { return; }
-	static $done = false;
-	if ( $done ) { return; }
-	$done = true;
-	$markup = go_verge_adsense_unit_markup(
-		'post-content-multiplex',
-		array(
-			'tag'   => 'aside',
-			'class' => 'go-post-content-multiplex go-page-end-multiplex',
-			'data'  => array( 'ad-surface' => 'page-end' ),
-		)
-	);
-	if ( '' === $markup ) {
-		return;
-	}
-	echo '<div class="go-container go-page-end-revenue">' . $markup . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built and escaped by the renderer.
-}
-add_action( 'get_footer', 'go_verge_ads_render_page_end_multiplex', 5 );
 
 /**
  * Backwards-compatible entry point for templates that schedule their own rows.

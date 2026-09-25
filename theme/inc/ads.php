@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-foreach ( array( 'mode', 'config', 'calendar-trials', 'economics', 'yield', 'context', 'consent', 'renderer', 'planner', 'composer', 'loader', 'topscroll', 'assets', 'clever' ) as $go_verge_ads_module ) {
+foreach ( array( 'engine-settings', 'mode', 'config', 'calendar-trials', 'economics', 'yield', 'context', 'consent', 'renderer', 'planner', 'composer', 'loader', 'topscroll', 'assets', 'clever' ) as $go_verge_ads_module ) {
 	require_once GO_VERGE_DIR . '/inc/ads/' . $go_verge_ads_module . '.php';
 }
 unset( $go_verge_ads_module );
@@ -42,6 +42,8 @@ if ( is_admin() ) {
 	require_once GO_VERGE_DIR . '/inc/ads/topscroll-admin.php';
 	require_once GO_VERGE_DIR . '/inc/ads/health.php';
 	require_once GO_VERGE_DIR . '/inc/ads/dashboard.php';
+	require_once GO_VERGE_DIR . '/inc/ads/engine-refine.php';
+	require_once GO_VERGE_DIR . '/inc/ads/engine-admin.php';
 }
 if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
 	require_once GO_VERGE_DIR . '/inc/ads/diagnostics.php';

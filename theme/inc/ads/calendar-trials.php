@@ -129,40 +129,27 @@ function go_verge_ads_trials() {
 		'go_verge_ads_trials',
 		array(
 			array(
-				/*
-				 * 5.7.0: o teste de antecipação do tier standard (22/09) foi
-				 * encerrado. O braço dele antecipava pedidos em dias alternados,
-				 * o oposto da meta de Active View desta versão.
-				 *
-				 * No lugar fica a prova da própria 5.7.0, DESLIGADA: a base é a
-				 * tabela nova (viewability-first) e o braço `legado` devolve as
-				 * distâncias da 5.6.7. Ligue ('enabled' => true e 'start' = o dia
-				 * seguinte) quando quiser medir, no relatório diário do AdSense,
-				 * quanto de Active View, RPM de impressão e RPM de página a
-				 * mudança vale contra a configuração anterior. Enquanto estiver
-				 * desligado, todos os dias rodam a tabela nova.
-				 */
-				'id'      => 'viewability-first-v1',
+				/* 5.8.0: stopped. Timing is now set by the engine settings and
+				 * may be changed during the day from wp-admin, which would
+				 * confound a day-by-day comparison of one rule. */
+				'id'      => 'mobile-standard-lead',
 				'enabled' => false,
-				'label'   => 'Antecipação viewability-first (5.7.0) contra a tabela 5.6.7',
-				'note'    => 'Mede se pedir o anúncio perto do leitor sobe Active View e valor por impressão sem perder receita por página. Só a antecipação muda entre os braços.',
-				'start'   => '2026-09-27',
+				'label'   => 'Antecipação do tier standard no mobile',
+				'note'    => 'Pergunta se preparar as posições standard um pouco mais cedo no telefone troca viewability por impressões de forma lucrativa. Nada além da antecipação muda.',
+				/*
+				 * A data de início é só um piso. O relatório começa a contar no
+				 * dia em que o teste foi REALMENTE visto rodando (ver
+				 * go_verge_ads_trial_first_seen), então instalar depois desta
+				 * data não faz dias do tema antigo entrarem na comparação.
+				 */
+				'start'   => '2026-09-22',
 				'days'    => 1,
 				'arms'    => array(
-					/* Baseline: the shipped (5.7.0) table, unmodified. */
-					'base'   => array(),
-					'legado' => array(
-						'mobile'  => array(
-							'rest_lead_vh'     => array( 'reach' => 1.00, 'premium' => 0.90, 'standard' => 0.75, 'deep' => 0.60, 'completion' => 0.52 ),
-							'rest_lead_min_px' => 260,
-							'rest_lead_max_px' => 1100,
-							'max_lookahead_vh' => 1.8,
-						),
-						'desktop' => array(
-							'rest_lead_vh'     => array( 'reach' => 0.85, 'premium' => 0.78, 'standard' => 0.65, 'deep' => 0.55, 'completion' => 0.50 ),
-							'rest_lead_min_px' => 280,
-							'rest_lead_max_px' => 1200,
-							'max_lookahead_vh' => 1.6,
+					/* Baseline: the shipped table, unmodified. */
+					'base' => array(),
+					'lead' => array(
+						'mobile' => array(
+							'rest_lead_vh' => array( 'standard' => 0.88 ),
 						),
 					),
 				),
