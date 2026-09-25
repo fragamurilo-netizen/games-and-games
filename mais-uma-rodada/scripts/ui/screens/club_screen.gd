@@ -466,6 +466,11 @@ func _manager_card(w: GameWorld) -> Control:
 	nr.add_child(UIKit.flag(String(m["nat"]), 30))
 	nr.add_child(UIKit.label("%d anos · %s" % [ManagerProfile.age(w), ManagerProfile.style_name(String(m["style"]))], "Small", true))
 	hc.add_child(nr)
+	var fame := CoachIdentity.headline(w)
+	if fame != "":
+		var fp := UIKit.pill(fame.to_upper(), UIColors.ACCENT, 14)
+		fp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		hc.add_child(fp)
 	head.add_child(hc)
 	card.add_child(UIKit.tap_row(head, func(): UIManager.push("manager"), "CardFlat"))
 	var row := UIKit.hbox(8)

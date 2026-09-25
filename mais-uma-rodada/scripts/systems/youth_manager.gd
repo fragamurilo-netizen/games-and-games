@@ -351,6 +351,7 @@ static func promote(world: GameWorld, p: Player) -> String:
 	p.morale = minf(100.0, p.morale + 12.0)
 	Valuation.update_value(p, world.year)
 	world.stat_add("youth_promoted")
+	CoachIdentity.on_promote(world)
 	_add_grad(world, p, club.id, 0, years_home)
 	NewsManager.post_raw(world, "%s sobe para o profissional" % p.display_name(),
 		"Aos %d anos, %s (%s) deixa a base do %s e passa a treinar com o elenco principal." % [p.age(world.year), p.display_name(), Pos.name_of(p.position).to_lower(), club.short_name],

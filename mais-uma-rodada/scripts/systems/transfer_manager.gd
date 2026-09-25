@@ -73,6 +73,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 	if p.morale < 40.0 and cur != null:
 		v += 0.15 # insatisfeito quer sair
 	v += HeartClubs.interest_delta(world, p, buyer)
+	v += CoachIdentity.interest_delta(world, p, buyer)
 	return clampf(v, 0.05, 0.95)
 
 
@@ -481,6 +482,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	var kind := Transfer.KIND_BUY if seller != null else Transfer.KIND_FREE
 	var t := Transfer.make(world.year, world.current_day(), p, seller_id, buyer.id, fee, kind)
 	world.transfer_log.append(t)
+	CoachIdentity.on_transfer(world, p, buyer, seller, fee)
 	world.stat_add("transfers")
 	world.stat_add("transfer_fees", fee)
 	# Propostas pendentes por esse jogador perdem o sentido.
