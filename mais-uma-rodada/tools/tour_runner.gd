@@ -253,6 +253,14 @@ func _run() -> void:
 	UIManager.replace("results", {"report": report})
 	await _frames(8)
 	await _shot("13_resultados")
+	UIManager.push("xray")
+	await _frames(8)
+	await _shot("13a_raio_x")
+	_screen().scroll().scroll_vertical = 900
+	await _frames(4)
+	await _shot("13b_raio_x_mapa")
+	UIManager.back()
+	await _frames(4)
 	UIManager.goto("table")
 	await _frames(8)
 	await _shot("14_tabela")
@@ -264,6 +272,14 @@ func _run() -> void:
 	_screen().refresh()
 	await _frames(6)
 	await _shot("16_rodadas")
+	for tt in ["numbers", "teams"]:
+		_screen().set("_tab", tt)
+		_screen().refresh()
+		await _frames(6)
+		await _shot("16c_tabela_" + tt)
+	UIManager.goto("table", {"league": "SCO1"})
+	await _frames(6)
+	await _shot("16d_escocia_split")
 	# Ligas de outros países (nomes longos, legenda de vagas e divisões): não podem alargar a tela.
 	for lid in ["TUR1", "ENG2", "BRA4"]:
 		UIManager.goto("table", {"league": lid})
@@ -309,6 +325,23 @@ func _run() -> void:
 	UIManager.push("settings")
 	await _frames(6)
 	await _shot("22_opcoes")
+	# Telas da apresentação, do treinador e dos revelados
+	UIManager.push("welcome")
+	await _frames(8)
+	await _shot("22a_apresentacao")
+	UIManager.push("manager")
+	await _frames(8)
+	await _shot("22b_treinador")
+	UIManager.push("graduates", {"id": w.user_club_id})
+	await _frames(8)
+	await _shot("22c_revelados")
+	UIManager.push("prematch", {"edit": true})
+	_screen().set("_pos_edit", true)
+	_screen().refresh()
+	await _frames(8)
+	_screen().scroll().scroll_vertical = 1100
+	await _frames(4)
+	await _shot("22d_tatica_ajustes")
 	# Telas novas: treino, base, editor, história, simulação, decisões e negociação
 	UIManager.goto("hub")
 	UIManager.push("training")

@@ -212,6 +212,7 @@ static func prepare_ai_sheet(world: GameWorld, club: Club, opponent: Club, is_ho
 		sheet.bench = pick_bench(world, club, sheet.starters)
 		pick_set_pieces(world, sheet)
 	ClubPhilosophy.apply_match_plan(world, club, opponent, is_home, sheet)
+	SquadRules.fix(world, club, sheet)
 	sheet.auto_subs = true
 	club.sheet = sheet
 	return sheet
@@ -332,6 +333,7 @@ static func validate_user_sheet(world: GameWorld, club: Club) -> Array:
 			if not bench.has(pid):
 				bench.append(pid)
 	sheet.bench = bench
+	msgs.append_array(SquadRules.fix(world, club, sheet))
 	for key in ["captain", "penalty_taker", "freekick_taker", "corner_taker"]:
 		if not sheet.starters.has(sheet.get(key)):
 			pick_set_pieces(world, sheet)
@@ -353,6 +355,7 @@ static func auto_sheet(world: GameWorld, club: Club, fname: String) -> TeamSheet
 		sheet.mentality = 2
 	sheet.starters = best_eleven(world, club, sheet.formation)
 	sheet.bench = pick_bench(world, club, sheet.starters)
+	SquadRules.fix(world, club, sheet)
 	pick_set_pieces(world, sheet)
 	return sheet
 

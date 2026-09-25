@@ -137,6 +137,16 @@ var crowd: float = 0.8
 ## Cultura da liga (LeagueCulture): multiplicadores de chances e de cartões.
 var goal_f: float = 1.0
 var card_f: float = 1.0
+## Raio-X tático (jogos do usuário): chances com corredor e contexto, avanços dos laterais,
+## entradas no último terço e na área, e trechos entre as mudanças do técnico.
+var xray_on: bool = false
+var xr_chances: Array = []
+var xr_adv: Dictionary = {} # player_id -> avanços ao ataque
+var xr_ft: Array[int] = [0, 0] # entradas no último terço
+var xr_box: Array[int] = [0, 0] # entradas na área (chances de jogada)
+var xr_segments: Array = []
+const OPEN_PLAY := [CH_THROUGH, CH_CROSS, CH_LONG, CH_DRIBBLE, CH_COUNTER, CH_SCRAMBLE, CH_ERROR]
+const LANE_BASE := [0.28, 0.44, 0.28]
 # Cópias locais das tabelas (acesso sem contenção quando várias partidas rodam em threads)
 var _type_w: PackedFloat32Array = PackedFloat32Array(BASE_TYPE_W)
 var _xg: PackedFloat32Array = PackedFloat32Array(BASE_XG)
@@ -188,6 +198,28 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		t.refresh_tactics()
 		t.recompute_units()
 	_refresh_rates()
+	xray_on = teams[0].is_user or teams[1].is_user
+	if xray_on:
+		xr_segments = [{"m": 0, "label": "Início", "snap": _xr_snap()}]
+
+
+## Contadores acumulados por time (a diferença entre dois retratos é o trecho).
+func _xr_snap() -> Array:
+	var out: Array = []
+	for t: MatchTeam in teams:
+		out.append({"sh": t.shots, "xg": t.xg, "poss": t.poss_ticks, "ft": xr_ft[t.side], "box": xr_box[t.side], "g": score[t.side]})
+	return out
+
+
+## Marca uma mudança do técnico: começa um trecho novo para comparar antes e depois.
+func xr_mark(label: String) -> void:
+	if not xray_on or xr_segments.is_empty():
+		return
+	var last: Dictionary = xr_segments[xr_segments.size() - 1]
+	if minute - int(last["m"]) < 3:
+		last["label"] = label # mudanças seguidas contam como uma só
+		return
+	xr_segments.append({"m": minute, "label": label, "snap": _xr_snap()})
 
 
 func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> MatchTeam:
@@ -225,6 +257,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 			t.slots.append(null)
 			continue
 		var mp := _make_mp(pl, big, inj_m)
+		mp.instr = sheet.instruction_of(pl.id)
 		_assign_slot(mp, i, fslots[i])
 		mp.on_pitch = true
 		mp.used = true
@@ -237,6 +270,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		if pl == null or t.by_id.has(pid):
 			continue
 		var mp := _make_mp(pl, big, inj_m)
+		mp.instr = sheet.instruction_of(pl.id)
 		t.bench.append(mp)
 		t.all.append(mp)
 		t.by_id[pid] = mp
@@ -269,6 +303,11 @@ func _assign_slot(mp: MatchPlayer, i: int, s: Dictionary) -> void:
 	mp.w_mid = s["mid"]
 	mp.w_att = s["att"]
 	mp.w_wide = s["wide"]
+	if not mp.instr.is_empty() and mp.pos != Pos.GK:
+		mp.w_def = maxf(0.0, mp.w_def + float(mp.instr["def"]))
+		mp.w_mid = maxf(0.0, mp.w_mid + float(mp.instr["mid"]))
+		mp.w_att = maxf(0.0, mp.w_att + float(mp.instr["att"]))
+		mp.card_mult = mp.p.trait_mult("card_mult") * float(mp.instr["foul"])
 	mp.fam = Pos.familiarity(mp.p.position, mp.p.secondary, mp.pos)
 	mp.slot_rating = mp.p.rating_at(mp.pos)
 	mp.apply_side(mp.pos)
@@ -473,6 +512,8 @@ func _simulate_minute() -> void:
 	var att: MatchTeam = teams[s]
 	var dfn: MatchTeam = teams[1 - s]
 	att.poss_ticks += 1
+	if xray_on:
+		_xr_tick(att, dfn)
 	var p_chance := clampf(_rate_chance[s] * (1.0 + momentum[s]), 0.02, 0.6)
 	var p_foul := _rate_foul[1 - s]
 	var p_off := _rate_off[s]
@@ -502,6 +543,52 @@ func _simulate_minute() -> void:
 	for t: MatchTeam in teams:
 		if rng.randf() < INJURY_RATE * t.i_fatigue:
 			_injury(t, _pick_injury_victim(t))
+
+
+## Raio-X: laterais que sobem ao ataque e chegadas ao último terço (só vis_rng: não muda o jogo).
+func _xr_tick(att: MatchTeam, dfn: MatchTeam) -> void:
+	for mp: MatchPlayer in att.slots:
+		if mp != null and (mp.role == "FB" or mp.role == "WB") and vis_rng.randf() < mp.w_att * 1.4:
+			xr_adv[mp.p.id] = int(xr_adv.get(mp.p.id, 0)) + 1
+	var dom := clampf(0.3 + (_att_power(att) - _def_power(dfn)) / 120.0, 0.12, 0.55)
+	if vis_rng.randf() < dom:
+		xr_ft[att.side] += 1
+
+
+## Corredor do ataque: o lado em que quem ataca leva mais vantagem sobre quem defende é o mais
+## usado, e a chance fica melhor (ou pior) conforme esse confronto. Retorna [corredor, fator de xG]
+## com o fator normalizado para a média ficar em 1 (o motor continua calibrado).
+func _pick_lane(att: MatchTeam, dfn: MatchTeam, ctype: int) -> Array:
+	var base: Array = LANE_BASE
+	if ctype == CH_CROSS:
+		base = [0.5, 0.0, 0.5]
+	elif ctype == CH_LONG:
+		base = [0.2, 0.6, 0.2]
+	var ratio: Array = []
+	var mean := 0.0
+	var wsum := 0.0
+	for l in 3:
+		var r := att.lane_att[l] / maxf(1.0, dfn.lane_def[2 - l]) # meu lado esquerdo enfrenta o direito deles
+		ratio.append(r)
+		mean += r * float(base[l])
+		wsum += float(base[l])
+	mean /= maxf(0.01, wsum)
+	var w: Array = []
+	var fac: Array = []
+	var e := 0.0
+	var tw := 0.0
+	for l in 3:
+		var rel := float(ratio[l]) / maxf(0.01, mean)
+		var wl := float(base[l]) * clampf(rel, 0.5, 2.0)
+		var fl := clampf(pow(rel, 0.3), 0.82, 1.22)
+		w.append(wl)
+		fac.append(fl)
+		e += wl * fl
+		tw += wl
+	var lane := RngUtil.weighted_index(rng, w)
+	if lane < 0:
+		lane = 1
+	return [lane, float(fac[lane]) / maxf(0.01, e / maxf(0.01, tw))]
 
 
 ## Minuto sem lance de perigo: troca de passes, dribles, desarmes, goleiro e torcida.
@@ -742,8 +829,15 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var culprit: MatchPlayer = null
 	if ctype == CH_ERROR:
 		culprit = _pick_weighted(dfn, PK_DEFEND)
+	var lane := -1
+	var lane_f := 1.0
+	if OPEN_PLAY.has(ctype):
+		var lp := _pick_lane(att, dfn, ctype)
+		lane = int(lp[0])
+		lane_f = float(lp[1])
+		xr_box[s] += 1
 	# Qualidade da chance
-	var xg: float = _xg[ctype]
+	var xg: float = _xg[ctype] * lane_f
 	if ctype != CH_PENALTY and ctype != CH_FREEKICK:
 		xg *= clampf(exp(DELTA * (_att_power(att) - _def_power(dfn))), 0.6, 1.6)
 		xg *= att.s_quality * dfn.l_opp_quality * att.g_quality
@@ -772,6 +866,9 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	att.shots += 1
 	att.xg += xg
 	shooter.shots += 1
+	var rec := {}
+	if xray_on:
+		rec = _xr_record(att, dfn, ctype, lane, xg, shooter, assister)
 	var z_from := vis_rng.randf_range(0.45, 0.7)
 	if ctype == CH_COUNTER:
 		z_from = vis_rng.randf_range(0.2, 0.4)
@@ -779,6 +876,8 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		z_from = 0.97
 	if rng.randf() < p_goal:
 		_goal(att, dfn, shooter, assister, ctype, culprit)
+		if not rec.is_empty():
+			rec["r"] = "gol"
 		if detail:
 			last_phase = {"side": s, "from": z_from, "to": 1.0, "ev": EV_GOAL, "ct": ctype}
 		return
@@ -814,6 +913,8 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		shooter.rating_pts -= 0.03
 	if assister != null:
 		assister.rating_pts += 0.06
+	if not rec.is_empty():
+		rec["r"] = {EV_SAVE: "defesa", EV_POST: "trave", EV_BLOCK: "bloqueio", EV_PEN_SAVE: "defesa"}.get(ev, "fora")
 	if detail:
 		var ex := {"ct": ctype, "xg": snappedf(xg, 0.01), "gk": gk.p.id if gk != null else -1}
 		if ev == EV_BLOCK and xg >= 0.1 and vis_rng.randf() < 0.25:
@@ -825,6 +926,40 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		last_phase = {"side": s, "from": z_from, "to": vis_rng.randf_range(0.85, 0.98), "ev": ev, "ct": ctype}
 	if (ev == EV_SAVE and rng.randf() < 0.3) or (ev == EV_BLOCK and rng.randf() < 0.4):
 		_corner(att, dfn)
+
+
+## Registro da chance para o Raio-X, com o contexto do corredor do lado de quem defendeu:
+## lateral que estava no ataque, ponta que não voltou, superioridade de 2 contra 1.
+func _xr_record(att: MatchTeam, dfn: MatchTeam, ctype: int, lane: int, xg: float, shooter: MatchPlayer, assister: MatchPlayer) -> Dictionary:
+	var rec := {"m": minute, "s": att.side, "l": lane, "ct": ctype, "xg": snappedf(xg, 0.01), "sh": shooter.p.id,
+		"as": assister.p.id if assister != null else -1, "r": "fora"}
+	if lane >= 0:
+		var dl := 2 - lane # o corredor de quem defende
+		var fb: MatchPlayer = null
+		var wing: MatchPlayer = null
+		var defenders := 0
+		for mp: MatchPlayer in dfn.slots:
+			if mp == null or mp.slot == 0 or dfn.lane_of(mp) != dl:
+				continue
+			if mp.w_def >= 0.4:
+				defenders += 1
+			if mp.role == "FB" or mp.role == "WB":
+				fb = mp
+			elif mp.role == "W" or mp.role == "WM":
+				wing = mp
+		var attackers := 0
+		for mp: MatchPlayer in att.slots:
+			if mp != null and mp.slot != 0 and att.lane_of(mp) == lane and mp.w_att >= 0.3:
+				attackers += 1
+		if fb != null:
+			rec["fb"] = fb.p.id
+			rec["fb_up"] = fb.w_att >= 0.25
+		if wing != null:
+			rec["wg"] = wing.p.id
+			rec["wg_off"] = wing.w_def < 0.15
+		rec["x2"] = lane != 1 and attackers >= 2 and defenders <= 1
+	xr_chances.append(rec)
+	return rec
 
 
 func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: MatchPlayer, ctype: int, culprit: MatchPlayer) -> void:
@@ -1178,6 +1313,8 @@ func user_substitution(side: int, out_id: int, in_id: int) -> String:
 	if in_mp == null or in_mp.used:
 		return "Esse jogador não pode entrar."
 	_do_sub(t, out_mp, in_mp, out_mp.slot)
+	if t.is_user:
+		xr_mark("Entrou %s" % in_mp.p.short_name())
 	return ""
 
 
@@ -1190,6 +1327,8 @@ func set_mentality(side: int, m: int) -> void:
 	t.recompute_units()
 	_refresh_rates()
 	_emit(EV_TACTIC, side, -1, -1, {"mentality": t.mentality})
+	if t.is_user:
+		xr_mark("Mentalidade %s" % String(DatabaseManager.tactics()["mentalities"][t.mentality]["name"]).to_lower())
 
 
 func set_style(side: int, st: int) -> void:
@@ -1202,6 +1341,8 @@ func set_style(side: int, st: int) -> void:
 	t.recompute_units()
 	_refresh_rates()
 	_emit(EV_TACTIC, side, -1, -1, {"style": t.style})
+	if t.is_user:
+		xr_mark("Estilo %s" % String(DatabaseManager.tactics()["styles"][t.style]["short"]).to_lower())
 
 
 ## Troca o desenho tático durante o jogo. Quem está em campo é redistribuído pelas vagas novas
@@ -1249,6 +1390,8 @@ func set_formation(side: int, fname: String) -> bool:
 	t.recompute_units()
 	_refresh_rates()
 	_emit(EV_TACTIC, side, -1, -1, {"formation": fname})
+	if t.is_user:
+		xr_mark("Mudou para %s" % DatabaseManager.formation_base(fname))
 	return true
 
 

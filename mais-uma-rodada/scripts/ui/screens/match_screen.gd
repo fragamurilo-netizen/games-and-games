@@ -308,6 +308,11 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 func _build_controls() -> void:
 	UIKit.clear(_controls)
 	if _done:
+		var xr := UIKit.button("Raio-X", "", func():
+			UIManager.replace("results", {"report": _report})
+			UIManager.push("xray"), "search")
+		xr.custom_minimum_size.y = 92
+		_controls.add_child(xr)
 		var cont := UIKit.button("CONTINUAR", "PrimaryButton", func(): UIManager.replace("results", {"report": _report}), "check")
 		cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cont.custom_minimum_size.y = 92

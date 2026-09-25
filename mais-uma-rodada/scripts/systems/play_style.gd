@@ -71,18 +71,7 @@ static func _role(pos: int) -> String:
 	return "ST"
 
 
+## Estilo mostrado em todas as telas: o perfil do jogador (Player.playstyle, que usa os 21
+## atributos). A tabela BY_ROLE continua como referência de perfis por função.
 static func of(p: Player) -> String:
-	var best := ""
-	var best_v := -1.0
-	for opt in BY_ROLE[_role(p.position)]:
-		var w: Dictionary = opt[1]
-		var s := 0.0
-		var t := 0.0
-		for a in w:
-			s += p.attrs[a] * float(w[a])
-			t += float(w[a])
-		var v := s / t
-		if v > best_v:
-			best_v = v
-			best = opt[0]
-	return best
+	return p.playstyle()

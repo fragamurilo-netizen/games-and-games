@@ -51,6 +51,8 @@ func _initialize() -> void:
 	_run("mods e jogadores personalizados", _test_mods)
 	_run("loja: temporada de demonstração e Carreira Completa", _test_store)
 	_run("times de coração, treinador e revelados", _test_hearts_manager)
+	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
+	_run("raio-x tático: corredores, causas e correção", _test_xray)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -1151,6 +1153,127 @@ func _test_hearts_manager() -> void:
 	for cl: Club in w.clubs_in_league("BRA1"):
 		any_grads += Graduates.count(w, cl.id)
 	check(any_grads > 20, "quase nenhum revelado nos clubes da Série A (%d)" % any_grads)
+
+
+func _test_tactical_freedom() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	# Formação personalizada: o 4-3-3 com um meia central virando meia-armador
+	var name := DatabaseManager.custom_formation_name("4-3-3", {6: "AM"})
+	check(DatabaseManager.has_formation(name) and DatabaseManager.formation_base(name) == "4-3-3", "formação personalizada não reconhecida")
+	var f := DatabaseManager.formation(name)
+	check(int(f["slots"][6]["pos"]) == Pos.AM and String(f["slots"][6]["role"]) == "AM" and f["slots"].size() == 11, "vaga personalizada não virou meia-armador")
+	check(int(f["slots"][0]["pos"]) == Pos.GK, "goleiro saiu do gol")
+	c.sheet = ClubAI.auto_sheet(w, c, name)
+	check(c.sheet.starters.size() == 11, "escalação na formação personalizada incompleta")
+	check(TacticsManager.formation_fam(c, name) <= TacticsManager.formation_fam(c, "4-3-3"), "variação personalizada sem custo de entrosamento")
+	# Instruções individuais mudam os pesos do jogador no motor
+	var pid: int = c.sheet.starters[9]
+	c.sheet.instr[pid] = "avancar"
+	var opp: Club = w.clubs_in_league("BRA1")[0]
+	var hs := c.sheet.duplicate_sheet()
+	var as_ := ClubAI.prepare_ai_sheet(w, opp, c, false)
+	var sim := MatchSimulation.new()
+	sim.setup(w, c, opp, hs, as_, {"competition": "BRA1", "attendance": 20000}, 5, false)
+	var mp: MatchPlayer = sim.teams[0].by_id[pid]
+	var base_att := float(f["slots"][9]["att"])
+	check(mp.w_att > base_att, "instrução de apoiar o ataque não subiu o peso ofensivo")
+	sim.run_to_end()
+	check(sim.finished, "partida com formação personalizada não terminou")
+	var r := QuickMatch.play(w, c, opp, hs, as_, {"competition": "BRA1", "attendance": 20000}, 9)
+	check(int(r["hg"]) >= 0, "modo rápido falhou com formação personalizada")
+	# Save guarda formação, instruções e largura
+	hs.width = 2
+	var back := TeamSheet.from_dict(hs.to_dict())
+	check(back.formation == name and String(back.instr.get(pid, "")) == "avancar" and back.width == 2, "escalação perdeu ajustes táticos no save")
+	# Regra de estrangeiros (Brasil: até 9 entre os relacionados)
+	var lim := int(SquadRules.limit(c)["max"])
+	check(lim == 9, "Brasil deveria permitir 9 estrangeiros (%d)" % lim)
+	var foreign_n := 0
+	for q: Player in w.squad(c):
+		if q.nationality != c.nation:
+			foreign_n += 1
+	# Força a regra: todo mundo do elenco vira estrangeiro, menos o necessário
+	var changed: Array = []
+	for q: Player in w.squad(c):
+		if q.nationality == c.nation and changed.size() < 14:
+			q.nationality = "ARG"
+			changed.append(q)
+	c.sheet = ClubAI.auto_sheet(w, c, "4-3-3")
+	check(SquadRules.count(w, c, c.sheet.starters + c.sheet.bench) <= lim, "escalação acima do limite de estrangeiros (%d)" % SquadRules.count(w, c, c.sheet.starters + c.sheet.bench))
+	for q: Player in changed:
+		q.nationality = c.nation
+	# Espanha: só extracomunitários contam
+	var esp: Club = w.clubs_in_league("ESP1")[0]
+	var probe := Player.new()
+	probe.nationality = "FRA"
+	check(not SquadRules.is_foreign(probe, esp, "non_eu"), "francês contou como extracomunitário na Espanha")
+	probe.nationality = "BRA"
+	check(SquadRules.is_foreign(probe, esp, "non_eu"), "brasileiro deveria ser extracomunitário na Espanha")
+
+
+func _test_xray() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var opp: Club = w.clubs_in_league("BRA1")[0]
+	c.sheet = ClubAI.auto_sheet(w, c, "4-3-3")
+	# Lado direito aberto: o lateral direito só apoia e o ponta direito não volta
+	var slots: Array = DatabaseManager.formation("4-3-3")["slots"]
+	var rb := -1
+	var rw := -1
+	for i in slots.size():
+		if int(slots[i]["pos"]) == Pos.RB:
+			rb = int(c.sheet.starters[i])
+		if int(slots[i]["pos"]) == Pos.RW:
+			rw = int(c.sheet.starters[i])
+	c.sheet.instr[rb] = "avancar"
+	var right := 0
+	var left := 0
+	var reports := 0
+	var fb_flagged := 0
+	for k in 30:
+		var sim := MatchSimulation.new()
+		sim.setup(w, c, opp, c.sheet.duplicate_sheet(), ClubAI.prepare_ai_sheet(w, opp, c, false), {"competition": "BRA1", "attendance": 20000}, 100 + k, false)
+		sim.run_to_end()
+		var rep := TacticalXRay.analyze(w, sim)
+		if rep.is_empty():
+			continue
+		reports += 1
+		var la: Array = rep["against"]["lanes"]
+		left += int(la[0])
+		right += int(la[2])
+		var total := 0
+		for ch in rep["chances"]:
+			if not bool(ch["mine"]) and int(ch["ul"]) >= 0:
+				total += 1
+				if int(ch["ul"]) == 2 and int(ch.get("fb", -1)) == rb and bool(ch.get("fb_up", false)):
+					fb_flagged += 1
+		check(total == int(la[0]) + int(la[1]) + int(la[2]), "corredores não somam as chances do adversário")
+		check(not Array(rep["segments"]).is_empty(), "raio-x sem trechos")
+	check(reports == 30, "raio-x não gerado em todas as partidas (%d)" % reports)
+	check(right > left * 1.15, "lado com lateral no ataque não sofreu mais (dir %d × esq %d)" % [right, left])
+	check(fb_flagged > 0, "raio-x não apontou o lateral no ataque")
+	# Correção: aplicar a sugestão muda a escalação
+	var fix := {"type": "instr", "pid": rb, "instr": "segurar", "label": "segurar"}
+	TacticalXRay.apply_fix(w, fix)
+	check(String(c.sheet.instr.get(rb, "")) == "segurar", "correção do raio-x não aplicada")
+	var fix2 := {"type": "formation", "slot_pos": "AM", "label": "meia"}
+	TacticalXRay.apply_fix(w, fix2)
+	check(c.sheet.formation.begins_with("C:") and DatabaseManager.formation(c.sheet.formation)["slots"].any(func(sl): return int(sl["pos"]) == Pos.AM), "correção de formação não aplicada")
+	# Mudança no meio do jogo cria um trecho novo
+	var sim2 := MatchSimulation.new()
+	sim2.setup(w, c, opp, c.sheet.duplicate_sheet(), ClubAI.prepare_ai_sheet(w, opp, c, false), {"competition": "BRA1", "attendance": 20000}, 7, false)
+	while sim2.minute < 55 and not sim2.finished:
+		sim2.step()
+	sim2.set_formation(0, "4-2-3-1")
+	sim2.run_to_end()
+	var rep2 := TacticalXRay.analyze(w, sim2)
+	check(Array(rep2["segments"]).size() >= 2, "mudança de formação não abriu um trecho novo")
+	var has_change := false
+	for ins in rep2["insights"]:
+		if String(ins["k"]) == "change":
+			has_change = true
+	check(has_change, "raio-x sem o antes e depois da mudança")
 
 
 func _test_trades() -> void:

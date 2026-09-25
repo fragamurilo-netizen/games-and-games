@@ -15,6 +15,55 @@ func _init() -> void:
 	screen_title = "Elenco"
 
 
+## Resumo do elenco: tamanho, idade, estrangeiros (com a regra da liga), crias da casa, força do
+## time titular, lesionados e folha salarial.
+func _summary_card(w: GameWorld, club: Club, squad: Array) -> Control:
+	var card := UIKit.card("Card", 8)
+	var foreign := 0
+	var home := 0
+	var hurt := 0
+	var expiring := 0
+	for p: Player in squad:
+		if p.nationality != club.nation:
+			foreign += 1
+		if Graduates.origin_of(p.spells, p.birth_year) == club.id:
+			home += 1
+		if p.injury_weeks > 0:
+			hurt += 1
+		if p.contract_end <= w.year:
+			expiring += 1
+	var xi := 0.0
+	if club.sheet != null:
+		xi = ClubAI.lineup_strength(w, club.sheet.formation, club.sheet.starters) / 11.0
+	var r1 := UIKit.hbox(4)
+	r1.add_child(UIKit.stat(str(squad.size()), "jogadores"))
+	r1.add_child(UIKit.stat(str(foreign), "estrangeiros"))
+	r1.add_child(UIKit.stat(str(home), "crias da casa", UIColors.GREEN))
+	r1.add_child(UIKit.stat(str(int(round(xi))), "força titular", UIColors.ACCENT))
+	card.add_child(r1)
+	var rule := SquadRules.describe(club)
+	if rule != "":
+		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
+		var lim := int(SquadRules.limit(club)["max"])
+		card.add_child(UIKit.colored("%s: %d/%d na escalação atual." % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
+	var alerts: Array = []
+	if hurt > 0:
+		alerts.append("%d lesionado(s)" % hurt)
+	if expiring > 0:
+		alerts.append("%d contrato(s) acabando" % expiring)
+	if not alerts.is_empty():
+		card.add_child(UIKit.colored(" · ".join(PackedStringArray(alerts)), UIColors.ORANGE, "Small", true))
+	var fin := FinanceManager.summary(w, club)
+	var bill := UIKit.hbox(8)
+	bill.add_child(UIKit.label("Folha salarial", "Muted"))
+	var bl := UIKit.label("%s / %s" % [Fmt.money_month(fin["wage_bill"]), Fmt.money(fin["wage_budget"])], "H3")
+	bl.add_theme_color_override(&"font_color", UIColors.RED if fin["wage_bill"] > fin["wage_budget"] else UIColors.TEXT)
+	bill.add_child(UIKit.spacer())
+	bill.add_child(bl)
+	card.add_child(bill)
+	return UIKit.card_panel(card)
+
+
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_sort = p.get("sort", "pos")
@@ -39,14 +88,7 @@ func refresh() -> void:
 	top.add_child(lineup)
 	top.add_child(UIKit.button("Numeração", "", func(): UIManager.push("numbers"), "shirt"))
 	c.add_child(top)
-	var fin := FinanceManager.summary(w, club)
-	var bill := UIKit.hbox(8)
-	bill.add_child(UIKit.label("Folha salarial", "Muted"))
-	var bl := UIKit.label("%s / %s" % [Fmt.money_month(fin["wage_bill"]), Fmt.money(fin["wage_budget"])], "H3")
-	bl.add_theme_color_override(&"font_color", UIColors.RED if fin["wage_bill"] > fin["wage_budget"] else UIColors.TEXT)
-	bill.add_child(UIKit.spacer())
-	bill.add_child(bl)
-	c.add_child(bill)
+	c.add_child(_summary_card(w, club, squad))
 	var gv := ButtonGroup.new()
 	var vrow := UIKit.hbox(8)
 	for i in VIEWS.size():

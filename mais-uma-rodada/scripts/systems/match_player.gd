@@ -7,6 +7,7 @@ var p: Player
 var slot: int = -1 # vaga na formação (-1 = banco/fora)
 var pos: int = Pos.CM
 var role: String = "CM"
+var instr: Dictionary = {} # instrução individual (TeamSheet.INSTRUCTIONS)
 var w_def: float = 0.0
 var w_mid: float = 0.0
 var w_att: float = 0.0

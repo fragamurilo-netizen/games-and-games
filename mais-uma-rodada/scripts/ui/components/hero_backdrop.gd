@@ -44,12 +44,12 @@ func _ready() -> void:
 func _layout() -> void:
 	if _crest == null:
 		return
-	var s := clampf(size.y * 1.35, 220.0, 420.0)
+	# O escudo fica inteiro dentro do card (encostado à direita), sem alargar o layout.
+	var s := clampf(minf(size.y * 1.1, size.x * 0.55), 160.0, 360.0)
 	_crest.size = Vector2(s, s)
-	var y := (size.y - s) * 0.5 + s * 0.08 if size.y * 1.35 <= 420.0 else -s * 0.1
-	_crest.position = Vector2(size.x - s * 0.62, y)
-	_crest.rotation = deg_to_rad(-8.0)
-	_crest.pivot_offset = Vector2(s, s) * 0.5
+	var y := (size.y - s) * 0.5 if size.y <= s * 1.3 else 8.0
+	_crest.position = Vector2(size.x - s - 6.0, y)
+	_crest.rotation = 0.0
 	queue_redraw()
 
 

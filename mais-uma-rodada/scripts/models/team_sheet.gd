@@ -34,6 +34,25 @@ var auto_subs: bool = true
 var plan_losing: int = -1
 var plan_winning: int = -1
 var plan_minute: int = 70
+## Instruções individuais: {player_id: chave de INSTRUCTIONS}.
+var instr: Dictionary = {}
+## Largura do time: 0 fechado, 1 normal, 2 aberto.
+var width: int = 1
+
+## Instruções individuais: ajustes nos pesos de defesa/meio/ataque da vaga, nas faltas e nos chutes.
+const INSTRUCTIONS := {
+	"avancar": {"name": "Apoiar o ataque", "desc": "Sobe mais, aparece na área. Deixa espaço atrás.", "def": -0.12, "mid": 0.0, "att": 0.15, "foul": 1.0, "shoot": 1.1},
+	"segurar": {"name": "Segurar a posição", "desc": "Não sai da função defensiva. Ataca menos.", "def": 0.12, "mid": 0.0, "att": -0.12, "foul": 1.0, "shoot": 0.85},
+	"chutar": {"name": "Arriscar de longe", "desc": "Finaliza de fora da área sempre que puder.", "def": 0.0, "mid": -0.03, "att": 0.06, "foul": 1.0, "shoot": 1.35},
+	"marcar": {"name": "Marcação forte", "desc": "Cola no adversário e não deixa jogar. Faz mais faltas.", "def": 0.08, "mid": 0.0, "att": -0.04, "foul": 1.35, "shoot": 1.0},
+	"prender": {"name": "Prender a bola", "desc": "Segura a posse e cadencia o jogo.", "def": 0.0, "mid": 0.12, "att": -0.05, "foul": 1.0, "shoot": 0.9},
+}
+const INSTRUCTION_ORDER: Array[String] = ["avancar", "segurar", "chutar", "marcar", "prender"]
+const WIDTH_NAMES: Array[String] = ["Fechado", "Normal", "Aberto"]
+
+
+func instruction_of(pid: int) -> Dictionary:
+	return INSTRUCTIONS.get(String(instr.get(pid, "")), {})
 
 
 func duplicate_sheet() -> TeamSheet:
@@ -53,7 +72,7 @@ func to_dict() -> Dictionary:
 		"f": formation, "s": starters.duplicate(), "b": bench.duplicate(),
 		"cap": captain, "pen": penalty_taker, "fk": freekick_taker, "ck": corner_taker,
 		"m": mentality, "st": style, "i": intensity, "l": line, "p": pressing, "as": auto_subs,
-		"pl": plan_losing, "pw": plan_winning, "pm": plan_minute,
+		"pl": plan_losing, "pw": plan_winning, "pm": plan_minute, "ins": instr.duplicate(), "wd": width,
 	}
 
 
@@ -75,4 +94,8 @@ static func from_dict(d: Dictionary) -> TeamSheet:
 	t.plan_losing = int(d.get("pl", -1))
 	t.plan_winning = int(d.get("pw", -1))
 	t.plan_minute = int(d.get("pm", 70))
+	var ins: Dictionary = d.get("ins", {})
+	for k in ins:
+		t.instr[int(k)] = String(ins[k])
+	t.width = int(d.get("wd", 1))
 	return t

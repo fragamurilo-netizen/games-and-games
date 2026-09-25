@@ -17,7 +17,9 @@ const FAM_SPAN := 0.06
 
 ## Entrosamento (0..100) do clube com uma formação.
 static func formation_fam(club: Club, fname: String) -> float:
-	return _fam_get(club, "f", fname)
+	# Variação personalizada: aproveita o que o time já sabe da base, com um pequeno custo por vaga mudada.
+	var base := _fam_get(club, "f", DatabaseManager.formation_base(fname))
+	return base * maxf(0.8, 1.0 - 0.04 * DatabaseManager.formation_overrides(fname).size())
 
 
 ## Entrosamento (0..100) do clube com um estilo de jogo.
@@ -55,7 +57,7 @@ static func after_match(club: Club, sheet: TeamSheet, tactical_training: bool = 
 		return
 	ensure(club)
 	var learn := FAM_LEARN * (1.5 if tactical_training else 1.0)
-	_learn(club.tactic_fam["f"], sheet.formation, learn)
+	_learn(club.tactic_fam["f"], DatabaseManager.formation_base(sheet.formation), learn)
 	_learn(club.tactic_fam["s"], str(sheet.style), learn)
 
 

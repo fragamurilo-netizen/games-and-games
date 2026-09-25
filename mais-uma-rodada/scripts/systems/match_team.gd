@@ -6,6 +6,10 @@ extends RefCounted
 var side: int = 0
 var club: Club
 var sheet: TeamSheet
+## Lados do campo (0 esquerda, 1 centro, 2 direita, do ponto de vista do próprio time): força de
+## ataque e de cobertura defensiva de cada corredor, pelo desenho e por quem está em campo.
+var lane_att: Array[float] = [1.0, 1.0, 1.0]
+var lane_def: Array[float] = [1.0, 1.0, 1.0]
 var formation: Dictionary
 var formation_name: String = "4-4-2"
 ## Formação trocada durante o jogo (a IA muda no máximo uma vez).
@@ -211,10 +215,11 @@ func recompute_units() -> void:
 			fit_sum += mp.style_fit_value(style, s_fit_attrs)
 		ovr_sum += mp.slot_rating
 	on_pitch_count = n + (1 if slots.size() > 0 and slots[0] != null else 0)
+	_recompute_lanes()
 	u_def = ((d / maxf(0.01, dw)) * sqrt(dw / norm_def) if dw > 0.0 else 10.0) * train_def
 	u_mid = (m / maxf(0.01, mw)) * sqrt(mw / norm_mid) if mw > 0.0 else 10.0
 	u_att = ((a / maxf(0.01, aw)) * sqrt(aw / norm_att) if aw > 0.0 else 10.0) * train_att
-	width = wsum
+	width = wsum * ([0.7, 1.0, 1.3][clampi(sheet.width, 0, 2)] if sheet != null else 1.0)
 	aer.sort()
 	aer.reverse()
 	aerial_att = _avg(aer.slice(0, 3))
@@ -280,3 +285,38 @@ static func _avg(arr: Array) -> float:
 	for v in arr:
 		s += v
 	return s / arr.size()
+
+
+## Corredor de uma vaga pela posição no desenho (x: 0 esquerda … 1 direita).
+func lane_of(mp: MatchPlayer) -> int:
+	if formation.is_empty() or mp.slot < 0 or mp.slot >= formation["slots"].size():
+		return 1
+	var x := float(formation["slots"][mp.slot]["x"])
+	return 0 if x < 0.34 else (2 if x > 0.66 else 1)
+
+
+func _recompute_lanes() -> void:
+	var la: Array[float] = [0.0, 0.0, 0.0]
+	var ld: Array[float] = [0.0, 0.0, 0.0]
+	for mp: MatchPlayer in slots:
+		if mp == null or mp.slot == 0:
+			continue
+		var l := lane_of(mp)
+		var att := mp.c_att * mp.f * mp.w_att
+		var dfv := mp.c_def * mp.f * mp.w_def
+		if l == 1:
+			la[1] += att
+			ld[1] += dfv
+			# Quem joga por dentro ainda cobre um pouco os lados.
+			ld[0] += dfv * 0.2
+			ld[2] += dfv * 0.2
+			la[0] += att * 0.1
+			la[2] += att * 0.1
+		else:
+			la[l] += att + mp.c_att * mp.f * mp.w_wide * 0.3
+			ld[l] += dfv
+			ld[1] += dfv * 0.15
+	for i in 3:
+		lane_att[i] = maxf(5.0, la[i])
+		lane_def[i] = maxf(5.0, ld[i])
+

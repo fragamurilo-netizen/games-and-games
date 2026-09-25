@@ -238,11 +238,13 @@ func _finish() -> void:
 	var pending := EventManager.pending(w)
 	if not pending.is_empty():
 		var ev: Dictionary = pending[0]
-		add_child(UIKit.button("RESPONDER: %s" % EventManager.describe(w, ev)["title"], "PrimaryButton", func():
+		var rb := UIKit.button("Responder: %s" % EventManager.describe(w, ev)["title"], "PrimaryButton", func():
 			UIManager.close_modal()
 			if on_done.is_valid():
 				on_done.call()
-			EventDialog.open(ev, on_done), "info"))
+			EventDialog.open(ev, on_done), "info")
+		UIKit.shrink_button(rb)
+		add_child(rb)
 	add_child(UIKit.button("OK", "GhostButton" if not pending.is_empty() else "PrimaryButton", func():
 		UIManager.close_modal()
 		if on_done.is_valid():

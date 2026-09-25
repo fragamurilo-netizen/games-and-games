@@ -48,19 +48,20 @@ func _hero(w: GameWorld, club: Club) -> Control:
 	col.add_child(stars)
 	row.add_child(col)
 	card.add_child(row)
-	card.add_child(UIKit.label("%s, treinador do %s. %s lugares no %s, uma torcida de %s e uma história para honrar." % [
+	card.add_child(UIKit.label("%s, treinador do %s. %s lugares no %s, %s e uma história para honrar." % [
 		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true))
 	return HeroBackdrop.attach(UIKit.card_panel(card), club)
 
 
 func _fans_text(club: Club) -> String:
-	if club.fan_base >= 20000000:
-		return "dezenas de milhões"
-	if club.fan_base >= 3000000:
-		return "milhões de apaixonados"
-	if club.fan_base >= 500000:
-		return "centenas de milhares"
-	return "fiéis de bairro"
+	# fan_base é o público potencial de estádio
+	if club.fan_base >= 60000:
+		return "uma das maiores torcidas do país"
+	if club.fan_base >= 30000:
+		return "uma torcida grande e apaixonada"
+	if club.fan_base >= 12000:
+		return "uma torcida fiel"
+	return "uma torcida pequena, mas fiel"
 
 
 func _expectations(w: GameWorld, club: Club) -> Control:

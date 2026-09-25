@@ -108,6 +108,12 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		var w_mid: float = s["mid"]
 		var w_att: float = s["att"]
 		var w_wide: float = s["wide"]
+		w_wide *= [0.7, 1.0, 1.3][clampi(sheet.width, 0, 2)]
+		var ins := sheet.instruction_of(p.id)
+		if not ins.is_empty() and i > 0:
+			w_def = maxf(0.0, w_def + float(ins["def"]))
+			w_mid = maxf(0.0, w_mid + float(ins["mid"]))
+			w_att = maxf(0.0, w_att + float(ins["att"]))
 		var side: Array = Physique.side_mods(p, pos)
 		var heavy := Physique.pace_penalty(p)
 		var c_fin: float = at[Attr.FIN] * 0.6 + at[Attr.FRI] * 0.15 + at[Attr.DEC] * 0.1 + at[Attr.TEC] * 0.15 + float(side[1])
@@ -139,7 +145,9 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 				base_foul = 1.0
 			Pos.ST:
 				base_foul = 0.8
-		var foul := base_foul * p.trait_mult("card_mult") * (1.5 - at[Attr.DIS] / 100.0)
+		var foul := base_foul * p.trait_mult("card_mult") * (1.5 - at[Attr.DIS] / 100.0) * (float(ins["foul"]) if not ins.is_empty() else 1.0)
+		if not ins.is_empty():
+			shoot *= float(ins["shoot"])
 		dis += at[Attr.DIS]
 		pl.append([p, pos, f, w_def, w_att, shoot, assist, foul, p.rating_at(pos) * perf, c_fin])
 	var n := maxi(1, pl.size() - 1)

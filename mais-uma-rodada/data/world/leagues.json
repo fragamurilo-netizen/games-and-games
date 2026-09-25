@@ -1,5 +1,5 @@
 {
-	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo.",
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE).",
 	"leagues": [
 		{
 			"id": "ENG1",
@@ -89,6 +89,10 @@
 				"goals": 0.98,
 				"home": 1.0,
 				"cards": 1.2
+			},
+			"foreign_limit": {
+				"max": 3,
+				"scope": "non_eu"
 			}
 		},
 		{
@@ -119,6 +123,10 @@
 				"goals": 0.87,
 				"home": 1.05,
 				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 3,
+				"scope": "non_eu"
 			}
 		},
 		{
@@ -841,6 +849,10 @@
 				"goals": 0.91,
 				"home": 1.2,
 				"cards": 1.2
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
 			}
 		},
 		{
@@ -872,6 +884,10 @@
 				"goals": 0.81,
 				"home": 1.25,
 				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
 			}
 		},
 		{
@@ -903,6 +919,10 @@
 				"goals": 0.83,
 				"home": 1.3,
 				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
 			}
 		},
 		{
@@ -933,6 +953,10 @@
 				"goals": 0.87,
 				"home": 1.35,
 				"cards": 1.2
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
 			}
 		},
 		{
@@ -981,6 +1005,10 @@
 				},
 				"neutral_final": true,
 				"desc": "30 clubes em turno único e os playoffs com os 16 melhores em jogo único; a final é em campo neutro."
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1011,6 +1039,10 @@
 				"goals": 0.75,
 				"home": 1.25,
 				"cards": 1.3
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1084,6 +1116,10 @@
 					"f": 2
 				},
 				"desc": "Turno único e o mata-mata dos 8 primeiros em ida e volta até a final."
+			},
+			"foreign_limit": {
+				"max": 4,
+				"scope": "all"
 			}
 		},
 		{
@@ -1113,6 +1149,10 @@
 				"goals": 1.06,
 				"home": 1.15,
 				"cards": 1.15
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1142,6 +1182,10 @@
 				"goals": 0.94,
 				"home": 1.3,
 				"cards": 1.15
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1171,6 +1215,10 @@
 				"goals": 1.02,
 				"home": 1.3,
 				"cards": 1.15
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1302,6 +1350,10 @@
 					"f": 2
 				},
 				"desc": "Torneio em turno único e a Liguilla: os 8 primeiros decidem o título em quartas, semifinal e final, todas em ida e volta."
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
 			}
 		},
 		{
@@ -1348,6 +1400,10 @@
 					"f": 1
 				},
 				"desc": "30 clubes em turno único e os MLS Cup Playoffs com 16 classificados em jogo único; a MLS Cup é na casa da melhor campanha."
+			},
+			"foreign_limit": {
+				"max": 8,
+				"scope": "all"
 			}
 		},
 		{
@@ -1377,6 +1433,10 @@
 				"goals": 0.83,
 				"home": 1.15,
 				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
 			}
 		},
 		{
@@ -1464,6 +1524,10 @@
 				"goals": 0.83,
 				"home": 1.15,
 				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
 			}
 		},
 		{
@@ -1551,6 +1615,10 @@
 				"goals": 1.13,
 				"home": 1.05,
 				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 10,
+				"scope": "all"
 			}
 		},
 		{
@@ -1580,6 +1648,10 @@
 				"goals": 0.98,
 				"home": 1.0,
 				"cards": 0.75
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
 			}
 		},
 		{
@@ -1621,6 +1693,10 @@
 					1
 				],
 				"desc": "33 rodadas e o split: Final A (6 de cima, pelo título) e Final B (6 de baixo), mais 5 rodadas."
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1650,6 +1726,10 @@
 				"goals": 1.28,
 				"home": 0.95,
 				"cards": 0.95
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
 			}
 		},
 		{
@@ -1679,6 +1759,10 @@
 				"goals": 1.17,
 				"home": 1.0,
 				"cards": 0.95
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
 			}
 		},
 		{
@@ -1708,6 +1792,10 @@
 				"goals": 1.09,
 				"home": 1.1,
 				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
 			}
 		},
 		{

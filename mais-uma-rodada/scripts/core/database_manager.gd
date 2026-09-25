@@ -305,12 +305,82 @@ static func news_templates() -> Dictionary:
 
 static func formation(fname: String) -> Dictionary:
 	load_all()
+	if fname.begins_with("C:"):
+		return _custom_formation(fname)
 	return _formations.get(fname, _formations["4-4-2"])
 
 
 static func has_formation(fname: String) -> bool:
 	load_all()
+	if fname.begins_with("C:"):
+		return _formations.has(formation_base(fname))
 	return _formations.has(fname)
+
+
+## Formação personalizada: "C:<base>|<vaga>=<posição>,..." (ex.: "C:4-3-3|6=AM,9=ST").
+## Cada vaga alterada ganha o papel e a profundidade típicos da nova posição.
+static var _custom_cache: Dictionary = {}
+const ROLE_OF_POS := {"GK": "GK", "RB": "FB", "LB": "FB", "CB": "CB", "DM": "DM", "CM": "CM", "AM": "AM", "RM": "WM", "LM": "WM", "RW": "W", "LW": "W", "ST": "ST"}
+const DEPTH_OF_POS := {"GK": 0.04, "RB": 0.22, "LB": 0.22, "CB": 0.17, "DM": 0.29, "CM": 0.4, "AM": 0.55, "RM": 0.45, "LM": 0.45, "RW": 0.63, "LW": 0.63, "ST": 0.66}
+const SIDE_X := {"RB": 0.86, "LB": 0.14, "RM": 0.86, "LM": 0.14, "RW": 0.84, "LW": 0.16}
+
+
+static func formation_base(fname: String) -> String:
+	if not fname.begins_with("C:"):
+		return fname
+	return fname.substr(2).get_slice("|", 0)
+
+
+static func formation_overrides(fname: String) -> Dictionary:
+	var out := {}
+	if not fname.begins_with("C:") or fname.find("|") < 0:
+		return out
+	for part in fname.get_slice("|", 1).split(",", false):
+		var kv := part.split("=")
+		if kv.size() == 2 and POS_BY_CODE.has(kv[1]):
+			out[int(kv[0])] = String(kv[1])
+	return out
+
+
+## Monta o nome de uma formação a partir da base e das vagas alteradas ({vaga: código}).
+static func custom_formation_name(base: String, overrides: Dictionary) -> String:
+	if overrides.is_empty():
+		return base
+	var keys := overrides.keys()
+	keys.sort()
+	var parts: Array = []
+	for k in keys:
+		parts.append("%d=%s" % [int(k), String(overrides[k])])
+	return "C:%s|%s" % [base, ",".join(PackedStringArray(parts))]
+
+
+static func _custom_formation(fname: String) -> Dictionary:
+	if _custom_cache.has(fname):
+		return _custom_cache[fname]
+	var base := formation_base(fname)
+	var src: Dictionary = _formations.get(base, _formations["4-4-2"])
+	var roles: Dictionary = get_data("formations")["roles"]
+	var slots: Array = []
+	var ov := formation_overrides(fname)
+	for i in src["slots"].size():
+		var s: Dictionary = src["slots"][i].duplicate()
+		if ov.has(i) and i > 0: # o goleiro não sai do gol
+			var code: String = ov[i]
+			var role_key: String = ROLE_OF_POS[code]
+			var role: Dictionary = roles[role_key]
+			s["pos"] = POS_BY_CODE[code]
+			s["role"] = role_key
+			s["y"] = float(DEPTH_OF_POS[code])
+			if SIDE_X.has(code):
+				s["x"] = float(SIDE_X[code])
+			elif float(s["x"]) < 0.2 or float(s["x"]) > 0.8:
+				s["x"] = 0.5 + (float(s["x"]) - 0.5) * 0.5 # quem sai da ponta vem para o meio
+			for k in ["def", "mid", "att", "wide"]:
+				s[k] = float(role[k])
+		slots.append(s)
+	var f := {"name": fname, "desc": "Variação personalizada do %s." % base, "slots": slots}
+	_custom_cache[fname] = f
+	return f
 
 
 static func formation_names() -> Array[String]:

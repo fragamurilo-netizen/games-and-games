@@ -6,6 +6,8 @@ var _edit := false
 var _pitch: PitchView
 var _notes: Array = []
 var _extras_open := false
+## Tocar numa vaga do campinho muda a posição dela (formação personalizada) em vez do jogador.
+var _pos_edit := false
 
 
 func _init() -> void:
@@ -56,10 +58,15 @@ func refresh() -> void:
 	c.add_child(_pitch)
 	var strength := ClubAI.lineup_strength(w, sheet.formation, sheet.starters) / 11.0
 	var hint := UIKit.hbox(8)
-	hint.add_child(UIKit.label("Toque em um jogador para trocar.", "Small"))
+	hint.add_child(UIKit.label("Toque numa vaga para mudar a posição dela." if _pos_edit else "Toque em um jogador para trocar.", "Small"))
 	hint.add_child(UIKit.spacer())
 	hint.add_child(UIKit.label("Força do time: %d" % int(round(strength)), "H3"))
 	c.add_child(hint)
+	var rule := SquadRules.describe(club)
+	if rule != "":
+		var used := SquadRules.count(w, club, sheet.starters + sheet.bench)
+		var lim := int(SquadRules.limit(club)["max"])
+		c.add_child(UIKit.colored("%s: %d/%d%s" % [rule, used, lim, " — acima do limite, o assistente ajusta antes do jogo." if used > lim else ""], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
 	var tools := UIKit.hbox(8)
 	var auto := UIKit.button("Escalação automática", "GhostButton", func():
 		club.sheet = ClubAI.auto_sheet(w, club, sheet.formation)
@@ -78,16 +85,33 @@ func refresh() -> void:
 	rest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(rest)
 	c.add_child(tools)
+	var pe := CheckButton.new()
+	pe.text = "Editar posições no campo (formação personalizada)"
+	pe.button_pressed = _pos_edit
+	pe.toggled.connect(func(v):
+		_pos_edit = v
+		refresh())
+	c.add_child(pe)
 	# Formação
-	c.add_child(UIKit.section("Formação"))
+	var base := DatabaseManager.formation_base(sheet.formation)
+	var custom := sheet.formation.begins_with("C:")
+	c.add_child(UIKit.section("Formação" + (" · variação do %s" % base if custom else "")))
 	var gf := ButtonGroup.new()
 	var fl := UIKit.flow(8)
 	for fname in DatabaseManager.formation_names():
 		var fn: String = fname
-		fl.add_child(UIKit.chip(fn, fn == sheet.formation, gf, func(): _set_formation(fn)))
+		fl.add_child(UIKit.chip(fn + ("*" if custom and fn == base else ""), fn == base, gf, func(): _set_formation(fn)))
 	c.add_child(fl)
 	c.add_child(UIKit.label(String(DatabaseManager.formation(sheet.formation)["desc"]), "Small", true))
-	c.add_child(_fam_row("Entrosamento com o %s" % sheet.formation, TacticsManager.formation_fam(club, sheet.formation)))
+	if custom:
+		var ov := DatabaseManager.formation_overrides(sheet.formation)
+		var base_slots: Array = DatabaseManager.formation(base)["slots"]
+		var changes: Array = []
+		for k in ov:
+			changes.append("%s → %s" % [Pos.code(int(base_slots[int(k)]["pos"])), Pos.code(DatabaseManager.POS_BY_CODE[ov[k]])])
+		c.add_child(UIKit.label("Mudanças: %s" % ", ".join(PackedStringArray(changes)), "Small", true))
+		c.add_child(UIKit.button("Voltar ao %s original" % base, "GhostButton", func(): _set_formation(base), "back"))
+	c.add_child(_fam_row("Entrosamento com o %s" % base, TacticsManager.formation_fam(club, sheet.formation)))
 	# Mentalidade
 	var tac := DatabaseManager.tactics()
 	c.add_child(UIKit.section("Mentalidade"))
@@ -126,12 +150,18 @@ func refresh() -> void:
 		_segment(c, "Intensidade", tac["intensity"], sheet.intensity, func(i): sheet.intensity = i)
 		_segment(c, "Linha defensiva", tac["line"], sheet.line, func(i): sheet.line = i)
 		_segment(c, "Pressão", tac["pressing"], sheet.pressing, func(i): sheet.pressing = i)
+		var wdesc := ["Time compacto por dentro: fecha o meio e ataca menos pelos lados.", "Largura da formação escolhida.", "Campo aberto: mais jogadas pelas pontas, cruzamentos e escanteios; deixa espaços por dentro."]
+		var wopts: Array = []
+		for wi in TeamSheet.WIDTH_NAMES.size():
+			wopts.append({"name": TeamSheet.WIDTH_NAMES[wi], "desc": wdesc[wi]})
+		_segment(c, "Largura", wopts, sheet.width, func(i): sheet.width = i)
 		var auto_subs := CheckButton.new()
 		auto_subs.text = "Assistente faz substituições por cansaço e lesão"
 		auto_subs.button_pressed = sheet.auto_subs
 		auto_subs.toggled.connect(func(v): sheet.auto_subs = v)
 		c.add_child(auto_subs)
 	_plan_section(c, sheet)
+	_instructions_section(c, w, sheet)
 	# Bola parada
 	c.add_child(UIKit.section("Capitão e bola parada"))
 	for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
@@ -372,7 +402,83 @@ func _set_formation(fname: String) -> void:
 	refresh()
 
 
+## Instruções individuais dos titulares (toque para mudar).
+func _instructions_section(c: VBoxContainer, w: GameWorld, sheet: TeamSheet) -> void:
+	c.add_child(UIKit.section("Instruções individuais"))
+	var slots: Array = DatabaseManager.formation(sheet.formation)["slots"]
+	for i in range(1, mini(slots.size(), sheet.starters.size())):
+		var p := w.player(sheet.starters[i])
+		if p == null:
+			continue
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.pos_badge(int(slots[i]["pos"])))
+		var nl := UIKit.label(p.display_name(), "")
+		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(nl)
+		var ins := sheet.instruction_of(p.id)
+		row.add_child(UIKit.colored(String(ins.get("name", "Padrão da função")), UIColors.ACCENT if not ins.is_empty() else UIColors.MUTED, "Small"))
+		var pid := p.id
+		c.add_child(UIKit.tap_row(row, func(): _pick_instruction(pid), "CardFlat"))
+
+
+func _pick_instruction(pid: int) -> void:
+	var w := world()
+	var sheet := _sheet()
+	var p := w.player(pid)
+	var v := UIKit.vbox(8)
+	v.add_child(UIKit.label("Instrução para %s" % p.display_name(), "Title", true))
+	v.add_child(UIKit.button("Padrão da função", "GhostButton", func():
+		sheet.instr.erase(pid)
+		UIManager.close_modal()
+		refresh()))
+	for k in TeamSheet.INSTRUCTION_ORDER:
+		var key: String = k
+		var d: Dictionary = TeamSheet.INSTRUCTIONS[key]
+		var col := UIKit.vbox(2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(String(d["name"]), "H3"))
+		col.add_child(UIKit.label(String(d["desc"]), "Small", true))
+		v.add_child(UIKit.tap_row(col, func():
+			sheet.instr[pid] = key
+			UIManager.close_modal()
+			refresh()))
+	_show_sheet(v)
+
+
+## Muda a posição de uma vaga (formação personalizada a partir da base).
+func _pick_slot_position(index: int) -> void:
+	var sheet := _sheet()
+	if index == 0:
+		UIManager.toast("O goleiro fica no gol.")
+		return
+	var base := DatabaseManager.formation_base(sheet.formation)
+	var base_pos: int = DatabaseManager.formation(base)["slots"][index]["pos"]
+	var v := UIKit.vbox(8)
+	v.add_child(UIKit.label("Nova posição da vaga", "Title"))
+	v.add_child(UIKit.label("O time leva um tempo para se acostumar: cada vaga mudada custa um pouco de entrosamento.", "Small", true))
+	var fl := UIKit.flow(8)
+	for pos in Pos.DISPLAY_ORDER:
+		if pos == Pos.GK:
+			continue
+		var pp: int = pos
+		fl.add_child(UIKit.button(Pos.name_of(pp), "PrimaryButton" if pp == int(DatabaseManager.formation(sheet.formation)["slots"][index]["pos"]) else "", func():
+			var ov := DatabaseManager.formation_overrides(sheet.formation)
+			if pp == base_pos:
+				ov.erase(index)
+			else:
+				ov[index] = Pos.CODES_I18N["en"][pp]
+			sheet.formation = DatabaseManager.custom_formation_name(base, ov)
+			UIManager.close_modal()
+			refresh()))
+	v.add_child(fl)
+	_show_sheet(v)
+
+
 func _on_slot(index: int) -> void:
+	if _pos_edit:
+		_pick_slot_position(index)
+		return
 	var w := world()
 	var sheet := _sheet()
 	_pitch.selected = index

@@ -31,6 +31,7 @@ const SCREENS := {
 	"manager": "res://scenes/screens/manager.tscn",
 	"welcome": "res://scenes/screens/welcome.tscn",
 	"graduates": "res://scenes/screens/graduates.tscn",
+	"xray": "res://scenes/screens/xray.tscn",
 }
 ## Telas que avançam a carreira: depois da temporada de demonstração, levam à compra.
 const GATED := ["prematch", "match", "preseason"]

@@ -27,6 +27,8 @@ func refresh() -> void:
 	UIKit.clear(c)
 	if f != null:
 		c.add_child(_user_card(w, f, user))
+		if not Dictionary(w.stats.get("xray", {})).is_empty():
+			c.add_child(_xray_teaser(w))
 	for ev in _report.get("cups", []):
 		var txt := CompText.cup_event_text(w, ev)
 		if txt != "" and (w.is_user_club(int(ev.get("club", -1))) or ev.get("t", "") == "cwc"):
@@ -51,6 +53,19 @@ func refresh() -> void:
 	if ret != null:
 		c.add_child(ret)
 	_build_footer()
+
+
+## Chamada para o Raio-X: o diagnóstico principal do jogo e o botão para abrir.
+func _xray_teaser(w: GameWorld) -> Control:
+	var rep: Dictionary = w.stats["xray"]
+	var card := UIKit.card("CardHighlight", 8)
+	card.add_child(UIKit.section("Raio-X tático"))
+	var ins: Array = rep.get("insights", [])
+	if not ins.is_empty():
+		card.add_child(UIKit.label(String(ins[0]["title"]), "H3"))
+		card.add_child(UIKit.label(String(ins[0]["lines"][0]), "", true))
+	card.add_child(UIKit.button("Abrir o Raio-X", "PrimaryButton", func(): UIManager.push("xray"), "search"))
+	return UIKit.card_panel(card)
 
 
 func _notice(icon_name: String, color: Color, text: String) -> Control:

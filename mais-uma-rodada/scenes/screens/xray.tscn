@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/screens/xray_screen.gd" id="1_screen"]
+
+[node name="XrayScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_screen")
+
+[node name="Body" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Scroll" type="ScrollContainer" parent="Body"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+scroll_deadzone = 14
+
+[node name="Margin" type="MarginContainer" parent="Body/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Body/Scroll/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Footer" type="PanelContainer" parent="Body"]
+visible = false
+layout_mode = 2
+theme_type_variation = &"BottomBar"
+
+[node name="FooterBox" type="VBoxContainer" parent="Body/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 10

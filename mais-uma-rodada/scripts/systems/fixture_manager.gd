@@ -43,6 +43,9 @@ static func round_robin(rng: RandomNumberGenerator, club_ids: Array, turns: int)
 	var home_count := {}
 	var n_turns := maxi(1, turns)
 	for t in n_turns:
+		# Turno único (ligas com playoffs): mandos equilibrados, metade em casa para cada um
+		if n_turns == 1:
+			return _balanced_single(first)
 		# Turno ímpar final (ex.: três turnos): mando decidido para equilibrar os jogos em casa
 		if t == n_turns - 1 and t % 2 == 0 and t > 0:
 			for pairs in first:
@@ -69,6 +72,42 @@ static func round_robin(rng: RandomNumberGenerator, club_ids: Array, turns: int)
 				for p in pairs:
 					mirrored.append([p[1], p[0]])
 				rounds.append(mirrored)
+	return rounds
+
+
+## Turno único com mandos equilibrados: orientação gulosa e depois inversões até cada clube ter
+## metade dos jogos em casa (arredondando para cima ou para baixo).
+static func _balanced_single(first: Array) -> Array:
+	var rounds: Array = []
+	var home := {}
+	var games := {}
+	for pairs in first:
+		var arr: Array = []
+		for p in pairs:
+			var a: int = p[0]
+			var b: int = p[1]
+			var q: Array = [b, a] if int(home.get(b, 0)) < int(home.get(a, 0)) else [a, b]
+			home[q[0]] = int(home.get(q[0], 0)) + 1
+			games[a] = int(games.get(a, 0)) + 1
+			games[b] = int(games.get(b, 0)) + 1
+			arr.append(q)
+		rounds.append(arr)
+	for _pass in 60:
+		var changed := false
+		for r in rounds:
+			for q in r:
+				var h: int = q[0]
+				var a: int = q[1]
+				var hi_h := int(ceil(int(games[h]) / 2.0))
+				var lo_a := int(floor(int(games[a]) / 2.0))
+				if int(home[h]) > hi_h and int(home.get(a, 0)) < int(ceil(int(games[a]) / 2.0)) or int(home[h]) > lo_a + 1 and int(home.get(a, 0)) < lo_a:
+					q[0] = a
+					q[1] = h
+					home[h] = int(home[h]) - 1
+					home[a] = int(home.get(a, 0)) + 1
+					changed = true
+		if not changed:
+			break
 	return rounds
 
 

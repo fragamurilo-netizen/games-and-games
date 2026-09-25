@@ -263,6 +263,15 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var tt := Time.get_ticks_usec()
 	for e in md["entries"]:
 		run_entry(world, e)
+	# Raio-X tático do jogo do usuário (o minuto a minuto registrou corredores e contexto)
+	var ue: Dictionary = md.get("user", {})
+	if not ue.is_empty() and ue.get("sim", null) != null:
+		var xr := TacticalXRay.analyze(world, ue["sim"])
+		if not xr.is_empty():
+			var f0: Fixture = ue["f"]
+			xr["comp"] = f0.comp
+			xr["day"] = f0.slot
+			world.stats["xray"] = xr
 	tt = _time("jogos", tt)
 	var s := world.season
 	var slot := s.day
