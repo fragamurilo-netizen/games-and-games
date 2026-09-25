@@ -44,7 +44,7 @@ var width: int = 1
 ## Instruções individuais: ajustes nos pesos de defesa/meio/ataque da vaga, nas faltas e nos chutes.
 ## "gap": espaço que o jogador deixa (ou fecha) no próprio corredor quando o time perde a bola.
 const INSTRUCTIONS := {
-	"avancar": {"name": "Apoiar o ataque", "desc": "Sobe mais, aparece na área. Deixa espaço atrás.", "def": -0.12, "mid": 0.0, "att": 0.15, "foul": 1.0, "shoot": 1.1, "gap": 0.3},
+	"avancar": {"name": "Apoiar o ataque", "desc": "Sobe mais, aparece na área. Deixa espaço atrás.", "def": -0.12, "mid": 0.0, "att": 0.15, "foul": 1.0, "shoot": 1.1, "gap": 0.45},
 	"segurar": {"name": "Segurar a posição", "desc": "Não sai da função defensiva. Ataca menos.", "def": 0.12, "mid": 0.0, "att": -0.12, "foul": 1.0, "shoot": 0.85, "gap": -0.12},
 	"chutar": {"name": "Arriscar de longe", "desc": "Finaliza de fora da área sempre que puder.", "def": 0.0, "mid": -0.03, "att": 0.06, "foul": 1.0, "shoot": 1.35},
 	"marcar": {"name": "Marcação forte", "desc": "Cola no adversário e não deixa jogar. Faz mais faltas.", "def": 0.08, "mid": 0.0, "att": -0.04, "foul": 1.35, "shoot": 1.0},
