@@ -49,7 +49,7 @@ func refresh() -> void:
 			c.add_child(_fit_card(w, p, own))
 			c.add_child(_positions_card(w, p, own))
 			c.add_child(_attributes(w, p, own))
-			c.add_child(_personality(p, own))
+			c.add_child(_personality(w, p, own))
 			if own:
 				c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
 	_actions(w, p, own)
@@ -315,7 +315,7 @@ func _attributes(w: GameWorld, p: Player, own: bool) -> Control:
 	return UIKit.card_panel(card)
 
 
-func _personality(p: Player, own: bool) -> Control:
+func _personality(w: GameWorld, p: Player, own: bool) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Personalidade"))
 	for t in p.traits:
@@ -324,6 +324,18 @@ func _personality(p: Player, own: bool) -> Control:
 		card.add_child(UIKit.label(String(d.get("desc", "")), "Muted", true))
 	if own:
 		card.add_child(UIKit.label("Consistência: %s · Propensão a lesões: %s" % [_level(p.consistency, false), _level(p.injury_prone, true)], "Small", true))
+	# Personalidade oculta: nunca o número, só o que a comissão percebe com a convivência.
+	card.add_child(UIKit.label("O que a comissão percebe", "Caps"))
+	if not own:
+		card.add_child(UIKit.label("Por dentro, só a convivência revela. Contrate para conhecer.", "Muted", true))
+	elif not HiddenPersona.known(w, p):
+		card.add_child(UIKit.label("Ainda conhecendo o jogador. A comissão precisa de mais tempo com ele.", "Muted", true))
+	else:
+		var rep_lines := HiddenPersona.report(p)
+		if rep_lines.is_empty():
+			card.add_child(UIKit.label("Nada fora do comum: um jogador equilibrado por dentro.", "Muted", true))
+		for ln: Array in rep_lines:
+			card.add_child(UIKit.colored(String(ln[0]), UIColors.GREEN if ln[1] else UIColors.RED, "Small", true))
 	if not p.persona_log.is_empty():
 		card.add_child(UIKit.label("Como ele mudou", "Caps"))
 		for i in range(p.persona_log.size() - 1, maxi(-1, p.persona_log.size() - 6), -1):

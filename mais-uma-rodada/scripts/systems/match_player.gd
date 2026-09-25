@@ -25,6 +25,7 @@ var base_f: float = 1.0 # moral × forma × desempenho × contexto
 var f: float = 1.0 # fator total (atualizado com a fadiga)
 var sh_f: float = 1.0 # reação ao grito do técnico (incentivo/cobrança), enquanto durar
 var talk_f: float = 1.0 # reação à palestra (antes do jogo / intervalo), até a próxima palestra
+var sc_f: float = 1.0 # reação ao placar (determinação e temperamento ocultos)
 var card_mult: float = 1.0
 var clutch: float = 0.0
 var injury_f: float = 1.0

@@ -172,7 +172,7 @@ func refresh_factors() -> void:
 		if mp == null:
 			continue
 		var c := clampf(mp.cond, 0.0, 100.0) / 100.0
-		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f * mp.sh_f * mp.talk_f
+		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f * mp.sh_f * mp.talk_f * mp.sc_f
 
 
 ## Recalcula os setores a partir de quem está em campo.
