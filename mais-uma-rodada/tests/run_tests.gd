@@ -925,6 +925,115 @@ func _test_training_youth() -> void:
 	check(not Array(turn["new"]).is_empty(), "nenhum garoto novo na virada")
 	for q: Player in w.academy.values():
 		check(q.age(w.year) <= YouthManager.MAX_AGE, "garoto acima da idade ficou na base")
+	_test_academy_depth()
+
+
+## Base aprofundada: categorias, escalação, sub-17, faixa de potencial, captação, peneira,
+## propostas, revelados e save.
+func _test_academy_depth() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	check(YouthManager.has_league(w, "u20") and YouthManager.has_league(w, "u17"), "ligas sub-20 e sub-17 não montadas")
+	# Categorias
+	for q: Player in w.academy.values():
+		var a := q.age(w.year)
+		var cat := YouthManager.category(q, w.year)
+		check((a >= 18) == (cat == YouthManager.CAT_U20) and (a <= 15) == (cat == YouthManager.CAT_U15), "categoria errada: %d anos em %s" % [a, cat])
+	# Faixa de potencial sempre contém o potencial real
+	for q: Player in w.academy.values():
+		var r := YouthManager.potential_range(w, q)
+		check(int(r[0]) <= q.potential and q.potential <= int(r[1]), "potencial %d fora da faixa %s" % [q.potential, r])
+	# Escalação: um goleiro no gol, sem repetir ninguém, e sub-17 só com garotos até 17 anos
+	var t := YouthManager.pick_team(w, "u20")
+	var gks := 0
+	var seen := {}
+	for e in t["xi"]:
+		if int(e[1]) == Pos.GK:
+			gks += 1
+		check(not seen.has(e[0].id), "garoto escalado duas vezes")
+		seen[e[0].id] = true
+	check(gks <= 1 and t["xi"].size() >= 5, "escalação do sub-20 estranha (%d jogadores, %d goleiros)" % [t["xi"].size(), gks])
+	var t17 := YouthManager.pick_team(w, "u17", seen)
+	for e in t17["xi"]:
+		check(e[0].age(w.year) <= 17 and not seen.has(e[0].id), "sub-17 com garoto de %d anos ou repetido" % e[0].age(w.year))
+	# Temporada das duas ligas: todo mundo joga tudo; quem joga soma minutos e notas
+	for slot in w.season.calendar.size():
+		if w.season.is_weekend(slot):
+			w.season.day = slot
+			YouthManager.play_slot(w, slot)
+			YouthManager.weekly(w)
+	for key in ["u20", "u17"]:
+		var yl := YouthManager.league(w, key)
+		var n: int = yl["clubs"].size()
+		for cid in yl["clubs"]:
+			check(int(yl["table"][cid]["pl"]) == n - 1, "%s: %s com %d jogos" % [key, w.club(cid).short_name, int(yl["table"][cid]["pl"])])
+	var played := 0
+	var gk_goals := 0
+	for q: Player in w.academy.values():
+		if q.stats[Player.S_APPS] > 0:
+			played += 1
+			check(q.avg_rating() >= 4.0 and q.avg_rating() <= 10.0, "nota fora da escala: %.2f" % q.avg_rating())
+		if q.position == Pos.GK:
+			gk_goals += q.stats[Player.S_GOALS]
+	check(played >= 18, "poucos garotos jogaram (%d)" % played)
+	check(gk_goals <= 1, "goleiros da base marcaram %d gols" % gk_goals)
+	var games_u: Array = []
+	for g in YouthManager.league(w, "u20")["rounds"][0] + YouthManager.league(w, "u20")["rounds"][1]:
+		if w.is_user_club(int(g[0])) or w.is_user_club(int(g[1])):
+			games_u.append(g)
+	check(not games_u.is_empty() and games_u[0].size() == 5, "jogo do usuário sem resumo (autores/melhor em campo)")
+	var fin := YouthManager.finish_league(w)
+	check(int(fin.get("champion", -1)) >= 0 and int(fin.get("u17", {}).get("champion", -1)) >= 0, "ligas da base sem campeão")
+	# Captação e peneira
+	YouthManager.set_region(w, "internacional")
+	YouthManager.set_focus(w, "gol")
+	check(YouthManager.scouting_cost(w) > YouthManager.scouting_cost(w, "nacional") and YouthManager.scouting_cost(w, "local") == 0, "custos da captação fora de ordem")
+	var bal := c.balance
+	check(YouthManager.can_trial(w), "peneira indisponível no começo")
+	var cands := YouthManager.run_trial(w)
+	check(cands.size() >= 4 and c.balance < bal and not YouthManager.can_trial(w), "peneira não gerou candidatos ou não cobrou")
+	for q: Player in cands:
+		check(not w.academy.has(q.id), "candidato entrou na base sem ser aprovado")
+	var n0 := w.academy.size()
+	YouthManager.accept_candidate(w, cands[0].id)
+	check(w.academy.size() == n0 + 1 and w.academy.has(cands[0].id) and YouthManager.candidates(w).size() == cands.size() - 1, "aprovação na peneira falhou")
+	# Regra da FIFA: garoto de 15 anos não vai para o exterior
+	check(YouthManager.min_foreign_age("BRA", "ESP") == 18 and YouthManager.min_foreign_age("POR", "ESP") == 16 and YouthManager.min_foreign_age("BRA", "BRA") == 0, "regra de transferência de menores errada")
+	# Proposta por um garoto: evento, venda com % de revenda e revelado registrado
+	var kid: Player = YouthManager.academy(w)[0]
+	kid.potential = maxi(kid.potential, 80)
+	var buyer := YouthManager.bid_buyer(w, kid)
+	if buyer != null:
+		check(kid.age(w.year) >= YouthManager.min_foreign_age(c.nation, buyer.nation), "comprador estrangeiro para garoto novo demais")
+		var ev := {"id": 999, "k": "youth_bid", "turn": w.current_turn(), "exp": w.current_turn() + 3, "p": kid.id, "d": {"club": buyer.id, "fee": YouthManager.bid_fee(w, kid, buyer)}}
+		check(EventManager.describe(w, ev)["options"].size() == 3, "evento de proposta sem as 3 opções")
+		w.events.append(ev)
+		var bal2 := c.balance
+		EventManager.resolve(w, ev, 0)
+		check(not w.academy.has(kid.id) and kid.club_id == buyer.id and c.balance > bal2 and int(kid.clauses.get("so", -1)) == c.id, "venda do garoto da base falhou")
+		check(YouthManager.graduates(w).size() >= 1 and YouthManager.sales_total(w) > 0, "venda não entrou nos revelados")
+	# Save guarda a base inteira
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(String(YouthManager.state(w2)["region"]) == "internacional" and YouthManager.has_league(w2, "u17") and YouthManager.graduates(w2).size() == YouthManager.graduates(w).size(), "save perdeu captação/sub-17/revelados")
+	# Virada: balanço do ano (estirão/estagnação), cobrança da captação e novos garotos
+	var bal3 := c.balance
+	w.year += 1
+	var turn := YouthManager.season_turnover(w)
+	check(int(turn["cost"]) > 0 and c.balance < bal3, "captação internacional não foi cobrada")
+	check(YouthManager.candidates(w).is_empty(), "candidatos da peneira sobraram para o ano seguinte")
+	for q: Player in turn["new"]:
+		check(q.age(w.year) >= YouthManager.MIN_AGE and q.age(w.year) <= 16, "garoto novo com %d anos" % q.age(w.year))
+	check(float(YouthManager._pos_weights(w)[Pos.GK]) >= float(YouthManager.POS_WEIGHTS[Pos.GK]) * 3.0, "foco em goleiros não mudou a captação")
+	# Estirão e estagnação acontecem num grupo grande ao longo de alguns anos
+	var ups := 0
+	var downs := 0
+	for i in 6:
+		for ch in YouthManager.yearly_review(w):
+			if ch["up"]:
+				ups += 1
+			else:
+				downs += 1
+	check(ups > 0 and downs > 0, "balanço da base sem estirão (%d) ou estagnação (%d)" % [ups, downs])
 
 
 func _test_trades() -> void:

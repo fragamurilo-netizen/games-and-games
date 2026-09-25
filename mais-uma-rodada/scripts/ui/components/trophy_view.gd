@@ -6,7 +6,7 @@ extends Control
 ## bronze abaixo) e a fita da base leva as cores da bandeira do país (ou da confederação).
 ## `key` usa o formato dos títulos do clube: "L:ENG1" (liga), "C:UCL" (continental),
 ## "W:CWC" (Mundial), "S:SPE" (estadual), "D:FAC" (copa nacional ou da liga), "U:CSH" (supercopa),
-## "P:ENG2" (acesso), "Y:ENG1" (sub-20).
+## "P:ENG2" (acesso), "Y:ENG1" (sub-20), "Z:ENG1" (sub-17).
 
 const STYLE_CUP := 0 # taça clássica de duas alças
 const STYLE_CHALICE := 1 # cálice alto com tampa
@@ -63,6 +63,8 @@ static func trophy_name(k: String, w: GameWorld = null) -> String:
 			return "Acesso · " + n2
 		"Y:":
 			return "Liga sub-20 · " + String(DatabaseManager.league_cfg(id).get("short", id))
+		"Z:":
+			return "Liga sub-17 · " + String(DatabaseManager.league_cfg(id).get("short", id))
 	return k
 
 
@@ -94,7 +96,7 @@ func _resolve() -> void:
 				_metal = GOLD if kind_c == "national" else SILVER
 			var cols: Array = cc.get("colors", [])
 			_ribbon = _colors(cols) if cols.size() >= 2 else _nation_colors(String(cc.get("nation", "")))
-		"P:", "Y:":
+		"P:", "Y:", "Z:":
 			_style = STYLE_PLAQUE
 			_metal = SILVER if kind == "P:" else BRONZE
 			_ribbon = _nation_colors(String(DatabaseManager.league_cfg(id).get("nation", "")))
@@ -359,6 +361,8 @@ static func _short(w: GameWorld, k: String) -> String:
 			return "Acesso " + (w.league_short(id) if w != null else id)
 		"Y:":
 			return "Sub-20"
+		"Z:":
+			return "Sub-17"
 	return k
 
 

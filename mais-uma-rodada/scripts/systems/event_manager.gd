@@ -28,6 +28,7 @@ const KINDS := {
 	"tickets": {"w": 0.5, "icon": "money", "color": "BLUE"},
 	"agent": {"w": 0.8, "icon": "search", "color": "BLUE"},
 	"prodigy": {"w": 0.8, "icon": "star", "color": "GREEN"},
+	"youth_bid": {"w": 0.5, "icon": "swap", "color": "ORANGE"},
 	"takeover": {"w": 0.25, "icon": "money", "color": "GREEN"},
 	"stadium": {"w": 0.4, "icon": "shield", "color": "BLUE"},
 }
@@ -221,6 +222,15 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 				return {}
 			ev["p"] = best.id
 			ev["d"] = {"wage": TransferManager.wage_ask(world, best, club), "years": TransferManager.preferred_years(world, best)}
+		"youth_bid":
+			var target: Player = YouthManager.bid_target(world)
+			if target == null:
+				return {}
+			var bidder := YouthManager.bid_buyer(world, target)
+			if bidder == null:
+				return {}
+			ev["p"] = target.id
+			ev["d"] = {"club": bidder.id, "fee": YouthManager.bid_fee(world, target, bidder)}
 		"prodigy":
 			var kid: Player = YouthManager.best_prospect(world, club)
 			if kid == null or Array(world.stats.get("ev_skip", [])).has(kid.id):
@@ -350,6 +360,18 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 				"options": [
 					{"t": "Contratar", "hint": "Chega sem custo de transferência"},
 					{"t": "Dispensar", "hint": "Nada muda"}]}
+		"youth_bid":
+			var bidder := world.club(int(d.get("club", -1)))
+			var bn := bidder.short_name if bidder != null else "gigante"
+			var abroad := bidder != null and bidder.nation != club.nation
+			return {"title": "%s quer %s, da base" % [bn, pn], "def": 2,
+				"body": "O %s%s oferece %s por %s (%d anos, %s), que ainda nem estreou no profissional. O garoto e a família ficaram animados." % [
+					bidder.name if bidder != null else "", (" (%s)" % DatabaseManager.nation_name(bidder.nation)) if abroad else "",
+					Fmt.money(int(d.get("fee", 0))), pn, p.age(world.year) if p != null else 0, Pos.name_of(p.position).to_lower() if p != null else ""],
+				"options": [
+					{"t": "Vender", "hint": "%s no caixa · 20%% de uma venda futura" % Fmt.money(int(d.get("fee", 0)))},
+					{"t": "Assinar o primeiro contrato profissional", "hint": "Sobe ao elenco com salário melhor · moral sobe"},
+					{"t": "Recusar", "hint": "Fica na base · ele pode ficar frustrado"}]}
 		"prodigy":
 			return {"title": "Joia na base: %s" % pn, "def": 1,
 				"body": "O coordenador da base diz que %s (%d anos) está pronto para treinar com os profissionais." % [pn, p.age(world.year) if p != null else 0],
@@ -565,6 +587,24 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 				msg = String(r.get("msg", ""))
 			else:
 				msg = "Proposta dispensada."
+		"youth_bid":
+			if p == null or not world.academy.has(p.id):
+				return "Ele já não está na base."
+			var skip_b: Dictionary = world.stats.get("yb_skip", {})
+			skip_b[str(p.id)] = world.year
+			world.stats["yb_skip"] = skip_b
+			match opt:
+				0:
+					msg = YouthManager.sell(world, p, world.club(int(d.get("club", -1))), int(d.get("fee", 0)))
+				1:
+					msg = YouthManager.promote(world, p)
+					if not world.academy.has(p.id):
+						p.wage = Valuation.round_wage(p.wage * 1.6)
+						p.contract_end = world.year + 4
+						_morale(p, 10.0)
+				_:
+					_morale(p, -16.0 if p.trait_sum("ambition") > 10.0 else -8.0)
+					msg = "%s fica na base. O garoto sentiu o golpe." % p.display_name()
 		"prodigy":
 			if p != null and opt == 0:
 				msg = YouthManager.promote(world, p)

@@ -141,6 +141,7 @@ Regras:
 | `TransferManager` | estático | Valor, salário, negociação, propostas IA↔IA e IA→usuário, agentes livres, renovação. |
 | `FinanceManager` | estático | Bilheteria, TV, patrocínio, salários, manutenção, prêmios, orçamentos. |
 | `PlayerDevelopment` | estático | Evolução semanal/anual, curvas de envelhecimento, aposentadoria, geração da base. |
+| `YouthManager` | estático | Base do usuário: categorias sub-15/17/20, ligas sub-17 e sub-20 com escalação e notas, faixa de potencial, estirão/estagnação, captação, peneira, venda de garotos e revelados (`world.academy`, `world.youth_league`, `world.youth`). |
 | `SeasonManager` | estático | Ciclo da rodada e da temporada: acesso/rebaixamento, contratos, nova temporada. |
 | `NewsManager` | estático | Feed procedural a partir de dados reais do save. |
 | `StoryHooks` | estático | Ganchos da próxima rodada ("clássico", "confronto direto", "retorno de lesão"...). |

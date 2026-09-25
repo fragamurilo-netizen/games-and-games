@@ -768,6 +768,12 @@ static func end_season(world: GameWorld) -> Dictionary:
 	if world.has_user():
 		var turnover := YouthManager.season_turnover(world)
 		summary["youth_left"] = turnover["left"]
+		summary["youth_changes"] = turnover["changes"]
+		summary["youth_cost"] = turnover["cost"]
+		for ch in turnover["changes"]:
+			if ch["up"] and int(ch["d"]) >= 4:
+				NewsManager.post_raw(world, "%s dá o salto na base" % ch["name"], "%s O coordenador da base está animado com o garoto." % ch["why"],
+					world.user_club_id, int(ch["id"]), NewsEvent.IMP_NORMAL, "base")
 		var mine: Array = turnover["new"]
 		yc += mine.size()
 		mine.sort_custom(func(a, b): return a.potential > b.potential)

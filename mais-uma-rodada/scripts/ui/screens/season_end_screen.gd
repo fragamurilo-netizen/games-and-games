@@ -300,6 +300,10 @@ func _awards_card(w: GameWorld) -> Control:
 		var champ := w.club(int(yl.get("champion", -1)))
 		if champ != null:
 			card.add_child(UIKit.kv(String(yl.get("name", "Sub-20")), "%s · seu time %dº" % [champ.short_name, int(yl.get("user_pos", 0))], UIColors.ACCENT if w.is_user_club(champ.id) else UIColors.TEXT))
+		var y17: Dictionary = yl.get("u17", {})
+		var champ17 := w.club(int(y17.get("champion", -1)))
+		if champ17 != null:
+			card.add_child(UIKit.kv(String(y17.get("name", "Sub-17")), "%s · seu time %dº" % [champ17.short_name, int(y17.get("user_pos", 0))], UIColors.ACCENT if w.is_user_club(champ17.id) else UIColors.TEXT))
 	return UIKit.card_panel(card)
 
 
@@ -376,7 +380,7 @@ func _club_card(w: GameWorld) -> Control:
 	var retired: Array = _summary.get("retired", [])
 	var left: Array = _summary.get("left", [])
 	var youth: Array = _summary.get("youth", [])
-	if retired.is_empty() and left.is_empty() and youth.is_empty():
+	if retired.is_empty() and left.is_empty() and youth.is_empty() and Array(_summary.get("youth_changes", [])).is_empty():
 		return null
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Seu elenco"))
@@ -386,10 +390,16 @@ func _club_card(w: GameWorld) -> Control:
 		card.add_child(UIKit.label("Saíram com o fim do contrato: %s." % ", ".join(PackedStringArray(left)), "", true))
 	if not youth.is_empty():
 		card.add_child(UIKit.label("Chegaram à base: %s." % ", ".join(PackedStringArray(youth)), "", true))
-		card.add_child(UIKit.label("Acompanhe os garotos em Central do clube → Base. O potencial é uma estimativa: alguns explodem, outros não.", "Small", true))
+		card.add_child(UIKit.label("Acompanhe os garotos em Central do clube → Base. O potencial é uma faixa que estreita com o tempo: alguns explodem, outros não.", "Small", true))
 	var yleft: Array = _summary.get("youth_left", [])
 	if not yleft.is_empty():
 		card.add_child(UIKit.label("Deixaram a base (idade limite): %s." % ", ".join(PackedStringArray(yleft)), "Small", true))
+	for ch in _summary.get("youth_changes", []):
+		var txt := "%s %s: %s" % ["▲" if ch["up"] else "▼", ch["name"], ch["why"]]
+		card.add_child(UIKit.colored(txt, UIColors.GREEN if ch["up"] else UIColors.ORANGE, "Small", true))
+	var ycost := int(_summary.get("youth_cost", 0))
+	if ycost > 0:
+		card.add_child(UIKit.label("Rede de observadores da base: %s no ano." % Fmt.money(ycost), "Small", true))
 	return UIKit.card_panel(card)
 
 

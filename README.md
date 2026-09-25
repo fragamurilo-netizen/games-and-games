@@ -70,6 +70,14 @@ vem da própria simulação.
   posições no perfil.
 - **Editor e mods**: o Editor do menu edita e cria jogadores do mundo padrão; mods em `user://mods` substituem ou
   corrigem qualquer JSON de dados e colocam jogadores reais (veja `docs/MODS.md`).
+- **Base de verdade**: garotos de 14 a 19 anos em sub-15, sub-17 e sub-20, com liga sub-17 além da sub-20. Cada
+  jogo escala um 4-3-3 com rodízio (goleiro no gol, garotos sobem de categoria quando se destacam) e dá minutos,
+  gols, assistências e notas; quem joga evolui mais. O potencial aparece como uma faixa que estreita com o tempo de
+  casa e o coordenador da base. No fim do ano há estirão (garotos tardios e quem brilhou ganham potencial) e
+  estagnação (quem não joga, festeiros, desanimados). Captação por região, país ou exterior (com a regra da FIFA
+  para menores) e setor prioritário; uma peneira por temporada; clubes maiores fazem propostas pelos garotos
+  (vender com 20% de revenda, assinar o primeiro contrato ou recusar); lista dos revelados com o clube e o nível
+  de hoje e o total arrecadado com vendas.
 
 ## Estrutura do repositório
 

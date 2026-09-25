@@ -36,6 +36,8 @@ var promises: Array = []
 ## Categorias de base do usuário (id → Player; fora de `players`) e a liga sub-20 da temporada.
 var academy: Dictionary = {}
 var youth_league: Dictionary = {}
+## Resto do estado da base (captação, peneira, liga sub-17, revelados): ver YouthManager.
+var youth: Dictionary = {}
 ## Estatísticas agregadas usadas pelo relatório de balanceamento.
 var stats: Dictionary = {}
 ## Técnicos, presidentes, comissão, torcida, imprensa e relações (People).
@@ -322,7 +324,7 @@ func to_dict() -> Dictionary:
 		"history": history, "news": nw, "offers": of, "tlog": tl, "retired": retired,
 		"mstats": manager_stats, "stats": stats, "events": events, "promises": promises,
 		"academy": academy.values().map(func(p: Player): return p.to_dict()), "yl": youth_league,
-		"people": people,
+		"yth": youth, "people": people,
 	}
 
 
@@ -365,6 +367,7 @@ static func from_dict(d: Dictionary) -> GameWorld:
 		var ap := Player.from_dict(pd)
 		w.academy[ap.id] = ap
 	w.youth_league = d.get("yl", {})
+	w.youth = d.get("yth", {})
 	w.people = d.get("people", {})
 	w._free_agents_dirty = true
 	w._club_by_key.clear()

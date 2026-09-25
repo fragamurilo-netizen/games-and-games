@@ -404,6 +404,10 @@ static func _title_text(w: GameWorld, k: String, n: int) -> String:
 			return "%dx campeão %s" % [n, w.league_short(id)]
 		"P:":
 			return "%dx acesso da %s" % [n, w.league_short(id)]
+		"Y:":
+			return "%dx campeão %s Sub-20" % [n, w.league_short(id)]
+		"Z:":
+			return "%dx campeão %s Sub-17" % [n, w.league_short(id)]
 	return "%dx %s" % [n, k]
 
 
