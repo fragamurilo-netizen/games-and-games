@@ -227,6 +227,174 @@
 				"initials": "KVM",
 				"sc": "#111111"
 			}
+		},
+		{
+			"key": "BEL_CER",
+			"name": "Cercle Brugge KSV",
+			"short": "Cercle Brugge",
+			"abbr": "CER",
+			"nick": "Cercle Brugge",
+			"city": "Bruges",
+			"founded": 1899,
+			"league": "BEL1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#00843D"
+			],
+			"stadium": "Jan Breydelstadion",
+			"capacity": 29000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_WES",
+			"name": "KVC Westerlo",
+			"short": "Westerlo",
+			"abbr": "WES",
+			"nick": "Westerlo",
+			"city": "Westerlo",
+			"founded": 1933,
+			"league": "BEL1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Het Kuipje",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_OHL",
+			"name": "Oud-Heverlee Leuven",
+			"short": "OH Leuven",
+			"abbr": "OHL",
+			"nick": "OH Leuven",
+			"city": "Leuven",
+			"founded": 2002,
+			"league": "BEL1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "King Power at Den Dreef",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_CHA",
+			"name": "Royal Charleroi SC",
+			"short": "Charleroi",
+			"abbr": "CHA",
+			"nick": "Charleroi",
+			"city": "Charleroi",
+			"founded": 1904,
+			"league": "BEL1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade du Pays de Charleroi",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_STV",
+			"name": "Sint-Truidense VV",
+			"short": "Sint-Truiden",
+			"abbr": "STV",
+			"nick": "Sint-Truiden",
+			"city": "Sint-Truiden",
+			"founded": 1924,
+			"league": "BEL1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stayen",
+			"capacity": 14000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_KOR",
+			"name": "KV Kortrijk",
+			"short": "Kortrijk",
+			"abbr": "KVK",
+			"nick": "Kortrijk",
+			"city": "Kortrijk",
+			"founded": 1901,
+			"league": "BEL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Guldensporenstadion",
+			"capacity": 9500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_DEN",
+			"name": "FCV Dender EH",
+			"short": "Dender",
+			"abbr": "DEN",
+			"nick": "Dender",
+			"city": "Denderleeuw",
+			"founded": 1943,
+			"league": "BEL1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Van Roystadion",
+			"capacity": 6400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_BEE",
+			"name": "K Beerschot VA",
+			"short": "Beerschot",
+			"abbr": "BEE",
+			"nick": "Beerschot",
+			"city": "Antwerp",
+			"founded": 1899,
+			"league": "BEL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Olympisch Stadion",
+			"capacity": 12700,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

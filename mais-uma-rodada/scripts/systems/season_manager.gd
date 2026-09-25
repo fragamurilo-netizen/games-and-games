@@ -81,7 +81,12 @@ static func build_season(world: GameWorld) -> SeasonState:
 		l.name = cfg["name"]
 		l.short_name = cfg.get("short", l.name)
 		l.club_ids = by_league.get(id, [])
-		FixtureManager.build_league_fixtures(world.rng, l, int(cfg.get("rr", 2)), weekends)
+		# Saves de antes das ligas ampliadas têm menos clubes: mais turnos para manter ~30 rodadas
+		var rr := int(cfg.get("rr", 2))
+		var n_clubs := l.club_ids.size()
+		if n_clubs > 1 and n_clubs < int(cfg.get("teams", n_clubs)):
+			rr = maxi(rr, int(ceil(30.0 / (n_clubs - 1))))
+		FixtureManager.build_league_fixtures(world.rng, l, rr, weekends)
 		CompetitionManager.init_table(l)
 		s.leagues[id] = l
 		s.league_order.append(id)
@@ -559,7 +564,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		for pid in champ.player_ids:
 			var p := world.player(pid)
 			if p != null and p.stats[Player.S_APPS] >= 5:
-				p.titles += 1
+				p.win_title(world.year, "L:" + id, champ.id)
 		for cid in promoted:
 			var c := world.club(cid)
 			c.add_title("P:" + id)
@@ -664,6 +669,19 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
 	People.on_season_end(world, summary)
+	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
+	var uc := world.user_club()
+	if uc != null:
+		var snap: Array = []
+		for p: Player in world.squad(uc):
+			var t := p.season_totals()
+			snap.append({"id": p.id, "n": p.display_name(), "pos": p.position, "sh": p.shirt, "a": int(t[0]), "g": int(t[1]),
+				"as": int(t[2]), "r": snappedf(p.avg_rating(), 0.01), "o": p.overall})
+		uc.squad_archive[str(world.year)] = snap
+		if uc.squad_archive.size() > 40:
+			var ks: Array = uc.squad_archive.keys()
+			ks.sort()
+			uc.squad_archive.erase(ks[0])
 	# Arquivo individual da temporada
 	for p: Player in world.players.values():
 		var tot := p.season_totals()

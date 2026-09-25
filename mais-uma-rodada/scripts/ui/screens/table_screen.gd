@@ -89,7 +89,7 @@ func _picker_row(w: GameWorld) -> Control:
 					_league_id = id
 					_round = -1
 					refresh())
-				chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				UIKit.shrink_button(chip)
 				drow.add_child(chip)
 			v.add_child(drow)
 	var tabs: Array = CUP_TABS if _cup_id != "" else LEAGUE_TABS
@@ -100,7 +100,7 @@ func _picker_row(w: GameWorld) -> Control:
 		var chip := UIKit.chip(t[1], key == _tab, gt, func():
 			_tab = key
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		chip.add_theme_font_size_override(&"font_size", 18)
 		trow.add_child(chip)
 	v.add_child(trow)
@@ -469,7 +469,7 @@ func _rank_view(c: VBoxContainer, w: GameWorld) -> void:
 		var chip := UIKit.chip(sc[1], key == _rank_scope, g, func():
 			_rank_scope = key
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		chip.add_theme_font_size_override(&"font_size", 18)
 		trow.add_child(chip)
 	c.add_child(trow)

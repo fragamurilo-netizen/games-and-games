@@ -37,6 +37,7 @@ func refresh() -> void:
 	var lineup := UIKit.button("Escalação e tática", "", func(): UIManager.push("prematch", {"edit": true}), "tactics")
 	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(lineup)
+	top.add_child(UIKit.button("Numeração", "", func(): UIManager.push("numbers"), "shirt"))
 	c.add_child(top)
 	var fin := FinanceManager.summary(w, club)
 	var bill := UIKit.hbox(8)
@@ -53,7 +54,7 @@ func refresh() -> void:
 		var chip := UIKit.chip(VIEWS[i], i == _view, gv, func():
 			_view = idx
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		vrow.add_child(chip)
 	c.add_child(vrow)
 	if _view == 1:

@@ -153,7 +153,7 @@ static func fixture_details(w: GameWorld, f: Fixture) -> void:
 				if int(g[1]) != side:
 					continue
 				var p := w.player(int(g[2]))
-				var txt := "%s  %s" % [Fmt.minute(int(g[0]), int(g[4]) if g.size() > 4 else 0), p.display_name() if p != null else "?"]
+				var txt := "%s  %s" % [Fmt.minute(int(g[0]), int(g[4]) if g.size() > 4 else 0), p.short_name() if p != null else "?"]
 				if int(g[3]) == Fixture.GOAL_PENALTY:
 					txt += " (p)"
 				elif int(g[3]) == Fixture.GOAL_OWN:

@@ -167,6 +167,132 @@
 				"field": "plain",
 				"symbol": "wolf"
 			}
+		},
+		{
+			"key": "AUT_HAR",
+			"name": "TSV Hartberg",
+			"short": "Hartberg",
+			"abbr": "HAR",
+			"nick": "Hartberg",
+			"city": "Hartberg",
+			"founded": 1946,
+			"league": "AUT1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Profertil Arena",
+			"capacity": 4600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_BWL",
+			"name": "FC Blau-Weiß Linz",
+			"short": "BW Linz",
+			"abbr": "BWL",
+			"nick": "BW Linz",
+			"city": "Linz",
+			"founded": 1997,
+			"league": "AUT1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Hofmann Personal Stadion",
+			"capacity": 5600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_ALT",
+			"name": "SCR Altach",
+			"short": "Altach",
+			"abbr": "ALT",
+			"nick": "Altach",
+			"city": "Altach",
+			"founded": 1929,
+			"league": "AUT1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Cashpoint Arena",
+			"capacity": 8500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_KLA",
+			"name": "SK Austria Klagenfurt",
+			"short": "Klagenfurt",
+			"abbr": "KLA",
+			"nick": "Klagenfurt",
+			"city": "Klagenfurt",
+			"founded": 2007,
+			"league": "AUT1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "28 Black Arena",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_TIR",
+			"name": "WSG Tirol",
+			"short": "WSG Tirol",
+			"abbr": "WSG",
+			"nick": "WSG Tirol",
+			"city": "Wattens",
+			"founded": 1930,
+			"league": "AUT1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Tivoli Stadion",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_GAK",
+			"name": "Grazer AK 1902",
+			"short": "GAK",
+			"abbr": "GAK",
+			"nick": "GAK",
+			"city": "Graz",
+			"founded": 1902,
+			"league": "AUT1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Merkur Arena",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

@@ -2,11 +2,18 @@ extends BaseScreen
 ## Tela inicial da carreira: a próxima partida no centro e o que está em jogo.
 
 const HOOK_ICONS := {"derby": "bolt", "table": "table", "streak": "up", "player": "shirt", "market": "swap", "contract": "clock", "season": "trophy"}
-const HOOK_COLORS := {"derby": UIColors.RED, "table": UIColors.ACCENT, "streak": UIColors.GREEN, "player": UIColors.BLUE, "market": UIColors.ORANGE, "contract": UIColors.ORANGE, "season": UIColors.ACCENT}
+const HOOK_COLORS := {"derby": UIColors.RED, "table": UIColors.GOLD, "streak": UIColors.GREEN, "player": UIColors.BLUE, "market": UIColors.ORANGE, "contract": UIColors.ORANGE, "season": UIColors.GOLD}
 
 
 func _init() -> void:
 	nav_tab = "hub"
+
+
+## Tabela e temporada usam o destaque do clube; o resto tem cor fixa.
+static func _hook_color(kind: String) -> Color:
+	if kind in ["table", "season"]:
+		return UIColors.ACCENT
+	return HOOK_COLORS.get(kind, UIColors.MUTED)
 
 
 func on_show() -> void:
@@ -151,7 +158,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		if hk["kind"] == "derby":
 			continue
 		var line := UIKit.hbox(10)
-		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 26, HOOK_COLORS.get(hk["kind"], UIColors.MUTED)))
+		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 26, _hook_color(String(hk["kind"]))))
 		var t := UIKit.label(hk["text"], "", true)
 		line.add_child(t)
 		card.add_child(line)

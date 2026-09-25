@@ -34,7 +34,7 @@ func refresh() -> void:
 		var chip := UIKit.chip(t[1], key == _tab, g, func():
 			_tab = key
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	c.add_child(row)
 	match _tab:

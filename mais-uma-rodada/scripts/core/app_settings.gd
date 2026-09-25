@@ -13,6 +13,8 @@ static var vibration: bool = true
 static var match_speed: int = SPEED_FAST
 static var tutorial_done: bool = false
 static var language: String = I18n.DEFAULT
+## Interface nas cores do clube durante a carreira.
+static var team_colors: bool = true
 static var _loaded := false
 
 
@@ -28,6 +30,7 @@ static func load_settings() -> void:
 	match_speed = cfg.get_value("game", "match_speed", SPEED_FAST)
 	tutorial_done = cfg.get_value("game", "tutorial_done", false)
 	language = cfg.get_value("game", "language", I18n.DEFAULT)
+	team_colors = cfg.get_value("game", "team_colors", true)
 
 
 static func save_settings() -> void:
@@ -37,4 +40,5 @@ static func save_settings() -> void:
 	cfg.set_value("game", "match_speed", match_speed)
 	cfg.set_value("game", "tutorial_done", tutorial_done)
 	cfg.set_value("game", "language", language)
+	cfg.set_value("game", "team_colors", team_colors)
 	cfg.save(PATH)

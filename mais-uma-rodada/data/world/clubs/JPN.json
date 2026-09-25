@@ -275,6 +275,216 @@
 				"initials": "FCT",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "JPN_KAS",
+			"name": "Kashiwa Reysol",
+			"short": "Kashiwa Reysol",
+			"abbr": "KSW",
+			"nick": "Kashiwa Reysol",
+			"city": "Kashiwa",
+			"founded": 1940,
+			"league": "JPN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Sankyo Frontier Kashiwa Stadium",
+			"capacity": 15100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_NAG",
+			"name": "Nagoya Grampus",
+			"short": "Nagoya Grampus",
+			"abbr": "NAG",
+			"nick": "Nagoya Grampus",
+			"city": "Nagoya",
+			"founded": 1939,
+			"league": "JPN1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#F5A12D"
+			],
+			"stadium": "Toyota Stadium",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_FUK",
+			"name": "Avispa Fukuoka",
+			"short": "Avispa Fukuoka",
+			"abbr": "AVI",
+			"nick": "Avispa Fukuoka",
+			"city": "Fukuoka",
+			"founded": 1982,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Best Denki Stadium",
+			"capacity": 21500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_NII",
+			"name": "Albirex Niigata",
+			"short": "Albirex Niigata",
+			"abbr": "ALB",
+			"nick": "Albirex Niigata",
+			"city": "Niigata",
+			"founded": 1955,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "Denka Big Swan Stadium",
+			"capacity": 42300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_SHO",
+			"name": "Shonan Bellmare",
+			"short": "Shonan Bellmare",
+			"abbr": "SHO",
+			"nick": "Shonan Bellmare",
+			"city": "Hiratsuka",
+			"founded": 1968,
+			"league": "JPN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#0055A4"
+			],
+			"stadium": "Lemon Gas Stadium",
+			"capacity": 15200,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_VER",
+			"name": "Tokyo Verdy",
+			"short": "Tokyo Verdy",
+			"abbr": "VER",
+			"nick": "Tokyo Verdy",
+			"city": "Tokyo",
+			"founded": 1969,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Ajinomoto Stadium",
+			"capacity": 49000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_KYO",
+			"name": "Kyoto Sanga FC",
+			"short": "Kyoto Sanga",
+			"abbr": "KYO",
+			"nick": "Kyoto Sanga",
+			"city": "Kyoto",
+			"founded": 1922,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Sanga Stadium by Kyocera",
+			"capacity": 21600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_YFC",
+			"name": "Yokohama FC",
+			"short": "Yokohama FC",
+			"abbr": "YFC",
+			"nick": "Yokohama FC",
+			"city": "Yokohama",
+			"founded": 1999,
+			"league": "JPN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "NHK Spring Mitsuzawa",
+			"capacity": 15400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_OKA",
+			"name": "Fagiano Okayama",
+			"short": "Fagiano Okayama",
+			"abbr": "FAG",
+			"nick": "Fagiano Okayama",
+			"city": "Okayama",
+			"founded": 1975,
+			"league": "JPN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "City Light Stadium",
+			"capacity": 15500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_SHI",
+			"name": "Shimizu S-Pulse",
+			"short": "Shimizu S-Pulse",
+			"abbr": "SSP",
+			"nick": "Shimizu S-Pulse",
+			"city": "Shizuoka",
+			"founded": 1991,
+			"league": "JPN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "IAI Stadium Nihondaira",
+			"capacity": 19600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

@@ -164,6 +164,132 @@
 				"symbol": "bear",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "SUI_LUZ",
+			"name": "FC Luzern",
+			"short": "Luzern",
+			"abbr": "LUZ",
+			"nick": "Luzern",
+			"city": "Lucerne",
+			"founded": 1901,
+			"league": "SUI1",
+			"rep": 55,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Swissporarena",
+			"capacity": 16800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_WIN",
+			"name": "FC Winterthur",
+			"short": "Winterthur",
+			"abbr": "WIN",
+			"nick": "Winterthur",
+			"city": "Winterthur",
+			"founded": 1896,
+			"league": "SUI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Schützenwiese",
+			"capacity": 8500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_GCZ",
+			"name": "Grasshopper Club Zürich",
+			"short": "Grasshoppers",
+			"abbr": "GCZ",
+			"nick": "Grasshoppers",
+			"city": "Zürich",
+			"founded": 1886,
+			"league": "SUI1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Letzigrund",
+			"capacity": 26100,
+			"kit": "halves",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_SIO",
+			"name": "FC Sion",
+			"short": "Sion",
+			"abbr": "SIO",
+			"nick": "Sion",
+			"city": "Sion",
+			"founded": 1909,
+			"league": "SUI1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stade de Tourbillon",
+			"capacity": 14300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_LAU",
+			"name": "FC Lausanne-Sport",
+			"short": "Lausanne",
+			"abbr": "LAU",
+			"nick": "Lausanne",
+			"city": "Lausanne",
+			"founded": 1896,
+			"league": "SUI1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de la Tuilière",
+			"capacity": 12500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_YVE",
+			"name": "Yverdon-Sport FC",
+			"short": "Yverdon",
+			"abbr": "YVE",
+			"nick": "Yverdon",
+			"city": "Yverdon-les-Bains",
+			"founded": 1948,
+			"league": "SUI1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Municipal",
+			"capacity": 6600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

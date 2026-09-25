@@ -11,6 +11,7 @@ const PATHS := {
 	"continental": "res://data/world/continental.json",
 	"international": "res://data/world/international.json",
 	"history": "res://data/world/history.json",
+	"foreign_clubs": "res://data/world/foreign_clubs.json",
 	"names": "res://data/names/names.json",
 	"archetypes": "res://data/gameplay/archetypes.json",
 	"personalities": "res://data/gameplay/personalities.json",

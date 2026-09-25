@@ -326,6 +326,90 @@
 				"field": "plain",
 				"symbol": "mountain"
 			}
+		},
+		{
+			"key": "URU_FEN",
+			"name": "Centro Atlético Fénix",
+			"short": "Fénix",
+			"abbr": "FEN",
+			"nick": "Fénix",
+			"city": "Montevideo",
+			"founded": 1916,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Capurro",
+			"capacity": 5500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "URU_MAL",
+			"name": "Club Deportivo Maldonado",
+			"short": "Dep. Maldonado",
+			"abbr": "MAL",
+			"nick": "Dep. Maldonado",
+			"city": "Maldonado",
+			"founded": 1928,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Estadio Domingo Burgueño",
+			"capacity": 22000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "URU_RIV",
+			"name": "Club Atlético River Plate",
+			"short": "River Plate URU",
+			"abbr": "RIP",
+			"nick": "River Plate URU",
+			"city": "Montevideo",
+			"founded": 1932,
+			"league": "URU1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Federico Omar Saroldi",
+			"capacity": 6000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "URU_JUV",
+			"name": "Club Social y Deportivo Juventud",
+			"short": "Juventud",
+			"abbr": "JUV",
+			"nick": "Juventud",
+			"city": "Las Piedras",
+			"founded": 1935,
+			"league": "URU1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Parque Artigas",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

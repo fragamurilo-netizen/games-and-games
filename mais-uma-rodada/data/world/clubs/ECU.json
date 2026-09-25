@@ -332,6 +332,90 @@
 				"field": "plain",
 				"symbol": "mountain"
 			}
+		},
+		{
+			"key": "ECU_TEC",
+			"name": "Club Técnico Universitario",
+			"short": "Técnico Universitario",
+			"abbr": "TEC",
+			"nick": "Técnico Universitario",
+			"city": "Ambato",
+			"founded": 1971,
+			"league": "ECU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bellavista",
+			"capacity": 16500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "ECU_LIB",
+			"name": "Libertad FC",
+			"short": "Libertad",
+			"abbr": "LIB",
+			"nick": "Libertad",
+			"city": "Loja",
+			"founded": 2017,
+			"league": "ECU1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Reina del Cisne",
+			"capacity": 14900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "ECU_VIN",
+			"name": "Vinotinto de Ecuador",
+			"short": "Vinotinto",
+			"abbr": "VIN",
+			"nick": "Vinotinto",
+			"city": "Quito",
+			"founded": 2016,
+			"league": "ECU1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Olímpico Atahualpa",
+			"capacity": 35000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "ECU_MAN",
+			"name": "Manta FC",
+			"short": "Manta",
+			"abbr": "MAN",
+			"nick": "Manta",
+			"city": "Manta",
+			"founded": 1998,
+			"league": "ECU1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Jocay",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

@@ -169,6 +169,90 @@
 				"symbol": "gear",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "CRO_GOR",
+			"name": "HNK Gorica",
+			"short": "Gorica",
+			"abbr": "GOR",
+			"nick": "Gorica",
+			"city": "Velika Gorica",
+			"founded": 2009,
+			"league": "CRO1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Radnik Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CRO_IST",
+			"name": "NK Istra 1961",
+			"short": "Istra 1961",
+			"abbr": "IST",
+			"nick": "Istra 1961",
+			"city": "Pula",
+			"founded": 1961,
+			"league": "CRO1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Aldo Drosina",
+			"capacity": 8900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CRO_SLB",
+			"name": "NK Slaven Belupo",
+			"short": "Slaven Belupo",
+			"abbr": "SLB",
+			"nick": "Slaven Belupo",
+			"city": "Koprivnica",
+			"founded": 1907,
+			"league": "CRO1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Gradski stadion",
+			"capacity": 3100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CRO_SIB",
+			"name": "HNK Šibenik",
+			"short": "Šibenik",
+			"abbr": "SIB",
+			"nick": "Šibenik",
+			"city": "Šibenik",
+			"founded": 1932,
+			"league": "CRO1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Šubićevac",
+			"capacity": 3400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

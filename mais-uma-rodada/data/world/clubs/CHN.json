@@ -209,6 +209,174 @@
 				"field": "plain",
 				"symbol": "castle"
 			}
+		},
+		{
+			"key": "CHN_CCY",
+			"name": "Changchun Yatai FC",
+			"short": "Changchun Yatai",
+			"abbr": "CCY",
+			"nick": "Changchun Yatai",
+			"city": "Changchun",
+			"founded": 1996,
+			"league": "CHN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Changchun Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_HEN",
+			"name": "Henan FC",
+			"short": "Henan",
+			"abbr": "HEN",
+			"nick": "Henan",
+			"city": "Zhengzhou",
+			"founded": 1994,
+			"league": "CHN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Zhengzhou Hanghai Stadium",
+			"capacity": 29800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_QWC",
+			"name": "Qingdao West Coast FC",
+			"short": "Qingdao West Coast",
+			"abbr": "QWC",
+			"nick": "Qingdao West Coast",
+			"city": "Qingdao",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Qingdao Youth Football Stadium",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_QHN",
+			"name": "Qingdao Hainiu FC",
+			"short": "Qingdao Hainiu",
+			"abbr": "QHN",
+			"nick": "Qingdao Hainiu",
+			"city": "Qingdao",
+			"founded": 1990,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Qingdao Youth Football Stadium",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_MEI",
+			"name": "Meizhou Hakka FC",
+			"short": "Meizhou Hakka",
+			"abbr": "MZH",
+			"nick": "Meizhou Hakka",
+			"city": "Meizhou",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Meixian Tsang Hin-chi Stadium",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_SZP",
+			"name": "Shenzhen Peng City FC",
+			"short": "Shenzhen Peng City",
+			"abbr": "SZP",
+			"nick": "Shenzhen Peng City",
+			"city": "Shenzhen",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Shenzhen Universiade Stadium",
+			"capacity": 60000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_DAL",
+			"name": "Dalian Yingbo FC",
+			"short": "Dalian Yingbo",
+			"abbr": "DLY",
+			"nick": "Dalian Yingbo",
+			"city": "Dalian",
+			"founded": 2020,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Dalian Suoyuwan Stadium",
+			"capacity": 63000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_YUN",
+			"name": "Yunnan Yukun FC",
+			"short": "Yunnan Yukun",
+			"abbr": "YYK",
+			"nick": "Yunnan Yukun",
+			"city": "Yuxi",
+			"founded": 2021,
+			"league": "CHN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Yuxi Plateau Sports Center",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

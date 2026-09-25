@@ -176,6 +176,174 @@
 				"initials": "OFI",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "GRE_VOL",
+			"name": "Volos NFC",
+			"short": "Volos",
+			"abbr": "VOL",
+			"nick": "Volos",
+			"city": "Volos",
+			"founded": 2017,
+			"league": "GRE1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Panthessaliko",
+			"capacity": 22700,
+			"kit": "halves",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_AST",
+			"name": "Asteras Tripolis FC",
+			"short": "Asteras",
+			"abbr": "AST",
+			"nick": "Asteras",
+			"city": "Tripoli",
+			"founded": 1931,
+			"league": "GRE1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Theodoros Kolokotronis",
+			"capacity": 7400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_ATR",
+			"name": "Atromitos FC",
+			"short": "Atromitos",
+			"abbr": "ATR",
+			"nick": "Atromitos",
+			"city": "Peristeri",
+			"founded": 1923,
+			"league": "GRE1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Peristeri Stadium",
+			"capacity": 9000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_PAN",
+			"name": "Panetolikos FC",
+			"short": "Panetolikos",
+			"abbr": "PNE",
+			"nick": "Panetolikos",
+			"city": "Agrinio",
+			"founded": 1926,
+			"league": "GRE1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Panetolikos Stadium",
+			"capacity": 7300,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_LAM",
+			"name": "PAS Lamia 1964",
+			"short": "Lamia",
+			"abbr": "LAM",
+			"nick": "Lamia",
+			"city": "Lamia",
+			"founded": 1964,
+			"league": "GRE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Lamia Municipal",
+			"capacity": 5500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_SER",
+			"name": "Panserraikos FC",
+			"short": "Panserraikos",
+			"abbr": "PSR",
+			"nick": "Panserraikos",
+			"city": "Serres",
+			"founded": 1964,
+			"league": "GRE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Serres Municipal",
+			"capacity": 9500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_LEV",
+			"name": "Levadiakos FC",
+			"short": "Levadiakos",
+			"abbr": "LEV",
+			"nick": "Levadiakos",
+			"city": "Livadeia",
+			"founded": 1961,
+			"league": "GRE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Levadia Municipal",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_KIF",
+			"name": "AE Kifisia FC",
+			"short": "Kifisia",
+			"abbr": "KIF",
+			"nick": "Kifisia",
+			"city": "Kifisia",
+			"founded": 2012,
+			"league": "GRE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Zirinio",
+			"capacity": 3500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

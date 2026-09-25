@@ -234,7 +234,7 @@ func _plan_section(c: VBoxContainer, sheet: TeamSheet) -> void:
 		var chip := UIKit.chip("%d'" % mv, sheet.plan_minute == mv, gmin, func():
 			sheet.plan_minute = mv
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		mrow.add_child(chip)
 	c.add_child(mrow)
 	for item in [["Se estiver perdendo", "plan_losing", [-1, TeamSheet.MENT_OFENSIVA, TeamSheet.MENT_TUDO]],
@@ -249,7 +249,7 @@ func _plan_section(c: VBoxContainer, sheet: TeamSheet) -> void:
 			var chip := UIKit.chip(name, int(sheet.get(key)) == ov, g, func():
 				sheet.set(key, ov)
 				refresh())
-			chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			UIKit.shrink_button(chip)
 			row.add_child(chip)
 		c.add_child(row)
 
@@ -283,7 +283,7 @@ func _segment(c: VBoxContainer, title: String, options: Array, current: int, set
 		var chip := UIKit.chip(String(options[i]["name"]), i == current, g, func():
 			setter.call(idx)
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	c.add_child(row)
 	c.add_child(UIKit.label(String(options[current]["desc"]), "Small", true))
@@ -339,7 +339,7 @@ func _update_chips() -> void:
 		var pid: int = sheet.starters[i] if i < sheet.starters.size() and sheet.starters[i] != null else -1
 		var p := w.player(pid)
 		var s: Dictionary = slots[i]
-		var ch := {"x": s["x"], "y": s["y"], "number": p.shirt if p != null else "?", "name": p.display_name() if p != null else "vazio",
+		var ch := {"x": s["x"], "y": s["y"], "number": p.shirt if p != null else "?", "name": p.short_name() if p != null else "vazio",
 			"rating": int(round(p.rating_at(s["pos"]))) if p != null else 0}
 		if p != null and Pos.familiarity(p.position, p.secondary, s["pos"]) < 0.9:
 			ch["warn"] = true
@@ -475,7 +475,7 @@ func _build_footer(w: GameWorld) -> void:
 		var chip := UIKit.chip(AppSettings.SPEED_NAMES[i], i == AppSettings.match_speed, g, func():
 			AppSettings.match_speed = idx
 			AppSettings.save_settings())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	f.add_child(row)
 	var start := UIKit.button("INICIAR PARTIDA", "PrimaryButton", _start, "whistle")

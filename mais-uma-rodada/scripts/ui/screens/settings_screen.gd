@@ -27,9 +27,14 @@ func refresh() -> void:
 			refresh.call_deferred())
 		# O nome de cada idioma aparece sempre na própria língua.
 		lchip.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-		lchip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(lchip)
 		lrow.add_child(lchip)
 	card0.add_child(lrow)
+	card0.add_child(_toggle("Interface nas cores do meu clube", AppSettings.team_colors, func(v: bool):
+		AppSettings.team_colors = v
+		AppSettings.save_settings()
+		UIManager.refresh_chrome()
+		refresh()))
 	c.add_child(UIKit.card_panel(card0))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
@@ -53,7 +58,7 @@ func refresh() -> void:
 		var chip := UIKit.chip(AppSettings.SPEED_NAMES[i], i == AppSettings.match_speed, g, func():
 			AppSettings.match_speed = idx
 			AppSettings.save_settings())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	card2.add_child(row)
 	card2.add_child(UIKit.label("Instantâneo mostra só o resultado. Rápido leva cerca de meio minuto; Normal, uns dois minutos, com narração completa. Durante a partida dá para trocar a qualquer momento.", "Small", true))

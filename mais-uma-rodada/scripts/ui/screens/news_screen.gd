@@ -36,7 +36,7 @@ func refresh() -> void:
 		var chip := UIKit.chip(f[1], key == _filter, g, func():
 			_filter = key
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		chip.add_theme_font_size_override(&"font_size", 18)
 		row.add_child(chip)
 	c.add_child(row)

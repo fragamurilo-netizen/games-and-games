@@ -63,6 +63,8 @@ var philosophy: String = ""
 var history: Array = []
 ## Títulos por chave: "L:BRA1" campeão da liga, "P:BRA2" acesso conquistado, "C:UCL" continental, "S:SPE" estadual, "W:CWC" mundial.
 var titles: Dictionary = {}
+## Elencos encerrados (clube do usuário): {"ano": [{id, n, pos, sh, a, g, as, r, o}]}
+var squad_archive: Dictionary = {}
 ## Ranking mundial: pontos das últimas temporadas (mais recente no fim) e posição ao fim da anterior.
 var rank_hist: Array = []
 var rank_prev: int = 0
@@ -177,7 +179,7 @@ func to_dict() -> Dictionary:
 		"coh": cohesion, "ll": last_lineup, "tf": tactic_fam.duplicate(true), "ph": philosophy, "afk": ai_formation_key,
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
-		"rk": rank_hist, "rkp": rank_prev,
+		"rk": rank_hist, "rkp": rank_prev, "sqa": squad_archive,
 	}
 
 
@@ -237,4 +239,5 @@ static func from_dict(d: Dictionary) -> Club:
 	c.results = d.get("res", "")
 	c.rank_hist = Array(d.get("rk", []))
 	c.rank_prev = int(d.get("rkp", 0))
+	c.squad_archive = d.get("sqa", {})
 	return c

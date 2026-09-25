@@ -170,6 +170,132 @@
 				"symbol": "letter",
 				"initials": "SIF"
 			}
+		},
+		{
+			"key": "DEN_RAN",
+			"name": "Randers FC",
+			"short": "Randers",
+			"abbr": "RFC",
+			"nick": "Randers",
+			"city": "Randers",
+			"founded": 2003,
+			"league": "DEN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Cepheus Park",
+			"capacity": 10300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_VIB",
+			"name": "Viborg FF",
+			"short": "Viborg",
+			"abbr": "VFF",
+			"nick": "Viborg",
+			"city": "Viborg",
+			"founded": 1896,
+			"league": "DEN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Energi Viborg Arena",
+			"capacity": 9600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_VEJ",
+			"name": "Vejle Boldklub",
+			"short": "Vejle",
+			"abbr": "VEJ",
+			"nick": "Vejle",
+			"city": "Vejle",
+			"founded": 1891,
+			"league": "DEN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Vejle Stadion",
+			"capacity": 10400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_AAB",
+			"name": "Aalborg BK",
+			"short": "AaB",
+			"abbr": "AAB",
+			"nick": "AaB",
+			"city": "Aalborg",
+			"founded": 1885,
+			"league": "DEN1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Aalborg Portland Park",
+			"capacity": 13800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_LYN",
+			"name": "Lyngby BK",
+			"short": "Lyngby",
+			"abbr": "LYN",
+			"nick": "Lyngby",
+			"city": "Lyngby",
+			"founded": 1921,
+			"league": "DEN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lyngby Stadion",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_SON",
+			"name": "Sønderjyske Fodbold",
+			"short": "Sønderjyske",
+			"abbr": "SJE",
+			"nick": "Sønderjyske",
+			"city": "Haderslev",
+			"founded": 2004,
+			"league": "DEN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Sydbank Park",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

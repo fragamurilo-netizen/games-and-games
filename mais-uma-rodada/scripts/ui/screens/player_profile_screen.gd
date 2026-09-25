@@ -67,12 +67,18 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		nrow.add_child(UIKit.label(nat, "Small"))
 		col.add_child(nrow)
 	var born := p.hometown if p.hometown != "" else nat
-	col.add_child(UIKit.label("%d anos · %s · %s · pé %s" % [p.age(w.year), Fmt.height(p.height), born, Player.FOOT_NAMES[p.foot].to_lower()], "Small", true))
+	col.add_child(UIKit.label("%d anos · %s · %d kg · pé %s" % [p.age(w.year), Fmt.height(p.height), p.weight, Player.FOOT_NAMES[p.foot].to_lower()], "Small", true))
+	col.add_child(UIKit.label("De %s" % born, "Small", true))
 	if club != null:
+		# Toque no clube abre a página dele
 		var cr := UIKit.hbox(8)
 		cr.add_child(UIKit.crest(club, 30))
-		cr.add_child(UIKit.label("%s · camisa %d" % [club.short_name, p.shirt], "Small"))
-		col.add_child(cr)
+		var cl := UIKit.label("%s · camisa %d" % [club.short_name, p.shirt], "Small")
+		cl.add_theme_color_override(&"font_color", UIColors.BLUE)
+		cr.add_child(cl)
+		cr.add_child(UIKit.label("›", "Small"))
+		var cid := club.id
+		col.add_child(UIKit.tap_row(cr, func(): UIManager.push("club", {"id": cid}), "CardFlat"))
 	row.add_child(col)
 	card.add_child(row)
 	var tags := UIKit.flow(8)
@@ -314,20 +320,29 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			var big := AwardManager.award_weight(String(a["k"])) >= 5
 			af.add_child(UIKit.pill("%s %d%s" % [AwardManager.award_name(String(a["k"])), int(a["y"]), where], UIColors.ACCENT if big else UIColors.BLUE, 16))
 		card.add_child(af)
+	if not p.trophies.is_empty():
+		card.add_child(UIKit.section("Títulos"))
+		card.add_child(_trophies(w, p))
 	if not p.spells.is_empty():
 		card.add_child(UIKit.section("Clubes"))
 		for i in range(p.spells.size() - 1, -1, -1):
 			var s: Dictionary = p.spells[i]
 			var line := UIKit.hbox(10)
-			var cl := w.club(int(s.get("c", -1)))
+			var cl := w.club(int(s.get("c", -1))) if int(s.get("c", -1)) >= 0 else null
 			if cl != null:
 				line.add_child(UIKit.crest(cl, 28))
 			var to := int(s.get("to", 0))
-			var name_l := UIKit.label("%s (%d–%s)" % [s.get("cn", "?"), int(s.get("from", 0)), str(to) if to > 0 else "hoje"], "")
+			var years := ("%d–%s" % [int(s.get("from", 0)), str(to) if to > 0 else "hoje"]) if to != int(s.get("from", 0)) else str(to)
+			var name_l := UIKit.label("%s (%s)%s" % [s.get("cn", "?"), years, "  emprestado" if bool(s.get("lo", false)) else ""], "")
 			name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			name_l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			line.add_child(name_l)
 			line.add_child(UIKit.label("%d j · %d g" % [int(s.get("a", 0)), int(s.get("g", 0))], "Muted"))
-			card.add_child(line)
+			if cl != null:
+				var ccid := cl.id
+				card.add_child(UIKit.tap_row(line, func(): UIManager.push("club", {"id": ccid}), "CardFlat"))
+			else:
+				card.add_child(line)
 	if not p.history.is_empty():
 		card.add_child(UIKit.section("Temporada a temporada"))
 		var chart := EvolutionChart.new()
@@ -346,7 +361,7 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			var y := UIKit.label(str(h.get("y", "")), "Mono")
 			y.custom_minimum_size.x = 64
 			line.add_child(y)
-			var cn := UIKit.label(String(h.get("cn", "")), "")
+			var cn := UIKit.label(String(h.get("cn", "")) + (" (emp.)" if bool(h.get("lo", false)) else ""), "")
 			cn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			cn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			line.add_child(cn)
@@ -369,7 +384,7 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			if int(h.get("mo", 0)) > 0:
 				extra.append("%d× craque do jogo" % int(h["mo"]))
 			if int(h.get("cs", 0)) > 0 and Pos.group(p.position) <= Pos.G_DEF:
-				extra.append("%d jogos sem sofrer gol" % int(h["cs"]))
+				extra.append(("%d jogo sem sofrer gol" if int(h["cs"]) == 1 else "%d jogos sem sofrer gol") % int(h["cs"]))
 			for k in p.awards_in(int(h.get("y", 0))):
 				if k != "team":
 					extra.append(AwardManager.award_name(k))
@@ -380,6 +395,55 @@ func _stats(w: GameWorld, p: Player) -> Control:
 				el.add_theme_color_override(&"font_color", UIColors.ACCENT)
 				card.add_child(el)
 	return UIKit.card_panel(card)
+
+
+## Estante do jogador: cada título com o troféu, quantas vezes e em que anos.
+func _trophies(w: GameWorld, p: Player) -> Control:
+	var groups := {} # chave -> [anos]
+	for t: Dictionary in p.trophies:
+		var k := String(t.get("k", ""))
+		if not groups.has(k):
+			groups[k] = []
+		groups[k].append(int(t.get("y", 0)))
+	var keys: Array = groups.keys()
+	keys.sort_custom(func(a, b):
+		var ra := _trophy_rank(a)
+		var rb := _trophy_rank(b)
+		return ra < rb if ra != rb else groups[a].size() > groups[b].size())
+	var box := UIKit.vbox(6)
+	for k: String in keys:
+		var ys: Array = groups[k]
+		ys.sort()
+		var row := UIKit.hbox(10)
+		var name := ""
+		if k.begins_with("N:"):
+			name = NationalTeamManager.tournament_name(k.substr(2))
+		else:
+			row.add_child(TrophyView.make(k, 40, w))
+			name = TrophyView.trophy_name(k, w)
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(("%d× " % ys.size() if ys.size() > 1 else "") + name, "H3", true))
+		col.add_child(UIKit.label(", ".join(ys.map(func(y): return str(y))), "Small", true))
+		row.add_child(col)
+		box.add_child(row)
+	return box
+
+
+## Ordem da estante: seleção, mundial, continentais, ligas (pela divisão), estaduais.
+static func _trophy_rank(k: String) -> int:
+	match k.substr(0, 2):
+		"N:":
+			return -1
+		"W:":
+			return 0
+		"C:":
+			return 1
+		"S:":
+			return 8
+		"L:":
+			return 2 + int(DatabaseManager.league_cfg(k.substr(2)).get("tier", 1))
+	return 9
 
 
 func _actions(w: GameWorld, p: Player, own: bool) -> void:

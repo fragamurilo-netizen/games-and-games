@@ -264,6 +264,132 @@
 				"field": "plain",
 				"symbol": "cross_plain"
 			}
+		},
+		{
+			"key": "BOL_AUR",
+			"name": "Club Aurora",
+			"short": "Aurora",
+			"abbr": "AUR",
+			"nick": "Aurora",
+			"city": "Cochabamba",
+			"founded": 1935,
+			"league": "BOL1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Félix Capriles",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BOL_VIN",
+			"name": "Club Universitario de Vinto",
+			"short": "Universitario Vinto",
+			"abbr": "UVI",
+			"nick": "Universitario Vinto",
+			"city": "Vinto",
+			"founded": 2016,
+			"league": "BOL1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Félix Capriles",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BOL_ORU",
+			"name": "Club Real Oruro",
+			"short": "Real Oruro",
+			"abbr": "ROR",
+			"nick": "Real Oruro",
+			"city": "Oruro",
+			"founded": 2017,
+			"league": "BOL1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Jesús Bermúdez",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BOL_GVS",
+			"name": "Club San José",
+			"short": "San José",
+			"abbr": "SJO",
+			"nick": "San José",
+			"city": "Oruro",
+			"founded": 1942,
+			"league": "BOL1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Jesús Bermúdez",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BOL_IPE",
+			"name": "Club Independiente Petrolero",
+			"short": "Ind. Petrolero",
+			"abbr": "IPE",
+			"nick": "Ind. Petrolero",
+			"city": "Sucre",
+			"founded": 1932,
+			"league": "BOL1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Olímpico Patria",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BOL_RPO",
+			"name": "Club Real Potosí",
+			"short": "Real Potosí",
+			"abbr": "RPO",
+			"nick": "Real Potosí",
+			"city": "Potosí",
+			"founded": 1986,
+			"league": "BOL1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Víctor Agustín Ugarte",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

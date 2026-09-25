@@ -127,7 +127,7 @@ func _test_generation() -> void:
 		abbrs[ak] = true
 		check(c.id == w.clubs.find(c), "id de %s não bate com a posição" % c.key)
 		var n := c.player_ids.size()
-		check(n >= 20 and n <= 28, "%s com %d jogadores" % [c.short_name, n])
+		check(n >= 20 and n <= int(DatabaseManager.squad_rules()["max_players"]) - 3, "%s com %d jogadores" % [c.short_name, n])
 		var sheet := ClubAI.auto_sheet(w, c, "")
 		check(sheet.starters.size() == 11 and not sheet.starters.has(-1), "%s não consegue escalar 11" % c.short_name)
 		for pid in c.player_ids:
@@ -135,7 +135,8 @@ func _test_generation() -> void:
 			check(p != null and p.club_id == c.id, "jogador %d fora do clube %s" % [pid, c.short_name])
 		for rid in c.rivals:
 			check(w.club(rid).is_rival(c.id), "rivalidade não é mútua: %s" % c.key)
-	check(w.players.size() >= 13500 and w.players.size() <= 16500, "total de jogadores plausível (%d)" % w.players.size())
+	# ~27 por clube (grandes com 29–32, pequenos com 23–26) + agentes livres
+	check(w.players.size() >= w.clubs.size() * 24 and w.players.size() <= w.clubs.size() * 30, "total de jogadores plausível (%d)" % w.players.size())
 	var names := {}
 	var dups := 0
 	var bad_attr := 0

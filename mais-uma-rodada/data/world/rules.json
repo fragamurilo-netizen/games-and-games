@@ -6,7 +6,7 @@
 	"squad": {
 		"min_players": 18,
 		"ideal_players": 25,
-		"max_players": 32,
+		"max_players": 36,
 		"bench_size": 7,
 		"max_subs": 5,
 		"yellow_limit": 3

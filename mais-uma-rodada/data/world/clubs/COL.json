@@ -334,6 +334,174 @@
 				"symbol": "mountain",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "COL_ALI",
+			"name": "Alianza FC",
+			"short": "Alianza",
+			"abbr": "ALI",
+			"nick": "Alianza",
+			"city": "Valledupar",
+			"founded": 1995,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estadio Armando Maestre",
+			"capacity": 11000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_AGU",
+			"name": "Águilas Doradas Rionegro",
+			"short": "Águilas Doradas",
+			"abbr": "AGU",
+			"nick": "Águilas Doradas",
+			"city": "Rionegro",
+			"founded": 2008,
+			"league": "COL1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Alberto Grisales",
+			"capacity": 14000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_FOR",
+			"name": "Fortaleza CEIF",
+			"short": "Fortaleza CEIF",
+			"abbr": "FOC",
+			"nick": "Fortaleza CEIF",
+			"city": "Bogotá",
+			"founded": 2010,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano de Techo",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_ENV",
+			"name": "Envigado FC",
+			"short": "Envigado",
+			"abbr": "ENV",
+			"nick": "Envigado",
+			"city": "Envigado",
+			"founded": 1989,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#00843D"
+			],
+			"stadium": "Estadio Polideportivo Sur",
+			"capacity": 11000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_EQU",
+			"name": "CD La Equidad",
+			"short": "La Equidad",
+			"abbr": "EQU",
+			"nick": "La Equidad",
+			"city": "Bogotá",
+			"founded": 1982,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano de Techo",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_LLA",
+			"name": "Llaneros FC",
+			"short": "Llaneros",
+			"abbr": "LLA",
+			"nick": "Llaneros",
+			"city": "Villavicencio",
+			"founded": 2012,
+			"league": "COL1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bello Horizonte",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_BOY",
+			"name": "Boyacá Chicó FC",
+			"short": "Boyacá Chicó",
+			"abbr": "BCH",
+			"nick": "Boyacá Chicó",
+			"city": "Tunja",
+			"founded": 2002,
+			"league": "COL1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Independencia",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_UNI",
+			"name": "Unión Magdalena",
+			"short": "Unión Magdalena",
+			"abbr": "UMA",
+			"nick": "Unión Magdalena",
+			"city": "Santa Marta",
+			"founded": 1953,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Estadio Sierra Nevada",
+			"capacity": 16000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

@@ -175,6 +175,132 @@
 				"symbol": "lion",
 				"sc": "#111111"
 			}
+		},
+		{
+			"key": "SCO_MOT",
+			"name": "Motherwell FC",
+			"short": "Motherwell",
+			"abbr": "MOT",
+			"nick": "Motherwell",
+			"city": "Motherwell",
+			"founded": 1886,
+			"league": "SCO1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F5A12D",
+				"#8A1538"
+			],
+			"stadium": "Fir Park",
+			"capacity": 13600,
+			"kit": "faixa",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_MIR",
+			"name": "St Mirren FC",
+			"short": "St Mirren",
+			"abbr": "SMI",
+			"nick": "St Mirren",
+			"city": "Paisley",
+			"founded": 1877,
+			"league": "SCO1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "St Mirren Park",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_KIL",
+			"name": "Kilmarnock FC",
+			"short": "Kilmarnock",
+			"abbr": "KIL",
+			"nick": "Kilmarnock",
+			"city": "Kilmarnock",
+			"founded": 1869,
+			"league": "SCO1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Rugby Park",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_ROS",
+			"name": "Ross County FC",
+			"short": "Ross County",
+			"abbr": "ROS",
+			"nick": "Ross County",
+			"city": "Dingwall",
+			"founded": 1929,
+			"league": "SCO1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0D2A5C",
+				"#E30613"
+			],
+			"stadium": "Victoria Park",
+			"capacity": 6500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_JOH",
+			"name": "St Johnstone FC",
+			"short": "St Johnstone",
+			"abbr": "STJ",
+			"nick": "St Johnstone",
+			"city": "Perth",
+			"founded": 1884,
+			"league": "SCO1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "McDiarmid Park",
+			"capacity": 10600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_DEE",
+			"name": "Dundee FC",
+			"short": "Dundee",
+			"abbr": "DUN",
+			"nick": "Dundee",
+			"city": "Dundee",
+			"founded": 1893,
+			"league": "SCO1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Dens Park",
+			"capacity": 11500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

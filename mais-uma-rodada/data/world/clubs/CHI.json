@@ -347,6 +347,90 @@
 				"symbol": "dragon",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "CHI_SER",
+			"name": "Club de Deportes La Serena",
+			"short": "La Serena",
+			"abbr": "LSE",
+			"nick": "La Serena",
+			"city": "La Serena",
+			"founded": 1955,
+			"league": "CHI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Portada",
+			"capacity": 18200,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHI_CAL",
+			"name": "Unión La Calera",
+			"short": "Unión La Calera",
+			"abbr": "ULC",
+			"nick": "Unión La Calera",
+			"city": "La Calera",
+			"founded": 1954,
+			"league": "CHI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Nicolás Chahuán",
+			"capacity": 9200,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHI_NUB",
+			"name": "Club Deportivo Ñublense",
+			"short": "Ñublense",
+			"abbr": "NUB",
+			"nick": "Ñublense",
+			"city": "Chillán",
+			"founded": 1916,
+			"league": "CHI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Nelson Oyarzún",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHI_LIM",
+			"name": "Deportes Limache",
+			"short": "Limache",
+			"abbr": "LIM",
+			"nick": "Limache",
+			"city": "Limache",
+			"founded": 2012,
+			"league": "CHI1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Municipal de Limache",
+			"capacity": 4500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

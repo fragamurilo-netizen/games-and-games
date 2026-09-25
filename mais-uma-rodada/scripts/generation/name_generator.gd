@@ -65,15 +65,16 @@ static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictio
 	var last := ""
 	var main := ""
 	var full := ""
+	var zipf := float(c.get("zipf", 1.0))
 	for _i in MAX_TRIES:
 		first = _pick_first(rng, c)
-		var a: String = RngUtil.pick(rng, c["last"])
+		var a: String = _pick_list(rng, c["last"], zipf)
 		last = a
 		main = a
 		if c.has("suffixes") and rng.randf() < float(c.get("suffix_chance", 0.0)):
 			last = a + " " + String(RngUtil.pick(rng, c["suffixes"]))
 		elif rng.randf() < float(c.get("double_last_chance", 0.0)):
-			var b: String = RngUtil.pick(rng, c["last"])
+			var b: String = _pick_list(rng, c["last"], zipf)
 			if b != a:
 				last = a + " " + b
 				main = a if String(c.get("main_surname", "last")) == "first" else b
@@ -97,6 +98,9 @@ static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictio
 		"full":
 			if bool(c.get("family_first", false)):
 				known = main + " " + first
+			elif _suffix_of(c, last) != "" and rng.randf() < 0.6:
+				# Sufixo de família vira o nome de jogo: "Vinícius Júnior", "Zé Neto"
+				known = first.get_slice(" ", 0) + " " + _suffix_of(c, last)
 			else:
 				known = first.get_slice(" ", 0) + " " + main
 		_:
@@ -106,10 +110,27 @@ static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictio
 	return {"first": first, "last": last, "nickname": nickname, "known_as": known}
 
 
+static func _suffix_of(c: Dictionary, last: String) -> String:
+	for sfx in c.get("suffixes", []):
+		if last.ends_with(" " + String(sfx)):
+			return String(sfx)
+	return ""
+
+
 static func _pick_first(rng: RandomNumberGenerator, c: Dictionary) -> String:
 	if c.has("compound") and rng.randf() < float(c.get("compound_chance", 0.0)):
 		return RngUtil.pick(rng, c["compound"])
-	return RngUtil.pick(rng, c["first"])
+	return _pick_list(rng, c["first"], float(c.get("zipf", 1.0)))
+
+
+## Sorteio com frequência: nas listas em ordem de popularidade (zipf > 1) os primeiros nomes
+## saem bem mais que os do fim — há muito mais Silva que Paquetá.
+static func _pick_list(rng: RandomNumberGenerator, arr: Array, zipf: float) -> String:
+	if arr.is_empty():
+		return ""
+	if zipf <= 1.0:
+		return String(arr[rng.randi_range(0, arr.size() - 1)])
+	return String(arr[mini(arr.size() - 1, int(floor(arr.size() * pow(rng.randf(), zipf))))])
 
 
 static func _make_nickname(rng: RandomNumberGenerator, c: Dictionary, first: String, last: String, ctx: Dictionary) -> String:

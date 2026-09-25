@@ -73,7 +73,7 @@ func _preview_card(club: Club, pre: bool) -> Control:
 		var chip := UIKit.chip(String(vb[1]), is_back == _back, vg, func():
 			_back = is_back
 			_changed())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		vrow.add_child(chip)
 	card.add_child(vrow)
 	var row := UIKit.hbox(12)
@@ -125,7 +125,7 @@ func _editor_card(club: Club) -> Control:
 		var chip := UIKit.chip(String(p[1]), key == _part, g, func():
 			_part = key
 			_changed())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		prow.add_child(chip)
 	card.add_child(prow)
 	var k := _kit()

@@ -36,6 +36,23 @@ const PROFILES: Dictionary = {
 }
 
 const HEIGHT_MEAN: Array[int] = [189, 177, 187, 177, 181, 179, 176, 176, 176, 175, 175, 183]
+
+## "Assinaturas": o que faz um jogador ser lembrado (e o preço que ele paga por isso).
+## [nome, posições, {atributo: ajuste}, cm a mais de altura]
+const SIGNATURES: Array = [
+	["velocista", [Pos.RB, Pos.LB, Pos.RM, Pos.LM, Pos.RW, Pos.LW, Pos.ST], {Attr.VEL: 13, Attr.FOR: -5, Attr.CAB: -3}, 0],
+	["matador", [Pos.ST, Pos.AM, Pos.RW, Pos.LW], {Attr.FIN: 11, Attr.POS: 5, Attr.PAS: -5, Attr.RES: -4}, 0],
+	["torre", [Pos.CB, Pos.ST], {Attr.CAB: 13, Attr.FOR: 7, Attr.VEL: -7, Attr.TEC: -4}, 7],
+	["driblador", [Pos.RW, Pos.LW, Pos.AM, Pos.RM, Pos.LM], {Attr.TEC: 12, Attr.VEL: 4, Attr.MAR: -6, Attr.CAB: -4}, -2],
+	["maestro", [Pos.CM, Pos.AM, Pos.DM], {Attr.PAS: 9, Attr.VIS: 10, Attr.FOR: -6, Attr.VEL: -4}, 0],
+	["carrapato", [Pos.DM, Pos.CB, Pos.RB, Pos.LB], {Attr.MAR: 10, Attr.RES: 6, Attr.TEC: -6, Attr.DIS: -6}, 0],
+	["motorzinho", [Pos.CM, Pos.RM, Pos.LM, Pos.RB, Pos.LB, Pos.DM], {Attr.RES: 13, Attr.FOR: 3, Attr.VIS: -4}, 0],
+	["cruzador", [Pos.RB, Pos.LB, Pos.RM, Pos.LM], {Attr.CRU: 13, Attr.MAR: -4}, 0],
+	["paredao", [Pos.GK], {Attr.GOL: 6, Attr.POS: 5, Attr.PAS: -8}, 3],
+	["goleiro_linha", [Pos.GK], {Attr.PAS: 14, Attr.TEC: 10, Attr.GOL: -2}, 0],
+	["cerebral", [Pos.CB, Pos.DM, Pos.CM], {Attr.DEC: 9, Attr.INT: 9, Attr.POS: 5, Attr.VEL: -6}, 0],
+]
+const SIGNATURE_CHANCE := 0.17
 const CURVE_WEIGHTS: Array = [15.0, 52.0, 13.0, 10.0, 10.0]
 
 ## Modelo de elenco (25 vagas): [posição, deslocamento de qualidade em relação ao nível do clube, "nível" 0 titular/1 reserva/2 jovem]
@@ -116,7 +133,7 @@ static func pick_free_nationality(rng: RandomNumberGenerator) -> String:
 
 ## Cria um jogador sem clube. `target` é o overall desejado na posição.
 static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, target: float, age: int,
-		nationality: String, club_city: String, used_names: Dictionary) -> Player:
+		nationality: String, club_city: String, used_names: Dictionary, sig_chance: float = SIGNATURE_CHANCE) -> Player:
 	var p := Player.new()
 	p.id = world.new_player_id()
 	p.face_seed = rng.randi()
@@ -126,9 +143,11 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	var origin := NameGenerator.pick_origin(rng, nationality)
 	p.eth = int(origin["eth"])
 	p.foot = _pick_foot(rng, pos)
-	p.height = int(round(RngUtil.gauss(rng, HEIGHT_MEAN[pos] + _height_shift(p.eth), 5.0, 163.0, 203.0)))
+	var sig: Array = _pick_signature(rng, pos) if rng.randf() < sig_chance else []
+	p.height = int(round(RngUtil.gauss(rng, HEIGHT_MEAN[pos] + _height_shift(p.eth) + (float(sig[3]) if not sig.is_empty() else 0.0), 5.0, 163.0, 205.0)))
+	p.weight = Physique.weight_for(rng, p.height, pos, age)
 	_pick_traits(rng, p)
-	_generate_attributes(rng, p, target, age)
+	_generate_attributes(rng, p, target, age, sig[2] if not sig.is_empty() else {})
 	p.secondary = _pick_secondary(rng, pos)
 	p.potential = _pick_potential(rng, p.overall, age)
 	p.dev_curve = RngUtil.weighted_index(rng, CURVE_WEIGHTS)
@@ -203,14 +222,22 @@ static func _conflicts(conflicts: Array, a: String, b: String) -> bool:
 	return false
 
 
-static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: float, age: int) -> void:
+static func _pick_signature(rng: RandomNumberGenerator, pos: int) -> Array:
+	var ok: Array = []
+	for sg: Array in SIGNATURES:
+		if (sg[1] as Array).has(pos):
+			ok.append(sg)
+	return RngUtil.pick(rng, ok) if not ok.is_empty() else []
+
+
+static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: float, age: int, sig: Dictionary = {}) -> void:
 	var pos := p.position
 	var vals: Array = []
 	var tpl: Array = TEMPLATE[pos]
 	var profile: Dictionary = RngUtil.pick(rng, PROFILES[pos])
 	for i in Attr.COUNT:
 		var v: float = target + tpl[i] + rng.randfn(0.0, 5.0)
-		v += float(profile.get(i, 0))
+		v += float(profile.get(i, 0)) + float(sig.get(i, 0))
 		vals.append(v)
 	# Idade: jovens mais físicos/menos maduros; veteranos mais inteligentes e mais lentos.
 	var mental := clampf((age - 25) * 0.9, -6.0, 6.0)
@@ -322,25 +349,63 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	var young_share: float = arch.get("young_share", 0.2)
 	var veteran_share: float = arch.get("veteran_share", 0.2)
 	var slots: Array = SQUAD_TEMPLATE.duplicate()
-	# Remove 0-3 vagas de baixo nível (exceto goleiros) e às vezes adiciona uma promessa.
+	# Tamanho do elenco como na vida real: grande clube de 1ª divisão tem 27–30 jogadores, o
+	# pequeno da 2ª fica com 22–25; no Brasil e na Argentina os elencos são mais inchados.
 	var removable: Array = []
 	for i in slots.size():
 		if slots[i][2] >= 1 and slots[i][0] != Pos.GK:
 			removable.append(i)
 	RngUtil.shuffle(rng, removable)
-	var remove_n := rng.randi_range(0, 3)
+	var remove_n := rng.randi_range(0, 2 if club.tier >= 2 else 1)
 	var to_remove: Array = removable.slice(0, remove_n)
 	to_remove.sort()
 	to_remove.reverse()
 	for i in to_remove:
 		slots.remove_at(i)
+	var extra := rng.randi_range(0, 1)
+	if club.tier == 1:
+		extra += 1 + (1 if club.reputation >= 60.0 else 0) + (1 if club.reputation >= 78.0 else 0)
+	if club.nation in ["BRA", "ARG"]:
+		extra += 2
+	var pool: Array = [[Pos.CB, -8.0, 1], [Pos.CM, -6.0, 1], [Pos.ST, -8.0, 1], [Pos.RW, -7.0, 1], [Pos.LW, -7.0, 1],
+		[Pos.LB, -12.0, 2], [Pos.RB, -12.0, 2], [Pos.AM, -10.0, 2], [Pos.DM, -10.0, 2], [Pos.GK, -16.0, 2]]
+	RngUtil.shuffle(rng, pool)
+	for i in mini(extra, pool.size()):
+		slots.append(pool[i])
 	if rng.randf() < 0.45:
 		slots.append([RngUtil.pick(rng, [Pos.CM, Pos.ST, Pos.CB, Pos.RW, Pos.AM]), -12.0, 2])
-	for s in slots:
+	# Craques: clube grande tem 2–4 jogadores bem acima do resto; o médio, às vezes um ídolo
+	var n_stars := 0
+	if club.reputation >= 85.0:
+		n_stars = rng.randi_range(2, 4)
+	elif club.reputation >= 74.0:
+		n_stars = rng.randi_range(1, 3)
+	elif club.reputation >= 58.0:
+		n_stars = rng.randi_range(0, 2)
+	else:
+		n_stars = 1 if rng.randf() < 0.45 else 0
+	var starters: Array = []
+	for i in slots.size():
+		if slots[i][2] == 0:
+			starters.append(i)
+	var star_w: Array = []
+	for i in starters:
+		star_w.append(2.2 if slots[i][0] in [Pos.ST, Pos.AM, Pos.RW, Pos.LW, Pos.CM] else 1.0)
+	var boost := {}
+	for k in n_stars:
+		var j := RngUtil.weighted_index(rng, star_w)
+		if j < 0:
+			break
+		boost[starters[j]] = rng.randf_range(3.5, 7.0) + (1.0 if k == 0 else 0.0)
+		star_w[j] = 0.0
+	for si in slots.size():
+		var s: Array = slots[si]
 		var pos: int = s[0]
 		var tier: int = s[2]
 		var age := _pick_age(rng, tier, young_share, veteran_share)
-		var target: float = level + float(s[1]) + rng.randfn(0.0, 2.6)
+		var target: float = level + float(s[1]) + rng.randfn(0.0, 2.6) + float(boost.get(si, 0.0))
+		if boost.has(si):
+			age = clampi(age, 22, 32)
 		if age <= 20:
 			target -= (21 - age) * 1.6
 		elif age >= 33:
@@ -348,8 +413,9 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 		var nat := pick_nationality(rng, club)
 		if nat != club.nation:
 			target += 1.5
-		target = clampf(target, 25.0, 92.0)
-		var p := create(world, rng, pos, target, age, nat, club.city, used_names)
+		target = clampf(target, 25.0, 93.0)
+		# Craque quase sempre tem "assinatura"
+		var p := create(world, rng, pos, target, age, nat, club.city, used_names, 0.6 if boost.has(si) else SIGNATURE_CHANCE)
 		sign_to_club(world, rng, p, club, true)
 	assign_statuses(world, club)
 	assign_shirt_numbers(world, club)

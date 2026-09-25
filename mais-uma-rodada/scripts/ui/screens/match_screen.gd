@@ -848,7 +848,7 @@ func _build_tabs() -> void:
 	for t in _tab_list():
 		var key: String = t[0]
 		var chip := UIKit.chip(t[1], key == _tab, g, func(): _set_tab(key))
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		chip.add_theme_font_size_override(&"font_size", 18)
 		_tabs_row.add_child(chip)
 
@@ -991,7 +991,7 @@ func _entry_scorers(e: Dictionary, minute: int, half: int) -> String:
 		if not _done and (gh > half or (gh == half and gm > minute)):
 			continue
 		var p: Player = world().player(int(g[2]))
-		parts.append("%s %s%s" % [p.display_name() if p != null else "?", Fmt.minute(gm, gh), " (c)" if int(g[3]) == Fixture.GOAL_OWN else ""])
+		parts.append("%s %s%s" % [p.short_name() if p != null else "?", Fmt.minute(gm, gh), " (c)" if int(g[3]) == Fixture.GOAL_OWN else ""])
 	return "  ·  ".join(PackedStringArray(parts))
 
 

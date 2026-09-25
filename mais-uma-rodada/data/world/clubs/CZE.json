@@ -164,6 +164,216 @@
 				"symbol": "letter",
 				"initials": "SK"
 			}
+		},
+		{
+			"key": "CZE_BOL",
+			"name": "FK Mladá Boleslav",
+			"short": "Mladá Boleslav",
+			"abbr": "MBO",
+			"nick": "Mladá Boleslav",
+			"city": "Mladá Boleslav",
+			"founded": 1902,
+			"league": "CZE1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lokotrans Aréna",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_JAB",
+			"name": "FK Jablonec",
+			"short": "Jablonec",
+			"abbr": "JAB",
+			"nick": "Jablonec",
+			"city": "Jablonec",
+			"founded": 1945,
+			"league": "CZE1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#111111"
+			],
+			"stadium": "Stadion Střelnice",
+			"capacity": 6100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_HRA",
+			"name": "FC Hradec Králové",
+			"short": "Hradec Králové",
+			"abbr": "HKR",
+			"nick": "Hradec Králové",
+			"city": "Hradec Králové",
+			"founded": 1905,
+			"league": "CZE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Malšovická aréna",
+			"capacity": 9300,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_BOH",
+			"name": "Bohemians Praha 1905",
+			"short": "Bohemians 1905",
+			"abbr": "BOH",
+			"nick": "Bohemians 1905",
+			"city": "Prague",
+			"founded": 1905,
+			"league": "CZE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Ďolíček",
+			"capacity": 6300,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_TEP",
+			"name": "FK Teplice",
+			"short": "Teplice",
+			"abbr": "TEP",
+			"nick": "Teplice",
+			"city": "Teplice",
+			"founded": 1945,
+			"league": "CZE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Na Stínadlech",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_SLO",
+			"name": "1. FC Slovácko",
+			"short": "Slovácko",
+			"abbr": "SLO",
+			"nick": "Slovácko",
+			"city": "Uherské Hradiště",
+			"founded": 1927,
+			"league": "CZE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Městský stadion",
+			"capacity": 8100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_KAR",
+			"name": "MFK Karviná",
+			"short": "Karviná",
+			"abbr": "KAR",
+			"nick": "Karviná",
+			"city": "Karviná",
+			"founded": 2003,
+			"league": "CZE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Městský stadion",
+			"capacity": 4800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_PAR",
+			"name": "FK Pardubice",
+			"short": "Pardubice",
+			"abbr": "PAR",
+			"nick": "Pardubice",
+			"city": "Pardubice",
+			"founded": 2008,
+			"league": "CZE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "CFIG Arena",
+			"capacity": 4600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_ZLI",
+			"name": "FC Zlín",
+			"short": "Zlín",
+			"abbr": "ZLI",
+			"nick": "Zlín",
+			"city": "Zlín",
+			"founded": 1919,
+			"league": "CZE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Letná",
+			"capacity": 5800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_DUK",
+			"name": "FK Dukla Praha",
+			"short": "Dukla Praha",
+			"abbr": "DUK",
+			"nick": "Dukla Praha",
+			"city": "Prague",
+			"founded": 1948,
+			"league": "CZE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Juliska",
+			"capacity": 8100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

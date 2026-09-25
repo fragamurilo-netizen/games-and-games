@@ -3243,7 +3243,7 @@
 			"coef": 45,
 			"origins": [
 				{
-					"c": "east_slav",
+					"c": "ua",
 					"w": 95,
 					"eth": {
 						"nor": 45,
@@ -3434,7 +3434,7 @@
 			"coef": 42,
 			"origins": [
 				{
-					"c": "south_slav",
+					"c": "hr",
 					"w": 95,
 					"eth": {
 						"eur": 85,
@@ -3610,7 +3610,7 @@
 			"coef": 42,
 			"origins": [
 				{
-					"c": "south_slav",
+					"c": "rs",
 					"w": 95,
 					"eth": {
 						"eur": 85,
@@ -3779,7 +3779,7 @@
 			"coef": 45,
 			"origins": [
 				{
-					"c": "west_slav",
+					"c": "cz",
 					"w": 92,
 					"eth": {
 						"nor": 50,
@@ -3945,7 +3945,7 @@
 			"coef": 45,
 			"origins": [
 				{
-					"c": "nordic",
+					"c": "dk",
 					"w": 85,
 					"eth": {
 						"nor": 90,
@@ -4214,7 +4214,7 @@
 			},
 			"origins": [
 				{
-					"c": "nordic",
+					"c": "no",
 					"w": 88,
 					"eth": {
 						"nor": 95,
@@ -4272,7 +4272,7 @@
 			},
 			"origins": [
 				{
-					"c": "nordic",
+					"c": "se",
 					"w": 80,
 					"eth": {
 						"nor": 95,
@@ -4338,7 +4338,7 @@
 			},
 			"origins": [
 				{
-					"c": "nordic",
+					"c": "is",
 					"w": 100,
 					"eth": {
 						"nor": 1
@@ -4359,7 +4359,7 @@
 			},
 			"origins": [
 				{
-					"c": "nordic",
+					"c": "fi",
 					"w": 90,
 					"eth": {
 						"nor": 1
@@ -4394,7 +4394,7 @@
 			},
 			"origins": [
 				{
-					"c": "west_slav",
+					"c": "pl",
 					"w": 98,
 					"eth": {
 						"nor": 50,
@@ -4431,7 +4431,7 @@
 			},
 			"origins": [
 				{
-					"c": "west_slav",
+					"c": "sk",
 					"w": 96,
 					"eth": {
 						"nor": 45,
@@ -4468,7 +4468,7 @@
 			},
 			"origins": [
 				{
-					"c": "south_slav",
+					"c": "si",
 					"w": 100,
 					"eth": {
 						"eur": 80,
@@ -4557,7 +4557,7 @@
 			},
 			"origins": [
 				{
-					"c": "south_slav",
+					"c": "ba",
 					"w": 100,
 					"eth": {
 						"eur": 85,
@@ -4585,7 +4585,7 @@
 			},
 			"origins": [
 				{
-					"c": "south_slav",
+					"c": "rs",
 					"w": 100,
 					"eth": {
 						"eur": 90,
@@ -4613,7 +4613,7 @@
 			},
 			"origins": [
 				{
-					"c": "south_slav",
+					"c": "mk",
 					"w": 75,
 					"eth": {
 						"eur": 1
@@ -4727,7 +4727,7 @@
 			},
 			"origins": [
 				{
-					"c": "east_slav",
+					"c": "ru",
 					"w": 97,
 					"eth": {
 						"nor": 50,
@@ -5722,7 +5722,7 @@
 			"coef": 58,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "co",
 					"w": 98,
 					"eth": {
 						"lat": 55,
@@ -5885,7 +5885,7 @@
 			"coef": 50,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "cl",
 					"w": 97,
 					"eth": {
 						"lat": 70,
@@ -6052,7 +6052,7 @@
 			"coef": 55,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "ec",
 					"w": 100,
 					"eth": {
 						"afr": 35,
@@ -6171,7 +6171,7 @@
 			"coef": 42,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "pe",
 					"w": 99,
 					"eth": {
 						"lat": 50,
@@ -6313,7 +6313,7 @@
 			"coef": 52,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "py",
 					"w": 98,
 					"eth": {
 						"lat": 80,
@@ -6427,7 +6427,7 @@
 			"coef": 35,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "bo",
 					"w": 100,
 					"eth": {
 						"lat": 40,
@@ -6534,7 +6534,7 @@
 			"coef": 35,
 			"origins": [
 				{
-					"c": "latam",
+					"c": "ve",
 					"w": 100,
 					"eth": {
 						"lat": 55,
@@ -6836,7 +6836,7 @@
 			"coef": 65,
 			"origins": [
 				{
-					"c": "en",
+					"c": "us",
 					"w": 72,
 					"eth": {
 						"nor": 45,
@@ -7210,7 +7210,7 @@
 			},
 			"origins": [
 				{
-					"c": "latam",
+					"c": "cam",
 					"w": 100,
 					"eth": {
 						"lat": 70,
@@ -7235,7 +7235,7 @@
 			},
 			"origins": [
 				{
-					"c": "en",
+					"c": "jm",
 					"w": 100,
 					"eth": {
 						"afr": 90,
@@ -7265,7 +7265,7 @@
 			},
 			"origins": [
 				{
-					"c": "latam",
+					"c": "cam",
 					"w": 100,
 					"eth": {
 						"lat": 60,
@@ -7290,7 +7290,7 @@
 			},
 			"origins": [
 				{
-					"c": "latam",
+					"c": "cam",
 					"w": 100,
 					"eth": {
 						"afr": 45,
@@ -7322,7 +7322,7 @@
 			"coef": 65,
 			"origins": [
 				{
-					"c": "arab",
+					"c": "eg",
 					"w": 100,
 					"eth": {
 						"arb": 90,
@@ -7447,7 +7447,7 @@
 			"coef": 62,
 			"origins": [
 				{
-					"c": "maghreb",
+					"c": "ma",
 					"w": 98,
 					"eth": {
 						"arb": 95,
@@ -7586,7 +7586,7 @@
 			"coef": 55,
 			"origins": [
 				{
-					"c": "maghreb",
+					"c": "tn",
 					"w": 100,
 					"eth": {
 						"arb": 95,
@@ -7835,7 +7835,7 @@
 			"coef": 40,
 			"origins": [
 				{
-					"c": "waf_en",
+					"c": "ng",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -7954,7 +7954,7 @@
 			"coef": 40,
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "sn",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8054,7 +8054,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_en",
+					"c": "gh",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8076,7 +8076,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "ci",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8105,17 +8105,10 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
-					"w": 85,
+					"c": "cm",
+					"w": 100,
 					"eth": {
-						"afr": 1
-					}
-				},
-				{
-					"c": "waf_en",
-					"w": 15,
-					"eth": {
-						"afr": 1
+						"afr": 2
 					}
 				}
 			]
@@ -8134,7 +8127,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "ml",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8162,7 +8155,7 @@
 			},
 			"origins": [
 				{
-					"c": "maghreb",
+					"c": "dz",
 					"w": 100,
 					"eth": {
 						"arb": 95,
@@ -8185,7 +8178,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "ml",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8213,7 +8206,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "bf",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8242,7 +8235,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "cd",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8264,7 +8257,7 @@
 			},
 			"origins": [
 				{
-					"c": "waf_fr",
+					"c": "ga",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8292,7 +8285,7 @@
 			},
 			"origins": [
 				{
-					"c": "lusoaf",
+					"c": "ao",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8330,7 +8323,7 @@
 			},
 			"origins": [
 				{
-					"c": "lusoaf",
+					"c": "cv",
 					"w": 100,
 					"eth": {
 						"mix": 70,
@@ -8356,7 +8349,7 @@
 			},
 			"origins": [
 				{
-					"c": "lusoaf",
+					"c": "mz",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8385,7 +8378,7 @@
 			},
 			"origins": [
 				{
-					"c": "lusoaf",
+					"c": "gw",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8411,7 +8404,7 @@
 			},
 			"origins": [
 				{
-					"c": "rsa",
+					"c": "zw",
 					"w": 100,
 					"eth": {
 						"afr": 1
@@ -8439,7 +8432,7 @@
 			"coef": 65,
 			"origins": [
 				{
-					"c": "arab",
+					"c": "gulf",
 					"w": 100,
 					"eth": {
 						"arb": 85,
@@ -8906,7 +8899,7 @@
 			"coef": 55,
 			"origins": [
 				{
-					"c": "arab",
+					"c": "gulf",
 					"w": 100,
 					"eth": {
 						"arb": 75,
@@ -9004,7 +8997,7 @@
 			"coef": 50,
 			"origins": [
 				{
-					"c": "arab",
+					"c": "gulf",
 					"w": 100,
 					"eth": {
 						"arb": 75,

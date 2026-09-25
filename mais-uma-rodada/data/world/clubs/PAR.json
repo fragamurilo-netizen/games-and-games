@@ -273,6 +273,48 @@
 				"initials": "CT",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "PAR_GCA",
+			"name": "Club General Caballero JLM",
+			"short": "Gral. Caballero JLM",
+			"abbr": "GCJ",
+			"nick": "Gral. Caballero JLM",
+			"city": "Juan León Mallorquín",
+			"founded": 1918,
+			"league": "PAR1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ka'arendy",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PAR_REC",
+			"name": "Club Recoleta",
+			"short": "Recoleta",
+			"abbr": "REC",
+			"nick": "Recoleta",
+			"city": "Asunción",
+			"founded": 1931,
+			"league": "PAR1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ricardo Gregor",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

@@ -169,6 +169,132 @@
 				"initials": "AU",
 				"sc": "#FFD100"
 			}
+		},
+		{
+			"key": "AUS_BRI",
+			"name": "Brisbane Roar FC",
+			"short": "Brisbane Roar",
+			"abbr": "BRI",
+			"nick": "Brisbane Roar",
+			"city": "Brisbane",
+			"founded": 2005,
+			"league": "AUS1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Suncorp Stadium",
+			"capacity": 52500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_PER",
+			"name": "Perth Glory FC",
+			"short": "Perth Glory",
+			"abbr": "PER",
+			"nick": "Perth Glory",
+			"city": "Perth",
+			"founded": 1995,
+			"league": "AUS1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "HBF Park",
+			"capacity": 20500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_NEW",
+			"name": "Newcastle Jets FC",
+			"short": "Newcastle Jets",
+			"abbr": "NEW",
+			"nick": "Newcastle Jets",
+			"city": "Newcastle",
+			"founded": 2000,
+			"league": "AUS1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "McDonald Jones Stadium",
+			"capacity": 33000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_MAC",
+			"name": "Macarthur FC",
+			"short": "Macarthur",
+			"abbr": "MAC",
+			"nick": "Macarthur",
+			"city": "Sydney",
+			"founded": 2017,
+			"league": "AUS1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#C5A572"
+			],
+			"stadium": "Campbelltown Stadium",
+			"capacity": 17500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_WEL",
+			"name": "Wellington Phoenix FC",
+			"short": "Wellington Phoenix",
+			"abbr": "WEL",
+			"nick": "Wellington Phoenix",
+			"city": "Wellington",
+			"founded": 2007,
+			"league": "AUS1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Sky Stadium",
+			"capacity": 34500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_AUK",
+			"name": "Auckland FC",
+			"short": "Auckland FC",
+			"abbr": "AUK",
+			"nick": "Auckland FC",
+			"city": "Auckland",
+			"founded": 2024,
+			"league": "AUS1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Go Media Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

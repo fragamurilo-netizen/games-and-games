@@ -108,23 +108,25 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		var w_mid: float = s["mid"]
 		var w_att: float = s["att"]
 		var w_wide: float = s["wide"]
-		var c_fin: float = at[Attr.FIN] * 0.7 + at[Attr.DEC] * 0.15 + at[Attr.TEC] * 0.15
+		var side: Array = Physique.side_mods(p, pos)
+		var heavy := Physique.pace_penalty(p)
+		var c_fin: float = at[Attr.FIN] * 0.7 + at[Attr.DEC] * 0.15 + at[Attr.TEC] * 0.15 + float(side[1])
 		if i == 0:
-			gk = (at[Attr.GOL] * 0.6 + at[Attr.POS] * 0.2 + at[Attr.DEC] * 0.1 + at[Attr.INT] * 0.1) * f
+			gk = (at[Attr.GOL] * 0.6 + at[Attr.POS] * 0.2 + at[Attr.DEC] * 0.1 + at[Attr.INT] * 0.1 + Physique.gk_reach(p)) * f
 			pl.append([p, pos, f, 1.0, 0.0, 0.0, 0.02, 0.05 * (1.5 - at[Attr.DIS] / 100.0), p.rating_at(pos) * perf, c_fin])
 			continue
-		d += (at[Attr.MAR] * 0.3 + at[Attr.POS] * 0.3 + at[Attr.FOR] * 0.1 + at[Attr.CAB] * 0.1 + at[Attr.VEL] * 0.1 + at[Attr.DEC] * 0.1) * f * w_def
+		d += (at[Attr.MAR] * 0.3 + at[Attr.POS] * 0.3 + at[Attr.FOR] * 0.1 + at[Attr.CAB] * 0.1 + (at[Attr.VEL] - heavy) * 0.1 + at[Attr.DEC] * 0.1 + Physique.strength(p) * 0.25) * f * w_def
 		dw += w_def
 		m += (at[Attr.PAS] * 0.3 + at[Attr.VIS] * 0.2 + at[Attr.TEC] * 0.2 + at[Attr.DEC] * 0.15 + at[Attr.RES] * 0.15) * f * w_mid
 		mw += w_mid
-		a += (at[Attr.FIN] * 0.3 + at[Attr.TEC] * 0.2 + at[Attr.VEL] * 0.2 + at[Attr.DEC] * 0.15 + at[Attr.POS] * 0.15) * f * w_att
+		a += (at[Attr.FIN] * 0.3 + at[Attr.TEC] * 0.2 + (at[Attr.VEL] - heavy) * 0.2 + at[Attr.DEC] * 0.15 + at[Attr.POS] * 0.15) * f * w_att
 		aw += w_att
 		if w_att >= 0.45:
 			fin += c_fin * f
 			fin_n += 1
-		var c_head: float = at[Attr.CAB] * 0.7 + at[Attr.POS] * 0.2 + at[Attr.FOR] * 0.1
+		var c_head: float = at[Attr.CAB] * 0.7 + at[Attr.POS] * 0.2 + at[Attr.FOR] * 0.1 + Physique.aerial(p) * 0.6
 		var shoot := (w_att + 0.04) * c_fin * f * (1.6 if pos == Pos.ST else 1.0) + 0.35 * (w_att + (0.35 if pos == Pos.CB else 0.0) + 0.05) * c_head * f
-		var assist := (w_mid + w_att * 0.5 + 0.05) * (at[Attr.PAS] + at[Attr.VIS]) * f + (w_wide + 0.05) * at[Attr.CRU] * f * 0.5
+		var assist := (w_mid + w_att * 0.5 + 0.05) * (at[Attr.PAS] + at[Attr.VIS]) * f + (w_wide + 0.05) * (at[Attr.CRU] + float(side[0])) * f * 0.5
 		var base_foul := 0.6
 		match pos:
 			Pos.DM:

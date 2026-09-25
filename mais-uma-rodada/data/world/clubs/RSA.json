@@ -162,6 +162,216 @@
 				"field": "plain",
 				"symbol": "star"
 			}
+		},
+		{
+			"key": "RSA_SSU",
+			"name": "Siwelele FC",
+			"short": "Siwelele",
+			"abbr": "SIW",
+			"nick": "Siwelele",
+			"city": "Pretoria",
+			"founded": 1994,
+			"league": "RSA1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lucas Moripe Stadium",
+			"capacity": 28900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_CTC",
+			"name": "Cape Town City FC",
+			"short": "Cape Town City",
+			"abbr": "CTC",
+			"nick": "Cape Town City",
+			"city": "Cape Town",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "DHL Stadium",
+			"capacity": 55000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_SEK",
+			"name": "Sekhukhune United FC",
+			"short": "Sekhukhune",
+			"abbr": "SEK",
+			"nick": "Sekhukhune",
+			"city": "Polokwane",
+			"founded": 2019,
+			"league": "RSA1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Peter Mokaba Stadium",
+			"capacity": 41700,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_POL",
+			"name": "Polokwane City FC",
+			"short": "Polokwane City",
+			"abbr": "PCF",
+			"nick": "Polokwane City",
+			"city": "Polokwane",
+			"founded": 2012,
+			"league": "RSA1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Old Peter Mokaba Stadium",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_GAR",
+			"name": "Lamontville Golden Arrows FC",
+			"short": "Golden Arrows",
+			"abbr": "GAR",
+			"nick": "Golden Arrows",
+			"city": "Durban",
+			"founded": 1943,
+			"league": "RSA1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "King Zwelithini Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_CHI",
+			"name": "Chippa United FC",
+			"short": "Chippa United",
+			"abbr": "CHI",
+			"nick": "Chippa United",
+			"city": "Gqeberha",
+			"founded": 2010,
+			"league": "RSA1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Buffalo City Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_RBY",
+			"name": "Richards Bay FC",
+			"short": "Richards Bay",
+			"abbr": "RBY",
+			"nick": "Richards Bay",
+			"city": "Richards Bay",
+			"founded": 2006,
+			"league": "RSA1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "King Zwelithini Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_MAG",
+			"name": "Magesi FC",
+			"short": "Magesi",
+			"abbr": "MAG",
+			"nick": "Magesi",
+			"city": "Polokwane",
+			"founded": 2011,
+			"league": "RSA1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Old Peter Mokaba Stadium",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_MAR",
+			"name": "Marumo Gallants FC",
+			"short": "Marumo Gallants",
+			"abbr": "MGA",
+			"nick": "Marumo Gallants",
+			"city": "Bloemfontein",
+			"founded": 2021,
+			"league": "RSA1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Dr Petrus Molemela Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_ORB",
+			"name": "Orbit College FC",
+			"short": "Orbit College",
+			"abbr": "ORB",
+			"nick": "Orbit College",
+			"city": "Rustenburg",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Olympia Park",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

@@ -253,6 +253,7 @@ func _assign_slot(mp: MatchPlayer, i: int, s: Dictionary) -> void:
 	mp.w_wide = s["wide"]
 	mp.fam = Pos.familiarity(mp.p.position, mp.p.secondary, mp.pos)
 	mp.slot_rating = mp.p.rating_at(mp.pos)
+	mp.apply_side(mp.pos)
 
 
 # ---------------------------------------------------------------------------

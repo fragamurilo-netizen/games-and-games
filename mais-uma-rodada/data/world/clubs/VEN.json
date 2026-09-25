@@ -266,6 +266,90 @@
 				"symbol": "letter",
 				"initials": "UCV"
 			}
+		},
+		{
+			"key": "VEN_ZUL",
+			"name": "Deportivo Rayo Zuliano",
+			"short": "Rayo Zuliano",
+			"abbr": "RZU",
+			"nick": "Rayo Zuliano",
+			"city": "Maracaibo",
+			"founded": 2013,
+			"league": "VEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio José Encarnación Romero",
+			"capacity": 35000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "VEN_POR",
+			"name": "Portuguesa FC",
+			"short": "Portuguesa",
+			"abbr": "POR",
+			"nick": "Portuguesa",
+			"city": "Acarigua",
+			"founded": 1972,
+			"league": "VEN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Estadio General José Antonio Páez",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "VEN_ANG",
+			"name": "Angostura FC",
+			"short": "Angostura",
+			"abbr": "ANG",
+			"nick": "Angostura",
+			"city": "Ciudad Bolívar",
+			"founded": 2014,
+			"league": "VEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio Ricardo Tulio Maya",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "VEN_ANZ",
+			"name": "Anzoátegui FC",
+			"short": "Anzoátegui",
+			"abbr": "ANZ",
+			"nick": "Anzoátegui",
+			"city": "Puerto La Cruz",
+			"founded": 2021,
+			"league": "VEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio José Antonio Anzoátegui",
+			"capacity": 37000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

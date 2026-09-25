@@ -166,6 +166,216 @@
 				"initials": "O",
 				"sc": "#111111"
 			}
+		},
+		{
+			"key": "UKR_RUK",
+			"name": "FC Rukh Lviv",
+			"short": "Rukh Lviv",
+			"abbr": "RUK",
+			"nick": "Rukh Lviv",
+			"city": "Lviv",
+			"founded": 2003,
+			"league": "UKR1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Arena Lviv",
+			"capacity": 34900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_KAR",
+			"name": "FC Karpaty Lviv",
+			"short": "Karpaty",
+			"abbr": "KAR",
+			"nick": "Karpaty",
+			"city": "Lviv",
+			"founded": 1963,
+			"league": "UKR1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Ukraina Stadium",
+			"capacity": 28000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_OBO",
+			"name": "FC Obolon Kyiv",
+			"short": "Obolon",
+			"abbr": "OBO",
+			"nick": "Obolon",
+			"city": "Kyiv",
+			"founded": 1992,
+			"league": "UKR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Obolon Arena",
+			"capacity": 5100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_VER",
+			"name": "NK Veres Rivne",
+			"short": "Veres",
+			"abbr": "VER",
+			"nick": "Veres",
+			"city": "Rivne",
+			"founded": 1957,
+			"league": "UKR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Avanhard Stadium",
+			"capacity": 4600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_LNZ",
+			"name": "LNZ Cherkasy",
+			"short": "LNZ",
+			"abbr": "LNZ",
+			"nick": "LNZ",
+			"city": "Cherkasy",
+			"founded": 2006,
+			"league": "UKR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Cherkasy Arena",
+			"capacity": 10300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_VOR",
+			"name": "FC Vorskla Poltava",
+			"short": "Vorskla",
+			"abbr": "VOR",
+			"nick": "Vorskla",
+			"city": "Poltava",
+			"founded": 1955,
+			"league": "UKR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Butovsky Vorskla",
+			"capacity": 24800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_CHO",
+			"name": "FC Chornomorets Odesa",
+			"short": "Chornomorets",
+			"abbr": "CHO",
+			"nick": "Chornomorets",
+			"city": "Odesa",
+			"founded": 1936,
+			"league": "UKR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Chornomorets Stadium",
+			"capacity": 34100,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_KOL",
+			"name": "FC Kolos Kovalivka",
+			"short": "Kolos",
+			"abbr": "KOL",
+			"nick": "Kolos",
+			"city": "Kovalivka",
+			"founded": 2012,
+			"league": "UKR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Kolos Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_LBE",
+			"name": "FC Livyi Bereh Kyiv",
+			"short": "Livyi Bereh",
+			"abbr": "LBE",
+			"nick": "Livyi Bereh",
+			"city": "Kyiv",
+			"founded": 2017,
+			"league": "UKR1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Livyi Bereh Arena",
+			"capacity": 1000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_ING",
+			"name": "FC Inhulets Petrove",
+			"short": "Inhulets",
+			"abbr": "ING",
+			"nick": "Inhulets",
+			"city": "Petrove",
+			"founded": 2013,
+			"league": "UKR1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Inhulets Stadium",
+			"capacity": 1700,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

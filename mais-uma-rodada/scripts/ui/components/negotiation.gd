@@ -100,7 +100,7 @@ func _render() -> void:
 						loan_mode = lm
 						message = ""
 						_render())
-					chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+					UIKit.shrink_button(chip)
 					mrow.add_child(chip)
 				box.add_child(mrow)
 				if loan_mode:
@@ -202,7 +202,7 @@ func _choice(caption: String, opts: Array, current: Variant, cb: Callable) -> Co
 		var chip := UIKit.chip(String(o[0]), val == current, g, func():
 			cb.call(val)
 			_render())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	v.add_child(row)
 	return v
@@ -325,7 +325,7 @@ func _render_terms(caption: String) -> void:
 		var yy := y
 		var chip := UIKit.chip("%d ano%s" % [y, "" if y == 1 else "s"], y == years, g, func():
 			years = yy)
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		yrow.add_child(chip)
 	box.add_child(yrow)
 	box.add_child(UIKit.section("Luvas (pagas na assinatura)"))

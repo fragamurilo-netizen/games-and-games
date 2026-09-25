@@ -25,6 +25,8 @@ const SCREENS := {
 	"kit": "res://scenes/screens/kit.tscn",
 	"preseason": "res://scenes/screens/preseason.tscn",
 	"relations": "res://scenes/screens/relations.tscn",
+	"numbers": "res://scenes/screens/numbers.tscn",
+	"past_squads": "res://scenes/screens/past_squads.tscn",
 }
 const TABS := ["hub", "squad", "market", "table", "club"]
 

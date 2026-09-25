@@ -97,7 +97,7 @@ static func _press_scale(t: Control, s: float) -> void:
 		return
 	# Um único tween por alvo: apertar e soltar rápido não deixa dois brigando (e o alvo
 	# nunca fica preso encolhido).
-	var old: Variant = t.get_meta(&"press_tw", null)
+	var old: Variant = t.get_meta(&"press_tw") if t.has_meta(&"press_tw") else null
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 	if is_equal_approx(t.scale.x, s):
@@ -112,7 +112,7 @@ static func _press_scale(t: Control, s: float) -> void:
 static func _press_reset(t: Control) -> void:
 	if not is_instance_valid(t):
 		return
-	var old: Variant = t.get_meta(&"press_tw", null)
+	var old: Variant = t.get_meta(&"press_tw") if t.has_meta(&"press_tw") else null
 	if old is Tween and (old as Tween).is_valid():
 		(old as Tween).kill()
 	t.scale = Vector2.ONE
@@ -125,24 +125,47 @@ static func fit_width(root: Control, max_w: float) -> void:
 	for _i in 16:
 		if root.get_combined_minimum_size().x <= max_w + 0.5:
 			return
-		var worst: Label = null
+		var worst: Control = null
 		var worst_w := 0.0
-		for n in root.find_children("*", "Label", true, false):
-			var l := n as Label
-			if not l.is_visible_in_tree() or l.autowrap_mode != TextServer.AUTOWRAP_OFF or l.clip_text \
-					or l.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING:
+		for n in root.find_children("*", "", true, false):
+			if not (n is Label or n is Button) or not (n as Control).is_visible_in_tree():
 				continue
-			var w := l.get_combined_minimum_size().x
+			if n is Label:
+				var l := n as Label
+				if l.autowrap_mode != TextServer.AUTOWRAP_OFF or l.clip_text or l.text_overrun_behavior != TextServer.OVERRUN_NO_TRIMMING:
+					continue
+			else:
+				var b := n as Button
+				# Botões só em linhas (numa FlowContainer eles precisam do tamanho natural)
+				if b.clip_text or b.text == "" or not (b.get_parent() is HBoxContainer):
+					continue
+			var w := (n as Control).get_combined_minimum_size().x
 			if w > worst_w:
 				worst_w = w
-				worst = l
+				worst = n
 		if worst == null:
 			return
-		worst.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		worst.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		worst.custom_minimum_size.x = minf(worst_w, max_w * 0.22)
-		if worst.tooltip_text == "":
-			worst.tooltip_text = worst.text
+		if worst is Button:
+			# Todos os botões da linha encolhem juntos (as abas continuam do mesmo tamanho)
+			for sib in worst.get_parent().get_children():
+				if sib is Button and (sib as Button).text != "":
+					shrink_button(sib)
+			continue
+		var wl := worst as Label
+		wl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		wl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		wl.custom_minimum_size.x = minf(worst_w, max_w * 0.22)
+		if wl.tooltip_text == "":
+			wl.tooltip_text = wl.text
+
+
+## Botão de linha que pode encolher (texto com "…") em vez de alargar a tela.
+static func shrink_button(b: Button) -> void:
+	b.clip_text = true
+	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if b.tooltip_text == "":
+		b.tooltip_text = b.text
 
 
 static func hbox(sep: int = 12) -> HBoxContainer:

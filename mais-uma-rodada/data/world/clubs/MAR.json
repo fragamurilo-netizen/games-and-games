@@ -215,6 +215,174 @@
 				"field": "plain",
 				"symbol": "horse"
 			}
+		},
+		{
+			"key": "MAR_OCK",
+			"name": "Olympique Club de Khouribga",
+			"short": "OC Khouribga",
+			"abbr": "OCK",
+			"nick": "OC Khouribga",
+			"city": "Khouribga",
+			"founded": 1923,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade du Phosphate",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_RCZ",
+			"name": "Renaissance Club Zemamra",
+			"short": "RC Zemamra",
+			"abbr": "RCZ",
+			"nick": "RC Zemamra",
+			"city": "Zemamra",
+			"founded": 1977,
+			"league": "MAR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Stade Ahmed Choukri",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_UTS",
+			"name": "Union Touarga Sport",
+			"short": "Union Touarga",
+			"abbr": "UTS",
+			"nick": "Union Touarga",
+			"city": "Rabat",
+			"founded": 1969,
+			"league": "MAR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Prince Héritier Moulay El Hassan",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_COD",
+			"name": "Club Omnisports de Meknès",
+			"short": "CODM Meknès",
+			"abbr": "COD",
+			"nick": "CODM Meknès",
+			"city": "Meknès",
+			"founded": 1962,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade d'Honneur de Meknès",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_MAT",
+			"name": "Moghreb Athletic de Tétouan",
+			"short": "Moghreb Tétouan",
+			"abbr": "MAT",
+			"nick": "Moghreb Tétouan",
+			"city": "Tétouan",
+			"founded": 1922,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Saniat Rmel",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_SCC",
+			"name": "Sporting Club Chabab Mohammédia",
+			"short": "Chabab Mohammédia",
+			"abbr": "SCC",
+			"nick": "Chabab Mohammédia",
+			"city": "Mohammédia",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade El Bachir",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_IRT",
+			"name": "Ittihad Riadi de Tanger",
+			"short": "IR Tanger",
+			"abbr": "IRT",
+			"nick": "IR Tanger",
+			"city": "Tangier",
+			"founded": 1983,
+			"league": "MAR1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Ibn Batouta",
+			"capacity": 65000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_OCS",
+			"name": "Olympic Club de Safi",
+			"short": "Olympic Safi",
+			"abbr": "OCS",
+			"nick": "Olympic Safi",
+			"city": "Safi",
+			"founded": 1921,
+			"league": "MAR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade El Massira",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

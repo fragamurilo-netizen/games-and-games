@@ -729,7 +729,7 @@ static func _crown(world: GameWorld, cup: Cup, final_tie: Dictionary) -> void:
 	for pid in champ.player_ids:
 		var p := world.player(pid)
 		if p != null and p.cup_stats.has(cup.id):
-			p.titles += 1
+			p.win_title(world.year, ("W:" if cup.id == CWC else ("S:" if is_state(cup.id) else "C:")) + cup.id, champ.id)
 
 
 ## Mundial de Clubes: campeões e vices da Europa e América do Sul, campeões da CONCACAF, África e Ásia

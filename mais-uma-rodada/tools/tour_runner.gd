@@ -113,6 +113,21 @@ func _run() -> void:
 	UIManager.goto("squad")
 	await _frames(8)
 	await _shot("05_elenco")
+	UIManager.push("numbers")
+	await _frames(8)
+	await _shot("05a_numeracao")
+	var num_star: Player = w.squad(w.user_club())[0]
+	_screen().set("_sel", num_star.id)
+	_screen().refresh()
+	await _frames(4)
+	await _shot("05b_numeracao_escolha")
+	_screen().call("_tap_number", 10)
+	await _frames(4)
+	UIManager.back()
+	UIManager.push("past_squads", {"id": w.user_club_id})
+	await _frames(8)
+	await _shot("05c_elencos_anteriores")
+	UIManager.back()
 	var star: Player = null
 	for p in w.squad(w.user_club()):
 		if star == null or p.ovr_f > star.ovr_f:
@@ -120,6 +135,14 @@ func _run() -> void:
 	UIManager.push("player", {"id": star.id})
 	await _frames(8)
 	await _shot("06_perfil")
+	# Carreira, títulos e temporada a temporada (fim da página)
+	var psc: ScrollContainer = _screen().scroll()
+	psc.scroll_vertical = int(psc.get_v_scroll_bar().max_value)
+	await _frames(4)
+	await _shot("06_perfil_carreira")
+	psc.scroll_vertical = maxi(0, psc.scroll_vertical - 1100)
+	await _frames(4)
+	await _shot("06_perfil_titulos")
 	# Pré-temporada: uniformes e patrocínios
 	UIManager.push("kit")
 	await _frames(8)

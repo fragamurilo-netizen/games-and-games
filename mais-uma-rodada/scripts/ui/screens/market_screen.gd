@@ -48,7 +48,7 @@ func refresh() -> void:
 		var chip := UIKit.chip(text, key == _tab, gt, func():
 			_tab = key
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		chip.add_theme_font_size_override(&"font_size", 18)
 		trow.add_child(chip)
 	c.add_child(trow)
@@ -96,7 +96,7 @@ func _group_chips(c: VBoxContainer) -> void:
 		var chip := UIKit.chip(GROUPS[i], i == _group, g, func():
 			_group = idx
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	c.add_child(row)
 

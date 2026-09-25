@@ -167,6 +167,216 @@
 				"initials": "RN",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "SRB_NPZ",
+			"name": "FK Novi Pazar",
+			"short": "Novi Pazar",
+			"abbr": "NPZ",
+			"nick": "Novi Pazar",
+			"city": "Novi Pazar",
+			"founded": 1928,
+			"league": "SRB1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Gradski stadion",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_ZEL",
+			"name": "FK Železničar Pančevo",
+			"short": "Železničar",
+			"abbr": "ZEL",
+			"nick": "Železničar",
+			"city": "Pančevo",
+			"founded": 1924,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "SC Mladost",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_SPA",
+			"name": "FK Spartak Subotica",
+			"short": "Spartak",
+			"abbr": "SPA",
+			"nick": "Spartak",
+			"city": "Subotica",
+			"founded": 1945,
+			"league": "SRB1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Subotica City",
+			"capacity": 13000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_MLA",
+			"name": "FK Mladost Lučani",
+			"short": "Mladost",
+			"abbr": "MLA",
+			"nick": "Mladost",
+			"city": "Lučani",
+			"founded": 1952,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Mladost Stadium",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_IMT",
+			"name": "FK IMT Beograd",
+			"short": "IMT",
+			"abbr": "IMT",
+			"nick": "IMT",
+			"city": "Belgrade",
+			"founded": 1988,
+			"league": "SRB1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "IMT Arena",
+			"capacity": 2000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_OFK",
+			"name": "OFK Beograd",
+			"short": "OFK Beograd",
+			"abbr": "OFK",
+			"nick": "OFK Beograd",
+			"city": "Belgrade",
+			"founded": 1911,
+			"league": "SRB1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Omladinski",
+			"capacity": 13900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_NAP",
+			"name": "FK Napredak Kruševac",
+			"short": "Napredak",
+			"abbr": "NAP",
+			"nick": "Napredak",
+			"city": "Kruševac",
+			"founded": 1946,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Mladost Stadium",
+			"capacity": 10300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_JED",
+			"name": "FK Jedinstvo Ub",
+			"short": "Jedinstvo",
+			"abbr": "JED",
+			"nick": "Jedinstvo",
+			"city": "Ub",
+			"founded": 1920,
+			"league": "SRB1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Gradski stadion",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_TEK",
+			"name": "FK Tekstilac Odžaci",
+			"short": "Tekstilac",
+			"abbr": "TEK",
+			"nick": "Tekstilac",
+			"city": "Odžaci",
+			"founded": 1936,
+			"league": "SRB1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Tekstilac Stadium",
+			"capacity": 2000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_R23",
+			"name": "FK Radnički 1923",
+			"short": "Radnički 1923",
+			"abbr": "R23",
+			"nick": "Radnički 1923",
+			"city": "Kragujevac",
+			"founded": 1923,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Čika Dača",
+			"capacity": 15100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

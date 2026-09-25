@@ -65,7 +65,7 @@ func _intensity_card(club: Club) -> Control:
 		var chip := UIKit.chip(String(TrainingManager.INTENSITY[i]["name"]), i == cur, g, func():
 			club.training["int"] = idx
 			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	card.add_child(row)
 	var it: Dictionary = TrainingManager.INTENSITY[cur]

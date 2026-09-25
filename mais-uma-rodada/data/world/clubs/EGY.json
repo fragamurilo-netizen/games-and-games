@@ -219,6 +219,216 @@
 				"symbol": "letter",
 				"initials": "ITT"
 			}
+		},
+		{
+			"key": "EGY_FUT",
+			"name": "Modern Sport FC",
+			"short": "Modern Sport",
+			"abbr": "MSP",
+			"nick": "Modern Sport",
+			"city": "Cairo",
+			"founded": 2011,
+			"league": "EGY1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Petro Sport Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_ENP",
+			"name": "ENPPI SC",
+			"short": "ENPPI",
+			"abbr": "ENP",
+			"nick": "ENPPI",
+			"city": "Cairo",
+			"founded": 1980,
+			"league": "EGY1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Petro Sport Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_SMO",
+			"name": "Smouha SC",
+			"short": "Smouha",
+			"abbr": "SMO",
+			"nick": "Smouha",
+			"city": "Alexandria",
+			"founded": 1949,
+			"league": "EGY1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Alexandria Stadium",
+			"capacity": 13600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_GOU",
+			"name": "El Gouna FC",
+			"short": "El Gouna",
+			"abbr": "GOU",
+			"nick": "El Gouna",
+			"city": "El Gouna",
+			"founded": 2003,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "El Gouna Stadium",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_GHA",
+			"name": "Ghazl El Mahalla SC",
+			"short": "Ghazl El Mahalla",
+			"abbr": "GHM",
+			"nick": "Ghazl El Mahalla",
+			"city": "El Mahalla El Kubra",
+			"founded": 1936,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Ghazl El Mahalla Stadium",
+			"capacity": 29000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_NBE",
+			"name": "National Bank of Egypt SC",
+			"short": "National Bank",
+			"abbr": "NBE",
+			"nick": "National Bank",
+			"city": "Cairo",
+			"founded": 1951,
+			"league": "EGY1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Al Salam Stadium",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_PHA",
+			"name": "Pharco FC",
+			"short": "Pharco",
+			"abbr": "PHA",
+			"nick": "Pharco",
+			"city": "Alexandria",
+			"founded": 2010,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Borg El Arab Stadium",
+			"capacity": 86000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_PET",
+			"name": "Petrojet SC",
+			"short": "Petrojet",
+			"abbr": "PJT",
+			"nick": "Petrojet",
+			"city": "Suez",
+			"founded": 1981,
+			"league": "EGY1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Suez Stadium",
+			"capacity": 27000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_HAR",
+			"name": "Haras El Hodoud SC",
+			"short": "Haras El Hodoud",
+			"abbr": "HAR",
+			"nick": "Haras El Hodoud",
+			"city": "Alexandria",
+			"founded": 1932,
+			"league": "EGY1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Haras El Hodoud Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_TAL",
+			"name": "Tala'ea El Gaish SC",
+			"short": "Tala'ea El Gaish",
+			"abbr": "TEG",
+			"nick": "Tala'ea El Gaish",
+			"city": "Cairo",
+			"founded": 1997,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Gehaz El Reyada Stadium",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

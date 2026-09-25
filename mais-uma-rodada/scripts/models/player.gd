@@ -55,6 +55,7 @@ var birth_year: int = 2000
 var nationality: String = ""
 var eth: int = 1 # etnia (índice em nations.json → ethnicities), usada pelo rosto
 var height: int = 178
+var weight: int = 75
 var foot: int = FOOT_RIGHT
 var position: int = Pos.CM
 var secondary: Array = []
@@ -121,6 +122,8 @@ var career_apps: int = 0
 var career_goals: int = 0
 var career_assists: int = 0
 var titles: int = 0
+## Títulos com o clube ou a seleção: [{y, k (chave do título: "L:BRA1", "C:LIB", "N:WC"...), c (clube, -1 seleção)}]
+var trophies: Array = []
 ## Prêmios individuais: [{y, k (ver AwardManager.award_name), l (liga ou copa)}]
 var awards: Array = []
 ## Mudanças de personalidade ao longo da carreira: [{y, t (traço), add (bool), why}]
@@ -156,6 +159,26 @@ func full_name() -> String:
 
 func display_name() -> String:
 	return known_as if known_as != "" else last_name
+
+
+## Nome curto para espaços apertados (campinho, súmula): quem é conhecido por um nome só usa
+## ele; quem usa nome e sobrenome aparece só pelo sobrenome ("Bruno Guimarães" → "Guimarães").
+func short_name() -> String:
+	var k := display_name()
+	var parts := k.split(" ", false)
+	if parts.size() <= 1 or k == nickname or k == first_name:
+		return k
+	# Conhecido só pelo sobrenome (inclusive composto: "van den Broek", "El Sayed")
+	if last_name == k or last_name.begins_with(k + " ") or last_name.ends_with(" " + k):
+		return k
+	# Coreia/China: sobrenome primeiro ("Son Heung-min" → "Son")
+	if k.ends_with(" " + first_name) and not k.begins_with(first_name + " "):
+		return k.substr(0, k.length() - first_name.length() - 1)
+	var rest := k.substr(parts[0].length() + 1)
+	# "Vinícius Júnior" fica inteiro; partículas acompanham o sobrenome ("van Dijk", "de Jong")
+	if rest in ["Júnior", "Junior", "Neto", "Filho", "Sobrinho", "Jr."]:
+		return k
+	return rest
 
 
 func attr(i: int) -> int:
@@ -294,6 +317,14 @@ func season_delta() -> int:
 
 
 ## Prêmios de um ano (chaves).
+## Registra um título (conta e guarda qual foi).
+func win_title(year: int, key: String, club_id: int) -> void:
+	titles += 1
+	trophies.append({"y": year, "k": key, "c": club_id})
+	if trophies.size() > 80:
+		trophies = trophies.slice(trophies.size() - 80)
+
+
 func awards_in(year: int) -> Array:
 	var out: Array = []
 	for a in awards:
@@ -415,7 +446,7 @@ func playstyle() -> String:
 func to_dict() -> Dictionary:
 	return {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
-		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "ft": foot, "pos": position,
+		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
 		"tr": traits, "sn": scout_noise,
@@ -425,7 +456,7 @@ func to_dict() -> Dictionary:
 		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
 		"stats": stats, "cs": cup_stats, "hist": history, "spells": spells,
-		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards,
+		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": trophies,
 	}
 
 
@@ -442,6 +473,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.height = int(d.get("h", 178))
 	p.foot = int(d.get("ft", FOOT_RIGHT))
 	p.position = int(d.get("pos", Pos.CM))
+	p.weight = int(d.get("wt", Physique.default_weight(p.height, p.position)))
 	p.secondary = Array(d.get("sec", []))
 	p.shirt = int(d.get("sh", 0))
 	p.hometown = d.get("ht", "")
@@ -493,6 +525,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.career_assists = int(d.get("cas", 0))
 	p.titles = int(d.get("tt", 0))
 	p.awards = Array(d.get("aw", []))
+	p.trophies = Array(d.get("tro", []))
 	p.persona_log = Array(d.get("pl", []))
 	p.recompute_overall()
 	p.ovr_start = int(d.get("o0", p.overall))

@@ -327,6 +327,132 @@
 				"initials": "AA",
 				"sc": "#0055A4"
 			}
+		},
+		{
+			"key": "PER_SBO",
+			"name": "Club Sport Boys Association",
+			"short": "Sport Boys",
+			"abbr": "SBA",
+			"nick": "Sport Boys",
+			"city": "Callao",
+			"founded": 1927,
+			"league": "PER1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F5A6C8",
+				"#111111"
+			],
+			"stadium": "Estadio Miguel Grau",
+			"capacity": 17000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PER_JPB",
+			"name": "Juan Pablo II College",
+			"short": "Juan Pablo II",
+			"abbr": "JPII",
+			"nick": "Juan Pablo II",
+			"city": "Chongoyape",
+			"founded": 2015,
+			"league": "PER1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio César Flores Marigorda",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PER_COM",
+			"name": "Comerciantes Unidos",
+			"short": "Comerciantes Unidos",
+			"abbr": "CMU",
+			"nick": "Comerciantes Unidos",
+			"city": "Cutervo",
+			"founded": 2008,
+			"league": "PER1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Juan Maldonado Gamarra",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PER_UTC",
+			"name": "Universidad Técnica de Cajamarca",
+			"short": "UTC",
+			"abbr": "UTC",
+			"nick": "UTC",
+			"city": "Cajamarca",
+			"founded": 1964,
+			"league": "PER1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Héroes de San Ramón",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PER_AYA",
+			"name": "Ayacucho FC",
+			"short": "Ayacucho",
+			"abbr": "AYA",
+			"nick": "Ayacucho",
+			"city": "Ayacucho",
+			"founded": 1972,
+			"league": "PER1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#8A1538"
+			],
+			"stadium": "Estadio Ciudad de Cumaná",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PER_AUH",
+			"name": "Club Alianza Universidad",
+			"short": "Alianza Universidad",
+			"abbr": "AUH",
+			"nick": "Alianza Universidad",
+			"city": "Huánuco",
+			"founded": 1939,
+			"league": "PER1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Heraclio Tapia",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

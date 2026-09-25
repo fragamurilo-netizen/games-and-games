@@ -163,6 +163,216 @@
 				"symbol": "letter",
 				"initials": "ST"
 			}
+		},
+		{
+			"key": "TUN_USB",
+			"name": "US Ben Guerdane",
+			"short": "Ben Guerdane",
+			"abbr": "USB",
+			"nick": "Ben Guerdane",
+			"city": "Ben Guerdane",
+			"founded": 1936,
+			"league": "TUN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade du 7 Mars",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_JSO",
+			"name": "Jeunesse Sportive d'El Omrane",
+			"short": "JS Omrane",
+			"abbr": "JSO",
+			"nick": "JS Omrane",
+			"city": "Tunis",
+			"founded": 1954,
+			"league": "TUN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Chedly Zouiten",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ASM",
+			"name": "Avenir Sportif de La Marsa",
+			"short": "AS Marsa",
+			"abbr": "ASM",
+			"nick": "AS Marsa",
+			"city": "La Marsa",
+			"founded": 1939,
+			"league": "TUN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stade Abdelaziz Chtioui",
+			"capacity": 6500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_CAB",
+			"name": "Club Athlétique Bizertin",
+			"short": "CA Bizertin",
+			"abbr": "CAB",
+			"nick": "CA Bizertin",
+			"city": "Bizerte",
+			"founded": 1928,
+			"league": "TUN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Stade 15 Octobre",
+			"capacity": 20000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_OLB",
+			"name": "Olympique de Béja",
+			"short": "Olympique Béja",
+			"abbr": "OLB",
+			"nick": "Olympique Béja",
+			"city": "Béja",
+			"founded": 1929,
+			"league": "TUN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Boujemaa Kmiti",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ESM",
+			"name": "ES Métlaoui",
+			"short": "ES Métlaoui",
+			"abbr": "ESM",
+			"nick": "ES Métlaoui",
+			"city": "Métlaoui",
+			"founded": 1950,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de Métlaoui",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_UST",
+			"name": "US Tataouine",
+			"short": "US Tataouine",
+			"abbr": "UST",
+			"nick": "US Tataouine",
+			"city": "Tataouine",
+			"founded": 1945,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Nejib Khattab",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_EGS",
+			"name": "El Gawafel Sportives de Gafsa",
+			"short": "EGS Gafsa",
+			"abbr": "EGS",
+			"nick": "EGS Gafsa",
+			"city": "Gafsa",
+			"founded": 1967,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Municipal de Gafsa",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ASS",
+			"name": "AS Soliman",
+			"short": "AS Soliman",
+			"abbr": "ASO",
+			"nick": "AS Soliman",
+			"city": "Soliman",
+			"founded": 1960,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade Municipal de Soliman",
+			"capacity": 4000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ESZ",
+			"name": "ES Zarzis",
+			"short": "ES Zarzis",
+			"abbr": "ESZ",
+			"nick": "ES Zarzis",
+			"city": "Zarzis",
+			"founded": 1934,
+			"league": "TUN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Abdessalem Kazouz",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

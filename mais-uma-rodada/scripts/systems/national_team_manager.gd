@@ -877,7 +877,7 @@ static func _bracket(seeds: Array, group_of: Array) -> Array:
 static func _tournament_effects(world: GameWorld, env: Env, rec: Dictionary) -> void:
 	var champ: String = rec["champion"]
 	for p: Player in env.squad(champ):
-		p.titles += 1
+		p.win_title(world.year, "N:" + String(rec.get("t", rec.get("id", ""))), -1)
 		p.morale = clampf(p.morale + 15.0, 0.0, 100.0)
 	for code in rec["teams"]:
 		for p: Player in env.squad(code):

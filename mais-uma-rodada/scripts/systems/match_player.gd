@@ -59,6 +59,11 @@ var a_pas_vis: float = 100.0
 var a_tec_vel: float = 100.0
 var a_vel_fin: float = 100.0
 var fit_cache: Dictionary = {}
+# Bases sem o efeito do pé (a vaga muda com substituições e trocas de formação)
+var _b_cru: float = 50.0
+var _b_fin: float = 50.0
+var _b_long: float = 50.0
+var _b_tv: float = 100.0
 
 
 func prepare() -> void:
@@ -66,24 +71,42 @@ func prepare() -> void:
 	c_def = a[Attr.MAR] * 0.3 + a[Attr.POS] * 0.3 + a[Attr.FOR] * 0.1 + a[Attr.CAB] * 0.1 + a[Attr.VEL] * 0.1 + a[Attr.DEC] * 0.1
 	c_mid = a[Attr.PAS] * 0.3 + a[Attr.VIS] * 0.2 + a[Attr.TEC] * 0.2 + a[Attr.DEC] * 0.15 + a[Attr.RES] * 0.15
 	c_att = a[Attr.FIN] * 0.3 + a[Attr.TEC] * 0.2 + a[Attr.VEL] * 0.2 + a[Attr.DEC] * 0.15 + a[Attr.POS] * 0.15
-	c_gk = a[Attr.GOL] * 0.6 + a[Attr.POS] * 0.2 + a[Attr.DEC] * 0.1 + a[Attr.INT] * 0.1
-	c_aer = a[Attr.CAB] * 0.7 + a[Attr.FOR] * 0.3
+	# Corpo: altura e peso na bola aérea e no choque; peso demais tira velocidade e fôlego
+	var aer := Physique.aerial(p)
+	var strg := Physique.strength(p)
+	var heavy := Physique.pace_penalty(p)
+	c_def += strg * 0.25
+	c_gk = a[Attr.GOL] * 0.6 + a[Attr.POS] * 0.2 + a[Attr.DEC] * 0.1 + a[Attr.INT] * 0.1 + Physique.gk_reach(p)
+	c_aer = a[Attr.CAB] * 0.7 + a[Attr.FOR] * 0.3 + aer
 	c_fin = a[Attr.FIN] * 0.7 + a[Attr.DEC] * 0.15 + a[Attr.TEC] * 0.15
-	c_head = a[Attr.CAB] * 0.7 + a[Attr.POS] * 0.2 + a[Attr.FOR] * 0.1
+	c_head = a[Attr.CAB] * 0.7 + a[Attr.POS] * 0.2 + a[Attr.FOR] * 0.1 + aer * 0.6
 	c_long = a[Attr.FIN] * 0.5 + a[Attr.TEC] * 0.5
-	a_vel = a[Attr.VEL]
+	a_vel = a[Attr.VEL] - heavy
 	a_tec = a[Attr.TEC]
 	a_dis = a[Attr.DIS]
 	a_dec = a[Attr.DEC]
-	a_res = a[Attr.RES]
+	a_res = a[Attr.RES] - heavy * 0.6
 	a_cru = a[Attr.CRU]
 	a_int = a[Attr.INT]
 	a_pas_vis = a[Attr.PAS] + a[Attr.VIS]
-	a_tec_vel = a[Attr.TEC] + a[Attr.VEL]
-	a_vel_fin = a[Attr.VEL] + a[Attr.FIN]
+	a_tec_vel = a[Attr.TEC] + a_vel
+	a_vel_fin = a_vel + a[Attr.FIN]
+	_b_cru = a_cru
+	_b_fin = c_fin
+	_b_long = c_long
+	_b_tv = a_tec_vel
 	var morale_f := 0.96 + p.morale / 100.0 * 0.08
 	var form_f := clampf(1.0 + (p.form() - 6.5) * 0.012, 0.97, 1.03)
 	base_f = morale_f * form_f * perf * ctx
+
+
+## Pé x lado da vaga: chamado sempre que o jogador assume uma vaga.
+func apply_side(slot_pos: int) -> void:
+	var m := Physique.side_mods(p, slot_pos)
+	a_cru = _b_cru + float(m[0])
+	c_fin = _b_fin + float(m[1])
+	c_long = _b_long + float(m[2])
+	a_tec_vel = _b_tv + float(m[3])
 
 
 func minutes_played(final_minute: int) -> int:

@@ -214,6 +214,90 @@
 				"symbol": "star",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "KOR_JEJ",
+			"name": "Jeju SK FC",
+			"short": "Jeju SK",
+			"abbr": "JEJ",
+			"nick": "Jeju SK",
+			"city": "Seogwipo",
+			"founded": 1982,
+			"league": "KOR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Jeju World Cup Stadium",
+			"capacity": 29800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "KOR_GWA",
+			"name": "Gwangju FC",
+			"short": "Gwangju FC",
+			"abbr": "GWJ",
+			"nick": "Gwangju FC",
+			"city": "Gwangju",
+			"founded": 2010,
+			"league": "KOR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Gwangju Football Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "KOR_ANY",
+			"name": "FC Anyang",
+			"short": "FC Anyang",
+			"abbr": "ANY",
+			"nick": "FC Anyang",
+			"city": "Anyang",
+			"founded": 2013,
+			"league": "KOR1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Anyang Stadium",
+			"capacity": 17100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "KOR_DGU",
+			"name": "Daegu FC",
+			"short": "Daegu FC",
+			"abbr": "DGU",
+			"nick": "Daegu FC",
+			"city": "Daegu",
+			"founded": 2002,
+			"league": "KOR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "DGB Daegu Bank Park",
+			"capacity": 12400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
 		}
 	]
 }

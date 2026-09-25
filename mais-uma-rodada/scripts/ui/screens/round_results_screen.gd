@@ -120,7 +120,7 @@ func _goals_box(w: GameWorld, f: Fixture) -> Control:
 			if int(g[1]) != side:
 				continue
 			var p := w.player(int(g[2]))
-			var txt := "%s %s" % [p.display_name() if p != null else "?", Fmt.minute(int(g[0]), int(g[4]) if g.size() > 4 else 0)]
+			var txt := "%s %s" % [p.short_name() if p != null else "?", Fmt.minute(int(g[0]), int(g[4]) if g.size() > 4 else 0)]
 			if int(g[3]) == Fixture.GOAL_PENALTY:
 				txt += " (p)"
 			elif int(g[3]) == Fixture.GOAL_OWN:
