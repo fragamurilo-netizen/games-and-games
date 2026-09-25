@@ -31,7 +31,7 @@ static func importance_of(world: GameWorld, f: Fixture) -> float:
 	elif f.stage == Fixture.STAGE_GROUP:
 		imp = 0.45 + 0.05 * f.round
 	elif f.stage == Fixture.STAGE_KO and world.league(f.comp) != null:
-		imp = 0.75 + 0.08 * f.round # playoffs de liga
+		imp = 0.95 if f.round == LeagueFormat.BAR_R else 0.75 + 0.08 * f.round # playoffs de liga e repescagem
 	elif f.stage == Fixture.STAGE_KO:
 		imp = CupManager.stage_importance(world, f)
 	var derby := is_derby(world, f.home, f.away)

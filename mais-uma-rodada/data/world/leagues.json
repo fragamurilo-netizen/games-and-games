@@ -1,5 +1,5 @@
 {
-	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). rev: força comercial além da folha (multiplica as receitas; padrão 1). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE).",
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). rev: força comercial além da folha (multiplica as receitas; padrão 1). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE). barrage: repescagem entre divisões na liga de cima ({pos, vs, legs, desc}): o clube em pos enfrenta o vs da divisão de baixo (ou o vencedor dos playoffs de acesso dela); com ela, o up da divisão de baixo conta só as vagas diretas.",
 	"leagues": [
 		{
 			"id": "ENG1",
@@ -186,6 +186,12 @@
 				"goals": 1.19,
 				"home": 0.95,
 				"cards": 0.95
+			},
+			"barrage": {
+				"pos": 16,
+				"vs": 3,
+				"legs": 2,
+				"desc": "18 clubes em turno e returno. Os 2 últimos caem direto; o 16º joga a repescagem (Relegation) contra o 3º da 2. Bundesliga, em ida e volta, com a volta na casa do clube da Bundesliga."
 			}
 		},
 		{
@@ -323,6 +329,12 @@
 				"goals": 1.08,
 				"home": 1.0,
 				"cards": 0.95
+			},
+			"barrage": {
+				"pos": 16,
+				"vs": 3,
+				"legs": 2,
+				"desc": "18 clubes em turno e returno. Os 2 últimos caem direto; o 16º joga o barrage em ida e volta contra o vencedor dos playoffs da Ligue 2."
 			}
 		},
 		{
@@ -353,6 +365,21 @@
 				"goals": 0.91,
 				"home": 1.05,
 				"cards": 1.0
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 3,
+				"byes": 1,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 1,
+					"f": 1
+				},
+				"desc": "Os 2 primeiros sobem direto. O 4º recebe o 5º, o vencedor visita o 3º, e quem passar enfrenta o 16º da Ligue 1 no barrage pela última vaga."
 			}
 		},
 		{
@@ -383,6 +410,12 @@
 				"goals": 1.0,
 				"home": 1.05,
 				"cards": 1.15
+			},
+			"barrage": {
+				"pos": 16,
+				"vs": 3,
+				"legs": 2,
+				"desc": "18 clubes em turno e returno. Os 2 últimos caem direto; o 16º joga o play-off de permanência em ida e volta contra o 3º da Liga Portugal 2."
 			}
 		},
 		{

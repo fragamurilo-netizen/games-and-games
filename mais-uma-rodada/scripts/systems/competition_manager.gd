@@ -9,6 +9,7 @@ const ZONE_RELEGATION := 3
 const ZONE_CONTINENTAL := 4
 const ZONE_CONTINENTAL_2 := 5 # Liga Europa, Sul-Americana
 const ZONE_CONTINENTAL_3 := 6 # Liga Conferência
+const ZONE_PLAYOFF := 7 # playoffs de acesso ou repescagem entre divisões
 
 
 static func empty_row() -> Dictionary:
@@ -101,20 +102,59 @@ static func zone_of(league: League, position: int) -> int:
 	var teams := league.club_ids.size()
 	if position == 1:
 		return ZONE_TITLE
-	var up := int(cfg.get("up", 0))
+	var up := direct_up(league)
 	if up > 0 and position <= up:
 		return ZONE_PROMOTION
 	var down := int(cfg.get("down", 0))
 	if down > 0 and position > teams - down:
 		return ZONE_RELEGATION
+	var pr := playoff_range(league)
+	if not pr.is_empty() and position >= int(pr[0]) and position <= int(pr[1]):
+		return ZONE_PLAYOFF
 	var cup := CupManager.cup_for_position(league, position)
 	if cup != "":
 		return [ZONE_CONTINENTAL, ZONE_CONTINENTAL, ZONE_CONTINENTAL_2, ZONE_CONTINENTAL_3][clampi(CupManager.cup_level(cup), 1, 3)]
 	return ZONE_NONE
 
 
+## Vagas de acesso direto: com playoffs de acesso a última vaga sai deles; com repescagem na
+## divisão de cima, "up" já conta só as diretas.
+static func direct_up(league: League) -> int:
+	var cfg := league.cfg()
+	var up := int(cfg.get("up", 0))
+	if up <= 0:
+		return 0
+	if _upper_barrage(league).is_empty() and LeagueFormat.kind(league) == "promo":
+		return up - 1
+	return up
+
+
+static func _upper_barrage(league: League) -> Dictionary:
+	if league.tier <= 1:
+		return {}
+	var up_id := DatabaseManager.league_at(league.nation, league.tier - 1)
+	return DatabaseManager.league_cfg(up_id).get("barrage", {}) if up_id != "" else {}
+
+
+## Faixa [de, até] das posições que vão aos playoffs de acesso ou à repescagem, ou [].
+static func playoff_range(league: League) -> Array:
+	var b: Dictionary = league.cfg().get("barrage", {})
+	if not b.is_empty():
+		return [int(b.get("pos", 16)), int(b.get("pos", 16))]
+	if LeagueFormat.kind(league) == "promo":
+		var f := LeagueFormat.cfg(league)
+		var from := int(f.get("from", 3))
+		return [from, from + int(f.get("teams", 4)) - 1]
+	var ub := _upper_barrage(league)
+	if not ub.is_empty():
+		return [int(ub.get("vs", 3)), int(ub.get("vs", 3))]
+	return []
+
+
 static func zone_color(zone: int) -> Color:
 	match zone:
+		ZONE_PLAYOFF:
+			return Color("#A879FF")
 		ZONE_TITLE:
 			return Color("#FFC940")
 		ZONE_PROMOTION:

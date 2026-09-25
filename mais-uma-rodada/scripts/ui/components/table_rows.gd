@@ -203,8 +203,14 @@ static func legend(league: League) -> HFlowContainer:
 	for band in CupManager.qualification_bands(league):
 		var zone := CompetitionManager.zone_of(league, int(band["from"])) if int(band["from"]) > 1 else CompetitionManager.ZONE_CONTINENTAL
 		f.add_child(_legend_item(CompetitionManager.zone_color(zone), "%s (%d)" % [CupManager.cup_short(band["cup"]), int(band["to"]) - int(band["from"]) + 1]))
-	if league.promoted_count() > 0:
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION), "Acesso (%d)" % league.promoted_count()))
+	var direct := CompetitionManager.direct_up(league)
+	if direct > 0:
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION), "Acesso (%d)" % direct))
+	var pr := CompetitionManager.playoff_range(league)
+	if not pr.is_empty():
+		var promo := LeagueFormat.kind(league) == "promo"
+		var span := ("%dº" % int(pr[0])) if int(pr[0]) == int(pr[1]) else ("%dº–%dº" % [int(pr[0]), int(pr[1])])
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PLAYOFF), ("Playoffs de acesso (%s)" if promo else "Repescagem (%s)") % span))
 	if league.relegated_count() > 0:
 		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % league.relegated_count()))
 	return f

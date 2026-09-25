@@ -124,6 +124,8 @@ static func _kind_of(world: GameWorld, f: Fixture) -> int:
 	if league != null:
 		if not LeagueFormat.is_deciding_leg(world, f):
 			return K_CUP
+		if f.round == LeagueFormat.BAR_R:
+			return K_KO
 		var ko: Array = LeagueFormat.cfg(league).get("ko", ["f"])
 		return K_FINAL if String(ko[clampi(f.round, 0, ko.size() - 1)]) == "f" else K_KO
 	var cup: Cup = world.season.cups.get(f.comp, null) if world.season != null else null
