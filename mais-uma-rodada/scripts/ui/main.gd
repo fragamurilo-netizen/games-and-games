@@ -10,6 +10,7 @@ extends Control
 @onready var toast_host: VBoxContainer = $Overlay/ToastBox/ToastHost
 
 var _safe := Rect2()
+var _keyboard_up := false
 var _shadow: TextureRect
 var _fade: TextureRect
 
@@ -59,6 +60,7 @@ func _edge(from: Color, to: Color) -> TextureRect:
 
 func _process(_delta: float) -> void:
 	var cur := UIManager.current()
+	_guard_layout(cur)
 	var sc: ScrollContainer = cur.scroll() if cur != null else null
 	var top := 0.0
 	var bottom := 0.0
@@ -73,6 +75,40 @@ func _process(_delta: float) -> void:
 		bottom = 1.0 if bar.max_value - bar.page - sc.scroll_vertical > 8 else 0.0
 	_ease_alpha(_shadow, top)
 	_ease_alpha(_fade, bottom)
+
+
+## Proteção contra a "tela com zoom": nada pode ficar maior que o espaço que tem. A raiz volta
+## ao tamanho da janela, a tela atual ao tamanho da área das telas (textos que empurravam a
+## largura passam a cortar com "…") e, quando o teclado do celular fecha, tudo é recalculado.
+func _guard_layout(cur: BaseScreen) -> void:
+	var vp := get_viewport_rect().size
+	if not size.is_equal_approx(vp) or not position.is_zero_approx():
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		safe_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD):
+		var up := DisplayServer.virtual_keyboard_get_height() > 0
+		if _keyboard_up and not up:
+			_relayout()
+		_keyboard_up = up
+	if cur == null or not cur.is_visible_in_tree():
+		return
+	var host_w := screen_host.size.x
+	if host_w > 0.0 and cur.size.x > host_w + 0.5:
+		UIKit.fit_width(cur, host_w)
+		var px := cur.position.x
+		cur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		cur.position.x = px
+	if not cur.scale.is_equal_approx(Vector2.ONE):
+		cur.scale = Vector2.ONE
+
+
+func _relayout() -> void:
+	_update_safe_area()
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	safe_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var cur := UIManager.current()
+	if cur != null:
+		cur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _ease_alpha(r: TextureRect, want: float) -> void:
@@ -126,6 +162,8 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		UIManager.handle_back()
+	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_relayout.call_deferred()
 
 
 func _unhandled_input(event: InputEvent) -> void:
