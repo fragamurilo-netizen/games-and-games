@@ -14,6 +14,8 @@ var _rank_scope := "-"
 const RANK_SHOW := 50
 ## Seleção mostrada na aba Seleções: "w" (rodada) ou o índice do mês fechado.
 var _xi_pick := "w"
+## Visão da classificação: geral, casa, fora ou momento (TableRows.VIEW_*).
+var _view := TableRows.VIEW_ALL
 
 
 func _init() -> void:
@@ -307,26 +309,279 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var po := _playoff_card(w, league)
 	if po != null:
 		c.add_child(po)
+	var mine := _user_card(w, league)
+	if mine != null:
+		c.add_child(mine)
+	# Geral, só em casa, só fora, ou o momento de cada um (últimos 5 jogos)
+	var gv := ButtonGroup.new()
+	var vrow := UIKit.hbox(8)
+	for vv in [[TableRows.VIEW_ALL, "Geral"], [TableRows.VIEW_HOME, "Casa"], [TableRows.VIEW_AWAY, "Fora"], [TableRows.VIEW_FORM, "Momento"]]:
+		var key: String = vv[0]
+		var chip := UIKit.chip(vv[1], key == _view, gv, func():
+			_view = key
+			refresh())
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		chip.add_theme_font_size_override(&"font_size", 18)
+		vrow.add_child(chip)
+	c.add_child(vrow)
 	var card := UIKit.card("Card", 2)
-	card.add_child(TableRows.header(false))
-	var ids := CompetitionManager.sorted_ids(league)
+	var played := league.rounds_played()
+	var head := UIKit.hbox(8)
+	var rl := UIKit.label(("Rodada %d de %d" % [played, league.rounds.size()]) if played > 0 else "Antes da 1ª rodada", "Caps")
+	rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(rl)
+	var hint := {TableRows.VIEW_HOME: "Só jogos em casa", TableRows.VIEW_AWAY: "Só jogos fora", TableRows.VIEW_FORM: "Últimos 5 jogos"}
+	if hint.has(_view):
+		head.add_child(UIKit.colored(String(hint[_view]), UIColors.ACCENT, "Caps"))
+	var hp := MarginContainer.new()
+	hp.add_theme_constant_override(&"margin_left", TableRows.ROW_PAD)
+	hp.add_theme_constant_override(&"margin_right", TableRows.ROW_PAD)
+	hp.add_theme_constant_override(&"margin_bottom", 6)
+	hp.add_child(head)
+	card.add_child(hp)
+	card.add_child(TableRows.header(false, _view))
+	var side := _view == TableRows.VIEW_HOME or _view == TableRows.VIEW_AWAY
+	var t: Dictionary = TableRows.side_table(league, _view) if side else league.table
+	var ids: Array = CompetitionManager.sort_table(league.club_ids, t) if side else CompetitionManager.sorted_ids(league)
+	var prev: Dictionary = {} if side else TableRows.previous_positions(league)
 	# Split: separador no começo de cada grupo da segunda fase
 	var starts := {}
 	var acc := 0
 	var ng := league.phase_groups.size()
-	for gi in ng:
-		starts[acc] = "Grupo do título" if gi == 0 else ("Grupo do rebaixamento" if gi == ng - 1 else "Grupo intermediário")
-		acc += Array(league.phase_groups[gi]).size()
+	if not side:
+		for gi in ng:
+			starts[acc] = "Grupo do título" if gi == 0 else ("Grupo do rebaixamento" if gi == ng - 1 else "Grupo intermediário")
+			acc += Array(league.phase_groups[gi]).size()
+	var last_zone := -1
 	for i in ids.size():
+		var cid := int(ids[i])
+		# Casa/fora: a faixa mostra a zona da classificação geral do clube, não a desta visão.
+		var zpos := CompetitionManager.position_of(league, cid) if side else i + 1
+		var zone := CompetitionManager.zone_of(league, zpos)
 		if starts.has(i):
 			card.add_child(UIKit.label(String(starts[i]).to_upper(), "Caps"))
-		card.add_child(TableRows.row(w, league, int(ids[i]), i + 1, false))
+		elif not side and i > 0 and zone != last_zone:
+			# Fronteira entre zonas (vaga, acesso, rebaixamento): uma linha fina ajuda a ler o corte.
+			card.add_child(_zone_line())
+		last_zone = zone
+		var move := 0
+		if prev.has(cid):
+			move = int(prev[cid]) - (i + 1)
+		var lg := league
+		card.add_child(TableRows.table_row(w, t[cid], cid, i + 1, false, CompetitionManager.zone_color(zone), _view, move,
+			func(): _club_sheet(w, lg, cid)))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(TableRows.legend(league))
+	var tip := "Toque num clube para ver a campanha em casa e fora, os últimos jogos e os próximos."
+	if not prev.is_empty():
+		tip = "As setas comparam com a rodada anterior. " + tip
+	c.add_child(UIKit.label(tip, "Small", true))
 	var fdesc := LeagueFormat.describe(league)
 	if fdesc != "":
 		c.add_child(_format_card(league.id, fdesc))
-	# Curiosidades da liga
+	_highlights(c, w, league)
+
+
+func _zone_line() -> Control:
+	var m := MarginContainer.new()
+	m.add_theme_constant_override(&"margin_left", TableRows.ROW_PAD)
+	m.add_theme_constant_override(&"margin_right", TableRows.ROW_PAD)
+	var r := ColorRect.new()
+	r.color = UIColors.LINE
+	r.custom_minimum_size.y = 2
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	m.add_child(r)
+	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return m
+
+
+## Resumo da campanha do clube do usuário: posição, pontos, forma e a distância para as zonas.
+func _user_card(w: GameWorld, league: League) -> Control:
+	var uid := w.user_club_id
+	if not league.table.has(uid):
+		return null
+	var r: Dictionary = league.table[uid]
+	var pl := int(r["pl"])
+	if pl == 0:
+		return null
+	var ids := CompetitionManager.sorted_ids(league)
+	var pos := ids.find(uid) + 1
+	var pts := int(r["pts"])
+	var card := UIKit.card("CardHighlight", 8)
+	var top := UIKit.hbox(14)
+	var big := UIKit.colored("%dº" % pos, UIColors.ACCENT, "Huge")
+	big.add_theme_font_size_override(&"font_size", 64)
+	big.custom_minimum_size.x = 96
+	big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	top.add_child(big)
+	var col := UIKit.vbox(2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_child(UIKit.label("SUA CAMPANHA", "Caps"))
+	col.add_child(UIKit.label("%s · %d pts" % [w.club(uid).short_name, pts], "H3"))
+	var sg := int(r["gf"]) - int(r["ga"])
+	col.add_child(UIKit.label("%dV %dE %dD · %d gols, saldo %s" % [int(r["w"]), int(r["d"]), int(r["l"]), int(r["gf"]), Fmt.signed(sg)], "Small"))
+	top.add_child(col)
+	var fcol := UIKit.vbox(4)
+	fcol.add_child(UIKit.label("FORMA", "Caps"))
+	fcol.add_child(TableRows.form_dots(String(r.get("form", "")), 16))
+	fcol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(fcol)
+	card.add_child(top)
+	# Distâncias que importam: líder, a zona boa mais próxima acima e o rebaixamento.
+	var facts := UIKit.flow(8)
+	var pts_at := func(p: int) -> int: return int(league.table[ids[clampi(p, 1, ids.size()) - 1]]["pts"])
+	if pos == 1:
+		if ids.size() > 1:
+			facts.add_child(UIKit.pill("%s à frente do 2º" % Fmt.plural(pts - int(pts_at.call(2)), "pt", "pts"), UIColors.GREEN))
+	else:
+		facts.add_child(UIKit.pill("%s atrás do líder" % Fmt.plural(int(pts_at.call(1)) - pts, "pt", "pts"), UIColors.MUTED))
+	var my_zone := CompetitionManager.zone_of(league, pos)
+	if my_zone == CompetitionManager.ZONE_NONE or my_zone == CompetitionManager.ZONE_RELEGATION:
+		for q in range(pos - 1, 1, -1):
+			var z := CompetitionManager.zone_of(league, q)
+			if z != CompetitionManager.ZONE_NONE and z != CompetitionManager.ZONE_RELEGATION:
+				facts.add_child(UIKit.pill("%s para %s (%dº)" % [Fmt.plural(int(pts_at.call(q)) - pts, "pt", "pts"), _zone_name(league, q, z), q],
+					CompetitionManager.zone_color(z)))
+				break
+	var down := league.relegated_count()
+	if down > 0 and ids.size() > down:
+		var first_down := ids.size() - down + 1
+		if pos < first_down:
+			facts.add_child(UIKit.pill("%s acima do Z%d" % [Fmt.plural(pts - int(pts_at.call(first_down)), "pt", "pts"), down], UIColors.MUTED))
+		else:
+			facts.add_child(UIKit.pill("%s para sair do Z%d" % [Fmt.plural(int(pts_at.call(first_down - 1)) - pts, "pt", "pts"), down], UIColors.RED))
+	var left := CompetitionManager.remaining_rounds(league, uid)
+	if left > 0:
+		facts.add_child(UIKit.pill("Faltam %s" % Fmt.plural(left, "jogo", "jogos"), UIColors.MUTED))
+	card.add_child(facts)
+	return UIKit.card_panel(card)
+
+
+func _zone_name(league: League, pos: int, zone: int) -> String:
+	match zone:
+		CompetitionManager.ZONE_TITLE:
+			return "a liderança"
+		CompetitionManager.ZONE_PROMOTION:
+			return "o acesso"
+	var cup := CupManager.cup_for_position(league, pos)
+	return ("a " + CupManager.cup_short(cup)) if cup != "" else "a zona"
+
+
+## Ficha rápida do clube na liga: campanha geral, em casa e fora, últimos e próximos jogos.
+func _club_sheet(w: GameWorld, league: League, cid: int) -> void:
+	var cl := w.club(cid)
+	var v := UIKit.vbox(12)
+	v.custom_minimum_size.x = 640
+	var head := UIKit.hbox(14)
+	head.add_child(UIKit.crest(cl, 64))
+	var hc := UIKit.vbox(2)
+	hc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var name_l := UIKit.label(cl.name, "Title", true)
+	hc.add_child(name_l)
+	var pos := CompetitionManager.position_of(league, cid)
+	var r: Dictionary = league.table[cid]
+	hc.add_child(UIKit.label("%dº no %s · %d pts" % [pos, league.short_name, int(r["pts"])], "Small"))
+	head.add_child(hc)
+	v.add_child(head)
+	# Campanha: geral, casa e fora lado a lado
+	var grid := GridContainer.new()
+	grid.columns = 8
+	grid.add_theme_constant_override(&"h_separation", 10)
+	grid.add_theme_constant_override(&"v_separation", 6)
+	for h in ["", "J", "V", "E", "D", "GP", "GC", "PTS"]:
+		var hl := UIKit.label(h, "Caps")
+		hl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if h != "" else HORIZONTAL_ALIGNMENT_LEFT
+		if h == "":
+			hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		else:
+			hl.custom_minimum_size.x = 48
+		grid.add_child(hl)
+	var rows := [["Geral", r], ["Casa", TableRows.side_table(league, TableRows.VIEW_HOME)[cid]], ["Fora", TableRows.side_table(league, TableRows.VIEW_AWAY)[cid]]]
+	for rr in rows:
+		var d: Dictionary = rr[1]
+		grid.add_child(UIKit.label(String(rr[0]), "Small"))
+		for k in ["pl", "w", "d", "l", "gf", "ga", "pts"]:
+			var l := UIKit.label(str(d[k]), "H3" if k == "pts" else "")
+			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			if k != "pts":
+				l.add_theme_color_override(&"font_color", UIColors.MUTED)
+			grid.add_child(l)
+	v.add_child(grid)
+	var pl := int(r["pl"])
+	if pl > 0:
+		var kv := UIKit.flow(8)
+		kv.add_child(UIKit.pill("Aproveitamento %d%%" % roundi(100.0 * int(r["pts"]) / (3.0 * pl)), UIColors.MUTED))
+		kv.add_child(UIKit.pill("%.1f gols por jogo" % (float(r["gf"]) / pl), UIColors.MUTED))
+		kv.add_child(UIKit.pill("%.1f sofridos por jogo" % (float(r["ga"]) / pl), UIColors.MUTED))
+		v.add_child(kv)
+	# Últimos 5 e próximos 3 jogos na liga
+	var past: Array = []
+	var next: Array = []
+	for rnd in league.rounds:
+		for f: Fixture in rnd:
+			if f.involves(cid):
+				if f.played:
+					past.append(f)
+				elif next.size() < 3:
+					next.append(f)
+	if not past.is_empty():
+		v.add_child(UIKit.section("Últimos jogos"))
+		for f in past.slice(maxi(0, past.size() - 5)):
+			v.add_child(_sheet_game(w, f, cid))
+	if not next.is_empty():
+		v.add_child(UIKit.section("Próximos jogos"))
+		for f in next:
+			v.add_child(_sheet_game(w, f, cid))
+	var top: Player = null
+	for p in w.squad(cl):
+		if top == null or p.stats[Player.S_GOALS] > top.stats[Player.S_GOALS]:
+			top = p
+	if top != null and top.stats[Player.S_GOALS] > 0:
+		v.add_child(UIKit.kv("Artilheiro do clube", "%s (%d)" % [top.display_name(), top.stats[Player.S_GOALS]]))
+	var btns := UIKit.hbox(10)
+	var go := UIKit.button("Ver clube", "PrimaryButton", func():
+		UIManager.close_modal()
+		if w.is_user_club(cid):
+			UIManager.goto("club")
+		else:
+			UIManager.push("club", {"id": cid}), "club")
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btns.add_child(go)
+	var close := UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal())
+	close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btns.add_child(close)
+	v.add_child(btns)
+	UIManager.show_modal(v, true)
+
+
+## Jogo na ficha do clube: resultado (V/E/D), adversário, mando e placar.
+func _sheet_game(w: GameWorld, f: Fixture, cid: int) -> Control:
+	var home := f.home == cid
+	var opp := w.club(f.away if home else f.home)
+	var row := UIKit.hbox(10)
+	if f.played:
+		var gf := f.hg if home else f.ag
+		var ga := f.ag if home else f.hg
+		var res := "V" if gf > ga else ("E" if gf == ga else "D")
+		var badge := UIKit.pill(res, {"V": UIColors.GREEN, "E": UIColors.MUTED, "D": UIColors.RED}[res], 16)
+		badge.custom_minimum_size.x = 44
+		row.add_child(badge)
+	else:
+		var dl := UIKit.label(w.season.date_label(f.slot, false), "Small")
+		dl.custom_minimum_size.x = 90
+		row.add_child(dl)
+	row.add_child(UIKit.crest(opp, 28))
+	var n := UIKit.label(("%s (casa)" if home else "%s (fora)") % opp.short_name, "")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	row.add_child(n)
+	if f.played:
+		row.add_child(UIKit.label("%d – %d" % [f.hg, f.ag], "H3"))
+	return row
+
+
+## Números da liga: ataque, defesa, mandantes, visitantes, momento, média de gols e campeões.
+func _highlights(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var info := UIKit.card("Card", 6)
 	info.add_child(UIKit.section("Destaques"))
 	var att := CompetitionManager.best_attack(league)
@@ -335,6 +590,31 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		info.add_child(UIKit.kv("Melhor ataque", "%s (%d gols)" % [w.club(att).short_name, int(league.table[att]["gf"])]))
 	if dfn >= 0 and int(league.table[dfn]["pl"]) > 0:
 		info.add_child(UIKit.kv("Melhor defesa", "%s (%d sofridos)" % [w.club(dfn).short_name, int(league.table[dfn]["ga"])]))
+	var games := 0
+	var goals := 0
+	for cid in league.table:
+		games += int(league.table[cid]["pl"])
+		goals += int(league.table[cid]["gf"])
+	if games > 0:
+		for side in [[TableRows.VIEW_HOME, "Melhor mandante"], [TableRows.VIEW_AWAY, "Melhor visitante"]]:
+			var st := TableRows.side_table(league, side[0])
+			var best := int(CompetitionManager.sort_table(league.club_ids, st)[0])
+			var b: Dictionary = st[best]
+			if int(b["pl"]) > 0:
+				info.add_child(UIKit.kv(side[1], "%s (%d pts em %d)" % [w.club(best).short_name, int(b["pts"]), int(b["pl"])]))
+		# Melhor momento: mais pontos nos últimos 5 (desempate pelo saldo geral)
+		var hot := -1
+		var hot_pts := -1
+		for cid in league.club_ids:
+			var fp := 0
+			for ch in String(league.table[cid].get("form", "")):
+				fp += 3 if ch == "V" else (1 if ch == "E" else 0)
+			if fp > hot_pts:
+				hot_pts = fp
+				hot = int(cid)
+		if hot >= 0 and hot_pts > 0:
+			info.add_child(UIKit.kv("Melhor momento", "%s (%d de %d pts)" % [w.club(hot).short_name, hot_pts, 3 * String(league.table[hot]["form"]).length()]))
+		info.add_child(UIKit.kv("Média de gols", "%.2f por jogo (%d gols)" % [2.0 * goals / games, goals]))
 	var top := CompetitionManager.player_ranking(w, _league_id, Player.S_GOALS, 1)
 	if not top.is_empty():
 		var p: Player = top[0]
@@ -532,12 +812,12 @@ func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	for g in cup.groups:
 		var card := UIKit.card("Card", 2)
 		card.add_child(UIKit.section("Grupo %s" % g["n"]))
-		card.add_child(TableRows.header(true))
+		card.add_child(TableRows.header(false))
 		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
 		for i in order.size():
 			var qualifies: bool = state_q.has(order[i]) if CupManager.is_state(cup.id) else i < 2
 			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if qualifies else Color(0, 0, 0, 0)
-			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, true, zone))
+			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, false, zone))
 		# Jogos do grupo com o usuário (ou os próximos) ficam a um toque
 		var mine: Array = []
 		for f: Fixture in cup.fixtures:

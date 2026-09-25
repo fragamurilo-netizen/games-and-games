@@ -20,13 +20,12 @@ static func single_round_robin(rng: RandomNumberGenerator, club_ids: Array) -> A
 			var b: int = teams[n - 1 - i]
 			if a < 0 or b < 0:
 				continue
-			# Alterna o mando por rodada e por posição no círculo para equilibrar casa/fora.
-			if i == 0:
-				pairs.append([a, b] if r % 2 == 0 else [b, a])
-			elif (i + r) % 2 == 0:
-				pairs.append([a, b])
-			else:
-				pairs.append([b, a])
+			# Alterna o mando por rodada: a cada rodada os clubes giram uma posição no círculo, e
+			# quem está na metade de cima numa rodada par joga em casa. Assim cada clube alterna
+			# casa/fora (com uma quebra ao cruzar o meio do círculo) e fica com metade dos jogos
+			# em casa. Alternar também pela posição fazia os clubes que giram jogarem sempre no
+			# mesmo mando (um turno inteiro em casa ou fora).
+			pairs.append([a, b] if r % 2 == 0 else [b, a])
 		leg.append(pairs)
 		# Rotação: o primeiro fica fixo, os demais giram.
 		var last: int = teams[n - 1]
