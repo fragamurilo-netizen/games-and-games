@@ -58,4 +58,5 @@ static func used_names_of(world: GameWorld) -> Dictionary:
 	var used := {}
 	for p in world.players.values():
 		used[p.first_name + " " + p.last_name] = true
+		NameGenerator.count_known(used, p.known_as)
 	return used

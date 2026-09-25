@@ -6,6 +6,13 @@ extends RefCounted
 ## completos já usados no mundo nem nomes de craques reais.
 
 const MAX_TRIES := 12
+## Quantos jogadores do mundo podem usar o mesmo apelido ou só o primeiro nome na camisa: um
+## "Canhoto" ou "Pedro" por aí é normal; vinte e cinco no mesmo mundo, não.
+const NICK_MAX := 2
+const FIRST_MAX := 4
+## Nome de camisa comum ("Silva", "Juan González"): a partir do terceiro, entra o primeiro nome ou
+## o sobrenome completo, como os clubes fazem na vida real.
+const KNOWN_MAX := 3
 
 static var _famous: Dictionary = {}
 static var _eth_index: Dictionary = {}
@@ -58,8 +65,12 @@ static func _is_famous(first: String, main: String, last: String) -> bool:
 ## ctx: {pos, height, foot, attrs (PackedByteArray), region}
 ## used: Dictionary de nomes completos já usados (é atualizado).
 ## Retorna {first, last, nickname, known_as}.
-static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictionary, used: Dictionary) -> Dictionary:
+static func generate(rng_in: RandomNumberGenerator, culture_id: String, ctx: Dictionary, used: Dictionary) -> Dictionary:
 	_prepare()
+	# Gerador próprio (um único sorteio do principal): mudar as listas de nomes ou as tentativas
+	# contra repetidos não desloca o resto da geração do mundo (atributos, clubes, rostos).
+	var rng := RandomNumberGenerator.new()
+	rng.seed = rng_in.randi()
 	var c := _culture(culture_id)
 	var first := ""
 	var last := ""
@@ -87,8 +98,11 @@ static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictio
 	var mode: String = RngUtil.weighted_key(rng, known_by)
 	if mode == "nickname":
 		nickname = _make_nickname(rng, c, first, last, ctx)
-		if nickname == "":
-			mode = "last"
+		if nickname == "" or int(used.get("~k:" + nickname, 0)) >= NICK_MAX:
+			nickname = ""
+			mode = "full" if known_by.has("full") else "last"
+	elif mode == "first" and int(used.get("~k:" + first, 0)) >= FIRST_MAX:
+		mode = "full" if known_by.has("full") else "last"
 	var known := ""
 	match mode:
 		"nickname":
@@ -107,7 +121,19 @@ static func generate(rng: RandomNumberGenerator, culture_id: String, ctx: Dictio
 			known = main
 	if _famous.has(known.to_lower()):
 		known = main
+	if mode != "nickname" and int(used.get("~k:" + known, 0)) >= KNOWN_MAX:
+		var fb := first.get_slice(" ", 0)
+		var alt := (main + " " + fb) if bool(c.get("family_first", false)) else (fb + " " + main)
+		if int(used.get("~k:" + alt, 0)) >= KNOWN_MAX and last != main:
+			alt = fb + " " + last
+		known = alt
+	count_known(used, known)
 	return {"first": first, "last": last, "nickname": nickname, "known_as": known}
+
+
+## Registra mais um jogador com esse nome de camisa (para o limite de apelidos repetidos).
+static func count_known(used: Dictionary, known: String) -> void:
+	used["~k:" + known] = int(used.get("~k:" + known, 0)) + 1
 
 
 static func _suffix_of(c: Dictionary, last: String) -> String:
