@@ -147,7 +147,7 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	ov.add_child(UIKit.label("overall", "Small"))
 	ov.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_child(ov)
-	var precision := 0.8 if own else 0.2
+	var precision := 0.8 if own else (0.75 if Scouting.is_scouted(w, p) else 0.2)
 	var pot := p.potential_estimate(precision)
 	var age := p.age(w.year)
 	var pot_label := Player.potential_label(pot) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
