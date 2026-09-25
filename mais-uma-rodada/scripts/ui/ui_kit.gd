@@ -241,8 +241,9 @@ static func flag(code: String, w: int) -> FlagView:
 	return v
 
 
-static func kit(k: Dictionary, px: int, number: int = 0) -> KitView:
+static func kit(k: Dictionary, px: int, number: int = 0, crest_spec: Dictionary = {}) -> KitView:
 	var v := KitView.new()
+	v.crest = crest_spec
 	v.custom_minimum_size = Vector2(px, px)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.kit = k
@@ -274,6 +275,8 @@ static func shirt_back(club: Club, number: int, px: int, away: bool = false, goa
 	k.kit = kd if not kd.is_empty() else {"pattern": "plain", "c1": "#2A3A50", "c2": "#FFFFFF"}
 	k.back = true
 	k.number = number
+	if club != null:
+		k.crest = club.crest
 	k.custom_minimum_size = Vector2(px, px)
 	k.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	k.mouse_filter = Control.MOUSE_FILTER_IGNORE

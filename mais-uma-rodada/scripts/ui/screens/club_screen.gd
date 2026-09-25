@@ -82,10 +82,10 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	if arch.has("desc"):
 		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
 	var kits := UIKit.hbox(12)
-	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.gk_kit(), "Goleiro"]]:
+	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.third_kit(), "Terceiro"], [club.gk_kit(), "Goleiro"]]:
 		var v := UIKit.vbox(2)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var kv := UIKit.kit(k[0], 80)
+		var kv := UIKit.kit(k[0], 72, 0, club.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(kv)
 		var l := UIKit.label(k[1], "Small")

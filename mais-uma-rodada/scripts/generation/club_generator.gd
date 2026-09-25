@@ -314,20 +314,157 @@ static func _resolve_rivals(world: GameWorld, rng: RandomNumberGenerator, datas_
 
 
 static func _make_kits(rng: RandomNumberGenerator, c: Club, hint: String) -> void:
-	var pattern := hint if KIT_PATTERNS.has(hint) else KIT_PATTERNS[RngUtil.weighted_index(rng, [5.0, 2.0, 1.5, 1.0, 1.0, 1.0])]
-	c.kit_home = {
-		"pattern": pattern, "c1": c.color1, "c2": c.color2,
-		"collar": RngUtil.pick(rng, COLLARS), "sleeve": "same" if rng.randf() < 0.6 else "contrast",
-	}
-	# Uniforme reserva: cores invertidas ou branco/escuro, padrão mais simples.
-	var away_c1 := c.color2
-	var away_c2 := c.color1
-	if Color(away_c1).get_luminance() > 0.85 and Color(c.color1).get_luminance() > 0.85:
-		away_c1 = "#1A1A2E"
-	c.kit_away = {
-		"pattern": "plain" if rng.randf() < 0.6 else pattern, "c1": away_c1, "c2": away_c2,
-		"collar": RngUtil.pick(rng, COLLARS), "sleeve": "same",
-	}
+	# Sorteio próprio do clube: uma só tirada do gerador do mundo.
+	var kr := RandomNumberGenerator.new()
+	kr.seed = hash([c.key, c.color1, c.color2, rng.randi()])
+	c.kit_home = home_kit(kr, c, hint)
+	c.kit_away = away_kit(kr, c, c.kit_home)
+	c.kit_third = {}
+
+
+## Estampas de clubes procedurais (peso: lisa e listras dominam, como no futebol de verdade).
+const HOME_PATTERNS := {"plain": 9.0, "stripes_v": 4.0, "stripes_h": 2.0, "faixa": 1.2, "diagonal": 1.0, "halves": 1.0,
+	"pinstripes": 0.8, "wide_stripes": 0.8, "center_stripe": 0.6, "hoops_thin": 0.6, "yoke": 0.5, "sash_thin": 0.5,
+	"chevron": 0.4, "quarters": 0.3, "checkers": 0.2, "double_band": 0.4, "cross": 0.2, "twin_stripes": 0.3, "bottom_half": 0.3}
+const COLLAR_W := {"round": 3.0, "v": 2.2, "crossover": 1.2, "polo": 1.4, "ringer": 1.0, "henley": 0.8, "wide": 0.6,
+	"mandarin": 0.6, "laced": 0.3, "retro": 0.3, "zip": 0.2}
+const SLEEVE_W := {"same": 4.0, "cuff": 2.4, "cuff_double": 1.0, "tipped": 0.8, "contrast": 1.2, "shoulder_stripe": 0.6,
+	"raglan": 0.5, "stripes": 0.4}
+const TRIM_W := {"none": 6.0, "sides": 1.0, "shoulders": 1.0, "both": 0.5, "hem": 0.4}
+const SHORTS_W := {"plain": 5.0, "side_stripe": 1.4, "hem": 1.2, "piping": 1.0, "side_panel": 0.8, "hem_double": 0.5,
+	"stripes3": 0.4, "vent": 0.4, "two_tone": 0.2}
+const SOCKS_W := {"plain": 4.0, "top_band": 2.4, "top_stripes": 1.4, "hoops": 1.0, "stripes3": 0.8, "hoops_thin": 0.6,
+	"band_mid": 0.5, "two_tone": 0.4, "chevron": 0.3, "foot": 0.3}
+## Estampas tom sobre tom das camisas lisas modernas.
+const TONAL := ["pinstripes", "hoops_pin", "halftone", "gradient", "argyle", "tartan", "waves", "brush", "topo", "sunburst"]
+## Cores "da moda" para terceiros uniformes.
+const THIRD_COLORS := ["#2BB3A3", "#B8A1E3", "#C7F464", "#3A3F47", "#F28C28", "#E8DCC4", "#7A1F3D", "#0E7C86", "#FF5E78",
+	"#5B6CFF", "#1F4E3D", "#D4AF37", "#9AD1F5", "#6B2D5C", "#EDE6D6", "#101820"]
+const THIRD_PATTERNS := ["plain", "gradient", "fade_up", "halftone", "brush", "shatter", "camo", "topo", "zigzag", "sunburst",
+	"waves", "pixels", "harlequin", "hoop_fade", "v_big", "sash_double", "diagonal_split", "triangles", "center_panel", "tricolor_v"]
+const AWAY_PATTERNS := ["faixa", "diagonal", "sash_thin", "chevron", "v_big", "side_panels", "center_stripe", "hoops_thin",
+	"yoke", "shoulder_band", "double_band", "gradient", "center_panel", "twin_stripes", "band_low"]
+
+
+static func _w(kr: RandomNumberGenerator, table: Dictionary) -> String:
+	return String(RngUtil.pick_weighted(kr, table))
+
+
+static func _lum(hex: String) -> float:
+	return Color(hex).get_luminance()
+
+
+## Detalhe que aparece sobre `bg`: a outra cor do clube, ou branco/preto.
+static func _accent(bg: String, prefs: Array) -> String:
+	for p in prefs:
+		if _color_dist(Color(String(p)), Color(bg)) > 0.45:
+			return String(p)
+	return "#FFFFFF" if _lum(bg) < 0.5 else "#111111"
+
+
+## Acabamento comum (gola, mangas, vivos, calção e meiões) sobre as cores já escolhidas.
+static func _finish(kr: RandomNumberGenerator, k: Dictionary, shorts_pref: Array, socks_pref: Array) -> void:
+	k["collar"] = _w(kr, COLLAR_W)
+	var sl := _w(kr, SLEEVE_W)
+	var pat := String(k.get("pattern", "plain"))
+	if sl == "contrast" and pat in ["halves", "quarters"]:
+		sl = "same"
+	k["sleeve"] = sl
+	k["trim"] = _w(kr, TRIM_W)
+	k["c3"] = _accent(String(k["c1"]), [k["c2"], "#FFFFFF", "#111111"]) if kr.randf() < 0.85 else _accent(String(k["c1"]), ["#D4AF37", k["c2"]])
+	k["shorts"] = String(RngUtil.pick(kr, shorts_pref)) if kr.randf() < 0.7 else String(shorts_pref[0])
+	k["shorts2"] = _accent(String(k["shorts"]), [k["c1"], k["c2"], k["c3"]])
+	k["shorts_style"] = _w(kr, SHORTS_W)
+	var so := String(socks_pref[0]) if kr.randf() < 0.55 else String(RngUtil.pick(kr, socks_pref))
+	k["socks"] = so
+	k["socks2"] = _accent(so, [k["c2"], k["c1"], k["shorts"]])
+	k["socks_style"] = _w(kr, SOCKS_W)
+
+
+## Uniforme titular: estampa tradicional do clube (dica do arquivo) com acabamento sorteado.
+static func home_kit(kr: RandomNumberGenerator, c: Club, hint: String) -> Dictionary:
+	var pattern := hint if hint != "" and KitView.pattern_name(hint) != hint else _w(kr, HOME_PATTERNS)
+	var k := {"pattern": pattern, "c1": c.color1, "c2": c.color2}
+	# Camisa lisa moderna: às vezes ganha estampa discreta tom sobre tom.
+	if pattern == "plain" and kr.randf() < 0.22:
+		k["pattern"] = RngUtil.pick(kr, TONAL)
+		k["tonal"] = true
+	# Calção: a secundária é o mais comum; branco e a principal também aparecem.
+	var shorts: Array = [c.color2, c.color2, "#FFFFFF", c.color1]
+	if pattern in ["stripes_v", "pinstripes", "wide_stripes", "halves", "quarters", "checkers"]:
+		shorts = [c.color2, "#FFFFFF", "#111111"] if _lum(c.color2) < 0.9 else [c.color1, "#111111", "#FFFFFF"]
+	_finish(kr, k, shorts, [c.color1, k.get("shorts", c.color2), c.color2])
+	# Meião acompanha o calção ou a camisa (sorteado em _finish); corrige combinação apagada
+	if _color_dist(Color(String(k["shorts"])), Color(c.color1)) < 0.1 and pattern == "plain" and not k.has("tonal") and kr.randf() < 0.5:
+		k["shorts"] = c.color2
+	return k
+
+
+## Uniforme reserva: branco, cores invertidas, escuro ou um tom próximo; sempre bem diferente do titular.
+static func away_kit(kr: RandomNumberGenerator, c: Club, home: Dictionary) -> Dictionary:
+	var home_c1 := Color(String(home.get("c1", c.color1)))
+	var modes := {"white": 3.5, "invert": 3.0, "dark": 2.0, "shade": 1.2}
+	if _lum(c.color1) > 0.8:
+		modes.erase("white")
+	var mode := _w(kr, modes)
+	var c1 := "#FFFFFF"
+	var c2 := c.color1
+	match mode:
+		"white":
+			c1 = "#F4F4F2" if kr.randf() < 0.3 else "#FFFFFF"
+			c2 = c.color1
+		"invert":
+			c1 = c.color2
+			c2 = c.color1
+		"dark":
+			c1 = String(RngUtil.pick(kr, ["#111111", "#1A1A2E", "#0B1F4B", "#2B2F36"]))
+			c2 = _accent(c1, [c.color1, c.color2])
+		"shade":
+			var base := Color(c.color1)
+			c1 = (base.darkened(0.45) if base.get_luminance() > 0.35 else base.lightened(0.55)).to_html(false)
+			c2 = _accent(c1, [c.color2, c.color1])
+	if _color_dist(Color(c1), home_c1) < 0.4:
+		c1 = "#FFFFFF" if home_c1.get_luminance() < 0.6 else "#15181D"
+		c2 = _accent(c1, [c.color1, c.color2])
+	var pattern := "plain"
+	var r := kr.randf()
+	if r < 0.3:
+		pattern = String(RngUtil.pick(kr, AWAY_PATTERNS))
+	elif r < 0.45 and String(home.get("pattern", "plain")) != "plain" and not home.get("tonal", false):
+		pattern = String(home["pattern"])
+	var k := {"pattern": pattern, "c1": c1, "c2": c2}
+	if pattern == "plain" and kr.randf() < 0.25:
+		k["pattern"] = RngUtil.pick(kr, TONAL)
+		k["tonal"] = true
+	_finish(kr, k, [c1, c2], [c1, c2])
+	return k
+
+
+## Terceiro uniforme: cor da moda e estampa ousada, com os detalhes nas cores do clube. Gerado na
+## primeira vez que é pedido (sempre o mesmo para o clube).
+static func make_third_kit(c: Club) -> Dictionary:
+	var kr := RandomNumberGenerator.new()
+	kr.seed = hash(c.key + ":3")
+	var used: Array = []
+	for k in [c.kit_home, c.kit_away]:
+		used.append(Color(String(k.get("c1", c.color1))))
+	var order: Array = range(THIRD_COLORS.size())
+	RngUtil.shuffle(kr, order)
+	var c1: String = THIRD_COLORS[order[0]]
+	for i in order:
+		var ok := true
+		for u: Color in used:
+			if _color_dist(Color(String(THIRD_COLORS[i])), u) < 0.45:
+				ok = false
+				break
+		if ok:
+			c1 = THIRD_COLORS[i]
+			break
+	var k := {"pattern": String(RngUtil.pick(kr, THIRD_PATTERNS)), "c1": c1, "c2": _accent(c1, [c.color1, c.color2])}
+	if kr.randf() < 0.4 and String(k["pattern"]) != "plain":
+		k["tonal"] = true
+	_finish(kr, k, [c1, String(k["c2"])], [c1, String(k["c2"])])
+	return k
 
 
 ## Cores clássicas de goleiro: [principal, detalhe].
@@ -360,9 +497,15 @@ static func make_gk_kit(c: Club) -> Dictionary:
 		if ok:
 			pick = cand
 			break
-	var patterns := ["plain", "plain", "plain", "side_panels", "chevron", "pixels", "yoke"]
-	return {"pattern": patterns[rng.randi_range(0, patterns.size() - 1)], "c1": pick[0], "c2": pick[1], "c3": pick[1],
-		"collar": RngUtil.pick(rng, ["round", "v", "polo", "mandarin"]), "sleeve": "same" if rng.randf() < 0.6 else "contrast", "gk": true}
+	var patterns := ["plain", "plain", "plain", "side_panels", "chevron", "pixels", "yoke", "shatter", "gradient", "hoop_fade", "triangles", "brush"]
+	var k := {"pattern": patterns[rng.randi_range(0, patterns.size() - 1)], "c1": pick[0], "c2": pick[1], "c3": pick[1],
+		"collar": RngUtil.pick(rng, ["round", "v", "polo", "mandarin", "crossover", "zip"]), "sleeve": "same" if rng.randf() < 0.6 else "contrast", "gk": true,
+		"sleeve_len": "long" if rng.randf() < 0.55 else "short", "trim": RngUtil.pick(rng, ["none", "none", "sides", "shoulders"]),
+		"shorts": pick[0], "shorts2": pick[1], "socks": pick[0], "socks2": pick[1],
+		"shorts_style": RngUtil.pick(rng, ["plain", "side_stripe", "piping"]), "socks_style": RngUtil.pick(rng, ["plain", "top_band", "top_stripes"])}
+	if String(k["pattern"]) != "plain" and rng.randf() < 0.5:
+		k["tonal"] = true
+	return k
 
 
 static func _color_dist(a: Color, b: Color) -> float:

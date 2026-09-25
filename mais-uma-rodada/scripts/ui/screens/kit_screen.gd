@@ -1,20 +1,79 @@
 extends BaseScreen
 ## Uniformes e patrocínios do clube do usuário. Na pré-temporada (até o primeiro jogo) dá para
-## redesenhar titular e reserva peça por peça — camisa, gola, mangas, calção e meiões — e fechar
-## os patrocínios (master no peito, manga, costas e calção). Fora dela, só mostra o que vale.
+## redesenhar titular, reserva, terceiro e goleiro peça por peça — modelos prontos, estampa, gola,
+## mangas, vivos, calção e meiões — e fechar os patrocínios (master no peito, manga, costas e
+## calção). Fora dela, só mostra o que vale.
 
 const PALETTE: Array[String] = [
-	"#FFFFFF", "#F4F1E8", "#D9D9D9", "#8D99AE", "#4A4A4A", "#111111",
-	"#FFD100", "#F2C14E", "#F2A900", "#F58220", "#E4572E", "#C8102E",
-	"#8B0000", "#6D1A36", "#E91E63", "#F48FB1", "#8E44AD", "#5B2C83",
-	"#1B3A8C", "#0033A0", "#003A70", "#4EA8DE", "#6CACE4", "#00838F",
-	"#004D40", "#0B6E4F", "#009C3B", "#2E7D32", "#00A86B", "#8BC34A",
-	"#B5A642", "#C9A227", "#7B3F00", "#3E2723", "#A0522D", "#1A1A2E",
+	"#FFFFFF", "#F4F1E8", "#E8DCC4", "#D9D9D9", "#8D99AE", "#5C6770", "#3A3F47", "#2B2F36", "#111111",
+	"#FFF3B0", "#FFD100", "#F2C14E", "#D4AF37", "#F2A900", "#F58220", "#E4572E", "#FF5E78", "#C8102E",
+	"#9B111E", "#8B0000", "#6D1A36", "#7A1F3D", "#E91E63", "#F48FB1", "#B8A1E3", "#8E44AD", "#5B2C83",
+	"#1A1A2E", "#0B1F4B", "#1B3A8C", "#0033A0", "#5B6CFF", "#003A70", "#4EA8DE", "#6CACE4", "#9AD1F5",
+	"#00838F", "#0E7C86", "#2BB3A3", "#004D40", "#1F4E3D", "#0B6E4F", "#009C3B", "#2E7D32", "#00A86B",
+	"#8BC34A", "#C7F464", "#B5A642", "#7B3F00", "#A0522D", "#3E2723",
 ]
 
-var _which := "home" # "home" | "away"
-var _part := "shirt" # "shirt" | "shorts" | "socks"
+## Modelos prontos: [nome, estilo, papéis de cor]. Papéis: p (cor principal do clube), s (secundária),
+## w (branco), k (preto), g (dourado), n (marinho).
+const TEMPLATES: Array = [
+	["Clássico", {"pattern": "plain", "collar": "round", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Listrado tradicional", {"pattern": "stripes_v", "collar": "polo", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_stripes"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "k", "shorts2": "s", "socks": "k", "socks2": "s"}],
+	["Anos 70", {"pattern": "plain", "collar": "retro", "sleeve": "same", "shorts_style": "hem", "socks_style": "top_stripes"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Anos 80", {"pattern": "pinstripes", "collar": "polo", "sleeve": "raglan", "trim": "none", "shorts_style": "side_stripe", "socks_style": "hoops_thin"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Anos 90", {"pattern": "triangles", "tonal": true, "collar": "crossover", "sleeve": "pattern", "shorts_style": "side_panel", "socks_style": "chevron"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Faixa no peito", {"pattern": "faixa", "collar": "round", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Diagonal", {"pattern": "diagonal", "collar": "v", "sleeve": "same", "shorts_style": "piping", "socks_style": "plain"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "k", "shorts2": "p", "socks": "w", "socks2": "p"}],
+	["Aros", {"pattern": "stripes_h", "collar": "ringer", "sleeve": "same", "shorts_style": "hem", "socks_style": "hoops"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Metades", {"pattern": "halves", "collar": "mandarin", "sleeve": "same", "shorts_style": "two_tone", "socks_style": "two_tone"},
+		{"c1": "p", "c2": "s", "c3": "k", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Xadrez", {"pattern": "checkers", "collar": "round", "sleeve": "contrast", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "w", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "s", "socks2": "w"}],
+	["Chevron", {"pattern": "chevron", "collar": "v", "sleeve": "tipped", "shorts_style": "side_stripe", "socks_style": "chevron"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Minimalista", {"pattern": "plain", "collar": "crossover", "sleeve": "cuff_double", "trim": "none", "shorts_style": "plain", "socks_style": "plain"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Todo preto", {"pattern": "topo", "tonal": true, "collar": "v", "sleeve": "shoulder_stripe", "shorts_style": "piping", "socks_style": "top_stripes"},
+		{"c1": "k", "c2": "p", "c3": "p", "shorts": "k", "shorts2": "p", "socks": "k", "socks2": "p"}],
+	["Branco e detalhes", {"pattern": "shoulder_band", "collar": "round", "sleeve": "same", "shorts_style": "hem", "socks_style": "top_stripes"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "w", "shorts2": "p", "socks": "w", "socks2": "p"}],
+	["Degradê", {"pattern": "gradient", "collar": "zip", "sleeve": "same", "trim": "sides", "shorts_style": "side_panel", "socks_style": "foot"},
+		{"c1": "p", "c2": "s", "c3": "w", "shorts": "s", "shorts2": "p", "socks": "s", "socks2": "p"}],
+	["Pontilhado", {"pattern": "halftone", "collar": "v", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "band_mid"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Ombros", {"pattern": "yoke", "collar": "polo", "sleeve": "same", "shorts_style": "side_stripe", "socks_style": "top_band"},
+		{"c1": "p", "c2": "s", "c3": "p", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Painel central", {"pattern": "center_panel", "collar": "round", "sleeve": "contrast", "trim": "shoulders", "shorts_style": "plain", "socks_style": "stripes3"},
+		{"c1": "s", "c2": "p", "c3": "p", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Arlequim", {"pattern": "harlequin", "collar": "mandarin", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "hoops"},
+		{"c1": "p", "c2": "s", "c3": "k", "shorts": "k", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Camuflado", {"pattern": "camo", "tonal": true, "collar": "crossover", "sleeve": "same", "trim": "sides", "shorts_style": "vent", "socks_style": "plain"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Tricolor", {"pattern": "tricolor_v", "collar": "round", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "w", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "w"}],
+	["Cruz", {"pattern": "cross", "collar": "laced", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "k", "shorts2": "w", "socks": "k", "socks2": "w"}],
+	["Gala", {"pattern": "plain", "collar": "polo", "sleeve": "cuff", "trim": "both", "shorts_style": "piping", "socks_style": "top_stripes"},
+		{"c1": "p", "c2": "s", "c3": "g", "shorts": "p", "shorts2": "g", "socks": "p", "socks2": "g"}],
+	["Marinho", {"pattern": "sash_thin", "collar": "v", "sleeve": "cuff", "shorts_style": "hem", "socks_style": "top_band"},
+		{"c1": "n", "c2": "p", "c3": "p", "shorts": "n", "shorts2": "p", "socks": "n", "socks2": "p"}],
+]
+const STYLE_KEYS := ["pattern", "tonal", "collar", "sleeve", "sleeve_len", "trim", "shorts_style", "socks_style"]
+const COLOR_KEYS := ["c1", "c2", "c3", "nc", "shorts", "shorts2", "socks", "socks2"]
+const KIT_NAMES := {"home": "Titular", "away": "Reserva", "third": "Terceiro", "gk": "Goleiro"}
+
+var _which := "home" # "home" | "away" | "third" | "gk"
+var _part := "models" # "models" | "shirt" | "details" | "shorts" | "socks"
+var _group := 0 # grupo de estampas
 var _back := false # prévia de costas
+var _history: Array = [] # [qual, cópia do uniforme] para desfazer
 
 
 func _init() -> void:
@@ -51,16 +110,57 @@ func _ten_name() -> String:
 	return ""
 
 
+## O uniforme em edição (o dicionário guardado no clube).
 func _kit() -> Dictionary:
 	var club := world().user_club()
-	if _which == "gk":
-		club.gk_kit() # gera na primeira vez
-		return club.kit_gk
-	return club.kit_home if _which == "home" else club.kit_away
+	match _which:
+		"gk":
+			club.gk_kit() # gera na primeira vez
+			return club.kit_gk
+		"third":
+			club.third_kit()
+			return club.kit_third
+		"away":
+			return club.kit_away
+	return club.kit_home
+
+
+## Como o uniforme aparece (com patrocinadores e fornecedor).
+func _shown(club: Club, which: String) -> Dictionary:
+	match which:
+		"gk":
+			return club.gk_kit()
+		"third":
+			return club.third_kit()
+		"away":
+			return club.kit_away
+	return club.kit_home
 
 
 func _changed() -> void:
 	refresh()
+
+
+## Guarda o estado para o "Desfazer" e aplica a mudança.
+func _edit(fn: Callable) -> void:
+	var k := _kit()
+	_history.append([_which, k.duplicate(true)])
+	if _history.size() > 40:
+		_history.pop_front()
+	fn.call(k)
+	_changed()
+
+
+func _undo() -> void:
+	if _history.is_empty():
+		return
+	var last: Array = _history.pop_back()
+	_which = String(last[0])
+	var k := _kit()
+	var snap: Dictionary = last[1]
+	k.clear()
+	k.merge(snap)
+	_changed()
 
 
 # ---------------------------------------------------------------------------
@@ -69,49 +169,63 @@ func _changed() -> void:
 
 func _preview_card(club: Club, pre: bool) -> Control:
 	var card := UIKit.card("CardHighlight", 10)
-	var vg := ButtonGroup.new()
-	var vrow := UIKit.hbox(8)
-	for vb in [[false, "Frente"], [true, "Costas"]]:
-		var is_back: bool = vb[0]
-		var chip := UIKit.chip(String(vb[1]), is_back == _back, vg, func():
-			_back = is_back
-			_changed())
-		UIKit.shrink_button(chip)
-		vrow.add_child(chip)
-	card.add_child(vrow)
-	var row := UIKit.hbox(12)
-	for k in [["home", "Titular", club.kit_home], ["away", "Reserva", club.kit_away], ["gk", "Goleiro", club.gk_kit()]]:
-		var key: String = k[0]
-		var v := UIKit.vbox(4)
-		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var kv := KitView.new()
-		kv.full = true
-		kv.kit = k[2]
-		kv.number = 1 if key == "gk" else 10
-		kv.back = _back
-		kv.back_name = _ten_name() if key != "gk" else ""
-		kv.custom_minimum_size = Vector2(190, 340)
-		kv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Os quatro uniformes: toque para escolher qual editar
+	var row := UIKit.hbox(8)
+	for key: String in ["home", "away", "third", "gk"]:
+		var inner := UIKit.vbox(2)
+		var kv := UIKit.kit(_shown(club, key), 96, 0, club.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		var inner := UIKit.vbox(4)
 		inner.add_child(kv)
-		var l := UIKit.label(String(k[1]).to_upper(), "Caps")
+		var l := UIKit.label(String(KIT_NAMES[key]).to_upper(), "Caps")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		inner.add_child(l)
-		if pre:
-			var t := UIKit.tap_row(inner, func():
-				_which = key
-				_changed(), "CardFlat" if key == _which else "RowPanel")
-			v.add_child(t)
-		else:
-			v.add_child(inner)
-		row.add_child(v)
+		var t := UIKit.tap_row(inner, func():
+			_which = key
+			_changed(), "CardFlat" if key == _which else "RowPanel")
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(t)
 	card.add_child(row)
+	# Prévia grande: frente e costas lado a lado
+	var big := UIKit.hbox(16)
+	big.alignment = BoxContainer.ALIGNMENT_CENTER
+	for is_back in [false, true]:
+		var kv := KitView.new()
+		kv.full = true
+		kv.kit = _shown(club, _which)
+		kv.crest = club.crest
+		kv.number = 1 if _which == "gk" else 10
+		kv.back = is_back
+		kv.back_name = _ten_name() if _which != "gk" else ""
+		kv.custom_minimum_size = Vector2(250, 450)
+		kv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		big.add_child(kv)
+	card.add_child(big)
+	var cap := UIKit.label("%s · %s" % [String(KIT_NAMES[_which]), _describe(_kit())], "Small", true)
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	card.add_child(cap)
 	if pre:
-		card.add_child(UIKit.label("Toque num uniforme para editá-lo. Dá para mudar tudo até o primeiro jogo da temporada: são mais de %s combinações de estilo, fora as cores." % Fmt.thousands(KitView.style_combinations()), "Small", true))
+		card.add_child(UIKit.label("Tudo pode mudar até o primeiro jogo da temporada: são mais de %s combinações de estilo, fora as cores." % Fmt.thousands(KitView.style_combinations()), "Small", true))
 	else:
-		card.add_child(UIKit.label("O uniforme da temporada já foi apresentado. Ele pode ser redesenhado na próxima pré-temporada.", "Small", true))
+		card.add_child(UIKit.label("Os uniformes da temporada já foram apresentados. Eles podem ser redesenhados na próxima pré-temporada.", "Small", true))
 	return UIKit.card_panel(card)
+
+
+## Resumo em palavras: estampa, gola e mangas.
+func _describe(k: Dictionary) -> String:
+	var parts: Array = [KitView.pattern_name(String(k.get("pattern", "plain")))]
+	if bool(k.get("tonal", false)):
+		parts[0] = String(parts[0]) + " (tom sobre tom)"
+	parts.append("gola " + _opt_name(KitView.COLLARS, String(k.get("collar", "round"))).to_lower())
+	if String(k.get("sleeve_len", "short")) == "long":
+		parts.append("manga longa")
+	return ", ".join(parts)
+
+
+static func _opt_name(opts: Array, key: String) -> String:
+	for o in opts:
+		if o[0] == key:
+			return String(o[1])
+	return key
 
 
 # ---------------------------------------------------------------------------
@@ -120,10 +234,10 @@ func _preview_card(club: Club, pre: bool) -> Control:
 
 func _editor_card(club: Club) -> Control:
 	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Editando: " + ("titular" if _which == "home" else "reserva")))
+	card.add_child(UIKit.section("Editando: " + String(KIT_NAMES[_which]).to_lower()))
 	var g := ButtonGroup.new()
-	var prow := UIKit.hbox(8)
-	for p in [["shirt", "Camisa"], ["shorts", "Calção"], ["socks", "Meiões"]]:
+	var prow := UIKit.flow(8)
+	for p in [["models", "Modelos"], ["shirt", "Camisa"], ["details", "Detalhes"], ["shorts", "Calção"], ["socks", "Meiões"]]:
 		var key: String = p[0]
 		var chip := UIKit.chip(String(p[1]), key == _part, g, func():
 			_part = key
@@ -133,51 +247,161 @@ func _editor_card(club: Club) -> Control:
 	card.add_child(prow)
 	var k := _kit()
 	match _part:
-		"shorts":
-			_options(card, "Estilo do calção", KitView.SHORTS_STYLES, String(k.get("shorts_style", "plain")), "shorts_style")
-			_colors(card, "Cor do calção", String(k.get("shorts", k.get("c2", "#111111"))), "shorts")
-			_colors(card, "Detalhes do calção", String(k.get("shorts2", k.get("c1", "#FFFFFF"))), "shorts2")
-		"socks":
-			_options(card, "Estilo dos meiões", KitView.SOCKS_STYLES, String(k.get("socks_style", "plain")), "socks_style")
-			_colors(card, "Cor dos meiões", String(k.get("socks", k.get("c1", "#FFFFFF"))), "socks")
-			_colors(card, "Detalhes dos meiões", String(k.get("socks2", k.get("c2", "#000000"))), "socks2")
-		_:
-			card.add_child(UIKit.label("Estilo da camisa", "Small"))
+		"models":
+			card.add_child(UIKit.label("Modelos prontos nas cores do clube. Depois de escolher, dá para mexer em cada detalhe.", "Small", true))
+			card.add_child(_template_grid(club, k))
+		"shirt":
+			var gg := ButtonGroup.new()
+			var grow := UIKit.flow(6)
+			for i in KitView.PATTERN_GROUPS.size():
+				var gi := i
+				var chip := UIKit.chip(String(KitView.PATTERN_GROUPS[i][0]), i == _group, gg, func():
+					_group = gi
+					_changed())
+				UIKit.shrink_button(chip)
+				grow.add_child(chip)
+			card.add_child(grow)
 			card.add_child(_pattern_grid(k))
+			var tonal := CheckButton.new()
+			tonal.text = "Estampa tom sobre tom (discreta, na cor principal)"
+			tonal.button_pressed = bool(k.get("tonal", false))
+			tonal.focus_mode = Control.FOCUS_NONE
+			tonal.custom_minimum_size.y = 56
+			tonal.toggled.connect(func(v: bool):
+				AudioManager.click()
+				_edit(func(kk: Dictionary): kk["tonal"] = v))
+			card.add_child(tonal)
+			_colors(card, club, "Cor principal", String(k.get("c1", club.color1)), "c1")
+			_colors(card, club, "Cor da estampa", String(k.get("c2", club.color2)), "c2")
+			var sw := UIKit.button("Trocar principal e estampa", "GhostButton", func():
+				_edit(func(kk: Dictionary):
+					var a: Variant = kk.get("c1", club.color1)
+					kk["c1"] = kk.get("c2", club.color2)
+					kk["c2"] = a), "swap")
+			card.add_child(sw)
+		"details":
 			_options(card, "Gola", KitView.COLLARS, String(k.get("collar", "round")), "collar")
 			_options(card, "Mangas", KitView.SLEEVES, String(k.get("sleeve", "same")), "sleeve")
-			_colors(card, "Cor principal", String(k.get("c1", club.color1)), "c1")
-			_colors(card, "Cor secundária (estampa)", String(k.get("c2", club.color2)), "c2")
-			_colors(card, "Detalhes (gola, punhos, frisos)", String(k.get("c3", k.get("c2", club.color2))), "c3")
+			_options(card, "Comprimento da manga", KitView.SLEEVE_LENGTHS, String(k.get("sleeve_len", "short")), "sleeve_len")
+			_options(card, "Vivos", KitView.TRIMS, String(k.get("trim", "none")), "trim")
+			_colors(card, club, "Detalhes (gola, punhos, vivos, terceira cor)", String(k.get("c3", k.get("c2", club.color2))), "c3")
+			_colors(card, club, "Números e nome", String(k.get("nc", "")), "nc", true)
+		"shorts":
+			_options(card, "Estilo do calção", KitView.SHORTS_STYLES, String(k.get("shorts_style", "plain")), "shorts_style")
+			_colors(card, club, "Cor do calção", String(k.get("shorts", k.get("c2", "#111111"))), "shorts")
+			_colors(card, club, "Detalhes do calção", String(k.get("shorts2", k.get("c1", "#FFFFFF"))), "shorts2")
+		"socks":
+			_options(card, "Estilo dos meiões", KitView.SOCKS_STYLES, String(k.get("socks_style", "plain")), "socks_style")
+			_colors(card, club, "Cor dos meiões", String(k.get("socks", k.get("c1", "#FFFFFF"))), "socks")
+			_colors(card, club, "Detalhes dos meiões", String(k.get("socks2", k.get("c2", "#000000"))), "socks2")
 	var tools := UIKit.hbox(8)
+	var undo := UIKit.button("Desfazer", "GhostButton", func(): _undo(), "back")
+	undo.disabled = _history.is_empty()
+	undo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(undo)
 	var rnd := UIKit.button("Surpreenda-me", "", func():
-		_randomize(k, club)
-		_changed(), "bolt")
+		_edit(func(kk: Dictionary): _randomize(kk, club)), "bolt")
 	rnd.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(rnd)
-	var other := club.kit_away if _which == "home" else club.kit_home
-	var cp := UIKit.button("Copiar estilo do " + ("reserva" if _which == "home" else "titular"), "GhostButton", func():
-		for key in ["pattern", "collar", "sleeve", "shorts_style", "socks_style"]:
-			if other.has(key):
-				k[key] = other[key]
-		_changed(), "swap")
-	cp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools.add_child(cp)
 	card.add_child(tools)
+	# Copiar o estilo (sem as cores) de outro uniforme do clube
+	var copy := UIKit.flow(8)
+	copy.add_child(UIKit.label("Copiar estilo do", "Small"))
+	for key: String in ["home", "away", "third", "gk"]:
+		if key == _which:
+			continue
+		var src := key
+		var b := UIKit.button(String(KIT_NAMES[key]).to_lower(), "GhostButton", func():
+			var other := _shown(club, src)
+			_edit(func(kk: Dictionary):
+				for sk in STYLE_KEYS:
+					if other.has(sk):
+						kk[sk] = other[sk]
+					else:
+						kk.erase(sk)))
+		UIKit.shrink_button(b)
+		copy.add_child(b)
+	card.add_child(copy)
 	return UIKit.card_panel(card)
 
 
-## Miniaturas de cada estampa, já com as cores do uniforme em edição.
+static func _role(club: Club, role: String) -> String:
+	match role:
+		"p":
+			return club.color1
+		"s":
+			return club.color2
+		"w":
+			return "#FFFFFF"
+		"k":
+			return "#111111"
+		"g":
+			return "#D4AF37"
+		"n":
+			return "#0B1F4B"
+	return role
+
+
+## O modelo pronto aplicado às cores do clube (sem tocar em patrocinadores).
+static func template_kit(club: Club, t: Array, base: Dictionary) -> Dictionary:
+	var k := base.duplicate()
+	for sk in STYLE_KEYS:
+		k.erase(sk)
+	for ck in COLOR_KEYS:
+		k.erase(ck)
+	var style: Dictionary = t[1]
+	k.merge(style, true)
+	var roles: Dictionary = t[2]
+	for ck in roles:
+		k[ck] = _role(club, String(roles[ck]))
+	# Cores iguais apagam a estampa: troca a secundária por branco ou preto.
+	if Color(String(k["c1"])).is_equal_approx(Color(String(k["c2"]))):
+		k["c2"] = "#FFFFFF" if Color(String(k["c1"])).get_luminance() < 0.5 else "#111111"
+	return k
+
+
+func _template_grid(club: Club, k: Dictionary) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.add_theme_constant_override(&"v_separation", 8)
+	for t: Array in TEMPLATES:
+		var tk := template_kit(club, t, k)
+		tk.erase("sp")
+		var inner := UIKit.vbox(0)
+		var kv := UIKit.kit(tk, 96, 0, club.crest)
+		kv.full = true
+		kv.custom_minimum_size = Vector2(96, 150)
+		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		inner.add_child(kv)
+		var l := UIKit.label(String(t[0]), "Small")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		l.custom_minimum_size.x = 104
+		inner.add_child(l)
+		var tt := t
+		var cell := UIKit.tap_row(inner, func():
+			_edit(func(kk: Dictionary):
+				var nk := template_kit(club, tt, kk)
+				kk.clear()
+				kk.merge(nk)), "RowPanel")
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(cell)
+	return grid
+
+
+## Miniaturas de cada estampa do grupo, já com as cores do uniforme em edição.
 func _pattern_grid(k: Dictionary) -> Control:
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.add_theme_constant_override(&"h_separation", 8)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	var cur := String(k.get("pattern", "plain"))
-	for p in KitView.PATTERNS:
+	for p in KitView.group_patterns(_group):
 		var key: String = p[0]
 		var mini := k.duplicate()
 		mini.erase("sp")
+		mini.erase("sup")
 		mini["pattern"] = key
 		var inner := UIKit.vbox(0)
 		var kv := UIKit.kit(mini, 84)
@@ -189,8 +413,7 @@ func _pattern_grid(k: Dictionary) -> Control:
 		l.custom_minimum_size.x = 104
 		inner.add_child(l)
 		var t := UIKit.tap_row(inner, func():
-			k["pattern"] = key
-			_changed(), "CardHighlight" if key == cur else "RowPanel")
+			_edit(func(kk: Dictionary): kk["pattern"] = key), "CardHighlight" if key == cur else "RowPanel")
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		grid.add_child(t)
 	return grid
@@ -203,54 +426,104 @@ func _options(card: VBoxContainer, caption: String, opts: Array, current: String
 	for o in opts:
 		var val: String = o[0]
 		flow.add_child(UIKit.chip(String(o[1]), val == current, g, func():
-			_kit()[field] = val
-			_changed()))
+			_edit(func(kk: Dictionary): kk[field] = val)))
 	card.add_child(flow)
 
 
-func _colors(card: VBoxContainer, caption: String, current: String, field: String) -> void:
+func _swatch(hex: String, selected: bool, cb: Callable, label := "") -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(52, 52)
+	b.focus_mode = Control.FOCUS_NONE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(hex) if hex != "" else Color(0, 0, 0, 0)
+	sb.set_corner_radius_all(26)
+	sb.set_border_width_all(4 if selected else 1)
+	sb.border_color = UIColors.ACCENT if selected else Color(1, 1, 1, 0.25)
+	for st in [&"normal", &"hover", &"pressed", &"focus"]:
+		b.add_theme_stylebox_override(st, sb)
+	if label != "":
+		b.text = label
+		b.add_theme_font_size_override(&"font_size", 16)
+	b.pressed.connect(cb)
+	return b
+
+
+## Paleta: cores do clube primeiro, depois a paleta geral e uma cor livre. `auto`: primeira opção
+## "Auto" (apaga o campo e deixa o jogo escolher).
+func _colors(card: VBoxContainer, club: Club, caption: String, current: String, field: String, auto: bool = false) -> void:
 	card.add_child(UIKit.label(caption, "Small"))
 	var flow := UIKit.flow(6)
-	for hex in PALETTE:
-		var h: String = hex
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(52, 52)
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(h)
-		sb.set_corner_radius_all(26)
-		var selected := Color(h).to_html(false) == Color(current).to_html(false)
-		sb.set_border_width_all(4 if selected else 1)
-		sb.border_color = UIColors.ACCENT if selected else Color(1, 1, 1, 0.25)
-		for st in [&"normal", &"hover", &"pressed", &"focus"]:
-			b.add_theme_stylebox_override(st, sb)
-		b.pressed.connect(func():
-			_kit()[field] = h
-			_changed())
-		flow.add_child(b)
+	var cur := Color(current).to_html(false) if current != "" else ""
+	if auto:
+		flow.add_child(_swatch("", current == "", func():
+			_edit(func(kk: Dictionary): kk.erase(field)), "Auto"))
+	var seen := {}
+	var list: Array = [club.color1, club.color2]
+	list.append_array(PALETTE)
+	if current != "" and not PALETTE.has(current):
+		list.insert(2, current)
+	for hex in list:
+		var h := Color(String(hex)).to_html(false)
+		if seen.has(h):
+			continue
+		seen[h] = true
+		var hh := "#" + h.to_upper()
+		flow.add_child(_swatch(hh, h == cur, func():
+			_edit(func(kk: Dictionary): kk[field] = hh)))
+	# Cor livre
+	var pick := ColorPickerButton.new()
+	pick.custom_minimum_size = Vector2(52, 52)
+	pick.text = "+"
+	pick.edit_alpha = false
+	pick.color = Color(current) if current != "" else Color.WHITE
+	pick.focus_mode = Control.FOCUS_NONE
+	pick.tooltip_text = "Cor livre"
+	pick.popup_closed.connect(func():
+		var hx := "#" + pick.color.to_html(false).to_upper()
+		if hx != "#" + cur.to_upper():
+			_edit(func(kk: Dictionary): kk[field] = hx))
+	flow.add_child(pick)
 	card.add_child(flow)
 
 
+## Desenho novo sorteado: de um modelo pronto ou do mesmo gerador dos clubes, nas cores do clube.
 func _randomize(k: Dictionary, club: Club) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	k["pattern"] = KitView.PATTERNS[rng.randi_range(0, KitView.PATTERNS.size() - 1)][0]
-	k["collar"] = KitView.COLLARS[rng.randi_range(0, KitView.COLLARS.size() - 1)][0]
-	k["sleeve"] = KitView.SLEEVES[rng.randi_range(0, KitView.SLEEVES.size() - 1)][0]
-	k["shorts_style"] = KitView.SHORTS_STYLES[rng.randi_range(0, KitView.SHORTS_STYLES.size() - 1)][0]
-	k["socks_style"] = KitView.SOCKS_STYLES[rng.randi_range(0, KitView.SOCKS_STYLES.size() - 1)][0]
-	# Cores: parte da identidade do clube, com um toque de contraste.
-	var base := [club.color1, club.color2, "#FFFFFF", "#111111"]
-	var main := String(base[rng.randi_range(0, 1)]) if _which == "home" else String(base[rng.randi_range(1, 3)])
-	var sec := String(base[rng.randi_range(0, 3)])
-	if Color(sec).to_html(false) == Color(main).to_html(false):
-		sec = club.color2 if main != club.color2 else club.color1
-	k["c1"] = main
-	k["c2"] = sec
-	k["c3"] = String(base[rng.randi_range(0, 3)])
-	k["shorts"] = [main, sec, "#FFFFFF", "#111111"][rng.randi_range(0, 3)]
-	k["shorts2"] = sec if k["shorts"] != sec else main
-	k["socks"] = [main, sec, k["shorts"]][rng.randi_range(0, 2)]
-	k["socks2"] = sec if k["socks"] != sec else main
+	var nk: Dictionary
+	if rng.randf() < 0.3:
+		nk = template_kit(club, TEMPLATES[rng.randi_range(0, TEMPLATES.size() - 1)], k)
+	else:
+		var hint := ""
+		if rng.randf() < 0.5:
+			hint = String(KitView.PATTERNS[rng.randi_range(0, KitView.PATTERNS.size() - 1)][0])
+		match _which:
+			"away":
+				nk = ClubGenerator.away_kit(rng, club, club.kit_home)
+			"third":
+				var tmp := club.kit_third
+				club.kit_third = {}
+				var old_key := club.key
+				club.key = "%s:%d" % [old_key, rng.randi()]
+				nk = ClubGenerator.make_third_kit(club)
+				club.key = old_key
+				club.kit_third = tmp
+			"gk":
+				nk = ClubGenerator.make_gk_kit(club)
+				var gk_patterns := ["plain", "gradient", "shatter", "brush", "hoop_fade", "triangles", "side_panels", "chevron", "camo"]
+				nk["pattern"] = gk_patterns[rng.randi_range(0, gk_patterns.size() - 1)]
+				nk["sleeve_len"] = "long" if rng.randf() < 0.5 else "short"
+			_:
+				nk = ClubGenerator.home_kit(rng, club, hint)
+		if rng.randf() < 0.15:
+			nk["sleeve_len"] = "long"
+	for sk in STYLE_KEYS:
+		k.erase(sk)
+	for ck in COLOR_KEYS:
+		k.erase(ck)
+	for key in nk:
+		if not String(key).begins_with("sp") and key != "sup":
+			k[key] = nk[key]
 
 
 # ---------------------------------------------------------------------------
