@@ -1,0 +1,53 @@
+TÍTULO
+Mais Uma Rodada: Técnico
+
+DESCRIÇÃO CURTA
+Seja o técnico: escale, negocie e simule temporadas. Offline e sem timers.
+
+DESCRIÇÃO COMPLETA
+Você é o técnico. Escolha um clube, monte o time e descubra até onde consegue levá-lo. Depois do apito final, a pergunta é sempre a mesma: só mais uma rodada?
+
+Mais Uma Rodada é um simulador de gestão de futebol feito para o celular. Joga offline, em retrato e com uma mão. Não tem energia, não tem timer e não tem caixa de prêmio. O que prende você é o campeonato.
+
+★ UM MUNDO INTEIRO PARA COMANDAR
+• Mais de 670 clubes em 53 ligas de 43 países, com acesso e rebaixamento
+• Cerca de 16 mil jogadores com 15 atributos, potencial, personalidade e carreira
+• Copas nacionais, estaduais, supercopas e torneios continentais com o formato da vida real
+• Seleções, eliminatórias e o torneio mundial de seleções
+
+★ PARTIDAS QUE CONTAM UMA HISTÓRIA
+• Motor minuto a minuto: táticas, cansaço, cartões, lesões, pênaltis e acréscimos
+• Jogo ao vivo em campo 2D com narração, placar dos outros jogos e três velocidades
+• Pause para mudar a tática ou fazer substituições
+• Zebras acontecem, mas o time mais forte costuma ganhar, como no futebol de verdade
+
+★ O TÉCNICO É VOCÊ
+• 8 formações, mentalidade, estilo, pressão, linha defensiva e bola parada
+• Plano de jogo automático para quando o time estiver ganhando ou perdendo
+• Treino semanal, entrosamento e rodízio de elenco
+
+★ MERCADO E BASTIDORES
+• Propostas, contrapropostas, trocas, empréstimos e renovações
+• Cada clube tem sua filosofia: tem quem só contrate jogador da região e quem aposte em jovens
+• Categorias de base, peneiras e promessas que viram craques
+• Diretoria com metas, torcida, imprensa, finanças e estádio
+
+★ SUA HISTÓRIA FICA GUARDADA
+• Sala de troféus, prêmios da temporada, eleição do melhor do mundo e Hall da Fama
+• Histórico de cada temporada, de cada jogador e da sua carreira
+• 5 espaços de save e salvamento automático a cada rodada
+
+★ DO SEU JEITO
+• Editor de clubes, uniformes, ligas e jogadores
+• Suporte a mods para quem quer montar o próprio mundo
+
+Comece de graça e jogue uma temporada completa. Gostou? Desbloqueie a Carreira Completa uma única vez e jogue quantas temporadas quiser, sem anúncios e sem assinatura.
+
+Os clubes, jogadores e competições do jogo são fictícios ou inspirados no futebol real, sem vínculo com nenhuma entidade oficial.
+
+NOVIDADES (0.2.1)
+• Força dos clubes e dos jogadores calibrada com a vida real
+• Uniforme de goleiro para cada clube
+• Jogos e gols pela seleção no perfil do jogador
+• Filosofias de contratação dos clubes
+• Todas as copas nacionais e supercopas
