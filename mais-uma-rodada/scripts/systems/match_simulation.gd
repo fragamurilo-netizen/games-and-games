@@ -498,6 +498,9 @@ func display_minute() -> String:
 func _simulate_minute() -> void:
 	momentum[0] *= 0.88
 	momentum[1] *= 0.88
+	for t: MatchTeam in teams:
+		if t.sh_until >= 0 and minute >= t.sh_until:
+			_clear_shout(t)
 	if minute % 5 == 0:
 		for t: MatchTeam in teams:
 			_apply_fatigue(t, 5.0)
@@ -667,8 +670,8 @@ func _game_state() -> void:
 func _refresh_rates() -> void:
 	var h: MatchTeam = teams[0]
 	var a: MatchTeam = teams[1]
-	var tilt_h := h.m_poss + h.s_poss + h.l_poss + (0.0 if a.s_ignores_press else h.pr_poss) + h.g_poss
-	var tilt_a := a.m_poss + a.s_poss + a.l_poss + (0.0 if h.s_ignores_press else a.pr_poss) + a.g_poss
+	var tilt_h := h.m_poss + h.s_poss + h.l_poss + (0.0 if a.s_ignores_press else h.pr_poss) + h.g_poss + h.sh_poss
+	var tilt_a := a.m_poss + a.s_poss + a.l_poss + (0.0 if h.s_ignores_press else a.pr_poss) + a.g_poss + a.sh_poss
 	var x := GAMMA * (h.u_mid - a.u_mid)
 	_poss_base = clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd, 0.25, 0.75)
 	for s in 2:
@@ -689,11 +692,11 @@ static func chance_mult(diff: float) -> float:
 
 
 func _att_power(t: MatchTeam) -> float:
-	return t.u_att * t.m_att * (1.0 + t.style_fit * MOD_DAMP)
+	return t.u_att * t.m_att * t.sh_att * (1.0 + t.style_fit * MOD_DAMP)
 
 
 func _def_power(t: MatchTeam) -> float:
-	return t.u_def * t.m_def
+	return t.u_def * t.m_def * t.sh_def
 
 
 func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
@@ -705,7 +708,7 @@ func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
 	# Jogo pelos lados contra formação estreita.
 	if att.style == TeamSheet.STYLE_LADOS and dfn.width < 2.0:
 		p *= 1.0 + att.s_vs_narrow
-	p *= dfn.l_opp_rate * dfn.pr_opp_rate
+	p *= dfn.l_opp_rate * dfn.pr_opp_rate * dfn.sh_opp_rate
 	p *= 1.0 + HOME_CHANCE * crowd if att.side == 0 else 1.0 - AWAY_CHANCE * crowd
 	# Time com menos jogadores sofre mais.
 	p *= 1.0 + (11 - dfn.on_pitch_count) * 0.08
@@ -714,7 +717,7 @@ func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
 
 
 func _foul_prob(dfn: MatchTeam) -> float:
-	var p := FOUL_RATE * dfn.i_fouls * dfn.pr_fouls * (1.3 - dfn.discipline / 100.0 * 0.6)
+	var p := FOUL_RATE * dfn.i_fouls * dfn.pr_fouls * dfn.sh_fouls * (1.3 - dfn.discipline / 100.0 * 0.6)
 	if derby:
 		p *= 1.12
 	return clampf(p, 0.05, 0.45)
@@ -722,7 +725,7 @@ func _foul_prob(dfn: MatchTeam) -> float:
 
 ## Fadiga aplicada em blocos de `minutes` minutos (barato e suficiente).
 func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
-	var mult: float = FATIGUE_RATE * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue
+	var mult: float = FATIGUE_RATE * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
 	for mp: MatchPlayer in t.slots:
 		if mp == null:
 			continue
@@ -1316,6 +1319,125 @@ func user_substitution(side: int, out_id: int, in_id: int) -> String:
 	if t.is_user:
 		xr_mark("Entrou %s" % in_mp.p.short_name())
 	return ""
+
+
+# ---------------------------------------------------------------------------
+# Gritos da beira do campo
+# ---------------------------------------------------------------------------
+
+## Duração do efeito e intervalo mínimo entre dois gritos (minutos de jogo).
+const SHOUT_MINUTES := 10
+const SHOUT_COOLDOWN := 6
+## Efeito de cada grito (multiplicadores; "poss" soma à inclinação da posse). "rx": reação
+## individual ("inc" incentivo, "cob" cobrança) que depende da personalidade e do placar.
+const SHOUTS := {
+	"pressao": {"name": "Pressão lá na frente!", "short": "Pressão", "icon": "bolt", "desc": "Rouba a bola mais alto. Cansa e faz mais faltas.",
+		"opp_rate": 0.93, "poss": 0.02, "fouls": 1.18, "fatigue": 1.35},
+	"calma": {"name": "Calma, toca a bola!", "short": "Calma", "icon": "clock", "desc": "Mais posse e menos faltas; ataca um pouco menos.",
+		"poss": 0.035, "att": 0.97, "fouls": 0.88, "fatigue": 0.9},
+	"frente": {"name": "Pra frente! Vamos buscar!", "short": "Pra frente", "icon": "up", "desc": "Mais gente no ataque. Deixa espaço atrás.",
+		"att": 1.06, "def": 0.95, "fatigue": 1.1},
+	"atencao": {"name": "Concentração atrás!", "short": "Atenção", "icon": "shield", "desc": "Fecha a defesa; o ataque perde força.",
+		"def": 1.06, "att": 0.96},
+	"incentivo": {"name": "Vamos, acredita!", "short": "Incentivar", "icon": "heart", "desc": "Levanta quem está abatido. Rende mais atrás no placar.", "rx": "inc"},
+	"cobranca": {"name": "Cobrar o time", "short": "Cobrar", "icon": "whistle", "desc": "Líderes respondem; os mais sensíveis podem sentir.", "rx": "cob"},
+}
+const SHOUT_ORDER: Array[String] = ["pressao", "calma", "frente", "atencao", "incentivo", "cobranca"]
+
+
+## Minutos até poder gritar de novo (0 = liberado).
+func shout_wait(side: int) -> int:
+	return maxi(0, teams[side].sh_next - minute)
+
+
+## O técnico grita da beira do campo. Efeito por SHOUT_MINUTES; repetir o mesmo grito rende
+## cada vez menos (o time para de ouvir). Retorna {"ok", "msg", "react": [[player_id, +1/-1]]}.
+func shout(side: int, key: String) -> Dictionary:
+	if finished or not started or not SHOUTS.has(key):
+		return {"ok": false, "msg": "Agora não dá."}
+	var t: MatchTeam = teams[side]
+	if minute < t.sh_next:
+		return {"ok": false, "msg": "O time ainda está digerindo o último grito (%d')." % (t.sh_next - minute)}
+	_clear_shout(t)
+	var cfg: Dictionary = SHOUTS[key]
+	var used := int(t.sh_uses.get(key, 0))
+	t.sh_uses[key] = used + 1
+	var eff := 1.0 / (1.0 + 0.6 * used)
+	t.sh_key = key
+	t.sh_until = minute + SHOUT_MINUTES
+	t.sh_next = minute + SHOUT_COOLDOWN
+	t.sh_att = 1.0 + (float(cfg.get("att", 1.0)) - 1.0) * eff
+	t.sh_def = 1.0 + (float(cfg.get("def", 1.0)) - 1.0) * eff
+	t.sh_poss = float(cfg.get("poss", 0.0)) * eff
+	t.sh_fouls = 1.0 + (float(cfg.get("fouls", 1.0)) - 1.0) * eff
+	t.sh_fatigue = 1.0 + (float(cfg.get("fatigue", 1.0)) - 1.0) * eff
+	t.sh_opp_rate = 1.0 + (float(cfg.get("opp_rate", 1.0)) - 1.0) * eff
+	var react: Array = []
+	var rx := String(cfg.get("rx", ""))
+	if rx != "":
+		var diff := score[side] - score[1 - side]
+		for mp: MatchPlayer in t.slots:
+			if mp == null:
+				continue
+			var d := _shout_reaction(mp, rx, diff) * eff
+			mp.sh_f = 1.0 + d
+			if absf(d) >= 0.03:
+				react.append([mp.p.id, 1 if d > 0 else -1])
+	t.recompute_units()
+	_refresh_rates()
+	_emit(EV_TACTIC, side, -1, -1, {"shout": key, "react": react})
+	if t.is_user:
+		xr_mark("Grito: %s" % String(cfg["short"]).to_lower())
+	var msg := "\"%s\"" % String(cfg["name"])
+	if used >= 2:
+		msg += " O time já não escuta como antes."
+	return {"ok": true, "msg": msg, "react": react}
+
+
+## Reação de um jogador ao incentivo ou à cobrança: personalidade, moral e placar.
+func _shout_reaction(mp: MatchPlayer, rx: String, diff: int) -> float:
+	var p := mp.p
+	var sensitive := p.has_trait("timido") or p.has_trait("inseguro")
+	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional")
+	var low := p.morale < 45.0
+	if rx == "inc":
+		var d := 0.015
+		if diff < 0:
+			d += 0.015
+		if sensitive or low:
+			d += 0.02
+		if p.has_trait("estrela") or p.has_trait("acomodado"):
+			d -= 0.01
+		return d
+	# Cobrança
+	var c := 0.01
+	if hard:
+		c = 0.04
+	if sensitive or low:
+		c = -0.035
+	if p.has_trait("temperamental") or p.has_trait("rebelde"):
+		c = -0.02
+		mp.card_mult *= 1.15 # esquenta
+	if diff > 0:
+		c -= 0.01 # cobrar ganhando soa injusto
+	return c
+
+
+func _clear_shout(t: MatchTeam) -> void:
+	if t.sh_key == "":
+		return
+	t.sh_key = ""
+	t.sh_until = -1
+	t.sh_att = 1.0
+	t.sh_def = 1.0
+	t.sh_poss = 0.0
+	t.sh_fouls = 1.0
+	t.sh_fatigue = 1.0
+	t.sh_opp_rate = 1.0
+	for mp: MatchPlayer in t.all:
+		mp.sh_f = 1.0
+	t.recompute_units()
+	_refresh_rates()
 
 
 func set_mentality(side: int, m: int) -> void:

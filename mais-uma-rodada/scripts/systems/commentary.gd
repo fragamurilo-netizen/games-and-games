@@ -210,6 +210,9 @@ func lines_for(ev: Dictionary) -> Array:
 		MatchSimulation.EV_FREEKICK:
 			out.append(_line(_pick("freekick"), ev, "normal", 0.0))
 		MatchSimulation.EV_TACTIC:
+			if x.has("shout"):
+				out.append_array(_shout_lines(ev, x))
+				return out
 			var m := int(x.get("mentality", -1))
 			var cat3 := "tactic_other"
 			if x.has("formation"):
@@ -222,6 +225,26 @@ func lines_for(ev: Dictionary) -> Array:
 				cat3 = "tactic_defend"
 			out.append(_line(_pick(cat3), ev, "tactic" if x.has("formation") else "info", 0.0))
 	return out
+
+
+## Grito da beira do campo e a reação de quem respondeu (ou sentiu).
+func _shout_lines(ev: Dictionary, x: Dictionary) -> Array:
+	var side := int(ev.get("s", 0))
+	var cfg: Dictionary = MatchSimulation.SHOUTS.get(String(x["shout"]), {})
+	var coach := I18n.t("O técnico do {team}")
+	var lines: Array = [_line(I18n.t("%s grita da beira do campo: “%s”") % [coach, I18n.t(String(cfg.get("name", "")))], ev, "tactic", 0.0)]
+	var good: Array = []
+	var bad: Array = []
+	for r in x.get("react", []):
+		var nm := _name(side, int(r[0]))
+		if nm == "":
+			continue
+		(good if int(r[1]) > 0 else bad).append(nm)
+	if not good.is_empty():
+		lines.append(_line(I18n.t("%s responde na hora e pede a bola.") % ", ".join(good.slice(0, 3)), ev, "info", 0.4))
+	if not bad.is_empty():
+		lines.append(_line(I18n.t("%s sente o grito e abaixa a cabeça.") % ", ".join(bad.slice(0, 2)), ev, "info", 0.4))
+	return lines
 
 
 func _line(text: String, ev: Dictionary, style: String, delay: float) -> Dictionary:

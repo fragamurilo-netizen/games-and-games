@@ -68,6 +68,7 @@ var _controls_panel: PanelContainer
 var _play_btn: Button
 var _speed_btn: Button
 var _tac_btn: Button
+var _shout_btn: Button = null
 var _skip_btn: Button
 var _overlay: GoalOverlay
 var _tac_box: VBoxContainer
@@ -321,11 +322,13 @@ func _build_controls() -> void:
 	_play_btn = UIKit.button("", "", _toggle_play, "pause")
 	_speed_btn = UIKit.button(PACE_NAMES[_pace], "", _cycle_speed, "fast")
 	_tac_btn = UIKit.button("Tática", "", _open_tactics, "tactics")
+	_shout_btn = UIKit.button("Gritar", "", _open_shouts, "whistle")
 	_skip_btn = UIKit.button("Fim", "", _confirm_skip, "skip")
-	for b in [_play_btn, _speed_btn, _tac_btn, _skip_btn]:
+	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _skip_btn]:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size.y = 80
-		b.add_theme_font_size_override(&"font_size", 21)
+		b.add_theme_font_size_override(&"font_size", 20)
+		b.clip_text = true
 		_controls.add_child(b)
 	_update_play_button()
 
@@ -1282,6 +1285,44 @@ func _other_scores(minute: int, half: int) -> VBoxContainer:
 # ---------------------------------------------------------------------------
 # Ajustes durante o jogo
 # ---------------------------------------------------------------------------
+
+## Gritos da beira do campo: efeito curto e real no time (MatchSimulation.shout). O jogo segue rodando.
+func _open_shouts() -> void:
+	if _done or _sim == null:
+		return
+	var t: MatchTeam = _sim.teams[_user_side]
+	var v := UIKit.vbox(10)
+	var head := UIKit.hbox(10)
+	var title := UIKit.label("Beira do campo", "Title")
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
+	v.add_child(head)
+	if t.sh_key != "":
+		v.add_child(UIKit.colored("Em vigor: %s (até %d')" % [String(MatchSimulation.SHOUTS[t.sh_key]["short"]), t.sh_until], UIColors.ACCENT, "Small"))
+	var wait := _sim.shout_wait(_user_side)
+	if wait > 0:
+		v.add_child(UIKit.label("O time ainda está digerindo o último grito: mais %d min." % wait, "Muted", true))
+	for key in MatchSimulation.SHOUT_ORDER:
+		var k: String = key
+		var cfg: Dictionary = MatchSimulation.SHOUTS[k]
+		var uses := int(t.sh_uses.get(k, 0))
+		var b := UIKit.button(String(cfg["name"]), "PrimaryButton" if k == t.sh_key else "", func():
+			var r := _sim.shout(_user_side, k)
+			UIManager.close_modal()
+			UIManager.toast(String(r["msg"]), UIColors.ACCENT if r["ok"] else UIColors.RED)
+			if r["ok"]:
+				_drain(false)
+				_update_board(), String(cfg["icon"]))
+		b.disabled = wait > 0
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		v.add_child(b)
+		var d := String(cfg["desc"])
+		if uses >= 1:
+			d += " Já usado %s." % Fmt.plural(uses, "vez", "vezes")
+		v.add_child(UIKit.label(d, "Small", true))
+	UIManager.show_modal(v, true)
+
 
 func _open_tactics() -> void:
 	if _done:

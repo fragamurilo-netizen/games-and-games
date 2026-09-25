@@ -56,6 +56,7 @@ func _initialize() -> void:
 	_run("times de coração, treinador e revelados", _test_hearts_manager)
 	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
+	_run("gritos da beira do campo", _test_shouts)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
@@ -1385,6 +1386,50 @@ func _test_tactical_freedom() -> void:
 	check(not SquadRules.is_foreign(probe, esp, "non_eu"), "francês contou como extracomunitário na Espanha")
 	probe.nationality = "BRA"
 	check(SquadRules.is_foreign(probe, esp, "non_eu"), "brasileiro deveria ser extracomunitário na Espanha")
+
+
+func _test_shouts() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var foe: Club = w.clubs_in_league("BRA1")[0]
+	if foe.id == c.id:
+		foe = w.clubs_in_league("BRA1")[1]
+	# Mesmo jogo (mesma semente) com e sem "Pra frente!" a cada janela: o time finaliza mais.
+	var shots := [0, 0]
+	var fouls := [0, 0]
+	for mode in 2:
+		for k in 40:
+			var sim := MatchSimulation.new()
+			sim.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 500 + k, false)
+			sim.teams[0].is_user = true
+			while not sim.finished:
+				sim.step()
+				if mode == 1 and sim.started and sim.shout_wait(0) == 0 and sim.minute >= 5 and sim.minute < 88:
+					sim.shout(0, "frente" if sim.minute < 60 else "pressao")
+			shots[mode] += sim.teams[0].shots
+			fouls[mode] += sim.teams[0].fouls
+	check(shots[1] > shots[0] * 1.03, "gritos de ataque não aumentaram as finalizações (%d × %d)" % [shots[1], shots[0]])
+	check(fouls[1] > fouls[0], "pressão não aumentou as faltas (%d × %d)" % [fouls[1], fouls[0]])
+	# Repetir perde efeito, intervalo entre gritos, reação conforme a personalidade
+	var sim2 := MatchSimulation.new()
+	sim2.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 77, false)
+	while sim2.minute < 10:
+		sim2.step()
+	check(sim2.shout(0, "frente")["ok"], "grito recusado")
+	var a1 := sim2.teams[0].sh_att
+	check(not sim2.shout(0, "frente")["ok"], "gritou de novo sem intervalo")
+	while sim2.shout_wait(0) > 0:
+		sim2.step()
+	sim2.shout(0, "frente")
+	check(sim2.teams[0].sh_att < a1, "repetir o grito não perdeu efeito")
+	var mp: MatchPlayer = sim2.teams[0].slots[5]
+	mp.p.traits = ["inseguro"]
+	check(sim2._shout_reaction(mp, "cob", 0) < 0.0, "inseguro não sentiu a cobrança")
+	mp.p.traits = ["lider"]
+	check(sim2._shout_reaction(mp, "cob", 0) > 0.0, "líder não respondeu à cobrança")
+	while sim2.minute < sim2.teams[0].sh_until + 1 and not sim2.finished:
+		sim2.step()
+	check(sim2.teams[0].sh_key == "" and is_equal_approx(sim2.teams[0].sh_att, 1.0), "efeito do grito não acabou")
 
 
 func _test_xray() -> void:
