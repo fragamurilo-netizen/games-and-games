@@ -34,6 +34,7 @@ func refresh() -> void:
 	c.add_child(_header(w, p, club))
 	c.add_child(_summary(w, p, own))
 	c.add_child(_fit_card(w, p, own))
+	c.add_child(_positions_card(w, p, own))
 	c.add_child(_attributes(w, p, own))
 	c.add_child(_personality(p, own))
 	if own:
@@ -52,13 +53,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	col.add_child(UIKit.label(p.full_name(), "Small", true))
 	var r1 := UIKit.hbox(8)
 	r1.add_child(UIKit.pos_badge(p.position))
-	var sec := ""
-	if not p.secondary.is_empty():
-		var codes: Array = []
-		for s in p.secondary:
-			codes.append(Pos.code(s))
-		sec = " (também " + ", ".join(codes) + ")"
-	r1.add_child(UIKit.label(Pos.name_of(p.position) + sec, "Small", true))
+	r1.add_child(UIKit.label(Pos.name_of(p.position), "Small", true))
 	col.add_child(r1)
 	var nat := NameGenerator.nationality_name(p.nationality)
 	if p.nationality != "":
@@ -67,13 +62,19 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		nrow.add_child(UIKit.label(nat, "Small"))
 		col.add_child(nrow)
 	var born := p.hometown if p.hometown != "" else nat
-	col.add_child(UIKit.label("%d anos · %s · %d kg · pé %s" % [p.age(w.year), Fmt.height(p.height), p.weight, Player.FOOT_NAMES[p.foot].to_lower()], "Small", true))
+	var brow := UIKit.hbox(10)
+	brow.add_child(UIKit.label("%d anos · %s · %d kg ·" % [p.age(w.year), Fmt.height(p.height), p.weight], "Small"))
+	brow.add_child(FootView.make(p.foot, 28))
+	brow.add_child(UIKit.label(["destro", "canhoto", "ambidestro"][p.foot], "Small"))
+	col.add_child(brow)
 	col.add_child(UIKit.label("De %s" % born, "Small", true))
 	if club != null:
 		# Toque no clube abre a página dele
 		var cr := UIKit.hbox(8)
 		cr.add_child(UIKit.crest(club, 30))
-		var cl := UIKit.label("%s · camisa %d" % [club.short_name, p.shirt], "Small")
+		if p.shirt > 0:
+			cr.add_child(UIKit.shirt_back(club, p.shirt, 38))
+		var cl := UIKit.label(club.short_name, "Small")
 		cl.add_theme_color_override(&"font_color", UIColors.BLUE)
 		cr.add_child(cl)
 		cr.add_child(UIKit.label("›", "Small"))
@@ -148,6 +149,42 @@ func _mini(value: String, caption: String, color: Color = UIColors.TEXT) -> VBox
 
 
 ## "Esse jogador é bom para meu time?"
+## Onde ele joga: mini campo com a posição principal, as secundárias e as vizinhas, pé e rendimento.
+func _positions_card(w: GameWorld, p: Player, own: bool) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Posições"))
+	var row := UIKit.hbox(16)
+	row.add_child(PositionMap.make(p, 170))
+	var col := UIKit.vbox(6)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var list: Array = [[p.position, "Principal", Color("#FFC940")]]
+	for s in p.secondary:
+		list.append([int(s), "Secundária", UIColors.GREEN])
+	for k in Pos.RELATED[p.position]:
+		if float(Pos.RELATED[p.position][k]) >= 0.85 and not p.secondary.has(k):
+			list.append([int(k), "Improvisa", UIColors.MUTED])
+	for e in list.slice(0, 6):
+		var r := UIKit.hbox(8)
+		r.add_child(UIKit.pos_badge(int(e[0])))
+		var nm := UIKit.vbox(0)
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nm.add_child(UIKit.label(Pos.name_of(int(e[0])), "", false))
+		nm.add_child(UIKit.colored(String(e[1]), e[2], "Small"))
+		r.add_child(nm)
+		var val := int(round(p.rating_at(int(e[0]))))
+		if not own:
+			val = PlayerRowView.estimate(w, p, val)
+		r.add_child(UIKit.badge(val, 52, 36, 22))
+		col.add_child(r)
+	var frow := UIKit.hbox(10)
+	frow.add_child(FootView.make(p.foot, 34))
+	frow.add_child(UIKit.label(["Destro", "Canhoto", "Ambidestro: chuta bem com os dois"][p.foot], "Small", true))
+	col.add_child(frow)
+	row.add_child(col)
+	card.add_child(row)
+	return UIKit.card_panel(card)
+
+
 func _fit_card(w: GameWorld, p: Player, own: bool) -> Control:
 	var card := UIKit.card("CardHighlight" if not own else "Card", 6)
 	var user := w.user_club()

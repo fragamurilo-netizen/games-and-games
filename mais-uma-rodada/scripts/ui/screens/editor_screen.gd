@@ -715,6 +715,7 @@ func _player_editor(c: VBoxContainer) -> void:
 	fc.add_child(UIKit.label("Pé preferido", "Small"))
 	var fg := ButtonGroup.new()
 	var frow := UIKit.hbox(8)
+	frow.add_child(FootView.make(p.foot, 40))
 	for i in Player.FOOT_NAMES.size():
 		var fi := i
 		var chip := UIKit.chip(Player.FOOT_NAMES[i], p.foot == fi, fg, func():

@@ -267,6 +267,20 @@ static func text_badge(text: String, color: Color, w: int = 60, h: int = 34, fs:
 	return b
 
 
+## Costas da camisa do clube com o número (no lugar de "camisa 10").
+static func shirt_back(club: Club, number: int, px: int, away: bool = false) -> KitView:
+	var k := KitView.new()
+	var kd: Dictionary = (club.kit_away if away else club.kit_home) if club != null else {}
+	k.kit = kd if not kd.is_empty() else {"pattern": "plain", "c1": "#2A3A50", "c2": "#FFFFFF"}
+	k.back = true
+	k.number = number
+	k.custom_minimum_size = Vector2(px, px)
+	k.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	k.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	k.tooltip_text = "Camisa %d" % number if number > 0 else "Sem número"
+	return k
+
+
 static func pos_badge(pos: int) -> RatingBadge:
 	return text_badge(Pos.code(pos), Pos.group_color(pos), 58, 34, 20)
 

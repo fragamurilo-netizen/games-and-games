@@ -121,7 +121,10 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 			if back_name != "":
 				_draw_text_centered(back_name.to_upper(), off + Vector2(0.5, 0.3) * s, s * 0.44, int(s * 0.075), fg, &"Caps")
 		if number > 0:
-			_draw_text_centered(str(number), off + Vector2(0.5, 0.62) * s, s * 0.44, int(s * 0.34), fg, &"Big")
+			# Em camisa listrada/estampada o número ganha contorno, como nas camisas de verdade.
+			var plain := String(kit.get("pattern", "plain")) == "plain"
+			var edge := Color(0, 0, 0, 0) if plain else (Color(0, 0, 0, 0.75) if fg.get_luminance() > 0.5 else Color(1, 1, 1, 0.85))
+			_draw_text_centered(str(number), off + Vector2(0.5, 0.6 if back_name != "" and show_logos else 0.55) * s, s * 0.46, int(s * (0.34 if show_logos else 0.44)), fg, &"Big", edge)
 		return
 	_draw_collar(s, off, c1, c3)
 	# Contorno sutil
@@ -249,7 +252,7 @@ func _draw_supplier(c: Vector2, u: float, sp: Dictionary, bg: Color) -> void:
 
 
 ## Texto centrado em `center`, encolhido até caber em `max_w`.
-func _draw_text_centered(txt: String, center: Vector2, max_w: float, size_px: int, color: Color, variation: StringName) -> bool:
+func _draw_text_centered(txt: String, center: Vector2, max_w: float, size_px: int, color: Color, variation: StringName, outline: Color = Color(0, 0, 0, 0)) -> bool:
 	var font := get_theme_font(&"font", variation)
 	var fs := maxi(4, size_px)
 	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
@@ -261,7 +264,10 @@ func _draw_text_centered(txt: String, center: Vector2, max_w: float, size_px: in
 		return false
 	var asc := font.get_ascent(fs)
 	var desc := font.get_descent(fs)
-	draw_string(font, Vector2(center.x - tw * 0.5, center.y + (asc - desc) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, color)
+	var at := Vector2(center.x - tw * 0.5, center.y + (asc - desc) * 0.5)
+	if outline.a > 0.0:
+		draw_string_outline(font, at, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, maxi(2, fs / 7), outline)
+	draw_string(font, at, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, color)
 	return true
 
 

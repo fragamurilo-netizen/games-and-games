@@ -9,12 +9,25 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
 	var row := UIKit.hbox(10)
 	if mode != "market":
-		var num := UIKit.label(str(p.shirt) if p.shirt > 0 else "–", "Mono")
-		num.custom_minimum_size.x = 38
-		num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		num.add_theme_color_override(&"font_color", UIColors.DIM)
-		row.add_child(num)
-	row.add_child(UIKit.pos_badge(p.position))
+		# Costas da camisa com o número, nas cores do clube
+		row.add_child(UIKit.shirt_back(w.club(p.club_id), p.shirt, 50))
+	# Posição principal e, embaixo, as secundárias
+	var pcol := UIKit.vbox(2)
+	pcol.alignment = BoxContainer.ALIGNMENT_CENTER
+	pcol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pcol.add_child(UIKit.pos_badge(p.position))
+	if not p.secondary.is_empty():
+		var codes: Array = []
+		for sp in p.secondary:
+			codes.append(Pos.code(int(sp)))
+		var sl := UIKit.label("+" + " ".join(codes), "Caps")
+		sl.add_theme_font_size_override(&"font_size", 13)
+		sl.add_theme_color_override(&"font_color", UIColors.GREEN)
+		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		sl.custom_minimum_size.x = 58
+		sl.clip_text = true
+		pcol.add_child(sl)
+	row.add_child(pcol)
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UIKit.label(p.display_name(), "H3")
