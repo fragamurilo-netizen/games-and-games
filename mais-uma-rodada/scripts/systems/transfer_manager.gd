@@ -447,6 +447,7 @@ static func loaned_out(world: GameWorld) -> Array:
 static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int, wage: int, years: int) -> Transfer:
 	var seller_id := p.club_id
 	var seller := world.club(seller_id) if seller_id >= 0 else null
+	Rivalry.on_transfer(world, p, seller, buyer)
 	if seller != null:
 		seller.player_ids.erase(p.id)
 		seller.add_ledger("vendas", fee)

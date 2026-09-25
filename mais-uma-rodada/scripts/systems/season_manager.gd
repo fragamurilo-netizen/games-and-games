@@ -371,6 +371,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		for ev in LeagueFormat.after_slot(world, s.leagues[lid]):
 			_league_format_news(world, s.leagues[lid], ev)
 	NewsManager.on_cup_events(world, cup_events)
+	# Rivalidades: o que aconteceu nos jogos e nos mata-matas esquenta os confrontos
+	Rivalry.after_matchday(world, md["entries"])
+	Rivalry.on_cup_events(world, cup_events)
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
@@ -597,6 +600,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var user_nation := world.user_nation()
 	var rep0 := world.user_club().reputation if world.has_user() else 0.0
 	var fans0 := world.user_club().fan_base if world.has_user() else 0
+	# O tempo esfria as rivalidades (o título decidido agora ainda esquenta, logo abaixo)
+	Rivalry.season_close(world)
 	# Vagas continentais do ano que vem (antes das mudanças de divisão)
 	world.stats["qualified"] = CupManager.compute_qualified(world)
 	# Ranking mundial de clubes: arquiva a temporada antes que tabelas e copas sejam desfeitas
@@ -631,6 +636,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 				c.history = c.history.slice(c.history.size() - 80)
 			_update_reputation(c, cfg, i + 1, teams, promoted.has(c.id), relegated.has(c.id))
 		var champ := world.club(LeagueFormat.champion(league, ids))
+		Rivalry.on_league_end(world, league, champ.id, LeagueFormat.runner_up(league, ids))
 		champ.add_title("L:" + id)
 		for pid in champ.player_ids:
 			var p := world.player(pid)

@@ -53,6 +53,7 @@ func _initialize() -> void:
 	_run("times de coração, treinador e revelados", _test_hearts_manager)
 	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
+	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -2127,3 +2128,88 @@ class _FakeBilling:
 
 	func consume_purchase(t: String) -> void:
 		consumed.append(t)
+
+
+func _test_rivalry() -> void:
+	var w := _career_world()
+	var user := w.user_club()
+	# Um adversário da mesma liga que não é rival de origem
+	var opp: Club = null
+	for cid in w.clubs_in_league(user.league_id):
+		var c: Club = cid if cid is Club else w.club(int(cid))
+		if c.id != user.id and not c.is_rival(user.id) and not user.is_rival(c.id):
+			opp = c
+			break
+	check(opp != null, "sem adversário para o teste")
+	if opp == null:
+		return
+	check(not MatchEngine.is_derby(w, user.id, opp.id), "par sem história já nasce clássico")
+	var att0 := Rivalry.attendance_factor(w, user.id, opp.id, false)
+	# Eliminado três vezes, perde o capitão para eles e depois perde a final
+	Rivalry.add(w, user.id, opp.id, 10.0, "%s elimina o %s" % [opp.short_name, user.short_name], "elim", opp.id)
+	check(Rivalry.level_of(Rivalry.heat(w, user.id, opp.id)) == 0, "uma eliminação já virou rixa")
+	Rivalry.add(w, user.id, opp.id, 16.0, "%s elimina o %s de novo" % [opp.short_name, user.short_name], "elim", opp.id)
+	check(Rivalry.heat(w, user.id, opp.id) >= Rivalry.RIXA_AT, "duas eliminações não criaram rixa")
+	var cap := w.squad(user)[0] as Player
+	user.sheet.captain = cap.id
+	var news0 := w.news.size()
+	TransferManager.complete_transfer(w, cap, opp, 1000000, cap.wage, 3)
+	var rng0 := w.rng.state
+	Rivalry.add(w, user.id, opp.id, 17.0, "%s vence o %s na final" % [opp.short_name, user.short_name], "final", opp.id)
+	var h := Rivalry.heat(w, user.id, opp.id)
+	check(h >= Rivalry.DERBY_AT, "história não virou clássico (%.1f)" % h)
+	check(MatchEngine.is_derby(w, user.id, opp.id) and MatchEngine.is_derby(w, opp.id, user.id), "clássico emergente não conta como clássico")
+	check(Rivalry.is_emergent_derby(w, user.id, opp.id), "clássico emergente não reconhecido")
+	var found := false
+	for i in range(news0, w.news.size()):
+		var n: NewsEvent = w.news[i]
+		if n.category == "rivalidade" and n.title.contains("clássico"):
+			found = true
+	check(found, "imprensa não noticiou o novo clássico")
+	var ev: Array = Rivalry.get_rec(w, user.id, opp.id)["ev"]
+	var has_transfer := false
+	for e: Dictionary in ev:
+		if String(e["k"]) == "transferencia":
+			has_transfer = true
+	check(has_transfer, "ida do capitão para o rival não entrou na história")
+	check(Rivalry.attendance_factor(w, user.id, opp.id, true) >= 1.0 and Rivalry.attendance_factor(w, user.id, opp.id, false) > att0, "rivalidade não mexeu no público")
+	check(Rivalry.memory_line(w, user.id, opp.id).begins_with("Revanche"), "prévia não lembra a revanche")
+	check(Rivalry.of_club(w, user.id).any(func(e): return int(e["club"]) == opp.id), "rivalidade fora da lista do clube")
+	check(w.rng.state == rng0, "rivalidade consumiu o RNG do mundo")
+	# Save guarda a rivalidade
+	var w2 := GameWorld.from_dict(JSON.parse_string(JSON.stringify(w.to_dict())))
+	check(absf(Rivalry.heat(w2, user.id, opp.id) - h) < 0.01 and MatchEngine.is_derby(w2, user.id, opp.id), "save perdeu a rivalidade")
+	# O tempo esfria; rivais de origem nunca caem abaixo do piso
+	for i in 8:
+		Rivalry.season_close(w)
+	check(Rivalry.heat(w, user.id, opp.id) < Rivalry.DERBY_AT, "rivalidade não esfriou com o tempo")
+	var orig := user.main_rival()
+	if orig >= 0:
+		check(Rivalry.heat(w, user.id, orig) >= Rivalry.STATIC_FLOOR, "rival de origem esfriou abaixo do piso")
+	# Uma temporada inteira: o mundo cria rivalidades sozinho (copas, títulos, goleadas)
+	var sw := _season_world
+	if sw == null:
+		sw = WorldGenerator.generate(777, "padrao")
+		_with_user(sw, sw.clubs_in_league("BRA1")[3].id)
+		_season(sw)
+	check(not sw.rivalries.is_empty(), "nenhuma rivalidade registrada na temporada")
+	var kinds := {}
+	var hot := 0
+	for k in sw.rivalries:
+		var r: Dictionary = sw.rivalries[k]
+		if float(r["s"]) >= Rivalry.RIXA_AT and not Rivalry._is_static(sw, int(r["a"]), int(r["b"])):
+			hot += 1
+		for e: Dictionary in r["ev"]:
+			kinds[String(e["k"])] = true
+	check(kinds.has("elim") and kinds.has("final"), "copas não alimentaram rivalidades: %s" % str(kinds.keys()))
+	var n0 := sw.rivalries.size()
+	var rv2: Dictionary = JSON.parse_string(JSON.stringify(sw.rivalries))
+	var sw2 := GameWorld.new()
+	sw2.clubs = sw.clubs
+	sw2.rivalries = rv2
+	Rivalry.season_close(sw2)
+	var bytes := JSON.stringify(sw2.rivalries).length()
+	check(sw2.rivalries.size() < n0, "virada de ano não esqueceu rixas pequenas")
+	check(bytes < 400000, "rivalidades pesam demais no save (%d bytes)" % bytes)
+	print("   depois da virada: %d (%d KB)" % [sw2.rivalries.size(), bytes / 1024])
+	print("   rivalidades: %d registradas, %d rixas novas, tipos %s" % [sw.rivalries.size(), hot, str(kinds.keys())])

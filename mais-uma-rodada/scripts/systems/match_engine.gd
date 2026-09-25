@@ -7,7 +7,7 @@ extends RefCounted
 static func is_derby(world: GameWorld, home_id: int, away_id: int) -> bool:
 	var h := world.club(home_id)
 	var a := world.club(away_id)
-	return h.is_rival(away_id) or a.is_rival(home_id)
+	return h.is_rival(away_id) or a.is_rival(home_id) or Rivalry.is_emergent_derby(world, home_id, away_id)
 
 
 ## Importância 0..1: fim de temporada + briga por título/vaga/acesso/rebaixamento, fase da copa, clássico.
@@ -34,8 +34,10 @@ static func importance_of(world: GameWorld, f: Fixture) -> float:
 		imp = 0.75 + 0.08 * f.round # playoffs de liga
 	elif f.stage == Fixture.STAGE_KO:
 		imp = CupManager.stage_importance(world, f)
-	if is_derby(world, f.home, f.away):
+	var derby := is_derby(world, f.home, f.away)
+	if derby:
 		imp += 0.2
+	imp += Rivalry.importance_bonus(world, f.home, f.away, derby)
 	return clampf(imp, 0.0, 1.0)
 
 
@@ -47,7 +49,7 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 	if f.neutral:
 		att = int(minf(float(maxi(home.capacity, away.capacity)) * 1.2, 78000.0) * world.rng.randf_range(0.75, 1.0))
 	else:
-		att = FinanceManager.expected_attendance(home, away, derby, world.rng)
+		att = FinanceManager.expected_attendance(home, away, derby, world.rng, Rivalry.attendance_factor(world, f.home, f.away, derby))
 		if not f.is_league():
 			att = mini(home.capacity, int(att * 1.12)) # noite de copa enche o estádio
 	var ctx := {

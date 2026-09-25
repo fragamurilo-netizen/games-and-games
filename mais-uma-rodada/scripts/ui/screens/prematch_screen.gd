@@ -197,6 +197,7 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 	card.add_child(row)
 	if MatchEngine.is_derby(w, f.home, f.away):
 		card.add_child(UIKit.colored("CLÁSSICO: jogadores de jogos grandes crescem; os tímidos sentem.", UIColors.RED, "Small"))
+	card.add_child(RivalryView.summary(w, club.id, opp.id))
 	var opp_sheet := opp.sheet
 	if opp_sheet != null:
 		var tac := DatabaseManager.tactics()

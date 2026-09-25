@@ -67,6 +67,7 @@ func _initialize() -> void:
 	for r in rows:
 		g += r["goals"]
 	_log("Média de gols: %.2f por jogo" % (g / maxf(1.0, rows.size())))
+	_rivalry_report(w)
 	_log("Inflação de valor médio: %s → %s (x%.2f) · salário médio %s → %s (x%.2f)" % [Fmt.money(first_value), Fmt.money(last_value), last_value / maxf(1.0, first_value), Fmt.money(first_wage), Fmt.money(last_wage), last_wage / maxf(1.0, first_wage)])
 	for d in champions:
 		if DatabaseManager.has_league(d) and not TOP.has(d):
@@ -187,3 +188,26 @@ func _args() -> Dictionary:
 			var kv := a.substr(2).split("=", true, 1)
 			out[kv[0]] = kv[1]
 	return out
+
+
+## Rivalidades que nasceram no save: quantas, quais e por quê.
+func _rivalry_report(w: GameWorld) -> void:
+	var emergent: Array = []
+	var rixas := 0
+	for k in w.rivalries:
+		var r: Dictionary = w.rivalries[k]
+		var a := int(r["a"])
+		var b := int(r["b"])
+		if w.club(a).is_rival(b) or w.club(b).is_rival(a):
+			continue
+		var s := float(r["s"])
+		if s >= Rivalry.RIXA_AT:
+			rixas += 1
+		if float(r.get("pk", 0.0)) >= Rivalry.DERBY_AT:
+			emergent.append(r)
+	emergent.sort_custom(func(x, y): return float(x["pk"]) > float(y["pk"]))
+	_log("Rivalidades: %d registros, %d rixas vivas, %d clássicos nascidos no save (%d KB no save)" % [w.rivalries.size(), rixas, emergent.size(), JSON.stringify(w.rivalries).length() / 1024])
+	for r: Dictionary in emergent.slice(0, 8):
+		var ev: Array = r["ev"]
+		var last := String(ev[ev.size() - 1]["t"]) if not ev.is_empty() else ""
+		_log("   %s x %s: hoje %d, pico %d, %d jogos. Último capítulo: %s" % [w.club(int(r["a"])).short_name, w.club(int(r["b"])).short_name, int(r["s"]), int(r["pk"]), int(r["g"]), last])

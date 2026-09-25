@@ -22,8 +22,14 @@ static func for_next_match(world: GameWorld) -> Array:
 	var remaining := CompetitionManager.remaining_rounds(league, user.id)
 	var played: int = league.table[user.id]["pl"]
 	# Clássico
-	if MatchEngine.is_derby(world, user.id, opp.id):
+	var derby := MatchEngine.is_derby(world, user.id, opp.id)
+	if derby:
 		out.append({"text": "CLÁSSICO contra o %s" % opp.short_name, "kind": "derby", "priority": 100})
+	elif Rivalry.heat(world, user.id, opp.id) >= Rivalry.RIXA_AT:
+		out.append({"text": "Rixa com o %s: termômetro em %d" % [opp.short_name, int(round(Rivalry.heat(world, user.id, opp.id)))], "kind": "derby", "priority": 85})
+	var memory := Rivalry.memory_line(world, user.id, opp.id)
+	if memory != "":
+		out.append({"text": memory, "kind": "derby", "priority": 97 if derby else 84})
 	# Copa
 	if not f.is_league():
 		out.append(_cup_hook(world, f, user, opp))

@@ -1066,7 +1066,11 @@ static func _press_questions(world: GameWorld) -> Array:
 	var oc: Dictionary = People.coach_of(world, opp.id) if opp != null else {}
 	var ocn := String(oc.get("n", "o técnico deles"))
 	if opp != null and MatchEngine.is_derby(world, nf.home, nf.away):
-		qs.append({"j": pick_j.call("bairrista"), "q": "Clássico contra o %s. %s disse que vocês chegam pressionados. O que responde?" % [opp.short_name, ocn], "o": [
+		var qtext := "Clássico contra o %s. %s disse que vocês chegam pressionados. O que responde?" % [opp.short_name, ocn]
+		var grudge := Rivalry.last_grudge(world, club.id, opp.id)
+		if Rivalry.is_emergent_derby(world, club.id, opp.id) and not grudge.is_empty():
+			qtext = "Esse jogo virou clássico. A torcida ainda fala de \"%s\". %s diz que vocês chegam pressionados. O que responde?" % [String(grudge["t"]), ocn]
+		qs.append({"j": pick_j.call("bairrista"), "q": qtext, "o": [
 			{"t": "\"Pressionado está ele. Domingo a gente mostra.\"", "fx": {"sup": 3.0, "team": 3.0, "crel:%d" % int(oc.get("id", -1)): -10.0, "bold": true, "head": true, "jrel": 3.0}},
 			{"t": "\"Respeito o %s. Clássico se decide em campo.\"" % ocn, "fx": {"board": 2.0, "crel:%d" % int(oc.get("id", -1)): 5.0}},
 			{"t": "\"Não vou alimentar polêmica.\"", "fx": {"jrel": -3.0}}]})

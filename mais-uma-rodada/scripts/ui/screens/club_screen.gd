@@ -118,21 +118,12 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		pc.add_child(UIKit.label(String(pol.get("desc", "")), "Small", true))
 		prow.add_child(pc)
 		card.add_child(prow)
-	var rivals: Array = []
-	for rid in club.rivals.slice(0, 3):
-		if int(rid) >= 0:
-			rivals.append(w.club(int(rid)))
+	# Rivais de origem e rivalidades que nasceram no save, da mais quente para a mais fria
+	var rivals := Rivalry.of_club(w, club.id).slice(0, 4)
 	if not rivals.is_empty():
 		card.add_child(UIKit.section("Rivais"))
-		for r: Club in rivals:
-			var rr := UIKit.hbox(10)
-			rr.add_child(UIKit.crest(r, 36))
-			var rl := UIKit.label(r.short_name, "H3")
-			rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			rr.add_child(rl)
-			rr.add_child(UIKit.label(w.league_short(r.league_id), "Small"))
-			var rid2 := r.id
-			card.add_child(UIKit.tap_row(rr, func(): _open_club(rid2), "CardFlat"))
+		for e: Dictionary in rivals:
+			card.add_child(RivalryView.club_row(w, club.id, e))
 	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1)
 
 

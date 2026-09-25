@@ -4,7 +4,7 @@ extends RefCounted
 
 const CAT_ICON := {
 	"selecao": "shield",
-	"goleada": "ball", "zebra": "bolt", "classico_vitoria": "bolt", "classico_empate": "bolt", "lider": "trophy",
+	"goleada": "ball", "zebra": "bolt", "classico_vitoria": "bolt", "classico_empate": "bolt", "rivalidade": "bolt", "lider": "trophy",
 	"sequencia_vitorias": "up", "sequencia_derrotas": "down", "sem_vencer": "down", "hattrick": "ball",
 	"primeiro_gol": "star", "artilheiro": "ball", "lesao_grave": "cross", "transferencia": "swap",
 	"transferencia_rival": "swap", "transferencia_livre": "swap", "venda_usuario": "money", "proposta_recebida": "money",

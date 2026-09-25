@@ -159,14 +159,15 @@ static func ticket_price(club: Club) -> int:
 	return maxi(1, int(round(float(club.league_cfg().get("ticket", 10)) * club.ticket_mult)))
 
 
-static func expected_attendance(club: Club, opponent: Club, derby: bool, rng: RandomNumberGenerator = null) -> int:
+## heat_f: rivalidade do confronto (Rivalry.attendance_factor): rixas enchem mais, clássicos quentes esgotam.
+static func expected_attendance(club: Club, opponent: Club, derby: bool, rng: RandomNumberGenerator = null, heat_f: float = 1.0) -> int:
 	var mood_f := 0.55 + club.fan_mood / 200.0
 	var opp_f := 0.9 + (opponent.reputation / 500.0 if opponent != null else 0.1)
 	var derby_f := 1.25 if derby else 1.0
 	var form_f := clampf(1.0 + club.streak_wins * 0.02 - club.streak_losses * 0.03, 0.85, 1.15)
 	var noise := rng.randf_range(0.93, 1.07) if rng != null else 1.0
 	var price_f := pow(1.0 / maxf(0.3, club.ticket_mult), 0.6)
-	var att := club.fan_base * mood_f * opp_f * derby_f * form_f * noise * price_f
+	var att := club.fan_base * mood_f * opp_f * derby_f * heat_f * form_f * noise * price_f
 	return clampi(int(att), int(club.capacity * 0.05), club.capacity)
 
 

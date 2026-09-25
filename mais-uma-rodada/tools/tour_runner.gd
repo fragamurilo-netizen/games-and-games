@@ -335,6 +335,11 @@ func _run() -> void:
 	UIManager.push("graduates", {"id": w.user_club_id})
 	await _frames(8)
 	await _shot("22c_revelados")
+	var rv := Rivalry.of_club(w, w.user_club_id, 0.0)
+	if not rv.is_empty():
+		UIManager.push("rivalry", {"a": w.user_club_id, "b": int(rv[0]["club"])})
+		await _frames(8)
+		await _shot("22e_rivalidade")
 	UIManager.push("prematch", {"edit": true})
 	_screen().set("_pos_edit", true)
 	_screen().refresh()
