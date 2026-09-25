@@ -308,5 +308,5 @@ func _slot_buttons() -> Array:
 
 func _begin(slot: int) -> void:
 	GameManager.start_career(_world, _selected, _manager, _difficulty, slot)
-	UIManager.goto("hub")
+	UIManager.goto("welcome")
 	UIManager.toast("Bem-vindo ao %s! Boa sorte, %s." % [_world.user_club().short_name, _world.manager_name])

@@ -6,7 +6,7 @@ extends RefCounted
 ## eles treinam, jogam, evoluem e podem subir ao elenco, ser vendidos ou dispensados.
 ##   - Cada jogo escala um time de verdade (um goleiro, quatro defensores, três meias e três atacantes)
 ##     com rodízio: quem joga ganha minutos, gols, assistências e notas, e evolui mais.
-##   - O potencial aparece como uma faixa que fica mais estreita com o tempo de casa e o coordenador.
+##   - O potencial nunca aparece: só a estimativa da comissão (estrelas), que melhora com o tempo e erra às vezes.
 ##   - No fim do ano alguns dão o estirão (ganham potencial) e outros estagnam.
 ##   - A captação escolhe onde procurar (região, país ou exterior) e qual setor priorizar, e uma
 ##     peneira por temporada traz candidatos para aprovar ou não.
@@ -31,11 +31,11 @@ const CATEGORIES: Array = [[CAT_U20, "Sub-20", "18 e 19 anos"], [CAT_U17, "Sub-1
 ## Onde a captação procura garotos. cost: multiplicador do custo anual da rede de observadores.
 const REGIONS := {
 	"local": {"name": "Região do clube", "desc": "Mais garotos da cidade, identificação com a torcida e custo zero. Nível médio um pouco menor.",
-		"cost": 0.0, "extra": 1, "target": -1.5, "import": 0.0, "gem": 0.85, "home": 0.9},
+		"cost": 0.0, "extra": 1, "target": -1.8, "import": 0.0, "gem": 0.85, "home": 0.9},
 	"nacional": {"name": "Todo o país", "desc": "Observadores espalhados pelo país. Equilíbrio entre custo e qualidade.",
 		"cost": 1.0, "extra": 0, "target": 0.0, "import": 0.03, "gem": 1.0, "home": 0.45},
-	"internacional": {"name": "Internacional", "desc": "Rede no exterior: mais joias raras, garotos melhores e custo alto. Pela regra da FIFA, estrangeiros só a partir dos 18 anos (16 entre países europeus).",
-		"cost": 3.0, "extra": 0, "target": 1.5, "import": 0.3, "gem": 1.5, "home": 0.3},
+	"internacional": {"name": "Internacional", "desc": "Rede no exterior: garotos um pouco melhores e alguma chance a mais de joia, por um custo bem alto. Pela regra da FIFA, estrangeiros só a partir dos 18 anos (16 entre países europeus).",
+		"cost": 4.0, "extra": 0, "target": 0.8, "import": 0.3, "gem": 1.25, "home": 0.3},
 }
 const REGION_ORDER: Array[String] = ["local", "nacional", "internacional"]
 
@@ -104,7 +104,7 @@ static func years_in(world: GameWorld, p: Player) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Potencial: faixa que estreita com o tempo
+# Potencial: só uma estimativa do departamento da base (nunca o número real)
 # ---------------------------------------------------------------------------
 
 ## Quanto o clube já conhece o garoto (0.3..0.92): coordenador da base, anos de casa e jogos.
@@ -115,24 +115,35 @@ static func precision(world: GameWorld, p: Player) -> float:
 	return clampf(pr, 0.3, 0.92)
 
 
-## Faixa estimada de potencial [mínimo, máximo]. O potencial real sempre está dentro dela.
-static func potential_range(world: GameWorld, p: Player) -> Array:
+## Potencial estimado pela comissão da base. Mesmo conhecendo bem o garoto, a avaliação
+## carrega um erro (olheiros erram): uma parte do ruído nunca some.
+static func estimate(world: GameWorld, p: Player) -> int:
 	var pr := precision(world, p)
-	var mid := p.potential_estimate(pr)
-	var half := int(round((1.0 - pr) * 9.0)) + 1
-	return [clampi(mid - half, p.overall, 94), clampi(mid + half, p.overall, 94)]
+	var err := float(p.scout_noise) * (1.0 - pr * 0.65)
+	return clampi(int(round(p.potential + err)), p.overall, 94)
 
 
-static func potential_text(world: GameWorld, p: Player) -> String:
-	var r := potential_range(world, p)
-	if int(r[0]) == int(r[1]):
-		return "Pot. %d" % int(r[0])
-	return "Pot. %d–%d" % [int(r[0]), int(r[1])]
+## Estrelas (0,5 a 5, de meia em meia) do potencial estimado.
+static func potential_stars(world: GameWorld, p: Player) -> float:
+	return clampf(snappedf((estimate(world, p) - 46.0) / 9.0, 0.5), 0.5, 5.0)
 
 
 static func potential_label_of(world: GameWorld, p: Player) -> String:
-	var r := potential_range(world, p)
-	return Player.potential_label(int(round((int(r[0]) + int(r[1])) / 2.0)))
+	return Player.potential_label(estimate(world, p))
+
+
+## Quão confiável é a avaliação.
+static func certainty_label(world: GameWorld, p: Player) -> String:
+	var pr := precision(world, p)
+	if pr < 0.5:
+		return "palpite"
+	if pr < 0.75:
+		return "avaliação razoável"
+	return "bem avaliado"
+
+
+static func potential_text(world: GameWorld, p: Player) -> String:
+	return "%s (%s)" % [potential_label_of(world, p), certainty_label(world, p)]
 
 
 # ---------------------------------------------------------------------------
@@ -230,6 +241,7 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 	p.joined_year = world.year
 	if p.nationality == club.nation and rng.randf() < float(reg["home"]) and not ClubPolicy.of(club).has("only"):
 		p.hometown = club.city
+	HeartClubs.assign_academy_kid(world, p, club)
 	Valuation.update_value(p, world.year)
 	world.academy[p.id] = p
 	return p
@@ -261,12 +273,13 @@ static func run_trial(world: GameWorld) -> Array:
 	club.add_ledger("investimentos", -trial_cost(world))
 	s["trial"] = world.year
 	var used := WorldGenerator.used_names_of(world)
-	var n := 4 + world.rng.randi_range(0, 2)
+	var n := 3 + world.rng.randi_range(0, 2)
 	var cands: Array = []
 	for _i in n:
-		var kid := _new_kid(world, club, world.rng.randi_range(MIN_AGE, 17), used, -3.0, 6.5, 1.3)
+		var kid := _new_kid(world, club, world.rng.randi_range(MIN_AGE, 17), used, -4.5, 5.5, 1.0)
 		world.academy.erase(kid.id) # só entra se for aprovado
 		kid.hometown = club.city if world.rng.randf() < 0.7 else kid.hometown
+		HeartClubs.assign_academy_kid(world, kid, club)
 		cands.append(kid.to_dict())
 	s["cands"] = cands
 	world.stat_add("youth_trials")
@@ -362,6 +375,8 @@ static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: fl
 		p.clauses = {"so": club.id, "pct": sell_on}
 	club.add_ledger("vendas", fee)
 	buyer.add_ledger("compras", -fee)
+	if HeartClubs.is_fan(p, buyer.id):
+		HeartClubs.reveal(world, p, "assinatura", false)
 	world.stat_add("youth_sold")
 	_add_grad(world, p, club.id, fee, years_home)
 	NewsManager.post_raw(world, "%s vende %s ao %s" % [club.short_name, p.display_name(), buyer.short_name],
@@ -470,7 +485,7 @@ static func weekly(world: GameWorld) -> void:
 	if world.academy.is_empty():
 		return
 	var club := world.user_club()
-	var focus := TrainingManager.youth_mult(world)
+	var focus := TrainingManager.youth_mult(world) * ManagerProfile.youth_mult(world)
 	for p: Player in world.academy.values():
 		var gap := float(p.potential) - p.ovr_f
 		if gap <= 0.0:

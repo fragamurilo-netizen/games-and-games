@@ -1044,8 +1044,8 @@
 			"nation": "UAE"
 		},
 		"USC": {
-			"name": "Supercopa da UEFA",
-			"short": "Supercopa UEFA",
+			"name": "Supercopa Europeia",
+			"short": "Supercopa Europeia",
 			"kind": "super",
 			"slot": "U0",
 			"from": [

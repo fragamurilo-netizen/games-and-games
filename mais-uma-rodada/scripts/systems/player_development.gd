@@ -75,6 +75,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 		# Moral volta aos poucos ao normal (duas semanas de efeito, como o resto do laço).
 		p.morale += (62.0 - p.morale) * 0.1
 		var cid := p.club_id
+		if cid >= 0 and cid == world.user_club_id and p.morale < 62.0:
+			p.morale += (62.0 - p.morale) * 0.1 * (ManagerProfile.morale_recovery(world) - 1.0)
 		# Quem ficou fora do jogo da semana: estrelas e titulares reclamam do banco.
 		if cid >= 0 and clubs_played.has(cid) and not minutes.has(p.id) and p.injury_weeks <= 0 and p.suspension <= 0:
 			if p.squad_status <= Player.STATUS_STARTER:
@@ -97,12 +99,15 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				var mins: int = minutes.get(p.id, -1)
 				var play_f := 1.25 if mins >= 60 else (1.05 if mins > 0 else (0.85 if cid >= 0 else 0.7))
 				var fac_f: float = (0.85 + clubs[cid].facilities * 0.003) if cid >= 0 else 0.7
-				var train_f := TrainingManager.growth_mult(world, p) if cid == world.user_club_id else 1.0
+				var train_f := TrainingManager.growth_mult(world, p) * (ManagerProfile.youth_mult(world) if age <= 21 else 1.0) if cid == world.user_club_id else 1.0
 				# Quem joga bem cresce mais; quem vive de notas baixas trava.
 				var perf_f := performance_factor(p) if mins > 0 else 1.0
 				# Jovens ao lado de um mentor aprendem mais rápido.
 				var mentor_f := 1.0 + float(mentors.get(cid, 0.0)) if age <= 22 and cid >= 0 and not p.has_trait("mentor") else 1.0
-				p.dev_acc += g * play_f * growth_f * fac_f * train_f * perf_f * mentor_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
+				# A cabeça conta: moral, confiança no treinador e o nível de quem treina ao lado.
+				var mind_f := mind_factor(world, p)
+				var env_f := environment_factor(world, p)
+				p.dev_acc += g * play_f * growth_f * fac_f * train_f * perf_f * mentor_f * mind_f * env_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
 				if p.dev_acc >= 0.15:
 					var before := p.overall
 					apply_growth(world, p, p.dev_acc, TrainingManager.bias_for(world, p) if cid == world.user_club_id else [])
@@ -134,6 +139,23 @@ static func performance_factor(p: Player) -> float:
 	if p.recent_ratings.is_empty():
 		return 1.0
 	return clampf(1.0 + (p.form() - 6.6) * 0.22, 0.82, 1.22)
+
+
+## Cabeça boa, treino bom: moral e (no clube do usuário) a confiança no treinador, o "carinho"
+## que ele recebe. Vai de ~0,85 (desmotivado, sem confiança) a ~1,1 (feliz e bancado).
+static func mind_factor(world: GameWorld, p: Player) -> float:
+	var f := 1.0 + (p.morale - 62.0) / 400.0
+	if p.club_id >= 0 and p.club_id == world.user_club_id and People.has_trust(world, p.id):
+		f += (People.trust_of(world, p) - 50.0) / 500.0
+	return clampf(f, 0.85, 1.1)
+
+
+## Treinar com gente melhor faz crescer (garoto no gigante); ser o melhor do treino, menos.
+static func environment_factor(world: GameWorld, p: Player) -> float:
+	if p.club_id < 0:
+		return 0.95
+	var lvl := PlayerGenerator.club_level(world.clubs[p.club_id])
+	return clampf(1.0 + (lvl - p.ovr_f) * 0.005, 0.95, 1.07)
 
 
 ## Ritmo de envelhecimento próprio do jogador (0,8 a 1,2), estável ao longo da carreira.
@@ -379,14 +401,44 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
-		if age > 23:
+		if age > 24:
 			continue
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
-		if share >= 0.5 and avg >= 7.0 and rng.randf() < boost_chance:
-			p.potential = mini(95, p.potential + rng.randi_range(0, 2))
-		elif p.minutes_season < 300 and age >= 19 and p.club_id >= 0:
-			p.potential = maxi(p.overall, p.potential - rng.randi_range(0, 2))
+		# O que aconteceu na temporada mexe no teto: jogar bem, ser bancado, prêmios, cabeça.
+		var up := 0.0
+		var down := 0.0
+		if share >= 0.5 and avg >= 7.0:
+			up += 0.45
+		elif share >= 0.3 and avg >= 6.8:
+			up += 0.2
+		if p.minutes_season < 300 and age >= 19 and p.club_id >= 0:
+			down += 0.45
+		elif share < 0.15 and age >= 20 and p.club_id >= 0:
+			down += 0.2
+		var dm := p.trait_mult("dev_mult")
+		if dm >= 1.05:
+			up += 0.08
+		elif dm <= 0.95:
+			down += 0.12
+		if p.morale < 35.0:
+			down += 0.1
+		if p.club_id >= 0 and p.club_id == world.user_club_id and People.has_trust(world, p.id):
+			var tr := People.trust_of(world, p)
+			if tr >= 70.0:
+				up += 0.08
+			elif tr <= 30.0:
+				down += 0.08
+		for k in p.awards_in(world.year):
+			if AwardManager.award_weight(k) >= 2:
+				up += 0.15
+				break
+		up *= boost_chance
+		var roll := rng.randf()
+		if roll < up:
+			p.potential = mini(94, p.potential + rng.randi_range(1, 3))
+		elif roll < up + down:
+			p.potential = maxi(p.overall, p.potential - rng.randi_range(1, 3))
 		if rng.randf() < 0.025:
 			p.potential = maxi(p.overall, p.potential - rng.randi_range(3, 6))
 			out["busts"].append(p)

@@ -7,8 +7,8 @@ const ZONE_TITLE := 1
 const ZONE_PROMOTION := 2
 const ZONE_RELEGATION := 3
 const ZONE_CONTINENTAL := 4
-const ZONE_CONTINENTAL_2 := 5 # Europa League, Sul-Americana
-const ZONE_CONTINENTAL_3 := 6 # Conference League
+const ZONE_CONTINENTAL_2 := 5 # Liga Europa, Sul-Americana
+const ZONE_CONTINENTAL_3 := 6 # Liga Conferência
 
 
 static func empty_row() -> Dictionary:
@@ -68,7 +68,7 @@ static func _push_form(row: Dictionary, r: String) -> void:
 
 ## Ids ordenados: pontos, vitórias, saldo, gols pró, menos vermelhos, id.
 static func sorted_ids(league: League) -> Array:
-	return sort_table(league.club_ids, league.table)
+	return LeagueFormat.sorted_ids(league)
 
 
 static func sort_table(club_ids: Array, t: Dictionary) -> Array:

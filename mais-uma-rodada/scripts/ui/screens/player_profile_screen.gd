@@ -69,6 +69,15 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	brow.add_child(UIKit.label(["destro", "canhoto", "ambidestro"][p.foot], "Small"))
 	col.add_child(brow)
 	col.add_child(UIKit.label("De %s" % born, "Small", true))
+	var heart_txt := HeartClubs.known_text(w, p)
+	if heart_txt != "":
+		var hrow := UIKit.hbox(8)
+		hrow.add_child(UIKit.icon_rect("heart", 22, UIColors.RED))
+		var hc := HeartClubs.club_of(w, p)
+		if hc != null:
+			hrow.add_child(UIKit.crest(hc, 24))
+		hrow.add_child(UIKit.label(("Torce para o %s" % hc.short_name) if hc != null else heart_txt, "Small", true))
+		col.add_child(hrow)
 	if club != null:
 		# Toque no clube abre a página dele
 		var cr := UIKit.hbox(8)
@@ -88,7 +97,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	for t in p.traits:
 		tags.add_child(UIKit.pill(String(DatabaseManager.trait_data(t).get("name", t)).to_upper(), UIColors.ACCENT))
 	card.add_child(tags)
-	return UIKit.card_panel(card)
+	return HeroBackdrop.attach(UIKit.card_panel(card), club)
 
 
 func _summary(w: GameWorld, p: Player, own: bool) -> Control:

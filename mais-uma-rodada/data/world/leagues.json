@@ -1,5 +1,5 @@
 {
-	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money).",
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo.",
 	"leagues": [
 		{
 			"id": "ENG1",
@@ -24,7 +24,12 @@
 			],
 			"wage": 1.35,
 			"att": 1.3,
-			"ticket": 60
+			"ticket": 60,
+			"culture": {
+				"goals": 1.13,
+				"home": 1.0,
+				"cards": 0.9
+			}
 		},
 		{
 			"id": "ENG2",
@@ -49,7 +54,12 @@
 			],
 			"wage": 0.8,
 			"att": 1.1,
-			"ticket": 35
+			"ticket": 35,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "ESP1",
@@ -74,7 +84,12 @@
 			],
 			"wage": 1.0,
 			"att": 1.0,
-			"ticket": 45
+			"ticket": 45,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "ESP2",
@@ -99,7 +114,12 @@
 			],
 			"wage": 0.35,
 			"att": 0.8,
-			"ticket": 20
+			"ticket": 20,
+			"culture": {
+				"goals": 0.87,
+				"home": 1.05,
+				"cards": 1.25
+			}
 		},
 		{
 			"id": "GER1",
@@ -124,7 +144,12 @@
 			],
 			"wage": 1.05,
 			"att": 1.4,
-			"ticket": 35
+			"ticket": 35,
+			"culture": {
+				"goals": 1.19,
+				"home": 0.95,
+				"cards": 0.95
+			}
 		},
 		{
 			"id": "GER2",
@@ -149,7 +174,12 @@
 			],
 			"wage": 0.4,
 			"att": 1.2,
-			"ticket": 22
+			"ticket": 22,
+			"culture": {
+				"goals": 1.11,
+				"home": 1.0,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "ITA1",
@@ -174,7 +204,12 @@
 			"wage": 0.95,
 			"att": 0.9,
 			"ticket": 35,
-			"down": 3
+			"down": 3,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.0,
+				"cards": 1.1
+			}
 		},
 		{
 			"id": "ITA2",
@@ -199,7 +234,12 @@
 			],
 			"wage": 0.35,
 			"att": 0.7,
-			"ticket": 18
+			"ticket": 18,
+			"culture": {
+				"goals": 0.92,
+				"home": 1.05,
+				"cards": 1.15
+			}
 		},
 		{
 			"id": "FRA1",
@@ -224,7 +264,12 @@
 			],
 			"wage": 0.9,
 			"att": 0.9,
-			"ticket": 30
+			"ticket": 30,
+			"culture": {
+				"goals": 1.08,
+				"home": 1.0,
+				"cards": 0.95
+			}
 		},
 		{
 			"id": "FRA2",
@@ -249,7 +294,12 @@
 			],
 			"wage": 0.35,
 			"att": 0.7,
-			"ticket": 15
+			"ticket": 15,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.05,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "POR1",
@@ -274,7 +324,12 @@
 			"wage": 0.55,
 			"att": 0.8,
 			"ticket": 20,
-			"down": 2
+			"down": 2,
+			"culture": {
+				"goals": 1.0,
+				"home": 1.05,
+				"cards": 1.15
+			}
 		},
 		{
 			"id": "POR2",
@@ -299,7 +354,12 @@
 			],
 			"wage": 0.18,
 			"att": 0.5,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.05,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "NED1",
@@ -323,7 +383,12 @@
 			],
 			"wage": 0.65,
 			"att": 1.1,
-			"ticket": 25
+			"ticket": 25,
+			"culture": {
+				"goals": 1.21,
+				"home": 1.0,
+				"cards": 0.9
+			}
 		},
 		{
 			"id": "TUR1",
@@ -347,7 +412,12 @@
 			],
 			"wage": 0.8,
 			"att": 1.0,
-			"ticket": 20
+			"ticket": 20,
+			"culture": {
+				"goals": 1.11,
+				"home": 1.15,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "BEL1",
@@ -371,7 +441,27 @@
 			],
 			"wage": 0.6,
 			"att": 0.9,
-			"ticket": 22
+			"ticket": 22,
+			"culture": {
+				"goals": 1.09,
+				"home": 1.0,
+				"cards": 1.0
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6,
+					4
+				],
+				"legs": [
+					1,
+					1,
+					1
+				],
+				"halve": true,
+				"desc": "30 rodadas; os pontos caem pela metade e os 6 primeiros disputam os playoffs do título, os 6 seguintes os da Europa e os 4 últimos fogem da queda."
+			}
 		},
 		{
 			"id": "SCO1",
@@ -395,7 +485,24 @@
 			],
 			"wage": 0.5,
 			"att": 1.1,
-			"ticket": 25
+			"ticket": 25,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.05,
+				"cards": 0.95
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "33 rodadas (três turnos) e depois o split: os 6 primeiros disputam o título e os 6 de baixo fogem da queda, mais 5 rodadas cada. O grupo de cima termina sempre à frente."
+			}
 		},
 		{
 			"id": "GRE1",
@@ -419,7 +526,26 @@
 			],
 			"wage": 0.5,
 			"att": 0.7,
-			"ticket": 15
+			"ticket": 15,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.15,
+				"cards": 1.2
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					4,
+					4,
+					6
+				],
+				"legs": [
+					2,
+					2,
+					1
+				],
+				"desc": "26 rodadas e três grupos: título (4), vagas europeias (4) e rebaixamento (6)."
+			}
 		},
 		{
 			"id": "AUT1",
@@ -432,7 +558,7 @@
 				"#FFFFFF"
 			],
 			"teams": 12,
-			"rr": 3,
+			"rr": 2,
 			"level": [
 				60,
 				72
@@ -443,7 +569,25 @@
 			],
 			"wage": 0.55,
 			"att": 0.8,
-			"ticket": 18
+			"ticket": 18,
+			"culture": {
+				"goals": 1.17,
+				"home": 1.0,
+				"cards": 0.95
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					2,
+					2
+				],
+				"halve": true,
+				"desc": "22 rodadas e a divisão em dois grupos de 6 em turno e returno, com os pontos cortados pela metade."
+			}
 		},
 		{
 			"id": "SUI1",
@@ -467,7 +611,24 @@
 			],
 			"wage": 0.6,
 			"att": 0.8,
-			"ticket": 25
+			"ticket": 25,
+			"culture": {
+				"goals": 1.17,
+				"home": 1.0,
+				"cards": 0.9
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "33 rodadas e o split em dois grupos de 6 (título e rebaixamento), mais 5 rodadas cada."
+			}
 		},
 		{
 			"id": "UKR1",
@@ -491,7 +652,12 @@
 			],
 			"wage": 0.4,
 			"att": 0.6,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 0.96,
+				"home": 1.05,
+				"cards": 1.05
+			}
 		},
 		{
 			"id": "CRO1",
@@ -515,7 +681,12 @@
 			],
 			"wage": 0.35,
 			"att": 0.6,
-			"ticket": 10
+			"ticket": 10,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.1,
+				"cards": 1.1
+			}
 		},
 		{
 			"id": "SRB1",
@@ -539,7 +710,24 @@
 			],
 			"wage": 0.35,
 			"att": 0.6,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 1.04,
+				"home": 1.2,
+				"cards": 1.15
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					8,
+					8
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "30 rodadas e dois grupos de 8: o do título e o do rebaixamento."
+			}
 		},
 		{
 			"id": "CZE1",
@@ -563,7 +751,26 @@
 			],
 			"wage": 0.4,
 			"att": 0.7,
-			"ticket": 12
+			"ticket": 12,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.05,
+				"cards": 1.0
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					4,
+					6
+				],
+				"legs": [
+					1,
+					1,
+					1
+				],
+				"desc": "30 rodadas e três grupos: título (6), meio da tabela (4) e rebaixamento (6)."
+			}
 		},
 		{
 			"id": "DEN1",
@@ -576,7 +783,7 @@
 				"#FFFFFF"
 			],
 			"teams": 12,
-			"rr": 3,
+			"rr": 2,
 			"level": [
 				59,
 				70
@@ -587,7 +794,24 @@
 			],
 			"wage": 0.55,
 			"att": 0.8,
-			"ticket": 20
+			"ticket": 20,
+			"culture": {
+				"goals": 1.09,
+				"home": 1.0,
+				"cards": 0.9
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					2,
+					2
+				],
+				"desc": "22 rodadas e depois o grupo do título e o grupo do rebaixamento, com 10 rodadas cada."
+			}
 		},
 		{
 			"id": "BRA1",
@@ -612,7 +836,12 @@
 			],
 			"wage": 0.45,
 			"att": 0.8,
-			"ticket": 14
+			"ticket": 14,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.2,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "BRA2",
@@ -638,7 +867,12 @@
 			],
 			"wage": 0.2,
 			"att": 0.6,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 0.81,
+				"home": 1.25,
+				"cards": 1.25
+			}
 		},
 		{
 			"id": "BRA3",
@@ -664,7 +898,12 @@
 			],
 			"wage": 0.11,
 			"att": 0.5,
-			"ticket": 5
+			"ticket": 5,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.3,
+				"cards": 1.25
+			}
 		},
 		{
 			"id": "BRA4",
@@ -689,7 +928,12 @@
 			],
 			"wage": 0.07,
 			"att": 0.45,
-			"ticket": 4
+			"ticket": 4,
+			"culture": {
+				"goals": 0.87,
+				"home": 1.35,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "ARG1",
@@ -701,8 +945,8 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"teams": 20,
-			"rr": 2,
+			"teams": 30,
+			"rr": 1,
 			"down": 2,
 			"level": [
 				66,
@@ -714,7 +958,30 @@
 			],
 			"wage": 0.3,
 			"att": 1.1,
-			"ticket": 10
+			"ticket": 10,
+			"culture": {
+				"goals": 0.79,
+				"home": 1.2,
+				"cards": 1.3
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 16,
+				"ko": [
+					"r16",
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"r16": 1,
+					"qf": 1,
+					"sf": 1,
+					"f": 1
+				},
+				"neutral_final": true,
+				"desc": "30 clubes em turno único e os playoffs com os 16 melhores em jogo único; a final é em campo neutro."
+			}
 		},
 		{
 			"id": "ARG2",
@@ -739,7 +1006,12 @@
 			],
 			"wage": 0.12,
 			"att": 0.8,
-			"ticket": 5
+			"ticket": 5,
+			"culture": {
+				"goals": 0.75,
+				"home": 1.25,
+				"cards": 1.3
+			}
 		},
 		{
 			"id": "URU1",
@@ -763,7 +1035,12 @@
 			],
 			"wage": 0.18,
 			"att": 0.7,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.15,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "COL1",
@@ -776,7 +1053,7 @@
 				"#003893"
 			],
 			"teams": 20,
-			"rr": 2,
+			"rr": 1,
 			"level": [
 				60,
 				70
@@ -787,7 +1064,27 @@
 			],
 			"wage": 0.2,
 			"att": 0.9,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 0.87,
+				"home": 1.25,
+				"cards": 1.2
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 8,
+				"ko": [
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"qf": 2,
+					"sf": 2,
+					"f": 2
+				},
+				"desc": "Turno único e o mata-mata dos 8 primeiros em ida e volta até a final."
+			}
 		},
 		{
 			"id": "CHI1",
@@ -811,7 +1108,12 @@
 			],
 			"wage": 0.2,
 			"att": 0.7,
-			"ticket": 10
+			"ticket": 10,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.15,
+				"cards": 1.15
+			}
 		},
 		{
 			"id": "ECU1",
@@ -835,7 +1137,12 @@
 			],
 			"wage": 0.2,
 			"att": 0.7,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 0.94,
+				"home": 1.3,
+				"cards": 1.15
+			}
 		},
 		{
 			"id": "PER1",
@@ -859,7 +1166,12 @@
 			],
 			"wage": 0.15,
 			"att": 0.7,
-			"ticket": 6
+			"ticket": 6,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.3,
+				"cards": 1.15
+			}
 		},
 		{
 			"id": "PAR1",
@@ -883,7 +1195,12 @@
 			],
 			"wage": 0.15,
 			"att": 0.6,
-			"ticket": 6
+			"ticket": 6,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.15,
+				"cards": 1.2
+			}
 		},
 		{
 			"id": "BOL1",
@@ -907,7 +1224,12 @@
 			],
 			"wage": 0.1,
 			"att": 0.6,
-			"ticket": 5
+			"ticket": 5,
+			"culture": {
+				"goals": 1.25,
+				"home": 1.6,
+				"cards": 1.1
+			}
 		},
 		{
 			"id": "VEN1",
@@ -931,7 +1253,12 @@
 			],
 			"wage": 0.1,
 			"att": 0.5,
-			"ticket": 4
+			"ticket": 4,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.2,
+				"cards": 1.1
+			}
 		},
 		{
 			"id": "MEX1",
@@ -944,7 +1271,7 @@
 				"#C5A572"
 			],
 			"teams": 18,
-			"rr": 2,
+			"rr": 1,
 			"level": [
 				65,
 				75
@@ -955,7 +1282,27 @@
 			],
 			"wage": 0.55,
 			"att": 1.0,
-			"ticket": 14
+			"ticket": 14,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.15,
+				"cards": 1.05
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 8,
+				"ko": [
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"qf": 2,
+					"sf": 2,
+					"f": 2
+				},
+				"desc": "Torneio em turno único e a Liguilla: os 8 primeiros decidem o título em quartas, semifinal e final, todas em ida e volta."
+			}
 		},
 		{
 			"id": "USA1",
@@ -967,8 +1314,8 @@
 				"#001F5B",
 				"#E03A3E"
 			],
-			"teams": 20,
-			"rr": 2,
+			"teams": 30,
+			"rr": 1,
 			"level": [
 				63,
 				73
@@ -979,7 +1326,29 @@
 			],
 			"wage": 0.65,
 			"att": 0.9,
-			"ticket": 35
+			"ticket": 35,
+			"culture": {
+				"goals": 1.13,
+				"home": 1.3,
+				"cards": 0.95
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 16,
+				"ko": [
+					"r16",
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"r16": 1,
+					"qf": 1,
+					"sf": 1,
+					"f": 1
+				},
+				"desc": "30 clubes em turno único e os MLS Cup Playoffs com 16 classificados em jogo único; a MLS Cup é na casa da melhor campanha."
+			}
 		},
 		{
 			"id": "EGY1",
@@ -1003,7 +1372,12 @@
 			],
 			"wage": 0.2,
 			"att": 0.5,
-			"ticket": 3
+			"ticket": 3,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.15,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "MAR1",
@@ -1027,7 +1401,12 @@
 			],
 			"wage": 0.2,
 			"att": 0.6,
-			"ticket": 5
+			"ticket": 5,
+			"culture": {
+				"goals": 0.79,
+				"home": 1.2,
+				"cards": 1.05
+			}
 		},
 		{
 			"id": "TUN1",
@@ -1051,7 +1430,12 @@
 			],
 			"wage": 0.15,
 			"att": 0.5,
-			"ticket": 4
+			"ticket": 4,
+			"culture": {
+				"goals": 0.79,
+				"home": 1.25,
+				"cards": 1.05
+			}
 		},
 		{
 			"id": "RSA1",
@@ -1075,7 +1459,12 @@
 			],
 			"wage": 0.2,
 			"att": 0.5,
-			"ticket": 5
+			"ticket": 5,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.15,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "NGA1",
@@ -1099,7 +1488,12 @@
 			],
 			"wage": 0.06,
 			"att": 0.4,
-			"ticket": 2
+			"ticket": 2,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.8,
+				"cards": 1.05
+			}
 		},
 		{
 			"id": "SEN1",
@@ -1123,7 +1517,12 @@
 			],
 			"wage": 0.06,
 			"att": 0.4,
-			"ticket": 2
+			"ticket": 2,
+			"culture": {
+				"goals": 0.72,
+				"home": 1.25,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "KSA1",
@@ -1147,7 +1546,12 @@
 			],
 			"wage": 1.2,
 			"att": 0.5,
-			"ticket": 8
+			"ticket": 8,
+			"culture": {
+				"goals": 1.13,
+				"home": 1.05,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "JPN1",
@@ -1171,7 +1575,12 @@
 			],
 			"wage": 0.45,
 			"att": 0.9,
-			"ticket": 25
+			"ticket": 25,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 0.75
+			}
 		},
 		{
 			"id": "KOR1",
@@ -1195,7 +1604,24 @@
 			],
 			"wage": 0.35,
 			"att": 0.6,
-			"ticket": 10
+			"ticket": 10,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 0.9
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "33 rodadas e o split: Final A (6 de cima, pelo título) e Final B (6 de baixo), mais 5 rodadas."
+			}
 		},
 		{
 			"id": "QAT1",
@@ -1219,7 +1645,12 @@
 			],
 			"wage": 0.8,
 			"att": 0.3,
-			"ticket": 5
+			"ticket": 5,
+			"culture": {
+				"goals": 1.28,
+				"home": 0.95,
+				"cards": 0.95
+			}
 		},
 		{
 			"id": "UAE1",
@@ -1243,7 +1674,12 @@
 			],
 			"wage": 0.7,
 			"att": 0.3,
-			"ticket": 6
+			"ticket": 6,
+			"culture": {
+				"goals": 1.17,
+				"home": 1.0,
+				"cards": 0.95
+			}
 		},
 		{
 			"id": "CHN1",
@@ -1267,7 +1703,12 @@
 			],
 			"wage": 0.6,
 			"att": 0.8,
-			"ticket": 10
+			"ticket": 10,
+			"culture": {
+				"goals": 1.09,
+				"home": 1.1,
+				"cards": 1.0
+			}
 		},
 		{
 			"id": "AUS1",
@@ -1291,7 +1732,28 @@
 			],
 			"wage": 0.4,
 			"att": 0.6,
-			"ticket": 20
+			"ticket": 20,
+			"culture": {
+				"goals": 1.21,
+				"home": 1.05,
+				"cards": 0.85
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 6,
+				"byes": 2,
+				"ko": [
+					"ef",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"ef": 1,
+					"sf": 2,
+					"f": 1
+				},
+				"desc": "Temporada regular e a Finals Series: os 6 primeiros vão aos playoffs (os 2 melhores direto na semifinal); a Grande Final é em jogo único na casa do melhor."
+			}
 		}
 	]
 }

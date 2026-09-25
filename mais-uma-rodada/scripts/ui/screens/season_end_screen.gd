@@ -45,12 +45,24 @@ func _celebrate() -> void:
 	if title == "":
 		if u.get("relegated", false):
 			AudioManager.play("lose", -4.0)
+		_ceremony.call_deferred()
 		return
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
 	AudioManager.play("title")
 	AudioManager.vibrate(400)
 	_overlay.play(3, title, club.short_name, tag, "Temporada %d" % int(_summary.get("year", w.year - 1)), club.primary_color(), club.secondary_color(), 1.0)
+	_overlay.finished.connect(_ceremony, CONNECT_ONE_SHOT)
+
+
+## Cerimônia animada das principais premiações (revelação, artilheiro, craque, Bola de Ouro...).
+func _ceremony() -> void:
+	var items := AwardCeremony.build_items(world(), _summary)
+	if items.is_empty() or not is_inside_tree():
+		return
+	var cer := AwardCeremony.new()
+	get_tree().root.add_child(cer)
+	cer.start(world(), items)
 
 
 func refresh() -> void:
@@ -235,6 +247,7 @@ func _awards_card(w: GameWorld) -> Control:
 		return null
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("Prêmios da temporada"))
+	card.add_child(UIKit.button("Rever a cerimônia de premiação", "GhostButton", func(): _ceremony(), "trophy"))
 	if not ballon.is_empty():
 		var row := UIKit.hbox(10)
 		row.add_child(UIKit.icon_rect("star", 34, UIColors.ACCENT))
@@ -291,11 +304,7 @@ func _awards_card(w: GameWorld) -> Control:
 	var team: Array = _summary.get("team", [])
 	if team.size() == 11:
 		card.add_child(UIKit.label(AwardManager.award_name("team"), "Caps"))
-		var names: Array = []
-		for pid in team:
-			var p := w.player(int(pid))
-			names.append(p.display_name() if p != null else "—")
-		card.add_child(UIKit.label("%s · %s · %s · %s" % [names[0], ", ".join(names.slice(1, 5)), ", ".join(names.slice(5, 8)), ", ".join(names.slice(8, 11))], "Small", true))
+		card.add_child(XIPitch.make(w, team, [], int(aw.get("mvp", {}).get("id", -1)) if aw.get("mvp", {}) is Dictionary else -1))
 	if not yl.is_empty():
 		var champ := w.club(int(yl.get("champion", -1)))
 		if champ != null:

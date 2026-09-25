@@ -74,6 +74,31 @@ static func build_calendar(year: int) -> Array:
 
 
 ## Cria as ligas (clubes pela liga atual de cada um), os jogos, as copas e o calendário de `world.year`.
+## Notícias da segunda fase e dos playoffs (só das ligas que interessam ao usuário).
+static func _league_format_news(world: GameWorld, league: League, ev: Dictionary) -> void:
+	var mine := world.has_user() and (league.nation == world.user_nation() or league.has_club(world.user_club_id))
+	if not mine and not _is_major(league):
+		return
+	match String(ev["t"]):
+		"split":
+			var names: Array = []
+			for g in league.phase_groups:
+				names.append(str(g.size()))
+			NewsManager.post_raw(world, "%s se divide: começa a fase decisiva" % league.short_name,
+				"Terminada a fase regular, a %s se divide em grupos de %s clubes. Quem está no grupo de cima termina à frente, aconteça o que acontecer." % [league.name, " e ".join(PackedStringArray(names))],
+				-1, -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"playoff_start":
+			var cl: Array = ev["clubs"]
+			NewsManager.post_raw(world, "Playoffs da %s definidos" % league.short_name,
+				"%d clubes disputam o título em mata-mata. %s termina a fase regular na liderança." % [cl.size(), world.club(int(cl[0])).short_name],
+				int(cl[0]), -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"playoff_champion":
+			var c := world.club(int(ev["club"]))
+			NewsManager.post_raw(world, "%s é campeão da %s!" % [c.short_name, league.short_name],
+				"O %s venceu os playoffs e levantou a taça da %s." % [c.name, league.name],
+				c.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(c.id) else NewsEvent.IMP_HIGH, "liga")
+
+
 static func build_season(world: GameWorld) -> SeasonState:
 	var s := SeasonState.new()
 	s.year = world.year
@@ -101,11 +126,17 @@ static func build_season(world: GameWorld) -> SeasonState:
 		var n_clubs := l.club_ids.size()
 		if n_clubs > 1 and n_clubs < int(cfg.get("teams", n_clubs)):
 			rr = maxi(rr, int(ceil(30.0 / (n_clubs - 1))))
+		# Formato real: os últimos fins de semana ficam para a segunda fase ou os playoffs.
+		var extra := LeagueFormat.extra_rounds(cfg, n_clubs)
+		var reg_weekends: Array = weekends.slice(0, weekends.size() - extra) if extra > 0 else weekends
 		# Cada rodada precisa de um fim de semana próprio: turnos a mais ficariam sem data.
 		var per_turn := n_clubs - 1 + n_clubs % 2
-		while rr > 1 and per_turn * rr > weekends.size():
+		while rr > 1 and per_turn * rr > reg_weekends.size():
 			rr -= 1
-		FixtureManager.build_league_fixtures(world.rng, l, rr, weekends)
+		FixtureManager.build_league_fixtures(world.rng, l, rr, reg_weekends)
+		l.regular_rounds = l.rounds.size()
+		if extra > 0:
+			l.phase_slots = weekends.slice(weekends.size() - extra)
 		CompetitionManager.init_table(l)
 		s.leagues[id] = l
 		s.league_order.append(id)
@@ -307,6 +338,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		tt = _time("financas", tt)
 		TrainingManager.weekly(world)
 		YouthManager.weekly(world)
+		HeartClubs.weekly(world)
 		report["youth"] = YouthManager.play_slot(world, slot)
 		report["transfers"] = TransferManager.process_matchday(world)
 		tt = _time("mercado", tt)
@@ -325,6 +357,10 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	# Copas: grupos, confrontos, campeões e o Mundial
 	var cup_events := CupManager.after_slot(world, slot)
 	report["cups"] = cup_events
+	# Formatos reais das ligas: split e playoffs
+	for lid in s.league_order:
+		for ev in LeagueFormat.after_slot(world, s.leagues[lid]):
+			_league_format_news(world, s.leagues[lid], ev)
 	NewsManager.on_cup_events(world, cup_events)
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
@@ -393,8 +429,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			league.table[f.home]["rc"] += int(rc[0])
 			league.table[f.away]["yc"] += int(yc[1])
 			league.table[f.away]["rc"] += int(rc[1])
-	else:
-		CupManager.apply_result(world, f)
+	elif world.league(f.comp) == null:
+		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
 	var derby := bool(res.get("derby", false))
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
@@ -411,6 +447,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 		var patience := float(club.arch().get("fan_patience", 50))
 		var swing := 1.0 + (50.0 - patience) / 100.0
 		var dm := 3.0 if result == "V" else (-0.5 if result == "E" else -3.0 * swing)
+		if result == "V" and world.is_user_club(club.id) and ManagerProfile.has_style(world, "ofensivo"):
+			dm *= 1.25
 		if big:
 			dm *= 1.8
 		club.fan_mood = clampf(club.fan_mood + dm, 0.0, 100.0)
@@ -578,7 +616,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			if c.history.size() > 80:
 				c.history = c.history.slice(c.history.size() - 80)
 			_update_reputation(c, cfg, i + 1, teams, promoted.has(c.id), relegated.has(c.id))
-		var champ := world.club(ids[0])
+		var champ := world.club(LeagueFormat.champion(league, ids))
 		champ.add_title("L:" + id)
 		for pid in champ.player_ids:
 			var p := world.player(pid)
@@ -591,9 +629,9 @@ static func end_season(world: GameWorld) -> Dictionary:
 			moves[cid] = upper
 		for cid in relegated:
 			moves[cid] = lower
-		summary["leagues"].append({"id": id, "name": league.name, "nation": league.nation, "tier": league.tier, "champion": ids[0],
+		summary["leagues"].append({"id": id, "name": league.name, "nation": league.nation, "tier": league.tier, "champion": champ.id,
 			"promoted": promoted, "relegated": relegated, "scorer": scorer, "table": ids})
-		hist_leagues[id] = {"champion": ids[0], "runner_up": ids[1] if ids.size() > 1 else -1, "promoted": promoted, "relegated": relegated, "scorer": scorer}
+		hist_leagues[id] = {"champion": champ.id, "runner_up": LeagueFormat.runner_up(league, ids), "promoted": promoted, "relegated": relegated, "scorer": scorer}
 		var mine := league.nation == user_nation
 		if mine or _is_major(league) or world.is_user_club(champ.id):
 			NewsManager.post(world, "campeao", {"club": champ.short_name, "division": league.name, "pts": league.table[champ.id]["pts"], "year": world.year},
@@ -668,9 +706,9 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["user"] = {"league": u.league_id, "league_name": league.name, "pos": pos, "goal": goal[0], "goal_met": pos <= int(goal[1]),
 			"promoted": moves.has(u.id) and DatabaseManager.league_cfg(moves[u.id]).get("tier", 1) < u.tier,
 			"relegated": moves.has(u.id) and DatabaseManager.league_cfg(moves[u.id]).get("tier", 1) > u.tier,
-			"champion": pos == 1, "cups": cups_user}
+			"champion": LeagueFormat.champion(league, CompetitionManager.sorted_ids(league)) == u.id, "cups": cups_user}
 		world.manager_stats["seasons"] = int(world.manager_stats.get("seasons", 0)) + 1
-		if pos == 1:
+		if summary["user"]["champion"]:
 			world.manager_stats["titles"] = int(world.manager_stats.get("titles", 0)) + 1
 		for cu in cups_user:
 			if cu["champion"]:
@@ -787,6 +825,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	TransferManager.pay_installments(world)
 	# Agentes livres: mantém o mercado vivo, sem inchar
 	_maintain_free_agents(world)
+	HeartClubs.ensure_all(world) # garotos e livres novos
 	TransferManager.balance_squads(world)
 	# Nova temporada
 	world.season = build_season(world)

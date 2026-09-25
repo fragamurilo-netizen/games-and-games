@@ -50,6 +50,7 @@ func _initialize() -> void:
 	_run("demissão no meio da temporada e troca de técnicos", _test_mid_season_firing)
 	_run("mods e jogadores personalizados", _test_mods)
 	_run("loja: temporada de demonstração e Carreira Completa", _test_store)
+	_run("times de coração, treinador e revelados", _test_hearts_manager)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -425,10 +426,25 @@ func _test_season_cycle() -> void:
 		for r in league.rounds:
 			for f: Fixture in r:
 				check(f.played, "%s: jogo não disputado" % id)
-				expect += 2 if f.hg == f.ag else 3
+				if f.stage == Fixture.STAGE_LEAGUE:
+					expect += 2 if f.hg == f.ag else 3
 		for cid in league.club_ids:
 			pts += int(league.table[cid]["pts"])
-		check(pts == expect, "%s: pontos na tabela (%d) não batem com os jogos (%d)" % [id, pts, expect])
+		if not bool(LeagueFormat.cfg(league).get("halve", false)): # pontos pela metade no split
+			check(pts == expect, "%s: pontos na tabela (%d) não batem com os jogos (%d)" % [id, pts, expect])
+	# Formatos reais: split na Escócia (6 + 6, grupo de cima à frente) e playoffs no México e na MLS
+	var sco: League = w.season.leagues["SCO1"]
+	check(sco.phase_groups.size() == 2 and Array(sco.phase_groups[0]).size() == 6, "Escócia sem o split 6 + 6")
+	if sco.phase_groups.size() == 2:
+		var order := CompetitionManager.sorted_ids(sco)
+		for cid in sco.phase_groups[0]:
+			check(order.find(cid) < 6, "clube do grupo de cima terminou abaixo do 6º na Escócia")
+		check(sco.rounds.size() == 38, "Escócia com %d rodadas (38 na vida real)" % sco.rounds.size())
+	for lid in ["MEX1", "USA1", "AUS1"]:
+		var pl: League = w.season.leagues[lid]
+		var champ := int(pl.po.get("champ", -1))
+		check(champ >= 0 and Array(pl.po.get("seeds", [])).has(champ), "%s sem campeão dos playoffs" % lid)
+		check(LeagueFormat.champion(pl, CompetitionManager.sorted_ids(pl)) == champ or champ < 0, "%s: campeão da temporada não é o dos playoffs" % lid)
 	# Copas continentais
 	for cid in ["UCL", "LIB", "AFC"]:
 		var cup: Cup = w.season.cups[cid]
@@ -461,8 +477,12 @@ func _test_season_cycle() -> void:
 			in_state[c] = true
 		for f in st.fixtures:
 			check(f.played and w.season.slot_type(f.slot).begins_with("E"), "%s: jogo fora das datas do estadual" % cid)
-	check(in_state.size() == 80, "%d clubes brasileiros nos estaduais" % in_state.size())
-	check(w.season.cups.has("SPE") and w.season.cups["SPE"].club_ids.size() == 17, "Paulistão sem os 17 clubes paulistas")
+	# Formatos reais: Paulistão com 16 (o 17º paulista joga a Série A2), Carioca com 8 na Taça Guanabara...
+	check(in_state.size() >= 75, "%d clubes brasileiros nos estaduais" % in_state.size())
+	check(w.season.cups.has("SPE") and w.season.cups["SPE"].club_ids.size() == 16 and w.season.cups["SPE"].groups.size() == 4, "Paulistão fora do formato (16 clubes em 4 grupos)")
+	check(w.season.cups.has("VER") and w.season.cups["VER"].groups.is_empty(), "Copa Verde deveria ser só mata-mata")
+	if w.season.cups.has("SPE"):
+		check(w.season.cups["SPE"].ties_of_round(0).size() == 4, "Paulistão sem quartas de final")
 	check(w.season.cups.has("CWC"), "Mundial de Clubes não foi montado")
 	if w.season.cups.has("CWC"):
 		var cwc: Cup = w.season.cups["CWC"]
@@ -939,10 +959,14 @@ func _test_academy_depth() -> void:
 		var a := q.age(w.year)
 		var cat := YouthManager.category(q, w.year)
 		check((a >= 18) == (cat == YouthManager.CAT_U20) and (a <= 15) == (cat == YouthManager.CAT_U15), "categoria errada: %d anos em %s" % [a, cat])
-	# Faixa de potencial sempre contém o potencial real
+	# Estimativa de potencial: perto do real, mas com erro que nunca some de todo
+	var exact := 0
 	for q: Player in w.academy.values():
-		var r := YouthManager.potential_range(w, q)
-		check(int(r[0]) <= q.potential and q.potential <= int(r[1]), "potencial %d fora da faixa %s" % [q.potential, r])
+		var est := YouthManager.estimate(w, q)
+		check(absi(est - q.potential) <= 6 or est == q.overall, "estimativa %d longe do potencial %d" % [est, q.potential])
+		if est == q.potential:
+			exact += 1
+	check(exact < w.academy.size(), "estimativa sempre exata: o potencial ficou exposto")
 	# Escalação: um goleiro no gol, sem repetir ninguém, e sub-17 só com garotos até 17 anos
 	var t := YouthManager.pick_team(w, "u20")
 	var gks := 0
@@ -1034,6 +1058,64 @@ func _test_academy_depth() -> void:
 			else:
 				downs += 1
 	check(ups > 0 and downs > 0, "balanço da base sem estirão (%d) ou estagnação (%d)" % [ups, downs])
+
+
+func _test_hearts_manager() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	# Times de coração: todo mundo sorteado, ~60% torcem para alguém, quase todos escondidos
+	var fans := 0
+	var total := 0
+	var known := 0
+	var local := 0
+	for p: Player in w.players.values():
+		total += 1
+		check(p.heart != -2, "jogador sem sorteio de time de coração")
+		if p.heart >= 0:
+			fans += 1
+			var hc := w.club(p.heart)
+			check(hc != null and hc.nation == p.nationality, "time de coração de outro país")
+			if hc != null and hc.city == p.hometown:
+				local += 1
+		if p.heart_known:
+			known += 1
+	var share := float(fans) / float(total)
+	check(share > 0.4 and share < 0.75, "fração de torcedores estranha: %.2f" % share)
+	check(known == 0, "time de coração revelado sem motivo (%d)" % known)
+	check(local > fans * 0.2, "poucos torcem para o clube da cidade (%d de %d)" % [local, fans])
+	# Save guarda o segredo
+	var any: Player = null
+	for p: Player in w.players.values():
+		if p.heart >= 0:
+			any = p
+			break
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(w2.player(any.id).heart == any.heart and not w2.player(any.id).heart_known, "save perdeu o time de coração")
+	# Efeito: topa ir para o clube do coração com mais vontade e pedindo menos
+	var heart_club := w.club(any.heart)
+	var before := any.heart
+	any.heart = -1
+	var i0 := TransferManager.interest(w, any, heart_club)
+	var wage0 := TransferManager.wage_ask(w, any, heart_club)
+	any.heart = before
+	check(TransferManager.interest(w, any, heart_club) >= i0 and TransferManager.wage_ask(w, any, heart_club) <= wage0, "clube do coração não pesou na negociação")
+	# Pergunta na conversa revela (ou ele desconversa se torce para o rival)
+	var sp: Player = w.squad(c)[0]
+	HeartClubs.ask(w, sp)
+	var hc2 := HeartClubs.club_of(w, sp)
+	check(sp.heart_known or (hc2 != null and (hc2.is_rival(c.id) or c.is_rival(hc2.id))), "pergunta sobre o time de coração não revelou")
+	# Treinador personalizado: salvo e com efeito do estilo
+	var m := ManagerProfile.data(w)
+	m["style"] = "formador"
+	m["nat"] = "ARG"
+	check(ManagerProfile.youth_mult(w) > 1.0 and ManagerProfile.cohesion_mult(w) == 1.0, "estilo formador sem efeito")
+	var w3 := GameWorld.from_dict(w.to_dict())
+	check(ManagerProfile.style(w3) == "formador" and String(ManagerProfile.data(w3)["nat"]) == "ARG", "save perdeu o treinador")
+	# Revelados: clubes formadores reconhecidos pela primeira passagem
+	var any_grads := 0
+	for cl: Club in w.clubs_in_league("BRA1"):
+		any_grads += Graduates.count(w, cl.id)
+	check(any_grads > 20, "quase nenhum revelado nos clubes da Série A (%d)" % any_grads)
 
 
 func _test_trades() -> void:

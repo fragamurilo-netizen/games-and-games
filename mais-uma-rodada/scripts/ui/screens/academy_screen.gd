@@ -65,7 +65,7 @@ func _header(w: GameWorld, club: Club) -> Control:
 	row.add_child(UIKit.stat(_pos_text(w, "u20"), "no sub-20"))
 	row.add_child(UIKit.stat(_pos_text(w, "u17"), "no sub-17"))
 	card.add_child(row)
-	card.add_child(UIKit.label("Quem joga evolui mais. O potencial é uma faixa que estreita com o tempo de casa e com um bom coordenador. Com 19 anos é a última chance: suba ao profissional ou ele sai de graça no fim da temporada.", "Small", true))
+	card.add_child(UIKit.label("Quem joga evolui mais. As estrelas são a estimativa da comissão sobre o futuro de cada garoto: ficam mais confiáveis com o tempo de casa e um bom coordenador, mas ninguém acerta sempre. Com 19 anos é a última chance: suba ao profissional ou ele sai de graça no fim da temporada.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -107,13 +107,22 @@ func _kid_row(w: GameWorld, club: Club, p: Player) -> Control:
 	name_row.add_child(nl)
 	col.add_child(name_row)
 	var age := p.age(w.year)
-	var info := "%d anos · %s" % [age, YouthManager.potential_text(w, p)]
+	var info := "%d anos · %s" % [age, YouthManager.potential_label_of(w, p)]
 	if p.stats[Player.S_APPS] > 0:
 		info += " · %d J %d G · %.1f" % [p.stats[Player.S_APPS], p.stats[Player.S_GOALS], p.avg_rating()]
 	col.add_child(UIKit.colored(info, UIColors.ORANGE if age >= YouthManager.MAX_AGE else UIColors.MUTED, "Small"))
 	row.add_child(col)
+	row.add_child(_stars(w, p, 14))
 	row.add_child(UIKit.badge(p.overall, 52, 38, 22))
 	return row
+
+
+func _stars(w: GameWorld, p: Player, px: float) -> StarsView:
+	var st := StarsView.new()
+	st.star_size = px
+	st.stars = YouthManager.potential_stars(w, p)
+	st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return st
 
 
 func _actions(p: Player) -> void:
@@ -125,7 +134,8 @@ func _actions(p: Player) -> void:
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(p.full_name(), "Title", true))
 	col.add_child(UIKit.label("%s · %d anos · %s · %s" % [Pos.name_of(p.position), p.age(w.year), YouthManager.category_name(YouthManager.category(p, w.year)), p.playstyle()], "Small", true))
-	col.add_child(UIKit.label("%s · %s" % [YouthManager.potential_text(w, p), YouthManager.potential_label_of(w, p)], "Small", true))
+	col.add_child(UIKit.label("Estimativa da base: %s" % YouthManager.potential_text(w, p), "Small", true))
+	col.add_child(_stars(w, p, 20))
 	head.add_child(col)
 	head.add_child(UIKit.badge(p.overall))
 	v.add_child(head)
@@ -339,7 +349,7 @@ func _trial(w: GameWorld) -> Control:
 		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nr.add_child(nl)
 		col.add_child(nr)
-		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), YouthManager.potential_text(w, p), p.hometown if p.hometown != "" else DatabaseManager.nation_name(p.nationality)], "Small"))
+		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), YouthManager.potential_label_of(w, p), p.hometown if p.hometown != "" else DatabaseManager.nation_name(p.nationality)], "Small"))
 		row.add_child(col)
 		row.add_child(UIKit.badge(p.overall, 48, 36, 20))
 		var pid := p.id

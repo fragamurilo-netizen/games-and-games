@@ -104,6 +104,9 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.button("Uniformes e patrocínios" + (" (pré-temporada)" if pre else ""), "PrimaryButton" if pre else "GhostButton", func(): UIManager.push("kit"), "shirt"))
 	var cid := club.id
 	card.add_child(UIKit.button("Elencos anteriores", "GhostButton", func(): UIManager.push("past_squads", {"id": cid}), "clock"))
+	card.add_child(UIKit.button("Revelados pela base", "GhostButton", func(): UIManager.push("graduates", {"id": cid}), "up"))
+	if _own():
+		card.add_child(UIKit.button("Apresentação do clube", "GhostButton", func(): UIManager.push("welcome"), "info"))
 	var pol := ClubPolicy.of(club)
 	if not pol.is_empty():
 		card.add_child(UIKit.section("Filosofia"))
@@ -130,7 +133,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 			rr.add_child(UIKit.label(w.league_short(r.league_id), "Small"))
 			var rid2 := r.id
 			card.add_child(UIKit.tap_row(rr, func(): _open_club(rid2), "CardFlat"))
-	return UIKit.card_panel(card)
+	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1)
 
 
 func _open_club(cid: int) -> void:
@@ -453,7 +456,19 @@ func _idols_card(w: GameWorld, club: Club) -> Control:
 func _manager_card(w: GameWorld) -> Control:
 	var s := w.manager_stats
 	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.section("Treinador · %s" % w.manager_name))
+	card.add_child(UIKit.section("Treinador"))
+	var head := UIKit.hbox(14)
+	head.add_child(ManagerProfile.portrait(w, 96))
+	var hc := UIKit.vbox(2)
+	hc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hc.add_child(UIKit.label(w.manager_name, "H3", true))
+	var m := ManagerProfile.data(w)
+	var nr := UIKit.hbox(8)
+	nr.add_child(UIKit.flag(String(m["nat"]), 30))
+	nr.add_child(UIKit.label("%d anos · %s" % [ManagerProfile.age(w), ManagerProfile.style_name(String(m["style"]))], "Small", true))
+	hc.add_child(nr)
+	head.add_child(hc)
+	card.add_child(UIKit.tap_row(head, func(): UIManager.push("manager"), "CardFlat"))
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.stat(str(int(s.get("games", 0))), "jogos"))
 	row.add_child(UIKit.stat("%d-%d-%d" % [int(s.get("w", 0)), int(s.get("d", 0)), int(s.get("l", 0))], "V-E-D"))
@@ -461,6 +476,7 @@ func _manager_card(w: GameWorld) -> Control:
 	row.add_child(UIKit.stat(str(int(s.get("promotions", 0))), "acessos", UIColors.GREEN))
 	card.add_child(row)
 	card.add_child(UIKit.label("Dificuldade: %s · temporada nº %d" % [GameWorld.DIFF_NAMES[w.difficulty], w.season_number], "Small"))
+	card.add_child(UIKit.button("Personalizar o treinador", "GhostButton", func(): UIManager.push("manager"), "star"))
 	return UIKit.card_panel(card)
 
 

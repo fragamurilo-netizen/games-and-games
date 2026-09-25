@@ -1,6 +1,6 @@
 class_name CupManager
 extends RefCounted
-## Copas continentais (Liga dos Campeões, Europa League, Conference League, Libertadores,
+## Copas continentais (Liga dos Campeões, Liga Europa, Liga Conferência, Libertadores,
 ## Sul-Americana, CONCACAF, África, Ásia) e Mundial de Clubes: classificação pelas ligas, sorteio de grupos (evitando clubes do mesmo país), mata-mata em ida e
 ## volta com prorrogação e pênaltis, final única em campo neutro, premiação por fase e títulos.
 ## Também os estaduais brasileiros (kind = "state" no continental.json): grupos em turno único nas
@@ -134,7 +134,7 @@ static func news_cat(id: String, what: String) -> String:
 	return ("estadual_" if is_state(id) else "copa_") + what
 
 
-## Nível da copa: 1 = principal, 2 = Europa League / Sul-Americana, 3 = Conference League.
+## Nível da copa: 1 = principal, 2 = Liga Europa / Sul-Americana, 3 = Liga Conferência.
 static func cup_level(id: String) -> int:
 	return int(cfg(id).get("level", 1))
 
@@ -196,10 +196,14 @@ static func cup_for_position(league: League, position: int) -> String:
 
 
 static func cup_name(id: String) -> String:
+	if DatabaseManager.has_league(id):
+		return "Playoffs · " + String(DatabaseManager.league_cfg(id).get("name", id)) # números dos playoffs de liga
 	return cfg(id).get("name", id)
 
 
 static func cup_short(id: String) -> String:
+	if DatabaseManager.has_league(id):
+		return "Playoffs " + String(DatabaseManager.league_cfg(id).get("short", id))
 	return cfg(id).get("short", id)
 
 
@@ -691,17 +695,25 @@ static func _setup_state_cups(world: GameWorld, s: SeasonState) -> void:
 		for club: Club in world.clubs:
 			if club.nation == String(c.get("nation", "BRA")) and ufs.has(uf_of(club)):
 				list.append(club.id)
-		if list.size() < int(c.get("qualify", 4)):
+		var plan := ko_plan(id)
+		var ko_n := 1 << plan.size() # quantos entram no mata-mata
+		if list.size() < ko_n:
 			continue
 		list.sort_custom(func(a, b): return world.club(a).reputation > world.club(b).reputation or (world.club(a).reputation == world.club(b).reputation and a < b))
+		list = list.slice(0, int(c.get("max_clubs", 16)))
 		var cup := Cup.new()
 		cup.id = id
 		cup.name = cup_name(id)
 		cup.short_name = cup_short(id)
 		cup.club_ids = list
-		for k in ko_plan(id):
+		for k in plan:
 			cup.round_names.append(ROUND_NAMES[k])
-		var n_groups := ceili(float(list.size()) / float(int(c.get("group_max", 8))))
+		# Só mata-mata (Copa Verde): cabeças de chave pela reputação.
+		if int(c.get("state_groups", -1)) == 0:
+			s.cups[id] = cup
+			_create_ko_round(world, s, cup, 0, state_pairs(cup, list.slice(0, ko_n), _legs(cup, 0)))
+			continue
+		var n_groups := int(c.get("state_groups", ceili(float(list.size()) / float(int(c.get("group_max", 8))))))
 		for g in n_groups:
 			cup.groups.append({"n": GROUP_LETTERS[g], "clubs": [], "table": {}})
 		# Distribuição em serpentina: 1º no A, 2º no B, ..., e volta.
@@ -881,8 +893,8 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 					events.append({"t": "out", "cup": id, "club": cid, "stage": "Primeira fase"})
 			for cid in seeds:
 				events.append({"t": "advance", "cup": id, "club": cid, "stage": "Primeira fase", "first": cid == seeds[0]})
-			# Semifinal: 1º x 4º e 2º x 3º, jogo único na casa da melhor campanha.
-			_create_ko_round(world, s, cup, 0, [[seeds[0], seeds[3]], [seeds[1], seeds[2]]])
+			# Chaveamento pela campanha: 1º x último classificado, 2º x penúltimo...
+			_create_ko_round(world, s, cup, 0, state_pairs(cup, seeds, _legs(cup, 0)))
 		elif not cup.groups.is_empty() and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1):
 			var winners: Array = []
 			var runners: Array = []
@@ -990,12 +1002,17 @@ static func _knockout_draw(world: GameWorld, cup: Cup, winners: Array, runners: 
 ## Fases seguintes: sorteio livre (copas continentais) ou chaveamento fixo (Mundial).
 static func _next_pairs(world: GameWorld, cup: Cup, winners: Array) -> Array:
 	if is_state(cup.id):
-		# Final em ida e volta: a melhor campanha da primeira fase decide em casa (jogo de volta).
-		var order_s := CompetitionManager.sort_table(winners, _merged_table(cup))
-		var out: Array = []
-		for i in range(0, order_s.size() - 1, 2):
-			out.append([order_s[i + 1], order_s[i]])
-		return out
+		# A melhor campanha da primeira fase (ou a cabeça de chave) decide em casa.
+		var next_r := 0
+		for t in cup.ties:
+			next_r = maxi(next_r, int(t["r"]) + 1)
+		var order_s: Array
+		if cup.groups.is_empty():
+			order_s = winners.duplicate()
+			order_s.sort_custom(func(a, b): return cup.club_ids.find(a) < cup.club_ids.find(b))
+		else:
+			order_s = CompetitionManager.sort_table(winners, _merged_table(cup))
+		return state_pairs(cup, order_s, _legs(cup, next_r))
 	var order: Array = winners.duplicate()
 	if cup.id != CWC:
 		RngUtil.shuffle(world.rng, order)
@@ -1005,16 +1022,30 @@ static func _next_pairs(world: GameWorld, cup: Cup, winners: Array) -> Array:
 	return pairs
 
 
-## Classificados de um estadual, em ordem de campanha: líderes dos grupos e depois os melhores dos demais.
+## Confrontos de um estadual a partir da ordem de campanha: 1º x último, 2º x penúltimo...
+## Jogo único na casa do melhor; em ida e volta, o melhor decide em casa (segundo jogo).
+static func state_pairs(cup: Cup, seeds: Array, legs: int) -> Array:
+	var out: Array = []
+	var n := seeds.size()
+	for i in n / 2:
+		var best: int = seeds[i]
+		var worst: int = seeds[n - 1 - i]
+		out.append([best, worst] if legs == 1 else [worst, best])
+	return out
+
+
+## Classificados de um estadual, em ordem de campanha: os per_group primeiros de cada grupo e,
+## se faltar gente para o mata-mata, os melhores dos demais.
 static func state_qualified(cup: Cup) -> Array:
 	var table := _merged_table(cup)
 	var leaders: Array = []
 	var rest: Array = []
+	var per_group := int(cfg(cup.id).get("per_group", 1))
 	for g in cup.groups:
 		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
-		leaders.append(order[0])
-		rest.append_array(order.slice(1))
-	var n := int(cfg(cup.id).get("qualify", 4))
+		leaders.append_array(order.slice(0, per_group))
+		rest.append_array(order.slice(per_group))
+	var n := 1 << ko_plan(cup.id).size()
 	var out := CompetitionManager.sort_table(leaders, table).slice(0, n)
 	for cid in CompetitionManager.sort_table(rest, table):
 		if out.size() >= n:

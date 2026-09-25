@@ -181,6 +181,8 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var neutral := bool(ctx.get("neutral", false))
 	var att_n := int(ctx.get("attendance", 0))
 	var crowd := 0.0 if neutral else 0.6 + 0.4 * clampf(float(att_n) / maxf(1.0, home.capacity), 0.0, 1.0)
+	var cul := LeagueCulture.for_match(world, String(ctx.get("competition", "")), home)
+	crowd *= float(cul["home"])
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	var derby := bool(ctx.get("derby", false))
 	var importance := float(ctx.get("importance", 0.3))
@@ -192,7 +194,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var tilt_a := float(ta["m_poss"]) + float(ta["s_poss"]) + float(ta["l_poss"]) + (0.0 if bool(th["ignores_press"]) else float(ta["pr_poss"]))
 	var x := MatchSimulation.GAMMA * (float(sides[0]["mid"]) - float(sides[1]["mid"]))
 	var poss := clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd, 0.25, 0.75)
-	var lam: Array = [_lambda(sides[0], sides[1], poss, true, crowd) * (1.0 + (HOME_BOOST - 1.0) * crowd / 0.9), _lambda(sides[1], sides[0], 1.0 - poss, false, crowd)]
+	var lam: Array = [_lambda(sides[0], sides[1], poss, true, crowd) * (1.0 + (HOME_BOOST - 1.0) * crowd / 0.9) * float(cul["goals"]), _lambda(sides[1], sides[0], 1.0 - poss, false, crowd) * float(cul["goals"])]
 	# Estado por jogador: [Player, pos, f, w_def, w_att, shoot, assist, foul, rating, c_fin, on(0/1), start_min, end_min, g, a, y, red, inj, pts]
 	var lines: Array = [[], []]
 	for s in 2:
@@ -203,7 +205,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 		for _g in _poisson(rng, lam[s]):
 			timeline.append([_goal_minute(rng), 0, s])
 		var tac: Dictionary = sides[s]["tac"]
-		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0)
+		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"])
 		for _y in _poisson(rng, 1.75 * fouls_f):
 			timeline.append([rng.randi_range(3, 92), 1, s])
 		if rng.randf() < 0.035 * fouls_f:

@@ -387,7 +387,7 @@ static func board_delta(world: GameWorld, club: Club, d: float, derby: bool) -> 
 	var st := pres_style(world, club.id)
 	var out := d
 	if out < 0.0:
-		out /= float(st["patience"])
+		out /= float(st["patience"]) * ManagerProfile.patience_mult(world)
 		out *= 1.0 - (float(pr.get("rel", 50.0)) - 50.0) / 200.0
 	else:
 		out *= 1.0 + (float(pr.get("rel", 50.0)) - 50.0) / 250.0

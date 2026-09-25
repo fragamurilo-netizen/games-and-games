@@ -164,6 +164,8 @@ static func _player_topics(world: GameWorld, conv: Dictionary, p: Player) -> voi
 		var kid := _mentor_target(world, p)
 		if kid != null:
 			opts.append({"id": "mentor:%d" % kid.id, "t": "Pedir que apadrinhe %s" % kid.display_name(), "hint": "Mentor ajuda o garoto a evoluir"})
+	if not p.heart_known and int(Dictionary(world.stats.get("hc_asked", {})).get(str(p.id), 0)) != world.year:
+		opts.append({"id": "coracao", "t": "Perguntar para qual time ele torce", "hint": "Conversa leve · ele pode não querer dizer"})
 	opts.append({"id": "bye", "t": "Encerrar a conversa", "hint": ""})
 	conv["opts"] = opts
 
@@ -271,11 +273,24 @@ static func _player_topic(world: GameWorld, conv: Dictionary, p: Player, topic: 
 			opts = [
 				{"id": "a", "t": "\"Fica de olho nele, dentro e fora de campo.\""},
 				{"id": "b", "t": "\"Ensina ele a ser profissional como você.\""}]
+		"coracao":
+			var asked: Dictionary = world.stats.get("hc_asked", {})
+			asked[str(p.id)] = world.year
+			world.stats["hc_asked"] = asked
+			_say(conv, "npc", "Pode perguntar, professor.")
+			opts = [
+				{"id": "a", "t": "\"Pra qual time você torcia quando era moleque?\""},
+				{"id": "b", "t": "\"Tem algum clube no coração?\""}]
 	conv["opts"] = opts
 
 
 ## Calcula a reação: base da opção + confiança + personalidade + sorte.
 static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic: String, tone: String) -> void:
+	if topic == "coracao":
+		_say(conv, "npc", HeartClubs.ask(world, p))
+		if p.heart_known and p.heart >= 0:
+			_fx(conv, "Time de coração: %s." % world.club(p.heart).short_name)
+		return
 	var r := _r(world)
 	var club := world.user_club()
 	var t := People.trust_of(world, p)

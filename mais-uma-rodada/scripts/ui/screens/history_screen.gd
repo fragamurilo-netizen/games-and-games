@@ -9,6 +9,7 @@ var _comp := ""
 var _year := -1 # temporada escolhida na aba Temporadas
 var _arch_league := ""
 var _arch_view := "tb" # tb (tabela) | sc | as | rt
+var _month_pick := 0 # seleção do mês mostrada na aba Temporadas
 
 
 func _init() -> void:
@@ -63,8 +64,14 @@ func refresh() -> void:
 func _career(w: GameWorld) -> Control:
 	var card := UIKit.card("CardHighlight", 10)
 	var ms := w.manager_stats
-	card.add_child(UIKit.label(w.manager_name, "Title"))
-	card.add_child(UIKit.label("Treinador · %s" % GameWorld.DIFF_NAMES[w.difficulty], "Small"))
+	var head := UIKit.hbox(14)
+	head.add_child(ManagerProfile.portrait(w, 96))
+	var hc := UIKit.vbox(2)
+	hc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hc.add_child(UIKit.label(w.manager_name, "Title", true))
+	hc.add_child(UIKit.label("Treinador · %s · %s" % [ManagerProfile.style_name(ManagerProfile.style(w)), GameWorld.DIFF_NAMES[w.difficulty]], "Small", true))
+	head.add_child(hc)
+	card.add_child(head)
 	var r1 := UIKit.hbox(4)
 	r1.add_child(UIKit.stat(str(int(ms.get("seasons", 0))), "temporadas"))
 	r1.add_child(UIKit.stat(str(int(ms.get("games", 0))), "jogos"))
@@ -240,11 +247,22 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 	if not months.is_empty():
 		var mc := UIKit.card("Card", 6)
 		mc.add_child(UIKit.section("Seleções do mês"))
-		for m: Dictionary in months:
-			var best := w.player(int(m["best"]))
-			mc.add_child(UIKit.label(WeeklyAwards.month_label(int(m["m"])).capitalize(), "Caps"))
-			if best != null:
-				mc.add_child(_player_tap(UIKit.label("Craque do mês: %s" % best.display_name(), "H3", true), best.id))
+		var g := ButtonGroup.new()
+		var fl := UIKit.flow(8)
+		_month_pick = clampi(_month_pick, 0, months.size() - 1)
+		for i in months.size():
+			var mi := i
+			fl.add_child(UIKit.chip(WeeklyAwards.month_label(int(months[i]["m"])).capitalize(), i == _month_pick, g, func():
+				_month_pick = mi
+				refresh()))
+		mc.add_child(fl)
+		var m: Dictionary = months[_month_pick]
+		var best := w.player(int(m["best"]))
+		if best != null:
+			mc.add_child(_player_tap(UIKit.label("Craque do mês: %s" % best.display_name(), "H3", true), best.id))
+		if Array(m.get("ids", [])).size() == 11:
+			mc.add_child(XIPitch.make(w, m.get("ids", []), m.get("rt", []), int(m["best"])))
+		else:
 			mc.add_child(UIKit.label(_xi_text(w, m.get("ids", [])), "Small", true))
 		c.add_child(UIKit.card_panel(mc))
 	# Elenco do usuário no ano
@@ -362,13 +380,12 @@ func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:
 				row.add_child(UIKit.label(String(ad.get("v", "")), "Small"))
 				card.add_child(_player_tap(row, int(ad["id"])))
 			var team: Array = lh.get("team", [])
-			if not team.is_empty():
+			if team.size() == 11:
 				card.add_child(UIKit.label(AwardManager.award_name("team"), "Caps"))
-				var names: Array = []
-				for pid in team:
-					var p := w.player(int(pid))
-					names.append(p.display_name() if p != null else "—")
-				card.add_child(UIKit.label(" · ".join(names), "Small", true))
+				card.add_child(XIPitch.make(w, team, [], -1, 640))
+			elif not team.is_empty():
+				card.add_child(UIKit.label(AwardManager.award_name("team"), "Caps"))
+				card.add_child(UIKit.label(_xi_text(w, team), "Small", true))
 			if aw.is_empty():
 				card.add_child(UIKit.label("Sem prêmios registrados.", "Muted"))
 	return UIKit.card_panel(card)

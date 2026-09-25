@@ -137,22 +137,9 @@ func _totw_card(w: GameWorld) -> Control:
 	var tw: Dictionary = w.stats.get("totw", {})
 	if tw.is_empty() or int(tw.get("y", 0)) != w.year:
 		return null
-	var ids: Array = tw.get("ids", [])
-	var rts: Array = tw.get("rt", [])
-	var card := UIKit.card("Card", 4)
+	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("Seleção da %dª rodada" % int(tw.get("r", 0))))
-	var lines := [[0, 1], [1, 5], [5, 8], [8, 11]]
-	for ln in lines:
-		var flow := UIKit.flow(8)
-		for i in range(int(ln[0]), mini(int(ln[1]), ids.size())):
-			var p := w.player(int(ids[i]))
-			if p == null:
-				continue
-			var mine := p.club_id >= 0 and w.is_user_club(p.club_id)
-			var star := int(ids[i]) == int(tw.get("best", -1))
-			var txt := "%s%s %s" % ["★ " if star else "", p.display_name(), Fmt.rating(float(rts[i]) if i < rts.size() else 0.0)]
-			flow.add_child(UIKit.pill(txt, UIColors.ACCENT if mine else (UIColors.GREEN if star else UIColors.BLUE), 16))
-		card.add_child(flow)
+	card.add_child(XIPitch.make(w, tw.get("ids", []), tw.get("rt", []), int(tw.get("best", -1))))
 	return UIKit.card_panel(card)
 
 

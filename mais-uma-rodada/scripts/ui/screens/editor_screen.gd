@@ -99,7 +99,7 @@ func _home(c: VBoxContainer) -> void:
 		items.append(["shirt", "Jogadores", "Editar qualquer jogador ou criar jogadores reais: nome, posições, físico, atributos, foto e aparência" if not has_career() else "Nome, posição, físico, atributos, foto e personalidade", func(): _go("pick_player")])
 	items.append(["trophy", "Competições", "Nomes, logos e cores de ligas e copas", func(): _go("pick_comp")])
 	if has_career():
-		items.append(["star", "Treinador", "Seu nome na carreira", func(): _manager_name()])
+		items.append(["star", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
 	items.append(["list", "Mods", "Instalar, ligar e criar mods; exportar suas personalizações", func(): _go("mods")])
 	for it in items:
 		var row := UIKit.hbox(14)
@@ -442,7 +442,7 @@ func _player_picker(c: VBoxContainer) -> void:
 	if w == null:
 		var wait := UIKit.card("Card", 8)
 		wait.add_child(UIKit.label("Carregando o mundo padrão…", "H2"))
-		wait.add_child(UIKit.label("Uns segundos: o editor monta os 672 clubes com os elencos que as novas carreiras vão receber, já com as suas personalizações.", "Small", true))
+		wait.add_child(UIKit.label("Uns segundos: o editor monta os 692 clubes com os elencos que as novas carreiras vão receber, já com as suas personalizações.", "Small", true))
 		c.add_child(UIKit.card_panel(wait))
 		c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 		GameManager.ensure_preview_world(func():

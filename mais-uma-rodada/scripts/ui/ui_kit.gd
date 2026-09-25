@@ -358,26 +358,13 @@ static func comp_logo(comp: String, px: int) -> Control:
 		tr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		return tr
-	var cols := CompText.colors(comp)
-	var p := PanelContainer.new()
-	var box := StyleBoxFlat.new()
-	box.bg_color = cols[0]
-	box.border_color = cols[1]
-	box.set_border_width_all(maxi(2, px / 16))
-	box.set_corner_radius_all(px / 4)
-	p.add_theme_stylebox_override(&"panel", box)
-	p.custom_minimum_size = Vector2(px, px)
-	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tint: Color = cols[1]
-	if absf(tint.get_luminance() - cols[0].get_luminance()) < 0.25:
-		tint = UIColors.on_color(cols[0])
-	var ic := icon_rect("trophy", int(px * 0.6), tint)
-	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	p.add_child(ic)
-	return p
+	var v := CrestView.new()
+	v.crest = CompText.logo(comp)
+	v.custom_minimum_size = Vector2(px, px)
+	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	v.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return v
 
 
 ## Faixa fina com as duas cores de uma competição (abaixo de cabeçalhos).

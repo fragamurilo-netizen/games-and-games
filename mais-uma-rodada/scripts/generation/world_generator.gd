@@ -38,6 +38,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	w.stats["talent_drift"] = 0.0
 	PreHistory.build(w)
 	CareerBackfill.build(w)
+	HeartClubs.ensure_all(w)
 	SeasonManager.setup_first_season(w)
 	return w
 

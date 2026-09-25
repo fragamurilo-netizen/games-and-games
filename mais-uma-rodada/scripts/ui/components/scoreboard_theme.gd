@@ -17,7 +17,10 @@ const DEFAULT := ["#10151C", "#18202A", "#FFC940"]
 
 static func for_competition(w: GameWorld, comp: String) -> Dictionary:
 	var pal: Array = DEFAULT
-	if CUPS.has(comp):
+	var custom: Dictionary = DatabaseManager.get_data("identity").get("scoreboard", {})
+	if custom.has(comp):
+		pal = custom[comp]
+	elif CUPS.has(comp):
 		pal = CUPS[comp]
 	elif DatabaseManager.has_league(comp):
 		pal = _league_palette(w, comp)
@@ -27,12 +30,24 @@ static func for_competition(w: GameWorld, comp: String) -> Dictionary:
 	return {"bg": bg, "bg2": bg2, "accent": accent, "text": Color("#F4F6F8"), "caps": accent.lerp(Color.WHITE, 0.35)}
 
 
-## Liga: fundo escuro tingido pela cor mais forte da bandeira, destaque com a outra cor.
-## Divisões de baixo ficam mais sóbrias.
+## Liga: fundo escuro na cor da marca da liga e destaque com a segunda cor (como a transmissão
+## oficial); sem cores próprias, a bandeira do país. Divisões de baixo ficam mais sóbrias.
 static func _league_palette(w: GameWorld, comp: String) -> Array:
 	var league := w.league(comp)
 	if league == null:
 		return DEFAULT
+	var brand: Array = DatabaseManager.league_cfg(comp).get("colors", [])
+	if brand.size() >= 2:
+		var b0 := Color(String(brand[0]))
+		var b1 := Color(String(brand[1]))
+		var fd := clampf(0.12 * (league.tier - 1), 0.0, 0.4)
+		if b0.get_luminance() > 0.6: # marca clara: fundo na segunda cor
+			var tmp := b0
+			b0 = b1
+			b1 = tmp
+		if b1.get_luminance() < 0.3:
+			b1 = b1.lightened(0.55)
+		return [b0.darkened(0.6).lerp(Color("#10151C"), fd).to_html(false), b0.darkened(0.4).lerp(Color("#18202A"), fd).to_html(false), b1.lerp(Color("#C8CED6"), fd).to_html(false)]
 	var flag: Dictionary = DatabaseManager.nation(league.nation).get("flag", {})
 	var cols: Array = flag.get("c", [])
 	if cols.is_empty():

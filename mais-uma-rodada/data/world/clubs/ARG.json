@@ -1,6 +1,6 @@
 {
 	"nation": "ARG",
-	"_doc": "Argentina: 1ª (20) e 2ª (16; restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"_doc": "Argentina: Liga Profesional com os 30 clubes reais e Primera Nacional (16). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "ARG_XEN",
@@ -727,7 +727,7 @@
 			"nick": "Decanos",
 			"city": "San Miguel de Tucumán",
 			"founded": 1902,
-			"league": "ARG2",
+			"league": "ARG1",
 			"rep": 54,
 			"arch": "estadio_enorme",
 			"colors": [
@@ -1006,6 +1006,284 @@
 				"initials": "CAB",
 				"sc": "#FFFFFF"
 			}
+		},
+		{
+			"key": "ARG_INS",
+			"name": "Instituto Atlético Central Córdoba",
+			"short": "Instituto",
+			"abbr": "INS",
+			"nick": "La Gloria",
+			"city": "Córdoba",
+			"founded": 1918,
+			"league": "ARG1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Juan Domingo Perón",
+			"capacity": 26535,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "IACC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ARG_BEL"
+			]
+		},
+		{
+			"key": "ARG_PLA",
+			"name": "Club Atlético Platense",
+			"short": "Platense",
+			"abbr": "PLA",
+			"nick": "Calamar",
+			"city": "Vicente López",
+			"founded": 1905,
+			"league": "ARG1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#6B3E26",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ciudad de Vicente López",
+			"capacity": 28530,
+			"kit": "faixa",
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "CAP",
+				"c1": "#FFFFFF",
+				"c2": "#6B3E26",
+				"sc": "#6B3E26"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_BAR",
+			"name": "Club Atlético Barracas Central",
+			"short": "Barracas Central",
+			"abbr": "BAR",
+			"nick": "Guapo",
+			"city": "Buenos Aires",
+			"founded": 1904,
+			"league": "ARG1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Claudio Chiqui Tapia",
+			"capacity": 4400,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CABC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_IRV",
+			"name": "Club Sportivo Independiente Rivadavia",
+			"short": "Ind. Rivadavia",
+			"abbr": "CSIR",
+			"nick": "La Lepra",
+			"city": "Mendoza",
+			"founded": 1913,
+			"league": "ARG1",
+			"rep": 52,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bautista Gargantini",
+			"capacity": 24000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CSIR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ARG_GEM"
+			]
+		},
+		{
+			"key": "ARG_RIE",
+			"name": "Club Deportivo Riestra",
+			"short": "Dep. Riestra",
+			"abbr": "RIE",
+			"nick": "Malevo",
+			"city": "Buenos Aires",
+			"founded": 1931,
+			"league": "ARG1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Guillermo Laza",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CDR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_SAR",
+			"name": "Club Atlético Sarmiento",
+			"short": "Sarmiento",
+			"abbr": "SAR",
+			"nick": "Verde",
+			"city": "Junín",
+			"founded": 1911,
+			"league": "ARG1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Eva Perón",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CAS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_CCO",
+			"name": "Club Atlético Central Córdoba",
+			"short": "Central Córdoba",
+			"abbr": "CCO",
+			"nick": "Ferroviarios",
+			"city": "Santiago del Estero",
+			"founded": 1919,
+			"league": "ARG1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Único Madre de Ciudades",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CACC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_SMJ",
+			"name": "Club Atlético San Martín de San Juan",
+			"short": "San Martín SJ",
+			"abbr": "SMJ",
+			"nick": "Verdinegro",
+			"city": "San Juan",
+			"founded": 1907,
+			"league": "ARG1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#111111"
+			],
+			"stadium": "Estadio Hilario Sánchez",
+			"capacity": 19000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SM",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_ALD",
+			"name": "Club Atlético Aldosivi",
+			"short": "Aldosivi",
+			"abbr": "ALD",
+			"nick": "Tiburón",
+			"city": "Mar del Plata",
+			"founded": 1913,
+			"league": "ARG1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Estadio José María Minella",
+			"capacity": 35354,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CAA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ARG_GEM",
+			"name": "Club Gimnasia y Esgrima de Mendoza",
+			"short": "Gimnasia Mendoza",
+			"abbr": "GEM",
+			"nick": "Lobo",
+			"city": "Mendoza",
+			"founded": 1908,
+			"league": "ARG2",
+			"rep": 49,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Víctor Legrotaglie",
+			"capacity": 11500,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GYE",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ARG_IRV"
+			]
 		}
 	]
 }

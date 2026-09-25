@@ -1,5 +1,5 @@
 {
-	"_doc": "Competições continentais e o Mundial de Clubes. level: 1 = principal (Campeões, Libertadores...), 2 = segunda (Europa League, Sul-Americana), 3 = terceira (Conference League); as vagas de cada nação são preenchidas em ordem de nível, pela classificação da liga (quem já foi para um nível acima pula para o próximo). O campeão de uma copa de nível 2 ou 3 ganha vaga na copa principal do ano seguinte. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra. Estaduais (kind = state): clubes brasileiros pelo uf do clube; grupos de até group_max em turno único nas datas E1..E7, os qualify melhores vão à semifinal (jogo único na casa do melhor) e à final em ida e volta (E9/E10).",
+	"_doc": "Competições continentais e o Mundial de Clubes. level: 1 = principal (Campeões, Libertadores...), 2 = segunda (Liga Europa, Sul-Americana), 3 = terceira (Liga Conferência); as vagas de cada nação são preenchidas em ordem de nível, pela classificação da liga (quem já foi para um nível acima pula para o próximo). O campeão de uma copa de nível 2 ou 3 ganha vaga na copa principal do ano seguinte. alloc: vagas por nação (os primeiros da 1ª divisão; o campeão continental anterior entra no lugar do último classificado do seu país se não tiver vaga). groups: grupos de 4 (0 = só mata-mata). prize: premiação em dinheiro por fase. Mundial: campeões da Europa, América do Sul, CONCACAF, África e Ásia, vices da Europa e da América do Sul e o melhor semifinalista europeu, em mata-mata de jogo único em sede neutra. Estaduais (kind = state): clubes brasileiros pelo uf do clube (os max_clubs de maior reputação), com o formato real adaptado às 10 datas de meio de semana (E1..E10): state_groups grupos (0 = só mata-mata, sem o campo = grupos de até group_max) em group_legs turnos nas datas group_slots; os per_group primeiros de cada grupo (e, se faltar, os melhores dos demais) vão ao mata-mata ko_plan, chaveado pela campanha (1º x último). Jogo único na casa da melhor campanha; em ida e volta ela decide em casa. format: texto do regulamento mostrado no jogo.",
 	"cups": {
 		"UCL": {
 			"name": "Liga dos Campeões",
@@ -43,8 +43,8 @@
 			"level": 1
 		},
 		"UEL": {
-			"name": "UEFA Europa League",
-			"short": "Europa League",
+			"name": "Liga Europa",
+			"short": "Liga Europa",
 			"confed": "UEFA",
 			"level": 2,
 			"teams": 32,
@@ -86,8 +86,8 @@
 			"trophy": "taca_prata"
 		},
 		"UECL": {
-			"name": "UEFA Conference League",
-			"short": "Conference",
+			"name": "Liga Conferência",
+			"short": "Conferência",
 			"confed": "UEFA",
 			"level": 3,
 			"teams": 32,
@@ -318,23 +318,24 @@
 			"ufs": [
 				"SP"
 			],
-			"group_max": 8,
-			"group_legs": 1,
-			"qualify": 4,
+			"group_legs": 2,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
 				"E5",
-				"E6",
-				"E7"
+				"E6"
 			],
 			"ko_plan": [
+				"qf",
 				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"qf": [
+					"E7"
+				],
 				"sf": [
 					"E8"
 				],
@@ -358,7 +359,11 @@
 				"#E30613",
 				"#111111"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 16,
+			"state_groups": 4,
+			"per_group": 2,
+			"format": "16 clubes em 4 grupos de 4 (turno e returno no grupo); os 2 primeiros de cada grupo vão às quartas. Quartas e semifinal em jogo único na casa da melhor campanha, final em ida e volta."
 		},
 		"RJE": {
 			"name": "Campeonato Carioca",
@@ -368,9 +373,7 @@
 			"ufs": [
 				"RJ"
 			],
-			"group_max": 8,
 			"group_legs": 1,
-			"qualify": 4,
 			"group_slots": [
 				"E1",
 				"E2",
@@ -408,7 +411,11 @@
 				"#0055A4",
 				"#FFD100"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 8,
+			"state_groups": 1,
+			"per_group": 4,
+			"format": "Taça Guanabara em turno único; os 4 primeiros fazem as semifinais (jogo único) e a final em ida e volta."
 		},
 		"MGE": {
 			"name": "Campeonato Mineiro",
@@ -418,17 +425,13 @@
 			"ufs": [
 				"MG"
 			],
-			"group_max": 8,
 			"group_legs": 1,
-			"qualify": 4,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6",
-				"E7"
+				"E5"
 			],
 			"ko_plan": [
 				"sf",
@@ -436,11 +439,12 @@
 			],
 			"ko_slots": {
 				"sf": [
-					"E8"
+					"E6",
+					"E7"
 				],
 				"f": [
-					"E9",
-					"E10"
+					"E8",
+					"E9"
 				]
 			},
 			"neutral_single": false,
@@ -458,7 +462,11 @@
 				"#111111",
 				"#E30613"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 6,
+			"state_groups": 1,
+			"per_group": 4,
+			"format": "Primeira fase em turno único; semifinais e final em ida e volta, com a melhor campanha decidindo em casa."
 		},
 		"RSE": {
 			"name": "Campeonato Gaúcho",
@@ -468,26 +476,19 @@
 			"ufs": [
 				"RS"
 			],
-			"group_max": 8,
-			"group_legs": 1,
-			"qualify": 4,
+			"group_legs": 2,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
 				"E5",
-				"E6",
-				"E7"
+				"E6"
 			],
 			"ko_plan": [
-				"sf",
 				"f"
 			],
 			"ko_slots": {
-				"sf": [
-					"E8"
-				],
 				"f": [
 					"E9",
 					"E10"
@@ -508,7 +509,11 @@
 				"#009B3A",
 				"#E30613"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 8,
+			"state_groups": 1,
+			"per_group": 2,
+			"format": "Turno e returno; os 2 melhores decidem o Gauchão em dois jogos."
 		},
 		"PRE": {
 			"name": "Campeonato Paranaense",
@@ -518,26 +523,19 @@
 			"ufs": [
 				"PR"
 			],
-			"group_max": 8,
-			"group_legs": 1,
-			"qualify": 4,
+			"group_legs": 2,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
 				"E5",
-				"E6",
-				"E7"
+				"E6"
 			],
 			"ko_plan": [
-				"sf",
 				"f"
 			],
 			"ko_slots": {
-				"sf": [
-					"E8"
-				],
 				"f": [
 					"E9",
 					"E10"
@@ -558,7 +556,11 @@
 				"#00843D",
 				"#FFFFFF"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 8,
+			"state_groups": 1,
+			"per_group": 2,
+			"format": "Turno e returno; os 2 melhores decidem o título em dois jogos."
 		},
 		"SCE": {
 			"name": "Campeonato Catarinense",
@@ -568,17 +570,13 @@
 			"ufs": [
 				"SC"
 			],
-			"group_max": 8,
 			"group_legs": 1,
-			"qualify": 4,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6",
-				"E7"
+				"E5"
 			],
 			"ko_plan": [
 				"sf",
@@ -586,11 +584,12 @@
 			],
 			"ko_slots": {
 				"sf": [
-					"E8"
+					"E6",
+					"E7"
 				],
 				"f": [
-					"E9",
-					"E10"
+					"E8",
+					"E9"
 				]
 			},
 			"neutral_single": false,
@@ -608,7 +607,11 @@
 				"#C8102E",
 				"#FFFFFF"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 6,
+			"state_groups": 1,
+			"per_group": 4,
+			"format": "Turno único; semifinais e final em ida e volta."
 		},
 		"CEE": {
 			"name": "Campeonato Cearense",
@@ -618,26 +621,19 @@
 			"ufs": [
 				"CE"
 			],
-			"group_max": 8,
-			"group_legs": 1,
-			"qualify": 4,
+			"group_legs": 2,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
 				"E5",
-				"E6",
-				"E7"
+				"E6"
 			],
 			"ko_plan": [
-				"sf",
 				"f"
 			],
 			"ko_slots": {
-				"sf": [
-					"E8"
-				],
 				"f": [
 					"E9",
 					"E10"
@@ -658,7 +654,11 @@
 				"#1B3A8C",
 				"#FFFFFF"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 8,
+			"state_groups": 1,
+			"per_group": 2,
+			"format": "Turno e returno; o Clássico-Rei costuma decidir a final em dois jogos."
 		},
 		"GOE": {
 			"name": "Campeonato Goiano",
@@ -668,17 +668,13 @@
 			"ufs": [
 				"GO"
 			],
-			"group_max": 8,
 			"group_legs": 1,
-			"qualify": 4,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6",
-				"E7"
+				"E5"
 			],
 			"ko_plan": [
 				"sf",
@@ -686,11 +682,12 @@
 			],
 			"ko_slots": {
 				"sf": [
-					"E8"
+					"E6",
+					"E7"
 				],
 				"f": [
-					"E9",
-					"E10"
+					"E8",
+					"E9"
 				]
 			},
 			"neutral_single": false,
@@ -708,7 +705,11 @@
 				"#006437",
 				"#FFD100"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 6,
+			"state_groups": 1,
+			"per_group": 4,
+			"format": "Turno único; semifinais e final em ida e volta."
 		},
 		"NOR": {
 			"name": "Copa do Nordeste",
@@ -725,9 +726,7 @@
 				"PB",
 				"PI"
 			],
-			"group_max": 8,
 			"group_legs": 1,
-			"qualify": 4,
 			"group_slots": [
 				"E1",
 				"E2",
@@ -765,7 +764,11 @@
 				"#F07F13",
 				"#1B3A8C"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 16,
+			"state_groups": 2,
+			"per_group": 2,
+			"format": "16 clubes do Nordeste em 2 grupos de 8; os 2 primeiros de cada grupo vão às semifinais (jogo único) e a final é em ida e volta."
 		},
 		"VER": {
 			"name": "Copa Verde",
@@ -780,25 +783,19 @@
 				"DF",
 				"AC"
 			],
-			"group_max": 8,
 			"group_legs": 1,
-			"qualify": 4,
-			"group_slots": [
-				"E1",
-				"E2",
-				"E3",
-				"E4",
-				"E5",
-				"E6",
-				"E7"
-			],
+			"group_slots": [],
 			"ko_plan": [
+				"qf",
 				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"qf": [
+					"E3"
+				],
 				"sf": [
-					"E8"
+					"E6"
 				],
 				"f": [
 					"E9",
@@ -820,7 +817,11 @@
 				"#2E7D32",
 				"#FFD100"
 			],
-			"trophy": "taca_estadual"
+			"trophy": "taca_estadual",
+			"max_clubs": 8,
+			"state_groups": 0,
+			"per_group": 1,
+			"format": "Mata-mata do início ao fim, com final em ida e volta."
 		}
 	}
 }

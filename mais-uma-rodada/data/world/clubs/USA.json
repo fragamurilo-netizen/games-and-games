@@ -1,6 +1,6 @@
 {
 	"nation": "USA",
-	"_doc": "Estados Unidos/Canadá (liga fechada de 20). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"_doc": "Estados Unidos/Canadá: os 30 clubes reais da MLS (liga fechada). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "USA_LAS",
@@ -581,6 +581,288 @@
 			"rivals": [
 				"USA_LAS"
 			]
+		},
+		{
+			"key": "USA_NER",
+			"name": "New England Revolution",
+			"short": "New England",
+			"abbr": "NE",
+			"nick": "Revs",
+			"city": "Foxborough",
+			"founded": 1995,
+			"league": "USA1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0A2240",
+				"#CE0E2D"
+			],
+			"stadium": "Gillette Stadium",
+			"capacity": 65878,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "stars:3",
+				"sc": "#CE0E2D",
+				"border": "thin"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_CHI",
+			"name": "Chicago Fire FC",
+			"short": "Chicago Fire",
+			"abbr": "CHI",
+			"nick": "Fire",
+			"city": "Chicago",
+			"founded": 1997,
+			"league": "USA1",
+			"rep": 62,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#9A1F2E",
+				"#0A174E"
+			],
+			"stadium": "Soldier Field",
+			"capacity": 61500,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFFFFF",
+				"c3": "#0A174E",
+				"border": "thick"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_COL",
+			"name": "Colorado Rapids",
+			"short": "Colorado",
+			"abbr": "COL",
+			"nick": "Rapids",
+			"city": "Commerce City",
+			"founded": 1995,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#862633",
+				"#8BB8E8"
+			],
+			"stadium": "Dick's Sporting Goods Park",
+			"capacity": 18061,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "thin"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_DAL",
+			"name": "FC Dallas",
+			"short": "FC Dallas",
+			"abbr": "DAL",
+			"nick": "Hoops",
+			"city": "Frisco",
+			"founded": 1996,
+			"league": "USA1",
+			"rep": 61,
+			"arch": "formador",
+			"colors": [
+				"#E81F3E",
+				"#1B3A8C"
+			],
+			"stadium": "Toyota Stadium",
+			"capacity": 20500,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:3",
+				"symbol": "bull",
+				"sc": "#FFFFFF",
+				"border": "thin"
+			},
+			"rivals": [
+				"USA_HOU"
+			]
+		},
+		{
+			"key": "USA_DCU",
+			"name": "D.C. United",
+			"short": "D.C. United",
+			"abbr": "DC",
+			"nick": "Black-and-Red",
+			"city": "Washington",
+			"founded": 1995,
+			"league": "USA1",
+			"rep": 61,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#EF3E42"
+			],
+			"stadium": "Audi Field",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#EF3E42",
+				"border": "thin"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_SJE",
+			"name": "San Jose Earthquakes",
+			"short": "San Jose",
+			"abbr": "SJ",
+			"nick": "Quakes",
+			"city": "San Jose",
+			"founded": 1994,
+			"league": "USA1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0067B1",
+				"#111111"
+			],
+			"stadium": "PayPal Park",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SJ",
+				"sc": "#FFFFFF",
+				"border": "thin"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_TOR",
+			"name": "Toronto FC",
+			"short": "Toronto FC",
+			"abbr": "TOR",
+			"nick": "The Reds",
+			"city": "Toronto",
+			"founded": 2006,
+			"league": "USA1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#B81137",
+				"#455560"
+			],
+			"stadium": "BMO Field",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TFC",
+				"sc": "#FFFFFF",
+				"border": "thin"
+			},
+			"rivals": [
+				"USA_MTL",
+				"USA_VAN"
+			]
+		},
+		{
+			"key": "USA_MTL",
+			"name": "CF Montréal",
+			"short": "CF Montréal",
+			"abbr": "MTL",
+			"nick": "Bleu-blanc-noir",
+			"city": "Montréal",
+			"founded": 1992,
+			"league": "USA1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#0033A1"
+			],
+			"stadium": "Stade Saputo",
+			"capacity": 19619,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "fleur",
+				"sc": "#FFFFFF",
+				"c3": "#0033A1",
+				"border": "thick"
+			},
+			"rivals": [
+				"USA_TOR"
+			]
+		},
+		{
+			"key": "USA_CLT",
+			"name": "Charlotte FC",
+			"short": "Charlotte",
+			"abbr": "CLT",
+			"nick": "The Crown",
+			"city": "Charlotte",
+			"founded": 2019,
+			"league": "USA1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#1A85C8",
+				"#111111"
+			],
+			"stadium": "Bank of America Stadium",
+			"capacity": 74867,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "crown",
+				"sc": "#FFFFFF",
+				"border": "thin"
+			},
+			"rivals": []
+		},
+		{
+			"key": "USA_STL",
+			"name": "St. Louis City SC",
+			"short": "St. Louis",
+			"abbr": "STL",
+			"nick": "City",
+			"city": "St. Louis",
+			"founded": 2019,
+			"league": "USA1",
+			"rep": 61,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#DD004A",
+				"#0A1E2C"
+			],
+			"stadium": "Energizer Park",
+			"capacity": 22500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "STL",
+				"sc": "#FFFFFF",
+				"border": "thin"
+			},
+			"rivals": []
 		}
 	]
 }

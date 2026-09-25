@@ -8,6 +8,9 @@ static func fixture_title(w: GameWorld, f: Fixture) -> String:
 	if f.is_league():
 		var league := w.league(f.comp)
 		return "Rodada %d de %d · %s" % [f.round + 1, league.rounds.size() if league != null else 0, w.league_short(f.comp)]
+	var pl := w.league(f.comp)
+	if pl != null:
+		return "%s · %s" % [pl.short_name, LeagueFormat.round_label(pl, f)]
 	var cup: Cup = w.season.cups.get(f.comp, null) if w.season != null else null
 	if cup == null:
 		return CupManager.cup_short(f.comp)
@@ -26,6 +29,32 @@ static func comp_short(w: GameWorld, comp: String) -> String:
 	return CupManager.cup_short(comp)
 
 
+## Logo desenhado de uma competição (formato do CrestView): o de identity.json, ou um selo gerado
+## com as cores oficiais e as iniciais.
+static func logo(comp: String) -> Dictionary:
+	var logos: Dictionary = DatabaseManager.get_data("identity").get("logos", {})
+	if logos.has(comp):
+		return logos[comp]
+	var cols := colors(comp)
+	var name := ""
+	if DatabaseManager.has_league(comp):
+		name = String(DatabaseManager.league_cfg(comp).get("short", comp))
+	else:
+		name = String(DatabaseManager.cup_cfg(comp).get("short", comp))
+	var ini := ""
+	for part in name.replace(".", " ").split(" ", false):
+		if ini.length() < 2 and part.length() > 0 and part[0] == part[0].to_upper():
+			ini += part[0]
+	if ini == "":
+		ini = name.substr(0, 2).to_upper()
+	var h := absi(hash(comp))
+	var shapes := ["round", "shield", "round", "heater"]
+	var cup := not DatabaseManager.has_league(comp)
+	return {"shape": shapes[h % shapes.size()], "field": "plain", "c1": cols[0].to_html(false), "c2": cols[1].to_html(false),
+		"symbol": "ball" if cup and h % 3 == 0 else ("star" if cup else "letter"), "initials": ini, "sc": cols[1].to_html(false),
+		"border": "gold" if cup else "thin"}
+
+
 ## Cores [principal, destaque] de uma liga ou copa (já com as personalizações do editor).
 static func colors(comp: String) -> Array[Color]:
 	var cfg: Dictionary = DatabaseManager.league_cfg(comp) if DatabaseManager.has_league(comp) else DatabaseManager.cup_cfg(comp)
@@ -42,6 +71,12 @@ static func sibling_fixtures(w: GameWorld, f: Fixture) -> Array:
 		var league := w.league(f.comp)
 		if league != null:
 			return league.fixtures_of_round(f.round)
+		return out
+	var pl := w.league(f.comp)
+	if pl != null:
+		for r in pl.rounds:
+			if r.has(f):
+				return r
 		return out
 	var cup: Cup = w.season.cups.get(f.comp, null)
 	if cup == null:

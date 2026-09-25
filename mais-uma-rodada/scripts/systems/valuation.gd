@@ -113,7 +113,19 @@ static func market_value(p: Player, year: int) -> int:
 	v *= position_factor(p.position)
 	# Forma recente pesa um pouco (quem está voando fica mais caro).
 	v *= clampf(1.0 + (p.form() - 6.5) * 0.08, 0.85, 1.2)
+	v *= season_factor(p)
 	return round_value(v)
+
+
+## Temporada que o mercado viu: boa campanha valoriza, temporada apagada desvaloriza.
+static func season_factor(p: Player) -> float:
+	var apps := p.stats[Player.S_APPS]
+	if apps < 8:
+		return 1.0
+	var contrib := float(p.stats[Player.S_GOALS] + p.stats[Player.S_ASSISTS] * 0.6) / float(apps)
+	var att := Pos.group(p.position) == Pos.G_ATT or p.position == Pos.AM
+	var f := 1.0 + (p.avg_rating() - 6.8) * 0.12 + (maxf(0.0, contrib - 0.3) * 0.25 if att else 0.0)
+	return clampf(f, 0.88, 1.2)
 
 
 ## Valor típico de um jogador de 25 anos com esse overall (referência para notícias e filtros).

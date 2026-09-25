@@ -30,6 +30,8 @@ static func importance_of(world: GameWorld, f: Fixture) -> float:
 				imp += 0.1
 	elif f.stage == Fixture.STAGE_GROUP:
 		imp = 0.45 + 0.05 * f.round
+	elif f.stage == Fixture.STAGE_KO and world.league(f.comp) != null:
+		imp = 0.75 + 0.08 * f.round # playoffs de liga
 	elif f.stage == Fixture.STAGE_KO:
 		imp = CupManager.stage_importance(world, f)
 	if is_derby(world, f.home, f.away):
@@ -58,6 +60,9 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 	if f.stage == Fixture.STAGE_KO and CupManager.is_deciding_leg(world, f):
 		ctx["ko"] = true
 		ctx["agg"] = CupManager.aggregate_before(world, f)
+	elif f.stage == Fixture.STAGE_KO and LeagueFormat.is_deciding_leg(world, f):
+		ctx["ko"] = true
+		ctx["agg"] = LeagueFormat.aggregate_before(world, f)
 	return ctx
 
 

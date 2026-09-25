@@ -77,6 +77,9 @@ var consistency: int = 10 # 1..20
 var injury_prone: int = 10 # 1..20
 var traits: Array = [] # ids de personalidade (String)
 var scout_noise: int = 0 # -6..6, ruído estável da avaliação de terceiros
+## Time de coração (HeartClubs): -2 não sorteado, -1 nenhum, >= 0 clube. Escondido até ser revelado.
+var heart: int = -2
+var heart_known: bool = false
 
 # Contrato e status
 var club_id: int = -1
@@ -449,7 +452,7 @@ func to_dict() -> Dictionary:
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
-		"tr": traits, "sn": scout_noise,
+		"tr": traits, "sn": scout_noise, "hc": heart, "hk": heart_known,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
@@ -489,6 +492,8 @@ static func from_dict(d: Dictionary) -> Player:
 	p.injury_prone = int(d.get("inj_p", 10))
 	p.traits = Array(d.get("tr", []))
 	p.scout_noise = int(d.get("sn", 0))
+	p.heart = int(d.get("hc", -2))
+	p.heart_known = bool(d.get("hk", false))
 	p.club_id = int(d.get("club", -1))
 	p.wage = int(d.get("wage", 0))
 	p.contract_end = int(d.get("ce", 0))

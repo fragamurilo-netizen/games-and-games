@@ -9,7 +9,7 @@ vem da própria simulação.
 
 ## O que já dá para jogar (versão 0.1.0 · MVP 1)
 
-- **Mundo vivo**: 672 clubes reais em 53 ligas de 43 países (nenhum clube inventado), ~16 mil jogadores procedurais com 15 atributos,
+- **Mundo vivo**: 692 clubes reais em 53 ligas de 43 países (nenhum clube inventado), ~16 mil jogadores procedurais com 15 atributos,
   potencial oculto (mostrado como estimativa), curvas de carreira, personalidades e histórico.
   Mundo padrão (seed fixo) ou aleatório (reputações, perfis e jogadores novos).
 - **Clubes com identidade**: 15 arquétipos (gigante endividado, rico recém-promovido, clube formador,
@@ -53,7 +53,7 @@ vem da própria simulação.
   cada corpo envelhece no seu ritmo e veteranos ganham leitura de jogo enquanto o físico cai.
 - **Copas de verdade**: 43 copas nacionais com nome real (Copa do Brasil, FA Cup, Copa del Rey, Coppa Italia,
   DFB-Pokal, Coupe de France, Taça de Portugal, U.S. Open Cup, Copa do Imperador...), copas da liga (EFL Cup,
-  Taça da Liga...) e 24 supercopas (Community Shield, Supercopa do Brasil, Supercopa da UEFA, Recopa...). Fase
+  Taça da Liga...) e 24 supercopas (Community Shield, Supercopa do Brasil, Supercopa Europeia, Recopa...). Fase
   preliminar, grandes entrando direto, ida e volta onde é assim na vida real, mando do menor, final em campo
   neutro e vaga continental para o campeão. Campeões reais desde 2005 na sala de troféus.
 - **Força realista**: elencos calibrados na escala da vida real (Real Madrid ~86, Man City ~85, Flamengo ~76,

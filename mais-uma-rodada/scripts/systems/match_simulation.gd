@@ -134,6 +134,9 @@ var last_events: Array = []
 var pressure: Array = []
 var year: int = 2026
 var crowd: float = 0.8
+## Cultura da liga (LeagueCulture): multiplicadores de chances e de cartões.
+var goal_f: float = 1.0
+var card_f: float = 1.0
 # Cópias locais das tabelas (acesso sem contenção quando várias partidas rodam em threads)
 var _type_w: PackedFloat32Array = PackedFloat32Array(BASE_TYPE_W)
 var _xg: PackedFloat32Array = PackedFloat32Array(BASE_XG)
@@ -167,6 +170,10 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		_build_team(world, 1, away, away_sheet),
 	]
 	crowd = 0.0 if neutral else 0.6 + 0.4 * clampf(float(attendance) / maxf(1.0, home.capacity), 0.0, 1.0)
+	var cul := LeagueCulture.for_match(world, competition, home)
+	goal_f = float(cul["goals"])
+	card_f = float(cul["cards"])
+	crowd *= float(cul["home"])
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	teams[0].home_f = 1.0 + adv * crowd * 0.5
 	teams[1].home_f = 1.0
@@ -233,6 +240,10 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		t.bench.append(mp)
 		t.all.append(mp)
 		t.by_id[pid] = mp
+	var cm := ManagerProfile.card_mult(world, club.id)
+	if cm != 1.0:
+		for mp2: MatchPlayer in t.all:
+			mp2.card_mult *= cm
 	return t
 
 
@@ -576,7 +587,7 @@ func _refresh_rates() -> void:
 	for s in 2:
 		var att: MatchTeam = teams[s]
 		var dfn: MatchTeam = teams[1 - s]
-		_rate_chance[s] = _chance_prob(att, dfn)
+		_rate_chance[s] = _chance_prob(att, dfn) * goal_f
 		_rate_foul[s] = _foul_prob(att)
 		var direct := att.style == TeamSheet.STYLE_DIRETO or att.style == TeamSheet.STYLE_CONTRA or att.style == TeamSheet.STYLE_LONGA
 		_rate_off[s] = 0.028 * dfn.l_offside * (1.25 if direct else 1.0)
@@ -943,8 +954,8 @@ func _resolve_foul(att: MatchTeam, dfn: MatchTeam) -> void:
 	if detail:
 		_emit(EV_FOUL, dfn.side, fouler.p.id, victim.p.id if victim != null else -1, {"danger": dangerous})
 	var dis := fouler.a_dis
-	var p_yellow := 0.155 * fouler.card_mult * (1.4 - dis / 100.0) * (1.15 if dfn.intensity == 2 else 1.0)
-	var p_red := 0.0045 * fouler.card_mult * (1.3 - dis / 100.0)
+	var p_yellow := 0.155 * fouler.card_mult * card_f * (1.4 - dis / 100.0) * (1.15 if dfn.intensity == 2 else 1.0)
+	var p_red := 0.0045 * fouler.card_mult * card_f * (1.3 - dis / 100.0)
 	if dangerous:
 		p_yellow *= 1.3
 	if fouler.yellow >= 1:

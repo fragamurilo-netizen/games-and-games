@@ -72,6 +72,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 	v += 0.1 if better == 0 else (-0.08 * better)
 	if p.morale < 40.0 and cur != null:
 		v += 0.15 # insatisfeito quer sair
+	v += HeartClubs.interest_delta(world, p, buyer)
 	return clampf(v, 0.05, 0.95)
 
 
@@ -79,7 +80,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 static func wage_ask(world: GameWorld, p: Player, buyer: Club) -> int:
 	var base := float(Valuation.wage_demand(p, buyer, world.year))
 	var i := interest(world, p, buyer)
-	base *= 1.0 + (0.5 - i) * 0.6
+	base *= (1.0 + (0.5 - i) * 0.6) * HeartClubs.wage_mult(p, buyer)
 	if p.club_id >= 0:
 		base = maxf(base, p.wage * 1.05)
 	return Valuation.round_wage(base)
@@ -489,6 +490,8 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	if world.is_user_club(buyer.id) and buyer.sheet != null:
 		pass # a escalação é revalidada antes do próximo jogo
 	NewsManager.on_transfer(world, t)
+	if HeartClubs.is_fan(p, buyer.id):
+		HeartClubs.reveal(world, p, "assinatura")
 	return t
 
 

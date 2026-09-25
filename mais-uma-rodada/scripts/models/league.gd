@@ -12,6 +12,12 @@ var rounds: Array = [] # Array de rodadas; cada rodada é Array de Fixture
 var round_slots: Array = [] # data do calendário de cada rodada
 ## Linhas da tabela: club_id -> {pl, w, d, l, gf, ga, pts, form, yc, rc}
 var table: Dictionary = {}
+## Formato real (LeagueFormat): rodadas da fase regular, fins de semana reservados para a fase
+## final, grupos do split e o mata-mata dos playoffs {seeds, ties, champ, runner}.
+var regular_rounds: int = 0
+var phase_slots: Array = []
+var phase_groups: Array = []
+var po: Dictionary = {}
 
 
 func cfg() -> Dictionary:
@@ -77,7 +83,7 @@ func to_dict() -> Dictionary:
 	for k in table:
 		tb[str(k)] = table[k]
 	return {"id": id, "nat": nation, "tier": tier, "name": name, "short": short_name, "clubs": club_ids, "rounds": rs,
-		"slots": round_slots, "table": tb}
+		"slots": round_slots, "table": tb, "reg": regular_rounds, "ps": phase_slots, "pg": phase_groups, "po": po}
 
 
 static func from_dict(d: Dictionary) -> League:
@@ -97,4 +103,8 @@ static func from_dict(d: Dictionary) -> League:
 	var tb: Dictionary = d.get("table", {})
 	for k in tb:
 		l.table[int(k)] = tb[k]
+	l.regular_rounds = int(d.get("reg", l.rounds.size()))
+	l.phase_slots = Array(d.get("ps", []))
+	l.phase_groups = Array(d.get("pg", []))
+	l.po = d.get("po", {})
 	return l

@@ -111,6 +111,7 @@ func load_career(save_slot: int) -> bool:
 	world = w
 	slot = save_slot
 	matchday = {}
+	HeartClubs.ensure_all(world) # saves de antes dos times de coração
 	Valuation.refresh_shift(world)
 	world_changed.emit()
 	return true

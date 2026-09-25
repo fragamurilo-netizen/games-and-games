@@ -109,7 +109,7 @@ static func weekly(world: GameWorld) -> void:
 	var club := world.user_club()
 	var f := focus_of(club)
 	var inten := intensity_of(club)
-	club.cohesion = minf(95.0, club.cohesion + float(f["cohesion"]) * (0.6 + 0.2 * int(club.training.get("int", 1))))
+	club.cohesion = minf(95.0, club.cohesion + float(f["cohesion"]) * (0.6 + 0.2 * int(club.training.get("int", 1))) * ManagerProfile.cohesion_mult(world))
 	var mdelta := float(inten["morale"])
 	for p: Player in world.squad(club):
 		if mdelta != 0.0:
