@@ -149,6 +149,7 @@ static func build_season(world: GameWorld) -> SeasonState:
 ## Metas da diretoria conforme a força relativa do elenco dentro da liga.
 static func compute_goals(world: GameWorld) -> void:
 	var goals := {}
+	var exp := {}
 	for id in world.season.league_order:
 		var league: League = world.season.leagues[id]
 		var ranked: Array = league.club_ids.duplicate()
@@ -157,6 +158,8 @@ static func compute_goals(world: GameWorld) -> void:
 			strength[cid] = ClubAI._compute_strength(world, world.club(cid))
 		ranked.sort_custom(func(a, b): return strength[a] > strength[b] or (strength[a] == strength[b] and a < b))
 		var teams := ranked.size()
+		for i in teams:
+			exp[ranked[i]] = i + 1
 		var up := league.promoted_count()
 		var down := league.relegated_count()
 		var cont := CupManager.continental_spots(league)
@@ -188,6 +191,18 @@ static func compute_goals(world: GameWorld) -> void:
 					goal = ["Evitar o rebaixamento", teams - down]
 			goals[ranked[i]] = goal
 	world.stats["goals"] = goals
+	world.stats["exp_rank"] = exp
+
+
+## Posição esperada no começo da temporada (ranking de força da liga). Usada pela imprensa e
+## pelo prêmio de treinador. Saves antigos sem o dado caem no meio da tabela.
+static func expected_rank(world: GameWorld, club_id: int, teams: int = 20) -> int:
+	var exp: Dictionary = world.stats.get("exp_rank", {})
+	if exp.has(club_id):
+		return int(exp[club_id])
+	if exp.has(str(club_id)):
+		return int(exp[str(club_id)])
+	return maxi(1, teams / 2)
 
 
 static func goal_of(world: GameWorld, club_id: int) -> Array:
@@ -374,6 +389,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
+	AwardVoting.maybe_announce(world)
+	PressRoom.after_matchday(world)
 	tt = _time("copas_noticias", tt)
 	# Avança o calendário
 	s.day += 1
@@ -398,6 +415,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
 		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
 		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
+		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
 	return report
 
 
@@ -657,42 +675,46 @@ static func end_season(world: GameWorld) -> Dictionary:
 			for cid in relegated:
 				NewsManager.post(world, "rebaixamento", {"club": world.club(cid).short_name, "division": world.league_name(lower), "pos": ids.find(cid) + 1},
 					cid, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(cid) else NewsEvent.IMP_NORMAL)
-	# Prêmios individuais
+	# Prêmios da liga e das copas (os técnicos da liga votam no craque e no treinador; os prêmios
+	# mundiais saem depois do torneio de seleções do verão, que pesa na votação)
 	var weekly := WeeklyAwards.season_close(world)
 	summary["months"] = weekly["months"]
 	summary["totw_most"] = WeeklyAwards.most_selected(weekly["totw_n"])
-	var bo_rank := AwardManager.ballon_ranking(world, 10)
-	summary["ballon_rank"] = bo_rank
 	var awards := AwardManager.league_awards(world)
-	var ballon := AwardManager.world_player(world)
+	var gloves := AwardVoting.golden_gloves(world)
+	var coaches := {}
+	for id in hist_leagues:
+		if gloves.has(id) and awards.has(id):
+			awards[id]["glove"] = gloves[id]
+		coaches[id] = AwardVoting.league_coach_vote(world, id)
 	var extra := {"teams": AwardManager.teams_of_season(world), "cups": AwardManager.cup_awards(world),
-		"world_young": AwardManager.world_young(world), "boot": AwardManager.golden_boot(world),
 		"club": AwardManager.club_player(world, world.user_club_id) if world.has_user() else {}}
-	AwardManager.credit(world, awards, ballon, extra)
+	AwardManager.credit(world, awards, {}, extra)
 	for id in hist_leagues:
 		hist_leagues[id]["awards"] = awards.get(id, {})
 		if extra["teams"].has(id):
 			hist_leagues[id]["team"] = extra["teams"][id]
+		if not Dictionary(coaches[id]).is_empty():
+			hist_leagues[id]["coach"] = coaches[id]
 	summary["awards"] = awards.get(world.user_league_id(), {})
 	summary["team"] = extra["teams"].get(world.user_league_id(), [])
-	summary["ballon"] = ballon
-	summary["world_young"] = extra["world_young"]
-	summary["boot"] = extra["boot"]
+	summary["coach"] = coaches.get(world.user_league_id(), {})
 	summary["club_player"] = extra["club"]
 	summary["cup_awards"] = extra["cups"]
-	if not extra["boot"].is_empty():
-		var bt: Dictionary = extra["boot"]
-		NewsManager.post_raw(world, "%s leva a Chuteira de Ouro" % bt["name"],
-			"Com %d gols pelo %s, %s foi o artilheiro mais valioso do mundo em %d." % [int(bt["goals"]), bt["club"], bt["name"], world.year],
-			-1, int(bt["id"]), NewsEvent.IMP_NORMAL, "premio")
-	if not ballon.is_empty():
-		NewsManager.post_raw(world, "%s ganha a Bola de Ouro" % ballon["name"],
-			"%s, do %s, foi eleito o melhor jogador do planeta em %d: %d gols em %d jogos." % [ballon["full"], ballon["club"], world.year, int(ballon["goals"]), int(ballon["apps"])],
-			-1, int(ballon["id"]), NewsEvent.IMP_HIGH, "premio")
 	var ua: Dictionary = summary["awards"]
 	if ua.has("mvp"):
 		NewsManager.post_raw(world, "%s é o craque da %s" % [ua["mvp"]["name"], world.league_name(world.user_league_id())],
-			"O prêmio de revelação ficou com %s." % (ua["young"]["name"] if ua.has("young") else "ninguém"), -1, int(ua["mvp"]["id"]), NewsEvent.IMP_NORMAL, "premio")
+			"Eleito pelos técnicos da liga (%s). A revelação ficou com %s." % [String(ua["mvp"].get("v", "")), ua["young"]["name"] if ua.has("young") else "ninguém"],
+			-1, int(ua["mvp"]["id"]), NewsEvent.IMP_NORMAL, "premio")
+	var uco: Dictionary = summary["coach"]
+	if not uco.is_empty():
+		if bool(uco.get("user", false)):
+			var ma: Array = world.manager_stats.get("awards", [])
+			ma.append({"y": world.year, "k": "coach", "l": world.user_league_id()})
+			world.manager_stats["awards"] = ma
+		NewsManager.post_raw(world, "%s é o treinador da temporada na %s" % [String(uco["n"]), world.league_name(world.user_league_id())],
+			"Os colegas de profissão escolheram o trabalho no %s (%s)." % [String(uco["cn"]), String(uco["v"])],
+			int(uco["c"]), -1, NewsEvent.IMP_HIGH if bool(uco.get("user", false)) else NewsEvent.IMP_NORMAL, "premio")
 	# Copas
 	var hist_cups := {}
 	for cid in s.cups:
@@ -706,6 +728,44 @@ static func end_season(world: GameWorld) -> Dictionary:
 		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer, "mvp": extra["cups"].get(cid, {})}
 	# Seleções: torneios de verão (Copa do Mundo, Eurocopa, Copa América...)
 	summary["intl"] = NationalTeamManager.play_summer(world)
+	# Prêmios mundiais: júri de jornalistas de cada país, com a temporada e o verão na conta
+	var bo_rank := AwardVoting.ballon_vote(world, summary["intl"], 10)
+	var ballon: Dictionary = bo_rank[0] if not bo_rank.is_empty() else {}
+	var wy_rank := AwardVoting.world_young_vote(world, summary["intl"])
+	var gk_rank := AwardVoting.gk_vote(world, summary["intl"])
+	extra["world_young"] = wy_rank[0] if not wy_rank.is_empty() else {}
+	extra["gk_world"] = gk_rank[0] if not gk_rank.is_empty() else {}
+	extra["boot"] = AwardManager.golden_boot(world)
+	extra["world_xi"] = AwardVoting.world_xi(world, summary["intl"])
+	AwardManager.credit(world, {}, ballon, {"world_young": extra["world_young"], "boot": extra["boot"], "gk_world": extra["gk_world"], "world_xi": extra["world_xi"]})
+	var wcoach := AwardVoting.world_coach_vote(world, coaches)
+	if bool(wcoach.get("user", false)):
+		var ma: Array = world.manager_stats.get("awards", [])
+		ma.append({"y": world.year, "k": "coach_world", "l": ""})
+		world.manager_stats["awards"] = ma
+	summary["ballon_rank"] = bo_rank
+	summary["ballon"] = ballon
+	summary["world_young"] = extra["world_young"]
+	summary["gk_world"] = extra["gk_world"]
+	summary["boot"] = extra["boot"]
+	summary["world_xi"] = extra["world_xi"]
+	summary["world_coach"] = wcoach
+	if not extra["boot"].is_empty():
+		var bt: Dictionary = extra["boot"]
+		NewsManager.post_raw(world, "%s leva a Chuteira de Ouro" % bt["name"],
+			"Com %d gols pelo %s, %s foi o artilheiro mais valioso do mundo em %d." % [int(bt["goals"]), bt["club"], bt["name"], world.year],
+			-1, int(bt["id"]), NewsEvent.IMP_NORMAL, "premio")
+	if not ballon.is_empty():
+		var body := "%s, do %s, foi eleito o melhor jogador do planeta em %d: %d gols em %d jogos. Somou %d pontos e %d votos de primeiro lugar entre %d jornalistas." % [
+			ballon["full"], ballon["club"], world.year, int(ballon["goals"]), int(ballon["apps"]), int(ballon["pts"]), int(ballon["first"]), int(ballon["votes"])]
+		if bo_rank.size() > 2:
+			body += " Completaram o pódio %s (%d) e %s (%d)." % [bo_rank[1]["name"], int(bo_rank[1]["pts"]), bo_rank[2]["name"], int(bo_rank[2]["pts"])]
+		NewsManager.post_raw(world, "%s ganha a Bola de Ouro" % ballon["name"], body, -1, int(ballon["id"]), NewsEvent.IMP_HIGH, "premio")
+	if not wcoach.is_empty():
+		NewsManager.post_raw(world, "%s é eleito o treinador do ano" % String(wcoach["n"]),
+			"O júri mundial premiou o trabalho no %s (%s)." % [String(wcoach["cn"]), String(wcoach.get("v", ""))],
+			int(wcoach["c"]), -1, NewsEvent.IMP_HEADLINE if bool(wcoach.get("user", false)) else NewsEvent.IMP_NORMAL, "premio")
+	var ledger := AwardVoting.season_ledger(world, awards, extra, coaches, bo_rank, wy_rank, gk_rank, wcoach, weekly["months"])
 	# Resumo do usuário
 	if world.has_user():
 		var u := world.user_club()
@@ -739,6 +799,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["user"]["board"] = u.board_confidence
 		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
+	PressRoom.on_season_end(world, summary)
 	People.on_season_end(world, summary)
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
@@ -769,7 +830,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.history.append({"y": world.year, "leagues": hist_leagues, "cups": hist_cups, "user": summary["user"], "ballon": ballon,
 		"club": world.user_club_id, "yl": yl_sum, "wy": extra["world_young"], "boot": extra["boot"], "cp": extra["club"],
 		"arch": SeasonArchive.snapshot_leagues(world), "sq": SeasonArchive.snapshot_squad(world),
-		"bo": bo_rank, "months": weekly["months"], "tw": summary["totw_most"]})
+		"bo": bo_rank, "months": weekly["months"], "tw": summary["totw_most"], "gkw": extra["gk_world"], "wxi": extra["world_xi"],
+		"wco": wcoach, "aw": ledger})
 	# Evolução do elenco do usuário no ano (quem subiu e quem caiu)
 	if world.has_user():
 		summary["evolution"] = PlayerDevelopment.squad_evolution(world, world.user_club_id)

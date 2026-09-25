@@ -125,7 +125,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 				text = "O presidente chamou você para uma reunião"
 				icon = "shield"
 			"press":
-				text = "Coletiva de imprensa antes do próximo jogo"
+				text = "Imprensa na zona mista: fale sobre o jogo" if q.get("post", false) else "Coletiva de imprensa antes do próximo jogo"
 				icon = "news"
 		row.add_child(UIKit.icon_rect(icon, 30, UIColors.ACCENT))
 		var l := UIKit.label(text, "", true)
@@ -408,6 +408,35 @@ func _fans(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 # ---------------------------------------------------------------------------
 
 func _press(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
+	PressRoom.ensure_predictions(w, false)
+	# Termômetro do cargo e bolsa de apostas
+	var hc := UIKit.card("Card", 6)
+	hc.add_child(UIKit.section("Termômetro do cargo"))
+	var h := PressRoom.heat(w)
+	var hcol := UIColors.RED if h >= PressRoom.HOT else (UIColors.ACCENT if h >= 50.0 else UIColors.GREEN)
+	hc.add_child(UIKit.kv(PressRoom.heat_label(h), "%d/100" % int(round(h)), hcol))
+	hc.add_child(UIKit.bar(h, 100.0, hcol))
+	var race := PressRoom.sack_race(w, 4)
+	if not race.is_empty():
+		hc.add_child(UIKit.label("Bolsa de apostas: quem cai primeiro", "Caps"))
+		for x in race:
+			var cl := w.club(int(x[1]))
+			hc.add_child(UIKit.kv("%s (%s)" % [String(x[0]), cl.short_name if cl != null else ""], "%.1f" % float(x[2]),
+				UIColors.ACCENT if w.is_user_club(int(x[1])) else UIColors.TEXT))
+	c.add_child(UIKit.card_panel(hc))
+	# Palpites da pré-temporada
+	var pred: Dictionary = People.data(w)["press"].get("pred", {})
+	if not Array(pred.get("list", [])).is_empty():
+		var pc := UIKit.card("Card", 6)
+		pc.add_child(UIKit.section("Palpites da temporada"))
+		var l := w.league_of(w.user_club_id)
+		var now := CompetitionManager.position_of(l, w.user_club_id) if l != null and l.rounds_played() > 0 else 0
+		pc.add_child(UIKit.label("A imprensa espera o time em %dº%s." % [PressRoom.consensus(w), " · hoje: %dº" % now if now > 0 else ""], "Small", true))
+		for e: Dictionary in pred["list"]:
+			var j := People.journalist(w, int(e["j"]))
+			var ch := w.club(int(e["champ"]))
+			pc.add_child(UIKit.kv(String(j.get("n", "")), "%dº · campeão: %s" % [int(e["pos"]), ch.short_name if ch != null else "?"]))
+		c.add_child(UIKit.card_panel(pc))
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Setoristas"))
 	for j: Dictionary in People.journalists(w):
@@ -415,7 +444,8 @@ func _press(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(j["n"]), "H3"))
-		col.add_child(UIKit.label("%s · %s" % [String(j["o"]), String(People.PRESS_TONES.get(String(j["t"]), "")).to_lower()], "Small"))
+		col.add_child(UIKit.label("%s · %s · acerta %d%% dos rumores" % [String(j["o"]), String(People.PRESS_TONES.get(String(j["t"]), "")).to_lower(),
+			int(round(PressRoom.accuracy(w, j) * 100.0))], "Small", true))
 		row.add_child(col)
 		var rel := float(j.get("rel", 50.0))
 		row.add_child(UIKit.colored(People.rel_label(rel), UIColors.morale_color(rel), "Small"))
@@ -426,12 +456,33 @@ func _press(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	b.disabled = not can
 	card.add_child(b)
 	c.add_child(UIKit.card_panel(card))
+	var rums: Array = People.data(w)["press"].get("rum", [])
+	if not rums.is_empty():
+		var rc := UIKit.card("Card", 6)
+		rc.add_child(UIKit.section("Rumores de mercado"))
+		var shown := 0
+		for i in range(rums.size() - 1, -1, -1):
+			var x: Dictionary = rums[i]
+			var st := String(x["st"])
+			var j := People.journalist(w, int(x["j"]))
+			var row := UIKit.hbox(8)
+			var nl := UIKit.label("%s → %s" % [String(x["n"]), String(x["tn"])], "", true)
+			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(nl)
+			row.add_child(UIKit.pill("Confirmado" if st == "hit" else ("Não rolou" if st == "miss" else "Em aberto"),
+				UIColors.GREEN if st == "hit" else (UIColors.MUTED if st == "miss" else UIColors.BLUE), 15))
+			rc.add_child(row)
+			rc.add_child(UIKit.label(String(j.get("o", "")), "Small"))
+			shown += 1
+			if shown >= 6:
+				break
+		c.add_child(UIKit.card_panel(rc))
 	var nc := UIKit.card("Card", 6)
 	nc.add_child(UIKit.section("Na imprensa"))
 	var n := 0
 	for i in range(w.news.size() - 1, -1, -1):
 		var ne: NewsEvent = w.news[i]
-		if ne.category != "imprensa" and ne.category != "tecnicos" and ne.category != "torcida":
+		if not ne.category in ["imprensa", "tecnicos", "torcida", "rumor"]:
 			continue
 		nc.add_child(UIKit.label(ne.title, "H3", true))
 		if ne.body != "":

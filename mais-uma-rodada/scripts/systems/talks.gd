@@ -965,8 +965,11 @@ static func _press_start(world: GameWorld) -> Dictionary:
 	conv["d"]["qs"] = qs
 	conv["d"]["i"] = 0
 	conv["d"]["head"] = ""
+	conv["d"]["head_j"] = -1
+	var last: Dictionary = People.data(world)["press"].get("match", {})
+	conv["d"]["post"] = not last.is_empty() and int(last.get("t", -1)) == world.current_turn()
 	conv["sub"] = "%d perguntas" % qs.size()
-	_say(conv, "info", "Sala cheia. Microfones ligados.")
+	_say(conv, "info", "Zona mista depois do %s. Microfones ligados." % String(last.get("score", "jogo")) if conv["d"]["post"] else "Sala cheia. Microfones ligados.")
 	_press_ask(world, conv)
 	return conv
 
@@ -991,8 +994,12 @@ static func _press_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 	var o: Dictionary = q["o"][clampi(int(id), 0, Array(q["o"]).size() - 1)]
 	var fx: Dictionary = o.get("fx", {})
 	_apply_press_fx(world, conv, fx, int(q["j"]))
+	if fx.has("quote"):
+		PressRoom.add_quote(world, String(fx["quote"]), String(o["t"]), int(q["j"]))
+		_fx(conv, "A imprensa vai lembrar dessa frase")
 	if fx.get("head", false) or String(conv["d"]["head"]) == "":
 		conv["d"]["head"] = String(o["t"])
+		conv["d"]["head_j"] = int(q["j"])
 	i += 1
 	conv["d"]["i"] = i
 	if i < qs.size():
@@ -1000,8 +1007,11 @@ static func _press_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 		return
 	_say(conv, "info", "Fim da coletiva.")
 	var club := world.user_club()
-	NewsManager.post_raw(world, "%s: %s" % [world.manager_name, String(conv["d"]["head"])],
-		"Na coletiva desta semana, o treinador do %s respondeu a %d perguntas." % [club.short_name, qs.size()], club.id, -1, NewsEvent.IMP_NORMAL, "imprensa")
+	var hj := People.journalist(world, int(conv["d"].get("head_j", -1)))
+	var when := "Na coletiva depois do jogo" if bool(conv["d"].get("post", false)) else "Na coletiva desta semana"
+	NewsManager.post_raw(world, PressRoom.spin(world, int(conv["d"].get("head_j", -1)), String(conv["d"]["head"])),
+		"%s, o treinador do %s respondeu a %d perguntas.\n— %s, %s" % [when, club.short_name, qs.size(), String(hj.get("n", "Redação")), String(hj.get("o", ""))],
+		club.id, -1, NewsEvent.IMP_NORMAL, "imprensa")
 	_finish(conv)
 
 
@@ -1060,7 +1070,7 @@ static func _press_questions(world: GameWorld) -> Array:
 			if String(j["t"]) == tone:
 				return int(j["id"])
 		return int(RngUtil.pick(r, js)["id"])
-	var qs: Array = []
+	var qs: Array = PressRoom.questions(world, pick_j)
 	var nf := FixtureManager.next_fixture_for(world, club.id)
 	var opp: Club = world.club(nf.opponent_of(club.id)) if nf != null else null
 	var oc: Dictionary = People.coach_of(world, opp.id) if opp != null else {}
@@ -1080,7 +1090,7 @@ static func _press_questions(world: GameWorld) -> Array:
 		for p: Player in world.squad(club):
 			if p.squad_status <= Player.STATUS_STARTER and (worst == null or p.form() < worst.form()):
 				worst = p
-		var o2 := {"team": -4.0, "board": 2.0, "head": true}
+		var o2 := {"team": -4.0, "board": 2.0, "head": true, "quote": "blame"}
 		if worst != null:
 			o2["trust:%d" % worst.id] = -6.0
 		qs.append({"j": pick_j.call("critico"), "q": "São %d derrotas seguidas. O que está acontecendo com o %s?" % [club.streak_losses, club.short_name], "o": [
@@ -1089,7 +1099,7 @@ static func _press_questions(world: GameWorld) -> Array:
 			{"t": "\"Faltou sorte. O trabalho está bom.\"", "fx": {"sup": -2.0, "jrel": -2.0}}]})
 	elif club.streak_wins >= 3:
 		qs.append({"j": pick_j.call("amigavel"), "q": "%d vitórias seguidas. Dá para sonhar alto?" % club.streak_wins, "o": [
-			{"t": "\"Por que não? Somos candidatos.\"", "fx": {"sup": 4.0, "mood": 3.0, "head": true, "jrel": 2.0}},
+			{"t": "\"Por que não? Somos candidatos.\"", "fx": {"sup": 4.0, "mood": 3.0, "head": true, "jrel": 2.0, "quote": "title"}},
 			{"t": "\"Pé no chão. Jogo a jogo.\"", "fx": {"board": 2.0}},
 			{"t": "\"Esse grupo não tem limite.\"", "fx": {"team": 3.0}}]})
 	var unhappy: Player = null
@@ -1143,7 +1153,7 @@ static func _press_questions(world: GameWorld) -> Array:
 	if world.transfer_window_open() and r.randf() < 0.5:
 		qs.append({"j": pick_j.call("analitico"), "q": "A janela está aberta. Vem reforço?", "o": [
 			{"t": "\"Estamos atentos ao mercado.\"", "fx": {}},
-			{"t": "\"Preciso de reforços com urgência.\"", "fx": {"board": -2.0, "team": -2.0, "sup": 2.0, "head": true}},
+			{"t": "\"Preciso de reforços com urgência.\"", "fx": {"board": -2.0, "team": -2.0, "sup": 2.0, "head": true, "quote": "reinforce"}},
 			{"t": "\"Confio no elenco que tenho.\"", "fx": {"team": 3.0}}]})
 	if opp != null:
 		qs.append({"j": int(RngUtil.pick(r, js)["id"]), "q": "Como chega o time para o jogo contra o %s?" % opp.short_name, "o": [

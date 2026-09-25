@@ -144,6 +144,8 @@ Regras:
 | `YouthManager` | estático | Base do usuário: categorias sub-15/17/20, ligas sub-17 e sub-20 com escalação e notas, faixa de potencial, estirão/estagnação, captação, peneira, venda de garotos e revelados (`world.academy`, `world.youth_league`, `world.youth`). |
 | `SeasonManager` | estático | Ciclo da rodada e da temporada: acesso/rebaixamento, contratos, nova temporada. |
 | `NewsManager` | estático | Feed procedural a partir de dados reais do save. |
+| `PressRoom` | estático | Imprensa com memória: palpites da pré-temporada, termômetro do cargo, bolsa de apostas dos técnicos, rumores com fonte e placar de acertos por veículo, coletiva pós-jogo, frases cobradas depois e entrevistas de jogadores (`People.data(world)["press"]`). |
+| `AwardVoting` | estático | Premiações votadas: indicados na reta final, júri de jornalistas por país (Bola de Ouro, 15-12-10...), técnicos da liga votando no craque e no treinador (sem votar no próprio elenco), Luva de Ouro, melhor goleiro, seleção e treinador do ano. `records()` / `winners()` consultam todos os prêmios gravados em `world.history[i]["aw"]` (também converte anos antigos). |
 | `StoryHooks` | estático | Ganchos da próxima rodada ("clássico", "confronto direto", "retorno de lesão"...). |
 
 Módulos planejados para MVPs seguintes (espaço já reservado nos modelos): `EventManager` (eventos com decisões),

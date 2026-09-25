@@ -6,7 +6,7 @@ extends RefCounted
 ## No clube do usuário: craque do clube. Tudo fica no histórico e no currículo do jogador.
 
 ## Ordem de exibição dos prêmios de liga.
-const LEAGUE_KEYS: Array[String] = ["mvp", "scorer", "assist", "young", "gk", "def", "mid", "att"]
+const LEAGUE_KEYS: Array[String] = ["mvp", "scorer", "assist", "young", "gk", "def", "mid", "att", "glove"]
 ## Formação da seleção do campeonato: goleiro, defensores, meias, atacantes.
 const TEAM_SHAPE: Array[int] = [1, 4, 3, 3]
 
@@ -46,15 +46,30 @@ static func league_awards(world: GameWorld) -> Dictionary:
 	for id in best:
 		var b: Dictionary = best[id]
 		var aw := {}
+		# Craque e revelação são votados pelos técnicos da liga entre os finalistas.
+		var voted := {}
+		if b.has("mvp"):
+			voted["mvp"] = AwardVoting.league_mvp_vote(world, id)
+		if b.has("young"):
+			voted["young"] = AwardVoting.league_mvp_vote(world, id, 21)
 		for k in LEAGUE_KEYS:
 			if b.has(k):
 				var p: Player = b[k][0]
 				var v := "%.2f" % p.avg_rating()
+				var pts := -1
+				var vr: Array = voted.get(k, [])
+				if not vr.is_empty() and world.player(int(vr[0]["id"])) != null:
+					p = world.player(int(vr[0]["id"]))
+					pts = int(vr[0]["pts"])
+					v = "%.2f · %d votos" % [p.avg_rating(), pts]
 				if k == "assist":
 					v = "%d assist." % p.stats[Player.S_ASSISTS]
 				elif k == "scorer":
 					v = "%d gols" % p.stats[Player.S_GOALS]
 				aw[k] = {"id": p.id, "name": p.display_name(), "club": world.club(p.club_id).short_name, "v": v}
+				if pts >= 0:
+					aw[k]["pts"] = pts
+					aw[k]["fin"] = vr.map(func(x): return [int(x["id"]), int(x["pts"])])
 		out[id] = aw
 	return out
 
@@ -268,6 +283,16 @@ static func award_name(k: String) -> String:
 			return "Chuteira de Ouro"
 		"club":
 			return "Craque do clube"
+		"glove":
+			return "Luva de Ouro"
+		"gk_world":
+			return "Melhor goleiro do mundo"
+		"world_xi":
+			return "Seleção do ano"
+		"coach":
+			return "Treinador da temporada"
+		"coach_world":
+			return "Treinador do ano"
 	return k
 
 
@@ -291,8 +316,12 @@ static func award_weight(k: String) -> int:
 			return 2
 		"ballon":
 			return 10
-		"boot", "world_young":
+		"boot", "world_young", "gk_world":
 			return 6
+		"world_xi":
+			return 4
+		"glove":
+			return 2
 		"mvp":
 			return 5
 		"scorer", "young", "cup_mvp":
@@ -315,10 +344,12 @@ static func credit(world: GameWorld, awards: Dictionary, ballon: Dictionary, ext
 		_give(world, int(cups[cid]["id"]), "cup_mvp", cid)
 	if not ballon.is_empty():
 		_give(world, int(ballon["id"]), "ballon", "")
-	for k in ["world_young", "boot"]:
+	for k in ["world_young", "boot", "gk_world"]:
 		var d: Dictionary = extra.get(k, {})
 		if not d.is_empty():
 			_give(world, int(d["id"]), k, "")
+	for pid in extra.get("world_xi", []):
+		_give(world, int(pid), "world_xi", "")
 	var cl: Dictionary = extra.get("club", {})
 	if not cl.is_empty():
 		_give(world, int(cl["id"]), "club", str(world.user_club_id))
