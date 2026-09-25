@@ -355,6 +355,36 @@ func _board(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		card.add_child(UIKit.colored("Ultimato: sem reação, a diretoria pode trocar o técnico a qualquer momento.", UIColors.RED, "Small", true))
 	card.add_child(UIKit.button("Pedir uma reunião", "PrimaryButton", func(): TalkDialog.open("board", -1, cb), "shield"))
 	c.add_child(UIKit.card_panel(card))
+	# Metas da temporada com a situação de cada uma
+	var oc := UIKit.card("Card", 8)
+	oc.add_child(UIKit.section("Metas da temporada"))
+	for o: Dictionary in BoardObjectives.list(w):
+		var stt := BoardObjectives.status(w, o)
+		var st_key := String(stt[0])
+		var colr: Color = {"ok": UIColors.GREEN, "done": UIColors.GREEN, "risk": UIColors.ORANGE, "fail": UIColors.RED}.get(st_key, UIColors.MUTED)
+		var orow := UIKit.hbox(10)
+		var ocol := UIKit.vbox(0)
+		ocol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		ocol.add_child(UIKit.label(String(o["t"]), "H3", true))
+		if String(stt[1]) != "":
+			ocol.add_child(UIKit.label(String(stt[1]), "Small", true))
+		orow.add_child(ocol)
+		orow.add_child(UIKit.pill(String(BoardObjectives.STATE_NAMES.get(st_key, "")).to_upper(), colr, 15))
+		oc.add_child(orow)
+	c.add_child(UIKit.card_panel(oc))
+	# O que mexeu na confiança nesta temporada
+	var bd := BoardObjectives.breakdown(w)
+	if not bd.is_empty():
+		var bc := UIKit.card("Card", 6)
+		bc.add_child(UIKit.section("O que pesa na avaliação"))
+		var keys: Array = bd.keys()
+		keys.sort_custom(func(a, b): return absf(float(bd[a])) > absf(float(bd[b])))
+		for key in keys:
+			var v := float(bd[key])
+			if absf(v) < 0.5:
+				continue
+			bc.add_child(UIKit.kv(String(key), ("+%s" % TacticalXRay.dec(v, 1)) if v > 0 else TacticalXRay.dec(v, 1), UIColors.GREEN if v > 0 else UIColors.RED))
+		c.add_child(UIKit.card_panel(bc))
 	var lg: Array = People.data(w).get("log", [])
 	if not lg.is_empty():
 		var lc := UIKit.card("Card", 6)

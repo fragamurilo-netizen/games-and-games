@@ -33,18 +33,27 @@ static func after_match(world: GameWorld, club: Club, res: String, derby: bool) 
 	var goal := SeasonManager.goal_of(world, club.id)
 	var pos := CompetitionManager.position_of(league, club.id)
 	var played: int = league.table[club.id]["pl"]
-	var d := 1.1 if res == "V" else (0.1 if res == "E" else -1.5)
+	var d_res := 1.1 if res == "V" else (0.1 if res == "E" else -1.5)
 	if derby:
-		d *= 1.6
+		d_res *= 1.6
 	# A posição em relação à meta pesa mais conforme a temporada avança.
 	var weight := clampf(played / 19.0, 0.2, 1.0)
-	d += clampf((int(goal[1]) - pos) * 0.12, -1.2, 0.8) * weight
-	d += (club.fan_mood - 55.0) * 0.012
+	var d_goal := clampf((int(goal[1]) - pos) * 0.12, -1.2, 0.8) * weight
+	var d_fans := (club.fan_mood - 55.0) * 0.012
+	var d_fin := 0.0
 	if FinanceManager.in_trouble(club):
-		d -= 0.3
+		d_fin -= 0.3
 	if FinanceManager.wage_bill(world, club) > int(club.wage_budget * 1.02):
-		d -= 0.4
-	d = People.board_delta(world, club, d, derby)
+		d_fin -= 0.4
+	var raw := d_res + d_goal + d_fans + d_fin
+	var d := People.board_delta(world, club, raw, derby)
+	if world.is_user_club(club.id):
+		# Quanto cada parte pesou (proporcional ao ajuste do perfil do presidente)
+		var k := d / raw if absf(raw) > 0.001 else 1.0
+		BoardObjectives.track(world, "Resultados", d_res * k)
+		BoardObjectives.track(world, "Posição x meta", d_goal * k)
+		BoardObjectives.track(world, "Torcida", d_fans * k)
+		BoardObjectives.track(world, "Finanças", d_fin * k)
 	var before := club.board_confidence
 	club.board_confidence = clampf(club.board_confidence + d, 0.0, 100.0)
 	if before >= ULTIMATUM and club.board_confidence < ULTIMATUM:
@@ -68,6 +77,8 @@ static func season_review(world: GameWorld, club: Club, user: Dictionary) -> Dic
 	if user.get("relegated", false):
 		d -= 22.0
 	d += People.pledge_delta(world, bool(user.get("goal_met", false)))
+	if world.is_user_club(club.id):
+		d += BoardObjectives.season_delta(world) # copas, finanças e base
 	var conf := clampf(club.board_confidence + d, 0.0, 100.0)
 	var limit: float = FIRE_LIMIT[clampi(world.difficulty, 0, 2)]
 	if limit >= 0.0:

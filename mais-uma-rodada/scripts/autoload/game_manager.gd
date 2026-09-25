@@ -104,6 +104,8 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 			NewsManager.post(world, CupManager.news_cat(cid, "classificado"), {"club": c.short_name, "cup": world.season.cups[cid].name}, c.id, -1, NewsEvent.IMP_HIGH)
 	if world.transfer_window_open():
 		NewsManager.on_window(world, true)
+	world.stats.erase(BoardObjectives.KEY)
+	BoardObjectives.list(world)
 	PreseasonManager.open(world)
 	InboxManager.on_new_job(world)
 	SeasonManager.advance_to_user(world)

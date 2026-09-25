@@ -977,6 +977,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	MarketAI.offseason(world)
 	compute_goals(world)
 	SponsorManager.open_preseason(world)
+	BoardObjectives.list(world) # metas da diretoria fixadas no começo do ano
 	if world.has_user():
 		var goal := goal_of(world, world.user_club_id)
 		NewsManager.post(world, "temporada", {"year": world.year, "club": world.user_club().short_name, "goal": String(goal[0]).to_lower()}, world.user_club_id, -1, NewsEvent.IMP_HIGH)

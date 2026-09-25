@@ -60,6 +60,7 @@ func _initialize() -> void:
 	_run("gritos da beira do campo e palestras", _test_shouts)
 	_run("arbitragem: perfis, escala e efeito no jogo", _test_referees)
 	_run("eventos de vestiário: saudade, Golfo, quer sair, briga e virose", _test_squad_events)
+	_run("diretoria: metas da temporada e o que pesa na avaliação", _test_board_objectives)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
@@ -1424,6 +1425,30 @@ func _test_tactical_freedom() -> void:
 	check(not SquadRules.is_foreign(probe, esp, "non_eu"), "francês contou como extracomunitário na Espanha")
 	probe.nationality = "BRA"
 	check(SquadRules.is_foreign(probe, esp, "non_eu"), "brasileiro deveria ser extracomunitário na Espanha")
+
+
+func _test_board_objectives() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var objs := BoardObjectives.list(w)
+	var kinds := objs.map(func(o): return String(o["k"]))
+	check(kinds.has("league") and kinds.has("wages") and kinds.has("balance"), "metas básicas faltando: %s" % [kinds])
+	var in_cup := false
+	for cid in w.season.cups:
+		if w.season.cups[cid].has_club(c.id) and not CupManager.is_state(String(cid)):
+			in_cup = true
+	check(not in_cup or kinds.has("cup"), "clube na copa sem meta de copa")
+	for _i in 10:
+		SeasonManager.play_matchday_instant(w)
+	for o: Dictionary in BoardObjectives.list(w):
+		var st := BoardObjectives.status(w, o)
+		check(BoardObjectives.STATE_NAMES.has(String(st[0])), "situação inválida: %s" % [st])
+	check(BoardObjectives.breakdown(w).has("Resultados"), "confiança sem registro do que pesou")
+	c.wage_budget = 1
+	var wo: Dictionary = BoardObjectives.list(w).filter(func(o): return String(o["k"]) == "wages")[0]
+	check(String(BoardObjectives.status(w, wo)[0]) == "risk", "folha estourada não ficou em risco")
+	var d := BoardObjectives.season_delta(w)
+	check(d >= -18.0 and d <= 14.0, "peso das metas fora da faixa (%.1f)" % d)
 
 
 func _test_squad_events() -> void:
