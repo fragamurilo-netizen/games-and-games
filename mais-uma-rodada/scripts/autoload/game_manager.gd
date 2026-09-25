@@ -99,6 +99,7 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 	if world.transfer_window_open():
 		NewsManager.on_window(world, true)
 	PreseasonManager.open(world)
+	InboxManager.on_new_job(world)
 	SeasonManager.advance_to_user(world)
 	save_now()
 	world_changed.emit()

@@ -864,6 +864,7 @@ static func _generate_offers_for_user(world: GameWorld) -> void:
 		o.expires_day = world.current_turn() + OFFER_DAYS
 		world.offers.append(o)
 		NewsManager.on_offer_received(world, o)
+		InboxManager.on_offer_received(world, o)
 		pending += 1
 		if pending >= 4:
 			return

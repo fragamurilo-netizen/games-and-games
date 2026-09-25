@@ -322,6 +322,22 @@ func _run() -> void:
 	UIManager.push("news")
 	await _frames(8)
 	await _shot("21_noticias")
+	# Caixa de entrada: cartão na tela inicial, lista e uma mensagem aberta
+	UIManager.goto("hub")
+	await _frames(8)
+	_screen().scroll().scroll_vertical = 700
+	await _frames(4)
+	await _shot("21a_hub_caixa_de_entrada")
+	UIManager.push("inbox")
+	await _frames(8)
+	await _shot("21b_caixa_de_entrada")
+	var w_in: GameWorld = GameManager.world
+	if not w_in.inbox.is_empty():
+		InboxScreen.open_message(w_in.inbox.back())
+		await _frames(8)
+		await _shot("21c_mensagem")
+		UIManager.close_all_modals()
+	UIManager.back()
 	UIManager.push("settings")
 	await _frames(6)
 	await _shot("22_opcoes")

@@ -386,12 +386,14 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	if now_open and not was_open:
 		report["window_opened"] = true
 		NewsManager.on_window(world, true)
+		InboxManager.on_window(world, true)
 		if s.day > 5:
 			for c: Club in world.clubs:
 				FinanceManager.mid_season_review(world, c)
 	elif was_open and not now_open:
 		report["window_closed"] = true
 		NewsManager.on_window(world, false)
+		InboxManager.on_window(world, false)
 	# Relatório do usuário
 	if world.has_user() and not md["user"].is_empty():
 		var f: Fixture = md["user"]["f"]
@@ -401,6 +403,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
 		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
 		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
+		InboxManager.after_user_turn(world, report, md["user"])
 	return report
 
 
@@ -533,6 +536,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 				p.injury_name = InjuryTable.name_for(inj, p.id + world.season.day)
 				PlayerDevelopment.injury_setback(world.rng, p, inj, p.age(world.year))
 				NewsManager.on_injury(world, p)
+				InboxManager.on_injury(world, p)
 			# Moral
 			var vol := p.trait_mult("morale_volatility")
 			var dmor := 4.0 if result == "V" else (0.5 if result == "E" else -4.0)
@@ -884,6 +888,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		for cid in world.season.cups:
 			if world.season.cups[cid].has_club(world.user_club_id):
 				NewsManager.post(world, CupManager.news_cat(cid, "classificado"), {"club": world.user_club().short_name, "cup": world.season.cups[cid].name}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
+		InboxManager.on_new_season(world)
 	return summary
 
 

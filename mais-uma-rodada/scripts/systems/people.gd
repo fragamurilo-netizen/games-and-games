@@ -879,6 +879,7 @@ static func _maybe_offer_user(world: GameWorld, r: RandomNumberGenerator, c: Clu
 	if r.randf() > 0.35:
 		return
 	pp["offer"] = {"c": c.id, "until": world.current_turn() + 3}
+	InboxManager.on_job_offer(world, c)
 	NewsManager.post_raw(world, "%s sonda %s" % [c.short_name, world.manager_name],
 		"O %s procurou o staff de %s para saber se ele toparia assumir o clube. A resposta pode mudar a temporada." % [c.name, world.manager_name], c.id, -1, NewsEvent.IMP_HEADLINE, "tecnicos")
 

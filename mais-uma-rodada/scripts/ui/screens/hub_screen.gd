@@ -51,6 +51,7 @@ func refresh() -> void:
 	var decisions := _decisions_card(w)
 	if decisions != null:
 		c.add_child(decisions)
+	c.add_child(_inbox_card(w))
 	c.add_child(RelationsScreen.pending_card(w, func(): refresh(), true))
 	c.add_child(_status_card(w, club))
 	var alerts := _alerts_card(w, club)
@@ -242,6 +243,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["trophy", "História", "Campeões e prêmios", func(): UIManager.push("history")],
 		["shield", "Seleções", "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())], func(): UIManager.push("national")],
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
+		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
 	]
 	for it in items:
@@ -458,6 +460,35 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 		var l := UIKit.label(it[2], "", true)
 		row.add_child(l)
 		card.add_child(UIKit.tap_row(row, it[3]))
+	return UIKit.card_panel(card)
+
+
+## Caixa de entrada: as mensagens novas mais recentes (ou um atalho quando está tudo lido).
+func _inbox_card(w: GameWorld) -> Control:
+	var unread := InboxManager.unread_count(w)
+	var card := UIKit.card("CardHighlight" if unread > 0 else "Card", 8)
+	var head := UIKit.hbox(8)
+	head.add_child(UIKit.icon_rect("mail", 28, UIColors.ACCENT))
+	var sec := UIKit.section("Caixa de entrada")
+	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(sec)
+	if unread > 0:
+		head.add_child(UIKit.colored("%d não lida(s)" % unread, UIColors.ACCENT, "Small"))
+	card.add_child(head)
+	var items: Array = w.inbox.duplicate()
+	items.reverse()
+	var shown := 0
+	for m: Dictionary in items:
+		if shown >= 3:
+			break
+		# Pedidos em aberto já aparecem nos cartões de decisões e bastidores acima.
+		if bool(m.get("r", false)) or InboxManager.action_open(w, m):
+			continue
+		card.add_child(InboxScreen.row(w, m, func(): refresh()))
+		shown += 1
+	if shown == 0:
+		card.add_child(UIKit.label("Nenhuma mensagem nova." if unread == 0 else "As mensagens novas pedem resposta: veja os cartões acima.", "Muted", true))
+	card.add_child(UIKit.button("Abrir caixa de entrada", "GhostButton", func(): UIManager.push("inbox"), "mail"))
 	return UIKit.card_panel(card)
 
 
