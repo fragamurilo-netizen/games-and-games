@@ -1,15 +1,16 @@
 class_name UIColors
 extends RefCounted
-## Paleta do jogo (escura, elegante, levemente retrô). Use estas constantes em vez de cores soltas.
+## Paleta do jogo: preto e grafite neutros (sem azul), texto branco e o destaque na cor do clube.
+## Use estas constantes em vez de cores soltas.
 
-const BG := Color("#0E1621")
-const SURFACE := Color("#162231")
-const SURFACE_2 := Color("#1D2B3C")
-const SURFACE_3 := Color("#26374B")
-const LINE := Color("#2A3B50")
-const TEXT := Color("#EAF0F6")
-const MUTED := Color("#8FA3B8")
-const DIM := Color("#5D7189")
+const BG := Color("#0A0B0D")
+const SURFACE := Color("#141518")
+const SURFACE_2 := Color("#1C1D21")
+const SURFACE_3 := Color("#26282D")
+const LINE := Color("#2F3137")
+const TEXT := Color("#F2F3F5")
+const MUTED := Color("#9EA2AA")
+const DIM := Color("#63676F")
 const GOLD := Color("#FFC940")
 const GOLD_DARK := Color("#C99A1E")
 const ON_GOLD := Color("#1A1300")

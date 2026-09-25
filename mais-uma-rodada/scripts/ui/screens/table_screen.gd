@@ -373,7 +373,7 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 		var apps: int = p.stats[Player.S_APPS]
 		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(apps, "jogo", "jogos")]))
 	c.add_child(UIKit.card_panel(card))
-	c.add_child(UIKit.label("Toque em um jogador para ver o perfil. Em caso de empate, fica à frente quem jogou menos minutos.", "Small", true))
+	c.add_child(UIKit.label("Empate: fica à frente quem jogou menos minutos.", "Small", true))
 
 
 func _rounds(c: VBoxContainer, w: GameWorld, league: League) -> void:

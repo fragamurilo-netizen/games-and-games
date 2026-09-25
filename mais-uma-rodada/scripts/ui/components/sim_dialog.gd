@@ -33,7 +33,6 @@ static func open(done: Callable) -> void:
 		return
 	var v := UIKit.vbox(12)
 	v.add_child(UIKit.label("Simular sem assistir", "Title"))
-	v.add_child(UIKit.label("Os jogos são disputados no motor completo, só que sem a transmissão. Você pode parar a qualquer momento.", "Small", true))
 	var opts: Array = [[MODE_GAMES, 1, "Próximo jogo", "play"], [MODE_GAMES, 3, "Próximos 3 jogos", "fast"], [MODE_MONTH, 0, "Até o fim do mês", "clock"]]
 	if w.transfer_window_open():
 		opts.append([MODE_WINDOW_END, 0, "Até fechar a janela de transferências", "swap"])

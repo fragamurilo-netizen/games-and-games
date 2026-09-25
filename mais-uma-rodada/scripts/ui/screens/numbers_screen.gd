@@ -72,7 +72,7 @@ func _head(w: GameWorld, club: Club) -> Control:
 	if p == null or p.club_id != club.id:
 		_sel = -1
 		card.add_child(UIKit.label("Toque num jogador e depois na camisa nova.", "H3", true))
-		card.add_child(UIKit.label("Se o número já tiver dono, os dois trocam. A 1, a 9 e a 10 pesam: quem combina com elas fica orgulhoso; quem perde a camisa dele pode reclamar.", "Muted", true))
+		card.add_child(UIKit.label("Se o número tiver dono, os dois trocam.", "Muted", true))
 		return UIKit.card_panel(card)
 	var row := UIKit.hbox(12)
 	row.add_child(UIKit.portrait(p, club, w.year, 72))

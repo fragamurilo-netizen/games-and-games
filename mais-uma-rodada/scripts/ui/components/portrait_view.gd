@@ -31,7 +31,7 @@ extends Control
 	set(v):
 		trim_color = v
 		_invalidate()
-@export var bg_color: Color = Color("#1D2B3C"):
+@export var bg_color: Color = Color("#1C1D21"):
 	set(v):
 		bg_color = v
 		_invalidate()

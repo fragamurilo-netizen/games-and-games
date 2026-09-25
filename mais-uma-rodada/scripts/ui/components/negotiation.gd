@@ -187,7 +187,7 @@ func _render_fee(caption: String, hint: String) -> void:
 			_render(), "swap")
 		shop.disabled = not w.transfer_window_open()
 		box.add_child(shop)
-		box.add_child(UIKit.label("Oferecer é mais rápido que anunciar: quem tiver interesse responde na hora, mas propostas de quem é procurado costumam vir abaixo do valor.", "Small", true))
+		box.add_child(UIKit.label("Quem tiver interesse responde na hora, em geral abaixo do valor.", "Small", true))
 
 
 ## Linha de opções mutuamente exclusivas.

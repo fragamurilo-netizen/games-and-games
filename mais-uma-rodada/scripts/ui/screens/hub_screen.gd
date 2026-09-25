@@ -119,7 +119,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	if f == null:
 		card.add_child(UIKit.section("Temporada"))
 		card.add_child(UIKit.label("Seu time não joga mais nesta temporada.", "Title", true))
-		card.add_child(UIKit.label("As outras ligas e as finais das copas ainda estão em andamento. Avance para ver os campeões e o resumo do ano.", "Muted", true))
+		card.add_child(UIKit.label("Outras ligas e copas ainda estão em andamento.", "Muted", true))
 		var adv := UIKit.button("AVANÇAR ATÉ O FIM DA TEMPORADA", "PrimaryButton", func():
 			GameManager.advance_to_end()
 			refresh(), "fast")
@@ -302,7 +302,6 @@ func _season_over_card(w: GameWorld) -> Control:
 	var pos := CompetitionManager.position_of(league, w.user_club_id)
 	var t := UIKit.label("Temporada %d encerrada: %dº lugar" % [w.year, pos], "Title", true)
 	card.add_child(t)
-	card.add_child(UIKit.label("Veja campeões, acessos, rebaixamentos e o que muda para a próxima temporada.", "Muted", true))
 	var b := UIKit.button("VER RESUMO DA TEMPORADA", "PrimaryButton", func(): UIManager.push("season_end"), "trophy")
 	b.custom_minimum_size.y = 104
 	card.add_child(b)

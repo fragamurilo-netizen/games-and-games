@@ -174,7 +174,6 @@ func _board_card(w: GameWorld, club: Club) -> Control:
 	frow.add_child(UIKit.colored(UIColors.fans_label(club.fan_mood), UIColors.morale_color(club.fan_mood), "H3"))
 	card.add_child(frow)
 	card.add_child(UIKit.bar(club.fan_mood, 100.0, UIColors.morale_color(club.fan_mood), 12))
-	card.add_child(UIKit.label("A diretoria olha a meta, os clássicos e as contas. A torcida sente cada resultado — e cobra mais nos clássicos.", "Small", true))
 	var pr := People.president(w, club.id)
 	card.add_child(UIKit.kv("Presidente", "%s (%s)" % [String(pr["n"]), String(People.pres_style(w, club.id)["name"]).to_lower()]))
 	card.add_child(UIKit.button("Relações: presidente, comissão, torcida e imprensa", "GhostButton", func(): UIManager.push("relations", {"tab": "board"}), "heart"))

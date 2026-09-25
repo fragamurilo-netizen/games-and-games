@@ -22,7 +22,7 @@ func refresh() -> void:
 	if not any:
 		c.add_child(UIKit.label("Nenhuma carreira salva ainda.", "Muted"))
 		c.add_child(UIKit.button("NOVA CARREIRA", "PrimaryButton", func(): UIManager.replace("new_career"), "plus"))
-	c.add_child(UIKit.label("O jogo salva sozinho depois de cada rodada e quando o app vai para segundo plano. Cada espaço guarda também uma cópia de segurança do save anterior.", "Small", true))
+	c.add_child(UIKit.label("Salvo a cada rodada, com cópia de segurança.", "Small", true))
 
 
 func _slot_card(s: int, meta: Dictionary, has: bool) -> Control:

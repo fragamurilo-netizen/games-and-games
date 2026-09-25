@@ -127,7 +127,7 @@ func _career(w: GameWorld) -> Control:
 func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 	if w.history.is_empty():
 		var empty := UIKit.card("Card", 6)
-		empty.add_child(UIKit.label("A primeira temporada ainda está em andamento. No fim do ano, a tabela final, os artilheiros e os números do seu elenco ficam guardados aqui.", "Muted", true))
+		empty.add_child(UIKit.label("A tabela e os números ficam guardados aqui no fim do ano.", "Muted", true))
 		c.add_child(UIKit.card_panel(empty))
 		return
 	var idx := -1

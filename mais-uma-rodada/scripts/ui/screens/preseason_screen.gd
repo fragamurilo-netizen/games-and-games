@@ -42,7 +42,6 @@ func _intro_card(w: GameWorld, pre: Dictionary) -> Control:
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label("Hora de preparar o %s" % club.short_name, "Title", true))
-	col.add_child(UIKit.label("Revise o elenco, escolha a intertemporada e faça os amistosos antes da estreia.", "Muted", true))
 	row.add_child(col)
 	card.add_child(row)
 	var steps := PreseasonManager.steps(w)
@@ -65,7 +64,7 @@ func _intro_card(w: GameWorld, pre: Dictionary) -> Control:
 func _plan_card(w: GameWorld) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Raio-x do elenco"))
-	card.add_child(UIKit.label("Nível dos titulares de cada setor comparado com a média da liga. Toque num setor para buscar reforços.", "Small", true))
+	card.add_child(UIKit.label("Titulares de cada setor contra a média da liga.", "Small", true))
 	for g in PreseasonManager.squad_plan(w):
 		var tone := int(g["tone"])
 		var color := UIColors.GREEN if tone > 0 else (UIColors.RED if tone < 0 else UIColors.BLUE)
@@ -146,7 +145,7 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 		row.add_child(col)
 		card.add_child(row)
 		return UIKit.card_panel(card)
-	card.add_child(UIKit.label("Escolha como o grupo vai se preparar. Só dá para fazer uma por temporada.", "Small", true))
+	card.add_child(UIKit.label("Uma por temporada.", "Small", true))
 	for key in PreseasonManager.CAMP_ORDER:
 		var cfg: Dictionary = PreseasonManager.CAMPS[key]
 		var row := UIKit.hbox(12)

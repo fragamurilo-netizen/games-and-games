@@ -155,7 +155,6 @@ func _cycler(caption: String, names: Array, current: int, set_value: Callable) -
 func _styles(w: GameWorld, m: Dictionary) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Estilo de trabalho"))
-	card.add_child(UIKit.label("Muda como o elenco, a torcida e a diretoria enxergam você. O efeito é pequeno: o estilo é tempero, não atalho.", "Small", true))
 	for st in People.COACH_STYLES:
 		var key: String = st
 		var sel := String(m["style"]) == key

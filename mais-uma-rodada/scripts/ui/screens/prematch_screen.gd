@@ -139,7 +139,7 @@ func refresh() -> void:
 	c.add_child(_style_fit_label(w, sheet, st))
 	c.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
 	if TacticsManager.sheet_fam(club, sheet) < 45.0:
-		c.add_child(UIKit.colored("O time ainda não conhece bem esta ideia de jogo. Rende menos até pegar o jeito (treino tático acelera).", UIColors.ORANGE, "Small", true))
+		c.add_child(UIKit.colored("Pouco entrosamento com esta ideia de jogo: o time rende menos.", UIColors.ORANGE, "Small", true))
 	# Ajustes finos
 	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes: intensidade, linha, pressão", "GhostButton", func():
 		_extras_open = not _extras_open

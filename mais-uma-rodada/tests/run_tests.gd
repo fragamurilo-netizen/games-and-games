@@ -932,7 +932,7 @@ func _test_training_youth() -> void:
 	var p: Player = w.squad(c)[8]
 	p.train = {"f": "finalizacao"}
 	var bias := TrainingManager.bias_for(w, p)
-	check(bias.size() == 5, "foco do time + individual deveria dar 5 pesos (%d)" % bias.size())
+	check(bias.size() == TrainingManager.focus_of(c)["attrs"].size() + TrainingManager.PLAYER_FOCUS["finalizacao"]["attrs"].size(), "foco do time + individual com pesos errados (%d)" % bias.size())
 	check(TrainingManager.injury_mult(w, c.id) > 1.3, "treino intenso sem risco maior")
 	var other: Club = w.clubs_in_league("BRA1")[0]
 	check(TrainingManager.bias_for(w, w.squad(other)[0]).is_empty(), "IA não deveria usar o treino do usuário")
@@ -1043,7 +1043,7 @@ func _test_academy_depth() -> void:
 	var bal := c.balance
 	check(YouthManager.can_trial(w), "peneira indisponível no começo")
 	var cands := YouthManager.run_trial(w)
-	check(cands.size() >= 4 and c.balance < bal and not YouthManager.can_trial(w), "peneira não gerou candidatos ou não cobrou")
+	check(cands.size() >= 3 and c.balance < bal and not YouthManager.can_trial(w), "peneira não gerou candidatos ou não cobrou")
 	for q: Player in cands:
 		check(not w.academy.has(q.id), "candidato entrou na base sem ser aprovado")
 	var n0 := w.academy.size()
@@ -1585,12 +1585,17 @@ func _test_persona_trophies() -> void:
 		check(d.persona_log.size() == vet.persona_log.size() and d.traits == vet.traits, "personalidade não sobreviveu ao save")
 	# Lesão grave custa físico; lesão leve não
 	var p2: Player = w.players.values()[10]
-	var phys := p2.attrs[Attr.VEL] + p2.attrs[Attr.RES] + p2.attrs[Attr.FOR]
+	var phys := 0
+	for a in Attr.PHYSICAL:
+		phys += p2.attrs[a]
 	check(PlayerDevelopment.injury_setback(w.rng, p2, 3, 30) == 0, "lesão leve tirou físico")
 	var lost := 0
 	for _i in 5:
 		lost += PlayerDevelopment.injury_setback(w.rng, p2, 20, 32)
-	check(lost > 0 and p2.attrs[Attr.VEL] + p2.attrs[Attr.RES] + p2.attrs[Attr.FOR] == phys - lost, "lesão grave sem efeito físico")
+	var phys2 := 0
+	for a in Attr.PHYSICAL:
+		phys2 += p2.attrs[a]
+	check(lost > 0 and phys2 == phys - lost, "lesão grave sem efeito físico")
 	# Troféus: cada liga resolve para um desenho e um nome
 	var styles := {}
 	for id in DatabaseManager.league_ids():

@@ -162,7 +162,7 @@ func refresh() -> void:
 
 ## Profundidade: os três melhores por posição e onde falta gente boa.
 func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
-	c.add_child(UIKit.label("Os três melhores do elenco em cada posição. Em laranja, onde falta reposição à altura.", "Small", true))
+	c.add_child(UIKit.label("Em laranja: falta reposição.", "Small", true))
 	for row in SquadManager.depth(w, club):
 		var card := UIKit.card("Card", 4)
 		var head := UIKit.hbox(8)
@@ -193,7 +193,7 @@ func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 
 ## Papéis: o que foi prometido a cada jogador. Mexer aqui mexe na moral.
 func _build_roles(w: GameWorld, club: Club, c: VBoxContainer) -> void:
-	c.add_child(UIKit.label("Toque em um jogador para mudar o papel dele. Promover anima; rebaixar quem se acha titular derruba a moral. Titulares e estrelas reclamam quando ficam fora.", "Small", true))
+	c.add_child(UIKit.label("Promover anima; rebaixar derruba a moral.", "Small", true))
 	var want := SquadManager.wants_more_minutes(w, club)
 	if not want.is_empty():
 		var names: Array = []

@@ -1322,7 +1322,7 @@ func _render_tactics() -> void:
 			_render_tactics()))
 	_tac_box.add_child(fl)
 	var fam := TacticsManager.formation_fam(t.club, t.formation_name)
-	var fam_l := UIKit.label("Entrosamento com o %s: %s. Os jogadores em campo são redistribuídos sem gastar substituição." % [t.formation_name, TacticsManager.fam_label(fam).to_lower()], "Small", true)
+	var fam_l := UIKit.label("Entrosamento com o %s: %s." % [t.formation_name, TacticsManager.fam_label(fam).to_lower()], "Small", true)
 	fam_l.add_theme_color_override(&"font_color", TacticsManager.fam_color(fam))
 	_tac_box.add_child(fam_l)
 	_tac_box.add_child(UIKit.section("Mentalidade"))

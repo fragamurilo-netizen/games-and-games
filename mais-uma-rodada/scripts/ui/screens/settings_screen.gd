@@ -69,7 +69,7 @@ func refresh() -> void:
 		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	card2.add_child(row)
-	card2.add_child(UIKit.label("Instantâneo mostra só o resultado. Rápido leva cerca de meio minuto; Normal, uns dois minutos, com narração completa. Durante a partida dá para trocar a qualquer momento.", "Small", true))
+	card2.add_child(UIKit.label("Dá para trocar durante a partida.", "Small", true))
 	c.add_child(UIKit.card_panel(card2))
 	var cs := UIKit.card("Card", 12)
 	cs.add_child(UIKit.section("Compras"))

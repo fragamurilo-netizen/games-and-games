@@ -193,7 +193,7 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 			continue
 		list.append(p)
 	list.sort_custom(func(a: Player, b: Player): return a.overall > b.overall)
-	c.add_child(UIKit.label("Jogadores sem clube podem ser contratados a qualquer momento, sem taxa, só com salário.", "Small", true))
+	c.add_child(UIKit.label("Sem taxa de transferência, só salário.", "Small", true))
 	for i in mini(MAX_ROWS, list.size()):
 		var p: Player = list[i]
 		var pid := p.id
@@ -205,7 +205,7 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 func _offers_tab(c: VBoxContainer, w: GameWorld) -> void:
 	var offers := TransferManager.pending_offers(w)
 	if offers.is_empty():
-		c.add_child(UIKit.label("Nenhuma proposta pelo seu elenco no momento. Com a janela aberta, clubes interessados aparecem aqui — jogadores anunciados à venda atraem mais propostas.", "Muted", true))
+		c.add_child(UIKit.label("Nenhuma proposta pelo seu elenco.", "Muted", true))
 		return
 	for o: TransferOffer in offers:
 		c.add_child(_offer_card(w, o))

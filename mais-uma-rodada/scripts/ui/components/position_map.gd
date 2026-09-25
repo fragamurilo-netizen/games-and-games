@@ -67,7 +67,7 @@ func _marker(f: Rect2, pos: int, rad: float, col: Color, font: Font) -> void:
 	var txt := Pos.code(pos)
 	var fs := int(rad * 0.95)
 	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	draw_string(font, Vector2(c.x - tw * 0.5, c.y + (font.get_ascent(fs) - font.get_descent(fs)) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#0E1621"))
+	draw_string(font, Vector2(c.x - tw * 0.5, c.y + (font.get_ascent(fs) - font.get_descent(fs)) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.BG)
 
 
 func _at(f: Rect2, pos: int) -> Vector2:

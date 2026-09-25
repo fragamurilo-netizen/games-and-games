@@ -37,4 +37,4 @@ func _draw() -> void:
 		if I18n.lang == "en":
 			r = {"V": "W", "E": "D", "D": "L"}.get(r, r)
 		var w := font.get_string_size(r, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(font, c + Vector2(-w * 0.5, fs * 0.36), r, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#0E1621"))
+		draw_string(font, c + Vector2(-w * 0.5, fs * 0.36), r, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.BG)

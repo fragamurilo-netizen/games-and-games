@@ -218,7 +218,7 @@ func _draw_chips(r: Rect2) -> void:
 		var rating: int = int(ch.get("rating", 0))
 		if rating > 0:
 			var rb := Rect2(p + Vector2(rad * 0.45, -rad * 1.25), Vector2(rad * 1.25, rad * 0.8))
-			draw_rect(rb, Color(0.05, 0.08, 0.12, 0.9))
+			draw_rect(rb, Color(0.04, 0.045, 0.05, 0.9))
 			var rs := str(rating)
 			var rfs := int(rad * 0.6)
 			var rw := font.get_string_size(rs, HORIZONTAL_ALIGNMENT_LEFT, -1, rfs).x
@@ -227,7 +227,7 @@ func _draw_chips(r: Rect2) -> void:
 		var nfs := int(maxf(13.0, rad * 0.62))
 		var tw := small.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
 		var bg := Rect2(p + Vector2(-tw * 0.5 - 6, rad + 3), Vector2(tw + 12, nfs * 1.25))
-		draw_rect(bg, Color(0.05, 0.08, 0.12, 0.78))
+		draw_rect(bg, Color(0.04, 0.045, 0.05, 0.78))
 		draw_string(small, p + Vector2(-tw * 0.5, rad + 3 + nfs * 0.98), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE if not ch.get("warn", false) else UIColors.ORANGE)
 
 

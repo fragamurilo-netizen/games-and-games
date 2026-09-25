@@ -167,7 +167,6 @@ func _squad(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	var cap := w.player(int(People.data(w).get("captain", -1)))
 	if cap != null and cap.club_id == club.id:
 		card.add_child(UIKit.kv("Capitão", cap.display_name(), UIColors.ACCENT))
-	card.add_child(UIKit.label("A confiança sobe com minutos, conversas e promessas cumpridas. Cai no banco, em promessas quebradas e quando um amigo vai embora.", "Small", true))
 	c.add_child(UIKit.card_panel(card))
 	var bonds: Array = People.data(w)["bonds"]
 	if not bonds.is_empty():
@@ -251,7 +250,6 @@ func _staff(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	var head := UIKit.card("Card", 8)
 	head.add_child(UIKit.section("Comissão técnica"))
 	head.add_child(UIKit.kv("Folha da comissão (mês)", "%s / %s" % [Fmt.money(People.staff_wage_bill(w)), Fmt.money(People.staff_budget(w))]))
-	head.add_child(UIKit.label("Cada profissional mexe em uma parte do clube. A sintonia com você deixa o trabalho render mais; sem sintonia, ele pode pedir para sair.", "Small", true))
 	c.add_child(UIKit.card_panel(head))
 	var st := People.staff(w)
 	for i in People.STAFF_ORDER.size():
@@ -392,7 +390,6 @@ func _fans(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	r2.add_child(UIKit.colored(UIColors.fans_label(club.fan_mood), UIColors.morale_color(club.fan_mood), "H3"))
 	card.add_child(r2)
 	card.add_child(UIKit.bar(club.fan_mood, 100.0, UIColors.morale_color(club.fan_mood), 10))
-	card.add_child(UIKit.label("O apoio a você pesa na diretoria (ainda mais com presidente populista). Com a torcida contra, vêm protestos.", "Small", true))
 	card.add_child(UIKit.button("Ir até a organizada", "PrimaryButton", func(): TalkDialog.open("fans", -1, cb), "heart"))
 	c.add_child(UIKit.card_panel(card))
 	var chants: Array = fans.get("chants", [])
@@ -428,7 +425,6 @@ func _press(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	var b := UIKit.button("Convocar coletiva" if can else "Coletiva feita há pouco", "PrimaryButton", func(): TalkDialog.open("press", -1, cb), "news")
 	b.disabled = not can
 	card.add_child(b)
-	card.add_child(UIKit.label("Cada jornalista tem um estilo. Quem você trata bem escreve melhor sobre você; o sensacionalista vive de rixas no vestiário.", "Small", true))
 	c.add_child(UIKit.card_panel(card))
 	var nc := UIKit.card("Card", 6)
 	nc.add_child(UIKit.section("Na imprensa"))

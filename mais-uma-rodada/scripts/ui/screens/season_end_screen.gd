@@ -399,7 +399,6 @@ func _club_card(w: GameWorld) -> Control:
 		card.add_child(UIKit.label("Saíram com o fim do contrato: %s." % ", ".join(PackedStringArray(left)), "", true))
 	if not youth.is_empty():
 		card.add_child(UIKit.label("Chegaram à base: %s." % ", ".join(PackedStringArray(youth)), "", true))
-		card.add_child(UIKit.label("Acompanhe os garotos em Central do clube → Base. O potencial é uma faixa que estreita com o tempo: alguns explodem, outros não.", "Small", true))
 	var yleft: Array = _summary.get("youth_left", [])
 	if not yleft.is_empty():
 		card.add_child(UIKit.label("Deixaram a base (idade limite): %s." % ", ".join(PackedStringArray(yleft)), "Small", true))

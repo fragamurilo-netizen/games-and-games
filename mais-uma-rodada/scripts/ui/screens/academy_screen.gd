@@ -65,7 +65,7 @@ func _header(w: GameWorld, club: Club) -> Control:
 	row.add_child(UIKit.stat(_pos_text(w, "u20"), "no sub-20"))
 	row.add_child(UIKit.stat(_pos_text(w, "u17"), "no sub-17"))
 	card.add_child(row)
-	card.add_child(UIKit.label("Quem joga evolui mais. As estrelas são a estimativa da comissão sobre o futuro de cada garoto: ficam mais confiáveis com o tempo de casa e um bom coordenador, mas ninguém acerta sempre. Com 19 anos é a última chance: suba ao profissional ou ele sai de graça no fim da temporada.", "Small", true))
+	card.add_child(UIKit.label("Estrelas: estimativa da comissão, não o teto real.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -316,7 +316,7 @@ func _scouting(w: GameWorld) -> Control:
 			refresh())
 		fl.add_child(chip)
 	card.add_child(fl)
-	card.add_child(UIKit.label("Na virada da temporada chegam cerca de %d garotos. O custo da rede de observadores é cobrado nessa hora." % YouthManager.intake_count(w, club), "Small", true))
+	card.add_child(UIKit.label("Chegam cerca de %d garotos por temporada." % YouthManager.intake_count(w, club), "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -325,7 +325,7 @@ func _trial(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Peneira"))
 	var cands := YouthManager.candidates(w)
 	if YouthManager.can_trial(w):
-		card.add_child(UIKit.label("Uma vez por temporada o clube abre as portas para garotos de 14 a 17 anos. A maioria não tem nível, mas às vezes aparece uma joia escondida.", "Small", true))
+		card.add_child(UIKit.label("Uma por temporada, para garotos de 14 a 17 anos.", "Small", true))
 		card.add_child(UIKit.button("FAZER PENEIRA · %s" % Fmt.money(YouthManager.trial_cost(w)), "PrimaryButton", func():
 			var got := YouthManager.run_trial(w)
 			UIManager.toast("%d garotos se destacaram na peneira." % got.size())
@@ -378,7 +378,7 @@ func _grads(w: GameWorld) -> Control:
 	if total > 0:
 		card.add_child(UIKit.kv("Arrecadado com vendas da base", Fmt.money(total), UIColors.GREEN))
 	if list.is_empty():
-		card.add_child(UIKit.label("Ninguém subiu ou foi vendido ainda. Os garotos que você revelar aparecem aqui, com o clube e o nível de hoje.", "Muted", true))
+		card.add_child(UIKit.label("Ninguém revelado ainda.", "Muted", true))
 		return UIKit.card_panel(card)
 	for e in list:
 		var p: Player = e["p"]

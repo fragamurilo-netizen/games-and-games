@@ -133,8 +133,8 @@ func _buttons(th: Theme) -> void:
 	th.add_type("DangerButton")
 	th.set_type_variation("DangerButton", "Button")
 	_button_states(th, "DangerButton",
-		sb(Color("#3A1C22"), 14, UIColors.RED, 2, 18, 12),
-		sb(Color("#4A2229"), 14, UIColors.RED, 2, 18, 12),
+		sb(Color("#3A1C1E"), 14, UIColors.RED, 2, 18, 12),
+		sb(Color("#4A2224"), 14, UIColors.RED, 2, 18, 12),
 		sb(UIColors.RED, 14, UIColors.RED, 2, 18, 12),
 		sb(UIColors.SURFACE, 14, UIColors.LINE, 1, 18, 12))
 	_button_colors(th, "DangerButton", Color("#FFB3B5"), Color.WHITE)
@@ -197,9 +197,9 @@ func _panels(th: Theme) -> void:
 	_panel_var(th, "CardInset", sb(UIColors.BG, 14, UIColors.LINE, 1, 16, 12))
 	_panel_var(th, "RowPanel", sb(UIColors.SURFACE_2, 12, Color(0, 0, 0, 0), 0, 14, 10))
 	_panel_var(th, "Pill", sb(UIColors.SURFACE_3, 20, Color(0, 0, 0, 0), 0, 12, 4))
-	var top := sb(Color("#111B28"), 0, Color(0, 0, 0, 0), 0, 16, 10)
+	var top := sb(Color("#0E0F11"), 0, Color(0, 0, 0, 0), 0, 16, 10)
 	_panel_var(th, "TopBar", top)
-	var nav := sb(Color("#111B28"), 0, Color(0, 0, 0, 0), 0, 8, 6)
+	var nav := sb(Color("#0E0F11"), 0, Color(0, 0, 0, 0), 0, 8, 6)
 	nav.border_color = UIColors.LINE
 	nav.border_width_top = 1
 	_panel_var(th, "BottomBar", nav)
@@ -208,7 +208,7 @@ func _panels(th: Theme) -> void:
 	sheet.corner_radius_top_right = 26
 	_panel_var(th, "Sheet", sheet)
 	_panel_var(th, "Dialog", sb(UIColors.SURFACE, 22, UIColors.LINE, 1, 26, 24))
-	_panel_var(th, "Toast", sb(Color("#22344A"), 16, UIColors.LINE, 1, 22, 14))
+	_panel_var(th, "Toast", sb(Color("#1F2126"), 16, UIColors.LINE, 1, 22, 14))
 
 
 func _inputs(th: Theme) -> void:

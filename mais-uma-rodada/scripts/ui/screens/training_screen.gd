@@ -77,7 +77,6 @@ func _intensity_card(club: Club) -> Control:
 func _players_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("Treino individual"))
-	card.add_child(UIKit.label("Toque em um jogador para escolher o foco dele ou ensinar uma nova posição.", "Small", true))
 	var squad := w.squad(club)
 	squad.sort_custom(func(a: Player, b: Player): return a.position < b.position if a.position != b.position else a.overall > b.overall)
 	for p: Player in squad:

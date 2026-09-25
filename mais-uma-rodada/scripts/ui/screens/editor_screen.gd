@@ -113,8 +113,7 @@ func _home(c: VBoxContainer) -> void:
 	var info := UIKit.card("Card", 6)
 	if has_career() and not AppSettings.career_edit:
 		info.add_child(UIKit.label("Para editar jogadores e outros clubes nesta carreira, ligue \"Editar jogadores e clubes durante a carreira\" em Opções. No Editor do menu inicial você sempre edita o mundo padrão das novas carreiras.", "Small", true))
-	info.add_child(UIKit.label("Imagens importadas (escudos, logos e fotos) ficam guardadas no aparelho e são recortadas em quadrado automaticamente.", "Small", true))
-	c.add_child(UIKit.card_panel(info))
+		c.add_child(UIKit.card_panel(info))
 
 
 func _manager_name() -> void:
@@ -1055,7 +1054,7 @@ func _comp_editor(c: VBoxContainer) -> void:
 			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], "", colors_v)
 			refresh()))
 	card.add_child(row)
-	card.add_child(UIKit.label("Os nomes das competições valem para todas as carreiras. Copas já sorteadas nesta temporada mudam de nome na próxima.", "Small", true))
+	card.add_child(UIKit.label("Vale para todas as carreiras.", "Small", true))
 	c.add_child(UIKit.card_panel(card))
 	var colors := UIKit.card("Card", 8)
 	colors.add_child(UIKit.section("Cores"))
@@ -1096,7 +1095,7 @@ func _mods_view(c: VBoxContainer) -> void:
 	var intro := UIKit.card("Card", 6)
 	intro.add_child(UIKit.label("Mods mudam os dados do jogo (clubes, ligas, copas, regras, textos) e colocam jogadores reais nos elencos. Os ligados valem na ordem da lista: o de baixo ganha.", "Small", true))
 	if has_career():
-		intro.add_child(UIKit.label("Com uma carreira aberta, ligar ou desligar um mod vale para as próximas carreiras (e quando você reabrir o jogo).", "Small", true))
+		intro.add_child(UIKit.label("Com carreira aberta, vale para as próximas.", "Small", true))
 	c.add_child(UIKit.card_panel(intro))
 	var list := Mods.list()
 	var card := UIKit.card("Card", 8)
