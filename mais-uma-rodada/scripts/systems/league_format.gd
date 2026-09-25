@@ -12,9 +12,18 @@ extends RefCounted
 ##           de acesso em mata-mata (Championship, LaLiga 2, Serie B, Ligue 2). O campeão continua sendo
 ##           o primeiro da tabela. {"type": "promo", "from": 3, "teams": 4, "ko": ["sf", "f"], ...}
 ##
+## Repescagem entre divisões (leagues.json → "barrage" na liga de cima): o clube na posição
+## "pos" da elite enfrenta o "vs" da divisão de baixo (ou o vencedor dos playoffs de acesso dela)
+## em ida e volta, com a decisão na casa do clube da elite. Quem vence fica (ou sobe).
+## {"pos": 16, "vs": 3, "legs": 2, "desc": "..."} — Bundesliga, Ligue 1, Liga Portugal.
+##
 ## As datas da fase final são os últimos fins de semana da temporada, reservados ao montar a
-## liga (League.phase_slots). O estado fica no próprio League (salvo com a temporada).
+## liga (League.phase_slots). O estado fica no próprio League (salvo com a temporada); a
+## repescagem guarda o confronto em po["bar"] da liga de cima e usa as datas depois do último
+## fim de semana.
 
+## Número de "rodada" dos jogos da repescagem (fora da numeração do mata-mata).
+const BAR_R := 50
 const KO_NAMES := {"r16": "Oitavas", "ef": "Eliminatória", "qf": "Quartas", "sf": "Semifinal", "f": "Final"}
 
 
@@ -143,6 +152,8 @@ static func sorted_ids(league: League) -> Array:
 # ---------------------------------------------------------------------------
 
 static func _legs(league: League, r: int) -> int:
+	if r == BAR_R:
+		return int(barrage(league).get("legs", 1))
 	var f := cfg(league)
 	var ko: Array = f.get("ko", ["f"])
 	return int(Dictionary(f.get("legs", {})).get(ko[clampi(r, 0, ko.size() - 1)], 1))
@@ -160,7 +171,7 @@ static func _playoff_step(world: GameWorld, league: League) -> Array:
 	var f := cfg(league)
 	var ko: Array = f.get("ko", ["f"])
 	var po := league.po
-	if po.is_empty():
+	if not po.has("seeds"):
 		var n := int(f.get("teams", 8))
 		var byes := int(f.get("byes", 0))
 		var first := maxi(0, int(f.get("from", 1)) - 1) if kind(league) == "promo" else 0
@@ -319,6 +330,9 @@ static func runner_up(league: League, ids: Array) -> int:
 static func round_label(league: League, f: Fixture) -> String:
 	if f.stage != Fixture.STAGE_KO:
 		return "%dª rodada" % (f.round + 1)
+	if f.round == BAR_R:
+		var n := _legs(league, BAR_R)
+		return "Repescagem · " + ("jogo único" if n == 1 else ("ida" if f.leg == 0 else "volta"))
 	var ko: Array = cfg(league).get("ko", ["f"])
 	var name := String(KO_NAMES.get(ko[clampi(f.round, 0, ko.size() - 1)], "Playoff"))
 	if _legs(league, f.round) == 2:
@@ -328,9 +342,19 @@ static func round_label(league: League, f: Fixture) -> String:
 
 ## Clubes que sobem: os primeiros da tabela e, com playoffs de acesso, o vencedor deles na
 ## última vaga (se os playoffs não terminaram, vale a tabela).
-static func promoted(league: League, ids: Array, up: int) -> Array:
+static func promoted(league: League, ids: Array, up: int, world: GameWorld = null) -> Array:
 	if up <= 0:
 		return []
+	# Com repescagem na divisão de cima, "up" conta só as vagas diretas; o vencedor da
+	# repescagem sobe junto (os playoffs de acesso, se houver, só decidem quem vai a ela).
+	var upl := barrage_upper(world, league) if world != null else null
+	if upl != null:
+		var direct: Array = ids.slice(0, up)
+		var bar := barrage(upl)
+		var bw := int(bar.get("w", -1))
+		if bw >= 0 and bw == int(bar.get("b", -1)) and not direct.has(bw):
+			direct.append(bw)
+		return direct
 	if kind(league) != "promo":
 		return ids.slice(0, up)
 	var out: Array = ids.slice(0, up - 1)
@@ -341,4 +365,115 @@ static func promoted(league: League, ids: Array, up: int) -> Array:
 
 ## Texto do regulamento para a interface.
 static func describe(league: League) -> String:
-	return String(cfg(league).get("desc", ""))
+	var parts: Array = []
+	var own := String(cfg(league).get("desc", ""))
+	if own != "":
+		parts.append(own)
+	var bar := String(barrage_cfg(league).get("desc", ""))
+	if bar != "":
+		parts.append(bar)
+	if league.tier > 1 and own == "":
+		var up_id := DatabaseManager.league_at(league.nation, league.tier - 1)
+		var ub: Dictionary = DatabaseManager.league_cfg(up_id).get("barrage", {}) if up_id != "" else {}
+		if not ub.is_empty():
+			parts.append("Os %d primeiros sobem direto; o %dº joga a repescagem em ida e volta contra o %dº da %s pela última vaga." % [
+				league.promoted_count(), int(ub.get("vs", 3)), int(ub.get("pos", 16)), String(DatabaseManager.league_cfg(up_id).get("short", up_id))])
+	return " ".join(PackedStringArray(parts))
+
+
+# ---------------------------------------------------------------------------
+# Repescagem entre divisões
+# ---------------------------------------------------------------------------
+
+static func barrage_cfg(league: League) -> Dictionary:
+	return league.cfg().get("barrage", {})
+
+
+## Confronto da repescagem guardado na liga de cima: {a (elite), b (divisão de baixo), w, legs}.
+static func barrage(league: League) -> Dictionary:
+	return league.po.get("bar", {})
+
+
+## Liga de cima quando ela tem repescagem contra esta; senão null.
+static func barrage_upper(world: GameWorld, lower: League) -> League:
+	if world == null or lower == null or lower.tier <= 1:
+		return null
+	var up := world.league(DatabaseManager.league_at(lower.nation, lower.tier - 1))
+	if up == null or barrage_cfg(up).is_empty():
+		return null
+	return up
+
+
+## Clube da elite que caiu na repescagem (ou -1 se ela não foi decidida ou ele ficou).
+static func barrage_relegated(league: League) -> int:
+	var bar := barrage(league)
+	var w := int(bar.get("w", -1))
+	return int(bar["a"]) if w >= 0 and w == int(bar.get("b", -1)) else -1
+
+
+## Chamado depois de after_slot de todas as ligas (os playoffs de acesso de baixo já andaram).
+static func barrage_after_slot(world: GameWorld, league: League) -> Array:
+	if league.regular_rounds <= 0 or barrage_cfg(league).is_empty():
+		return []
+	return _barrage_step(world, league)
+
+
+static func _barrage_step(world: GameWorld, upper: League) -> Array:
+	var b := barrage_cfg(upper)
+	var bar := barrage(upper)
+	if int(bar.get("w", -1)) >= 0:
+		return []
+	if bar.is_empty():
+		if not _regular_done(upper):
+			return []
+		var lower := world.league(DatabaseManager.league_at(upper.nation, upper.tier + 1))
+		if lower == null or lower.club_ids.size() < 3 or not _regular_done(lower):
+			return []
+		var entrant := -1
+		if kind(lower) == "promo":
+			entrant = int(lower.po.get("champ", -1))
+			if entrant < 0:
+				return [] # os playoffs de acesso ainda não terminaram
+		else:
+			var lids := sorted_ids(lower)
+			entrant = int(lids[clampi(int(b.get("vs", 3)), 1, lids.size()) - 1])
+		var uids := sorted_ids(upper)
+		var pos := clampi(int(b.get("pos", uids.size() - upper.relegated_count())), 1, uids.size())
+		var elite := int(uids[pos - 1])
+		# Datas livres depois do último fim de semana de liga
+		var s := world.season
+		var last_w := -1
+		for i in s.calendar.size():
+			if s.calendar[i]["t"] == "W":
+				last_w = i
+		var free: Array = []
+		for i in range(maxi(last_w + 1, s.day + 1), s.calendar.size()):
+			free.append(i)
+		var legs := mini(int(b.get("legs", 2)), free.size())
+		bar = {"r": BAR_R, "a": elite, "b": entrant, "w": -1, "legs": legs}
+		upper.po["bar"] = bar
+		if legs <= 0:
+			bar["w"] = elite # sem datas: a elite mantém a vaga
+			return [{"t": "barrage_end", "league": upper.id, "club": elite}]
+		for leg in legs:
+			var fx := Fixture.new()
+			# A decisão é na casa do clube da elite
+			var elite_home := leg == legs - 1
+			fx.home = elite if elite_home else entrant
+			fx.away = entrant if elite_home else elite
+			fx.round = BAR_R
+			fx.leg = leg
+			fx.comp = upper.id
+			fx.stage = Fixture.STAGE_KO
+			fx.slot = int(free[leg])
+			upper.rounds.append([fx])
+			upper.round_slots.append(fx.slot)
+		return [{"t": "barrage_start", "league": upper.id, "clubs": [elite, entrant]}]
+	var fxs := _tie_fixtures(upper, bar)
+	if fxs.size() < int(bar.get("legs", 1)):
+		return []
+	for g: Fixture in fxs:
+		if not g.played:
+			return []
+	bar["w"] = _tie_winner(world, bar, fxs)
+	return [{"t": "barrage_end", "league": upper.id, "club": int(bar["w"])}]

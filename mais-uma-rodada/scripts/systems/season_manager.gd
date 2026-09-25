@@ -113,6 +113,20 @@ static func _league_format_news(world: GameWorld, league: League, ev: Dictionary
 			NewsManager.post_raw(world, "Playoffs da %s definidos" % league.short_name,
 				"%d clubes disputam o título em mata-mata. %s termina a fase regular na liderança." % [cl.size(), world.club(int(cl[0])).short_name],
 				int(cl[0]), -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"barrage_start":
+			var cl2: Array = ev["clubs"]
+			var a := world.club(int(cl2[0]))
+			var b := world.club(int(cl2[1]))
+			NewsManager.post_raw(world, "Repescagem: %s x %s" % [a.short_name, b.short_name],
+				"O %s, %dº da %s, defende a vaga na elite contra o %s, que vem da %s. São dois jogos, com a decisão na casa do clube da elite." % [a.name, CompetitionManager.position_of(league, a.id), league.short_name, b.name, world.league_name(b.league_id)],
+				a.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(a.id) or world.is_user_club(b.id) else (NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL), "liga")
+		"barrage_end":
+			var bar2 := LeagueFormat.barrage(league)
+			var wc := world.club(int(ev["club"]))
+			var elite_won := int(ev["club"]) == int(bar2.get("a", -1))
+			NewsManager.post_raw(world, ("%s se salva na repescagem" if elite_won else "%s sobe pela repescagem!") % wc.short_name,
+				("O %s venceu a repescagem e segue na %s." if elite_won else "O %s venceu a repescagem e vai jogar a %s na próxima temporada.") % [wc.name, league.name],
+				wc.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(wc.id) else (NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL), "liga")
 		"playoff_champion":
 			var c := world.club(int(ev["club"]))
 			NewsManager.post_raw(world, "%s é campeão da %s!" % [c.short_name, league.short_name],
@@ -414,6 +428,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	for lid in s.league_order:
 		for ev in LeagueFormat.after_slot(world, s.leagues[lid]):
 			_league_format_news(world, s.leagues[lid], ev)
+	for lid in s.league_order:
+		for ev in LeagueFormat.barrage_after_slot(world, s.leagues[lid]):
+			_league_format_news(world, s.leagues[lid], ev)
 	NewsManager.on_cup_events(world, cup_events)
 	# Rivalidades: o que aconteceu nos jogos e nos mata-matas esquenta os confrontos
 	Rivalry.after_matchday(world, md["entries"])
@@ -643,6 +660,11 @@ static func advance_to_user(world: GameWorld) -> Array:
 # Fim de temporada
 # ---------------------------------------------------------------------------
 
+## Vencedor dos playoffs da liga (título ou acesso), ou -1.
+static func kind_po_champ(league: League) -> int:
+	return int(league.po.get("champ", -1)) if LeagueFormat.kind(league) in ["playoff", "promo"] else -1
+
+
 static func _is_major(league: League) -> bool:
 	return league.tier == 1 and int(DatabaseManager.nation(league.nation).get("coef", 0)) >= MAJOR_COEF
 
@@ -673,8 +695,12 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var down := league.relegated_count()
 		var upper := DatabaseManager.league_at(league.nation, league.tier - 1) if league.tier > 1 else ""
 		var lower := DatabaseManager.league_at(league.nation, league.tier + 1)
-		var promoted: Array = LeagueFormat.promoted(league, ids, up) if up > 0 and upper != "" else []
+		var promoted: Array = LeagueFormat.promoted(league, ids, up, world) if up > 0 and upper != "" else []
 		var relegated: Array = ids.slice(teams - down) if down > 0 and lower != "" else []
+		# Repescagem: o clube da elite que perdeu cai junto (o vencedor de baixo sobe em promoted)
+		var bar_down := LeagueFormat.barrage_relegated(league)
+		if bar_down >= 0 and lower != "" and not relegated.has(bar_down):
+			relegated.append(bar_down)
 		var top := CompetitionManager.player_ranking(world, id, Player.S_GOALS, 1)
 		var scorer := {}
 		if not top.is_empty():
@@ -706,6 +732,12 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["leagues"].append({"id": id, "name": league.name, "nation": league.nation, "tier": league.tier, "champion": champ.id,
 			"promoted": promoted, "relegated": relegated, "scorer": scorer, "table": ids})
 		hist_leagues[id] = {"champion": champ.id, "runner_up": LeagueFormat.runner_up(league, ids), "promoted": promoted, "relegated": relegated, "scorer": scorer}
+		var bar := LeagueFormat.barrage(league)
+		if int(bar.get("w", -1)) >= 0:
+			hist_leagues[id]["barrage"] = {"a": int(bar["a"]), "b": int(bar["b"]), "w": int(bar["w"])}
+		if kind_po_champ(league) >= 0:
+			hist_leagues[id]["po"] = kind_po_champ(league)
+		hist_leagues[id]["pts"] = int(league.table[champ.id]["pts"]) if league.table.has(champ.id) else 0
 		var mine := league.nation == user_nation
 		if mine or _is_major(league) or world.is_user_club(champ.id):
 			NewsManager.post(world, "campeao", {"club": champ.short_name, "division": league.name, "pts": league.table[champ.id]["pts"], "year": world.year},
