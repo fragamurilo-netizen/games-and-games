@@ -33,6 +33,7 @@ const SCREENS := {
 	"welcome": "res://scenes/screens/welcome.tscn",
 	"graduates": "res://scenes/screens/graduates.tscn",
 	"compare": "res://scenes/screens/compare.tscn",
+	"coach": "res://scenes/screens/coach.tscn",
 	"xray": "res://scenes/screens/xray.tscn",
 	"rivalry": "res://scenes/screens/rivalry.tscn",
 }

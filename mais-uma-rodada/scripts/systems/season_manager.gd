@@ -36,8 +36,11 @@ static func setup_first_season(world: GameWorld) -> void:
 ## As supercopas (U0, U1) vêm antes da primeira rodada. Cada data leva as marcas "win" (janela de
 ## transferências aberta) e "ret" (anúncio de aposentadorias), então saves antigos com outro modelo
 ## de calendário continuam com as suas próprias datas.
-static func build_calendar(year: int) -> Array:
-	var cc := DatabaseManager.calendar_cfg()
+## Modelos: "calendar" (europeu, agosto a maio) e "calendars" → "ano" (ano civil). Marcas no modelo:
+## "E3@" data no fim de semana (estaduais em janeiro-março), "W~" rodada de liga no meio de semana,
+## "_" semana sem jogos (pausa do meio do ano).
+static func build_calendar(year: int, kind: String = "") -> Array:
+	var cc := DatabaseManager.calendar_cfg(kind)
 	var jan1 := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1})
 	var start := Time.get_unix_time_from_datetime_dict({"year": year, "month": int(cc.get("start_month", 8)), "day": int(cc.get("start_day", 15))})
 	var sat := int((start - jan1) / 86400)
@@ -49,6 +52,18 @@ static func build_calendar(year: int) -> Array:
 	var first_w := true
 	for i in slots.size():
 		var t: String = slots[i]
+		if t == "_":
+			sat += 7
+			continue
+		if t == "W~":
+			out.append({"t": "W", "d": sat + 3, "mid": true})
+			continue
+		if t.ends_with("@"):
+			if not first_w:
+				sat += 7
+			first_w = false
+			out.append({"t": t.trim_suffix("@"), "d": sat})
+			continue
 		if t == "W":
 			if not first_w:
 				sat += 7
@@ -62,7 +77,7 @@ static func build_calendar(year: int) -> Array:
 			out.append({"t": t, "d": sat + 4})
 		else:
 			out.append({"t": t, "d": (int(out[out.size() - 1]["d"]) + 4) if not out.is_empty() else sat})
-		if i == brk:
+		if out.size() - 1 == brk:
 			sat += int(cc.get("winter_break_days", 0))
 	for w in cc.get("windows", []):
 		for i in range(int(w[0]), mini(int(w[1]) + 1, out.size())):
@@ -71,6 +86,12 @@ static func build_calendar(year: int) -> Array:
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
 	return out
+
+
+## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
+## "" = europeu. O mundo inteiro segue um calendário só (as competições dependem disso).
+static func calendar_kind(world: GameWorld) -> String:
+	return String(world.stats.get("cal", ""))
 
 
 ## Cria as ligas (clubes pela liga atual de cada um), os jogos, as copas e o calendário de `world.year`.
@@ -102,7 +123,7 @@ static func _league_format_news(world: GameWorld, league: League, ev: Dictionary
 static func build_season(world: GameWorld) -> SeasonState:
 	var s := SeasonState.new()
 	s.year = world.year
-	s.calendar = build_calendar(world.year)
+	s.calendar = build_calendar(world.year, calendar_kind(world))
 	var weekends: Array = []
 	for i in s.calendar.size():
 		if s.calendar[i]["t"] == "W":
@@ -466,6 +487,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	elif world.league(f.comp) == null:
 		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
 	FootballMemory.on_match(world, f)
+	Referees.record(world, res)
 	var derby := bool(res.get("derby", false))
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
@@ -942,6 +964,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			PlayerGenerator.assign_statuses(world, c)
 		_assign_missing_shirts(world, c)
 	Valuation.refresh_shift(world)
+	Referees.season_close(world)
 	for p: Player in world.players.values():
 		p.reset_season_stats()
 		p.yellow_acc = 0

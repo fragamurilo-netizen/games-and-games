@@ -39,7 +39,7 @@ const L_DEFN := 22
 const CONV := 0.118
 const CAL := 1.29
 ## O minuto a minuto dá ao mandante um pouco mais do que as taxas médias sugerem (momento, torcida).
-const HOME_BOOST := 1.10
+const HOME_BOOST := 1.06
 const MINUTES := 93.0
 const PENALTY_SHARE := 0.075
 const OWN_GOAL_SHARE := 0.035
@@ -196,6 +196,10 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var importance := float(ctx.get("importance", 0.3))
 	var big := derby or importance >= 0.7
 	var sides: Array = [_side(world, home, hs, 1.0 + adv * crowd * 0.5, big, rng), _side(world, away, as_, 1.0, big, rng)]
+	var ref: Array = Array(ctx.get("ref", []))
+	var rf := Referees.factors(world, ref)
+	for sd: Dictionary in sides:
+		sd["ref_pens"] = float(rf["pens"])
 	var th: Dictionary = sides[0]["tac"]
 	var ta: Dictionary = sides[1]["tac"]
 	var tilt_h := float(th["m_poss"]) + float(th["s_poss"]) + float(th["l_poss"]) + (0.0 if bool(ta["ignores_press"]) else float(th["pr_poss"]))
@@ -213,7 +217,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 		for _g in _poisson(rng, lam[s]):
 			timeline.append([_goal_minute(rng), 0, s])
 		var tac: Dictionary = sides[s]["tac"]
-		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"])
+		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"]) * float(rf["cards"])
 		for _y in _poisson(rng, 1.75 * fouls_f):
 			timeline.append([rng.randi_range(3, 92), 1, s])
 		if rng.randf() < 0.035 * fouls_f:
@@ -289,7 +293,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var out_lines: Array = [[], []]
 	for s in 2:
 		var diff: int = score[s] - score[1 - s]
-		var team_bonus := 0.3 if diff > 0 else (-0.25 if diff < 0 else 0.0)
+		var team_bonus := MatchSimulation.RATING_WIN if diff > 0 else (MatchSimulation.RATING_LOSS if diff < 0 else 0.0)
 		var conceded: int = score[1 - s]
 		var clean := conceded == 0
 		var avg := 0.0
@@ -317,10 +321,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 			if clean and mins >= 60:
 				pts += 0.8 if gk else (0.45 if float(v[3]) >= 0.8 else 0.0)
 			var perf_c := clampf((float(v[8]) / maxf(1.0, avg) - 1.0) * 4.0, -0.5, 0.5)
-			var r := 6.0 + pts + team_bonus + perf_c + rng.randfn(0.0, 0.3)
-			if mins < 20:
-				r = 6.0 + clampf(pts, -1.0, 1.5) + team_bonus * 0.5
-			r = clampf(snappedf(r, 0.1), 3.0, 10.0)
+			var r := MatchSimulation.rating_from(pts, team_bonus, perf_c, rng.randfn(0.0, 0.3), mins)
 			var cond := maxf(5.0, p.condition - fat * (1.25 - p.attrs[Attr.RES] / 100.0 * 0.6) * (0.35 if gk else 1.0) * mins / 90.0)
 			v.append(mins)
 			v.append(r)
@@ -332,7 +333,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 				motm_v = mv
 				motm_pid = p.id
 	return {"hg": score[0], "ag": score[1], "att": att_n, "goals": goals, "motm": motm_pid, "et": et, "pens": pens,
-		"derby": derby, "importance": importance, "yc": yc, "rc": rc, "lines": out_lines, "poss": poss}
+		"derby": derby, "importance": importance, "yc": yc, "rc": rc, "lines": out_lines, "poss": poss, "ref": ref}
 
 
 static func _poisson(rng: RandomNumberGenerator, lam: float) -> int:
@@ -386,7 +387,7 @@ static func _goal(rng: RandomNumberGenerator, sides: Array, lines: Array, s: int
 			score[s] += 1
 			goals.append([mnt, s, og[0].id, Fixture.GOAL_OWN, half])
 			return
-	if r < OWN_GOAL_SHARE + PENALTY_SHARE:
+	if r < OWN_GOAL_SHARE + PENALTY_SHARE * float(sides[s].get("ref_pens", 1.0)):
 		var sheet: TeamSheet = sides[s]["sheet"]
 		var taker: Variant = null
 		for v in lines[s]:

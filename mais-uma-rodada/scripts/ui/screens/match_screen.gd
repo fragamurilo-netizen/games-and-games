@@ -225,6 +225,9 @@ func _build() -> void:
 	if _sim.derby:
 		info += " · CLÁSSICO"
 	_add_line({"text": info, "style": "info", "side": -1, "minute": ""})
+	var rs := Referees.summary(w, _sim.ref)
+	if rs != "":
+		_add_line({"text": "Árbitro: " + rs, "style": "info", "side": -1, "minute": ""})
 	_add_line(_com.extra_line("weather", "info", 0, 1))
 	if not _sim.started and _sim.can_talk(_user_side):
 		_open_talk.call_deferred(false)

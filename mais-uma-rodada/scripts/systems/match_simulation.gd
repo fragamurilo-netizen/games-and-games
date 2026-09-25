@@ -75,8 +75,8 @@ const BETA := 0.06 # sensibilidade da taxa de chances à diferença ATA×DEF (po
 const GAMMA := 0.021 # sensibilidade da posse à diferença de meio-campo (por ponto)
 const DELTA := 0.007 # sensibilidade da qualidade da chance
 const EPS := 0.006 # finalizador × goleiro
-const HOME_CHANCE := 0.12 # empurrão da torcida na taxa de chances do mandante
-const AWAY_CHANCE := 0.06 # pressão sobre o visitante
+const HOME_CHANCE := 0.1 # empurrão da torcida na taxa de chances do mandante
+const AWAY_CHANCE := 0.05 # pressão sobre o visitante
 const FOUL_RATE := 0.235
 const INJURY_RATE := 0.0014
 const FATIGUE_RATE := 0.17
@@ -137,6 +137,9 @@ var crowd: float = 0.8
 ## Cultura da liga (LeagueCulture): multiplicadores de chances e de cartões.
 var goal_f: float = 1.0
 var card_f: float = 1.0
+var ref: Array = [] # árbitro [nação, id] (Referees)
+var ref_pens: float = 1.0
+var ref_fouls: float = 1.0
 ## Raio-X tático (jogos do usuário): chances com corredor e contexto, avanços dos laterais,
 ## entradas no último terço e na área, e trechos entre as mudanças do técnico.
 var xray_on: bool = false
@@ -183,6 +186,11 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 	var cul := LeagueCulture.for_match(world, competition, home)
 	goal_f = float(cul["goals"])
 	card_f = float(cul["cards"])
+	ref = Array(ctx.get("ref", []))
+	var rf := Referees.factors(world, ref)
+	card_f *= float(rf["cards"])
+	ref_pens = float(rf["pens"])
+	ref_fouls = float(rf["fouls"])
 	crowd *= float(cul["home"])
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	teams[0].home_f = 1.0 + adv * crowd * 0.5
@@ -517,7 +525,7 @@ func _simulate_minute() -> void:
 	att.poss_ticks += 1
 	if xray_on:
 		_xr_tick(att, dfn)
-	var p_chance := clampf(_rate_chance[s] * (1.0 + momentum[s]), 0.02, 0.6)
+	var p_chance := clampf(_rate_chance[s] * (1.0 + momentum[s]) * _time_factor(), 0.02, 0.6)
 	var p_foul := _rate_foul[1 - s]
 	var p_off := _rate_off[s]
 	var p_corner := _rate_corner[s]
@@ -546,6 +554,14 @@ func _simulate_minute() -> void:
 	for t: MatchTeam in teams:
 		if rng.randf() < INJURY_RATE * t.i_fatigue:
 			_injury(t, _pick_injury_victim(t))
+
+
+## O jogo abre com o tempo: pernas cansadas, espaços e pressa. Começa ~10% abaixo da média e
+## termina ~10% acima (média 1 nos 90 minutos, então o total de gols não muda).
+func _time_factor() -> float:
+	if half >= 3:
+		return 1.05
+	return 0.9 + 0.2 * clampf(float(minute) / 90.0, 0.0, 1.0)
 
 
 ## Raio-X: laterais que sobem ao ataque e chegadas ao último terço (só vis_rng: não muda o jogo).
@@ -651,7 +667,8 @@ func _game_state() -> void:
 	for t: MatchTeam in teams:
 		var diff: int = score[t.side] - score[1 - t.side]
 		if diff == 0:
-			t.g_rate = 1.0
+			# Empate nos minutos finais: ninguém quer se expor (o empate real é mais comum que o sorteio puro).
+			t.g_rate = 0.9 if minute >= 80 and half == 2 else 1.0
 			t.g_quality = 1.0
 			t.g_poss = 0.0
 			continue
@@ -717,7 +734,7 @@ func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
 
 
 func _foul_prob(dfn: MatchTeam) -> float:
-	var p := FOUL_RATE * dfn.i_fouls * dfn.pr_fouls * dfn.sh_fouls * (1.3 - dfn.discipline / 100.0 * 0.6)
+	var p := FOUL_RATE * dfn.i_fouls * dfn.pr_fouls * dfn.sh_fouls * ref_fouls * (1.3 - dfn.discipline / 100.0 * 0.6)
 	if derby:
 		p *= 1.12
 	return clampf(p, 0.05, 0.45)
@@ -1114,7 +1131,7 @@ func _resolve_foul(att: MatchTeam, dfn: MatchTeam) -> void:
 	elif detail and victim != null and victim.on_pitch and vis_rng.randf() < 0.07:
 		_emit(EV_KNOCK, att.side, fouler.p.id, victim.p.id)
 	if dangerous:
-		if rng.randf() < 0.045:
+		if rng.randf() < 0.045 * ref_pens:
 			_emit(EV_PENALTY_AWARDED, att.side, victim.p.id if victim != null else -1, fouler.p.id)
 			if detail and vis_rng.randf() < 0.35:
 				_emit(EV_VAR, att.side, victim.p.id if victim != null else -1, fouler.p.id, {"kind": "pen_ok"})
@@ -1744,7 +1761,7 @@ func _finish() -> void:
 	var end_minute := minute
 	for t: MatchTeam in teams:
 		var diff: int = score[t.side] - score[1 - t.side]
-		var team_bonus := 0.3 if diff > 0 else (-0.25 if diff < 0 else 0.0)
+		var team_bonus := RATING_WIN if diff > 0 else (RATING_LOSS if diff < 0 else 0.0)
 		var clean := score[1 - t.side] == 0
 		var avg := 0.0
 		var n := 0
@@ -1764,10 +1781,25 @@ func _finish() -> void:
 				elif mp.w_def >= 0.8:
 					pts += 0.45
 			var perf_c := clampf((mp.p.rating_at(mp.pos) * mp.perf / maxf(1.0, avg) - 1.0) * 4.0, -0.5, 0.5)
-			var r := 6.0 + pts + team_bonus + perf_c + rng.randfn(0.0, 0.25)
-			if mins < 20:
-				r = 6.0 + clampf(pts, -1.0, 1.5) + team_bonus * 0.5
-			mp.final_rating = clampf(snappedf(r, 0.1), 3.0, 10.0)
+			mp.final_rating = rating_from(pts, team_bonus, perf_c, rng.randfn(0.0, 0.25), mins)
+
+
+## Nota do jogo no estilo das plataformas de estatística: começa perto de 6,6, os lances somam
+## com retorno decrescente (um hat-trick passa de 9, mas sofrer quatro gols não derruba ninguém a 3),
+## e o resultado e o rendimento em relação ao time ajustam. Quem jogou pouco fica perto do neutro.
+const RATING_BASE := 6.55
+const RATING_SPAN := 2.6
+const RATING_WIN := 0.22
+const RATING_LOSS := -0.18
+
+
+static func rating_from(pts: float, team_bonus: float, perf_c: float, noise: float, mins: int) -> float:
+	var r: float
+	if mins < 20:
+		r = 6.5 + 0.9 * tanh(pts / 1.2) + team_bonus * 0.4
+	else:
+		r = RATING_BASE + RATING_SPAN * tanh(pts / RATING_SPAN) + team_bonus + perf_c * 0.8 + noise
+	return clampf(snappedf(r, 0.1), 3.0, 10.0)
 
 
 ## Resumo no formato comum dos resultados (o mesmo de QuickMatch.play) para aplicar ao mundo.
@@ -1801,7 +1833,7 @@ func to_result() -> Dictionary:
 	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats,
 		"et": half >= 3, "pens": [pen_score[0], pen_score[1]] if pen_taken[0] + pen_taken[1] > 0 else [],
 		"derby": derby, "importance": importance, "yc": [teams[0].yellows, teams[1].yellows], "rc": [teams[0].reds, teams[1].reds],
-		"lines": lines, "poss": possession_pct(0)}
+		"lines": lines, "poss": possession_pct(0), "ref": ref}
 
 
 ## Craque do jogo: maior nota (desempate: time vencedor).

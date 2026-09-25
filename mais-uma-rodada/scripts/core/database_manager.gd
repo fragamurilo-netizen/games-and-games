@@ -109,7 +109,9 @@ static func money() -> Dictionary:
 	return rules()["money"]
 
 
-static func calendar_cfg() -> Dictionary:
+static func calendar_cfg(kind: String = "") -> Dictionary:
+	if kind != "" and rules().get("calendars", {}).has(kind):
+		return rules()["calendars"][kind]
 	return rules()["calendar"]
 
 

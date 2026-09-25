@@ -854,7 +854,8 @@
 			"foreign_limit": {
 				"max": 9,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "BRA2",
@@ -890,7 +891,8 @@
 			"foreign_limit": {
 				"max": 9,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "BRA3",
@@ -926,7 +928,8 @@
 			"foreign_limit": {
 				"max": 9,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "BRA4",
@@ -960,7 +963,8 @@
 			"foreign_limit": {
 				"max": 9,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "ARG1",
@@ -1013,7 +1017,8 @@
 			"foreign_limit": {
 				"max": 6,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "ARG2",
@@ -1047,7 +1052,8 @@
 			"foreign_limit": {
 				"max": 6,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "URU1",
@@ -1076,7 +1082,8 @@
 				"goals": 0.91,
 				"home": 1.15,
 				"cards": 1.2
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "COL1",
@@ -1124,7 +1131,8 @@
 			"foreign_limit": {
 				"max": 4,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "CHI1",
@@ -1157,7 +1165,8 @@
 			"foreign_limit": {
 				"max": 6,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "ECU1",
@@ -1190,7 +1199,8 @@
 			"foreign_limit": {
 				"max": 6,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "PER1",
@@ -1223,7 +1233,8 @@
 			"foreign_limit": {
 				"max": 6,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "PAR1",
@@ -1252,7 +1263,8 @@
 				"goals": 0.98,
 				"home": 1.15,
 				"cards": 1.2
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "BOL1",
@@ -1281,7 +1293,8 @@
 				"goals": 1.25,
 				"home": 1.6,
 				"cards": 1.1
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "VEN1",
@@ -1310,7 +1323,8 @@
 				"goals": 0.91,
 				"home": 1.2,
 				"cards": 1.1
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "MEX1",
@@ -1410,7 +1424,8 @@
 			"foreign_limit": {
 				"max": 8,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "EGY1",
@@ -1659,7 +1674,8 @@
 			"foreign_limit": {
 				"max": 5,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "KOR1",
@@ -1704,7 +1720,8 @@
 			"foreign_limit": {
 				"max": 6,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "QAT1",
@@ -1803,7 +1820,8 @@
 			"foreign_limit": {
 				"max": 5,
 				"scope": "all"
-			}
+			},
+			"calendar": "ano"
 		},
 		{
 			"id": "AUS1",

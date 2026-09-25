@@ -353,7 +353,15 @@ func _season_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(UIKit.kv("Meta da diretoria", String(goal[0])))
 	var co := People.coach_of(w, club.id)
 	if not co.is_empty():
-		card.add_child(UIKit.kv("Técnico", "%s (%s)" % [String(co["n"]), People.style_name(String(co["st"])).to_lower()]))
+		var crow := UIKit.hbox(12)
+		crow.add_child(CoachScreen.portrait(w, co, club, 56))
+		var ccol := UIKit.vbox(0)
+		ccol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		ccol.add_child(UIKit.label("Técnico", "Small"))
+		ccol.add_child(UIKit.label("%s · %s" % [String(co["n"]), People.style_name(String(co["st"])).to_lower()], "H3", true))
+		crow.add_child(ccol)
+		var ccid := club.id
+		card.add_child(UIKit.tap_row(crow, func(): UIManager.push("coach", {"club": ccid}), "CardFlat"))
 		var rel := People.coach_rel(w, int(co["id"]))
 		if absf(rel) >= 12.0:
 			card.add_child(UIKit.kv("Relação com você", People.coach_rel_label(rel), UIColors.GREEN if rel > 0 else UIColors.RED))

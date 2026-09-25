@@ -25,6 +25,7 @@ func _initialize() -> void:
 	_run("troca de formação durante a partida", _test_formation_change)
 	_run("temporada completa, copas e Mundial", _test_season_cycle)
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
+	_run("calendário de ano civil (Brasil, América do Sul, MLS)", _test_year_calendar)
 	_run("Football Memory: confrontos, recordes e linha do tempo", _test_football_memory)
 	_run("ranking de clubes, finanças e eventos do mundo", _test_ranking_economy)
 	_run("dívida de longo prazo, cheque especial e refinanciamento", _test_debt)
@@ -57,6 +58,7 @@ func _initialize() -> void:
 	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
 	_run("gritos da beira do campo e palestras", _test_shouts)
+	_run("arbitragem: perfis, escala e efeito no jogo", _test_referees)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
@@ -418,6 +420,41 @@ func _season(w: GameWorld) -> void:
 	while not w.season.finished and guard < 120:
 		SeasonManager.play_matchday_instant(w)
 		guard += 1
+
+
+func _test_year_calendar() -> void:
+	var w := WorldGenerator.generate(778, "padrao")
+	var c := _with_user(w, w.clubs_in_league("BRA1")[2].id)
+	w.stats["cal"] = String(c.league_cfg().get("calendar", ""))
+	check(w.stats["cal"] == "ano", "Brasileirão deveria usar o calendário de ano civil")
+	w.season = SeasonManager.build_season(w)
+	SeasonManager.compute_goals(w)
+	var cal: Array = w.season.calendar
+	var first_w := -1
+	for i in cal.size():
+		if String(cal[i]["t"]) == "W":
+			first_w = i
+			break
+	var jan1 := Time.get_unix_time_from_datetime_dict({"year": w.year, "month": 1, "day": 1})
+	var d0 := Time.get_datetime_dict_from_unix_time(jan1 + int(cal[first_w]["d"]) * 86400)
+	check(int(d0["month"]) >= 3 and int(d0["month"]) <= 4, "Brasileirão deveria começar entre março e abril (mês %d)" % int(d0["month"]))
+	var e1 := -1
+	for i in cal.size():
+		if String(cal[i]["t"]) == "E1":
+			e1 = i
+	check(e1 >= 0 and e1 < first_w, "estaduais deveriam vir antes da liga")
+	check(w.window_open_at(0) and not w.window_open_at(first_w + 8), "janelas do ano civil fora do lugar")
+	for i in range(1, cal.size()):
+		check(int(cal[i]["d"]) >= int(cal[i - 1]["d"]), "datas fora de ordem no calendário (%d)" % i)
+	_season(w)
+	check(w.season.finished, "temporada de ano civil não terminou")
+	for id in w.season.league_order:
+		for r in w.season.leagues[id].rounds:
+			for f: Fixture in r:
+				check(f.played, "%s: jogo não disputado no ano civil" % id)
+	var s := SeasonManager.end_season(w)
+	check(not s.is_empty() and w.season != null and not w.season.finished, "virada do ano civil falhou")
+	check(String(w.season.calendar[0]["t"]) == "U0" and int(w.season.calendar[first_w]["d"]) > 60, "a temporada seguinte deveria continuar no ano civil")
 
 
 func _test_season_cycle() -> void:
@@ -1388,28 +1425,79 @@ func _test_tactical_freedom() -> void:
 	check(SquadRules.is_foreign(probe, esp, "non_eu"), "brasileiro deveria ser extracomunitário na Espanha")
 
 
+func _test_referees() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var foe: Club = w.clubs_in_league("BRA1")[0]
+	if foe.id == c.id:
+		foe = w.clubs_in_league("BRA1")[1]
+	var pool := Referees.pool(w, "BRA")
+	check(pool.size() == Referees.PER_NATION and String(pool[0]["n"]) != "", "quadro de árbitros vazio")
+	# Árbitro rigoroso × árbitro que deixa jogar, mesmas sementes
+	pool[0]["st"] = 1.35
+	pool[1]["st"] = 0.72
+	var cards := [0, 0]
+	for mode in 2:
+		for k in 80:
+			var r := QuickMatch.play(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false),
+				{"competition": "BRA1", "attendance": 20000, "ref": ["BRA", mode]}, 300 + k)
+			cards[mode] += int(r["yc"][0]) + int(r["yc"][1])
+			Referees.record(w, r)
+	check(cards[0] > cards[1] * 1.3, "árbitro rigoroso não deu mais cartões (%d × %d)" % [cards[0], cards[1]])
+	check(int(pool[0]["g"]) == 80 and int(pool[0]["y"]) > 0, "estatísticas do árbitro não registradas")
+	# Motor completo também sente o árbitro
+	var full := [0, 0]
+	for mode in 2:
+		for k in 30:
+			var sim := MatchSimulation.new()
+			sim.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000, "ref": ["BRA", mode]}, 700 + k, false)
+			sim.run_to_end()
+			full[mode] += sim.teams[0].yellows + sim.teams[1].yellows
+	check(full[0] > full[1], "motor completo ignorou o árbitro (%d × %d)" % [full[0], full[1]])
+	# Escala: jogo continental tem árbitro de outro país da confederação
+	var lib: Cup = w.season.cups.get("LIB", null)
+	if lib != null and not lib.fixtures.is_empty():
+		var f: Fixture = lib.fixtures[0]
+		var ref := Referees.assign(w, f, 0.8)
+		check(String(ref[0]) != w.club(f.home).nation and String(ref[0]) != w.club(f.away).nation, "árbitro continental do mesmo país de um dos times")
+	var lf: Fixture = w.league_of(c.id).rounds[0][0]
+	check(String(Referees.assign(w, lf, 0.3)[0]) == w.club(lf.home).nation, "jogo da liga com árbitro estrangeiro")
+	check(Referees.summary(w, ["BRA", 0]) != "", "resumo do árbitro vazio")
+	Referees.season_close(w)
+	check(int(pool[0]["g"]) == 0, "números do árbitro não zeraram na virada")
+
+
 func _test_shouts() -> void:
 	var w := _career_world()
 	var c := w.user_club()
 	var foe: Club = w.clubs_in_league("BRA1")[0]
 	if foe.id == c.id:
 		foe = w.clubs_in_league("BRA1")[1]
-	# Mesmo jogo (mesma semente) com e sem "Pra frente!" a cada janela: o time finaliza mais.
-	var shots := [0, 0]
-	var fouls := [0, 0]
-	for mode in 2:
-		for k in 40:
+	# Mesmo jogo (mesma semente) com e sem um grito aos 60': até ali tudo igual; nos 10 minutos
+	# seguintes, "Pra frente!" dá mais finalizações e "Pressão!" mais faltas.
+	var shot_t := [MatchSimulation.EV_GOAL, MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS, MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK]
+	var shots := [0, 0, 0]
+	var fouls := [0, 0, 0]
+	for mode in 3:
+		for k in 120:
 			var sim := MatchSimulation.new()
-			sim.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 500 + k, false)
+			sim.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 500 + k, true)
 			sim.teams[0].is_user = true
+			var shouted := false
 			while not sim.finished:
 				sim.step()
-				if mode == 1 and sim.started and sim.shout_wait(0) == 0 and sim.minute >= 5 and sim.minute < 88:
-					sim.shout(0, "frente" if sim.minute < 60 else "pressao")
-			shots[mode] += sim.teams[0].shots
-			fouls[mode] += sim.teams[0].fouls
-	check(shots[1] > shots[0] * 1.03, "gritos de ataque não aumentaram as finalizações (%d × %d)" % [shots[1], shots[0]])
-	check(fouls[1] > fouls[0], "pressão não aumentou as faltas (%d × %d)" % [fouls[1], fouls[0]])
+				if mode > 0 and not shouted and sim.half == 2 and sim.minute >= 60:
+					sim.shout(0, "frente" if mode == 1 else "pressao")
+					shouted = true
+			for ev in sim.events:
+				if int(ev.get("h", 1)) != 2 or int(ev["m"]) <= 60 or int(ev["m"]) > 70:
+					continue
+				if int(ev["s"]) == 0 and shot_t.has(int(ev["t"])):
+					shots[mode] += 1
+				if int(ev["t"]) == MatchSimulation.EV_FOUL and int(ev["s"]) == 0:
+					fouls[mode] += 1
+	check(shots[1] > shots[0] * 1.08, "\"Pra frente!\" não aumentou as finalizações (%d × %d)" % [shots[1], shots[0]])
+	check(fouls[2] > fouls[0], "\"Pressão!\" não aumentou as faltas (%d × %d)" % [fouls[2], fouls[0]])
 	# Repetir perde efeito, intervalo entre gritos, reação conforme a personalidade
 	var sim2 := MatchSimulation.new()
 	sim2.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 77, false)

@@ -180,20 +180,23 @@ func refresh() -> void:
 func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 	var club := w.user_club()
 	var opp := w.club(f.opponent_of(club.id))
-	var league := w.league_of(club.id)
+	var league := w.league_of(opp.id) # a liga do adversário (em copa pode ser outra divisão ou país)
 	var card := UIKit.card("Card", 6)
 	var row := UIKit.hbox(12)
 	row.add_child(UIKit.crest(opp, 64))
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(("vs " if f.home == club.id else "@ ") + opp.short_name, "H2"))
-	var pos := CompetitionManager.position_of(league, opp.id)
-	col.add_child(UIKit.label("%dº colocado · força %d · %s" % [pos, int(round(ClubAI._compute_strength(w, opp))), opp.arch().get("tag", "")], "Small"))
+	var where := ""
+	if league != null and league.table.has(opp.id):
+		where = "%dº na %s · " % [CompetitionManager.position_of(league, opp.id), league.short_name]
+	col.add_child(UIKit.label("%sforça %d · %s" % [where, int(round(ClubAI._compute_strength(w, opp))), opp.arch().get("tag", "")], "Small", true))
 	row.add_child(col)
-	var fd := FormDots.new()
-	fd.dot = 18
-	fd.form = league.table[opp.id]["form"]
-	row.add_child(fd)
+	if league != null and league.table.has(opp.id):
+		var fd := FormDots.new()
+		fd.dot = 18
+		fd.form = league.table[opp.id]["form"]
+		row.add_child(fd)
 	card.add_child(row)
 	if MatchEngine.is_derby(w, f.home, f.away):
 		card.add_child(UIKit.colored("CLÁSSICO: jogadores de jogos grandes crescem; os tímidos sentem.", UIColors.RED, "Small"))
@@ -218,6 +221,16 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 		names.append("%s (%s)" % [p.display_name(), PlayStyle.of(p).to_lower()])
 	if not names.is_empty():
 		card.add_child(UIKit.label("De olho em: " + ", ".join(names) + ".", "Small", true))
+	var ref := Referees.assign(w, f, MatchEngine.importance_of(w, f))
+	var rs := Referees.summary(w, ref)
+	if rs != "":
+		var rrow := UIKit.hbox(8)
+		rrow.add_child(UIKit.icon_rect("whistle", 22, UIColors.MUTED))
+		rrow.add_child(UIKit.flag(String(ref[0]), 26))
+		var rl := UIKit.label("Árbitro: " + rs, "Small", true)
+		rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		rrow.add_child(rl)
+		card.add_child(rrow)
 	return UIKit.card_panel(card)
 
 

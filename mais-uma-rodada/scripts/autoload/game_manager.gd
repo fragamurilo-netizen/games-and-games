@@ -81,6 +81,12 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 	world.manager_name = manager_name.strip_edges() if manager_name.strip_edges() != "" else "Treinador"
 	world.difficulty = difficulty
 	var c := world.user_club()
+	# Calendário da carreira pela liga do usuário (ano civil na América do Sul, MLS e Ásia).
+	var kind := String(c.league_cfg().get("calendar", ""))
+	if kind != SeasonManager.calendar_kind(world) and world.season != null and world.season.day == 0:
+		world.stats["cal"] = kind
+		world.season = SeasonManager.build_season(world)
+		SeasonManager.compute_goals(world)
 	FinanceManager.set_budgets(world, c)
 	SponsorManager.open_preseason(world)
 	c.sheet = ClubAI.auto_sheet(world, c, "")
@@ -112,6 +118,10 @@ func load_career(save_slot: int) -> bool:
 	world = w
 	slot = save_slot
 	matchday = {}
+	# Entropia nova a cada abertura: reabrir o save não repete os mesmos jogos, gols e minutos.
+	var fresh := RandomNumberGenerator.new()
+	fresh.randomize()
+	world.rng.seed = world.rng.randi() ^ fresh.randi()
 	HeartClubs.ensure_all(world) # saves de antes dos times de coração
 	Valuation.refresh_shift(world)
 	world_changed.emit()

@@ -163,6 +163,15 @@ func _run() -> void:
 		await _shot("06q_comparar")
 	UIManager.back()
 	await _frames(4)
+	# Perfil de um técnico da IA
+	for oc: Club in w.clubs_in_league(w.user_club().league_id):
+		if not w.is_user_club(oc.id):
+			UIManager.push("coach", {"club": oc.id})
+			await _frames(8)
+			await _shot("06r_tecnico")
+			UIManager.back()
+			await _frames(4)
+			break
 	# Pré-temporada: uniformes e patrocínios
 	UIManager.push("kit")
 	await _frames(8)

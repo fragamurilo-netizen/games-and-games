@@ -522,15 +522,18 @@ func _coaches(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		if co.is_empty():
 			continue
 		var row := UIKit.hbox(12)
-		row.add_child(UIKit.crest(cl, 44))
+		row.add_child(CoachScreen.portrait(w, co, cl, 60))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(co["n"]), "H3", true))
+		var nrow := UIKit.hbox(8)
+		nrow.add_child(UIKit.crest(cl, 26))
+		nrow.add_child(UIKit.label(String(co["n"]), "H3", true))
+		col.add_child(nrow)
 		var job := float(co.get("job", 60.0))
 		col.add_child(UIKit.label("%s · %s · %dV %dE %dD%s" % [cl.short_name, People.style_name(String(co["st"])), int(co.get("w", 0)), int(co.get("d", 0)), int(co.get("l", 0)), " · cargo balançando" if job < 30.0 else ""], "Small", true))
 		row.add_child(col)
 		var rel := People.coach_rel(w, int(co["id"]))
 		row.add_child(UIKit.colored(People.coach_rel_label(rel), UIColors.GREEN if rel >= 12.0 else (UIColors.RED if rel <= -12.0 else UIColors.MUTED), "Small"))
 		var cid := cl.id
-		card.add_child(UIKit.tap_row(row, func(): TalkDialog.open("coach", cid, cb)))
+		card.add_child(UIKit.tap_row(row, func(): UIManager.push("coach", {"club": cid})))
 	c.add_child(UIKit.card_panel(card))

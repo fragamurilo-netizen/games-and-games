@@ -59,6 +59,7 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 		"competition": f.comp,
 		"neutral": f.neutral,
 	}
+	ctx["ref"] = Referees.assign(world, f, float(ctx["importance"]))
 	if f.stage == Fixture.STAGE_KO and CupManager.is_deciding_leg(world, f):
 		ctx["ko"] = true
 		ctx["agg"] = CupManager.aggregate_before(world, f)
