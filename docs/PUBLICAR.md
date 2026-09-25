@@ -31,7 +31,7 @@ O código fica em `mais-uma-rodada/scripts/autoload/store.gd` (autoload `Store`)
 GODOT_ANDROID_KEYSTORE_RELEASE_PATH=/caminho/mais-uma-rodada-upload.jks \
 GODOT_ANDROID_KEYSTORE_RELEASE_USER=upload \
 GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD='senha' \
-godot --headless --export-release "Android" build/MaisUmaRodada-0.3.1.aab
+godot --headless --export-release "Android" build/MaisUmaRodada-0.3.2.aab
 ```
 
 O preset "Android" gera AAB só com ARM64 (menos de 30 MB; celulares só de 32 bits ficam de fora) e alvo no SDK 36. O preset "Android arm64" gera um APK para

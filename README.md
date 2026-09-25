@@ -92,6 +92,17 @@ vem da própria simulação.
   de copa, títulos decididos no detalhe, goleadas, expulsões, gols no fim e ídolos trocando de lado, e esfria a
   cada temporada. Acima de 25 vira rixa, de 50 clássico e de 75 grande clássico: público, importância, torcida,
   imprensa, prévia e coletiva reagem. Tela própria com o retrospecto e a linha do tempo da rivalidade.
+- **Caixa de entrada do treinador**: mensagens de presidente, comissão, departamento médico, olheiro, jogadores,
+  empresários, outros clubes e imprensa, com atalho para resolver cada assunto.
+- **Reputação do treinador**: o jogo aprende o seu estilo (formações, pressão, idade dos titulares, mercado, base)
+  e dá títulos como "Especialista em jovens" ou "Reconstrutor", que mudam o interesse dos jogadores e as ofertas.
+- **Uniformes realistas**: tecido com dobras, escudo no peito, 48 estampas, 11 golas, 9 mangas, calções e meiões;
+  customizador com 4 uniformes, 24 modelos prontos, prévia frente e costas e desfazer.
+- **Football Memory**: retrospecto de cada confronto, recordes, finais, zebras e a linha do tempo de cada jogador;
+  aba Enciclopédia na História e lendas aposentadas que viram técnicos.
+- **DNA dos clubes da IA**: cada clube tem filosofia de elenco, mercado, escola tática e ambição que guiam a IA e
+  mudam com donos, dívidas e títulos.
+- **Tabelas mais ricas**: resumo da campanha, visões casa/fora/momento, setas de posição e ficha do clube.
 
 ## Estrutura do repositório
 

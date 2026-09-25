@@ -1329,7 +1329,7 @@ func _test_xray() -> void:
 	var left := 0
 	var reports := 0
 	var fb_flagged := 0
-	for k in 30:
+	for k in 60:
 		var sim := MatchSimulation.new()
 		sim.setup(w, c, opp, c.sheet.duplicate_sheet(), ClubAI.prepare_ai_sheet(w, opp, c, false), {"competition": "BRA1", "attendance": 20000}, 100 + k, false)
 		sim.run_to_end()
@@ -1348,7 +1348,7 @@ func _test_xray() -> void:
 					fb_flagged += 1
 		check(total == int(la[0]) + int(la[1]) + int(la[2]), "corredores não somam as chances do adversário")
 		check(not Array(rep["segments"]).is_empty(), "raio-x sem trechos")
-	check(reports == 30, "raio-x não gerado em todas as partidas (%d)" % reports)
+	check(reports == 60, "raio-x não gerado em todas as partidas (%d)" % reports)
 	check(right > left * 1.15, "lado com lateral no ataque não sofreu mais (dir %d × esq %d)" % [right, left])
 	check(fb_flagged > 0, "raio-x não apontou o lateral no ataque")
 	# Correção: aplicar a sugestão muda a escalação
