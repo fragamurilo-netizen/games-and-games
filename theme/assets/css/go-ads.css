@@ -334,3 +334,62 @@ body.go-verge .go-ad-slot--site-masthead[data-go-ad-viewport="phone"]{
   contain:none;
   text-align:center;
 }
+
+/* ==========================================================================
+ * 5.7.0 — the rest of the post-content zone and the page-end Multiplex.
+ *
+ * Same visual contract as the 5.5.4 hosts above: nothing at all until the
+ * runtime requests the position, a hairline above on request and a lighter
+ * one below only once a creative is present.
+ * ========================================================================== */
+.go-listing-revenue-slot--post-content-after-comments,
+.go-listing-revenue-slot--post-content-after-article-sections{
+  display:block;
+  inline-size:100%;
+  max-inline-size:100%;
+  min-width:0;
+  margin-block:0;
+  padding-block:0;
+  overflow:visible;
+  contain:none;
+}
+.go-listing-revenue-slot--post-content-after-comments[data-go-ad-requested="1"],
+.go-listing-revenue-slot--post-content-after-article-sections[data-go-ad-requested="1"]{
+  margin-block:clamp(26px,4vw,42px);
+  padding-block:10px 0;
+  border-block-start:var(--go-ad-break-top);
+}
+.go-listing-revenue-slot--post-content-after-comments[data-go-ad-present="1"],
+.go-listing-revenue-slot--post-content-after-article-sections[data-go-ad-present="1"]{
+  padding-block-end:8px;
+  border-block-end:var(--go-ad-break-bottom);
+}
+.go-listing-revenue-slot--post-content-after-comments > .go-ad-slot__label,
+.go-listing-revenue-slot--post-content-after-article-sections > .go-ad-slot__label{
+  margin-block-end:8px;
+}
+.go-listing-revenue-slot--post-content-after-comments > ins.adsbygoogle,
+.go-listing-revenue-slot--post-content-after-article-sections > ins.adsbygoogle{
+  inline-size:100%;
+  margin-inline:auto;
+}
+/* Wrappers exist only around a rendered host; they add no space of their own. */
+.go-post-content-revenue,
+.go-page-end-revenue{
+  display:block;
+  min-width:0;
+}
+.go-page-end-multiplex[data-go-ad-requested="1"]{
+  margin-block:clamp(30px,5vw,52px);
+}
+/* The stacked rail on game pages spans the two-column sidebar grid (640-1023px). */
+.od-game-sidebar > .go-article-sidebar__ad--stacked{
+  grid-column:1/-1;
+}
+@media(max-width:767px){
+  .go-listing-revenue-slot--post-content-after-comments[data-go-ad-requested="1"],
+  .go-listing-revenue-slot--post-content-after-article-sections[data-go-ad-requested="1"]{margin-block:24px;padding-block-start:8px}
+  .go-listing-revenue-slot--post-content-after-comments[data-go-ad-present="1"],
+  .go-listing-revenue-slot--post-content-after-article-sections[data-go-ad-present="1"]{padding-block-end:6px}
+  .go-page-end-multiplex[data-go-ad-requested="1"]{margin-block:28px}
+}

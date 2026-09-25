@@ -129,8 +129,9 @@ $od_phone_masthead = function_exists( 'go_verge_ads_render_masthead_phone' ) && 
 				<?php if ( ! empty( $c['follow'] ) && function_exists( 'go_verge_product_follow_button' ) ) : ?><div class="go-product-actions"><?php go_verge_product_follow_button( $c['follow']['id'], $c['follow']['type'] ); ?></div><?php endif; ?>
 				<?php go_verge_author_card( $c['post_id'] ); ?>
 
-				<?php /* Post-content inventory. Three editorial boundaries below the prose,
-				 * each offering at most one unit from the shared listing pool. The zone
+				<?php /* Post-content inventory. Editorial boundaries below the prose (three
+				 * here, two more after the comments since 5.7.0), each offering at most
+				 * one unit from the shared listing pool. The zone
 				 * they cover is several screens of scrolled content on a phone and had
 				 * none before. The runtime applies the usual stream spacing and density
 				 * rules, so a short story still ends up with fewer than three. */ ?>
@@ -142,12 +143,15 @@ $od_phone_masthead = function_exists( 'go_verge_ads_render_masthead_phone' ) && 
 				<?php if ( function_exists( 'go_verge_render_game_content_cluster' ) ) { go_verge_render_game_content_cluster( $c['post_id'] ); } ?>
 				<?php if ( function_exists( 'go_verge_render_topic_bar' ) ) { go_verge_render_topic_bar( $c['post_id'] ); } ?>
 				<?php if ( function_exists( 'go_verge_ads_render_post_content_unit' ) ) { go_verge_ads_render_post_content_unit( 'before-comments' ); } ?>
-				<?php if ( comments_open() || get_comments_number() ) : ?><div class="go-single-comments-wrap go-single-comments-wrap--inline"><?php comments_template(); ?></div><?php endif; ?>
+				<?php if ( comments_open() || get_comments_number() ) : ?><div class="go-single-comments-wrap go-single-comments-wrap--inline"><?php comments_template(); ?></div><?php if ( function_exists( 'go_verge_ads_render_post_content_unit' ) ) { go_verge_ads_render_post_content_unit( 'after-comments' ); } ?><?php endif; ?>
 			</div>
 			<?php go_verge_article_sidebar( $c['post_id'] ); ?>
 		</div>
 	</article>
 
 	<?php go_verge_render_after_article_sections( $c['post_id'] ); ?>
+	<?php /* Last recirculation choice before "Explore": a full-width break in the
+	 * site container, printed only when a unit actually rendered. */ ?>
+	<?php if ( function_exists( 'go_verge_ads_render_post_content_unit' ) ) { go_verge_ads_render_post_content_unit( 'after-article-sections', 'go-container go-post-content-revenue' ); } ?>
 	<?php if ( function_exists( 'go_verge_render_explore_overdrive' ) ) { go_verge_render_explore_overdrive( 'single' ); } ?>
 </main>

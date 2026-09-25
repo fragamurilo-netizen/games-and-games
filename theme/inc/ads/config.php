@@ -102,15 +102,28 @@ if ( ! defined( 'GO_VERGE_ADS_ARTICLE_A8_SLOT' ) ) {
 }
 
 /*
- * Production RPM guard for the in-article ladder.
+ * The in-article ladder runs to A8 (5.7.0).
  *
- * A7/A8 remain real, valid units, but they are not part of the default request
- * ladder. This avoids turning long-form depth into automatic extra supply before
- * unit-level revenue and Active View prove that the deeper auctions are accretive.
- * Emergency/controlled opt-in remains possible from wp-config.php.
+ * With the ceiling at A6, every article above ~760 body words planned exactly
+ * P1 + A1..A6 and nothing else: a 3,600-word guide carried the same seven
+ * opportunities as a 760-word story, and — because reserves borrow the unused
+ * A-ids — it carried ZERO reserve hosts. On the long reads that keep a reader
+ * longest, one no-fill or one host jumped by a flick was simply lost.
+ * tools/plan-bench.php measures that on a fixed corpus.
+ *
+ * Opening A7/A8 does not raise density anywhere. The word ladder only reaches
+ * rungs 7-9 at 1,200 / 1,800 / 2,600 body words, the editorial clearance and the
+ * browser's real-pixel rules (min gap, unit window, local and article ratios)
+ * are unchanged, and A7/A8 are `deep` tier: requested only when the reader is
+ * about half a screen away, so an unreached rung costs no request and no
+ * Active View. Medium articles gain nothing but the reserve ids they lacked.
+ *
+ * A7/A8 have their own unit ids, so their contribution is read directly in the
+ * per-unit report. Rollback without editing theme files:
+ *   define( 'GO_VERGE_ADS_ARTICLE_MAX_RUNG', 6 ); // in wp-config.php
  */
 if ( ! defined( 'GO_VERGE_ADS_ARTICLE_MAX_RUNG' ) ) {
-	define( 'GO_VERGE_ADS_ARTICLE_MAX_RUNG', 6 );
+	define( 'GO_VERGE_ADS_ARTICLE_MAX_RUNG', 8 );
 }
 
 /*
@@ -219,19 +232,28 @@ function go_verge_ads_delivery_rules() {
 				 * prose, so the sliding window does not describe them. */
 				'min_stream_gap_px'       => 380,
 				/* Resting warm-up distance for a reader who is not moving, per
-				 * quality tier, in viewports. A high-reach position may be prepared
-				 * a full screen ahead; a completion unit stays cold until the reader
-				 * is nearly there, because an early request there is the most likely
-				 * to become a non-viewable impression. */
-				'rest_lead_vh'            => array( 'reach' => 1.00, 'premium' => 0.90, 'standard' => 0.75, 'deep' => 0.60, 'completion' => 0.52 ),
-				'rest_lead_min_px'        => 260,
-				'rest_lead_max_px'        => 1100,
+				 * quality tier, in viewports.
+				 *
+				 * 5.7.0, viewability-first. The 5.6 table prepared a reach position
+				 * a full screen ahead (0.52-1.00 vh). Every reader who stopped
+				 * inside that screen left a served, counted, never-seen impression
+				 * behind: exactly the impressions that hold Active View below 50%
+				 * and teach Google to bid less for the unit. A creative needs
+				 * about one second; a reader moves 150-300 px/s, so half a screen
+				 * (~400 px) still paints before arrival, and a faster reader is
+				 * covered by the predictive branch (stopping distance + lead).
+				 * The per-unit Active View controller shortens these further for
+				 * units measured below the band (go_verge_ads_viewability_policy). */
+				'rest_lead_vh'            => array( 'reach' => 0.62, 'premium' => 0.55, 'standard' => 0.48, 'deep' => 0.42, 'completion' => 0.38 ),
+				'rest_lead_min_px'        => 240,
+				'rest_lead_max_px'        => 700,
 				/* Absolute ceiling for the predictive window. However fast the
 				 * reader moves, nothing is requested more than this far ahead.
-				 * 13.0 lowered it from 3.0: on live articles the units requested
-				 * two to three screens ahead of a flick were filled and never
-				 * seen, which costs Active View and therefore price. */
-				'max_lookahead_vh'        => 1.8,
+				 * 13.0 lowered it from 3.0 to 1.8: on live articles the units
+				 * requested two to three screens ahead of a flick were filled and
+				 * never seen, which costs Active View and therefore price. 5.7.0
+				 * takes the same evidence one step further. */
+				'max_lookahead_vh'        => 1.25,
 				/* Time constant of a touch fling's deceleration. A flick still
 				 * travels about velocity x this before the reader stops; the
 				 * resting lead is applied from that stopping point. */
@@ -264,11 +286,12 @@ function go_verge_ads_delivery_rules() {
 				'max_ad_to_content_ratio' => 0.45,
 				'min_stream_gap_px'       => 460,
 				/* Desktop viewports are taller, so the same fraction of a viewport is
-				 * already more pixels. The fractions are deliberately smaller. */
-				'rest_lead_vh'            => array( 'reach' => 0.85, 'premium' => 0.78, 'standard' => 0.65, 'deep' => 0.55, 'completion' => 0.50 ),
-				'rest_lead_min_px'        => 280,
-				'rest_lead_max_px'        => 1200,
-				'max_lookahead_vh'        => 1.6,
+				 * already more pixels. The fractions are deliberately smaller, and
+				 * 5.7.0 shortens them for the same Active View reason as mobile. */
+				'rest_lead_vh'            => array( 'reach' => 0.55, 'premium' => 0.50, 'standard' => 0.42, 'deep' => 0.38, 'completion' => 0.35 ),
+				'rest_lead_min_px'        => 260,
+				'rest_lead_max_px'        => 720,
+				'max_lookahead_vh'        => 1.15,
 				/* Wheel and trackpad momentum decays faster than a touch fling. */
 				'fling_tau_s'             => 0.30,
 				/* A mouse wheel moves in discrete jumps, so the honest flick
@@ -321,8 +344,10 @@ function go_verge_ads_delivery_rules() {
 				 * has proven nothing yet, and while they are flick-scrolling. Both
 				 * are in viewports, and both are ceilings on the predictive window
 				 * rather than distances of their own. */
-				'warmup_lookahead_vh'   => 1.15,
-				'conservative_lookahead_vh' => 1.25,
+				/* 5.7.0: a reader who has not moved yet (and may never) only has
+				 * the next half screen prepared; a flicking reader, a little more. */
+				'warmup_lookahead_vh'   => 0.62,
+				'conservative_lookahead_vh' => 0.90,
 				/* Spacing multipliers per state. Conservative widens the floor;
 				 * expansion is allowed to close slightly, never below the hard
 				 * minimum the density policy already guarantees. */
@@ -343,7 +368,7 @@ function go_verge_ads_config() {
 	$masthead_mobile   = ! defined( 'GO_VERGE_ADS_MASTHEAD_MOBILE' ) || (bool) GO_VERGE_ADS_MASTHEAD_MOBILE;
 
 	$config = array(
-		'version'   => '20.1.0-hybrid',
+		'version'   => '20.2.0-hybrid',
 		'delivery_mode' => 'hybrid',
 		/* Account-controlled: the theme does not know the live on/off setting. */
 		'account_formats' => array(
@@ -521,7 +546,11 @@ function go_verge_ads_config() {
 				'measurement_tier'  => 'standard',
 				'requested_size'    => 'multiplex autorelaxed grid',
 				'collapse_unfilled' => true,
-				'templates'         => array( 'single_post' ),
+				/* 5.7.0: every template ends in a "what next" moment. Single posts
+				 * keep the grid at the recirculation break; everywhere else it is
+				 * printed once at the page end (go_verge_ads_render_page_end_multiplex).
+				 * The per-response slot claim keeps it to one grid per document. */
+				'templates'         => array( 'home', 'single_post', 'single_game', 'single_production', 'single_entity', 'latest', 'category', 'tag', 'search', 'author', 'games_archive', 'productions_archive', 'entities_archive', 'reviews_archive', 'editorial_page' ),
 				'reserve'           => array( 'mobile' => 0, 'desktop' => 0 ),
 				'enabled'           => '' !== go_verge_ads_optional_slot( GO_VERGE_ADS_POST_CONTENT_MULTIPLEX_SLOT ),
 			),

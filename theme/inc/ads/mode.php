@@ -74,6 +74,23 @@ function go_verge_ads_migrate_manual_architecture() {
 }
 add_action( 'admin_init', 'go_verge_ads_migrate_manual_architecture', 10 );
 
+/**
+ * 5.7.0 changed the inline runtime and its GOAdsYieldConfig (viewability-first
+ * leads, per-unit Active View controller, skim gate, A7/A8, new hosts). Cached
+ * HTML would keep serving the 5.6.7 engine until a purge, so the first
+ * administrator request after the update queues the same single purge the
+ * migrations above use. add_option makes it happen once. CDN layers outside
+ * LiteSpeed still need their own purge.
+ */
+function go_verge_ads_release_570_purge() {
+	if ( ! is_admin() || ! current_user_can( 'manage_options' ) || ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) ) { return; }
+	if ( false !== get_option( 'go_verge_ads_release_570_purged', false ) ) { return; }
+	if ( add_option( 'go_verge_ads_release_570_purged', gmdate( 'c' ), '', false ) ) {
+		go_verge_ads_schedule_policy_cache_purge();
+	}
+}
+add_action( 'admin_init', 'go_verge_ads_release_570_purge', 20 );
+
 /** Coalesce administrative architecture/preset migrations into one final purge. */
 function go_verge_ads_schedule_policy_cache_purge() {
 	if ( ! is_admin() || ! current_user_can( 'manage_options' ) || ! empty( $GLOBALS['go_verge_ads_policy_cache_purge_queued'] ) ) { return; }

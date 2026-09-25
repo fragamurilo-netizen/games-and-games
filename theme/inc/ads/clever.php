@@ -53,8 +53,22 @@ if ( ! defined( 'GO_VERGE_CLEVER_SCRIPT_ID' ) ) {
 if ( ! defined( 'GO_VERGE_CLEVER_SCRIPT_URL' ) ) {
 	define( 'GO_VERGE_CLEVER_SCRIPT_URL', 'https://scripts.cleverwebserver.com/498461ef42e36bdbfe38a5e2b7f253ec.js' );
 }
+/*
+ * Clever stays on desktop; phones are AdSense-only by default since 5.7.0.
+ *
+ * The phone rotation opens with the anchor documented above, which sends the
+ * reader's first link click to the sponsor. That click is the one AdSense's
+ * vignette waits for — the most valuable and most viewable format the account
+ * serves — so the first internal navigation of every rotation lost its vignette
+ * and, usually, the rest of the session. It also held Top Scroll to a compact
+ * exact 300x250 on the first access instead of the full-width creative, and
+ * a redirecting ad on the same page as Google ads is a policy exposure the
+ * account does not need. Desktop keeps Clever's 300x250 as before.
+ *
+ * To restore the previous behaviour: define( 'GO_VERGE_CLEVER_MOBILE', true );
+ */
 if ( ! defined( 'GO_VERGE_CLEVER_MOBILE' ) ) {
-	define( 'GO_VERGE_CLEVER_MOBILE', true );
+	define( 'GO_VERGE_CLEVER_MOBILE', false );
 }
 if ( ! defined( 'GO_VERGE_CLEVER_FIRST_ACCESS' ) ) {
 	define( 'GO_VERGE_CLEVER_FIRST_ACCESS', true );

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GO_VERGE_VERSION', '5.6.7' );
+define( 'GO_VERGE_VERSION', '5.7.0' );
 
 require_once get_template_directory() . '/inc/brand-icons.php';
 
