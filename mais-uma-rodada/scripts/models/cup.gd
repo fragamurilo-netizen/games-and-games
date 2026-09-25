@@ -1,6 +1,6 @@
 class_name Cup
 extends RefCounted
-## Copa de uma temporada (continental ou Mundial de Clubes): fase de grupos opcional e mata-mata
+## Copa de uma temporada (continental, Mundial de Clubes, estadual, nacional ou supercopa): fase de grupos opcional e mata-mata
 ## (ida e volta ou jogo único). A lógica de sorteio e avanço fica em CupManager.
 
 var id: String = "" # "UCL", "LIB", "CCC", "CAF", "AFC", "CWC"
@@ -15,6 +15,11 @@ var fixtures: Array = []
 var ties: Array = []
 ## Nome de cada fase do mata-mata (índice = Fixture.round).
 var round_names: Array = []
+## Copas nacionais: chaves das fases ("pre", "r64"... "f"), datas de cada fase (códigos, uma por
+## jogo do confronto) e clubes que entram direto na segunda fase. Vazio nas continentais.
+var plan: Array = []
+var plan_slots: Array = []
+var byes: Array = []
 var champion: int = -1
 var runner_up: int = -1
 var finished: bool = false
@@ -86,7 +91,8 @@ func to_dict() -> Dictionary:
 			tb[str(k)] = g["table"][k]
 		gs.append({"n": g["n"], "clubs": g["clubs"], "table": tb})
 	return {"id": id, "name": name, "short": short_name, "clubs": club_ids, "groups": gs, "fx": fx, "ties": ties,
-		"rn": round_names, "champ": champion, "ru": runner_up, "fin": finished}
+		"rn": round_names, "champ": champion, "ru": runner_up, "fin": finished,
+		"plan": plan, "ps": plan_slots, "byes": byes}
 
 
 static func from_dict(d: Dictionary) -> Cup:
@@ -108,4 +114,7 @@ static func from_dict(d: Dictionary) -> Cup:
 	c.champion = int(d.get("champ", -1))
 	c.runner_up = int(d.get("ru", -1))
 	c.finished = bool(d.get("fin", false))
+	c.plan = Array(d.get("plan", []))
+	c.plan_slots = Array(d.get("ps", []))
+	c.byes = Array(d.get("byes", []))
 	return c

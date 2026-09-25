@@ -33,6 +33,9 @@ static func setup_first_season(world: GameWorld) -> void:
 
 
 ## Datas da temporada a partir do modelo do rules.json (sábados para a liga, quartas para as copas).
+## As supercopas (U0, U1) vêm antes da primeira rodada. Cada data leva as marcas "win" (janela de
+## transferências aberta) e "ret" (anúncio de aposentadorias), então saves antigos com outro modelo
+## de calendário continuam com as suas próprias datas.
 static func build_calendar(year: int) -> Array:
 	var cc := DatabaseManager.calendar_cfg()
 	var jan1 := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1})
@@ -43,18 +46,30 @@ static func build_calendar(year: int) -> Array:
 	var out: Array = []
 	var slots: Array = cc["slots"]
 	var brk := int(cc.get("winter_break_after", -1))
+	var first_w := true
 	for i in slots.size():
 		var t: String = slots[i]
 		if t == "W":
-			if i > 0:
+			if not first_w:
 				sat += 7
+			first_w = false
 			out.append({"t": t, "d": sat})
+		elif t == "U0":
+			out.append({"t": t, "d": sat - 10}) # quarta-feira, dez dias antes da estreia
+		elif t == "U1":
+			out.append({"t": t, "d": sat - 6}) # domingo anterior à primeira rodada
 		elif t.begins_with("C"):
 			out.append({"t": t, "d": sat + 4})
 		else:
 			out.append({"t": t, "d": (int(out[out.size() - 1]["d"]) + 4) if not out.is_empty() else sat})
 		if i == brk:
 			sat += int(cc.get("winter_break_days", 0))
+	for w in cc.get("windows", []):
+		for i in range(int(w[0]), mini(int(w[1]) + 1, out.size())):
+			out[i]["win"] = true
+	var ret := int(cc.get("retire_announce", -1))
+	if ret >= 0 and ret < out.size():
+		out[ret]["ret"] = true
 	return out
 
 
@@ -86,6 +101,10 @@ static func build_season(world: GameWorld) -> SeasonState:
 		var n_clubs := l.club_ids.size()
 		if n_clubs > 1 and n_clubs < int(cfg.get("teams", n_clubs)):
 			rr = maxi(rr, int(ceil(30.0 / (n_clubs - 1))))
+		# Cada rodada precisa de um fim de semana próprio: turnos a mais ficariam sem data.
+		var per_turn := n_clubs - 1 + n_clubs % 2
+		while rr > 1 and per_turn * rr > weekends.size():
+			rr -= 1
 		FixtureManager.build_league_fixtures(world.rng, l, rr, weekends)
 		CompetitionManager.init_table(l)
 		s.leagues[id] = l
@@ -298,7 +317,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 				Valuation.update_value(p, world.year)
 		tt = _time("valores", tt)
 	# Veteranos anunciam aposentadoria
-	if slot == int(DatabaseManager.calendar_cfg().get("retire_announce", 38)):
+	if s.is_retire_slot(slot):
 		var ann := PlayerDevelopment.announce_retirements(world)
 		report["retiring"] = ann
 		for p in ann:
@@ -574,7 +593,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			moves[cid] = lower
 		summary["leagues"].append({"id": id, "name": league.name, "nation": league.nation, "tier": league.tier, "champion": ids[0],
 			"promoted": promoted, "relegated": relegated, "scorer": scorer, "table": ids})
-		hist_leagues[id] = {"champion": ids[0], "promoted": promoted, "relegated": relegated, "scorer": scorer}
+		hist_leagues[id] = {"champion": ids[0], "runner_up": ids[1] if ids.size() > 1 else -1, "promoted": promoted, "relegated": relegated, "scorer": scorer}
 		var mine := league.nation == user_nation
 		if mine or _is_major(league) or world.is_user_club(champ.id):
 			NewsManager.post(world, "campeao", {"club": champ.short_name, "division": league.name, "pts": league.table[champ.id]["pts"], "year": world.year},

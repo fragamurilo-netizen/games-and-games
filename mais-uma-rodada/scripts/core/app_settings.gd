@@ -15,6 +15,9 @@ static var tutorial_done: bool = false
 static var language: String = I18n.DEFAULT
 ## Interface nas cores do clube durante a carreira.
 static var team_colors: bool = true
+## Editar jogadores e clubes do save durante a carreira (desligado = carreira "limpa"; o Editor do menu
+## continua mudando o padrão das novas carreiras).
+static var career_edit: bool = false
 static var _loaded := false
 
 
@@ -31,6 +34,7 @@ static func load_settings() -> void:
 	tutorial_done = cfg.get_value("game", "tutorial_done", false)
 	language = cfg.get_value("game", "language", I18n.DEFAULT)
 	team_colors = cfg.get_value("game", "team_colors", true)
+	career_edit = cfg.get_value("game", "career_edit", false)
 
 
 static func save_settings() -> void:
@@ -41,4 +45,5 @@ static func save_settings() -> void:
 	cfg.set_value("game", "tutorial_done", tutorial_done)
 	cfg.set_value("game", "language", language)
 	cfg.set_value("game", "team_colors", team_colors)
+	cfg.set_value("game", "career_edit", career_edit)
 	cfg.save(PATH)

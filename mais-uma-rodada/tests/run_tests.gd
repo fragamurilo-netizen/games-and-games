@@ -1,6 +1,7 @@
 extends SceneTree
 ## Testes automáticos do núcleo do jogo (sem interface).
 ## Uso: godot --headless --path . --script res://tests/run_tests.gd
+## Só alguns: ... run_tests.gd -- --only=calend,mercado (trechos do nome do teste, separados por vírgula)
 ## Sai com código 1 se algum teste falhar. O teste de fumaça da interface fica em
 ## tools/screenshot_tour.gd e a simulação longa em tests/season_simulator.gd.
 
@@ -53,6 +54,11 @@ func _initialize() -> void:
 
 
 func _run(name: String, fn: Callable) -> void:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--only="):
+			var parts := a.substr(7).split(",")
+			if not Array(parts).any(func(x): return name.to_lower().contains(String(x).to_lower())):
+				return
 	current = name
 	var before := failures
 	var t := Time.get_ticks_msec()
@@ -391,9 +397,12 @@ func _test_knockout() -> void:
 	check(ets > 0 and pens > 0, "prorrogação (%d) e pênaltis (%d) deveriam acontecer" % [ets, pens])
 
 
+var _cup_champs := {}
+
+
 func _season(w: GameWorld) -> void:
 	var guard := 0
-	while not w.season.finished and guard < 80:
+	while not w.season.finished and guard < 120:
 		SeasonManager.play_matchday_instant(w)
 		guard += 1
 
@@ -458,6 +467,46 @@ func _test_season_cycle() -> void:
 		check(cwc.club_ids.size() == 8 and cwc.finished and cwc.champion >= 0, "Mundial incompleto")
 		check(cwc.club_ids.has(w.season.cups["UCL"].champion) and cwc.club_ids.has(w.season.cups["LIB"].champion), "campeões continentais fora do Mundial")
 		check(w.club(cwc.champion).title_count("W:CWC") == int(titles_before[cwc.champion].get("W:CWC", 0)) + 1, "título mundial não registrado")
+	# Copas nacionais, copas da liga e supercopas
+	var clash := 0
+	for slot in w.season.calendar.size():
+		var seen := {}
+		for f in w.season.fixtures_at(slot):
+			for cl in [f.home, f.away]:
+				if seen.has(cl):
+					clash += 1
+				seen[cl] = true
+	check(clash == 0, "%d clubes com dois jogos na mesma data" % clash)
+	for cid in ["FAC", "CDB", "CDR", "CIT", "DFB", "CDF", "EFL", "USO", "EMP", "CSH", "SCB", "USC", "REC"]:
+		check(w.season.cups.has(cid), "%s não foi montada" % cid)
+		if not w.season.cups.has(cid):
+			continue
+		var dc: Cup = w.season.cups[cid]
+		check(dc.finished and dc.champion >= 0, "%s sem campeão" % cid)
+		for f in dc.fixtures:
+			check(f.played, "%s: jogo não disputado" % cid)
+		check(w.club(dc.champion).title_count(CupManager.title_key(cid)) == int(titles_before[dc.champion].get(CupManager.title_key(cid), 0)) + 1, "%s: título não registrado" % cid)
+	var cdb: Cup = w.season.cups["CDB"]
+	check(cdb.club_ids.size() == 80 and cdb.plan == ["pre", "r64", "r32", "r16", "qf", "sf", "f"] and cdb.byes.size() == 48, "Copa do Brasil com fases erradas: %s" % [cdb.plan])
+	check(Array(cdb.plan_slots[6]).size() == 2 and Array(cdb.plan_slots[0]).size() == 1, "Copa do Brasil: final deveria ser em ida e volta")
+	var fac: Cup = w.season.cups["FAC"]
+	check(fac.club_ids.size() == 40 and fac.plan[0] == "pre" and fac.plan.size() == 6, "FA Cup com fases erradas: %s" % [fac.plan])
+	for f in fac.fixtures:
+		check(w.season.slot_type(f.slot).begins_with("N"), "FA Cup fora das datas de copa nacional")
+		if f.round == fac.plan.size() - 1:
+			check(f.neutral, "final da FA Cup deveria ser em campo neutro")
+	for f in w.season.cups["EFL"].fixtures:
+		check(w.season.slot_type(f.slot).begins_with("E"), "Copa da Liga inglesa fora das datas E")
+	for f in w.season.cups["CSH"].fixtures:
+		check(w.season.slot_type(f.slot) == "U1", "Community Shield fora da data das supercopas")
+	var nations_with_cup := {}
+	for cid in CupManager.domestic_ids():
+		if w.season.cups.has(cid):
+			nations_with_cup[String(CupManager.cfg(cid).get("nation", ""))] = true
+	for n in DatabaseManager.league_nations():
+		if n != "MEX":
+			check(nations_with_cup.has(n), "%s sem copa nacional" % n)
+	_cup_champs = {"CDB": cdb.champion, "FAC": fac.champion}
 	# Estatísticas de copa separadas das de liga
 	var top := CupManager.scorers(w, "UCL", 1)
 	check(not top.is_empty() and top[0].cup_stats["UCL"][Player.C_GOALS] > 0, "artilharia da Liga dos Campeões vazia")
@@ -518,6 +567,17 @@ func _test_end_season() -> void:
 			bra = d
 	check(w.season.cups["LIB"].has_club(int(bra["champion"])), "campeão brasileiro fora da Libertadores")
 	check(w.season.cups["UCL"].club_ids.size() == 32 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
+	# Campeão da Copa do Brasil garante a Libertadores; supercopa com o campeão da liga e o da copa.
+	check(w.season.cups["LIB"].has_club(int(_cup_champs.get("CDB", -1))), "campeão da Copa do Brasil fora da Libertadores")
+	check(w.season.cups.has("SCB") and w.season.cups["SCB"].has_club(int(bra["champion"])), "Supercopa do Brasil sem o campeão brasileiro")
+	if int(_cup_champs.get("CDB", -1)) != int(bra["champion"]):
+		check(w.season.cups["SCB"].has_club(int(_cup_champs["CDB"])), "Supercopa do Brasil sem o campeão da copa")
+	var fac_champ := int(_cup_champs.get("FAC", -1))
+	var in_eu := false
+	for eu in ["UCL", "UEL"]:
+		if w.season.cups[eu].has_club(fac_champ):
+			in_eu = true
+	check(in_eu, "campeão da FA Cup sem vaga europeia")
 	check(not summary["user"].is_empty(), "resumo do usuário vazio")
 	var rv: Dictionary = summary.get("review", {})
 	check(not rv.is_empty() and String(rv.get("grade", "")) != "", "balanço da temporada sem nota")
@@ -1041,7 +1101,12 @@ func _test_market_ai() -> void:
 			prospect = q
 	big.transfer_budget = 900_000_000
 	if prospect != null:
-		var deal := MarketAI.negotiate(w, big, prospect, 1.0, false)
+		# Pode virar novela (o comprador sobe a oferta nas semanas seguintes), como no jogo.
+		var deal := {}
+		for push in 4:
+			deal = MarketAI.negotiate(w, big, prospect, 1.0, false, false, push)
+			if deal.has("fee"):
+				break
 		check(deal.has("fee") and int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
 		var bids := MarketAI.bids_for_user_player(w, big, prospect)
 		check(int(bids[0]) <= int(bids[1]) and int(bids[0]) > 0, "proposta acima do teto do comprador")
@@ -1390,7 +1455,7 @@ func _test_second_cups() -> void:
 		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == 32, "%s sem 32 clubes" % cid)
 	var seen := {}
 	for cid in w.season.cups:
-		if CupManager.is_state(cid):
+		if not CupManager.is_international(cid):
 			continue
 		for club in w.season.cups[cid].club_ids:
 			check(not seen.has(club), "clube em duas copas continentais")

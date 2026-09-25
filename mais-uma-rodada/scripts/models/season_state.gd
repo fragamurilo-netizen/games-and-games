@@ -46,6 +46,46 @@ func is_weekend(slot: int) -> bool:
 	return slot_type(slot) == "W"
 
 
+## Janelas e aposentadorias de saves com o calendário antigo (sem as marcas "win"/"ret").
+const LEGACY_WINDOWS: Array = [[0, 5], [32, 36]]
+const LEGACY_RETIRE := 48
+
+
+var _windows_cache: Array = []
+
+
+func _marked() -> bool:
+	return calendar.any(func(e): return e.has("win"))
+
+
+## Faixas [início, fim] (índices) em que a janela de transferências fica aberta, na ordem.
+func window_ranges() -> Array:
+	if not _windows_cache.is_empty():
+		return _windows_cache
+	if not _marked():
+		_windows_cache = LEGACY_WINDOWS
+		return _windows_cache
+	var out: Array = []
+	var a := -1
+	for i in calendar.size():
+		var open := bool(calendar[i].get("win", false))
+		if open and a < 0:
+			a = i
+		elif not open and a >= 0:
+			out.append([a, i - 1])
+			a = -1
+	if a >= 0:
+		out.append([a, calendar.size() - 1])
+	_windows_cache = out
+	return out
+
+
+func is_retire_slot(slot: int) -> bool:
+	if not _marked():
+		return slot == LEGACY_RETIRE
+	return slot >= 0 and slot < calendar.size() and bool(calendar[slot].get("ret", false))
+
+
 ## Índice da data com o código `code` ("C1", "X3"...), ou -1.
 func slot_of(code: String) -> int:
 	for i in calendar.size():

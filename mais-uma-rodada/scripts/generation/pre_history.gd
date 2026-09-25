@@ -35,12 +35,23 @@ static func build(world: GameWorld) -> void:
 			_count(counts, int(champs[y]), key)
 	# Copas continentais e Mundial
 	for cid in CupManager.continental_ids() + [CupManager.CWC]:
-		var key: String = ("W:" if cid == CupManager.CWC else "C:") + String(cid)
+		var key: String = CupManager.title_key(String(cid))
 		var champs := {}
 		if years.has(key):
 			champs = _real(world, years[key])
 		elif not real_only.has(key) and cid != CupManager.CWC:
 			champs = _generated(world, rng, _confed_clubs(world, String(CupManager.cfg(cid).get("confed", ""))), first, start - 2)
+		for y in champs:
+			_season(seasons, int(y))["cups"][cid] = {"champion": champs[y], "runner_up": -1, "scorer": {}, "pre": true}
+			_count(counts, int(champs[y]), key)
+	# Copas nacionais e da liga (mata-mata: mais surpresas que nas ligas) e supercopas reais
+	for cid in CupManager.domestic_ids() + CupManager.super_ids():
+		var key: String = CupManager.title_key(String(cid))
+		var champs := {}
+		if years.has(key):
+			champs = _real(world, years[key])
+		elif not real_only.has(key) and CupManager.is_domestic(String(cid)):
+			champs = _generated(world, rng, _nation_clubs(world, String(CupManager.cfg(cid).get("nation", ""))), first, start - 2, 9.0)
 		for y in champs:
 			_season(seasons, int(y))["cups"][cid] = {"champion": champs[y], "runner_up": -1, "scorer": {}, "pre": true}
 			_count(counts, int(champs[y]), key)
@@ -96,6 +107,14 @@ static func _league_clubs(world: GameWorld, lid: String) -> Array:
 	return out
 
 
+static func _nation_clubs(world: GameWorld, nation: String) -> Array:
+	var out: Array = []
+	for c: Club in world.clubs:
+		if c.nation == nation:
+			out.append(c)
+	return out
+
+
 static func _confed_clubs(world: GameWorld, confed: String) -> Array:
 	var out: Array = []
 	for c: Club in world.clubs:
@@ -105,7 +124,7 @@ static func _confed_clubs(world: GameWorld, confed: String) -> Array:
 
 
 ## Campeões sorteados pela reputação, com eras de 5 anos em que alguns clubes dominam.
-static func _generated(world: GameWorld, rng: RandomNumberGenerator, clubs: Array, from_y: int, to_y: int) -> Dictionary:
+static func _generated(world: GameWorld, rng: RandomNumberGenerator, clubs: Array, from_y: int, to_y: int, spread: float = 6.0) -> Dictionary:
 	var out := {}
 	if clubs.is_empty():
 		return out
@@ -119,7 +138,7 @@ static func _generated(world: GameWorld, rng: RandomNumberGenerator, clubs: Arra
 				era[c.id] = rng.randfn(0.0, 0.45)
 		var weights: Array = []
 		for c: Club in clubs:
-			weights.append(exp((c.reputation - top) / 6.0 + float(era[c.id])))
+			weights.append(exp((c.reputation - top) / spread + float(era[c.id])))
 		var i := RngUtil.weighted_index(rng, weights)
 		if i >= 0:
 			out[y] = (clubs[i] as Club).id

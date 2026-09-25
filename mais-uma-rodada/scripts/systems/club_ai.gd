@@ -194,7 +194,7 @@ static func _compute_strength(world: GameWorld, club: Club) -> float:
 static func prepare_ai_sheet(world: GameWorld, club: Club, opponent: Club, is_home: bool) -> TeamSheet:
 	var sheet := club.sheet
 	# A formação é repensada no início da temporada e depois da janela do meio do ano.
-	var key := world.year * 100 + (1 if world.season != null and world.season.day >= int(DatabaseManager.calendar_cfg()["windows"][1][0]) else 0)
+	var key := world.year * 100 + (1 if world.season != null and world.season.day >= world.second_window_day() else 0)
 	var fresh := false
 	if sheet == null or club.ai_formation_key != key or not DatabaseManager.has_formation(sheet.formation):
 		sheet = TeamSheet.new()

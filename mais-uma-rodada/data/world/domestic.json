@@ -1,0 +1,1098 @@
+{
+	"_doc": "Copas nacionais, copas da liga e supercopas. kind: national (todos os clubes do país, mata-mata nas datas N1..N12 de meio de semana; quanto maior o país, mais fases — quem sobra na conta de potência de 2 joga a fase preliminar e os demais entram direto, os de divisão mais alta primeiro), league_cup (igual, nas datas E1..E10 que o país não usa), super (jogo único antes da 1ª rodada: U1 nacionais, U0 continentais; from: [origem A, origem B] com L:<liga> campeão, L2:<liga> vice, N:<copa> ou C:<copa> campeão da temporada anterior; se as duas origens forem o mesmo clube, entra o vice da liga). two_legs: fases em ida e volta, contadas do fim (f, sf, qf, r16, r32, r64...). neutral_final: final em campo neutro; neutral_all: todos os jogos em campo neutro; small_home: em jogo único o clube de divisão mais baixa (ou de menor reputação) manda o jogo. qualifies: o campeão ganha vaga nessa copa continental se ainda não tiver uma igual ou maior. prize_scale: premiação relativa (1 = copa nacional grande).",
+	"cups": {
+		"FAC": {
+			"name": "FA Cup",
+			"short": "FA Cup",
+			"kind": "national",
+			"nation": "ENG",
+			"pool": "N",
+			"colors": [
+				"#E4002B",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 1.6
+		},
+		"CDR": {
+			"name": "Copa del Rey",
+			"short": "Copa del Rey",
+			"kind": "national",
+			"nation": "ESP",
+			"pool": "N",
+			"colors": [
+				"#C60B1E",
+				"#F1BF00"
+			],
+			"qualifies": "UEL",
+			"two_legs": [
+				"sf"
+			],
+			"neutral_final": true,
+			"small_home": true,
+			"prize_scale": 1.2
+		},
+		"CIT": {
+			"name": "Coppa Italia",
+			"short": "Coppa Italia",
+			"kind": "national",
+			"nation": "ITA",
+			"pool": "N",
+			"colors": [
+				"#0B7A3E",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"two_legs": [
+				"sf"
+			],
+			"neutral_final": true,
+			"prize_scale": 1.2
+		},
+		"DFB": {
+			"name": "DFB-Pokal",
+			"short": "DFB-Pokal",
+			"kind": "national",
+			"nation": "GER",
+			"pool": "N",
+			"colors": [
+				"#111111",
+				"#E2B33C"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"small_home": true,
+			"prize_scale": 1.5
+		},
+		"CDF": {
+			"name": "Coupe de France",
+			"short": "Coupe de France",
+			"kind": "national",
+			"nation": "FRA",
+			"pool": "N",
+			"colors": [
+				"#0055A4",
+				"#EF4135"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"small_home": true,
+			"prize_scale": 0.8
+		},
+		"TDP": {
+			"name": "Taça de Portugal",
+			"short": "Taça de Portugal",
+			"kind": "national",
+			"nation": "POR",
+			"pool": "N",
+			"colors": [
+				"#006600",
+				"#FF0000"
+			],
+			"qualifies": "UEL",
+			"two_legs": [
+				"sf"
+			],
+			"neutral_final": true,
+			"small_home": true,
+			"prize_scale": 0.6
+		},
+		"KNV": {
+			"name": "KNVB Beker",
+			"short": "KNVB Beker",
+			"kind": "national",
+			"nation": "NED",
+			"pool": "N",
+			"colors": [
+				"#F36C21",
+				"#1B1B1B"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.6
+		},
+		"TKK": {
+			"name": "Türkiye Kupası",
+			"short": "Copa da Turquia",
+			"kind": "national",
+			"nation": "TUR",
+			"pool": "N",
+			"colors": [
+				"#E30A17",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.6
+		},
+		"BEC": {
+			"name": "Copa da Bélgica",
+			"short": "Copa da Bélgica",
+			"kind": "national",
+			"nation": "BEL",
+			"pool": "N",
+			"colors": [
+				"#1B1B1B",
+				"#FDDA24"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.5
+		},
+		"SCC": {
+			"name": "Scottish Cup",
+			"short": "Scottish Cup",
+			"kind": "national",
+			"nation": "SCO",
+			"pool": "N",
+			"colors": [
+				"#0065BD",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.5
+		},
+		"GRC": {
+			"name": "Copa da Grécia",
+			"short": "Copa da Grécia",
+			"kind": "national",
+			"nation": "GRE",
+			"pool": "N",
+			"colors": [
+				"#0D5EAF",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.4
+		},
+		"OFB": {
+			"name": "ÖFB-Cup",
+			"short": "ÖFB-Cup",
+			"kind": "national",
+			"nation": "AUT",
+			"pool": "N",
+			"colors": [
+				"#ED2939",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.4
+		},
+		"SUC": {
+			"name": "Copa da Suíça",
+			"short": "Copa da Suíça",
+			"kind": "national",
+			"nation": "SUI",
+			"pool": "N",
+			"colors": [
+				"#D52B1E",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.4
+		},
+		"UKC": {
+			"name": "Copa da Ucrânia",
+			"short": "Copa da Ucrânia",
+			"kind": "national",
+			"nation": "UKR",
+			"pool": "N",
+			"colors": [
+				"#0057B7",
+				"#FFD700"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"CRC": {
+			"name": "Copa da Croácia",
+			"short": "Copa da Croácia",
+			"kind": "national",
+			"nation": "CRO",
+			"pool": "N",
+			"colors": [
+				"#FF0000",
+				"#171796"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"SRC": {
+			"name": "Copa da Sérvia",
+			"short": "Copa da Sérvia",
+			"kind": "national",
+			"nation": "SRB",
+			"pool": "N",
+			"colors": [
+				"#C6363C",
+				"#0C4076"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"CZC": {
+			"name": "Copa da Tchéquia",
+			"short": "Copa da Tchéquia",
+			"kind": "national",
+			"nation": "CZE",
+			"pool": "N",
+			"colors": [
+				"#11457E",
+				"#D7141A"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"DBU": {
+			"name": "DBU Pokalen",
+			"short": "Copa da Dinamarca",
+			"kind": "national",
+			"nation": "DEN",
+			"pool": "N",
+			"colors": [
+				"#C8102E",
+				"#FFFFFF"
+			],
+			"qualifies": "UEL",
+			"neutral_final": true,
+			"prize_scale": 0.4
+		},
+		"CDB": {
+			"name": "Copa do Brasil",
+			"short": "Copa do Brasil",
+			"kind": "national",
+			"nation": "BRA",
+			"pool": "N",
+			"colors": [
+				"#0B2D6B",
+				"#F2C230"
+			],
+			"qualifies": "LIB",
+			"two_legs": [
+				"r32",
+				"r16",
+				"qf",
+				"sf",
+				"f"
+			],
+			"neutral_final": false,
+			"prize_scale": 2.2
+		},
+		"CAR": {
+			"name": "Copa Argentina",
+			"short": "Copa Argentina",
+			"kind": "national",
+			"nation": "ARG",
+			"pool": "N",
+			"colors": [
+				"#74ACDF",
+				"#FFFFFF"
+			],
+			"qualifies": "LIB",
+			"neutral_final": true,
+			"prize_scale": 0.6,
+			"neutral_all": true
+		},
+		"CAU": {
+			"name": "Copa AUF Uruguay",
+			"short": "Copa AUF",
+			"kind": "national",
+			"nation": "URU",
+			"pool": "N",
+			"colors": [
+				"#5CBFEB",
+				"#111111"
+			],
+			"qualifies": "SUD",
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"CCO": {
+			"name": "Copa Colombia",
+			"short": "Copa Colombia",
+			"kind": "national",
+			"nation": "COL",
+			"pool": "N",
+			"colors": [
+				"#FCD116",
+				"#003893"
+			],
+			"qualifies": "LIB",
+			"two_legs": [
+				"r16",
+				"qf",
+				"sf",
+				"f"
+			],
+			"neutral_final": false,
+			"prize_scale": 0.3
+		},
+		"CCH": {
+			"name": "Copa Chile",
+			"short": "Copa Chile",
+			"kind": "national",
+			"nation": "CHI",
+			"pool": "N",
+			"colors": [
+				"#D52B1E",
+				"#0039A6"
+			],
+			"qualifies": "LIB",
+			"two_legs": [
+				"sf",
+				"f"
+			],
+			"neutral_final": false,
+			"prize_scale": 0.3
+		},
+		"CEC": {
+			"name": "Copa Ecuador",
+			"short": "Copa Ecuador",
+			"kind": "national",
+			"nation": "ECU",
+			"pool": "N",
+			"colors": [
+				"#FFD100",
+				"#034EA2"
+			],
+			"qualifies": "LIB",
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"CPE": {
+			"name": "Copa Bicentenario",
+			"short": "Copa Bicentenario",
+			"kind": "national",
+			"nation": "PER",
+			"pool": "N",
+			"colors": [
+				"#D91023",
+				"#FFFFFF"
+			],
+			"qualifies": "SUD",
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"CPY": {
+			"name": "Copa Paraguay",
+			"short": "Copa Paraguay",
+			"kind": "national",
+			"nation": "PAR",
+			"pool": "N",
+			"colors": [
+				"#0038A8",
+				"#D52B1E"
+			],
+			"qualifies": "SUD",
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"CBO": {
+			"name": "Copa Bolivia",
+			"short": "Copa Bolivia",
+			"kind": "national",
+			"nation": "BOL",
+			"pool": "N",
+			"colors": [
+				"#007934",
+				"#F9E300"
+			],
+			"qualifies": "SUD",
+			"neutral_final": true,
+			"prize_scale": 0.1
+		},
+		"CVE": {
+			"name": "Copa Venezuela",
+			"short": "Copa Venezuela",
+			"kind": "national",
+			"nation": "VEN",
+			"pool": "N",
+			"colors": [
+				"#CF142B",
+				"#FFCC00"
+			],
+			"qualifies": "SUD",
+			"neutral_final": true,
+			"prize_scale": 0.1
+		},
+		"USO": {
+			"name": "U.S. Open Cup",
+			"short": "U.S. Open Cup",
+			"kind": "national",
+			"nation": "USA",
+			"pool": "N",
+			"colors": [
+				"#0A3161",
+				"#B31942"
+			],
+			"qualifies": "CCC",
+			"neutral_final": false,
+			"prize_scale": 0.4
+		},
+		"EGC": {
+			"name": "Copa do Egito",
+			"short": "Copa do Egito",
+			"kind": "national",
+			"nation": "EGY",
+			"pool": "N",
+			"colors": [
+				"#CE1126",
+				"#111111"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"CDT": {
+			"name": "Coupe du Trône",
+			"short": "Coupe du Trône",
+			"kind": "national",
+			"nation": "MAR",
+			"pool": "N",
+			"colors": [
+				"#C1272D",
+				"#006233"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"CTN": {
+			"name": "Coupe de Tunisie",
+			"short": "Copa da Tunísia",
+			"kind": "national",
+			"nation": "TUN",
+			"pool": "N",
+			"colors": [
+				"#E70013",
+				"#FFFFFF"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.1
+		},
+		"NDB": {
+			"name": "Nedbank Cup",
+			"short": "Nedbank Cup",
+			"kind": "national",
+			"nation": "RSA",
+			"pool": "N",
+			"colors": [
+				"#007749",
+				"#FFB81C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"NFC": {
+			"name": "President Federation Cup",
+			"short": "Copa da Nigéria",
+			"kind": "national",
+			"nation": "NGA",
+			"pool": "N",
+			"colors": [
+				"#008751",
+				"#FFFFFF"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.1
+		},
+		"CSN": {
+			"name": "Coupe du Sénégal",
+			"short": "Copa do Senegal",
+			"kind": "national",
+			"nation": "SEN",
+			"pool": "N",
+			"colors": [
+				"#00853F",
+				"#FDEF42"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.1
+		},
+		"KSC": {
+			"name": "King's Cup",
+			"short": "Copa do Rei",
+			"kind": "national",
+			"nation": "KSA",
+			"pool": "N",
+			"colors": [
+				"#006C35",
+				"#FFFFFF"
+			],
+			"qualifies": "AFC",
+			"neutral_final": true,
+			"prize_scale": 0.8
+		},
+		"EMP": {
+			"name": "Emperor's Cup",
+			"short": "Copa do Imperador",
+			"kind": "national",
+			"nation": "JPN",
+			"pool": "N",
+			"colors": [
+				"#BC002D",
+				"#FFFFFF"
+			],
+			"qualifies": "AFC",
+			"neutral_final": true,
+			"prize_scale": 0.6
+		},
+		"KRC": {
+			"name": "Korea Cup",
+			"short": "Copa da Coreia",
+			"kind": "national",
+			"nation": "KOR",
+			"pool": "N",
+			"colors": [
+				"#003478",
+				"#C60C30"
+			],
+			"qualifies": "AFC",
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"EMC": {
+			"name": "Emir Cup",
+			"short": "Copa do Emir",
+			"kind": "national",
+			"nation": "QAT",
+			"pool": "N",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"qualifies": "AFC",
+			"neutral_final": true,
+			"prize_scale": 0.5
+		},
+		"UPC": {
+			"name": "President's Cup",
+			"short": "Copa do Presidente",
+			"kind": "national",
+			"nation": "UAE",
+			"pool": "N",
+			"colors": [
+				"#00732F",
+				"#FF0000"
+			],
+			"qualifies": "AFC",
+			"neutral_final": true,
+			"prize_scale": 0.4
+		},
+		"CFA": {
+			"name": "Copa da China",
+			"short": "Copa da China",
+			"kind": "national",
+			"nation": "CHN",
+			"pool": "N",
+			"colors": [
+				"#DE2910",
+				"#FFDE00"
+			],
+			"qualifies": "AFC",
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"AUC": {
+			"name": "Australia Cup",
+			"short": "Australia Cup",
+			"kind": "national",
+			"nation": "AUS",
+			"pool": "N",
+			"colors": [
+				"#00843D",
+				"#FFCD00"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"EFL": {
+			"name": "EFL Cup",
+			"short": "Copa da Liga",
+			"kind": "league_cup",
+			"nation": "ENG",
+			"pool": "E",
+			"colors": [
+				"#00A94F",
+				"#1B1B1B"
+			],
+			"qualifies": "UECL",
+			"two_legs": [
+				"sf"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.8
+		},
+		"TDL": {
+			"name": "Taça da Liga",
+			"short": "Taça da Liga",
+			"kind": "league_cup",
+			"nation": "POR",
+			"pool": "E",
+			"colors": [
+				"#1B3A8C",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"SLC": {
+			"name": "Scottish League Cup",
+			"short": "Copa da Liga",
+			"kind": "league_cup",
+			"nation": "SCO",
+			"pool": "E",
+			"colors": [
+				"#5A2D82",
+				"#FFFFFF"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.2
+		},
+		"JLC": {
+			"name": "J.League Cup",
+			"short": "Copa da J.League",
+			"kind": "league_cup",
+			"nation": "JPN",
+			"pool": "E",
+			"colors": [
+				"#E60012",
+				"#1B1B1B"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3
+		},
+		"CSH": {
+			"name": "Community Shield",
+			"short": "Community Shield",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:ENG1",
+				"N:FAC"
+			],
+			"colors": [
+				"#1B1B1B",
+				"#E4002B"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "ENG"
+		},
+		"SES": {
+			"name": "Supercopa de España",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:ESP1",
+				"N:CDR"
+			],
+			"colors": [
+				"#C60B1E",
+				"#F1BF00"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "ESP"
+		},
+		"SCI": {
+			"name": "Supercoppa Italiana",
+			"short": "Supercoppa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:ITA1",
+				"N:CIT"
+			],
+			"colors": [
+				"#0B7A3E",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "ITA"
+		},
+		"DFS": {
+			"name": "DFL-Supercup",
+			"short": "Supercup",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:GER1",
+				"N:DFB"
+			],
+			"colors": [
+				"#D20515",
+				"#1B1B1B"
+			],
+			"neutral_final": false,
+			"prize_scale": 0.3,
+			"nation": "GER"
+		},
+		"TDC": {
+			"name": "Trophée des Champions",
+			"short": "Trophée des Champions",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:FRA1",
+				"N:CDF"
+			],
+			"colors": [
+				"#0055A4",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "FRA"
+		},
+		"STP": {
+			"name": "Supertaça Cândido de Oliveira",
+			"short": "Supertaça",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:POR1",
+				"N:TDP"
+			],
+			"colors": [
+				"#006600",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "POR"
+		},
+		"JCS": {
+			"name": "Johan Cruijff Schaal",
+			"short": "Johan Cruijff Schaal",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:NED1",
+				"N:KNV"
+			],
+			"colors": [
+				"#F36C21",
+				"#FFFFFF"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "NED"
+		},
+		"TSK": {
+			"name": "Turkcell Süper Kupa",
+			"short": "Süper Kupa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:TUR1",
+				"N:TKK"
+			],
+			"colors": [
+				"#E30A17",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "TUR"
+		},
+		"UKS": {
+			"name": "Supercopa da Ucrânia",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:UKR1",
+				"N:UKC"
+			],
+			"colors": [
+				"#0057B7",
+				"#FFD700"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "UKR"
+		},
+		"SCB": {
+			"name": "Supercopa do Brasil",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:BRA1",
+				"N:CDB"
+			],
+			"colors": [
+				"#009C3B",
+				"#FFDF00"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "BRA"
+		},
+		"SCA": {
+			"name": "Supercopa Argentina",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:ARG1",
+				"N:CAR"
+			],
+			"colors": [
+				"#74ACDF",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "ARG"
+		},
+		"SUY": {
+			"name": "Supercopa Uruguaya",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:URU1",
+				"N:CAU"
+			],
+			"colors": [
+				"#5CBFEB",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "URU"
+		},
+		"SLG": {
+			"name": "Superliga de Colombia",
+			"short": "Superliga",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:COL1",
+				"N:CCO"
+			],
+			"colors": [
+				"#FCD116",
+				"#CE1126"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "COL"
+		},
+		"SCH": {
+			"name": "Supercopa de Chile",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:CHI1",
+				"N:CCH"
+			],
+			"colors": [
+				"#D52B1E",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "CHI"
+		},
+		"SEC": {
+			"name": "Supercopa de Ecuador",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:ECU1",
+				"N:CEC"
+			],
+			"colors": [
+				"#FFD100",
+				"#1B1B1B"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "ECU"
+		},
+		"CDC": {
+			"name": "Campeón de Campeones",
+			"short": "Campeón de Campeones",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:MEX1",
+				"L2:MEX1"
+			],
+			"colors": [
+				"#006847",
+				"#CE1126"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "MEX"
+		},
+		"SKS": {
+			"name": "Supercopa Saudita",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:KSA1",
+				"N:KSC"
+			],
+			"colors": [
+				"#006C35",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "KSA"
+		},
+		"FSC": {
+			"name": "Supercopa do Japão",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:JPN1",
+				"N:EMP"
+			],
+			"colors": [
+				"#BC002D",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "JPN"
+		},
+		"CSC": {
+			"name": "Supercopa da China",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:CHN1",
+				"N:CFA"
+			],
+			"colors": [
+				"#DE2910",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "CHN"
+		},
+		"EGS": {
+			"name": "Supercopa do Egito",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:EGY1",
+				"N:EGC"
+			],
+			"colors": [
+				"#CE1126",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "EGY"
+		},
+		"SJC": {
+			"name": "Copa Sheikh Jassim",
+			"short": "Sheikh Jassim",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:QAT1",
+				"N:EMC"
+			],
+			"colors": [
+				"#8A1538",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "QAT"
+		},
+		"UAS": {
+			"name": "Supercopa dos Emirados",
+			"short": "Supercopa",
+			"kind": "super",
+			"slot": "U1",
+			"from": [
+				"L:UAE1",
+				"N:UPC"
+			],
+			"colors": [
+				"#00732F",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.3,
+			"nation": "UAE"
+		},
+		"USC": {
+			"name": "Supercopa da UEFA",
+			"short": "Supercopa UEFA",
+			"kind": "super",
+			"slot": "U0",
+			"from": [
+				"C:UCL",
+				"C:UEL"
+			],
+			"colors": [
+				"#0B1F4B",
+				"#E2B33C"
+			],
+			"neutral_final": true,
+			"prize_scale": 0.8,
+			"confed": "UEFA"
+		},
+		"REC": {
+			"name": "Recopa Sul-Americana",
+			"short": "Recopa",
+			"kind": "super",
+			"slot": "U0",
+			"from": [
+				"C:LIB",
+				"C:SUD"
+			],
+			"colors": [
+				"#0A0A0A",
+				"#E2B33C"
+			],
+			"neutral_final": false,
+			"prize_scale": 0.5,
+			"confed": "CONMEBOL"
+		},
+		"CPC": {
+			"name": "Campeones Cup",
+			"short": "Campeones Cup",
+			"kind": "super",
+			"slot": "U0",
+			"from": [
+				"L:USA1",
+				"L:MEX1"
+			],
+			"colors": [
+				"#1F3A93",
+				"#E2B33C"
+			],
+			"neutral_final": false,
+			"prize_scale": 0.2,
+			"confed": "CONCACAF"
+		}
+	}
+}

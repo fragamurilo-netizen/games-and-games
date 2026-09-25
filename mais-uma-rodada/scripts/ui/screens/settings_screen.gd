@@ -36,6 +36,14 @@ func refresh() -> void:
 		UIManager.refresh_chrome()
 		refresh()))
 	c.add_child(UIKit.card_panel(card0))
+	var card_ed := UIKit.card("Card", 12)
+	card_ed.add_child(UIKit.section("Editor"))
+	card_ed.add_child(_toggle("Editar jogadores e clubes durante a carreira", AppSettings.career_edit, func(v: bool):
+		AppSettings.career_edit = v
+		AppSettings.save_settings()
+		refresh()))
+	card_ed.add_child(UIKit.label("Desligado, a carreira fica sem atalhos: o botão Editar some dos perfis e o editor dentro da carreira só mexe no visual do seu clube. O Editor do menu inicial sempre edita o mundo padrão das novas carreiras.", "Small", true))
+	c.add_child(UIKit.card_panel(card_ed))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
 	card.add_child(_toggle("Efeitos sonoros e torcida", AppSettings.sound, func(v: bool):

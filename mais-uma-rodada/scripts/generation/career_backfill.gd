@@ -69,7 +69,7 @@ static func _context(world: GameWorld) -> Dictionary:
 			if cid2 >= 0:
 				if not m.has(cid2):
 					m[cid2] = []
-				m[cid2].append(("W:" if String(cup) == CupManager.CWC else "C:") + String(cup))
+				m[cid2].append(CupManager.title_key(String(cup)))
 		champs[y] = m
 	for nat in by_nation:
 		var best := 0.0

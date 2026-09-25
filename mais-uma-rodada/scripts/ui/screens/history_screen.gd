@@ -185,8 +185,8 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 					lines.append([w.league_short(String(lid)), champ, "L:" + String(lid)])
 			for cid in h.get("cups", {}):
 				var champ := w.club(int(h["cups"][cid]["champion"]))
-				if champ != null:
-					lines.append([CupManager.cup_short(String(cid)), champ, ("W:" if cid == CupManager.CWC else "C:") + String(cid)])
+				if champ != null and CupManager.relevant_to_user(w, String(cid)):
+					lines.append([CupManager.cup_short(String(cid)), champ, CupManager.title_key(String(cid))])
 			for ln in lines:
 				var row := UIKit.hbox(10)
 				row.add_child(TrophyView.make(String(ln[2]), 34, w))
@@ -259,10 +259,10 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 		for cid in cups:
 			var e: Dictionary = cups[cid]
 			var champ := w.club(int(e.get("champion", -1)))
-			if champ == null:
+			if champ == null or not (CupManager.relevant_to_user(w, String(cid)) or w.is_user_club(champ.id)):
 				continue
 			var row := UIKit.hbox(10)
-			row.add_child(TrophyView.make(("W:" if cid == CupManager.CWC else "C:") + String(cid), 40, w))
+			row.add_child(TrophyView.make(CupManager.title_key(String(cid)), 40, w))
 			var col := UIKit.vbox(0)
 			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			col.add_child(UIKit.label(CupManager.cup_name(String(cid)), "Small"))
@@ -424,7 +424,7 @@ func _comp_options(w: GameWorld) -> Array:
 	var confed := String(DatabaseManager.nation(nat).get("confed", ""))
 	for cid in DatabaseManager.cups_cfg():
 		var cfg := DatabaseManager.cup_cfg(cid)
-		if CupManager.is_state(cid):
+		if cfg.has("nation"):
 			if String(cfg.get("nation", "")) == nat:
 				out.append([cid, String(cfg.get("short", cid))])
 		elif String(cfg.get("confed", "")) == confed or String(cfg.get("confed", "")) == "" or cid == "CWC":
@@ -453,12 +453,12 @@ func _champions(w: GameWorld, c: VBoxContainer) -> void:
 	var title := w.league_name(_comp) if is_league else ("Sub-20" if _comp == "YOUTH" else CupManager.cup_name(_comp))
 	var head := UIKit.hbox(12)
 	if _comp != "YOUTH":
-		head.add_child(TrophyView.make(("L:" if is_league else ("W:" if _comp == CupManager.CWC else "C:")) + _comp, 72, w))
+		head.add_child(TrophyView.make(("L:" + _comp if is_league else CupManager.title_key(_comp)), 72, w))
 	var hcol := UIKit.vbox(0)
 	hcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hcol.add_child(UIKit.section(title))
 	if _comp != "YOUTH":
-		hcol.add_child(UIKit.label(TrophyView.trophy_name(("L:" if is_league else ("W:" if _comp == CupManager.CWC else "C:")) + _comp, w), "Small", true))
+		hcol.add_child(UIKit.label(TrophyView.trophy_name(("L:" + _comp if is_league else CupManager.title_key(_comp)), w), "Small", true))
 	head.add_child(hcol)
 	card.add_child(head)
 	var any := false

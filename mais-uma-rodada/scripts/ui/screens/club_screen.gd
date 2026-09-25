@@ -373,17 +373,21 @@ static func _title_rank(k: String) -> int:
 			return 0
 		"C:":
 			return 1
+		"D:":
+			return 7
 		"S:":
 			return 8
+		"U:":
+			return 9
 		"L:":
 			return 2 + int(DatabaseManager.league_cfg(k.substr(2)).get("tier", 1))
-	return 9
+	return 10
 
 
 static func _title_text(w: GameWorld, k: String, n: int) -> String:
 	var id := k.substr(2)
 	match k.substr(0, 2):
-		"W:", "C:", "S:":
+		"W:", "C:", "S:", "D:", "U:":
 			return "%dx %s" % [n, CupManager.cup_name(id)]
 		"L:":
 			return "%dx campeão %s" % [n, w.league_short(id)]
@@ -394,7 +398,7 @@ static func _title_text(w: GameWorld, k: String, n: int) -> String:
 
 static func _title_color(k: String) -> Color:
 	match k.substr(0, 2):
-		"W:", "C:", "S:":
+		"W:", "C:", "S:", "D:", "U:":
 			return UIColors.ACCENT
 		"L:":
 			return UIColors.ACCENT

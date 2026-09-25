@@ -252,7 +252,9 @@ func transfer_window_open() -> bool:
 
 
 func window_open_at(slot: int) -> bool:
-	for w in DatabaseManager.calendar_cfg()["windows"]:
+	if season == null:
+		return false
+	for w in season.window_ranges():
 		if slot >= int(w[0]) and slot <= int(w[1]):
 			return true
 	return false
@@ -262,7 +264,7 @@ func window_open_at(slot: int) -> bool:
 func next_window_day() -> int:
 	if season == null:
 		return -1
-	for w in DatabaseManager.calendar_cfg()["windows"]:
+	for w in season.window_ranges():
 		if int(w[0]) > season.day:
 			return int(w[0])
 	return -1
@@ -272,10 +274,18 @@ func next_window_day() -> int:
 func window_end_day() -> int:
 	if season == null:
 		return -1
-	for w in DatabaseManager.calendar_cfg()["windows"]:
+	for w in season.window_ranges():
 		if season.day >= int(w[0]) and season.day <= int(w[1]):
 			return int(w[1])
 	return -1
+
+
+## Início da segunda janela (meio da temporada), ou o fim do calendário se não houver.
+func second_window_day() -> int:
+	if season == null:
+		return 1 << 30
+	var ws := season.window_ranges()
+	return int(ws[1][0]) if ws.size() > 1 else season.calendar.size()
 
 
 func stat_add(key: String, amount: float = 1.0) -> void:

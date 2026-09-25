@@ -150,6 +150,11 @@ static func on_cup_events(world: GameWorld, events: Array) -> void:
 	var user := world.user_club()
 	for ev in events:
 		var cup_name := CupManager.cup_name(String(ev["cup"]))
+		var cid_ev := String(ev["cup"])
+		# Copas de outros países não viram notícia (são dezenas por temporada), só as do seu.
+		var foreign := not CupManager.is_international(cid_ev) and String(CupManager.cfg(cid_ev).get("nation", "")) != user.nation
+		if foreign and not world.is_user_club(int(ev.get("club", -1))):
+			continue
 		match String(ev["t"]):
 			"champion":
 				var c := world.club(int(ev["club"]))
@@ -163,6 +168,13 @@ static func on_cup_events(world: GameWorld, events: Array) -> void:
 					post(world, CupManager.news_cat(String(ev["cup"]), "avanca"), {"club": user.short_name, "cup": cup_name, "stage": String(ev["stage"]).to_lower(),
 						"opponent": by.short_name if by != null else ""}, user.id, -1, NewsEvent.IMP_HIGH)
 			"out":
+				var giant := world.club(int(ev["club"]))
+				var killer := world.club(int(ev.get("by", -1)))
+				if CupManager.is_domestic(cid_ev) and killer != null and giant != null and killer.tier - giant.tier >= 2 \
+						and not world.is_user_club(giant.id):
+					post_raw(world, "Zebra na %s: %s elimina o %s" % [cup_name, killer.short_name, giant.short_name],
+						"Duas divisões abaixo, o %s derrubou o %s na %s." % [killer.short_name, giant.short_name, String(ev["stage"]).to_lower()],
+						killer.id, -1, NewsEvent.IMP_NORMAL, "zebra")
 				if world.is_user_club(int(ev["club"])):
 					var by := world.club(int(ev.get("by", -1)))
 					post(world, CupManager.news_cat(String(ev["cup"]), "eliminado"), {"club": user.short_name, "cup": cup_name, "stage": String(ev["stage"]).to_lower(),

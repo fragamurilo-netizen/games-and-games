@@ -708,9 +708,11 @@ func _traits_card(p: Player) -> Control:
 func _comp_picker(c: VBoxContainer) -> void:
 	screen_subtitle = "Ligas e copas"
 	var cups := UIKit.card("Card", 4)
-	cups.add_child(UIKit.section("Copas"))
+	cups.add_child(UIKit.section("Copas internacionais"))
 	for cid in DatabaseManager.cups_cfg():
 		var id: String = cid
+		if DatabaseManager.cup_cfg(id).has("nation"):
+			continue # copas de um país ficam com as ligas dele
 		cups.add_child(_comp_row("cups", id, CupManager.cup_name(id)))
 	c.add_child(UIKit.card_panel(cups))
 	if _nation == "":
@@ -730,6 +732,15 @@ func _comp_picker(c: VBoxContainer) -> void:
 	for lid in DatabaseManager.leagues_of_nation(_nation):
 		var id: String = lid
 		leagues.add_child(_comp_row("leagues", id, String(DatabaseManager.league_cfg(id).get("name", id))))
+	var first_cup := true
+	for cid in DatabaseManager.cups_cfg():
+		var cfg2: Dictionary = DatabaseManager.cup_cfg(cid)
+		if String(cfg2.get("nation", "")) != _nation:
+			continue
+		if first_cup:
+			leagues.add_child(UIKit.section("Copas do país"))
+			first_cup = false
+		leagues.add_child(_comp_row("cups", String(cid), CupManager.cup_name(String(cid))))
 	c.add_child(UIKit.card_panel(leagues))
 	c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 

@@ -439,11 +439,15 @@ static func _trophy_rank(k: String) -> int:
 			return 0
 		"C:":
 			return 1
+		"D:":
+			return 7
 		"S:":
 			return 8
+		"U:":
+			return 9
 		"L:":
 			return 2 + int(DatabaseManager.league_cfg(k.substr(2)).get("tier", 1))
-	return 9
+	return 10
 
 
 func _actions(w: GameWorld, p: Player, own: bool) -> void:
@@ -458,7 +462,8 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 			refresh(), "up")
 		up.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		arow.add_child(up)
-		arow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
+		if AppSettings.career_edit:
+			arow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
 		f.add_child(arow)
 		return
 	if own and not p.loan.is_empty():
@@ -482,7 +487,8 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 				if r["ok"]:
 					GameManager.save_now()
 					UIManager.back()), "swap"))
-		trow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
+		if AppSettings.career_edit:
+			trow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
 		f.add_child(trow)
 		var row := UIKit.hbox(10)
 		var renew := UIKit.button("Renovar", "", func(): Negotiation.open(w, p, "renew", refresh_cb), "clock")

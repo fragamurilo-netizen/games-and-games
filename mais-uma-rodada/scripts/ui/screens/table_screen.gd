@@ -76,23 +76,36 @@ func _picker_row(w: GameWorld) -> Control:
 	var v := UIKit.vbox(8)
 	v.add_child(row)
 	v.add_child(UIKit.comp_stripe(_cup_id if _cup_id != "" else _league_id))
-	# Divisões do país (liga) ou abas (copa)
+	# Divisões e copas do país: a liga e a copa nacional ficam a um toque uma da outra.
+	var nation := ""
 	if _cup_id == "":
-		var nation: String = DatabaseManager.league_cfg(_league_id).get("nation", "")
+		nation = String(DatabaseManager.league_cfg(_league_id).get("nation", ""))
+	elif CupManager.is_domestic(_cup_id) or CupManager.is_super(_cup_id):
+		nation = String(CupManager.cfg(_cup_id).get("nation", ""))
+	if nation != "":
+		var gd := ButtonGroup.new()
 		var ids := DatabaseManager.leagues_of_nation(nation)
-		if ids.size() > 1:
-			var gd := ButtonGroup.new()
+		if ids.size() > 1 or _cup_id != "":
 			var drow := UIKit.hbox(8)
 			for lid in ids:
 				var id: String = lid
-				var chip := UIKit.chip(String(DatabaseManager.league_cfg(id).get("short", id)), id == _league_id, gd, func():
-					_league_id = id
-					_round = -1
-					refresh())
+				var chip := UIKit.chip(String(DatabaseManager.league_cfg(id).get("short", id)), _cup_id == "" and id == _league_id, gd, func():
+					_pick_league(id))
 				UIKit.shrink_button(chip)
 				drow.add_child(chip)
 			v.add_child(drow)
-	var tabs: Array = CUP_TABS if _cup_id != "" else LEAGUE_TABS
+		var crow := UIKit.flow(8)
+		for cid in CupManager.cups_of_country(nation):
+			var id: String = cid
+			if CupManager.is_state(id) or not w.season.cups.has(id):
+				continue
+			var chip := UIKit.chip(w.season.cups[id].short_name, id == _cup_id, gd, func(): _pick_cup(id))
+			crow.add_child(chip)
+		if crow.get_child_count() > 0:
+			v.add_child(crow)
+	var tabs: Array = LEAGUE_TABS
+	if _cup_id != "":
+		tabs = CUP_TABS.filter(func(t): return t[0] != "groups" or not w.season.cups[_cup_id].groups.is_empty())
 	var gt := ButtonGroup.new()
 	var trow := UIKit.hbox(8)
 	for t in tabs:
@@ -121,8 +134,8 @@ func _open_picker(w: GameWorld) -> void:
 	mine.add_child(UIKit.button(w.league_short(ul), "", func(): _pick_league(ul), "table"))
 	for cid in w.season.cups:
 		var id: String = cid
-		# Estaduais: só o do seu clube aqui; todos aparecem na seção "Estaduais do Brasil".
-		if CupManager.is_state(id) and not w.season.cups[id].has_club(w.user_club_id):
+		# Estaduais e copas de outros países ficam nas suas seções; aqui só as do seu clube.
+		if not CupManager.is_international(id) and not w.season.cups[id].has_club(w.user_club_id):
 			continue
 		mine.add_child(UIKit.button(w.season.cups[id].short_name, "", func(): _pick_cup(id), "trophy"))
 	mine.add_child(UIKit.button("Ranking de clubes", "", func(): _pick_rank(""), "star"))
@@ -173,6 +186,8 @@ func _pick_cup(id: String) -> void:
 	_cup_id = id
 	if not CUP_TABS.any(func(t): return t[0] == _tab):
 		_tab = "groups"
+	if _tab == "groups" and world().season.cups.has(id) and world().season.cups[id].groups.is_empty():
+		_tab = "ko"
 	refresh()
 
 

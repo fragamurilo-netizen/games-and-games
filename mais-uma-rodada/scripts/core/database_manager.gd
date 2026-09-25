@@ -9,6 +9,7 @@ const PATHS := {
 	"nations": "res://data/world/nations.json",
 	"leagues": "res://data/world/leagues.json",
 	"continental": "res://data/world/continental.json",
+	"domestic": "res://data/world/domestic.json",
 	"international": "res://data/world/international.json",
 	"history": "res://data/world/history.json",
 	"foreign_clubs": "res://data/world/foreign_clubs.json",
@@ -51,6 +52,7 @@ static func load_all() -> void:
 	_prepare_traits()
 	_prepare_leagues()
 	_prepare_clubs()
+	_prepare_cups()
 	_loaded = true
 	Overrides.apply_db()
 
@@ -181,6 +183,16 @@ static func league_at(code: String, tier: int) -> String:
 
 
 ## Copas continentais e Mundial: id -> configuração (continental.json).
+## Copas nacionais, da liga e supercopas (domestic.json) entram no mesmo dicionário das
+## continentais, depois delas: todo o resto do jogo enxerga uma lista só de copas.
+static func _prepare_cups() -> void:
+	var cups: Dictionary = get_data("continental").get("cups", {})
+	var dom: Dictionary = get_data("domestic").get("cups", {})
+	for id in dom:
+		if not cups.has(id):
+			cups[id] = dom[id]
+
+
 static func cups_cfg() -> Dictionary:
 	return get_data("continental")["cups"]
 

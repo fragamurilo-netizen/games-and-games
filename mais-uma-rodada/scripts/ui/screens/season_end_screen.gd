@@ -85,7 +85,8 @@ func refresh() -> void:
 	if ev != null:
 		c.add_child(ev)
 	for cu in _summary.get("cups", []):
-		c.add_child(_cup_card(w, cu))
+		if CupManager.relevant_to_user(w, String(cu["id"])) or w.is_user_club(int(cu.get("champion", -1))):
+			c.add_child(_cup_card(w, cu))
 	for rec in _summary.get("intl", []):
 		c.add_child(_intl_card(w, rec))
 	var nat := w.user_nation()
@@ -201,7 +202,7 @@ func _cup_card(w: GameWorld, cu: Dictionary) -> Control:
 		card.add_child(UIKit.label("Sem campeão.", "Muted"))
 		return UIKit.card_panel(card)
 	var row := UIKit.hbox(12)
-	row.add_child(TrophyView.make(("W:" if String(cu["id"]) == CupManager.CWC else "C:") + String(cu["id"]), 52, w))
+	row.add_child(TrophyView.make(CupManager.title_key(String(cu["id"])), 52, w))
 	row.add_child(UIKit.crest(champ, 48))
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL

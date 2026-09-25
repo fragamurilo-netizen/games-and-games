@@ -5,6 +5,9 @@ extends RefCounted
 ## volta com prorrogação e pênaltis, final única em campo neutro, premiação por fase e títulos.
 ## Também os estaduais brasileiros (kind = "state" no continental.json): grupos em turno único nas
 ## datas E1..E7, semifinal em jogo único na casa do melhor campanha e final em ida e volta.
+## E as copas de cada país (domestic.json): copas nacionais e da liga em mata-mata com todos os clubes
+## do país (fase preliminar para quem sobra na conta, os grandes entram direto) e as supercopas antes
+## da primeira rodada (campeão da liga × campeão da copa, campeões continentais).
 
 const ROUND_NAMES := {"r16": "Oitavas de final", "qf": "Quartas de final", "sf": "Semifinal", "f": "Final"}
 const KO_SLOTS := {"r16": ["C7", "C8"], "qf": ["C9", "C10"], "sf": ["C11", "C12"], "f": ["C13"]}
@@ -12,6 +15,9 @@ const CWC_SLOTS := {"qf": ["X1"], "sf": ["X2"], "f": ["X3"]}
 const STAGE_IMPORTANCE := {"r16": 0.62, "qf": 0.72, "sf": 0.85, "f": 1.0}
 const GROUP_LETTERS := "ABCDEFGH"
 const CWC := "CWC"
+const DOMESTIC_KINDS: Array[String] = ["national", "league_cup"]
+## Premiação-base das copas nacionais (multiplicada pelo prize_scale de cada copa).
+const DOMESTIC_PRIZE := {"pre": 60000, "early": 120000, "r16": 300000, "qf": 600000, "sf": 1100000, "f": 1800000, "champion": 3000000}
 
 
 static func cfg(id: String) -> Dictionary:
@@ -38,6 +44,78 @@ static func state_ids() -> Array:
 
 static func is_state(id: String) -> bool:
 	return String(cfg(id).get("kind", "")) == "state"
+
+
+## Copa nacional ou copa da liga de um país.
+static func is_domestic(id: String) -> bool:
+	return DOMESTIC_KINDS.has(String(cfg(id).get("kind", "")))
+
+
+static func is_super(id: String) -> bool:
+	return String(cfg(id).get("kind", "")) == "super"
+
+
+## Copas continentais e o Mundial (as que não pertencem a um país).
+static func is_international(id: String) -> bool:
+	return id == CWC or cfg(id).has("alloc")
+
+
+## Copas nacionais e da liga, na ordem dos dados.
+static func domestic_ids() -> Array:
+	var out: Array = []
+	for id in DatabaseManager.cups_cfg():
+		if is_domestic(id):
+			out.append(id)
+	return out
+
+
+static func super_ids() -> Array:
+	var out: Array = []
+	for id in DatabaseManager.cups_cfg():
+		if is_super(id):
+			out.append(id)
+	return out
+
+
+## Copas de um país (nacional, da liga, supercopa e estaduais), para listas e seletores.
+static func cups_of_country(nation: String) -> Array:
+	var out: Array = []
+	for id in DatabaseManager.cups_cfg():
+		if String(cfg(id).get("nation", "")) == nation:
+			out.append(id)
+	return out
+
+
+## Copa que interessa ao usuário em listas e resumos: internacionais, as do país dele e as que o
+## clube dele disputou. As copas nacionais do mundo inteiro continuam na tela de Tabelas.
+static func relevant_to_user(world: GameWorld, id: String) -> bool:
+	if is_international(id):
+		return true
+	var nation := String(cfg(id).get("nation", ""))
+	if nation == "" or nation == world.user_nation():
+		return true
+	if world.season != null and world.season.cups.has(id) and world.season.cups[id].has_club(world.user_club_id):
+		return true
+	return false
+
+
+## Chave de título da copa no clube/jogador: "W:" Mundial, "C:" continental, "S:" estadual,
+## "D:" copa nacional ou da liga, "U:" supercopa.
+static func title_key(id: String) -> String:
+	if id == CWC:
+		return "W:" + id
+	if is_state(id):
+		return "S:" + id
+	if is_domestic(id):
+		return "D:" + id
+	if is_super(id):
+		return "U:" + id
+	return "C:" + id
+
+
+## Prefixos de título que são copas (qualquer tipo).
+static func is_cup_title(k: String) -> bool:
+	return ["W:", "C:", "S:", "D:", "U:"].has(k.substr(0, 2))
 
 
 static var _uf_cache: Dictionary = {}
@@ -142,11 +220,15 @@ static func ko_plan(id: String) -> Array:
 
 
 static func _round_key(cup: Cup, r: int) -> String:
+	if not cup.plan.is_empty():
+		return String(cup.plan[clampi(r, 0, cup.plan.size() - 1)])
 	var plan := ko_plan(cup.id)
 	return plan[clampi(r, 0, plan.size() - 1)]
 
 
 static func _round_slots(cup: Cup, r: int) -> Array:
+	if not cup.plan_slots.is_empty():
+		return Array(cup.plan_slots[clampi(r, 0, cup.plan_slots.size() - 1)])
 	var key := _round_key(cup, r)
 	if cfg(cup.id).has("ko_slots"):
 		return Array(cfg(cup.id)["ko_slots"][key])
@@ -165,7 +247,12 @@ static func stage_importance(world: GameWorld, f: Fixture) -> float:
 	var cup: Cup = world.season.cups.get(f.comp, null) if world.season != null else null
 	if cup == null:
 		return 0.6
-	var imp: float = STAGE_IMPORTANCE.get(_round_key(cup, f.round), 0.6) * float(cfg(cup.id).get("importance", 1.0))
+	var imp_def := 1.0
+	if is_super(cup.id):
+		imp_def = 0.55
+	elif is_domestic(cup.id):
+		imp_def = 0.85 if String(cfg(cup.id).get("kind", "")) == "national" else 0.65
+	var imp: float = STAGE_IMPORTANCE.get(_round_key(cup, f.round), 0.6) * float(cfg(cup.id).get("importance", imp_def))
 	if f.leg == 1:
 		imp += 0.05
 	return clampf(imp, 0.0, 1.0)
@@ -247,7 +334,21 @@ static func compute_qualified(world: GameWorld) -> Dictionary:
 		if league != null:
 			ranked[nation] = CompetitionManager.sorted_ids(league)
 	var out := _fill_by_level(world, ranked)
-	# Vagas de campeão: [clube, copa de destino]
+	# Campeões das copas nacionais: vaga na copa indicada se ainda não têm uma igual ou maior.
+	for id in domestic_ids():
+		var dest := String(cfg(id).get("qualifies", ""))
+		var dc: Cup = world.season.cups.get(id, null)
+		if dest == "" or dc == null or dc.champion < 0 or not out.has(dest):
+			continue
+		if nation_spots(dest, String(cfg(id).get("nation", ""))) <= 0:
+			continue
+		var already := false
+		for cid in out:
+			if out[cid].has(dc.champion) and cup_level(cid) <= cup_level(dest) and cfg(cid).get("confed", "") == cfg(dest).get("confed", ""):
+				already = true
+		if not already:
+			_place_holder(world, out, dc.champion, dest)
+	# Vagas de campeão continental: [clube, copa de destino]
 	var holders: Array = []
 	for id in continental_ids():
 		var cup: Cup = world.season.cups.get(id, null)
@@ -374,6 +475,211 @@ static func setup_season(world: GameWorld, s: SeasonState) -> void:
 		s.cups[id] = cup
 	world.stats.erase("qualified")
 	_setup_state_cups(world, s)
+	_setup_domestic_cups(world, s)
+	_setup_super_cups(world, s)
+
+
+# ---------------------------------------------------------------------------
+# Copas nacionais, copas da liga e supercopas
+# ---------------------------------------------------------------------------
+
+## Fases de um mata-mata com n clubes: ["pre"?, ..., "r16", "qf", "sf", "f"]. "pre" é a fase
+## preliminar que acerta a conta para uma potência de 2.
+static func domestic_plan(n: int) -> Array:
+	var p := 1
+	while p * 2 <= n:
+		p *= 2
+	var keys: Array = []
+	var size := p
+	while size >= 2:
+		keys.append(_size_key(size))
+		size /= 2
+	if n > p:
+		keys.push_front("pre")
+	return keys
+
+
+static func _size_key(size: int) -> String:
+	match size:
+		2:
+			return "f"
+		4:
+			return "sf"
+		8:
+			return "qf"
+		16:
+			return "r16"
+	return "r%d" % size
+
+
+## Nomes das fases: as quatro últimas com nome próprio, as demais "1ª fase", "2ª fase"...
+static func domestic_round_names(plan: Array) -> Array:
+	var out: Array = []
+	for i in plan.size():
+		var k := String(plan[i])
+		out.append(ROUND_NAMES[k] if ROUND_NAMES.has(k) else "%dª fase" % (i + 1))
+	return out
+
+
+## Códigos de data de um grupo ("N" → N1..N12, "E" → E1..E10), na ordem do calendário.
+static func _pool_codes(s: SeasonState, pool: String) -> Array:
+	var out: Array = []
+	for e in s.calendar:
+		var t := String(e["t"])
+		if t.length() > 1 and t.begins_with(pool) and t.substr(1).is_valid_int():
+			out.append(t)
+	return out
+
+
+## Datas de cada fase, de trás para a frente (a final fica na última data do grupo). Se faltar data,
+## as fases de ida e volta mais antigas viram jogo único; se ainda faltar, devolve [].
+static func _assign_slots(plan: Array, two_legs: Array, codes: Array) -> Array:
+	var legs: Array = []
+	var total := 0
+	for k in plan:
+		var n := 2 if two_legs.has(k) else 1
+		legs.append(n)
+		total += n
+	var i := 0
+	while total > codes.size() and i < legs.size():
+		if int(legs[i]) == 2:
+			legs[i] = 1
+			total -= 1
+		i += 1
+	if total > codes.size():
+		return []
+	var out: Array = []
+	out.resize(plan.size())
+	var ci := codes.size() - 1
+	for r in range(plan.size() - 1, -1, -1):
+		var arr: Array = []
+		for _l in int(legs[r]):
+			arr.push_front(codes[ci])
+			ci -= 1
+		out[r] = arr
+	return out
+
+
+## Força para o chaveamento: divisão (menor = mais forte) e reputação.
+static func _strength_key(world: GameWorld, cid: int) -> float:
+	var c := world.club(cid)
+	return -float(c.tier) * 100.0 + c.reputation
+
+
+static func _setup_domestic_cups(world: GameWorld, s: SeasonState) -> void:
+	for id in domestic_ids():
+		var c := cfg(id)
+		var nation := String(c.get("nation", ""))
+		var list: Array = []
+		for lid in DatabaseManager.leagues_of_nation(nation):
+			var l: League = s.leagues.get(lid, null)
+			if l != null:
+				list.append_array(l.club_ids)
+		if list.size() < 4:
+			continue
+		list.sort_custom(func(a, b): return _strength_key(world, a) > _strength_key(world, b) or (_strength_key(world, a) == _strength_key(world, b) and a < b))
+		var plan := domestic_plan(list.size())
+		var ps := _assign_slots(plan, Array(c.get("two_legs", [])), _pool_codes(s, String(c.get("pool", "N"))))
+		if ps.is_empty():
+			continue
+		var cup := Cup.new()
+		cup.id = id
+		cup.name = cup_name(id)
+		cup.short_name = cup_short(id)
+		cup.club_ids = list
+		cup.plan = plan
+		cup.plan_slots = ps
+		cup.round_names = domestic_round_names(plan)
+		var first: Array = list
+		if String(plan[0]) == "pre":
+			var p := 1 << (plan.size() - 1)
+			var n_pre := 2 * (list.size() - p)
+			cup.byes = list.slice(0, list.size() - n_pre)
+			first = list.slice(list.size() - n_pre)
+		s.cups[id] = cup
+		_create_ko_round(world, s, cup, 0, _domestic_pairs(world, cup, first, 0))
+
+
+## Sorteio livre de uma fase da copa nacional. Em ida e volta o mais forte decide em casa; em jogo
+## único vale a ordem do sorteio, ou o mando fica com o mais fraco (small_home: Copa del Rey, DFB-Pokal).
+static func _domestic_pairs(world: GameWorld, cup: Cup, ids: Array, r: int) -> Array:
+	var pool: Array = ids.duplicate()
+	RngUtil.shuffle(world.rng, pool)
+	var two := cup.plan_slots.size() > r and Array(cup.plan_slots[r]).size() > 1
+	var small_home := bool(cfg(cup.id).get("small_home", false))
+	var pairs: Array = []
+	for i in range(0, pool.size() - 1, 2):
+		var a: int = pool[i]
+		var b: int = pool[i + 1]
+		if two or small_home:
+			# `a` manda o primeiro jogo: o mais fraco
+			if _strength_key(world, a) > _strength_key(world, b):
+				var t := a
+				a = b
+				b = t
+		pairs.append([a, b])
+	return pairs
+
+
+## Campeão (ou vice, "L2:") de uma competição na temporada anterior, pelo histórico. -1 se não houver.
+static func last_winner(world: GameWorld, src: String) -> int:
+	var parts := src.split(":")
+	if parts.size() < 2:
+		return -1
+	var kind := parts[0]
+	var comp := parts[1]
+	for i in range(world.history.size() - 1, -1, -1):
+		var h: Dictionary = world.history[i]
+		if int(h.get("y", 0)) < world.year - 2:
+			break
+		if int(h.get("y", 0)) >= world.year:
+			continue
+		var e: Dictionary = h.get("leagues" if kind.begins_with("L") else "cups", {}).get(comp, {})
+		if e.is_empty():
+			continue
+		var cid := int(e.get("runner_up" if kind == "L2" else "champion", -1))
+		if cid >= 0 and world.club(cid) != null:
+			return cid
+		if kind == "L2":
+			return _fallback_runner_up(world, comp, int(e.get("champion", -1)))
+	return -1
+
+
+## Sem vice registrado (passado real): o clube de maior reputação da liga depois do campeão.
+static func _fallback_runner_up(world: GameWorld, league_id: String, champ: int) -> int:
+	var best := -1
+	for c: Club in world.clubs_in_league(league_id):
+		if c.id != champ and (best < 0 or c.reputation > world.club(best).reputation):
+			best = c.id
+	return best
+
+
+static func _setup_super_cups(world: GameWorld, s: SeasonState) -> void:
+	for id in super_ids():
+		var c := cfg(id)
+		var src: Array = c.get("from", [])
+		var code := String(c.get("slot", "U1"))
+		if src.size() < 2 or s.slot_of(code) < 0:
+			continue
+		var a := last_winner(world, String(src[0]))
+		var b := last_winner(world, String(src[1]))
+		if a >= 0 and (b < 0 or b == a) and String(src[0]).begins_with("L:"):
+			# Campeão da liga e da copa é o mesmo clube: entra o vice da liga.
+			b = last_winner(world, "L2:" + String(src[0]).substr(2))
+			if b < 0 or b == a:
+				b = _fallback_runner_up(world, String(src[0]).substr(2), a)
+		if a < 0 or b < 0 or a == b:
+			continue
+		var cup := Cup.new()
+		cup.id = id
+		cup.name = cup_name(id)
+		cup.short_name = cup_short(id)
+		cup.club_ids = [a, b]
+		cup.plan = ["f"]
+		cup.plan_slots = [[code]]
+		cup.round_names = ["Final"]
+		s.cups[id] = cup
+		_create_ko_round(world, s, cup, 0, [[a, b]]) # sem campo neutro, o campeão da liga manda o jogo
 
 
 ## Estaduais: todos os clubes brasileiros do(s) estado(s), divididos em grupos equilibrados por reputação.
@@ -502,13 +808,36 @@ static func _create_ko_round(world: GameWorld, s: SeasonState, cup: Cup, r: int,
 			f.round = r
 			f.leg = leg
 			f.slot = s.slot_of(slots[leg])
-			f.neutral = slots.size() == 1 and bool(cfg(cup.id).get("neutral_single", true))
+			f.neutral = _is_neutral(cup, key, slots.size())
 			cup.fixtures.append(f)
 		# Premiação por alcançar a fase (a fase de grupos paga no primeiro jogo).
-		var prize := int(cfg(cup.id).get("prize", {}).get(key, 0))
+		var prize := prize_of(cup.id, key)
 		if prize > 0:
 			for cid in [a, b]:
 				world.club(cid).add_ledger("premiacao", prize)
+
+
+static func _is_neutral(cup: Cup, key: String, legs: int) -> bool:
+	var c := cfg(cup.id)
+	if legs != 1:
+		return false
+	if is_domestic(cup.id) or is_super(cup.id):
+		return bool(c.get("neutral_all", false)) or (key == "f" and bool(c.get("neutral_final", true)))
+	return bool(c.get("neutral_single", true))
+
+
+## Premiação de uma fase (ou "champion"). Copas nacionais sem tabela própria usam a base × prize_scale.
+static func prize_of(id: String, key: String) -> int:
+	var c := cfg(id)
+	if c.has("prize"):
+		return int(c["prize"].get(key, 0))
+	if not (is_domestic(id) or is_super(id)):
+		return 0
+	var scale := float(c.get("prize_scale", 1.0))
+	if is_super(id):
+		return int(DOMESTIC_PRIZE["champion"] * scale) if key == "champion" else int(DOMESTIC_PRIZE["qf"] * scale)
+	var base: int = DOMESTIC_PRIZE.get(key, DOMESTIC_PRIZE["early"])
+	return int(base * scale)
 
 
 # ---------------------------------------------------------------------------
@@ -603,12 +932,17 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 					var winners: Array = []
 					for t in round_ties:
 						winners.append(int(t["w"]))
-					_create_ko_round(world, s, cup, last_r + 1, _next_pairs(world, cup, winners))
+					if not cup.plan.is_empty():
+						if last_r == 0:
+							winners.append_array(cup.byes) # quem entrou direto estreia na 2ª fase
+						_create_ko_round(world, s, cup, last_r + 1, _domestic_pairs(world, cup, winners, last_r + 1))
+					else:
+						_create_ko_round(world, s, cup, last_r + 1, _next_pairs(world, cup, winners))
 	# Mundial: quando todas as copas continentais acabaram.
 	if not s.cups.has(CWC) and s.slot_type(slot) == "C13":
 		var all_done := true
 		for id in s.cups:
-			if not s.cups[id].finished and not is_state(id):
+			if not s.cups[id].finished and is_international(id):
 				all_done = false
 		if all_done:
 			var cwc := _setup_club_world_cup(world, s)
@@ -722,14 +1056,22 @@ static func _crown(world: GameWorld, cup: Cup, final_tie: Dictionary) -> void:
 	cup.runner_up = int(final_tie["a"]) if cup.champion == int(final_tie["b"]) else int(final_tie["b"])
 	cup.finished = true
 	var champ := world.club(cup.champion)
-	champ.add_title(("W:" if cup.id == CWC else ("S:" if is_state(cup.id) else "C:")) + cup.id)
-	champ.add_ledger("premiacao", int(cfg(cup.id).get("prize", {}).get("champion", 0)))
-	champ.reputation = clampf(champ.reputation + float(cfg(cup.id).get("rep_bonus", 4.0 if cup.id == CWC else 3.0)), 5.0, 99.0)
-	champ.fan_mood = clampf(champ.fan_mood + float(cfg(cup.id).get("fan_bonus", 15.0)), 0.0, 100.0)
+	champ.add_title(title_key(cup.id))
+	champ.add_ledger("premiacao", prize_of(cup.id, "champion"))
+	var rep_def := 4.0 if cup.id == CWC else 3.0
+	var fan_def := 15.0
+	if is_super(cup.id):
+		rep_def = 0.5
+		fan_def = 5.0
+	elif is_domestic(cup.id):
+		rep_def = 1.5 if String(cfg(cup.id).get("kind", "")) == "national" else 0.8
+		fan_def = 10.0 if String(cfg(cup.id).get("kind", "")) == "national" else 6.0
+	champ.reputation = clampf(champ.reputation + float(cfg(cup.id).get("rep_bonus", rep_def)), 5.0, 99.0)
+	champ.fan_mood = clampf(champ.fan_mood + float(cfg(cup.id).get("fan_bonus", fan_def)), 0.0, 100.0)
 	for pid in champ.player_ids:
 		var p := world.player(pid)
 		if p != null and p.cup_stats.has(cup.id):
-			p.win_title(world.year, ("W:" if cup.id == CWC else ("S:" if is_state(cup.id) else "C:")) + cup.id, champ.id)
+			p.win_title(world.year, title_key(cup.id), champ.id)
 
 
 ## Mundial de Clubes: campeões e vices da Europa e América do Sul, campeões da CONCACAF, África e Ásia

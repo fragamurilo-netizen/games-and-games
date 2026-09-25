@@ -5,7 +5,8 @@ extends Control
 ## competição (fixo entre saves), o metal do nível (ouro na elite, prata na segunda divisão,
 ## bronze abaixo) e a fita da base leva as cores da bandeira do país (ou da confederação).
 ## `key` usa o formato dos títulos do clube: "L:ENG1" (liga), "C:UCL" (continental),
-## "W:CWC" (Mundial), "P:ENG2" (acesso), "Y:ENG1" (sub-20).
+## "W:CWC" (Mundial), "S:SPE" (estadual), "D:FAC" (copa nacional ou da liga), "U:CSH" (supercopa),
+## "P:ENG2" (acesso), "Y:ENG1" (sub-20).
 
 const STYLE_CUP := 0 # taça clássica de duas alças
 const STYLE_CHALICE := 1 # cálice alto com tampa
@@ -52,7 +53,7 @@ static func trophy_name(k: String, w: GameWorld = null) -> String:
 	var kind := k.substr(0, 2)
 	var id := k.substr(2)
 	match kind:
-		"W:", "C:":
+		"W:", "C:", "S:", "D:", "U:":
 			return CupManager.cup_name(id)
 		"L:":
 			var n: String = w.league_name(id) if w != null else String(DatabaseManager.league_cfg(id).get("name", id))
@@ -79,6 +80,20 @@ func _resolve() -> void:
 			_style = STYLE_EARS if h % 2 == 0 else STYLE_CHALICE
 			_metal = GOLD
 			_ribbon = _colors(CONFED_COLORS.get(confed, ["#1C2A4A", "#E2B33C"]))
+		"S:", "D:", "U:":
+			var cc := CupManager.cfg(id)
+			var kind_c := String(cc.get("kind", ""))
+			if kind_c == "super":
+				_style = STYLE_PLATE
+				_metal = SILVER
+			elif kind_c == "league_cup":
+				_style = STYLE_CHALICE if h % 2 == 0 else STYLE_CUP
+				_metal = SILVER
+			else:
+				_style = STYLE_CUP if kind_c == "national" else [STYLE_CUP, STYLE_CHALICE, STYLE_STAR][h % 3]
+				_metal = GOLD if kind_c == "national" else SILVER
+			var cols: Array = cc.get("colors", [])
+			_ribbon = _colors(cols) if cols.size() >= 2 else _nation_colors(String(cc.get("nation", "")))
 		"P:", "Y:":
 			_style = STYLE_PLAQUE
 			_metal = SILVER if kind == "P:" else BRONZE
@@ -322,6 +337,12 @@ static func _rank(k: String) -> int:
 			return 1
 		"L:":
 			return 2 + int(DatabaseManager.league_cfg(k.substr(2)).get("tier", 1))
+		"D:":
+			return 8 if String(CupManager.cfg(k.substr(2)).get("kind", "")) == "national" else 10
+		"S:":
+			return 12
+		"U:":
+			return 14
 		"P:":
 			return 20
 	return 30
@@ -330,7 +351,7 @@ static func _rank(k: String) -> int:
 static func _short(w: GameWorld, k: String) -> String:
 	var id := k.substr(2)
 	match k.substr(0, 2):
-		"W:", "C:":
+		"W:", "C:", "S:", "D:", "U:":
 			return CupManager.cup_short(id)
 		"L:":
 			return w.league_short(id) if w != null else id
