@@ -255,6 +255,8 @@ func _awards_card(w: GameWorld) -> Control:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label("Bola de Ouro", "Caps"))
 		col.add_child(UIKit.label("%s (%s) · %d gols" % [ballon["name"], ballon["club"], int(ballon.get("goals", 0))], "H3", true))
+		if ballon.has("votes"):
+			col.add_child(UIKit.label("%d pontos · %d de %d votos em 1º lugar" % [int(ballon["pts"]), int(ballon.get("first", 0)), int(ballon["votes"])], "Small"))
 		row.add_child(col)
 		row.add_child(UIKit.flag(String(ballon.get("nat", "")), 40))
 		card.add_child(row)
@@ -265,10 +267,14 @@ func _awards_card(w: GameWorld) -> Control:
 			podium.append("%dº %s (%s) %d pts" % [i + 1, rank[i]["name"], rank[i]["club"], int(rank[i]["pts"])])
 		card.add_child(UIKit.label(" · ".join(podium), "Small", true))
 	var rows: Array = []
-	for wk in ["world_young", "boot"]:
+	for wk in ["world_young", "gk_world", "boot"]:
 		var wd: Dictionary = _summary.get(wk, {})
 		if not wd.is_empty():
-			rows.append([wk, wd, "%d gols" % int(wd["goals"]) if wk == "boot" else ""])
+			rows.append([wk, wd, "%d gols" % int(wd["goals"]) if wk == "boot" else ("%d pts" % int(wd["pts"]) if wd.has("pts") else "")])
+	for ck in [["world_coach", "coach_world"], ["coach", "coach"]]:
+		var cd: Dictionary = _summary.get(ck[0], {})
+		if not cd.is_empty():
+			rows.append([ck[1], {"id": -1, "name": cd["n"], "club": cd["cn"], "user": cd.get("user", false)}, String(cd.get("v", ""))])
 	for k in AwardManager.LEAGUE_KEYS:
 		if aw.has(k):
 			rows.append([k, aw[k], String(aw[k].get("v", ""))])
@@ -283,7 +289,7 @@ func _awards_card(w: GameWorld) -> Control:
 		row.add_child(kl)
 		var nl := UIKit.label("%s (%s)" % [a["name"], a["club"]], "", true)
 		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		if w.player(int(a["id"])) != null and w.is_user_club(w.player(int(a["id"])).club_id):
+		if a.get("user", false) or (w.player(int(a["id"])) != null and w.is_user_club(w.player(int(a["id"])).club_id)):
 			nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
 		row.add_child(nl)
 		row.add_child(UIKit.label(String(r[2]), "Small"))

@@ -35,6 +35,12 @@ static func build_items(w: GameWorld, summary: Dictionary) -> Array:
 	var mvp: Dictionary = aw.get("mvp", {})
 	if not mvp.is_empty():
 		out.append({"kind": "mvp", "title": "CRAQUE DO CAMPEONATO", "sub": league, "id": mvp.get("id", -1), "name": mvp.get("name", ""), "club": mvp.get("club", ""), "v": mvp.get("v", "")})
+	var co: Dictionary = summary.get("coach", {})
+	if not co.is_empty():
+		out.append({"kind": "coach", "title": "TREINADOR DA TEMPORADA", "sub": league, "id": -1, "name": co.get("n", ""), "club": co.get("cn", ""), "v": co.get("v", ""), "club_id": int(co.get("c", -1))})
+	var gk: Dictionary = summary.get("gk_world", {})
+	if not gk.is_empty():
+		out.append({"kind": "gk", "title": "MELHOR GOLEIRO DO MUNDO", "sub": "Votação de jornalistas", "id": gk.get("id", -1), "name": gk.get("name", ""), "club": gk.get("club", ""), "v": "%d pontos" % int(gk.get("pts", 0))})
 	var wy: Dictionary = summary.get("world_young", {})
 	if not wy.is_empty():
 		out.append({"kind": "young", "title": "REVELAÇÃO MUNDIAL", "sub": "Melhor jogador de até 21 anos", "id": wy.get("id", -1), "name": wy.get("name", ""), "club": wy.get("club", ""), "v": ""})
@@ -43,7 +49,7 @@ static func build_items(w: GameWorld, summary: Dictionary) -> Array:
 		out.append({"kind": "boot", "title": "CHUTEIRA DE OURO", "sub": "Maior artilheiro do mundo", "id": bt.get("id", -1), "name": bt.get("name", ""), "club": bt.get("club", ""), "v": "%d gols" % int(bt.get("goals", 0))})
 	var bo: Dictionary = summary.get("ballon", {})
 	if not bo.is_empty():
-		out.append({"kind": "ballon", "title": "BOLA DE OURO", "sub": "Melhor jogador do mundo", "id": bo.get("id", -1), "name": bo.get("name", ""), "club": bo.get("club", ""), "v": "%d gols na temporada" % int(bo.get("goals", 0))})
+		out.append({"kind": "ballon", "title": "BOLA DE OURO", "sub": "Melhor jogador do mundo", "id": bo.get("id", -1), "name": bo.get("name", ""), "club": bo.get("club", ""), "v": "%d gols · %d pontos na votação" % [int(bo.get("goals", 0)), int(bo.get("pts", 0))]})
 	return out
 
 
@@ -83,6 +89,10 @@ func _show(i: int) -> void:
 		if club != null:
 			_crest = UIKit.crest(club, 70)
 			add_child(_crest)
+	elif world.club(int(it.get("club_id", -1))) != null:
+		# Treinador: o escudo do clube no lugar do rosto.
+		_crest = UIKit.crest(world.club(int(it["club_id"])), 70)
+		add_child(_crest)
 	_rng.seed = hash([it.get("id", -1), _i])
 	_confetti.clear()
 	AudioManager.play("whistle", -10.0)
@@ -147,7 +157,11 @@ func _layout_nodes() -> void:
 		_portrait.scale = Vector2.ONE * (s / 220.0)
 		_portrait.position = Vector2(size.x * 0.5 - s * 0.5, size.y * 0.5 + 10.0)
 		_portrait.modulate.a = appear
-	if _crest != null:
+	if _crest != null and _portrait == null:
+		_crest.scale = Vector2.ONE * 2.2
+		_crest.position = Vector2(size.x * 0.5 - 77.0, size.y * 0.5 + 40.0)
+		_crest.modulate.a = appear
+	elif _crest != null:
 		_crest.position = Vector2(size.x * 0.5 + 60.0, size.y * 0.5 + 170.0)
 		_crest.modulate.a = appear
 

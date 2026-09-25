@@ -207,6 +207,7 @@ static func _top_scorer_name(world: GameWorld, f: Fixture, club_id: int) -> Stri
 static func on_transfer(world: GameWorld, t: Transfer) -> void:
 	if not world.has_user():
 		return
+	PressRoom.on_transfer(world, t)
 	var p := world.player(t.player_id)
 	if p == null:
 		return
@@ -283,3 +284,4 @@ static func on_window(world: GameWorld, opening: bool) -> void:
 		post(world, "janela_abre", {"until": world.window_end_day() + 1}, -1, -1, NewsEvent.IMP_HIGH)
 	else:
 		post(world, "janela_fecha", {}, -1, -1, NewsEvent.IMP_NORMAL)
+		PressRoom.on_window_close(world)

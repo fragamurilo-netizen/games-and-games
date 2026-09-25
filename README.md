@@ -39,6 +39,16 @@ vem da própria simulação.
 - **Prêmios**: craque, artilheiro, garçom, revelação e melhor de cada setor em todas as ligas, seleção do
   campeonato, craque de cada copa, Bola de Ouro com votação dos 10 mais, revelação mundial, Chuteira de Ouro
   e craque do clube. Seleção da rodada e seleção do mês (com craque do mês) na liga do usuário.
+- **Premiações votadas**: os indicados saem na reta final (30 à Bola de Ouro, 5 finalistas a craque da liga, 3 a
+  treinador) e o vencedor sai de um júri. Na Bola de Ouro, um jornalista de cada país ranqueia 10 nomes
+  (15-12-10-8-7-5-4-3-2-1), puxando um pouco para o próprio país; títulos do clube e da seleção pesam, e a votação
+  só fecha depois do torneio de seleções do verão. O craque e o treinador da liga são votados pelos técnicos, que
+  não podem escolher o próprio elenco. Novos prêmios: treinador da temporada (você pode ganhar), treinador do ano,
+  Luva de Ouro, melhor goleiro do mundo e seleção do ano.
+- **Imprensa com memória**: os setoristas cravam palpites na pré-temporada e cobram no fim; termômetro do cargo e
+  bolsa de apostas de quem cai primeiro; rumores de mercado com fonte (veículo sério costuma acertar, o
+  sensacionalista inventa) e placar de acertos de cada um; coletiva na zona mista depois de jogos marcantes; frases
+  como "somos candidatos" voltam para cobrar semanas depois; jogadores dão entrevista para elogiar ou desabafar.
 - **Troféus**: cada liga e copa tem um troféu desenhado (formato próprio, metal pela divisão, fita nas cores do
   país) e o clube ganha uma sala de troféus.
 - **Temporadas anteriores**: tabela final, artilharia, assistências, notas, prêmios, Bola de Ouro, seleções do

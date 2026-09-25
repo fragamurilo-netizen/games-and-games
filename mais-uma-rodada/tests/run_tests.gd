@@ -47,6 +47,7 @@ func _initialize() -> void:
 	_run("seleções: eliminatórias, torneios e ranking", _test_national_teams)
 	_run("técnicos, comissão, presidente e relações", _test_people)
 	_run("conversas e coletiva de imprensa", _test_talks)
+	_run("imprensa: palpites, termômetro, rumores e cobrança", _test_press_room)
 	_run("demissão no meio da temporada e troca de técnicos", _test_mid_season_firing)
 	_run("mods e jogadores personalizados", _test_mods)
 	_run("loja: temporada de demonstração e Carreira Completa", _test_store)
@@ -583,12 +584,24 @@ func _test_end_season() -> void:
 	for k in ["mvp", "scorer", "assist", "young", "gk", "def", "mid", "att"]:
 		check(aw.has(k), "prêmio %s ausente na liga do usuário" % k)
 	check((summary["team"] as Array).size() == 11, "seleção do campeonato incompleta")
-	check((summary["ballon_rank"] as Array).size() == 10 and int(summary["ballon_rank"][0]["pts"]) == 1000, "votação da Bola de Ouro inválida")
+	var bo: Array = summary["ballon_rank"]
+	check(bo.size() == 10 and int(bo[0]["pts"]) >= int(bo[1]["pts"]) and int(bo[0]["votes"]) == AwardVoting.jury_nations().size(), "votação da Bola de Ouro inválida")
+	check(int(bo[0]["pts"]) <= int(bo[0]["votes"]) * 15 and int(bo[0]["first"]) > 0, "pontos da Bola de Ouro fora da escala")
+	check(int(Dictionary(w.stats.get("aw_nom", {})).get("y", 0)) == year and Array(w.stats["aw_nom"]["bo"]).size() == AwardVoting.BALLON_NOMINEES, "indicados não anunciados na reta final")
+	check(not Dictionary(summary["coach"]).is_empty() and not Dictionary(summary["gk_world"]).is_empty(), "treinador da temporada / melhor goleiro ausentes")
+	check(Array(summary["world_xi"]).size() == 11, "seleção do ano incompleta")
+	check(String(aw["mvp"].get("v", "")).find("votos") >= 0 and Array(aw["mvp"].get("fin", [])).size() >= 2, "craque sem votação dos técnicos")
 	check(not Dictionary(summary["boot"]).is_empty() and not Dictionary(summary["world_young"]).is_empty(), "Chuteira de Ouro / revelação mundial ausentes")
 	var hist: Dictionary = w.history[w.history.size() - 1]
 	var arch: Dictionary = hist.get("arch", {})
 	check(arch.has("BRA1") and (arch["BRA1"]["tb"] as Array).size() == 20 and (arch["BRA1"]["sc"] as Array).size() == 10, "arquivo da temporada incompleto")
 	check(not (hist.get("sq", []) as Array).is_empty() and not (hist.get("months", []) as Array).is_empty(), "elenco/meses não arquivados")
+	# Registro dos prêmios para a enciclopédia
+	var bw := AwardVoting.winners(w, "ballon")
+	check(bw.size() >= 1 and int(bw.back()["y"]) == year and int(bw.back()["id"]) == int(bo[0]["id"]), "Bola de Ouro fora do registro")
+	check(AwardVoting.records(w, {"k": "coach", "y": year}).size() >= 20, "treinadores da temporada fora do registro")
+	check(AwardVoting.records(w, {"id": int(aw["mvp"]["id"]), "k": "mvp", "pos": 1}).size() >= 1, "consulta por jogador falhou")
+	check(AwardVoting.records(w, {"k": "ballon", "y": year}).size() == 10, "ranking da Bola de Ouro fora do registro")
 	check(w.stats.get("totw", {}).is_empty(), "seleção da rodada não foi limpa na virada")
 	var mvp := w.player(int(aw["mvp"]["id"]))
 	check(mvp == null or mvp.awards_in(year).has("mvp"), "craque sem o prêmio no currículo")
@@ -1938,6 +1951,68 @@ func _test_people() -> void:
 	People.after_matchday(w, [])
 	Talks.start(w, "press")
 	check(w.rng.state == st, "People/Talks consumiram o sorteio do mundo")
+
+
+func _test_press_room() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	w.season.turn = 10
+	People.ensure(w)
+	var js := People.journalists(w)
+	var pred := PressRoom.ensure_predictions(w)
+	check(Array(pred.get("list", [])).size() == js.size(), "palpites incompletos")
+	var cons := PressRoom.consensus(w)
+	check(cons >= 1 and cons <= 20, "consenso fora da tabela (%d)" % cons)
+	var h := PressRoom.heat(w)
+	check(h >= 0.0 and h <= 100.0, "termômetro fora da escala")
+	var race := PressRoom.sack_race(w, 3)
+	check(race.size() == 3 and float(race[0][2]) <= float(race[2][2]), "bolsa de apostas inválida")
+	# Rumores e placar de acertos
+	var r := People.rng(w, 1)
+	var made := 0
+	for i in 40:
+		if not PressRoom.make_rumor(w, r).is_empty():
+			made += 1
+	check(made >= 5, "poucos rumores (%d)" % made)
+	var x: Dictionary = People.data(w)["press"]["rum"][0]
+	var j := People.journalist(w, int(x["j"]))
+	var acc0 := PressRoom.accuracy(w, j)
+	var t := Transfer.new()
+	t.player_id = int(x["p"])
+	t.to_id = int(x["to"])
+	t.from_id = int(x["from"])
+	PressRoom.on_transfer(w, t)
+	check(String(x["st"]) == "hit" and PressRoom.accuracy(w, j) > acc0, "rumor confirmado não contou")
+	PressRoom.on_window_close(w)
+	w.season.turn += 3
+	PressRoom.on_window_close(w)
+	check(Array(People.data(w)["press"]["rum"]).filter(func(q): return String(q["st"]) == "open").is_empty(), "rumores abertos depois da janela")
+	# Coletiva depois de goleada sofrida, com frase cobrada depois
+	var opp: Club = w.clubs_in_league(c.league_id)[0] if w.clubs_in_league(c.league_id)[0].id != c.id else w.clubs_in_league(c.league_id)[1]
+	People.data(w)["press"]["match"] = {"t": w.current_turn(), "res": "D", "gd": -4, "score": "0 x 4", "opp": opp.id, "derby": false,
+		"hero": -1, "hr": 0.0, "red": c.player_ids[0], "asked": false}
+	var conv := Talks.start(w, "press")
+	check(bool(conv["d"].get("post", false)), "coletiva pós-jogo não reconhecida")
+	var qtext := String(conv["lines"].back()[1])
+	check(qtext.find("0 x 4") >= 0, "primeira pergunta não fala do jogo: %s" % qtext)
+	Talks.choose(w, conv, "1") # "Tem jogador que precisa se olhar no espelho" (frase guardada)
+	var guard := 0
+	while not conv["done"] and guard < 5:
+		Talks.choose(w, conv, "0")
+		guard += 1
+	check(conv["done"], "coletiva pós-jogo não terminou")
+	var quotes: Array = People.data(w)["press"]["quotes"]
+	check(quotes.size() >= 1 and String(quotes[0]["k"]) == "blame", "frase não guardada")
+	check(w.news.back().category == "imprensa" and w.news.back().body.find("depois do jogo") >= 0, "manchete da coletiva ausente")
+	quotes[0]["t"] = w.current_turn() - 5
+	c.streak_wins = 3
+	var qs := PressRoom.questions(w, func(_tone): return int(js[0]["id"]))
+	check(qs.size() == 1 and String(qs[0]["q"]).find("cobrança") >= 0, "frase antiga não voltou na coletiva")
+	check(PressRoom.questions(w, func(_tone): return int(js[0]["id"])).is_empty(), "cobrança repetida")
+	# Fim de temporada: palpites conferidos
+	var n0 := w.news.size()
+	PressRoom.on_season_end(w, {"user": {"league": c.league_id, "pos": 3}})
+	check(w.news.size() == n0 + 1 and w.news.back().title.find(c.short_name) >= 0, "balanço dos palpites ausente")
 
 
 func _test_talks() -> void:
