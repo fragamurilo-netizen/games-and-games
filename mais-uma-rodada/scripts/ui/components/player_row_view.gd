@@ -28,6 +28,10 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		sl.clip_text = true
 		pcol.add_child(sl)
 	row.add_child(pcol)
+	if mode == "market" and p.nationality != "":
+		var fl := UIKit.flag(p.nationality, 30)
+		fl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(fl)
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UIKit.label(p.display_name(), "H3")
@@ -82,7 +86,7 @@ static func subtitle(w: GameWorld, p: Player, mode: String) -> String:
 	var age := p.age(w.year)
 	if mode == "market":
 		var cname := "Livre" if p.club_id < 0 else w.club(p.club_id).short_name
-		return "%d anos · %s · %s" % [age, PlayStyle.of(p), cname]
+		return "%d anos · %s · %s%s" % [age, PlayStyle.of(p), cname, " · observado" if Scouting.is_scouted(w, p) else ""]
 	var parts: Array = ["%d anos" % age, PlayStyle.of(p)]
 	if p.injury_weeks > 0:
 		parts.append("lesionado (%d sem.)" % p.injury_weeks)
@@ -109,6 +113,8 @@ static func _cond_color(c: float) -> Color:
 ## Jogadores da mesma divisão são mais conhecidos; livres e de longe, menos.
 static func estimate(w: GameWorld, p: Player, value: int) -> int:
 	var err := 3.0
-	if p.club_id >= 0 and w.has_user() and w.club(p.club_id).league_id == w.user_league_id():
+	if Scouting.is_scouted(w, p):
+		err = 0.5
+	elif p.club_id >= 0 and w.has_user() and w.club(p.club_id).league_id == w.user_league_id():
 		err = 1.5
 	return clampi(value + int(round(p.scout_noise / 6.0 * err)), 1, 99)
