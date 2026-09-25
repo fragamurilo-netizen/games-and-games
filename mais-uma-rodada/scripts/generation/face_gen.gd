@@ -40,6 +40,9 @@ const HAIR_STYLES: Array[String] = [
 	"Coque com undercut", "Meio preso", "Mullet com degradê", "Corte Edgar", "Faux hawk", "Nevou (descolorido)",
 	"Dreads com degradê", "Franja cacheada", "Para trás com degradê", "Tranças com coque", "Topete com risco",
 	"Longo para trás", "Ondulado com franja", "Espetado com gel", "Cachos médios", "Moicano trançado", "Sidecut",
+	"Dreads presos", "Moicano de dreads", "Blowout", "Franja texturizada", "Twist out", "Afro puff",
+	"Nagô em zigue-zague", "Tranças longas com degradê", "Pompadour com risco", "Longo ondulado",
+	"Espetado descolorido", "Máquina com risco", "Esponja", "Coque baixo", "Topete desfiado", "Franja longa de lado",
 ]
 const H_BUZZ := 0
 const H_SHORT := 1
@@ -108,6 +111,22 @@ const H_GEL_SPIKES := 63
 const H_MED_CURLS := 64
 const H_BRAID_HAWK := 65
 const H_SIDECUT := 66
+const H_DREAD_BUN := 67
+const H_DREAD_HAWK := 68
+const H_BLOWOUT := 69
+const H_TEXT_FRINGE := 70
+const H_TWIST_OUT := 71
+const H_AFRO_PUFF := 72
+const H_ZIGZAG_ROWS := 73
+const H_LONG_BRAIDS_FADE := 74
+const H_POMP_PART := 75
+const H_LONG_WAVY := 76
+const H_FROSTED := 77
+const H_BUZZ_PART := 78
+const H_SPONGE := 79
+const H_LOW_BUN := 80
+const H_TEXT_QUIFF := 81
+const H_LONG_SIDE_FRINGE := 82
 
 ## Textura natural do cabelo.
 const T_STRAIGHT := 0
@@ -184,13 +203,31 @@ const STYLE_TEX_W: Array = [
 	[0.0, 0.4, 2.0, 0.4], # cachos médios
 	[0.0, 0.0, 0.0, 0.6], # moicano trançado
 	[1.0, 0.8, 0.2, 0.0], # sidecut
+	[0.0, 0.0, 0.1, 0.9], # dreads presos
+	[0.0, 0.0, 0.0, 0.5], # moicano de dreads
+	[1.2, 1.3, 0.4, 0.0], # blowout
+	[1.6, 1.3, 0.3, 0.0], # franja texturizada
+	[0.0, 0.2, 1.2, 1.6], # twist out
+	[0.0, 0.0, 0.4, 0.9], # afro puff
+	[0.0, 0.0, 0.0, 0.7], # nagô em zigue-zague
+	[0.0, 0.0, 0.1, 0.8], # tranças longas com degradê
+	[0.8, 0.8, 0.1, 0.0], # pompadour com risco
+	[0.4, 0.9, 0.3, 0.0], # longo ondulado
+	[0.8, 0.5, 0.3, 0.6], # espetado descolorido
+	[0.6, 0.6, 0.6, 1.4], # máquina com risco
+	[0.0, 0.0, 0.2, 1.8], # esponja
+	[0.4, 0.6, 0.5, 0.2], # coque baixo
+	[1.4, 1.3, 0.4, 0.0], # topete desfiado
+	[0.8, 0.5, 0.1, 0.0], # franja longa de lado
 ]
 ## Penteados que exigem cabelo (somem com calvície avançada).
 const NEEDS_HAIR: Array[int] = [H_QUIFF, H_CURLY, H_AFRO, H_LONG, H_BUN, H_FRINGE, H_POMPADOUR, H_WAVY,
 	H_MIDPART, H_MULLET, H_PONYTAIL, H_HIGHTOP, H_SURFER, H_BOWL, H_BRAIDS, H_TOPKNOT, H_LONG_CURLY, H_TWISTS,
 	H_TAPER_AFRO, H_FLOW, H_MESSY, H_CURLY_MOHAWK, H_TWO_BLOCK, H_SIDE_FRINGE, H_FREEFORM, H_CURLY_FADE,
 	H_CURLY_TAPER, H_BUN_UNDERCUT, H_HALF_UP, H_FADE_MULLET, H_EDGAR, H_FAUX_HAWK, H_LOCS_FADE, H_CURLY_FRINGE,
-	H_BRAID_BUN, H_QUIFF_PART, H_LONG_BACK, H_WAVY_FRINGE, H_GEL_SPIKES, H_MED_CURLS, H_SIDECUT]
+	H_BRAID_BUN, H_QUIFF_PART, H_LONG_BACK, H_WAVY_FRINGE, H_GEL_SPIKES, H_MED_CURLS, H_SIDECUT,
+	H_DREAD_BUN, H_DREAD_HAWK, H_BLOWOUT, H_TEXT_FRINGE, H_TWIST_OUT, H_AFRO_PUFF, H_LONG_BRAIDS_FADE, H_POMP_PART,
+	H_LONG_WAVY, H_FROSTED, H_SPONGE, H_LOW_BUN, H_TEXT_QUIFF, H_LONG_SIDE_FRINGE, H_ZIGZAG_ROWS]
 
 # ---------------------------------------------------------------------------
 # Barbas
@@ -202,6 +239,9 @@ const BEARDS: Array[String] = [
 	"Cavanhaque fechado", "Garibaldi", "Barba degradê", "Barba média", "Cerrada", "Lenhador", "Bigode e mosca",
 	"Barba quadrada", "Bigode inglês", "Barba com risco", "Bigode fino e cavanhaque", "Hollywood", "Contorno com mosca",
 	"Cheia aparada", "Longa pontuda",
+	"Bigode guidão", "Fu Manchu", "Bigode morsa", "Barba de uma semana", "Barba Verdi", "Lenhador longa",
+	"Cavanhaque com costeletas", "Curta com bigode grosso", "Queixo e bigode fino", "Tufo no queixo",
+	"Desenhada grossa", "Âncora longa",
 ]
 const B_NONE := 0
 const B_STUBBLE := 1
@@ -241,6 +281,18 @@ const B_HOLLYWOOD := 34
 const B_STRAP_SOUL := 35
 const B_TRIMMED := 36
 const B_POINTED := 37
+const B_HANDLEBAR := 38
+const B_FU_MANCHU := 39
+const B_WALRUS := 40
+const B_WEEK := 41
+const B_VERDI := 42
+const B_BANDHOLZ := 43
+const B_GOATEE_SIDES := 44
+const B_SHORT_THICK_MU := 45
+const B_CHIN_PENCIL := 46
+const B_CHIN_PUFF := 47
+const B_THICK_LINED := 48
+const B_LONG_ANCHOR := 49
 
 ## Partes de cada barba: ch = bochechas (0 = não, senão a altura da linha: 0.1 alta … 0.5 baixa),
 ## sd = costeletas, jw = contorno da mandíbula, cn = queixo, mu = bigode (1 normal, 2 fino, 3 ferradura),
@@ -285,33 +337,54 @@ const BEARD_PARTS: Array = [
 	{"ch": 0.0, "sd": 1.0, "jw": 1.0, "cn": 0.4, "mu": 0, "so": 1.0, "nk": 0.0, "ln": 0.02, "op": 0.9, "sh": 0.8, "pt": 0.0, "tx": 1},
 	{"ch": 0.3, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.2, "ln": 0.035, "op": 0.9, "sh": 0.9, "pt": 0.0, "tx": 1},
 	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.9, "ln": 0.42, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "pp": 1.0},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.0, "mu": 6, "so": 0.0, "nk": 0.0, "ln": 0.0, "op": 0.95, "sh": 0.5, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.0, "mu": 7, "so": 0.0, "nk": 0.0, "ln": 0.0, "op": 0.95, "sh": 0.5, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.0, "mu": 8, "so": 0.0, "nk": 0.0, "ln": 0.0, "op": 0.97, "sh": 0.3, "pt": 0.0, "tx": 1},
+	{"ch": 0.22, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.55, "ln": 0.02, "op": 0.66, "sh": 0.15, "pt": 0.03, "tx": 0},
+	{"ch": 0.15, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 6, "so": 1.0, "nk": 0.8, "ln": 0.3, "op": 0.96, "sh": 0.2, "pt": 0.0, "tx": 1, "rd": 1.25},
+	{"ch": 0.1, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 4, "so": 1.0, "nk": 1.0, "ln": 0.68, "op": 0.97, "sh": 0.0, "pt": 0.0, "tx": 1, "rd": 1.4, "wild": 1.0},
+	{"ch": 0.0, "sd": 1.0, "jw": 0.0, "cn": 0.75, "mu": 0, "so": 1.0, "nk": 0.0, "ln": 0.05, "op": 0.9, "sh": 0.6, "pt": 0.0, "tx": 1, "sdl": 1.0},
+	{"ch": 0.26, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 4, "so": 1.0, "nk": 0.3, "ln": 0.05, "op": 0.93, "sh": 0.4, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 1.0, "jw": 0.6, "cn": 0.45, "mu": 2, "so": 0.0, "nk": 0.0, "ln": 0.02, "op": 0.9, "sh": 0.85, "pt": 0.0, "tx": 1, "thin": 1.0},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.5, "mu": 0, "so": 0.5, "nk": 0.0, "ln": 0.06, "op": 0.8, "sh": 0.2, "pt": 0.2, "tx": 1},
+	{"ch": 0.12, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.3, "ln": 0.09, "op": 0.97, "sh": 1.0, "pt": 0.0, "tx": 1, "cut": 1.0, "sq": 0.6},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.35, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.22, "op": 0.94, "sh": 0.5, "pt": 0.0, "tx": 1, "pp": 1.0},
 ]
 ## Capacidade de barba mínima para cada estilo (genética × maturidade).
 const BEARD_MIN_CAP: Array[float] = [0.0, 0.22, 0.55, 0.72, 0.42, 0.5, 0.55, 0.5, 0.25, 0.82, 0.32, 0.6, 0.3, 0.65, 0.55, 0.62, 0.45, 0.62, 0.55, 0.66, 0.06, 0.55, 0.5, 0.5, 0.8, 0.6, 0.65, 0.42,
-	0.88, 0.5, 0.72, 0.55, 0.6, 0.5, 0.6, 0.55, 0.55, 0.8]
+	0.88, 0.5, 0.72, 0.55, 0.6, 0.5, 0.6, 0.55, 0.55, 0.8,
+	0.6, 0.62, 0.66, 0.4, 0.8, 0.9, 0.58, 0.64, 0.5, 0.3, 0.72, 0.7]
 ## Popularidade dos estilos entre quem pode tê-los.
 const BEARD_POP: Array[float] = [5.0, 3.2, 2.4, 1.3, 0.8, 0.35, 0.45, 0.7, 1.0, 0.25, 2.4, 0.12, 0.25, 0.12, 0.3, 0.2, 0.12, 1.2, 0.3, 0.15, 0.8, 0.25, 0.2, 0.7, 0.25, 1.4, 1.6, 1.8,
-	0.12, 0.25, 0.45, 0.08, 0.4, 0.3, 0.35, 0.15, 1.0, 0.1]
+	0.12, 0.25, 0.45, 0.08, 0.4, 0.3, 0.35, 0.15, 1.0, 0.1,
+	0.12, 0.08, 0.1, 1.8, 0.3, 0.08, 0.3, 0.6, 0.35, 0.6, 0.9, 0.2]
 
 # ---------------------------------------------------------------------------
 # Cores
 # ---------------------------------------------------------------------------
 const HAIR_COLOR_NAMES: Array[String] = [
 	"Preto", "Castanho-escuro", "Castanho", "Castanho-claro", "Loiro-escuro", "Loiro", "Ruivo", "Platinado",
-	"Acaju", "Loiro-acinzentado", "Preto-azulado", "Pontas descoloridas",
+	"Acaju", "Loiro-acinzentado", "Preto-azulado", "Pontas descoloridas", "Loiro mel", "Tingido de vermelho",
 ]
 const HC_PLATINUM := 7
 const HC_TIPS := 11
+const HC_HONEY := 12
+const HC_RED_DYE := 13
+## Cores que são tinta (a sobrancelha e a barba continuam naturais).
+const DYED: Array[int] = [HC_PLATINUM, HC_RED_DYE]
 const HAIR_COLORS: Array[Color] = [
 	Color("#161211"), Color("#2E1F16"), Color("#4B3122"), Color("#765033"),
 	Color("#A1804F"), Color("#D2B57A"), Color("#93401D"), Color("#E6E0D2"),
-	Color("#5B2B1E"), Color("#9A8A6E"), Color("#0D0E15"), Color("#1A1411"),
+	Color("#5B2B1E"), Color("#9A8A6E"), Color("#0D0E15"), Color("#1A1411"), Color("#B48748"), Color("#A3262A"),
 ]
 const SKIN_COLORS: Array[Color] = [
 	Color("#FBE3D4"), Color("#F3CFB5"), Color("#E9BE9C"), Color("#DBA983"), Color("#C79369"),
 	Color("#AF7A51"), Color("#936240"), Color("#774C30"), Color("#5B3923"), Color("#40281A"),
 ]
 const FACE_SHAPES: Array[String] = ["Oval", "Redondo", "Quadrado", "Coração", "Losango", "Alongado", "Triangular", "Retangular"]
+const EYE_SHAPES: Array[String] = ["Amendoado", "Grande", "Estreito", "Caído", "Puxado", "Fundo", "Afastados", "Próximos"]
+const EYE_SHAPE_W: Array[float] = [4.0, 1.2, 1.2, 0.8, 0.8, 0.8, 0.6, 0.6]
+const TATTOOS: Array[String] = ["Sem tatuagem", "Escrita", "Tribal", "Estrela", "Asas"]
 const FACE_SHAPE_W: Array[float] = [4.0, 1.8, 2.2, 1.4, 1.1, 1.6, 0.7, 1.4]
 const EYE_NAMES: Array[String] = ["Castanho-escuro", "Castanho", "Mel", "Verde", "Azul", "Cinza", "Quase preto",
 	"Âmbar", "Avelã", "Azul-claro", "Azul-acinzentado", "Verde-acinzentado"]
@@ -333,19 +406,19 @@ const ETH_UNDERTONE: Array = [
 ]
 ## Pesos das cores de cabelo (0..11).
 const ETH_HAIR_COLOR: Array = [
-	[0.3, 1.5, 1.6, 1.3, 1.3, 1.3, 0.4, 0.03, 0.2, 0.9, 0.0, 0.0],
-	[0.8, 2.2, 1.7, 0.8, 0.5, 0.3, 0.12, 0.03, 0.25, 0.3, 0.0, 0.01],
-	[2.0, 2.2, 1.0, 0.3, 0.1, 0.05, 0.05, 0.03, 0.15, 0.03, 0.1, 0.02],
-	[3.0, 1.6, 0.4, 0.1, 0.0, 0.0, 0.03, 0.03, 0.1, 0.0, 0.3, 0.02],
-	[2.5, 2.0, 0.6, 0.2, 0.08, 0.04, 0.03, 0.06, 0.12, 0.0, 0.2, 0.08],
-	[4.0, 1.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.03, 0.0, 0.0, 0.8, 0.02],
-	[3.0, 1.5, 0.4, 0.1, 0.05, 0.0, 0.02, 0.08, 0.05, 0.0, 0.3, 0.2],
-	[5.0, 0.8, 0.1, 0.0, 0.0, 0.0, 0.0, 0.12, 0.0, 0.0, 0.3, 0.25],
-	[3.0, 1.4, 0.3, 0.05, 0.0, 0.0, 0.0, 0.06, 0.1, 0.0, 1.8, 0.05],
-	[3.5, 1.4, 0.2, 0.0, 0.0, 0.0, 0.0, 0.02, 0.1, 0.0, 1.0, 0.02],
-	[4.5, 1.2, 0.1, 0.0, 0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.3, 0.1],
-	[3.5, 1.5, 0.3, 0.05, 0.02, 0.0, 0.02, 0.04, 0.05, 0.0, 0.4, 0.1],
-	[3.5, 1.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.05, 0.05, 0.0, 1.2, 0.05],
+	[0.3, 1.5, 1.6, 1.3, 1.3, 1.3, 0.4, 0.03, 0.2, 0.9, 0.0, 0.0, 0.25, 0.004],
+	[0.8, 2.2, 1.7, 0.8, 0.5, 0.3, 0.12, 0.03, 0.25, 0.3, 0.0, 0.01, 0.3, 0.006],
+	[2.0, 2.2, 1.0, 0.3, 0.1, 0.05, 0.05, 0.03, 0.15, 0.03, 0.1, 0.02, 0.15, 0.008],
+	[3.0, 1.6, 0.4, 0.1, 0.0, 0.0, 0.03, 0.03, 0.1, 0.0, 0.3, 0.02, 0.05, 0.006],
+	[2.5, 2.0, 0.6, 0.2, 0.08, 0.04, 0.03, 0.06, 0.12, 0.0, 0.2, 0.08, 0.2, 0.01],
+	[4.0, 1.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.03, 0.0, 0.0, 0.8, 0.02, 0.03, 0.003],
+	[3.0, 1.5, 0.4, 0.1, 0.05, 0.0, 0.02, 0.08, 0.05, 0.0, 0.3, 0.2, 0.25, 0.012],
+	[5.0, 0.8, 0.1, 0.0, 0.0, 0.0, 0.0, 0.12, 0.0, 0.0, 0.3, 0.25, 0.04, 0.012],
+	[3.0, 1.4, 0.3, 0.05, 0.0, 0.0, 0.0, 0.06, 0.1, 0.0, 1.8, 0.05, 0.02, 0.012],
+	[3.5, 1.4, 0.2, 0.0, 0.0, 0.0, 0.0, 0.02, 0.1, 0.0, 1.0, 0.02, 0.02, 0.004],
+	[4.5, 1.2, 0.1, 0.0, 0.0, 0.0, 0.0, 0.05, 0.0, 0.0, 0.3, 0.1, 0.03, 0.01],
+	[3.5, 1.5, 0.3, 0.05, 0.02, 0.0, 0.02, 0.04, 0.05, 0.0, 0.4, 0.1, 0.08, 0.008],
+	[3.5, 1.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.05, 0.05, 0.0, 1.2, 0.05, 0.03, 0.01],
 ]
 ## Pesos por etnia: [castanho-escuro, castanho, mel, verde, azul, cinza, quase preto, âmbar, avelã,
 ## azul-claro, azul-acinzentado, verde-acinzentado].
@@ -510,10 +583,48 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["bow"] = rng.randf_range(0.2, 1.0)
 	f["smile"] = rng.randf_range(-0.35, 0.8)
 
+	# --- Variedade: formato dos olhos e proporções (sorteio próprio) -----------
+	var vrng := RandomNumberGenerator.new()
+	vrng.seed = hash([seed_value, "variedade"])
+	var eye_shape := RngUtil.weighted_index(vrng, EYE_SHAPE_W)
+	if look.has("es"):
+		eye_shape = clampi(int(look["es"]), 0, EYE_SHAPES.size() - 1)
+	f["eye_shape"] = eye_shape
+	match eye_shape:
+		1:
+			f["eye_h"] = float(f["eye_h"]) * 1.2
+			f["eye_w"] = float(f["eye_w"]) * 1.05
+		2:
+			f["eye_h"] = float(f["eye_h"]) * 0.8
+			f["eye_w"] = float(f["eye_w"]) * 1.03
+		3:
+			f["eye_tilt"] = float(f["eye_tilt"]) - 0.035
+		4:
+			f["eye_tilt"] = float(f["eye_tilt"]) + 0.035
+		5:
+			f["deep"] = float(f["deep"]) * 1.35
+			f["hooded"] = bool(f["hooded"]) or vrng.randf() < 0.5
+		6:
+			f["eye_dx"] = float(f["eye_dx"]) + 0.035
+		7:
+			f["eye_dx"] = float(f["eye_dx"]) - 0.03
+	f["fw"] = float(f["fw"]) * vrng.randf_range(0.95, 1.06)
+	f["fh"] = float(f["fh"]) * vrng.randf_range(0.965, 1.045)
+	f["nose_w"] = float(f["nose_w"]) * vrng.randf_range(0.88, 1.16)
+	f["nose_len"] = float(f["nose_len"]) * vrng.randf_range(0.92, 1.1)
+	f["mouth_w"] = float(f["mouth_w"]) * vrng.randf_range(0.9, 1.1)
+	var lipk := vrng.randf_range(0.85, 1.2)
+	f["lip_u"] = float(f["lip_u"]) * lipk
+	f["lip_l"] = float(f["lip_l"]) * lipk * vrng.randf_range(0.95, 1.08)
+	f["brow_t"] = float(f["brow_t"]) * vrng.randf_range(0.82, 1.28)
+	f["ear"] = float(f["ear"]) * vrng.randf_range(0.92, 1.1)
+
 	# --- Cabelo -----------------------------------------------------------------
 	var hc_i := RngUtil.weighted_index(rng, ETH_HAIR_COLOR[e])
 	if hc_i == HC_TIPS and age > 30:
 		hc_i = 0
+	if hc_i == HC_RED_DYE and age > 28:
+		hc_i = 1
 	if look.has("hc"):
 		hc_i = clampi(int(look["hc"]), 0, HAIR_COLORS.size() - 1)
 	f["hair_i"] = hc_i
@@ -559,11 +670,36 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["lineup"] = tex == T_COILY and rng.randf() < 0.6
 	var hair := HAIR_COLORS[hc_i if hc_i != HC_TIPS else 0]
 	hair = hair.lerp(Color.from_hsv(rng.randf_range(0.02, 0.1), 0.5, hair.v), rng.randf_range(0.0, 0.12))
-	if hc_i != HC_PLATINUM:
+	if not hc_i in DYED:
 		hair = hair.lerp(Color("#C8C5C0"), gray * 0.72)
 	f["hair"] = hair
 	f["tips"] = hc_i == HC_TIPS
 	f["hair_seed"] = rng.randi()
+	# Riscos na sobrancelha, tatuagem no pescoço e luzes: sorteio próprio (não mexe no resto)
+	var xrng := RandomNumberGenerator.new()
+	xrng.seed = hash([seed_value, "estilo"])
+	var slit_p := 0.07 * (1.8 if age < 25 else (1.0 if age < 31 else 0.3))
+	if e in [E_AFR, E_MIX, E_LAT, E_HAE]:
+		slit_p *= 1.6
+	elif e in [E_EAS, E_SEA, E_NOR]:
+		slit_p *= 0.5
+	var slit := 0
+	if xrng.randf() < slit_p:
+		slit = 1 + RngUtil.weighted_index(xrng, [0.55, 0.35, 0.1]) + 10 * (1 + RngUtil.weighted_index(xrng, [0.45, 0.35, 0.2]))
+	if look.has("sl"):
+		slit = int(look["sl"])
+	f["brow_slit"] = slit
+	var tat_p := 0.07 * (1.4 if age >= 21 and age <= 33 else 0.5)
+	var tattoo := 1 + RngUtil.weighted_index(xrng, [0.4, 0.25, 0.2, 0.15]) if xrng.randf() < tat_p else 0
+	if look.has("tt"):
+		tattoo = clampi(int(look["tt"]), 0, TATTOOS.size() - 1)
+	f["tattoo"] = tattoo
+	f["tattoo_side"] = -1.0 if xrng.randf() < 0.5 else 1.0
+	f["tattoo_seed"] = xrng.randi()
+	var hl_p := 0.05 * (1.5 if age < 27 else 0.6) * (1.4 if e in [E_MIX, E_LAT, E_AFR] else 1.0)
+	f["highlights"] = xrng.randf() < hl_p and hc_i in [0, 1, 2, 3, 10, HC_HONEY] and style not in [H_BALD, H_BUZZ, H_CORNROWS, H_WAVES]
+	if style == H_FROSTED:
+		f["tips"] = true
 
 	# --- Barba ------------------------------------------------------------------
 	# Genética × maturidade: começa a nascer entre 15 e 21 anos e engrossa por ~7 anos.
@@ -580,14 +716,19 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 			w *= 1.8 if pref < 0.3 else (0.4 if pref > 0.75 else 1.0)
 			w += (1.0 - cap) * 4.0
 		elif i in [B_FULL, B_LONG, B_SHORT, B_BOXED, B_HEAVY_STUBBLE, B_MEDIUM, B_FADED, B_DENSE_STUBBLE, B_GARIBALDI,
-				B_LUMBERJACK, B_SQUARE, B_LINE_CUT, B_HOLLYWOOD, B_TRIMMED, B_POINTED]:
+				B_LUMBERJACK, B_SQUARE, B_LINE_CUT, B_HOLLYWOOD, B_TRIMMED, B_POINTED, B_WEEK, B_VERDI, B_BANDHOLZ,
+				B_SHORT_THICK_MU, B_THICK_LINED, B_LONG_ANCHOR]:
 			w *= 2.0 if pref > 0.75 else (0.4 if pref < 0.3 else 1.0)
 		if i == B_PATCHY:
 			w *= 3.0 if cap < 0.6 else 0.3
 		if i == B_WISPY:
 			w *= 3.0 if cap < 0.35 else 0.1
-		if (e == E_EAS or e == E_SEA) and i in [B_FULL, B_LONG, B_MUTTON]:
+		if (e == E_EAS or e == E_SEA) and i in [B_FULL, B_LONG, B_MUTTON, B_VERDI, B_BANDHOLZ, B_WALRUS]:
 			w *= 0.3
+		if i == B_CHIN_PUFF:
+			w *= 2.0 if cap < 0.55 else 0.4
+		if age >= 30 and i in [B_WALRUS, B_HANDLEBAR, B_VERDI]:
+			w *= 1.6
 		if (e == E_ARB or e == E_SAS) and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED]:
 			w *= 1.8
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
@@ -605,7 +746,12 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	# Sombra da barba feita (quem tem barba forte e cabelo escuro)
 	var dark_hair := 1.0 - clampf(HAIR_COLORS[hc_i if hc_i != HC_TIPS else 0].v * 1.6, 0.0, 0.8)
 	f["shadow"] = cap * dark_hair * rng.randf_range(0.25, 0.7) if beard == B_NONE else cap * dark_hair * 0.35
-	var beard_col := HAIR_COLORS[hc_i if hc_i < HC_PLATINUM or hc_i == 8 or hc_i == 9 or hc_i == 10 else (0 if hc_i == HC_TIPS else 1)].darkened(0.06)
+	var natural := hc_i
+	if hc_i in DYED:
+		natural = 4 if e <= E_EUR and xrng.randf() < 0.3 else 1
+	elif hc_i == HC_TIPS:
+		natural = 0
+	var beard_col := HAIR_COLORS[natural].darkened(0.06)
 	if hc_i == 6 or (hc_i >= 4 and rng.randf() < 0.3):
 		beard_col = beard_col.lerp(HAIR_COLORS[6], 0.35) # barba puxando ao ruivo
 	f["beard_col"] = beard_col.lerp(Color("#D2CFCA"), clampf(gray * 1.15, 0.0, 0.92))
@@ -765,7 +911,7 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 		var w: float = float((STYLE_TEX_W[i] as Array)[tex])
 		sw.append(w)
 	if e == E_EAS or e == E_SEA:
-		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP]:
+		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE]:
 			sw[i] = float(sw[i]) * 2.0
 	if e == E_PAC:
 		for i in [H_LONG_CURLY, H_BUN, H_TOPKNOT, H_CURLY]:
@@ -775,13 +921,14 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 			sw[i] = float(sw[i]) * 1.5
 	if age >= 32:
 		for i in [H_MOHAWK, H_HIGHTOP, H_BRAIDS, H_TWISTS, H_SPIKY, H_BOWL, H_TOPKNOT, H_MULLET, H_EDGAR,
-				H_BLEACHED, H_FADE_MULLET, H_FAUX_HAWK, H_CURLY_FRINGE, H_GEL_SPIKES, H_BRAID_HAWK, H_SIDECUT]:
+				H_BLEACHED, H_FADE_MULLET, H_FAUX_HAWK, H_CURLY_FRINGE, H_GEL_SPIKES, H_BRAID_HAWK, H_SIDECUT,
+				H_DREAD_HAWK, H_FROSTED, H_AFRO_PUFF, H_SPONGE, H_ZIGZAG_ROWS, H_TEXT_FRINGE]:
 			sw[i] = float(sw[i]) * 0.35
 		for i in [H_SHORT, H_PART, H_CREW, H_BUZZ, H_BALD]:
 			sw[i] = float(sw[i]) * 1.5
 	if age < 24:
 		for i in [H_FADE, H_CROP, H_FADE_PART, H_UNDERCUT, H_TWISTS, H_MULLET, H_EDGAR, H_CURLY_FADE, H_FADE_MULLET,
-				H_CURLY_FRINGE, H_BLEACHED]:
+				H_CURLY_FRINGE, H_BLEACHED, H_TEXT_FRINGE, H_FROSTED, H_SPONGE, H_TEXT_QUIFF, H_BLOWOUT, H_TWIST_OUT]:
 			sw[i] = float(sw[i]) * 1.4
 		sw[H_BALD] = float(sw[H_BALD]) * 0.3
 	return sw

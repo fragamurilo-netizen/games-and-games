@@ -5,6 +5,7 @@ extends SceneTree
 ## --aging: cada linha é a mesma pessoa envelhecendo pelas idades das colunas.
 ## --catalog=hs ou --catalog=bd: um retrato por penteado ou por barba, na ordem da lista.
 ## --beauty: com --aging, as colunas vão da pessoa mais feia à mais bonita.
+## --list=3,18,60: com --catalog, mostra só esses índices (em sequência).
 
 var _out := "user://faces.png"
 
@@ -20,6 +21,7 @@ func _initialize() -> void:
 	var kits := false
 	var offset := 0
 	var catalog := ""
+	var only: Array = []
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
@@ -33,6 +35,8 @@ func _initialize() -> void:
 			eths = Array(a.substr(6).split(",")).map(func(x): return int(x))
 		elif a.begins_with("--catalog="):
 			catalog = a.substr(10)
+		elif a.begins_with("--list="):
+			only = Array(a.substr(7).split(",")).map(func(x): return int(x))
 		elif a.begins_with("--offset="):
 			offset = int(a.substr(9))
 		elif a == "--kits":
@@ -58,7 +62,8 @@ func _initialize() -> void:
 			v.eth = e
 			v.age = ages[k % ages.size()]
 			if catalog != "":
-				v.look = {catalog: offset + r * cols + k}
+				var idx := r * cols + k
+				v.look = {catalog: int(only[idx % only.size()]) if not only.is_empty() else offset + idx}
 				v.eth = [1, 7, 3, 4, 8, 6, 2][(r * cols + k) % 7]
 				v.age = 30
 			if beauty:
@@ -76,8 +81,10 @@ func _initialize() -> void:
 					"collar": ["round", "v", "polo", "wide", "henley", "mandarin"][i % 6],
 					"sleeve": ["same", "contrast", "raglan", "stripes", "cuff"][i % 5],
 					"sp": {"n": ["Banco Norte", "Aero Sul", "Nuvem", "Frigo Max"][i % 4], "c": "#FFFFFF", "t": "#FFFFFF"} if i % 2 == 0 else {},
-					"sup": {"n": "Marca", "c": "#FFFFFF", "logo": "curva"},
+					"sup": {"n": "Marca", "c": "#FFFFFF", "logo": ["curva", "barras", "raio", "trevo", "chevron"][i % 5]},
 				}
+				v.crest = {"shape": ["shield", "round", "modern", "oval"][i % 4], "symbol": ["star", "letter", "ball", "crown", "anchor"][i % 5],
+					"c1": c1.darkened(0.15).to_html(false), "c2": c2.to_html(false), "border": "thin", "initials": "FC"}
 			v.bg_color = v.shirt_color.darkened(0.6)
 			if k == cols - 1 and r % 4 == 3:
 				v.suit = true
@@ -94,7 +101,7 @@ func _process(_delta: float) -> bool:
 		_t0 = Time.get_ticks_usec()
 	if _frames == 2:
 		print("primeiro quadro em ", (Time.get_ticks_usec() - _t0) / 1000.0, " ms")
-	if _frames == 5:
+	if _frames == 12:
 		root.get_viewport().get_texture().get_image().save_png(_out)
 		print("ok ", _out)
 		return true
