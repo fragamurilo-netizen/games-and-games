@@ -31,7 +31,13 @@ const KINDS := {
 	"youth_bid": {"w": 0.5, "icon": "swap", "color": "ORANGE"},
 	"takeover": {"w": 0.25, "icon": "money", "color": "GREEN"},
 	"stadium": {"w": 0.4, "icon": "shield", "color": "BLUE"},
+	"homesick": {"w": 0.6, "icon": "home", "color": "ORANGE"},
+	"mercenary": {"w": 0.55, "icon": "money", "color": "ORANGE"},
+	"want_leave": {"w": 0.5, "icon": "swap", "color": "RED"},
+	"fight": {"w": 0.45, "icon": "card", "color": "RED"},
 }
+## Ligas que pagam acima do mercado (propostas "irrecusáveis").
+const RICH_NATIONS := ["KSA", "QAT", "UAE"]
 
 
 static func pending(world: GameWorld) -> Array:
@@ -236,6 +242,78 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			if kid == null or Array(world.stats.get("ev_skip", [])).has(kid.id):
 				return {}
 			ev["p"] = kid.id
+		"homesick":
+			# Estrangeiro jovem ou recém-chegado, longe de casa e com a cabeça baixa
+			var pool: Array = []
+			for p: Player in squad:
+				if p.nationality != club.nation and p.morale < 55.0 and (p.age(world.year) <= 24 or world.year - p.joined_year <= 1) and not p.is_injured():
+					pool.append(p)
+			if pool.is_empty():
+				return {}
+			var hp: Player = RngUtil.pick(rng, pool)
+			ev["p"] = hp.id
+			ev["d"] = {"cost": Valuation.round_wage(maxf(20000.0, hp.wage * 1.5))}
+		"mercenary":
+			# Proposta milionária do Golfo para quem liga para dinheiro
+			var best: Player = null
+			for p: Player in squad:
+				if p.transfer_listed or p.age(world.year) < 24 or p.age(world.year) > 33 or p.is_injured():
+					continue
+				if not (p.has_trait("mercenario") or p.has_trait("ambicioso") or p.trait_sum("greed") > 1.1):
+					continue
+				if best == null or p.overall > best.overall:
+					best = p
+			if best == null or best.overall < 62:
+				return {}
+			var rich: Club = null
+			for c: Club in world.clubs:
+				if RICH_NATIONS.has(c.nation) and c.tier == 1 and (rich == null or c.reputation + rng.randf() * 8.0 > rich.reputation):
+					rich = c
+			if rich == null:
+				return {}
+			ev["p"] = best.id
+			ev["d"] = {"club": rich.id, "fee": Valuation.round_value(best.value * rng.randf_range(1.1, 1.4)),
+				"their_wage": Valuation.round_wage(best.wage * rng.randf_range(2.5, 4.0)), "raise": Valuation.round_wage(best.wage * 1.35)}
+		"want_leave":
+			# Craque ambicioso com um clube maior de olho
+			var star: Player = null
+			for p: Player in squad:
+				if p.transfer_listed or p.age(world.year) > 30 or p.squad_status > Player.STATUS_STARTER:
+					continue
+				if not (p.has_trait("ambicioso") or p.has_trait("estrela") or p.has_trait("competitivo")):
+					continue
+				if star == null or p.overall > star.overall:
+					star = p
+			if star == null:
+				return {}
+			var bigger: Array = []
+			for c: Club in world.clubs:
+				if c.id != club.id and c.tier == 1 and c.reputation >= minf(club.reputation + 10.0, 92.0) and c.reputation > club.reputation:
+					bigger.append(c)
+			if bigger.is_empty():
+				return {}
+			var big: Club = RngUtil.pick(rng, bigger)
+			ev["p"] = star.id
+			ev["d"] = {"club": big.id}
+		"fight":
+			# Briga no treino: pelo menos um esquentado
+			var hot: Array = []
+			for p: Player in squad:
+				if p.has_trait("temperamental") or p.has_trait("rebelde") or p.has_trait("provocador"):
+					hot.append(p)
+			if hot.is_empty() or squad.size() < 2:
+				return {}
+			var a1: Player = RngUtil.pick(rng, hot)
+			var a2: Player = RngUtil.pick(rng, squad)
+			for _t in 10:
+				if a2.id != a1.id:
+					break
+				a2 = RngUtil.pick(rng, squad)
+			if a2.id == a1.id:
+				return {}
+			ev["p"] = a1.id
+			ev["p2"] = a2.id
+			ev["d"] = {"fine": Valuation.round_wage(maxf(5000.0, a1.wage * 0.5))}
 		"takeover":
 			# Raro: investidores só aparecem de tempos em tempos e não logo depois de uma troca de dono.
 			var own := WorldEvents.owner_of(world, club.id)
@@ -327,6 +405,39 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 					{"t": "Inegociável", "hint": "Torcida vibra · ele pode ficar frustrado"},
 					{"t": "Ouvir propostas", "hint": "Entra na lista de venda com preço alto"},
 					{"t": "Conversar e valorizar o jogador", "hint": "Moral dele sobe"}]}
+		"homesick":
+			return {"title": "%s com saudade de casa" % pn, "def": 2,
+				"body": "%s anda calado no vestiário. Longe da família, não se adaptou e o rendimento caiu. O staff sugere agir." % pn,
+				"options": [
+					{"t": "Trazer a família para cá", "hint": "Custa %s · moral e adaptação sobem" % Fmt.money(int(d.get("cost", 0)))},
+					{"t": "Liberar uns dias em casa", "hint": "Fica fora do próximo jogo · volta renovado"},
+					{"t": "Cobrar foco", "hint": "Nada muda no caixa · moral cai; os sensíveis podem pedir para sair"}]}
+		"mercenary":
+			var rich := world.club(int(d.get("club", -1)))
+			return {"title": "Proposta milionária por %s" % pn, "def": 2,
+				"body": "O %s (%s) oferece %s ao clube e um salário de %s/mês a %s, bem acima do que ele ganha aqui (%s). O jogador quer ouvir." % [
+					rich.short_name if rich != null else "", DatabaseManager.nation_name(rich.nation) if rich != null else "", Fmt.money(int(d.get("fee", 0))),
+					Fmt.money(int(d.get("their_wage", 0))), pn, Fmt.money(p.wage if p != null else 0)],
+				"options": [
+					{"t": "Vender", "hint": "Entra %s no caixa" % Fmt.money(int(d.get("fee", 0)))},
+					{"t": "Segurar com aumento", "hint": "Salário vai a %s · ele fica, mas de olho" % Fmt.money(int(d.get("raise", 0)))},
+					{"t": "Recusar", "hint": "Moral despenca e o rendimento pode cair"}]}
+		"want_leave":
+			var big := world.club(int(d.get("club", -1)))
+			return {"title": "%s quer sair" % pn, "def": 2,
+				"body": "%s avisou que sonha em jogar no %s e pediu para ser negociado. O vestiário acompanha como você vai lidar." % [pn, big.short_name if big != null else "exterior"],
+				"options": [
+					{"t": "Prometer um time para brigar por títulos", "hint": "Ele fica por ora · cobra resultado"},
+					{"t": "Colocar à venda", "hint": "Entra na lista com preço de mercado"},
+					{"t": "Segurar sem conversa", "hint": "Moral despenca · clima pesa no vestiário"}]}
+		"fight":
+			var n2 := p2.display_name() if p2 != null else "um companheiro"
+			return {"title": "Briga no treino", "def": 2,
+				"body": "%s e %s trocaram empurrões no treino de hoje e precisaram ser separados. O elenco espera uma resposta." % [pn, n2],
+				"options": [
+					{"t": "Multar os dois", "hint": "Multa de %s cada · os dois ficam chateados" % Fmt.money(int(d.get("fine", 0)))},
+					{"t": "Afastar %s do próximo jogo" % pn, "hint": "Ele cumpre suspensão interna · o grupo aprova"},
+					{"t": "Conversar e deixar passar", "hint": "Sem punição · entrosamento sofre"}]}
 		"medical":
 			return {"title": "Departamento médico", "def": 1,
 				"body": "O médico sugere um tratamento intensivo para acelerar a volta dos lesionados. Custo: %s." % Fmt.money(int(d.get("cost", 0))),
@@ -529,6 +640,85 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 				_:
 					_morale(p, 6.0)
 					msg = "%s se sentiu valorizado." % p.display_name()
+		"homesick":
+			if p == null or p.club_id != club.id:
+				return "Ele já não está no clube."
+			match opt:
+				0:
+					club.add_ledger("outros", -int(d.get("cost", 0)))
+					_morale(p, 18.0)
+					msg = "A família de %s chegou. Ele está bem mais animado." % p.display_name()
+				1:
+					p.injury_weeks = maxi(p.injury_weeks, 1)
+					p.injury_name = "Folga para visitar a família"
+					_morale(p, 12.0)
+					msg = "%s vai passar uns dias em casa e volta na semana que vem." % p.display_name()
+				_:
+					var sens := p.has_trait("timido") or p.has_trait("inseguro")
+					_morale(p, -12.0 if sens else -5.0)
+					if sens and p.morale < 30.0:
+						p.transfer_listed = true
+						p.asking_price = TransferManager.asking_price(world, p)
+						msg = "%s não aguentou a pressão e pediu para voltar ao país dele. Está à venda." % p.display_name()
+					else:
+						msg = "%s ouviu a cobrança em silêncio." % p.display_name()
+		"mercenary":
+			if p == null or p.club_id != club.id:
+				return "Ele já não está no clube."
+			var rich := world.club(int(d.get("club", -1)))
+			match opt:
+				0:
+					if rich == null:
+						return "A proposta caiu."
+					TransferManager.complete_transfer(world, p, rich, int(d.get("fee", 0)), int(d.get("their_wage", p.wage)), 3)
+					msg = "%s foi vendido ao %s por %s." % [p.display_name(), rich.short_name, Fmt.money(int(d.get("fee", 0)))]
+				1:
+					p.wage = maxi(p.wage, int(d.get("raise", p.wage)))
+					_morale(p, 6.0)
+					msg = "%s aceitou ficar com o aumento. Salário: %s/mês." % [p.display_name(), Fmt.money(p.wage)]
+				_:
+					_morale(p, -20.0 if p.has_trait("mercenario") else -12.0)
+					msg = "%s ficou muito contrariado com a recusa." % p.display_name()
+		"want_leave":
+			if p == null or p.club_id != club.id:
+				return "Ele já não está no clube."
+			match opt:
+				0:
+					_morale(p, 4.0)
+					msg = "%s aceitou esperar, mas vai cobrar resultado." % p.display_name()
+				1:
+					p.transfer_listed = true
+					p.asking_price = TransferManager.asking_price(world, p)
+					_morale(p, 8.0)
+					msg = "%s está à venda por %s." % [p.display_name(), Fmt.money(p.asking_price)]
+				_:
+					_morale(p, -22.0)
+					club.cohesion = maxf(20.0, club.cohesion - 3.0)
+					msg = "%s ficou revoltado. O clima no vestiário pesou." % p.display_name()
+		"fight":
+			if p == null or p.club_id != club.id:
+				return "Ele já não está no clube."
+			var fine := int(d.get("fine", 0))
+			match opt:
+				0:
+					club.add_ledger("outros", fine * (2 if p2 != null else 1))
+					_morale(p, -6.0)
+					if p2 != null:
+						_morale(p2, -6.0)
+					club.cohesion = minf(100.0, club.cohesion + 1.0)
+					msg = "Os dois foram multados. O recado foi dado."
+				1:
+					p.suspension = maxi(p.suspension, 1)
+					_morale(p, -10.0)
+					if p2 != null:
+						_morale(p2, 3.0)
+					club.cohesion = minf(100.0, club.cohesion + 2.0)
+					msg = "%s está fora do próximo jogo. O grupo aprovou." % p.display_name()
+				_:
+					club.cohesion = maxf(20.0, club.cohesion - 4.0)
+					if p2 != null:
+						_morale(p2, -5.0)
+					msg = "Ficou tudo por isso mesmo. Parte do elenco não gostou."
 		"medical":
 			if opt == 0:
 				club.add_ledger("investimentos", -int(d.get("cost", 0)))
@@ -709,6 +899,26 @@ static func _random_happenings(world: GameWorld) -> void:
 			p.injury_name = RngUtil.pick(rng, ["Torção no tornozelo (treino)", "Dor muscular (treino)", "Pancada no joelho (treino)", "Contusão no pé (treino)"])
 			NewsManager.on_injury(world, p)
 			InboxManager.on_injury(world, p)
+	elif rng.randf() < 0.035:
+		# Virose ou gripe: um ou mais jogadores de molho por uma semana
+		var squad2: Array = world.squad(club)
+		var fit2: Array = []
+		for p: Player in squad2:
+			if not p.is_injured():
+				fit2.append(p)
+		if not fit2.is_empty():
+			var ill: String = RngUtil.pick(rng, ["Virose", "Gripe forte", "Intoxicação alimentar", "Amigdalite"])
+			var n_ill := 1 if ill == "Amigdalite" else rng.randi_range(1, 3)
+			var names: Array = []
+			for _i in n_ill:
+				if fit2.is_empty():
+					break
+				var p: Player = fit2.pop_at(rng.randi_range(0, fit2.size() - 1))
+				p.injury_weeks = 1
+				p.injury_name = ill
+				p.condition = maxf(40.0, p.condition - 20.0)
+				names.append(p.display_name())
+			NewsManager.post_raw(world, "%s no elenco" % ill, "%s %s fora do próximo jogo: %s." % [", ".join(names), "está" if names.size() == 1 else "estão", ill.to_lower()], club.id, -1, NewsEvent.IMP_NORMAL)
 	elif rng.randf() < 0.04:
 		var squad: Array = world.squad(club)
 		if not squad.is_empty():

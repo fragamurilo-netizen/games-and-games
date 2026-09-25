@@ -59,6 +59,7 @@ func _initialize() -> void:
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
 	_run("gritos da beira do campo e palestras", _test_shouts)
 	_run("arbitragem: perfis, escala e efeito no jogo", _test_referees)
+	_run("eventos de vestiário: saudade, Golfo, quer sair, briga e virose", _test_squad_events)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
@@ -1423,6 +1424,73 @@ func _test_tactical_freedom() -> void:
 	check(not SquadRules.is_foreign(probe, esp, "non_eu"), "francês contou como extracomunitário na Espanha")
 	probe.nationality = "BRA"
 	check(SquadRules.is_foreign(probe, esp, "non_eu"), "brasileiro deveria ser extracomunitário na Espanha")
+
+
+func _test_squad_events() -> void:
+	for k in ["homesick", "mercenary", "want_leave", "fight"]:
+		var w := _career_world()
+		var c := w.user_club()
+		for opt in 3:
+			var squad := w.squad(c)
+			for q: Player in squad:
+				q.traits = []
+				q.morale = 70.0
+			var a: Player = squad[3 + opt * 2]
+			# Condições de cada evento
+			a.nationality = "ARG" if c.nation != "ARG" else "URU"
+			a.morale = 40.0
+			a.joined_year = w.year
+			a.traits = ["mercenario", "ambicioso", "temperamental", "timido"]
+			a.squad_status = Player.STATUS_STARTER
+			a.overall = maxi(a.overall, 70)
+			a.birth_year = w.year - 24
+			var ev := EventManager._build(w, k)
+			check(not ev.is_empty(), "evento %s não montou" % k)
+			if ev.is_empty():
+				continue
+			ev["id"] = 900 + opt
+			ev["turn"] = 0
+			ev["exp"] = 99
+			w.events.append(ev)
+			var desc := EventManager.describe(w, ev)
+			check(Array(desc["options"]).size() == 3 and String(desc["title"]) != "", "evento %s sem texto/opções" % k)
+			var bal := c.balance
+			var p: Player = w.player(int(ev["p"]))
+			var coh := c.cohesion
+			var msg := EventManager.resolve(w, ev, opt)
+			check(msg != "" and not w.events.has(ev), "evento %s opção %d não resolveu" % [k, opt])
+			match k:
+				"homesick":
+					if opt == 0:
+						check(c.balance < bal, "trazer a família não custou")
+					elif opt == 1:
+						check(p.injury_weeks >= 1, "folga não tirou do próximo jogo")
+				"mercenary":
+					if opt == 0:
+						check(p.club_id != c.id and c.balance > bal, "venda ao Golfo não aconteceu")
+					elif opt == 1:
+						check(p.club_id == c.id, "aumento não segurou o jogador")
+				"want_leave":
+					if opt == 1:
+						check(p.transfer_listed, "não entrou na lista de venda")
+					elif opt == 2:
+						check(c.cohesion < coh, "segurar à força não pesou no vestiário")
+				"fight":
+					if opt == 1:
+						check(p.suspension >= 1, "afastamento não valeu")
+					elif opt == 2:
+						check(c.cohesion < coh, "deixar passar não afetou o entrosamento")
+	# Virose: força o sorteio até acontecer
+	var w2 := _career_world()
+	var sick := false
+	for _i in 400:
+		EventManager._random_happenings(w2)
+		for p: Player in w2.squad(w2.user_club()):
+			if ["Virose", "Gripe forte", "Intoxicação alimentar", "Amigdalite"].has(p.injury_name):
+				sick = true
+		if sick:
+			break
+	check(sick, "virose nunca aconteceu")
 
 
 func _test_referees() -> void:
