@@ -568,16 +568,31 @@ func _hw(v: float) -> float:
 	return w
 
 
+## Expoente do crânio visto de frente: um pouco "quadrado" (superelipse), largo nas têmporas e
+## arredondado no alto — uma elipse pura deixa a cabeça careca em forma de cone.
+const SKULL_N := 2.35
+
+
+## Meia largura do crânio (em fw) na altura `up` (0 = meio da cabeça, 1 = topo): a testa só
+## estreita perto do alto, como num crânio real.
+func _skull_rx(up: float) -> float:
+	return lerpf(float(_f["cheek_w"]), float(_f["forehead"]), pow(clampf(up, 0.0, 1.0), 1.6))
+
+
+## Ponto do alto da cabeça no ângulo `a` (de -PI a 0), em unidades do rosto.
+func _skull_pt(a: float, grow_x: float = 0.0, grow_y: float = 0.0) -> Vector2:
+	var e := 2.0 / SKULL_N
+	var cx := signf(cos(a)) * pow(absf(cos(a)), e)
+	var sy := signf(sin(a)) * pow(absf(sin(a)), e)
+	return Vector2(cx * (_skull_rx(-sy) + grow_x), sy * (1.02 + grow_y))
+
+
 ## Contorno da cabeça (sentido horário a partir do alto).
 func _head_contour(k: int) -> PackedVector2Array:
-	var f := _f
-	var cw: float = f["cheek_w"]
-	var fore: float = f["forehead"]
 	var right := PackedVector2Array()
 	for i in k:
 		var a := -PI * 0.5 + PI * 0.5 * float(i) / k
-		var up := -sin(a)
-		right.append(Vector2(cos(a) * lerpf(cw, fore, up), sin(a) * 1.02))
+		right.append(_skull_pt(a))
 	for i in k + 1:
 		var q := float(i) / k
 		var v := sin(q * PI * 0.5)
@@ -596,8 +611,8 @@ func _th(u: float, v: float) -> float:
 		# Perto do queixo a largura tende a zero; um piso evita uma "agulha" de barba no pescoço
 		var hw := maxf(_hw(minf(v, 1.0)), maxf(0.001, 0.32 * smoothstep(0.8, 1.0, v)))
 		return maxf(absf(u) / hw, v)
-	var rx := lerpf(float(_f["cheek_w"]), float(_f["forehead"]), clampf(-v / 1.02, 0.0, 1.0))
-	return sqrt(pow(u / rx, 2.0) + pow(v / 1.02, 2.0))
+	var rx := _skull_rx(-v / 1.02)
+	return pow(pow(absf(u / rx), SKULL_N) + pow(absf(v / 1.02), SKULL_N), 1.0 / SKULL_N)
 
 
 # ---------------------------------------------------------------------------
@@ -913,8 +928,9 @@ func _body_setup() -> void:
 	var build: float = f.get("build", 0.5)
 	_chin_y = _hc.y + _fh
 	_nwt = _fw * float(f.get("neck_w", 0.68)) * (1.0 + 0.1 * float(f["fat"]))
-	# O pescoço nunca passa da mandíbula: em rosto fino um pescoço largo vira uma "coluna"
-	_nwt = minf(_nwt, _fw * float(f["jaw"]) * 0.95 * 0.86)
+	# Pescoço de atleta: nunca um "palito" embaixo de um rosto fino, mas também nunca mais largo que
+	# a mandíbula (aí vira uma "coluna")
+	_nwt = minf(maxf(_nwt, _fw * 0.6), _fw * float(f["jaw"]) * 0.95 * 0.92)
 	_ynb = _chin_y + s * (0.058 + 0.01 * build)
 	_ynotch = _chin_y + s * (0.1 + 0.01 * build)
 	_sw = s * (0.41 + 0.07 * build)
@@ -1902,8 +1918,9 @@ func _poly_colors(pts: PackedVector2Array, cols: PackedColorArray) -> void:
 # Barba
 # ---------------------------------------------------------------------------
 
-## Densidade (0..1) de pelos da barba `P` no ponto (u, v) do rosto.
-func _beard_dens(u: float, v: float, P: Dictionary) -> float:
+## Densidade (0..1) de pelos da barba `P` no ponto (u, v) do rosto. Sem `patches`, ignora as falhas
+## (a malha usa a versão contínua; as falhas ficam nos fios, que têm resolução para desenhá-las).
+func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> float:
 	if P.is_empty():
 		return 0.0
 	var f := _f
@@ -2036,13 +2053,17 @@ func _beard_dens(u: float, v: float, P: Dictionary) -> float:
 	# Nunca acima da linha das maçãs
 	d *= smoothstep(_E + 0.08, _E + 0.2, v) if au < 0.8 else 1.0
 	# Falhas
-	var pt: float = maxf(float(P["pt"]), float(f["beard_patch"]) if P != _shadow_p else 0.0)
-	if pt > 0.01:
+	var pt := _beard_patchiness(P)
+	if pt > 0.01 and patches:
 		var sd2 := float(int(f["beard_seed"]) % 1000)
 		var nz := _vnoise(u * 6.5 + sd2 * 0.37, v * 6.5 - sd2 * 0.21) * 0.62 + _vnoise(u * 15.0 - sd2, v * 13.0 + sd2 * 0.5) * 0.38
 		var on_cheek := smoothstep(0.15, 0.45, au) * (1.0 - smoothstep(0.8, 1.0, v))
 		d *= lerpf(1.0, smoothstep(pt - 0.12, pt + 0.1, nz), on_cheek * minf(1.0, pt * 1.6))
 	return clampf(d, 0.0, 1.0)
+
+
+func _beard_patchiness(P: Dictionary) -> float:
+	return maxf(float(P["pt"]), float(_f["beard_patch"]) if P != _shadow_p else 0.0)
 
 
 func _beard_mesh() -> void:
@@ -2052,6 +2073,9 @@ func _beard_mesh() -> void:
 	var op: float = P["op"]
 	var col: Color = f["beard_col"]
 	var gray := clampf(float(f["gray"]) * 1.6, 0.0, 0.8)
+	var short := int(P["tx"]) == 0
+	# Barba rala: a malha é só uma sombra leve e contínua; quem desenha as falhas são os fios
+	var patchy := minf(1.0, _beard_patchiness(P) * 1.6)
 	var head := _head_contour(_contour_k())
 	var grown := PackedVector2Array()
 	for p in head:
@@ -2066,9 +2090,10 @@ func _beard_mesh() -> void:
 		grown.append(p + Vector2(dir.x * _fw, dir.y * _fh) * ext + Vector2(0, _fh * ext * 0.6 * float(q.y > 0.5)))
 	_beard_data = _radial(_hc, grown, _rings(13), func(p: Vector2, _t: float, _i: int) -> Color:
 		var q := _uv(p)
-		var dens := _beard_dens(q.x, q.y, P)
+		var dens := _beard_dens(q.x, q.y, P, false)
 		if dens <= 0.0:
 			return Color(col, 0.0)
+		dens *= 1.0 - 0.5 * patchy * smoothstep(0.15, 0.45, absf(q.x))
 		var lum := 0.95 - 0.22 * clampf(q.x, -1.0, 1.0) - 0.2 * smoothstep(0.6, 1.3, q.y) + 0.12 * _g2(q.x + 0.3, q.y - 0.5, 0.3, 0.2)
 		lum += 0.05 * sin(q.x * 23.0 + q.y * 7.0) * sin(q.y * 19.0 - q.x * 5.0)
 		var c := col.lerp(Color.BLACK, (1.0 - lum) * 0.6) if lum < 1.0 else col.lerp(col.lightened(0.3), lum - 1.0)
@@ -2076,6 +2101,9 @@ func _beard_mesh() -> void:
 		c = c.lerp(col.lightened(0.18).lerp(Color("#8A5A3A"), 0.15), 0.25 * smoothstep(0.7, 1.2, q.y) + 0.1 * smoothstep(0.4, 0.8, absf(q.x)))
 		# Os primeiros fios brancos aparecem nos cantos do queixo
 		c = c.lerp(Color("#D9D6D0"), gray * _g2(absf(q.x) - 0.3, q.y - 0.95, 0.16, 0.22))
+		if short:
+			# Barba por fazer vista de longe é uma sombra fria na pele, não uma mancha marrom
+			c = c.lerp(_shadow_col, 0.4)
 		return Color(c, dens * op))
 
 
@@ -2105,7 +2133,8 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 			cand.append(i)
 	if cand.is_empty():
 		return
-	var n := int((420 if tx == 0 else 300 + ln * 300.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6))
+	var patchy := minf(1.0, _beard_patchiness(P) * 1.6)
+	var n := int((420 if tx == 0 else 300 + ln * 300.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6) * (1.0 + patchy * 0.4))
 	var w := maxf(0.6, _s * 0.0036)
 	var jit := _fw * 0.05
 	for k in n:
@@ -2116,6 +2145,11 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 		var p := pts[i] + Vector2(rng.randf_range(-jit, jit), rng.randf_range(-jit, jit))
 		if (p - _c).length() > _R - 1.0:
 			continue
+		if patchy > 0.01:
+			# Falhas desenhadas pelos fios, na posição exata de cada um
+			var qp := _uv(p)
+			if rng.randf() > _beard_dens(qp.x, qp.y, P):
+				continue
 		if tx == 0:
 			# Pelos curtos: tracinhos finos e claros, não pontos grossos
 			var dd := Vector2(rng.randf_range(-0.3, 0.3), 1.0).normalized() * _s * rng.randf_range(0.003, 0.006)
@@ -2186,7 +2220,8 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 	if crown > 0.0:
 		a *= 1.0 - minf(1.0, crown * 1.3) * _g(q.x, 0.7) * smoothstep(0.35, 0.8, h) * smoothstep(0.05, 0.4, w)
 	var sharp: bool = bool(f["lineup"]) or _hs("tx", "") in ["braid", "braid_zig", "waves"]
-	a *= lerpf(0.9 if sharp else 0.4, 1.0, smoothstep(0.0, 0.08 if sharp else 0.25, w))
+	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa)
+	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
 	return a
 
 
@@ -2208,16 +2243,21 @@ func _build_cap() -> void:
 	for i in n:
 		var a := PI - d0 + (PI + 2.0 * d0) * float(i) / (n - 1)
 		var up := maxf(0.0, -sin(a))
-		var rx := lerpf(cw, fore, up) * 1.035
-		var ext := sd * (1.0 - up * up) + tp * up * up
+		# O volume de cima cobre toda a coroa (não só o ponto mais alto, que vira um "cone")
+		var ext := lerpf(sd, tp, smoothstep(0.05, 0.8, up))
 		if sp == 3:
 			ext += 0.035 * sin(a * 11.0 + seed) + 0.025 * sin(a * 17.0 + seed * 1.7)
-		var x := cos(a) * (rx + ext * 0.9)
-		var y := sin(a) * (1.03 + ext)
+		var q: Vector2
+		if sin(a) < 0.0:
+			# Alto da cabeça: mesma superelipse do crânio, crescida pelo volume do cabelo
+			q = _skull_pt(a, 0.035 + ext * 0.9, 0.01 + ext)
+		else:
+			q = Vector2(cos(a) * (cw * 1.035 + ext * 0.9), sin(a) * (1.03 + ext))
 		if sp == 1:
-			y = -pow(up, 0.22) * (1.03 + tp) if sin(a) < 0.0 else y
-			x = cos(a) * (rx + 0.04)
-		outer.append(Vector2(x, y))
+			if sin(a) < 0.0:
+				q.y = -pow(up, 0.22) * (1.03 + tp)
+			q.x = cos(a) * (lerpf(cw, fore, up) * 1.035 + 0.04)
+		outer.append(q)
 	# Linha do cabelo
 	var rec: float = f["recession"]
 	var hl: float = float(f["hairline"]) + float(_hs("hl", 0.0))
@@ -2234,6 +2274,8 @@ func _build_cap() -> void:
 			y -= rec * 0.12 + rec * 0.3 * smoothstep(0.15, 0.66, absf(u))
 			if bool(f["widow"]):
 				y += 0.05 * _g(u, 0.09)
+			if not bool(f["lineup"]):
+				y += 0.012 * sin(t * 23.0 + seed) + 0.008 * sin(t * 41.0 + seed * 0.7)
 		if int(_hs("fl", 0)) == 3:
 			# Repartido ao meio: o cabelo cai para os lados e deixa um "V" de testa no centro
 			y = hl + 0.2 - 0.1 * absf(u) / 0.66 - 0.2 * _g(u, 0.16) + 0.08 * smoothstep(0.3, 0.66, absf(u))
@@ -2296,6 +2338,9 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 		return Color(_hair_col(p, 1.0, t, gloss), _cap_alpha(p, 1.0)))
 	var tex := String(_hs("tx", ["str", "wavy", "curl", "coil"][int(f["texture"])]))
 	_cap_texture(rng, tex, hair)
+	var wr := RandomNumberGenerator.new()
+	wr.seed = int(f["texture_seed"]) + 31 # gerador próprio: não mexe nos sorteios das outras peças
+	_hairline_wisps(wr, tex, hair)
 	_front_piece(rng, String(_hs("fr", "")), hair, gloss)
 	_front_piece(rng, String(_hs("fr2", "")), hair, gloss)
 	# Silhueta espetada / crista
@@ -2355,6 +2400,45 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 				_strands_in_poly(rng, crest, hair, Vector2(0, -1), 24)
 	if bool(f["balding"]) or float(f["recession"]) > 0.5:
 		_scalp_shine()
+
+
+## Altura (v) da linha do cabelo na coluna `u` do rosto, lida da calota já montada.
+func _hairline_v(u: float) -> float:
+	var best := INF
+	var v := float(_f["hairline"])
+	for p in _cap_in:
+		var q := _uv(p)
+		if q.y > -0.15:
+			continue # laterais
+		var d := absf(q.x - u)
+		if d < best:
+			best = d
+			v = q.y
+	return v
+
+
+## Fios finos e curtos que atravessam a linha do cabelo (testa e têmporas): ligam o cabelo à pele
+## como numa foto, em vez de uma borda recortada. Cortes marcados (lineup, tranças) ficam limpos.
+func _hairline_wisps(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
+	if _s < 80.0 or bool(_f["lineup"]) or tex in ["braid", "braid_zig", "waves", "dots", "locs"]:
+		return
+	var w := maxf(0.5, _s * 0.0026)
+	var n := int(70 * clampf(_det, 0.5, 1.6))
+	var kinky := tex == "coil" or tex == "curl"
+	for i in n:
+		var t := rng.randf_range(0.04, 0.96)
+		var root := _cap_pt(t, rng.randf_range(0.14, 0.3))
+		if _cap_alpha(root, 0.35) < 0.5:
+			continue # lateral raspada
+		var tip := _cap_pt(t + rng.randf_range(-0.01, 0.01), rng.randf_range(-0.07, 0.02))
+		var c := hair.darkened(rng.randf_range(0.0, 0.25)).lerp(_skin, rng.randf_range(0.05, 0.25))
+		var a := rng.randf_range(0.18, 0.4)
+		if kinky:
+			# Crespos: pontinhos e voltinhas curtas em vez de fios lisos
+			_r_circle(_cl(root.lerp(tip, rng.randf_range(0.3, 0.9))), maxf(0.4, _s * rng.randf_range(0.0018, 0.003)), Color(c, a))
+			continue
+		var bend := (tip - root).orthogonal() * rng.randf_range(-0.2, 0.2)
+		_r_polyline(PackedVector2Array([_cl(root), _cl(root.lerp(tip, 0.5) + bend), _cl(tip)]), Color(c, a), w, true)
 
 
 ## Mecha espetada: base larga que afina até a ponta numa curva leve (não um triângulo reto),
@@ -2447,7 +2531,8 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 					if tex == "wavy":
 						tt += 0.012 * sin(ww * 11.0 + t0 * 30.0)
 					var p := _cap_pt(tt, ww)
-					if _cap_alpha(p, ww) < 0.5:
+					# Só pula a área raspada (degradê); a borda rala da linha do cabelo recebe fios
+					if _cap_alpha(p, maxf(ww, 0.3)) < 0.5:
 						ok = false
 						break
 					pts.append(_cl(p))
@@ -2622,10 +2707,11 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 			var hh := 0.4 if big else 0.3
 			var hl0 := float(f["hairline"])
 			var pts := PackedVector2Array()
+			# A base acompanha a linha do cabelo (um pouco para dentro dela), não uma régua na testa
 			for i in 15:
 				var t := float(i) / 14.0
 				var u := lerpf(-0.64, 0.64, t)
-				pts.append(_px(u, hl0 + 0.03 - 0.04 * sin(PI * t)))
+				pts.append(_px(u, _hairline_v(u) - 0.035))
 			for i in 17:
 				var t := float(i) / 16.0
 				var u := lerpf(0.66, -0.66, t)
@@ -2639,14 +2725,8 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 				var q := _uv(p)
 				var up := clampf((hl0 - q.y) / (hh + 0.2), 0.0, 1.0)
 				var c := _hair_col(p, 0.35 + up * 0.6, float(_i) / 32.0, gloss + 0.25)
-				return Color(c, 1.0 - smoothstep(0.8, 1.0, t) * (0.55 if _i < 15 else 0.0)))
+				return Color(c, 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if _i < 15 else 0.0)))
 			_strands_in_poly(rng, clean, hair, Vector2(-sx * 0.25, -1.0), 30 if big else 22)
-			# Sombra do topete na testa
-			var sh := PackedVector2Array()
-			for i in 11:
-				var t := float(i) / 10.0
-				sh.append(_px(lerpf(-0.55, 0.55, t), hl0 + 0.07 - 0.03 * sin(PI * t)))
-			_r_polyline(sh, Color(0, 0, 0, 0.08), _fh * 0.05, true)
 		"fringe", "crop":
 			var crop := kind == "crop"
 			var locks := 11 if not crop else 14
