@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "AUT_MOZ",
-			"name": "FC Red Bull Salzburg",
+			"name": "RB Salzburg",
 			"short": "RB Salzburg",
 			"abbr": "RBS",
 			"nick": "Bullen",
@@ -17,7 +17,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "Red Bull Arena",
+			"stadium": "Stadion Wals-Siezenheim",
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "AUT_HUT",
-			"name": "SK Rapid Wien",
+			"name": "Rapid Wien",
 			"short": "Rapid Wien",
 			"abbr": "RAP",
 			"nick": "Grün-Weißen",
@@ -46,7 +46,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Allianz Stadion",
+			"stadium": "Weststadion",
 			"capacity": 28300,
 			"kit": "plain",
 			"crest": {
@@ -64,7 +64,7 @@
 		},
 		{
 			"key": "AUT_VEI",
-			"name": "FK Austria Wien",
+			"name": "Austria Wien",
 			"short": "Austria Wien",
 			"abbr": "FAK",
 			"nick": "Veilchen",
@@ -77,7 +77,7 @@
 				"#5E2A84",
 				"#FFFFFF"
 			],
-			"stadium": "Generali Arena",
+			"stadium": "Franz-Horr-Stadion",
 			"capacity": 17600,
 			"kit": "plain",
 			"crest": {
@@ -93,7 +93,7 @@
 		},
 		{
 			"key": "AUT_GRZ",
-			"name": "SK Sturm Graz",
+			"name": "Sturm Graz",
 			"short": "Sturm Graz",
 			"abbr": "STU",
 			"nick": "Blackies",
@@ -106,7 +106,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Merkur Arena",
+			"stadium": "Stadion Graz-Liebenau",
 			"capacity": 16300,
 			"kit": "plain",
 			"crest": {
@@ -131,7 +131,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Raiffeisen Arena",
+			"stadium": "Linzer Stadion",
 			"capacity": 19000,
 			"kit": "stripes_v",
 			"rivals": [],
@@ -145,7 +145,7 @@
 		},
 		{
 			"key": "AUT_WAC",
-			"name": "Wolfsberger AC",
+			"name": "Wolfsberg",
 			"short": "Wolfsberg",
 			"abbr": "WAC",
 			"nick": "Wölfe",
@@ -170,7 +170,7 @@
 		},
 		{
 			"key": "AUT_HAR",
-			"name": "TSV Hartberg",
+			"name": "Hartberg",
 			"short": "Hartberg",
 			"abbr": "HAR",
 			"nick": "Hartberg",
@@ -191,7 +191,7 @@
 		},
 		{
 			"key": "AUT_BWL",
-			"name": "FC Blau-Weiß Linz",
+			"name": "BW Linz",
 			"short": "BW Linz",
 			"abbr": "BWL",
 			"nick": "BW Linz",
@@ -212,7 +212,7 @@
 		},
 		{
 			"key": "AUT_ALT",
-			"name": "SCR Altach",
+			"name": "Altach",
 			"short": "Altach",
 			"abbr": "ALT",
 			"nick": "Altach",
@@ -233,7 +233,7 @@
 		},
 		{
 			"key": "AUT_KLA",
-			"name": "SK Austria Klagenfurt",
+			"name": "Klagenfurt",
 			"short": "Klagenfurt",
 			"abbr": "KLA",
 			"nick": "Klagenfurt",
@@ -275,7 +275,7 @@
 		},
 		{
 			"key": "AUT_GAK",
-			"name": "Grazer AK 1902",
+			"name": "GAK",
 			"short": "GAK",
 			"abbr": "GAK",
 			"nick": "GAK",
@@ -288,7 +288,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Merkur Arena",
+			"stadium": "Stadion Graz-Liebenau",
 			"capacity": 16000,
 			"kit": "plain",
 			"crest": {},

@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "DEN_LOV",
-			"name": "F.C. København",
+			"name": "FC København",
 			"short": "FC København",
 			"abbr": "FCK",
 			"nick": "Løverne",
@@ -35,7 +35,7 @@
 		},
 		{
 			"key": "DEN_DRE",
-			"name": "Brøndby IF",
+			"name": "Brøndby",
 			"short": "Brøndby",
 			"abbr": "BIF",
 			"nick": "Drengene",
@@ -67,7 +67,7 @@
 		},
 		{
 			"key": "DEN_ULV",
-			"name": "FC Midtjylland",
+			"name": "Midtjylland",
 			"short": "Midtjylland",
 			"abbr": "FCM",
 			"nick": "Ulvene",
@@ -93,7 +93,7 @@
 		},
 		{
 			"key": "DEN_AGF",
-			"name": "Aarhus Gymnastikforening",
+			"name": "AGF",
 			"short": "AGF",
 			"abbr": "AGF",
 			"nick": "De Hvide",
@@ -120,7 +120,7 @@
 		},
 		{
 			"key": "DEN_NOR",
-			"name": "FC Nordsjælland",
+			"name": "Nordsjælland",
 			"short": "Nordsjælland",
 			"abbr": "FCN",
 			"nick": "Tigrene",
@@ -147,7 +147,7 @@
 		},
 		{
 			"key": "DEN_SIL",
-			"name": "Silkeborg IF",
+			"name": "Silkeborg",
 			"short": "Silkeborg",
 			"abbr": "SIF",
 			"nick": "Silkeborg",
@@ -173,7 +173,7 @@
 		},
 		{
 			"key": "DEN_RAN",
-			"name": "Randers FC",
+			"name": "Randers",
 			"short": "Randers",
 			"abbr": "RFC",
 			"nick": "Randers",
@@ -194,7 +194,7 @@
 		},
 		{
 			"key": "DEN_VIB",
-			"name": "Viborg FF",
+			"name": "Viborg",
 			"short": "Viborg",
 			"abbr": "VFF",
 			"nick": "Viborg",
@@ -215,7 +215,7 @@
 		},
 		{
 			"key": "DEN_VEJ",
-			"name": "Vejle Boldklub",
+			"name": "Vejle",
 			"short": "Vejle",
 			"abbr": "VEJ",
 			"nick": "Vejle",
@@ -236,7 +236,7 @@
 		},
 		{
 			"key": "DEN_AAB",
-			"name": "Aalborg BK",
+			"name": "AaB",
 			"short": "AaB",
 			"abbr": "AAB",
 			"nick": "AaB",
@@ -257,7 +257,7 @@
 		},
 		{
 			"key": "DEN_LYN",
-			"name": "Lyngby BK",
+			"name": "Lyngby",
 			"short": "Lyngby",
 			"abbr": "LYN",
 			"nick": "Lyngby",
@@ -278,7 +278,7 @@
 		},
 		{
 			"key": "DEN_SON",
-			"name": "Sønderjyske Fodbold",
+			"name": "Sønderjyske",
 			"short": "Sønderjyske",
 			"abbr": "SJE",
 			"nick": "Sønderjyske",

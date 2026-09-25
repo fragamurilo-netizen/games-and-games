@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "CRO_MOD",
-			"name": "GNK Dinamo Zagreb",
+			"name": "Dinamo Zagreb",
 			"short": "Dinamo Zagreb",
 			"abbr": "DIN",
 			"nick": "Modri",
@@ -36,7 +36,7 @@
 		},
 		{
 			"key": "CRO_BIL",
-			"name": "HNK Hajduk Split",
+			"name": "Hajduk Split",
 			"short": "Hajduk Split",
 			"abbr": "HAJ",
 			"nick": "Bili",
@@ -67,7 +67,7 @@
 		},
 		{
 			"key": "CRO_RIJ",
-			"name": "HNK Rijeka",
+			"name": "Rijeka",
 			"short": "Rijeka",
 			"abbr": "RIJ",
 			"nick": "Riječki bijeli",
@@ -95,7 +95,7 @@
 		},
 		{
 			"key": "CRO_OSI",
-			"name": "NK Osijek",
+			"name": "Osijek",
 			"short": "Osijek",
 			"abbr": "OSI",
 			"nick": "Bijelo-plavi",
@@ -121,7 +121,7 @@
 		},
 		{
 			"key": "CRO_VAR",
-			"name": "NK Varaždin",
+			"name": "Varaždin",
 			"short": "Varaždin",
 			"abbr": "VAR",
 			"nick": "Varaždinci",
@@ -146,7 +146,7 @@
 		},
 		{
 			"key": "CRO_LOK",
-			"name": "NK Lokomotiva Zagreb",
+			"name": "Lokomotiva",
 			"short": "Lokomotiva",
 			"abbr": "LOK",
 			"nick": "Lokosi",
@@ -172,7 +172,7 @@
 		},
 		{
 			"key": "CRO_GOR",
-			"name": "HNK Gorica",
+			"name": "Gorica",
 			"short": "Gorica",
 			"abbr": "GOR",
 			"nick": "Gorica",
@@ -193,7 +193,7 @@
 		},
 		{
 			"key": "CRO_IST",
-			"name": "NK Istra 1961",
+			"name": "Istra 1961",
 			"short": "Istra 1961",
 			"abbr": "IST",
 			"nick": "Istra 1961",
@@ -214,7 +214,7 @@
 		},
 		{
 			"key": "CRO_SLB",
-			"name": "NK Slaven Belupo",
+			"name": "Slaven Belupo",
 			"short": "Slaven Belupo",
 			"abbr": "SLB",
 			"nick": "Slaven Belupo",
@@ -235,7 +235,7 @@
 		},
 		{
 			"key": "CRO_SIB",
-			"name": "HNK Šibenik",
+			"name": "Šibenik",
 			"short": "Šibenik",
 			"abbr": "SIB",
 			"nick": "Šibenik",

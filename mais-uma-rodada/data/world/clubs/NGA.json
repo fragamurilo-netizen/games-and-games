@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "NGA_ABA",
-			"name": "Enyimba FC",
+			"name": "Enyimba",
 			"short": "Enyimba",
 			"abbr": "ENY",
 			"nick": "Elephants",
@@ -30,7 +30,7 @@
 		},
 		{
 			"key": "NGA_ENU",
-			"name": "Rangers International FC",
+			"name": "Enugu Rangers",
 			"short": "Enugu Rangers",
 			"abbr": "RAN",
 			"nick": "Flying Antelopes",
@@ -56,7 +56,7 @@
 		},
 		{
 			"key": "NGA_REM",
-			"name": "Remo Stars FC",
+			"name": "Remo Stars",
 			"short": "Remo Stars",
 			"abbr": "REM",
 			"nick": "Sky Blue Stars",
@@ -81,7 +81,7 @@
 		},
 		{
 			"key": "NGA_RIV",
-			"name": "Rivers United FC",
+			"name": "Rivers United",
 			"short": "Rivers United",
 			"abbr": "RIV",
 			"nick": "Pride of Rivers",
@@ -106,7 +106,7 @@
 		},
 		{
 			"key": "NGA_KAN",
-			"name": "Kano Pillars FC",
+			"name": "Kano Pillars",
 			"short": "Kano Pillars",
 			"abbr": "KAN",
 			"nick": "Sai Masu Gida",
@@ -131,7 +131,7 @@
 		},
 		{
 			"key": "NGA_SHO",
-			"name": "Shooting Stars SC",
+			"name": "Shooting Stars",
 			"short": "Shooting Stars",
 			"abbr": "3SC",
 			"nick": "Oluyole Warriors",
@@ -157,7 +157,7 @@
 		},
 		{
 			"key": "NGA_PLA",
-			"name": "Plateau United FC",
+			"name": "Plateau United",
 			"short": "Plateau United",
 			"abbr": "PLU",
 			"nick": "Plateau United",
@@ -178,7 +178,7 @@
 		},
 		{
 			"key": "NGA_KWA",
-			"name": "Kwara United FC",
+			"name": "Kwara United",
 			"short": "Kwara United",
 			"abbr": "KWU",
 			"nick": "Kwara United",
@@ -199,7 +199,7 @@
 		},
 		{
 			"key": "NGA_AKW",
-			"name": "Akwa United FC",
+			"name": "Akwa United",
 			"short": "Akwa United",
 			"abbr": "AKU",
 			"nick": "Akwa United",
@@ -220,7 +220,7 @@
 		},
 		{
 			"key": "NGA_LOB",
-			"name": "Lobi Stars FC",
+			"name": "Lobi Stars",
 			"short": "Lobi Stars",
 			"abbr": "LOB",
 			"nick": "Lobi Stars",
@@ -241,7 +241,7 @@
 		},
 		{
 			"key": "NGA_BEN",
-			"name": "Bendel Insurance FC",
+			"name": "Bendel Insurance",
 			"short": "Bendel Insurance",
 			"abbr": "BIN",
 			"nick": "Bendel Insurance",
@@ -262,7 +262,7 @@
 		},
 		{
 			"key": "NGA_ABI",
-			"name": "Abia Warriors FC",
+			"name": "Abia Warriors",
 			"short": "Abia Warriors",
 			"abbr": "ABW",
 			"nick": "Abia Warriors",
@@ -283,7 +283,7 @@
 		},
 		{
 			"key": "NGA_NIG",
-			"name": "Niger Tornadoes FC",
+			"name": "Niger Tornadoes",
 			"short": "Niger Tornadoes",
 			"abbr": "NIT",
 			"nick": "Niger Tornadoes",
@@ -304,7 +304,7 @@
 		},
 		{
 			"key": "NGA_KAT",
-			"name": "Katsina United FC",
+			"name": "Katsina United",
 			"short": "Katsina United",
 			"abbr": "KAT",
 			"nick": "Katsina United",
@@ -325,7 +325,7 @@
 		},
 		{
 			"key": "NGA_BAY",
-			"name": "Bayelsa United FC",
+			"name": "Bayelsa United",
 			"short": "Bayelsa United",
 			"abbr": "BAY",
 			"nick": "Bayelsa United",
@@ -346,7 +346,7 @@
 		},
 		{
 			"key": "NGA_NAS",
-			"name": "Nasarawa United FC",
+			"name": "Nasarawa United",
 			"short": "Nasarawa United",
 			"abbr": "NAS",
 			"nick": "Nasarawa United",
@@ -367,7 +367,7 @@
 		},
 		{
 			"key": "NGA_ELK",
-			"name": "El-Kanemi Warriors FC",
+			"name": "El-Kanemi",
 			"short": "El-Kanemi",
 			"abbr": "ELK",
 			"nick": "El-Kanemi",
@@ -388,7 +388,7 @@
 		},
 		{
 			"key": "NGA_SUN",
-			"name": "Sunshine Stars FC",
+			"name": "Sunshine Stars",
 			"short": "Sunshine Stars",
 			"abbr": "SUN",
 			"nick": "Sunshine Stars",
@@ -409,7 +409,7 @@
 		},
 		{
 			"key": "NGA_HEA",
-			"name": "Heartland FC",
+			"name": "Heartland",
 			"short": "Heartland",
 			"abbr": "HEA",
 			"nick": "Heartland",
@@ -430,7 +430,7 @@
 		},
 		{
 			"key": "NGA_IKO",
-			"name": "Ikorodu City FC",
+			"name": "Ikorodu City",
 			"short": "Ikorodu City",
 			"abbr": "IKC",
 			"nick": "Ikorodu City",

@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "TUR_IAS",
-			"name": "Galatasaray SK",
+			"name": "Galatasaray",
 			"short": "Galatasaray",
 			"abbr": "GS",
 			"nick": "Cimbom",
@@ -37,7 +37,7 @@
 		},
 		{
 			"key": "TUR_IKN",
-			"name": "Fenerbahçe SK",
+			"name": "Fenerbahçe",
 			"short": "Fenerbahçe",
 			"abbr": "FB",
 			"nick": "Sarı Kanaryalar",
@@ -50,7 +50,7 @@
 				"#FFED00",
 				"#002D72"
 			],
-			"stadium": "Ülker Stadyumu",
+			"stadium": "Şükrü Saracoğlu",
 			"capacity": 47800,
 			"kit": "stripes_v",
 			"crest": {
@@ -69,7 +69,7 @@
 		},
 		{
 			"key": "TUR_IKR",
-			"name": "Beşiktaş JK",
+			"name": "Beşiktaş",
 			"short": "Beşiktaş",
 			"abbr": "BJK",
 			"nick": "Kara Kartallar",
@@ -127,7 +127,7 @@
 		},
 		{
 			"key": "TUR_BSK",
-			"name": "İstanbul Başakşehir FK",
+			"name": "Başakşehir",
 			"short": "Başakşehir",
 			"abbr": "IBFK",
 			"nick": "Turuncu-Lacivertliler",
@@ -180,7 +180,7 @@
 		},
 		{
 			"key": "TUR_GOZ",
-			"name": "Göztepe SK",
+			"name": "Göztepe",
 			"short": "Göztepe",
 			"abbr": "GOZ",
 			"nick": "Göz-Göz",
@@ -234,7 +234,7 @@
 		},
 		{
 			"key": "TUR_KAS",
-			"name": "Kasımpaşa SK",
+			"name": "Kasımpaşa",
 			"short": "Kasımpaşa",
 			"abbr": "KAS",
 			"nick": "Apaçiler",
@@ -365,7 +365,7 @@
 		},
 		{
 			"key": "TUR_GFK",
-			"name": "Gaziantep FK",
+			"name": "Gaziantep",
 			"short": "Gaziantep",
 			"abbr": "GFK",
 			"nick": "Gazi Şehir",
@@ -418,7 +418,7 @@
 		},
 		{
 			"key": "TUR_RIZ",
-			"name": "Çaykur Rizespor",
+			"name": "Rizespor",
 			"short": "Rizespor",
 			"abbr": "RIZ",
 			"nick": "Atmacalar",
@@ -445,7 +445,7 @@
 		},
 		{
 			"key": "TUR_GEN",
-			"name": "Gençlerbirliği SK",
+			"name": "Gençlerbirliği",
 			"short": "Gençlerbirliği",
 			"abbr": "GEN",
 			"nick": "Gençler",
@@ -472,7 +472,7 @@
 		},
 		{
 			"key": "TUR_FKG",
-			"name": "Fatih Karagümrük SK",
+			"name": "Karagümrük",
 			"short": "Karagümrük",
 			"abbr": "FKG",
 			"nick": "Karagümrük",

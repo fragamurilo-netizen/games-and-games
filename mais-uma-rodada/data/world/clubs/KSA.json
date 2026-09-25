@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "KSA_AZR",
-			"name": "Al Hilal SFC",
+			"name": "Al Hilal",
 			"short": "Al Hilal",
 			"abbr": "HIL",
 			"nick": "Líder",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "KSA_ALM",
-			"name": "Al Nassr FC",
+			"name": "Al Nassr",
 			"short": "Al Nassr",
 			"abbr": "NAS",
 			"nick": "Global",
@@ -62,7 +62,7 @@
 		},
 		{
 			"key": "KSA_AMD",
-			"name": "Al Ittihad Club",
+			"name": "Al Ittihad",
 			"short": "Al Ittihad",
 			"abbr": "ITT",
 			"nick": "Tigres",
@@ -92,7 +92,7 @@
 		},
 		{
 			"key": "KSA_RAQ",
-			"name": "Al Ahli Saudi FC",
+			"name": "Al Ahli",
 			"short": "Al Ahli",
 			"abbr": "AHL",
 			"nick": "Real",
@@ -120,7 +120,7 @@
 		},
 		{
 			"key": "KSA_QAD",
-			"name": "Al Qadsiah FC",
+			"name": "Al Qadsiah",
 			"short": "Al Qadsiah",
 			"abbr": "QAD",
 			"nick": "Qadsawi",
@@ -148,7 +148,7 @@
 		},
 		{
 			"key": "KSA_ETT",
-			"name": "Al Ettifaq FC",
+			"name": "Al Ettifaq",
 			"short": "Al Ettifaq",
 			"abbr": "ETT",
 			"nick": "Cavaleiros do Golfo",
@@ -177,7 +177,7 @@
 		},
 		{
 			"key": "KSA_SHB",
-			"name": "Al Shabab FC",
+			"name": "Al Shabab",
 			"short": "Al Shabab",
 			"abbr": "SHB",
 			"nick": "Leões Brancos",
@@ -206,7 +206,7 @@
 		},
 		{
 			"key": "KSA_TAA",
-			"name": "Al Taawoun FC",
+			"name": "Al Taawoun",
 			"short": "Al Taawoun",
 			"abbr": "TAA",
 			"nick": "Sukkari",
@@ -232,7 +232,7 @@
 		},
 		{
 			"key": "KSA_FAT",
-			"name": "Al Fateh SC",
+			"name": "Al Fateh",
 			"short": "Al Fateh",
 			"abbr": "FAT",
 			"nick": "Modelo",
@@ -257,7 +257,7 @@
 		},
 		{
 			"key": "KSA_KHA",
-			"name": "Al Khaleej FC",
+			"name": "Al Khaleej",
 			"short": "Al Khaleej",
 			"abbr": "KHA",
 			"nick": "Golfinhos",
@@ -282,7 +282,7 @@
 		},
 		{
 			"key": "KSA_FAY",
-			"name": "Al Fayha FC",
+			"name": "Al Fayha",
 			"short": "Al Fayha",
 			"abbr": "FAY",
 			"nick": "Laranja",
@@ -307,7 +307,7 @@
 		},
 		{
 			"key": "KSA_RIY",
-			"name": "Al Riyadh SC",
+			"name": "Al Riyadh",
 			"short": "Al Riyadh",
 			"abbr": "RIY",
 			"nick": "Escola",
@@ -334,7 +334,7 @@
 		},
 		{
 			"key": "KSA_KHO",
-			"name": "Al Kholood Club",
+			"name": "Al Kholood",
 			"short": "Al Kholood",
 			"abbr": "KHO",
 			"nick": "Kholood",
@@ -362,7 +362,7 @@
 		},
 		{
 			"key": "KSA_OKH",
-			"name": "Al Okhdood Club",
+			"name": "Al Okhdood",
 			"short": "Al Okhdood",
 			"abbr": "OKH",
 			"nick": "Okhdood",
@@ -387,7 +387,7 @@
 		},
 		{
 			"key": "KSA_HAZ",
-			"name": "Al Hazem SC",
+			"name": "Al Hazem",
 			"short": "Al Hazem",
 			"abbr": "HAZ",
 			"nick": "Hazem",
@@ -415,7 +415,7 @@
 		},
 		{
 			"key": "KSA_DAM",
-			"name": "Damac FC",
+			"name": "Damac",
 			"short": "Damac",
 			"abbr": "DAM",
 			"nick": "Cavaleiros do Sul",
@@ -440,7 +440,7 @@
 		},
 		{
 			"key": "KSA_NAJ",
-			"name": "Al Najma SC",
+			"name": "Al Najma",
 			"short": "Al Najma",
 			"abbr": "NAJ",
 			"nick": "Estrela",
@@ -465,7 +465,7 @@
 		},
 		{
 			"key": "KSA_NEO",
-			"name": "NEOM SC",
+			"name": "NEOM",
 			"short": "NEOM",
 			"abbr": "NEO",
 			"nick": "NEOM",

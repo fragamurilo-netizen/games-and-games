@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "KOR_ULS",
-			"name": "Ulsan HD FC",
+			"name": "Ulsan HD",
 			"short": "Ulsan HD",
 			"abbr": "ULS",
 			"nick": "Horangi",
@@ -32,7 +32,7 @@
 		},
 		{
 			"key": "KOR_JEO",
-			"name": "Jeonbuk Hyundai Motors FC",
+			"name": "Jeonbuk",
 			"short": "Jeonbuk",
 			"abbr": "JEO",
 			"nick": "Green Warriors",
@@ -59,7 +59,7 @@
 		},
 		{
 			"key": "KOR_POH",
-			"name": "Pohang Steelers",
+			"name": "Pohang",
 			"short": "Pohang",
 			"abbr": "POH",
 			"nick": "Steelers",
@@ -114,7 +114,7 @@
 		},
 		{
 			"key": "KOR_GAN",
-			"name": "Gangwon FC",
+			"name": "Gangwon",
 			"short": "Gangwon",
 			"abbr": "GAN",
 			"nick": "Gangwon",
@@ -164,7 +164,7 @@
 		},
 		{
 			"key": "KOR_DAE",
-			"name": "Daejeon Hana Citizen",
+			"name": "Daejeon",
 			"short": "Daejeon",
 			"abbr": "DAE",
 			"nick": "Purple",
@@ -191,7 +191,7 @@
 		},
 		{
 			"key": "KOR_GIM",
-			"name": "Gimcheon Sangmu FC",
+			"name": "Gimcheon",
 			"short": "Gimcheon",
 			"abbr": "GIM",
 			"nick": "Sangmu",
@@ -217,7 +217,7 @@
 		},
 		{
 			"key": "KOR_JEJ",
-			"name": "Jeju SK FC",
+			"name": "Jeju SK",
 			"short": "Jeju SK",
 			"abbr": "JEJ",
 			"nick": "Jeju SK",
@@ -293,7 +293,7 @@
 				"#75AADB",
 				"#FFFFFF"
 			],
-			"stadium": "DGB Daegu Bank Park",
+			"stadium": "Daegu Forest Arena",
 			"capacity": 12400,
 			"kit": "plain",
 			"crest": {},

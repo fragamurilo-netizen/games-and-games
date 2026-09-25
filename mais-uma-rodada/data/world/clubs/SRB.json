@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "SRB_CZV",
-			"name": "FK Crvena zvezda",
+			"name": "Crvena zvezda",
 			"short": "Crvena zvezda",
 			"abbr": "CZV",
 			"nick": "Zvezdaši",
@@ -34,7 +34,7 @@
 		},
 		{
 			"key": "SRB_CRN",
-			"name": "FK Partizan",
+			"name": "Partizan",
 			"short": "Partizan",
 			"abbr": "PAR",
 			"nick": "Grobari",
@@ -63,7 +63,7 @@
 		},
 		{
 			"key": "SRB_TSC",
-			"name": "FK TSC Bačka Topola",
+			"name": "TSC",
 			"short": "TSC",
 			"abbr": "TSC",
 			"nick": "Plavo-beli",
@@ -89,7 +89,7 @@
 		},
 		{
 			"key": "SRB_VOJ",
-			"name": "FK Vojvodina",
+			"name": "Vojvodina",
 			"short": "Vojvodina",
 			"abbr": "VOJ",
 			"nick": "Voša",
@@ -116,7 +116,7 @@
 		},
 		{
 			"key": "SRB_CUK",
-			"name": "FK Čukarički",
+			"name": "Čukarički",
 			"short": "Čukarički",
 			"abbr": "CUK",
 			"nick": "Brđani",
@@ -143,7 +143,7 @@
 		},
 		{
 			"key": "SRB_RAD",
-			"name": "FK Radnički Niš",
+			"name": "Radnički Niš",
 			"short": "Radnički Niš",
 			"abbr": "RNI",
 			"nick": "Real sa Nišave",
@@ -170,7 +170,7 @@
 		},
 		{
 			"key": "SRB_NPZ",
-			"name": "FK Novi Pazar",
+			"name": "Novi Pazar",
 			"short": "Novi Pazar",
 			"abbr": "NPZ",
 			"nick": "Novi Pazar",
@@ -191,7 +191,7 @@
 		},
 		{
 			"key": "SRB_ZEL",
-			"name": "FK Železničar Pančevo",
+			"name": "Železničar",
 			"short": "Železničar",
 			"abbr": "ZEL",
 			"nick": "Železničar",
@@ -212,7 +212,7 @@
 		},
 		{
 			"key": "SRB_SPA",
-			"name": "FK Spartak Subotica",
+			"name": "Spartak",
 			"short": "Spartak",
 			"abbr": "SPA",
 			"nick": "Spartak",
@@ -233,7 +233,7 @@
 		},
 		{
 			"key": "SRB_MLA",
-			"name": "FK Mladost Lučani",
+			"name": "Mladost",
 			"short": "Mladost",
 			"abbr": "MLA",
 			"nick": "Mladost",
@@ -254,7 +254,7 @@
 		},
 		{
 			"key": "SRB_IMT",
-			"name": "FK IMT Beograd",
+			"name": "IMT",
 			"short": "IMT",
 			"abbr": "IMT",
 			"nick": "IMT",
@@ -296,7 +296,7 @@
 		},
 		{
 			"key": "SRB_NAP",
-			"name": "FK Napredak Kruševac",
+			"name": "Napredak",
 			"short": "Napredak",
 			"abbr": "NAP",
 			"nick": "Napredak",
@@ -317,7 +317,7 @@
 		},
 		{
 			"key": "SRB_JED",
-			"name": "FK Jedinstvo Ub",
+			"name": "Jedinstvo",
 			"short": "Jedinstvo",
 			"abbr": "JED",
 			"nick": "Jedinstvo",
@@ -338,7 +338,7 @@
 		},
 		{
 			"key": "SRB_TEK",
-			"name": "FK Tekstilac Odžaci",
+			"name": "Tekstilac",
 			"short": "Tekstilac",
 			"abbr": "TEK",
 			"nick": "Tekstilac",
@@ -359,7 +359,7 @@
 		},
 		{
 			"key": "SRB_R23",
-			"name": "FK Radnički 1923",
+			"name": "Radnički 1923",
 			"short": "Radnički 1923",
 			"abbr": "R23",
 			"nick": "Radnički 1923",

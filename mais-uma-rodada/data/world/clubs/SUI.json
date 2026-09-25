@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "SUI_BAS",
-			"name": "FC Basel 1893",
+			"name": "Basel",
 			"short": "Basel",
 			"abbr": "FCB",
 			"nick": "Bebbi",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "SUI_BRN",
-			"name": "BSC Young Boys",
+			"name": "Young Boys",
 			"short": "Young Boys",
 			"abbr": "YB",
 			"nick": "Gelbschwarze",
@@ -59,7 +59,7 @@
 		},
 		{
 			"key": "SUI_ZUR",
-			"name": "FC Zürich",
+			"name": "Zürich",
 			"short": "Zürich",
 			"abbr": "FCZ",
 			"nick": "Zürcher",
@@ -88,7 +88,7 @@
 		},
 		{
 			"key": "SUI_GEN",
-			"name": "Servette FC",
+			"name": "Servette",
 			"short": "Servette",
 			"abbr": "SFC",
 			"nick": "Grenats",
@@ -114,7 +114,7 @@
 		},
 		{
 			"key": "SUI_LUG",
-			"name": "FC Lugano",
+			"name": "Lugano",
 			"short": "Lugano",
 			"abbr": "FCL",
 			"nick": "Bianconeri",
@@ -141,7 +141,7 @@
 		},
 		{
 			"key": "SUI_STG",
-			"name": "FC St. Gallen 1879",
+			"name": "St. Gallen",
 			"short": "St. Gallen",
 			"abbr": "FCSG",
 			"nick": "Espen",
@@ -167,7 +167,7 @@
 		},
 		{
 			"key": "SUI_LUZ",
-			"name": "FC Luzern",
+			"name": "Luzern",
 			"short": "Luzern",
 			"abbr": "LUZ",
 			"nick": "Luzern",
@@ -180,7 +180,7 @@
 				"#0055A4",
 				"#FFFFFF"
 			],
-			"stadium": "Swissporarena",
+			"stadium": "Stadion Allmend",
 			"capacity": 16800,
 			"kit": "plain",
 			"crest": {},
@@ -188,7 +188,7 @@
 		},
 		{
 			"key": "SUI_WIN",
-			"name": "FC Winterthur",
+			"name": "Winterthur",
 			"short": "Winterthur",
 			"abbr": "WIN",
 			"nick": "Winterthur",
@@ -209,7 +209,7 @@
 		},
 		{
 			"key": "SUI_GCZ",
-			"name": "Grasshopper Club Zürich",
+			"name": "Grasshoppers",
 			"short": "Grasshoppers",
 			"abbr": "GCZ",
 			"nick": "Grasshoppers",
@@ -230,7 +230,7 @@
 		},
 		{
 			"key": "SUI_SIO",
-			"name": "FC Sion",
+			"name": "Sion",
 			"short": "Sion",
 			"abbr": "SIO",
 			"nick": "Sion",
@@ -251,7 +251,7 @@
 		},
 		{
 			"key": "SUI_LAU",
-			"name": "FC Lausanne-Sport",
+			"name": "Lausanne",
 			"short": "Lausanne",
 			"abbr": "LAU",
 			"nick": "Lausanne",
@@ -272,7 +272,7 @@
 		},
 		{
 			"key": "SUI_YVE",
-			"name": "Yverdon-Sport FC",
+			"name": "Yverdon",
 			"short": "Yverdon",
 			"abbr": "YVE",
 			"nick": "Yverdon",

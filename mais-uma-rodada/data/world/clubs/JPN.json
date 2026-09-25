@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "JPN_KSH",
-			"name": "Kashima Antlers",
+			"name": "Kashima",
 			"short": "Kashima",
 			"abbr": "KAS",
 			"nick": "Deer",
@@ -30,7 +30,7 @@
 		},
 		{
 			"key": "JPN_SAI",
-			"name": "Urawa Red Diamonds",
+			"name": "Urawa Reds",
 			"short": "Urawa Reds",
 			"abbr": "URA",
 			"nick": "Reds",
@@ -56,7 +56,7 @@
 		},
 		{
 			"key": "JPN_YKM",
-			"name": "Yokohama F. Marinos",
+			"name": "Yokohama FM",
 			"short": "Yokohama FM",
 			"abbr": "YFM",
 			"nick": "Mariners",
@@ -69,7 +69,7 @@
 				"#003D99",
 				"#FFFFFF"
 			],
-			"stadium": "Nissan Stadium",
+			"stadium": "International Stadium Yokohama",
 			"capacity": 72000,
 			"kit": "plain",
 			"crest": {
@@ -86,7 +86,7 @@
 		},
 		{
 			"key": "JPN_KWS",
-			"name": "Kawasaki Frontale",
+			"name": "Kawasaki",
 			"short": "Kawasaki",
 			"abbr": "KAW",
 			"nick": "Frontale",
@@ -128,7 +128,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Noevir Stadium Kobe",
+			"stadium": "Misaki Park Stadium",
 			"capacity": 30100,
 			"kit": "plain",
 			"crest": {
@@ -156,7 +156,7 @@
 				"#1D3F91",
 				"#111111"
 			],
-			"stadium": "Panasonic Stadium Suita",
+			"stadium": "Suita City Football Stadium",
 			"capacity": 39700,
 			"kit": "stripes_v",
 			"crest": {
@@ -172,7 +172,7 @@
 		},
 		{
 			"key": "JPN_HIR",
-			"name": "Sanfrecce Hiroshima",
+			"name": "Sanfrecce",
 			"short": "Sanfrecce",
 			"abbr": "SAN",
 			"nick": "Sanfrecce",
@@ -199,7 +199,7 @@
 		},
 		{
 			"key": "JPN_MAC",
-			"name": "FC Machida Zelvia",
+			"name": "Machida Zelvia",
 			"short": "Machida Zelvia",
 			"abbr": "MAC",
 			"nick": "Zelvia",
@@ -264,7 +264,7 @@
 				"#0055A4",
 				"#E30613"
 			],
-			"stadium": "Ajinomoto Stadium",
+			"stadium": "Tokyo Stadium",
 			"capacity": 49000,
 			"kit": "stripes_v",
 			"rivals": [],
@@ -291,7 +291,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Sankyo Frontier Kashiwa Stadium",
+			"stadium": "Hitachidai Stadium",
 			"capacity": 15100,
 			"kit": "plain",
 			"crest": {},
@@ -312,7 +312,7 @@
 				"#E30613",
 				"#F5A12D"
 			],
-			"stadium": "Toyota Stadium",
+			"stadium": "Toyota City Stadium",
 			"capacity": 44000,
 			"kit": "plain",
 			"crest": {},
@@ -354,7 +354,7 @@
 				"#F07F13",
 				"#0055A4"
 			],
-			"stadium": "Denka Big Swan Stadium",
+			"stadium": "Niigata Stadium",
 			"capacity": 42300,
 			"kit": "plain",
 			"crest": {},
@@ -396,7 +396,7 @@
 				"#00843D",
 				"#FFFFFF"
 			],
-			"stadium": "Ajinomoto Stadium",
+			"stadium": "Tokyo Stadium",
 			"capacity": 49000,
 			"kit": "plain",
 			"crest": {},
@@ -404,7 +404,7 @@
 		},
 		{
 			"key": "JPN_KYO",
-			"name": "Kyoto Sanga FC",
+			"name": "Kyoto Sanga",
 			"short": "Kyoto Sanga",
 			"abbr": "KYO",
 			"nick": "Kyoto Sanga",

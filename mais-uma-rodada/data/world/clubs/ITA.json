@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "ITA_NAP",
-			"name": "SSC Napoli",
+			"name": "Napoli",
 			"short": "Napoli",
 			"abbr": "NAP",
 			"nick": "Azzurri",
@@ -35,7 +35,7 @@
 		},
 		{
 			"key": "ITA_MNZ",
-			"name": "FC Internazionale Milano",
+			"name": "Inter",
 			"short": "Inter",
 			"abbr": "INT",
 			"nick": "Nerazzurri",
@@ -68,7 +68,7 @@
 		},
 		{
 			"key": "ITA_MRN",
-			"name": "AC Milan",
+			"name": "Milan",
 			"short": "Milan",
 			"abbr": "MIL",
 			"nick": "Diavoli",
@@ -98,7 +98,7 @@
 		},
 		{
 			"key": "ITA_TBN",
-			"name": "Juventus FC",
+			"name": "Juventus",
 			"short": "Juventus",
 			"abbr": "JUV",
 			"nick": "Vecchia Signora",
@@ -111,7 +111,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Allianz Stadium",
+			"stadium": "Juventus Stadium",
 			"capacity": 41500,
 			"kit": "stripes_v",
 			"crest": {
@@ -133,7 +133,7 @@
 		},
 		{
 			"key": "ITA_BER",
-			"name": "Atalanta BC",
+			"name": "Atalanta",
 			"short": "Atalanta",
 			"abbr": "ATA",
 			"nick": "Orobici",
@@ -146,7 +146,7 @@
 				"#1E71B8",
 				"#111111"
 			],
-			"stadium": "Gewiss Stadium",
+			"stadium": "Stadio di Bergamo",
 			"capacity": 25000,
 			"kit": "stripes_v",
 			"crest": {
@@ -160,7 +160,7 @@
 		},
 		{
 			"key": "ITA_RGR",
-			"name": "AS Roma",
+			"name": "Roma",
 			"short": "Roma",
 			"abbr": "ROM",
 			"nick": "Lupi",
@@ -190,7 +190,7 @@
 		},
 		{
 			"key": "ITA_RBC",
-			"name": "SS Lazio",
+			"name": "Lazio",
 			"short": "Lazio",
 			"abbr": "LAZ",
 			"nick": "Aquile",
@@ -221,7 +221,7 @@
 		},
 		{
 			"key": "ITA_FIR",
-			"name": "ACF Fiorentina",
+			"name": "Fiorentina",
 			"short": "Fiorentina",
 			"abbr": "FIO",
 			"nick": "Viola",
@@ -250,7 +250,7 @@
 		},
 		{
 			"key": "ITA_BGN",
-			"name": "Bologna FC 1909",
+			"name": "Bologna",
 			"short": "Bologna",
 			"abbr": "BOL",
 			"nick": "Felsinei",
@@ -279,7 +279,7 @@
 		},
 		{
 			"key": "ITA_COM",
-			"name": "Como 1907",
+			"name": "Como",
 			"short": "Como",
 			"abbr": "COM",
 			"nick": "Lariani",
@@ -306,7 +306,7 @@
 		},
 		{
 			"key": "ITA_TGR",
-			"name": "Torino FC",
+			"name": "Torino",
 			"short": "Torino",
 			"abbr": "TOR",
 			"nick": "Toro",
@@ -334,7 +334,7 @@
 		},
 		{
 			"key": "ITA_UDI",
-			"name": "Udinese Calcio",
+			"name": "Udinese",
 			"short": "Udinese",
 			"abbr": "UDI",
 			"nick": "Zebrette",
@@ -360,7 +360,7 @@
 		},
 		{
 			"key": "ITA_GEN",
-			"name": "Genoa CFC",
+			"name": "Genoa",
 			"short": "Genoa",
 			"abbr": "GEN",
 			"nick": "Grifoni",
@@ -386,7 +386,7 @@
 		},
 		{
 			"key": "ITA_VER",
-			"name": "Hellas Verona FC",
+			"name": "Hellas Verona",
 			"short": "Hellas Verona",
 			"abbr": "VER",
 			"nick": "Gialloblù",
@@ -415,7 +415,7 @@
 		},
 		{
 			"key": "ITA_CAG",
-			"name": "Cagliari Calcio",
+			"name": "Cagliari",
 			"short": "Cagliari",
 			"abbr": "CAG",
 			"nick": "Isolani",
@@ -428,7 +428,7 @@
 				"#A51A3A",
 				"#0D2A5C"
 			],
-			"stadium": "Unipol Domus",
+			"stadium": "Arena Cagliari",
 			"capacity": 16400,
 			"kit": "halves",
 			"crest": {
@@ -441,7 +441,7 @@
 		},
 		{
 			"key": "ITA_PMA",
-			"name": "Parma Calcio 1913",
+			"name": "Parma",
 			"short": "Parma",
 			"abbr": "PAR",
 			"nick": "Crociati",
@@ -469,7 +469,7 @@
 		},
 		{
 			"key": "ITA_LEC",
-			"name": "US Lecce",
+			"name": "Lecce",
 			"short": "Lecce",
 			"abbr": "LEC",
 			"nick": "Salentini",
@@ -495,7 +495,7 @@
 		},
 		{
 			"key": "ITA_SAS",
-			"name": "US Sassuolo Calcio",
+			"name": "Sassuolo",
 			"short": "Sassuolo",
 			"abbr": "SAS",
 			"nick": "Neroverdi",
@@ -508,7 +508,7 @@
 				"#00A752",
 				"#111111"
 			],
-			"stadium": "Mapei Stadium",
+			"stadium": "Stadio Città del Tricolore",
 			"capacity": 21500,
 			"kit": "stripes_v",
 			"crest": {
@@ -522,7 +522,7 @@
 		},
 		{
 			"key": "ITA_PIS",
-			"name": "AC Pisa 1909",
+			"name": "Pisa",
 			"short": "Pisa",
 			"abbr": "PIS",
 			"nick": "Nerazzurri Pisani",
@@ -548,7 +548,7 @@
 		},
 		{
 			"key": "ITA_CRE",
-			"name": "US Cremonese",
+			"name": "Cremonese",
 			"short": "Cremonese",
 			"abbr": "CRE",
 			"nick": "Grigiorossi",
@@ -575,7 +575,7 @@
 		},
 		{
 			"key": "ITA_PAL",
-			"name": "Palermo FC",
+			"name": "Palermo",
 			"short": "Palermo",
 			"abbr": "PAL",
 			"nick": "Rosanero",
@@ -601,7 +601,7 @@
 		},
 		{
 			"key": "ITA_SAM",
-			"name": "UC Sampdoria",
+			"name": "Sampdoria",
 			"short": "Sampdoria",
 			"abbr": "SAM",
 			"nick": "Blucerchiati",
@@ -627,7 +627,7 @@
 		},
 		{
 			"key": "ITA_VEN",
-			"name": "Venezia FC",
+			"name": "Venezia",
 			"short": "Venezia",
 			"abbr": "VEN",
 			"nick": "Lagunari",
@@ -653,7 +653,7 @@
 		},
 		{
 			"key": "ITA_MON",
-			"name": "AC Monza",
+			"name": "Monza",
 			"short": "Monza",
 			"abbr": "MON",
 			"nick": "Brianzoli",
@@ -666,7 +666,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "U-Power Stadium",
+			"stadium": "Stadio Brianteo",
 			"capacity": 16900,
 			"kit": "halves",
 			"rivals": [],
@@ -680,7 +680,7 @@
 		},
 		{
 			"key": "ITA_EMP",
-			"name": "Empoli FC",
+			"name": "Empoli",
 			"short": "Empoli",
 			"abbr": "EMP",
 			"nick": "Azzurri",
@@ -706,7 +706,7 @@
 		},
 		{
 			"key": "ITA_FRO",
-			"name": "Frosinone Calcio",
+			"name": "Frosinone",
 			"short": "Frosinone",
 			"abbr": "FRO",
 			"nick": "Canarini",
@@ -734,7 +734,7 @@
 		},
 		{
 			"key": "ITA_BAR",
-			"name": "SSC Bari",
+			"name": "Bari",
 			"short": "Bari",
 			"abbr": "BAR",
 			"nick": "Galletti",
@@ -762,7 +762,7 @@
 		},
 		{
 			"key": "ITA_SPE",
-			"name": "Spezia Calcio",
+			"name": "Spezia",
 			"short": "Spezia",
 			"abbr": "SPE",
 			"nick": "Aquilotti",
@@ -788,7 +788,7 @@
 		},
 		{
 			"key": "ITA_MOD",
-			"name": "Modena FC",
+			"name": "Modena",
 			"short": "Modena",
 			"abbr": "MOD",
 			"nick": "Canarini",
@@ -814,7 +814,7 @@
 		},
 		{
 			"key": "ITA_CES",
-			"name": "Cesena FC",
+			"name": "Cesena",
 			"short": "Cesena",
 			"abbr": "CES",
 			"nick": "Cavallucci Marini",
@@ -842,7 +842,7 @@
 		},
 		{
 			"key": "ITA_CAT",
-			"name": "US Catanzaro 1929",
+			"name": "Catanzaro",
 			"short": "Catanzaro",
 			"abbr": "CTZ",
 			"nick": "Aquile",
@@ -868,7 +868,7 @@
 		},
 		{
 			"key": "ITA_SUD",
-			"name": "FC Südtirol",
+			"name": "Südtirol",
 			"short": "Südtirol",
 			"abbr": "SUD",
 			"nick": "Biancorossi",
@@ -894,7 +894,7 @@
 		},
 		{
 			"key": "ITA_REG",
-			"name": "AC Reggiana 1919",
+			"name": "Reggiana",
 			"short": "Reggiana",
 			"abbr": "REG",
 			"nick": "Granata",
@@ -907,7 +907,7 @@
 				"#8A1538",
 				"#FFFFFF"
 			],
-			"stadium": "Mapei Stadium",
+			"stadium": "Stadio Città del Tricolore",
 			"capacity": 21500,
 			"kit": "plain",
 			"rivals": [],
@@ -920,7 +920,7 @@
 		},
 		{
 			"key": "ITA_CAR",
-			"name": "Carrarese Calcio",
+			"name": "Carrarese",
 			"short": "Carrarese",
 			"abbr": "CAR",
 			"nick": "Marmiferi",
@@ -947,7 +947,7 @@
 		},
 		{
 			"key": "ITA_JST",
-			"name": "SS Juve Stabia",
+			"name": "Juve Stabia",
 			"short": "Juve Stabia",
 			"abbr": "JST",
 			"nick": "Vespe",
@@ -974,7 +974,7 @@
 		},
 		{
 			"key": "ITA_MAN",
-			"name": "Mantova 1911",
+			"name": "Mantova",
 			"short": "Mantova",
 			"abbr": "MAN",
 			"nick": "Virgiliani",
@@ -999,7 +999,7 @@
 		},
 		{
 			"key": "ITA_PAD",
-			"name": "Calcio Padova",
+			"name": "Padova",
 			"short": "Padova",
 			"abbr": "PAD",
 			"nick": "Biancoscudati",
@@ -1024,7 +1024,7 @@
 		},
 		{
 			"key": "ITA_AVE",
-			"name": "US Avellino 1912",
+			"name": "Avellino",
 			"short": "Avellino",
 			"abbr": "AVE",
 			"nick": "Lupi",
@@ -1050,7 +1050,7 @@
 		},
 		{
 			"key": "ITA_ENT",
-			"name": "Virtus Entella",
+			"name": "Entella",
 			"short": "Entella",
 			"abbr": "ENT",
 			"nick": "Diavoli Neri",
@@ -1076,7 +1076,7 @@
 		},
 		{
 			"key": "ITA_PES",
-			"name": "Delfino Pescara 1936",
+			"name": "Pescara",
 			"short": "Pescara",
 			"abbr": "PES",
 			"nick": "Delfini",

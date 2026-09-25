@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "POR_ENC",
-			"name": "Sport Lisboa e Benfica",
+			"name": "Benfica",
 			"short": "Benfica",
 			"abbr": "SLB",
 			"nick": "Águias",
@@ -36,7 +36,7 @@
 		},
 		{
 			"key": "POR_LEO",
-			"name": "Sporting Clube de Portugal",
+			"name": "Sporting",
 			"short": "Sporting",
 			"abbr": "SCP",
 			"nick": "Leões",
@@ -66,7 +66,7 @@
 		},
 		{
 			"key": "POR_DRA",
-			"name": "Futebol Clube do Porto",
+			"name": "Porto",
 			"short": "Porto",
 			"abbr": "FCP",
 			"nick": "Dragões",
@@ -100,7 +100,7 @@
 		},
 		{
 			"key": "POR_BRG",
-			"name": "Sporting Clube de Braga",
+			"name": "Braga",
 			"short": "Braga",
 			"abbr": "SCB",
 			"nick": "Guerreiros do Minho",
@@ -130,7 +130,7 @@
 		},
 		{
 			"key": "POR_GMR",
-			"name": "Vitória Sport Clube",
+			"name": "Vitória SC",
 			"short": "Vitória SC",
 			"abbr": "VSC",
 			"nick": "Vimaranenses",
@@ -158,7 +158,7 @@
 		},
 		{
 			"key": "POR_SCL",
-			"name": "CD Santa Clara",
+			"name": "Santa Clara",
 			"short": "Santa Clara",
 			"abbr": "SCL",
 			"nick": "Açorianos",
@@ -184,7 +184,7 @@
 		},
 		{
 			"key": "POR_FAM",
-			"name": "FC Famalicão",
+			"name": "Famalicão",
 			"short": "Famalicão",
 			"abbr": "FAM",
 			"nick": "Famalicenses",
@@ -210,7 +210,7 @@
 		},
 		{
 			"key": "POR_GIL",
-			"name": "Gil Vicente FC",
+			"name": "Gil Vicente",
 			"short": "Gil Vicente",
 			"abbr": "GIL",
 			"nick": "Galos",
@@ -236,7 +236,7 @@
 		},
 		{
 			"key": "POR_MOR",
-			"name": "Moreirense FC",
+			"name": "Moreirense",
 			"short": "Moreirense",
 			"abbr": "MOR",
 			"nick": "Cónegos",
@@ -264,7 +264,7 @@
 		},
 		{
 			"key": "POR_EST",
-			"name": "GD Estoril Praia",
+			"name": "Estoril",
 			"short": "Estoril",
 			"abbr": "EST",
 			"nick": "Canarinhos",
@@ -291,7 +291,7 @@
 		},
 		{
 			"key": "POR_RAV",
-			"name": "Rio Ave FC",
+			"name": "Rio Ave",
 			"short": "Rio Ave",
 			"abbr": "RAV",
 			"nick": "Vilacondenses",
@@ -318,7 +318,7 @@
 		},
 		{
 			"key": "POR_CPI",
-			"name": "Casa Pia AC",
+			"name": "Casa Pia",
 			"short": "Casa Pia",
 			"abbr": "CPI",
 			"nick": "Gansos",
@@ -344,7 +344,7 @@
 		},
 		{
 			"key": "POR_ARO",
-			"name": "FC Arouca",
+			"name": "Arouca",
 			"short": "Arouca",
 			"abbr": "ARO",
 			"nick": "Arouquenses",
@@ -371,7 +371,7 @@
 		},
 		{
 			"key": "POR_NAC",
-			"name": "CD Nacional",
+			"name": "Nacional",
 			"short": "Nacional",
 			"abbr": "NAC",
 			"nick": "Alvinegros",
@@ -398,7 +398,7 @@
 		},
 		{
 			"key": "POR_EAM",
-			"name": "CF Estrela da Amadora",
+			"name": "Estrela",
 			"short": "Estrela",
 			"abbr": "EAM",
 			"nick": "Tricolores",
@@ -424,7 +424,7 @@
 		},
 		{
 			"key": "POR_ALV",
-			"name": "FC Alverca",
+			"name": "Alverca",
 			"short": "Alverca",
 			"abbr": "ALV",
 			"nick": "Ribatejanos",
@@ -450,7 +450,7 @@
 		},
 		{
 			"key": "POR_TON",
-			"name": "CD Tondela",
+			"name": "Tondela",
 			"short": "Tondela",
 			"abbr": "TON",
 			"nick": "Auriverdes",
@@ -477,7 +477,7 @@
 		},
 		{
 			"key": "POR_AVS",
-			"name": "AVS Futebol SAD",
+			"name": "AVS",
 			"short": "AVS",
 			"abbr": "AVS",
 			"nick": "Avenses",
@@ -503,7 +503,7 @@
 		},
 		{
 			"key": "POR_MAR",
-			"name": "CS Marítimo",
+			"name": "Marítimo",
 			"short": "Marítimo",
 			"abbr": "MAR",
 			"nick": "Leões do Almirante Reis",
@@ -529,7 +529,7 @@
 		},
 		{
 			"key": "POR_VIZ",
-			"name": "FC Vizela",
+			"name": "Vizela",
 			"short": "Vizela",
 			"abbr": "VIZ",
 			"nick": "Vizelenses",
@@ -555,7 +555,7 @@
 		},
 		{
 			"key": "POR_ACV",
-			"name": "Académico de Viseu FC",
+			"name": "Académico Viseu",
 			"short": "Académico Viseu",
 			"abbr": "ACV",
 			"nick": "Viriatos",
@@ -581,7 +581,7 @@
 		},
 		{
 			"key": "POR_CHA",
-			"name": "GD Chaves",
+			"name": "Chaves",
 			"short": "Chaves",
 			"abbr": "CHA",
 			"nick": "Flavienses",
@@ -608,7 +608,7 @@
 		},
 		{
 			"key": "POR_LEI",
-			"name": "Leixões SC",
+			"name": "Leixões",
 			"short": "Leixões",
 			"abbr": "LEI",
 			"nick": "Bebés do Mar",
@@ -634,7 +634,7 @@
 		},
 		{
 			"key": "POR_FEI",
-			"name": "CD Feirense",
+			"name": "Feirense",
 			"short": "Feirense",
 			"abbr": "FEI",
 			"nick": "Fogaceiros",
@@ -660,7 +660,7 @@
 		},
 		{
 			"key": "POR_PEN",
-			"name": "FC Penafiel",
+			"name": "Penafiel",
 			"short": "Penafiel",
 			"abbr": "PEN",
 			"nick": "Durienses",
@@ -686,7 +686,7 @@
 		},
 		{
 			"key": "POR_OLI",
-			"name": "UD Oliveirense",
+			"name": "Oliveirense",
 			"short": "Oliveirense",
 			"abbr": "OLI",
 			"nick": "Unionistas",
@@ -713,7 +713,7 @@
 		},
 		{
 			"key": "POR_PTM",
-			"name": "Portimonense SC",
+			"name": "Portimonense",
 			"short": "Portimonense",
 			"abbr": "PTM",
 			"nick": "Alvinegros",
@@ -740,7 +740,7 @@
 		},
 		{
 			"key": "POR_TOR",
-			"name": "SCU Torreense",
+			"name": "Torreense",
 			"short": "Torreense",
 			"abbr": "TOR",
 			"nick": "Galos",
@@ -767,7 +767,7 @@
 		},
 		{
 			"key": "POR_ULE",
-			"name": "UD Leiria",
+			"name": "União de Leiria",
 			"short": "União de Leiria",
 			"abbr": "ULE",
 			"nick": "Lis",
@@ -793,7 +793,7 @@
 		},
 		{
 			"key": "POR_PAC",
-			"name": "FC Paços de Ferreira",
+			"name": "Paços de Ferreira",
 			"short": "Paços de Ferreira",
 			"abbr": "PAC",
 			"nick": "Castores",
@@ -820,7 +820,7 @@
 		},
 		{
 			"key": "POR_FAR",
-			"name": "SC Farense",
+			"name": "Farense",
 			"short": "Farense",
 			"abbr": "FAR",
 			"nick": "Leões de Faro",
@@ -846,7 +846,7 @@
 		},
 		{
 			"key": "POR_LOU",
-			"name": "Lusitânia FC Lourosa",
+			"name": "Lourosa",
 			"short": "Lourosa",
 			"abbr": "LOU",
 			"nick": "Lusitanos",
@@ -872,7 +872,7 @@
 		},
 		{
 			"key": "POR_FEL",
-			"name": "FC Felgueiras 1932",
+			"name": "Felgueiras",
 			"short": "Felgueiras",
 			"abbr": "FEL",
 			"nick": "Felgueirenses",
@@ -899,7 +899,7 @@
 		},
 		{
 			"key": "POR_BOA",
-			"name": "Boavista FC",
+			"name": "Boavista",
 			"short": "Boavista",
 			"abbr": "BFC",
 			"nick": "Axadrezados",
@@ -926,7 +926,7 @@
 		},
 		{
 			"key": "POR_BEL",
-			"name": "CF Os Belenenses",
+			"name": "Belenenses",
 			"short": "Belenenses",
 			"abbr": "BEL",
 			"nick": "Pastéis",
@@ -952,7 +952,7 @@
 		},
 		{
 			"key": "POR_AAC",
-			"name": "Associação Académica de Coimbra",
+			"name": "Académica",
 			"short": "Académica",
 			"abbr": "AAC",
 			"nick": "Estudantes",

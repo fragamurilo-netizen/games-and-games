@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "EGY_AHM",
-			"name": "Al Ahly SC",
+			"name": "Al Ahly",
 			"short": "Al Ahly",
 			"abbr": "AHL",
 			"nick": "Diabos Vermelhos",
@@ -35,7 +35,7 @@
 		},
 		{
 			"key": "EGY_ABY",
-			"name": "Zamalek SC",
+			"name": "Zamalek",
 			"short": "Zamalek",
 			"abbr": "ZAM",
 			"nick": "Cavaleiros Brancos",
@@ -65,7 +65,7 @@
 		},
 		{
 			"key": "EGY_PYR",
-			"name": "Pyramids FC",
+			"name": "Pyramids",
 			"short": "Pyramids",
 			"abbr": "PYR",
 			"nick": "Faraós",
@@ -90,7 +90,7 @@
 		},
 		{
 			"key": "EGY_MAS",
-			"name": "Al Masry SC",
+			"name": "Al Masry",
 			"short": "Al Masry",
 			"abbr": "MAS",
 			"nick": "Verdes",
@@ -116,7 +116,7 @@
 		},
 		{
 			"key": "EGY_ISM",
-			"name": "Ismaily SC",
+			"name": "Ismaily",
 			"short": "Ismaily",
 			"abbr": "ISM",
 			"nick": "Dervixes",
@@ -143,7 +143,7 @@
 		},
 		{
 			"key": "EGY_CER",
-			"name": "Ceramica Cleopatra FC",
+			"name": "Ceramica",
 			"short": "Ceramica",
 			"abbr": "CER",
 			"nick": "Cerâmicos",
@@ -169,7 +169,7 @@
 		},
 		{
 			"key": "EGY_ZED",
-			"name": "ZED FC",
+			"name": "ZED",
 			"short": "ZED",
 			"abbr": "ZED",
 			"nick": "ZED",
@@ -196,7 +196,7 @@
 		},
 		{
 			"key": "EGY_ITT",
-			"name": "Al Ittihad Alexandria",
+			"name": "Al Ittihad",
 			"short": "Al Ittihad",
 			"abbr": "ITA",
 			"nick": "Zaeem",
@@ -222,7 +222,7 @@
 		},
 		{
 			"key": "EGY_FUT",
-			"name": "Modern Sport FC",
+			"name": "Modern Sport",
 			"short": "Modern Sport",
 			"abbr": "MSP",
 			"nick": "Modern Sport",
@@ -243,7 +243,7 @@
 		},
 		{
 			"key": "EGY_ENP",
-			"name": "ENPPI SC",
+			"name": "ENPPI",
 			"short": "ENPPI",
 			"abbr": "ENP",
 			"nick": "ENPPI",
@@ -264,7 +264,7 @@
 		},
 		{
 			"key": "EGY_SMO",
-			"name": "Smouha SC",
+			"name": "Smouha",
 			"short": "Smouha",
 			"abbr": "SMO",
 			"nick": "Smouha",
@@ -285,7 +285,7 @@
 		},
 		{
 			"key": "EGY_GOU",
-			"name": "El Gouna FC",
+			"name": "El Gouna",
 			"short": "El Gouna",
 			"abbr": "GOU",
 			"nick": "El Gouna",
@@ -306,7 +306,7 @@
 		},
 		{
 			"key": "EGY_GHA",
-			"name": "Ghazl El Mahalla SC",
+			"name": "Ghazl El Mahalla",
 			"short": "Ghazl El Mahalla",
 			"abbr": "GHM",
 			"nick": "Ghazl El Mahalla",
@@ -327,7 +327,7 @@
 		},
 		{
 			"key": "EGY_NBE",
-			"name": "National Bank of Egypt SC",
+			"name": "National Bank",
 			"short": "National Bank",
 			"abbr": "NBE",
 			"nick": "National Bank",
@@ -348,7 +348,7 @@
 		},
 		{
 			"key": "EGY_PHA",
-			"name": "Pharco FC",
+			"name": "Pharco",
 			"short": "Pharco",
 			"abbr": "PHA",
 			"nick": "Pharco",
@@ -369,7 +369,7 @@
 		},
 		{
 			"key": "EGY_PET",
-			"name": "Petrojet SC",
+			"name": "Petrojet",
 			"short": "Petrojet",
 			"abbr": "PJT",
 			"nick": "Petrojet",
@@ -390,7 +390,7 @@
 		},
 		{
 			"key": "EGY_HAR",
-			"name": "Haras El Hodoud SC",
+			"name": "Haras El Hodoud",
 			"short": "Haras El Hodoud",
 			"abbr": "HAR",
 			"nick": "Haras El Hodoud",
@@ -411,7 +411,7 @@
 		},
 		{
 			"key": "EGY_TAL",
-			"name": "Tala'ea El Gaish SC",
+			"name": "Tala'ea El Gaish",
 			"short": "Tala'ea El Gaish",
 			"abbr": "TEG",
 			"nick": "Tala'ea El Gaish",

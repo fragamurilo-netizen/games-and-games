@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "UKR_HIR",
-			"name": "FC Shakhtar Donetsk",
+			"name": "Shakhtar",
 			"short": "Shakhtar",
 			"abbr": "SHA",
 			"nick": "Hirnyky",
@@ -34,7 +34,7 @@
 		},
 		{
 			"key": "UKR_BSY",
-			"name": "FC Dynamo Kyiv",
+			"name": "Dynamo Kyiv",
 			"short": "Dynamo Kyiv",
 			"abbr": "DYN",
 			"nick": "Bilo-Syni",
@@ -64,7 +64,7 @@
 		},
 		{
 			"key": "UKR_POL",
-			"name": "FC Polissya Zhytomyr",
+			"name": "Polissya",
 			"short": "Polissya",
 			"abbr": "POL",
 			"nick": "Vovky",
@@ -90,7 +90,7 @@
 		},
 		{
 			"key": "UKR_KRY",
-			"name": "FC Kryvbas Kryvyi Rih",
+			"name": "Kryvbas",
 			"short": "Kryvbas",
 			"abbr": "KRY",
 			"nick": "Ruda",
@@ -116,7 +116,7 @@
 		},
 		{
 			"key": "UKR_ZOR",
-			"name": "FC Zorya Luhansk",
+			"name": "Zorya",
 			"short": "Zorya",
 			"abbr": "ZOR",
 			"nick": "Myronosci",
@@ -142,7 +142,7 @@
 		},
 		{
 			"key": "UKR_OLE",
-			"name": "FC Oleksandriya",
+			"name": "Oleksandriya",
 			"short": "Oleksandriya",
 			"abbr": "OLE",
 			"nick": "Mistiany",
@@ -169,7 +169,7 @@
 		},
 		{
 			"key": "UKR_RUK",
-			"name": "FC Rukh Lviv",
+			"name": "Rukh Lviv",
 			"short": "Rukh Lviv",
 			"abbr": "RUK",
 			"nick": "Rukh Lviv",
@@ -190,7 +190,7 @@
 		},
 		{
 			"key": "UKR_KAR",
-			"name": "FC Karpaty Lviv",
+			"name": "Karpaty",
 			"short": "Karpaty",
 			"abbr": "KAR",
 			"nick": "Karpaty",
@@ -211,7 +211,7 @@
 		},
 		{
 			"key": "UKR_OBO",
-			"name": "FC Obolon Kyiv",
+			"name": "Obolon",
 			"short": "Obolon",
 			"abbr": "OBO",
 			"nick": "Obolon",
@@ -232,7 +232,7 @@
 		},
 		{
 			"key": "UKR_VER",
-			"name": "NK Veres Rivne",
+			"name": "Veres",
 			"short": "Veres",
 			"abbr": "VER",
 			"nick": "Veres",
@@ -253,7 +253,7 @@
 		},
 		{
 			"key": "UKR_LNZ",
-			"name": "LNZ Cherkasy",
+			"name": "LNZ",
 			"short": "LNZ",
 			"abbr": "LNZ",
 			"nick": "LNZ",
@@ -274,7 +274,7 @@
 		},
 		{
 			"key": "UKR_VOR",
-			"name": "FC Vorskla Poltava",
+			"name": "Vorskla",
 			"short": "Vorskla",
 			"abbr": "VOR",
 			"nick": "Vorskla",
@@ -295,7 +295,7 @@
 		},
 		{
 			"key": "UKR_CHO",
-			"name": "FC Chornomorets Odesa",
+			"name": "Chornomorets",
 			"short": "Chornomorets",
 			"abbr": "CHO",
 			"nick": "Chornomorets",
@@ -316,7 +316,7 @@
 		},
 		{
 			"key": "UKR_KOL",
-			"name": "FC Kolos Kovalivka",
+			"name": "Kolos",
 			"short": "Kolos",
 			"abbr": "KOL",
 			"nick": "Kolos",
@@ -337,7 +337,7 @@
 		},
 		{
 			"key": "UKR_LBE",
-			"name": "FC Livyi Bereh Kyiv",
+			"name": "Livyi Bereh",
 			"short": "Livyi Bereh",
 			"abbr": "LBE",
 			"nick": "Livyi Bereh",
@@ -358,7 +358,7 @@
 		},
 		{
 			"key": "UKR_ING",
-			"name": "FC Inhulets Petrove",
+			"name": "Inhulets",
 			"short": "Inhulets",
 			"abbr": "ING",
 			"nick": "Inhulets",

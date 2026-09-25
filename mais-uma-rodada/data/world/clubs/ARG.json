@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "ARG_XEN",
-			"name": "Club Atlético Boca Juniors",
+			"name": "Boca Juniors",
 			"short": "Boca Juniors",
 			"abbr": "BOC",
 			"nick": "Xeneizes",
@@ -37,7 +37,7 @@
 		},
 		{
 			"key": "ARG_MIL",
-			"name": "Club Atlético River Plate",
+			"name": "River Plate",
 			"short": "River Plate",
 			"abbr": "RIV",
 			"nick": "Millonarios",
@@ -68,7 +68,7 @@
 		},
 		{
 			"key": "ARG_ACA",
-			"name": "Racing Club",
+			"name": "Racing",
 			"short": "Racing",
 			"abbr": "RAC",
 			"nick": "Académicos",
@@ -99,7 +99,7 @@
 		},
 		{
 			"key": "ARG_ROJ",
-			"name": "Club Atlético Independiente",
+			"name": "Independiente",
 			"short": "Independiente",
 			"abbr": "IND",
 			"nick": "Rojos",
@@ -128,7 +128,7 @@
 		},
 		{
 			"key": "ARG_CUE",
-			"name": "Club Atlético San Lorenzo de Almagro",
+			"name": "San Lorenzo",
 			"short": "San Lorenzo",
 			"abbr": "SLO",
 			"nick": "Cuervos",
@@ -157,7 +157,7 @@
 		},
 		{
 			"key": "ARG_PIN",
-			"name": "Club Estudiantes de La Plata",
+			"name": "Estudiantes",
 			"short": "Estudiantes",
 			"abbr": "EST",
 			"nick": "Pinchas",
@@ -186,7 +186,7 @@
 		},
 		{
 			"key": "ARG_LOB",
-			"name": "Club de Gimnasia y Esgrima La Plata",
+			"name": "Gimnasia LP",
 			"short": "Gimnasia LP",
 			"abbr": "GIM",
 			"nick": "Triperos",
@@ -215,7 +215,7 @@
 		},
 		{
 			"key": "ARG_FOR",
-			"name": "Club Atlético Vélez Sarsfield",
+			"name": "Vélez",
 			"short": "Vélez",
 			"abbr": "VEL",
 			"nick": "Fortineros",
@@ -240,7 +240,7 @@
 		},
 		{
 			"key": "ARG_RCA",
-			"name": "Club Atlético Rosario Central",
+			"name": "Rosario Central",
 			"short": "Rosario Central",
 			"abbr": "RCE",
 			"nick": "Canallas",
@@ -271,7 +271,7 @@
 		},
 		{
 			"key": "ARG_LEP",
-			"name": "Club Atlético Newell's Old Boys",
+			"name": "Newell's",
 			"short": "Newell's",
 			"abbr": "NOB",
 			"nick": "Leprosos",
@@ -300,7 +300,7 @@
 		},
 		{
 			"key": "ARG_MAT",
-			"name": "Club Atlético Talleres",
+			"name": "Talleres",
 			"short": "Talleres",
 			"abbr": "TAL",
 			"nick": "Matadores",
@@ -329,7 +329,7 @@
 		},
 		{
 			"key": "ARG_PTA",
-			"name": "Club Atlético Belgrano",
+			"name": "Belgrano",
 			"short": "Belgrano",
 			"abbr": "BEL",
 			"nick": "Piratas",
@@ -359,7 +359,7 @@
 		},
 		{
 			"key": "ARG_GBO",
-			"name": "Club Atlético Huracán",
+			"name": "Huracán",
 			"short": "Huracán",
 			"abbr": "HUR",
 			"nick": "Quemeros",
@@ -389,7 +389,7 @@
 		},
 		{
 			"key": "ARG_LAN",
-			"name": "Club Atlético Lanús",
+			"name": "Lanús",
 			"short": "Lanús",
 			"abbr": "LAN",
 			"nick": "Granates",
@@ -418,7 +418,7 @@
 		},
 		{
 			"key": "ARG_BIC",
-			"name": "Asociación Atlética Argentinos Juniors",
+			"name": "Argentinos Jrs",
 			"short": "Argentinos Jrs",
 			"abbr": "ARJ",
 			"nick": "Bichos",
@@ -444,7 +444,7 @@
 		},
 		{
 			"key": "ARG_HAL",
-			"name": "Club Social y Deportivo Defensa y Justicia",
+			"name": "Defensa",
 			"short": "Defensa",
 			"abbr": "DYJ",
 			"nick": "Halcones",
@@ -469,7 +469,7 @@
 		},
 		{
 			"key": "ARG_TOM",
-			"name": "Club Deportivo Godoy Cruz Antonio Tomba",
+			"name": "Godoy Cruz",
 			"short": "Godoy Cruz",
 			"abbr": "GCR",
 			"nick": "Tombinos",
@@ -496,7 +496,7 @@
 		},
 		{
 			"key": "ARG_TAD",
-			"name": "Club Atlético Banfield",
+			"name": "Banfield",
 			"short": "Banfield",
 			"abbr": "BAN",
 			"nick": "Taladros",
@@ -525,7 +525,7 @@
 		},
 		{
 			"key": "ARG_DEL",
-			"name": "Club Atlético Tigre",
+			"name": "Tigre",
 			"short": "Tigre",
 			"abbr": "TIG",
 			"nick": "Matadores del Delta",
@@ -552,7 +552,7 @@
 		},
 		{
 			"key": "ARG_TAT",
-			"name": "Club Atlético Unión",
+			"name": "Unión",
 			"short": "Unión",
 			"abbr": "UNI",
 			"nick": "Tatengues",
@@ -581,7 +581,7 @@
 		},
 		{
 			"key": "ARG_SAB",
-			"name": "Club Atlético Colón",
+			"name": "Colón",
 			"short": "Colón",
 			"abbr": "COL",
 			"nick": "Sabaleros",
@@ -610,7 +610,7 @@
 		},
 		{
 			"key": "ARG_FUN",
-			"name": "Club Atlético Chacarita Juniors",
+			"name": "Chacarita",
 			"short": "Chacarita",
 			"abbr": "CHA",
 			"nick": "Funebreros",
@@ -640,7 +640,7 @@
 		},
 		{
 			"key": "ARG_CER",
-			"name": "Quilmes Atlético Club",
+			"name": "Quilmes",
 			"short": "Quilmes",
 			"abbr": "QUI",
 			"nick": "Cerveceros",
@@ -668,7 +668,7 @@
 		},
 		{
 			"key": "ARG_VER",
-			"name": "Club Ferro Carril Oeste",
+			"name": "Ferro",
 			"short": "Ferro",
 			"abbr": "FER",
 			"nick": "Verdolagas",
@@ -694,7 +694,7 @@
 		},
 		{
 			"key": "ARG_BOH",
-			"name": "Club Atlético Atlanta",
+			"name": "Atlanta",
 			"short": "Atlanta",
 			"abbr": "ATL",
 			"nick": "Bohemios",
@@ -721,7 +721,7 @@
 		},
 		{
 			"key": "ARG_TUC",
-			"name": "Club Atlético Tucumán",
+			"name": "Atl. Tucumán",
 			"short": "Atl. Tucumán",
 			"abbr": "ATU",
 			"nick": "Decanos",
@@ -748,7 +748,7 @@
 		},
 		{
 			"key": "ARG_SMT",
-			"name": "Club Atlético San Martín de Tucumán",
+			"name": "San Martín T",
 			"short": "San Martín T",
 			"abbr": "SMT",
 			"nick": "Santo",
@@ -775,7 +775,7 @@
 		},
 		{
 			"key": "ARG_ALM",
-			"name": "Club Almirante Brown",
+			"name": "Almirante Brown",
 			"short": "Almirante Brown",
 			"abbr": "ALM",
 			"nick": "La Fragata",
@@ -801,7 +801,7 @@
 		},
 		{
 			"key": "ARG_ALB",
-			"name": "Club Atlético All Boys",
+			"name": "All Boys",
 			"short": "All Boys",
 			"abbr": "ALB",
 			"nick": "Albo",
@@ -828,7 +828,7 @@
 		},
 		{
 			"key": "ARG_NCH",
-			"name": "Club Atlético Nueva Chicago",
+			"name": "Nueva Chicago",
 			"short": "Nueva Chicago",
 			"abbr": "NCH",
 			"nick": "Torito de Mataderos",
@@ -854,7 +854,7 @@
 		},
 		{
 			"key": "ARG_TEM",
-			"name": "Club Atlético Temperley",
+			"name": "Temperley",
 			"short": "Temperley",
 			"abbr": "TEM",
 			"nick": "Gasolero",
@@ -880,7 +880,7 @@
 		},
 		{
 			"key": "ARG_MOR",
-			"name": "Club Deportivo Morón",
+			"name": "Morón",
 			"short": "Morón",
 			"abbr": "MOR",
 			"nick": "El Gallo",
@@ -905,7 +905,7 @@
 		},
 		{
 			"key": "ARG_AGR",
-			"name": "Club Agropecuario Argentino",
+			"name": "Agropecuario",
 			"short": "Agropecuario",
 			"abbr": "AGR",
 			"nick": "El Sojero",
@@ -930,7 +930,7 @@
 		},
 		{
 			"key": "ARG_MAI",
-			"name": "Club Deportivo Maipú",
+			"name": "Deportivo Maipú",
 			"short": "Deportivo Maipú",
 			"abbr": "DMA",
 			"nick": "El Cruzado",
@@ -957,7 +957,7 @@
 		},
 		{
 			"key": "ARG_AND",
-			"name": "Club Atlético Los Andes",
+			"name": "Los Andes",
 			"short": "Los Andes",
 			"abbr": "LAN2",
 			"nick": "El Milrayitas",
@@ -982,7 +982,7 @@
 		},
 		{
 			"key": "ARG_BRO",
-			"name": "Club Atlético Brown",
+			"name": "Brown de Adrogué",
 			"short": "Brown de Adrogué",
 			"abbr": "BRA",
 			"nick": "El Tricolor",
@@ -1009,7 +1009,7 @@
 		},
 		{
 			"key": "ARG_INS",
-			"name": "Instituto Atlético Central Córdoba",
+			"name": "Instituto",
 			"short": "Instituto",
 			"abbr": "INS",
 			"nick": "La Gloria",
@@ -1038,7 +1038,7 @@
 		},
 		{
 			"key": "ARG_PLA",
-			"name": "Club Atlético Platense",
+			"name": "Platense",
 			"short": "Platense",
 			"abbr": "PLA",
 			"nick": "Calamar",
@@ -1067,7 +1067,7 @@
 		},
 		{
 			"key": "ARG_BAR",
-			"name": "Club Atlético Barracas Central",
+			"name": "Barracas Central",
 			"short": "Barracas Central",
 			"abbr": "BAR",
 			"nick": "Guapo",
@@ -1094,7 +1094,7 @@
 		},
 		{
 			"key": "ARG_IRV",
-			"name": "Club Sportivo Independiente Rivadavia",
+			"name": "Ind. Rivadavia",
 			"short": "Ind. Rivadavia",
 			"abbr": "CSIR",
 			"nick": "La Lepra",
@@ -1123,7 +1123,7 @@
 		},
 		{
 			"key": "ARG_RIE",
-			"name": "Club Deportivo Riestra",
+			"name": "Dep. Riestra",
 			"short": "Dep. Riestra",
 			"abbr": "RIE",
 			"nick": "Malevo",
@@ -1150,7 +1150,7 @@
 		},
 		{
 			"key": "ARG_SAR",
-			"name": "Club Atlético Sarmiento",
+			"name": "Sarmiento",
 			"short": "Sarmiento",
 			"abbr": "SAR",
 			"nick": "Verde",
@@ -1177,7 +1177,7 @@
 		},
 		{
 			"key": "ARG_CCO",
-			"name": "Club Atlético Central Córdoba",
+			"name": "Central Córdoba",
 			"short": "Central Córdoba",
 			"abbr": "CCO",
 			"nick": "Ferroviarios",
@@ -1204,7 +1204,7 @@
 		},
 		{
 			"key": "ARG_SMJ",
-			"name": "Club Atlético San Martín de San Juan",
+			"name": "San Martín SJ",
 			"short": "San Martín SJ",
 			"abbr": "SMJ",
 			"nick": "Verdinegro",
@@ -1231,7 +1231,7 @@
 		},
 		{
 			"key": "ARG_ALD",
-			"name": "Club Atlético Aldosivi",
+			"name": "Aldosivi",
 			"short": "Aldosivi",
 			"abbr": "ALD",
 			"nick": "Tiburón",
@@ -1258,7 +1258,7 @@
 		},
 		{
 			"key": "ARG_GEM",
-			"name": "Club Gimnasia y Esgrima de Mendoza",
+			"name": "Gimnasia Mendoza",
 			"short": "Gimnasia Mendoza",
 			"abbr": "GEM",
 			"nick": "Lobo",

@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "BRA_RNC",
-			"name": "Clube de Regatas do Flamengo",
+			"name": "Flamengo",
 			"short": "Flamengo",
 			"abbr": "FLA",
 			"nick": "Mengão",
@@ -36,7 +36,7 @@
 		},
 		{
 			"key": "BRA_VPA",
-			"name": "Sociedade Esportiva Palmeiras",
+			"name": "Palmeiras",
 			"short": "Palmeiras",
 			"abbr": "PAL",
 			"nick": "Porco",
@@ -50,7 +50,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Allianz Parque",
+			"stadium": "Arena Palestra",
 			"capacity": 43000,
 			"kit": "plain",
 			"crest": {
@@ -72,7 +72,7 @@
 		},
 		{
 			"key": "BRA_TIM",
-			"name": "Sport Club Corinthians Paulista",
+			"name": "Corinthians",
 			"short": "Corinthians",
 			"abbr": "COR",
 			"nick": "Coringão",
@@ -86,7 +86,7 @@
 				"#FFFFFF",
 				"#111111"
 			],
-			"stadium": "Neo Química Arena",
+			"stadium": "Arena de Itaquera",
 			"capacity": 49000,
 			"kit": "plain",
 			"crest": {
@@ -108,7 +108,7 @@
 		},
 		{
 			"key": "BRA_MOR",
-			"name": "São Paulo Futebol Clube",
+			"name": "São Paulo",
 			"short": "São Paulo",
 			"abbr": "SAO",
 			"nick": "Tricolor",
@@ -144,7 +144,7 @@
 		},
 		{
 			"key": "BRA_PRA",
-			"name": "Santos Futebol Clube",
+			"name": "Santos",
 			"short": "Santos",
 			"abbr": "SAN",
 			"nick": "Peixe",
@@ -179,7 +179,7 @@
 		},
 		{
 			"key": "BRA_TRL",
-			"name": "Fluminense Football Club",
+			"name": "Fluminense",
 			"short": "Fluminense",
 			"abbr": "FLU",
 			"nick": "Flu",
@@ -215,7 +215,7 @@
 		},
 		{
 			"key": "BRA_GLO",
-			"name": "Botafogo de Futebol e Regatas",
+			"name": "Botafogo",
 			"short": "Botafogo",
 			"abbr": "BOT",
 			"nick": "Fogão",
@@ -247,7 +247,7 @@
 		},
 		{
 			"key": "BRA_CMA",
-			"name": "Club de Regatas Vasco da Gama",
+			"name": "Vasco",
 			"short": "Vasco",
 			"abbr": "VAS",
 			"nick": "Gigante da Colina",
@@ -278,7 +278,7 @@
 		},
 		{
 			"key": "BRA_IMT",
-			"name": "Grêmio Foot-Ball Porto Alegrense",
+			"name": "Grêmio",
 			"short": "Grêmio",
 			"abbr": "GRE",
 			"nick": "Tricolor",
@@ -312,7 +312,7 @@
 		},
 		{
 			"key": "BRA_COL",
-			"name": "Sport Club Internacional",
+			"name": "Internacional",
 			"short": "Internacional",
 			"abbr": "INT",
 			"nick": "Inter",
@@ -343,7 +343,7 @@
 		},
 		{
 			"key": "BRA_GAL",
-			"name": "Clube Atlético Mineiro",
+			"name": "Atlético-MG",
 			"short": "Atlético-MG",
 			"abbr": "CAM",
 			"nick": "Galo",
@@ -357,7 +357,7 @@
 				"#111111",
 				"#FFFFFF"
 			],
-			"stadium": "Arena MRV",
+			"stadium": "Arena do Galo",
 			"capacity": 46000,
 			"kit": "stripes_v",
 			"crest": {
@@ -375,7 +375,7 @@
 		},
 		{
 			"key": "BRA_RAP",
-			"name": "Cruzeiro Esporte Clube",
+			"name": "Cruzeiro",
 			"short": "Cruzeiro",
 			"abbr": "CRU",
 			"nick": "Cabuloso",
@@ -407,7 +407,7 @@
 		},
 		{
 			"key": "BRA_ESQ",
-			"name": "Esporte Clube Bahia",
+			"name": "Bahia",
 			"short": "Bahia",
 			"abbr": "BAH",
 			"nick": "Bahêa",
@@ -442,7 +442,7 @@
 		},
 		{
 			"key": "BRA_LBA",
-			"name": "Esporte Clube Vitória",
+			"name": "Vitória",
 			"short": "Vitória",
 			"abbr": "VIT",
 			"nick": "Leão da Barra",
@@ -472,7 +472,7 @@
 		},
 		{
 			"key": "BRA_PIC",
-			"name": "Fortaleza Esporte Clube",
+			"name": "Fortaleza",
 			"short": "Fortaleza",
 			"abbr": "FOR",
 			"nick": "Tricolor de Aço",
@@ -505,7 +505,7 @@
 		},
 		{
 			"key": "BRA_VOZ",
-			"name": "Ceará Sporting Club",
+			"name": "Ceará",
 			"short": "Ceará",
 			"abbr": "CEA",
 			"nick": "Vovô",
@@ -536,7 +536,7 @@
 		},
 		{
 			"key": "BRA_FUR",
-			"name": "Club Athletico Paranaense",
+			"name": "Athletico-PR",
 			"short": "Athletico-PR",
 			"abbr": "CAP",
 			"nick": "Furacão",
@@ -550,7 +550,7 @@
 				"#C8102E",
 				"#111111"
 			],
-			"stadium": "Ligga Arena",
+			"stadium": "Arena da Baixada",
 			"capacity": 42000,
 			"kit": "stripes_h",
 			"crest": {
@@ -564,7 +564,7 @@
 		},
 		{
 			"key": "BRA_MBR",
-			"name": "Red Bull Bragantino",
+			"name": "Bragantino",
 			"short": "Bragantino",
 			"abbr": "RBB",
 			"nick": "Massa Bruta",
@@ -594,7 +594,7 @@
 		},
 		{
 			"key": "BRA_LDI",
-			"name": "Sport Club do Recife",
+			"name": "Sport",
 			"short": "Sport",
 			"abbr": "SPT",
 			"nick": "Leão",
@@ -624,7 +624,7 @@
 		},
 		{
 			"key": "BRA_LMI",
-			"name": "Mirassol Futebol Clube",
+			"name": "Mirassol",
 			"short": "Mirassol",
 			"abbr": "MIR",
 			"nick": "Leão",
@@ -651,7 +651,7 @@
 		},
 		{
 			"key": "BRA_COX",
-			"name": "Coritiba Foot Ball Club",
+			"name": "Coritiba",
 			"short": "Coritiba",
 			"abbr": "CFC",
 			"nick": "Coxa",
@@ -683,7 +683,7 @@
 		},
 		{
 			"key": "BRA_ESM",
-			"name": "Goiás Esporte Clube",
+			"name": "Goiás",
 			"short": "Goiás",
 			"abbr": "GOI",
 			"nick": "Verdão",
@@ -714,7 +714,7 @@
 		},
 		{
 			"key": "BRA_DGO",
-			"name": "Atlético Clube Goianiense",
+			"name": "Atlético-GO",
 			"short": "Atlético-GO",
 			"abbr": "ACG",
 			"nick": "Dragão",
@@ -745,7 +745,7 @@
 		},
 		{
 			"key": "BRA_COE",
-			"name": "América Futebol Clube",
+			"name": "América-MG",
 			"short": "América-MG",
 			"abbr": "AME",
 			"nick": "Coelho",
@@ -776,7 +776,7 @@
 		},
 		{
 			"key": "BRA_CON",
-			"name": "Associação Chapecoense de Futebol",
+			"name": "Chapecoense",
 			"short": "Chapecoense",
 			"abbr": "CHA",
 			"nick": "Chape",
@@ -806,7 +806,7 @@
 		},
 		{
 			"key": "BRA_TSC",
-			"name": "Criciúma Esporte Clube",
+			"name": "Criciúma",
 			"short": "Criciúma",
 			"abbr": "CRI",
 			"nick": "Tigre",
@@ -834,7 +834,7 @@
 		},
 		{
 			"key": "BRA_RES",
-			"name": "Avaí Futebol Clube",
+			"name": "Avaí",
 			"short": "Avaí",
 			"abbr": "AVA",
 			"nick": "Leão da Ilha",
@@ -864,7 +864,7 @@
 		},
 		{
 			"key": "BRA_MAC",
-			"name": "Associação Atlética Ponte Preta",
+			"name": "Ponte Preta",
 			"short": "Ponte Preta",
 			"abbr": "PON",
 			"nick": "Macaca",
@@ -894,7 +894,7 @@
 		},
 		{
 			"key": "BRA_BUG",
-			"name": "Guarani Futebol Clube",
+			"name": "Guarani",
 			"short": "Guarani",
 			"abbr": "GUA",
 			"nick": "Bugre",
@@ -924,7 +924,7 @@
 		},
 		{
 			"key": "BRA_TVA",
-			"name": "Grêmio Novorizontino",
+			"name": "Novorizontino",
 			"short": "Novorizontino",
 			"abbr": "NOV",
 			"nick": "Tigre do Vale",
@@ -953,7 +953,7 @@
 		},
 		{
 			"key": "BRA_PAJ",
-			"name": "Clube de Regatas Brasil",
+			"name": "CRB",
 			"short": "CRB",
 			"abbr": "CRB",
 			"nick": "Galo",
@@ -983,7 +983,7 @@
 		},
 		{
 			"key": "BRA_PPA",
-			"name": "Paysandu Sport Club",
+			"name": "Paysandu",
 			"short": "Paysandu",
 			"abbr": "PAY",
 			"nick": "Papão",
@@ -1013,7 +1013,7 @@
 		},
 		{
 			"key": "BRA_LAZ",
-			"name": "Clube do Remo",
+			"name": "Remo",
 			"short": "Remo",
 			"abbr": "REM",
 			"nick": "Leão Azul",
@@ -1044,7 +1044,7 @@
 		},
 		{
 			"key": "BRA_TIG",
-			"name": "Vila Nova Futebol Clube",
+			"name": "Vila Nova",
 			"short": "Vila Nova",
 			"abbr": "VNO",
 			"nick": "Tigrão",
@@ -1074,7 +1074,7 @@
 		},
 		{
 			"key": "BRA_FAN",
-			"name": "Operário Ferroviário Esporte Clube",
+			"name": "Operário-PR",
 			"short": "Operário-PR",
 			"abbr": "OPE",
 			"nick": "Fantasma",
@@ -1101,7 +1101,7 @@
 		},
 		{
 			"key": "BRA_PAN",
-			"name": "Botafogo Futebol Clube",
+			"name": "Botafogo-SP",
 			"short": "Botafogo-SP",
 			"abbr": "BFC",
 			"nick": "Pantera",
@@ -1129,7 +1129,7 @@
 		},
 		{
 			"key": "BRA_DOU",
-			"name": "Cuiabá Esporte Clube",
+			"name": "Cuiabá",
 			"short": "Cuiabá",
 			"abbr": "CUI",
 			"nick": "Dourado",
@@ -1157,7 +1157,7 @@
 		},
 		{
 			"key": "BRA_ONC",
-			"name": "Amazonas Futebol Clube",
+			"name": "Amazonas",
 			"short": "Amazonas",
 			"abbr": "AMZ",
 			"nick": "Onça",
@@ -1186,7 +1186,7 @@
 		},
 		{
 			"key": "BRA_LOC",
-			"name": "Associação Ferroviária de Esportes",
+			"name": "Ferroviária",
 			"short": "Ferroviária",
 			"abbr": "FER",
 			"nick": "Ferrinha",
@@ -1213,7 +1213,7 @@
 		},
 		{
 			"key": "BRA_CRI",
-			"name": "Villa Nova Atlético Clube",
+			"name": "Villa Nova",
 			"short": "Villa Nova",
 			"abbr": "VIL",
 			"nick": "Leão do Bonfim",
@@ -1241,7 +1241,7 @@
 		},
 		{
 			"key": "BRA_TIB",
-			"name": "Clube Náutico Capibaribe",
+			"name": "Náutico",
 			"short": "Náutico",
 			"abbr": "NAU",
 			"nick": "Timbu",
@@ -1271,7 +1271,7 @@
 		},
 		{
 			"key": "BRA_CCO",
-			"name": "Santa Cruz Futebol Clube",
+			"name": "Santa Cruz",
 			"short": "Santa Cruz",
 			"abbr": "SCR",
 			"nick": "Tricolor do Arruda",
@@ -1302,7 +1302,7 @@
 		},
 		{
 			"key": "BRA_POT",
-			"name": "ABC Futebol Clube",
+			"name": "ABC",
 			"short": "ABC",
 			"abbr": "ABC",
 			"nick": "Mais Querido",
@@ -1332,7 +1332,7 @@
 		},
 		{
 			"key": "BRA_MEC",
-			"name": "América Futebol Clube (RN)",
+			"name": "América-RN",
 			"short": "América-RN",
 			"abbr": "AMR",
 			"nick": "Mecão",
@@ -1361,7 +1361,7 @@
 		},
 		{
 			"key": "BRA_FIG",
-			"name": "Figueirense Futebol Clube",
+			"name": "Figueirense",
 			"short": "Figueirense",
 			"abbr": "FIG",
 			"nick": "Figueira",
@@ -1391,7 +1391,7 @@
 		},
 		{
 			"key": "BRA_JEC",
-			"name": "Joinville Esporte Clube",
+			"name": "Joinville",
 			"short": "Joinville",
 			"abbr": "JEC",
 			"nick": "Tricolor",
@@ -1419,7 +1419,7 @@
 		},
 		{
 			"key": "BRA_BRU",
-			"name": "Brusque Futebol Clube",
+			"name": "Brusque",
 			"short": "Brusque",
 			"abbr": "BRU",
 			"nick": "Quadricolor",
@@ -1447,7 +1447,7 @@
 		},
 		{
 			"key": "BRA_CAN",
-			"name": "Ypiranga Futebol Clube",
+			"name": "Ypiranga-RS",
 			"short": "Ypiranga-RS",
 			"abbr": "YPI",
 			"nick": "Canarinho",
@@ -1476,7 +1476,7 @@
 		},
 		{
 			"key": "BRA_GRE",
-			"name": "Sociedade Esportiva e Recreativa Caxias do Sul",
+			"name": "Caxias",
 			"short": "Caxias",
 			"abbr": "CAX",
 			"nick": "Grená",
@@ -1505,7 +1505,7 @@
 		},
 		{
 			"key": "BRA_DSE",
-			"name": "Associação Desportiva Confiança",
+			"name": "Confiança",
 			"short": "Confiança",
 			"abbr": "CON",
 			"nick": "Dragão",
@@ -1534,7 +1534,7 @@
 		},
 		{
 			"key": "BRA_BOQ",
-			"name": "Sampaio Corrêa Futebol Clube",
+			"name": "Sampaio Corrêa",
 			"short": "Sampaio Corrêa",
 			"abbr": "SAM",
 			"nick": "Tubarão",
@@ -1568,7 +1568,7 @@
 		},
 		{
 			"key": "BRA_BEL",
-			"name": "Botafogo Futebol Clube (PB)",
+			"name": "Botafogo-PB",
 			"short": "Botafogo-PB",
 			"abbr": "BPB",
 			"nick": "Belo",
@@ -1597,7 +1597,7 @@
 		},
 		{
 			"key": "BRA_BOR",
-			"name": "Treze Futebol Clube",
+			"name": "Treze",
 			"short": "Treze",
 			"abbr": "TRE",
 			"nick": "Galo",
@@ -1627,7 +1627,7 @@
 		},
 		{
 			"key": "BRA_GIT",
-			"name": "Ituano Futebol Clube",
+			"name": "Ituano",
 			"short": "Ituano",
 			"abbr": "ITU",
 			"nick": "Galo",
@@ -1655,7 +1655,7 @@
 		},
 		{
 			"key": "BRA_TAB",
-			"name": "São Bernardo Futebol Clube",
+			"name": "São Bernardo",
 			"short": "São Bernardo",
 			"abbr": "SBE",
 			"nick": "Tigre",
@@ -1684,7 +1684,7 @@
 		},
 		{
 			"key": "BRA_CAR",
-			"name": "Tombense Futebol Clube",
+			"name": "Tombense",
 			"short": "Tombense",
 			"abbr": "TOM",
 			"nick": "Gavião",
@@ -1711,7 +1711,7 @@
 		},
 		{
 			"key": "BRA_TUB",
-			"name": "Londrina Esporte Clube",
+			"name": "Londrina",
 			"short": "Londrina",
 			"abbr": "LON",
 			"nick": "Tubarão",
@@ -1738,7 +1738,7 @@
 		},
 		{
 			"key": "BRA_VOL",
-			"name": "Volta Redonda Futebol Clube",
+			"name": "Volta Redonda",
 			"short": "Volta Redonda",
 			"abbr": "VRE",
 			"nick": "Voltaço",
@@ -1765,7 +1765,7 @@
 		},
 		{
 			"key": "BRA_ATH",
-			"name": "Athletic Club",
+			"name": "Athletic",
 			"short": "Athletic",
 			"abbr": "ATH",
 			"nick": "Esquadrão",
@@ -1793,7 +1793,7 @@
 		},
 		{
 			"key": "BRA_LOB",
-			"name": "Floresta Esporte Clube",
+			"name": "Floresta",
 			"short": "Floresta",
 			"abbr": "FLO",
 			"nick": "Lobo",
@@ -1820,7 +1820,7 @@
 		},
 		{
 			"key": "BRA_LUS",
-			"name": "Associação Portuguesa de Desportos",
+			"name": "Portuguesa",
 			"short": "Portuguesa",
 			"abbr": "POR",
 			"nick": "Lusa",
@@ -1849,7 +1849,7 @@
 		},
 		{
 			"key": "BRA_MOL",
-			"name": "Clube Atlético Juventus",
+			"name": "Juventus-SP",
 			"short": "Juventus-SP",
 			"abbr": "JUV",
 			"nick": "Moleque Travesso",
@@ -1878,7 +1878,7 @@
 		},
 		{
 			"key": "BRA_NHO",
-			"name": "Esporte Clube XV de Novembro",
+			"name": "XV de Piracicaba",
 			"short": "XV de Piracicaba",
 			"abbr": "XVP",
 			"nick": "Nhô Quim",
@@ -1908,7 +1908,7 @@
 		},
 		{
 			"key": "BRA_LLI",
-			"name": "Associação Atlética Internacional",
+			"name": "Inter de Limeira",
 			"short": "Inter de Limeira",
 			"abbr": "INL",
 			"nick": "Leão da Paulista",
@@ -1938,7 +1938,7 @@
 		},
 		{
 			"key": "BRA_ANA",
-			"name": "Anápolis Futebol Clube",
+			"name": "Anápolis",
 			"short": "Anápolis",
 			"abbr": "ANA",
 			"nick": "Galo da Comarca",
@@ -1968,7 +1968,7 @@
 		},
 		{
 			"key": "BRA_CAM",
-			"name": "Associação Atlética Aparecidense",
+			"name": "Aparecidense",
 			"short": "Aparecidense",
 			"abbr": "APA",
 			"nick": "Camaleão",
@@ -1998,7 +1998,7 @@
 		},
 		{
 			"key": "BRA_JAC",
-			"name": "Brasiliense Futebol Clube",
+			"name": "Brasiliense",
 			"short": "Brasiliense",
 			"abbr": "BSE",
 			"nick": "Jacaré",
@@ -2028,7 +2028,7 @@
 		},
 		{
 			"key": "BRA_PER",
-			"name": "Sociedade Esportiva do Gama",
+			"name": "Gama",
 			"short": "Gama",
 			"abbr": "GAM",
 			"nick": "Periquito",
@@ -2057,7 +2057,7 @@
 		},
 		{
 			"key": "BRA_MOT",
-			"name": "Moto Club de São Luís",
+			"name": "Moto Club",
 			"short": "Moto Club",
 			"abbr": "MOT",
 			"nick": "Papão do Norte",
@@ -2087,7 +2087,7 @@
 		},
 		{
 			"key": "BRA_GPI",
-			"name": "River Atlético Clube",
+			"name": "River-PI",
 			"short": "River-PI",
 			"abbr": "RIV",
 			"nick": "Galo",
@@ -2115,7 +2115,7 @@
 		},
 		{
 			"key": "BRA_FCE",
-			"name": "Ferroviário Atlético Clube",
+			"name": "Ferroviário",
 			"short": "Ferroviário",
 			"abbr": "FCE",
 			"nick": "Tubarão",
@@ -2144,7 +2144,7 @@
 		},
 		{
 			"key": "BRA_CSE",
-			"name": "Club Sportivo Sergipe",
+			"name": "Sergipe",
 			"short": "Sergipe",
 			"abbr": "SER",
 			"nick": "Colorado",
@@ -2174,7 +2174,7 @@
 		},
 		{
 			"key": "BRA_ITB",
-			"name": "Associação Olímpica de Itabaiana",
+			"name": "Itabaiana",
 			"short": "Itabaiana",
 			"abbr": "ITA",
 			"nick": "Tremendão",
@@ -2204,7 +2204,7 @@
 		},
 		{
 			"key": "BRA_AZU",
-			"name": "Centro Sportivo Alagoano",
+			"name": "CSA",
 			"short": "CSA",
 			"abbr": "CSA",
 			"nick": "Azulão",
@@ -2236,7 +2236,7 @@
 		},
 		{
 			"key": "BRA_BAN",
-			"name": "Bangu Atlético Clube",
+			"name": "Bangu",
 			"short": "Bangu",
 			"abbr": "BAN",
 			"nick": "Alvirrubro",
@@ -2267,7 +2267,7 @@
 		},
 		{
 			"key": "BRA_MRJ",
-			"name": "America Football Club",
+			"name": "America-RJ",
 			"short": "America-RJ",
 			"abbr": "AFC",
 			"nick": "Mecão",
@@ -2297,7 +2297,7 @@
 		},
 		{
 			"key": "BRA_MAD",
-			"name": "Madureira Esporte Clube",
+			"name": "Madureira",
 			"short": "Madureira",
 			"abbr": "MAD",
 			"nick": "Tricolor Suburbano",
@@ -2328,7 +2328,7 @@
 		},
 		{
 			"key": "BRA_LAR",
-			"name": "Nova Iguaçu Futebol Clube",
+			"name": "Nova Iguaçu",
 			"short": "Nova Iguaçu",
 			"abbr": "NIG",
 			"nick": "Carrossel da Baixada",
@@ -2355,7 +2355,7 @@
 		},
 		{
 			"key": "BRA_GMS",
-			"name": "Operário Futebol Clube (MS)",
+			"name": "Operário-MS",
 			"short": "Operário-MS",
 			"abbr": "OMS",
 			"nick": "Galo",
@@ -2383,7 +2383,7 @@
 		},
 		{
 			"key": "BRA_EST",
-			"name": "Rio Branco Football Club",
+			"name": "Rio Branco-AC",
 			"short": "Rio Branco-AC",
 			"abbr": "RBR",
 			"nick": "Estrelão",

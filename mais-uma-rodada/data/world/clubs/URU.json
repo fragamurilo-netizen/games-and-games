@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "URU_MAU",
-			"name": "Club Atlético Peñarol",
+			"name": "Peñarol",
 			"short": "Peñarol",
 			"abbr": "PEN",
 			"nick": "Manyas",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "URU_BOS",
-			"name": "Club Nacional de Football",
+			"name": "Nacional",
 			"short": "Nacional",
 			"abbr": "NAC",
 			"nick": "Bolsos",
@@ -64,7 +64,7 @@
 		},
 		{
 			"key": "URU_VIO",
-			"name": "Defensor Sporting Club",
+			"name": "Defensor",
 			"short": "Defensor",
 			"abbr": "DEF",
 			"nick": "Violetas",
@@ -90,7 +90,7 @@
 		},
 		{
 			"key": "URU_FRA",
-			"name": "Danubio Fútbol Club",
+			"name": "Danubio",
 			"short": "Danubio",
 			"abbr": "DAN",
 			"nick": "Franjeados",
@@ -117,7 +117,7 @@
 		},
 		{
 			"key": "URU_LIV",
-			"name": "Liverpool Fútbol Club",
+			"name": "Liverpool",
 			"short": "Liverpool",
 			"abbr": "LIV",
 			"nick": "Negriazules",
@@ -144,7 +144,7 @@
 		},
 		{
 			"key": "URU_WAN",
-			"name": "Montevideo Wanderers FC",
+			"name": "Wanderers",
 			"short": "Wanderers",
 			"abbr": "MWA",
 			"nick": "Bohemios",
@@ -171,7 +171,7 @@
 		},
 		{
 			"key": "URU_CER",
-			"name": "Club Atlético Cerro",
+			"name": "Cerro",
 			"short": "Cerro",
 			"abbr": "CER",
 			"nick": "Villeros",
@@ -197,7 +197,7 @@
 		},
 		{
 			"key": "URU_RAC",
-			"name": "Racing Club de Montevideo",
+			"name": "Racing",
 			"short": "Racing",
 			"abbr": "RAC",
 			"nick": "Cervecero",
@@ -224,7 +224,7 @@
 		},
 		{
 			"key": "URU_PLA",
-			"name": "Club Plaza Colonia",
+			"name": "Plaza Colonia",
 			"short": "Plaza Colonia",
 			"abbr": "PLA",
 			"nick": "Pata Blanca",
@@ -277,7 +277,7 @@
 		},
 		{
 			"key": "URU_PRO",
-			"name": "Club Atlético Progreso",
+			"name": "Progreso",
 			"short": "Progreso",
 			"abbr": "PRO",
 			"nick": "Gaucho del Pantanoso",
@@ -304,7 +304,7 @@
 		},
 		{
 			"key": "URU_CLA",
-			"name": "Club Deportivo Cerro Largo",
+			"name": "Cerro Largo",
 			"short": "Cerro Largo",
 			"abbr": "CLA",
 			"nick": "Arachanes",
@@ -329,7 +329,7 @@
 		},
 		{
 			"key": "URU_FEN",
-			"name": "Centro Atlético Fénix",
+			"name": "Fénix",
 			"short": "Fénix",
 			"abbr": "FEN",
 			"nick": "Fénix",
@@ -350,7 +350,7 @@
 		},
 		{
 			"key": "URU_MAL",
-			"name": "Club Deportivo Maldonado",
+			"name": "Dep. Maldonado",
 			"short": "Dep. Maldonado",
 			"abbr": "MAL",
 			"nick": "Dep. Maldonado",
@@ -371,7 +371,7 @@
 		},
 		{
 			"key": "URU_RIV",
-			"name": "Club Atlético River Plate",
+			"name": "River Plate URU",
 			"short": "River Plate URU",
 			"abbr": "RIP",
 			"nick": "River Plate URU",
@@ -392,7 +392,7 @@
 		},
 		{
 			"key": "URU_JUV",
-			"name": "Club Social y Deportivo Juventud",
+			"name": "Juventud",
 			"short": "Juventud",
 			"abbr": "JUV",
 			"nick": "Juventud",

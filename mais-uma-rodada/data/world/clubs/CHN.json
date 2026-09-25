@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "CHN_SHH",
-			"name": "Shanghai Port FC",
+			"name": "Shanghai Port",
 			"short": "Shanghai Port",
 			"abbr": "SHP",
 			"nick": "Red Eagles",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "CHN_JIN",
-			"name": "Shandong Taishan FC",
+			"name": "Shandong Taishan",
 			"short": "Shandong Taishan",
 			"abbr": "SDT",
 			"nick": "Taishan",
@@ -58,7 +58,7 @@
 		},
 		{
 			"key": "CHN_BEI",
-			"name": "Beijing Guoan FC",
+			"name": "Beijing Guoan",
 			"short": "Beijing Guoan",
 			"abbr": "BGA",
 			"nick": "Imperial",
@@ -84,7 +84,7 @@
 		},
 		{
 			"key": "CHN_SHS",
-			"name": "Shanghai Shenhua FC",
+			"name": "Shanghai Shenhua",
 			"short": "Shanghai Shenhua",
 			"abbr": "SSH",
 			"nick": "Blue Devils",
@@ -112,7 +112,7 @@
 		},
 		{
 			"key": "CHN_CHE",
-			"name": "Chengdu Rongcheng FC",
+			"name": "Chengdu Rongcheng",
 			"short": "Chengdu Rongcheng",
 			"abbr": "CDR",
 			"nick": "Rongcheng",
@@ -137,7 +137,7 @@
 		},
 		{
 			"key": "CHN_ZHE",
-			"name": "Zhejiang FC",
+			"name": "Zhejiang",
 			"short": "Zhejiang",
 			"abbr": "ZHE",
 			"nick": "Green Town",
@@ -162,7 +162,7 @@
 		},
 		{
 			"key": "CHN_TIA",
-			"name": "Tianjin Jinmen Tiger FC",
+			"name": "Tianjin Tiger",
 			"short": "Tianjin Tiger",
 			"abbr": "TJT",
 			"nick": "Tigres",
@@ -187,7 +187,7 @@
 		},
 		{
 			"key": "CHN_WUH",
-			"name": "Wuhan Three Towns FC",
+			"name": "Wuhan Three Towns",
 			"short": "Wuhan Three Towns",
 			"abbr": "WTT",
 			"nick": "Três Cidades",
@@ -212,7 +212,7 @@
 		},
 		{
 			"key": "CHN_CCY",
-			"name": "Changchun Yatai FC",
+			"name": "Changchun Yatai",
 			"short": "Changchun Yatai",
 			"abbr": "CCY",
 			"nick": "Changchun Yatai",
@@ -233,7 +233,7 @@
 		},
 		{
 			"key": "CHN_HEN",
-			"name": "Henan FC",
+			"name": "Henan",
 			"short": "Henan",
 			"abbr": "HEN",
 			"nick": "Henan",
@@ -254,7 +254,7 @@
 		},
 		{
 			"key": "CHN_QWC",
-			"name": "Qingdao West Coast FC",
+			"name": "Qingdao West Coast",
 			"short": "Qingdao West Coast",
 			"abbr": "QWC",
 			"nick": "Qingdao West Coast",
@@ -275,7 +275,7 @@
 		},
 		{
 			"key": "CHN_QHN",
-			"name": "Qingdao Hainiu FC",
+			"name": "Qingdao Hainiu",
 			"short": "Qingdao Hainiu",
 			"abbr": "QHN",
 			"nick": "Qingdao Hainiu",
@@ -296,7 +296,7 @@
 		},
 		{
 			"key": "CHN_MEI",
-			"name": "Meizhou Hakka FC",
+			"name": "Meizhou Hakka",
 			"short": "Meizhou Hakka",
 			"abbr": "MZH",
 			"nick": "Meizhou Hakka",
@@ -317,7 +317,7 @@
 		},
 		{
 			"key": "CHN_SZP",
-			"name": "Shenzhen Peng City FC",
+			"name": "Shenzhen Peng City",
 			"short": "Shenzhen Peng City",
 			"abbr": "SZP",
 			"nick": "Shenzhen Peng City",
@@ -338,7 +338,7 @@
 		},
 		{
 			"key": "CHN_DAL",
-			"name": "Dalian Yingbo FC",
+			"name": "Dalian Yingbo",
 			"short": "Dalian Yingbo",
 			"abbr": "DLY",
 			"nick": "Dalian Yingbo",
@@ -359,7 +359,7 @@
 		},
 		{
 			"key": "CHN_YUN",
-			"name": "Yunnan Yukun FC",
+			"name": "Yunnan Yukun",
 			"short": "Yunnan Yukun",
 			"abbr": "YYK",
 			"nick": "Yunnan Yukun",

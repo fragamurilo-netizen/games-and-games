@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "FRA_PCF",
-			"name": "Paris Saint-Germain",
+			"name": "PSG",
 			"short": "PSG",
 			"abbr": "PSG",
 			"nick": "Parisiens",
@@ -37,7 +37,7 @@
 		},
 		{
 			"key": "FRA_MRS",
-			"name": "Olympique de Marseille",
+			"name": "Marseille",
 			"short": "Marseille",
 			"abbr": "OM",
 			"nick": "Olympiens",
@@ -50,7 +50,7 @@
 				"#FFFFFF",
 				"#2FAEE0"
 			],
-			"stadium": "Orange Vélodrome",
+			"stadium": "Stade Vélodrome",
 			"capacity": 67000,
 			"kit": "plain",
 			"crest": {
@@ -70,7 +70,7 @@
 		},
 		{
 			"key": "FRA_MON",
-			"name": "AS Monaco",
+			"name": "Monaco",
 			"short": "Monaco",
 			"abbr": "MON",
 			"nick": "Monégasques",
@@ -101,7 +101,7 @@
 		},
 		{
 			"key": "FRA_NIC",
-			"name": "OGC Nice",
+			"name": "Nice",
 			"short": "Nice",
 			"abbr": "NIC",
 			"nick": "Aiglons",
@@ -114,7 +114,7 @@
 				"#C8102E",
 				"#111111"
 			],
-			"stadium": "Allianz Riviera",
+			"stadium": "Stade de Nice",
 			"capacity": 36000,
 			"kit": "stripes_v",
 			"crest": {
@@ -129,7 +129,7 @@
 		},
 		{
 			"key": "FRA_LIL",
-			"name": "LOSC Lille",
+			"name": "Lille",
 			"short": "Lille",
 			"abbr": "LIL",
 			"nick": "Dogues",
@@ -158,7 +158,7 @@
 		},
 		{
 			"key": "FRA_LYO",
-			"name": "Olympique Lyonnais",
+			"name": "Lyon",
 			"short": "Lyon",
 			"abbr": "OL",
 			"nick": "Gones",
@@ -171,7 +171,7 @@
 				"#FFFFFF",
 				"#DA291C"
 			],
-			"stadium": "Groupama Stadium",
+			"stadium": "Parc Olympique Lyonnais",
 			"capacity": 59000,
 			"kit": "plain",
 			"crest": {
@@ -190,7 +190,7 @@
 		},
 		{
 			"key": "FRA_STR",
-			"name": "RC Strasbourg Alsace",
+			"name": "Strasbourg",
 			"short": "Strasbourg",
 			"abbr": "RCS",
 			"nick": "Alsaciens",
@@ -216,7 +216,7 @@
 		},
 		{
 			"key": "FRA_LEN",
-			"name": "RC Lens",
+			"name": "Lens",
 			"short": "Lens",
 			"abbr": "RCL",
 			"nick": "Sang et Or",
@@ -244,7 +244,7 @@
 		},
 		{
 			"key": "FRA_BST",
-			"name": "Stade Brestois 29",
+			"name": "Brest",
 			"short": "Brest",
 			"abbr": "SB29",
 			"nick": "Pirates",
@@ -273,7 +273,7 @@
 		},
 		{
 			"key": "FRA_TOU",
-			"name": "Toulouse FC",
+			"name": "Toulouse",
 			"short": "Toulouse",
 			"abbr": "TFC",
 			"nick": "Violets",
@@ -299,7 +299,7 @@
 		},
 		{
 			"key": "FRA_AUX",
-			"name": "AJ Auxerre",
+			"name": "Auxerre",
 			"short": "Auxerre",
 			"abbr": "AJA",
 			"nick": "Ajaïstes",
@@ -326,7 +326,7 @@
 		},
 		{
 			"key": "FRA_REN",
-			"name": "Stade Rennais FC",
+			"name": "Rennes",
 			"short": "Rennes",
 			"abbr": "SRFC",
 			"nick": "Rouge et Noir",
@@ -356,7 +356,7 @@
 		},
 		{
 			"key": "FRA_NAN",
-			"name": "FC Nantes",
+			"name": "Nantes",
 			"short": "Nantes",
 			"abbr": "FCN",
 			"nick": "Canaris",
@@ -384,7 +384,7 @@
 		},
 		{
 			"key": "FRA_ANG",
-			"name": "Angers SCO",
+			"name": "Angers",
 			"short": "Angers",
 			"abbr": "SCO",
 			"nick": "Scoïstes",
@@ -411,7 +411,7 @@
 		},
 		{
 			"key": "FRA_HAV",
-			"name": "Le Havre AC",
+			"name": "Le Havre",
 			"short": "Le Havre",
 			"abbr": "HAC",
 			"nick": "Havrais",
@@ -438,7 +438,7 @@
 		},
 		{
 			"key": "FRA_LOR",
-			"name": "FC Lorient",
+			"name": "Lorient",
 			"short": "Lorient",
 			"abbr": "FCL",
 			"nick": "Merlus",
@@ -494,7 +494,7 @@
 		},
 		{
 			"key": "FRA_MET",
-			"name": "FC Metz",
+			"name": "Metz",
 			"short": "Metz",
 			"abbr": "FCM",
 			"nick": "Grenats",
@@ -522,7 +522,7 @@
 		},
 		{
 			"key": "FRA_STE",
-			"name": "AS Saint-Étienne",
+			"name": "Saint-Étienne",
 			"short": "Saint-Étienne",
 			"abbr": "ASSE",
 			"nick": "Les Verts",
@@ -551,7 +551,7 @@
 		},
 		{
 			"key": "FRA_MTP",
-			"name": "Montpellier HSC",
+			"name": "Montpellier",
 			"short": "Montpellier",
 			"abbr": "MHSC",
 			"nick": "Pailladins",
@@ -580,7 +580,7 @@
 		},
 		{
 			"key": "FRA_REI",
-			"name": "Stade de Reims",
+			"name": "Reims",
 			"short": "Reims",
 			"abbr": "SDR",
 			"nick": "Rémois",
@@ -607,7 +607,7 @@
 		},
 		{
 			"key": "FRA_GUI",
-			"name": "En Avant Guingamp",
+			"name": "Guingamp",
 			"short": "Guingamp",
 			"abbr": "EAG",
 			"nick": "Guingampais",
@@ -634,7 +634,7 @@
 		},
 		{
 			"key": "FRA_TRO",
-			"name": "ESTAC Troyes",
+			"name": "Troyes",
 			"short": "Troyes",
 			"abbr": "ETR",
 			"nick": "Troyens",
@@ -660,7 +660,7 @@
 		},
 		{
 			"key": "FRA_BAS",
-			"name": "SC Bastia",
+			"name": "Bastia",
 			"short": "Bastia",
 			"abbr": "SCB",
 			"nick": "Bastiais",
@@ -686,7 +686,7 @@
 		},
 		{
 			"key": "FRA_DUN",
-			"name": "USL Dunkerque",
+			"name": "Dunkerque",
 			"short": "Dunkerque",
 			"abbr": "USLD",
 			"nick": "Dunkerquois",
@@ -711,7 +711,7 @@
 		},
 		{
 			"key": "FRA_LAV",
-			"name": "Stade Lavallois",
+			"name": "Laval",
 			"short": "Laval",
 			"abbr": "SLM",
 			"nick": "Tango",
@@ -737,7 +737,7 @@
 		},
 		{
 			"key": "FRA_PAU",
-			"name": "Pau FC",
+			"name": "Pau",
 			"short": "Pau",
 			"abbr": "PAU",
 			"nick": "Béarnais",
@@ -764,7 +764,7 @@
 		},
 		{
 			"key": "FRA_GRE",
-			"name": "Grenoble Foot 38",
+			"name": "Grenoble",
 			"short": "Grenoble",
 			"abbr": "GF38",
 			"nick": "Grenoblois",
@@ -790,7 +790,7 @@
 		},
 		{
 			"key": "FRA_ANN",
-			"name": "FC Annecy",
+			"name": "Annecy",
 			"short": "Annecy",
 			"abbr": "FCA",
 			"nick": "Annéciens",
@@ -816,7 +816,7 @@
 		},
 		{
 			"key": "FRA_SOU",
-			"name": "Red Star FC",
+			"name": "Red Star",
 			"short": "Red Star",
 			"abbr": "RSF",
 			"nick": "Audoniens",
@@ -845,7 +845,7 @@
 		},
 		{
 			"key": "FRA_AMI",
-			"name": "Amiens SC",
+			"name": "Amiens",
 			"short": "Amiens",
 			"abbr": "ASC",
 			"nick": "Picards",
@@ -872,7 +872,7 @@
 		},
 		{
 			"key": "FRA_CLE",
-			"name": "Clermont Foot 63",
+			"name": "Clermont",
 			"short": "Clermont",
 			"abbr": "CF63",
 			"nick": "Clermontois",
@@ -898,7 +898,7 @@
 		},
 		{
 			"key": "FRA_ROD",
-			"name": "Rodez Aveyron Football",
+			"name": "Rodez",
 			"short": "Rodez",
 			"abbr": "RAF",
 			"nick": "Ruthénois",
@@ -925,7 +925,7 @@
 		},
 		{
 			"key": "FRA_BOU",
-			"name": "US Boulogne",
+			"name": "Boulogne",
 			"short": "Boulogne",
 			"abbr": "USB",
 			"nick": "Boulonnais",
@@ -950,7 +950,7 @@
 		},
 		{
 			"key": "FRA_NCY",
-			"name": "AS Nancy Lorraine",
+			"name": "Nancy",
 			"short": "Nancy",
 			"abbr": "ASNL",
 			"nick": "Chardons",
@@ -978,7 +978,7 @@
 		},
 		{
 			"key": "FRA_LMS",
-			"name": "Le Mans FC",
+			"name": "Le Mans",
 			"short": "Le Mans",
 			"abbr": "LMFC",
 			"nick": "Manceaux",

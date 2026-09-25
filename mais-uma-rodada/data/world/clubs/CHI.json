@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "CHI_ALB",
-			"name": "Club Social y Deportivo Colo-Colo",
+			"name": "Colo-Colo",
 			"short": "Colo-Colo",
 			"abbr": "COL",
 			"nick": "Albos",
@@ -38,7 +38,7 @@
 		},
 		{
 			"key": "CHI_AZU",
-			"name": "Club Universidad de Chile",
+			"name": "U. de Chile",
 			"short": "U. de Chile",
 			"abbr": "UCH",
 			"nick": "Chunchos",
@@ -70,7 +70,7 @@
 		},
 		{
 			"key": "CHI_CRU",
-			"name": "Club Deportivo Universidad Católica",
+			"name": "U. Católica",
 			"short": "U. Católica",
 			"abbr": "UCA",
 			"nick": "Cruzados",
@@ -97,7 +97,7 @@
 		},
 		{
 			"key": "CHI_LOA",
-			"name": "Club de Deportes Cobreloa",
+			"name": "Cobreloa",
 			"short": "Cobreloa",
 			"abbr": "COB",
 			"nick": "Zorros del Desierto",
@@ -124,7 +124,7 @@
 		},
 		{
 			"key": "CHI_AUD",
-			"name": "Audax Club Sportivo Italiano",
+			"name": "Audax Italiano",
 			"short": "Audax Italiano",
 			"abbr": "AUD",
 			"nick": "Tanos",
@@ -155,7 +155,7 @@
 		},
 		{
 			"key": "CHI_PAL",
-			"name": "Club Deportivo Palestino",
+			"name": "Palestino",
 			"short": "Palestino",
 			"abbr": "PAL",
 			"nick": "Árabes",
@@ -186,7 +186,7 @@
 		},
 		{
 			"key": "CHI_HUA",
-			"name": "Club Deportivo Huachipato",
+			"name": "Huachipato",
 			"short": "Huachipato",
 			"abbr": "HUA",
 			"nick": "Acereros",
@@ -212,7 +212,7 @@
 		},
 		{
 			"key": "CHI_EVE",
-			"name": "Everton de Viña del Mar",
+			"name": "Everton",
 			"short": "Everton",
 			"abbr": "EVE",
 			"nick": "Ruleteros",
@@ -272,7 +272,7 @@
 		},
 		{
 			"key": "CHI_OHI",
-			"name": "Club Deportivo O'Higgins",
+			"name": "O'Higgins",
 			"short": "O'Higgins",
 			"abbr": "OHI",
 			"nick": "Capo de Provincia",
@@ -298,7 +298,7 @@
 		},
 		{
 			"key": "CHI_COQ",
-			"name": "Coquimbo Unido",
+			"name": "Coquimbo",
 			"short": "Coquimbo",
 			"abbr": "COQ",
 			"nick": "Piratas",
@@ -324,7 +324,7 @@
 		},
 		{
 			"key": "CHI_IQU",
-			"name": "Club de Deportes Iquique",
+			"name": "Deportes Iquique",
 			"short": "Deportes Iquique",
 			"abbr": "IQU",
 			"nick": "Dragones Celestes",
@@ -350,7 +350,7 @@
 		},
 		{
 			"key": "CHI_SER",
-			"name": "Club de Deportes La Serena",
+			"name": "La Serena",
 			"short": "La Serena",
 			"abbr": "LSE",
 			"nick": "La Serena",
@@ -392,7 +392,7 @@
 		},
 		{
 			"key": "CHI_NUB",
-			"name": "Club Deportivo Ñublense",
+			"name": "Ñublense",
 			"short": "Ñublense",
 			"abbr": "NUB",
 			"nick": "Ñublense",
@@ -413,7 +413,7 @@
 		},
 		{
 			"key": "CHI_LIM",
-			"name": "Deportes Limache",
+			"name": "Limache",
 			"short": "Limache",
 			"abbr": "LIM",
 			"nick": "Limache",

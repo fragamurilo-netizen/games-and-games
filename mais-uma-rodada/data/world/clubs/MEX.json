@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "MEX_AGU",
-			"name": "Club América",
+			"name": "América",
 			"short": "América",
 			"abbr": "AME",
 			"nick": "Azulcremas",
@@ -36,7 +36,7 @@
 		},
 		{
 			"key": "MEX_GDL",
-			"name": "Club Deportivo Guadalajara",
+			"name": "Chivas",
 			"short": "Chivas",
 			"abbr": "GDL",
 			"nick": "Rebaño Sagrado",
@@ -49,7 +49,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio Akron",
+			"stadium": "Estadio de Zapopan",
 			"capacity": 46000,
 			"kit": "stripes_v",
 			"crest": {
@@ -99,7 +99,7 @@
 		},
 		{
 			"key": "MEX_FEL",
-			"name": "Club Universidad Nacional",
+			"name": "Pumas UNAM",
 			"short": "Pumas UNAM",
 			"abbr": "PUM",
 			"nick": "Felinos",
@@ -127,7 +127,7 @@
 		},
 		{
 			"key": "MEX_AUR",
-			"name": "Tigres UANL",
+			"name": "Tigres",
 			"short": "Tigres",
 			"abbr": "TIG",
 			"nick": "Felinos del Norte",
@@ -155,7 +155,7 @@
 		},
 		{
 			"key": "MEX_RAY",
-			"name": "CF Monterrey",
+			"name": "Monterrey",
 			"short": "Monterrey",
 			"abbr": "MTY",
 			"nick": "Pandilla",
@@ -168,7 +168,7 @@
 				"#0D2A5C",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio BBVA",
+			"stadium": "Estadio de Guadalupe",
 			"capacity": 53500,
 			"kit": "stripes_v",
 			"crest": {
@@ -183,7 +183,7 @@
 		},
 		{
 			"key": "MEX_TOL",
-			"name": "Deportivo Toluca FC",
+			"name": "Toluca",
 			"short": "Toluca",
 			"abbr": "TOL",
 			"nick": "Diablos Rojos",
@@ -209,7 +209,7 @@
 		},
 		{
 			"key": "MEX_GRR",
-			"name": "Club Santos Laguna",
+			"name": "Santos Laguna",
 			"short": "Santos Laguna",
 			"abbr": "SAN",
 			"nick": "Guerreros",
@@ -222,7 +222,7 @@
 				"#006437",
 				"#FFFFFF"
 			],
-			"stadium": "Estadio Corona",
+			"stadium": "Estadio Nuevo Territorio Santos",
 			"capacity": 30000,
 			"kit": "halves",
 			"crest": {
@@ -236,7 +236,7 @@
 		},
 		{
 			"key": "MEX_ESM",
-			"name": "Club León",
+			"name": "León",
 			"short": "León",
 			"abbr": "LEO",
 			"nick": "Panzas Verdes",
@@ -263,7 +263,7 @@
 		},
 		{
 			"key": "MEX_TUZ",
-			"name": "CF Pachuca",
+			"name": "Pachuca",
 			"short": "Pachuca",
 			"abbr": "PAC",
 			"nick": "Tuzos",
@@ -290,7 +290,7 @@
 		},
 		{
 			"key": "MEX_ATL",
-			"name": "Atlas FC",
+			"name": "Atlas",
 			"short": "Atlas",
 			"abbr": "ATS",
 			"nick": "Zorros",
@@ -319,7 +319,7 @@
 		},
 		{
 			"key": "MEX_RYS",
-			"name": "Club Necaxa",
+			"name": "Necaxa",
 			"short": "Necaxa",
 			"abbr": "NEC",
 			"nick": "Rayos",
@@ -345,7 +345,7 @@
 		},
 		{
 			"key": "MEX_PUE",
-			"name": "Club Puebla",
+			"name": "Puebla",
 			"short": "Puebla",
 			"abbr": "PUE",
 			"nick": "Camoteros",
@@ -372,7 +372,7 @@
 		},
 		{
 			"key": "MEX_GAL",
-			"name": "Querétaro FC",
+			"name": "Querétaro",
 			"short": "Querétaro",
 			"abbr": "QRO",
 			"nick": "Gallos Blancos",
@@ -398,7 +398,7 @@
 		},
 		{
 			"key": "MEX_CAN",
-			"name": "Mazatlán FC",
+			"name": "Mazatlán",
 			"short": "Mazatlán",
 			"abbr": "MAZ",
 			"nick": "Cañoneros",
@@ -424,7 +424,7 @@
 		},
 		{
 			"key": "MEX_XOL",
-			"name": "Club Tijuana",
+			"name": "Tijuana",
 			"short": "Tijuana",
 			"abbr": "TIJ",
 			"nick": "Xolos",
@@ -476,7 +476,7 @@
 		},
 		{
 			"key": "MEX_TUN",
-			"name": "Atlético de San Luis",
+			"name": "San Luis",
 			"short": "San Luis",
 			"abbr": "ASL",
 			"nick": "Tuneros",

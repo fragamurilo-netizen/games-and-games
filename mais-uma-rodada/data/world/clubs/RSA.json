@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "RSA_BRZ",
-			"name": "Mamelodi Sundowns FC",
+			"name": "Sundowns",
 			"short": "Sundowns",
 			"abbr": "MSU",
 			"nick": "Masandawana",
@@ -30,7 +30,7 @@
 		},
 		{
 			"key": "RSA_AMA",
-			"name": "Kaizer Chiefs FC",
+			"name": "Kaizer Chiefs",
 			"short": "Kaizer Chiefs",
 			"abbr": "KAI",
 			"nick": "Amakhosi",
@@ -59,7 +59,7 @@
 		},
 		{
 			"key": "RSA_BUC",
-			"name": "Orlando Pirates FC",
+			"name": "Orlando Pirates",
 			"short": "Orlando Pirates",
 			"abbr": "OPI",
 			"nick": "Bucs",
@@ -87,7 +87,7 @@
 		},
 		{
 			"key": "RSA_STE",
-			"name": "Stellenbosch FC",
+			"name": "Stellenbosch",
 			"short": "Stellenbosch",
 			"abbr": "STB",
 			"nick": "Stellies",
@@ -114,7 +114,7 @@
 		},
 		{
 			"key": "RSA_AMZ",
-			"name": "AmaZulu FC",
+			"name": "AmaZulu",
 			"short": "AmaZulu",
 			"abbr": "AZU",
 			"nick": "Usuthu",
@@ -140,7 +140,7 @@
 		},
 		{
 			"key": "RSA_TSG",
-			"name": "TS Galaxy FC",
+			"name": "TS Galaxy",
 			"short": "TS Galaxy",
 			"abbr": "TSG",
 			"nick": "The Rockets",
@@ -165,7 +165,7 @@
 		},
 		{
 			"key": "RSA_SSU",
-			"name": "Siwelele FC",
+			"name": "Siwelele",
 			"short": "Siwelele",
 			"abbr": "SIW",
 			"nick": "Siwelele",
@@ -186,7 +186,7 @@
 		},
 		{
 			"key": "RSA_CTC",
-			"name": "Cape Town City FC",
+			"name": "Cape Town City",
 			"short": "Cape Town City",
 			"abbr": "CTC",
 			"nick": "Cape Town City",
@@ -207,7 +207,7 @@
 		},
 		{
 			"key": "RSA_SEK",
-			"name": "Sekhukhune United FC",
+			"name": "Sekhukhune",
 			"short": "Sekhukhune",
 			"abbr": "SEK",
 			"nick": "Sekhukhune",
@@ -228,7 +228,7 @@
 		},
 		{
 			"key": "RSA_POL",
-			"name": "Polokwane City FC",
+			"name": "Polokwane City",
 			"short": "Polokwane City",
 			"abbr": "PCF",
 			"nick": "Polokwane City",
@@ -249,7 +249,7 @@
 		},
 		{
 			"key": "RSA_GAR",
-			"name": "Lamontville Golden Arrows FC",
+			"name": "Golden Arrows",
 			"short": "Golden Arrows",
 			"abbr": "GAR",
 			"nick": "Golden Arrows",
@@ -270,7 +270,7 @@
 		},
 		{
 			"key": "RSA_CHI",
-			"name": "Chippa United FC",
+			"name": "Chippa United",
 			"short": "Chippa United",
 			"abbr": "CHI",
 			"nick": "Chippa United",
@@ -291,7 +291,7 @@
 		},
 		{
 			"key": "RSA_RBY",
-			"name": "Richards Bay FC",
+			"name": "Richards Bay",
 			"short": "Richards Bay",
 			"abbr": "RBY",
 			"nick": "Richards Bay",
@@ -312,7 +312,7 @@
 		},
 		{
 			"key": "RSA_MAG",
-			"name": "Magesi FC",
+			"name": "Magesi",
 			"short": "Magesi",
 			"abbr": "MAG",
 			"nick": "Magesi",
@@ -333,7 +333,7 @@
 		},
 		{
 			"key": "RSA_MAR",
-			"name": "Marumo Gallants FC",
+			"name": "Marumo Gallants",
 			"short": "Marumo Gallants",
 			"abbr": "MGA",
 			"nick": "Marumo Gallants",
@@ -354,7 +354,7 @@
 		},
 		{
 			"key": "RSA_ORB",
-			"name": "Orbit College FC",
+			"name": "Orbit College",
 			"short": "Orbit College",
 			"abbr": "ORB",
 			"nick": "Orbit College",

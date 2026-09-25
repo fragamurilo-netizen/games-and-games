@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "ESP_MBL",
-			"name": "Real Madrid CF",
+			"name": "Real Madrid",
 			"short": "Real Madrid",
 			"abbr": "RMA",
 			"nick": "Merengues",
@@ -39,7 +39,7 @@
 		},
 		{
 			"key": "ESP_BLG",
-			"name": "FC Barcelona",
+			"name": "Barcelona",
 			"short": "Barcelona",
 			"abbr": "BAR",
 			"nick": "Culés",
@@ -52,7 +52,7 @@
 				"#A50044",
 				"#004D98"
 			],
-			"stadium": "Spotify Camp Nou",
+			"stadium": "Camp Nou",
 			"capacity": 99000,
 			"kit": "stripes_v",
 			"crest": {
@@ -74,7 +74,7 @@
 		},
 		{
 			"key": "ESP_MRB",
-			"name": "Club Atlético de Madrid",
+			"name": "Atlético",
 			"short": "Atlético",
 			"abbr": "ATM",
 			"nick": "Colchoneros",
@@ -105,7 +105,7 @@
 		},
 		{
 			"key": "ESP_BIL",
-			"name": "Athletic Club",
+			"name": "Athletic",
 			"short": "Athletic",
 			"abbr": "ATH",
 			"nick": "Leones",
@@ -133,7 +133,7 @@
 		},
 		{
 			"key": "ESP_DON",
-			"name": "Real Sociedad de Fútbol",
+			"name": "Real Sociedad",
 			"short": "Real Sociedad",
 			"abbr": "RSO",
 			"nick": "Txuri-Urdin",
@@ -146,7 +146,7 @@
 				"#0067B1",
 				"#FFFFFF"
 			],
-			"stadium": "Reale Arena",
+			"stadium": "Anoeta",
 			"capacity": 39500,
 			"kit": "stripes_v",
 			"crest": {
@@ -163,7 +163,7 @@
 		},
 		{
 			"key": "ESP_SUB",
-			"name": "Villarreal CF",
+			"name": "Villarreal",
 			"short": "Villarreal",
 			"abbr": "VIL",
 			"nick": "Submarino",
@@ -193,7 +193,7 @@
 		},
 		{
 			"key": "ESP_VBL",
-			"name": "Real Betis Balompié",
+			"name": "Real Betis",
 			"short": "Real Betis",
 			"abbr": "BET",
 			"nick": "Béticos",
@@ -224,7 +224,7 @@
 		},
 		{
 			"key": "ESP_NER",
-			"name": "Sevilla FC",
+			"name": "Sevilla",
 			"short": "Sevilla",
 			"abbr": "SEV",
 			"nick": "Sevillistas",
@@ -254,7 +254,7 @@
 		},
 		{
 			"key": "ESP_VLC",
-			"name": "Valencia CF",
+			"name": "Valencia",
 			"short": "Valencia",
 			"abbr": "VAL",
 			"nick": "Che",
@@ -285,7 +285,7 @@
 		},
 		{
 			"key": "ESP_VIG",
-			"name": "RC Celta de Vigo",
+			"name": "Celta",
 			"short": "Celta",
 			"abbr": "CEL",
 			"nick": "Celestes",
@@ -316,7 +316,7 @@
 		},
 		{
 			"key": "ESP_GIR",
-			"name": "Girona FC",
+			"name": "Girona",
 			"short": "Girona",
 			"abbr": "GIR",
 			"nick": "Gironins",
@@ -347,7 +347,7 @@
 		},
 		{
 			"key": "ESP_PAM",
-			"name": "CA Osasuna",
+			"name": "Osasuna",
 			"short": "Osasuna",
 			"abbr": "OSA",
 			"nick": "Rojillos",
@@ -377,7 +377,7 @@
 		},
 		{
 			"key": "ESP_MLL",
-			"name": "RCD Mallorca",
+			"name": "Mallorca",
 			"short": "Mallorca",
 			"abbr": "MLL",
 			"nick": "Bermellones",
@@ -437,7 +437,7 @@
 		},
 		{
 			"key": "ESP_GET",
-			"name": "Getafe CF",
+			"name": "Getafe",
 			"short": "Getafe",
 			"abbr": "GET",
 			"nick": "Azulones",
@@ -466,7 +466,7 @@
 		},
 		{
 			"key": "ESP_VIT",
-			"name": "Deportivo Alavés",
+			"name": "Alavés",
 			"short": "Alavés",
 			"abbr": "ALA",
 			"nick": "Babazorros",
@@ -494,7 +494,7 @@
 		},
 		{
 			"key": "ESP_PQT",
-			"name": "RCD Espanyol",
+			"name": "Espanyol",
 			"short": "Espanyol",
 			"abbr": "ESP",
 			"nick": "Pericos",
@@ -525,7 +525,7 @@
 		},
 		{
 			"key": "ESP_GRA",
-			"name": "Levante UD",
+			"name": "Levante",
 			"short": "Levante",
 			"abbr": "LEV",
 			"nick": "Granotes",
@@ -554,7 +554,7 @@
 		},
 		{
 			"key": "ESP_ELX",
-			"name": "Elche CF",
+			"name": "Elche",
 			"short": "Elche",
 			"abbr": "ELC",
 			"nick": "Franjiverdes",
@@ -610,7 +610,7 @@
 		},
 		{
 			"key": "ESP_COR",
-			"name": "RC Deportivo de La Coruña",
+			"name": "Deportivo",
 			"short": "Deportivo",
 			"abbr": "DEP",
 			"nick": "Turcos",
@@ -641,7 +641,7 @@
 		},
 		{
 			"key": "ESP_GIJ",
-			"name": "Real Sporting de Gijón",
+			"name": "Sporting Gijón",
 			"short": "Sporting Gijón",
 			"abbr": "SPG",
 			"nick": "Sportinguistas",
@@ -704,7 +704,7 @@
 		},
 		{
 			"key": "ESP_SAN",
-			"name": "Real Racing Club de Santander",
+			"name": "Racing",
 			"short": "Racing",
 			"abbr": "RAC",
 			"nick": "Racinguistas",
@@ -733,7 +733,7 @@
 		},
 		{
 			"key": "ESP_GCA",
-			"name": "UD Las Palmas",
+			"name": "Las Palmas",
 			"short": "Las Palmas",
 			"abbr": "LPA",
 			"nick": "Amarillos",
@@ -761,7 +761,7 @@
 		},
 		{
 			"key": "ESP_TEN",
-			"name": "CD Tenerife",
+			"name": "Tenerife",
 			"short": "Tenerife",
 			"abbr": "TEN",
 			"nick": "Chicharreros",
@@ -789,7 +789,7 @@
 		},
 		{
 			"key": "ESP_PUC",
-			"name": "Real Valladolid CF",
+			"name": "Valladolid",
 			"short": "Valladolid",
 			"abbr": "VLL",
 			"nick": "Pucelanos",
@@ -817,7 +817,7 @@
 		},
 		{
 			"key": "ESP_ALM",
-			"name": "UD Almería",
+			"name": "Almería",
 			"short": "Almería",
 			"abbr": "ALM",
 			"nick": "Indálicos",
@@ -830,7 +830,7 @@
 				"#EE1119",
 				"#FFFFFF"
 			],
-			"stadium": "Power Horse Stadium",
+			"stadium": "Estadio de los Juegos Mediterráneos",
 			"capacity": 17400,
 			"kit": "stripes_v",
 			"crest": {
@@ -844,7 +844,7 @@
 		},
 		{
 			"key": "ESP_NAZ",
-			"name": "Granada CF",
+			"name": "Granada",
 			"short": "Granada",
 			"abbr": "GRA",
 			"nick": "Nazaríes",
@@ -872,7 +872,7 @@
 		},
 		{
 			"key": "ESP_CAD",
-			"name": "Cádiz CF",
+			"name": "Cádiz",
 			"short": "Cádiz",
 			"abbr": "CAD",
 			"nick": "Cadistas",
@@ -899,7 +899,7 @@
 		},
 		{
 			"key": "ESP_EIB",
-			"name": "SD Eibar",
+			"name": "Eibar",
 			"short": "Eibar",
 			"abbr": "EIB",
 			"nick": "Armeros",
@@ -926,7 +926,7 @@
 		},
 		{
 			"key": "ESP_HUE",
-			"name": "SD Huesca",
+			"name": "Huesca",
 			"short": "Huesca",
 			"abbr": "HUE",
 			"nick": "Oscenses",
@@ -955,7 +955,7 @@
 		},
 		{
 			"key": "ESP_MIR",
-			"name": "CD Mirandés",
+			"name": "Mirandés",
 			"short": "Mirandés",
 			"abbr": "MIR",
 			"nick": "Jabatos",
@@ -982,7 +982,7 @@
 		},
 		{
 			"key": "ESP_ALC",
-			"name": "Albacete Balompié",
+			"name": "Albacete",
 			"short": "Albacete",
 			"abbr": "ALB",
 			"nick": "Queso Mecánico",
@@ -1008,7 +1008,7 @@
 		},
 		{
 			"key": "ESP_BUR",
-			"name": "Burgos CF",
+			"name": "Burgos",
 			"short": "Burgos",
 			"abbr": "BUR",
 			"nick": "Blanquinegros",
@@ -1036,7 +1036,7 @@
 		},
 		{
 			"key": "ESP_CCF",
-			"name": "Córdoba CF",
+			"name": "Córdoba",
 			"short": "Córdoba",
 			"abbr": "COR",
 			"nick": "Califas",
@@ -1063,7 +1063,7 @@
 		},
 		{
 			"key": "ESP_MLG",
-			"name": "Málaga CF",
+			"name": "Málaga",
 			"short": "Málaga",
 			"abbr": "MAL",
 			"nick": "Boquerones",
@@ -1091,7 +1091,7 @@
 		},
 		{
 			"key": "ESP_CAS",
-			"name": "CD Castellón",
+			"name": "Castellón",
 			"short": "Castellón",
 			"abbr": "CAS",
 			"nick": "Orelluts",
@@ -1118,7 +1118,7 @@
 		},
 		{
 			"key": "ESP_LEG",
-			"name": "CD Leganés",
+			"name": "Leganés",
 			"short": "Leganés",
 			"abbr": "LEG",
 			"nick": "Pepineros",
@@ -1147,7 +1147,7 @@
 		},
 		{
 			"key": "ESP_LEO",
-			"name": "Cultural y Deportiva Leonesa",
+			"name": "Cultural",
 			"short": "Cultural",
 			"abbr": "CUL",
 			"nick": "Culturalistas",

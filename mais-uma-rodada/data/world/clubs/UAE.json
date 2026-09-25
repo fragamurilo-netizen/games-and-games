@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "UAE_BOS",
-			"name": "Al Ain FC",
+			"name": "Al Ain",
 			"short": "Al Ain",
 			"abbr": "AIN",
 			"nick": "Boss",
@@ -30,7 +30,7 @@
 		},
 		{
 			"key": "UAE_DUB",
-			"name": "Shabab Al Ahli Club",
+			"name": "Shabab Al Ahli",
 			"short": "Shabab Al Ahli",
 			"abbr": "SAH",
 			"nick": "Cavaleiros",
@@ -55,7 +55,7 @@
 		},
 		{
 			"key": "UAE_WAH",
-			"name": "Al Wahda FC",
+			"name": "Al Wahda",
 			"short": "Al Wahda",
 			"abbr": "WAH",
 			"nick": "Al Anabi",
@@ -81,7 +81,7 @@
 		},
 		{
 			"key": "UAE_JAZ",
-			"name": "Al Jazira Club",
+			"name": "Al Jazira",
 			"short": "Al Jazira",
 			"abbr": "JAZ",
 			"nick": "Al Fakher",
@@ -108,7 +108,7 @@
 		},
 		{
 			"key": "UAE_SHJ",
-			"name": "Sharjah FC",
+			"name": "Sharjah",
 			"short": "Sharjah",
 			"abbr": "SHJ",
 			"nick": "Al Malik",
@@ -134,7 +134,7 @@
 		},
 		{
 			"key": "UAE_WAS",
-			"name": "Al Wasl FC",
+			"name": "Al Wasl",
 			"short": "Al Wasl",
 			"abbr": "WAS",
 			"nick": "Al Fahood",
@@ -161,7 +161,7 @@
 		},
 		{
 			"key": "UAE_NAS",
-			"name": "Al Nasr SC",
+			"name": "Al Nasr Dubai",
 			"short": "Al Nasr Dubai",
 			"abbr": "NAS",
 			"nick": "Al Nasr Dubai",
@@ -182,7 +182,7 @@
 		},
 		{
 			"key": "UAE_BAN",
-			"name": "Baniyas SC",
+			"name": "Baniyas",
 			"short": "Baniyas",
 			"abbr": "BAN",
 			"nick": "Baniyas",
@@ -203,7 +203,7 @@
 		},
 		{
 			"key": "UAE_AJM",
-			"name": "Ajman Club",
+			"name": "Ajman",
 			"short": "Ajman",
 			"abbr": "AJM",
 			"nick": "Ajman",
@@ -224,7 +224,7 @@
 		},
 		{
 			"key": "UAE_KHF",
-			"name": "Khor Fakkan Club",
+			"name": "Khor Fakkan",
 			"short": "Khor Fakkan",
 			"abbr": "KFK",
 			"nick": "Khor Fakkan",
@@ -245,7 +245,7 @@
 		},
 		{
 			"key": "UAE_KAL",
-			"name": "Kalba FC",
+			"name": "Kalba",
 			"short": "Kalba",
 			"abbr": "KAL",
 			"nick": "Kalba",
@@ -266,7 +266,7 @@
 		},
 		{
 			"key": "UAE_DIB",
-			"name": "Dibba Al Fujairah Club",
+			"name": "Dibba",
 			"short": "Dibba",
 			"abbr": "DIB",
 			"nick": "Dibba",
@@ -287,7 +287,7 @@
 		},
 		{
 			"key": "UAE_BAT",
-			"name": "Al Bataeh Club",
+			"name": "Al Bataeh",
 			"short": "Al Bataeh",
 			"abbr": "BAT",
 			"nick": "Al Bataeh",
@@ -308,7 +308,7 @@
 		},
 		{
 			"key": "UAE_ORO",
-			"name": "Al Orooba FC",
+			"name": "Al Orooba",
 			"short": "Al Orooba",
 			"abbr": "ORO",
 			"nick": "Al Orooba",

@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "BOL_ACA",
-			"name": "Club Bolívar",
+			"name": "Bolívar",
 			"short": "Bolívar",
 			"abbr": "BOL",
 			"nick": "Academia",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "BOL_ATI",
-			"name": "Club The Strongest",
+			"name": "The Strongest",
 			"short": "The Strongest",
 			"abbr": "STR",
 			"nick": "Atigrados",
@@ -62,7 +62,7 @@
 		},
 		{
 			"key": "BOL_ALT",
-			"name": "Club Always Ready",
+			"name": "Always Ready",
 			"short": "Always Ready",
 			"abbr": "ARE",
 			"nick": "Millonarios",
@@ -88,7 +88,7 @@
 		},
 		{
 			"key": "BOL_AVI",
-			"name": "Club Deportivo Jorge Wilstermann",
+			"name": "Wilstermann",
 			"short": "Wilstermann",
 			"abbr": "WIL",
 			"nick": "Aviadores",
@@ -114,7 +114,7 @@
 		},
 		{
 			"key": "BOL_REF",
-			"name": "Club Deportivo Oriente Petrolero",
+			"name": "Oriente Petrolero",
 			"short": "Oriente Petrolero",
 			"abbr": "ORP",
 			"nick": "Refineros",
@@ -140,7 +140,7 @@
 		},
 		{
 			"key": "BOL_BLO",
-			"name": "Club Blooming",
+			"name": "Blooming",
 			"short": "Blooming",
 			"abbr": "BLO",
 			"nick": "Academia Cruceña",
@@ -166,7 +166,7 @@
 		},
 		{
 			"key": "BOL_NPO",
-			"name": "Club Atlético Nacional Potosí",
+			"name": "Nacional Potosí",
 			"short": "Nacional Potosí",
 			"abbr": "NPO",
 			"nick": "Banda Roja",
@@ -191,7 +191,7 @@
 		},
 		{
 			"key": "BOL_TOM",
-			"name": "Club Real Tomayapo",
+			"name": "Real Tomayapo",
 			"short": "Real Tomayapo",
 			"abbr": "RTO",
 			"nick": "Chapaco",
@@ -216,7 +216,7 @@
 		},
 		{
 			"key": "BOL_GUA",
-			"name": "Club Deportivo Guabirá",
+			"name": "Guabirá",
 			"short": "Guabirá",
 			"abbr": "GUA",
 			"nick": "Azucarero",
@@ -242,7 +242,7 @@
 		},
 		{
 			"key": "BOL_SAB",
-			"name": "Club San Antonio Bulo Bulo",
+			"name": "San Antonio",
 			"short": "San Antonio",
 			"abbr": "SAB",
 			"nick": "Cocalero",
@@ -267,7 +267,7 @@
 		},
 		{
 			"key": "BOL_AUR",
-			"name": "Club Aurora",
+			"name": "Aurora",
 			"short": "Aurora",
 			"abbr": "AUR",
 			"nick": "Aurora",
@@ -288,7 +288,7 @@
 		},
 		{
 			"key": "BOL_VIN",
-			"name": "Club Universitario de Vinto",
+			"name": "Universitario Vinto",
 			"short": "Universitario Vinto",
 			"abbr": "UVI",
 			"nick": "Universitario Vinto",
@@ -309,7 +309,7 @@
 		},
 		{
 			"key": "BOL_ORU",
-			"name": "Club Real Oruro",
+			"name": "Real Oruro",
 			"short": "Real Oruro",
 			"abbr": "ROR",
 			"nick": "Real Oruro",
@@ -330,7 +330,7 @@
 		},
 		{
 			"key": "BOL_GVS",
-			"name": "Club San José",
+			"name": "San José",
 			"short": "San José",
 			"abbr": "SJO",
 			"nick": "San José",
@@ -351,7 +351,7 @@
 		},
 		{
 			"key": "BOL_IPE",
-			"name": "Club Independiente Petrolero",
+			"name": "Ind. Petrolero",
 			"short": "Ind. Petrolero",
 			"abbr": "IPE",
 			"nick": "Ind. Petrolero",
@@ -372,7 +372,7 @@
 		},
 		{
 			"key": "BOL_RPO",
-			"name": "Club Real Potosí",
+			"name": "Real Potosí",
 			"short": "Real Potosí",
 			"abbr": "RPO",
 			"nick": "Real Potosí",

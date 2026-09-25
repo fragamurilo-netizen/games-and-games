@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "ENG_MSK",
-			"name": "Manchester City FC",
+			"name": "Man City",
 			"short": "Man City",
 			"abbr": "MCI",
 			"nick": "Citizens",
@@ -17,7 +17,7 @@
 				"#6CABDD",
 				"#FFFFFF"
 			],
-			"stadium": "Etihad Stadium",
+			"stadium": "City of Manchester Stadium",
 			"capacity": 53000,
 			"kit": "plain",
 			"crest": {
@@ -37,7 +37,7 @@
 		},
 		{
 			"key": "ENG_MRD",
-			"name": "Manchester United FC",
+			"name": "Man United",
 			"short": "Man United",
 			"abbr": "MUN",
 			"nick": "Red Devils",
@@ -71,7 +71,7 @@
 		},
 		{
 			"key": "ENG_MSR",
-			"name": "Liverpool FC",
+			"name": "Liverpool",
 			"short": "Liverpool",
 			"abbr": "LIV",
 			"nick": "Reds",
@@ -103,7 +103,7 @@
 		},
 		{
 			"key": "ENG_MSB",
-			"name": "Everton FC",
+			"name": "Everton",
 			"short": "Everton",
 			"abbr": "EVE",
 			"nick": "Toffees",
@@ -132,7 +132,7 @@
 		},
 		{
 			"key": "ENG_NLR",
-			"name": "Arsenal FC",
+			"name": "Arsenal",
 			"short": "Arsenal",
 			"abbr": "ARS",
 			"nick": "Gunners",
@@ -145,7 +145,7 @@
 				"#EF0107",
 				"#FFFFFF"
 			],
-			"stadium": "Emirates Stadium",
+			"stadium": "Arsenal Stadium",
 			"capacity": 60000,
 			"kit": "plain",
 			"crest": {
@@ -166,7 +166,7 @@
 		},
 		{
 			"key": "ENG_NLW",
-			"name": "Tottenham Hotspur FC",
+			"name": "Tottenham",
 			"short": "Tottenham",
 			"abbr": "TOT",
 			"nick": "Lilywhites",
@@ -195,7 +195,7 @@
 		},
 		{
 			"key": "ENG_WLB",
-			"name": "Chelsea FC",
+			"name": "Chelsea",
 			"short": "Chelsea",
 			"abbr": "CHE",
 			"nick": "Blues",
@@ -228,7 +228,7 @@
 		},
 		{
 			"key": "ENG_TYN",
-			"name": "Newcastle United FC",
+			"name": "Newcastle",
 			"short": "Newcastle",
 			"abbr": "NEW",
 			"nick": "Magpies",
@@ -257,7 +257,7 @@
 		},
 		{
 			"key": "ENG_AST",
-			"name": "Aston Villa FC",
+			"name": "Aston Villa",
 			"short": "Aston Villa",
 			"abbr": "AVL",
 			"nick": "Villans",
@@ -288,7 +288,7 @@
 		},
 		{
 			"key": "ENG_ELI",
-			"name": "West Ham United FC",
+			"name": "West Ham",
 			"short": "West Ham",
 			"abbr": "WHU",
 			"nick": "Hammers",
@@ -319,7 +319,7 @@
 		},
 		{
 			"key": "ENG_SSG",
-			"name": "Brighton & Hove Albion FC",
+			"name": "Brighton",
 			"short": "Brighton",
 			"abbr": "BHA",
 			"nick": "Seagulls",
@@ -348,7 +348,7 @@
 		},
 		{
 			"key": "ENG_SLE",
-			"name": "Crystal Palace FC",
+			"name": "Crystal Palace",
 			"short": "Crystal Palace",
 			"abbr": "CRY",
 			"nick": "Eagles",
@@ -376,7 +376,7 @@
 		},
 		{
 			"key": "ENG_RIV",
-			"name": "Fulham FC",
+			"name": "Fulham",
 			"short": "Fulham",
 			"abbr": "FUL",
 			"nick": "Cottagers",
@@ -407,7 +407,7 @@
 		},
 		{
 			"key": "ENG_BEE",
-			"name": "Brentford FC",
+			"name": "Brentford",
 			"short": "Brentford",
 			"abbr": "BRE",
 			"nick": "Bees",
@@ -420,7 +420,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Gtech Community Stadium",
+			"stadium": "Brentford Community Stadium",
 			"capacity": 17250,
 			"kit": "stripes_v",
 			"crest": {
@@ -439,7 +439,7 @@
 		},
 		{
 			"key": "ENG_CHE",
-			"name": "AFC Bournemouth",
+			"name": "Bournemouth",
 			"short": "Bournemouth",
 			"abbr": "BOU",
 			"nick": "Cherries",
@@ -452,7 +452,7 @@
 				"#DA291C",
 				"#111111"
 			],
-			"stadium": "Vitality Stadium",
+			"stadium": "Dean Court",
 			"capacity": 11300,
 			"kit": "stripes_v",
 			"crest": {
@@ -468,7 +468,7 @@
 		},
 		{
 			"key": "ENG_WLV",
-			"name": "Wolverhampton Wanderers FC",
+			"name": "Wolves",
 			"short": "Wolves",
 			"abbr": "WOL",
 			"nick": "Wolves",
@@ -496,7 +496,7 @@
 		},
 		{
 			"key": "ENG_NOT",
-			"name": "Nottingham Forest FC",
+			"name": "Nottm Forest",
 			"short": "Nottm Forest",
 			"abbr": "NFO",
 			"nick": "Tricky Trees",
@@ -527,7 +527,7 @@
 		},
 		{
 			"key": "ENG_YOR",
-			"name": "Leeds United FC",
+			"name": "Leeds",
 			"short": "Leeds",
 			"abbr": "LEE",
 			"nick": "Whites",
@@ -560,7 +560,7 @@
 		},
 		{
 			"key": "ENG_WEA",
-			"name": "Sunderland AFC",
+			"name": "Sunderland",
 			"short": "Sunderland",
 			"abbr": "SUN",
 			"nick": "Black Cats",
@@ -589,7 +589,7 @@
 		},
 		{
 			"key": "ENG_CLA",
-			"name": "Burnley FC",
+			"name": "Burnley",
 			"short": "Burnley",
 			"abbr": "BUR",
 			"nick": "Clarets",
@@ -617,7 +617,7 @@
 		},
 		{
 			"key": "ENG_FOX",
-			"name": "Leicester City FC",
+			"name": "Leicester",
 			"short": "Leicester",
 			"abbr": "LEI",
 			"nick": "Foxes",
@@ -630,7 +630,7 @@
 				"#003090",
 				"#FDBE11"
 			],
-			"stadium": "King Power Stadium",
+			"stadium": "Filbert Way",
 			"capacity": 32000,
 			"kit": "plain",
 			"crest": {
@@ -648,7 +648,7 @@
 		},
 		{
 			"key": "ENG_STS",
-			"name": "Southampton FC",
+			"name": "Southampton",
 			"short": "Southampton",
 			"abbr": "SOU",
 			"nick": "Saints",
@@ -677,7 +677,7 @@
 		},
 		{
 			"key": "ENG_SUF",
-			"name": "Ipswich Town FC",
+			"name": "Ipswich",
 			"short": "Ipswich",
 			"abbr": "IPS",
 			"nick": "Tractor Boys",
@@ -706,7 +706,7 @@
 		},
 		{
 			"key": "ENG_BLD",
-			"name": "Sheffield United FC",
+			"name": "Sheffield Utd",
 			"short": "Sheffield Utd",
 			"abbr": "SHU",
 			"nick": "Blades",
@@ -735,7 +735,7 @@
 		},
 		{
 			"key": "ENG_OWL",
-			"name": "Sheffield Wednesday FC",
+			"name": "Sheffield Wed",
 			"short": "Sheffield Wed",
 			"abbr": "SHW",
 			"nick": "Owls",
@@ -763,7 +763,7 @@
 		},
 		{
 			"key": "ENG_TEE",
-			"name": "Middlesbrough FC",
+			"name": "Middlesbrough",
 			"short": "Middlesbrough",
 			"abbr": "MID",
 			"nick": "Boro",
@@ -794,7 +794,7 @@
 		},
 		{
 			"key": "ENG_ALB",
-			"name": "West Bromwich Albion FC",
+			"name": "West Brom",
 			"short": "West Brom",
 			"abbr": "WBA",
 			"nick": "Baggies",
@@ -821,7 +821,7 @@
 		},
 		{
 			"key": "ENG_CAN",
-			"name": "Norwich City FC",
+			"name": "Norwich",
 			"short": "Norwich",
 			"abbr": "NOR",
 			"nick": "Canaries",
@@ -851,7 +851,7 @@
 		},
 		{
 			"key": "ENG_COV",
-			"name": "Coventry City FC",
+			"name": "Coventry",
 			"short": "Coventry",
 			"abbr": "COV",
 			"nick": "Sky Blues",
@@ -879,7 +879,7 @@
 		},
 		{
 			"key": "ENG_HOR",
-			"name": "Watford FC",
+			"name": "Watford",
 			"short": "Watford",
 			"abbr": "WAT",
 			"nick": "Hornets",
@@ -905,7 +905,7 @@
 		},
 		{
 			"key": "ENG_STK",
-			"name": "Stoke City FC",
+			"name": "Stoke",
 			"short": "Stoke",
 			"abbr": "STK",
 			"nick": "Potters",
@@ -918,7 +918,7 @@
 				"#E03A3E",
 				"#FFFFFF"
 			],
-			"stadium": "bet365 Stadium",
+			"stadium": "Stoke Stadium",
 			"capacity": 30000,
 			"kit": "stripes_v",
 			"crest": {
@@ -932,7 +932,7 @@
 		},
 		{
 			"key": "ENG_HUM",
-			"name": "Hull City AFC",
+			"name": "Hull City",
 			"short": "Hull City",
 			"abbr": "HUL",
 			"nick": "Tigers",
@@ -945,7 +945,7 @@
 				"#F5A12D",
 				"#111111"
 			],
-			"stadium": "MKM Stadium",
+			"stadium": "Hull Stadium",
 			"capacity": 25400,
 			"kit": "stripes_v",
 			"crest": {
@@ -958,7 +958,7 @@
 		},
 		{
 			"key": "ENG_RAM",
-			"name": "Derby County FC",
+			"name": "Derby",
 			"short": "Derby",
 			"abbr": "DER",
 			"nick": "Rams",
@@ -987,7 +987,7 @@
 		},
 		{
 			"key": "ENG_HOO",
-			"name": "Queens Park Rangers FC",
+			"name": "QPR",
 			"short": "QPR",
 			"abbr": "QPR",
 			"nick": "Hoops",
@@ -1017,7 +1017,7 @@
 		},
 		{
 			"key": "ENG_LIO",
-			"name": "Millwall FC",
+			"name": "Millwall",
 			"short": "Millwall",
 			"abbr": "MIL",
 			"nick": "Lions",
@@ -1045,7 +1045,7 @@
 		},
 		{
 			"key": "ENG_BRS",
-			"name": "Bristol City FC",
+			"name": "Bristol City",
 			"short": "Bristol City",
 			"abbr": "BRC",
 			"nick": "Robins",
@@ -1071,7 +1071,7 @@
 		},
 		{
 			"key": "ENG_ROV",
-			"name": "Blackburn Rovers FC",
+			"name": "Blackburn",
 			"short": "Blackburn",
 			"abbr": "BLB",
 			"nick": "Rovers",
@@ -1100,7 +1100,7 @@
 		},
 		{
 			"key": "ENG_PRE",
-			"name": "Preston North End FC",
+			"name": "Preston",
 			"short": "Preston",
 			"abbr": "PNE",
 			"nick": "Lilywhites",
@@ -1128,7 +1128,7 @@
 		},
 		{
 			"key": "ENG_POM",
-			"name": "Portsmouth FC",
+			"name": "Portsmouth",
 			"short": "Portsmouth",
 			"abbr": "POR",
 			"nick": "Pompey",
@@ -1157,7 +1157,7 @@
 		},
 		{
 			"key": "ENG_BIR",
-			"name": "Birmingham City FC",
+			"name": "Birmingham",
 			"short": "Birmingham",
 			"abbr": "BIR",
 			"nick": "Blues",

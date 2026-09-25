@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "BEL_BRU",
-			"name": "Club Brugge KV",
+			"name": "Club Brugge",
 			"short": "Club Brugge",
 			"abbr": "CLB",
 			"nick": "Blauw-Zwart",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "BEL_BXL",
-			"name": "RSC Anderlecht",
+			"name": "Anderlecht",
 			"short": "Anderlecht",
 			"abbr": "AND",
 			"nick": "Mauves",
@@ -46,7 +46,7 @@
 				"#4F2D7F",
 				"#FFFFFF"
 			],
-			"stadium": "Lotto Park",
+			"stadium": "Stade Constant Vanden Stock",
 			"capacity": 22500,
 			"kit": "plain",
 			"crest": {
@@ -67,7 +67,7 @@
 		},
 		{
 			"key": "BEL_UNS",
-			"name": "Royale Union Saint-Gilloise",
+			"name": "Union SG",
 			"short": "Union SG",
 			"abbr": "USG",
 			"nick": "Unionistes",
@@ -96,7 +96,7 @@
 		},
 		{
 			"key": "BEL_LIM",
-			"name": "KRC Genk",
+			"name": "Genk",
 			"short": "Genk",
 			"abbr": "GNK",
 			"nick": "Smurfen",
@@ -122,7 +122,7 @@
 		},
 		{
 			"key": "BEL_BUF",
-			"name": "KAA Gent",
+			"name": "Gent",
 			"short": "Gent",
 			"abbr": "GNT",
 			"nick": "Buffalo's",
@@ -147,7 +147,7 @@
 		},
 		{
 			"key": "BEL_ROU",
-			"name": "Standard de Liège",
+			"name": "Standard",
 			"short": "Standard",
 			"abbr": "STA",
 			"nick": "Rouches",
@@ -176,7 +176,7 @@
 		},
 		{
 			"key": "BEL_ANT",
-			"name": "Royal Antwerp FC",
+			"name": "Antwerp",
 			"short": "Antwerp",
 			"abbr": "RAFC",
 			"nick": "The Great Old",
@@ -203,7 +203,7 @@
 		},
 		{
 			"key": "BEL_MEC",
-			"name": "KV Mechelen",
+			"name": "Mechelen",
 			"short": "Mechelen",
 			"abbr": "KVM",
 			"nick": "Malinwa",
@@ -216,7 +216,7 @@
 				"#FFD100",
 				"#E30613"
 			],
-			"stadium": "AFAS Stadion Achter de Kazerne",
+			"stadium": "Achter de Kazerne",
 			"capacity": 16700,
 			"kit": "stripes_v",
 			"rivals": [],
@@ -230,7 +230,7 @@
 		},
 		{
 			"key": "BEL_CER",
-			"name": "Cercle Brugge KSV",
+			"name": "Cercle Brugge",
 			"short": "Cercle Brugge",
 			"abbr": "CER",
 			"nick": "Cercle Brugge",
@@ -251,7 +251,7 @@
 		},
 		{
 			"key": "BEL_WES",
-			"name": "KVC Westerlo",
+			"name": "Westerlo",
 			"short": "Westerlo",
 			"abbr": "WES",
 			"nick": "Westerlo",
@@ -272,7 +272,7 @@
 		},
 		{
 			"key": "BEL_OHL",
-			"name": "Oud-Heverlee Leuven",
+			"name": "OH Leuven",
 			"short": "OH Leuven",
 			"abbr": "OHL",
 			"nick": "OH Leuven",
@@ -285,7 +285,7 @@
 				"#FFFFFF",
 				"#E30613"
 			],
-			"stadium": "King Power at Den Dreef",
+			"stadium": "Den Dreef",
 			"capacity": 10000,
 			"kit": "plain",
 			"crest": {},
@@ -293,7 +293,7 @@
 		},
 		{
 			"key": "BEL_CHA",
-			"name": "Royal Charleroi SC",
+			"name": "Charleroi",
 			"short": "Charleroi",
 			"abbr": "CHA",
 			"nick": "Charleroi",
@@ -314,7 +314,7 @@
 		},
 		{
 			"key": "BEL_STV",
-			"name": "Sint-Truidense VV",
+			"name": "Sint-Truiden",
 			"short": "Sint-Truiden",
 			"abbr": "STV",
 			"nick": "Sint-Truiden",
@@ -335,7 +335,7 @@
 		},
 		{
 			"key": "BEL_KOR",
-			"name": "KV Kortrijk",
+			"name": "Kortrijk",
 			"short": "Kortrijk",
 			"abbr": "KVK",
 			"nick": "Kortrijk",
@@ -356,7 +356,7 @@
 		},
 		{
 			"key": "BEL_DEN",
-			"name": "FCV Dender EH",
+			"name": "Dender",
 			"short": "Dender",
 			"abbr": "DEN",
 			"nick": "Dender",
@@ -377,7 +377,7 @@
 		},
 		{
 			"key": "BEL_BEE",
-			"name": "K Beerschot VA",
+			"name": "Beerschot",
 			"short": "Beerschot",
 			"abbr": "BEE",
 			"nick": "Beerschot",

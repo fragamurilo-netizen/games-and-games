@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "CZE_SES",
-			"name": "SK Slavia Praha",
+			"name": "Slavia Praha",
 			"short": "Slavia Praha",
 			"abbr": "SLA",
 			"nick": "Sešívaní",
@@ -34,7 +34,7 @@
 		},
 		{
 			"key": "CZE_LET",
-			"name": "AC Sparta Praha",
+			"name": "Sparta Praha",
 			"short": "Sparta Praha",
 			"abbr": "SPA",
 			"nick": "Rudí",
@@ -63,7 +63,7 @@
 		},
 		{
 			"key": "CZE_VIK",
-			"name": "FC Viktoria Plzeň",
+			"name": "Viktoria Plzeň",
 			"short": "Viktoria Plzeň",
 			"abbr": "VPL",
 			"nick": "Viktoriáni",
@@ -90,7 +90,7 @@
 		},
 		{
 			"key": "CZE_BAN",
-			"name": "FC Baník Ostrava",
+			"name": "Baník Ostrava",
 			"short": "Baník Ostrava",
 			"abbr": "BAN",
 			"nick": "Chachaři",
@@ -115,7 +115,7 @@
 		},
 		{
 			"key": "CZE_LIB",
-			"name": "FC Slovan Liberec",
+			"name": "Slovan Liberec",
 			"short": "Slovan Liberec",
 			"abbr": "LIB",
 			"nick": "Slovan",
@@ -141,7 +141,7 @@
 		},
 		{
 			"key": "CZE_SIG",
-			"name": "SK Sigma Olomouc",
+			"name": "Sigma Olomouc",
 			"short": "Sigma Olomouc",
 			"abbr": "SIG",
 			"nick": "Sigmáci",
@@ -167,7 +167,7 @@
 		},
 		{
 			"key": "CZE_BOL",
-			"name": "FK Mladá Boleslav",
+			"name": "Mladá Boleslav",
 			"short": "Mladá Boleslav",
 			"abbr": "MBO",
 			"nick": "Mladá Boleslav",
@@ -188,7 +188,7 @@
 		},
 		{
 			"key": "CZE_JAB",
-			"name": "FK Jablonec",
+			"name": "Jablonec",
 			"short": "Jablonec",
 			"abbr": "JAB",
 			"nick": "Jablonec",
@@ -209,7 +209,7 @@
 		},
 		{
 			"key": "CZE_HRA",
-			"name": "FC Hradec Králové",
+			"name": "Hradec Králové",
 			"short": "Hradec Králové",
 			"abbr": "HKR",
 			"nick": "Hradec Králové",
@@ -230,7 +230,7 @@
 		},
 		{
 			"key": "CZE_BOH",
-			"name": "Bohemians Praha 1905",
+			"name": "Bohemians 1905",
 			"short": "Bohemians 1905",
 			"abbr": "BOH",
 			"nick": "Bohemians 1905",
@@ -251,7 +251,7 @@
 		},
 		{
 			"key": "CZE_TEP",
-			"name": "FK Teplice",
+			"name": "Teplice",
 			"short": "Teplice",
 			"abbr": "TEP",
 			"nick": "Teplice",
@@ -272,7 +272,7 @@
 		},
 		{
 			"key": "CZE_SLO",
-			"name": "1. FC Slovácko",
+			"name": "Slovácko",
 			"short": "Slovácko",
 			"abbr": "SLO",
 			"nick": "Slovácko",
@@ -293,7 +293,7 @@
 		},
 		{
 			"key": "CZE_KAR",
-			"name": "MFK Karviná",
+			"name": "Karviná",
 			"short": "Karviná",
 			"abbr": "KAR",
 			"nick": "Karviná",
@@ -314,7 +314,7 @@
 		},
 		{
 			"key": "CZE_PAR",
-			"name": "FK Pardubice",
+			"name": "Pardubice",
 			"short": "Pardubice",
 			"abbr": "PAR",
 			"nick": "Pardubice",
@@ -335,7 +335,7 @@
 		},
 		{
 			"key": "CZE_ZLI",
-			"name": "FC Zlín",
+			"name": "Zlín",
 			"short": "Zlín",
 			"abbr": "ZLI",
 			"nick": "Zlín",
@@ -356,7 +356,7 @@
 		},
 		{
 			"key": "CZE_DUK",
-			"name": "FK Dukla Praha",
+			"name": "Dukla Praha",
 			"short": "Dukla Praha",
 			"abbr": "DUK",
 			"nick": "Dukla Praha",

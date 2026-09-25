@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "VEN_ROJ",
-			"name": "Caracas Fútbol Club",
+			"name": "Caracas",
 			"short": "Caracas",
 			"abbr": "CFC",
 			"nick": "Rojos del Ávila",
@@ -32,7 +32,7 @@
 		},
 		{
 			"key": "VEN_CAR",
-			"name": "Deportivo Táchira FC",
+			"name": "Táchira",
 			"short": "Táchira",
 			"abbr": "TAC",
 			"nick": "Carrusel Aurinegro",
@@ -61,7 +61,7 @@
 		},
 		{
 			"key": "VEN_AZG",
-			"name": "Monagas Sport Club",
+			"name": "Monagas",
 			"short": "Monagas",
 			"abbr": "MON",
 			"nick": "Azulgranas",
@@ -88,7 +88,7 @@
 		},
 		{
 			"key": "VEN_LGU",
-			"name": "Deportivo La Guaira FC",
+			"name": "La Guaira",
 			"short": "La Guaira",
 			"abbr": "DLG",
 			"nick": "Naranja",
@@ -114,7 +114,7 @@
 		},
 		{
 			"key": "VEN_CAB",
-			"name": "Carabobo FC",
+			"name": "Carabobo",
 			"short": "Carabobo",
 			"abbr": "CAB",
 			"nick": "Granates",
@@ -139,7 +139,7 @@
 		},
 		{
 			"key": "VEN_APC",
-			"name": "Academia Puerto Cabello",
+			"name": "Puerto Cabello",
 			"short": "Puerto Cabello",
 			"abbr": "APC",
 			"nick": "Porteños",
@@ -165,7 +165,7 @@
 		},
 		{
 			"key": "VEN_EME",
-			"name": "Estudiantes de Mérida FC",
+			"name": "Estudiantes",
 			"short": "Estudiantes",
 			"abbr": "EME",
 			"nick": "Académicos",
@@ -190,7 +190,7 @@
 		},
 		{
 			"key": "VEN_ZAM",
-			"name": "Zamora FC",
+			"name": "Zamora",
 			"short": "Zamora",
 			"abbr": "ZAM",
 			"nick": "Blanquinegros",
@@ -217,7 +217,7 @@
 		},
 		{
 			"key": "VEN_MET",
-			"name": "Metropolitanos FC",
+			"name": "Metropolitanos",
 			"short": "Metropolitanos",
 			"abbr": "MET",
 			"nick": "Violetas",
@@ -243,7 +243,7 @@
 		},
 		{
 			"key": "VEN_UCV",
-			"name": "Universidad Central de Venezuela FC",
+			"name": "UCV",
 			"short": "UCV",
 			"abbr": "UCV",
 			"nick": "Universitarios",
@@ -269,7 +269,7 @@
 		},
 		{
 			"key": "VEN_ZUL",
-			"name": "Deportivo Rayo Zuliano",
+			"name": "Rayo Zuliano",
 			"short": "Rayo Zuliano",
 			"abbr": "RZU",
 			"nick": "Rayo Zuliano",
@@ -290,7 +290,7 @@
 		},
 		{
 			"key": "VEN_POR",
-			"name": "Portuguesa FC",
+			"name": "Portuguesa",
 			"short": "Portuguesa",
 			"abbr": "POR",
 			"nick": "Portuguesa",
@@ -311,7 +311,7 @@
 		},
 		{
 			"key": "VEN_ANG",
-			"name": "Angostura FC",
+			"name": "Angostura",
 			"short": "Angostura",
 			"abbr": "ANG",
 			"nick": "Angostura",
@@ -332,7 +332,7 @@
 		},
 		{
 			"key": "VEN_ANZ",
-			"name": "Anzoátegui FC",
+			"name": "Anzoátegui",
 			"short": "Anzoátegui",
 			"abbr": "ANZ",
 			"nick": "Anzoátegui",

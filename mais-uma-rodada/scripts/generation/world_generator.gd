@@ -36,6 +36,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	Valuation.refresh_shift(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
+	w.stats["short_names"] = true # nomes dos clubes já vêm curtos dos dados (GameWorld.from_dict)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
 	HeartClubs.ensure_all(w)

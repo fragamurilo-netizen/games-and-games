@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "SCO_GLE",
-			"name": "Celtic FC",
+			"name": "Celtic",
 			"short": "Celtic",
 			"abbr": "CEL",
 			"nick": "Bhoys",
@@ -36,7 +36,7 @@
 		},
 		{
 			"key": "SCO_GLR",
-			"name": "Rangers FC",
+			"name": "Rangers",
 			"short": "Rangers",
 			"abbr": "RAN",
 			"nick": "Gers",
@@ -69,7 +69,7 @@
 		},
 		{
 			"key": "SCO_ABE",
-			"name": "Aberdeen FC",
+			"name": "Aberdeen",
 			"short": "Aberdeen",
 			"abbr": "ABE",
 			"nick": "Dons",
@@ -96,7 +96,7 @@
 		},
 		{
 			"key": "SCO_EDM",
-			"name": "Heart of Midlothian FC",
+			"name": "Hearts",
 			"short": "Hearts",
 			"abbr": "HEA",
 			"nick": "Jambos",
@@ -124,7 +124,7 @@
 		},
 		{
 			"key": "SCO_EDG",
-			"name": "Hibernian FC",
+			"name": "Hibernian",
 			"short": "Hibernian",
 			"abbr": "HIB",
 			"nick": "Hibees",
@@ -152,7 +152,7 @@
 		},
 		{
 			"key": "SCO_DUN",
-			"name": "Dundee United FC",
+			"name": "Dundee Utd",
 			"short": "Dundee Utd",
 			"abbr": "DUU",
 			"nick": "The Terrors",
@@ -178,7 +178,7 @@
 		},
 		{
 			"key": "SCO_MOT",
-			"name": "Motherwell FC",
+			"name": "Motherwell",
 			"short": "Motherwell",
 			"abbr": "MOT",
 			"nick": "Motherwell",
@@ -199,7 +199,7 @@
 		},
 		{
 			"key": "SCO_MIR",
-			"name": "St Mirren FC",
+			"name": "St Mirren",
 			"short": "St Mirren",
 			"abbr": "SMI",
 			"nick": "St Mirren",
@@ -220,7 +220,7 @@
 		},
 		{
 			"key": "SCO_KIL",
-			"name": "Kilmarnock FC",
+			"name": "Kilmarnock",
 			"short": "Kilmarnock",
 			"abbr": "KIL",
 			"nick": "Kilmarnock",
@@ -241,7 +241,7 @@
 		},
 		{
 			"key": "SCO_ROS",
-			"name": "Ross County FC",
+			"name": "Ross County",
 			"short": "Ross County",
 			"abbr": "ROS",
 			"nick": "Ross County",
@@ -262,7 +262,7 @@
 		},
 		{
 			"key": "SCO_JOH",
-			"name": "St Johnstone FC",
+			"name": "St Johnstone",
 			"short": "St Johnstone",
 			"abbr": "STJ",
 			"nick": "St Johnstone",
@@ -283,7 +283,7 @@
 		},
 		{
 			"key": "SCO_DEE",
-			"name": "Dundee FC",
+			"name": "Dundee",
 			"short": "Dundee",
 			"abbr": "DUN",
 			"nick": "Dundee",

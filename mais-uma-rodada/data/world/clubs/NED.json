@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "NED_AMS",
-			"name": "AFC Ajax",
+			"name": "Ajax",
 			"short": "Ajax",
 			"abbr": "AJA",
 			"nick": "Godenzonen",
@@ -35,7 +35,7 @@
 		},
 		{
 			"key": "NED_EIN",
-			"name": "PSV Eindhoven",
+			"name": "PSV",
 			"short": "PSV",
 			"abbr": "PSV",
 			"nick": "Boeren",
@@ -48,7 +48,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "Philips Stadion",
+			"stadium": "PSV Stadion",
 			"capacity": 35000,
 			"kit": "stripes_v",
 			"crest": {
@@ -98,7 +98,7 @@
 		},
 		{
 			"key": "NED_ALK",
-			"name": "AZ Alkmaar",
+			"name": "AZ",
 			"short": "AZ",
 			"abbr": "AZ",
 			"nick": "Kaaskoppen",
@@ -111,7 +111,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "AFAS Stadion",
+			"stadium": "Alkmaar Stadion",
 			"capacity": 19500,
 			"kit": "plain",
 			"crest": {
@@ -124,7 +124,7 @@
 		},
 		{
 			"key": "NED_ENS",
-			"name": "FC Twente",
+			"name": "Twente",
 			"short": "Twente",
 			"abbr": "TWE",
 			"nick": "Tukkers",
@@ -137,7 +137,7 @@
 				"#E30613",
 				"#FFFFFF"
 			],
-			"stadium": "De Grolsch Veste",
+			"stadium": "Stadion Enschede",
 			"capacity": 30200,
 			"kit": "plain",
 			"crest": {
@@ -150,7 +150,7 @@
 		},
 		{
 			"key": "NED_UTR",
-			"name": "FC Utrecht",
+			"name": "Utrecht",
 			"short": "Utrecht",
 			"abbr": "UTR",
 			"nick": "Domstedelingen",
@@ -179,7 +179,7 @@
 		},
 		{
 			"key": "NED_GAE",
-			"name": "Go Ahead Eagles",
+			"name": "Go Ahead",
 			"short": "Go Ahead",
 			"abbr": "GAE",
 			"nick": "Eagles",
@@ -205,7 +205,7 @@
 		},
 		{
 			"key": "NED_NEC",
-			"name": "N.E.C. Nijmegen",
+			"name": "NEC",
 			"short": "NEC",
 			"abbr": "NEC",
 			"nick": "Nijmegenaren",
@@ -232,7 +232,7 @@
 		},
 		{
 			"key": "NED_HEE",
-			"name": "SC Heerenveen",
+			"name": "Heerenveen",
 			"short": "Heerenveen",
 			"abbr": "HEE",
 			"nick": "Superfriezen",
@@ -259,7 +259,7 @@
 		},
 		{
 			"key": "NED_SPA",
-			"name": "Sparta Rotterdam",
+			"name": "Sparta",
 			"short": "Sparta",
 			"abbr": "SPA",
 			"nick": "Kasteelheren",
@@ -289,7 +289,7 @@
 		},
 		{
 			"key": "NED_GRO",
-			"name": "FC Groningen",
+			"name": "Groningen",
 			"short": "Groningen",
 			"abbr": "GRO",
 			"nick": "Trots van het Noorden",
@@ -316,7 +316,7 @@
 		},
 		{
 			"key": "NED_FOR",
-			"name": "Fortuna Sittard",
+			"name": "Fortuna",
 			"short": "Fortuna",
 			"abbr": "FOR",
 			"nick": "Fortunezen",
@@ -369,7 +369,7 @@
 		},
 		{
 			"key": "NED_HER",
-			"name": "Heracles Almelo",
+			"name": "Heracles",
 			"short": "Heracles",
 			"abbr": "HER",
 			"nick": "Heraclieden",
@@ -396,7 +396,7 @@
 		},
 		{
 			"key": "NED_NAC",
-			"name": "NAC Breda",
+			"name": "NAC",
 			"short": "NAC",
 			"abbr": "NAC",
 			"nick": "Parel van het Zuiden",
@@ -423,7 +423,7 @@
 		},
 		{
 			"key": "NED_TEL",
-			"name": "SC Telstar",
+			"name": "Telstar",
 			"short": "Telstar",
 			"abbr": "TEL",
 			"nick": "Witte Leeuwen",
@@ -449,7 +449,7 @@
 		},
 		{
 			"key": "NED_VOL",
-			"name": "FC Volendam",
+			"name": "Volendam",
 			"short": "Volendam",
 			"abbr": "VOL",
 			"nick": "Palingboeren",
@@ -475,7 +475,7 @@
 		},
 		{
 			"key": "NED_EXC",
-			"name": "Excelsior Rotterdam",
+			"name": "Excelsior",
 			"short": "Excelsior",
 			"abbr": "EXC",
 			"nick": "Kralingers",

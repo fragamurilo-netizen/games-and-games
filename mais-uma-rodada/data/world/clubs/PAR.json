@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "PAR_DEC",
-			"name": "Club Olimpia",
+			"name": "Olimpia",
 			"short": "Olimpia",
 			"abbr": "OLI",
 			"nick": "Franjeados",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "PAR_CIC",
-			"name": "Club Cerro Porteño",
+			"name": "Cerro Porteño",
 			"short": "Cerro Porteño",
 			"abbr": "CCP",
 			"nick": "Azulgranas",
@@ -62,7 +62,7 @@
 		},
 		{
 			"key": "PAR_GUM",
-			"name": "Club Libertad",
+			"name": "Libertad",
 			"short": "Libertad",
 			"abbr": "LIB",
 			"nick": "Gumarelos",
@@ -89,7 +89,7 @@
 		},
 		{
 			"key": "PAR_ABO",
-			"name": "Club Guaraní",
+			"name": "Guaraní",
 			"short": "Guaraní",
 			"abbr": "GUA",
 			"nick": "Aborígenes",
@@ -116,7 +116,7 @@
 		},
 		{
 			"key": "PAR_NAC",
-			"name": "Club Nacional",
+			"name": "Nacional",
 			"short": "Nacional",
 			"abbr": "NAC",
 			"nick": "Tricolor",
@@ -143,7 +143,7 @@
 		},
 		{
 			"key": "PAR_LUQ",
-			"name": "Club Sportivo Luqueño",
+			"name": "Sportivo Luqueño",
 			"short": "Sportivo Luqueño",
 			"abbr": "LUQ",
 			"nick": "Chanchos",
@@ -170,7 +170,7 @@
 		},
 		{
 			"key": "PAR_TRI",
-			"name": "Club Sportivo Trinidense",
+			"name": "Trinidense",
 			"short": "Trinidense",
 			"abbr": "TRI",
 			"nick": "Tricolor",
@@ -196,7 +196,7 @@
 		},
 		{
 			"key": "PAR_DDM",
-			"name": "Club 2 de Mayo",
+			"name": "2 de Mayo",
 			"short": "2 de Mayo",
 			"abbr": "DDM",
 			"nick": "Gallo del Norte",
@@ -223,7 +223,7 @@
 		},
 		{
 			"key": "PAR_AME",
-			"name": "Club Sportivo Ameliano",
+			"name": "Ameliano",
 			"short": "Ameliano",
 			"abbr": "AME",
 			"nick": "Ameliano",
@@ -249,7 +249,7 @@
 		},
 		{
 			"key": "PAR_TAC",
-			"name": "Club Tacuary",
+			"name": "Tacuary",
 			"short": "Tacuary",
 			"abbr": "TAC",
 			"nick": "Albinegro de Jara",
@@ -276,7 +276,7 @@
 		},
 		{
 			"key": "PAR_GCA",
-			"name": "Club General Caballero JLM",
+			"name": "Gral. Caballero JLM",
 			"short": "Gral. Caballero JLM",
 			"abbr": "GCJ",
 			"nick": "Gral. Caballero JLM",
@@ -297,7 +297,7 @@
 		},
 		{
 			"key": "PAR_REC",
-			"name": "Club Recoleta",
+			"name": "Recoleta",
 			"short": "Recoleta",
 			"abbr": "REC",
 			"nick": "Recoleta",

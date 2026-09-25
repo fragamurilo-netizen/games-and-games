@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "ECU_ALQ",
-			"name": "Liga Deportiva Universitaria de Quito",
+			"name": "LDU Quito",
 			"short": "LDU Quito",
 			"abbr": "LDU",
 			"nick": "Albos",
@@ -34,7 +34,7 @@
 		},
 		{
 			"key": "ECU_TOR",
-			"name": "Barcelona Sporting Club",
+			"name": "Barcelona SC",
 			"short": "Barcelona SC",
 			"abbr": "BSC",
 			"nick": "Toreros",
@@ -47,7 +47,7 @@
 				"#FFD100",
 				"#111111"
 			],
-			"stadium": "Estadio Monumental Banco Pichincha",
+			"stadium": "Estadio Monumental Isidro Romero Carbo",
 			"capacity": 57000,
 			"kit": "plain",
 			"crest": {
@@ -64,7 +64,7 @@
 		},
 		{
 			"key": "ECU_ELE",
-			"name": "Club Sport Emelec",
+			"name": "Emelec",
 			"short": "Emelec",
 			"abbr": "EME",
 			"nick": "Bombillo",
@@ -92,7 +92,7 @@
 		},
 		{
 			"key": "ECU_RAY",
-			"name": "Independiente del Valle",
+			"name": "Ind. del Valle",
 			"short": "Ind. del Valle",
 			"abbr": "IDV",
 			"nick": "Rayados",
@@ -105,7 +105,7 @@
 				"#111111",
 				"#1D5BBF"
 			],
-			"stadium": "Estadio Banco Guayaquil",
+			"stadium": "Estadio de Amaguaña",
 			"capacity": 12000,
 			"kit": "stripes_v",
 			"crest": {
@@ -119,7 +119,7 @@
 		},
 		{
 			"key": "ECU_ORI",
-			"name": "Sociedad Deportiva Aucas",
+			"name": "Aucas",
 			"short": "Aucas",
 			"abbr": "AUC",
 			"nick": "Papá Aucas",
@@ -150,7 +150,7 @@
 		},
 		{
 			"key": "ECU_UCQ",
-			"name": "Club Deportivo Universidad Católica",
+			"name": "U. Católica",
 			"short": "U. Católica",
 			"abbr": "UCQ",
 			"nick": "Trencito Azul",
@@ -176,7 +176,7 @@
 		},
 		{
 			"key": "ECU_CUE",
-			"name": "Club Deportivo Cuenca",
+			"name": "Deportivo Cuenca",
 			"short": "Deportivo Cuenca",
 			"abbr": "CUE",
 			"nick": "Morlaco",
@@ -203,7 +203,7 @@
 		},
 		{
 			"key": "ECU_MAC",
-			"name": "Club Social y Deportivo Macará",
+			"name": "Macará",
 			"short": "Macará",
 			"abbr": "MAC",
 			"nick": "Ídolo Ambateño",
@@ -229,7 +229,7 @@
 		},
 		{
 			"key": "ECU_NAC",
-			"name": "Club Deportivo El Nacional",
+			"name": "El Nacional",
 			"short": "El Nacional",
 			"abbr": "ENA",
 			"nick": "Puros Criollos",
@@ -255,7 +255,7 @@
 		},
 		{
 			"key": "ECU_ORE",
-			"name": "Orense Sporting Club",
+			"name": "Orense",
 			"short": "Orense",
 			"abbr": "ORE",
 			"nick": "Bananeros",
@@ -282,7 +282,7 @@
 		},
 		{
 			"key": "ECU_DEL",
-			"name": "Delfín Sporting Club",
+			"name": "Delfín",
 			"short": "Delfín",
 			"abbr": "DEL",
 			"nick": "Cetáceo",
@@ -310,7 +310,7 @@
 		},
 		{
 			"key": "ECU_MUS",
-			"name": "Mushuc Runa Sporting Club",
+			"name": "Mushuc Runa",
 			"short": "Mushuc Runa",
 			"abbr": "MUS",
 			"nick": "Ponchito",
@@ -335,7 +335,7 @@
 		},
 		{
 			"key": "ECU_TEC",
-			"name": "Club Técnico Universitario",
+			"name": "Técnico Universitario",
 			"short": "Técnico Universitario",
 			"abbr": "TEC",
 			"nick": "Técnico Universitario",
@@ -356,7 +356,7 @@
 		},
 		{
 			"key": "ECU_LIB",
-			"name": "Libertad FC",
+			"name": "Libertad",
 			"short": "Libertad",
 			"abbr": "LIB",
 			"nick": "Libertad",
@@ -377,7 +377,7 @@
 		},
 		{
 			"key": "ECU_VIN",
-			"name": "Vinotinto de Ecuador",
+			"name": "Vinotinto",
 			"short": "Vinotinto",
 			"abbr": "VIN",
 			"nick": "Vinotinto",
@@ -398,7 +398,7 @@
 		},
 		{
 			"key": "ECU_MAN",
-			"name": "Manta FC",
+			"name": "Manta",
 			"short": "Manta",
 			"abbr": "MAN",
 			"nick": "Manta",

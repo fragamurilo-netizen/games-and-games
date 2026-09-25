@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "COL_VRD",
-			"name": "Atlético Nacional",
+			"name": "Atl. Nacional",
 			"short": "Atl. Nacional",
 			"abbr": "NAC",
 			"nick": "Verdolagas",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "COL_EMB",
-			"name": "Millonarios FC",
+			"name": "Millonarios",
 			"short": "Millonarios",
 			"abbr": "MIL",
 			"nick": "Embajadores",
@@ -92,7 +92,7 @@
 		},
 		{
 			"key": "COL_TIB",
-			"name": "Junior FC",
+			"name": "Junior",
 			"short": "Junior",
 			"abbr": "JUN",
 			"nick": "Tiburones",
@@ -119,7 +119,7 @@
 		},
 		{
 			"key": "COL_POD",
-			"name": "Deportivo Independiente Medellín",
+			"name": "DIM",
 			"short": "DIM",
 			"abbr": "DIM",
 			"nick": "Poderoso",
@@ -148,7 +148,7 @@
 		},
 		{
 			"key": "COL_CAR",
-			"name": "Independiente Santa Fe",
+			"name": "Santa Fe",
 			"short": "Santa Fe",
 			"abbr": "SFE",
 			"nick": "Cardenales",
@@ -231,7 +231,7 @@
 		},
 		{
 			"key": "COL_TOL",
-			"name": "Deportes Tolima",
+			"name": "Tolima",
 			"short": "Tolima",
 			"abbr": "TOL",
 			"nick": "Pijao",
@@ -258,7 +258,7 @@
 		},
 		{
 			"key": "COL_BUC",
-			"name": "Atlético Bucaramanga",
+			"name": "Bucaramanga",
 			"short": "Bucaramanga",
 			"abbr": "BUC",
 			"nick": "Leopardo",
@@ -284,7 +284,7 @@
 		},
 		{
 			"key": "COL_PER",
-			"name": "Deportivo Pereira",
+			"name": "Pereira",
 			"short": "Pereira",
 			"abbr": "PER",
 			"nick": "Matecaña",
@@ -311,7 +311,7 @@
 		},
 		{
 			"key": "COL_PAS",
-			"name": "Deportivo Pasto",
+			"name": "Pasto",
 			"short": "Pasto",
 			"abbr": "PAS",
 			"nick": "Volcánicos",
@@ -337,7 +337,7 @@
 		},
 		{
 			"key": "COL_ALI",
-			"name": "Alianza FC",
+			"name": "Alianza",
 			"short": "Alianza",
 			"abbr": "ALI",
 			"nick": "Alianza",
@@ -358,7 +358,7 @@
 		},
 		{
 			"key": "COL_AGU",
-			"name": "Águilas Doradas Rionegro",
+			"name": "Águilas Doradas",
 			"short": "Águilas Doradas",
 			"abbr": "AGU",
 			"nick": "Águilas Doradas",
@@ -400,7 +400,7 @@
 		},
 		{
 			"key": "COL_ENV",
-			"name": "Envigado FC",
+			"name": "Envigado",
 			"short": "Envigado",
 			"abbr": "ENV",
 			"nick": "Envigado",
@@ -421,7 +421,7 @@
 		},
 		{
 			"key": "COL_EQU",
-			"name": "CD La Equidad",
+			"name": "La Equidad",
 			"short": "La Equidad",
 			"abbr": "EQU",
 			"nick": "La Equidad",
@@ -442,7 +442,7 @@
 		},
 		{
 			"key": "COL_LLA",
-			"name": "Llaneros FC",
+			"name": "Llaneros",
 			"short": "Llaneros",
 			"abbr": "LLA",
 			"nick": "Llaneros",
@@ -463,7 +463,7 @@
 		},
 		{
 			"key": "COL_BOY",
-			"name": "Boyacá Chicó FC",
+			"name": "Boyacá Chicó",
 			"short": "Boyacá Chicó",
 			"abbr": "BCH",
 			"nick": "Boyacá Chicó",

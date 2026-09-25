@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "MAR_WYR",
-			"name": "Wydad Athletic Club",
+			"name": "Wydad",
 			"short": "Wydad",
 			"abbr": "WAC",
 			"nick": "Wydadis",
@@ -33,7 +33,7 @@
 		},
 		{
 			"key": "MAR_RVE",
-			"name": "Raja Club Athletic",
+			"name": "Raja",
 			"short": "Raja",
 			"abbr": "RCA",
 			"nick": "Aigles Verts",
@@ -61,7 +61,7 @@
 		},
 		{
 			"key": "MAR_ARF",
-			"name": "AS FAR",
+			"name": "FAR Rabat",
 			"short": "FAR Rabat",
 			"abbr": "FAR",
 			"nick": "Militaires",
@@ -114,7 +114,7 @@
 		},
 		{
 			"key": "MAR_FUS",
-			"name": "FUS de Rabat",
+			"name": "FUS Rabat",
 			"short": "FUS Rabat",
 			"abbr": "FUS",
 			"nick": "Fussistes",
@@ -140,7 +140,7 @@
 		},
 		{
 			"key": "MAR_MAS",
-			"name": "Maghreb Association Sportive de Fès",
+			"name": "MAS Fès",
 			"short": "MAS Fès",
 			"abbr": "MAS",
 			"nick": "Nemours",
@@ -167,7 +167,7 @@
 		},
 		{
 			"key": "MAR_HUS",
-			"name": "Hassania Union Sport d'Agadir",
+			"name": "Hassania Agadir",
 			"short": "Hassania Agadir",
 			"abbr": "HUSA",
 			"nick": "Gazelles",
@@ -193,7 +193,7 @@
 		},
 		{
 			"key": "MAR_DHJ",
-			"name": "Difaâ Hassani El Jadidi",
+			"name": "DH El Jadida",
 			"short": "DH El Jadida",
 			"abbr": "DHJ",
 			"nick": "Dokkalis",
@@ -218,7 +218,7 @@
 		},
 		{
 			"key": "MAR_OCK",
-			"name": "Olympique Club de Khouribga",
+			"name": "OC Khouribga",
 			"short": "OC Khouribga",
 			"abbr": "OCK",
 			"nick": "OC Khouribga",
@@ -239,7 +239,7 @@
 		},
 		{
 			"key": "MAR_RCZ",
-			"name": "Renaissance Club Zemamra",
+			"name": "RC Zemamra",
 			"short": "RC Zemamra",
 			"abbr": "RCZ",
 			"nick": "RC Zemamra",
@@ -260,7 +260,7 @@
 		},
 		{
 			"key": "MAR_UTS",
-			"name": "Union Touarga Sport",
+			"name": "Union Touarga",
 			"short": "Union Touarga",
 			"abbr": "UTS",
 			"nick": "Union Touarga",
@@ -281,7 +281,7 @@
 		},
 		{
 			"key": "MAR_COD",
-			"name": "Club Omnisports de Meknès",
+			"name": "CODM Meknès",
 			"short": "CODM Meknès",
 			"abbr": "COD",
 			"nick": "CODM Meknès",
@@ -302,7 +302,7 @@
 		},
 		{
 			"key": "MAR_MAT",
-			"name": "Moghreb Athletic de Tétouan",
+			"name": "Moghreb Tétouan",
 			"short": "Moghreb Tétouan",
 			"abbr": "MAT",
 			"nick": "Moghreb Tétouan",
@@ -323,7 +323,7 @@
 		},
 		{
 			"key": "MAR_SCC",
-			"name": "Sporting Club Chabab Mohammédia",
+			"name": "Chabab Mohammédia",
 			"short": "Chabab Mohammédia",
 			"abbr": "SCC",
 			"nick": "Chabab Mohammédia",
@@ -344,7 +344,7 @@
 		},
 		{
 			"key": "MAR_IRT",
-			"name": "Ittihad Riadi de Tanger",
+			"name": "IR Tanger",
 			"short": "IR Tanger",
 			"abbr": "IRT",
 			"nick": "IR Tanger",
@@ -365,7 +365,7 @@
 		},
 		{
 			"key": "MAR_OCS",
-			"name": "Olympic Club de Safi",
+			"name": "Olympic Safi",
 			"short": "Olympic Safi",
 			"abbr": "OCS",
 			"nick": "Olympic Safi",

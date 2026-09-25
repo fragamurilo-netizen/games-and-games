@@ -383,4 +383,18 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.memory = d.get("mem", {})
 	w._free_agents_dirty = true
 	w._club_by_key.clear()
+	# Mundo padrão: clubes só com o nome curto (sem o nome oficial completo) e estádios sem naming
+	# rights. Saves antigos
+	# migram uma vez; nomes trocados depois no editor ficam.
+	if w.world_type == "padrao" and not w.stats.has("short_names"):
+		var stadiums := {}
+		for code in DatabaseManager.league_nations():
+			for cd in DatabaseManager.club_data(code):
+				stadiums[String(cd.get("key", ""))] = String(cd.get("stadium", ""))
+		for c: Club in w.clubs:
+			if c.short_name != "":
+				c.name = c.short_name
+			if String(stadiums.get(c.key, "")) != "":
+				c.stadium = stadiums[c.key] # estádios sem nome de patrocinador
+	w.stats["short_names"] = true
 	return w

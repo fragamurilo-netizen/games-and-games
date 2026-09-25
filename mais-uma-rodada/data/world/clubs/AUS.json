@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "AUS_MVB",
-			"name": "Melbourne Victory FC",
+			"name": "Melb. Victory",
 			"short": "Melb. Victory",
 			"abbr": "MVC",
 			"nick": "Victory",
@@ -44,7 +44,7 @@
 				"#6CABDD",
 				"#0D2A5C"
 			],
-			"stadium": "Allianz Stadium",
+			"stadium": "Sydney Football Stadium",
 			"capacity": 42500,
 			"kit": "plain",
 			"crest": {
@@ -60,7 +60,7 @@
 		},
 		{
 			"key": "AUS_PAR",
-			"name": "Western Sydney Wanderers FC",
+			"name": "W. Sydney",
 			"short": "W. Sydney",
 			"abbr": "WSW",
 			"nick": "Wanderers",
@@ -73,7 +73,7 @@
 				"#E30613",
 				"#111111"
 			],
-			"stadium": "CommBank Stadium",
+			"stadium": "Western Sydney Stadium",
 			"capacity": 30000,
 			"kit": "halves",
 			"crest": {
@@ -89,7 +89,7 @@
 		},
 		{
 			"key": "AUS_MCY",
-			"name": "Melbourne City FC",
+			"name": "Melbourne City",
 			"short": "Melbourne City",
 			"abbr": "MCY",
 			"nick": "City",
@@ -118,7 +118,7 @@
 		},
 		{
 			"key": "AUS_CCM",
-			"name": "Central Coast Mariners FC",
+			"name": "Central Coast",
 			"short": "Central Coast",
 			"abbr": "CCM",
 			"nick": "Mariners",
@@ -145,7 +145,7 @@
 		},
 		{
 			"key": "AUS_ADL",
-			"name": "Adelaide United FC",
+			"name": "Adelaide United",
 			"short": "Adelaide United",
 			"abbr": "ADL",
 			"nick": "Reds",
@@ -172,7 +172,7 @@
 		},
 		{
 			"key": "AUS_BRI",
-			"name": "Brisbane Roar FC",
+			"name": "Brisbane Roar",
 			"short": "Brisbane Roar",
 			"abbr": "BRI",
 			"nick": "Brisbane Roar",
@@ -193,7 +193,7 @@
 		},
 		{
 			"key": "AUS_PER",
-			"name": "Perth Glory FC",
+			"name": "Perth Glory",
 			"short": "Perth Glory",
 			"abbr": "PER",
 			"nick": "Perth Glory",
@@ -214,7 +214,7 @@
 		},
 		{
 			"key": "AUS_NEW",
-			"name": "Newcastle Jets FC",
+			"name": "Newcastle Jets",
 			"short": "Newcastle Jets",
 			"abbr": "NEW",
 			"nick": "Newcastle Jets",
@@ -235,7 +235,7 @@
 		},
 		{
 			"key": "AUS_MAC",
-			"name": "Macarthur FC",
+			"name": "Macarthur",
 			"short": "Macarthur",
 			"abbr": "MAC",
 			"nick": "Macarthur",
@@ -256,7 +256,7 @@
 		},
 		{
 			"key": "AUS_WEL",
-			"name": "Wellington Phoenix FC",
+			"name": "Wellington Phoenix",
 			"short": "Wellington Phoenix",
 			"abbr": "WEL",
 			"nick": "Wellington Phoenix",

@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "QAT_ZAE",
-			"name": "Al Sadd SC",
+			"name": "Al Sadd",
 			"short": "Al Sadd",
 			"abbr": "SAD",
 			"nick": "Líderes",
@@ -32,7 +32,7 @@
 		},
 		{
 			"key": "QAT_KNI",
-			"name": "Al Duhail SC",
+			"name": "Al Duhail",
 			"short": "Al Duhail",
 			"abbr": "DUH",
 			"nick": "Cavaleiros Vermelhos",
@@ -60,7 +60,7 @@
 		},
 		{
 			"key": "QAT_RAY",
-			"name": "Al Rayyan SC",
+			"name": "Al Rayyan",
 			"short": "Al Rayyan",
 			"abbr": "RAY",
 			"nick": "Leões",
@@ -86,7 +86,7 @@
 		},
 		{
 			"key": "QAT_GHA",
-			"name": "Al Gharafa SC",
+			"name": "Al Gharafa",
 			"short": "Al Gharafa",
 			"abbr": "GHA",
 			"nick": "Cheetahs",
@@ -112,7 +112,7 @@
 		},
 		{
 			"key": "QAT_ARA",
-			"name": "Al Arabi SC",
+			"name": "Al Arabi",
 			"short": "Al Arabi",
 			"abbr": "ARA",
 			"nick": "Dream Team",
@@ -138,7 +138,7 @@
 		},
 		{
 			"key": "QAT_WAK",
-			"name": "Al Wakrah SC",
+			"name": "Al Wakrah",
 			"short": "Al Wakrah",
 			"abbr": "WAK",
 			"nick": "Al Mawaaj",
@@ -184,7 +184,7 @@
 		},
 		{
 			"key": "QAT_SHA",
-			"name": "Al Shamal SC",
+			"name": "Al Shamal",
 			"short": "Al Shamal",
 			"abbr": "SHM",
 			"nick": "Al Shamal",
@@ -205,7 +205,7 @@
 		},
 		{
 			"key": "QAT_UMM",
-			"name": "Umm Salal SC",
+			"name": "Umm Salal",
 			"short": "Umm Salal",
 			"abbr": "UMS",
 			"nick": "Umm Salal",
@@ -226,7 +226,7 @@
 		},
 		{
 			"key": "QAT_KHO",
-			"name": "Al Khor SC",
+			"name": "Al Khor",
 			"short": "Al Khor",
 			"abbr": "KHR",
 			"nick": "Al Khor",
@@ -247,7 +247,7 @@
 		},
 		{
 			"key": "QAT_AHL",
-			"name": "Al Ahli SC",
+			"name": "Al Ahli Doha",
 			"short": "Al Ahli Doha",
 			"abbr": "AHD",
 			"nick": "Al Ahli Doha",
@@ -268,7 +268,7 @@
 		},
 		{
 			"key": "QAT_SHN",
-			"name": "Al Shahania SC",
+			"name": "Al Shahania",
 			"short": "Al Shahania",
 			"abbr": "SHN",
 			"nick": "Al Shahania",

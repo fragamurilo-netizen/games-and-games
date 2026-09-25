@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "PER_CRE",
-			"name": "Club Universitario de Deportes",
+			"name": "Universitario",
 			"short": "Universitario",
 			"abbr": "UNI",
 			"nick": "Cremas",
@@ -35,7 +35,7 @@
 		},
 		{
 			"key": "PER_INT",
-			"name": "Club Alianza Lima",
+			"name": "Alianza Lima",
 			"short": "Alianza Lima",
 			"abbr": "ALI",
 			"nick": "Íntimos",
@@ -64,7 +64,7 @@
 		},
 		{
 			"key": "PER_CEL",
-			"name": "Club Sporting Cristal",
+			"name": "Sporting Cristal",
 			"short": "Sporting Cristal",
 			"abbr": "SCR",
 			"nick": "Celestes",
@@ -94,7 +94,7 @@
 		},
 		{
 			"key": "PER_DOM",
-			"name": "FBC Melgar",
+			"name": "Melgar",
 			"short": "Melgar",
 			"abbr": "MEL",
 			"nick": "Dominós",
@@ -120,7 +120,7 @@
 		},
 		{
 			"key": "PER_IMP",
-			"name": "Club Cienciano",
+			"name": "Cienciano",
 			"short": "Cienciano",
 			"abbr": "CIE",
 			"nick": "Papá",
@@ -172,7 +172,7 @@
 		},
 		{
 			"key": "PER_ADT",
-			"name": "Asociación Deportiva Tarma",
+			"name": "ADT",
 			"short": "ADT",
 			"abbr": "ADT",
 			"nick": "Celeste de Tarma",
@@ -198,7 +198,7 @@
 		},
 		{
 			"key": "PER_HUA",
-			"name": "Club Sport Huancayo",
+			"name": "Sport Huancayo",
 			"short": "Sport Huancayo",
 			"abbr": "SHU",
 			"nick": "Rojo Matador",
@@ -224,7 +224,7 @@
 		},
 		{
 			"key": "PER_GRA",
-			"name": "Club Atlético Grau",
+			"name": "Atlético Grau",
 			"short": "Atlético Grau",
 			"abbr": "GRA",
 			"nick": "Albos",
@@ -251,7 +251,7 @@
 		},
 		{
 			"key": "PER_GAR",
-			"name": "Deportivo Garcilaso",
+			"name": "Garcilaso",
 			"short": "Garcilaso",
 			"abbr": "GAR",
 			"nick": "Celeste Imperial",
@@ -277,7 +277,7 @@
 		},
 		{
 			"key": "PER_CHA",
-			"name": "Los Chankas CYC",
+			"name": "Los Chankas",
 			"short": "Los Chankas",
 			"abbr": "LCH",
 			"nick": "Guerreros",
@@ -303,7 +303,7 @@
 		},
 		{
 			"key": "PER_AAT",
-			"name": "Club Alianza Atlético",
+			"name": "Alianza Atlético",
 			"short": "Alianza Atlético",
 			"abbr": "AAT",
 			"nick": "Vendaval Churre",
@@ -330,7 +330,7 @@
 		},
 		{
 			"key": "PER_SBO",
-			"name": "Club Sport Boys Association",
+			"name": "Sport Boys",
 			"short": "Sport Boys",
 			"abbr": "SBA",
 			"nick": "Sport Boys",
@@ -351,7 +351,7 @@
 		},
 		{
 			"key": "PER_JPB",
-			"name": "Juan Pablo II College",
+			"name": "Juan Pablo II",
 			"short": "Juan Pablo II",
 			"abbr": "JPII",
 			"nick": "Juan Pablo II",
@@ -393,7 +393,7 @@
 		},
 		{
 			"key": "PER_UTC",
-			"name": "Universidad Técnica de Cajamarca",
+			"name": "UTC",
 			"short": "UTC",
 			"abbr": "UTC",
 			"nick": "UTC",
@@ -414,7 +414,7 @@
 		},
 		{
 			"key": "PER_AYA",
-			"name": "Ayacucho FC",
+			"name": "Ayacucho",
 			"short": "Ayacucho",
 			"abbr": "AYA",
 			"nick": "Ayacucho",
@@ -435,7 +435,7 @@
 		},
 		{
 			"key": "PER_AUH",
-			"name": "Club Alianza Universidad",
+			"name": "Alianza Universidad",
 			"short": "Alianza Universidad",
 			"abbr": "AUH",
 			"nick": "Alianza Universidad",

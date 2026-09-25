@@ -29,7 +29,7 @@
 		},
 		{
 			"key": "SEN_JAR",
-			"name": "ASC Jaraaf",
+			"name": "Jaraaf",
 			"short": "Jaraaf",
 			"abbr": "JAR",
 			"nick": "Vert et Blanc",
@@ -54,7 +54,7 @@
 		},
 		{
 			"key": "SEN_TEU",
-			"name": "Teungueth FC",
+			"name": "Teungueth",
 			"short": "Teungueth",
 			"abbr": "TFC",
 			"nick": "Rufisquois",
@@ -156,7 +156,7 @@
 		},
 		{
 			"key": "SEN_GUE",
-			"name": "Guédiawaye FC",
+			"name": "Guédiawaye",
 			"short": "Guédiawaye",
 			"abbr": "GFC",
 			"nick": "Guédiawaye",
@@ -198,7 +198,7 @@
 		},
 		{
 			"key": "SEN_LIN",
-			"name": "ASC Linguère",
+			"name": "Linguère",
 			"short": "Linguère",
 			"abbr": "LIN",
 			"nick": "Linguère",
@@ -219,7 +219,7 @@
 		},
 		{
 			"key": "SEN_SON",
-			"name": "ASC Sonacos",
+			"name": "Sonacos",
 			"short": "Sonacos",
 			"abbr": "SON",
 			"nick": "Sonacos",
@@ -240,7 +240,7 @@
 		},
 		{
 			"key": "SEN_AJE",
-			"name": "AJEL de Rufisque",
+			"name": "AJEL Rufisque",
 			"short": "AJEL Rufisque",
 			"abbr": "AJE",
 			"nick": "AJEL Rufisque",
@@ -261,7 +261,7 @@
 		},
 		{
 			"key": "SEN_WAL",
-			"name": "Wally Daan de Thiès",
+			"name": "Wally Daan",
 			"short": "Wally Daan",
 			"abbr": "WAD",
 			"nick": "Wally Daan",
@@ -303,7 +303,7 @@
 		},
 		{
 			"key": "SEN_HLM",
-			"name": "ASC HLM de Dakar",
+			"name": "HLM Dakar",
 			"short": "HLM Dakar",
 			"abbr": "HLM",
 			"nick": "HLM Dakar",

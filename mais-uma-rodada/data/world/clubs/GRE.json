@@ -4,7 +4,7 @@
 	"clubs": [
 		{
 			"key": "GRE_PIR",
-			"name": "Olympiacos FC",
+			"name": "Olympiacos",
 			"short": "Olympiacos",
 			"abbr": "OLY",
 			"nick": "Thrylos",
@@ -38,7 +38,7 @@
 		},
 		{
 			"key": "GRE_ATH",
-			"name": "Panathinaikos FC",
+			"name": "Panathinaikos",
 			"short": "Panathinaikos",
 			"abbr": "PAO",
 			"nick": "Trifylli",
@@ -68,7 +68,7 @@
 		},
 		{
 			"key": "GRE_AEN",
-			"name": "AEK Athens FC",
+			"name": "AEK",
 			"short": "AEK",
 			"abbr": "AEK",
 			"nick": "Enosi",
@@ -97,7 +97,7 @@
 		},
 		{
 			"key": "GRE_DIK",
-			"name": "PAOK FC",
+			"name": "PAOK",
 			"short": "PAOK",
 			"abbr": "PAOK",
 			"nick": "Dikefalos",
@@ -125,7 +125,7 @@
 		},
 		{
 			"key": "GRE_ARI",
-			"name": "Aris Thessaloniki FC",
+			"name": "Aris",
 			"short": "Aris",
 			"abbr": "ARI",
 			"nick": "Thrylos tou Vorra",
@@ -152,7 +152,7 @@
 		},
 		{
 			"key": "GRE_OFI",
-			"name": "OFI Crete FC",
+			"name": "OFI",
 			"short": "OFI",
 			"abbr": "OFI",
 			"nick": "Omilos",
@@ -179,7 +179,7 @@
 		},
 		{
 			"key": "GRE_VOL",
-			"name": "Volos NFC",
+			"name": "Volos",
 			"short": "Volos",
 			"abbr": "VOL",
 			"nick": "Volos",
@@ -200,7 +200,7 @@
 		},
 		{
 			"key": "GRE_AST",
-			"name": "Asteras Tripolis FC",
+			"name": "Asteras",
 			"short": "Asteras",
 			"abbr": "AST",
 			"nick": "Asteras",
@@ -221,7 +221,7 @@
 		},
 		{
 			"key": "GRE_ATR",
-			"name": "Atromitos FC",
+			"name": "Atromitos",
 			"short": "Atromitos",
 			"abbr": "ATR",
 			"nick": "Atromitos",
@@ -242,7 +242,7 @@
 		},
 		{
 			"key": "GRE_PAN",
-			"name": "Panetolikos FC",
+			"name": "Panetolikos",
 			"short": "Panetolikos",
 			"abbr": "PNE",
 			"nick": "Panetolikos",
@@ -263,7 +263,7 @@
 		},
 		{
 			"key": "GRE_LAM",
-			"name": "PAS Lamia 1964",
+			"name": "Lamia",
 			"short": "Lamia",
 			"abbr": "LAM",
 			"nick": "Lamia",
@@ -284,7 +284,7 @@
 		},
 		{
 			"key": "GRE_SER",
-			"name": "Panserraikos FC",
+			"name": "Panserraikos",
 			"short": "Panserraikos",
 			"abbr": "PSR",
 			"nick": "Panserraikos",
@@ -305,7 +305,7 @@
 		},
 		{
 			"key": "GRE_LEV",
-			"name": "Levadiakos FC",
+			"name": "Levadiakos",
 			"short": "Levadiakos",
 			"abbr": "LEV",
 			"nick": "Levadiakos",
@@ -326,7 +326,7 @@
 		},
 		{
 			"key": "GRE_KIF",
-			"name": "AE Kifisia FC",
+			"name": "Kifisia",
 			"short": "Kifisia",
 			"abbr": "KIF",
 			"nick": "Kifisia",
