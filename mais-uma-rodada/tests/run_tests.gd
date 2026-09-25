@@ -869,6 +869,7 @@ func _test_trades() -> void:
 	var w := _career_world()
 	var c := w.user_club()
 	c.transfer_budget = 80_000_000
+	c.wage_budget = maxi(c.wage_budget, 50_000_000) # o teste é da troca, não do teto salarial
 	w.season.day = 0 # janela aberta no início
 	check(w.transfer_window_open(), "janela deveria estar aberta")
 	var seller: Club = w.clubs_in_league("BRA1")[10]

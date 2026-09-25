@@ -93,7 +93,7 @@ func _guard_layout(cur: BaseScreen) -> void:
 	if cur == null or not cur.is_visible_in_tree():
 		return
 	var host_w := screen_host.size.x
-	if host_w > 0.0 and cur.size.x > host_w + 0.5:
+	if host_w > 0.0 and (cur.size.x > host_w + 0.5 or UIKit.layout_need(cur) > host_w + 0.5):
 		UIKit.fit_width(cur, host_w)
 		var px := cur.position.x
 		cur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

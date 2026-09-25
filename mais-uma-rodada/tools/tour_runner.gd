@@ -264,6 +264,11 @@ func _run() -> void:
 	_screen().refresh()
 	await _frames(6)
 	await _shot("16_rodadas")
+	# Ligas de outros países (nomes longos, legenda de vagas e divisões): não podem alargar a tela.
+	for lid in ["TUR1", "ENG2", "BRA4"]:
+		UIManager.goto("table", {"league": lid})
+		await _frames(8)
+		await _shot("16a_tabela_" + lid)
 	# Estadual do clube do usuário (clube brasileiro no passeio), ou o Paulistão.
 	var state_id := "SPE"
 	for cid in CupManager.state_ids():

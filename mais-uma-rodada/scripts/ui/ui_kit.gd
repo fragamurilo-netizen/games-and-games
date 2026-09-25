@@ -122,8 +122,8 @@ static func _press_reset(t: Control) -> void:
 ## além da tela passam a cortar com "…" (o texto inteiro fica na dica). Sem isso a tela
 ## inteira ficava mais larga que o celular e parecia "com zoom".
 static func fit_width(root: Control, max_w: float) -> void:
-	for _i in 16:
-		if root.get_combined_minimum_size().x <= max_w + 0.5:
+	for _i in 24:
+		if layout_need(root) <= max_w + 0.5:
 			return
 		var worst: Control = null
 		var worst_w := 0.0
@@ -136,8 +136,8 @@ static func fit_width(root: Control, max_w: float) -> void:
 					continue
 			else:
 				var b := n as Button
-				# Botões só em linhas (numa FlowContainer eles precisam do tamanho natural)
-				if b.clip_text or b.text == "" or not (b.get_parent() is HBoxContainer):
+				# Numa FlowContainer eles precisam do tamanho natural
+				if b.clip_text or b.text == "" or b.autowrap_mode != TextServer.AUTOWRAP_OFF or b.get_parent() is FlowContainer:
 					continue
 			var w := (n as Control).get_combined_minimum_size().x
 			if w > worst_w:
@@ -145,6 +145,10 @@ static func fit_width(root: Control, max_w: float) -> void:
 				worst = n
 		if worst == null:
 			return
+		if worst is Button and not (worst.get_parent() is HBoxContainer):
+			# Botão sozinho numa coluna: o texto quebra em linhas.
+			(worst as Button).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			continue
 		if worst is Button:
 			# Todos os botões da linha encolhem juntos (as abas continuam do mesmo tamanho)
 			for sib in worst.get_parent().get_children():
@@ -157,6 +161,18 @@ static func fit_width(root: Control, max_w: float) -> void:
 		wl.custom_minimum_size.x = minf(worst_w, max_w * 0.22)
 		if wl.tooltip_text == "":
 			wl.tooltip_text = wl.text
+
+
+## Largura mínima que o conteúdo de `root` exige. Uma tela é um Control simples (não um
+## container): o mínimo dela é 0 e quem cresce são os filhos ancorados (Body), então medimos eles.
+static func layout_need(root: Control) -> float:
+	var need := root.get_combined_minimum_size().x
+	if root is Container:
+		return need
+	for ch in root.get_children():
+		if ch is Control and (ch as Control).visible and not (ch as Control).top_level:
+			need = maxf(need, (ch as Control).get_combined_minimum_size().x)
+	return need
 
 
 ## Botão de linha que pode encolher (texto com "…") em vez de alargar a tela.
@@ -381,6 +397,13 @@ static func kv(key: String, value: String, value_color: Color = UIColors.TEXT) -
 	h.add_child(k)
 	var v := label(value, "H3")
 	v.add_theme_color_override(&"font_color", value_color)
+	if value.length() > 22:
+		# Valor longo quebra em linhas à direita em vez de alargar a tela.
+		k.size_flags_horizontal = Control.SIZE_FILL
+		k.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		v.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	h.add_child(v)
 	return h
 
