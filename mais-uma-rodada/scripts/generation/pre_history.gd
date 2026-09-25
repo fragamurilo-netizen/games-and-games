@@ -1,9 +1,9 @@
 class_name PreHistory
 extends RefCounted
 ## Passado das competições antes do primeiro ano do jogo. No mundo padrão, usa os campeões
-## reais (data/world/history.json) e os títulos de todos os tempos de cada clube; as ligas sem
-## lista real ganham um passado gerado pela reputação dos clubes, com "eras" de domínio.
-## No mundo aleatório, tudo é gerado. As temporadas entram em `world.history` com "pre": true.
+## reais (data/world/history.json, desde 1990) e os títulos de todos os tempos de cada clube;
+## competição sem lista real fica sem campeões passados (nada é inventado).
+## No mundo aleatório, tudo é gerado pela reputação dos clubes, com "eras" de domínio. As temporadas entram em `world.history` com "pre": true.
 
 ## Temporadas geradas para as ligas sem dados reais.
 const GEN_SEASONS := 20
@@ -16,7 +16,6 @@ static func build(world: GameWorld) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(world.world_seed * 31 + 7)
 	var years: Dictionary = data.get("years", {}) if real else {}
-	var real_only: Array = data.get("real_only", []) if real else []
 	var alltime: Dictionary = data.get("alltime", {}) if real else {}
 	var start := world.year
 	var first := start - 1 - GEN_SEASONS
@@ -28,7 +27,7 @@ static func build(world: GameWorld) -> void:
 		var champs := {}
 		if years.has(key):
 			champs = _real(world, years[key])
-		elif not real_only.has(key):
+		elif not real:
 			champs = _generated(world, rng, _league_clubs(world, lid), first, start - 2)
 		for y in champs:
 			_season(seasons, int(y))["leagues"][lid] = {"champion": champs[y], "promoted": [], "relegated": [], "pre": true}
@@ -39,7 +38,7 @@ static func build(world: GameWorld) -> void:
 		var champs := {}
 		if years.has(key):
 			champs = _real(world, years[key])
-		elif not real_only.has(key) and cid != CupManager.CWC:
+		elif not real and cid != CupManager.CWC:
 			champs = _generated(world, rng, _confed_clubs(world, String(CupManager.cfg(cid).get("confed", ""))), first, start - 2)
 		for y in champs:
 			_season(seasons, int(y))["cups"][cid] = {"champion": champs[y], "runner_up": -1, "scorer": {}, "pre": true}
@@ -50,7 +49,7 @@ static func build(world: GameWorld) -> void:
 		var champs := {}
 		if years.has(key):
 			champs = _real(world, years[key])
-		elif not real_only.has(key) and CupManager.is_domestic(String(cid)):
+		elif not real and CupManager.is_domestic(String(cid)):
 			champs = _generated(world, rng, _nation_clubs(world, String(CupManager.cfg(cid).get("nation", ""))), first, start - 2, 9.0)
 		for y in champs:
 			_season(seasons, int(y))["cups"][cid] = {"champion": champs[y], "runner_up": -1, "scorer": {}, "pre": true}
