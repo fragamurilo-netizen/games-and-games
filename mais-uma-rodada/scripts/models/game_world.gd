@@ -44,6 +44,8 @@ var manager: Dictionary = {}
 var stats: Dictionary = {}
 ## Técnicos, presidentes, comissão, torcida, imprensa e relações (People).
 var people: Dictionary = {}
+## Caixa de entrada do treinador (InboxManager): mensagens pessoais, mais recente no fim.
+var inbox: Array = []
 
 # Índices em memória (não salvos): reconstruídos sob demanda.
 var _free_agents_cache: Array = []
@@ -326,7 +328,7 @@ func to_dict() -> Dictionary:
 		"history": history, "news": nw, "offers": of, "tlog": tl, "retired": retired,
 		"mstats": manager_stats, "stats": stats, "events": events, "promises": promises,
 		"academy": academy.values().map(func(p: Player): return p.to_dict()), "yl": youth_league,
-		"yth": youth, "mgr": manager, "people": people,
+		"yth": youth, "mgr": manager, "people": people, "inbox": inbox,
 	}
 
 
@@ -372,6 +374,7 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.youth = d.get("yth", {})
 	w.manager = d.get("mgr", {})
 	w.people = d.get("people", {})
+	w.inbox = Array(d.get("inbox", []))
 	w._free_agents_dirty = true
 	w._club_by_key.clear()
 	return w

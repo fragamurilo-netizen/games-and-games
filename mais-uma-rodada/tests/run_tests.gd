@@ -53,6 +53,7 @@ func _initialize() -> void:
 	_run("times de coração, treinador e revelados", _test_hearts_manager)
 	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
+	_run("caixa de entrada do treinador", _test_inbox)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -2127,3 +2128,55 @@ class _FakeBilling:
 
 	func consume_purchase(t: String) -> void:
 		consumed.append(t)
+
+
+func _test_inbox() -> void:
+	var w := _career_world()
+	InboxManager.on_new_job(w)
+	check(w.inbox.size() >= 2, "sem boas-vindas na caixa de entrada (%d)" % w.inbox.size())
+	check(String(w.inbox[0]["f"]) == "presidente", "a primeira mensagem não é do presidente")
+	# Joga até o 13º jogo do usuário: relatórios, olheiro e diretoria.
+	var guard := 0
+	while w.current_turn() < 13 and guard < 80:
+		SeasonManager.play_matchday_instant(w)
+		guard += 1
+	var from := {}
+	var broken := 0
+	for m: Dictionary in w.inbox:
+		from[String(m["f"])] = true
+		var txt := String(m["s"]) + String(m["b"])
+		if txt.contains("{") or txt.contains("%d") or txt.contains("%s") or String(m["s"]).strip_edges() == "" or String(m["n"]).strip_edges() == "":
+			broken += 1
+	check(broken == 0, "%d mensagens com texto quebrado" % broken)
+	check(from.has("auxiliar"), "sem relatório do auxiliar")
+	check(from.has("olheiro"), "sem relatório do olheiro")
+	check(from.has("presidente"), "sem carta do presidente")
+	check(InboxManager.unread_count(w) == w.inbox.size(), "mensagens novas deveriam estar não lidas")
+	# Decisões da carreira viram mensagens com resposta pendente enquanto o evento existir.
+	var ev := EventManager._build(w, "raise")
+	if not ev.is_empty():
+		ev["id"] = 9999
+		ev["turn"] = w.current_turn()
+		ev["exp"] = w.current_turn() + 3
+		w.events.append(ev)
+		InboxManager.on_event(w, ev)
+		var m: Dictionary = w.inbox.back()
+		check(InboxManager.action_open(w, m), "decisão pendente não aparece como aberta")
+		EventManager.resolve(w, ev, 0)
+		check(not InboxManager.action_open(w, m), "decisão resolvida continua aberta")
+	# Não mexe no sorteio da simulação.
+	var st := w.rng.state
+	InboxManager.scout_report(w)
+	InboxManager.after_user_turn(w, {}, {})
+	check(w.rng.state == st, "a caixa de entrada consumiu o rng do mundo")
+	# Save e load preservam as mensagens.
+	var n := w.inbox.size()
+	InboxManager.mark_read(w.inbox[0])
+	var l := GameWorld.from_dict(w.to_dict())
+	check(l.inbox.size() == n, "save perdeu mensagens (%d de %d)" % [l.inbox.size(), n])
+	check(bool(l.inbox[0]["r"]), "save perdeu o estado de lida")
+	InboxManager.mark_all_read(w)
+	check(InboxManager.unread_count(w) == 0, "marcar todas como lidas falhou")
+	InboxManager.delete_read(w)
+	for m: Dictionary in w.inbox:
+		check(InboxManager.action_open(w, m), "limpar lidas apagou mensagem que pede resposta")

@@ -49,6 +49,8 @@ static func after_match(world: GameWorld, club: Club, res: String, derby: bool) 
 	club.board_confidence = clampf(club.board_confidence + d, 0.0, 100.0)
 	if before >= ULTIMATUM and club.board_confidence < ULTIMATUM:
 		NewsManager.post(world, "diretoria_ultimato", {"club": club.short_name, "goal": String(goal[0]).to_lower()}, club.id, -1, NewsEvent.IMP_HEADLINE)
+		if world.is_user_club(club.id):
+			InboxManager.on_ultimatum(world, club)
 
 
 ## Balanço da temporada. Atualiza a confiança e decide a demissão.
@@ -133,6 +135,7 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	YouthManager.build_league(world)
 	People.on_new_job(world, old_id)
 	NewsManager.post(world, "novo_tecnico", {"club": c.short_name, "manager": world.manager_name}, c.id, -1, NewsEvent.IMP_HEADLINE)
+	InboxManager.on_new_job(world)
 	# No meio da temporada o calendário segue: joga as datas até o próximo jogo do clube novo.
 	if mid and world.season != null and not world.season.finished:
 		SeasonManager.advance_to_user(world)
