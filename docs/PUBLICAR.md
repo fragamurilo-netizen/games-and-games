@@ -37,6 +37,10 @@ godot --headless --export-release "Android" build/MaisUmaRodada-0.3.0.aab
 O preset "Android" gera AAB só com ARM64 (menos de 30 MB; celulares só de 32 bits ficam de fora) e alvo no SDK 36. O preset "Android arm64" gera um APK para
 instalar direto no celular; exporte-o com `--export-debug` para jogar sem trava.
 
+Sem Android SDK (ou sem acesso ao dl.google.com), `mais-uma-rodada/tools/build_debug_apk.sh` gera um APK de teste
+arm64 com o modelo pronto do Godot, sem o plugin de compras, e o assina com a chave de debug pelo
+[uber-apk-signer](https://github.com/patrickfav/uber-apk-signer). Serve para testar no celular, não para a loja.
+
 A cada versão nova, aumente `version/code` nos dois presets de `export_presets.cfg` e `config/version` em
 `project.godot`.
 

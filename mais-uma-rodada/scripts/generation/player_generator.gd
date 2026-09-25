@@ -3,36 +3,36 @@ extends RefCounted
 ## Cria jogadores com atributos coerentes por posição e perfil, físico, potencial,
 ## curva de desenvolvimento, personalidade e contrato. Tudo a partir do RNG do mundo.
 
-# Índices: FIN PAS TEC VEL FOR MAR POS VIS CRU CAB RES GOL DIS INT DEC
+# Índices: FIN PAS TEC VEL FOR MAR POS VIS CRU CAB RES GOL DIS INT DEC DRI DES CHL ACE REF FRI
 const TEMPLATE: Array = [
-	[-40, -10, -20, -12, -2, -35, 3, -15, -35, -25, -15, 5, 0, 0, 1], # GK
-	[-20, -4, -4, 3, -4, 1, 0, -8, 2, -10, 3, -50, 0, -4, -2], # RB
-	[-28, -8, -14, -5, 4, 4, 3, -12, -18, 4, -4, -50, 0, -2, 0], # CB
-	[-20, -4, -4, 3, -4, 1, 0, -8, 2, -10, 3, -50, 0, -4, -2], # LB
-	[-18, 0, -6, -6, 2, 3, 2, -4, -14, -4, 2, -50, 0, 0, 0], # DM
-	[-10, 2, 1, -4, -4, -4, -2, 2, -6, -10, 2, -50, 0, 0, 1], # CM
-	[-2, 2, 3, -1, -10, -20, -6, 3, -4, -14, -4, -50, 0, 0, 0], # AM
-	[-8, 0, 1, 2, -8, -8, -6, -2, 3, -14, 2, -50, 0, -4, -2], # RM
-	[-8, 0, 1, 2, -8, -8, -6, -2, 3, -14, 2, -50, 0, -4, -2], # LM
-	[-2, -4, 2, 4, -10, -22, -4, -2, 0, -14, -2, -50, 0, -4, -2], # RW
-	[-2, -4, 2, 4, -10, -22, -4, -2, 0, -14, -2, -50, 0, -4, -2], # LW
-	[3, -10, -2, 0, 0, -26, 2, -10, -14, 0, -4, -50, 0, -2, 0], # ST
+	[-40, -10, -20, -12, -2, -35, 3, -15, -35, -25, -15, 5, 0, 0, 1, -30, -35, -30, -12, 6, 0], # GK
+	[-20, -4, -4, 3, -4, 1, 0, -8, 2, -10, 3, -50, 0, -4, -2, -2, 2, -12, 3, -50, -4], # RB
+	[-28, -8, -14, -5, 4, 4, 3, -12, -18, 4, -4, -50, 0, -2, 0, -16, 5, -16, -6, -50, 0], # CB
+	[-20, -4, -4, 3, -4, 1, 0, -8, 2, -10, 3, -50, 0, -4, -2, -2, 2, -12, 3, -50, -4], # LB
+	[-18, 0, -6, -6, 2, 3, 2, -4, -14, -4, 2, -50, 0, 0, 0, -8, 4, -6, -6, -50, 0], # DM
+	[-10, 2, 1, -4, -4, -4, -2, 2, -6, -10, 2, -50, 0, 0, 1, -2, -2, 0, -4, -50, 0], # CM
+	[-2, 2, 3, -1, -10, -20, -6, 3, -4, -14, -4, -50, 0, 0, 0, 4, -18, 2, 0, -50, 0], # AM
+	[-8, 0, 1, 2, -8, -8, -6, -2, 3, -14, 2, -50, 0, -4, -2, 2, -6, -4, 2, -50, -2], # RM
+	[-8, 0, 1, 2, -8, -8, -6, -2, 3, -14, 2, -50, 0, -4, -2, 2, -6, -4, 2, -50, -2], # LM
+	[-2, -4, 2, 4, -10, -22, -4, -2, 0, -14, -2, -50, 0, -4, -2, 5, -20, -2, 5, -50, -2], # RW
+	[-2, -4, 2, 4, -10, -22, -4, -2, 0, -14, -2, -50, 0, -4, -2, 5, -20, -2, 5, -50, -2], # LW
+	[3, -10, -2, 0, 0, -26, 2, -10, -14, 0, -4, -50, 0, -2, 0, 0, -24, -2, 0, -50, 3], # ST
 ]
 
 ## Perfis por posição: pequenas variações que tornam dois jogadores de mesmo overall diferentes.
 const PROFILES: Dictionary = {
-	Pos.GK: [{Attr.VEL: 6, Attr.POS: -4}, {Attr.POS: 6, Attr.DEC: 3, Attr.VEL: -4}, {Attr.PAS: 14, Attr.TEC: 8}, {}],
-	Pos.CB: [{Attr.CAB: 8, Attr.FOR: 8, Attr.VEL: -6}, {Attr.VEL: 10, Attr.FOR: -4, Attr.CAB: -4}, {Attr.PAS: 10, Attr.TEC: 6, Attr.VIS: 6, Attr.MAR: -3}, {}],
-	Pos.RB: [{Attr.CRU: 8, Attr.VEL: 4, Attr.TEC: 4, Attr.MAR: -6}, {Attr.MAR: 6, Attr.POS: 5, Attr.CRU: -6}, {Attr.VEL: 10}, {}],
-	Pos.LB: [{Attr.CRU: 8, Attr.VEL: 4, Attr.TEC: 4, Attr.MAR: -6}, {Attr.MAR: 6, Attr.POS: 5, Attr.CRU: -6}, {Attr.VEL: 10}, {}],
-	Pos.DM: [{Attr.MAR: 7, Attr.FOR: 6, Attr.PAS: -5}, {Attr.PAS: 8, Attr.VIS: 6, Attr.MAR: -4}, {}],
-	Pos.CM: [{Attr.RES: 10, Attr.MAR: 5, Attr.FIN: 3}, {Attr.VIS: 8, Attr.PAS: 6, Attr.FOR: -5}, {Attr.FIN: 8, Attr.POS: 4, Attr.MAR: -4}, {}],
-	Pos.AM: [{Attr.VIS: 8, Attr.PAS: 6, Attr.FIN: -4}, {Attr.FIN: 8, Attr.VEL: 4, Attr.VIS: -4}, {Attr.TEC: 8, Attr.VEL: 4}, {}],
-	Pos.RM: [{Attr.CRU: 8, Attr.TEC: -3}, {Attr.TEC: 7, Attr.VEL: 4, Attr.CRU: -4}, {Attr.RES: 8, Attr.MAR: 6, Attr.TEC: -4}, {}],
-	Pos.LM: [{Attr.CRU: 8, Attr.TEC: -3}, {Attr.TEC: 7, Attr.VEL: 4, Attr.CRU: -4}, {Attr.RES: 8, Attr.MAR: 6, Attr.TEC: -4}, {}],
-	Pos.RW: [{Attr.VEL: 10, Attr.FIN: -2}, {Attr.TEC: 8, Attr.VIS: 3}, {Attr.FIN: 8, Attr.POS: 4, Attr.CRU: -4}, {}],
-	Pos.LW: [{Attr.VEL: 10, Attr.FIN: -2}, {Attr.TEC: 8, Attr.VIS: 3}, {Attr.FIN: 8, Attr.POS: 4, Attr.CRU: -4}, {}],
-	Pos.ST: [{Attr.CAB: 10, Attr.FOR: 10, Attr.VEL: -8}, {Attr.VEL: 12, Attr.FOR: -6, Attr.CAB: -4}, {Attr.FIN: 8, Attr.POS: 6, Attr.TEC: -3, Attr.PAS: -3}, {Attr.TEC: 8, Attr.PAS: 6, Attr.VIS: 6, Attr.CAB: -4}, {}],
+	Pos.GK: [{Attr.REF: 8, Attr.ACE: 5, Attr.POS: -4}, {Attr.POS: 6, Attr.DEC: 3, Attr.REF: -3}, {Attr.PAS: 14, Attr.TEC: 8, Attr.FRI: 4}, {Attr.CAB: 6, Attr.FOR: 6}, {}],
+	Pos.CB: [{Attr.CAB: 8, Attr.FOR: 8, Attr.VEL: -6, Attr.ACE: -6}, {Attr.VEL: 10, Attr.ACE: 8, Attr.FOR: -4, Attr.CAB: -4}, {Attr.PAS: 10, Attr.TEC: 6, Attr.VIS: 6, Attr.DRI: 6, Attr.MAR: -3}, {Attr.DES: 9, Attr.POS: 4, Attr.PAS: -4}, {}],
+	Pos.RB: [{Attr.CRU: 8, Attr.VEL: 4, Attr.TEC: 4, Attr.DRI: 5, Attr.MAR: -6}, {Attr.MAR: 6, Attr.DES: 6, Attr.POS: 5, Attr.CRU: -6}, {Attr.VEL: 10, Attr.ACE: 8}, {Attr.PAS: 8, Attr.VIS: 6, Attr.INT: 4, Attr.VEL: -4}, {}],
+	Pos.LB: [{Attr.CRU: 8, Attr.VEL: 4, Attr.TEC: 4, Attr.DRI: 5, Attr.MAR: -6}, {Attr.MAR: 6, Attr.DES: 6, Attr.POS: 5, Attr.CRU: -6}, {Attr.VEL: 10, Attr.ACE: 8}, {Attr.PAS: 8, Attr.VIS: 6, Attr.INT: 4, Attr.VEL: -4}, {}],
+	Pos.DM: [{Attr.MAR: 7, Attr.DES: 8, Attr.FOR: 6, Attr.PAS: -5}, {Attr.PAS: 8, Attr.VIS: 8, Attr.FRI: 4, Attr.MAR: -4, Attr.DES: -4}, {Attr.CHL: 10, Attr.FOR: 4, Attr.VIS: -3}, {}],
+	Pos.CM: [{Attr.RES: 10, Attr.MAR: 5, Attr.DES: 5, Attr.FIN: 3}, {Attr.VIS: 8, Attr.PAS: 6, Attr.FOR: -5}, {Attr.FIN: 8, Attr.CHL: 8, Attr.POS: 4, Attr.MAR: -4}, {Attr.DRI: 8, Attr.TEC: 5, Attr.ACE: 4, Attr.MAR: -5}, {}],
+	Pos.AM: [{Attr.VIS: 8, Attr.PAS: 6, Attr.FIN: -4}, {Attr.FIN: 8, Attr.FRI: 5, Attr.VEL: 4, Attr.VIS: -4}, {Attr.TEC: 6, Attr.DRI: 9, Attr.ACE: 4}, {Attr.CHL: 11, Attr.TEC: 3, Attr.DRI: -3}, {}],
+	Pos.RM: [{Attr.CRU: 8, Attr.TEC: -3}, {Attr.TEC: 5, Attr.DRI: 7, Attr.VEL: 4, Attr.CRU: -4}, {Attr.RES: 8, Attr.MAR: 6, Attr.DES: 4, Attr.TEC: -4}, {}],
+	Pos.LM: [{Attr.CRU: 8, Attr.TEC: -3}, {Attr.TEC: 5, Attr.DRI: 7, Attr.VEL: 4, Attr.CRU: -4}, {Attr.RES: 8, Attr.MAR: 6, Attr.DES: 4, Attr.TEC: -4}, {}],
+	Pos.RW: [{Attr.VEL: 10, Attr.ACE: 9, Attr.FIN: -2}, {Attr.TEC: 6, Attr.DRI: 10, Attr.VIS: 3}, {Attr.FIN: 8, Attr.CHL: 5, Attr.POS: 4, Attr.CRU: -4}, {Attr.CRU: 9, Attr.PAS: 5, Attr.DRI: -4}, {}],
+	Pos.LW: [{Attr.VEL: 10, Attr.ACE: 9, Attr.FIN: -2}, {Attr.TEC: 6, Attr.DRI: 10, Attr.VIS: 3}, {Attr.FIN: 8, Attr.CHL: 5, Attr.POS: 4, Attr.CRU: -4}, {Attr.CRU: 9, Attr.PAS: 5, Attr.DRI: -4}, {}],
+	Pos.ST: [{Attr.CAB: 10, Attr.FOR: 10, Attr.VEL: -8, Attr.ACE: -6}, {Attr.VEL: 12, Attr.ACE: 10, Attr.FOR: -6, Attr.CAB: -4}, {Attr.FIN: 8, Attr.FRI: 6, Attr.POS: 6, Attr.TEC: -3, Attr.PAS: -3}, {Attr.TEC: 8, Attr.PAS: 6, Attr.VIS: 6, Attr.DRI: 5, Attr.CAB: -4}, {}],
 }
 
 const HEIGHT_MEAN: Array[int] = [189, 177, 187, 177, 181, 179, 176, 176, 176, 175, 175, 183]
@@ -40,17 +40,23 @@ const HEIGHT_MEAN: Array[int] = [189, 177, 187, 177, 181, 179, 176, 176, 176, 17
 ## "Assinaturas": o que faz um jogador ser lembrado (e o preço que ele paga por isso).
 ## [nome, posições, {atributo: ajuste}, cm a mais de altura]
 const SIGNATURES: Array = [
-	["velocista", [Pos.RB, Pos.LB, Pos.RM, Pos.LM, Pos.RW, Pos.LW, Pos.ST], {Attr.VEL: 13, Attr.FOR: -5, Attr.CAB: -3}, 0],
-	["matador", [Pos.ST, Pos.AM, Pos.RW, Pos.LW], {Attr.FIN: 11, Attr.POS: 5, Attr.PAS: -5, Attr.RES: -4}, 0],
-	["torre", [Pos.CB, Pos.ST], {Attr.CAB: 13, Attr.FOR: 7, Attr.VEL: -7, Attr.TEC: -4}, 7],
-	["driblador", [Pos.RW, Pos.LW, Pos.AM, Pos.RM, Pos.LM], {Attr.TEC: 12, Attr.VEL: 4, Attr.MAR: -6, Attr.CAB: -4}, -2],
-	["maestro", [Pos.CM, Pos.AM, Pos.DM], {Attr.PAS: 9, Attr.VIS: 10, Attr.FOR: -6, Attr.VEL: -4}, 0],
-	["carrapato", [Pos.DM, Pos.CB, Pos.RB, Pos.LB], {Attr.MAR: 10, Attr.RES: 6, Attr.TEC: -6, Attr.DIS: -6}, 0],
+	["velocista", [Pos.RB, Pos.LB, Pos.RM, Pos.LM, Pos.RW, Pos.LW, Pos.ST], {Attr.VEL: 13, Attr.ACE: 10, Attr.FOR: -5, Attr.CAB: -3}, 0],
+	["matador", [Pos.ST, Pos.AM, Pos.RW, Pos.LW], {Attr.FIN: 11, Attr.FRI: 8, Attr.POS: 5, Attr.PAS: -5, Attr.RES: -4}, 0],
+	["torre", [Pos.CB, Pos.ST], {Attr.CAB: 13, Attr.FOR: 7, Attr.VEL: -7, Attr.ACE: -7, Attr.TEC: -4}, 7],
+	["driblador", [Pos.RW, Pos.LW, Pos.AM, Pos.RM, Pos.LM], {Attr.DRI: 14, Attr.TEC: 6, Attr.ACE: 5, Attr.MAR: -6, Attr.CAB: -4}, -2],
+	["maestro", [Pos.CM, Pos.AM, Pos.DM], {Attr.PAS: 9, Attr.VIS: 10, Attr.FRI: 4, Attr.FOR: -6, Attr.VEL: -4}, 0],
+	["carrapato", [Pos.DM, Pos.CB, Pos.RB, Pos.LB], {Attr.MAR: 9, Attr.DES: 9, Attr.RES: 6, Attr.TEC: -6, Attr.DIS: -6}, 0],
 	["motorzinho", [Pos.CM, Pos.RM, Pos.LM, Pos.RB, Pos.LB, Pos.DM], {Attr.RES: 13, Attr.FOR: 3, Attr.VIS: -4}, 0],
 	["cruzador", [Pos.RB, Pos.LB, Pos.RM, Pos.LM], {Attr.CRU: 13, Attr.MAR: -4}, 0],
-	["paredao", [Pos.GK], {Attr.GOL: 6, Attr.POS: 5, Attr.PAS: -8}, 3],
-	["goleiro_linha", [Pos.GK], {Attr.PAS: 14, Attr.TEC: 10, Attr.GOL: -2}, 0],
+	["paredao", [Pos.GK], {Attr.GOL: 6, Attr.POS: 5, Attr.REF: 4, Attr.PAS: -8}, 3],
+	["goleiro_linha", [Pos.GK], {Attr.PAS: 14, Attr.TEC: 10, Attr.FRI: 6, Attr.GOL: -2}, 0],
 	["cerebral", [Pos.CB, Pos.DM, Pos.CM], {Attr.DEC: 9, Attr.INT: 9, Attr.POS: 5, Attr.VEL: -6}, 0],
+	["chutador", [Pos.AM, Pos.CM, Pos.DM, Pos.ST, Pos.RW, Pos.LW], {Attr.CHL: 15, Attr.FIN: 3, Attr.PAS: -3, Attr.DRI: -3}, 0],
+	["gelo", [Pos.ST, Pos.AM, Pos.CM, Pos.GK], {Attr.FRI: 15, Attr.DEC: 4, Attr.RES: -4}, 0],
+	["ladrao", [Pos.DM, Pos.CB, Pos.CM], {Attr.DES: 14, Attr.POS: 4, Attr.TEC: -5, Attr.PAS: -3}, 0],
+	["arranque", [Pos.RB, Pos.LB, Pos.RW, Pos.LW, Pos.ST], {Attr.ACE: 15, Attr.VEL: 4, Attr.RES: -5, Attr.CAB: -3}, -1],
+	["reflexo", [Pos.GK], {Attr.REF: 13, Attr.ACE: 6, Attr.POS: -4, Attr.CAB: -4}, -2],
+	["garcom", [Pos.AM, Pos.CM, Pos.RW, Pos.LW, Pos.RM, Pos.LM], {Attr.PAS: 10, Attr.VIS: 9, Attr.CRU: 4, Attr.FIN: -6}, 0],
 ]
 const SIGNATURE_CHANCE := 0.17
 const CURVE_WEIGHTS: Array = [15.0, 52.0, 13.0, 10.0, 10.0]
@@ -148,6 +154,7 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.weight = Physique.weight_for(rng, p.height, pos, age)
 	_pick_traits(rng, p)
 	_generate_attributes(rng, p, target, age, sig[2] if not sig.is_empty() else {})
+	p.signature = String(sig[0]) if not sig.is_empty() else ""
 	p.secondary = _pick_secondary(rng, pos)
 	p.potential = _pick_potential(rng, p.overall, age)
 	p.dev_curve = RngUtil.weighted_index(rng, CURVE_WEIGHTS)
@@ -245,15 +252,22 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 		vals[i] += mental
 	if age > 29:
 		vals[Attr.VEL] -= (age - 29) * 1.8
+		vals[Attr.ACE] -= (age - 29) * 2.1
 		vals[Attr.RES] -= (age - 29) * 1.2
 	elif age < 23:
 		vals[Attr.VEL] += (23 - age) * 0.6
+		vals[Attr.ACE] += (23 - age) * 0.8
+	vals[Attr.FRI] += mental * 0.7
 	# Físico
 	var h := float(p.height)
 	vals[Attr.CAB] += (h - 180.0) * 0.5
 	vals[Attr.FOR] += (h - 180.0) * 0.35
 	if h > 182.0:
 		vals[Attr.VEL] -= (h - 182.0) * 0.25
+		vals[Attr.ACE] -= (h - 182.0) * 0.4
+	elif h < 174.0:
+		vals[Attr.ACE] += (174.0 - h) * 0.4
+		vals[Attr.DRI] += (174.0 - h) * 0.3
 	if h > 186.0:
 		vals[Attr.TEC] -= (h - 186.0) * 0.2
 	# Personalidade
@@ -286,7 +300,7 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 				vals[i] += d
 	for i in Attr.COUNT:
 		var hi := 99.0
-		if i == Attr.GOL and pos != Pos.GK:
+		if (i == Attr.GOL or i == Attr.REF) and pos != Pos.GK:
 			vals[i] = clampf(vals[i], 1.0, 25.0)
 		p.attrs[i] = int(clampf(round(vals[i]), 1.0, hi))
 	p.recompute_overall()

@@ -8,11 +8,11 @@ extends RefCounted
 
 const TEAM_FOCUS := {
 	"equilibrado": {"name": "Equilibrado", "desc": "Um pouco de tudo. Sem pontos fracos, sem ênfase.", "attrs": [], "growth": 1.0, "recovery": 1.0, "injury": 1.0, "cohesion": 0.0, "att": 1.0, "def": 1.0},
-	"fisico": {"name": "Físico", "desc": "Velocidade, força e resistência. Cansa mais, forma atletas.", "attrs": [Attr.VEL, Attr.FOR, Attr.RES], "growth": 1.0, "recovery": 0.92, "injury": 1.15, "cohesion": 0.0, "att": 1.0, "def": 1.0},
-	"tecnico": {"name": "Técnico", "desc": "Passe, técnica, visão e cruzamento.", "attrs": [Attr.PAS, Attr.TEC, Attr.VIS, Attr.CRU], "growth": 1.0, "recovery": 1.0, "injury": 0.95, "cohesion": 0.0, "att": 1.0, "def": 1.0},
-	"tatico": {"name": "Tático", "desc": "Posicionamento, inteligência e entrosamento do time.", "attrs": [Attr.POS, Attr.INT, Attr.DEC], "growth": 0.95, "recovery": 1.0, "injury": 0.9, "cohesion": 1.0, "att": 1.0, "def": 1.0},
-	"ataque": {"name": "Ataque", "desc": "Finalização e jogadas ofensivas. Setor ofensivo +3% nos jogos.", "attrs": [Attr.FIN, Attr.CAB, Attr.TEC], "growth": 1.0, "recovery": 1.0, "injury": 1.0, "cohesion": 0.2, "att": 1.03, "def": 0.99},
-	"defesa": {"name": "Defesa", "desc": "Marcação e cobertura. Setor defensivo +3% nos jogos.", "attrs": [Attr.MAR, Attr.POS, Attr.CAB], "growth": 1.0, "recovery": 1.0, "injury": 1.0, "cohesion": 0.2, "att": 0.99, "def": 1.03},
+	"fisico": {"name": "Físico", "desc": "Velocidade, força e resistência. Cansa mais, forma atletas.", "attrs": [Attr.VEL, Attr.ACE, Attr.FOR, Attr.RES], "growth": 1.0, "recovery": 0.92, "injury": 1.15, "cohesion": 0.0, "att": 1.0, "def": 1.0},
+	"tecnico": {"name": "Técnico", "desc": "Passe, técnica, visão e cruzamento.", "attrs": [Attr.PAS, Attr.TEC, Attr.DRI, Attr.VIS, Attr.CRU], "growth": 1.0, "recovery": 1.0, "injury": 0.95, "cohesion": 0.0, "att": 1.0, "def": 1.0},
+	"tatico": {"name": "Tático", "desc": "Posicionamento, inteligência e entrosamento do time.", "attrs": [Attr.POS, Attr.INT, Attr.DEC, Attr.FRI], "growth": 0.95, "recovery": 1.0, "injury": 0.9, "cohesion": 1.0, "att": 1.0, "def": 1.0},
+	"ataque": {"name": "Ataque", "desc": "Finalização e jogadas ofensivas. Setor ofensivo +3% nos jogos.", "attrs": [Attr.FIN, Attr.CHL, Attr.CAB, Attr.TEC], "growth": 1.0, "recovery": 1.0, "injury": 1.0, "cohesion": 0.2, "att": 1.03, "def": 0.99},
+	"defesa": {"name": "Defesa", "desc": "Marcação e cobertura. Setor defensivo +3% nos jogos.", "attrs": [Attr.MAR, Attr.DES, Attr.POS, Attr.CAB], "growth": 1.0, "recovery": 1.0, "injury": 1.0, "cohesion": 0.2, "att": 0.99, "def": 1.03},
 	"recuperacao": {"name": "Recuperação", "desc": "Treinos leves e fisioterapia. Recupera rápido, evolui menos.", "attrs": [], "growth": 0.65, "recovery": 1.3, "injury": 0.6, "cohesion": 0.0, "att": 1.0, "def": 1.0},
 }
 const FOCUS_ORDER: Array[String] = ["equilibrado", "fisico", "tecnico", "tatico", "ataque", "defesa", "recuperacao"]
@@ -25,17 +25,19 @@ const INTENSITY: Array = [
 
 const PLAYER_FOCUS := {
 	"": {"name": "Sem foco", "attrs": []},
-	"finalizacao": {"name": "Finalização", "attrs": [Attr.FIN, Attr.POS]},
+	"finalizacao": {"name": "Finalização", "attrs": [Attr.FIN, Attr.FRI, Attr.POS]},
+	"chute": {"name": "Chute de longe", "attrs": [Attr.CHL, Attr.TEC]},
+	"desarme": {"name": "Desarme e marcação", "attrs": [Attr.DES, Attr.MAR]},
 	"armacao": {"name": "Armação", "attrs": [Attr.PAS, Attr.VIS, Attr.TEC]},
-	"drible": {"name": "Drible e velocidade", "attrs": [Attr.TEC, Attr.VEL]},
+	"drible": {"name": "Drible e arranque", "attrs": [Attr.DRI, Attr.ACE, Attr.TEC]},
 	"cruzamento": {"name": "Cruzamento", "attrs": [Attr.CRU, Attr.PAS]},
 	"bola_aerea": {"name": "Jogo aéreo", "attrs": [Attr.CAB, Attr.FOR]},
 	"marcacao": {"name": "Marcação", "attrs": [Attr.MAR, Attr.POS]},
-	"fisico": {"name": "Físico", "attrs": [Attr.VEL, Attr.FOR, Attr.RES]},
+	"fisico": {"name": "Físico", "attrs": [Attr.VEL, Attr.ACE, Attr.FOR, Attr.RES]},
 	"mental": {"name": "Mental", "attrs": [Attr.DEC, Attr.INT, Attr.DIS]},
-	"goleiro": {"name": "Goleiro", "attrs": [Attr.GOL, Attr.POS]},
+	"goleiro": {"name": "Goleiro", "attrs": [Attr.GOL, Attr.REF, Attr.POS]},
 }
-const PLAYER_FOCUS_ORDER: Array[String] = ["", "finalizacao", "armacao", "drible", "cruzamento", "bola_aerea", "marcacao", "fisico", "mental", "goleiro"]
+const PLAYER_FOCUS_ORDER: Array[String] = ["", "finalizacao", "chute", "armacao", "drible", "cruzamento", "bola_aerea", "marcacao", "desarme", "fisico", "mental", "goleiro"]
 
 
 static func focus_of(club: Club) -> Dictionary:

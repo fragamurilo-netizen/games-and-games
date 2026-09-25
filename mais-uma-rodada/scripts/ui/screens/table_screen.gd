@@ -2,7 +2,7 @@ extends BaseScreen
 ## Tabelas do mundo inteiro: ligas de qualquer país (classificação, artilharia, assistências, rodadas)
 ## e as copas da temporada (grupos, mata-mata e artilharia), além do ranking mundial de clubes.
 
-const LEAGUE_TABS := [["table", "Tabela"], ["scorers", "Artilharia"], ["assists", "Assist."], ["rounds", "Rodadas"], ["teams", "Seleções"]]
+const LEAGUE_TABS := [["table", "Tabela"], ["scorers", "Artilharia"], ["assists", "Assist."], ["numbers", "Números"], ["rounds", "Rodadas"], ["teams", "Seleções"]]
 const CUP_TABS := [["groups", "Grupos"], ["ko", "Mata-mata"], ["scorers", "Artilharia"]]
 
 var _league_id := ""
@@ -212,8 +212,40 @@ func _league_view(c: VBoxContainer, w: GameWorld, league: League) -> void:
 			_rounds(c, w, league)
 		"teams":
 			_teams(c, w, league)
+		"numbers":
+			_numbers(c, w)
 		_:
 			_table(c, w, league)
+
+
+## Líderes da liga nas estatísticas detalhadas (top 5 de cada).
+func _numbers(c: VBoxContainer, w: GameWorld) -> void:
+	var cats := [[Player.S_SHOTS, "Finalizações"], [Player.S_KEY_PASSES, "Passes decisivos"], [Player.S_DRIBBLES, "Dribles certos"],
+		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_SAVES, "Defesas"], [Player.S_XG, "xG"]]
+	for cat in cats:
+		var stat: int = cat[0]
+		var list := CompetitionManager.player_ranking(w, _league_id, stat, 5)
+		if list.is_empty():
+			continue
+		var card := UIKit.card("Card", 4)
+		card.add_child(UIKit.section(String(cat[1])))
+		for i in list.size():
+			var p: Player = list[i]
+			var row := UIKit.hbox(10)
+			var rk := UIKit.label(str(i + 1), "H3")
+			rk.custom_minimum_size.x = 30
+			row.add_child(rk)
+			row.add_child(UIKit.crest(w.club(p.club_id), 28))
+			var nl := UIKit.label(p.display_name(), "")
+			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			if w.is_user_club(p.club_id):
+				nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+			row.add_child(nl)
+			row.add_child(UIKit.label(("%.1f" % p.xg()) if stat == Player.S_XG else str(p.stats[stat]), "Stat"))
+			var pid := p.id
+			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
+		c.add_child(UIKit.card_panel(card))
 
 
 ## Seleção da rodada e seleções do mês da liga do usuário, no campinho.

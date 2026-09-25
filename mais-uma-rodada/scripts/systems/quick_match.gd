@@ -110,16 +110,16 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		var w_wide: float = s["wide"]
 		var side: Array = Physique.side_mods(p, pos)
 		var heavy := Physique.pace_penalty(p)
-		var c_fin: float = at[Attr.FIN] * 0.7 + at[Attr.DEC] * 0.15 + at[Attr.TEC] * 0.15 + float(side[1])
+		var c_fin: float = at[Attr.FIN] * 0.6 + at[Attr.FRI] * 0.15 + at[Attr.DEC] * 0.1 + at[Attr.TEC] * 0.15 + float(side[1])
 		if i == 0:
-			gk = (at[Attr.GOL] * 0.6 + at[Attr.POS] * 0.2 + at[Attr.DEC] * 0.1 + at[Attr.INT] * 0.1 + Physique.gk_reach(p)) * f
+			gk = (at[Attr.GOL] * 0.4 + at[Attr.REF] * 0.22 + at[Attr.POS] * 0.2 + at[Attr.DEC] * 0.1 + at[Attr.FRI] * 0.08 + Physique.gk_reach(p)) * f
 			pl.append([p, pos, f, 1.0, 0.0, 0.0, 0.02, 0.05 * (1.5 - at[Attr.DIS] / 100.0), p.rating_at(pos) * perf, c_fin])
 			continue
-		d += (at[Attr.MAR] * 0.3 + at[Attr.POS] * 0.3 + at[Attr.FOR] * 0.1 + at[Attr.CAB] * 0.1 + (at[Attr.VEL] - heavy) * 0.1 + at[Attr.DEC] * 0.1 + Physique.strength(p) * 0.25) * f * w_def
+		d += (at[Attr.MAR] * 0.18 + at[Attr.DES] * 0.14 + at[Attr.POS] * 0.28 + at[Attr.FOR] * 0.1 + at[Attr.CAB] * 0.1 + (at[Attr.VEL] - heavy) * 0.1 + at[Attr.DEC] * 0.1 + Physique.strength(p) * 0.25) * f * w_def
 		dw += w_def
-		m += (at[Attr.PAS] * 0.3 + at[Attr.VIS] * 0.2 + at[Attr.TEC] * 0.2 + at[Attr.DEC] * 0.15 + at[Attr.RES] * 0.15) * f * w_mid
+		m += (at[Attr.PAS] * 0.3 + at[Attr.VIS] * 0.2 + at[Attr.TEC] * 0.12 + at[Attr.DRI] * 0.08 + at[Attr.DEC] * 0.15 + at[Attr.RES] * 0.15) * f * w_mid
 		mw += w_mid
-		a += (at[Attr.FIN] * 0.3 + at[Attr.TEC] * 0.2 + (at[Attr.VEL] - heavy) * 0.2 + at[Attr.DEC] * 0.15 + at[Attr.POS] * 0.15) * f * w_att
+		a += (at[Attr.FIN] * 0.25 + at[Attr.TEC] * 0.1 + at[Attr.DRI] * 0.12 + (at[Attr.VEL] - heavy) * 0.12 + (at[Attr.ACE] - heavy) * 0.08 + at[Attr.DEC] * 0.1 + at[Attr.POS] * 0.13 + at[Attr.FRI] * 0.1) * f * w_att
 		aw += w_att
 		if w_att >= 0.45:
 			fin += c_fin * f
@@ -472,7 +472,7 @@ static func _substitute(side: Dictionary, lines: Array, used: Dictionary, out: A
 	var f: float = float(out[2]) * clampf(f_ratio, 0.5, 1.3)
 	var ba := best.attrs
 	var oa := op.attrs
-	var c_fin: float = ba[Attr.FIN] * 0.7 + ba[Attr.DEC] * 0.15 + ba[Attr.TEC] * 0.15
+	var c_fin: float = ba[Attr.FIN] * 0.6 + ba[Attr.FRI] * 0.15 + ba[Attr.DEC] * 0.1 + ba[Attr.TEC] * 0.15
 	var shoot := float(out[5]) * (c_fin / maxf(1.0, float(out[9]))) * (f / maxf(0.01, float(out[2])))
 	var assist := float(out[6]) * float(ba[Attr.PAS] + ba[Attr.VIS]) / maxf(1.0, float(oa[Attr.PAS] + oa[Attr.VIS])) * (f / maxf(0.01, float(out[2])))
 	var foul := float(out[7]) * (1.5 - ba[Attr.DIS] / 100.0) / maxf(0.1, 1.5 - oa[Attr.DIS] / 100.0)

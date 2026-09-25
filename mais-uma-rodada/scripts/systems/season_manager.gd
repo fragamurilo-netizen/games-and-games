@@ -435,6 +435,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
+	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
@@ -486,6 +487,10 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 					p.stats[Player.S_MOTM] += 1
 				if conceded == 0 and mins >= 60 and ln[QuickMatch.L_DEFN]:
 					p.stats[Player.S_CLEAN] += 1
+				var ds: Array = detail.get(p.id, [])
+				if ds.size() == MatchStats.N:
+					for k in MatchStats.N:
+						p.stats[Player.S_SHOTS + k] += int(ds[k])
 			else:
 				p.cup_add(f.comp, mins, g, a, r)
 			p.push_rating(r)

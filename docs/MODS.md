@@ -87,7 +87,7 @@ Campos: `club` (chave do clube, vazio = sem clube), `first`, `last`, `known` (no
 `nat` (código do país, ex. `BRA`), `pos` e `sec` (códigos `GOL LD ZAG LE VOL MC MEI MD ME PD PE ATA` ou
 `GK RB CB LB DM CM AM RM LM RW LW ST`), `birth` ou `age`, `height`, `weight`, `foot` (`R`, `L` ou `B`),
 `shirt`, `ovr` (overall alvo: o jogo monta atributos coerentes com a posição), `attrs` (qualquer um de
-`FIN PAS TEC VEL FOR MAR POS VIS CRU CAB RES GOL DIS INT DEC`, de 1 a 99), `pot` (potencial), `traits`
+`FIN PAS TEC VEL FOR MAR POS VIS CRU CAB RES GOL DIS INT DEC DRI DES CHL ACE REF FRI`, de 1 a 99; os que faltarem ficam com os valores gerados para o jogador), `pot` (potencial), `traits`
 (ids de `data/gameplay/personalities.json`), `look` (aparência: `hs`, `hc`, `bd`, `sk`, `ey`, `photo`).
 
 As chaves dos clubes estão em `data/world/clubs/<PAÍS>.json` (campo `key`) e aparecem no editor de

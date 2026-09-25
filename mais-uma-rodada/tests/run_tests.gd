@@ -432,6 +432,32 @@ func _test_season_cycle() -> void:
 			pts += int(league.table[cid]["pts"])
 		if not bool(LeagueFormat.cfg(league).get("halve", false)): # pontos pela metade no split
 			check(pts == expect, "%s: pontos na tabela (%d) não batem com os jogos (%d)" % [id, pts, expect])
+	# Estatísticas detalhadas com médias reais por time e por jogo (Premier League)
+	var eng: League = w.season.leagues["ENG1"]
+	var team_games := 0
+	for r in eng.rounds:
+		team_games += r.size() * 2
+	var tot := {"sh": 0, "so": 0, "tk": 0, "pp": 0, "apps": 0, "xg": 0, "g": 0}
+	for cid in eng.club_ids:
+		for pid in w.club(cid).player_ids:
+			var q: Player = w.player(pid)
+			if q == null:
+				continue
+			tot["sh"] += q.stats[Player.S_SHOTS]
+			tot["so"] += q.stats[Player.S_SHOTS_ON]
+			tot["tk"] += q.stats[Player.S_TACKLES]
+			tot["pp"] += q.stats[Player.S_PASS_PCT]
+			tot["apps"] += q.stats[Player.S_APPS]
+			tot["xg"] += q.stats[Player.S_XG]
+			tot["g"] += q.stats[Player.S_GOALS]
+	var shots_pg := float(tot["sh"]) / team_games
+	var on_pg := float(tot["so"]) / team_games
+	check(shots_pg > 9.5 and shots_pg < 16.0, "finalizações por jogo irreais: %.1f" % shots_pg)
+	check(on_pg > 3.0 and on_pg < 6.0, "chutes no alvo por jogo irreais: %.1f" % on_pg)
+	check(float(tot["tk"]) / team_games > 10.0, "desarmes por jogo irreais")
+	var ppct := float(tot["pp"]) / maxf(1.0, tot["apps"])
+	check(ppct > 70.0 and ppct < 88.0, "passes certos irreais: %.0f%%" % ppct)
+	check(absf(tot["xg"] / 100.0 - float(tot["g"])) / maxf(1.0, float(tot["g"])) < 0.3, "xG longe dos gols (%.0f × %d)" % [tot["xg"] / 100.0, tot["g"]])
 	# Formatos reais: split na Escócia (6 + 6, grupo de cima à frente) e playoffs no México e na MLS
 	var sco: League = w.season.leagues["SCO1"]
 	check(sco.phase_groups.size() == 2 and Array(sco.phase_groups[0]).size() == 6, "Escócia sem o split 6 + 6")
@@ -1111,6 +1137,15 @@ func _test_hearts_manager() -> void:
 	check(ManagerProfile.youth_mult(w) > 1.0 and ManagerProfile.cohesion_mult(w) == 1.0, "estilo formador sem efeito")
 	var w3 := GameWorld.from_dict(w.to_dict())
 	check(ManagerProfile.style(w3) == "formador" and String(ManagerProfile.data(w3)["nat"]) == "ARG", "save perdeu o treinador")
+	# Save antigo: 15 atributos viram 21, estatísticas antigas ganham as novas colunas zeradas
+	var old_d := sp.to_dict()
+	var at: PackedByteArray = old_d["at"]
+	old_d["at"] = at.slice(0, Attr.OLD_COUNT)
+	var st0: PackedInt32Array = old_d["stats"]
+	old_d["stats"] = st0.slice(0, 10)
+	var mig := Player.from_dict(old_d)
+	check(mig.attrs.size() == Attr.COUNT and mig.attrs[Attr.DRI] > 0 and mig.attrs[Attr.ACE] > 0 and mig.stats.size() == Player.S_COUNT, "migração de save antigo falhou")
+	check(absi(mig.overall - sp.overall) <= 6, "overall mudou demais na migração (%d → %d)" % [sp.overall, mig.overall])
 	# Revelados: clubes formadores reconhecidos pela primeira passagem
 	var any_grads := 0
 	for cl: Club in w.clubs_in_league("BRA1"):

@@ -201,7 +201,7 @@ static func scale_to(p: Player, target: int) -> void:
 			return
 		var step := signi(diff) * maxi(1, absi(diff) / 2)
 		for i in Attr.COUNT:
-			if i == Attr.GOL and p.position != Pos.GK:
+			if (i == Attr.GOL or i == Attr.REF) and p.position != Pos.GK:
 				continue
 			p.set_attr(i, clampi(p.attrs[i] + step, 1, 99))
 

@@ -35,7 +35,17 @@ const S_REDS := 6
 const S_RATING_SUM := 7 # soma das notas × 10
 const S_MOTM := 8
 const S_CLEAN := 9
-const S_COUNT := 10
+# Estatísticas detalhadas (MatchStats), da liga
+const S_SHOTS := 10
+const S_SHOTS_ON := 11
+const S_KEY_PASSES := 12
+const S_TACKLES := 13
+const S_INTERCEPTIONS := 14
+const S_DRIBBLES := 15
+const S_SAVES := 16
+const S_PASS_PCT := 17 # soma das % de passes certos por jogo (média = / jogos)
+const S_XG := 18 # xG × 100
+const S_COUNT := 19
 
 # --- Estatísticas de copa (PackedInt32Array por copa; as de liga ficam em `stats`) ---
 const C_APPS := 0
@@ -77,6 +87,8 @@ var consistency: int = 10 # 1..20
 var injury_prone: int = 10 # 1..20
 var traits: Array = [] # ids de personalidade (String)
 var scout_noise: int = 0 # -6..6, ruído estável da avaliação de terceiros
+## Assinatura (PlayerGenerator.SIGNATURES): o traço que faz o jogador ser único ("" = nenhuma).
+var signature: String = ""
 ## Time de coração (HeartClubs): -2 não sorteado, -1 nenhum, >= 0 clube. Escondido até ser revelado.
 var heart: int = -2
 var heart_known: bool = false
@@ -307,6 +319,20 @@ func avg_rating() -> float:
 	return stats[S_RATING_SUM] / 10.0 / stats[S_APPS]
 
 
+## % média de passes certos na temporada (0 sem jogos).
+func pass_pct() -> float:
+	return float(stats[S_PASS_PCT]) / stats[S_APPS] if stats[S_APPS] > 0 else 0.0
+
+
+func xg() -> float:
+	return stats[S_XG] / 100.0
+
+
+## Por 90 minutos (0 sem minutos).
+func per90(i: int) -> float:
+	return float(stats[i]) * 90.0 / stats[S_MINUTES] if stats[S_MINUTES] > 0 else 0.0
+
+
 func reset_season_stats() -> void:
 	stats.fill(0)
 	cup_stats.clear()
@@ -389,57 +415,135 @@ func playstyle() -> String:
 	# Sempre relativo ao próprio overall: o rótulo descreve o *perfil*, não o nível.
 	var a := attrs
 	var o := float(overall)
+	var inverted := (position == Pos.RW and foot == FOOT_LEFT) or (position == Pos.LW and foot == FOOT_RIGHT)
 	match Pos.group(position):
 		Pos.G_GK:
-			if a[Attr.PAS] >= o - 4:
+			if a[Attr.PAS] >= o - 4 and a[Attr.TEC] >= o - 12:
 				return "Goleiro-líbero"
-			if a[Attr.VEL] >= o - 6:
+			if a[Attr.REF] >= o + 4:
 				return "Goleiro de reflexo"
+			if a[Attr.CAB] >= o - 20 and height >= 192:
+				return "Dono da área"
 			if a[Attr.POS] >= o + 3:
 				return "Bem colocado"
 			return "Paredão"
 		Pos.G_DEF:
 			if position == Pos.RB or position == Pos.LB:
-				if a[Attr.CRU] >= a[Attr.MAR] + 6:
-					return "Lateral ofensivo"
-				if a[Attr.VEL] >= o + 8:
+				if a[Attr.PAS] >= o + 2 and a[Attr.VIS] >= o - 6:
+					return "Lateral construtor"
+				if a[Attr.CRU] >= a[Attr.MAR] + 6 and a[Attr.DRI] >= o - 4:
+					return "Ala ofensivo"
+				if a[Attr.ACE] >= o + 8 or a[Attr.VEL] >= o + 8:
 					return "Lateral veloz"
 				return "Lateral marcador"
-			if a[Attr.PAS] >= o - 2:
+			if a[Attr.PAS] >= o - 2 and a[Attr.VIS] >= o - 10:
 				return "Zagueiro construtor"
+			if a[Attr.INT] >= o + 4 and a[Attr.POS] >= o + 2 and a[Attr.VEL] >= o - 6:
+				return "Líbero"
 			if a[Attr.CAB] >= o + 6 and a[Attr.FOR] >= o + 4:
 				return "Xerife"
+			if a[Attr.DES] >= o + 6:
+				return "Desarmador"
 			if a[Attr.VEL] >= o + 2:
 				return "Zagueiro rápido"
 			return "Zagueiro clássico"
 		Pos.G_MID:
 			if position == Pos.DM:
-				return "Cão de guarda" if a[Attr.MAR] >= a[Attr.PAS] + 4 else "Primeiro volante"
+				if a[Attr.PAS] >= o + 3 and a[Attr.VIS] >= o + 2:
+					return "Regista"
+				if a[Attr.DES] >= o + 4 and a[Attr.MAR] >= o + 2:
+					return "Cão de guarda"
+				return "Primeiro volante"
 			if position == Pos.AM:
-				return "Camisa 10" if a[Attr.VIS] >= a[Attr.FIN] + 3 else "Meia-atacante"
+				if a[Attr.VIS] >= a[Attr.FIN] + 3 and a[Attr.PAS] >= o:
+					return "Camisa 10"
+				if a[Attr.DRI] >= o + 5:
+					return "Meia driblador"
+				if a[Attr.CHL] >= o + 5:
+					return "Meia chutador"
+				return "Meia-atacante"
 			if position == Pos.RM or position == Pos.LM:
-				return "Cruzador" if a[Attr.CRU] >= a[Attr.TEC] + 3 else "Meia driblador"
-			if a[Attr.RES] >= o + 6 and a[Attr.MAR] >= o - 6:
+				if a[Attr.CRU] >= a[Attr.TEC] + 3:
+					return "Cruzador"
+				if a[Attr.RES] >= o + 6 and a[Attr.DES] >= o - 8:
+					return "Ala incansável"
+				return "Meia driblador"
+			if a[Attr.RES] >= o + 6 and a[Attr.DES] >= o - 6:
 				return "Box-to-box"
-			if a[Attr.FIN] >= o - 2:
+			if a[Attr.CHL] >= o + 4 or a[Attr.FIN] >= o - 2:
 				return "Meia chegador"
+			if a[Attr.DRI] >= o + 4 and a[Attr.ACE] >= o:
+				return "Condutor"
 			return "Armador" if a[Attr.VIS] >= o + 2 else "Meio-campista"
 		_:
 			if position == Pos.ST:
 				if a[Attr.CAB] >= o + 5 and a[Attr.FOR] >= o + 3:
 					return "Pivô"
-				if a[Attr.VEL] >= o + 8:
+				if a[Attr.PAS] >= o and a[Attr.VIS] >= o - 2 and a[Attr.DRI] >= o - 2:
+					return "Falso 9"
+				if a[Attr.ACE] >= o + 8 or a[Attr.VEL] >= o + 8:
 					return "Velocista"
-				if a[Attr.FIN] >= o + 6:
+				if a[Attr.FIN] >= o + 6 and a[Attr.FRI] >= o:
 					return "Matador"
+				if a[Attr.POS] >= o + 5:
+					return "Homem de área"
 				return "Atacante técnico"
-			if a[Attr.VEL] >= o + 8:
+			if inverted and (a[Attr.FIN] >= o or a[Attr.CHL] >= o + 2):
+				return "Ponta invertido"
+			if a[Attr.ACE] >= o + 8 or a[Attr.VEL] >= o + 8:
 				return "Ponta veloz"
-			if a[Attr.TEC] >= o + 4:
+			if a[Attr.DRI] >= o + 5:
 				return "Driblador"
+			if a[Attr.CRU] >= o + 3 and a[Attr.PAS] >= o - 4:
+				return "Ponta garçom"
 			if a[Attr.FIN] >= o + 2:
 				return "Ponta finalizador"
 			return "Ponta"
+
+
+## Assinaturas (o que faz o jogador ser lembrado): nome para a interface.
+const SIGNATURE_NAMES := {
+	"velocista": "Velocista", "matador": "Matador", "torre": "Torre", "driblador": "Driblador nato", "maestro": "Maestro",
+	"carrapato": "Carrapato", "motorzinho": "Motorzinho", "cruzador": "Cruzador", "paredao": "Paredão", "goleiro_linha": "Goleiro-linha",
+	"cerebral": "Cerebral", "chutador": "Canhão", "gelo": "Sangue frio", "ladrao": "Ladrão de bolas", "arranque": "Arranque",
+	"reflexo": "Reflexo felino", "garcom": "Garçom",
+}
+
+
+## Especialidades: atributos de elite que viram marca registrada (e aparecem no perfil).
+func specialties() -> Array:
+	var out: Array = []
+	var a := attrs
+	var gk := position == Pos.GK
+	if gk:
+		if a[Attr.REF] >= 84:
+			out.append("Reflexos felinos")
+		if a[Attr.REF] >= 78 and a[Attr.FRI] >= 78:
+			out.append("Pegador de pênalti")
+		if a[Attr.PAS] >= 72:
+			out.append("Saída com os pés")
+		return out
+	if a[Attr.FIN] >= 84 and a[Attr.FRI] >= 80:
+		out.append("Finalizador frio")
+	if a[Attr.CHL] >= 83:
+		out.append("Chute de fora")
+	if a[Attr.DRI] >= 86:
+		out.append("Drible desconcertante")
+	if a[Attr.ACE] >= 88:
+		out.append("Explosão")
+	if a[Attr.PAS] >= 84 and a[Attr.VIS] >= 84:
+		out.append("Passe decisivo")
+	if a[Attr.CRU] >= 84:
+		out.append("Cruzamento na medida")
+	if a[Attr.CAB] >= 84:
+		out.append("Cabeceio")
+	if a[Attr.DES] >= 84 and a[Attr.MAR] >= 80:
+		out.append("Muralha")
+	if a[Attr.RES] >= 88:
+		out.append("Pulmão")
+	if a[Attr.FRI] >= 86 and a[Attr.DEC] >= 80:
+		out.append("Decide jogo grande")
+	return out.slice(0, 3)
 
 
 # ---------------------------------------------------------------------------
@@ -452,7 +556,7 @@ func to_dict() -> Dictionary:
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
-		"tr": traits, "sn": scout_noise, "hc": heart, "hk": heart_known,
+		"tr": traits, "sn": scout_noise, "hc": heart, "hk": heart_known, "sg": signature,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
@@ -486,6 +590,8 @@ static func from_dict(d: Dictionary) -> Player:
 	var at: Variant = d.get("at", null)
 	if at is PackedByteArray and at.size() == Attr.COUNT:
 		p.attrs = at
+	elif at is PackedByteArray and at.size() == Attr.OLD_COUNT:
+		p.attrs = Attr.migrate(at, p.id, p.position == Pos.GK) # save de antes dos 21 atributos
 	p.potential = int(d.get("pot", 50))
 	p.dev_curve = int(d.get("dc", CURVE_NORMAL))
 	p.consistency = int(d.get("cons", 10))
@@ -493,6 +599,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.traits = Array(d.get("tr", []))
 	p.scout_noise = int(d.get("sn", 0))
 	p.heart = int(d.get("hc", -2))
+	p.signature = String(d.get("sg", ""))
 	p.heart_known = bool(d.get("hk", false))
 	p.club_id = int(d.get("club", -1))
 	p.wage = int(d.get("wage", 0))
@@ -519,6 +626,9 @@ static func from_dict(d: Dictionary) -> Player:
 	var st: Variant = d.get("stats", null)
 	if st is PackedInt32Array and st.size() == S_COUNT:
 		p.stats = st
+	elif st is PackedInt32Array and st.size() < S_COUNT:
+		p.stats = st.duplicate()
+		p.stats.resize(S_COUNT) # save de antes das estatísticas detalhadas: o resto começa em zero
 	var cs: Dictionary = d.get("cs", {})
 	for k in cs:
 		if cs[k] is PackedInt32Array and cs[k].size() == C_COUNT:

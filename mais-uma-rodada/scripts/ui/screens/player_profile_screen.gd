@@ -94,6 +94,10 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	card.add_child(row)
 	var tags := UIKit.flow(8)
 	tags.add_child(UIKit.pill(p.playstyle().to_upper(), UIColors.BLUE))
+	if p.signature != "":
+		tags.add_child(UIKit.pill("★ " + String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD))
+	for sp in p.specialties():
+		tags.add_child(UIKit.pill(String(sp).to_upper(), UIColors.GREEN))
 	for t in p.traits:
 		tags.add_child(UIKit.pill(String(DatabaseManager.trait_data(t).get("name", t)).to_upper(), UIColors.ACCENT))
 	card.add_child(tags)
@@ -333,6 +337,31 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	var d := p.season_delta()
 	row_b.add_child(UIKit.stat(("+%d" % d) if d > 0 else str(d), "overall no ano", UIColors.GREEN if d > 0 else (UIColors.RED if d < 0 else UIColors.TEXT)))
 	card.add_child(row_b)
+	if p.stats[Player.S_APPS] > 0:
+		card.add_child(UIKit.label("Números detalhados (liga)", "Caps"))
+		var gk := p.position == Pos.GK
+		var row_c := UIKit.hbox(4)
+		if gk:
+			row_c.add_child(UIKit.stat(str(p.stats[Player.S_SAVES]), "defesas"))
+			row_c.add_child(UIKit.stat("%.1f" % p.per90(Player.S_SAVES), "defesas /90"))
+			row_c.add_child(UIKit.stat("%d%%" % int(round(p.pass_pct())), "passes certos"))
+		else:
+			row_c.add_child(UIKit.stat("%d (%d)" % [p.stats[Player.S_SHOTS], p.stats[Player.S_SHOTS_ON]], "chutes (alvo)"))
+			row_c.add_child(UIKit.stat("%.1f" % p.xg(), "xG"))
+			row_c.add_child(UIKit.stat(str(p.stats[Player.S_KEY_PASSES]), "passes decisivos"))
+			row_c.add_child(UIKit.stat("%d%%" % int(round(p.pass_pct())), "passes certos"))
+		card.add_child(row_c)
+		if not gk:
+			var row_d := UIKit.hbox(4)
+			row_d.add_child(UIKit.stat(str(p.stats[Player.S_DRIBBLES]), "dribles"))
+			row_d.add_child(UIKit.stat(str(p.stats[Player.S_TACKLES]), "desarmes"))
+			row_d.add_child(UIKit.stat(str(p.stats[Player.S_INTERCEPTIONS]), "interceptações"))
+			var conv := 100.0 * p.stats[Player.S_GOALS] / p.stats[Player.S_SHOTS] if p.stats[Player.S_SHOTS] > 0 else 0.0
+			row_d.add_child(UIKit.stat("%d%%" % int(round(conv)), "aproveitamento"))
+			card.add_child(row_d)
+			var diff := p.stats[Player.S_GOALS] - p.xg()
+			if p.stats[Player.S_SHOTS] >= 15 and absf(diff) >= 2.0:
+				card.add_child(UIKit.colored(("Marcando %.1f gols acima do esperado: fase iluminada." if diff > 0 else "%.1f gols abaixo do esperado: está desperdiçando chances.") % absf(diff), UIColors.GREEN if diff > 0 else UIColors.ORANGE, "Small", true))
 	var tot := p.season_totals()
 	if int(tot[0]) > p.stats[Player.S_APPS]:
 		card.add_child(UIKit.label("Com as copas: %d jogos, %d gols e %d assistências." % [int(tot[0]), int(tot[1]), int(tot[2])], "Small", true))

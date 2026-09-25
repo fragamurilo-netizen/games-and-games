@@ -48,11 +48,18 @@ static func logo(comp: String) -> Dictionary:
 	if ini == "":
 		ini = name.substr(0, 2).to_upper()
 	var h := absi(hash(comp))
-	var shapes := ["round", "shield", "round", "heater"]
 	var cup := not DatabaseManager.has_league(comp)
-	return {"shape": shapes[h % shapes.size()], "field": "plain", "c1": cols[0].to_html(false), "c2": cols[1].to_html(false),
-		"symbol": "ball" if cup and h % 3 == 0 else ("star" if cup else "letter"), "initials": ini, "sc": cols[1].to_html(false),
-		"border": "gold" if cup else "thin"}
+	var nat := String(DatabaseManager.league_cfg(comp).get("nation", "")) if not cup else String(DatabaseManager.cup_cfg(comp).get("nation", ""))
+	var logo := {"field": "plain", "c1": cols[0].to_html(false), "c2": cols[1].to_html(false), "sc": cols[1].to_html(false), "initials": ini}
+	if cup:
+		# Copa: escudo com a bola ou a coroa, louros e faixa com o nome
+		logo.merge({"shape": ["shield", "heater", "round"][h % 3], "symbol": ["ball", "crown", "star"][h % 3], "border": "gold",
+			"laurel": h % 2 == 0, "ribbon": name.to_upper()})
+	else:
+		# Liga: anel com o nome e o país, iniciais no centro
+		logo.merge({"shape": "ring", "symbol": "letter", "border": "thin", "text": name.to_upper(),
+			"text2": DatabaseManager.nation_name(nat).to_upper() if nat != "" else ""})
+	return logo
 
 
 ## Cores [principal, destaque] de uma liga ou copa (já com as personalizações do editor).

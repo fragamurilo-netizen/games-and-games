@@ -20,7 +20,8 @@ const CURVES: Array = [
 const TALENT_PER_CLUB := 16 # titulares e primeiros reservas de cada clube
 
 ## Pesos para escolher qual atributo cai com a idade.
-const DECLINE_W: Array = [0.07, 0.05, 0.07, 0.24, 0.1, 0.07, 0.05, 0.02, 0.06, 0.05, 0.2, 0.02, 0.0, 0.0, 0.03]
+const DECLINE_W: Array = [0.07, 0.05, 0.07, 0.24, 0.1, 0.07, 0.05, 0.02, 0.06, 0.05, 0.2, 0.02, 0.0, 0.0, 0.03,
+	0.08, 0.06, 0.04, 0.26, 0.05, 0.0] # DRI DES CHL ACE REF FRI: a aceleração é a primeira a ir embora
 
 
 ## Overall médio dos melhores jogadores do mundo (TALENT_PER_CLUB por clube).

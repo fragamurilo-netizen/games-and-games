@@ -395,7 +395,7 @@ func _start_shootout() -> void:
 
 
 func _pen_skill(mp: MatchPlayer) -> float:
-	return mp.attr(Attr.FIN) * 0.6 + mp.attr(Attr.DEC) * 0.3 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0
+	return mp.attr(Attr.FIN) * 0.45 + mp.attr(Attr.FRI) * 0.35 + mp.attr(Attr.DEC) * 0.1 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0
 
 
 func _shootout_kick() -> void:
@@ -890,7 +890,7 @@ func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: Match
 		tags.append("hattrick")
 	if score[0] + score[1] == 1:
 		tags.append("first")
-	if not own_goal and (ctype == CH_LONG or ctype == CH_FREEKICK or (ctype == CH_DRIBBLE and shooter.attr(Attr.TEC) >= 70)) and rng.randf() < 0.6:
+	if not own_goal and (ctype == CH_LONG or ctype == CH_FREEKICK or (ctype == CH_DRIBBLE and shooter.attr(Attr.DRI) >= 70)) and rng.randf() < 0.6:
 		tags.append("golaco")
 	if ctype == CH_ERROR:
 		tags.append("error")
@@ -1031,9 +1031,9 @@ func _best_on_pitch(t: MatchTeam, kind: String) -> MatchPlayer:
 		var v := 0.0
 		match kind:
 			"pen":
-				v = mp.attr(Attr.FIN) * 0.6 + mp.attr(Attr.DEC) * 0.3 + mp.attr(Attr.INT) * 0.1
+				v = mp.attr(Attr.FIN) * 0.45 + mp.attr(Attr.FRI) * 0.35 + mp.attr(Attr.DEC) * 0.1 + mp.attr(Attr.INT) * 0.1
 			"fk":
-				v = mp.attr(Attr.TEC) * 0.5 + mp.attr(Attr.FIN) * 0.3 + mp.attr(Attr.PAS) * 0.2
+				v = mp.attr(Attr.CHL) * 0.45 + mp.attr(Attr.TEC) * 0.35 + mp.attr(Attr.PAS) * 0.2
 			"corner":
 				v = mp.attr(Attr.CRU) * 0.7 + mp.attr(Attr.TEC) * 0.3
 		if v > best_v:
@@ -1429,7 +1429,12 @@ func to_result() -> Dictionary:
 				mp.injury_weeks if mp.injured else 0, mp.rating_pts, mp.minutes_played(minute), mp.final_rating, mp.cond,
 				mp.pos == Pos.GK or mp.w_def >= 0.8])
 	var motm := man_of_the_match()
-	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1,
+	var pstats := {}
+	for t: MatchTeam in teams:
+		for mp: MatchPlayer in t.all:
+			if mp.used:
+				pstats[mp.p.id] = [mp.shots, mp.shots_on, mp.saves]
+	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats,
 		"et": half >= 3, "pens": [pen_score[0], pen_score[1]] if pen_taken[0] + pen_taken[1] > 0 else [],
 		"derby": derby, "importance": importance, "yc": [teams[0].yellows, teams[1].yellows], "rc": [teams[0].reds, teams[1].reds],
 		"lines": lines, "poss": possession_pct(0)}

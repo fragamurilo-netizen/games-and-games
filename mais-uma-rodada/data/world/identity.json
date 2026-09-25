@@ -2,41 +2,50 @@
 	"_doc": "Identidade visual das competições, inspirada nas reais (sem copiar marcas). logos: desenho no formato do CrestView (mesmas chaves dos escudos). Competições sem logo aqui ganham um selo gerado com as cores oficiais. scoreboard: [fundo, fundo 2, destaque] do placar da TV; sem entrada, o placar usa as cores da liga.",
 	"logos": {
 		"ENG1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#3D195B",
-			"c2": "#00FF85",
+			"c2": "#FFFFFF",
 			"symbol": "lion_head",
 			"sc": "#FFFFFF",
 			"crown": 1,
-			"border": "thin"
+			"border": "thin",
+			"text": "PREMIER LEAGUE",
+			"text2": "ENGLAND",
+			"c3": "#00FF85"
 		},
 		"ENG2": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#0B1C3F",
 			"c2": "#D4AF37",
 			"symbol": "lion",
 			"sc": "#D4AF37",
-			"border": "thin"
+			"border": "thin",
+			"text": "CHAMPIONSHIP",
+			"text2": "EFL"
 		},
 		"ESP1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#FF4B44",
 			"c2": "#FFFFFF",
 			"symbol": "ball",
 			"sc": "#FFFFFF",
-			"border": "thick"
+			"border": "thin",
+			"text": "LALIGA",
+			"text2": "ESPAÑA"
 		},
 		"ESP2": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#1B1B1B",
 			"c2": "#00D0FF",
 			"symbol": "ball",
 			"sc": "#00D0FF",
-			"border": "thin"
+			"border": "thin",
+			"text": "LALIGA 2",
+			"text2": "ESPAÑA"
 		},
 		"GER1": {
 			"shape": "square",
@@ -64,7 +73,8 @@
 			"symbol": "letter",
 			"initials": "A",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "SERIE A"
 		},
 		"ITA2": {
 			"shape": "shield",
@@ -74,27 +84,32 @@
 			"symbol": "letter",
 			"initials": "B",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "SERIE B"
 		},
 		"FRA1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#091C3E",
 			"c2": "#DAE025",
 			"symbol": "letter",
 			"initials": "L1",
 			"sc": "#DAE025",
-			"border": "thin"
+			"border": "thin",
+			"text": "LIGUE 1",
+			"text2": "FRANCE"
 		},
 		"FRA2": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#0E3B7D",
 			"c2": "#F28C28",
 			"symbol": "letter",
 			"initials": "L2",
 			"sc": "#F28C28",
-			"border": "thin"
+			"border": "thin",
+			"text": "LIGUE 2",
+			"text2": "FRANCE"
 		},
 		"POR1": {
 			"shape": "shield",
@@ -103,7 +118,8 @@
 			"c2": "#00C1D5",
 			"symbol": "caravel",
 			"sc": "#00C1D5",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "LIGA PORTUGAL"
 		},
 		"POR2": {
 			"shape": "shield",
@@ -112,25 +128,30 @@
 			"c2": "#FFCC00",
 			"symbol": "caravel",
 			"sc": "#FFCC00",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "LIGA 2"
 		},
 		"NED1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#F36C21",
 			"c2": "#FFFFFF",
 			"symbol": "ball",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"text": "EREDIVISIE",
+			"text2": "NEDERLAND"
 		},
 		"TUR1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#E30A17",
 			"c2": "#FFFFFF",
 			"symbol": "crescent",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"text": "SÜPER LIG",
+			"text2": "TÜRKİYE"
 		},
 		"BEL1": {
 			"shape": "shield",
@@ -229,7 +250,8 @@
 			"symbol": "southern_cross",
 			"sc": "#FFCC29",
 			"border": "gold",
-			"stars": 5
+			"stars": 5,
+			"ribbon": "SÉRIE A"
 		},
 		"BRA2": {
 			"shape": "shield",
@@ -238,7 +260,8 @@
 			"c2": "#FFCC29",
 			"symbol": "southern_cross",
 			"sc": "#FFCC29",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "SÉRIE B"
 		},
 		"BRA3": {
 			"shape": "shield",
@@ -247,7 +270,8 @@
 			"c2": "#FFFFFF",
 			"symbol": "southern_cross",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "SÉRIE C"
 		},
 		"BRA4": {
 			"shape": "shield",
@@ -256,17 +280,20 @@
 			"c2": "#FFFFFF",
 			"symbol": "southern_cross",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "SÉRIE D"
 		},
 		"ARG1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "hoops:3",
 			"c1": "#75AADB",
 			"fc": "#FFFFFF",
 			"c2": "#FFFFFF",
 			"symbol": "sunrise",
 			"sc": "#F6B40E",
-			"border": "thin"
+			"border": "thin",
+			"text": "LIGA PROFESIONAL",
+			"text2": "ARGENTINA"
 		},
 		"ARG2": {
 			"shape": "round",
@@ -365,7 +392,8 @@
 			"c2": "#C5A572",
 			"symbol": "eagle",
 			"sc": "#C5A572",
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "LIGA MX"
 		},
 		"USA1": {
 			"shape": "shield",
@@ -375,7 +403,8 @@
 			"c2": "#FFFFFF",
 			"symbol": "stars:3",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "MLS"
 		},
 		"EGY1": {
 			"shape": "shield",
@@ -442,16 +471,19 @@
 			"c2": "#FFFFFF",
 			"symbol": "swords",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "PRO LEAGUE"
 		},
 		"JPN1": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#FFFFFF",
 			"c2": "#E60012",
 			"symbol": "sunrise",
 			"sc": "#E60012",
-			"border": "thick"
+			"border": "thick",
+			"text": "J1 LEAGUE",
+			"text2": "JAPAN"
 		},
 		"KOR1": {
 			"shape": "round",
@@ -499,7 +531,7 @@
 			"border": "thin"
 		},
 		"UCL": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#0B1F4B",
 			"c2": "#C9D6EA",
@@ -507,25 +539,31 @@
 			"sc": "#FFFFFF",
 			"laurel": 0,
 			"stars": 8,
-			"border": "thin"
+			"border": "thin",
+			"text": "LIGA DOS CAMPEÕES",
+			"text2": "EUROPA"
 		},
 		"UEL": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#1B1B1B",
 			"c2": "#F26B0F",
 			"symbol": "ball",
 			"sc": "#F26B0F",
-			"border": "thick"
+			"border": "thin",
+			"text": "LIGA EUROPA",
+			"text2": "EUROPA"
 		},
 		"UECL": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#00A650",
 			"c2": "#0A2E1F",
 			"symbol": "ball",
 			"sc": "#FFFFFF",
-			"border": "thick"
+			"border": "thin",
+			"text": "LIGA CONFERÊNCIA",
+			"text2": "EUROPA"
 		},
 		"LIB": {
 			"shape": "shield",
@@ -535,16 +573,20 @@
 			"symbol": "laurel",
 			"sc": "#F2C94C",
 			"border": "gold",
-			"stars": 3
+			"stars": 3,
+			"ribbon": "LIBERTADORES",
+			"laurel": true
 		},
 		"SUD": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#003DA5",
 			"c2": "#F5C400",
 			"symbol": "ball",
 			"sc": "#F5C400",
-			"border": "thin"
+			"border": "thin",
+			"text": "SUL-AMERICANA",
+			"text2": "CONMEBOL"
 		},
 		"CCC": {
 			"shape": "shield",
@@ -581,7 +623,8 @@
 			"symbol": "ball",
 			"sc": "#E2B84A",
 			"laurel": 1,
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "MUNDIAL"
 		},
 		"SPE": {
 			"shape": "shield",
@@ -592,16 +635,19 @@
 			"chief_text": "",
 			"symbol": "star",
 			"sc": "#E30613",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "PAULISTÃO"
 		},
 		"RJE": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#0055A4",
 			"c2": "#FFD100",
 			"symbol": "sunrise",
 			"sc": "#FFD100",
-			"border": "thin"
+			"border": "thin",
+			"text": "CARIOCA",
+			"text2": "RIO DE JANEIRO"
 		},
 		"MGE": {
 			"shape": "shield",
@@ -610,7 +656,8 @@
 			"c2": "#E30613",
 			"symbol": "mountain",
 			"sc": "#E30613",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "MINEIRO"
 		},
 		"RSE": {
 			"shape": "shield",
@@ -621,7 +668,8 @@
 			"c2": "#E30613",
 			"symbol": "star",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "GAUCHÃO"
 		},
 		"PRE": {
 			"shape": "shield",
@@ -631,7 +679,8 @@
 			"c2": "#FFFFFF",
 			"symbol": "southern_cross",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "PARANAENSE"
 		},
 		"SCE": {
 			"shape": "shield",
@@ -641,7 +690,8 @@
 			"c2": "#FFFFFF",
 			"symbol": "star",
 			"sc": "#00843D",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "CATARINENSE"
 		},
 		"CEE": {
 			"shape": "shield",
@@ -651,7 +701,8 @@
 			"c2": "#FFD100",
 			"symbol": "star",
 			"sc": "#1B3A8C",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "CEARENSE"
 		},
 		"GOE": {
 			"shape": "shield",
@@ -661,25 +712,30 @@
 			"c2": "#FFD100",
 			"symbol": "southern_cross",
 			"sc": "#1B3A8C",
-			"border": "thin"
+			"border": "thin",
+			"ribbon": "GOIANÃO"
 		},
 		"NOR": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#F07F13",
 			"c2": "#1B3A8C",
 			"symbol": "sunrise",
 			"sc": "#FFFFFF",
-			"border": "thin"
+			"border": "thin",
+			"text": "COPA DO NORDESTE",
+			"text2": "NORDESTÃO"
 		},
 		"VER": {
-			"shape": "round",
+			"shape": "ring",
 			"field": "plain",
 			"c1": "#2E7D32",
 			"c2": "#FFD100",
 			"symbol": "tree",
 			"sc": "#FFD100",
-			"border": "thin"
+			"border": "thin",
+			"text": "COPA VERDE",
+			"text2": "NORTE"
 		},
 		"FAC": {
 			"shape": "round",
@@ -688,7 +744,9 @@
 			"c2": "#E2B84A",
 			"symbol": "crown",
 			"sc": "#E2B84A",
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "FA CUP",
+			"laurel": true
 		},
 		"CDR": {
 			"shape": "round",
@@ -697,7 +755,8 @@
 			"c2": "#E2B84A",
 			"symbol": "crown",
 			"sc": "#E2B84A",
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "COPA DEL REY"
 		},
 		"CIT": {
 			"shape": "shield",
@@ -708,7 +767,8 @@
 			"c2": "#E2B84A",
 			"symbol": "star",
 			"sc": "#E2B84A",
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "COPPA ITALIA"
 		},
 		"DFB": {
 			"shape": "round",
@@ -717,7 +777,8 @@
 			"c2": "#E2B84A",
 			"symbol": "eagle",
 			"sc": "#E2B84A",
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "POKAL"
 		},
 		"CDF": {
 			"shape": "round",
@@ -746,7 +807,9 @@
 			"c2": "#E2B84A",
 			"symbol": "star",
 			"sc": "#E2B84A",
-			"border": "gold"
+			"border": "gold",
+			"ribbon": "COPA DO BRASIL",
+			"laurel": true
 		},
 		"CAR": {
 			"shape": "round",

@@ -68,19 +68,19 @@ var _b_tv: float = 100.0
 
 func prepare() -> void:
 	var a := p.attrs
-	c_def = a[Attr.MAR] * 0.3 + a[Attr.POS] * 0.3 + a[Attr.FOR] * 0.1 + a[Attr.CAB] * 0.1 + a[Attr.VEL] * 0.1 + a[Attr.DEC] * 0.1
-	c_mid = a[Attr.PAS] * 0.3 + a[Attr.VIS] * 0.2 + a[Attr.TEC] * 0.2 + a[Attr.DEC] * 0.15 + a[Attr.RES] * 0.15
-	c_att = a[Attr.FIN] * 0.3 + a[Attr.TEC] * 0.2 + a[Attr.VEL] * 0.2 + a[Attr.DEC] * 0.15 + a[Attr.POS] * 0.15
+	c_def = a[Attr.MAR] * 0.18 + a[Attr.DES] * 0.14 + a[Attr.POS] * 0.28 + a[Attr.FOR] * 0.1 + a[Attr.CAB] * 0.1 + a[Attr.VEL] * 0.1 + a[Attr.DEC] * 0.1
+	c_mid = a[Attr.PAS] * 0.3 + a[Attr.VIS] * 0.2 + a[Attr.TEC] * 0.12 + a[Attr.DRI] * 0.08 + a[Attr.DEC] * 0.15 + a[Attr.RES] * 0.15
+	c_att = a[Attr.FIN] * 0.25 + a[Attr.TEC] * 0.1 + a[Attr.DRI] * 0.12 + a[Attr.VEL] * 0.12 + a[Attr.ACE] * 0.08 + a[Attr.DEC] * 0.1 + a[Attr.POS] * 0.13 + a[Attr.FRI] * 0.1
 	# Corpo: altura e peso na bola aérea e no choque; peso demais tira velocidade e fôlego
 	var aer := Physique.aerial(p)
 	var strg := Physique.strength(p)
 	var heavy := Physique.pace_penalty(p)
 	c_def += strg * 0.25
-	c_gk = a[Attr.GOL] * 0.6 + a[Attr.POS] * 0.2 + a[Attr.DEC] * 0.1 + a[Attr.INT] * 0.1 + Physique.gk_reach(p)
+	c_gk = a[Attr.GOL] * 0.4 + a[Attr.REF] * 0.22 + a[Attr.POS] * 0.2 + a[Attr.DEC] * 0.1 + a[Attr.FRI] * 0.08 + Physique.gk_reach(p)
 	c_aer = a[Attr.CAB] * 0.7 + a[Attr.FOR] * 0.3 + aer
-	c_fin = a[Attr.FIN] * 0.7 + a[Attr.DEC] * 0.15 + a[Attr.TEC] * 0.15
+	c_fin = a[Attr.FIN] * 0.6 + a[Attr.FRI] * 0.15 + a[Attr.DEC] * 0.1 + a[Attr.TEC] * 0.15
 	c_head = a[Attr.CAB] * 0.7 + a[Attr.POS] * 0.2 + a[Attr.FOR] * 0.1 + aer * 0.6
-	c_long = a[Attr.FIN] * 0.5 + a[Attr.TEC] * 0.5
+	c_long = a[Attr.CHL] * 0.6 + a[Attr.FIN] * 0.15 + a[Attr.TEC] * 0.25
 	a_vel = a[Attr.VEL] - heavy
 	a_tec = a[Attr.TEC]
 	a_dis = a[Attr.DIS]
@@ -89,7 +89,7 @@ func prepare() -> void:
 	a_cru = a[Attr.CRU]
 	a_int = a[Attr.INT]
 	a_pas_vis = a[Attr.PAS] + a[Attr.VIS]
-	a_tec_vel = a[Attr.TEC] + a_vel
+	a_tec_vel = a[Attr.TEC] * 0.4 + a[Attr.DRI] * 0.6 + a_vel * 0.5 + (a[Attr.ACE] - heavy) * 0.5
 	a_vel_fin = a_vel + a[Attr.FIN]
 	_b_cru = a_cru
 	_b_fin = c_fin
