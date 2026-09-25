@@ -115,14 +115,17 @@
 		"wage_growth": 1.152,
 		"revenue_per_wage": 330,
 		"tv_share": 0.35,
-		"prize_first": 0.3,
-		"prize_last": 0.04,
+		"prize_first": 0.16,
+		"prize_last": 0.02,
 		"promotion_bonus": 0.25,
-		"maintenance_share": 0.03,
+		"maintenance_share": 0.15,
 		"maintenance_per_facility": 0.0005,
 		"seat_upkeep": 0.6,
 		"upgrade_share": 0.012,
-		"debt_interest": 0.08
+		"debt_interest": 0.12,
+		"loan_interest": 0.05,
+		"loan_years": 10,
+		"debt_limit": 2.0
 	},
 	"free_agents_per_club": 0.5
 }

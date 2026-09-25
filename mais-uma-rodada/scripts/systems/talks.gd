@@ -556,7 +556,7 @@ static func _board_base(world: GameWorld) -> float:
 	var rev := float(FinanceManager.expected_revenue(club))
 	if club.balance > rev * 0.2:
 		s += 0.15
-	elif club.balance < 0:
+	elif FinanceManager.in_trouble(club):
 		s -= 0.4
 	return s
 

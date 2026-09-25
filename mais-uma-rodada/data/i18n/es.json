@@ -2312,5 +2312,12 @@
 	"Prestígio": "Prestigio",
 	"Peso do nome construído ao longo das décadas.": "Peso del nombre construido a lo largo de las décadas.",
 	"Ambição": "Ambición",
-	"O tamanho do sonho da diretoria.": "El tamaño del sueño de la directiva."
+	"O tamanho do sonho da diretoria.": "El tamaño del sueño de la directiva.",
+	"Empréstimo bancário": "Préstamo bancario",
+	"Amortização da dívida": "Amortización de la deuda",
+	"Dívida de longo prazo": "Deuda a largo plazo",
+	"Parcela da dívida (ano)": "Cuota de la deuda (año)",
+	"Com o caixa no vermelho, a diretoria não libera contratações e paga juros de cheque especial. No fim do ano o rombo vira empréstimo.": "Con la caja en rojo, la directiva no autoriza fichajes y paga intereses de descubierto. A fin de año el agujero se convierte en préstamo.",
+	"A dívida passa de um ano de receita: os bancos exigem contenção na folha e metade da verba de contratações.": "La deuda supera un año de ingresos: los bancos exigen contención salarial y la mitad del presupuesto de fichajes.",
+	"Custos operacionais": "Costes operativos"
 }

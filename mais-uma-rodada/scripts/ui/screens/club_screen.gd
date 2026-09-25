@@ -238,13 +238,20 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(UIKit.kv("Folha consome da receita", "%d%%" % int(round(share * 100.0)), UIColors.RED if share > 0.85 else (UIColors.ORANGE if share > 0.7 else UIColors.TEXT)))
 	var proj := FinanceManager.projected_balance(w, club)
 	card.add_child(UIKit.kv("Caixa previsto no fim da temporada", Fmt.money(proj), UIColors.RED if proj < 0 else UIColors.TEXT))
+	if club.debt > 0:
+		var dr := FinanceManager.debt_ratio(club, float(fin["expected_revenue"]))
+		card.add_child(UIKit.kv("Dívida de longo prazo", "%s · %s da receita" % [Fmt.money(club.debt), "%d%%" % int(round(dr * 100.0))],
+			UIColors.RED if dr > 1.0 else (UIColors.ORANGE if dr > 0.5 else UIColors.TEXT)))
+		card.add_child(UIKit.kv("Parcela da dívida (ano)", Fmt.money(FinanceManager.debt_service(club))))
 	var deal := FinanceManager.tv_deal(w, club.league_id)
 	card.add_child(UIKit.kv("Cota de TV (ano)", "%s%s" % [Fmt.money(club.income_tv), "" if absf(deal - 1.0) < 0.01 else " · contrato %s%d%%" % ["+" if deal > 1.0 else "−", int(round(absf(deal - 1.0) * 100.0))]]))
 	var own := WorldEvents.owner_of(w, club.id)
 	if not own.is_empty():
 		card.add_child(UIKit.kv("Dono", "%s (desde %d)" % [own.get("who", ""), int(own.get("y", 0))]))
 	if club.balance < 0:
-		card.add_child(UIKit.colored("Com o caixa no vermelho, a diretoria não libera contratações e paga juros sobre a dívida.", UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored("Com o caixa no vermelho, a diretoria não libera contratações e paga juros de cheque especial. No fim do ano o rombo vira empréstimo.", UIColors.ORANGE, "Small", true))
+	elif FinanceManager.debt_ratio(club, float(fin["expected_revenue"])) > 1.0:
+		card.add_child(UIKit.colored("A dívida passa de um ano de receita: os bancos exigem contenção na folha e metade da verba de contratações.", UIColors.ORANGE, "Small", true))
 	card.add_child(UIKit.separator())
 	card.add_child(UIKit.label("Temporada %d" % w.year, "Caps"))
 	var any := false

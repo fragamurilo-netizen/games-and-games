@@ -492,7 +492,8 @@ static func _season_club(world: GameWorld, c: Club, moves: Dictionary, sales: Ar
 	var cc := int(d.get("cc", 0))
 	d["cc"] = 0
 	var revenue := float(FinanceManager.expected_revenue(c))
-	var debt := FinanceManager.debt_ratio(c, revenue)
+	# Dívida "normal" (até meio ano de receita, como quase todo clube) não pesa no DNA.
+	var debt := maxf(0.0, FinanceManager.debt_ratio(c, revenue) - 0.5)
 	var h: Array = d.get("h", [])
 	h.append({"y": world.year, "lv": snappedf(lv, 0.01), "rep": snappedf(c.reputation, 0.1), "ys": int(sales[0]), "yf": int(sales[1]),
 		"kids": kids, "t": new_titles, "cc": cc, "neg": debt > 0.0})

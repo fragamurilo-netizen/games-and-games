@@ -28,7 +28,7 @@ static func weekly(world: GameWorld) -> void:
 	var rng := world.rng
 	if rng.randf() < P_TAKEOVER:
 		var c: Club = RngUtil.pick(rng, world.clubs)
-		if _can_be_bought(world, c) and (c.balance < 0 or rng.randf() < 0.5):
+		if _can_be_bought(world, c) and (FinanceManager.in_trouble(c) or rng.randf() < 0.5):
 			takeover(world, c, RngUtil.pick(rng, INVESTORS))
 	if rng.randf() < P_EXIT:
 		_investor_exit(world)
@@ -58,6 +58,9 @@ static func takeover(world: GameWorld, c: Club, who: String) -> int:
 	var revenue := float(FinanceManager.expected_revenue(c))
 	var money := int(revenue * rng.randf_range(0.8, 2.0)) + maxi(0, -c.balance)
 	c.add_ledger("aporte", money)
+	# O comprador assume a dívida de longo prazo (quita com os bancos fora do caixa do clube).
+	var paid_debt := c.debt
+	c.debt = 0
 	var owners: Dictionary = world.stats.get("owners", {})
 	var prev: Dictionary = owners.get(str(c.id), {})
 	owners[str(c.id)] = {"y": world.year, "who": who, "arch": String(prev.get("arch", c.archetype))}
@@ -82,8 +85,9 @@ static func takeover(world: GameWorld, c: Club, who: String) -> int:
 	ClubDNA.on_takeover(world, c, who)
 	var saf := c.nation == "BRA"
 	var title := ("%s vira SAF" if saf else "%s tem novo dono") % c.short_name
-	var body := "%s comprou o %s%s e promete %s em investimentos. A dívida foi quitada e a torcida sonha alto." % [
-		who, c.name, " na transformação em SAF" if saf else "", Fmt.money(money)]
+	var body := "%s comprou o %s%s e promete %s em investimentos. %s e a torcida sonha alto." % [
+		who, c.name, " na transformação em SAF" if saf else "", Fmt.money(money),
+		("A dívida de %s foi quitada" % Fmt.money(paid_debt)) if paid_debt > 0 else "O clube não devia nada"]
 	if world.is_user_club(c.id):
 		body += " O recado para o treinador: quer títulos logo."
 		NewsManager.post_raw(world, title, body, c.id, -1, NewsEvent.IMP_HEADLINE, "clube")
@@ -109,7 +113,7 @@ static func _investor_exit(world: GameWorld) -> void:
 	owners.erase(str(c.id))
 	world.stats["owners"] = owners
 	var debt := int(FinanceManager.expected_revenue(c) * world.rng.randf_range(0.3, 0.7))
-	c.add_ledger("saida_dono", -debt)
+	c.debt += debt # empréstimos no nome do clube que o dono deixa para trás
 	c.archetype = String(o.get("arch", c.archetype))
 	c.fan_mood = clampf(c.fan_mood - 12.0, 0.0, 100.0)
 	c.board_confidence = 45.0
@@ -150,7 +154,10 @@ static func season_start(world: GameWorld) -> void:
 	for c: Club in world.clubs:
 		var revenue := float(FinanceManager.expected_revenue(c))
 		var ratio := FinanceManager.debt_ratio(c, revenue)
-		if ratio > 1.0 and world.rng.randf() < 0.45:
+		# Dívida grande sozinha não quebra ninguém (bancos rolam); quebra quem passou do limite do
+		# crédito ou fechou o ano com um rombo que os bancos não cobrem.
+		var broke := ratio > float(FinanceManager.money()["debt_limit"]) or c.balance < -revenue * 0.3
+		if broke and world.rng.randf() < 0.45:
 			_judicial_recovery(world, c, revenue)
 		elif not world.is_user_club(c.id) and c.balance > revenue * 1.5 and c.fan_base > c.capacity and world.rng.randf() < 0.3:
 			_expand_stadium_ai(world, c)
@@ -177,8 +184,13 @@ static func _tv_deals(world: GameWorld) -> void:
 
 ## Recuperação judicial: parte da dívida é renegociada, mas o clube perde prestígio e precisa vender.
 static func _judicial_recovery(world: GameWorld, c: Club, revenue: float) -> void:
-	var forgiven := int(-c.balance * 0.45)
-	c.add_ledger("renegociacao", forgiven)
+	# O acordo com os credores corta parte da dívida (empréstimos + rombo do caixa) e alonga o resto;
+	# o caixa volta a zero para o clube conseguir operar.
+	var overdraft := maxi(0, -c.balance)
+	var total := c.debt + overdraft
+	var forgiven := int(total * 0.45)
+	c.add_ledger("renegociacao", overdraft)
+	c.debt = total - forgiven
 	c.reputation = maxf(5.0, c.reputation - 3.0)
 	c.fan_mood = clampf(c.fan_mood - 10.0, 0.0, 100.0)
 	var squad: Array = world.squad(c)
@@ -192,7 +204,7 @@ static func _judicial_recovery(world: GameWorld, c: Club, revenue: float) -> voi
 	world.stat_add("judicial_recoveries")
 	ClubDNA.on_crisis(world, c)
 	var body := "Afundado em dívidas (%s, mais de um ano de receita), o %s entrou em recuperação judicial. %s da dívida foram renegociados, mas o clube terá de apertar o cinto." % [
-		Fmt.money(-c.balance + forgiven), c.name, Fmt.money(forgiven)]
+		Fmt.money(total), c.name, Fmt.money(forgiven)]
 	if not listed.is_empty():
 		body += " %s estão à venda." % " e ".join(listed)
 	if world.is_user_club(c.id):

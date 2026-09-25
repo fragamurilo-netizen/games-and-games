@@ -9,17 +9,26 @@ extends RefCounted
 ## (posição na liga anterior) e um quarto por audiência (tamanho do clube), e o contrato de cada
 ## liga é renegociado a cada poucos anos. O patrocínio cresce com a reputação; bilheteria e loja
 ## dependem de torcida, estádio, ingresso e da fase do time. Assim um clube da Série D e um gigante inglês vivem em
-## realidades diferentes, mas ambos conseguem pagar um elenco do próprio nível.
+## realidades diferentes, mas ambos conseguem pagar um elenco do próprio nível. Ligas com mais
+## força comercial do que o nível dos jogadores sugere (Brasil, MLS, México) têm um multiplicador
+## de receita próprio ("rev" em leagues.json).
+##
+## Dívida: o caixa (balance) é o dia a dia; a dívida de longo prazo (Club.debt) paga juros e
+## amortização toda semana. Caixa no vermelho paga juros de cheque especial e, na virada do ano,
+## vira empréstimo bancário até o limite que os bancos aceitam (debt_limit anos de receita).
 
 const CAT_NAMES := {
 	"bilheteria": "Bilheteria", "tv": "Direitos de TV", "loja": "Loja e produtos", "patrocinio": "Patrocínio", "premiacao": "Premiação",
 	"vendas": "Venda de jogadores", "salarios": "Salários", "compras": "Compra de jogadores",
-	"manutencao": "Manutenção", "juros": "Juros da dívida", "rescisoes": "Rescisões", "luvas": "Luvas",
+	"manutencao": "Custos operacionais", "juros": "Juros da dívida", "rescisoes": "Rescisões", "luvas": "Luvas",
 	"investimentos": "Investimentos", "bonus_patrocinio": "Bônus de patrocínio", "aporte": "Aporte do novo dono",
 	"renegociacao": "Dívida renegociada", "saida_dono": "Dívida deixada pelo dono", "impostos": "Impostos",
+	"emprestimo": "Empréstimo bancário", "amortizacao": "Amortização da dívida",
 }
-const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "loja", "premiacao", "vendas", "aporte", "renegociacao"]
-const EXPENSE_CATS: Array[String] = ["salarios", "compras", "manutencao", "juros", "rescisoes", "luvas", "investimentos", "saida_dono", "impostos"]
+const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "loja", "premiacao", "vendas", "aporte", "renegociacao", "emprestimo"]
+const EXPENSE_CATS: Array[String] = ["salarios", "compras", "manutencao", "juros", "amortizacao", "rescisoes", "luvas", "investimentos", "saida_dono", "impostos"]
+## Movimentos de dívida e de dono não são lucro nem prejuízo: ficam fora do imposto.
+const NOT_TAXED: Array[String] = ["emprestimo", "amortizacao", "aporte", "renegociacao", "saida_dono"]
 ## Rodadas de fim de semana por temporada: salários, TV e patrocínio são pagos nelas.
 const WEEKS := 38.0
 ## Divisão da TV: parte igual, parte por mérito, parte por audiência.
@@ -65,7 +74,7 @@ static func league_mid_level(cfg: Dictionary) -> float:
 
 ## Receita anual típica de um clube de nível `level` na liga.
 static func revenue_target(cfg: Dictionary, level: float) -> float:
-	return float(money()["revenue_per_wage"]) * Valuation.base_wage(level - Valuation.shift) * float(cfg.get("wage", 0.5))
+	return float(money()["revenue_per_wage"]) * Valuation.base_wage(level - Valuation.shift) * float(cfg.get("wage", 0.5)) * float(cfg.get("rev", 1.0))
 
 
 ## Receita típica de um clube médio da liga (referência para TV, prêmios e custos).
@@ -184,8 +193,16 @@ static func process_week(world: GameWorld, club: Club) -> void:
 	club.add_ledger("patrocinio", int(club.income_sponsor / WEEKS))
 	club.add_ledger("loja", int(merch_income(club) / WEEKS * merch_mood(club)))
 	club.add_ledger("manutencao", -int(club.cost_upkeep / WEEKS))
+	var m := money()
+	if club.debt > 0:
+		# Juros e amortização do empréstimo de longo prazo (a parcela encolhe junto com a dívida)
+		club.add_ledger("juros", -int(club.debt * float(m["loan_interest"]) / WEEKS))
+		var amort := mini(club.debt, maxi(1, int(club.debt / float(m["loan_years"]) / WEEKS)))
+		club.add_ledger("amortizacao", -amort)
+		club.debt -= amort
 	if club.balance < 0:
-		club.add_ledger("juros", -int(-club.balance * float(money()["debt_interest"]) / WEEKS))
+		# Cheque especial: caixa no vermelho custa bem mais caro que a dívida negociada
+		club.add_ledger("juros", -int(-club.balance * float(m["debt_interest"]) / WEEKS))
 
 
 ## Premiação por posição final (linear entre o 1º e o último).
@@ -214,34 +231,75 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 		ratio = [0.95, 0.86, 0.8][world.difficulty]
 		spend = [0.6, 0.45, 0.35][world.difficulty]
 	var current := float(wage_bill(world, club))
+	# A parcela da dívida sai antes da folha: o que sobra da receita é o que dá para gastar.
+	var service := debt_service(club)
+	# Parcela da dívida e custos operacionais (staff, viagens, base) além do básico saem antes da folha.
+	var free := maxf(revenue * 0.5, revenue - service - maxf(0.0, club.cost_upkeep - revenue * 0.06))
+	var dr := debt_ratio(club, revenue)
 	# Reservas viram poder de fogo salarial (dinheiro parado circula), dívida aperta o cinto.
 	var reserve := minf(maxf(0.0, club.balance) * 0.12, revenue * 0.35)
-	var budget := (revenue * ratio + reserve) / 12.0
+	var budget := (free * ratio + reserve) / 12.0
 	if club.balance >= 0:
 		# Clube saudável pode manter a folha atual mesmo um pouco acima do ideal.
 		budget = maxf(budget, minf(current, budget * 1.1))
+		if dr > 1.0:
+			# Caixa em dia, mas dívida acima de um ano de receita: os bancos pedem contenção.
+			budget *= clampf(1.1 - dr * 0.15, 0.8, 1.0)
 	else:
-		# Endividado: o teto cai conforme o tamanho da dívida e força cortes (vendas, não renovações).
-		budget *= clampf(1.0 - debt_ratio(club, revenue) * 0.25, 0.75, 0.95)
+		# Caixa no vermelho: o teto cai conforme o tamanho da dívida e força cortes (vendas, não renovações).
+		budget *= clampf(1.0 - dr * 0.25, 0.75, 0.95)
 	club.wage_budget = int(budget)
 	# Teto por temporada: contratações limitadas a uma fração da receita anual, por mais rico que o clube seja.
 	var cap_mult := 1.4
 	if world.is_user_club(club.id):
 		cap_mult = [2.0, 1.6, 1.3][world.difficulty]
 	var tb := club.balance * spend
-	# Sobra prevista do ano (receita − folha − custos) também vira verba, com cautela.
+	# Sobra prevista do ano (receita − folha − custos − parcela da dívida) também vira verba, com cautela.
 	if club.balance >= 0:
-		tb += maxf(0.0, revenue - current * 12.0 - club.cost_upkeep) * 0.2
+		tb += maxf(0.0, revenue - current * 12.0 - club.cost_upkeep - service) * 0.2
+	if dr > 1.0:
+		tb *= 0.5
 	club.transfer_budget = int(clampf(tb, 0.0, revenue * cap_mult))
 
 
-## Dívida em anos de receita (0 = sem dívida).
+## Dívida total (empréstimos + caixa no vermelho) em anos de receita (0 = sem dívida).
 static func debt_ratio(club: Club, revenue: float = -1.0) -> float:
-	if club.balance >= 0:
+	var total := club.debt + maxi(0, -club.balance)
+	if total <= 0:
 		return 0.0
 	if revenue < 0.0:
 		revenue = float(expected_revenue(club))
-	return -club.balance / maxf(1.0, revenue)
+	return total / maxf(1.0, revenue)
+
+
+## Juros + amortização da dívida de longo prazo previstos para o ano.
+static func debt_service(club: Club) -> float:
+	var m := money()
+	return club.debt * (float(m["loan_interest"]) + 1.0 / float(m["loan_years"]))
+
+
+## Aperto financeiro de verdade: caixa no vermelho ou dívida acima de um ano de receita.
+static func in_trouble(club: Club) -> bool:
+	return club.balance < 0 or debt_ratio(club) > 1.0
+
+
+## Virada do ano: o rombo do caixa vira empréstimo bancário, até o limite que os bancos aceitam.
+## Retorna o valor emprestado.
+static func refinance(world: GameWorld, club: Club) -> int:
+	if club.balance >= 0:
+		return 0
+	var rev := float(expected_revenue(club))
+	var room := int(rev * float(money()["debt_limit"])) - club.debt
+	var loan := mini(-club.balance, maxi(0, room))
+	if loan <= 0:
+		return 0
+	club.debt += loan
+	club.add_ledger("emprestimo", loan)
+	if world.is_user_club(club.id):
+		NewsManager.post_raw(world, "Banco cobre o rombo do %s" % club.short_name,
+			"O caixa fechou o ano no vermelho e a diretoria transformou %s em empréstimo de longo prazo. A dívida total vai a %s e a parcela entra na conta de cada mês." % [
+				Fmt.money(loan), Fmt.money(club.debt)], club.id, -1, NewsEvent.IMP_HIGH, "clube")
+	return loan
 
 
 ## Revisão de meio de temporada (abertura da janela de inverno): a diretoria ajusta a verba
@@ -269,7 +327,7 @@ static func projected_balance(world: GameWorld, club: Club) -> int:
 	for i in range(s.day, s.calendar.size()):
 		if s.is_weekend(i):
 			left += 1
-	var weekly := (club.income_tv + club.income_sponsor + merch_income(club) - club.cost_upkeep) / WEEKS - wage_bill(world, club) * 12.0 / WEEKS
+	var weekly := (club.income_tv + club.income_sponsor + merch_income(club) - club.cost_upkeep - debt_service(club)) / WEEKS - wage_bill(world, club) * 12.0 / WEEKS
 	var gate_left := expected_gate(club) * left / WEEKS
 	return int(club.balance + weekly * left + gate_left)
 
@@ -313,6 +371,7 @@ static func summary(world: GameWorld, club: Club) -> Dictionary:
 			expense += -v
 	return {
 		"balance": club.balance,
+		"debt": club.debt,
 		"transfer_budget": club.transfer_budget,
 		"wage_bill": wage_bill(world, club),
 		"wage_budget": club.wage_budget,
@@ -322,15 +381,16 @@ static func summary(world: GameWorld, club: Club) -> Dictionary:
 	}
 
 
-## Situação financeira em palavras (para o usuário entender em segundos).
+## Situação financeira em palavras (para o usuário entender em segundos): caixa e dívida juntos.
 static func health_label(_world: GameWorld, club: Club) -> String:
 	var rev := float(expected_revenue(club))
 	var bal := float(club.balance)
-	if bal < -rev * 0.5:
+	var dr := debt_ratio(club, rev)
+	if bal < -rev * 0.3 or dr > 1.5:
 		return "Crise"
-	if bal < 0:
+	if bal < 0 or dr > 0.7:
 		return "Endividado"
-	if bal < rev * 0.2:
+	if bal < rev * 0.2 or dr > 0.4:
 		return "Apertado"
 	if bal < rev:
 		return "Estável"
@@ -390,7 +450,8 @@ static func season_taxes(world: GameWorld) -> Dictionary:
 	for c: Club in world.clubs:
 		var net := 0
 		for k in c.ledger:
-			net += int(c.ledger[k])
+			if not NOT_TAXED.has(String(k)):
+				net += int(c.ledger[k])
 		if net > 0:
 			out[c.id] = int(net * PROFIT_TAX)
 	return out

@@ -38,7 +38,7 @@ static func asking_price(world: GameWorld, p: Player) -> int:
 		mult *= 0.7
 	elif years == 1:
 		mult *= 0.9
-	if club.balance < 0:
+	if FinanceManager.in_trouble(club):
 		mult *= 0.85
 	if not world.is_user_club(club.id) and world.has_user():
 		mult *= [0.92, 1.0, 1.1][world.difficulty]

@@ -1,5 +1,5 @@
 {
-	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE).",
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). rev: força comercial além da folha (multiplica as receitas; padrão 1). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE).",
 	"leagues": [
 		{
 			"id": "ENG1",
@@ -843,6 +843,7 @@
 				94
 			],
 			"wage": 0.45,
+			"rev": 1.45,
 			"att": 0.8,
 			"ticket": 14,
 			"culture": {
@@ -878,6 +879,7 @@
 				68
 			],
 			"wage": 0.2,
+			"rev": 1.3,
 			"att": 0.6,
 			"ticket": 8,
 			"culture": {
@@ -913,6 +915,7 @@
 				56
 			],
 			"wage": 0.11,
+			"rev": 1.15,
 			"att": 0.5,
 			"ticket": 5,
 			"culture": {
@@ -981,6 +984,7 @@
 				90
 			],
 			"wage": 0.3,
+			"rev": 1.2,
 			"att": 1.1,
 			"ticket": 10,
 			"culture": {
@@ -1329,6 +1333,7 @@
 				84
 			],
 			"wage": 0.55,
+			"rev": 1.3,
 			"att": 1.0,
 			"ticket": 14,
 			"culture": {
@@ -1377,6 +1382,7 @@
 				78
 			],
 			"wage": 0.65,
+			"rev": 1.4,
 			"att": 0.9,
 			"ticket": 35,
 			"culture": {
@@ -1642,6 +1648,7 @@
 				70
 			],
 			"wage": 0.45,
+			"rev": 1.25,
 			"att": 0.9,
 			"ticket": 25,
 			"culture": {

@@ -40,7 +40,7 @@ static func after_match(world: GameWorld, club: Club, res: String, derby: bool) 
 	var weight := clampf(played / 19.0, 0.2, 1.0)
 	d += clampf((int(goal[1]) - pos) * 0.12, -1.2, 0.8) * weight
 	d += (club.fan_mood - 55.0) * 0.012
-	if club.balance < 0:
+	if FinanceManager.in_trouble(club):
 		d -= 0.3
 	if FinanceManager.wage_bill(world, club) > int(club.wage_budget * 1.02):
 		d -= 0.4

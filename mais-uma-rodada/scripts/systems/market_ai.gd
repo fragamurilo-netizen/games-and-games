@@ -206,7 +206,7 @@ static func _plan_sales(world: GameWorld, c: Club, summer: bool) -> void:
 			p.transfer_listed = true
 			fam_n[f] = int(fam_n[f]) - 1
 			listed += 1
-	if c.balance < 0 and world.rng.randf() < 0.6:
+	if FinanceManager.in_trouble(c) and world.rng.randf() < 0.6:
 		TransferManager._ai_list_for_sale(world, c)
 
 
@@ -674,7 +674,7 @@ static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club,
 		m *= 1.08
 	if p.transfer_listed:
 		m *= 0.85
-	if seller.balance < 0:
+	if FinanceManager.in_trouble(seller):
 		m *= 0.8
 	if TransferManager._family_count(world, seller, p.position) <= TransferManager._family_min(p.position):
 		m *= 1.6 # sem reposição na posição

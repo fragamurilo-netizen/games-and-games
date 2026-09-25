@@ -103,6 +103,16 @@ vem da própria simulação.
 - **DNA dos clubes da IA**: cada clube tem filosofia de elenco, mercado, escola tática e ambição que guiam a IA e
   mudam com donos, dívidas e títulos.
 - **Tabelas mais ricas**: resumo da campanha, visões casa/fora/momento, setas de posição e ficha do clube.
+- **Dívida de verdade**: caixa e dívida de longo prazo separados. A dívida paga juros e amortização toda
+  semana; caixa no vermelho paga cheque especial e vira empréstimo na virada do ano, até o limite dos bancos.
+  Gigantes endividados (Barcelona, Manchester United, Corinthians) começam devendo mais de um ano de receita,
+  mas com dinheiro para operar; dívida acima de um ano de receita segura a folha e a verba de contratações.
+- **Receitas mais reais**: Brasileirão, Liga MX, MLS, J-League e Argentina com força comercial própria
+  (o Flamengo fatura na faixa de Benfica e Galatasaray, não um oitavo do Real Madrid).
+- **Nomes por país**: listas reais por frequência em 80 culturas (Kim, Lee e Park dominam a Coreia; Silva e
+  Santos, o Brasil), sem nomes de craques famosos, Irlanda/Escócia/Gales separadas e sem apelido repetido.
+- **Retratos mais bem acabados**: crânio arredondado, linha do cabelo suave com fios finos, barba rala sem
+  manchas e pescoço de atleta.
 
 ## Estrutura do repositório
 

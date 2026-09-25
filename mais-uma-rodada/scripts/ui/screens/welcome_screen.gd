@@ -102,7 +102,7 @@ func _traits(w: GameWorld, club: Club) -> Control:
 		tags.add_child(UIKit.pill("CT DE PONTA", UIColors.BLUE, 16))
 	if club.capacity >= 60000:
 		tags.add_child(UIKit.pill("CALDEIRÃO", UIColors.RED, 16))
-	if club.balance < 0:
+	if FinanceManager.in_trouble(club):
 		tags.add_child(UIKit.pill("ENDIVIDADO", UIColors.ORANGE, 16))
 	card.add_child(tags)
 	if arch.has("desc"):

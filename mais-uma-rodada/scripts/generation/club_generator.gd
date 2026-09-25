@@ -275,6 +275,11 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	var revenue := float(FinanceManager.expected_revenue(c))
 	c.balance = int(revenue * float(arch.get("balance_mult", 0.3)) * rng.randf_range(0.8, 1.2))
 	c.balance = int(round(c.balance / 10000.0)) * 10000
+	# Dívida de longo prazo em anos de receita (arquétipo). Sorteio à parte, sem mexer no gerador do mundo.
+	var dr := RandomNumberGenerator.new()
+	dr.seed = hash([c.key, c.name, rng.state])
+	var dm: Array = arch.get("debt", [0.05, 0.3])
+	c.debt = int(round(revenue * dr.randf_range(float(dm[0]), float(dm[1])) / 10000.0)) * 10000
 
 
 ## Rivais: autorais pela chave; procedurais pelos clubes da mesma cidade ou de reputação parecida na nação.

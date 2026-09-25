@@ -933,6 +933,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		c.reset_season_state()
 		if taxes.has(c.id):
 			c.add_ledger("impostos", -int(taxes[c.id]))
+		FinanceManager.refinance(world, c)
 		c.cohesion = maxf(35.0, c.cohesion - 8.0)
 		FinanceManager.set_budgets(world, c)
 		if not world.is_user_club(c.id):

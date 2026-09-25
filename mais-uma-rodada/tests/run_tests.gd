@@ -27,6 +27,7 @@ func _initialize() -> void:
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
 	_run("Football Memory: confrontos, recordes e linha do tempo", _test_football_memory)
 	_run("ranking de clubes, finanças e eventos do mundo", _test_ranking_economy)
+	_run("dívida de longo prazo, cheque especial e refinanciamento", _test_debt)
 	_run("avanço até o próximo jogo do usuário", _test_advance)
 	_run("save/load (ida e volta, backup e determinismo)", _test_save_load)
 	_run("negociações do usuário", _test_transfers)
@@ -746,6 +747,82 @@ func _test_end_season() -> void:
 			check(p != null and p.club_id == c.id, "vínculo inconsistente do jogador %d" % pid)
 
 
+func _test_debt() -> void:
+	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	# Gigantes endividados começam devendo mais de um ano de receita, mas com caixa para operar;
+	# a maioria dos clubes deve pouco, e os de dono rico não devem nada.
+	var giants := 0
+	var small_debt := 0
+	var total := 0
+	for c: Club in w.clubs:
+		check(c.balance >= 0, "%s começou com caixa negativo" % c.name)
+		var dr := FinanceManager.debt_ratio(c)
+		if c.archetype == "gigante_endividado":
+			giants += 1
+			check(dr >= 0.95, "%s: gigante endividado com dívida de %.2f" % [c.name, dr])
+		elif c.archetype == "rico_promovido":
+			check(c.debt == 0, "%s: clube de dono rico começou devendo" % c.name)
+		if dr < 0.5:
+			small_debt += 1
+		total += 1
+	check(giants >= 5 and small_debt > total * 0.7, "distribuição de dívidas estranha (%d gigantes, %d/%d com pouca dívida)" % [giants, small_debt, total])
+	# Brasileirão com receita na faixa dos grandes de Portugal/Turquia (antes: um oitavo do Real Madrid)
+	var fla := w.club_by_key("BRA_RNC")
+	var rm := w.club_by_key("ESP_MBL")
+	if fla != null and rm != null:
+		var ratio := float(FinanceManager.expected_revenue(fla)) / float(FinanceManager.expected_revenue(rm))
+		check(ratio > 0.16 and ratio < 0.35, "receita do Flamengo fora da escala real (%.2f do Real Madrid)" % ratio)
+	# Semana a semana: juros e amortização saem do caixa e a dívida encolhe
+	var c: Club = w.clubs_in_league("ESP1")[2]
+	c.debt = FinanceManager.expected_revenue(c)
+	c.balance = 50_000_000
+	c.ledger = {}
+	var d0 := c.debt
+	var b0 := c.balance
+	FinanceManager.process_week(w, c)
+	check(c.debt < d0 and int(c.ledger.get("amortizacao", 0)) < 0 and int(c.ledger.get("juros", 0)) < 0, "dívida não cobrou juros nem amortização")
+	check(c.balance < b0, "parcela da dívida não saiu do caixa")
+	# Dívida pesada com caixa positivo: folha contida e metade da verba de contratações
+	c.debt = 0
+	FinanceManager.set_budgets(w, c)
+	var wb0 := c.wage_budget
+	var tb0 := c.transfer_budget
+	c.debt = int(FinanceManager.expected_revenue(c) * 1.4)
+	FinanceManager.set_budgets(w, c)
+	check(c.wage_budget < wb0 and c.transfer_budget < tb0, "dívida grande não aperta o orçamento (%d/%d, %d/%d)" % [c.wage_budget, wb0, c.transfer_budget, tb0])
+	check(FinanceManager.in_trouble(c) and FinanceManager.health_label(w, c) != "Saudável", "dívida grande não aparece na saúde financeira")
+	# Virada do ano: o rombo do caixa vira empréstimo, até o limite dos bancos
+	var r: Club = w.clubs_in_league("ITA1")[5]
+	r.debt = 0
+	r.balance = -10_000_000
+	r.ledger = {}
+	var lent := FinanceManager.refinance(w, r)
+	check(lent == 10_000_000 and r.balance == 0 and r.debt == 10_000_000 and int(r.ledger.get("emprestimo", 0)) == lent, "refinanciamento do rombo falhou")
+	var rev := FinanceManager.expected_revenue(r)
+	r.debt = int(rev * 2.0)
+	r.balance = -5_000_000
+	check(FinanceManager.refinance(w, r) == 0 and r.balance < 0, "banco emprestou além do limite")
+	# Empréstimo e amortização não são lucro nem prejuízo
+	r.ledger = {"emprestimo": 100_000_000, "amortizacao": -5_000_000, "tv": 1_000_000}
+	var taxes := FinanceManager.season_taxes(w)
+	check(int(taxes.get(r.id, 0)) == int(1_000_000 * FinanceManager.PROFIT_TAX), "empréstimo entrou no imposto (%d)" % int(taxes.get(r.id, 0)))
+	# Comprador quita a dívida; dono que sai deixa dívida de longo prazo
+	var t: Club = w.clubs_in_league("FRA1")[6]
+	t.debt = 30_000_000
+	WorldEvents.takeover(w, t, "Grupo Teste")
+	check(t.debt == 0 and t.balance > 0, "novo dono não quitou a dívida")
+	# Recuperação judicial corta parte da dívida e zera o rombo do caixa
+	var j: Club = w.clubs_in_league("TUR1")[3]
+	j.debt = int(FinanceManager.expected_revenue(j) * 2.5)
+	j.balance = -3_000_000
+	var before := j.debt + 3_000_000
+	WorldEvents._judicial_recovery(w, j, float(FinanceManager.expected_revenue(j)))
+	check(j.balance >= 0 and j.debt < before * 0.6, "recuperação judicial não renegociou a dívida")
+	# Save guarda a dívida
+	var w2 := GameWorld.from_dict(JSON.parse_string(JSON.stringify(w.to_dict())))
+	check(w2.club(j.id).debt == j.debt, "save perdeu a dívida")
+
+
 func _test_ranking_economy() -> void:
 	# Ranking: depois da virada, todo clube arquivou a temporada e tem posição
 	var w := _season_world
@@ -1329,9 +1406,13 @@ func _test_xray() -> void:
 	var left := 0
 	var reports := 0
 	var fb_flagged := 0
-	for k in 60:
+	# Três adversários diferentes: o efeito é do lateral que sobe, não do jeito de jogar de um rival só
+	for k in 120:
+		var foe: Club = w.clubs_in_league("BRA1")[k % 3]
+		if foe.id == c.id:
+			foe = w.clubs_in_league("BRA1")[3]
 		var sim := MatchSimulation.new()
-		sim.setup(w, c, opp, c.sheet.duplicate_sheet(), ClubAI.prepare_ai_sheet(w, opp, c, false), {"competition": "BRA1", "attendance": 20000}, 100 + k, false)
+		sim.setup(w, c, foe, c.sheet.duplicate_sheet(), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 100 + k, false)
 		sim.run_to_end()
 		var rep := TacticalXRay.analyze(w, sim)
 		if rep.is_empty():
@@ -1348,7 +1429,7 @@ func _test_xray() -> void:
 					fb_flagged += 1
 		check(total == int(la[0]) + int(la[1]) + int(la[2]), "corredores não somam as chances do adversário")
 		check(not Array(rep["segments"]).is_empty(), "raio-x sem trechos")
-	check(reports == 60, "raio-x não gerado em todas as partidas (%d)" % reports)
+	check(reports == 120, "raio-x não gerado em todas as partidas (%d)" % reports)
 	check(right > left * 1.15, "lado com lateral no ataque não sofreu mais (dir %d × esq %d)" % [right, left])
 	check(fb_flagged > 0, "raio-x não apontou o lateral no ataque")
 	# Correção: aplicar a sugestão muda a escalação

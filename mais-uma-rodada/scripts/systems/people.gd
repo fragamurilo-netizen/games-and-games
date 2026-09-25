@@ -401,7 +401,7 @@ static func board_delta(world: GameWorld, club: Club, d: float, derby: bool) -> 
 		"populista":
 			out += (fan_support(world) - 50.0) * 0.02
 		"empresario":
-			if club.balance < 0:
+			if FinanceManager.in_trouble(club):
 				out -= 0.3
 		"vaidoso":
 			if derby:

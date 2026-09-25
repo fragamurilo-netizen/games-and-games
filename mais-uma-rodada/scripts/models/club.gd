@@ -26,6 +26,9 @@ var stadium: String = ""
 var capacity: int = 10000
 
 var balance: int = 0
+## Dívida de longo prazo (empréstimos, bancos, parcelamentos): paga juros e amortização toda semana,
+## separada do caixa — um clube pode ter dinheiro em caixa e dever ao mesmo tempo, como na vida real.
+var debt: int = 0
 var transfer_budget: int = 0
 var wage_budget: int = 0 # folha mensal máxima
 var ledger: Dictionary = {} # receitas/despesas da temporada por categoria
@@ -207,7 +210,7 @@ func to_dict() -> Dictionary:
 		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
 		"rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
 		"rivals": rivals, "stadium": stadium, "cap": capacity,
-		"bal": balance, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
+		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
 		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "kg": kit_gk, "k3": kit_third, "crest": crest, "spn": sponsors,
@@ -242,6 +245,7 @@ static func from_dict(d: Dictionary) -> Club:
 	c.stadium = d.get("stadium", "")
 	c.capacity = int(d.get("cap", 10000))
 	c.balance = int(d.get("bal", 0))
+	c.debt = int(d.get("debt", 0))
 	c.transfer_budget = int(d.get("tb", 0))
 	c.wage_budget = int(d.get("wb", 0))
 	c.ledger = d.get("ledger", {})

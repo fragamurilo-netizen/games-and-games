@@ -2312,5 +2312,12 @@
 	"Prestígio": "Prestige",
 	"Peso do nome construído ao longo das décadas.": "Weight of the name built over the decades.",
 	"Ambição": "Ambition",
-	"O tamanho do sonho da diretoria.": "How big the board dreams."
+	"O tamanho do sonho da diretoria.": "How big the board dreams.",
+	"Empréstimo bancário": "Bank loan",
+	"Amortização da dívida": "Debt repayment",
+	"Dívida de longo prazo": "Long-term debt",
+	"Parcela da dívida (ano)": "Debt service (year)",
+	"Com o caixa no vermelho, a diretoria não libera contratações e paga juros de cheque especial. No fim do ano o rombo vira empréstimo.": "With cash in the red, the board blocks signings and pays overdraft interest. At the end of the season the hole becomes a loan.",
+	"A dívida passa de um ano de receita: os bancos exigem contenção na folha e metade da verba de contratações.": "Debt exceeds a year of revenue: the banks demand wage restraint and half of the transfer budget.",
+	"Custos operacionais": "Operating costs"
 }
