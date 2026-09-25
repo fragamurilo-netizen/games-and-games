@@ -8,6 +8,9 @@ extends RefCounted
 ##   playoff os primeiros da fase regular decidem o título em mata-mata; a tabela continua valendo
 ##           para vagas e rebaixamento. {"type": "playoff", "teams": 8, "byes": 0,
 ##           "ko": ["qf", "sf", "f"], "legs": {"qf": 2, "sf": 2, "f": 2}, "neutral_final": false}
+##   promo   playoffs de acesso: os colocados de "from" em diante (teams clubes) decidem a última vaga
+##           de acesso em mata-mata (Championship, LaLiga 2, Serie B, Ligue 2). O campeão continua sendo
+##           o primeiro da tabela. {"type": "promo", "from": 3, "teams": 4, "ko": ["sf", "f"], ...}
 ##
 ## As datas da fase final são os últimos fins de semana da temporada, reservados ao montar a
 ## liga (League.phase_slots). O estado fica no próprio League (salvo com a temporada).
@@ -36,7 +39,7 @@ static func extra_rounds(league_cfg: Dictionary, n_clubs: int) -> int:
 				var l := int(legs[mini(i, legs.size() - 1)])
 				most = maxi(most, (g - 1 + g % 2) * l)
 			return most
-		"playoff":
+		"playoff", "promo":
 			var n := 0
 			var legs2: Dictionary = f.get("legs", {})
 			for k in f.get("ko", []):
@@ -68,7 +71,7 @@ static func after_slot(world: GameWorld, league: League) -> Array:
 	if k == "split" and league.phase_groups.is_empty():
 		_start_split(world, league)
 		events.append({"t": "split", "league": league.id})
-	elif k == "playoff":
+	elif k == "playoff" or k == "promo":
 		events.append_array(_playoff_step(world, league))
 	return events
 
@@ -160,7 +163,8 @@ static func _playoff_step(world: GameWorld, league: League) -> Array:
 	if po.is_empty():
 		var n := int(f.get("teams", 8))
 		var byes := int(f.get("byes", 0))
-		var seeds := CompetitionManager.sort_table(league.club_ids, league.table).slice(0, n)
+		var first := maxi(0, int(f.get("from", 1)) - 1) if kind(league) == "promo" else 0
+		var seeds := CompetitionManager.sort_table(league.club_ids, league.table).slice(first, first + n)
 		po["seeds"] = seeds
 		po["ties"] = []
 		po["champ"] = -1
@@ -319,7 +323,20 @@ static func round_label(league: League, f: Fixture) -> String:
 	var name := String(KO_NAMES.get(ko[clampi(f.round, 0, ko.size() - 1)], "Playoff"))
 	if _legs(league, f.round) == 2:
 		name += " · %s" % ("ida" if f.leg == 0 else "volta")
-	return "Playoffs · " + name
+	return ("Playoffs de acesso · " if kind(league) == "promo" else "Playoffs · ") + name
+
+
+## Clubes que sobem: os primeiros da tabela e, com playoffs de acesso, o vencedor deles na
+## última vaga (se os playoffs não terminaram, vale a tabela).
+static func promoted(league: League, ids: Array, up: int) -> Array:
+	if up <= 0:
+		return []
+	if kind(league) != "promo":
+		return ids.slice(0, up)
+	var out: Array = ids.slice(0, up - 1)
+	var w := int(league.po.get("champ", -1))
+	out.append(w if w >= 0 and not out.has(w) else ids[mini(up - 1, ids.size() - 1)])
+	return out
 
 
 ## Texto do regulamento para a interface.

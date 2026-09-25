@@ -149,14 +149,21 @@ static func build_season(world: GameWorld) -> SeasonState:
 			rr = maxi(rr, int(ceil(30.0 / (n_clubs - 1))))
 		# Formato real: os últimos fins de semana ficam para a segunda fase ou os playoffs.
 		var extra := LeagueFormat.extra_rounds(cfg, n_clubs)
-		var reg_weekends: Array = weekends.slice(0, weekends.size() - extra) if extra > 0 else weekends
+		var promo := String(cfg.get("format", {}).get("type", "")) == "promo"
+		var reg_weekends: Array = weekends.slice(0, weekends.size() - extra) if extra > 0 and not promo else weekends
 		# Cada rodada precisa de um fim de semana próprio: turnos a mais ficariam sem data.
 		var per_turn := n_clubs - 1 + n_clubs % 2
 		while rr > 1 and per_turn * rr > reg_weekends.size():
 			rr -= 1
 		FixtureManager.build_league_fixtures(world.rng, l, rr, reg_weekends)
 		l.regular_rounds = l.rounds.size()
-		if extra > 0:
+		if extra > 0 and promo:
+			# Playoffs de acesso depois da temporada regular (datas que sobram no fim do calendário)
+			var after: Array = []
+			for i in range(int(weekends.back()) + 1, s.calendar.size()):
+				after.append(i)
+			l.phase_slots = after.slice(0, extra)
+		elif extra > 0:
 			l.phase_slots = weekends.slice(weekends.size() - extra)
 		CompetitionManager.init_table(l)
 		s.leagues[id] = l
@@ -666,7 +673,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var down := league.relegated_count()
 		var upper := DatabaseManager.league_at(league.nation, league.tier - 1) if league.tier > 1 else ""
 		var lower := DatabaseManager.league_at(league.nation, league.tier + 1)
-		var promoted: Array = ids.slice(0, up) if up > 0 and upper != "" else []
+		var promoted: Array = LeagueFormat.promoted(league, ids, up) if up > 0 and upper != "" else []
 		var relegated: Array = ids.slice(teams - down) if down > 0 and lower != "" else []
 		var top := CompetitionManager.player_ranking(world, id, Player.S_GOALS, 1)
 		var scorer := {}

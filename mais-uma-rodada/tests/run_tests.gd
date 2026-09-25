@@ -750,6 +750,14 @@ func _test_end_season() -> void:
 		for cid in d["relegated"]:
 			var c := w.club(cid)
 			check(c.tier == int(DatabaseManager.league_cfg(old_league[cid])["tier"]) + 1, "%s não caiu" % c.short_name)
+	# Playoffs de acesso (Championship): o vencedor sobe, vindo do 3º ao 6º lugar
+	for d in summary["leagues"]:
+		if d["id"] == "ENG2":
+			var tbl: Array = d["table"]
+			var promo: Array = d["promoted"]
+			check(promo.size() == 3 and promo.has(tbl[0]) and promo.has(tbl[1]), "Championship: acessos diretos errados")
+			var third: int = int(promo[2])
+			check(tbl.find(third) >= 2 and tbl.find(third) <= 5, "vencedor dos playoffs de acesso fora do 3º-6º (%dº)" % (tbl.find(third) + 1))
 	# Classificados: campeão da Série A está na Libertadores do ano seguinte.
 	var bra: Dictionary = {}
 	for d in summary["leagues"]:
@@ -2902,6 +2910,18 @@ func world_player_of(w: GameWorld, c: Club) -> Player:
 
 func _test_club_dna() -> void:
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	# DNA real dos clubes conhecidos
+	var rm := w.club_by_key("ESP_MBL")
+	var aj: Club = null
+	var bha: Club = null
+	for cl: Club in w.clubs:
+		if cl.short_name == "Ajax":
+			aj = cl
+		elif cl.short_name == "Brighton":
+			bha = cl
+	check(rm != null and ClubDNA.rec(rm) == "estrelas" and ClubDNA.mkt(rm) == "global", "Real Madrid sem DNA de estrelas")
+	check(aj != null and ClubDNA.val(aj, "yth") >= 90.0 and ClubDNA.rec(aj) == "formacao", "Ajax sem DNA de formação")
+	check(bha != null and ClubDNA.val(bha, "sell") >= 88.0, "Brighton sem DNA de venda")
 	var st := w.rng.state
 	var recs := {}
 	var bad := 0

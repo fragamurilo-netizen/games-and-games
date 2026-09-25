@@ -59,6 +59,21 @@
 				"goals": 0.98,
 				"home": 1.0,
 				"cards": 1.0
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 4,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 2,
+					"f": 1
+				},
+				"neutral_final": true,
+				"desc": "Os 2 primeiros sobem direto; do 3º ao 6º disputam os playoffs de acesso (semifinal em ida e volta e final em Wembley, campo neutro) pela terceira vaga."
 			}
 		},
 		{
@@ -127,6 +142,20 @@
 			"foreign_limit": {
 				"max": 3,
 				"scope": "non_eu"
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 4,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 1,
+					"f": 2
+				},
+				"desc": "Os 2 primeiros sobem direto; do 3º ao 6º decidem a terceira vaga: semifinal em jogo único na casa do melhor e final em ida e volta, depois da temporada regular."
 			}
 		},
 		{
@@ -247,6 +276,23 @@
 				"goals": 0.92,
 				"home": 1.05,
 				"cards": 1.15
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 6,
+				"byes": 2,
+				"ko": [
+					"ef",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"ef": 1,
+					"sf": 1,
+					"f": 1
+				},
+				"desc": "Os 2 primeiros sobem direto; do 3º ao 8º vão aos playoffs depois da temporada regular (3º e 4º direto na semifinal), em jogos únicos na casa do melhor."
 			}
 		},
 		{

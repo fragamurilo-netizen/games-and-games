@@ -143,9 +143,17 @@ static func _initial(club: Club) -> Dictionary:
 	var honours := club.titles_of_kind("L:") + club.titles_of_kind("C:") * 3 + club.titles_of_kind("W:") * 4
 	d["pre"] = club.reputation * 0.85 + minf(15.0, honours * 0.6)
 	d["amb"] = 35.0 + (club.reputation - 50.0) * 0.45 + float(ad.get("amb", 0.0)) + rng.randf_range(-10.0, 10.0)
-	for k in PARAMS:
-		d[k] = snappedf(clampf(float(d[k]), 5.0, 95.0), 0.1)
 	d["era"] = String(ad.get("era", "estavel"))
+	# Clubes conhecidos: o DNA da vida real (filosofia, mercado, escola, momento e traços marcantes).
+	var real: Dictionary = db().get("clubs", {}).get(club.key, {})
+	for k in ["rec", "mkt", "tac", "era"]:
+		if real.has(k):
+			d[k] = String(real[k])
+	for k in PARAMS:
+		if real.has(k):
+			d[k] = float(real[k])
+	for k in PARAMS:
+		d[k] = snappedf(clampf(float(d[k]), 5.0, 99.0), 0.1)
 	d["since"] = DatabaseManager.start_year()
 	d["log"] = []
 	d["h"] = []
