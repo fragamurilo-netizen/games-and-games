@@ -10,7 +10,7 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 	var row := UIKit.hbox(10)
 	if mode != "market":
 		# Costas da camisa com o número, nas cores do clube
-		row.add_child(UIKit.shirt_back(w.club(p.club_id), p.shirt, 50))
+		row.add_child(UIKit.shirt_back(w.club(p.club_id), p.shirt, 50, false, p.position == Pos.GK))
 	# Posição principal e, embaixo, as secundárias
 	var pcol := UIKit.vbox(2)
 	pcol.alignment = BoxContainer.ALIGNMENT_CENTER

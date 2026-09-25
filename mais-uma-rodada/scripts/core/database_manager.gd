@@ -19,6 +19,7 @@ const PATHS := {
 	"formations": "res://data/gameplay/formations.json",
 	"tactics": "res://data/gameplay/tactics.json",
 	"sponsors": "res://data/gameplay/sponsors.json",
+	"club_policies": "res://data/gameplay/club_policies.json",
 	"commentary": "res://data/text/commentary.json",
 	"news": "res://data/text/news.json",
 }

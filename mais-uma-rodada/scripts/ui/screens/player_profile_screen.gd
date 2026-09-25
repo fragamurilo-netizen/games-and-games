@@ -59,7 +59,8 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	if p.nationality != "":
 		var nrow := UIKit.hbox(8)
 		nrow.add_child(UIKit.flag(p.nationality, 36))
-		nrow.add_child(UIKit.label(nat, "Small"))
+		var caps_h := NationalTeamManager.caps_of(w, p.id)
+		nrow.add_child(UIKit.label(nat + ((" · %d jogos, %d gols pela seleção" % [caps_h[0], caps_h[1]]) if caps_h[0] > 0 else ""), "Small", true))
 		col.add_child(nrow)
 	var born := p.hometown if p.hometown != "" else nat
 	var brow := UIKit.hbox(10)
@@ -73,7 +74,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		var cr := UIKit.hbox(8)
 		cr.add_child(UIKit.crest(club, 30))
 		if p.shirt > 0:
-			cr.add_child(UIKit.shirt_back(club, p.shirt, 38))
+			cr.add_child(UIKit.shirt_back(club, p.shirt, 38, false, p.position == Pos.GK))
 		var cl := UIKit.label(club.short_name, "Small")
 		cl.add_theme_color_override(&"font_color", UIColors.BLUE)
 		cr.add_child(cl)

@@ -101,12 +101,23 @@ static func preferred_years(world: GameWorld, p: Player) -> int:
 # ---------------------------------------------------------------------------
 
 ## Proposta do usuário ao clube dono. Retorna {result: "accepted"|"counter"|"rejected", fee, msg}.
+## Mensagem da diretoria quando a filosofia do clube do usuário barra o jogador ("" = pode).
+static func policy_block(world: GameWorld, club: Club, p: Player) -> String:
+	if ClubPolicy.eligible(world, club, p):
+		return ""
+	var pol := ClubPolicy.of(club)
+	return "A diretoria vetou: %s. %s" % [String(pol.get("name", "filosofia do clube")).to_lower(), String(pol.get("desc", ""))]
+
+
 static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {}) -> Dictionary:
 	var user := world.user_club()
 	if p.club_id < 0:
 		return {"result": "accepted", "fee": 0, "msg": "Jogador livre: negocie direto com ele."}
 	if p.club_id == user.id:
 		return {"result": "rejected", "fee": 0, "msg": "Ele já é seu jogador."}
+	var rule := policy_block(world, user, p)
+	if rule != "":
+		return {"result": "rejected", "fee": 0, "msg": rule}
 	if not world.transfer_window_open():
 		return {"result": "rejected", "fee": 0, "msg": "A janela de transferências está fechada."}
 	if p.loan.size() > 0:
@@ -509,6 +520,9 @@ static func user_sign_free(world: GameWorld, p: Player, wage: int, years: int, d
 	var user := world.user_club()
 	if p.club_id >= 0:
 		return {"ok": false, "msg": "Ele tem contrato com outro clube."}
+	var rule := policy_block(world, user, p)
+	if rule != "":
+		return {"ok": false, "msg": rule}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio (máximo %d)." % int(DatabaseManager.squad_rules()["max_players"])}
 	var r := user_terms(world, p, wage, years, deal)
@@ -1006,7 +1020,7 @@ static func balance_squads(world: GameWorld) -> void:
 					continue
 				if fam >= 0 and _family_of(p.position) != fam:
 					continue
-				if p.ovr_f > level + 6.0:
+				if p.ovr_f > level + 6.0 or not ClubPolicy.eligible(world, c, p):
 					continue
 				pick = p
 				break

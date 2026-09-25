@@ -259,14 +259,16 @@ func _draw_match(r: Rect2) -> void:
 				continue
 			var ab := _slot_ab(s, side, i)
 			var p := P(ab.x, ab.y, r)
+			var k1: Color = s.get("c1", c1) # goleiro com a camisa dele
+			var k2: Color = s.get("c2", c2)
 			draw_circle(p + Vector2(0, 2), rad, Color(0, 0, 0, 0.3))
-			draw_circle(p, rad, c1)
-			draw_arc(p, rad, 0.0, TAU, 20, c2, maxf(1.5, rad * 0.22), true)
+			draw_circle(p, rad, k1)
+			draw_arc(p, rad, 0.0, TAU, 20, k2, maxf(1.5, rad * 0.22), true)
 			if side == highlight_side and i == highlight_slot:
 				draw_arc(p, rad * 1.6, 0.0, TAU, 24, UIColors.ACCENT, 2.5, true)
 			var num := str(s.get("number", ""))
 			var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-			draw_string(font, p + Vector2(-nw * 0.5, fs * 0.36), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
+			draw_string(font, p + Vector2(-nw * 0.5, fs * 0.36), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(k1))
 	var bp := P(ball.x, ball.y, r)
 	draw_circle(bp + Vector2(1.5, 2.5), rad * 0.5, Color(0, 0, 0, 0.35))
 	draw_circle(bp, rad * 0.5, Color.WHITE)

@@ -109,19 +109,19 @@ var poss_ticks: int = 0
 func refresh_tactics() -> void:
 	var t: Dictionary = DatabaseManager.tactics()
 	var m: Dictionary = t["mentalities"][mentality]
-	m_att = float(m["att"])
-	m_def = float(m["def"])
-	m_poss = float(m["poss"])
+	m_att = MatchSimulation.damp(float(m["att"]))
+	m_def = MatchSimulation.damp(float(m["def"]))
+	m_poss = float(m["poss"]) * MatchSimulation.MOD_DAMP
 	var s: Dictionary = t["styles"][style]
-	s_rate = float(s["rate"])
-	s_quality = float(s["quality"])
+	s_rate = MatchSimulation.damp(float(s["rate"]))
+	s_quality = MatchSimulation.damp(float(s["quality"]))
 	s_fatigue = float(s["fatigue"])
-	s_poss = float(s["poss"])
+	s_poss = float(s["poss"]) * MatchSimulation.MOD_DAMP
 	var types: Dictionary = s["types"]
 	s_types = PackedFloat32Array([float(types.get("through", 1.0)), float(types.get("cross", 1.0)), float(types.get("long", 1.0)),
 		float(types.get("dribble", 1.0)), float(types.get("counter", 1.0)), float(types.get("scramble", 1.0))])
-	s_vs_open = float(s.get("vs_open_bonus", 0.0))
-	s_vs_narrow = float(s.get("vs_narrow_bonus", 0.0))
+	s_vs_open = float(s.get("vs_open_bonus", 0.0)) * MatchSimulation.MOD_DAMP
+	s_vs_narrow = float(s.get("vs_narrow_bonus", 0.0)) * MatchSimulation.MOD_DAMP
 	s_ignores_press = bool(s.get("ignores_press", false))
 	s_fit_attrs.clear()
 	for code in s.get("fit", []):
@@ -131,14 +131,14 @@ func refresh_tactics() -> void:
 	i_fatigue = float(i["fatigue"])
 	i_fouls = float(i["fouls"])
 	var l: Dictionary = t["line"][line]
-	l_opp_rate = float(l["opp_rate"])
-	l_opp_quality = float(l["opp_quality"])
+	l_opp_rate = MatchSimulation.damp(float(l["opp_rate"]))
+	l_opp_quality = MatchSimulation.damp(float(l["opp_quality"]))
 	l_offside = float(l["offside"])
-	l_poss = float(l["poss"])
+	l_poss = float(l["poss"]) * MatchSimulation.MOD_DAMP
 	var p: Dictionary = t["pressing"][pressing]
-	pr_poss = float(p["poss"])
+	pr_poss = float(p["poss"]) * MatchSimulation.MOD_DAMP
 	pr_fatigue = float(p["fatigue"])
-	pr_opp_rate = float(p["opp_rate"])
+	pr_opp_rate = MatchSimulation.damp(float(p["opp_rate"]))
 	pr_fouls = float(p["fouls"])
 
 
@@ -150,12 +150,12 @@ func goalkeeper() -> MatchPlayer:
 
 ## Fator individual: familiaridade × físico × (moral, forma, desempenho do dia, contexto) × time.
 func refresh_factors() -> void:
-	var team_f := i_perf * cohesion_f * home_f
+	var team_f := MatchSimulation.damp(i_perf) * MatchSimulation.damp(cohesion_f) * MatchSimulation.damp(home_f)
 	for mp: MatchPlayer in slots:
 		if mp == null:
 			continue
 		var c := clampf(mp.cond, 0.0, 100.0) / 100.0
-		mp.f = mp.fam * (0.72 + 0.28 * c * c) * mp.base_f * team_f
+		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f
 
 
 ## Recalcula os setores a partir de quem está em campo.

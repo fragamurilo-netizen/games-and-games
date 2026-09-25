@@ -245,6 +245,8 @@ static func _loan_destination(world: GameWorld, owner: Club, p: Player) -> Club:
 		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
 		if c.id == owner.id or world.is_user_club(c.id) or c.player_ids.size() >= max_players - 2 or c.is_rival(owner.id):
 			continue
+		if not ClubPolicy.eligible(world, c, p):
+			continue
 		var lvl := PlayerGenerator.club_level(c)
 		if p.ovr_f < lvl - 3.0 or p.ovr_f > lvl + 6.0:
 			continue
@@ -322,12 +324,15 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 		var p := _draw(world, index, c, fam, min_rating, prof)
 		if p == null or p.club_id == c.id or p.retiring or p.injury_weeks > 4:
 			continue
+		if not ClubPolicy.ai_wants(world, c, p):
+			continue # filosofia do clube (Athletic só bascos, Red Bull só jovens...)
 		if p.club_id >= 0:
 			if free_only or world.is_user_club(p.club_id) or p.joined_year == world.year:
 				continue # recém-contratado não é revendido na mesma temporada
 		var age := p.age(world.year)
 		var rating := p.rating_at(target_pos) if target_pos >= 0 else p.ovr_f
 		var eff := rating + (float(p.potential) - rating) * pot_w * (0.6 if age <= 23 else 0.0)
+		eff += ClubPolicy.preference_bonus(world, c, p)
 		if eff < min_rating and not mismanaged:
 			continue
 		var price := 0.0
@@ -444,6 +449,8 @@ static func _auction(world: GameWorld, buyer: Club, p: Player, fee: int, buyer_t
 		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
 		if c.id == buyer.id or c.id == seller.id or world.is_user_club(c.id) or c.transfer_budget <= fee or c.player_ids.size() >= max_players - 1:
 			continue
+		if not ClubPolicy.ai_wants(world, c, p):
+			continue
 		var lvl := PlayerGenerator.club_level(c)
 		if r < lvl - 3.0 or r > lvl + 8.0 or world.rng.randf() > 0.12:
 			continue
@@ -472,6 +479,8 @@ static func _swap_piece(world: GameWorld, buyer: Club, seller: Club, target: Pla
 	var lvl := PlayerGenerator.club_level(seller)
 	for q: Player in world.squad(buyer):
 		if q == target or not q.loan.is_empty() or q.joined_year == world.year or q.injury_weeks > 0 or q.retiring:
+			continue
+		if not ClubPolicy.eligible(world, seller, q):
 			continue
 		if not q.transfer_listed and q.squad_status < Player.STATUS_BACKUP:
 			continue
@@ -591,7 +600,10 @@ static func _draw(world: GameWorld, index: Dictionary, c: Club, fam: int, min_ra
 	var r := world.rng.randf()
 	var dom := float(prof.get("domestic", 0.6))
 	var nat := ""
-	if r < dom:
+	var only := String(ClubPolicy.of(c).get("only", ""))
+	if only != "":
+		nat = ClubPolicy.rule_nation(only) # só procura onde a regra deixa
+	elif r < dom:
 		nat = c.nation
 	else:
 		var sources: Array = prof.get("sources", [])
@@ -741,6 +753,8 @@ static func find_buyer_for(world: GameWorld, p: Player) -> Club:
 	for _k in 40:
 		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
 		if world.is_user_club(c.id) or c.transfer_budget < p.value * 0.75:
+			continue
+		if not ClubPolicy.ai_wants(world, c, p):
 			continue
 		var level := PlayerGenerator.club_level(c)
 		if r < level - 3.0 or r > level + 12.0:

@@ -46,6 +46,8 @@ var color1: String = "#FFFFFF"
 var color2: String = "#000000"
 var kit_home: Dictionary = {}
 var kit_away: Dictionary = {}
+## Camisa de goleiro (gerada na primeira vez que é pedida; ver gk_kit()).
+var kit_gk: Dictionary = {}
 var crest: Dictionary = {}
 ## Patrocínios (só o clube do usuário negocia): espaço -> {n, c, t, kind, v (por ano), b (por vitória), y (até)}.
 var sponsors: Dictionary = {}
@@ -85,6 +87,23 @@ func arch() -> Dictionary:
 
 func league_cfg() -> Dictionary:
 	return DatabaseManager.league_cfg(league_id)
+
+
+## Uniforme do goleiro: cor de goleiro que não se confunde com a titular nem com a reserva, com os
+## mesmos patrocinadores e fornecedor da camisa titular.
+func gk_kit() -> Dictionary:
+	if kit_gk.is_empty():
+		kit_gk = ClubGenerator.make_gk_kit(self)
+	var k := kit_gk.duplicate()
+	for key in ["sp", "sp_m", "sp_c", "sup"]:
+		if kit_home.has(key):
+			k[key] = kit_home[key]
+	return k
+
+
+## Camisa que um jogador veste (goleiro usa a dele).
+func kit_for(p: Player) -> Dictionary:
+	return gk_kit() if p != null and p.position == Pos.GK else kit_home
 
 
 func primary_color() -> Color:
@@ -173,7 +192,7 @@ func to_dict() -> Dictionary:
 		"bal": balance, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
-		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "crest": crest, "spn": sponsors,
+		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "kg": kit_gk, "crest": crest, "spn": sponsors,
 		"players": player_ids,
 		"sheet": sheet.to_dict() if sheet != null else {},
 		"coh": cohesion, "ll": last_lineup, "tf": tactic_fam.duplicate(true), "ph": philosophy, "afk": ai_formation_key,
@@ -220,6 +239,7 @@ static func from_dict(d: Dictionary) -> Club:
 	c.color2 = d.get("c2", "#000000")
 	c.kit_home = d.get("kh", {})
 	c.kit_away = d.get("ka", {})
+	c.kit_gk = d.get("kg", {})
 	c.crest = d.get("crest", {})
 	c.sponsors = d.get("spn", {})
 	c.ai_formation_key = int(d.get("afk", -1))

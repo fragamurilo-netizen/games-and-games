@@ -59,12 +59,12 @@ static func _tactics(sheet: TeamSheet) -> Dictionary:
 	var l: Dictionary = t["line"][clampi(sheet.line, 0, 2)]
 	var p: Dictionary = t["pressing"][clampi(sheet.pressing, 0, 2)]
 	var out := {
-		"m_att": float(m["att"]), "m_def": float(m["def"]), "m_poss": float(m["poss"]),
-		"s_rate": float(s["rate"]), "s_quality": float(s["quality"]), "s_poss": float(s["poss"]), "s_fatigue": float(s["fatigue"]),
+		"m_att": float(m["att"]), "m_def": float(m["def"]), "m_poss": float(m["poss"]) * MatchSimulation.MOD_DAMP,
+		"s_rate": MatchSimulation.damp(float(s["rate"])), "s_quality": MatchSimulation.damp(float(s["quality"])), "s_poss": float(s["poss"]) * MatchSimulation.MOD_DAMP, "s_fatigue": float(s["fatigue"]),
 		"ignores_press": bool(s.get("ignores_press", false)),
 		"i_perf": float(i["perf"]), "i_fatigue": float(i["fatigue"]), "i_fouls": float(i["fouls"]),
-		"l_opp_rate": float(l["opp_rate"]), "l_opp_quality": float(l["opp_quality"]), "l_poss": float(l["poss"]),
-		"pr_poss": float(p["poss"]), "pr_fatigue": float(p["fatigue"]), "pr_opp_rate": float(p["opp_rate"]), "pr_fouls": float(p["fouls"]),
+		"l_opp_rate": MatchSimulation.damp(float(l["opp_rate"])), "l_opp_quality": MatchSimulation.damp(float(l["opp_quality"])), "l_poss": float(l["poss"]) * MatchSimulation.MOD_DAMP,
+		"pr_poss": float(p["poss"]) * MatchSimulation.MOD_DAMP, "pr_fatigue": float(p["fatigue"]), "pr_opp_rate": MatchSimulation.damp(float(p["opp_rate"])), "pr_fouls": float(p["fouls"]),
 	}
 	_tac_cache[key] = out
 	return out
@@ -75,9 +75,9 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var tac := _tactics(sheet)
 	var slots: Array = DatabaseManager.formation(sheet.formation)["slots"]
 	var norms := DatabaseManager.formation_norms()
-	var team_f := float(tac["i_perf"]) * (0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet) * home_f
+	var team_f := MatchSimulation.damp(float(tac["i_perf"])) * MatchSimulation.damp((0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet)) * MatchSimulation.damp(home_f)
 	# Dia do time (mesmo sorteio do MatchSimulation.DAY_SIGMA).
-	team_f *= clampf(rng.randfn(1.0, MatchSimulation.DAY_SIGMA), 0.93, 1.07)
+	team_f *= MatchSimulation.damp(clampf(rng.randfn(1.0, MatchSimulation.DAY_SIGMA), 0.93, 1.07))
 	var pl: Array = [] # [Player, slot_pos, f, w_def, w_att, shoot_w, assist_w, foul_w, rating, c_fin]
 	var d := 0.0
 	var dw := 0.0
@@ -103,7 +103,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		var ctx := 1.0 + (p.trait_sum("big_game") if big else 0.0)
 		var morale_f := 0.96 + p.morale / 100.0 * 0.08
 		var form_f := clampf(1.0 + (p.form() - 6.5) * 0.012, 0.97, 1.03)
-		var f := Pos.familiarity(p.position, p.secondary, pos) * (0.72 + 0.28 * c * c) * morale_f * form_f * perf * ctx * team_f
+		var f := Pos.familiarity(p.position, p.secondary, pos) * (0.84 + 0.16 * c * c) * MatchSimulation.damp(morale_f * form_f * perf * ctx) * team_f
 		var w_def: float = s["def"]
 		var w_mid: float = s["mid"]
 		var w_att: float = s["att"]
@@ -163,8 +163,8 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 static func _lambda(att: Dictionary, dfn: Dictionary, poss: float, home: bool, crowd: float) -> float:
 	var ta: Dictionary = att["tac"]
 	var td: Dictionary = dfn["tac"]
-	var diff := float(att["att"]) * float(ta["m_att"]) - float(dfn["def"]) * float(td["m_def"])
-	var p := MatchSimulation.BASE_CHANCE * exp(MatchSimulation.BETA * diff) * float(ta["s_rate"])
+	var diff := float(att["att"]) * MatchSimulation.damp(float(ta["m_att"])) - float(dfn["def"]) * MatchSimulation.damp(float(td["m_def"]))
+	var p := MatchSimulation.BASE_CHANCE * MatchSimulation.chance_mult(diff) * float(ta["s_rate"])
 	p *= float(td["l_opp_rate"]) * float(td["pr_opp_rate"])
 	p *= (1.0 + MatchSimulation.HOME_CHANCE * crowd) if home else (1.0 - MatchSimulation.AWAY_CHANCE * crowd)
 	p *= 1.0 + (11 - int(dfn["count"])) * 0.08

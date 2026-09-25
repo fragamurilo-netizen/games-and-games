@@ -145,10 +145,11 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 			_draw_patch(Rect2(off + Vector2(0.77, 0.17) * s, Vector2(0.11, 0.06) * s), spm, c2 if sleeve == "contrast" or sleeve == "raglan" else c1)
 	if number > 0:
 		var fg := UIColors.on_color(c1)
+		var edge := Color(0, 0, 0, 0) if String(kit.get("pattern", "plain")) == "plain" else (Color(0, 0, 0, 0.75) if fg.get_luminance() > 0.5 else Color(1, 1, 1, 0.85))
 		if has_master:
-			_draw_text_centered(str(number), off + Vector2(0.5, 0.68) * s, s * 0.3, int(s * 0.2), fg, &"Big")
+			_draw_text_centered(str(number), off + Vector2(0.5, 0.68) * s, s * 0.3, int(s * 0.2), fg, &"Big", edge)
 		else:
-			_draw_text_centered(str(number), off + Vector2(0.5, 0.52) * s, s * 0.4, int(s * 0.3), fg, &"Big")
+			_draw_text_centered(str(number), off + Vector2(0.5, 0.52) * s, s * 0.4, int(s * 0.3), fg, &"Big", edge)
 
 
 func _draw_collar(s: float, off: Vector2, c1: Color, c3: Color) -> void:

@@ -610,7 +610,12 @@ func _sync_slots() -> void:
 		for i in fslots.size():
 			var s: Dictionary = fslots[i]
 			var mp: MatchPlayer = t.slots[i] if i < t.slots.size() else null
-			arr.append({"x": s["x"], "y": s["y"], "number": mp.p.shirt if mp != null else 0, "on": mp != null})
+			var e := {"x": s["x"], "y": s["y"], "number": mp.p.shirt if mp != null else 0, "on": mp != null}
+			if mp != null and mp.p.position == Pos.GK and int(s.get("pos", -1)) == Pos.GK:
+				var gk := t.club.gk_kit()
+				e["c1"] = Color(String(gk.get("c1", "#111111")))
+				e["c2"] = Color(String(gk.get("c2", "#FFFFFF")))
+			arr.append(e)
 		if side == 0:
 			_pitch.home_slots = arr
 		else:

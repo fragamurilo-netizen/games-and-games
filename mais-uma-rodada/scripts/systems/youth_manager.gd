@@ -48,13 +48,14 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary) -
 	target = clampf(target, 20.0, 68.0)
 	var nat := club.nation if rng.randf() < 0.95 else PlayerGenerator.pick_import(rng, club.nation)
 	var p := PlayerGenerator.create(world, rng, pos, target, age, nat, club.city, used)
+	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used)
 	p.potential = PlayerGenerator.youth_potential(rng, p.overall, club.youth_level, drift, nation_bonus)
 	p.club_id = club.id
 	p.squad_status = Player.STATUS_PROSPECT
 	p.wage = 0
 	p.contract_end = world.year
 	p.joined_year = world.year
-	if p.nationality == club.nation and rng.randf() < 0.6:
+	if p.nationality == club.nation and rng.randf() < 0.6 and not ClubPolicy.of(club).has("only"):
 		p.hometown = club.city
 	Valuation.update_value(p, world.year)
 	world.academy[p.id] = p

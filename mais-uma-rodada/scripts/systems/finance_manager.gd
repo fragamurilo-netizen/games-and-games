@@ -54,7 +54,7 @@ static func wage_bill(world: GameWorld, club: Club) -> int:
 static func level_of_rep(cfg: Dictionary, rep: float) -> float:
 	var lr: Array = cfg.get("level", [55, 65])
 	var rr: Array = cfg.get("rep", [40, 70])
-	var t := clampf((rep - float(rr[0])) / maxf(1.0, float(rr[1]) - float(rr[0])), -0.3, 1.2)
+	var t := clampf((rep - float(rr[0])) / maxf(1.0, float(rr[1]) - float(rr[0])), -0.3, 1.04)
 	return float(lr[0]) + (float(lr[1]) - float(lr[0])) * t
 
 

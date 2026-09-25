@@ -82,10 +82,10 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	if arch.has("desc"):
 		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
 	var kits := UIKit.hbox(12)
-	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"]]:
+	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.gk_kit(), "Goleiro"]]:
 		var v := UIKit.vbox(2)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var kv := UIKit.kit(k[0], 96)
+		var kv := UIKit.kit(k[0], 80)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(kv)
 		var l := UIKit.label(k[1], "Small")
@@ -104,6 +104,17 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.button("Uniformes e patrocínios" + (" (pré-temporada)" if pre else ""), "PrimaryButton" if pre else "GhostButton", func(): UIManager.push("kit"), "shirt"))
 	var cid := club.id
 	card.add_child(UIKit.button("Elencos anteriores", "GhostButton", func(): UIManager.push("past_squads", {"id": cid}), "clock"))
+	var pol := ClubPolicy.of(club)
+	if not pol.is_empty():
+		card.add_child(UIKit.section("Filosofia"))
+		var prow := UIKit.hbox(10)
+		prow.add_child(UIKit.icon_rect("star" if pol.has("only") else "info", 30, UIColors.ACCENT))
+		var pc := UIKit.vbox(0)
+		pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pc.add_child(UIKit.label(String(pol.get("name", "")), "H3"))
+		pc.add_child(UIKit.label(String(pol.get("desc", "")), "Small", true))
+		prow.add_child(pc)
+		card.add_child(prow)
 	var rivals: Array = []
 	for rid in club.rivals.slice(0, 3):
 		if int(rid) >= 0:

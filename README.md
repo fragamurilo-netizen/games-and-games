@@ -51,11 +51,31 @@ vem da própria simulação.
   troféus (`data/world/history.json`). Ligas sem dados reais ganham um passado gerado pela reputação.
 - **Evolução e declínio**: quem joga bem cresce mais, mentores aceleram os jovens, lesões graves custam físico,
   cada corpo envelhece no seu ritmo e veteranos ganham leitura de jogo enquanto o físico cai.
+- **Copas de verdade**: 43 copas nacionais com nome real (Copa do Brasil, FA Cup, Copa del Rey, Coppa Italia,
+  DFB-Pokal, Coupe de France, Taça de Portugal, U.S. Open Cup, Copa do Imperador...), copas da liga (EFL Cup,
+  Taça da Liga...) e 24 supercopas (Community Shield, Supercopa do Brasil, Supercopa da UEFA, Recopa...). Fase
+  preliminar, grandes entrando direto, ida e volta onde é assim na vida real, mando do menor, final em campo
+  neutro e vaga continental para o campeão. Campeões reais desde 2005 na sala de troféus.
+- **Força realista**: elencos calibrados na escala da vida real (Real Madrid ~86, Man City ~85, Flamengo ~76,
+  Série D ~54), craques raros (poucos passam de 88) e no auge entre 23 e 31 anos, goleiros que amadurecem mais
+  tarde, potenciais com teto de 94. O motor de partidas pesa a qualidade do elenco mais que os ajustes táticos:
+  em simulações, a correlação entre a força do elenco e a posição final é de ~0,84, como no futebol real.
+- **Carreira anterior mais crível**: jogos de copa em cada temporada, menos trocas de clube (passagens longas nos
+  grandes) e jogos e gols pela seleção desde antes do jogo começar.
+- **Filosofias reais de clubes** (`data/gameplay/club_policies.json`): o Athletic só escala bascos e tem uma das
+  melhores bases do mundo, o Chivas só mexicanos, Red Bull e Brighton compram jovens, os árabes buscam estrelas
+  experientes; bases fortes em La Masia, Ajax, Benfica, Santos, Fluminense, São Paulo e outros.
+- **Uniforme de goleiro** para cada clube, nas fotos, no elenco, no campinho e no editor de uniformes.
+- **Elenco mais legível**: costas da camisa com o número, ícone dos pés (canhoto, destro, ambidestro) e mapa de
+  posições no perfil.
+- **Editor e mods**: o Editor do menu edita e cria jogadores do mundo padrão; mods em `user://mods` substituem ou
+  corrigem qualquer JSON de dados e colocam jogadores reais (veja `docs/MODS.md`).
 
 ## Estrutura do repositório
 
 ```text
 docs/ARQUITETURA.md      documento técnico (decisões, módulos, motor, economia, balanceamento)
+docs/MODS.md             como criar mods (dados, patches, jogadores reais)
 mais-uma-rodada/         projeto Godot — abra esta pasta no editor
   data/                  todo o conteúdo em JSON (clubes, nomes, táticas, narração, notícias)
   scripts/               núcleo (models, generation, systems), autoloads e interface

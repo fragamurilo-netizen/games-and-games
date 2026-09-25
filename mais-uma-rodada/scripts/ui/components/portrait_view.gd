@@ -224,7 +224,10 @@ func set_player(p: Player, club: Club, year: int) -> void:
 		shirt_color = club.primary_color()
 		trim_color = club.secondary_color()
 		bg_color = club.primary_color().darkened(0.6)
-		kit = club.kit_home
+		kit = club.kit_for(p)
+		if p.position == Pos.GK:
+			shirt_color = Color(String(kit.get("c1", "#111111")))
+			trim_color = Color(String(kit.get("c2", "#FFFFFF")))
 		crest = club.crest
 	queue_redraw()
 

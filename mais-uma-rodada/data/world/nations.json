@@ -486,7 +486,8 @@
 				],
 				[
 					"Bilbao",
-					4
+					4,
+					"EUS"
 				],
 				[
 					"Málaga",
@@ -538,15 +539,18 @@
 				],
 				[
 					"Vitoria",
-					3
+					3,
+					"EUS"
 				],
 				[
 					"San Sebastián",
-					3
+					3,
+					"EUS"
 				],
 				[
 					"Pamplona",
-					3
+					3,
+					"EUS"
 				],
 				[
 					"Santander",
@@ -638,7 +642,8 @@
 				],
 				[
 					"Eibar",
-					1
+					1,
+					"EUS"
 				],
 				[
 					"Villarreal",
@@ -662,7 +667,98 @@
 				],
 				[
 					"Vitoria-Gasteiz",
-					3
+					3,
+					"EUS"
+				],
+				[
+					"Barakaldo",
+					1,
+					"EUS"
+				],
+				[
+					"Getxo",
+					1,
+					"EUS"
+				],
+				[
+					"Irun",
+					1,
+					"EUS"
+				],
+				[
+					"Durango",
+					1,
+					"EUS"
+				],
+				[
+					"Basauri",
+					1,
+					"EUS"
+				],
+				[
+					"Sestao",
+					1,
+					"EUS"
+				],
+				[
+					"Portugalete",
+					1,
+					"EUS"
+				],
+				[
+					"Tolosa",
+					1,
+					"EUS"
+				],
+				[
+					"Gernika",
+					1,
+					"EUS"
+				],
+				[
+					"Zarautz",
+					1,
+					"EUS"
+				],
+				[
+					"Azpeitia",
+					1,
+					"EUS"
+				],
+				[
+					"Leioa",
+					1,
+					"EUS"
+				],
+				[
+					"Tudela",
+					1,
+					"EUS"
+				],
+				[
+					"Estella",
+					1,
+					"EUS"
+				],
+				[
+					"Lezama",
+					1,
+					"EUS"
+				],
+				[
+					"Zumaia",
+					1,
+					"EUS"
+				],
+				[
+					"Galdakao",
+					1,
+					"EUS"
+				],
+				[
+					"Amorebieta",
+					1,
+					"EUS"
 				]
 			],
 			"lang": "es"

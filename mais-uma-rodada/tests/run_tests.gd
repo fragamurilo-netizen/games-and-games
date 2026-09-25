@@ -1352,10 +1352,11 @@ func _test_tactics() -> void:
 		check(m1.score == m2.score and _goal_log(m1) == _goal_log(m2), "plano: ao vivo ≠ instantâneo (seed %d)" % (500 + s))
 		var t: MatchTeam = m2.teams[0]
 		var diff: int = m2.score[0] - m2.score[1]
-		if diff < 0:
+		# Gol no último lance: o plano ainda não teve minuto para reagir ao placar final.
+		if diff < 0 and t.plan_state == 0:
 			check(t.mentality == TeamSheet.MENT_TUDO, "perdendo e o plano não foi para o tudo ou nada")
 			changed += 1
-		elif diff > 0 and t.plan_state >= 0:
+		elif diff > 0 and t.plan_state == 2:
 			check(t.mentality == TeamSheet.MENT_RETRANCA, "vencendo e o plano não fechou o time")
 			changed += 1
 	check(changed > 0, "plano de jogo nunca agiu")

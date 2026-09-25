@@ -53,6 +53,9 @@ func _ten_name() -> String:
 
 func _kit() -> Dictionary:
 	var club := world().user_club()
+	if _which == "gk":
+		club.gk_kit() # gera na primeira vez
+		return club.kit_gk
 	return club.kit_home if _which == "home" else club.kit_away
 
 
@@ -77,17 +80,17 @@ func _preview_card(club: Club, pre: bool) -> Control:
 		vrow.add_child(chip)
 	card.add_child(vrow)
 	var row := UIKit.hbox(12)
-	for k in [["home", "Titular", club.kit_home], ["away", "Reserva", club.kit_away]]:
+	for k in [["home", "Titular", club.kit_home], ["away", "Reserva", club.kit_away], ["gk", "Goleiro", club.gk_kit()]]:
 		var key: String = k[0]
 		var v := UIKit.vbox(4)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var kv := KitView.new()
 		kv.full = true
 		kv.kit = k[2]
-		kv.number = 10
+		kv.number = 1 if key == "gk" else 10
 		kv.back = _back
-		kv.back_name = _ten_name()
-		kv.custom_minimum_size = Vector2(240, 430)
+		kv.back_name = _ten_name() if key != "gk" else ""
+		kv.custom_minimum_size = Vector2(190, 340)
 		kv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		var inner := UIKit.vbox(4)

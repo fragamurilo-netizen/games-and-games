@@ -266,7 +266,8 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	if c.capacity <= 0:
 		c.capacity = int(c.fan_base * float(arch.get("stadium_mult", 1.0)) * rng.randf_range(0.9, 1.3))
 		c.capacity = maxi(2000, int(round(c.capacity / 500.0)) * 500)
-	c.youth_level = clampi(int(arch.get("youth", 50)) + rng.randi_range(-8, 8), 5, 99)
+	var yb := ClubPolicy.youth_bonus(c)
+	c.youth_level = clampi(int(arch.get("youth", 50)) + rng.randi_range(-8, 8) + yb, 5, 97 if yb >= 20 else 92)
 	c.facilities = clampi(int(float(arch.get("facilities", 50)) + (c.reputation - 60.0) * 0.4) + rng.randi_range(-8, 8), 5, 99)
 	c.fan_mood = clampf(60.0 + rng.randf_range(-10.0, 10.0), 0.0, 100.0)
 	c.board_confidence = 60.0
@@ -327,6 +328,45 @@ static func _make_kits(rng: RandomNumberGenerator, c: Club, hint: String) -> voi
 		"pattern": "plain" if rng.randf() < 0.6 else pattern, "c1": away_c1, "c2": away_c2,
 		"collar": RngUtil.pick(rng, COLLARS), "sleeve": "same",
 	}
+
+
+## Cores clássicas de goleiro: [principal, detalhe].
+const GK_COLORS: Array = [["#111111", "#39FF14"], ["#39FF14", "#111111"], ["#FFD400", "#111111"], ["#FF6A00", "#111111"],
+	["#6A1B9A", "#FFD400"], ["#FF3EA5", "#111111"], ["#00B8D9", "#0B1F4B"], ["#7D8A99", "#111111"], ["#0B6E4F", "#F2C14E"],
+	["#1E3A8A", "#7DD3FC"], ["#B91C1C", "#111111"], ["#A3E635", "#1F2937"]]
+
+
+## Camisa de goleiro do clube: uma cor de goleiro bem diferente das duas camisas de linha, sempre a
+## mesma para o clube (sorteio pela chave).
+static func make_gk_kit(c: Club) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(c.key + ":gk")
+	var order: Array = range(GK_COLORS.size())
+	RngUtil.shuffle(rng, order)
+	var used: Array = []
+	for k in [c.kit_home, c.kit_away]:
+		for f in ["c1", "c2"]:
+			if k.has(f):
+				used.append(Color(String(k[f])))
+	var pick: Array = GK_COLORS[order[0]]
+	for i in order:
+		var cand: Array = GK_COLORS[i]
+		var col := Color(String(cand[0]))
+		var ok := true
+		for u: Color in used:
+			if _color_dist(col, u) < 0.35:
+				ok = false
+				break
+		if ok:
+			pick = cand
+			break
+	var patterns := ["plain", "plain", "plain", "side_panels", "chevron", "pixels", "yoke"]
+	return {"pattern": patterns[rng.randi_range(0, patterns.size() - 1)], "c1": pick[0], "c2": pick[1], "c3": pick[1],
+		"collar": RngUtil.pick(rng, ["round", "v", "polo", "mandarin"]), "sleeve": "same" if rng.randf() < 0.6 else "contrast", "gk": true}
+
+
+static func _color_dist(a: Color, b: Color) -> float:
+	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
 
 
 ## Saves antigos: escudos no formato antigo (sem "field") viram os novos — os reais pelo banco

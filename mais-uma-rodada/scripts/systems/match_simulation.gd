@@ -70,11 +70,11 @@ const PK_MID := 7
 const PK_DEFEND := 8
 
 # --- Calibração (ver tests/season_simulator.gd) ---
-const BASE_CHANCE := 0.178 # prob. de chance por minuto de posse, times iguais
-const BETA := 0.0118 # sensibilidade da taxa de chances à diferença ATA×DEF (por ponto)
-const GAMMA := 0.0128 # sensibilidade da posse à diferença de meio-campo (por ponto)
-const DELTA := 0.003 # sensibilidade da qualidade da chance
-const EPS := 0.003 # finalizador × goleiro
+const BASE_CHANCE := 0.165 # prob. de chance por minuto de posse, times iguais
+const BETA := 0.06 # sensibilidade da taxa de chances à diferença ATA×DEF (por ponto)
+const GAMMA := 0.021 # sensibilidade da posse à diferença de meio-campo (por ponto)
+const DELTA := 0.007 # sensibilidade da qualidade da chance
+const EPS := 0.006 # finalizador × goleiro
 const HOME_CHANCE := 0.12 # empurrão da torcida na taxa de chances do mandante
 const AWAY_CHANCE := 0.06 # pressão sobre o visitante
 const FOUL_RATE := 0.235
@@ -82,6 +82,13 @@ const INJURY_RATE := 0.0014
 const FATIGUE_RATE := 0.17
 ## Desvio do "dia do time" (1,0 ± ~3,5%): times iguais podem ter jogos bem diferentes.
 const DAY_SIGMA := 0.035
+## Modificadores de tática, moral, forma, entrosamento e dia valem esta fração do efeito nominal: a
+## qualidade dos jogadores decide mais que os ajustes (senão jogar no ataque sempre compensa).
+const MOD_DAMP := 0.35
+
+
+static func damp(x: float) -> float:
+	return 1.0 + (x - 1.0) * MOD_DAMP
 ## Contra o time do usuário a IA se motiva mais conforme a dificuldade (fácil, normal, difícil).
 const USER_OPP_BOOST: Array[float] = [0.99, 1.01, 1.025]
 ## Força do efeito do placar (no começo do jogo e somado até o fim).
@@ -164,7 +171,7 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 	teams[0].home_f = 1.0 + adv * crowd * 0.5
 	teams[1].home_f = 1.0
 	for t: MatchTeam in teams:
-		t.day_f = clampf(rng.randfn(1.0, DAY_SIGMA), 0.93, 1.07)
+		t.day_f = clampf(rng.randfn(1.0, DAY_SIGMA), 0.93, 1.07) # entra no home_f, atenuado em refresh_factors
 	for side in 2:
 		if teams[side].is_user and not teams[1 - side].is_user:
 			teams[1 - side].day_f *= USER_OPP_BOOST[clampi(world.difficulty, 0, 2)]
@@ -195,8 +202,8 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.cohesion_base = 0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08
 	t.cohesion_f = t.cohesion_base * TacticsManager.fam_factor(club, sheet)
 	var um := TrainingManager.unit_mults(world, club)
-	t.train_att = float(um[0])
-	t.train_def = float(um[1])
+	t.train_att = damp(float(um[0]))
+	t.train_def = damp(float(um[1]))
 	var inj_m := TrainingManager.injury_mult(world, club.id)
 	var norms := DatabaseManager.formation_norms()
 	t.norm_def = float(norms["def"])
@@ -576,8 +583,15 @@ func _refresh_rates() -> void:
 		_rate_corner[s] = 0.04 * clampf(0.6 + att.width / 4.0, 0.6, 1.5)
 
 
+## Quanto a diferença ataque × defesa multiplica as chances: forte perto de zero (times de nível
+## parecido se separam bem) e cada vez mais suave nos extremos (goleada existe, mas 6 × 0 é raro).
+static func chance_mult(diff: float) -> float:
+	var d := signf(diff) * 12.0 * log(1.0 + absf(diff) / 12.0)
+	return exp(BETA * d)
+
+
 func _att_power(t: MatchTeam) -> float:
-	return t.u_att * t.m_att * (1.0 + t.style_fit)
+	return t.u_att * t.m_att * (1.0 + t.style_fit * MOD_DAMP)
 
 
 func _def_power(t: MatchTeam) -> float:
@@ -585,7 +599,7 @@ func _def_power(t: MatchTeam) -> float:
 
 
 func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
-	var p := BASE_CHANCE * exp(BETA * (_att_power(att) - _def_power(dfn)))
+	var p := BASE_CHANCE * chance_mult(_att_power(att) - _def_power(dfn))
 	p *= att.s_rate * att.g_rate
 	# Contra-ataque rende mais contra times que se lançam.
 	if att.style == TeamSheet.STYLE_CONTRA and (dfn.mentality >= 3 or dfn.style == TeamSheet.STYLE_POSSE or dfn.style == TeamSheet.STYLE_PRESSAO):

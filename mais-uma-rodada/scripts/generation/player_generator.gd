@@ -315,19 +315,23 @@ static func _pick_secondary(rng: RandomNumberGenerator, pos: int) -> Array:
 static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> int:
 	var gap := 0.0
 	if age <= 18:
-		gap = rng.randfn(10.0, 6.0)
+		gap = rng.randfn(9.0, 5.0)
 	elif age <= 20:
-		gap = rng.randfn(7.0, 5.0)
+		gap = rng.randfn(6.5, 4.2)
 	elif age <= 22:
-		gap = rng.randfn(4.5, 3.5)
+		gap = rng.randfn(4.0, 3.0)
 	elif age <= 24:
-		gap = rng.randfn(2.5, 2.5)
+		gap = rng.randfn(2.2, 2.0)
 	elif age <= 27:
-		gap = rng.randfn(1.0, 1.2)
-	if age <= 21 and rng.randf() < 0.02:
-		gap += rng.randf_range(8.0, 15.0) # joia rara
+		gap = rng.randfn(0.8, 1.0)
+	if age <= 20 and rng.randf() < 0.012:
+		gap += rng.randf_range(6.0, 12.0) # joia rara
 	gap = maxf(0.0, gap)
-	return clampi(ovr + int(round(gap)), ovr, 96)
+	# Acima de 85 cada ponto de potencial é mais raro (só os fenômenos passam de 90).
+	var pot := float(ovr) + gap
+	if pot > 85.0:
+		pot = 85.0 + (pot - 85.0) * 0.6
+	return clampi(int(round(pot)), ovr, 94)
 
 
 ## Potencial de um jovem da base, influenciado pela qualidade da base do clube e pela escola do país.
@@ -336,7 +340,10 @@ static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: i
 	var gem_chance := 0.004 + youth_level * 0.0002 + nation_bonus * 0.001
 	if rng.randf() < gem_chance:
 		gap += rng.randf_range(12.0, 20.0)
-	return clampi(ovr + int(round(maxf(2.0, gap))), ovr + 2, 95)
+	var pot := float(ovr) + maxf(2.0, gap)
+	if pot > 85.0:
+		pot = 85.0 + (pot - 85.0) * 0.6
+	return clampi(int(round(pot)), ovr + 2, 94)
 
 
 # ---------------------------------------------------------------------------
@@ -346,6 +353,7 @@ static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: i
 ## Gera o elenco inicial de um clube em torno do nível `level` (overall médio dos titulares).
 static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Club, level: float, used_names: Dictionary) -> void:
 	var arch: Dictionary = club.arch()
+	var hg_share := ClubPolicy.homegrown_share(club)
 	var young_share: float = arch.get("young_share", 0.2)
 	var veteran_share: float = arch.get("veteran_share", 0.2)
 	var slots: Array = SQUAD_TEMPLATE.duplicate()
@@ -377,13 +385,13 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	# Craques: clube grande tem 2–4 jogadores bem acima do resto; o médio, às vezes um ídolo
 	var n_stars := 0
 	if club.reputation >= 85.0:
-		n_stars = rng.randi_range(2, 4)
-	elif club.reputation >= 74.0:
 		n_stars = rng.randi_range(1, 3)
+	elif club.reputation >= 74.0:
+		n_stars = rng.randi_range(1, 2)
 	elif club.reputation >= 58.0:
-		n_stars = rng.randi_range(0, 2)
+		n_stars = rng.randi_range(0, 1)
 	else:
-		n_stars = 1 if rng.randf() < 0.45 else 0
+		n_stars = 1 if rng.randf() < 0.35 else 0
 	var starters: Array = []
 	for i in slots.size():
 		if slots[i][2] == 0:
@@ -396,29 +404,111 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 		var j := RngUtil.weighted_index(rng, star_w)
 		if j < 0:
 			break
-		boost[starters[j]] = rng.randf_range(3.5, 7.0) + (1.0 if k == 0 else 0.0)
+		boost[starters[j]] = rng.randf_range(2.5, 5.5) + (1.0 if k == 0 else 0.0)
 		star_w[j] = 0.0
 	for si in slots.size():
 		var s: Array = slots[si]
 		var pos: int = s[0]
 		var tier: int = s[2]
 		var age := _pick_age(rng, tier, young_share, veteran_share)
-		var target: float = level + float(s[1]) + rng.randfn(0.0, 2.6) + float(boost.get(si, 0.0))
+		if pos == Pos.GK and tier == 0:
+			age = clampi(int(round(rng.randfn(29.5, 3.3))), 22, 37) # goleiro titular costuma ser mais experiente
+		var pol_age := ClubPolicy.of(club)
+		if pol_age.has("buy_age_max") and tier <= 1:
+			age = mini(age, int(pol_age["buy_age_max"]) + (6 if pos == Pos.GK else 3)) # elenco jovem (Red Bull, Brighton...)
+		if pol_age.has("buy_age_min") and tier == 0:
+			age = maxi(age, int(pol_age["buy_age_min"]) + 1) # estrelas experientes
+		var target: float = level + float(s[1]) + rng.randfn(0.0, 2.4) + float(boost.get(si, 0.0))
 		if boost.has(si):
-			age = clampi(age, 22, 32)
-		if age <= 20:
-			target -= (21 - age) * 1.6
-		elif age >= 33:
-			target -= (age - 32) * 1.0
+			if pos == Pos.GK:
+				age = clampi(int(round(rng.randfn(29.5, 2.6))), 25, 34) # goleiro craque é experiente
+			else:
+				age = clampi(int(round(rng.randfn(27.0, 2.6))), 22, 31) # craques no auge
+		target -= age_penalty(age, pos)
 		var nat := pick_nationality(rng, club)
 		if nat != club.nation:
 			target += 1.5
-		target = clampf(target, 25.0, 93.0)
+		target = clampf(soft_cap(target, star_ceiling(club)), 25.0, 93.0)
 		# Craque quase sempre tem "assinatura"
 		var p := create(world, rng, pos, target, age, nat, club.city, used_names, 0.6 if boost.has(si) else SIGNATURE_CHANCE)
+		ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
 		sign_to_club(world, rng, p, club, true)
+		# Cria da casa: na carreira anterior ele só jogou aqui (formado na base)
+		if hg_share > 0.0 and age <= 31 and rng.randf() < hg_share:
+			p.joined_year = world.year - maxi(0, age - 18)
+	calibrate_xi(world, club, level)
 	assign_statuses(world, club)
 	assign_shirt_numbers(world, club)
+
+
+## Quanto a idade tira do nível de quem ainda não chegou (ou já passou) do auge.
+static func age_penalty(age: int, pos: int = -1) -> float:
+	if pos == Pos.GK:
+		# Goleiro amadurece mais tarde e dura mais: auge dos 27 aos 33.
+		if age <= 23:
+			return (24 - age) * 1.5
+		age = maxi(age - 3, 21)
+	if age <= 20:
+		return (21 - age) * 1.6
+	if age <= 30:
+		return 0.0
+	return [0.0, 0.6, 1.5, 2.8, 4.2, 5.8, 7.5][mini(age - 30, 6)]
+
+
+## Teto de um craque na liga: o melhor da liga fica ~6 acima do nível do clube mais forte dela.
+static func star_ceiling(club: Club) -> float:
+	var lr: Array = club.league_cfg().get("level", [55, 65])
+	return float(lr[1]) + 6.0
+
+
+## Acima do teto o nível cresce devagar (poucos chegam a 90 no mundo).
+static func soft_cap(target: float, ceiling: float) -> float:
+	var knee := ceiling - 5.0
+	if target <= knee:
+		return target
+	return knee + (target - knee) * 0.45
+
+
+## Média do time titular provável (melhor goleiro + 10 melhores de linha).
+static func xi_average(world: GameWorld, club: Club) -> float:
+	var gk := 0
+	var field: Array = []
+	for pid in club.player_ids:
+		var p := world.player(pid)
+		if p == null:
+			continue
+		if p.position == Pos.GK:
+			gk = maxi(gk, p.overall)
+		else:
+			field.append(p.overall)
+	field.sort()
+	field.reverse()
+	var s := float(gk)
+	for i in mini(10, field.size()):
+		s += float(field[i])
+	return s / float(1 + mini(10, field.size()))
+
+
+## Acerta o elenco inteiro para o time titular ter a média do nível do clube (a força que ele tem na
+## vida real): estrelas, estrangeiros e sorteio não podem inflar nem esvaziar o time.
+static func calibrate_xi(world: GameWorld, club: Club, level: float) -> void:
+	for _iter in 3:
+		var d := level - xi_average(world, club)
+		if absf(d) < 0.35:
+			return
+		var step := int(round(d))
+		if step == 0:
+			step = signi(int(signf(d)))
+		for pid in club.player_ids:
+			var p := world.player(pid)
+			if p == null:
+				continue
+			for i in Attr.COUNT:
+				if i == Attr.DIS or (i == Attr.GOL and p.position != Pos.GK):
+					continue
+				p.attrs[i] = clampi(p.attrs[i] + step, 1, 99)
+			p.recompute_overall()
+			p.potential = clampi(p.potential + step, p.overall, 94)
 
 
 static func _pick_age(rng: RandomNumberGenerator, tier: int, young_share: float, veteran_share: float) -> int:
@@ -516,12 +606,13 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	target = clampf(target, 22.0, 72.0)
 	var nat := club.nation if rng.randf() < 0.95 else pick_import(rng, club.nation)
 	var p := create(world, rng, pos, target, age, nat, club.city, used_names)
+	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
 	p.potential = youth_potential(rng, p.overall, club.youth_level, drift, nation_bonus)
 	p.squad_status = Player.STATUS_PROSPECT
 	sign_to_club(world, rng, p, club, false)
 	p.contract_end = world.year + 3
 	p.wage = Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5)))
-	if p.nationality == club.nation and rng.randf() < 0.55:
+	if p.nationality == club.nation and rng.randf() < 0.55 and not ClubPolicy.of(club).has("only"):
 		p.hometown = club.city
 	return p
 
@@ -548,5 +639,7 @@ static func league_level(club: Club) -> float:
 
 
 ## Nível-alvo do elenco de um clube (liga + reputação + arquétipo).
+## O arquétipo mexe pouco: a reputação já diz quão forte o clube é (e ninguém passa do teto da liga).
 static func club_level(club: Club) -> float:
-	return league_level(club) + float(club.arch().get("level_mod", 0.0))
+	var lr: Array = club.league_cfg().get("level", [55, 65])
+	return minf(league_level(club) + float(club.arch().get("level_mod", 0.0)) * 0.4, float(lr[1]) + 0.5)

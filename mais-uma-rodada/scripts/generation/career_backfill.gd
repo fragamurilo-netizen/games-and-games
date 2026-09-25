@@ -76,7 +76,19 @@ static func _context(world: GameWorld) -> Dictionary:
 		for e: Array in by_nation[nat]:
 			best = maxf(best, float(e[0]))
 		top[nat] = best
-	return {"nations": by_nation, "top": top, "champs": champs, "rows": {}, "wcache": {}}
+	# Seleções: o nível do 23º melhor jogador de cada nacionalidade é a linha de corte da convocação.
+	var by_nat := {}
+	for p: Player in world.players.values():
+		if not by_nat.has(p.nationality):
+			by_nat[p.nationality] = []
+		by_nat[p.nationality].append(p.overall)
+	var cut := {}
+	for nat in by_nat:
+		var arr: Array = by_nat[nat]
+		arr.sort()
+		arr.reverse()
+		cut[nat] = float(arr[mini(22, arr.size() - 1)])
+	return {"nations": by_nation, "top": top, "champs": champs, "rows": {}, "wcache": {}, "nt_cut": cut, "world": world}
 
 
 ## País onde ele jogava naquele ano: em casa enquanto cabe na liga de lá; quando fica bom
@@ -106,7 +118,7 @@ static func _pick_nation(rng: RandomNumberGenerator, ctx: Dictionary, home: Stri
 
 ## Clube do passado para quem tinha `level` de overall: um onde ele caberia no elenco.
 ## Os pesos por (país, nível desejado) ficam em cache: são milhares de jogadores.
-static func _pick_club(rng: RandomNumberGenerator, ctx: Dictionary, nation: String, level: float, role: float, avoid: Array) -> Array:
+static func _pick_club(rng: RandomNumberGenerator, ctx: Dictionary, nation: String, level: float, role: float, avoid: Array, p: Player = null) -> Array:
 	var pool: Array = ctx["nations"].get(nation, [])
 	if pool.is_empty():
 		return []
@@ -127,6 +139,8 @@ static func _pick_club(rng: RandomNumberGenerator, ctx: Dictionary, nation: Stri
 		var i := cw.bsearch(rng.randf() * cw[cw.size() - 1])
 		i = clampi(i, 0, pool.size() - 1)
 		var e2: Array = pool[i]
+		if int(e2[1]) >= 0 and p != null and not ClubPolicy.eligible(ctx["world"], ctx["world"].club(int(e2[1])), p):
+			continue # Athletic não teve estrangeiros no passado
 		if int(e2[1]) < 0 or not avoid.has(int(e2[1])):
 			return e2
 	return pool[rng.randi_range(0, pool.size() - 1)]
@@ -169,13 +183,16 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		var yr_age := age - (year - y2)
 		var lvl: float = ovr[y2]
 		var nation := _pick_nation(rng, ctx, home, cur.nation if cur != null else home, lvl, yr_age)
-		var span := 1 + RngUtil.weighted_index(rng, [30.0, 30.0, 22.0, 12.0])
+		var span := 1 + RngUtil.weighted_index(rng, [16.0, 26.0, 26.0, 18.0, 14.0])
 		if yr_age <= 19:
 			span = maxi(span, 2)
 		var role := rng.randfn(1.5 if yr_age >= 22 else -1.0, 3.0)
-		var club := _pick_club(rng, ctx, nation, lvl, role, avoid)
+		var club := _pick_club(rng, ctx, nation, lvl, role, avoid, p)
 		if club.is_empty():
 			break
+		# Clube grande segura seus jogadores: passagens longas (quem chega lá não sai a cada ano).
+		if float(club[0]) >= float(ctx["top"].get(nation, 99.0)) - 3.0:
+			span += rng.randi_range(1, 2)
 		# Empréstimo: o jovem do clube grande roda por um ano num menor
 		var loan := yr_age <= 22 and float(club[0]) < later_level - 3.0 and rng.randf() < 0.45
 		if loan:
@@ -193,7 +210,7 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 	# próximo do nível dele) quando o país tem clubes conhecidos
 	if plan.has(first_y) and String(plan[first_y][5]) != home and ctx["nations"].has(home) and rng.randf() < 0.85 \
 			and (cur == null or int(plan[first_y][0]) != cur.id):
-		var hc := _pick_club(rng, ctx, home, minf(float(ovr[first_y]), float(ctx["top"][home])), 0.5, [])
+		var hc := _pick_club(rng, ctx, home, minf(float(ovr[first_y]), float(ctx["top"][home])), 0.5, [], p)
 		if not hc.is_empty():
 			plan[first_y] = [int(hc[1]), String(hc[2]), String(hc[3]), float(hc[0]), false, home]
 	# Temporadas
@@ -203,10 +220,11 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 	for y in ys:
 		var e: Array = plan[y]
 		var row := _season_row(rng, p, y, e, float(ovr.get(y, p.overall)), float(ovr.get(y - 1, float(ovr.get(y, p.overall)) - 1.0)), age - (year - y))
+		_cup_games(rng, ctx, row, e)
 		hist.append(row)
-		p.career_apps += int(row["a"])
-		p.career_goals += int(row["g"])
-		p.career_assists += int(row["as"])
+		p.career_apps += int(row["a"]) + int(row.get("ca", 0))
+		p.career_goals += int(row["g"]) + int(row.get("cg", 0))
+		p.career_assists += int(row["as"]) + int(row.get("cas", 0))
 		# Títulos do clube naquele ano (tendo jogado)
 		var cid := int(e[0])
 		if cid >= 0 and int(row["a"]) >= 5:
@@ -245,7 +263,71 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		spells.append(open)
 		p.joined_year = int(open["from"])
 	p.spells = spells
+	_national_caps(world, rng, ctx, p, ovr, age)
 	_earned_traits(rng, p, year, age)
+
+
+## Jogos de copa (nacional e continental) numa temporada do passado: quem joga no clube mais forte
+## do país disputa mais competições. Como na vida real, um titular de clube grande passa dos 50 jogos.
+static func _cup_games(rng: RandomNumberGenerator, ctx: Dictionary, row: Dictionary, e: Array) -> void:
+	var apps := int(row["a"])
+	if apps <= 0:
+		return
+	var nation := String(e[5])
+	var top := float(ctx["top"].get(nation, float(e[3])))
+	var big := clampf(1.0 - (top - float(e[3])) / 8.0, 0.0, 1.0) # 1 = um dos grandes do país
+	var ratio := rng.randf_range(0.12, 0.22) + big * rng.randf_range(0.12, 0.3)
+	var ca := int(round(apps * ratio))
+	if ca <= 0:
+		return
+	var per_g := float(row["g"]) / maxf(1.0, apps)
+	var per_a := float(row["as"]) / maxf(1.0, apps)
+	row["ca"] = ca
+	row["cg"] = _poisson(rng, ca * per_g)
+	row["cas"] = _poisson(rng, ca * per_a)
+
+
+## Jogos e gols pela seleção antes do jogo começar: todo ano em que ele estava entre os melhores do
+## país (acima da linha de corte da convocação), entra na lista — titular joga quase todas as datas.
+static func _national_caps(world: GameWorld, rng: RandomNumberGenerator, ctx: Dictionary, p: Player, ovr: Dictionary, age: int) -> void:
+	var cut := float(ctx["nt_cut"].get(p.nationality, 99.0))
+	var caps := 0
+	var goals := 0
+	var per_goal := 0.0
+	match Pos.group(p.position):
+		Pos.G_GK:
+			per_goal = 0.0
+		Pos.G_DEF:
+			per_goal = 0.04
+		Pos.G_MID:
+			per_goal = 0.07 + maxf(0.0, float(p.attrs[Attr.FIN]) - 60.0) * 0.004
+		_:
+			per_goal = 0.18 + maxf(0.0, float(p.attrs[Attr.FIN]) - 60.0) * 0.009
+	if p.position in [Pos.AM, Pos.RW, Pos.LW]:
+		per_goal *= 0.8
+	var ys: Array = ovr.keys()
+	ys.sort()
+	for y in ys:
+		var a := age - (world.year - int(y))
+		if a < 19:
+			continue
+		# A linha de corte de anos atrás é a de hoje (o país não muda tanto de nível).
+		var rel := float(ovr[y]) - cut
+		var n := 0
+		if rel >= 4.0:
+			n = rng.randi_range(7, 11)
+		elif rel >= 1.5:
+			n = rng.randi_range(4, 9)
+		elif rel >= 0.0:
+			n = rng.randi_range(1, 5)
+		elif rel >= -2.0 and rng.randf() < 0.3:
+			n = rng.randi_range(1, 2)
+		if p.position == Pos.GK and rel < 3.0:
+			n = int(n * 0.4) # o reserva do goleiro quase não entra
+		caps += n
+		goals += _poisson(rng, n * per_goal)
+	if caps > 0:
+		NationalTeamManager.data(world)["pl"][p.id] = [caps, goals]
 
 
 ## Traços que se ganham com a estrada: ídolo de quem tem anos de clube, cascudo de quem já

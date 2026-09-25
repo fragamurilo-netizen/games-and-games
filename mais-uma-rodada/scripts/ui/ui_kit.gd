@@ -268,9 +268,9 @@ static func text_badge(text: String, color: Color, w: int = 60, h: int = 34, fs:
 
 
 ## Costas da camisa do clube com o número (no lugar de "camisa 10").
-static func shirt_back(club: Club, number: int, px: int, away: bool = false) -> KitView:
+static func shirt_back(club: Club, number: int, px: int, away: bool = false, goalkeeper: bool = false) -> KitView:
 	var k := KitView.new()
-	var kd: Dictionary = (club.kit_away if away else club.kit_home) if club != null else {}
+	var kd: Dictionary = (club.gk_kit() if goalkeeper else (club.kit_away if away else club.kit_home)) if club != null else {}
 	k.kit = kd if not kd.is_empty() else {"pattern": "plain", "c1": "#2A3A50", "c2": "#FFFFFF"}
 	k.back = true
 	k.number = number
