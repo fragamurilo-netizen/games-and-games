@@ -1,0 +1,47 @@
+<wpml-config>
+    <admin-texts>
+        <key name="gamxo">
+            <key name="address_label" />
+            <key name="phone" />
+            <key name="topbar_menu" />
+            <key name="email" />
+            <key name="address" />		
+            <key name="sidetext_label" />       
+            <key name="sidetext" />       
+            <key name="social_label" />        			
+            <key name="copyright_text" /> 
+            <key name="ticker_title_text" /> 
+            <key name="scroll_indicator_position" /> 
+            <key name="related_title" />
+            <key name="team_form_title" />
+            <key name="team_related_title" />
+            <key name="error_text1" />
+            <key name="error_text2" />
+            <key name="error_buttontext" />	
+            <key name="team_slug" />          			
+            <key name="team_cat_slug" />
+        </key>
+    </admin-texts>
+	<custom-types>
+        <custom-type translate="1">gamxo_team</custom-type>
+    </custom-types>
+    <taxonomies>
+        <taxonomy translate="1">gamxo_team_category</taxonomy>
+    </taxonomies>
+	<custom-fields>
+       <custom-field action="translate">gamxo_post_layout</custom-field>
+       <custom-field action="translate">gamxo_youtube_link</custom-field>
+       <custom-field action="translate">gamxo_team_position</custom-field>
+       <custom-field action="translate">gamxo_team_website</custom-field>
+       <custom-field action="translate">gamxo_team_email</custom-field>
+       <custom-field action="translate">gamxo_team_phone</custom-field>
+       <custom-field action="translate">gamxo_team_address</custom-field>
+       <custom-field action="translate">gamxo_team_socials_header</custom-field>
+       <custom-field action="translate">gamxo_team_skill</custom-field>
+       <custom-field action="translate">skill_name</custom-field>
+       <custom-field action="translate">skill_value</custom-field>
+       <custom-field action="translate">skill_color</custom-field>
+       <custom-field action="translate">gamxo_team_contact</custom-field>
+       <custom-field action="translate">gamxo_team_contact_form</custom-field>
+   </custom-fields>
+</wpml-config>

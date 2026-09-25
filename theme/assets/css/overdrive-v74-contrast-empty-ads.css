@@ -1,0 +1,38 @@
+html[data-theme="light-mode"] body.go-verge .go-subject-type-filters a:hover,
+html[data-theme="light-mode"] body.go-verge .go-subject-type-filters a:focus-visible,
+html[data-theme="light"] body.go-verge .go-subject-type-filters a:hover,
+html[data-theme="light"] body.go-verge .go-subject-type-filters a:focus-visible{background:#EEE5FF!important;border-color:#7900FF!important;color:#6200CE!important;-webkit-text-fill-color:#6200CE!important}html[data-theme="light-mode"] body.go-verge .go-subject-type-filters a:hover span,
+html[data-theme="light-mode"] body.go-verge .go-subject-type-filters a:focus-visible span,
+html[data-theme="light"] body.go-verge .go-subject-type-filters a:hover span,
+html[data-theme="light"] body.go-verge .go-subject-type-filters a:focus-visible span{color:#6200CE!important;-webkit-text-fill-color:#6200CE!important;background:rgba(121,0,255,.10)!important}html[data-theme="light-mode"] body.go-verge :where(
+	.go-product-action,
+	.go-topicbar__actions a,
+	.go-topicbar__actions button,
+	.go-follow-dialog__close,
+	.go-btn,
+	.go-filter-chip,
+	.go-chip
+):is(:hover,:focus-visible),
+html[data-theme="light"] body.go-verge :where(
+	.go-product-action,
+	.go-topicbar__actions a,
+	.go-topicbar__actions button,
+	.go-follow-dialog__close,
+	.go-btn,
+	.go-filter-chip,
+	.go-chip
+):is(:hover,:focus-visible){color:#6200CE!important;-webkit-text-fill-color:#6200CE!important}html[data-theme="light-mode"] body.go-verge :where(
+	.go-header-social__menu,
+	.go-header__dropdown,
+	.go-nav-dropdown,
+	.go-menu-popover,
+	.go-share-menu
+) :where(a,button):is(:hover,:focus-visible),
+html[data-theme="light"] body.go-verge :where(
+	.go-header-social__menu,
+	.go-header__dropdown,
+	.go-nav-dropdown,
+	.go-menu-popover,
+	.go-share-menu
+) :where(a,button):is(:hover,:focus-visible){background:#EEE5FF!important;color:#6200CE!important;-webkit-text-fill-color:#6200CE!important}html[data-theme="light-mode"] body.go-verge :where(.go-entity-hero-v40__actions,.go-topic-hub-v21__actions) :where(a,button):is(:hover,:focus-visible),
+html[data-theme="light"] body.go-verge :where(.go-entity-hero-v40__actions,.go-topic-hub-v21__actions) :where(a,button):is(:hover,:focus-visible){color:#6200CE!important;-webkit-text-fill-color:#6200CE!important}

@@ -1,0 +1,38 @@
+/*
+ * Overdrive 5.6.5 — Clever, first-paint geometry. Printed inline in the head by
+ * inc/ads/clever.php (never enqueued, so the style bundle never folds it in).
+ * __CLEVER_ID__ is replaced with the Clever script ID.
+ */
+
+/* 320x50 strip: reserved only on the phone pageview that opens Clever's rotation. */
+.go-clever-anchor-slot{display:none}
+@media (max-width:767px){
+	html[data-go-first-access="1"]:not([data-go-clever-anchor]) body.go-verge>.go-clever-anchor-slot{display:block;box-sizing:border-box;width:100%;height:50px;margin:0;padding:0;background:#111015}
+	html[data-theme="light-mode"][data-go-first-access="1"]:not([data-go-clever-anchor]) body.go-verge>.go-clever-anchor-slot{background:#FAF8F6}
+}
+/* The anchor takes the strip's place in the same frame. Its own rule: a browser
+ * without :has() drops this line only; the controller covers it a microtask later. */
+body:has(>[id^="clever-__CLEVER_ID__-"][id$="-stickySponsorClick"])>.go-clever-anchor-slot{display:none!important}
+
+/* Clever's 320x50 anchor: in normal flow at the very top, above Top Scroll —
+ * never fixed over the article, the menu or Google's own anchor. */
+body>[id^="clever-__CLEVER_ID__-"][id$="-stickySponsorClick"],
+body>[id^="clever-__CLEVER_ID__-"][id$="-stickySponsorClickTop"]{position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;left:50%!important;transform:translateX(-50%)!important;z-index:1!important;margin:0!important;max-width:100%!important}
+html[data-go-clever-anchor="closed"] body>[id^="clever-__CLEVER_ID__-"][id$="-stickySponsorClick"],
+html[data-go-clever-anchor="closed"] body>[id^="clever-__CLEVER_ID__-"][id$="-stickySponsorClickTop"]{display:none!important}
+
+/* Top Scroll on that same pageview: exact 300x250, "Publicidade" 8px above the
+ * creative, 12px before the masthead. 36 + 250 + 12 = 298px, against 308-401px
+ * for the responsive unit, so strip + Top Scroll stays below today's height. */
+@media (max-width:767px){
+	html[data-go-first-access="1"] body.go-verge>.go-adsense-topscroll:not([data-go-ad-variant="normal"]){padding:36px 0 12px;min-height:var(--go-ad-resolved-reserve,298px)}
+	html[data-go-first-access="1"] body.go-verge>.go-adsense-topscroll:not([data-go-ad-variant="normal"])>.go-ad-slot__label{inset-block-start:8px}
+	html[data-go-first-access="1"] body.go-verge>.go-adsense-topscroll:not([data-go-ad-variant="normal"])>.go-ad-slot__dismiss{inset-block-start:4px;inline-size:26px;block-size:26px}
+}
+
+/* 300x250 host: zero height until Clever puts a creative in it. */
+.go-clever-slot{display:none}
+.go-clever-slot[data-go-clever-state="filled"]{display:block;clear:both;box-sizing:border-box;width:100%;max-width:100%;margin:28px auto;padding:0;text-align:center}
+.go-clever-slot__label{display:block;margin:0 auto 8px;color:var(--go-ad-label-color,#8b8595);font:600 10px/1.4 "Source Sans 3",Arial,sans-serif;letter-spacing:.07em;text-transform:uppercase}
+.go-clever-slot__mount{display:block;min-height:250px}
+.go-archive-aside>.go-clever-slot[data-go-clever-state="filled"]{grid-column:1/-1;margin:0}

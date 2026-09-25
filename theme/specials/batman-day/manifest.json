@@ -1,0 +1,11 @@
+{
+  "id": "batman-day",
+  "name": "Batman: a história do morcego",
+  "version": "1.1.0",
+  "description": "Especial de Gregory Felipe com a história de Batman, catálogos, linha do tempo e imagens locais.",
+  "content_mode": "file",
+  "content": "content.html",
+  "style": "style.css",
+  "script": "script.js",
+  "auto_slugs": []
+}

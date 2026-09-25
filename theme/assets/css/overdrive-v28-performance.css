@@ -1,0 +1,6 @@
+@media (max-width: 900px), (prefers-reduced-motion: reduce){html[data-theme="light-mode"] body.go-verge,
+  html[data-theme="light"] body.go-verge,
+  html[data-theme="dark-mode"] body.go-verge,
+  html[data-theme="dark"] body.go-verge,
+  html[data-theme="light-mode"] body.go-verge.go-has-editorial-background[class],
+  html[data-theme="dark-mode"] body.go-verge.go-has-editorial-background[class]{background-attachment:scroll!important}body.go-verge::before{position:absolute!important;min-height:100%;background-attachment:scroll!important}}

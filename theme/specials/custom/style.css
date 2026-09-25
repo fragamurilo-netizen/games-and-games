@@ -1,0 +1,19 @@
+/* Overdrive — base neutra para especiais personalizados. */
+body.go-special-active { overflow-x: hidden; }
+body.go-special-active .go-special-page {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.go-special-custom-root {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.go-special-custom-root *,
+.go-special-custom-root *::before,
+.go-special-custom-root *::after { box-sizing: border-box; }

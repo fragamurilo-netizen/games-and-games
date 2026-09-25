@@ -1,0 +1,92 @@
+html body.single-post.go-verge [data-go-article-layout="portal"]:not([data-go-article-layout-variant="scored-masthead"]) > .go-article__posthero-bar.go-article__posthero-bar--reader-tools,
+html body.single-post.go-verge [data-go-article-layout="portal"]:not([data-go-article-layout-variant="scored-masthead"]) .go-article__posthero-bar.go-article__posthero-bar--reader-tools{border-top:0!important;border-top-width:0!important;border-top-color:transparent!important;border-bottom:1px solid rgba(255,255,255,.065)!important;box-shadow:none!important}html[data-theme="light-mode"] body.single-post.go-verge [data-go-article-layout="portal"]:not([data-go-article-layout-variant="scored-masthead"]) > .go-article__posthero-bar.go-article__posthero-bar--reader-tools,
+html[data-theme="light"] body.single-post.go-verge [data-go-article-layout="portal"]:not([data-go-article-layout-variant="scored-masthead"]) > .go-article__posthero-bar.go-article__posthero-bar--reader-tools{border-bottom-color:rgba(15,23,42,.085)!important}body.single-post.go-verge .go-article__posthero-bar--reader-tools::before,
+body.single-post.go-verge .go-article__posthero-bar--reader-tools::after{content:none!important;display:none!important}body.go-verge::before{content:none!important;display:none!important}html[data-theme="light-mode"] body.go-verge,
+html[data-theme="light"] body.go-verge,
+html[data-theme="light-mode"] body.go-verge[class],
+html[data-theme="light"] body.go-verge[class]{background-color:#FAF8F6!important;background-image:var(--od471-light-canvas,radial-gradient(ellipse at 16% -10%,#fff 0%,#FAF8F6 38%,transparent 70%),radial-gradient(ellipse at 92% 0%,rgba(198,163,255,.14) 0%,transparent 42%),linear-gradient(#FAF8F6,#FAF8F6))!important;background-attachment:fixed!important;background-repeat:no-repeat!important;background-size:cover!important;background-position:center top!important}html[data-theme="dark-mode"] body.go-verge,
+html[data-theme="dark"] body.go-verge,
+html[data-theme="dark-mode"] body.go-verge[class],
+html[data-theme="dark"] body.go-verge[class]{background-color:#111015!important;background-image:var(--od471-dark-canvas,radial-gradient(ellipse at 24% -8%,#302C37 0%,#24212B 44%,transparent 72%),radial-gradient(ellipse at 90% 0%,rgba(198,163,255,.11) 0%,transparent 42%),linear-gradient(#12141a,#0c111a))!important;background-attachment:fixed!important;background-repeat:no-repeat!important;background-size:cover!important;background-position:center top!important}body.go-verge :where(
+  #page,.site,.go-site,.site-content,#content,.content-area,.site-main,.go-main,#primary.go-main,
+  .go-home,.go-home-main,.go-editorial-zone,.go-editorial-hub,.go-archive-page,.go-review-index,
+  .go-latest-page,.go-games-hub,.go-author-page,.go-page-shell,.go-category-page,.go-taxonomy-page
+){background-color:transparent!important;background-image:none!important}body.go-verge.go-has-editorial-background:not(.single-post),
+body.go-verge.go-has-editorial-background:not(.single-post)[class],
+body.go-verge.post-type-archive-games .go-main.go-editorial-zone--games,
+body.go-verge.go-review-index .go-main.go-review-index--review,
+body.go-verge.go-critique-index .go-main,
+body.go-verge .go-main.go-editorial-zone{background-color:transparent!important;background-image:none!important}body.post-type-archive-games.go-verge .go-main.go-editorial-zone--games{padding-top:0!important}body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(240px,320px)!important;column-gap:clamp(24px,4vw,56px)!important;row-gap:12px!important;align-items:end!important;width:100%!important;max-width:var(--container)!important;margin:0 auto!important;padding-top:clamp(28px,4vw,52px)!important;padding-bottom:clamp(14px,2vw,24px)!important;padding-inline:var(--pad)!important}body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search > .go-breadcrumbs{grid-column:1/-1!important;margin:0 0 6px!important;padding:0!important;align-self:auto!important}body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search .go-pagehead__title{grid-column:1!important;margin:0!important;padding:0!important;align-self:end!important}body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search .go-editorial-search{grid-column:2!important;align-self:end!important;width:100%!important;max-width:320px!important;margin:0!important}body.post-type-archive-games.go-verge .go-archive-page.go-section{width:100%!important;max-width:var(--container)!important;margin-inline:auto!important;padding-top:44px!important;padding-inline:var(--pad)!important}body.post-type-archive-games.go-verge .go-archive-hero{margin-top:0!important}@media (max-width:760px){body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search{grid-template-columns:1fr!important;row-gap:14px!important}body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search > .go-breadcrumbs,
+  body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search .go-pagehead__title,
+  body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search .go-editorial-search{grid-column:1!important}body.post-type-archive-games.go-verge .go-pagehead.go-pagehead--search .go-editorial-search{width:min(100%,360px)!important;max-width:360px!important}}html[data-theme="light-mode"] body.go-verge :is(
+  .go-chips--filter a,
+  .go-category-access__filters a,
+  .go-offers-filters a,
+  .go-filter-chip,
+  .go-latest-filter,
+  .go-review-genre-filters a,
+  .go-game-coverage__filters button,
+  .go-launch-toolbar .go-btn,
+  .go-search-filter,
+  .go-coupon-center__filters button
+),
+html[data-theme="light"] body.go-verge :is(
+  .go-chips--filter a,
+  .go-category-access__filters a,
+  .go-offers-filters a,
+  .go-filter-chip,
+  .go-latest-filter,
+  .go-review-genre-filters a,
+  .go-game-coverage__filters button,
+  .go-launch-toolbar .go-btn,
+  .go-search-filter,
+  .go-coupon-center__filters button
+){background:#ffffff!important;border-color:#aeb7c2!important;color:#18202b!important;-webkit-text-fill-color:#18202b!important;opacity:1!important;text-shadow:none!important}html[data-theme="light-mode"] body.go-verge :is(
+  .go-chips--filter a.is-active,.go-chips--filter a[aria-current="page"],
+  .go-category-access__filters a.is-active,.go-offers-filters a.is-active,.go-filter-chip.is-active,
+  .go-latest-filter.is-active,.go-latest-filter[aria-current="page"],
+  .go-review-genre-filters a.is-active,.go-game-coverage__filters button.is-active,
+  .go-launch-toolbar .go-btn--mint,.go-search-filter.is-active,.go-search-filter[aria-current="page"],
+  .go-coupon-center__filters button.is-active
+),
+html[data-theme="light"] body.go-verge :is(
+  .go-chips--filter a.is-active,.go-chips--filter a[aria-current="page"],
+  .go-category-access__filters a.is-active,.go-offers-filters a.is-active,.go-filter-chip.is-active,
+  .go-latest-filter.is-active,.go-latest-filter[aria-current="page"],
+  .go-review-genre-filters a.is-active,.go-game-coverage__filters button.is-active,
+  .go-launch-toolbar .go-btn--mint,.go-search-filter.is-active,.go-search-filter[aria-current="page"],
+  .go-coupon-center__filters button.is-active
+){background:#7900FF!important;border-color:#7900FF!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;text-shadow:none!important;box-shadow:none!important}html[data-theme="light-mode"] body.go-verge :is(
+  .go-chips--filter a,.go-category-access__filters a,.go-offers-filters a,.go-filter-chip,
+  .go-latest-filter,.go-review-genre-filters a,.go-game-coverage__filters button,
+  .go-launch-toolbar .go-btn,.go-search-filter,.go-coupon-center__filters button
+) *,
+html[data-theme="light"] body.go-verge :is(
+  .go-chips--filter a,.go-category-access__filters a,.go-offers-filters a,.go-filter-chip,
+  .go-latest-filter,.go-review-genre-filters a,.go-game-coverage__filters button,
+  .go-launch-toolbar .go-btn,.go-search-filter,.go-coupon-center__filters button
+) *{color:inherit!important;-webkit-text-fill-color:currentColor!important}html[data-theme="light-mode"] body.go-verge :is(
+  .go-chips--filter a,.go-category-access__filters a,.go-offers-filters a,.go-filter-chip,
+  .go-latest-filter,.go-review-genre-filters a,.go-game-coverage__filters button,
+  .go-launch-toolbar .go-btn,.go-search-filter,.go-coupon-center__filters button
+):hover,
+html[data-theme="light"] body.go-verge :is(
+  .go-chips--filter a,.go-category-access__filters a,.go-offers-filters a,.go-filter-chip,
+  .go-latest-filter,.go-review-genre-filters a,.go-game-coverage__filters button,
+  .go-launch-toolbar .go-btn,.go-search-filter,.go-coupon-center__filters button
+):hover{background:#EEE5FF!important;border-color:#7900FF!important;color:#6200CE!important;-webkit-text-fill-color:#6200CE!important}html[data-theme="light-mode"] body.go-verge :is(
+  .go-chips--filter a.is-active,.go-chips--filter a[aria-current="page"],
+  .go-category-access__filters a.is-active,.go-offers-filters a.is-active,.go-filter-chip.is-active,
+  .go-latest-filter.is-active,.go-latest-filter[aria-current="page"],
+  .go-review-genre-filters a.is-active,.go-game-coverage__filters button.is-active,
+  .go-launch-toolbar .go-btn--mint,.go-search-filter.is-active,.go-search-filter[aria-current="page"],
+  .go-coupon-center__filters button.is-active
+):is(:hover,:focus-visible),
+html[data-theme="light"] body.go-verge :is(
+  .go-chips--filter a.is-active,.go-chips--filter a[aria-current="page"],
+  .go-category-access__filters a.is-active,.go-offers-filters a.is-active,.go-filter-chip.is-active,
+  .go-latest-filter.is-active,.go-latest-filter[aria-current="page"],
+  .go-review-genre-filters a.is-active,.go-game-coverage__filters button.is-active,
+  .go-launch-toolbar .go-btn--mint,.go-search-filter.is-active,.go-search-filter[aria-current="page"],
+  .go-coupon-center__filters button.is-active
+):is(:hover,:focus-visible){background:#7900FF!important;border-color:#7900FF!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}

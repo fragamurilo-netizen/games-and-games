@@ -1,0 +1,14 @@
+# Overdrive
+
+> Mapa opcional de interoperabilidade para agentes. Este arquivo não é requisito de Google Search, Google Discover, AI Overviews ou AI Mode e não substitui robots.txt, sitemap XML, canonical ou dados estruturados.
+
+- Site: https://gameoverdrive.com.br/
+- Últimas publicações: https://gameoverdrive.com.br/ultimas-publicacoes/
+- Notícias: https://gameoverdrive.com.br/noticias/
+- Games: https://gameoverdrive.com.br/games/
+- Entretenimento: https://gameoverdrive.com.br/entretenimento/
+- Tecnologia: https://gameoverdrive.com.br/tecnologia/
+- Política editorial: https://gameoverdrive.com.br/politica-editorial/
+- Contato: https://gameoverdrive.com.br/contato/
+- Sitemap principal: https://gameoverdrive.com.br/sitemap.xml
+- Google News sitemap: https://gameoverdrive.com.br/news-sitemap.xml

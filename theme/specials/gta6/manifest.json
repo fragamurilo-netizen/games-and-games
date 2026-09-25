@@ -1,0 +1,13 @@
+{
+  "id": "gta6",
+  "name": "GTA VI — Guia Definitivo",
+  "version": "1.4.0",
+  "description": "Especial editorial de GTA VI em português do Brasil, com texto longform revisado para leitura natural, menos microcopy e melhor equilíbrio entre Search, Discover e voz jornalística.",
+  "content_mode": "file",
+  "content": "content.html",
+  "style": "style.css",
+  "auto_slugs": [
+    "gta-6-guia-completo",
+    "gta-6-guia-definitivo"
+  ]
+}

@@ -1,0 +1,16 @@
+<?php
+/** Template Name: Lançamentos */
+if(!defined('ABSPATH')){exit;} get_header();
+$now=current_time('timestamp');$end=$now+370*DAY_IN_SECONDS;
+$games=get_posts(array('post_type'=>'games','post_status'=>'publish','posts_per_page'=>300,'orderby'=>'title','order'=>'ASC'));
+$months=array();
+foreach($games as $game){$data=go_verge_game_data($game->ID);$ts=go_verge_game_release_timestamp($data['release_date']);if(!$ts||$ts<$now-DAY_IN_SECONDS||$ts>$end){continue;}$key=wp_date('Y-m',$ts);$months[$key][]=array('post'=>$game,'data'=>$data,'ts'=>$ts);}
+ksort($months);foreach($months as &$month_items){usort($month_items,static function($a,$b){return $a['ts']<=>$b['ts'];});}unset($month_items);
+?>
+<main id="primary" class="go-main"><div class="go-container go-pagehead"><?php go_verge_breadcrumbs(); ?><h1 class="go-pagehead__title">Lançamentos</h1></div>
+<div class="go-container go-section"><div class="go-launch-toolbar" data-go-launch-filters><button class="go-btn go-btn--mint" data-platform="all">Todos</button><?php foreach(array('playstation'=>'PlayStation','xbox'=>'Xbox','nintendo'=>'Nintendo','pc'=>'PC','mobile'=>'Mobile') as $key=>$label): ?><button class="go-btn" data-platform="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></button><?php endforeach; ?></div>
+<?php if(!$months): ?><p class="go-product-empty">Nenhum lançamento com data cadastrada para os próximos meses.</p><?php endif; ?>
+<?php foreach($months as $month=>$items): $month_ts=go_verge_game_release_timestamp($month.'-01'); ?><section class="go-launch-month"><h2 class="go-section__title"><?php echo esc_html(ucfirst(wp_date('F \d\e Y',$month_ts,wp_timezone()))); ?></h2><div class="go-launch-list"><?php foreach($items as $item): $game=$item['post'];$data=$item['data'];$platforms=strtolower(remove_accents($data['platforms']));$tokens=array();if(strpos($platforms,'playstation')!==false||strpos($platforms,'ps5')!==false||strpos($platforms,'ps4')!==false)$tokens[]='playstation';if(strpos($platforms,'xbox')!==false)$tokens[]='xbox';if(strpos($platforms,'nintendo')!==false||strpos($platforms,'switch')!==false)$tokens[]='nintendo';if(preg_match('/\bpc\b|steam|windows/',$platforms))$tokens[]='pc';if(preg_match('/mobile|android|ios|iphone|ipad/',$platforms))$tokens[]='mobile'; ?>
+<article class="go-launch-item" data-go-launch-item data-platforms="<?php echo esc_attr(implode(' ',$tokens)); ?>"><time class="go-launch-item__date" datetime="<?php echo esc_attr(wp_date('Y-m-d',$item['ts'])); ?>"><?php echo esc_html(wp_date('d M',$item['ts'])); ?></time><a class="go-launch-item__media" href="<?php echo esc_url(get_permalink($game)); ?>"><?php echo get_the_post_thumbnail($game,'go_card',array('loading'=>'lazy','width'=>100,'height'=>70)); ?></a><div class="go-launch-item__body"><h3><a href="<?php echo esc_url(get_permalink($game)); ?>"><?php echo esc_html(get_the_title($game)); ?></a></h3><?php if($data['platforms']): ?><p><?php echo esc_html($data['platforms']); ?></p><?php endif; ?></div><a class="go-launch-item__link" href="<?php echo esc_url(get_permalink($game)); ?>" aria-label="<?php echo esc_attr(sprintf(__('Abrir %s','go-verge'),get_the_title($game))); ?>"><span aria-hidden="true">→</span></a></article>
+<?php endforeach; ?></div></section><?php endforeach; ?></div></main>
+<?php get_footer();
