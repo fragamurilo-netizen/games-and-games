@@ -404,7 +404,7 @@ static func _move_loan(world: GameWorld, p: Player, owner: Club, borrower: Club)
 	p.club_id = borrower.id
 	p.loan = {"from": owner.id, "until": world.year}
 	p.transfer_listed = false
-	p.spells.append({"c": borrower.id, "cn": borrower.short_name + " (empr.)", "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0})
+	p.spells.append({"c": borrower.id, "cn": borrower.short_name + " (empr.)", "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0, "k": "e"})
 	if borrower.sheet != null and world.is_user_club(owner.id):
 		pass
 	for o: TransferOffer in world.offers:
@@ -476,7 +476,8 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	p.release_clause = 0
 	p.retiring = false
 	p.morale = clampf(p.morale + 10.0, 0.0, 100.0)
-	p.spells.append({"c": buyer.id, "cn": buyer.short_name, "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0})
+	p.spells.append({"c": buyer.id, "cn": buyer.short_name, "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0,
+		"fee": fee, "k": "c" if seller != null and fee > 0 else "l"})
 	_set_status_on_arrival(world, p, buyer)
 	world.mark_free_agents_dirty()
 	Valuation.update_value(p, world.year)

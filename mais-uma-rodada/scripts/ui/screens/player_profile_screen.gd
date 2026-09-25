@@ -3,6 +3,8 @@ extends BaseScreen
 ## depois atributos, personalidade e histórico.
 
 var _pid := -1
+var _tab := "geral"
+const TABS := [["geral", "Visão geral"], ["numeros", "Números"], ["carreira", "Carreira"]]
 
 
 func _init() -> void:
@@ -11,7 +13,10 @@ func _init() -> void:
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
-	_pid = int(p.get("id", -1))
+	var np := int(p.get("id", -1))
+	if np != _pid:
+		_tab = String(p.get("tab", "geral"))
+	_pid = np
 
 
 func refresh() -> void:
@@ -32,16 +37,38 @@ func refresh() -> void:
 	screen_subtitle = club.short_name if club != null else "Sem clube"
 	UIManager.refresh_chrome()
 	c.add_child(_header(w, p, club))
-	c.add_child(_summary(w, p, own))
-	c.add_child(_fit_card(w, p, own))
-	c.add_child(_positions_card(w, p, own))
-	c.add_child(_attributes(w, p, own))
-	c.add_child(_personality(p, own))
-	if own:
-		c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
-	c.add_child(_stats(w, p))
-	c.add_child(_memory(w, p))
+	c.add_child(_tabs_row(p))
+	match _tab:
+		"numeros":
+			c.add_child(_stats(w, p))
+		"carreira":
+			c.add_child(_career(w, p))
+			c.add_child(_memory(w, p))
+		_:
+			c.add_child(_summary(w, p, own))
+			c.add_child(_fit_card(w, p, own))
+			c.add_child(_positions_card(w, p, own))
+			c.add_child(_attributes(w, p, own))
+			c.add_child(_personality(p, own))
+			if own:
+				c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
 	_actions(w, p, own)
+
+
+func _tabs_row(p: Player) -> Control:
+	var row := UIKit.hbox(8)
+	var g := ButtonGroup.new()
+	for t in TABS:
+		var key: String = t[0]
+		var ch := UIKit.chip(t[1], key == _tab, g, func():
+			_tab = key
+			refresh()
+			scroll_to_top())
+		ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(ch)
+	var pid := p.id
+	row.add_child(UIKit.icon_button("swap", func(): UIManager.push("compare", {"a": pid}), "Comparar"))
+	return row
 
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
@@ -366,6 +393,12 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	var tot := p.season_totals()
 	if int(tot[0]) > p.stats[Player.S_APPS]:
 		card.add_child(UIKit.label("Com as copas: %d jogos, %d gols e %d assistências." % [int(tot[0]), int(tot[1]), int(tot[2])], "Small", true))
+	return UIKit.card_panel(card)
+
+
+## Aba Carreira: números da carreira, seleção, prêmios, títulos, transferências e ano a ano.
+func _career(w: GameWorld, p: Player) -> Control:
+	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Carreira"))
 	var row2 := UIKit.hbox(4)
 	row2.add_child(UIKit.stat(str(p.career_apps), "jogos"))
@@ -401,25 +434,20 @@ func _stats(w: GameWorld, p: Player) -> Control:
 		card.add_child(UIKit.section("Títulos"))
 		card.add_child(_trophies(w, p))
 	if not p.spells.is_empty():
-		card.add_child(UIKit.section("Clubes"))
+		card.add_child(UIKit.section("Clubes e transferências"))
+		var total := 0
+		var top := 0
+		for sp: Dictionary in p.spells:
+			total += int(sp.get("fee", 0))
+			top = maxi(top, int(sp.get("fee", 0)))
+		if total > 0:
+			var fr := UIKit.hbox(4)
+			fr.add_child(UIKit.stat(Fmt.money(total), "em transferências"))
+			fr.add_child(UIKit.stat(Fmt.money(top), "maior valor pago"))
+			fr.add_child(UIKit.stat(Fmt.money(p.value), "valor hoje", UIColors.GREEN))
+			card.add_child(fr)
 		for i in range(p.spells.size() - 1, -1, -1):
-			var s: Dictionary = p.spells[i]
-			var line := UIKit.hbox(10)
-			var cl := w.club(int(s.get("c", -1))) if int(s.get("c", -1)) >= 0 else null
-			if cl != null:
-				line.add_child(UIKit.crest(cl, 28))
-			var to := int(s.get("to", 0))
-			var years := ("%d–%s" % [int(s.get("from", 0)), str(to) if to > 0 else "hoje"]) if to != int(s.get("from", 0)) else str(to)
-			var name_l := UIKit.label("%s (%s)%s" % [s.get("cn", "?"), years, "  emprestado" if bool(s.get("lo", false)) else ""], "")
-			name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			name_l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			line.add_child(name_l)
-			line.add_child(UIKit.label("%d j · %d g" % [int(s.get("a", 0)), int(s.get("g", 0))], "Muted"))
-			if cl != null:
-				var ccid := cl.id
-				card.add_child(UIKit.tap_row(line, func(): UIManager.push("club", {"id": ccid}), "CardFlat"))
-			else:
-				card.add_child(line)
+			card.add_child(_spell_row(w, p.spells[i], i == p.spells.size() - 1))
 	if not p.history.is_empty():
 		card.add_child(UIKit.section("Temporada a temporada"))
 		var chart := EvolutionChart.new()
@@ -472,6 +500,40 @@ func _stats(w: GameWorld, p: Player) -> Control:
 				el.add_theme_color_override(&"font_color", UIColors.ACCENT)
 				card.add_child(el)
 	return UIKit.card_panel(card)
+
+
+## Uma passagem: escudo, clube, anos, como chegou (base, compra, sem custo, empréstimo) e números.
+func _spell_row(w: GameWorld, s: Dictionary, _current: bool) -> Control:
+	var line := UIKit.hbox(10)
+	var cl := w.club(int(s.get("c", -1))) if int(s.get("c", -1)) >= 0 else null
+	if cl != null:
+		line.add_child(UIKit.crest(cl, 40))
+	var col := UIKit.vbox(0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var to := int(s.get("to", 0))
+	var from := int(s.get("from", 0))
+	var years := ("%d–%s" % [from, str(to) if to > 0 else "hoje"]) if to != from else str(to)
+	var name_l := UIKit.label(String(s.get("cn", "?")).replace(" (empr.)", ""), "H3")
+	name_l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(name_l)
+	col.add_child(UIKit.label("%s · %d jogos · %d gols" % [years, int(s.get("a", 0)), int(s.get("g", 0))], "Small"))
+	line.add_child(col)
+	var k := String(s.get("k", ""))
+	if k == "" and (bool(s.get("lo", false)) or String(s.get("cn", "")).ends_with("(empr.)")):
+		k = "e"
+	match k:
+		"b":
+			line.add_child(UIKit.pill("BASE", UIColors.GREEN, 15))
+		"e":
+			line.add_child(UIKit.pill("EMPRÉSTIMO", UIColors.BLUE, 15))
+		"l":
+			line.add_child(UIKit.pill("SEM CUSTO", UIColors.MUTED, 15))
+		"c":
+			line.add_child(UIKit.pill(Fmt.money(int(s.get("fee", 0))), UIColors.ACCENT, 15))
+	if cl != null:
+		var ccid := cl.id
+		return UIKit.tap_row(line, func(): UIManager.push("club", {"id": ccid}), "CardFlat")
+	return line
 
 
 ## Football Memory: os fatos que definem a carreira e a linha do tempo, ano a ano.

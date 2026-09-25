@@ -251,6 +251,7 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 			var sp := {"c": int(row["c"]), "cn": String(row["cn"]), "from": int(row["y"]), "to": int(row["y"]), "a": int(row["a"]), "g": int(row["g"]), "as": int(row["as"])}
 			if bool(row.get("lo", false)):
 				sp["lo"] = true
+			_move_fee(rng, p, sp, int(row.get("o", 0)), spells.is_empty())
 			spells.append(sp)
 	if cur != null:
 		var open := {"c": cur.id, "cn": cur.short_name, "from": join, "to": 0, "a": 0, "g": 0, "as": 0}
@@ -260,11 +261,38 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 			open["a"] = int(sp2["a"])
 			open["g"] = int(sp2["g"])
 			open["as"] = int(sp2["as"])
+			for k in ["fee", "k"]:
+				if sp2.has(k):
+					open[k] = sp2[k]
+		else:
+			_move_fee(rng, p, open, int(hist.back().get("o", p.overall)) if not hist.is_empty() else p.overall, spells.is_empty())
 		spells.append(open)
 		p.joined_year = int(open["from"])
 	p.spells = spells
 	_national_caps(world, rng, ctx, p, ovr, age)
 	_earned_traits(rng, p, year, age)
+
+
+## Como o jogador chegou ao clube no passado: base (primeiro clube, até 19 anos), empréstimo,
+## sem custo (veteranos em fim de contrato) ou compra estimada pelo valor de mercado da época.
+static func _move_fee(rng: RandomNumberGenerator, p: Player, sp: Dictionary, ovr: int, first: bool) -> void:
+	var age := int(sp["from"]) - p.birth_year
+	if bool(sp.get("lo", false)):
+		sp["k"] = "e"
+		return
+	if first and age <= 19:
+		sp["k"] = "b"
+		return
+	var free_p := 0.1 + (0.25 if age >= 29 else (0.1 if age >= 26 else 0.0))
+	if first:
+		free_p += 0.2
+	if rng.randf() < free_p or ovr <= 0:
+		sp["k"] = "l"
+		sp["fee"] = 0
+		return
+	var v := Valuation.market_value_of_rating(float(ovr)) * Valuation.age_factor(age) * rng.randf_range(0.6, 1.45)
+	sp["k"] = "c"
+	sp["fee"] = Valuation.round_value(v)
 
 
 ## Jogos de copa (nacional e continental) numa temporada do passado: quem joga no clube mais forte

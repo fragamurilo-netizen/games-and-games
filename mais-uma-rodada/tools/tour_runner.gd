@@ -135,14 +135,34 @@ func _run() -> void:
 	UIManager.push("player", {"id": star.id})
 	await _frames(8)
 	await _shot("06_perfil")
-	# Carreira, títulos e temporada a temporada (fim da página)
+	# Abas: números da temporada e carreira (transferências, títulos, ano a ano)
+	_screen().set("_tab", "numeros")
+	_screen().refresh()
+	await _frames(6)
+	await _shot("06_perfil_numeros")
+	_screen().set("_tab", "carreira")
+	_screen().refresh()
+	await _frames(6)
+	await _shot("06_perfil_carreira")
 	var psc: ScrollContainer = _screen().scroll()
 	psc.scroll_vertical = int(psc.get_v_scroll_bar().max_value)
 	await _frames(4)
-	await _shot("06_perfil_carreira")
-	psc.scroll_vertical = maxi(0, psc.scroll_vertical - 1100)
-	await _frames(4)
 	await _shot("06_perfil_titulos")
+	# Comparador: sugestões e dois jogadores lado a lado
+	UIManager.push("compare", {"a": star.id})
+	await _frames(8)
+	await _shot("06p_comparar_escolha")
+	var cmp_b: Player = null
+	for p in w.squad(w.user_club()):
+		if p.id != star.id and Pos.group(p.position) == Pos.group(star.position) and (cmp_b == null or p.overall > cmp_b.overall):
+			cmp_b = p
+	if cmp_b != null:
+		_screen().set("_b", cmp_b.id)
+		_screen().refresh()
+		await _frames(8)
+		await _shot("06q_comparar")
+	UIManager.back()
+	await _frames(4)
 	# Pré-temporada: uniformes e patrocínios
 	UIManager.push("kit")
 	await _frames(8)
