@@ -497,6 +497,16 @@ static func _shootout(rng: RandomNumberGenerator, sides: Array, lines: Array) ->
 			if v[10] == 1:
 				kickers[s].append(v)
 		kickers[s].sort_custom(func(p, q): return float(p[9]) > float(q[9]))
+		# Ordem escolhida pelo técnico vem na frente.
+		var sheet: TeamSheet = sides[s]["sheet"]
+		var chosen: Array = []
+		for pid in sheet.shootout_order:
+			for v in kickers[s]:
+				if v[0].id == int(pid):
+					chosen.append(v)
+					kickers[s].erase(v)
+					break
+		kickers[s] = chosen + kickers[s]
 	var ps: Array = [0, 0]
 	var taken: Array = [0, 0]
 	var guard := 0

@@ -23,6 +23,8 @@ var captain: int = -1
 var penalty_taker: int = -1
 var freekick_taker: int = -1
 var corner_taker: int = -1
+## Ordem dos batedores na disputa de pênaltis (ids). Vazia = automática pela habilidade.
+var shootout_order: Array = []
 var mentality: int = MENT_EQUILIBRADA
 var style: int = STYLE_POSSE
 var intensity: int = 1
@@ -73,7 +75,7 @@ func to_dict() -> Dictionary:
 		"f": formation, "s": starters.duplicate(), "b": bench.duplicate(),
 		"cap": captain, "pen": penalty_taker, "fk": freekick_taker, "ck": corner_taker,
 		"m": mentality, "st": style, "i": intensity, "l": line, "p": pressing, "as": auto_subs,
-		"pl": plan_losing, "pw": plan_winning, "pm": plan_minute, "ins": instr.duplicate(), "wd": width,
+		"so": shootout_order.duplicate(), "pl": plan_losing, "pw": plan_winning, "pm": plan_minute, "ins": instr.duplicate(), "wd": width,
 	}
 
 
@@ -86,6 +88,8 @@ static func from_dict(d: Dictionary) -> TeamSheet:
 	t.penalty_taker = int(d.get("pen", -1))
 	t.freekick_taker = int(d.get("fk", -1))
 	t.corner_taker = int(d.get("ck", -1))
+	for pid in d.get("so", []):
+		t.shootout_order.append(int(pid))
 	t.mentality = int(d.get("m", MENT_EQUILIBRADA))
 	t.style = int(d.get("st", STYLE_POSSE))
 	t.intensity = int(d.get("i", 1))

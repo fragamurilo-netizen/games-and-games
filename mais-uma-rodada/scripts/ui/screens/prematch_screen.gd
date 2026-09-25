@@ -166,6 +166,7 @@ func refresh() -> void:
 	c.add_child(UIKit.section("Capitão e bola parada"))
 	for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
 		c.add_child(_taker_row(w, sheet, item[0], item[1]))
+	c.add_child(_shootout_row(w, sheet))
 	# Banco
 	c.add_child(UIKit.section("Banco de reservas (%d)" % sheet.bench.size()))
 	for i in sheet.bench.size():
@@ -370,6 +371,45 @@ func _pick_taker(key: String, label_text: String) -> void:
 			UIManager.close_modal()
 			refresh()))
 	_show_sheet(v)
+
+
+## Ordem dos batedores se o jogo for para os pênaltis.
+func _shootout_row(w: GameWorld, sheet: TeamSheet) -> Control:
+	var row := UIKit.hbox(10)
+	var l := UIKit.label("Disputa de pênaltis", "Muted")
+	l.custom_minimum_size.x = 170
+	row.add_child(l)
+	var names: Array = []
+	for p: Player in _shootout_players(w, sheet).slice(0, 5):
+		names.append(p.short_name())
+	var txt := "Automática" if sheet.shootout_order.is_empty() else ", ".join(names)
+	var v := UIKit.label(txt, "H3")
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.clip_text = true
+	row.add_child(v)
+	row.add_child(UIKit.icon_rect("swap", 22, UIColors.MUTED))
+	return UIKit.tap_row(row, _pick_shootout_order)
+
+
+func _shootout_players(w: GameWorld, sheet: TeamSheet) -> Array:
+	var ps: Array = []
+	for pid in sheet.starters:
+		var p := w.player(pid)
+		if p != null:
+			ps.append(p)
+	return ShootoutOrderView.ordered(ps, sheet.shootout_order)
+
+
+func _pick_shootout_order() -> void:
+	var w := world()
+	var sheet := _sheet()
+	var auto := ShootoutOrderView.ordered(_shootout_players(w, sheet), [])
+	_show_sheet(ShootoutOrderView.build("Batedores na disputa de pênaltis",
+		"Vale para mata-mata que terminar empatado. Quem não estiver em campo na hora é pulado.",
+		_shootout_players(w, sheet), auto, func(ids: Array):
+			sheet.shootout_order = ids
+			UIManager.close_modal()
+			refresh()))
 
 
 func _show_sheet(v: VBoxContainer) -> void:

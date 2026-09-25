@@ -18,6 +18,7 @@ var _paused := false
 var _halftime := false
 var _pending_halftime := false
 var _pending_final := false
+var _pending_shootout := false
 var _done := false
 var _report: Dictionary = {}
 var _clock := 0.9
@@ -428,6 +429,10 @@ func _process(delta: float) -> void:
 		_update_board()
 		_show_halftime()
 		return
+	if _pending_shootout:
+		_pending_shootout = false
+		_show_shootout_order()
+		return
 	if _halftime or _paused:
 		return
 	_clock -= delta
@@ -487,6 +492,8 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 	var side: int = ev["s"]
 	if t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL:
 		_record_scorer(ev)
+	if t == MatchSimulation.EV_SHOOTOUT and not silent:
+		_pending_shootout = true
 	if t == MatchSimulation.EV_KICKOFF or t == MatchSimulation.EV_SECOND_HALF:
 		_pitch.reset_kickoff()
 		if not silent:
@@ -1177,6 +1184,21 @@ func _skip_to_end() -> void:
 	_after_step()
 	_pending_final = false
 	_on_final()
+
+
+## Antes da primeira cobrança: o técnico escolhe a ordem dos batedores em campo.
+func _show_shootout_order() -> void:
+	var players: Array = []
+	for mp: MatchPlayer in _sim.shootout_kickers(_user_side):
+		players.append(mp.p)
+	var auto := ShootoutOrderView.ordered(players, [])
+	var v := ShootoutOrderView.build("Disputa de pênaltis",
+		"Escolha quem bate. Os cinco primeiros cobram as regulares; depois vêm as alternadas.",
+		players, auto, func(ids: Array):
+			_sim.set_shootout_order(_user_side, ids)
+			UIManager.close_modal())
+	v.custom_minimum_size.x = 600
+	UIManager.show_modal(v, true, false)
 
 
 # ---------------------------------------------------------------------------
