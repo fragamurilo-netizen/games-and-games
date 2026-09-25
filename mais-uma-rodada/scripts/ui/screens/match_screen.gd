@@ -757,7 +757,7 @@ func _add_line(line: Dictionary) -> void:
 			col = UIColors.BLUE
 		"other":
 			col = Color("#C9E7A8")
-	t.add_theme_color_override(&"font_color", col)
+	t.add_theme_color_override(&"font_color", UIColors.ink(col))
 	row.add_child(t)
 	var node: Control = row
 	if style == "goal":

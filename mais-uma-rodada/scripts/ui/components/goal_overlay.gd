@@ -44,6 +44,10 @@ func play(level: int, title: String, scorer: String, tag: String, info: String, 
 	_c2 = c2
 	_t = 0.0
 	_dur = float(DURATION.get(level, 1.5)) * clampf(speed_scale, 0.45, 1.0)
+	if AppSettings.reduce_motion:
+		# Animações reduzidas: faixa curta, sem chuva de papel picado.
+		_dur = minf(_dur, 1.2)
+		level = mini(level, 1)
 	_rng.seed = hash(scorer + info)
 	_confetti.clear()
 	if level >= 2:

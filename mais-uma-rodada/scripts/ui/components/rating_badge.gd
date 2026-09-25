@@ -27,7 +27,7 @@ func _init() -> void:
 
 
 func _draw() -> void:
-	var col := color_override if color_override.a > 0.0 else Fmt.rating_color(value)
+	var col := UIColors.ink(color_override) if color_override.a > 0.0 else Fmt.rating_color(value)
 	var r := Rect2(Vector2.ZERO, size)
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(col.r, col.g, col.b, 0.16)

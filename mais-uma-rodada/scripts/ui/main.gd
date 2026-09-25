@@ -17,6 +17,9 @@ var _fade: TextureRect
 
 func _ready() -> void:
 	UIManager.register_main(self)
+	UIColors.set_light(AppSettings.wants_light())
+	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale]
+	$Background.color = UIColors.BG
 	add_child(TouchScroll.new())
 	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
 	_fade = _edge(Color(UIColors.BG, 0.0), Color(UIColors.BG, 0.92))
@@ -31,7 +34,19 @@ func _ready() -> void:
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
+	AudioManager.start_music()
 	UIManager.goto("menu")
+
+
+## Depois de trocar entre claro e escuro: fundo, esmaecido do pé e barras redesenhados.
+func restyle() -> void:
+	$Background.color = UIColors.BG
+	var g := (_fade.texture as GradientTexture2D).gradient
+	g.set_color(0, Color(UIColors.BG, 0.0))
+	g.set_color(1, Color(UIColors.BG, 0.92))
+	UIManager._redraw_tree(self)
+
+
 
 
 ## Bordas da área rolável: uma sombra sob a barra superior quando o conteúdo rolou por
@@ -167,6 +182,9 @@ func _notification(what: int) -> void:
 		UIManager.handle_back()
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		_relayout.call_deferred()
+		# Tema "do aparelho": o sistema pode ter trocado entre claro e escuro.
+		if AppSettings.theme_mode == AppSettings.THEME_SYSTEM and AppSettings.wants_light() != UIColors.light:
+			UIManager.apply_look.call_deferred()
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -1,20 +1,153 @@
 extends Node
 ## Sons sintetizados em tempo de execução (nenhum arquivo de áudio no APK) + vibração.
 ## Cada som é gerado uma única vez, sob demanda, e reaproveitado.
+## A música de fundo (MusicSynth) é gerada numa thread e guardada em cache no aparelho.
 
 const RATE := 22050
+const MUSIC_CACHE := "user://music_v1_%d.pcm"
 
 var _players: Array[AudioStreamPlayer] = []
 var _cache: Dictionary = {}
 var _next := 0
+var _music: AudioStreamPlayer
+var _music_streams: Dictionary = {} # faixa -> AudioStreamWAV
+var _music_task := -1
+var _music_task_track := -1
+var _music_samples := PackedFloat32Array()
+var _in_match := false
+var _fade: Tween
 
 
 func _ready() -> void:
+	_ensure_bus(&"Music")
+	_ensure_bus(&"SFX")
 	for i in 4:
 		var p := AudioStreamPlayer.new()
-		p.bus = &"Master"
+		p.bus = &"SFX"
 		add_child(p)
 		_players.append(p)
+	_music = AudioStreamPlayer.new()
+	_music.bus = &"Music"
+	add_child(_music)
+	apply_volumes()
+
+
+func _ensure_bus(bus: StringName) -> void:
+	if AudioServer.get_bus_index(bus) >= 0:
+		return
+	AudioServer.add_bus()
+	var idx := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, bus)
+	AudioServer.set_bus_send(idx, &"Master")
+
+
+## Aplica os volumes das Opções (0 a 100) aos canais de música e de efeitos.
+func apply_volumes() -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(&"SFX"), _to_db(AppSettings.sfx_volume))
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(&"Music"), _to_db(AppSettings.music_volume) - 6.0)
+
+
+static func _to_db(v: int) -> float:
+	return -80.0 if v <= 0 else linear_to_db(pow(v / 100.0, 1.6))
+
+
+# ---------------------------------------------------------------------------
+# Música de fundo
+# ---------------------------------------------------------------------------
+
+## Liga (ou desliga) a música conforme as Opções e a tela atual.
+func start_music() -> void:
+	var want := AppSettings.music and AppSettings.music_volume > 0 and (not _in_match or AppSettings.music_in_match)
+	if not want:
+		_fade_to(-40.0, func(): _music.stop())
+		return
+	var track := clampi(AppSettings.music_track, 0, MusicSynth.TRACKS.size() - 1)
+	var stream: AudioStreamWAV = _music_streams.get(track)
+	if stream == null:
+		stream = _load_cached(track)
+	if stream == null:
+		_render_async(track)
+		return
+	_music_streams[track] = stream
+	if _music.stream != stream or not _music.playing:
+		_music.stream = stream
+		_music.volume_db = -30.0
+		_music.play()
+	_fade_to(0.0)
+
+
+## Avisada a cada troca de tela: durante a partida a música some (a torcida é o som do jogo).
+func screen_changed(screen_name: String) -> void:
+	var match_now := screen_name == "match"
+	if match_now == _in_match:
+		return
+	_in_match = match_now
+	start_music()
+
+
+func _fade_to(db: float, done: Callable = Callable()) -> void:
+	if _fade != null and _fade.is_valid():
+		_fade.kill()
+	if not _music.playing:
+		if done.is_valid():
+			done.call()
+		return
+	_fade = create_tween()
+	_fade.tween_property(_music, "volume_db", db, 0.8)
+	if done.is_valid():
+		_fade.tween_callback(done)
+
+
+func _render_async(track: int) -> void:
+	if _music_task >= 0:
+		return # já há uma faixa sendo gerada; ao terminar, start_music confere a escolhida
+	_music_task_track = track
+	_music_task = WorkerThreadPool.add_task(func():
+		_music_samples = MusicSynth.new().render(track))
+	set_process(true)
+
+
+func _process(_delta: float) -> void:
+	if _music_task < 0:
+		set_process(false)
+		return
+	if not WorkerThreadPool.is_task_completed(_music_task):
+		return
+	WorkerThreadPool.wait_for_task_completion(_music_task)
+	_music_task = -1
+	var wav := _to_wav(_music_samples)
+	_music_samples = PackedFloat32Array()
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = wav.data.size() / 2
+	_music_streams[_music_task_track] = wav
+	var f := FileAccess.open(MUSIC_CACHE % _music_task_track, FileAccess.WRITE)
+	if f != null:
+		f.store_buffer(wav.data)
+		f.close()
+	start_music()
+
+
+func _load_cached(track: int) -> AudioStreamWAV:
+	var path := MUSIC_CACHE % track
+	if not FileAccess.file_exists(path):
+		return null
+	var data := FileAccess.get_file_as_bytes(path)
+	if data.size() < RATE * 2:
+		return null
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = RATE
+	wav.stereo = false
+	wav.data = data
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_end = data.size() / 2
+	return wav
+
+
+## A faixa já foi gerada (ou está no cache do aparelho)?
+func music_ready(track: int) -> bool:
+	return _music_streams.has(track) or FileAccess.file_exists(MUSIC_CACHE % track)
 
 
 func click() -> void:
@@ -47,6 +180,15 @@ func goal(importance: float, ours: bool) -> void:
 	else:
 		play("groan", -4.0)
 		vibrate(60)
+
+
+func _notification(what: int) -> void:
+	# No Android o jogo em segundo plano não deve continuar tocando.
+	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		if OS.has_feature("mobile"):
+			_music.stream_paused = true
+	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_music.stream_paused = false
 
 
 func _stream(name: String) -> AudioStreamWAV:
