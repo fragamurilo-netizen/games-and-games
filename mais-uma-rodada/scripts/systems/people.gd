@@ -973,6 +973,7 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 			add_trust(world, p, 0.2)
 		var t := trust_of(world, p)
 		p.morale = clampf(p.morale + (t - 50.0) * 0.012, 0.0, 100.0)
+	_dressing_room(world, club, squad, r)
 	# Laços em campo: amigos juntos entrosam, rivais juntos às vezes explodem.
 	for b: Dictionary in pp["bonds"]:
 		var both := started.has(int(b["a"])) and started.has(int(b["b"]))
@@ -1042,6 +1043,61 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 	_check_job(world, r)
 	# Pedidos de conversa
 	return _requests(world, r)
+
+
+## Vestiário como grupo, depois de cada jogo:
+## - líderes (líder, cascudo, mentor) puxam o humor do grupo para o deles;
+## - estrela ou titular muito insatisfeito contamina amigos e compatriotas;
+## - estrangeiro com compatriotas (ou mesma língua) se adapta mais rápido; isolado no primeiro ano sofre.
+static func _dressing_room(world: GameWorld, club: Club, squad: Array, r: RandomNumberGenerator) -> void:
+	if squad.is_empty():
+		return
+	var leaders: Array = []
+	for p: Player in squad:
+		if (p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("mentor")) and p.squad_status <= Player.STATUS_STARTER:
+			leaders.append(p)
+	if not leaders.is_empty():
+		var lm := 0.0
+		for p: Player in leaders:
+			lm += p.morale
+		lm /= leaders.size()
+		for p: Player in squad:
+			if not leaders.has(p):
+				p.morale = clampf(p.morale + (lm - p.morale) * 0.035, 0.0, 100.0)
+	# Insatisfação que se espalha
+	for p: Player in squad:
+		if p.morale >= 28.0 or p.squad_status > Player.STATUS_STARTER:
+			continue
+		var hit := 0
+		for q: Player in squad:
+			if q.id == p.id:
+				continue
+			var b := bond_between(world, p.id, q.id)
+			var friend := not b.is_empty() and String(b["k"]) != BOND_RIVAL
+			if friend or (q.nationality == p.nationality and p.nationality != club.nation):
+				q.morale = clampf(q.morale - 1.0 * q.trait_mult("morale_volatility"), 0.0, 100.0)
+				hit += 1
+		if hit >= 2 and r.randf() < 0.08:
+			NewsManager.post_raw(world, "Clima pesado no %s" % club.short_name,
+				"A insatisfação de %s já contagia parte do elenco, principalmente os mais próximos dele." % p.display_name(), club.id, p.id, NewsEvent.IMP_NORMAL, "clube")
+	# Adaptação de estrangeiros: grupo de compatriotas ou mesma língua ajuda
+	var langs := {}
+	var nats := {}
+	for p: Player in squad:
+		nats[p.nationality] = int(nats.get(p.nationality, 0)) + 1
+		var lg := String(DatabaseManager.nation(p.nationality).get("lang", ""))
+		langs[lg] = int(langs.get(lg, 0)) + 1
+	var club_lang := String(DatabaseManager.nation(club.nation).get("lang", ""))
+	for p: Player in squad:
+		if p.nationality == club.nation:
+			continue
+		var lg := String(DatabaseManager.nation(p.nationality).get("lang", ""))
+		var company := int(nats.get(p.nationality, 0)) >= 2 or (lg != "" and (lg == club_lang or int(langs.get(lg, 0)) >= 2))
+		if company:
+			if p.morale < 62.0:
+				p.morale = minf(62.0, p.morale + 0.4)
+		elif world.year - p.joined_year <= 1 and p.morale > 50.0:
+			p.morale = maxf(50.0, p.morale - 0.35 * p.trait_mult("morale_volatility"))
 
 
 ## Jogadores que saíram: amigos e pupilos sentem.

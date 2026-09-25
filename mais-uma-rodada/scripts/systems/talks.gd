@@ -462,10 +462,23 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 static func _apply_player_fx(world: GameWorld, conv: Dictionary, p: Player, fx: Dictionary) -> void:
 	var club := world.user_club()
 	var before := People.trust_of(world, p)
+	# Conversa demais com o mesmo jogador perde força: o que é positivo rende menos a cada
+	# conversa recente (últimos 10 jogos); o que é negativo continua pesando igual.
+	var talks_log: Dictionary = People.data(world).get("talk_n", {})
+	var turn := world.current_turn()
+	var recent: Array = Array(talks_log.get(str(p.id), [])).filter(func(t): return turn - int(t) <= 10)
+	var fade := 1.0 / (1.0 + 0.45 * recent.size())
+	recent.append(turn)
+	talks_log[str(p.id)] = recent
+	People.data(world)["talk_n"] = talks_log
+	if recent.size() >= 3:
+		_fx(conv, "%s já ouviu isso outras vezes: a conversa rende menos" % p.display_name())
 	if fx.has("trust"):
-		People.add_trust(world, p, float(fx["trust"]))
+		var dt := float(fx["trust"])
+		People.add_trust(world, p, dt * fade if dt > 0.0 else dt)
 	if fx.has("morale"):
-		p.morale = clampf(p.morale + float(fx["morale"]), 0.0, 100.0)
+		var dm := float(fx["morale"])
+		p.morale = clampf(p.morale + (dm * fade if dm > 0.0 else dm), 0.0, 100.0)
 		_fx(conv, "Moral de %s %s" % [p.display_name(), "subiu" if float(fx["morale"]) > 0 else "caiu"])
 	var after := People.trust_of(world, p)
 	if absf(after - before) >= 1.0:

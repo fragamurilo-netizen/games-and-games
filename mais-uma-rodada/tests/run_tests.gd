@@ -61,6 +61,7 @@ func _initialize() -> void:
 	_run("arbitragem: perfis, escala e efeito no jogo", _test_referees)
 	_run("eventos de vestiário: saudade, Golfo, quer sair, briga e virose", _test_squad_events)
 	_run("diretoria: metas da temporada e o que pesa na avaliação", _test_board_objectives)
+	_run("vestiário: líderes, contágio, adaptação e conversas repetidas", _test_dressing_room)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
@@ -1425,6 +1426,58 @@ func _test_tactical_freedom() -> void:
 	check(not SquadRules.is_foreign(probe, esp, "non_eu"), "francês contou como extracomunitário na Espanha")
 	probe.nationality = "BRA"
 	check(SquadRules.is_foreign(probe, esp, "non_eu"), "brasileiro deveria ser extracomunitário na Espanha")
+
+
+func _test_dressing_room() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	var squad := w.squad(c)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	for p: Player in squad:
+		p.traits = []
+		p.morale = 50.0
+		p.nationality = c.nation
+		p.squad_status = Player.STATUS_ROTATION
+	# Líder feliz puxa o grupo
+	var lead: Player = squad[0]
+	lead.traits = ["lider"]
+	lead.squad_status = Player.STATUS_STARTER
+	lead.morale = 95.0
+	People._dressing_room(w, c, squad, rng)
+	check(squad[5].morale > 50.0, "líder não puxou o humor do grupo (%.1f)" % squad[5].morale)
+	lead.traits = []
+	# Estrela insatisfeita contamina o amigo
+	var star: Player = squad[1]
+	var pal: Player = squad[2]
+	star.squad_status = Player.STATUS_STAR
+	star.morale = 15.0
+	People.data(w)["bonds"].append({"a": star.id, "b": pal.id, "k": People.BOND_FRIEND, "v": 60.0})
+	var m0 := pal.morale
+	People._dressing_room(w, c, squad, rng)
+	check(pal.morale < m0, "insatisfação não contagiou o amigo")
+	star.morale = 60.0
+	# Estrangeiro isolado no primeiro ano × com compatriota
+	var alone: Player = squad[7]
+	alone.nationality = "JPN" if c.nation != "JPN" else "KOR"
+	alone.joined_year = w.year
+	alone.morale = 60.0
+	People._dressing_room(w, c, squad, rng)
+	check(alone.morale < 60.0, "estrangeiro isolado não sentiu a adaptação")
+	var buddy: Player = squad[8]
+	buddy.nationality = alone.nationality
+	alone.morale = 55.0
+	People._dressing_room(w, c, squad, rng)
+	check(alone.morale > 55.0, "compatriota não ajudou na adaptação")
+	# Conversas repetidas rendem menos
+	var tp: Player = squad[9]
+	tp.morale = 30.0
+	var gains: Array = []
+	for i in 3:
+		var before := tp.morale
+		Talks._apply_player_fx(w, {"lines": [], "fx": []}, tp, {"morale": 10.0})
+		gains.append(tp.morale - before)
+	check(float(gains[2]) < float(gains[0]) * 0.7, "conversa repetida não perdeu força: %s" % [gains])
 
 
 func _test_board_objectives() -> void:
