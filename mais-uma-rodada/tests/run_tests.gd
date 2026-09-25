@@ -49,6 +49,7 @@ func _initialize() -> void:
 	_run("conversas e coletiva de imprensa", _test_talks)
 	_run("demissão no meio da temporada e troca de técnicos", _test_mid_season_firing)
 	_run("mods e jogadores personalizados", _test_mods)
+	_run("loja: temporada de demonstração e Carreira Completa", _test_store)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -1729,3 +1730,46 @@ func _test_mods() -> void:
 	PlayerMods._apply_one(w, rng, {"club": "BRA_RNC", "match": vname, "remove": true}, used, marks)
 	check(w.player(victim.id) == null and not fla.player_ids.has(victim.id), "jogador removido continua no mundo")
 	check(PlayerMods.pos_from("ST") == Pos.ST and PlayerMods.pos_from("ZAG") == Pos.CB, "códigos de posição")
+
+
+func _test_store() -> void:
+	var st: Node = load("res://scripts/autoload/store.gd").new()
+	var w := GameWorld.new()
+	st.enforce_override = 0
+	w.season_number = 3
+	check(not st.locked(w), "fora da loja a carreira não pode travar")
+	st.enforce_override = 1
+	st.owned = false
+	w.season_number = 1
+	check(not st.locked(w), "a primeira temporada tem que ser grátis")
+	w.season_number = 2
+	check(st.locked(w), "a segunda temporada sem compra deveria travar")
+	check(not st.locked(null), "sem carreira não há trava")
+	st._handle({"purchase_state": 2, "product_ids": ["carreira_completa"], "purchase_token": "t"}, false)
+	check(st.locked(w) and st.pending, "compra pendente não pode liberar")
+	st._client = _FakeBilling.new()
+	st._handle({"purchase_state": 1, "product_ids": ["carreira_completa"], "purchase_token": "t", "is_acknowledged": false}, false)
+	check(not st.locked(w), "compra confirmada tem que liberar")
+	check(st._client.acked == ["t"], "a compra precisa ser confirmada (acknowledge) na Play")
+	st._handle({"purchase_state": 1, "product_ids": ["cafe"], "purchase_token": "c"}, false)
+	check(st._client.consumed == ["c"], "o café precisa ser consumido para poder comprar de novo")
+	st._on_purchases_query({"response_code": 0, "purchases": []})
+	check(st.locked(w), "compra reembolsada tem que voltar a travar")
+	st._on_purchases_query({"response_code": 2})
+	check(st.locked(w), "sem conexão mantém o estado salvo")
+	st.owned = true
+	st._on_purchases_query({"response_code": 6})
+	check(not st.locked(w), "erro da Play não pode tirar uma compra salva")
+	st.free()
+
+
+class _FakeBilling:
+	extends RefCounted
+	var acked: Array = []
+	var consumed: Array = []
+
+	func acknowledge_purchase(t: String) -> void:
+		acked.append(t)
+
+	func consume_purchase(t: String) -> void:
+		consumed.append(t)

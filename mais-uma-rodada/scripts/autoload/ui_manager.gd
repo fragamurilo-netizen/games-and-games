@@ -27,7 +27,10 @@ const SCREENS := {
 	"relations": "res://scenes/screens/relations.tscn",
 	"numbers": "res://scenes/screens/numbers.tscn",
 	"past_squads": "res://scenes/screens/past_squads.tscn",
+	"paywall": "res://scenes/screens/paywall.tscn",
 }
+## Telas que avançam a carreira: depois da temporada de demonstração, levam à compra.
+const GATED := ["prematch", "match", "preseason"]
 const TABS := ["hub", "squad", "market", "table", "club"]
 
 var main: Node = null # scripts/ui/main.gd
@@ -45,6 +48,9 @@ func current() -> BaseScreen:
 
 
 func _instance(name: String, params: Dictionary) -> BaseScreen:
+	if name in GATED and Store.locked(GameManager.world):
+		name = "paywall"
+		params = {}
 	if not _scene_cache.has(name):
 		_scene_cache[name] = load(SCREENS[name])
 	var node: BaseScreen = _scene_cache[name].instantiate()

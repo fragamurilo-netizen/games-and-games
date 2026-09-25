@@ -71,6 +71,16 @@ func refresh() -> void:
 	card2.add_child(row)
 	card2.add_child(UIKit.label("Instantâneo mostra só o resultado. Rápido leva cerca de meio minuto; Normal, uns dois minutos, com narração completa. Durante a partida dá para trocar a qualquer momento.", "Small", true))
 	c.add_child(UIKit.card_panel(card2))
+	var cs := UIKit.card("Card", 12)
+	cs.add_child(UIKit.section("Compras"))
+	if Store.owned or not Store.enforced():
+		cs.add_child(UIKit.colored("Carreira Completa liberada. Obrigado!", UIColors.GREEN, "H3", true))
+	else:
+		cs.add_child(UIKit.label("Primeira temporada grátis. A Carreira Completa libera as temporadas seguintes e os mods, com pagamento único de %s." % Store.price(), "Small", true))
+		cs.add_child(UIKit.button("Ver a Carreira Completa", "GhostButton", func(): UIManager.push("paywall", {"reason": "settings"}), "star"))
+	cs.add_child(UIKit.button("Restaurar compras", "GhostButton", func(): Store.restore(), "save"))
+	cs.add_child(UIKit.button("Pagar um café pro desenvolvedor · %s" % Store.price(Store.TIP), "GhostButton", func(): Store.buy(Store.TIP), "star"))
+	c.add_child(UIKit.card_panel(cs))
 	var card3 := UIKit.card("Card", 12)
 	card3.add_child(UIKit.section("Ajuda"))
 	card3.add_child(UIKit.button("Mostrar as dicas iniciais novamente", "GhostButton", func():
@@ -85,7 +95,7 @@ func refresh() -> void:
 	card4.add_child(UIKit.label("Mais Uma Rodada · versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "H3"))
 	card4.add_child(UIKit.label("Clubes, estádios e ligas usam os nomes reais apenas como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
 	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
-	card4.add_child(UIKit.label("Tudo roda offline; nenhum dado sai do aparelho.", "Small", true))
+	card4.add_child(UIKit.label("Tudo roda offline e o jogo não coleta dados. As compras são processadas pela Google Play.", "Small", true))
 	c.add_child(UIKit.card_panel(card4))
 
 

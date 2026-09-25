@@ -143,7 +143,7 @@ func close_career() -> void:
 ## Monta a data do próximo jogo do usuário; a partida dele volta viva e as demais rodam em
 ## segundo plano (pump_ai) enquanto ele assiste.
 func begin_match() -> Dictionary:
-	if world == null or world.season == null or world.season.finished:
+	if world == null or world.season == null or world.season.finished or Store.locked(world):
 		return {}
 	if not matchday.is_empty():
 		return matchday
@@ -242,7 +242,7 @@ func season_over() -> bool:
 
 ## Sem jogos do usuário até o fim da temporada: joga o resto do calendário de uma vez.
 func advance_to_end() -> void:
-	if world == null or world.season == null or not matchday.is_empty():
+	if world == null or world.season == null or not matchday.is_empty() or Store.locked(world):
 		return
 	SeasonManager.advance_to_user(world)
 	save_now()

@@ -400,6 +400,9 @@ func _footer(w: GameWorld) -> void:
 	if fired:
 		f.add_child(UIKit.button("ESCOLHER NOVO CLUBE", "PrimaryButton", func(): UIManager.goto("hub"), "play"))
 		return
+	if Store.locked(w):
+		f.add_child(UIKit.button("MAIS UMA TEMPORADA?", "PrimaryButton", func(): UIManager.push("paywall"), "star"))
+		return
 	f.add_child(UIKit.button("IR PARA A PRÉ-TEMPORADA %d" % w.year, "PrimaryButton", func():
 		UIManager.goto("hub")
 		if PreseasonManager.is_active(world()):

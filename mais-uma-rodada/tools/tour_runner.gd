@@ -399,6 +399,24 @@ func _run() -> void:
 	await _frames(6)
 	await _shot("57_conversa_presidente")
 	UIManager.close_all_modals()
+	# Versão de loja depois da temporada de demonstração: hub travado, compra e Opções.
+	var sn := GameManager.world.season_number
+	var had: bool = Store.owned
+	Store.enforce_override = 1
+	Store.owned = false
+	GameManager.world.season_number = 2
+	UIManager.goto("hub")
+	await _frames(6)
+	await _shot("58_hub_bloqueado")
+	UIManager.push("prematch")
+	await _frames(6)
+	await _shot("59_compra")
+	UIManager.goto("settings")
+	await _frames(6)
+	await _shot("60_opcoes_compras")
+	GameManager.world.season_number = sn
+	Store.owned = had
+	Store.enforce_override = -1
 	UIManager.goto("menu")
 	UIManager.push("load")
 	await _frames(6)

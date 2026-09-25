@@ -1086,6 +1086,13 @@ func _comp_editor(c: VBoxContainer) -> void:
 
 func _mods_view(c: VBoxContainer) -> void:
 	screen_subtitle = "Mods"
+	if not Store.unlocked():
+		var lk := UIKit.card("CardHighlight", 10)
+		lk.add_child(UIKit.label("Mods fazem parte da Carreira Completa", "Title", true))
+		lk.add_child(UIKit.label("Instale mods, ligue e desligue e exporte suas personalizações depois de desbloquear a Carreira Completa (pagamento único de %s)." % Store.price(), "Muted", true))
+		lk.add_child(UIKit.button("VER A CARREIRA COMPLETA", "PrimaryButton", func(): UIManager.push("paywall", {"reason": "mods"}), "star"))
+		c.add_child(UIKit.card_panel(lk))
+		return
 	var intro := UIKit.card("Card", 6)
 	intro.add_child(UIKit.label("Mods mudam os dados do jogo (clubes, ligas, copas, regras, textos) e colocam jogadores reais nos elencos. Os ligados valem na ordem da lista: o de baixo ganha.", "Small", true))
 	if has_career():

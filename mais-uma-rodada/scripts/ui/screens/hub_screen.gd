@@ -38,9 +38,13 @@ func refresh() -> void:
 		c.add_child(_jobs_card(w, jobs))
 		return
 	var preseason := PreseasonManager.is_active(w)
-	if preseason:
+	if Store.locked(w):
+		c.add_child(_paywall_card(w))
+	elif preseason:
 		c.add_child(_preseason_card(w))
-	if w.season.finished:
+	if Store.locked(w):
+		pass
+	elif w.season.finished:
 		c.add_child(_season_over_card(w))
 	else:
 		c.add_child(_next_match_card(w, club))
@@ -185,6 +189,18 @@ func _instant() -> void:
 	if report.is_empty():
 		return
 	UIManager.push("results", {"report": report})
+
+
+## Temporada de demonstração encerrada: o convite para seguir com a Carreira Completa.
+func _paywall_card(w: GameWorld) -> Control:
+	var card := UIKit.card("CardHighlight", 12)
+	card.add_child(UIKit.section("Temporada %d" % w.year))
+	card.add_child(UIKit.label("Mais uma temporada?", "Title", true))
+	card.add_child(UIKit.label("A primeira temporada é grátis. Com a Carreira Completa você segue com o %s por quantos anos quiser, pagando uma vez só." % w.user_club().short_name, "Muted", true))
+	var b := UIKit.button("CONTINUAR A CARREIRA · %s" % Store.price(), "PrimaryButton", func(): UIManager.push("paywall"), "star")
+	b.custom_minimum_size.y = 104
+	card.add_child(b)
+	return UIKit.card_panel(card)
 
 
 ## Decisões pendentes (eventos da carreira).

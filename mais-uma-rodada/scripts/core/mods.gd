@@ -61,6 +61,15 @@ static func enabled_ids() -> Array:
 	return _enabled
 
 
+## Mods que valem de fato: os ligados, se a Carreira Completa estiver liberada. O Store atualiza
+## `allowed`; é uma variável simples porque a leitura dos dados também roda em threads.
+static var allowed := true
+
+
+static func active_ids() -> Array:
+	return enabled_ids() if allowed else []
+
+
 static func set_enabled(id: String, on: bool) -> void:
 	var e := enabled_ids()
 	e.erase(id)
@@ -114,10 +123,10 @@ static func _remove_dir(path: String) -> void:
 
 ## Chamado pelo DatabaseManager para cada arquivo de res://data: devolve os dados com os mods ligados.
 static func apply_to(res_path: String, data: Variant) -> Variant:
-	if not res_path.begins_with("res://") or enabled_ids().is_empty():
+	if not res_path.begins_with("res://") or active_ids().is_empty():
 		return data
 	var rel := res_path.substr(6) # "data/world/clubs/BRA.json"
-	for id in enabled_ids():
+	for id in active_ids():
 		var full := "%s/%s/%s" % [DIR, id, rel]
 		if FileAccess.file_exists(full):
 			var rep: Variant = _read(full)
@@ -183,7 +192,7 @@ static func _copy(v: Variant) -> Variant:
 ## Jogadores de todos os mods ligados (players.json de cada um, na ordem).
 static func players() -> Array:
 	var out: Array = []
-	for id in enabled_ids():
+	for id in active_ids():
 		var p: Variant = _read("%s/%s/players.json" % [DIR, id])
 		if p is Array:
 			out.append_array(p)
