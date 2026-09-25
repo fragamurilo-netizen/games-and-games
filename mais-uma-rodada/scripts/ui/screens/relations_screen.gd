@@ -538,6 +538,7 @@ func _coaches(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	stars.stars = clampf(rep / 20.0, 0.5, 5.0)
 	me.add_child(stars)
 	me.add_child(UIKit.label("Sua reputação decide quem te procura quando um clube troca de técnico.", "Small", true))
+	me.add_child(UIKit.button("Dança das cadeiras", "", func(): UIManager.push("coach_moves"), "swap"))
 	c.add_child(UIKit.card_panel(me))
 	var club := w.user_club()
 	var card := UIKit.card("Card", 6)

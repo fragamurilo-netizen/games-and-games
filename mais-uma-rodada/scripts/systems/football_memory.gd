@@ -396,8 +396,11 @@ static func on_coach_left(world: GameWorld, club: Club, coach: Dictionary) -> vo
 		return
 	var cr := _cr(data(world), club.id)
 	var arr: Array = cr["coaches"]
-	arr.append([String(coach.get("n", "")), int(coach.get("since", world.year)), world.year, int(coach.get("w", 0)), int(coach.get("d", 0)),
-		int(coach.get("l", 0)), int(coach.get("id", -1)), int(coach.get("pid", -1))])
+	# O trabalho inteiro (temporadas anteriores já somadas na carreira) e os títulos dele no clube.
+	var sp := CoachCareer.current_spell(coach)
+	var nm := String(coach.get("n", "")) + (" (interino)" if bool(coach.get("int", false)) else "")
+	arr.append([nm, int(coach.get("since", world.year)), world.year, int(coach.get("w", 0)) + int(sp.get("w", 0)), int(coach.get("d", 0)) + int(sp.get("d", 0)),
+		int(coach.get("l", 0)) + int(sp.get("l", 0)), int(coach.get("id", -1)), int(coach.get("pid", -1)), (sp.get("t", []) as Array).size()])
 	if arr.size() > COACHES_MAX:
 		cr["coaches"] = arr.slice(arr.size() - COACHES_MAX)
 

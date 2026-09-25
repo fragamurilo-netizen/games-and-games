@@ -399,6 +399,7 @@ static func loan_out(world: GameWorld, p: Player) -> Dictionary:
 
 
 static func _move_loan(world: GameWorld, p: Player, owner: Club, borrower: Club) -> void:
+	PlayerCareer.on_leave(world, p)
 	owner.player_ids.erase(p.id)
 	borrower.player_ids.append(p.id)
 	p.club_id = borrower.id
@@ -501,6 +502,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 
 
 static func _close_spell(world: GameWorld, p: Player) -> void:
+	PlayerCareer.on_leave(world, p) # no meio do ano, o que ele fez no clube antigo fica numa linha própria
 	if not p.spells.is_empty():
 		var s: Dictionary = p.spells[p.spells.size() - 1]
 		if int(s.get("to", 0)) == 0:

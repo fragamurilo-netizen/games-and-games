@@ -220,6 +220,7 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 	for y in ys:
 		var e: Array = plan[y]
 		var row := _season_row(rng, p, y, e, float(ovr.get(y, p.overall)), float(ovr.get(y - 1, float(ovr.get(y, p.overall)) - 1.0)), age - (year - y))
+		PlayerCareer.backfill_injury(rng, p, row, age - (year - y))
 		_cup_games(rng, ctx, row, e)
 		hist.append(row)
 		p.career_apps += int(row["a"]) + int(row.get("ca", 0))
@@ -237,6 +238,7 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 			if not ctx["rows"].has(key2):
 				ctx["rows"][key2] = []
 			ctx["rows"][key2].append([p, row])
+	hist = PlayerCareer.backfill_splits(rng, hist)
 	p.history = hist + p.history
 	# Passagens (em ordem); a atual continua aberta e soma o que ele já jogou lá
 	var spells: Array = []

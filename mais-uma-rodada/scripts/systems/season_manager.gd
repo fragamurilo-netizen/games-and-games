@@ -585,6 +585,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			if inj > 0:
 				p.injury_weeks = maxi(p.injury_weeks, inj)
 				p.injury_name = InjuryTable.name_for(inj, p.id + world.season.day)
+				PlayerCareer.on_injury(world, p, inj, p.injury_name)
 				PlayerDevelopment.injury_setback(world.rng, p, inj, p.age(world.year))
 				NewsManager.on_injury(world, p)
 				InboxManager.on_injury(world, p)
@@ -846,6 +847,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
 	PressRoom.on_season_end(world, summary)
+	CoachCareer.on_titles(world, hist_leagues, hist_cups) # títulos na carreira de quem está no banco
 	People.on_season_end(world, summary)
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
@@ -861,17 +863,14 @@ static func end_season(world: GameWorld) -> Dictionary:
 			ks.sort()
 			uc.squad_archive.erase(ks[0])
 	# Arquivo individual da temporada
+	# (uma linha por clube: quem trocou no meio do ano tem os números de cada um; lesões graves anotadas)
 	for p: Player in world.players.values():
-		var tot := p.season_totals()
-		if int(tot[0]) > 0 and p.club_id >= 0:
-			p.history.append({"y": world.year, "c": p.club_id, "cn": world.club(p.club_id).short_name, "l": world.club(p.club_id).league_id,
-				"a": p.stats[Player.S_APPS], "g": p.stats[Player.S_GOALS], "as": p.stats[Player.S_ASSISTS], "r": snappedf(p.avg_rating(), 0.01),
-				"ca": int(tot[0]) - p.stats[Player.S_APPS], "cg": int(tot[1]) - p.stats[Player.S_GOALS],
-				"cas": int(tot[2]) - p.stats[Player.S_ASSISTS], "mi": p.minutes_season, "st": p.stats[Player.S_STARTS],
-				"mo": p.stats[Player.S_MOTM], "cs": p.stats[Player.S_CLEAN], "yc": p.stats[Player.S_YELLOWS], "rc": p.stats[Player.S_REDS],
-				"o": p.overall, "o0": p.ovr_start if p.ovr_start >= 0 else p.overall})
-			if p.history.size() > 25:
-				p.history = p.history.slice(p.history.size() - 25)
+		var rows := PlayerCareer.season_rows(world, p)
+		if not rows.is_empty():
+			p.history.append_array(rows)
+			if p.history.size() > 30:
+				p.history = p.history.slice(p.history.size() - 30)
+	PlayerCareer.clear_season(world)
 	var yl_sum: Dictionary = summary.get("youth_league", {})
 	world.history.append({"y": world.year, "leagues": hist_leagues, "cups": hist_cups, "user": summary["user"], "ballon": ballon,
 		"club": world.user_club_id, "yl": yl_sum, "wy": extra["world_young"], "boot": extra["boot"], "cp": extra["club"],
