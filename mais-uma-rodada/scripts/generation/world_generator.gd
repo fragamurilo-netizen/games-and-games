@@ -32,6 +32,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	var n_free := int(w.clubs.size() * float(DatabaseManager.rules().get("free_agents_per_club", 0.5)))
 	for i in n_free:
 		PlayerGenerator.create_free_agent(w, rng, random_league_level(rng), used_names)
+	PlayerMods.apply(w) # jogadores do Editor geral e de mods (RNG próprio: o sorteio não muda)
 	Valuation.refresh_shift(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0

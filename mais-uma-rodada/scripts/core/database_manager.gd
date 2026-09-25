@@ -57,10 +57,19 @@ static func load_all() -> void:
 	Overrides.apply_db()
 
 
+## Relê todos os dados (depois de ligar ou desligar um mod). Só sem carreira aberta.
+static func reload() -> void:
+	_cache.clear()
+	_formations.clear()
+	_formation_order.clear()
+	_loaded = false
+	load_all()
+
+
 static func _load_json(key: String) -> Variant:
 	if _cache.has(key):
 		return _cache[key]
-	var data: Variant = read_json(PATHS[key])
+	var data: Variant = Mods.apply_to(PATHS[key], read_json(PATHS[key]))
 	_cache[key] = data if data != null else {}
 	return _cache[key]
 
@@ -241,7 +250,7 @@ static func _prepare_clubs() -> void:
 		if not FileAccess.file_exists(path):
 			_club_data[n] = []
 			continue
-		var d: Variant = read_json(path)
+		var d: Variant = Mods.apply_to(path, read_json(path))
 		_club_data[n] = d.get("clubs", []) if d is Dictionary else []
 
 

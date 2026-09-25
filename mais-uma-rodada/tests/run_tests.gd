@@ -48,6 +48,7 @@ func _initialize() -> void:
 	_run("técnicos, comissão, presidente e relações", _test_people)
 	_run("conversas e coletiva de imprensa", _test_talks)
 	_run("demissão no meio da temporada e troca de técnicos", _test_mid_season_firing)
+	_run("mods e jogadores personalizados", _test_mods)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -1694,3 +1695,36 @@ func _test_mid_season_firing() -> void:
 			changes += 1
 	print("   técnicos trocados na temporada: %d de %d clubes" % [changes, w4.clubs.size()])
 	check(changes > 0 and changes < w4.clubs.size() / 3, "trocas de técnico fora do esperado (%d)" % changes)
+
+
+func _test_mods() -> void:
+	# Mesclagem de patches: objeto chave a chave, lista pelo campo _by, remoção.
+	var base := {"cups": {"CDB": {"name": "Copa do Brasil", "two_legs": ["f"]}}, "list": [{"key": "A", "v": 1}, {"key": "B", "v": 2}]}
+	var patch := {"cups": {"CDB": {"two_legs": ["sf", "f"]}}, "list": {"_by": "key", "items": [{"key": "A", "v": 9}, {"key": "C", "v": 3}], "remove": ["B"]}}
+	var m: Dictionary = Mods.merge(base.duplicate(true), patch)
+	check(m["cups"]["CDB"]["name"] == "Copa do Brasil" and m["cups"]["CDB"]["two_legs"] == ["sf", "f"], "patch de objeto mal mesclado")
+	var keys: Array = m["list"].map(func(e): return e["key"])
+	check(keys == ["A", "C"] and int(m["list"][0]["v"]) == 9, "patch de lista mal mesclado: %s" % [m["list"]])
+	# Jogadores: novo, editado e removido, sem mexer no sorteio do mundo.
+	var w := WorldGenerator.generate(555, "padrao")
+	var fla := _club(w, "BRA_RNC")
+	var n0 := fla.player_ids.size()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	var marks := {}
+	var used := WorldGenerator.used_names_of(w)
+	PlayerMods._apply_one(w, rng, {"club": "BRA_RNC", "first": "Giorgian", "last": "de Arrascaeta", "known": "Arrascaeta",
+		"nat": "URU", "pos": "MEI", "sec": ["MC"], "birth": 1994, "foot": "R", "ovr": 84, "shirt": 10}, used, marks)
+	var arr := PlayerMods.find(w, fla, "Giorgian de Arrascaeta")
+	check(arr != null and fla.player_ids.size() == n0 + 1, "jogador novo não entrou no elenco")
+	if arr != null:
+		check(arr.position == Pos.AM and arr.secondary == [Pos.CM] and arr.nationality == "URU" and arr.shirt == 10, "campos do jogador novo errados")
+		check(absi(arr.overall - 84) <= 1 and arr.potential >= arr.overall and arr.value > 0, "overall do jogador novo %d (esperado 84)" % arr.overall)
+	var victim: Player = w.squad(fla)[3]
+	var vname := victim.first_name + " " + victim.last_name
+	PlayerMods._apply_one(w, rng, {"club": "BRA_RNC", "match": vname, "known": "Editado", "attrs": {"FIN": 97}}, used, marks)
+	check(victim.known_as == "Editado" and victim.attrs[Attr.FIN] == 97, "edição do jogador não aplicada")
+	check(marks.has(str(victim.id)) and String(marks[str(victim.id)]) == "BRA_RNC/" + vname, "edição sem marca de origem")
+	PlayerMods._apply_one(w, rng, {"club": "BRA_RNC", "match": vname, "remove": true}, used, marks)
+	check(w.player(victim.id) == null and not fla.player_ids.has(victim.id), "jogador removido continua no mundo")
+	check(PlayerMods.pos_from("ST") == Pos.ST and PlayerMods.pos_from("ZAG") == Pos.CB, "códigos de posição")

@@ -13,6 +13,8 @@ var matchday: Dictionary = {} # data em andamento (begin_match → finish_match)
 var last_report: Dictionary = {}
 var last_summary: Dictionary = {}
 var _ai_queue: Array = [] # entradas da data ainda não simuladas (modo rápido, em segundo plano)
+## Mundo padrão carregado pelo Editor geral (sem carreira) para editar jogadores.
+var preview_world: GameWorld = null
 var _gen_task: int = -1
 var _gen_result: GameWorld = null
 var _gen_callback: Callable
@@ -55,6 +57,18 @@ func _process(_delta: float) -> void:
 
 func is_generating() -> bool:
 	return _gen_task >= 0
+
+
+## Gera (em thread) o mundo padrão para o Editor geral; `done` é chamado quando estiver pronto.
+func ensure_preview_world(done: Callable) -> void:
+	if preview_world != null:
+		done.call()
+		return
+	if is_generating():
+		return
+	generate_world_async(WorldGenerator.DEFAULT_SEED, "padrao", func(w: GameWorld):
+		preview_world = w
+		done.call())
 
 
 # ---------------------------------------------------------------------------

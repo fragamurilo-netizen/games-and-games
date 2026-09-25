@@ -1,7 +1,8 @@
 class_name Overrides
 extends RefCounted
 ## Personalizações do editor que valem para todas as carreiras (user://custom/overrides.json):
-## nomes, cores e escudos de clubes (pela chave estável do clube) e nomes/logos/cores das competições.
+## nomes, cores e escudos de clubes (pela chave estável do clube), nomes/logos/cores das competições
+## e jogadores editados ou criados no Editor geral (PlayerMods).
 
 const PATH := "user://custom/overrides.json"
 const CLUB_FIELDS: Array[String] = ["name", "short", "abbr", "nick", "city", "stadium", "c1", "c2", "crest"]
@@ -13,13 +14,14 @@ static var _loaded := false
 static func data() -> Dictionary:
 	if not _loaded:
 		_loaded = true
-		_data = {"clubs": {}, "leagues": {}, "cups": {}}
+		_data = {"clubs": {}, "leagues": {}, "cups": {}, "players": []}
 		if FileAccess.file_exists(PATH):
 			var f := FileAccess.open(PATH, FileAccess.READ)
 			var parsed: Variant = JSON.parse_string(f.get_as_text())
 			if parsed is Dictionary:
 				for k in ["clubs", "leagues", "cups"]:
 					_data[k] = parsed.get(k, {})
+				_data["players"] = Array(parsed.get("players", []))
 	return _data
 
 
