@@ -25,6 +25,7 @@ func _initialize() -> void:
 	_run("troca de formação durante a partida", _test_formation_change)
 	_run("temporada completa, copas e Mundial", _test_season_cycle)
 	_run("virada de ano: acessos, quedas e vagas", _test_end_season)
+	_run("Football Memory: confrontos, recordes e linha do tempo", _test_football_memory)
 	_run("ranking de clubes, finanças e eventos do mundo", _test_ranking_economy)
 	_run("avanço até o próximo jogo do usuário", _test_advance)
 	_run("save/load (ida e volta, backup e determinismo)", _test_save_load)
@@ -564,6 +565,86 @@ func _test_season_cycle() -> void:
 	# Estatísticas de copa separadas das de liga
 	var top := CupManager.scorers(w, "UCL", 1)
 	check(not top.is_empty() and top[0].cup_stats["UCL"][Player.C_GOALS] > 0, "artilharia da Liga dos Campeões vazia")
+
+
+func _test_football_memory() -> void:
+	var w := _season_world
+	if w == null:
+		check(false, "sem mundo da temporada")
+		return
+	var m := FootballMemory.data(w)
+	check(m["h2h"].size() > 3000, "poucos confrontos registrados (%d)" % m["h2h"].size())
+	# Retrospecto simétrico entre dois clubes da mesma liga (turno e returno)
+	var bra: Array = w.clubs_in_league("BRA1")
+	var a: Club = bra[0]
+	var b: Club = bra[1]
+	var ab := FootballMemory.head_to_head(w, a.id, b.id)
+	var ba := FootballMemory.head_to_head(w, b.id, a.id)
+	check(int(ab["games"]) >= 2 and int(ab["games"]) == int(ba["games"]), "retrospecto incompleto: %d jogos" % int(ab["games"]))
+	check(int(ab["wins"]) == int(ba["losses"]) and int(ab["gf"]) == int(ba["ga"]) and int(ab["draws"]) == int(ba["draws"]), "retrospecto assimétrico")
+	check(int(ab["wins"]) + int(ab["draws"]) + int(ab["losses"]) == int(ab["games"]), "V+E+D diferente do total de jogos")
+	check((ab["recent"] as Array).size() == mini(FootballMemory.LAST_N, int(ab["games"])), "últimos encontros não guardados")
+	check(not FootballMemory.opponents_of(w, a.id).is_empty(), "sem adversários para o clube")
+	# Finais, títulos decididos, zebras e mercado
+	check((m["fin"] as Array).size() >= 20, "poucas finais registradas (%d)" % (m["fin"] as Array).size())
+	check((m["tit"] as Array).size() >= 10, "poucos títulos decididos (%d)" % (m["tit"] as Array).size())
+	var ups_year := 0
+	for u in m["ups"]:
+		if int(u[0]) == w.year - 1:
+			ups_year += 1
+	check(ups_year <= FootballMemory.UPS_PER_YEAR, "zebras do ano não foram podadas")
+	var fees: Array = m["wr"]["fee"]
+	check(not fees.is_empty(), "sem transferências no recorde mundial")
+	for i in range(1, fees.size()):
+		check(int(fees[i - 1][0]) >= int(fees[i][0]), "recorde de transferências fora de ordem")
+	# Braçadeira e linha do tempo
+	check(m["cap"].size() >= 300, "poucos capitães registrados (%d)" % m["cap"].size())
+	var with_moves := 0
+	for p: Player in w.players.values():
+		if p.spells.size() < 2 or p.career_apps < 50:
+			continue
+		var tl := FootballMemory.timeline(w, p)
+		var ev: Array = tl["events"]
+		check(not ev.is_empty() and String(ev[0]["k"]) == "debut", "linha do tempo sem estreia")
+		for i in range(1, ev.size()):
+			check(int(ev[i - 1]["y"]) <= int(ev[i]["y"]), "linha do tempo fora de ordem")
+		with_moves += 1
+		if with_moves >= 50:
+			break
+	check(with_moves >= 50, "poucos jogadores com carreira para a linha do tempo")
+	# Técnicos: a galeria do clube registra quem saiu
+	var club: Club = w.clubs[5]
+	var old := People.coach_of(w, club.id)
+	People.replace_coach(w, club, "resultados")
+	var gallery: Array = FootballMemory.club_records(w, club.id)["coaches"]
+	check(not gallery.is_empty() and String(gallery[-1][0]) == String(old["n"]), "técnico que saiu não entrou na galeria")
+	# Ídolo aposentado que vira técnico enfrenta o ex-clube
+	var legend := {}
+	for r in w.retired:
+		if int(r.get("apps", 0)) >= 150 and not Array(r.get("spells", [])).is_empty():
+			legend = r
+			break
+	if not legend.is_empty():
+		var home_id := int(legend["spells"][0]["c"])
+		var coach := People.coach_of(w, club.id)
+		coach["pid"] = int(legend["id"])
+		var f := Fixture.new()
+		f.home = club.id
+		f.away = home_id
+		f.comp = club.league_id
+		f.played = true
+		f.hg = 1
+		f.ag = 0
+		if club.id != home_id and FootballMemory.coach_bond(w, coach, home_id) >= 40:
+			FootballMemory.on_match(w, f)
+			var got := FootballMemory.moments(w, int(legend["id"])).any(func(e): return String(e[1]) == "face")
+			check(got, "reencontro do ídolo com o ex-clube não registrado")
+		coach.erase("pid")
+	# Save: a memória vai e volta
+	var back := GameWorld.from_dict(w.to_dict())
+	check(FootballMemory.data(back)["h2h"].size() == m["h2h"].size(), "memória perdida no save")
+	var ab2 := FootballMemory.head_to_head(back, a.id, b.id)
+	check(int(ab2["games"]) == int(ab["games"]) and int(ab2["gf"]) == int(ab["gf"]), "retrospecto mudou depois do save")
 
 
 func _test_end_season() -> void:

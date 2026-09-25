@@ -319,6 +319,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
 	WeeklyAwards.after_matchday(world, md, slot)
+	FootballMemory.after_matchday(world, md["entries"])
 	tt = _time("aplicar", tt)
 	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube
 	var sus := world.suspended()
@@ -464,6 +465,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			league.table[f.away]["rc"] += int(rc[1])
 	elif world.league(f.comp) == null:
 		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
+	FootballMemory.on_match(world, f)
 	var derby := bool(res.get("derby", false))
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
@@ -865,6 +867,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	# Aposentadorias
 	var retired := PlayerDevelopment.process_retirements(world)
 	world.stat_add("retirements", retired.size())
+	FootballMemory.on_season_end(world, retired)
 	for p in retired:
 		if p.club_id >= 0 and world.is_user_club(p.club_id):
 			summary["retired"].append(p.display_name())

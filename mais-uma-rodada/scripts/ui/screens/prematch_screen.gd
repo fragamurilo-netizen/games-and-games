@@ -203,6 +203,14 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 		var tac := DatabaseManager.tactics()
 		card.add_child(UIKit.label("Costuma jogar no %s, %s." % [opp_sheet.formation, String(tac["styles"][opp_sheet.style]["name"]).to_lower()], "Small"))
 	card.add_child(UIKit.label("Filosofia: " + ClubPhilosophy.summary(opp), "Small", true))
+	var h2h := FootballMemory.head_to_head(w, club.id, opp.id)
+	if int(h2h["games"]) > 0:
+		var last: Array = h2h["recent"]
+		var tail := ""
+		if not last.is_empty():
+			var e: Dictionary = last[-1]
+			tail = " Último: %d x %d (%s %d)." % [int(e["gf"]), int(e["ga"]), FootballMemory.comp_name(w, String(e["comp"])), int(e["y"])]
+		card.add_child(UIKit.label("Retrospecto: %s.%s" % [FootballMemory.h2h_line(h2h), tail], "Small", true))
 	var stars: Array = w.squad(opp).duplicate()
 	stars.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
 	var names: Array = []

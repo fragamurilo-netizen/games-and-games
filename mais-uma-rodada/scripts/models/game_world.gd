@@ -48,6 +48,8 @@ var people: Dictionary = {}
 var rivalries: Dictionary = {}
 ## Caixa de entrada do treinador (InboxManager): mensagens pessoais, mais recente no fim.
 var inbox: Array = []
+## Football Memory: confrontos, recordes, momentos e linha do tempo dos atletas (ver FootballMemory).
+var memory: Dictionary = {}
 
 # Índices em memória (não salvos): reconstruídos sob demanda.
 var _free_agents_cache: Array = []
@@ -330,7 +332,7 @@ func to_dict() -> Dictionary:
 		"history": history, "news": nw, "offers": of, "tlog": tl, "retired": retired,
 		"mstats": manager_stats, "stats": stats, "events": events, "promises": promises,
 		"academy": academy.values().map(func(p: Player): return p.to_dict()), "yl": youth_league,
-		"yth": youth, "mgr": manager, "people": people, "rv": rivalries, "inbox": inbox,
+		"yth": youth, "mgr": manager, "people": people, "rv": rivalries, "inbox": inbox, "mem": memory,
 	}
 
 
@@ -378,6 +380,7 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.people = d.get("people", {})
 	w.rivalries = d.get("rv", {})
 	w.inbox = Array(d.get("inbox", []))
+	w.memory = d.get("mem", {})
 	w._free_agents_dirty = true
 	w._club_by_key.clear()
 	return w

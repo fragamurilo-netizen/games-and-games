@@ -40,6 +40,7 @@ func refresh() -> void:
 	if own:
 		c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
 	c.add_child(_stats(w, p))
+	c.add_child(_memory(w, p))
 	_actions(w, p, own)
 
 
@@ -470,6 +471,37 @@ func _stats(w: GameWorld, p: Player) -> Control:
 				var el := UIKit.label("      " + " · ".join(extra), "Small", true)
 				el.add_theme_color_override(&"font_color", UIColors.ACCENT)
 				card.add_child(el)
+	return UIKit.card_panel(card)
+
+
+## Football Memory: os fatos que definem a carreira e a linha do tempo, ano a ano.
+func _memory(w: GameWorld, p: Player) -> Control:
+	var tl := FootballMemory.timeline(w, p)
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Linha do tempo"))
+	card.add_child(UIKit.label("%s, %d anos" % [p.display_name(), p.age(w.year)], "H3"))
+	for f: String in tl["facts"]:
+		card.add_child(UIKit.colored(f, UIColors.ACCENT, "Small", true))
+	card.add_child(UIKit.separator())
+	var events: Array = tl["events"]
+	var start := maxi(0, events.size() - 30)
+	if start > 0:
+		card.add_child(UIKit.label("(%d momentos mais antigos omitidos)" % start, "Small"))
+	var last_y := -1
+	for i in range(start, events.size()):
+		var e: Dictionary = events[i]
+		var row := UIKit.hbox(10)
+		var y := int(e["y"])
+		var yl := UIKit.label(str(y) if y != last_y else "", "H3")
+		yl.custom_minimum_size.x = 64
+		row.add_child(yl)
+		last_y = y
+		var t := UIKit.label(String(e["t"]), "", true)
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if String(e["k"]) in ["title", "goal", "record"]:
+			t.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		row.add_child(t)
+		card.add_child(row)
 	return UIKit.card_panel(card)
 
 

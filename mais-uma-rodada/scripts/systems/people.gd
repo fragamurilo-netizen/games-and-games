@@ -295,6 +295,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String) -> Dicti
 	var r := rng(world, 3)
 	var old: Dictionary = pp["coaches"].get(club.id, {})
 	if not old.is_empty():
+		FootballMemory.on_coach_left(world, club, old)
 		old["c"] = -1
 		old["fired"] = int(old.get("fired", 0)) + 1
 		old["rep"] = maxf(5.0, float(old.get("rep", 40.0)) - 4.0)
@@ -307,6 +308,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String) -> Dicti
 		if float(f["rep"]) > club.reputation + 18.0:
 			continue
 		var score := -absf(float(f["rep"]) - club.reputation * 0.9) + (8.0 if String(f["nat"]) == club.nation else 0.0) + r.randf() * 10.0
+		score += minf(20.0, FootballMemory.coach_bond(world, f, club.id) / 8.0) # ídolos da casa têm preferência
 		if score > best_score:
 			best_score = score
 			best = f
