@@ -70,6 +70,7 @@ func refresh() -> void:
 		AppSettings.save_settings()
 		UIManager.toast("As dicas voltam a aparecer no início da carreira."), "info"))
 	card3.add_child(UIKit.button("Como jogar", "GhostButton", func(): Tutorial.show_all(), "list"))
+	card3.add_child(UIKit.button("Créditos", "GhostButton", func(): MainMenuScreen.show_credits(), "star"))
 	c.add_child(UIKit.card_panel(card3))
 	var card4 := UIKit.card("Card", 8)
 	card4.add_child(UIKit.section("Sobre"))

@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="432" height="432" viewBox="0 0 432 432">
+<defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#16263D"/>
       <stop offset="1" stop-color="#0A121D"/>
@@ -10,9 +10,7 @@
     </linearGradient>
     <clipPath id="ball"><circle cx="128" cy="134" r="50"/></clipPath>
   </defs>
-  <rect x="0" y="0" width="256" height="256" rx="56" fill="url(#bg)"/>
-  <path d="M 0 134 H 256" stroke="#22354F" stroke-width="3"/>
-  <circle cx="128" cy="134" r="112" fill="none" stroke="#22354F" stroke-width="3"/>
+<g transform="translate(216 216) scale(1.0800) translate(-128 -128)">
   <path d="M 184.2 71.6 A 84 84 0 1 1 96.5 56.1" fill="none" stroke="url(#gold)" stroke-width="17" stroke-linecap="round"/>
   <path d="M 120.6 46.4 L 87.2 38.3 L 102.2 75.4 Z" fill="#FFD25C" stroke="#FFD25C" stroke-width="4" stroke-linejoin="round"/>
   <circle cx="128" cy="134" r="50" fill="#F4F6F9"/>
@@ -23,4 +21,5 @@
   <rect x="181" y="52" width="22" height="8" rx="3" fill="#0A121D"/>
   <rect x="188" y="45" width="8" height="22" rx="3" fill="#0A121D"/>
   <path d="M 209 41 L 220 36 L 220 76 L 211 76 L 211 49 L 206 51 Z" fill="#0A121D"/>
+</g>
 </svg>

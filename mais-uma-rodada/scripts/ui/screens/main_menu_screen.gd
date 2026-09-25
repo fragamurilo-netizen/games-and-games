@@ -1,5 +1,9 @@
+class_name MainMenuScreen
 extends BaseScreen
 ## Menu inicial: continuar a última carreira em um toque, ou começar outra.
+
+
+const DEVELOPER := "Murilo Rodrigues"
 
 
 func _init() -> void:
@@ -10,11 +14,18 @@ func _init() -> void:
 func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
-	c.add_child(UIKit.gap(90))
+	c.add_child(UIKit.gap(60))
 	var logo := UIKit.vbox(0)
 	logo.alignment = BoxContainer.ALIGNMENT_CENTER
-	var icon := UIKit.icon_rect("ball", 96, UIColors.ACCENT)
+	var icon := TextureRect.new()
+	icon.texture = load("res://icon.svg")
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size = Vector2(176, 176)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo.add_child(icon)
+	logo.add_child(UIKit.gap(10))
 	var l1 := UIKit.label("MAIS UMA", "Logo")
 	l1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l1.add_theme_color_override(&"font_color", UIColors.TEXT)
@@ -44,9 +55,40 @@ func refresh() -> void:
 	c.add_child(UIKit.button("Editor", "", func(): UIManager.push("editor"), "shield"))
 	c.add_child(UIKit.button("Opções", "GhostButton", func(): UIManager.push("settings"), "gear"))
 	c.add_child(UIKit.gap(40))
+	var credit := UIKit.label("Desenvolvido por %s" % DEVELOPER, "Small")
+	credit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var credit_row := UIKit.tap_row(credit, show_credits, "CardFlat")
+	c.add_child(credit_row)
 	var ver := UIKit.label("versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "Small")
 	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ver.add_theme_color_override(&"font_color", UIColors.DIM)
 	c.add_child(ver)
+
+
+## Créditos do jogo (também abertos pelas Opções).
+static func show_credits() -> void:
+	var v := UIKit.vbox(12)
+	v.custom_minimum_size.x = 600
+	var icon := TextureRect.new()
+	icon.texture = load("res://icon.svg")
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size = Vector2(120, 120)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(icon)
+	var t := UIKit.label("Mais Uma Rodada", "Title")
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(t)
+	v.add_child(UIKit.section("Criação e desenvolvimento"))
+	v.add_child(UIKit.label(DEVELOPER, "H2"))
+	v.add_child(UIKit.label("Design de jogo, programação, simulação, interface e dados.", "Muted", true))
+	v.add_child(UIKit.section("Tecnologia"))
+	v.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby (SIL Open Font License 1.1).", "Small", true))
+	v.add_child(UIKit.section("Aviso"))
+	v.add_child(UIKit.label("Clubes, estádios e competições usam os nomes reais só como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
+	v.add_child(UIKit.label("versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "Small"))
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true)
 
 
 func _load(slot: int) -> void:
