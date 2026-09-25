@@ -78,6 +78,10 @@ vem da própria simulação.
   para menores) e setor prioritário; uma peneira por temporada; clubes maiores fazem propostas pelos garotos
   (vender com 20% de revenda, assinar o primeiro contrato ou recusar); lista dos revelados com o clube e o nível
   de hoje e o total arrecadado com vendas.
+- **Rivalidade emergente**: cada par de clubes tem um termômetro (0 a 100) que esquenta com eliminações e finais
+  de copa, títulos decididos no detalhe, goleadas, expulsões, gols no fim e ídolos trocando de lado, e esfria a
+  cada temporada. Acima de 25 vira rixa, de 50 clássico e de 75 grande clássico: público, importância, torcida,
+  imprensa, prévia e coletiva reagem. Tela própria com o retrospecto e a linha do tempo da rivalidade.
 
 ## Estrutura do repositório
 
