@@ -49,6 +49,8 @@ static func after_match(world: GameWorld, club: Club, res: String, derby: bool) 
 	club.board_confidence = clampf(club.board_confidence + d, 0.0, 100.0)
 	if before >= ULTIMATUM and club.board_confidence < ULTIMATUM:
 		NewsManager.post(world, "diretoria_ultimato", {"club": club.short_name, "goal": String(goal[0]).to_lower()}, club.id, -1, NewsEvent.IMP_HEADLINE)
+		if world.is_user_club(club.id):
+			InboxManager.on_ultimatum(world, club)
 
 
 ## Balanço da temporada. Atualiza a confiança e decide a demissão.
@@ -88,12 +90,13 @@ static func season_review(world: GameWorld, club: Club, user: Dictionary) -> Dic
 ## uma divisão abaixo — a volta por cima começa de baixo.
 static func job_offers(world: GameWorld, from_club: Club) -> Array:
 	var cands: Array = []
+	var known := CoachIdentity.job_context(world)
 	for c: Club in world.clubs:
 		if c.id == from_club.id:
 			continue
 		if c.reputation > from_club.reputation + 3.0:
 			continue
-		var score := -absf(c.reputation - (from_club.reputation - 8.0))
+		var score := -absf(c.reputation - (from_club.reputation - 8.0)) + CoachIdentity.job_score(known, c)
 		if c.nation == from_club.nation:
 			score += 10.0
 			if c.tier == from_club.tier + 1:
@@ -119,7 +122,9 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 		return
 	var old_id := world.user_club_id
 	var mid := bool(world.stats.get("fired", {}).get("mid", false)) or (world.season != null and not world.season.finished and world.current_turn() > 0)
+	CoachIdentity.mem(world) # garante o registro do emprego antigo antes da troca
 	world.user_club_id = club_id
+	CoachIdentity.on_new_job(world, world.club(old_id), c)
 	world.stats.erase("fired")
 	c.board_confidence = 60.0
 	FinanceManager.set_budgets(world, c)
@@ -133,6 +138,7 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 	YouthManager.build_league(world)
 	People.on_new_job(world, old_id)
 	NewsManager.post(world, "novo_tecnico", {"club": c.short_name, "manager": world.manager_name}, c.id, -1, NewsEvent.IMP_HEADLINE)
+	InboxManager.on_new_job(world)
 	# No meio da temporada o calendário segue: joga as datas até o próximo jogo do clube novo.
 	if mid and world.season != null and not world.season.finished:
 		SeasonManager.advance_to_user(world)

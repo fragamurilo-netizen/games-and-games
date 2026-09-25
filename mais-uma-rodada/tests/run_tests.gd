@@ -47,6 +47,7 @@ func _initialize() -> void:
 	_run("seleções: eliminatórias, torneios e ranking", _test_national_teams)
 	_run("técnicos, comissão, presidente e relações", _test_people)
 	_run("conversas e coletiva de imprensa", _test_talks)
+	_run("imprensa: palpites, termômetro, rumores e cobrança", _test_press_room)
 	_run("demissão no meio da temporada e troca de técnicos", _test_mid_season_firing)
 	_run("mods e jogadores personalizados", _test_mods)
 	_run("loja: temporada de demonstração e Carreira Completa", _test_store)
@@ -54,6 +55,8 @@ func _initialize() -> void:
 	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
+	_run("caixa de entrada do treinador", _test_inbox)
+	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -581,12 +584,24 @@ func _test_end_season() -> void:
 	for k in ["mvp", "scorer", "assist", "young", "gk", "def", "mid", "att"]:
 		check(aw.has(k), "prêmio %s ausente na liga do usuário" % k)
 	check((summary["team"] as Array).size() == 11, "seleção do campeonato incompleta")
-	check((summary["ballon_rank"] as Array).size() == 10 and int(summary["ballon_rank"][0]["pts"]) == 1000, "votação da Bola de Ouro inválida")
+	var bo: Array = summary["ballon_rank"]
+	check(bo.size() == 10 and int(bo[0]["pts"]) >= int(bo[1]["pts"]) and int(bo[0]["votes"]) == AwardVoting.jury_nations().size(), "votação da Bola de Ouro inválida")
+	check(int(bo[0]["pts"]) <= int(bo[0]["votes"]) * 15 and int(bo[0]["first"]) > 0, "pontos da Bola de Ouro fora da escala")
+	check(int(Dictionary(w.stats.get("aw_nom", {})).get("y", 0)) == year and Array(w.stats["aw_nom"]["bo"]).size() == AwardVoting.BALLON_NOMINEES, "indicados não anunciados na reta final")
+	check(not Dictionary(summary["coach"]).is_empty() and not Dictionary(summary["gk_world"]).is_empty(), "treinador da temporada / melhor goleiro ausentes")
+	check(Array(summary["world_xi"]).size() == 11, "seleção do ano incompleta")
+	check(String(aw["mvp"].get("v", "")).find("votos") >= 0 and Array(aw["mvp"].get("fin", [])).size() >= 2, "craque sem votação dos técnicos")
 	check(not Dictionary(summary["boot"]).is_empty() and not Dictionary(summary["world_young"]).is_empty(), "Chuteira de Ouro / revelação mundial ausentes")
 	var hist: Dictionary = w.history[w.history.size() - 1]
 	var arch: Dictionary = hist.get("arch", {})
 	check(arch.has("BRA1") and (arch["BRA1"]["tb"] as Array).size() == 20 and (arch["BRA1"]["sc"] as Array).size() == 10, "arquivo da temporada incompleto")
 	check(not (hist.get("sq", []) as Array).is_empty() and not (hist.get("months", []) as Array).is_empty(), "elenco/meses não arquivados")
+	# Registro dos prêmios para a enciclopédia
+	var bw := AwardVoting.winners(w, "ballon")
+	check(bw.size() >= 1 and int(bw.back()["y"]) == year and int(bw.back()["id"]) == int(bo[0]["id"]), "Bola de Ouro fora do registro")
+	check(AwardVoting.records(w, {"k": "coach", "y": year}).size() >= 20, "treinadores da temporada fora do registro")
+	check(AwardVoting.records(w, {"id": int(aw["mvp"]["id"]), "k": "mvp", "pos": 1}).size() >= 1, "consulta por jogador falhou")
+	check(AwardVoting.records(w, {"k": "ballon", "y": year}).size() == 10, "ranking da Bola de Ouro fora do registro")
 	check(w.stats.get("totw", {}).is_empty(), "seleção da rodada não foi limpa na virada")
 	var mvp := w.player(int(aw["mvp"]["id"]))
 	check(mvp == null or mvp.awards_in(year).has("mvp"), "craque sem o prêmio no currículo")
@@ -1938,6 +1953,68 @@ func _test_people() -> void:
 	check(w.rng.state == st, "People/Talks consumiram o sorteio do mundo")
 
 
+func _test_press_room() -> void:
+	var w := _career_world()
+	var c := w.user_club()
+	w.season.turn = 10
+	People.ensure(w)
+	var js := People.journalists(w)
+	var pred := PressRoom.ensure_predictions(w)
+	check(Array(pred.get("list", [])).size() == js.size(), "palpites incompletos")
+	var cons := PressRoom.consensus(w)
+	check(cons >= 1 and cons <= 20, "consenso fora da tabela (%d)" % cons)
+	var h := PressRoom.heat(w)
+	check(h >= 0.0 and h <= 100.0, "termômetro fora da escala")
+	var race := PressRoom.sack_race(w, 3)
+	check(race.size() == 3 and float(race[0][2]) <= float(race[2][2]), "bolsa de apostas inválida")
+	# Rumores e placar de acertos
+	var r := People.rng(w, 1)
+	var made := 0
+	for i in 40:
+		if not PressRoom.make_rumor(w, r).is_empty():
+			made += 1
+	check(made >= 5, "poucos rumores (%d)" % made)
+	var x: Dictionary = People.data(w)["press"]["rum"][0]
+	var j := People.journalist(w, int(x["j"]))
+	var acc0 := PressRoom.accuracy(w, j)
+	var t := Transfer.new()
+	t.player_id = int(x["p"])
+	t.to_id = int(x["to"])
+	t.from_id = int(x["from"])
+	PressRoom.on_transfer(w, t)
+	check(String(x["st"]) == "hit" and PressRoom.accuracy(w, j) > acc0, "rumor confirmado não contou")
+	PressRoom.on_window_close(w)
+	w.season.turn += 3
+	PressRoom.on_window_close(w)
+	check(Array(People.data(w)["press"]["rum"]).filter(func(q): return String(q["st"]) == "open").is_empty(), "rumores abertos depois da janela")
+	# Coletiva depois de goleada sofrida, com frase cobrada depois
+	var opp: Club = w.clubs_in_league(c.league_id)[0] if w.clubs_in_league(c.league_id)[0].id != c.id else w.clubs_in_league(c.league_id)[1]
+	People.data(w)["press"]["match"] = {"t": w.current_turn(), "res": "D", "gd": -4, "score": "0 x 4", "opp": opp.id, "derby": false,
+		"hero": -1, "hr": 0.0, "red": c.player_ids[0], "asked": false}
+	var conv := Talks.start(w, "press")
+	check(bool(conv["d"].get("post", false)), "coletiva pós-jogo não reconhecida")
+	var qtext := String(conv["lines"].back()[1])
+	check(qtext.find("0 x 4") >= 0, "primeira pergunta não fala do jogo: %s" % qtext)
+	Talks.choose(w, conv, "1") # "Tem jogador que precisa se olhar no espelho" (frase guardada)
+	var guard := 0
+	while not conv["done"] and guard < 5:
+		Talks.choose(w, conv, "0")
+		guard += 1
+	check(conv["done"], "coletiva pós-jogo não terminou")
+	var quotes: Array = People.data(w)["press"]["quotes"]
+	check(quotes.size() >= 1 and String(quotes[0]["k"]) == "blame", "frase não guardada")
+	check(w.news.back().category == "imprensa" and w.news.back().body.find("depois do jogo") >= 0, "manchete da coletiva ausente")
+	quotes[0]["t"] = w.current_turn() - 5
+	c.streak_wins = 3
+	var qs := PressRoom.questions(w, func(_tone): return int(js[0]["id"]))
+	check(qs.size() == 1 and String(qs[0]["q"]).find("cobrança") >= 0, "frase antiga não voltou na coletiva")
+	check(PressRoom.questions(w, func(_tone): return int(js[0]["id"])).is_empty(), "cobrança repetida")
+	# Fim de temporada: palpites conferidos
+	var n0 := w.news.size()
+	PressRoom.on_season_end(w, {"user": {"league": c.league_id, "pos": 3}})
+	check(w.news.size() == n0 + 1 and w.news.back().title.find(c.short_name) >= 0, "balanço dos palpites ausente")
+
+
 func _test_talks() -> void:
 	var w := _career_world()
 	var c := w.user_club()
@@ -2213,3 +2290,120 @@ func _test_rivalry() -> void:
 	check(bytes < 400000, "rivalidades pesam demais no save (%d bytes)" % bytes)
 	print("   depois da virada: %d (%d KB)" % [sw2.rivalries.size(), bytes / 1024])
 	print("   rivalidades: %d registradas, %d rixas novas, tipos %s" % [sw.rivalries.size(), hot, str(kinds.keys())])
+func _test_inbox() -> void:
+	var w := _career_world()
+	InboxManager.on_new_job(w)
+	check(w.inbox.size() >= 2, "sem boas-vindas na caixa de entrada (%d)" % w.inbox.size())
+	check(String(w.inbox[0]["f"]) == "presidente", "a primeira mensagem não é do presidente")
+	# Joga até o 13º jogo do usuário: relatórios, olheiro e diretoria.
+	var guard := 0
+	while w.current_turn() < 13 and guard < 80:
+		SeasonManager.play_matchday_instant(w)
+		guard += 1
+	var from := {}
+	var broken := 0
+	for m: Dictionary in w.inbox:
+		from[String(m["f"])] = true
+		var txt := String(m["s"]) + String(m["b"])
+		if txt.contains("{") or txt.contains("%d") or txt.contains("%s") or String(m["s"]).strip_edges() == "" or String(m["n"]).strip_edges() == "":
+			broken += 1
+	check(broken == 0, "%d mensagens com texto quebrado" % broken)
+	check(from.has("auxiliar"), "sem relatório do auxiliar")
+	check(from.has("olheiro"), "sem relatório do olheiro")
+	check(from.has("presidente"), "sem carta do presidente")
+	check(InboxManager.unread_count(w) == w.inbox.size(), "mensagens novas deveriam estar não lidas")
+	# Decisões da carreira viram mensagens com resposta pendente enquanto o evento existir.
+	var ev := EventManager._build(w, "raise")
+	if not ev.is_empty():
+		ev["id"] = 9999
+		ev["turn"] = w.current_turn()
+		ev["exp"] = w.current_turn() + 3
+		w.events.append(ev)
+		InboxManager.on_event(w, ev)
+		var m: Dictionary = w.inbox.back()
+		check(InboxManager.action_open(w, m), "decisão pendente não aparece como aberta")
+		EventManager.resolve(w, ev, 0)
+		check(not InboxManager.action_open(w, m), "decisão resolvida continua aberta")
+	# Não mexe no sorteio da simulação.
+	var st := w.rng.state
+	InboxManager.scout_report(w)
+	InboxManager.after_user_turn(w, {}, {})
+	check(w.rng.state == st, "a caixa de entrada consumiu o rng do mundo")
+	# Save e load preservam as mensagens.
+	var n := w.inbox.size()
+	InboxManager.mark_read(w.inbox[0])
+	var l := GameWorld.from_dict(w.to_dict())
+	check(l.inbox.size() == n, "save perdeu mensagens (%d de %d)" % [l.inbox.size(), n])
+	check(bool(l.inbox[0]["r"]), "save perdeu o estado de lida")
+	InboxManager.mark_all_read(w)
+	check(InboxManager.unread_count(w) == 0, "marcar todas como lidas falhou")
+	InboxManager.delete_read(w)
+	for m: Dictionary in w.inbox:
+		check(InboxManager.action_open(w, m), "limpar lidas apagou mensagem que pede resposta")
+func _test_coach_identity() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	var user := _with_user(w, w.clubs_in_league("BRA1")[8].id)
+	check(CoachIdentity.titles(w).is_empty(), "carreira nova não deveria ter reputação")
+	check(CoachIdentity.headline(w) == "", "sem título principal no começo")
+	check((CoachIdentity.mem(w)["jobs"] as Array).size() == 1, "o primeiro emprego deveria ser registrado")
+	# 20 jogos no 4-3-3 com pressão alta
+	user.sheet.formation = "4-3-3"
+	user.sheet.pressing = 2
+	for i in 20:
+		CoachIdentity.on_match(w, user)
+	var ids := {}
+	for t in CoachIdentity.titles(w):
+		ids[t["id"]] = true
+	check(ids.has("pressao"), "20 jogos pressionando deveriam render 'Técnico de pressão alta'")
+	check(ids.has("fiel"), "20 jogos no 4-3-3 deveriam render 'Fiel ao 4-3-3'")
+	# 6 reforços de até 21 anos
+	var kids: Array = []
+	for p: Player in w.players.values():
+		if p.club_id >= 0 and p.club_id != user.id and p.age(w.year) <= 21 and p.loan.is_empty():
+			kids.append(p)
+		if kids.size() >= 7:
+			break
+	for i in 6:
+		TransferManager.complete_transfer(w, kids[i], user, 0, kids[i].wage, 3)
+	var probe: Player = kids[6]
+	var jovens := false
+	for t in CoachIdentity.titles(w):
+		jovens = jovens or t["id"] == "jovens"
+	check(jovens, "6 reforços garotos deveriam render 'Especialista em jovens'")
+	check(CoachIdentity.interest_delta(w, probe, user) > 0.0, "garotos deveriam gostar mais de assinar com o especialista em jovens")
+	check(CoachIdentity.interest_delta(w, probe, w.clubs[0] if w.clubs[0].id != user.id else w.clubs[1]) == 0.0, "reputação do usuário não muda o interesse por outros clubes")
+	# Venda registrada com idade
+	var seller_p := world_player_of(w, user)
+	TransferManager.complete_transfer(w, seller_p, w.clubs_in_league("BRA1")[0], 3_000_000, seller_p.wage, 3)
+	check(int(CoachIdentity.mem(w)["sell_paid"]) == 1, "venda do usuário não registrada")
+	check(not CoachIdentity.habits(w).is_empty(), "hábitos deveriam aparecer")
+	# Fim de temporada: a imprensa anuncia uma vez só
+	var news0 := w.news.size()
+	var fresh := CoachIdentity.on_season_end(w, {"pos": 5, "champion": false, "cups": []}, user.reputation)
+	check(fresh.size() >= 3, "títulos novos deveriam ser anunciados (%d)" % fresh.size())
+	check(w.news.size() > news0, "a imprensa deveria noticiar a reputação nova")
+	check(CoachIdentity.on_season_end(w, {"pos": 5, "champion": false, "cups": []}, user.reputation).is_empty(), "título já conhecido não vira notícia de novo")
+	# Emprego novo: clubes que combinam com o perfil lembram de você
+	var formador: Club = null
+	var other: Club = null
+	for c: Club in w.clubs:
+		if c.nation != user.nation and c.archetype == "formador" and formador == null:
+			formador = c
+		if c.nation != user.nation and c.archetype == "gigante_endividado" and other == null:
+			other = c
+	var ctx := CoachIdentity.job_context(w)
+	if formador != null and other != null:
+		check(CoachIdentity.job_score(ctx, formador) > CoachIdentity.job_score(ctx, other), "clube formador deveria preferir o especialista em jovens")
+	BoardManager.take_job(w, w.clubs_in_league("BRA1")[15].id)
+	var jobs: Array = CoachIdentity.mem(w)["jobs"]
+	check(jobs.size() == 2 and int(jobs[0]["to"]) > 0, "troca de clube deveria fechar o emprego antigo e abrir o novo")
+	# Save/load
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(CoachIdentity.headline(w2) == CoachIdentity.headline(w), "a reputação deveria sobreviver ao save")
+
+
+func world_player_of(w: GameWorld, c: Club) -> Player:
+	for p in w.squad(c):
+		if p.loan.is_empty():
+			return p
+	return null

@@ -70,6 +70,11 @@ func _career(w: GameWorld) -> Control:
 	hc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hc.add_child(UIKit.label(w.manager_name, "Title", true))
 	hc.add_child(UIKit.label("Treinador · %s · %s" % [ManagerProfile.style_name(ManagerProfile.style(w)), GameWorld.DIFF_NAMES[w.difficulty]], "Small", true))
+	var fame := CoachIdentity.headline(w)
+	if fame != "":
+		var fp := UIKit.pill(fame.to_upper(), UIColors.ACCENT, 14)
+		fp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		hc.add_child(fp)
 	head.add_child(hc)
 	card.add_child(head)
 	var r1 := UIKit.hbox(4)
@@ -379,6 +384,19 @@ func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:
 				row.add_child(nl)
 				row.add_child(UIKit.label(String(ad.get("v", "")), "Small"))
 				card.add_child(_player_tap(row, int(ad["id"])))
+			var co: Dictionary = lh.get("coach", {})
+			if not co.is_empty():
+				var row := UIKit.hbox(10)
+				var kl := UIKit.label(AwardManager.award_name("coach"), "Small")
+				kl.custom_minimum_size.x = 170
+				row.add_child(kl)
+				var nl := UIKit.label("%s (%s)" % [co["n"], co["cn"]], "", true)
+				nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				if co.get("user", false):
+					nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+				row.add_child(nl)
+				row.add_child(UIKit.label(String(co.get("v", "")), "Small"))
+				card.add_child(row)
 			var team: Array = lh.get("team", [])
 			if team.size() == 11:
 				card.add_child(UIKit.label(AwardManager.award_name("team"), "Caps"))

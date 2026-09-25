@@ -19,6 +19,7 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	c.add_child(_preview(w, m))
+	c.add_child(_reputation(w))
 	c.add_child(_identity(w, m))
 	c.add_child(_look(w, m))
 	c.add_child(_styles(w, m))
@@ -45,6 +46,30 @@ func _preview(w: GameWorld, m: Dictionary) -> Control:
 	row.add_child(col)
 	card.add_child(row)
 	return HeroBackdrop.attach(UIKit.card_panel(card), w.user_club())
+
+
+## O que o jogo aprendeu com as suas decisões: títulos conquistados e hábitos, com números.
+func _reputation(w: GameWorld) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Reputação"))
+	var ts := CoachIdentity.titles(w)
+	if ts.is_empty():
+		card.add_child(UIKit.label("A imprensa ainda não sabe quem você é. Sua reputação nasce do que você fizer: quem contrata, quem vende, como seu time joga e quantos garotos sobem da base.", "Small", true))
+	for i in mini(CoachIdentity.SHOWN, ts.size()):
+		var t: Dictionary = ts[i]
+		var col := UIKit.vbox(2)
+		var pl := UIKit.pill(String(t["name"]).to_upper(), UIColors.ACCENT if i == 0 else UIColors.MUTED, 16)
+		pl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		col.add_child(pl)
+		col.add_child(UIKit.label(String(t["why"]) + ".", "Small", true))
+		col.add_child(UIKit.colored(String(t["fx"]), UIColors.GREEN, "Small", true))
+		card.add_child(col)
+	var hb := CoachIdentity.habits(w)
+	if not hb.is_empty():
+		card.add_child(UIKit.section("O que o jogo aprendeu sobre você"))
+		for h in hb:
+			card.add_child(UIKit.label("• " + String(h), "Small", true))
+	return UIKit.card_panel(card)
 
 
 func _identity(w: GameWorld, m: Dictionary) -> Control:

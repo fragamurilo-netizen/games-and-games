@@ -82,10 +82,10 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	if arch.has("desc"):
 		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
 	var kits := UIKit.hbox(12)
-	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.gk_kit(), "Goleiro"]]:
+	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.third_kit(), "Terceiro"], [club.gk_kit(), "Goleiro"]]:
 		var v := UIKit.vbox(2)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var kv := UIKit.kit(k[0], 80)
+		var kv := UIKit.kit(k[0], 72, 0, club.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(kv)
 		var l := UIKit.label(k[1], "Small")
@@ -457,6 +457,11 @@ func _manager_card(w: GameWorld) -> Control:
 	nr.add_child(UIKit.flag(String(m["nat"]), 30))
 	nr.add_child(UIKit.label("%d anos · %s" % [ManagerProfile.age(w), ManagerProfile.style_name(String(m["style"]))], "Small", true))
 	hc.add_child(nr)
+	var fame := CoachIdentity.headline(w)
+	if fame != "":
+		var fp := UIKit.pill(fame.to_upper(), UIColors.ACCENT, 14)
+		fp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		hc.add_child(fp)
 	head.add_child(hc)
 	card.add_child(UIKit.tap_row(head, func(): UIManager.push("manager"), "CardFlat"))
 	var row := UIKit.hbox(8)

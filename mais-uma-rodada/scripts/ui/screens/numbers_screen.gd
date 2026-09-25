@@ -96,6 +96,7 @@ func _cell(club: Club, n: int, owner: Player) -> Control:
 	var kit := KitView.new()
 	kit.kit = club.kit_for(owner) if owner != null else club.kit_home
 	kit.number = n
+	kit.crest = club.crest
 	kit.custom_minimum_size = Vector2(96, 78)
 	kit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owner == null:

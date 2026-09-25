@@ -708,6 +708,7 @@ static func _random_happenings(world: GameWorld) -> void:
 			p.injury_weeks = rng.randi_range(1, 3)
 			p.injury_name = RngUtil.pick(rng, ["Torção no tornozelo (treino)", "Dor muscular (treino)", "Pancada no joelho (treino)", "Contusão no pé (treino)"])
 			NewsManager.on_injury(world, p)
+			InboxManager.on_injury(world, p)
 	elif rng.randf() < 0.04:
 		var squad: Array = world.squad(club)
 		if not squad.is_empty():

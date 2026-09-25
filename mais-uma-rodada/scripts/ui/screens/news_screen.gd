@@ -2,7 +2,7 @@ extends BaseScreen
 ## Notícias do mundo, geradas a partir do que realmente aconteceu no save.
 
 const FILTERS := [["all", "Todas"], ["mine", "Meu clube"], ["div", "Divisão"], ["market", "Mercado"]]
-const MARKET_CATS := ["transferencia", "transferencia_rival", "transferencia_livre", "venda_usuario", "proposta_recebida", "janela_abre", "janela_fecha", "contrato_fim"]
+const MARKET_CATS := ["transferencia", "transferencia_rival", "transferencia_livre", "venda_usuario", "proposta_recebida", "janela_abre", "janela_fecha", "contrato_fim", "rumor"]
 
 var _filter := "all"
 
