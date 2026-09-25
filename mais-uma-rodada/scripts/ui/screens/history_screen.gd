@@ -753,11 +753,12 @@ func _club_memory(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 	var cur := People.coach_of(w, club.id)
 	if not cur.is_empty():
 		coaches.append(_mem_row(int(cur.get("since", w.year)), "%s (atual)%s" % [String(cur.get("n", "")), " · ídolo do clube" if FootballMemory.coach_bond(w, cur, club.id) >= FootballMemory.IDOL_APPS else ""],
-			"%dV %dE %dD" % [int(cur.get("w", 0)), int(cur.get("d", 0)), int(cur.get("l", 0))]))
+			"%dV %dE %dD" % [int(cur.get("w", 0)) + int(CoachCareer.current_spell(cur).get("w", 0)), int(cur.get("d", 0)) + int(CoachCareer.current_spell(cur).get("d", 0)),
+			int(cur.get("l", 0)) + int(CoachCareer.current_spell(cur).get("l", 0))]))
 	var past: Array = cr["coaches"]
 	for i in range(past.size() - 1, -1, -1):
 		var e: Array = past[i]
-		var t := FootballMemory.titles_between(w, club.id, int(e[1]), int(e[2]))
+		var t := int(e[8]) if e.size() > 8 else FootballMemory.titles_between(w, club.id, int(e[1]), int(e[2]))
 		coaches.append(_mem_row(int(e[1]), "%s, até %d%s" % [String(e[0]), int(e[2]), (" · %d título(s)" % t) if t > 0 else ""],
 			"%dV %dE %dD" % [int(e[3]), int(e[4]), int(e[5])]))
 	c.add_child(_list_card("Técnicos históricos", coaches, "A galeria começa quando o primeiro técnico deixar o clube."))

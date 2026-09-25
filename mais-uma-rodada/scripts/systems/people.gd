@@ -73,6 +73,7 @@ static func rng(world: GameWorld, salt: int = 0) -> RandomNumberGenerator:
 static func ensure(world: GameWorld) -> void:
 	var pp: Dictionary = world.people
 	if int(pp.get("v", 0)) >= VERSION:
+		CoachCareer.ensure(world) # saves antigos ganham o passado dos técnicos
 		if world.has_user() and int(pp.get("uc", -1)) != world.user_club_id:
 			_setup_user(world)
 		return
@@ -105,6 +106,7 @@ static func ensure(world: GameWorld) -> void:
 		var c: Club = world.clubs[r.randi_range(0, world.clubs.size() - 1)]
 		var coach := _new_coach(world, r, c.nation, c.reputation - r.randf_range(0.0, 15.0), "")
 		pp["free"].append(coach)
+	CoachCareer.ensure(world)
 	if world.has_user():
 		_setup_user(world)
 
@@ -121,8 +123,13 @@ static func _setup_user(world: GameWorld) -> void:
 	# O técnico que estava no clube sai (vai para a lista de livres).
 	var old: Dictionary = pp["coaches"].get(club.id, {})
 	if not old.is_empty():
+		FootballMemory.on_coach_left(world, club, old)
+		CoachCareer.close_spell(world, old, "int" if bool(old.get("int", false)) else "usr", world.manager_name)
+		if prev >= 0:
+			CoachCareer.log_move(world, club, old, {"n": world.manager_name, "id": -1}, "usr")
 		old["c"] = -1
-		pp["free"].append(old)
+		if not bool(old.get("int", false)):
+			pp["free"].append(old)
 		pp["coaches"].erase(club.id)
 	if prev < 0:
 		pp["mrep"] = clampf(club.reputation * 0.75, 15.0, 70.0)
@@ -289,17 +296,46 @@ static func manager_rep(world: GameWorld) -> float:
 	return float(data(world).get("mrep", 40.0))
 
 
-## Troca de comando num clube da IA: o técnico vai para a lista de livres e outro assume.
-static func replace_coach(world: GameWorld, club: Club, reason: String) -> Dictionary:
+## Troca de comando num clube da IA: o técnico sai (para a lista de livres, ou se aposenta) e
+## outro assume. No meio da temporada o auxiliar pode segurar o time como interino; o clube pode
+## tirar o técnico de um clube menor pagando a multa (e aí a troca continua lá, em cadeia).
+static var _chain := 0
+
+
+static func replace_coach(world: GameWorld, club: Club, reason: String, note: String = "") -> Dictionary:
 	var pp := data(world)
 	var r := rng(world, 3)
 	var old: Dictionary = pp["coaches"].get(club.id, {})
 	if not old.is_empty():
 		FootballMemory.on_coach_left(world, club, old)
+		pp["coaches"].erase(club.id)
 		old["c"] = -1
-		old["fired"] = int(old.get("fired", 0)) + 1
-		old["rep"] = maxf(5.0, float(old.get("rep", 40.0)) - 4.0)
-		pp["free"].append(old)
+		if bool(old.get("int", false)):
+			CoachCareer.close_spell(world, old, "int") # o interino volta a ser auxiliar
+		else:
+			var code: String = CoachCareer.END_BY_REASON.get(reason, "dem")
+			CoachCareer.close_spell(world, old, code)
+			if code == "dem":
+				old["fired"] = int(old.get("fired", 0)) + 1
+				old["rep"] = maxf(5.0, float(old.get("rep", 40.0)) - 4.0)
+			elif code == "res":
+				old["rep"] = maxf(5.0, float(old.get("rep", 40.0)) - 1.5)
+			if code != "apo":
+				pp["free"].append(old)
+	# Interino: no meio do ano, o auxiliar segura o time por alguns jogos enquanto o clube procura.
+	if reason in ["resultados", "res"] and r.randf() < 0.45:
+		var it := _new_coach(world, r, club.nation, club.reputation - 14.0, club.archetype)
+		it["int"] = true
+		it["left"] = r.randi_range(1, 3)
+		it["c"] = club.id
+		it["since"] = world.year
+		it["job"] = 55.0
+		CoachCareer.fresh_past(world, r, it, club, true)
+		CoachCareer.open_spell(world, it, club, "int")
+		pp["coaches"][club.id] = it
+		CoachCareer.log_move(world, club, old, it, reason)
+		_announce_change(world, club, old, it, reason, note)
+		return it
 	var best: Dictionary = {}
 	var best_score := -INF
 	for f: Dictionary in pp["free"]:
@@ -312,8 +348,36 @@ static func replace_coach(world: GameWorld, club: Club, reason: String) -> Dicti
 		if score > best_score:
 			best_score = score
 			best = f
-	if best.is_empty() or r.randf() < 0.25:
+	# Quem está bem num clube menor chama atenção: o clube maior paga a multa e leva.
+	var from_club: Club = null
+	if _chain < 2 and reason != "usuario" and r.randf() < 0.35:
+		for cid in pp["coaches"]:
+			var co: Dictionary = pp["coaches"][cid]
+			var t := world.club(int(cid))
+			if t == null or t.id == club.id or bool(co.get("int", false)) or world.is_user_club(t.id):
+				continue
+			if t.reputation > club.reputation - 6.0 or float(co.get("job", 60.0)) < 62.0 or float(co["rep"]) > club.reputation + 12.0:
+				continue
+			if t.nation != club.nation and (float(co["rep"]) < 60.0 or r.randf() < 0.85):
+				continue
+			var score := -absf(float(co["rep"]) - club.reputation * 0.9) + (8.0 if String(co["nat"]) == club.nation else 0.0) + r.randf() * 10.0
+			score += (float(co.get("job", 60.0)) - 60.0) * 0.25 + 3.0
+			if score > best_score:
+				best_score = score
+				best = co
+				from_club = t
+	var fee := 0
+	if from_club != null:
+		pp["coaches"].erase(from_club.id)
+		FootballMemory.on_coach_left(world, from_club, best)
+		CoachCareer.close_spell(world, best, "sai", club.short_name)
+		fee = Valuation.round_value(maxf(50000.0, from_club.wage_budget * 2.5))
+		club.balance -= fee
+		from_club.balance += fee
+		best["rep"] = minf(99.0, float(best["rep"]) + 2.0)
+	elif best.is_empty() or r.randf() < 0.25:
 		best = _new_coach(world, r, club.nation, club.reputation, club.archetype)
+		CoachCareer.fresh_past(world, r, best, club)
 	else:
 		pp["free"].erase(best)
 	best["c"] = club.id
@@ -326,23 +390,47 @@ static func replace_coach(world: GameWorld, club: Club, reason: String) -> Dicti
 	best["w"] = 0
 	best["d"] = 0
 	best["l"] = 0
+	CoachCareer.open_spell(world, best, club)
 	pp["coaches"][club.id] = best
 	while pp["free"].size() > maxi(40, world.clubs.size() / 8):
 		pp["free"].pop_front()
-	_announce_change(world, club, old, best, reason)
+	CoachCareer.log_move(world, club, old, best, reason, from_club.id if from_club != null else -1, fee)
+	_announce_change(world, club, old, best, reason, note, from_club, fee)
+	# Efeito dominó: o clube que perdeu o técnico vai atrás de outro.
+	if from_club != null:
+		_chain += 1
+		replace_coach(world, from_club, "perdeu", club.short_name)
+		_chain -= 1
 	return best
 
 
-static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_coach: Dictionary, reason: String) -> void:
+static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_coach: Dictionary, reason: String, note: String = "", from_club: Club = null, fee: int = 0) -> void:
 	if not world.has_user():
 		return
 	var u := world.user_club()
 	var relevant := club.league_id == u.league_id or u.is_rival(club.id) or (club.nation == u.nation and club.tier == 1)
 	if not relevant:
 		return
-	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio", "usuario": "após a saída de %s" % world.manager_name}.get(reason, "")
-	var title := "%s troca de técnico: sai %s, chega %s" % [club.short_name, String(old.get("n", "o treinador")), String(new_coach["n"])] if not old.is_empty() else "%s anuncia %s como técnico" % [club.short_name, String(new_coach["n"])]
-	var body := "O %s anunciou %s (%s, %d anos) %s. O novo comandante tem perfil %s." % [club.name, String(new_coach["n"]), DatabaseManager.nation_name(String(new_coach["nat"])), world.year - int(new_coach["by"]), ("no lugar de %s, %s" % [String(old.get("n", "")), why]) if not old.is_empty() else "", style_name(String(new_coach["st"])).to_lower()]
+	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio",
+		"usuario": "após a saída de %s" % world.manager_name, "res": "que pediu demissão", "efetivo": "que era interino",
+		"perdeu": "que foi contratado pelo %s" % note}.get(reason, "")
+	var nm := String(new_coach["n"])
+	var title := ""
+	var body := ""
+	if bool(new_coach.get("int", false)):
+		title = "%s: %s assume como interino" % [club.short_name, nm]
+		body = "Com a saída de %s, o auxiliar %s comanda o time nos próximos jogos enquanto a diretoria procura um nome." % [String(old.get("n", "o treinador")), nm]
+	else:
+		title = "%s troca de técnico: sai %s, chega %s" % [club.short_name, String(old.get("n", "o treinador")), nm] if not old.is_empty() else "%s anuncia %s como técnico" % [club.short_name, nm]
+		if from_club != null:
+			title = "%s tira %s do %s" % [club.short_name, nm, from_club.short_name]
+		body = "O %s anunciou %s (%s, %d anos) %s. O novo comandante tem perfil %s." % [club.name, nm, DatabaseManager.nation_name(String(new_coach["nat"])), world.year - int(new_coach["by"]),
+			("no lugar de %s, %s" % [String(old.get("n", "")), why]) if not old.is_empty() else ("no lugar do técnico %s" % why if why != "" else ""), style_name(String(new_coach["st"])).to_lower()]
+		if from_club != null:
+			body += " Para liberá-lo, o clube pagou %s de multa ao %s." % [Fmt.money(fee), from_club.short_name]
+		var tt := CoachCareer.totals(new_coach)
+		if int(tt["t"]) > 0:
+			body += " No currículo, %d título(s) em %d clube(s)." % [int(tt["t"]), int(tt["clubs"])]
 	NewsManager.post_raw(world, title, body, club.id, -1, NewsEvent.IMP_HIGH if u.is_rival(club.id) or club.league_id == u.league_id else NewsEvent.IMP_NORMAL, "tecnicos")
 
 
@@ -867,9 +955,37 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 				d *= float(TRIGGER_HAPPY.get(c.nation, 1.0))
 			co["job"] = clampf(float(co.get("job", 60.0)) + d + (60.0 - float(co.get("job", 60.0))) * 0.02, 0.0, 100.0)
 			var games := int(co.get("w", 0)) + int(co.get("d", 0)) + int(co.get("l", 0))
+			if bool(co.get("int", false)):
+				_interim_game(world, r, c, co)
+				continue
 			if float(co["job"]) < 25.0 and c.streak_winless >= 3 and games >= 5 and r.randf() < 0.35 * float(TRIGGER_HAPPY.get(c.nation, 1.0)):
 				replace_coach(world, c, "resultados")
 				_maybe_offer_user(world, r, c)
+			elif float(co["job"]) < 22.0 and games >= 6 and r.randf() < 0.03:
+				# Sem ambiente, o técnico entrega o cargo antes de ser demitido.
+				replace_coach(world, c, "res")
+				_maybe_offer_user(world, r, c)
+
+
+## Um jogo do interino: acabado o prazo, ou é efetivado (se foi bem) ou o clube traz um técnico.
+static func _interim_game(world: GameWorld, r: RandomNumberGenerator, c: Club, co: Dictionary) -> void:
+	co["left"] = int(co.get("left", 1)) - 1
+	if int(co["left"]) > 0:
+		return
+	var games := int(co.get("w", 0)) + int(co.get("d", 0)) + int(co.get("l", 0))
+	var pts := int(co.get("w", 0)) * 3 + int(co.get("d", 0))
+	if games > 0 and pts >= games * 2 and r.randf() < 0.55:
+		co.erase("int")
+		co.erase("left")
+		co["job"] = 62.0
+		CoachCareer.confirm_interim(co)
+		CoachCareer.log_move(world, c, co, co, "efe")
+		if world.has_user() and (c.league_id == world.user_club().league_id or world.user_club().is_rival(c.id)):
+			NewsManager.post_raw(world, "%s efetiva %s" % [c.short_name, String(co["n"])],
+				"Depois de %d pontos em %d jogos como interino, %s ganhou o cargo de técnico do %s." % [pts, games, String(co["n"]), c.short_name],
+				c.id, -1, NewsEvent.IMP_NORMAL, "tecnicos")
+		return
+	replace_coach(world, c, "efetivo")
 
 
 ## Clube que acabou de demitir pode sondar o usuário (se ele tiver moral para isso).
@@ -1263,17 +1379,21 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 		var diff := int(goal[1]) - int(h["p"])
 		co["rep"] = clampf(float(co["rep"]) + clampf(diff * 0.8, -5.0, 6.0) + (6.0 if int(h["p"]) == 1 else 0.0), 5.0, 99.0)
 		co["sk"] = clampf(float(co["sk"]) + r.randf_range(-1.0, 1.5), 15.0, 97.0)
+		CoachCareer.bank(co)
 		co["w"] = 0
 		co["d"] = 0
 		co["l"] = 0
 		var pres_pat := float(PRES_STYLES.get(String(pp["pres"].get(c.id, {}).get("st", "paciente")), PRES_STYLES["paciente"])["patience"])
 		var age := world.year - int(co["by"])
-		if age >= 70 and r.randf() < 0.5:
+		if bool(co.get("int", false)):
+			replace_coach(world, c, "efetivo") # a temporada acabou: o clube escolhe um técnico
+		elif age >= 70 and r.randf() < 0.5:
 			replace_coach(world, c, "")
 		elif diff <= -3 and r.randf() < 0.55 / pres_pat:
 			replace_coach(world, c, "temporada")
 		else:
 			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + diff * 2.0, 20.0, 90.0)
+	CoachCareer.retire_free(world, r)
 	# Presidentes: fim de mandato e eleições
 	for cid in pp["pres"]:
 		var pr: Dictionary = pp["pres"][cid]

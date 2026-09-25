@@ -499,6 +499,10 @@ func _career(w: GameWorld, p: Player) -> Control:
 				var el := UIKit.label("      " + " · ".join(extra), "Small", true)
 				el.add_theme_color_override(&"font_color", UIColors.ACCENT)
 				card.add_child(el)
+			for inj in h.get("inj", []):
+				var il := UIKit.label("      %s · %d semanas fora" % [String(inj[0]), int(inj[1])], "Small", true)
+				il.add_theme_color_override(&"font_color", UIColors.RED)
+				card.add_child(il)
 	return UIKit.card_panel(card)
 
 
