@@ -617,7 +617,8 @@ func _flavor(att: MatchTeam, dfn: MatchTeam) -> void:
 	var r := vis_rng.randf()
 	if r < 0.15:
 		var carrier := _pick_weighted(att, PK_MID, vis_rng)
-		_emit(EV_POSSESSION, s, carrier.p.id if carrier != null else -1)
+		var kinds := ["", "", "switch", "long", "press", "build", "throw", "goalkick", "back"]
+		_emit(EV_POSSESSION, s, carrier.p.id if carrier != null else -1, -1, {"kind": kinds[vis_rng.randi_range(0, kinds.size() - 1)]})
 	elif r < 0.21:
 		var dr := _pick_weighted(att, PK_DRIBBLE, vis_rng)
 		var dm := _pick_weighted(dfn, PK_DEFEND, vis_rng)

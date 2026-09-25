@@ -132,7 +132,8 @@ func lines_for(ev: Dictionary) -> Array:
 		MatchSimulation.EV_FULLTIME:
 			out.append(_line(_pick("fulltime"), ev, "big", 0.0))
 		MatchSimulation.EV_POSSESSION:
-			out.append(_line(_pick("possession"), ev, "normal", 0.0))
+			var pk := "poss_" + String(x.get("kind", ""))
+			out.append(_line(_pick(pk if _data.has(pk) else "possession"), ev, "normal", 0.0))
 		MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL:
 			var ct := int(x.get("ct", -1))
 			var tags: Array = x.get("tags", [])
@@ -155,20 +156,37 @@ func lines_for(ev: Dictionary) -> Array:
 				cat = "goal_golaco"
 			elif tags.has("penalty"):
 				cat = "goal_penalty"
+			elif ct == MatchSimulation.CH_FREEKICK:
+				cat = "goal_freekick"
 			elif tags.has("header"):
 				cat = "goal_header"
+			elif tags.has("counter"):
+				cat = "goal_counter"
+			elif tags.has("error"):
+				cat = "goal_error"
 			elif tags.has("blowout"):
 				cat = "goal_blowout"
 			out.append(_line(_pick(cat), ev, "goal", 0.55))
+			if t == MatchSimulation.EV_GOAL and not tags.has("hattrick") and _goals_of(side, int(ev.get("p", -1))) == 2:
+				out.append(_line(_pick("brace"), ev, "info", 0.7))
 			if int(ev.get("p2", -1)) >= 0 and t == MatchSimulation.EV_GOAL:
 				out.append(_line(_pick("assist"), ev, "info", 0.8))
+			if rng.randf() < 0.55:
+				out.append(_pundit(_pundit_goal_cat(ct, tags), ev, 1.6))
 		MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS, MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK:
 			var ct2 := int(x.get("ct", -1))
 			out.append(_line(_pick(_build_cat(ct2, int(ev.get("p2", -1)) >= 0)), ev, "chance", 0.0))
 			var cat2: String = {MatchSimulation.EV_SAVE: "save", MatchSimulation.EV_MISS: "miss", MatchSimulation.EV_POST: "post", MatchSimulation.EV_BLOCK: "block"}[t]
+			var big := float(x.get("xg", 0.0)) >= 0.3
 			if t == MatchSimulation.EV_BLOCK and x.has("line"):
 				cat2 = "block_line"
-			out.append(_line(_pick(cat2), ev, "chance" if t == MatchSimulation.EV_POST or cat2 == "block_line" else "normal", 0.5))
+			elif big and (t == MatchSimulation.EV_SAVE or t == MatchSimulation.EV_MISS):
+				cat2 += "_big"
+			out.append(_line(_pick(cat2), ev, "chance" if t == MatchSimulation.EV_POST or cat2 == "block_line" or big else "normal", 0.5))
+			if big and t == MatchSimulation.EV_MISS and rng.randf() < 0.5:
+				out.append(_pundit("pundit_miss", ev, 1.4))
+			elif big and t == MatchSimulation.EV_SAVE and rng.randf() < 0.35:
+				out.append(_pundit("pundit_save", ev, 1.4))
 		MatchSimulation.EV_PEN_SAVE:
 			out.append(_line(_pick("build_penalty"), ev, "chance", 0.0))
 			out.append(_line(_pick("pen_save"), ev, "big", 0.6))
@@ -181,12 +199,18 @@ func lines_for(ev: Dictionary) -> Array:
 			out.append(_line(_pick("foul_danger" if x.get("danger", false) else "foul"), ev, "normal", 0.0))
 		MatchSimulation.EV_YELLOW:
 			out.append(_line(_pick("yellow"), ev, "card_y", 0.2))
+			if rng.randf() < 0.3:
+				out.append(_line(_pick("reporter_card"), ev, "reporter", 1.4))
 		MatchSimulation.EV_RED:
 			out.append(_line(_pick("second_yellow" if x.get("second", false) else "red"), ev, "card_r", 0.2))
+			out.append(_line(_pick("reporter_card"), ev, "reporter", 1.4))
 		MatchSimulation.EV_INJURY:
 			out.append(_line(_pick("injury"), ev, "injury", 0.0))
+			out.append(_line(_pick("reporter_injury"), ev, "reporter", 1.2))
 		MatchSimulation.EV_SUB:
 			out.append(_line(_pick("sub"), ev, "sub", 0.0))
+			if rng.randf() < 0.35:
+				out.append(_line(_pick("reporter_sub"), ev, "reporter", 1.0))
 		MatchSimulation.EV_OFFSIDE:
 			if x.get("goal", false):
 				out.append(_line(_pick("offside_goal"), ev, "big", 0.0))
@@ -227,7 +251,83 @@ func lines_for(ev: Dictionary) -> Array:
 			elif m >= 0 and m <= 1:
 				cat3 = "tactic_defend"
 			out.append(_line(_pick(cat3), ev, "tactic" if x.has("formation") else "info", 0.0))
+			if (x.has("formation") or x.has("style")) and rng.randf() < 0.4:
+				out.append(_line(_pick("reporter_coach"), ev, "reporter", 1.0))
 	return out
+
+
+func _goals_of(side: int, pid: int) -> int:
+	if side < 0 or pid < 0:
+		return 0
+	var mp: MatchPlayer = sim.teams[side].by_id.get(pid, null)
+	return mp.goals if mp != null else 0
+
+
+static func _pundit_goal_cat(ct: int, tags: Array) -> String:
+	if tags.has("counter") or ct == MatchSimulation.CH_COUNTER:
+		return "pundit_goal_counter"
+	if tags.has("error"):
+		return "pundit_goal_error"
+	if ct == MatchSimulation.CH_PENALTY:
+		return "pundit_goal_penalty"
+	if ct == MatchSimulation.CH_CORNER or ct == MatchSimulation.CH_FREEKICK:
+		return "pundit_goal_setpiece"
+	if tags.has("header"):
+		return "pundit_goal_header"
+	if ct == MatchSimulation.CH_LONG or tags.has("golaco"):
+		return "pundit_goal_long"
+	return "pundit_goal"
+
+
+## Fala do comentarista (com o rótulo na frente).
+func _pundit(cat: String, ev: Dictionary, delay: float) -> Dictionary:
+	var l := _line(_pick(cat), ev, "pundit", delay)
+	l["text"] = I18n.t("Comentarista") + ": " + String(l["text"])
+	return l
+
+
+## Análise do comentarista a partir dos números do jogo: posse, finalizações, goleiro que
+## brilha, atacante que insiste, jogo pegado ou equilibrado. Vazio se não há o que dizer.
+func analysis_line(minute: int, half: int) -> Dictionary:
+	var h: MatchTeam = sim.teams[0]
+	var a: MatchTeam = sim.teams[1]
+	var opts: Array = []
+	var ph := sim.possession_pct(0)
+	if ph >= 0.6 or ph <= 0.4:
+		var dom := 0 if ph >= 0.6 else 1
+		opts.append(["pundit_dom", dom, -1, int(round((ph if dom == 0 else 1.0 - ph) * 100.0))])
+	if absi(h.shots - a.shots) >= 5:
+		var more := 0 if h.shots > a.shots else 1
+		opts.append(["pundit_shots", more, -1, maxi(h.shots, a.shots)])
+	var xd := h.xg - a.xg
+	var sd := sim.score[0] - sim.score[1]
+	if absf(xd) >= 0.9 and ((xd > 0.0 and sd <= 0) or (xd < 0.0 and sd >= 0)):
+		opts.append(["pundit_unfair", 0 if xd > 0.0 else 1, -1, 0])
+	for side in 2:
+		var gk := sim.teams[side].goalkeeper()
+		if gk != null and gk.saves >= 3:
+			opts.append(["pundit_keeper", side, gk.p.id, gk.saves])
+		var best: MatchPlayer = null
+		for mp: MatchPlayer in sim.teams[side].slots:
+			if mp != null and mp.shots >= 3 and mp.goals == 0 and (best == null or mp.shots > best.shots):
+				best = mp
+		if best != null:
+			opts.append(["pundit_striker", side, best.p.id, best.shots])
+	var cards := h.yellows + a.yellows
+	if cards >= 4:
+		opts.append(["pundit_cards", -1, -1, cards])
+	if opts.is_empty():
+		if absi(h.shots - a.shots) <= 2 and absf(ph - 0.5) < 0.07:
+			opts.append(["pundit_even", -1, -1, 0])
+		else:
+			return {}
+	var o: Array = opts[rng.randi_range(0, opts.size() - 1)]
+	var ev := {"t": -1, "m": minute, "h": half, "s": int(o[1]), "p": int(o[2]), "x": {"n": int(o[3])}, "hs": sim.score[0], "as": sim.score[1]}
+	if int(o[1]) < 0:
+		ev["s"] = 0
+	var l := _pundit(String(o[0]), ev, 0.0)
+	l["side"] = int(o[1])
+	return l
 
 
 ## Palestra no vestiário: o tom da conversa e quem saiu mais ligado (ou abatido).

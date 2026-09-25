@@ -6,6 +6,7 @@ extends BaseScreen
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
+const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
 
 var _sim: MatchSimulation
 var _fx: Fixture
@@ -27,11 +28,12 @@ var _queue: Array = [] # [{at, line, ev}]
 var _ev_index := 0
 var _announced: Array[bool] = [false, false]
 var _scorers: Array = [[], []] # por lado: [[nome, [minutos]]]
+var _shown_score: Array[int] = [0, 0] # placar mostrado: o gol só entra quando a bola entra no campo 2D
 var _colors: Array[Color] = []
 var _vis_rng := RandomNumberGenerator.new()
 var _last_phase: Dictionary = {}
-var _phase_next: Dictionary = {}
-var _phase_timer := 0.0
+var _play_delay := 0.0 # quanto a jogada encenada no campo ainda leva (s): a narração acompanha
+var _stadium: Dictionary = {}
 var _highlight_timer := 0.0
 var _ticker_t := 1.5
 var _ticker_i := -1
@@ -139,7 +141,7 @@ func _build() -> void:
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
 	_pitch.horizontal = true
-	_pitch.custom_minimum_size = Vector2(0, 400)
+	_pitch.custom_minimum_size = Vector2(0, 440)
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
 	_pitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -147,7 +149,17 @@ func _build() -> void:
 	_pitch.home_color2 = _colors[1]
 	_pitch.away_color = _colors[2]
 	_pitch.away_color2 = _colors[3]
-	_root.add_child(UIKit.margin(_pitch, 10, 8, 10, 4))
+	var th := ScoreboardTheme.for_competition(w, _fx.comp)
+	_pitch.comp_accent = th["accent"]
+	_pitch.comp_bg = th["bg"]
+	var refc := _ref_colors()
+	_pitch.ref_color = refc[0]
+	_pitch.ref_color2 = refc[1]
+	_pitch.motion = PitchMotion.new(seed_base * 7 + 3)
+	_pitch.motion.tempo = TEMPO[_pace]
+	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
+	_pitch.stadium = _stadium
+	_root.add_child(UIKit.margin(_pitch, 0, 6, 0, 4))
 	# Posse e números
 	_stats_box = UIKit.vbox(4)
 	var poss := UIKit.hbox(8)
@@ -228,24 +240,44 @@ func _build() -> void:
 	var rs := Referees.summary(w, _sim.ref)
 	if rs != "":
 		_add_line({"text": "Árbitro: " + rs, "style": "info", "side": -1, "minute": ""})
-	_add_line(_com.extra_line("weather", "info", 0, 1))
+	var wcat := "weather_" + String(_stadium.get("weather", ""))
+	_add_line(_com.extra_line(wcat if DatabaseManager.commentary().has(wcat) else "weather", "info", 0, 1))
+	var scat := "stadium_" + String(_stadium.get("kind", ""))
+	if DatabaseManager.commentary().has(scat):
+		_add_line(_com.extra_line(scat, "info", 0, 1))
 	if not _sim.started and _sim.can_talk(_user_side):
 		_open_talk.call_deferred(false)
 
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
-	# Placar com a cara da competição (cores da liga/copa, faixa com o nome e a rodada).
+	# Placar com a cara da competição: cores da liga/copa e um desenho próprio (faixa, TV,
+	# angular, cápsula ou clássico), como os grafismos de cada transmissão.
 	var th := ScoreboardTheme.for_competition(world(), _fx.comp)
+	var layout := String(th.get("layout", "faixa"))
+	var accent: Color = th["accent"]
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = "TopBar"
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = th["bg"]
-	sb.border_color = th["accent"]
+	sb.border_color = accent
 	sb.border_width_bottom = 4
 	sb.content_margin_left = 16
 	sb.content_margin_right = 16
 	sb.content_margin_top = 10
 	sb.content_margin_bottom = 8
+	match layout:
+		"tv":
+			sb.border_width_bottom = 0
+			sb.border_width_top = 3
+		"capsula":
+			sb.corner_radius_bottom_left = 26
+			sb.corner_radius_bottom_right = 26
+			sb.shadow_color = Color(accent.r, accent.g, accent.b, 0.35)
+			sb.shadow_size = 6
+		"classico":
+			sb.bg_color = Color("#0B0B0B")
+			sb.border_color = Color("#3A3A3A")
+			sb.border_width_bottom = 5
 	panel.add_theme_stylebox_override(&"panel", sb)
 	var v := UIKit.vbox(2)
 	panel.add_child(v)
@@ -257,15 +289,38 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	ss.content_margin_right = 10
 	ss.content_margin_top = 3
 	ss.content_margin_bottom = 3
+	var caps_col: Color = th["caps"]
+	match layout:
+		"tv":
+			ss.bg_color = accent
+			ss.set_corner_radius_all(0)
+			caps_col = UIColors.on_color(accent)
+		"angular":
+			ss.bg_color = accent
+			ss.skew = Vector2(0.35, 0)
+			ss.set_corner_radius_all(0)
+			caps_col = UIColors.on_color(accent)
+		"capsula":
+			ss.set_corner_radius_all(20)
+			ss.border_color = accent
+			ss.set_border_width_all(2)
+		"classico":
+			ss.bg_color = Color("#000000")
+			ss.set_corner_radius_all(2)
+			ss.border_color = Color("#3A3A3A")
+			ss.set_border_width_all(1)
+			caps_col = Color("#FFB000")
 	strip.add_theme_stylebox_override(&"panel", ss)
 	var comp_lbl := UIKit.label(CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO", "Caps")
 	comp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	comp_lbl.clip_text = true
-	comp_lbl.add_theme_color_override(&"font_color", th["caps"])
+	comp_lbl.add_theme_color_override(&"font_color", caps_col)
 	strip.add_child(comp_lbl)
 	v.add_child(strip)
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.crest(home, 58))
+	if layout == "tv" or layout == "angular":
+		row.add_child(_team_block(_colors[0], _colors[1], layout))
 	_home_name = UIKit.label(home.short_name, "H2")
 	_home_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_home_name.clip_text = true
@@ -274,27 +329,67 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	var score_box := PanelContainer.new()
 	var sbx := StyleBoxFlat.new()
 	sbx.bg_color = th["bg2"]
-	sbx.border_color = th["accent"]
+	sbx.border_color = accent
 	sbx.set_border_width_all(2)
 	sbx.set_corner_radius_all(10)
 	sbx.content_margin_left = 14
 	sbx.content_margin_right = 14
+	var score_col: Color = th["text"]
+	var clock_col := accent
+	match layout:
+		"tv":
+			sbx.bg_color = accent
+			sbx.set_corner_radius_all(0)
+			sbx.set_border_width_all(0)
+			score_col = UIColors.on_color(accent)
+		"angular":
+			sbx.skew = Vector2(0.22, 0)
+			sbx.set_corner_radius_all(0)
+			sbx.border_width_top = 0
+			sbx.border_width_bottom = 0
+			sbx.border_width_left = 5
+			sbx.border_width_right = 5
+		"capsula":
+			sbx.set_corner_radius_all(24)
+			sbx.set_border_width_all(3)
+			sbx.shadow_color = Color(accent.r, accent.g, accent.b, 0.45)
+			sbx.shadow_size = 8
+		"classico":
+			sbx.bg_color = Color("#050505")
+			sbx.border_color = Color("#FFB000").darkened(0.5)
+			sbx.set_corner_radius_all(3)
+			sbx.set_border_width_all(3)
+			score_col = Color("#FFB000")
+			clock_col = Color("#FFB000")
 	score_box.add_theme_stylebox_override(&"panel", sbx)
 	_score_lbl = UIKit.label("0 – 0", "Score")
 	_score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_score_lbl.add_theme_color_override(&"font_color", th["text"])
+	_score_lbl.add_theme_color_override(&"font_color", score_col)
 	score_box.add_child(_score_lbl)
 	mid.add_child(score_box)
-	_clock_lbl = UIKit.label("0'", "Accent")
+	_clock_lbl = UIKit.label("0'", "Accent" if layout != "classico" else "Mono")
 	_clock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_clock_lbl.add_theme_color_override(&"font_color", th["accent"])
-	mid.add_child(_clock_lbl)
+	_clock_lbl.add_theme_color_override(&"font_color", clock_col)
+	if layout == "tv":
+		# Relógio numa aba própria, como na barra de TV.
+		var tab := PanelContainer.new()
+		var tb := StyleBoxFlat.new()
+		tb.bg_color = th["bg2"]
+		tb.content_margin_left = 8
+		tb.content_margin_right = 8
+		tab.add_theme_stylebox_override(&"panel", tb)
+		tab.add_child(_clock_lbl)
+		mid.add_child(tab)
+	else:
+		mid.add_child(_clock_lbl)
 	row.add_child(mid)
 	_away_name = UIKit.label(away.short_name, "H2")
 	_away_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_away_name.clip_text = true
 	row.add_child(_away_name)
+	if layout == "tv" or layout == "angular":
+		row.add_child(_team_block(_colors[2], _colors[3], layout))
 	row.add_child(UIKit.crest(away, 58))
 	v.add_child(row)
 	var sc := UIKit.hbox(8)
@@ -309,6 +404,21 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	_ticker.clip_text = true
 	v.add_child(_ticker)
 	return panel
+
+
+## Bloco com as duas cores do time ao lado do nome (placares de TV e angular).
+func _team_block(c1: Color, c2: Color, layout: String) -> Control:
+	var p := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = c1
+	st.border_color = c2
+	st.border_width_bottom = 5
+	if layout == "angular":
+		st.skew = Vector2(0.3, 0)
+	p.add_theme_stylebox_override(&"panel", st)
+	p.custom_minimum_size = Vector2(12, 44)
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return p
 
 
 func _build_controls() -> void:
@@ -400,11 +510,7 @@ func _process(delta: float) -> void:
 	_flush_lines()
 	_update_ticker(delta)
 	_refresh_tab_if_needed()
-	if _phase_timer > 0.0:
-		_phase_timer -= delta
-		if _phase_timer <= 0.0 and not _phase_next.is_empty():
-			_pitch.set_phase(int(_phase_next["side"]), float(_phase_next["depth"]), float(_phase_next["lat"]))
-			_phase_next = {}
+	_pitch.motion.frozen = _paused or _halftime or _done or UIManager.has_modal()
 	if _highlight_timer > 0.0:
 		_highlight_timer -= delta
 		if _highlight_timer <= 0.0:
@@ -439,7 +545,11 @@ func _process(delta: float) -> void:
 
 func _advance() -> void:
 	_sim.step()
+	# Primeiro o campo encena o lance; a narração do desfecho sai quando a jogada termina.
+	_play_delay = 0.0
+	_script_play()
 	_drain(false)
+	_play_delay = 0.0
 	_after_step()
 
 
@@ -455,9 +565,7 @@ func _after_step() -> void:
 		_pending_final = true
 	elif _sim.is_halftime_pause():
 		_pending_halftime = true
-	if not is_same(_sim.last_phase, _last_phase) and not _sim.last_phase.is_empty():
-		_last_phase = _sim.last_phase
-		_apply_phase(_last_phase)
+	_script_play()
 	_update_sides()
 	_stat_summary()
 	if GameManager.ai_ready() and not _sim.finished:
@@ -485,22 +593,33 @@ func _enqueue(line: Dictionary, ev: Dictionary, delay: float) -> void:
 func _handle_event(ev: Dictionary, silent: bool) -> void:
 	var t: int = ev["t"]
 	var side: int = ev["s"]
-	if t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL:
+	if (t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL) and silent:
 		_record_scorer(ev)
-	if t == MatchSimulation.EV_KICKOFF or t == MatchSimulation.EV_SECOND_HALF:
-		_pitch.reset_kickoff()
+		_shown_score = [int(ev["hs"]), int(ev["as"])]
+	if t in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF, MatchSimulation.EV_EXTRA_TIME, MatchSimulation.EV_ET_SECOND]:
+		_pitch.motion.kickoff(0 if _sim.half % 2 == 1 else 1, true)
 		if not silent:
 			AudioManager.play("whistle", -4.0)
+	var scripted := _play_delay > 0.0 and t in SCRIPTED_EVENTS
 	for line in _com.lines_for(ev):
 		var style: String = line["style"]
-		if silent and style in ["normal", "chance", "info", "crowd", "var"] and t != MatchSimulation.EV_FULLTIME and t != MatchSimulation.EV_HALFTIME:
+		if silent and style in ["normal", "chance", "info", "crowd", "var", "pundit", "reporter"] and t != MatchSimulation.EV_FULLTIME and t != MatchSimulation.EV_HALFTIME:
 			continue
 		if silent:
 			_add_line(line)
 			continue
-		_enqueue(line, ev, float(line["delay"]) * _delay_scale())
+		var d := float(line["delay"]) * _delay_scale()
+		if scripted:
+			# Preparação no meio da jogada; desfecho quando a bola chega.
+			d = d + _play_delay if d > 0.0 or style in ["goal", "card_y", "card_r", "big"] else _play_delay * 0.5
+		_enqueue(line, ev, d)
 	if silent:
 		return
+	if t == MatchSimulation.EV_HALFTIME:
+		var an := _com.analysis_line(int(ev["m"]), int(ev["h"]))
+		if not an.is_empty():
+			_enqueue(an, {}, 1.2)
+	_on_event_visual(ev)
 	# Destaque do protagonista no campo
 	var pid: int = ev.get("p", -1)
 	if pid >= 0 and side >= 0:
@@ -551,6 +670,8 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 
 
 func _celebrate(ev: Dictionary) -> void:
+	_record_scorer(ev)
+	_shown_score = [int(ev["hs"]), int(ev["as"])]
 	var side: int = ev["s"]
 	var x: Dictionary = ev.get("x", {})
 	var tags: Array = x.get("tags", [])
@@ -570,10 +691,14 @@ func _celebrate(ev: Dictionary) -> void:
 	var dur := _overlay.play(level, title, scorer, GoalOverlay.tag_text(tags), info, c1, c2, 1.0 if _pace < 2 else 0.5)
 	_hold = maxf(_hold, dur + 0.2)
 	_pitch.goal_effect(side, c1)
+	var sc_mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
+	_pitch.motion.celebrate(side, sc_mp.slot if sc_mp != null and sc_mp.on_pitch and int(ev["t"]) == MatchSimulation.EV_GOAL else -1)
 	AudioManager.goal(imp if level != 3 else maxf(imp, 0.8), ours)
+	if _pace == 0:
+		_hold += 1.8 # tempo de ver os times voltando para a saída
 	var tw := create_tween()
 	tw.tween_interval(dur)
-	tw.tween_callback(_pitch.reset_kickoff)
+	tw.tween_callback(func(): _pitch.motion.kickoff(1 - side, false))
 
 
 func _player_name(side: int, pid: int) -> String:
@@ -582,6 +707,16 @@ func _player_name(side: int, pid: int) -> String:
 		if mp != null:
 			return mp.p.display_name()
 	return ""
+
+
+## Artilheiros a partir de todos os gols da simulação (ao pular para o fim, a narração pendente some).
+func _rebuild_scorers() -> void:
+	_scorers = [[], []]
+	for ev in _sim.events:
+		var t := int(ev["t"])
+		if t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL:
+			_record_scorer(ev)
+	_shown_score = [_sim.score[0], _sim.score[1]]
 
 
 func _record_scorer(ev: Dictionary) -> void:
@@ -602,24 +737,146 @@ func _record_scorer(ev: Dictionary) -> void:
 	list.append([scorer, [m]])
 
 
-func _apply_phase(ph: Dictionary) -> void:
-	var ev := int(ph.get("ev", -1))
-	if ev == MatchSimulation.EV_KICKOFF or ev == MatchSimulation.EV_SECOND_HALF:
-		_pitch.reset_kickoff()
+const SCRIPTED_EVENTS: Array[int] = [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS,
+	MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK, MatchSimulation.EV_PEN_SAVE, MatchSimulation.EV_PEN_MISS, MatchSimulation.EV_PENALTY_AWARDED,
+	MatchSimulation.EV_FOUL, MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED, MatchSimulation.EV_OFFSIDE, MatchSimulation.EV_CORNER,
+	MatchSimulation.EV_FREEKICK, MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER, MatchSimulation.EV_VAR]
+const CHANCE_RES := {
+	MatchSimulation.EV_GOAL: "goal", MatchSimulation.EV_OWN_GOAL: "goal", MatchSimulation.EV_SAVE: "save",
+	MatchSimulation.EV_MISS: "miss", MatchSimulation.EV_POST: "post", MatchSimulation.EV_BLOCK: "block",
+	MatchSimulation.EV_PEN_SAVE: "pen_save", MatchSimulation.EV_PEN_MISS: "miss",
+}
+
+
+func _slot_of(side: int, pid: int) -> int:
+	if side < 0 or pid < 0:
+		return -1
+	var mp: MatchPlayer = _sim.teams[side].by_id.get(pid, null)
+	return mp.slot if mp != null and mp.on_pitch else -1
+
+
+func _find_ev(types: Array) -> Dictionary:
+	for i in range(_sim.last_events.size() - 1, -1, -1):
+		var e: Dictionary = _sim.last_events[i]
+		if types.has(int(e["t"])):
+			return e
+	return {}
+
+
+## Traduz a fase do minuto (e os eventos dele) numa jogada encenada pelo PitchMotion.
+func _script_play() -> void:
+	var ph: Dictionary = _sim.last_phase
+	if ph.is_empty() or is_same(ph, _last_phase):
 		return
-	var side: int = ph.get("side", 0)
-	var depth_from: float = ph.get("from", 0.5)
-	var depth_to: float = ph.get("to", 0.5)
-	var ct := int(ph.get("ct", -1))
-	var wide := ct == MatchSimulation.CH_CROSS or ct == MatchSimulation.CH_CORNER
-	var lat := _vis_rng.randf_range(0.2, 0.8)
-	if wide:
-		lat = 0.06 if _vis_rng.randf() < 0.5 else 0.94
-	_pitch.ball_speed = clampf(0.55 / PACE[_pace], 0.5, 7.0)
-	_pitch.set_phase(side, depth_from, lat)
-	var lat2 := 0.5 + (lat - 0.5) * (0.25 if wide else 0.6) + _vis_rng.randf_range(-0.08, 0.08)
-	_phase_next = {"side": side, "depth": depth_to, "lat": lat2}
-	_phase_timer = PACE[_pace] * 0.45
+	_last_phase = ph
+	var ev := int(ph.get("ev", -1))
+	if ev in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF, MatchSimulation.EV_EXTRA_TIME]:
+		return
+	var side := int(ph.get("side", 0))
+	var info := {"side": side, "zone": float(ph.get("to", 0.5))}
+	var mo := _pitch.motion
+	if CHANCE_RES.has(ev):
+		var e := _find_ev(CHANCE_RES.keys())
+		if e.is_empty():
+			mo.ambient(side, float(ph.get("to", 0.5)))
+			return
+		var t := int(e["t"])
+		var x: Dictionary = e.get("x", {})
+		info["kind"] = "chance"
+		info["ct"] = int(ph.get("ct", x.get("ct", 0)))
+		info["res"] = CHANCE_RES[t]
+		if t == MatchSimulation.EV_OWN_GOAL:
+			info["own"] = true
+			info["sh"] = _slot_of(1 - side, int(e["p"]))
+		else:
+			info["sh"] = _slot_of(side, int(e["p"]))
+			info["as"] = _slot_of(side, int(e.get("p2", -1)))
+		if x.has("line"):
+			info["line"] = _slot_of(1 - side, int(x["line"]))
+		if x.has("culprit"):
+			info["culprit"] = _slot_of(1 - side, int(x["culprit"]))
+		if int(info["ct"]) == MatchSimulation.CH_PENALTY:
+			var pa := _find_ev([MatchSimulation.EV_PENALTY_AWARDED])
+			if not pa.is_empty():
+				info["pen"] = {"victim": _slot_of(side, int(pa["p"])), "fouler": _slot_of(1 - side, int(pa.get("p2", -1)))}
+	elif ev == MatchSimulation.EV_FOUL:
+		var f := _find_ev([MatchSimulation.EV_FOUL])
+		if f.is_empty():
+			return
+		info["kind"] = "foul"
+		info["p"] = _slot_of(1 - side, int(f["p"]))
+		info["p2"] = _slot_of(side, int(f.get("p2", -1)))
+		info["danger"] = bool(f.get("x", {}).get("danger", false))
+		info["zone"] = float(ph.get("to", 0.5))
+		var c := _find_ev([MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED])
+		if not c.is_empty() and int(c["p"]) == int(f["p"]):
+			info["card"] = 2 if int(c["t"]) == MatchSimulation.EV_RED else 1
+			# Expulso: o slot já saiu do campo na simulação; o cartão aparece antes de ele sair.
+			if info["p"] == -1:
+				var mp: MatchPlayer = _sim.teams[1 - side].by_id.get(int(f["p"]), null)
+				if mp != null:
+					info["p"] = mp.slot
+	elif ev == MatchSimulation.EV_OFFSIDE:
+		var o := _find_ev([MatchSimulation.EV_OFFSIDE])
+		info["kind"] = "offside"
+		info["p"] = _slot_of(side, int(o.get("p", -1))) if not o.is_empty() else -1
+	elif ev == MatchSimulation.EV_CORNER:
+		var cn := _find_ev([MatchSimulation.EV_CORNER])
+		info["kind"] = "corner"
+		info["p"] = _slot_of(side, int(cn.get("p", -1))) if not cn.is_empty() else -1
+	else:
+		var fl := _find_ev([MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER])
+		if fl.is_empty():
+			mo.ambient(side, float(ph.get("to", 0.5)))
+			return
+		var ft := int(fl["t"])
+		var fs := int(fl["s"])
+		info["side"] = fs
+		info["kind"] = {MatchSimulation.EV_SKILL: "skill", MatchSimulation.EV_TACKLE: "tackle", MatchSimulation.EV_KEEPER: "keeper"}[ft]
+		info["p"] = _slot_of(fs, int(fl["p"]))
+		info["p2"] = _slot_of(1 - fs, int(fl.get("p2", -1)))
+	mo.play(info)
+	# No ritmo normal a partida espera a jogada; no rápido, só os gols; no turbo, nada.
+	var bt := mo.busy_time()
+	if _pace == 0:
+		_play_delay = minf(bt, 3.4)
+	elif _pace == 1 and String(info.get("res", "")) == "goal":
+		_play_delay = minf(bt, 1.6)
+
+
+## Efeitos no campo que não dependem da jogada: lesão, jogador caído, VAR.
+func _on_event_visual(ev: Dictionary) -> void:
+	var t := int(ev["t"])
+	var side := int(ev["s"])
+	match t:
+		MatchSimulation.EV_INJURY:
+			var mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
+			if mp != null and mp.slot >= 0:
+				_pitch.motion.player_down(side, mp.slot, 3.5)
+				var a := _pitch.motion.ag(side, mp.slot)
+				if a != null:
+					a.hurt = 3.5
+		MatchSimulation.EV_KNOCK:
+			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p2", -1))), 2.2)
+		MatchSimulation.EV_VAR:
+			_pitch.motion.var_check(2.0)
+
+
+## Cor do árbitro que não se confunde com nenhum dos dois uniformes.
+func _ref_colors() -> Array[Color]:
+	var opts := [[Color("#111111"), Color("#F5D547")], [Color("#F5D547"), Color("#111111")], [Color("#E5484D"), Color("#111111")],
+		[Color("#3DBE7A"), Color("#111111")], [Color("#4EA8DE"), Color("#111111")], [Color("#9B5DE5"), Color("#FFFFFF")]]
+	var best: Array = opts[0]
+	var best_d := -1.0
+	for o in opts:
+		var c: Color = o[0]
+		var d := minf(_cdist(c, _colors[0]), _cdist(c, _colors[2]))
+		d = minf(d, minf(_cdist(c, _colors[1]), _cdist(c, _colors[3])) + 0.25)
+		if d > best_d:
+			best_d = d
+			best = o
+	var out: Array[Color] = [best[0], best[1]]
+	return out
 
 
 func _sync_slots() -> void:
@@ -630,7 +887,9 @@ func _sync_slots() -> void:
 		for i in fslots.size():
 			var s: Dictionary = fslots[i]
 			var mp: MatchPlayer = t.slots[i] if i < t.slots.size() else null
-			var e := {"x": s["x"], "y": s["y"], "number": mp.p.shirt if mp != null else 0, "on": mp != null}
+			var e := {"x": s["x"], "y": s["y"], "number": mp.p.shirt if mp != null else 0, "on": mp != null,
+				"name": mp.p.display_name() if mp != null else "", "role": String(s.get("role", "CM")),
+				"gk": String(s.get("role", "")) == "GK" or int(s.get("pos", -1)) == Pos.GK}
 			if mp != null and mp.p.position == Pos.GK and int(s.get("pos", -1)) == Pos.GK:
 				var gk := t.club.gk_kit()
 				e["c1"] = Color(String(gk.get("c1", "#111111")))
@@ -640,10 +899,13 @@ func _sync_slots() -> void:
 			_pitch.home_slots = arr
 		else:
 			_pitch.away_slots = arr
+		_pitch.motion.set_team(side, arr)
 
 
 func _update_board() -> void:
-	_score_lbl.text = "%d – %d" % [_sim.score[0], _sim.score[1]]
+	if _done:
+		_shown_score = [_sim.score[0], _sim.score[1]]
+	_score_lbl.text = "%d – %d" % [_shown_score[0], _shown_score[1]]
 	if _sim.shootout or _sim.pen_taken[0] + _sim.pen_taken[1] > 0:
 		_score_lbl.text += "  (%d–%d)" % [_sim.pen_score[0], _sim.pen_score[1]]
 	if _done or _sim.finished:
@@ -654,6 +916,8 @@ func _update_board() -> void:
 		_clock_lbl.text = "Pênaltis"
 	else:
 		_clock_lbl.text = Fmt.minute(_sim.minute, _sim.half)
+	if _pitch != null:
+		_pitch.board = {"h": _sim.teams[0].club.abbr, "a": _sim.teams[1].club.abbr, "hs": _shown_score[0], "as": _shown_score[1], "clock": _clock_lbl.text}
 	_home_scorers.text = _scorer_text(0)
 	_away_scorers.text = _scorer_text(1)
 	var ph := _sim.possession_pct(0)
@@ -684,7 +948,7 @@ func _update_sides() -> void:
 		return
 	_swapped = sw
 	_pitch.swapped = sw
-	_pitch.reset_kickoff()
+	_pitch.motion.kickoff(1 if sw else 0, true)
 	if sw and _sim.half == 2:
 		_enqueue(_com.extra_line("sides_swap", "info", 0, 2), {}, 0.3)
 
@@ -698,6 +962,12 @@ func _stat_summary() -> void:
 	if _stat_marks.has(key):
 		return
 	_stat_marks[key] = true
+	# Aos 30' e 75' fala o comentarista; aos 15' e 60' saem os números.
+	if m == 30 or m == 75:
+		var an := _com.analysis_line(m, _sim.half)
+		if not an.is_empty():
+			_enqueue(an, {}, 0.1)
+			return
 	var h: MatchTeam = _sim.teams[0]
 	var a: MatchTeam = _sim.teams[1]
 	var txt := "Números até aqui: posse %s x %s, finalizações %d x %d, no gol %d x %d." % [Fmt.percent(_sim.possession_pct(0)), Fmt.percent(_sim.possession_pct(1)), h.shots, a.shots, h.on_target, a.on_target]
@@ -748,6 +1018,10 @@ func _add_line(line: Dictionary) -> void:
 			col = Color("#9AD0FF")
 		"tactic":
 			col = UIColors.BLUE
+		"pundit":
+			col = Color("#8FD9C5")
+		"reporter":
+			col = Color("#F2C58A")
 		"other":
 			col = Color("#C9E7A8")
 	t.add_theme_color_override(&"font_color", col)
@@ -1154,6 +1428,7 @@ func _cycle_speed() -> void:
 	_pace = (_pace + 1) % PACE.size()
 	_speed_btn.text = PACE_NAMES[_pace]
 	_clock = minf(_clock, PACE[_pace])
+	_pitch.motion.tempo = TEMPO[_pace]
 	# A preferência padrão acompanha a escolha (Normal/Rápido); o turbo é só desta partida.
 	if _pace < 2:
 		AppSettings.match_speed = AppSettings.SPEED_NORMAL if _pace == 0 else AppSettings.SPEED_FAST
@@ -1174,6 +1449,7 @@ func _skip_to_end() -> void:
 	_pending_halftime = false
 	_sim.run_to_end()
 	_drain(true)
+	_rebuild_scorers()
 	_after_step()
 	_pending_final = false
 	_on_final()
