@@ -59,11 +59,16 @@ func start(w: GameWorld, list: Array) -> void:
 	_font = get_theme_default_font()
 	_font_bold = get_theme_font(&"font", &"Title") if has_theme_font(&"font", &"Title") else _font
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Acima dos esmaecidos das bordas da tela (z 5), que no modo claro apareceriam por cima.
+	z_index = 10
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var skip := UIKit.button("Pular", "GhostButton", func(): _end())
 	skip.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	skip.position = Vector2(-150, 40)
 	skip.custom_minimum_size = Vector2(120, 56)
+	# Palco escuro: texto claro também no modo claro.
+	for st in [&"font_color", &"font_hover_color", &"font_pressed_color", &"font_hover_pressed_color"]:
+		skip.add_theme_color_override(st, UIColors.D_TEXT)
 	add_child(skip)
 	_show(0)
 
@@ -117,7 +122,7 @@ func _end() -> void:
 func _burst() -> void:
 	var it: Dictionary = items[_i]
 	var gold := String(it["kind"]) in ["ballon", "boot"]
-	var palette := [UIColors.GOLD, Color.WHITE, UIColors.GOLD_DARK, UIColors.ACCENT] if gold else [UIColors.ACCENT, Color.WHITE, UIColors.BLUE, UIColors.GOLD]
+	var palette := [UIColors.D_GOLD, Color.WHITE, UIColors.D_GOLD_DARK, UIColors.ACCENT] if gold else [UIColors.ACCENT, Color.WHITE, UIColors.D_BLUE, UIColors.D_GOLD]
 	for k in (140 if gold else 80):
 		var pos := Vector2(size.x * 0.5 + _rng.randf_range(-40, 40), size.y * 0.42)
 		var ang := _rng.randf_range(-PI * 0.95, -PI * 0.05)
@@ -171,7 +176,8 @@ func _draw() -> void:
 		return
 	var it: Dictionary = items[_i]
 	var gold := String(it["kind"]) in ["ballon", "boot"]
-	var accent := UIColors.GOLD if gold else UIColors.ACCENT
+	# O palco é sempre escuro, também no modo claro: usa as cores feitas para fundo escuro.
+	var accent := UIColors.D_GOLD if gold else (UIColors.ACCENT.lightened(0.35) if UIColors.light else UIColors.ACCENT)
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.05, 0.96))
 	var center := Vector2(size.x * 0.5, size.y * 0.3)
 	# Raios girando atrás do troféu
@@ -196,7 +202,7 @@ func _draw() -> void:
 	# Título e subtítulo
 	var head_a := _ease((_t - 0.3) / 0.6)
 	_text(String(it["title"]), Vector2(size.x * 0.5, size.y * 0.1), 44, Color(accent, head_a), true)
-	_text(String(it["sub"]), Vector2(size.x * 0.5, size.y * 0.1 + 44), 22, Color(UIColors.MUTED, head_a), false)
+	_text(String(it["sub"]), Vector2(size.x * 0.5, size.y * 0.1 + 44), 22, Color(UIColors.D_MUTED, head_a), false)
 	# Anúncio do vencedor
 	var ann := _ease((_t - 1.6) / 0.5)
 	if ann > 0.0:
@@ -205,11 +211,11 @@ func _draw() -> void:
 		var line := String(it.get("club", ""))
 		if String(it.get("v", "")) != "":
 			line += " · " + String(it["v"])
-		_text(line, Vector2(size.x * 0.5, y + 50.0), 24, Color(UIColors.MUTED, ann), false)
-		_text("Toque para continuar", Vector2(size.x * 0.5, size.y - 60.0), 18, Color(UIColors.DIM, ann * (0.6 + 0.4 * sin(_t * 4.0))), false)
+		_text(line, Vector2(size.x * 0.5, y + 50.0), 24, Color(UIColors.D_MUTED, ann), false)
+		_text("Toque para continuar", Vector2(size.x * 0.5, size.y - 60.0), 18, Color(UIColors.D_DIM, ann * (0.6 + 0.4 * sin(_t * 4.0))), false)
 	# Progresso
 	for k in items.size():
-		var col := accent if k <= _i else UIColors.LINE
+		var col := accent if k <= _i else UIColors.D_LINE
 		draw_circle(Vector2(size.x * 0.5 + (k - (items.size() - 1) * 0.5) * 22.0, size.y - 110.0), 5.0, col)
 	# Confete
 	for c in _confetti:
@@ -236,8 +242,8 @@ func _text(t: String, center: Vector2, fs: int, col: Color, bold: bool) -> void:
 
 ## Troféus desenhados: bola dourada, chuteira dourada ou taça com estrela.
 func _trophy(kind: String, c: Vector2, r: float) -> void:
-	var g1 := UIColors.GOLD
-	var g2 := UIColors.GOLD_DARK
+	var g1 := UIColors.D_GOLD
+	var g2 := UIColors.D_GOLD_DARK
 	match kind:
 		"ballon":
 			draw_circle(c, r, g2)

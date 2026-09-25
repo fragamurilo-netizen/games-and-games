@@ -2,7 +2,6 @@ extends BaseScreen
 ## Tela inicial da carreira: a próxima partida no centro e o que está em jogo.
 
 const HOOK_ICONS := {"derby": "bolt", "table": "table", "streak": "up", "player": "shirt", "market": "swap", "contract": "clock", "season": "trophy"}
-const HOOK_COLORS := {"derby": UIColors.RED, "table": UIColors.GOLD, "streak": UIColors.GREEN, "player": UIColors.BLUE, "market": UIColors.ORANGE, "contract": UIColors.ORANGE, "season": UIColors.GOLD}
 
 
 func _init() -> void:
@@ -13,7 +12,7 @@ func _init() -> void:
 static func _hook_color(kind: String) -> Color:
 	if kind in ["table", "season"]:
 		return UIColors.ACCENT
-	return HOOK_COLORS.get(kind, UIColors.MUTED)
+	return {"derby": UIColors.RED, "streak": UIColors.GREEN, "player": UIColors.BLUE, "market": UIColors.ORANGE, "contract": UIColors.ORANGE}.get(kind, UIColors.MUTED)
 
 
 func on_show() -> void:
@@ -580,7 +579,7 @@ func _mini_table_card(w: GameWorld, club: Club) -> Control:
 		pos.custom_minimum_size.x = 34
 		pos.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if zone != CompetitionManager.ZONE_NONE:
-			pos.add_theme_color_override(&"font_color", CompetitionManager.zone_color(zone))
+			pos.add_theme_color_override(&"font_color", UIColors.ink(CompetitionManager.zone_color(zone)))
 		row.add_child(pos)
 		row.add_child(UIKit.crest(cl, 30))
 		var n := UIKit.label(cl.short_name, "H3" if cl.id == club.id else "")

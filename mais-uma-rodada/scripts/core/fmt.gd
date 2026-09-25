@@ -86,6 +86,10 @@ static func plural(n: int, singular: String, plural_form: String) -> String:
 
 ## Cor de destaque para um overall (vermelho → cinza → verde → dourado).
 static func rating_color(ovr: int) -> Color:
+	return UIColors.ink(_rating_color(ovr))
+
+
+static func _rating_color(ovr: int) -> Color:
 	if ovr >= 80:
 		return Color("#FFC940")
 	if ovr >= 70:
@@ -101,6 +105,10 @@ static func rating_color(ovr: int) -> Color:
 
 ## Cor para notas de partida (3–10).
 static func match_rating_color(r: float) -> Color:
+	return UIColors.ink(_match_rating_color(r))
+
+
+static func _match_rating_color(r: float) -> Color:
 	if r >= 8.0:
 		return Color("#FFC940")
 	if r >= 7.0:

@@ -124,6 +124,8 @@ func _show(screen: BaseScreen, from_x: float) -> void:
 ## voltar = da esquerda) enquanto aparece. Trocar de aba é só um fade rápido.
 func _animate_in(screen: Control, from_x: float) -> void:
 	screen.modulate.a = 0.0
+	if AppSettings.reduce_motion:
+		from_x = 0.0
 	screen.position.x = from_x
 	var tw := screen.create_tween().set_parallel()
 	tw.tween_property(screen, "modulate:a", 1.0, 0.16 if from_x != 0.0 else 0.12)
@@ -135,6 +137,7 @@ func _apply_chrome(screen: BaseScreen) -> void:
 	if main == null:
 		return
 	main.apply_chrome(screen, stack.size() > 1)
+	AudioManager.screen_changed(screen.screen_name)
 
 
 ## Atualiza título/barras da tela atual (quando os dados mudam).
@@ -142,6 +145,27 @@ func refresh_chrome() -> void:
 	var cur := current()
 	if cur != null:
 		_apply_chrome(cur)
+
+
+## Aplica tema claro/escuro e tamanho da interface das Opções e redesenha tudo.
+func apply_look() -> void:
+	UIColors.set_light(AppSettings.wants_light())
+	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale]
+	if main != null:
+		main.restyle()
+	var cur := current()
+	if cur != null:
+		_apply_chrome(cur)
+		cur.refresh()
+	for m in _modals:
+		_redraw_tree(m)
+
+
+func _redraw_tree(n: Node) -> void:
+	if n is CanvasItem:
+		(n as CanvasItem).queue_redraw()
+	for c in n.get_children():
+		_redraw_tree(c)
 
 
 ## Botão voltar do Android / Esc.

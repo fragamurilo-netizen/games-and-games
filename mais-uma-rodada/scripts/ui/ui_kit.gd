@@ -338,13 +338,14 @@ static func stat(value: String, caption: String, color: Color = UIColors.TEXT) -
 	return v
 
 
-static func icon_rect(name: String, px: int, tint: Color = Color.WHITE) -> TextureRect:
+static func icon_rect(name: String, px: int, tint: Color = Color(0, 0, 0, 0)) -> TextureRect:
 	var t := TextureRect.new()
 	t.texture = icon(name)
 	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	t.custom_minimum_size = Vector2(px, px)
-	t.modulate = tint
+	# Sem cor definida, o ícone acompanha a cor do texto (branco no escuro, grafite no claro).
+	t.modulate = tint if tint.a > 0.0 else UIColors.TEXT
 	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return t
 

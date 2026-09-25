@@ -1,5 +1,6 @@
 extends BaseScreen
-## Opções do aparelho: idioma, som, vibração, velocidade padrão das partidas, dicas e créditos.
+## Opções do aparelho: aparência (claro/escuro, tamanho), idioma, música e som, vibração,
+## velocidade padrão das partidas, dicas e créditos.
 
 
 func _init() -> void:
@@ -12,6 +13,29 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	var cl := UIKit.card("Card", 12)
+	cl.add_child(UIKit.section("Aparência"))
+	cl.add_child(UIKit.label("Tema", "Muted"))
+	cl.add_child(_chips(AppSettings.THEME_NAMES, AppSettings.theme_mode, func(i: int):
+		AppSettings.theme_mode = i
+		AppSettings.save_settings()
+		UIManager.apply_look()))
+	cl.add_child(UIKit.label("Claro e escuro têm contraste alto para ler no sol ou à noite. \"Do aparelho\" segue o modo do celular.", "Small", true))
+	cl.add_child(_toggle("Interface nas cores do meu clube", AppSettings.team_colors, func(v: bool):
+		AppSettings.team_colors = v
+		AppSettings.save_settings()
+		UIManager.refresh_chrome()
+		refresh()))
+	cl.add_child(UIKit.label("Tamanho da interface", "Muted"))
+	cl.add_child(_chips(AppSettings.UI_SCALE_NAMES, AppSettings.ui_scale, func(i: int):
+		AppSettings.ui_scale = i
+		AppSettings.save_settings()
+		UIManager.apply_look()))
+	cl.add_child(_toggle("Animações reduzidas", AppSettings.reduce_motion, func(v: bool):
+		AppSettings.reduce_motion = v
+		AppSettings.save_settings()))
+	cl.add_child(UIKit.label("Telas sem deslizar e comemorações de gol curtas.", "Small", true))
+	c.add_child(UIKit.card_panel(cl))
 	var card0 := UIKit.card("Card", 12)
 	card0.add_child(UIKit.section("Idioma"))
 	var lg := ButtonGroup.new()
@@ -30,11 +54,6 @@ func refresh() -> void:
 		UIKit.shrink_button(lchip)
 		lrow.add_child(lchip)
 	card0.add_child(lrow)
-	card0.add_child(_toggle("Interface nas cores do meu clube", AppSettings.team_colors, func(v: bool):
-		AppSettings.team_colors = v
-		AppSettings.save_settings()
-		UIManager.refresh_chrome()
-		refresh()))
 	c.add_child(UIKit.card_panel(card0))
 	var card_ed := UIKit.card("Card", 12)
 	card_ed.add_child(UIKit.section("Editor"))
@@ -44,12 +63,43 @@ func refresh() -> void:
 		refresh()))
 	card_ed.add_child(UIKit.label("Desligado, a carreira fica sem atalhos: o botão Editar some dos perfis e o editor dentro da carreira só mexe no visual do seu clube. O Editor do menu inicial sempre edita o mundo padrão das novas carreiras.", "Small", true))
 	c.add_child(UIKit.card_panel(card_ed))
+	var cm := UIKit.card("Card", 12)
+	cm.add_child(UIKit.section("Música"))
+	cm.add_child(_toggle("Música de fundo", AppSettings.music, func(v: bool):
+		AppSettings.music = v
+		AppSettings.save_settings()
+		AudioManager.start_music()
+		refresh()))
+	if AppSettings.music:
+		cm.add_child(UIKit.label("Faixa", "Muted"))
+		cm.add_child(_chips(MusicSynth.TRACKS, AppSettings.music_track, func(i: int):
+			AppSettings.music_track = i
+			AppSettings.save_settings()
+			if not AudioManager.music_ready(i):
+				UIManager.toast("Compondo a faixa… começa em instantes.")
+			AudioManager.start_music()))
+		cm.add_child(_slider("Volume da música", AppSettings.music_volume, func(v: int):
+			AppSettings.music_volume = v
+			AudioManager.apply_volumes()
+			AudioManager.start_music(), func(): AppSettings.save_settings()))
+		cm.add_child(_toggle("Tocar também durante as partidas", AppSettings.music_in_match, func(v: bool):
+			AppSettings.music_in_match = v
+			AppSettings.save_settings()))
+	cm.add_child(UIKit.label("As músicas são compostas e tocadas pelo próprio jogo, sem arquivos de terceiros.", "Small", true))
+	c.add_child(UIKit.card_panel(cm))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
 	card.add_child(_toggle("Efeitos sonoros e torcida", AppSettings.sound, func(v: bool):
 		AppSettings.sound = v
 		AppSettings.save_settings()
 		if v:
+			AudioManager.play("whistle", -6.0)
+		refresh()))
+	if AppSettings.sound:
+		card.add_child(_slider("Volume dos efeitos", AppSettings.sfx_volume, func(v: int):
+			AppSettings.sfx_volume = v
+			AudioManager.apply_volumes(), func():
+			AppSettings.save_settings()
 			AudioManager.play("whistle", -6.0)))
 	card.add_child(_toggle("Vibrar nos gols e cartões", AppSettings.vibration, func(v: bool):
 		AppSettings.vibration = v
@@ -97,6 +147,44 @@ func refresh() -> void:
 	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
 	card4.add_child(UIKit.label("Tudo roda offline e o jogo não coleta dados. As compras são processadas pela Google Play.", "Small", true))
 	c.add_child(UIKit.card_panel(card4))
+
+
+## Fileira de opções exclusivas (chips); `cb` recebe o índice escolhido.
+func _chips(names: Array, selected: int, cb: Callable) -> HBoxContainer:
+	var g := ButtonGroup.new()
+	var row := UIKit.hbox(8)
+	for i in names.size():
+		var idx := i
+		var chip := UIKit.chip(String(names[i]), i == selected, g, func(): cb.call(idx))
+		UIKit.shrink_button(chip)
+		row.add_child(chip)
+	return row
+
+
+## Controle deslizante de 0 a 100 com o valor ao lado. `on_change` roda enquanto arrasta;
+## `on_done` quando solta (salvar).
+func _slider(text: String, value: int, on_change: Callable, on_done: Callable) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	var head := UIKit.hbox(8)
+	var l := UIKit.label(text, "Muted")
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(l)
+	var val := UIKit.label("%d%%" % value, "H3")
+	head.add_child(val)
+	box.add_child(head)
+	var sl := HSlider.new()
+	sl.min_value = 0
+	sl.max_value = 100
+	sl.step = 5
+	sl.value = value
+	sl.custom_minimum_size.y = 48
+	sl.focus_mode = Control.FOCUS_NONE
+	sl.value_changed.connect(func(v: float):
+		val.text = "%d%%" % int(v)
+		on_change.call(int(v)))
+	sl.drag_ended.connect(func(_c: bool): on_done.call())
+	box.add_child(sl)
+	return box
 
 
 func _toggle(text: String, value: bool, cb: Callable) -> CheckButton:
