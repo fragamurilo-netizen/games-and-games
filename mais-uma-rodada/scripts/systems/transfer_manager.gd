@@ -481,6 +481,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	var kind := Transfer.KIND_BUY if seller != null else Transfer.KIND_FREE
 	var t := Transfer.make(world.year, world.current_day(), p, seller_id, buyer.id, fee, kind)
 	world.transfer_log.append(t)
+	FootballMemory.on_transfer(world, t)
 	world.stat_add("transfers")
 	world.stat_add("transfer_fees", fee)
 	# Propostas pendentes por esse jogador perdem o sentido.

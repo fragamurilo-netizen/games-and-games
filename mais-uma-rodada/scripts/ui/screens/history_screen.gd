@@ -2,7 +2,7 @@ extends BaseScreen
 ## Memória do save: a carreira do treinador, campeões de cada competição ano a ano,
 ## prêmios individuais, recordes do clube e as lendas aposentadas.
 
-const TABS := [["career", "Carreira"], ["seasons", "Temporadas"], ["champions", "Campeões"], ["awards", "Prêmios"], ["club", "Clube"], ["legends", "Lendas"]]
+const TABS := [["career", "Carreira"], ["seasons", "Temporadas"], ["champions", "Campeões"], ["awards", "Prêmios"], ["club", "Clube"], ["memory", "Enciclopédia"], ["legends", "Lendas"]]
 
 var _tab := "career"
 var _comp := ""
@@ -53,6 +53,8 @@ func refresh() -> void:
 			c.add_child(_awards(w))
 		"club":
 			_club(w, c)
+		"memory":
+			_encyclopedia(w, c)
 		"legends":
 			c.add_child(_legends(w))
 
@@ -626,19 +628,8 @@ func _club(w: GameWorld, c: VBoxContainer) -> void:
 		row.add_child(UIKit.label("%d pts · %d-%d-%d" % [int(hh["pts"]), int(hh["w"]), int(hh["dr"]), int(hh["lo"])], "Small"))
 		seasons.add_child(row)
 	c.add_child(UIKit.card_panel(seasons))
-	# Recordes do clube (jogadores atuais e aposentados)
-	var totals := {}
-	for p: Player in w.players.values():
-		for s in p.spells:
-			if int(s.get("c", -1)) == club.id:
-				var extra := p.stats[Player.S_GOALS] if p.club_id == club.id and int(s.get("to", 0)) == 0 else 0
-				var extra_a := p.stats[Player.S_APPS] if p.club_id == club.id and int(s.get("to", 0)) == 0 else 0
-				_acc(totals, "p%d" % p.id, p.display_name(), int(s.get("g", 0)) + extra, int(s.get("a", 0)) + extra_a, p.id)
-	for r in w.retired:
-		for s in r.get("spells", []):
-			if int(s.get("c", -1)) == club.id:
-				_acc(totals, "r%d" % int(r["id"]), String(r.get("ka", r.get("name", ""))), int(s.get("g", 0)), int(s.get("a", 0)), -1)
-	var arr: Array = totals.values()
+	# Recordes do clube (jogadores atuais e aposentados). As passagens já somam os jogos do ano.
+	var arr: Array = FootballMemory.club_legends(w, club.id)
 	for kind in [["g", "Artilheiros históricos", "gols"], ["a", "Mais jogos pelo clube", "jogos"]]:
 		var key: String = kind[0]
 		arr.sort_custom(func(x: Dictionary, y: Dictionary): return int(x[key]) > int(y[key]))
@@ -661,13 +652,7 @@ func _club(w: GameWorld, c: VBoxContainer) -> void:
 		if shown == 0:
 			card.add_child(UIKit.label("Ainda sem registros.", "Muted"))
 		c.add_child(UIKit.card_panel(card))
-
-
-static func _acc(totals: Dictionary, key: String, name: String, g: int, a: int, pid: int) -> void:
-	if not totals.has(key):
-		totals[key] = {"n": name, "g": 0, "a": 0, "pid": pid}
-	totals[key]["g"] = int(totals[key]["g"]) + g
-	totals[key]["a"] = int(totals[key]["a"]) + a
+	_club_memory(w, club, c)
 
 
 # ---------------------------------------------------------------------------
@@ -695,3 +680,175 @@ func _legends(w: GameWorld) -> Control:
 		row.add_child(UIKit.label("%d J · %d G · %d tít." % [int(r.get("apps", 0)), int(r.get("goals", 0)), int(r.get("titles", 0))], "Small"))
 		card.add_child(row)
 	return UIKit.card_panel(card)
+
+
+# ---------------------------------------------------------------------------
+# Football Memory: recordes do clube e a enciclopédia do save
+# ---------------------------------------------------------------------------
+
+func _list_card(title: String, rows: Array, empty: String) -> Control:
+	var card := UIKit.card("Card", 4)
+	card.add_child(UIKit.section(title))
+	for r in rows:
+		card.add_child(r)
+	if rows.is_empty():
+		card.add_child(UIKit.label(empty, "Muted", true))
+	return UIKit.card_panel(card)
+
+
+## Linha "ano · texto · valor"; com pid, abre o perfil do jogador.
+func _mem_row(y: int, text: String, value: String = "", pid: int = -1) -> Control:
+	var row := UIKit.hbox(10)
+	var yl := UIKit.label(str(y) if y > 0 else "", "H3")
+	yl.custom_minimum_size.x = 64
+	row.add_child(yl)
+	var t := UIKit.label(text, "", true)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(t)
+	if value != "":
+		row.add_child(UIKit.label(value, "Stat"))
+	return _player_tap(row, pid) if pid >= 0 else row
+
+
+static func _cn(w: GameWorld, id: int) -> String:
+	return w.club(id).short_name if id >= 0 and id < w.clubs.size() else "?"
+
+
+func _club_memory(w: GameWorld, club: Club, c: VBoxContainer) -> void:
+	var cr := FootballMemory.club_records(w, club.id)
+	for kind in [["buy", "Maiores compras", "de"], ["sell", "Maiores vendas", "para o"]]:
+		var rows: Array = []
+		for e in cr[kind[0]]:
+			rows.append(_mem_row(int(e[4]), "%s (%s %s)" % [String(e[2]), kind[2], _cn(w, int(e[3]))], Fmt.money(int(e[0])), int(e[1])))
+		c.add_child(_list_card(String(kind[1]), rows, "Nenhum negócio registrado ainda."))
+	var goals: Array = []
+	for e in cr["win"]:
+		goals.append(_mem_row(int(e[3]), "%d x %d no %s (%s)" % [int(e[0]), int(e[1]), _cn(w, int(e[2])), FootballMemory.comp_name(w, String(e[4]))]))
+	for e in cr["loss"]:
+		goals.append(_mem_row(int(e[3]), "Derrota por %d x %d para o %s (%s)" % [int(e[0]), int(e[1]), _cn(w, int(e[2])), FootballMemory.comp_name(w, String(e[4]))]))
+	var att: Array = cr["att"]
+	if not att.is_empty():
+		goals.append(_mem_row(int(att[2]), "Recorde de público: contra o %s" % _cn(w, int(att[1])), Fmt.thousands(int(att[0]))))
+	c.add_child(_list_card("Goleadas e recordes", goals, "As maiores goleadas (a favor e contra) aparecem aqui."))
+	# Técnicos: o atual e os que passaram
+	var coaches: Array = []
+	var cur := People.coach_of(w, club.id)
+	if not cur.is_empty():
+		coaches.append(_mem_row(int(cur.get("since", w.year)), "%s (atual)%s" % [String(cur.get("n", "")), " · ídolo do clube" if FootballMemory.coach_bond(w, cur, club.id) >= FootballMemory.IDOL_APPS else ""],
+			"%dV %dE %dD" % [int(cur.get("w", 0)), int(cur.get("d", 0)), int(cur.get("l", 0))]))
+	var past: Array = cr["coaches"]
+	for i in range(past.size() - 1, -1, -1):
+		var e: Array = past[i]
+		var t := FootballMemory.titles_between(w, club.id, int(e[1]), int(e[2]))
+		coaches.append(_mem_row(int(e[1]), "%s, até %d%s" % [String(e[0]), int(e[2]), (" · %d título(s)" % t) if t > 0 else ""],
+			"%dV %dE %dD" % [int(e[3]), int(e[4]), int(e[5])]))
+	c.add_child(_list_card("Técnicos históricos", coaches, "A galeria começa quando o primeiro técnico deixar o clube."))
+	# Confrontos: rivais primeiro, depois os adversários mais frequentes
+	var opps: Array = FootballMemory.opponents_of(w, club.id, 8)
+	for rv in club.rivals:
+		if not opps.any(func(o): return int(o["id"]) == int(rv)):
+			var h := FootballMemory.head_to_head(w, club.id, int(rv))
+			if int(h["games"]) > 0:
+				h["id"] = int(rv)
+				opps.push_front(h)
+	var rows: Array = []
+	for o: Dictionary in opps:
+		var name := _cn(w, int(o["id"])) + (" (rival)" if club.is_rival(int(o["id"])) else "")
+		var extra: Array = []
+		if int(o["finals_won"]) + int(o["finals_lost"]) > 0:
+			extra.append("finais %d-%d" % [int(o["finals_won"]), int(o["finals_lost"])])
+		if int(o["ko_won"]) + int(o["ko_lost"]) > 0:
+			extra.append("mata-matas %d-%d" % [int(o["ko_won"]), int(o["ko_lost"])])
+		rows.append(_mem_row(int(o["first"]), name + (" · " + ", ".join(extra) if not extra.is_empty() else ""), "%dV %dE %dD" % [int(o["wins"]), int(o["draws"]), int(o["losses"])]))
+	c.add_child(_list_card("Confrontos", rows, "O retrospecto contra cada adversário começa no primeiro jogo."))
+
+
+func _encyclopedia(w: GameWorld, c: VBoxContainer) -> void:
+	var m := FootballMemory.data(w)
+	var nat := w.user_nation()
+	var relevant := func(comp: String, a: int, b: int) -> bool:
+		if w.has_user() and (w.is_user_club(a) or w.is_user_club(b)):
+			return true
+		if CupManager.continental_ids().has(comp) or comp == CupManager.CWC:
+			return true
+		return w.club(a).nation == nat
+	# Títulos decididos (com o gol do título)
+	var rows: Array = []
+	var tit: Array = m["tit"]
+	for i in range(tit.size() - 1, -1, -1):
+		var e: Array = tit[i]
+		if rows.size() >= 12:
+			break
+		if not relevant.call(String(e[1]), int(e[2]), int(e[2])):
+			continue
+		var hero := int(e[6])
+		var hp := w.player(hero)
+		var who := (" · gol de " + hp.display_name()) if hp != null else ""
+		var opp := (" contra o %s (%d x %d)" % [_cn(w, int(e[3])), int(e[4]), int(e[5])]) if int(e[3]) >= 0 else ""
+		rows.append(_mem_row(int(e[0]), "%s decide a %s%s%s" % [_cn(w, int(e[2])), w.league_short(String(e[1])), opp, who], ("%d rod. antes" % int(e[7])) if int(e[7]) > 0 else "", hero if hp != null else -1))
+	c.add_child(_list_card("Títulos decididos", rows, "Quando uma liga for decidida, o jogo guarda contra quem e quem fez o gol do título."))
+	# Finais memoráveis
+	rows = []
+	var fin: Array = m["fin"]
+	for i in range(fin.size() - 1, -1, -1):
+		var e: Array = fin[i]
+		if rows.size() >= 15:
+			break
+		if not relevant.call(String(e[1]), int(e[2]), int(e[3])):
+			continue
+		var score := "%d x %d" % [int(e[4]), int(e[5])]
+		if int(e[6]) >= 0:
+			score += " (pên. %d x %d)" % [int(e[6]), int(e[7])]
+		var names: Array = []
+		for pid in e[8]:
+			var p := w.player(int(pid))
+			if p != null:
+				names.append(p.display_name())
+		rows.append(_mem_row(int(e[0]), "%s: %s bate o %s%s" % [FootballMemory.comp_name(w, String(e[1])), _cn(w, int(e[2])), _cn(w, int(e[3])),
+			(" · gols de " + ", ".join(names)) if not names.is_empty() else ""], score))
+	c.add_child(_list_card("Finais memoráveis", rows, "As finais das copas entram aqui assim que forem disputadas."))
+	# Zebras
+	rows = []
+	var ups: Array = m["ups"].duplicate()
+	ups.sort_custom(func(a, b): return int(a[0]) > int(b[0]) if a[0] != b[0] else float(a[6]) > float(b[6]))
+	for e in ups:
+		if rows.size() >= 12:
+			break
+		if not relevant.call(String(e[1]), int(e[2]), int(e[3])):
+			continue
+		rows.append(_mem_row(int(e[0]), "%s %d x %d %s (%s)" % [_cn(w, int(e[2])), int(e[4]), int(e[5]), _cn(w, int(e[3])), FootballMemory.comp_name(w, String(e[1]))], "zebra"))
+	c.add_child(_list_card("Maiores zebras", rows, "Vitórias de quem ninguém esperava ficam registradas."))
+	# Clássicos
+	rows = []
+	var der: Array = m["der"]
+	for i in range(der.size() - 1, -1, -1):
+		var e: Array = der[i]
+		if rows.size() >= 12:
+			break
+		if not relevant.call(String(e[1]), int(e[2]), int(e[3])):
+			continue
+		var tag: String = ["goleada", "copa", "mata-mata", "final"][clampi(int(e[6]), 0, 3)]
+		rows.append(_mem_row(int(e[0]), "%s %d x %d %s (%s)" % [_cn(w, int(e[2])), int(e[4]), int(e[5]), _cn(w, int(e[3])), FootballMemory.comp_name(w, String(e[1]))], tag))
+	c.add_child(_list_card("Clássicos históricos", rows, "Goleadas e mata-matas entre rivais viram história."))
+	# Mercado
+	rows = []
+	for e in m["wr"]["fee"]:
+		rows.append(_mem_row(int(e[5]), "%s: %s → %s" % [String(e[2]), _cn(w, int(e[3])), _cn(w, int(e[4]))], Fmt.money(int(e[0])), int(e[1])))
+	c.add_child(_list_card("Maiores transferências", rows, "As transferências mais caras do mundo aparecem aqui."))
+	rows = []
+	for e in m["wr"]["win"]:
+		rows.append(_mem_row(int(e[4]), "%s %d x %d %s (%s)" % [_cn(w, int(e[2])), int(e[0]), int(e[1]), _cn(w, int(e[3])), FootballMemory.comp_name(w, String(e[5]))]))
+	c.add_child(_list_card("Maiores goleadas", rows, "Goleadas por cinco gols ou mais ficam guardadas."))
+	# Artilheiros de todos os tempos (em atividade e aposentados)
+	var all: Array = []
+	for p: Player in w.players.values():
+		if p.career_goals >= 50:
+			all.append([p.career_goals, p.display_name(), p.id, p.career_apps])
+	for r in w.retired:
+		all.append([int(r.get("goals", 0)), String(r.get("ka", r.get("name", ""))) + " (aposentado)", -1, int(r.get("apps", 0))])
+	all.sort_custom(func(a, b): return int(a[0]) > int(b[0]))
+	rows = []
+	for i in mini(15, all.size()):
+		var e: Array = all[i]
+		rows.append(_mem_row(0, "%d. %s · %d jogos" % [i + 1, String(e[1]), int(e[3])], "%d gols" % int(e[0]), int(e[2])))
+	c.add_child(_list_card("Artilheiros de todos os tempos", rows, "Sem artilheiros registrados ainda."))
