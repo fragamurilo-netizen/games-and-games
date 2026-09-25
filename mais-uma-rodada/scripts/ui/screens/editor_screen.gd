@@ -212,7 +212,7 @@ func _club_editor(c: VBoxContainer) -> void:
 	var row := UIKit.hbox(16)
 	var crest := UIKit.crest(cl, 110)
 	row.add_child(crest)
-	row.add_child(UIKit.kit(cl.kit_home, 96, 10))
+	row.add_child(UIKit.kit(cl.kit_home, 96, 10, cl.crest))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(cl.name, "Title", true))

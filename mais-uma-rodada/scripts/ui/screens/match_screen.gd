@@ -357,6 +357,10 @@ func _team_colors(home: Club, away: Club) -> Array[Color]:
 		a1 = Color(String(away.kit_away.get("c1", "#FFFFFF")))
 		a2 = Color(String(away.kit_away.get("c2", "#111111")))
 		if _cdist(h1, a1) < 0.35:
+			var third := away.third_kit()
+			a1 = Color(String(third.get("c1", "#FFFFFF")))
+			a2 = Color(String(third.get("c2", "#111111")))
+		if _cdist(h1, a1) < 0.35:
 			a1 = Color("#F4F4F4") if h1.get_luminance() < 0.5 else Color("#15181D")
 			a2 = Color("#15181D") if h1.get_luminance() < 0.5 else Color("#F4F4F4")
 	var out: Array[Color] = [h1, h2, a1, a2]
