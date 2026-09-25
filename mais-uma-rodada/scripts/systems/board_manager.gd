@@ -90,12 +90,13 @@ static func season_review(world: GameWorld, club: Club, user: Dictionary) -> Dic
 ## uma divisão abaixo — a volta por cima começa de baixo.
 static func job_offers(world: GameWorld, from_club: Club) -> Array:
 	var cands: Array = []
+	var known := CoachIdentity.job_context(world)
 	for c: Club in world.clubs:
 		if c.id == from_club.id:
 			continue
 		if c.reputation > from_club.reputation + 3.0:
 			continue
-		var score := -absf(c.reputation - (from_club.reputation - 8.0))
+		var score := -absf(c.reputation - (from_club.reputation - 8.0)) + CoachIdentity.job_score(known, c)
 		if c.nation == from_club.nation:
 			score += 10.0
 			if c.tier == from_club.tier + 1:
@@ -121,7 +122,9 @@ static func take_job(world: GameWorld, club_id: int) -> void:
 		return
 	var old_id := world.user_club_id
 	var mid := bool(world.stats.get("fired", {}).get("mid", false)) or (world.season != null and not world.season.finished and world.current_turn() > 0)
+	CoachIdentity.mem(world) # garante o registro do emprego antigo antes da troca
 	world.user_club_id = club_id
+	CoachIdentity.on_new_job(world, world.club(old_id), c)
 	world.stats.erase("fired")
 	c.board_confidence = 60.0
 	FinanceManager.set_budgets(world, c)

@@ -473,6 +473,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			world.manager_stats["games"] = int(world.manager_stats.get("games", 0)) + 1
 			var key := "w" if result == "V" else ("d" if result == "E" else "l")
 			world.manager_stats[key] = int(world.manager_stats.get(key, 0)) + 1
+			CoachIdentity.on_match(world, club)
 			BoardManager.after_match(world, club, result, derby)
 		var conceded: int = score[1 - side]
 		for ln in res["lines"][side]:
@@ -740,6 +741,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 				world.manager_stats["cup_titles"] = int(world.manager_stats.get("cup_titles", 0)) + 1
 		if summary["user"]["promoted"]:
 			world.manager_stats["promotions"] = int(world.manager_stats.get("promotions", 0)) + 1
+		summary["user"]["identity"] = CoachIdentity.on_season_end(world, summary["user"], rep0)
 		EventManager.on_season_end(world, bool(summary["user"]["goal_met"]))
 		summary["youth_league"] = YouthManager.finish_league(world)
 		var review := BoardManager.season_review(world, u, summary["user"])

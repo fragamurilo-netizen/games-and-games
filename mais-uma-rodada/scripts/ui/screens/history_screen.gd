@@ -70,6 +70,11 @@ func _career(w: GameWorld) -> Control:
 	hc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hc.add_child(UIKit.label(w.manager_name, "Title", true))
 	hc.add_child(UIKit.label("Treinador · %s · %s" % [ManagerProfile.style_name(ManagerProfile.style(w)), GameWorld.DIFF_NAMES[w.difficulty]], "Small", true))
+	var fame := CoachIdentity.headline(w)
+	if fame != "":
+		var fp := UIKit.pill(fame.to_upper(), UIColors.ACCENT, 14)
+		fp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		hc.add_child(fp)
 	head.add_child(hc)
 	card.add_child(head)
 	var r1 := UIKit.hbox(4)

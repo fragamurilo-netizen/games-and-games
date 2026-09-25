@@ -55,6 +55,7 @@ func _initialize() -> void:
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
+	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -2264,3 +2265,70 @@ func _test_inbox() -> void:
 	InboxManager.delete_read(w)
 	for m: Dictionary in w.inbox:
 		check(InboxManager.action_open(w, m), "limpar lidas apagou mensagem que pede resposta")
+func _test_coach_identity() -> void:
+	var w := WorldGenerator.generate(4242, "padrao")
+	var user := _with_user(w, w.clubs_in_league("BRA1")[8].id)
+	check(CoachIdentity.titles(w).is_empty(), "carreira nova não deveria ter reputação")
+	check(CoachIdentity.headline(w) == "", "sem título principal no começo")
+	check((CoachIdentity.mem(w)["jobs"] as Array).size() == 1, "o primeiro emprego deveria ser registrado")
+	# 20 jogos no 4-3-3 com pressão alta
+	user.sheet.formation = "4-3-3"
+	user.sheet.pressing = 2
+	for i in 20:
+		CoachIdentity.on_match(w, user)
+	var ids := {}
+	for t in CoachIdentity.titles(w):
+		ids[t["id"]] = true
+	check(ids.has("pressao"), "20 jogos pressionando deveriam render 'Técnico de pressão alta'")
+	check(ids.has("fiel"), "20 jogos no 4-3-3 deveriam render 'Fiel ao 4-3-3'")
+	# 6 reforços de até 21 anos
+	var kids: Array = []
+	for p: Player in w.players.values():
+		if p.club_id >= 0 and p.club_id != user.id and p.age(w.year) <= 21 and p.loan.is_empty():
+			kids.append(p)
+		if kids.size() >= 7:
+			break
+	for i in 6:
+		TransferManager.complete_transfer(w, kids[i], user, 0, kids[i].wage, 3)
+	var probe: Player = kids[6]
+	var jovens := false
+	for t in CoachIdentity.titles(w):
+		jovens = jovens or t["id"] == "jovens"
+	check(jovens, "6 reforços garotos deveriam render 'Especialista em jovens'")
+	check(CoachIdentity.interest_delta(w, probe, user) > 0.0, "garotos deveriam gostar mais de assinar com o especialista em jovens")
+	check(CoachIdentity.interest_delta(w, probe, w.clubs[0] if w.clubs[0].id != user.id else w.clubs[1]) == 0.0, "reputação do usuário não muda o interesse por outros clubes")
+	# Venda registrada com idade
+	var seller_p := world_player_of(w, user)
+	TransferManager.complete_transfer(w, seller_p, w.clubs_in_league("BRA1")[0], 3_000_000, seller_p.wage, 3)
+	check(int(CoachIdentity.mem(w)["sell_paid"]) == 1, "venda do usuário não registrada")
+	check(not CoachIdentity.habits(w).is_empty(), "hábitos deveriam aparecer")
+	# Fim de temporada: a imprensa anuncia uma vez só
+	var news0 := w.news.size()
+	var fresh := CoachIdentity.on_season_end(w, {"pos": 5, "champion": false, "cups": []}, user.reputation)
+	check(fresh.size() >= 3, "títulos novos deveriam ser anunciados (%d)" % fresh.size())
+	check(w.news.size() > news0, "a imprensa deveria noticiar a reputação nova")
+	check(CoachIdentity.on_season_end(w, {"pos": 5, "champion": false, "cups": []}, user.reputation).is_empty(), "título já conhecido não vira notícia de novo")
+	# Emprego novo: clubes que combinam com o perfil lembram de você
+	var formador: Club = null
+	var other: Club = null
+	for c: Club in w.clubs:
+		if c.nation != user.nation and c.archetype == "formador" and formador == null:
+			formador = c
+		if c.nation != user.nation and c.archetype == "gigante_endividado" and other == null:
+			other = c
+	var ctx := CoachIdentity.job_context(w)
+	if formador != null and other != null:
+		check(CoachIdentity.job_score(ctx, formador) > CoachIdentity.job_score(ctx, other), "clube formador deveria preferir o especialista em jovens")
+	BoardManager.take_job(w, w.clubs_in_league("BRA1")[15].id)
+	var jobs: Array = CoachIdentity.mem(w)["jobs"]
+	check(jobs.size() == 2 and int(jobs[0]["to"]) > 0, "troca de clube deveria fechar o emprego antigo e abrir o novo")
+	# Save/load
+	var w2 := GameWorld.from_dict(w.to_dict())
+	check(CoachIdentity.headline(w2) == CoachIdentity.headline(w), "a reputação deveria sobreviver ao save")
+
+
+func world_player_of(w: GameWorld, c: Club) -> Player:
+	for p in w.squad(c):
+		if p.loan.is_empty():
+			return p
+	return null
