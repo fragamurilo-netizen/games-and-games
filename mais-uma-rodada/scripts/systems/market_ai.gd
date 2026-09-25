@@ -166,7 +166,7 @@ static func _plan_window(world: GameWorld, st: Dictionary, summer: bool) -> void
 			n = 1 + int(round(minf(3.0, pw * 1.6))) + mini(2, needs.size())
 			if c.transfer_budget <= 0 and needs.is_empty():
 				n = 1
-			n += world.rng.randi_range(-1, 1)
+			n += world.rng.randi_range(-1, 1) + ClubDNA.window_delta(c)
 		else:
 			# Janela de inverno é de remendos: só quem tem carência ou dinheiro sobrando.
 			n = mini(2, needs.size()) if not needs.is_empty() else (1 if world.rng.randf() < 0.3 else 0)
@@ -282,13 +282,25 @@ static func _pick_need(world: GameWorld, c: Club, free_only: bool) -> Dictionary
 	if c.player_ids.size() >= int(rules["max_players"]) - 2:
 		return {}
 	var arch := c.arch()
-	# Formadores e vendedores apostam em promessas; os outros reforçam o time titular.
-	if float(arch.get("potential_weight", 0.4)) >= 0.6 and world.rng.randf() < 0.4:
+	# DNA: clubes de formação (e os que usam muito a base) apostam em promessas; os de estrelas
+	# miram alto; os outros reforçam o titular mais fraco.
+	var rec := ClubDNA.rec(c)
+	var young_p := 0.4 if float(arch.get("potential_weight", 0.4)) >= 0.6 else 0.0
+	if rec == "formacao":
+		young_p = maxf(young_p, 0.5)
+	elif rec == "estrelas" or rec == "veteranos":
+		young_p *= 0.3
+	if young_p > 0.0 and world.rng.randf() < young_p:
 		var fam := world.rng.randi_range(0, TransferManager.FAMILIES.size() - 1)
 		return {"fam": fam, "pos": -1, "min_rating": level - 4.0, "urgency": 0.5, "young": true}
 	var weak := TransferManager._weakest_starter(world, c)
 	if not weak.is_empty() and float(weak["rating"]) < level + 5.0 and world.rng.randf() < 0.75:
-		return {"fam": TransferManager._family_of(int(weak["pos"])), "pos": int(weak["pos"]), "min_rating": float(weak["rating"]) + 2.0, "urgency": 1.0}
+		var wfam := TransferManager._family_of(int(weak["pos"]))
+		# Garoto da base pronto para a vaga: o clube que usa a base não compra por cima dele.
+		if ClubDNA.kid_blocks(world, c, wfam, level):
+			return {}
+		var bar := float(weak["rating"]) + (4.0 if rec == "estrelas" else 2.0)
+		return {"fam": wfam, "pos": int(weak["pos"]), "min_rating": bar, "urgency": 1.0}
 	if not needs.is_empty():
 		return {"fam": int(needs[0]["fam"]), "pos": -1, "min_rating": float(needs[0]["best"]) + 1.0, "urgency": float(needs[0]["urgency"])}
 	return {}
@@ -311,13 +323,20 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 	var arch := c.arch()
 	var ages: Array = arch.get("target_age", [20, 30])
 	var pages: Variant = prof.get("age")
-	if pages is Array and world.rng.randf() < 0.7:
+	var ra := world.rng.randf()
+	if ra < 0.6:
+		ages = ClubDNA.ages(c) # a filosofia de elenco manda
+	elif pages is Array and ra < 0.85:
 		ages = pages
 	if need.get("young", false):
 		ages = [17, 22]
 	var pot_w := float(arch.get("potential_weight", 0.4))
+	if ClubDNA.rec(c) == "formacao":
+		pot_w = maxf(pot_w, 0.75)
 	var sources: Array = prof.get("sources", [])
 	var my_power := power(c)
+	var level := PlayerGenerator.club_level(c)
+	var fam_surplus := TransferManager._family_count(world, c, int(TransferManager.FAMILIES[fam][0][0])) - int(TransferManager.FAMILIES[fam][1]) - 1
 	var best: Player = null
 	var best_score := -1e9
 	for _k in CANDIDATES:
@@ -364,6 +383,7 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 			score += 1.5 # repatriação
 		if seller != null and (seller.is_rival(c.id) or c.is_rival(seller.id)):
 			score -= 4.0
+		score += ClubDNA.candidate_bonus(world, c, p, rating, level, price, float(budget), maxi(0, fam_surplus))
 		if mismanaged:
 			score = world.rng.randf_range(-5.0, 5.0) + (rating - min_rating) * 0.3
 		if score > best_score:
@@ -598,7 +618,7 @@ static func exercise_loan_options(world: GameWorld) -> void:
 ## Sorteia um candidato: próprio país, rotas de garimpo do país ou o mercado mundial por nível.
 static func _draw(world: GameWorld, index: Dictionary, c: Club, fam: int, min_rating: float, prof: Dictionary) -> Player:
 	var r := world.rng.randf()
-	var dom := float(prof.get("domestic", 0.6))
+	var dom := ClubDNA.home_share(c, float(prof.get("domestic", 0.6))) # alcance do mercado (DNA)
 	var nat := ""
 	var only := String(ClubPolicy.of(c).get("only", ""))
 	if only != "":
@@ -606,9 +626,7 @@ static func _draw(world: GameWorld, index: Dictionary, c: Club, fam: int, min_ra
 	elif r < dom:
 		nat = c.nation
 	else:
-		var sources: Array = prof.get("sources", [])
-		if not sources.is_empty() and world.rng.randf() < 0.5:
-			nat = sources[world.rng.randi_range(0, sources.size() - 1)]
+		nat = ClubDNA.away_nation(world.rng, c, prof.get("sources", []))
 	if nat != "":
 		var arr: Array = index["nat"].get(nat, [])
 		if not arr.is_empty() and not arr[fam].is_empty():
@@ -645,6 +663,8 @@ static func player_interest(world: GameWorld, p: Player, buyer: Club) -> float:
 ## Multiplicador (sobre o valor de mercado) do mínimo que o vendedor aceita.
 static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club, deadline: bool) -> float:
 	var m := float(seller.arch().get("sell_mult", 1.0)) * STATUS_ASK[clampi(p.squad_status, 0, 4)]
+	if not world.is_user_club(seller.id):
+		m *= ClubDNA.sell_mult(world, seller, p) # venda de jovens, moneyball, ambição
 	var years := p.contract_years_left(world.year)
 	if years <= 0:
 		m *= 0.6 # ou vende agora, ou perde de graça
@@ -684,6 +704,8 @@ static func max_bid(world: GameWorld, buyer: Club, p: Player, urgency: float, de
 		m *= 1.1
 	if mismanaged:
 		m *= 1.25
+	if not world.is_user_club(buyer.id):
+		m *= ClubDNA.bid_mult(buyer, p, level)
 	return minf(float(p.value) * m * 1.15, float(buyer.transfer_budget) * (1.3 if mismanaged else 1.0))
 
 

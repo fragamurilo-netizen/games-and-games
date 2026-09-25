@@ -35,6 +35,7 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	c.add_child(_identity_card(w, club))
+	c.add_child(_dna_card(w, club))
 	if _own():
 		c.add_child(_board_card(w, club))
 		c.add_child(_finance_card(w, club))
@@ -134,6 +135,57 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 			var rid2 := r.id
 			card.add_child(UIKit.tap_row(rr, func(): _open_club(rid2), "CardFlat"))
 	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1)
+
+
+## DNA: o que o clube é (filosofia, mercado, escola, números) e as viradas da sua história.
+func _dna_card(w: GameWorld, club: Club) -> Control:
+	var d := ClubDNA.of(club)
+	var card := UIKit.card("Card", 10)
+	card.add_child(UIKit.section("DNA do clube"))
+	var era_id := ClubDNA.era(club)
+	var era_row := UIKit.flow(8)
+	era_row.add_child(UIKit.pill(ClubDNA.name_of("eras", era_id).to_upper(), _era_color(era_id), 16))
+	era_row.add_child(UIKit.label("desde %d" % int(d.get("since", w.year)), "Small"))
+	card.add_child(era_row)
+	card.add_child(UIKit.label(String(ClubDNA.info("eras", era_id).get("desc", "")), "Small", true))
+	for item in [["rec", "Filosofia de elenco", ClubDNA.rec(club)], ["mkt", "Alcance do mercado", ClubDNA.mkt(club)], ["tac", "Escola tática", ClubDNA.tac(club)]]:
+		card.add_child(UIKit.kv(item[1], ClubDNA.name_of(item[0], item[2])))
+		card.add_child(UIKit.label(String(ClubDNA.info(item[0], item[2]).get("desc", "")), "Small", true))
+	for k in ClubDNA.PARAMS:
+		var v := ClubDNA.val(club, k)
+		var head := UIKit.hbox(8)
+		var l := UIKit.label(ClubDNA.name_of("params", k), "Muted")
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(l)
+		head.add_child(UIKit.label("%d" % int(round(v)), "H3"))
+		card.add_child(head)
+		card.add_child(UIKit.bar(v, 100.0, UIColors.BLUE, 8))
+	var lg: Array = d.get("log", [])
+	card.add_child(UIKit.section("Linha do tempo"))
+	if lg.is_empty():
+		card.add_child(UIKit.label("Nenhuma virada ainda. A história do clube começa agora.", "Muted", true))
+	for i in range(lg.size() - 1, maxi(-1, lg.size() - 7), -1):
+		var e: Dictionary = lg[i]
+		var row := UIKit.hbox(10)
+		row.add_child(UIKit.label(str(int(e.get("y", 0))), "H3"))
+		var t := UIKit.label(String(e.get("t", "")), "Small", true)
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(t)
+		card.add_child(row)
+	return UIKit.card_panel(card)
+
+
+static func _era_color(e: String) -> Color:
+	match e:
+		"potencia", "crescendo":
+			return UIColors.GREEN
+		"crise", "decadencia":
+			return UIColors.RED
+		"fabrica":
+			return UIColors.BLUE
+		"novo_rico":
+			return UIColors.GOLD
+	return UIColors.MUTED
 
 
 func _open_club(cid: int) -> void:

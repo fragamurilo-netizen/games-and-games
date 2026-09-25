@@ -79,6 +79,7 @@ static func takeover(world: GameWorld, c: Club, who: String) -> int:
 		c.board_confidence = 55.0
 		FinanceManager.set_budgets(world, c)
 	world.stat_add("takeovers_total")
+	ClubDNA.on_takeover(world, c, who)
 	var saf := c.nation == "BRA"
 	var title := ("%s vira SAF" if saf else "%s tem novo dono") % c.short_name
 	var body := "%s comprou o %s%s e promete %s em investimentos. A dívida foi quitada e a torcida sonha alto." % [
@@ -113,6 +114,7 @@ static func _investor_exit(world: GameWorld) -> void:
 	c.fan_mood = clampf(c.fan_mood - 12.0, 0.0, 100.0)
 	c.board_confidence = 45.0
 	FinanceManager.set_budgets(world, c)
+	ClubDNA.on_owner_exit(world, c, String(o.get("who", "O investidor")))
 	if newsworthy(world, c):
 		NewsManager.post_raw(world, "%s abandona o %s" % [o.get("who", "Investidor"), c.short_name],
 			"Depois de %d temporada(s), %s desistiu do projeto e deixou %s em dívidas. O clube terá de vender para fechar as contas." % [
@@ -127,6 +129,7 @@ static func new_president(world: GameWorld, c: Club) -> void:
 	var who: String = RngUtil.pick(rng, ["um empresário do ramo imobiliário", "um ex-jogador ídolo do clube", "o antigo vice de futebol",
 		"um advogado da oposição", "um banqueiro conselheiro", "um candidato da torcida organizada"])
 	var style: String = RngUtil.pick(rng, ["promete austeridade", "promete reforços", "diz que confia no trabalho atual", "quer a base no time principal"])
+	ClubDNA.on_president(world, c, style)
 	if world.is_user_club(c.id):
 		var mood := "mais paciência" if c.board_confidence > before else "menos paciência"
 		NewsManager.post_raw(world, "Novo presidente no %s" % c.short_name,
@@ -187,6 +190,7 @@ static func _judicial_recovery(world: GameWorld, c: Club, revenue: float) -> voi
 			p.asking_price = int(TransferManager.asking_price(world, p) * 0.8)
 			listed.append(p.display_name())
 	world.stat_add("judicial_recoveries")
+	ClubDNA.on_crisis(world, c)
 	var body := "Afundado em dívidas (%s, mais de um ano de receita), o %s entrou em recuperação judicial. %s da dívida foram renegociados, mas o clube terá de apertar o cinto." % [
 		Fmt.money(-c.balance + forgiven), c.name, Fmt.money(forgiven)]
 	if not listed.is_empty():
