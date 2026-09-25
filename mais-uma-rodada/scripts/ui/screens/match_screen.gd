@@ -226,6 +226,8 @@ func _build() -> void:
 		info += " · CLÁSSICO"
 	_add_line({"text": info, "style": "info", "side": -1, "minute": ""})
 	_add_line(_com.extra_line("weather", "info", 0, 1))
+	if not _sim.started and _sim.can_talk(_user_side):
+		_open_talk.call_deferred(false)
 
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
@@ -324,11 +326,13 @@ func _build_controls() -> void:
 	_tac_btn = UIKit.button("Tática", "", _open_tactics, "tactics")
 	_shout_btn = UIKit.button("Gritar", "", _open_shouts, "whistle")
 	_skip_btn = UIKit.button("Fim", "", _confirm_skip, "skip")
+	_skip_btn.text = ""
+	_skip_btn.tooltip_text = "Ir para o fim"
 	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _skip_btn]:
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size.y = 80
-		b.add_theme_font_size_override(&"font_size", 20)
-		b.clip_text = true
+		var icon_only: bool = b == _play_btn or b == _skip_btn
+		b.size_flags_horizontal = Control.SIZE_FILL if icon_only else Control.SIZE_EXPAND_FILL
+		b.custom_minimum_size = Vector2(88 if icon_only else 0, 80)
+		b.add_theme_font_size_override(&"font_size", 21)
 		_controls.add_child(b)
 	_update_play_button()
 
@@ -336,14 +340,15 @@ func _build_controls() -> void:
 func _update_play_button() -> void:
 	if _play_btn == null or _done:
 		return
+	_play_btn.text = ""
 	if _halftime:
-		_play_btn.text = "2º tempo"
+		_play_btn.tooltip_text = "2º tempo"
 		_play_btn.icon = UIKit.icon("play")
 	elif _paused:
-		_play_btn.text = "Seguir"
+		_play_btn.tooltip_text = "Seguir"
 		_play_btn.icon = UIKit.icon("play")
 	else:
-		_play_btn.text = "Pausar"
+		_play_btn.tooltip_text = "Pausar"
 		_play_btn.icon = UIKit.icon("pause")
 
 
@@ -1189,6 +1194,13 @@ func _show_halftime() -> void:
 	if others != null:
 		v.add_child(others)
 	var row := UIKit.vbox(10)
+	var ut: MatchTeam = _sim.teams[_user_side]
+	if _sim.can_talk(_user_side):
+		row.add_child(UIKit.button("Palestra no vestiário", "", func():
+			UIManager.close_modal()
+			_open_talk(true), "mail"))
+	elif ut.talk_key != "":
+		row.add_child(UIKit.colored("Palestra: %s" % String(MatchSimulation.TALKS[ut.talk_key]["short"]), UIColors.ACCENT, "Small"))
 	row.add_child(UIKit.button("Ajustes táticos e substituições", "", func():
 		UIManager.close_modal()
 		_open_tactics(), "tactics"))
@@ -1228,7 +1240,7 @@ func _stats_table(full: bool) -> VBoxContainer:
 	var rows: Array = [
 		["Posse", Fmt.percent(_sim.possession_pct(0)), Fmt.percent(_sim.possession_pct(1))],
 		["Finalizações", str(h.shots), str(a.shots)],
-		["Gols esperados (xG)", "%.1f" % h.xg, "%.1f" % a.xg],
+		["Gols esperados (xG)", TacticalXRay.dec(h.xg, 1), TacticalXRay.dec(a.xg, 1)],
 		["No gol", str(h.on_target), str(a.on_target)],
 		["Escanteios", str(h.corners), str(a.corners)],
 		["Faltas", str(h.fouls), str(a.fouls)],
@@ -1285,6 +1297,36 @@ func _other_scores(minute: int, half: int) -> VBoxContainer:
 # ---------------------------------------------------------------------------
 # Ajustes durante o jogo
 # ---------------------------------------------------------------------------
+
+## Palestra no vestiário (antes do pontapé inicial ou no intervalo). O relógio fica parado
+## enquanto o modal está aberto; "Sem palestra" segue sem efeito.
+func _open_talk(halftime: bool) -> void:
+	if _sim == null or not _sim.can_talk(_user_side):
+		return
+	var v := UIKit.vbox(10)
+	v.add_child(UIKit.label("Palestra no intervalo" if halftime else "Palestra antes do jogo", "Title"))
+	var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
+	if halftime:
+		v.add_child(UIKit.label(("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate."), "Muted"))
+	for key in MatchSimulation.TALK_ORDER:
+		var k: String = key
+		var cfg: Dictionary = MatchSimulation.TALKS[k]
+		var b := UIKit.button(String(cfg["name"]), "", func():
+			var r := _sim.team_talk(_user_side, k)
+			UIManager.close_modal()
+			UIManager.toast(String(r["msg"]), UIColors.ACCENT if r["ok"] else UIColors.RED)
+			_drain(false)
+			if halftime:
+				_show_halftime(), "")
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		v.add_child(b)
+		v.add_child(UIKit.label(String(cfg["desc"]), "Small", true))
+	v.add_child(UIKit.button("Sem palestra", "GhostButton", func():
+		UIManager.close_modal()
+		if halftime:
+			_show_halftime()))
+	UIManager.show_modal(v, true, false)
+
 
 ## Gritos da beira do campo: efeito curto e real no time (MatchSimulation.shout). O jogo segue rodando.
 func _open_shouts() -> void:

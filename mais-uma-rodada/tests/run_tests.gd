@@ -56,7 +56,7 @@ func _initialize() -> void:
 	_run("times de coração, treinador e revelados", _test_hearts_manager)
 	_run("formação personalizada, instruções e regra de estrangeiros", _test_tactical_freedom)
 	_run("raio-x tático: corredores, causas e correção", _test_xray)
-	_run("gritos da beira do campo", _test_shouts)
+	_run("gritos da beira do campo e palestras", _test_shouts)
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
@@ -1430,6 +1430,24 @@ func _test_shouts() -> void:
 	while sim2.minute < sim2.teams[0].sh_until + 1 and not sim2.finished:
 		sim2.step()
 	check(sim2.teams[0].sh_key == "" and is_equal_approx(sim2.teams[0].sh_att, 1.0), "efeito do grito não acabou")
+	# Palestra: antes do jogo e no intervalo, uma por pausa; reação conforme placar e personalidade
+	var sim3 := MatchSimulation.new()
+	sim3.setup(w, c, foe, ClubAI.prepare_ai_sheet(w, c, foe, true), ClubAI.prepare_ai_sheet(w, foe, c, false), {"competition": "BRA1", "attendance": 20000}, 91, false)
+	check(sim3.can_talk(0) and sim3.team_talk(0, "motivar")["ok"], "palestra antes do jogo recusada")
+	check(not sim3.can_talk(0), "duas palestras antes do jogo")
+	sim3.step()
+	sim3.step()
+	check(not sim3.can_talk(0), "palestra com a bola rolando")
+	while not sim3.halftime_pending and not sim3.finished:
+		sim3.step()
+	check(sim3.can_talk(0) and sim3.team_talk(0, "cobrar")["ok"], "palestra do intervalo recusada")
+	var pl := Player.new()
+	pl.traits = ["inseguro"]
+	check(sim3._talk_reaction(pl, "cobrar", -1, 0.0) < 0.0, "inseguro gostou da cobrança")
+	pl.traits = ["lider"]
+	check(sim3._talk_reaction(pl, "cobrar", -1, 0.0) > 0.0, "líder perdendo não respondeu à cobrança")
+	check(sim3._talk_reaction(pl, "cobrar", 2, 0.0) < 0.0, "cobrar ganhando deveria pesar contra")
+	check(sim3._talk_reaction(pl, "elogiar", 1, 0.0) > sim3._talk_reaction(pl, "elogiar", -1, 0.0), "elogio perdendo rendeu igual")
 
 
 func _test_xray() -> void:

@@ -213,6 +213,9 @@ func lines_for(ev: Dictionary) -> Array:
 			if x.has("shout"):
 				out.append_array(_shout_lines(ev, x))
 				return out
+			if x.has("talk"):
+				out.append_array(_talk_lines(ev, x))
+				return out
 			var m := int(x.get("mentality", -1))
 			var cat3 := "tactic_other"
 			if x.has("formation"):
@@ -225,6 +228,26 @@ func lines_for(ev: Dictionary) -> Array:
 				cat3 = "tactic_defend"
 			out.append(_line(_pick(cat3), ev, "tactic" if x.has("formation") else "info", 0.0))
 	return out
+
+
+## Palestra no vestiário: o tom da conversa e quem saiu mais ligado (ou abatido).
+func _talk_lines(ev: Dictionary, x: Dictionary) -> Array:
+	var side := int(ev.get("s", 0))
+	var cfg: Dictionary = MatchSimulation.TALKS.get(String(x["talk"]), {})
+	var lines: Array = [_line(I18n.t("No vestiário do {team}: “%s”") % I18n.t(String(cfg.get("name", ""))), ev, "tactic", 0.0)]
+	var up: Array = []
+	for pid in x.get("up", []):
+		up.append(_name(side, int(pid)))
+	var down: Array = []
+	for pid in x.get("down", []):
+		down.append(_name(side, int(pid)))
+	if up.size() >= 3:
+		lines.append(_line(I18n.t("O grupo volta a campo ligado. %s parecem outros.") % ", ".join(up.slice(0, 2)), ev, "info", 0.4))
+	elif not up.is_empty():
+		lines.append(_line(I18n.t("%s sai do vestiário mais confiante.") % ", ".join(up), ev, "info", 0.4))
+	if not down.is_empty():
+		lines.append(_line(I18n.t("%s não gostou do tom da conversa.") % ", ".join(down.slice(0, 2)), ev, "info", 0.4))
+	return lines
 
 
 ## Grito da beira do campo e a reação de quem respondeu (ou sentiu).

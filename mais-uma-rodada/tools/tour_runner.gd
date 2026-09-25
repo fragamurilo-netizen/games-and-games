@@ -230,9 +230,19 @@ func _run() -> void:
 	UIManager.replace("match")
 	await _frames(6)
 	var ms := _screen()
+	await _frames(6)
+	await _shot("07b_palestra")
+	var tsim: MatchSimulation = ms.get("_sim")
+	tsim.team_talk(int(ms.get("_user_side")), "motivar")
+	UIManager.close_all_modals()
+	ms.call("_drain", false)
 	ms.set("_pace", 2)
 	await _wait(2.5)
 	await _shot("08_partida")
+	ms.call("_open_shouts")
+	await _frames(6)
+	await _shot("08b_gritos")
+	UIManager.close_all_modals()
 	var got_goal := false
 	var got_half := false
 	var guard := Time.get_ticks_msec() + 120000

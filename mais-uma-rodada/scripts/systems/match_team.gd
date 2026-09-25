@@ -71,6 +71,8 @@ var sh_key: String = ""
 var sh_until: int = -1 # minuto em que o efeito acaba
 var sh_next: int = 0 # próximo minuto em que dá para gritar de novo
 var sh_uses: Dictionary = {} # grito -> vezes usado (repetir perde efeito)
+var talk_half: int = -1 # tempo em que a última palestra foi dada (0 = antes do jogo)
+var talk_key: String = ""
 var sh_att: float = 1.0
 var sh_def: float = 1.0
 var sh_poss: float = 0.0
@@ -170,7 +172,7 @@ func refresh_factors() -> void:
 		if mp == null:
 			continue
 		var c := clampf(mp.cond, 0.0, 100.0) / 100.0
-		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f * mp.sh_f
+		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f * mp.sh_f * mp.talk_f
 
 
 ## Recalcula os setores a partir de quem está em campo.

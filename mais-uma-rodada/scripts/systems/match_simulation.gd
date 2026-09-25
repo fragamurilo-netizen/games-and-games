@@ -1423,6 +1423,105 @@ func _shout_reaction(mp: MatchPlayer, rx: String, diff: int) -> float:
 	return c
 
 
+# ---------------------------------------------------------------------------
+# Palestra no vestiário (antes do jogo e no intervalo)
+# ---------------------------------------------------------------------------
+
+const TALKS := {
+	"motivar": {"name": "Vamos pra cima, o jogo é nosso!", "short": "Motivar", "desc": "Acende o time. Rende mais para quem está atrás ou é azarão."},
+	"tranquilizar": {"name": "Calma, joguem o nosso jogo.", "short": "Tranquilizar", "desc": "Tira o peso dos mais nervosos. Bom em jogo grande ou vencendo."},
+	"elogiar": {"name": "Estão de parabéns, continuem assim.", "short": "Elogiar", "desc": "Mantém o embalo de quem está bem. Perdendo, soa acomodado."},
+	"exigir": {"name": "Só a vitória interessa hoje.", "short": "Exigir vitória", "desc": "Líderes crescem; os inseguros sentem. Pesa mais quando se é favorito."},
+	"sem_pressao": {"name": "Sem pressão. Divirtam-se.", "short": "Sem pressão", "desc": "Solta o azarão. Para o favorito, pode relaxar demais."},
+	"cobrar": {"name": "Isso está inaceitável!", "short": "Cobrar", "desc": "Chacoalha quem está mal. Ganhando, é injusto e pesa contra."},
+}
+const TALK_ORDER: Array[String] = ["motivar", "tranquilizar", "elogiar", "exigir", "sem_pressao", "cobrar"]
+
+
+## Dá para falar com o time agora? Antes do pontapé inicial ou no intervalo, uma vez por pausa.
+func can_talk(side: int) -> bool:
+	if finished:
+		return false
+	var at := 0 if not started else half
+	if started and not (halftime_pending or et_pending):
+		return false
+	return teams[side].talk_half != at
+
+
+## Palestra: reação individual pela personalidade, moral, placar, favoritismo e peso do jogo.
+## Vale até a próxima palestra. Retorna {"ok", "msg", "up": [ids], "down": [ids]}.
+func team_talk(side: int, key: String) -> Dictionary:
+	if not TALKS.has(key) or not can_talk(side):
+		return {"ok": false, "msg": "Agora não dá para falar com o time."}
+	var t: MatchTeam = teams[side]
+	var o: MatchTeam = teams[1 - side]
+	t.talk_half = 0 if not started else half
+	t.talk_key = key
+	var diff := score[side] - score[1 - side]
+	var fav := (t.u_att + t.u_mid + t.u_def) - (o.u_att + o.u_mid + o.u_def) # >0: somos favoritos
+	var up: Array = []
+	var down: Array = []
+	for mp: MatchPlayer in t.all:
+		var d := _talk_reaction(mp.p, key, diff, fav)
+		mp.talk_f = 1.0 + d
+		if not mp.on_pitch:
+			continue
+		if d >= 0.025:
+			up.append(mp.p.id)
+		elif d <= -0.02:
+			down.append(mp.p.id)
+	t.recompute_units()
+	_refresh_rates()
+	_emit(EV_TACTIC, side, -1, -1, {"talk": key, "up": up, "down": down})
+	var msg := "Palestra: \"%s\"" % String(TALKS[key]["name"])
+	if up.size() > down.size() + 2:
+		msg += " O vestiário comprou a ideia."
+	elif down.size() > up.size():
+		msg += " Nem todo mundo gostou."
+	return {"ok": true, "msg": msg, "up": up, "down": down}
+
+
+func _talk_reaction(p: Player, key: String, diff: int, fav: float) -> float:
+	var sensitive := p.has_trait("timido") or p.has_trait("inseguro")
+	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional")
+	var loose := p.has_trait("acomodado") or p.has_trait("festeiro")
+	var low := p.morale < 45.0
+	var big := importance >= 0.6 or derby
+	var d := 0.0
+	match key:
+		"motivar":
+			d = 0.012 + (0.015 if diff < 0 else 0.0) + (0.012 if fav < -3.0 else 0.0) - (0.01 if diff >= 2 else 0.0)
+			if p.has_trait("competitivo") or p.has_trait("estrela"):
+				d += 0.008
+		"tranquilizar":
+			d = 0.006 + (0.02 if sensitive or low else 0.0) + (0.01 if big else 0.0) + (0.006 if diff > 0 else 0.0) - (0.012 if diff < 0 else 0.0)
+		"elogiar":
+			d = (0.02 if diff > 0 else (0.004 if diff == 0 else -0.015))
+			if loose and diff > 0:
+				d -= 0.02 # relaxa
+			if sensitive:
+				d += 0.008
+		"exigir":
+			d = 0.01 + (0.008 if fav > 3.0 else 0.0)
+			if hard:
+				d += 0.02
+			if sensitive or low:
+				d = -0.03 - (0.01 if big else 0.0)
+		"sem_pressao":
+			d = (0.018 if fav < -3.0 else -0.004) + (0.012 if sensitive else 0.0)
+			if loose:
+				d -= 0.02 if fav > 0.0 else 0.0
+		"cobrar":
+			d = (0.02 if diff < 0 else (-0.006 if diff == 0 else -0.025))
+			if hard:
+				d += 0.015
+			if sensitive or low:
+				d = -0.035
+			if p.has_trait("temperamental") or p.has_trait("rebelde"):
+				d -= 0.015
+	return clampf(d, -0.05, 0.05)
+
+
 func _clear_shout(t: MatchTeam) -> void:
 	if t.sh_key == "":
 		return
