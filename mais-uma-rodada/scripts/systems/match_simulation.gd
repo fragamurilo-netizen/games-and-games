@@ -429,16 +429,47 @@ func _start_shootout() -> void:
 	pen_score = [0, 0]
 	pen_taken = [0, 0]
 	for side in 2:
-		var t: MatchTeam = teams[side]
-		var kickers: Array = []
-		for mp: MatchPlayer in t.slots:
-			if mp != null and mp.on_pitch:
-				kickers.append(mp)
-		kickers.sort_custom(func(a, b): return _pen_skill(a) > _pen_skill(b))
-		# O goleiro bate por último.
-		kickers.sort_custom(func(a, b): return (1 if a.slot == 0 else 0) < (1 if b.slot == 0 else 0))
-		_pen_order[side] = kickers
+		_pen_order[side] = _build_pen_order(side)
 	_emit(EV_SHOOTOUT, 0, -1, -1, {"ps": [0, 0]})
+
+
+## Batedores em campo: primeiro os da ordem escolhida no TeamSheet, depois o resto pela
+## habilidade, com o goleiro por último. Só ordena, não sorteia.
+func _build_pen_order(side: int) -> Array:
+	var t: MatchTeam = teams[side]
+	var chosen: Array = []
+	var rest: Array = []
+	for mp: MatchPlayer in t.slots:
+		if mp != null and mp.on_pitch:
+			rest.append(mp)
+	if t.sheet != null:
+		for pid in t.sheet.shootout_order:
+			for mp: MatchPlayer in rest:
+				if mp.p.id == int(pid):
+					chosen.append(mp)
+					rest.erase(mp)
+					break
+	rest.sort_custom(func(a, b): return _pen_skill(a) > _pen_skill(b))
+	# O goleiro bate por último.
+	rest.sort_custom(func(a, b): return (1 if a.slot == 0 else 0) < (1 if b.slot == 0 else 0))
+	return chosen + rest
+
+
+## Batedores da disputa na ordem atual (MatchPlayer).
+func shootout_kickers(side: int) -> Array:
+	return _pen_order[side]
+
+
+## O técnico define a ordem antes da primeira cobrança do time. Guarda no TeamSheet
+## para a próxima disputa.
+func set_shootout_order(side: int, ids: Array) -> bool:
+	var t: MatchTeam = teams[side]
+	if t.sheet != null:
+		t.sheet.shootout_order = ids.duplicate()
+	if not shootout or pen_taken[side] > 0:
+		return false
+	_pen_order[side] = _build_pen_order(side)
+	return true
 
 
 func _pen_skill(mp: MatchPlayer) -> float:
