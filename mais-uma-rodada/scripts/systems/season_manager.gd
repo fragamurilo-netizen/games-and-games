@@ -878,6 +878,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 	for p in left:
 		summary["left"].append(p.display_name())
 		NewsManager.post(world, "contrato_fim", {"player": p.display_name(), "club": world.user_club().short_name, "apps": p.career_apps}, world.user_club_id, p.id, NewsEvent.IMP_HIGH)
+	# DNA dos clubes reage à temporada (antes da troca de divisões)
+	ClubDNA.season_end(world, moves)
 	# Investimentos em estrutura/base e depreciação
 	FinanceManager.yearly_investments(world)
 	# Mudança de divisões

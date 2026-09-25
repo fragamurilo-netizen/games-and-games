@@ -342,6 +342,12 @@ func _run() -> void:
 		UIManager.push("club", {"id": rival})
 		await _frames(8)
 		await _shot("20_clube_rival")
+		_screen().scroll().scroll_vertical = 1150
+		await _frames(4)
+		await _shot("20b_clube_rival_dna")
+		_screen().scroll().scroll_vertical = 1900
+		await _frames(4)
+		await _shot("20c_clube_rival_dna_historia")
 	UIManager.goto("hub")
 	UIManager.push("news")
 	await _frames(8)

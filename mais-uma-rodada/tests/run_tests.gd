@@ -58,6 +58,7 @@ func _initialize() -> void:
 	_run("rivalidade emergente: clássicos que nascem no save", _test_rivalry)
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
+	_run("DNA dos clubes: identidade, mercado e mudanças", _test_club_dna)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -2488,3 +2489,94 @@ func world_player_of(w: GameWorld, c: Club) -> Player:
 		if p.loan.is_empty():
 			return p
 	return null
+
+
+func _test_club_dna() -> void:
+	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	var st := w.rng.state
+	var recs := {}
+	var bad := 0
+	for c: Club in w.clubs:
+		var d := ClubDNA.of(c)
+		recs[String(d["rec"])] = int(recs.get(String(d["rec"]), 0)) + 1
+		if ClubDNA.info("rec", String(d["rec"])).is_empty() or ClubDNA.info("mkt", String(d["mkt"])).is_empty() or ClubDNA.info("tac", String(d["tac"])).is_empty():
+			bad += 1
+		for k in ClubDNA.PARAMS:
+			if float(d[k]) < 0.0 or float(d[k]) > 100.0:
+				bad += 1
+	check(bad == 0, "%d DNA(s) inválido(s)" % bad)
+	check(recs.size() >= 5, "pouca variedade de filosofias de elenco: %s" % str(recs))
+	check(w.rng.state == st, "gerar o DNA consumiu o sorteio do mundo")
+	# Mesmo mundo, mesmo DNA.
+	var w2 := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	var same := true
+	for i in 40:
+		var a: Club = w.clubs[i * 7 % w.clubs.size()]
+		if var_to_str(ClubDNA.of(a)) != var_to_str(ClubDNA.of(w2.club(a.id))):
+			same = false
+	check(same, "DNA não é determinístico")
+	# Gigantes olham o mundo; clubes de divisões baixas, o próprio país.
+	var big: Club = w.clubs_in_league("ENG1")[0]
+	var wide := 0
+	var top_n := 0
+	for c: Club in w.clubs_in_league("ENG1"):
+		top_n += 1
+		if ["global", "continental"].has(ClubDNA.mkt(c)):
+			wide += 1
+	check(wide * 2 > top_n, "clubes ingleses deveriam ter mercado amplo (%d/%d)" % [wide, top_n])
+	var low_home := 0
+	var low_n := 0
+	for c: Club in w.clubs:
+		if c.tier >= 3:
+			low_n += 1
+			if ["domestico", "regional"].has(ClubDNA.mkt(c)):
+				low_home += 1
+	check(low_n == 0 or low_home * 10 >= low_n * 7, "clubes pequenos com mercado amplo demais (%d/%d)" % [low_home, low_n])
+	# Filosofia de elenco muda o mercado: quem vende jovens cede mais barato; quem é ambicioso segura.
+	var kid: Player = null
+	for q: Player in w.squad(big):
+		if q.age(w.year) <= 21:
+			kid = q
+	if kid != null:
+		big.dna["sell"] = 90.0
+		big.dna["amb"] = 50.0
+		var easy := ClubDNA.sell_mult(w, big, kid)
+		big.dna["sell"] = 10.0
+		check(ClubDNA.sell_mult(w, big, kid) > easy * 1.3, "venda de jovens não muda o preço")
+	var spender: Club = w.clubs_in_league("ESP1")[3]
+	spender.dna["fin"] = 95.0
+	var sm := ClubDNA.spend_mult(spender)
+	spender.dna["fin"] = 5.0
+	check(sm > ClubDNA.spend_mult(spender) * 1.5, "apetite financeiro não muda o orçamento")
+	# Dono rico compra o clube: novo rico, estrelas, cofre aberto e mercado mais amplo.
+	var target: Club = w.clubs_in_league("POR1")[10]
+	var mk0 := ClubDNA.MKT_ORDER.find(ClubDNA.mkt(target))
+	WorldEvents.takeover(w, target, "Grupo Teste")
+	check(ClubDNA.era(target) == "novo_rico" and ClubDNA.rec(target) == "estrelas" and ClubDNA.val(target, "fin") >= 85.0, "compra do clube não mudou o DNA: %s" % str(target.dna))
+	check(ClubDNA.MKT_ORDER.find(ClubDNA.mkt(target)) >= mk0 and not ClubDNA.log_of(target).is_empty(), "compra do clube fora da linha do tempo")
+	# Presidente da austeridade fecha o cofre.
+	var pc: Club = w.clubs_in_league("ITA1")[6]
+	var fin0 := ClubDNA.val(pc, "fin")
+	ClubDNA.on_president(w, pc, "promete austeridade")
+	check(ClubDNA.val(pc, "fin") < fin0, "presidente não mudou o apetite financeiro")
+	# Técnico novo: a escola do clube costuma prevalecer.
+	var school := 0
+	var sc: Club = w.clubs_in_league("GER1")[4]
+	var fam: Array = ClubDNA.info("tac", ClubDNA.tac(sc)).get("ph", [])
+	for _k in 30:
+		People.replace_coach(w, sc, "resultados")
+		if fam.has(sc.philosophy):
+			school += 1
+	check(school >= 15, "a escola do clube não sobrevive aos técnicos (%d/30)" % school)
+	check(int(sc.dna.get("cc", 0)) >= 30, "trocas de técnico não contadas no DNA")
+	# Temporada inteira: o DNA registra o ano, e a dívida alta leva à crise.
+	_season(w)
+	var broke: Club = w.clubs_in_league("ARG1")[2]
+	broke.balance = -FinanceManager.expected_revenue(broke) * 2
+	broke.dna["since"] = w.year - 5
+	ClubDNA.season_end(w, {})
+	check(ClubDNA.era(broke) == "crise", "clube afundado em dívida não entrou em crise (%s)" % ClubDNA.era(broke))
+	check(ClubDNA.of(big)["h"].size() == 1, "temporada não registrada no DNA")
+	# Save/load preserva o DNA.
+	var w3 := GameWorld.from_dict(w.to_dict())
+	check(var_to_str(w3.club(broke.id).dna) == var_to_str(broke.dna), "DNA não sobrevive ao save")

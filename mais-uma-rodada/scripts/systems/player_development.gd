@@ -549,6 +549,7 @@ static func youth_intake(world: GameWorld) -> Dictionary:
 		if c.id == world.user_club_id:
 			continue # a base do usuário tem garotos de verdade (YouthManager)
 		var n := 1 + (1 if c.youth_level >= 55 else 0) + (1 if c.youth_level >= 85 else 0) + (1 if world.rng.randf() < 0.35 else 0)
+		n = maxi(1, n + ClubDNA.intake_extra(c)) # uso da base (DNA)
 		var arr: Array = []
 		for _i in n:
 			arr.append(PlayerGenerator.create_youth(world, world.rng, c, used))

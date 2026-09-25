@@ -27,11 +27,13 @@ static func best_eleven(world: GameWorld, club: Club, fname: String, exclude: Ar
 		slot_pos.append(slots[i]["pos"])
 	var m := PackedFloat32Array()
 	m.resize(n * n_slots)
+	var ai := not world.is_user_club(club.id)
 	for a in n:
 		var p: Player = avail[a]
 		var cond_f := 0.72 + 0.28 * clampf(p.condition, 0.0, 100.0) / 100.0
+		var kid := ClubDNA.selection_bonus(club, p, world.year) if ai else 0.0 # clube que usa a base dá minutos aos garotos
 		for i in n_slots:
-			m[a * n_slots + i] = p.rating_at(slot_pos[i]) * cond_f
+			m[a * n_slots + i] = p.rating_at(slot_pos[i]) * cond_f + kid
 	var assign := PackedInt32Array() # vaga -> índice em avail
 	assign.resize(n_slots)
 	assign.fill(-1)

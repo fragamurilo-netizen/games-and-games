@@ -209,7 +209,7 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 	var arch := club.arch()
 	var revenue := float(expected_revenue(club) + club.income_tv - tv_income(club))
 	var ratio := float(arch.get("wage_ratio", 0.62))
-	var spend := float(arch.get("spend_rate", 0.35))
+	var spend := float(arch.get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
 	if world.is_user_club(club.id):
 		ratio = [0.95, 0.86, 0.8][world.difficulty]
 		spend = [0.6, 0.45, 0.35][world.difficulty]
@@ -253,7 +253,7 @@ static func mid_season_review(world: GameWorld, club: Club) -> void:
 		if debt_ratio(club, revenue) > 0.4:
 			club.wage_budget = int(club.wage_budget * 0.95)
 		return
-	var spend := float(club.arch().get("spend_rate", 0.35))
+	var spend := float(club.arch().get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
 	if world.is_user_club(club.id):
 		spend = [0.6, 0.45, 0.35][world.difficulty]
 	var fresh := int(minf(club.balance * spend * 0.5, revenue * 0.5))

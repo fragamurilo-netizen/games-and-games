@@ -201,7 +201,7 @@ static func _new_coach(world: GameWorld, r: RandomNumberGenerator, nation: Strin
 static func _new_president(world: GameWorld, r: RandomNumberGenerator, c: Club) -> Dictionary:
 	var styles: Array = PRES_STYLES.keys()
 	var weights: Array = [1.0, 1.0, 1.0, 1.0, 1.0]
-	var bp := float(c.arch().get("board_patience", 50))
+	var bp := ClubDNA.patience(c)
 	weights[0] += (bp - 50.0) / 25.0
 	weights[1] += (50.0 - bp) / 25.0
 	for i in weights.size():
@@ -319,6 +319,10 @@ static func replace_coach(world: GameWorld, club: Club, reason: String) -> Dicti
 	best["c"] = club.id
 	best["since"] = world.year
 	best["job"] = 65.0
+	ClubDNA.on_coach_change(club)
+	if not world.is_user_club(club.id):
+		# O técnico novo traz a filosofia dele, mas a escola do clube costuma prevalecer.
+		club.philosophy = ClubDNA.new_coach_philosophy(club, r, String(best.get("st", "")))
 	best["w"] = 0
 	best["d"] = 0
 	best["l"] = 0
@@ -853,7 +857,7 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 			var derby := MatchEngine.is_derby(world, f.home, f.away)
 			var key := "w" if res == "V" else ("d" if res == "E" else "l")
 			co[key] = int(co.get(key, 0)) + 1
-			var bp := float(c.arch().get("board_patience", 50))
+			var bp := ClubDNA.patience(c) # paciência com técnico é DNA do clube
 			var pres_pat := float(PRES_STYLES.get(String(pp["pres"].get(cid, {}).get("st", "paciente")), PRES_STYLES["paciente"])["patience"])
 			var d := 2.0 if res == "V" else (0.2 if res == "E" else -2.6)
 			if derby:
