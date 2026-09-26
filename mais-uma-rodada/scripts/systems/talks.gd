@@ -46,17 +46,17 @@ static func start(world: GameWorld, kind: String, target: int = -1) -> Dictionar
 	People.ensure(world)
 	match kind:
 		"player":
-			return _player_start(world, target)
+			return AmbientStorytelling.enrich_conversation(world, _player_start(world, target), kind, target)
 		"board":
-			return _board_start(world)
+			return AmbientStorytelling.enrich_conversation(world, _board_start(world), kind, target)
 		"staff":
-			return _staff_start(world, target)
+			return AmbientStorytelling.enrich_conversation(world, _staff_start(world, target), kind, target)
 		"fans":
-			return _fans_start(world)
+			return AmbientStorytelling.enrich_conversation(world, _fans_start(world), kind, target)
 		"coach":
-			return _coach_start(world, target)
+			return AmbientStorytelling.enrich_conversation(world, _coach_start(world, target), kind, target)
 		"press":
-			return _press_start(world)
+			return AmbientStorytelling.enrich_conversation(world, _press_start(world), kind, target)
 	var c := _new(kind, target, "", "")
 	_finish(c)
 	return c
