@@ -7,7 +7,7 @@ const DIFF_EASY := 0
 const DIFF_NORMAL := 1
 const DIFF_HARD := 2
 const DIFF_NAMES: Array[String] = ["Fácil", "Normal", "Difícil"]
-const MAX_NEWS := 160
+const MAX_NEWS := 240
 
 var version: int = SAVE_VERSION
 var world_seed: int = 0
@@ -48,6 +48,10 @@ var people: Dictionary = {}
 var rivalries: Dictionary = {}
 ## Caixa de entrada do treinador (InboxManager): mensagens pessoais, mais recente no fim.
 var inbox: Array = []
+## Contratações importantes do usuário esperando a apresentação animada (não vai para o save).
+var pending_signings: Array = []
+## Conquistas recém-desbloqueadas esperando o aviso na tela (não vai para o save).
+var pending_achievements: Array = []
 ## Football Memory: confrontos, recordes, momentos e linha do tempo dos atletas (ver FootballMemory).
 var memory: Dictionary = {}
 

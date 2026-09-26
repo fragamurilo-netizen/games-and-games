@@ -16,6 +16,7 @@ const SCREENS := {
 	"season_end": "res://scenes/screens/season_end.tscn",
 	"load": "res://scenes/screens/load_game.tscn",
 	"news": "res://scenes/screens/news.tscn",
+	"achievements": "res://scenes/screens/achievements.tscn",
 	"social": "res://scenes/screens/social.tscn",
 	"inbox": "res://scenes/screens/inbox.tscn",
 	"settings": "res://scenes/screens/settings.tscn",

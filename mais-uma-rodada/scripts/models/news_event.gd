@@ -16,6 +16,9 @@ var club_id: int = -1
 var player_id: int = -1
 var importance: int = IMP_NORMAL
 var read: bool = false
+## Imagem da notícia: {type: "signing" (player, club, n, fee, from), "score" (home, away, hg, ag, comp),
+## "nation" (code), "player" (player, club), "crest" (club)}. Vazio = imagem escolhida pela categoria.
+var media: Dictionary = {}
 
 
 static func make(y: int, d: int, cat: String, t: String, b: String, c: int = -1, p: int = -1, imp: int = IMP_NORMAL) -> NewsEvent:
@@ -32,7 +35,10 @@ static func make(y: int, d: int, cat: String, t: String, b: String, c: int = -1,
 
 
 func to_dict() -> Dictionary:
-	return {"y": year, "d": day, "cat": category, "t": title, "b": body, "c": club_id, "p": player_id, "i": importance, "r": read}
+	var d := {"y": year, "d": day, "cat": category, "t": title, "b": body, "c": club_id, "p": player_id, "i": importance, "r": read}
+	if not media.is_empty():
+		d["m"] = media
+	return d
 
 
 static func from_dict(d: Dictionary) -> NewsEvent:
@@ -46,4 +52,7 @@ static func from_dict(d: Dictionary) -> NewsEvent:
 	n.player_id = int(d.get("p", -1))
 	n.importance = int(d.get("i", IMP_NORMAL))
 	n.read = bool(d.get("r", false))
+	var m: Variant = d.get("m", {})
+	if m is Dictionary:
+		n.media = m
 	return n

@@ -557,5 +557,5 @@ func _career_card(w: GameWorld) -> Control:
 	card.add_child(row)
 	var games := maxi(1, int(ms.get("games", 0)))
 	card.add_child(UIKit.label("%dV %dE %dD · aproveitamento de %d%% · %d de %d conquistas" % [int(ms.get("w", 0)), int(ms.get("d", 0)), int(ms.get("l", 0)),
-		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), SeasonReview.ACH_ORDER.size()], "Small", true))
+		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), Achievements.CATALOG.size()], "Small", true))
 	return UIKit.card_panel(card)
