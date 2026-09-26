@@ -73,96 +73,136 @@ func _tabs_row(p: Player) -> Control:
 
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	var row := UIKit.hbox(16)
-	row.add_child(UIKit.portrait(p, club, w.year, 132))
-	var col := UIKit.vbox(4)
+	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
+	var card := UIKit.card("Card", 14)
+	var row := UIKit.hbox(18)
+	var pv := UIKit.portrait(p, club, w.year, 176)
+	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(pv)
+	var col := UIKit.vbox(6)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(p.display_name(), "Title"))
-	col.add_child(UIKit.label(p.full_name(), "Small", true))
+	# Nome e, ao lado, o selo de overall/potencial (como uma ficha de jogador)
+	var top := UIKit.hbox(10)
+	var names := UIKit.vbox(4)
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nl := UIKit.label(p.display_name(), "Title")
+	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	nl.custom_minimum_size.x = 60
+	names.add_child(nl)
+	if p.full_name() != p.display_name():
+		names.add_child(UIKit.label(p.full_name(), "Small", true))
 	var r1 := UIKit.hbox(8)
 	r1.add_child(UIKit.pos_badge(p.position))
-	r1.add_child(UIKit.label(Pos.name_of(p.position), "Small", true))
-	col.add_child(r1)
+	var pn := UIKit.label(Pos.name_of(p.position), "Small", true)
+	pn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r1.add_child(pn)
+	names.add_child(UIKit.gap(4))
+	names.add_child(r1)
+	# Nacionalidade, físico e origem seguem na coluna do nome (sem buraco ao lado do selo)
 	var nat := NameGenerator.nationality_name(p.nationality)
 	if p.nationality != "":
 		var nrow := UIKit.hbox(8)
-		nrow.add_child(UIKit.flag(p.nationality, 36))
+		nrow.add_child(UIKit.flag(p.nationality, 32))
 		var caps_h := NationalTeamManager.caps_of(w, p.id)
 		nrow.add_child(UIKit.label(nat + ((" · %d jogos, %d gols pela seleção" % [caps_h[0], caps_h[1]]) if caps_h[0] > 0 else ""), "Small", true))
-		col.add_child(nrow)
-	var born := p.hometown if p.hometown != "" else nat
-	var brow := UIKit.hbox(10)
-	brow.add_child(UIKit.label("%d anos · %s · %d kg ·" % [p.age(w.year), Fmt.height(p.height), p.weight], "Small"))
-	brow.add_child(FootView.make(p.foot, 28))
+		names.add_child(nrow)
+	var brow := UIKit.hbox(8)
+	brow.add_child(UIKit.label("%d anos · %s · %d kg" % [p.age(w.year), Fmt.height(p.height), p.weight], "Small"))
+	brow.add_child(FootView.make(p.foot, 24))
 	brow.add_child(UIKit.label(["destro", "canhoto", "ambidestro"][p.foot], "Small"))
-	col.add_child(brow)
-	col.add_child(UIKit.label("De %s" % born, "Small", true))
+	names.add_child(brow)
+	var born := p.hometown if p.hometown != "" else nat
+	if born != "":
+		names.add_child(UIKit.label("De %s" % born, "Small", true))
 	var heart_txt := HeartClubs.known_text(w, p)
 	if heart_txt != "":
 		var hrow := UIKit.hbox(8)
-		hrow.add_child(UIKit.icon_rect("heart", 22, UIColors.RED))
+		hrow.add_child(UIKit.icon_rect("heart", 20, UIColors.RED))
 		var hc := HeartClubs.club_of(w, p)
 		if hc != null:
-			hrow.add_child(UIKit.crest(hc, 24))
+			hrow.add_child(UIKit.crest(hc, 22))
 		hrow.add_child(UIKit.label(("Torce para o %s" % hc.short_name) if hc != null else heart_txt, "Small", true))
-		col.add_child(hrow)
-	if club != null:
-		# Toque no clube abre a página dele
-		var cr := UIKit.hbox(8)
-		cr.add_child(UIKit.crest(club, 30))
-		if p.shirt > 0:
-			cr.add_child(UIKit.shirt_back(club, p.shirt, 38, false, p.position == Pos.GK))
-		var cl := UIKit.label(club.short_name, "Small")
-		cl.add_theme_color_override(&"font_color", UIColors.BLUE)
-		cr.add_child(cl)
-		cr.add_child(UIKit.label("›", "Small"))
-		var cid := club.id
-		col.add_child(UIKit.tap_row(cr, func(): UIManager.push("club", {"id": cid}), "CardFlat"))
+		names.add_child(hrow)
+	top.add_child(names)
+	top.add_child(_ovr_block(w, p, own))
+	col.add_child(top)
 	row.add_child(col)
 	card.add_child(row)
+	if club != null:
+		# Toque no clube abre a página dele: faixa larga com escudo, camisa e contrato
+		var cr := UIKit.hbox(10)
+		cr.add_child(UIKit.crest(club, 34))
+		if p.shirt > 0:
+			cr.add_child(UIKit.shirt_back(club, p.shirt, 40, false, p.position == Pos.GK))
+		var cv := UIKit.vbox(0)
+		cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var cl := UIKit.label(club.short_name, "H3")
+		cl.add_theme_color_override(&"font_color", UIColors.BLUE)
+		cv.add_child(cl)
+		var sub := "Camisa %d" % p.shirt if p.shirt > 0 else "Sem número"
+		if not p.loan.is_empty():
+			sub += " · emprestado"
+		elif p.contract_end > 0:
+			sub += " · contrato até %d" % p.contract_end
+		cv.add_child(UIKit.label(sub, "Small"))
+		cr.add_child(cv)
+		cr.add_child(UIKit.label("›", "H3"))
+		var cid := club.id
+		card.add_child(UIKit.tap_row(cr, func(): UIManager.push("club", {"id": cid}), "CardFlat"))
 	var tags := UIKit.flow(8)
-	tags.add_child(UIKit.pill(p.playstyle().to_upper(), UIColors.BLUE))
+	tags.add_child(UIKit.pill(p.playstyle().to_upper(), UIColors.BLUE, 16))
 	if p.signature != "":
-		tags.add_child(UIKit.pill("★ " + String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD))
+		tags.add_child(UIKit.pill("★ " + String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD, 16))
 	for sp in p.specialties():
-		tags.add_child(UIKit.pill(String(sp).to_upper(), UIColors.GREEN))
+		tags.add_child(UIKit.pill(String(sp).to_upper(), UIColors.GREEN, 16))
 	for t in p.traits:
-		tags.add_child(UIKit.pill(String(DatabaseManager.trait_data(t).get("name", t)).to_upper(), UIColors.ACCENT))
+		tags.add_child(UIKit.pill(String(DatabaseManager.trait_data(t).get("name", t)).to_upper(), UIColors.ACCENT, 16))
 	card.add_child(tags)
-	return HeroBackdrop.attach(UIKit.card_panel(card), club)
+	card.add_child(UIKit.gap(2))
+	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.08)
+
+
+## Selo da ficha: overall grande e, embaixo, o potencial em palavras.
+func _ovr_block(w: GameWorld, p: Player, own: bool) -> Control:
+	var v := UIKit.vbox(2)
+	v.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var ovr := p.overall if own else PlayerRowView.estimate(w, p, p.overall)
+	var ob := UIKit.badge(ovr, 96, 72, 46)
+	if not own:
+		ob.text_override = "~%d" % ovr
+	v.add_child(ob)
+	var cap := UIKit.label("OVERALL", "Caps")
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cap.add_theme_font_size_override(&"font_size", 14)
+	v.add_child(cap)
+	var precision := 0.8 if own else (0.75 if Scouting.is_scouted(w, p) else 0.2)
+	var pot := p.potential_estimate(precision)
+	var age := p.age(w.year)
+	var pot_label := Player.potential_label(pot) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
+	var pl := UIKit.colored(pot_label, UIColors.ACCENT if pot >= p.overall + 8 and age <= 25 else UIColors.MUTED, "Small")
+	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pl.custom_minimum_size.x = 96
+	pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	v.add_child(pl)
+	return v
 
 
 func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	var card := UIKit.card("Card", 12)
 	var grid := GridContainer.new()
-	grid.columns = 4
-	grid.add_theme_constant_override(&"h_separation", 8)
-	grid.add_theme_constant_override(&"v_separation", 14)
-	var ovr := p.overall if own else PlayerRowView.estimate(w, p, p.overall)
-	var ob := UIKit.badge(ovr, 84, 64, 40)
-	if not own:
-		ob.text_override = "~%d" % ovr
-	var ov := UIKit.vbox(2)
-	ov.add_child(ob)
-	ov.add_child(UIKit.label("overall", "Small"))
-	ov.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_child(ov)
-	var precision := 0.8 if own else (0.75 if Scouting.is_scouted(w, p) else 0.2)
-	var pot := p.potential_estimate(precision)
-	var age := p.age(w.year)
-	var pot_label := Player.potential_label(pot) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
-	grid.add_child(_mini(pot_label, "potencial", UIColors.ACCENT if pot >= p.overall + 8 and age <= 25 else UIColors.TEXT))
-	grid.add_child(_mini(Fmt.money(p.value), "valor"))
-	grid.add_child(_mini(Fmt.money(p.wage) if p.club_id >= 0 else "—", "salário/mês"))
-	grid.add_child(_mini(str(p.contract_end) if p.club_id >= 0 else "Livre", "contrato até", UIColors.ORANGE if own and p.contract_end <= w.year else UIColors.TEXT))
+	grid.columns = 3
+	grid.add_theme_constant_override(&"h_separation", 10)
+	grid.add_theme_constant_override(&"v_separation", 10)
+	grid.add_child(_tile(Fmt.money(p.value), "valor de mercado"))
+	grid.add_child(_tile(Fmt.money(p.wage) if p.club_id >= 0 else "—", "salário/mês"))
+	grid.add_child(_tile(str(p.contract_end) if p.club_id >= 0 else "Livre", "contrato até", UIColors.ORANGE if own and p.contract_end <= w.year else UIColors.TEXT))
 	var form := p.form()
-	grid.add_child(_mini(Fmt.rating(form) if not p.recent_ratings.is_empty() else "—", "forma", Fmt.match_rating_color(form) if not p.recent_ratings.is_empty() else UIColors.TEXT))
-	grid.add_child(_mini(UIColors.morale_label(p.morale), "moral", UIColors.morale_color(p.morale)))
+	grid.add_child(_tile(Fmt.rating(form) if not p.recent_ratings.is_empty() else "—", "forma", Fmt.match_rating_color(form) if not p.recent_ratings.is_empty() else UIColors.TEXT))
+	grid.add_child(_tile(UIColors.morale_label(p.morale), "moral", UIColors.morale_color(p.morale)))
 	var cond_txt := "%d%%" % int(p.condition)
 	if p.injury_weeks > 0:
 		cond_txt = "Lesão"
-	grid.add_child(_mini(cond_txt, "físico" if p.injury_weeks == 0 else "%d semana(s)" % p.injury_weeks, UIColors.RED if p.injury_weeks > 0 else UIColors.TEXT))
+	grid.add_child(_tile(cond_txt, "físico" if p.injury_weeks == 0 else "%d semana(s)" % p.injury_weeks, UIColors.RED if p.injury_weeks > 0 else (UIColors.GREEN if p.condition >= 90 else UIColors.TEXT), p.condition / 100.0 if p.injury_weeks == 0 else -1.0))
 	card.add_child(grid)
 	if p.injury_weeks > 0:
 		card.add_child(UIKit.colored("%s — volta em %d semana(s)." % [p.injury_name, p.injury_weeks], UIColors.RED, "Small"))
@@ -180,15 +220,24 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	return UIKit.card_panel(card)
 
 
-func _mini(value: String, caption: String, color: Color = UIColors.TEXT) -> VBoxContainer:
-	var v := UIKit.vbox(0)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+## Quadradinho da ficha: valor grande, legenda e, se houver, uma barrinha de nível.
+func _tile(value: String, caption: String, color: Color = UIColors.TEXT, fill: float = -1.0) -> Control:
+	var v := UIKit.card("CardFlat", 2)
+	var panel := UIKit.card_panel(v)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var l := UIKit.label(value, "H3")
 	l.add_theme_color_override(&"font_color", color)
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	l.custom_minimum_size.x = 40
 	v.add_child(l)
-	v.add_child(UIKit.label(caption, "Small"))
-	return v
+	var c := UIKit.label(caption, "Small")
+	c.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	c.custom_minimum_size.x = 40
+	v.add_child(c)
+	if fill >= 0.0:
+		var b := UIKit.bar(fill * 100.0, 100.0, color if color != UIColors.TEXT else UIColors.BLUE, 5)
+		v.add_child(b)
+	return panel
 
 
 ## "Esse jogador é bom para meu time?"
@@ -287,23 +336,51 @@ func _fit_card(w: GameWorld, p: Player, own: bool) -> Control:
 	return UIKit.card_panel(card)
 
 
+func _attr_val(p: Player, a: int, own: bool) -> int:
+	var v: int = p.attrs[a]
+	if not own:
+		v = clampi(v + int(round(RngUtil.noise(p.id, a, 7) * 5.0)), 1, 99)
+	return v
+
+
 func _attributes(w: GameWorld, p: Player, own: bool) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Atributos" + ("" if own else " (avaliação do olheiro)")))
-	var groups: Array = Attr.UI_GROUPS.duplicate()
+	var groups: Array = []
+	for g: Array in Attr.UI_GROUPS:
+		if String(g[0]) == "Goleiro" and p.position != Pos.GK:
+			continue
+		groups.append(g)
 	if p.position == Pos.GK:
-		groups.insert(0, ["Goleiro", [Attr.GOL]])
-	for g in groups:
-		card.add_child(UIKit.label(g[0], "Caps"))
+		groups.erase(groups[groups.size() - 1])
+		groups.insert(0, ["Goleiro", [Attr.GOL, Attr.REF]])
+	# Radar com a média de cada grupo, para ler o jogador num relance
+	var axes: Array = []
+	var avgs: Array = []
+	for g: Array in groups:
+		var sum := 0
+		for a in g[1]:
+			sum += _attr_val(p, int(a), own)
+		var avg := int(round(float(sum) / (g[1] as Array).size()))
+		axes.append([String(g[0]), avg])
+		avgs.append(avg)
+	card.add_child(AttrRadar.make(axes, 390))
+	for gi in groups.size():
+		var g: Array = groups[gi]
+		var head := UIKit.hbox(8)
+		var gl := UIKit.label(String(g[0]).to_upper(), "Caps")
+		gl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(gl)
+		head.add_child(UIKit.badge(int(avgs[gi]), 48, 30, 18))
+		card.add_child(UIKit.gap(4))
+		card.add_child(head)
 		for a in g[1]:
 			var row := UIKit.hbox(10)
 			var n := UIKit.label(Attr.NAMES[a], "")
 			n.custom_minimum_size.x = 210
 			row.add_child(n)
-			var v: int = p.attrs[a]
-			if not own:
-				v = clampi(v + int(round(RngUtil.noise(p.id, a, 7) * 5.0)), 1, 99)
-			var bar := UIKit.bar(v, 100.0, Fmt.rating_color(v), 12)
+			var v := _attr_val(p, int(a), own)
+			var bar := UIKit.bar(v, 100.0, Fmt.rating_color(v), 10)
 			bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			row.add_child(bar)
@@ -663,43 +740,33 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 		f.add_child(UIKit.label("Seu jogador, emprestado até o fim da temporada. Volta ao clube na virada do ano.", "Small", true))
 		return
 	if own:
-		var trow := UIKit.hbox(10)
-		var tr := UIKit.button("Treino individual", "", func(): TrainingSheet.open(p, refresh_cb), "tactics")
-		tr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		trow.add_child(tr)
-		trow.add_child(UIKit.button("Emprestar", "", func():
+		# Uma fileira só de ações compactas (ícone em cima, nome embaixo): a ficha ganha tela
+		var row := UIKit.hbox(8)
+		row.add_child(_act("Treino", "tactics", func(): TrainingSheet.open(p, refresh_cb)))
+		row.add_child(_act("Renovar", "clock", func(): Negotiation.open(w, p, "renew", refresh_cb)))
+		if p.transfer_listed:
+			row.add_child(_act("Tirar venda", "money", func():
+				p.transfer_listed = false
+				p.asking_price = 0
+				UIManager.toast("%s não está mais à venda." % p.display_name())
+				refresh()))
+		else:
+			row.add_child(_act("Vender", "money", func(): Negotiation.open(w, p, "sell", refresh_cb)))
+		row.add_child(_act("Emprestar", "swap", func():
 			UIManager.confirm("Emprestar %s?" % p.display_name(), "Ele vai para um clube onde deve jogar mais, até o fim da temporada. O salário fica por conta do outro clube.", "Emprestar", func():
 				var r := TransferManager.loan_out(w, p)
 				UIManager.toast(r["msg"], UIColors.GREEN if r["ok"] else UIColors.RED)
 				if r["ok"]:
 					GameManager.save_now()
-					UIManager.back()), "swap"))
+					UIManager.back())))
 		if AppSettings.career_edit:
-			trow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
-		f.add_child(trow)
-		var row := UIKit.hbox(10)
-		var renew := UIKit.button("Renovar", "", func(): Negotiation.open(w, p, "renew", refresh_cb), "clock")
-		renew.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(renew)
-		if p.transfer_listed:
-			var unl := UIKit.button("Tirar da venda", "", func():
-				p.transfer_listed = false
-				p.asking_price = 0
-				UIManager.toast("%s não está mais à venda." % p.display_name())
-				refresh(), "money")
-			unl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(unl)
-		else:
-			var sell := UIKit.button("Vender", "", func(): Negotiation.open(w, p, "sell", refresh_cb), "money")
-			sell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			row.add_child(sell)
-		var rel := UIKit.button("Rescindir", "DangerButton", func():
+			row.add_child(_act("Editar", "gear", func(): UIManager.push("editor", {"player": p.id})))
+		row.add_child(_act("Rescindir", "close", func():
 			var cost := TransferManager.release_cost(w, p)
 			UIManager.confirm("Rescindir com %s?" % p.display_name(), "Multa rescisória: %s (metade dos salários restantes). Ele sai do clube imediatamente." % Fmt.money(cost), "Rescindir", func():
 				TransferManager.release(w, p)
 				UIManager.toast("%s não é mais jogador do clube." % p.display_name())
-				UIManager.back()))
-		row.add_child(rel)
+				UIManager.back()), "DangerButton"))
 		f.add_child(row)
 	elif p.club_id < 0:
 		f.add_child(UIKit.button("CONTRATAR (LIVRE)", "PrimaryButton", func(): Negotiation.open(w, p, "free", refresh_cb), "check"))
@@ -709,3 +776,16 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 			b.disabled = true
 			b.text = "JANELA FECHADA"
 		f.add_child(b)
+
+
+## Botão compacto do rodapé: ícone em cima e o nome curto embaixo.
+func _act(text: String, icon_name: String, cb: Callable, variation: String = "") -> Button:
+	var b := UIKit.button(text, variation, cb, icon_name)
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	b.custom_minimum_size = Vector2(0, 88)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.add_theme_font_size_override(&"font_size", 18)
+	b.add_theme_constant_override(&"h_separation", 2)
+	b.clip_text = true
+	return b
