@@ -85,6 +85,20 @@ jobs:
             barichello/godot-ci:4.7 \
             godot --headless --editor --path /workspace/mais-uma-rodada --quit-after 30
 
+      - name: Smoke boot main scene
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            godot --headless --path /workspace/mais-uma-rodada --quit-after 10 2>&1 | tee /tmp/boot.log
+          if grep -E "SCRIPT ERROR|Parse Error|Cannot get class|Invalid call|ERROR:" /tmp/boot.log; then
+            echo "::error::Runtime boot produced Godot errors."
+            exit 1
+          fi
+
       - name: Run game tests
         shell: bash
         run: |
