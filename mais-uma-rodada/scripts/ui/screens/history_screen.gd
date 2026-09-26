@@ -42,6 +42,7 @@ func refresh() -> void:
 			_tab = key
 			refresh()))
 	c.add_child(row)
+	c.add_child(UIKit.button("Joias do futebol: NXGN e Next Generation", "GhostButton", func(): UIManager.push("nextgen"), "star"))
 	match _tab:
 		"career":
 			c.add_child(_career(w))
