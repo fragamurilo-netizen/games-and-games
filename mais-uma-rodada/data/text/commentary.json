@@ -443,6 +443,42 @@
 		"O {team} fecha as linhas e se defende.",
 		"O {team} agora joga no contra-ataque, bem fechado."
 	],
+	"tactic_press_up": [
+		"O {team} adianta a marcação: agora pressiona a saída de bola.",
+		"Pressão alta do {team}! O time sobe para roubar a bola lá na frente.",
+		"O técnico do {team} manda o time apertar a saída adversária."
+	],
+	"tactic_press_down": [
+		"O {team} para de pressionar lá na frente e espera no próprio campo.",
+		"O {team} tira o pé da pressão para poupar fôlego.",
+		"Marcação mais recuada no {team}: agora espera o adversário."
+	],
+	"tactic_line_high": [
+		"O {team} adianta a linha defensiva e encurta o campo.",
+		"Linha alta no {team}: a zaga sobe até o meio."
+	],
+	"tactic_line_low": [
+		"O {team} recua a linha de defesa para não dar espaço nas costas.",
+		"A zaga do {team} dá dois passos atrás: linha mais baixa.",
+		"O técnico do {team} pede a linha mais perto da área."
+	],
+	"tactic_width_open": [
+		"O {team} abre o campo: pontas colados na linha lateral.",
+		"Amplitude no {team}: a bola agora roda pelos lados."
+	],
+	"tactic_width_closed": [
+		"O {team} fecha o time por dentro e congestiona o meio.",
+		"O {team} fica mais compacto, com todo mundo por dentro."
+	],
+	"tactic_intensity": [
+		"O {team} muda o ritmo das divididas.",
+		"Ajuste de intensidade no {team}."
+	],
+	"tactic_instr": [
+		"{p} recebe instruções da beira do campo.",
+		"O técnico chama {p} e muda a função dele.",
+		"{p} ouve o técnico e ajusta o posicionamento."
+	],
 	"tactic_other": [
 		"O {team} muda a forma de jogar.",
 		"Ajuste tático no {team}.",

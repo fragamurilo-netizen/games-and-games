@@ -7,6 +7,7 @@ const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
+const USE_LIVE_ENGINE := false
 
 var _sim: MatchSimulation
 var _fx: Fixture
@@ -59,6 +60,13 @@ var _other_seen: Dictionary = {} # índice da entrada -> gols já anunciados
 var _day_entries: Array = [] # outros jogos do mesmo país na data (fora a competição do usuário)
 var _stat_marks: Dictionary = {}
 var _swapped := false
+## Auxiliar durante o jogo: o que já disse e a sugestão que está na tela.
+var _aux_state: Dictionary = {}
+var _aux_bar: PanelContainer
+var _aux_text: Label
+var _aux_btn: Button
+var _aux_act: Dictionary = {}
+var _aux_timer := 0.0
 
 # Nós
 var _root: VBoxContainer
@@ -144,9 +152,12 @@ func _build() -> void:
 	_colors = _team_colors(home, away)
 	var seed_base := (_fx.home * 131 + _fx.away) * 7919 + _fx.round * 97 + w.year
 	_com = Commentary.new(_sim, home.stadium, seed_base)
-	if _sim.live == null and not _sim.started:
+	# Motor da partida: o minuto a minuto estatístico (o mesmo dos outros jogos do mundo), encenado
+	# pelo PitchMotion. O LiveEngine posicional segue no código, mas desligado.
+	if USE_LIVE_ENGINE and _sim.live == null and not _sim.started:
 		_sim.enable_live(seed_base * 13 + 7)
 	_live = _sim.live != null
+	_aux_state = {"seed": seed_base, "ev": 0, "given": {}}
 	_vis_rng.seed = seed_base * 31 + 17
 
 	_root = UIKit.vbox(0)
@@ -240,6 +251,8 @@ func _build() -> void:
 	tm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tab_scroll.add_child(tm)
 	_root.add_child(_tab_scroll)
+	# Sugestão do auxiliar (aparece quando ele tem algo a propor)
+	_root.add_child(_build_aux_bar())
 	# Controles
 	_controls_panel = PanelContainer.new()
 	_controls_panel.theme_type_variation = "BottomBar"
@@ -537,6 +550,10 @@ func _process(delta: float) -> void:
 	_update_ticker(delta)
 	_update_strip(delta)
 	_refresh_tab_if_needed()
+	if _aux_timer > 0.0 and not _paused and not _halftime:
+		_aux_timer -= delta
+		if _aux_timer <= 0.0:
+			_hide_aux()
 	_pitch.motion.frozen = _paused or _halftime or _done or UIManager.has_modal()
 	if _highlight_timer > 0.0:
 		_highlight_timer -= delta
@@ -606,6 +623,8 @@ func _after_step() -> void:
 		_announce_other_goals(_sim.minute, _sim.half)
 	_sync_slots()
 	_update_board()
+	if not _sim.finished:
+		_assistant_tick()
 
 
 ## Processa os eventos novos da simulação (inclusive os gerados por ajustes do usuário).
@@ -1096,6 +1115,8 @@ func _add_line(line: Dictionary) -> void:
 			col = Color("#F2C58A")
 		"other":
 			col = Color("#C9E7A8")
+		"assistant":
+			col = Color("#6FD3C1")
 	t.add_theme_color_override(&"font_color", UIColors.ink(col))
 	row.add_child(t)
 	var node: Control = row
@@ -1680,7 +1701,8 @@ func _show_halftime() -> void:
 	sc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sc)
 	v.add_child(_stats_table(false))
-	v.add_child(_halftime_hint())
+	var aux := _halftime_assistant()
+	v.add_child(aux if aux.get_child_count() > 0 else _halftime_hint())
 	var others := _other_scores(90 if et else 45, 2 if et else 1)
 	if others != null:
 		v.add_child(others)
@@ -1924,6 +1946,24 @@ func _render_tactics() -> void:
 			_render_tactics()))
 	_tac_box.add_child(sl)
 	_tac_box.add_child(UIKit.label(String(tac["styles"][t.style]["desc"]), "Small", true))
+	# Ajustes finos também no meio do jogo
+	var fine := [["Pressão", tac["pressing"], t.pressing, func(i): _sim.set_pressing(_user_side, i)],
+		["Linha defensiva", tac["line"], t.line, func(i): _sim.set_line(_user_side, i)],
+		["Largura", [{"name": TeamSheet.WIDTH_NAMES[0]}, {"name": TeamSheet.WIDTH_NAMES[1]}, {"name": TeamSheet.WIDTH_NAMES[2]}], t.width_i, func(i): _sim.set_width(_user_side, i)],
+		["Intensidade", tac["intensity"], t.intensity, func(i): _sim.set_intensity(_user_side, i)]]
+	for item in fine:
+		_tac_box.add_child(UIKit.section(String(item[0])))
+		var g := ButtonGroup.new()
+		var fl2 := UIKit.flow(8)
+		var opts: Array = item[1]
+		for i in opts.size():
+			var idx := i
+			var setter: Callable = item[3]
+			fl2.add_child(UIKit.chip(String(opts[i]["name"]), i == int(item[2]), g, func():
+				setter.call(idx)
+				_drain(false)
+				_render_tactics()))
+		_tac_box.add_child(fl2)
 	var auto := CheckButton.new()
 	auto.text = "Assistente troca jogadores cansados"
 	auto.button_pressed = t.auto_subs
@@ -2158,3 +2198,121 @@ func _build_summary() -> void:
 		oc.add_child(others)
 		_feed.add_child(UIKit.card_panel(oc))
 	_feed_scroll.scroll_vertical = 0
+
+
+# ---------------------------------------------------------------------------
+# Auxiliar ao vivo
+# ---------------------------------------------------------------------------
+
+func _build_aux_bar() -> Control:
+	_aux_bar = PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.07, 0.19, 0.23, 0.96)
+	box.border_color = Color("#6FD3C1")
+	box.border_width_left = 5
+	box.set_corner_radius_all(10)
+	box.content_margin_left = 14
+	box.content_margin_right = 10
+	box.content_margin_top = 10
+	box.content_margin_bottom = 10
+	_aux_bar.add_theme_stylebox_override(&"panel", box)
+	var row := UIKit.hbox(10)
+	row.add_child(UIKit.icon_rect("tactics", 30, Color("#6FD3C1")))
+	_aux_text = UIKit.label("", "Small", true)
+	_aux_text.add_theme_color_override(&"font_color", Color("#E6FFF9"))
+	_aux_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_aux_text)
+	var col := UIKit.vbox(6)
+	_aux_btn = UIKit.button("Aplicar", "PrimaryButton", _apply_aux)
+	_aux_btn.custom_minimum_size = Vector2(190, 58)
+	_aux_btn.add_theme_font_size_override(&"font_size", 20)
+	col.add_child(_aux_btn)
+	var no := UIKit.button("Dispensar", "GhostButton", _hide_aux)
+	no.custom_minimum_size = Vector2(190, 50)
+	no.add_theme_font_size_override(&"font_size", 19)
+	col.add_child(no)
+	row.add_child(col)
+	_aux_bar.add_child(row)
+	_aux_bar.visible = false
+	return UIKit.margin(_aux_bar, 12, 2, 12, 4)
+
+
+## Depois de cada minuto: o auxiliar tem algo a dizer?
+func _assistant_tick() -> void:
+	if _aux_state.is_empty() or _done:
+		return
+	var w := world()
+	var reads := Assistant.live(w, _sim, _user_side, _aux_state)
+	for r: Dictionary in reads:
+		var txt := "%s: %s" % [Assistant.name_of(w), String(r["text"])]
+		_enqueue({"text": txt, "style": "assistant", "side": _user_side, "minute": _sim.display_minute()}, {}, 0.4)
+		var act: Dictionary = r.get("act", {})
+		_show_aux(String(r["text"]), act)
+
+
+func _show_aux(text: String, act: Dictionary) -> void:
+	if _aux_bar == null:
+		return
+	_aux_act = act
+	_aux_text.text = text
+	_aux_btn.visible = not act.is_empty()
+	if not act.is_empty():
+		_aux_btn.text = "Abrir" if String(act.get("kind", "")) == "tactics" else Assistant.act_label(act)
+	_aux_bar.get_parent().visible = true
+	_aux_bar.visible = true
+	_aux_timer = 12.0
+
+
+func _hide_aux() -> void:
+	if _aux_bar == null:
+		return
+	_aux_bar.visible = false
+	_aux_act = {}
+	_aux_timer = 0.0
+
+
+func _apply_aux() -> void:
+	var act := _aux_act
+	_hide_aux()
+	if act.is_empty() or _done:
+		return
+	if String(act.get("kind", "")) == "tactics":
+		_open_tactics()
+		return
+	var msg := Assistant.apply_live(_sim, _user_side, act)
+	_drain(false)
+	_sync_slots()
+	_update_board()
+	if msg != "":
+		UIManager.toast(msg)
+
+
+## No intervalo: as leituras mais importantes do auxiliar, cada uma com o ajuste pronto.
+func _halftime_assistant() -> Control:
+	var w := world()
+	var reads := Assistant.halftime(_sim, _user_side)
+	var card := UIKit.vbox(8)
+	if reads.is_empty():
+		return card
+	card.add_child(UIKit.colored("%s, no vestiário:" % Assistant.name_of(w), Color("#6FD3C1"), "Caps"))
+	for r: Dictionary in reads:
+		var row := UIKit.hbox(8)
+		var l := UIKit.label("• " + String(r["text"]), "Small", true)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		var act: Dictionary = r.get("act", {})
+		if not act.is_empty() and String(act.get("kind", "")) != "tactics":
+			var b := UIKit.button(Assistant.act_label(act), "GhostButton")
+			b.custom_minimum_size = Vector2(170, 56)
+			b.pressed.connect(func():
+				var msg := Assistant.apply_live(_sim, _user_side, act)
+				_drain(false)
+				_sync_slots()
+				_update_board()
+				b.disabled = true
+				b.text = "Feito"
+				if msg != "":
+					UIManager.toast(msg))
+			row.add_child(b)
+		card.add_child(row)
+	return card

@@ -246,6 +246,16 @@ func lines_for(ev: Dictionary) -> Array:
 				cat3 = "tactic_formation"
 			elif x.has("style"):
 				cat3 = "tactic_style"
+			elif x.has("pressing"):
+				cat3 = "tactic_press_up" if int(x["pressing"]) == 2 else "tactic_press_down"
+			elif x.has("line"):
+				cat3 = "tactic_line_high" if int(x["line"]) == 2 else "tactic_line_low"
+			elif x.has("width"):
+				cat3 = "tactic_width_open" if int(x["width"]) == 2 else ("tactic_width_closed" if int(x["width"]) == 0 else "tactic_other")
+			elif x.has("intensity"):
+				cat3 = "tactic_intensity"
+			elif x.has("instr"):
+				cat3 = "tactic_instr"
 			elif m >= 3:
 				cat3 = "tactic_attack"
 			elif m >= 0 and m <= 1:

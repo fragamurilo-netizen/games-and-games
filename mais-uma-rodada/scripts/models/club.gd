@@ -73,6 +73,10 @@ var philosophy: String = ""
 ## DNA do clube: filosofia de elenco, mercado, escola tática, paciência, apetite, base, prestígio,
 ## ambição, era e linha do tempo ({} = gerar pelo perfil; ver ClubDNA).
 var dna: Dictionary = {}
+## Diário tático dos últimos jogos (TacticalScout): como jogou, gols por tipo de jogada, xG.
+var tac_log: Array = []
+## Evolução do time (TeamEvolution): trabalho do técnico, fase (confiança) e histórico de força.
+var evo: Dictionary = {}
 
 ## Memória: [{y, l (liga), p (posição), pts, w, dr, l, gf, ga}]
 var history: Array = []
@@ -227,6 +231,7 @@ func to_dict() -> Dictionary:
 		"players": player_ids,
 		"sheet": sheet.to_dict() if sheet != null else {},
 		"coh": cohesion, "ll": last_lineup, "tf": tactic_fam.duplicate(true), "ph": philosophy, "dna": dna.duplicate(true), "afk": ai_formation_key,
+		"tlog": tac_log.duplicate(true), "evo": evo.duplicate(true),
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
 		"rk": rank_hist, "rkp": rank_prev, "sqa": squad_archive,
@@ -286,6 +291,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.tactic_fam = Dictionary(d.get("tf", {})).duplicate(true)
 	c.philosophy = String(d.get("ph", ""))
 	c.dna = Dictionary(d.get("dna", {})).duplicate(true)
+	c.tac_log = Array(d.get("tlog", [])).duplicate(true)
+	c.evo = Dictionary(d.get("evo", {})).duplicate(true)
 	c.history = Array(d.get("hist", []))
 	c.titles = d.get("titles", {})
 	c.streak_unbeaten = int(d.get("su", 0))

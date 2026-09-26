@@ -249,26 +249,48 @@ func _fam_row(title: String, v: float) -> Control:
 	return row
 
 
-## Leitura do auxiliar: sugestão de mentalidade e estilo contra o próximo rival.
+## Dossiê do auxiliar: como o rival joga, onde sofre, onde é perigoso, como deve vir contra nós
+## e o plano completo para o jogo (aplicável com um toque).
 func _assistant_card(w: GameWorld, f: Fixture) -> Control:
 	var club := w.user_club()
 	var opp := w.club(f.opponent_of(club.id))
-	var sug := TacticsManager.suggest(w, club, opp, f.home == club.id)
-	var tac := DatabaseManager.tactics()
+	var d := Assistant.dossier(w, club, opp, f.home == club.id)
+	var plan: Dictionary = d["plan"]
 	var card := UIKit.card("Card", 6)
-	card.add_child(UIKit.label("Leitura do auxiliar", "Caps"))
-	for r in sug["reasons"]:
+	var head := UIKit.hbox(8)
+	head.add_child(UIKit.icon_rect("tactics", 22, UIColors.ACCENT))
+	var ht := UIKit.label("Dossiê do auxiliar · %s" % Assistant.name_of(w), "Caps")
+	ht.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(ht)
+	card.add_child(head)
+	for t in d["how"]:
+		card.add_child(UIKit.label(String(t), "Small", true))
+	if String(d["coach"]) != "":
+		card.add_child(UIKit.label(String(d["coach"]), "Small", true))
+	card.add_child(UIKit.colored("Momento: " + String(d["evo"]), UIColors.MUTED, "Small", true))
+	if not (d["weak"] as Array).is_empty():
+		card.add_child(UIKit.colored("Onde eles sofrem", UIColors.GREEN, "Caps"))
+		for t in d["weak"]:
+			card.add_child(UIKit.label("• " + String(t), "Small", true))
+	if not (d["danger"] as Array).is_empty():
+		card.add_child(UIKit.colored("Cuidado", UIColors.ORANGE, "Caps"))
+		for t in d["danger"]:
+			card.add_child(UIKit.label("• " + String(t), "Small", true))
+	if String(d["pred"]) != "":
+		card.add_child(UIKit.label(String(d["pred"]), "Small", true))
+	if String(d["blind"]) != "":
+		card.add_child(UIKit.colored(String(d["blind"]), UIColors.MUTED, "Small", true))
+	card.add_child(UIKit.label("Nosso plano", "Caps"))
+	for r in plan["reasons"]:
 		card.add_child(UIKit.label("• " + String(r), "Small", true))
-	var m: int = sug["mentality"]
-	var st: int = sug["style"]
 	var sheet := _sheet()
-	if m == sheet.mentality and st == sheet.style:
-		card.add_child(UIKit.colored("Sua tática já segue essa ideia.", UIColors.GREEN, "Small"))
+	if Assistant.plan_matches(sheet, plan):
+		card.add_child(UIKit.colored("Sua tática já segue o plano.", UIColors.GREEN, "Small"))
 	else:
-		card.add_child(UIKit.button("Aplicar: %s, %s" % [String(tac["mentalities"][m]["name"]), String(tac["styles"][st]["short"]).to_lower()], "GhostButton", func():
-			sheet.mentality = m
-			sheet.style = st
-			UIManager.toast("Sugestão do auxiliar aplicada.")
+		card.add_child(UIKit.label(Assistant.plan_summary(plan) + ".", "Small", true))
+		card.add_child(UIKit.button("Aplicar o plano do auxiliar", "GhostButton", func():
+			Assistant.apply_plan(sheet, plan)
+			UIManager.toast("Plano do auxiliar aplicado.")
 			refresh(), "tactics"))
 	return UIKit.card_panel(card)
 
