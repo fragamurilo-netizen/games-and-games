@@ -24,6 +24,7 @@ const SCREENS := {
 	"national": "res://scenes/screens/national.tscn",
 	"editor": "res://scenes/screens/editor.tscn",
 	"kit": "res://scenes/screens/kit.tscn",
+	"kit_history": "res://scenes/screens/kit_history.tscn",
 	"preseason": "res://scenes/screens/preseason.tscn",
 	"relations": "res://scenes/screens/relations.tscn",
 	"numbers": "res://scenes/screens/numbers.tscn",
