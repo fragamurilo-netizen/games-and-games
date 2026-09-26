@@ -86,7 +86,7 @@ const DAY_SIGMA := 0.035
 ## qualidade dos jogadores decide mais que os ajustes (senão jogar no ataque sempre compensa).
 const MOD_DAMP := 0.35
 ## Ajuste fino do xG geométrico do motor posicional para a média de gols bater com a do sorteio.
-const LIVE_XG := 1.0
+const LIVE_XG := 0.72
 
 
 static func damp(x: float) -> float:
@@ -795,24 +795,24 @@ func live_cross(_side: int, from: MatchPlayer, _to: MatchPlayer) -> void:
 
 func live_pass(from: MatchPlayer, to: MatchPlayer, ok: bool, key: bool) -> void:
 	if ok:
-		from.rating_pts += 0.004 + (0.03 if key else 0.0)
+		from.rating_pts += 0.0015 + (0.025 if key else 0.0)
 	else:
-		from.rating_pts -= 0.012
+		from.rating_pts -= 0.01
 
 
 func live_intercept(mp: MatchPlayer) -> void:
-	mp.rating_pts += 0.04
+	mp.rating_pts += 0.025
 
 
 func live_tackle(dfn_mp: MatchPlayer, att_mp: MatchPlayer, won: bool) -> void:
 	if won:
-		dfn_mp.rating_pts += 0.05
-		att_mp.rating_pts -= 0.025
+		dfn_mp.rating_pts += 0.03
+		att_mp.rating_pts -= 0.02
 		if vis_rng.randf() < 0.18:
 			_emit(EV_TACKLE, _mp_team(dfn_mp).side, dfn_mp.p.id, att_mp.p.id)
 	else:
 		dfn_mp.rating_pts -= 0.02
-		att_mp.rating_pts += 0.035
+		att_mp.rating_pts += 0.02
 		if vis_rng.randf() < 0.18:
 			_emit(EV_SKILL, _mp_team(att_mp).side, att_mp.p.id, dfn_mp.p.id)
 

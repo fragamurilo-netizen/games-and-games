@@ -29,6 +29,8 @@ func _initialize() -> void:
 	var ms := 0.0
 	var scores := {}
 	var by_ct := {}
+	var fi := 0
+	var fo := 0
 	for i in n:
 		var cl := w.clubs_in_league(ids[i % ids.size()])
 		var a: Club = cl[rng.randi_range(0, cl.size() - 1)]
@@ -78,6 +80,8 @@ func _initialize() -> void:
 			if int(ev["t"]) in [MatchSimulation.EV_GOAL, MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS, MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK]:
 				var ct := int(ev.get("x", {}).get("ct", -1))
 				by_ct[ct] = int(by_ct.get(ct, 0)) + 1
+		fi += sim.live.fail_int[0] + sim.live.fail_int[1]
+		fo += sim.live.fail_out[0] + sim.live.fail_out[1]
 		var p0 := sim.possession_pct(0)
 		poss_min = minf(poss_min, p0)
 		poss_max = maxf(poss_max, p0)
@@ -92,5 +96,6 @@ func _initialize() -> void:
 	for k in keys.slice(0, 8):
 		top.append("%s×%d" % [k, scores[k]])
 	print("placares: ", ", ".join(top))
+	print("passes errados por time: interceptados %.0f · para fora %.0f" % [fi / teams, fo / teams])
 	print("chutes por tipo (0 enfiada,1 cruz,2 longe,3 drible,4 contra,5 sobra,6 esc,7 falta): ", by_ct)
 	quit()

@@ -27,6 +27,10 @@ const GOAL_HW := 3.66
 const BOX_D := 16.5
 const BOX_HW := 20.16
 const TICKS := 240 # 60 s / DT
+## Valor de manter a posse (na mesma escala da ameaça ≈ gols esperados da sequência).
+const KEEP := 0.03
+## Vontade geral de finalizar (calibra o volume de chutes).
+const SHOT_BIAS := 0.62
 
 class A:
 	var side := 0
@@ -99,6 +103,9 @@ var keys: Array = [] # [t, peso] lances que merecem replay
 var passes: Array[int] = [0, 0]
 var passes_ok: Array[int] = [0, 0]
 var tackles: Array[int] = [0, 0]
+var fail_int: Array[int] = [0, 0]
+var fail_out: Array[int] = [0, 0]
+var shot_log: Array = [] # [lado, distância, xG, marcadores a menos de 3 m, tempo de condução, cabeça]
 
 
 func _init(s: MatchSimulation, seed_value: int) -> void:
@@ -156,9 +163,9 @@ static func seg_dist(p: Vector2, a: Vector2, b: Vector2) -> float:
 static func threat(side: int, p: Vector2) -> float:
 	var d := depth(side, p)
 	var c := absf(lat(side, p) - 0.5) * 2.0
-	var v := 0.006 + 0.3 * pow(d, 4.2) * (1.0 - 0.75 * c * c)
+	var v := 0.004 + 0.13 * pow(d, 5.0) * (1.0 - 0.75 * c * c)
 	if d > 0.84 and c < 0.6:
-		v += 0.07 * (1.0 - c / 0.6) * smoothstep(0.84, 0.97, d)
+		v += 0.035 * (1.0 - c / 0.6) * smoothstep(0.84, 0.97, d)
 	return v
 
 
@@ -396,6 +403,10 @@ func _move_all() -> void:
 			elif owner == null and _chaser(a):
 				tg = _ball_intercept_point(a)
 				urg = 1.0
+			elif owner == null and not pz.is_empty() and int(pz["from"].side) != side and _lane_cutter(a):
+				# Passe no ar: quem está perto da linha vai cortar
+				tg = _lane_point(a)
+				urg = 1.0
 			elif not in_poss[side] and presser[side].has(a):
 				tg = _press_target(a)
 				urg = 1.0 if not a.has_meta("contain") else 0.6
@@ -433,8 +444,21 @@ func _steer(a: A, tg: Vector2, urg: float) -> void:
 		a.face = a.vel.normalized()
 
 
-## Colegas não se amontoam (empurrão leve de quem está a menos de 2 m).
+## Colegas não se amontoam (empurrão leve de quem está a menos de 2 m) e adversários não se
+## atravessam (ninguém ocupa o mesmo espaço de outro corpo).
 func _separate() -> void:
+	for a: A in ag[0]:
+		if not a.on:
+			continue
+		for b: A in ag[1]:
+			if not b.on:
+				continue
+			var d := a.pos - b.pos
+			var l2 := d.length_squared()
+			if l2 < 0.81 and l2 > 1e-4:
+				var push := d / sqrt(l2) * (0.9 - sqrt(l2)) * 0.5
+				a.pos += push
+				b.pos -= push
 	for side in 2:
 		var arr: Array = ag[side]
 		for i in arr.size():
@@ -470,6 +494,18 @@ func _chaser(a: A) -> bool:
 	return best == a
 
 
+func _lane_cutter(a: A) -> bool:
+	var to: Vector2 = pz["at"]
+	return seg_dist(a.pos, ball, to) < 5.0 + a.psn * 3.0
+
+
+func _lane_point(a: A) -> Vector2:
+	var to: Vector2 = pz["at"]
+	var ab := to - ball
+	var tt := clampf((a.pos - ball).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.1, 1.0)
+	return ball + ab * tt
+
+
 func _ball_intercept_point(a: A) -> Vector2:
 	# Mira onde a bola vai estar quando ele chegar
 	var tt := a.pos.distance_to(ball) / maxf(3.0, a.spd)
@@ -497,21 +533,23 @@ func _formation_target(a: A) -> Vector2:
 	var lo: float
 	var hi: float
 	if att:
-		lo = clampf(bd - 0.42 + m + line_bias * 0.5, 0.12, 0.56)
-		hi = clampf(lo + 0.47 + m, 0.5, 0.97)
+		# Com a bola o time sobe junto: a zaga acompanha (~25 m atrás da bola)
+		lo = clampf(bd - 0.25 + m + line_bias * 0.5, 0.15, 0.55)
+		hi = clampf(lo + 0.45 + m, 0.5, 0.97)
 		hi = minf(hi, off_line[s] - 0.006)
 	else:
-		lo = clampf(bd - 0.3 + line_bias + m * 0.6, 0.06, 0.5)
-		hi = clampf(lo + 0.34 - 0.03 * float(tm.pressing - 1), lo + 0.2, 0.82)
+		lo = clampf(bd - 0.28 + line_bias + m * 0.6, 0.05, 0.45)
+		# Bloco compacto: ~30 m entre a zaga e o ataque (mais curto no próprio terço)
+		hi = clampf(lo + 0.3 - 0.03 * float(tm.pressing - 1) - (0.04 if bd < 0.35 else 0.0), lo + 0.2, 0.8)
 	var k := clampf((a.ay - 0.15) / 0.51, 0.0, 1.05)
 	var d := lerpf(lo, hi, k)
-	var width_k := 0.78
+	var width_k := 0.6 # sem a bola o time fecha por dentro
 	if att:
 		width_k = [0.84, 1.0, 1.12][clampi(tm.sheet.width if tm.sheet != null else 1, 0, 2)]
 		if tm.style == TeamSheet.STYLE_LADOS:
 			width_k += 0.08
 	var lx := 0.5 + (a.ax - 0.5) * width_k
-	lx = lerpf(lx, lat(s, ball), 0.1 if att else 0.24)
+	lx = lerpf(lx, lat(s, ball), 0.1 if att else 0.3)
 	if att:
 		# Quem tem instrução de apoiar sobe (laterais passando pelo ponta)
 		var side_ball := absf(lat(s, ball) - a.ax) < 0.3
@@ -541,7 +579,11 @@ func _formation_target(a: A) -> Vector2:
 			mk = o
 	if mk != null:
 		var og := own_goal(s)
-		var goal_side := mk.pos + (og - mk.pos).normalized() * 1.6
+		var mpos := mk.pos
+		if mk.run_t > 0.0:
+			# Atacante arrancou: o marcador acompanha a corrida
+			mpos = mk.pos.lerp(mk.run_to, clampf(0.3 + a.mar * 0.4, 0.0, 0.8))
+		var goal_side := mpos + (og - mpos).normalized() * 1.6
 		p2 = p2.lerp(goal_side, clampf(0.35 + a.mar * 0.4 + (0.2 if depth(s, mk.pos) < 0.3 else 0.0), 0.0, 0.85))
 	return p2
 
@@ -559,10 +601,12 @@ func _maybe_run(a: A, _d: float) -> void:
 		rate *= 2.0
 	if rng.randf() > rate * DT * 4.0:
 		return
-	var target_d := minf(off_line[s] + 0.1, 0.95)
+	# Corre até a linha (sem passar dela): quem decide a hora de ir para as costas é o passe
+	# Nem todo mundo acerta o tempo: às vezes passa da linha antes da hora
+	var target_d := minf(off_line[s] + rng.randf_range(-0.012, 0.014) * (1.4 - a.dec), 0.93)
 	var l := clampf(lat(s, a.pos) + rng.randf_range(-0.12, 0.12), 0.15, 0.85)
 	a.run_to = pt(s, l, target_d)
-	a.run_t = 2.5
+	a.run_t = 2.0
 
 
 func _gk_target(a: A) -> Vector2:
@@ -572,6 +616,11 @@ func _gk_target(a: A) -> Vector2:
 	# Bola solta perto: sai para abafar
 	if owner == null and pz.is_empty() and d < 12.0 and _chaser_gk(a):
 		return ball
+	# Enfiada para a área: o goleiro sai no ponto da bola
+	if not pz.is_empty() and int(pz["from"].side) != s and String(pz.get("kind", "")) in ["through", "long"]:
+		var at: Vector2 = pz["at"]
+		if at.distance_to(og) < 22.0:
+			return at
 	var out := clampf(d * 0.12, 1.0, 5.5)
 	if in_poss[s]:
 		out = clampf(d * 0.2, 2.0, 14.0)
@@ -638,6 +687,8 @@ func _ball_step() -> void:
 
 ## Bola saiu: lateral, escanteio ou tiro de meta.
 func _out_check() -> bool:
+	if (ball.y < 0.0 or ball.y > W or ball.x < 0.0 or ball.x > L) and not pz.is_empty():
+		fail_out[int(pz["from"].side)] += 1
 	if ball.y < 0.0 or ball.y > W:
 		var side := 1 - last_side
 		_set_restart("throw", side, Vector2(clampf(ball.x, 1.0, L - 1.0), clampf(ball.y, 0.0, W)))
@@ -663,6 +714,10 @@ func _control_check() -> void:
 			if not a.on or a.stun > 0.0:
 				continue
 			var reach := 1.1 if not a.gk else 1.9
+			if not pz.is_empty() and pz.get("to") == a:
+				reach = 1.5
+			if not a.gk and not pz.is_empty() and a.side != int(pz["from"].side):
+				reach = 1.3 + a.psn * 0.4 # quem defende se estica para cortar
 			if a.gk and depth(a.side, ball) < 0.16 and absf(lat(a.side, ball) - 0.5) < 0.3:
 				reach = 2.4
 			var d := a.pos.distance_to(ball)
@@ -681,11 +736,19 @@ func _control_check() -> void:
 		if a.gk and depth(a.side, ball) < 0.17:
 			p = 0.75 + 0.2 * a.gkv
 		elif intended:
-			p = 0.9 * (0.72 + 0.28 * a.tec) - clampf((sp - 16.0) * 0.02, 0.0, 0.3)
+			p = 0.93 + 0.06 * a.tec - clampf((sp - 18.0) * 0.02, 0.0, 0.25)
+			# Marcador colado disputa a bola na recepção (mais ainda dentro da área)
+			var tight := _nearest(1 - a.side, a.pos, false)
+			if tight != null and not tight.gk and tight.stun <= 0.0 and tight.pos.distance_to(a.pos) < 2.0:
+				var in_box := depth(a.side, a.pos) > 1.0 - BOX_D / L and absf(a.pos.y - W * 0.5) < BOX_HW
+				var p_def := clampf(0.2 + 0.35 * tight.mar + 0.15 * tight.psn - 0.25 * a.tec - 0.1 * a.strn + (0.12 if in_box else 0.0), 0.05, 0.7)
+				if rng.randf() < p_def:
+					_gain(tight)
+					return
 		elif not pz.is_empty() and a.side != int(pz["from"].side):
-			p = 0.42 + 0.35 * a.psn - clampf((sp - 12.0) * 0.025, 0.0, 0.3)
+			p = 0.45 + 0.35 * a.psn - clampf((sp - 14.0) * 0.025, 0.0, 0.25)
 		else:
-			p = 0.7 + 0.25 * a.tec - clampf((sp - 10.0) * 0.03, 0.0, 0.5)
+			p = 0.75 + 0.22 * a.tec - clampf((sp - 10.0) * 0.03, 0.0, 0.5)
 		if rng.randf() < p:
 			_gain(a)
 			return
@@ -710,6 +773,12 @@ func _aerial(cands: Array) -> void:
 	var in_box := depth(s, best.pos) > 0.84 and absf(lat(s, best.pos) - 0.5) < 0.32
 	if in_box and _cross_active(s):
 		_shoot(best, true)
+		return
+	# Zagueiro afasta de cabeça na área: às vezes manda para escanteio
+	if not in_box and depth(s, best.pos) < 0.18 and rng.randf() < 0.22:
+		last_touch = best
+		last_side = s
+		_set_restart("corner", 1 - s, Vector2(0.3 if s == 0 else L - 0.3, 0.3 if best.pos.y < W * 0.5 else W - 0.3))
 		return
 	# Cabeçada para longe (defesa) ou para um colega (ataque)
 	last_touch = best
@@ -743,6 +812,7 @@ func _gain(a: A) -> void:
 			assist_kind = String(pz.get("kind", "pass"))
 			sim.live_pass(from.mp, a.mp, true, threat(a.side, a.pos) > 0.05)
 		else:
+			fail_int[from.side] += 1
 			sim.live_pass(from.mp, null, false, false)
 			sim.live_intercept(a.mp)
 	pz = {}
@@ -750,7 +820,7 @@ func _gain(a: A) -> void:
 	last_touch = a
 	last_side = a.side
 	a.vel *= 0.4
-	decide_t = 0.35 + (1.0 - a.dec) * 0.4
+	decide_t = 1.5 + (1.0 - a.dec) * 0.7 # domina, levanta a cabeça e só então decide
 	carry_t = 0.0
 	if prev_side != a.side:
 		turnover_t = clock
@@ -769,6 +839,10 @@ func _holder_tick() -> void:
 	carry_t += DT
 	decide_t -= DT
 	var press := _pressure(h)
+	# No último terço o jogo é de decisões rápidas: reavalia a cada passo
+	var dh := depth(s, h.pos)
+	if dh > 0.68:
+		decide_t = minf(decide_t, 0.25)
 	if decide_t > 0.0 and press < 0.75:
 		_carry(h, press)
 		return
@@ -783,8 +857,18 @@ func _holder_tick() -> void:
 	if gd < 32.0 and not h.gk:
 		var xg := _xg_at(h, h.pos, false)
 		var eager := 1.0 + 0.12 * float(ment - 2) + (0.15 if style == TeamSheet.STYLE_DIRETO else 0.0) - (0.2 if style == TeamSheet.STYLE_POSSE else 0.0)
-		eager *= 0.85 + h.lng * 0.3 if gd > 19.0 else 1.0
-		var v := xg * 1.25 * eager
+		if gd > 19.0:
+			eager *= 0.5 + h.lng * 0.7
+		# Chutar entrega a bola: só vale se a chance for melhor do que manter a posse
+		var g := goal_of(s)
+		var blockers := 0
+		for o: A in ag[1 - s]:
+			if o.on and not o.gk and seg_dist(o.pos, h.pos, g) < 1.2 and o.pos.distance_to(h.pos) < 12.0:
+				blockers += 1
+		xg *= pow(0.8, blockers)
+		# Na cara do gol chutar é quase sempre o certo; de longe só quem tem chute
+		# Mesma escala dos passes: o chute troca o valor da posse atual pelo xG (+ sobra/escanteio)
+		var v := xg * eager * SHOT_BIAS - (here + KEEP)
 		if v > best_v:
 			best_v = v
 			best = {"k": "shoot"}
@@ -808,7 +892,7 @@ func _holder_tick() -> void:
 	if depth(s, h.pos) < 0.3 and press > 0.8 and best_v < 0.004:
 		best = {"k": "clear"}
 	# Um jogador com decisão ruim escolhe pior (ruído)
-	decide_t = clampf(0.45 + (1.0 - h.dec) * 0.5 - press * 0.25, 0.2, 1.0)
+	decide_t = clampf(1.9 + (1.0 - h.dec) * 0.7 - press * 0.9, 0.3, 2.6)
 	if style == TeamSheet.STYLE_POSSE:
 		decide_t += 0.12
 	match String(best.get("k", "carry")):
@@ -860,9 +944,9 @@ func _eval_pass(h: A, r: A, kind: String, press: float, style: int, ment: int) -
 	var to := r.pos + r.vel * 0.6
 	match kind:
 		"through":
-			var ahead := r.run_to if r.run_t > 0.0 else r.pos + Vector2(dirx(s) * 8.0, 0.0)
-			to = r.pos.lerp(ahead, 0.7)
-			spd = 17.0
+			# Bola no espaço às costas da linha: o recebedor arranca na hora do passe
+			to = r.pos + Vector2(dirx(s) * (7.0 + r.spd * 0.6), (r.vel.y * 0.4))
+			spd = 16.0
 		"cross":
 			spd = 19.0
 			loft = true
@@ -871,10 +955,13 @@ func _eval_pass(h: A, r: A, kind: String, press: float, style: int, ment: int) -
 			spd = 22.0
 			loft = true
 			to = r.pos + r.vel * 1.2
-	to = _clampf_field(to)
+	to = Vector2(clampf(to.x, 1.5, L - 1.5), clampf(to.y, 2.0, W - 2.0))
 	var dist := h.pos.distance_to(to)
 	if dist < 4.0 or dist > 60.0:
 		return {}
+	if not loft:
+		# Força na medida: a bola chega ao pé sem passar direto
+		spd = clampf(dist * 0.75 + 6.0, 9.0, spd)
 	if r.gk and depth(s, h.pos) > 0.35:
 		return {}
 	# Impedido: recebedor à frente da linha no momento do passe (no campo adversário)
@@ -896,14 +983,33 @@ func _eval_pass(h: A, r: A, kind: String, press: float, style: int, ment: int) -
 		if loft and proj < 0.8:
 			ri *= 0.3
 		risk = 1.0 - (1.0 - risk) * (1.0 - ri)
+	# Corrida pela bola: na enfiada e no lançamento, quem chega antes no ponto (goleiro incluído)
+	if kind == "through" or kind == "long" or dist > 25.0:
+		var t_r := maxf(tb, r.pos.distance_to(to) / maxf(3.0, r.spd))
+		var t_d := INF
+		for o3: A in ag[1 - s]:
+			if o3.on:
+				var reach_o := maxf(0.0, o3.pos.distance_to(to) - (2.0 if o3.gk else 1.0))
+				t_d = minf(t_d, reach_o / maxf(3.0, o3.spd * 0.95) + 0.2)
+		var race := clampf(0.5 + (t_d - t_r) * 1.1, 0.03, 0.97)
+		risk = 1.0 - (1.0 - risk) * race
+	# Área cheia: passe para dentro dela é muito mais cortado
+	if depth(s, to) > 1.0 - BOX_D / L and absf(to.y - W * 0.5) < BOX_HW:
+		var crowd := 0
+		for o6: A in ag[1 - s]:
+			if o6.on and o6.pos.distance_to(to) < 5.0:
+				crowd += 1
+		risk = 1.0 - (1.0 - risk) * pow(0.8, crowd)
 	var skill := h.pas * 0.7 + h.vis * 0.15 + h.tec * 0.15
 	if kind == "cross":
 		skill = h.cro * 0.8 + h.tec * 0.2
 	elif kind == "long":
 		skill = h.pas * 0.6 + h.vis * 0.25 + h.lng * 0.15
 	var acc := clampf(1.0 - (1.0 - skill) * (dist / 38.0) * (1.0 + press * 0.5) - (0.12 if loft else 0.0), 0.2, 0.98)
-	var ok := (1.0 - risk) * acc
-	var gain := threat(s, to) - threat(s, h.pos) * 0.92
+	var ok := (1.0 - minf(0.99, risk * 1.2)) * acc # o jogador superestima um pouco o risco (joga seguro)
+	# Valor de ter a bola = ameaça do lugar + o valor da própria posse (KEEP): perder a bola custa
+	# isso e a ameaça que o rival ganha; por isso o time circula em vez de arriscar sempre
+	var gain := threat(s, to) + KEEP
 	# Espaço de quem recebe (um recebedor marcado vale menos)
 	var space := 99.0
 	for o2: A in ag[1 - s]:
@@ -911,9 +1017,9 @@ func _eval_pass(h: A, r: A, kind: String, press: float, style: int, ment: int) -
 			space = minf(space, o2.pos.distance_to(to))
 	gain += clampf((space - 3.0) * 0.0015, -0.006, 0.01)
 	if kind == "cross":
-		gain = _xg_at(r, to, true) * 0.55
-	var loss := threat(1 - s, to) * 0.9 + 0.004
-	var v := ok * gain - (1.0 - ok) * loss
+		gain = _xg_at(r, to, true) * 0.6 + KEEP * 0.3
+	var loss := threat(1 - s, to) * 0.9 + KEEP
+	var v := ok * gain - (1.0 - ok) * loss - (threat(s, h.pos) + KEEP)
 	# Estilo e mentalidade
 	var fwd := depth(s, to) - depth(s, h.pos)
 	match style:
@@ -932,7 +1038,7 @@ func _eval_pass(h: A, r: A, kind: String, press: float, style: int, ment: int) -
 				v += fwd * 0.02
 	v += fwd * 0.003 * float(ment - 2)
 	if off:
-		v -= 0.02 * (0.3 + h.vis * 0.7) # quem tem visão enxerga o impedimento
+		v -= 0.06 * (0.3 + h.vis * 0.7) # quem tem visão enxerga o impedimento
 	v += rng.randf_range(-0.004, 0.004) * (1.5 - h.dec)
 	return {"k": "pass", "r": r, "kind": kind, "to": to, "spd": spd, "loft": loft, "ok": ok, "off": off, "v": v}
 
@@ -945,8 +1051,17 @@ func _carry_value(h: A, press: float, here: float, style: int) -> float:
 		if o.on:
 			space = minf(space, seg_dist(o.pos, h.pos, ahead))
 	var keep := clampf(0.55 + space * 0.08 + h.dri * 0.25 - press * 0.3, 0.1, 0.97)
-	var gain := threat(s, ahead) - here
-	var v := keep * gain - (1.0 - keep) * (threat(1 - s, h.pos) * 0.8 + 0.004)
+	# Conduzir para dentro da área cheia de zagueiros é perder a bola
+	var dd := depth(s, h.pos)
+	if dd > 0.78:
+		var close := 0
+		for o5: A in ag[1 - s]:
+			if o5.on and not o5.gk and o5.pos.distance_to(h.pos) < 4.0:
+				close += 1
+		keep -= 0.15 * close + 0.2 * smoothstep(0.78, 0.9, dd)
+		keep = clampf(keep, 0.05, 0.95)
+	var gain := threat(s, ahead) + KEEP
+	var v := keep * gain - (1.0 - keep) * (threat(1 - s, h.pos) * 0.8 + KEEP) - (here + KEEP)
 	if style == TeamSheet.STYLE_POSSE:
 		v -= 0.002
 	v -= carry_t * 0.0015 # não fica eternamente com a bola
@@ -965,7 +1080,13 @@ func _carry(h: A, press: float) -> void:
 	# Ponta abre para a linha de fundo; ninguém corre para a lateral
 	if absf(lat(s, h.pos) - 0.5) > 0.35 and depth(s, h.pos) < 0.85:
 		dirv = (dirv + Vector2(dirx(s), 0.0)).normalized()
-	var spd := h.spd * (0.72 + 0.1 * h.dri) * (0.8 if press > 0.6 else 1.0)
+	var spd := h.spd * (0.62 + 0.12 * h.dri) * (0.8 if press > 0.6 else 1.0)
+	# Corpo a corpo: com um marcador colado na frente não dá para passar reto
+	if near != null:
+		var rel := near.pos - h.pos
+		if rel.length() < 1.4 and rel.dot(dirv) > 0.0:
+			spd *= 0.35
+			dirv = (dirv + rel.normalized().orthogonal() * (1.0 if rel.cross(dirv) > 0.0 else -1.0)).normalized()
 	var desired := dirv * spd
 	var dv := desired - h.vel
 	var mx := h.acc * DT
@@ -984,7 +1105,7 @@ func _do_pass(h: A, o: Dictionary) -> void:
 	passes[s] += 1
 	# Erro de execução proporcional à falta de precisão
 	var ok := float(o["ok"])
-	var err := (1.0 - clampf(ok * 1.1, 0.0, 1.0)) * h.pos.distance_to(to) * 0.18
+	var err := (1.0 - clampf(ok * 1.08, 0.0, 1.0)) * h.pos.distance_to(to) * 0.2 + (1.0 - h.pas) * 0.8
 	to += Vector2(rng.randfn(0.0, err), rng.randfn(0.0, err))
 	var dist := h.pos.distance_to(to)
 	var spd := float(o["spd"])
@@ -1001,8 +1122,11 @@ func _do_pass(h: A, o: Dictionary) -> void:
 		bvh = 0.0
 	pz = {"from": h, "to": r, "kind": kind, "t": clock, "off": bool(o["off"]), "at": to}
 	h.vel *= 0.5
-	# Quem recebe vai na bola
+	# Quem recebe vai na bola (na enfiada, arranca para o espaço)
 	r.run_t = 0.0
+	if kind == "through":
+		r.run_to = to
+		r.run_t = 1.5
 	if kind == "cross":
 		keys.append([t, 0.6])
 		sim.live_cross(s, h.mp, r.mp)
@@ -1030,17 +1154,20 @@ func _duel() -> void:
 		if not o.on or o.gk or o.stun > 0.0:
 			continue
 		var d := o.pos.distance_to(h.pos)
-		if d > 1.5:
+		if d > 2.0:
 			continue
 		var tm: MatchTeam = sim.teams[o.side]
 		var intensity: float = [0.75, 1.0, 1.3][clampi(tm.intensity, 0, 2)]
-		var attempt: float = 0.2 * intensity * (0.6 + o.tck * 0.6 + o.agg * 0.2) * (1.0 + carry_t * 0.25)
+		var behind := (o.pos - h.pos).dot(Vector2(dirx(s), 0.0)) < -0.3
+		var attempt: float = 0.16 * intensity * (0.6 + o.tck * 0.6 + o.agg * 0.2) * (1.0 + carry_t * 0.3) * (1.8 if d < 1.2 and not behind else 1.0)
 		if rng.randf() > attempt:
 			continue
 		tackles[o.side] += 1
-		var behind := (o.pos - h.pos).dot(Vector2(dirx(s), 0.0)) < -0.3
-		var foul_p: float = (0.13 + 0.14 * o.agg) * (1.9 if behind else 1.0) * sim.ref_fouls * (1.1 if sim.derby else 1.0) * intensity
+		var foul_p: float = (0.2 + 0.16 * o.agg) * (1.9 if behind else 1.0) * sim.ref_fouls * (1.1 if sim.derby else 1.0) * intensity
 		foul_p *= 1.0 + h.dri * 0.35
+		var in_own_box := depth(s, h.pos) > 1.0 - BOX_D / L and absf(h.pos.y - W * 0.5) < BOX_HW
+		if in_own_box:
+			foul_p *= 0.2 # na área o zagueiro evita o contato
 		if rng.randf() < foul_p:
 			_foul(o, h)
 			return
@@ -1096,18 +1223,23 @@ func _xg_at(sh: A, p: Vector2, header: bool) -> float:
 	var xg := 0.92 * exp(-0.105 * d) * clampf(ang / 0.8, 0.12, 1.15)
 	if header:
 		xg *= 0.5
+	# Marcação em volta: cada zagueiro perto fecha ângulo, apressa e tira a qualidade do chute
 	var near := 99.0
+	var dens := 0.0
+	var to_goal := (g - p).normalized()
 	for o: A in ag[1 - s]:
 		if o.on and not o.gk:
-			near = minf(near, o.pos.distance_to(p))
-	if near < 1.5:
-		xg *= 0.6
-	elif near < 3.0:
-		xg *= 0.82
+			var od := o.pos.distance_to(p)
+			near = minf(near, od)
+			var front := 1.3 if (o.pos - p).dot(to_goal) > 0.0 else 0.7
+			dens += maxf(0.0, 1.0 - od / 5.0) * front
+	xg *= exp(-0.4 * dens)
+	if near < 1.2:
+		xg *= 0.75
 	# Goleiro fora do lugar
 	var k := keeper(1 - s)
-	if k != null and k.pos.distance_to(own_goal(1 - s)) > 9.0 and d < 25.0:
-		xg *= 1.5
+	if k != null and k.pos.distance_to(own_goal(1 - s)) > 12.0 and d < 25.0 and k.pos.distance_to(p) > 5.0:
+		xg *= 1.25
 	return clampf(xg, 0.005, 0.8)
 
 
@@ -1125,6 +1257,11 @@ func _shoot(sh: A, header: bool) -> void:
 		if seg_dist(o.pos, p, g) < 1.0 and o.pos.distance_to(p) < 11.0:
 			block = 1.0 - (1.0 - block) * (1.0 - 0.33)
 	block = minf(block, 0.6)
+	var near_n := 0
+	for o4: A in ag[1 - s]:
+		if o4.on and not o4.gk and o4.pos.distance_to(p) < 3.0:
+			near_n += 1
+	shot_log.append([s, snappedf(p.distance_to(g), 0.1), snappedf(xg, 0.01), near_n, snappedf(carry_t, 0.1), header])
 	var assister: A = assist_by if assist_by != null and assist_by != sh and clock - assist_t < 9.0 else null
 	var k := keeper(1 - s)
 	var res := sim.live_shot(s, sh.mp, assister.mp if assister != null else null, xg, ctype, block, k.mp if k != null else null, header)
@@ -1187,7 +1324,7 @@ func _shot_land() -> void:
 			restart = {"kind": "kickoff", "side": 1 - s}
 		"save":
 			var k := keeper(1 - s)
-			if k != null and rng.randf() < 0.58:
+			if k != null and rng.randf() < 0.72:
 				ball = k.pos
 				bvel = Vector2.ZERO
 				bh = 0.0
@@ -1197,7 +1334,7 @@ func _shot_land() -> void:
 			else:
 				# Rebote: a bola espirra na área (segunda bola de verdade)
 				ball = aim
-				bvel = Vector2(-dirx(s) * rng.randf_range(4.0, 10.0), rng.randf_range(-8.0, 8.0))
+				bvel = Vector2(-dirx(s) * rng.randf_range(3.0, 7.0), rng.randf_range(8.0, 14.0) * (1.0 if rng.randf() < 0.5 else -1.0))
 				bh = 0.3
 				bvh = 1.0
 				last_touch = k

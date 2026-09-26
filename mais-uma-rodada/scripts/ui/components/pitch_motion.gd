@@ -305,8 +305,91 @@ func celebrate(side: int, scorer_idx: int) -> void:
 # Laço
 # ---------------------------------------------------------------------------
 
+## Modo replay (motor posicional): em vez de encenar, reproduz os quadros gravados pelo
+## LiveEngine — cada jogador e a bola exatamente onde estavam, interpolados entre quadros.
+var _rp: Array = []
+var _rp_t := 0.0
+var _rp_end := 0.0
+var _rp_speed := 1.0
+
+
+## Toca os quadros [t, PackedFloat32Array] de `from_t` a `to_t` (segundos do minuto) a `speed`×.
+func play_frames(frames: Array, from_t: float, to_t: float, speed: float) -> void:
+	_clear()
+	mode = "play"
+	_rp = frames
+	_rp_t = from_t
+	_rp_end = to_t
+	_rp_speed = speed
+	_apply_frame(from_t, 0.0)
+
+
+func replay_on() -> bool:
+	return not _rp.is_empty()
+
+
+func _apply_frame(tt: float, delta: float) -> void:
+	var n := _rp.size()
+	if n == 0:
+		return
+	var fi := clampf(tt / 0.25, 0.0, n - 1.0)
+	var i0 := int(fi)
+	var i1 := mini(i0 + 1, n - 1)
+	var k := fi - i0
+	var f0: PackedFloat32Array = _rp[i0][1]
+	var f1: PackedFloat32Array = _rp[i1][1]
+	var j := 0
+	for side in 2:
+		var arr: Array = agents[side]
+		for i in 11:
+			if i < arr.size():
+				var a: Ag = arr[i]
+				if f0[j] > -50.0 and f1[j] > -50.0:
+					var np := Vector2(lerpf(f0[j], f1[j], k), lerpf(f0[j + 1], f1[j + 1], k))
+					var mv := np - a.pos
+					if delta > 0.0 and mv.length_squared() > 1e-4:
+						a.vel = mv / delta
+						a.face = mv.normalized()
+						a.run += mv.length() * 0.9
+					else:
+						a.vel = Vector2.ZERO
+					a.pos = np
+			j += 2
+	var nb := Vector2(lerpf(f0[44], f1[44], k), lerpf(f0[45], f1[45], k))
+	if delta > 0.0 and ball.distance_to(nb) > 2.5 and ball_h > 0.3 or lerpf(f0[46], f1[46], k) > 0.8:
+		trail.append([ball, ball_h, 0.0])
+	ball = nb
+	ball_h = lerpf(f0[46], f1[46], k)
+	var ow := int(f0[47])
+	if ow >= 0:
+		owner = ag(ow / 11, ow % 11)
+		if owner != null:
+			poss = owner.side
+	else:
+		owner = null
+	# A bola entrou: rede balança
+	if ball.x <= 0.3 and absf(ball.y - W * 0.5) < GOAL_HW:
+		net_hit = 0
+		net_t = 1.2
+	elif ball.x >= L - 0.3 and absf(ball.y - W * 0.5) < GOAL_HW:
+		net_hit = 1
+		net_t = 1.2
+
+
 func update(delta: float) -> void:
 	if frozen:
+		return
+	if not _rp.is_empty():
+		if _rp_t < _rp_end:
+			_rp_t = minf(_rp_end, _rp_t + delta * _rp_speed)
+			_apply_frame(_rp_t, delta)
+		_update_officials(delta * _rp_speed)
+		whistle = maxf(0.0, whistle - delta)
+		net_t = maxf(0.0, net_t - delta)
+		for tr in trail:
+			tr[2] += delta
+		while not trail.is_empty() and float(trail[0][2]) > 0.35:
+			trail.pop_front()
 		return
 	var dt := delta * tempo
 	_t += dt
