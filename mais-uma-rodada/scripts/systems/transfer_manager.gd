@@ -117,6 +117,8 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 		return {"result": "accepted", "fee": 0, "msg": "Jogador livre: negocie direto com ele."}
 	if p.club_id == user.id:
 		return {"result": "rejected", "fee": 0, "msg": "Ele já é seu jogador."}
+	if ClubEvents.banned(world, user):
+		return {"result": "rejected", "fee": 0, "msg": "O clube está punido (transfer ban) e não pode inscrever reforços até o fim da temporada."}
 	var rule := policy_block(world, user, p)
 	if rule != "":
 		return {"result": "rejected", "fee": 0, "msg": rule}
@@ -553,6 +555,8 @@ static func user_sign_free(world: GameWorld, p: Player, wage: int, years: int, d
 	var user := world.user_club()
 	if p.club_id >= 0:
 		return {"ok": false, "msg": "Ele tem contrato com outro clube."}
+	if ClubEvents.banned(world, user):
+		return {"ok": false, "msg": "O clube está punido (transfer ban) e não pode inscrever reforços até o fim da temporada."}
 	var rule := policy_block(world, user, p)
 	if rule != "":
 		return {"ok": false, "msg": rule}

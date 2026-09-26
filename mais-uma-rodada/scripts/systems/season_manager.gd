@@ -376,6 +376,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
 	WeeklyAwards.after_matchday(world, md, slot)
+	ClubEvents.after_matchday(world, slot)
 	FootballMemory.after_matchday(world, md["entries"])
 	tt = _time("aplicar", tt)
 	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube

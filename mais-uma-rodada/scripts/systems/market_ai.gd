@@ -353,6 +353,8 @@ static func _pick_need(world: GameWorld, c: Club, free_only: bool) -> Dictionary
 
 
 static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dictionary, deadline: bool, free_only: bool) -> Transfer:
+	if ClubEvents.banned(world, c):
+		return null # transfer ban: não pode inscrever reforços
 	var need := _pick_need(world, c, free_only)
 	var mismanaged := world.rng.randf() < float(c.arch().get("mismanagement", 0.0)) * 0.2
 	if need.is_empty():

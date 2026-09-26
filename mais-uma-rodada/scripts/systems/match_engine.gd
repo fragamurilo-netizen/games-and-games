@@ -52,6 +52,8 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 		att = FinanceManager.expected_attendance(home, away, derby, world.rng, Rivalry.attendance_factor(world, f.home, f.away, derby))
 		if not f.is_league():
 			att = mini(home.capacity, int(att * 1.12)) # noite de copa enche o estádio
+		if ClubEvents.take_closed(home):
+			att = 0 # punição: portões fechados
 	var ctx := {
 		"derby": derby,
 		"importance": importance_of(world, f),
