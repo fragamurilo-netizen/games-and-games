@@ -2648,16 +2648,13 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 	var crown: float = f["crown"]
 	if crown > 0.0:
 		a *= 1.0 - minf(1.0, crown * 1.3) * _g(q.x, 0.7) * smoothstep(0.35, 0.8, h) * smoothstep(0.05, 0.4, w)
-	# Costeleta: some aos poucos embaixo, em vez de terminar numa linha reta
+	var sharp: bool = bool(f["lineup"]) or _hs("tx", "") in ["braid", "braid_zig", "waves"]
+	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa).
+	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
+	# Costeletas afinam até sumir. Em line-up/tranças/waves a ponta fica um pouco mais marcada.
 	var sb: float = float(_hs("sb", 0.0))
 	if absf(q.x) > 0.5:
-		a *= 1.0 - 0.85 * smoothstep(sb - 0.16, sb + 0.02, q.y)
-	var sharp: bool = bool(f["lineup"]) or _hs("tx", "") in ["braid", "braid_zig", "waves"]
-	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa)
-	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
-	# Pontas das laterais (costeletas): afinam até sumir em vez de terminar num corte reto
-	var sb := float(_hs("sb", 0.0))
-	a *= 1.0 - smoothstep(sb - 0.16, sb + 0.01, q.y) * (0.6 if sharp else 1.0)
+		a *= 1.0 - smoothstep(sb - 0.16, sb + 0.01, q.y) * (0.6 if sharp else 1.0)
 	return a
 
 
