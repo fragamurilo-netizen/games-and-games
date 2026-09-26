@@ -954,6 +954,16 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var review_y := PlayerDevelopment.yearly_review(world)
 	for p in review_y["explosions"]:
 		NewsManager.on_explosion(world, p)
+	for p: Player in review_y["late"]:
+		var lc := world.club(p.club_id)
+		NewsManager.post_raw(world, "%s floresce aos %d anos" % [p.display_name(), p.age(world.year)],
+			"Tratado por anos como jogador comum, %s viveu a melhor temporada da carreira no %s e subiu de patamar. Os grandes já perguntam o preço." % [p.display_name(), lc.short_name if lc != null else "clube"],
+			p.club_id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(p.club_id) else NewsEvent.IMP_NORMAL, "jogador")
+	for p: Player in review_y["derail"]:
+		var dc := world.club(p.club_id)
+		NewsManager.post_raw(world, "O que houve com %s?" % p.display_name(),
+			"Há pouco tempo apontado como futuro craque, %s perdeu espaço e rendimento no %s. A imprensa fala em falta de foco; o jogador diz que só precisa de sequência." % [p.display_name(), dc.short_name if dc != null else "clube"],
+			p.club_id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(p.club_id) else NewsEvent.IMP_NORMAL, "jogador")
 	# Aposentadorias
 	var retired := PlayerDevelopment.process_retirements(world)
 	world.stat_add("retirements", retired.size())
