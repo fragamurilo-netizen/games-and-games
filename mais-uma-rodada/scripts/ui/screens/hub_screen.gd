@@ -72,6 +72,9 @@ func refresh() -> void:
 		c.add_child(cups)
 	c.add_child(_shortcuts_card(w))
 	c.add_child(_news_card(w))
+	var social := _social_card(w)
+	if social != null:
+		c.add_child(social)
 	c.add_child(_form_card(w, club))
 
 
@@ -247,6 +250,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
 		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
+		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club())) + " seguidores", func(): UIManager.push("social")],
 	]
 	for it in items:
 		var v := UIKit.vbox(4)
@@ -519,6 +523,19 @@ func _news_card(w: GameWorld) -> Control:
 	return UIKit.card_panel(card)
 
 
+## O post mais recente sobre o seu clube nas redes.
+func _social_card(w: GameWorld) -> Control:
+	var posts := SocialFeed.latest_for_user(w, 1)
+	if posts.is_empty():
+		return null
+	var card := UIKit.card("Card", 10)
+	card.add_child(UIKit.section("Nas redes"))
+	var post := SocialPost.make(w, posts[0], false)
+	card.add_child(post)
+	card.add_child(UIKit.button("Abrir as redes sociais", "GhostButton", func(): UIManager.push("social"), "chat"))
+	return UIKit.card_panel(card)
+
+
 func _form_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Últimos jogos"))
@@ -730,5 +747,6 @@ func _kit_launch_prompt(w: GameWorld) -> void:
 		UIManager.close_modal()
 		KitDesign.mark_launched(w)
 		GameManager.save_now()
-		refresh()))
+		refresh()
+		SocialPost.show_launch(w)))
 	UIManager.show_modal(v)
