@@ -957,6 +957,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 			w *= 1.8
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
 			w *= 1.4
+		w *= _beard_realism()[i]
 		bw.append(w)
 	var beard := RngUtil.weighted_index(phase_rng, bw)
 	if beard < 0:
@@ -1413,10 +1414,35 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 
 
 ## Pesos dos penteados para uma pessoa (etnia + textura + idade).
+## Frequência real entre jogadores profissionais: cortes chamativos (moicano, descolorido, mullet,
+## tigela, desenhos...) são raros (~3-4% no total) e cabelo longo/coque é minoria (~5%).
+const FLASHY_STYLE_NAMES := ["Moicano", "Nevou (descolorido)", "Espetado descolorido", "Descolorido com desenho",
+	"Moicano espetado", "Moicano trançado", "Moicano de dreads", "Moicano cacheado", "Mullet", "Mullet com degradê",
+	"Mullet cacheado", "Tigela", "Samurai", "High top", "Black power alto", "Dois puffs", "Afro puff", "Espetado com gel",
+	"Máquina com desenho", "Cachos com luzes", "Chanel", "Faux hawk", "Sidecut", "Nagô em zigue-zague", "Arrepiado"]
+const LONG_STYLE_NAMES := ["Longo", "Coque", "Rabo de cavalo", "Surfista", "Cacheado longo", "Meio preso",
+	"Longo para trás", "Longo ondulado", "Coque baixo", "Longo com franja", "Coque com undercut",
+	"Undercut com coque baixo", "Coque alto com degradê", "Cacheado longo com franja", "Flow para trás"]
+static var _style_mult := PackedFloat32Array()
+
+
+static func _style_realism() -> PackedFloat32Array:
+	if _style_mult.size() == HAIR_STYLES.size():
+		return _style_mult
+	var m := PackedFloat32Array()
+	m.resize(HAIR_STYLES.size())
+	for i in HAIR_STYLES.size():
+		var n: String = HAIR_STYLES[i]
+		m[i] = 0.3 if n in FLASHY_STYLE_NAMES else (0.6 if n in LONG_STYLE_NAMES else 1.0)
+	_style_mult = m
+	return m
+
+
 static func _style_weights(e: int, tex: int, age: int) -> Array:
 	var sw: Array = []
+	var real := _style_realism()
 	for i in HAIR_STYLES.size():
-		var w: float = float((STYLE_TEX_W[i] as Array)[tex])
+		var w: float = float((STYLE_TEX_W[i] as Array)[tex]) * real[i]
 		sw.append(w)
 	if e == E_EAS or e == E_SEA:
 		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE, H_CURTAIN, H_LONG_FRINGE, H_BOB]:
@@ -1442,6 +1468,32 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 			sw[i] = float(sw[i]) * 1.4
 		sw[H_BALD] = float(sw[H_BALD]) * 0.3
 	return sw
+
+
+## Barbas: no futebol real a maioria tem rosto limpo, barba por fazer ou barba curta/cheia bem
+## aparada; bigodão, costeleta, barba longa e desenhos exóticos são raros (<5% somados).
+static var _beard_mult := PackedFloat32Array()
+
+
+static func _beard_realism() -> PackedFloat32Array:
+	if _beard_mult.size() == BEARDS.size():
+		return _beard_mult
+	var m := PackedFloat32Array()
+	m.resize(BEARDS.size())
+	var plain := [B_NONE, B_WISPY, B_PEACH, B_STUBBLE, B_HEAVY_STUBBLE, B_DENSE_STUBBLE, B_WEEK, B_FADED, B_PATCHY]
+	var beards := [B_SHORT, B_FULL, B_BOXED, B_MEDIUM, B_TRIMMED, B_SQUARE, B_ROUNDED, B_SHORT_SHARP, B_LINE_CUT]
+	var classic := [B_GOATEE, B_MUSTACHE, B_VANDYKE, B_CHINSTRAP, B_SOUL, B_CIRCLE, B_BALBO, B_ANCHOR]
+	for i in BEARDS.size():
+		if i in plain:
+			m[i] = 1.0
+		elif i in beards:
+			m[i] = 1.5
+		elif i in classic:
+			m[i] = 0.9
+		else:
+			m[i] = 0.18
+	_beard_mult = m
+	return m
 
 
 static func skin_at(v: float) -> Color:
