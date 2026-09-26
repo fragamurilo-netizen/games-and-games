@@ -161,22 +161,36 @@ const STYLE_P: Array = [
 	{"tp": 0.04, "sd": 0.02, "bk": "bun_low", "gl": 0.3, "fl": 0}, # coque baixo
 	{"tp": 0.12, "sd": 0.02, "fd": 2, "fr": "quiff", "sp": 5, "fl": 1}, # topete desfiado
 	{"tp": 0.14, "sd": 0.06, "hl": 0.14, "fd": 3, "fr": "side_fringe_long", "fl": 1}, # franja longa de lado
-	{"tp": 0.08, "sd": 0.03, "fd": 1, "fl": 1, "fr": "part", "gl": 0.15}, # social clássico
-	{"tp": 0.09, "sd": 0.03, "hl": 0.12, "fd": 1, "fr": "crop", "fl": 2}, # crop francês
-	{"tp": 0.13, "sd": 0.0, "fd": 3, "gl": 0.4}, # undercut para trás
-	{"tp": 0.15, "sd": 0.0, "fd": 4, "sp": 5, "fl": 1}, # texturizado com degradê
-	{"tp": 0.34, "sd": 0.1, "fd": 1, "sp": 3, "tx": "coil", "fr": "shaved_part"}, # afro com risco
-	{"tp": 0.16, "sd": 0.0, "fd": 2, "tx": "locs", "fr": "locs_top"}, # dreads curtos com degradê
-	{"tp": 0.24, "sd": 0.12, "tx": "coil", "fr": "twists", "sb": 0.1}, # twists longos
-	{"tp": 0.1, "sd": 0.03, "fd": 2, "fr": "part", "fl": 1, "gl": 0.35}, # penteado de lado
-	{"tp": 0.16, "sd": 0.1, "sb": 0.1, "sp": 5, "fl": 2, "hl": 0.12, "fr": "fringe"}, # médio bagunçado
-	{"tp": 0.12, "sd": 0.07, "sb": 0.08, "fl": 3, "fr": "locks", "lk": 0.22, "fd": 1}, # cortina
-	{"tp": 0.44, "sd": 0.1, "fd": 1, "sp": 3, "tx": "coil"}, # afro alto com degradê
-	{"tp": 0.4, "sd": 0.02, "fd": 2, "sp": 1, "tx": "coil"}, # flat top
-	{"tp": 0.14, "sd": 0.03, "hl": 0.18, "fd": 3, "fr": "fringe", "fl": 2}, # corte coreano
-	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "tx": "coil"}, # frohawk
-	{"tp": 0.03, "sd": 0.0, "fd": 2, "bk": "pony", "gl": 0.25}, # rabo com degradê
-	{"tp": 0.12, "sd": 0.05, "fd": 1, "tx": "wavy", "fl": 1}, # ondulado curto
+	{"tp": 0.13, "sd": 0.1, "sb": 0.12, "fl": 3, "fr": "curtain", "tx": "wavy"}, # franja cortina
+	{"tp": 0.04, "sd": 0.01, "tx": "dots", "op": 0.82, "fd": 1}, # máquina 2
+	{"tp": 0.1, "sd": 0.0, "fd": 5, "fl": 1}, # degradê navalhado
+	{"tp": 0.14, "sd": 0.0, "fd": 3, "fr": "pomp", "gl": 0.35, "ph": 1.35}, # topete alto
+	{"tp": 0.2, "sd": 0.0, "fd": 2, "sp": 3, "tx": "curl", "fr": "quiff"}, # topete cacheado
+	{"tp": 0.07, "sd": 0.02, "hl": 0.09, "fd": 1, "fr": "crop", "fl": 2, "fc": 0.7}, # social com franjinha
+	{"tp": 0.08, "sd": 0.02, "fd": 1, "fl": 1, "fr": "part", "gl": 0.2}, # ivy league
+	{"tp": 0.1, "sd": 0.04, "fd": 1, "gl": 0.6, "fl": 0}, # molhado para trás
+	{"tp": 0.28, "sd": 0.0, "fd": 4, "sp": 3, "tx": "curl"}, # burst cacheado
+	{"tp": 0.5, "sd": 0.42, "sp": 3, "tx": "coil", "bk": "afro", "ar": 1.22}, # black power alto
+	{"tp": 0.34, "sd": 0.0, "fd": 2, "sp": 3, "tx": "coil", "fr": "shaved_part"}, # afro com risco
+	{"tp": 0.2, "sd": 0.08, "tx": "coil", "fr": "twists", "bk": "braids", "sb": 0.05}, # twists longos
+	{"tp": 0.1, "sd": 0.04, "tx": "locs", "bk": "pony", "fl": 0}, # dreads em rabo
+	{"tp": 0.03, "sd": 0.02, "tx": "braid", "op": 0.78, "bk": "pony"}, # nagô com rabo
+	{"tp": 0.04, "sd": 0.0, "fd": 2, "bk": "knot", "gl": 0.25}, # coque alto com degradê
+	{"tp": 0.1, "sd": 0.1, "sb": 0.3, "hl": 0.22, "bk": "long", "fr": "fringe", "fr2": "locks", "lk": 1.3, "fl": 2}, # longo com franja
+	{"tp": 0.12, "sd": 0.12, "sb": 0.3, "bk": "long_short", "fr": "locks", "lk": 0.65, "fl": 3, "gl": 0.2}, # chanel
+	{"tp": 0.2, "sd": 0.08, "sp": 3, "tx": "curl", "bk": "mullet", "fd": 1}, # mullet cacheado
+	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "ck": "spikes"}, # moicano espetado
+	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.75, "fr": "design", "fd": 1}, # descolorido com desenho
+	{"tp": 0.18, "sd": 0.1, "sb": 0.08, "tx": "wavy", "sp": 5, "fl": 1}, # ondulado bagunçado
+	{"tp": 0.19, "sd": 0.08, "fl": 1, "fr": "part", "gl": 0.15}, # repartido volumoso
+	{"tp": 0.07, "sd": 0.02, "hl": 0.12, "fd": 1, "fr": "crop", "fl": 2, "fc": 0.55}, # corte césar
+	{"tp": 0.1, "sd": 0.0, "fd": 4, "fr": "quiff"}, # topete com burst
+	{"tp": 0.12, "sd": 0.0, "fd": 3, "bk": "bun_low", "gl": 0.3, "fl": 0}, # undercut com coque baixo
+	{"tp": 0.3, "sd": 0.3, "sp": 3, "tx": "curl", "sb": 0.3, "bk": "curly_long", "hl": 0.12, "fr": "curl_fringe"}, # cacheado longo com franja
+	{"tp": 0.18, "sd": 0.0, "fd": 2, "tx": "locs", "fr": "locs_top"}, # freeform com degradê
+	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "waves", "op": 0.9}, # waves com degradê
+	{"tp": 0.24, "sd": 0.02, "fd": 2, "sp": 3, "tx": "curl"}, # cachos com luzes
+	{"tp": 0.04, "sd": 0.0, "fd": 1, "tx": "coil", "bk": "puffs2", "fl": 3}, # dois puffs
 ]
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
@@ -434,9 +448,11 @@ func _setup(c: Vector2, s: float) -> void:
 	_BW = float(f["bridge_w"])
 	_MW = float(f["mouth_w"]) * 1.15
 	_skin = f["skin"]
-	_beard_p = FaceGen.BEARD_PARTS[int(f["beard"])]
+	# Índice fora da tabela (save antigo, catálogo novo) cai no último item em vez de travar o
+	# _setup no meio: com o _setup interrompido a pele do rosto saía toda preta.
+	_beard_p = FaceGen.BEARD_PARTS[clampi(int(f["beard"]), 0, FaceGen.BEARD_PARTS.size() - 1)]
 	_shadow_p = FaceGen.BEARD_PARTS[FaceGen.B_STUBBLE]
-	_hair_style = STYLE_P[int(f["style"])]
+	_hair_style = STYLE_P[clampi(int(f["style"]), 0, STYLE_P.size() - 1)]
 	_half = (_light + Vector3(0, 0, 1)).normalized()
 	_shadow_col = Color(0.2, 0.22, 0.28).lerp(_skin.darkened(0.5), 0.5)
 	var ag: float = f["aging"]
@@ -3230,7 +3246,7 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 			# Mechas finas e sobrepostas que afinam e ficam transparentes na ponta (dente de serra
 			# de triângulos opacos parecia papel recortado)
 			var locks := 17 if not crop else 21
-			var top_y := hl - (0.3 if not crop else 0.18)
+			var top_y := hl - (0.3 if not crop else 0.18) * float(_hs("fc", 1.0))
 			for pass_i in 2:
 				for i in locks:
 					var t := (float(i) + 0.5 * pass_i) / (locks - 1)
@@ -3319,6 +3335,10 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 					var tc := 0.14 + 0.14 * t
 					pts.append(_cl(_cap_pt(tc if sx < 0.0 else 1.0 - tc, 0.3 + k * 0.24 + 0.1 * sin(PI * t * 2.0))))
 				_r_polyline(pts, Color(_skin.lightened(0.05), 0.85), lw, true)
+		"curtain":
+			# Franja cortina: risco no meio e as duas metades abrindo para os lados
+			for cs: float in [-1.0, 1.0]:
+				_swoop(rng, hair, gloss, hl, false, cs)
 		"side_fringe":
 			var sx := float(f["part_side"])
 			# Com a lateral raspada a franja não passa da têmpora (senão fica "solta" sobre a pele)
