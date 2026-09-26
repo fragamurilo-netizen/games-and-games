@@ -43,7 +43,13 @@ const HAIR_STYLES: Array[String] = [
 	"Dreads presos", "Moicano de dreads", "Blowout", "Franja texturizada", "Twist out", "Afro puff",
 	"Nagô em zigue-zague", "Tranças longas com degradê", "Pompadour com risco", "Longo ondulado",
 	"Espetado descolorido", "Máquina com risco", "Esponja", "Coque baixo", "Topete desfiado", "Franja longa de lado",
+	"Social clássico", "Crop francês", "Undercut para trás", "Texturizado com degradê", "Afro com risco",
+	"Dreads curtos com degradê", "Twists longos", "Penteado de lado", "Médio bagunçado", "Cortina",
+	"Afro alto com degradê", "Flat top", "Corte coreano", "Frohawk", "Rabo com degradê", "Ondulado curto",
 ]
+## Quantos penteados existiam antes do catálogo crescer: o sorteio desses continua igual (os rostos
+## dos saves não mudam) e só uma fatia proporcional troca para um dos novos.
+const OLD_STYLES := 83
 const H_BUZZ := 0
 const H_SHORT := 1
 const H_PART := 2
@@ -127,6 +133,22 @@ const H_SPONGE := 79
 const H_LOW_BUN := 80
 const H_TEXT_QUIFF := 81
 const H_LONG_SIDE_FRINGE := 82
+const H_CLASSIC := 83
+const H_FRENCH_CROP := 84
+const H_SLICK_UNDERCUT := 85
+const H_TEXT_FADE := 86
+const H_AFRO_PART := 87
+const H_LOCS_HIGH_FADE := 88
+const H_LONG_TWISTS := 89
+const H_COMB_OVER := 90
+const H_MESSY_MED := 91
+const H_CURTAINS := 92
+const H_HIGH_AFRO_FADE := 93
+const H_FLAT_TOP := 94
+const H_KOREAN := 95
+const H_FROHAWK := 96
+const H_PONY_FADE := 97
+const H_SHORT_WAVY := 98
 
 ## Textura natural do cabelo.
 const T_STRAIGHT := 0
@@ -219,6 +241,22 @@ const STYLE_TEX_W: Array = [
 	[0.4, 0.6, 0.5, 0.2], # coque baixo
 	[1.4, 1.3, 0.4, 0.0], # topete desfiado
 	[0.8, 0.5, 0.1, 0.0], # franja longa de lado
+	[2.0, 2.0, 0.6, 0.2], # social clássico
+	[1.6, 1.4, 0.5, 0.0], # crop francês
+	[1.0, 1.0, 0.2, 0.0], # undercut para trás
+	[1.4, 1.4, 0.6, 0.0], # texturizado com degradê
+	[0.0, 0.0, 0.3, 1.2], # afro com risco
+	[0.0, 0.0, 0.1, 1.2], # dreads curtos com degradê
+	[0.0, 0.0, 0.2, 0.8], # twists longos
+	[1.2, 1.0, 0.2, 0.0], # penteado de lado
+	[0.9, 1.1, 0.4, 0.0], # médio bagunçado
+	[0.9, 0.9, 0.2, 0.0], # cortina
+	[0.0, 0.0, 0.2, 1.0], # afro alto com degradê
+	[0.0, 0.0, 0.1, 0.6], # flat top
+	[1.0, 0.6, 0.1, 0.0], # corte coreano
+	[0.0, 0.0, 0.3, 0.6], # frohawk
+	[0.3, 0.4, 0.3, 0.1], # rabo com degradê
+	[0.3, 2.0, 0.5, 0.0], # ondulado curto
 ]
 ## Penteados que exigem cabelo (somem com calvície avançada).
 const NEEDS_HAIR: Array[int] = [H_QUIFF, H_CURLY, H_AFRO, H_LONG, H_BUN, H_FRINGE, H_POMPADOUR, H_WAVY,
@@ -227,7 +265,9 @@ const NEEDS_HAIR: Array[int] = [H_QUIFF, H_CURLY, H_AFRO, H_LONG, H_BUN, H_FRING
 	H_CURLY_TAPER, H_BUN_UNDERCUT, H_HALF_UP, H_FADE_MULLET, H_EDGAR, H_FAUX_HAWK, H_LOCS_FADE, H_CURLY_FRINGE,
 	H_BRAID_BUN, H_QUIFF_PART, H_LONG_BACK, H_WAVY_FRINGE, H_GEL_SPIKES, H_MED_CURLS, H_SIDECUT,
 	H_DREAD_BUN, H_DREAD_HAWK, H_BLOWOUT, H_TEXT_FRINGE, H_TWIST_OUT, H_AFRO_PUFF, H_LONG_BRAIDS_FADE, H_POMP_PART,
-	H_LONG_WAVY, H_FROSTED, H_SPONGE, H_LOW_BUN, H_TEXT_QUIFF, H_LONG_SIDE_FRINGE, H_ZIGZAG_ROWS]
+	H_LONG_WAVY, H_FROSTED, H_SPONGE, H_LOW_BUN, H_TEXT_QUIFF, H_LONG_SIDE_FRINGE, H_ZIGZAG_ROWS,
+	H_SLICK_UNDERCUT, H_TEXT_FADE, H_AFRO_PART, H_LOCS_HIGH_FADE, H_LONG_TWISTS, H_MESSY_MED, H_CURTAINS,
+	H_HIGH_AFRO_FADE, H_FLAT_TOP, H_KOREAN, H_FROHAWK, H_PONY_FADE, H_SHORT_WAVY]
 
 # ---------------------------------------------------------------------------
 # Barbas
@@ -242,7 +282,12 @@ const BEARDS: Array[String] = [
 	"Bigode guidão", "Fu Manchu", "Bigode morsa", "Barba de uma semana", "Barba Verdi", "Lenhador longa",
 	"Cavanhaque com costeletas", "Curta com bigode grosso", "Queixo e bigode fino", "Tufo no queixo",
 	"Desenhada grossa", "Âncora longa",
+	"Curta aparada", "Van Dyke pontudo", "Cheia com degradê", "Arredondada", "Rala longa", "Cavanhaque quadrado",
+	"Longa quadrada", "Média com guidão", "Bigode fino e mosca", "Costeletas longas", "Duas semanas",
+	"Cavanhaque com contorno", "Ferradura e mosca", "Longa sem bigode", "Morsa com barba", "Âncora fina",
 ]
+## Quantas barbas existiam antes do catálogo crescer (mesma ideia de OLD_STYLES).
+const OLD_BEARDS := 50
 const B_NONE := 0
 const B_STUBBLE := 1
 const B_SHORT := 2
@@ -293,6 +338,22 @@ const B_CHIN_PENCIL := 46
 const B_CHIN_PUFF := 47
 const B_THICK_LINED := 48
 const B_LONG_ANCHOR := 49
+const B_NEAT_SHORT := 50
+const B_VANDYKE_POINT := 51
+const B_FULL_FADE := 52
+const B_ROUND := 53
+const B_PATCHY_LONG := 54
+const B_SQUARE_GOATEE := 55
+const B_LONG_SQUARE := 56
+const B_HANDLEBAR_BEARD := 57
+const B_PENCIL_SOUL := 58
+const B_LONG_SIDEBURNS := 59
+const B_TWO_WEEK := 60
+const B_GOATEE_STRAP := 61
+const B_HORSESHOE_SOUL := 62
+const B_LONG_NO_MU := 63
+const B_WALRUS_BEARD := 64
+const B_THIN_ANCHOR := 65
 
 ## Partes de cada barba: ch = bochechas (0 = não, senão a altura da linha: 0.1 alta … 0.5 baixa),
 ## sd = costeletas, jw = contorno da mandíbula, cn = queixo, mu = bigode (1 normal, 2 fino, 3 ferradura),
@@ -349,15 +410,33 @@ const BEARD_PARTS: Array = [
 	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.5, "mu": 0, "so": 0.5, "nk": 0.0, "ln": 0.06, "op": 0.8, "sh": 0.2, "pt": 0.2, "tx": 1},
 	{"ch": 0.12, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.3, "ln": 0.09, "op": 0.97, "sh": 1.0, "pt": 0.0, "tx": 1, "cut": 1.0, "sq": 0.6},
 	{"ch": 0.0, "sd": 0.0, "jw": 0.35, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.22, "op": 0.94, "sh": 0.5, "pt": 0.0, "tx": 1, "pp": 1.0},
+	{"ch": 0.22, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.03, "op": 0.9, "sh": 0.85, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.7, "mu": 2, "so": 1.0, "nk": 0.0, "ln": 0.22, "op": 0.92, "sh": 0.5, "pt": 0.0, "tx": 1, "pp": 1.0},
+	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.6, "ln": 0.16, "op": 0.95, "sh": 0.3, "pt": 0.0, "tx": 1, "fd": 1.0},
+	{"ch": 0.18, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.7, "ln": 0.24, "op": 0.95, "sh": 0.15, "pt": 0.0, "tx": 1, "rd": 1.1},
+	{"ch": 0.3, "sd": 0.8, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.12, "op": 0.7, "sh": 0.0, "pt": 0.6, "tx": 1},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.85, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.08, "op": 0.93, "sh": 0.8, "pt": 0.0, "tx": 1, "sq": 1.0, "ci": 1.0},
+	{"ch": 0.12, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 1.0, "ln": 0.45, "op": 0.96, "sh": 0.2, "pt": 0.0, "tx": 1, "rd": 1.0, "sq": 1.0},
+	{"ch": 0.18, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 6, "so": 1.0, "nk": 0.5, "ln": 0.12, "op": 0.95, "sh": 0.3, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.0, "mu": 2, "so": 1.0, "nk": 0.0, "ln": 0.0, "op": 0.9, "sh": 0.7, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 1.0, "jw": 0.0, "cn": 0.0, "mu": 0, "so": 0.0, "nk": 0.0, "ln": 0.0, "op": 0.9, "sh": 0.6, "pt": 0.0, "tx": 1, "sdl": 1.0},
+	{"ch": 0.24, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.5, "ln": 0.03, "op": 0.8, "sh": 0.1, "pt": 0.05, "tx": 1},
+	{"ch": 0.0, "sd": 1.0, "jw": 0.6, "cn": 0.8, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.04, "op": 0.9, "sh": 0.75, "pt": 0.0, "tx": 1, "thin": 1.0, "ci": 1.0},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.0, "mu": 3, "so": 1.0, "nk": 0.0, "ln": 0.0, "op": 0.92, "sh": 0.45, "pt": 0.0, "tx": 1},
+	{"ch": 0.3, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 0, "so": 0.0, "nk": 0.8, "ln": 0.4, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "rd": 1.0},
+	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 8, "so": 1.0, "nk": 0.6, "ln": 0.14, "op": 0.96, "sh": 0.2, "pt": 0.0, "tx": 1},
+	{"ch": 0.0, "sd": 0.0, "jw": 0.3, "cn": 0.75, "mu": 2, "so": 1.0, "nk": 0.0, "ln": 0.04, "op": 0.9, "sh": 0.85, "pt": 0.0, "tx": 1, "thin": 1.0},
 ]
 ## Capacidade de barba mínima para cada estilo (genética × maturidade).
 const BEARD_MIN_CAP: Array[float] = [0.0, 0.22, 0.55, 0.72, 0.42, 0.5, 0.55, 0.5, 0.25, 0.82, 0.32, 0.6, 0.3, 0.65, 0.55, 0.62, 0.45, 0.62, 0.55, 0.66, 0.06, 0.55, 0.5, 0.5, 0.8, 0.6, 0.65, 0.42,
 	0.88, 0.5, 0.72, 0.55, 0.6, 0.5, 0.6, 0.55, 0.55, 0.8,
-	0.6, 0.62, 0.66, 0.4, 0.8, 0.9, 0.58, 0.64, 0.5, 0.3, 0.72, 0.7]
+	0.6, 0.62, 0.66, 0.4, 0.8, 0.9, 0.58, 0.64, 0.5, 0.3, 0.72, 0.7,
+	0.55, 0.6, 0.72, 0.78, 0.35, 0.5, 0.85, 0.7, 0.45, 0.55, 0.5, 0.55, 0.55, 0.8, 0.75, 0.5]
 ## Popularidade dos estilos entre quem pode tê-los.
 const BEARD_POP: Array[float] = [5.0, 3.2, 2.4, 1.3, 0.8, 0.35, 0.45, 0.7, 1.0, 0.25, 2.4, 0.12, 0.25, 0.12, 0.3, 0.2, 0.12, 1.2, 0.3, 0.15, 0.8, 0.25, 0.2, 0.7, 0.25, 1.4, 1.6, 1.8,
 	0.12, 0.25, 0.45, 0.08, 0.4, 0.3, 0.35, 0.15, 1.0, 0.1,
-	0.12, 0.08, 0.1, 1.8, 0.3, 0.08, 0.3, 0.6, 0.35, 0.6, 0.9, 0.2]
+	0.12, 0.08, 0.1, 1.8, 0.3, 0.08, 0.3, 0.6, 0.35, 0.6, 0.9, 0.2,
+	1.4, 0.15, 0.9, 0.5, 0.5, 0.25, 0.12, 0.1, 0.15, 0.12, 1.2, 0.35, 0.1, 0.08, 0.1, 0.2]
 
 # ---------------------------------------------------------------------------
 # Cores
@@ -640,13 +719,17 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["gray"] = gray
 	# Penteado: o "de sempre" e o da fase (muda a cada ~4 anos)
 	var sw := _style_weights(e, tex, age)
-	var base_style := RngUtil.weighted_index(rng, sw)
+	var sx := RandomNumberGenerator.new()
+	sx.seed = hash([seed_value, "penteados novos"])
+	var base_style := _pick_grown(rng, sw, OLD_STYLES, sx)
 	var phase_rng := RandomNumberGenerator.new()
 	var phase_off := rng.randi_range(0, 3)
 	phase_rng.seed = hash([seed_value, int(floor((age + phase_off) / 4.0))])
 	var style := base_style
 	if phase_rng.randf() < 0.45:
-		style = RngUtil.weighted_index(phase_rng, sw)
+		var px := RandomNumberGenerator.new()
+		px.seed = hash([phase_rng.seed, "penteados novos"])
+		style = _pick_grown(phase_rng, sw, OLD_STYLES, px)
 	# Calvície avançada: raspa, passa a máquina ou assume a careca
 	if (crown > 0.35 or rec > 0.7) and style in NEEDS_HAIR:
 		var r := phase_rng.randf()
@@ -717,24 +800,31 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 			w += (1.0 - cap) * 4.0
 		elif i in [B_FULL, B_LONG, B_SHORT, B_BOXED, B_HEAVY_STUBBLE, B_MEDIUM, B_FADED, B_DENSE_STUBBLE, B_GARIBALDI,
 				B_LUMBERJACK, B_SQUARE, B_LINE_CUT, B_HOLLYWOOD, B_TRIMMED, B_POINTED, B_WEEK, B_VERDI, B_BANDHOLZ,
-				B_SHORT_THICK_MU, B_THICK_LINED, B_LONG_ANCHOR]:
+				B_SHORT_THICK_MU, B_THICK_LINED, B_LONG_ANCHOR, B_NEAT_SHORT, B_FULL_FADE, B_ROUND, B_LONG_SQUARE,
+				B_TWO_WEEK, B_LONG_NO_MU, B_WALRUS_BEARD]:
 			w *= 2.0 if pref > 0.75 else (0.4 if pref < 0.3 else 1.0)
 		if i == B_PATCHY:
 			w *= 3.0 if cap < 0.6 else 0.3
 		if i == B_WISPY:
 			w *= 3.0 if cap < 0.35 else 0.1
-		if (e == E_EAS or e == E_SEA) and i in [B_FULL, B_LONG, B_MUTTON, B_VERDI, B_BANDHOLZ, B_WALRUS]:
+		if (e == E_EAS or e == E_SEA) and i in [B_FULL, B_LONG, B_MUTTON, B_VERDI, B_BANDHOLZ, B_WALRUS, B_LONG_SQUARE,
+				B_ROUND, B_LONG_NO_MU, B_WALRUS_BEARD, B_LONG_SIDEBURNS]:
 			w *= 0.3
 		if i == B_CHIN_PUFF:
 			w *= 2.0 if cap < 0.55 else 0.4
-		if age >= 30 and i in [B_WALRUS, B_HANDLEBAR, B_VERDI]:
+		if i == B_PATCHY_LONG:
+			w *= 2.0 if cap < 0.6 else 0.3
+		if age >= 30 and i in [B_WALRUS, B_HANDLEBAR, B_VERDI, B_WALRUS_BEARD, B_HANDLEBAR_BEARD, B_LONG_SQUARE]:
 			w *= 1.6
-		if (e == E_ARB or e == E_SAS) and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED]:
+		if (e == E_ARB or e == E_SAS) and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED, B_NEAT_SHORT,
+				B_FULL_FADE, B_ROUND, B_LONG_NO_MU]:
 			w *= 1.8
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
 			w *= 1.4
 		bw.append(w)
-	var beard := RngUtil.weighted_index(phase_rng, bw)
+	var bx := RandomNumberGenerator.new()
+	bx.seed = hash([phase_rng.seed, "barbas novas"])
+	var beard := _pick_grown(phase_rng, bw, OLD_BEARDS, bx)
 	if beard < 0:
 		beard = B_NONE
 	if look.has("bd"):
@@ -904,6 +994,28 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 	f["deep"] = float(f["deep"]) * lerpf(1.2, 1.0, beauty)
 
 
+## Sorteio de um catálogo que cresceu: os `old_n` primeiros são sorteados exatamente como antes
+## (mesmo consumo de `rng`), e um gerador à parte (`extra`) decide, com a chance do peso somado dos
+## novos, se a pessoa troca para um deles. O conjunto fica com a mesma distribuição de um sorteio
+## único, mas quem já existia num save só muda de visual nessa fatia.
+static func _pick_grown(rng: RandomNumberGenerator, weights: Array, old_n: int, extra: RandomNumberGenerator) -> int:
+	var idx := RngUtil.weighted_index(rng, weights.slice(0, old_n))
+	var old_w := 0.0
+	var new_w := 0.0
+	for i in weights.size():
+		var w := float(weights[i])
+		if w > 0.0:
+			if i < old_n:
+				old_w += w
+			else:
+				new_w += w
+	if new_w > 0.0 and extra.randf() < new_w / (old_w + new_w):
+		var sub := RngUtil.weighted_index(extra, weights.slice(old_n))
+		if sub >= 0:
+			return old_n + sub
+	return idx
+
+
 ## Pesos dos penteados para uma pessoa (etnia + textura + idade).
 static func _style_weights(e: int, tex: int, age: int) -> Array:
 	var sw: Array = []
@@ -911,24 +1023,26 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 		var w: float = float((STYLE_TEX_W[i] as Array)[tex])
 		sw.append(w)
 	if e == E_EAS or e == E_SEA:
-		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE]:
+		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE, H_KOREAN, H_CURTAINS]:
 			sw[i] = float(sw[i]) * 2.0
 	if e == E_PAC:
 		for i in [H_LONG_CURLY, H_BUN, H_TOPKNOT, H_CURLY]:
 			sw[i] = float(sw[i]) * 2.0
 	if e == E_ARB or e == E_MED or e == E_SAS:
-		for i in [H_SLICK, H_FADE, H_UNDERCUT, H_WAVY_BACK]:
+		for i in [H_SLICK, H_FADE, H_UNDERCUT, H_WAVY_BACK, H_SLICK_UNDERCUT, H_COMB_OVER]:
 			sw[i] = float(sw[i]) * 1.5
 	if age >= 32:
 		for i in [H_MOHAWK, H_HIGHTOP, H_BRAIDS, H_TWISTS, H_SPIKY, H_BOWL, H_TOPKNOT, H_MULLET, H_EDGAR,
 				H_BLEACHED, H_FADE_MULLET, H_FAUX_HAWK, H_CURLY_FRINGE, H_GEL_SPIKES, H_BRAID_HAWK, H_SIDECUT,
-				H_DREAD_HAWK, H_FROSTED, H_AFRO_PUFF, H_SPONGE, H_ZIGZAG_ROWS, H_TEXT_FRINGE]:
+				H_DREAD_HAWK, H_FROSTED, H_AFRO_PUFF, H_SPONGE, H_ZIGZAG_ROWS, H_TEXT_FRINGE, H_FROHAWK, H_FLAT_TOP,
+				H_LONG_TWISTS, H_KOREAN, H_PONY_FADE, H_TEXT_FADE]:
 			sw[i] = float(sw[i]) * 0.35
-		for i in [H_SHORT, H_PART, H_CREW, H_BUZZ, H_BALD]:
+		for i in [H_SHORT, H_PART, H_CREW, H_BUZZ, H_BALD, H_CLASSIC, H_COMB_OVER]:
 			sw[i] = float(sw[i]) * 1.5
 	if age < 24:
 		for i in [H_FADE, H_CROP, H_FADE_PART, H_UNDERCUT, H_TWISTS, H_MULLET, H_EDGAR, H_CURLY_FADE, H_FADE_MULLET,
-				H_CURLY_FRINGE, H_BLEACHED, H_TEXT_FRINGE, H_FROSTED, H_SPONGE, H_TEXT_QUIFF, H_BLOWOUT, H_TWIST_OUT]:
+				H_CURLY_FRINGE, H_BLEACHED, H_TEXT_FRINGE, H_FROSTED, H_SPONGE, H_TEXT_QUIFF, H_BLOWOUT, H_TWIST_OUT,
+				H_TEXT_FADE, H_FRENCH_CROP, H_KOREAN, H_FROHAWK, H_AFRO_PART, H_LOCS_HIGH_FADE, H_HIGH_AFRO_FADE]:
 			sw[i] = float(sw[i]) * 1.4
 		sw[H_BALD] = float(sw[H_BALD]) * 0.3
 	return sw
