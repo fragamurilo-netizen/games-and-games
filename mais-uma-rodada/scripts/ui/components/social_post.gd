@@ -371,3 +371,63 @@ static func show_launch(w: GameWorld) -> void:
 		UIManager.push("social", {"filter": "kits"}), "chat"))
 	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
 	UIManager.show_modal(v)
+
+
+# ---------------------------------------------------------------------------
+# Perfis
+# ---------------------------------------------------------------------------
+
+## Cabeçalho de perfil: avatar, nome, @, seguidores, crescimento na temporada e posts.
+static func profile_header(w: GameWorld, acc: Dictionary, followers: int, growth: float, n_posts: int) -> Control:
+	var card := UIKit.card("CardHighlight", 10)
+	var row := UIKit.hbox(14)
+	row.add_child(avatar(w, acc, 88))
+	var col := UIKit.vbox(2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := UIKit.hbox(6)
+	nm.add_child(UIKit.label(String(acc["name"]), "H2", true))
+	if bool(acc.get("verified", false)):
+		var vb := UIKit.icon_rect("check", 24, UIColors.BLUE)
+		vb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		nm.add_child(vb)
+	col.add_child(nm)
+	col.add_child(UIKit.label(String(acc["handle"]), "Small"))
+	row.add_child(col)
+	card.add_child(row)
+	var stats := UIKit.hbox(10)
+	for it in [[SocialFeed.count(followers), "seguidores"], [str(n_posts), "posts recentes"],
+			[("%+.1f%%" % (growth * 100.0)).replace(".", ","), "na temporada"]]:
+		var s := UIKit.stat(String(it[0]), String(it[1]), (UIColors.GREEN if growth > 0.001 else (UIColors.RED if growth < -0.001 else UIColors.TEXT)) if it[1] == "na temporada" else UIColors.TEXT)
+		s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		stats.add_child(s)
+	card.add_child(stats)
+	return UIKit.card_panel(card)
+
+
+## Cartão "Redes sociais" para o perfil de um clube ou jogador: seguidores e o último post.
+static func mini_card(w: GameWorld, club_id: int, player_id: int) -> Control:
+	var posts := SocialFeed.posts(w, "all", 1, club_id, player_id)
+	var card := UIKit.card("Card", 10)
+	var head := UIKit.hbox(8)
+	var sec := UIKit.section("Redes sociais")
+	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(sec)
+	var f := 0
+	var handle := ""
+	if player_id >= 0:
+		var p := w.player(player_id)
+		f = SocialFeed.player_followers(p, w)
+		handle = String(SocialFeed.player_acc(w, p)["handle"])
+	else:
+		var c := w.club(club_id)
+		f = SocialFeed.followers(c, w)
+		handle = String(SocialFeed.club_acc(c)["handle"])
+	head.add_child(UIKit.label("%s · %s seguidores" % [handle, SocialFeed.count(f)], "Small"))
+	card.add_child(head)
+	if posts.is_empty():
+		card.add_child(UIKit.label("Nenhum post recente.", "Muted"))
+	else:
+		card.add_child(make(w, posts[0], false))
+	card.add_child(UIKit.button("Ver o perfil nas redes", "GhostButton", func():
+		UIManager.push("social", {"club": club_id, "player": player_id}), "chat"))
+	return UIKit.card_panel(card)

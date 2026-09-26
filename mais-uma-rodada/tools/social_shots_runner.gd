@@ -83,7 +83,7 @@ func _run() -> void:
 	var social_y := 0.0
 	for n in _scr().content().get_children():
 		for l in n.find_children("*", "Label", true, false):
-			if (l as Label).text.to_lower() == "nas redes":
+			if (l as Label).text.to_lower() == "feed das redes":
 				social_y = n.position.y
 	_scr().scroll().scroll_vertical = int(social_y)
 	await _shot("s03_hub_nas_redes")
@@ -101,6 +101,33 @@ func _run() -> void:
 	_scr().refresh()
 	_scr().scroll().scroll_vertical = 1100
 	await _shot("s07_redes_kits_rivais")
+	# Perfis: um gigante, um clube médio e um jogador.
+	var big: Club = null
+	for cc: Club in w.clubs_in_league("BRA1"):
+		if big == null or cc.reputation > big.reputation:
+			big = cc
+	UIManager.push("social", {"club": big.id})
+	await _frames(8)
+	await _shot("s10_perfil_gigante")
+	UIManager.push("social", {"club": club.id})
+	await _frames(8)
+	await _shot("s11_perfil_meu_clube")
+	var star: Player = w.squad(big)[0]
+	for pp: Player in w.squad(big):
+		if pp.overall > star.overall:
+			star = pp
+	UIManager.push("social", {"player": star.id})
+	await _frames(8)
+	await _shot("s12_perfil_jogador")
+	UIManager.push("club", {"id": big.id})
+	await _frames(8)
+	_scr().scroll().scroll_vertical = 700
+	await _shot("s13_clube_card_redes")
+	for cc2: Club in [big, club]:
+		print("SEG ", cc2.short_name, " ", SocialFeed.followers(cc2, w))
+	for lid in ["BRA1", "BRA3", "ENG1", "ESP1"]:
+		for cc3: Club in w.clubs_in_league(lid):
+			print("SEG ", lid, " ", cc3.short_name, " ", SocialFeed.count(SocialFeed.followers(cc3, w)))
 	UIManager.goto("hub")
 	TalkDialog.open("press")
 	await _frames(10)

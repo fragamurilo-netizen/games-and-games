@@ -32,7 +32,8 @@ const FAN_TAIL := ["", "_", "oficial", "fc", "10", "raiz", "ultra", "doente", "s
 # ---------------------------------------------------------------------------
 
 ## Todos os posts, do mais recente para o mais antigo. `filter`: uma das chaves de FILTERS.
-static func posts(world: GameWorld, filter: String = "all", limit: int = 80) -> Array:
+## `club_id` / `player_id` (>= 0): só o que é daquele clube ou jogador (o perfil dele).
+static func posts(world: GameWorld, filter: String = "all", limit: int = 80, club_id: int = -1, player_id: int = -1) -> Array:
 	if world == null or not world.has_user():
 		return []
 	var out: Array = []
@@ -42,8 +43,19 @@ static func posts(world: GameWorld, filter: String = "all", limit: int = 80) -> 
 	_from_press(world, out)
 	_from_fans(world, out)
 	var user := world.user_club()
+	if player_id >= 0:
+		_from_player_life(world, out, world.player(player_id), 8)
+	else:
+		var stars: Array = world.squad(user).duplicate()
+		stars.sort_custom(func(a, b): return a.overall > b.overall)
+		for i in mini(3, stars.size()):
+			_from_player_life(world, out, stars[i], 2)
 	var kept: Array = []
 	for p: Dictionary in out:
+		if player_id >= 0 and int(p.get("player", -1)) != player_id:
+			continue
+		if club_id >= 0 and int(p.get("club", -1)) != club_id:
+			continue
 		if _passes(world, p, filter, user):
 			kept.append(p)
 	kept.sort_custom(func(a, b): return float(a["o"]) > float(b["o"]))
@@ -67,8 +79,8 @@ static func _passes(world: GameWorld, p: Dictionary, filter: String, user: Club)
 
 
 ## Os posts mais recentes do clube do usuário e sobre ele (cartão do hub).
-static func latest_for_user(world: GameWorld, n: int = 2) -> Array:
-	return posts(world, "mine", n)
+static func latest_for_user(world: GameWorld, n: int = 3) -> Array:
+	return posts(world, "all", n)
 
 
 # ---------------------------------------------------------------------------
@@ -142,20 +154,85 @@ static func fan_acc(r: RandomNumberGenerator, c: Club) -> Dictionary:
 # Engajamento
 # ---------------------------------------------------------------------------
 
-## Seguidores do perfil oficial: torcida e tamanho do clube.
-static func followers(c: Club) -> int:
-	var base := float(c.fan_base) * (0.6 + c.reputation / 40.0)
-	return int(maxf(3000.0, base))
+## Seguidores do perfil oficial (log10 pela reputação mundial): clube pequeno de interior fica
+## na casa dos milhares, clube médio em centenas de milhares e gigante em dezenas de milhões.
+const FOLLOW_CURVE := [[20.0, 3.3], [30.0, 3.8], [45.0, 4.5], [60.0, 5.2], [75.0, 5.9], [85.0, 6.6], [93.0, 7.35], [100.0, 8.2]]
 
 
-static func _engage(p: Dictionary, c: Club, weight: float) -> void:
+## Seguidores de base: reputação, tamanho da torcida perto do esperado para essa reputação
+## (clube de massa tem mais que o nível do time sugere) e uma variação fixa por clube.
+static func base_followers(c: Club) -> float:
+	var rep := clampf(c.reputation, 20.0, 100.0)
+	var lg := 3.3
+	for i in range(1, FOLLOW_CURVE.size()):
+		var lo: Array = FOLLOW_CURVE[i - 1]
+		var hi: Array = FOLLOW_CURVE[i]
+		if rep <= float(hi[0]):
+			lg = lerpf(float(lo[1]), float(hi[1]), (rep - float(lo[0])) / (float(hi[0]) - float(lo[0])))
+			break
+	var expected := 30.0 * pow(rep, 1.6)
+	var mass := clampf(float(c.fan_base) / expected, 0.5, 2.5)
+	var jitter := 0.85 + float(absi(hash(c.key + "seg")) % 300) / 1000.0
+	return pow(10.0, lg) * pow(mass, 0.8) * jitter
+
+
+## Seguidores agora: a base mais o que a temporada rendeu (campanha boa atrai, ruim espanta).
+static func followers(c: Club, world: GameWorld = null) -> int:
+	return int(maxf(800.0, base_followers(c) * (1.0 + season_growth(c, world))))
+
+
+## Crescimento na temporada (fração): pelos pontos por jogo na liga, proporcional aos jogos feitos.
+static func season_growth(c: Club, world: GameWorld) -> float:
+	if world == null:
+		return 0.0
+	var lg := world.league_of(c.id)
+	if lg == null or not lg.table.has(c.id):
+		return 0.0
+	var row: Dictionary = lg.table[c.id]
+	var pl := int(row.get("pl", 0))
+	if pl == 0:
+		return 0.0
+	var ppg := float(row.get("pts", 0)) / pl
+	var done := clampf(pl / 38.0, 0.0, 1.0)
+	return clampf(0.02 + (ppg - 1.35) * 0.06, -0.05, 0.12) * done
+
+
+## Seguidores de um jogador: nível, idade (jovem em alta atrai mais) e a vitrine do clube.
+static func player_followers(p: Player, world: GameWorld) -> int:
+	var lg := 3.0 + (p.overall - 50) * 0.085
+	var c := world.club(p.club_id) if p.club_id >= 0 else null
+	var f := pow(10.0, lg)
+	if c != null:
+		f += base_followers(c) * 0.012 * pow(p.overall / 80.0, 3.0)
+	var age := p.age(world.year)
+	if age <= 23:
+		f *= 1.25
+	elif age >= 33:
+		f *= 0.85
+	return int(maxf(300.0, f * (0.8 + float(absi(hash(p.id)) % 400) / 1000.0)))
+
+
+## Seguidores de jornalistas (dezenas a centenas de milhares) e do portal de resultados (milhões).
+static func media_followers(acc: Dictionary) -> int:
+	var h := absi(hash(String(acc.get("handle", ""))))
+	if String(acc.get("kind", "")) == "outlet":
+		return 900000 + h % 1600000
+	return 25000 + h % 380000
+
+
+## Curtidas, reposts e comentários: contas grandes engajam proporcionalmente menos.
+static func _engage(p: Dictionary, c: Club, weight: float, world: GameWorld = null) -> void:
+	_engage_f(p, float(followers(c, world)) if c != null else 20000.0, weight)
+
+
+static func _engage_f(p: Dictionary, f: float, weight: float) -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([p["key"], "eng"])
-	var f := float(followers(c)) if c != null else 20000.0
-	var likes := f * 0.012 * weight * r.randf_range(0.55, 1.5)
+	var rate := 0.035 * pow(maxf(1.0, f / 100000.0), -0.15)
+	var likes := f * rate * weight * r.randf_range(0.55, 1.5)
 	p["likes"] = int(maxf(3.0, likes))
-	p["rts"] = int(maxf(0.0, likes * r.randf_range(0.06, 0.18)))
-	p["n_rep"] = int(maxf(1.0, likes * r.randf_range(0.02, 0.07)))
+	p["rts"] = int(maxf(0.0, likes * r.randf_range(0.04, 0.12)))
+	p["n_rep"] = int(maxf(1.0, likes * r.randf_range(0.015, 0.05)))
 
 
 ## 1234 → "1,2 mil"; 2500000 → "2,5 mi".
@@ -176,50 +253,39 @@ static func _dec(x: float) -> String:
 	return s.replace(".", ",")
 
 
-## Respostas da torcida. `mood`: good, bad, neutral, rumor, signing, injury, kit_good, kit_mid, kit_bad.
-static func _replies(world: GameWorld, p: Dictionary, c: Club, mood: String, n: int = 2) -> void:
+## Comentários da torcida (SocialComments), com o contexto do post.
+static func _replies(world: GameWorld, p: Dictionary, ctx: Dictionary, n: int = 3) -> void:
+	p["replies"] = SocialComments.make(world, String(p["key"]), ctx, n, int(p.get("likes", 0)))
+
+
+## Contexto básico de um clube: técnico, maior rival, posição e sequência na liga.
+static func ctx_for(world: GameWorld, c: Club, kind: String) -> Dictionary:
+	var ctx := {"kind": kind, "club": c, "year": world.year}
 	if c == null:
-		c = world.user_club()
-	var r := RandomNumberGenerator.new()
-	r.seed = hash([p["key"], "rep"])
-	var sn := c.short_name
-	var pool: Array = []
-	match mood:
-		"good":
-			pool = ["Que time! %s é outro patamar esse ano." % sn, "Eu falei que dava. Ninguém acreditou.", "Vamos, %s! Hoje eu durmo feliz." % sn,
-				"Esse elenco tá com fome.", "Quem criticou vai ter que engolir.", "Chora, rival!"]
-		"bad":
-			pool = ["Inadmissível. Cadê a raça?", "Já deu, precisa mudar alguma coisa.", "Eu não aguento mais sofrer com esse time.",
-				"Diretoria, acorda!", "Com esse meio-campo não dá.", "Paciência tem limite."]
-		"rumor":
-			pool = ["Fonte: vozes da cabeça dele.", "Se vier, eu vou buscar no aeroporto.", "Acredito quando vir a camisa na mão.",
-				"Esse aí erra mais do que acerta.", "Traz logo, %s!" % sn, "Mais um que vai ficar no quase."]
-		"signing":
-			pool = ["Bem-vindo! Honra essa camisa.", "Gostei da contratação. Era o que faltava.", "Quero ver jogar primeiro.",
-				"Chegou o reforço!", "Ele era craque no FIFA, confia.", "Tá pago, diretoria."]
-		"injury":
-			pool = ["Força, guerreiro!", "Volta mais forte.", "Que azar, logo agora.", "Departamento médico precisa rever isso aí."]
-		"kit_good":
-			pool = ["Manto lindo demais. Já comprei o meu.", "Respeitou a história do clube. Nota 10.", "Esse é o uniforme do título, anota.",
-				"A reserva ficou um espetáculo.", "Fornecedora acertou em cheio esse ano.", "Vou de terceiro uniforme, sem dúvida."]
-		"kit_mid":
-			pool = ["O titular ficou bom, o terceiro eu não sei não.", "Nada demais, mas dá pro gasto.", "Queria algo mais ousado.",
-				"Bonito na foto, quero ver em campo.", "A gola podia ser outra."]
-		"kit_bad":
-			pool = ["Quem aprovou isso?", "Cadê as cores do clube?", "Parece uniforme de time de várzea.", "Não compro nem na promoção.",
-				"Devolve o do ano passado.", "Isso não é o %s." % sn]
-		_:
-			pool = ["Vamos, %s!" % sn, "Seguimos.", "Tá difícil prever esse campeonato.", "Bora pra próxima.", "Olho nesse aí."]
-	RngUtil.shuffle(r, pool)
-	var out: Array = []
-	var used: Dictionary = {}
-	for i in mini(n, pool.size()):
-		var a := fan_acc(r, c)
-		while used.has(a["handle"]):
-			a = fan_acc(r, c)
-		used[a["handle"]] = true
-		out.append({"acc": a, "text": String(pool[i]), "likes": int(float(p.get("likes", 10)) * r.randf_range(0.01, 0.08))})
-	p["replies"] = out
+		return ctx
+	ctx["manager"] = world.manager_name if world.is_user_club(c.id) else People.coach_name(world, c.id)
+	if not c.rivals.is_empty():
+		ctx["rival"] = world.club(int(c.rivals[0]))
+	var lg := world.league_of(c.id)
+	if lg != null and lg.table.has(c.id) and int(lg.table[c.id]["pl"]) > 0:
+		ctx["pos"] = CompetitionManager.position_of(lg, c.id)
+		ctx["streak"] = _streak(String(lg.table[c.id].get("form", "")))
+	return ctx
+
+
+## "VVEVV" → 2 (duas vitórias seguidas); "EDD" → -2.
+static func _streak(form: String) -> int:
+	if form == "":
+		return 0
+	var last := form[form.length() - 1]
+	if last not in ["V", "D"]:
+		return 0
+	var n := 0
+	for i in range(form.length() - 1, -1, -1):
+		if form[i] != last:
+			break
+		n += 1
+	return n if last == "V" else -n
 
 
 static func _post(key: String, acc: Dictionary, text: String, y: int, d: int, sub: float = 0.0) -> Dictionary:
@@ -298,7 +364,7 @@ static func _news_post(world: GameWorld, n: NewsEvent, c: Club, pl: Player, key:
 				}
 				p = _post(key, player_acc(world, pl), String(RngUtil.pick(r, lines[cat])), n.year, n.day)
 				p["media"] = {"type": "player", "player": pl.id}
-				mood = "good"
+				mood = "player"
 			else:
 				p = _post(key, outlet_acc(world), n.title, n.year, n.day)
 		"goleada", "zebra", "classico_vitoria", "lider", "sequencia_vitorias", "copa_avanca", "estadual_avanca", "copa_classificado", "estadual_classificado", "mundial_classificado":
@@ -313,10 +379,10 @@ static func _news_post(world: GameWorld, n: NewsEvent, c: Club, pl: Player, key:
 			if c != null:
 				p = _post(key, club_acc(c), ("É CAMPEÃO! " if cat != "acesso" else "SUBIMOS! ") + n.title + "\n" + _tags(c, "Historia"), n.year, n.day)
 				p["media"] = {"type": "trophy", "club": c.id, "title": n.title}
-				imp += 3.0
+				imp += 1.5
 			else:
 				p = _post(key, outlet_acc(world), n.title, n.year, n.day)
-			mood = "good"
+			mood = "title"
 		"sequencia_derrotas", "sem_vencer", "rebaixamento", "copa_eliminado", "estadual_eliminado", "classico_empate":
 			if c != null and r.randf() < 0.55:
 				var cry := ["Protesto marcado para o próximo treino. Chega!", "Cobrança é pouco. Queremos respeito à camisa.", "O torcedor não merece isso. Acorda, %s!" % c.short_name]
@@ -338,7 +404,7 @@ static func _news_post(world: GameWorld, n: NewsEvent, c: Club, pl: Player, key:
 				imp += 1.5
 			else:
 				p = _post(key, outlet_acc(world), n.title, n.year, n.day)
-			mood = "good"
+			mood = "player"
 		"demissao", "novo_tecnico", "diretoria_ultimato":
 			if c != null and cat == "novo_tecnico":
 				p = _post(key, club_acc(c), n.title + "\nBoa sorte na nova caminhada.", n.year, n.day)
@@ -352,8 +418,25 @@ static func _news_post(world: GameWorld, n: NewsEvent, c: Club, pl: Player, key:
 	p["cat"] = cat
 	p["club"] = c.id if c != null else int(p["acc"].get("club", -1))
 	p["player"] = pl.id if pl != null else int(p["acc"].get("player", -1))
-	_engage(p, home, imp)
-	_replies(world, p, home, mood)
+	var ak := String(p["acc"]["kind"])
+	if ak == "player" and pl != null:
+		_engage_f(p, float(player_followers(pl, world)), imp * 0.8)
+	elif ak == "press" or ak == "outlet":
+		_engage_f(p, float(media_followers(p["acc"])), imp * 0.7)
+	else:
+		_engage(p, home, imp, world)
+	var ctx := ctx_for(world, home, mood)
+	ctx["player"] = pl
+	if mood == "player" or mood == "title":
+		ctx["hero"] = pl
+	if pl != null:
+		ctx["age"] = pl.age(world.year)
+	if mood == "signing" and c != null and pl != null:
+		ctx["upgrade"] = pl.overall >= _squad_avg(world, c)
+	if String(p["acc"]["kind"]) == "press":
+		ctx["journo"] = String(p["acc"]["name"])
+		ctx["acc"] = PressRoom.accuracy(world, People.journalist(world, int(p["acc"].get("jid", -1))))
+	_replies(world, p, ctx, 3 if mine else 2)
 	return p
 
 
@@ -397,9 +480,31 @@ static func _from_user_games(world: GameWorld, out: Array) -> void:
 		var p := _post(key, club_acc(user), text, world.year, f.slot, 0.5)
 		p["media"] = {"type": "score", "home": f.home, "away": f.away, "hg": f.hg, "ag": f.ag, "comp": f.comp, "pen_h": f.pen_h, "pen_a": f.pen_a}
 		p["cat"] = "jogo"
-		_engage(p, user, 2.2 if won else 1.4)
-		_replies(world, p, user, "good" if won else ("bad" if lost else "neutral"), 3)
+		_engage(p, user, 2.2 if won else 1.4, world)
+		var ctx := ctx_for(world, user, "win" if won else ("loss" if lost else "draw"))
+		ctx["opp"] = opp
+		ctx["gf"] = gf
+		ctx["ga"] = ga
+		ctx["hero"] = motm if motm != null and motm.club_id == user.id else _top_scorer(world, f, home_side)
+		ctx["weak"] = _weak_link(world, user, r)
+		_replies(world, p, ctx, 3)
 		out.append(p)
+		var hero: Player = ctx["hero"]
+		if won and hero != null and r.randf() < 0.65:
+			var lines := ["Que noite! Obrigado, torcida.", "Três pontos e trabalho seguindo. Vamos, %s!" % user.short_name,
+				"Feliz por ajudar o grupo. Isso aqui é %s!" % user.short_name, "Mais uma. Foco no próximo jogo."]
+			if gf - ga >= 3:
+				lines.append("Atropelo! Noite perfeita.")
+			var hp := _post(key + "h", player_acc(world, hero), String(RngUtil.pick(r, lines)), world.year, f.slot, 0.6)
+			hp["media"] = {"type": "player", "player": hero.id}
+			hp["cat"] = "jogador"
+			hp["club"] = user.id
+			_engage_f(hp, float(player_followers(hero, world)), 1.5)
+			var hctx := ctx_for(world, user, "player")
+			hctx["player"] = hero
+			hctx["hero"] = hero
+			_replies(world, hp, hctx, 2)
+			out.append(hp)
 
 
 ## Frases da coletiva: o setorista repercute o que o treinador disse.
@@ -421,8 +526,8 @@ static func _from_press(world: GameWorld, out: Array) -> void:
 		p["cat"] = "coletiva"
 		p["club"] = user.id
 		p["media"] = {"type": "press", "club": user.id}
-		_engage(p, user, 1.6)
-		_replies(world, p, user, "neutral")
+		_engage_f(p, float(media_followers(p["acc"])), 1.8)
+		_replies(world, p, ctx_for(world, user, "coletiva"), 3)
 		out.append(p)
 
 
@@ -437,8 +542,8 @@ static func _from_fans(world: GameWorld, out: Array) -> void:
 		var p := _post(key, fans_acc(world, user), "Hoje na arquibancada: %s" % String(ch.get("t", "")), world.year, _turn_day(world, int(ch.get("turn", 0))), 0.8)
 		p["cat"] = "torcida"
 		var sup := float(f.get("support", 50.0))
-		_engage(p, user, 0.9)
-		_replies(world, p, user, "good" if sup >= 50.0 else "bad")
+		_engage(p, user, 0.9, world)
+		_replies(world, p, ctx_for(world, user, "good" if sup >= 50.0 else "bad"), 2)
 		out.append(p)
 
 
@@ -500,8 +605,11 @@ static func kit_post(world: GameWorld, c: Club, y: int, kits: Dictionary, prev: 
 	var rec := kit_reception(c, kits, prev)
 	p["reception"] = rec
 	var w := 2.4 * (0.6 + float(rec["score"]) / 100.0)
-	_engage(p, c, w if world.is_user_club(c.id) else w * 0.7)
-	_replies(world, p, c, String(rec["mood"]), 3)
+	_engage(p, c, w if world.is_user_club(c.id) else w * 0.7, world)
+	var ctx := ctx_for(world, c, String(rec["mood"]))
+	ctx["notes"] = rec["notes"]
+	ctx["brand"] = brand if brand != "" else "a fornecedora"
+	_replies(world, p, ctx, 3)
 	return p
 
 
@@ -554,3 +662,83 @@ static func kit_reception(c: Club, kits: Dictionary, prev: Dictionary) -> Dictio
 	var label := "Aprovado pela torcida" if s >= 72 else ("Boa aceitação" if s >= 56 else ("Divide opiniões" if s >= 40 else "Rejeitado pela torcida"))
 	var mood := "kit_good" if s >= 60 else ("kit_mid" if s >= 40 else "kit_bad")
 	return {"score": s, "label": label, "mood": mood, "notes": notes}
+
+
+## Artilheiro do jogo do lado do usuário.
+static func _top_scorer(world: GameWorld, f: Fixture, home_side: bool) -> Player:
+	var side := 0 if home_side else 1
+	var cnt: Dictionary = {}
+	for g in f.goals:
+		if int(g[1]) == side and int(g[2]) >= 0:
+			cnt[int(g[2])] = int(cnt.get(int(g[2]), 0)) + 1
+	var best := -1
+	for pid in cnt:
+		if best < 0 or int(cnt[pid]) > int(cnt[best]):
+			best = pid
+	return world.player(best) if best >= 0 else null
+
+
+## Alguém do time em má fase para a torcida cornetar.
+static func _weak_link(world: GameWorld, c: Club, r: RandomNumberGenerator) -> Player:
+	var cands: Array = []
+	for p: Player in world.squad(c):
+		if p.minutes_season > 0 and not p.recent_ratings.is_empty():
+			cands.append(p)
+	if cands.is_empty():
+		return null
+	cands.sort_custom(func(a, b): return a.form() < b.form())
+	return cands[mini(cands.size() - 1, r.randi_range(0, 2))]
+
+
+static func _squad_avg(world: GameWorld, c: Club) -> float:
+	var sq := world.squad(c)
+	if sq.is_empty():
+		return 60.0
+	var ovrs: Array = []
+	for p: Player in sq:
+		ovrs.append(p.overall)
+	ovrs.sort()
+	ovrs.reverse()
+	var tot := 0.0
+	var n := mini(14, ovrs.size())
+	for i in n:
+		tot += float(ovrs[i])
+	return tot / n
+
+
+## O dia a dia do jogador nas redes: treino, folga, recuperação, recado antes do jogo.
+static func _from_player_life(world: GameWorld, out: Array, p: Player, keep: int) -> void:
+	if p == null or p.club_id < 0 or world.season == null:
+		return
+	var c := world.club(p.club_id)
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([p.id, world.year, "vida"])
+	var today := world.current_day()
+	var days: Array = []
+	var d := r.randi_range(0, 5)
+	while d <= today:
+		days.append(d)
+		d += r.randi_range(6, 15)
+	var start := maxi(0, days.size() - keep)
+	for i in range(start, days.size()):
+		var day := int(days[i])
+		var pr := RandomNumberGenerator.new()
+		pr.seed = hash([p.id, world.year, day])
+		var lines: Array = ["Treino concluído. Seguimos trabalhando.", "Foco total. Vamos, %s!" % c.short_name, "Dia de folga com a família.",
+			"Obrigado pelo carinho de sempre, torcida.", "Trabalho invisível: academia antes de todo mundo chegar.", "Mais um dia vestindo essa camisa."]
+		if p.is_injured() and i == days.size() - 1:
+			lines = ["Recuperação a mil. Volto mais forte.", "Um dia de cada vez. Obrigado pelas mensagens.", "Fisioterapia em dia. Logo estou de volta."]
+		elif p.form() >= 7.3:
+			lines.append_array(["Fase boa é fruto de trabalho.", "Confiança lá em cima. Bora!"])
+		elif p.form() > 0.0 and p.form() < 6.2:
+			lines.append_array(["Fase difícil, mas não abaixo a cabeça.", "Sei que posso mais. Vou dar a volta por cima."])
+		var key := "v%d-%d-%d" % [p.id, world.year, day]
+		var post := _post(key, player_acc(world, p), String(RngUtil.pick(pr, lines)), world.year, day, 0.3)
+		post["cat"] = "jogador"
+		post["club"] = p.club_id
+		_engage_f(post, float(player_followers(p, world)), 0.8)
+		var ctx := ctx_for(world, c, "player")
+		ctx["player"] = p
+		ctx["hero"] = p
+		_replies(world, post, ctx, 2)
+		out.append(post)

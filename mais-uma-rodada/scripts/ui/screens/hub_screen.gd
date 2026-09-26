@@ -250,7 +250,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
 		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
-		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club())) + " seguidores", func(): UIManager.push("social")],
+		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club(), w)) + " seguidores", func(): UIManager.push("social")],
 	]
 	for it in items:
 		var v := UIKit.vbox(4)
@@ -525,15 +525,20 @@ func _news_card(w: GameWorld) -> Control:
 
 ## O post mais recente sobre o seu clube nas redes.
 func _social_card(w: GameWorld) -> Control:
-	var posts := SocialFeed.latest_for_user(w, 1)
+	var posts := SocialFeed.latest_for_user(w, 3)
 	if posts.is_empty():
 		return null
-	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Nas redes"))
-	var post := SocialPost.make(w, posts[0], false)
-	card.add_child(post)
-	card.add_child(UIKit.button("Abrir as redes sociais", "GhostButton", func(): UIManager.push("social"), "chat"))
-	return UIKit.card_panel(card)
+	var card := UIKit.vbox(12)
+	var head := UIKit.hbox(8)
+	var sec := UIKit.section("Feed das redes")
+	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(sec)
+	head.add_child(UIKit.label("%s · %s seguidores" % [SocialFeed.club_acc(w.user_club())["handle"], SocialFeed.count(SocialFeed.followers(w.user_club(), w))], "Small"))
+	card.add_child(head)
+	for p in posts:
+		card.add_child(SocialPost.make(w, p, false))
+	card.add_child(UIKit.button("Abrir o feed completo", "GhostButton", func(): UIManager.push("social"), "chat"))
+	return card
 
 
 func _form_card(w: GameWorld, club: Club) -> Control:
