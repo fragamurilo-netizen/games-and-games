@@ -974,7 +974,108 @@ static func _expire_offers(world: GameWorld) -> void:
 
 ## Contratos que vencem agora: IA renova quem vale a pena; o resto (e os do usuário não renovados) sai.
 ## Retorna jogadores que deixaram o clube do usuário.
+# ---------------------------------------------------------------------------
+# Pré-contrato (Bosman): no último ano, da metade da temporada em diante, o jogador pode assinar
+# com outro clube e chega de graça quando o contrato acaba. world.stats["pre"] = {id: {club, wage, years, deal}}
+# ---------------------------------------------------------------------------
+
+static func season_progress(world: GameWorld) -> float:
+	if world.season == null or world.season.calendar.is_empty():
+		return 0.0
+	return float(world.season.day) / float(world.season.calendar.size())
+
+
+static func precontract_of(world: GameWorld, p: Player) -> Dictionary:
+	return world.stats.get("pre", {}).get(str(p.id), {})
+
+
+## "" se pode receber proposta de pré-contrato do clube `c`; senão o motivo.
+static func precontract_block(world: GameWorld, p: Player, c: Club) -> String:
+	if p.club_id < 0 or p.club_id == c.id:
+		return "Só vale para jogador com contrato em outro clube."
+	if p.contract_end > world.year:
+		return "O contrato dele não termina nesta temporada."
+	if season_progress(world) < 0.5:
+		return "Pré-contrato só a partir da metade da temporada (últimos meses de contrato)."
+	if not precontract_of(world, p).is_empty():
+		return "Ele já assinou pré-contrato."
+	if not p.loan.is_empty() or p.retiring:
+		return "Ele não pode assinar agora."
+	return ""
+
+
+static func user_precontract(world: GameWorld, p: Player, wage: int, years: int, deal: Dictionary = {}) -> Dictionary:
+	var user := world.user_club()
+	var why := precontract_block(world, p, user)
+	if why != "":
+		return {"ok": false, "msg": why}
+	if ClubEvents.banned(world, user):
+		return {"ok": false, "msg": "Clube punido (transfer ban): não pode inscrever reforços."}
+	var r := user_terms(world, p, wage, years, deal)
+	if r["result"] != "accepted":
+		return {"ok": false, "msg": r["msg"], "wage": r.get("wage", 0), "result": r["result"]}
+	_register_pre(world, p, user, wage, years, deal)
+	return {"ok": true, "msg": "%s assinou pré-contrato: chega de graça no fim da temporada!" % p.display_name()}
+
+
+static func _register_pre(world: GameWorld, p: Player, c: Club, wage: int, years: int, deal: Dictionary) -> void:
+	var pre: Dictionary = world.stats.get("pre", {})
+	pre[str(p.id)] = {"club": c.id, "wage": wage, "years": years, "deal": deal}
+	world.stats["pre"] = pre
+	var from := world.club(p.club_id)
+	var body := "%s, que termina contrato com o %s, assinou pré-contrato e defende o %s a partir da próxima temporada." % [p.display_name(), from.short_name if from != null else "?", c.short_name]
+	var near := world.is_user_club(c.id) or world.is_user_club(p.club_id)
+	if near or p.overall >= 78:
+		NewsManager.post_raw(world, "%s acerta com o %s" % [p.display_name(), c.short_name], body, c.id, p.id, NewsEvent.IMP_HIGH if near else NewsEvent.IMP_NORMAL, "mercado")
+	if world.is_user_club(p.club_id):
+		InboxManager.send(world, "diretoria", "%s assinou pré-contrato" % p.display_name(), body + " Sem renovação, ele sai de graça.")
+
+
+## IA: clubes assinam pré-contrato com jogadores em fim de contrato (inclusive os do usuário que
+## não foram renovados). Chamado a cada data.
+static func ai_precontracts(world: GameWorld) -> void:
+	if season_progress(world) < 0.5:
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([world.world_seed, world.year, world.season.day, "pre"])
+	for p: Player in world.players.values():
+		if p.club_id < 0 or p.contract_end > world.year or p.overall < 60 or p.age(world.year) > 32:
+			continue
+		if not precontract_of(world, p).is_empty() or not p.loan.is_empty() or p.retiring:
+			continue
+		var ch := 0.012 + maxf(0.0, float(p.overall) - 70.0) * 0.002
+		if world.is_user_club(p.club_id):
+			ch *= 1.5 # o empresário do jogador sem renovação ouve propostas
+		if rng.randf() >= ch:
+			continue
+		var cur := world.club(p.club_id)
+		var suitor := MarketAI.realistic_suitor(world, p, maxf(20.0, cur.reputation - 10.0) if cur != null else 20.0, rng)
+		if suitor == null or ClubEvents.banned(world, suitor):
+			continue
+		_register_pre(world, p, suitor, wage_ask(world, p, suitor), preferred_years(world, p), {})
+
+
+## Fim de temporada: quem tem pré-contrato muda de clube de graça.
+static func complete_precontracts(world: GameWorld) -> Array:
+	var moved: Array = []
+	var pre: Dictionary = world.stats.get("pre", {})
+	for k in pre.keys():
+		var p := world.player(int(k))
+		var d: Dictionary = pre[k]
+		var c := world.club(int(d.get("club", -1)))
+		if p == null or c == null or p.contract_end > world.year:
+			pre.erase(k)
+			continue
+		complete_transfer(world, p, c, 0, int(d["wage"]), int(d["years"]))
+		apply_deal(world, p, c, -1, 0, d.get("deal", {}))
+		moved.append(p)
+		pre.erase(k)
+	world.stats["pre"] = pre
+	return moved
+
+
 static func process_expiring_contracts(world: GameWorld) -> Array:
+	complete_precontracts(world)
 	var left_user: Array = []
 	for p: Player in world.players.values().duplicate():
 		if p.club_id < 0 or p.contract_end > world.year:

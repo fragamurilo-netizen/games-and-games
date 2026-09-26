@@ -4,7 +4,7 @@ extends RefCounted
 
 var w: GameWorld
 var p: Player
-var mode: String # "buy" | "free" | "renew" | "sell"
+var mode: String # "buy" | "free" | "renew" | "sell" | "pre" (pré-contrato)
 var fee: int = 0
 var agreed_fee: int = -1
 var wage: int = 0
@@ -47,7 +47,7 @@ func _init_values() -> void:
 			wage = Valuation.wage_demand(p, w.user_club(), w.year)
 		_:
 			wage = TransferManager.wage_ask(w, p, w.user_club())
-	if mode == "free":
+	if mode == "free" or mode == "pre":
 		wage = TransferManager.wage_ask(w, p, w.user_club())
 
 
@@ -78,7 +78,7 @@ func _render() -> void:
 	head.add_child(UIKit.portrait(p, club, w.year, 72))
 	var t := UIKit.vbox(0)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var titles := {"buy": "Proposta por", "free": "Contratar", "renew": "Renovar com", "sell": "Colocar à venda"}
+	var titles := {"buy": "Proposta por", "free": "Contratar", "renew": "Renovar com", "sell": "Colocar à venda", "pre": "Pré-contrato com"}
 	t.add_child(UIKit.label(titles.get(mode, ""), "Caps"))
 	t.add_child(UIKit.label(p.display_name(), "Title"))
 	t.add_child(UIKit.label("%s · %d anos · valor %s" % [Pos.code(p.position), p.age(w.year), Fmt.money(p.value)], "Small"))
@@ -111,6 +111,8 @@ func _render() -> void:
 				_render_terms("Taxa acertada: %s. Agora, o contrato:" % Fmt.money(agreed_fee))
 		"free":
 			_render_terms("Jogador livre: sem taxa de transferência.")
+		"pre":
+			_render_terms("O contrato dele acaba em %d: assinando agora, chega de graça no fim da temporada." % p.contract_end)
 		"renew":
 			_render_terms("Contrato atual: %s até %d." % [Fmt.money_month(p.wage), p.contract_end])
 		"sell":
@@ -354,6 +356,8 @@ func _send_terms() -> void:
 			r = TransferManager.user_sign(w, p, agreed_fee, wage, years, deal)
 		"free":
 			r = TransferManager.user_sign_free(w, p, wage, years, deal)
+		"pre":
+			r = TransferManager.user_precontract(w, p, wage, years, deal)
 		"renew":
 			var rr := TransferManager.renewal_terms(w, p, wage, years, deal)
 			if rr["result"] == "accepted":

@@ -55,6 +55,7 @@ static func after_matchday(world: GameWorld, slot: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([world.world_seed, world.year, slot, "clubes"])
 	var first_day := slot <= 1
+	TransferManager.ai_precontracts(world)
 	var PER_SEASON := maxf(20.0, float(world.season.calendar.size()))
 	for c: Club in world.clubs:
 		if c.league_id == "" or world.league(c.league_id) == null:

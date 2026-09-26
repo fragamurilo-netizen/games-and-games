@@ -570,7 +570,7 @@ const GROUP_MOUTH_W: Array = [
 	[4, 1.0, 1.0, 1.0, 0.8, 1.0, 1.0, 0.6, 0.8, 0.4],
 	[3, 0.4, 1.8, 1.2, 0.4, 1.4, 0.5, 0.6, 0.3, 1.6],
 ]
-const TATTOOS: Array[String] = ["Sem tatuagem", "Escrita", "Tribal", "Estrela", "Asas"]
+const TATTOOS: Array[String] = ["Sem tatuagem", "Escrita", "Tribal", "Estrela", "Asas", "Rosa", "Cruz", "Coroa", "Números romanos", "Terço", "Ramo de folhas", "Manga no ombro", "Nome do filho"]
 const FACE_SHAPE_W: Array[float] = [4.0, 1.8, 2.2, 1.4, 1.1, 1.6, 0.7, 1.4, 1.2, 1.0, 0.9, 0.8]
 const EYE_NAMES: Array[String] = ["Castanho-escuro", "Castanho", "Mel", "Verde", "Azul", "Cinza", "Quase preto",
 	"Âmbar", "Avelã", "Azul-claro", "Azul-acinzentado", "Verde-acinzentado"]
@@ -640,7 +640,7 @@ const ETH_RIDGE: Array[float] = [1.0, 0.95, 0.95, 1.05, 0.85, 0.8, 0.8, 0.8, 0.3
 const ETH_MONOLID: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.02, 0.15, 0.03, 0.0, 0.72, 0.0, 0.0, 0.05, 0.35]
 const ETH_AQUILINE: Array[float] = [0.1, 0.12, 0.2, 0.35, 0.08, 0.3, 0.05, 0.02, 0.0, 0.15, 0.18, 0.02, 0.0]
 ## Genética de barba (média) e de calvície (média).
-const ETH_BEARD_GENE: Array[float] = [0.75, 0.8, 0.9, 0.95, 0.7, 0.35, 0.62, 0.55, 0.28, 0.88, 0.45, 0.55, 0.28]
+const ETH_BEARD_GENE: Array[float] = [0.75, 0.8, 0.9, 0.95, 0.7, 0.35, 0.62, 0.55, 0.16, 0.88, 0.45, 0.55, 0.18]
 const ETH_BALD_GENE: Array[float] = [0.45, 0.45, 0.45, 0.42, 0.35, 0.25, 0.35, 0.32, 0.25, 0.38, 0.3, 0.3, 0.25]
 
 
@@ -911,8 +911,13 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if look.has("sl"):
 		slit = int(look["sl"])
 	f["brow_slit"] = slit
-	var tat_p := 0.07 * (1.4 if age >= 21 and age <= 33 else 0.5)
-	var tattoo := 1 + RngUtil.weighted_index(xrng, [0.4, 0.25, 0.2, 0.15]) if xrng.randf() < tat_p else 0
+	# Tatuagem visível no pescoço/ombro: comum no futebol de hoje (menos no leste asiático e no mundo árabe)
+	var tat_p := 0.13 * (1.4 if age >= 21 and age <= 33 else 0.55)
+	if e in [E_LAT, E_MIX, E_AFR, E_HAE, E_EUR, E_NOR, E_MED]:
+		tat_p *= 1.3
+	elif e in [E_EAS, E_SEA, E_ARB, E_SAS]:
+		tat_p *= 0.45
+	var tattoo := 1 + RngUtil.weighted_index(xrng, [0.16, 0.12, 0.1, 0.08, 0.1, 0.09, 0.07, 0.07, 0.06, 0.05, 0.06, 0.04]) if xrng.randf() < tat_p else 0
 	if look.has("tt"):
 		tattoo = clampi(int(look["tt"]), 0, TATTOOS.size() - 1)
 	f["tattoo"] = tattoo
@@ -958,6 +963,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
 			w *= 1.4
 		w *= _beard_realism()[i]
+		if (e == E_EAS or e == E_SEA) and i != B_NONE and i not in [B_WISPY, B_PEACH, B_STUBBLE]:
+			w *= 0.4 # leste e sudeste asiático: barba rala e pouco comum no futebol
 		bw.append(w)
 	var beard := RngUtil.weighted_index(phase_rng, bw)
 	if beard < 0:

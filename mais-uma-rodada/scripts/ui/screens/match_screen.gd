@@ -1311,11 +1311,13 @@ func _build_strip() -> Control:
 		line.add_child(UIKit.crest(w.club(f.home), 22))
 		var sc := UIKit.label("%s 0–0 %s" % [w.club(f.home).abbr, w.club(f.away).abbr], "H3")
 		sc.add_theme_font_size_override(&"font_size", 19)
+		sc.add_theme_color_override(&"font_color", Color("#F2F4F7")) # fundo sempre escuro: texto claro em qualquer tema
 		line.add_child(sc)
 		line.add_child(UIKit.crest(w.club(f.away), 22))
 		col.add_child(line)
 		var info := UIKit.label("", "Small")
 		info.add_theme_font_size_override(&"font_size", 14)
+		info.add_theme_color_override(&"font_color", Color("#7CFFB2"))
 		info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		info.visible = false
 		col.add_child(info)
@@ -1369,8 +1371,9 @@ func _update_strip(delta: float) -> void:
 				(c["info"] as Label).text = "GOL  %s %d'" % [who, int(g[0])]
 				(c["info"] as Label).visible = true
 			var box: StyleBoxFlat = c["box"]
-			box.bg_color = UIColors.ACCENT.darkened(0.55)
-			box.border_color = UIColors.ACCENT
+			# Gol: verde escuro com borda verde viva (antes a cor do clube escurecida, que sumia com o texto)
+			box.bg_color = Color("#0F3D26")
+			box.border_color = Color("#2ECC71")
 			c["flash"] = 6.0
 			_strip_hold = 3.5
 			var panel: Control = c["panel"]

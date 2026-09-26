@@ -160,6 +160,10 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 	if not p.loan.is_empty():
 		var other := w.club(int(p.loan.get("from", -1)) if int(p.loan.get("from", -1)) != club.id else p.club_id)
 		bits.append(("emprestado ao %s" if int(p.loan.get("from", -1)) == club.id else "emprestado pelo %s") % (other.short_name if other != null else "?"))
+	var pre := TransferManager.precontract_of(w, p)
+	if not pre.is_empty():
+		var pc := w.club(int(pre.get("club", -1)))
+		bits.append("pré-contrato com o %s" % (pc.short_name if pc != null else "?"))
 	v.add_child(UIKit.label(" · ".join(bits), "Small"))
 	h.add_child(v)
 	var right := UIKit.vbox(0)
@@ -176,7 +180,7 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 	var pid := p.id
 	var outer := UIKit.vbox(4)
 	outer.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
-	if p.club_id == club.id and p.loan.is_empty() and yrs <= 1:
+	if p.club_id == club.id and p.loan.is_empty() and yrs <= 1 and TransferManager.precontract_of(w, p).is_empty():
 		var rb := UIKit.button("Renovar contrato", "GhostButton", func(): Negotiation.open(w, p, "renew", refresh), "clock")
 		rb.custom_minimum_size = Vector2(320, 64)
 		rb.size_flags_horizontal = Control.SIZE_SHRINK_END

@@ -146,7 +146,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(head_row)
 	card.add_child(UIKit.comp_stripe(f.comp, 4))
 	var row := UIKit.hbox(6)
-	row.add_child(_team_block(w, w.club(f.home), f))
+	row.add_child(_club_tap(w, _team_block(w, w.club(f.home), f), f.home))
 	var mid := UIKit.vbox(2)
 	mid.alignment = BoxContainer.ALIGNMENT_CENTER
 	var vs := UIKit.label("x", "Big")
@@ -158,7 +158,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	where.add_theme_color_override(&"font_color", UIColors.MUTED if f.neutral else (UIColors.GREEN if f.home == club.id else UIColors.ORANGE))
 	mid.add_child(where)
 	row.add_child(mid)
-	row.add_child(_team_block(w, w.club(f.away), f))
+	row.add_child(_club_tap(w, _team_block(w, w.club(f.away), f), f.away))
 	card.add_child(row)
 	var stadium := UIKit.label(("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city]), "Small")
 	stadium.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -188,6 +188,19 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	sub.add_child(quick)
 	card.add_child(sub)
 	return UIKit.card_panel(card)
+
+
+## Toque no time abre a ficha dele (o seu clube vai para a aba Clube).
+func _club_tap(w: GameWorld, inner: Control, cid: int) -> Control:
+	var expand := inner.size_flags_horizontal
+	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := UIKit.tap_row(inner, func():
+		if w.is_user_club(cid):
+			UIManager.goto("club")
+		else:
+			UIManager.push("club", {"id": cid}), "CardFlat")
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return row
 
 
 func _instant() -> void:
@@ -565,7 +578,7 @@ func _form_card(w: GameWorld, club: Club) -> Control:
 		var mine := f.hg if f.home == club.id else f.ag
 		var theirs := f.ag if f.home == club.id else f.hg
 		row.add_child(UIKit.label("%d x %d" % [mine, theirs], "Stat"))
-		card.add_child(row)
+		card.add_child(_club_tap(w, row, opp.id))
 	return UIKit.card_panel(card)
 
 
@@ -721,7 +734,7 @@ func _upcoming_card(w: GameWorld, club: Club) -> Control:
 		var league := w.league_of(opp.id)
 		if league != null and league.id == club.league_id and int(league.table[opp.id]["pl"]) > 0:
 			row.add_child(UIKit.label("%dº" % CompetitionManager.position_of(league, opp.id), "H3"))
-		card.add_child(row)
+		card.add_child(_club_tap(w, row, opp.id))
 	return UIKit.card_panel(card)
 
 

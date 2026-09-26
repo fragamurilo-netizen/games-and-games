@@ -624,6 +624,20 @@ func to_dict() -> Dictionary:
 	return d
 
 
+## Compacta o histórico na memória (mesmos dados; abre de novo quando alguém lê). Usado depois de
+## gerar o mundo: ~27 mil jogadores com décadas de histórico em dicionários pesam ~180 MB.
+func compact() -> void:
+	if _history_raw == null and _history.size() >= 2:
+		_history_raw = SaveCodec.pack_rows(_history)
+		_history = []
+	if _spells_raw == null and _spells.size() >= 2:
+		_spells_raw = SaveCodec.pack_rows(_spells)
+		_spells = []
+	if _trophies_raw == null and _trophies.size() >= 2:
+		_trophies_raw = SaveCodec.pack_rows(_trophies)
+		_trophies = []
+
+
 ## Lista ainda fechada desde o load vai para o save do jeito que veio (sem abrir e compactar de novo).
 static func _packed(raw: Variant, rows: Array) -> Variant:
 	return raw if raw != null else SaveCodec.pack_rows(rows)

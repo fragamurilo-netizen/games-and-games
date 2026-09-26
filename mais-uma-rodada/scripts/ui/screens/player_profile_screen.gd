@@ -920,6 +920,13 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 			b.disabled = true
 			b.text = "JANELA FECHADA"
 		f.add_child(b)
+		# Fim de contrato: pré-contrato (chega de graça no fim da temporada)
+		var pre := TransferManager.precontract_of(w, p)
+		if not pre.is_empty():
+			var pc := w.club(int(pre.get("club", -1)))
+			f.add_child(UIKit.label("Assinou pré-contrato com o %s." % (pc.short_name if pc != null else "?"), "Small", true))
+		elif TransferManager.precontract_block(w, p, w.user_club()) == "":
+			f.add_child(UIKit.button("PROPOR PRÉ-CONTRATO", "GhostButton", func(): Negotiation.open(w, p, "pre", refresh_cb), "clock"))
 
 
 ## Botão compacto do rodapé: ícone em cima e o nome curto embaixo.

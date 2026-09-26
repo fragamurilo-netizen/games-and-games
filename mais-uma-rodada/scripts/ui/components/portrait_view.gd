@@ -1674,6 +1674,67 @@ func _neck_tattoo() -> void:
 				var base := Vector2(cx - sx * _nwt * 0.2, mid + _s * 0.012)
 				var tip := base + Vector2(sx * _nwt * (0.35 + k * 0.1), -_s * (0.035 - k * 0.006))
 				_r_polyline(PackedVector2Array([base, base.lerp(tip, 0.5) + Vector2(0, -_s * 0.01), tip]), ink, lw, true)
+		5: # rosa: espiral de pétalas e duas folhas
+			var cen := Vector2(cx, mid)
+			var pts5 := PackedVector2Array()
+			for i in 26:
+				var t := float(i) / 25.0
+				var a := t * TAU * 2.2
+				pts5.append(cen + Vector2(cos(a), sin(a)) * _s * (0.004 + 0.02 * t))
+			_r_polyline(pts5, ink, lw, true)
+			for sgn: float in [-1.0, 1.0]:
+				var lf := cen + Vector2(sgn * _s * 0.02, _s * 0.022)
+				_fill(PackedVector2Array([cen + Vector2(0, _s * 0.018), lf + Vector2(0, -_s * 0.006), lf, lf + Vector2(-sgn * _s * 0.008, _s * 0.004)]), ink)
+		6: # cruz
+			var c6 := Vector2(cx, mid)
+			_r_line(c6 + Vector2(0, -_s * 0.03), c6 + Vector2(0, _s * 0.03), ink, lw * 1.6, true)
+			_r_line(c6 + Vector2(-_s * 0.016, -_s * 0.012), c6 + Vector2(_s * 0.016, -_s * 0.012), ink, lw * 1.6, true)
+		7: # coroa
+			var b7 := Vector2(cx - _s * 0.024, mid + _s * 0.012)
+			var w7 := _s * 0.048
+			_r_polyline(PackedVector2Array([b7, b7 + Vector2(0, -_s * 0.024), b7 + Vector2(w7 * 0.25, -_s * 0.012), b7 + Vector2(w7 * 0.5, -_s * 0.03),
+				b7 + Vector2(w7 * 0.75, -_s * 0.012), b7 + Vector2(w7, -_s * 0.024), b7 + Vector2(w7, 0), b7]), ink, lw, true)
+		8: # números romanos (uma data)
+			var y8 := mid
+			var x8 := cx - sx * _nwt * 0.3
+			for i in 9:
+				var tall := rng.randf() < 0.7
+				var px := x8 + sx * i * _s * 0.007
+				if tall:
+					_r_line(Vector2(px, y8 - _s * 0.009), Vector2(px, y8 + _s * 0.009), ink, lw, true)
+				else:
+					_r_line(Vector2(px - _s * 0.004, y8 - _s * 0.009), Vector2(px + _s * 0.004, y8 + _s * 0.009), ink, lw, true)
+		9: # terço: contas descendo pelo pescoço e a cruz
+			for i in 9:
+				var t9 := float(i) / 8.0
+				var p9 := Vector2(cx - sx * _nwt * 0.15 * sin(t9 * PI), lerpf(top, bot - _s * 0.012, t9))
+				_r_circle(p9, maxf(0.7, _s * 0.0032), ink)
+			var cb := Vector2(cx, bot - _s * 0.004)
+			_r_line(cb + Vector2(0, -_s * 0.01), cb + Vector2(0, _s * 0.006), ink, lw, true)
+			_r_line(cb + Vector2(-_s * 0.005, -_s * 0.004), cb + Vector2(_s * 0.005, -_s * 0.004), ink, lw, true)
+		10: # ramo de folhas subindo pelo pescoço
+			var stem := PackedVector2Array()
+			for i in 12:
+				var t10 := float(i) / 11.0
+				stem.append(Vector2(cx + sx * _nwt * 0.12 * sin(t10 * 3.0), lerpf(bot, top, t10)))
+			_r_polyline(stem, ink, lw, true)
+			for i in 5:
+				var q := stem[2 + i * 2]
+				var sgn2 := 1.0 if i % 2 == 0 else -1.0
+				_fill(PackedVector2Array([q, q + Vector2(sgn2 * _s * 0.014, -_s * 0.006), q + Vector2(sgn2 * _s * 0.018, -_s * 0.014), q + Vector2(sgn2 * _s * 0.004, -_s * 0.008)]), ink)
+		11: # manga no ombro: padrão denso aparecendo na borda da camisa
+			var sh := Vector2(_hc.x + sx * _nwt * 1.9, bot + _s * 0.01)
+			for k in 7:
+				var a0 := -PI * 0.5 + sx * (0.2 + k * 0.18)
+				var r0 := _s * (0.018 + (k % 3) * 0.008)
+				_r_polyline(PackedVector2Array([sh + Vector2(cos(a0), sin(a0)) * r0 * 0.4, sh + Vector2(cos(a0 + 0.3), sin(a0 + 0.3)) * r0, sh + Vector2(cos(a0 + 0.6), sin(a0 + 0.6)) * r0 * 0.6]), ink, lw, true)
+		12: # nome do filho em letra cursiva grande, na lateral do pescoço
+			var pts12 := PackedVector2Array()
+			var x0 := cx - sx * _nwt * 0.35
+			for i in 22:
+				var t12 := float(i) / 21.0
+				pts12.append(Vector2(x0 + sx * _nwt * 0.8 * t12, mid + _s * 0.01 * sin(t12 * 26.0) - t12 * _s * 0.018))
+			_r_polyline(pts12, ink, lw * 1.2, true)
 
 
 static func _ink_on(sp: Dictionary, bg: Color) -> Color:

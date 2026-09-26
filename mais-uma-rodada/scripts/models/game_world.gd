@@ -342,7 +342,8 @@ func to_dict(bulk := true) -> Dictionary:
 	}
 
 
-static func from_dict(d: Dictionary) -> GameWorld:
+## `pre_clubs`/`pre_players`: já montados (save em fluxo, carregado bloco a bloco sem juntar tudo).
+static func from_dict(d: Dictionary, pre_clubs: Array = [], pre_players: Array = []) -> GameWorld:
 	var w := GameWorld.new()
 	w.version = int(d.get("version", SAVE_VERSION))
 	w.world_seed = int(d.get("seed", 0))
@@ -351,6 +352,10 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.rng.state = int(d.get("rng_state", 0))
 	w.year = int(d.get("year", 2026))
 	w.season_number = int(d.get("sn", 1))
+	for c in pre_clubs:
+		w.clubs.append(c)
+	for p in pre_players:
+		w.players[(p as Player).id] = p
 	for cd in d.get("clubs", []):
 		w.clubs.append(Club.from_dict(cd))
 	for pd in d.get("players", []):

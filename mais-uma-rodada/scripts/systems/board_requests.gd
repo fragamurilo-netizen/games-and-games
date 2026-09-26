@@ -28,14 +28,9 @@ static func director(world: GameWorld) -> Dictionary:
 
 static func chairman_name(world: GameWorld) -> String:
 	var club := world.user_club()
-	if club.affairs.has("pres"):
-		return String(club.affairs["pres"])
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash([world.world_seed, club.id, "presidente"])
-	var o := NameGenerator.pick_origin(rng, club.nation)
-	var n := NameGenerator.generate(rng, String(o["c"]), {}, {})
-	club.affairs["pres"] = "%s %s" % [n["first"], n["last"]]
-	return String(club.affairs["pres"])
+	if club.affairs.has("pres_note"):
+		return String(club.affairs["pres"]) # presidente real do clube (ex.: a dona da patrocinadora)
+	return String(People.president(world, club.id).get("n", "o presidente"))
 
 
 static func cost_of(world: GameWorld, kind: String, points: int = POINTS) -> int:

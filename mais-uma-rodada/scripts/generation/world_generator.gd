@@ -44,6 +44,8 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	SponsorManager.ensure_all(w) # patrocinadores e fornecedoras da IA, por país
 	if world_type == "padrao":
 		WorldEvents.seed_real_situation(w) # donos, SAFs e crises que já existem no começo do jogo
+	for p: Player in w.players.values():
+		p.compact() # histórico compactado na memória (o celular agradece)
 	return w
 
 
