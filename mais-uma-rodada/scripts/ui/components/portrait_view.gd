@@ -2831,9 +2831,12 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 			var crest := PackedVector2Array()
 			for q in rough:
 				crest.append(_cl(_px(q.x, q.y)))
-				var cc := _hair_col(crest[i], 0.3 + 0.6 * clampf(-(q.y + 0.6) / 0.8, 0.0, 1.0), float(i) / 7.0, 0.2).darkened(0.12 if q.x > 0.0 else 0.0)
-				# A base da crista nasce do degradê (meio transparente), não cola na testa como um chapéu
-				ccol.append(Color(cc, 0.45 if i == 0 or i == shape.size() - 1 else 1.0))
+			var ccen := _px(0.0, -0.95 - h * 0.35)
+			_radial(ccen, crest, _rings(5), func(p: Vector2, t: float, _i: int) -> Color:
+				var q := _uv(p)
+				var up := clampf(-(q.y + 0.6) / (0.5 + h), 0.0, 1.0)
+				var cc := _hair_col(p, 0.35 + 0.6 * up, float(_i) / 40.0, 0.2).darkened(0.1 * smoothstep(0.0, 0.3, q.x))
+				return Color(cc, 1.0 - smoothstep(0.85, 1.0, t) * 0.35 * float(q.y > hl0 - 0.1)))
 			if faux:
 				for i in 7:
 					var ux := lerpf(-0.3, 0.3, i / 6.0)
@@ -3223,6 +3226,7 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 			# Mechas que caem sobre a testa: duas fileiras de tufos curvos que se sobrepõem (a de trás
 			# mais escura), pontas desencontradas e sombra suave embaixo (não um serrote de triângulos)
 			var crop := kind == "crop"
+			var sx := float(f["part_side"])
 			# Mechas finas e sobrepostas que afinam e ficam transparentes na ponta (dente de serra
 			# de triângulos opacos parecia papel recortado)
 			var locks := 17 if not crop else 21
