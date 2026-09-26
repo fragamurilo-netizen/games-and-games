@@ -57,7 +57,13 @@ func refresh() -> void:
 
 
 func _tabs_row(p: Player) -> Control:
-	var row := UIKit.hbox(8)
+	# Controle segmentado: as três abas numa pílula só, com o comparador ao lado
+	var outer := UIKit.hbox(10)
+	var seg := UIKit.card("CardFlat", 0)
+	var seg_panel := UIKit.card_panel(seg)
+	seg_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := UIKit.hbox(6)
+	seg.add_child(row)
 	var g := ButtonGroup.new()
 	for t in TABS:
 		var key: String = t[0]
@@ -67,16 +73,17 @@ func _tabs_row(p: Player) -> Control:
 			scroll_to_top())
 		ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(ch)
+	outer.add_child(seg_panel)
 	var pid := p.id
-	row.add_child(UIKit.icon_button("swap", func(): UIManager.push("compare", {"a": pid}), "Comparar"))
-	return row
+	outer.add_child(UIKit.icon_button("swap", func(): UIManager.push("compare", {"a": pid}), "Comparar"))
+	return outer
 
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
 	var card := UIKit.card("Card", 14)
 	var row := UIKit.hbox(18)
-	var pv := UIKit.portrait(p, club, w.year, 176)
+	var pv := UIKit.portrait(p, club, w.year, 184)
 	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(pv)
 	var col := UIKit.vbox(6)
@@ -106,11 +113,6 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		var caps_h := NationalTeamManager.caps_of(w, p.id)
 		nrow.add_child(UIKit.label(nat + ((" · %d jogos, %d gols pela seleção" % [caps_h[0], caps_h[1]]) if caps_h[0] > 0 else ""), "Small", true))
 		names.add_child(nrow)
-	var brow := UIKit.hbox(8)
-	brow.add_child(UIKit.label("%d anos · %s · %d kg" % [p.age(w.year), Fmt.height(p.height), p.weight], "Small"))
-	brow.add_child(FootView.make(p.foot, 24))
-	brow.add_child(UIKit.label(["destro", "canhoto", "ambidestro"][p.foot], "Small"))
-	names.add_child(brow)
 	var born := p.hometown if p.hometown != "" else nat
 	if born != "":
 		names.add_child(UIKit.label("De %s" % born, "Small", true))
@@ -128,6 +130,13 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	col.add_child(top)
 	row.add_child(col)
 	card.add_child(row)
+	# Dados do corpo em quadrinhos iguais (idade, altura, peso, pé), no lugar da linha corrida
+	var facts := UIKit.hbox(8)
+	facts.add_child(_fact(str(p.age(w.year)), "anos"))
+	facts.add_child(_fact(Fmt.height(p.height), "altura"))
+	facts.add_child(_fact("%d kg" % p.weight, "peso"))
+	facts.add_child(_fact(["Destro", "Canhoto", "Ambos"][p.foot], "pé", FootView.make(p.foot, 22)))
+	card.add_child(facts)
 	if club != null:
 		# Toque no clube abre a página dele: faixa larga com escudo, camisa e contrato
 		var cr := UIKit.hbox(10)
@@ -159,7 +168,27 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		tags.add_child(UIKit.pill(String(DatabaseManager.trait_data(t).get("name", t)).to_upper(), UIColors.ACCENT, 16))
 	card.add_child(tags)
 	card.add_child(UIKit.gap(2))
-	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.08)
+	# Brilho atrás do retrato (centro do retrato, em coordenadas do conteúdo do card)
+	return HeroBackdrop.attach_clean(UIKit.card_panel(card), club, Vector2(92, 92))
+
+
+## Quadrinho de dado do cabeçalho: valor em destaque e legenda embaixo, centralizados.
+func _fact(value: String, caption: String, lead: Control = null) -> Control:
+	var v := UIKit.card("CardFlat", 0)
+	var panel := UIKit.card_panel(v)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.self_modulate = Color(1, 1, 1, 0.85)
+	var top := UIKit.hbox(6)
+	top.alignment = BoxContainer.ALIGNMENT_CENTER
+	if lead != null:
+		top.add_child(lead)
+	top.add_child(UIKit.label(value, "H3"))
+	v.add_child(top)
+	var c := UIKit.label(caption.to_upper(), "Caps")
+	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	c.add_theme_font_size_override(&"font_size", 13)
+	v.add_child(c)
+	return panel
 
 
 ## Selo da ficha: overall grande e, embaixo, o potencial em palavras.
@@ -374,22 +403,28 @@ func _attributes(w: GameWorld, p: Player, own: bool) -> Control:
 		head.add_child(UIKit.badge(int(avgs[gi]), 48, 30, 18))
 		card.add_child(UIKit.gap(4))
 		card.add_child(head)
+		# Dois atributos por linha: nome e número em cima, barra fina embaixo
+		var grid := GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override(&"h_separation", 22)
+		grid.add_theme_constant_override(&"v_separation", 10)
 		for a in g[1]:
-			var row := UIKit.hbox(10)
-			var n := UIKit.label(Attr.NAMES[a], "")
-			n.custom_minimum_size.x = 210
-			row.add_child(n)
 			var v := _attr_val(p, int(a), own)
-			var bar := UIKit.bar(v, 100.0, Fmt.rating_color(v), 10)
-			bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			row.add_child(bar)
+			var cell := UIKit.vbox(4)
+			cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var top := UIKit.hbox(6)
+			var n := UIKit.label(Attr.NAMES[a], "")
+			n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			n.custom_minimum_size.x = 60
+			top.add_child(n)
 			var num := UIKit.label(str(v) if own else "~%d" % v, "Mono")
-			num.custom_minimum_size.x = 58
-			num.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			num.add_theme_color_override(&"font_color", Fmt.rating_color(v))
-			row.add_child(num)
-			card.add_child(row)
+			top.add_child(num)
+			cell.add_child(top)
+			cell.add_child(UIKit.bar(v, 100.0, Fmt.rating_color(v), 6))
+			grid.add_child(cell)
+		card.add_child(grid)
 	return UIKit.card_panel(card)
 
 
