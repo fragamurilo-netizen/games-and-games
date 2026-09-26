@@ -50,6 +50,7 @@ static func _pname(p: Player) -> String:
 static func after_matchday(world: GameWorld, results: Array) -> void:
 	if not world.has_user():
 		return
+	world_roundup(world, results)
 	var user := world.user_club()
 	var lid := user.league_id
 	var league: League = world.league(lid)
@@ -78,13 +79,13 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 		if MatchEngine.is_derby(world, f.home, f.away):
 			if diff == 0:
 				data["score"] = "%d x %d" % [f.hg, f.ag]
-				post(world, "classico_empate", data, home.id, -1, imp)
+				_with_score(post(world, "classico_empate", data, home.id, -1, imp), f)
 			else:
-				post(world, "classico_vitoria", data, winner.id, -1, imp)
+				_with_score(post(world, "classico_vitoria", data, winner.id, -1, imp), f)
 			posted += 1
 			continue
 		if absi(diff) >= 4:
-			post(world, "goleada", data, winner.id, -1, imp)
+			_with_score(post(world, "goleada", data, winner.id, -1, imp), f)
 			posted += 1
 			continue
 		if diff != 0 and f.comp == lid:
@@ -93,7 +94,7 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 			if pw - pl >= 10 and pl <= 4:
 				data["pos_w"] = pw
 				data["pos_l"] = pl
-				post(world, "zebra", data, winner.id, -1, imp)
+				_with_score(post(world, "zebra", data, winner.id, -1, imp), f)
 				posted += 1
 		# Hat-trick e primeiro gol (do usuário ou da liga)
 		for side in 2:
@@ -184,6 +185,63 @@ static func on_cup_events(world: GameWorld, events: Array) -> void:
 					post(world, "mundial_classificado", {"club": user.short_name}, user.id, -1, NewsEvent.IMP_HEADLINE)
 
 
+static func _with_score(n: NewsEvent, f: Fixture) -> NewsEvent:
+	n.media = score_media(f)
+	return n
+
+
+static func score_media(f: Fixture) -> Dictionary:
+	return {"type": "score", "home": f.home, "away": f.away, "hg": f.hg, "ag": f.ag, "comp": f.comp}
+
+
+## Pelo mundo: nas grandes ligas estrangeiras, líder novo e goleadas de gigantes viram notícia.
+static func world_roundup(world: GameWorld, results: Array) -> void:
+	var user_nat := world.user_nation()
+	var posted := 0
+	var leagues_today: Dictionary = {}
+	for r in results:
+		var f: Fixture = r["f"]
+		var lg := world.league(f.comp)
+		if lg == null or lg.nation == user_nat or not SeasonManager._is_major(lg):
+			continue
+		leagues_today[lg.id] = lg
+		var diff := f.hg - f.ag
+		if absi(diff) < 4 or posted >= 2:
+			continue
+		var home := world.club(f.home)
+		var away := world.club(f.away)
+		var winner: Club = home if diff > 0 else away
+		var loser: Club = away if diff > 0 else home
+		if maxf(winner.reputation, loser.reputation) < 75.0:
+			continue
+		var sc := "%d x %d" % [maxi(f.hg, f.ag), mini(f.hg, f.ag)]
+		var scorer := _top_scorer_name(world, f, winner.id)
+		var body := "Pela %s, o %s atropelou o %s%s." % [lg.name, winner.short_name, loser.short_name, (" com %s decisivo" % scorer) if scorer != "" else ""]
+		var n := post_raw(world, "%s aplica %s no %s" % [winner.short_name, sc, loser.short_name], body, winner.id, -1, NewsEvent.IMP_NORMAL, "goleada")
+		n.media = score_media(f)
+		posted += 1
+	for lid in leagues_today:
+		var lg: League = leagues_today[lid]
+		if lg.rounds_played() < 4:
+			continue
+		var ids := CompetitionManager.sorted_ids(lg)
+		if ids.is_empty():
+			continue
+		var leader: int = ids[0]
+		var key := "leader_" + String(lid)
+		var last := int(world.stats.get(key, -1))
+		world.stats[key] = leader
+		if leader == last or last < 0:
+			continue
+		var c := world.club(leader)
+		var row: Dictionary = lg.table[leader]
+		var n := post_raw(world, "%s assume a liderança da %s" % [c.short_name, lg.name],
+			"Com %d pontos em %d jogos, o %s passa o %s e lidera o campeonato %s." % [int(row["pts"]), int(row["pl"]), c.short_name,
+			world.club(last).short_name if world.club(last) != null else "antigo líder", DatabaseManager.nation_adj(lg.nation)],
+			leader, -1, NewsEvent.IMP_NORMAL, "lider")
+		n.media = {"type": "crest", "club": leader}
+
+
 static func _top_scorer_name(world: GameWorld, f: Fixture, club_id: int) -> String:
 	var counts := {}
 	var side := 0 if f.home == club_id else 1
@@ -217,19 +275,60 @@ static func on_transfer(world: GameWorld, t: Transfer) -> void:
 	var involves_user := world.is_user_club(t.to_id) or world.is_user_club(t.from_id)
 	var in_div := (to != null and to.league_id == user.league_id) or (from != null and from.league_id == user.league_id)
 	var big := t.fee >= 40_000_000
-	if not involves_user and not (in_div and (t.fee >= Valuation.market_value_of_rating(PlayerGenerator.league_level(user)) or p.overall >= PlayerGenerator.league_level(user))) and not big:
+	# Mercado internacional: craques e valores altos em qualquer país viram notícia.
+	var intl := to != null and to.nation != user.nation and (t.fee >= 20_000_000 or p.overall >= 80 or (p.overall >= 76 and to.reputation >= 78))
+	var national := to != null and to.nation == user.nation and to.tier <= 1 and (t.fee >= 8_000_000 or p.overall >= 76)
+	var major := world.is_user_club(t.to_id) and is_major_signing(world, p, to, t.fee)
+	if not involves_user and not (in_div and (t.fee >= Valuation.market_value_of_rating(PlayerGenerator.league_level(user)) or p.overall >= PlayerGenerator.league_level(user))) and not big and not intl and not national:
 		return
 	var data := {"player": _pname(p), "to": to.short_name if to != null else "", "from": from.short_name if from != null else "",
 		"fee": Fmt.money(t.fee), "age": t.age, "pos": Pos.name_of(p.position).to_lower()}
 	var imp := NewsEvent.IMP_HIGH if involves_user else NewsEvent.IMP_NORMAL
+	if major or (big and not involves_user):
+		imp = NewsEvent.IMP_HEADLINE
+	var n: NewsEvent
 	if world.is_user_club(t.from_id) and t.kind == Transfer.KIND_BUY:
-		post(world, "venda_usuario", data, t.to_id, p.id, imp)
+		n = post(world, "venda_usuario", data, t.to_id, p.id, imp)
 	elif from != null and to != null and (from.is_rival(t.to_id) or to.is_rival(t.from_id)) and t.kind == Transfer.KIND_BUY:
-		post(world, "transferencia_rival", data, t.to_id, p.id, NewsEvent.IMP_HIGH)
+		n = post(world, "transferencia_rival", data, t.to_id, p.id, maxi(imp, NewsEvent.IMP_HIGH))
 	elif t.kind == Transfer.KIND_FREE:
-		post(world, "transferencia_livre", data, t.to_id, p.id, imp)
+		n = post(world, "transferencia_livre", data, t.to_id, p.id, imp)
 	else:
-		post(world, "transferencia", data, t.to_id, p.id, imp)
+		n = post(world, "transferencia", data, t.to_id, p.id, imp)
+	if to != null:
+		n.media = signing_media(p, to, t.fee, t.from_id)
+	if major:
+		world.pending_signings.append({"player": p.id, "club": to.id, "fee": t.fee, "from": t.from_id, "n": p.shirt})
+
+
+## Mídia de apresentação (foto do jogador segurando a camisa do clube novo).
+static func signing_media(p: Player, to: Club, fee: int, from_id: int) -> Dictionary:
+	return {"type": "signing", "player": p.id, "club": to.id, "n": p.shirt, "fee": fee, "from": from_id}
+
+
+## Contratação que merece a apresentação animada: chega para ser um dos 3 melhores do elenco,
+## bate o recorde de compra do clube, é muito acima do nível da liga ou é uma joia rara.
+static func is_major_signing(world: GameWorld, p: Player, club: Club, fee: int) -> bool:
+	if club == null:
+		return false
+	var better := 0
+	for q: Player in world.squad(club):
+		if q.id != p.id and q.overall > p.overall:
+			better += 1
+	if better < 3:
+		return true
+	if p.overall >= PlayerGenerator.league_level(club) + 6.0:
+		return true
+	if p.age(world.year) <= 21 and p.potential >= 84:
+		return true
+	if fee > 0:
+		var record := 0
+		for tr: Transfer in world.transfer_log:
+			if tr.to_id == club.id and tr.player_id != p.id:
+				record = maxi(record, tr.fee)
+		if fee >= maxi(record, 1_000_000) and fee >= int((club.transfer_budget + fee) * 0.35):
+			return true
+	return false
 
 
 static func on_offer_received(world: GameWorld, o: TransferOffer) -> void:

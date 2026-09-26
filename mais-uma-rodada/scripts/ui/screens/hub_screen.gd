@@ -22,6 +22,8 @@ func on_show() -> void:
 		Tutorial.maybe_show()
 		if not tutorial_now and KitDesign.launch_pending(world()):
 			_kit_launch_prompt(world())
+	# Reforço importante fechado fora da negociação (eventos, propostas): apresentação animada.
+	SigningCeremony.play_pending(world())
 
 
 func refresh() -> void:
