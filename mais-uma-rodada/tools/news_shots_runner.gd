@@ -1,6 +1,7 @@
 extends Node
 ## Lógica do news_shots.gd (carregada depois que os autoloads existem).
 var out_dir := "/tmp/news"
+var quick := false
 func _ready() -> void:
 	_run()
 func _frames(n: int) -> void:
@@ -59,6 +60,9 @@ func _run() -> void:
 	await _shot("c02_foto")
 	await _wait(1.9)
 	await _shot("c03_ficha")
+	if quick:
+		get_tree().quit()
+		return
 	UIManager.close_all_modals()
 	var cer := get_tree().root.get_node_or_null("SigningCeremony")
 	if cer != null:
@@ -91,6 +95,16 @@ func _run() -> void:
 	var c2 := get_tree().root.get_node_or_null("SigningCeremony")
 	if c2 != null:
 		c2.get_child(0).call("_end")
+	await _frames(6)
+	await _wait(0.6)
+	await _shot("a00_aviso_conquista")
+	await _wait(8.0)
+	UIManager.push("achievements")
+	await _frames(8)
+	await _shot("a01_conquistas")
+	_scr().scroll().scroll_vertical = 1200
+	await _shot("a02_conquistas_rolado")
+	UIManager.back()
 	await _frames(6)
 	var news_y := 0.0
 	for n in _scr().content().get_children():

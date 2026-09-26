@@ -5,23 +5,8 @@ extends RefCounted
 ## SeasonManager.end_season, antes de as estatísticas da temporada serem zeradas.
 
 ## Conquistas de carreira do treinador (desbloqueadas uma única vez, guardadas em world.stats["ach"]).
-const ACHIEVEMENTS := {
-	"primeira": {"name": "Primeira de muitas", "desc": "Completar a primeira temporada", "icon": "whistle"},
-	"meta": {"name": "Palavra cumprida", "desc": "Cumprir a meta da diretoria", "icon": "check"},
-	"meta3": {"name": "Homem de confiança", "desc": "Cumprir a meta 3 temporadas seguidas", "icon": "shield"},
-	"titulo": {"name": "Levantou a taça", "desc": "Conquistar o primeiro título", "icon": "trophy"},
-	"titulos5": {"name": "Colecionador", "desc": "Chegar a 5 títulos na carreira", "icon": "trophy"},
-	"acesso": {"name": "Subiu!", "desc": "Conquistar um acesso", "icon": "up"},
-	"invicto_casa": {"name": "Alçapão", "desc": "Terminar a liga invicto em casa", "icon": "home"},
-	"ataque": {"name": "Rolo compressor", "desc": "Marcar 2 gols por jogo na liga", "icon": "ball"},
-	"defesa": {"name": "Muralha", "desc": "Sofrer menos de 1 gol por jogo na liga", "icon": "shield"},
-	"artilheiro": {"name": "Tem goleador", "desc": "Ter o artilheiro da liga no elenco", "icon": "star"},
-	"jogos100": {"name": "Cem jogos", "desc": "Chegar a 100 jogos como treinador", "icon": "clock"},
-	"jogos250": {"name": "Veterano da casamata", "desc": "Chegar a 250 jogos como treinador", "icon": "clock"},
-	"temporadas5": {"name": "Longevidade", "desc": "Completar 5 temporadas", "icon": "star"},
-	"cria": {"name": "Cria da casa", "desc": "Um jogador de 21 anos ou menos com 20+ jogos", "icon": "up"},
-}
-const ACH_ORDER: Array[String] = ["primeira", "meta", "meta3", "titulo", "titulos5", "acesso", "invicto_casa", "ataque",
+const ACHIEVEMENTS := Achievements.CATALOG
+const ACH_ORDER: Array[String] = ["primeira", "meta", "meta3", "titulo", "titulos5", "acesso", "liga", "invicto_casa", "ataque",
 	"defesa", "artilheiro", "jogos100", "jogos250", "temporadas5", "cria"]
 
 const GRADES: Array = [
@@ -173,7 +158,6 @@ static func _headline(world: GameWorld, user: Dictionary, rec: Dictionary, grade
 
 ## Verifica as conquistas e devolve só as desbloqueadas agora.
 static func _unlock(world: GameWorld, user: Dictionary, rec: Dictionary, league: League, stars: Dictionary, league_scorer: Dictionary) -> Array:
-	var have: Array = world.stats.get("ach", [])
 	var ms := world.manager_stats
 	var streak := int(world.stats.get("goal_streak", 0))
 	streak = streak + 1 if bool(user.get("goal_met", false)) else 0
@@ -201,11 +185,16 @@ static func _unlock(world: GameWorld, user: Dictionary, rec: Dictionary, league:
 		"jogos250": int(ms.get("games", 0)) >= 250,
 		"temporadas5": int(ms.get("seasons", 0)) >= 5,
 		"cria": young,
+		"liga": bool(user.get("champion", false)) and league.tier == 1,
 	}
 	var new: Array = []
 	for k in ACH_ORDER:
-		if bool(cond[k]) and not have.has(k):
-			have.append(k)
+		if bool(cond[k]) and Achievements.unlock(world, k):
 			new.append(k)
-	world.stats["ach"] = have
+	# Contadores (temporadas, títulos...) que a virada acabou de completar.
+	var before: Array = (world.stats.get("ach", []) as Array).duplicate()
+	Achievements.check_counters(world)
+	for k in world.stats.get("ach", []):
+		if not before.has(k):
+			new.append(k)
 	return new

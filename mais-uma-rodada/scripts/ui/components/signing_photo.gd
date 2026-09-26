@@ -124,31 +124,86 @@ func _draw_desk() -> void:
 	_desk.draw_line(Vector2(w * 0.655, top - h * 0.033), Vector2(w * 0.662, top - h * 0.036), Color("#D4AF37"), maxf(2.0, h * 0.008), true)
 
 
-## Mãos segurando a camisa pelos ombros, e a faixa "OFICIAL".
+## Mãos segurando a camisa pelos ombros: a mão fica atrás do tecido e os quatro dedos dobram
+## por cima da costura do ombro, com nós, unhas, dobras e sombra no pano. Depois, a faixa "OFICIAL".
 func _draw_hands() -> void:
 	var r := Rect2(_shirt.position, _shirt.size)
 	var s := r.size.x
 	for si in 2:
 		var side := -1.0 if si == 0 else 1.0
-		var x := r.position.x + s * (0.5 + side * 0.2)
-		var y := r.position.y + s * 0.085
-		var c := Vector2(x, y)
-		var hw := s * 0.07
-		var hh := s * 0.085
-		# Punho e antebraço descendo por trás da camisa.
-		_hands.draw_set_transform(c, side * 0.18, Vector2(1.0, hh / hw))
-		_hands.draw_circle(Vector2.ZERO, hw, _skin.darkened(0.08), true, -1.0, true)
-		_hands.draw_set_transform_matrix(Transform2D.IDENTITY)
-		# Dedos dobrados por cima da gola.
-		for k in 4:
-			var fx := c.x + (float(k) - 1.5) * hw * 0.48 - side * hw * 0.1
-			var fy := c.y - hh * 0.45 + absf(float(k) - 1.5) * hw * 0.08
-			_hands.draw_circle(Vector2(fx, fy), hw * 0.27, _skin, true, -1.0, true)
-			_hands.draw_line(Vector2(fx - hw * 0.12, fy + hw * 0.18), Vector2(fx + hw * 0.12, fy + hw * 0.18), _skin.darkened(0.25), maxf(1.0, s * 0.004), true)
-		# Polegar por trás, aparecendo na lateral.
-		_hands.draw_circle(c + Vector2(side * hw * 0.85, hh * 0.1), hw * 0.3, _skin.darkened(0.12), true, -1.0, true)
-		# Luz de cima.
-		_hands.draw_circle(c + Vector2(-hw * 0.2, -hh * 0.4), hw * 0.35, Color(1, 1, 1, 0.08), true, -1.0, true)
+		# Costura do ombro da camisa (KitView): sobe da manga até a gola.
+		var c := r.position + Vector2(0.5 + side * 0.225, 0.088) * s
+		_draw_hand(c, s, side * 0.3, side)
+	_draw_tag()
+
+
+func _draw_hand(c: Vector2, s: float, rot: float, side: float) -> void:
+	var fw := s * 0.042 # largura de um dedo
+	var fl := s * 0.105 # quanto o dedo desce na frente da camisa
+	var skin := _skin
+	var shade := skin.darkened(0.3)
+	var lw := maxf(1.0, s * 0.004)
+	_hands.draw_set_transform(c, rot, Vector2.ONE)
+	# Sombra dos dedos no tecido.
+	_hands.draw_colored_polygon(_capsule(Vector2(fw * 0.35, fl * 0.12), fw * 4.3, fl * 1.05, fw * 0.9), Color(0, 0, 0, 0.22))
+	# Dorso da mão aparecendo atrás da costura (só a curva dos nós).
+	var back := _capsule(Vector2(0, -fl * 0.2), fw * 4.4, fl * 0.55, fw * 1.1)
+	_hands.draw_polygon(back, _shaded(back, skin.darkened(0.12), 0.0, fw * 2.2))
+	# Quatro dedos: indicador e médio maiores, anelar e mínimo mais curtos.
+	var lens := [0.92, 1.0, 0.94, 0.8]
+	var widths := [1.0, 1.04, 0.98, 0.86]
+	for k in 4:
+		var i := k if side > 0.0 else 3 - k
+		var fx := (float(k) - 1.5) * fw * 0.98
+		var w := fw * float(widths[i])
+		var l := fl * float(lens[i])
+		var top := -fl * 0.12
+		var poly := _capsule(Vector2(fx, top + l * 0.5), w, l, w * 0.5)
+		_hands.draw_polygon(poly, _shaded(poly, skin, fx - w * 0.5, w))
+		var outline := poly.duplicate()
+		outline.append(poly[0])
+		_hands.draw_polyline(outline, shade, lw, true)
+		# Dobras das falanges.
+		for j in 2:
+			var yy := top + l * (0.34 + j * 0.28)
+			_hands.draw_line(Vector2(fx - w * 0.3, yy), Vector2(fx + w * 0.25, yy + w * 0.05), Color(shade, 0.7), lw * 0.8, true)
+		# Unha na ponta.
+		var tip := Vector2(fx, top + l - w * 0.42)
+		_hands.draw_set_transform(c + tip.rotated(rot), rot, Vector2(1.0, 1.25))
+		_hands.draw_circle(Vector2.ZERO, w * 0.28, skin.lightened(0.35).lerp(Color("#F2D7CF"), 0.35), true, -1.0, true)
+		_hands.draw_set_transform(c, rot, Vector2.ONE)
+		# Brilho do nó.
+		_hands.draw_circle(Vector2(fx - w * 0.12, top + w * 0.05), w * 0.22, Color(1, 1, 1, 0.12), true, -1.0, true)
+	# Polegar atrás do pano, só a ponta saindo pela lateral de fora.
+	var th := _capsule(Vector2(side * fw * 2.35, fl * 0.05), fw * 0.95, fl * 0.5, fw * 0.45)
+	_hands.draw_polygon(th, _shaded(th, skin.darkened(0.18), side * fw * 1.9, fw))
+	_hands.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## Retângulo de cantos redondos centrado em `c` (w × h, raio rr), como polígono.
+static func _capsule(c: Vector2, w: float, h: float, rr: float) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	rr = minf(rr, minf(w, h) * 0.5)
+	var hw := w * 0.5 - rr
+	var hh := h * 0.5 - rr
+	var centers := [Vector2(hw, hh), Vector2(-hw, hh), Vector2(-hw, -hh), Vector2(hw, -hh)]
+	for q in 4:
+		for k in 5:
+			var a := PI * 0.5 * q + PI * 0.5 * float(k) / 4.0
+			out.append(c + (centers[q] as Vector2) + Vector2(cos(a), sin(a)) * rr)
+	return out
+
+
+## Cor por vértice: luz vindo da esquerda (x0 = borda esquerda do dedo, w = largura).
+static func _shaded(poly: PackedVector2Array, base: Color, x0: float, w: float) -> PackedColorArray:
+	var cols := PackedColorArray()
+	for p in poly:
+		var t := clampf((p.x - x0) / maxf(w, 0.001), 0.0, 1.0)
+		cols.append(base.lightened(0.14 * (1.0 - t)).darkened(0.22 * t * t))
+	return cols
+
+
+func _draw_tag() -> void:
 	if not show_tag:
 		return
 	var font := get_theme_font(&"font", &"Stat")

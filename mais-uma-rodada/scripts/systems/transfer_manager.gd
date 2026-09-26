@@ -498,6 +498,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	if world.is_user_club(buyer.id) and buyer.sheet != null:
 		pass # a escalação é revalidada antes do próximo jogo
 	NewsManager.on_transfer(world, t)
+	Achievements.on_transfer(world, p, buyer, seller, fee, world.is_user_club(buyer.id) and NewsManager.is_major_signing(world, p, buyer, fee))
 	if HeartClubs.is_fan(p, buyer.id):
 		HeartClubs.reveal(world, p, "assinatura")
 	return t

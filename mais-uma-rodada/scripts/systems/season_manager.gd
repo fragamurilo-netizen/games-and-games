@@ -453,6 +453,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	Rivalry.on_cup_events(world, cup_events)
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
+	Achievements.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
 	AwardVoting.maybe_announce(world)
 	PressRoom.after_matchday(world)

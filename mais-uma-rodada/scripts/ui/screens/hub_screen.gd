@@ -22,6 +22,8 @@ func on_show() -> void:
 		Tutorial.maybe_show()
 		if not tutorial_now and KitDesign.launch_pending(world()):
 			_kit_launch_prompt(world())
+	# Conquistas de contador de saves antigos e avisos pendentes.
+	Achievements.check_counters(world())
 	# Reforço importante fechado fora da negociação (eventos, propostas): apresentação animada.
 	SigningCeremony.play_pending(world())
 
@@ -253,6 +255,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
 		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club(), w)) + " seguidores", func(): UIManager.push("social")],
+		["star", "Conquistas", "%d de %d" % [Achievements.unlocked(w).size(), Achievements.CATALOG.size()], func(): UIManager.push("achievements")],
 	]
 	for it in items:
 		var v := UIKit.vbox(4)

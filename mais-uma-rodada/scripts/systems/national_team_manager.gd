@@ -647,6 +647,8 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 		var p := world.player(int(pid))
 		if p != null and p.club_id == world.user_club_id:
 			mine.append(p)
+	if mine.size() >= 5:
+		Achievements.unlock(world, "vitrine")
 	if not mine.is_empty():
 		mine.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
 		var parts: Array = mine.map(func(p: Player): return "%s (%s)" % [p.display_name(), DatabaseManager.nation_name(p.nationality)])

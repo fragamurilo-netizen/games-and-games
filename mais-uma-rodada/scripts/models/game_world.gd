@@ -50,6 +50,8 @@ var rivalries: Dictionary = {}
 var inbox: Array = []
 ## Contratações importantes do usuário esperando a apresentação animada (não vai para o save).
 var pending_signings: Array = []
+## Conquistas recém-desbloqueadas esperando o aviso na tela (não vai para o save).
+var pending_achievements: Array = []
 ## Football Memory: confrontos, recordes, momentos e linha do tempo dos atletas (ver FootballMemory).
 var memory: Dictionary = {}
 

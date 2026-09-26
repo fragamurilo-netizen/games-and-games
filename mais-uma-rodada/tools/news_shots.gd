@@ -6,5 +6,10 @@ func _initialize() -> void:
 func _start() -> void:
 	OS.low_processor_usage_mode = false
 	var runner: Node = load("res://tools/news_shots_runner.gd").new()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--out="):
+			runner.set("out_dir", a.substr(6))
+		elif a == "--quick":
+			runner.set("quick", true)
 	DirAccess.make_dir_recursive_absolute(String(runner.get("out_dir")))
 	root.add_child(runner)
