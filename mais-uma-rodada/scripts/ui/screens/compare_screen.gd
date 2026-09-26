@@ -338,4 +338,6 @@ func _career_card(w: GameWorld, pa: Player, pb: Player) -> Control:
 	var caps_a := NationalTeamManager.caps_of(w, pa.id)
 	var caps_b := NationalTeamManager.caps_of(w, pb.id)
 	card.add_child(_line("Jogos pela seleção", int(caps_a[0]), int(caps_b[0]), true, ""))
+	card.add_child(_line("Gols pela seleção", int(caps_a[1]), int(caps_b[1]), true, ""))
+	card.add_child(_line("Assist. pela seleção", int(caps_a[2]), int(caps_b[2]), true, ""))
 	return UIKit.card_panel(card)

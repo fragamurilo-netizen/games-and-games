@@ -18,6 +18,12 @@ var preview_world: GameWorld = null
 var _gen_task: int = -1
 var _gen_result: GameWorld = null
 var _gen_callback: Callable
+## Save em segundo plano: pedido pendente, job em andamento e a thread que grava o arquivo.
+var _save_dirty := false
+var _save_busy := false
+var _save_thread: Thread = null
+var _save_gen := 0 # troca a cada carreira aberta/fechada: um job antigo não grava por cima
+var _save_phase := 0 # 0 parado, 1 montando os blocos, 2 gravando na thread
 
 
 func _ready() -> void:
@@ -76,6 +82,7 @@ func ensure_preview_world(done: Callable) -> void:
 # ---------------------------------------------------------------------------
 
 func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int) -> void:
+	_cancel_save()
 	world = w
 	world.user_club_id = club_id
 	world.manager_name = manager_name.strip_edges() if manager_name.strip_edges() != "" else "Treinador"
@@ -117,6 +124,7 @@ func load_career(save_slot: int) -> bool:
 	var w := SaveManager.load_world(save_slot)
 	if w == null:
 		return false
+	_cancel_save()
 	world = w
 	slot = save_slot
 	matchday = {}
@@ -131,21 +139,110 @@ func load_career(save_slot: int) -> bool:
 	return true
 
 
+## Pede um save. Não trava a tela: os pedidos da mesma hora se juntam num só, os jogadores são
+## serializados aos poucos (alguns milissegundos por quadro) e a compressão e a escrita rodam em
+## outra thread. Sem vídeo (testes) grava na hora.
 func save_now() -> bool:
 	if world == null or slot <= 0 or not matchday.is_empty():
 		return false
-	return SaveManager.save_world(world, slot) == OK
+	if DisplayServer.get_name() == "headless":
+		return SaveManager.save_world(world, slot) == OK
+	_save_dirty = true
+	if not _save_busy:
+		_save_busy = true
+		_run_save.call_deferred()
+	return true
+
+
+## Termina o que estiver pendente agora mesmo (fechar a carreira, app indo para o fundo).
+func save_blocking() -> void:
+	var need := _save_dirty or _save_phase == 1
+	if _save_thread != null:
+		_save_thread.wait_to_finish()
+		_save_thread = null
+		if _save_phase == 2 and not need and world != null:
+			SaveManager.write_meta(world, slot)
+	if need and world != null and slot > 0 and matchday.is_empty():
+		SaveManager.save_world(world, slot)
+	_save_gen += 1 # o job que estava no meio fica sem efeito
+	_save_busy = false
+	_save_dirty = false
+	_save_phase = 0
+
+
+## Troca de carreira: espera a gravação em curso e descarta o job (ele é da carreira anterior).
+func _cancel_save() -> void:
+	if _save_thread != null:
+		_save_thread.wait_to_finish()
+		_save_thread = null
+	_save_gen += 1
+	_save_busy = false
+	_save_dirty = false
+	_save_phase = 0
+
+
+func _run_save() -> void:
+	var gen := _save_gen
+	var w := world
+	var s := slot
+	_save_dirty = false
+	_save_phase = 1
+	var budget := 6 # ms de serialização por quadro
+	var cl: Array = []
+	var pl: Array = []
+	var t0 := Time.get_ticks_msec()
+	for c in w.clubs:
+		cl.append(var_to_bytes(c.to_dict()))
+		if Time.get_ticks_msec() - t0 >= budget:
+			await get_tree().process_frame
+			if gen != _save_gen:
+				return
+			t0 = Time.get_ticks_msec()
+	for p in w.players.values():
+		pl.append(var_to_bytes(p.to_dict()))
+		if Time.get_ticks_msec() - t0 >= budget:
+			await get_tree().process_frame
+			if gen != _save_gen:
+				return
+			t0 = Time.get_ticks_msec()
+	if gen != _save_gen or w != world or not matchday.is_empty():
+		if gen == _save_gen:
+			# Começou uma partida no meio: grava depois dela (finish_match pede o save)
+			_save_phase = 0
+			_save_busy = false
+		return
+	var data := SaveManager.pack_file(w, cl, pl)
+	_save_phase = 2
+	_save_thread = Thread.new()
+	_save_thread.start(SaveManager.write_file.bind(data, s))
+	while _save_thread != null and _save_thread.is_alive():
+		await get_tree().process_frame
+	if _save_thread != null:
+		var err: int = _save_thread.wait_to_finish()
+		_save_thread = null
+		if err == OK and gen == _save_gen:
+			SaveManager.write_meta(w, s)
+	if gen != _save_gen:
+		return
+	_save_phase = 0
+	if _save_dirty:
+		_run_save.call_deferred()
+	else:
+		_save_busy = false
 
 
 func save_copy(to_slot: int) -> bool:
 	if world == null:
 		return false
+	save_blocking()
 	var ok := SaveManager.save_world(world, to_slot) == OK
 	return ok
 
 
 func close_career() -> void:
 	save_now()
+	save_blocking()
+	_save_gen += 1
 	world = null
 	slot = -1
 	matchday = {}
@@ -284,10 +381,13 @@ func end_season() -> Dictionary:
 
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
+		NOTIFICATION_APPLICATION_PAUSED:
+			# Só grava na hora se houver algo pendente (os saves normais já rodam em segundo plano).
+			# Antes gravava sempre, e também a cada perda de foco, travando a volta ao jogo.
 			if matchday.is_empty():
-				save_now()
+				save_blocking()
 		NOTIFICATION_WM_CLOSE_REQUEST:
 			if matchday.is_empty():
 				save_now()
+				save_blocking()
 			get_tree().quit()

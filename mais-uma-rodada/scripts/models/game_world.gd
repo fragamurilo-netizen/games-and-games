@@ -310,13 +310,15 @@ func stat_add(key: String, amount: float = 1.0) -> void:
 # Serialização
 # ---------------------------------------------------------------------------
 
-func to_dict() -> Dictionary:
+## `bulk` false deixa clubes e jogadores de fora: o save os grava em blocos separados (SaveManager).
+func to_dict(bulk := true) -> Dictionary:
 	var cl: Array = []
-	for c in clubs:
-		cl.append(c.to_dict())
 	var pl: Array = []
-	for p in players.values():
-		pl.append(p.to_dict())
+	if bulk:
+		for c in clubs:
+			cl.append(c.to_dict())
+		for p in players.values():
+			pl.append(p.to_dict())
 	var nw: Array = []
 	for n in news:
 		nw.append(n.to_dict())

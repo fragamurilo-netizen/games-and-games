@@ -359,7 +359,7 @@ func _squad(w: GameWorld, c: VBoxContainer) -> void:
 			n.add_theme_color_override(&"font_color", UIColors.ACCENT)
 		v.add_child(n)
 		var caps := NationalTeamManager.caps_of(w, p.id)
-		v.add_child(UIKit.label("%s · %d anos · %d jogos, %d gols" % [cl.short_name if cl != null else "sem clube", p.age(w.year), caps[0], caps[1]], "Small"))
+		v.add_child(UIKit.label("%s · %d anos · %d jogos · %d gols · %d assist." % [cl.short_name if cl != null else "sem clube", p.age(w.year), caps[0], caps[1], caps[2]], "Small"))
 		h.add_child(v)
 		h.add_child(UIKit.badge(p.overall, 52, 36, 22))
 		var pid := p.id

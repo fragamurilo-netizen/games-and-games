@@ -48,6 +48,15 @@ static func text_texture(text: String, requester: CanvasItem) -> Texture2D:
 	return _lookup(key, requester)
 
 
+## Volta do segundo plano: o conteúdo dos SubViewports pode ter sido perdido junto com a
+## superfície; pede um novo desenho de todos.
+static func refresh() -> void:
+	for key in _entries:
+		var vp := _entries[key]["vp"] as SubViewport
+		if vp != null and is_instance_valid(vp):
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
 ## A textura já foi desenhada ao menos uma vez?
 static func is_ready(tex: Texture2D) -> bool:
 	var key: Variant = _by_tex.get(tex.get_instance_id())

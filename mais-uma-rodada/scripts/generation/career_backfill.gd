@@ -317,47 +317,78 @@ static func _cup_games(rng: RandomNumberGenerator, ctx: Dictionary, row: Diction
 	row["cas"] = _poisson(rng, ca * per_a)
 
 
-## Jogos e gols pela seleção antes do jogo começar: todo ano em que ele estava entre os melhores do
-## país (acima da linha de corte da convocação), entra na lista — titular joga quase todas as datas.
+## Jogos, gols e assistências pela seleção antes do jogo começar: todo ano em que ele estava entre
+## os melhores do país (acima da linha de corte da lista de 23), entra na lista. Titular joga quase
+## todas as datas FIFA (7-11 por ano) e, em ano de Copa do Mundo ou de torneio continental, mais
+## 3-6 jogos; quem fica no limite da lista entra de vez em quando. Estreia raramente antes dos 19.
 static func _national_caps(world: GameWorld, rng: RandomNumberGenerator, ctx: Dictionary, p: Player, ovr: Dictionary, age: int) -> void:
 	var cut := float(ctx["nt_cut"].get(p.nationality, 99.0))
+	var confed := String(DatabaseManager.nation(p.nationality).get("confed", ""))
 	var caps := 0
 	var goals := 0
+	var assists := 0
 	var per_goal := 0.0
+	var per_assist := 0.0
 	match Pos.group(p.position):
 		Pos.G_GK:
 			per_goal = 0.0
+			per_assist = 0.003
 		Pos.G_DEF:
 			per_goal = 0.04
+			per_assist = 0.05
 		Pos.G_MID:
 			per_goal = 0.07 + maxf(0.0, float(p.attrs[Attr.FIN]) - 60.0) * 0.004
+			per_assist = 0.1 + maxf(0.0, float(p.attrs[Attr.PAS]) - 60.0) * 0.005
 		_:
 			per_goal = 0.18 + maxf(0.0, float(p.attrs[Attr.FIN]) - 60.0) * 0.009
+			per_assist = 0.1 + maxf(0.0, float(p.attrs[Attr.VIS]) - 60.0) * 0.003
 	if p.position in [Pos.AM, Pos.RW, Pos.LW]:
 		per_goal *= 0.8
+		per_assist *= 1.5
 	var ys: Array = ovr.keys()
 	ys.sort()
 	for y in ys:
 		var a := age - (world.year - int(y))
-		if a < 19:
+		if a < 18 or (a < 19 and rng.randf() < 0.85):
 			continue
 		# A linha de corte de anos atrás é a de hoje (o país não muda tanto de nível).
 		var rel := float(ovr[y]) - cut
 		var n := 0
+		var tier := 0 # 3 titular, 2 rodízio, 1 limite da lista
 		if rel >= 4.0:
 			n = rng.randi_range(7, 11)
+			tier = 3
 		elif rel >= 1.5:
 			n = rng.randi_range(4, 9)
+			tier = 2
 		elif rel >= 0.0:
 			n = rng.randi_range(1, 5)
+			tier = 1
 		elif rel >= -2.0 and rng.randf() < 0.3:
 			n = rng.randi_range(1, 2)
+		if tier > 0 and _tournament_year(confed, int(y)):
+			n += [0, rng.randi_range(0, 2), rng.randi_range(2, 4), rng.randi_range(3, 6)][tier]
 		if p.position == Pos.GK and rel < 3.0:
 			n = int(n * 0.4) # o reserva do goleiro quase não entra
 		caps += n
 		goals += _poisson(rng, n * per_goal)
+		assists += _poisson(rng, n * per_assist)
 	if caps > 0:
-		NationalTeamManager.data(world)["pl"][p.id] = [caps, goals]
+		NationalTeamManager.data(world)["pl"][p.id] = [caps, goals, assists]
+
+
+## Ano com Copa do Mundo ou com o torneio continental da confederação.
+static func _tournament_year(confed: String, y: int) -> bool:
+	if y % 4 == 2:
+		return true # Copa do Mundo (2014, 2018, 2022...)
+	match confed:
+		"UEFA", "CONMEBOL":
+			return y % 4 == 0 or (confed == "CONMEBOL" and y in [2015, 2019, 2021])
+		"CAF", "CONCACAF":
+			return y % 2 == 1
+		"AFC":
+			return y % 4 == 3
+	return false
 
 
 ## Traços que se ganham com a estrada: ídolo de quem tem anos de clube, cascudo de quem já

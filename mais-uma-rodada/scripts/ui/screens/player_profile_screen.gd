@@ -538,6 +538,7 @@ func _career(w: GameWorld, p: Player) -> Control:
 		var row3 := UIKit.hbox(4)
 		row3.add_child(UIKit.stat(str(caps[0]), "jogos"))
 		row3.add_child(UIKit.stat(str(caps[1]), "gols"))
+		row3.add_child(UIKit.stat(str(caps[2]), "assist."))
 		row3.add_child(UIKit.stat("Sim" if NationalTeamManager.is_called(w, p) else "Não", "convocado", UIColors.GREEN if NationalTeamManager.is_called(w, p) else UIColors.MUTED))
 		card.add_child(row3)
 		if not nt_titles.is_empty():

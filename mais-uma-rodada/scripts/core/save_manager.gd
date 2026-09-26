@@ -28,10 +28,30 @@ static func has_save(slot: int) -> bool:
 
 
 ## Grava o mundo no slot. Retorna OK ou o código de erro.
+## Formato 2: cada clube e cada jogador vira um bloco de bytes à parte e o resto do mundo outro.
+## Assim o GameManager monta o save aos poucos (alguns jogadores por quadro) e só a gravação
+## comprimida vai para outra thread, sem travar a tela.
 static func save_world(world: GameWorld, slot: int) -> Error:
+	var cl: Array = []
+	for c in world.clubs:
+		cl.append(var_to_bytes(c.to_dict()))
+	var pl: Array = []
+	for p in world.players.values():
+		pl.append(var_to_bytes(p.to_dict()))
+	var err := write_file(pack_file(world, cl, pl), slot)
+	if err == OK:
+		write_meta(world, slot)
+	return err
+
+
+## Junta os blocos de clubes e jogadores ao resto do mundo (que é serializado aqui, na hora).
+static func pack_file(world: GameWorld, club_blobs: Array, player_blobs: Array) -> Dictionary:
+	return {"magic": MAGIC, "fmt": 2, "head": var_to_bytes(world.to_dict(false)), "cl": club_blobs, "pl": player_blobs}
+
+
+## Escrita atômica do arquivo já montado. Só mexe em bytes prontos: pode rodar em outra thread.
+static func write_file(data: Dictionary, slot: int) -> Error:
 	_ensure_dir()
-	var data := world.to_dict()
-	data["magic"] = MAGIC
 	var path := slot_path(slot)
 	var tmp := path + ".tmp"
 	var f := FileAccess.open_compressed(tmp, FileAccess.WRITE, FileAccess.COMPRESSION_ZSTD)
@@ -46,14 +66,29 @@ static func save_world(world: GameWorld, slot: int) -> Error:
 		if FileAccess.file_exists(path + ".bak"):
 			d.remove(path.get_file() + ".bak")
 		d.rename(path.get_file(), path.get_file() + ".bak")
-	var err := d.rename(tmp.get_file(), path.get_file())
-	if err != OK:
-		return err
-	_write_meta(world, slot)
-	return OK
+	return d.rename(tmp.get_file(), path.get_file())
 
 
-static func _write_meta(world: GameWorld, slot: int) -> void:
+## Abre o formato 2 de volta no dicionário único que o GameWorld.from_dict entende.
+static func _unpack_file(data: Dictionary) -> Variant:
+	if int(data.get("fmt", 1)) < 2:
+		return data
+	var head: Variant = bytes_to_var(data.get("head", PackedByteArray()))
+	if not head is Dictionary:
+		return null
+	var cl: Array = []
+	for b: PackedByteArray in data.get("cl", []):
+		cl.append(bytes_to_var(b))
+	var pl: Array = []
+	for b: PackedByteArray in data.get("pl", []):
+		pl.append(bytes_to_var(b))
+	head["clubs"] = cl
+	head["players"] = pl
+	head["magic"] = MAGIC
+	return head
+
+
+static func write_meta(world: GameWorld, slot: int) -> void:
 	var u := world.user_club()
 	var meta := {
 		"version": GameWorld.SAVE_VERSION,
@@ -97,6 +132,9 @@ static func load_world(slot: int) -> GameWorld:
 		var data: Variant = f.get_var(false)
 		f.close()
 		if not (data is Dictionary) or data.get("magic", "") != MAGIC:
+			continue
+		data = _unpack_file(data)
+		if not data is Dictionary:
 			continue
 		data = migrate(data)
 		if data.is_empty():
