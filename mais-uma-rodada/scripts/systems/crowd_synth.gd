@@ -75,6 +75,8 @@ static func render(prof: Dictionary) -> PackedFloat32Array:
 			_pattern(buf, beat, [0, 8], "bombo", 0.5)
 			_trumpet(buf, rng, beat, pitch * 2.0, 0.14, [0, 1, 2, 3])
 			_chant(buf, rng, beat, pitch, 0.24 * sing, [2], 0.9 * leg)
+	# Pessoas isoladas e pequenas rodas quebram a sensação de loop/sintetizador perfeito.
+	_shouts(buf, rng, loop_s, 0.08 * sing)
 	# Emenda: o fim continua o começo, sem estalo no loop
 	var out := PackedFloat32Array()
 	out.resize(n)
@@ -83,6 +85,7 @@ static func render(prof: Dictionary) -> PackedFloat32Array:
 	for i in f:
 		var a := float(i) / f
 		out[i] = buf[i] * a + buf[n + i] * (1.0 - a)
+	_stadium_echo(out, 0.11)
 	var peak := 0.001
 	for v in out:
 		peak = maxf(peak, absf(v))
@@ -94,14 +97,29 @@ static func render(prof: Dictionary) -> PackedFloat32Array:
 
 ## Chão de vozes: ruído passado em dois filtros, respirando no ritmo do loop.
 static func _bed(buf: PackedFloat32Array, rng: RandomNumberGenerator, vol: float, loop_s: float) -> void:
+	# Em vez de só ruído, mistura centenas de pessoas percebidas como uma massa de vogais:
+	# seis grupos de vozes desafinados + murmúrio filtrado e respiração lenta.
 	var lp := 0.0
 	var lp2 := 0.0
+	var phases := [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	var freqs: Array = []
+	var speeds: Array = []
+	for v in 6:
+		freqs.append(rng.randf_range(88.0, 205.0))
+		speeds.append(rng.randf_range(0.12, 0.45))
 	for i in buf.size():
 		var t := float(i) / RATE
-		lp += (rng.randf_range(-1.0, 1.0) - lp) * 0.16
-		lp2 += (lp - lp2) * 0.16
-		var sw := 0.8 + 0.2 * sin(TAU * t * 2.0 / loop_s) + 0.08 * sin(TAU * t * 7.0 / loop_s)
-		buf[i] += lp2 * 3.0 * vol * sw
+		var noise := rng.randf_range(-1.0, 1.0)
+		lp += (noise - lp) * 0.12
+		lp2 += (lp - lp2) * 0.11
+		var voices := 0.0
+		for v in 6:
+			phases[v] += TAU * float(freqs[v]) * (1.0 + 0.006 * sin(TAU * float(speeds[v]) * t)) / RATE
+			var p: float = phases[v]
+			var breath := 0.55 + 0.45 * sin(TAU * (0.17 + v * 0.031) * t + v)
+			voices += (sin(p) + 0.28 * sin(2.0 * p) + 0.10 * sin(3.0 * p)) * breath
+		var sw := 0.82 + 0.12 * sin(TAU * t * 2.0 / loop_s) + 0.06 * sin(TAU * t * 7.0 / loop_s)
+		buf[i] += (lp2 * 1.9 + voices * 0.075) * vol * sw
 
 
 ## Batida nos passos (16 por compasso, 4 compassos). `bars` limita a alguns compassos.
@@ -182,7 +200,9 @@ static func _chant(buf: PackedFloat32Array, rng: RandomNumberGenerator, beat: fl
 		motif.append(PENTA[rng.randi_range(0, PENTA.size() - 1)])
 		durs.append(d)
 		total += d
-	var detune := [1.0, 1.012, 0.989]
+	# Seis grupos de vozes, cada um um pouco fora do tom/tempo. O resultado perde o timbre de
+	# "três osciladores" e fica mais próximo de milhares de pessoas cantando a mesma frase.
+	var detune := [0.972, 0.985, 0.995, 1.006, 1.018, 1.033]
 	for bar in phrases:
 		var off := float(bar) * 4.0
 		for k in motif.size():
@@ -190,23 +210,59 @@ static func _chant(buf: PackedFloat32Array, rng: RandomNumberGenerator, beat: fl
 			var at := int(off * beat * RATE)
 			var n := int(float(durs[k]) * beat * legato * RATE)
 			var dur := float(n) / RATE
-			var phs := [0.0, 0.0, 0.0]
+			var phs := [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 			var lp := 0.0
 			for i in n:
 				var j := at + i
 				if j >= buf.size():
 					break
 				var t := float(i) / RATE
-				var env := minf(1.0, t / 0.06) * minf(1.0, (dur - t) / 0.08)
-				var vib := 1.0 + 0.006 * sin(TAU * 5.2 * t)
+				var env := minf(1.0, t / 0.07) * minf(1.0, (dur - t) / 0.11)
 				var s := 0.0
-				for vi in 3:
+				for vi in detune.size():
+					var vib := 1.0 + (0.0035 + vi * 0.00035) * sin(TAU * (4.7 + vi * 0.13) * t + vi)
 					phs[vi] += TAU * freq * float(detune[vi]) * vib / RATE
 					var p: float = phs[vi]
-					s += sin(p) + 0.45 * sin(2.0 * p) + 0.2 * sin(3.0 * p)
-				lp += (s - lp) * 0.35 # suaviza: vozes, não sintetizador
-				buf[j] += (lp * 0.22 + rng.randf_range(-0.12, 0.12)) * env * vol
+					# Harmônicos imitam vogais abertas de arquibancada, não um seno puro.
+					s += sin(p) + 0.36 * sin(2.0 * p) + 0.15 * sin(3.0 * p) + 0.06 * sin(5.0 * p)
+				lp += (s - lp) * 0.24
+				buf[j] += (lp * 0.105 + rng.randf_range(-0.08, 0.08)) * env * vol
 			off += float(durs[k])
+
+
+## Gritos individuais espalhados: a arquibancada nunca é um coro perfeito o tempo inteiro.
+static func _shouts(buf: PackedFloat32Array, rng: RandomNumberGenerator, loop_s: float, vol: float) -> void:
+	var count := 10
+	for q in count:
+		var at := int(rng.randf_range(0.15, maxf(0.2, loop_s - 0.45)) * RATE)
+		var dur := rng.randf_range(0.16, 0.42)
+		var n := int(dur * RATE)
+		var freq := rng.randf_range(115.0, 245.0)
+		var ph := 0.0
+		for i in n:
+			var j := at + i
+			if j >= buf.size():
+				break
+			var t := float(i) / RATE
+			ph += TAU * freq * (1.0 - 0.12 * t / dur) / RATE
+			var env := minf(1.0, t / 0.025) * minf(1.0, (dur - t) / 0.06)
+			var voice := sin(ph) + 0.42 * sin(2.0 * ph) + 0.17 * sin(3.0 * ph)
+			buf[j] += voice * env * vol * rng.randf_range(0.55, 1.0)
+
+
+## Reflexões curtas do estádio. O acesso circular mantém o loop sem emenda audível.
+static func _stadium_echo(buf: PackedFloat32Array, amount: float) -> void:
+	if buf.is_empty():
+		return
+	var dry := buf.duplicate()
+	var n := buf.size()
+	var d1 := int(0.082 * RATE)
+	var d2 := int(0.173 * RATE)
+	var d3 := int(0.287 * RATE)
+	for i in n:
+		buf[i] += dry[(i - d1 + n) % n] * amount
+		buf[i] += dry[(i - d2 + n) % n] * amount * 0.55
+		buf[i] += dry[(i - d3 + n) % n] * amount * 0.28
 
 
 ## "Hey!" grave e curto no fim de um compasso (curva alemã).
