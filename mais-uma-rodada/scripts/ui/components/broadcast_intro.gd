@@ -172,7 +172,7 @@ static func _star(t: MatchTeam) -> Player:
 			continue
 		var g: int = mp.p.stats[Player.S_GOALS] if mp.p.stats.size() > Player.S_GOALS else 0
 		var a: int = mp.p.stats[Player.S_ASSISTS] if mp.p.stats.size() > Player.S_ASSISTS else 0
-		var v := float(mp.p.overall) + [-12.0, -3.0, 1.0, 3.0][Pos.group(mp.p.position)] + g * 1.5 + a * 0.8
+		var v: float = float(mp.p.overall) + [-12.0, -3.0, 1.0, 3.0][Pos.group(mp.p.position)] + g * 1.5 + a * 0.8
 		if v > best_v:
 			best_v = v
 			best = mp.p
