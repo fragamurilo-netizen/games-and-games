@@ -1,0 +1,434 @@
+{
+	"nation": "EGY",
+	"_doc": "Egito (liga de 8; restantes gerados). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "EGY_AHM",
+			"name": "Al Ahly",
+			"short": "Al Ahly",
+			"abbr": "AHL",
+			"nick": "Diabos Vermelhos",
+			"city": "Cairo",
+			"founded": 1907,
+			"league": "EGY1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Internacional do Cairo",
+			"capacity": 75000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "eagle",
+				"text": "AL AHLY",
+				"year": "1907",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"EGY_ABY"
+			]
+		},
+		{
+			"key": "EGY_ABY",
+			"name": "Zamalek",
+			"short": "Zamalek",
+			"abbr": "ZAM",
+			"nick": "Cavaleiros Brancos",
+			"city": "Giza",
+			"founded": 1911,
+			"league": "EGY1",
+			"rep": 70,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Estádio Internacional do Cairo",
+			"capacity": 20000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "Z",
+				"sc": "#E30613",
+				"border": "thick"
+			},
+			"rivals": [
+				"EGY_AHM"
+			]
+		},
+		{
+			"key": "EGY_PYR",
+			"name": "Pyramids",
+			"short": "Pyramids",
+			"abbr": "PYR",
+			"nick": "Faraós",
+			"city": "Cairo",
+			"founded": 2008,
+			"league": "EGY1",
+			"rep": 68,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio 30 de Junho",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "EGY_MAS",
+			"name": "Al Masry",
+			"short": "Al Masry",
+			"abbr": "MAS",
+			"nick": "Verdes",
+			"city": "Port Said",
+			"founded": 1920,
+			"league": "EGY1",
+			"rep": 60,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Port Said",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MSC"
+			}
+		},
+		{
+			"key": "EGY_ISM",
+			"name": "Ismaily",
+			"short": "Ismaily",
+			"abbr": "ISM",
+			"nick": "Dervixes",
+			"city": "Ismailia",
+			"founded": 1924,
+			"league": "EGY1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estádio de Ismailia",
+			"capacity": 18500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ISC",
+				"sc": "#0055A4"
+			}
+		},
+		{
+			"key": "EGY_CER",
+			"name": "Ceramica",
+			"short": "Ceramica",
+			"abbr": "CER",
+			"nick": "Cerâmicos",
+			"city": "Cairo",
+			"founded": 2007,
+			"league": "EGY1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Al Salam",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CC"
+			}
+		},
+		{
+			"key": "EGY_ZED",
+			"name": "ZED",
+			"short": "ZED",
+			"abbr": "ZED",
+			"nick": "ZED",
+			"city": "Cairo",
+			"founded": 2009,
+			"league": "EGY1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Estádio Petrosport",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ZED",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "EGY_ITT",
+			"name": "Al Ittihad",
+			"short": "Al Ittihad",
+			"abbr": "ITA",
+			"nick": "Zaeem",
+			"city": "Alexandria",
+			"founded": 1914,
+			"league": "EGY1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Alexandria",
+			"capacity": 13600,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ITT"
+			}
+		},
+		{
+			"key": "EGY_FUT",
+			"name": "Modern Sport",
+			"short": "Modern Sport",
+			"abbr": "MSP",
+			"nick": "Modern Sport",
+			"city": "Cairo",
+			"founded": 2011,
+			"league": "EGY1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Petro Sport Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_ENP",
+			"name": "ENPPI",
+			"short": "ENPPI",
+			"abbr": "ENP",
+			"nick": "ENPPI",
+			"city": "Cairo",
+			"founded": 1980,
+			"league": "EGY1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Petro Sport Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_SMO",
+			"name": "Smouha",
+			"short": "Smouha",
+			"abbr": "SMO",
+			"nick": "Smouha",
+			"city": "Alexandria",
+			"founded": 1949,
+			"league": "EGY1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Alexandria Stadium",
+			"capacity": 13600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_GOU",
+			"name": "El Gouna",
+			"short": "El Gouna",
+			"abbr": "GOU",
+			"nick": "El Gouna",
+			"city": "El Gouna",
+			"founded": 2003,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "El Gouna Stadium",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_GHA",
+			"name": "Ghazl El Mahalla",
+			"short": "Ghazl El Mahalla",
+			"abbr": "GHM",
+			"nick": "Ghazl El Mahalla",
+			"city": "El Mahalla El Kubra",
+			"founded": 1936,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Ghazl El Mahalla Stadium",
+			"capacity": 29000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_NBE",
+			"name": "National Bank",
+			"short": "National Bank",
+			"abbr": "NBE",
+			"nick": "National Bank",
+			"city": "Cairo",
+			"founded": 1951,
+			"league": "EGY1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Al Salam Stadium",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_PHA",
+			"name": "Pharco",
+			"short": "Pharco",
+			"abbr": "PHA",
+			"nick": "Pharco",
+			"city": "Alexandria",
+			"founded": 2010,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Borg El Arab Stadium",
+			"capacity": 86000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_PET",
+			"name": "Petrojet",
+			"short": "Petrojet",
+			"abbr": "PJT",
+			"nick": "Petrojet",
+			"city": "Suez",
+			"founded": 1981,
+			"league": "EGY1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Suez Stadium",
+			"capacity": 27000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_HAR",
+			"name": "Haras El Hodoud",
+			"short": "Haras El Hodoud",
+			"abbr": "HAR",
+			"nick": "Haras El Hodoud",
+			"city": "Alexandria",
+			"founded": 1932,
+			"league": "EGY1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Haras El Hodoud Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "EGY_TAL",
+			"name": "Tala'ea El Gaish",
+			"short": "Tala'ea El Gaish",
+			"abbr": "TEG",
+			"nick": "Tala'ea El Gaish",
+			"city": "Cairo",
+			"founded": 1997,
+			"league": "EGY1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Gehaz El Reyada Stadium",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

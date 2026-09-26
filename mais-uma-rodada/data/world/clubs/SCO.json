@@ -1,0 +1,306 @@
+{
+	"nation": "SCO",
+	"_doc": "Escócia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "SCO_GLE",
+			"name": "Celtic",
+			"short": "Celtic",
+			"abbr": "CEL",
+			"nick": "Bhoys",
+			"city": "Glasgow",
+			"founded": 1887,
+			"league": "SCO1",
+			"rep": 78,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#018749",
+				"#FFFFFF"
+			],
+			"stadium": "Celtic Park",
+			"capacity": 60000,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "clover",
+				"text": "THE CELTIC FOOTBALL CLUB",
+				"year": "1888",
+				"c1": "#FFFFFF",
+				"c2": "#018749",
+				"sc": "#018749"
+			},
+			"rivals": [
+				"SCO_GLR"
+			]
+		},
+		{
+			"key": "SCO_GLR",
+			"name": "Rangers",
+			"short": "Rangers",
+			"abbr": "RAN",
+			"nick": "Gers",
+			"city": "Glasgow",
+			"founded": 1872,
+			"league": "SCO1",
+			"rep": 76,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#1B458F",
+				"#FFFFFF"
+			],
+			"stadium": "Ibrox Stadium",
+			"capacity": 50800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RFC",
+				"c2": "#E30613",
+				"sc": "#FFFFFF",
+				"stars": 5,
+				"c3": "#FFD100",
+				"ribbon": "READY"
+			},
+			"rivals": [
+				"SCO_GLE"
+			]
+		},
+		{
+			"key": "SCO_ABE",
+			"name": "Aberdeen",
+			"short": "Aberdeen",
+			"abbr": "ABE",
+			"nick": "Dons",
+			"city": "Aberdeen",
+			"founded": 1903,
+			"league": "SCO1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Pittodrie Stadium",
+			"capacity": 20900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "A",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SCO_EDM",
+			"name": "Hearts",
+			"short": "Hearts",
+			"abbr": "HEA",
+			"nick": "Jambos",
+			"city": "Edinburgh",
+			"founded": 1874,
+			"league": "SCO1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Tynecastle Park",
+			"capacity": 19800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "heart",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"SCO_EDG"
+			]
+		},
+		{
+			"key": "SCO_EDG",
+			"name": "Hibernian",
+			"short": "Hibernian",
+			"abbr": "HIB",
+			"nick": "Hibees",
+			"city": "Edinburgh",
+			"founded": 1875,
+			"league": "SCO1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Easter Road",
+			"capacity": 20400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"SCO_EDM"
+			]
+		},
+		{
+			"key": "SCO_DUN",
+			"name": "Dundee Utd",
+			"short": "Dundee Utd",
+			"abbr": "DUU",
+			"nick": "The Terrors",
+			"city": "Dundee",
+			"founded": 1909,
+			"league": "SCO1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Tannadice Park",
+			"capacity": 14200,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "SCO_MOT",
+			"name": "Motherwell",
+			"short": "Motherwell",
+			"abbr": "MOT",
+			"nick": "Motherwell",
+			"city": "Motherwell",
+			"founded": 1886,
+			"league": "SCO1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F5A12D",
+				"#8A1538"
+			],
+			"stadium": "Fir Park",
+			"capacity": 13600,
+			"kit": "faixa",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_MIR",
+			"name": "St Mirren",
+			"short": "St Mirren",
+			"abbr": "SMI",
+			"nick": "St Mirren",
+			"city": "Paisley",
+			"founded": 1877,
+			"league": "SCO1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "St Mirren Park",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_KIL",
+			"name": "Kilmarnock",
+			"short": "Kilmarnock",
+			"abbr": "KIL",
+			"nick": "Kilmarnock",
+			"city": "Kilmarnock",
+			"founded": 1869,
+			"league": "SCO1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Rugby Park",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_ROS",
+			"name": "Ross County",
+			"short": "Ross County",
+			"abbr": "ROS",
+			"nick": "Ross County",
+			"city": "Dingwall",
+			"founded": 1929,
+			"league": "SCO1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0D2A5C",
+				"#E30613"
+			],
+			"stadium": "Victoria Park",
+			"capacity": 6500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_JOH",
+			"name": "St Johnstone",
+			"short": "St Johnstone",
+			"abbr": "STJ",
+			"nick": "St Johnstone",
+			"city": "Perth",
+			"founded": 1884,
+			"league": "SCO1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "McDiarmid Park",
+			"capacity": 10600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SCO_DEE",
+			"name": "Dundee",
+			"short": "Dundee",
+			"abbr": "DUN",
+			"nick": "Dundee",
+			"city": "Dundee",
+			"founded": 1893,
+			"league": "SCO1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Dens Park",
+			"capacity": 11500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

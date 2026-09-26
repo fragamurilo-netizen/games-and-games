@@ -1,0 +1,388 @@
+{
+	"nation": "MAR",
+	"_doc": "Marrocos (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "MAR_WYR",
+			"name": "Wydad",
+			"short": "Wydad",
+			"abbr": "WAC",
+			"nick": "Wydadis",
+			"city": "Casablanca",
+			"founded": 1937,
+			"league": "MAR1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Mohammed V",
+			"capacity": 45000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "WAC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"MAR_RVE"
+			]
+		},
+		{
+			"key": "MAR_RVE",
+			"name": "Raja",
+			"short": "Raja",
+			"abbr": "RCA",
+			"nick": "Aigles Verts",
+			"city": "Casablanca",
+			"founded": 1949,
+			"league": "MAR1",
+			"rep": 70,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Mohammed V",
+			"capacity": 45000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"MAR_WYR"
+			]
+		},
+		{
+			"key": "MAR_ARF",
+			"name": "FAR Rabat",
+			"short": "FAR Rabat",
+			"abbr": "FAR",
+			"nick": "Militaires",
+			"city": "Rabat",
+			"founded": 1958,
+			"league": "MAR1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#E30613"
+			],
+			"stadium": "Stade Prince Moulay Abdellah",
+			"capacity": 52000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#E30613"
+			},
+			"rivals": []
+		},
+		{
+			"key": "MAR_BER",
+			"name": "RS Berkane",
+			"short": "RS Berkane",
+			"abbr": "RSB",
+			"nick": "Laranjas",
+			"city": "Berkane",
+			"founded": 1938,
+			"league": "MAR1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stade Municipal de Berkane",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RSB",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "MAR_FUS",
+			"name": "FUS Rabat",
+			"short": "FUS Rabat",
+			"abbr": "FUS",
+			"nick": "Fussistes",
+			"city": "Rabat",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade Moulay Hassan",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FUS"
+			}
+		},
+		{
+			"key": "MAR_MAS",
+			"name": "MAS Fès",
+			"short": "MAS Fès",
+			"abbr": "MAS",
+			"nick": "Nemours",
+			"city": "Fès",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 54,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Complexe Sportif de Fès",
+			"capacity": 45000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MAS",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "MAR_HUS",
+			"name": "Hassania Agadir",
+			"short": "Hassania Agadir",
+			"abbr": "HUSA",
+			"nick": "Gazelles",
+			"city": "Agadir",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Adrar",
+			"capacity": 45000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "HUSA"
+			}
+		},
+		{
+			"key": "MAR_DHJ",
+			"name": "DH El Jadida",
+			"short": "DH El Jadida",
+			"abbr": "DHJ",
+			"nick": "Dokkalis",
+			"city": "El Jadida",
+			"founded": 1956,
+			"league": "MAR1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade El Abdi",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "horse"
+			}
+		},
+		{
+			"key": "MAR_OCK",
+			"name": "OC Khouribga",
+			"short": "OC Khouribga",
+			"abbr": "OCK",
+			"nick": "OC Khouribga",
+			"city": "Khouribga",
+			"founded": 1923,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade du Phosphate",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_RCZ",
+			"name": "RC Zemamra",
+			"short": "RC Zemamra",
+			"abbr": "RCZ",
+			"nick": "RC Zemamra",
+			"city": "Zemamra",
+			"founded": 1977,
+			"league": "MAR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Stade Ahmed Choukri",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_UTS",
+			"name": "Union Touarga",
+			"short": "Union Touarga",
+			"abbr": "UTS",
+			"nick": "Union Touarga",
+			"city": "Rabat",
+			"founded": 1969,
+			"league": "MAR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Prince Héritier Moulay El Hassan",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_COD",
+			"name": "CODM Meknès",
+			"short": "CODM Meknès",
+			"abbr": "COD",
+			"nick": "CODM Meknès",
+			"city": "Meknès",
+			"founded": 1962,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade d'Honneur de Meknès",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_MAT",
+			"name": "Moghreb Tétouan",
+			"short": "Moghreb Tétouan",
+			"abbr": "MAT",
+			"nick": "Moghreb Tétouan",
+			"city": "Tétouan",
+			"founded": 1922,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Saniat Rmel",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_SCC",
+			"name": "Chabab Mohammédia",
+			"short": "Chabab Mohammédia",
+			"abbr": "SCC",
+			"nick": "Chabab Mohammédia",
+			"city": "Mohammédia",
+			"founded": 1946,
+			"league": "MAR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade El Bachir",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_IRT",
+			"name": "IR Tanger",
+			"short": "IR Tanger",
+			"abbr": "IRT",
+			"nick": "IR Tanger",
+			"city": "Tangier",
+			"founded": 1983,
+			"league": "MAR1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Ibn Batouta",
+			"capacity": 65000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "MAR_OCS",
+			"name": "Olympic Safi",
+			"short": "Olympic Safi",
+			"abbr": "OCS",
+			"nick": "Olympic Safi",
+			"city": "Safi",
+			"founded": 1921,
+			"league": "MAR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade El Massira",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

@@ -1,0 +1,1187 @@
+{
+	"nation": "ENG",
+	"_doc": "Inglaterra: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "ENG_MSK",
+			"name": "Man City",
+			"short": "Man City",
+			"abbr": "MCI",
+			"nick": "Citizens",
+			"city": "Manchester",
+			"founded": 1880,
+			"league": "ENG1",
+			"rep": 94,
+			"arch": "rico_promovido",
+			"colors": [
+				"#6CABDD",
+				"#FFFFFF"
+			],
+			"stadium": "City of Manchester Stadium",
+			"capacity": 53000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "ship",
+				"text": "MANCHESTER CITY",
+				"year": "1894",
+				"c1": "#6CABDD",
+				"c2": "#6CABDD",
+				"c3": "#FFFFFF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_MRD"
+			]
+		},
+		{
+			"key": "ENG_MRD",
+			"name": "Man United",
+			"short": "Man United",
+			"abbr": "MUN",
+			"nick": "Red Devils",
+			"city": "Manchester",
+			"founded": 1878,
+			"league": "ENG1",
+			"rep": 87,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#DA020E",
+				"#FFFFFF"
+			],
+			"stadium": "Old Trafford",
+			"capacity": 74000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "devil",
+				"c2": "#111111",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick",
+				"ribbon": "MANCHESTER UNITED"
+			},
+			"rivals": [
+				"ENG_MSK",
+				"ENG_MSR",
+				"ENG_YOR"
+			]
+		},
+		{
+			"key": "ENG_MSR",
+			"name": "Liverpool",
+			"short": "Liverpool",
+			"abbr": "LIV",
+			"nick": "Reds",
+			"city": "Liverpool",
+			"founded": 1892,
+			"league": "ENG1",
+			"rep": 93,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#C8102E",
+				"#FFFFFF"
+			],
+			"stadium": "Anfield",
+			"capacity": 61000,
+			"kit": "plain",
+			"crest": {
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "bird",
+				"c2": "#FFFFFF",
+				"c3": "#00A398",
+				"sc": "#FFFFFF",
+				"ribbon": "YNWA"
+			},
+			"rivals": [
+				"ENG_MSB",
+				"ENG_MRD"
+			]
+		},
+		{
+			"key": "ENG_MSB",
+			"name": "Everton",
+			"short": "Everton",
+			"abbr": "EVE",
+			"nick": "Toffees",
+			"city": "Liverpool",
+			"founded": 1878,
+			"league": "ENG1",
+			"rep": 77,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#003399",
+				"#FFFFFF"
+			],
+			"stadium": "Hill Dickinson Stadium",
+			"capacity": 52000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF",
+				"ribbon": "NIL SATIS NISI OPTIMUM"
+			},
+			"rivals": [
+				"ENG_MSR"
+			]
+		},
+		{
+			"key": "ENG_NLR",
+			"name": "Arsenal",
+			"short": "Arsenal",
+			"abbr": "ARS",
+			"nick": "Gunners",
+			"city": "London",
+			"founded": 1886,
+			"league": "ENG1",
+			"rep": 92,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EF0107",
+				"#FFFFFF"
+			],
+			"stadium": "Arsenal Stadium",
+			"capacity": 60000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "cannon",
+				"chief_text": "ARSENAL",
+				"cc": "#0B2A6B",
+				"c2": "#0B2A6B",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"border": "gold"
+			},
+			"rivals": [
+				"ENG_NLW",
+				"ENG_WLB"
+			]
+		},
+		{
+			"key": "ENG_NLW",
+			"name": "Tottenham",
+			"short": "Tottenham",
+			"abbr": "TOT",
+			"nick": "Lilywhites",
+			"city": "London",
+			"founded": 1882,
+			"league": "ENG1",
+			"rep": 86,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#132257"
+			],
+			"stadium": "Tottenham Hotspur Stadium",
+			"capacity": 62000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "rooster",
+				"sc": "#132257"
+			},
+			"rivals": [
+				"ENG_NLR",
+				"ENG_WLB"
+			]
+		},
+		{
+			"key": "ENG_WLB",
+			"name": "Chelsea",
+			"short": "Chelsea",
+			"abbr": "CHE",
+			"nick": "Blues",
+			"city": "London",
+			"founded": 1905,
+			"league": "ENG1",
+			"rep": 90,
+			"arch": "dinheiro_gestao_ruim",
+			"colors": [
+				"#034694",
+				"#FFFFFF"
+			],
+			"stadium": "Stamford Bridge",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "lion",
+				"text": "CHELSEA FOOTBALL CLUB",
+				"c2": "#FFFFFF",
+				"c3": "#DBA111",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_NLR",
+				"ENG_NLW",
+				"ENG_RIV"
+			]
+		},
+		{
+			"key": "ENG_TYN",
+			"name": "Newcastle",
+			"short": "Newcastle",
+			"abbr": "NEW",
+			"nick": "Magpies",
+			"city": "Newcastle",
+			"founded": 1892,
+			"league": "ENG1",
+			"rep": 84,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "St James' Park",
+			"capacity": 52000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "castle",
+				"c3": "#0070C0",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_WEA"
+			]
+		},
+		{
+			"key": "ENG_AST",
+			"name": "Aston Villa",
+			"short": "Aston Villa",
+			"abbr": "AVL",
+			"nick": "Villans",
+			"city": "Birmingham",
+			"founded": 1874,
+			"league": "ENG1",
+			"rep": 82,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#670E36",
+				"#95BFE5"
+			],
+			"stadium": "Villa Park",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "french",
+				"field": "plain",
+				"symbol": "lion",
+				"c3": "#FFD100",
+				"sc": "#FFD100",
+				"stars": 1,
+				"border": "thick"
+			},
+			"rivals": [
+				"ENG_BIR"
+			]
+		},
+		{
+			"key": "ENG_ELI",
+			"name": "West Ham",
+			"short": "West Ham",
+			"abbr": "WHU",
+			"nick": "Hammers",
+			"city": "London",
+			"founded": 1895,
+			"league": "ENG1",
+			"rep": 77,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#7A263A",
+				"#1BB1E7"
+			],
+			"stadium": "London Stadium",
+			"capacity": 62500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#F7C240",
+				"border": "thick"
+			},
+			"rivals": [
+				"ENG_NLW",
+				"ENG_WLB",
+				"ENG_LIO"
+			]
+		},
+		{
+			"key": "ENG_SSG",
+			"name": "Brighton",
+			"short": "Brighton",
+			"abbr": "BHA",
+			"nick": "Seagulls",
+			"city": "Brighton",
+			"founded": 1901,
+			"league": "ENG1",
+			"rep": 76,
+			"arch": "vendedor",
+			"colors": [
+				"#0057B8",
+				"#FFFFFF"
+			],
+			"stadium": "Amex Stadium",
+			"capacity": 31800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "seagull",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
+			"rivals": [
+				"ENG_SLE"
+			]
+		},
+		{
+			"key": "ENG_SLE",
+			"name": "Crystal Palace",
+			"short": "Crystal Palace",
+			"abbr": "CRY",
+			"nick": "Eagles",
+			"city": "London",
+			"founded": 1905,
+			"league": "ENG1",
+			"rep": 74,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1B458F",
+				"#C4122E"
+			],
+			"stadium": "Selhurst Park",
+			"capacity": 25000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_SSG"
+			]
+		},
+		{
+			"key": "ENG_RIV",
+			"name": "Fulham",
+			"short": "Fulham",
+			"abbr": "FUL",
+			"nick": "Cottagers",
+			"city": "London",
+			"founded": 1879,
+			"league": "ENG1",
+			"rep": 71,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Craven Cottage",
+			"capacity": 29600,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FFC",
+				"sc": "#111111",
+				"c3": "#E30613"
+			},
+			"rivals": [
+				"ENG_WLB",
+				"ENG_BEE"
+			]
+		},
+		{
+			"key": "ENG_BEE",
+			"name": "Brentford",
+			"short": "Brentford",
+			"abbr": "BRE",
+			"nick": "Bees",
+			"city": "London",
+			"founded": 1889,
+			"league": "ENG1",
+			"rep": 70,
+			"arch": "vendedor",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Brentford Community Stadium",
+			"capacity": 17250,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "bee",
+				"text": "BRENTFORD FC",
+				"year": "1889",
+				"c2": "#FFFFFF",
+				"c3": "#FFD100",
+				"sc": "#FFD100"
+			},
+			"rivals": [
+				"ENG_RIV"
+			]
+		},
+		{
+			"key": "ENG_CHE",
+			"name": "Bournemouth",
+			"short": "Bournemouth",
+			"abbr": "BOU",
+			"nick": "Cherries",
+			"city": "Bournemouth",
+			"founded": 1899,
+			"league": "ENG1",
+			"rep": 70,
+			"arch": "azarao",
+			"colors": [
+				"#DA291C",
+				"#111111"
+			],
+			"stadium": "Dean Court",
+			"capacity": 11300,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "AFCB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_STS"
+			]
+		},
+		{
+			"key": "ENG_WLV",
+			"name": "Wolves",
+			"short": "Wolves",
+			"abbr": "WOL",
+			"nick": "Wolves",
+			"city": "Wolverhampton",
+			"founded": 1877,
+			"league": "ENG1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FDB913",
+				"#231F20"
+			],
+			"stadium": "Molineux Stadium",
+			"capacity": 31700,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "wolf",
+				"sc": "#231F20"
+			},
+			"rivals": [
+				"ENG_ALB"
+			]
+		},
+		{
+			"key": "ENG_NOT",
+			"name": "Nottm Forest",
+			"short": "Nottm Forest",
+			"abbr": "NFO",
+			"nick": "Tricky Trees",
+			"city": "Nottingham",
+			"founded": 1865,
+			"league": "ENG1",
+			"rep": 74,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#DD0000",
+				"#FFFFFF"
+			],
+			"stadium": "City Ground",
+			"capacity": 30400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tree",
+				"sc": "#FFFFFF",
+				"stars": 2,
+				"c3": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_RAM",
+				"ENG_FOX"
+			]
+		},
+		{
+			"key": "ENG_YOR",
+			"name": "Leeds",
+			"short": "Leeds",
+			"abbr": "LEE",
+			"nick": "Whites",
+			"city": "Leeds",
+			"founded": 1919,
+			"league": "ENG1",
+			"rep": 74,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFFFFF",
+				"#1D428A"
+			],
+			"stadium": "Elland Road",
+			"capacity": 37600,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "rose",
+				"text": "LEEDS UNITED",
+				"c1": "#FFFFFF",
+				"c2": "#1D428A",
+				"c3": "#FFCD00",
+				"sc": "#FFCD00"
+			},
+			"rivals": [
+				"ENG_MRD",
+				"ENG_BLD"
+			]
+		},
+		{
+			"key": "ENG_WEA",
+			"name": "Sunderland",
+			"short": "Sunderland",
+			"abbr": "SUN",
+			"nick": "Black Cats",
+			"city": "Sunderland",
+			"founded": 1879,
+			"league": "ENG1",
+			"rep": 68,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#EB172B",
+				"#FFFFFF"
+			],
+			"stadium": "Stadium of Light",
+			"capacity": 49000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "cat",
+				"sc": "#111111",
+				"border": "thick"
+			},
+			"rivals": [
+				"ENG_TYN"
+			]
+		},
+		{
+			"key": "ENG_CLA",
+			"name": "Burnley",
+			"short": "Burnley",
+			"abbr": "BUR",
+			"nick": "Clarets",
+			"city": "Burnley",
+			"founded": 1882,
+			"league": "ENG1",
+			"rep": 64,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#6C1D45",
+				"#99D6EA"
+			],
+			"stadium": "Turf Moor",
+			"capacity": 21900,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "lion",
+				"sc": "#FFD100"
+			},
+			"rivals": [
+				"ENG_ROV"
+			]
+		},
+		{
+			"key": "ENG_FOX",
+			"name": "Leicester",
+			"short": "Leicester",
+			"abbr": "LEI",
+			"nick": "Foxes",
+			"city": "Leicester",
+			"founded": 1884,
+			"league": "ENG2",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#003090",
+				"#FDBE11"
+			],
+			"stadium": "Filbert Way",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "fox",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
+			"rivals": [
+				"ENG_NOT",
+				"ENG_RAM",
+				"ENG_COV"
+			]
+		},
+		{
+			"key": "ENG_STS",
+			"name": "Southampton",
+			"short": "Southampton",
+			"abbr": "SOU",
+			"nick": "Saints",
+			"city": "Southampton",
+			"founded": 1885,
+			"league": "ENG2",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#D71920",
+				"#FFFFFF"
+			],
+			"stadium": "St Mary's Stadium",
+			"capacity": 32000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "halves_h",
+				"symbol": "tree",
+				"sc": "#FFD100"
+			},
+			"rivals": [
+				"ENG_CHE",
+				"ENG_POM"
+			]
+		},
+		{
+			"key": "ENG_SUF",
+			"name": "Ipswich",
+			"short": "Ipswich",
+			"abbr": "IPS",
+			"nick": "Tractor Boys",
+			"city": "Ipswich",
+			"founded": 1878,
+			"league": "ENG2",
+			"rep": 64,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0044A9",
+				"#FFFFFF"
+			],
+			"stadium": "Portman Road",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
+			"rivals": [
+				"ENG_CAN"
+			]
+		},
+		{
+			"key": "ENG_BLD",
+			"name": "Sheffield Utd",
+			"short": "Sheffield Utd",
+			"abbr": "SHU",
+			"nick": "Blades",
+			"city": "Sheffield",
+			"founded": 1889,
+			"league": "ENG2",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#EE2737",
+				"#FFFFFF"
+			],
+			"stadium": "Bramall Lane",
+			"capacity": 32000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "swords",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_OWL",
+				"ENG_YOR"
+			]
+		},
+		{
+			"key": "ENG_OWL",
+			"name": "Sheffield Wed",
+			"short": "Sheffield Wed",
+			"abbr": "SHW",
+			"nick": "Owls",
+			"city": "Sheffield",
+			"founded": 1867,
+			"league": "ENG2",
+			"rep": 58,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#1560BD",
+				"#FFFFFF"
+			],
+			"stadium": "Hillsborough",
+			"capacity": 39700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "owl",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_BLD"
+			]
+		},
+		{
+			"key": "ENG_TEE",
+			"name": "Middlesbrough",
+			"short": "Middlesbrough",
+			"abbr": "MID",
+			"nick": "Boro",
+			"city": "Middlesbrough",
+			"founded": 1876,
+			"league": "ENG2",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E11B22",
+				"#FFFFFF"
+			],
+			"stadium": "Riverside Stadium",
+			"capacity": 34000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"c1": "#FFFFFF",
+				"c2": "#E11B22",
+				"sc": "#E11B22"
+			},
+			"rivals": [
+				"ENG_TYN",
+				"ENG_WEA"
+			]
+		},
+		{
+			"key": "ENG_ALB",
+			"name": "West Brom",
+			"short": "West Brom",
+			"abbr": "WBA",
+			"nick": "Baggies",
+			"city": "West Bromwich",
+			"founded": 1878,
+			"league": "ENG2",
+			"rep": 62,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#122F67",
+				"#FFFFFF"
+			],
+			"stadium": "The Hawthorns",
+			"capacity": 26800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "bird"
+			},
+			"rivals": [
+				"ENG_WLV"
+			]
+		},
+		{
+			"key": "ENG_CAN",
+			"name": "Norwich",
+			"short": "Norwich",
+			"abbr": "NOR",
+			"nick": "Canaries",
+			"city": "Norwich",
+			"founded": 1902,
+			"league": "ENG2",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#FFF200",
+				"#00A650"
+			],
+			"stadium": "Carrow Road",
+			"capacity": 27000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bird",
+				"c1": "#00A650",
+				"c2": "#FFF200",
+				"sc": "#FFF200"
+			},
+			"rivals": [
+				"ENG_SUF"
+			]
+		},
+		{
+			"key": "ENG_COV",
+			"name": "Coventry",
+			"short": "Coventry",
+			"abbr": "COV",
+			"nick": "Sky Blues",
+			"city": "Coventry",
+			"founded": 1883,
+			"league": "ENG2",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#59CBE8",
+				"#FFFFFF"
+			],
+			"stadium": "Coventry Building Society Arena",
+			"capacity": 32600,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_FOX"
+			]
+		},
+		{
+			"key": "ENG_HOR",
+			"name": "Watford",
+			"short": "Watford",
+			"abbr": "WAT",
+			"nick": "Hornets",
+			"city": "Watford",
+			"founded": 1881,
+			"league": "ENG2",
+			"rep": 60,
+			"arch": "vendedor",
+			"colors": [
+				"#FBEE23",
+				"#ED2127"
+			],
+			"stadium": "Vicarage Road",
+			"capacity": 22200,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "antlers",
+				"sc": "#ED2127"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ENG_STK",
+			"name": "Stoke",
+			"short": "Stoke",
+			"abbr": "STK",
+			"nick": "Potters",
+			"city": "Stoke-on-Trent",
+			"founded": 1863,
+			"league": "ENG2",
+			"rep": 60,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E03A3E",
+				"#FFFFFF"
+			],
+			"stadium": "Stoke Stadium",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SCFC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ENG_HUM",
+			"name": "Hull City",
+			"short": "Hull City",
+			"abbr": "HUL",
+			"nick": "Tigers",
+			"city": "Hull",
+			"founded": 1904,
+			"league": "ENG2",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F5A12D",
+				"#111111"
+			],
+			"stadium": "Hull Stadium",
+			"capacity": 25400,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#111111"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ENG_RAM",
+			"name": "Derby",
+			"short": "Derby",
+			"abbr": "DER",
+			"nick": "Rams",
+			"city": "Derby",
+			"founded": 1884,
+			"league": "ENG2",
+			"rep": 60,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Pride Park",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ram",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"ENG_NOT",
+				"ENG_FOX"
+			]
+		},
+		{
+			"key": "ENG_HOO",
+			"name": "QPR",
+			"short": "QPR",
+			"abbr": "QPR",
+			"nick": "Hoops",
+			"city": "London",
+			"founded": 1882,
+			"league": "ENG2",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BA4",
+				"#FFFFFF"
+			],
+			"stadium": "Loftus Road",
+			"capacity": 18400,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "round",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "QPR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_WLB",
+				"ENG_RIV"
+			]
+		},
+		{
+			"key": "ENG_LIO",
+			"name": "Millwall",
+			"short": "Millwall",
+			"abbr": "MIL",
+			"nick": "Lions",
+			"city": "London",
+			"founded": 1885,
+			"league": "ENG2",
+			"rep": 54,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#001D5E",
+				"#FFFFFF"
+			],
+			"stadium": "The Den",
+			"capacity": 20100,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_ELI"
+			]
+		},
+		{
+			"key": "ENG_BRS",
+			"name": "Bristol City",
+			"short": "Bristol City",
+			"abbr": "BRC",
+			"nick": "Robins",
+			"city": "Bristol",
+			"founded": 1894,
+			"league": "ENG2",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E21A23",
+				"#FFFFFF"
+			],
+			"stadium": "Ashton Gate",
+			"capacity": 27000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "ENG_ROV",
+			"name": "Blackburn",
+			"short": "Blackburn",
+			"abbr": "BLB",
+			"nick": "Rovers",
+			"city": "Blackburn",
+			"founded": 1875,
+			"league": "ENG2",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#009EE0",
+				"#FFFFFF"
+			],
+			"stadium": "Ewood Park",
+			"capacity": 31300,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "rose",
+				"sc": "#E30613"
+			},
+			"rivals": [
+				"ENG_CLA",
+				"ENG_PRE"
+			]
+		},
+		{
+			"key": "ENG_PRE",
+			"name": "Preston",
+			"short": "Preston",
+			"abbr": "PNE",
+			"nick": "Lilywhites",
+			"city": "Preston",
+			"founded": 1880,
+			"league": "ENG2",
+			"rep": 55,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#001489"
+			],
+			"stadium": "Deepdale",
+			"capacity": 23400,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ram",
+				"sc": "#001489"
+			},
+			"rivals": [
+				"ENG_ROV"
+			]
+		},
+		{
+			"key": "ENG_POM",
+			"name": "Portsmouth",
+			"short": "Portsmouth",
+			"abbr": "POR",
+			"nick": "Pompey",
+			"city": "Portsmouth",
+			"founded": 1898,
+			"league": "ENG2",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#001489",
+				"#FFFFFF"
+			],
+			"stadium": "Fratton Park",
+			"capacity": 20900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "crescent",
+				"c3": "#FFD100",
+				"sc": "#FFD100"
+			},
+			"rivals": [
+				"ENG_STS"
+			]
+		},
+		{
+			"key": "ENG_BIR",
+			"name": "Birmingham",
+			"short": "Birmingham",
+			"abbr": "BIR",
+			"nick": "Blues",
+			"city": "Birmingham",
+			"founded": 1875,
+			"league": "ENG2",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0000FF",
+				"#FFFFFF"
+			],
+			"stadium": "St Andrew's",
+			"capacity": 29400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ball",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"ENG_AST"
+			]
+		}
+	]
+}

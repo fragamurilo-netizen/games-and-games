@@ -1,0 +1,506 @@
+{
+	"nation": "NED",
+	"_doc": "Holanda (liga de 18). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "NED_AMS",
+			"name": "Ajax",
+			"short": "Ajax",
+			"abbr": "AJA",
+			"nick": "Godenzonen",
+			"city": "Amsterdam",
+			"founded": 1900,
+			"league": "NED1",
+			"rep": 82,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#D2122E"
+			],
+			"stadium": "Johan Cruijff ArenA",
+			"capacity": 55000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AJAX",
+				"sc": "#D2122E",
+				"border": "thick"
+			},
+			"rivals": [
+				"NED_ROT",
+				"NED_EIN"
+			]
+		},
+		{
+			"key": "NED_EIN",
+			"name": "PSV",
+			"short": "PSV",
+			"abbr": "PSV",
+			"nick": "Boeren",
+			"city": "Eindhoven",
+			"founded": 1913,
+			"league": "NED1",
+			"rep": 82,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "PSV Stadion",
+			"capacity": 35000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "PSV",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"NED_AMS",
+				"NED_ROT"
+			]
+		},
+		{
+			"key": "NED_ROT",
+			"name": "Feyenoord",
+			"short": "Feyenoord",
+			"abbr": "FEY",
+			"nick": "Stadionclub",
+			"city": "Rotterdam",
+			"founded": 1908,
+			"league": "NED1",
+			"rep": 80,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "De Kuip",
+			"capacity": 47500,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "none",
+				"chief_text": "FEYENOORD",
+				"cc": "#111111",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"c3": "#FFFFFF"
+			},
+			"rivals": [
+				"NED_AMS",
+				"NED_EIN"
+			]
+		},
+		{
+			"key": "NED_ALK",
+			"name": "AZ",
+			"short": "AZ",
+			"abbr": "AZ",
+			"nick": "Kaaskoppen",
+			"city": "Alkmaar",
+			"founded": 1967,
+			"league": "NED1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Alkmaar Stadion",
+			"capacity": 19500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AZ"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NED_ENS",
+			"name": "Twente",
+			"short": "Twente",
+			"abbr": "TWE",
+			"nick": "Tukkers",
+			"city": "Enschede",
+			"founded": 1965,
+			"league": "NED1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Enschede",
+			"capacity": 30200,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NED_UTR",
+			"name": "Utrecht",
+			"short": "Utrecht",
+			"abbr": "UTR",
+			"nick": "Domstedelingen",
+			"city": "Utrecht",
+			"founded": 1970,
+			"league": "NED1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Galgenwaard",
+			"capacity": 23700,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "U",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"NED_AMS"
+			]
+		},
+		{
+			"key": "NED_GAE",
+			"name": "Go Ahead",
+			"short": "Go Ahead",
+			"abbr": "GAE",
+			"nick": "Eagles",
+			"city": "Deventer",
+			"founded": 1902,
+			"league": "NED1",
+			"rep": 60,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "De Adelaarshorst",
+			"capacity": 10400,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "NED_NEC",
+			"name": "NEC",
+			"short": "NEC",
+			"abbr": "NEC",
+			"nick": "Nijmegenaren",
+			"city": "Nijmegen",
+			"founded": 1900,
+			"league": "NED1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#006A3A"
+			],
+			"stadium": "Goffertstadion",
+			"capacity": 12500,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "NEC",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "NED_HEE",
+			"name": "Heerenveen",
+			"short": "Heerenveen",
+			"abbr": "HEE",
+			"nick": "Superfriezen",
+			"city": "Heerenveen",
+			"founded": 1920,
+			"league": "NED1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Abe Lenstra Stadion",
+			"capacity": 26100,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SCH",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "NED_SPA",
+			"name": "Sparta",
+			"short": "Sparta",
+			"abbr": "SPA",
+			"nick": "Kasteelheren",
+			"city": "Rotterdam",
+			"founded": 1888,
+			"league": "NED1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Het Kasteel",
+			"capacity": 11000,
+			"kit": "stripes_v",
+			"rivals": [
+				"NED_EXC",
+				"NED_ROT"
+			],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "S",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "NED_GRO",
+			"name": "Groningen",
+			"short": "Groningen",
+			"abbr": "GRO",
+			"nick": "Trots van het Noorden",
+			"city": "Groningen",
+			"founded": 1971,
+			"league": "NED1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Euroborg",
+			"capacity": 22500,
+			"kit": "halves",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCG",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "NED_FOR",
+			"name": "Fortuna",
+			"short": "Fortuna",
+			"abbr": "FOR",
+			"nick": "Fortunezen",
+			"city": "Sittard",
+			"founded": 1968,
+			"league": "NED1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Fortuna Sittard Stadion",
+			"capacity": 12500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FS",
+				"sc": "#00843D"
+			}
+		},
+		{
+			"key": "NED_PEC",
+			"name": "PEC Zwolle",
+			"short": "PEC Zwolle",
+			"abbr": "PEC",
+			"nick": "Blauwvingers",
+			"city": "Zwolle",
+			"founded": 1910,
+			"league": "NED1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "MAC³PARK Stadion",
+			"capacity": 14000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PEC"
+			}
+		},
+		{
+			"key": "NED_HER",
+			"name": "Heracles",
+			"short": "Heracles",
+			"abbr": "HER",
+			"nick": "Heraclieden",
+			"city": "Almelo",
+			"founded": 1903,
+			"league": "NED1",
+			"rep": 53,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Erve Asito",
+			"capacity": 12080,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "H",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "NED_NAC",
+			"name": "NAC",
+			"short": "NAC",
+			"abbr": "NAC",
+			"nick": "Parel van het Zuiden",
+			"city": "Breda",
+			"founded": 1912,
+			"league": "NED1",
+			"rep": 55,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Rat Verlegh Stadion",
+			"capacity": 19000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NAC",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "NED_TEL",
+			"name": "Telstar",
+			"short": "Telstar",
+			"abbr": "TEL",
+			"nick": "Witte Leeuwen",
+			"city": "Velsen",
+			"founded": 1963,
+			"league": "NED1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "BUKO Stadion",
+			"capacity": 5000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "NED_VOL",
+			"name": "Volendam",
+			"short": "Volendam",
+			"abbr": "VOL",
+			"nick": "Palingboeren",
+			"city": "Volendam",
+			"founded": 1977,
+			"league": "NED1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Kras Stadion",
+			"capacity": 7400,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "NED_EXC",
+			"name": "Excelsior",
+			"short": "Excelsior",
+			"abbr": "EXC",
+			"nick": "Kralingers",
+			"city": "Rotterdam",
+			"founded": 1902,
+			"league": "NED1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Van Donge & De Roo Stadion",
+			"capacity": 4500,
+			"kit": "stripes_v",
+			"rivals": [
+				"NED_SPA"
+			],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "E",
+				"sc": "#FFFFFF"
+			}
+		}
+	]
+}

@@ -1,0 +1,415 @@
+{
+	"nation": "URU",
+	"_doc": "Uruguai (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "URU_MAU",
+			"name": "Peñarol",
+			"short": "Peñarol",
+			"abbr": "PEN",
+			"nick": "Manyas",
+			"city": "Montevideo",
+			"founded": 1891,
+			"league": "URU1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Campeón del Siglo",
+			"capacity": 40000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "iberian",
+				"field": "stripes:4",
+				"symbol": "none",
+				"stars": 5,
+				"c3": "#FFD100"
+			},
+			"rivals": [
+				"URU_BOS"
+			]
+		},
+		{
+			"key": "URU_BOS",
+			"name": "Nacional",
+			"short": "Nacional",
+			"abbr": "NAC",
+			"nick": "Bolsos",
+			"city": "Montevideo",
+			"founded": 1899,
+			"league": "URU1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Gran Parque Central",
+			"capacity": 34000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "CN",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#E30613"
+			},
+			"rivals": [
+				"URU_MAU"
+			]
+		},
+		{
+			"key": "URU_VIO",
+			"name": "Defensor",
+			"short": "Defensor",
+			"abbr": "DEF",
+			"nick": "Violetas",
+			"city": "Montevideo",
+			"founded": 1913,
+			"league": "URU1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Luis Franzini",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DSC"
+			},
+			"rivals": []
+		},
+		{
+			"key": "URU_FRA",
+			"name": "Danubio",
+			"short": "Danubio",
+			"abbr": "DAN",
+			"nick": "Franjeados",
+			"city": "Montevideo",
+			"founded": 1932,
+			"league": "URU1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Jardines del Hipódromo",
+			"capacity": 18000,
+			"kit": "diagonal",
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "DFC",
+				"sc": "#111111"
+			},
+			"rivals": []
+		},
+		{
+			"key": "URU_LIV",
+			"name": "Liverpool",
+			"short": "Liverpool",
+			"abbr": "LIV",
+			"nick": "Negriazules",
+			"city": "Montevideo",
+			"founded": 1915,
+			"league": "URU1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#0055A4"
+			],
+			"stadium": "Estadio Belvedere",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "LFC",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "URU_WAN",
+			"name": "Wanderers",
+			"short": "Wanderers",
+			"abbr": "MWA",
+			"nick": "Bohemios",
+			"city": "Montevideo",
+			"founded": 1902,
+			"league": "URU1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Alfredo Víctor Viera",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MW",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "URU_CER",
+			"name": "Cerro",
+			"short": "Cerro",
+			"abbr": "CER",
+			"nick": "Villeros",
+			"city": "Montevideo",
+			"founded": 1922,
+			"league": "URU1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#E30613"
+			],
+			"stadium": "Estadio Luis Tróccoli",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "URU_RAC",
+			"name": "Racing",
+			"short": "Racing",
+			"abbr": "RAC",
+			"nick": "Cervecero",
+			"city": "Montevideo",
+			"founded": 1919,
+			"league": "URU1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#FFFFFF",
+				"#00843D"
+			],
+			"stadium": "Parque Osvaldo Roberto",
+			"capacity": 8500,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RC",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "URU_PLA",
+			"name": "Plaza Colonia",
+			"short": "Plaza Colonia",
+			"abbr": "PLA",
+			"nick": "Pata Blanca",
+			"city": "Colonia del Sacramento",
+			"founded": 1917,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Profesor Alberto Suppici",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PC"
+			}
+		},
+		{
+			"key": "URU_BRI",
+			"name": "Boston River",
+			"short": "Boston River",
+			"abbr": "BRI",
+			"nick": "Sastre",
+			"city": "Montevideo",
+			"founded": 1939,
+			"league": "URU1",
+			"rep": 52,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Campeones Olímpicos",
+			"capacity": 5000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "BR",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "URU_PRO",
+			"name": "Progreso",
+			"short": "Progreso",
+			"abbr": "PRO",
+			"nick": "Gaucho del Pantanoso",
+			"city": "Montevideo",
+			"founded": 1917,
+			"league": "URU1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Parque Abraham Paladino",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CAP",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "URU_CLA",
+			"name": "Cerro Largo",
+			"short": "Cerro Largo",
+			"abbr": "CLA",
+			"nick": "Arachanes",
+			"city": "Melo",
+			"founded": 2002,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio Arquitecto Antonio Ubilla",
+			"capacity": 9000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain"
+			}
+		},
+		{
+			"key": "URU_FEN",
+			"name": "Fénix",
+			"short": "Fénix",
+			"abbr": "FEN",
+			"nick": "Fénix",
+			"city": "Montevideo",
+			"founded": 1916,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Capurro",
+			"capacity": 5500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "URU_MAL",
+			"name": "Dep. Maldonado",
+			"short": "Dep. Maldonado",
+			"abbr": "MAL",
+			"nick": "Dep. Maldonado",
+			"city": "Maldonado",
+			"founded": 1928,
+			"league": "URU1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Estadio Domingo Burgueño",
+			"capacity": 22000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "URU_RIV",
+			"name": "River Plate URU",
+			"short": "River Plate URU",
+			"abbr": "RIP",
+			"nick": "River Plate URU",
+			"city": "Montevideo",
+			"founded": 1932,
+			"league": "URU1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Parque Federico Omar Saroldi",
+			"capacity": 6000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "URU_JUV",
+			"name": "Juventud",
+			"short": "Juventud",
+			"abbr": "JUV",
+			"nick": "Juventud",
+			"city": "Las Piedras",
+			"founded": 1935,
+			"league": "URU1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Parque Artigas",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

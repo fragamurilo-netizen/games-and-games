@@ -1,0 +1,400 @@
+{
+	"nation": "BEL",
+	"_doc": "Bélgica (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "BEL_BRU",
+			"name": "Club Brugge",
+			"short": "Club Brugge",
+			"abbr": "CLB",
+			"nick": "Blauw-Zwart",
+			"city": "Brugge",
+			"founded": 1891,
+			"league": "BEL1",
+			"rep": 76,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0072BC",
+				"#111111"
+			],
+			"stadium": "Jan Breydelstadion",
+			"capacity": 29000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BEL_BXL"
+			]
+		},
+		{
+			"key": "BEL_BXL",
+			"name": "Anderlecht",
+			"short": "Anderlecht",
+			"abbr": "AND",
+			"nick": "Mauves",
+			"city": "Bruxelles",
+			"founded": 1908,
+			"league": "BEL1",
+			"rep": 76,
+			"arch": "formador",
+			"colors": [
+				"#4F2D7F",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Constant Vanden Stock",
+			"capacity": 22500,
+			"kit": "plain",
+			"crest": {
+				"shape": "oval",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RSCA",
+				"crown": 1,
+				"c1": "#FFFFFF",
+				"c2": "#4F2D7F",
+				"sc": "#4F2D7F",
+				"ribbon": "MENS SANA"
+			},
+			"rivals": [
+				"BEL_BRU",
+				"BEL_ROU"
+			]
+		},
+		{
+			"key": "BEL_UNS",
+			"name": "Union SG",
+			"short": "Union SG",
+			"abbr": "USG",
+			"nick": "Unionistes",
+			"city": "Bruxelles",
+			"founded": 1897,
+			"league": "BEL1",
+			"rep": 70,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#1D5BBF"
+			],
+			"stadium": "Stade Joseph Marien",
+			"capacity": 9400,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "USG",
+				"sc": "#1D5BBF"
+			},
+			"rivals": [
+				"BEL_BXL"
+			]
+		},
+		{
+			"key": "BEL_LIM",
+			"name": "Genk",
+			"short": "Genk",
+			"abbr": "GNK",
+			"nick": "Smurfen",
+			"city": "Genk",
+			"founded": 1988,
+			"league": "BEL1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Cegeka Arena",
+			"capacity": 23700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "KRC"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BEL_BUF",
+			"name": "Gent",
+			"short": "Gent",
+			"abbr": "GNT",
+			"nick": "Buffalo's",
+			"city": "Gent",
+			"founded": 1900,
+			"league": "BEL1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Planet Group Arena",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bull"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BEL_ROU",
+			"name": "Standard",
+			"short": "Standard",
+			"abbr": "STA",
+			"nick": "Rouches",
+			"city": "Liège",
+			"founded": 1898,
+			"league": "BEL1",
+			"rep": 66,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Maurice Dufrasne",
+			"capacity": 27600,
+			"kit": "plain",
+			"crest": {
+				"shape": "french",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SL",
+				"crown": 1
+			},
+			"rivals": [
+				"BEL_BXL"
+			]
+		},
+		{
+			"key": "BEL_ANT",
+			"name": "Antwerp",
+			"short": "Antwerp",
+			"abbr": "RAFC",
+			"nick": "The Great Old",
+			"city": "Antwerpen",
+			"founded": 1880,
+			"league": "BEL1",
+			"rep": 66,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Bosuilstadion",
+			"capacity": 16100,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "RAFC",
+				"sc": "#E30613"
+			}
+		},
+		{
+			"key": "BEL_MEC",
+			"name": "Mechelen",
+			"short": "Mechelen",
+			"abbr": "KVM",
+			"nick": "Malinwa",
+			"city": "Mechelen",
+			"founded": 1904,
+			"league": "BEL1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Achter de Kazerne",
+			"capacity": 16700,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "KVM",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "BEL_CER",
+			"name": "Cercle Brugge",
+			"short": "Cercle Brugge",
+			"abbr": "CER",
+			"nick": "Cercle Brugge",
+			"city": "Bruges",
+			"founded": 1899,
+			"league": "BEL1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#00843D"
+			],
+			"stadium": "Jan Breydelstadion",
+			"capacity": 29000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_WES",
+			"name": "Westerlo",
+			"short": "Westerlo",
+			"abbr": "WES",
+			"nick": "Westerlo",
+			"city": "Westerlo",
+			"founded": 1933,
+			"league": "BEL1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Het Kuipje",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_OHL",
+			"name": "OH Leuven",
+			"short": "OH Leuven",
+			"abbr": "OHL",
+			"nick": "OH Leuven",
+			"city": "Leuven",
+			"founded": 2002,
+			"league": "BEL1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Den Dreef",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_CHA",
+			"name": "Charleroi",
+			"short": "Charleroi",
+			"abbr": "CHA",
+			"nick": "Charleroi",
+			"city": "Charleroi",
+			"founded": 1904,
+			"league": "BEL1",
+			"rep": 57,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade du Pays de Charleroi",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_STV",
+			"name": "Sint-Truiden",
+			"short": "Sint-Truiden",
+			"abbr": "STV",
+			"nick": "Sint-Truiden",
+			"city": "Sint-Truiden",
+			"founded": 1924,
+			"league": "BEL1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stayen",
+			"capacity": 14000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_KOR",
+			"name": "Kortrijk",
+			"short": "Kortrijk",
+			"abbr": "KVK",
+			"nick": "Kortrijk",
+			"city": "Kortrijk",
+			"founded": 1901,
+			"league": "BEL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Guldensporenstadion",
+			"capacity": 9500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_DEN",
+			"name": "Dender",
+			"short": "Dender",
+			"abbr": "DEN",
+			"nick": "Dender",
+			"city": "Denderleeuw",
+			"founded": 1943,
+			"league": "BEL1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Van Roystadion",
+			"capacity": 6400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "BEL_BEE",
+			"name": "Beerschot",
+			"short": "Beerschot",
+			"abbr": "BEE",
+			"nick": "Beerschot",
+			"city": "Antwerp",
+			"founded": 1899,
+			"league": "BEL1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Olympisch Stadion",
+			"capacity": 12700,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

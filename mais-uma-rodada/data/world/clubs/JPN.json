@@ -1,0 +1,490 @@
+{
+	"nation": "JPN",
+	"_doc": "Japão (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "JPN_KSH",
+			"name": "Kashima",
+			"short": "Kashima",
+			"abbr": "KAS",
+			"nick": "Deer",
+			"city": "Kashima",
+			"founded": 1947,
+			"league": "JPN1",
+			"rep": 68,
+			"arch": "formador",
+			"colors": [
+				"#B71234",
+				"#111111"
+			],
+			"stadium": "Mercari Stadium",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "antlers",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "JPN_SAI",
+			"name": "Urawa Reds",
+			"short": "Urawa Reds",
+			"abbr": "URA",
+			"nick": "Reds",
+			"city": "Saitama",
+			"founded": 1950,
+			"league": "JPN1",
+			"rep": 68,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#E6002D",
+				"#FFFFFF"
+			],
+			"stadium": "Saitama Stadium 2002",
+			"capacity": 63700,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "URD"
+			},
+			"rivals": []
+		},
+		{
+			"key": "JPN_YKM",
+			"name": "Yokohama FM",
+			"short": "Yokohama FM",
+			"abbr": "YFM",
+			"nick": "Mariners",
+			"city": "Yokohama",
+			"founded": 1972,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#003D99",
+				"#FFFFFF"
+			],
+			"stadium": "International Stadium Yokohama",
+			"capacity": 72000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "anchor",
+				"text": "YOKOHAMA F. MARINOS",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"JPN_KWS"
+			]
+		},
+		{
+			"key": "JPN_KWS",
+			"name": "Kawasaki",
+			"short": "Kawasaki",
+			"abbr": "KAW",
+			"nick": "Frontale",
+			"city": "Kawasaki",
+			"founded": 1955,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#1D9AD6",
+				"#111111"
+			],
+			"stadium": "Uvance Todoroki Stadium",
+			"capacity": 26800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "KF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"JPN_YKM"
+			]
+		},
+		{
+			"key": "JPN_KOB",
+			"name": "Vissel Kobe",
+			"short": "Vissel Kobe",
+			"abbr": "VIS",
+			"nick": "Crimson",
+			"city": "Kobe",
+			"founded": 1966,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Misaki Park Stadium",
+			"capacity": 30100,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"JPN_OSK"
+			]
+		},
+		{
+			"key": "JPN_OSK",
+			"name": "Gamba Osaka",
+			"short": "Gamba Osaka",
+			"abbr": "GAM",
+			"nick": "Gamba",
+			"city": "Osaka",
+			"founded": 1980,
+			"league": "JPN1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#1D3F91",
+				"#111111"
+			],
+			"stadium": "Suita City Football Stadium",
+			"capacity": 39700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "G",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"JPN_KOB"
+			]
+		},
+		{
+			"key": "JPN_HIR",
+			"name": "Sanfrecce",
+			"short": "Sanfrecce",
+			"abbr": "SAN",
+			"nick": "Sanfrecce",
+			"city": "Hiroshima",
+			"founded": 1938,
+			"league": "JPN1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Edion Peace Wing Hiroshima",
+			"capacity": 28500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "S",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "JPN_MAC",
+			"name": "Machida Zelvia",
+			"short": "Machida Zelvia",
+			"abbr": "MAC",
+			"nick": "Zelvia",
+			"city": "Machida",
+			"founded": 1989,
+			"league": "JPN1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Machida GION Stadium",
+			"capacity": 15500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCMZ"
+			}
+		},
+		{
+			"key": "JPN_CER",
+			"name": "Cerezo Osaka",
+			"short": "Cerezo Osaka",
+			"abbr": "CER",
+			"nick": "Cerezo",
+			"city": "Osaka",
+			"founded": 1957,
+			"league": "JPN1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#E91E63",
+				"#0055A4"
+			],
+			"stadium": "Yodoko Sakura Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "rose",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "JPN_TOK",
+			"name": "FC Tokyo",
+			"short": "FC Tokyo",
+			"abbr": "TOK",
+			"nick": "Gasmen",
+			"city": "Tóquio",
+			"founded": 1935,
+			"league": "JPN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Tokyo Stadium",
+			"capacity": 49000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCT",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "JPN_KAS",
+			"name": "Kashiwa Reysol",
+			"short": "Kashiwa Reysol",
+			"abbr": "KSW",
+			"nick": "Kashiwa Reysol",
+			"city": "Kashiwa",
+			"founded": 1940,
+			"league": "JPN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Hitachidai Stadium",
+			"capacity": 15100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_NAG",
+			"name": "Nagoya Grampus",
+			"short": "Nagoya Grampus",
+			"abbr": "NAG",
+			"nick": "Nagoya Grampus",
+			"city": "Nagoya",
+			"founded": 1939,
+			"league": "JPN1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#F5A12D"
+			],
+			"stadium": "Toyota City Stadium",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_FUK",
+			"name": "Avispa Fukuoka",
+			"short": "Avispa Fukuoka",
+			"abbr": "AVI",
+			"nick": "Avispa Fukuoka",
+			"city": "Fukuoka",
+			"founded": 1982,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "Best Denki Stadium",
+			"capacity": 21500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_NII",
+			"name": "Albirex Niigata",
+			"short": "Albirex Niigata",
+			"abbr": "ALB",
+			"nick": "Albirex Niigata",
+			"city": "Niigata",
+			"founded": 1955,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "Niigata Stadium",
+			"capacity": 42300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_SHO",
+			"name": "Shonan Bellmare",
+			"short": "Shonan Bellmare",
+			"abbr": "SHO",
+			"nick": "Shonan Bellmare",
+			"city": "Hiratsuka",
+			"founded": 1968,
+			"league": "JPN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#0055A4"
+			],
+			"stadium": "Lemon Gas Stadium",
+			"capacity": 15200,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_VER",
+			"name": "Tokyo Verdy",
+			"short": "Tokyo Verdy",
+			"abbr": "VER",
+			"nick": "Tokyo Verdy",
+			"city": "Tokyo",
+			"founded": 1969,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Tokyo Stadium",
+			"capacity": 49000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_KYO",
+			"name": "Kyoto Sanga",
+			"short": "Kyoto Sanga",
+			"abbr": "KYO",
+			"nick": "Kyoto Sanga",
+			"city": "Kyoto",
+			"founded": 1922,
+			"league": "JPN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Sanga Stadium by Kyocera",
+			"capacity": 21600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_YFC",
+			"name": "Yokohama FC",
+			"short": "Yokohama FC",
+			"abbr": "YFC",
+			"nick": "Yokohama FC",
+			"city": "Yokohama",
+			"founded": 1999,
+			"league": "JPN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "NHK Spring Mitsuzawa",
+			"capacity": 15400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_OKA",
+			"name": "Fagiano Okayama",
+			"short": "Fagiano Okayama",
+			"abbr": "FAG",
+			"nick": "Fagiano Okayama",
+			"city": "Okayama",
+			"founded": 1975,
+			"league": "JPN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "City Light Stadium",
+			"capacity": 15500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "JPN_SHI",
+			"name": "Shimizu S-Pulse",
+			"short": "Shimizu S-Pulse",
+			"abbr": "SSP",
+			"nick": "Shimizu S-Pulse",
+			"city": "Shizuoka",
+			"founded": 1991,
+			"league": "JPN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#0055A4"
+			],
+			"stadium": "IAI Stadium Nihondaira",
+			"capacity": 19600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

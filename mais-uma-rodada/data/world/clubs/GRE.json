@@ -1,0 +1,349 @@
+{
+	"nation": "GRE",
+	"_doc": "Grécia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "GRE_PIR",
+			"name": "Olympiacos",
+			"short": "Olympiacos",
+			"abbr": "OLY",
+			"nick": "Thrylos",
+			"city": "Piraeus",
+			"founded": 1925,
+			"league": "GRE1",
+			"rep": 74,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Georgios Karaiskakis",
+			"capacity": 32100,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "O",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613",
+				"c3": "#E30613",
+				"laurel": true
+			},
+			"rivals": [
+				"GRE_ATH",
+				"GRE_AEN"
+			]
+		},
+		{
+			"key": "GRE_ATH",
+			"name": "Panathinaikos",
+			"short": "Panathinaikos",
+			"abbr": "PAO",
+			"nick": "Trifylli",
+			"city": "Athens",
+			"founded": 1908,
+			"league": "GRE1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#007A33",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Apostolos Nikolaidis",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "shamrock",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
+			"rivals": [
+				"GRE_PIR",
+				"GRE_AEN"
+			]
+		},
+		{
+			"key": "GRE_AEN",
+			"name": "AEK",
+			"short": "AEK",
+			"abbr": "AEK",
+			"nick": "Enosi",
+			"city": "Athens",
+			"founded": 1924,
+			"league": "GRE1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "OPAP Arena",
+			"capacity": 32500,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"GRE_PIR",
+				"GRE_ATH"
+			]
+		},
+		{
+			"key": "GRE_DIK",
+			"name": "PAOK",
+			"short": "PAOK",
+			"abbr": "PAOK",
+			"nick": "Dikefalos",
+			"city": "Thessaloniki",
+			"founded": 1926,
+			"league": "GRE1",
+			"rep": 72,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Toumba",
+			"capacity": 28700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"GRE_PIR"
+			]
+		},
+		{
+			"key": "GRE_ARI",
+			"name": "Aris",
+			"short": "Aris",
+			"abbr": "ARI",
+			"nick": "Thrylos tou Vorra",
+			"city": "Thessaloniki",
+			"founded": 1914,
+			"league": "GRE1",
+			"rep": 62,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Kleanthis Vikelidis",
+			"capacity": 22800,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ARIS",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "GRE_OFI",
+			"name": "OFI",
+			"short": "OFI",
+			"abbr": "OFI",
+			"nick": "Omilos",
+			"city": "Heraklion",
+			"founded": 1925,
+			"league": "GRE1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Theodoros Vardinogiannis",
+			"capacity": 9000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "OFI",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "GRE_VOL",
+			"name": "Volos",
+			"short": "Volos",
+			"abbr": "VOL",
+			"nick": "Volos",
+			"city": "Volos",
+			"founded": 2017,
+			"league": "GRE1",
+			"rep": 54,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Panthessaliko",
+			"capacity": 22700,
+			"kit": "halves",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_AST",
+			"name": "Asteras",
+			"short": "Asteras",
+			"abbr": "AST",
+			"nick": "Asteras",
+			"city": "Tripoli",
+			"founded": 1931,
+			"league": "GRE1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Theodoros Kolokotronis",
+			"capacity": 7400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_ATR",
+			"name": "Atromitos",
+			"short": "Atromitos",
+			"abbr": "ATR",
+			"nick": "Atromitos",
+			"city": "Peristeri",
+			"founded": 1923,
+			"league": "GRE1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Peristeri Stadium",
+			"capacity": 9000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_PAN",
+			"name": "Panetolikos",
+			"short": "Panetolikos",
+			"abbr": "PNE",
+			"nick": "Panetolikos",
+			"city": "Agrinio",
+			"founded": 1926,
+			"league": "GRE1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Panetolikos Stadium",
+			"capacity": 7300,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_LAM",
+			"name": "Lamia",
+			"short": "Lamia",
+			"abbr": "LAM",
+			"nick": "Lamia",
+			"city": "Lamia",
+			"founded": 1964,
+			"league": "GRE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Lamia Municipal",
+			"capacity": 5500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_SER",
+			"name": "Panserraikos",
+			"short": "Panserraikos",
+			"abbr": "PSR",
+			"nick": "Panserraikos",
+			"city": "Serres",
+			"founded": 1964,
+			"league": "GRE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Serres Municipal",
+			"capacity": 9500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_LEV",
+			"name": "Levadiakos",
+			"short": "Levadiakos",
+			"abbr": "LEV",
+			"nick": "Levadiakos",
+			"city": "Livadeia",
+			"founded": 1961,
+			"league": "GRE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Levadia Municipal",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "GRE_KIF",
+			"name": "Kifisia",
+			"short": "Kifisia",
+			"abbr": "KIF",
+			"nick": "Kifisia",
+			"city": "Kifisia",
+			"founded": 2012,
+			"league": "GRE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Zirinio",
+			"capacity": 3500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

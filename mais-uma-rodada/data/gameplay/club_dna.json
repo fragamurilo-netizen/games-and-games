@@ -1,0 +1,915 @@
+{
+	"_doc": "DNA dos clubes (scripts/systems/club_dna.gd): parâmetros permanentes que guiam a IA em vez de só 'preciso de um meia 78'. rec = filosofia de elenco; mkt = alcance do mercado; tac = tática institucional (a escola que sobrevive aos técnicos). Os números (0..100) são paciência com técnico, apetite financeiro, uso da base, venda de jovens, prestígio e ambição. era = momento do clube, recalculado a cada temporada. archetype: pesos de sorteio da filosofia de elenco e do alcance de mercado por arquétipo, e ajustes de ambição. clubs: DNA real dos clubes conhecidos (chave do clube) — filosofia, mercado, escola, momento e ajustes de yth/sell/pat/fin/pre/amb; vale para as carreiras novas e depois evolui com o save.",
+	"rec": {
+		"formacao": {
+			"name": "Formação",
+			"desc": "Aposta em garotos da base e em jovens baratos para lapidar.",
+			"ages": [
+				17,
+				22
+			]
+		},
+		"estrelas": {
+			"name": "Compra estrelas",
+			"desc": "Paga caro por nomes prontos que decidam já.",
+			"ages": [
+				23,
+				30
+			]
+		},
+		"moneyball": {
+			"name": "Moneyball",
+			"desc": "Números antes de nomes: compra barato quem rende, vende no pico.",
+			"ages": [
+				21,
+				27
+			]
+		},
+		"veteranos": {
+			"name": "Veteranos",
+			"desc": "Experiência acima de tudo. Gosta de jogador rodado e de contrato no fim.",
+			"ages": [
+				27,
+				33
+			]
+		},
+		"equilibrio": {
+			"name": "Equilíbrio",
+			"desc": "Mistura base, apostas e reforços prontos conforme a necessidade.",
+			"ages": [
+				20,
+				30
+			]
+		}
+	},
+	"mkt": {
+		"domestico": {
+			"name": "Doméstico",
+			"desc": "Contrata quase só no próprio país.",
+			"home": 0.85
+		},
+		"regional": {
+			"name": "Regional",
+			"desc": "Casa, vizinhos e as rotas tradicionais do país.",
+			"home": 0.55
+		},
+		"continental": {
+			"name": "Continental",
+			"desc": "Garimpa no próprio continente.",
+			"home": 0.4
+		},
+		"global": {
+			"name": "Global",
+			"desc": "Olheiros no mundo inteiro.",
+			"home": 0.3
+		}
+	},
+	"tac": {
+		"posse": {
+			"name": "Posse",
+			"desc": "A bola é do clube. Técnicos que chegam mantêm o toque.",
+			"ph": [
+				"posicional",
+				"toque"
+			]
+		},
+		"transicao": {
+			"name": "Transição",
+			"desc": "Recuperar e acelerar. O contra-ataque é a marca da casa.",
+			"ph": [
+				"contragolpe",
+				"vertical"
+			]
+		},
+		"defesa": {
+			"name": "Defesa",
+			"desc": "Solidez primeiro. Perder de pouco é quase vencer.",
+			"ph": [
+				"ferrolho",
+				"tres_zagueiros"
+			]
+		},
+		"intensidade": {
+			"name": "Intensidade",
+			"desc": "Pressão, disputa e ritmo alto os 90 minutos.",
+			"ph": [
+				"pressao",
+				"direto"
+			]
+		}
+	},
+	"eras": {
+		"estavel": {
+			"name": "Estável",
+			"desc": "Sem grandes sustos nem grandes saltos."
+		},
+		"crescendo": {
+			"name": "Em ascensão",
+			"desc": "Temporada após temporada, o clube sobe de patamar."
+		},
+		"potencia": {
+			"name": "Potência",
+			"desc": "Prestígio no topo e títulos recentes."
+		},
+		"fabrica": {
+			"name": "Fábrica de talentos",
+			"desc": "Revela e vende jovens com frequência."
+		},
+		"novo_rico": {
+			"name": "Novo rico",
+			"desc": "Dono com dinheiro e pressa."
+		},
+		"crise": {
+			"name": "Em crise",
+			"desc": "Dívida alta: vender, cortar e apostar na base."
+		},
+		"decadencia": {
+			"name": "Perdendo relevância",
+			"desc": "O nome ainda pesa, os resultados não."
+		}
+	},
+	"params": {
+		"pat": {
+			"name": "Paciência com o técnico",
+			"desc": "Quanto a diretoria aguenta uma fase ruim antes de trocar o comando."
+		},
+		"fin": {
+			"name": "Apetite financeiro",
+			"desc": "Quanto arrisca do caixa em reforços e salários."
+		},
+		"yth": {
+			"name": "Uso da base",
+			"desc": "Espaço para os garotos no time principal."
+		},
+		"sell": {
+			"name": "Venda de jovens",
+			"desc": "Facilidade para vender promessas."
+		},
+		"pre": {
+			"name": "Prestígio",
+			"desc": "Peso do nome construído ao longo das décadas."
+		},
+		"amb": {
+			"name": "Ambição",
+			"desc": "O tamanho do sonho da diretoria."
+		}
+	},
+	"archetype": {
+		"gigante_endividado": {
+			"rec": {
+				"estrelas": 3,
+				"equilibrio": 2,
+				"veteranos": 1
+			},
+			"amb": 18,
+			"era": "crise"
+		},
+		"rico_promovido": {
+			"rec": {
+				"estrelas": 4,
+				"equilibrio": 1
+			},
+			"amb": 22,
+			"era": "novo_rico"
+		},
+		"tradicional_decadente": {
+			"rec": {
+				"veteranos": 3,
+				"equilibrio": 2,
+				"formacao": 1
+			},
+			"amb": 8,
+			"era": "decadencia"
+		},
+		"formador": {
+			"rec": {
+				"formacao": 5,
+				"moneyball": 1
+			},
+			"amb": 0,
+			"era": "fabrica"
+		},
+		"vendedor": {
+			"rec": {
+				"moneyball": 3,
+				"formacao": 2
+			},
+			"amb": -2,
+			"era": "fabrica"
+		},
+		"defensivo": {
+			"rec": {
+				"equilibrio": 2,
+				"veteranos": 2,
+				"moneyball": 1
+			},
+			"amb": -6
+		},
+		"torcida_impaciente": {
+			"rec": {
+				"estrelas": 2,
+				"equilibrio": 2,
+				"veteranos": 1
+			},
+			"amb": 10
+		},
+		"projeto_jovem": {
+			"rec": {
+				"formacao": 4,
+				"moneyball": 2
+			},
+			"amb": 6,
+			"era": "crescendo"
+		},
+		"veteranos": {
+			"rec": {
+				"veteranos": 5,
+				"equilibrio": 1
+			},
+			"amb": 0
+		},
+		"azarao": {
+			"rec": {
+				"moneyball": 3,
+				"equilibrio": 2,
+				"formacao": 1
+			},
+			"amb": -4
+		},
+		"cidade_pequena": {
+			"rec": {
+				"equilibrio": 2,
+				"veteranos": 2,
+				"formacao": 1
+			},
+			"amb": -12
+		},
+		"estadio_enorme": {
+			"rec": {
+				"equilibrio": 2,
+				"estrelas": 2
+			},
+			"amb": 8
+		},
+		"base_sem_dinheiro": {
+			"rec": {
+				"formacao": 5,
+				"moneyball": 1
+			},
+			"amb": -6
+		},
+		"dinheiro_gestao_ruim": {
+			"rec": {
+				"estrelas": 4,
+				"veteranos": 1
+			},
+			"amb": 16
+		},
+		"tradicional_equilibrado": {
+			"rec": {
+				"equilibrio": 4,
+				"formacao": 1,
+				"moneyball": 1
+			},
+			"amb": 0
+		}
+	},
+	"clubs": {
+		"ENG_MSK": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "potencia",
+			"fin": 88,
+			"pat": 70,
+			"yth": 45
+		},
+		"ENG_WLB": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "novo_rico",
+			"fin": 95,
+			"pat": 12,
+			"sell": 60,
+			"yth": 55
+		},
+		"ENG_NLR": {
+			"rec": "formacao",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "crescendo",
+			"pat": 75,
+			"yth": 65,
+			"fin": 70
+		},
+		"ENG_MSR": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "potencia",
+			"pat": 78,
+			"fin": 65,
+			"sell": 55
+		},
+		"ENG_MRD": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "decadencia",
+			"fin": 85,
+			"pat": 30,
+			"yth": 60
+		},
+		"ENG_NLW": {
+			"rec": "equilibrio",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "estavel",
+			"pat": 40,
+			"fin": 60
+		},
+		"ENG_TYN": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "novo_rico",
+			"fin": 85,
+			"amb": 85
+		},
+		"ENG_SSG": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "crescendo",
+			"sell": 92,
+			"yth": 55,
+			"pat": 70
+		},
+		"ENG_AST": {
+			"rec": "equilibrio",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "crescendo",
+			"fin": 70,
+			"amb": 75
+		},
+		"ENG_MSB": {
+			"rec": "equilibrio",
+			"mkt": "regional",
+			"tac": "defesa",
+			"era": "crise",
+			"fin": 30
+		},
+		"ESP_MBL": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "potencia",
+			"pat": 25,
+			"fin": 80,
+			"pre": 99,
+			"amb": 95
+		},
+		"ESP_BLG": {
+			"rec": "formacao",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "crescendo",
+			"yth": 90,
+			"fin": 55,
+			"pat": 45
+		},
+		"ESP_MRB": {
+			"rec": "equilibrio",
+			"mkt": "global",
+			"tac": "defesa",
+			"era": "estavel",
+			"pat": 95,
+			"fin": 60
+		},
+		"ESP_BIL": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "intensidade",
+			"era": "estavel",
+			"yth": 95,
+			"sell": 20,
+			"pat": 70
+		},
+		"ESP_DON": {
+			"rec": "formacao",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "estavel",
+			"yth": 85,
+			"sell": 70
+		},
+		"ESP_SUB": {
+			"rec": "moneyball",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "estavel",
+			"sell": 75
+		},
+		"ESP_NER": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "decadencia",
+			"sell": 88,
+			"fin": 35
+		},
+		"ESP_VBL": {
+			"rec": "equilibrio",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "crescendo"
+		},
+		"ESP_VLC": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "transicao",
+			"era": "crise",
+			"yth": 80,
+			"fin": 25,
+			"sell": 80
+		},
+		"ITA_TBN": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "defesa",
+			"era": "crise",
+			"fin": 65,
+			"pat": 40
+		},
+		"ITA_MNZ": {
+			"rec": "veteranos",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "potencia",
+			"fin": 60,
+			"pat": 60
+		},
+		"ITA_MRN": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "crescendo",
+			"sell": 60
+		},
+		"ITA_NAP": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "estavel",
+			"sell": 70,
+			"pat": 35
+		},
+		"ITA_RGR": {
+			"rec": "equilibrio",
+			"mkt": "global",
+			"tac": "defesa",
+			"era": "estavel",
+			"pat": 25
+		},
+		"ITA_BER": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "crescendo",
+			"sell": 90,
+			"yth": 75,
+			"pat": 90
+		},
+		"ITA_RBC": {
+			"rec": "veteranos",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "estavel"
+		},
+		"GER_MUR": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "potencia",
+			"pat": 30,
+			"fin": 70,
+			"pre": 97
+		},
+		"GER_DOR": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "estavel",
+			"sell": 95,
+			"yth": 70
+		},
+		"GER_LEV": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "crescendo",
+			"sell": 75,
+			"pat": 80
+		},
+		"GER_RBL": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "crescendo",
+			"sell": 90,
+			"yth": 50
+		},
+		"GER_STU": {
+			"rec": "formacao",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "crescendo",
+			"yth": 75,
+			"sell": 75
+		},
+		"FRA_PCF": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "potencia",
+			"fin": 99,
+			"pat": 20,
+			"amb": 98
+		},
+		"FRA_MON": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "estavel",
+			"sell": 95,
+			"yth": 70
+		},
+		"FRA_LYO": {
+			"rec": "formacao",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "crise",
+			"yth": 90,
+			"sell": 85,
+			"fin": 30
+		},
+		"FRA_LIL": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "estavel",
+			"sell": 92
+		},
+		"FRA_MRS": {
+			"rec": "equilibrio",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "estavel",
+			"pat": 15,
+			"fin": 65
+		},
+		"POR_ENC": {
+			"rec": "formacao",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "potencia",
+			"yth": 92,
+			"sell": 95
+		},
+		"POR_DRA": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "estavel",
+			"sell": 92,
+			"yth": 70
+		},
+		"POR_LEO": {
+			"rec": "formacao",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "potencia",
+			"yth": 92,
+			"sell": 92
+		},
+		"POR_BRG": {
+			"rec": "moneyball",
+			"mkt": "continental",
+			"tac": "transicao",
+			"era": "crescendo",
+			"sell": 88
+		},
+		"NED_AMS": {
+			"rec": "formacao",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "crise",
+			"yth": 95,
+			"sell": 95
+		},
+		"NED_EIN": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "estavel",
+			"sell": 85,
+			"yth": 75
+		},
+		"NED_ROT": {
+			"rec": "moneyball",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "estavel",
+			"sell": 85
+		},
+		"TUR_IAS": {
+			"rec": "veteranos",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "potencia",
+			"fin": 75,
+			"pat": 25
+		},
+		"TUR_IKN": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "estavel",
+			"fin": 80,
+			"pat": 15
+		},
+		"SCO_GLE": {
+			"rec": "moneyball",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "potencia",
+			"sell": 80
+		},
+		"BRA_RNC": {
+			"rec": "estrelas",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "potencia",
+			"fin": 85,
+			"pat": 20,
+			"yth": 65,
+			"sell": 70
+		},
+		"BRA_VPA": {
+			"rec": "formacao",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "potencia",
+			"yth": 85,
+			"sell": 88,
+			"pat": 85,
+			"fin": 70
+		},
+		"BRA_TIM": {
+			"rec": "veteranos",
+			"mkt": "domestico",
+			"tac": "defesa",
+			"era": "crise",
+			"fin": 40,
+			"pat": 25
+		},
+		"BRA_MOR": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "transicao",
+			"era": "crise",
+			"yth": 88,
+			"sell": 80
+		},
+		"BRA_PRA": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "posse",
+			"era": "crise",
+			"yth": 95,
+			"sell": 92
+		},
+		"BRA_TRL": {
+			"rec": "formacao",
+			"mkt": "regional",
+			"tac": "posse",
+			"era": "estavel",
+			"yth": 85,
+			"sell": 85
+		},
+		"BRA_IMT": {
+			"rec": "formacao",
+			"mkt": "regional",
+			"tac": "transicao",
+			"era": "estavel",
+			"yth": 82,
+			"sell": 80
+		},
+		"BRA_COL": {
+			"rec": "equilibrio",
+			"mkt": "regional",
+			"tac": "transicao",
+			"era": "estavel",
+			"yth": 72
+		},
+		"BRA_GAL": {
+			"rec": "estrelas",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "novo_rico",
+			"fin": 80
+		},
+		"BRA_GLO": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "novo_rico",
+			"fin": 82,
+			"sell": 75
+		},
+		"BRA_RAP": {
+			"rec": "estrelas",
+			"mkt": "continental",
+			"tac": "transicao",
+			"era": "novo_rico",
+			"fin": 78
+		},
+		"BRA_CMA": {
+			"rec": "equilibrio",
+			"mkt": "domestico",
+			"tac": "transicao",
+			"era": "crise",
+			"fin": 30,
+			"yth": 72
+		},
+		"BRA_FUR": {
+			"rec": "moneyball",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "estavel",
+			"yth": 75,
+			"sell": 85
+		},
+		"BRA_MBR": {
+			"rec": "moneyball",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "crescendo",
+			"sell": 90,
+			"yth": 60
+		},
+		"ARG_MIL": {
+			"rec": "formacao",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "potencia",
+			"yth": 90,
+			"sell": 88
+		},
+		"ARG_XEN": {
+			"rec": "veteranos",
+			"mkt": "continental",
+			"tac": "defesa",
+			"era": "estavel",
+			"yth": 72,
+			"sell": 80,
+			"pat": 20
+		},
+		"ARG_BIC": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "posse",
+			"era": "fabrica",
+			"yth": 95,
+			"sell": 95
+		},
+		"ARG_FOR": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "transicao",
+			"era": "estavel",
+			"yth": 85,
+			"sell": 88
+		},
+		"ARG_ROJ": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "transicao",
+			"era": "crise",
+			"fin": 25,
+			"yth": 80
+		},
+		"ARG_LAN": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "posse",
+			"era": "estavel",
+			"yth": 85,
+			"sell": 85
+		},
+		"USA_MIA": {
+			"rec": "veteranos",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "novo_rico",
+			"fin": 85
+		},
+		"USA_LAS": {
+			"rec": "veteranos",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "estavel"
+		},
+		"USA_LAG": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "intensidade",
+			"era": "crescendo"
+		},
+		"KSA_AZR": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "posse",
+			"era": "novo_rico",
+			"fin": 98,
+			"yth": 20
+		},
+		"KSA_ALM": {
+			"rec": "veteranos",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "novo_rico",
+			"fin": 98,
+			"yth": 15
+		},
+		"KSA_AMD": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "novo_rico",
+			"fin": 95,
+			"yth": 15
+		},
+		"KSA_RAQ": {
+			"rec": "estrelas",
+			"mkt": "global",
+			"tac": "transicao",
+			"era": "novo_rico",
+			"fin": 95,
+			"yth": 15
+		},
+		"MEX_AGU": {
+			"rec": "estrelas",
+			"mkt": "continental",
+			"tac": "intensidade",
+			"era": "potencia",
+			"fin": 80
+		},
+		"MEX_GDL": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "transicao",
+			"era": "estavel",
+			"yth": 85
+		},
+		"MEX_TUZ": {
+			"rec": "formacao",
+			"mkt": "continental",
+			"tac": "posse",
+			"era": "fabrica",
+			"yth": 90,
+			"sell": 90
+		},
+		"MEX_RAY": {
+			"rec": "estrelas",
+			"mkt": "continental",
+			"tac": "transicao",
+			"era": "estavel",
+			"fin": 80
+		},
+		"MEX_AUR": {
+			"rec": "veteranos",
+			"mkt": "continental",
+			"tac": "defesa",
+			"era": "estavel",
+			"fin": 78
+		},
+		"JPN_KWS": {
+			"rec": "formacao",
+			"mkt": "domestico",
+			"tac": "posse",
+			"era": "estavel",
+			"yth": 75,
+			"sell": 80
+		},
+		"JPN_KOB": {
+			"rec": "estrelas",
+			"mkt": "regional",
+			"tac": "intensidade",
+			"era": "novo_rico",
+			"fin": 80
+		}
+	}
+}

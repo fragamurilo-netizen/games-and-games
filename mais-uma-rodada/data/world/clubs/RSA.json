@@ -1,0 +1,377 @@
+{
+	"nation": "RSA",
+	"_doc": "África do Sul (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "RSA_BRZ",
+			"name": "Sundowns",
+			"short": "Sundowns",
+			"abbr": "MSU",
+			"nick": "Masandawana",
+			"city": "Pretoria",
+			"founded": 1970,
+			"league": "RSA1",
+			"rep": 72,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#006437"
+			],
+			"stadium": "Loftus Versfeld",
+			"capacity": 51000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#006437"
+			},
+			"rivals": []
+		},
+		{
+			"key": "RSA_AMA",
+			"name": "Kaizer Chiefs",
+			"short": "Kaizer Chiefs",
+			"abbr": "KAI",
+			"nick": "Amakhosi",
+			"city": "Johannesburg",
+			"founded": 1970,
+			"league": "RSA1",
+			"rep": 64,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "FNB Stadium",
+			"capacity": 94000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "KC",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"RSA_BUC"
+			]
+		},
+		{
+			"key": "RSA_BUC",
+			"name": "Orlando Pirates",
+			"short": "Orlando Pirates",
+			"abbr": "OPI",
+			"nick": "Bucs",
+			"city": "Johannesburg",
+			"founded": 1937,
+			"league": "RSA1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Orlando Stadium",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "skull",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"RSA_AMA"
+			]
+		},
+		{
+			"key": "RSA_STE",
+			"name": "Stellenbosch",
+			"short": "Stellenbosch",
+			"abbr": "STB",
+			"nick": "Stellies",
+			"city": "Stellenbosch",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Danie Craven Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SFC",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "RSA_AMZ",
+			"name": "AmaZulu",
+			"short": "AmaZulu",
+			"abbr": "AZU",
+			"nick": "Usuthu",
+			"city": "Durban",
+			"founded": 1932,
+			"league": "RSA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Moses Mabhida Stadium",
+			"capacity": 56000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AZ"
+			}
+		},
+		{
+			"key": "RSA_TSG",
+			"name": "TS Galaxy",
+			"short": "TS Galaxy",
+			"abbr": "TSG",
+			"nick": "The Rockets",
+			"city": "Mbombela",
+			"founded": 2015,
+			"league": "RSA1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Mbombela Stadium",
+			"capacity": 40000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star"
+			}
+		},
+		{
+			"key": "RSA_SSU",
+			"name": "Siwelele",
+			"short": "Siwelele",
+			"abbr": "SIW",
+			"nick": "Siwelele",
+			"city": "Pretoria",
+			"founded": 1994,
+			"league": "RSA1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lucas Moripe Stadium",
+			"capacity": 28900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_CTC",
+			"name": "Cape Town City",
+			"short": "Cape Town City",
+			"abbr": "CTC",
+			"nick": "Cape Town City",
+			"city": "Cape Town",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "DHL Stadium",
+			"capacity": 55000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_SEK",
+			"name": "Sekhukhune",
+			"short": "Sekhukhune",
+			"abbr": "SEK",
+			"nick": "Sekhukhune",
+			"city": "Polokwane",
+			"founded": 2019,
+			"league": "RSA1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Peter Mokaba Stadium",
+			"capacity": 41700,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_POL",
+			"name": "Polokwane City",
+			"short": "Polokwane City",
+			"abbr": "PCF",
+			"nick": "Polokwane City",
+			"city": "Polokwane",
+			"founded": 2012,
+			"league": "RSA1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Old Peter Mokaba Stadium",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_GAR",
+			"name": "Golden Arrows",
+			"short": "Golden Arrows",
+			"abbr": "GAR",
+			"nick": "Golden Arrows",
+			"city": "Durban",
+			"founded": 1943,
+			"league": "RSA1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "King Zwelithini Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_CHI",
+			"name": "Chippa United",
+			"short": "Chippa United",
+			"abbr": "CHI",
+			"nick": "Chippa United",
+			"city": "Gqeberha",
+			"founded": 2010,
+			"league": "RSA1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Buffalo City Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_RBY",
+			"name": "Richards Bay",
+			"short": "Richards Bay",
+			"abbr": "RBY",
+			"nick": "Richards Bay",
+			"city": "Richards Bay",
+			"founded": 2006,
+			"league": "RSA1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "King Zwelithini Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_MAG",
+			"name": "Magesi",
+			"short": "Magesi",
+			"abbr": "MAG",
+			"nick": "Magesi",
+			"city": "Polokwane",
+			"founded": 2011,
+			"league": "RSA1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Old Peter Mokaba Stadium",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_MAR",
+			"name": "Marumo Gallants",
+			"short": "Marumo Gallants",
+			"abbr": "MGA",
+			"nick": "Marumo Gallants",
+			"city": "Bloemfontein",
+			"founded": 2021,
+			"league": "RSA1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Dr Petrus Molemela Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "RSA_ORB",
+			"name": "Orbit College",
+			"short": "Orbit College",
+			"abbr": "ORB",
+			"nick": "Orbit College",
+			"city": "Rustenburg",
+			"founded": 2016,
+			"league": "RSA1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Olympia Park",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

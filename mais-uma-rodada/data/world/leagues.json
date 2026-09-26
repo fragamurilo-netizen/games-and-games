@@ -1,0 +1,1987 @@
+{
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). rev: força comercial além da folha (multiplica as receitas; padrão 1). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE). barrage: repescagem entre divisões na liga de cima ({pos, vs, legs, desc}): o clube em pos enfrenta o vs da divisão de baixo (ou o vencedor dos playoffs de acesso dela); com ela, o up da divisão de baixo conta só as vagas diretas.",
+	"leagues": [
+		{
+			"id": "ENG1",
+			"nation": "ENG",
+			"tier": 1,
+			"name": "Premier League",
+			"short": "Premier League",
+			"colors": [
+				"#3D195B",
+				"#00FF85"
+			],
+			"teams": 20,
+			"rr": 2,
+			"down": 3,
+			"level": [
+				74,
+				85
+			],
+			"rep": [
+				60,
+				96
+			],
+			"wage": 1.35,
+			"att": 1.3,
+			"ticket": 60,
+			"culture": {
+				"goals": 1.13,
+				"home": 1.0,
+				"cards": 0.9
+			}
+		},
+		{
+			"id": "ENG2",
+			"nation": "ENG",
+			"tier": 2,
+			"name": "EFL Championship",
+			"short": "Championship",
+			"colors": [
+				"#0B1C3F",
+				"#D4AF37"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 3,
+			"level": [
+				65,
+				73
+			],
+			"rep": [
+				50,
+				72
+			],
+			"wage": 0.8,
+			"att": 1.1,
+			"ticket": 35,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 1.0
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 4,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 2,
+					"f": 1
+				},
+				"neutral_final": true,
+				"desc": "Os 2 primeiros sobem direto; do 3º ao 6º disputam os playoffs de acesso (semifinal em ida e volta e final em Wembley, campo neutro) pela terceira vaga."
+			}
+		},
+		{
+			"id": "ESP1",
+			"nation": "ESP",
+			"tier": 1,
+			"name": "LaLiga",
+			"short": "LaLiga",
+			"colors": [
+				"#FF4B44",
+				"#1B1B1B"
+			],
+			"teams": 20,
+			"rr": 2,
+			"down": 3,
+			"level": [
+				72,
+				86
+			],
+			"rep": [
+				54,
+				98
+			],
+			"wage": 1.0,
+			"att": 1.0,
+			"ticket": 45,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 1.2
+			},
+			"foreign_limit": {
+				"max": 3,
+				"scope": "non_eu"
+			}
+		},
+		{
+			"id": "ESP2",
+			"nation": "ESP",
+			"tier": 2,
+			"name": "LaLiga Hypermotion",
+			"short": "LaLiga 2",
+			"colors": [
+				"#1B1B1B",
+				"#00D0FF"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 3,
+			"level": [
+				62,
+				70
+			],
+			"rep": [
+				44,
+				64
+			],
+			"wage": 0.35,
+			"att": 0.8,
+			"ticket": 20,
+			"culture": {
+				"goals": 0.87,
+				"home": 1.05,
+				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 3,
+				"scope": "non_eu"
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 4,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 1,
+					"f": 2
+				},
+				"desc": "Os 2 primeiros sobem direto; do 3º ao 6º decidem a terceira vaga: semifinal em jogo único na casa do melhor e final em ida e volta, depois da temporada regular."
+			}
+		},
+		{
+			"id": "GER1",
+			"nation": "GER",
+			"tier": 1,
+			"name": "Bundesliga",
+			"short": "Bundesliga",
+			"colors": [
+				"#D20515",
+				"#FFFFFF"
+			],
+			"teams": 18,
+			"rr": 2,
+			"down": 2,
+			"level": [
+				71,
+				85
+			],
+			"rep": [
+				56,
+				96
+			],
+			"wage": 1.05,
+			"att": 1.4,
+			"ticket": 35,
+			"culture": {
+				"goals": 1.19,
+				"home": 0.95,
+				"cards": 0.95
+			},
+			"barrage": {
+				"pos": 16,
+				"vs": 3,
+				"legs": 2,
+				"desc": "18 clubes em turno e returno. Os 2 últimos caem direto; o 16º joga a repescagem (Relegation) contra o 3º da 2. Bundesliga, em ida e volta, com a volta na casa do clube da Bundesliga."
+			}
+		},
+		{
+			"id": "GER2",
+			"nation": "GER",
+			"tier": 2,
+			"name": "2. Bundesliga",
+			"short": "2. Bundesliga",
+			"colors": [
+				"#111111",
+				"#D20515"
+			],
+			"teams": 18,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				62,
+				70
+			],
+			"rep": [
+				44,
+				72
+			],
+			"wage": 0.4,
+			"att": 1.2,
+			"ticket": 22,
+			"culture": {
+				"goals": 1.11,
+				"home": 1.0,
+				"cards": 1.0
+			}
+		},
+		{
+			"id": "ITA1",
+			"nation": "ITA",
+			"tier": 1,
+			"name": "Serie A",
+			"short": "Serie A",
+			"colors": [
+				"#0A2E6E",
+				"#00B2E3"
+			],
+			"teams": 20,
+			"rr": 2,
+			"level": [
+				71,
+				84
+			],
+			"rep": [
+				54,
+				92
+			],
+			"wage": 0.95,
+			"att": 0.9,
+			"ticket": 35,
+			"down": 3,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.0,
+				"cards": 1.1
+			}
+		},
+		{
+			"id": "ITA2",
+			"nation": "ITA",
+			"tier": 2,
+			"name": "Serie B",
+			"short": "Serie B",
+			"colors": [
+				"#0B7B3E",
+				"#FFFFFF"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 3,
+			"level": [
+				62,
+				70
+			],
+			"rep": [
+				44,
+				64
+			],
+			"wage": 0.35,
+			"att": 0.7,
+			"ticket": 18,
+			"culture": {
+				"goals": 0.92,
+				"home": 1.05,
+				"cards": 1.15
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 6,
+				"byes": 2,
+				"ko": [
+					"ef",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"ef": 1,
+					"sf": 1,
+					"f": 1
+				},
+				"desc": "Os 2 primeiros sobem direto; do 3º ao 8º vão aos playoffs depois da temporada regular (3º e 4º direto na semifinal), em jogos únicos na casa do melhor."
+			}
+		},
+		{
+			"id": "FRA1",
+			"nation": "FRA",
+			"tier": 1,
+			"name": "Ligue 1",
+			"short": "Ligue 1",
+			"colors": [
+				"#091C3E",
+				"#DAE025"
+			],
+			"teams": 18,
+			"rr": 2,
+			"down": 2,
+			"level": [
+				69,
+				84
+			],
+			"rep": [
+				54,
+				94
+			],
+			"wage": 0.9,
+			"att": 0.9,
+			"ticket": 30,
+			"culture": {
+				"goals": 1.08,
+				"home": 1.0,
+				"cards": 0.95
+			},
+			"barrage": {
+				"pos": 16,
+				"vs": 3,
+				"legs": 2,
+				"desc": "18 clubes em turno e returno. Os 2 últimos caem direto; o 16º joga o barrage em ida e volta contra o vencedor dos playoffs da Ligue 2."
+			}
+		},
+		{
+			"id": "FRA2",
+			"nation": "FRA",
+			"tier": 2,
+			"name": "Ligue 2",
+			"short": "Ligue 2",
+			"colors": [
+				"#0E3B7D",
+				"#F28C28"
+			],
+			"teams": 18,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				60,
+				68
+			],
+			"rep": [
+				40,
+				68
+			],
+			"wage": 0.35,
+			"att": 0.7,
+			"ticket": 15,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.05,
+				"cards": 1.0
+			},
+			"format": {
+				"type": "promo",
+				"from": 3,
+				"teams": 3,
+				"byes": 1,
+				"ko": [
+					"sf",
+					"f"
+				],
+				"legs": {
+					"sf": 1,
+					"f": 1
+				},
+				"desc": "Os 2 primeiros sobem direto. O 4º recebe o 5º, o vencedor visita o 3º, e quem passar enfrenta o 16º da Ligue 1 no barrage pela última vaga."
+			}
+		},
+		{
+			"id": "POR1",
+			"nation": "POR",
+			"tier": 1,
+			"name": "Liga Portugal",
+			"short": "Liga Portugal",
+			"colors": [
+				"#00205B",
+				"#00C1D5"
+			],
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				64,
+				80
+			],
+			"rep": [
+				50,
+				88
+			],
+			"wage": 0.55,
+			"att": 0.8,
+			"ticket": 20,
+			"down": 2,
+			"culture": {
+				"goals": 1.0,
+				"home": 1.05,
+				"cards": 1.15
+			},
+			"barrage": {
+				"pos": 16,
+				"vs": 3,
+				"legs": 2,
+				"desc": "18 clubes em turno e returno. Os 2 últimos caem direto; o 16º joga o play-off de permanência em ida e volta contra o 3º da Liga Portugal 2."
+			}
+		},
+		{
+			"id": "POR2",
+			"nation": "POR",
+			"tier": 2,
+			"name": "Liga Portugal 2",
+			"short": "Liga Portugal 2",
+			"colors": [
+				"#1D3F91",
+				"#FFCC00"
+			],
+			"teams": 18,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				56,
+				64
+			],
+			"rep": [
+				38,
+				56
+			],
+			"wage": 0.18,
+			"att": 0.5,
+			"ticket": 8,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.05,
+				"cards": 1.2
+			}
+		},
+		{
+			"id": "NED1",
+			"nation": "NED",
+			"tier": 1,
+			"name": "Eredivisie",
+			"short": "Eredivisie",
+			"colors": [
+				"#F36C21",
+				"#1B1B1B"
+			],
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				63,
+				77
+			],
+			"rep": [
+				52,
+				84
+			],
+			"wage": 0.65,
+			"att": 1.1,
+			"ticket": 25,
+			"culture": {
+				"goals": 1.21,
+				"home": 1.0,
+				"cards": 0.9
+			}
+		},
+		{
+			"id": "TUR1",
+			"nation": "TUR",
+			"tier": 1,
+			"name": "Süper Lig",
+			"short": "Süper Lig",
+			"colors": [
+				"#E30A17",
+				"#FFFFFF"
+			],
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				64,
+				78
+			],
+			"rep": [
+				52,
+				86
+			],
+			"wage": 0.8,
+			"att": 1.0,
+			"ticket": 20,
+			"culture": {
+				"goals": 1.11,
+				"home": 1.15,
+				"cards": 1.2
+			}
+		},
+		{
+			"id": "BEL1",
+			"nation": "BEL",
+			"tier": 1,
+			"name": "Jupiler Pro League",
+			"short": "Pro League",
+			"colors": [
+				"#E4002B",
+				"#111111"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				62,
+				74
+			],
+			"rep": [
+				52,
+				78
+			],
+			"wage": 0.6,
+			"att": 0.9,
+			"ticket": 22,
+			"culture": {
+				"goals": 1.09,
+				"home": 1.0,
+				"cards": 1.0
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6,
+					4
+				],
+				"legs": [
+					1,
+					1,
+					1
+				],
+				"halve": true,
+				"desc": "30 rodadas; os pontos caem pela metade e os 6 primeiros disputam os playoffs do título, os 6 seguintes os da Europa e os 4 últimos fogem da queda."
+			}
+		},
+		{
+			"id": "SCO1",
+			"nation": "SCO",
+			"tier": 1,
+			"name": "Scottish Premiership",
+			"short": "Premiership",
+			"colors": [
+				"#4B2C83",
+				"#E6E6E6"
+			],
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				58,
+				72
+			],
+			"rep": [
+				50,
+				80
+			],
+			"wage": 0.5,
+			"att": 1.1,
+			"ticket": 25,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.05,
+				"cards": 0.95
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "33 rodadas (três turnos) e depois o split: os 6 primeiros disputam o título e os 6 de baixo fogem da queda, mais 5 rodadas cada. O grupo de cima termina sempre à frente."
+			}
+		},
+		{
+			"id": "GRE1",
+			"nation": "GRE",
+			"tier": 1,
+			"name": "Stoiximan Super League",
+			"short": "Super League",
+			"colors": [
+				"#0D5EAF",
+				"#FFFFFF"
+			],
+			"teams": 14,
+			"rr": 2,
+			"level": [
+				60,
+				72
+			],
+			"rep": [
+				52,
+				76
+			],
+			"wage": 0.5,
+			"att": 0.7,
+			"ticket": 15,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.15,
+				"cards": 1.2
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					4,
+					4,
+					6
+				],
+				"legs": [
+					2,
+					2,
+					1
+				],
+				"desc": "26 rodadas e três grupos: título (4), vagas europeias (4) e rebaixamento (6)."
+			}
+		},
+		{
+			"id": "AUT1",
+			"nation": "AUT",
+			"tier": 1,
+			"name": "Admiral Bundesliga",
+			"short": "Bundesliga AUT",
+			"colors": [
+				"#ED2939",
+				"#FFFFFF"
+			],
+			"teams": 12,
+			"rr": 2,
+			"level": [
+				60,
+				72
+			],
+			"rep": [
+				50,
+				76
+			],
+			"wage": 0.55,
+			"att": 0.8,
+			"ticket": 18,
+			"culture": {
+				"goals": 1.17,
+				"home": 1.0,
+				"cards": 0.95
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					2,
+					2
+				],
+				"halve": true,
+				"desc": "22 rodadas e a divisão em dois grupos de 6 em turno e returno, com os pontos cortados pela metade."
+			}
+		},
+		{
+			"id": "SUI1",
+			"nation": "SUI",
+			"tier": 1,
+			"name": "Brack.ch Super League",
+			"short": "Super League SUI",
+			"colors": [
+				"#1F1F1F",
+				"#DA291C"
+			],
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				60,
+				71
+			],
+			"rep": [
+				50,
+				72
+			],
+			"wage": 0.6,
+			"att": 0.8,
+			"ticket": 25,
+			"culture": {
+				"goals": 1.17,
+				"home": 1.0,
+				"cards": 0.9
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "33 rodadas e o split em dois grupos de 6 (título e rebaixamento), mais 5 rodadas cada."
+			}
+		},
+		{
+			"id": "UKR1",
+			"nation": "UKR",
+			"tier": 1,
+			"name": "VBET Liha",
+			"short": "UPL",
+			"colors": [
+				"#005BBB",
+				"#FFD500"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				72
+			],
+			"rep": [
+				50,
+				74
+			],
+			"wage": 0.4,
+			"att": 0.6,
+			"ticket": 8,
+			"culture": {
+				"goals": 0.96,
+				"home": 1.05,
+				"cards": 1.05
+			}
+		},
+		{
+			"id": "CRO1",
+			"nation": "CRO",
+			"tier": 1,
+			"name": "SuperSport HNL",
+			"short": "HNL",
+			"colors": [
+				"#171796",
+				"#FF0000"
+			],
+			"teams": 10,
+			"rr": 4,
+			"level": [
+				57,
+				71
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.35,
+			"att": 0.6,
+			"ticket": 10,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.1,
+				"cards": 1.1
+			}
+		},
+		{
+			"id": "SRB1",
+			"nation": "SRB",
+			"tier": 1,
+			"name": "Mozzart Bet Superliga",
+			"short": "Superliga SRB",
+			"colors": [
+				"#0C4076",
+				"#C6363C"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				56,
+				70
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.35,
+			"att": 0.6,
+			"ticket": 8,
+			"culture": {
+				"goals": 1.04,
+				"home": 1.2,
+				"cards": 1.15
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					8,
+					8
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "30 rodadas e dois grupos de 8: o do título e o do rebaixamento."
+			}
+		},
+		{
+			"id": "CZE1",
+			"nation": "CZE",
+			"tier": 1,
+			"name": "Chance Liga",
+			"short": "Chance Liga",
+			"colors": [
+				"#11457E",
+				"#D7141A"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				70
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.4,
+			"att": 0.7,
+			"ticket": 12,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.05,
+				"cards": 1.0
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					4,
+					6
+				],
+				"legs": [
+					1,
+					1,
+					1
+				],
+				"desc": "30 rodadas e três grupos: título (6), meio da tabela (4) e rebaixamento (6)."
+			}
+		},
+		{
+			"id": "DEN1",
+			"nation": "DEN",
+			"tier": 1,
+			"name": "3F Superliga",
+			"short": "Superliga DEN",
+			"colors": [
+				"#C8102E",
+				"#FFFFFF"
+			],
+			"teams": 12,
+			"rr": 2,
+			"level": [
+				59,
+				70
+			],
+			"rep": [
+				48,
+				70
+			],
+			"wage": 0.55,
+			"att": 0.8,
+			"ticket": 20,
+			"culture": {
+				"goals": 1.09,
+				"home": 1.0,
+				"cards": 0.9
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					2,
+					2
+				],
+				"desc": "22 rodadas e depois o grupo do título e o grupo do rebaixamento, com 10 rodadas cada."
+			}
+		},
+		{
+			"id": "BRA1",
+			"nation": "BRA",
+			"tier": 1,
+			"name": "Brasileirão Série A",
+			"short": "Série A",
+			"colors": [
+				"#00A859",
+				"#FFCC29"
+			],
+			"teams": 20,
+			"rr": 2,
+			"down": 4,
+			"level": [
+				68,
+				77
+			],
+			"rep": [
+				58,
+				94
+			],
+			"wage": 0.45,
+			"rev": 1.45,
+			"att": 0.8,
+			"ticket": 14,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.2,
+				"cards": 1.2
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "BRA2",
+			"nation": "BRA",
+			"tier": 2,
+			"name": "Brasileirão Série B",
+			"short": "Série B",
+			"colors": [
+				"#1C3F94",
+				"#FFCC29"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 4,
+			"down": 4,
+			"level": [
+				61,
+				68
+			],
+			"rep": [
+				46,
+				68
+			],
+			"wage": 0.2,
+			"rev": 1.3,
+			"att": 0.6,
+			"ticket": 8,
+			"culture": {
+				"goals": 0.81,
+				"home": 1.25,
+				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "BRA3",
+			"nation": "BRA",
+			"tier": 3,
+			"name": "Brasileirão Série C",
+			"short": "Série C",
+			"colors": [
+				"#D35400",
+				"#FFFFFF"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 4,
+			"down": 4,
+			"level": [
+				56,
+				62
+			],
+			"rep": [
+				40,
+				56
+			],
+			"wage": 0.11,
+			"rev": 1.15,
+			"att": 0.5,
+			"ticket": 5,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.3,
+				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "BRA4",
+			"nation": "BRA",
+			"tier": 4,
+			"name": "Brasileirão Série D",
+			"short": "Série D",
+			"colors": [
+				"#7B2D8E",
+				"#FFFFFF"
+			],
+			"teams": 20,
+			"rr": 2,
+			"up": 4,
+			"level": [
+				51,
+				57
+			],
+			"rep": [
+				30,
+				46
+			],
+			"wage": 0.07,
+			"att": 0.45,
+			"ticket": 4,
+			"culture": {
+				"goals": 0.87,
+				"home": 1.35,
+				"cards": 1.2
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "BRA5",
+			"nation": "BRA",
+			"tier": 5,
+			"pool": true,
+			"name": "Clubes de estadual",
+			"short": "Estaduais",
+			"colors": [
+				"#5A6270",
+				"#FFFFFF"
+			],
+			"teams": 74,
+			"rr": 0,
+			"level": [
+				44,
+				51
+			],
+			"rep": [
+				18,
+				34
+			],
+			"wage": 0.04,
+			"att": 0.3,
+			"ticket": 3,
+			"culture": {
+				"goals": 0.9,
+				"home": 1.35,
+				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			},
+			"calendar": "ano",
+			"desc": "Clubes sem divisão nacional: jogam só o estadual (ou o regional)."
+		},
+		{
+			"id": "ARG1",
+			"nation": "ARG",
+			"tier": 1,
+			"name": "Liga Profesional Argentina",
+			"short": "Liga Profesional",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"teams": 30,
+			"rr": 1,
+			"down": 2,
+			"level": [
+				66,
+				76
+			],
+			"rep": [
+				54,
+				90
+			],
+			"wage": 0.3,
+			"rev": 1.2,
+			"att": 1.1,
+			"ticket": 10,
+			"culture": {
+				"goals": 0.79,
+				"home": 1.2,
+				"cards": 1.3
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 16,
+				"ko": [
+					"r16",
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"r16": 1,
+					"qf": 1,
+					"sf": 1,
+					"f": 1
+				},
+				"neutral_final": true,
+				"desc": "30 clubes em turno único e os playoffs com os 16 melhores em jogo único; a final é em campo neutro."
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "ARG2",
+			"nation": "ARG",
+			"tier": 2,
+			"name": "Primera Nacional",
+			"short": "Primera Nacional",
+			"colors": [
+				"#1D3F91",
+				"#75AADB"
+			],
+			"teams": 16,
+			"rr": 2,
+			"up": 2,
+			"level": [
+				57,
+				64
+			],
+			"rep": [
+				40,
+				58
+			],
+			"wage": 0.12,
+			"att": 0.8,
+			"ticket": 5,
+			"culture": {
+				"goals": 0.75,
+				"home": 1.25,
+				"cards": 1.3
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "URU1",
+			"nation": "URU",
+			"tier": 1,
+			"name": "Campeonato Uruguayo",
+			"short": "Campeonato Uruguayo",
+			"colors": [
+				"#5CBFEB",
+				"#111111"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				48,
+				78
+			],
+			"wage": 0.18,
+			"att": 0.7,
+			"ticket": 8,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.15,
+				"cards": 1.2
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "COL1",
+			"nation": "COL",
+			"tier": 1,
+			"name": "Liga BetPlay",
+			"short": "Liga BetPlay",
+			"colors": [
+				"#FCD116",
+				"#003893"
+			],
+			"teams": 20,
+			"rr": 1,
+			"level": [
+				60,
+				70
+			],
+			"rep": [
+				50,
+				74
+			],
+			"wage": 0.2,
+			"att": 0.9,
+			"ticket": 8,
+			"culture": {
+				"goals": 0.87,
+				"home": 1.25,
+				"cards": 1.2
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 8,
+				"ko": [
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"qf": 2,
+					"sf": 2,
+					"f": 2
+				},
+				"desc": "Turno único e o mata-mata dos 8 primeiros em ida e volta até a final."
+			},
+			"foreign_limit": {
+				"max": 4,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "CHI1",
+			"nation": "CHI",
+			"tier": 1,
+			"name": "Liga de Primera",
+			"short": "Primera Chile",
+			"colors": [
+				"#D52B1E",
+				"#0039A6"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				68
+			],
+			"rep": [
+				48,
+				74
+			],
+			"wage": 0.2,
+			"att": 0.7,
+			"ticket": 10,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.15,
+				"cards": 1.15
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "ECU1",
+			"nation": "ECU",
+			"tier": 1,
+			"name": "LigaPro",
+			"short": "LigaPro",
+			"colors": [
+				"#FFD100",
+				"#034EA2"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				59,
+				70
+			],
+			"rep": [
+				48,
+				72
+			],
+			"wage": 0.2,
+			"att": 0.7,
+			"ticket": 8,
+			"culture": {
+				"goals": 0.94,
+				"home": 1.3,
+				"cards": 1.15
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "PER1",
+			"nation": "PER",
+			"tier": 1,
+			"name": "Liga 1",
+			"short": "Liga 1",
+			"colors": [
+				"#D91023",
+				"#FFFFFF"
+			],
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				56,
+				66
+			],
+			"rep": [
+				46,
+				68
+			],
+			"wage": 0.15,
+			"att": 0.7,
+			"ticket": 6,
+			"culture": {
+				"goals": 1.02,
+				"home": 1.3,
+				"cards": 1.15
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "PAR1",
+			"nation": "PAR",
+			"tier": 1,
+			"name": "Copa de Primera",
+			"short": "Copa de Primera",
+			"colors": [
+				"#0038A8",
+				"#D52B1E"
+			],
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				58,
+				68
+			],
+			"rep": [
+				46,
+				70
+			],
+			"wage": 0.15,
+			"att": 0.6,
+			"ticket": 6,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.15,
+				"cards": 1.2
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "BOL1",
+			"nation": "BOL",
+			"tier": 1,
+			"name": "División Profesional",
+			"short": "División Profesional",
+			"colors": [
+				"#007934",
+				"#F9E300"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				54,
+				64
+			],
+			"rep": [
+				44,
+				62
+			],
+			"wage": 0.1,
+			"att": 0.6,
+			"ticket": 5,
+			"culture": {
+				"goals": 1.25,
+				"home": 1.6,
+				"cards": 1.1
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "VEN1",
+			"nation": "VEN",
+			"tier": 1,
+			"name": "Liga FUTVE",
+			"short": "Liga FUTVE",
+			"colors": [
+				"#CF142B",
+				"#FFCC00"
+			],
+			"teams": 14,
+			"rr": 2,
+			"level": [
+				52,
+				63
+			],
+			"rep": [
+				42,
+				58
+			],
+			"wage": 0.1,
+			"att": 0.5,
+			"ticket": 4,
+			"culture": {
+				"goals": 0.91,
+				"home": 1.2,
+				"cards": 1.1
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "MEX1",
+			"nation": "MEX",
+			"tier": 1,
+			"name": "Liga MX",
+			"short": "Liga MX",
+			"colors": [
+				"#0A2240",
+				"#C5A572"
+			],
+			"teams": 18,
+			"rr": 1,
+			"level": [
+				65,
+				75
+			],
+			"rep": [
+				50,
+				84
+			],
+			"wage": 0.55,
+			"rev": 1.3,
+			"att": 1.0,
+			"ticket": 14,
+			"culture": {
+				"goals": 1.06,
+				"home": 1.15,
+				"cards": 1.05
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 8,
+				"ko": [
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"qf": 2,
+					"sf": 2,
+					"f": 2
+				},
+				"desc": "Torneio em turno único e a Liguilla: os 8 primeiros decidem o título em quartas, semifinal e final, todas em ida e volta."
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			}
+		},
+		{
+			"id": "USA1",
+			"nation": "USA",
+			"tier": 1,
+			"name": "Major League Soccer",
+			"short": "MLS",
+			"colors": [
+				"#001F5B",
+				"#E03A3E"
+			],
+			"teams": 30,
+			"rr": 1,
+			"level": [
+				63,
+				73
+			],
+			"rep": [
+				54,
+				78
+			],
+			"wage": 0.65,
+			"rev": 1.4,
+			"att": 0.9,
+			"ticket": 35,
+			"culture": {
+				"goals": 1.13,
+				"home": 1.3,
+				"cards": 0.95
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 16,
+				"ko": [
+					"r16",
+					"qf",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"r16": 1,
+					"qf": 1,
+					"sf": 1,
+					"f": 1
+				},
+				"desc": "30 clubes em turno único e os MLS Cup Playoffs com 16 classificados em jogo único; a MLS Cup é na casa da melhor campanha."
+			},
+			"foreign_limit": {
+				"max": 8,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "EGY1",
+			"nation": "EGY",
+			"tier": 1,
+			"name": "Egyptian Premier League",
+			"short": "EPL Egito",
+			"colors": [
+				"#CE1126",
+				"#111111"
+			],
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				58,
+				70
+			],
+			"rep": [
+				50,
+				78
+			],
+			"wage": 0.2,
+			"att": 0.5,
+			"ticket": 3,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.15,
+				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
+			}
+		},
+		{
+			"id": "MAR1",
+			"nation": "MAR",
+			"tier": 1,
+			"name": "Botola Pro",
+			"short": "Botola Pro",
+			"colors": [
+				"#C1272D",
+				"#006233"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				50,
+				72
+			],
+			"wage": 0.2,
+			"att": 0.6,
+			"ticket": 5,
+			"culture": {
+				"goals": 0.79,
+				"home": 1.2,
+				"cards": 1.05
+			}
+		},
+		{
+			"id": "TUN1",
+			"nation": "TUN",
+			"tier": 1,
+			"name": "Ligue Professionnelle 1",
+			"short": "Ligue 1 TUN",
+			"colors": [
+				"#E70013",
+				"#FFFFFF"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				56,
+				67
+			],
+			"rep": [
+				48,
+				70
+			],
+			"wage": 0.15,
+			"att": 0.5,
+			"ticket": 4,
+			"culture": {
+				"goals": 0.79,
+				"home": 1.25,
+				"cards": 1.05
+			}
+		},
+		{
+			"id": "RSA1",
+			"nation": "RSA",
+			"tier": 1,
+			"name": "Betway Premiership",
+			"short": "Premiership SA",
+			"colors": [
+				"#007749",
+				"#FFB81C"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				56,
+				66
+			],
+			"rep": [
+				48,
+				74
+			],
+			"wage": 0.2,
+			"att": 0.5,
+			"ticket": 5,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.15,
+				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
+			}
+		},
+		{
+			"id": "NGA1",
+			"nation": "NGA",
+			"tier": 1,
+			"name": "NPFL",
+			"short": "NPFL",
+			"colors": [
+				"#008751",
+				"#FFFFFF"
+			],
+			"teams": 20,
+			"rr": 2,
+			"level": [
+				50,
+				60
+			],
+			"rep": [
+				40,
+				58
+			],
+			"wage": 0.06,
+			"att": 0.4,
+			"ticket": 2,
+			"culture": {
+				"goals": 0.83,
+				"home": 1.8,
+				"cards": 1.05
+			}
+		},
+		{
+			"id": "SEN1",
+			"nation": "SEN",
+			"tier": 1,
+			"name": "Ligue 1 Sénégal",
+			"short": "Ligue 1 SEN",
+			"colors": [
+				"#00853F",
+				"#FDEF42"
+			],
+			"teams": 14,
+			"rr": 2,
+			"level": [
+				50,
+				60
+			],
+			"rep": [
+				40,
+				56
+			],
+			"wage": 0.06,
+			"att": 0.4,
+			"ticket": 2,
+			"culture": {
+				"goals": 0.72,
+				"home": 1.25,
+				"cards": 1.0
+			}
+		},
+		{
+			"id": "KSA1",
+			"nation": "KSA",
+			"tier": 1,
+			"name": "Saudi Pro League",
+			"short": "Saudi Pro League",
+			"colors": [
+				"#0B6E4F",
+				"#FFFFFF"
+			],
+			"teams": 18,
+			"rr": 2,
+			"level": [
+				62,
+				79
+			],
+			"rep": [
+				52,
+				80
+			],
+			"wage": 1.2,
+			"att": 0.5,
+			"ticket": 8,
+			"culture": {
+				"goals": 1.13,
+				"home": 1.05,
+				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 10,
+				"scope": "all"
+			}
+		},
+		{
+			"id": "JPN1",
+			"nation": "JPN",
+			"tier": 1,
+			"name": "J1 League",
+			"short": "J1 League",
+			"colors": [
+				"#E60012",
+				"#1B1B1B"
+			],
+			"teams": 20,
+			"rr": 2,
+			"level": [
+				60,
+				70
+			],
+			"rep": [
+				50,
+				70
+			],
+			"wage": 0.45,
+			"rev": 1.25,
+			"att": 0.9,
+			"ticket": 25,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 0.75
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "KOR1",
+			"nation": "KOR",
+			"tier": 1,
+			"name": "K League 1",
+			"short": "K League 1",
+			"colors": [
+				"#0047A0",
+				"#CD2E3A"
+			],
+			"teams": 12,
+			"rr": 3,
+			"level": [
+				60,
+				69
+			],
+			"rep": [
+				50,
+				68
+			],
+			"wage": 0.35,
+			"att": 0.6,
+			"ticket": 10,
+			"culture": {
+				"goals": 0.98,
+				"home": 1.0,
+				"cards": 0.9
+			},
+			"format": {
+				"type": "split",
+				"groups": [
+					6,
+					6
+				],
+				"legs": [
+					1,
+					1
+				],
+				"desc": "33 rodadas e o split: Final A (6 de cima, pelo título) e Final B (6 de baixo), mais 5 rodadas."
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "QAT1",
+			"nation": "QAT",
+			"tier": 1,
+			"name": "Qatar Stars League",
+			"short": "QSL",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"teams": 12,
+			"rr": 2,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				48,
+				68
+			],
+			"wage": 0.8,
+			"att": 0.3,
+			"ticket": 5,
+			"culture": {
+				"goals": 1.28,
+				"home": 0.95,
+				"cards": 0.95
+			},
+			"foreign_limit": {
+				"max": 6,
+				"scope": "all"
+			}
+		},
+		{
+			"id": "UAE1",
+			"nation": "UAE",
+			"tier": 1,
+			"name": "UAE Pro League",
+			"short": "UAE Pro League",
+			"colors": [
+				"#00732F",
+				"#FF0000"
+			],
+			"teams": 14,
+			"rr": 2,
+			"level": [
+				58,
+				69
+			],
+			"rep": [
+				48,
+				66
+			],
+			"wage": 0.7,
+			"att": 0.3,
+			"ticket": 6,
+			"culture": {
+				"goals": 1.17,
+				"home": 1.0,
+				"cards": 0.95
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
+			}
+		},
+		{
+			"id": "CHN1",
+			"nation": "CHN",
+			"tier": 1,
+			"name": "Chinese Super League",
+			"short": "CSL",
+			"colors": [
+				"#DE2910",
+				"#FFDE00"
+			],
+			"teams": 16,
+			"rr": 2,
+			"level": [
+				58,
+				68
+			],
+			"rep": [
+				50,
+				66
+			],
+			"wage": 0.6,
+			"att": 0.8,
+			"ticket": 10,
+			"culture": {
+				"goals": 1.09,
+				"home": 1.1,
+				"cards": 1.0
+			},
+			"foreign_limit": {
+				"max": 5,
+				"scope": "all"
+			},
+			"calendar": "ano"
+		},
+		{
+			"id": "AUS1",
+			"nation": "AUS",
+			"tier": 1,
+			"name": "A-League Men",
+			"short": "A-League",
+			"colors": [
+				"#FF6B00",
+				"#1B1B1B"
+			],
+			"teams": 12,
+			"rr": 2,
+			"level": [
+				56,
+				66
+			],
+			"rep": [
+				48,
+				62
+			],
+			"wage": 0.4,
+			"att": 0.6,
+			"ticket": 20,
+			"culture": {
+				"goals": 1.21,
+				"home": 1.05,
+				"cards": 0.85
+			},
+			"format": {
+				"type": "playoff",
+				"teams": 6,
+				"byes": 2,
+				"ko": [
+					"ef",
+					"sf",
+					"f"
+				],
+				"legs": {
+					"ef": 1,
+					"sf": 2,
+					"f": 1
+				},
+				"desc": "Temporada regular e a Finals Series: os 6 primeiros vão aos playoffs (os 2 melhores direto na semifinal); a Grande Final é em jogo único na casa do melhor."
+			}
+		}
+	]
+}

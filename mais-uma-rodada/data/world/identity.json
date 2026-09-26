@@ -1,0 +1,960 @@
+{
+	"_doc": "Identidade visual das competições, inspirada nas reais (sem copiar marcas). logos: desenho no formato do CrestView (mesmas chaves dos escudos). Competições sem logo aqui ganham um selo gerado com as cores oficiais. scoreboard: [fundo, fundo 2, destaque] do placar da TV; sem entrada, o placar usa as cores da liga.",
+	"logos": {
+		"ENG1": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#3D195B",
+			"c2": "#FFFFFF",
+			"symbol": "lion_head",
+			"sc": "#FFFFFF",
+			"crown": 1,
+			"border": "thin",
+			"text": "PREMIER LEAGUE",
+			"text2": "ENGLAND",
+			"c3": "#00FF85"
+		},
+		"ENG2": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#0B1C3F",
+			"c2": "#D4AF37",
+			"symbol": "lion",
+			"sc": "#D4AF37",
+			"border": "thin",
+			"text": "CHAMPIONSHIP",
+			"text2": "EFL"
+		},
+		"ESP1": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#FF4B44",
+			"c2": "#FFFFFF",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"text": "LALIGA",
+			"text2": "ESPAÑA"
+		},
+		"ESP2": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#1B1B1B",
+			"c2": "#00D0FF",
+			"symbol": "ball",
+			"sc": "#00D0FF",
+			"border": "thin",
+			"text": "LALIGA 2",
+			"text2": "ESPAÑA"
+		},
+		"GER1": {
+			"shape": "square",
+			"field": "plain",
+			"c1": "#D20515",
+			"c2": "#FFFFFF",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"GER2": {
+			"shape": "square",
+			"field": "plain",
+			"c1": "#111111",
+			"c2": "#D20515",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"ITA1": {
+			"shape": "shield",
+			"field": "halves",
+			"c1": "#0A2E6E",
+			"c2": "#00B2E3",
+			"symbol": "letter",
+			"initials": "A",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "SERIE A"
+		},
+		"ITA2": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#0B7B3E",
+			"c2": "#FFFFFF",
+			"symbol": "letter",
+			"initials": "B",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "SERIE B"
+		},
+		"FRA1": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#091C3E",
+			"c2": "#DAE025",
+			"symbol": "letter",
+			"initials": "L1",
+			"sc": "#DAE025",
+			"border": "thin",
+			"text": "LIGUE 1",
+			"text2": "FRANCE"
+		},
+		"FRA2": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#0E3B7D",
+			"c2": "#F28C28",
+			"symbol": "letter",
+			"initials": "L2",
+			"sc": "#F28C28",
+			"border": "thin",
+			"text": "LIGUE 2",
+			"text2": "FRANCE"
+		},
+		"POR1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#00205B",
+			"c2": "#00C1D5",
+			"symbol": "caravel",
+			"sc": "#00C1D5",
+			"border": "thin",
+			"ribbon": "LIGA PORTUGAL"
+		},
+		"POR2": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#1D3F91",
+			"c2": "#FFCC00",
+			"symbol": "caravel",
+			"sc": "#FFCC00",
+			"border": "thin",
+			"ribbon": "LIGA 2"
+		},
+		"NED1": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#F36C21",
+			"c2": "#FFFFFF",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"text": "EREDIVISIE",
+			"text2": "NEDERLAND"
+		},
+		"TUR1": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#E30A17",
+			"c2": "#FFFFFF",
+			"symbol": "crescent",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"text": "SÜPER LIG",
+			"text2": "TÜRKİYE"
+		},
+		"BEL1": {
+			"shape": "shield",
+			"field": "tricolor_v",
+			"c1": "#111111",
+			"fc": "#F2C300",
+			"c3": "#E4002B",
+			"c2": "#E4002B",
+			"symbol": "lion",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"SCO1": {
+			"shape": "shield",
+			"field": "saltire",
+			"c1": "#4B2C83",
+			"c2": "#FFFFFF",
+			"symbol": "lion",
+			"sc": "#FFD100",
+			"border": "thin"
+		},
+		"GRE1": {
+			"shape": "round",
+			"field": "hoops:4",
+			"c1": "#0D5EAF",
+			"c2": "#FFFFFF",
+			"symbol": "star",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"AUT1": {
+			"shape": "shield",
+			"field": "hoops:3",
+			"c1": "#ED2939",
+			"c2": "#FFFFFF",
+			"symbol": "eagle",
+			"sc": "#111111",
+			"border": "thin"
+		},
+		"SUI1": {
+			"shape": "swiss",
+			"field": "cross",
+			"c1": "#DA291C",
+			"c2": "#FFFFFF",
+			"symbol": "none",
+			"border": "thin"
+		},
+		"UKR1": {
+			"shape": "shield",
+			"field": "halves_h",
+			"c1": "#005BBB",
+			"c2": "#FFD500",
+			"symbol": "trident",
+			"sc": "#FFD500",
+			"border": "thin"
+		},
+		"CRO1": {
+			"shape": "shield",
+			"field": "checky",
+			"c1": "#FF0000",
+			"c2": "#FFFFFF",
+			"symbol": "none",
+			"border": "thin"
+		},
+		"SRB1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#C6363C",
+			"c2": "#0C4076",
+			"symbol": "eagle",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"CZE1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#11457E",
+			"c2": "#D7141A",
+			"symbol": "lion",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"DEN1": {
+			"shape": "shield",
+			"field": "cross",
+			"c1": "#C8102E",
+			"c2": "#FFFFFF",
+			"symbol": "none",
+			"border": "thin"
+		},
+		"BRA1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#00A859",
+			"c2": "#FFCC29",
+			"symbol": "southern_cross",
+			"sc": "#FFCC29",
+			"border": "gold",
+			"stars": 5,
+			"ribbon": "SÉRIE A"
+		},
+		"BRA2": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#1C3F94",
+			"c2": "#FFCC29",
+			"symbol": "southern_cross",
+			"sc": "#FFCC29",
+			"border": "thin",
+			"ribbon": "SÉRIE B"
+		},
+		"BRA3": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#D35400",
+			"c2": "#FFFFFF",
+			"symbol": "southern_cross",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "SÉRIE C"
+		},
+		"BRA4": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#7B2D8E",
+			"c2": "#FFFFFF",
+			"symbol": "southern_cross",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "SÉRIE D"
+		},
+		"ARG1": {
+			"shape": "ring",
+			"field": "hoops:3",
+			"c1": "#75AADB",
+			"fc": "#FFFFFF",
+			"c2": "#FFFFFF",
+			"symbol": "sunrise",
+			"sc": "#F6B40E",
+			"border": "thin",
+			"text": "LIGA PROFESIONAL",
+			"text2": "ARGENTINA"
+		},
+		"ARG2": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#1D3F91",
+			"c2": "#75AADB",
+			"symbol": "sunrise",
+			"sc": "#F6B40E",
+			"border": "thin"
+		},
+		"URU1": {
+			"shape": "round",
+			"field": "hoops:5",
+			"c1": "#FFFFFF",
+			"fc": "#5CBFEB",
+			"c2": "#5CBFEB",
+			"symbol": "sunrise",
+			"sc": "#F6B40E",
+			"border": "thin"
+		},
+		"COL1": {
+			"shape": "shield",
+			"field": "tricolor_h",
+			"c1": "#FCD116",
+			"fc": "#003893",
+			"c3": "#CE1126",
+			"c2": "#003893",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"CHI1": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#D52B1E",
+			"c2": "#0039A6",
+			"symbol": "star",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"ECU1": {
+			"shape": "shield",
+			"field": "tricolor_h",
+			"c1": "#FFD100",
+			"fc": "#034EA2",
+			"c3": "#EF3340",
+			"c2": "#034EA2",
+			"symbol": "mountain",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"PER1": {
+			"shape": "shield",
+			"field": "tricolor_v",
+			"c1": "#D91023",
+			"fc": "#FFFFFF",
+			"c3": "#D91023",
+			"c2": "#FFFFFF",
+			"symbol": "ball",
+			"sc": "#D91023",
+			"border": "thin"
+		},
+		"PAR1": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#0038A8",
+			"c2": "#D52B1E",
+			"symbol": "star",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"BOL1": {
+			"shape": "shield",
+			"field": "tricolor_h",
+			"c1": "#D52B1E",
+			"fc": "#F9E300",
+			"c3": "#007934",
+			"c2": "#F9E300",
+			"symbol": "mountain",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"VEN1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#CF142B",
+			"c2": "#FFCC00",
+			"symbol": "star",
+			"sc": "#FFCC00",
+			"border": "thin"
+		},
+		"MEX1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#0A2240",
+			"c2": "#C5A572",
+			"symbol": "eagle",
+			"sc": "#C5A572",
+			"border": "gold",
+			"ribbon": "LIGA MX"
+		},
+		"USA1": {
+			"shape": "shield",
+			"field": "sash",
+			"c1": "#001F5B",
+			"fc": "#E03A3E",
+			"c2": "#FFFFFF",
+			"symbol": "stars:3",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "MLS"
+		},
+		"EGY1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#CE1126",
+			"c2": "#111111",
+			"symbol": "eagle",
+			"sc": "#E2B84A",
+			"border": "thin"
+		},
+		"MAR1": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#C1272D",
+			"c2": "#006233",
+			"symbol": "star",
+			"sc": "#006233",
+			"border": "thin"
+		},
+		"TUN1": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#E70013",
+			"c2": "#FFFFFF",
+			"symbol": "crescent",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"RSA1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#007749",
+			"c2": "#FFB81C",
+			"symbol": "ball",
+			"sc": "#FFB81C",
+			"border": "thin"
+		},
+		"NGA1": {
+			"shape": "shield",
+			"field": "tricolor_v",
+			"c1": "#008751",
+			"fc": "#FFFFFF",
+			"c3": "#008751",
+			"c2": "#FFFFFF",
+			"symbol": "eagle",
+			"sc": "#111111",
+			"border": "thin"
+		},
+		"SEN1": {
+			"shape": "round",
+			"field": "tricolor_v",
+			"c1": "#00853F",
+			"fc": "#FDEF42",
+			"c3": "#E31B23",
+			"c2": "#FDEF42",
+			"symbol": "star",
+			"sc": "#00853F",
+			"border": "thin"
+		},
+		"KSA1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#0B6E4F",
+			"c2": "#FFFFFF",
+			"symbol": "swords",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "PRO LEAGUE"
+		},
+		"JPN1": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#FFFFFF",
+			"c2": "#E60012",
+			"symbol": "sunrise",
+			"sc": "#E60012",
+			"border": "thick",
+			"text": "J1 LEAGUE",
+			"text2": "JAPAN"
+		},
+		"KOR1": {
+			"shape": "round",
+			"field": "halves",
+			"c1": "#CD2E3A",
+			"c2": "#0047A0",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"QAT1": {
+			"shape": "shield",
+			"field": "pale",
+			"c1": "#8A1538",
+			"c2": "#FFFFFF",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"UAE1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#00732F",
+			"c2": "#FF0000",
+			"symbol": "eagle",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"CHN1": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#DE2910",
+			"c2": "#FFDE00",
+			"symbol": "dragon",
+			"sc": "#FFDE00",
+			"border": "thin"
+		},
+		"AUS1": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#1B1B1B",
+			"c2": "#FF6B00",
+			"symbol": "southern_cross",
+			"sc": "#FF6B00",
+			"border": "thin"
+		},
+		"UCL": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#0B1F4B",
+			"c2": "#C9D6EA",
+			"symbol": "star",
+			"sc": "#FFFFFF",
+			"laurel": 0,
+			"stars": 8,
+			"border": "thin",
+			"text": "LIGA DOS CAMPEÕES",
+			"text2": "EUROPA"
+		},
+		"UEL": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#1B1B1B",
+			"c2": "#F26B0F",
+			"symbol": "ball",
+			"sc": "#F26B0F",
+			"border": "thin",
+			"text": "LIGA EUROPA",
+			"text2": "EUROPA"
+		},
+		"UECL": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#00A650",
+			"c2": "#0A2E1F",
+			"symbol": "ball",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"text": "LIGA CONFERÊNCIA",
+			"text2": "EUROPA"
+		},
+		"LIB": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#0A0A0A",
+			"c2": "#E3B23C",
+			"symbol": "laurel",
+			"sc": "#F2C94C",
+			"border": "gold",
+			"stars": 3,
+			"ribbon": "LIBERTADORES",
+			"laurel": true
+		},
+		"SUD": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#003DA5",
+			"c2": "#F5C400",
+			"symbol": "ball",
+			"sc": "#F5C400",
+			"border": "thin",
+			"text": "SUL-AMERICANA",
+			"text2": "CONMEBOL"
+		},
+		"CCC": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#1F3A93",
+			"c2": "#F2F2F2",
+			"symbol": "star",
+			"sc": "#F2F2F2",
+			"border": "thin"
+		},
+		"CAF": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#0B6E4F",
+			"c2": "#F2C14E",
+			"symbol": "star",
+			"sc": "#F2C14E",
+			"border": "gold"
+		},
+		"AFC": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#6A1B9A",
+			"c2": "#E0C3FC",
+			"symbol": "star",
+			"sc": "#E0C3FC",
+			"border": "thin"
+		},
+		"CWC": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#2A1F00",
+			"c2": "#E2B84A",
+			"symbol": "ball",
+			"sc": "#E2B84A",
+			"laurel": 1,
+			"border": "gold",
+			"ribbon": "MUNDIAL"
+		},
+		"SPE": {
+			"shape": "shield",
+			"field": "stripes:6",
+			"c1": "#FFFFFF",
+			"fc": "#111111",
+			"c2": "#E30613",
+			"chief_text": "",
+			"symbol": "star",
+			"sc": "#E30613",
+			"border": "thin",
+			"ribbon": "PAULISTÃO"
+		},
+		"RJE": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#0055A4",
+			"c2": "#FFD100",
+			"symbol": "sunrise",
+			"sc": "#FFD100",
+			"border": "thin",
+			"text": "CARIOCA",
+			"text2": "RIO DE JANEIRO"
+		},
+		"MGE": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#FFFFFF",
+			"c2": "#E30613",
+			"symbol": "mountain",
+			"sc": "#E30613",
+			"border": "thin",
+			"ribbon": "MINEIRO"
+		},
+		"RSE": {
+			"shape": "shield",
+			"field": "sash",
+			"c1": "#009B3A",
+			"fc": "#FFD100",
+			"c3": "#E30613",
+			"c2": "#E30613",
+			"symbol": "star",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "GAUCHÃO"
+		},
+		"PRE": {
+			"shape": "shield",
+			"field": "sash",
+			"c1": "#00843D",
+			"fc": "#FFFFFF",
+			"c2": "#FFFFFF",
+			"symbol": "southern_cross",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"ribbon": "PARANAENSE"
+		},
+		"SCE": {
+			"shape": "shield",
+			"field": "hoops:3",
+			"c1": "#C8102E",
+			"fc": "#FFFFFF",
+			"c2": "#FFFFFF",
+			"symbol": "star",
+			"sc": "#00843D",
+			"border": "thin",
+			"ribbon": "CATARINENSE"
+		},
+		"CEE": {
+			"shape": "shield",
+			"field": "lozenges",
+			"c1": "#00843D",
+			"fc": "#FFD100",
+			"c2": "#FFD100",
+			"symbol": "star",
+			"sc": "#1B3A8C",
+			"border": "thin",
+			"ribbon": "CEARENSE"
+		},
+		"GOE": {
+			"shape": "shield",
+			"field": "stripes:4",
+			"c1": "#006437",
+			"fc": "#FFD100",
+			"c2": "#FFD100",
+			"symbol": "southern_cross",
+			"sc": "#1B3A8C",
+			"border": "thin",
+			"ribbon": "GOIANÃO"
+		},
+		"NOR": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#F07F13",
+			"c2": "#1B3A8C",
+			"symbol": "sunrise",
+			"sc": "#FFFFFF",
+			"border": "thin",
+			"text": "COPA DO NORDESTE",
+			"text2": "NORDESTÃO"
+		},
+		"VER": {
+			"shape": "ring",
+			"field": "plain",
+			"c1": "#2E7D32",
+			"c2": "#FFD100",
+			"symbol": "tree",
+			"sc": "#FFD100",
+			"border": "thin",
+			"text": "COPA VERDE",
+			"text2": "NORTE"
+		},
+		"FAC": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#0B1C3F",
+			"c2": "#E2B84A",
+			"symbol": "crown",
+			"sc": "#E2B84A",
+			"border": "gold",
+			"ribbon": "FA CUP",
+			"laurel": true
+		},
+		"CDR": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#8B0000",
+			"c2": "#E2B84A",
+			"symbol": "crown",
+			"sc": "#E2B84A",
+			"border": "gold",
+			"ribbon": "COPA DEL REY"
+		},
+		"CIT": {
+			"shape": "shield",
+			"field": "tricolor_v",
+			"c1": "#009246",
+			"fc": "#FFFFFF",
+			"c3": "#CE2B37",
+			"c2": "#E2B84A",
+			"symbol": "star",
+			"sc": "#E2B84A",
+			"border": "gold",
+			"ribbon": "COPPA ITALIA"
+		},
+		"DFB": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#111111",
+			"c2": "#E2B84A",
+			"symbol": "eagle",
+			"sc": "#E2B84A",
+			"border": "gold",
+			"ribbon": "POKAL"
+		},
+		"CDF": {
+			"shape": "round",
+			"field": "tricolor_v",
+			"c1": "#002395",
+			"fc": "#FFFFFF",
+			"c3": "#ED2939",
+			"c2": "#FFFFFF",
+			"symbol": "rooster",
+			"sc": "#E2B84A",
+			"border": "thin"
+		},
+		"TDP": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#006600",
+			"c2": "#FF0000",
+			"symbol": "caravel",
+			"sc": "#E2B84A",
+			"border": "thin"
+		},
+		"CDB": {
+			"shape": "shield",
+			"field": "plain",
+			"c1": "#003366",
+			"c2": "#E2B84A",
+			"symbol": "star",
+			"sc": "#E2B84A",
+			"border": "gold",
+			"ribbon": "COPA DO BRASIL",
+			"laurel": true
+		},
+		"CAR": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#75AADB",
+			"c2": "#FFFFFF",
+			"symbol": "sunrise",
+			"sc": "#F6B40E",
+			"border": "gold"
+		},
+		"USO": {
+			"shape": "shield",
+			"field": "sash",
+			"c1": "#0A3161",
+			"fc": "#B31942",
+			"c2": "#FFFFFF",
+			"symbol": "star",
+			"sc": "#FFFFFF",
+			"border": "thin"
+		},
+		"EMP": {
+			"shape": "round",
+			"field": "plain",
+			"c1": "#FFFFFF",
+			"c2": "#BC002D",
+			"symbol": "sunrise",
+			"sc": "#BC002D",
+			"border": "gold"
+		}
+	},
+	"scoreboard": {
+		"ENG1": [
+			"#2A0F3F",
+			"#3D195B",
+			"#00FF85"
+		],
+		"ESP1": [
+			"#1B1B1B",
+			"#2A2A2A",
+			"#FF4B44"
+		],
+		"GER1": [
+			"#141414",
+			"#2A0A0C",
+			"#D20515"
+		],
+		"ITA1": [
+			"#061A3F",
+			"#0A2E6E",
+			"#00B2E3"
+		],
+		"FRA1": [
+			"#061228",
+			"#091C3E",
+			"#DAE025"
+		],
+		"POR1": [
+			"#00153D",
+			"#00205B",
+			"#00C1D5"
+		],
+		"NED1": [
+			"#1B1B1B",
+			"#2A2A2A",
+			"#F36C21"
+		],
+		"BRA1": [
+			"#003A20",
+			"#00552F",
+			"#FFCC29"
+		],
+		"BRA2": [
+			"#0E224F",
+			"#1C3F94",
+			"#FFCC29"
+		],
+		"ARG1": [
+			"#0C2340",
+			"#163A63",
+			"#75AADB"
+		],
+		"MEX1": [
+			"#061528",
+			"#0A2240",
+			"#C5A572"
+		],
+		"USA1": [
+			"#00133A",
+			"#001F5B",
+			"#E03A3E"
+		],
+		"KSA1": [
+			"#063F2D",
+			"#0B6E4F",
+			"#FFFFFF"
+		],
+		"JPN1": [
+			"#1B1B1B",
+			"#2A0A0A",
+			"#E60012"
+		],
+		"TUR1": [
+			"#2A0306",
+			"#4A060B",
+			"#FFFFFF"
+		],
+		"SPE": [
+			"#1A1A1A",
+			"#2B0508",
+			"#E30613"
+		],
+		"RJE": [
+			"#00264D",
+			"#0055A4",
+			"#FFD100"
+		],
+		"MGE": [
+			"#1A1A1A",
+			"#2A2A2A",
+			"#E30613"
+		],
+		"RSE": [
+			"#00301A",
+			"#004D29",
+			"#FFD100"
+		],
+		"CDB": [
+			"#001A33",
+			"#003366",
+			"#E2B84A"
+		],
+		"UEL": [
+			"#1B1B1B",
+			"#2A1606",
+			"#F26B0F"
+		],
+		"UECL": [
+			"#0A2E1F",
+			"#0F4A30",
+			"#00E676"
+		],
+		"SUD": [
+			"#001E52",
+			"#003DA5",
+			"#F5C400"
+		]
+	}
+}

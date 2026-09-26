@@ -1,0 +1,453 @@
+{
+	"nation": "NGA",
+	"_doc": "Nigéria (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "NGA_ABA",
+			"name": "Enyimba",
+			"short": "Enyimba",
+			"abbr": "ENY",
+			"nick": "Elephants",
+			"city": "Aba",
+			"founded": 1976,
+			"league": "NGA1",
+			"rep": 56,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Enyimba International Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "EFC"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NGA_ENU",
+			"name": "Enugu Rangers",
+			"short": "Enugu Rangers",
+			"abbr": "RAN",
+			"nick": "Flying Antelopes",
+			"city": "Enugu",
+			"founded": 1970,
+			"league": "NGA1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#1D5BBF"
+			],
+			"stadium": "Nnamdi Azikiwe Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "R"
+			},
+			"rivals": []
+		},
+		{
+			"key": "NGA_REM",
+			"name": "Remo Stars",
+			"short": "Remo Stars",
+			"abbr": "REM",
+			"nick": "Sky Blue Stars",
+			"city": "Ikenne",
+			"founded": 2010,
+			"league": "NGA1",
+			"rep": 50,
+			"arch": "azarao",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Remo Stars Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star"
+			}
+		},
+		{
+			"key": "NGA_RIV",
+			"name": "Rivers United",
+			"short": "Rivers United",
+			"abbr": "RIV",
+			"nick": "Pride of Rivers",
+			"city": "Port Harcourt",
+			"founded": 2016,
+			"league": "NGA1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Adokiye Amiesimaka Stadium",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves"
+			}
+		},
+		{
+			"key": "NGA_KAN",
+			"name": "Kano Pillars",
+			"short": "Kano Pillars",
+			"abbr": "KAN",
+			"nick": "Sai Masu Gida",
+			"city": "Kano",
+			"founded": 1990,
+			"league": "NGA1",
+			"rep": 50,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Sani Abacha Stadium",
+			"capacity": 16000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tower"
+			}
+		},
+		{
+			"key": "NGA_SHO",
+			"name": "Shooting Stars",
+			"short": "Shooting Stars",
+			"abbr": "3SC",
+			"nick": "Oluyole Warriors",
+			"city": "Ibadan",
+			"founded": 1950,
+			"league": "NGA1",
+			"rep": 50,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lekan Salami Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"border": "double"
+			}
+		},
+		{
+			"key": "NGA_PLA",
+			"name": "Plateau United",
+			"short": "Plateau United",
+			"abbr": "PLU",
+			"nick": "Plateau United",
+			"city": "Jos",
+			"founded": 1975,
+			"league": "NGA1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "New Jos Stadium",
+			"capacity": 40000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_KWA",
+			"name": "Kwara United",
+			"short": "Kwara United",
+			"abbr": "KWU",
+			"nick": "Kwara United",
+			"city": "Ilorin",
+			"founded": 1997,
+			"league": "NGA1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Kwara State Stadium",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_AKW",
+			"name": "Akwa United",
+			"short": "Akwa United",
+			"abbr": "AKU",
+			"nick": "Akwa United",
+			"city": "Uyo",
+			"founded": 1996,
+			"league": "NGA1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Godswill Akpabio Stadium",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_LOB",
+			"name": "Lobi Stars",
+			"short": "Lobi Stars",
+			"abbr": "LOB",
+			"nick": "Lobi Stars",
+			"city": "Makurdi",
+			"founded": 1981,
+			"league": "NGA1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Aper Aku Stadium",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_BEN",
+			"name": "Bendel Insurance",
+			"short": "Bendel Insurance",
+			"abbr": "BIN",
+			"nick": "Bendel Insurance",
+			"city": "Benin City",
+			"founded": 1966,
+			"league": "NGA1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Samuel Ogbemudia Stadium",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_ABI",
+			"name": "Abia Warriors",
+			"short": "Abia Warriors",
+			"abbr": "ABW",
+			"nick": "Abia Warriors",
+			"city": "Umuahia",
+			"founded": 2003,
+			"league": "NGA1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Umuahia Township Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_NIG",
+			"name": "Niger Tornadoes",
+			"short": "Niger Tornadoes",
+			"abbr": "NIT",
+			"nick": "Niger Tornadoes",
+			"city": "Minna",
+			"founded": 1978,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Bako Kontagora Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_KAT",
+			"name": "Katsina United",
+			"short": "Katsina United",
+			"abbr": "KAT",
+			"nick": "Katsina United",
+			"city": "Katsina",
+			"founded": 2002,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Muhammadu Dikko Stadium",
+			"capacity": 35000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_BAY",
+			"name": "Bayelsa United",
+			"short": "Bayelsa United",
+			"abbr": "BAY",
+			"nick": "Bayelsa United",
+			"city": "Yenagoa",
+			"founded": 2002,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Samson Siasia Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_NAS",
+			"name": "Nasarawa United",
+			"short": "Nasarawa United",
+			"abbr": "NAS",
+			"nick": "Nasarawa United",
+			"city": "Lafia",
+			"founded": 2003,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Lafia City Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_ELK",
+			"name": "El-Kanemi",
+			"short": "El-Kanemi",
+			"abbr": "ELK",
+			"nick": "El-Kanemi",
+			"city": "Maiduguri",
+			"founded": 1987,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "El-Kanemi Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_SUN",
+			"name": "Sunshine Stars",
+			"short": "Sunshine Stars",
+			"abbr": "SUN",
+			"nick": "Sunshine Stars",
+			"city": "Akure",
+			"founded": 1995,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Akure Township Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_HEA",
+			"name": "Heartland",
+			"short": "Heartland",
+			"abbr": "HEA",
+			"nick": "Heartland",
+			"city": "Owerri",
+			"founded": 1976,
+			"league": "NGA1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Dan Anyiam Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "NGA_IKO",
+			"name": "Ikorodu City",
+			"short": "Ikorodu City",
+			"abbr": "IKC",
+			"nick": "Ikorodu City",
+			"city": "Ikorodu",
+			"founded": 2016,
+			"league": "NGA1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Mobolaji Johnson Arena",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

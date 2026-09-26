@@ -1,0 +1,436 @@
+{
+	"nation": "CHI",
+	"_doc": "Chile (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "CHI_ALB",
+			"name": "Colo-Colo",
+			"short": "Colo-Colo",
+			"abbr": "COL",
+			"nick": "Albos",
+			"city": "Santiago",
+			"founded": 1925,
+			"league": "CHI1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Monumental David Arellano",
+			"capacity": 47000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CC",
+				"c1": "#FFFFFF",
+				"c2": "#111111",
+				"sc": "#111111",
+				"stars": 1,
+				"c3": "#111111"
+			},
+			"rivals": [
+				"CHI_AZU",
+				"CHI_CRU"
+			]
+		},
+		{
+			"key": "CHI_AZU",
+			"name": "U. de Chile",
+			"short": "U. de Chile",
+			"abbr": "UCH",
+			"nick": "Chunchos",
+			"city": "Santiago",
+			"founded": 1927,
+			"league": "CHI1",
+			"rep": 68,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio Nacional",
+			"capacity": 48000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "U",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#E30613",
+				"border": "thick"
+			},
+			"rivals": [
+				"CHI_ALB"
+			]
+		},
+		{
+			"key": "CHI_CRU",
+			"name": "U. Católica",
+			"short": "U. Católica",
+			"abbr": "UCA",
+			"nick": "Cruzados",
+			"city": "Santiago",
+			"founded": 1937,
+			"league": "CHI1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#1D5BBF"
+			],
+			"stadium": "Claro Arena",
+			"capacity": 14000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "shield",
+				"field": "cross",
+				"symbol": "none"
+			},
+			"rivals": [
+				"CHI_ALB"
+			]
+		},
+		{
+			"key": "CHI_LOA",
+			"name": "Cobreloa",
+			"short": "Cobreloa",
+			"abbr": "COB",
+			"nick": "Zorros del Desierto",
+			"city": "Calama",
+			"founded": 1977,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Zorros del Desierto",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CL",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "CHI_AUD",
+			"name": "Audax Italiano",
+			"short": "Audax Italiano",
+			"abbr": "AUD",
+			"nick": "Tanos",
+			"city": "Santiago",
+			"founded": 1910,
+			"league": "CHI1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bicentenario de La Florida",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "tricolor_v",
+				"symbol": "letter",
+				"initials": "AI",
+				"c1": "#00843D",
+				"c2": "#FFFFFF",
+				"fc": "#FFFFFF",
+				"c3": "#E30613",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "CHI_PAL",
+			"name": "Palestino",
+			"short": "Palestino",
+			"abbr": "PAL",
+			"nick": "Árabes",
+			"city": "Santiago",
+			"founded": 1920,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#00843D",
+				"#E30613"
+			],
+			"stadium": "Estadio Municipal de La Cisterna",
+			"capacity": 12000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "tricolor_h",
+				"symbol": "letter",
+				"initials": "CDP",
+				"c1": "#111111",
+				"c2": "#FFFFFF",
+				"fc": "#FFFFFF",
+				"c3": "#00843D",
+				"sc": "#E30613"
+			}
+		},
+		{
+			"key": "CHI_HUA",
+			"name": "Huachipato",
+			"short": "Huachipato",
+			"abbr": "HUA",
+			"nick": "Acereros",
+			"city": "Talcahuano",
+			"founded": 1947,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Estadio Huachipato-CAP Acero",
+			"capacity": 10500,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "gear",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "CHI_EVE",
+			"name": "Everton",
+			"short": "Everton",
+			"abbr": "EVE",
+			"nick": "Ruleteros",
+			"city": "Viña del Mar",
+			"founded": 1909,
+			"league": "CHI1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estadio Sausalito",
+			"capacity": 22000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "E",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "CHI_UES",
+			"name": "Unión Española",
+			"short": "Unión Española",
+			"abbr": "UES",
+			"nick": "Hispanos",
+			"city": "Santiago",
+			"founded": 1897,
+			"league": "CHI1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio Santa Laura",
+			"capacity": 19000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "UE",
+				"c1": "#E30613",
+				"c2": "#FFD100",
+				"sc": "#E30613",
+				"crown": 1,
+				"c3": "#FFD100"
+			}
+		},
+		{
+			"key": "CHI_OHI",
+			"name": "O'Higgins",
+			"short": "O'Higgins",
+			"abbr": "OHI",
+			"nick": "Capo de Provincia",
+			"city": "Rancagua",
+			"founded": 1955,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio El Teniente",
+			"capacity": 14000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OH"
+			}
+		},
+		{
+			"key": "CHI_COQ",
+			"name": "Coquimbo",
+			"short": "Coquimbo",
+			"abbr": "COQ",
+			"nick": "Piratas",
+			"city": "Coquimbo",
+			"founded": 1958,
+			"league": "CHI1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Francisco Sánchez Rumoroso",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "CHI_IQU",
+			"name": "Deportes Iquique",
+			"short": "Deportes Iquique",
+			"abbr": "IQU",
+			"nick": "Dragones Celestes",
+			"city": "Iquique",
+			"founded": 1978,
+			"league": "CHI1",
+			"rep": 52,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Tierra de Campeones",
+			"capacity": 13000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dragon",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "CHI_SER",
+			"name": "La Serena",
+			"short": "La Serena",
+			"abbr": "LSE",
+			"nick": "La Serena",
+			"city": "La Serena",
+			"founded": 1955,
+			"league": "CHI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Portada",
+			"capacity": 18200,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHI_CAL",
+			"name": "Unión La Calera",
+			"short": "Unión La Calera",
+			"abbr": "ULC",
+			"nick": "Unión La Calera",
+			"city": "La Calera",
+			"founded": 1954,
+			"league": "CHI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Nicolás Chahuán",
+			"capacity": 9200,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHI_NUB",
+			"name": "Ñublense",
+			"short": "Ñublense",
+			"abbr": "NUB",
+			"nick": "Ñublense",
+			"city": "Chillán",
+			"founded": 1916,
+			"league": "CHI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Nelson Oyarzún",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHI_LIM",
+			"name": "Limache",
+			"short": "Limache",
+			"abbr": "LIM",
+			"nick": "Limache",
+			"city": "Limache",
+			"founded": 2012,
+			"league": "CHI1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Municipal de Limache",
+			"capacity": 4500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

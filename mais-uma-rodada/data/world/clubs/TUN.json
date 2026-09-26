@@ -1,0 +1,378 @@
+{
+	"nation": "TUN",
+	"_doc": "Tunísia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "TUN_TAR",
+			"name": "Espérance",
+			"short": "Espérance",
+			"abbr": "EST",
+			"nick": "Taraji",
+			"city": "Tunis",
+			"founded": 1919,
+			"league": "TUN1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Stade Hammadi Agrebi",
+			"capacity": 60000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "EST",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"TUN_CLU"
+			]
+		},
+		{
+			"key": "TUN_CLU",
+			"name": "Club Africain",
+			"short": "Club Africain",
+			"abbr": "CA",
+			"nick": "Clubistes",
+			"city": "Tunis",
+			"founded": 1920,
+			"league": "TUN1",
+			"rep": 60,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Hammadi Agrebi",
+			"capacity": 60000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CA"
+			},
+			"rivals": [
+				"TUN_TAR"
+			]
+		},
+		{
+			"key": "TUN_ETO",
+			"name": "Étoile du Sahel",
+			"short": "Étoile du Sahel",
+			"abbr": "ESS",
+			"nick": "Étoilés",
+			"city": "Sousse",
+			"founded": 1925,
+			"league": "TUN1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Olympique de Sousse",
+			"capacity": 28000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "crescent",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "TUN_CSS",
+			"name": "CS Sfaxien",
+			"short": "CS Sfaxien",
+			"abbr": "CSS",
+			"nick": "Noir et Blanc",
+			"city": "Sfax",
+			"founded": 1928,
+			"league": "TUN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Taïeb Mhiri",
+			"capacity": 22000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CSS",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "TUN_USM",
+			"name": "US Monastir",
+			"short": "US Monastir",
+			"abbr": "USM",
+			"nick": "Monastiriens",
+			"city": "Monastir",
+			"founded": 1923,
+			"league": "TUN1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Mustapha Ben Jannet",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "USM"
+			}
+		},
+		{
+			"key": "TUN_STU",
+			"name": "Stade Tunisien",
+			"short": "Stade Tunisien",
+			"abbr": "ST",
+			"nick": "Bayadha",
+			"city": "Tunis",
+			"founded": 1948,
+			"league": "TUN1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade Hédi Enneifer",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ST"
+			}
+		},
+		{
+			"key": "TUN_USB",
+			"name": "Ben Guerdane",
+			"short": "Ben Guerdane",
+			"abbr": "USB",
+			"nick": "Ben Guerdane",
+			"city": "Ben Guerdane",
+			"founded": 1936,
+			"league": "TUN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade du 7 Mars",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_JSO",
+			"name": "JS Omrane",
+			"short": "JS Omrane",
+			"abbr": "JSO",
+			"nick": "JS Omrane",
+			"city": "Tunis",
+			"founded": 1954,
+			"league": "TUN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Chedly Zouiten",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ASM",
+			"name": "AS Marsa",
+			"short": "AS Marsa",
+			"abbr": "ASM",
+			"nick": "AS Marsa",
+			"city": "La Marsa",
+			"founded": 1939,
+			"league": "TUN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Stade Abdelaziz Chtioui",
+			"capacity": 6500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_CAB",
+			"name": "CA Bizertin",
+			"short": "CA Bizertin",
+			"abbr": "CAB",
+			"nick": "CA Bizertin",
+			"city": "Bizerte",
+			"founded": 1928,
+			"league": "TUN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Stade 15 Octobre",
+			"capacity": 20000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_OLB",
+			"name": "Olympique Béja",
+			"short": "Olympique Béja",
+			"abbr": "OLB",
+			"nick": "Olympique Béja",
+			"city": "Béja",
+			"founded": 1929,
+			"league": "TUN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Boujemaa Kmiti",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ESM",
+			"name": "ES Métlaoui",
+			"short": "ES Métlaoui",
+			"abbr": "ESM",
+			"nick": "ES Métlaoui",
+			"city": "Métlaoui",
+			"founded": 1950,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de Métlaoui",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_UST",
+			"name": "US Tataouine",
+			"short": "US Tataouine",
+			"abbr": "UST",
+			"nick": "US Tataouine",
+			"city": "Tataouine",
+			"founded": 1945,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Nejib Khattab",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_EGS",
+			"name": "EGS Gafsa",
+			"short": "EGS Gafsa",
+			"abbr": "EGS",
+			"nick": "EGS Gafsa",
+			"city": "Gafsa",
+			"founded": 1967,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Municipal de Gafsa",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ASS",
+			"name": "AS Soliman",
+			"short": "AS Soliman",
+			"abbr": "ASO",
+			"nick": "AS Soliman",
+			"city": "Soliman",
+			"founded": 1960,
+			"league": "TUN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Stade Municipal de Soliman",
+			"capacity": 4000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "TUN_ESZ",
+			"name": "ES Zarzis",
+			"short": "ES Zarzis",
+			"abbr": "ESZ",
+			"nick": "ES Zarzis",
+			"city": "Zarzis",
+			"founded": 1934,
+			"league": "TUN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Abdessalem Kazouz",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

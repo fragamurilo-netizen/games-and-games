@@ -1,0 +1,379 @@
+{
+	"nation": "CZE",
+	"_doc": "Tchéquia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "CZE_SES",
+			"name": "Slavia Praha",
+			"short": "Slavia Praha",
+			"abbr": "SLA",
+			"nick": "Sešívaní",
+			"city": "Praha",
+			"founded": 1892,
+			"league": "CZE1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Fortuna Arena",
+			"capacity": 19300,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "star",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
+			},
+			"rivals": [
+				"CZE_LET"
+			]
+		},
+		{
+			"key": "CZE_LET",
+			"name": "Sparta Praha",
+			"short": "Sparta Praha",
+			"abbr": "SPA",
+			"nick": "Rudí",
+			"city": "Praha",
+			"founded": 1893,
+			"league": "CZE1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#A51A3A",
+				"#FFFFFF"
+			],
+			"stadium": "epet Arena",
+			"capacity": 18900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ACS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"CZE_SES"
+			]
+		},
+		{
+			"key": "CZE_VIK",
+			"name": "Viktoria Plzeň",
+			"short": "Viktoria Plzeň",
+			"abbr": "VPL",
+			"nick": "Viktoriáni",
+			"city": "Plzeň",
+			"founded": 1911,
+			"league": "CZE1",
+			"rep": 64,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#1D5BBF"
+			],
+			"stadium": "Doosan Arena",
+			"capacity": 11700,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCVP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "CZE_BAN",
+			"name": "Baník Ostrava",
+			"short": "Baník Ostrava",
+			"abbr": "BAN",
+			"nick": "Chachaři",
+			"city": "Ostrava",
+			"founded": 1922,
+			"league": "CZE1",
+			"rep": 60,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Městský stadion Ostrava",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "hammers"
+			}
+		},
+		{
+			"key": "CZE_LIB",
+			"name": "Slovan Liberec",
+			"short": "Slovan Liberec",
+			"abbr": "LIB",
+			"nick": "Slovan",
+			"city": "Liberec",
+			"founded": 1958,
+			"league": "CZE1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion u Nisy",
+			"capacity": 9900,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SL"
+			}
+		},
+		{
+			"key": "CZE_SIG",
+			"name": "Sigma Olomouc",
+			"short": "Sigma Olomouc",
+			"abbr": "SIG",
+			"nick": "Sigmáci",
+			"city": "Olomouc",
+			"founded": 1919,
+			"league": "CZE1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Andrův stadion",
+			"capacity": 12500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SK"
+			}
+		},
+		{
+			"key": "CZE_BOL",
+			"name": "Mladá Boleslav",
+			"short": "Mladá Boleslav",
+			"abbr": "MBO",
+			"nick": "Mladá Boleslav",
+			"city": "Mladá Boleslav",
+			"founded": 1902,
+			"league": "CZE1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lokotrans Aréna",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_JAB",
+			"name": "Jablonec",
+			"short": "Jablonec",
+			"abbr": "JAB",
+			"nick": "Jablonec",
+			"city": "Jablonec",
+			"founded": 1945,
+			"league": "CZE1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#111111"
+			],
+			"stadium": "Stadion Střelnice",
+			"capacity": 6100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_HRA",
+			"name": "Hradec Králové",
+			"short": "Hradec Králové",
+			"abbr": "HKR",
+			"nick": "Hradec Králové",
+			"city": "Hradec Králové",
+			"founded": 1905,
+			"league": "CZE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Malšovická aréna",
+			"capacity": 9300,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_BOH",
+			"name": "Bohemians 1905",
+			"short": "Bohemians 1905",
+			"abbr": "BOH",
+			"nick": "Bohemians 1905",
+			"city": "Prague",
+			"founded": 1905,
+			"league": "CZE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Ďolíček",
+			"capacity": 6300,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_TEP",
+			"name": "Teplice",
+			"short": "Teplice",
+			"abbr": "TEP",
+			"nick": "Teplice",
+			"city": "Teplice",
+			"founded": 1945,
+			"league": "CZE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Na Stínadlech",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_SLO",
+			"name": "Slovácko",
+			"short": "Slovácko",
+			"abbr": "SLO",
+			"nick": "Slovácko",
+			"city": "Uherské Hradiště",
+			"founded": 1927,
+			"league": "CZE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Městský stadion",
+			"capacity": 8100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_KAR",
+			"name": "Karviná",
+			"short": "Karviná",
+			"abbr": "KAR",
+			"nick": "Karviná",
+			"city": "Karviná",
+			"founded": 2003,
+			"league": "CZE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Městský stadion",
+			"capacity": 4800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_PAR",
+			"name": "Pardubice",
+			"short": "Pardubice",
+			"abbr": "PAR",
+			"nick": "Pardubice",
+			"city": "Pardubice",
+			"founded": 2008,
+			"league": "CZE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "CFIG Arena",
+			"capacity": 4600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_ZLI",
+			"name": "Zlín",
+			"short": "Zlín",
+			"abbr": "ZLI",
+			"nick": "Zlín",
+			"city": "Zlín",
+			"founded": 1919,
+			"league": "CZE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Letná",
+			"capacity": 5800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CZE_DUK",
+			"name": "Dukla Praha",
+			"short": "Dukla Praha",
+			"abbr": "DUK",
+			"nick": "Dukla Praha",
+			"city": "Prague",
+			"founded": 1948,
+			"league": "CZE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Juliska",
+			"capacity": 8100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

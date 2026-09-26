@@ -1,0 +1,301 @@
+{
+	"nation": "DEN",
+	"_doc": "Dinamarca (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "DEN_LOV",
+			"name": "FC København",
+			"short": "FC København",
+			"abbr": "FCK",
+			"nick": "Løverne",
+			"city": "København",
+			"founded": 1992,
+			"league": "DEN1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#1D3F91"
+			],
+			"stadium": "Parken",
+			"capacity": 38000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "lion",
+				"text": "F.C. KOBENHAVN",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#1D3F91"
+			},
+			"rivals": [
+				"DEN_DRE"
+			]
+		},
+		{
+			"key": "DEN_DRE",
+			"name": "Brøndby",
+			"short": "Brøndby",
+			"abbr": "BIF",
+			"nick": "Drengene",
+			"city": "Brøndby",
+			"founded": 1964,
+			"league": "DEN1",
+			"rep": 64,
+			"arch": "formador",
+			"colors": [
+				"#FFD100",
+				"#1D5BBF"
+			],
+			"stadium": "Brøndby Stadion",
+			"capacity": 28000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B",
+				"text": "BRONDBY IF",
+				"c1": "#FFD100",
+				"c2": "#1D5BBF",
+				"sc": "#1D5BBF"
+			},
+			"rivals": [
+				"DEN_LOV"
+			]
+		},
+		{
+			"key": "DEN_ULV",
+			"name": "Midtjylland",
+			"short": "Midtjylland",
+			"abbr": "FCM",
+			"nick": "Ulvene",
+			"city": "Herning",
+			"founded": 1999,
+			"league": "DEN1",
+			"rep": 66,
+			"arch": "vendedor",
+			"colors": [
+				"#111111",
+				"#E30613"
+			],
+			"stadium": "MCH Arena",
+			"capacity": 11800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "wolf",
+				"sc": "#E30613"
+			},
+			"rivals": []
+		},
+		{
+			"key": "DEN_AGF",
+			"name": "AGF",
+			"short": "AGF",
+			"abbr": "AGF",
+			"nick": "De Hvide",
+			"city": "Aarhus",
+			"founded": 1880,
+			"league": "DEN1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Ceres Park",
+			"capacity": 19400,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AGF",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "DEN_NOR",
+			"name": "Nordsjælland",
+			"short": "Nordsjælland",
+			"abbr": "FCN",
+			"nick": "Tigrene",
+			"city": "Farum",
+			"founded": 1991,
+			"league": "DEN1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Right to Dream Park",
+			"capacity": 10300,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCN",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "DEN_SIL",
+			"name": "Silkeborg",
+			"short": "Silkeborg",
+			"abbr": "SIF",
+			"nick": "Silkeborg",
+			"city": "Silkeborg",
+			"founded": 1917,
+			"league": "DEN1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "JYSK Park",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SIF"
+			}
+		},
+		{
+			"key": "DEN_RAN",
+			"name": "Randers",
+			"short": "Randers",
+			"abbr": "RFC",
+			"nick": "Randers",
+			"city": "Randers",
+			"founded": 2003,
+			"league": "DEN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Cepheus Park",
+			"capacity": 10300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_VIB",
+			"name": "Viborg",
+			"short": "Viborg",
+			"abbr": "VFF",
+			"nick": "Viborg",
+			"city": "Viborg",
+			"founded": 1896,
+			"league": "DEN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Energi Viborg Arena",
+			"capacity": 9600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_VEJ",
+			"name": "Vejle",
+			"short": "Vejle",
+			"abbr": "VEJ",
+			"nick": "Vejle",
+			"city": "Vejle",
+			"founded": 1891,
+			"league": "DEN1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Vejle Stadion",
+			"capacity": 10400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_AAB",
+			"name": "AaB",
+			"short": "AaB",
+			"abbr": "AAB",
+			"nick": "AaB",
+			"city": "Aalborg",
+			"founded": 1885,
+			"league": "DEN1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Aalborg Portland Park",
+			"capacity": 13800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_LYN",
+			"name": "Lyngby",
+			"short": "Lyngby",
+			"abbr": "LYN",
+			"nick": "Lyngby",
+			"city": "Lyngby",
+			"founded": 1921,
+			"league": "DEN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Lyngby Stadion",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "DEN_SON",
+			"name": "Sønderjyske",
+			"short": "Sønderjyske",
+			"abbr": "SJE",
+			"nick": "Sønderjyske",
+			"city": "Haderslev",
+			"founded": 2004,
+			"league": "DEN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Sydbank Park",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

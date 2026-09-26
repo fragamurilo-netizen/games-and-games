@@ -1,0 +1,300 @@
+{
+	"nation": "AUS",
+	"_doc": "Austrália (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "AUS_MVB",
+			"name": "Melb. Victory",
+			"short": "Melb. Victory",
+			"abbr": "MVC",
+			"nick": "Victory",
+			"city": "Melbourne",
+			"founded": 2004,
+			"league": "AUS1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0D2A5C",
+				"#FFFFFF"
+			],
+			"stadium": "AAMI Park",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "vee",
+				"symbol": "none"
+			},
+			"rivals": [
+				"AUS_MSC"
+			]
+		},
+		{
+			"key": "AUS_SSK",
+			"name": "Sydney FC",
+			"short": "Sydney FC",
+			"abbr": "SYD",
+			"nick": "Sky Blues",
+			"city": "Sydney",
+			"founded": 2004,
+			"league": "AUS1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#6CABDD",
+				"#0D2A5C"
+			],
+			"stadium": "Sydney Football Stadium",
+			"capacity": 42500,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "halves_h",
+				"symbol": "letter",
+				"initials": "SFC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"AUS_PAR"
+			]
+		},
+		{
+			"key": "AUS_PAR",
+			"name": "W. Sydney",
+			"short": "W. Sydney",
+			"abbr": "WSW",
+			"nick": "Wanderers",
+			"city": "Sydney",
+			"founded": 2012,
+			"league": "AUS1",
+			"rep": 58,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Western Sydney Stadium",
+			"capacity": 30000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "WSW",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"AUS_SSK"
+			]
+		},
+		{
+			"key": "AUS_MCY",
+			"name": "Melbourne City",
+			"short": "Melbourne City",
+			"abbr": "MCY",
+			"nick": "City",
+			"city": "Melbourne",
+			"founded": 2009,
+			"league": "AUS1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#6CABDD",
+				"#FFFFFF"
+			],
+			"stadium": "AAMI Park",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MC",
+				"c2": "#0D2A5C",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			}
+		},
+		{
+			"key": "AUS_CCM",
+			"name": "Central Coast",
+			"short": "Central Coast",
+			"abbr": "CCM",
+			"nick": "Mariners",
+			"city": "Gosford",
+			"founded": 2004,
+			"league": "AUS1",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#FFD100",
+				"#1B3A8C"
+			],
+			"stadium": "Industree Group Stadium",
+			"capacity": 20000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"c1": "#1B3A8C",
+				"c2": "#FFD100"
+			}
+		},
+		{
+			"key": "AUS_ADL",
+			"name": "Adelaide United",
+			"short": "Adelaide United",
+			"abbr": "ADL",
+			"nick": "Reds",
+			"city": "Adelaide",
+			"founded": 2003,
+			"league": "AUS1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Coopers Stadium",
+			"capacity": 16500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AU",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "AUS_BRI",
+			"name": "Brisbane Roar",
+			"short": "Brisbane Roar",
+			"abbr": "BRI",
+			"nick": "Brisbane Roar",
+			"city": "Brisbane",
+			"founded": 2005,
+			"league": "AUS1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Suncorp Stadium",
+			"capacity": 52500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_PER",
+			"name": "Perth Glory",
+			"short": "Perth Glory",
+			"abbr": "PER",
+			"nick": "Perth Glory",
+			"city": "Perth",
+			"founded": 1995,
+			"league": "AUS1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "HBF Park",
+			"capacity": 20500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_NEW",
+			"name": "Newcastle Jets",
+			"short": "Newcastle Jets",
+			"abbr": "NEW",
+			"nick": "Newcastle Jets",
+			"city": "Newcastle",
+			"founded": 2000,
+			"league": "AUS1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "McDonald Jones Stadium",
+			"capacity": 33000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_MAC",
+			"name": "Macarthur",
+			"short": "Macarthur",
+			"abbr": "MAC",
+			"nick": "Macarthur",
+			"city": "Sydney",
+			"founded": 2017,
+			"league": "AUS1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#C5A572"
+			],
+			"stadium": "Campbelltown Stadium",
+			"capacity": 17500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_WEL",
+			"name": "Wellington Phoenix",
+			"short": "Wellington Phoenix",
+			"abbr": "WEL",
+			"nick": "Wellington Phoenix",
+			"city": "Wellington",
+			"founded": 2007,
+			"league": "AUS1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Sky Stadium",
+			"capacity": 34500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUS_AUK",
+			"name": "Auckland FC",
+			"short": "Auckland FC",
+			"abbr": "AUK",
+			"nick": "Auckland FC",
+			"city": "Auckland",
+			"founded": 2024,
+			"league": "AUS1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Go Media Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

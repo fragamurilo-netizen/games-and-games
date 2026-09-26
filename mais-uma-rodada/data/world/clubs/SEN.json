@@ -1,0 +1,326 @@
+{
+	"nation": "SEN",
+	"_doc": "Senegal (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "SEN_GEN",
+			"name": "Génération Foot",
+			"short": "Génération Foot",
+			"abbr": "GFO",
+			"nick": "Académiciens",
+			"city": "Dakar",
+			"founded": 2000,
+			"league": "SEN1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stade Déni Biram Ndao",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SEN_JAR",
+			"name": "Jaraaf",
+			"short": "Jaraaf",
+			"abbr": "JAR",
+			"nick": "Vert et Blanc",
+			"city": "Dakar",
+			"founded": 1933,
+			"league": "SEN1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Demba Diop",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SEN_TEU",
+			"name": "Teungueth",
+			"short": "Teungueth",
+			"abbr": "TFC",
+			"nick": "Rufisquois",
+			"city": "Rufisque",
+			"founded": 2010,
+			"league": "SEN1",
+			"rep": 50,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade Ngalandou Diouf",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TFC"
+			}
+		},
+		{
+			"key": "SEN_PIK",
+			"name": "AS Pikine",
+			"short": "AS Pikine",
+			"abbr": "ASP",
+			"nick": "Pikinois",
+			"city": "Pikine",
+			"founded": 1973,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Alassane Djigo",
+			"capacity": 8000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ASP"
+			}
+		},
+		{
+			"key": "SEN_GOR",
+			"name": "US Gorée",
+			"short": "US Gorée",
+			"abbr": "USG",
+			"nick": "Insulaires",
+			"city": "Dakar",
+			"founded": 1933,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Demba Diop",
+			"capacity": 15000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship"
+			}
+		},
+		{
+			"key": "SEN_CAS",
+			"name": "Casa Sports",
+			"short": "Casa Sports",
+			"abbr": "CAS",
+			"nick": "Ziguinchorois",
+			"city": "Ziguinchor",
+			"founded": 1960,
+			"league": "SEN1",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Stade Aline Sitoe Diatta",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tree"
+			}
+		},
+		{
+			"key": "SEN_GUE",
+			"name": "Guédiawaye",
+			"short": "Guédiawaye",
+			"abbr": "GFC",
+			"nick": "Guédiawaye",
+			"city": "Guédiawaye",
+			"founded": 2003,
+			"league": "SEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Amadou Barry",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_MBO",
+			"name": "Stade de Mbour",
+			"short": "Stade de Mbour",
+			"abbr": "SMB",
+			"nick": "Stade de Mbour",
+			"city": "Mbour",
+			"founded": 1960,
+			"league": "SEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Caroline Faye",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_LIN",
+			"name": "Linguère",
+			"short": "Linguère",
+			"abbr": "LIN",
+			"nick": "Linguère",
+			"city": "Saint-Louis",
+			"founded": 1969,
+			"league": "SEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Stade Mawade Wade",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_SON",
+			"name": "Sonacos",
+			"short": "Sonacos",
+			"abbr": "SON",
+			"nick": "Sonacos",
+			"city": "Diourbel",
+			"founded": 1971,
+			"league": "SEN1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Stade Ely Manel Fall",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_AJE",
+			"name": "AJEL Rufisque",
+			"short": "AJEL Rufisque",
+			"abbr": "AJE",
+			"nick": "AJEL Rufisque",
+			"city": "Rufisque",
+			"founded": 1972,
+			"league": "SEN1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Ngalandou Diouf",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_WAL",
+			"name": "Wally Daan",
+			"short": "Wally Daan",
+			"abbr": "WAD",
+			"nick": "Wally Daan",
+			"city": "Thiès",
+			"founded": 1954,
+			"league": "SEN1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Lat-Dior",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_DSC",
+			"name": "Dakar Sacré-Cœur",
+			"short": "Dakar Sacré-Cœur",
+			"abbr": "DSC",
+			"nick": "Dakar Sacré-Cœur",
+			"city": "Dakar",
+			"founded": 2005,
+			"league": "SEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Stade Iba Mar Diop",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SEN_HLM",
+			"name": "HLM Dakar",
+			"short": "HLM Dakar",
+			"abbr": "HLM",
+			"nick": "HLM Dakar",
+			"city": "Dakar",
+			"founded": 1975,
+			"league": "SEN1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Stade Iba Mar Diop",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

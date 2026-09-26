@@ -1,0 +1,291 @@
+{
+	"nation": "QAT",
+	"_doc": "Catar (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "QAT_ZAE",
+			"name": "Al Sadd",
+			"short": "Al Sadd",
+			"abbr": "SAD",
+			"nick": "Líderes",
+			"city": "Doha",
+			"founded": 1969,
+			"league": "QAT1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estádio Jassim bin Hamad",
+			"capacity": 12900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"QAT_KNI"
+			]
+		},
+		{
+			"key": "QAT_KNI",
+			"name": "Al Duhail",
+			"short": "Al Duhail",
+			"abbr": "DUH",
+			"nick": "Cavaleiros Vermelhos",
+			"city": "Doha",
+			"founded": 2009,
+			"league": "QAT1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Abdullah bin Khalifa",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"QAT_ZAE"
+			]
+		},
+		{
+			"key": "QAT_RAY",
+			"name": "Al Rayyan",
+			"short": "Al Rayyan",
+			"abbr": "RAY",
+			"nick": "Leões",
+			"city": "Al Rayyan",
+			"founded": 1967,
+			"league": "QAT1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Ahmad bin Ali",
+			"capacity": 44000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "QAT_GHA",
+			"name": "Al Gharafa",
+			"short": "Al Gharafa",
+			"abbr": "GHA",
+			"nick": "Cheetahs",
+			"city": "Doha",
+			"founded": 1979,
+			"league": "QAT1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estádio Thani bin Jassim",
+			"capacity": 21000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#0055A4"
+			}
+		},
+		{
+			"key": "QAT_ARA",
+			"name": "Al Arabi",
+			"short": "Al Arabi",
+			"abbr": "ARA",
+			"nick": "Dream Team",
+			"city": "Doha",
+			"founded": 1952,
+			"league": "QAT1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Grand Hamad",
+			"capacity": 13000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "A"
+			}
+		},
+		{
+			"key": "QAT_WAK",
+			"name": "Al Wakrah",
+			"short": "Al Wakrah",
+			"abbr": "WAK",
+			"nick": "Al Mawaaj",
+			"city": "Al Wakrah",
+			"founded": 1959,
+			"league": "QAT1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Saoud bin Abdulrahman",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship"
+			}
+		},
+		{
+			"key": "QAT_QSC",
+			"name": "Qatar SC",
+			"short": "Qatar SC",
+			"abbr": "QSC",
+			"nick": "Qatar SC",
+			"city": "Doha",
+			"founded": 1959,
+			"league": "QAT1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#8A1538"
+			],
+			"stadium": "Suheim bin Hamad Stadium",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "QAT_SHA",
+			"name": "Al Shamal",
+			"short": "Al Shamal",
+			"abbr": "SHM",
+			"nick": "Al Shamal",
+			"city": "Madinat ash Shamal",
+			"founded": 1980,
+			"league": "QAT1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Al Shamal Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "QAT_UMM",
+			"name": "Umm Salal",
+			"short": "Umm Salal",
+			"abbr": "UMS",
+			"nick": "Umm Salal",
+			"city": "Umm Salal",
+			"founded": 1979,
+			"league": "QAT1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Thani bin Jassim Stadium",
+			"capacity": 21000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "QAT_KHO",
+			"name": "Al Khor",
+			"short": "Al Khor",
+			"abbr": "KHR",
+			"nick": "Al Khor",
+			"city": "Al Khor",
+			"founded": 1961,
+			"league": "QAT1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Al Bayt Stadium",
+			"capacity": 60000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "QAT_AHL",
+			"name": "Al Ahli Doha",
+			"short": "Al Ahli Doha",
+			"abbr": "AHD",
+			"nick": "Al Ahli Doha",
+			"city": "Doha",
+			"founded": 1950,
+			"league": "QAT1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Hamad bin Khalifa Stadium",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "QAT_SHN",
+			"name": "Al Shahania",
+			"short": "Al Shahania",
+			"abbr": "SHN",
+			"nick": "Al Shahania",
+			"city": "Al-Shahaniya",
+			"founded": 1998,
+			"league": "QAT1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Grand Hamad Stadium",
+			"capacity": 13000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

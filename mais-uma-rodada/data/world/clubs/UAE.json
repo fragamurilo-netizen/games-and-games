@@ -1,0 +1,331 @@
+{
+	"nation": "UAE",
+	"_doc": "Emirados Árabes (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "UAE_BOS",
+			"name": "Al Ain",
+			"short": "Al Ain",
+			"abbr": "AIN",
+			"nick": "Boss",
+			"city": "Al Ain",
+			"founded": 1968,
+			"league": "UAE1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Hazza bin Zayed",
+			"capacity": 22700,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "UAE_DUB",
+			"name": "Shabab Al Ahli",
+			"short": "Shabab Al Ahli",
+			"abbr": "SAH",
+			"nick": "Cavaleiros",
+			"city": "Dubai",
+			"founded": 1958,
+			"league": "UAE1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Rashid",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "tower"
+			},
+			"rivals": []
+		},
+		{
+			"key": "UAE_WAH",
+			"name": "Al Wahda",
+			"short": "Al Wahda",
+			"abbr": "WAH",
+			"nick": "Al Anabi",
+			"city": "Abu Dhabi",
+			"founded": 1974,
+			"league": "UAE1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Al Nahyan",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "W"
+			}
+		},
+		{
+			"key": "UAE_JAZ",
+			"name": "Al Jazira",
+			"short": "Al Jazira",
+			"abbr": "JAZ",
+			"nick": "Al Fakher",
+			"city": "Abu Dhabi",
+			"founded": 1974,
+			"league": "UAE1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Mohammed bin Zayed",
+			"capacity": 42000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "J",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "UAE_SHJ",
+			"name": "Sharjah",
+			"short": "Sharjah",
+			"abbr": "SHJ",
+			"nick": "Al Malik",
+			"city": "Sharjah",
+			"founded": 1966,
+			"league": "UAE1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio de Sharjah",
+			"capacity": 12000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "S"
+			}
+		},
+		{
+			"key": "UAE_WAS",
+			"name": "Al Wasl",
+			"short": "Al Wasl",
+			"abbr": "WAS",
+			"nick": "Al Fahood",
+			"city": "Dubai",
+			"founded": 1960,
+			"league": "UAE1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio Zabeel",
+			"capacity": 18000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "W",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "UAE_NAS",
+			"name": "Al Nasr Dubai",
+			"short": "Al Nasr Dubai",
+			"abbr": "NAS",
+			"nick": "Al Nasr Dubai",
+			"city": "Dubai",
+			"founded": 1945,
+			"league": "UAE1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Al-Maktoum Stadium",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_BAN",
+			"name": "Baniyas",
+			"short": "Baniyas",
+			"abbr": "BAN",
+			"nick": "Baniyas",
+			"city": "Abu Dhabi",
+			"founded": 1981,
+			"league": "UAE1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Baniyas Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_AJM",
+			"name": "Ajman",
+			"short": "Ajman",
+			"abbr": "AJM",
+			"nick": "Ajman",
+			"city": "Ajman",
+			"founded": 1974,
+			"league": "UAE1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Ajman Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_KHF",
+			"name": "Khor Fakkan",
+			"short": "Khor Fakkan",
+			"abbr": "KFK",
+			"nick": "Khor Fakkan",
+			"city": "Khor Fakkan",
+			"founded": 1981,
+			"league": "UAE1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Saqr bin Mohammad Stadium",
+			"capacity": 9000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_KAL",
+			"name": "Kalba",
+			"short": "Kalba",
+			"abbr": "KAL",
+			"nick": "Kalba",
+			"city": "Kalba",
+			"founded": 1972,
+			"league": "UAE1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Ittihad Kalba Stadium",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_DIB",
+			"name": "Dibba",
+			"short": "Dibba",
+			"abbr": "DIB",
+			"nick": "Dibba",
+			"city": "Dibba Al-Fujairah",
+			"founded": 1976,
+			"league": "UAE1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Fujairah Club Stadium",
+			"capacity": 10600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_BAT",
+			"name": "Al Bataeh",
+			"short": "Al Bataeh",
+			"abbr": "BAT",
+			"nick": "Al Bataeh",
+			"city": "Sharjah",
+			"founded": 1981,
+			"league": "UAE1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Al Bataeh Stadium",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UAE_ORO",
+			"name": "Al Orooba",
+			"short": "Al Orooba",
+			"abbr": "ORO",
+			"nick": "Al Orooba",
+			"city": "Qidfa",
+			"founded": 1974,
+			"league": "UAE1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Al Orooba Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

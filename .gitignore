@@ -1,0 +1,18 @@
+# Godot 4
+.godot/
+*.translation
+export_credentials.cfg
+mais-uma-rodada/.godot/
+mais-uma-rodada/android/
+mais-uma-rodada/build/
+
+# Builds
+*.apk
+*.aab
+*.idsig
+build/
+
+# SO / editores
+.DS_Store
+Thumbs.db
+*.tmp

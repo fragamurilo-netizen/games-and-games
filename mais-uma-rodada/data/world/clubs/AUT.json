@@ -1,0 +1,298 @@
+{
+	"nation": "AUT",
+	"_doc": "Áustria (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "AUT_MOZ",
+			"name": "RB Salzburg",
+			"short": "RB Salzburg",
+			"abbr": "RBS",
+			"nick": "Bullen",
+			"city": "Salzburg",
+			"founded": 1933,
+			"league": "AUT1",
+			"rep": 74,
+			"arch": "vendedor",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stadion Wals-Siezenheim",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "bull_charging",
+				"text": "FC RED BULL SALZBURG",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
+			},
+			"rivals": []
+		},
+		{
+			"key": "AUT_HUT",
+			"name": "Rapid Wien",
+			"short": "Rapid Wien",
+			"abbr": "RAP",
+			"nick": "Grün-Weißen",
+			"city": "Wien",
+			"founded": 1899,
+			"league": "AUT1",
+			"rep": 64,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Weststadion",
+			"capacity": 28300,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "R",
+				"text": "SK RAPID WIEN",
+				"year": "1899",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"AUT_VEI"
+			]
+		},
+		{
+			"key": "AUT_VEI",
+			"name": "Austria Wien",
+			"short": "Austria Wien",
+			"abbr": "FAK",
+			"nick": "Veilchen",
+			"city": "Wien",
+			"founded": 1911,
+			"league": "AUT1",
+			"rep": 60,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Franz-Horr-Stadion",
+			"capacity": 17600,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FAK",
+				"border": "thick"
+			},
+			"rivals": [
+				"AUT_HUT"
+			]
+		},
+		{
+			"key": "AUT_GRZ",
+			"name": "Sturm Graz",
+			"short": "Sturm Graz",
+			"abbr": "STU",
+			"nick": "Blackies",
+			"city": "Graz",
+			"founded": 1909,
+			"league": "AUT1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Graz-Liebenau",
+			"capacity": 16300,
+			"kit": "plain",
+			"crest": {
+				"shape": "french",
+				"field": "halves",
+				"symbol": "cat"
+			},
+			"rivals": []
+		},
+		{
+			"key": "AUT_LAS",
+			"name": "LASK",
+			"short": "LASK",
+			"abbr": "LASK",
+			"nick": "Athletiker",
+			"city": "Linz",
+			"founded": 1908,
+			"league": "AUT1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Linzer Stadion",
+			"capacity": 19000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "LASK",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "AUT_WAC",
+			"name": "Wolfsberg",
+			"short": "Wolfsberg",
+			"abbr": "WAC",
+			"nick": "Wölfe",
+			"city": "Wolfsberg",
+			"founded": 1931,
+			"league": "AUT1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#F07F13"
+			],
+			"stadium": "Lavanttal-Arena",
+			"capacity": 7300,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "wolf"
+			}
+		},
+		{
+			"key": "AUT_HAR",
+			"name": "Hartberg",
+			"short": "Hartberg",
+			"abbr": "HAR",
+			"nick": "Hartberg",
+			"city": "Hartberg",
+			"founded": 1946,
+			"league": "AUT1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Profertil Arena",
+			"capacity": 4600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_BWL",
+			"name": "BW Linz",
+			"short": "BW Linz",
+			"abbr": "BWL",
+			"nick": "BW Linz",
+			"city": "Linz",
+			"founded": 1997,
+			"league": "AUT1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Hofmann Personal Stadion",
+			"capacity": 5600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_ALT",
+			"name": "Altach",
+			"short": "Altach",
+			"abbr": "ALT",
+			"nick": "Altach",
+			"city": "Altach",
+			"founded": 1929,
+			"league": "AUT1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Cashpoint Arena",
+			"capacity": 8500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_KLA",
+			"name": "Klagenfurt",
+			"short": "Klagenfurt",
+			"abbr": "KLA",
+			"nick": "Klagenfurt",
+			"city": "Klagenfurt",
+			"founded": 2007,
+			"league": "AUT1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "28 Black Arena",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_TIR",
+			"name": "WSG Tirol",
+			"short": "WSG Tirol",
+			"abbr": "WSG",
+			"nick": "WSG Tirol",
+			"city": "Wattens",
+			"founded": 1930,
+			"league": "AUT1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Tivoli Stadion",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "AUT_GAK",
+			"name": "GAK",
+			"short": "GAK",
+			"abbr": "GAK",
+			"nick": "GAK",
+			"city": "Graz",
+			"founded": 1902,
+			"league": "AUT1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Graz-Liebenau",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

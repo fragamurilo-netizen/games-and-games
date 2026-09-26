@@ -1,0 +1,355 @@
+{
+	"nation": "VEN",
+	"_doc": "Venezuela (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "VEN_ROJ",
+			"name": "Caracas",
+			"short": "Caracas",
+			"abbr": "CFC",
+			"nick": "Rojos del Ávila",
+			"city": "Caracas",
+			"founded": 1967,
+			"league": "VEN1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Olímpico de la UCV",
+			"capacity": 24000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"VEN_CAR"
+			]
+		},
+		{
+			"key": "VEN_CAR",
+			"name": "Táchira",
+			"short": "Táchira",
+			"abbr": "TAC",
+			"nick": "Carrusel Aurinegro",
+			"city": "San Cristóbal",
+			"founded": 1974,
+			"league": "VEN1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Polideportivo de Pueblo Nuevo",
+			"capacity": 38000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "DT",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"VEN_ROJ"
+			]
+		},
+		{
+			"key": "VEN_AZG",
+			"name": "Monagas",
+			"short": "Monagas",
+			"abbr": "MON",
+			"nick": "Azulgranas",
+			"city": "Maturín",
+			"founded": 1987,
+			"league": "VEN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio Monumental de Maturín",
+			"capacity": 51000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MSC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "VEN_LGU",
+			"name": "La Guaira",
+			"short": "La Guaira",
+			"abbr": "DLG",
+			"nick": "Naranja",
+			"city": "Caracas",
+			"founded": 2008,
+			"league": "VEN1",
+			"rep": 52,
+			"arch": "rico_promovido",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Estadio Olímpico de la UCV",
+			"capacity": 24000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "VEN_CAB",
+			"name": "Carabobo",
+			"short": "Carabobo",
+			"abbr": "CAB",
+			"nick": "Granates",
+			"city": "Valencia",
+			"founded": 1997,
+			"league": "VEN1",
+			"rep": 50,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Misael Delgado",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "horse"
+			}
+		},
+		{
+			"key": "VEN_APC",
+			"name": "Puerto Cabello",
+			"short": "Puerto Cabello",
+			"abbr": "APC",
+			"nick": "Porteños",
+			"city": "Puerto Cabello",
+			"founded": 2014,
+			"league": "VEN1",
+			"rep": 50,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio La Bombonerita",
+			"capacity": 7500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "VEN_EME",
+			"name": "Estudiantes",
+			"short": "Estudiantes",
+			"abbr": "EME",
+			"nick": "Académicos",
+			"city": "Mérida",
+			"founded": 1971,
+			"league": "VEN1",
+			"rep": 46,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano de Mérida",
+			"capacity": 42000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain"
+			}
+		},
+		{
+			"key": "VEN_ZAM",
+			"name": "Zamora",
+			"short": "Zamora",
+			"abbr": "ZAM",
+			"nick": "Blanquinegros",
+			"city": "Barinas",
+			"founded": 1977,
+			"league": "VEN1",
+			"rep": 48,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Agustín Tovar",
+			"capacity": 30000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ZFC",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "VEN_MET",
+			"name": "Metropolitanos",
+			"short": "Metropolitanos",
+			"abbr": "MET",
+			"nick": "Violetas",
+			"city": "Caracas",
+			"founded": 2011,
+			"league": "VEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Brígido Iriarte",
+			"capacity": 10000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "M"
+			}
+		},
+		{
+			"key": "VEN_UCV",
+			"name": "UCV",
+			"short": "UCV",
+			"abbr": "UCV",
+			"nick": "Universitarios",
+			"city": "Caracas",
+			"founded": 1950,
+			"league": "VEN1",
+			"rep": 44,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Olímpico de la UCV",
+			"capacity": 24000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "UCV"
+			}
+		},
+		{
+			"key": "VEN_ZUL",
+			"name": "Rayo Zuliano",
+			"short": "Rayo Zuliano",
+			"abbr": "RZU",
+			"nick": "Rayo Zuliano",
+			"city": "Maracaibo",
+			"founded": 2013,
+			"league": "VEN1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio José Encarnación Romero",
+			"capacity": 35000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "VEN_POR",
+			"name": "Portuguesa",
+			"short": "Portuguesa",
+			"abbr": "POR",
+			"nick": "Portuguesa",
+			"city": "Acarigua",
+			"founded": 1972,
+			"league": "VEN1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#00843D"
+			],
+			"stadium": "Estadio General José Antonio Páez",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "VEN_ANG",
+			"name": "Angostura",
+			"short": "Angostura",
+			"abbr": "ANG",
+			"nick": "Angostura",
+			"city": "Ciudad Bolívar",
+			"founded": 2014,
+			"league": "VEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio Ricardo Tulio Maya",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "VEN_ANZ",
+			"name": "Anzoátegui",
+			"short": "Anzoátegui",
+			"abbr": "ANZ",
+			"nick": "Anzoátegui",
+			"city": "Puerto La Cruz",
+			"founded": 2021,
+			"league": "VEN1",
+			"rep": 45,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio José Antonio Anzoátegui",
+			"capacity": 37000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

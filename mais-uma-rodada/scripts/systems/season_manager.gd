@@ -1,0 +1,1104 @@
+class_name SeasonManager
+extends RefCounted
+## Ciclo da temporada no mundo inteiro: montagem (ligas de todos os países, copas e calendário
+## unificado), processamento data a data (partida detalhada do usuário, modo rápido para o resto do
+## mundo), acesso e rebaixamento por país, classificação continental e a virada de ano.
+
+## Ligas de primeira divisão cujos campeões viram notícia mesmo longe do usuário.
+const MAJOR_COEF := 70
+
+## Tempo acumulado (µs) por etapa do processamento das datas — medição de desempenho (simulador).
+static var timings: Dictionary = {}
+
+
+static func _time(key: String, t0: int) -> int:
+	var now := Time.get_ticks_usec()
+	timings[key] = int(timings.get(key, 0)) + now - t0
+	return now
+
+
+# ---------------------------------------------------------------------------
+# Montagem
+# ---------------------------------------------------------------------------
+
+static func setup_first_season(world: GameWorld) -> void:
+	world.season = build_season(world)
+	NationalTeamManager.start_season(world)
+	for c in world.clubs:
+		c.reset_season_state()
+		FinanceManager.set_budgets(world, c)
+	for p: Player in world.players.values():
+		p.ovr_start = p.overall
+	compute_goals(world)
+
+
+## Datas da temporada a partir do modelo do rules.json (sábados para a liga, quartas para as copas).
+## As supercopas (U0, U1) vêm antes da primeira rodada. Cada data leva as marcas "win" (janela de
+## transferências aberta) e "ret" (anúncio de aposentadorias), então saves antigos com outro modelo
+## de calendário continuam com as suas próprias datas.
+## Modelos: "calendar" (europeu, agosto a maio) e "calendars" → "ano" (ano civil). Marcas no modelo:
+## "E3@" data no fim de semana (estaduais em janeiro-março), "W~" rodada de liga no meio de semana,
+## "_" semana sem jogos (pausa do meio do ano).
+static func build_calendar(year: int, kind: String = "") -> Array:
+	var cc := DatabaseManager.calendar_cfg(kind)
+	var jan1 := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1})
+	var start := Time.get_unix_time_from_datetime_dict({"year": year, "month": int(cc.get("start_month", 8)), "day": int(cc.get("start_day", 15))})
+	var sat := int((start - jan1) / 86400)
+	var wd := int(Time.get_datetime_dict_from_unix_time(start)["weekday"])
+	sat += (6 - wd + 7) % 7
+	var out: Array = []
+	var slots: Array = cc["slots"]
+	var brk := int(cc.get("winter_break_after", -1))
+	var first_w := true
+	for i in slots.size():
+		var t: String = slots[i]
+		if t == "_":
+			sat += 7
+			continue
+		if t == "W~":
+			out.append({"t": "W", "d": sat + 3, "mid": true})
+			continue
+		if t.ends_with("@"):
+			if not first_w:
+				sat += 7
+			first_w = false
+			out.append({"t": t.trim_suffix("@"), "d": sat})
+			continue
+		if t == "W":
+			if not first_w:
+				sat += 7
+			first_w = false
+			out.append({"t": t, "d": sat})
+		elif t == "U0":
+			out.append({"t": t, "d": sat - 10}) # quarta-feira, dez dias antes da estreia
+		elif t == "U1":
+			out.append({"t": t, "d": sat - 6}) # domingo anterior à primeira rodada
+		elif t.begins_with("C"):
+			out.append({"t": t, "d": sat + 4})
+		else:
+			out.append({"t": t, "d": (int(out[out.size() - 1]["d"]) + 4) if not out.is_empty() else sat})
+		if out.size() - 1 == brk:
+			sat += int(cc.get("winter_break_days", 0))
+	for w in cc.get("windows", []):
+		for i in range(int(w[0]), mini(int(w[1]) + 1, out.size())):
+			out[i]["win"] = true
+	var ret := int(cc.get("retire_announce", -1))
+	if ret >= 0 and ret < out.size():
+		out[ret]["ret"] = true
+	return out
+
+
+## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
+## "" = europeu. O mundo inteiro segue um calendário só (as competições dependem disso).
+static func calendar_kind(world: GameWorld) -> String:
+	return String(world.stats.get("cal", ""))
+
+
+## Cria as ligas (clubes pela liga atual de cada um), os jogos, as copas e o calendário de `world.year`.
+## Notícias da segunda fase e dos playoffs (só das ligas que interessam ao usuário).
+static func _league_format_news(world: GameWorld, league: League, ev: Dictionary) -> void:
+	var mine := world.has_user() and (league.nation == world.user_nation() or league.has_club(world.user_club_id))
+	if not mine and not _is_major(league):
+		return
+	match String(ev["t"]):
+		"split":
+			var names: Array = []
+			for g in league.phase_groups:
+				names.append(str(g.size()))
+			NewsManager.post_raw(world, "%s se divide: começa a fase decisiva" % league.short_name,
+				"Terminada a fase regular, a %s se divide em grupos de %s clubes. Quem está no grupo de cima termina à frente, aconteça o que acontecer." % [league.name, " e ".join(PackedStringArray(names))],
+				-1, -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"playoff_start":
+			var cl: Array = ev["clubs"]
+			NewsManager.post_raw(world, "Playoffs da %s definidos" % league.short_name,
+				"%d clubes disputam o título em mata-mata. %s termina a fase regular na liderança." % [cl.size(), world.club(int(cl[0])).short_name],
+				int(cl[0]), -1, NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "liga")
+		"barrage_start":
+			var cl2: Array = ev["clubs"]
+			var a := world.club(int(cl2[0]))
+			var b := world.club(int(cl2[1]))
+			NewsManager.post_raw(world, "Repescagem: %s x %s" % [a.short_name, b.short_name],
+				"O %s, %dº da %s, defende a vaga na elite contra o %s, que vem da %s. São dois jogos, com a decisão na casa do clube da elite." % [a.name, CompetitionManager.position_of(league, a.id), league.short_name, b.name, world.league_name(b.league_id)],
+				a.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(a.id) or world.is_user_club(b.id) else (NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL), "liga")
+		"barrage_end":
+			var bar2 := LeagueFormat.barrage(league)
+			var wc := world.club(int(ev["club"]))
+			var elite_won := int(ev["club"]) == int(bar2.get("a", -1))
+			NewsManager.post_raw(world, ("%s se salva na repescagem" if elite_won else "%s sobe pela repescagem!") % wc.short_name,
+				("O %s venceu a repescagem e segue na %s." if elite_won else "O %s venceu a repescagem e vai jogar a %s na próxima temporada.") % [wc.name, league.name],
+				wc.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(wc.id) else (NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL), "liga")
+		"playoff_champion":
+			var c := world.club(int(ev["club"]))
+			NewsManager.post_raw(world, "%s é campeão da %s!" % [c.short_name, league.short_name],
+				"O %s venceu os playoffs e levantou a taça da %s." % [c.name, league.name],
+				c.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(c.id) else NewsEvent.IMP_HIGH, "liga")
+
+
+static func build_season(world: GameWorld) -> SeasonState:
+	var s := SeasonState.new()
+	s.year = world.year
+	s.calendar = build_calendar(world.year, calendar_kind(world))
+	var weekends: Array = []
+	for i in s.calendar.size():
+		if s.calendar[i]["t"] == "W":
+			weekends.append(i)
+	var by_league := {}
+	for c in world.clubs:
+		if not by_league.has(c.league_id):
+			by_league[c.league_id] = []
+		by_league[c.league_id].append(c.id)
+	for id in DatabaseManager.league_ids():
+		var cfg := DatabaseManager.league_cfg(id)
+		var l := League.new()
+		l.id = id
+		l.nation = cfg["nation"]
+		l.tier = int(cfg["tier"])
+		l.name = cfg["name"]
+		l.short_name = cfg.get("short", l.name)
+		l.club_ids = by_league.get(id, [])
+		# Saves de antes das ligas ampliadas têm menos clubes: mais turnos para manter ~30 rodadas
+		var rr := int(cfg.get("rr", 2))
+		var n_clubs := l.club_ids.size()
+		if n_clubs > 1 and n_clubs < int(cfg.get("teams", n_clubs)):
+			rr = maxi(rr, int(ceil(30.0 / (n_clubs - 1))))
+		# Formato real: os últimos fins de semana ficam para a segunda fase ou os playoffs.
+		var extra := LeagueFormat.extra_rounds(cfg, n_clubs)
+		var promo := String(cfg.get("format", {}).get("type", "")) == "promo"
+		var reg_weekends: Array = weekends.slice(0, weekends.size() - extra) if extra > 0 and not promo else weekends
+		# Cada rodada precisa de um fim de semana próprio: turnos a mais ficariam sem data.
+		var per_turn := n_clubs - 1 + n_clubs % 2
+		while rr > 1 and per_turn * rr > reg_weekends.size():
+			rr -= 1
+		FixtureManager.build_league_fixtures(world.rng, l, rr, reg_weekends)
+		l.regular_rounds = l.rounds.size()
+		if extra > 0 and promo:
+			# Playoffs de acesso depois da temporada regular (datas que sobram no fim do calendário)
+			var after: Array = []
+			for i in range(int(weekends.back()) + 1, s.calendar.size()):
+				after.append(i)
+			l.phase_slots = after.slice(0, extra)
+		elif extra > 0:
+			l.phase_slots = weekends.slice(weekends.size() - extra)
+		CompetitionManager.init_table(l)
+		s.leagues[id] = l
+		s.league_order.append(id)
+	# Clubes só de estadual: uma "liga" sem jogos (league_of continua valendo), fora da ordem das
+	# ligas, então não tem tabela, campeão, acesso nem prêmios
+	for id in DatabaseManager.pool_ids():
+		var pcfg := DatabaseManager.league_cfg(id)
+		var pl := League.new()
+		pl.id = id
+		pl.nation = pcfg["nation"]
+		pl.tier = int(pcfg["tier"])
+		pl.name = pcfg["name"]
+		pl.short_name = pcfg.get("short", pl.name)
+		pl.club_ids = by_league.get(id, [])
+		CompetitionManager.init_table(pl)
+		s.leagues[id] = pl
+	CupManager.setup_season(world, s)
+	s.day = 0
+	s.finished = false
+	return s
+
+
+## Metas da diretoria conforme a força relativa do elenco dentro da liga.
+static func compute_goals(world: GameWorld) -> void:
+	var goals := {}
+	var exp := {}
+	for id in world.season.league_order:
+		var league: League = world.season.leagues[id]
+		var ranked: Array = league.club_ids.duplicate()
+		var strength := {}
+		for cid in ranked:
+			strength[cid] = ClubAI._compute_strength(world, world.club(cid))
+		ranked.sort_custom(func(a, b): return strength[a] > strength[b] or (strength[a] == strength[b] and a < b))
+		var teams := ranked.size()
+		for i in teams:
+			exp[ranked[i]] = i + 1
+		var up := league.promoted_count()
+		var down := league.relegated_count()
+		var cont := CupManager.continental_spots(league)
+		var cup_short := CupManager.cup_short(CupManager.cup_of_nation(league.nation))
+		for i in teams:
+			var rank := i + 1
+			var goal: Array
+			if league.tier == 1:
+				var top := maxi(3, int(round(teams * 0.3)))
+				var mid := maxi(top + 1, int(round(teams * 0.6)))
+				if rank <= 2:
+					goal = ["Ser campeão", 1]
+				elif cont > 0 and rank <= cont + 1:
+					goal = ["Classificar para a %s" % cup_short, cont]
+				elif rank <= top + 1:
+					goal = ["Terminar entre os %d primeiros" % top, top]
+				elif rank <= mid or down == 0:
+					goal = ["Terminar entre os %d primeiros" % mid, mid] if down > 0 or rank <= mid else ["Não terminar entre os últimos", teams - 2]
+				else:
+					goal = ["Evitar o rebaixamento", teams - down]
+			else:
+				if rank <= maxi(2, up):
+					goal = ["Conquistar o acesso", up]
+				elif rank <= up + 5:
+					goal = ["Brigar pelo acesso", up + 3]
+				elif down == 0 or rank <= teams - down - 3:
+					goal = ["Terminar no meio da tabela", teams / 2 + 2]
+				else:
+					goal = ["Evitar o rebaixamento", teams - down]
+			goals[ranked[i]] = goal
+	world.stats["goals"] = goals
+	world.stats["exp_rank"] = exp
+
+
+## Posição esperada no começo da temporada (ranking de força da liga). Usada pela imprensa e
+## pelo prêmio de treinador. Saves antigos sem o dado caem no meio da tabela.
+static func expected_rank(world: GameWorld, club_id: int, teams: int = 20) -> int:
+	var exp: Dictionary = world.stats.get("exp_rank", {})
+	if exp.has(club_id):
+		return int(exp[club_id])
+	if exp.has(str(club_id)):
+		return int(exp[str(club_id)])
+	return maxi(1, teams / 2)
+
+
+static func goal_of(world: GameWorld, club_id: int) -> Array:
+	var goals: Dictionary = world.stats.get("goals", {})
+	if goals.has(club_id):
+		return goals[club_id]
+	if goals.has(str(club_id)):
+		return goals[str(club_id)]
+	return ["Fazer uma boa campanha", 10]
+
+
+# ---------------------------------------------------------------------------
+# Data (slot) do calendário
+# ---------------------------------------------------------------------------
+
+## Prepara a data atual: contexto e sementes de todos os jogos. A partida do usuário volta viva
+## (MatchSimulation detalhada); as demais ficam na fila do modo rápido (run_entry).
+## Retorna {"day", "entries": [{f, seed, ctx, sim}], "user": entrada do usuário ou {}, "notes"}.
+static func begin_matchday(world: GameWorld) -> Dictionary:
+	var md := {"day": world.season.day, "entries": [], "user": {}, "notes": []}
+	for f: Fixture in world.season.fixtures_at(world.season.day):
+		if not f.played and (world.is_user_club(f.home) or world.is_user_club(f.away)):
+			SponsorManager.close_preseason(world) # primeiro jogo: uniforme e patrocínios travados
+			break
+	for f: Fixture in world.season.fixtures_at(world.season.day):
+		if f.played:
+			continue
+		var entry := {"f": f, "seed": world.rng.randi(), "ctx": MatchEngine.context_for(world, f), "sim": null, "res": {}}
+		if world.is_user_club(f.home) or world.is_user_club(f.away):
+			var home := world.club(f.home)
+			var away := world.club(f.away)
+			var hs := _sheet_for(world, home, away, true, md)
+			var as_ := _sheet_for(world, away, home, false, md)
+			var sim := MatchSimulation.new()
+			sim.setup(world, home, away, hs, as_, entry["ctx"], entry["seed"], true)
+			entry["sim"] = sim
+			md["user"] = entry
+		md["entries"].append(entry)
+	return md
+
+
+static func _sheet_for(world: GameWorld, club: Club, opp: Club, home: bool, md: Dictionary) -> TeamSheet:
+	if world.is_user_club(club.id):
+		md["notes"] = ClubAI.validate_user_sheet(world, club)
+		return club.sheet.duplicate_sheet()
+	return ClubAI.prepare_ai_sheet(world, club, opp, home)
+
+
+## Roda uma entrada ainda não simulada: modo rápido para IA × IA; minuto a minuto para o usuário.
+static func run_entry(world: GameWorld, entry: Dictionary) -> void:
+	if not entry["res"].is_empty():
+		return
+	var sim: MatchSimulation = entry["sim"]
+	if sim != null:
+		if not sim.finished:
+			sim.run_to_end()
+		entry["res"] = sim.to_result()
+		return
+	var f: Fixture = entry["f"]
+	var home := world.club(f.home)
+	var away := world.club(f.away)
+	var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
+	var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+	entry["res"] = QuickMatch.play(world, home, away, hs, as_, entry["ctx"], entry["seed"])
+
+
+static func entry_done(entry: Dictionary) -> bool:
+	return not entry["res"].is_empty()
+
+
+## Aplica tudo o que aconteceu na data e avança o calendário. Retorna um relatório para a UI.
+static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
+	var tt := Time.get_ticks_usec()
+	for e in md["entries"]:
+		run_entry(world, e)
+	# Raio-X tático do jogo do usuário (o minuto a minuto registrou corredores e contexto)
+	var ue: Dictionary = md.get("user", {})
+	if not ue.is_empty() and ue.get("sim", null) != null:
+		var xr := TacticalXRay.analyze(world, ue["sim"])
+		if not xr.is_empty():
+			var f0: Fixture = ue["f"]
+			xr["comp"] = f0.comp
+			xr["day"] = f0.slot
+			world.stats["xray"] = xr
+	tt = _time("jogos", tt)
+	var s := world.season
+	var slot := s.day
+	var weekend := s.is_weekend(slot)
+	var report := {"day": slot, "user": {}, "transfers": [], "retiring": [], "window_opened": false, "window_closed": false, "cups": []}
+	var user_pos_before := 0
+	if world.has_user():
+		var ul := world.league_of(world.user_club_id)
+		if ul != null and int(ul.table[world.user_club_id]["pl"]) > 0:
+			user_pos_before = CompetitionManager.position_of(ul, world.user_club_id)
+	var was_open := world.transfer_window_open()
+	# Lesões antigas avançam uma semana (a cada fim de semana) antes de registrar as novas.
+	if weekend:
+		for p: Player in world.players.values():
+			if p.injury_weeks > 0:
+				p.injury_weeks -= 1
+				if p.injury_weeks == 0:
+					p.injury_name = ""
+	var played := {}
+	var newly_suspended := {}
+	var clubs_played := {}
+	for e in md["entries"]:
+		var f: Fixture = e["f"]
+		var res: Dictionary = e["res"]
+		_apply_match(world, f, res, played, newly_suspended)
+		clubs_played[f.home] = true
+		clubs_played[f.away] = true
+		if not f.neutral:
+			var home := world.club(f.home)
+			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
+			home.add_ledger("bilheteria", int(int(res["att"]) * price))
+	WeeklyAwards.after_matchday(world, md, slot)
+	FootballMemory.after_matchday(world, md["entries"])
+	tt = _time("aplicar", tt)
+	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube
+	var sus := world.suspended()
+	for pid in sus.keys():
+		var p: Player = world.players.get(pid, null)
+		if p == null or p.suspension <= 0:
+			sus.erase(pid)
+			continue
+		if p.club_id >= 0 and clubs_played.has(p.club_id) and not played.has(pid) and not newly_suspended.has(pid):
+			p.suspension -= 1
+			if p.suspension <= 0:
+				sus.erase(pid)
+	# Recuperação física (proporcional aos dias até a próxima data); a moral volta ao normal na evolução semanal.
+	var days := _days_to_next(s, slot)
+	var dayf := days / 7.0
+	var rec_set := world.recovering()
+	for pid in rec_set.keys():
+		var p: Player = world.players.get(pid, null)
+		if p == null:
+			rec_set.erase(pid)
+			continue
+		var fac: int = world.clubs[p.club_id].facilities if p.club_id >= 0 else 40
+		var rec: float = (16.0 + p.attrs[Attr.RES] * 0.08 + fac * 0.04 - maxf(0.0, p.age(world.year) - 30.0) * 0.8) * dayf
+		rec *= 1.0 + (p.hid("pro") - 10) * 0.012 # quem se cuida (sono, alimentação) volta antes
+		if p.club_id == world.user_club_id and p.club_id >= 0:
+			rec *= TrainingManager.recovery_mult(world, p.club_id)
+		p.condition = minf(100.0, p.condition + rec)
+		if p.condition >= 100.0:
+			rec_set.erase(pid)
+	tt = _time("recuperacao", tt)
+	if weekend:
+		# Evolução, finanças e mercado andam por semana.
+		var notable := PlayerDevelopment.weekly_tick(world, played, clubs_played)
+		for p in notable:
+			if p.age(world.year) <= 21:
+				NewsManager.on_explosion(world, p)
+		tt = _time("evolucao", tt)
+		for c: Club in world.clubs:
+			FinanceManager.process_week(world, c)
+			c.fan_mood = clampf(c.fan_mood + (60.0 - c.fan_mood) * 0.03, 0.0, 100.0)
+		WorldEvents.weekly(world)
+		tt = _time("financas", tt)
+		TrainingManager.weekly(world)
+		YouthManager.weekly(world)
+		HeartClubs.weekly(world)
+		report["youth"] = YouthManager.play_slot(world, slot)
+		report["transfers"] = TransferManager.process_matchday(world)
+		tt = _time("mercado", tt)
+		report["intl"] = NationalTeamManager.after_weekend(world, _weekend_index(s, slot))
+		tt = _time("selecoes", tt)
+		if _weekend_index(s, slot) % 4 == 3:
+			for p: Player in world.players.values():
+				Valuation.update_value(p, world.year)
+		tt = _time("valores", tt)
+	# Veteranos anunciam aposentadoria
+	if s.is_retire_slot(slot):
+		var ann := PlayerDevelopment.announce_retirements(world)
+		report["retiring"] = ann
+		for p in ann:
+			NewsManager.on_retirement_announced(world, p)
+	# Copas: grupos, confrontos, campeões e o Mundial
+	var cup_events := CupManager.after_slot(world, slot)
+	report["cups"] = cup_events
+	# Formatos reais das ligas: split e playoffs
+	for lid in s.league_order:
+		for ev in LeagueFormat.after_slot(world, s.leagues[lid]):
+			_league_format_news(world, s.leagues[lid], ev)
+	for lid in s.league_order:
+		for ev in LeagueFormat.barrage_after_slot(world, s.leagues[lid]):
+			_league_format_news(world, s.leagues[lid], ev)
+	NewsManager.on_cup_events(world, cup_events)
+	# Rivalidades: o que aconteceu nos jogos e nos mata-matas esquenta os confrontos
+	Rivalry.after_matchday(world, md["entries"])
+	Rivalry.on_cup_events(world, cup_events)
+	# Notícias da data e pressão sobre os técnicos
+	NewsManager.after_matchday(world, md["entries"])
+	People.after_matchday(world, md["entries"])
+	AwardVoting.maybe_announce(world)
+	PressRoom.after_matchday(world)
+	tt = _time("copas_noticias", tt)
+	# Avança o calendário
+	s.day += 1
+	if s.day >= s.calendar.size():
+		s.finished = true
+	var now_open := world.transfer_window_open()
+	if now_open and not was_open:
+		report["window_opened"] = true
+		NewsManager.on_window(world, true)
+		InboxManager.on_window(world, true)
+		if s.day > 5:
+			for c: Club in world.clubs:
+				FinanceManager.mid_season_review(world, c)
+	elif was_open and not now_open:
+		report["window_closed"] = true
+		NewsManager.on_window(world, false)
+		InboxManager.on_window(world, false)
+	# Relatório do usuário
+	if world.has_user() and not md["user"].is_empty():
+		var f: Fixture = md["user"]["f"]
+		s.turn += 1
+		var league := world.league_of(world.user_club_id)
+		report["user"] = {"fixture": f, "result": f.result_for(world.user_club_id), "pos_before": user_pos_before,
+			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
+		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
+		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
+		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
+		InboxManager.after_user_turn(world, report, md["user"])
+	return report
+
+
+static func _days_to_next(s: SeasonState, slot: int) -> int:
+	if slot + 1 >= s.calendar.size():
+		return 7
+	return clampi(int(s.calendar[slot + 1]["d"]) - int(s.calendar[slot]["d"]), 1, 21)
+
+
+static func _weekend_index(s: SeasonState, slot: int) -> int:
+	var n := 0
+	for i in slot:
+		if s.calendar[i]["t"] == "W":
+			n += 1
+	return n
+
+
+static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: Dictionary, newly_suspended: Dictionary) -> void:
+	f.played = true
+	f.hg = int(res["hg"])
+	f.ag = int(res["ag"])
+	f.attendance = int(res["att"])
+	f.extra_time = bool(res.get("et", false))
+	var pens: Array = res.get("pens", [])
+	if pens.size() == 2:
+		f.pen_h = int(pens[0])
+		f.pen_a = int(pens[1])
+	f.goals = Array(res["goals"]).duplicate()
+	f.motm = int(res["motm"])
+	var is_league := f.is_league()
+	if is_league:
+		var league := world.league(f.comp)
+		if league != null:
+			CompetitionManager.apply_result(league, f)
+			var yc: Array = res["yc"]
+			var rc: Array = res["rc"]
+			league.table[f.home]["yc"] += int(yc[0])
+			league.table[f.home]["rc"] += int(rc[0])
+			league.table[f.away]["yc"] += int(yc[1])
+			league.table[f.away]["rc"] += int(rc[1])
+	elif world.league(f.comp) == null:
+		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
+	FootballMemory.on_match(world, f)
+	Referees.record(world, res)
+	var derby := bool(res.get("derby", false))
+	var big := derby or float(res.get("importance", 0.3)) >= 0.7
+	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
+	var score: Array = [f.hg, f.ag]
+	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	for side in 2:
+		var club := world.club(f.home if side == 0 else f.away)
+		var result := f.result_for(club.id)
+		club.push_result(result)
+		if result == "V" and world.is_user_club(club.id):
+			SponsorManager.on_win(world, club)
+		club.cohesion = minf(92.0, club.cohesion + 1.2)
+		TacticsManager.after_match(club, club.sheet, String(club.training.get("focus", "")) == "tatico")
+		# Torcida
+		var patience := float(club.arch().get("fan_patience", 50))
+		var swing := 1.0 + (50.0 - patience) / 100.0
+		var dm := 3.0 if result == "V" else (-0.5 if result == "E" else -3.0 * swing)
+		if result == "V" and world.is_user_club(club.id) and ManagerProfile.has_style(world, "ofensivo"):
+			dm *= 1.25
+		if big:
+			dm *= 1.8
+		club.fan_mood = clampf(club.fan_mood + dm, 0.0, 100.0)
+		# Técnico do usuário
+		if world.is_user_club(club.id):
+			world.manager_stats["games"] = int(world.manager_stats.get("games", 0)) + 1
+			var key := "w" if result == "V" else ("d" if result == "E" else "l")
+			world.manager_stats[key] = int(world.manager_stats.get(key, 0)) + 1
+			CoachIdentity.on_match(world, club)
+			BoardManager.after_match(world, club, result, derby)
+		var conceded: int = score[1 - side]
+		for ln in res["lines"][side]:
+			var p: Player = ln[QuickMatch.L_P]
+			var mins: int = ln[QuickMatch.L_MINS]
+			var g: int = ln[QuickMatch.L_G]
+			var a: int = ln[QuickMatch.L_A]
+			var r: float = ln[QuickMatch.L_R]
+			var yellows: int = ln[QuickMatch.L_Y]
+			var red: bool = ln[QuickMatch.L_RED]
+			var inj: int = ln[QuickMatch.L_INJ]
+			played[p.id] = int(played.get(p.id, 0)) + mins
+			p.minutes_season += mins
+			if is_league:
+				p.stats[Player.S_APPS] += 1
+				if int(ln[QuickMatch.L_START]) == 0:
+					p.stats[Player.S_STARTS] += 1
+				p.stats[Player.S_MINUTES] += mins
+				p.stats[Player.S_GOALS] += g
+				p.stats[Player.S_ASSISTS] += a
+				p.stats[Player.S_RATING_SUM] += int(round(r * 10.0))
+				if red:
+					p.stats[Player.S_REDS] += 1
+				else:
+					p.stats[Player.S_YELLOWS] += yellows
+				if f.motm == p.id:
+					p.stats[Player.S_MOTM] += 1
+				if conceded == 0 and mins >= 60 and ln[QuickMatch.L_DEFN]:
+					p.stats[Player.S_CLEAN] += 1
+				var ds: Array = detail.get(p.id, [])
+				if ds.size() == MatchStats.N:
+					for k in MatchStats.N:
+						p.stats[Player.S_SHOTS + k] += int(ds[k])
+			else:
+				p.cup_add(f.comp, mins, g, a, r)
+			p.push_rating(r)
+			p.condition = float(ln[QuickMatch.L_COND])
+			world.mark_tired(p)
+			var before := p.career_goals
+			p.career_apps += 1
+			p.career_goals += g
+			p.career_assists += a
+			_update_spell(p, club, g, a)
+			if g > 0 and before / 50 != p.career_goals / 50 and world.has_user() and (world.is_user_club(club.id) or club.league_id == world.user_league_id()):
+				NewsManager.on_goal_milestone(world, p, (p.career_goals / 50) * 50)
+			# Disciplina
+			if red:
+				p.suspension += 1 if world.rng.randf() < 0.7 else 2
+				newly_suspended[p.id] = true
+				world.mark_suspended(p)
+			elif yellows > 0 and is_league:
+				p.yellow_acc += yellows
+				if p.yellow_acc >= yellow_limit:
+					p.yellow_acc -= yellow_limit
+					p.suspension += 1
+					newly_suspended[p.id] = true
+					world.mark_suspended(p)
+			# Lesão
+			if inj > 0:
+				p.injury_weeks = maxi(p.injury_weeks, inj)
+				p.injury_name = InjuryTable.name_for(inj, p.id + world.season.day)
+				PlayerCareer.on_injury(world, p, inj, p.injury_name)
+				PlayerDevelopment.injury_setback(world.rng, p, inj, p.age(world.year))
+				NewsManager.on_injury(world, p)
+				InboxManager.on_injury(world, p)
+			# Moral
+			var vol := p.trait_mult("morale_volatility")
+			var dmor := 4.0 if result == "V" else (0.5 if result == "E" else -4.0)
+			if r >= 7.5:
+				dmor += 2.0
+			elif r <= 5.5:
+				dmor -= 2.0
+			if big:
+				dmor *= 1.5
+			p.morale = clampf(p.morale + dmor * vol, 0.0, 100.0)
+
+
+static func _update_spell(p: Player, club: Club, goals: int, assists: int) -> void:
+	var s: Dictionary = p.spells[p.spells.size() - 1] if not p.spells.is_empty() else {}
+	if s.is_empty() or int(s["c"]) != club.id:
+		s = {"c": club.id, "cn": club.short_name, "from": p.joined_year, "to": 0, "a": 0, "g": 0, "as": 0}
+		p.spells.append(s)
+	s["a"] += 1
+	if goals > 0:
+		s["g"] += goals
+	if assists > 0:
+		s["as"] += assists
+
+
+## Atalho: joga a data inteira sem interface (simulador, datas sem o usuário e modo instantâneo).
+static func play_matchday_instant(world: GameWorld) -> Dictionary:
+	var tt := Time.get_ticks_usec()
+	var md := begin_matchday(world)
+	_time("preparar", tt)
+	for e in md["entries"]:
+		run_entry(world, e)
+	return finish_matchday(world, md)
+
+
+## O usuário joga na data atual?
+static func user_plays_now(world: GameWorld) -> bool:
+	if not world.has_user() or world.season == null or world.season.finished:
+		return false
+	return FixtureManager.next_slot_for(world, world.user_club_id) == world.season.day
+
+
+## Joga (instantaneamente) todas as datas até a próxima partida do usuário ou o fim da temporada.
+## Retorna os relatórios dessas datas.
+static func advance_to_user(world: GameWorld) -> Array:
+	var reports: Array = []
+	var guard := 0
+	while world.season != null and not world.season.finished and not user_plays_now(world) and guard < 80:
+		reports.append(play_matchday_instant(world))
+		guard += 1
+	return reports
+
+
+# ---------------------------------------------------------------------------
+# Fim de temporada
+# ---------------------------------------------------------------------------
+
+## Vencedor dos playoffs da liga (título ou acesso), ou -1.
+static func kind_po_champ(league: League) -> int:
+	return int(league.po.get("champ", -1)) if LeagueFormat.kind(league) in ["playoff", "promo"] else -1
+
+
+static func _is_major(league: League) -> bool:
+	return league.tier == 1 and int(DatabaseManager.nation(league.nation).get("coef", 0)) >= MAJOR_COEF
+
+
+## Processa a virada de temporada. Retorna um resumo para a tela de fim de temporada.
+static func end_season(world: GameWorld) -> Dictionary:
+	var s := world.season
+	var summary := {"year": world.year, "leagues": [], "cups": [], "user": {}, "retired": [], "youth": [], "left": []}
+	var user_nation := world.user_nation()
+	var rep0 := world.user_club().reputation if world.has_user() else 0.0
+	var fans0 := world.user_club().fan_base if world.has_user() else 0
+	# O tempo esfria as rivalidades (o título decidido agora ainda esquenta, logo abaixo)
+	Rivalry.season_close(world)
+	# Vagas continentais do ano que vem (antes das mudanças de divisão)
+	world.stats["qualified"] = CupManager.compute_qualified(world)
+	# Ranking mundial de clubes: arquiva a temporada antes que tabelas e copas sejam desfeitas
+	ClubRanking.close_season(world)
+	ClubRanking.season_news(world)
+	var moves := {} # club_id -> nova liga
+	var hist_leagues := {}
+	for id in s.league_order:
+		var league: League = s.leagues[id]
+		var ids := CompetitionManager.sorted_ids(league)
+		var teams := ids.size()
+		if teams == 0:
+			continue
+		var up := league.promoted_count()
+		var down := league.relegated_count()
+		var upper := DatabaseManager.league_at(league.nation, league.tier - 1) if league.tier > 1 else ""
+		var lower := DatabaseManager.league_at(league.nation, league.tier + 1)
+		var promoted: Array = LeagueFormat.promoted(league, ids, up, world) if up > 0 and upper != "" else []
+		var relegated: Array = ids.slice(teams - down) if down > 0 and lower != "" else []
+		# Repescagem: o clube da elite que perdeu cai junto (o vencedor de baixo sobe em promoted)
+		var bar_down := LeagueFormat.barrage_relegated(league)
+		if bar_down >= 0 and lower != "" and not relegated.has(bar_down):
+			relegated.append(bar_down)
+		var top := CompetitionManager.player_ranking(world, id, Player.S_GOALS, 1)
+		var scorer := {}
+		if not top.is_empty():
+			var sp: Player = top[0]
+			scorer = {"id": sp.id, "name": sp.display_name(), "club": world.club(sp.club_id).short_name if sp.club_id >= 0 else "", "goals": sp.stats[Player.S_GOALS]}
+		var cfg := league.cfg()
+		for i in teams:
+			var c := world.club(ids[i])
+			var row: Dictionary = league.table[c.id]
+			c.add_ledger("premiacao", FinanceManager.prize_for(id, i + 1, teams))
+			c.history.append({"y": world.year, "l": id, "p": i + 1, "pts": row["pts"], "w": row["w"], "dr": row["d"], "lo": row["l"], "gf": row["gf"], "ga": row["ga"]})
+			if c.history.size() > 80:
+				c.history = c.history.slice(c.history.size() - 80)
+			_update_reputation(c, cfg, i + 1, teams, promoted.has(c.id), relegated.has(c.id))
+		var champ := world.club(LeagueFormat.champion(league, ids))
+		Rivalry.on_league_end(world, league, champ.id, LeagueFormat.runner_up(league, ids))
+		champ.add_title("L:" + id)
+		for pid in champ.player_ids:
+			var p := world.player(pid)
+			if p != null and p.stats[Player.S_APPS] >= 5:
+				p.win_title(world.year, "L:" + id, champ.id)
+		for cid in promoted:
+			var c := world.club(cid)
+			c.add_title("P:" + id)
+			c.add_ledger("premiacao", FinanceManager.promotion_bonus(upper))
+			moves[cid] = upper
+		for cid in relegated:
+			moves[cid] = lower
+		summary["leagues"].append({"id": id, "name": league.name, "nation": league.nation, "tier": league.tier, "champion": champ.id,
+			"promoted": promoted, "relegated": relegated, "scorer": scorer, "table": ids})
+		hist_leagues[id] = {"champion": champ.id, "runner_up": LeagueFormat.runner_up(league, ids), "promoted": promoted, "relegated": relegated, "scorer": scorer}
+		var bar := LeagueFormat.barrage(league)
+		if int(bar.get("w", -1)) >= 0:
+			hist_leagues[id]["barrage"] = {"a": int(bar["a"]), "b": int(bar["b"]), "w": int(bar["w"])}
+		if kind_po_champ(league) >= 0:
+			hist_leagues[id]["po"] = kind_po_champ(league)
+		hist_leagues[id]["pts"] = int(league.table[champ.id]["pts"]) if league.table.has(champ.id) else 0
+		var mine := league.nation == user_nation
+		if mine or _is_major(league) or world.is_user_club(champ.id):
+			NewsManager.post(world, "campeao", {"club": champ.short_name, "division": league.name, "pts": league.table[champ.id]["pts"], "year": world.year},
+				champ.id, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(champ.id) else (NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL))
+		if mine:
+			for cid in promoted:
+				NewsManager.post(world, "acesso", {"club": world.club(cid).short_name, "division": world.league_name(upper), "pos": ids.find(cid) + 1},
+					cid, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(cid) else NewsEvent.IMP_NORMAL)
+			for cid in relegated:
+				NewsManager.post(world, "rebaixamento", {"club": world.club(cid).short_name, "division": world.league_name(lower), "pos": ids.find(cid) + 1},
+					cid, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(cid) else NewsEvent.IMP_NORMAL)
+	# Prêmios da liga e das copas (os técnicos da liga votam no craque e no treinador; os prêmios
+	# mundiais saem depois do torneio de seleções do verão, que pesa na votação)
+	var weekly := WeeklyAwards.season_close(world)
+	summary["months"] = weekly["months"]
+	summary["totw_most"] = WeeklyAwards.most_selected(weekly["totw_n"])
+	var awards := AwardManager.league_awards(world)
+	var gloves := AwardVoting.golden_gloves(world)
+	var coaches := {}
+	for id in hist_leagues:
+		if gloves.has(id) and awards.has(id):
+			awards[id]["glove"] = gloves[id]
+		coaches[id] = AwardVoting.league_coach_vote(world, id)
+	var extra := {"teams": AwardManager.teams_of_season(world), "cups": AwardManager.cup_awards(world),
+		"club": AwardManager.club_player(world, world.user_club_id) if world.has_user() else {}}
+	AwardManager.credit(world, awards, {}, extra)
+	for id in hist_leagues:
+		hist_leagues[id]["awards"] = awards.get(id, {})
+		if extra["teams"].has(id):
+			hist_leagues[id]["team"] = extra["teams"][id]
+		if not Dictionary(coaches[id]).is_empty():
+			hist_leagues[id]["coach"] = coaches[id]
+	summary["awards"] = awards.get(world.user_league_id(), {})
+	summary["team"] = extra["teams"].get(world.user_league_id(), [])
+	summary["coach"] = coaches.get(world.user_league_id(), {})
+	summary["club_player"] = extra["club"]
+	summary["cup_awards"] = extra["cups"]
+	var ua: Dictionary = summary["awards"]
+	if ua.has("mvp"):
+		NewsManager.post_raw(world, "%s é o craque da %s" % [ua["mvp"]["name"], world.league_name(world.user_league_id())],
+			"Eleito pelos técnicos da liga (%s). A revelação ficou com %s." % [String(ua["mvp"].get("v", "")), ua["young"]["name"] if ua.has("young") else "ninguém"],
+			-1, int(ua["mvp"]["id"]), NewsEvent.IMP_NORMAL, "premio")
+	var uco: Dictionary = summary["coach"]
+	if not uco.is_empty():
+		if bool(uco.get("user", false)):
+			var ma: Array = world.manager_stats.get("awards", [])
+			ma.append({"y": world.year, "k": "coach", "l": world.user_league_id()})
+			world.manager_stats["awards"] = ma
+		NewsManager.post_raw(world, "%s é o treinador da temporada na %s" % [String(uco["n"]), world.league_name(world.user_league_id())],
+			"Os colegas de profissão escolheram o trabalho no %s (%s)." % [String(uco["cn"]), String(uco["v"])],
+			int(uco["c"]), -1, NewsEvent.IMP_HIGH if bool(uco.get("user", false)) else NewsEvent.IMP_NORMAL, "premio")
+	# Copas
+	var hist_cups := {}
+	for cid in s.cups:
+		var cup: Cup = s.cups[cid]
+		var top := CupManager.scorers(world, cid, 1)
+		var scorer := {}
+		if not top.is_empty():
+			var sp: Player = top[0]
+			scorer = {"id": sp.id, "name": sp.display_name(), "club": world.club(sp.club_id).short_name if sp.club_id >= 0 else "", "goals": sp.cup_stats[cid][Player.C_GOALS]}
+		summary["cups"].append({"id": cid, "name": cup.name, "champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer})
+		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer, "mvp": extra["cups"].get(cid, {})}
+	# Patrocínio: momento comercial de cada clube e cláusulas dos contratos do usuário
+	summary["sponsor"] = SponsorManager.season_close(world, moves)
+	# Seleções: torneios de verão (Copa do Mundo, Eurocopa, Copa América...)
+	summary["intl"] = NationalTeamManager.play_summer(world)
+	# Prêmios mundiais: júri de jornalistas de cada país, com a temporada e o verão na conta
+	var bo_rank := AwardVoting.ballon_vote(world, summary["intl"], 10)
+	var ballon: Dictionary = bo_rank[0] if not bo_rank.is_empty() else {}
+	var wy_rank := AwardVoting.world_young_vote(world, summary["intl"])
+	var gk_rank := AwardVoting.gk_vote(world, summary["intl"])
+	extra["world_young"] = wy_rank[0] if not wy_rank.is_empty() else {}
+	extra["gk_world"] = gk_rank[0] if not gk_rank.is_empty() else {}
+	extra["boot"] = AwardManager.golden_boot(world)
+	extra["world_xi"] = AwardVoting.world_xi(world, summary["intl"])
+	AwardManager.credit(world, {}, ballon, {"world_young": extra["world_young"], "boot": extra["boot"], "gk_world": extra["gk_world"], "world_xi": extra["world_xi"]})
+	var wcoach := AwardVoting.world_coach_vote(world, coaches)
+	if bool(wcoach.get("user", false)):
+		var ma: Array = world.manager_stats.get("awards", [])
+		ma.append({"y": world.year, "k": "coach_world", "l": ""})
+		world.manager_stats["awards"] = ma
+	summary["ballon_rank"] = bo_rank
+	summary["ballon"] = ballon
+	summary["world_young"] = extra["world_young"]
+	summary["gk_world"] = extra["gk_world"]
+	summary["boot"] = extra["boot"]
+	summary["world_xi"] = extra["world_xi"]
+	summary["world_coach"] = wcoach
+	if not extra["boot"].is_empty():
+		var bt: Dictionary = extra["boot"]
+		NewsManager.post_raw(world, "%s leva a Chuteira de Ouro" % bt["name"],
+			"Com %d gols pelo %s, %s foi o artilheiro mais valioso do mundo em %d." % [int(bt["goals"]), bt["club"], bt["name"], world.year],
+			-1, int(bt["id"]), NewsEvent.IMP_NORMAL, "premio")
+	if not ballon.is_empty():
+		var body := "%s, do %s, foi eleito o melhor jogador do planeta em %d: %d gols em %d jogos. Somou %d pontos e %d votos de primeiro lugar entre %d jornalistas." % [
+			ballon["full"], ballon["club"], world.year, int(ballon["goals"]), int(ballon["apps"]), int(ballon["pts"]), int(ballon["first"]), int(ballon["votes"])]
+		if bo_rank.size() > 2:
+			body += " Completaram o pódio %s (%d) e %s (%d)." % [bo_rank[1]["name"], int(bo_rank[1]["pts"]), bo_rank[2]["name"], int(bo_rank[2]["pts"])]
+		NewsManager.post_raw(world, "%s ganha a Bola de Ouro" % ballon["name"], body, -1, int(ballon["id"]), NewsEvent.IMP_HIGH, "premio")
+	if not wcoach.is_empty():
+		NewsManager.post_raw(world, "%s é eleito o treinador do ano" % String(wcoach["n"]),
+			"O júri mundial premiou o trabalho no %s (%s)." % [String(wcoach["cn"]), String(wcoach.get("v", ""))],
+			int(wcoach["c"]), -1, NewsEvent.IMP_HEADLINE if bool(wcoach.get("user", false)) else NewsEvent.IMP_NORMAL, "premio")
+	var ledger := AwardVoting.season_ledger(world, awards, extra, coaches, bo_rank, wy_rank, gk_rank, wcoach, weekly["months"])
+	# Resumo do usuário
+	if world.has_user():
+		var u := world.user_club()
+		var league := world.league_of(u.id)
+		var pos := CompetitionManager.position_of(league, u.id)
+		var goal := goal_of(world, u.id)
+		var cups_user: Array = []
+		for cid in s.cups:
+			var cup: Cup = s.cups[cid]
+			if cup.has_club(u.id):
+				cups_user.append({"id": cid, "name": cup.name, "champion": cup.champion == u.id, "stage": _stage_reached(cup, u.id)})
+		summary["user"] = {"league": u.league_id, "league_name": league.name, "pos": pos, "goal": goal[0], "goal_met": pos <= int(goal[1]),
+			"promoted": moves.has(u.id) and DatabaseManager.league_cfg(moves[u.id]).get("tier", 1) < u.tier,
+			"relegated": moves.has(u.id) and DatabaseManager.league_cfg(moves[u.id]).get("tier", 1) > u.tier,
+			"champion": LeagueFormat.champion(league, CompetitionManager.sorted_ids(league)) == u.id, "cups": cups_user}
+		world.manager_stats["seasons"] = int(world.manager_stats.get("seasons", 0)) + 1
+		if summary["user"]["champion"]:
+			world.manager_stats["titles"] = int(world.manager_stats.get("titles", 0)) + 1
+		for cu in cups_user:
+			if cu["champion"]:
+				world.manager_stats["titles"] = int(world.manager_stats.get("titles", 0)) + 1
+				world.manager_stats["cup_titles"] = int(world.manager_stats.get("cup_titles", 0)) + 1
+		if summary["user"]["promoted"]:
+			world.manager_stats["promotions"] = int(world.manager_stats.get("promotions", 0)) + 1
+		summary["user"]["identity"] = CoachIdentity.on_season_end(world, summary["user"], rep0)
+		EventManager.on_season_end(world, bool(summary["user"]["goal_met"]))
+		summary["youth_league"] = YouthManager.finish_league(world)
+		var review := BoardManager.season_review(world, u, summary["user"])
+		summary["user"]["board_delta"] = review["delta"]
+		summary["user"]["fired"] = review["fired"]
+		summary["user"]["offers"] = review["offers"]
+		summary["user"]["board"] = u.board_confidence
+		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
+		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
+	PressRoom.on_season_end(world, summary)
+	CoachCareer.on_titles(world, hist_leagues, hist_cups) # títulos na carreira de quem está no banco
+	People.on_season_end(world, summary)
+	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
+	var uc := world.user_club()
+	if uc != null:
+		var snap: Array = []
+		for p: Player in world.squad(uc):
+			var t := p.season_totals()
+			snap.append({"id": p.id, "n": p.display_name(), "pos": p.position, "sh": p.shirt, "a": int(t[0]), "g": int(t[1]),
+				"as": int(t[2]), "r": snappedf(p.avg_rating(), 0.01), "o": p.overall})
+		uc.squad_archive[str(world.year)] = snap
+		if uc.squad_archive.size() > 40:
+			var ks: Array = uc.squad_archive.keys()
+			ks.sort()
+			uc.squad_archive.erase(ks[0])
+	# Arquivo individual da temporada
+	# (uma linha por clube: quem trocou no meio do ano tem os números de cada um; lesões graves anotadas)
+	for p: Player in world.players.values():
+		var rows := PlayerCareer.season_rows(world, p)
+		if not rows.is_empty():
+			p.history.append_array(rows)
+			if p.history.size() > 30:
+				p.history = p.history.slice(p.history.size() - 30)
+	PlayerCareer.clear_season(world)
+	var yl_sum: Dictionary = summary.get("youth_league", {})
+	world.history.append({"y": world.year, "leagues": hist_leagues, "cups": hist_cups, "user": summary["user"], "ballon": ballon,
+		"club": world.user_club_id, "yl": yl_sum, "wy": extra["world_young"], "boot": extra["boot"], "cp": extra["club"],
+		"arch": SeasonArchive.snapshot_leagues(world), "sq": SeasonArchive.snapshot_squad(world),
+		"bo": bo_rank, "months": weekly["months"], "tw": summary["totw_most"], "gkw": extra["gk_world"], "wxi": extra["world_xi"],
+		"wco": wcoach, "aw": ledger})
+	# Evolução do elenco do usuário no ano (quem subiu e quem caiu)
+	if world.has_user():
+		summary["evolution"] = PlayerDevelopment.squad_evolution(world, world.user_club_id)
+	# Personalidade: traços que surgem ou somem com a idade, os prêmios e o momento
+	var persona := PlayerDevelopment.personality_review(world)
+	summary["persona"] = []
+	for ch in persona:
+		var cp: Player = ch["p"]
+		if cp.club_id >= 0 and world.is_user_club(cp.club_id):
+			summary["persona"].append({"id": cp.id, "name": cp.display_name(), "t": ch["t"], "add": ch["add"], "why": ch["why"]})
+			NewsManager.post_raw(world, "%s: %s" % [cp.display_name(), PlayerDevelopment.persona_headline(ch)],
+				String(ch["why"]), world.user_club_id, cp.id, NewsEvent.IMP_NORMAL, "personalidade")
+	# Âncora de talento do mundo (antes da revisão anual e da nova base)
+	PlayerDevelopment.update_talent_drift(world)
+	# Revisão anual de potencial (explosões / estagnações)
+	var review_y := PlayerDevelopment.yearly_review(world)
+	for p in review_y["explosions"]:
+		NewsManager.on_explosion(world, p)
+	# Aposentadorias
+	var retired := PlayerDevelopment.process_retirements(world)
+	world.stat_add("retirements", retired.size())
+	FootballMemory.on_season_end(world, retired)
+	for p in retired:
+		if p.club_id >= 0 and world.is_user_club(p.club_id):
+			summary["retired"].append(p.display_name())
+	# Contratos vencidos
+	var loans_back := TransferManager.return_loans(world)
+	summary["loans_back"] = loans_back.map(func(q: Player): return q.display_name())
+	var left := TransferManager.process_expiring_contracts(world)
+	for p in left:
+		summary["left"].append(p.display_name())
+		NewsManager.post(world, "contrato_fim", {"player": p.display_name(), "club": world.user_club().short_name, "apps": p.career_apps}, world.user_club_id, p.id, NewsEvent.IMP_HIGH)
+	# DNA dos clubes reage à temporada (antes da troca de divisões)
+	ClubDNA.season_end(world, moves)
+	# Investimentos em estrutura/base e depreciação
+	FinanceManager.yearly_investments(world)
+	# Mudança de divisões
+	for cid in moves:
+		var c := world.club(cid)
+		c.league_id = moves[cid]
+		c.tier = int(DatabaseManager.league_cfg(c.league_id).get("tier", 1))
+	# Novo ano
+	world.year += 1
+	world.season_number += 1
+	# Base
+	var youth := PlayerDevelopment.youth_intake(world)
+	var yc := 0
+	for cid in youth:
+		yc += youth[cid].size()
+	world.stat_add("youth_generated", yc)
+	if world.has_user():
+		var turnover := YouthManager.season_turnover(world)
+		summary["youth_left"] = turnover["left"]
+		summary["youth_changes"] = turnover["changes"]
+		summary["youth_cost"] = turnover["cost"]
+		for ch in turnover["changes"]:
+			if ch["up"] and int(ch["d"]) >= 4:
+				NewsManager.post_raw(world, "%s dá o salto na base" % ch["name"], "%s O coordenador da base está animado com o garoto." % ch["why"],
+					world.user_club_id, int(ch["id"]), NewsEvent.IMP_NORMAL, "base")
+		var mine: Array = turnover["new"]
+		yc += mine.size()
+		mine.sort_custom(func(a, b): return a.potential > b.potential)
+		for p in mine:
+			summary["youth"].append(p.display_name())
+		if not mine.is_empty():
+			var best: Player = mine[0]
+			NewsManager.post(world, "base", {"club": world.user_club().short_name, "n": mine.size(), "player": best.display_name(),
+				"pos": Pos.name_of(best.position).to_lower(), "age": best.age(world.year), "potential": Player.potential_label(best.potential_estimate(0.8)).to_lower()},
+				world.user_club_id, best.id, NewsEvent.IMP_HIGH)
+	TransferManager.pay_installments(world)
+	# Agentes livres: mantém o mercado vivo, sem inchar
+	_maintain_free_agents(world)
+	HeartClubs.ensure_all(world) # garotos e livres novos
+	TransferManager.balance_squads(world)
+	# Nova temporada
+	world.season = build_season(world)
+	NationalTeamManager.start_season(world)
+	YouthManager.build_league(world)
+	world.transfer_log = world.transfer_log.filter(func(t): return t.year >= world.year - 1)
+	world.offers.clear()
+	world.stats.erase("neg")
+	var taxes := FinanceManager.season_taxes(world)
+	WorldEvents.season_start(world)
+	for c: Club in world.clubs:
+		c.reset_season_state()
+		if taxes.has(c.id):
+			c.add_ledger("impostos", -int(taxes[c.id]))
+		FinanceManager.refinance(world, c)
+		c.cohesion = maxf(35.0, c.cohesion - 8.0)
+		FinanceManager.set_budgets(world, c)
+		if not world.is_user_club(c.id):
+			PlayerGenerator.assign_statuses(world, c)
+		_assign_missing_shirts(world, c)
+	Valuation.refresh_shift(world)
+	Referees.season_close(world)
+	for p: Player in world.players.values():
+		p.reset_season_stats()
+		p.yellow_acc = 0
+		p.suspension = 0
+		p.condition = 100.0
+		p.retiring = false
+		Valuation.update_value(p, world.year)
+	world.reset_indexes()
+	# Mercado das férias: os outros clubes fazem a maior parte dos negócios antes da bola rolar.
+	MarketAI.offseason(world)
+	compute_goals(world)
+	SponsorManager.open_preseason(world)
+	BoardObjectives.list(world) # metas da diretoria fixadas no começo do ano
+	if world.has_user():
+		var goal := goal_of(world, world.user_club_id)
+		NewsManager.post(world, "temporada", {"year": world.year, "club": world.user_club().short_name, "goal": String(goal[0]).to_lower()}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
+		for cid in world.season.cups:
+			if world.season.cups[cid].has_club(world.user_club_id):
+				NewsManager.post(world, CupManager.news_cat(cid, "classificado"), {"club": world.user_club().short_name, "cup": world.season.cups[cid].name}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
+		InboxManager.on_new_season(world)
+	return summary
+
+
+## Fase mais longe alcançada numa copa ("Campeão", "Final", "Semifinal", ..., "Fase de grupos").
+static func _stage_reached(cup: Cup, club_id: int) -> String:
+	if cup.champion == club_id:
+		return "Campeão"
+	var best := -1
+	for t in cup.ties:
+		if int(t["a"]) == club_id or int(t["b"]) == club_id:
+			best = maxi(best, int(t["r"]))
+	if best < 0:
+		return "Fase de grupos" if not cup.groups.is_empty() else "Primeira fase"
+	return cup.round_names[best]
+
+
+static func _update_reputation(c: Club, cfg: Dictionary, pos: int, teams: int, promoted: bool, relegated: bool) -> void:
+	var rr: Array = cfg.get("rep", [40, 70])
+	var t := float(teams - pos) / maxf(1.0, teams - 1)
+	var target := float(rr[0]) + (float(rr[1]) - float(rr[0])) * t
+	if promoted:
+		target += 6.0
+	if relegated:
+		target -= 6.0
+	c.reputation = clampf(c.reputation + (target - c.reputation) * 0.18, 5.0, 99.0)
+	var fan_f := 1.0 + (target - c.reputation) / 400.0
+	if pos == 1:
+		fan_f += 0.05
+	if relegated:
+		fan_f -= 0.05
+	c.fan_base = maxi(600, int(c.fan_base * fan_f))
+
+
+static func _maintain_free_agents(world: GameWorld) -> void:
+	var per_club := float(DatabaseManager.rules().get("free_agents_per_club", 0.5))
+	var target := int(world.clubs.size() * per_club)
+	var cap := target * 2
+	var free := world.free_agents().duplicate()
+	# Remove os mais fracos se o mercado inchar demais: quem sobra sem clube (velhos e fracos primeiro) para.
+	if free.size() > cap:
+		var y := world.year
+		free.sort_custom(func(a, b): return a.ovr_f - maxf(0.0, a.age(y) - 29.0) * 3.0 < b.ovr_f - maxf(0.0, b.age(y) - 29.0) * 3.0)
+		for i in free.size() - cap:
+			world.remove_player(free[i])
+		world.stat_add("retirements", free.size() - cap)
+	var used := WorldGenerator.used_names_of(world)
+	var have := world.free_agents().size()
+	for i in maxi(0, target - have):
+		PlayerGenerator.create_free_agent(world, world.rng, WorldGenerator.random_league_level(world.rng), used)
+
+
+static func _assign_missing_shirts(world: GameWorld, c: Club) -> void:
+	var used := {}
+	for p in world.squad(c):
+		if p.shirt > 0 and not used.has(p.shirt):
+			used[p.shirt] = true
+		else:
+			p.shirt = 0
+	var next := 12
+	for p in world.squad(c):
+		if p.shirt == 0:
+			while used.has(next):
+				next += 1
+			p.shirt = next
+			used[next] = true

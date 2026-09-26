@@ -1,0 +1,381 @@
+{
+	"nation": "UKR",
+	"_doc": "Ucrânia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "UKR_HIR",
+			"name": "Shakhtar",
+			"short": "Shakhtar",
+			"abbr": "SHA",
+			"nick": "Hirnyky",
+			"city": "Donetsk",
+			"founded": 1936,
+			"league": "UKR1",
+			"rep": 72,
+			"arch": "vendedor",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Donbass Arena",
+			"capacity": 52000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "ring",
+				"field": "stripes:3",
+				"symbol": "hammers",
+				"text": "SHAKHTAR",
+				"text2": "DONETSK",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"UKR_BSY"
+			]
+		},
+		{
+			"key": "UKR_BSY",
+			"name": "Dynamo Kyiv",
+			"short": "Dynamo Kyiv",
+			"abbr": "DYN",
+			"nick": "Bilo-Syni",
+			"city": "Kyiv",
+			"founded": 1927,
+			"league": "UKR1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#1D5BBF"
+			],
+			"stadium": "Estádio Olímpico de Kiev",
+			"capacity": 16800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "D",
+				"sc": "#1D5BBF",
+				"border": "thick"
+			},
+			"rivals": [
+				"UKR_HIR"
+			]
+		},
+		{
+			"key": "UKR_POL",
+			"name": "Polissya",
+			"short": "Polissya",
+			"abbr": "POL",
+			"nick": "Vovky",
+			"city": "Zhytomyr",
+			"founded": 2016,
+			"league": "UKR1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Tsentralnyi Stadion Zhytomyr",
+			"capacity": 5900,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "P"
+			}
+		},
+		{
+			"key": "UKR_KRY",
+			"name": "Kryvbas",
+			"short": "Kryvbas",
+			"abbr": "KRY",
+			"nick": "Ruda",
+			"city": "Kryvyi Rih",
+			"founded": 1959,
+			"league": "UKR1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Hirnyk",
+			"capacity": 2500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "K"
+			}
+		},
+		{
+			"key": "UKR_ZOR",
+			"name": "Zorya",
+			"short": "Zorya",
+			"abbr": "ZOR",
+			"nick": "Myronosci",
+			"city": "Luhansk",
+			"founded": 1923,
+			"league": "UKR1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Slavutych-Arena",
+			"capacity": 11600,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "UKR_OLE",
+			"name": "Oleksandriya",
+			"short": "Oleksandriya",
+			"abbr": "OLE",
+			"nick": "Mistiany",
+			"city": "Oleksandriya",
+			"founded": 1948,
+			"league": "UKR1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Nika Stadion",
+			"capacity": 7000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "O",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "UKR_RUK",
+			"name": "Rukh Lviv",
+			"short": "Rukh Lviv",
+			"abbr": "RUK",
+			"nick": "Rukh Lviv",
+			"city": "Lviv",
+			"founded": 2003,
+			"league": "UKR1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Arena Lviv",
+			"capacity": 34900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_KAR",
+			"name": "Karpaty",
+			"short": "Karpaty",
+			"abbr": "KAR",
+			"nick": "Karpaty",
+			"city": "Lviv",
+			"founded": 1963,
+			"league": "UKR1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Ukraina Stadium",
+			"capacity": 28000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_OBO",
+			"name": "Obolon",
+			"short": "Obolon",
+			"abbr": "OBO",
+			"nick": "Obolon",
+			"city": "Kyiv",
+			"founded": 1992,
+			"league": "UKR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Obolon Arena",
+			"capacity": 5100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_VER",
+			"name": "Veres",
+			"short": "Veres",
+			"abbr": "VER",
+			"nick": "Veres",
+			"city": "Rivne",
+			"founded": 1957,
+			"league": "UKR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Avanhard Stadium",
+			"capacity": 4600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_LNZ",
+			"name": "LNZ",
+			"short": "LNZ",
+			"abbr": "LNZ",
+			"nick": "LNZ",
+			"city": "Cherkasy",
+			"founded": 2006,
+			"league": "UKR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Cherkasy Arena",
+			"capacity": 10300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_VOR",
+			"name": "Vorskla",
+			"short": "Vorskla",
+			"abbr": "VOR",
+			"nick": "Vorskla",
+			"city": "Poltava",
+			"founded": 1955,
+			"league": "UKR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Butovsky Vorskla",
+			"capacity": 24800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_CHO",
+			"name": "Chornomorets",
+			"short": "Chornomorets",
+			"abbr": "CHO",
+			"nick": "Chornomorets",
+			"city": "Odesa",
+			"founded": 1936,
+			"league": "UKR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#111111"
+			],
+			"stadium": "Chornomorets Stadium",
+			"capacity": 34100,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_KOL",
+			"name": "Kolos",
+			"short": "Kolos",
+			"abbr": "KOL",
+			"nick": "Kolos",
+			"city": "Kovalivka",
+			"founded": 2012,
+			"league": "UKR1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Kolos Stadium",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_LBE",
+			"name": "Livyi Bereh",
+			"short": "Livyi Bereh",
+			"abbr": "LBE",
+			"nick": "Livyi Bereh",
+			"city": "Kyiv",
+			"founded": 2017,
+			"league": "UKR1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Livyi Bereh Arena",
+			"capacity": 1000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "UKR_ING",
+			"name": "Inhulets",
+			"short": "Inhulets",
+			"abbr": "ING",
+			"nick": "Inhulets",
+			"city": "Petrove",
+			"founded": 2013,
+			"league": "UKR1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Inhulets Stadium",
+			"capacity": 1700,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

@@ -1,0 +1,382 @@
+{
+	"nation": "SRB",
+	"_doc": "Sérvia (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "SRB_CZV",
+			"name": "Crvena zvezda",
+			"short": "Crvena zvezda",
+			"abbr": "CZV",
+			"nick": "Zvezdaši",
+			"city": "Beograd",
+			"founded": 1945,
+			"league": "SRB1",
+			"rep": 70,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Rajko Mitić",
+			"capacity": 51700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "star",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#E30613"
+			},
+			"rivals": [
+				"SRB_CRN"
+			]
+		},
+		{
+			"key": "SRB_CRN",
+			"name": "Partizan",
+			"short": "Partizan",
+			"abbr": "PAR",
+			"nick": "Grobari",
+			"city": "Beograd",
+			"founded": 1945,
+			"league": "SRB1",
+			"rep": 66,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Partizana",
+			"capacity": 29800,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FKP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"SRB_CZV"
+			]
+		},
+		{
+			"key": "SRB_TSC",
+			"name": "TSC",
+			"short": "TSC",
+			"abbr": "TSC",
+			"nick": "Plavo-beli",
+			"city": "Bačka Topola",
+			"founded": 1913,
+			"league": "SRB1",
+			"rep": 58,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "TSC Arena",
+			"capacity": 4500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TSC"
+			}
+		},
+		{
+			"key": "SRB_VOJ",
+			"name": "Vojvodina",
+			"short": "Vojvodina",
+			"abbr": "VOJ",
+			"nick": "Voša",
+			"city": "Novi Sad",
+			"founded": 1914,
+			"league": "SRB1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Karađorđe",
+			"capacity": 14500,
+			"kit": "halves",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "V",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "SRB_CUK",
+			"name": "Čukarički",
+			"short": "Čukarički",
+			"abbr": "CUK",
+			"nick": "Brđani",
+			"city": "Beograd",
+			"founded": 1926,
+			"league": "SRB1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "Stadion Čukarički",
+			"capacity": 4000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FKC",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "SRB_RAD",
+			"name": "Radnički Niš",
+			"short": "Radnički Niš",
+			"abbr": "RNI",
+			"nick": "Real sa Nišave",
+			"city": "Niš",
+			"founded": 1923,
+			"league": "SRB1",
+			"rep": 52,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Stadion Čair",
+			"capacity": 18000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RN",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "SRB_NPZ",
+			"name": "Novi Pazar",
+			"short": "Novi Pazar",
+			"abbr": "NPZ",
+			"nick": "Novi Pazar",
+			"city": "Novi Pazar",
+			"founded": 1928,
+			"league": "SRB1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Gradski stadion",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_ZEL",
+			"name": "Železničar",
+			"short": "Železničar",
+			"abbr": "ZEL",
+			"nick": "Železničar",
+			"city": "Pančevo",
+			"founded": 1924,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "SC Mladost",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_SPA",
+			"name": "Spartak",
+			"short": "Spartak",
+			"abbr": "SPA",
+			"nick": "Spartak",
+			"city": "Subotica",
+			"founded": 1945,
+			"league": "SRB1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Subotica City",
+			"capacity": 13000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_MLA",
+			"name": "Mladost",
+			"short": "Mladost",
+			"abbr": "MLA",
+			"nick": "Mladost",
+			"city": "Lučani",
+			"founded": 1952,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Mladost Stadium",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_IMT",
+			"name": "IMT",
+			"short": "IMT",
+			"abbr": "IMT",
+			"nick": "IMT",
+			"city": "Belgrade",
+			"founded": 1988,
+			"league": "SRB1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFD100"
+			],
+			"stadium": "IMT Arena",
+			"capacity": 2000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_OFK",
+			"name": "OFK Beograd",
+			"short": "OFK Beograd",
+			"abbr": "OFK",
+			"nick": "OFK Beograd",
+			"city": "Belgrade",
+			"founded": 1911,
+			"league": "SRB1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Omladinski",
+			"capacity": 13900,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_NAP",
+			"name": "Napredak",
+			"short": "Napredak",
+			"abbr": "NAP",
+			"nick": "Napredak",
+			"city": "Kruševac",
+			"founded": 1946,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Mladost Stadium",
+			"capacity": 10300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_JED",
+			"name": "Jedinstvo",
+			"short": "Jedinstvo",
+			"abbr": "JED",
+			"nick": "Jedinstvo",
+			"city": "Ub",
+			"founded": 1920,
+			"league": "SRB1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Gradski stadion",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_TEK",
+			"name": "Tekstilac",
+			"short": "Tekstilac",
+			"abbr": "TEK",
+			"nick": "Tekstilac",
+			"city": "Odžaci",
+			"founded": 1936,
+			"league": "SRB1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Tekstilac Stadium",
+			"capacity": 2000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SRB_R23",
+			"name": "Radnički 1923",
+			"short": "Radnički 1923",
+			"abbr": "R23",
+			"nick": "Radnički 1923",
+			"city": "Kragujevac",
+			"founded": 1923,
+			"league": "SRB1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Čika Dača",
+			"capacity": 15100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

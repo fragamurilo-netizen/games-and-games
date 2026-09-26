@@ -1,0 +1,303 @@
+{
+	"nation": "KOR",
+	"_doc": "Coreia do Sul (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "KOR_ULS",
+			"name": "Ulsan HD",
+			"short": "Ulsan HD",
+			"abbr": "ULS",
+			"nick": "Horangi",
+			"city": "Ulsan",
+			"founded": 1983,
+			"league": "KOR1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#1D3F91",
+				"#FFD100"
+			],
+			"stadium": "Munsu Football Stadium",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#FFD100"
+			},
+			"rivals": [
+				"KOR_POH"
+			]
+		},
+		{
+			"key": "KOR_JEO",
+			"name": "Jeonbuk",
+			"short": "Jeonbuk",
+			"abbr": "JEO",
+			"nick": "Green Warriors",
+			"city": "Jeonju",
+			"founded": 1994,
+			"league": "KOR1",
+			"rep": 66,
+			"arch": "rico_promovido",
+			"colors": [
+				"#006437",
+				"#FFD100"
+			],
+			"stadium": "Jeonju World Cup Stadium",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "JB",
+				"sc": "#FFD100"
+			},
+			"rivals": []
+		},
+		{
+			"key": "KOR_POH",
+			"name": "Pohang",
+			"short": "Pohang",
+			"abbr": "POH",
+			"nick": "Steelers",
+			"city": "Pohang",
+			"founded": 1973,
+			"league": "KOR1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Pohang Steel Yard",
+			"capacity": 17400,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "gear",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"KOR_ULS"
+			]
+		},
+		{
+			"key": "KOR_SEO",
+			"name": "FC Seoul",
+			"short": "FC Seoul",
+			"abbr": "SEO",
+			"nick": "Seoul",
+			"city": "Seoul",
+			"founded": 1983,
+			"league": "KOR1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Seoul World Cup Stadium",
+			"capacity": 66700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FCS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "KOR_GAN",
+			"name": "Gangwon",
+			"short": "Gangwon",
+			"abbr": "GAN",
+			"nick": "Gangwon",
+			"city": "Gangneung",
+			"founded": 2008,
+			"league": "KOR1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#1B3A8C"
+			],
+			"stadium": "Gangneung Stadium",
+			"capacity": 22000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain"
+			}
+		},
+		{
+			"key": "KOR_SUW",
+			"name": "Suwon FC",
+			"short": "Suwon FC",
+			"abbr": "SUW",
+			"nick": "Suwon",
+			"city": "Suwon",
+			"founded": 2003,
+			"league": "KOR1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Suwon Sports Complex",
+			"capacity": 11800,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "castle"
+			}
+		},
+		{
+			"key": "KOR_DAE",
+			"name": "Daejeon",
+			"short": "Daejeon",
+			"abbr": "DAE",
+			"nick": "Purple",
+			"city": "Daejeon",
+			"founded": 1997,
+			"league": "KOR1",
+			"rep": 56,
+			"arch": "rico_promovido",
+			"colors": [
+				"#5E2A84",
+				"#00843D"
+			],
+			"stadium": "Daejeon World Cup Stadium",
+			"capacity": 40500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DHC",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "KOR_GIM",
+			"name": "Gimcheon",
+			"short": "Gimcheon",
+			"abbr": "GIM",
+			"nick": "Sangmu",
+			"city": "Gimcheon",
+			"founded": 2021,
+			"league": "KOR1",
+			"rep": 54,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Gimcheon Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "KOR_JEJ",
+			"name": "Jeju SK",
+			"short": "Jeju SK",
+			"abbr": "JEJ",
+			"nick": "Jeju SK",
+			"city": "Seogwipo",
+			"founded": 1982,
+			"league": "KOR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Jeju World Cup Stadium",
+			"capacity": 29800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "KOR_GWA",
+			"name": "Gwangju FC",
+			"short": "Gwangju FC",
+			"abbr": "GWJ",
+			"nick": "Gwangju FC",
+			"city": "Gwangju",
+			"founded": 2010,
+			"league": "KOR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Gwangju Football Stadium",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "KOR_ANY",
+			"name": "FC Anyang",
+			"short": "FC Anyang",
+			"abbr": "ANY",
+			"nick": "FC Anyang",
+			"city": "Anyang",
+			"founded": 2013,
+			"league": "KOR1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#5E2A84",
+				"#FFFFFF"
+			],
+			"stadium": "Anyang Stadium",
+			"capacity": 17100,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "KOR_DGU",
+			"name": "Daegu FC",
+			"short": "Daegu FC",
+			"abbr": "DGU",
+			"nick": "Daegu FC",
+			"city": "Daegu",
+			"founded": 2002,
+			"league": "KOR1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#75AADB",
+				"#FFFFFF"
+			],
+			"stadium": "Daegu Forest Arena",
+			"capacity": 12400,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

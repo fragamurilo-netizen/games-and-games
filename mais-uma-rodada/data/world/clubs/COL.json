@@ -1,0 +1,507 @@
+{
+	"nation": "COL",
+	"_doc": "Colômbia (liga de 12). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "COL_VRD",
+			"name": "Atl. Nacional",
+			"short": "Atl. Nacional",
+			"abbr": "NAC",
+			"nick": "Verdolagas",
+			"city": "Medellín",
+			"founded": 1947,
+			"league": "COL1",
+			"rep": 72,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Atanasio Girardot",
+			"capacity": 40000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:4",
+				"symbol": "letter",
+				"initials": "AN",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"COL_POD"
+			]
+		},
+		{
+			"key": "COL_EMB",
+			"name": "Millonarios",
+			"short": "Millonarios",
+			"abbr": "MIL",
+			"nick": "Embajadores",
+			"city": "Bogotá",
+			"founded": 1946,
+			"league": "COL1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio El Campín",
+			"capacity": 36000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "star",
+				"text": "MILLONARIOS",
+				"text2": "F.C.",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"COL_CAR"
+			]
+		},
+		{
+			"key": "COL_ESC",
+			"name": "América de Cali",
+			"short": "América de Cali",
+			"abbr": "AME",
+			"nick": "Diablos Rojos",
+			"city": "Cali",
+			"founded": 1927,
+			"league": "COL1",
+			"rep": 68,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Pascual Guerrero",
+			"capacity": 38000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "devil",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"COL_AZC"
+			]
+		},
+		{
+			"key": "COL_TIB",
+			"name": "Junior",
+			"short": "Junior",
+			"abbr": "JUN",
+			"nick": "Tiburones",
+			"city": "Barranquilla",
+			"founded": 1924,
+			"league": "COL1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano Roberto Meléndez",
+			"capacity": 46000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "J",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "COL_POD",
+			"name": "DIM",
+			"short": "DIM",
+			"abbr": "DIM",
+			"nick": "Poderoso",
+			"city": "Medellín",
+			"founded": 1913,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#1D3F91"
+			],
+			"stadium": "Estadio Atanasio Girardot",
+			"capacity": 40000,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "DIM",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"COL_VRD"
+			]
+		},
+		{
+			"key": "COL_CAR",
+			"name": "Santa Fe",
+			"short": "Santa Fe",
+			"abbr": "SFE",
+			"nick": "Cardenales",
+			"city": "Bogotá",
+			"founded": 1941,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio El Campín",
+			"capacity": 36000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"COL_EMB"
+			]
+		},
+		{
+			"key": "COL_AZC",
+			"name": "Deportivo Cali",
+			"short": "Deportivo Cali",
+			"abbr": "CAL",
+			"nick": "Azucareros",
+			"city": "Cali",
+			"founded": 1912,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "formador",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Deportivo Cali",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AD"
+			},
+			"rivals": [
+				"COL_ESC"
+			]
+		},
+		{
+			"key": "COL_ONC",
+			"name": "Once Caldas",
+			"short": "Once Caldas",
+			"abbr": "ONC",
+			"nick": "Blanco Blanco",
+			"city": "Manizales",
+			"founded": 1961,
+			"league": "COL1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Palogrande",
+			"capacity": 36500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OC",
+				"sc": "#111111"
+			}
+		},
+		{
+			"key": "COL_TOL",
+			"name": "Tolima",
+			"short": "Tolima",
+			"abbr": "TOL",
+			"nick": "Pijao",
+			"city": "Ibagué",
+			"founded": 1954,
+			"league": "COL1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#8A1538",
+				"#FFD100"
+			],
+			"stadium": "Estadio Manuel Murillo Toro",
+			"capacity": 28000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DT",
+				"sc": "#FFD100"
+			}
+		},
+		{
+			"key": "COL_BUC",
+			"name": "Bucaramanga",
+			"short": "Bucaramanga",
+			"abbr": "BUC",
+			"nick": "Leopardo",
+			"city": "Bucaramanga",
+			"founded": 1949,
+			"league": "COL1",
+			"rep": 58,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#00843D"
+			],
+			"stadium": "Estadio Américo Montanini",
+			"capacity": 28000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "cat",
+				"sc": "#00843D"
+			}
+		},
+		{
+			"key": "COL_PER",
+			"name": "Pereira",
+			"short": "Pereira",
+			"abbr": "PER",
+			"nick": "Matecaña",
+			"city": "Pereira",
+			"founded": 1944,
+			"league": "COL1",
+			"rep": 56,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Estadio Hernán Ramírez Villegas",
+			"capacity": 30000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "DP",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "COL_PAS",
+			"name": "Pasto",
+			"short": "Pasto",
+			"abbr": "PAS",
+			"nick": "Volcánicos",
+			"city": "Pasto",
+			"founded": 1949,
+			"league": "COL1",
+			"rep": 54,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Departamental Libertad",
+			"capacity": 20000,
+			"kit": "halves",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "COL_ALI",
+			"name": "Alianza",
+			"short": "Alianza",
+			"abbr": "ALI",
+			"nick": "Alianza",
+			"city": "Valledupar",
+			"founded": 1995,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#0055A4"
+			],
+			"stadium": "Estadio Armando Maestre",
+			"capacity": 11000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_AGU",
+			"name": "Águilas Doradas",
+			"short": "Águilas Doradas",
+			"abbr": "AGU",
+			"nick": "Águilas Doradas",
+			"city": "Rionegro",
+			"founded": 2008,
+			"league": "COL1",
+			"rep": 51,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Alberto Grisales",
+			"capacity": 14000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_FOR",
+			"name": "Fortaleza CEIF",
+			"short": "Fortaleza CEIF",
+			"abbr": "FOC",
+			"nick": "Fortaleza CEIF",
+			"city": "Bogotá",
+			"founded": 2010,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano de Techo",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_ENV",
+			"name": "Envigado",
+			"short": "Envigado",
+			"abbr": "ENV",
+			"nick": "Envigado",
+			"city": "Envigado",
+			"founded": 1989,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#00843D"
+			],
+			"stadium": "Estadio Polideportivo Sur",
+			"capacity": 11000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_EQU",
+			"name": "La Equidad",
+			"short": "La Equidad",
+			"abbr": "EQU",
+			"nick": "La Equidad",
+			"city": "Bogotá",
+			"founded": 1982,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Metropolitano de Techo",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_LLA",
+			"name": "Llaneros",
+			"short": "Llaneros",
+			"abbr": "LLA",
+			"nick": "Llaneros",
+			"city": "Villavicencio",
+			"founded": 2012,
+			"league": "COL1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Bello Horizonte",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_BOY",
+			"name": "Boyacá Chicó",
+			"short": "Boyacá Chicó",
+			"abbr": "BCH",
+			"nick": "Boyacá Chicó",
+			"city": "Tunja",
+			"founded": 2002,
+			"league": "COL1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Independencia",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "COL_UNI",
+			"name": "Unión Magdalena",
+			"short": "Unión Magdalena",
+			"abbr": "UMA",
+			"nick": "Unión Magdalena",
+			"city": "Santa Marta",
+			"founded": 1953,
+			"league": "COL1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Estadio Sierra Nevada",
+			"capacity": 16000,
+			"kit": "stripes_v",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}
