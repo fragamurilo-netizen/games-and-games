@@ -84,37 +84,40 @@ static func plural(n: int, singular: String, plural_form: String) -> String:
 	return str(n) + " " + I18n.t(singular if n == 1 else plural_form)
 
 
-## Cor de destaque para um overall (vermelho → cinza → verde → dourado).
+## Cor de destaque para um overall: escala contínua do ruim ao ótimo (vermelho → laranja →
+## amarelo → verde-claro → verde → esmeralda). Verde é sempre melhor que amarelo.
 static func rating_color(ovr: int) -> Color:
 	return UIColors.ink(_rating_color(ovr))
 
 
 static func _rating_color(ovr: int) -> Color:
 	if ovr >= 80:
-		return Color("#FFC940")
+		return Color("#00C08B")
 	if ovr >= 70:
-		return Color("#3DBE7A")
+		return Color("#3DBE5A")
 	if ovr >= 60:
-		return Color("#8FD694")
+		return Color("#9ACD4E")
 	if ovr >= 50:
-		return Color("#C9D3DD")
+		return Color("#E8C547")
 	if ovr >= 40:
-		return Color("#F0A35E")
+		return Color("#F08A3E")
 	return Color("#E5484D")
 
 
-## Cor para notas de partida (3–10).
+## Cor para notas de partida (3–10), na mesma escala.
 static func match_rating_color(r: float) -> Color:
 	return UIColors.ink(_match_rating_color(r))
 
 
 static func _match_rating_color(r: float) -> Color:
 	if r >= 8.0:
-		return Color("#FFC940")
+		return Color("#00C08B")
 	if r >= 7.0:
-		return Color("#3DBE7A")
+		return Color("#3DBE5A")
+	if r >= 6.5:
+		return Color("#9ACD4E")
 	if r >= 6.0:
-		return Color("#C9D3DD")
+		return Color("#E8C547")
 	if r >= 5.0:
-		return Color("#F0A35E")
+		return Color("#F08A3E")
 	return Color("#E5484D")

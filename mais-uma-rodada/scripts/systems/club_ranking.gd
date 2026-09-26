@@ -138,6 +138,16 @@ static func close_season(world: GameWorld) -> void:
 			c.rank_hist.append(snappedf(pts, 0.1))
 			if c.rank_hist.size() > SEASONS:
 				c.rank_hist = c.rank_hist.slice(c.rank_hist.size() - SEASONS)
+	# Clubes só de estadual: pontuam pelas copas que jogaram
+	for id in DatabaseManager.pool_ids():
+		var pool: League = world.season.leagues.get(id, null)
+		if pool == null:
+			continue
+		for cid in pool.club_ids:
+			var pc := world.club(cid)
+			pc.rank_hist.append(snappedf(float(cups.get(pc.id, 0.0)), 0.1))
+			if pc.rank_hist.size() > SEASONS:
+				pc.rank_hist = pc.rank_hist.slice(pc.rank_hist.size() - SEASONS)
 	var t := table(world, "", false)
 	for i in t.size():
 		world.club(int(t[i]["id"])).rank_prev = i + 1

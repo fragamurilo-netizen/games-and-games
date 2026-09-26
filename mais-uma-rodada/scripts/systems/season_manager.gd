@@ -182,6 +182,19 @@ static func build_season(world: GameWorld) -> SeasonState:
 		CompetitionManager.init_table(l)
 		s.leagues[id] = l
 		s.league_order.append(id)
+	# Clubes só de estadual: uma "liga" sem jogos (league_of continua valendo), fora da ordem das
+	# ligas, então não tem tabela, campeão, acesso nem prêmios
+	for id in DatabaseManager.pool_ids():
+		var pcfg := DatabaseManager.league_cfg(id)
+		var pl := League.new()
+		pl.id = id
+		pl.nation = pcfg["nation"]
+		pl.tier = int(pcfg["tier"])
+		pl.name = pcfg["name"]
+		pl.short_name = pcfg.get("short", pl.name)
+		pl.club_ids = by_league.get(id, [])
+		CompetitionManager.init_table(pl)
+		s.leagues[id] = pl
 	CupManager.setup_season(world, s)
 	s.day = 0
 	s.finished = false

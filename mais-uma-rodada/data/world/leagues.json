@@ -1046,6 +1046,42 @@
 			"calendar": "ano"
 		},
 		{
+			"id": "BRA5",
+			"nation": "BRA",
+			"tier": 5,
+			"pool": true,
+			"name": "Clubes de estadual",
+			"short": "Estaduais",
+			"colors": [
+				"#5A6270",
+				"#FFFFFF"
+			],
+			"teams": 74,
+			"rr": 0,
+			"level": [
+				44,
+				51
+			],
+			"rep": [
+				18,
+				34
+			],
+			"wage": 0.04,
+			"att": 0.3,
+			"ticket": 3,
+			"culture": {
+				"goals": 0.9,
+				"home": 1.35,
+				"cards": 1.25
+			},
+			"foreign_limit": {
+				"max": 9,
+				"scope": "all"
+			},
+			"calendar": "ano",
+			"desc": "Clubes sem divisão nacional: jogam só o estadual (ou o regional)."
+		},
+		{
 			"id": "ARG1",
 			"nation": "ARG",
 			"tier": 1,

@@ -135,7 +135,7 @@ func _club(w: GameWorld, key: String) -> Club:
 func _test_generation() -> void:
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
 	var slots := 0
-	for id in DatabaseManager.league_ids():
+	for id in DatabaseManager.league_ids() + DatabaseManager.pool_ids():
 		var cfg := DatabaseManager.league_cfg(id)
 		slots += int(cfg["teams"])
 		check(w.league(id).club_ids.size() == int(cfg["teams"]), "%s com %d clubes" % [id, w.league(id).club_ids.size()])
@@ -740,10 +740,18 @@ func _test_end_season() -> void:
 	for id in DatabaseManager.league_ids():
 		check(w.league(id).club_ids.size() == int(DatabaseManager.league_cfg(id)["teams"]), "%s ficou com %d clubes" % [id, w.league(id).club_ids.size()])
 	for d in summary["leagues"]:
-		var up := int(DatabaseManager.league_cfg(d["id"]).get("up", 0))
-		var down := int(DatabaseManager.league_cfg(d["id"]).get("down", 0))
-		check((d["promoted"] as Array).size() == up, "%s: %d acessos (esperado %d)" % [d["id"], (d["promoted"] as Array).size(), up])
-		check((d["relegated"] as Array).size() == down, "%s: %d quedas (esperado %d)" % [d["id"], (d["relegated"] as Array).size(), down])
+		var cfg: Dictionary = DatabaseManager.league_cfg(d["id"])
+		var up := int(cfg.get("up", 0))
+		var down := int(cfg.get("down", 0))
+		# Repescagem (Portugal, Alemanha, França): o clube da elite que perde cai a mais e o de baixo
+		# que vence sobe a mais
+		var upper := DatabaseManager.league_at(String(cfg["nation"]), int(cfg["tier"]) - 1)
+		var up_extra := 1 if upper != "" and DatabaseManager.league_cfg(upper).has("barrage") else 0
+		var down_extra := 1 if cfg.has("barrage") else 0
+		var np := (d["promoted"] as Array).size()
+		var nr := (d["relegated"] as Array).size()
+		check(np >= up and np <= up + up_extra, "%s: %d acessos (esperado %d)" % [d["id"], np, up])
+		check(nr >= down and nr <= down + down_extra, "%s: %d quedas (esperado %d)" % [d["id"], nr, down])
 		for cid in d["promoted"]:
 			var c := w.club(cid)
 			check(c.tier == int(DatabaseManager.league_cfg(old_league[cid])["tier"]) - 1 and c.nation == d["nation"], "%s não subiu" % c.short_name)

@@ -8,6 +8,8 @@ extends Control
 ##   collar, sleeve, sleeve_len (short|long), trim (vivos),
 ##   shorts / shorts2 / shorts_style, socks / socks2 / socks_style,
 ##   sp = {n, c, t} (patrocinador master no peito), sp_m (manga), sp_c (costas), sp_s (calção),
+##   spc / spmc / spcc / spsc / supc = cor escolhida para cada logo (master, manga, costas, calção,
+##   fornecedor); vazio = a cor da própria marca que mais contrasta com o tecido,
 ##   sup = {n, c, t, logo} (fornecedor de material esportivo, logo pequeno no peito).
 ## O escudo do clube vai no peito (lado do coração) quando `crest` é dado.
 
@@ -262,7 +264,7 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 		if show_logos:
 			var spc: Dictionary = kit.get("sp_c", {})
 			if not spc.is_empty():
-				_draw_patch(Rect2(off + Vector2(0.33, 0.12) * s, Vector2(0.34, 0.075) * s), spc, c1)
+				_draw_patch(Rect2(off + Vector2(0.33, 0.12) * s, Vector2(0.34, 0.075) * s), spc, c1, false, "spcc")
 			if back_name != "":
 				_draw_text_centered(back_name.to_upper(), off + Vector2(0.5, 0.28) * s, s * 0.44, int(s * 0.072), fg, &"Caps", _num_edge(fg))
 		if number > 0:
@@ -278,14 +280,14 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 		_place_crest(Rect2())
 	if show_logos:
 		if has_master:
-			_draw_patch(Rect2(off + Vector2(0.29, 0.34) * s, Vector2(0.42, 0.12) * s), sp, _bg_at(Vector2(0.5, 0.4), c1), true)
+			_draw_patch(Rect2(off + Vector2(0.29, 0.34) * s, Vector2(0.42, 0.12) * s), sp, _bg_at(Vector2(0.5, 0.4), c1), true, "spc")
 		var sup: Dictionary = kit.get("sup", {})
 		if not sup.is_empty():
 			# Fornecedor no peito direito do jogador (esquerda de quem olha).
 			_draw_supplier(off + Vector2(0.39, 0.2) * s, s * 0.035, sup, _bg_at(Vector2(0.39, 0.2), c1))
 		var spm: Dictionary = kit.get("sp_m", {})
 		if not spm.is_empty():
-			_draw_patch(Rect2(off + Vector2(0.765, 0.15) * s, Vector2(0.1, 0.05) * s), spm, sleeve_col)
+			_draw_patch(Rect2(off + Vector2(0.765, 0.15) * s, Vector2(0.1, 0.05) * s), spm, sleeve_col, false, "spmc")
 	if number > 0:
 		var fg := _number_col(c1)
 		if has_master:
@@ -594,8 +596,10 @@ func _place_crest(r: Rect2) -> void:
 
 ## Patrocinador estampado no tecido: sem caixa, na cor da marca que contrasta com o fundo.
 ## O master ganha um pequeno emblema da marca ao lado do nome.
-func _draw_patch(r: Rect2, sp: Dictionary, bg: Color, emblem: bool = false) -> void:
+func _draw_patch(r: Rect2, sp: Dictionary, bg: Color, emblem: bool = false, ov_key: String = "") -> void:
 	var fg := _ink(sp, bg)
+	if ov_key != "" and String(kit.get(ov_key, "")) != "":
+		fg = Color(String(kit[ov_key])) # cor escolhida no editor de uniforme
 	var name := String(sp.get("n", "")).to_upper()
 	var center := r.get_center()
 	var max_w := r.size.x
@@ -627,6 +631,8 @@ static func _ink(sp: Dictionary, bg: Color) -> Color:
 ## Logos genéricos de material esportivo (formas simples, sem marcas reais).
 func _draw_supplier(c: Vector2, u: float, sp: Dictionary, bg: Color) -> void:
 	var col := _ink(sp, bg)
+	if String(kit.get("supc", "")) != "":
+		col = Color(String(kit["supc"]))
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * u
 	match String(sp.get("logo", "")):
 		"curva":
@@ -746,7 +752,7 @@ func _draw_legs(r: Rect2) -> void:
 			draw_colored_polygon(piece, Color(0, 0, 0, 0.12 * shade_k))
 	var sps: Dictionary = kit.get("sp_s", {})
 	if not sps.is_empty() and r.size.y >= 120.0 and not back:
-		_draw_patch(_fr(r, 0.56, 0.575, 0.18, 0.045), sps, sh)
+		_draw_patch(_fr(r, 0.56, 0.575, 0.18, 0.045), sps, sh, false, "spsc")
 	var so_line := shorts.duplicate()
 	so_line.append(shorts[0])
 	draw_polyline(so_line, out_sh, lw, true)

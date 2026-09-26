@@ -188,8 +188,8 @@ func _look(w: GameWorld, m: Dictionary) -> Control:
 		_touch()))
 	card.add_child(UIKit.label("Tom de pele", "Small"))
 	var sl := HSlider.new()
-	sl.min_value = 0.0
-	sl.max_value = 9.0
+	sl.min_value = FaceGen.SKIN_MIN
+	sl.max_value = FaceGen.SKIN_MAX
 	sl.step = 0.25
 	sl.value = float(feats["skin_i"])
 	sl.custom_minimum_size.y = 48

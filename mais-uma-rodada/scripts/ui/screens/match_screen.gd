@@ -39,6 +39,13 @@ var _highlight_timer := 0.0
 var _ticker_t := 1.5
 var _ticker_i := -1
 var _ticker_seen: Dictionary = {}
+## Faixa "ao vivo" embaixo do campo: todos os jogos da rodada com placar parcial; quando sai gol
+## o chip acende com o autor e a faixa para nele por alguns segundos.
+var _strip_scroll: ScrollContainer
+var _strip_chips: Array = [] # {e, panel, score, info, box, flash, total}
+var _strip_t := 0.0
+var _strip_hold := 0.0
+var _strip_x := 0.0
 var _sub_out := -1
 var _built := false
 var _tab := "feed" # feed | stats | round | table
@@ -161,6 +168,9 @@ func _build() -> void:
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
 	_pitch.stadium = _stadium
 	_root.add_child(UIKit.margin(_pitch, 0, 6, 0, 4))
+	if not _div_entries.is_empty() or not _day_entries.is_empty():
+		_root.add_child(UIKit.margin(_build_strip(), 8, 0, 8, 4))
+		_ticker.visible = false
 	# Posse e números
 	_stats_box = UIKit.vbox(4)
 	var poss := UIKit.hbox(8)
@@ -510,6 +520,7 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	_flush_lines()
 	_update_ticker(delta)
+	_update_strip(delta)
 	_refresh_tab_if_needed()
 	_pitch.motion.frozen = _paused or _halftime or _done or UIManager.has_modal()
 	if _highlight_timer > 0.0:
@@ -1083,6 +1094,129 @@ func _update_ticker(delta: float) -> void:
 	var e2: Dictionary = _div_entries[_ticker_i]
 	_ticker.text = _entry_text(e2, _score_of(e2, minute, half))
 	_ticker.add_theme_color_override(&"font_color", UIColors.MUTED)
+
+
+func _build_strip() -> Control:
+	_strip_scroll = ScrollContainer.new()
+	_strip_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_strip_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	_strip_scroll.custom_minimum_size.y = 58
+	_strip_scroll.scroll_deadzone = 14
+	var row := UIKit.hbox(6)
+	_strip_scroll.add_child(row)
+	var w := world()
+	var live := PanelContainer.new()
+	var lb := StyleBoxFlat.new()
+	lb.bg_color = UIColors.RED.darkened(0.15)
+	lb.set_corner_radius_all(8)
+	lb.content_margin_left = 10
+	lb.content_margin_right = 10
+	live.add_theme_stylebox_override(&"panel", lb)
+	var ll := UIKit.label("AO VIVO", "Caps")
+	ll.add_theme_color_override(&"font_color", Color.WHITE)
+	ll.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	live.add_child(ll)
+	row.add_child(live)
+	var list: Array = _div_entries.duplicate()
+	list.append_array(_day_entries)
+	for e in list:
+		var f: Fixture = e["f"]
+		var panel := PanelContainer.new()
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color("#1B1E23")
+		box.border_color = Color(1, 1, 1, 0.08)
+		box.set_border_width_all(1)
+		box.set_corner_radius_all(8)
+		box.content_margin_left = 10
+		box.content_margin_right = 10
+		box.content_margin_top = 4
+		box.content_margin_bottom = 4
+		panel.add_theme_stylebox_override(&"panel", box)
+		var col := UIKit.vbox(0)
+		var line := UIKit.hbox(6)
+		line.add_child(UIKit.crest(w.club(f.home), 22))
+		var sc := UIKit.label("%s 0–0 %s" % [w.club(f.home).abbr, w.club(f.away).abbr], "H3")
+		sc.add_theme_font_size_override(&"font_size", 19)
+		line.add_child(sc)
+		line.add_child(UIKit.crest(w.club(f.away), 22))
+		col.add_child(line)
+		var info := UIKit.label("", "Small")
+		info.add_theme_font_size_override(&"font_size", 14)
+		info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		info.visible = false
+		col.add_child(info)
+		panel.add_child(col)
+		row.add_child(panel)
+		_strip_chips.append({"e": e, "panel": panel, "score": sc, "info": info, "box": box, "flash": 0.0, "total": 0})
+	return _strip_scroll
+
+
+func _update_strip(delta: float) -> void:
+	if _strip_scroll == null:
+		return
+	# Rolagem contínua (para em cima de um gol recém-saído)
+	if _strip_hold > 0.0:
+		_strip_hold -= delta
+	elif not _done:
+		_strip_x += delta * 38.0
+		var max_x := maxf(0.0, _strip_scroll.get_h_scroll_bar().max_value - _strip_scroll.size.x)
+		if _strip_x > max_x + 60.0:
+			_strip_x = 0.0
+		_strip_scroll.scroll_horizontal = int(minf(_strip_x, max_x))
+	for c: Dictionary in _strip_chips:
+		if float(c["flash"]) > 0.0:
+			c["flash"] = float(c["flash"]) - delta
+			if float(c["flash"]) <= 0.0:
+				(c["box"] as StyleBoxFlat).bg_color = Color("#1B1E23")
+				(c["box"] as StyleBoxFlat).border_color = Color(1, 1, 1, 0.08)
+				(c["info"] as Label).visible = false
+	_strip_t -= delta
+	if _strip_t > 0.0:
+		return
+	_strip_t = 0.4
+	var w := world()
+	var ready := GameManager.ai_ready() or _done
+	var minute := _sim.minute
+	var half := _sim.half
+	for c: Dictionary in _strip_chips:
+		var e: Dictionary = c["e"]
+		var f: Fixture = e["f"]
+		var sc: Array = _score_of(e, minute, half) if ready else [0, 0]
+		(c["score"] as Label).text = "%s %d–%d %s" % [w.club(f.home).abbr, int(sc[0]), int(sc[1]), w.club(f.away).abbr]
+		var total := int(sc[0]) + int(sc[1])
+		if total > int(c["total"]):
+			c["total"] = total
+			var g := _last_goal(e, minute, half)
+			if not g.is_empty():
+				var pl: Player = w.player(int(g[2]))
+				var who := pl.display_name() if pl != null else ""
+				if int(g[3]) == Fixture.GOAL_OWN:
+					who += " (contra)"
+				(c["info"] as Label).text = "GOL  %s %d'" % [who, int(g[0])]
+				(c["info"] as Label).visible = true
+			var box: StyleBoxFlat = c["box"]
+			box.bg_color = UIColors.ACCENT.darkened(0.55)
+			box.border_color = UIColors.ACCENT
+			c["flash"] = 6.0
+			_strip_hold = 3.5
+			var panel: Control = c["panel"]
+			_strip_x = maxf(0.0, panel.position.x - 40.0)
+			_strip_scroll.scroll_horizontal = int(_strip_x)
+
+
+## Último gol de outro jogo até o minuto atual: [minuto, lado, jogador, tipo, tempo].
+func _last_goal(e: Dictionary, minute: int, half: int) -> Array:
+	var res: Dictionary = e["res"]
+	if res.is_empty():
+		return []
+	var last: Array = []
+	for g in res["goals"]:
+		var gh: int = g[4]
+		var gm: int = g[0]
+		if gh > half or (gh == half and gm > minute):
+			continue
+		last = g
+	return last
 
 
 ## Gols dos outros jogos da competição entram na narração com o autor.

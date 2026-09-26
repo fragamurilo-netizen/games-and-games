@@ -103,7 +103,7 @@ static func job_offers(world: GameWorld, from_club: Club) -> Array:
 	var cands: Array = []
 	var known := CoachIdentity.job_context(world)
 	for c: Club in world.clubs:
-		if c.id == from_club.id:
+		if c.id == from_club.id or c.is_pool():
 			continue
 		if c.reputation > from_club.reputation + 3.0:
 			continue

@@ -1328,14 +1328,14 @@ func _chest_marks(body_col: Color, c2: Color, trim: Color, neck_low: float) -> v
 	if not sup.is_empty():
 		var sc := _wrap(Vector2(_hc.x - _sw * 0.36, y - s * 0.004))
 		if (sc - _c).length() < _R - s * 0.04:
-			var ink := _shade(_ink_on(sup, body_col), _cloth_lum(sc, neck_low))
+			var ink := _shade(Color(String(kit["supc"])) if String(kit.get("supc", "")) != "" else _ink_on(sup, body_col), _cloth_lum(sc, neck_low))
 			_supplier_logo(sc, s * 0.022, String(sup.get("logo", "")), String(sup.get("n", "")), ink)
 	# Patrocinador master no peito (o que couber no retrato)
 	var sp: Dictionary = kit.get("sp", {}) if kit.get("sp") is Dictionary else {}
 	var name := String(sp.get("n", "")).to_upper()
 	if name == "" or s < 90.0:
 		return
-	var ink_sp := _ink_on(sp, body_col)
+	var ink_sp := Color(String(kit["spc"])) if String(kit.get("spc", "")) != "" else _ink_on(sp, body_col)
 	var sy := _ynotch + s * 0.19
 	if _sponsor_tex != null:
 		var aspect := DecalCache.aspect(_sponsor_tex)

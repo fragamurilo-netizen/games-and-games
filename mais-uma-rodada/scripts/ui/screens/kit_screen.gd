@@ -286,6 +286,13 @@ func _editor_card(club: Club) -> Control:
 			_options(card, "Vivos", KitView.TRIMS, String(k.get("trim", "none")), "trim")
 			_colors(card, club, "Detalhes (gola, punhos, vivos, terceira cor)", String(k.get("c3", k.get("c2", club.color2))), "c3")
 			_colors(card, club, "Números e nome", String(k.get("nc", "")), "nc", true)
+			card.add_child(UIKit.section("Microdetalhes"))
+			card.add_child(UIKit.label("Cor de cada logo sobre o tecido. \"Auto\" usa a cor da marca que mais contrasta.", "Small", true))
+			_colors(card, club, "Patrocínio master (peito)", String(k.get("spc", "")), "spc", true)
+			_colors(card, club, "Patrocínio da manga", String(k.get("spmc", "")), "spmc", true)
+			_colors(card, club, "Patrocínio das costas", String(k.get("spcc", "")), "spcc", true)
+			_colors(card, club, "Patrocínio do calção", String(k.get("spsc", "")), "spsc", true)
+			_colors(card, club, "Logo da fornecedora", String(k.get("supc", "")), "supc", true)
 		"shorts":
 			_options(card, "Estilo do calção", KitView.SHORTS_STYLES, String(k.get("shorts_style", "plain")), "shorts_style")
 			_colors(card, club, "Cor do calção", String(k.get("shorts", k.get("c2", "#111111"))), "shorts")
@@ -470,18 +477,13 @@ func _colors(card: VBoxContainer, club: Club, caption: String, current: String, 
 		var hh := "#" + h.to_upper()
 		flow.add_child(_swatch(hh, h == cur, func():
 			_edit(func(kk: Dictionary): kk[field] = hh)))
-	# Cor livre
-	var pick := ColorPickerButton.new()
+	# Cor livre: roda de cores
+	var pick := UIKit.icon_button("palette", func():
+		ColorWheel.open(Color(current) if current != "" else Color.WHITE, caption, func(c: Color):
+			var hx := "#" + c.to_html(false).to_upper()
+			if hx != "#" + cur.to_upper():
+				_edit(func(kk: Dictionary): kk[field] = hx)), "Roda de cores")
 	pick.custom_minimum_size = Vector2(52, 52)
-	pick.text = "+"
-	pick.edit_alpha = false
-	pick.color = Color(current) if current != "" else Color.WHITE
-	pick.focus_mode = Control.FOCUS_NONE
-	pick.tooltip_text = "Cor livre"
-	pick.popup_closed.connect(func():
-		var hx := "#" + pick.color.to_html(false).to_upper()
-		if hx != "#" + cur.to_upper():
-			_edit(func(kk: Dictionary): kk[field] = hx))
 	flow.add_child(pick)
 	card.add_child(flow)
 

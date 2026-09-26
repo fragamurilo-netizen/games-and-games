@@ -456,10 +456,16 @@ const HAIR_COLORS: Array[Color] = [
 	Color("#A1804F"), Color("#D2B57A"), Color("#93401D"), Color("#E6E0D2"),
 	Color("#5B2B1E"), Color("#9A8A6E"), Color("#0D0E15"), Color("#1A1411"), Color("#B48748"), Color("#A3262A"),
 ]
+## Tons de pele pelo índice contínuo: 0..9 são a escala original; abaixo de 0 (até -1) a pele
+## clarinha de porcelana e acima de 9 (até 11) os tons mais retintos.
 const SKIN_COLORS: Array[Color] = [
 	Color("#FBE3D4"), Color("#F3CFB5"), Color("#E9BE9C"), Color("#DBA983"), Color("#C79369"),
 	Color("#AF7A51"), Color("#936240"), Color("#774C30"), Color("#5B3923"), Color("#40281A"),
+	Color("#33200F"), Color("#26180C"),
 ]
+const SKIN_PORCELAIN := Color("#FFF1EA")
+const SKIN_MIN := -1.0
+const SKIN_MAX := 11.0
 const FACE_SHAPES: Array[String] = ["Oval", "Redondo", "Quadrado", "Coração", "Losango", "Alongado", "Triangular", "Retangular"]
 const EYE_SHAPES: Array[String] = ["Amendoado", "Grande", "Estreito", "Caído", "Puxado", "Fundo", "Afastados", "Próximos"]
 const EYE_SHAPE_W: Array[float] = [4.0, 1.2, 1.2, 0.8, 0.8, 0.8, 0.6, 0.6]
@@ -559,8 +565,20 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	# --- Pele -----------------------------------------------------------------
 	var rg: Array = ETH_SKIN_RANGE[e]
 	var sk := lerpf(float(rg[0]), float(rg[1]), (rng.randf() + rng.randf()) * 0.5)
+	# Extremos da escala (porcelana, retinto) num sorteio à parte: quem já existia não muda de tom
+	var skx := RandomNumberGenerator.new()
+	skx.seed = hash([seed_value, "pele"])
+	var ext_roll := skx.randf()
+	var ext_amt := skx.randf()
+	if sk <= float(rg[0]) + 0.6 and float(rg[0]) <= 1.0 and ext_roll < 0.35:
+		sk -= ext_amt * 1.0 # porcelana (nórdicos, europeus, leste asiático claro)
+	elif sk >= 7.6 and ext_roll < 0.45:
+		sk += ext_amt * (float(rg[1]) - 7.0) # retinto (África, Pacífico)
+	elif ext_roll > 0.9:
+		sk += (ext_amt - 0.5) * 0.8 # um pouco fora da faixa típica, para mais variedade
+	sk = clampf(sk, SKIN_MIN, SKIN_MAX)
 	if look.has("sk"):
-		sk = float(look["sk"])
+		sk = clampf(float(look["sk"]), SKIN_MIN, SKIN_MAX)
 	f["skin_i"] = sk
 	var under := RngUtil.weighted_index(rng, ETH_UNDERTONE[e])
 	f["undertone"] = under
@@ -1049,6 +1067,8 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 
 
 static func skin_at(v: float) -> Color:
+	if v < 0.0:
+		return SKIN_PORCELAIN.lerp(SKIN_COLORS[0], clampf(v + 1.0, 0.0, 1.0))
 	var i := clampi(int(floor(v)), 0, SKIN_COLORS.size() - 1)
 	var j := mini(i + 1, SKIN_COLORS.size() - 1)
 	return SKIN_COLORS[i].lerp(SKIN_COLORS[j], clampf(v - i, 0.0, 1.0))

@@ -44,7 +44,7 @@ static func build_all(world: GameWorld, rng: RandomNumberGenerator, shuffle_rep:
 	var used_names := {} # nação -> {nome: true}
 	var used_short := {} # nação -> {curto: true}
 	var proc_count := {} # nação -> n
-	for league_id in DatabaseManager.league_ids():
+	for league_id in DatabaseManager.league_ids() + DatabaseManager.pool_ids():
 		var cfg := DatabaseManager.league_cfg(league_id)
 		var nation: String = cfg["nation"]
 		if not used_abbr.has(nation):

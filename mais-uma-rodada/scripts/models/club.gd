@@ -100,6 +100,11 @@ func league_cfg() -> Dictionary:
 	return DatabaseManager.league_cfg(league_id)
 
 
+## Clube sem divisão nacional: só disputa o estadual (grupo "pool" do leagues.json).
+func is_pool() -> bool:
+	return DatabaseManager.is_pool(league_id)
+
+
 ## Uniforme do goleiro: cor de goleiro que não se confunde com a titular nem com a reserva, com os
 ## mesmos patrocinadores e fornecedor da camisa titular.
 func gk_kit() -> Dictionary:
