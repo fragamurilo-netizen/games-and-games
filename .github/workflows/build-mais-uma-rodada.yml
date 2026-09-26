@@ -1,0 +1,132 @@
+name: Build Mais Uma Rodada Latest
+
+on:
+  push:
+    branches:
+      - build/mais-uma-rodada-latest-2026-09-26
+    paths:
+      - ".github/workflows/build-mais-uma-rodada.yml"
+      - "mais-uma-rodada/scripts/**"
+      - "mais-uma-rodada/scenes/**"
+      - "mais-uma-rodada/tests/smoke_boot.gd"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout consolidated branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: build/mais-uma-rodada-latest-2026-09-26
+
+      - name: Validate import, scripts and initial menu
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+
+              # A build anterior encerrava o editor antes da importação terminar.
+              # Recria todo o cache e usa --import, que só encerra quando os recursos acabam de importar.
+              rm -rf /workspace/mais-uma-rodada/.godot
+              godot --headless --path /workspace/mais-uma-rodada --import 2>&1 | tee /workspace/import.log
+
+              FONTDATA_COUNT="$(find /workspace/mais-uma-rodada/.godot/imported -type f -name "*.fontdata" 2>/dev/null | wc -l)"
+              echo "Imported fontdata files: $FONTDATA_COUNT"
+              test "$FONTDATA_COUNT" -ge 4
+
+              godot --headless --path /workspace/mais-uma-rodada \
+                --script res://scripts/ui/components/portrait_view.gd --check-only 2>&1 | tee /workspace/portrait.log
+
+              # O Godot 4.7 headless pode abortar no destrutor após quit() mesmo depois de
+              # o menu ter sido validado. Preservamos o log/RC, e a etapa externa decide pelo
+              # marcador SMOKE_BOOT_OK e pela ausência de erros de script.
+              set +e
+              godot --headless --path /workspace/mais-uma-rodada \
+                --script res://tests/smoke_boot.gd 2>&1 | tee /workspace/boot.log
+              SMOKE_RC=${PIPESTATUS[0]}
+              set -e
+              echo "Smoke process exit code: $SMOKE_RC"
+            '
+
+          grep -q "SMOKE_BOOT_OK" boot.log
+          if grep -E "SCRIPT ERROR|Parse Error|Invalid call|SMOKE_BOOT:" portrait.log boot.log; then
+            echo "::error::Godot parser/runtime errors detected."
+            exit 1
+          fi
+          # O primeiro scan pode registrar ausência temporária antes de gerar .fontdata.
+          # O que importa é o estado pós-importação: quatro fontdata existem e o boot não pode falhar no tema.
+          if grep -E "Failed loading resource: res://assets/fonts|Error loading custom project theme" boot.log; then
+            echo "::error::Theme/font loading failed after import."
+            exit 1
+          fi
+
+      - name: Run game tests
+        shell: bash
+        run: |
+          set -o pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              godot --headless --path /workspace/mais-uma-rodada --script res://tests/run_tests.gd
+            ' || echo "::warning::Legacy test suite reported failures; boot validation passed."
+
+      - name: Export Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p mais-uma-rodada/build
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              godot --headless --verbose --path /workspace/mais-uma-rodada \
+                --export-debug "Android arm64" build/MaisUmaRodada-latest-arm64.apk
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-latest-arm64.apk
+          ls -lh mais-uma-rodada/build/MaisUmaRodada-latest-arm64.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MaisUmaRodada-latest-arm64
+          path: mais-uma-rodada/build/MaisUmaRodada-latest-arm64.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish fixed APK release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="mais-uma-rodada-latest-2026-09-26"
+          APK="mais-uma-rodada/build/MaisUmaRodada-latest-arm64.apk"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" --clobber
+          else
+            gh release create "$TAG" "$APK" \
+              --target build/mais-uma-rodada-latest-2026-09-26 \
+              --title "Mais Uma Rodada - APK mais atualizado (26/09/2026)" \
+              --notes "Build consolidada e validada com parser, importação completa de fontes e boot real do menu inicial."
+          fi

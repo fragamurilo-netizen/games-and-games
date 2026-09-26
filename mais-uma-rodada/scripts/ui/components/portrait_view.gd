@@ -2433,21 +2433,21 @@ func _beard_mesh() -> void:
 	var col: Color = f["beard_col"]
 	var gray := clampf(float(f["gray"]) * 1.6, 0.0, 0.8)
 	var short := int(P["tx"]) == 0
-	# Barba rala: a malha é só uma sombra leve e contínua; quem desenha as falhas são os fios
+	# Barba rala: a malha é só uma sombra leve e contínua; quem desenha as falhas são os fios.
 	var patchy := minf(1.0, _beard_patchiness(P) * 1.6)
 	var head := _head_contour(_contour_k())
 	var grown := PackedVector2Array()
 	for p in head:
 		var q := _uv(p)
-		# Folga além de onde a densidade zera: a borda da barba é o degradê, nunca o fim da malha
+		# Folga mínima além da linha de densidade para a borda sempre terminar em degradê.
 		var ext := 0.035 * smoothstep(-0.45, -0.2, q.y)
 		if q.y > 0.0:
 			ext += (0.05 + ln * 1.05 * pow(q.y, 1.5)) * smoothstep(0.0, 0.4, q.y)
 			ext *= 1.0 + float(P.get("sq", 0.0)) * (0.9 * smoothstep(0.15, 0.55, absf(q.x)) - 0.25 * (1.0 - smoothstep(0.0, 0.2, absf(q.x))))
 			ext *= 1.0 - float(P.get("pp", 0.0)) * 0.65 * smoothstep(0.05, 0.45, absf(q.x))
 			ext *= 1.0 + float(P.get("wild", 0.0)) * (0.18 * sin(q.x * 23.0 + 1.3) + 0.12 * sin(q.x * 41.0))
-			# Bifurcada: duas pontas, com o meio mais curto
-			ext *= 1.0 - float(P.get("fk", 0.0)) * (0.55 * _g(q.x, 0.1) - 0.2 * _g(absf(q.x) - 0.22, 0.1))
+		# Bifurcada: duas pontas, com o meio mais curto.
+		ext *= 1.0 - float(P.get("fk", 0.0)) * (0.55 * _g(q.x, 0.1) - 0.2 * _g(absf(q.x) - 0.22, 0.1))
 		var dir := (p - _hc).normalized()
 		grown.append(p + Vector2(dir.x * _fw, dir.y * _fh) * ext + Vector2(0, _fh * ext * 0.6 * float(q.y > 0.5)))
 	# Grade fina na metade de baixo do rosto (a malha radial era grossa demais perto da boca e
@@ -2460,8 +2460,8 @@ func _beard_mesh() -> void:
 		var edge := _inside_star(_hc, bound, p)
 		if edge <= 0.0:
 			return Color(col, 0.0)
-		var c: Color = _beard_px(p, P, col, gray, short, patchy, op)
-		return Color(c, c.a * edge)
+		var px: Color = _beard_px(p, P, col, gray, short, patchy, op)
+		return Color(px, px.a * edge)
 	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, int(54 * clampf(_det, 0.35, 1.3)), int(60 * clampf(_det, 0.35, 1.3)), shade)
 
 
@@ -2667,7 +2667,10 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 	var crown: float = f["crown"]
 	if crown > 0.0:
 		a *= 1.0 - minf(1.0, crown * 1.3) * _g(q.x, 0.7) * smoothstep(0.35, 0.8, h) * smoothstep(0.05, 0.4, w)
-	# Costeleta: some aos poucos embaixo, em vez de terminar numa linha reta
+	var sharp: bool = bool(f["lineup"]) or _hs("tx", "") in ["braid", "braid_zig", "waves"]
+	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa).
+	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
+	# Costeletas afinam até sumir. Em line-up/tranças/waves a ponta fica um pouco mais marcada.
 	var sb: float = float(_hs("sb", 0.0))
 	if absf(q.x) > 0.5:
 		a *= 1.0 - 0.85 * smoothstep(sb - 0.16, sb + 0.02, q.y)
@@ -3254,9 +3257,9 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 				sh.append(_px(lerpf(-0.68, 0.68, t), hl + 0.04 + 0.03 * sin(PI * t)))
 			_r_polyline(sh, Color(0, 0, 0, 0.09), _fh * 0.06, true)
 			for row in 2:
-				var locks := (9 if not crop else 11) - row
-				for i in locks:
-					var t := (float(i) + 0.5 * row) / float(locks - 1 + row)
+				var tuft_count := (9 if not crop else 11) - row
+				for i in tuft_count:
+					var t := (float(i) + 0.5 * row) / float(tuft_count - 1 + row)
 					var u := lerpf(-0.72, 0.72, t) + rng.randf_range(-0.02, 0.02)
 					var edge := pow(absf(u) / 0.72, 2.0)
 					var tip_y := hl + rng.randf_range(-0.035, 0.03) - edge * 0.07 - row * 0.03 + (0.0 if crop else 0.025 * sin(PI * t))

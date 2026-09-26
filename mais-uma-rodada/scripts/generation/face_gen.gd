@@ -45,9 +45,6 @@ const HAIR_STYLES: Array[String] = [
 	"Espetado descolorido", "Máquina com risco", "Esponja", "Coque baixo", "Topete desfiado", "Franja longa de lado",
 	"Franja cortina", "Máquina 2", "Degradê navalhado", "Topete alto", "Topete cacheado", "Social com franjinha", "Ivy League", "Molhado para trás", "Burst cacheado", "Black power alto", "Afro com risco", "Twists longos", "Dreads em rabo", "Nagô com rabo", "Coque alto com degradê", "Longo com franja", "Chanel", "Mullet cacheado", "Moicano espetado", "Descolorido com desenho", "Ondulado bagunçado", "Repartido volumoso", "Corte César", "Topete com burst", "Undercut com coque baixo", "Cacheado longo com franja", "Freeform com degradê", "Waves com degradê", "Cachos com luzes", "Dois puffs",
 ]
-## Quantos penteados existiam antes do catálogo crescer: o sorteio desses continua igual (os rostos
-## dos saves não mudam) e só uma fatia proporcional troca para um dos novos.
-const OLD_STYLES := 83
 const H_BUZZ := 0
 const H_SHORT := 1
 const H_PART := 2
@@ -316,8 +313,6 @@ const BEARDS: Array[String] = [
 	"Ferradura grossa", "Mosca comprida", "Bifurcada", "Longa com guidão", "Bigode fino e mosca",
 	"Barba baixa", "Barba alta", "Cavanhaque triangular", "Semana com bigode grosso", "Longa rala",
 ]
-## Quantas barbas existiam antes do catálogo crescer (mesma ideia de OLD_STYLES).
-const OLD_BEARDS := 50
 const B_NONE := 0
 const B_STUBBLE := 1
 const B_SHORT := 2
@@ -867,17 +862,13 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["gray"] = gray
 	# Penteado: o "de sempre" e o da fase (muda a cada ~4 anos)
 	var sw := _style_weights(e, tex, age)
-	var sx := RandomNumberGenerator.new()
-	sx.seed = hash([seed_value, "penteados novos"])
-	var base_style := _pick_grown(rng, sw, OLD_STYLES, sx)
+	var base_style := RngUtil.weighted_index(rng, sw)
 	var phase_rng := RandomNumberGenerator.new()
 	var phase_off := rng.randi_range(0, 3)
 	phase_rng.seed = hash([seed_value, int(floor((age + phase_off) / 4.0))])
 	var style := base_style
 	if phase_rng.randf() < 0.45:
-		var px := RandomNumberGenerator.new()
-		px.seed = hash([phase_rng.seed, "penteados novos"])
-		style = _pick_grown(phase_rng, sw, OLD_STYLES, px)
+		style = RngUtil.weighted_index(phase_rng, sw)
 	# Calvície avançada: raspa, passa a máquina ou assume a careca
 	if (crown > 0.35 or rec > 0.7) and style in NEEDS_HAIR:
 		var r := phase_rng.randf()
@@ -967,9 +958,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
 			w *= 1.4
 		bw.append(w)
-	var bx := RandomNumberGenerator.new()
-	bx.seed = hash([phase_rng.seed, "barbas novas"])
-	var beard := _pick_grown(phase_rng, bw, OLD_BEARDS, bx)
+	var beard := RngUtil.weighted_index(phase_rng, bw)
 	if beard < 0:
 		beard = B_NONE
 	if look.has("bd"):
@@ -1421,28 +1410,6 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 	if bad > 0.3:
 		f["chin_len"] = float(f.get("chin_len", 0.0)) + (bad * r.randf_range(-0.07, 0.07))
 		f["cheekbone"] = float(f["cheekbone"]) * (1.0 - bad * 0.3)
-
-
-## Sorteio de um catálogo que cresceu: os `old_n` primeiros são sorteados exatamente como antes
-## (mesmo consumo de `rng`), e um gerador à parte (`extra`) decide, com a chance do peso somado dos
-## novos, se a pessoa troca para um deles. O conjunto fica com a mesma distribuição de um sorteio
-## único, mas quem já existia num save só muda de visual nessa fatia.
-static func _pick_grown(rng: RandomNumberGenerator, weights: Array, old_n: int, extra: RandomNumberGenerator) -> int:
-	var idx := RngUtil.weighted_index(rng, weights.slice(0, old_n))
-	var old_w := 0.0
-	var new_w := 0.0
-	for i in weights.size():
-		var w := float(weights[i])
-		if w > 0.0:
-			if i < old_n:
-				old_w += w
-			else:
-				new_w += w
-	if new_w > 0.0 and extra.randf() < new_w / (old_w + new_w):
-		var sub := RngUtil.weighted_index(extra, weights.slice(old_n))
-		if sub >= 0:
-			return old_n + sub
-	return idx
 
 
 ## Pesos dos penteados para uma pessoa (etnia + textura + idade).
