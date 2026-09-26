@@ -157,9 +157,9 @@ func _done(w: GameWorld) -> void:
 	var first := not KitDesign.launched(w)
 	KitDesign.mark_launched(w)
 	GameManager.save_now()
-	if first:
-		UIManager.toast("Uniformes %d apresentados à torcida" % w.year, UIColors.GREEN)
 	UIManager.back()
+	if first:
+		SocialPost.show_launch(w)
 
 
 ## Nome do camisa 10 do elenco, para a prévia de costas.

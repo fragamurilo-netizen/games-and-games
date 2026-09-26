@@ -18,6 +18,8 @@ static func open(kind: String, target: int = -1, on_done: Callable = Callable())
 static func _render(root: VBoxContainer, conv: Dictionary, on_done: Callable) -> void:
 	var w := GameManager.world
 	UIKit.clear(root)
+	if String(conv["k"]) == "press":
+		root.add_child(_press_room(w))
 	var head := UIKit.hbox(12)
 	var p: Player = w.player(int(conv.get("p", -1)))
 	if p != null:
@@ -65,6 +67,23 @@ static func _render(root: VBoxContainer, conv: Dictionary, on_done: Callable) ->
 		root.add_child(UIKit.tap_row(v, func():
 			Talks.choose(w, conv, id)
 			_render(root, conv, on_done), "Card"))
+
+
+## Arte da sala de imprensa no topo da coletiva: painel com o escudo e os patrocinadores.
+static func _press_room(w: GameWorld) -> Control:
+	var room := PressRoomView.new()
+	room.setup(w, w.user_club())
+	room.custom_minimum_size = Vector2(0, 250)
+	var p := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = UIColors.SURFACE_2
+	box.set_corner_radius_all(14)
+	box.anti_aliasing = true
+	p.add_theme_stylebox_override(&"panel", box)
+	p.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(room)
+	return p
 
 
 static func _bubble(who: String, text: String) -> Control:
