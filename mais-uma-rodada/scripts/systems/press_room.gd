@@ -226,7 +226,11 @@ static func make_rumor(world: GameWorld, r: RandomNumberGenerator) -> Dictionary
 		var want := TransferManager.interest(world, p, buyer)
 		var score := (1.0 if fit else 0.0) + (1.0 if money else 0.0) + want
 		if not solid:
-			# Sensacionalismo: quanto maior o nome e o clube, melhor a manchete.
+			# Sensacionalismo exagera, mas não inventa o impossível: o jogador precisa ter algum nível
+			# para o clube (ninguém publica o gigante atrás do reserva da quarta divisão).
+			if not MarketAI.fits_level(world, buyer, p, 8.0, 25.0):
+				continue
+			# Quanto maior o nome e o clube, melhor a manchete.
 			score = p.overall / 20.0 + buyer.reputation / 25.0 + r.randf()
 		elif not (fit and money and want >= 0.5):
 			continue

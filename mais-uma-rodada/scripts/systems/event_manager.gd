@@ -182,12 +182,9 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 					star = p
 			if star == null or star.age(world.year) > 31:
 				return {}
-			var buyer: Club = null
-			for tries in 30:
-				var c: Club = RngUtil.pick(rng, world.clubs)
-				if c.id != club.id and c.reputation >= club.reputation + 8.0 and c.tier == 1:
-					buyer = c
-					break
+			# Só sonda quem tem nível para o elenco do interessado (ninguém liga da Europa por um reserva da Série D).
+			var buyer := MarketAI.realistic_suitor(world, star, club.reputation + 8.0, rng, 4.0,
+				func(c: Club): return c.tier == 1)
 			if buyer == null:
 				return {}
 			ev["p"] = star.id
@@ -275,10 +272,9 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 					best = p
 			if best == null or best.overall < 62:
 				return {}
-			var rich: Club = null
-			for c: Club in world.clubs:
-				if RICH_NATIONS.has(c.nation) and c.tier == 1 and (rich == null or c.reputation + rng.randf() * 8.0 > rich.reputation):
-					rich = c
+			# Clube do Golfo que tenha o jogador no nível do elenco dele.
+			var rich := MarketAI.realistic_suitor(world, best, 0.0, rng, 6.0,
+				func(c: Club): return RICH_NATIONS.has(c.nation) and c.tier == 1)
 			if rich == null:
 				return {}
 			ev["p"] = best.id
@@ -296,13 +292,11 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 					star = p
 			if star == null:
 				return {}
-			var bigger: Array = []
-			for c: Club in world.clubs:
-				if c.id != club.id and c.tier == 1 and c.reputation >= minf(club.reputation + 10.0, 92.0) and c.reputation > club.reputation:
-					bigger.append(c)
-			if bigger.is_empty():
+			# O sonho é um clube maior, mas ao alcance dele (um degrau acima, não o gigante europeu).
+			var big := MarketAI.realistic_suitor(world, star, minf(club.reputation + 10.0, 92.0), rng, 6.0,
+				func(c: Club): return c.tier == 1 and c.reputation > club.reputation)
+			if big == null:
 				return {}
-			var big: Club = RngUtil.pick(rng, bigger)
 			ev["p"] = star.id
 			ev["d"] = {"club": big.id}
 		"fight":
