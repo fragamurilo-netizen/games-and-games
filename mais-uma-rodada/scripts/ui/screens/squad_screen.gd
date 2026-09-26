@@ -87,6 +87,7 @@ func refresh() -> void:
 	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(lineup)
 	top.add_child(UIKit.button("Numeração", "", func(): UIManager.push("numbers"), "shirt"))
+	top.add_child(UIKit.button("Contratos", "", func(): UIManager.push("contracts"), "money"))
 	c.add_child(top)
 	c.add_child(_summary_card(w, club, squad))
 	var gv := ButtonGroup.new()

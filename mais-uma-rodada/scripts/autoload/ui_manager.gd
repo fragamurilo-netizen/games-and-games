@@ -30,6 +30,7 @@ const SCREENS := {
 	"preseason": "res://scenes/screens/preseason.tscn",
 	"relations": "res://scenes/screens/relations.tscn",
 	"numbers": "res://scenes/screens/numbers.tscn",
+	"contracts": "res://scenes/screens/contracts.tscn",
 	"past_squads": "res://scenes/screens/past_squads.tscn",
 	"paywall": "res://scenes/screens/paywall.tscn",
 	"manager": "res://scenes/screens/manager.tscn",
