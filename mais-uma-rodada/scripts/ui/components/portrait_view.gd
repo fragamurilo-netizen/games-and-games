@@ -1134,18 +1134,28 @@ func _kit_flat(q: Vector2) -> Vector2:
 	return Vector2(_hc.x + (q.x - 0.5) / 0.25 * _sw * 1.12, _ynotch + (q.y - 0.12) * _s * 0.75)
 
 
-func _kit_band_pts(pattern: String) -> Array:
+## Parte da camisa do KitView que aparece no retrato (peito e ombros). As faixas são recortadas
+## nela antes de vestir o tronco: pontos muito fora dela se amontoariam na curva das laterais e
+## a faixa (diagonais, aspas) sumiria.
+const KIT_WINDOW := [Vector2(0.2, 0.0), Vector2(0.8, 0.0), Vector2(0.8, 0.75), Vector2(0.2, 0.75)]
+
+
+func _kit_band_pts(pattern: String, third: bool = false) -> Array:
 	# Faixas do uniforme (coordenadas do KitView) vestidas no tronco do retrato
 	var out: Array = []
-	for band: PackedVector2Array in KitView.pattern_bands(pattern):
-		var pts := PackedVector2Array()
-		var n := band.size()
-		for i in n:
-			var a := band[i]
-			var b := band[(i + 1) % n]
-			for k in 12:
-				pts.append(_wrap(_kit_flat(a.lerp(b, k / 12.0))))
-		out.append(pts)
+	var bands: Array = KitView.pattern_bands3(pattern) if third else KitView.pattern_bands(pattern)
+	for raw: PackedVector2Array in bands:
+		for band in Geometry2D.intersect_polygons(raw, PackedVector2Array(KIT_WINDOW)):
+			if band.size() < 3:
+				continue
+			var pts := PackedVector2Array()
+			var n := band.size()
+			for i in n:
+				var a := band[i]
+				var b := band[(i + 1) % n]
+				for k in 12:
+					pts.append(_wrap(_kit_flat(a.lerp(b, k / 12.0))))
+			out.append(pts)
 	return out
 
 
@@ -1168,20 +1178,28 @@ func _body() -> void:
 	var collar := int(f["collar"])
 	var henley := false
 	var ck := String(kit.get("collar", kit_collar))
+	var ringer := false
+	var zip := false
 	match ck:
-		"v":
+		"v", "crossover":
 			collar = 0
 		"round":
 			collar = 1
+		"ringer":
+			collar = 1
+			ringer = true
 		"wide":
 			collar = 4
-		"henley":
+		"henley", "laced":
 			collar = 1
 			henley = true
-		"polo":
+		"polo", "retro":
 			collar = 2
 		"mandarin":
 			collar = 3
+		"zip":
+			collar = 3
+			zip = true
 	if suit:
 		_suit_body(layers)
 		return
@@ -1194,6 +1212,13 @@ func _body() -> void:
 		trim = body_col.darkened(0.35)
 	var pattern := String(kit.get("pattern", kit_pattern))
 	var sleeve := String(kit.get("sleeve", ""))
+	var kit_trim := String(kit.get("trim", "none"))
+	# Estampa tom sobre tom: tons da própria cor principal, como no KitView
+	var pat_col := c2
+	var pat_col3 := trim
+	if bool(kit.get("tonal", false)):
+		pat_col = KitView.tone_of(body_col)
+		pat_col3 = pat_col.lerp(body_col, 0.5)
 	# Parte de dentro da gola, atrás do pescoço
 	if collar == 2 or collar == 3:
 		var back := PackedVector2Array()
@@ -1226,31 +1251,42 @@ func _body() -> void:
 	shirt.append(Vector2(_hc.x + _sw * 1.1, _c.y + s * 0.6))
 	shirt.append(Vector2(_hc.x - _sw * 1.1, _c.y + s * 0.6))
 	var panels: Array = []
+	var panels3: Array = []
 	if pattern != "" and pattern != "plain":
 		panels.append_array(_kit_band_pts(pattern))
+		panels3.append_array(_kit_band_pts(pattern, true))
+	var sleeve_panels: Array = []
 	# Mangas de outra cor: raglan (costura do pescoço à axila) ou manga contrastante no ombro
 	if sleeve == "contrast" or sleeve == "raglan":
 		for sx: float in [-1.0, 1.0]:
 			var sp := PackedVector2Array()
+			# x relativo ao centro, y absoluto
 			if sleeve == "raglan":
-				sp = PackedVector2Array([Vector2(_nwt * 1.2, _ynb - s * 0.03), Vector2(_sw * 1.3, _ynb - s * 0.05), Vector2(_sw * 1.3, _c.y + s * 0.6 - _hc.y), Vector2(_sw * 0.86, _c.y + s * 0.6 - _hc.y)])
+				sp = PackedVector2Array([Vector2(_nwt * 1.2, _ynb - s * 0.03), Vector2(_sw * 1.3, _ynb - s * 0.05), Vector2(_sw * 1.3, _c.y + s * 0.6), Vector2(_sw * 0.86, _c.y + s * 0.6)])
 			else:
-				sp = PackedVector2Array([Vector2(_sw * 0.8, _ysp - s * 0.06), Vector2(_sw * 1.3, _ysp - s * 0.06), Vector2(_sw * 1.3, _c.y + s * 0.6 - _hc.y), Vector2(_sw * 0.9, _c.y + s * 0.6 - _hc.y)])
+				sp = PackedVector2Array([Vector2(_sw * 0.8, _ysp - s * 0.06), Vector2(_sw * 1.3, _ysp - s * 0.06), Vector2(_sw * 1.3, _c.y + s * 0.6), Vector2(_sw * 0.9, _c.y + s * 0.6)])
 			var poly := PackedVector2Array()
 			var n := sp.size()
 			for i in n:
 				for k in 6:
 					var q := sp[i].lerp(sp[(i + 1) % n], k / 6.0)
-					poly.append(Vector2(_hc.x + sx * q.x, _hc.y + q.y))
-			panels.append(poly)
-	for band: PackedVector2Array in panels:
-		for piece in Geometry2D.intersect_polygons(band, shirt):
-			var cols := PackedColorArray()
-			for i in piece.size():
-				piece[i] = _cl(piece[i])
-				cols.append(_shade(c2, _cloth_lum(piece[i], neck_low)))
-			if not Geometry2D.triangulate_polygon(piece).is_empty():
-				_r_polygon(piece, cols)
+					poly.append(Vector2(_hc.x + sx * q.x, q.y))
+			sleeve_panels.append(poly)
+	# Recorte pelo círculo do retrato como polígono (prender ponto a ponto na borda cruzava o
+	# contorno das faixas largas, e a faixa não era desenhada).
+	var disc := PackedVector2Array()
+	for i in 64:
+		disc.append(_c + Vector2.from_angle(TAU * i / 64.0) * _R * 0.995)
+	for layer in [[panels, pat_col], [panels3, pat_col3], [sleeve_panels, c2]]:
+		var col: Color = layer[1]
+		for band: PackedVector2Array in layer[0]:
+			for part in Geometry2D.intersect_polygons(band, shirt):
+				for piece in Geometry2D.intersect_polygons(part, disc):
+					var cols := PackedColorArray()
+					for i in piece.size():
+						cols.append(_shade(col, _cloth_lum(piece[i], neck_low)))
+					if not Geometry2D.triangulate_polygon(piece).is_empty():
+						_r_polygon(piece, cols)
 	# Costura do ombro (ou as três listras da manga)
 	for sx: float in [-1.0, 1.0]:
 		var a := Vector2(_hc.x + sx * _nwt * 1.25, _ynb - s * 0.004)
@@ -1259,6 +1295,10 @@ func _body() -> void:
 			for k in 3:
 				var d := Vector2(0, s * 0.012 * (k - 1))
 				_r_line(_cl(a.lerp(b, 0.35) + d), _cl(b + Vector2(sx * _sw * 0.12, s * 0.02) + d), trim, maxf(0.8, s * 0.007), true)
+		elif sleeve == "shoulder_stripe" or kit_trim in ["shoulders", "both"]:
+			# Friso ou vivo no ombro, na cor dos detalhes
+			var w := s * (0.016 if sleeve == "shoulder_stripe" else 0.009)
+			_r_line(_cl(a), _cl(b + Vector2(sx * _sw * 0.1, s * 0.015)), _shade(trim, _cloth_lum(a.lerp(b, 0.5), neck_low)), maxf(1.0, w), true)
 		else:
 			_r_line(_cl(a), _cl(b), Color(0, 0, 0, 0.1), maxf(0.6, s * 0.004), true)
 	# Escudo, fornecedor e patrocinador no peito
@@ -1268,11 +1308,19 @@ func _body() -> void:
 	match collar:
 		0, 1, 4:
 			_band(line, lw * (1.1 if collar == 0 else (1.35 if collar == 4 else 1.0)), trim)
+			if ringer:
+				# Friso duplo: segunda linha fina logo abaixo da gola
+				var low := PackedVector2Array()
+				for p in line:
+					low.append(p + Vector2(0, lw * 1.6))
+				_band(low, lw * 0.45, trim)
 			if henley:
 				_placket(line[line.size() / 2], trim, body_col, 3)
 		3:
 			_band(line, s * 0.035, trim, true)
 			var bx := _hc.x
+			if zip:
+				_r_line(_cl(Vector2(bx, neck_low - s * 0.03)), _cl(Vector2(bx, neck_low + s * 0.07)), trim.darkened(0.25), maxf(1.0, s * 0.008), true)
 			_r_circle(Vector2(bx, neck_low - s * 0.012), maxf(0.8, s * 0.007), trim.darkened(0.35))
 		2:
 			_polo_collar(line, trim, body_col)
