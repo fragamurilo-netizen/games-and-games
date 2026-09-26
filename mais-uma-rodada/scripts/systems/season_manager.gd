@@ -454,6 +454,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
+	CoachStories.after_matchday(world, md["entries"])
 	AwardVoting.maybe_announce(world)
 	PressRoom.after_matchday(world)
 	tt = _time("copas_noticias", tt)
@@ -482,6 +483,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
 		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
 		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
+		report["feats"] = ManagerFeats.on_user_match(world, md["user"], String(report["user"]["result"]))
+		CoachStories.after_user_match(world, md["user"], String(report["user"]["result"]))
 		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
 		InboxManager.after_user_turn(world, report, md["user"])
 	return report
@@ -895,7 +898,11 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
 	PressRoom.on_season_end(world, summary)
 	CoachCareer.on_titles(world, hist_leagues, hist_cups) # títulos na carreira de quem está no banco
+	CoachStories.season_awards(world, hist_leagues, wcoach)
 	People.on_season_end(world, summary)
+	CoachStories.on_season_end(world, moves, hist_leagues, hist_cups) # arcos, despedidas e o mercado de técnicos
+	if world.has_user():
+		summary["user"]["prestige"] = ManagerFeats.on_season_end(world, summary["user"])
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
 	if uc != null:
