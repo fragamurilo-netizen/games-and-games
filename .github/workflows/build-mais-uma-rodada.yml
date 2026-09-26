@@ -50,8 +50,15 @@ jobs:
               godot --headless --path /workspace/mais-uma-rodada \
                 --script res://scripts/ui/components/portrait_view.gd --check-only 2>&1 | tee /workspace/portrait.log
 
+              # O Godot 4.7 headless pode abortar no destrutor após quit() mesmo depois de
+              # o menu ter sido validado. Preservamos o log/RC, e a etapa externa decide pelo
+              # marcador SMOKE_BOOT_OK e pela ausência de erros de script.
+              set +e
               godot --headless --path /workspace/mais-uma-rodada \
                 --script res://tests/smoke_boot.gd 2>&1 | tee /workspace/boot.log
+              SMOKE_RC=${PIPESTATUS[0]}
+              set -e
+              echo "Smoke process exit code: $SMOKE_RC"
             '
 
           grep -q "SMOKE_BOOT_OK" boot.log
