@@ -2684,9 +2684,6 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 	var sb: float = float(_hs("sb", 0.0))
 	if absf(q.x) > 0.5:
 		a *= 1.0 - 0.85 * smoothstep(sb - 0.16, sb + 0.02, q.y)
-	var sharp: bool = bool(f["lineup"]) or _hs("tx", "") in ["braid", "braid_zig", "waves"]
-	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa)
-	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
 	return a
 
 

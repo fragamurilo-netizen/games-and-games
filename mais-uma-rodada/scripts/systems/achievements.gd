@@ -129,7 +129,9 @@ static func unlock(world: GameWorld, id: String) -> bool:
 	when[id] = [world.year, world.current_day()]
 	world.stats["ach_when"] = when
 	world.pending_achievements.append(id)
-	AchievementBanner.notify(world)
+	# Carregado na hora (sem referência estática) para os testes sem autoloads de UI compilarem
+	if DisplayServer.get_name() != "headless":
+		load("res://scripts/ui/components/achievement_banner.gd").notify(world)
 	return true
 
 
