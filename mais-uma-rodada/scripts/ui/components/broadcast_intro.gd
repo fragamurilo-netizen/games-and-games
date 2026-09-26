@@ -26,7 +26,9 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 	hs.content_margin_bottom = 8
 	head.add_theme_stylebox_override(&"panel", hs)
 	var hr := UIKit.hbox(10)
-	hr.add_child(Broadcaster.bug(b, false))
+	var lg := BroadcasterLogo.make(b, 40.0)
+	lg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hr.add_child(lg)
 	var ch := UIKit.label(String(b["name"]).to_upper(), "H3")
 	ch.add_theme_color_override(&"font_color", b["c2"])
 	ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL

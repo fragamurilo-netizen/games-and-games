@@ -13,19 +13,13 @@ func _initialize() -> void:
 	var ex := {}
 	for c: Club in w.clubs:
 		var a: Dictionary = c.affairs
-		if a.has("owner") and not a.has("saf"):
-			cnt["compra"] += 1
-			ex["compra"] = "%s (%s) ← %s" % [c.short_name, c.nation, a["owner"]]
-		if a.has("saf"):
-			cnt["saf"] += 1
-			ex["saf"] = "%s ← %s" % [c.short_name, a["owner"]]
-		if a.has("admin"):
-			cnt["falência"] += 1
-			ex["falência"] = "%s (%s)" % [c.short_name, c.nation]
+		var own := WorldEvents.owner_of(w, c.id)
+		if not own.is_empty() and int(own.get("y", 0)) == w.year:
+			var k := "saf" if c.nation == "BRA" else "compra"
+			cnt[k] += 1
+			ex[k] = "%s (%s) ← %s" % [c.short_name, c.nation, own["who"]]
 		if int(a.get("ban", 0)) > 0:
 			cnt["ban"] += 1
-		if a.has("pres"):
-			cnt["presidente"] += 1
 		var lg := w.league(c.league_id)
 		if lg != null and lg.table.has(c.id) and int(lg.table[c.id].get("ded", 0)) > 0:
 			cnt["pontos"] += 1
@@ -37,6 +31,7 @@ func _initialize() -> void:
 			closed += 1
 		if n.title.contains("Salários atrasados"):
 			late += 1
+	cnt["falência"] = int(w.stats.get("judicial_recoveries", 0))
 	print("datas: %d · clubes: %d" % [guard, w.clubs.size()])
 	print(cnt)
 	print("notícias: portões fechados %d · salários atrasados %d (só as visíveis ao usuário)" % [closed, late])

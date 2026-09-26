@@ -324,7 +324,7 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			if turn < 4 or rng.randf() > 0.25 or (not own.is_empty() and world.year - int(own.get("y", 0)) < WorldEvents.OWNER_COOLDOWN):
 				return {}
 			var revenue := float(FinanceManager.expected_revenue(club))
-			ev["d"] = {"who": RngUtil.pick(rng, WorldEvents.INVESTORS), "money": Valuation.round_value(revenue * rng.randf_range(0.8, 1.8) + maxi(0, -club.balance))}
+			ev["d"] = {"who": ClubEvents.investor_for(club, rng), "money": Valuation.round_value(revenue * rng.randf_range(0.8, 1.8) + maxi(0, -club.balance))}
 		"stadium":
 			if club.fan_base < club.capacity or world.stats.has("stadium_work"):
 				return {}

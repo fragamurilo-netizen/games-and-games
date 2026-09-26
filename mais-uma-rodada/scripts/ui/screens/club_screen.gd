@@ -250,7 +250,17 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(UIKit.kv("Cota de TV (ano)", "%s%s" % [Fmt.money(club.income_tv), "" if absf(deal - 1.0) < 0.01 else " · contrato %s%d%%" % ["+" if deal > 1.0 else "−", int(round(absf(deal - 1.0) * 100.0))]]))
 	var own := WorldEvents.owner_of(w, club.id)
 	if not own.is_empty():
-		card.add_child(UIKit.kv("Dono", "%s (desde %d)" % [own.get("who", ""), int(own.get("y", 0))]))
+		card.add_child(UIKit.kv("Dona da SAF" if bool(own.get("saf", false)) or club.affairs.has("saf") else "Dono", "%s (desde %d)" % [own.get("who", ""), int(own.get("y", 0))]))
+	if club.affairs.has("pres"):
+		card.add_child(UIKit.kv("Presidente", String(club.affairs["pres"]) + ((" · " + String(club.affairs["pres_note"])) if club.affairs.has("pres_note") else "")))
+	if club.affairs.has("master"):
+		card.add_child(UIKit.kv("Patrocinadora master", String(club.affairs["master"])))
+	if club.affairs.has("rj"):
+		card.add_child(UIKit.colored("Em recuperação judicial desde %d%s." % [int(club.affairs["rj"]), (" (depois da saída da %s, dona da SAF)" % club.affairs["ex_owner"]) if club.affairs.has("ex_owner") else ""], UIColors.ORANGE, "Small", true))
+	if ClubEvents.banned(w, club):
+		card.add_child(UIKit.colored("Transfer ban: o clube não pode inscrever reforços até o fim da temporada.", UIColors.RED, "Small", true))
+	if int(club.affairs.get("closed", 0)) > 0:
+		card.add_child(UIKit.colored("Punido com %d jogo(s) de portões fechados." % int(club.affairs["closed"]), UIColors.ORANGE, "Small", true))
 	if club.balance < 0:
 		card.add_child(UIKit.colored("Com o caixa no vermelho, a diretoria não libera contratações e paga juros de cheque especial. No fim do ano o rombo vira empréstimo.", UIColors.ORANGE, "Small", true))
 	elif FinanceManager.debt_ratio(club, float(fin["expected_revenue"])) > 1.0:

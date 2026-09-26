@@ -1,13 +1,12 @@
 class_name ClubEvents
 extends RefCounted
 ## Acontecimentos institucionais que mudam clubes pelo mundo, sempre pela realidade de cada país:
-##   compra por empresário ou fundo (Inglaterra atrai mais), clube vira SAF (Brasil), falência e
-##   recuperação judicial (Inglaterra e Itália tiram pontos; no Brasil vem o bloqueio), dedução de
-##   pontos por regra financeira (PSR inglês) ou escândalo, transfer ban da FIFA por dívida,
-##   portões fechados por briga de torcida (Brasil, Argentina, Turquia...), salários atrasados,
-##   eleição para presidente (clubes de sócios) e patrocinador master que chega ou vai embora.
-## Estado em club.affairs: {owner, saf (ano), ban (ano até quando está punido, exclusivo),
-##   closed (jogos com portões fechados), admin (ano da falência), pres (presidente), pres_y}.
+##   dedução de pontos por regra financeira (PSR inglês) ou escândalo, transfer ban da FIFA por
+##   dívida, portões fechados por briga de torcida (Brasil, Argentina, Turquia...), salários
+##   atrasados e patrocinador master que chega ou vai embora. Compras de clube, SAF, presidentes e
+##   recuperação judicial ficam no WorldEvents (que usa daqui quem compra onde e as punições).
+## Estado em club.affairs: {ban (ano até quando está punido, exclusivo), closed (jogos com portões
+##   fechados), psr_<ano>}.
 ## Probabilidades são por temporada e divididas pelas datas do calendário.
 
 
@@ -36,9 +35,6 @@ const LATE_WAGES_P := {"BRA": 0.3, "ARG": 0.3, "TUR": 0.3, "GRE": 0.3, "SRB": 0.
 ## Onde investidor estrangeiro compra clube com frequência.
 const TAKEOVER_P := {"ENG": 0.03, "FRA": 0.018, "ITA": 0.018, "ESP": 0.01, "POR": 0.015, "BEL": 0.015, "SCO": 0.012,
 	"USA": 0.01, "NED": 0.008, "GER": 0.002, "TUR": 0.006}
-## Clubes de sócios que elegem presidente.
-const ELECTION_NATIONS := ["BRA", "ARG", "URU", "CHI", "PAR", "POR"]
-const ELECTION_CLUBS := ["ESP_MBL", "ESP_BLG", "ESP_BIL", "ESP_PAM"]
 
 
 static func banned(world: GameWorld, c: Club) -> bool:
@@ -67,22 +63,6 @@ static func after_matchday(world: GameWorld, slot: int) -> void:
 		var user := world.is_user_club(c.id)
 		var rev := maxf(1.0, float(c.income_tv + c.income_sponsor))
 		var broke := c.balance < 0 and c.debt > 0
-		# Eleição no clube de sócios (início de temporada, ~a cada 3 anos)
-		if first_day and (c.nation in ELECTION_NATIONS or c.key in ELECTION_CLUBS) and world.year - int(c.affairs.get("pres_y", world.year - 2 - (c.id % 3))) >= 3 and rng.randf() < 0.5:
-			_election(world, c, rng, user)
-			continue
-		# Compra do clube (a do usuário é decisão dele: evento "takeover")
-		if not user and not c.affairs.has("owner") and league.tier <= 2:
-			var tp := float(TAKEOVER_P.get(c.nation, 0.004)) * (1.6 if c.debt > rev else 1.0) * 1.3
-			if c.nation == "BRA" and not c.affairs.has("saf"):
-				tp = 0.09 * (1.5 if c.debt > rev * 0.8 else 0.7)
-			if rng.randf() < tp / PER_SEASON:
-				_takeover(world, c, rng)
-				continue
-		# Falência / recuperação judicial
-		if broke and c.debt > rev * 2.5 and int(c.affairs.get("admin", 0)) < world.year - 3 and rng.randf() < 0.18 / PER_SEASON:
-			_administration(world, c, rng, league, user)
-			continue
 		# PSR: prejuízo grande na Premier League custa pontos
 		if c.nation == "ENG" and league.tier == 1 and c.balance < -int(rev * 0.35) and not c.affairs.has("psr_%d" % world.year) and rng.randf() < 0.3 / PER_SEASON:
 			c.affairs["psr_%d" % world.year] = true
@@ -139,82 +119,40 @@ static func after_matchday(world: GameWorld, slot: int) -> void:
 				_news(world, c, "%s perde o patrocinador master" % c.short_name, "A %s encerrou o contrato com o %s. A diretoria corre atrás de um substituto." % [sp, c.short_name], user, user, "financas")
 
 
-static func _takeover(world: GameWorld, c: Club, rng: RandomNumberGenerator) -> void:
-	var rev := float(c.income_tv + c.income_sponsor)
+## Chance relativa (0..1) de um clube desse país ser comprado (Inglaterra = 1).
+static func takeover_appeal(c: Club) -> float:
+	if c.nation == "BRA":
+		return 1.0 # a onda das SAFs
+	return clampf(float(TAKEOVER_P.get(c.nation, 0.004)) / 0.03, 0.08, 1.0)
+
+
+## Comprador plausível para o clube: fundos do Golfo e americanos na Inglaterra, grupos locais,
+## americanos e empresários nas SAFs brasileiras, multiclubes pela Europa.
+static func investor_for(c: Club, rng: RandomNumberGenerator) -> String:
 	var mix: Dictionary = INVESTOR_MIX.get(c.nation, {"latam": 0.5, "multi": 0.5} if c.nation in ["ARG", "URU", "CHI", "COL", "PAR", "PER", "ECU", "MEX"] else {"multi": 0.6, "us": 0.4})
 	var group := String(RngUtil.weighted_key(rng, mix))
 	var pool: Array = INVESTORS[group]
-	var inv: String = pool[rng.randi_range(0, pool.size() - 1)]
 	if group == "latam" and rng.randf() < 0.35:
 		var o := NameGenerator.pick_origin(rng, c.nation)
 		var nm := NameGenerator.generate(rng, String(o["c"]), {}, {})
-		inv = "o empresário %s %s" % [nm["first"], nm["last"]]
-	var money := int(maxf(rev * rng.randf_range(0.5, 1.2), 8_000_000.0 * (2.0 if c.nation == "ENG" else 1.0)))
-	var saf := c.nation == "BRA"
-	c.affairs["owner"] = inv
-	if saf:
-		c.affairs["saf"] = world.year
-	c.balance += money
-	var paid := int(c.debt * (0.7 if saf else 0.5))
-	c.debt -= paid
-	c.transfer_budget += int(money * 0.6)
-	c.wage_budget = int(c.wage_budget * 1.12)
-	c.commercial = clampf(c.commercial * 1.08, 0.72, 1.35)
-	c.board_confidence = 60.0
-	c.fan_mood = clampf(c.fan_mood + 8.0, 0.0, 100.0)
-	if saf:
-		_news(world, c, "%s vira SAF: %s compra 90%% do futebol" % [c.short_name, inv],
-			"Os sócios aprovaram a venda da SAF do %s para o %s. O acordo prevê %s de aporte e o pagamento de %s em dívidas." % [c.short_name, inv, Fmt.money(money), Fmt.money(paid)],
-			false, true, "financas")
-	else:
-		_news(world, c, "%s é comprado pelo %s" % [c.short_name, inv],
-			"O %s assume o controle do %s com promessa de %s de investimento e um projeto para brigar no topo." % [inv, c.short_name, Fmt.money(money)],
-			false, true, "financas")
+		return "o empresário %s %s" % [nm["first"], nm["last"]]
+	return pool[rng.randi_range(0, pool.size() - 1)]
 
 
-static func _administration(world: GameWorld, c: Club, rng: RandomNumberGenerator, league: League, user: bool) -> void:
-	c.affairs["admin"] = world.year
+## Punição da liga na recuperação judicial/administração: pontos na Inglaterra e na Itália
+## e transfer ban em todo lugar. Retorna os pontos tirados.
+static func insolvency_penalty(world: GameWorld, c: Club) -> int:
 	c.affairs["ban"] = world.year + 1
-	c.transfer_budget = 0
-	c.wage_budget = int(c.wage_budget * 0.75)
-	c.board_confidence = 30.0
-	c.fan_mood = maxf(5.0, c.fan_mood - 15.0)
-	# Os mais caros vão para a vitrine
-	var squad: Array = []
-	for pid in c.player_ids:
-		var p := world.player(int(pid))
-		if p != null:
-			squad.append(p)
-	squad.sort_custom(func(a: Player, b: Player): return a.wage > b.wage)
-	for p: Player in squad.slice(0, 3):
-		p.transfer_listed = true
+	var league := world.league(c.league_id)
 	var pts := 0
 	match c.nation:
 		"ENG", "SCO", "WAL":
-			pts = 12 if league.tier >= 2 else 9
+			pts = 12 if league != null and league.tier >= 2 else 9
 		"ITA":
 			pts = 8
-	if pts > 0:
+	if pts > 0 and league != null:
 		_deduct(world, c, league, pts)
-	var body := "Com dívidas de %s, o %s entrou com pedido de %s. " % [Fmt.money(c.debt), c.short_name, "recuperação judicial" if c.nation in ["BRA", "ARG", "POR", "ESP"] else "administração judicial"]
-	body += ("A liga tira %d pontos do clube, que também não pode contratar até o fim da temporada." % pts) if pts > 0 else "O clube fica proibido de contratar e deve vender jogadores para pagar credores."
-	_news(world, c, "%s em crise: pedido de %s" % [c.short_name, "recuperação judicial" if c.nation in ["BRA", "ARG", "POR", "ESP"] else "falência"], body, user, true, "financas")
-
-
-static func _election(world: GameWorld, c: Club, rng: RandomNumberGenerator, user: bool) -> void:
-	var o := NameGenerator.pick_origin(rng, c.nation)
-	var n := NameGenerator.generate(rng, String(o["c"]), {}, {})
-	var pres := "%s %s" % [n["first"], n["last"]]
-	var old := String(c.affairs.get("pres", ""))
-	c.affairs["pres"] = pres
-	c.affairs["pres_y"] = world.year
-	var opposition := old == "" or rng.randf() < 0.45
-	if opposition:
-		# Oposição vence: promete investir, mas herda as contas
-		c.transfer_budget = int(c.transfer_budget * rng.randf_range(1.0, 1.25))
-		c.board_confidence = 55.0
-	var txt := "%s foi eleito presidente do %s%s." % [pres, c.short_name, " pela oposição, com promessa de reforços" if opposition and old != "" else ""]
-	_news(world, c, "%s tem novo presidente" % c.short_name, txt, user, false, "diretoria")
+	return pts
 
 
 static func _deduct(world: GameWorld, c: Club, league: League, n: int) -> void:

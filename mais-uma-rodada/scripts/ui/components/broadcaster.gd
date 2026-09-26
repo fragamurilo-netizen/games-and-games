@@ -68,24 +68,12 @@ static func _make(a: Array) -> Dictionary:
 	return {"name": String(a[0]), "short": String(a[1]), "c1": Color(String(a[2])), "c2": Color(String(a[3]))}
 
 
-## Selo da emissora (retângulo com a sigla) e, opcionalmente, o "AO VIVO" com a bolinha vermelha.
+## Selo da emissora (logo desenhado) e, opcionalmente, o "AO VIVO" com a bolinha vermelha.
 static func bug(b: Dictionary, live := true) -> Control:
 	var row := UIKit.hbox(6)
-	var p := PanelContainer.new()
-	var st := StyleBoxFlat.new()
-	st.bg_color = b["c1"]
-	st.border_color = (b["c2"] as Color)
-	st.set_border_width_all(1)
-	st.set_corner_radius_all(4)
-	st.content_margin_left = 6
-	st.content_margin_right = 6
-	st.content_margin_top = 1
-	st.content_margin_bottom = 1
-	p.add_theme_stylebox_override(&"panel", st)
-	var l := UIKit.label(String(b["short"]), "Caps")
-	l.add_theme_color_override(&"font_color", b["c2"])
-	p.add_child(l)
-	row.add_child(p)
+	var logo := BroadcasterLogo.make(b, 26.0)
+	logo.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(logo)
 	if live:
 		var dot := UIKit.label("● AO VIVO", "Caps")
 		dot.add_theme_color_override(&"font_color", Color("#FF4B4B"))
