@@ -197,6 +197,11 @@ func vibrate(ms: int) -> void:
 
 ## Celebração de gol: rugido proporcional à importância + vibração.
 func goal(importance: float, ours: bool) -> void:
+	# Durante a partida o próprio loop da arquibancada reage ao gol. Evita empilhar um
+	# "ruído de torcida" artificial por cima da torcida humana sintetizada.
+	if _crowd_on:
+		vibrate(int(120 + importance * 380) if ours else 60)
+		return
 	if ours:
 		play("goal_big" if importance >= 0.6 else "goal", 0.0)
 		vibrate(int(120 + importance * 380))
