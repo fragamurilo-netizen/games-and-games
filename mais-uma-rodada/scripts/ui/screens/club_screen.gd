@@ -44,6 +44,7 @@ func refresh() -> void:
 	else:
 		c.add_child(_season_card(w, club))
 		c.add_child(_squad_card(w, club))
+		c.add_child(_youth_card(w, club))
 	c.add_child(_history_card(w, club))
 	var idols := _idols_card(w, club)
 	if idols != null:
@@ -406,6 +407,36 @@ func _show_suggestions() -> void:
 			UIManager.push("player", {"id": id}), "CardFlat"))
 	root.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
 	UIManager.show_modal(root, true)
+
+
+## Base de outro clube: os garotos até 20 anos, com o potencial pelo olho dos seus olheiros
+## (estimativa com ruído; o valor real nunca aparece).
+func _youth_card(w: GameWorld, club: Club) -> Control:
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Base · joias do clube"))
+	card.add_child(UIKit.kv("Nível da base", "%d/100" % club.youth_level))
+	var kids: Array = []
+	for p: Player in w.squad(club):
+		if p.age(w.year) <= 20:
+			kids.append(p)
+	var prec := 0.35 + float(BoardRequests.director(w).get("net", 50)) / 250.0
+	kids.sort_custom(func(a: Player, b: Player): return a.potential_estimate(prec) > b.potential_estimate(prec))
+	if kids.is_empty():
+		card.add_child(UIKit.label("Nenhum garoto da base no elenco principal agora.", "Muted", true))
+	for p: Player in kids.slice(0, 6):
+		var h := UIKit.hbox(10)
+		h.add_child(UIKit.pos_badge(p.position))
+		var v := UIKit.vbox(0)
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v.add_child(UIKit.label(p.display_name(), "H3"))
+		v.add_child(UIKit.label("%d anos · %s" % [p.age(w.year), Player.potential_label(p.potential_estimate(prec))], "Small"))
+		h.add_child(v)
+		h.add_child(UIKit.badge(p.overall, 52, 36, 22))
+		var pid := p.id
+		card.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
+	var cid := club.id
+	card.add_child(UIKit.button("Revelados pelo clube", "GhostButton", func(): UIManager.push("graduates", {"id": cid}), "star"))
+	return UIKit.card_panel(card)
 
 
 func _season_card(w: GameWorld, club: Club) -> Control:
