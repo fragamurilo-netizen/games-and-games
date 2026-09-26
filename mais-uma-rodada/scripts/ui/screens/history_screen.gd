@@ -91,6 +91,7 @@ func _career(w: GameWorld) -> Control:
 	card.add_child(UIKit.kv("Aproveitamento", "%d%%" % int(round(100.0 * (wins * 3 + int(ms.get("d", 0))) / (games * 3.0)))))
 	var out := UIKit.vbox(12)
 	out.add_child(UIKit.card_panel(card))
+	out.add_child(PrestigeCard.career_card(w))
 	var tl := UIKit.card("Card", 6)
 	tl.add_child(UIKit.section("Linha do tempo"))
 	var any := false

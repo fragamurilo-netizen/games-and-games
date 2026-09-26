@@ -90,6 +90,7 @@ static func for_next_match(world: GameWorld) -> Array:
 	var offers := TransferManager.pending_offers(world).size()
 	if offers > 0:
 		out.append({"text": "%d proposta(s) aguardando resposta" % offers, "kind": "market", "priority": 80})
+	out.append_array(ManagerFeats.next_hooks(world, opp))
 	out.sort_custom(func(a, b): return a["priority"] > b["priority"])
 	return out.slice(0, 4)
 

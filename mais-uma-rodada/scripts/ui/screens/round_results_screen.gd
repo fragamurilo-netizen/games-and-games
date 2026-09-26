@@ -27,6 +27,9 @@ func refresh() -> void:
 	UIKit.clear(c)
 	if f != null:
 		c.add_child(_user_card(w, f, user))
+		var pc := PrestigeCard.round_card(w, _report.get("feats", {}))
+		if pc != null:
+			c.add_child(pc)
 		if not Dictionary(w.stats.get("xray", {})).is_empty():
 			c.add_child(_xray_teaser(w))
 	for ev in _report.get("cups", []):
