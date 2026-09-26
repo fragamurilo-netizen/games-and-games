@@ -580,56 +580,134 @@ func _career(w: GameWorld, p: Player) -> Control:
 		chart.custom_minimum_size = Vector2(0, 150)
 		chart.setup(p, w.year)
 		card.add_child(chart)
-		var hdr := UIKit.hbox(8)
-		var hl := UIKit.label("Ano  Clube", "Caps")
-		hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		hdr.add_child(hl)
-		hdr.add_child(UIKit.label("J  G  A  NOTA  OVR", "Caps"))
-		card.add_child(hdr)
+		card.add_child(_season_header())
 		for i in range(p.history.size() - 1, -1, -1):
-			var h: Dictionary = p.history[i]
-			var line := UIKit.hbox(8)
-			var y := UIKit.label(str(h.get("y", "")), "Mono")
-			y.custom_minimum_size.x = 64
-			line.add_child(y)
-			var cn := UIKit.label(String(h.get("cn", "")) + (" (emp.)" if bool(h.get("lo", false)) else ""), "")
-			cn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			line.add_child(cn)
-			var apps := int(h.get("a", 0)) + int(h.get("ca", 0))
-			var goals := int(h.get("g", 0)) + int(h.get("cg", 0))
-			var ast := int(h.get("as", 0)) + int(h.get("cas", 0))
-			line.add_child(UIKit.label("%d  %d  %d  %s" % [apps, goals, ast, Fmt.rating(float(h.get("r", 0.0)))], "Mono"))
-			var o := int(h.get("o", 0))
-			var ol := UIKit.label("—" if o <= 0 else str(o), "Mono")
-			ol.custom_minimum_size.x = 84
-			ol.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-			if o > 0 and h.has("o0"):
-				var dd := o - int(h["o0"])
-				if dd != 0:
-					ol.text = "%d %s%d" % [o, "+" if dd > 0 else "", dd]
-					ol.add_theme_color_override(&"font_color", UIColors.GREEN if dd > 0 else UIColors.RED)
-			line.add_child(ol)
-			card.add_child(line)
-			var extra: Array = []
-			if int(h.get("mo", 0)) > 0:
-				extra.append("%d× craque do jogo" % int(h["mo"]))
-			if int(h.get("cs", 0)) > 0 and Pos.group(p.position) <= Pos.G_DEF:
-				extra.append(("%d jogo sem sofrer gol" if int(h["cs"]) == 1 else "%d jogos sem sofrer gol") % int(h["cs"]))
-			for k in p.awards_in(int(h.get("y", 0))):
-				if k != "team":
-					extra.append(AwardManager.award_name(k))
-			if p.awards_in(int(h.get("y", 0))).has("team"):
-				extra.append(AwardManager.award_name("team"))
-			if not extra.is_empty():
-				var el := UIKit.label("      " + " · ".join(extra), "Small", true)
-				el.add_theme_color_override(&"font_color", UIColors.ACCENT)
-				card.add_child(el)
-			for inj in h.get("inj", []):
-				var il := UIKit.label("      %s · %d semanas fora" % [String(inj[0]), int(inj[1])], "Small", true)
-				il.add_theme_color_override(&"font_color", UIColors.RED)
-				card.add_child(il)
+			card.add_child(_season_row(w, p, p.history[i], i % 2 == 0))
+		card.add_child(_season_totals(p))
 	return UIKit.card_panel(card)
+
+
+# --- Temporada a temporada: colunas alinhadas, escudo, nota na escala de cores e chips ---
+
+const SEASON_COLS := [["J", 50], ["G", 50], ["A", 50], ["NOTA", 70], ["OVR", 82]]
+
+
+func _num_cell(text: String, w: int, col: Color = UIColors.TEXT, variation := "H3") -> Label:
+	var l := UIKit.colored(text, col, variation)
+	l.custom_minimum_size.x = w
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	return l
+
+
+func _season_header() -> Control:
+	var h := UIKit.hbox(6)
+	var a := UIKit.label("TEMPORADA", "Caps")
+	a.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(a)
+	for c in SEASON_COLS:
+		h.add_child(_num_cell(String(c[0]), int(c[1]), UIColors.MUTED, "Caps"))
+	return h
+
+
+func _season_row(w: GameWorld, p: Player, h: Dictionary, shade: bool) -> Control:
+	var box := UIKit.vbox(4)
+	var row := UIKit.hbox(6)
+	var y := UIKit.label(str(h.get("y", "")), "H3")
+	y.custom_minimum_size.x = 60
+	row.add_child(y)
+	var cl := w.club(int(h.get("c", -1))) if int(h.get("c", -1)) >= 0 else null
+	if cl != null:
+		row.add_child(UIKit.crest(cl, 34))
+	var names := UIKit.vbox(0)
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cn := UIKit.label(String(h.get("cn", "")).replace(" (empr.)", ""), "")
+	cn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	names.add_child(cn)
+	var sub: Array = []
+	var lid := String(h.get("l", ""))
+	if lid != "" and DatabaseManager.has_league(lid):
+		sub.append(w.league_short(lid))
+	if bool(h.get("lo", false)) or String(h.get("cn", "")).ends_with("(empr.)"):
+		sub.append("emprestado")
+	if not sub.is_empty():
+		names.add_child(UIKit.label(" · ".join(sub), "Small"))
+	row.add_child(names)
+	var apps := int(h.get("a", 0)) + int(h.get("ca", 0))
+	var goals := int(h.get("g", 0)) + int(h.get("cg", 0))
+	var ast := int(h.get("as", 0)) + int(h.get("cas", 0))
+	var dim := UIColors.MUTED
+	row.add_child(_num_cell(str(apps), 50, UIColors.TEXT if apps > 0 else dim))
+	row.add_child(_num_cell(str(goals), 50, UIColors.TEXT if goals > 0 else dim))
+	row.add_child(_num_cell(str(ast), 50, UIColors.TEXT if ast > 0 else dim))
+	var r := float(h.get("r", 0.0))
+	row.add_child(_num_cell(Fmt.rating(r) if apps > 0 and r > 0.0 else "—", 70, Fmt.match_rating_color(r) if apps > 0 and r > 0.0 else dim))
+	var o := int(h.get("o", 0))
+	var ov := UIKit.vbox(0)
+	ov.custom_minimum_size.x = 82
+	var ol := _num_cell("—" if o <= 0 else str(o), 82, Fmt.rating_color(o) if o > 0 else dim)
+	ov.add_child(ol)
+	if o > 0 and h.has("o0"):
+		var dd := o - int(h["o0"])
+		if dd != 0:
+			ov.add_child(_num_cell(("+%d" if dd > 0 else "%d") % dd, 82, UIColors.GREEN if dd > 0 else UIColors.RED, "Small"))
+	row.add_child(ov)
+	box.add_child(row)
+	# Destaques do ano em chips: prêmios e craque do jogo em dourado, jogos sem sofrer gol em azul,
+	# lesões em vermelho (e não tudo na cor do clube, que parecia erro)
+	var chips := UIKit.flow(6)
+	var gold := Color("#E8C547")
+	var yr := int(h.get("y", 0))
+	for k in p.awards_in(yr):
+		chips.add_child(UIKit.pill(AwardManager.award_name(k), gold, 14))
+	if int(h.get("mo", 0)) > 0:
+		chips.add_child(UIKit.pill("%d× craque do jogo" % int(h["mo"]), gold, 14))
+	if int(h.get("cs", 0)) > 0 and Pos.group(p.position) <= Pos.G_DEF:
+		chips.add_child(UIKit.pill(("%d jogo sem sofrer gol" if int(h["cs"]) == 1 else "%d jogos sem sofrer gol") % int(h["cs"]), UIColors.BLUE, 14))
+	for inj in h.get("inj", []):
+		chips.add_child(UIKit.pill("%s · %d sem." % [String(inj[0]), int(inj[1])], UIColors.RED, 14))
+	if chips.get_child_count() > 0:
+		box.add_child(UIKit.margin(chips, 66, 0, 0, 0))
+	var panel := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color(1, 1, 1, 0.035) if shade else Color(0, 0, 0, 0)
+	st.set_corner_radius_all(8)
+	st.content_margin_left = 6
+	st.content_margin_right = 6
+	st.content_margin_top = 6
+	st.content_margin_bottom = 6
+	panel.add_theme_stylebox_override(&"panel", st)
+	panel.add_child(box)
+	return panel
+
+
+func _season_totals(p: Player) -> Control:
+	var apps := 0
+	var goals := 0
+	var ast := 0
+	var rs := 0.0
+	var rn := 0
+	for h: Dictionary in p.history:
+		var a := int(h.get("a", 0)) + int(h.get("ca", 0))
+		apps += a
+		goals += int(h.get("g", 0)) + int(h.get("cg", 0))
+		ast += int(h.get("as", 0)) + int(h.get("cas", 0))
+		if a > 0 and float(h.get("r", 0.0)) > 0.0:
+			rs += float(h["r"]) * a
+			rn += a
+	var row := UIKit.hbox(6)
+	var t := UIKit.label("TOTAL · %d temporadas" % p.history.size(), "Caps")
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(t)
+	row.add_child(_num_cell(str(apps), 50))
+	row.add_child(_num_cell(str(goals), 50))
+	row.add_child(_num_cell(str(ast), 50))
+	var avg := rs / maxf(1.0, rn)
+	row.add_child(_num_cell(Fmt.rating(avg) if rn > 0 else "—", 70, Fmt.match_rating_color(avg) if rn > 0 else UIColors.MUTED))
+	row.add_child(_num_cell("", 82))
+	var v := UIKit.vbox(4)
+	v.add_child(UIKit.separator())
+	v.add_child(row)
+	return v
 
 
 ## Uma passagem: escudo, clube, anos, como chegou (base, compra, sem custo, empréstimo) e números.

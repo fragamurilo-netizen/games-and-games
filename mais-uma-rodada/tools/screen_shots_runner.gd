@@ -6,6 +6,8 @@ var opt_league := "BRA1"
 var opt_days := "6"
 var opt_screens := "squad,contracts"
 var opt_scrolls := "0,900"
+var opt_tab := ""
+var opt_pick := "best" # best: o melhor do elenco · veteran: o mais velho (histórico longo)
 var shots := false
 
 
@@ -43,7 +45,10 @@ func _run() -> void:
 	UIManager.close_all_modals()
 	var best: Player = null
 	for p: Player in w.squad(clubs[0]):
-		if best == null or p.overall > best.overall:
+		if opt_pick == "veteran":
+			if best == null or p.age(w.year) > best.age(w.year):
+				best = p
+		elif best == null or p.overall > best.overall:
 			best = p
 	for sc in opt_screens.split(","):
 		var params := {}
@@ -52,6 +57,10 @@ func _run() -> void:
 		UIManager.push(sc, params)
 		await _frames(10)
 		var cur: BaseScreen = UIManager.current()
+		if opt_tab != "":
+			cur.set("_tab", opt_tab)
+			cur.refresh()
+			await _frames(6)
 		for sy in opt_scrolls.split(","):
 			if cur.scroll() != null:
 				cur.scroll().scroll_vertical = int(sy)
