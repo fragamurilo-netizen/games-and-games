@@ -142,7 +142,7 @@ static func apply_to_kits(club: Club) -> void:
 			if m.is_empty():
 				k.erase(key)
 			else:
-				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"], "logo": m.get("logo", "")}
+				k[key] = {"n": m["n"], "c": m["c"], "t": m["t"], "logo": m.get("logo", ""), "m": m.get("m", "")}
 
 
 ## Bônus por vitória (contratos "por vitória").
@@ -173,50 +173,97 @@ static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
 	rng.seed = hash("%d:%d:%d" % [world.world_seed, world.year, club.id])
 	# O mercado paga pelo momento do clube (já embutido na receita típica de patrocínio).
 	var target := float(FinanceManager.sponsor_income(club))
-	var tier := 1
-	if club.reputation >= 72.0:
-		tier = 3
-	elif club.reputation >= 50.0:
-		tier = 2
-	var suppliers: Array = []
-	for b in DatabaseManager.kit_suppliers():
-		if absi(int(b.get("tier", 1)) - tier) <= 1:
-			suppliers.append(b)
-	RngUtil.shuffle(rng, suppliers)
-	var brands: Array = []
+	var tier := BrandCatalog.club_tier(club)
+	# As marcas vêm do país do clube (BrandCatalog): quem anuncia num clube inglês é inglês ou
+	# multinacional, e as regras locais do peito valem (ex.: sem casa de apostas na Espanha).
 	var used := {}
 	for s in club.sponsors.values():
 		used[String(s.get("n", ""))] = true
-	for b in DatabaseManager.sponsor_brands():
-		if absi(int(b.get("tier", 1)) - tier) <= 1 and not used.has(String(b["n"])):
-			brands.append(b)
-	RngUtil.shuffle(rng, brands)
 	var out := {}
-	var bi := 0
 	for s in SLOTS:
 		var slot: String = s[0]
 		if club.sponsors.has(slot):
 			continue
 		var base := target * float(s[2])
+		var pool: Array = []
+		var weights: Array = []
+		if slot == "fornecedor":
+			pool = BrandCatalog.suppliers_for(club.nation, tier)
+			for b: Dictionary in pool:
+				weights.append(float(b.get("w", 1.0)))
+		else:
+			for b: Dictionary in BrandCatalog.brands_for(club.nation, tier, slot, club.tier, club.city):
+				if used.has(String(b["n"])):
+					continue
+				pool.append(b)
+				var w := BrandCatalog.master_weight(club.nation, b) if slot == "master" else 1.0
+				# Peito vai para marca do tamanho do clube; espaços menores aceitam marcas menores.
+				if int(b.get("tier", 1)) == tier:
+					w *= 1.6
+				elif slot != "master" and int(b.get("tier", 1)) < tier:
+					w *= 1.2
+				# Multinacionais aparecem, mas a maioria dos contratos é com empresas do país.
+				if b.has("r"):
+					w *= 0.45
+				weights.append(w)
 		var list: Array = []
-		var pool: Array = suppliers if slot == "fornecedor" else brands
-		var si := 0
 		for yrs in [1, 2, 3]:
 			if pool.is_empty():
 				break
-			var b: Dictionary
-			if slot == "fornecedor":
-				b = pool[si % pool.size()]
-				si += 1
-			else:
-				b = pool[bi % pool.size()]
-				bi += 1
+			var i := RngUtil.weighted_index(rng, weights)
+			if i < 0:
+				break
+			var b: Dictionary = pool[i]
+			pool.remove_at(i)
+			weights.remove_at(i)
+			if slot != "fornecedor":
+				used[String(b["n"])] = true
 			# Marcas maiores pagam um pouco mais; contratos longos pagam um pouco menos por ano.
 			var v: float = base * rng.randf_range(0.92, 1.08) * (1.0 + (int(b.get("tier", 1)) - tier) * 0.08) * (1.0 - (yrs - 1) * 0.03)
-			list.append({"n": b["n"], "c": b["c"], "t": b["t"], "logo": b.get("logo", ""), "slot": slot, "yrs": yrs,
+			list.append({"n": b["n"], "c": b["c"], "t": b["t"], "logo": b.get("logo", ""), "m": b.get("m", ""),
+				"s": b.get("s", "material" if slot == "fornecedor" else ""), "slot": slot, "yrs": yrs,
 				"v": Valuation.round_value(v), "b": 0, "tb": TITLE_BONUS, "qb": CONT_BONUS, "rc": RELEGATION_CUT})
 		out[slot] = list
 	return out
+
+
+## Chance de a IA fechar cada espaço, por nível comercial do clube [local, nacional, grande].
+const AI_FILL := {"master": [0.8, 0.95, 1.0], "fornecedor": [1.0, 1.0, 1.0], "manga": [0.25, 0.5, 0.85],
+	"costas": [0.15, 0.35, 0.6], "calcao": [0.1, 0.2, 0.3]}
+
+
+## Clubes da IA também têm patrocínio de verdade: contratos vencidos saem, a diretoria fecha os
+## espaços livres com marcas do país e os logos vão para as camisas. Sem notícia.
+static func renew_ai(world: GameWorld, club: Club) -> void:
+	if world.is_user_club(club.id):
+		return
+	for slot in club.sponsors.keys():
+		if int(club.sponsors[slot].get("y", 0)) < world.year:
+			club.sponsors.erase(slot)
+	var r := RandomNumberGenerator.new()
+	r.seed = hash([world.world_seed, world.year, club.key, "ia"])
+	var tier := BrandCatalog.club_tier(club)
+	var offers := _make_offers(world, club)
+	for slot in offers:
+		var list: Array = offers[slot]
+		if list.is_empty() or r.randf() > float(AI_FILL[slot][tier - 1]):
+			continue
+		var best: Dictionary = list[0]
+		for o: Dictionary in list:
+			if _board_score(club, o) > _board_score(club, best):
+				best = o
+		_sign(world, club, slot, best)
+	apply_to_kits(club)
+
+
+## Mundo novo ou save antigo: todo clube da IA sem patrocínio recebe os seus.
+static func ensure_all(world: GameWorld) -> void:
+	if int(world.stats.get("sp_ai", -1)) == world.year:
+		return
+	for c: Club in world.clubs:
+		if c.sponsors.is_empty():
+			renew_ai(world, c)
+	world.stats["sp_ai"] = world.year
 
 
 ## Fim de temporada: atualiza o momento comercial de todos os clubes e aplica as cláusulas dos

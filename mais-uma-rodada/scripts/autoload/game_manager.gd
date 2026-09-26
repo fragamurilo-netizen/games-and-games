@@ -125,6 +125,7 @@ func load_career(save_slot: int) -> bool:
 	fresh.randomize()
 	world.rng.seed = world.rng.randi() ^ fresh.randi()
 	HeartClubs.ensure_all(world) # saves de antes dos times de coração
+	SponsorManager.ensure_all(world) # saves de antes dos patrocínios da IA
 	Valuation.refresh_shift(world)
 	world_changed.emit()
 	return true

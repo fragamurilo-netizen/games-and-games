@@ -41,6 +41,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	CareerBackfill.build(w)
 	HeartClubs.ensure_all(w)
 	SeasonManager.setup_first_season(w)
+	SponsorManager.ensure_all(w) # patrocinadores e fornecedoras da IA, por país
 	return w
 
 

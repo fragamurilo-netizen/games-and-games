@@ -104,6 +104,8 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		var pre := SponsorManager.is_preseason(w)
 		card.add_child(UIKit.button("Uniformes e patrocínios" + (" (pré-temporada)" if pre else ""), "PrimaryButton" if pre else "GhostButton", func(): UIManager.push("kit"), "shirt"))
 	var cid := club.id
+	if not club.kit_history.is_empty():
+		card.add_child(UIKit.button("Uniformes por temporada", "GhostButton", func(): UIManager.push("kit_history", {"id": cid}), "shirt"))
 	card.add_child(UIKit.button("Elencos anteriores", "GhostButton", func(): UIManager.push("past_squads", {"id": cid}), "clock"))
 	card.add_child(UIKit.button("Revelados pela base", "GhostButton", func(): UIManager.push("graduates", {"id": cid}), "up"))
 	if _own():

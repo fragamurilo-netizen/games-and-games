@@ -18,7 +18,10 @@ static func _hook_color(kind: String) -> Color:
 func on_show() -> void:
 	refresh()
 	if BoardManager.pending_job_offers(world()).is_empty():
+		var tutorial_now := not AppSettings.tutorial_done
 		Tutorial.maybe_show()
+		if not tutorial_now and KitDesign.launch_pending(world()):
+			_kit_launch_prompt(world())
 
 
 func refresh() -> void:
@@ -69,6 +72,9 @@ func refresh() -> void:
 		c.add_child(cups)
 	c.add_child(_shortcuts_card(w))
 	c.add_child(_news_card(w))
+	var social := _social_card(w)
+	if social != null:
+		c.add_child(social)
 	c.add_child(_form_card(w, club))
 
 
@@ -244,6 +250,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
 		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
+		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club())) + " seguidores", func(): UIManager.push("social")],
 	]
 	for it in items:
 		var v := UIKit.vbox(4)
@@ -419,7 +426,8 @@ static func _team_morale(w: GameWorld, club: Club) -> float:
 func _alerts_card(w: GameWorld, club: Club) -> Control:
 	var items: Array = []
 	if SponsorManager.is_preseason(w):
-		items.append(["shirt", UIColors.ACCENT, "Pré-temporada: desenhe o uniforme antes do primeiro jogo", func(): UIManager.push("kit")])
+		if not KitDesign.launched(w):
+			items.append(["shirt", UIColors.ACCENT, "Pré-temporada: apresente os uniformes de %d antes do primeiro jogo" % w.year, func(): UIManager.push("kit", {"launch": true})])
 	var offers := TransferManager.pending_offers(w)
 	if not offers.is_empty():
 		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
@@ -515,6 +523,19 @@ func _news_card(w: GameWorld) -> Control:
 	return UIKit.card_panel(card)
 
 
+## O post mais recente sobre o seu clube nas redes.
+func _social_card(w: GameWorld) -> Control:
+	var posts := SocialFeed.latest_for_user(w, 1)
+	if posts.is_empty():
+		return null
+	var card := UIKit.card("Card", 10)
+	card.add_child(UIKit.section("Nas redes"))
+	var post := SocialPost.make(w, posts[0], false)
+	card.add_child(post)
+	card.add_child(UIKit.button("Abrir as redes sociais", "GhostButton", func(): UIManager.push("social"), "chat"))
+	return UIKit.card_panel(card)
+
+
 func _form_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Últimos jogos"))
@@ -551,6 +572,12 @@ func _preseason_card(w: GameWorld) -> Control:
 		var l := UIKit.label(names[i], "" if not steps[i] else "Muted", true)
 		row.add_child(l)
 		card.add_child(row)
+	if SponsorManager.is_preseason(w):
+		var kit_done := KitDesign.launched(w)
+		var krow := UIKit.hbox(10)
+		krow.add_child(UIKit.icon_rect("check" if kit_done else "shirt", 26, UIColors.GREEN if kit_done else UIColors.ACCENT))
+		krow.add_child(UIKit.label("Uniformes da temporada", "Muted" if kit_done else "", true))
+		card.add_child(krow if kit_done else UIKit.tap_row(krow, func(): UIManager.push("kit", {"launch": true})))
 	var b := UIKit.button("ABRIR PRÉ-TEMPORADA", "PrimaryButton", func(): UIManager.push("preseason"), "tactics")
 	b.custom_minimum_size.y = 96
 	card.add_child(b)
@@ -686,3 +713,40 @@ func _upcoming_card(w: GameWorld, club: Club) -> Control:
 			row.add_child(UIKit.label("%dº" % CompetitionManager.position_of(league, opp.id), "H3"))
 		card.add_child(row)
 	return UIKit.card_panel(card)
+
+
+## Convite de lançamento dos uniformes, uma vez por pré-temporada.
+func _kit_launch_prompt(w: GameWorld) -> void:
+	KitDesign.mark_asked(w)
+	var club := w.user_club()
+	var sup: Dictionary = club.sponsors.get("fornecedor", {})
+	var brand := String(sup.get("n", "")) if not sup.is_empty() else "A fornecedora"
+	var v := UIKit.vbox(16)
+	v.custom_minimum_size.x = 600
+	var head := UIKit.hbox(14)
+	head.add_child(UIKit.icon_rect("shirt", 56, UIColors.ACCENT))
+	head.add_child(UIKit.label("Uniformes %d" % w.year, "Title", true))
+	v.add_child(head)
+	v.add_child(UIKit.label("Pré-temporada é época de lançamento. %s mandou três coleções para a nova temporada. Escolha uma, desenhe do seu jeito ou mantenha os uniformes atuais." % brand, "", true))
+	var row := UIKit.hbox(8)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	for k in [club.kit_home, club.kit_away, club.third_kit()]:
+		var kv := UIKit.kit(k, 84, 0, club.crest)
+		kv.full = true
+		kv.custom_minimum_size = Vector2(96, 160)
+		row.add_child(kv)
+	v.add_child(UIKit.label("Hoje em campo", "Caps"))
+	v.add_child(row)
+	v.add_child(UIKit.button("VER AS COLEÇÕES", "PrimaryButton", func():
+		UIManager.close_modal()
+		UIManager.push("kit", {"launch": true}), "shirt"))
+	v.add_child(UIKit.button("Desenhar do zero", "", func():
+		UIManager.close_modal()
+		UIManager.push("kit", {"launch": true, "part": "models"}), "tactics"))
+	v.add_child(UIKit.button("Manter os uniformes atuais", "GhostButton", func():
+		UIManager.close_modal()
+		KitDesign.mark_launched(w)
+		GameManager.save_now()
+		refresh()
+		SocialPost.show_launch(w)))
+	UIManager.show_modal(v)

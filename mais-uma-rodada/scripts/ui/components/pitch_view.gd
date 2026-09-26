@@ -34,7 +34,7 @@ var home_color2: Color = Color.WHITE
 var away_color: Color = Color("#B3122E")
 var away_color2: Color = Color.WHITE
 var motion: PitchMotion = PitchMotion.new()
-## StadiumStyle.for_match(): {kind, night, rain, weather, fill, brands, away_share, seed}
+## StadiumStyle.for_match(): {kind, night, rain, weather, fill, brands, fence_brands, away_share, seed}
 var stadium: Dictionary = {}:
 	set(v):
 		stadium = v
@@ -395,6 +395,38 @@ func _draw_track(track: Rect2, grass: Rect2) -> void:
 		draw_rect(rr, Color(1, 1, 1, 0.35), false, 1.0)
 
 
+## Faixas de lona amarradas no alambrado (comércio da cidade, marcas pequenas do país), só nos
+## lados longos, espaçadas e um pouco tortas como na vida real.
+func _draw_fence_banners(bands: Array) -> void:
+	var brands: Array = stadium.get("fence_brands", [])
+	if brands.is_empty():
+		return
+	var font := get_theme_font(&"font", &"Stat")
+	var idx := int(stadium.get("seed", 0)) % brands.size()
+	for k in 2:
+		var band: Rect2 = bands[k]
+		if band.size.y < 5.0:
+			continue
+		var per := 3
+		for i in per:
+			var b: Dictionary = brands[idx % brands.size()]
+			idx += 1
+			var w := band.size.x * 0.13
+			var h := band.size.y * 0.78
+			var x := band.position.x + band.size.x * (0.14 + i * 0.3 + (0.04 if k == 1 else 0.0))
+			var rr := Rect2(Vector2(x, band.get_center().y - h * 0.5), Vector2(w, h))
+			var bg := Color(String(b.get("c", "#EEEEEE")))
+			var tx := Color(String(b.get("t", "#111111")))
+			var sag := 0.03 * (1 if (i + k) % 2 == 0 else -1)
+			draw_set_transform(rr.get_center(), sag, Vector2.ONE)
+			draw_rect(Rect2(-rr.size * 0.5, rr.size), bg.darkened(0.08))
+			draw_rect(Rect2(-rr.size * 0.5, rr.size), Color(0, 0, 0, 0.35), false, 1.0)
+			for cx in [-0.5, 0.5]:
+				draw_circle(Vector2(rr.size.x * cx * 0.94, -rr.size.y * 0.38), 1.0, Color(0.85, 0.85, 0.85, 0.9))
+			_board_logo(b, rr.size.x, rr.size.y, int(clampf(h * 0.55, 6.0, 16.0)), font, tx, bg)
+			draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
 func _draw_fence(fence: Rect2, boards: Rect2) -> void:
 	# Alambrado: tela de arame entre o campo e a torcida, com o poste e o cano de cima.
 	var col := Color(0.82, 0.85, 0.88, 0.28)
@@ -419,6 +451,7 @@ func _draw_fence(fence: Rect2, boards: Rect2) -> void:
 			var b0 := Vector2(band.position.x + o - band.size.y, band.position.y)
 			var b1 := b0 + Vector2(band.size.y, band.size.y)
 			_clip_line(b0, b1, band, col)
+	_draw_fence_banners(bands)
 	draw_rect(fence, Color(0.75, 0.78, 0.8, 0.8), false, 1.5)
 	# Postes.
 	var posts := 14
@@ -495,24 +528,36 @@ func _draw_boards(boards: Rect2, inner: Rect2, bt: float, kind: String) -> void:
 			draw_rect(seg, bg.darkened(0.25 * (1.0 - fade)))
 			if led:
 				draw_line(seg.position, seg.position + Vector2(seg.size.x, 0) if not vertical else seg.position + Vector2(0, seg.size.y), Color(1, 1, 1, 0.18), 1.0)
-			var txt := String(b.get("n", "")).to_upper()
 			var tcol := Color(tx.r, tx.g, tx.b, fade)
+			# Placa em coordenadas locais: comprimento ao longo do campo, espessura para fora.
+			var along := seg.size.y if vertical else seg.size.x
+			var thick := seg.size.x if vertical else seg.size.y
+			var rot := 0.0
 			if vertical:
-				var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-				var maxw := seg.size.y - 4.0
-				var f2 := fs if tw <= maxw else maxi(6, int(fs * maxw / tw))
-				tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f2).x
-				var c := seg.get_center()
-				draw_set_transform(c, -PI / 2.0 if seg.position.x < size.x * 0.5 else PI / 2.0, Vector2.ONE)
-				draw_string(font, Vector2(-tw * 0.5, f2 * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f2, tcol)
-				draw_set_transform_matrix(Transform2D.IDENTITY)
-			else:
-				var tw2 := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-				var maxw2 := seg.size.x - 4.0
-				var f3 := fs if tw2 <= maxw2 else maxi(6, int(fs * maxw2 / tw2))
-				tw2 = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f3).x
-				var c2 := seg.get_center()
-				draw_string(font, c2 + Vector2(-tw2 * 0.5, f3 * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f3, tcol)
+				rot = -PI / 2.0 if seg.position.x < size.x * 0.5 else PI / 2.0
+			draw_set_transform(seg.get_center(), rot, Vector2.ONE)
+			_board_logo(b, along, thick, fs, font, tcol, bg)
+			draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## Nome da marca com o símbolo dela à esquerda, centrados numa placa de `along` x `thick`
+## (coordenadas locais, centro em 0,0).
+func _board_logo(b: Dictionary, along: float, thick: float, fs: int, font: Font, tcol: Color, bg: Color) -> void:
+	var txt := String(b.get("n", "")).to_upper()
+	var mark := String(b.get("m", ""))
+	if mark == "":
+		mark = String(b.get("logo", ""))
+	var mu := thick * 0.3
+	var has_mark := mark != "" and BrandMark.has(mark) and mu >= 2.5
+	var mark_w := mu * 2.6 if has_mark else 0.0
+	var maxw := along - 6.0 - mark_w
+	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var f2 := fs if tw <= maxw else maxi(6, int(fs * maxw / tw))
+	tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f2).x
+	var x0 := -(tw + mark_w) * 0.5
+	if has_mark:
+		BrandMark.draw(self, mark, Vector2(x0 + mu, 0), mu, tcol, bg)
+	draw_string(font, Vector2(x0 + mark_w, f2 * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, f2, tcol)
 
 
 ## Tapetes de publicidade deitados na grama ao lado dos gols (estádios modernos).
@@ -534,14 +579,9 @@ func _draw_carpets(r: Rect2, grass: Rect2) -> void:
 			var rr := Rect2(Vector2(x, y0), Vector2(gap - 2.0, r.size.y * 0.18))
 			var bg := Color(String(b.get("c", "#1B1B1B")))
 			draw_rect(rr, Color(bg.r, bg.g, bg.b, 0.85))
-			var txt := String(b.get("n", "")).to_upper()
 			var fs := int(clampf(gap * 0.55, 6.0, 16.0))
-			var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-			if tw > rr.size.y - 2.0:
-				fs = maxi(5, int(fs * (rr.size.y - 2.0) / tw))
-				tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 			draw_set_transform(rr.get_center(), -PI / 2.0 if left else PI / 2.0, Vector2.ONE)
-			draw_string(font, Vector2(-tw * 0.5, fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(String(b.get("t", "#FFFFFF"))))
+			_board_logo(b, rr.size.y, rr.size.x, fs, font, Color(String(b.get("t", "#FFFFFF"))), bg)
 			draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
