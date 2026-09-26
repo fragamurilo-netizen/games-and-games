@@ -50,6 +50,7 @@ func refresh() -> void:
 			c.add_child(_positions_card(w, p, own))
 			c.add_child(_attributes(w, p, own))
 			c.add_child(_personality(w, p, own))
+			c.add_child(SocialPost.mini_card(w, -1, p.id))
 			if own:
 				c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
 	_actions(w, p, own)

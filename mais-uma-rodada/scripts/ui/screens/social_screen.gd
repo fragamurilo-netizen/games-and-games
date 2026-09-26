@@ -11,20 +11,36 @@ func _init() -> void:
 	screen_title = "Redes sociais"
 
 
+var _club := -1
+var _player := -1
+
+
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_filter = String(p.get("filter", "all"))
+	_club = int(p.get("club", -1))
+	_player = int(p.get("player", -1))
 
 
 func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
-	var user := w.user_club()
-	screen_subtitle = "%s · %s seguidores" % [SocialFeed.club_acc(user)["handle"], SocialFeed.count(SocialFeed.followers(user))]
+	var pl := w.player(_player) if _player >= 0 else null
+	var cl := w.club(_club) if _club >= 0 else w.user_club()
+	var acc := SocialFeed.player_acc(w, pl) if pl != null else SocialFeed.club_acc(cl)
+	var fol := SocialFeed.player_followers(pl, w) if pl != null else SocialFeed.followers(cl, w)
+	var growth := 0.0 if pl != null else SocialFeed.season_growth(cl, w)
+	screen_subtitle = String(acc["handle"]) if (pl != null or _club >= 0) else "Feed"
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	var own := SocialFeed.posts(w, "all", 200, cl.id if pl == null else -1, _player)
+	c.add_child(SocialPost.profile_header(w, acc, fol, growth, own.size()))
+	if pl != null or _club >= 0:
+		var list := SocialFeed.posts(w, "all", _limit + 1, _club if pl == null else -1, _player)
+		_list(w, c, list)
+		return
 	var g := ButtonGroup.new()
 	var row := UIKit.flow(8)
 	for f in SocialFeed.FILTERS:
@@ -37,7 +53,10 @@ func refresh() -> void:
 		chip.add_theme_font_size_override(&"font_size", 18)
 		row.add_child(chip)
 	c.add_child(row)
-	var posts := SocialFeed.posts(w, _filter, _limit + 1)
+	_list(w, c, SocialFeed.posts(w, _filter, _limit + 1))
+
+
+func _list(w: GameWorld, c: VBoxContainer, posts: Array) -> void:
 	if posts.is_empty():
 		c.add_child(UIKit.label("Nada por aqui ainda. Jogos, contratações, coletivas e lançamentos de uniforme viram posts ao longo da temporada.", "Muted", true))
 		return

@@ -36,6 +36,7 @@ func refresh() -> void:
 	UIKit.clear(c)
 	c.add_child(_identity_card(w, club))
 	c.add_child(_dna_card(w, club))
+	c.add_child(SocialPost.mini_card(w, club.id, -1))
 	if _own():
 		c.add_child(_board_card(w, club))
 		c.add_child(_finance_card(w, club))
