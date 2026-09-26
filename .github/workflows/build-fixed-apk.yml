@@ -1,0 +1,81 @@
+name: Build Fixed APK
+
+on:
+  push:
+    branches:
+      - build/mais-uma-rodada-latest-2026-09-26
+    paths:
+      - ".github/workflows/build-fixed-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: build/mais-uma-rodada-latest-2026-09-26
+          fetch-depth: 0
+
+      - name: Import and smoke boot
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              rm -rf .godot
+              godot --headless --path . --import
+              test "$(find .godot/imported -type f -name "*.fontdata" | wc -l)" -ge 4
+              set +e
+              godot --headless --path . --script res://tests/smoke_boot.gd > /workspace/boot-fixed.log 2>&1
+              RC=$?
+              set -e
+              cat /workspace/boot-fixed.log
+              grep -q "SMOKE_BOOT_OK" /workspace/boot-fixed.log
+              if grep -E "SCRIPT ERROR|Parse Error|Invalid call|Failed loading resource: res://assets/fonts|Error loading custom project theme" /workspace/boot-fixed.log; then
+                exit 1
+              fi
+              echo "Smoke RC: $RC"
+            '
+
+      - name: Export fixed Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p mais-uma-rodada/build
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              godot --headless --path . --export-debug "Android arm64" build/MaisUmaRodada-fixed-arm64.apk
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-fixed-arm64.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaisUmaRodada-fixed-arm64
+          path: mais-uma-rodada/build/MaisUmaRodada-fixed-arm64.apk
+          retention-days: 30
+
+      - name: Replace release APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="mais-uma-rodada-latest-2026-09-26"
+          APK="mais-uma-rodada/build/MaisUmaRodada-fixed-arm64.apk"
+          gh release upload "$TAG" "$APK" --clobber
