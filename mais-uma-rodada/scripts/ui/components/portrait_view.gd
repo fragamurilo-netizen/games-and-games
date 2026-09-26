@@ -2413,30 +2413,35 @@ func _beard_mesh() -> void:
 	var col: Color = f["beard_col"]
 	var gray := clampf(float(f["gray"]) * 1.6, 0.0, 0.8)
 	var short := int(P["tx"]) == 0
-	# Barba rala: a malha é só uma sombra leve e contínua; quem desenha as falhas são os fios
+	# Barba rala: a malha é só uma sombra leve e contínua; quem desenha as falhas são os fios.
 	var patchy := minf(1.0, _beard_patchiness(P) * 1.6)
 	var head := _head_contour(_contour_k())
 	var grown := PackedVector2Array()
 	for p in head:
 		var q := _uv(p)
-		# Folga além de onde a densidade zera: a borda da barba é o degradê, nunca o fim da malha
+		# Folga mínima além da linha de densidade para a borda sempre terminar em degradê.
 		var ext := 0.035 * smoothstep(-0.45, -0.2, q.y)
 		if q.y > 0.0:
 			ext += (0.05 + ln * 1.05 * pow(q.y, 1.5)) * smoothstep(0.0, 0.4, q.y)
 			ext *= 1.0 + float(P.get("sq", 0.0)) * (0.9 * smoothstep(0.15, 0.55, absf(q.x)) - 0.25 * (1.0 - smoothstep(0.0, 0.2, absf(q.x))))
 			ext *= 1.0 - float(P.get("pp", 0.0)) * 0.65 * smoothstep(0.05, 0.45, absf(q.x))
 			ext *= 1.0 + float(P.get("wild", 0.0)) * (0.18 * sin(q.x * 23.0 + 1.3) + 0.12 * sin(q.x * 41.0))
-			# Bifurcada: duas pontas, com o meio mais curto
-			ext *= 1.0 - float(P.get("fk", 0.0)) * (0.55 * _g(q.x, 0.1) - 0.2 * _g(absf(q.x) - 0.22, 0.1))
+		# Bifurcada: duas pontas, com o meio mais curto.
+		ext *= 1.0 - float(P.get("fk", 0.0)) * (0.55 * _g(q.x, 0.1) - 0.2 * _g(absf(q.x) - 0.22, 0.1))
 		var dir := (p - _hc).normalized()
 		grown.append(p + Vector2(dir.x * _fw, dir.y * _fh) * ext + Vector2(0, _fh * ext * 0.6 * float(q.y > 0.5)))
-	_beard_data = _radial(_hc, grown, _rings(13), func(p: Vector2, t: float, _i: int) -> Color:
-		var q := _uv(p)
-		var dens := _beard_dens(q.x, q.y, P, false) * (1.0 - smoothstep(0.9, 1.0, t))
-		if dens <= 0.0:
+	# Grade fina na metade de baixo do rosto. Ela preserva bigodes finos e contornos
+	# sem o serrilhado/pontilhado que a antiga malha radial produzia.
+	var bound := _angle_radius_table(_hc, grown, 128)
+	var vmax := -0.4
+	for p in grown:
+		vmax = maxf(vmax, _uv(p).y)
+	var shade := func(p: Vector2) -> Color:
+		var edge := _inside_star(_hc, bound, p)
+		if edge <= 0.0:
 			return Color(col, 0.0)
-		var c: Color = _beard_px(p, P, col, gray, short, patchy, op)
-		return Color(c, c.a * edge)
+		var px: Color = _beard_px(p, P, col, gray, short, patchy, op)
+		return Color(px, px.a * edge)
 	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, int(54 * clampf(_det, 0.35, 1.3)), int(60 * clampf(_det, 0.35, 1.3)), shade)
 
 
