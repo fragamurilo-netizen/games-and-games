@@ -146,6 +146,9 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	# Elenco curto na posição: pede mais.
 	if _family_count(world, seller, p.position) <= _family_min(p.position):
 		ask = int(ask * 1.25)
+	# Diretor de futebol que negocia bem arranca até ~7% (ou paga a mais, se for fraco)
+	var dof := BoardRequests.director(world)
+	ask = int(ask * (1.0 - (float(dof.get("neg", 50)) - 50.0) / 500.0))
 	var swaps := swap_players(world, deal)
 	for sp: Player in swaps:
 		if sp.club_id != user.id or not sp.loan.is_empty():
