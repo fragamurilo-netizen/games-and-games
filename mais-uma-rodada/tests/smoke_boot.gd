@@ -18,15 +18,23 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	await process_frame
-	var host := main.get_node_or_null("SafeArea/Layout/ScreenHost")
-	if host == null:
-		push_error("SMOKE_BOOT: ScreenHost missing")
+	var current := UIManager.current()
+	if current == null:
+		push_error("SMOKE_BOOT: UIManager has no current screen")
 		quit(12)
 		return
-	if host.get_child_count() < 1:
-		push_error("SMOKE_BOOT: no initial screen rendered")
+	if String(current.screen_name) != "menu":
+		push_error("SMOKE_BOOT: expected menu, got %s" % current.screen_name)
 		quit(13)
 		return
-	var first := host.get_child(0)
-	print("SMOKE_BOOT_OK child=", first.name, " type=", first.get_class())
+	var content := current.get_node_or_null("Body/Scroll/Margin/Content")
+	if content == null:
+		push_error("SMOKE_BOOT: menu content node is missing")
+		quit(14)
+		return
+	if content.get_child_count() < 5:
+		push_error("SMOKE_BOOT: menu rendered too few items (%d)" % content.get_child_count())
+		quit(15)
+		return
+	print("SMOKE_BOOT_OK screen=menu items=", content.get_child_count())
 	quit(0)
