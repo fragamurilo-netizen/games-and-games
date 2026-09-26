@@ -35,7 +35,14 @@ jobs:
               apt-get update -qq
               apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
 
-              godot --headless --editor --path /workspace/mais-uma-rodada --quit-after 30 2>&1 | tee /workspace/import.log
+              # A build anterior encerrava o editor antes da importação terminar.
+              # Recria todo o cache e usa --import, que só encerra quando os recursos acabam de importar.
+              rm -rf /workspace/mais-uma-rodada/.godot
+              godot --headless --path /workspace/mais-uma-rodada --import 2>&1 | tee /workspace/import.log
+
+              FONTDATA_COUNT="$(find /workspace/mais-uma-rodada/.godot/imported -type f -name "*.fontdata" 2>/dev/null | wc -l)"
+              echo "Imported fontdata files: $FONTDATA_COUNT"
+              test "$FONTDATA_COUNT" -ge 4
 
               godot --headless --path /workspace/mais-uma-rodada \
                 --script res://scripts/ui/components/portrait_view.gd --check-only 2>&1 | tee /workspace/portrait.log
@@ -109,5 +116,5 @@ jobs:
             gh release create "$TAG" "$APK" \
               --target build/mais-uma-rodada-latest-2026-09-26 \
               --title "Mais Uma Rodada - APK mais atualizado (26/09/2026)" \
-              --notes "Build consolidada e validada com parser, importação de fontes e boot real do menu inicial."
+              --notes "Build consolidada e validada com parser, importação completa de fontes e boot real do menu inicial."
           fi
