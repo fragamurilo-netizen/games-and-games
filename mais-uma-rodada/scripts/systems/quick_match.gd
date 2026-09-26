@@ -78,6 +78,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var team_f := MatchSimulation.damp(float(tac["i_perf"])) * MatchSimulation.damp((0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet)) * MatchSimulation.damp(home_f)
 	# Dia do time (mesmo sorteio do MatchSimulation.DAY_SIGMA).
 	team_f *= MatchSimulation.damp(clampf(rng.randfn(1.0, MatchSimulation.DAY_SIGMA), 0.93, 1.07))
+	team_f *= TeamEvolution.factor(world, club)
 	var pl: Array = [] # [Player, slot_pos, f, w_def, w_att, shoot_w, assist_w, foul_w, rating, c_fin]
 	var d := 0.0
 	var dw := 0.0
@@ -89,6 +90,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var fin := 0.0
 	var fin_n := 0
 	var dis := 0.0
+	var ptech := 0.0
 	for i in slots.size():
 		var pid: int = sheet.starters[i] if i < sheet.starters.size() and sheet.starters[i] != null else -1
 		var p: Player = world.players.get(pid, null)
@@ -149,6 +151,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		if not ins.is_empty():
 			shoot *= float(ins["shoot"])
 		dis += at[Attr.DIS]
+		ptech += at[Attr.TEC] * 0.45 + (at[Attr.PAS] + at[Attr.VIS]) * 0.175 + at[Attr.DEC] * 0.2
 		pl.append([p, pos, f, w_def, w_att, shoot, assist, foul, p.rating_at(pos) * perf, c_fin])
 	var n := maxi(1, pl.size() - 1)
 	var bench: Array = []
@@ -164,6 +167,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		"fin": fin / fin_n if fin_n > 0 else 45.0,
 		"discipline": dis / n,
 		"count": pl.size(),
+		"mu": {"tech": ptech / n, "mid": mw, "pressing": sheet.pressing, "style": sheet.style, "mentality": sheet.mentality, "line": sheet.line, "width": sheet.width},
 	}
 
 
@@ -205,8 +209,22 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var tilt_h := float(th["m_poss"]) + float(th["s_poss"]) + float(th["l_poss"]) + (0.0 if bool(ta["ignores_press"]) else float(th["pr_poss"]))
 	var tilt_a := float(ta["m_poss"]) + float(ta["s_poss"]) + float(ta["l_poss"]) + (0.0 if bool(th["ignores_press"]) else float(ta["pr_poss"]))
 	var x := MatchSimulation.GAMMA * (float(sides[0]["mid"]) - float(sides[1]["mid"]))
-	var poss := clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd, 0.25, 0.75)
+	# Confronto de ideias e estudo do rival (os mesmos do minuto a minuto).
+	var mu := TacticalMatchup.edges(sides[0]["mu"], sides[1]["mu"])
+	var poss := clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd + float(mu["poss"]), 0.25, 0.75)
 	var lam: Array = [_lambda(sides[0], sides[1], poss, true, crowd) * (1.0 + (HOME_BOOST - 1.0) * crowd / 0.9) * float(cul["goals"]), _lambda(sides[1], sides[0], 1.0 - poss, false, crowd) * float(cul["goals"])]
+	var ex_w: Array = []
+	for s in 2:
+		var club_s: Club = sides[s]["club"]
+		var types := TacticalScout.style_types(int(sides[s]["mu"]["style"]))
+		var ex := TacticalScout.exploit(types, TacticalScout.vulnerability(world, sides[1 - s]["club"]), TacticalScout.study(world, club_s))
+		lam[s] *= float(ex[2]) * float(mu["rate_a" if s == 0 else "rate_b"])
+		var w: Array = []
+		for i in 6:
+			w.append(MatchSimulation.BASE_TYPE_W[i] * types[i] * float(ex[0][i]) * MatchSimulation.BASE_XG[i] * float(ex[1][i]))
+		w.append(0.016) # escanteio
+		w.append(0.005) # falta direta
+		ex_w.append(w)
 	# Estado por jogador: [Player, pos, f, w_def, w_att, shoot, assist, foul, rating, c_fin, on(0/1), start_min, end_min, g, a, y, red, inj, pts]
 	var lines: Array = [[], []]
 	for s in 2:
@@ -332,8 +350,18 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 			if mv > motm_v:
 				motm_v = mv
 				motm_pid = p.id
+	# Tipo de jogada de cada gol (diário tático): pelo estilo e pelo que o rival concede.
+	var cts: Array = []
+	for g in goals:
+		var gs: int = g[1]
+		var ct := MatchSimulation.CH_PENALTY if int(g[3]) == Fixture.GOAL_PENALTY else (MatchSimulation.CH_CROSS if int(g[3]) == Fixture.GOAL_OWN else -1)
+		if ct < 0:
+			var k := RngUtil.weighted_index(rng, ex_w[gs])
+			ct = k if k < 6 else (MatchSimulation.CH_CORNER if k == 6 else MatchSimulation.CH_FREEKICK)
+		cts.append([gs, ct, int(g[0]), int(g[4])])
 	return {"hg": score[0], "ag": score[1], "att": att_n, "goals": goals, "motm": motm_pid, "et": et, "pens": pens,
-		"derby": derby, "importance": importance, "yc": yc, "rc": rc, "lines": out_lines, "poss": poss, "ref": ref}
+		"derby": derby, "importance": importance, "yc": yc, "rc": rc, "lines": out_lines, "poss": poss, "ref": ref,
+		"tac": {"ct": cts, "xg": [snappedf(float(lam[0]), 0.01), snappedf(float(lam[1]), 0.01)]}}
 
 
 static func _poisson(rng: RandomNumberGenerator, lam: float) -> int:

@@ -46,6 +46,27 @@ var day_f: float = 1.0
 var g_rate: float = 1.0
 var g_quality: float = 1.0
 var g_poss: float = 0.0
+## Trabalho do técnico e fase do time (TeamEvolution): entra direto no fator individual.
+var evo_f: float = 1.0
+## Largura em campo (0 fechado, 1 normal, 2 aberto): começa na da escalação e muda no jogo.
+var width_i: int = 1
+## Estudo do rival (TacticalScout.exploit): peso e qualidade por tipo de jogada.
+var exploit_w: PackedFloat32Array = PackedFloat32Array([1, 1, 1, 1, 1, 1])
+var exploit_q: PackedFloat32Array = PackedFloat32Array([1, 1, 1, 1, 1, 1])
+## Massa de meio-campo (soma dos pesos de meio) e técnica com a bola sob pressão.
+var mid_mass: float = 4.0
+var press_tech: float = 55.0
+## Leitura do jogo (IA do banco e auxiliar): chances sofridas por corredor (do ponto de vista
+## de quem defende) e por tipo; xG sofrido; decisões táticas já tomadas no jogo.
+var lane_conc: Array[int] = [0, 0, 0]
+var ct_conc: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var xg_conc: float = 0.0
+var ai_reads: int = 0
+## Vulnerabilidade do rival por tipo de jogada e qualidade do estudo de quem prepara o time.
+var vuln: PackedFloat32Array = PackedFloat32Array([1, 1, 1, 1, 1, 1])
+var study: float = 0.5
+## Quanto o técnico se dispõe a mudar o plano (filosofia do clube; o usuário decide sozinho).
+var adapt: float = 0.5
 
 # --- Números táticos cacheados (evita dicionários no laço quente) ---
 var m_att: float = 1.0
@@ -137,6 +158,9 @@ func refresh_tactics() -> void:
 	var types: Dictionary = s["types"]
 	s_types = PackedFloat32Array([float(types.get("through", 1.0)), float(types.get("cross", 1.0)), float(types.get("long", 1.0)),
 		float(types.get("dribble", 1.0)), float(types.get("counter", 1.0)), float(types.get("scramble", 1.0))])
+	var ex := TacticalScout.exploit(s_types, vuln, study)
+	exploit_w = ex[0]
+	exploit_q = ex[1]
 	s_vs_open = float(s.get("vs_open_bonus", 0.0)) * MatchSimulation.MOD_DAMP
 	s_vs_narrow = float(s.get("vs_narrow_bonus", 0.0)) * MatchSimulation.MOD_DAMP
 	s_ignores_press = bool(s.get("ignores_press", false))
@@ -159,6 +183,11 @@ func refresh_tactics() -> void:
 	pr_fouls = float(p["fouls"])
 
 
+## Descrição para o confronto de ideias (TacticalMatchup).
+func matchup_desc() -> Dictionary:
+	return {"tech": press_tech, "mid": mid_mass, "pressing": pressing, "style": style, "mentality": mentality, "line": line, "width": width_i}
+
+
 func goalkeeper() -> MatchPlayer:
 	if slots.size() > 0 and slots[0] != null:
 		return slots[0]
@@ -167,7 +196,7 @@ func goalkeeper() -> MatchPlayer:
 
 ## Fator individual: familiaridade × físico × (moral, forma, desempenho do dia, contexto) × time.
 func refresh_factors() -> void:
-	var team_f := MatchSimulation.damp(i_perf) * MatchSimulation.damp(cohesion_f) * MatchSimulation.damp(home_f)
+	var team_f := MatchSimulation.damp(i_perf) * MatchSimulation.damp(cohesion_f) * MatchSimulation.damp(home_f) * evo_f
 	for mp: MatchPlayer in slots:
 		if mp == null:
 			continue
@@ -197,6 +226,7 @@ func recompute_units() -> void:
 	var dec_n := 0.0
 	var fit_sum := 0.0
 	var ovr_sum := 0.0
+	var pt_sum := 0.0
 	var n := 0
 	u_gk = 15.0
 	for mp: MatchPlayer in slots:
@@ -223,6 +253,7 @@ func recompute_units() -> void:
 			dec_sum += mp.a_dec
 			dec_n += 1.0
 		tech_sum += mp.a_tec
+		pt_sum += mp.a_tec * 0.45 + mp.a_pas_vis * 0.175 + mp.a_dec * 0.2
 		dis_sum += mp.a_dis
 		if not s_fit_attrs.is_empty():
 			fit_sum += mp.style_fit_value(style, s_fit_attrs)
@@ -232,7 +263,9 @@ func recompute_units() -> void:
 	u_def = ((d / maxf(0.01, dw)) * sqrt(dw / norm_def) if dw > 0.0 else 10.0) * train_def
 	u_mid = (m / maxf(0.01, mw)) * sqrt(mw / norm_mid) if mw > 0.0 else 10.0
 	u_att = ((a / maxf(0.01, aw)) * sqrt(aw / norm_att) if aw > 0.0 else 10.0) * train_att
-	width = wsum * ([0.7, 1.0, 1.3][clampi(sheet.width, 0, 2)] if sheet != null else 1.0)
+	width = wsum * [0.7, 1.0, 1.3][clampi(width_i, 0, 2)]
+	mid_mass = mw
+	press_tech = pt_sum / maxf(1.0, n)
 	aer.sort()
 	aer.reverse()
 	aerial_att = _avg(aer.slice(0, 3))

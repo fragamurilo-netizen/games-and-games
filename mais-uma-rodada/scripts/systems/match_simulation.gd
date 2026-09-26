@@ -209,6 +209,12 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 			teams[1 - side].day_f *= USER_OPP_BOOST[clampi(world.difficulty, 0, 2)]
 	for t: MatchTeam in teams:
 		t.home_f *= t.day_f
+	# Os times se estudaram: cada um sabe onde o outro sofre (TacticalScout).
+	for t: MatchTeam in teams:
+		var opp_club: Club = teams[1 - t.side].club
+		t.vuln = TacticalScout.vulnerability(world, opp_club)
+		t.study = TacticalScout.study(world, t.club)
+		t.adapt = float(ClubPhilosophy.of(t.club).get("adapt", 0.4))
 	for t: MatchTeam in teams:
 		t.refresh_tactics()
 		t.recompute_units()
@@ -253,6 +259,8 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.intensity = sheet.intensity
 	t.line = sheet.line
 	t.pressing = sheet.pressing
+	t.width_i = sheet.width
+	t.evo_f = TeamEvolution.factor(world, club)
 	t.cohesion_base = 0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08
 	t.cohesion_f = t.cohesion_base * TacticsManager.fam_factor(club, sheet)
 	var um := TrainingManager.unit_mults(world, club)
@@ -363,6 +371,10 @@ func step() -> Array:
 			t.recompute_units()
 		_game_state()
 		_refresh_rates()
+		# No vestiário, o técnico da IA relê o primeiro tempo.
+		for t: MatchTeam in teams:
+			if not t.is_user:
+				_ai_read(t)
 		if live != null:
 			live.sync_teams()
 			live.kickoff(1)
@@ -958,11 +970,12 @@ func _refresh_rates() -> void:
 	var tilt_h := h.m_poss + h.s_poss + h.l_poss + (0.0 if a.s_ignores_press else h.pr_poss) + h.g_poss + h.sh_poss
 	var tilt_a := a.m_poss + a.s_poss + a.l_poss + (0.0 if h.s_ignores_press else a.pr_poss) + a.g_poss + a.sh_poss
 	var x := GAMMA * (h.u_mid - a.u_mid)
-	_poss_base = clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd, 0.25, 0.75)
+	var mu := TacticalMatchup.edges(h.matchup_desc(), a.matchup_desc())
+	_poss_base = clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd + float(mu["poss"]), 0.25, 0.75)
 	for s in 2:
 		var att: MatchTeam = teams[s]
 		var dfn: MatchTeam = teams[1 - s]
-		_rate_chance[s] = _chance_prob(att, dfn) * goal_f
+		_rate_chance[s] = _chance_prob(att, dfn) * goal_f * float(mu["rate_a" if s == 0 else "rate_b"])
 		_rate_foul[s] = _foul_prob(att)
 		var direct := att.style == TeamSheet.STYLE_DIRETO or att.style == TeamSheet.STYLE_CONTRA or att.style == TeamSheet.STYLE_LONGA
 		_rate_off[s] = 0.028 * dfn.l_offside * (1.25 if direct else 1.0)
@@ -1025,7 +1038,7 @@ func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
 func _pick_chance_type(att: MatchTeam, dfn: MatchTeam) -> int:
 	var w: Array = []
 	for i in 6:
-		var v: float = _type_w[i] * att.s_types[i]
+		var v: float = _type_w[i] * att.s_types[i] * att.exploit_w[i]
 		match i:
 			CH_CROSS:
 				v *= clampf(0.5 + att.width / 4.0, 0.5, 1.6)
@@ -1135,6 +1148,13 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		# O jogo aéreo decide cruzamentos e escanteios.
 		if ctype == CH_CROSS or ctype == CH_CORNER:
 			xg *= clampf(exp(0.012 * (att.aerial_att - dfn.aerial_def)), 0.7, 1.4)
+	if ctype < 6:
+		xg *= att.exploit_q[ctype]
+	# Leitura do jogo: onde e como cada time está sofrendo.
+	dfn.ct_conc[ctype] += 1
+	dfn.xg_conc += xg
+	if lane >= 0:
+		dfn.lane_conc[2 - lane] += 1
 	var skill: float
 	match ctype:
 		CH_CROSS, CH_CORNER:
@@ -1911,6 +1931,135 @@ func set_formation(side: int, fname: String) -> bool:
 	return true
 
 
+func set_pressing(side: int, v: int) -> void:
+	var t: MatchTeam = teams[side]
+	v = clampi(v, 0, 2)
+	if t.pressing == v:
+		return
+	t.pressing = v
+	_retune(t, {"pressing": v}, "Pressão %s" % String(DatabaseManager.tactics()["pressing"][v]["name"]).to_lower())
+
+
+func set_line(side: int, v: int) -> void:
+	var t: MatchTeam = teams[side]
+	v = clampi(v, 0, 2)
+	if t.line == v:
+		return
+	t.line = v
+	_retune(t, {"line": v}, "Linha %s" % String(DatabaseManager.tactics()["line"][v]["name"]).to_lower())
+
+
+func set_width(side: int, v: int) -> void:
+	var t: MatchTeam = teams[side]
+	v = clampi(v, 0, 2)
+	if t.width_i == v:
+		return
+	t.width_i = v
+	_retune(t, {"width": v}, "Largura: %s" % TeamSheet.WIDTH_NAMES[v].to_lower())
+
+
+func set_intensity(side: int, v: int) -> void:
+	var t: MatchTeam = teams[side]
+	v = clampi(v, 0, 2)
+	if t.intensity == v:
+		return
+	t.intensity = v
+	_retune(t, {"intensity": v}, "Intensidade %s" % String(DatabaseManager.tactics()["intensity"][v]["name"]).to_lower())
+
+
+## Instrução individual no meio do jogo ("" tira a instrução).
+func set_instruction(side: int, pid: int, key: String) -> void:
+	var t: MatchTeam = teams[side]
+	var mp: MatchPlayer = t.by_id.get(pid, null)
+	if mp == null or not mp.on_pitch or mp.slot <= 0:
+		return
+	var ins: Dictionary = TeamSheet.INSTRUCTIONS.get(key, {})
+	if ins == mp.instr:
+		return
+	mp.instr = ins
+	_assign_slot(mp, mp.slot, t.formation["slots"][mp.slot])
+	_retune(t, {"instr": key}, "%s: %s" % [mp.p.display_name(), String(ins.get("name", "sem instrução")).to_lower()], pid)
+
+
+func _retune(t: MatchTeam, x: Dictionary, label: String, pid: int = -1) -> void:
+	t.refresh_tactics()
+	t.recompute_units()
+	_refresh_rates()
+	_emit(EV_TACTIC, t.side, pid, -1, x)
+	if t.is_user:
+		xr_mark(label)
+
+
+## O técnico da IA lê o jogo (no intervalo e duas vezes no segundo tempo) e corrige o que está
+## dando errado: cansaço, pressão sofrida, linha alta contra velocistas, um lado que só sofre,
+## domínio sem gol, bloco baixo que não se abre. No máximo uma mudança por leitura; técnico
+## que estuda mais (TacticalScout.study) enxerga mais e reage mais.
+func _ai_read(t: MatchTeam) -> void:
+	if t.ai_reads >= 3 or t.on_pitch_count < 10:
+		return
+	t.ai_reads += 1
+	if rng.randf() > 0.3 + t.study * 0.65:
+		return
+	var o: MatchTeam = teams[1 - t.side]
+	var diff: int = score[t.side] - score[o.side]
+	var poss := possession_pct(t.side)
+	var cond := 0.0
+	var n := 0
+	for mp: MatchPlayer in t.slots:
+		if mp != null and mp.slot > 0:
+			cond += mp.cond
+			n += 1
+	cond /= maxf(1.0, n)
+	var conc_total: int = t.lane_conc[0] + t.lane_conc[1] + t.lane_conc[2]
+	# 1. Fôlego: pressão e intensidade não se sustentam
+	if t.pressing == 2 and cond < 68.0:
+		set_pressing(t.side, 1)
+		return
+	if t.intensity == 2 and cond < 64.0:
+		set_intensity(t.side, 1)
+		return
+	# 2. Sufocado pela pressão rival: ligação direta
+	if (o.pressing == 2 or o.style == TeamSheet.STYLE_PRESSAO) and poss < 0.42 and t.press_tech < o.press_tech and t.style != TeamSheet.STYLE_LONGA and t.adapt >= 0.4:
+		set_style(t.side, TeamSheet.STYLE_LONGA)
+		return
+	# 3. Linha alta sofrendo com bolas nas costas
+	if t.line == 2 and t.ct_conc[CH_THROUGH] + t.ct_conc[CH_COUNTER] >= 3:
+		set_line(t.side, 1)
+		return
+	# 4. Um lado que só sofre: quem joga ali segura a posição
+	if conc_total >= 4:
+		for l in 3:
+			if l != 1 and t.lane_conc[l] >= 3 and float(t.lane_conc[l]) / conc_total >= 0.55:
+				var who := _lane_player(t, l)
+				if who != null and String(who.instr.get("name", "")) != String(TeamSheet.INSTRUCTIONS["segurar"]["name"]):
+					set_instruction(t.side, who.p.id, "segurar")
+					return
+	# 5. Domina e não marca: abre o campo
+	if diff <= 0 and t.xg - o.xg >= 0.8 and t.width_i < 2:
+		set_width(t.side, 2)
+		return
+	# 6. Bloco baixo do rival que não se abre: jogo pelos lados
+	if diff <= 0 and o.line == 0 and o.mentality <= TeamSheet.MENT_DEFENSIVA and t.xg < 0.6 and t.style == TeamSheet.STYLE_POSSE and t.adapt >= 0.4:
+		set_style(t.side, TeamSheet.STYLE_LADOS)
+		return
+	# 7. Vencendo e sofrendo muito: baixa a linha e fecha o meio
+	if diff > 0 and o.xg - t.xg >= 0.7 and t.line > 0:
+		set_line(t.side, t.line - 1)
+
+
+## Lateral (ou ala/meia aberto) que cobre o corredor `lane` (do ponto de vista de quem defende).
+func _lane_player(t: MatchTeam, lane: int) -> MatchPlayer:
+	var best: MatchPlayer = null
+	for mp: MatchPlayer in t.slots:
+		if mp == null or mp.slot <= 0 or t.lane_of(mp) != lane:
+			continue
+		if mp.role == "FB" or mp.role == "WB":
+			return mp
+		if best == null or mp.w_def > best.w_def:
+			best = mp
+	return best
+
+
 ## Entrosamento com a formação/estilo em uso agora (muda quando o técnico mexe no time).
 func _refresh_fam(t: MatchTeam) -> void:
 	var fam := (TacticsManager.formation_fam(t.club, t.formation_name) + TacticsManager.style_fam(t.club, t.style)) * 0.5
@@ -1965,6 +2114,8 @@ func _ai_decisions() -> void:
 			_auto_subs(t)
 		if t.is_user:
 			continue
+		if minute == 58 or minute == 70:
+			_ai_read(t)
 		_ai_formation(t)
 		if minute % 10 == 0 and minute >= 60:
 			var diff: int = score[t.side] - score[1 - t.side]
@@ -2111,7 +2262,18 @@ func to_result() -> Dictionary:
 	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats,
 		"et": half >= 3, "pens": [pen_score[0], pen_score[1]] if pen_taken[0] + pen_taken[1] > 0 else [],
 		"derby": derby, "importance": importance, "yc": [teams[0].yellows, teams[1].yellows], "rc": [teams[0].reds, teams[1].reds],
-		"lines": lines, "poss": possession_pct(0), "ref": ref}
+		"lines": lines, "poss": possession_pct(0), "ref": ref, "tac": tactical_result()}
+
+
+## Gols por tipo de jogada e xG, para o diário tático (TacticalScout): {ct: [[lado, tipo, min, tempo]], xg}.
+func tactical_result() -> Dictionary:
+	var cts: Array = []
+	for ev in events:
+		var t: int = ev["t"]
+		if t == EV_GOAL or t == EV_OWN_GOAL:
+			var ct := CH_CROSS if t == EV_OWN_GOAL else int(ev.get("x", {}).get("ct", CH_THROUGH))
+			cts.append([int(ev["s"]), ct, int(ev["m"]), int(ev["h"])])
+	return {"ct": cts, "xg": [snappedf(teams[0].xg, 0.01), snappedf(teams[1].xg, 0.01)]}
 
 
 ## Craque do jogo: maior nota (desempate: time vencedor).
