@@ -55,7 +55,7 @@ func refresh() -> void:
 	c.add_child(UIKit.section("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
 	grid.columns = 5
-	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):
 		grid.add_child(_cell(club, n, owners.get(n, null)))
@@ -89,15 +89,17 @@ func _head(w: GameWorld, club: Club) -> Control:
 	return UIKit.card_panel(card)
 
 
-## Camisa: a miniatura no uniforme do clube, com o número e o dono embaixo.
+## Camisa vista de costas (como no vestiário): número grande e o nome do dono em cima.
 func _cell(club: Club, n: int, owner: Player) -> Control:
 	var col := UIKit.vbox(0)
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	var kit := KitView.new()
 	kit.kit = club.kit_for(owner) if owner != null else club.kit_home
+	kit.back = true
+	kit.back_name = owner.short_name() if owner != null else ""
 	kit.number = n
 	kit.crest = club.crest
-	kit.custom_minimum_size = Vector2(96, 78)
+	kit.custom_minimum_size = Vector2(96, 100)
 	kit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owner == null:
 		kit.modulate = Color(1, 1, 1, 0.38)
