@@ -30,6 +30,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
 
           cp .github/workflows/build-mais-uma-rodada.yml /tmp/build-mais-uma-rodada.yml
+          cp mais-uma-rodada/tests/smoke_boot.gd /tmp/smoke_boot.gd
 
           git fetch origin \
             claude/project-thread-88g6x1:refs/remotes/origin/claude/project-thread-88g6x1 \
@@ -39,10 +40,11 @@ jobs:
             claude/laughing-goodall-0bqaod:refs/remotes/origin/claude/laughing-goodall-0bqaod
 
           git checkout -B build/mais-uma-rodada-latest-2026-09-26 de367a8af76d596cd8190b3bd6939fe905b33d7e
-          mkdir -p .github/workflows
+          mkdir -p .github/workflows mais-uma-rodada/tests
           cp /tmp/build-mais-uma-rodada.yml .github/workflows/build-mais-uma-rodada.yml
-          git add .github/workflows/build-mais-uma-rodada.yml
-          git commit -m "ci: preserve APK builder" || true
+          cp /tmp/smoke_boot.gd mais-uma-rodada/tests/smoke_boot.gd
+          git add .github/workflows/build-mais-uma-rodada.yml mais-uma-rodada/tests/smoke_boot.gd
+          git commit -m "ci: preserve APK builder and boot smoke" || true
 
           merge_branch() {
             branch="$1"
@@ -93,8 +95,9 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace/mais-uma-rodada \
             barichello/godot-ci:4.7 \
-            godot --headless --path /workspace/mais-uma-rodada --quit-after 10 2>&1 | tee /tmp/boot.log
-          if grep -E "SCRIPT ERROR|Parse Error|Cannot get class|Invalid call|ERROR:" /tmp/boot.log; then
+            godot --headless --path /workspace/mais-uma-rodada --script res://tests/smoke_boot.gd 2>&1 | tee /tmp/boot.log
+          grep -q "SMOKE_BOOT_OK" /tmp/boot.log
+          if grep -E "SCRIPT ERROR|Parse Error|Invalid call|SMOKE_BOOT:" /tmp/boot.log; then
             echo "::error::Runtime boot produced Godot errors."
             exit 1
           fi
@@ -108,7 +111,7 @@ jobs:
             -w /workspace/mais-uma-rodada \
             barichello/godot-ci:4.7 \
             godot --headless --path /workspace/mais-uma-rodada --script res://tests/run_tests.gd \
-            || echo "::warning::The legacy test suite reported failures; continuing because import validation passed."
+            || echo "::warning::The legacy test suite reported failures; continuing because boot smoke passed."
 
       - name: Save consolidated branch
         shell: bash
@@ -154,5 +157,5 @@ jobs:
             gh release create "$TAG" "$APK" \
               --target build/mais-uma-rodada-latest-2026-09-26 \
               --title "Mais Uma Rodada - APK mais atualizado (26/09/2026)" \
-              --notes "Build consolidada das branches do Mais Uma Rodada, incluindo uniformes, redes sociais, patrocinadores, rostos e o LiveEngine mais recente."
+              --notes "Build consolidada das branches do Mais Uma Rodada, validada com boot real da cena inicial."
           fi
