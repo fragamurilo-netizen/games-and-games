@@ -537,6 +537,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
@@ -545,6 +546,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
 		TacticsManager.after_match(club, club.sheet, String(club.training.get("focus", "")) == "tatico")
+		TeamEvolution.after_match(world, club, world.club(f.away if side == 0 else f.home), result, side == 0)
 		# Torcida
 		var patience := float(club.arch().get("fan_patience", 50))
 		var swing := 1.0 + (50.0 - patience) / 100.0
@@ -966,6 +968,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		NewsManager.post(world, "contrato_fim", {"player": p.display_name(), "club": world.user_club().short_name, "apps": p.career_apps}, world.user_club_id, p.id, NewsEvent.IMP_HIGH)
 	# DNA dos clubes reage à temporada (antes da troca de divisões)
 	ClubDNA.season_end(world, moves)
+	TeamEvolution.season_end(world)
 	# Investimentos em estrutura/base e depreciação
 	FinanceManager.yearly_investments(world)
 	# Mudança de divisões
@@ -1040,6 +1043,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	# Mercado das férias: os outros clubes fazem a maior parte dos negócios antes da bola rolar.
 	MarketAI.offseason(world)
 	compute_goals(world)
+	TeamEvolution.season_start(world)
 	SponsorManager.open_preseason(world)
 	BoardObjectives.list(world) # metas da diretoria fixadas no começo do ano
 	if world.has_user():

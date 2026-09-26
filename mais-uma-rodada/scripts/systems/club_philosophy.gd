@@ -76,7 +76,7 @@ static func formations(club: Club) -> Array:
 ## Tática da IA para um jogo, a partir da filosofia. Clubes pragmáticos leem o adversário;
 ## os idealistas mudam pouco (no máximo baixam um pouco a mentalidade contra gigantes).
 ## Não usa o RNG do mundo: a variação vem do dia e do clube, então tudo segue determinístico.
-static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_home: bool, sheet: TeamSheet) -> void:
+static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_home: bool, sheet: TeamSheet, with_study: bool = true) -> void:
 	var ph := of(club)
 	var adapt := float(ph.get("adapt", 0.3))
 	var day := world.season.day if world.season != null else 0
@@ -122,6 +122,11 @@ static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_ho
 	sheet.pressing = clampi(pressing, 0, 2)
 	sheet.line = clampi(line, 0, 2)
 	sheet.intensity = clampi(intensity, 0, 2)
+	sheet.width = 1
+	# Estudo do rival: o técnico lê o adversário e ajusta o plano para este jogo.
+	if with_study and opponent != null:
+		var roll2 := float(absi(club.id * 3571 + day * 7907 + opponent.id * 613) % 1000) / 1000.0
+		TacticalScout.ai_adjust(world, club, opponent, is_home, sheet, adapt, roll2)
 
 
 static func _avg_condition(world: GameWorld, sheet: TeamSheet) -> float:

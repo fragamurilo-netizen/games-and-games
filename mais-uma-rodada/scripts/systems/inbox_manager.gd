@@ -46,6 +46,10 @@ const BOARD_EVERY := 8 # jogos entre duas cartas da diretoria
 # Acesso
 # ---------------------------------------------------------------------------
 
+## A cada quantas rodadas o auxiliar manda as tendências do time.
+const TREND_EVERY := 5
+
+
 static func send(world: GameWorld, from: String, subject: String, body: String, action: Dictionary = {}, player_id: int = -1, club_id: int = -1, sender_name: String = "") -> Dictionary:
 	var id := int(world.stats.get("inbox_next", 1))
 	world.stats["inbox_next"] = id + 1
@@ -250,6 +254,8 @@ static func after_user_turn(world: GameWorld, report: Dictionary, entry: Diction
 	var club := world.user_club()
 	if turn > 0 and turn % SCOUT_EVERY == 0:
 		scout_report(world)
+	if turn > 0 and turn % TREND_EVERY == 0:
+		Assistant.trend_message(world)
 	if turn > 0 and turn % BOARD_EVERY == 0:
 		_board_letter(world, club)
 	_contracts_notice(world, club)
@@ -291,6 +297,10 @@ static func _match_report(world: GameWorld, entry: Dictionary) -> void:
 		lines[0] += " Destaque: %s (nota %s)." % [best.display_name(), _nota(best_r)]
 	if worst != null and worst != best and worst_r < 6.0:
 		lines.append("%s ficou abaixo (nota %s). Pode ser hora de uma conversa ou de um descanso." % [worst.display_name(), _nota(worst_r)])
+	# Leitura tática do jogo
+	var tl := Assistant.match_lines(world, club, entry)
+	if not tl.is_empty():
+		lines.append(" ".join(tl))
 	var nf := FixtureManager.next_fixture_for(world, club.id)
 	if nf != null:
 		var nopp := world.club(nf.opponent_of(club.id))
@@ -306,6 +316,10 @@ static func _match_report(world: GameWorld, entry: Dictionary) -> void:
 			if MatchEngine.is_derby(world, nf.home, nf.away):
 				txt += " É clássico: a torcida vai cobrar."
 			lines.append(txt)
+			# Primeira leitura do estudo do próximo rival
+			var notes := TacticalScout.weaknesses(TacticalScout.profile(world, nopp), TacticalScout.study(world, club))
+			if not notes.is_empty():
+				lines.append("Já comecei a estudar o %s. %s O dossiê completo está no pré-jogo." % [nopp.short_name, String(notes[0]["text"])])
 	send(world, "auxiliar", "Relatório: %s %d x %d %s" % [club.short_name, mine, theirs, opp.short_name if opp != null else ""],
 		"\n\n".join(lines), {"k": "screen", "s": "prematch", "args": {"edit": true}} if nf != null else {}, best.id if best != null else -1)
 
