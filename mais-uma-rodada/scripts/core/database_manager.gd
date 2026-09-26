@@ -19,7 +19,7 @@ const PATHS := {
 	"personalities": "res://data/gameplay/personalities.json",
 	"formations": "res://data/gameplay/formations.json",
 	"tactics": "res://data/gameplay/tactics.json",
-	"sponsors": "res://data/gameplay/sponsors.json",
+	"brands": "res://data/world/brands.json",
 	"club_policies": "res://data/gameplay/club_policies.json",
 	"commentary": "res://data/text/commentary.json",
 	"news": "res://data/text/news.json",
@@ -135,12 +135,13 @@ static func has_nation(code: String) -> bool:
 	return nations().has(code)
 
 
-static func sponsor_brands() -> Array:
-	return _load_json("sponsors").get("brands", [])
+## Catálogo de marcas fictícias por país (use BrandCatalog para consultar).
+static func brand_data() -> Dictionary:
+	return _load_json("brands")
 
 
 static func kit_suppliers() -> Array:
-	return _load_json("sponsors").get("suppliers", [])
+	return brand_data().get("suppliers", [])
 
 
 static func nation_name(code: String) -> String:

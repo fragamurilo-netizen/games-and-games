@@ -1,0 +1,831 @@
+{
+	"_doc": "Catálogo único das marcas fictícias do mundo do jogo: patrocinadores de clubes, fornecedoras de material esportivo e anunciantes das placas. Lido por BrandCatalog (scripts/systems/brand_catalog.gd), que é a porta para qualquer tela (uniformes, placas, sala de imprensa, redes sociais). Campos da marca: n nome, s setor, tier (1 local, 2 nacional, 3 grande do país ou multinacional), c cor de fundo, t cor do texto, m forma do símbolo. nations[código]: brands (marcas do país), local (modelos com {c} = cidade do clube, viram marcas de bairro), mix (peso de cada setor no peito da camisa, como no país real), ban (setor: all = proibido em camisa e placa; master1 = não pode no peito na 1ª divisão). global: multinacionais (r = confederações onde anunciam). suppliers: fornecedoras (r = all, confederações ou países; o = país de origem; logo = forma no peito). sectors: nome de cada setor para a interface.",
+	"sectors": {"aposta": "Casa de apostas", "banco": "Banco", "fintech": "Banco digital", "aerea": "Companhia aérea", "cerveja": "Cervejaria", "bebida": "Bebidas", "telecom": "Telefonia", "montadora": "Automotivo", "energia": "Energia", "seguro": "Seguradora", "varejo": "Varejo", "tecnologia": "Tecnologia", "construcao": "Construção", "alimentos": "Alimentos", "saude": "Saúde", "educacao": "Educação", "turismo": "Turismo", "petroleo": "Combustíveis", "logistica": "Logística", "imobiliaria": "Imobiliária", "cripto": "Criptomoedas", "midia": "Streaming e mídia", "mineracao": "Mineração", "luxo": "Luxo"},
+	"marks": {"aposta": ["estrela", "diamante", "raio", "alvo"], "banco": ["escudo", "colunas", "anel"], "fintech": ["hexagono", "seta", "anel"], "aerea": ["asa", "asa", "seta"], "cerveja": ["coroa", "espiga"], "bebida": ["gota", "onda"], "telecom": ["onda", "sinal"], "montadora": ["anel", "chevron", "escudo"], "energia": ["raio", "sol", "chama"], "seguro": ["escudo", "guarda"], "varejo": ["seta", "sacola"], "tecnologia": ["hexagono", "pixel"], "construcao": ["telhado", "colunas"], "alimentos": ["folha", "sol", "espiga"], "saude": ["cruz", "folha"], "educacao": ["livro", "estrela"], "turismo": ["sol", "onda"], "petroleo": ["gota", "chama"], "logistica": ["seta", "chevron"], "imobiliaria": ["telhado", "colunas"], "cripto": ["hexagono", "diamante"], "midia": ["play", "onda"], "mineracao": ["montanha", "diamante"], "luxo": ["coroa", "diamante"]},
+	"palettes": {"aposta": [["#0B2E13", "#C6FF00"], ["#FF6A00", "#FFFFFF"], ["#111111", "#FFD100"], ["#1A0B3D", "#39FF14"], ["#003B7A", "#FFB800"], ["#E4002B", "#FFFFFF"]], "banco": [["#0B3C5D", "#FFFFFF"], ["#C8102E", "#FFFFFF"], ["#00563F", "#FFFFFF"], ["#FFCC00", "#003366"], ["#1B3A8C", "#FFD100"], ["#EC7000", "#FFFFFF"]], "fintech": [["#820AD1", "#FFFFFF"], ["#00D1B2", "#0B1F33"], ["#FF3D6E", "#FFFFFF"], ["#111111", "#7CFFCB"]], "aerea": [["#FFFFFF", "#0B3C8C"], ["#8A1538", "#FFFFFF"], ["#004D40", "#E8C872"], ["#0072CE", "#FFFFFF"], ["#E30613", "#FFFFFF"]], "cerveja": [["#FFD100", "#C8102E"], ["#0B5E2E", "#F2E3B3"], ["#7A0019", "#F2C14E"], ["#0033A0", "#FFFFFF"], ["#1B1B1B", "#D4AF37"]], "bebida": [["#E4002B", "#FFFFFF"], ["#FF8200", "#FFFFFF"], ["#00A3E0", "#FFFFFF"], ["#2E7D32", "#FFFFFF"], ["#4A148C", "#FFD54F"]], "telecom": [["#5B2C83", "#FFFFFF"], ["#E60000", "#FFFFFF"], ["#00A0DF", "#FFFFFF"], ["#FF7900", "#111111"], ["#E20074", "#FFFFFF"]], "montadora": [["#111111", "#FFFFFF"], ["#8B0000", "#FFFFFF"], ["#0A2240", "#C0C0C0"], ["#C0C0C0", "#111111"], ["#003399", "#FFFFFF"]], "energia": [["#F58220", "#111111"], ["#00838F", "#FFFFFF"], ["#FFD100", "#0B3C5D"], ["#009A44", "#FFFFFF"], ["#E4002B", "#FFD100"]], "seguro": [["#1B3A8C", "#FFD100"], ["#00539B", "#FFFFFF"], ["#E30613", "#FFFFFF"], ["#006D5B", "#FFFFFF"]], "varejo": [["#E91E63", "#FFFFFF"], ["#E4572E", "#FFFFFF"], ["#FFD100", "#E4002B"], ["#0071CE", "#FFC220"], ["#00843D", "#FFFFFF"]], "tecnologia": [["#111111", "#00A86B"], ["#1428A0", "#FFFFFF"], ["#FFFFFF", "#111111"], ["#00B2A9", "#FFFFFF"]], "construcao": [["#8D99AE", "#111111"], ["#FFB400", "#111111"], ["#5D4037", "#FFFFFF"], ["#003F72", "#FFFFFF"]], "alimentos": [["#2E7D32", "#FFFFFF"], ["#FFFFFF", "#C8102E"], ["#F2A900", "#3E2723"], ["#3E2723", "#F2C14E"], ["#FFFFFF", "#2E7D32"]], "saude": [["#FFFFFF", "#00A651"], ["#00A651", "#FFFFFF"], ["#0072BC", "#FFFFFF"]], "educacao": [["#0B3C5D", "#F2C14E"], ["#7A0019", "#FFFFFF"], ["#FFFFFF", "#1B3A8C"]], "turismo": [["#00A3E0", "#FFFFFF"], ["#FFB81C", "#0B3C5D"], ["#FFFFFF", "#0077C8"]], "petroleo": [["#006341", "#FFD100"], ["#111111", "#E4002B"], ["#FFD100", "#E4002B"], ["#0033A0", "#FFD100"]], "logistica": [["#FFCC00", "#D40511"], ["#4D148C", "#FF6600"], ["#111111", "#FFB400"]], "imobiliaria": [["#0B2545", "#D4AF37"], ["#FFFFFF", "#0B2545"], ["#6B2737", "#FFFFFF"]], "cripto": [["#111111", "#F7931A"], ["#0B0E11", "#F0B90B"], ["#1652F0", "#FFFFFF"]], "midia": [["#E50914", "#FFFFFF"], ["#111111", "#1DB954"], ["#6441A5", "#FFFFFF"]], "mineracao": [["#4E342E", "#FFB300"], ["#263238", "#FFFFFF"], ["#FF6F00", "#111111"]], "luxo": [["#111111", "#D4AF37"], ["#FFFFFF", "#111111"], ["#0B2545", "#FFFFFF"]]},
+	"nations": {
+		"BRA": {
+			"mix": {"aposta": 7, "banco": 2, "fintech": 2, "saude": 1, "bebida": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Auto Peças {c}|montadora", "Materiais {c}|construcao", "Hospital {c}|saude", "Faculdade {c}|educacao", "Imobiliária {c}|imobiliaria", "Cooperativa {c}|banco", "Rádio {c}|midia"],
+			"brands": [
+				{"n": "Banco Horizonte", "s": "banco", "tier": 3, "c": "#0B6E4F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Voa Linhas Aéreas", "s": "aerea", "tier": 3, "c": "#4EA8DE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Chutaço Bet", "s": "aposta", "tier": 3, "c": "#0B2E13", "t": "#C6FF00", "m": "estrela"},
+				{"n": "Pagaê", "s": "fintech", "tier": 3, "c": "#820AD1", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Telefônica Onda", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Cerveja Garoa", "s": "cerveja", "tier": 3, "c": "#FFD100", "t": "#C8102E", "m": "coroa"},
+				{"n": "Energia Faísca", "s": "energia", "tier": 3, "c": "#F58220", "t": "#111111", "m": "raio"},
+				{"n": "Palpitaço", "s": "aposta", "tier": 3, "c": "#FF6A00", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Seguros Âncora", "s": "seguro", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Leite Campo Verde", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "folha"},
+				{"n": "Pneus Trilho", "s": "montadora", "tier": 2, "c": "#111111", "t": "#FFD100", "m": "chevron"},
+				{"n": "Loja Veloz", "s": "varejo", "tier": 2, "c": "#E91E63", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Bebidas Guará", "s": "bebida", "tier": 2, "c": "#E4002B", "t": "#FFFFFF", "m": "gota"},
+				{"n": "Construtora Alicerce", "s": "construcao", "tier": 2, "c": "#8D99AE", "t": "#111111", "m": "telhado"},
+				{"n": "Universidade Saber", "s": "educacao", "tier": 2, "c": "#7A0019", "t": "#FFFFFF", "m": "estrela"},
+				{"n": "Frigorífico Pampa", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Rede Saúde Vida", "s": "saude", "tier": 2, "c": "#FFFFFF", "t": "#00A651", "m": "cruz"},
+				{"n": "Postos Rota", "s": "petroleo", "tier": 2, "c": "#0033A0", "t": "#FFD100", "m": "gota"},
+				{"n": "Apostaê", "s": "aposta", "tier": 2, "c": "#111111", "t": "#FFD100", "m": "diamante"},
+				{"n": "Bate-Bola Bet", "s": "aposta", "tier": 2, "c": "#E4002B", "t": "#FFFFFF", "m": "alvo"},
+				{"n": "Padaria Estrela", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "Auto Peças Rodão", "s": "montadora", "tier": 1, "c": "#C8102E", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Farmácia Bem-Estar", "s": "saude", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "cruz"},
+				{"n": "Supermercado Cesta", "s": "varejo", "tier": 1, "c": "#E4572E", "t": "#FFFFFF", "m": "sacola"},
+				{"n": "Café Serrano", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "sol"},
+				{"n": "Móveis Lar Doce", "s": "varejo", "tier": 1, "c": "#FFFFFF", "t": "#7B3F00", "m": "sacola"},
+				{"n": "Transportes Vento Sul", "s": "logistica", "tier": 1, "c": "#0033A0", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Açaí da Praça", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "sol"},
+				{"n": "Churrascaria Fogo Bravo", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"}
+			]
+		},
+		"ENG": {
+			"mix": {"aposta": 4, "aerea": 2, "cripto": 2, "fintech": 2, "banco": 1, "montadora": 1}, "ban": {"aposta": "master1"}, "local": ["{c} Motors|montadora", "{c} Building Society|banco", "{c} Evening News|midia", "{c} Carpets|varejo", "{c} Glass|construcao", "{c} Taxis|logistica"],
+			"brands": [
+				{"n": "Albion Bank", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Skyward Airways", "s": "aerea", "tier": 3, "c": "#FFFFFF", "t": "#0B3C8C", "m": "seta"},
+				{"n": "Wagerly", "s": "aposta", "tier": 3, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Beacon Mobile", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Harrow Insurance", "s": "seguro", "tier": 3, "c": "#00539B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Coinvault", "s": "cripto", "tier": 3, "c": "#0B0E11", "t": "#F0B90B", "m": "hexagono"},
+				{"n": "Marlow Motors", "s": "montadora", "tier": 3, "c": "#003399", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Pennant Ale", "s": "cerveja", "tier": 2, "c": "#FFD100", "t": "#C8102E", "m": "coroa"},
+				{"n": "Brightwater Energy", "s": "energia", "tier": 2, "c": "#FFD100", "t": "#0B3C5D", "m": "sol"},
+				{"n": "Kestrel Retail", "s": "varejo", "tier": 2, "c": "#E4572E", "t": "#FFFFFF", "m": "sacola"},
+				{"n": "OddsOn Sport", "s": "aposta", "tier": 2, "c": "#1A0B3D", "t": "#39FF14", "m": "estrela"},
+				{"n": "Greystone Homes", "s": "imobiliaria", "tier": 2, "c": "#0B2545", "t": "#D4AF37", "m": "telhado"},
+				{"n": "Fenwick Logistics", "s": "logistica", "tier": 2, "c": "#111111", "t": "#FFB400", "m": "seta"},
+				{"n": "Bramble Foods", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Redbrick University", "s": "educacao", "tier": 2, "c": "#FFFFFF", "t": "#1B3A8C", "m": "livro"},
+				{"n": "PuntPal", "s": "aposta", "tier": 2, "c": "#FF6A00", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Dockside Tiles", "s": "construcao", "tier": 1, "c": "#FFB400", "t": "#111111", "m": "colunas"},
+				{"n": "Hollis & Sons", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "The Crown & Anchor", "s": "cerveja", "tier": 1, "c": "#0B5E2E", "t": "#F2E3B3", "m": "coroa"},
+				{"n": "Pembury Motors", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "chevron"},
+				{"n": "Oakley Carpets", "s": "varejo", "tier": 1, "c": "#E4572E", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Station Road Garage", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "escudo"}
+			]
+		},
+		"SCO": {
+			"mix": {"aposta": 3, "banco": 1, "imobiliaria": 1, "montadora": 1}, "ban": {}, "local": ["{c} Motors|montadora", "{c} Building Society|banco", "{c} Evening News|midia", "{c} Carpets|varejo", "{c} Glass|construcao", "{c} Taxis|logistica"],
+			"brands": [
+				{"n": "Caledon Bank", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "anel"},
+				{"n": "Thistle Air", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Clydebet", "s": "aposta", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Saltire Telecom", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Glen Aird Whisky", "s": "bebida", "tier": 2, "c": "#FF8200", "t": "#FFFFFF", "m": "gota"},
+				{"n": "Firth Homes", "s": "imobiliaria", "tier": 2, "c": "#0B2545", "t": "#D4AF37", "m": "colunas"},
+				{"n": "Macrae Motors", "s": "montadora", "tier": 2, "c": "#003399", "t": "#FFFFFF", "m": "chevron"},
+				{"n": "Braeburn Foods", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "folha"},
+				{"n": "Kelpie Energy", "s": "energia", "tier": 2, "c": "#FFD100", "t": "#0B3C5D", "m": "chama"},
+				{"n": "Tartan Taxis", "s": "logistica", "tier": 2, "c": "#111111", "t": "#FFB400", "m": "seta"},
+				{"n": "Kinloch Butchers", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "McAllister Plumbing", "s": "construcao", "tier": 1, "c": "#8D99AE", "t": "#111111", "m": "colunas"},
+				{"n": "The Stag Bar", "s": "cerveja", "tier": 1, "c": "#FFD100", "t": "#C8102E", "m": "espiga"},
+				{"n": "Munro Glazing", "s": "construcao", "tier": 1, "c": "#003F72", "t": "#FFFFFF", "m": "telhado"}
+			]
+		},
+		"ESP": {
+			"mix": {"turismo": 3, "energia": 2, "banco": 2, "montadora": 1, "telecom": 1}, "ban": {"aposta": "all"}, "local": ["Supermercados {c}|varejo", "Talleres {c}|montadora", "Autocares {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia"],
+			"brands": [
+				{"n": "Banco Meridiano", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Iberalia", "s": "aerea", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Telefonía Brisa", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Energía Solana", "s": "energia", "tier": 3, "c": "#FFD100", "t": "#0B3C5D", "m": "raio"},
+				{"n": "Seguros Faro", "s": "seguro", "tier": 3, "c": "#006D5B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Automóviles Ronda", "s": "montadora", "tier": 3, "c": "#0A2240", "t": "#C0C0C0", "m": "anel"},
+				{"n": "Cerveza Sierra Clara", "s": "cerveja", "tier": 3, "c": "#FFD100", "t": "#C8102E", "m": "coroa"},
+				{"n": "Aceites La Vega", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"},
+				{"n": "Hoteles Mediterra", "s": "turismo", "tier": 2, "c": "#00A3E0", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Supermercados Oliva", "s": "varejo", "tier": 2, "c": "#00843D", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Construcciones Atalaya", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Universidad Horizonte", "s": "educacao", "tier": 2, "c": "#FFFFFF", "t": "#1B3A8C", "m": "estrela"},
+				{"n": "Jamones del Sur", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "folha"},
+				{"n": "Turismo Costa Azahar", "s": "turismo", "tier": 2, "c": "#FFB81C", "t": "#0B3C5D", "m": "sol"},
+				{"n": "Bar La Peña", "s": "bebida", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "gota"},
+				{"n": "Talleres Robles", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "escudo"},
+				{"n": "Panadería San Roque", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "espiga"},
+				{"n": "Muebles Castilla", "s": "varejo", "tier": 1, "c": "#FFD100", "t": "#E4002B", "m": "seta"}
+			]
+		},
+		"GER": {
+			"mix": {"seguro": 3, "energia": 3, "montadora": 2, "banco": 2, "aposta": 1}, "ban": {}, "local": ["Stadtwerke {c}|energia", "Bürgerbank {c}|banco", "Autohaus {c}|montadora", "Brauhaus {c}|cerveja", "Bau {c}|construcao"],
+			"brands": [
+				{"n": "Rheinbank", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Hanse Versicherung", "s": "seguro", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Adler Motorenwerke", "s": "montadora", "tier": 3, "c": "#C0C0C0", "t": "#111111", "m": "escudo"},
+				{"n": "Nordwind Energie", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "chama"},
+				{"n": "Funkwelle", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Luftreise", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Brauerei Tannenberg", "s": "cerveja", "tier": 2, "c": "#1B1B1B", "t": "#D4AF37", "m": "coroa"},
+				{"n": "Baumann Bau", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "telhado"},
+				{"n": "Lieferblitz", "s": "logistica", "tier": 2, "c": "#111111", "t": "#FFB400", "m": "seta"},
+				{"n": "Wettkönig", "s": "aposta", "tier": 2, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Schwarzwald Quelle", "s": "bebida", "tier": 2, "c": "#E4002B", "t": "#FFFFFF", "m": "gota"},
+				{"n": "Krone Versicherung", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Eisenwerk Ruhr", "s": "construcao", "tier": 2, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Metzgerei Huber", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "folha"},
+				{"n": "Autohaus Keller", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "chevron"},
+				{"n": "Bäckerei Brandt", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "folha"},
+				{"n": "Elektro Vogt", "s": "construcao", "tier": 1, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"}
+			]
+		},
+		"AUT": {
+			"mix": {"bebida": 3, "seguro": 2, "banco": 2, "aposta": 1, "energia": 2}, "ban": {}, "local": ["Stadtwerke {c}|energia", "Bürgerbank {c}|banco", "Autohaus {c}|montadora", "Brauhaus {c}|cerveja", "Bau {c}|construcao"],
+			"brands": [
+				{"n": "Alpenbank", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Donau Versicherung", "s": "seguro", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Tauern Energie", "s": "energia", "tier": 3, "c": "#00838F", "t": "#FFFFFF", "m": "chama"},
+				{"n": "Stierkraft", "s": "bebida", "tier": 3, "c": "#4A148C", "t": "#FFD54F", "m": "gota"},
+				{"n": "Wiener Wetten", "s": "aposta", "tier": 2, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Bräu am Berg", "s": "cerveja", "tier": 2, "c": "#FFD100", "t": "#C8102E", "m": "espiga"},
+				{"n": "Tiroler Bau", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Ostmark Telekom", "s": "telecom", "tier": 2, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Almhof Käse", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Gasthof Zum Hirschen", "s": "turismo", "tier": 1, "c": "#FFB81C", "t": "#0B3C5D", "m": "sol"},
+				{"n": "Autohaus Gruber", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Tischlerei Moser", "s": "construcao", "tier": 1, "c": "#8D99AE", "t": "#111111", "m": "colunas"}
+			]
+		},
+		"SUI": {
+			"mix": {"banco": 3, "seguro": 3, "luxo": 2, "telecom": 1}, "ban": {"aposta": "all"}, "local": ["Stadtwerke {c}|energia", "Bürgerbank {c}|banco", "Autohaus {c}|montadora", "Brauhaus {c}|cerveja", "Bau {c}|construcao"],
+			"brands": [
+				{"n": "Bank Alpina", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "anel"},
+				{"n": "Gletscher Versicherung", "s": "seguro", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Lémanair", "s": "aerea", "tier": 3, "c": "#004D40", "t": "#E8C872", "m": "asa"},
+				{"n": "Chronex", "s": "luxo", "tier": 3, "c": "#111111", "t": "#D4AF37", "m": "diamante"},
+				{"n": "Alpfunk", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Käserei Emmen", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Chocolat Moret", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Rhône Energie", "s": "energia", "tier": 2, "c": "#009A44", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Bergbahn Reisen", "s": "turismo", "tier": 2, "c": "#FFFFFF", "t": "#0077C8", "m": "sol"},
+				{"n": "Garage Frei", "s": "montadora", "tier": 1, "c": "#0A2240", "t": "#C0C0C0", "m": "escudo"},
+				{"n": "Bäckerei Keller", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Malerei Meier", "s": "construcao", "tier": 1, "c": "#FFB400", "t": "#111111", "m": "telhado"}
+			]
+		},
+		"ITA": {
+			"mix": {"energia": 3, "banco": 2, "alimentos": 2, "montadora": 2, "seguro": 2}, "ban": {"aposta": "all"}, "local": ["Banca di {c}|banco", "Costruzioni {c}|construcao", "Caseificio {c}|alimentos", "Autosalone {c}|montadora", "Pneumatici {c}|montadora"],
+			"brands": [
+				{"n": "Banca Tiberina", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "colunas"},
+				{"n": "Eolia Energia", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Assicurazioni Laguna", "s": "seguro", "tier": 3, "c": "#006D5B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Auto Castello", "s": "montadora", "tier": 3, "c": "#0A2240", "t": "#C0C0C0", "m": "escudo"},
+				{"n": "Telecom Lira", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Aliante Air", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Pasta Molino d'Oro", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Caffè Aurelio", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Birra Dolomia", "s": "cerveja", "tier": 2, "c": "#1B1B1B", "t": "#D4AF37", "m": "espiga"},
+				{"n": "Acqua Sorgente Alta", "s": "bebida", "tier": 2, "c": "#4A148C", "t": "#FFD54F", "m": "onda"},
+				{"n": "Costruzioni Ferraro", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "telhado"},
+				{"n": "Moda Veneta", "s": "luxo", "tier": 2, "c": "#0B2545", "t": "#FFFFFF", "m": "coroa"},
+				{"n": "Gommista Rapido", "s": "montadora", "tier": 2, "c": "#8B0000", "t": "#FFFFFF", "m": "chevron"},
+				{"n": "Salumificio Rossi", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Autofficina Bruno", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Pasticceria Gallo", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Mobili Serra", "s": "varejo", "tier": 1, "c": "#FFD100", "t": "#E4002B", "m": "sacola"}
+			]
+		},
+		"FRA": {
+			"mix": {"aposta": 3, "seguro": 2, "banco": 2, "varejo": 1, "aerea": 1}, "ban": {"cerveja": "all"}, "local": ["{c} Métropole|turismo", "Garage {c}|montadora", "Épargne {c}|banco", "Transports {c}|logistica", "Clinique {c}|saude"],
+			"brands": [
+				{"n": "Banque Atlantique", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Air Solène", "s": "aerea", "tier": 3, "c": "#004D40", "t": "#E8C872", "m": "asa"},
+				{"n": "Mutuelle Horizon", "s": "seguro", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Énergie Lumen", "s": "energia", "tier": 3, "c": "#F58220", "t": "#111111", "m": "raio"},
+				{"n": "Télécom Azur", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Voitures Mistral", "s": "montadora", "tier": 3, "c": "#0A2240", "t": "#C0C0C0", "m": "chevron"},
+				{"n": "Pari Royal", "s": "aposta", "tier": 2, "c": "#FF6A00", "t": "#FFFFFF", "m": "estrela"},
+				{"n": "Brasserie du Nord", "s": "cerveja", "tier": 2, "c": "#7A0019", "t": "#F2C14E", "m": "espiga"},
+				{"n": "Fromagerie Belval", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Hypermarché Soleil", "s": "varejo", "tier": 2, "c": "#E4572E", "t": "#FFFFFF", "m": "sacola"},
+				{"n": "BTP Rivière", "s": "construcao", "tier": 2, "c": "#003F72", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Transports Garonne", "s": "logistica", "tier": 2, "c": "#111111", "t": "#FFB400", "m": "seta"},
+				{"n": "ParieGol", "s": "aposta", "tier": 2, "c": "#111111", "t": "#FFD100", "m": "estrela"},
+				{"n": "Boulangerie Martin", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"},
+				{"n": "Garage Lefèvre", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "anel"},
+				{"n": "Café du Port", "s": "bebida", "tier": 1, "c": "#FF8200", "t": "#FFFFFF", "m": "gota"}
+			]
+		},
+		"POR": {
+			"mix": {"aposta": 4, "telecom": 2, "banco": 1, "energia": 1}, "ban": {}, "local": ["Município de {c}|turismo", "Auto {c}|montadora", "Construções {c}|construcao", "Farmácia {c}|saude", "Hotel {c}|turismo"],
+			"brands": [
+				{"n": "Banco Atlântico", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "anel"},
+				{"n": "Aérea Lusa", "s": "aerea", "tier": 3, "c": "#004D40", "t": "#E8C872", "m": "asa"},
+				{"n": "Telco Tejo", "s": "telecom", "tier": 3, "c": "#E60000", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Energia Mar", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Apostas Quina", "s": "aposta", "tier": 3, "c": "#003B7A", "t": "#FFB800", "m": "estrela"},
+				{"n": "Cerveja Farol", "s": "cerveja", "tier": 3, "c": "#0B5E2E", "t": "#F2E3B3", "m": "coroa"},
+				{"n": "Seguros Caravela", "s": "seguro", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Construções Douro", "s": "construcao", "tier": 2, "c": "#8D99AE", "t": "#111111", "m": "colunas"},
+				{"n": "Conservas Maré", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Vinhos Quinta Alta", "s": "bebida", "tier": 2, "c": "#4A148C", "t": "#FFD54F", "m": "gota"},
+				{"n": "Mercados Ribeira", "s": "varejo", "tier": 2, "c": "#E91E63", "t": "#FFFFFF", "m": "sacola"},
+				{"n": "Aposta Lusa", "s": "aposta", "tier": 2, "c": "#FF6A00", "t": "#FFFFFF", "m": "alvo"},
+				{"n": "Pastelaria Aurora", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Oficina Ferreira", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "chevron"},
+				{"n": "Talho Silva", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "sol"}
+			]
+		},
+		"NED": {
+			"mix": {"energia": 2, "seguro": 2, "banco": 2, "varejo": 2, "logistica": 1}, "ban": {"aposta": "all"}, "local": ["Bouwbedrijf {c}|construcao", "Autobedrijf {c}|montadora", "Installatie {c}|construcao", "Drukkerij {c}|midia"],
+			"brands": [
+				{"n": "Polderbank", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "TulpAir", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Delta Verzekeringen", "s": "seguro", "tier": 3, "c": "#00539B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Windmolen Energie", "s": "energia", "tier": 3, "c": "#E4002B", "t": "#FFD100", "m": "sol"},
+				{"n": "Kanaal Telecom", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Brouwerij Oranjehof", "s": "cerveja", "tier": 3, "c": "#1B1B1B", "t": "#D4AF37", "m": "coroa"},
+				{"n": "Kaasboerderij Groen", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "espiga"},
+				{"n": "Bouwbedrijf Visser", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "colunas"},
+				{"n": "Havenlogistiek", "s": "logistica", "tier": 2, "c": "#4D148C", "t": "#FF6600", "m": "seta"},
+				{"n": "Zuivel Weide", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Fietsfabriek Snel", "s": "varejo", "tier": 2, "c": "#0071CE", "t": "#FFC220", "m": "sacola"},
+				{"n": "Uitzendbureau Vast", "s": "varejo", "tier": 2, "c": "#E91E63", "t": "#FFFFFF", "m": "sacola"},
+				{"n": "Bakkerij de Vries", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "espiga"},
+				{"n": "Garage Jansen", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Café 't Hoekje", "s": "bebida", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "gota"}
+			]
+		},
+		"BEL": {
+			"mix": {"energia": 2, "banco": 2, "seguro": 2, "cerveja": 1, "telecom": 1}, "ban": {"aposta": "all"}, "local": ["Bouwbedrijf {c}|construcao", "Autobedrijf {c}|montadora", "Installatie {c}|construcao", "Drukkerij {c}|midia"],
+			"brands": [
+				{"n": "Brabant Bank", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Scheldt Air", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Kempen Energie", "s": "energia", "tier": 3, "c": "#E4002B", "t": "#FFD100", "m": "raio"},
+				{"n": "Ardennes Assurances", "s": "seguro", "tier": 3, "c": "#006D5B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Brouwerij Sint-Arnold", "s": "cerveja", "tier": 3, "c": "#FFD100", "t": "#C8102E", "m": "coroa"},
+				{"n": "Proximo Telecom", "s": "telecom", "tier": 2, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Chocolaterie Royale", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "folha"},
+				{"n": "Bouw Peeters", "s": "construcao", "tier": 2, "c": "#8D99AE", "t": "#111111", "m": "colunas"},
+				{"n": "Bières du Sud", "s": "cerveja", "tier": 2, "c": "#1B1B1B", "t": "#D4AF37", "m": "coroa"},
+				{"n": "Staalwerk Luik", "s": "construcao", "tier": 2, "c": "#003F72", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Garage Dubois", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Bakkerij Maes", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "espiga"},
+				{"n": "Frituur De Kaai", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "folha"}
+			]
+		},
+		"TUR": {
+			"mix": {"banco": 2, "construcao": 2, "telecom": 2, "aposta": 1, "aerea": 1}, "ban": {"cerveja": "all"}, "local": ["{c} Belediyesi|turismo", "{c} Oto|montadora", "{c} Yapı|construcao", "{c} Gıda|alimentos"],
+			"brands": [
+				{"n": "Boğaz Bank", "s": "banco", "tier": 3, "c": "#C8102E", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Göktürk Hava Yolları", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Hilal Telekom", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Kartal Sigorta", "s": "seguro", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Toros Otomotiv", "s": "montadora", "tier": 3, "c": "#111111", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Yıldız Enerji", "s": "energia", "tier": 3, "c": "#F58220", "t": "#111111", "m": "raio"},
+				{"n": "Lale Gıda", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Marmara İnşaat", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "telhado"},
+				{"n": "Karadeniz Çay", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Galata Mobilya", "s": "varejo", "tier": 2, "c": "#E91E63", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Tahmin", "s": "aposta", "tier": 2, "c": "#1A0B3D", "t": "#39FF14", "m": "alvo"},
+				{"n": "Anka Nakliyat", "s": "logistica", "tier": 2, "c": "#4D148C", "t": "#FF6600", "m": "chevron"},
+				{"n": "Özdemir Oto", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "anel"},
+				{"n": "Kardeşler Fırın", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "folha"},
+				{"n": "Sultan Kuruyemiş", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"}
+			]
+		},
+		"GRE": {
+			"mix": {"aposta": 5, "banco": 1, "telecom": 1}, "ban": {}, "local": [],
+			"brands": [
+				{"n": "Kallisto Bank", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Kyma Airways", "s": "aerea", "tier": 3, "c": "#FFFFFF", "t": "#0B3C8C", "m": "asa"},
+				{"n": "Nikiforos Bet", "s": "aposta", "tier": 3, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Hellenic Kinito", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Thalassa Energy", "s": "energia", "tier": 3, "c": "#00838F", "t": "#FFFFFF", "m": "chama"},
+				{"n": "Galaktokomika Ida", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"},
+				{"n": "Zythos Kykladon", "s": "cerveja", "tier": 2, "c": "#0B5E2E", "t": "#F2E3B3", "m": "coroa"},
+				{"n": "Asfalistiki Aigis", "s": "seguro", "tier": 2, "c": "#00539B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Ktimata Naxou", "s": "bebida", "tier": 2, "c": "#00A3E0", "t": "#FFFFFF", "m": "gota"},
+				{"n": "Naftiliaki Pontos", "s": "logistica", "tier": 2, "c": "#111111", "t": "#FFB400", "m": "chevron"},
+				{"n": "Fournos Papadopoulou", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Taverna O Giorgos", "s": "turismo", "tier": 1, "c": "#FFB81C", "t": "#0B3C5D", "m": "onda"},
+				{"n": "Auto Nikolaou", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"UKR": {
+			"mix": {"aposta": 4, "alimentos": 2, "mineracao": 2, "banco": 1}, "ban": {}, "local": [],
+			"brands": [
+				{"n": "Dnipro Bank", "s": "banco", "tier": 3, "c": "#FFCC00", "t": "#003366", "m": "anel"},
+				{"n": "Zirka Mobile", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "sinal"},
+				{"n": "Karpaty Enerhiya", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Stavka UA", "s": "aposta", "tier": 3, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Sonyashnyk Agro", "s": "alimentos", "tier": 3, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Pyvovarnia Hetman", "s": "cerveja", "tier": 2, "c": "#0B5E2E", "t": "#F2E3B3", "m": "espiga"},
+				{"n": "Budivelnyk Kyiv", "s": "construcao", "tier": 2, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Chornomor Logistyka", "s": "logistica", "tier": 2, "c": "#FFCC00", "t": "#D40511", "m": "chevron"},
+				{"n": "Metalurh Skhid", "s": "mineracao", "tier": 2, "c": "#4E342E", "t": "#FFB300", "m": "montanha"},
+				{"n": "Pekarnia Kalyna", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Avto Maister", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "chevron"}
+			]
+		},
+		"CRO": {
+			"mix": {"aposta": 4, "telecom": 1, "banco": 1}, "ban": {}, "local": [],
+			"brands": [
+				{"n": "Dalmatinska Štedionica", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Adria Telekom", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Kladionica Tris", "s": "aposta", "tier": 3, "c": "#111111", "t": "#FFD100", "m": "estrela"},
+				{"n": "Pivovara Velebit", "s": "cerveja", "tier": 3, "c": "#1B1B1B", "t": "#D4AF37", "m": "coroa"},
+				{"n": "Energija Sava", "s": "energia", "tier": 3, "c": "#00838F", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Osiguranje Brod", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Maslina Hvar", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Brodogradnja Kvarner", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Turizam Jadran", "s": "turismo", "tier": 2, "c": "#00A3E0", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Pekara Anić", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"},
+				{"n": "Autokuća Horvat", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"SRB": {
+			"mix": {"aposta": 4, "petroleo": 2, "telecom": 1}, "ban": {}, "local": [],
+			"brands": [
+				{"n": "Kosmaj Banka", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "colunas"},
+				{"n": "Mobi Srbija", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "onda"},
+				{"n": "Kladionica Majstor", "s": "aposta", "tier": 3, "c": "#111111", "t": "#FFD100", "m": "estrela"},
+				{"n": "Pivara Avala", "s": "cerveja", "tier": 3, "c": "#1B1B1B", "t": "#D4AF37", "m": "coroa"},
+				{"n": "Energo Drina", "s": "energia", "tier": 3, "c": "#FFD100", "t": "#0B3C5D", "m": "raio"},
+				{"n": "Osiguranje Stub", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Mlekara Tara", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "sol"},
+				{"n": "Gradnja Morava", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "colunas"},
+				{"n": "Naftagas Banat", "s": "petroleo", "tier": 2, "c": "#FFD100", "t": "#E4002B", "m": "gota"},
+				{"n": "Pekara Jovanović", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Auto Kuća Petrović", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"CZE": {
+			"mix": {"aposta": 4, "cerveja": 2, "energia": 1, "montadora": 1}, "ban": {}, "local": [],
+			"brands": [
+				{"n": "Vltava Banka", "s": "banco", "tier": 3, "c": "#C8102E", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Pivovar Hradní", "s": "cerveja", "tier": 3, "c": "#0033A0", "t": "#FFFFFF", "m": "coroa"},
+				{"n": "Sázkař", "s": "aposta", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Moravia Energie", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Česká Vlna", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Autowerk Bohemia", "s": "montadora", "tier": 3, "c": "#C0C0C0", "t": "#111111", "m": "escudo"},
+				{"n": "Pojišťovna Lípa", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Stavby Krkonoše", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Uzeniny Novák", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Sklárna Jizera", "s": "varejo", "tier": 2, "c": "#E91E63", "t": "#FFFFFF", "m": "sacola"},
+				{"n": "Pekárna Dvořák", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Autoservis Svoboda", "s": "montadora", "tier": 1, "c": "#0A2240", "t": "#C0C0C0", "m": "escudo"}
+			]
+		},
+		"DEN": {
+			"mix": {"aposta": 3, "energia": 2, "seguro": 2, "banco": 1}, "ban": {}, "local": [],
+			"brands": [
+				{"n": "Nordisk Havbank", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Kattegat Air", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Øresund Energi", "s": "energia", "tier": 3, "c": "#FFD100", "t": "#0B3C5D", "m": "sol"},
+				{"n": "Spilnet", "s": "aposta", "tier": 3, "c": "#0B2E13", "t": "#C6FF00", "m": "diamante"},
+				{"n": "Bryggeriet Hvidsten", "s": "cerveja", "tier": 3, "c": "#0033A0", "t": "#FFFFFF", "m": "coroa"},
+				{"n": "Fjordnet", "s": "telecom", "tier": 3, "c": "#E60000", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Forsikring Skjold", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Mejeri Jylland", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Byggeri Holm", "s": "construcao", "tier": 2, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Vindkraft Vest", "s": "energia", "tier": 2, "c": "#009A44", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Bageri Hansen", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Auto Jensen", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "escudo"}
+			]
+		},
+		"AUS": {
+			"mix": {"aposta": 3, "seguro": 2, "turismo": 2, "mineracao": 1, "banco": 1}, "ban": {}, "local": ["{c} Motors|montadora", "{c} Building Society|banco", "{c} Evening News|midia", "{c} Carpets|varejo", "{c} Glass|construcao", "{c} Taxis|logistica"],
+			"brands": [
+				{"n": "Wattle Bank", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Coral Air", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Outback Energy", "s": "energia", "tier": 3, "c": "#FFD100", "t": "#0B3C5D", "m": "chama"},
+				{"n": "Punt Club", "s": "aposta", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "diamante"},
+				{"n": "Kookaburra Mobile", "s": "telecom", "tier": 3, "c": "#E60000", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Swagman Lager", "s": "cerveja", "tier": 3, "c": "#1B1B1B", "t": "#D4AF37", "m": "coroa"},
+				{"n": "Bondi Insurance", "s": "seguro", "tier": 2, "c": "#E30613", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Eucalypt Homes", "s": "construcao", "tier": 2, "c": "#8D99AE", "t": "#111111", "m": "telhado"},
+				{"n": "Barramundi Foods", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "sol"},
+				{"n": "Ironbark Mining", "s": "mineracao", "tier": 2, "c": "#4E342E", "t": "#FFB300", "m": "diamante"},
+				{"n": "Surf Coast Tourism", "s": "turismo", "tier": 2, "c": "#FFFFFF", "t": "#0077C8", "m": "sol"},
+				{"n": "Harbourside Motors", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Lamington Bakery", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Southside Plumbing", "s": "construcao", "tier": 1, "c": "#8D99AE", "t": "#111111", "m": "colunas"}
+			]
+		},
+		"USA": {
+			"mix": {"saude": 3, "seguro": 2, "tecnologia": 2, "banco": 2, "telecom": 1}, "ban": {"aposta": "master1"}, "local": ["{c} Health|saude", "{c} Credit Union|banco", "{c} Auto Group|montadora", "{c} Realty|imobiliaria"],
+			"brands": [
+				{"n": "Redwood Bank", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "anel"},
+				{"n": "Liberty Health", "s": "saude", "tier": 3, "c": "#FFFFFF", "t": "#00A651", "m": "folha"},
+				{"n": "Frontier Wireless", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Sunbelt Energy", "s": "energia", "tier": 3, "c": "#00838F", "t": "#FFFFFF", "m": "chama"},
+				{"n": "Keystone Insurance", "s": "seguro", "tier": 3, "c": "#00539B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Cloudpeak", "s": "tecnologia", "tier": 3, "c": "#1428A0", "t": "#FFFFFF", "m": "hexagono"},
+				{"n": "Mesa Motors", "s": "montadora", "tier": 3, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Bluegrass Brewing", "s": "cerveja", "tier": 2, "c": "#0B5E2E", "t": "#F2E3B3", "m": "coroa"},
+				{"n": "Harbor Supply", "s": "varejo", "tier": 2, "c": "#0071CE", "t": "#FFC220", "m": "seta"},
+				{"n": "Prairie Foods", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "Coastline Realty", "s": "imobiliaria", "tier": 2, "c": "#6B2737", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Canyon Credit Union", "s": "banco", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Trailhead Outdoors", "s": "varejo", "tier": 2, "c": "#FFD100", "t": "#E4002B", "m": "sacola"},
+				{"n": "Main Street Auto", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Nona's Pizza", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Patriot Plumbing", "s": "construcao", "tier": 1, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"}
+			]
+		},
+		"MEX": {
+			"mix": {"aposta": 3, "cerveja": 3, "telecom": 2, "construcao": 1, "bebida": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco del Valle", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Cerveza Tláloc", "s": "cerveja", "tier": 3, "c": "#FFD100", "t": "#C8102E", "m": "espiga"},
+				{"n": "Tel Maya", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Cementos Sierra", "s": "construcao", "tier": 3, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Aerolíneas Quetzal", "s": "aerea", "tier": 3, "c": "#004D40", "t": "#E8C872", "m": "seta"},
+				{"n": "Apuesta Jaguar", "s": "aposta", "tier": 3, "c": "#003B7A", "t": "#FFB800", "m": "estrela"},
+				{"n": "Refrescos Mezquite", "s": "bebida", "tier": 2, "c": "#4A148C", "t": "#FFD54F", "m": "onda"},
+				{"n": "Tiendas Nopal", "s": "varejo", "tier": 2, "c": "#FFD100", "t": "#E4002B", "m": "sacola"},
+				{"n": "Seguros Pirámide", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Gasolineras Bajío", "s": "petroleo", "tier": 2, "c": "#0033A0", "t": "#FFD100", "m": "chama"},
+				{"n": "Panificadora Sol", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Caliza Bet", "s": "aposta", "tier": 2, "c": "#FF6A00", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Tacos El Güero", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "Llantera Hernández", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "anel"},
+				{"n": "Farmacia San Judas", "s": "saude", "tier": 1, "c": "#00A651", "t": "#FFFFFF", "m": "cruz"}
+			]
+		},
+		"ARG": {
+			"mix": {"aposta": 5, "banco": 1, "cerveja": 1, "energia": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Pampeano", "s": "banco", "tier": 3, "c": "#FFCC00", "t": "#003366", "m": "anel"},
+				{"n": "Aerolíneas del Plata", "s": "aerea", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Cerveza Río Negro", "s": "cerveja", "tier": 3, "c": "#FFD100", "t": "#C8102E", "m": "espiga"},
+				{"n": "Telecom Austral", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "sinal"},
+				{"n": "Apuestas Tango", "s": "aposta", "tier": 3, "c": "#003B7A", "t": "#FFB800", "m": "diamante"},
+				{"n": "Energía Andina", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Yerba La Pampa", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Seguros La Estancia", "s": "seguro", "tier": 2, "c": "#E30613", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Frigorífico El Gaucho", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "espiga"},
+				{"n": "Constructora Riachuelo", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Vinos Cuyo", "s": "bebida", "tier": 2, "c": "#4A148C", "t": "#FFD54F", "m": "gota"},
+				{"n": "Gol Apuesta", "s": "aposta", "tier": 2, "c": "#0B2E13", "t": "#C6FF00", "m": "diamante"},
+				{"n": "Panadería La Esquina", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Gomería Rodríguez", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Parrilla El Fogón", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"}
+			]
+		},
+		"URU": {
+			"mix": {"aposta": 4, "telecom": 1, "banco": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Oriental", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Telefónica Charrúa", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Cerveza Rambla", "s": "cerveja", "tier": 3, "c": "#0033A0", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Apuestas Celeste", "s": "aposta", "tier": 3, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Lácteos Colonia", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Seguros Artigas", "s": "seguro", "tier": 2, "c": "#00539B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Frigorífico Tacuarembó", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Puerto Logística", "s": "logistica", "tier": 2, "c": "#4D148C", "t": "#FF6600", "m": "chevron"},
+				{"n": "Panadería Carrasco", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Taller Pereira", "s": "montadora", "tier": 1, "c": "#0A2240", "t": "#C0C0C0", "m": "anel"}
+			]
+		},
+		"COL": {
+			"mix": {"aposta": 5, "cerveja": 1, "aerea": 1, "bebida": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Andino", "s": "banco", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "anel"},
+				{"n": "Aerolíneas Cóndor", "s": "aerea", "tier": 3, "c": "#004D40", "t": "#E8C872", "m": "seta"},
+				{"n": "Cerveza Nevado", "s": "cerveja", "tier": 3, "c": "#0033A0", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Apuestas Rumba", "s": "aposta", "tier": 3, "c": "#FF6A00", "t": "#FFFFFF", "m": "diamante"},
+				{"n": "Café de la Sierra", "s": "alimentos", "tier": 3, "c": "#F2A900", "t": "#3E2723", "m": "sol"},
+				{"n": "Telco Caribe", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Seguros Magdalena", "s": "seguro", "tier": 2, "c": "#E30613", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Gaseosas Cumbia", "s": "bebida", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Construcciones Antioquia", "s": "construcao", "tier": 2, "c": "#8D99AE", "t": "#111111", "m": "telhado"},
+				{"n": "Flores de la Sabana", "s": "varejo", "tier": 2, "c": "#00843D", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Panadería El Trigal", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Arepas Doña Rosa", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "folha"}
+			]
+		},
+		"CHI": {
+			"mix": {"aposta": 4, "mineracao": 2, "banco": 1, "telecom": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Cordillera", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Aerolínea Albatros", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Minera Atacama", "s": "mineracao", "tier": 3, "c": "#4E342E", "t": "#FFB300", "m": "diamante"},
+				{"n": "Telco Pacífico", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Apuestas Cóndor", "s": "aposta", "tier": 3, "c": "#FF6A00", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Viña Valle Central", "s": "bebida", "tier": 3, "c": "#4A148C", "t": "#FFD54F", "m": "gota"},
+				{"n": "Cerveza Lago Sur", "s": "cerveja", "tier": 2, "c": "#0033A0", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Seguros Araucaria", "s": "seguro", "tier": 2, "c": "#E30613", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Salmones del Sur", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "Retail Andes", "s": "varejo", "tier": 2, "c": "#0071CE", "t": "#FFC220", "m": "sacola"},
+				{"n": "Panadería La Moneda", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Taller Soto", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"ECU": {
+			"mix": {"aposta": 4, "banco": 2, "cerveja": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Chimborazo", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Cerveza Galápagos", "s": "cerveja", "tier": 3, "c": "#7A0019", "t": "#F2C14E", "m": "espiga"},
+				{"n": "MitadBet", "s": "aposta", "tier": 3, "c": "#003B7A", "t": "#FFB800", "m": "raio"},
+				{"n": "Telco Andina", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "sinal"},
+				{"n": "Petro Amazonía", "s": "petroleo", "tier": 3, "c": "#FFD100", "t": "#E4002B", "m": "gota"},
+				{"n": "Bananera Costa Verde", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Seguros Cotopaxi", "s": "seguro", "tier": 2, "c": "#00539B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Acuícola Pacífico", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "folha"},
+				{"n": "Panadería Quiteña", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"},
+				{"n": "Taller Mendoza", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"PER": {
+			"mix": {"aposta": 4, "cerveja": 1, "mineracao": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Inca", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Cerveza Huascarán", "s": "cerveja", "tier": 3, "c": "#0033A0", "t": "#FFFFFF", "m": "coroa"},
+				{"n": "Apuestas Pisco", "s": "aposta", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "estrela"},
+				{"n": "Telco Pacífico Sur", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Minera Andina", "s": "mineracao", "tier": 3, "c": "#FF6F00", "t": "#111111", "m": "diamante"},
+				{"n": "Gaseosa Dorada", "s": "bebida", "tier": 2, "c": "#00A3E0", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Seguros Pachacútec", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Pollería El Rico", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Panadería Miraflores", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "Taller Quispe", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "chevron"}
+			]
+		},
+		"PAR": {
+			"mix": {"aposta": 4, "cerveja": 1, "telecom": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Guaraní", "s": "banco", "tier": 3, "c": "#FFCC00", "t": "#003366", "m": "colunas"},
+				{"n": "Cerveza Chaco", "s": "cerveja", "tier": 3, "c": "#0033A0", "t": "#FFFFFF", "m": "coroa"},
+				{"n": "Telco Paraná", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Apuestas Jopara", "s": "aposta", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Energía Tapé", "s": "energia", "tier": 3, "c": "#F58220", "t": "#111111", "m": "chama"},
+				{"n": "Yerba Ñandutí", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "sol"},
+				{"n": "Seguros Ypacaraí", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Frigorífico del Chaco", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "sol"},
+				{"n": "Panadería San Blas", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Taller Benítez", "s": "montadora", "tier": 1, "c": "#0A2240", "t": "#C0C0C0", "m": "chevron"}
+			]
+		},
+		"BOL": {
+			"mix": {"telecom": 2, "cerveja": 2, "petroleo": 2, "aposta": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Illimani", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Cerveza Altiplano", "s": "cerveja", "tier": 3, "c": "#0B5E2E", "t": "#F2E3B3", "m": "espiga"},
+				{"n": "Telco Andes", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Petro Oriente", "s": "petroleo", "tier": 3, "c": "#006341", "t": "#FFD100", "m": "gota"},
+				{"n": "Aerolíneas Amboró", "s": "aerea", "tier": 3, "c": "#FFFFFF", "t": "#0B3C8C", "m": "asa"},
+				{"n": "Seguros Titicaca", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Lácteos Chiquitano", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Apuestas Illampu", "s": "aposta", "tier": 2, "c": "#111111", "t": "#FFD100", "m": "raio"},
+				{"n": "Salteñería Doña Elena", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Taller Mamani", "s": "montadora", "tier": 1, "c": "#0A2240", "t": "#C0C0C0", "m": "chevron"}
+			]
+		},
+		"VEN": {
+			"mix": {"banco": 2, "telecom": 2, "cerveja": 1, "petroleo": 1}, "ban": {}, "local": ["Supermercados {c}|varejo", "Transportes {c}|logistica", "Construcciones {c}|construcao", "Farmacia {c}|saude", "Radio {c}|midia", "Clínica {c}|saude"],
+			"brands": [
+				{"n": "Banco Ávila", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Cerveza Orinoco", "s": "cerveja", "tier": 3, "c": "#FFD100", "t": "#C8102E", "m": "espiga"},
+				{"n": "Petro Llanos", "s": "petroleo", "tier": 3, "c": "#FFD100", "t": "#E4002B", "m": "chama"},
+				{"n": "Telco Tepuy", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "onda"},
+				{"n": "Aerolínea Guácharo", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Harina La Arepera", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Seguros Catatumbo", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Ron Barlovento", "s": "bebida", "tier": 2, "c": "#4A148C", "t": "#FFD54F", "m": "onda"},
+				{"n": "Panadería La Candelaria", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Taller Rondón", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "escudo"}
+			]
+		},
+		"EGY": {
+			"mix": {"telecom": 3, "banco": 2, "construcao": 2, "petroleo": 1}, "ban": {"cerveja": "all", "aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Nile Bank", "s": "banco", "tier": 3, "c": "#C8102E", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Horus Air", "s": "aerea", "tier": 3, "c": "#FFFFFF", "t": "#0B3C8C", "m": "seta"},
+				{"n": "Delta Mobile", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "onda"},
+				{"n": "Sahara Petroleum", "s": "petroleo", "tier": 3, "c": "#006341", "t": "#FFD100", "m": "gota"},
+				{"n": "Giza Steel", "s": "construcao", "tier": 3, "c": "#FFB400", "t": "#111111", "m": "telhado"},
+				{"n": "Assiut Foods", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Sinai Insurance", "s": "seguro", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Alex Ceramics", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "colunas"},
+				{"n": "Red Sea Resorts", "s": "turismo", "tier": 2, "c": "#00A3E0", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Koshary El Sayed", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Hassan Motors", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"MAR": {
+			"mix": {"telecom": 2, "banco": 2, "mineracao": 2, "aerea": 1}, "ban": {"cerveja": "all", "aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Banque Atlas", "s": "banco", "tier": 3, "c": "#FFCC00", "t": "#003366", "m": "anel"},
+				{"n": "Atlas Wings", "s": "aerea", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Zellige Télécom", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Mines du Rif", "s": "mineracao", "tier": 3, "c": "#4E342E", "t": "#FFB300", "m": "montanha"},
+				{"n": "Énergie Sahara", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Assurances Chellah", "s": "seguro", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Argan du Souss", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Ciments Tadla", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "colunas"},
+				{"n": "Garage Benali", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "chevron"},
+				{"n": "Pâtisserie de Fès", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "folha"}
+			]
+		},
+		"TUN": {
+			"mix": {"telecom": 2, "banco": 2, "alimentos": 2}, "ban": {"cerveja": "all", "aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Banque de Carthage", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Carthago Air", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Medina Télécom", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "sinal"},
+				{"n": "Lait Jasmin", "s": "alimentos", "tier": 3, "c": "#2E7D32", "t": "#FFFFFF", "m": "folha"},
+				{"n": "Olivier du Sahel", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "espiga"},
+				{"n": "Assurances Hannibal", "s": "seguro", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Ciments Kairouan", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Garage Trabelsi", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Pâtisserie Sousse", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "espiga"}
+			]
+		},
+		"RSA": {
+			"mix": {"aposta": 2, "telecom": 2, "banco": 2, "seguro": 2, "cerveja": 1}, "ban": {}, "local": ["{c} Motors|montadora", "{c} Building Society|banco", "{c} Evening News|midia", "{c} Carpets|varejo", "{c} Glass|construcao", "{c} Taxis|logistica"],
+			"brands": [
+				{"n": "Protea Bank", "s": "banco", "tier": 3, "c": "#FFCC00", "t": "#003366", "m": "colunas"},
+				{"n": "Kalahari Air", "s": "aerea", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Vuma Mobile", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Highveld Energy", "s": "energia", "tier": 3, "c": "#E4002B", "t": "#FFD100", "m": "sol"},
+				{"n": "Baobab Bet", "s": "aposta", "tier": 3, "c": "#0B2E13", "t": "#C6FF00", "m": "diamante"},
+				{"n": "Zebra Lager", "s": "cerveja", "tier": 3, "c": "#7A0019", "t": "#F2C14E", "m": "espiga"},
+				{"n": "Karoo Insurance", "s": "seguro", "tier": 2, "c": "#00539B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Fynbos Foods", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "sol"},
+				{"n": "Umhlanga Homes", "s": "imobiliaria", "tier": 2, "c": "#0B2545", "t": "#D4AF37", "m": "colunas"},
+				{"n": "Reef Mining", "s": "mineracao", "tier": 2, "c": "#4E342E", "t": "#FFB300", "m": "diamante"},
+				{"n": "Braai Masters", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Soweto Motors", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "escudo"}
+			]
+		},
+		"NGA": {
+			"mix": {"aposta": 4, "telecom": 2, "banco": 2, "petroleo": 1}, "ban": {}, "local": ["{c} Motors|montadora", "{c} Building Society|banco", "{c} Evening News|midia", "{c} Carpets|varejo", "{c} Glass|construcao", "{c} Taxis|logistica"],
+			"brands": [
+				{"n": "Kainji Bank", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Eagle Wings Air", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Kolanet", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "sinal"},
+				{"n": "Delta Oil", "s": "petroleo", "tier": 3, "c": "#111111", "t": "#E4002B", "m": "chama"},
+				{"n": "Oga Bet", "s": "aposta", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "raio"},
+				{"n": "Jollof Foods", "s": "alimentos", "tier": 2, "c": "#3E2723", "t": "#F2C14E", "m": "sol"},
+				{"n": "Harmattan Insurance", "s": "seguro", "tier": 2, "c": "#00539B", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Benue Cement", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Palm Malt", "s": "bebida", "tier": 2, "c": "#FF8200", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Mama Titi Kitchen", "s": "alimentos", "tier": 1, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Chukwu Motors", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "escudo"}
+			]
+		},
+		"SEN": {
+			"mix": {"telecom": 3, "banco": 1, "aposta": 1}, "ban": {"cerveja": "all"}, "local": ["{c} Métropole|turismo", "Garage {c}|montadora", "Épargne {c}|banco", "Transports {c}|logistica", "Clinique {c}|saude"],
+			"brands": [
+				{"n": "Banque Téranga", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Air Sahel", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Téranga Mobile", "s": "telecom", "tier": 3, "c": "#FF7900", "t": "#111111", "m": "sinal"},
+				{"n": "Pétrole Casamance", "s": "petroleo", "tier": 3, "c": "#111111", "t": "#E4002B", "m": "chama"},
+				{"n": "Ciments du Sine", "s": "construcao", "tier": 3, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Assurances Gorée", "s": "seguro", "tier": 2, "c": "#E30613", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Arachide d'Or", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "folha"},
+				{"n": "Pari Lion", "s": "aposta", "tier": 2, "c": "#1A0B3D", "t": "#39FF14", "m": "raio"},
+				{"n": "Boulangerie Dakaroise", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Garage Ndiaye", "s": "montadora", "tier": 1, "c": "#8B0000", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"KSA": {
+			"mix": {"turismo": 3, "telecom": 2, "banco": 2, "petroleo": 2, "aerea": 1}, "ban": {"cerveja": "all", "aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Al Waha Bank", "s": "banco", "tier": 3, "c": "#0B3C5D", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Falcon Airways", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Rimal Telecom", "s": "telecom", "tier": 3, "c": "#E60000", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Najd Petroleum", "s": "petroleo", "tier": 3, "c": "#111111", "t": "#E4002B", "m": "chama"},
+				{"n": "Al Amana Takaful", "s": "seguro", "tier": 3, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Hijaz Tourism", "s": "turismo", "tier": 3, "c": "#FFB81C", "t": "#0B3C5D", "m": "onda"},
+				{"n": "Al Nakhla Dates", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Al Fayha Dairy", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "espiga"},
+				{"n": "Qasr Construction", "s": "construcao", "tier": 2, "c": "#5D4037", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Sadu Real Estate", "s": "imobiliaria", "tier": 2, "c": "#6B2737", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Shawarma Al Balad", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#2E7D32", "m": "sol"},
+				{"n": "Al Rashid Motors", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"QAT": {
+			"mix": {"aerea": 2, "banco": 2, "telecom": 2, "energia": 1}, "ban": {"cerveja": "all", "aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Lusail Bank", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Maroon Airways", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Dana Telecom", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Dukhan Energy", "s": "energia", "tier": 3, "c": "#009A44", "t": "#FFFFFF", "m": "chama"},
+				{"n": "Al Wakra Foods", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#2E7D32", "m": "espiga"},
+				{"n": "Zubarah Insurance", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Corniche Developments", "s": "imobiliaria", "tier": 2, "c": "#6B2737", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Karak House", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "sol"},
+				{"n": "Al Khor Motors", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "anel"}
+			]
+		},
+		"UAE": {
+			"mix": {"aerea": 3, "imobiliaria": 2, "banco": 2, "telecom": 1}, "ban": {"cerveja": "all", "aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Al Majd Bank", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Sahra Airways", "s": "aerea", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Burj Telecom", "s": "telecom", "tier": 3, "c": "#E20074", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Dune Energy", "s": "energia", "tier": 3, "c": "#F58220", "t": "#111111", "m": "chama"},
+				{"n": "Oasis Properties", "s": "imobiliaria", "tier": 3, "c": "#FFFFFF", "t": "#0B2545", "m": "telhado"},
+				{"n": "Liwa Dairy", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "sol"},
+				{"n": "Jebel Insurance", "s": "seguro", "tier": 2, "c": "#E30613", "t": "#FFFFFF", "m": "guarda"},
+				{"n": "Marina Developments", "s": "imobiliaria", "tier": 2, "c": "#0B2545", "t": "#D4AF37", "m": "colunas"},
+				{"n": "Al Fahidi Motors", "s": "montadora", "tier": 1, "c": "#003399", "t": "#FFFFFF", "m": "anel"},
+				{"n": "Karak Corner", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "espiga"}
+			]
+		},
+		"JPN": {
+			"mix": {"montadora": 3, "tecnologia": 3, "banco": 1, "alimentos": 1}, "ban": {"aposta": "all"}, "local": ["{c} Gas|energia", "{c} Shinkin|banco", "{c} Railway|logistica"],
+			"brands": [
+				{"n": "Kasumi Bank", "s": "banco", "tier": 3, "c": "#FFCC00", "t": "#003366", "m": "colunas"},
+				{"n": "Hayate Motors", "s": "montadora", "tier": 3, "c": "#0A2240", "t": "#C0C0C0", "m": "escudo"},
+				{"n": "Tsubasa Air", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "seta"},
+				{"n": "Kizuna Mobile", "s": "telecom", "tier": 3, "c": "#E60000", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Denkō Electric", "s": "tecnologia", "tier": 3, "c": "#1428A0", "t": "#FFFFFF", "m": "pixel"},
+				{"n": "Yamabiko Beer", "s": "cerveja", "tier": 3, "c": "#0B5E2E", "t": "#F2E3B3", "m": "espiga"},
+				{"n": "Hikari Insurance", "s": "seguro", "tier": 2, "c": "#00539B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Midori Foods", "s": "alimentos", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "m": "espiga"},
+				{"n": "Arashi Construction", "s": "construcao", "tier": 2, "c": "#FFB400", "t": "#111111", "m": "telhado"},
+				{"n": "Kaze Logistics", "s": "logistica", "tier": 2, "c": "#FFCC00", "t": "#D40511", "m": "chevron"},
+				{"n": "Sora Games", "s": "midia", "tier": 2, "c": "#E50914", "t": "#FFFFFF", "m": "play"},
+				{"n": "Ramen Taishō", "s": "alimentos", "tier": 1, "c": "#FFFFFF", "t": "#C8102E", "m": "folha"},
+				{"n": "Tanaka Auto", "s": "montadora", "tier": 1, "c": "#C0C0C0", "t": "#111111", "m": "anel"}
+			]
+		},
+		"KOR": {
+			"mix": {"montadora": 3, "tecnologia": 2, "construcao": 2, "banco": 1}, "ban": {"aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Hanbit Bank", "s": "banco", "tier": 3, "c": "#00563F", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Daebak Motors", "s": "montadora", "tier": 3, "c": "#C0C0C0", "t": "#111111", "m": "escudo"},
+				{"n": "Arirang Air", "s": "aerea", "tier": 3, "c": "#0072CE", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Nuri Telecom", "s": "telecom", "tier": 3, "c": "#00A0DF", "t": "#FFFFFF", "m": "onda"},
+				{"n": "Seorak Electronics", "s": "tecnologia", "tier": 3, "c": "#1428A0", "t": "#FFFFFF", "m": "hexagono"},
+				{"n": "Baekdu Steel", "s": "construcao", "tier": 3, "c": "#003F72", "t": "#FFFFFF", "m": "telhado"},
+				{"n": "Hanok Foods", "s": "alimentos", "tier": 2, "c": "#F2A900", "t": "#3E2723", "m": "sol"},
+				{"n": "Mugunghwa Insurance", "s": "seguro", "tier": 2, "c": "#006D5B", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Hallasan Soju", "s": "bebida", "tier": 2, "c": "#FF8200", "t": "#FFFFFF", "m": "gota"},
+				{"n": "Chimaek Chicken", "s": "alimentos", "tier": 1, "c": "#3E2723", "t": "#F2C14E", "m": "folha"},
+				{"n": "Kim Auto", "s": "montadora", "tier": 1, "c": "#0A2240", "t": "#C0C0C0", "m": "chevron"}
+			]
+		},
+		"CHN": {
+			"mix": {"imobiliaria": 4, "montadora": 2, "tecnologia": 2, "banco": 1}, "ban": {"aposta": "all"}, "local": [],
+			"brands": [
+				{"n": "Changjiang Bank", "s": "banco", "tier": 3, "c": "#EC7000", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Longteng Motors", "s": "montadora", "tier": 3, "c": "#003399", "t": "#FFFFFF", "m": "escudo"},
+				{"n": "Pengfei Airlines", "s": "aerea", "tier": 3, "c": "#E30613", "t": "#FFFFFF", "m": "asa"},
+				{"n": "Tianlian Mobile", "s": "telecom", "tier": 3, "c": "#5B2C83", "t": "#FFFFFF", "m": "sinal"},
+				{"n": "Jinhai Real Estate", "s": "imobiliaria", "tier": 3, "c": "#6B2737", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Xinghe Tech", "s": "tecnologia", "tier": 3, "c": "#00B2A9", "t": "#FFFFFF", "m": "hexagono"},
+				{"n": "Baiyun Brewery", "s": "cerveja", "tier": 2, "c": "#1B1B1B", "t": "#D4AF37", "m": "espiga"},
+				{"n": "Taishan Insurance", "s": "seguro", "tier": 2, "c": "#1B3A8C", "t": "#FFD100", "m": "escudo"},
+				{"n": "Jiangnan Foods", "s": "alimentos", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "m": "sol"},
+				{"n": "Huanan Construction", "s": "construcao", "tier": 2, "c": "#003F72", "t": "#FFFFFF", "m": "colunas"},
+				{"n": "Xiaolong Dumplings", "s": "alimentos", "tier": 1, "c": "#F2A900", "t": "#3E2723", "m": "folha"},
+				{"n": "Wang Auto Parts", "s": "montadora", "tier": 1, "c": "#111111", "t": "#FFFFFF", "m": "escudo"}
+			]
+		}
+	},
+	"global": [
+		{"n": "Zenith Airways", "s": "aerea", "tier": 3, "c": "#8A1538", "t": "#FFFFFF", "m": "seta", "r": ["UEFA", "AFC", "CAF", "CONMEBOL", "CONCACAF"]},
+		{"n": "Oryx Airways", "s": "aerea", "tier": 3, "c": "#5C0632", "t": "#FFFFFF", "m": "seta", "r": ["UEFA", "AFC", "CAF"]},
+		{"n": "Aurum Bank", "s": "banco", "tier": 3, "c": "#B5A642", "t": "#111111", "m": "anel", "r": ["UEFA", "CONMEBOL", "CONCACAF"]},
+		{"n": "Nexa Tech", "s": "tecnologia", "tier": 3, "c": "#111111", "t": "#00A86B", "m": "hexagono", "r": ["UEFA", "AFC", "CONCACAF", "CONMEBOL"]},
+		{"n": "Orbita Motors", "s": "montadora", "tier": 3, "c": "#8B0000", "t": "#FFFFFF", "m": "anel", "r": ["UEFA", "AFC", "CONCACAF", "CONMEBOL", "CAF"]},
+		{"n": "Pulso Energy", "s": "energia", "tier": 3, "c": "#00838F", "t": "#FFFFFF", "m": "sol", "r": ["UEFA", "CONMEBOL", "CAF"]},
+		{"n": "Vértice Mobile", "s": "telecom", "tier": 3, "c": "#6CACE4", "t": "#111111", "m": "onda", "r": ["UEFA", "CONMEBOL", "CONCACAF"]},
+		{"n": "Coinstream", "s": "cripto", "tier": 3, "c": "#111111", "t": "#F7931A", "m": "hexagono", "r": ["UEFA", "CONMEBOL", "AFC"]},
+		{"n": "Stakeline", "s": "aposta", "tier": 3, "c": "#0B2E13", "t": "#C6FF00", "m": "estrela", "r": ["UEFA", "CONMEBOL", "CONCACAF", "CAF"]},
+		{"n": "Streamix", "s": "midia", "tier": 3, "c": "#E50914", "t": "#FFFFFF", "m": "play", "r": ["UEFA", "CONMEBOL", "CONCACAF", "AFC"]},
+		{"n": "Lumora Electronics", "s": "tecnologia", "tier": 3, "c": "#1428A0", "t": "#FFFFFF", "m": "hexagono", "r": ["UEFA", "AFC", "CONMEBOL", "CAF"]},
+		{"n": "Kinetic Tyres", "s": "montadora", "tier": 3, "c": "#FFD100", "t": "#111111", "m": "escudo", "r": ["UEFA", "CONMEBOL", "AFC", "CONCACAF"]},
+		{"n": "Fresca Cola", "s": "bebida", "tier": 3, "c": "#E4002B", "t": "#FFFFFF", "m": "onda", "r": ["UEFA", "CONMEBOL", "CONCACAF", "CAF", "AFC"]},
+		{"n": "Payvo", "s": "fintech", "tier": 3, "c": "#1652F0", "t": "#FFFFFF", "m": "anel", "r": ["UEFA", "CONMEBOL", "CONCACAF", "AFC", "CAF"]}
+	],
+	"suppliers": [
+		{"n": "Kora", "tier": 3, "c": "#FFFFFF", "t": "#111111", "logo": "curva", "o": "USA", "r": ["all"]},
+		{"n": "Veloce", "tier": 3, "c": "#111111", "t": "#FFFFFF", "logo": "barras", "o": "GER", "r": ["all"]},
+		{"n": "Striker", "tier": 3, "c": "#C8102E", "t": "#FFFFFF", "logo": "raio", "o": "GER", "r": ["all"]},
+		{"n": "Tenkai", "tier": 2, "c": "#0B3C8C", "t": "#FFFFFF", "logo": "sol", "o": "JPN", "r": ["AFC", "UEFA", "CONMEBOL"]},
+		{"n": "Albion Kit", "tier": 2, "c": "#111111", "t": "#F2F2F2", "logo": "coroa", "o": "ENG", "r": ["UEFA", "CAF", "CONMEBOL", "AFC"]},
+		{"n": "Olimpo", "tier": 2, "c": "#F2C14E", "t": "#111111", "logo": "asas", "o": "ITA", "r": ["UEFA", "CONMEBOL", "CAF", "AFC"]},
+		{"n": "Tessuto", "tier": 2, "c": "#0B3C5D", "t": "#FFFFFF", "logo": "onda", "o": "ITA", "r": ["UEFA", "CAF"]},
+		{"n": "Ataque", "tier": 2, "c": "#0033A0", "t": "#FFFFFF", "logo": "diamante", "o": "ESP", "r": ["UEFA", "CONMEBOL", "CONCACAF"]},
+		{"n": "Nordvik", "tier": 2, "c": "#FFFFFF", "t": "#C8102E", "logo": "chevron", "o": "DEN", "r": ["UEFA", "AFC"]},
+		{"n": "Alouette", "tier": 2, "c": "#1B3A8C", "t": "#FFFFFF", "logo": "asa", "o": "FRA", "r": ["UEFA", "CAF"]},
+		{"n": "Pampa Sport", "tier": 2, "c": "#2E7D32", "t": "#FFFFFF", "logo": "trevo", "o": "BRA", "r": ["BRA", "URU", "PAR"]},
+		{"n": "Rinha", "tier": 1, "c": "#E4572E", "t": "#FFFFFF", "logo": "estrela", "o": "BRA", "r": ["BRA"]},
+		{"n": "Gol Norte", "tier": 1, "c": "#4EA8DE", "t": "#111111", "logo": "chevron", "o": "BRA", "r": ["BRA"]},
+		{"n": "Tramela", "tier": 1, "c": "#FFFFFF", "t": "#5B2C83", "logo": "triangulo", "o": "BRA", "r": ["BRA"]},
+		{"n": "Tango Deportes", "tier": 2, "c": "#75AADB", "t": "#FFFFFF", "logo": "sol", "o": "ARG", "r": ["ARG", "URU", "PAR", "BOL", "CHI"]},
+		{"n": "Gauchito", "tier": 1, "c": "#FFFFFF", "t": "#1B3A8C", "logo": "estrela", "o": "ARG", "r": ["ARG"]},
+		{"n": "Cóndor Sport", "tier": 1, "c": "#FFD100", "t": "#111111", "logo": "asa", "o": "COL", "r": ["COL", "ECU", "PER", "VEN", "BOL"]},
+		{"n": "Xolo Sport", "tier": 2, "c": "#006341", "t": "#FFFFFF", "logo": "raio", "o": "MEX", "r": ["MEX", "USA"]},
+		{"n": "Hamle", "tier": 2, "c": "#E30A17", "t": "#FFFFFF", "logo": "seta", "o": "TUR", "r": ["TUR"]},
+		{"n": "Hanse Trikot", "tier": 1, "c": "#FFFFFF", "t": "#111111", "logo": "escudo", "o": "GER", "r": ["GER", "AUT", "SUI"]},
+		{"n": "Alpina Sport", "tier": 1, "c": "#C8102E", "t": "#FFFFFF", "logo": "montanha", "o": "SUI", "r": ["SUI", "AUT"]},
+		{"n": "Lusitano", "tier": 1, "c": "#006600", "t": "#FFFFFF", "logo": "escudo", "o": "POR", "r": ["POR"]},
+		{"n": "Delta Sport", "tier": 1, "c": "#FF6600", "t": "#FFFFFF", "logo": "triangulo", "o": "NED", "r": ["NED", "BEL"]},
+		{"n": "Tartan Kit", "tier": 1, "c": "#0B2545", "t": "#FFFFFF", "logo": "barras", "o": "SCO", "r": ["SCO", "ENG"]},
+		{"n": "Ferrier", "tier": 1, "c": "#6B2737", "t": "#FFFFFF", "logo": "circulo", "o": "ENG", "r": ["ENG"]},
+		{"n": "Vardar Sport", "tier": 1, "c": "#111111", "t": "#FFD100", "logo": "diamante", "o": "SRB", "r": ["SRB", "CRO", "GRE", "UKR", "CZE"]},
+		{"n": "Hwarang", "tier": 1, "c": "#FFFFFF", "t": "#003478", "logo": "circulo", "o": "KOR", "r": ["KOR"]},
+		{"n": "Longwei", "tier": 2, "c": "#DE2910", "t": "#FFDE00", "logo": "onda", "o": "CHN", "r": ["CHN"]},
+		{"n": "Sahel Sport", "tier": 1, "c": "#008751", "t": "#FFFFFF", "logo": "sol", "o": "SEN", "r": ["CAF"]},
+		{"n": "Rimal Sport", "tier": 1, "c": "#FFFFFF", "t": "#006C35", "logo": "folha", "o": "KSA", "r": ["KSA", "QAT", "UAE", "EGY"]},
+		{"n": "Southern Kit", "tier": 1, "c": "#00843D", "t": "#FFCD00", "logo": "estrela", "o": "AUS", "r": ["AUS"]}
+	]
+}

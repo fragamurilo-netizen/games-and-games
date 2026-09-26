@@ -11,7 +11,7 @@ var club_name := ""
 var coach_name := ""
 var c1 := Color("#1B3A8C")
 var c2 := Color("#FFFFFF")
-var brands: Array = [] # [{n, c, t}]
+var brands: Array = [] # [{n, c, t, m, logo}] (BrandCatalog)
 var outlets: Array = [] # nomes dos veículos (cubos dos microfones)
 var crest_spec: Dictionary = {}
 
@@ -48,33 +48,26 @@ func setup(w: GameWorld, c: Club) -> void:
 
 ## Marcas do painel: patrocinadores do clube (camisa, fornecedora) e, se faltar, parceiros da liga.
 static func brands_for(c: Club) -> Array:
+	# Patrocinadores do clube (master primeiro) e, se faltarem marcas no painel, anunciantes do
+	# país do clube — tudo do BrandCatalog, a mesma fonte das camisas e das placas.
 	var out: Array = []
 	var seen: Dictionary = {}
-	for slot in ["master", "fornecedor", "costas", "manga", "omoplata", "calcao"]:
-		if not c.sponsors.has(slot):
-			continue
-		var s: Dictionary = c.sponsors[slot]
-		var n := String(s.get("n", ""))
+	for b: Dictionary in BrandCatalog.for_club(null, c):
+		var n := String(b.get("n", ""))
 		if n != "" and not seen.has(n):
 			seen[n] = true
-			out.append({"n": n, "c": String(s.get("c", "#1B1B1B")), "t": String(s.get("t", "#FFFFFF"))})
-	for slot in c.sponsors:
-		var s2: Dictionary = c.sponsors[slot]
-		var n2 := String(s2.get("n", ""))
-		if n2 != "" and not seen.has(n2):
-			seen[n2] = true
-			out.append({"n": n2, "c": String(s2.get("c", "#1B1B1B")), "t": String(s2.get("t", "#FFFFFF"))})
+			out.append({"n": n, "c": String(b.get("c", "#1B1B1B")), "t": String(b.get("t", "#FFFFFF")), "m": String(b.get("m", "")), "logo": String(b.get("logo", ""))})
 	if out.size() < 4:
 		var r := RandomNumberGenerator.new()
 		r.seed = hash([c.key, "painel"])
-		var pool: Array = DatabaseManager.sponsor_brands().duplicate()
+		var pool: Array = BrandCatalog.brands_for(c.nation, BrandCatalog.club_tier(c), "placa", c.tier, c.city)
 		RngUtil.shuffle(r, pool)
-		for b in pool:
+		for b: Dictionary in pool:
 			if out.size() >= 4:
 				break
 			if not seen.has(String(b["n"])):
 				seen[String(b["n"])] = true
-				out.append({"n": String(b["n"]), "c": String(b.get("c", "#1B1B1B")), "t": String(b.get("t", "#FFFFFF"))})
+				out.append({"n": String(b["n"]), "c": String(b.get("c", "#1B1B1B")), "t": String(b.get("t", "#FFFFFF")), "m": String(b.get("m", "")), "logo": ""})
 	return out
 
 
@@ -211,12 +204,20 @@ func _draw() -> void:
 		sb.anti_aliasing = true
 		draw_style_box(sb, logo)
 		var txt := String(b.get("n", "")).to_upper()
+		var mark := String(b.get("m", ""))
+		if mark == "":
+			mark = String(b.get("logo", ""))
+		var mu := logo.size.y * 0.24
+		var mark_w := mu * 2.6 if BrandMark.has(mark) and mu >= 2.5 else 0.0
 		var fs := int(logo.size.y * 0.5)
 		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		if tw > logo.size.x - 8.0:
-			fs = maxi(7, int(fs * (logo.size.x - 8.0) / tw))
+		if tw > logo.size.x - 8.0 - mark_w:
+			fs = maxi(7, int(fs * (logo.size.x - 8.0 - mark_w) / tw))
 			tw = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(font, logo.get_center() + Vector2(-tw * 0.5, fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tx)
+		var x0 := logo.get_center().x - (tw + mark_w) * 0.5
+		if mark_w > 0.0:
+			BrandMark.draw(self, mark, Vector2(x0 + mu, logo.get_center().y), mu, tx, bg)
+		draw_string(font, Vector2(x0 + mark_w, logo.get_center().y + fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tx)
 	# Rodapé do painel e piso.
 	draw_rect(Rect2(0, back.end.y, w, 4), c1)
 	for i in 6:
