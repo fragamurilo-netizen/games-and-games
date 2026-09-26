@@ -12,72 +12,17 @@ permissions:
   contents: write
 
 jobs:
-  consolidate-and-build:
+  validate-and-build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout consolidated branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: build/mais-uma-rodada-latest-2026-09-26
 
-      - name: Consolidate game branches chronologically
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "Mais Uma Rodada Builder"
-          git config user.email "actions@users.noreply.github.com"
-
-          cp .github/workflows/build-mais-uma-rodada.yml /tmp/build-mais-uma-rodada.yml
-          cp mais-uma-rodada/tests/smoke_boot.gd /tmp/smoke_boot.gd
-
-          git fetch origin \
-            claude/project-thread-88g6x1:refs/remotes/origin/claude/project-thread-88g6x1 \
-            claude/redes-sociais-imprensa-qyb7p6:refs/remotes/origin/claude/redes-sociais-imprensa-qyb7p6 \
-            claude/cabelos-barbas-u67uuh:refs/remotes/origin/claude/cabelos-barbas-u67uuh \
-            claude/patrocinadores-por-pais-2frahf:refs/remotes/origin/claude/patrocinadores-por-pais-2frahf \
-            claude/laughing-goodall-0bqaod:refs/remotes/origin/claude/laughing-goodall-0bqaod
-
-          git checkout -B build/mais-uma-rodada-latest-2026-09-26 de367a8af76d596cd8190b3bd6939fe905b33d7e
-          mkdir -p .github/workflows mais-uma-rodada/tests
-          cp /tmp/build-mais-uma-rodada.yml .github/workflows/build-mais-uma-rodada.yml
-          cp /tmp/smoke_boot.gd mais-uma-rodada/tests/smoke_boot.gd
-          git add .github/workflows/build-mais-uma-rodada.yml mais-uma-rodada/tests/smoke_boot.gd
-          git commit -m "ci: preserve APK builder and boot smoke" || true
-
-          merge_branch() {
-            branch="$1"
-            label="$2"
-            echo "==> Merging $branch ($label)"
-            if git merge --no-ff -X theirs "$branch" -m "Integrate $label"; then
-              return 0
-            fi
-
-            echo "Automatic merge left conflicts; resolving only remaining conflict files in favor of the newer incoming branch."
-            conflicts="$(git diff --name-only --diff-filter=U || true)"
-            if [ -z "$conflicts" ]; then
-              echo "Merge failed without conflict paths."
-              exit 1
-            fi
-            while IFS= read -r path; do
-              [ -z "$path" ] && continue
-              git checkout --theirs -- "$path" || git rm -f -- "$path"
-              git add -A -- "$path"
-            done <<< "$conflicts"
-            git commit -m "Integrate $label (resolve remaining conflicts)"
-          }
-
-          merge_branch origin/claude/project-thread-88g6x1 "uniform history and cutout kits"
-          merge_branch origin/claude/redes-sociais-imprensa-qyb7p6 "social network and press presentation"
-          merge_branch origin/claude/cabelos-barbas-u67uuh "hair, beards and face refinements"
-          merge_branch origin/claude/patrocinadores-por-pais-2frahf "sponsor and brand catalog"
-          merge_branch origin/claude/laughing-goodall-0bqaod "latest human faces, club data and LiveEngine"
-
-          echo "Consolidated head:"
-          git log --oneline -12
-
-      - name: Validate Godot project import
+      - name: Validate import, scripts and initial menu
         shell: bash
         run: |
           set -euo pipefail
@@ -85,20 +30,27 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace/mais-uma-rodada \
             barichello/godot-ci:4.7 \
-            godot --headless --editor --path /workspace/mais-uma-rodada --quit-after 30
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
 
-      - name: Smoke boot main scene
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker run --rm \
-            -v "$PWD:/workspace" \
-            -w /workspace/mais-uma-rodada \
-            barichello/godot-ci:4.7 \
-            godot --headless --path /workspace/mais-uma-rodada --script res://tests/smoke_boot.gd 2>&1 | tee /tmp/boot.log
-          grep -q "SMOKE_BOOT_OK" /tmp/boot.log
-          if grep -E "SCRIPT ERROR|Parse Error|Invalid call|SMOKE_BOOT:" /tmp/boot.log; then
-            echo "::error::Runtime boot produced Godot errors."
+              godot --headless --editor --path /workspace/mais-uma-rodada --quit-after 30 2>&1 | tee /workspace/import.log
+
+              godot --headless --path /workspace/mais-uma-rodada \
+                --script res://scripts/ui/components/portrait_view.gd --check-only 2>&1 | tee /workspace/portrait.log
+
+              godot --headless --path /workspace/mais-uma-rodada \
+                --script res://tests/smoke_boot.gd 2>&1 | tee /workspace/boot.log
+            '
+
+          grep -q "SMOKE_BOOT_OK" boot.log
+          if grep -E "SCRIPT ERROR|Parse Error|Invalid call|SMOKE_BOOT:" portrait.log boot.log; then
+            echo "::error::Godot parser/runtime errors detected."
+            exit 1
+          fi
+          if grep -E "Failed loading resource: res://assets/fonts|Error loading custom project theme" import.log boot.log; then
+            echo "::error::Theme/font import failed."
             exit 1
           fi
 
@@ -110,16 +62,11 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace/mais-uma-rodada \
             barichello/godot-ci:4.7 \
-            godot --headless --path /workspace/mais-uma-rodada --script res://tests/run_tests.gd \
-            || echo "::warning::The legacy test suite reported failures; continuing because boot smoke passed."
-
-      - name: Save consolidated branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add -A
-          git commit -m "build: consolidated Mais Uma Rodada latest [skip ci]" || true
-          git push --force-with-lease origin HEAD:build/mais-uma-rodada-latest-2026-09-26
+            bash -lc '
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              godot --headless --path /workspace/mais-uma-rodada --script res://tests/run_tests.gd
+            ' || echo "::warning::Legacy test suite reported failures; boot validation passed."
 
       - name: Export Android APK
         shell: bash
@@ -130,8 +77,13 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace/mais-uma-rodada \
             barichello/godot-ci:4.7 \
-            godot --headless --verbose --path /workspace/mais-uma-rodada \
-              --export-debug "Android arm64" build/MaisUmaRodada-latest-arm64.apk
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              godot --headless --verbose --path /workspace/mais-uma-rodada \
+                --export-debug "Android arm64" build/MaisUmaRodada-latest-arm64.apk
+            '
           test -s mais-uma-rodada/build/MaisUmaRodada-latest-arm64.apk
           ls -lh mais-uma-rodada/build/MaisUmaRodada-latest-arm64.apk
 
@@ -143,7 +95,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish APK release
+      - name: Publish fixed APK release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -157,5 +109,5 @@ jobs:
             gh release create "$TAG" "$APK" \
               --target build/mais-uma-rodada-latest-2026-09-26 \
               --title "Mais Uma Rodada - APK mais atualizado (26/09/2026)" \
-              --notes "Build consolidada das branches do Mais Uma Rodada, validada com boot real da cena inicial."
+              --notes "Build consolidada e validada com parser, importação de fontes e boot real do menu inicial."
           fi
