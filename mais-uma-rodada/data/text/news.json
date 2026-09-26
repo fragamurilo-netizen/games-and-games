@@ -4,12 +4,14 @@
 		"t": [
 			"{winner} atropela o {loser}: {score}",
 			"Passeio do {winner}: {score} no {loser}",
-			"{winner} não tem piedade e aplica {score}"
+			"{winner} não tem piedade e aplica {score}",
+			"{winner} transforma jogo em exibição e goleia {loser}"
 		],
 		"b": [
 			"{scorer} foi o nome do jogo na vitória por {score}.",
 			"Com atuação de gala de {scorer}, o {winner} dominou do início ao fim.",
-			"O {loser} não viu a cor da bola. {scorer} brilhou."
+			"O {loser} não viu a cor da bola. {scorer} brilhou.",
+			"O placar de {score} refletiu uma atuação dominante, com {scorer} entre os destaques."
 		]
 	},
 	"zebra": {
@@ -27,11 +29,13 @@
 		"t": [
 			"{winner} vence o clássico contra o {loser}",
 			"Clássico é do {winner}: {score}",
-			"{winner} leva a melhor no clássico"
+			"{winner} leva a melhor no clássico",
+			"No clássico, {winner} faz a festa e cala o {loser}"
 		],
 		"b": [
 			"{score} no clássico. {scorer} entrou para a história do confronto.",
-			"A cidade é do {winner}, pelo menos até o próximo clássico. Gol de {scorer}."
+			"A cidade é do {winner}, pelo menos até o próximo clássico. Gol de {scorer}.",
+			"O duelo terminou {score}, resultado que vai alimentar a rivalidade até o próximo encontro."
 		]
 	},
 	"classico_empate": {
@@ -68,11 +72,13 @@
 		"t": [
 			"Crise no {club}: {n} derrotas seguidas",
 			"Torcida perde a paciência após {n}ª derrota seguida do {club}",
-			"{club} afunda com {n} derrotas consecutivas"
+			"{club} afunda com {n} derrotas consecutivas",
+			"{club} tenta estancar crise após {n} derrotas"
 		],
 		"b": [
 			"A pressão aumenta nos bastidores. A diretoria cobra reação imediata.",
-			"Vaias no estádio e cobrança nas redes: o momento é delicado."
+			"Vaias no estádio e cobrança nas redes: o momento é delicado.",
+			"Lideranças do elenco conversaram depois do jogo e pediram uma reação imediata."
 		]
 	},
 	"sem_vencer": {
@@ -118,22 +124,26 @@
 	"lesao_grave": {
 		"t": [
 			"{player} sofre lesão e desfalca o {club} por {weeks} semanas",
-			"Baixa no {club}: {player} vai parar por {weeks} semanas"
+			"Baixa no {club}: {player} vai parar por {weeks} semanas",
+			"{club} perde {player} por lesão"
 		],
 		"b": [
 			"Diagnóstico: {injury}. O departamento médico prevê retorno em cerca de {weeks} semanas.",
-			"{injury}. Um golpe duro para o {club}."
+			"{injury}. Um golpe duro para o {club}.",
+			"O exame confirmou {injury}; o retorno de {player} deve acontecer em aproximadamente {weeks} semanas."
 		]
 	},
 	"transferencia": {
 		"t": [
 			"{to} contrata {player} por {fee}",
 			"{player} é o novo reforço do {to}",
-			"Negócio fechado: {player} troca o {from} pelo {to}"
+			"Negócio fechado: {player} troca o {from} pelo {to}",
+			"{to} fecha negócio e anuncia {player}"
 		],
 		"b": [
 			"O {to} pagou {fee} ao {from} pelo {pos} de {age} anos.",
-			"Aos {age} anos, {player} deixa o {from} rumo ao {to} por {fee}."
+			"Aos {age} anos, {player} deixa o {from} rumo ao {to} por {fee}.",
+			"{player} chega ao {to} depois de uma negociação de {fee} com o {from}."
 		]
 	},
 	"transferencia_rival": {
@@ -417,6 +427,105 @@
 		"b": [
 			"Na decisão, o {club} superou o {runner_up} e levou a taça do estado.",
 			"Festa na cidade: {club} vence o {runner_up} e fica com o {cup}."
+		]
+	},
+	"treino_destaque": {
+		"t": [
+			"{player} chama atenção nos treinos do {club}",
+			"Treino forte coloca {player} no radar da comissão",
+			"{player} vive semana de destaque no {club}",
+			"Boa fase de {player} começa no CT"
+		],
+		"b": [
+			"Aos {age} anos, {player} foi um dos destaques das atividades e aumentou a disputa por espaço.",
+			"A comissão gostou da intensidade de {player}; companheiros também elogiaram a semana de trabalho.",
+			"Sem promessa de titularidade, {player} ganhou pontos nos treinos e pode aparecer mais nos próximos jogos."
+		]
+	},
+	"treino_queda": {
+		"t": [
+			"{player} preocupa comissão nos treinos",
+			"Momento de {player} acende alerta no {club}",
+			"{player} tenta recuperar confiança no CT"
+		],
+		"b": [
+			"A comissão percebeu queda de confiança de {player} e prepara trabalho específico para recuperar o jogador.",
+			"O rendimento de {player} nos treinos caiu nas últimas semanas. O clube tenta entender se o problema é físico ou emocional.",
+			"Companheiros têm apoiado {player}, que atravessa um momento abaixo do esperado."
+		]
+	},
+	"jovem_monitorado": {
+		"t": [
+			"Olheiros acompanham de perto {player}, joia do {club}",
+			"{player}, {age}, começa a chamar atenção fora do {club}",
+			"Joia do {club} entra no radar do mercado",
+			"Base do {club}: {player} ganha projeção"
+		],
+		"b": [
+			"O jovem de {age} anos vem sendo acompanhado por observadores e pode virar assunto no mercado.",
+			"Ainda sem proposta oficial, {player} já desperta curiosidade de clubes que monitoram jovens promessas.",
+			"O {club} trata {player} como patrimônio esportivo e pretende controlar os próximos passos da carreira."
+		]
+	},
+	"veterano_lider": {
+		"t": [
+			"{player} assume voz de liderança no vestiário do {club}",
+			"Experiência de {player} ganha peso no {club}",
+			"{player} vira referência interna no elenco"
+		],
+		"b": [
+			"O veterano tem conversado com os mais jovens e ganhou espaço como uma das vozes do grupo.",
+			"Companheiros destacam a postura de {player} nos bastidores, principalmente nos momentos de pressão.",
+			"Sem precisar de braçadeira, {player} passou a exercer influência crescente no vestiário."
+		]
+	},
+	"tecnico_adversario": {
+		"t": [
+			"{opponent} estuda o {club} antes do confronto",
+			"Próximo rival prepara detalhes para enfrentar o {club}",
+			"{opponent} promete jogo estudado contra o {club}"
+		],
+		"b": [
+			"A comissão do {opponent} analisou os últimos jogos do {club} e prepara ajustes específicos para o confronto.",
+			"O adversário acredita que pequenos detalhes táticos podem decidir a partida contra o {club}.",
+			"Nos bastidores, o {opponent} trata o duelo com o {club} como um dos jogos que exigem preparação especial."
+		]
+	},
+	"rumor_mercado": {
+		"t": [
+			"Mercado observa {player}, do {club}",
+			"Rumores cercam o futuro de {player}",
+			"{player} entra no radar de outros clubes",
+			"Empresários sondam situação de {player} no {club}"
+		],
+		"b": [
+			"Não há proposta oficial, mas pessoas ligadas ao mercado consultaram a situação contratual de {player}.",
+			"O {club} não recebeu oferta, embora o nome de {player} tenha circulado entre intermediários nesta semana.",
+			"A boa fase colocou {player} em evidência; a diretoria acompanha o movimento sem abrir negociação."
+		]
+	},
+	"vestiario_reacao": {
+		"t": [
+			"Vestiário do {club} reage após {result}",
+			"Clima interno muda no {club}",
+			"Elenco do {club} conversa sobre o momento da equipe"
+		],
+		"b": [
+			"Jogadores mais experientes tomaram a palavra depois de {result} e pediram foco na próxima rodada.",
+			"A comissão percebeu mudança de clima no grupo após {result}; a resposta dos próximos jogos será observada de perto.",
+			"O elenco se reuniu sem a presença da imprensa para discutir {result} e o rumo da temporada."
+		]
+	},
+	"torcida_clima": {
+		"t": [
+			"Torcida do {club} prepara recepção para o próximo jogo",
+			"Arquibancada promete pressão a favor do {club}",
+			"Clima cresce entre os torcedores do {club}"
+		],
+		"b": [
+			"Movimentos de torcedores organizam ações para empurrar a equipe e aumentar a pressão sobre o adversário.",
+			"A procura por ingressos cresceu e o ambiente para a próxima partida promete ser intenso.",
+			"Nas redes, a mobilização da torcida aumentou durante a semana."
 		]
 	}
 }
