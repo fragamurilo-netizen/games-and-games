@@ -5,7 +5,7 @@ extends RefCounted
 ## (diminutivos, regionais e descritivos), o nome de camisa (known_as) e nunca repete nomes
 ## completos já usados no mundo nem nomes de craques reais.
 
-const MAX_TRIES := 12
+const MAX_TRIES := 60
 ## Quantos jogadores do mundo podem usar o mesmo apelido ou só o primeiro nome na camisa: um
 ## "Canhoto" ou "Pedro" por aí é normal; vinte e cinco no mesmo mundo, não.
 const NICK_MAX := 2

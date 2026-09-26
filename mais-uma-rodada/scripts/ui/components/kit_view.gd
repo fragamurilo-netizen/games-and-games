@@ -8,6 +8,8 @@ extends Control
 ##   collar, sleeve, sleeve_len (short|long), trim (vivos),
 ##   shorts / shorts2 / shorts_style, socks / socks2 / socks_style,
 ##   sp = {n, c, t} (patrocinador master no peito), sp_m (manga), sp_c (costas), sp_s (calção),
+##   spc / spmc / spcc / spsc / supc = cor escolhida para cada logo (master, manga, costas, calção,
+##   fornecedor); vazio = a cor da própria marca que mais contrasta com o tecido,
 ##   sup = {n, c, t, logo} (fornecedor de material esportivo, logo pequeno no peito).
 ##   sp = {n, c, t, m} (patrocinador; m = símbolo de BrandMark desenhado ao lado do nome).
 ## O escudo do clube vai no peito (lado do coração) quando `crest` é dado.
@@ -263,7 +265,7 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 		if show_logos:
 			var spc: Dictionary = kit.get("sp_c", {})
 			if not spc.is_empty():
-				_draw_patch(Rect2(off + Vector2(0.33, 0.12) * s, Vector2(0.34, 0.075) * s), spc, c1)
+				_draw_patch(Rect2(off + Vector2(0.33, 0.12) * s, Vector2(0.34, 0.075) * s), spc, c1, false, "spcc")
 			if back_name != "":
 				_draw_text_centered(back_name.to_upper(), off + Vector2(0.5, 0.28) * s, s * 0.44, int(s * 0.072), fg, &"Caps", _num_edge(fg))
 		if number > 0:
@@ -279,14 +281,14 @@ func _draw_shirt(s: float, off: Vector2) -> void:
 		_place_crest(Rect2())
 	if show_logos:
 		if has_master:
-			_draw_patch(Rect2(off + Vector2(0.29, 0.34) * s, Vector2(0.42, 0.12) * s), sp, _bg_at(Vector2(0.5, 0.4), c1), true)
+			_draw_patch(Rect2(off + Vector2(0.29, 0.34) * s, Vector2(0.42, 0.12) * s), sp, _bg_at(Vector2(0.5, 0.4), c1), true, "spc")
 		var sup: Dictionary = kit.get("sup", {})
 		if not sup.is_empty():
 			# Fornecedor no peito direito do jogador (esquerda de quem olha).
 			_draw_supplier(off + Vector2(0.39, 0.2) * s, s * 0.035, sup, _bg_at(Vector2(0.39, 0.2), c1))
 		var spm: Dictionary = kit.get("sp_m", {})
 		if not spm.is_empty():
-			_draw_patch(Rect2(off + Vector2(0.765, 0.15) * s, Vector2(0.1, 0.05) * s), spm, sleeve_col)
+			_draw_patch(Rect2(off + Vector2(0.765, 0.15) * s, Vector2(0.1, 0.05) * s), spm, sleeve_col, false, "spmc")
 	if number > 0:
 		var fg := _number_col(c1)
 		if has_master:
@@ -595,8 +597,10 @@ func _place_crest(r: Rect2) -> void:
 
 ## Patrocinador estampado no tecido: sem caixa, na cor da marca que contrasta com o fundo.
 ## O master ganha um pequeno emblema da marca ao lado do nome.
-func _draw_patch(r: Rect2, sp: Dictionary, bg: Color, emblem: bool = false) -> void:
+func _draw_patch(r: Rect2, sp: Dictionary, bg: Color, emblem: bool = false, ov_key: String = "") -> void:
 	var fg := _ink(sp, bg)
+	if ov_key != "" and String(kit.get(ov_key, "")) != "":
+		fg = Color(String(kit[ov_key])) # cor escolhida no editor de uniforme
 	var name := String(sp.get("n", "")).to_upper()
 	var center := r.get_center()
 	var max_w := r.size.x
@@ -628,8 +632,44 @@ static func _ink(sp: Dictionary, bg: Color) -> Color:
 ## Logo da fornecedora (formas simples de BrandMark, sem marcas reais).
 func _draw_supplier(c: Vector2, u: float, sp: Dictionary, bg: Color) -> void:
 	var col := _ink(sp, bg)
-	if not BrandMark.draw(self, String(sp.get("logo", "")), c, u, col, bg):
-		_draw_text_centered(String(sp.get("n", "")).substr(0, 1).to_upper(), c, u * 2.0, int(u * 1.6), col, &"Big")
+	if String(kit.get("supc", "")) != "":
+		col = Color(String(kit["supc"]))
+	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * u
+	match String(sp.get("logo", "")):
+		"curva":
+			draw_colored_polygon(PackedVector2Array([P.call(-1.0, 0.1), P.call(-0.6, 0.6), P.call(0.2, 0.4), P.call(1.1, -0.5), P.call(0.1, 0.1), P.call(-0.55, 0.3)]), col)
+		"barras":
+			for i in 3:
+				var x := -0.8 + i * 0.6
+				var hh := 0.5 + i * 0.35
+				draw_colored_polygon(PackedVector2Array([P.call(x, 0.6), P.call(x + 0.35, 0.6), P.call(x + 0.35 + hh * 0.5, 0.6 - hh), P.call(x + hh * 0.5, 0.6 - hh)]), col)
+		"triangulo":
+			for i in 3:
+				var y := 0.6 - i * 0.45
+				var hw := 1.0 - i * 0.33
+				draw_colored_polygon(PackedVector2Array([P.call(-hw, y), P.call(hw, y), P.call(hw * 0.8, y - 0.3), P.call(-hw * 0.8, y - 0.3)]), col)
+		"raio":
+			draw_colored_polygon(PackedVector2Array([P.call(0.3, -0.9), P.call(-0.6, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.9), P.call(0.6, -0.2), P.call(0.05, -0.2)]), col)
+		"asas":
+			draw_colored_polygon(PackedVector2Array([P.call(-1.0, -0.5), P.call(0.0, 0.1), P.call(1.0, -0.5), P.call(0.0, 0.6)]), col)
+		"diamante":
+			draw_polyline(PackedVector2Array([P.call(0, -0.8), P.call(0.7, 0), P.call(0, 0.8), P.call(-0.7, 0), P.call(0, -0.8)]), col, maxf(1.0, u * 0.25), true)
+		"trevo":
+			for a in [-PI / 2.0, PI / 6.0, PI * 5.0 / 6.0]:
+				draw_circle(c + Vector2(cos(a), sin(a)) * u * 0.42, u * 0.38, col)
+		"estrela":
+			var pts := PackedVector2Array()
+			for i in 10:
+				var rr := 0.9 if i % 2 == 0 else 0.38
+				var a := -PI / 2.0 + i * PI / 5.0
+				pts.append(c + Vector2(cos(a), sin(a)) * u * rr)
+			draw_colored_polygon(pts, col)
+		"chevron":
+			for i in 2:
+				var y := -0.3 + i * 0.55
+				draw_polyline(PackedVector2Array([P.call(-0.8, y), P.call(0, y + 0.45), P.call(0.8, y)]), col, maxf(1.0, u * 0.28), true)
+		_:
+			_draw_text_centered(String(sp.get("n", "")).substr(0, 1).to_upper(), c, u * 2.0, int(u * 1.6), col, &"Big")
 
 
 ## Texto centrado em `center`, encolhido até caber em `max_w`.
@@ -713,7 +753,7 @@ func _draw_legs(r: Rect2) -> void:
 			draw_colored_polygon(piece, Color(0, 0, 0, 0.12 * shade_k))
 	var sps: Dictionary = kit.get("sp_s", {})
 	if not sps.is_empty() and r.size.y >= 120.0 and not back:
-		_draw_patch(_fr(r, 0.56, 0.575, 0.18, 0.045), sps, sh)
+		_draw_patch(_fr(r, 0.56, 0.575, 0.18, 0.045), sps, sh, false, "spsc")
 	var so_line := shorts.duplicate()
 	so_line.append(shorts[0])
 	draw_polyline(so_line, out_sh, lw, true)

@@ -426,6 +426,15 @@ func _editor_card(club: Club) -> Control:
 			card.add_child(_style_grid(k, "sleeve", KitView.SLEEVES, "same", false))
 			_options(card, "Comprimento da manga", KitView.SLEEVE_LENGTHS, String(k.get("sleeve_len", "short")), "sleeve_len")
 			_options(card, "Vivos", KitView.TRIMS, String(k.get("trim", "none")), "trim")
+			_colors(card, club, "Detalhes (gola, punhos, vivos, terceira cor)", String(k.get("c3", k.get("c2", club.color2))), "c3")
+			_colors(card, club, "Números e nome", String(k.get("nc", "")), "nc", true)
+			card.add_child(UIKit.section("Microdetalhes"))
+			card.add_child(UIKit.label("Cor de cada logo sobre o tecido. \"Auto\" usa a cor da marca que mais contrasta.", "Small", true))
+			_colors(card, club, "Patrocínio master (peito)", String(k.get("spc", "")), "spc", true)
+			_colors(card, club, "Patrocínio da manga", String(k.get("spmc", "")), "spmc", true)
+			_colors(card, club, "Patrocínio das costas", String(k.get("spcc", "")), "spcc", true)
+			_colors(card, club, "Patrocínio do calção", String(k.get("spsc", "")), "spsc", true)
+			_colors(card, club, "Logo da fornecedora", String(k.get("supc", "")), "supc", true)
 		"shorts":
 			card.add_child(_style_grid(k, "shorts_style", KitView.SHORTS_STYLES, "plain", true))
 			_palette(card, club, "Cor do calção", "shorts", String(k.get("shorts", k.get("c2", "#111111"))))
@@ -871,6 +880,126 @@ static func template_kit(club: Club, t: Array, base: Dictionary) -> Dictionary:
 		k["c2"] = "#FFFFFF" if Color(String(k["c1"])).get_luminance() < 0.5 else "#111111"
 	return k
 
+
+func _template_grid(club: Club, k: Dictionary) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.add_theme_constant_override(&"v_separation", 8)
+	for t: Array in TEMPLATES:
+		var tk := template_kit(club, t, k)
+		tk.erase("sp")
+		var inner := UIKit.vbox(0)
+		var kv := UIKit.kit(tk, 96, 0, club.crest)
+		kv.full = true
+		kv.custom_minimum_size = Vector2(96, 150)
+		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		inner.add_child(kv)
+		var l := UIKit.label(String(t[0]), "Small")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		l.custom_minimum_size.x = 104
+		inner.add_child(l)
+		var tt := t
+		var cell := UIKit.tap_row(inner, func():
+			_edit(func(kk: Dictionary):
+				var nk := template_kit(club, tt, kk)
+				kk.clear()
+				kk.merge(nk)), "RowPanel")
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(cell)
+	return grid
+
+
+## Miniaturas de cada estampa do grupo, já com as cores do uniforme em edição.
+func _pattern_grid(k: Dictionary) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.add_theme_constant_override(&"v_separation", 8)
+	var cur := String(k.get("pattern", "plain"))
+	for p in KitView.group_patterns(_group):
+		var key: String = p[0]
+		var mini := k.duplicate()
+		mini.erase("sp")
+		mini.erase("sup")
+		mini["pattern"] = key
+		var inner := UIKit.vbox(0)
+		var kv := UIKit.kit(mini, 84)
+		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		inner.add_child(kv)
+		var l := UIKit.label(String(p[1]), "Small")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		l.custom_minimum_size.x = 104
+		inner.add_child(l)
+		var t := UIKit.tap_row(inner, func():
+			_edit(func(kk: Dictionary): kk["pattern"] = key), "CardHighlight" if key == cur else "RowPanel")
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(t)
+	return grid
+
+
+func _options(card: VBoxContainer, caption: String, opts: Array, current: String, field: String) -> void:
+	card.add_child(UIKit.label(caption, "Small"))
+	var g := ButtonGroup.new()
+	var flow := UIKit.flow(8)
+	for o in opts:
+		var val: String = o[0]
+		flow.add_child(UIKit.chip(String(o[1]), val == current, g, func():
+			_edit(func(kk: Dictionary): kk[field] = val)))
+	card.add_child(flow)
+
+
+func _swatch(hex: String, selected: bool, cb: Callable, label := "") -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(52, 52)
+	b.focus_mode = Control.FOCUS_NONE
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(hex) if hex != "" else Color(0, 0, 0, 0)
+	sb.set_corner_radius_all(26)
+	sb.set_border_width_all(4 if selected else 1)
+	sb.border_color = UIColors.ACCENT if selected else Color(1, 1, 1, 0.25)
+	for st in [&"normal", &"hover", &"pressed", &"focus"]:
+		b.add_theme_stylebox_override(st, sb)
+	if label != "":
+		b.text = label
+		b.add_theme_font_size_override(&"font_size", 16)
+	b.pressed.connect(cb)
+	return b
+
+
+## Paleta: cores do clube primeiro, depois a paleta geral e uma cor livre. `auto`: primeira opção
+## "Auto" (apaga o campo e deixa o jogo escolher).
+func _colors(card: VBoxContainer, club: Club, caption: String, current: String, field: String, auto: bool = false) -> void:
+	card.add_child(UIKit.label(caption, "Small"))
+	var flow := UIKit.flow(6)
+	var cur := Color(current).to_html(false) if current != "" else ""
+	if auto:
+		flow.add_child(_swatch("", current == "", func():
+			_edit(func(kk: Dictionary): kk.erase(field)), "Auto"))
+	var seen := {}
+	var list: Array = [club.color1, club.color2]
+	list.append_array(PALETTE)
+	if current != "" and not PALETTE.has(current):
+		list.insert(2, current)
+	for hex in list:
+		var h := Color(String(hex)).to_html(false)
+		if seen.has(h):
+			continue
+		seen[h] = true
+		var hh := "#" + h.to_upper()
+		flow.add_child(_swatch(hh, h == cur, func():
+			_edit(func(kk: Dictionary): kk[field] = hh)))
+	# Cor livre: roda de cores
+	var pick := UIKit.icon_button("palette", func():
+		ColorWheel.open(Color(current) if current != "" else Color.WHITE, caption, func(c: Color):
+			var hx := "#" + c.to_html(false).to_upper()
+			if hx != "#" + cur.to_upper():
+				_edit(func(kk: Dictionary): kk[field] = hx)), "Roda de cores")
+	pick.custom_minimum_size = Vector2(52, 52)
+	flow.add_child(pick)
+	card.add_child(flow)
 
 
 ## Desenho novo sorteado: de um modelo pronto ou do mesmo gerador dos clubes, nas cores do clube.

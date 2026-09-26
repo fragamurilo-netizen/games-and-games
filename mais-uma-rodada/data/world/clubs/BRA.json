@@ -1,6 +1,6 @@
 {
 	"nation": "BRA",
-	"_doc": "Clubes do Brasil (Séries A a D). uf: estado, usado nos estaduais (continental.json, kind = state). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"_doc": "Clubes do Brasil (Séries A a D, temporada 2026) e os que só disputam estaduais (league BRA5, grupo sem divisão nacional). uf: estado, usado nos estaduais (continental.json, kind = state). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
 	"clubs": [
 		{
 			"key": "BRA_RNC",
@@ -479,7 +479,7 @@
 			"city": "Fortaleza",
 			"uf": "CE",
 			"founded": 1918,
-			"league": "BRA1",
+			"league": "BRA2",
 			"rep": 72,
 			"arch": "tradicional_equilibrado",
 			"colors": [
@@ -512,7 +512,7 @@
 			"city": "Fortaleza",
 			"uf": "CE",
 			"founded": 1914,
-			"league": "BRA1",
+			"league": "BRA2",
 			"rep": 66,
 			"arch": "torcida_impaciente",
 			"colors": [
@@ -601,7 +601,7 @@
 			"city": "Recife",
 			"uf": "PE",
 			"founded": 1905,
-			"league": "BRA1",
+			"league": "BRA2",
 			"rep": 68,
 			"arch": "tradicional_decadente",
 			"colors": [
@@ -658,7 +658,7 @@
 			"city": "Curitiba",
 			"uf": "PR",
 			"founded": 1909,
-			"league": "BRA2",
+			"league": "BRA1",
 			"rep": 66,
 			"arch": "tradicional_decadente",
 			"colors": [
@@ -783,7 +783,7 @@
 			"city": "Chapecó",
 			"uf": "SC",
 			"founded": 1973,
-			"league": "BRA2",
+			"league": "BRA1",
 			"rep": 57,
 			"arch": "cidade_pequena",
 			"colors": [
@@ -901,7 +901,7 @@
 			"city": "Campinas",
 			"uf": "SP",
 			"founded": 1911,
-			"league": "BRA2",
+			"league": "BRA3",
 			"rep": 54,
 			"arch": "tradicional_decadente",
 			"colors": [
@@ -1020,7 +1020,7 @@
 			"city": "Belém",
 			"uf": "PA",
 			"founded": 1905,
-			"league": "BRA2",
+			"league": "BRA1",
 			"rep": 55,
 			"arch": "torcida_impaciente",
 			"colors": [
@@ -1220,7 +1220,7 @@
 			"city": "Nova Lima",
 			"uf": "MG",
 			"founded": 1908,
-			"league": "BRA2",
+			"league": "BRA4",
 			"rep": 48,
 			"arch": "cidade_pequena",
 			"colors": [
@@ -1500,7 +1500,8 @@
 				"initials": "SER"
 			},
 			"rivals": [
-				"BRA_PAP"
+				"BRA_PAP",
+				"BRA_JUV"
 			]
 		},
 		{
@@ -1622,7 +1623,8 @@
 				"sc": "#FFFFFF"
 			},
 			"rivals": [
-				"BRA_BEL"
+				"BRA_BEL",
+				"BRA_E47"
 			]
 		},
 		{
@@ -1772,7 +1774,7 @@
 			"city": "São João del-Rei",
 			"uf": "MG",
 			"founded": 1909,
-			"league": "BRA3",
+			"league": "BRA2",
 			"rep": 44,
 			"arch": "cidade_pequena",
 			"colors": [
@@ -1851,7 +1853,7 @@
 			"key": "BRA_MOL",
 			"name": "Juventus-SP",
 			"short": "Juventus-SP",
-			"abbr": "JUV",
+			"abbr": "JTS",
 			"nick": "Moleque Travesso",
 			"city": "São Paulo",
 			"uf": "SP",
@@ -2335,7 +2337,7 @@
 			"city": "Nova Iguaçu",
 			"uf": "RJ",
 			"founded": 1990,
-			"league": "BRA4",
+			"league": "BRA5",
 			"rep": 37,
 			"arch": "base_sem_dinheiro",
 			"colors": [
@@ -2404,6 +2406,2090 @@
 				"shape": "round",
 				"field": "plain",
 				"symbol": "star",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_JUV",
+			"name": "Juventude",
+			"short": "Juventude",
+			"abbr": "JUV",
+			"nick": "Papo",
+			"city": "Caxias do Sul",
+			"uf": "RS",
+			"founded": 1913,
+			"league": "BRA2",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#007A33",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Alfredo Jaconi",
+			"capacity": 19900,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "ECJ",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BRA_GRE"
+			]
+		},
+		{
+			"key": "BRA_E01",
+			"name": "Brasil de Pelotas",
+			"short": "Brasil de Pelotas",
+			"abbr": "BRP",
+			"nick": "Xavante",
+			"city": "Pelotas",
+			"uf": "RS",
+			"founded": 1911,
+			"league": "BRA5",
+			"rep": 33,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Bento Freitas",
+			"capacity": 18000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "BRP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BRA_E02"
+			]
+		},
+		{
+			"key": "BRA_E02",
+			"name": "Pelotas",
+			"short": "Pelotas",
+			"abbr": "PEL",
+			"nick": "Lobão",
+			"city": "Pelotas",
+			"uf": "RS",
+			"founded": 1908,
+			"league": "BRA5",
+			"rep": 25,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#1C3F94"
+			],
+			"stadium": "Estádio da Boca do Lobo",
+			"capacity": 18000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "PEL",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BRA_E01"
+			]
+		},
+		{
+			"key": "BRA_E03",
+			"name": "São José-RS",
+			"short": "São José-RS",
+			"abbr": "SJR",
+			"nick": "Zequinha",
+			"city": "Porto Alegre",
+			"uf": "RS",
+			"founded": 1913,
+			"league": "BRA5",
+			"rep": 28,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Passo D'Areia",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SJR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E04",
+			"name": "Novo Hamburgo",
+			"short": "Novo Hamburgo",
+			"abbr": "NHA",
+			"nick": "Anilado",
+			"city": "Novo Hamburgo",
+			"uf": "RS",
+			"founded": 1911,
+			"league": "BRA5",
+			"rep": 27,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1E5AA8",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Vale",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NHA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E05",
+			"name": "Avenida",
+			"short": "Avenida",
+			"abbr": "AVE",
+			"nick": "Periquito",
+			"city": "Santa Cruz do Sul",
+			"uf": "RS",
+			"founded": 1944,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#009B3A",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio dos Eucaliptos",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AVE",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E06",
+			"name": "São Luiz",
+			"short": "São Luiz",
+			"abbr": "SLU",
+			"nick": "Leão",
+			"city": "Ijuí",
+			"uf": "RS",
+			"founded": 1938,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio 19 de Outubro",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SLU",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E07",
+			"name": "Guarany de Bagé",
+			"short": "Guarany de Bagé",
+			"abbr": "GUB",
+			"nick": "Índio",
+			"city": "Bagé",
+			"uf": "RS",
+			"founded": 1907,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Estrela D'Alva",
+			"capacity": 7000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GUB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E08",
+			"name": "Paraná",
+			"short": "Paraná",
+			"abbr": "PAR",
+			"nick": "Tricolor da Vila",
+			"city": "Curitiba",
+			"uf": "PR",
+			"founded": 1989,
+			"league": "BRA5",
+			"rep": 32,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#E30613"
+			],
+			"stadium": "Estádio Durival Britto",
+			"capacity": 18000,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "round",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "PAR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E09",
+			"name": "Maringá",
+			"short": "Maringá",
+			"abbr": "MGA",
+			"nick": "Dogão",
+			"city": "Maringá",
+			"uf": "PR",
+			"founded": 2010,
+			"league": "BRA5",
+			"rep": 30,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Willie Davids",
+			"capacity": 21000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MGA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E10",
+			"name": "Cianorte",
+			"short": "Cianorte",
+			"abbr": "CIA",
+			"nick": "Leão do Vale",
+			"city": "Cianorte",
+			"uf": "PR",
+			"founded": 2002,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Albino Turbay",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CIA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E11",
+			"name": "Cascavel",
+			"short": "Cascavel",
+			"abbr": "CAS",
+			"nick": "Serpente",
+			"city": "Cascavel",
+			"uf": "PR",
+			"founded": 2008,
+			"league": "BRA5",
+			"rep": 25,
+			"arch": "base_sem_dinheiro",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estádio Olímpico Regional",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CAS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E12",
+			"name": "Azuriz",
+			"short": "Azuriz",
+			"abbr": "AZZ",
+			"nick": "Azuriz",
+			"city": "Pato Branco",
+			"uf": "PR",
+			"founded": 2018,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#FFD100"
+			],
+			"stadium": "Estádio Os Pioneiros",
+			"capacity": 4000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AZZ",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E13",
+			"name": "Rio Branco-PR",
+			"short": "Rio Branco-PR",
+			"abbr": "RBP",
+			"nick": "Leão da Estradinha",
+			"city": "Paranaguá",
+			"uf": "PR",
+			"founded": 1913,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Gigante do Itiberê",
+			"capacity": 7000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RBP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E14",
+			"name": "Marcílio Dias",
+			"short": "Marcílio Dias",
+			"abbr": "MDI",
+			"nick": "Marinheiro",
+			"city": "Itajaí",
+			"uf": "SC",
+			"founded": 1919,
+			"league": "BRA5",
+			"rep": 25,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#1C3F94"
+			],
+			"stadium": "Estádio Hercílio Luz",
+			"capacity": 6000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MDI",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E15",
+			"name": "Hercílio Luz",
+			"short": "Hercílio Luz",
+			"abbr": "HLU",
+			"nick": "Leão do Sul",
+			"city": "Tubarão",
+			"uf": "SC",
+			"founded": 1918,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Aníbal Costa",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "HLU",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E16",
+			"name": "Inter de Lages",
+			"short": "Inter de Lages",
+			"abbr": "ILA",
+			"nick": "Colorado da Serra",
+			"city": "Lages",
+			"uf": "SC",
+			"founded": 1949,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Vidal Ramos Júnior",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ILA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E17",
+			"name": "Barra",
+			"short": "Barra",
+			"abbr": "BRR",
+			"nick": "Barra",
+			"city": "Itajaí",
+			"uf": "SC",
+			"founded": 2013,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Camilo Mussi",
+			"capacity": 4000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "BRR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E18",
+			"name": "Concórdia",
+			"short": "Concórdia",
+			"abbr": "CCR",
+			"nick": "Galo do Oeste",
+			"city": "Concórdia",
+			"uf": "SC",
+			"founded": 2005,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Domingos Machado de Lima",
+			"capacity": 6000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CCR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E19",
+			"name": "Boavista",
+			"short": "Boavista",
+			"abbr": "BOA",
+			"nick": "Verdão",
+			"city": "Saquarema",
+			"uf": "RJ",
+			"founded": 1961,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "base_sem_dinheiro",
+			"colors": [
+				"#009B3A",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Elcyr Resende",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "BOA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E20",
+			"name": "Portuguesa-RJ",
+			"short": "Portuguesa-RJ",
+			"abbr": "PRJ",
+			"nick": "Lusa Carioca",
+			"city": "Rio de Janeiro",
+			"uf": "RJ",
+			"founded": 1924,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#009B3A"
+			],
+			"stadium": "Estádio Luso-Brasileiro",
+			"capacity": 5000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PRJ",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E21",
+			"name": "Olaria",
+			"short": "Olaria",
+			"abbr": "OLA",
+			"nick": "Alviazul",
+			"city": "Rio de Janeiro",
+			"uf": "RJ",
+			"founded": 1915,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio da Rua Bariri",
+			"capacity": 7000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "OLA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E22",
+			"name": "Pouso Alegre",
+			"short": "Pouso Alegre",
+			"abbr": "PAB",
+			"nick": "Dragão",
+			"city": "Pouso Alegre",
+			"uf": "MG",
+			"founded": 1913,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Manduzão",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PAB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E23",
+			"name": "Uberlândia",
+			"short": "Uberlândia",
+			"abbr": "UBE",
+			"nick": "Verdão",
+			"city": "Uberlândia",
+			"uf": "MG",
+			"founded": 1922,
+			"league": "BRA5",
+			"rep": 27,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#009B3A",
+				"#FFFFFF"
+			],
+			"stadium": "Parque do Sabiá",
+			"capacity": 53000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "UBE",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E24",
+			"name": "Democrata-GV",
+			"short": "Democrata-GV",
+			"abbr": "DEM",
+			"nick": "Pantera",
+			"city": "Governador Valadares",
+			"uf": "MG",
+			"founded": 1932,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Mamudão",
+			"capacity": 7000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "DEM",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E25",
+			"name": "URT",
+			"short": "URT",
+			"abbr": "URT",
+			"nick": "Trovão Azul",
+			"city": "Patos de Minas",
+			"uf": "MG",
+			"founded": 1939,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Zama Maciel",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "URT",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E26",
+			"name": "Caldense",
+			"short": "Caldense",
+			"abbr": "CAL",
+			"nick": "Veterana",
+			"city": "Poços de Caldas",
+			"uf": "MG",
+			"founded": 1925,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#009B3A",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Ronaldão",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CAL",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E27",
+			"name": "Tupi",
+			"short": "Tupi",
+			"abbr": "TUP",
+			"nick": "Galo Carijó",
+			"city": "Juiz de Fora",
+			"uf": "MG",
+			"founded": 1912,
+			"league": "BRA5",
+			"rep": 25,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Mário Helênio",
+			"capacity": 31000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "TUP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E28",
+			"name": "Icasa",
+			"short": "Icasa",
+			"abbr": "ICA",
+			"nick": "Verdão do Cariri",
+			"city": "Juazeiro do Norte",
+			"uf": "CE",
+			"founded": 1963,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "azarao",
+			"colors": [
+				"#009B3A",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Romeirão",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ICA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E29",
+			"name": "Guarany de Sobral",
+			"short": "Guarany de Sobral",
+			"abbr": "GSO",
+			"nick": "Bugre",
+			"city": "Sobral",
+			"uf": "CE",
+			"founded": 1938,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio do Junco",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GSO",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E30",
+			"name": "Maracanã-CE",
+			"short": "Maracanã-CE",
+			"abbr": "MCE",
+			"nick": "Alviceleste",
+			"city": "Maracanaú",
+			"uf": "CE",
+			"founded": 1998,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1E5AA8",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Almir Dutra",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MCE",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E31",
+			"name": "Iguatu",
+			"short": "Iguatu",
+			"abbr": "IGU",
+			"nick": "Azulão",
+			"city": "Iguatu",
+			"uf": "CE",
+			"founded": 1989,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "base_sem_dinheiro",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Morenão",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "IGU",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E32",
+			"name": "Horizonte",
+			"short": "Horizonte",
+			"abbr": "HOR",
+			"nick": "Galo do Tabuleiro",
+			"city": "Horizonte",
+			"uf": "CE",
+			"founded": 1994,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Domingão",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "HOR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E33",
+			"name": "CRAC",
+			"short": "CRAC",
+			"abbr": "CRA",
+			"nick": "Leão do Sul",
+			"city": "Catalão",
+			"uf": "GO",
+			"founded": 1931,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Genervino da Fonseca",
+			"capacity": 9000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CRA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E34",
+			"name": "Goiatuba",
+			"short": "Goiatuba",
+			"abbr": "GTB",
+			"nick": "Azulão do Sul",
+			"city": "Goiatuba",
+			"uf": "GO",
+			"founded": 1970,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Divino Garcia Rosa",
+			"capacity": 7000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GTB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E35",
+			"name": "Goianésia",
+			"short": "Goianésia",
+			"abbr": "GNS",
+			"nick": "Azulão do Vale",
+			"city": "Goianésia",
+			"uf": "GO",
+			"founded": 1955,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Valdeir José de Oliveira",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GNS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E36",
+			"name": "Inhumas",
+			"short": "Inhumas",
+			"abbr": "INH",
+			"nick": "Canário",
+			"city": "Inhumas",
+			"uf": "GO",
+			"founded": 1979,
+			"league": "BRA5",
+			"rep": 19,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#009B3A"
+			],
+			"stadium": "Estádio Zico Brandão",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "INH",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E37",
+			"name": "Jataiense",
+			"short": "Jataiense",
+			"abbr": "JAT",
+			"nick": "Galo",
+			"city": "Jataí",
+			"uf": "GO",
+			"founded": 1954,
+			"league": "BRA5",
+			"rep": 19,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Oscar Campos",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "JAT",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E38",
+			"name": "Juazeirense",
+			"short": "Juazeirense",
+			"abbr": "JZE",
+			"nick": "Cancão de Fogo",
+			"city": "Juazeiro",
+			"uf": "BA",
+			"founded": 2006,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#E30613"
+			],
+			"stadium": "Estádio Adauto Moraes",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "JZE",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E39",
+			"name": "Jacuipense",
+			"short": "Jacuipense",
+			"abbr": "JAC",
+			"nick": "Leão do Sisal",
+			"city": "Riachão do Jacuípe",
+			"uf": "BA",
+			"founded": 1965,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "base_sem_dinheiro",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Eliel Martins",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "JAC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E40",
+			"name": "Atlético de Alagoinhas",
+			"short": "Atlético de Alagoinhas",
+			"abbr": "ATA",
+			"nick": "Carcará",
+			"city": "Alagoinhas",
+			"uf": "BA",
+			"founded": 1970,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Antônio Carneiro",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "ATA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E41",
+			"name": "Fluminense de Feira",
+			"short": "Fluminense de Feira",
+			"abbr": "FLF",
+			"nick": "Touro do Sertão",
+			"city": "Feira de Santana",
+			"uf": "BA",
+			"founded": 1941,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#009B3A"
+			],
+			"stadium": "Estádio Joia da Princesa",
+			"capacity": 16000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FLF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BRA_E42"
+			]
+		},
+		{
+			"key": "BRA_E42",
+			"name": "Bahia de Feira",
+			"short": "Bahia de Feira",
+			"abbr": "BAF",
+			"nick": "Tremendão",
+			"city": "Feira de Santana",
+			"uf": "BA",
+			"founded": 1937,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#E30613"
+			],
+			"stadium": "Estádio Joia da Princesa",
+			"capacity": 16000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "BAF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BRA_E41"
+			]
+		},
+		{
+			"key": "BRA_E43",
+			"name": "Vitória da Conquista",
+			"short": "Vitória da Conquista",
+			"abbr": "VCQ",
+			"nick": "Bode",
+			"city": "Vitória da Conquista",
+			"uf": "BA",
+			"founded": 2005,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "base_sem_dinheiro",
+			"colors": [
+				"#009B3A",
+				"#FFD100"
+			],
+			"stadium": "Estádio Lomanto Júnior",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "VCQ",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E44",
+			"name": "Retrô",
+			"short": "Retrô",
+			"abbr": "RET",
+			"nick": "Fênix",
+			"city": "Camaragibe",
+			"uf": "PE",
+			"founded": 2016,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "azarao",
+			"colors": [
+				"#E36C0A",
+				"#111111"
+			],
+			"stadium": "Arena de Pernambuco",
+			"capacity": 45000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RET",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E45",
+			"name": "Central",
+			"short": "Central",
+			"abbr": "CEN",
+			"nick": "Patativa",
+			"city": "Caruaru",
+			"uf": "PE",
+			"founded": 1919,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Lacerdão",
+			"capacity": 19000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CEN",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E46",
+			"name": "Salgueiro",
+			"short": "Salgueiro",
+			"abbr": "SAL",
+			"nick": "Carcará do Sertão",
+			"city": "Salgueiro",
+			"uf": "PE",
+			"founded": 2005,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Cornélio de Barros",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SAL",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E47",
+			"name": "Campinense",
+			"short": "Campinense",
+			"abbr": "CPN",
+			"nick": "Raposa",
+			"city": "Campina Grande",
+			"uf": "PB",
+			"founded": 1915,
+			"league": "BRA5",
+			"rep": 26,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estádio Amigão",
+			"capacity": 19000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CPN",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"BRA_BOR"
+			]
+		},
+		{
+			"key": "BRA_E48",
+			"name": "Sousa",
+			"short": "Sousa",
+			"abbr": "SOU",
+			"nick": "Dinossauro",
+			"city": "Sousa",
+			"uf": "PB",
+			"founded": 1991,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "azarao",
+			"colors": [
+				"#FFD100",
+				"#009B3A"
+			],
+			"stadium": "Estádio Marizão",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SOU",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E49",
+			"name": "Potiguar",
+			"short": "Potiguar",
+			"abbr": "POG",
+			"nick": "Macho",
+			"city": "Mossoró",
+			"uf": "RN",
+			"founded": 1945,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Nogueirão",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "POG",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E50",
+			"name": "Maranhão",
+			"short": "Maranhão",
+			"abbr": "MAC",
+			"nick": "Bode Gregório",
+			"city": "São Luís",
+			"uf": "MA",
+			"founded": 1932,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#E30613"
+			],
+			"stadium": "Estádio Castelão",
+			"capacity": 40000,
+			"kit": "stripes_h",
+			"crest": {
+				"shape": "round",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "MAC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E51",
+			"name": "Imperatriz",
+			"short": "Imperatriz",
+			"abbr": "IMP",
+			"nick": "Cavalo de Aço",
+			"city": "Imperatriz",
+			"uf": "MA",
+			"founded": 1962,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "base_sem_dinheiro",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Frei Epifânio",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "IMP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E52",
+			"name": "Altos",
+			"short": "Altos",
+			"abbr": "ALT",
+			"nick": "Jacaré",
+			"city": "Altos",
+			"uf": "PI",
+			"founded": 2013,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#FFD100"
+			],
+			"stadium": "Estádio Felipe Raulino",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ALT",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E53",
+			"name": "Fluminense-PI",
+			"short": "Fluminense-PI",
+			"abbr": "FPI",
+			"nick": "Tricolor da Ilha",
+			"city": "Teresina",
+			"uf": "PI",
+			"founded": 1938,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#009B3A"
+			],
+			"stadium": "Estádio Albertão",
+			"capacity": 44000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FPI",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E54",
+			"name": "Parnahyba",
+			"short": "Parnahyba",
+			"abbr": "PHY",
+			"nick": "Tubarão",
+			"city": "Parnaíba",
+			"uf": "PI",
+			"founded": 1913,
+			"league": "BRA5",
+			"rep": 20,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Pedro Alelaf",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PHY",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E55",
+			"name": "ASA",
+			"short": "ASA",
+			"abbr": "ASA",
+			"nick": "Fantasma",
+			"city": "Arapiraca",
+			"uf": "AL",
+			"founded": 1952,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Coaracy da Mata Fonseca",
+			"capacity": 17000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ASA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E56",
+			"name": "Águia de Marabá",
+			"short": "Águia de Marabá",
+			"abbr": "AGM",
+			"nick": "Azulão",
+			"city": "Marabá",
+			"uf": "PA",
+			"founded": 1982,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Zinho Oliveira",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AGM",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E57",
+			"name": "Tuna Luso",
+			"short": "Tuna Luso",
+			"abbr": "TUN",
+			"nick": "Águia Guerreira",
+			"city": "Belém",
+			"uf": "PA",
+			"founded": 1903,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#009B3A"
+			],
+			"stadium": "Estádio do Souza",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "TUN",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E58",
+			"name": "Manaus",
+			"short": "Manaus",
+			"abbr": "MNS",
+			"nick": "Gavião do Norte",
+			"city": "Manaus",
+			"uf": "AM",
+			"founded": 2013,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Arena da Amazônia",
+			"capacity": 44000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MNS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E59",
+			"name": "Nacional-AM",
+			"short": "Nacional-AM",
+			"abbr": "NAM",
+			"nick": "Naça",
+			"city": "Manaus",
+			"uf": "AM",
+			"founded": 1913,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Carlos Zamith",
+			"capacity": 6000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NAM",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E60",
+			"name": "Mixto",
+			"short": "Mixto",
+			"abbr": "MIX",
+			"nick": "Tigre",
+			"city": "Cuiabá",
+			"uf": "MT",
+			"founded": 1934,
+			"league": "BRA5",
+			"rep": 22,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Dutrinha",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "modern",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MIX",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E61",
+			"name": "União Rondonópolis",
+			"short": "União Rondonópolis",
+			"abbr": "URO",
+			"nick": "Colorado do Sul",
+			"city": "Rondonópolis",
+			"uf": "MT",
+			"founded": 1973,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Luthero Lopes",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "URO",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E62",
+			"name": "Luverdense",
+			"short": "Luverdense",
+			"abbr": "LUV",
+			"nick": "Verdão do Norte",
+			"city": "Lucas do Rio Verde",
+			"uf": "MT",
+			"founded": 2004,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#009B3A",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Passo das Emas",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LUV",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E63",
+			"name": "Comercial-MS",
+			"short": "Comercial-MS",
+			"abbr": "CMS",
+			"nick": "Colorado",
+			"city": "Campo Grande",
+			"uf": "MS",
+			"founded": 1943,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Morenão",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CMS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E64",
+			"name": "Capital",
+			"short": "Capital",
+			"abbr": "CAB",
+			"nick": "Coruja",
+			"city": "Brasília",
+			"uf": "DF",
+			"founded": 2005,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Serejão",
+			"capacity": 8000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CAB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E65",
+			"name": "Ceilândia",
+			"short": "Ceilândia",
+			"abbr": "CEI",
+			"nick": "Gato Preto",
+			"city": "Ceilândia",
+			"uf": "DF",
+			"founded": 1979,
+			"league": "BRA5",
+			"rep": 21,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Abadião",
+			"capacity": 5000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "round",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CEI",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E66",
+			"name": "Santo André",
+			"short": "Santo André",
+			"abbr": "SAB",
+			"nick": "Ramalhão",
+			"city": "Santo André",
+			"uf": "SP",
+			"founded": 1967,
+			"league": "BRA5",
+			"rep": 30,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Bruno José Daniel",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SAB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E67",
+			"name": "Paulista",
+			"short": "Paulista",
+			"abbr": "PTA",
+			"nick": "Galo da Japi",
+			"city": "Jundiaí",
+			"uf": "SP",
+			"founded": 1909,
+			"league": "BRA5",
+			"rep": 27,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Jayme Cintra",
+			"capacity": 15000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "PTA",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E68",
+			"name": "São Caetano",
+			"short": "São Caetano",
+			"abbr": "SCT",
+			"nick": "Azulão",
+			"city": "São Caetano do Sul",
+			"uf": "SP",
+			"founded": 1989,
+			"league": "BRA5",
+			"rep": 29,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Anacletto Campanella",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SCT",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E69",
+			"name": "Oeste",
+			"short": "Oeste",
+			"abbr": "OES",
+			"nick": "Rubrão",
+			"city": "Barueri",
+			"uf": "SP",
+			"founded": 1921,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Arena Barueri",
+			"capacity": 31000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OES",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E70",
+			"name": "Velo Clube",
+			"short": "Velo Clube",
+			"abbr": "VEL",
+			"nick": "Rubro-Verde",
+			"city": "Rio Claro",
+			"uf": "SP",
+			"founded": 1910,
+			"league": "BRA5",
+			"rep": 25,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#009B3A"
+			],
+			"stadium": "Estádio Benitão",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "VEL",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E71",
+			"name": "Noroeste",
+			"short": "Noroeste",
+			"abbr": "NOR",
+			"nick": "Norusca",
+			"city": "Bauru",
+			"uf": "SP",
+			"founded": 1910,
+			"league": "BRA5",
+			"rep": 24,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Alfredo de Castilho",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NOR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E72",
+			"name": "Água Santa",
+			"short": "Água Santa",
+			"abbr": "AGS",
+			"nick": "Netuno",
+			"city": "Diadema",
+			"uf": "SP",
+			"founded": 1981,
+			"league": "BRA5",
+			"rep": 26,
+			"arch": "azarao",
+			"colors": [
+				"#1C3F94",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Distrital do Inamar",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AGS",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "BRA_E73",
+			"name": "América-SP",
+			"short": "América-SP",
+			"abbr": "AMS",
+			"nick": "Diabo",
+			"city": "São José do Rio Preto",
+			"uf": "SP",
+			"founded": 1946,
+			"league": "BRA5",
+			"rep": 23,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estádio Benedito Teixeira",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AMS",
 				"sc": "#FFFFFF"
 			},
 			"rivals": []

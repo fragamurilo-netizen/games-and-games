@@ -379,9 +379,7 @@
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6",
-				"E7"
+				"E5"
 			],
 			"ko_plan": [
 				"sf",
@@ -389,7 +387,7 @@
 			],
 			"ko_slots": {
 				"sf": [
-					"E8"
+					"E7"
 				],
 				"f": [
 					"E9",
@@ -412,9 +410,9 @@
 				"#FFD100"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 8,
-			"state_groups": 1,
-			"per_group": 4,
+			"max_clubs": 12,
+			"state_groups": 2,
+			"per_group": 2,
 			"format": "Taça Guanabara em turno único; os 4 primeiros fazem as semifinais (jogo único) e a final em ida e volta."
 		},
 		"MGE": {
@@ -463,9 +461,9 @@
 				"#E30613"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 6,
-			"state_groups": 1,
-			"per_group": 4,
+			"max_clubs": 12,
+			"state_groups": 2,
+			"per_group": 2,
 			"format": "Primeira fase em turno único; semifinais e final em ida e volta, com a melhor campanha decidindo em casa."
 		},
 		"RSE": {
@@ -476,19 +474,23 @@
 			"ufs": [
 				"RS"
 			],
-			"group_legs": 2,
+			"group_legs": 1,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6"
+				"E5"
 			],
 			"ko_plan": [
+				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"sf": [
+					"E6",
+					"E7"
+				],
 				"f": [
 					"E9",
 					"E10"
@@ -510,8 +512,8 @@
 				"#E30613"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 8,
-			"state_groups": 1,
+			"max_clubs": 12,
+			"state_groups": 2,
 			"per_group": 2,
 			"format": "Turno e returno; os 2 melhores decidem o Gauchão em dois jogos."
 		},
@@ -523,19 +525,23 @@
 			"ufs": [
 				"PR"
 			],
-			"group_legs": 2,
+			"group_legs": 1,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6"
+				"E5"
 			],
 			"ko_plan": [
+				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"sf": [
+					"E6",
+					"E7"
+				],
 				"f": [
 					"E9",
 					"E10"
@@ -557,8 +563,8 @@
 				"#FFFFFF"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 8,
-			"state_groups": 1,
+			"max_clubs": 12,
+			"state_groups": 2,
 			"per_group": 2,
 			"format": "Turno e returno; os 2 melhores decidem o título em dois jogos."
 		},
@@ -608,9 +614,9 @@
 				"#FFFFFF"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 6,
-			"state_groups": 1,
-			"per_group": 4,
+			"max_clubs": 12,
+			"state_groups": 2,
+			"per_group": 2,
 			"format": "Turno único; semifinais e final em ida e volta."
 		},
 		"CEE": {
@@ -621,19 +627,23 @@
 			"ufs": [
 				"CE"
 			],
-			"group_legs": 2,
+			"group_legs": 1,
 			"group_slots": [
 				"E1",
 				"E2",
 				"E3",
 				"E4",
-				"E5",
-				"E6"
+				"E5"
 			],
 			"ko_plan": [
+				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"sf": [
+					"E6",
+					"E7"
+				],
 				"f": [
 					"E9",
 					"E10"
@@ -655,8 +665,8 @@
 				"#FFFFFF"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 8,
-			"state_groups": 1,
+			"max_clubs": 10,
+			"state_groups": 2,
 			"per_group": 2,
 			"format": "Turno e returno; o Clássico-Rei costuma decidir a final em dois jogos."
 		},
@@ -706,9 +716,9 @@
 				"#FFD100"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 6,
-			"state_groups": 1,
-			"per_group": 4,
+			"max_clubs": 12,
+			"state_groups": 2,
+			"per_group": 2,
 			"format": "Turno único; semifinais e final em ida e volta."
 		},
 		"NOR": {
@@ -786,13 +796,17 @@
 			"group_legs": 1,
 			"group_slots": [],
 			"ko_plan": [
+				"r16",
 				"qf",
 				"sf",
 				"f"
 			],
 			"ko_slots": {
+				"r16": [
+					"E2"
+				],
 				"qf": [
-					"E3"
+					"E4"
 				],
 				"sf": [
 					"E6"
@@ -818,7 +832,7 @@
 				"#FFD100"
 			],
 			"trophy": "taca_estadual",
-			"max_clubs": 8,
+			"max_clubs": 16,
 			"state_groups": 0,
 			"per_group": 1,
 			"format": "Mata-mata do início ao fim, com final em ida e volta."

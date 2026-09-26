@@ -998,7 +998,7 @@ static func _maybe_offer_user(world: GameWorld, r: RandomNumberGenerator, c: Clu
 	if pp.has("offer"):
 		return
 	var u := world.user_club()
-	if c.reputation <= u.reputation + 2.0 or c.reputation > manager_rep(world) + 22.0 or c.nation != u.nation and r.randf() < 0.6:
+	if c.is_pool() or c.reputation <= u.reputation + 2.0 or c.reputation > manager_rep(world) + 22.0 or c.nation != u.nation and r.randf() < 0.6:
 		return
 	if r.randf() > 0.35:
 		return

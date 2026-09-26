@@ -42,6 +42,9 @@ static var _league_by_id: Dictionary = {}
 static var _league_order: Array[String] = []
 static var _leagues_by_nation: Dictionary = {} # nação -> [ids por divisão]
 static var _league_nations: Array[String] = []
+## Grupos de clubes sem divisão nacional ("pool": true no leagues.json): só disputam os estaduais.
+## Ficam fora de league_ids/leagues_of_nation (não têm tabela, acesso nem prêmios).
+static var _pool_order: Array[String] = []
 static var _club_data: Dictionary = {} # nação -> Array de dicionários de clube
 
 
@@ -176,6 +179,16 @@ static func league_ids() -> Array[String]:
 	return _league_order
 
 
+## Grupos de clubes que só jogam estaduais (ver _pool_order).
+static func pool_ids() -> Array[String]:
+	load_all()
+	return _pool_order
+
+
+static func is_pool(id: String) -> bool:
+	return bool(league_cfg(id).get("pool", false))
+
+
 ## Ids das ligas de uma nação, da primeira para a última divisão.
 static func leagues_of_nation(code: String) -> Array:
 	load_all()
@@ -235,9 +248,13 @@ static func _prepare_leagues() -> void:
 	_league_order.clear()
 	_leagues_by_nation.clear()
 	_league_nations.clear()
+	_pool_order.clear()
 	for l in get_data("leagues")["leagues"]:
 		var id: String = l["id"]
 		_league_by_id[id] = l
+		if bool(l.get("pool", false)):
+			_pool_order.append(id)
+			continue
 		_league_order.append(id)
 		var n: String = l["nation"]
 		if not _leagues_by_nation.has(n):

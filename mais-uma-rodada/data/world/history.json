@@ -921,10 +921,13 @@
 			"1996": "BRA_RAP",
 			"1997": "BRA_IMT",
 			"1998": "BRA_VPA",
+			"1999": "BRA_JUV",
 			"2000": "BRA_RAP",
 			"2001": "BRA_IMT",
 			"2002": "BRA_TIM",
 			"2003": "BRA_RAP",
+			"2004": "BRA_E66",
+			"2005": "BRA_E67",
 			"2006": "BRA_RNC",
 			"2007": "BRA_TRL",
 			"2008": "BRA_LDI",
@@ -1843,7 +1846,10 @@
 			"BRA_CMA": 1,
 			"BRA_MOR": 1,
 			"BRA_COL": 1,
-			"BRA_TSC": 1
+			"BRA_TSC": 1,
+			"BRA_JUV": 1,
+			"BRA_E66": 1,
+			"BRA_E67": 1
 		},
 		"D:CAR": {
 			"ARG_MIL": 3,

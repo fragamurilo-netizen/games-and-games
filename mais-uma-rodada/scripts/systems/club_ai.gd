@@ -163,21 +163,20 @@ static func choose_formation(world: GameWorld, club: Club) -> String:
 	return best_f
 
 
-static var _strength_cache: Dictionary = {}
-
-
 ## Força média dos titulares (para comparar com o adversário). Cacheada por algumas datas:
 ## muda devagar (lesões e contratações) e é consultada em todos os jogos do mundo.
+## O cache fica no próprio mundo (world.stats, salvo junto): um save carregado no meio de um
+## bloco de datas usa o mesmo valor que o mundo que continuou aberto — senão os dois divergem.
 static func team_strength(world: GameWorld, club: Club) -> float:
-	# A chave inclui o mundo: abrir outro save (ou outra carreira) na mesma sessão não herda a
-	# força dos clubes do mundo anterior.
 	var key := world.year * 1000 + (world.season.day / 4 if world.season != null else 0)
-	var wid := world.get_instance_id()
-	var cached: Array = _strength_cache.get(club.id, [])
-	if cached.size() == 3 and cached[0] == key and cached[2] == wid:
+	if not world.stats.has("strc"):
+		world.stats["strc"] = {}
+	var cache: Dictionary = world.stats["strc"]
+	var cached: Array = cache.get(club.id, [])
+	if cached.size() == 2 and cached[0] == key:
 		return cached[1]
 	var v := _compute_strength(world, club)
-	_strength_cache[club.id] = [key, v, wid]
+	cache[club.id] = [key, v]
 	return v
 
 
