@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: build/mais-uma-rodada-latest-2026-09-26
-      - name: Parse PortraitView
+      - name: Import project and parse PortraitView
         shell: bash
         run: |
           set -o pipefail
@@ -24,5 +24,12 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace/mais-uma-rodada \
             barichello/godot-ci:4.7 \
-            godot --headless --path /workspace/mais-uma-rodada \
-              --script res://scripts/ui/components/portrait_view.gd --check-only 2>&1 | tee /tmp/portrait.log
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              rm -rf .godot
+              godot --headless --path /workspace/mais-uma-rodada --import >/tmp/import.log 2>&1
+              godot --headless --path /workspace/mais-uma-rodada \
+                --script res://scripts/ui/components/portrait_view.gd --check-only
+            '
