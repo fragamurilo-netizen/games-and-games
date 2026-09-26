@@ -471,20 +471,27 @@ static func _cdist(a: Color, b: Color) -> float:
 
 
 func _team_colors(home: Club, away: Club) -> Array[Color]:
-	var h1 := Color(String(home.kit_home.get("c1", home.color1)))
-	var h2 := Color(String(home.kit_home.get("c2", home.color2)))
-	var a1 := Color(String(away.kit_home.get("c1", away.color1)))
-	var a2 := Color(String(away.kit_home.get("c2", away.color2)))
-	if _cdist(h1, a1) < 0.35:
-		a1 = Color(String(away.kit_away.get("c1", "#FFFFFF")))
-		a2 = Color(String(away.kit_away.get("c2", "#111111")))
-		if _cdist(h1, a1) < 0.35:
+	var hk := home.kit_home
+	var h1 := Color(String(hk.get("c1", home.color1)))
+	var h2 := Color(String(hk.get("c2", home.color2)))
+	var a1: Color
+	var a2: Color
+	# Visitante entra com o uniforme que mais contrasta com o do mandante (camisa e calção inteiros).
+	match KitDesign.away_choice(home, away):
+		"home":
+			a1 = Color(String(away.kit_home.get("c1", away.color1)))
+			a2 = Color(String(away.kit_home.get("c2", away.color2)))
+		"away":
+			a1 = Color(String(away.kit_away.get("c1", "#FFFFFF")))
+			a2 = Color(String(away.kit_away.get("c2", "#111111")))
+		"third":
 			var third := away.third_kit()
 			a1 = Color(String(third.get("c1", "#FFFFFF")))
 			a2 = Color(String(third.get("c2", "#111111")))
-		if _cdist(h1, a1) < 0.35:
-			a1 = Color("#F4F4F4") if h1.get_luminance() < 0.5 else Color("#15181D")
-			a2 = Color("#15181D") if h1.get_luminance() < 0.5 else Color("#F4F4F4")
+		_:
+			var dom := KitDesign.dominant(hk)
+			a1 = Color("#F4F4F4") if dom.get_luminance() < 0.5 else Color("#15181D")
+			a2 = Color("#15181D") if dom.get_luminance() < 0.5 else Color("#F4F4F4")
 	var out: Array[Color] = [h1, h2, a1, a2]
 	return out
 

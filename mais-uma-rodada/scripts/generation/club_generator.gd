@@ -405,8 +405,55 @@ static func home_kit(kr: RandomNumberGenerator, c: Club, hint: String) -> Dictio
 	return k
 
 
-## Uniforme reserva: branco, cores invertidas, escuro ou um tom próximo; sempre bem diferente do titular.
+## Uniforme reserva: branco, cores invertidas, escuro ou um tom próximo; nunca da mesma cor do
+## titular (KitDesign.clash olha a camisa inteira, com estampa e calção, não só a cor principal).
+## Na maioria das vezes sai da mesma "coleção" do titular: mesma gola, mangas e acabamento.
 static func away_kit(kr: RandomNumberGenerator, c: Club, home: Dictionary) -> Dictionary:
+	var best: Dictionary = {}
+	var best_d := -1.0
+	for i in 10:
+		var k := _away_candidate(kr, c, home, i)
+		if not KitDesign.clash(home, k):
+			best = k
+			break
+		var d := KitDesign.distance(home, k)
+		if d > best_d:
+			best_d = d
+			best = k
+	if KitDesign.clash(home, best):
+		# Nenhum sorteio serviu: a camisa lisa mais distante do titular, entre branco, escuro e cores da moda.
+		for c1x: String in ["#FFFFFF", "#15181D"] + THIRD_COLORS:
+			var kx := {"pattern": "plain", "c1": c1x, "c2": _accent(c1x, [c.color1, c.color2])}
+			_finish(kr, kx, [c1x], [c1x])
+			var d := KitDesign.distance(home, kx)
+			if d > best_d and not KitDesign.same_main_color(home, kx):
+				best_d = d
+				best = kx
+	if kr.randf() < 0.6:
+		var fam := best.duplicate()
+		for key in ["collar", "sleeve", "sleeve_len", "trim", "shorts_style", "socks_style"]:
+			if home.has(key):
+				fam[key] = home[key]
+			else:
+				fam.erase(key)
+		if String(fam.get("sleeve", "same")) in ["contrast", "raglan"]:
+			fam["sleeve"] = "cuff"
+		if not KitDesign.clash(home, fam) or KitDesign.clash(home, best):
+			best = fam
+	return best
+
+
+## Um desenho de reserva. Depois de algumas tentativas sem contraste, parte para o branco ou o
+## escuro, que sempre funcionam contra a cor dominante do titular.
+static func _away_candidate(kr: RandomNumberGenerator, c: Club, home: Dictionary, attempt: int) -> Dictionary:
+	if attempt >= 6:
+		var dom := KitDesign.dominant(home)
+		var c1x := "#FFFFFF" if dom.get_luminance() < 0.55 else String(RngUtil.pick(kr, ["#15181D", "#0B1F4B", "#2B2F36"]))
+		if attempt >= 8: # titular preto e branco (ou parecido): reserva colorido
+			c1x = String(RngUtil.pick(kr, THIRD_COLORS))
+		var kx := {"pattern": "plain", "c1": c1x, "c2": _accent(c1x, [c.color1, c.color2])}
+		_finish(kr, kx, [c1x, String(kx["c2"])], [c1x, String(kx["c2"])])
+		return kx
 	var home_c1 := Color(String(home.get("c1", c.color1)))
 	var modes := {"white": 3.5, "invert": 3.0, "dark": 2.0, "shade": 1.2}
 	if _lum(c.color1) > 0.8:
@@ -426,7 +473,7 @@ static func away_kit(kr: RandomNumberGenerator, c: Club, home: Dictionary) -> Di
 			c2 = _accent(c1, [c.color1, c.color2])
 		"shade":
 			var base := Color(c.color1)
-			c1 = (base.darkened(0.45) if base.get_luminance() > 0.35 else base.lightened(0.55)).to_html(false)
+			c1 = "#" + (base.darkened(0.45) if base.get_luminance() > 0.35 else base.lightened(0.55)).to_html(false).to_upper()
 			c2 = _accent(c1, [c.color2, c.color1])
 	if _color_dist(Color(c1), home_c1) < 0.4:
 		c1 = "#FFFFFF" if home_c1.get_luminance() < 0.6 else "#15181D"
@@ -450,8 +497,13 @@ static func away_kit(kr: RandomNumberGenerator, c: Club, home: Dictionary) -> Di
 static func make_third_kit(c: Club) -> Dictionary:
 	var kr := RandomNumberGenerator.new()
 	kr.seed = hash(c.key + ":3")
+	return third_for(kr, c, c.kit_home, c.kit_away)
+
+
+## Terceiro uniforme que não repete titular nem reserva.
+static func third_for(kr: RandomNumberGenerator, c: Club, home: Dictionary, away: Dictionary) -> Dictionary:
 	var used: Array = []
-	for k in [c.kit_home, c.kit_away]:
+	for k in [home, away]:
 		used.append(Color(String(k.get("c1", c.color1))))
 	var order: Array = range(THIRD_COLORS.size())
 	RngUtil.shuffle(kr, order)
@@ -465,6 +517,15 @@ static func make_third_kit(c: Club) -> Dictionary:
 		if ok:
 			c1 = THIRD_COLORS[i]
 			break
+	var k := _third_candidate(kr, c, c1)
+	for i in order:
+		if not KitDesign.clash(home, k) and (away.is_empty() or not KitDesign.clash(away, k)):
+			break
+		k = _third_candidate(kr, c, String(THIRD_COLORS[i]))
+	return k
+
+
+static func _third_candidate(kr: RandomNumberGenerator, c: Club, c1: String) -> Dictionary:
 	var k := {"pattern": String(RngUtil.pick(kr, THIRD_PATTERNS)), "c1": c1, "c2": _accent(c1, [c.color1, c.color2])}
 	if kr.randf() < 0.4 and String(k["pattern"]) != "plain":
 		k["tonal"] = true

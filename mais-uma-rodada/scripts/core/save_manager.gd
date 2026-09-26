@@ -105,6 +105,7 @@ static func load_world(slot: int) -> GameWorld:
 		if w.clubs.is_empty() or w.season == null:
 			continue
 		ClubGenerator.upgrade_crests(w)
+		KitDesign.ensure_all(w) # saves antigos: reservas da cor do titular
 		return w
 	return null
 

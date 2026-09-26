@@ -109,7 +109,8 @@ func _run() -> void:
 	await _shot("04c_pre_temporada_amistosos")
 	UIManager.goto("hub")
 	await _frames(6)
-	await _shot("04d_hub_pre_temporada")
+	await _shot("04d_hub_pre_temporada") # com o convite de lançamento dos uniformes
+	UIManager.close_all_modals()
 	UIManager.goto("squad")
 	await _frames(8)
 	await _shot("05_elenco")
