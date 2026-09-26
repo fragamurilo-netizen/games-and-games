@@ -60,6 +60,8 @@ var _other_seen: Dictionary = {} # índice da entrada -> gols já anunciados
 var _day_entries: Array = [] # outros jogos do mesmo país na data (fora a competição do usuário)
 var _stat_marks: Dictionary = {}
 var _swapped := false
+var _bug: Control # selo da emissora + "AO VIVO"
+var _l3: PanelContainer # tarja do gol
 ## Auxiliar durante o jogo: o que já disse e a sugestão que está na tela.
 var _aux_state: Dictionary = {}
 var _aux_bar: PanelContainer
@@ -114,6 +116,7 @@ func on_show() -> void:
 
 func on_hide() -> void:
 	set_process(false)
+	AudioManager.crowd_stop()
 
 
 func refresh() -> void:
@@ -186,7 +189,11 @@ func _build() -> void:
 	_pitch.motion.tempo = TEMPO[_pace]
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
 	_pitch.stadium = _stadium
+	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
+	AudioManager.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
 	_root.add_child(UIKit.margin(_pitch, 0, 6, 0, 4))
+	_l3 = _build_l3()
+	_root.add_child(UIKit.margin(_l3, 8, 0, 8, 4))
 	if not _div_entries.is_empty() or not _day_entries.is_empty():
 		_root.add_child(UIKit.margin(_build_strip(), 8, 0, 8, 4))
 		_ticker.visible = false
@@ -277,8 +284,79 @@ func _build() -> void:
 	var scat := "stadium_" + String(_stadium.get("kind", ""))
 	if DatabaseManager.commentary().has(scat):
 		_add_line(_com.extra_line(scat, "info", 0, 1))
-	if not _sim.started and _sim.can_talk(_user_side):
-		_open_talk.call_deferred(false)
+	if not _sim.started:
+		# Abertura da transmissão e, depois dela, a palestra
+		_open_intro.call_deferred()
+
+
+func _open_intro() -> void:
+	BroadcastIntro.show(world(), _sim, _fx, _stadium, func():
+		if not _sim.started and _sim.can_talk(_user_side):
+			_open_talk(false))
+
+
+## Texto do selo da emissora: "AO VIVO", "INTERVALO" ou "FIM DE JOGO".
+func _set_bug(text: String, col: Color) -> void:
+	if _bug == null or _bug.get_child_count() < 2:
+		return
+	var l := _bug.get_child(1) as Label
+	l.text = text
+	l.add_theme_color_override(&"font_color", col)
+
+
+## Tarja de TV depois do gol: artilheiro, número do gol no jogo e na temporada.
+func _lower_third(ev: Dictionary) -> void:
+	var side: int = ev["s"]
+	var mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
+	if mp == null or _l3 == null:
+		return
+	var in_game := 0
+	for e in _sim.events:
+		if int(e["t"]) == MatchSimulation.EV_GOAL and int(e.get("p", -1)) == mp.p.id and int(e["s"]) == side and int(e["m"]) <= int(ev["m"]):
+			in_game += 1
+	var season_g: int = mp.p.stats[Player.S_GOALS] if mp.p.stats.size() > Player.S_GOALS else 0
+	var b := Broadcaster.for_competition(world(), _fx.comp)
+	(_l3.get_theme_stylebox(&"panel") as StyleBoxFlat).bg_color = b["c1"]
+	var name_l := _l3.get_node("R/V/N") as Label
+	var info_l := _l3.get_node("R/V/I") as Label
+	name_l.text = "%s  %s" % [mp.p.display_name().to_upper(), Fmt.minute(int(ev["m"]), int(ev["h"]))]
+	name_l.add_theme_color_override(&"font_color", b["c2"])
+	var parts: Array = [_sim.teams[side].club.short_name, "%dº gol no jogo" % maxi(1, in_game), "%d na temporada" % (season_g + maxi(1, in_game))]
+	info_l.text = " · ".join(parts)
+	_l3.visible = true
+	_l3.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(_l3, "modulate:a", 1.0, 0.25)
+	tw.tween_interval(4.5)
+	tw.tween_property(_l3, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(func(): _l3.visible = false)
+
+
+func _build_l3() -> PanelContainer:
+	var p := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color("#101010")
+	st.border_color = Color(1, 1, 1, 0.25)
+	st.border_width_left = 6
+	st.content_margin_left = 12
+	st.content_margin_right = 12
+	st.content_margin_top = 6
+	st.content_margin_bottom = 6
+	p.add_theme_stylebox_override(&"panel", st)
+	var r := UIKit.hbox(10)
+	r.name = "R"
+	var v := UIKit.vbox(0)
+	v.name = "V"
+	var n := UIKit.label("", "H3")
+	n.name = "N"
+	v.add_child(n)
+	var i := UIKit.label("", "Small")
+	i.name = "I"
+	v.add_child(i)
+	r.add_child(v)
+	p.add_child(r)
+	p.visible = false
+	return p
 
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
@@ -347,7 +425,13 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	comp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	comp_lbl.clip_text = true
 	comp_lbl.add_theme_color_override(&"font_color", caps_col)
-	strip.add_child(comp_lbl)
+	comp_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Selo da emissora no canto, como numa transmissão
+	var srow := UIKit.hbox(8)
+	_bug = Broadcaster.bug(Broadcaster.for_competition(world(), _fx.comp), true)
+	srow.add_child(_bug)
+	srow.add_child(comp_lbl)
+	strip.add_child(srow)
 	v.add_child(strip)
 	var row := UIKit.hbox(8)
 	row.add_child(UIKit.crest(home, 58))
@@ -576,6 +660,7 @@ func _process(delta: float) -> void:
 		_halftime = true
 		_update_play_button()
 		_update_board()
+		_set_bug("INTERVALO", Color("#FFC940"))
 		_show_halftime()
 		return
 	if _pending_shootout:
@@ -706,6 +791,7 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 		"goal":
 			_celebrate(ev)
 		"card_y", "card_r":
+			AudioManager.crowd_event("card", int(ev["s"]))
 			AudioManager.play("card", -6.0)
 			AudioManager.vibrate(25)
 			_hold = maxf(_hold, 0.5 * _delay_scale())
@@ -714,6 +800,9 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 				AudioManager.play("chance", -4.0)
 				_hold = maxf(_hold, 0.9 * _delay_scale())
 		"chance":
+			AudioManager.crowd_event("danger", int(ev["s"]))
+			if t == MatchSimulation.EV_SAVE and int(ev["s"]) == 1:
+				AudioManager.crowd_event("save", 0) # defesa do goleiro da casa: aplausos
 			if t == MatchSimulation.EV_POST or (ev.has("x") and float(ev["x"].get("xg", 0.0)) >= 0.3):
 				AudioManager.play("chance", -8.0)
 		"var":
@@ -721,15 +810,22 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 	if t == MatchSimulation.EV_OFFSIDE and style == "big":
 		AudioManager.play("whistle", -8.0)
 		_hold = maxf(_hold, 0.9 * _delay_scale())
+	if t == MatchSimulation.EV_FOUL:
+		AudioManager.crowd_event("foul", int(ev["s"]))
 	if t == MatchSimulation.EV_HALFTIME:
 		AudioManager.play("whistle", -4.0)
+		AudioManager.crowd_event("half", 0)
 	elif t == MatchSimulation.EV_FULLTIME:
 		AudioManager.play("whistle_end", -3.0)
+		var hs := int(_sim.score[0])
+		var as_ := int(_sim.score[1])
+		AudioManager.crowd_event("end", 0 if hs >= as_ else 1)
 
 
 func _celebrate(ev: Dictionary) -> void:
 	_record_scorer(ev)
 	_shown_score = [int(ev["hs"]), int(ev["as"])]
+	_update_board() # placar muda na hora do gol, não só no próximo minuto
 	var side: int = ev["s"]
 	var x: Dictionary = ev.get("x", {})
 	var tags: Array = x.get("tags", [])
@@ -752,11 +848,14 @@ func _celebrate(ev: Dictionary) -> void:
 	var sc_mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
 	_pitch.motion.celebrate(side, sc_mp.slot if sc_mp != null and sc_mp.on_pitch and int(ev["t"]) == MatchSimulation.EV_GOAL else -1)
 	AudioManager.goal(imp if level != 3 else maxf(imp, 0.8), ours)
+	AudioManager.crowd_event("goal", side)
 	if _pace == 0:
 		_hold += 1.8 # tempo de ver os times voltando para a saída
 	var tw := create_tween()
 	tw.tween_interval(dur)
 	tw.tween_callback(func(): _pitch.motion.kickoff(1 - side, false))
+	if int(ev["t"]) == MatchSimulation.EV_GOAL:
+		tw.tween_callback(_lower_third.bind(ev))
 
 
 func _player_name(side: int, pid: int) -> String:
@@ -1633,6 +1732,8 @@ func _toggle_play() -> void:
 
 
 func _start_second_half() -> void:
+	_set_bug("● AO VIVO", Color("#FF4B4B"))
+	AudioManager.crowd_event("second", 0)
 	_halftime = false
 	_paused = false
 	_clock = 0.5
@@ -2050,6 +2151,8 @@ func _on_final() -> void:
 	if _done:
 		return
 	_done = true
+	_set_bug("FIM DE JOGO", UIColors.MUTED)
+	_hide_aux() # sugestão tática não faz sentido depois do apito final
 	UIManager.close_all_modals()
 	_report = GameManager.finish_match()
 	var mine: int = _sim.score[_user_side]
@@ -2251,7 +2354,7 @@ func _assistant_tick() -> void:
 
 
 func _show_aux(text: String, act: Dictionary) -> void:
-	if _aux_bar == null:
+	if _aux_bar == null or _done:
 		return
 	_aux_act = act
 	_aux_text.text = text
