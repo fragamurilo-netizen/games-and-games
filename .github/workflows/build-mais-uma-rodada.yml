@@ -59,8 +59,10 @@ jobs:
             echo "::error::Godot parser/runtime errors detected."
             exit 1
           fi
-          if grep -E "Failed loading resource: res://assets/fonts|Error loading custom project theme" import.log boot.log; then
-            echo "::error::Theme/font import failed."
+          # O primeiro scan pode registrar ausência temporária antes de gerar .fontdata.
+          # O que importa é o estado pós-importação: quatro fontdata existem e o boot não pode falhar no tema.
+          if grep -E "Failed loading resource: res://assets/fonts|Error loading custom project theme" boot.log; then
+            echo "::error::Theme/font loading failed after import."
             exit 1
           fi
 
