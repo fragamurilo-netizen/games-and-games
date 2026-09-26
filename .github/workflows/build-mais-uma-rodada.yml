@@ -6,6 +6,9 @@ on:
       - build/mais-uma-rodada-latest-2026-09-26
     paths:
       - ".github/workflows/build-mais-uma-rodada.yml"
+      - "mais-uma-rodada/scripts/**"
+      - "mais-uma-rodada/scenes/**"
+      - "mais-uma-rodada/tests/smoke_boot.gd"
   workflow_dispatch:
 
 permissions:
