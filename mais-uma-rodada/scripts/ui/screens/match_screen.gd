@@ -94,6 +94,7 @@ var _play_btn: Button
 var _speed_btn: Button
 var _tac_btn: Button
 var _shout_btn: Button = null
+var _sound_btn: Button = null
 var _skip_btn: Button
 var _overlay: GoalOverlay
 var _tac_box: VBoxContainer
@@ -554,16 +555,32 @@ func _build_controls() -> void:
 	_speed_btn = UIKit.button(PACE_NAMES[_pace], "", _cycle_speed, "fast")
 	_tac_btn = UIKit.button("Tática", "", _open_tactics, "tactics")
 	_shout_btn = UIKit.button("Gritar", "", _open_shouts, "whistle")
+	_sound_btn = UIKit.button("Som", "", _toggle_match_sound, "sound")
 	_skip_btn = UIKit.button("Fim", "", _confirm_skip, "skip")
 	_skip_btn.text = ""
 	_skip_btn.tooltip_text = "Ir para o fim"
-	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _skip_btn]:
+	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _sound_btn, _skip_btn]:
 		var icon_only: bool = b == _play_btn or b == _skip_btn
 		b.size_flags_horizontal = Control.SIZE_FILL if icon_only else Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size = Vector2(88 if icon_only else 0, 80)
 		b.add_theme_font_size_override(&"font_size", 21)
 		_controls.add_child(b)
 	_update_play_button()
+	_update_sound_button()
+
+
+func _toggle_match_sound() -> void:
+	AudioManager.set_match_muted(not AudioManager.match_muted())
+	_update_sound_button()
+
+
+func _update_sound_button() -> void:
+	if _sound_btn == null:
+		return
+	var muted := AudioManager.match_muted()
+	_sound_btn.text = "Mudo" if muted else "Som"
+	_sound_btn.tooltip_text = "Ligar som da partida" if muted else "Desligar som da partida"
+	_sound_btn.modulate.a = 0.58 if muted else 1.0
 
 
 func _update_play_button() -> void:

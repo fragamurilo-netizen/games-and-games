@@ -34,6 +34,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 		PlayerGenerator.create_free_agent(w, rng, random_league_level(rng), used_names)
 	PlayerMods.apply(w) # jogadores do Editor geral e de mods (RNG próprio: o sorteio não muda)
 	Valuation.refresh_shift(w)
+	MarketReality.ensure_world(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
 	w.stats["short_names"] = true # nomes dos clubes já vêm curtos dos dados (GameWorld.from_dict)

@@ -4,7 +4,7 @@ extends Node
 ## A música de fundo (MusicSynth) é gerada numa thread e guardada em cache no aparelho.
 
 const RATE := 22050
-const MUSIC_CACHE := "user://music_v1_%d.pcm"
+const MUSIC_CACHE := "user://music_v2_%d.pcm"
 
 var _players: Array[AudioStreamPlayer] = []
 var _cache: Dictionary = {}
@@ -15,6 +15,7 @@ var _music_task := -1
 var _music_task_track := -1
 var _music_samples := PackedFloat32Array()
 var _in_match := false
+var _match_muted := false # mute temporário da tela de partida; não altera as Opções globais
 var _fade: Tween
 ## Torcida da partida: loop dos donos da casa e da visitante, com volume que reage ao jogo.
 var _crowd_p: Array[AudioStreamPlayer] = []
@@ -74,7 +75,7 @@ static func _to_db(v: int) -> float:
 
 ## Liga (ou desliga) a música conforme as Opções e a tela atual.
 func start_music() -> void:
-	var want := AppSettings.music and AppSettings.music_volume > 0 and (not _in_match or AppSettings.music_in_match)
+	var want := AppSettings.music and AppSettings.music_volume > 0 and (not _in_match or AppSettings.music_in_match) and not (_in_match and _match_muted)
 	if not want:
 		_fade_to(-40.0, func(): _music.stop())
 		return
@@ -99,6 +100,8 @@ func screen_changed(screen_name: String) -> void:
 	if match_now == _in_match:
 		return
 	_in_match = match_now
+	if not match_now:
+		_match_muted = false
 	start_music()
 
 
@@ -175,7 +178,7 @@ func click() -> void:
 
 
 func play(name: String, volume_db: float = 0.0) -> void:
-	if not AppSettings.sound:
+	if not AppSettings.sound or (_in_match and _match_muted):
 		return
 	var stream := _stream(name)
 	if stream == null:
@@ -194,6 +197,11 @@ func vibrate(ms: int) -> void:
 
 ## Celebração de gol: rugido proporcional à importância + vibração.
 func goal(importance: float, ours: bool) -> void:
+	# Durante a partida o próprio loop da arquibancada reage ao gol. Evita empilhar um
+	# "ruído de torcida" artificial por cima da torcida humana sintetizada.
+	if _crowd_on:
+		vibrate(int(120 + importance * 380) if ours else 60)
+		return
 	if ours:
 		play("goal_big" if importance >= 0.6 else "goal", 0.0)
 		vibrate(int(120 + importance * 380))
@@ -213,6 +221,24 @@ func _notification(what: int) -> void:
 		_music.stream_paused = false
 		for cp in _crowd_p:
 			cp.stream_paused = false
+
+
+# ---------------------------------------------------------------------------
+# Mute rápido da partida
+# ---------------------------------------------------------------------------
+
+func match_muted() -> bool:
+	return _match_muted
+
+func set_match_muted(muted: bool) -> void:
+	_match_muted = muted
+	if muted:
+		# Corta imediatamente efeitos pontuais; a torcida faz fade no _crowd_tick.
+		for p in _players:
+			if p.playing:
+				p.stop()
+	start_music()
+	set_process(true)
 
 
 # ---------------------------------------------------------------------------
@@ -259,7 +285,7 @@ func crowd_stop(now := false) -> void:
 ## Reações: "danger" (ataque perigoso), "goal", "foul", "card", "save", "half", "second", "end".
 ## `side` 0 casa, 1 visitante: de quem é o lance.
 func crowd_event(kind: String, side: int) -> void:
-	if not _crowd_on:
+	if not _crowd_on or _match_muted:
 		return
 	var s := clampi(side, 0, 1)
 	var o := 1 - s
@@ -327,7 +353,7 @@ func _crowd_tick(delta: float) -> void:
 			if _crowd_boost_t[i] <= 0.0:
 				_crowd_boost[i] = 0.0
 		var target := 0.0
-		if _crowd_on:
+		if _crowd_on and not _match_muted:
 			target = clampf(_crowd_base[i] * (1.0 + _crowd_boost[i]), 0.0, 1.0)
 		_crowd_level[i] = move_toward(_crowd_level[i], target, delta * (0.9 if target > _crowd_level[i] else 0.35))
 		_crowd_p[i].volume_db = linear_to_db(maxf(0.0005, _crowd_level[i]))
