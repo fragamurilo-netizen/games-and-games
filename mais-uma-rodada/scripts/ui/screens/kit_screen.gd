@@ -936,25 +936,21 @@ func _sponsors_card(w: GameWorld, club: Club, _pre: bool) -> Control:
 	return UIKit.card_panel(card)
 
 
+## "Casa de apostas · Inglaterra", "Material esportivo · Itália", "Companhia aérea · multinacional".
+func _brand_origin(o: Dictionary) -> String:
+	var e := BrandCatalog.find(String(o.get("n", "")))
+	if e.is_empty():
+		return ""
+	var s := String(o.get("s", e.get("s", "")))
+	var sector := "Material esportivo" if s == "material" else BrandCatalog.sector_name(s)
+	var origin := String(e.get("o", ""))
+	var where := DatabaseManager.nation_name(origin) if origin != "" else "multinacional"
+	return "%s · %s" % [sector, where]
+
+
 func _sponsor_row(o: Dictionary, caption: String, cb: Callable) -> Control:
 	var row := UIKit.hbox(12)
-	var logo := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(String(o.get("c", "#FFFFFF")))
-	sb.set_corner_radius_all(8)
-	sb.content_margin_left = 10
-	sb.content_margin_right = 10
-	sb.content_margin_top = 4
-	sb.content_margin_bottom = 4
-	logo.add_theme_stylebox_override(&"panel", sb)
-	logo.custom_minimum_size = Vector2(190, 48)
-	var ln := UIKit.label(String(o.get("n", "")).to_upper(), "Caps")
-	ln.add_theme_color_override(&"font_color", Color(String(o.get("t", "#111111"))))
-	ln.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ln.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	ln.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	ln.custom_minimum_size.x = 170
-	logo.add_child(ln)
+	var logo := BrandBadge.make(o)
 	row.add_child(logo)
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -962,6 +958,9 @@ func _sponsor_row(o: Dictionary, caption: String, cb: Callable) -> Control:
 	if int(o.get("b", 0)) > 0:
 		val += " + %s/vitória" % Fmt.money(int(o["b"]))
 	col.add_child(UIKit.label(val, "H3", true))
+	var who := _brand_origin(o)
+	if who != "":
+		col.add_child(UIKit.label(who, "Muted"))
 	col.add_child(UIKit.label(caption, "Small"))
 	row.add_child(col)
 	if cb.is_valid():

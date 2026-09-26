@@ -74,32 +74,58 @@ static func for_match(w: GameWorld, fx: Fixture, home: Club, away: Club, neutral
 		tier_goal = 3 if league.tier == 1 and home.reputation >= 70.0 else (2 if league.tier <= 2 else 1)
 	return {
 		"kind": kind, "night": night, "rain": rain, "weather": weather, "fill": fill, "cap": cap,
-		"brands": _brands(home, tier_goal, r), "seed": seed_value,
+		"brands": _brands(w, fx, home, tier_goal, continental, r), "fence_brands": _fence_brands(home, r), "seed": seed_value,
 		"away_share": 0.5 if neutral else clampf(0.06 + away.reputation / 900.0, 0.05, 0.16),
 	}
 
 
-static func _brands(home: Club, tier_goal: int, r: RandomNumberGenerator) -> Array:
+## Placas do jogo: patrocinadores do mandante primeiro (o master aparece mais de uma vez), depois
+## as parceiras da competição e as marcas do país no tamanho do jogo. Tudo sai do BrandCatalog,
+## então num jogo na Inglaterra só aparecem marcas inglesas e multinacionais.
+static func _brands(w: GameWorld, fx: Fixture, home: Club, tier_goal: int, continental: bool, r: RandomNumberGenerator) -> Array:
 	var out: Array = []
 	var seen: Dictionary = {}
-	for slot in home.sponsors:
-		var s: Dictionary = home.sponsors[slot]
-		var n := String(s.get("n", ""))
-		if n != "" and not seen.has(n):
-			seen[n] = true
-			out.append({"n": n, "c": String(s.get("c", "#1B1B1B")), "t": String(s.get("t", "#FFFFFF"))})
-	var pool: Array = []
-	for b in DatabaseManager.sponsor_brands():
-		if absi(int(b.get("tier", 1)) - tier_goal) <= 1 and not seen.has(String(b["n"])):
-			pool.append(b)
-	for b in DatabaseManager.kit_suppliers():
-		if int(b.get("tier", 1)) >= tier_goal - 1:
+	var add := func(b: Dictionary) -> void:
+		var n := String(b.get("n", ""))
+		if n == "" or seen.has(n):
+			return
+		seen[n] = true
+		out.append({"n": n, "c": String(b.get("c", "#1B1B1B")), "t": String(b.get("t", "#FFFFFF")),
+			"m": String(b.get("m", "")), "logo": String(b.get("logo", ""))})
+	var master: Dictionary = home.sponsors.get("master", {})
+	for s in SponsorManager.SLOTS:
+		var ct: Dictionary = home.sponsors.get(s[0], {})
+		if not ct.is_empty():
+			var e := BrandCatalog.find(String(ct.get("n", "")))
+			var b := ct.duplicate()
+			if not b.has("m") or String(b.get("m", "")) == "":
+				b["m"] = e.get("m", "")
+			add.call(b)
+	if fx != null and fx.comp != "F":
+		for b in BrandCatalog.competition_partners(fx.comp, home.nation, continental, 3 if tier_goal >= 2 else 2):
+			add.call(b)
+	var pool := BrandCatalog.brands_for(home.nation, tier_goal, "placa", w.league_of(home.id).tier if w != null and w.league_of(home.id) != null else 1, home.city)
+	RngUtil.shuffle(r, pool)
+	for b: Dictionary in pool:
+		if out.size() >= 11:
+			break
+		add.call(b)
+	if out.is_empty():
+		out.append({"n": home.short_name, "c": home.color1, "t": home.color2, "m": "", "logo": ""})
+	# O master do clube volta no meio da fila: é quem mais aparece em volta do gramado.
+	if not master.is_empty() and out.size() >= 6:
+		out.insert(out.size() / 2, out[0].duplicate())
+	return out
+
+
+## Faixas amarradas no alambrado: comércio da cidade e marcas pequenas do país.
+static func _fence_brands(home: Club, r: RandomNumberGenerator) -> Array:
+	var pool := BrandCatalog.local_brands(home.nation, home.city)
+	for b: Dictionary in BrandCatalog.brands_for(home.nation, 1, "placa", 2, ""):
+		if int(b.get("tier", 1)) <= 2:
 			pool.append(b)
 	RngUtil.shuffle(r, pool)
-	for b in pool:
-		if out.size() >= 10:
-			break
-		out.append({"n": String(b["n"]), "c": String(b.get("c", "#1B1B1B")), "t": String(b.get("t", "#FFFFFF"))})
-	if out.is_empty():
-		out.append({"n": home.short_name, "c": home.color1, "t": home.color2})
+	var out: Array = []
+	for b: Dictionary in pool.slice(0, 6):
+		out.append({"n": String(b["n"]), "c": String(b.get("c", "#1B1B1B")), "t": String(b.get("t", "#FFFFFF")), "m": String(b.get("m", ""))})
 	return out

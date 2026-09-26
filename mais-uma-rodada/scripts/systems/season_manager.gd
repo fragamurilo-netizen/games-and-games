@@ -1001,6 +1001,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		FinanceManager.refinance(world, c)
 		c.cohesion = maxf(35.0, c.cohesion - 8.0)
 		KitDesign.renew_ai(world, c) # uniformes novos na IA; o usuário decide os dele no lançamento
+		SponsorManager.renew_ai(world, c) # patrocínios da IA com marcas do país
 		FinanceManager.set_budgets(world, c)
 		if not world.is_user_club(c.id):
 			PlayerGenerator.assign_statuses(world, c)
