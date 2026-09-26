@@ -4,6 +4,7 @@ extends BaseScreen
 
 var _pid := -1
 var _tab := "geral"
+var _season_filter := 0 # temporada a temporada: 0 todas, 1 liga, 2 outras competições
 const TABS := [["geral", "Visão geral"], ["numeros", "Números"], ["carreira", "Carreira"]]
 
 
@@ -580,6 +581,16 @@ func _career(w: GameWorld, p: Player) -> Control:
 		chart.custom_minimum_size = Vector2(0, 150)
 		chart.setup(p, w.year)
 		card.add_child(chart)
+		var gsf := ButtonGroup.new()
+		var sfr := UIKit.hbox(8)
+		for i in 3:
+			var fi := i
+			var chip := UIKit.chip(["Todas", "Liga", "Outras competições"][i], i == _season_filter, gsf, func():
+				_season_filter = fi
+				refresh())
+			UIKit.shrink_button(chip)
+			sfr.add_child(chip)
+		card.add_child(sfr)
 		card.add_child(_season_header())
 		for i in range(p.history.size() - 1, -1, -1):
 			card.add_child(_season_row(w, p, p.history[i], i % 2 == 0))
@@ -597,6 +608,22 @@ func _num_cell(text: String, w: int, col: Color = UIColors.TEXT, variation := "H
 	l.custom_minimum_size.x = w
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	return l
+
+
+## J, G, A e se a nota vale, conforme o filtro (a nota guardada é a da liga).
+func _season_nums(h: Dictionary) -> Array:
+	var la := int(h.get("a", 0))
+	var lg := int(h.get("g", 0))
+	var las := int(h.get("as", 0))
+	var ca := int(h.get("ca", 0))
+	var cg := int(h.get("cg", 0))
+	var cas := int(h.get("cas", 0))
+	match _season_filter:
+		1:
+			return [la, lg, las, true]
+		2:
+			return [ca, cg, cas, false]
+	return [la + ca, lg + cg, las + cas, true]
 
 
 func _season_header() -> Control:
@@ -632,15 +659,17 @@ func _season_row(w: GameWorld, p: Player, h: Dictionary, shade: bool) -> Control
 	if not sub.is_empty():
 		names.add_child(UIKit.label(" · ".join(sub), "Small"))
 	row.add_child(names)
-	var apps := int(h.get("a", 0)) + int(h.get("ca", 0))
-	var goals := int(h.get("g", 0)) + int(h.get("cg", 0))
-	var ast := int(h.get("as", 0)) + int(h.get("cas", 0))
+	var nums := _season_nums(h)
+	var apps: int = nums[0]
+	var goals: int = nums[1]
+	var ast: int = nums[2]
+	var rated: bool = nums[3] and int(h.get("a", 0)) > 0
 	var dim := UIColors.MUTED
 	row.add_child(_num_cell(str(apps), 50, UIColors.TEXT if apps > 0 else dim))
 	row.add_child(_num_cell(str(goals), 50, UIColors.TEXT if goals > 0 else dim))
 	row.add_child(_num_cell(str(ast), 50, UIColors.TEXT if ast > 0 else dim))
 	var r := float(h.get("r", 0.0))
-	row.add_child(_num_cell(Fmt.rating(r) if apps > 0 and r > 0.0 else "—", 70, Fmt.match_rating_color(r) if apps > 0 and r > 0.0 else dim))
+	row.add_child(_num_cell(Fmt.rating(r) if rated and r > 0.0 else "—", 70, Fmt.match_rating_color(r) if rated and r > 0.0 else dim))
 	var o := int(h.get("o", 0))
 	var ov := UIKit.vbox(0)
 	ov.custom_minimum_size.x = 82
@@ -687,13 +716,14 @@ func _season_totals(p: Player) -> Control:
 	var rs := 0.0
 	var rn := 0
 	for h: Dictionary in p.history:
-		var a := int(h.get("a", 0)) + int(h.get("ca", 0))
-		apps += a
-		goals += int(h.get("g", 0)) + int(h.get("cg", 0))
-		ast += int(h.get("as", 0)) + int(h.get("cas", 0))
-		if a > 0 and float(h.get("r", 0.0)) > 0.0:
-			rs += float(h["r"]) * a
-			rn += a
+		var nums := _season_nums(h)
+		apps += int(nums[0])
+		goals += int(nums[1])
+		ast += int(nums[2])
+		var la := int(h.get("a", 0))
+		if bool(nums[3]) and la > 0 and float(h.get("r", 0.0)) > 0.0:
+			rs += float(h["r"]) * la
+			rn += la
 	var row := UIKit.hbox(6)
 	var t := UIKit.label("TOTAL · %d temporadas" % p.history.size(), "Caps")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
