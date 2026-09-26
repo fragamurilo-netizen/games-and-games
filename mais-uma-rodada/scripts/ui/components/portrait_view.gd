@@ -3250,9 +3250,9 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 				sh.append(_px(lerpf(-0.68, 0.68, t), hl + 0.04 + 0.03 * sin(PI * t)))
 			_r_polyline(sh, Color(0, 0, 0, 0.09), _fh * 0.06, true)
 			for row in 2:
-				var locks := (9 if not crop else 11) - row
-				for i in locks:
-					var t := (float(i) + 0.5 * row) / float(locks - 1 + row)
+				var tuft_count := (9 if not crop else 11) - row
+				for i in tuft_count:
+					var t := (float(i) + 0.5 * row) / float(tuft_count - 1 + row)
 					var u := lerpf(-0.72, 0.72, t) + rng.randf_range(-0.02, 0.02)
 					var edge := pow(absf(u) / 0.72, 2.0)
 					var tip_y := hl + rng.randf_range(-0.035, 0.03) - edge * 0.07 - row * 0.03 + (0.0 if crop else 0.025 * sin(PI * t))
