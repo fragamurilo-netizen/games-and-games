@@ -267,7 +267,9 @@ static func begin_matchday(world: GameWorld) -> Dictionary:
 	var md := {"day": world.season.day, "entries": [], "user": {}, "notes": []}
 	for f: Fixture in world.season.fixtures_at(world.season.day):
 		if not f.played and (world.is_user_club(f.home) or world.is_user_club(f.away)):
-			SponsorManager.close_preseason(world) # primeiro jogo: uniforme e patrocínios travados
+			if SponsorManager.is_preseason(world):
+				SponsorManager.close_preseason(world) # primeiro jogo: uniforme e patrocínios travados
+				KitDesign.record(world, world.user_club()) # os uniformes que vão a campo entram no histórico
 			break
 	for f: Fixture in world.season.fixtures_at(world.season.day):
 		if f.played:
@@ -998,6 +1000,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			c.add_ledger("impostos", -int(taxes[c.id]))
 		FinanceManager.refinance(world, c)
 		c.cohesion = maxf(35.0, c.cohesion - 8.0)
+		KitDesign.renew_ai(world, c) # uniformes novos na IA; o usuário decide os dele no lançamento
 		FinanceManager.set_budgets(world, c)
 		if not world.is_user_club(c.id):
 			PlayerGenerator.assign_statuses(world, c)

@@ -53,6 +53,8 @@ var kit_away: Dictionary = {}
 var kit_gk: Dictionary = {}
 ## Terceiro uniforme (gerado na primeira vez que é pedido; ver third_kit()).
 var kit_third: Dictionary = {}
+## Uniformes de cada temporada (ver KitDesign.record): "ano" -> {h, a, t, g, coach}.
+var kit_history: Dictionary = {}
 var crest: Dictionary = {}
 ## Patrocínios (só o clube do usuário negocia): espaço -> {n, c, t, kind, v (por ano), b (por vitória), y (até)}.
 var sponsors: Dictionary = {}
@@ -216,7 +218,7 @@ func to_dict() -> Dictionary:
 		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
-		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "kg": kit_gk, "k3": kit_third, "crest": crest, "spn": sponsors,
+		"c1": color1, "c2": color2, "kh": kit_home, "ka": kit_away, "kg": kit_gk, "k3": kit_third, "kx": kit_history, "crest": crest, "spn": sponsors,
 		"players": player_ids,
 		"sheet": sheet.to_dict() if sheet != null else {},
 		"coh": cohesion, "ll": last_lineup, "tf": tactic_fam.duplicate(true), "ph": philosophy, "dna": dna.duplicate(true), "afk": ai_formation_key,
@@ -266,6 +268,7 @@ static func from_dict(d: Dictionary) -> Club:
 	c.kit_away = d.get("ka", {})
 	c.kit_gk = d.get("kg", {})
 	c.kit_third = d.get("k3", {})
+	c.kit_history = d.get("kx", {})
 	c.crest = d.get("crest", {})
 	c.sponsors = d.get("spn", {})
 	c.commercial = float(d.get("cmk", 1.0))
