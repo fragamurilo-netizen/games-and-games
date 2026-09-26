@@ -71,6 +71,11 @@ var photo: Texture2D = null:
 	set(v):
 		photo = v
 		queue_redraw()
+## Recorte para fotos (apresentação, notícias): sem o fundo redondo nem a borda, só o jogador.
+var cutout: bool = false:
+	set(v):
+		cutout = v
+		queue_redraw()
 
 ## Parâmetros de cada penteado: tp/sd = volume no alto/nas laterais, hl = franja (desce a linha do
 ## cabelo), sb = até onde descem as laterais, fd = degradê (1 leve, 2 alto, 3 lateral raspada),
@@ -298,7 +303,7 @@ func _draw() -> void:
 	_prepare_decals(s)
 	# Três camadas com cache próprio: fundo + cabelo de trás, corpo + roupa, rosto + cabelo.
 	# Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
-	var face_key := hash([face_seed, eth, age, look, size, bg_color])
+	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout])
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest,
 		_crest_tex != null, _sponsor_tex != null])
@@ -332,8 +337,9 @@ func _draw() -> void:
 func _layer_back() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(_f["texture_seed"])
-	_background()
-	_backdrop_depth()
+	if not cutout:
+		_background()
+		_backdrop_depth()
 	_back_hair(rng)
 
 
@@ -365,6 +371,8 @@ func _layer_front() -> void:
 		_scalp_shine()
 	_accessories()
 	_light_pass()
+	if cutout:
+		return
 	# Borda
 	_r_arc(_c, _R - 1.0, 0.0, TAU, 64, Color(bg_color.lightened(0.25), 0.6), maxf(1.0, _s * 0.012), true)
 
@@ -448,9 +456,11 @@ func _setup(c: Vector2, s: float) -> void:
 	_BW = float(f["bridge_w"])
 	_MW = float(f["mouth_w"]) * 1.15
 	_skin = f["skin"]
-	_beard_p = FaceGen.BEARD_PARTS[int(f["beard"])]
+	# Índice fora da tabela (save antigo, catálogo novo) cai no último item em vez de travar o
+	# _setup no meio: com o _setup interrompido a pele do rosto saía toda preta.
+	_beard_p = FaceGen.BEARD_PARTS[clampi(int(f["beard"]), 0, FaceGen.BEARD_PARTS.size() - 1)]
 	_shadow_p = FaceGen.BEARD_PARTS[FaceGen.B_STUBBLE]
-	_hair_style = STYLE_P[int(f["style"])]
+	_hair_style = STYLE_P[clampi(int(f["style"]), 0, STYLE_P.size() - 1)]
 	_half = (_light + Vector3(0, 0, 1)).normalized()
 	_shadow_col = Color(0.2, 0.22, 0.28).lerp(_skin.darkened(0.5), 0.5)
 	var ag: float = f["aging"]
@@ -3323,6 +3333,10 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 					var tc := 0.14 + 0.14 * t
 					pts.append(_cl(_cap_pt(tc if sx < 0.0 else 1.0 - tc, 0.3 + k * 0.24 + 0.1 * sin(PI * t * 2.0))))
 				_r_polyline(pts, Color(_skin.lightened(0.05), 0.85), lw, true)
+		"curtain":
+			# Franja cortina: risco no meio e as duas metades abrindo para os lados
+			for cs: float in [-1.0, 1.0]:
+				_swoop(rng, hair, gloss, hl, false, cs)
 		"side_fringe":
 			_swoop(rng, hair, gloss, hl, false)
 		"curtain":

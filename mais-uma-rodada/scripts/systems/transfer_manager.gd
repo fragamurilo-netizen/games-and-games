@@ -364,7 +364,8 @@ static func loan_in(world: GameWorld, p: Player) -> Dictionary:
 	user.transfer_budget = maxi(0, user.transfer_budget - fee)
 	owner.add_ledger("vendas", fee)
 	_move_loan(world, p, owner, user)
-	NewsManager.post_raw(world, "%s chega emprestado" % p.display_name(), "%s vai defender o %s até o fim da temporada, emprestado pelo %s." % [p.display_name(), user.short_name, owner.short_name], user.id, p.id, NewsEvent.IMP_HIGH, "transferencia")
+	var ln := NewsManager.post_raw(world, "%s chega emprestado" % p.display_name(), "%s vai defender o %s até o fim da temporada, emprestado pelo %s." % [p.display_name(), user.short_name, owner.short_name], user.id, p.id, NewsEvent.IMP_HIGH, "transferencia")
+	ln.media = NewsManager.signing_media(p, user, 0, owner.id)
 	return {"ok": true, "msg": "%s chegou por empréstimo!" % p.display_name()}
 
 
@@ -480,6 +481,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	p.spells.append({"c": buyer.id, "cn": buyer.short_name, "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0,
 		"fee": fee, "k": "c" if seller != null and fee > 0 else "l"})
 	_set_status_on_arrival(world, p, buyer)
+	_arrival_shirt(world, p, buyer)
 	world.mark_free_agents_dirty()
 	Valuation.update_value(p, world.year)
 	var kind := Transfer.KIND_BUY if seller != null else Transfer.KIND_FREE
@@ -496,9 +498,30 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	if world.is_user_club(buyer.id) and buyer.sheet != null:
 		pass # a escalação é revalidada antes do próximo jogo
 	NewsManager.on_transfer(world, t)
+	Achievements.on_transfer(world, p, buyer, seller, fee, world.is_user_club(buyer.id) and NewsManager.is_major_signing(world, p, buyer, fee))
 	if HeartClubs.is_fan(p, buyer.id):
 		HeartClubs.reveal(world, p, "assinatura")
 	return t
+
+
+## Número na chegada: mantém o dele se estiver livre, senão o clássico da posição ou o próximo livre.
+static func _arrival_shirt(world: GameWorld, p: Player, buyer: Club) -> void:
+	var used := {}
+	for q: Player in world.squad(buyer):
+		if q.id != p.id and q.shirt > 0:
+			used[q.shirt] = true
+	if p.shirt > 0 and not used.has(p.shirt):
+		return
+	var classic := {Pos.GK: [1, 12], Pos.RB: [2], Pos.CB: [3, 4], Pos.LB: [6], Pos.DM: [5], Pos.CM: [8], Pos.AM: [10],
+		Pos.RW: [7], Pos.RM: [7], Pos.LW: [11], Pos.LM: [11], Pos.ST: [9]}
+	for n in classic.get(p.position, []):
+		if not used.has(n):
+			p.shirt = n
+			return
+	var n := 13
+	while used.has(n) and n < 99:
+		n += 1
+	p.shirt = n
 
 
 static func _close_spell(world: GameWorld, p: Player) -> void:

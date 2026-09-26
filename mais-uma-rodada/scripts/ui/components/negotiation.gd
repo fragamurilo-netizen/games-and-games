@@ -366,7 +366,8 @@ func _send_terms() -> void:
 		UIManager.close_modal()
 		AudioManager.play("sign")
 		AudioManager.vibrate(40)
-		UIManager.toast(r["msg"], UIColors.GREEN)
+		if not SigningCeremony.play_pending(w):
+			UIManager.toast(r["msg"], UIColors.GREEN)
 		_done()
 		return
 	message = r["msg"]

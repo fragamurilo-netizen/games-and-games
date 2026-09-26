@@ -550,9 +550,12 @@ static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
 			free.append(code)
 	RngUtil.shuffle(env.rng, free)
 	env.k = 12.0
+	var friendlies: Array = []
 	for i in range(0, free.size() - 1, 2):
-		play(env, free[i], free[i + 1], true, false)
-	_after_date(world, env, lines)
+		var fr := play(env, free[i], free[i + 1], true, false)
+		fr["fr"] = true
+		friendlies.append(fr)
+	_after_date(world, env, lines + friendlies)
 	return lines
 
 
@@ -582,8 +585,9 @@ static func _close_campaign(world: GameWorld, camp: Dictionary) -> void:
 	var user_nat := _user_nation(world)
 	if user_nat != "" and _in_campaign(camp, user_nat):
 		var ok: bool = camp["q"].has(user_nat)
-		NewsManager.post_raw(world, "%s %s para a %s %d" % [DatabaseManager.nation_name(user_nat), "se classifica" if ok else "fica fora", tournament_name(camp["t"]), int(camp["y"])],
+		var qn := NewsManager.post_raw(world, "%s %s para a %s %d" % [DatabaseManager.nation_name(user_nat), "se classifica" if ok else "fica fora", tournament_name(camp["t"]), int(camp["y"])],
 			"Terminaram as %s. Classificados: %s." % [String(camp["name"]).to_lower(), _names(camp["q"])], -1, -1, NewsEvent.IMP_HIGH, "selecao")
+		qn.media = {"type": "nation", "code": user_nat}
 
 
 static func _in_campaign(camp: Dictionary, code: String) -> bool:
@@ -643,6 +647,8 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 		var p := world.player(int(pid))
 		if p != null and p.club_id == world.user_club_id:
 			mine.append(p)
+	if mine.size() >= 5:
+		Achievements.unlock(world, "vitrine")
 	if not mine.is_empty():
 		mine.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
 		var parts: Array = mine.map(func(p: Player): return "%s (%s)" % [p.display_name(), DatabaseManager.nation_name(p.nationality)])
@@ -653,8 +659,57 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 	var mine_r: Array = results.filter(func(r): return r["a"] == nat or r["b"] == nat)
 	if not mine_r.is_empty():
 		var txt: Array = mine_r.map(func(r): return result_text(r))
-		NewsManager.post_raw(world, "Eliminatórias: %s" % txt[0], "Resultados da %s na data FIFA: %s." % [DatabaseManager.nation_name(nat), "; ".join(txt)],
+		var en := NewsManager.post_raw(world, "%s: %s" % ["Amistoso" if bool(mine_r[0].get("fr", false)) else "Eliminatórias", txt[0]], "Resultados da %s na data FIFA: %s." % [DatabaseManager.nation_name(nat), "; ".join(txt)],
 			-1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		var r0: Dictionary = mine_r[0]
+		en.media = {"type": "nation", "code": String(r0["a"]), "vs": String(r0["b"]), "ga": int(r0["ga"]), "gb": int(r0["gb"])}
+	_world_nat_news(world, env, results, nat)
+
+
+## Pelo mundo das seleções: a lista de convocados do país do usuário e os resultados que
+## chamaram a atenção entre as seleções fortes (goleadas e zebras).
+static func _world_nat_news(world: GameWorld, env: Env, results: Array, nat: String) -> void:
+	var called: Array = []
+	for pid in env.called:
+		var p := world.player(int(pid))
+		if p != null and p.nationality == nat:
+			called.append(p)
+	if called.size() >= 11:
+		called.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+		var names: Array = []
+		for i in mini(5, called.size()):
+			var p: Player = called[i]
+			var c := world.club(p.club_id)
+			names.append("%s (%s)" % [p.display_name(), c.short_name if c != null else "sem clube"])
+		var cn := NewsManager.post_raw(world, "%s divulga a lista de convocados" % DatabaseManager.nation_name(nat),
+			"%d nomes para a data FIFA. Os destaques: %s." % [called.size(), ", ".join(names)], -1, int(called[0].id), NewsEvent.IMP_NORMAL, "selecao")
+		cn.media = {"type": "nation", "code": nat}
+	var rank := ranking(world)
+	var pos := {}
+	for i in rank.size():
+		pos[rank[i][0]] = i + 1
+	var picks: Array = []
+	for r: Dictionary in results:
+		if r["a"] == nat or r["b"] == nat:
+			continue
+		var ra := int(pos.get(r["a"], 99))
+		var rb := int(pos.get(r["b"], 99))
+		if mini(ra, rb) > 15:
+			continue
+		var diff := int(r["ga"]) - int(r["gb"])
+		var upset := (diff > 0 and ra - rb >= 12) or (diff < 0 and rb - ra >= 12)
+		if upset or absi(diff) >= 3:
+			picks.append([r, 2 if upset else 1])
+	picks.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	for k in mini(2, picks.size()):
+		var r: Dictionary = picks[k][0]
+		var upset: bool = int(picks[k][1]) == 2
+		var a := DatabaseManager.nation_name(r["a"])
+		var b := DatabaseManager.nation_name(r["b"])
+		var title := ("Zebra: %s" % result_text(r)) if upset else result_text(r)
+		var body := "Resultado de peso na data FIFA entre %s (%dº no ranking) e %s (%dº)." % [a, int(pos.get(r["a"], 0)), b, int(pos.get(r["b"], 0))]
+		var n := NewsManager.post_raw(world, title, body, -1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		n.media = {"type": "nation", "code": String(r["a"]), "vs": String(r["b"]), "ga": int(r["ga"]), "gb": int(r["gb"])}
 
 
 static func result_text(r: Dictionary) -> String:
@@ -753,8 +808,10 @@ static func _playoff(world: GameWorld, env: Env, qualified: Array, n: int, id: S
 		if winners.size() >= n:
 			break
 	if not lines.is_empty():
-		NewsManager.post_raw(world, "Repescagem da %s %d" % [tournament_name(id), y], "Classificados na repescagem: %s. Jogos: %s." % [_names(winners), "; ".join(lines)],
+		var rn := NewsManager.post_raw(world, "Repescagem da %s %d" % [tournament_name(id), y], "Classificados na repescagem: %s. Jogos: %s." % [_names(winners), "; ".join(lines)],
 			-1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		if not winners.is_empty():
+			rn.media = {"type": "nation", "code": String(winners[0])}
 	return winners
 
 
@@ -891,7 +948,8 @@ static func _tournament_effects(world: GameWorld, env: Env, rec: Dictionary) -> 
 	var nat := _user_nation(world)
 	if champ == nat or String(rec["t"]) == "WC":
 		imp = NewsEvent.IMP_HEADLINE
-	NewsManager.post_raw(world, "%s é campeã da %s %d" % [DatabaseManager.nation_name(champ), rec["name"], int(rec["y"])], body, -1, -1, imp, "selecao")
+	var cn := NewsManager.post_raw(world, "%s é campeã da %s %d" % [DatabaseManager.nation_name(champ), rec["name"], int(rec["y"])], body, -1, -1, imp, "selecao")
+	cn.media = {"type": "nation", "code": String(champ), "trophy": true}
 	if world.has_user():
 		var mine: Array = []
 		for code in rec["teams"]:
