@@ -6,6 +6,7 @@ on:
       - build/mais-uma-rodada-latest-2026-09-26
     paths:
       - ".github/workflows/diagnose-portrait.yml"
+      - "mais-uma-rodada/scripts/ui/components/portrait_view.gd"
   workflow_dispatch:
 
 jobs:
