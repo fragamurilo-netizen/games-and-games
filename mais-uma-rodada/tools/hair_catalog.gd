@@ -49,7 +49,24 @@ func _initialize() -> void:
 			dy = float(a.substr(5))
 		elif a.begins_with("--seed="):
 			seed_base = int(a.substr(7))
-	var names: Array = FaceGen.HAIR_STYLES if kind == "hs" else FaceGen.BEARDS
+	var lists := {"hs": FaceGen.HAIR_STYLES, "bd": FaceGen.BEARDS, "fs": FaceGen.FACE_SHAPES, "es": FaceGen.EYE_SHAPES,
+		"ns": FaceGen.NOSE_TYPES, "mt": FaceGen.MOUTH_TYPES, "bw": FaceGen.BROW_TYPES, "er": FaceGen.EAR_TYPES,
+		"cn": FaceGen.CHIN_TYPES, "ex": FaceGen.EXPRESSIONS}
+	var names: Array = []
+	if lists.has(kind):
+		names = lists[kind]
+	else:
+		# Escalas contínuas: ms (fino → gordo), bt (feio → bonito), age (idade, uma mesma pessoa)
+		var n := to if to > 0 else 8
+		for i in n:
+			var t := float(i) / maxf(1.0, n - 1.0)
+			match kind:
+				"ms":
+					names.append("massa %.1f" % lerpf(-1.0, 1.0, t))
+				"bt":
+					names.append("beleza %.2f" % t)
+				"age":
+					names.append("%d anos" % int(lerpf(18.0, 72.0, t)))
 	if to < 0 or to > names.size():
 		to = names.size()
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
@@ -76,7 +93,28 @@ func _initialize() -> void:
 		v.face_seed = seed_base + idx * 31
 		v.eth = eths[idx % eths.size()]
 		v.age = age
-		var look := {"hs": idx, "bd": 0} if kind == "hs" else {"bd": idx, "hs": FaceGen.H_CREW}
+		var look := {}
+		match kind:
+			"hs":
+				look = {"hs": idx, "bd": 0}
+			"bd":
+				look = {"bd": idx, "hs": FaceGen.H_CREW}
+			"ms", "bt", "age":
+				var t := float(idx) / maxf(1.0, names.size() - 1.0)
+				v.face_seed = seed_base
+				if kind == "ms":
+					look = {"ms": lerpf(-1.0, 1.0, t), "bd": 0, "ex": 0}
+				elif kind == "bt":
+					look = {"bt": t, "bd": 0, "ex": 0}
+					v.face_seed = seed_base + idx * 31
+				else:
+					look = {"ex": 0}
+					v.age = int(lerpf(18.0, 72.0, t))
+					v.eth = eths[0]
+			_:
+				look = {kind: idx, "bd": 0, "hs": FaceGen.H_CREW}
+				if kind != "ex":
+					look["ex"] = 0
 		if hc >= 0:
 			look["hc"] = hc
 		v.look = look
