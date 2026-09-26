@@ -7,6 +7,7 @@ var opt_days := "6"
 var opt_screens := "squad,contracts"
 var opt_scrolls := "0,900"
 var opt_tab := ""
+var opt_params := "" # parâmetros da tela: chave:valor;chave:valor
 var opt_pick := "best" # best: o melhor do elenco · veteran: o mais velho (histórico longo)
 var shots := false
 
@@ -34,6 +35,9 @@ func _run() -> void:
 	get_tree().root.add_child(main)
 	await _frames(6)
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	var pre := w.clubs_in_league(opt_league)
+	pre.sort_custom(func(a: Club, b: Club): return a.reputation > b.reputation)
+	w.user_club_id = pre[0].id
 	for i in int(opt_days):
 		SeasonManager.play_matchday_instant(w)
 	var clubs := w.clubs_in_league(opt_league)
@@ -54,6 +58,10 @@ func _run() -> void:
 		var params := {}
 		if sc == "player":
 			params = {"id": best.id}
+		for kv in opt_params.split(";", false):
+			var pr := kv.split(":")
+			if pr.size() == 2:
+				params[pr[0]] = pr[1]
 		UIManager.push(sc, params)
 		await _frames(10)
 		var cur: BaseScreen = UIManager.current()

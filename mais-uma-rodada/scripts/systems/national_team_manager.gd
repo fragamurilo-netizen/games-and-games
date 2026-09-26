@@ -12,8 +12,8 @@ extends RefCounted
 ##   fifa: datas FIFA já disputadas na temporada.
 
 const KEY := "intl"
-const SQUAD_SIZE := 23 # lista clássica de 23 (3 goleiros)
-const SQUAD_SHAPE := [3, 8, 7, 5] # goleiros, defensores, meias, atacantes
+const SQUAD_SIZE := 26 # lista de 26 (3 goleiros), como nas Copas recentes
+const SQUAD_SHAPE := [3, 9, 8, 6] # goleiros, defensores, meias, atacantes
 const XI_SHAPE := [1, 4, 3, 3]
 const HOME_BONUS := 2.5 # pontos de força para o mandante (sede do torneio ou jogo em casa)
 const BASE_GOALS := 1.22
@@ -143,7 +143,7 @@ static func _pool(world: GameWorld) -> Dictionary:
 	return out
 
 
-## Convoca os melhores por setor (3 goleiros, 8 defensores, 7 meias, 5 atacantes; completa com quem sobrar).
+## Convoca os melhores por setor (3 goleiros, 9 defensores, 8 meias, 6 atacantes; completa com quem sobrar).
 static func call_up(pool: Array) -> Array:
 	var by_group: Array = [[], [], [], []]
 	for p: Player in pool:

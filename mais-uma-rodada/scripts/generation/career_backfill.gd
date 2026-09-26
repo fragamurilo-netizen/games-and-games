@@ -76,7 +76,7 @@ static func _context(world: GameWorld) -> Dictionary:
 		for e: Array in by_nation[nat]:
 			best = maxf(best, float(e[0]))
 		top[nat] = best
-	# Seleções: o nível do 23º melhor jogador de cada nacionalidade é a linha de corte da convocação.
+	# Seleções: o nível do 26º melhor jogador de cada nacionalidade é a linha de corte da convocação.
 	var by_nat := {}
 	for p: Player in world.players.values():
 		if not by_nat.has(p.nationality):
@@ -87,7 +87,7 @@ static func _context(world: GameWorld) -> Dictionary:
 		var arr: Array = by_nat[nat]
 		arr.sort()
 		arr.reverse()
-		cut[nat] = float(arr[mini(22, arr.size() - 1)])
+		cut[nat] = float(arr[mini(25, arr.size() - 1)])
 	return {"nations": by_nation, "top": top, "champs": champs, "rows": {}, "wcache": {}, "nt_cut": cut, "world": world}
 
 
@@ -318,7 +318,7 @@ static func _cup_games(rng: RandomNumberGenerator, ctx: Dictionary, row: Diction
 
 
 ## Jogos, gols e assistências pela seleção antes do jogo começar: todo ano em que ele estava entre
-## os melhores do país (acima da linha de corte da lista de 23), entra na lista. Titular joga quase
+## os melhores do país (acima da linha de corte da lista de 26), entra na lista. Titular joga quase
 ## todas as datas FIFA (7-11 por ano) e, em ano de Copa do Mundo ou de torneio continental, mais
 ## 3-6 jogos; quem fica no limite da lista entra de vez em quando. Estreia raramente antes dos 19.
 static func _national_caps(world: GameWorld, rng: RandomNumberGenerator, ctx: Dictionary, p: Player, ovr: Dictionary, age: int) -> void:

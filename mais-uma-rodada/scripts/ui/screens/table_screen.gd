@@ -586,15 +586,16 @@ func _numbers(c: VBoxContainer, w: GameWorld) -> void:
 		c.add_child(UIKit.card_panel(card))
 
 
-## Seleção da rodada e seleções do mês da liga do usuário, no campinho.
+## Seleção da rodada e seleções do mês de qualquer liga (a do usuário e as primeiras divisões), no campinho.
 func _teams(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var card := UIKit.card("Card", 8)
-	if league.id != w.user_league_id():
-		card.add_child(UIKit.label("As seleções da rodada e do mês são da liga do seu clube.", "Muted", true))
+	if league.id != w.user_league_id() and league.tier != 1:
+		card.add_child(UIKit.label("As seleções da rodada e do mês saem na liga do seu clube e nas primeiras divisões.", "Muted", true))
 		c.add_child(UIKit.card_panel(card))
 		return
-	var tw: Dictionary = w.stats.get("totw", {})
-	var months: Array = w.stats.get("totm_list", [])
+	var teams := WeeklyAwards.league_teams(w, league.id)
+	var tw: Dictionary = teams["totw"]
+	var months: Array = teams["list"]
 	var g := ButtonGroup.new()
 	var fl := UIKit.flow(8)
 	var has_w := not tw.is_empty() and int(tw.get("y", 0)) == w.year
