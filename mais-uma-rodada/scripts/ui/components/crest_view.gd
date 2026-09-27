@@ -134,11 +134,12 @@ func _render(s: float) -> void:
 	var box := Rect2(Vector2((s - box_s) * 0.5, s * top + (s * (1.0 - top - bottom) - box_s) * 0.5), Vector2(box_s, box_s))
 	var unit := unit_shape(shape)
 	var poly := _xf(unit, box)
-	# Sombra e base
-	var shadow := PackedVector2Array()
-	for p in poly:
-		shadow.append(p + Vector2(0, s * 0.03))
-	_poly(shadow, Color(0, 0, 0, 0.28))
+	# Sombra suave (duas camadas) e base
+	for k in 2:
+		var shadow := PackedVector2Array()
+		for p in poly:
+			shadow.append(p + Vector2(s * 0.004 * (k + 1), s * (0.022 + 0.018 * k)))
+		_poly(shadow, Color(0, 0, 0, 0.2 - 0.08 * k))
 	var ring := shape == "ring" or shape == "oval_ring"
 	var inner := poly
 	if ring:
@@ -163,8 +164,22 @@ func _render(s: float) -> void:
 		charge_box = Rect2(charge_box.position + Vector2(0, box.size.y * 0.12), charge_box.size * Vector2(1.0, 0.86))
 	# Símbolo
 	_charge(sp, charge_box, inner, s)
+	# Acabamento: luz de cima, sombra embaixo e um brilho no alto (dá volume, como escudo bordado)
+	if not small:
+		_poly_grad(inner, Color(1, 1, 1, 0.13), Color(0, 0, 0, 0.2))
+		var gloss := PackedVector2Array()
+		for i in 24:
+			var a := TAU * i / 24.0
+			gloss.append(box.position + Vector2(box.size.x * (0.36 + 0.42 * cos(a)), box.size.y * (0.04 + 0.26 * sin(a))))
+		for piece in Geometry2D.intersect_polygons(gloss, inner):
+			_poly(piece, Color(1, 1, 1, 0.07))
 	# Borda
 	_border(poly, inner, ring, sp, s)
+	# Chanfro: filete claro por dentro da borda e contorno escuro por fora
+	if not small:
+		for piece in Geometry2D.offset_polygon(poly, -s * 0.034):
+			_polyline_closed(piece, Color(1, 1, 1, 0.16), maxf(0.8, s * 0.007))
+		_polyline_closed(poly, Color(0, 0, 0, 0.35), maxf(0.8, s * 0.006))
 	# Texto do anel
 	if ring and not small:
 		var cc := box.get_center()
@@ -200,6 +215,9 @@ func _render(s: float) -> void:
 			var x := s * 0.5 + (i - (n - 1) * 0.5) * r * 2.3
 			var dy := -absf(i - (n - 1) * 0.5) * r * 0.25 * -1.0
 			_poly(_star(Vector2(x, sy + dy), r, r * 0.42, 5), sc)
+			if not small:
+				# Brilho metálico na estrela
+				_poly(_star(Vector2(x - r * 0.12, sy + dy - r * 0.12), r * 0.45, r * 0.19, 5), Color(sc.lightened(0.5), 0.55))
 	if bool(sp["laurel"]):
 		_laurel(box, c3, s)
 
@@ -692,6 +710,21 @@ func _poly(pts: PackedVector2Array, col: Color) -> void:
 	_rec.append([0, pts, col])
 
 
+## Polígono com degradê vertical (cor de cima para a de baixo, por vértice).
+func _poly_grad(pts: PackedVector2Array, top: Color, bot: Color) -> void:
+	if pts.size() < 3 or Geometry2D.triangulate_polygon(pts).is_empty():
+		return
+	var y0 := INF
+	var y1 := -INF
+	for p in pts:
+		y0 = minf(y0, p.y)
+		y1 = maxf(y1, p.y)
+	var cols := PackedColorArray()
+	for p in pts:
+		cols.append(top.lerp(bot, clampf((p.y - y0) / maxf(1.0, y1 - y0), 0.0, 1.0)))
+	_rec.append([6, pts, cols])
+
+
 func _polyline(pts: PackedVector2Array, col: Color, w: float) -> void:
 	_rec.append([1, pts, col, w])
 
@@ -734,6 +767,8 @@ func _replay(cmds: Array, off: Vector2) -> void:
 				draw_string(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5])
 			4:
 				draw_string_outline(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5], c[6])
+			6:
+				draw_polygon(c[1], c[2])
 			5:
 				var p: Vector2 = c[2]
 				draw_set_transform(off + p, c[3], Vector2.ONE)
