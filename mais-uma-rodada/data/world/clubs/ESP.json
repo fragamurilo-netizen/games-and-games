@@ -30,7 +30,8 @@
 				"c2": "#3E3A8A",
 				"c3": "#FEBE10",
 				"sc": "#FEBE10",
-				"border": "gold"
+				"border": "gold",
+				"plate": "none"
 			},
 			"rivals": [
 				"ESP_BLG",
@@ -56,14 +57,15 @@
 			"capacity": 99000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "iberian",
-				"field": "stripes:3",
+				"shape": "tall",
+				"field": "barca",
 				"symbol": "ball",
 				"chief_text": "FCB",
-				"cc": "#FFD100",
+				"cc": "#FFFFFF",
 				"c1": "#004D98",
 				"c2": "#A50044",
-				"c3": "#A50044",
+				"fc": "#A50044",
+				"c3": "#DB0030",
 				"sc": "#FFD100",
 				"border": "gold"
 			},
@@ -92,12 +94,15 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "iberian",
-				"field": "stripes:3",
-				"symbol": "tree",
+				"field": "stripes:4",
+				"symbol": "none",
 				"c1": "#FFFFFF",
 				"c2": "#CB3524",
-				"sc": "#272E61",
-				"border": "thick"
+				"fc": "#CB3524",
+				"canton": "#272E61",
+				"canton_sym": "bear",
+				"border": "thick",
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"ESP_MBL"
@@ -214,13 +219,19 @@
 			"capacity": 60000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "iberian",
-				"field": "stripes:3",
+				"shape": "diamond",
+				"field": "stripes:5",
 				"symbol": "letter",
 				"initials": "RB",
 				"crown": 1,
+				"c1": "#FFFFFF",
+				"c2": "#00954C",
+				"fc": "#00954C",
 				"c3": "#FFD100",
-				"sc": "#00954C"
+				"sc": "#00954C",
+				"plate": "disc",
+				"pc": "#FFFFFF",
+				"border": "thick"
 			},
 			"rivals": [
 				"ESP_NER"
@@ -247,10 +258,15 @@
 			"crest": {
 				"shape": "french",
 				"field": "stripes:3",
-				"symbol": "none",
-				"chief_text": "SFC",
-				"cc": "#FFFFFF",
-				"c3": "#D71A28"
+				"symbol": "letter",
+				"initials": "SFC",
+				"c1": "#FFFFFF",
+				"c2": "#D71A28",
+				"fc": "#D71A28",
+				"sc": "#D71A28",
+				"plate": "band",
+				"pc": "#FFFFFF",
+				"border": "thick"
 			},
 			"rivals": [
 				"ESP_VBL"

@@ -26,7 +26,11 @@
 				"field": "hoops:4",
 				"symbol": "letter",
 				"initials": "CRF",
-				"sc": "#FFFFFF"
+				"c1": "#C8102E",
+				"c2": "#111111",
+				"fc": "#111111",
+				"sc": "#FFFFFF",
+				"plate": "none"
 			},
 			"rivals": [
 				"BRA_TRL",

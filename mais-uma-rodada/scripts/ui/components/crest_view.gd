@@ -22,6 +22,9 @@ extends Control
 ##   plate  auto|band|disc|none — placa atrás do monograma (auto: só em campo listrado/dividido)
 ##   pc     cor da placa                         finish  false tira o brilho e o filete interno
 ##   tc     cor do texto do anel
+##   canton cor do cantão (quadrado no alto à esquerda)   canton_sym  símbolo dentro dele
+##   field pale_cross:L|R  metade com cruz (lado L/R) e metade listrada (Milan, Bologna)
+##   field barca  alto partido (cruz | listras), faixa com o chief_text no meio e listras embaixo
 
 @export var crest: Dictionary = {"shape": "shield", "symbol": "star", "c1": "#1B3A8C", "c2": "#FFFFFF", "border": "thin", "initials": "RA"}:
 	set(v):
@@ -109,6 +112,8 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["pc"] = Color(String(cr.get("pc", ""))) if String(cr.get("pc", "")) != "" else null
 	sp["finish"] = bool(cr.get("finish", true))
 	sp["tc"] = Color(String(cr.get("tc", ""))) if String(cr.get("tc", "")) != "" else null
+	sp["canton"] = Color(String(cr.get("canton", ""))) if String(cr.get("canton", "")) != "" else null
+	sp["canton_sym"] = String(cr.get("canton_sym", ""))
 	return sp
 
 
@@ -160,7 +165,20 @@ func _render(s: float) -> void:
 	_field(inner, box, sp, s)
 	# Chefe com texto
 	var charge_box := _inner_box(box, shape)
-	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief":
+	var barca := String(sp["field"]) == "barca"
+	if sp["canton"] != null:
+		_canton(sp, box, inner, s)
+	if barca:
+		# Faixa com o texto no meio; o símbolo vai para a parte listrada de baixo
+		var by := 0.4
+		var bh := 0.13
+		var band_b := _xf(_rect(-0.1, by, 1.2, bh), box)
+		for piece in Geometry2D.intersect_polygons(band_b, inner):
+			_poly(piece, sp["cc"])
+		if String(sp["chief_text"]) != "" and not small:
+			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * (by + bh * 0.5)), box.size.x * 0.5, box.size.y * 0.1, contrast(sp["cc"], c1, c3))
+		charge_box = Rect2(box.position + Vector2(0.37, 0.58) * box.size, Vector2(0.26, 0.26) * box.size)
+	elif String(sp["chief_text"]) != "" or String(sp["field"]) == "chief":
 		var chief_h := 0.24
 		var band := _xf(PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, chief_h), Vector2(0, chief_h)]), box)
 		var cc: Color = sp["cc"]
@@ -326,6 +344,26 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 			for i in n:
 				if i % 3 != 0:
 					parts.append([_rect(w3 * i, -0.1, w3 + 0.001, 1.2), c2 if i % 3 == 1 else c3])
+		"pale_cross":
+			# Metade listrada (c1/fc) e metade branca (c2) com cruz (c3)
+			var cross_left := f.get_slice(":", 1) == "L"
+			var x0 := 0.0 if cross_left else 0.5
+			var sx := 0.5 if cross_left else 0.0
+			parts.append([_rect(x0 - (0.1 if cross_left else 0.0), -0.1, 0.6, 1.2), sp["c2"]])
+			parts.append([_rect(x0 + 0.2, -0.1, 0.1, 1.2), c3])
+			parts.append([_rect(x0 - (0.1 if cross_left else 0.0), 0.36, 0.6, 0.1), c3])
+			for i in 2:
+				parts.append([_rect(sx + 0.125 + i * 0.25, -0.1, 0.125, 1.2), c2])
+		"barca":
+			# Alto: cruz (branco/c3) à esquerda e listras (amarelo/c3) à direita; embaixo listras c1/fc
+			parts.append([_rect(-0.1, -0.1, 0.6, 0.5), Color.WHITE])
+			parts.append([_rect(0.2, -0.1, 0.1, 0.5), c3])
+			parts.append([_rect(-0.1, 0.16, 0.6, 0.09), c3])
+			parts.append([_rect(0.5, -0.1, 0.6, 0.5), Color("#FFD100")])
+			for i in 4:
+				parts.append([_rect(0.56 + i * 0.11, -0.1, 0.055, 0.5), c3])
+			for i in 3:
+				parts.append([_rect(0.2 + i * 0.25, 0.5, 0.125, 0.7), c2])
 		"bordure":
 			pass
 	for part: Array in parts:
@@ -476,6 +514,20 @@ func _plate(kind: String, sp: Dictionary, cb: Rect2, box: Rect2, inner: PackedVe
 		_poly(piece, line)
 	for piece in Geometry2D.intersect_polygons(band, inner):
 		_poly(piece, pcol)
+
+
+## Cantão: quadrado no alto à esquerda com um símbolo pequeno (Atlético de Madrid).
+func _canton(sp: Dictionary, box: Rect2, inner: PackedVector2Array, s: float) -> void:
+	var col: Color = sp["canton"]
+	for piece in Geometry2D.intersect_polygons(_xf(_rect(-0.1, -0.1, 0.6, 0.56), box), inner):
+		_poly(piece, col)
+	var sym := String(sp["canton_sym"])
+	if sym == "" or not CrestArt.has(sym) or s < 28.0:
+		return
+	var cen := box.position + Vector2(0.3, 0.26) * box.size
+	var ink := contrast(col, Color.WHITE, sp["c3"])
+	for p: PackedVector2Array in CrestArt.polys(sym):
+		_poly(_xf_c(p, cen, box.size.x * 0.15), ink)
 
 
 ## Filete fino por dentro da borda, como nos escudos bordados/esmaltados.

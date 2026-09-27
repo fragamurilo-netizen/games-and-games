@@ -90,11 +90,15 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "oval",
-				"field": "stripes:4",
+				"field": "pale_cross:R",
 				"symbol": "none",
 				"chief_text": "ACM",
 				"cc": "#FFFFFF",
-				"c3": "#111111"
+				"c1": "#FB090B",
+				"c2": "#FFFFFF",
+				"fc": "#111111",
+				"c3": "#FB090B",
+				"border": "thin"
 			},
 			"rivals": [
 				"ITA_MNZ"
@@ -128,7 +132,8 @@
 				"c2": "#111111",
 				"c3": "#FFD100",
 				"sc": "#FFD100",
-				"stars": 3
+				"stars": 3,
+				"border": "thin"
 			},
 			"rivals": [
 				"ITA_TGR",
@@ -279,12 +284,15 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "french",
-				"field": "stripes:3",
-				"symbol": "letter",
-				"initials": "BFC",
+				"field": "pale_cross:L",
+				"symbol": "none",
+				"chief_text": "BFC",
+				"cc": "#FFFFFF",
 				"c1": "#A21C26",
-				"c2": "#1A2F48",
-				"sc": "#FFFFFF"
+				"c2": "#FFFFFF",
+				"fc": "#1A2F48",
+				"c3": "#A21C26",
+				"border": "thin"
 			},
 			"rivals": []
 		},

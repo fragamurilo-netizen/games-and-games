@@ -83,15 +83,16 @@
 			"capacity": 50000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"field": "quarters",
+				"shape": "round",
+				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCP",
 				"c1": "#1D5BBF",
 				"c2": "#FFFFFF",
-				"sc": "#FFD100",
+				"sc": "#FFFFFF",
 				"crown": 1,
-				"c3": "#FFD100"
+				"c3": "#FFD100",
+				"border": "gold"
 			},
 			"rivals": [
 				"POR_ENC",

@@ -60,9 +60,7 @@
 				"c1": "#FDE100",
 				"c2": "#111111",
 				"sc": "#111111",
-				"border": "thick",
-				"ribbon": "09",
-				"c3": "#111111"
+				"border": "thick"
 			},
 			"rivals": [
 				"GER_GEL",
@@ -176,12 +174,16 @@
 			"capacity": 60000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "oval",
 				"field": "hoops:2",
-				"symbol": "antlers",
+				"symbol": "letter",
+				"initials": "VfB",
 				"c1": "#FFFFFF",
 				"c2": "#E32219",
-				"sc": "#111111"
+				"fc": "#E32219",
+				"sc": "#FFFFFF",
+				"border": "thick",
+				"stars": 0
 			},
 			"rivals": [
 				"GER_KAR"
@@ -209,7 +211,7 @@
 				"shape": "diamond",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "B",
+				"initials": "VfL",
 				"c1": "#FFFFFF",
 				"c2": "#111111",
 				"sc": "#00843D",

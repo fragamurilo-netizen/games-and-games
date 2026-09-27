@@ -23,12 +23,14 @@
 			"crest": {
 				"shape": "ring",
 				"field": "plain",
-				"symbol": "tower",
+				"symbol": "eiffel",
 				"text": "PARIS SAINT-GERMAIN",
+				"year": "1970",
 				"c1": "#004170",
 				"c2": "#004170",
 				"c3": "#FFFFFF",
-				"sc": "#DA291C"
+				"sc": "#DA291C",
+				"tc": "#FFFFFF"
 			},
 			"rivals": [
 				"FRA_MRS",
@@ -89,11 +91,14 @@
 			"crest": {
 				"shape": "french",
 				"field": "diag",
-				"symbol": "letter",
-				"initials": "ASM",
+				"symbol": "none",
 				"crown": 1,
-				"sc": "#FFFFFF",
-				"c3": "#FFD100"
+				"c1": "#E5053A",
+				"c2": "#FFFFFF",
+				"c3": "#FFD100",
+				"chief_text": "MONACO",
+				"cc": "#E5053A",
+				"border": "gold"
 			},
 			"rivals": [
 				"FRA_NIC"

@@ -57,10 +57,16 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"field": "stripes:3",
+				"field": "stripes:5",
 				"symbol": "letter",
 				"initials": "PSV",
-				"sc": "#FFFFFF"
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"fc": "#E30613",
+				"sc": "#FFFFFF",
+				"plate": "band",
+				"pc": "#E30613",
+				"border": "thick"
 			},
 			"rivals": [
 				"NED_AMS",
