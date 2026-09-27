@@ -447,8 +447,7 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			_polyline_closed(pts, c1.darkened(0.3) if c1.get_luminance() < 0.6 else Color(0, 0, 0, 0.6), maxf(1.0, r * 0.07))
 	for p: PackedVector2Array in polys:
 		_poly(_xf_c(p, cen, r), col)
-	# Montanha clara: o pico cinza fica sujo, então vai sem detalhe
-	if CrestArt.has(det) and s >= 28.0 and not (sym == "mountain" and col.get_luminance() > 0.75):
+	if CrestArt.has(det) and s >= 28.0:
 		for p: PackedVector2Array in CrestArt.polys(det):
 			_poly(_xf_c(p, cen, r), shade if sym != "ball" else Color("#15171B"))
 
