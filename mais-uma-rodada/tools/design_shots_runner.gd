@@ -9,6 +9,9 @@ var lang := ""
 ## no modo escuro, com esse prefixo no nome (capturas de paisagem e tablet).
 var tablet := false
 var prefix := ""
+## --only=rota,rota:aba,...: só essas telas (depois de --rounds=N rodadas jogadas), modo escuro.
+var only := ""
+var rounds := 3
 
 
 func _ready() -> void:
@@ -51,6 +54,10 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	get_tree().root.add_child(main)
 	await _frames(10)
+	if only != "":
+		await _only_pass()
+		get_tree().quit()
+		return
 	await _shot(prefix + "01_menu")
 	UIManager.push("new_career")
 	await _frames(8)
@@ -187,3 +194,45 @@ func _wide_pass(w: GameWorld) -> void:
 	while Time.get_ticks_msec() < t:
 		await get_tree().process_frame
 	await _shot(prefix + "08_partida")
+
+
+func _only_pass() -> void:
+	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	var club_id := -1
+	for c: Club in w.clubs_in_league("BRA1"):
+		if c.archetype == "tradicional_decadente" or club_id < 0:
+			club_id = c.id
+	AppSettings.tutorial_done = true
+	GameManager.start_career(w, club_id, "Murilo", GameWorld.DIFF_NORMAL, 5)
+	for i in rounds:
+		GameManager.play_instant()
+		await _frames(2)
+	UIManager.goto("hub")
+	await _frames(6)
+	UIManager.close_all_modals()
+	for spec in only.split(","):
+		var parts := spec.split(":")
+		var route := parts[0]
+		var args := {}
+		if parts.size() > 1:
+			args["tab"] = parts[1]
+		if route == "player":
+			var star: Player = null
+			for p in w.squad(w.user_club()):
+				if star == null or p.ovr_f > star.ovr_f:
+					star = p
+			args["id"] = star.id
+		if route in UIManager.TABS:
+			UIManager.goto(route, args)
+		else:
+			UIManager.goto("hub")
+			await _frames(2)
+			UIManager.push(route, args)
+		await _frames(8)
+		UIManager.close_all_modals()
+		var shot_name := prefix + spec.replace(":", "_")
+		await _shot(shot_name)
+		var sc := _screen().scroll()
+		if sc != null and sc.get_v_scroll_bar().max_value > sc.size.y + 200:
+			sc.scroll_vertical = int(sc.size.y * 0.85)
+			await _shot(shot_name + "_b")

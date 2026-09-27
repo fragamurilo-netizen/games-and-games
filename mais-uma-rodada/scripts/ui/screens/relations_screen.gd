@@ -28,17 +28,14 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	max_content_width = 1700
+	# Painel das relações: um medidor por frente (vestiário, diretoria, torcida, imprensa...).
+	# Cada medidor é também a aba: tocar abre os detalhes daquela frente.
+	c.add_child(_gauges(w))
 	var pend := pending_card(w, func(): refresh(), false)
 	if pend != null:
 		c.add_child(pend)
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in TABS:
-		var key: String = t[0]
-		row.add_child(UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh()))
-	c.add_child(row)
+	var start := c.get_child_count()
 	var cb := func(): refresh()
 	match _tab:
 		"squad":
@@ -53,6 +50,59 @@ func refresh() -> void:
 			_press(w, c, cb)
 		"coaches":
 			_coaches(w, c, cb)
+	columnize(c, start)
+
+
+const TAB_ICONS := {"squad": "shirt", "staff": "tactics", "board": "shield", "fans": "heart", "press": "news", "coaches": "whistle"}
+
+
+func _gauges(w: GameWorld) -> Control:
+	var club := w.user_club()
+	var squad := w.squad(club)
+	var sum := 0.0
+	for p: Player in squad:
+		sum += People.trust_of(w, p)
+	var trust := sum / maxf(1.0, squad.size())
+	var rel := float(People.president(w, club.id).get("rel", 50.0))
+	var sup := People.fan_support(w)
+	var heat := PressRoom.heat(w)
+	var vals := {
+		"squad": [People.trust_label(trust), trust, _trust_color(trust)],
+		"board": [People.rel_label(rel), rel, UIColors.morale_color(rel)],
+		"fans": [People.support_label(sup), sup, UIColors.morale_color(sup)],
+		"press": [PressRoom.heat_label(heat), 100.0 - heat, UIColors.RED if heat >= PressRoom.HOT else (UIColors.ACCENT if heat >= 50.0 else UIColors.GREEN)],
+	}
+	var grid := GridContainer.new()
+	grid.columns = 6 if UILayout.is_wide() else 3
+	grid.add_theme_constant_override(&"h_separation", UITokens.S3)
+	grid.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for t in TABS:
+		var key: String = t[0]
+		var v := UIKit.vbox(6)
+		var head := UIKit.hbox(8)
+		head.add_child(UIKit.icon_rect(String(TAB_ICONS[key]), 22, UIColors.ACCENT if key == _tab else UIColors.MUTED))
+		var name_l := UIKit.label(String(t[1]).to_upper(), "Caps")
+		name_l.clip_text = true
+		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(name_l)
+		v.add_child(head)
+		if vals.has(key):
+			var d: Array = vals[key]
+			var vl := UIKit.colored(String(d[0]), d[2], "H3")
+			vl.clip_text = true
+			vl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			v.add_child(vl)
+			v.add_child(UIKit.bar(float(d[1]), 100.0, d[2], 6))
+		else:
+			var more := UIKit.label("Ver" if key != "staff" else "Equipe", "Muted")
+			v.add_child(more)
+			v.add_child(UIKit.gap(6))
+		var tile := UIKit.tap_row(v, func():
+			_tab = key
+			refresh(), "CardHighlight" if key == _tab else "CardFlat")
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(tile)
+	return grid
 
 
 static func _trust_color(t: float) -> Color:
@@ -80,7 +130,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 	if reqs.is_empty() and offer.is_empty() and not always:
 		return null
 	var card := UIKit.card("CardHighlight" if not reqs.is_empty() or not offer.is_empty() else "Card", 8)
-	card.add_child(UIKit.section("Bastidores"))
+	card.add_child(UIKit.section_header("Bastidores"))
 	if not offer.is_empty():
 		var oc := w.club(int(offer["c"]))
 		var row := UIKit.hbox(12)
@@ -109,7 +159,6 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 		brow.add_child(dec)
 		card.add_child(brow)
 	for q in reqs:
-		var row := UIKit.hbox(12)
 		var text := ""
 		var icon := "info"
 		var kind := String(q["k"])
@@ -127,12 +176,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 			"press":
 				text = "Imprensa na zona mista: fale sobre o jogo" if q.get("post", false) else "Coletiva de imprensa antes do próximo jogo"
 				icon = "news"
-		row.add_child(UIKit.icon_rect(icon, 30, UIColors.ACCENT))
-		var l := UIKit.label(text, "", true)
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
-		row.add_child(UIKit.label("›", "H2"))
-		card.add_child(UIKit.tap_row(row, func(): TalkDialog.open(kind, target, on_done), "Card"))
+		card.add_child(UIKit.menu_row(icon, text, "Toque para conversar", func(): TalkDialog.open(kind, target, on_done), UIKit.pill("AGORA", UIColors.ORANGE, 14)))
 	if always:
 		var b := UIKit.button("Vestiário, diretoria, torcida e imprensa", "GhostButton", func(): UIManager.push("relations"), "heart")
 		card.add_child(b)
