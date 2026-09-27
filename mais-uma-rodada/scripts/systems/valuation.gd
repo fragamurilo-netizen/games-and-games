@@ -13,6 +13,26 @@ static var VALUE_GROWTH := 1.19
 static var WAGE_BASE := 1600.0
 static var WAGE_GROWTH := 1.152
 
+## Quanto a liga valoriza o jogador (Transfermarkt: o mesmo nível vale muito mais na Premier League
+## do que no Brasileirão ou na Argentina). Divisões de baixo valem 20% menos a cada degrau.
+const LEAGUE_VALUE := {"ENG": 1.55, "ESP": 0.9, "GER": 1.0, "ITA": 1.0, "FRA": 0.92, "POR": 0.85, "NED": 0.9,
+	"BEL": 0.78, "TUR": 0.78, "KSA": 0.85, "QAT": 0.6, "UAE": 0.6, "SCO": 0.6, "AUT": 0.7, "SUI": 0.7,
+	"DEN": 0.7, "GRE": 0.65, "BRA": 0.85, "ARG": 0.58, "MEX": 0.85, "USA": 1.05, "JPN": 0.55, "KOR": 0.5,
+	"URU": 0.5, "COL": 0.52, "CHI": 0.5, "ECU": 0.5, "PAR": 0.45}
+const FREE_VALUE := 0.7
+static var _club_factor := {}
+
+
+static func set_club_factors(world: GameWorld) -> void:
+	_club_factor.clear()
+	for c: Club in world.clubs:
+		_club_factor[c.id] = float(LEAGUE_VALUE.get(c.nation, 0.6)) * pow(0.8, maxi(0, c.tier - 1))
+
+
+static func league_value(club_id: int) -> float:
+	return float(_club_factor.get(club_id, FREE_VALUE))
+
+
 ## Deslocamento da escala econômica: quanto o nível do mundo subiu/desceu desde a criação.
 ## Mantém valores e salários ancorados ao talento relativo (evita espirais de inflação).
 static var shift: float = 0.0
@@ -54,6 +74,7 @@ static func market_reference(world: GameWorld) -> float:
 ## Atualiza o deslocamento a partir do mundo (chamar na criação, ao carregar e a cada temporada).
 static func refresh_shift(world: GameWorld) -> void:
 	load_scale()
+	set_club_factors(world)
 	var ref := market_reference(world)
 	if not world.stats.has("mref0"):
 		world.stats["mref0"] = ref
@@ -109,8 +130,13 @@ static func market_value(p: Player, year: int) -> int:
 	var eff := perceived_rating(p, year)
 	var v := VALUE_BASE * pow(VALUE_GROWTH, eff - 40.0)
 	v *= age_factor(p.age(year))
+	# Garoto que já é craque vale uma fortuna (o mercado paga os anos de auge pela frente)
+	var ag := p.age(year)
+	if ag <= 23:
+		v *= 1.0 + clampf((p.ovr_f - 74.0) / 10.0, 0.0, 1.0) * (0.7 if ag <= 20 else (0.5 if ag <= 21 else 0.25))
 	v *= contract_factor(p.contract_years_left(year))
 	v *= position_factor(p.position)
+	v *= league_value(p.club_id)
 	# Forma recente pesa um pouco (quem está voando fica mais caro).
 	v *= clampf(1.0 + (p.form() - 6.5) * 0.08, 0.85, 1.2)
 	v *= season_factor(p)

@@ -111,6 +111,26 @@ static func policy_block(world: GameWorld, club: Club, p: Player) -> String:
 	return "A diretoria vetou: %s. %s" % [String(pol.get("name", "filosofia do clube")).to_lower(), String(pol.get("desc", ""))]
 
 
+## Vendas que não acontecem no futebol de verdade, por dinheiro nenhum. "" se pode negociar.
+##   Rival: titular, cria da casa ou jovem não vai para o rival (Figo é exceção de uma geração).
+##   Joia da base de clube grande (Yamal no Barça): inegociável enquanto é jovem e titular.
+##   Concorrente direto: clube grande não vende titular a quem briga com ele pela liga (quase nunca).
+static func sale_block(world: GameWorld, seller: Club, buyer: Club, p: Player) -> String:
+	if seller == null or buyer == null or seller.id == buyer.id:
+		return ""
+	var age := p.age(world.year)
+	var formed := ClubPolicy.formed_at(p, seller)
+	if seller.is_rival(buyer.id) or buyer.is_rival(seller.id):
+		if p.squad_status <= Player.STATUS_ROTATION or formed or age <= 25:
+			return "O %s não negocia %s com o rival %s." % [seller.short_name, p.display_name(), buyer.short_name]
+	if formed and age <= 22 and p.squad_status <= Player.STATUS_STARTER and seller.reputation >= 78.0:
+		return "%s é a joia da base do %s: o clube considera inegociável." % [p.display_name(), seller.short_name]
+	if seller.league_id == buyer.league_id and seller.reputation >= 80.0 and buyer.reputation >= seller.reputation - 6.0 \
+			and p.squad_status <= Player.STATUS_STARTER and age <= 29 and absi(hash([p.id, buyer.id, world.year])) % 100 < 85:
+		return "O %s não vende titular para um concorrente direto." % seller.short_name
+	return ""
+
+
 static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {}) -> Dictionary:
 	var user := world.user_club()
 	if p.club_id < 0:
@@ -139,6 +159,9 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	neg[key] = n
 	world.stats["neg"] = neg
 	var seller := world.club(p.club_id)
+	var block := sale_block(world, seller, user, p)
+	if block != "":
+		return {"result": "rejected", "fee": 0, "msg": block}
 	var ask := asking_price(world, p)
 	# Clube não vende titular absoluto para rival direto, exceto por muito dinheiro.
 	if seller.is_rival(user.id) and p.squad_status <= Player.STATUS_STARTER:

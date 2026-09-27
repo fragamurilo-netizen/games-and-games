@@ -6,7 +6,7 @@ extends RefCounted
 ##
 ## Base monetária interna: EUR. A moeda escolhida pelo usuário é só de exibição (Fmt).
 
-const VERSION := 2
+const VERSION := 3
 
 ## Valores totais de elenco usados como âncoras (Transfermarkt, temporada 2026/27 ou 2026).
 ## Clubes sem âncora recebem a média do fator das âncoras da própria liga.
@@ -50,6 +50,13 @@ static func _rescale_club(world: GameWorld, club: Club, factor: float) -> void:
 static func ensure_world(world: GameWorld) -> bool:
 	if int(world.stats.get("market_reality", 0)) >= VERSION:
 		return false
+	# Versão 3: o peso de cada liga entra no próprio cálculo do valor (Valuation.LEAGUE_VALUE) e
+	# não se perde quando o valor é recalculado; basta recalcular todo mundo uma vez.
+	Valuation.set_club_factors(world)
+	for p: Player in world.players.values():
+		Valuation.update_value(p, world.year)
+	world.stats["market_reality"] = VERSION
+	return true
 	var league_factors: Dictionary = {}
 	var explicit_factors: Dictionary = {}
 	for key in SQUAD_ANCHORS_EUR:
