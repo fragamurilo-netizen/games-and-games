@@ -1016,6 +1016,8 @@ func _on_event_visual(ev: Dictionary) -> void:
 					a.hurt = 3.5
 		MatchSimulation.EV_KNOCK:
 			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p2", -1))), 2.2)
+		MatchSimulation.EV_CRAMP:
+			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p", -1))), 3.0)
 		MatchSimulation.EV_VAR:
 			_pitch.motion.var_check(2.0)
 

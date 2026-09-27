@@ -425,9 +425,12 @@ static func _chance(st: Dictionary, s: int, m: int, half: int, qual_m: float) ->
 		if taker == null:
 			return
 		st["xg"][s] += 0.76
-		var tk: Player = taker[0]
-		var pen_skill := float(tk.attrs[Attr.FIN]) * 0.4 + float(tk.attrs[Attr.FRI]) * 0.4 + float(tk.attrs[Attr.TEC]) * 0.2
-		if rng.randf() < clampf(0.62 + (pen_skill - float(sides[1 - s]["gk"])) * 0.004, 0.55, 0.9):
+		var gk_p: Player = null
+		for v in lines[1 - s]:
+			if v[10] == 1 and int(v[1]) == Pos.GK:
+				gk_p = v[0]
+		var pk := PenaltyKick.kick(rng, taker[0], gk_p, {"f": float(taker[2]), "cond": 90.0 - m * 0.3, "pressure": 0.3 + (0.3 if m >= 80 and score[s] <= score[1 - s] else 0.0), "away": s == 1})
+		if String(pk["res"]) == "goal":
 			taker[13] += 1
 			taker[18] += 0.85
 			score[s] += 1
@@ -697,11 +700,14 @@ static func _shootout(rng: RandomNumberGenerator, sides: Array, lines: Array) ->
 		if ks.is_empty():
 			break
 		var k: Array = ks[taken[s] % ks.size()]
-		var p := clampf(0.76 + (float(k[9]) * float(k[2]) - float(sides[1 - s]["gk"])) * 0.004, 0.55, 0.9)
-		if taken[s] >= 5:
-			p -= 0.03
+		var gk_p: Player = null
+		for v in lines[1 - s]:
+			if v[10] == 1 and int(v[1]) == Pos.GK:
+				gk_p = v[0]
+		var pressure := 0.55 + 0.05 * mini(taken[s], 4) + (0.2 if taken[s] >= 5 else 0.0)
+		var pk := PenaltyKick.kick(rng, k[0], gk_p, {"f": float(k[2]), "cond": 60.0, "pressure": pressure, "away": s == 1})
 		taken[s] += 1
-		if rng.randf() < p:
+		if String(pk["res"]) == "goal":
 			ps[s] += 1
 		var a: int = taken[0]
 		var b: int = taken[1]

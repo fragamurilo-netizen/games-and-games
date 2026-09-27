@@ -42,6 +42,7 @@ const EV_KEEPER := 29 # goleiro p fica com a bola
 const EV_CROWD := 30 # clima: x = {kind}
 const EV_VAR := 31 # revisão do VAR: x = {kind}
 const EV_KNOCK := 32 # p2 fica caído após falta de p, mas segue em campo
+const EV_CRAMP := 33 # p sente câimbra (fim de jogo e prorrogação): rende muito menos até sair
 
 # --- Tipos de chance ---
 const CH_THROUGH := 0
@@ -499,6 +500,17 @@ func set_shootout_order(side: int, ids: Array) -> bool:
 	return true
 
 
+## Última cobrança da disputa (canto, goleiro, resultado), para a tela encenar.
+var last_pen: Dictionary = {}
+
+
+## Lado da próxima cobrança da disputa (-1 fora dela).
+func next_kick_side() -> int:
+	if not shootout:
+		return -1
+	return 0 if pen_taken[0] == pen_taken[1] else 1
+
+
 func _pen_skill(mp: MatchPlayer) -> float:
 	return mp.attr(Attr.FIN) * 0.45 + mp.attr(Attr.FRI) * 0.35 + mp.attr(Attr.DEC) * 0.1 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0 + HiddenPersona.penalty_nerve(mp.p) * 60.0
 
@@ -511,12 +523,16 @@ func _shootout_kick() -> void:
 		return
 	var kicker: MatchPlayer = order[pen_taken[side] % order.size()]
 	var gk := teams[1 - side].goalkeeper()
-	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
-	# Na disputa, os nervos pesam o dobro: quem treme sob pressão erra muito mais.
-	var p := clampf(0.76 + (kicker.finishing() * kicker.f - gk_val) * 0.004 + kicker.clutch * 0.05 + HiddenPersona.penalty_nerve(kicker.p) * 2.0, 0.5, 0.92)
-	if pen_taken[side] >= 5:
-		p -= 0.03 # alternadas: pressão máxima
-	var ok := rng.randf() < p
+	# Na disputa a pressão cresce a cada cobrança; nas alternadas e no "se errar, acabou", é máxima
+	var pressure := 0.55 + 0.05 * mini(pen_taken[side], 4) + (0.2 if pen_taken[side] >= 5 else 0.0)
+	var left_me := maxi(0, 5 - pen_taken[side])
+	if pen_score[side] + left_me < pen_score[1 - side] + maxi(0, 5 - pen_taken[1 - side]) + 1:
+		pressure += 0.1 # errar pode eliminar
+	var pk := PenaltyKick.kick(rng, kicker.p, gk.p if gk != null else null, {"f": kicker.f, "gk_f": gk.f if gk != null else 1.0,
+		"cond": kicker.cond, "pressure": clampf(pressure + importance * 0.2, 0.0, 1.0), "away": side == 1 and not neutral,
+		"study": teams[1 - side].study})
+	var ok := String(pk["res"]) == "goal"
+	last_pen = pk
 	pen_taken[side] += 1
 	if ok:
 		pen_score[side] += 1
@@ -525,7 +541,7 @@ func _shootout_kick() -> void:
 		kicker.rating_pts -= 0.4
 		if gk != null:
 			gk.rating_pts += 0.35
-	_emit(EV_SHOOT_KICK, side, kicker.p.id, gk.p.id if gk != null else -1, {"ok": ok, "n": pen_taken[side], "ps": [pen_score[0], pen_score[1]]})
+	_emit(EV_SHOOT_KICK, side, kicker.p.id, gk.p.id if gk != null else -1, {"ok": ok, "n": pen_taken[side], "ps": [pen_score[0], pen_score[1]], "res": String(pk["res"]), "dir": int(pk["dir"]), "dive": int(pk["dive"]), "panenka": bool(pk["panenka"])})
 	# Decidido?
 	var a := pen_taken[0]
 	var b := pen_taken[1]
@@ -810,12 +826,17 @@ func _foul_prob(dfn: MatchTeam) -> float:
 
 ## Fadiga aplicada em blocos de `minutes` minutos (barato e suficiente).
 func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
-	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
+	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * (1.25 if half >= 3 else 1.0) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
 	for mp: MatchPlayer in t.slots:
 		if mp == null:
 			continue
 		var gk_f := 0.35 if mp.slot == 0 else 1.0
 		mp.cond = maxf(5.0, mp.cond - mult * (1.25 - mp.a_res / 100.0 * 0.6) * gk_f)
+		# Câimbra: perna no limite no fim do jogo e, principalmente, na prorrogação
+		if mp.slot != 0 and mp.cond < 32.0 and (half >= 3 or minute >= 80) and rng.randf() < (0.05 if half >= 3 else 0.02) * minutes / 5.0:
+			mp.cond = minf(mp.cond, 10.0)
+			mp.rating_pts -= 0.1
+			_emit(EV_CRAMP, t.side, mp.p.id)
 
 
 # ---------------------------------------------------------------------------
@@ -956,8 +977,14 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var gk := dfn.goalkeeper()
 	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
 	var p_goal := clampf(xg * exp(EPS * (skill - gk_val)), 0.01, 0.92)
+	var pk := {}
 	if ctype == CH_PENALTY:
-		p_goal = clampf(0.75 + (shooter.finishing() - gk_val) * 0.004 + HiddenPersona.penalty_nerve(shooter.p) * (1.0 + importance), 0.5, 0.92)
+		# Cobrança de verdade: canto, goleiro, pressão do momento, cansaço e torcida
+		var must := half == 2 and minute >= 80 and score[s] <= score[1 - s]
+		pk = PenaltyKick.kick(rng, shooter.p, gk.p if gk != null else null, {"f": shooter.f, "gk_f": gk.f if gk != null else 1.0,
+			"cond": shooter.cond, "pressure": clampf(importance * 0.6 + (0.3 if must else 0.0) + (0.15 if derby else 0.0), 0.0, 1.0),
+			"away": s == 1 and not neutral, "study": dfn.study})
+		p_goal = 1.0 if String(pk["res"]) == "goal" else 0.0
 	att.shots += 1
 	att.xg += xg
 	shooter.shots += 1
@@ -979,7 +1006,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var r := rng.randf()
 	var ev := EV_MISS
 	if ctype == CH_PENALTY:
-		if r < 0.7:
+		if String(pk.get("res", "save")) == "save":
 			ev = EV_PEN_SAVE
 			att.on_target += 1
 			shooter.shots_on += 1
@@ -1012,6 +1039,10 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		rec["r"] = {EV_SAVE: "defesa", EV_POST: "trave", EV_BLOCK: "bloqueio", EV_PEN_SAVE: "defesa"}.get(ev, "fora")
 	if detail:
 		var ex := {"ct": ctype, "xg": snappedf(xg, 0.01), "gk": gk.p.id if gk != null else -1}
+		if not pk.is_empty():
+			ex["res"] = String(pk["res"])
+			ex["dir"] = int(pk["dir"])
+			ex["dive"] = int(pk["dive"])
 		if ev == EV_BLOCK and xg >= 0.1 and vis_rng.randf() < 0.25:
 			var cl := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 			if cl != null:

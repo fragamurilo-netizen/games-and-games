@@ -938,5 +938,11 @@
 		"Repórter: o auxiliar do {team} passou orientações para os laterais.",
 		"O técnico do {team} chamou o capitão para conversar na beira do campo.",
 		"Repórter: mudança no {team} foi pedida pelos próprios jogadores, segundo o banco."
+	],
+	"cramp": [
+		"{p} sente câimbra e pede atendimento. Vai jogar no sacrifício.",
+		"Câimbra em {p}! O corpo não aguenta mais.",
+		"{p} cai com câimbra: o banco já se mexe.",
+		"Perna travada: {p} está com câimbra."
 	]
 }
