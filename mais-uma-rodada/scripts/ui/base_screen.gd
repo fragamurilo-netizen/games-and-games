@@ -79,6 +79,18 @@ func content() -> VBoxContainer:
 	return get_node_or_null("Body/Scroll/Margin/Content") as VBoxContainer
 
 
+## Responsivo para telas montadas cartão a cartão: pega os filhos de `c` a partir de `start`
+## e redistribui em colunas quando a tela é larga (no celular em retrato não muda nada).
+func columnize(c: Container, start: int = 0, max_cols: int = 2, pinned: int = 0) -> void:
+	if UILayout.columns_for(content_width(), max_cols) <= 1:
+		return
+	var cards: Array = []
+	for ch in c.get_children().slice(start):
+		c.remove_child(ch)
+		cards.append(ch)
+	UIKit.columns(c, cards, content_width(), max_cols, pinned)
+
+
 ## Área fixa na base da tela (botão principal da tela). Fica oculta até ser usada.
 func footer() -> VBoxContainer:
 	var f := get_node_or_null("Body/Footer") as Control

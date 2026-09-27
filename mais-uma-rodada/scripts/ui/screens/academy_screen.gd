@@ -29,16 +29,12 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	max_content_width = 1700
 	c.add_child(_header(w, club))
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in TABS:
-		var key: String = t[0]
-		var chip := UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh())
-		row.add_child(chip)
-	c.add_child(row)
+	c.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()))
+	var start := c.get_child_count()
 	match _tab:
 		"players":
 			for cat in YouthManager.CATEGORIES:
@@ -55,18 +51,19 @@ func refresh() -> void:
 			c.add_child(_trial(w))
 		"grads":
 			c.add_child(_grads(w))
+	columnize(c, start)
 
 
 func _header(w: GameWorld, club: Club) -> Control:
-	var card := UIKit.card("CardHighlight", 8)
-	var row := UIKit.hbox(4)
-	row.add_child(UIKit.stat(str(club.youth_level), "nível da base", UIColors.ACCENT))
-	row.add_child(UIKit.stat("%d/%d" % [w.academy.size(), YouthManager.MAX_SIZE], "garotos"))
-	row.add_child(UIKit.stat(_pos_text(w, "u20"), "no sub-20"))
-	row.add_child(UIKit.stat(_pos_text(w, "u17"), "no sub-17"))
-	card.add_child(row)
-	card.add_child(UIKit.label("Estrelas: estimativa da comissão, não o teto real.", "Small", true))
-	return UIKit.card_panel(card)
+	var v := UIKit.vbox(6)
+	v.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(str(club.youth_level), "Nível da base", UIColors.ACCENT),
+		UIKit.stat_tile("%d/%d" % [w.academy.size(), YouthManager.MAX_SIZE], "Garotos"),
+		UIKit.stat_tile(_pos_text(w, "u20"), "No sub-20"),
+		UIKit.stat_tile(_pos_text(w, "u17"), "No sub-17"),
+	], content_width()))
+	v.add_child(UIKit.label("Estrelas: estimativa da comissão, não o teto real.", "Caps", true))
+	return v
 
 
 func _pos_text(w: GameWorld, key: String) -> String:
@@ -85,7 +82,7 @@ func _pos_text(w: GameWorld, key: String) -> String:
 func _players(w: GameWorld, club: Club, cat: Array) -> Control:
 	var list := YouthManager.in_category(w, String(cat[0]))
 	var card := UIKit.card("Card", 6)
-	card.add_child(UIKit.section("%s · %s · %d" % [cat[1], cat[2], list.size()]))
+	card.add_child(UIKit.section_header("%s · %s · %d" % [cat[1], cat[2], list.size()]))
 	if list.is_empty():
 		card.add_child(UIKit.label("Nenhum garoto nesta categoria. Novos garotos chegam na virada da temporada ou pela peneira.", "Muted", true))
 		return UIKit.card_panel(card)
@@ -281,41 +278,24 @@ func _scouting(w: GameWorld) -> Control:
 	var s := YouthManager.state(w)
 	var club := w.user_club()
 	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.section("Onde procurar garotos"))
+	card.add_child(UIKit.section_header("Onde procurar garotos"))
+	var items: Array = []
 	for rk in YouthManager.REGION_ORDER:
 		var cfg: Dictionary = YouthManager.REGIONS[rk]
-		var sel := String(s["region"]) == rk
-		var col := UIKit.vbox(2)
-		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var top := UIKit.hbox(8)
-		var nl := UIKit.label(String(cfg["name"]), "H3")
-		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		if sel:
-			nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
-		top.add_child(nl)
 		var cost := YouthManager.scouting_cost(w, rk)
-		top.add_child(UIKit.label("grátis" if cost == 0 else "%s/ano" % Fmt.money(cost), "Small"))
-		col.add_child(top)
-		col.add_child(UIKit.label(String(cfg["desc"]), "Small", true))
-		var line := UIKit.hbox(10)
-		line.add_child(col)
-		var mark := UIKit.icon_rect("check", 30, UIColors.ACCENT)
-		mark.modulate.a = 1.0 if sel else 0.0
-		line.add_child(mark)
-		card.add_child(UIKit.tap_row(line, func():
-			YouthManager.set_region(w, rk)
-			GameManager.save_now()
-			refresh()))
-	card.add_child(UIKit.section("Setor prioritário"))
-	var g := ButtonGroup.new()
-	var fl := UIKit.flow(8)
+		items.append([rk, String(cfg["name"]), "%s · %s" % [tr("grátis") if cost == 0 else tr("%s/ano") % Fmt.money(cost), tr(String(cfg["desc"]))], "search"])
+	card.add_child(UIKit.option_grid(items, String(s["region"]), func(rk: String):
+		YouthManager.set_region(w, rk)
+		GameManager.save_now()
+		refresh(), 2 if UILayout.is_wide() else 1))
+	card.add_child(UIKit.section_header("Setor prioritário"))
+	var fitems: Array = []
 	for fk in YouthManager.FOCUS_ORDER:
-		var chip := UIKit.chip(String(YouthManager.FOCUS[fk]["name"]), String(s["focus"]) == fk, g, func():
-			YouthManager.set_focus(w, fk)
-			GameManager.save_now()
-			refresh())
-		fl.add_child(chip)
-	card.add_child(fl)
+		fitems.append([fk, String(YouthManager.FOCUS[fk]["name"])])
+	card.add_child(UIKit.segment(fitems, String(s["focus"]), func(fk: String):
+		YouthManager.set_focus(w, fk)
+		GameManager.save_now()
+		refresh()))
 	card.add_child(UIKit.label("Chegam cerca de %d garotos por temporada." % YouthManager.intake_count(w, club), "Small", true))
 	return UIKit.card_panel(card)
 

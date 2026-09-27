@@ -31,6 +31,8 @@ func refresh() -> void:
 		c.add_child(notes)
 	c.add_child(_camp_card(w, pre))
 	c.add_child(_friendlies_card(w, pre))
+	max_content_width = 1700
+	columnize(c, 0, 2, 1)
 	_footer(w)
 
 
@@ -46,18 +48,31 @@ func _intro_card(w: GameWorld, pre: Dictionary) -> Control:
 	card.add_child(row)
 	var steps := PreseasonManager.steps(w)
 	var names := ["Planejar o elenco", "Escolher a intertemporada", "Jogar os amistosos"]
-	var flow := UIKit.flow(8)
+	# As três etapas da pré-temporada como um passo a passo numerado.
+	var stepper := UIKit.hbox(8)
 	for i in 3:
-		flow.add_child(UIKit.pill(("✓ " if steps[i] else "") + names[i], UIColors.GREEN if steps[i] else UIColors.MUTED, 16))
-	card.add_child(flow)
-	card.add_child(UIKit.separator())
+		var st := UIKit.hbox(8)
+		st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var num := UIKit.pill("✓" if steps[i] else str(i + 1), UIColors.GREEN if steps[i] else UIColors.DIM, 16)
+		num.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		st.add_child(num)
+		var sl := UIKit.label(names[i], "Small", true)
+		sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if steps[i]:
+			sl.add_theme_color_override(&"font_color", UIColors.GREEN)
+		st.add_child(sl)
+		stepper.add_child(st)
+	card.add_child(stepper)
 	var goal := SeasonManager.goal_of(w, club.id)
 	card.add_child(UIKit.kv("Meta da diretoria", String(goal[0]), UIColors.ACCENT))
-	card.add_child(UIKit.kv("Verba para contratações", Fmt.money(club.transfer_budget)))
 	var bill := FinanceManager.wage_bill(w, club)
-	card.add_child(UIKit.kv("Folha salarial / limite", "%s / %s" % [Fmt.money_month(bill), Fmt.money_month(club.wage_budget)], UIColors.RED if bill > club.wage_budget else UIColors.TEXT))
-	card.add_child(UIKit.kv("Entrosamento", "%d" % int(club.cohesion), UIColors.morale_color(club.cohesion)))
-	return UIKit.card_panel(card)
+	card.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(Fmt.money(club.transfer_budget), "Verba"),
+		UIKit.stat_tile(Fmt.money_month(bill), "Folha / mês", UIColors.RED if bill > club.wage_budget else Color(0, 0, 0, 0)),
+		UIKit.stat_tile(Fmt.money_month(club.wage_budget), "Teto / mês"),
+		UIKit.stat_tile("%d" % int(club.cohesion), "Entrosamento", UIColors.morale_color(club.cohesion)),
+	], content_width()))
+	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1)
 
 
 ## Raio-x por setor: titulares contra a média da liga, quantidade e idade.
@@ -148,8 +163,12 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 	card.add_child(UIKit.label("Uma por temporada.", "Small", true))
 	for key in PreseasonManager.CAMP_ORDER:
 		var cfg: Dictionary = PreseasonManager.CAMPS[key]
-		var row := UIKit.hbox(12)
-		row.add_child(UIKit.icon_rect(String(cfg["icon"]), 36, UIColors.ACCENT))
+		var row := UIKit.hbox(14)
+		var tile := PanelContainer.new()
+		tile.theme_type_variation = "IconTile"
+		tile.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		tile.add_child(UIKit.icon_rect(String(cfg["icon"]), 28, UIColors.ACCENT))
+		row.add_child(tile)
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(cfg["name"]), "H3", true))
@@ -157,6 +176,7 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 		col.add_child(UIKit.colored("+ " + String(cfg["pros"]), UIColors.GREEN, "Small", true))
 		col.add_child(UIKit.colored("− " + String(cfg["cons"]), UIColors.ORANGE, "Small", true))
 		row.add_child(col)
+		row.add_child(UIKit.icon_rect("forward", 22, UIColors.DIM))
 		var k: String = key
 		card.add_child(UIKit.tap_row(row, func():
 			UIManager.confirm(String(cfg["name"]) + "?", String(cfg["pros"]) + "\n" + String(cfg["cons"]), "Escolher", func():

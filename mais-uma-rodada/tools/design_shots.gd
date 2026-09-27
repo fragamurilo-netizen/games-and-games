@@ -25,6 +25,10 @@ func _start() -> void:
 			runner.set("tablet", true)
 		if a.begins_with("--prefix="):
 			runner.set("prefix", a.substr(9))
+		if a.begins_with("--only="):
+			runner.set("only", a.substr(7))
+		if a.begins_with("--rounds="):
+			runner.set("rounds", int(a.substr(9)))
 		if a.begins_with("--lang="):
 			runner.set("lang", a.substr(7))
 	var out: String = runner.get("out_dir")

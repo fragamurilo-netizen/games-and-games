@@ -40,6 +40,8 @@ func refresh() -> void:
 	c.add_child(_look_slot)
 	_rebuild_look(w, m)
 	c.add_child(_styles(w, m))
+	max_content_width = 1600
+	columnize(c, 0, 2, 1)
 
 
 ## Marca para salvar na saída e redesenha só a prévia.

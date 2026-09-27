@@ -761,3 +761,132 @@ static func stat_grid(tiles: Array, width: float) -> GridContainer:
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		g.add_child(t)
 	return g
+
+
+## Ladrilho de ação (menus em grade): ícone no alto, título e uma linha de apoio.
+static func action_tile(icon_name: String, title: String, subtitle: String, cb: Callable, highlight: bool = false) -> PanelContainer:
+	var v := vbox(8)
+	var tile := PanelContainer.new()
+	tile.theme_type_variation = "IconTile"
+	tile.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	tile.add_child(icon_rect(icon_name, 30, UIColors.ON_ACCENT if highlight else UIColors.ACCENT))
+	if highlight:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = UIColors.ACCENT
+		sb.set_corner_radius_all(UITokens.R_SM)
+		sb.set_content_margin_all(10)
+		tile.add_theme_stylebox_override(&"panel", sb)
+	v.add_child(tile)
+	var t := label(title, "H3")
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(t)
+	if subtitle != "":
+		var s := label(subtitle, "Small", true)
+		v.add_child(s)
+	var row := tap_row(v, cb, "CardHighlight" if highlight else "Card")
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.custom_minimum_size.y = 150
+	return row
+
+
+## Grade de ladrilhos com colunas fixas (2 no celular, mais em telas largas).
+static func tile_grid(tiles: Array, cols: int = 2) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = cols
+	g.add_theme_constant_override(&"h_separation", UITokens.S3)
+	g.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for t: Control in tiles:
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		g.add_child(t)
+	return g
+
+
+## Grade de opções escolhíveis (foco de treino, setor de captação...): cada opção é um ladrilho
+## com ícone, nome e uma linha de efeito; a escolhida fica destacada. Substitui fileiras de chips
+## quando a escolha merece explicação. `items` = [[chave, título, subtítulo, ícone], ...].
+static func option_grid(items: Array, selected: String, cb: Callable, cols: int = 2) -> GridContainer:
+	var grid := GridContainer.new()
+	grid.columns = cols
+	grid.add_theme_constant_override(&"h_separation", UITokens.S3)
+	grid.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for it: Array in items:
+		var key := String(it[0])
+		var on := key == selected
+		var v := vbox(2)
+		var head := hbox(10)
+		if it.size() > 3 and String(it[3]) != "":
+			head.add_child(icon_rect(String(it[3]), 24, UIColors.ACCENT if on else UIColors.MUTED))
+		var t := label(String(it[1]), "H3")
+		t.clip_text = true
+		t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		if on:
+			head.add_child(icon_rect("check", 22, UIColors.ACCENT))
+		v.add_child(head)
+		if it.size() > 2 and String(it[2]) != "":
+			var s := label(String(it[2]), "Small", true)
+			s.max_lines_visible = 2
+			v.add_child(s)
+		var tile := tap_row(v, func(): cb.call(key), "CardHighlight" if on else "CardFlat")
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(tile)
+	return grid
+
+
+## Efeitos em porcentagem como selos coloridos ("Evolução +10%" em verde, "Lesão +15%" em
+## vermelho). `items` = [[nome, delta_em_%, maior_é_melhor], ...]; zeros ficam de fora.
+static func effect_pills(items: Array) -> HFlowContainer:
+	var f := flow(8)
+	for it: Array in items:
+		var d := int(it[1])
+		if d == 0:
+			continue
+		var good := (d > 0) == bool(it[2])
+		f.add_child(pill("%s %+d%%" % [tr_static(String(it[0])), d], UIColors.GREEN if good else UIColors.RED, 16))
+	return f
+
+
+static func tr_static(s: String) -> String:
+	return I18n.t(s)
+
+
+## Linha de comparação entre dois lados (estatísticas de jogo): valores nas pontas, o nome no
+## meio e uma barra dividida na proporção, com o lado maior em destaque.
+static func versus_row(caption: String, a_text: String, b_text: String, a_val: float, b_val: float) -> VBoxContainer:
+	var v := vbox(4)
+	var r := hbox(8)
+	var total := a_val + b_val
+	var a_win := a_val > b_val
+	var b_win := b_val > a_val
+	var a := label(a_text, "H3")
+	a.custom_minimum_size.x = 90
+	if a_win:
+		a.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	r.add_child(a)
+	var n := label(caption, "Caps")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	r.add_child(n)
+	var b := label(b_text, "H3")
+	b.custom_minimum_size.x = 90
+	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if b_win:
+		b.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	r.add_child(b)
+	v.add_child(r)
+	var bars := hbox(4)
+	var left := ColorRect.new()
+	left.color = UIColors.ACCENT if a_win else UIColors.SURFACE_3
+	left.custom_minimum_size.y = 6
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = maxf(0.05, a_val / total) if total > 0.0 else 1.0
+	var right := ColorRect.new()
+	right.color = UIColors.ACCENT if b_win else UIColors.SURFACE_3
+	right.custom_minimum_size.y = 6
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.size_flags_stretch_ratio = maxf(0.05, b_val / total) if total > 0.0 else 1.0
+	bars.add_child(left)
+	bars.add_child(right)
+	v.add_child(bars)
+	return v

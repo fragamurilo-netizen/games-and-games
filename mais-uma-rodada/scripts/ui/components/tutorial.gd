@@ -28,13 +28,27 @@ static func _show_step(i: int) -> void:
 	var s: Array = STEPS[i]
 	var v := UIKit.vbox(16)
 	v.custom_minimum_size.x = 600
-	var head := UIKit.hbox(14)
-	head.add_child(UIKit.icon_rect(s[0], 56, UIColors.ACCENT))
-	var t := UIKit.label(s[1], "Title", true)
-	head.add_child(t)
-	v.add_child(head)
-	v.add_child(UIKit.label(s[2], "", true))
-	var dots := UIKit.label("%d de %d" % [i + 1, STEPS.size()], "Caps")
+	# Passo a passo: ícone em destaque, título, texto e a trilha de pontos do progresso.
+	var tile := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = UIColors.ACCENT
+	sb.set_corner_radius_all(UITokens.R_LG)
+	sb.set_content_margin_all(18)
+	tile.add_theme_stylebox_override(&"panel", sb)
+	tile.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	tile.add_child(UIKit.icon_rect(s[0], 48, UIColors.ON_ACCENT))
+	v.add_child(tile)
+	v.add_child(UIKit.eyebrow(I18n.t("Passo %d de %d") % [i + 1, STEPS.size()]))
+	v.add_child(UIKit.label(s[1], "Title", true))
+	var body := UIKit.label(s[2], "", true)
+	body.add_theme_color_override(&"font_color", UIColors.MUTED)
+	v.add_child(body)
+	var dots := UIKit.hbox(8)
+	for k in STEPS.size():
+		var d := ColorRect.new()
+		d.color = UIColors.ACCENT if k == i else (Color(UIColors.ACCENT, 0.45) if k < i else UIColors.SURFACE_3)
+		d.custom_minimum_size = Vector2(40 if k == i else 18, 6)
+		dots.add_child(d)
 	v.add_child(dots)
 	var row := UIKit.hbox(10)
 	var last := i == STEPS.size() - 1

@@ -101,15 +101,13 @@ func _home(c: VBoxContainer) -> void:
 	if has_career():
 		items.append(["star", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
 	items.append(["list", "Mods", "Instalar, ligar e criar mods; exportar suas personalizações", func(): _go("mods")])
+	# Início do editor: um ladrilho grande por área (como o hub de criação de um jogo de esporte).
+	max_content_width = 1500
+	c.add_child(UIKit.eyebrow("O que você quer editar?"))
+	var tiles: Array = []
 	for it in items:
-		var row := UIKit.hbox(14)
-		row.add_child(UIKit.icon_rect(String(it[0]), 40, UIColors.ACCENT))
-		var col := UIKit.vbox(0)
-		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(it[1]), "H2"))
-		col.add_child(UIKit.label(String(it[2]), "Small", true))
-		row.add_child(col)
-		c.add_child(UIKit.tap_row(row, it[3], "Card"))
+		tiles.append(UIKit.action_tile(String(it[0]), String(it[1]), String(it[2]), it[3], tiles.is_empty()))
+	c.add_child(UIKit.tile_grid(tiles, 3 if UILayout.is_wide() else 2))
 	var info := UIKit.card("Card", 6)
 	if has_career() and not AppSettings.career_edit:
 		info.add_child(UIKit.label("Para editar jogadores e outros clubes nesta carreira, ligue \"Editar jogadores e clubes durante a carreira\" em Opções. No Editor do menu inicial você sempre edita o mundo padrão das novas carreiras.", "Small", true))
@@ -154,14 +152,12 @@ func _club_picker(c: VBoxContainer) -> void:
 	var leagues: Array = DatabaseManager.leagues_of_nation(_nation)
 	if _league == "" or not leagues.has(_league):
 		_league = String(leagues[0])
-	var g := ButtonGroup.new()
-	var flow := UIKit.flow(8)
+	var litems: Array = []
 	for id in leagues:
-		var lid: String = id
-		flow.add_child(UIKit.chip(String(DatabaseManager.league_cfg(lid).get("short", lid)), lid == _league, g, func():
-			_league = lid
-			refresh()))
-	c.add_child(flow)
+		litems.append([String(id), String(DatabaseManager.league_cfg(String(id)).get("short", id))])
+	c.add_child(UIKit.scroll_tabs(litems, _league, func(k: String):
+		_league = k
+		refresh()))
 	var card := UIKit.card("Card", 4)
 	for cl: Club in _clubs_of(_league):
 		var row := UIKit.hbox(12)
