@@ -479,7 +479,8 @@ func _test_season_cycle() -> void:
 				if f.stage == Fixture.STAGE_LEAGUE:
 					expect += 2 if f.hg == f.ag else 3
 		for cid in league.club_ids:
-			pts += int(league.table[cid]["pts"])
+			# Soma de volta os pontos perdidos por punição (ClubEvents._deduct)
+			pts += int(league.table[cid]["pts"]) + int(league.table[cid].get("ded", 0))
 		if not bool(LeagueFormat.cfg(league).get("halve", false)): # pontos pela metade no split
 			check(pts == expect, "%s: pontos na tabela (%d) não batem com os jogos (%d)" % [id, pts, expect])
 	# Estatísticas detalhadas com médias reais por time e por jogo (Premier League)

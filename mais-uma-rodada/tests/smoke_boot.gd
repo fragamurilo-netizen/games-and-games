@@ -32,10 +32,21 @@ func _run() -> void:
 		quit(13)
 		return
 
-	if content.get_child_count() < 5:
-		push_error("SMOKE_BOOT: menu rendered too few items (%d)" % content.get_child_count())
+	# O layout largo agrupa logo e menu numa linha só, então contamos os
+	# controles renderizados em qualquer nível, não só os filhos diretos.
+	var rendered := _count_controls(content)
+	if content.get_child_count() < 3 or rendered < 20:
+		push_error("SMOKE_BOOT: menu rendered too few items (%d children, %d controls)" % [content.get_child_count(), rendered])
 		quit(14)
 		return
 
-	print("SMOKE_BOOT_OK screen=MainMenuScreen items=", content.get_child_count())
+	print("SMOKE_BOOT_OK screen=MainMenuScreen items=", content.get_child_count(), " controls=", rendered)
 	quit(0)
+
+func _count_controls(node: Node) -> int:
+	var n := 0
+	for child in node.get_children():
+		if child is Control:
+			n += 1
+		n += _count_controls(child)
+	return n
