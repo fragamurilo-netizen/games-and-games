@@ -207,6 +207,7 @@ const LIGHT := FaceLighting.KEY
 ## Rebatedor (luz de preenchimento) do lado direito, bem mais fraco que a principal.
 const FILL := FaceLighting.FILL
 const SKIN_SHADER := preload("res://scripts/face/face_skin.gdshader")
+const HAIR_SHADER := preload("res://scripts/face/face_hair.gdshader")
 ## Suavização dos cantos do perfil da mandíbula (média de 5 amostras em ±2 passos).
 const JAW_SMOOTH := 0.028
 const HEAD_SCALE := 0.88
@@ -260,10 +261,11 @@ var _hw0 := 1.0
 var _jaw_tab := PackedFloat32Array()
 var _rtab := PackedFloat32Array()
 # Camadas filhas (RenderingServer): pele com shader e traços por cima
-enum { T_SELF, T_SKIN, T_OVER }
+enum { T_SELF, T_SKIN, T_OVER, T_HAIR, T_TOP }
 var _target := T_SELF
 var _items: Array[RID] = []
 var _skin_mat: ShaderMaterial = null
+var _hair_mat: ShaderMaterial = null
 static var _mat_cache: Dictionary = {}
 ## Desliga o shader da pele (volta à malha com cor por vértice): testes e comparação.
 static var use_skin_shader := true
@@ -350,13 +352,19 @@ func _draw() -> void:
 		var key: int = pair[0]
 		if _cmd_cache.has(key) and (int(pair[1]) != 2 or _mat_cache.has(key) or not use_skin_shader):
 			if int(pair[1]) == 2 and use_skin_shader:
-				_skin_mat = _mat_cache[key]
-				RenderingServer.canvas_item_set_material(_items[0], _skin_mat.get_rid())
+				var mats: Array = _mat_cache[key]
+				_skin_mat = mats[0]
+				_hair_mat = mats[1]
+				_bind_materials()
 			_replay(_cmd_cache[key])
 			continue
 		if not ready:
 			_setup(c, s)
 			ready = true
+		if int(pair[1]) == 2:
+			_skin_mat = null
+			_hair_mat = null
+			_bind_materials()
 		_rec = []
 		_recording = true
 		_target = T_SELF
@@ -372,7 +380,7 @@ func _draw() -> void:
 		_cmd_cache[key] = _rec
 		_cmd_cache_order.append(key)
 		if int(pair[1]) == 2 and _skin_mat != null:
-			_mat_cache[key] = _skin_mat
+			_mat_cache[key] = [_skin_mat, _hair_mat]
 		if _cmd_cache_order.size() > CMD_CACHE_MAX:
 			var old: int = _cmd_cache_order.pop_front()
 			_cmd_cache.erase(old)
@@ -387,7 +395,7 @@ func _draw() -> void:
 func _ensure_items() -> void:
 	if not _items.is_empty():
 		return
-	for i in 2:
+	for i in 4:
 		var ci := RenderingServer.canvas_item_create()
 		RenderingServer.canvas_item_set_parent(ci, get_canvas_item())
 		# Antes de nós filhos (selos, emblemas), depois do desenho do próprio retrato
@@ -409,6 +417,14 @@ func _notification(what: int) -> void:
 
 func _item(t: int) -> RID:
 	return get_canvas_item() if t == T_SELF or _items.is_empty() else _items[t - 1]
+
+
+## Materiais das camadas com shader (pele e cabelo); sem material a camada desenha normal.
+func _bind_materials() -> void:
+	if _items.size() < 4:
+		return
+	RenderingServer.canvas_item_set_material(_items[0], _skin_mat.get_rid() if _skin_mat != null else RID())
+	RenderingServer.canvas_item_set_material(_items[2], _hair_mat.get_rid() if _hair_mat != null else RID())
 
 
 func _layer_back() -> void:
@@ -447,11 +463,13 @@ func _layer_front() -> void:
 	_mouth()
 	if int(f["beard"]) != FaceGen.B_NONE:
 		_beard_hairs(rng)
-	# Cabelo da frente
+	# Cabelo da frente (a calota vai para a camada do cabelo; o resto fica por cima dela)
 	if style != FaceGen.H_BALD:
 		_front_hair(rng, hair)
+		_target = T_TOP
 		_hair_light(hair)
 	else:
+		_target = T_TOP
 		_scalp_shine()
 	_accessories()
 	_light_pass()
@@ -722,22 +740,10 @@ func _hair_light(hair: Color) -> void:
 	# Com cabelo de trás (longo, black power, coque…) a borda da calota fica dentro do volume: ali a
 	# luz some aos poucos para não desenhar um "capacete", e a luz de recorte fica para o volume.
 	var behind := String(_hs("bk", "")) in ["long", "long_short", "curly_long", "afro", "dreads", "braids"]
+	var sh := use_skin_shader and _hair_mat != null
 	# 1) Forma
-	_strip(_cap_in, _cap_out, _rings(6), func(p: Vector2, _t: float, w: float) -> Color:
-		var a := _cap_alpha(p, w)
-		if behind:
-			a *= 1.0 - smoothstep(0.55, 0.95, w)
-		if a <= 0.01:
-			return Color(0, 0, 0, 0)
-		var q := _uv(p)
-		var dn := Vector2(q.x, q.y * 0.9).normalized() if q.length() > 0.001 else Vector2(0, -1)
-		var lam := dn.dot(key)
-		var sh := 0.4 * smoothstep(0.1, -0.8, lam) + 0.2 * smoothstep(-0.25, 0.25, q.y)
-		sh += 0.14 * (1.0 - smoothstep(0.0, 0.3, w)) * smoothstep(-0.2, 0.4, lam + 0.3)
-		var lit := 0.14 * smoothstep(0.35, 0.95, lam) * smoothstep(0.3, 0.9, w)
-		if lit > sh:
-			return Color(hair.lightened(0.5).lerp(Color(1.0, 0.93, 0.8), 0.4), lit * a)
-		return Color(0.06, 0.04, 0.03, clampf(sh, 0.0, 0.45) * a))
+	if not sh:
+		_hair_shape_light(hair, behind, key)
 	# 2) Reflexo em mechas
 	var dark := hair.get_luminance() < 0.2
 	var spec := hair.lightened(0.42).lerp(Color(1.0, 0.95, 0.86), 0.15)
@@ -746,7 +752,7 @@ func _hair_light(hair: Color) -> void:
 	var kinky := tex in ["curl", "coil", "dots"]
 	var skip := tex in ["braid", "braid_zig", "waves", "locs"]
 	var lw := maxf(0.5, _s * 0.0024)
-	if not skip:
+	if not skip and not sh:
 		var n := int((170 if not kinky else 120) * clampf(_det, 0.4, 1.7))
 		for i in n:
 			var t := rng.randf_range(0.06, 0.94)
@@ -790,7 +796,7 @@ func _hair_light(hair: Color) -> void:
 			_r_polyline_colors(PackedVector2Array([_cl(base), _cl(mid), _cl(tip)]),
 				PackedColorArray([Color(hc, 0.7), Color(hc, 0.45), Color(hc, 0.0)]), lw * rng.randf_range(0.7, 1.1), true)
 	# 4) Luz de recorte fria no lado direito da silhueta (os crespos têm cachos por cima da borda)
-	if behind or kinky or skip:
+	if behind or kinky or skip or sh:
 		return
 	var rim := PackedVector2Array()
 	var rc := PackedColorArray()
@@ -804,6 +810,25 @@ func _hair_light(hair: Color) -> void:
 		rc.append(Color(0.82, 0.9, 1.0, 0.3 * smoothstep(0.1, 0.6, q.x) * _cap_alpha(p, 0.95) * (1.0 - smoothstep(-0.6, -0.3, q.y))))
 	if rim.size() > 2:
 		_r_polyline_colors(rim, rc, lw * 1.4, true)
+
+
+## Forma da calota com cor por vértice (caminho sem shader): sombra embaixo e à direita, luz no alto.
+func _hair_shape_light(hair: Color, behind: bool, key: Vector2) -> void:
+	_strip(_cap_in, _cap_out, _rings(6), func(p: Vector2, _t: float, w: float) -> Color:
+		var a := _cap_alpha(p, w)
+		if behind:
+			a *= 1.0 - smoothstep(0.55, 0.95, w)
+		if a <= 0.01:
+			return Color(0, 0, 0, 0)
+		var q := _uv(p)
+		var dn := Vector2(q.x, q.y * 0.9).normalized() if q.length() > 0.001 else Vector2(0, -1)
+		var lam := dn.dot(key)
+		var sh := 0.4 * smoothstep(0.1, -0.8, lam) + 0.2 * smoothstep(-0.25, 0.25, q.y)
+		sh += 0.14 * (1.0 - smoothstep(0.0, 0.3, w)) * smoothstep(-0.2, 0.4, lam + 0.3)
+		var lit := 0.14 * smoothstep(0.35, 0.95, lam) * smoothstep(0.3, 0.9, w)
+		if lit > sh:
+			return Color(hair.lightened(0.5).lerp(Color(1.0, 0.93, 0.8), 0.4), lit * a)
+		return Color(0.06, 0.04, 0.03, clampf(sh, 0.0, 0.45) * a))
 
 
 ## Pede ao DecalCache o escudo e o patrocínio em textura; só usa quando já foram desenhados.
@@ -1175,7 +1200,7 @@ func _skin_surface(head: PackedVector2Array) -> void:
 	var params := _skin_params()
 	for key: String in params:
 		_skin_mat.set_shader_parameter(key, params[key])
-	RenderingServer.canvas_item_set_material(_items[0], _skin_mat.get_rid())
+	_bind_materials()
 	_target = T_SKIN
 	var cols := PackedColorArray()
 	cols.resize(pts.size())
@@ -3429,9 +3454,12 @@ func _beard_mask(u0: float, u1: float, v0: float, v1: float, nu: int, nv: int, c
 	_skin_mat.set_shader_parameter("beard_mask", tex)
 	_skin_mat.set_shader_parameter("beard_rect", Vector4(u0, v0, u1 - u0, v1 - v0))
 	var bc: Color = _f["beard_col"]
+	# Pelo curto visto de longe: tom mais frio (a raiz escura por baixo da pele), não marrom
+	if short:
+		bc = bc.lerp(_shadow_col, 0.4)
 	_skin_mat.set_shader_parameter("beard_col", bc)
 	# Curta: o shader desenha a barba toda; comprida: só escurece a pele por baixo dos fios
-	_skin_mat.set_shader_parameter("beard2", Vector4(1.0, 1.0 if short else 0.75, 1.0 if short else 0.4, 0.0))
+	_skin_mat.set_shader_parameter("beard2", Vector4(1.0, 0.78 if short else 0.75, 1.0 if short else 0.4, 0.0))
 
 
 func _beard_hairs(rng: RandomNumberGenerator) -> void:
@@ -3645,6 +3673,136 @@ func _build_cap() -> void:
 		_cap_out.append(_px(o.x, o.y))
 
 
+## Calota do cabelo no shader FaceHair: faixa da linha do cabelo até um pouco além da silhueta
+## (as pontas quebram o contorno), com (t, w) nos UVs e o degradê do corte no alfa dos vértices.
+func _hair_surface(tex: String, gloss: float) -> void:
+	var f := _f
+	var n := _cap_in.size()
+	if n < 3 or _cap_out.size() != n:
+		return
+	var layers := maxi(4, _rings(7))
+	var ext := _fw * 0.07
+	var pts := PackedVector2Array()
+	var cols := PackedColorArray()
+	var uvs := PackedVector2Array()
+	for l in layers + 1:
+		var wl := float(l) / layers
+		for i in n:
+			var a := _cap_in[i]
+			var b := _cap_out[i]
+			var d := b - a
+			var ln := maxf(d.length(), 0.001)
+			var p := a.lerp(b + d / ln * ext, wl)
+			var w := wl * (ln + ext) / ln
+			pts.append(_cl(p))
+			uvs.append(Vector2(float(i) / (n - 1), w))
+			cols.append(Color(1, 1, 1, _cap_alpha(p, minf(w, 1.0))))
+	var idx := PackedInt32Array()
+	for l in layers:
+		var b0 := l * n
+		var b1 := (l + 1) * n
+		for i in n - 1:
+			idx.append_array([b0 + i, b1 + i, b1 + i + 1, b0 + i, b1 + i + 1, b0 + i + 1])
+	var hair: Color = f["hair"]
+	var tid := {"str": 0, "wavy": 1, "curl": 2, "coil": 3, "dots": 4}.get(tex, 5) as int
+	var ti: int = int(f["texture"])
+	var gl := float([0.5, 0.36, 0.2, 0.1][ti]) + gloss
+	var behind := String(_hs("bk", "")) in ["long", "long_short", "curly_long", "afro", "dreads", "braids"]
+	var gray := float(f["gray"]) if int(f["hair_i"]) not in FaceGen.DYED else 0.0
+	_hair_mat = ShaderMaterial.new()
+	_hair_mat.shader = HAIR_SHADER
+	_hair_mat.set_shader_parameter("hair_col", hair)
+	_hair_mat.set_shader_parameter("hair_p", Vector4(gl, tid, int(_hs("fl", 0)), 0.5 + float(f["part_side"]) * 0.19))
+	_hair_mat.set_shader_parameter("hair_p2", Vector4(1.0 if bool(f["tips"]) else 0.0, 1.0 if bool(f.get("highlights", false)) else 0.0, gray, float(int(f["hair_seed"]) % 1000) * 0.37))
+	_hair_mat.set_shader_parameter("hair_p3", Vector4(1.0 if behind else 0.0, 1.0 if hair.get_luminance() < 0.2 else 0.0, 0.0, 0.0))
+	_hair_mat.set_shader_parameter("head", Vector4(_hc.x, _hc.y, _fw, _fh))
+	_hair_mat.set_shader_parameter("tips_col", Color("#E2C98C"))
+	_hair_mat.set_shader_parameter("streak_col", Color("#D8B46A").lerp(hair, 0.35))
+	_hair_mat.set_shader_parameter("scalp_col", _skin.darkened(0.08))
+	_hair_mat.set_shader_parameter("key_dir", FaceLighting.KEY)
+	_bind_materials()
+	_target = T_HAIR
+	_r_tex_tri(idx, pts, cols, uvs, null)
+
+
+## Peça de cabelo (mecha, franja, tufo) na camada do shader do cabelo: faixa entre `lower` e
+## `upper` com (através, ao longo) nos UVs — os fios seguem o comprimento da peça. `alpha(t, ww)`
+## dá a opacidade; `bright` escurece fileiras de trás. Sem o shader, devolve false.
+func _hair_piece(lower: PackedVector2Array, upper: PackedVector2Array, layers: int, alpha: Callable, bright: float = 1.0) -> bool:
+	if not (use_skin_shader and _hair_mat != null and _items.size() >= 4):
+		return false
+	var n := mini(lower.size(), upper.size())
+	if n < 2:
+		return true
+	var across := 0.0
+	for i in n:
+		across += lower[i].distance_to(upper[i])
+	across /= n
+	var k := across / maxf(1.0, 2.2 * _fw)
+	var off := fposmod(lower[0].x * 0.013 + lower[0].y * 0.007 + n * 0.137, 1.0) * 3.0
+	var pts := PackedVector2Array()
+	var cols := PackedColorArray()
+	var uvs := PackedVector2Array()
+	layers = maxi(layers, 4)
+	for l in layers + 1:
+		var ww := float(l) / layers
+		for i in n:
+			var t := float(i) / (n - 1)
+			pts.append(_cl(lower[i].lerp(upper[i], ww)))
+			uvs.append(Vector2(off + ww * k, lerpf(0.3, 0.85, t)))
+			# Bordas macias através da peça (sem serrilhado e sem recorte de papel)
+			var soft := smoothstep(0.0, 0.2, ww) * (1.0 - smoothstep(0.8, 1.0, ww))
+			cols.append(Color(0.0, bright, 1.0, float(alpha.call(t, ww)) * soft))
+	var idx := PackedInt32Array()
+	for l in layers:
+		var b0 := l * n
+		var b1 := (l + 1) * n
+		for i in n - 1:
+			idx.append_array([b0 + i, b1 + i, b1 + i + 1, b0 + i, b1 + i + 1, b0 + i + 1])
+	var prev := _target
+	_target = T_HAIR
+	_r_tex_tri(idx, pts, cols, uvs, null)
+	_target = prev
+	return true
+
+
+## Peça em malha radial (topete, pompadour) na camada do cabelo, com fios na vertical.
+func _hair_radial(center: Vector2, boundary: PackedVector2Array, rings: int, alpha: Callable, v_base: float, v_span: float) -> bool:
+	if not (use_skin_shader and _hair_mat != null and _items.size() >= 4):
+		return false
+	var n := boundary.size()
+	var pts := PackedVector2Array()
+	var cols := PackedColorArray()
+	var uvs := PackedVector2Array()
+	var uv_of := func(p: Vector2) -> Vector2:
+		var q := _uv(p)
+		return Vector2(0.5 + (p.x - _hc.x) / maxf(1.0, 2.2 * _fw), 0.3 + 0.55 * clampf((v_base - q.y) / maxf(0.01, v_span), 0.0, 1.0))
+	pts.append(_cl(center))
+	uvs.append(uv_of.call(center))
+	cols.append(Color(0, 1, 1, float(alpha.call(0.0, 0))))
+	for r in range(1, rings + 1):
+		var t := float(r) / rings
+		for i in n:
+			var p := center + (boundary[i] - center) * t
+			pts.append(_cl(p))
+			uvs.append(uv_of.call(p))
+			cols.append(Color(0, 1, 1, float(alpha.call(t, i))))
+	var idx := PackedInt32Array()
+	for i in n:
+		idx.append_array([0, 1 + i, 1 + (i + 1) % n])
+	for r in range(1, rings):
+		var b0 := 1 + (r - 1) * n
+		var b1 := 1 + r * n
+		for i in n:
+			var j := (i + 1) % n
+			idx.append_array([b0 + i, b1 + i, b1 + j, b0 + i, b1 + j, b0 + j])
+	var prev := _target
+	_target = T_HAIR
+	_r_tex_tri(idx, pts, cols, uvs, null)
+	_target = prev
+	return true
+
+
 static func _resample(pts: PackedVector2Array, n: int) -> PackedVector2Array:
 	var lens := PackedFloat32Array([0.0])
 	for i in range(1, pts.size()):
@@ -3691,6 +3849,16 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 	_build_cap()
 	var gloss: float = float(_hs("gl", 0.0))
 	_hair_shadow()
+	var tex := String(_hs("tx", ["str", "wavy", "curl", "coil"][int(f["texture"])]))
+	if use_skin_shader and _items.size() >= 4:
+		_hair_surface(tex, gloss)
+		_target = T_TOP
+		_cap_texture(rng, tex, hair)
+		var wr0 := RandomNumberGenerator.new()
+		wr0.seed = int(f["texture_seed"]) + 31
+		_hairline_wisps(wr0, tex, hair)
+		_front_hair_pieces(rng, hair, gloss)
+		return
 	_strip(_cap_in, _cap_out, _rings(7), func(p: Vector2, t: float, w: float) -> Color:
 		var c := _hair_col(p, w, t, gloss)
 		return Color(c, _cap_alpha(p, w)))
@@ -3705,11 +3873,16 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 				i = k
 		var t := float(i) / maxf(1.0, nc - 1.0)
 		return Color(_hair_col(p, 1.0, t, gloss), _cap_alpha(p, 1.0)))
-	var tex := String(_hs("tx", ["str", "wavy", "curl", "coil"][int(f["texture"])]))
 	_cap_texture(rng, tex, hair)
 	var wr := RandomNumberGenerator.new()
 	wr.seed = int(f["texture_seed"]) + 31 # gerador próprio: não mexe nos sorteios das outras peças
 	_hairline_wisps(wr, tex, hair)
+	_front_hair_pieces(rng, hair, gloss)
+
+
+## Peças da frente (franja, mechas, topete…), silhueta espetada/crista e brilho da careca rala.
+func _front_hair_pieces(rng: RandomNumberGenerator, hair: Color, gloss: float) -> void:
+	var f := _f
 	_front_piece(rng, String(_hs("fr", "")), hair, gloss)
 	_front_piece(rng, String(_hs("fr2", "")), hair, gloss)
 	# Silhueta espetada / crista
@@ -3847,6 +4020,10 @@ func _tuft(base: Vector2, tip: Vector2, half_w: float, bend: float, col: Color) 
 		right.append(_cl(c + nrm * hw))
 		mid.append(_cl(c))
 	var lit := 1.0 if nrm.dot(Vector2(_light.x, _light.y)) < 0.0 else -1.0
+	var bright := clampf(col.get_luminance() / maxf(0.02, (_f["hair"] as Color).get_luminance()), 0.6, 1.15)
+	if _hair_piece(left, right, 2, func(t: float, _ww: float) -> float:
+			return 1.0 - 0.7 * t * t, bright):
+		return
 	var pts := PackedVector2Array(left)
 	var cols := PackedColorArray()
 	# A ponta afina também na opacidade: mecha de verdade termina em fios, não numa quina
@@ -3894,9 +4071,12 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 	var k := clampf(_det * _det, 0.1, 2.0)
 	var flow := int(_hs("fl", 0))
 	var part := 0.5 + float(f["part_side"]) * 0.19
+	var sh := use_skin_shader and _hair_mat != null
+	if sh and tex == "dots":
+		return
 	match tex:
 		"str", "wavy":
-			var n := int(200 * k)
+			var n := int(200 * k * (0.22 if sh else 1.0))
 			w = maxf(0.6, _s * 0.0026)
 			var hl_on: bool = bool(f.get("highlights", false))
 			var hl_col := Color("#D8B46A").lerp(hair, 0.35)
@@ -3932,6 +4112,8 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 				if not ok:
 					continue
 				var roll := rng.randf()
+				if sh and (streak or roll < 0.55):
+					continue
 				var c: Color
 				if streak:
 					c = hl_col.lerp(hair, rng.randf_range(0.0, 0.3))
@@ -3975,7 +4157,7 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 					_r_arc(_cl(p), r * 0.3, a0, a0 + PI, 5, Color(hair.darkened(0.35), 0.4), w, true)
 			_outline_bumps(rng, hair, 0.075 if not big else 0.095, 26)
 		"coil":
-			for i in int(420 * k):
+			for i in int(420 * k * (0.15 if sh else 1.0)):
 				var ww := rng.randf_range(0.05, 1.0)
 				var tt := rng.randf()
 				var p := _cap_pt(tt, ww)
@@ -4134,11 +4316,14 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 			for p in pts:
 				clean.append(_cl(p))
 			var cen := _px(-sx * 0.1, hl0 - 0.12 - hh * 0.4)
-			_radial(cen, clean, _rings(5), func(p: Vector2, t: float, _i: int) -> Color:
-				var q := _uv(p)
-				var up := clampf((hl0 - q.y) / (hh + 0.2), 0.0, 1.0)
-				var c := _hair_col(p, 0.35 + up * 0.6, float(_i) / 32.0, gloss + 0.25)
-				return Color(c, 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if _i < 15 else 0.0)))
+			var q_sh := _hair_radial(cen, clean, _rings(5), func(t: float, i: int) -> float:
+				return 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if i < 15 else 0.0), hl0, hh + 0.2)
+			if not q_sh:
+				_radial(cen, clean, _rings(5), func(p: Vector2, t: float, _i: int) -> Color:
+					var q := _uv(p)
+					var up := clampf((hl0 - q.y) / (hh + 0.2), 0.0, 1.0)
+					var c := _hair_col(p, 0.35 + up * 0.6, float(_i) / 32.0, gloss + 0.25)
+					return Color(c, 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if _i < 15 else 0.0)))
 			_strands_in_poly(rng, clean, hair, Vector2(-sx * 0.25, -1.0), 30 if big else 22)
 		"fringe", "crop":
 			# Mechas que caem sobre a testa: duas fileiras de tufos curvos que se sobrepõem (a de trás
@@ -4178,11 +4363,14 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 					var thick := lerpf(0.3, 0.06, pow(t, 1.4)) * (0.8 if braid else 1.0)
 					inner.append(_px(sx * ix, v))
 					outer.append(_px(sx * (ix + thick + 0.06 * sin(PI * t)), v + 0.03 * t))
-				_strip(inner, outer, 4, func(p: Vector2, t: float, ww: float) -> Color:
-					var c := _hair_col(p, 0.55 + ww * 0.3, t, gloss)
-					# Borda do lado do rosto e pontas desfiadas: nada de painel recortado
-					var a := smoothstep(0.0, 0.3, ww) * (1.0 - smoothstep(0.8, 1.0, t) * 0.75) * smoothstep(0.0, 0.1, t)
-					return Color(c.darkened(0.08 * t), a))
+				var lk_sh := _hair_piece(inner, outer, 4, func(t: float, ww: float) -> float:
+					return smoothstep(0.0, 0.3, ww) * (1.0 - smoothstep(0.8, 1.0, t) * 0.75) * smoothstep(0.0, 0.1, t))
+				if not lk_sh:
+					_strip(inner, outer, 4, func(p: Vector2, t: float, ww: float) -> Color:
+						var c := _hair_col(p, 0.55 + ww * 0.3, t, gloss)
+						# Borda do lado do rosto e pontas desfiadas: nada de painel recortado
+						var a := smoothstep(0.0, 0.3, ww) * (1.0 - smoothstep(0.8, 1.0, t) * 0.75) * smoothstep(0.0, 0.1, t)
+						return Color(c.darkened(0.08 * t), a))
 				var n := int(18 * clampf(_det, 0.4, 1.6))
 				for j in n:
 					var ww := rng.randf()
@@ -4347,10 +4535,13 @@ func _swoop(rng: RandomNumberGenerator, hair: Color, gloss: float, hl: float, lo
 	for k in range(3, n - 2):
 		sh.append(_cl(lower[k] + Vector2(0, _fh * 0.03)))
 	_r_polyline(sh, Color(0, 0, 0, 0.1), _fh * 0.045, true)
-	_strip(lower, upper, 4, func(p: Vector2, t: float, ww: float) -> Color:
-		var c := _hair_col(p, 0.85 + ww * 0.15, t, gloss + 0.3).lightened(0.06)
-		return Color(c.darkened(0.08 * (1.0 - ww)), smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.88, 1.0, t) * 0.5)))
-	for j in int(24 * clampf(_det, 0.3, 1.6)):
+	var in_sh := _hair_piece(lower, upper, 4, func(t: float, _ww: float) -> float:
+		return smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.88, 1.0, t) * 0.5))
+	if not in_sh:
+		_strip(lower, upper, 4, func(p: Vector2, t: float, ww: float) -> Color:
+			var c := _hair_col(p, 0.85 + ww * 0.15, t, gloss + 0.3).lightened(0.06)
+			return Color(c.darkened(0.08 * (1.0 - ww)), smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.88, 1.0, t) * 0.5)))
+	for j in int(24 * clampf(_det, 0.3, 1.6) * (0.35 if in_sh else 1.0)):
 		var ww := rng.randf_range(0.08, 0.92)
 		var pts := PackedVector2Array()
 		var end := n - rng.randi_range(0, 4)
