@@ -200,11 +200,11 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 3
+const PORTRAIT_RENDER_VERSION := 4
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
-const HEAD_W := 0.93
+const HEAD_W := 1.04
 
 var _f: Dictionary = {}
 var _dirty := true
@@ -669,7 +669,7 @@ func _chin_v(v: float) -> float:
 
 ## Expoente do crânio visto de frente: um pouco "quadrado" (superelipse), largo nas têmporas e
 ## arredondado no alto — uma elipse pura deixa a cabeça careca em forma de cone.
-const SKULL_N := 2.35
+const SKULL_N := 2.15
 
 
 ## Meia largura do crânio (em fw) na altura `up` (0 = meio da cabeça, 1 = topo): a testa só
@@ -2287,7 +2287,7 @@ func _mouth() -> void:
 	# demais parece boca aberta)
 	var rose := Color("#9A5A5E")
 	var rk := lip.get_luminance() / maxf(0.05, rose.get_luminance())
-	var lip_lo := lip.lerp(Color(minf(1.0, rose.r * rk), minf(1.0, rose.g * rk), minf(1.0, rose.b * rk)), darkness * 0.3)
+	var lip_lo := lip.lerp(Color(minf(1.0, rose.r * rk), minf(1.0, rose.g * rk), minf(1.0, rose.b * rk)), darkness * 0.16)
 	var corner_y := mouth_y - smile * _fh * 0.03 + float(f.get("corner", 0.0)) * _fh * 0.022
 	var bow: float = f["bow"]
 	# Canto de um lado mais alto (sorriso de canto) ou boca torta
