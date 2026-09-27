@@ -1,14 +1,16 @@
 class_name TopBar
 extends PanelContainer
-## Barra superior: voltar, escudo do clube, título/subtítulo e saldo.
+## Barra superior: voltar, escudo do clube, título/subtítulo, saldo e menu (☰).
 
 signal back_pressed
+signal menu_pressed
 
 @onready var back_btn: Button = $Row/Back
 @onready var crest: CrestView = $Row/Crest
 @onready var title_lbl: Label = $Row/Titles/Title
 @onready var subtitle_lbl: Label = $Row/Titles/Subtitle
 @onready var money_lbl: Label = $Row/Money
+@onready var menu_btn: Button = $Row/Menu
 
 
 func _ready() -> void:
@@ -22,6 +24,10 @@ func _ready() -> void:
 	back_btn.pressed.connect(func():
 		AudioManager.click()
 		back_pressed.emit())
+	menu_btn.icon = UIKit.icon("menu")
+	menu_btn.pressed.connect(func():
+		AudioManager.click()
+		menu_pressed.emit())
 
 
 ## Fundo com a identidade do clube: a cor principal nasce atrás do escudo e se dissolve para a
@@ -60,9 +66,10 @@ func _draw() -> void:
 		draw_style_box(pill, r)
 
 
-func set_state(title: String, subtitle: String, show_back: bool, club: Club) -> void:
+func set_state(title: String, subtitle: String, show_back: bool, club: Club, show_menu: bool = false) -> void:
 	queue_redraw()
 	back_btn.visible = show_back
+	menu_btn.visible = show_menu
 	title_lbl.text = title
 	subtitle_lbl.text = subtitle
 	subtitle_lbl.visible = subtitle != ""

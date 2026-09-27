@@ -789,6 +789,30 @@ static func action_tile(icon_name: String, title: String, subtitle: String, cb: 
 	return row
 
 
+## Estado vazio: ícone num círculo, título, explicação e (opcional) um botão para resolver.
+static func empty_state(icon_name: String, title: String, body: String, action: String = "", cb: Callable = Callable()) -> PanelContainer:
+	var box := card("Card", 10)
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	var ic := PanelContainer.new()
+	ic.theme_type_variation = "IconTile"
+	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	ic.add_child(icon_rect(icon_name, 40, UIColors.ACCENT))
+	box.add_child(gap(8))
+	box.add_child(ic)
+	var t := label(title, "H3", true)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(t)
+	if body != "":
+		var b := label(body, "Muted", true)
+		b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(b)
+	if action != "" and cb.is_valid():
+		var btn := button(action, "PrimaryButton", cb)
+		box.add_child(btn)
+	box.add_child(gap(4))
+	return card_panel(box)
+
+
 ## Grade de ladrilhos com colunas fixas (2 no celular, mais em telas largas).
 static func tile_grid(tiles: Array, cols: int = 2) -> GridContainer:
 	var g := GridContainer.new()

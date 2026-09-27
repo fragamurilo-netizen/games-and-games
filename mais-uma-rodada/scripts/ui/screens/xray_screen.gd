@@ -16,7 +16,7 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	if rep.is_empty():
-		c.add_child(UIKit.label("Jogue uma partida para ver o Raio-X.", "Muted", true))
+		c.add_child(UIKit.empty_state("search", "Raio-X ainda vazio", "Depois de cada partida, o Raio-X mostra onde o jogo foi ganho ou perdido: chutes, posse, duelos e o que a comissão sugere mudar."))
 		return
 	var opp := w.club(int(rep["opp"]))
 	var sc: Array = rep["score"]

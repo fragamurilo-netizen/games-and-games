@@ -106,7 +106,7 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 	card.add_child(row)
 	card.add_child(UIKit.bar(minf(pct, 1.2), 1.2, col, 10))
 	var row2 := UIKit.hbox(4)
-	row2.add_child(UIKit.stat(str(expiring), "vencem nesta temporada", UIColors.RED if expiring > 0 else UIColors.TEXT))
+	row2.add_child(UIKit.stat(str(expiring), "vencem nesta", UIColors.RED if expiring > 0 else UIColors.TEXT))
 	row2.add_child(UIKit.stat(str(next_year), "vencem na próxima", Color("#E8C547") if next_year > 0 else UIColors.TEXT))
 	row2.add_child(UIKit.stat(Fmt.money_month(total / maxi(1, squad.size())), "média"))
 	card.add_child(row2)

@@ -29,9 +29,7 @@ func refresh() -> void:
 	UIKit.clear(c)
 	var hist := KitDesign.history(club)
 	if hist.is_empty():
-		var card := UIKit.card("Card", 8)
-		card.add_child(UIKit.label("Ainda não há uniformes no histórico. Eles entram aqui quando estreiam em campo, no primeiro jogo de cada temporada.", "", true))
-		c.add_child(UIKit.card_panel(card))
+		c.add_child(UIKit.empty_state("shirt", "Nenhuma camisa no histórico ainda", "Os uniformes entram aqui quando estreiam em campo, no primeiro jogo de cada temporada."))
 		return
 	max_content_width = 1700
 	for h in hist:

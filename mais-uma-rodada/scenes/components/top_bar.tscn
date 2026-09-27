@@ -54,3 +54,13 @@ text = "$ 0"
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
 mouse_filter = 2
+
+[node name="Menu" type="Button" parent="Row"]
+visible = false
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+theme_type_variation = &"IconButton"
+tooltip_text = "Menu"
+expand_icon = true

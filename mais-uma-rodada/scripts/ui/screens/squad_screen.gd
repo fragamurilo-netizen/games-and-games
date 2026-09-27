@@ -82,17 +82,17 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	# A ação principal (escalar) em destaque; os atalhos do elenco numa fileira de mesma largura.
+	c.add_child(UIKit.button("Escalação e tática", "PrimaryButton", func(): UIManager.push("prematch", {"edit": true}), "tactics"))
 	var top := UIKit.hbox(10)
-	var lineup := UIKit.button("Escalação e tática", "", func(): UIManager.push("prematch", {"edit": true}), "tactics")
-	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(lineup)
-	top.add_child(UIKit.button("Numeração", "", func(): UIManager.push("numbers"), "shirt"))
-	top.add_child(UIKit.button("Contratos", "", func(): UIManager.push("contracts"), "money"))
-	c.add_child(top)
-	top = UIKit.hbox(10)
-	var vest := UIKit.button("Vestiário: clima, líderes e panelinhas", "GhostButton", func(): UIManager.push("dressing_room"), "heart")
-	vest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(vest)
+	for it in [["Numeração", "numbers", "shirt"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
+		var dest := String(it[1])
+		var b := UIKit.button(String(it[0]), "GhostButton", func(): UIManager.push(dest), String(it[2]))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.size_flags_stretch_ratio = 1.0
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		top.add_child(b)
 	c.add_child(top)
 	c.add_child(_summary_card(w, club, squad))
 	var vitems: Array = []

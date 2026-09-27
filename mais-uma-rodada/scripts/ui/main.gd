@@ -37,6 +37,7 @@ func _ready() -> void:
 	_update_safe_area()
 	_update_layout()
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
+	top_bar.menu_pressed.connect(NavMenu.open)
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
 	AudioManager.start_music()
@@ -203,7 +204,7 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 	bottom_nav.visible = screen.show_nav and GameManager.has_career()
 	if screen.show_top:
 		var club: Club = GameManager.user_club() if GameManager.has_career() else null
-		top_bar.set_state(screen.screen_title, screen.screen_subtitle, can_go_back, club)
+		top_bar.set_state(screen.screen_title, screen.screen_subtitle, can_go_back, club, NavMenu.available(screen))
 	bottom_nav.select(screen.nav_tab)
 
 

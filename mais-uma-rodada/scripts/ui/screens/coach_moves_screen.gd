@@ -82,7 +82,7 @@ func _moves(w: GameWorld, c: VBoxContainer) -> void:
 		card.add_child(UIKit.kv("Quem mais trocou", "%s (%d)" % [w.club(top).short_name, int(per_club[top])]))
 	c.add_child(UIKit.card_panel(card))
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhuma troca de técnico por aqui ainda.", "Muted"))
+		c.add_child(UIKit.empty_state("swap", "Nenhuma troca de técnico ainda", "Demissões, contratações e interinos aparecem aqui assim que a bola rolar."))
 		return
 	var box := UIKit.card("Card", 6)
 	var last_key := ""
