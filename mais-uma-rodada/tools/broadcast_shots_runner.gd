@@ -4,6 +4,9 @@ extends Node
 var opt_out := ""
 var opt_league := "ARG1"
 var opt_days := "3"
+var opt_wx := "" # força o clima: sun, cloud, rain, storm, snow, heat, wind, fog
+var opt_night := "0"
+var opt_quick := "0" # 1: só abertura, placar e um trecho do jogo
 var shots := false
 
 
@@ -40,6 +43,9 @@ func _run() -> void:
 	await _frames(6)
 	UIManager.close_all_modals()
 	GameManager.begin_match()
+	if opt_wx != "":
+		var sim0 := GameManager.user_sim()
+		sim0.wx = {"kind": opt_wx, "night": opt_night == "1", "temp": 20, "fx": Weather.effects(opt_wx, 20.0)}
 	UIManager.replace("match")
 	await _frames(12)
 	await _shot("b01_abertura")
@@ -49,6 +55,15 @@ func _run() -> void:
 	UIManager.close_all_modals()
 	await _frames(4)
 	await _shot("b02_placar_emissora")
+	if opt_quick == "1":
+		ms.set("_pace", 1)
+		for i in 240:
+			await get_tree().process_frame
+			if UIManager.has_modal():
+				UIManager.close_all_modals()
+		await _shot("b03_jogo")
+		get_tree().quit()
+		return
 	ms.set("_pace", 1)
 	var got_goal := false
 	var got_half := false

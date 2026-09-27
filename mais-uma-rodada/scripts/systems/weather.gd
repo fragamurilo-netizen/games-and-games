@@ -16,13 +16,13 @@ const NAMES := {"sun": "Sol", "cloud": "Nublado", "rain": "Chuva", "storm": "Tem
 ## Clima por país: temperatura média [inverno, primavera, verão, outono], chance de chuva por
 ## estação e chance de neve no inverno. Hemisfério sul: as estações se invertem.
 const CLIMATES := {
-	"oceanic": {"t": [5, 11, 19, 12], "rain": [0.38, 0.3, 0.22, 0.36], "snow": 0.05},
+	"oceanic": {"t": [5, 11, 19, 12], "rain": [0.38, 0.3, 0.22, 0.36], "snow": 0.03},
 	"continental": {"t": [0, 10, 21, 10], "rain": [0.22, 0.28, 0.3, 0.26], "snow": 0.22},
 	"nordic": {"t": [-4, 6, 17, 6], "rain": [0.2, 0.25, 0.3, 0.3], "snow": 0.45},
 	"mediterranean": {"t": [11, 17, 28, 19], "rain": [0.3, 0.2, 0.05, 0.22], "snow": 0.01},
 	"tropical": {"t": [24, 27, 29, 27], "rain": [0.18, 0.28, 0.42, 0.3], "snow": 0.0},
 	"subtropical_s": {"t": [15, 21, 28, 22], "rain": [0.14, 0.22, 0.34, 0.24], "snow": 0.0},
-	"temperate_s": {"t": [8, 15, 24, 16], "rain": [0.2, 0.22, 0.2, 0.22], "snow": 0.02},
+	"temperate_s": {"t": [9, 16, 25, 17], "rain": [0.2, 0.22, 0.2, 0.22], "snow": 0.0},
 	"desert": {"t": [19, 29, 38, 30], "rain": [0.06, 0.03, 0.01, 0.03], "snow": 0.0},
 	"highland": {"t": [13, 15, 16, 15], "rain": [0.25, 0.3, 0.35, 0.3], "snow": 0.0},
 	"east_asia": {"t": [1, 13, 27, 16], "rain": [0.1, 0.25, 0.45, 0.2], "snow": 0.12},
@@ -40,6 +40,20 @@ const NATION_CLIMATE := {
 	"ECU": "highland", "BOL": "highland", "PER": "highland",
 	"JPN": "east_asia", "KOR": "east_asia", "CHN": "east_asia", "USA": "east_asia",
 }
+## Horários de jogo mais comuns em cada país (hora local) e o peso de cada um.
+const KICKOFFS := {
+	"BRA": {16: 0.3, 18: 0.2, 19: 0.1, 21: 0.4}, "ARG": {15: 0.1, 17: 0.25, 19: 0.3, 21: 0.35}, "URU": {15: 0.3, 17: 0.3, 20: 0.4},
+	"CHI": {15: 0.3, 18: 0.35, 20: 0.35}, "COL": {16: 0.3, 18: 0.3, 20: 0.4}, "MEX": {17: 0.2, 19: 0.4, 21: 0.4}, "USA": {15: 0.2, 19: 0.5, 20: 0.3},
+	"ENG": {12: 0.15, 15: 0.45, 17: 0.25, 20: 0.15}, "ESP": {14: 0.15, 16: 0.2, 18: 0.25, 21: 0.4}, "ITA": {12: 0.1, 15: 0.3, 18: 0.3, 20: 0.3},
+	"GER": {15: 0.6, 17: 0.15, 20: 0.25}, "FRA": {13: 0.1, 15: 0.25, 17: 0.25, 21: 0.4}, "POR": {15: 0.2, 18: 0.35, 20: 0.45},
+	"NED": {12: 0.2, 14: 0.35, 16: 0.25, 20: 0.2}, "TUR": {14: 0.2, 17: 0.3, 20: 0.5}, "KSA": {17: 0.1, 20: 0.5, 21: 0.4},
+	"QAT": {17: 0.2, 20: 0.8}, "UAE": {17: 0.2, 20: 0.8}, "EGY": {17: 0.3, 20: 0.7}, "JPN": {14: 0.3, 16: 0.2, 19: 0.5},
+}
+const DEFAULT_KICKOFFS := {14: 0.2, 16: 0.3, 18: 0.2, 20: 0.3}
+## Pôr do sol aproximado por clima e estação [inverno, primavera, verão, outono] (hora local).
+const SUNSET := {"oceanic": [16.2, 19.5, 21.2, 18.0], "continental": [16.6, 19.4, 21.0, 18.2], "nordic": [15.3, 19.8, 22.5, 17.6],
+	"mediterranean": [17.8, 20.2, 21.3, 19.0], "tropical": [17.9, 18.1, 18.6, 18.3], "subtropical_s": [17.6, 18.9, 19.9, 18.6],
+	"temperate_s": [18.0, 19.6, 20.6, 19.1], "desert": [17.3, 18.4, 18.9, 17.9], "highland": [18.1, 18.2, 18.4, 18.3], "east_asia": [16.8, 18.8, 19.9, 17.8]}
 const SOUTH: Array[String] = ["BRA", "ARG", "URU", "PAR", "CHI", "RSA", "AUS", "NZL", "BOL", "PER"]
 ## Estados do Brasil com inverno de verdade (frio e garoa no Sul).
 const BRA_SOUTH_UF: Array[String] = ["RS", "SC", "PR"]
@@ -92,15 +106,13 @@ static func roll(home: Club, month: int, continental: bool, seed_value: int) -> 
 	var temp := float(cl["t"][season]) + r.randfn(0.0, 3.5)
 	if nation == "BRA" and home != null and BRA_SOUTH_UF.has(home.region):
 		temp -= 6.0
-	# Horário: noite de copa quase sempre; no deserto e no verão brasileiro, jogo à noite para fugir do calor
-	var p_night := 0.42
+	# Horário: o de sempre da liga; noite de copa continental; o sol se põe conforme estação e lugar
+	var ko: Dictionary = KICKOFFS.get(nation, DEFAULT_KICKOFFS)
+	var hour: int = int(RngUtil.weighted_key(r, ko))
 	if continental:
-		p_night = 0.85
-	elif NATION_CLIMATE.get(nation, "") == "desert":
-		p_night = 0.9
-	elif nation in ["BRA", "ARG", "MEX", "COL"]:
-		p_night = 0.6
-	var night := r.randf() < p_night
+		hour = 21 if r.randf() < 0.8 else 19
+	var sunset: float = float(SUNSET[NATION_CLIMATE.get(nation, "oceanic")][season])
+	var night := float(hour) + 1.0 >= sunset # o jogo termina depois do pôr do sol: refletores
 	if night:
 		temp -= 4.0
 	var kind := "cloud"
@@ -127,7 +139,7 @@ static func roll(home: Club, month: int, continental: bool, seed_value: int) -> 
 			pitch = "heavy"
 		"snow":
 			pitch = "snow"
-	return {"kind": kind, "night": night, "temp": int(round(temp)), "pitch": pitch, "fx": effects(kind, temp)}
+	return {"kind": kind, "night": night, "hour": hour, "temp": int(round(temp)), "pitch": pitch, "fx": effects(kind, temp)}
 
 
 ## Efeitos no jogo (multiplicadores; 1 = neutro).

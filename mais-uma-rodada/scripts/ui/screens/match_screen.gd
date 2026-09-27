@@ -180,6 +180,7 @@ func _build() -> void:
 	_pitch.motion = PitchMotion.new(seed_base * 7 + 3)
 	_pitch.motion.tempo = TEMPO[_pace]
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
+	StadiumStyle.apply_weather(_stadium, _sim.wx)
 	_pitch.stadium = _stadium
 	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
 	AudioManager.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
@@ -507,11 +508,34 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	_away_scorers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	sc.add_child(_away_scorers)
 	v.add_child(sc)
+	v.add_child(_conditions_row())
 	_ticker = UIKit.label("", "Small")
 	_ticker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_ticker.clip_text = true
 	v.add_child(_ticker)
 	return panel
+
+
+## Condições do jogo: clima (ícone), temperatura, dia/noite, altitude e público.
+func _conditions_row() -> Control:
+	var row := UIKit.hbox(8)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var wx: Dictionary = _sim.wx
+	var bits: Array = []
+	if not wx.is_empty():
+		row.add_child(WeatherIcon.new(String(wx.get("kind", "cloud")), bool(wx.get("night", false)), 26))
+		bits.append("%s · %d°C" % [Weather.NAMES.get(String(wx.get("kind", "")), ""), int(wx.get("temp", 20))])
+		bits.append("%dh" % int(wx.get("hour", 16)))
+		if wx.has("alt"):
+			bits.append("%s m de altitude" % Fmt.thousands(int(wx["alt"])))
+	if _sim.attendance > 0:
+		bits.append("%s torcedores" % Fmt.thousands(_sim.attendance))
+	else:
+		bits.append("portões fechados")
+	var l := UIKit.label(" · ".join(bits), "Small")
+	l.clip_text = true
+	row.add_child(l)
+	return row
 
 
 ## Bloco com as duas cores do time ao lado do nome (placares de TV e angular).
@@ -542,22 +566,29 @@ func _build_controls() -> void:
 		cont.custom_minimum_size.y = 92
 		_controls.add_child(cont)
 		return
-	_play_btn = UIKit.button("", "", _toggle_play, "pause")
-	_speed_btn = UIKit.button(PACE_NAMES[_pace], "", _cycle_speed, "fast")
-	_tac_btn = UIKit.button("Tática", "", _open_tactics, "tactics")
-	_shout_btn = UIKit.button("Gritar", "", _open_shouts, "whistle")
-	_sound_btn = UIKit.button("Som", "", _toggle_match_sound, "sound")
-	_skip_btn = UIKit.button("Fim", "", _confirm_skip, "skip")
-	_skip_btn.text = ""
+	_play_btn = _ctl_btn("Pausar", "pause", _toggle_play)
+	_speed_btn = _ctl_btn(PACE_NAMES[_pace], "fast", _cycle_speed)
+	_tac_btn = _ctl_btn("Tática", "tactics", _open_tactics)
+	_shout_btn = _ctl_btn("Gritar", "whistle", _open_shouts)
+	_sound_btn = _ctl_btn("Som", "sound", _toggle_match_sound)
+	_skip_btn = _ctl_btn("Fim", "skip", _confirm_skip)
 	_skip_btn.tooltip_text = "Ir para o fim"
 	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _sound_btn, _skip_btn]:
-		var icon_only: bool = b == _play_btn or b == _skip_btn
-		b.size_flags_horizontal = Control.SIZE_FILL if icon_only else Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size = Vector2(88 if icon_only else 0, 80)
-		b.add_theme_font_size_override(&"font_size", 21)
 		_controls.add_child(b)
 	_update_play_button()
 	_update_sound_button()
+
+
+## Botão da barra: ícone em cima e o nome embaixo (cabe em qualquer largura de celular).
+func _ctl_btn(text: String, icon_name: String, cb: Callable) -> Button:
+	var b := UIKit.button(text, "", cb, icon_name)
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size = Vector2(0, 88)
+	b.clip_text = false
+	b.add_theme_font_size_override(&"font_size", 16)
+	return b
 
 
 func _toggle_match_sound() -> void:
@@ -577,16 +608,16 @@ func _update_sound_button() -> void:
 func _update_play_button() -> void:
 	if _play_btn == null or _done:
 		return
-	_play_btn.text = ""
 	if _halftime:
-		_play_btn.tooltip_text = "2º tempo"
+		_play_btn.text = "2º tempo"
 		_play_btn.icon = UIKit.icon("play")
 	elif _paused:
-		_play_btn.tooltip_text = "Seguir"
+		_play_btn.text = "Seguir"
 		_play_btn.icon = UIKit.icon("play")
 	else:
-		_play_btn.tooltip_text = "Pausar"
+		_play_btn.text = "Pausar"
 		_play_btn.icon = UIKit.icon("pause")
+	_play_btn.tooltip_text = _play_btn.text
 
 
 static func _cdist(a: Color, b: Color) -> float:
