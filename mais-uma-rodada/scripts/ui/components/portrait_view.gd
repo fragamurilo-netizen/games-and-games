@@ -198,9 +198,9 @@ const STYLE_P: Array = [
 	{"tp": 0.04, "sd": 0.0, "fd": 1, "tx": "coil", "bk": "puffs2", "fl": 3}, # dois puffs
 ]
 
-const LIGHT := Vector3(-0.45, -0.52, 0.72)
+const LIGHT := Vector3(-0.28, -0.22, 0.94)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 7
+const PORTRAIT_RENDER_VERSION := 8
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -396,7 +396,7 @@ func _light_pass() -> void:
 		var d := (p - key) / (_s * 0.9)
 		var fall := clampf(d.length(), 0.0, 1.3)
 		var warm := Color(1.0, 0.9, 0.76, 0.045 * (1.0 - smoothstep(0.0, 0.6, fall)))
-		var shade := 0.13 * smoothstep(0.45, 1.25, fall)
+		var shade := 0.06 * smoothstep(0.45, 1.25, fall)
 		if shade > warm.a:
 			return Color(0.04, 0.06, 0.12, shade)
 		return warm)
@@ -740,11 +740,11 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var nz := fn.z
 	# Luz "enrolada": a pele espalha a luz por dentro, então a passagem para a sombra é gradual
 	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
-	var lum := 0.51 + 0.54 * diff
+	var lum := 0.64 + 0.38 * diff
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
-	lum -= 0.06 * smoothstep(0.78, 1.0, t)
-	lum += 0.07 * smoothstep(0.86, 1.0, t) * maxf(0.0, dx) * (1.0 - smoothstep(0.3, 0.9, -dy))
+	lum -= 0.04 * smoothstep(0.78, 1.0, t)
+	lum += 0.035 * smoothstep(0.86, 1.0, t) * maxf(0.0, dx) * (1.0 - smoothstep(0.3, 0.9, -dy))
 	var E := _E
 	var X := _X
 	var N := _N
@@ -878,7 +878,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
 	var col := _shade(_skin, lum)
 	# Pele humana perde mais azul e verde na sombra; isso evita a aparência cinza/plástica.
-	col = col.lerp(Color(col.r, col.g * 0.9, col.b * 0.82), 0.32 * (1.0 - diff))
+	col = col.lerp(Color(col.r, col.g * 0.92, col.b * 0.86), 0.2 * (1.0 - diff))
 	# Rubor nas bochechas, nariz e queixo
 	a = (au - 0.52) / 0.22
 	b = (v - cheek_v - 0.1) / 0.13
