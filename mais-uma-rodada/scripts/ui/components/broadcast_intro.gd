@@ -101,6 +101,13 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 	info.add_child(UIKit.kv("Narração", booth[0]))
 	info.add_child(UIKit.kv("Comentários", booth[1]))
 	root.add_child(info)
+	# Estúdio: prévia dos comentaristas nos jogos grandes
+	if Pundits.is_big(sim):
+		var nat := w.league(fx.comp).nation if w.league(fx.comp) != null else home.nation
+		var studio := UIKit.vbox(10)
+		studio.add_child(UIKit.label("No estúdio", "Title", true))
+		studio.add_child(Pundits.card("Prévia", Pundits.preview(w, sim, nat)))
+		pages.append(studio)
 	# 2. Entrada dos times
 	var rit := WalkoutView.ritual_for(w, fx.comp, home)
 	var walk := UIKit.vbox(8)
@@ -149,7 +156,7 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 			if pg.get_parent() == body:
 				body.remove_child(pg)
 		body.add_child(pages[step[0]])
-		if step[0] == 1:
+		if pages[step[0]] is VBoxContainer and pages[step[0]].get_child_count() > 1 and pages[step[0]].get_child(1) is WalkoutView:
 			AudioManager.crowd_clip(0, "entrada"))
 	nav.add_child(skip_btn)
 	nav.add_child(next_btn)

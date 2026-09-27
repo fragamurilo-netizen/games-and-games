@@ -2194,6 +2194,10 @@ func _build_summary() -> void:
 	if _sim.derby:
 		top.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 18))
 	_feed.add_child(top)
+	# Mesa-redonda dos comentaristas nos jogos grandes
+	if Pundits.is_big(_sim):
+		var lg := world().league(_fx.comp)
+		_feed.add_child(Pundits.card("Mesa-redonda", Pundits.review(world(), _sim, lg.nation if lg != null else _sim.teams[0].club.nation)))
 	# Gols
 	var goals := UIKit.card("Card", 6)
 	goals.add_child(UIKit.section("Gols"))
