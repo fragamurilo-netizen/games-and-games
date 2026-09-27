@@ -31,7 +31,7 @@ jobs:
             bash -lc '
               set -euo pipefail
               apt-get update -qq
-              apt-get install -y --no-install-recommends xvfb libfontconfig1 libgl1-mesa-dri libglx-mesa0 >/dev/null
+              apt-get install -y --no-install-recommends xvfb libfontconfig1 libgl1-mesa-dri libglx-mesa0 libxcursor1 libxinerama1 libxi6 libxrandr2 libxrender1 libxext6 libx11-6 libxfixes3 libxkbcommon0 libxkbcommon-x11-0 libwayland-client0 >/dev/null
               rm -rf .godot
               godot --headless --path . --import
               mkdir -p build
