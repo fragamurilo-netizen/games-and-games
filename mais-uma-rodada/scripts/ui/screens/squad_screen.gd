@@ -95,15 +95,12 @@ func refresh() -> void:
 	top.add_child(vest)
 	c.add_child(top)
 	c.add_child(_summary_card(w, club, squad))
-	var gv := ButtonGroup.new()
-	var vrow := UIKit.hbox(8)
+	var vitems: Array = []
 	for i in VIEWS.size():
-		var idx := i
-		var chip := UIKit.chip(VIEWS[i], i == _view, gv, func():
-			_view = idx
-			refresh())
-		UIKit.shrink_button(chip)
-		vrow.add_child(chip)
+		vitems.append([str(i), VIEWS[i]])
+	var vrow := UIKit.tabs(vitems, str(_view), func(key: String):
+		_view = int(key)
+		refresh())
 	c.add_child(vrow)
 	if _view == 1:
 		_build_depth(w, club, c)
@@ -111,13 +108,12 @@ func refresh() -> void:
 	if _view == 2:
 		_build_roles(w, club, c)
 		return
-	var g := ButtonGroup.new()
-	var frow := UIKit.hbox(8)
+	var fitems: Array = []
 	for i in FILTERS.size():
-		var idx := i
-		frow.add_child(UIKit.chip(FILTERS[i], i == _filter, g, func():
-			_filter = idx
-			refresh()))
+		fitems.append([str(i), FILTERS[i]])
+	var frow := UIKit.segment(fitems, str(_filter), func(key: String):
+		_filter = int(key)
+		refresh())
 	c.add_child(frow)
 	var g2 := ButtonGroup.new()
 	var srow := UIKit.hbox(6)

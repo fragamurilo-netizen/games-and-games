@@ -32,38 +32,29 @@ func refresh() -> void:
 	var segs: Array = rep.get("segments", [])
 	if segs.size() >= 2:
 		c.add_child(_segments_card(segs))
+	max_content_width = 1700
+	columnize(c, 0, 2, 0)
 
 
 func _numbers(w: GameWorld, rep: Dictionary, opp: Club) -> Control:
-	var card := UIKit.card("Card", 8)
+	var card := UIKit.card("Card", 12)
+	card.add_child(UIKit.section_header("O jogo em números"))
 	var head := UIKit.hbox(10)
-	head.add_child(UIKit.crest(w.user_club(), 44))
+	head.add_child(UIKit.crest(w.user_club(), 64))
 	var sc: Array = rep["score"]
 	var s := UIKit.label("%d × %d" % [int(sc[0]), int(sc[1])], "Title")
 	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	head.add_child(s)
 	if opp != null:
-		head.add_child(UIKit.crest(opp, 44))
+		head.add_child(UIKit.crest(opp, 64))
 	card.add_child(head)
 	var fo: Dictionary = rep["for"]
 	var ag: Dictionary = rep["against"]
 	for row in [["Finalizações", str(fo["shots"]), str(ag["shots"])], ["xG", TacticalXRay.dec(float(fo["xg"])), TacticalXRay.dec(float(ag["xg"]))],
 			["Posse", "%d%%" % int(fo["poss"]), "%d%%" % int(ag["poss"])], ["Entradas na área", str(fo["box"]), str(ag["box"])],
 			["No último terço", str(fo["ft"]), str(ag["ft"])]]:
-		var r := UIKit.hbox(8)
-		var a := UIKit.label(String(row[1]), "H3")
-		a.custom_minimum_size.x = 90
-		r.add_child(a)
-		var n := UIKit.label(String(row[0]), "Small")
-		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		r.add_child(n)
-		var b := UIKit.label(String(row[2]), "H3")
-		b.custom_minimum_size.x = 90
-		b.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		r.add_child(b)
-		card.add_child(r)
+		card.add_child(UIKit.versus_row(String(row[0]), String(row[1]), String(row[2]), String(row[1]).to_float(), String(row[2]).to_float()))
 	return UIKit.card_panel(card)
 
 

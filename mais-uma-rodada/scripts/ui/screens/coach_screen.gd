@@ -61,6 +61,8 @@ func refresh() -> void:
 	c.add_child(_stories(w, co))
 	c.add_child(_career(w, co))
 	c.add_child(_style_card(w, co))
+	max_content_width = 1600
+	columnize(c, 0, 2, 1)
 	if club != null:
 		var cid := club.id
 		f.add_child(UIKit.button("Conversar", "PrimaryButton", func(): TalkDialog.open("coach", cid, func(): refresh()), "mail"))

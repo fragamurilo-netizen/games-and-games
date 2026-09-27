@@ -78,44 +78,58 @@ func refresh() -> void:
 		c.add_child(UIKit.label("A temporada ainda não terminou.", "Muted"))
 		_footer(w)
 		return
+	max_content_width = 1700
+	# Duas partes, como a retrospectiva de um jogo de gestão: a sua temporada e o resto do mundo.
 	c.add_child(_user_card(w, year))
+	var mine_cards: Array = []
 	var pr: Dictionary = _summary.get("user", {}).get("prestige", {})
 	if not pr.is_empty():
-		c.add_child(_prestige_card(w, pr))
+		mine_cards.append(_prestige_card(w, pr))
 	var rv: Dictionary = _summary.get("review", {})
 	if not rv.is_empty():
-		c.add_child(_grade_card(rv))
-		c.add_child(_numbers_card(w, rv))
+		mine_cards.append(_grade_card(rv))
+		mine_cards.append(_numbers_card(w, rv))
 		var stars := _stars_card(w, rv)
 		if stars != null:
-			c.add_child(stars)
+			mine_cards.append(stars)
 		var ach := _achievements_card(rv)
 		if ach != null:
-			c.add_child(ach)
-		c.add_child(_career_card(w))
+			mine_cards.append(ach)
+		mine_cards.append(_career_card(w))
+	var mine := _club_card(w)
+	if mine != null:
+		mine_cards.append(mine)
+	var world_cards: Array = []
 	var aw := _awards_card(w)
 	if aw != null:
-		c.add_child(aw)
+		world_cards.append(aw)
 	var ev := _evolution_card(w)
 	if ev != null:
-		c.add_child(ev)
+		world_cards.append(ev)
 	for cu in _summary.get("cups", []):
 		if CupManager.relevant_to_user(w, String(cu["id"])) or w.is_user_club(int(cu.get("champion", -1))):
-			c.add_child(_cup_card(w, cu))
+			world_cards.append(_cup_card(w, cu))
 	for rec in _summary.get("intl", []):
-		c.add_child(_intl_card(w, rec))
+		world_cards.append(_intl_card(w, rec))
 	var nat := w.user_nation()
 	var others: Array = []
 	for d in _summary.get("leagues", []):
 		if String(d["nation"]) == nat:
-			c.add_child(_division_card(w, d))
+			world_cards.append(_division_card(w, d))
 		elif int(d["tier"]) == 1:
 			others.append(d)
 	if not others.is_empty():
-		c.add_child(_world_card(w, others))
-	var mine := _club_card(w)
-	if mine != null:
-		c.add_child(mine)
+		world_cards.append(_world_card(w, others))
+	if not mine_cards.is_empty():
+		c.add_child(UIKit.section_header("Sua temporada"))
+		var box := UIKit.vbox(UITokens.S4)
+		c.add_child(box)
+		UIKit.columns(box, mine_cards, content_width())
+	if not world_cards.is_empty():
+		c.add_child(UIKit.section_header("Campeões e prêmios"))
+		var box2 := UIKit.vbox(UITokens.S4)
+		c.add_child(box2)
+		UIKit.columns(box2, world_cards, content_width())
 	_footer(w)
 
 
@@ -142,11 +156,13 @@ func _user_card(w: GameWorld, year: int) -> Control:
 		return UIKit.card_panel(card)
 	var fired: bool = u.get("fired", false)
 	var club: Club = w.club(int(w.stats.get("fired", {}).get("from", w.user_club_id))) if fired else w.user_club()
-	var row := UIKit.hbox(14)
-	row.add_child(UIKit.crest(club, 88))
+	var row := UIKit.hbox(18)
+	row.add_child(UIKit.crest(club, 120))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(club.short_name, "Title", true))
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_child(UIKit.eyebrow(tr("Temporada %d") % year))
+	col.add_child(UIKit.label(club.short_name.to_upper(), "Display" if not UILayout.is_wide() else "Display", true))
 	col.add_child(UIKit.label("%dº lugar na %s" % [int(u.get("pos", 0)), String(u.get("league_name", ""))], "H3", true))
 	for cu in u.get("cups", []):
 		col.add_child(UIKit.label("%s: %s" % [cu["name"], cu["stage"]], "Small", true))
@@ -168,7 +184,7 @@ func _user_card(w: GameWorld, year: int) -> Control:
 		var delta := float(u.get("board_delta", 0.0))
 		var conf := float(u.get("board", club.board_confidence))
 		card.add_child(UIKit.kv("Diretoria", "%s (%s)" % [BoardManager.label(conf), "subiu" if delta > 0 else "caiu"], BoardManager.color(conf)))
-	return UIKit.card_panel(card)
+	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.12)
 
 
 func _division_card(w: GameWorld, d: Dictionary) -> Control:

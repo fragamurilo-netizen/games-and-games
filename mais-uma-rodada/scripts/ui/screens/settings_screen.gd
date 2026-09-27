@@ -13,6 +13,8 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	max_content_width = 1600.0
+	var cards: Array = []
 	var cl := UIKit.card("Card", 12)
 	cl.add_child(UIKit.section("Aparência"))
 	cl.add_child(UIKit.label("Tema", "Muted"))
@@ -35,26 +37,22 @@ func refresh() -> void:
 		AppSettings.reduce_motion = v
 		AppSettings.save_settings()))
 	cl.add_child(UIKit.label("Telas sem deslizar e comemorações de gol curtas.", "Small", true))
-	c.add_child(UIKit.card_panel(cl))
+	cards.append(UIKit.card_panel(cl))
 	var card0 := UIKit.card("Card", 12)
 	card0.add_child(UIKit.section("Idioma"))
-	var lg := ButtonGroup.new()
-	var lrow := UIKit.hbox(8)
-	for i in I18n.LANGS.size():
+	var lrow := _chips(I18n.LANG_NAMES, I18n.LANGS.find(AppSettings.language), func(i: int):
 		var code := I18n.LANGS[i]
-		var lchip := UIKit.chip(I18n.LANG_NAMES[i], code == AppSettings.language, lg, func():
-			if code == AppSettings.language:
-				return
-			AppSettings.language = code
-			AppSettings.save_settings()
-			I18n.apply(code)
-			refresh.call_deferred())
-		# O nome de cada idioma aparece sempre na própria língua.
-		lchip.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-		UIKit.shrink_button(lchip)
-		lrow.add_child(lchip)
+		if code == AppSettings.language:
+			return
+		AppSettings.language = code
+		AppSettings.save_settings()
+		I18n.apply(code)
+		refresh.call_deferred())
+	# O nome de cada idioma aparece sempre na própria língua.
+	for b in lrow.find_children("*", "Button", true, false):
+		(b as Button).auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	card0.add_child(lrow)
-	c.add_child(UIKit.card_panel(card0))
+	cards.append(UIKit.card_panel(card0))
 	var currency_card := UIKit.card("Card", 12)
 	currency_card.add_child(UIKit.section("Moeda"))
 	currency_card.add_child(UIKit.label("Valores de mercado, salários e finanças", "Muted"))
@@ -63,7 +61,7 @@ func refresh() -> void:
 		AppSettings.save_settings()
 		refresh()))
 	currency_card.add_child(UIKit.label("A moeda muda apenas a exibição. A economia é calculada em euro-base e usa o câmbio de referência do BCE de %s." % Fmt.FX_DATE, "Small", true))
-	c.add_child(UIKit.card_panel(currency_card))
+	cards.append(UIKit.card_panel(currency_card))
 	var card_ed := UIKit.card("Card", 12)
 	card_ed.add_child(UIKit.section("Editor"))
 	card_ed.add_child(_toggle("Editar jogadores e clubes durante a carreira", AppSettings.career_edit, func(v: bool):
@@ -71,7 +69,7 @@ func refresh() -> void:
 		AppSettings.save_settings()
 		refresh()))
 	card_ed.add_child(UIKit.label("Desligado, a carreira fica sem atalhos: o botão Editar some dos perfis e o editor dentro da carreira só mexe no visual do seu clube. O Editor do menu inicial sempre edita o mundo padrão das novas carreiras.", "Small", true))
-	c.add_child(UIKit.card_panel(card_ed))
+	cards.append(UIKit.card_panel(card_ed))
 	var cm := UIKit.card("Card", 12)
 	cm.add_child(UIKit.section("Música"))
 	cm.add_child(_toggle("Música de fundo", AppSettings.music, func(v: bool):
@@ -95,7 +93,7 @@ func refresh() -> void:
 			AppSettings.music_in_match = v
 			AppSettings.save_settings()))
 	cm.add_child(UIKit.label("As músicas são compostas e tocadas pelo próprio jogo, sem arquivos de terceiros.", "Small", true))
-	c.add_child(UIKit.card_panel(cm))
+	cards.append(UIKit.card_panel(cm))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
 	card.add_child(_toggle("Efeitos sonoros e torcida", AppSettings.sound, func(v: bool):
@@ -114,22 +112,16 @@ func refresh() -> void:
 		AppSettings.vibration = v
 		AppSettings.save_settings()
 		AudioManager.vibrate(60)))
-	c.add_child(UIKit.card_panel(card))
+	cards.append(UIKit.card_panel(card))
 	var card2 := UIKit.card("Card", 12)
 	card2.add_child(UIKit.section("Partidas"))
 	card2.add_child(UIKit.label("Velocidade padrão ao iniciar um jogo", "Muted"))
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
-	for i in 3:
-		var idx := i
-		var chip := UIKit.chip(AppSettings.SPEED_NAMES[i], i == AppSettings.match_speed, g, func():
-			AppSettings.match_speed = idx
-			AppSettings.save_settings())
-		UIKit.shrink_button(chip)
-		row.add_child(chip)
+	var row := _chips(AppSettings.SPEED_NAMES, AppSettings.match_speed, func(i: int):
+		AppSettings.match_speed = i
+		AppSettings.save_settings())
 	card2.add_child(row)
 	card2.add_child(UIKit.label("Dá para trocar durante a partida.", "Small", true))
-	c.add_child(UIKit.card_panel(card2))
+	cards.append(UIKit.card_panel(card2))
 	var cs := UIKit.card("Card", 12)
 	cs.add_child(UIKit.section("Compras"))
 	if Store.owned or not Store.enforced():
@@ -137,37 +129,38 @@ func refresh() -> void:
 	else:
 		cs.add_child(UIKit.label("Primeira temporada grátis. A Carreira Completa libera as temporadas seguintes e os mods, com pagamento único de %s." % Store.price(), "Small", true))
 		cs.add_child(UIKit.button("Ver a Carreira Completa", "GhostButton", func(): UIManager.push("paywall", {"reason": "settings"}), "star"))
-	cs.add_child(UIKit.button("Restaurar compras", "GhostButton", func(): Store.restore(), "save"))
-	cs.add_child(UIKit.button("Pagar um café pro desenvolvedor · %s" % Store.price(Store.TIP), "GhostButton", func(): Store.buy(Store.TIP), "star"))
-	c.add_child(UIKit.card_panel(cs))
+	cs.add_child(UIKit.menu_group([
+		UIKit.menu_row("save", "Restaurar compras", "", func(): Store.restore()),
+		UIKit.menu_row("star", "Pagar um café pro desenvolvedor · %s" % Store.price(Store.TIP), "", func(): Store.buy(Store.TIP)),
+	]))
+	cards.append(UIKit.card_panel(cs))
 	var card3 := UIKit.card("Card", 12)
 	card3.add_child(UIKit.section("Ajuda"))
-	card3.add_child(UIKit.button("Mostrar as dicas iniciais novamente", "GhostButton", func():
-		AppSettings.tutorial_done = false
-		AppSettings.save_settings()
-		UIManager.toast("As dicas voltam a aparecer no início da carreira."), "info"))
-	card3.add_child(UIKit.button("Como jogar", "GhostButton", func(): Tutorial.show_all(), "list"))
-	card3.add_child(UIKit.button("Créditos", "GhostButton", func(): MainMenuScreen.show_credits(), "star"))
-	c.add_child(UIKit.card_panel(card3))
+	card3.add_child(UIKit.menu_group([
+		UIKit.menu_row("info", "Mostrar as dicas iniciais novamente", "", func():
+			AppSettings.tutorial_done = false
+			AppSettings.save_settings()
+			UIManager.toast("As dicas voltam a aparecer no início da carreira.")),
+		UIKit.menu_row("list", "Como jogar", "", func(): Tutorial.show_all()),
+		UIKit.menu_row("star", "Créditos", "", func(): MainMenuScreen.show_credits()),
+	]))
+	cards.append(UIKit.card_panel(card3))
 	var card4 := UIKit.card("Card", 8)
 	card4.add_child(UIKit.section("Sobre"))
 	card4.add_child(UIKit.label("Mais Uma Rodada · versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "H3"))
 	card4.add_child(UIKit.label("Clubes, estádios e ligas usam os nomes reais apenas como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
 	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
 	card4.add_child(UIKit.label("Tudo roda offline e o jogo não coleta dados. As compras são processadas pela Google Play.", "Small", true))
-	c.add_child(UIKit.card_panel(card4))
+	cards.append(UIKit.card_panel(card4))
+	UIKit.columns(c, cards, content_width())
 
 
 ## Fileira de opções exclusivas (chips); `cb` recebe o índice escolhido.
-func _chips(names: Array, selected: int, cb: Callable) -> HBoxContainer:
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
+func _chips(names: Array, selected: int, cb: Callable) -> Control:
+	var items: Array = []
 	for i in names.size():
-		var idx := i
-		var chip := UIKit.chip(String(names[i]), i == selected, g, func(): cb.call(idx))
-		UIKit.shrink_button(chip)
-		row.add_child(chip)
-	return row
+		items.append([str(i), String(names[i])])
+	return UIKit.segment(items, str(selected), func(k: String): cb.call(int(k)))
 
 
 ## Controle deslizante de 0 a 100 com o valor ao lado. `on_change` roda enquanto arrasta;
