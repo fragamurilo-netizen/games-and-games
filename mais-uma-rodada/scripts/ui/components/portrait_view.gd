@@ -193,8 +193,8 @@ const STYLE_P: Array = [
 	{"tp": 0.04, "sd": 0.0, "fd": 1, "tx": "coil", "bk": "puffs2", "fl": 3}, # dois puffs
 ]
 
-const LIGHT := Vector3(-0.45, -0.52, 0.72)
-const HEAD_SCALE := 0.88
+const LIGHT := Vector3(-0.58, -0.5, 0.64)
+const HEAD_SCALE := 0.85
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
 const HEAD_W := 0.93
@@ -574,10 +574,13 @@ func _setup(c: Vector2, s: float) -> void:
 	_light = LIGHT.normalized()
 	_E = float(f["eye_y"])
 	_X = float(f["eye_dx"])
-	_N = float(f["nose_len"])
-	_M = float(f["mouth_y"])
-	_NW = float(f["nose_w"]) * 1.1
-	_BW = float(f["bridge_w"])
+	# Proporções humanas (terços do rosto): a base do nariz fica perto de 0.43 e a boca a um terço
+	# do caminho entre o nariz e o queixo. Nariz curto com um buço enorme dava a "cara de ET".
+	# Só o desenho muda, os números salvos no FaceGen continuam os mesmos.
+	_N = float(f["nose_len"]) * 1.2 + 0.06
+	_M = maxf(float(f["mouth_y"]) + 0.06, _N + 0.15)
+	_NW = float(f["nose_w"]) * 1.2
+	_BW = float(f["bridge_w"]) * 1.15
 	_MW = float(f["mouth_w"]) * 1.15
 	_skin = f["skin"]
 	# Índice fora da tabela (save antigo, catálogo novo) cai no último item em vez de travar o
@@ -769,8 +772,9 @@ func _hw(v: float) -> float:
 		# Da mandíbula ao queixo em linha quase reta, com a ponta arredondada: o queixo tem
 		# largura própria (mais largo no queixo quadrado) em vez de um "U" cheio
 		var q := clampf((v - jv) / (1.0 - jv), 0.0, 1.0)
-		var chin := jaw * lerpf(0.42, 0.58, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
-		var e := 3.0 + sq
+		# Queixo largo o bastante para ser de gente (o "V" fino deixava o rosto de alienígena)
+		var chin := jaw * lerpf(0.47, 0.62, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
+		var e := 2.4 + sq * 0.7
 		w = lerpf(jaw, chin, pow(q, 1.1)) * pow(maxf(0.0, 1.0 - pow(q, e)), 1.0 / e)
 	w += 0.03 * float(f["cheekbone"]) * _g(v - 0.08, 0.16)
 	w *= 1.0 + float(f["fat"]) * 0.11 * _g(v - 0.5, 0.3)
@@ -855,7 +859,8 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var nz := sqrt(maxf(0.0, 1.0 - tilt * tilt))
 	# Luz "enrolada": a pele espalha a luz por dentro, então a passagem para a sombra é gradual
 	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
-	var lum := 0.47 + 0.6 * diff
+	# Luz principal mais lateral e com mais contraste (antes o rosto ficava chapado)
+	var lum := 0.33 + 0.78 * diff
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
 	lum -= 0.06 * smoothstep(0.78, 1.0, t)
@@ -875,7 +880,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	a = (u - X) / 0.27
 	b = (u + X) / 0.27
 	var ey2 := ey * ey / 0.0121
-	lum -= 0.13 * k[0] * (exp(-a * a - ey2) + exp(-b * b - ey2))
+	lum -= (0.05 + 0.16 * k[0]) * (exp(-a * a - ey2) + exp(-b * b - ey2) * 1.2)
 	a = (au - 0.2) / 0.08
 	b = (v - E) / 0.08
 	lum -= 0.05 * exp(-a * a - b * b)
@@ -903,9 +908,9 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		if k[2] > 0.0:
 			b = (v - (E + N) * 0.5) / 0.06
 			hump = 0.05 * exp(-b * b)
-		lum += (0.1 * k[3] + hump) * ridge_hl
+		lum += (0.05 + 0.1 * k[3] + hump) * ridge_hl
 		a = (un - BW * 1.7) / (BW * 0.9)
-		lum -= 0.2 * k[3] * exp(-a * a) * wv
+		lum -= (0.13 + 0.2 * k[3]) * exp(-a * a) * wv
 		a = (un + BW * 1.9) / (BW * 0.9)
 		lum -= 0.05 * k[3] * exp(-a * a) * wv
 	if v > N - 0.25 and v < N + 0.12:
@@ -920,6 +925,9 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		a = (un - 0.02) / (NW * 0.8)
 		b = (v - (N + 0.035)) / 0.034
 		lum -= 0.28 * exp(-a * a - b * b)
+	# Sombra que o nariz projeta para baixo e para a direita (luz principal no alto à esquerda)
+	if v > N - 0.2 and v < N + 0.2:
+		lum -= 0.13 * _g2(un - NW * 0.9, v - (N + 0.03), NW * 0.75, 0.07)
 	# Sulco nasolabial (mais marcado com a idade e o sorriso)
 	if v > N - 0.1 and v < M + 0.15:
 		var nl_d := _seg_dist(Vector2(au, v), Vector2(NW * 1.25, N - 0.02), Vector2(MW * 1.12, M + 0.04)) / 0.045
@@ -931,12 +939,15 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	lum += k[6] * (0.07 * exp(-a * a - b * b) + 0.03 * exp(-a2 * a2 - b * b))
 	a = (au - 0.64) / 0.17
 	b = (v - 0.4) / 0.13
-	lum -= k[7] * exp(-a * a - b * b)
+	lum -= (0.035 + k[7]) * exp(-a * a - b * b) * (1.15 if u > 0.0 else 0.8)
+	# Mandíbula: a face de baixo da mandíbula vira para longe da luz e escurece rente à borda
+	var jd := au / maxf(0.05, _hw(clampf(v, 0.0, 1.0)))
+	lum -= 0.08 * smoothstep(0.35, 0.8, v) * smoothstep(0.7, 1.0, jd) * (1.2 if u > 0.0 else 0.6)
 	# Boca e queixo
 	if v > M - 0.15:
 		a = u / (MW * 0.55)
 		b = (v - (M + k[8] * 2.0 + 0.06)) / 0.035
-		lum -= 0.11 * exp(-a * a - b * b)
+		lum -= 0.16 * exp(-a * a - b * b)
 		a = (au - MW * 1.05) / 0.05
 		b = (v - M) / 0.04
 		lum -= 0.08 * exp(-a * a - b * b)
@@ -990,7 +1001,14 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		a = (u - float(bl[0])) / float(bl[2])
 		b = (v - float(bl[1])) / float(bl[2])
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
+	# Piso suave: sombras somadas não podem virar mancha preta (pior em pele escura)
+	lum = maxf(lum, 0.3 + 0.1 * smoothstep(0.1, 0.45, 0.45 - lum))
 	var col := _shade(_skin, lum)
+	# Luz quente, sombra fria, e a pele avermelha na passagem da luz para a sombra (luz que
+	# atravessa a pele), como numa foto de estúdio
+	col = col.lerp(Color(col.r * 0.86, col.g * 0.9, minf(col.b * 1.08 + 0.01, 1.0)), 0.5 * (1.0 - diff))
+	col = col.lerp(Color(minf(col.r * 1.06, 1.0), col.g * 0.97, col.b * 0.9), 0.35 * smoothstep(0.55, 1.0, diff))
+	col = col.lerp(Color(0.75, 0.28, 0.22), 0.07 * _g(diff - 0.32, 0.14))
 	# Rubor nas bochechas, nariz e queixo
 	a = (au - 0.52) / 0.22
 	b = (v - 0.25) / 0.13
@@ -1229,7 +1247,7 @@ func _body_setup() -> void:
 	_nwt = _fw * float(f.get("neck_w", 0.68)) * (1.0 + 0.1 * float(f["fat"]))
 	# Pescoço de atleta: nunca um "palito" embaixo de um rosto fino, mas também nunca mais largo que
 	# a mandíbula (aí vira uma "coluna")
-	_nwt = minf(maxf(_nwt, _fw * 0.6), _fw * float(f["jaw"]) * 0.95 * 0.92)
+	_nwt = minf(maxf(_nwt, _fw * 0.68), _fw * float(f["jaw"]) * 0.99 * 0.95)
 	_ynb = _chin_y + s * (0.058 + 0.01 * build)
 	_ynotch = _chin_y + s * (0.1 + 0.01 * build)
 	_sw = s * (0.41 + 0.07 * build)
@@ -2083,8 +2101,9 @@ func _ears() -> void:
 
 func _eyes() -> void:
 	var f := _f
-	var ew := _fw * float(f["eye_w"])
-	var eh := _fw * float(f["eye_h"])
+	# Olhos um pouco menores: o olho humano tem 1/5 da largura do rosto
+	var ew := _fw * float(f["eye_w"]) * 0.9
+	var eh := _fw * float(f["eye_h"]) * 0.88
 	var tilt := _fw * float(f["eye_tilt"])
 	var iris_main: Color = f["eye"]
 	var ring: float = f.get("eye_ring", 0.0)
@@ -2367,7 +2386,7 @@ func _mouth() -> void:
 	var sk := _shade(_skin, 0.86)
 	var red := Color("#A8585A")
 	var rr := sk.get_luminance() / maxf(0.05, red.get_luminance())
-	var lip := sk.lerp(Color(minf(1.0, red.r * rr), minf(1.0, red.g * rr), minf(1.0, red.b * rr)), 0.38 - darkness * 0.12).darkened(0.06 + darkness * 0.06)
+	var lip := sk.lerp(Color(minf(1.0, red.r * rr), minf(1.0, red.g * rr), minf(1.0, red.b * rr)), 0.3 - darkness * 0.1).darkened(0.08 + darkness * 0.06)
 	var lip_up := lip.darkened(0.1 + darkness * 0.14)
 	# Em pele escura o lábio de baixo puxa para o rosado, mas no mesmo brilho do lábio (clarear
 	# demais parece boca aberta)
@@ -2428,22 +2447,26 @@ func _mouth() -> void:
 	# Lábio superior (cor por vértice: mais escuro junto à linha da boca)
 	var upper := PackedVector2Array(up)
 	var ucol := PackedColorArray()
+	# A boca recebe a mesma luz do rosto: o lado direito cai na sombra e o lábio de cima, virado
+	# para baixo, fica mais escuro que o de baixo (que pega a luz)
+	var lit := func(c: Color, p: Vector2) -> Color:
+		return _shade(c, 1.04 - 0.3 * smoothstep(-mw, mw * 1.1, p.x - _hc.x))
 	for i in up.size():
-		ucol.append(lip_up.lightened(0.05))
+		ucol.append(lit.call(lip_up.darkened(0.04), up[i]))
 	for i in range(line.size() - 1, -1, -1):
 		upper.append(line[i])
-		ucol.append(lip_up.darkened(0.15))
+		ucol.append(lit.call(lip_up.darkened(0.2), line[i]))
 	_poly_colors(upper, ucol)
 	# Lábio inferior (claro no meio, com brilho)
 	var lower := PackedVector2Array(bot)
 	var lcol := PackedColorArray()
 	for i in bot.size():
-		lcol.append(lip_lo.darkened(0.12))
+		lcol.append(lit.call(lip_lo.darkened(0.12), bot[i]))
 	var lo_r := lo.duplicate()
 	lo_r.reverse()
 	for i in lo_r.size():
 		var t := float(i) / 14.0
-		lcol.append(lip_lo.lightened(0.05 * sin(PI * t)).darkened(0.08 * (1.0 - sin(PI * t))))
+		lcol.append(lit.call(lip_lo.lightened(0.05 * sin(PI * t)).darkened(0.08 * (1.0 - sin(PI * t))), lo_r[i]))
 	lower.append_array(lo_r)
 	_poly_colors(lower, lcol)
 	_fill(_ellipse(Vector2(_hc.x - mw * 0.14, mouth_y + ll * 0.48), mw * 0.22, ll * 0.14, 12), Color(1, 1, 1, 0.07 + darkness * 0.03))
@@ -2639,7 +2662,7 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 func _neck_half() -> float:
 	var f := _f
 	var nw := float(f.get("neck_w", 0.68)) * (1.0 + 0.1 * float(f["fat"]))
-	return minf(maxf(nw, 0.6), float(f["jaw"]) * 0.95 * 0.92)
+	return minf(maxf(nw, 0.68), float(f["jaw"]) * 0.99 * 0.95)
 
 
 func _beard_patchiness(P: Dictionary) -> float:
