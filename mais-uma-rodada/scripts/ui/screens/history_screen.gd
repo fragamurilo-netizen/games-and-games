@@ -38,6 +38,7 @@ func refresh() -> void:
 	c.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
 		_tab = k
 		refresh()))
+	# Acesso ao NXGN continua em largura total; o conteúdo da aba passa a usar duas colunas.
 	c.add_child(UIKit.button("Joias do futebol: NXGN e Next Generation", "GhostButton", func(): UIManager.push("nextgen"), "star"))
 	var start := c.get_child_count()
 	match _tab:
@@ -55,7 +56,7 @@ func refresh() -> void:
 			_encyclopedia(w, c)
 		"legends":
 			c.add_child(_legends(w))
-	# Temporadas e campeões têm seletores no topo (liga, competição) que ficam na largura toda.
+	# Temporadas e campeões têm seletores próprios no topo; o restante se adapta em duas colunas.
 	columnize(c, start, 2, 2 if _tab in ["seasons", "champions"] else 0)
 
 
@@ -221,12 +222,14 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 	else:
 		if not arch.has(_arch_league):
 			_arch_league = String(u.get("league", "")) if arch.has(String(u.get("league", ""))) else String(arch.keys()[0])
-		var items: Array = []
+		var g := ButtonGroup.new()
+		var flow := UIKit.flow(8)
 		for lid in arch:
-			items.append([String(lid), w.league_short(String(lid))])
-		c.add_child(UIKit.scroll_tabs(items, _arch_league, func(k: String):
-			_arch_league = k
-			refresh()))
+			var id := String(lid)
+			flow.add_child(UIKit.chip(w.league_short(id), id == _arch_league, g, func():
+				_arch_league = id
+				refresh()))
+		c.add_child(flow)
 		c.add_child(_arch_card(w, h, arch[_arch_league]))
 	# Bola de Ouro do ano
 	var bo: Array = h.get("bo", [])
@@ -253,13 +256,15 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 	if not months.is_empty():
 		var mc := UIKit.card("Card", 6)
 		mc.add_child(UIKit.section("Seleções do mês"))
+		var g := ButtonGroup.new()
+		var fl := UIKit.flow(8)
 		_month_pick = clampi(_month_pick, 0, months.size() - 1)
-		var mitems: Array = []
 		for i in months.size():
-			mitems.append([str(i), WeeklyAwards.month_label(int(months[i]["m"])).capitalize()])
-		mc.add_child(UIKit.scroll_tabs(mitems, str(_month_pick), func(k: String):
-			_month_pick = int(k)
-			refresh()))
+			var mi := i
+			fl.add_child(UIKit.chip(WeeklyAwards.month_label(int(months[i]["m"])).capitalize(), i == _month_pick, g, func():
+				_month_pick = mi
+				refresh()))
+		mc.add_child(fl)
 		var m: Dictionary = months[_month_pick]
 		var best := w.player(int(m["best"]))
 		if best != null:
@@ -308,9 +313,14 @@ func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	card.add_child(head)
-	card.add_child(UIKit.segment([["tb", "Tabela"], ["sc", "Gols"], ["as", "Assist."], ["rt", "Notas"], ["aw", "Prêmios"]], _arch_view, func(k: String):
-		_arch_view = k
-		refresh()))
+	var g := ButtonGroup.new()
+	var views := UIKit.flow(8)
+	for v in [["tb", "Tabela"], ["sc", "Gols"], ["as", "Assistências"], ["rt", "Notas"], ["aw", "Prêmios"]]:
+		var key: String = v[0]
+		views.add_child(UIKit.chip(String(v[1]), key == _arch_view, g, func():
+			_arch_view = key
+			refresh()))
+	card.add_child(views)
 	var lh: Dictionary = h.get("leagues", {}).get(_arch_league, {})
 	match _arch_view:
 		"tb":
@@ -469,9 +479,14 @@ func _champions(w: GameWorld, c: VBoxContainer) -> void:
 	var opts := _comp_options(w)
 	if _comp == "":
 		_comp = String(opts[0][0])
-	c.add_child(UIKit.scroll_tabs(opts, _comp, func(k: String):
-		_comp = k
-		refresh()))
+	var g := ButtonGroup.new()
+	var flow := UIKit.flow(8)
+	for o in opts:
+		var id: String = o[0]
+		flow.add_child(UIKit.chip(String(o[1]), id == _comp, g, func():
+			_comp = id
+			refresh()))
+	c.add_child(flow)
 	var card := UIKit.card("Card", 6)
 	var is_league := DatabaseManager.has_league(_comp)
 	var title := w.league_name(_comp) if is_league else ("Sub-20" if _comp == "YOUTH" else CupManager.cup_name(_comp))

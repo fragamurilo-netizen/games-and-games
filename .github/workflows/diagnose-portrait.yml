@@ -7,6 +7,8 @@ on:
     paths:
       - ".github/workflows/diagnose-portrait.yml"
       - "mais-uma-rodada/scripts/ui/components/portrait_view.gd"
+      - "mais-uma-rodada/scripts/generation/face_gen.gd"
+      - "mais-uma-rodada/tools/face_sheet.gd"
   workflow_dispatch:
 
 jobs:
@@ -33,3 +35,43 @@ jobs:
               godot --headless --path /workspace/mais-uma-rodada \
                 --script res://scripts/ui/components/portrait_view.gd --check-only
             '
+
+      - name: Render portrait realism sheet
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 xvfb libxcursor1 libxinerama1 libxi6 libxrandr2 libxrender1 libxext6 libgl1 >/dev/null
+              xvfb-run -a godot --display-driver x11 --path /workspace/mais-uma-rodada --resolution 800x800 \
+                --script res://tools/face_sheet.gd -- \
+                --out=/workspace/portrait-realism-sheet.png \
+                --size=190 --cols=4 --eth=1,4,7,8 --ages=21,24,28,32
+              xvfb-run -a godot --display-driver x11 --path /workspace/mais-uma-rodada --resolution 800x800 \
+                --script res://tools/face_sheet.gd -- \
+                --out=/workspace/portrait-realism-closeup.png \
+                --size=360 --cols=2 --eth=1,7 --ages=23,29
+              xvfb-run -a godot --display-driver x11 --path /workspace/mais-uma-rodada --resolution 800x800 \
+                --script res://tools/face_sheet.gd -- \
+                --out=/workspace/portrait-clean-shaven.png \
+                --size=360 --cols=2 --eth=1,7 --catalog=bd --list=0
+            '
+          test -s portrait-realism-sheet.png
+          test -s portrait-realism-closeup.png
+          test -s portrait-clean-shaven.png
+
+      - name: Upload portrait realism previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: portrait-realism-sheet
+          path: |
+            portrait-realism-sheet.png
+            portrait-realism-closeup.png
+            portrait-clean-shaven.png
+          if-no-files-found: error
+          retention-days: 14

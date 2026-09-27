@@ -84,8 +84,10 @@ jobs:
             bash -lc '
               apt-get update -qq
               apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
-              godot --headless --path /workspace/mais-uma-rodada --script res://tests/run_tests.gd
-            ' || echo "::warning::Legacy test suite reported failures; boot validation passed."
+              # A suíte legada pode ficar presa em processos de simulação; ela é informativa.
+              # O parser + smoke boot acima continuam sendo os gates obrigatórios do APK.
+              timeout 180s godot --headless --path /workspace/mais-uma-rodada --script res://tests/run_tests.gd
+            ' || echo "::warning::Legacy test suite failed or timed out; boot validation passed."
 
       - name: Export Android APK
         shell: bash

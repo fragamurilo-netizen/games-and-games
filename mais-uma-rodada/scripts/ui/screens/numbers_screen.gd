@@ -56,7 +56,7 @@ func refresh() -> void:
 	c.add_child(UIKit.section_header("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
 	grid.columns = 10 if UILayout.is_wide() else 5
-	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):
 		grid.add_child(_cell(club, n, owners.get(n, null)))
