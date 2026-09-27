@@ -109,7 +109,9 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["ribbon_top"] = String(cr.get("ribbon_top", "")) # faixa acima do escudo (MANCHESTER)
 	sp["top_style"] = String(cr.get("top_style", "")) # "gates": portão em arco atrás da faixa de cima (Liverpool)
 	sp["flames"] = bool(cr.get("flames", false)) # chamas dos dois lados (Liverpool)
-	sp["chief_sym"] = String(cr.get("chief_sym", "")) # símbolo no chefe (navio do United)
+	sp["chief_sym"] = String(cr.get("chief_sym", ""))
+	sp["chief_text2"] = String(cr.get("chief_text2", "")) # segunda linha menor no chefe
+	sp["chief_h"] = float(cr.get("chief_h", 0.24)) # símbolo no chefe (navio do United)
 	sp["chief_sc"] = Color(String(cr.get("chief_sc", "#C8102E")))
 	sp["staff"] = bool(cr.get("staff", false)) # cajado atrás do leão (Chelsea)
 	sp["ring_deco"] = String(cr.get("ring_deco", "")) # "roses": rosas e bolas embaixo do anel # símbolo em traço (Ajax), sem preenchimento
@@ -169,7 +171,7 @@ func _render(s: float) -> void:
 	# Chefe com texto
 	var charge_box := _inner_box(box, shape)
 	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief" or String(sp["chief_sym"]) != "":
-		var chief_h := 0.24
+		var chief_h := float(sp["chief_h"])
 		var band := _xf(PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, chief_h), Vector2(0, chief_h)]), box)
 		var cc: Color = sp["cc"]
 		for piece in Geometry2D.intersect_polygons(band, inner):
@@ -177,7 +179,11 @@ func _render(s: float) -> void:
 		if String(sp["chief_text"]) != "" and not small:
 			var ink := contrast(cc, c1, c3)
 			var narrow := shape in ["round", "oval", "ring", "oval_ring", "octagon", "hexagon", "diamond"]
-			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.56), box.size.x * (0.46 if narrow else 0.62), box.size.y * 0.15, ink)
+			var t2 := String(sp["chief_text2"])
+			var ty := chief_h * (0.42 if t2 != "" else 0.56)
+			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * ty), box.size.x * (0.46 if narrow else 0.66), box.size.y * (0.14 if t2 != "" else 0.15), ink)
+			if t2 != "":
+				_text_center(t2, box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.8), box.size.x * 0.7, box.size.y * 0.06, ink)
 		if String(sp["chief_sym"]) != "" and CrestArt.has(String(sp["chief_sym"])):
 			var ccen := box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.55)
 			for pp: PackedVector2Array in CrestArt.polys(String(sp["chief_sym"])):
