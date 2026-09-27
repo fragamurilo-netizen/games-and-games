@@ -66,6 +66,60 @@ const TEMPLATES: Array = [
 		{"c1": "p", "c2": "s", "c3": "g", "shorts": "p", "shorts2": "g", "socks": "p", "socks2": "g"}],
 	["Marinho", {"pattern": "sash_thin", "collar": "v", "sleeve": "cuff", "shorts_style": "hem", "socks_style": "top_band"},
 		{"c1": "n", "c2": "p", "c3": "p", "shorts": "n", "shorts2": "p", "socks": "n", "socks2": "p"}],
+	["Mangas brancas", {"pattern": "plain", "collar": "round", "sleeve": "contrast", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "w", "c3": "w", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "w"}],
+	["Listras tricolores", {"pattern": "stripes_tri", "collar": "polo", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_stripes"},
+		{"c1": "w", "c2": "p", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "w", "socks2": "p"}],
+	["Faixa bicolor", {"pattern": "faixa_duo", "collar": "polo", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "w", "c2": "p", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "w", "socks2": "p"}],
+	["Listra com filetes", {"pattern": "center_stripe_edged", "collar": "round", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "n", "c2": "w", "c3": "p", "shorts": "n", "shorts2": "p", "socks": "n", "socks2": "p"}],
+	["Listras largas", {"pattern": "wide_stripes", "collar": "v", "sleeve": "same", "shorts_style": "plain", "socks_style": "plain"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Listras gêmeas", {"pattern": "twin_stripes", "collar": "round", "sleeve": "cuff", "shorts_style": "side_stripe", "socks_style": "top_band"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "p", "shorts2": "w", "socks": "w", "socks2": "p"}],
+	["Listra central", {"pattern": "center_stripe", "collar": "crossover", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Aros finos", {"pattern": "hoops_thin", "collar": "round", "sleeve": "same", "shorts_style": "hem", "socks_style": "hoops_thin"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Riscas", {"pattern": "hoops_pin", "collar": "v", "sleeve": "cuff_double", "shorts_style": "piping", "socks_style": "plain"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Faixa dupla", {"pattern": "double_band", "collar": "ringer", "sleeve": "same", "shorts_style": "hem_double", "socks_style": "hoops_thin"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "p", "shorts2": "w", "socks": "w", "socks2": "p"}],
+	["Faixa baixa", {"pattern": "band_low", "collar": "v", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "band_mid"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Tricolor horizontal", {"pattern": "tricolor_h", "collar": "round", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "w", "c3": "s", "shorts": "s", "shorts2": "w", "socks": "s", "socks2": "w"}],
+	["Quartos", {"pattern": "quarters", "collar": "polo", "sleeve": "same", "shorts_style": "two_tone", "socks_style": "two_tone"},
+		{"c1": "p", "c2": "s", "c3": "k", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["V largo", {"pattern": "v_big", "collar": "v", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "w", "shorts2": "p", "socks": "w", "socks2": "p"}],
+	["Aspa", {"pattern": "saltire", "collar": "round", "sleeve": "same", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "w", "c3": "w", "shorts": "p", "shorts2": "w", "socks": "p", "socks2": "w"}],
+	["Cordão retrô", {"pattern": "plain", "collar": "laced", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_stripes"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Três listras", {"pattern": "plain", "collar": "crossover", "sleeve": "stripes", "shorts_style": "stripes3", "socks_style": "stripes3"},
+		{"c1": "p", "c2": "s", "c3": "w", "shorts": "s", "shorts2": "w", "socks": "p", "socks2": "w"}],
+	["Raglan", {"pattern": "plain", "collar": "round", "sleeve": "raglan", "shorts_style": "side_panel", "socks_style": "top_band"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Laterais", {"pattern": "side_panels", "collar": "v", "sleeve": "same", "trim": "shoulders", "shorts_style": "side_panel", "socks_style": "foot"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Losangos", {"pattern": "argyle", "tonal": true, "collar": "polo", "sleeve": "cuff", "shorts_style": "plain", "socks_style": "top_band"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Xadrez escocês", {"pattern": "tartan", "tonal": true, "collar": "ringer", "sleeve": "same", "shorts_style": "hem", "socks_style": "top_stripes"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "w", "shorts2": "p", "socks": "p", "socks2": "s"}],
+	["Ondas", {"pattern": "waves", "tonal": true, "collar": "crossover", "sleeve": "same", "shorts_style": "vent", "socks_style": "plain"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Raios", {"pattern": "sunburst", "collar": "mandarin", "sleeve": "same", "trim": "sides", "shorts_style": "side_stripe", "socks_style": "chevron"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "p", "shorts2": "s", "socks": "p", "socks2": "s"}],
+	["Degradê de baixo", {"pattern": "fade_up", "collar": "v", "sleeve": "same", "shorts_style": "plain", "socks_style": "foot"},
+		{"c1": "p", "c2": "k", "c3": "s", "shorts": "k", "shorts2": "p", "socks": "k", "socks2": "p"}],
+	["Pinceladas", {"pattern": "brush", "collar": "round", "sleeve": "same", "trim": "sides", "shorts_style": "vent", "socks_style": "plain"},
+		{"c1": "w", "c2": "p", "c3": "p", "shorts": "w", "shorts2": "p", "socks": "w", "socks2": "p"}],
+	["Estilhaços", {"pattern": "shatter", "collar": "zip", "sleeve": "same", "shorts_style": "side_panel", "socks_style": "foot"},
+		{"c1": "k", "c2": "p", "c3": "p", "shorts": "k", "shorts2": "p", "socks": "k", "socks2": "p"}],
+	["Zigue-zague", {"pattern": "zigzag", "collar": "v", "sleeve": "pattern", "shorts_style": "plain", "socks_style": "chevron"},
+		{"c1": "p", "c2": "s", "c3": "s", "shorts": "s", "shorts2": "p", "socks": "p", "socks2": "s"}],
 ]
 const STYLE_KEYS := ["pattern", "tonal", "collar", "sleeve", "sleeve_len", "trim", "shorts_style", "socks_style"]
 const COLOR_KEYS := ["c1", "c2", "c3", "nc", "shorts", "shorts2", "socks", "socks2"]
@@ -619,8 +673,27 @@ func _template_grid(club: Club, k: Dictionary) -> Control:
 	grid.columns = 4
 	grid.add_theme_constant_override(&"h_separation", 8)
 	grid.add_theme_constant_override(&"v_separation", 8)
+	# Primeiro, o uniforme de verdade do clube (quando o clube tem dados reais).
+	var real := ClubGenerator.real_kits(club)
+	var cells: Array = []
+	if not real.is_empty():
+		var rk: Dictionary = real[{"home": "h", "away": "a", "third": "t", "gk": "g"}[_which]]
+		cells.append(["Original do clube", rk])
 	for t: Array in TEMPLATES:
-		var tk := template_kit(club, t, k)
+		cells.append([String(t[0]), t])
+	for cell_data: Array in cells:
+		var t: Array = [cell_data[0]]
+		var tk: Dictionary
+		if cell_data[1] is Dictionary:
+			tk = k.duplicate()
+			for sk in STYLE_KEYS:
+				tk.erase(sk)
+			for ck in COLOR_KEYS:
+				tk.erase(ck)
+			tk.merge(cell_data[1], true)
+		else:
+			t = cell_data[1]
+			tk = template_kit(club, t, k)
 		if _which in ["away", "third"]:
 			KitDesign.recolor_distinct(club, tk, [club.kit_home] if _which == "away" else [club.kit_home, club.kit_away])
 		tk.erase("sp")

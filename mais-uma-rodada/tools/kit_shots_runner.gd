@@ -99,6 +99,16 @@ func _run() -> void:
 	_scr().set("_part", "shirt")
 	_scr().refresh()
 	await _shot("k10_estampa")
+	_scr().set("_part", "models")
+	_scr().refresh()
+	_scr().scroll().scroll_vertical = 0
+	await _shot("k14_modelos")
+	_scr().scroll().scroll_vertical = 1400
+	await _shot("k15_modelos_novos")
+	_scr().scroll().scroll_vertical = 2600
+	await _shot("k16_modelos_novos_2")
+	_scr().set("_part", "shirt")
+	_scr().refresh()
 	_scr().scroll().scroll_vertical = 100000
 	await _shot("k11_historico_resumo")
 	UIManager.push("kit_history")
