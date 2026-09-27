@@ -1,0 +1,1339 @@
+{
+	"_doc": "Clubes de países sem liga no jogo, só para o passado dos jogadores (carreira antes do início). [nome curto, nível típico dos titulares].",
+	"clubs": {
+		"WAL": [
+			[
+				"Cardiff City",
+				69
+			],
+			[
+				"Swansea City",
+				68
+			],
+			[
+				"Wrexham",
+				64
+			],
+			[
+				"Newport County",
+				58
+			],
+			[
+				"The New Saints",
+				55
+			],
+			[
+				"Connah's Quay",
+				50
+			],
+			[
+				"Bala Town",
+				48
+			],
+			[
+				"Penybont",
+				47
+			]
+		],
+		"IRL": [
+			[
+				"Shamrock Rovers",
+				60
+			],
+			[
+				"Bohemians",
+				57
+			],
+			[
+				"Derry City",
+				58
+			],
+			[
+				"St Patrick's Athletic",
+				57
+			],
+			[
+				"Shelbourne",
+				56
+			],
+			[
+				"Dundalk",
+				56
+			],
+			[
+				"Sligo Rovers",
+				53
+			],
+			[
+				"Cork City",
+				52
+			],
+			[
+				"Galway United",
+				52
+			],
+			[
+				"Waterford",
+				51
+			]
+		],
+		"NOR": [
+			[
+				"Bodø/Glimt",
+				70
+			],
+			[
+				"Molde",
+				68
+			],
+			[
+				"Rosenborg",
+				67
+			],
+			[
+				"Brann",
+				67
+			],
+			[
+				"Viking",
+				65
+			],
+			[
+				"Vålerenga",
+				63
+			],
+			[
+				"Lillestrøm",
+				63
+			],
+			[
+				"Strømsgodset",
+				61
+			],
+			[
+				"Sarpsborg 08",
+				61
+			],
+			[
+				"Odd",
+				60
+			],
+			[
+				"Tromsø",
+				61
+			],
+			[
+				"HamKam",
+				58
+			],
+			[
+				"Sandefjord",
+				58
+			],
+			[
+				"Aalesund",
+				57
+			]
+		],
+		"SWE": [
+			[
+				"Malmö FF",
+				69
+			],
+			[
+				"AIK",
+				66
+			],
+			[
+				"Djurgården",
+				66
+			],
+			[
+				"Hammarby",
+				66
+			],
+			[
+				"IFK Göteborg",
+				64
+			],
+			[
+				"Häcken",
+				65
+			],
+			[
+				"Elfsborg",
+				65
+			],
+			[
+				"IFK Norrköping",
+				63
+			],
+			[
+				"Kalmar FF",
+				61
+			],
+			[
+				"Mjällby",
+				61
+			],
+			[
+				"Sirius",
+				60
+			],
+			[
+				"Halmstad",
+				59
+			],
+			[
+				"GAIS",
+				59
+			],
+			[
+				"Värnamo",
+				58
+			]
+		],
+		"ISL": [
+			[
+				"Víkingur",
+				52
+			],
+			[
+				"Breiðablik",
+				53
+			],
+			[
+				"Valur",
+				52
+			],
+			[
+				"KR",
+				51
+			],
+			[
+				"FH",
+				50
+			],
+			[
+				"Stjarnan",
+				50
+			],
+			[
+				"ÍA",
+				48
+			],
+			[
+				"KA",
+				48
+			]
+		],
+		"FIN": [
+			[
+				"HJK",
+				60
+			],
+			[
+				"KuPS",
+				57
+			],
+			[
+				"SJK",
+				56
+			],
+			[
+				"Ilves",
+				55
+			],
+			[
+				"Inter Turku",
+				55
+			],
+			[
+				"Honka",
+				53
+			],
+			[
+				"VPS",
+				53
+			],
+			[
+				"Lahti",
+				51
+			],
+			[
+				"Haka",
+				51
+			]
+		],
+		"POL": [
+			[
+				"Legia Warszawa",
+				67
+			],
+			[
+				"Lech Poznań",
+				67
+			],
+			[
+				"Raków Częstochowa",
+				66
+			],
+			[
+				"Jagiellonia",
+				65
+			],
+			[
+				"Pogoń Szczecin",
+				64
+			],
+			[
+				"Górnik Zabrze",
+				63
+			],
+			[
+				"Wisła Kraków",
+				61
+			],
+			[
+				"Cracovia",
+				62
+			],
+			[
+				"Śląsk Wrocław",
+				62
+			],
+			[
+				"Zagłębie Lubin",
+				61
+			],
+			[
+				"Lechia Gdańsk",
+				61
+			],
+			[
+				"Widzew Łódź",
+				61
+			],
+			[
+				"Piast Gliwice",
+				61
+			],
+			[
+				"Korona Kielce",
+				60
+			]
+		],
+		"SVK": [
+			[
+				"Slovan Bratislava",
+				64
+			],
+			[
+				"Spartak Trnava",
+				60
+			],
+			[
+				"DAC Dunajská Streda",
+				60
+			],
+			[
+				"Žilina",
+				59
+			],
+			[
+				"Ružomberok",
+				57
+			],
+			[
+				"Podbrezová",
+				56
+			],
+			[
+				"Trenčín",
+				56
+			],
+			[
+				"Michalovce",
+				54
+			]
+		],
+		"SVN": [
+			[
+				"Olimpija Ljubljana",
+				61
+			],
+			[
+				"Maribor",
+				60
+			],
+			[
+				"Celje",
+				60
+			],
+			[
+				"Mura",
+				56
+			],
+			[
+				"Koper",
+				56
+			],
+			[
+				"Domžale",
+				55
+			],
+			[
+				"Bravo",
+				54
+			],
+			[
+				"Radomlje",
+				52
+			]
+		],
+		"HUN": [
+			[
+				"Ferencváros",
+				66
+			],
+			[
+				"Puskás Akadémia",
+				61
+			],
+			[
+				"Paks",
+				60
+			],
+			[
+				"Debrecen",
+				59
+			],
+			[
+				"Fehérvár",
+				60
+			],
+			[
+				"Újpest",
+				58
+			],
+			[
+				"MTK",
+				57
+			],
+			[
+				"Győr",
+				57
+			],
+			[
+				"Diósgyőr",
+				56
+			],
+			[
+				"ZTE",
+				55
+			]
+		],
+		"ROU": [
+			[
+				"FCSB",
+				64
+			],
+			[
+				"CFR Cluj",
+				63
+			],
+			[
+				"Rapid București",
+				62
+			],
+			[
+				"Universitatea Craiova",
+				62
+			],
+			[
+				"Farul Constanța",
+				60
+			],
+			[
+				"Dinamo București",
+				60
+			],
+			[
+				"Sepsi",
+				59
+			],
+			[
+				"Petrolul",
+				58
+			],
+			[
+				"UTA Arad",
+				57
+			],
+			[
+				"Hermannstadt",
+				56
+			],
+			[
+				"Oțelul Galați",
+				56
+			],
+			[
+				"Universitatea Cluj",
+				58
+			]
+		],
+		"BIH": [
+			[
+				"Zrinjski",
+				58
+			],
+			[
+				"Borac Banja Luka",
+				57
+			],
+			[
+				"Sarajevo",
+				56
+			],
+			[
+				"Željezničar",
+				55
+			],
+			[
+				"Velež",
+				54
+			],
+			[
+				"Široki Brijeg",
+				54
+			],
+			[
+				"Tuzla City",
+				52
+			],
+			[
+				"Sloga Doboj",
+				51
+			]
+		],
+		"MNE": [
+			[
+				"Budućnost",
+				54
+			],
+			[
+				"Sutjeska",
+				52
+			],
+			[
+				"Dečić",
+				51
+			],
+			[
+				"Mornar",
+				49
+			],
+			[
+				"Jezero",
+				48
+			],
+			[
+				"Petrovac",
+				48
+			],
+			[
+				"Arsenal Tivat",
+				47
+			]
+		],
+		"MKD": [
+			[
+				"Shkëndija",
+				55
+			],
+			[
+				"Vardar",
+				53
+			],
+			[
+				"Struga",
+				53
+			],
+			[
+				"Shkupi",
+				52
+			],
+			[
+				"Rabotnički",
+				51
+			],
+			[
+				"Sileks",
+				50
+			],
+			[
+				"Tikvesh",
+				49
+			]
+		],
+		"ALB": [
+			[
+				"Partizani",
+				54
+			],
+			[
+				"Egnatia",
+				54
+			],
+			[
+				"Tirana",
+				53
+			],
+			[
+				"Vllaznia",
+				52
+			],
+			[
+				"Skënderbeu",
+				51
+			],
+			[
+				"Kukësi",
+				51
+			],
+			[
+				"Teuta",
+				51
+			],
+			[
+				"Dinamo City",
+				50
+			]
+		],
+		"KOS": [
+			[
+				"Ballkani",
+				53
+			],
+			[
+				"Drita",
+				52
+			],
+			[
+				"Prishtina",
+				51
+			],
+			[
+				"Llapi",
+				50
+			],
+			[
+				"Gjilani",
+				49
+			],
+			[
+				"Malisheva",
+				48
+			]
+		],
+		"GEO": [
+			[
+				"Dinamo Tbilisi",
+				57
+			],
+			[
+				"Dinamo Batumi",
+				57
+			],
+			[
+				"Torpedo Kutaisi",
+				55
+			],
+			[
+				"Iberia 1999",
+				55
+			],
+			[
+				"Saburtalo",
+				54
+			],
+			[
+				"Dila Gori",
+				53
+			],
+			[
+				"Samgurali",
+				52
+			]
+		],
+		"RUS": [
+			[
+				"Zenit",
+				71
+			],
+			[
+				"Spartak Moscow",
+				69
+			],
+			[
+				"CSKA Moscow",
+				68
+			],
+			[
+				"Lokomotiv Moscow",
+				68
+			],
+			[
+				"Krasnodar",
+				69
+			],
+			[
+				"Dynamo Moscow",
+				67
+			],
+			[
+				"Rostov",
+				64
+			],
+			[
+				"Rubin Kazan",
+				63
+			],
+			[
+				"Akhmat",
+				62
+			],
+			[
+				"Krylia Sovetov",
+				62
+			],
+			[
+				"Orenburg",
+				61
+			],
+			[
+				"Fakel",
+				60
+			]
+		],
+		"CAN": [
+			[
+				"Toronto FC",
+				66
+			],
+			[
+				"CF Montréal",
+				65
+			],
+			[
+				"Forge FC",
+				55
+			],
+			[
+				"Cavalry FC",
+				54
+			],
+			[
+				"Pacific FC",
+				53
+			],
+			[
+				"York United",
+				52
+			],
+			[
+				"HFX Wanderers",
+				52
+			],
+			[
+				"Atlético Ottawa",
+				52
+			]
+		],
+		"CRC": [
+			[
+				"Saprissa",
+				59
+			],
+			[
+				"Alajuelense",
+				59
+			],
+			[
+				"Herediano",
+				58
+			],
+			[
+				"Cartaginés",
+				55
+			],
+			[
+				"San Carlos",
+				53
+			],
+			[
+				"Puntarenas",
+				52
+			],
+			[
+				"Sporting FC",
+				52
+			],
+			[
+				"Guanacasteca",
+				51
+			]
+		],
+		"JAM": [
+			[
+				"Cavalier",
+				50
+			],
+			[
+				"Mount Pleasant",
+				50
+			],
+			[
+				"Harbour View",
+				49
+			],
+			[
+				"Portmore United",
+				49
+			],
+			[
+				"Waterhouse",
+				48
+			],
+			[
+				"Arnett Gardens",
+				48
+			],
+			[
+				"Tivoli Gardens",
+				47
+			]
+		],
+		"HON": [
+			[
+				"Olimpia",
+				57
+			],
+			[
+				"Motagua",
+				56
+			],
+			[
+				"Real España",
+				55
+			],
+			[
+				"Marathón",
+				53
+			],
+			[
+				"Olancho",
+				52
+			],
+			[
+				"Génesis",
+				50
+			],
+			[
+				"Lobos UPNFM",
+				50
+			]
+		],
+		"PAN": [
+			[
+				"Plaza Amador",
+				51
+			],
+			[
+				"Tauro",
+				52
+			],
+			[
+				"Árabe Unido",
+				51
+			],
+			[
+				"CAI",
+				52
+			],
+			[
+				"Sporting San Miguelito",
+				50
+			],
+			[
+				"Alianza",
+				49
+			],
+			[
+				"Herrera",
+				48
+			]
+		],
+		"GHA": [
+			[
+				"Asante Kotoko",
+				55
+			],
+			[
+				"Hearts of Oak",
+				54
+			],
+			[
+				"Medeama",
+				53
+			],
+			[
+				"Aduana Stars",
+				52
+			],
+			[
+				"Bechem United",
+				51
+			],
+			[
+				"Dreams FC",
+				52
+			],
+			[
+				"Nations FC",
+				51
+			],
+			[
+				"Legon Cities",
+				50
+			],
+			[
+				"Right to Dream",
+				53
+			]
+		],
+		"CIV": [
+			[
+				"ASEC Mimosas",
+				56
+			],
+			[
+				"Stade d'Abidjan",
+				52
+			],
+			[
+				"Africa Sports",
+				52
+			],
+			[
+				"Séwé Sport",
+				51
+			],
+			[
+				"SOA",
+				51
+			],
+			[
+				"Stella Club",
+				50
+			],
+			[
+				"ASC Ouragahio",
+				49
+			]
+		],
+		"CMR": [
+			[
+				"Coton Sport",
+				54
+			],
+			[
+				"Canon Yaoundé",
+				52
+			],
+			[
+				"Union Douala",
+				51
+			],
+			[
+				"Colombe du Dja",
+				50
+			],
+			[
+				"Fovu Baham",
+				49
+			],
+			[
+				"Dynamo Douala",
+				50
+			],
+			[
+				"Fauve Azur",
+				49
+			]
+		],
+		"MLI": [
+			[
+				"Stade Malien",
+				53
+			],
+			[
+				"Djoliba",
+				52
+			],
+			[
+				"Real Bamako",
+				51
+			],
+			[
+				"AS Bakaridjan",
+				49
+			],
+			[
+				"Onze Créateurs",
+				49
+			],
+			[
+				"AS Police",
+				48
+			]
+		],
+		"ALG": [
+			[
+				"MC Alger",
+				60
+			],
+			[
+				"CR Belouizdad",
+				60
+			],
+			[
+				"JS Kabylie",
+				58
+			],
+			[
+				"USM Alger",
+				58
+			],
+			[
+				"ES Sétif",
+				57
+			],
+			[
+				"CS Constantine",
+				57
+			],
+			[
+				"Paradou AC",
+				55
+			],
+			[
+				"MC Oran",
+				55
+			],
+			[
+				"JS Saoura",
+				54
+			]
+		],
+		"GUI": [
+			[
+				"Horoya",
+				53
+			],
+			[
+				"Hafia",
+				51
+			],
+			[
+				"Kaloum Star",
+				50
+			],
+			[
+				"Milo",
+				49
+			],
+			[
+				"SAN",
+				49
+			],
+			[
+				"Wakriya",
+				48
+			]
+		],
+		"BFA": [
+			[
+				"ASFA Yennenga",
+				50
+			],
+			[
+				"Rail Club du Kadiogo",
+				50
+			],
+			[
+				"Salitas",
+				49
+			],
+			[
+				"AS SONABEL",
+				48
+			],
+			[
+				"USFA",
+				48
+			],
+			[
+				"Majestic",
+				47
+			]
+		],
+		"COD": [
+			[
+				"TP Mazembe",
+				58
+			],
+			[
+				"AS Vita Club",
+				56
+			],
+			[
+				"DC Motema Pembe",
+				54
+			],
+			[
+				"FC Lupopo",
+				53
+			],
+			[
+				"AS Maniema Union",
+				54
+			],
+			[
+				"Sanga Balende",
+				51
+			],
+			[
+				"Don Bosco",
+				51
+			]
+		],
+		"GAB": [
+			[
+				"CF Mounana",
+				50
+			],
+			[
+				"AS Mangasport",
+				50
+			],
+			[
+				"FC 105 Libreville",
+				49
+			],
+			[
+				"Bouenguidi Sports",
+				48
+			],
+			[
+				"Stade Mandji",
+				47
+			]
+		],
+		"ANG": [
+			[
+				"Petro de Luanda",
+				56
+			],
+			[
+				"Primeiro de Agosto",
+				55
+			],
+			[
+				"Sagrada Esperança",
+				53
+			],
+			[
+				"Interclube",
+				52
+			],
+			[
+				"Kabuscorp",
+				51
+			],
+			[
+				"Académica do Lobito",
+				50
+			],
+			[
+				"Wiliete",
+				51
+			]
+		],
+		"CPV": [
+			[
+				"Mindelense",
+				48
+			],
+			[
+				"Sporting da Praia",
+				48
+			],
+			[
+				"Académica do Mindelo",
+				47
+			],
+			[
+				"Boavista da Praia",
+				47
+			],
+			[
+				"Derby",
+				46
+			]
+		],
+		"MOZ": [
+			[
+				"Black Bulls",
+				51
+			],
+			[
+				"Ferroviário de Maputo",
+				50
+			],
+			[
+				"Costa do Sol",
+				50
+			],
+			[
+				"UD Songo",
+				50
+			],
+			[
+				"Ferroviário da Beira",
+				48
+			],
+			[
+				"Chingale",
+				47
+			]
+		],
+		"GNB": [
+			[
+				"Sporting de Bissau",
+				46
+			],
+			[
+				"Benfica de Bissau",
+				46
+			],
+			[
+				"UDIB",
+				45
+			],
+			[
+				"Sport Bissau e Benfica",
+				45
+			],
+			[
+				"Cuntum",
+				44
+			]
+		],
+		"ZIM": [
+			[
+				"FC Platinum",
+				51
+			],
+			[
+				"Dynamos",
+				50
+			],
+			[
+				"CAPS United",
+				49
+			],
+			[
+				"Highlanders",
+				50
+			],
+			[
+				"Ngezi Platinum",
+				49
+			],
+			[
+				"Chicken Inn",
+				48
+			],
+			[
+				"Manica Diamonds",
+				48
+			]
+		],
+		"IRN": [
+			[
+				"Persepolis",
+				62
+			],
+			[
+				"Esteghlal",
+				61
+			],
+			[
+				"Sepahan",
+				61
+			],
+			[
+				"Tractor",
+				60
+			],
+			[
+				"Foolad",
+				58
+			],
+			[
+				"Gol Gohar",
+				57
+			],
+			[
+				"Zob Ahan",
+				56
+			],
+			[
+				"Mes Rafsanjan",
+				55
+			],
+			[
+				"Aluminium Arak",
+				55
+			]
+		],
+		"NZL": [
+			[
+				"Auckland City",
+				52
+			],
+			[
+				"Wellington Olympic",
+				49
+			],
+			[
+				"Christchurch United",
+				48
+			],
+			[
+				"Auckland United",
+				48
+			],
+			[
+				"Eastern Suburbs",
+				48
+			],
+			[
+				"Wellington Phoenix",
+				62
+			]
+		]
+	}
+}

@@ -1,0 +1,1007 @@
+{
+	"nation": "FRA",
+	"_doc": "França: 1ª e 2ª divisão. Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "FRA_PCF",
+			"name": "PSG",
+			"short": "PSG",
+			"abbr": "PSG",
+			"nick": "Parisiens",
+			"city": "Paris",
+			"founded": 1970,
+			"league": "FRA1",
+			"rep": 93,
+			"arch": "rico_promovido",
+			"colors": [
+				"#004170",
+				"#DA291C"
+			],
+			"stadium": "Parc des Princes",
+			"capacity": 48000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "tower",
+				"text": "PARIS SAINT-GERMAIN",
+				"c1": "#004170",
+				"c2": "#004170",
+				"c3": "#FFFFFF",
+				"sc": "#DA291C"
+			},
+			"rivals": [
+				"FRA_MRS",
+				"FRA_PCT"
+			]
+		},
+		{
+			"key": "FRA_MRS",
+			"name": "Marseille",
+			"short": "Marseille",
+			"abbr": "OM",
+			"nick": "Olympiens",
+			"city": "Marseille",
+			"founded": 1899,
+			"league": "FRA1",
+			"rep": 85,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#2FAEE0"
+			],
+			"stadium": "Stade Vélodrome",
+			"capacity": 67000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OM",
+				"sc": "#2FAEE0",
+				"stars": 1,
+				"c3": "#FFD100",
+				"ribbon": "DROIT AU BUT"
+			},
+			"rivals": [
+				"FRA_PCF",
+				"FRA_LYO"
+			]
+		},
+		{
+			"key": "FRA_MON",
+			"name": "Monaco",
+			"short": "Monaco",
+			"abbr": "MON",
+			"nick": "Monégasques",
+			"city": "Monaco",
+			"founded": 1924,
+			"league": "FRA1",
+			"rep": 80,
+			"arch": "vendedor",
+			"colors": [
+				"#E5053A",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Louis-II",
+			"capacity": 18500,
+			"kit": "diagonal",
+			"crest": {
+				"shape": "french",
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "ASM",
+				"crown": 1,
+				"sc": "#FFFFFF",
+				"c3": "#FFD100"
+			},
+			"rivals": [
+				"FRA_NIC"
+			]
+		},
+		{
+			"key": "FRA_NIC",
+			"name": "Nice",
+			"short": "Nice",
+			"abbr": "NIC",
+			"nick": "Aiglons",
+			"city": "Nice",
+			"founded": 1904,
+			"league": "FRA1",
+			"rep": 74,
+			"arch": "rico_promovido",
+			"colors": [
+				"#C8102E",
+				"#111111"
+			],
+			"stadium": "Stade de Nice",
+			"capacity": 36000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "eagle",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_MON"
+			]
+		},
+		{
+			"key": "FRA_LIL",
+			"name": "Lille",
+			"short": "Lille",
+			"abbr": "LIL",
+			"nick": "Dogues",
+			"city": "Lille",
+			"founded": 1944,
+			"league": "FRA1",
+			"rep": 78,
+			"arch": "vendedor",
+			"colors": [
+				"#E01E13",
+				"#1D2C5E"
+			],
+			"stadium": "Stade Pierre-Mauroy",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LOSC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_LEN"
+			]
+		},
+		{
+			"key": "FRA_LYO",
+			"name": "Lyon",
+			"short": "Lyon",
+			"abbr": "OL",
+			"nick": "Gones",
+			"city": "Lyon",
+			"founded": 1950,
+			"league": "FRA1",
+			"rep": 80,
+			"arch": "gigante_endividado",
+			"colors": [
+				"#FFFFFF",
+				"#DA291C"
+			],
+			"stadium": "Parc Olympique Lyonnais",
+			"capacity": 59000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "lion",
+				"c1": "#FFFFFF",
+				"c2": "#1D3F91",
+				"sc": "#DA291C",
+				"border": "double"
+			},
+			"rivals": [
+				"FRA_MRS",
+				"FRA_STE"
+			]
+		},
+		{
+			"key": "FRA_STR",
+			"name": "Strasbourg",
+			"short": "Strasbourg",
+			"abbr": "RCS",
+			"nick": "Alsaciens",
+			"city": "Strasbourg",
+			"founded": 1906,
+			"league": "FRA1",
+			"rep": 70,
+			"arch": "rico_promovido",
+			"colors": [
+				"#009FE3",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de la Meinau",
+			"capacity": 29000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_LEN",
+			"name": "Lens",
+			"short": "Lens",
+			"abbr": "RCL",
+			"nick": "Sang et Or",
+			"city": "Lens",
+			"founded": 1906,
+			"league": "FRA1",
+			"rep": 72,
+			"arch": "estadio_enorme",
+			"colors": [
+				"#FFD100",
+				"#E30613"
+			],
+			"stadium": "Stade Bollaert-Delelis",
+			"capacity": 38200,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "french",
+				"field": "halves",
+				"symbol": "lion",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"FRA_LIL"
+			]
+		},
+		{
+			"key": "FRA_BST",
+			"name": "Brest",
+			"short": "Brest",
+			"abbr": "SB29",
+			"nick": "Pirates",
+			"city": "Brest",
+			"founded": 1950,
+			"league": "FRA1",
+			"rep": 64,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Francis-Le Blé",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_REN",
+				"FRA_LOR"
+			]
+		},
+		{
+			"key": "FRA_TOU",
+			"name": "Toulouse",
+			"short": "Toulouse",
+			"abbr": "TFC",
+			"nick": "Violets",
+			"city": "Toulouse",
+			"founded": 1970,
+			"league": "FRA1",
+			"rep": 64,
+			"arch": "vendedor",
+			"colors": [
+				"#57227E",
+				"#FFFFFF"
+			],
+			"stadium": "Stadium de Toulouse",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "cross_pattee",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_AUX",
+			"name": "Auxerre",
+			"short": "Auxerre",
+			"abbr": "AJA",
+			"nick": "Ajaïstes",
+			"city": "Auxerre",
+			"founded": 1905,
+			"league": "FRA1",
+			"rep": 60,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Stade de l'Abbé-Deschamps",
+			"capacity": 18500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AJA",
+				"sc": "#0055A4"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_REN",
+			"name": "Rennes",
+			"short": "Rennes",
+			"abbr": "SRFC",
+			"nick": "Rouge et Noir",
+			"city": "Rennes",
+			"founded": 1901,
+			"league": "FRA1",
+			"rep": 72,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Roazhon Park",
+			"capacity": 29800,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "SRFC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_NAN",
+				"FRA_BST"
+			]
+		},
+		{
+			"key": "FRA_NAN",
+			"name": "Nantes",
+			"short": "Nantes",
+			"abbr": "FCN",
+			"nick": "Canaris",
+			"city": "Nantes",
+			"founded": 1943,
+			"league": "FRA1",
+			"rep": 66,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFE600",
+				"#00A650"
+			],
+			"stadium": "Stade de la Beaujoire",
+			"capacity": 35300,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "caravel",
+				"sc": "#00A650"
+			},
+			"rivals": [
+				"FRA_REN"
+			]
+		},
+		{
+			"key": "FRA_ANG",
+			"name": "Angers",
+			"short": "Angers",
+			"abbr": "SCO",
+			"nick": "Scoïstes",
+			"city": "Angers",
+			"founded": 1919,
+			"league": "FRA1",
+			"rep": 58,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Raymond-Kopa",
+			"capacity": 18700,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SCO",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_HAV",
+			"name": "Le Havre",
+			"short": "Le Havre",
+			"abbr": "HAC",
+			"nick": "Havrais",
+			"city": "Le Havre",
+			"founded": 1872,
+			"league": "FRA1",
+			"rep": 58,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#8BBEE8",
+				"#0D2D57"
+			],
+			"stadium": "Stade Océane",
+			"capacity": 25200,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "HAC",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_LOR",
+			"name": "Lorient",
+			"short": "Lorient",
+			"abbr": "FCL",
+			"nick": "Merlus",
+			"city": "Lorient",
+			"founded": 1926,
+			"league": "FRA1",
+			"rep": 56,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stade du Moustoir",
+			"capacity": 18800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"FRA_BST"
+			]
+		},
+		{
+			"key": "FRA_PCT",
+			"name": "Paris FC",
+			"short": "Paris FC",
+			"abbr": "PFC",
+			"nick": "Parisiens",
+			"city": "Paris",
+			"founded": 1969,
+			"league": "FRA1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Jean-Bouin",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_PCF"
+			]
+		},
+		{
+			"key": "FRA_MET",
+			"name": "Metz",
+			"short": "Metz",
+			"abbr": "FCM",
+			"nick": "Grenats",
+			"city": "Metz",
+			"founded": 1932,
+			"league": "FRA1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Saint-Symphorien",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dragon",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_NCY"
+			]
+		},
+		{
+			"key": "FRA_STE",
+			"name": "Saint-Étienne",
+			"short": "Saint-Étienne",
+			"abbr": "ASSE",
+			"nick": "Les Verts",
+			"city": "Saint-Étienne",
+			"founded": 1919,
+			"league": "FRA2",
+			"rep": 66,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#009A44",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Geoffroy-Guichard",
+			"capacity": 42000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ASSE",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_LYO"
+			]
+		},
+		{
+			"key": "FRA_MTP",
+			"name": "Montpellier",
+			"short": "Montpellier",
+			"abbr": "MHSC",
+			"nick": "Pailladins",
+			"city": "Montpellier",
+			"founded": 1974,
+			"league": "FRA2",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F07F13",
+				"#1D3F91"
+			],
+			"stadium": "Stade de la Mosson",
+			"capacity": 32900,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "MHSC",
+				"c1": "#1D3F91",
+				"c2": "#F07F13",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_REI",
+			"name": "Reims",
+			"short": "Reims",
+			"abbr": "SDR",
+			"nick": "Rémois",
+			"city": "Reims",
+			"founded": 1931,
+			"league": "FRA2",
+			"rep": 58,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Auguste-Delaune",
+			"capacity": 21000,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "SR",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_GUI",
+			"name": "Guingamp",
+			"short": "Guingamp",
+			"abbr": "EAG",
+			"nick": "Guingampais",
+			"city": "Guingamp",
+			"founded": 1912,
+			"league": "FRA2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade du Roudourou",
+			"capacity": 18400,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "EAG",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_TRO",
+			"name": "Troyes",
+			"short": "Troyes",
+			"abbr": "ETR",
+			"nick": "Troyens",
+			"city": "Troyes",
+			"founded": 1986,
+			"league": "FRA2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de l'Aube",
+			"capacity": 21000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ESTAC"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_BAS",
+			"name": "Bastia",
+			"short": "Bastia",
+			"abbr": "SCB",
+			"nick": "Bastiais",
+			"city": "Bastia",
+			"founded": 1905,
+			"league": "FRA2",
+			"rep": 52,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Armand-Cesari",
+			"capacity": 16500,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SCB"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_DUN",
+			"name": "Dunkerque",
+			"short": "Dunkerque",
+			"abbr": "USLD",
+			"nick": "Dunkerquois",
+			"city": "Dunkerque",
+			"founded": 1909,
+			"league": "FRA2",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Marcel-Tribut",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_LAV",
+			"name": "Laval",
+			"short": "Laval",
+			"abbr": "SLM",
+			"nick": "Tango",
+			"city": "Laval",
+			"founded": 1902,
+			"league": "FRA2",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#F07F13",
+				"#111111"
+			],
+			"stadium": "Stade Francis-Le Basser",
+			"capacity": 18000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SL"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_PAU",
+			"name": "Pau",
+			"short": "Pau",
+			"abbr": "PAU",
+			"nick": "Béarnais",
+			"city": "Pau",
+			"founded": 1959,
+			"league": "FRA2",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFD100",
+				"#1D3F91"
+			],
+			"stadium": "Nouste Camp",
+			"capacity": 4000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PFC",
+				"sc": "#1D3F91"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_GRE",
+			"name": "Grenoble",
+			"short": "Grenoble",
+			"abbr": "GF38",
+			"nick": "Grenoblois",
+			"city": "Grenoble",
+			"founded": 1892,
+			"league": "FRA2",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#1D5BBF",
+				"#FFFFFF"
+			],
+			"stadium": "Stade des Alpes",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_ANN",
+			"name": "Annecy",
+			"short": "Annecy",
+			"abbr": "FCA",
+			"nick": "Annéciens",
+			"city": "Annecy",
+			"founded": 1927,
+			"league": "FRA2",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Parc des Sports",
+			"capacity": 15600,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCA"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_SOU",
+			"name": "Red Star",
+			"short": "Red Star",
+			"abbr": "RSF",
+			"nick": "Audoniens",
+			"city": "Saint-Ouen",
+			"founded": 1897,
+			"league": "FRA2",
+			"rep": 50,
+			"arch": "projeto_jovem",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Bauer",
+			"capacity": 10000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#E30613",
+				"border": "double"
+			},
+			"rivals": [
+				"FRA_PCT"
+			]
+		},
+		{
+			"key": "FRA_AMI",
+			"name": "Amiens",
+			"short": "Amiens",
+			"abbr": "ASC",
+			"nick": "Picards",
+			"city": "Amiens",
+			"founded": 1901,
+			"league": "FRA2",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Stade de la Licorne",
+			"capacity": 12000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "ASC",
+				"sc": "#111111"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_CLE",
+			"name": "Clermont",
+			"short": "Clermont",
+			"abbr": "CF63",
+			"nick": "Clermontois",
+			"city": "Clermont-Ferrand",
+			"founded": 1990,
+			"league": "FRA2",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#1D3F91"
+			],
+			"stadium": "Stade Gabriel-Montpied",
+			"capacity": 11900,
+			"kit": "halves",
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "mountain",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_ROD",
+			"name": "Rodez",
+			"short": "Rodez",
+			"abbr": "RAF",
+			"nick": "Ruthénois",
+			"city": "Rodez",
+			"founded": 1929,
+			"league": "FRA2",
+			"rep": 44,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "Stade Paul-Lignon",
+			"capacity": 5900,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "RAF",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_BOU",
+			"name": "Boulogne",
+			"short": "Boulogne",
+			"abbr": "USB",
+			"nick": "Boulonnais",
+			"city": "Boulogne-sur-Mer",
+			"founded": 1898,
+			"league": "FRA2",
+			"rep": 42,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Stade de la Libération",
+			"capacity": 14000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor"
+			},
+			"rivals": []
+		},
+		{
+			"key": "FRA_NCY",
+			"name": "Nancy",
+			"short": "Nancy",
+			"abbr": "ASNL",
+			"nick": "Chardons",
+			"city": "Nancy",
+			"founded": 1967,
+			"league": "FRA2",
+			"rep": 48,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Marcel-Picot",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "cross_plain",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"FRA_MET"
+			]
+		},
+		{
+			"key": "FRA_LMS",
+			"name": "Le Mans",
+			"short": "Le Mans",
+			"abbr": "LMFC",
+			"nick": "Manceaux",
+			"city": "Le Mans",
+			"founded": 1985,
+			"league": "FRA2",
+			"rep": 46,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFD100"
+			],
+			"stadium": "MMArena",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LMFC",
+				"sc": "#FFD100"
+			},
+			"rivals": []
+		}
+	]
+}

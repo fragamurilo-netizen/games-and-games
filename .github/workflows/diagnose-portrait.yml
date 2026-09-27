@@ -1,0 +1,35 @@
+name: Diagnose Portrait Parser
+
+on:
+  push:
+    branches:
+      - build/mais-uma-rodada-latest-2026-09-26
+    paths:
+      - ".github/workflows/diagnose-portrait.yml"
+      - "mais-uma-rodada/scripts/ui/components/portrait_view.gd"
+  workflow_dispatch:
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: build/mais-uma-rodada-latest-2026-09-26
+      - name: Import project and parse PortraitView
+        shell: bash
+        run: |
+          set -o pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              rm -rf .godot
+              godot --headless --path /workspace/mais-uma-rodada --import >/tmp/import.log 2>&1
+              godot --headless --path /workspace/mais-uma-rodada \
+                --script res://scripts/ui/components/portrait_view.gd --check-only
+            '

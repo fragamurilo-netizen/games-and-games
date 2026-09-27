@@ -1,0 +1,320 @@
+{
+	"nation": "PAR",
+	"_doc": "Paraguai (liga de 10). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "PAR_DEC",
+			"name": "Olimpia",
+			"short": "Olimpia",
+			"abbr": "OLI",
+			"nick": "Franjeados",
+			"city": "Asunción",
+			"founded": 1902,
+			"league": "PAR1",
+			"rep": 68,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#111111"
+			],
+			"stadium": "Estadio Manuel Ferreira",
+			"capacity": 22000,
+			"kit": "faixa",
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "CO",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"PAR_CIC"
+			]
+		},
+		{
+			"key": "PAR_CIC",
+			"name": "Cerro Porteño",
+			"short": "Cerro Porteño",
+			"abbr": "CCP",
+			"nick": "Azulgranas",
+			"city": "Asunción",
+			"founded": 1912,
+			"league": "PAR1",
+			"rep": 66,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#E30613"
+			],
+			"stadium": "Estadio La Nueva Olla",
+			"capacity": 45000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CCP",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"PAR_DEC"
+			]
+		},
+		{
+			"key": "PAR_GUM",
+			"name": "Libertad",
+			"short": "Libertad",
+			"abbr": "LIB",
+			"nick": "Gumarelos",
+			"city": "Asunción",
+			"founded": 1905,
+			"league": "PAR1",
+			"rep": 64,
+			"arch": "formador",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio La Huerta",
+			"capacity": 10000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CL",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "PAR_ABO",
+			"name": "Guaraní",
+			"short": "Guaraní",
+			"abbr": "GUA",
+			"nick": "Aborígenes",
+			"city": "Asunción",
+			"founded": 1903,
+			"league": "PAR1",
+			"rep": 56,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Estadio Rogelio Livieres",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CG",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "PAR_NAC",
+			"name": "Nacional",
+			"short": "Nacional",
+			"abbr": "NAC",
+			"nick": "Tricolor",
+			"city": "Asunción",
+			"founded": 1904,
+			"league": "PAR1",
+			"rep": 54,
+			"arch": "formador",
+			"colors": [
+				"#FFFFFF",
+				"#0055A4"
+			],
+			"stadium": "Estadio Arsenio Erico",
+			"capacity": 4000,
+			"kit": "stripes_h",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "CN",
+				"sc": "#0055A4"
+			}
+		},
+		{
+			"key": "PAR_LUQ",
+			"name": "Sportivo Luqueño",
+			"short": "Sportivo Luqueño",
+			"abbr": "LUQ",
+			"nick": "Chanchos",
+			"city": "Luque",
+			"founded": 1921,
+			"league": "PAR1",
+			"rep": 52,
+			"arch": "torcida_impaciente",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Estadio Feliciano Cáceres",
+			"capacity": 24000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CSL",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "PAR_TRI",
+			"name": "Trinidense",
+			"short": "Trinidense",
+			"abbr": "TRI",
+			"nick": "Tricolor",
+			"city": "Asunción",
+			"founded": 1935,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#E30613",
+				"#0055A4"
+			],
+			"stadium": "Estadio Martín Torres",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CST"
+			}
+		},
+		{
+			"key": "PAR_DDM",
+			"name": "2 de Mayo",
+			"short": "2 de Mayo",
+			"abbr": "DDM",
+			"nick": "Gallo del Norte",
+			"city": "Pedro Juan Caballero",
+			"founded": 1935,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Estadio Río Parapití",
+			"capacity": 25000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "2M",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "PAR_AME",
+			"name": "Ameliano",
+			"short": "Ameliano",
+			"abbr": "AME",
+			"nick": "Ameliano",
+			"city": "Asunción",
+			"founded": 1936,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio José Tomás Silva",
+			"capacity": 3000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CSA"
+			}
+		},
+		{
+			"key": "PAR_TAC",
+			"name": "Tacuary",
+			"short": "Tacuary",
+			"abbr": "TAC",
+			"nick": "Albinegro de Jara",
+			"city": "Asunción",
+			"founded": 1923,
+			"league": "PAR1",
+			"rep": 48,
+			"arch": "azarao",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Toribio Vargas",
+			"capacity": 8000,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CT",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "PAR_GCA",
+			"name": "Gral. Caballero JLM",
+			"short": "Gral. Caballero JLM",
+			"abbr": "GCJ",
+			"nick": "Gral. Caballero JLM",
+			"city": "Juan León Mallorquín",
+			"founded": 1918,
+			"league": "PAR1",
+			"rep": 47,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ka'arendy",
+			"capacity": 5000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "PAR_REC",
+			"name": "Recoleta",
+			"short": "Recoleta",
+			"abbr": "REC",
+			"nick": "Recoleta",
+			"city": "Asunción",
+			"founded": 1931,
+			"league": "PAR1",
+			"rep": 46,
+			"arch": "azarao",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Estadio Ricardo Gregor",
+			"capacity": 3000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

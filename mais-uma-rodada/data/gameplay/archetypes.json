@@ -1,0 +1,169 @@
+{
+  "gigante_endividado": {
+    "name": "Gigante endividado",
+    "tag": "Gigante endividado",
+    "desc": "Torcida gigantesca, estádio sempre cheio e uma dívida que tira o sono da diretoria.",
+    "rep_mod": 8, "fan_mult": 1.7, "balance_mult": 0.08, "debt": [1.0, 1.6], "revenue_mult": 1.25,
+    "youth": 55, "facilities": 68, "wage_ratio": 1.04, "spend_rate": 0.12,
+    "target_age": [23, 31], "potential_weight": 0.25, "sell_mult": 0.95, "star_pref": 0.75,
+    "level_mod": 1.5, "young_share": 0.18, "veteran_share": 0.28,
+    "fan_patience": 30, "board_patience": 40, "mismanagement": 0.25,
+    "formations": ["4-2-3-1", "4-3-3"], "style": 0, "mentality": 3, "stadium_mult": 1.5
+  },
+  "rico_promovido": {
+    "name": "Rico recém-promovido",
+    "tag": "Novo rico",
+    "desc": "Investidor novo, cofre cheio e pressa. Falta tradição — e torcida.",
+    "rep_mod": 0, "fan_mult": 0.6, "balance_mult": 1.4, "debt": [0.0, 0.0], "revenue_mult": 1.35,
+    "youth": 40, "facilities": 72, "wage_ratio": 0.97, "spend_rate": 0.7,
+    "target_age": [24, 31], "potential_weight": 0.2, "sell_mult": 1.2, "star_pref": 0.9,
+    "level_mod": 2.0, "young_share": 0.12, "veteran_share": 0.3,
+    "fan_patience": 55, "board_patience": 35, "mismanagement": 0.1,
+    "formations": ["4-3-3", "4-2-3-1"], "style": 1, "mentality": 3, "stadium_mult": 0.7
+  },
+  "tradicional_decadente": {
+    "name": "Tradicional decadente",
+    "tag": "Tradição em crise",
+    "desc": "Já foi campeão, tem estádio grande e nome pesado. Hoje sobrevive de memórias.",
+    "rep_mod": 8, "fan_mult": 1.35, "balance_mult": 0.05, "debt": [0.5, 0.9], "revenue_mult": 1.0,
+    "youth": 45, "facilities": 42, "wage_ratio": 0.92, "spend_rate": 0.25,
+    "target_age": [26, 33], "potential_weight": 0.2, "sell_mult": 0.9, "star_pref": 0.5,
+    "level_mod": -1.0, "young_share": 0.15, "veteran_share": 0.38,
+    "fan_patience": 35, "board_patience": 45, "mismanagement": 0.15,
+    "formations": ["4-4-2", "4-2-3-1"], "style": 4, "mentality": 2, "stadium_mult": 1.6
+  },
+  "formador": {
+    "name": "Clube formador",
+    "tag": "Formador",
+    "desc": "A base é a alma do clube. Prioriza atletas até 23 anos e vive de revelar talentos.",
+    "rep_mod": 0, "fan_mult": 1.0, "balance_mult": 0.3, "debt": [0.0, 0.25], "revenue_mult": 0.95,
+    "youth": 88, "facilities": 70, "wage_ratio": 0.82, "spend_rate": 0.3,
+    "target_age": [17, 23], "potential_weight": 0.8, "sell_mult": 1.1, "star_pref": 0.2,
+    "level_mod": -0.5, "young_share": 0.42, "veteran_share": 0.1,
+    "fan_patience": 60, "board_patience": 65, "mismanagement": 0.05,
+    "formations": ["4-3-3", "4-2-3-1"], "style": 0, "mentality": 3, "stadium_mult": 1.0
+  },
+  "vendedor": {
+    "name": "Clube vendedor",
+    "tag": "Vendedor",
+    "desc": "Compra barato, desenvolve e vende caro. Ninguém é inegociável.",
+    "rep_mod": 0, "fan_mult": 0.95, "balance_mult": 0.45, "debt": [0.0, 0.25], "revenue_mult": 1.0,
+    "youth": 65, "facilities": 62, "wage_ratio": 0.77, "spend_rate": 0.35,
+    "target_age": [18, 24], "potential_weight": 0.7, "sell_mult": 0.8, "star_pref": 0.25,
+    "level_mod": 0.0, "young_share": 0.35, "veteran_share": 0.12,
+    "fan_patience": 50, "board_patience": 55, "mismanagement": 0.05,
+    "formations": ["4-3-3", "4-4-2"], "style": 2, "mentality": 2, "stadium_mult": 0.95
+  },
+  "defensivo": {
+    "name": "Equipe defensiva",
+    "tag": "Retranca raiz",
+    "desc": "Zaga forte, meio de marcação e contra-ataque. Perder de pouco é quase vencer.",
+    "rep_mod": 0, "fan_mult": 1.0, "balance_mult": 0.25, "debt": [0.05, 0.35], "revenue_mult": 1.0,
+    "youth": 55, "facilities": 58, "wage_ratio": 0.84, "spend_rate": 0.3,
+    "target_age": [23, 30], "potential_weight": 0.35, "sell_mult": 1.0, "star_pref": 0.35,
+    "level_mod": 0.0, "young_share": 0.2, "veteran_share": 0.22,
+    "fan_patience": 50, "board_patience": 55, "mismanagement": 0.05,
+    "formations": ["5-3-2", "4-1-4-1", "4-4-2"], "style": 2, "mentality": 1, "stadium_mult": 1.0
+  },
+  "torcida_impaciente": {
+    "name": "Torcida impaciente",
+    "tag": "Pressão total",
+    "desc": "Arquibancada apaixonada e exigente. Duas derrotas seguidas já viram crise.",
+    "rep_mod": 4, "fan_mult": 1.45, "balance_mult": 0.1, "debt": [0.2, 0.5], "revenue_mult": 1.1,
+    "youth": 55, "facilities": 62, "wage_ratio": 0.94, "spend_rate": 0.4,
+    "target_age": [22, 30], "potential_weight": 0.3, "sell_mult": 1.05, "star_pref": 0.7,
+    "level_mod": 0.5, "young_share": 0.2, "veteran_share": 0.22,
+    "fan_patience": 15, "board_patience": 35, "mismanagement": 0.12,
+    "formations": ["4-3-3", "4-2-3-1"], "style": 3, "mentality": 3, "stadium_mult": 1.2
+  },
+  "projeto_jovem": {
+    "name": "Projeto jovem",
+    "tag": "Projeto jovem",
+    "desc": "Elenco jovem, diretoria paciente e liberdade para errar enquanto a garotada cresce.",
+    "rep_mod": -2, "fan_mult": 0.9, "balance_mult": 0.3, "debt": [0.0, 0.25], "revenue_mult": 0.95,
+    "youth": 72, "facilities": 60, "wage_ratio": 0.77, "spend_rate": 0.35,
+    "target_age": [17, 22], "potential_weight": 0.85, "sell_mult": 1.15, "star_pref": 0.2,
+    "level_mod": -1.0, "young_share": 0.5, "veteran_share": 0.08,
+    "fan_patience": 70, "board_patience": 75, "mismanagement": 0.05,
+    "formations": ["4-3-3", "3-4-3"], "style": 3, "mentality": 3, "stadium_mult": 0.9
+  },
+  "veteranos": {
+    "name": "Contrata veteranos",
+    "tag": "Experiência",
+    "desc": "Prefere quem já viu de tudo. Elenco rodado, cascudo e caro de manter.",
+    "rep_mod": 0, "fan_mult": 1.0, "balance_mult": 0.2, "debt": [0.05, 0.35], "revenue_mult": 1.0,
+    "youth": 40, "facilities": 55, "wage_ratio": 0.92, "spend_rate": 0.3,
+    "target_age": [28, 34], "potential_weight": 0.05, "sell_mult": 1.0, "star_pref": 0.55,
+    "level_mod": 0.5, "young_share": 0.1, "veteran_share": 0.45,
+    "fan_patience": 45, "board_patience": 50, "mismanagement": 0.08,
+    "formations": ["4-4-2", "4-3-1-2"], "style": 0, "mentality": 2, "stadium_mult": 1.0
+  },
+  "azarao": {
+    "name": "Azarão",
+    "tag": "Azarão",
+    "desc": "Pouco dinheiro, muita raça. Grupo unido que adora derrubar favorito.",
+    "rep_mod": -4, "fan_mult": 0.8, "balance_mult": 0.15, "debt": [0.05, 0.35], "revenue_mult": 0.85,
+    "youth": 50, "facilities": 45, "wage_ratio": 0.82, "spend_rate": 0.3,
+    "target_age": [20, 29], "potential_weight": 0.4, "sell_mult": 1.0, "star_pref": 0.2,
+    "level_mod": -1.5, "young_share": 0.25, "veteran_share": 0.2,
+    "fan_patience": 75, "board_patience": 70, "mismanagement": 0.05,
+    "formations": ["4-4-2", "4-1-4-1"], "style": 2, "mentality": 2, "stadium_mult": 0.8,
+    "cohesion_bonus": 12
+  },
+  "cidade_pequena": {
+    "name": "Clube de cidade pequena",
+    "tag": "Cidade pequena",
+    "desc": "A cidade inteira cabe no estádio. Torcida fiel, orçamento curto.",
+    "rep_mod": -3, "fan_mult": 0.55, "balance_mult": 0.25, "debt": [0.05, 0.3], "revenue_mult": 0.8,
+    "youth": 45, "facilities": 40, "wage_ratio": 0.82, "spend_rate": 0.3,
+    "target_age": [20, 30], "potential_weight": 0.35, "sell_mult": 0.9, "star_pref": 0.15,
+    "level_mod": -1.0, "young_share": 0.25, "veteran_share": 0.2,
+    "fan_patience": 80, "board_patience": 70, "mismanagement": 0.05,
+    "formations": ["4-4-2", "4-2-3-1"], "style": 5, "mentality": 2, "stadium_mult": 0.6,
+    "cohesion_bonus": 6
+  },
+  "estadio_enorme": {
+    "name": "Estádio enorme",
+    "tag": "Estádio gigante",
+    "desc": "Um colosso de concreto que dá dinheiro quando o time empolga — e ecoa quando não.",
+    "rep_mod": 2, "fan_mult": 1.2, "balance_mult": 0.1, "debt": [0.4, 0.8], "revenue_mult": 1.0,
+    "youth": 50, "facilities": 55, "wage_ratio": 0.87, "spend_rate": 0.3,
+    "target_age": [22, 30], "potential_weight": 0.35, "sell_mult": 1.0, "star_pref": 0.45,
+    "level_mod": -0.5, "young_share": 0.22, "veteran_share": 0.22,
+    "fan_patience": 45, "board_patience": 50, "mismanagement": 0.08,
+    "formations": ["4-4-2", "4-2-3-1"], "style": 4, "mentality": 3, "stadium_mult": 2.2
+  },
+  "base_sem_dinheiro": {
+    "name": "Boa base, pouco dinheiro",
+    "tag": "Celeiro de craques",
+    "desc": "Revela joias todo ano, mas precisa vendê-las para pagar as contas.",
+    "rep_mod": -2, "fan_mult": 0.9, "balance_mult": 0.05, "debt": [0.3, 0.6], "revenue_mult": 0.85,
+    "youth": 92, "facilities": 50, "wage_ratio": 0.77, "spend_rate": 0.15,
+    "target_age": [17, 23], "potential_weight": 0.75, "sell_mult": 0.85, "star_pref": 0.1,
+    "level_mod": -1.0, "young_share": 0.45, "veteran_share": 0.1,
+    "fan_patience": 60, "board_patience": 60, "mismanagement": 0.05,
+    "formations": ["4-3-3", "4-2-3-1"], "style": 0, "mentality": 2, "stadium_mult": 0.9
+  },
+  "dinheiro_gestao_ruim": {
+    "name": "Dinheiro com gestão ruim",
+    "tag": "Gestão caótica",
+    "desc": "Dinheiro sobra, planejamento falta. Contrata por impulso e troca de rumo a cada crise.",
+    "rep_mod": 2, "fan_mult": 1.1, "balance_mult": 0.9, "debt": [0.2, 0.5], "revenue_mult": 1.25,
+    "youth": 45, "facilities": 60, "wage_ratio": 1.12, "spend_rate": 0.85,
+    "target_age": [22, 33], "potential_weight": 0.25, "sell_mult": 1.2, "star_pref": 0.85,
+    "level_mod": 1.0, "young_share": 0.15, "veteran_share": 0.3,
+    "fan_patience": 35, "board_patience": 20, "mismanagement": 0.55,
+    "formations": ["4-3-3", "4-4-2", "3-5-2"], "style": 1, "mentality": 3, "stadium_mult": 1.0
+  },
+  "tradicional_equilibrado": {
+    "name": "Tradicional equilibrado",
+    "tag": "Tradicional",
+    "desc": "Gestão séria, torcida fiel e um plano de longo prazo. Raramente brilha, raramente afunda.",
+    "rep_mod": 2, "fan_mult": 1.1, "balance_mult": 0.4, "debt": [0.1, 0.4], "revenue_mult": 1.05,
+    "youth": 62, "facilities": 65, "wage_ratio": 0.84, "spend_rate": 0.35,
+    "target_age": [21, 29], "potential_weight": 0.45, "sell_mult": 1.05, "star_pref": 0.45,
+    "level_mod": 0.5, "young_share": 0.25, "veteran_share": 0.2,
+    "fan_patience": 55, "board_patience": 60, "mismanagement": 0.04,
+    "formations": ["4-4-2", "4-2-3-1", "4-3-3"], "style": 0, "mentality": 2, "stadium_mult": 1.1
+  }
+}

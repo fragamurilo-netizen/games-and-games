@@ -1,0 +1,295 @@
+{
+	"nation": "SUI",
+	"_doc": "Suíça (liga de 6). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "SUI_BAS",
+			"name": "Basel",
+			"short": "Basel",
+			"abbr": "FCB",
+			"nick": "Bebbi",
+			"city": "Basel",
+			"founded": 1893,
+			"league": "SUI1",
+			"rep": 68,
+			"arch": "formador",
+			"colors": [
+				"#E30613",
+				"#1D3F91"
+			],
+			"stadium": "St. Jakob-Park",
+			"capacity": 38500,
+			"kit": "halves",
+			"crest": {
+				"shape": "shield",
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "FCB",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"SUI_ZUR"
+			]
+		},
+		{
+			"key": "SUI_BRN",
+			"name": "Young Boys",
+			"short": "Young Boys",
+			"abbr": "YB",
+			"nick": "Gelbschwarze",
+			"city": "Bern",
+			"founded": 1898,
+			"league": "SUI1",
+			"rep": 70,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFD100",
+				"#111111"
+			],
+			"stadium": "Stadion Wankdorf",
+			"capacity": 32000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bear",
+				"sc": "#111111"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SUI_ZUR",
+			"name": "Zürich",
+			"short": "Zürich",
+			"abbr": "FCZ",
+			"nick": "Zürcher",
+			"city": "Zürich",
+			"founded": 1896,
+			"league": "SUI1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#1D5BBF"
+			],
+			"stadium": "Letzigrund",
+			"capacity": 26100,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "FCZ",
+				"sc": "#111111"
+			},
+			"rivals": [
+				"SUI_BAS"
+			]
+		},
+		{
+			"key": "SUI_GEN",
+			"name": "Servette",
+			"short": "Servette",
+			"abbr": "SFC",
+			"nick": "Grenats",
+			"city": "Genève",
+			"founded": 1890,
+			"league": "SUI1",
+			"rep": 60,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#8A1538",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de Genève",
+			"capacity": 30000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "key",
+				"sc": "#FFD100"
+			},
+			"rivals": []
+		},
+		{
+			"key": "SUI_LUG",
+			"name": "Lugano",
+			"short": "Lugano",
+			"abbr": "FCL",
+			"nick": "Bianconeri",
+			"city": "Lugano",
+			"founded": 1908,
+			"league": "SUI1",
+			"rep": 62,
+			"arch": "rico_promovido",
+			"colors": [
+				"#111111",
+				"#FFFFFF"
+			],
+			"stadium": "Stadio di Cornaredo",
+			"capacity": 6300,
+			"kit": "stripes_v",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FCL",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "SUI_STG",
+			"name": "St. Gallen",
+			"short": "St. Gallen",
+			"abbr": "FCSG",
+			"nick": "Espen",
+			"city": "St. Gallen",
+			"founded": 1879,
+			"league": "SUI1",
+			"rep": 58,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Kybunpark",
+			"capacity": 19400,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bear",
+				"sc": "#FFFFFF"
+			}
+		},
+		{
+			"key": "SUI_LUZ",
+			"name": "Luzern",
+			"short": "Luzern",
+			"abbr": "LUZ",
+			"nick": "Luzern",
+			"city": "Lucerne",
+			"founded": 1901,
+			"league": "SUI1",
+			"rep": 55,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stadion Allmend",
+			"capacity": 16800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_WIN",
+			"name": "Winterthur",
+			"short": "Winterthur",
+			"abbr": "WIN",
+			"nick": "Winterthur",
+			"city": "Winterthur",
+			"founded": 1896,
+			"league": "SUI1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Schützenwiese",
+			"capacity": 8500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_GCZ",
+			"name": "Grasshoppers",
+			"short": "Grasshoppers",
+			"abbr": "GCZ",
+			"nick": "Grasshoppers",
+			"city": "Zürich",
+			"founded": 1886,
+			"league": "SUI1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Letzigrund",
+			"capacity": 26100,
+			"kit": "halves",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_SIO",
+			"name": "Sion",
+			"short": "Sion",
+			"abbr": "SIO",
+			"nick": "Sion",
+			"city": "Sion",
+			"founded": 1909,
+			"league": "SUI1",
+			"rep": 53,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#FFFFFF",
+				"#E30613"
+			],
+			"stadium": "Stade de Tourbillon",
+			"capacity": 14300,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_LAU",
+			"name": "Lausanne",
+			"short": "Lausanne",
+			"abbr": "LAU",
+			"nick": "Lausanne",
+			"city": "Lausanne",
+			"founded": 1896,
+			"league": "SUI1",
+			"rep": 52,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Stade de la Tuilière",
+			"capacity": 12500,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "SUI_YVE",
+			"name": "Yverdon",
+			"short": "Yverdon",
+			"abbr": "YVE",
+			"nick": "Yverdon",
+			"city": "Yverdon-les-Bains",
+			"founded": 1948,
+			"league": "SUI1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Stade Municipal",
+			"capacity": 6600,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}

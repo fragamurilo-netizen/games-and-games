@@ -1,0 +1,382 @@
+{
+	"nation": "CHN",
+	"_doc": "China (liga de 8). Nomes, siglas e estádios reais; força, finanças e elencos são do jogo.",
+	"clubs": [
+		{
+			"key": "CHN_SHH",
+			"name": "Shanghai Port",
+			"short": "Shanghai Port",
+			"abbr": "SHP",
+			"nick": "Red Eagles",
+			"city": "Shanghai",
+			"founded": 2005,
+			"league": "CHN1",
+			"rep": 64,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Pudong Football Stadium",
+			"capacity": 37000,
+			"kit": "plain",
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "anchor",
+				"text": "SHANGHAI PORT",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"CHN_SHS"
+			]
+		},
+		{
+			"key": "CHN_JIN",
+			"name": "Shandong Taishan",
+			"short": "Shandong Taishan",
+			"abbr": "SDT",
+			"nick": "Taishan",
+			"city": "Jinan",
+			"founded": 1988,
+			"league": "CHN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#F07F13",
+				"#FFFFFF"
+			],
+			"stadium": "Jinan Olympic Sports Center",
+			"capacity": 56800,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain"
+			},
+			"rivals": []
+		},
+		{
+			"key": "CHN_BEI",
+			"name": "Beijing Guoan",
+			"short": "Beijing Guoan",
+			"abbr": "BGA",
+			"nick": "Imperial",
+			"city": "Beijing",
+			"founded": 1992,
+			"league": "CHN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#006437",
+				"#FFFFFF"
+			],
+			"stadium": "Workers' Stadium",
+			"capacity": 68000,
+			"kit": "plain",
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "dragon",
+				"sc": "#FFFFFF"
+			},
+			"rivals": []
+		},
+		{
+			"key": "CHN_SHS",
+			"name": "Shanghai Shenhua",
+			"short": "Shanghai Shenhua",
+			"abbr": "SSH",
+			"nick": "Blue Devils",
+			"city": "Shanghai",
+			"founded": 1993,
+			"league": "CHN1",
+			"rep": 62,
+			"arch": "tradicional_equilibrado",
+			"colors": [
+				"#1D3F91",
+				"#FFFFFF"
+			],
+			"stadium": "Hongkou Football Stadium",
+			"capacity": 33000,
+			"kit": "plain",
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "rose",
+				"sc": "#FFFFFF"
+			},
+			"rivals": [
+				"CHN_SHH"
+			]
+		},
+		{
+			"key": "CHN_CHE",
+			"name": "Chengdu Rongcheng",
+			"short": "Chengdu Rongcheng",
+			"abbr": "CDR",
+			"nick": "Rongcheng",
+			"city": "Chengdu",
+			"founded": 2018,
+			"league": "CHN1",
+			"rep": 60,
+			"arch": "rico_promovido",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Phoenix Hill Football Stadium",
+			"capacity": 50700,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise"
+			}
+		},
+		{
+			"key": "CHN_ZHE",
+			"name": "Zhejiang",
+			"short": "Zhejiang",
+			"abbr": "ZHE",
+			"nick": "Green Town",
+			"city": "Hangzhou",
+			"founded": 1998,
+			"league": "CHN1",
+			"rep": 56,
+			"arch": "formador",
+			"colors": [
+				"#00843D",
+				"#FFFFFF"
+			],
+			"stadium": "Huanglong Sports Center",
+			"capacity": 51000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves"
+			}
+		},
+		{
+			"key": "CHN_TIA",
+			"name": "Tianjin Tiger",
+			"short": "Tianjin Tiger",
+			"abbr": "TJT",
+			"nick": "Tigres",
+			"city": "Tianjin",
+			"founded": 1951,
+			"league": "CHN1",
+			"rep": 54,
+			"arch": "tradicional_decadente",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "TEDA Football Stadium",
+			"capacity": 37500,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tiger"
+			}
+		},
+		{
+			"key": "CHN_WUH",
+			"name": "Wuhan Three Towns",
+			"short": "Wuhan Three Towns",
+			"abbr": "WTT",
+			"nick": "Três Cidades",
+			"city": "Wuhan",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 54,
+			"arch": "rico_promovido",
+			"colors": [
+				"#0055A4",
+				"#E30613"
+			],
+			"stadium": "Wuhan Sports Center",
+			"capacity": 54000,
+			"kit": "plain",
+			"rivals": [],
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle"
+			}
+		},
+		{
+			"key": "CHN_CCY",
+			"name": "Changchun Yatai",
+			"short": "Changchun Yatai",
+			"abbr": "CCY",
+			"nick": "Changchun Yatai",
+			"city": "Changchun",
+			"founded": 1996,
+			"league": "CHN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Changchun Stadium",
+			"capacity": 25000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_HEN",
+			"name": "Henan",
+			"short": "Henan",
+			"abbr": "HEN",
+			"nick": "Henan",
+			"city": "Zhengzhou",
+			"founded": 1994,
+			"league": "CHN1",
+			"rep": 50,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Zhengzhou Hanghai Stadium",
+			"capacity": 29800,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_QWC",
+			"name": "Qingdao West Coast",
+			"short": "Qingdao West Coast",
+			"abbr": "QWC",
+			"nick": "Qingdao West Coast",
+			"city": "Qingdao",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Qingdao Youth Football Stadium",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_QHN",
+			"name": "Qingdao Hainiu",
+			"short": "Qingdao Hainiu",
+			"abbr": "QHN",
+			"nick": "Qingdao Hainiu",
+			"city": "Qingdao",
+			"founded": 1990,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFD100"
+			],
+			"stadium": "Qingdao Youth Football Stadium",
+			"capacity": 50000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_MEI",
+			"name": "Meizhou Hakka",
+			"short": "Meizhou Hakka",
+			"abbr": "MZH",
+			"nick": "Meizhou Hakka",
+			"city": "Meizhou",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#FFFFFF"
+			],
+			"stadium": "Meixian Tsang Hin-chi Stadium",
+			"capacity": 20000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_SZP",
+			"name": "Shenzhen Peng City",
+			"short": "Shenzhen Peng City",
+			"abbr": "SZP",
+			"nick": "Shenzhen Peng City",
+			"city": "Shenzhen",
+			"founded": 2013,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#E30613",
+				"#111111"
+			],
+			"stadium": "Shenzhen Universiade Stadium",
+			"capacity": 60000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_DAL",
+			"name": "Dalian Yingbo",
+			"short": "Dalian Yingbo",
+			"abbr": "DLY",
+			"nick": "Dalian Yingbo",
+			"city": "Dalian",
+			"founded": 2020,
+			"league": "CHN1",
+			"rep": 49,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#0055A4",
+				"#FFFFFF"
+			],
+			"stadium": "Dalian Suoyuwan Stadium",
+			"capacity": 63000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		},
+		{
+			"key": "CHN_YUN",
+			"name": "Yunnan Yukun",
+			"short": "Yunnan Yukun",
+			"abbr": "YYK",
+			"nick": "Yunnan Yukun",
+			"city": "Yuxi",
+			"founded": 2021,
+			"league": "CHN1",
+			"rep": 48,
+			"arch": "cidade_pequena",
+			"colors": [
+				"#00843D",
+				"#FFD100"
+			],
+			"stadium": "Yuxi Plateau Sports Center",
+			"capacity": 15000,
+			"kit": "plain",
+			"crest": {},
+			"rivals": []
+		}
+	]
+}
