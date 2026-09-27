@@ -206,8 +206,15 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var safe: Rect2 = main.safe_margins()
-	holder.add_theme_constant_override(&"margin_left", 0 if as_sheet else 28)
-	holder.add_theme_constant_override(&"margin_right", 0 if as_sheet else 28)
+	# Telas largas (paisagem, tablet): folha e diálogo ficam numa coluna central com largura de
+	# leitura, em vez de atravessar a tela inteira.
+	var side := 0 if as_sheet else 28
+	var vw := layer.get_viewport_rect().size.x
+	var cap := 820.0 if as_sheet else 680.0
+	if vw > cap + 2.0 * side:
+		side = int((vw - cap) / 2.0)
+	holder.add_theme_constant_override(&"margin_left", side)
+	holder.add_theme_constant_override(&"margin_right", side)
 	holder.add_theme_constant_override(&"margin_top", int(safe.position.y) + 60)
 	holder.add_theme_constant_override(&"margin_bottom", 0 if as_sheet else int(safe.size.y) + 60)
 	dim.add_child(holder)
@@ -228,7 +235,17 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	if as_sheet:
 		var inner := MarginContainer.new()
 		inner.add_theme_constant_override(&"margin_bottom", int(safe.size.y))
-		inner.add_child(body)
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override(&"separation", 14)
+		# Alça da folha: o traço no topo que diz "isto desliza e fecha".
+		var grab := ColorRect.new()
+		grab.color = Color(UIColors.TEXT, 0.22)
+		grab.custom_minimum_size = Vector2(64, 6)
+		grab.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		grab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		col.add_child(grab)
+		col.add_child(body)
+		inner.add_child(col)
 		panel.add_child(inner)
 	else:
 		panel.add_child(body)
@@ -296,24 +313,37 @@ func has_modal() -> bool:
 func dialog(title: String, body: String, buttons: Array) -> void:
 	var v := UIKit.vbox(18)
 	v.custom_minimum_size.x = 560
-	var t := UIKit.label(title, "Title", true)
+	var t := UIKit.label(title, "H2", true)
 	v.add_child(t)
 	if body != "":
-		v.add_child(UIKit.label(body, "", true))
-	var row := UIKit.vbox(10)
+		var bl := UIKit.label(body, "", true)
+		bl.add_theme_color_override(&"font_color", UIColors.MUTED)
+		v.add_child(bl)
+	# Dois botões lado a lado (confirmar e cancelar), com o principal à direita, como nos
+	# diálogos de console; mais de dois, empilhados.
+	var row: BoxContainer = UIKit.vbox(10)
+	if buttons.size() == 2:
+		row = UIKit.hbox(12)
+		buttons = [buttons[1], buttons[0]]
 	for b in buttons:
 		var cb: Callable = b.get("cb", Callable())
 		var btn := UIKit.button(b.get("text", "OK"), b.get("style", ""), func():
 			close_modal()
 			if cb.is_valid():
 				cb.call())
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(btn)
 	v.add_child(row)
 	show_modal(v)
 
 
 func confirm(title: String, body: String, yes_text: String, cb: Callable) -> void:
-	dialog(title, body, [{"text": yes_text, "style": "PrimaryButton", "cb": cb}, {"text": "Cancelar", "style": "GhostButton"}])
+	# Ações que destroem algo (apagar, demitir, vender...) ganham o botão vermelho.
+	var danger := false
+	for word in ["Apagar", "Excluir", "Remover", "Demitir", "Dispensar", "Rescindir", "Sair"]:
+		if yes_text.begins_with(word):
+			danger = true
+	dialog(title, body, [{"text": yes_text, "style": "DangerButton" if danger else "PrimaryButton", "cb": cb}, {"text": "Cancelar", "style": "GhostButton"}])
 
 
 func info(title: String, body: String) -> void:
@@ -331,10 +361,18 @@ func toast(text: String, color: Color = UIColors.TEXT) -> void:
 	var p := PanelContainer.new()
 	p.theme_type_variation = "Toast"
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Faixa de cor à esquerda diz o tipo do aviso (verde bom, vermelho ruim, neutro).
+	var row := UIKit.hbox(14)
+	var bar := ColorRect.new()
+	bar.color = color if color != UIColors.TEXT else UIColors.ACCENT
+	bar.custom_minimum_size = Vector2(5, 0)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(bar)
 	var l := UIKit.label(text, "", true)
 	l.add_theme_color_override(&"font_color", color)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p.add_child(l)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(l)
+	p.add_child(row)
 	main.toast_host.add_child(p)
 	p.modulate.a = 0.0
 	var tw := p.create_tween()

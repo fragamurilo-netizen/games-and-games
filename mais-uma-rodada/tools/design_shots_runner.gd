@@ -211,6 +211,9 @@ func _only_pass() -> void:
 	await _frames(6)
 	UIManager.close_all_modals()
 	for spec in only.split(","):
+		if spec.begins_with("~"):
+			await _dialog_shot(w, spec.substr(1))
+			continue
 		var parts := spec.split(":")
 		var route := parts[0]
 		var args := {}
@@ -249,3 +252,37 @@ func _only_pass() -> void:
 		if sc != null and sc.get_v_scroll_bar().max_value > sc.size.y + 200:
 			sc.scroll_vertical = int(sc.size.y * 0.85)
 			await _shot(shot_name + "_b")
+
+
+## Diálogos e folhas por cima do hub (~confirm, ~event, ~sim, ~tutorial, ~buy, ~talk, ~toast).
+func _dialog_shot(w: GameWorld, kind: String) -> void:
+	UIManager.close_all_modals()
+	UIManager.goto("hub")
+	await _frames(6)
+	UIManager.close_all_modals()
+	var u := w.user_club()
+	match kind:
+		"confirm":
+			UIManager.confirm("Apagar o espaço 2?", "Isso apaga o Coritiba para sempre, incluindo a cópia de segurança.", "Apagar", func(): pass)
+		"event":
+			var evs := EventManager.pending(w)
+			if evs.is_empty():
+				return
+			EventDialog.open(evs[0])
+		"sim":
+			SimDialog.open(func(): pass)
+		"tutorial":
+			Tutorial.show_all()
+		"buy":
+			for c: Club in w.clubs_in_league(u.league_id):
+				if c.id != u.id:
+					var sq := w.squad(c)
+					sq.sort_custom(func(a, b): return a.overall > b.overall)
+					Negotiation.open(w, sq[0], "buy", func(): pass)
+					break
+		"talk":
+			TalkDialog.open("board", -1)
+		"toast":
+			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
+	await _shot(prefix + "dlg_" + kind)
+	UIManager.close_all_modals()

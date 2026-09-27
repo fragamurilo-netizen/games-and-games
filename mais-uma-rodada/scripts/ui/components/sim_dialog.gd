@@ -32,6 +32,7 @@ static func open(done: Callable) -> void:
 	if w == null or w.season == null:
 		return
 	var v := UIKit.vbox(12)
+	v.add_child(UIKit.eyebrow("Simulação"))
 	v.add_child(UIKit.label("Simular sem assistir", "Title"))
 	var opts: Array = [[MODE_GAMES, 1, "Próximo jogo", "play"], [MODE_GAMES, 3, "Próximos 3 jogos", "fast"], [MODE_MONTH, 0, "Até o fim do mês", "clock"]]
 	if w.transfer_window_open():
@@ -39,17 +40,15 @@ static func open(done: Callable) -> void:
 	elif w.next_window_day() >= 0:
 		opts.append([MODE_WINDOW_OPEN, 0, "Até abrir a janela de transferências", "swap"])
 	opts.append([MODE_SEASON, 0, "Até o fim da temporada", "trophy"])
+	var rows: Array = []
 	for o in opts:
-		var row := UIKit.hbox(12)
-		row.add_child(UIKit.icon_rect(String(o[3]), 30, UIColors.ACCENT))
-		var l := UIKit.label(String(o[2]), "H3")
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
 		var m: int = o[0]
 		var n: int = o[1]
-		v.add_child(UIKit.tap_row(row, func():
+		rows.append(UIKit.menu_row(String(o[3]), String(o[2]), "", func():
 			UIManager.close_modal()
-			start(m, n, done), "Card"))
+			start(m, n, done)))
+	v.add_child(UIKit.menu_group(rows))
+	v.add_child(UIKit.section_header("Opções"))
 	v.add_child(_toggle("Parar em decisões, propostas e lesões", stop_on_events, func(on: bool): stop_on_events = on))
 	v.add_child(_toggle("Assistente escala o time a cada jogo", auto_lineup, func(on: bool): auto_lineup = on))
 	v.add_child(UIKit.button("Cancelar", "GhostButton", func(): UIManager.close_modal()))
