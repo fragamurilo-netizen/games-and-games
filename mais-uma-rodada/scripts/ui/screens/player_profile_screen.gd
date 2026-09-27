@@ -36,6 +36,7 @@ func refresh() -> void:
 	screen_title = p.display_name()
 	screen_subtitle = club.short_name if club != null else "Sem clube"
 	UIManager.refresh_chrome()
+	max_content_width = 1800.0
 	c.add_child(_header(w, p, club))
 	c.add_child(_tabs_row(p))
 	match _tab:
@@ -45,14 +46,11 @@ func refresh() -> void:
 			c.add_child(_career(w, p))
 			c.add_child(_memory(w, p))
 		_:
-			c.add_child(_summary(w, p, own))
-			c.add_child(_fit_card(w, p, own))
-			c.add_child(_positions_card(w, p, own))
-			c.add_child(_attributes(w, p, own))
-			c.add_child(_personality(w, p, own))
-			c.add_child(SocialPost.mini_card(w, -1, p.id))
+			var cards: Array = [_summary(w, p, own), _fit_card(w, p, own), _positions_card(w, p, own),
+				_attributes(w, p, own), _personality(w, p, own), SocialPost.mini_card(w, -1, p.id)]
 			if own:
-				c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
+				cards.append(RelationsScreen.player_card(w, p, func(): refresh()))
+			UIKit.columns(c, cards, content_width())
 	_actions(w, p, own)
 
 

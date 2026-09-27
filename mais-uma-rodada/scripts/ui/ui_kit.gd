@@ -682,3 +682,50 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 		# A aba ativa fica visível mesmo quando está no fim da lista.
 		sel.ready.connect(func(): sc.ensure_control_visible.call_deferred(sel), CONNECT_ONE_SHOT)
 	return sc
+
+
+## Responsivo: coloca os cartões em `c` numa coluna (celular em retrato) ou distribui em
+## colunas lado a lado (paisagem, tablet), sempre equilibrando a altura das colunas.
+## `pinned` = quantos dos primeiros cartões ocupam a largura toda (o destaque da tela).
+static func columns(c: Container, cards: Array, width: float, max_cols: int = 2, pinned: int = 0) -> void:
+	var n := UILayout.columns_for(width, max_cols)
+	var i := 0
+	while i < mini(pinned, cards.size()):
+		c.add_child(cards[i])
+		i += 1
+	if n <= 1:
+		for k in range(i, cards.size()):
+			c.add_child(cards[k])
+		return
+	var row := hbox(UITokens.S4)
+	var cols: Array = []
+	var load: Array = []
+	for _k in n:
+		var v := vbox(UITokens.S4)
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v.size_flags_stretch_ratio = 1.0
+		row.add_child(v)
+		cols.append(v)
+		load.append(0.0)
+	for k in range(i, cards.size()):
+		var card: Control = cards[k]
+		var best := 0
+		for j in n:
+			if load[j] < load[best] - 0.5:
+				best = j
+		(cols[best] as VBoxContainer).add_child(card)
+		load[best] += _weight(card)
+	c.add_child(row)
+
+
+## Altura estimada de um cartão antes do layout (textos quebrados ainda não têm largura).
+static func _weight(n: Node) -> float:
+	var h := 40.0
+	for ch in n.find_children("*", "", true, false):
+		if ch is Label:
+			h += 30.0 if (ch as Label).autowrap_mode == TextServer.AUTOWRAP_OFF else 48.0
+		elif ch is Button:
+			h += 60.0
+		elif ch is Control and not (ch is Container) and (ch as Control).custom_minimum_size.y > 0:
+			h += (ch as Control).custom_minimum_size.y * 0.6
+	return h

@@ -34,23 +34,30 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	c.add_child(_identity_card(w, club))
-	c.add_child(_dna_card(w, club))
-	c.add_child(SocialPost.mini_card(w, club.id, -1))
+	var cards: Array = []
+	var ident := _identity_card(w, club)
+	for ch in ident.get_children():
+		ident.remove_child(ch)
+		cards.append(ch)
+	ident.free()
+	cards.append(_dna_card(w, club))
+	cards.append(SocialPost.mini_card(w, club.id, -1))
 	if _own():
-		c.add_child(_board_card(w, club))
-		c.add_child(_finance_card(w, club))
-		c.add_child(_structure_card(w, club))
+		cards.append(_board_card(w, club))
+		cards.append(_finance_card(w, club))
+		cards.append(_structure_card(w, club))
 	else:
-		c.add_child(_season_card(w, club))
-		c.add_child(_squad_card(w, club))
-	c.add_child(_history_card(w, club))
+		cards.append(_season_card(w, club))
+		cards.append(_squad_card(w, club))
+	cards.append(_history_card(w, club))
 	var idols := _idols_card(w, club)
 	if idols != null:
-		c.add_child(idols)
+		cards.append(idols)
 	if _own():
-		c.add_child(_manager_card(w))
-		c.add_child(_career_card(w))
+		cards.append(_manager_card(w))
+		cards.append(_career_card(w))
+	max_content_width = 1800.0
+	UIKit.columns(c, cards, content_width(), 2, 1)
 
 
 func _identity_card(w: GameWorld, club: Club) -> Control:

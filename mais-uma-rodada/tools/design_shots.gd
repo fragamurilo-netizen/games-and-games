@@ -21,6 +21,10 @@ func _start() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			runner.set("out_dir", a.substr(6))
+		if a == "--tablet":
+			runner.set("tablet", true)
+		if a.begins_with("--prefix="):
+			runner.set("prefix", a.substr(9))
 		if a.begins_with("--lang="):
 			runner.set("lang", a.substr(7))
 	var out: String = runner.get("out_dir")

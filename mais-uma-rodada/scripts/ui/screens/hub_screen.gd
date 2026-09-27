@@ -39,43 +39,46 @@ func refresh() -> void:
 	if not jobs.is_empty():
 		c.add_child(_jobs_card(w, jobs))
 		return
+	var cards: Array = []
 	var preseason := PreseasonManager.is_active(w)
 	if Store.locked(w):
-		c.add_child(_paywall_card(w))
+		cards.append(_paywall_card(w))
 	elif preseason:
-		c.add_child(_preseason_card(w))
+		cards.append(_preseason_card(w))
 	if Store.locked(w):
 		pass
 	elif w.season.finished:
-		c.add_child(_season_over_card(w))
+		cards.append(_season_over_card(w))
 	else:
-		c.add_child(_next_match_card(w, club))
+		cards.append(_next_match_card(w, club))
 	var decisions := _decisions_card(w)
 	if decisions != null:
-		c.add_child(decisions)
-	c.add_child(_inbox_card(w))
-	c.add_child(RelationsScreen.pending_card(w, func(): refresh(), true))
-	c.add_child(_status_card(w, club))
+		cards.append(decisions)
+	cards.append(_inbox_card(w))
+	cards.append(RelationsScreen.pending_card(w, func(): refresh(), true))
+	cards.append(_status_card(w, club))
 	var alerts := _alerts_card(w, club)
 	if alerts != null:
-		c.add_child(alerts)
+		cards.append(alerts)
 	if not preseason:
-		c.add_child(_mini_table_card(w, club))
+		cards.append(_mini_table_card(w, club))
 		var stars := _highlights_card(w, club)
 		if stars != null:
-			c.add_child(stars)
+			cards.append(stars)
 	var upcoming := _upcoming_card(w, club)
 	if upcoming != null:
-		c.add_child(upcoming)
+		cards.append(upcoming)
 	var cups := _cups_card(w, club)
 	if cups != null:
-		c.add_child(cups)
-	c.add_child(_shortcuts_card(w))
-	c.add_child(_news_card(w))
+		cards.append(cups)
+	cards.append(_shortcuts_card(w))
+	cards.append(_news_card(w))
 	var social := _social_card(w)
 	if social != null:
-		c.add_child(social)
-	c.add_child(_form_card(w, club))
+		cards.append(social)
+	cards.append(_form_card(w, club))
+	max_content_width = 1800.0
+	UIKit.columns(c, cards, content_width())
 
 
 ## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.
