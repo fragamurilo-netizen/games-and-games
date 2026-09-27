@@ -20,6 +20,8 @@ const CRESTS=[
 
 func _ready()->void:
 	get_window().size=Vector2i(900,1600)
+	get_window().content_scale_size=Vector2i(900,1600)
+	get_window().content_scale_factor=1.0
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	if mode=="crests": _gallery()
 	else: _dashboard()
@@ -54,9 +56,17 @@ func _l(parent:Node,txt:String,r:Rect2,fs:int,c:Color,center:=false)->Label:
 	parent.add_child(n);return n
 
 func _c(parent:Node,i:int,r:Rect2)->TextureRect:
-	var n=TextureRect.new();n.texture=load(CRESTS[i][1]);n.position=r.position;n.size=r.size
-	n.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;n.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	parent.add_child(n);return n
+	var n=TextureRect.new()
+	n.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	n.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	n.custom_minimum_size=Vector2.ZERO
+	n.texture=load(CRESTS[i][1])
+	n.position=r.position
+	n.size=r.size
+	n.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	parent.add_child(n)
+	n.set_deferred("size",r.size)
+	return n
 
 func _bg(c:Color)->void:
 	var b=ColorRect.new();b.color=c;b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(b)
