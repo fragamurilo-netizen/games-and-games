@@ -446,8 +446,8 @@ func _light_pass() -> void:
 ## pessoa tem o próprio recorte da textura e a própria intensidade: dois rostos não repetem o
 ## mesmo padrão. Só aparece em retratos grandes o bastante para o detalhe existir.
 func _skin_grain(head: PackedVector2Array) -> void:
-	if _s < 80.0 or DisplayServer.get_name() == "headless":
-		return
+	if true:
+		return # estilo ilustrado: sem textura fotográfica
 	var pts := PackedVector2Array()
 	for p in head:
 		pts.append(_cl(p))
@@ -1195,6 +1195,8 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		a = (u - float(bl[0])) / float(bl[2])
 		b = (v - float(bl[1])) / float(bl[2])
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
+	# Estilo ilustrado (figurinha): a luz vira três tons chapados com passagem curta
+	lum = _toon(lum)
 	var col := _shade(_skin, lum)
 	# Sombra quente (marrom avermelhado, nunca cinza): a luz rebate dentro da pele
 	col = col.lerp(Color(col.r, col.g * 0.87, col.b * 0.78), 0.4 * (1.0 - diff))
@@ -1242,8 +1244,15 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var sharp := pow(ndh, 16.0 + oil * 26.0) * (0.3 + 0.6 * oil)
 	var broad := pow(ndh, 5.0) * 0.1
 	var spec := (sharp * (0.35 + 0.9 * tzone) + broad * (0.4 + 0.6 * tzone)) * (0.55 + 0.45 * diff)
-	spec *= k[13] * 1.9 + 0.03
+	spec = (0.1 if sharp > 0.5 else 0.0) * (0.4 + 0.6 * tzone)
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
+
+
+## Tons chapados: sombra, meio-tom e luz, com uma borda estreita entre eles.
+static func _toon(l: float) -> float:
+	var t1 := smoothstep(0.7, 0.76, l)
+	var t2 := smoothstep(1.0, 1.05, l)
+	return lerpf(lerpf(0.74, 0.92, t1), 1.04, t2)
 
 
 ## Relevo do rosto em unidades da meia largura (0 na borda, ~0,9 no meio): serve para tirar a normal.
@@ -2435,8 +2444,8 @@ func _ears() -> void:
 func _eyes() -> void:
 	var f := _f
 	# Olho de ~0,21 da largura do rosto, abertura de ~0,07: a íris grande mostra pouco branco
-	var ew := _fw * float(f["eye_w"]) * 0.92
-	var eh := _fw * float(f["eye_h"]) * 0.85
+	var ew := _fw * float(f["eye_w"]) * 1.05
+	var eh := _fw * float(f["eye_h"]) * 1.05
 	var tilt := _fw * float(f["eye_tilt"])
 	var iris_main: Color = f["eye"]
 	var ring: float = f.get("eye_ring", 0.0)
