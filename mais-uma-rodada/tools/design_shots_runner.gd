@@ -52,6 +52,26 @@ func _run() -> void:
 	get_tree().root.add_child(main)
 	await _frames(10)
 	await _shot(prefix + "01_menu")
+	UIManager.push("new_career")
+	await _frames(8)
+	await _shot(prefix + "02_nova_carreira_1")
+	var nc := _screen()
+	nc.set("_step", 1)
+	nc.call("_build")
+	await _shot(prefix + "02_nova_carreira_2")
+	var until := Time.get_ticks_msec() + 30000
+	while nc.get("_world") == null and Time.get_ticks_msec() < until:
+		await get_tree().process_frame
+	nc.set("_step", 2)
+	nc.call("_build")
+	await _frames(4)
+	var nw: GameWorld = nc.get("_world")
+	if nw != null:
+		nc.set("_selected", nw.clubs_in_league("BRA1")[3].id)
+		nc.call("_build")
+	await _shot(prefix + "02_nova_carreira_3")
+	UIManager.back()
+	await _frames(4)
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
 	var club_id := -1
 	for c: Club in w.clubs_in_league("BRA1"):

@@ -761,3 +761,41 @@ static func stat_grid(tiles: Array, width: float) -> GridContainer:
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		g.add_child(t)
 	return g
+
+
+## Ladrilho de ação (menus em grade): ícone no alto, título e uma linha de apoio.
+static func action_tile(icon_name: String, title: String, subtitle: String, cb: Callable, highlight: bool = false) -> PanelContainer:
+	var v := vbox(8)
+	var tile := PanelContainer.new()
+	tile.theme_type_variation = "IconTile"
+	tile.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	tile.add_child(icon_rect(icon_name, 30, UIColors.ON_ACCENT if highlight else UIColors.ACCENT))
+	if highlight:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = UIColors.ACCENT
+		sb.set_corner_radius_all(UITokens.R_SM)
+		sb.set_content_margin_all(10)
+		tile.add_theme_stylebox_override(&"panel", sb)
+	v.add_child(tile)
+	var t := label(title, "H3")
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(t)
+	if subtitle != "":
+		var s := label(subtitle, "Small", true)
+		v.add_child(s)
+	var row := tap_row(v, cb, "CardHighlight" if highlight else "Card")
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.custom_minimum_size.y = 150
+	return row
+
+
+## Grade de ladrilhos com colunas fixas (2 no celular, mais em telas largas).
+static func tile_grid(tiles: Array, cols: int = 2) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = cols
+	g.add_theme_constant_override(&"h_separation", UITokens.S3)
+	g.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for t: Control in tiles:
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		g.add_child(t)
+	return g
