@@ -36,7 +36,8 @@ func refresh() -> void:
 		top = maxi(top, p.shirt)
 	c.add_child(_head(w, club))
 	# Jogadores
-	c.add_child(UIKit.section("Jogadores"))
+	max_content_width = 1700
+	c.add_child(UIKit.section_header("Jogadores"))
 	var flow := UIKit.flow(8)
 	for p: Player in squad:
 		var inner := UIKit.hbox(6)
@@ -52,9 +53,9 @@ func refresh() -> void:
 	c.add_child(flow)
 	# Camisas
 	var last := 99 if _all else maxi(40, top + 5)
-	c.add_child(UIKit.section("Camisas 1–%d" % last))
+	c.add_child(UIKit.section_header("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
-	grid.columns = 5
+	grid.columns = 10 if UILayout.is_wide() else 5
 	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):
