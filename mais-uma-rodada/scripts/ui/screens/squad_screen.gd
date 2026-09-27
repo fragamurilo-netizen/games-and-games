@@ -89,6 +89,11 @@ func refresh() -> void:
 	top.add_child(UIKit.button("Numeração", "", func(): UIManager.push("numbers"), "shirt"))
 	top.add_child(UIKit.button("Contratos", "", func(): UIManager.push("contracts"), "money"))
 	c.add_child(top)
+	top = UIKit.hbox(10)
+	var vest := UIKit.button("Vestiário: clima, líderes e panelinhas", "GhostButton", func(): UIManager.push("dressing_room"), "heart")
+	vest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(vest)
+	c.add_child(top)
 	c.add_child(_summary_card(w, club, squad))
 	var gv := ButtonGroup.new()
 	var vrow := UIKit.hbox(8)

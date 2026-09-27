@@ -32,6 +32,7 @@ const SCREENS := {
 	"numbers": "res://scenes/screens/numbers.tscn",
 	"contracts": "res://scenes/screens/contracts.tscn",
 	"nextgen": "res://scenes/screens/nextgen.tscn",
+	"dressing_room": "res://scenes/screens/dressing_room.tscn",
 	"past_squads": "res://scenes/screens/past_squads.tscn",
 	"paywall": "res://scenes/screens/paywall.tscn",
 	"manager": "res://scenes/screens/manager.tscn",
