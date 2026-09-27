@@ -63,7 +63,7 @@ func _run() -> void:
 			if pr.size() == 2:
 				params[pr[0]] = pr[1]
 		UIManager.push(sc, params)
-		await _frames(10)
+		await _frames(10 + int(OS.get_environment("SHOT_WAIT") if OS.get_environment("SHOT_WAIT") != "" else "0"))
 		var cur: BaseScreen = UIManager.current()
 		if opt_tab != "":
 			cur.set("_tab", opt_tab)
