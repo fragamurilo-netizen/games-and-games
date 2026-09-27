@@ -556,7 +556,11 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			_polyline_closed(pts, c1.darkened(0.3) if c1.get_luminance() < 0.6 else Color(0, 0, 0, 0.6), maxf(1.0, r * 0.07))
 	for p: PackedVector2Array in polys:
 		_poly(_xf_c(p, cen, r), col)
-	if CrestArt.has(det) and s >= 28.0:
+	# Recortes do liver bird usam o campo; em ícones pequenos vale a silhueta limpa.
+	var detail_min := 48.0 if sym == "liverbird" else 28.0
+	if sym == "liverbird":
+		shade = c1
+	if CrestArt.has(det) and s >= detail_min:
 		for p: PackedVector2Array in CrestArt.polys(det):
 			_poly(_xf_c(p, cen, r), shade if sym != "ball" else Color("#15171B"))
 
