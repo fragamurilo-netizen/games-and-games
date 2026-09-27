@@ -1,0 +1,89 @@
+{
+  "_doc": "Uniformes reais de Venezuela (temporada 2025/26 ou a mais recente conhecida): titular (h), reserva (a), terceiro (t), goleiro (g); alt = outros reservas/terceiros usados em temporadas recentes.",
+  "kits": {
+    "VEN_ROJ": {
+      "h": {"pattern": "plain", "c1": "#D0102B", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#FFFFFF", "socks": "#D0102B", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#D0102B", "c3": "#D0102B", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#D0102B", "c3": "#FFFFFF", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    },
+    "VEN_CAR": {
+      "h": {"pattern": "stripes_v", "c1": "#FFD100", "c2": "#111111", "c3": "#111111", "shorts": "#111111", "socks": "#FFD100", "collar": "round", "sleeve": "pattern"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#111111", "c3": "#FFD100", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "round", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#6E7379", "c2": "#FFD100", "c3": "#FFD100", "shorts": "#6E7379", "socks": "#6E7379", "collar": "v"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    },
+    "VEN_AZG": {
+      "h": {"pattern": "stripes_v", "c1": "#1D3F91", "c2": "#D0102B", "c3": "#D0102B", "shorts": "#1D3F91", "socks": "#1D3F91", "collar": "round", "sleeve": "pattern"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#1D3F91", "c3": "#D0102B", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "round", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#D0102B", "c3": "#1D3F91", "shorts": "#111111", "socks": "#111111", "collar": "v"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_LGU": {
+      "h": {"pattern": "plain", "c1": "#F07F13", "c2": "#111111", "c3": "#111111", "shorts": "#111111", "socks": "#F07F13", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#F07F13", "c3": "#111111", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#F07F13", "c3": "#F07F13", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    },
+    "VEN_CAB": {
+      "h": {"pattern": "plain", "c1": "#7A1E2E", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#FFFFFF", "socks": "#7A1E2E", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#7A1E2E", "c3": "#7A1E2E", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#7A1E2E", "c3": "#7A1E2E", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_APC": {
+      "h": {"pattern": "plain", "c1": "#0055A4", "c2": "#FFD100", "c3": "#FFD100", "shorts": "#0055A4", "socks": "#0055A4", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#0055A4", "c3": "#FFD100", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#FFD100", "c2": "#0055A4", "c3": "#0055A4", "shorts": "#0055A4", "socks": "#FFD100", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    },
+    "VEN_EME": {
+      "h": {"pattern": "plain", "c1": "#D0102B", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#FFFFFF", "socks": "#D0102B", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#D0102B", "c3": "#D0102B", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#D0102B", "c3": "#D0102B", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    },
+    "VEN_ZAM": {
+      "h": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#111111", "c3": "#111111", "shorts": "#111111", "socks": "#FFFFFF", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#111111", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#111111", "socks": "#111111", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#6E7379", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#6E7379", "socks": "#6E7379", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_MET": {
+      "h": {"pattern": "plain", "c1": "#5E2A84", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#FFFFFF", "socks": "#5E2A84", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#5E2A84", "c3": "#5E2A84", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#5E2A84", "c3": "#5E2A84", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_UCV": {
+      "h": {"pattern": "plain", "c1": "#0055A4", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#FFFFFF", "socks": "#0055A4", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#0055A4", "c3": "#0055A4", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#0055A4", "c3": "#0055A4", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_ZUL": {
+      "h": {"pattern": "plain", "c1": "#0055A4", "c2": "#FFFFFF", "c3": "#FFFFFF", "shorts": "#FFFFFF", "socks": "#0055A4", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#0055A4", "c3": "#0055A4", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#111111", "c2": "#0055A4", "c3": "#0055A4", "shorts": "#111111", "socks": "#111111", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_POR": {
+      "h": {"pattern": "plain", "c1": "#D0102B", "c2": "#00843D", "c3": "#FFFFFF", "shorts": "#00843D", "socks": "#D0102B", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#D0102B", "c3": "#00843D", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#00843D", "c2": "#D0102B", "c3": "#FFFFFF", "shorts": "#00843D", "socks": "#00843D", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#FFD100", "c2": "#111111", "shorts": "#FFD100", "socks": "#FFD100", "sleeve_len": "long"}
+    },
+    "VEN_ANG": {
+      "h": {"pattern": "plain", "c1": "#0055A4", "c2": "#FFD100", "c3": "#FFD100", "shorts": "#0055A4", "socks": "#0055A4", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#0055A4", "c3": "#FFD100", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#FFD100", "c2": "#0055A4", "c3": "#0055A4", "shorts": "#0055A4", "socks": "#FFD100", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    },
+    "VEN_ANZ": {
+      "h": {"pattern": "plain", "c1": "#D0102B", "c2": "#FFD100", "c3": "#FFD100", "shorts": "#D0102B", "socks": "#D0102B", "collar": "v", "sleeve": "cuff"},
+      "a": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#D0102B", "c3": "#FFD100", "shorts": "#FFFFFF", "socks": "#FFFFFF", "collar": "v", "trim": "sides"},
+      "t": {"pattern": "plain", "c1": "#FFD100", "c2": "#D0102B", "c3": "#D0102B", "shorts": "#D0102B", "socks": "#FFD100", "collar": "round"},
+      "g": {"pattern": "plain", "c1": "#00843D", "c2": "#111111", "shorts": "#00843D", "socks": "#00843D", "sleeve_len": "long"}
+    }
+  }
+}

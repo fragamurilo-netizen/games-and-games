@@ -1,0 +1,721 @@
+{
+  "_doc": "Uniformes reais de Peru (temporada 2025/26 ou a mais recente conhecida): titular (h), reserva (a), terceiro (t), goleiro (g); alt = outros reservas/terceiros usados em temporadas recentes.",
+  "kits": {
+    "PER_CRE": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#F2E3C6",
+        "c2": "#7A1E2E",
+        "c3": "#7A1E2E",
+        "shorts": "#F2E3C6",
+        "socks": "#F2E3C6",
+        "socks2": "#7A1E2E",
+        "collar": "v",
+        "sleeve": "cuff",
+        "socks_style": "top_band"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#7A1E2E",
+        "c2": "#F2E3C6",
+        "c3": "#F2E3C6",
+        "shorts": "#7A1E2E",
+        "socks": "#7A1E2E",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#F2E3C6",
+        "c3": "#F2E3C6",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#75AADB",
+        "c2": "#111111",
+        "shorts": "#75AADB",
+        "socks": "#75AADB",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_INT": {
+      "h": {
+        "pattern": "stripes_v",
+        "c1": "#0A1F4E",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#0A1F4E",
+        "socks": "#0A1F4E",
+        "socks2": "#FFFFFF",
+        "collar": "v",
+        "sleeve": "pattern",
+        "socks_style": "top_band"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#0A1F4E",
+        "c3": "#0A1F4E",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#5B2C83",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#5B2C83",
+        "socks": "#5B2C83",
+        "collar": "v"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      },
+      "alt": [
+        {
+          "pattern": "plain",
+          "c1": "#111111",
+          "c2": "#0A1F4E",
+          "c3": "#FFFFFF",
+          "shorts": "#111111",
+          "socks": "#111111",
+          "collar": "round"
+        }
+      ]
+    },
+    "PER_CEL": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#62B5E5",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#62B5E5",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#0A2A66",
+        "c2": "#62B5E5",
+        "c3": "#62B5E5",
+        "shorts": "#0A2A66",
+        "socks": "#0A2A66",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#62B5E5",
+        "c3": "#62B5E5",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#F07F13",
+        "c2": "#111111",
+        "shorts": "#F07F13",
+        "socks": "#F07F13",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_DOM": {
+      "h": {
+        "pattern": "halves",
+        "c1": "#D0102B",
+        "c2": "#111111",
+        "c3": "#FFFFFF",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "v"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#111111",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "round",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#6E7379",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#6E7379",
+        "socks": "#6E7379",
+        "collar": "v"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_IMP": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#D0102B",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#D0102B",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#00843D",
+        "c2": "#111111",
+        "shorts": "#00843D",
+        "socks": "#00843D",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_CUS": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "c3": "#111111",
+        "shorts": "#111111",
+        "socks": "#FFD100",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#FFD100",
+        "c3": "#FFD100",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#0A2A66",
+        "c2": "#FFD100",
+        "c3": "#FFD100",
+        "shorts": "#0A2A66",
+        "socks": "#0A2A66",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#00843D",
+        "c2": "#111111",
+        "shorts": "#00843D",
+        "socks": "#00843D",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_ADT": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#75AADB",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#75AADB",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#1D3F91",
+        "c2": "#75AADB",
+        "c3": "#75AADB",
+        "shorts": "#1D3F91",
+        "socks": "#1D3F91",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#75AADB",
+        "c3": "#75AADB",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#F07F13",
+        "c2": "#111111",
+        "shorts": "#F07F13",
+        "socks": "#F07F13",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_HUA": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#D0102B",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#D0102B",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#00843D",
+        "c2": "#111111",
+        "shorts": "#00843D",
+        "socks": "#00843D",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_GRA": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#111111",
+        "c3": "#111111",
+        "shorts": "#111111",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#6E7379",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#6E7379",
+        "socks": "#6E7379",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_GAR": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#75AADB",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#75AADB",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#1D3F91",
+        "c2": "#75AADB",
+        "c3": "#75AADB",
+        "shorts": "#1D3F91",
+        "socks": "#1D3F91",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#75AADB",
+        "c3": "#75AADB",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#F07F13",
+        "c2": "#111111",
+        "shorts": "#F07F13",
+        "socks": "#F07F13",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_CHA": {
+      "h": {
+        "pattern": "stripes_v",
+        "c1": "#D0102B",
+        "c2": "#111111",
+        "c3": "#111111",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round",
+        "sleeve": "pattern"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#111111",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "round",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#6E7379",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#6E7379",
+        "socks": "#6E7379",
+        "collar": "v"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_AAT": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#0055A4",
+        "c3": "#0055A4",
+        "shorts": "#0055A4",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#0055A4",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#0055A4",
+        "socks": "#0055A4",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_SBO": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#F5A6C8",
+        "c2": "#111111",
+        "c3": "#111111",
+        "shorts": "#111111",
+        "socks": "#F5A6C8",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#F5A6C8",
+        "c3": "#F5A6C8",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#F5A6C8",
+        "c3": "#111111",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#00843D",
+        "c2": "#111111",
+        "shorts": "#00843D",
+        "socks": "#00843D",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_JPB": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#0055A4",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#0055A4",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#0055A4",
+        "c3": "#0055A4",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#0055A4",
+        "c3": "#0055A4",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_COM": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#D0102B",
+        "c2": "#0055A4",
+        "c3": "#FFFFFF",
+        "shorts": "#0055A4",
+        "socks": "#D0102B",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#0055A4",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "round",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#0055A4",
+        "c2": "#D0102B",
+        "c3": "#FFFFFF",
+        "shorts": "#0055A4",
+        "socks": "#0055A4",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_UTC": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#D0102B",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#D0102B",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#00843D",
+        "c2": "#111111",
+        "shorts": "#00843D",
+        "socks": "#00843D",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_AYA": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#7A1E2E",
+        "c3": "#7A1E2E",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#7A1E2E",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#7A1E2E",
+        "socks": "#7A1E2E",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#FFD100",
+        "c2": "#111111",
+        "shorts": "#FFD100",
+        "socks": "#FFD100",
+        "sleeve_len": "long"
+      }
+    },
+    "PER_AUH": {
+      "h": {
+        "pattern": "plain",
+        "c1": "#D0102B",
+        "c2": "#FFFFFF",
+        "c3": "#FFFFFF",
+        "shorts": "#FFFFFF",
+        "socks": "#D0102B",
+        "collar": "v",
+        "sleeve": "cuff"
+      },
+      "a": {
+        "pattern": "plain",
+        "c1": "#FFFFFF",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#FFFFFF",
+        "socks": "#FFFFFF",
+        "collar": "v",
+        "trim": "sides"
+      },
+      "t": {
+        "pattern": "plain",
+        "c1": "#111111",
+        "c2": "#D0102B",
+        "c3": "#D0102B",
+        "shorts": "#111111",
+        "socks": "#111111",
+        "collar": "round"
+      },
+      "g": {
+        "pattern": "plain",
+        "c1": "#00843D",
+        "c2": "#111111",
+        "shorts": "#00843D",
+        "socks": "#00843D",
+        "sleeve_len": "long"
+      }
+    }
+  }
+}
