@@ -163,7 +163,7 @@ void fragment() {
 	}
 	// Microrrelevo (poros) + rugas → normal
 	vec3 tri = abs(NORMAL);
-	float pr = texture(pores, p.xy * 1.7).r * 0.5 + texture(pores, p.zy * 1.7 + 0.3).r * 0.5;
+	float pr = texture(pores, p.xy * 3.4).r * 0.5 + texture(pores, p.zy * 3.4 + 0.3).r * 0.5;
 	float h = (pr - 0.5) * 0.35 * (0.6 + 0.4 * face) + wrinkles(p) * (0.4 + 0.6 * age + max(max(wr_fore, wr_eyes), wr_naso) * 0.2) + vnoise3(p * 14.0 + seed) * 0.06;
 	float hs = h * 0.0022;
 	vec3 dpdx = dFdx(VERTEX);

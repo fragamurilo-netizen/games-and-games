@@ -199,7 +199,7 @@ static func build(f: Dictionary, seed_v: int) -> Dictionary:
 	var skc: Color = f["skin"]
 	out["skin"] = Color.from_hsv(skc.h, skc.s * 0.8, skc.v * 0.97)
 	out["dark"] = clampf((sk - 2.0) / 8.0, 0.0, 1.0)
-	out["detail"] = "light_m" if age >= 32 else ("light" if rng.randf() < 0.5 else "light2")
+	out["detail"] = "light"
 	out["rosy"] = float(f.get("rosy", 0.3))
 	var wr := float(f.get("wrinkles", 0.0))
 	out["age"] = clampf((age - 25.0) / 25.0, 0.0, 1.0)

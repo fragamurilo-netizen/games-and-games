@@ -126,7 +126,7 @@ def atlas(kind, seed):
     rgb = np.repeat(np.clip(L, 0, 255)[..., None], 3, 2)
     img = np.concatenate([rgb, np.clip(A, 0, 255)[..., None]], 2).astype(np.uint8)
     # metade da largura: no tamanho do retrato cada cartão tem poucos pixels
-    Image.fromarray(img, "RGBA").resize((w * n // 2, h), Image.LANCZOS).save(f"{OUT}/strands_{kind}.png", optimize=True)
+    Image.fromarray(img, "RGBA").resize((w * n // 4, h // 2), Image.LANCZOS).save(f"{OUT}/strands_{kind}.png", optimize=True)
     print("strands", kind)
 
 
@@ -169,7 +169,7 @@ for i in range(900):
     ring = np.exp(-((d - rr * (0.6 + 0.4 * np.sin(ang * 3 + i))) / (rr * 0.35)) ** 2)
     coil = np.maximum(coil, ring * (d < rr * 1.6) * rng.uniform(0.5, 1.0))
 fur[..., 3] = coil
-Image.fromarray((np.clip(fur, 0, 1) * 255).astype(np.uint8), "RGBA").save(f"{OUT}/fur.png", optimize=True)
+Image.fromarray((np.clip(fur, 0, 1) * 255).astype(np.uint8), "RGBA").resize((256, 256), Image.LANCZOS).save(f"{OUT}/fur.png", optimize=True)
 print("fur")
 
 # --- pores.png: poros + microrrelevo (tileável) -------------------------------------------
@@ -190,5 +190,5 @@ for x, y in zip(px, py):
             if d < 1.4:
                 pores[(iy + dy) % P, (ix + dx) % P] = max(pores[(iy + dy) % P, (ix + dx) % P], 1 - d / 1.4)
 hh = np.clip(h / h.max() * 0.7 - pores * 0.5 + 0.3, 0, 1)
-Image.fromarray((hh * 255).astype(np.uint8), "L").save(f"{OUT}/pores.png", optimize=True)
+Image.fromarray((hh * 255).astype(np.uint8), "L").resize((256, 256), Image.LANCZOS).save(f"{OUT}/pores.png", optimize=True)
 print("pores ok")

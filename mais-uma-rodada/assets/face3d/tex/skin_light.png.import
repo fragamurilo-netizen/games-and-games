@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/skin_light.png-50d41d233b8cc70f918a3de7c58dfa
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.85
+compress/lossy_quality=0.75
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

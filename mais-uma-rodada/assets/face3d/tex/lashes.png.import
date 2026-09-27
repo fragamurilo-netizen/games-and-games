@@ -17,7 +17,7 @@ dest_files=["res://.godot/imported/lashes.png-76aba8d4f2d3f47854ef9dbcccecce34.c
 
 compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.85
+compress/lossy_quality=0.75
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

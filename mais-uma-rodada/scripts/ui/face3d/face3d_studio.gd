@@ -310,7 +310,7 @@ func _apply(spec: Dictionary, d: Dictionary) -> void:
 		m.set_shader_parameter("lighten", float(L["lighten"]) + float(L["tips"]) * 0.5)
 		m.set_shader_parameter("gray", L["gray"])
 		m.set_shader_parameter("flat_top", float(st.get("flat", 0.0)))
-		m.set_shader_parameter("tile", 0.55 if coily < 0.5 else 0.45)
+		m.set_shader_parameter("tile", 1.1 if coily < 0.5 else 0.9)
 		m.set_shader_parameter("patchy", 0.0)
 		_hair_params(m, st, hp)
 	# --- Camadas da barba ---------------------------------------------------------------
@@ -335,7 +335,7 @@ func _apply(spec: Dictionary, d: Dictionary) -> void:
 		m.set_shader_parameter("seed", seedf + 3.0)
 		m.set_shader_parameter("lighten", 0.0)
 		m.set_shader_parameter("gray", float(L["gray"]) * 1.2)
-		m.set_shader_parameter("tile", 0.6)
+		m.set_shader_parameter("tile", 1.2)
 		_beard_params(m, bd)
 	# --- Mechas, barba longa e sobrancelhas -----------------------------------------------
 	var hm: ArrayMesh = d["hair"]

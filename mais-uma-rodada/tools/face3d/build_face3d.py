@@ -306,7 +306,7 @@ def is_brow(c):
     return 0.03 < ax < 0.8 and 7.95 < y < 8.5 and z > 0.75
 
 
-for name, pred, cnt, sd in (("roots_scalp", is_scalp, 12000, 1), ("roots_beard", is_beard, 9000, 2), ("roots_brow", is_brow, 14000, 3)):
+for name, pred, cnt, sd in (("roots_scalp", is_scalp, 9000, 1), ("roots_beard", is_beard, 7000, 2), ("roots_brow", is_brow, 10000, 3)):
     ids, bc, P = sample_roots(pred, cnt, sd)
     write_bin(f"{OUT}/{name}.bin", {"n": int(cnt)}, [("ids", "i32", ids.flatten()), ("bc", "f32", bc.flatten()), ("p", "f32", P.flatten())])
     print(name, cnt)
@@ -325,8 +325,7 @@ print("elipsoide", ellip)
 
 # --- peles e cor média do rosto (para ajustar o tom exato no shader) -------------------------
 SKINS = {"light": "young_caucasian_male/textures/young_lightskinned_male_diffuse.png",
-         "light2": "young_caucasian_male/textures/young_lightskinned_male_diffuse2.png",
-         "light_m": "middleage_caucasian_male/textures/middleage_lightskinned_male_diffuse.png"}
+}
 # máscara do rosto no UV (bochechas/testa) para medir a cor média
 face_uv = np.concatenate([UV[f[2]] for f in head_faces if V[f[0], 1].min() > 7.4 and V[f[0], 2].min() > 0.6])
 avg = {}
@@ -338,176 +337,7 @@ for k, rel in SKINS.items():
     avg[k] = px.mean(0).round(4).tolist()
     im.save(OUT + f"/tex/skin_{k}.png", optimize=True)
 
-# --- raízes dos fios (couro cabeludo, barba, sobrancelhas) --------------------------------
-def sample_roots(pred, count, seed):
-    tri_v, tri_area = [], []
-    for vs, _m, _uv in head_faces:
-        for t in ([(0, 1, 2), (0, 2, 3)] if len(vs) == 4 else [(0, 1, 2)]):
-            ids = [vs[t[0]], vs[t[1]], vs[t[2]]]
-            P = V[ids]
-            cen = P.mean(0)
-            if not pred(cen):
-                continue
-            tri_v.append(ids)
-            tri_area.append(0.5 * np.linalg.norm(np.cross(P[1] - P[0], P[2] - P[0])))
-    tri_v = np.array(tri_v)
-    pa = np.array(tri_area)
-    r = np.random.default_rng(seed)
-    pick = r.choice(len(tri_v), size=count, p=pa / pa.sum())
-    u = r.random(count)
-    v = r.random(count)
-    flip = u + v > 1
-    u[flip] = 1 - u[flip]
-    v[flip] = 1 - v[flip]
-    ids = tri_v[pick]
-    P = V[ids[:, 0]] * (1 - u - v)[:, None] + V[ids[:, 1]] * u[:, None] + V[ids[:, 2]] * v[:, None]
-    # ordena de trás para frente (fios da frente desenhados por último ajudam no alfa)
-    order = np.argsort(P[:, 2])
-    return remap[ids[order]], np.stack([u, v], 1)[order], P[order]
-
-
-def is_scalp(c):
-    x, y, z = c
-    ax = abs(x)
-    if y < 6.9:
-        return False
-    face = z > 0.45 and y < 8.62 and ax < 0.66
-    ear = ax > 0.6 and ((y - 7.58) / 0.5) ** 2 + ((z - 0.45) / 0.42) ** 2 < 1.0
-    return not face and not ear
-
-
-def is_beard(c):
-    x, y, z = c
-    ax = abs(x)
-    if y < 6.3 or y > 8.15 or z < -0.15 or ax > 0.86:
-        return False
-    if y > 7.72 and ax < 0.5 and z > 1.0:  # olhos e nariz
-        return False
-    return True
-
-
-def is_brow(c):
-    x, y, z = c
-    ax = abs(x)
-    return 0.03 < ax < 0.8 and 7.95 < y < 8.5 and z > 0.75
-
-
-for name, pred, cnt, sd in (("roots_scalp", is_scalp, 12000, 1), ("roots_beard", is_beard, 9000, 2), ("roots_brow", is_brow, 14000, 3)):
-    ids, bc, P = sample_roots(pred, cnt, sd)
-    write_bin(f"{OUT}/{name}.bin", {"n": int(cnt)}, [("ids", "i32", ids.flatten()), ("bc", "f32", bc.flatten()), ("p", "f32", P.flatten())])
-    print(name, cnt)
-
-# elipsoide do crânio (colisão dos fios): a x² + b (y-cy)² + c (z-cz)² = 1 ajustado no domo
-dome = head_verts[(V[head_verts, 1] > 7.95)]
-Pd = V[dome]
-A = np.stack([Pd[:, 0] ** 2, Pd[:, 1] ** 2, Pd[:, 2] ** 2, Pd[:, 1], Pd[:, 2]], 1)
-coef = np.linalg.lstsq(A, np.ones(len(Pd)), rcond=None)[0]
-ca, cb, cc, cd, ce = coef
-cy = -cd / (2 * cb)
-cz = -ce / (2 * cc)
-k = 1 + cb * cy * cy + cc * cz * cz
-ellip = {"c": [0.0, cy * M, cz * M], "r": [float(np.sqrt(k / ca)) * M, float(np.sqrt(k / cb)) * M, float(np.sqrt(k / cc)) * M]}
-print("elipsoide", ellip)
-
-# --- peles e cor média do rosto (para ajustar o tom exato no shader) -------------------------
-SKINS = {"light": "young_caucasian_male/textures/young_lightskinned_male_diffuse.png",
-         "light2": "young_caucasian_male/textures/young_lightskinned_male_diffuse2.png",
-         "light_m": "middleage_caucasian_male/textures/middleage_lightskinned_male_diffuse.png"}
-# máscara do rosto no UV (bochechas/testa) para medir a cor média
-face_uv = np.concatenate([UV[f[2]] for f in head_faces if V[f[0], 1].min() > 7.4 and V[f[0], 2].min() > 0.6])
-avg = {}
-for k, rel in SKINS.items():
-    im = Image.open(f"{D}public/data/skins/{rel}").convert("RGB")
-    a = np.asarray(im, dtype=np.float64) / 255.0
-    h, wdt = a.shape[:2]
-    px = a[((1.0 - face_uv[:, 1]) * (h - 1)).astype(int), (face_uv[:, 0] * (wdt - 1)).astype(int)]
-    avg[k] = px.mean(0).round(4).tolist()
-    im.save(OUT + f"/tex/skin_{k}.png", optimize=True)
-
-# --- posmap: posição (x, y, z) de cada texel da pele (normalizada na caixa da cabeça) ---------
-R = 1024
-pos_f = np.zeros((R, R, 3), dtype=np.float64)
-has = np.zeros((R, R), dtype=bool)
-for vs, _m, uv in head_faces:
-    tri_sets = [(0, 1, 2), (0, 2, 3)] if len(vs) == 4 else [(0, 1, 2)]
-    for a, b, c in tri_sets:
-        P = np.array([V[vs[a]], V[vs[b]], V[vs[c]]])
-        T = np.array([UV[uv[a]], UV[uv[b]], UV[uv[c]]]) * (R - 1)
-        T[:, 1] = (R - 1) - T[:, 1]
-        x0, y0 = np.floor(T.min(0)).astype(int)
-        x1, y1 = np.ceil(T.max(0)).astype(int)
-        xs, ys = np.meshgrid(np.arange(max(x0 - 1, 0), min(x1 + 2, R)), np.arange(max(y0 - 1, 0), min(y1 + 2, R)))
-        pts = np.stack([xs.ravel(), ys.ravel()], 1).astype(np.float64)
-        m = np.array([[T[1, 0] - T[0, 0], T[2, 0] - T[0, 0]], [T[1, 1] - T[0, 1], T[2, 1] - T[0, 1]]])
-        if abs(np.linalg.det(m)) < 1e-9:
-            continue
-        bc = np.linalg.solve(m, (pts - T[0]).T).T
-        u, v = bc[:, 0], bc[:, 1]
-        ok = (u >= -0.03) & (v >= -0.03) & (u + v <= 1.03)
-        p3 = P[0] + np.outer(u, P[1] - P[0]) + np.outer(v, P[2] - P[0])
-        ii = pts[ok].astype(int)
-        pos_f[ii[:, 1], ii[:, 0]] = p3[ok]
-        has[ii[:, 1], ii[:, 0]] = True
-# dilata as bordas (evita costura no mipmap)
-for _ in range(6):
-    acc = np.zeros_like(pos_f)
-    cnt = np.zeros((R, R))
-    for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
-        sh = np.roll(np.roll(pos_f, dy, 0), dx, 1)
-        hh = np.roll(np.roll(has, dy, 0), dx, 1)
-        acc[hh] += sh[hh]
-        cnt[hh] += 1
-    fill = (~has) & (cnt > 0)
-    pos_f[fill] = acc[fill] / cnt[fill][:, None]
-    has = has | fill
-lo = np.array([-1.05, 6.2, -1.1])
-hi = np.array([1.05, 9.25, 1.75])
-pn = np.clip((pos_f - lo) / (hi - lo), 0, 1)
-img = np.concatenate([pn, has[..., None].astype(np.float64)], 2)
-Image.fromarray((img * 255).round().astype(np.uint8), "RGBA").save(OUT + "/tex/posmap.png", optimize=True)
-
-# --- rugas e marcas de expressão (alturas no UV da pele; o shader tira a normal) ------------
-X, Y, Z = pos_f[..., 0], pos_f[..., 1], pos_f[..., 2]
-AX = np.abs(X)
-rng = np.random.default_rng(7)
-
-
-def sm(e0, e1, x):
-    t = np.clip((x - e0) / (e1 - e0), 0, 1)
-    return t * t * (3 - 2 * t)
-
-
-def grooves(dist, width, count, jitter):
-    return np.exp(-(dist / width) ** 2)
-
-
-# R: testa (linhas horizontais onduladas)
-wav = 0.018 * np.sin(X * 7.0) + 0.012 * np.sin(X * 13.0 + 1.3)
-lines = np.abs(np.sin((Y + wav) * 26.0))
-fore = (1 - sm(0.0, 0.25, lines)) * sm(8.3, 8.45, Y) * (1 - sm(8.7, 8.85, Y)) * sm(0.9, 1.25, Z) * (1 - sm(0.45, 0.62, AX))
-# rugas verticais entre as sobrancelhas
-glab = np.exp(-((AX - 0.06) / 0.018) ** 2) * sm(8.08, 8.18, Y) * (1 - sm(8.33, 8.42, Y)) * sm(1.3, 1.45, Z)
-# G: pés de galinha (raios saindo do canto de fora do olho) + dobras sob os olhos
-cx, cy = 0.56, 8.02
-ang = np.arctan2(Y - cy, AX - cx)
-rad = np.hypot(AX - cx, Y - cy)
-crow = (1 - sm(0.0, 0.3, np.abs(np.sin(ang * 5.0)))) * sm(0.04, 0.08, rad) * (1 - sm(0.2, 0.3, rad)) * (AX > 0.5) * sm(0.6, 0.9, Z)
-under = np.exp(-(((Y - (7.9 - 0.2 * (AX - 0.3) ** 2)) / 0.02) ** 2)) * sm(0.12, 0.2, AX) * (1 - sm(0.45, 0.55, AX)) * sm(1.1, 1.3, Z)
-under2 = np.exp(-(((Y - (7.84 - 0.25 * (AX - 0.3) ** 2)) / 0.018) ** 2)) * sm(0.15, 0.22, AX) * (1 - sm(0.42, 0.5, AX)) * sm(1.1, 1.3, Z)
-# B: sulco nasolabial (da asa do nariz ao canto da boca) e linhas de marionete
-def seg_dist(px, py, ax_, ay, bx, by):
-    vx, vy = bx - ax_, by - ay
-    t = np.clip(((px - ax_) * vx + (py - ay) * vy) / (vx * vx + vy * vy), 0, 1)
-    return np.hypot(px - (ax_ + t * vx), py - (ay + t * vy))
-naso = np.exp(-(seg_dist(AX, Y, 0.2, 7.64, 0.33, 7.3) / 0.03) ** 2) * sm(1.0, 1.25, Z)
-mari = np.exp(-(seg_dist(AX, Y, 0.3, 7.3, 0.34, 7.02) / 0.025) ** 2) * sm(1.0, 1.25, Z)
-# A: pescoço (anéis horizontais) + covinha do queixo
-neck = (1 - sm(0.0, 0.35, np.abs(np.sin(Y * 18.0 + np.sin(X * 3) * 0.3)))) * sm(6.3, 6.45, Y) * (1 - sm(6.75, 6.85, Y)) * sm(0.2, 0.7, Z)
-wr = np.stack([np.clip(fore + glab * 0.9, 0, 1), np.clip(crow + under * 0.8 + under2 * 0.5, 0, 1),
-               np.clip(naso + mari * 0.7, 0, 1), np.clip(neck, 0, 1)], 2)
-Image.fromarray((wr * 255).round().astype(np.uint8), "RGBA").save(OUT + "/tex/wrinkles.png", optimize=True)
-
-# olhos (íris) e demais texturas extras
+# íris (esclera da textura do MakeHuman)
 for c in ("brown",):
     Image.open(f"{D}public/data/proxies/eyes/HighPolyEyes/textures/{c}_eye.png").save(OUT + f"/tex/eye_{c}.png", optimize=True)
 
