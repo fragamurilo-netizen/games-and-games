@@ -1014,7 +1014,18 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_mass(f, seed_value, age, look)
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
+	_proportion_floor(f)
 	return f
+
+
+## Cabeça humana tem proporção: os ajustes (magro, rosto estreito, alongado, etnia) somados
+## deixavam alguns rostos finos demais. Largura mínima de ~73% da altura (rosto real fica
+## entre ~0,75 e 0,9) e mandíbula e maçãs sem afinar além do plausível.
+static func _proportion_floor(f: Dictionary) -> void:
+	var fh := float(f["fh"])
+	f["fw"] = clampf(float(f["fw"]), fh * 0.73, fh * 0.92)
+	f["jaw"] = maxf(float(f["jaw"]), 0.7)
+	f["cheek_w"] = maxf(float(f["cheek_w"]), 0.97)
 
 
 ## Corpo: a maioria é atleta, mas há rostos muito finos (chupados, maçãs saltadas) e gordos
@@ -1043,7 +1054,7 @@ static func _apply_mass(f: Dictionary, seed_value: int, age: int, look: Dictiona
 	f["thin"] = thin
 	f["heavy"] = heavy
 	f["fat"] = clampf(float(f["fat"]) * (1.0 - thin) + heavy * 0.85, 0.0, 1.0)
-	f["fw"] = float(f["fw"]) * (1.0 - thin * 0.13) * (1.0 + heavy * 0.2)
+	f["fw"] = float(f["fw"]) * (1.0 - thin * 0.07) * (1.0 + heavy * 0.2)
 	f["fh"] = float(f["fh"]) * (1.0 + heavy * 0.04) * (1.0 + thin * 0.02)
 	f["cheekbone"] = float(f["cheekbone"]) * (1.0 + thin * 0.35) * (1.0 - heavy * 0.4)
 	f["jaw"] = lerpf(float(f["jaw"]), 0.96, heavy * 0.6) - thin * 0.04
@@ -1201,7 +1212,7 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 			f["chin_sq"] = r.randf_range(2.2, 2.8)
 			f["forehead"] = r.randf_range(0.96, 0.99)
 		8: # estreito
-			f["fw"] = float(f["fw"]) * 0.9
+			f["fw"] = float(f["fw"]) * 0.95
 			f["fh"] = float(f["fh"]) * 1.03
 			f["jaw"] = r.randf_range(0.66, 0.76)
 			f["cheek_w"] = float(f["cheek_w"]) * 0.97
