@@ -68,7 +68,7 @@ var look: Dictionary = {}:
 		_dirty = true
 		_invalidate()
 ## Usa o retrato 3D realista quando disponível (Face3DStudio); desligue para forçar o desenho 2D.
-var use_3d := true:
+var use_3d := false:
 	set(v):
 		use_3d = v
 		queue_redraw()
