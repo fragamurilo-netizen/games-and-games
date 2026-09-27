@@ -362,3 +362,34 @@ func advance_to_end() -> void:
 	SeasonManager.advance_to_user(world)
 	save_now()
 	world_changed.emit()
+
+
+func end_season() -> Dictionary:
+	if not season_over():
+		return {}
+	last_summary = SeasonManager.end_season(world)
+	PreseasonManager.open(world)
+	var c := world.user_club()
+	c.sheet = ClubAI.auto_sheet(world, c, c.sheet.formation if c.sheet != null else "")
+	SeasonManager.advance_to_user(world)
+	save_now()
+	season_finished.emit(last_summary)
+	world_changed.emit()
+	return last_summary
+
+
+# ---------------------------------------------------------------------------
+# Ciclo de vida do app: autosave ao pausar/fechar
+# ---------------------------------------------------------------------------
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED:
+			# Só grava na hora se houver algo pendente (os saves normais já rodam em segundo plano).
+			if matchday.is_empty():
+				save_blocking()
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			if matchday.is_empty():
+				save_now()
+				save_blocking()
+			get_tree().quit()
