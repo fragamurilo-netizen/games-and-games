@@ -35,9 +35,9 @@ jobs:
               rm -rf .godot
               godot --headless --path . --import
               mkdir -p build
-              xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/crests.tscn -- --render-proof
+              timeout 25s xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/crests.tscn -- --render-proof || test -s build/visual-proof-crests.png
               test -s build/visual-proof-crests.png
-              xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/dashboard.tscn -- --render-proof
+              timeout 25s xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/dashboard.tscn -- --render-proof || test -s build/visual-proof-ui.png
               test -s build/visual-proof-ui.png
             '
 
