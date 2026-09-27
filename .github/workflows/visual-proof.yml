@@ -1,4 +1,5 @@
 name: Render Godot Visual Proof
+# rerender 1:1 SVG fit
 
 on:
   push:
