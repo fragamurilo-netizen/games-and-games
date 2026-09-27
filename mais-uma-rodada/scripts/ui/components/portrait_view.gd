@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 6
+const PORTRAIT_RENDER_VERSION := 7
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -913,51 +913,49 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 
 
 func _face_h(u: float, v: float) -> float:
-	# Distância suave ao contorno (o `_th` usa um max() que deixaria um vinco na diagonal do rosto)
-	var th: float
-	if v >= 0.0:
-		var hw := maxf(_hw(minf(v, 1.0)), maxf(0.001, 0.32 * smoothstep(0.8, 1.0, v)))
-		var vm := 1.0 + float(_f.get("chin_len", 0.0))
-		th = pow(pow(absf(u) / hw, 5.0) + pow(v / vm, 5.0), 0.2)
-	else:
-		th = _th(u, v)
-	th = minf(th, 1.0)
-	# Perfil que vira para o lado sem ficar vertical na borda (a malha não resolve uma borda
-	# vertical, e a normal pulando de um vértice para o outro fazia facetas na mandíbula)
-	var h := 0.8 * (1.0 - pow(th, 3.4))
+	# Cúpula facial contínua. A versão anterior trocava a equação exatamente no eixo dos olhos,
+	# criando uma faixa horizontal de sombra. Aqui a largura do crânio e da mandíbula é interpolada
+	# em uma zona larga, sem descontinuidade de normal.
+	var upper_rx := _skull_rx(clampf(-v / 1.02, 0.0, 1.0))
+	var lower_rx := maxf(0.18, _hw(clampf(v, 0.0, 0.98)))
+	var side_mix := smoothstep(-0.16, 0.18, v)
+	var rx := lerpf(upper_rx, lower_rx, side_mix)
+	var vm := lerpf(1.02, 1.0 + float(_f.get("chin_len", 0.0)), smoothstep(-0.08, 0.45, v))
+	var p := 4.4
+	var th := pow(pow(absf(u) / maxf(rx, 0.08), p) + pow(absf(v) / maxf(vm, 0.2), p), 1.0 / p)
+	th = clampf(th, 0.0, 1.0)
+	# Forma-base suave: suficiente para volume sem transformar cada mudança de largura em uma quina.
+	var h := 0.72 * (1.0 - pow(th, 2.65))
 	var au := absf(u)
 	var un := u - _ND * smoothstep(_E - 0.05, _N, v)
 	var fat: float = float(_f["fat"])
-	# Arco das sobrancelhas, órbitas e o globo do olho dentro delas
-	h += 0.05 * _g2(au - _X, v - (_E - 0.16), 0.3, 0.06)
-	h -= 0.09 * _g2(au - _X, v - _E, 0.25, 0.1)
-	h += 0.035 * _g2(au - _X, v - _E, 0.13, 0.055)
-	# Nariz: dorso que se projeta mais perto da ponta, ponta arredondada e asas
-	var along := smoothstep(_E - 0.02, _N, v)
-	var nose_on := smoothstep(_E - 0.1, _E + 0.06, v) * (1.0 - smoothstep(_N - 0.02, _N + 0.03, v))
-	h += (0.04 + 0.12 * along) * _g(un, _BW * 1.2 + 0.05 * along) * nose_on
-	h += 0.06 * _g2(un, v - (_N - 0.07), _NW * 0.42, 0.055)
-	h += 0.03 * _g2(absf(un) - _NW * 0.8, v - (_N - 0.04), _NW * 0.28, 0.045)
-	# Maçãs e a parte funda logo abaixo delas
+	# Arco superciliar + órbita + globo ocular.
+	h += 0.035 * _g2(au - _X, v - (_E - 0.14), 0.3, 0.07)
+	h -= 0.06 * _g2(au - _X, v - _E, 0.25, 0.115)
+	h += 0.025 * _g2(au - _X, v - _E, 0.14, 0.065)
+	# Nariz em três volumes, com transições largas.
+	var along := smoothstep(_E - 0.03, _N, v)
+	var nose_on := smoothstep(_E - 0.12, _E + 0.08, v) * (1.0 - smoothstep(_N - 0.03, _N + 0.045, v))
+	h += (0.03 + 0.085 * along) * _g(un, _BW * 1.35 + 0.055 * along) * nose_on
+	h += 0.045 * _g2(un, v - (_N - 0.065), _NW * 0.48, 0.065)
+	h += 0.022 * _g2(absf(un) - _NW * 0.78, v - (_N - 0.04), _NW * 0.32, 0.055)
+	# Maçãs, têmporas e cavidade suave abaixo das maçãs.
 	var cheek_v := (_E + _N) * 0.5
-	h += 0.035 * _g2(au - 0.5, v - cheek_v + 0.03, 0.2, 0.1)
-	h -= 0.03 * (1.0 - fat) * _g2(au - 0.62, v - _N - 0.1, 0.15, 0.12)
-	# Boca (o arco dos dentes empurra a região para frente), dobra sob o lábio e queixo
-	h += 0.03 * _g2(u / maxf(0.05, _MW * 1.4), (v - _M) / 0.16, 1.0, 1.0)
-	h -= 0.025 * _g2(u, v - _M - 0.1, 0.18, 0.03)
-	h += 0.04 * _g2(u, v - 0.9, 0.2, 0.09)
-	# Têmporas
-	h -= 0.03 * _g2(au - 0.86, v + 0.3, 0.1, 0.18)
+	h += 0.026 * _g2(au - 0.5, v - cheek_v + 0.025, 0.23, 0.12)
+	h -= 0.018 * (1.0 - fat) * _g2(au - 0.62, v - _N - 0.1, 0.18, 0.15)
+	h -= 0.018 * _g2(au - 0.86, v + 0.3, 0.13, 0.2)
+	# Região oral e queixo: volumes baixos para não formar uma máscara ao redor da boca.
+	h += 0.02 * _g2(u / maxf(0.05, _MW * 1.45), (v - _M) / 0.18, 1.0, 1.0)
+	h -= 0.014 * _g2(u, v - _M - 0.1, 0.2, 0.04)
+	h += 0.028 * _g2(u, v - 0.88, 0.24, 0.11)
 	return h
 
-
-## Normal do relevo `_face_h` no ponto (u, v) do rosto, em coordenadas de tela (x, y, z para a câmera).
-
 func _face_normal(u: float, v: float) -> Vector3:
-	var e := 0.012
+	var e := 0.018
 	var dhu := (_face_h(u + e, v) - _face_h(u - e, v)) / (2.0 * e)
 	var dhv := (_face_h(u, v + e) - _face_h(u, v - e)) / (2.0 * e)
-	return Vector3(-dhu, -dhv * _fw / maxf(_fh, 0.001), 1.0).normalized()
+	# Z maior suaviza microquinas e imita a difusão da pele sob luz grande de estúdio.
+	return Vector3(-dhu * 0.82, -dhv * _fw / maxf(_fh, 0.001) * 0.82, 1.12).normalized()
 
 static func _hash2(x: int, y: int) -> float:
 	var h := (x * 374761393 + y * 668265263) & 0x7fffffff
