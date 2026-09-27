@@ -124,7 +124,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 			if age >= 30:
 				var mins: int = minutes.get(p.id, 0)
 				load_f = 1.08 if mins >= 80 else (0.95 if mins == 0 else 1.0)
-			var expected := (5.0 + (age - dstart) * 4.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
+			# Real (Transfermarkt/FC): ~-1 por ano logo depois do auge, -2 aos 33-34, -3 perto dos 36
+			var expected := (8.0 + (age - dstart) * 5.5) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
 			while expected > 0.0:
 				if rng.randf() < minf(1.0, expected):
 					apply_decline(rng, p)
@@ -406,6 +407,7 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 		var age := p.age(world.year)
 		if age > 24:
 			_late_turns(world, p, age, p.minutes_season / full, out)
+			_form_swing(world, p, age, p.minutes_season / full)
 			continue
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
@@ -486,6 +488,24 @@ static func _late_turns(world: GameWorld, p: Player, age: int, share: float, out
 			out["late"].append(p)
 	elif age <= 26:
 		_derail(world, p, age, share, out)
+
+
+## Ninguém é igual todo ano: no auge, uma temporada iluminada sobe um ou dois pontos e uma
+## apagada (sem ritmo, cabeça fora, lesões chatas) tira. Média levemente negativa.
+static func _form_swing(world: GameWorld, p: Player, age: int, share: float) -> void:
+	if age > 32 or p.club_id < 0:
+		return
+	var rng := world.rng
+	var avg := p.avg_rating()
+	var good := 0.07 + (0.06 if share >= 0.6 and avg >= 7.1 else 0.0)
+	var bad := 0.08 + (0.07 if share < 0.25 else 0.0) + (0.04 if p.morale < 40.0 else 0.0)
+	var r := rng.randf()
+	if r < good:
+		p.potential = mini(94, maxi(p.potential, p.overall + 1))
+		apply_growth(world, p, rng.randf_range(0.8, 2.0))
+	elif r < good + bad:
+		for i in rng.randi_range(4, 12):
+			apply_decline(rng, p)
 
 
 ## Descarrilhou depois de chegar lá (o caso Sancho): jovem que já era bom perde espaço e rumo.

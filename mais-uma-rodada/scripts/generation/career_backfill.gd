@@ -480,8 +480,12 @@ static func _season_row(rng: RandomNumberGenerator, p: Player, y: int, e: Array,
 		share = rng.randf_range(0.1, 0.35)
 	else:
 		share = rng.randf_range(0.0, 0.14)
-	if bool(e[4]):
-		share = maxf(share, rng.randf_range(0.5, 0.85)) # emprestado para jogar
+	if bool(e[4]) and q >= -6.0:
+		share = maxf(share, rng.randf_range(0.45, 0.8)) # emprestado para jogar
+	if age <= 18 and q < 3.0:
+		share = minf(share, rng.randf_range(0.05, 0.4)) # adolescente só entra aos poucos
+	elif age <= 20 and q < 0.0:
+		share = minf(share, rng.randf_range(0.15, 0.55))
 	if p.position == Pos.GK and q < 0.0:
 		share *= 0.45 # goleiro reserva quase não joga
 	share *= 1.0 - clampf((p.injury_prone - 10) * 0.025, -0.05, 0.25) * rng.randf()
