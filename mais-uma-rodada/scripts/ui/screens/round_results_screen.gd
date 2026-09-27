@@ -52,6 +52,8 @@ func refresh() -> void:
 	var ret := _retiring_card(w)
 	if ret != null:
 		c.add_child(ret)
+	max_content_width = 1700
+	columnize(c, 0, 2, 1 if f != null else 0)
 	_build_footer()
 
 
@@ -69,9 +71,15 @@ func _xray_teaser(w: GameWorld) -> Control:
 
 
 func _notice(icon_name: String, color: Color, text: String) -> Control:
-	var row := UIKit.hbox(12)
-	row.add_child(UIKit.icon_rect(icon_name, 30, color))
-	row.add_child(UIKit.label(text, "", true))
+	var row := UIKit.hbox(14)
+	var tile := PanelContainer.new()
+	tile.theme_type_variation = "IconTile"
+	tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	tile.add_child(UIKit.icon_rect(icon_name, 26, color))
+	row.add_child(tile)
+	var l := UIKit.label(text, "", true)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(l)
 	var card := UIKit.card("CardFlat", 0)
 	card.add_child(row)
 	return UIKit.card_panel(card)
@@ -80,14 +88,21 @@ func _notice(icon_name: String, color: Color, text: String) -> Control:
 func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 	var club := w.user_club()
 	var res: String = user.get("result", f.result_for(club.id))
-	var card := UIKit.card("CardHighlight", 12)
-	var head := UIKit.hbox(8)
-	var names := {"V": "VITÓRIA", "E": "EMPATE", "D": "DERROTA"}
-	head.add_child(UIKit.pill(names.get(res, res), UIColors.result_color(res), 22))
-	head.add_child(UIKit.spacer())
+	# Placar final no cartão de dia de jogo: faixa da competição e os lados nas cores dos clubes.
+	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
+	var band: HBoxContainer = hero[1]
+	var ft := UIKit.label(tr("Fim de jogo").to_upper(), "Caps")
+	ft.add_theme_color_override(&"font_color", Color.WHITE)
+	ft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ft.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(ft)
 	if MatchEngine.is_derby(w, f.home, f.away):
-		head.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 18))
-	card.add_child(head)
+		band.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 16))
+	var names := {"V": "VITÓRIA", "E": "EMPATE", "D": "DERROTA"}
+	var rp := UIKit.pill(names.get(res, res), UIColors.result_color(res), 18)
+	rp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(rp)
+	var card: VBoxContainer = hero[2]
 	var row := UIKit.hbox(8)
 	for side in 2:
 		var cl := w.club(f.home if side == 0 else f.away)
@@ -123,7 +138,7 @@ func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 		else:
 			prow.add_child(UIKit.label("%dº" % after, "H3"))
 		card.add_child(prow)
-	return UIKit.card_panel(card)
+	return hero[0]
 
 
 func _goals_box(w: GameWorld, f: Fixture) -> Control:

@@ -25,37 +25,63 @@ func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
+	max_content_width = 1700
 	screen_subtitle = "Temporada %d" % w.year
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
-	for f in FILTERS:
-		var key: String = f[0]
-		var chip := UIKit.chip(f[1], key == _filter, g, func():
-			_filter = key
-			refresh())
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		row.add_child(chip)
-	c.add_child(row)
+	c.add_child(UIKit.tabs(FILTERS, _filter, func(k: String):
+		_filter = k
+		refresh()))
 	var items: Array = w.news.duplicate()
 	items.reverse()
 	var user := w.user_club()
-	var shown := 0
-	var last_key := ""
+	var shown: Array = []
 	for n: NewsEvent in items:
-		if not _passes(w, n, user):
+		if _passes(w, n, user):
+			shown.append(n)
+	if shown.is_empty():
+		var empty := UIKit.card("CardFlat", 10)
+		empty.add_child(UIKit.icon_rect("news", 48, UIColors.DIM))
+		empty.add_child(UIKit.label("Nenhuma notícia com esse filtro.", "Muted"))
+		c.add_child(UIKit.card_panel(empty))
+		return
+	# Manchete: a notícia mais importante da rodada mais recente.
+	var lead: NewsEvent = shown[0]
+	for n: NewsEvent in shown:
+		if n.year != lead.year or n.day != shown[0].day:
+			break
+		if n.importance > lead.importance:
+			lead = n
+	c.add_child(NewsRow.hero(w, lead))
+	# O resto, rodada a rodada, cada uma num cartão.
+	var cards: Array = []
+	var last_key := ""
+	var group: Array = []
+	var title := ""
+	for n: NewsEvent in shown:
+		if n == lead:
 			continue
 		var key := "%d-%d" % [n.year, n.day]
 		if key != last_key:
+			if not group.is_empty():
+				cards.append(_round_card(title, group))
+			group = []
 			last_key = key
-			c.add_child(UIKit.section("Rodada %d · %d" % [n.day + 1, n.year] if n.day < 38 else "Temporada %d" % n.year))
-		c.add_child(NewsRow.make(w, n, false))
-		shown += 1
-	if shown == 0:
-		c.add_child(UIKit.label("Nenhuma notícia com esse filtro.", "Muted"))
+			title = tr("Rodada %d · %d") % [n.day + 1, n.year] if n.day < 38 else tr("Temporada %d") % n.year
+		group.append(NewsRow.make(w, n, false))
+	if not group.is_empty():
+		cards.append(_round_card(title, group))
+	var holder := UIKit.vbox(UITokens.S4)
+	c.add_child(holder)
+	UIKit.columns(holder, cards, content_width())
+
+
+func _round_card(title: String, rows: Array) -> Control:
+	var v := UIKit.vbox(UITokens.S2)
+	v.add_child(UIKit.section_header(title))
+	v.add_child(UIKit.menu_group(rows))
+	return v
 
 
 func _passes(w: GameWorld, n: NewsEvent, user: Club) -> bool:

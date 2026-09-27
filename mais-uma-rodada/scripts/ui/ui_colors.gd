@@ -4,27 +4,28 @@ extends RefCounted
 ## (cinzas quentes, texto quase preto), com o destaque na cor do clube.
 ## Use estas cores em vez de cores soltas; elas mudam quando o modo muda.
 
-## Paleta escura original (é a que está gravada no tema do projeto).
-const D_BG := Color("#0A0B0D")
-const D_SURFACE := Color("#141518")
-const D_SURFACE_2 := Color("#1C1D21")
-const D_SURFACE_3 := Color("#26282D")
-const D_LINE := Color("#2F3137")
-const D_TEXT := Color("#F2F3F5")
-const D_MUTED := Color("#9EA2AA")
-const D_DIM := Color("#63676F")
+## Paleta escura (é a que está gravada no tema do projeto). Grafite azulado em camadas, como
+## as interfaces de transmissão: fundo quase preto, superfícies que sobem de tom a cada nível.
+const D_BG := Color("#090B0F")
+const D_SURFACE := Color("#12151B")
+const D_SURFACE_2 := Color("#1A1E26")
+const D_SURFACE_3 := Color("#242A34")
+const D_LINE := Color("#2B313C")
+const D_TEXT := Color("#F3F5F8")
+const D_MUTED := Color("#9AA2AF")
+const D_DIM := Color("#646C79")
 const D_GOLD := Color("#FFC940")
 const D_GOLD_DARK := Color("#C99A1E")
-const D_GREEN := Color("#3DBE7A")
-const D_RED := Color("#E5484D")
-const D_BLUE := Color("#4EA8DE")
-const D_ORANGE := Color("#F0A35E")
+const D_GREEN := Color("#34C77B")
+const D_RED := Color("#EF4B55")
+const D_BLUE := Color("#4DA8F0")
+const D_ORANGE := Color("#F5A45B")
 ## Paleta clara: contraste de texto AA (4,5:1 ou mais) sobre o branco e sobre o fundo.
 const LIGHT := {
-	"BG": Color("#ECEEF1"), "SURFACE": Color("#FFFFFF"), "SURFACE_2": Color("#F5F6F8"),
-	"SURFACE_3": Color("#E1E4E8"), "LINE": Color("#C5CAD1"), "TEXT": Color("#101216"),
-	"MUTED": Color("#484D55"), "DIM": Color("#5C6169"), "GOLD": Color("#8A5E00"),
-	"GOLD_DARK": Color("#6B4900"), "GREEN": Color("#157A43"), "RED": Color("#C4262B"),
+	"BG": Color("#EDEFF3"), "SURFACE": Color("#FFFFFF"), "SURFACE_2": Color("#F4F6F9"),
+	"SURFACE_3": Color("#E2E6EC"), "LINE": Color("#D3D8E0"), "TEXT": Color("#0E1117"),
+	"MUTED": Color("#474E5A"), "DIM": Color("#5B6270"), "GOLD": Color("#8A5E00"),
+	"GOLD_DARK": Color("#6B4900"), "GREEN": Color("#137A43"), "RED": Color("#C4262B"),
 	"BLUE": Color("#1766A6"), "ORANGE": Color("#A5550A"),
 }
 const DARK := {
@@ -32,10 +33,19 @@ const DARK := {
 	"LINE": D_LINE, "TEXT": D_TEXT, "MUTED": D_MUTED, "DIM": D_DIM, "GOLD": D_GOLD,
 	"GOLD_DARK": D_GOLD_DARK, "GREEN": D_GREEN, "RED": D_RED, "BLUE": D_BLUE, "ORANGE": D_ORANGE,
 }
+## Tons da paleta escura anterior ainda escritos em algumas telas: viram o tom novo equivalente.
+const LEGACY := {
+	"0A0B0D": "BG", "141518": "SURFACE", "1C1D21": "SURFACE_2", "26282D": "SURFACE_3",
+	"2F3137": "LINE", "F2F3F5": "TEXT", "9EA2AA": "MUTED", "63676F": "DIM", "3DBE7A": "GREEN",
+	"E5484D": "RED", "4EA8DE": "BLUE", "F0A35E": "ORANGE",
+}
 ## Cores do tema escuro que não são da paleta acima e seus pares no modo claro.
 const LIGHT_EXTRA := [
 	[Color("#0E0F11"), Color("#E4E7EB")],
+	[Color("#0D1015"), Color("#FFFFFF")],
+	[Color("#1E232C"), Color("#DDE2E9")],
 	[Color("#1F2126"), Color("#E9EBEE")],
+	[Color("#20252F"), Color("#E9ECF1")],
 	[Color("#FFB3B5"), Color("#B3261E")],
 	[Color("#4A2224"), Color("#FBD9DA")],
 	[Color("#3A1C1E"), Color("#FDE6E6")],
@@ -234,6 +244,12 @@ static func themed(orig: Color) -> Color:
 	var accents := [D_GOLD, D_GOLD_DARK, ON_GOLD]
 	var news := [ACCENT, ACCENT_DARK, ON_ACCENT]
 	var found := false
+	var legacy: String = LEGACY.get(orig.to_html(false).to_upper(), "")
+	if legacy != "":
+		orig = Color(DARK[legacy], orig.a)
+		nc = orig
+		if not light:
+			return nc
 	for k in accents.size():
 		if _same_rgb(orig, accents[k]):
 			nc = news[k]
@@ -325,3 +341,22 @@ static func ink(c: Color) -> Color:
 ## Cor legível (preta ou branca) sobre um fundo.
 static func on_color(bg: Color) -> Color:
 	return Color("#111111") if bg.get_luminance() > 0.6 else Color.WHITE
+
+
+## Cor que identifica o clube em fundos e degradês: a mais saturada das duas; em clubes de
+## preto e branco, o tom que não é branco (branco sobre o fundo claro some).
+static func club_tone(c: Club) -> Color:
+	if c == null:
+		return ACCENT
+	return tone_of(Color(c.color1), Color(c.color2))
+
+
+## Tom de identidade a partir das duas cores de um clube (também para saves, sem o Club).
+static func tone_of(a: Color, b: Color) -> Color:
+	if a.s < 0.2 and b.s >= 0.2:
+		return b
+	if b.s > a.s + 0.25:
+		return b
+	if a.s < 0.2 and b.s < 0.2:
+		return a if a.get_luminance() < b.get_luminance() else b
+	return a

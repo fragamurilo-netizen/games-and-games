@@ -79,8 +79,8 @@ func _render() -> void:
 	var t := UIKit.vbox(0)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var titles := {"buy": "Proposta por", "free": "Contratar", "renew": "Renovar com", "sell": "Colocar à venda"}
-	t.add_child(UIKit.label(titles.get(mode, ""), "Caps"))
-	t.add_child(UIKit.label(p.display_name(), "Title"))
+	t.add_child(UIKit.eyebrow(titles.get(mode, "")))
+	t.add_child(UIKit.label(p.display_name().to_upper(), "Title"))
 	t.add_child(UIKit.label("%s · %d anos · valor %s" % [Pos.code(p.position), p.age(w.year), Fmt.money(p.value)], "Small"))
 	head.add_child(t)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
@@ -92,17 +92,10 @@ func _render() -> void:
 	match mode:
 		"buy":
 			if agreed_fee < 0:
-				var g := ButtonGroup.new()
-				var mrow := UIKit.hbox(8)
-				for m in [[false, "Compra"], [true, "Empréstimo"]]:
-					var lm: bool = m[0]
-					var chip := UIKit.chip(String(m[1]), lm == loan_mode, g, func():
-						loan_mode = lm
-						message = ""
-						_render())
-					UIKit.shrink_button(chip)
-					mrow.add_child(chip)
-				box.add_child(mrow)
+				box.add_child(UIKit.segment([["buy", "Compra"], ["loan", "Empréstimo"]], "loan" if loan_mode else "buy", func(k: String):
+					loan_mode = k == "loan"
+					message = ""
+					_render()))
 				if loan_mode:
 					_render_loan()
 				else:
@@ -129,8 +122,12 @@ func _stepper(value_text: String, minus: Callable, plus: Callable) -> HBoxContai
 	row.add_child(mb)
 	var l := UIKit.label(value_text, "Big")
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(l)
+	l.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	var inset := PanelContainer.new()
+	inset.theme_type_variation = "CardInset"
+	inset.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inset.add_child(l)
+	row.add_child(inset)
 	var pb := UIKit.icon_button("plus", plus)
 	pb.theme_type_variation = "Button"
 	pb.custom_minimum_size = Vector2(84, 76)
@@ -139,7 +136,7 @@ func _stepper(value_text: String, minus: Callable, plus: Callable) -> HBoxContai
 
 
 func _render_fee(caption: String, hint: String) -> void:
-	box.add_child(UIKit.section(caption))
+	box.add_child(UIKit.section_header(caption))
 	box.add_child(_stepper(Fmt.money(fee), func():
 		fee = maxi(0, fee - _step(fee))
 		_render(), func():
@@ -195,16 +192,15 @@ func _choice(caption: String, opts: Array, current: Variant, cb: Callable) -> Co
 	var v := UIKit.vbox(4)
 	if caption != "":
 		v.add_child(UIKit.label(caption, "Small"))
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
-	for o in opts:
-		var val: Variant = o[1]
-		var chip := UIKit.chip(String(o[0]), val == current, g, func():
-			cb.call(val)
-			_render())
-		UIKit.shrink_button(chip)
-		row.add_child(chip)
-	v.add_child(row)
+	var items: Array = []
+	var sel := ""
+	for i in opts.size():
+		items.append([str(i), String(opts[i][0])])
+		if opts[i][1] == current:
+			sel = str(i)
+	v.add_child(UIKit.segment(items, sel, func(k: String):
+		cb.call(opts[int(k)][1])
+		_render()))
 	return v
 
 

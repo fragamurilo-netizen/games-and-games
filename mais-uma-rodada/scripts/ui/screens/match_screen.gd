@@ -108,8 +108,71 @@ func on_hide() -> void:
 	set_process(false)
 
 
+## Chamado quando a tela troca de ponto de quebra (girar o aparelho): só rearruma.
 func refresh() -> void:
-	pass
+	if _built:
+		_responsive_layout()
+
+
+var _wide_body: HBoxContainer = null
+
+
+## Paisagem e tablet: campo e números à esquerda, abas e narração numa coluna à direita.
+## No celular em retrato fica tudo empilhado (o placar em cima e os controles embaixo sempre).
+func _responsive_layout() -> void:
+	var wide := UILayout.is_wide()
+	if wide == (_wide_body != null):
+		return
+	var left_nodes: Array = []
+	var right_nodes: Array = []
+	var pitch_box := _pitch.get_parent()
+	left_nodes.append(pitch_box)
+	var stats_box := _stats_box.get_parent()
+	var tabs_box := _tabs_row.get_parent()
+	var strip: Node = null
+	var idx_pitch := pitch_box.get_index()
+	if idx_pitch + 1 < _root.get_child_count() and _root.get_child(idx_pitch + 1) != stats_box:
+		strip = _root.get_child(idx_pitch + 1)
+	if strip != null:
+		left_nodes.append(strip)
+	left_nodes.append(stats_box)
+	right_nodes = [tabs_box, _feed_scroll, _tab_scroll]
+	if wide:
+		var at := pitch_box.get_index()
+		_wide_body = UIKit.hbox(0)
+		_wide_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		var lv := UIKit.vbox(0)
+		lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lv.size_flags_stretch_ratio = 1.4
+		var rv := UIKit.vbox(0)
+		rv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for n: Node in left_nodes:
+			_root.remove_child(n)
+			lv.add_child(n)
+		for n: Node in right_nodes:
+			_root.remove_child(n)
+			rv.add_child(n)
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL
+		_wide_body.add_child(lv)
+		var sep := ColorRect.new()
+		sep.color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+		sep.custom_minimum_size.x = 1
+		sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_wide_body.add_child(sep)
+		_wide_body.add_child(rv)
+		_root.add_child(_wide_body)
+		_root.move_child(_wide_body, at)
+	else:
+		var at := _wide_body.get_index()
+		var order: Array = left_nodes + right_nodes
+		for n: Node in order:
+			n.get_parent().remove_child(n)
+			_root.add_child(n)
+			_root.move_child(n, at)
+			at += 1
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_FILL
+		_wide_body.queue_free()
+		_wide_body = null
 
 
 # ---------------------------------------------------------------------------
@@ -247,6 +310,7 @@ func _build() -> void:
 	_controls_panel.add_child(_controls)
 	_root.add_child(_controls_panel)
 	_build_controls()
+	_responsive_layout()
 	# Comemoração por cima de tudo
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
@@ -1338,13 +1402,11 @@ func _tab_list() -> Array:
 
 func _build_tabs() -> void:
 	UIKit.clear(_tabs_row)
-	var g := ButtonGroup.new()
-	for t in _tab_list():
-		var key: String = t[0]
-		var chip := UIKit.chip(t[1], key == _tab, g, func(): _set_tab(key))
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		_tabs_row.add_child(chip)
+	var t := UIKit.tabs(_tab_list(), _tab, func(key: String): _set_tab(key))
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for b in t.get_children():
+		(b as Button).custom_minimum_size.y = 56
+	_tabs_row.add_child(t)
 
 
 func _set_tab(key: String) -> void:

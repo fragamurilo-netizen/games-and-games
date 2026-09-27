@@ -636,15 +636,12 @@ func _build_footer(w: GameWorld) -> void:
 			UIManager.toast("Escalação salva.")
 			UIManager.back(), "check"))
 		return
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
+	var items: Array = []
 	for i in 3:
-		var idx := i
-		var chip := UIKit.chip(AppSettings.SPEED_NAMES[i], i == AppSettings.match_speed, g, func():
-			AppSettings.match_speed = idx
-			AppSettings.save_settings())
-		UIKit.shrink_button(chip)
-		row.add_child(chip)
+		items.append([str(i), AppSettings.SPEED_NAMES[i]])
+	var row := UIKit.segment(items, str(AppSettings.match_speed), func(key: String):
+		AppSettings.match_speed = int(key)
+		AppSettings.save_settings())
 	f.add_child(row)
 	var start := UIKit.button("INICIAR PARTIDA", "PrimaryButton", _start, "whistle")
 	start.custom_minimum_size.y = 100

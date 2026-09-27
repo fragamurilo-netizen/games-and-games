@@ -432,16 +432,21 @@ static func bid_target(world: GameWorld) -> Player:
 	return best
 
 
-## Clube interessado num garoto: bem maior que o do usuário. De fora do país só se a idade
-## permitir a transferência internacional. Retorna null se ninguém se encaixar.
+## Clube interessado num garoto: bem maior que o do usuário e que o veja como futuro titular
+## (potencial à altura do elenco dele: gigante não compra garoto que nunca vai jogar lá).
+## De fora do país só se a idade permitir a transferência internacional. null se ninguém se encaixar.
 static func bid_buyer(world: GameWorld, p: Player) -> Club:
 	var club := world.user_club()
 	var age := p.age(world.year)
+	var pot := float(p.potential) + p.scout_noise * 0.5
 	var cands: Array = []
 	for c: Club in world.clubs:
 		if c.id == club.id or c.tier != 1 or c.reputation < club.reputation + 10.0:
 			continue
 		if age < min_foreign_age(club.nation, c.nation):
+			continue
+		var lvl := PlayerGenerator.club_level(c)
+		if pot < lvl - 2.0 or pot > lvl + 14.0 or not ClubPolicy.ai_wants(world, c, p):
 			continue
 		cands.append(c)
 	if cands.is_empty():
@@ -450,11 +455,10 @@ static func bid_buyer(world: GameWorld, p: Player) -> Club:
 	return cands[world.rng.randi_range(0, mini(cands.size(), 25) - 1)]
 
 
-## Valor de uma proposta por um garoto da base (potencial pesa mais que o nível atual).
+## Valor de uma proposta por um garoto da base: aposta no potencial, com o desconto de quem nunca
+## jogou no profissional (ver MarketAI.academy_fee).
 static func bid_fee(world: GameWorld, p: Player, buyer: Club) -> int:
-	var base := maxf(float(p.value), Valuation.base_wage(float(p.potential)) * 30.0)
-	var pot_f := 1.0 + maxf(0.0, p.potential - 70.0) * 0.08
-	return Valuation.round_value(base * pot_f * world.rng.randf_range(1.1, 1.8) * (0.8 + buyer.reputation / 250.0))
+	return MarketAI.academy_fee(world, p, buyer, world.rng)
 
 
 # ---------------------------------------------------------------------------

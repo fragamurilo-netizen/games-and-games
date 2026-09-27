@@ -4,7 +4,8 @@ extends Control
 
 @onready var safe_area: MarginContainer = $SafeArea
 @onready var top_bar: TopBar = $SafeArea/Layout/TopBar
-@onready var screen_host: Control = $SafeArea/Layout/ScreenHost
+@onready var middle: HBoxContainer = $SafeArea/Layout/Middle
+@onready var screen_host: Control = $SafeArea/Layout/Middle/ScreenHost
 @onready var bottom_nav: BottomNav = $SafeArea/Layout/BottomNav
 @onready var modal_host: Control = $Overlay/ModalHost
 @onready var toast_host: VBoxContainer = $Overlay/ToastBox/ToastHost
@@ -13,12 +14,13 @@ var _safe := Rect2()
 var _keyboard_up := false
 var _shadow: TextureRect
 var _fade: TextureRect
+var _size_class := -1
 
 
 func _ready() -> void:
 	UIManager.register_main(self)
 	UIColors.set_light(AppSettings.wants_light())
-	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale]
+	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
 	$Background.color = UIColors.BG
 	add_child(TouchScroll.new())
 	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
@@ -30,7 +32,9 @@ func _ready() -> void:
 			if cur != null:
 				cur.scroll_to_top())
 	get_viewport().size_changed.connect(_update_safe_area)
+	get_viewport().size_changed.connect(_update_layout)
 	_update_safe_area()
+	_update_layout()
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
@@ -44,6 +48,7 @@ func restyle() -> void:
 	var g := (_fade.texture as GradientTexture2D).gradient
 	g.set_color(0, Color(UIColors.BG, 0.0))
 	g.set_color(1, Color(UIColors.BG, 0.92))
+	bottom_nav.set_vertical(bottom_nav.vertical)
 	UIManager._redraw_tree(self)
 
 
@@ -137,6 +142,30 @@ func _on_tab(tab: String) -> void:
 		cur.scroll_to_top()
 		return
 	UIManager.goto(tab)
+
+
+## Responsivo: mede o viewport e, ao cruzar um ponto de quebra, leva a navegação para a
+## lateral (telas largas) ou de volta para baixo, e reconstrói a tela atual.
+func _update_layout() -> void:
+	UILayout.viewport = get_viewport_rect().size
+	var sc := UILayout.size_class()
+	if sc == _size_class:
+		return
+	var first := _size_class < 0
+	_size_class = sc
+	var wide := sc != UILayout.COMPACT
+	var layout := $SafeArea/Layout
+	bottom_nav.get_parent().remove_child(bottom_nav)
+	if wide:
+		middle.add_child(bottom_nav)
+		middle.move_child(bottom_nav, 0)
+	else:
+		layout.add_child(bottom_nav)
+	bottom_nav.set_vertical(wide)
+	if not first:
+		var cur := UIManager.current()
+		if cur != null:
+			cur.refresh.call_deferred()
 
 
 ## Margens seguras (em coordenadas do viewport): position.y = topo, size.y = base.

@@ -7,79 +7,92 @@ func _init() -> void:
 	screen_title = "Treino"
 
 
+const FOCUS_ICONS := {"equilibrado": "list", "fisico": "bolt", "tecnico": "ball", "tatico": "tactics",
+	"ataque": "up", "defesa": "shield", "recuperacao": "heart"}
+
+
 func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
+	max_content_width = 1700
 	var club := w.user_club()
-	screen_subtitle = "Entrosamento %d · estrutura %d" % [int(club.cohesion), club.facilities]
+	screen_subtitle = "Semana de treino"
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	var f := TrainingManager.focus_of(club)
+	var it: Dictionary = TrainingManager.INTENSITY[int(club.training.get("int", 1))]
+	c.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(String(f["name"]), "Foco da semana", UIColors.ACCENT),
+		UIKit.stat_tile(String(it["name"]), "Intensidade"),
+		UIKit.stat_tile(str(int(club.cohesion)), "Entrosamento", UIColors.morale_color(club.cohesion)),
+		UIKit.stat_tile(str(club.facilities), "Estrutura"),
+	], content_width()))
+	var start := c.get_child_count()
 	c.add_child(_focus_card(club))
 	c.add_child(_intensity_card(club))
 	c.add_child(_players_card(w, club))
+	columnize(c, start, 2, 0)
+
+
+func _pct(v: Variant) -> int:
+	return int(round((float(v) - 1.0) * 100.0))
 
 
 func _focus_card(club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Foco coletivo"))
+	var card := UIKit.card("Card", 12)
+	card.add_child(UIKit.section_header("Foco coletivo"))
 	var cur := String(club.training.get("focus", "equilibrado"))
-	var g := ButtonGroup.new()
-	var flow := UIKit.flow(8)
+	var items: Array = []
 	for key in TrainingManager.FOCUS_ORDER:
 		var k: String = key
-		flow.add_child(UIKit.chip(String(TrainingManager.TEAM_FOCUS[k]["name"]), k == cur, g, func():
-			club.training["focus"] = k
-			refresh()))
-	card.add_child(flow)
+		items.append([k, String(TrainingManager.TEAM_FOCUS[k]["name"]), "", String(FOCUS_ICONS.get(k, "list"))])
+	card.add_child(UIKit.option_grid(items, cur, func(k: String):
+		club.training["focus"] = k
+		refresh(), 2))
 	var f := TrainingManager.focus_of(club)
-	card.add_child(UIKit.label(String(f["desc"]), "", true))
-	var fx: Array = []
+	var detail := UIKit.card("CardInset", 8)
+	detail.add_child(UIKit.eyebrow(String(f["name"])))
+	detail.add_child(UIKit.label(String(f["desc"]), "", true))
 	if not Array(f["attrs"]).is_empty():
 		var names: Array = []
 		for a in f["attrs"]:
 			names.append(Attr.NAMES[int(a)])
-		fx.append("Prioriza: " + ", ".join(names))
-	if float(f["growth"]) != 1.0:
-		fx.append("Evolução %+d%%" % int(round((float(f["growth"]) - 1.0) * 100.0)))
-	if float(f["recovery"]) != 1.0:
-		fx.append("Recuperação %+d%%" % int(round((float(f["recovery"]) - 1.0) * 100.0)))
-	if float(f["injury"]) != 1.0:
-		fx.append("Risco de lesão %+d%%" % int(round((float(f["injury"]) - 1.0) * 100.0)))
+		detail.add_child(UIKit.label(tr("Prioriza: %s") % ", ".join(names), "Small", true))
+	detail.add_child(UIKit.effect_pills([["Evolução", _pct(f["growth"]), true], ["Recuperação", _pct(f["recovery"]), true], ["Risco de lesão", _pct(f["injury"]), false]]))
 	if float(f["cohesion"]) > 0.0:
-		fx.append("Entrosamento sobe mais rápido")
-	for line in fx:
-		card.add_child(UIKit.colored("• " + line, UIColors.MUTED, "Small", true))
+		detail.add_child(UIKit.pill("Entrosamento sobe mais rápido", UIColors.GREEN, 16))
+	card.add_child(UIKit.card_panel(detail))
 	return UIKit.card_panel(card)
 
 
 func _intensity_card(club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Intensidade"))
+	var card := UIKit.card("Card", 12)
+	card.add_child(UIKit.section_header("Intensidade"))
 	var cur := int(club.training.get("int", 1))
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
+	var items: Array = []
 	for i in TrainingManager.INTENSITY.size():
-		var idx := i
-		var chip := UIKit.chip(String(TrainingManager.INTENSITY[i]["name"]), i == cur, g, func():
-			club.training["int"] = idx
-			refresh())
-		UIKit.shrink_button(chip)
-		row.add_child(chip)
-	card.add_child(row)
+		items.append([str(i), String(TrainingManager.INTENSITY[i]["name"])])
+	card.add_child(UIKit.segment(items, str(cur), func(k: String):
+		club.training["int"] = int(k)
+		refresh()))
 	var it: Dictionary = TrainingManager.INTENSITY[cur]
-	card.add_child(UIKit.label("Evolução %+d%% · recuperação %+d%% · risco de lesão %+d%%" % [
-		int(round((float(it["growth"]) - 1.0) * 100.0)), int(round((float(it["recovery"]) - 1.0) * 100.0)), int(round((float(it["injury"]) - 1.0) * 100.0))], "Small", true))
+	card.add_child(UIKit.effect_pills([["Evolução", _pct(it["growth"]), true], ["Recuperação", _pct(it["recovery"]), true], ["Risco de lesão", _pct(it["injury"]), false]]))
 	return UIKit.card_panel(card)
 
 
 func _players_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 6)
-	card.add_child(UIKit.section("Treino individual"))
+	card.add_child(UIKit.section_header("Treino individual"))
+	card.add_child(UIKit.label("Toque num jogador para escolher o foco dele ou ensinar uma posição nova.", "Small", true))
 	var squad := w.squad(club)
 	squad.sort_custom(func(a: Player, b: Player): return a.position < b.position if a.position != b.position else a.overall > b.overall)
+	var last_group := -1
 	for p: Player in squad:
+		if Pos.group(p.position) != last_group:
+			last_group = Pos.group(p.position)
+			card.add_child(UIKit.eyebrow(["Goleiros", "Defensores", "Meio-campistas", "Atacantes"][clampi(last_group, 0, 3)], Pos.group_color(p.position)))
 		var row := UIKit.hbox(10)
 		row.add_child(UIKit.pos_badge(p.position))
 		var col := UIKit.vbox(0)

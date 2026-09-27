@@ -56,8 +56,8 @@ func _layout() -> void:
 func _draw() -> void:
 	if club == null or size.x <= 1.0:
 		return
-	var c1 := club.primary_color()
-	var c2 := club.secondary_color()
+	var c1 := UIColors.club_tone(club)
+	var c2 := club.secondary_color() if c1 == club.primary_color() else club.primary_color()
 	# Degradê: a cor do clube nasce à direita e some antes da metade.
 	var steps := 24
 	for i in steps:

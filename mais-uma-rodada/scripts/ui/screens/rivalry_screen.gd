@@ -29,8 +29,15 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	# Cabeçalho
-	var card := UIKit.card("Card", 10)
+	max_content_width = 1500
+	# Cabeçalho: o clássico no fundo das cores dos dois clubes, com a faixa da liga.
+	var hero := MatchHero.wrap(w, ca.league_id, ca, cb)
+	var band: HBoxContainer = hero[1]
+	var bl := UIKit.label(tr("Clássico").to_upper() if ca.is_rival(_b) or cb.is_rival(_a) else tr("Rivalidade").to_upper(), "Caps")
+	bl.add_theme_color_override(&"font_color", Color.WHITE)
+	bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(bl)
+	var card: VBoxContainer = hero[2]
 	var row := UIKit.hbox(12)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_child(_side(ca))
@@ -47,38 +54,47 @@ func refresh() -> void:
 	row.add_child(_side(cb))
 	card.add_child(row)
 	card.add_child(RivalryView.meter(h))
+	c.add_child(hero[0])
+	card = UIKit.card("Card", 10)
+	card.add_child(UIKit.section_header("Retrospecto"))
 	var rec := Rivalry.record_for(w, _a, _b)
 	if int(rec["g"]) > 0:
-		var stats := UIKit.hbox(8)
-		stats.add_child(UIKit.stat(str(rec["w"]), "Vitórias " + ca.short_name, UIColors.GREEN))
-		stats.add_child(UIKit.stat(str(rec["d"]), "Empates", UIColors.MUTED))
-		stats.add_child(UIKit.stat(str(rec["l"]), "Vitórias " + cb.short_name, UIColors.RED))
-		card.add_child(stats)
+		var grid := GridContainer.new()
+		grid.columns = 3
+		grid.add_theme_constant_override(&"h_separation", UITokens.S2)
+		grid.add_child(UIKit.stat_tile(str(rec["w"]), ca.short_name, UIColors.GREEN))
+		grid.add_child(UIKit.stat_tile(str(rec["d"]), "Empates"))
+		grid.add_child(UIKit.stat_tile(str(rec["l"]), cb.short_name, UIColors.RED))
+		card.add_child(grid)
 	card.add_child(UIKit.label(RivalryView.record_text(w, _a, _b), "Small", true))
 	var r := Rivalry.get_rec(w, _a, _b)
 	if ca.is_rival(_b) or cb.is_rival(_a):
 		card.add_child(UIKit.label("Rivais de origem: a rivalidade nunca esfria de verdade.", "Small", true))
 	elif not r.is_empty():
 		card.add_child(UIKit.label("Nasceu dentro do save. Pico: %d." % int(round(float(r.get("pk", 0.0)))), "Small", true))
+	var start := c.get_child_count()
 	c.add_child(UIKit.card_panel(card))
 	# Momentos
 	var ev: Array = r.get("ev", [])
 	var mc := UIKit.card("Card", 8)
-	mc.add_child(UIKit.section("Momentos"))
+	mc.add_child(UIKit.section_header("Momentos"))
 	if ev.is_empty():
 		mc.add_child(UIKit.label("Nada marcante ainda. Eliminações, finais, títulos decididos no detalhe e jogadores trocando de lado esquentam o confronto.", "Small", true))
 	for i in range(ev.size() - 1, -1, -1):
 		var e: Dictionary = ev[i]
 		var er := UIKit.hbox(10)
-		var y := UIKit.label(str(int(e["y"])), "H3")
+		var y := UIKit.colored(str(int(e["y"])), UIColors.ACCENT, "H3")
 		y.custom_minimum_size.x = 70
 		y.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		er.add_child(y)
 		var t := UIKit.label(String(e["t"]), "Small", true)
 		er.add_child(t)
 		er.add_child(UIKit.colored("+%d" % int(round(float(e["p"]))), RivalryView.heat_color(h), "Small"))
-		mc.add_child(er)
+		var ep := UIKit.card("CardInset", 0)
+		ep.add_child(er)
+		mc.add_child(UIKit.card_panel(ep))
 	c.add_child(UIKit.card_panel(mc))
+	columnize(c, start)
 
 
 func _side(club: Club) -> Control:

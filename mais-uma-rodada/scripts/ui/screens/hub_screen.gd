@@ -39,43 +39,46 @@ func refresh() -> void:
 	if not jobs.is_empty():
 		c.add_child(_jobs_card(w, jobs))
 		return
+	var cards: Array = []
 	var preseason := PreseasonManager.is_active(w)
 	if Store.locked(w):
-		c.add_child(_paywall_card(w))
+		cards.append(_paywall_card(w))
 	elif preseason:
-		c.add_child(_preseason_card(w))
+		cards.append(_preseason_card(w))
 	if Store.locked(w):
 		pass
 	elif w.season.finished:
-		c.add_child(_season_over_card(w))
+		cards.append(_season_over_card(w))
 	else:
-		c.add_child(_next_match_card(w, club))
+		cards.append(_next_match_card(w, club))
 	var decisions := _decisions_card(w)
 	if decisions != null:
-		c.add_child(decisions)
-	c.add_child(_inbox_card(w))
-	c.add_child(RelationsScreen.pending_card(w, func(): refresh(), true))
-	c.add_child(_status_card(w, club))
+		cards.append(decisions)
+	cards.append(_inbox_card(w))
+	cards.append(RelationsScreen.pending_card(w, func(): refresh(), true))
+	cards.append(_status_card(w, club))
 	var alerts := _alerts_card(w, club)
 	if alerts != null:
-		c.add_child(alerts)
+		cards.append(alerts)
 	if not preseason:
-		c.add_child(_mini_table_card(w, club))
+		cards.append(_mini_table_card(w, club))
 		var stars := _highlights_card(w, club)
 		if stars != null:
-			c.add_child(stars)
+			cards.append(stars)
 	var upcoming := _upcoming_card(w, club)
 	if upcoming != null:
-		c.add_child(upcoming)
+		cards.append(upcoming)
 	var cups := _cups_card(w, club)
 	if cups != null:
-		c.add_child(cups)
-	c.add_child(_shortcuts_card(w))
-	c.add_child(_news_card(w))
+		cards.append(cups)
+	cards.append(_shortcuts_card(w))
+	cards.append(_news_card(w))
 	var social := _social_card(w)
 	if social != null:
-		c.add_child(social)
-	c.add_child(_form_card(w, club))
+		cards.append(social)
+	cards.append(_form_card(w, club))
+	max_content_width = 1800.0
+	UIKit.columns(c, cards, content_width())
 
 
 ## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.
@@ -83,10 +86,11 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 	var v := UIKit.vbox(6)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	var cr := UIKit.crest(cl, 104)
+	var cr := UIKit.crest(cl, 112)
 	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(cr)
 	var n := UIKit.label(cl.short_name, "H2")
+	n.uppercase = true
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(n)
@@ -133,26 +137,37 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(adv)
 		return UIKit.card_panel(card)
 	var derby := MatchEngine.is_derby(w, f.home, f.away)
-	var head := UIKit.section("Próxima partida · %s · %s" % [CompText.fixture_title(w, f), w.season.date_label(f.slot)])
-	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var head_row := UIKit.hbox(10)
-	head_row.add_child(UIKit.comp_logo(f.comp, 30))
-	head_row.add_child(head)
-	card.add_child(head_row)
-	card.add_child(UIKit.comp_stripe(f.comp, 4))
+	# Cartão de dia de jogo: faixa na identidade da competição, lados nas cores dos clubes.
+	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
+	var band: HBoxContainer = hero[1]
+	var st := ScoreboardTheme.for_competition(w, f.comp)
+	band.add_child(UIKit.comp_logo(f.comp, 38))
+	var bt := UIKit.vbox(0)
+	bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var ct := UIKit.label(CompText.fixture_title(w, f).to_upper(), "Eyebrow")
+	ct.add_theme_color_override(&"font_color", st["caps"])
+	ct.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	bt.add_child(ct)
+	var dl := UIKit.label("Próxima partida · %s" % w.season.date_label(f.slot), "Small")
+	dl.add_theme_color_override(&"font_color", Color(st["text"], 0.75))
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	bt.add_child(dl)
+	band.add_child(bt)
+	var where_col: Color = UIColors.MUTED if f.neutral else (UIColors.GREEN if f.home == club.id else UIColors.ORANGE)
+	var where_pill := UIKit.pill("NEUTRO" if f.neutral else ("EM CASA" if f.home == club.id else "FORA"), where_col.lightened(0.2), 16)
+	where_pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(where_pill)
+	UIKit.card_panel(card).free()
+	card = hero[2]
 	var row := UIKit.hbox(6)
 	row.add_child(_team_block(w, w.club(f.home), f))
 	var mid := UIKit.vbox(2)
 	mid.alignment = BoxContainer.ALIGNMENT_CENTER
-	var vs := UIKit.label("x", "Big")
+	var vs := UIKit.label("VS", "Title")
 	vs.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vs.add_theme_color_override(&"font_color", UIColors.DIM)
 	mid.add_child(vs)
-	var where := UIKit.label("NEUTRO" if f.neutral else ("EM CASA" if f.home == club.id else "FORA"), "Caps")
-	where.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	where.add_theme_color_override(&"font_color", UIColors.MUTED if f.neutral else (UIColors.GREEN if f.home == club.id else UIColors.ORANGE))
-	mid.add_child(where)
 	row.add_child(mid)
 	row.add_child(_team_block(w, w.club(f.away), f))
 	card.add_child(row)
@@ -183,7 +198,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	quick.tooltip_text = "Joga um ou vários jogos sem assistir"
 	sub.add_child(quick)
 	card.add_child(sub)
-	return UIKit.card_panel(card)
+	return hero[0]
 
 
 func _instant() -> void:
@@ -255,7 +270,9 @@ func _shortcuts_card(w: GameWorld) -> Control:
 	for it in items:
 		var v := UIKit.vbox(4)
 		v.alignment = BoxContainer.ALIGNMENT_CENTER
-		var ic := UIKit.icon_rect(String(it[0]), 40, UIColors.ACCENT)
+		var ic := PanelContainer.new()
+		ic.theme_type_variation = "IconTile"
+		ic.add_child(UIKit.icon_rect(String(it[0]), 32, UIColors.ACCENT))
 		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(ic)
 		var t := UIKit.label(String(it[1]), "H3")

@@ -127,6 +127,8 @@ func refresh() -> void:
 		c.add_child(UIKit.card_panel(info))
 	c.add_child(_history_card(club))
 	c.add_child(_sponsors_card(w, club, pre))
+	max_content_width = 1700
+	columnize(c, 0, 2, 0)
 	var f := footer()
 	UIKit.clear(f)
 	var txt := "PRONTO"
@@ -380,16 +382,14 @@ static func _opt_name(opts: Array, key: String) -> String:
 
 func _editor_card(club: Club) -> Control:
 	var card := UIKit.card("Card", 12)
-	var g := ButtonGroup.new()
-	var prow := UIKit.flow(8)
+	var parts: Array = []
 	for p in PARTS:
-		var key: String = p[0]
-		if key == "collections" and _which == "gk":
+		if String(p[0]) == "collections" and _which == "gk":
 			continue
-		prow.add_child(UIKit.chip(String(p[1]), key == _part, g, func():
-			_part = key
-			refresh()))
-	card.add_child(prow)
+		parts.append([String(p[0]), String(p[1])])
+	card.add_child(UIKit.scroll_tabs(parts, _part, func(k: String):
+		_part = k
+		refresh()))
 	var k := _kit()
 	match _part:
 		"collections":
@@ -398,14 +398,12 @@ func _editor_card(club: Club) -> Control:
 			card.add_child(UIKit.label("Modelos prontos nas cores do clube. Depois, ajuste cada detalhe nas outras abas.", "Small", true))
 			card.add_child(_template_grid(club, k))
 		"shirt":
-			var gg := ButtonGroup.new()
-			var grow := UIKit.flow(6)
+			var groups: Array = []
 			for i in KitView.PATTERN_GROUPS.size():
-				var gi := i
-				grow.add_child(UIKit.chip(String(KitView.PATTERN_GROUPS[i][0]), i == _group, gg, func():
-					_group = gi
-					refresh()))
-			card.add_child(grow)
+				groups.append([str(i), String(KitView.PATTERN_GROUPS[i][0])])
+			card.add_child(UIKit.scroll_tabs(groups, str(_group), func(k: String):
+				_group = int(k)
+				refresh()))
 			card.add_child(_pattern_grid(k))
 			var tonal := CheckButton.new()
 			tonal.text = "Tom sobre tom (estampa discreta na cor principal)"
@@ -713,6 +711,13 @@ func _style_grid(k: Dictionary, field: String, opts: Array, default: String, ful
 
 func _options(card: VBoxContainer, caption: String, opts: Array, current: String, field: String) -> void:
 	card.add_child(UIKit.label(caption, "Caps"))
+	if opts.size() <= 4:
+		var items: Array = []
+		for o in opts:
+			items.append([String(o[0]), String(o[1])])
+		card.add_child(UIKit.segment(items, current, func(val: String):
+			_edit(func(kk: Dictionary): kk[field] = val)))
+		return
 	var g := ButtonGroup.new()
 	var flow := UIKit.flow(8)
 	for o in opts:

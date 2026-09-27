@@ -36,6 +36,7 @@ func refresh() -> void:
 	screen_title = p.display_name()
 	screen_subtitle = club.short_name if club != null else "Sem clube"
 	UIManager.refresh_chrome()
+	max_content_width = 1800.0
 	c.add_child(_header(w, p, club))
 	c.add_child(_tabs_row(p))
 	match _tab:
@@ -45,31 +46,45 @@ func refresh() -> void:
 			c.add_child(_career(w, p))
 			c.add_child(_memory(w, p))
 		_:
-			c.add_child(_summary(w, p, own))
-			c.add_child(_fit_card(w, p, own))
-			c.add_child(_positions_card(w, p, own))
-			c.add_child(_attributes(w, p, own))
-			c.add_child(_personality(w, p, own))
-			c.add_child(SocialPost.mini_card(w, -1, p.id))
+			var cards: Array = [_summary(w, p, own), _fit_card(w, p, own), _positions_card(w, p, own),
+				_attributes(w, p, own), _personality(w, p, own), SocialPost.mini_card(w, -1, p.id)]
 			if own:
-				c.add_child(RelationsScreen.player_card(w, p, func(): refresh()))
+				cards.append(RelationsScreen.player_card(w, p, func(): refresh()))
+			UIKit.columns(c, cards, content_width())
 	_actions(w, p, own)
 
 
 func _tabs_row(p: Player) -> Control:
 	var row := UIKit.hbox(8)
-	var g := ButtonGroup.new()
-	for t in TABS:
-		var key: String = t[0]
-		var ch := UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh()
-			scroll_to_top())
-		ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(ch)
+	var t := UIKit.tabs(TABS, _tab, func(key: String):
+		_tab = key
+		refresh()
+		scroll_to_top())
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(t)
 	var pid := p.id
+	var w := world()
+	if w != null and w.has_user() and not w.is_user_club(p.club_id) and not w.academy.has(p.id) and not p.retiring:
+		row.add_child(_shortlist_button(w, p))
 	row.add_child(UIKit.icon_button("swap", func(): UIManager.push("compare", {"a": pid}), "Comparar"))
 	return row
+
+
+## Estrela da lista de observação do mercado (acesa = jogador na lista).
+func _shortlist_button(w: GameWorld, p: Player) -> Button:
+	var on := Shortlist.has(w, p)
+	var b := UIKit.icon_button("star", func():
+		if not Shortlist.has(w, p) and Shortlist.is_full(w):
+			UIManager.toast("Sua lista está cheia (%d). Tire alguém no Mercado > Lista." % Shortlist.MAX_ENTRIES, UIColors.ORANGE)
+			return
+		var added := Shortlist.toggle(w, p)
+		UIManager.toast("%s entrou na sua lista de observação." % p.display_name() if added else "%s saiu da sua lista." % p.display_name(), UIColors.GREEN if added else UIColors.TEXT)
+		GameManager.save_now()
+		refresh(), "Tirar da lista" if on else "Pôr na lista")
+	var tint := UIColors.ACCENT if on else UIColors.MUTED
+	for k in [&"icon_normal_color", &"icon_hover_color", &"icon_pressed_color", &"icon_focus_color"]:
+		b.add_theme_color_override(k, tint)
+	return b
 
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
@@ -78,8 +93,12 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	row.add_child(UIKit.portrait(p, club, w.year, 132))
 	var col := UIKit.vbox(4)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(p.display_name(), "Title"))
-	col.add_child(UIKit.label(p.full_name(), "Small", true))
+	var nm := UIKit.label(p.display_name(), "Title")
+	nm.uppercase = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(nm)
+	if p.full_name() != p.display_name():
+		col.add_child(UIKit.label(p.full_name(), "Small", true))
 	var r1 := UIKit.hbox(8)
 	r1.add_child(UIKit.pos_badge(p.position))
 	r1.add_child(UIKit.label(Pos.name_of(p.position), "Small", true))

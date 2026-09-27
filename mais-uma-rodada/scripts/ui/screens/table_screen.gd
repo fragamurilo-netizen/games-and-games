@@ -93,14 +93,10 @@ func _picker_row(w: GameWorld) -> Control:
 		var gd := ButtonGroup.new()
 		var ids := DatabaseManager.leagues_of_nation(nation)
 		if ids.size() > 1 or _cup_id != "":
-			var drow := UIKit.hbox(8)
+			var divs: Array = []
 			for lid in ids:
-				var id: String = lid
-				var chip := UIKit.chip(String(DatabaseManager.league_cfg(id).get("short", id)), _cup_id == "" and id == _league_id, gd, func():
-					_pick_league(id))
-				UIKit.shrink_button(chip)
-				drow.add_child(chip)
-			v.add_child(drow)
+				divs.append([String(lid), String(DatabaseManager.league_cfg(String(lid)).get("short", lid))])
+			v.add_child(UIKit.segment(divs, _league_id if _cup_id == "" else "", func(id: String): _pick_league(id)))
 		var crow := UIKit.flow(8)
 		for cid in CupManager.cups_of_country(nation):
 			var id: String = cid
@@ -113,15 +109,9 @@ func _picker_row(w: GameWorld) -> Control:
 	var tabs: Array = LEAGUE_TABS
 	if _cup_id != "":
 		tabs = CUP_TABS.filter(func(t): return t[0] != "groups" or not w.season.cups[_cup_id].groups.is_empty())
-	var gt := ButtonGroup.new()
-	var trow := UIKit.flow(8) # quebra em duas linhas quando há muitas abas (nada cortado)
-	for t in tabs:
-		var key: String = t[0]
-		var chip := UIKit.chip(t[1], key == _tab, gt, func():
-			_tab = key
-			refresh())
-		chip.add_theme_font_size_override(&"font_size", 18)
-		trow.add_child(chip)
+	var trow := UIKit.scroll_tabs(tabs, _tab, func(key: String):
+		_tab = key
+		refresh())
 	v.add_child(trow)
 	return v
 
@@ -652,16 +642,9 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	if mine != null:
 		c.add_child(mine)
 	# Geral, só em casa, só fora, ou o momento de cada um (últimos 5 jogos)
-	var gv := ButtonGroup.new()
-	var vrow := UIKit.hbox(8)
-	for vv in [[TableRows.VIEW_ALL, "Geral"], [TableRows.VIEW_HOME, "Casa"], [TableRows.VIEW_AWAY, "Fora"], [TableRows.VIEW_FORM, "Momento"]]:
-		var key: String = vv[0]
-		var chip := UIKit.chip(vv[1], key == _view, gv, func():
-			_view = key
-			refresh())
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		chip.add_theme_font_size_override(&"font_size", 18)
-		vrow.add_child(chip)
+	var vrow := UIKit.segment([[TableRows.VIEW_ALL, "Geral"], [TableRows.VIEW_HOME, "Casa"], [TableRows.VIEW_AWAY, "Fora"], [TableRows.VIEW_FORM, "Momento"]], _view, func(key: String):
+		_view = key
+		refresh())
 	c.add_child(vrow)
 	var card := UIKit.card("Card", 2)
 	# Playoffs e repescagem não contam como rodadas da classificação
