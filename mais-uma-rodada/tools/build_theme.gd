@@ -53,20 +53,31 @@ func _label_var(th: Theme, name: String, font: Font, size: int, color: Color) ->
 	th.set_color(&"font_color", name, color)
 
 
+## Fonte com espaço extra entre as letras (rótulos em caixa alta, como nas transmissões).
+func _spaced(base: Font, px: int) -> FontVariation:
+	var fv := FontVariation.new()
+	fv.base_font = base
+	fv.spacing_glyph = px
+	return fv
+
+
 func _labels(th: Theme) -> void:
 	th.set_color(&"font_color", "Label", UIColors.TEXT)
-	th.set_font_size(&"font_size", "Label", 24)
-	_label_var(th, "Title", f_cond, 38, UIColors.TEXT)
-	_label_var(th, "H2", f_cond, 30, UIColors.TEXT)
-	_label_var(th, "H3", f_semi, 24, UIColors.TEXT)
+	th.set_font_size(&"font_size", "Label", UITokens.F_BODY)
+	_label_var(th, "Display", f_bold, UITokens.F_DISPLAY, UIColors.TEXT)
+	_label_var(th, "Title", f_bold, UITokens.F_TITLE, UIColors.TEXT)
+	_label_var(th, "H2", f_cond, UITokens.F_H2, UIColors.TEXT)
+	_label_var(th, "H3", f_semi, UITokens.F_H3, UIColors.TEXT)
 	_label_var(th, "Big", f_bold, 58, UIColors.TEXT)
 	_label_var(th, "Huge", f_bold, 92, UIColors.TEXT)
 	_label_var(th, "Score", f_bold, 72, UIColors.TEXT)
 	_label_var(th, "Muted", f_reg, 21, UIColors.MUTED)
-	_label_var(th, "Small", f_reg, 18, UIColors.MUTED)
-	_label_var(th, "Caps", f_semi, 17, UIColors.DIM)
+	_label_var(th, "Small", f_reg, UITokens.F_SMALL, UIColors.MUTED)
+	_label_var(th, "Caps", _spaced(f_semi, 1), UITokens.F_CAPS, UIColors.DIM)
+	_label_var(th, "Eyebrow", _spaced(f_cond, 2), UITokens.F_EYEBROW, UIColors.ACCENT)
 	_label_var(th, "Accent", f_semi, 24, UIColors.ACCENT)
 	_label_var(th, "Stat", f_cond, 32, UIColors.TEXT)
+	_label_var(th, "StatBig", f_bold, 44, UIColors.TEXT)
 	_label_var(th, "Mono", f_cond, 24, UIColors.TEXT)
 	_label_var(th, "Logo", f_bold, 76, UIColors.ACCENT)
 
@@ -96,90 +107,128 @@ func _button_colors(th: Theme, name: String, fg: Color, pressed_fg: Color) -> vo
 
 
 func _buttons(th: Theme) -> void:
-	# Botão padrão
+	var clear := Color(0, 0, 0, 0)
+	var r := UITokens.R_MD
+	# Botão padrão: superfície elevada com filete; ao tocar, borda na cor do clube.
 	_button_states(th, "Button",
-		sb(UIColors.SURFACE_2, 14, UIColors.LINE, 1, 20, 14),
-		sb(UIColors.SURFACE_3, 14, UIColors.LINE, 1, 20, 14),
-		sb(UIColors.SURFACE_3, 14, UIColors.ACCENT, 2, 20, 14),
-		sb(UIColors.SURFACE, 14, UIColors.LINE, 1, 20, 14))
+		sb(UIColors.SURFACE_2, r, UITokens.HAIRLINE, 1, 20, 14),
+		sb(UIColors.SURFACE_3, r, UITokens.HAIRLINE, 1, 20, 14),
+		sb(UIColors.SURFACE_3, r, UIColors.ACCENT, 2, 20, 14),
+		sb(UIColors.SURFACE, r, UITokens.HAIRLINE, 1, 20, 14))
 	_button_colors(th, "Button", UIColors.TEXT, UIColors.ACCENT)
 	th.set_font(&"font", "Button", f_semi)
-	th.set_font_size(&"font_size", "Button", 24)
-	th.set_constant(&"h_separation", "Button", 10)
-	th.set_constant(&"icon_max_width", "Button", 40)
-	# Primário (JOGAR, confirmar)
+	th.set_font_size(&"font_size", "Button", 23)
+	th.set_constant(&"h_separation", "Button", 12)
+	th.set_constant(&"icon_max_width", "Button", 34)
+	# Primário (JOGAR, confirmar): cor do clube cheia, com a base mais escura dando volume.
 	th.add_type("PrimaryButton")
 	th.set_type_variation("PrimaryButton", "Button")
-	_button_states(th, "PrimaryButton",
-		sb(UIColors.ACCENT, 16, Color(0, 0, 0, 0), 0, 24, 16),
-		sb(Color("#FFD466"), 16, Color(0, 0, 0, 0), 0, 24, 16),
-		sb(UIColors.ACCENT_DARK, 16, Color(0, 0, 0, 0), 0, 24, 16),
-		sb(UIColors.SURFACE_2, 16, Color(0, 0, 0, 0), 0, 24, 16))
+	var pn := sb(UIColors.ACCENT, r, clear, 0, 24, 16)
+	pn.border_color = UIColors.ACCENT_DARK
+	pn.border_width_bottom = 5
+	var ph := sb(Color("#FFD466"), r, clear, 0, 24, 16)
+	ph.border_color = UIColors.ACCENT_DARK
+	ph.border_width_bottom = 5
+	var pp := sb(UIColors.ACCENT_DARK, r, clear, 0, 24, 16)
+	pp.content_margin_top = 19
+	_button_states(th, "PrimaryButton", pn, ph, pp, sb(UIColors.SURFACE_2, r, clear, 0, 24, 16))
 	_button_colors(th, "PrimaryButton", UIColors.ON_ACCENT, UIColors.ON_ACCENT)
-	th.set_font(&"font", "PrimaryButton", f_bold)
-	th.set_font_size(&"font_size", "PrimaryButton", 34)
+	th.set_font(&"font", "PrimaryButton", _spaced(f_bold, 1))
+	th.set_font_size(&"font_size", "PrimaryButton", 32)
 	# Fantasma (ações secundárias)
 	th.add_type("GhostButton")
 	th.set_type_variation("GhostButton", "Button")
 	_button_states(th, "GhostButton",
-		sb(Color(0, 0, 0, 0), 14, UIColors.LINE, 2, 18, 12),
-		sb(UIColors.SURFACE_2, 14, UIColors.LINE, 2, 18, 12),
-		sb(UIColors.SURFACE_3, 14, UIColors.ACCENT, 2, 18, 12),
-		sb(Color(0, 0, 0, 0), 14, UIColors.SURFACE_2, 2, 18, 12))
+		sb(clear, r, UIColors.LINE, 1, 18, 12),
+		sb(UIColors.SURFACE_2, r, UIColors.LINE, 1, 18, 12),
+		sb(UIColors.SURFACE_3, r, UIColors.ACCENT, 2, 18, 12),
+		sb(clear, r, UIColors.SURFACE_2, 1, 18, 12))
 	_button_colors(th, "GhostButton", UIColors.TEXT, UIColors.ACCENT)
 	th.set_font(&"font", "GhostButton", f_semi)
 	th.set_font_size(&"font_size", "GhostButton", 22)
+	# Texto (links "ver tudo" nos cabeçalhos de seção)
+	th.add_type("TextButton")
+	th.set_type_variation("TextButton", "Button")
+	var empty := StyleBoxEmpty.new()
+	_button_states(th, "TextButton", sb(clear, UITokens.R_SM, clear, 0, 8, 4), sb(Color(1, 1, 1, 0.04), UITokens.R_SM, clear, 0, 8, 4),
+		sb(Color(1, 1, 1, 0.08), UITokens.R_SM, clear, 0, 8, 4), sb(clear, UITokens.R_SM, clear, 0, 8, 4))
+	_button_colors(th, "TextButton", UIColors.ACCENT, UIColors.ACCENT)
+	th.set_font(&"font", "TextButton", _spaced(f_cond, 1))
+	th.set_font_size(&"font_size", "TextButton", 20)
 	# Perigo
 	th.add_type("DangerButton")
 	th.set_type_variation("DangerButton", "Button")
 	_button_states(th, "DangerButton",
-		sb(Color("#3A1C1E"), 14, UIColors.RED, 2, 18, 12),
-		sb(Color("#4A2224"), 14, UIColors.RED, 2, 18, 12),
-		sb(UIColors.RED, 14, UIColors.RED, 2, 18, 12),
-		sb(UIColors.SURFACE, 14, UIColors.LINE, 1, 18, 12))
+		sb(Color("#3A1C1E"), r, UIColors.RED, 1, 18, 12),
+		sb(Color("#4A2224"), r, UIColors.RED, 1, 18, 12),
+		sb(UIColors.RED, r, UIColors.RED, 1, 18, 12),
+		sb(UIColors.SURFACE, r, UIColors.LINE, 1, 18, 12))
 	_button_colors(th, "DangerButton", Color("#FFB3B5"), Color.WHITE)
 	th.set_font(&"font", "DangerButton", f_semi)
-	# Chip (seleção em grupo: formações, mentalidade, filtros)
+	# Chip (filtros e seleções em grupo): compacto, cantos retos; selecionado = cor do clube.
 	th.add_type("ChipButton")
 	th.set_type_variation("ChipButton", "Button")
 	_button_states(th, "ChipButton",
-		sb(UIColors.SURFACE_2, 22, UIColors.LINE, 1, 16, 8),
-		sb(UIColors.SURFACE_3, 22, UIColors.LINE, 1, 16, 8),
-		sb(UIColors.ACCENT, 22, UIColors.ACCENT, 1, 16, 8),
-		sb(UIColors.SURFACE, 22, UIColors.LINE, 1, 16, 8))
+		sb(UIColors.SURFACE, UITokens.R_SM, UIColors.LINE, 1, 14, 6),
+		sb(UIColors.SURFACE_2, UITokens.R_SM, UIColors.LINE, 1, 14, 6),
+		sb(UIColors.ACCENT, UITokens.R_SM, UIColors.ACCENT, 1, 14, 6),
+		sb(UIColors.SURFACE, UITokens.R_SM, UITokens.HAIRLINE, 1, 14, 6))
 	_button_colors(th, "ChipButton", UIColors.MUTED, UIColors.ON_ACCENT)
 	th.set_font(&"font", "ChipButton", f_semi)
-	th.set_font_size(&"font_size", "ChipButton", 20)
-	# Navegação inferior
+	th.set_font_size(&"font_size", "ChipButton", 19)
+	# Abas (seções de uma tela): texto em caixa alta com sublinhado na cor do clube.
+	th.add_type("TabButton")
+	th.set_type_variation("TabButton", "Button")
+	var tn := sb(clear, 0, clear, 0, 10, 10)
+	tn.border_color = UITokens.HAIRLINE
+	tn.border_width_bottom = 2
+	var th_ := sb(Color(1, 1, 1, 0.03), 0, clear, 0, 10, 10)
+	th_.border_color = UIColors.LINE
+	th_.border_width_bottom = 2
+	var tp := sb(clear, 0, clear, 0, 10, 10)
+	tp.border_color = UIColors.ACCENT
+	tp.border_width_bottom = 4
+	_button_states(th, "TabButton", tn, th_, tp, tn)
+	_button_colors(th, "TabButton", UIColors.MUTED, UIColors.TEXT)
+	th.set_font(&"font", "TabButton", _spaced(f_cond, 1))
+	th.set_font_size(&"font_size", "TabButton", 22)
+	# Segmento (seletor compacto dentro de uma cápsula "Segment")
+	th.add_type("SegmentButton")
+	th.set_type_variation("SegmentButton", "Button")
+	_button_states(th, "SegmentButton", sb(clear, UITokens.R_SM, clear, 0, 10, 6), sb(Color(1, 1, 1, 0.04), UITokens.R_SM, clear, 0, 10, 6),
+		sb(UIColors.SURFACE_3, UITokens.R_SM, UITokens.HAIRLINE, 1, 10, 6), sb(clear, UITokens.R_SM, clear, 0, 10, 6))
+	_button_colors(th, "SegmentButton", UIColors.MUTED, UIColors.TEXT)
+	th.set_font(&"font", "SegmentButton", f_semi)
+	th.set_font_size(&"font_size", "SegmentButton", 20)
+	# Navegação inferior (o indicador da aba ativa é desenhado pela BottomNav)
 	th.add_type("NavButton")
 	th.set_type_variation("NavButton", "Button")
-	var empty := StyleBoxEmpty.new()
-	_button_states(th, "NavButton", empty, sb(Color(1, 1, 1, 0.03), 12, Color(0, 0, 0, 0), 0, 4, 6), sb(Color(1, 1, 1, 0.05), 12, Color(0, 0, 0, 0), 0, 4, 6), empty)
-	_button_colors(th, "NavButton", UIColors.MUTED, UIColors.ACCENT)
-	th.set_font(&"font", "NavButton", f_semi)
-	th.set_font_size(&"font_size", "NavButton", 16)
-	th.set_constant(&"icon_max_width", "NavButton", 36)
+	_button_states(th, "NavButton", empty, sb(Color(1, 1, 1, 0.03), UITokens.R_MD, clear, 0, 4, 6), sb(clear, UITokens.R_MD, clear, 0, 4, 6), empty)
+	_button_colors(th, "NavButton", UIColors.DIM, UIColors.ACCENT)
+	th.set_font(&"font", "NavButton", _spaced(f_cond, 1))
+	th.set_font_size(&"font_size", "NavButton", 17)
+	th.set_constant(&"icon_max_width", "NavButton", 34)
 	# Linha clicável (listas)
 	th.add_type("RowButton")
 	th.set_type_variation("RowButton", "Button")
 	_button_states(th, "RowButton",
-		sb(UIColors.SURFACE, 12, Color(0, 0, 0, 0), 0, 14, 10),
-		sb(UIColors.SURFACE_2, 12, Color(0, 0, 0, 0), 0, 14, 10),
-		sb(UIColors.SURFACE_3, 12, UIColors.ACCENT, 1, 14, 10),
-		sb(UIColors.SURFACE, 12, Color(0, 0, 0, 0), 0, 14, 10))
+		sb(UIColors.SURFACE, r, UITokens.HAIRLINE, 1, 14, 10),
+		sb(UIColors.SURFACE_2, r, UITokens.HAIRLINE, 1, 14, 10),
+		sb(UIColors.SURFACE_3, r, UIColors.ACCENT, 1, 14, 10),
+		sb(UIColors.SURFACE, r, UITokens.HAIRLINE, 1, 14, 10))
 	_button_colors(th, "RowButton", UIColors.TEXT, UIColors.TEXT)
 	# Camada clicável transparente sobre linhas (ver UIKit.tap_row)
 	th.add_type("RowOverlay")
 	th.set_type_variation("RowOverlay", "Button")
-	_button_states(th, "RowOverlay", empty, sb(Color(1, 1, 1, 0.035), 12, Color(0, 0, 0, 0), 0, 0, 0),
-		sb(Color(1, 0.79, 0.25, 0.08), 12, UIColors.ACCENT, 2, 0, 0), empty)
+	_button_states(th, "RowOverlay", empty, sb(Color(1, 1, 1, 0.035), r, clear, 0, 0, 0),
+		sb(Color(1, 0.79, 0.25, 0.08), r, UIColors.ACCENT, 2, 0, 0), empty)
 	_button_colors(th, "RowOverlay", UIColors.TEXT, UIColors.TEXT)
 	# Ícone (barra superior)
 	th.add_type("IconButton")
 	th.set_type_variation("IconButton", "Button")
-	_button_states(th, "IconButton", empty, sb(Color(1, 1, 1, 0.05), 14, Color(0, 0, 0, 0), 0, 8, 8), sb(Color(1, 1, 1, 0.1), 14, Color(0, 0, 0, 0), 0, 8, 8), empty)
+	_button_states(th, "IconButton", empty, sb(Color(1, 1, 1, 0.05), r, clear, 0, 8, 8), sb(Color(1, 1, 1, 0.1), r, clear, 0, 8, 8), empty)
 	_button_colors(th, "IconButton", UIColors.TEXT, UIColors.ACCENT)
-	th.set_constant(&"icon_max_width", "IconButton", 40)
+	th.set_constant(&"icon_max_width", "IconButton", 36)
 
 
 func _panel_var(th: Theme, name: String, box: StyleBox) -> void:
@@ -189,31 +238,37 @@ func _panel_var(th: Theme, name: String, box: StyleBox) -> void:
 
 
 func _panels(th: Theme) -> void:
+	var clear := Color(0, 0, 0, 0)
+	var hair := UITokens.HAIRLINE
 	th.set_stylebox(&"panel", "PanelContainer", StyleBoxEmpty.new())
-	th.set_stylebox(&"panel", "Panel", sb(UIColors.SURFACE, 18))
-	_panel_var(th, "Card", sb(UIColors.SURFACE, 18, Color(0, 0, 0, 0), 0, 22, 18))
-	_panel_var(th, "CardFlat", sb(UIColors.SURFACE, 14, Color(0, 0, 0, 0), 0, 14, 10))
-	_panel_var(th, "CardHighlight", sb(UIColors.SURFACE_2, 18, UIColors.ACCENT, 2, 22, 18))
-	_panel_var(th, "CardInset", sb(UIColors.BG, 14, UIColors.LINE, 1, 16, 12))
-	_panel_var(th, "RowPanel", sb(UIColors.SURFACE_2, 12, Color(0, 0, 0, 0), 0, 14, 10))
-	_panel_var(th, "Pill", sb(UIColors.SURFACE_3, 20, Color(0, 0, 0, 0), 0, 12, 4))
-	var top := sb(Color("#0E0F11"), 0, Color(0, 0, 0, 0), 0, 16, 10)
+	th.set_stylebox(&"panel", "Panel", sb(UIColors.SURFACE, UITokens.R_LG))
+	_panel_var(th, "Card", sb(UIColors.SURFACE, UITokens.R_LG, hair, 1, 22, 18))
+	_panel_var(th, "CardFlat", sb(UIColors.SURFACE, UITokens.R_MD, hair, 1, 14, 10))
+	_panel_var(th, "CardHighlight", sb(UIColors.SURFACE_2, UITokens.R_LG, UIColors.ACCENT, 2, 22, 18))
+	_panel_var(th, "CardInset", sb(UIColors.BG, UITokens.R_MD, UIColors.LINE, 1, 16, 12))
+	_panel_var(th, "RowPanel", sb(UIColors.SURFACE_2, UITokens.R_MD, hair, 1, 14, 10))
+	_panel_var(th, "Pill", sb(UIColors.SURFACE_3, 20, clear, 0, 12, 4))
+	# Cápsula que agrupa SegmentButtons
+	_panel_var(th, "Segment", sb(UIColors.SURFACE, UITokens.R_MD, hair, 1, 4, 4))
+	# Ladrilho do ícone nas linhas de menu
+	_panel_var(th, "IconTile", sb(UIColors.SURFACE_3, UITokens.R_SM, clear, 0, 10, 10))
+	var top := sb(UITokens.BAR, 0, clear, 0, 16, 10)
 	_panel_var(th, "TopBar", top)
-	var nav := sb(Color("#0E0F11"), 0, Color(0, 0, 0, 0), 0, 8, 6)
-	nav.border_color = UIColors.LINE
+	var nav := sb(UITokens.BAR, 0, clear, 0, 8, 4)
+	nav.border_color = hair
 	nav.border_width_top = 1
 	_panel_var(th, "BottomBar", nav)
-	var sheet := sb(UIColors.SURFACE, 0, Color(0, 0, 0, 0), 0, 24, 22)
-	sheet.corner_radius_top_left = 26
-	sheet.corner_radius_top_right = 26
+	var sheet := sb(UIColors.SURFACE, 0, clear, 0, 24, 22)
+	sheet.corner_radius_top_left = 24
+	sheet.corner_radius_top_right = 24
 	_panel_var(th, "Sheet", sheet)
-	_panel_var(th, "Dialog", sb(UIColors.SURFACE, 22, UIColors.LINE, 1, 26, 24))
-	_panel_var(th, "Toast", sb(Color("#1F2126"), 16, UIColors.LINE, 1, 22, 14))
+	_panel_var(th, "Dialog", sb(UIColors.SURFACE, 20, UIColors.LINE, 1, 26, 24))
+	_panel_var(th, "Toast", sb(Color("#20252F"), UITokens.R_MD, UIColors.LINE, 1, 22, 14))
 
 
 func _inputs(th: Theme) -> void:
-	th.set_stylebox(&"normal", "LineEdit", sb(UIColors.SURFACE_2, 12, UIColors.LINE, 1, 16, 12))
-	th.set_stylebox(&"focus", "LineEdit", sb(UIColors.SURFACE_2, 12, UIColors.ACCENT, 2, 16, 12))
+	th.set_stylebox(&"normal", "LineEdit", sb(UIColors.SURFACE_2, UITokens.R_MD, UIColors.LINE, 1, 16, 12))
+	th.set_stylebox(&"focus", "LineEdit", sb(UIColors.SURFACE_2, UITokens.R_MD, UIColors.ACCENT, 2, 16, 12))
 	th.set_stylebox(&"read_only", "LineEdit", sb(UIColors.SURFACE, 12, UIColors.LINE, 1, 16, 12))
 	th.set_color(&"font_color", "LineEdit", UIColors.TEXT)
 	th.set_color(&"font_placeholder_color", "LineEdit", UIColors.DIM)
