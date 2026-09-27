@@ -53,6 +53,8 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		icons.add_child(UIKit.icon_rect("money", 22, UIColors.GREEN))
 	if p.retiring:
 		icons.add_child(UIKit.icon_rect("heart", 22, UIColors.MUTED))
+	if not own and Shortlist.has(w, p):
+		icons.add_child(UIKit.icon_rect("star", 22, UIColors.ACCENT))
 	if icons.get_child_count() > 0:
 		row.add_child(icons)
 	if mode != "market":
@@ -67,9 +69,20 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		cond.add_child(mor)
 		row.add_child(cond)
 	else:
-		var val := UIKit.label(Fmt.money(p.value), "Stat")
+		# Mercado: o preço que o clube pede hoje (livres: o valor de mercado, sem taxa).
+		var pcol2 := UIKit.vbox(0)
+		pcol2.alignment = BoxContainer.ALIGNMENT_CENTER
+		var free := p.club_id < 0 or not p.loan.is_empty() # emprestado: não está à venda por quem o tem
+		var val := UIKit.label(Fmt.money(p.value if free else TransferManager.asking_price(w, p)), "Stat")
 		val.add_theme_font_size_override(&"font_size", 24)
-		row.add_child(val)
+		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		pcol2.add_child(val)
+		var cap := UIKit.label("valor" if free else "pedem", "Caps")
+		cap.add_theme_font_size_override(&"font_size", 13)
+		cap.add_theme_color_override(&"font_color", UIColors.MUTED)
+		cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		pcol2.add_child(cap)
+		row.add_child(pcol2)
 	var pos: int = opts.get("pos", -1)
 	var shown := int(round(p.rating_at(pos))) if pos >= 0 else p.overall
 	if own or opts.get("known", false):
