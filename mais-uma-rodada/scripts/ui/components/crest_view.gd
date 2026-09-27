@@ -19,6 +19,12 @@ extends Control
 ##   chief_text  texto na faixa de cima          ribbon  texto da faixa de baixo
 ##   stars  estrelas acima do escudo            crown  1 coroa real, 2 coroa mural
 ##   laurel  louros em volta                    border  none|thin|thick|double|gold
+##   plate  auto|band|disc|none — placa atrás do monograma (auto: só em campo listrado/dividido)
+##   pc     cor da placa                         finish  false tira o filete interno
+##   tc     cor do texto do anel
+##   canton cor do cantão (quadrado no alto à esquerda)   canton_sym  símbolo dentro dele
+##   field pale_cross:L|R  metade com cruz (lado L/R) e metade listrada (Milan, Bologna)
+##   field barca  alto partido (cruz | listras), faixa com o chief_text no meio e listras embaixo
 
 @export var crest: Dictionary = {"shape": "shield", "symbol": "star", "c1": "#1B3A8C", "c2": "#FFFFFF", "border": "thin", "initials": "RA"}:
 	set(v):
@@ -26,6 +32,9 @@ extends Control
 		queue_redraw()
 
 const GOLD := Color("#E2B84A")
+## Campos em que o monograma ganha placa (listras, faixas, divididos).
+const BUSY_FIELDS := ["stripes", "hoops", "halves", "halves_h", "tierce", "quarters", "sash", "sash_r", "diag", "saltire", "cross", "lozenges", "checky", "vee", "tricolor_h", "tricolor_v", "stripes_tri", "pile", "chevron"]
+const ROUNDISH := ["round", "ring", "oval", "oval_ring", "octagon", "hexagon"]
 ## Símbolos antigos → desenho do CrestArt.
 const LEGACY := {"sun": "sunrise", "wave": "waves", "cross": "cross_plain", "diamond": "diamond_plain", "chevron": "chevron_plain"}
 
@@ -99,6 +108,12 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["crown"] = int(cr.get("crown", 0))
 	sp["laurel"] = bool(cr.get("laurel", false))
 	sp["border"] = String(cr.get("border", "thin"))
+	sp["plate"] = String(cr.get("plate", "auto"))
+	sp["pc"] = Color(String(cr.get("pc", ""))) if String(cr.get("pc", "")) != "" else null
+	sp["finish"] = bool(cr.get("finish", true))
+	sp["tc"] = Color(String(cr.get("tc", ""))) if String(cr.get("tc", "")) != "" else null
+	sp["canton"] = Color(String(cr.get("canton", ""))) if String(cr.get("canton", "")) != "" else null
+	sp["canton_sym"] = String(cr.get("canton_sym", ""))
 	return sp
 
 
@@ -150,7 +165,20 @@ func _render(s: float) -> void:
 	_field(inner, box, sp, s)
 	# Chefe com texto
 	var charge_box := _inner_box(box, shape)
-	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief":
+	var barca := String(sp["field"]) == "barca"
+	if sp["canton"] != null:
+		_canton(sp, box, inner, s)
+	if barca:
+		# Faixa com o texto no meio; o símbolo vai para a parte listrada de baixo
+		var by := 0.4
+		var bh := 0.13
+		var band_b := _xf(_rect(-0.1, by, 1.2, bh), box)
+		for piece in Geometry2D.intersect_polygons(band_b, inner):
+			_poly(piece, sp["cc"])
+		if String(sp["chief_text"]) != "" and not small:
+			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * (by + bh * 0.5)), box.size.x * 0.5, box.size.y * 0.1, contrast(sp["cc"], c1, c3))
+		charge_box = Rect2(box.position + Vector2(0.37, 0.58) * box.size, Vector2(0.26, 0.26) * box.size)
+	elif String(sp["chief_text"]) != "" or String(sp["field"]) == "chief":
 		var chief_h := 0.24
 		var band := _xf(PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, chief_h), Vector2(0, chief_h)]), box)
 		var cc: Color = sp["cc"]
@@ -161,8 +189,15 @@ func _render(s: float) -> void:
 			var narrow := shape in ["round", "oval", "ring", "oval_ring", "octagon", "hexagon", "diamond"]
 			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.56), box.size.x * (0.46 if narrow else 0.62), box.size.y * 0.15, ink)
 		charge_box = Rect2(charge_box.position + Vector2(0, box.size.y * 0.12), charge_box.size * Vector2(1.0, 0.86))
+	# Filete interno fino (estilo chapado)
+	if bool(sp["finish"]) and s >= 30.0 and not ring and String(sp["border"]) in ["thin", "thick", "none"]:
+		_rim(inner, sp, s)
+	# Placa atrás do monograma (faixa ou disco), para as letras não se perderem nas listras
+	var plate := plate_mode(sp)
+	if plate != "" and not small:
+		_plate(plate, sp, charge_box, box, inner, s)
 	# Símbolo
-	_charge(sp, charge_box, inner, s)
+	_charge(sp, charge_box, inner, s, box)
 	# Borda
 	_border(poly, inner, ring, sp, s)
 	# Texto do anel
@@ -170,17 +205,13 @@ func _render(s: float) -> void:
 		var cc := box.get_center()
 		var rr := box.size.x * 0.5 * (0.87 if shape == "ring" else 0.87)
 		var band_col := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.15 else c1.darkened(0.35)
-		var ink := contrast(band_col, c1, c3)
+		var ink: Color = sp["tc"] if sp["tc"] != null else contrast(band_col, c1, c3)
 		var fs := box.size.x * 0.105
 		if String(sp["text"]) != "":
 			_arc_text(String(sp["text"]), cc, rr - fs * 0.35, fs, ink, true)
 		var bottom_text := String(sp["text2"]) if String(sp["text2"]) != "" else String(sp["year"])
 		if bottom_text != "":
 			_arc_text(bottom_text, cc, rr - fs * 0.35, fs * 0.9, ink, false)
-		# Pontinhos separando os textos
-		for sx: float in [-1.0, 1.0]:
-			var a := PI * (0.5 - 0.42 * sx) + PI
-			_circle(cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.3), fs * 0.12, ink)
 	# Faixa embaixo
 	if bottom > 0.0:
 		_ribbon(String(sp["ribbon"]), Rect2(Vector2(s * 0.12, s * (1.0 - bottom - 0.03)), Vector2(s * 0.76, s * bottom)), c3, c1)
@@ -239,7 +270,8 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 				var x := w * (1 + i * 2)
 				parts.append([_rect(x, -0.1, w, 1.2), c2])
 		"hoops":
-			n = maxi(n, 3)
+			# hoops:2 = uma faixa só atravessando o meio (Boca, Olimpia, Platense)
+			n = maxi(n, 2)
 			var h := 1.0 / (n * 2 - 1)
 			for i in n - 1:
 				var y := h * (1 + i * 2)
@@ -306,6 +338,26 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 			for i in n:
 				if i % 3 != 0:
 					parts.append([_rect(w3 * i, -0.1, w3 + 0.001, 1.2), c2 if i % 3 == 1 else c3])
+		"pale_cross":
+			# Metade listrada (c1/fc) e metade branca (c2) com cruz (c3)
+			var cross_left := f.get_slice(":", 1) == "L"
+			var x0 := 0.0 if cross_left else 0.5
+			var sx := 0.5 if cross_left else 0.0
+			parts.append([_rect(x0 - (0.1 if cross_left else 0.0), -0.1, 0.6, 1.2), sp["c2"]])
+			parts.append([_rect(x0 + 0.2, -0.1, 0.1, 1.2), c3])
+			parts.append([_rect(x0 - (0.1 if cross_left else 0.0), 0.36, 0.6, 0.1), c3])
+			for i in 2:
+				parts.append([_rect(sx + 0.125 + i * 0.25, -0.1, 0.125, 1.2), c2])
+		"barca":
+			# Alto: cruz (branco/c3) à esquerda e listras (amarelo/c3) à direita; embaixo listras c1/fc
+			parts.append([_rect(-0.1, -0.1, 0.6, 0.5), Color.WHITE])
+			parts.append([_rect(0.2, -0.1, 0.1, 0.5), c3])
+			parts.append([_rect(-0.1, 0.16, 0.6, 0.09), c3])
+			parts.append([_rect(0.5, -0.1, 0.6, 0.5), Color("#FFD100")])
+			for i in 4:
+				parts.append([_rect(0.56 + i * 0.11, -0.1, 0.055, 0.5), c3])
+			for i in 3:
+				parts.append([_rect(0.2 + i * 0.25, 0.5, 0.125, 0.7), c2])
 		"bordure":
 			pass
 	for part: Array in parts:
@@ -317,7 +369,7 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 			_polyline_closed(piece, c2, maxf(1.0, box.size.x * 0.08))
 
 
-func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float) -> void:
+func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float, box: Rect2 = Rect2()) -> void:
 	var sym := String(sp["symbol"])
 	if sym == "none" or sym == "":
 		return
@@ -339,7 +391,27 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 	if sym == "letter" or sym == "letters":
 		var txt := String(sp["initials"])
 		var fs := r * (1.25 if txt.length() <= 2 else (1.0 if txt.length() == 3 else 0.8))
-		_text_center(txt, cen + Vector2(0, r * 0.05), cb.size.x * 1.05, fs, col, outline, Color("#15171B") if col.get_luminance() > 0.5 else Color.WHITE)
+		var max_w := cb.size.x * 1.05
+		var plate := plate_mode(sp)
+		if plate != "":
+			var pcol := plate_color(sp)
+			col = contrast(pcol, plate_line(sp), c3)
+			if sp["sc"] != null and absf((sp["sc"] as Color).get_luminance() - pcol.get_luminance()) > 0.28:
+				col = sp["sc"]
+			if plate == "band":
+				fs = minf(fs, cb.size.y * 0.5 * 0.8)
+			else:
+				max_w = r * 1.7
+			outline = false
+		elif (field == "hoops:2" or field == "tricolor_h") and String(sp["chief_text"]) == "" and box.size.x > 0.0:
+			# Letras em cima da faixa do meio, do tamanho dela
+			cen.y = box.position.y + box.size.y * 0.5
+			fs = minf(fs, box.size.y * 0.333 * 0.72)
+			var band_c: Color = c2
+			if absf(col.get_luminance() - band_c.get_luminance()) < 0.28:
+				col = contrast(band_c, c1, c3)
+		var dark_ink := col.get_luminance() < 0.5
+		_text_center(txt, cen + Vector2(0, r * 0.05), max_w, fs, col, outline, Color("#15171B") if not dark_ink else Color.WHITE, s >= 36.0 and not dark_ink)
 		return
 	if sym.begins_with("stars:"):
 		var n := clampi(int(sym.get_slice(":", 1)), 1, 5)
@@ -380,12 +452,108 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			_poly(_xf_c(p, cen, r), shade if sym != "ball" else Color("#15171B"))
 
 
+## Placa do monograma: "band" (faixa atravessada) ou "disc" (disco central). "" = sem placa.
+static func plate_mode(sp: Dictionary) -> String:
+	var sym := String(sp["symbol"])
+	if sym != "letter" and sym != "letters":
+		return ""
+	var p := String(sp.get("plate", "auto"))
+	if p == "none":
+		return ""
+	if p == "band" or p == "disc":
+		return p
+	var field := String(sp["field"])
+	# Uma faixa só no meio (hoops:2, tricolor_h) já faz o papel de placa
+	if String(sp["chief_text"]) != "" or field == "hoops:2" or field == "tricolor_h" or not field.get_slice(":", 0) in BUSY_FIELDS:
+		return ""
+	# No anel o disco de dentro já é pequeno: letras com contorno, sem placa
+	if String(sp["shape"]) in ["ring", "oval_ring"]:
+		return ""
+	return "disc" if String(sp["shape"]) in ROUNDISH else "band"
+
+
+## Cor da placa: a pedida ou a mais escura entre o fundo e o desenho do campo.
+static func plate_color(sp: Dictionary) -> Color:
+	if sp.get("pc") != null:
+		return sp["pc"]
+	var c1: Color = sp["c1"]
+	var fc: Color = sp["fc"]
+	return c1 if c1.get_luminance() <= fc.get_luminance() + 0.05 else fc
+
+
+## Cor dos filetes da placa: a outra cor do campo, ou o dourado se as duas forem parecidas.
+static func plate_line(sp: Dictionary) -> Color:
+	var pcol := plate_color(sp)
+	var c1: Color = sp["c1"]
+	var fc: Color = sp["fc"]
+	var other := fc if pcol == c1 else c1
+	if absf(other.get_luminance() - pcol.get_luminance()) < 0.25:
+		other = sp["c3"]
+	if absf(other.get_luminance() - pcol.get_luminance()) < 0.25:
+		other = Color.WHITE if pcol.get_luminance() < 0.5 else Color("#15171B")
+	return other
+
+
+func _plate(kind: String, sp: Dictionary, cb: Rect2, box: Rect2, inner: PackedVector2Array, s: float) -> void:
+	var pcol := plate_color(sp)
+	var line := plate_line(sp)
+	var cen := cb.get_center() + Vector2(0, minf(cb.size.x, cb.size.y) * 0.025)
+	var t := maxf(1.0, s * 0.018)
+	if kind == "disc":
+		var r := minf(cb.size.x, cb.size.y) * 0.56
+		_poly(_ngon(cen, r + t * 1.6, 48, 0.0), line)
+		_poly(_ngon(cen, r, 48, 0.0), pcol)
+		return
+	var h := cb.size.y * 0.5
+	var band := _xf(_rect(-0.1, 0, 1.2, 1), Rect2(Vector2(box.position.x, cen.y - h * 0.5), Vector2(box.size.x, h)))
+	var outer := _xf(_rect(-0.1, 0, 1.2, 1), Rect2(Vector2(box.position.x, cen.y - h * 0.5 - t * 1.6), Vector2(box.size.x, h + t * 3.2)))
+	for piece in Geometry2D.intersect_polygons(outer, inner):
+		_poly(piece, line)
+	for piece in Geometry2D.intersect_polygons(band, inner):
+		_poly(piece, pcol)
+
+
+## Cantão: quadrado no alto à esquerda com um símbolo pequeno (Atlético de Madrid).
+func _canton(sp: Dictionary, box: Rect2, inner: PackedVector2Array, s: float) -> void:
+	var col: Color = sp["canton"]
+	for piece in Geometry2D.intersect_polygons(_xf(_rect(-0.1, -0.1, 0.6, 0.56), box), inner):
+		_poly(piece, col)
+	var sym := String(sp["canton_sym"])
+	if sym == "" or not CrestArt.has(sym) or s < 28.0:
+		return
+	var cen := box.position + Vector2(0.3, 0.26) * box.size
+	var ink := contrast(col, Color.WHITE, sp["c3"])
+	for p: PackedVector2Array in CrestArt.polys(sym):
+		_poly(_xf_c(p, cen, box.size.x * 0.15), ink)
+
+
+## Filete fino por dentro da borda, como nos escudos bordados/esmaltados.
+func _rim(inner: PackedVector2Array, sp: Dictionary, s: float) -> void:
+	var c1: Color = sp["c1"]
+	var c2: Color = sp["c2"]
+	var col := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.15 else c1.lightened(0.35)
+	col.a = 0.7
+	for piece in Geometry2D.offset_polygon(inner, -s * 0.052):
+		_polyline_closed(piece, col, maxf(1.0, s * 0.011))
+
+
+static func _outer_edge(sp: Dictionary) -> Color:
+	var c1: Color = sp["c1"]
+	var c2: Color = sp["c2"]
+	var d := c1 if c1.get_luminance() < c2.get_luminance() else c2
+	return d.darkened(0.55)
+
+
 func _border(poly: PackedVector2Array, inner: PackedVector2Array, ring: bool, sp: Dictionary, s: float) -> void:
 	var b := String(sp["border"])
 	var c2: Color = sp["c2"]
 	var c3: Color = sp["c3"]
 	var c1: Color = sp["c1"]
 	var edge := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.15 else c1.lightened(0.3)
+	# Contorno escuro por fora: recorta o escudo de qualquer fundo (tema claro ou escuro)
+	if b != "none" and s >= 20.0:
+		var lw := {"thick": 0.06, "gold": 0.045, "double": 0.03}.get(b, 0.03) as float
+		_polyline_closed(poly, _outer_edge(sp), maxf(1.5, s * lw) + maxf(1.0, s * 0.012))
 	match b:
 		"none":
 			pass
@@ -635,7 +803,7 @@ func _font() -> Font:
 	return f if f != null else ThemeDB.fallback_font
 
 
-func _text_center(txt: String, center: Vector2, max_w: float, size_px: float, col: Color, outline: bool = false, out_col: Color = Color.BLACK) -> void:
+func _text_center(txt: String, center: Vector2, max_w: float, size_px: float, col: Color, outline: bool = false, out_col: Color = Color.BLACK, shadow: bool = false) -> void:
 	var font := _font()
 	var fs := maxi(4, int(size_px))
 	var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
@@ -645,6 +813,8 @@ func _text_center(txt: String, center: Vector2, max_w: float, size_px: float, co
 	if fs < 5:
 		return
 	var pos := center + Vector2(-tw * 0.5, fs * 0.36)
+	if shadow:
+		_string(font, pos + Vector2(fs * 0.03, fs * 0.07), txt, fs, Color(0, 0, 0, 0.2))
 	if outline:
 		_string_outline(font, pos, txt, fs, maxi(1, int(fs * 0.12)), out_col)
 	_string(font, pos, txt, fs, col)

@@ -51,12 +51,16 @@
 			"capacity": 16800,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "shield",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "D",
-				"sc": "#1D5BBF",
-				"border": "thick"
+				"c1": "#FFFFFF",
+				"c2": "#0B4EA2",
+				"sc": "#0B4EA2",
+				"chief_text": "DYNAMO",
+				"cc": "#0B4EA2",
+				"border": "double"
 			},
 			"rivals": [
 				"UKR_HIR"
@@ -82,7 +86,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "P"
@@ -108,7 +112,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "K"
@@ -160,7 +164,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "O",

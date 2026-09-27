@@ -578,8 +578,14 @@ static func _color_dist(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
 
 
+## Versão dos desenhos de escudo do banco de dados. Subir quando os escudos dos clubes reais
+## forem redesenhados, para os saves em andamento receberem os novos.
+const CREST_VERSION := 2
+
+
 ## Saves antigos: escudos no formato antigo (sem "field") viram os novos — os reais pelo banco
-## de dados, os gerados pelo estilo do país. Imagem importada e escudo do editor ficam.
+## de dados, os gerados pelo estilo do país. Escudo de versão antiga do banco é refeito.
+## Imagem importada e escudo mexido no editor ficam.
 static func upgrade_crests(world: GameWorld) -> void:
 	var datas := {}
 	for c in world.clubs:
@@ -589,12 +595,15 @@ static func upgrade_crests(world: GameWorld) -> void:
 				by_key[String(d.get("key", ""))] = d
 			datas[c.nation] = by_key
 	for c in world.clubs:
-		if c.crest.has("field") or c.crest.has("img") or not Overrides.club(c.key).get("crest", {}).is_empty():
+		if c.crest.has("img") or bool(c.crest.get("edited", false)) or not Overrides.club(c.key).get("crest", {}).is_empty():
 			continue
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(c.key)
 		var data: Dictionary = datas[c.nation].get(c.key, {})
 		var hint: Dictionary = data.get("crest", {})
+		# Formato novo: só os clubes reais com desenho mais recente no banco são refeitos
+		if c.crest.has("field") and (not hint.has("field") or int(c.crest.get("v", 1)) >= CREST_VERSION):
+			continue
 		var old: Dictionary = c.crest
 		_make_crest(rng, c, hint)
 		if not hint.has("initials") and old.has("initials"):
@@ -610,6 +619,7 @@ static func upgrade_crests(world: GameWorld) -> void:
 static func _make_crest(rng: RandomNumberGenerator, c: Club, hint: Dictionary) -> void:
 	if hint.has("field"):
 		c.crest = hint.duplicate(true)
+		c.crest["v"] = CREST_VERSION
 	else:
 		c.crest = _random_crest(rng, c)
 		if hint.has("shape"):

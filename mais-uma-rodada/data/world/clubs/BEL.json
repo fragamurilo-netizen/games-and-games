@@ -21,11 +21,15 @@
 			"capacity": 29000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"field": "stripes:3",
-				"symbol": "letter",
-				"initials": "CB",
-				"sc": "#FFFFFF"
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"c1": "#0072BC",
+				"c2": "#111111",
+				"sc": "#FFFFFF",
+				"chief_text": "CLUB BRUGGE",
+				"cc": "#111111",
+				"border": "thick"
 			},
 			"rivals": [
 				"BEL_BXL"
@@ -113,7 +117,7 @@
 			"capacity": 23700,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "KRC"

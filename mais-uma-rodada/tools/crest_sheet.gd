@@ -1,7 +1,8 @@
 extends SceneTree
 ## Folha de escudos para conferir o CrestView.
 ## xvfb-run godot --path . --resolution 1220x1220 --script res://tools/crest_sheet.gd -- --out=/tmp/crests.png
-## Opções: --size=N, --cols=N, --demo (catálogo de formatos/campos/símbolos),
+## Opções: --size=N, --cols=N, --h=N (altura da tela), --demo (catálogo de formatos/campos/símbolos),
+## --names=A,B (só esses clubes),
 ## --clubs (escudos dos clubes reais, na ordem dos arquivos), --offset=N, --league=id
 
 var _out := "user://crests.png"
@@ -13,17 +14,24 @@ func _initialize() -> void:
 	var mode := "demo"
 	var offset := 0
 	var league := ""
+	var max_h := 1220
 	var only_syms: Array = []
+	var only_names: Array = []
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
 		elif a.begins_with("--size="):
 			px = int(a.substr(7))
+		elif a.begins_with("--h="):
+			max_h = int(a.substr(4))
 		elif a.begins_with("--cols="):
 			cols = int(a.substr(7))
 		elif a.begins_with("--syms="):
 			mode = "syms"
 			only_syms = Array(a.substr(7).split(","))
+		elif a.begins_with("--names="):
+			mode = "clubs"
+			only_names = Array(a.substr(8).split(","))
 		elif a == "--proc":
 			mode = "proc"
 		elif a == "--clubs":
@@ -76,6 +84,8 @@ func _initialize() -> void:
 			for cd: Dictionary in list:
 				if league != "" and String(cd.get("league", "")) != league and f.get_basename() != league:
 					continue
+				if not only_names.is_empty() and not only_names.has(String(cd.get("name", ""))):
+					continue
 				var rng := RandomNumberGenerator.new()
 				rng.seed = hash(String(cd.get("key", "")))
 				var c := ClubGenerator.from_data(null, rng, cd, specs.size(), {"nation": f.get_basename(), "id": String(cd.get("league", "")), "tier": 1})
@@ -88,7 +98,7 @@ func _initialize() -> void:
 	for i in specs.size():
 		var k := i % cols
 		var r := i / cols
-		if 5 + r * (px + 3 + lh) > 1220:
+		if 5 + r * (px + 3 + lh) + px > max_h:
 			break
 		var v := CrestView.new()
 		v.position = Vector2(5 + k * (px + 3), 5 + r * (px + 3 + lh))

@@ -91,10 +91,12 @@
 				"shape": "iberian",
 				"field": "plain",
 				"symbol": "bird",
+				"c1": "#C8102E",
 				"c2": "#FFFFFF",
-				"c3": "#00A398",
-				"sc": "#FFFFFF",
-				"ribbon": "YNWA"
+				"c3": "#F6EB61",
+				"sc": "#F6EB61",
+				"ribbon": "YNWA",
+				"border": "gold"
 			},
 			"rivals": [
 				"ENG_MSB",
@@ -183,10 +185,13 @@
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
-				"shape": "modern",
+				"shape": "shield",
 				"field": "plain",
 				"symbol": "rooster",
-				"sc": "#132257"
+				"c1": "#FFFFFF",
+				"c2": "#132257",
+				"sc": "#132257",
+				"border": "thin"
 			},
 			"rivals": [
 				"ENG_NLR",
@@ -1004,7 +1009,7 @@
 			"capacity": 18400,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "QPR",

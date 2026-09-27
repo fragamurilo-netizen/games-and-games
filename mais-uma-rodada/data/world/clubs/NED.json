@@ -21,12 +21,16 @@
 			"capacity": 55000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "AJAX",
+				"initials": "A",
+				"c1": "#FFFFFF",
+				"c2": "#D2122E",
 				"sc": "#D2122E",
-				"border": "thick"
+				"text": "AJAX",
+				"text2": "AMSTERDAM",
+				"border": "thin"
 			},
 			"rivals": [
 				"NED_ROT",
@@ -53,10 +57,16 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "round",
-				"field": "stripes:3",
+				"field": "stripes:5",
 				"symbol": "letter",
 				"initials": "PSV",
-				"sc": "#FFFFFF"
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"fc": "#E30613",
+				"sc": "#FFFFFF",
+				"plate": "band",
+				"pc": "#E30613",
+				"border": "thick"
 			},
 			"rivals": [
 				"NED_AMS",
@@ -115,7 +125,7 @@
 			"capacity": 19500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AZ"
@@ -223,7 +233,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "NEC",
@@ -307,7 +317,7 @@
 			"kit": "halves",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "FCG",
@@ -334,7 +344,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FS",
@@ -361,7 +371,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "PEC"
@@ -414,7 +424,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NAC",
