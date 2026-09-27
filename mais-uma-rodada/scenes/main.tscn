@@ -40,9 +40,16 @@ theme_override_constants/separation = 0
 [node name="TopBar" parent="SafeArea/Layout" instance=ExtResource("2_top")]
 layout_mode = 2
 
-[node name="ScreenHost" type="Control" parent="SafeArea/Layout"]
+[node name="Middle" type="HBoxContainer" parent="SafeArea/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="ScreenHost" type="Control" parent="SafeArea/Layout/Middle"]
 clip_contents = true
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 

@@ -157,7 +157,7 @@ func refresh_chrome() -> void:
 ## Aplica tema claro/escuro e tamanho da interface das Opções e redesenha tudo.
 func apply_look() -> void:
 	UIColors.set_light(AppSettings.wants_light())
-	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale]
+	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
 	if main != null:
 		main.restyle()
 	var cur := current()
