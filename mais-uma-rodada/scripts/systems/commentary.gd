@@ -59,6 +59,8 @@ func _fill(text: String, ev: Dictionary) -> String:
 		p2_side = 1 - side
 	out = out.replace("{p2}", _name(p2_side, int(ev.get("p2", -1))))
 	out = out.replace("{gk}", gk_name)
+	if x.has("d"):
+		out = out.replace("{d}", _name(1 - side, int(x["d"])))
 	out = out.replace("{culprit}", _name(1 - side, int(x.get("culprit", -1))))
 	out = out.replace("{TEAM}", team.club.short_name.to_upper())
 	out = out.replace("{team}", team.club.short_name)

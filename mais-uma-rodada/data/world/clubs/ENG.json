@@ -186,10 +186,14 @@
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
-				"shape": "modern",
+				"shape": "tall",
 				"field": "plain",
-				"symbol": "rooster",
-				"sc": "#132257"
+				"symbol": "rooster_ball",
+				"c1": "#FFFFFF",
+				"c2": "#132257",
+				"sc": "#132257",
+				"sym_scale": 1.1,
+				"border": "thin"
 			},
 			"rivals": [
 				"ENG_NLR",
@@ -219,9 +223,11 @@
 				"field": "plain",
 				"symbol": "lion",
 				"text": "CHELSEA FOOTBALL CLUB",
-				"c2": "#FFFFFF",
+				"c1": "#034694",
+				"c2": "#034694",
 				"c3": "#DBA111",
-				"sc": "#FFFFFF"
+				"sc": "#FFFFFF",
+				"border": "gold"
 			},
 			"rivals": [
 				"ENG_NLR",

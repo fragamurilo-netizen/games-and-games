@@ -688,30 +688,61 @@ func _pick_lane(att: MatchTeam, dfn: MatchTeam, ctype: int) -> Array:
 ## Minuto sem lance de perigo: troca de passes, dribles, desarmes, goleiro e torcida.
 ## Só apresentação (vis_rng): assistir nunca muda o placar.
 func _flavor(att: MatchTeam, dfn: MatchTeam) -> void:
+	# Narração do minuto sem lance de perigo: quase todo minuto tem alguma coisa para contar
+	# (só vis_rng: não mexe no resultado). Os nomes vêm de quem está com a bola de verdade.
 	var s := att.side
 	var r := vis_rng.randf()
-	if r < 0.15:
-		var carrier := _pick_weighted(att, PK_MID, vis_rng)
-		var kinds := ["", "", "switch", "long", "press", "build", "throw", "goalkick", "back"]
-		_emit(EV_POSSESSION, s, carrier.p.id if carrier != null else -1, -1, {"kind": kinds[vis_rng.randi_range(0, kinds.size() - 1)]})
-	elif r < 0.21:
+	var carrier := _pick_weighted(att, PK_MID, vis_rng)
+	var mate := _pick_weighted(att, PK_PASS, vis_rng)
+	if mate == carrier:
+		mate = _pick_weighted(att, PK_COUNTER, vis_rng)
+	var cid := carrier.p.id if carrier != null else -1
+	var mid := mate.p.id if mate != null and mate != carrier else -1
+	if r < 0.46:
+		var kinds := ["switch", "long", "press", "build", "throw", "goalkick", "back", "tabela", "wing", "carry", "hold", "patience",
+			"tabela", "wing", "carry", "build", "back"]
+		var k: String = kinds[vis_rng.randi_range(0, kinds.size() - 1)]
+		if (k in ["tabela", "wing"]) and mid < 0:
+			k = "carry"
+		_emit(EV_POSSESSION, s, cid, mid, {"kind": k})
+	elif r < 0.56:
+		var d := _pick_weighted(dfn, PK_DEFEND, vis_rng)
+		_emit(EV_POSSESSION, s, cid, mid, {"kind": "intercept" if vis_rng.randf() < 0.6 else "cross_cut", "d": d.p.id if d != null else -1})
+	elif r < 0.66:
 		var dr := _pick_weighted(att, PK_DRIBBLE, vis_rng)
 		var dm := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 		if dr != null and dm != null:
 			_emit(EV_SKILL, s, dr.p.id, dm.p.id)
-	elif r < 0.27:
+	elif r < 0.76:
 		var dm2 := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 		var vic := _pick_weighted(att, PK_DRIBBLE, vis_rng)
 		if dm2 != null and vic != null:
 			_emit(EV_TACKLE, dfn.side, dm2.p.id, vic.p.id)
-	elif r < 0.30:
+	elif r < 0.81:
 		var gk := dfn.goalkeeper()
 		if gk != null:
 			_emit(EV_KEEPER, dfn.side, gk.p.id)
-	elif r < 0.335:
+	elif r < 0.87:
 		var cr := crowd_mood()
 		if not cr.is_empty():
 			_emit(EV_CROWD, int(cr["side"]), -1, -1, {"kind": cr["kind"]})
+	elif r < 0.95:
+		# Leitura do jogo: quem manda, jogo truncado, ritmo
+		var poss := possession_pct(s)
+		var k2 := "read_even"
+		if poss >= 0.58:
+			k2 = "read_dom"
+		elif att.xg - dfn.xg >= 0.6:
+			k2 = "read_danger"
+		elif minute >= 70 and score[0] == score[1]:
+			k2 = "read_tense"
+		elif fouls_total() >= minute / 4:
+			k2 = "read_rough"
+		_emit(EV_POSSESSION, s, cid, mid, {"kind": k2})
+
+
+func fouls_total() -> int:
+	return teams[0].fouls + teams[1].fouls
 
 
 ## Clima do estádio conforme placar e minuto: {side, kind} ou vazio.

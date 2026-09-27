@@ -105,6 +105,7 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["sym_scale"] = float(cr.get("sym_scale", 1.0))
 	sp["mono"] = bool(cr.get("mono", false))
 	sp["sub"] = String(cr.get("sub", ""))
+	sp["line_art"] = bool(cr.get("line_art", false)) # símbolo em traço (Ajax), sem preenchimento
 	sp["star_c"] = Color(String(cr.get("star_c", ""))) if String(cr.get("star_c", "")) != "" else sp["c3"]
 	return sp
 
@@ -339,6 +340,13 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 			for i in n:
 				if i % 3 != 0:
 					parts.append([_rect(w3 * i, -0.1, w3 + 0.001, 1.2), c2 if i % 3 == 1 else c3])
+		"bends":
+			# Faixas diagonais (Athletico): n faixas da segunda cor
+			n = maxi(n, 3)
+			var bw := 1.0 / (n * 2)
+			for i in n:
+				var o := -0.5 + i * bw * 2.0 + bw
+				parts.append([PackedVector2Array([Vector2(o, 1.1), Vector2(o + bw, 1.1), Vector2(o + bw + 1.2, -0.1), Vector2(o + 1.2, -0.1)]), c2])
 		"barca":
 			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa do meio clara
 			for i in 7:
@@ -425,7 +433,29 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			var y := -0.35 + k * 0.6
 			_polyline(PackedVector2Array([cen + Vector2(-r, (y - 0.4) * r), cen + Vector2(0, (y + 0.2) * r), cen + Vector2(r, (y - 0.4) * r)]), col, maxf(2.0, r * 0.26))
 		return
+	# Galo em cima da bola (Tottenham)
+	if sym == "rooster_ball":
+		var rc := cen + Vector2(0, -r * 0.18)
+		for p: PackedVector2Array in CrestArt.polys("rooster"):
+			_poly(_xf_c(p, rc, r * 0.8), col)
+		var bc := cen + Vector2(r * 0.02, r * 0.72)
+		_circle(bc, r * 0.26, col)
+		_circle(bc, r * 0.2, c1)
+		_circle(bc, r * 0.07, col)
+		for k in 5:
+			var a := TAU * k / 5.0 - PI * 0.5
+			_polyline(PackedVector2Array([bc + Vector2(cos(a), sin(a)) * r * 0.07, bc + Vector2(cos(a), sin(a)) * r * 0.2]), col, maxf(1.0, r * 0.03))
+		return
 	var det := sym + "_d"
+	if bool(sp["line_art"]) and CrestArt.has(sym):
+		# Desenho só em traços: contorno e detalhes na cor do símbolo
+		var lw := maxf(1.2, r * 0.075)
+		for p: PackedVector2Array in CrestArt.polys(sym):
+			_polyline_closed(_xf_c(p, cen, r), col, lw)
+		if CrestArt.has(det) and s >= 28.0:
+			for p: PackedVector2Array in CrestArt.polys(det):
+				_poly(_xf_c(p, cen, r), col)
+		return
 	if sym == "tiger":
 		sym = "cat"
 		det = "tiger_d"

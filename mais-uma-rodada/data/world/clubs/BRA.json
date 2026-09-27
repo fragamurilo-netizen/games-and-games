@@ -568,9 +568,12 @@
 			"capacity": 42000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "modern",
-				"field": "hoops:4",
-				"symbol": "none"
+				"shape": "hexagon",
+				"field": "bends:4",
+				"symbol": "none",
+				"c1": "#111111",
+				"c2": "#C8102E",
+				"border": "thick"
 			},
 			"rivals": [
 				"BRA_COX"

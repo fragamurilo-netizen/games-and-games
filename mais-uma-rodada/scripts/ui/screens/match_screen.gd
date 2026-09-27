@@ -163,7 +163,7 @@ func _build() -> void:
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
 	_pitch.horizontal = true
-	_pitch.custom_minimum_size = Vector2(0, 440)
+	_pitch.custom_minimum_size = Vector2(0, 330)
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
 	_pitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -220,12 +220,12 @@ func _build() -> void:
 	_stats_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_stats_box.add_child(_stats_lbl)
 	_momentum = MomentumView.new()
-	_momentum.custom_minimum_size = Vector2(0, 50)
+	_momentum.custom_minimum_size = Vector2(0, 30)
 	_momentum.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_momentum.home_color = _side_color(0)
 	_momentum.away_color = _side_color(1)
 	_stats_box.add_child(_momentum)
-	_root.add_child(UIKit.margin(_stats_box, 20, 2, 20, 6))
+	_root.add_child(UIKit.margin(_stats_box, 20, 0, 20, 2))
 	# Abas: lances, números, outros jogos e tabela ao vivo (o jogo segue rolando em todas)
 	_tabs_row = UIKit.hbox(6)
 	_root.add_child(UIKit.margin(_tabs_row, 14, 0, 14, 4))
@@ -235,7 +235,7 @@ func _build() -> void:
 	_feed_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_feed_scroll.scroll_deadzone = 14
 	_feed_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_feed = UIKit.vbox(8)
+	_feed = UIKit.vbox(12)
 	_feed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_feed_scroll.add_child(UIKit.margin(_feed, 18, 6, 18, 12))
 	(_feed.get_parent() as Control).size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -366,8 +366,8 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	sb.border_width_bottom = 4
 	sb.content_margin_left = 16
 	sb.content_margin_right = 16
-	sb.content_margin_top = 10
-	sb.content_margin_bottom = 8
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 4
 	match layout:
 		"tv":
 			sb.border_width_bottom = 0
@@ -427,10 +427,10 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	strip.add_child(srow)
 	v.add_child(strip)
 	var row := UIKit.hbox(8)
-	row.add_child(UIKit.crest(home, 58))
+	row.add_child(UIKit.crest(home, 40))
 	if layout == "tv" or layout == "angular":
 		row.add_child(_team_block(_colors[0], _colors[1], layout))
-	_home_name = UIKit.label(home.short_name, "H2")
+	_home_name = UIKit.label(home.short_name, "H3")
 	_home_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_home_name.clip_text = true
 	row.add_child(_home_name)
@@ -472,6 +472,7 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 			clock_col = Color("#FFB000")
 	score_box.add_theme_stylebox_override(&"panel", sbx)
 	_score_lbl = UIKit.label("0 – 0", "Score")
+	_score_lbl.add_theme_font_size_override(&"font_size", 40)
 	_score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_score_lbl.add_theme_color_override(&"font_color", score_col)
 	score_box.add_child(_score_lbl)
@@ -492,14 +493,14 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	else:
 		mid.add_child(_clock_lbl)
 	row.add_child(mid)
-	_away_name = UIKit.label(away.short_name, "H2")
+	_away_name = UIKit.label(away.short_name, "H3")
 	_away_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_away_name.clip_text = true
 	row.add_child(_away_name)
 	if layout == "tv" or layout == "angular":
 		row.add_child(_team_block(_colors[2], _colors[3], layout))
-	row.add_child(UIKit.crest(away, 58))
+	row.add_child(UIKit.crest(away, 40))
 	v.add_child(row)
 	var sc := UIKit.hbox(8)
 	_home_scorers = UIKit.label("", "Small", true)
@@ -1110,6 +1111,8 @@ func _update_board() -> void:
 		_pitch.board = {"h": _sim.teams[0].club.abbr, "a": _sim.teams[1].club.abbr, "hs": _shown_score[0], "as": _shown_score[1], "clock": _clock_lbl.text}
 	_home_scorers.text = _scorer_text(0)
 	_away_scorers.text = _scorer_text(1)
+	# Linha dos goleadores só aparece quando alguém marcou (placar compacto)
+	(_home_scorers.get_parent() as Control).visible = _home_scorers.text != "" or _away_scorers.text != ""
 	var ph := _sim.possession_pct(0)
 	_poss_home.size_flags_stretch_ratio = maxf(0.05, ph)
 	_poss_away.size_flags_stretch_ratio = maxf(0.05, 1.0 - ph)
@@ -1181,11 +1184,15 @@ func _add_line(line: Dictionary) -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(bar)
 	var m := UIKit.label(String(line.get("minute", "")), "Mono")
-	m.custom_minimum_size.x = 76
+	m.custom_minimum_size.x = 70
+	m.add_theme_font_size_override(&"font_size", 22)
 	m.add_theme_color_override(&"font_color", UIColors.DIM)
 	row.add_child(m)
 	var variation := "H3" if style in ["goal", "big"] else ""
 	var t := UIKit.label(String(line.get("text", "")), variation, true)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if variation == "":
+		t.add_theme_font_size_override(&"font_size", 24)
 	var col := UIColors.TEXT
 	match style:
 		"info":
