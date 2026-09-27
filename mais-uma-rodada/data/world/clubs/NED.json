@@ -23,9 +23,11 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "letter",
-				"initials": "AJAX",
+				"symbol": "warrior",
+				"c1": "#FFFFFF",
+				"c2": "#D2122E",
 				"sc": "#D2122E",
+				"sym_scale": 1.12,
 				"border": "thick"
 			},
 			"rivals": [

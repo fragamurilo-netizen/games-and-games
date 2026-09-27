@@ -57,7 +57,11 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "BVB",
+				"sub": "09",
+				"c1": "#FDE100",
+				"c2": "#111111",
 				"sc": "#111111",
+				"sym_scale": 1.1,
 				"border": "thick"
 			},
 			"rivals": [
@@ -209,6 +213,7 @@
 				"c1": "#FFFFFF",
 				"c2": "#111111",
 				"sc": "#00843D",
+				"sym_scale": 1.9,
 				"border": "thick"
 			},
 			"rivals": [

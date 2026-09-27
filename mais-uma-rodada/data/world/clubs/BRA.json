@@ -26,7 +26,14 @@
 				"field": "hoops:4",
 				"symbol": "letter",
 				"initials": "CRF",
-				"sc": "#FFFFFF"
+				"mono": true,
+				"sym_pos": "tl",
+				"sc": "#FFFFFF",
+				"c1": "#C8102E",
+				"c2": "#111111",
+				"c3": "#F2C230",
+				"stars": 1,
+				"border": "thin"
 			},
 			"rivals": [
 				"BRA_TRL",
@@ -134,7 +141,10 @@
 				"c1": "#E30613",
 				"c2": "#FFFFFF",
 				"fc": "#FFFFFF",
-				"c3": "#111111"
+				"c3": "#111111",
+				"stars": 3,
+				"border": "double",
+				"star_c": "#E2B84A"
 			},
 			"rivals": [
 				"BRA_TIM",
@@ -334,6 +344,10 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SCI",
+				"mono": true,
+				"sym_scale": 1.1,
+				"c1": "#E30613",
+				"c2": "#FFFFFF",
 				"sc": "#FFFFFF",
 				"border": "double"
 			},

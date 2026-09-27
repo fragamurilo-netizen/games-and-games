@@ -88,12 +88,15 @@
 			"capacity": 61000,
 			"kit": "plain",
 			"crest": {
-				"shape": "iberian",
+				"shape": "shield",
 				"field": "plain",
-				"symbol": "bird",
+				"symbol": "liverbird",
+				"c1": "#C8102E",
 				"c2": "#FFFFFF",
-				"c3": "#00A398",
+				"c3": "#F6EB61",
 				"sc": "#FFFFFF",
+				"sym_scale": 1.08,
+				"border": "gold",
 				"ribbon": "YNWA"
 			},
 			"rivals": [

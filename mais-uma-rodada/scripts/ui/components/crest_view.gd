@@ -99,6 +99,13 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["crown"] = int(cr.get("crown", 0))
 	sp["laurel"] = bool(cr.get("laurel", false))
 	sp["border"] = String(cr.get("border", "thin"))
+	# Onde fica o símbolo ("" centro, "tl" canto de cima à esquerda, "low" metade de baixo), escala,
+	# letras entrelaçadas (monograma) e um texto curto embaixo das letras ("09")
+	sp["sym_pos"] = String(cr.get("sym_pos", ""))
+	sp["sym_scale"] = float(cr.get("sym_scale", 1.0))
+	sp["mono"] = bool(cr.get("mono", false))
+	sp["sub"] = String(cr.get("sub", ""))
+	sp["star_c"] = Color(String(cr.get("star_c", ""))) if String(cr.get("star_c", "")) != "" else sp["c3"]
 	return sp
 
 
@@ -163,6 +170,14 @@ func _render(s: float) -> void:
 			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.56), box.size.x * (0.46 if narrow else 0.62), box.size.y * 0.15, ink)
 		charge_box = Rect2(charge_box.position + Vector2(0, box.size.y * 0.12), charge_box.size * Vector2(1.0, 0.86))
 	# Símbolo
+	match String(sp["sym_pos"]):
+		"tl":
+			charge_box = Rect2(box.position + box.size * Vector2(0.13, 0.1), box.size * 0.4)
+		"low":
+			charge_box = Rect2(box.position + box.size * Vector2(0.3, 0.55), box.size * 0.4)
+	if float(sp["sym_scale"]) != 1.0:
+		var cc0 := charge_box.get_center()
+		charge_box = Rect2(cc0 - charge_box.size * 0.5 * float(sp["sym_scale"]), charge_box.size * float(sp["sym_scale"]))
 	_charge(sp, charge_box, inner, s)
 	# Acabamento: luz de cima, sombra embaixo e um brilho no alto (dá volume, como escudo bordado)
 	if not small:
@@ -210,7 +225,7 @@ func _render(s: float) -> void:
 		var n: int = mini(int(sp["stars"]), 7)
 		var r := s * (0.045 if not small else 0.05)
 		var sy := y_cursor - r * 1.25
-		var sc: Color = c3 if int(sp["stars"]) > 0 else c2
+		var sc: Color = sp["star_c"]
 		for i in n:
 			var x := s * 0.5 + (i - (n - 1) * 0.5) * r * 2.3
 			var dy := -absf(i - (n - 1) * 0.5) * r * 0.25 * -1.0
@@ -324,11 +339,28 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 			for i in n:
 				if i % 3 != 0:
 					parts.append([_rect(w3 * i, -0.1, w3 + 0.001, 1.2), c2 if i % 3 == 1 else c3])
+		"barca":
+			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa do meio clara
+			for i in 7:
+				if i % 2 == 1:
+					parts.append([_rect(i / 7.0, 0.5, 1.0 / 7.0 + 0.001, 0.6), c2])
+			parts.append([_rect(-0.1, -0.1, 0.6, 0.46), Color("#F4F1E8")])
+			parts.append([_rect(0.21, -0.1, 0.08, 0.46), Color("#D7191F")])
+			parts.append([_rect(-0.1, 0.13, 0.6, 0.08), Color("#D7191F")])
+			parts.append([_rect(0.5, -0.1, 0.6, 0.46), Color("#FCD116")])
+			for i in 4:
+				parts.append([_rect(0.5 + (1 + i * 2) * 0.5 / 9.0, -0.1, 0.5 / 9.0, 0.46), Color("#D7191F")])
+			parts.append([_rect(-0.1, 0.36, 1.2, 0.14), Color("#F4F1E8")])
+			parts.append([_rect(-0.1, 0.355, 1.2, 0.012), Color(0, 0, 0, 0.5)])
+			parts.append([_rect(-0.1, 0.495, 1.2, 0.012), Color(0, 0, 0, 0.5)])
+			parts.append([_rect(0.494, -0.1, 0.012, 0.46), Color(0, 0, 0, 0.5)])
 		"bordure":
 			pass
 	for part: Array in parts:
 		for piece in Geometry2D.intersect_polygons(_xf(part[0], box), poly):
 			_poly(piece, part[1])
+	if kind == "barca" and s >= 36.0:
+		_text_center(String(sp["text"]) if String(sp["text"]) != "" else "FCB", box.position + box.size * Vector2(0.5, 0.43), box.size.x * 0.5, box.size.y * 0.12, Color("#15171B"))
 	if kind == "bordure":
 		var inner := Geometry2D.offset_polygon(poly, -box.size.x * 0.07)
 		for piece in inner:
@@ -357,7 +389,23 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 	if sym == "letter" or sym == "letters":
 		var txt := String(sp["initials"])
 		var fs := r * (1.25 if txt.length() <= 2 else (1.0 if txt.length() == 3 else 0.8))
-		_text_center(txt, cen + Vector2(0, r * 0.05), cb.size.x * 1.05, fs, col, outline, Color("#15171B") if col.get_luminance() > 0.5 else Color.WHITE)
+		var ink_out := Color("#15171B") if col.get_luminance() > 0.5 else Color.WHITE
+		var sub := String(sp["sub"])
+		if sub != "":
+			cen.y -= r * 0.2
+		if bool(sp["mono"]) and txt.length() >= 2:
+			# Monograma: letras grandes entrelaçadas, cada uma um pouco deslocada, contorno na cor do fundo
+			var n := txt.length()
+			var fsm := r * (1.5 if n <= 3 else 1.2)
+			var step := fsm * 0.36
+			for i in n:
+				var dx := (i - (n - 1) * 0.5) * step
+				var dy := (r * 0.14) * (1.0 if i % 2 == 1 else -1.0) if n >= 3 else 0.0
+				_text_center(txt[i], cen + Vector2(dx, r * 0.05 + dy), cb.size.x, fsm, col, true, c1)
+		else:
+			_text_center(txt, cen + Vector2(0, r * 0.05), cb.size.x * 1.05, fs, col, outline, ink_out)
+		if sub != "":
+			_text_center(sub, cen + Vector2(0, r * 0.95), cb.size.x * 0.6, fs * 0.55, col)
 		return
 	if sym.begins_with("stars:"):
 		var n := clampi(int(sym.get_slice(":", 1)), 1, 5)
@@ -579,6 +627,18 @@ static func unit_shape(shape: String) -> PackedVector2Array:
 				var a := PI * float(i) / 16.0
 				pts.append(Vector2(0.5 + cos(a) * 0.4, 0.56 + sin(a) * 0.42))
 			pts.append(Vector2(0.1, 0.56))
+		"barca":
+			# Pontas no alto, topo côncavo, cintura e fundo arredondado em ponta (formato de ânfora)
+			for i in 13:
+				pts.append(_bezier(Vector2(0.07, 0.02), Vector2(0.5, 0.14), Vector2(0.93, 0.02), i / 12.0))
+			for i in range(1, 9):
+				pts.append(_bezier(Vector2(0.93, 0.02), Vector2(0.84, 0.3), Vector2(0.91, 0.52), i / 8.0))
+			for i in range(1, 14):
+				pts.append(_bezier(Vector2(0.91, 0.52), Vector2(0.93, 0.9), Vector2(0.5, 0.98), i / 13.0))
+			for i in range(1, 14):
+				pts.append(_bezier(Vector2(0.5, 0.98), Vector2(0.07, 0.9), Vector2(0.09, 0.52), i / 13.0))
+			for i in range(1, 8):
+				pts.append(_bezier(Vector2(0.09, 0.52), Vector2(0.16, 0.3), Vector2(0.07, 0.02), i / 8.0))
 		"swiss":
 			pts.append(Vector2(0.08, 0.05))
 			pts.append(Vector2(0.5, 0.1))
