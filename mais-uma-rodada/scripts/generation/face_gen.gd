@@ -753,7 +753,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	var eye_open: float = ETH_EYE_OPEN[e]
 	# Faixa mais próxima da anatomia adulta: menos olhos grandes de boneco e mais variação sutil.
 	f["eye_w"] = rng.randf_range(0.198, 0.238)
-	f["eye_h"] = rng.randf_range(0.084, 0.108) * eye_open * (1.0 - aging * 0.1)
+	f["eye_h"] = rng.randf_range(0.09, 0.116) * eye_open * (1.0 - aging * 0.1)
 	f["eye_dx"] = rng.randf_range(0.405, 0.465)
 	f["eye_y"] = rng.randf_range(-0.06, 0.02)
 	f["eye_tilt"] = rng.randf_range(-0.015, 0.035) + (0.03 if e == E_EAS or e == E_SEA else 0.0)
@@ -1017,6 +1017,23 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_mass(f, seed_value, age, look)
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
+	# Limites anatômicos finais: os catálogos ainda variam bastante, mas combinações de
+	# formato + beleza + idade não podem empurrar o rosto para proporções de caricatura.
+	f["fh"] = clampf(float(f["fh"]), 0.278, 0.315)
+	f["fw"] = clampf(float(f["fw"]), 0.202, 0.248)
+	var wh := float(f["fw"]) / maxf(0.001, float(f["fh"]))
+	if wh < 0.69:
+		f["fw"] = float(f["fh"]) * 0.69
+	elif wh > 0.82:
+		f["fw"] = float(f["fh"]) * 0.82
+	f["eye_w"] = clampf(float(f["eye_w"]), 0.185, 0.255)
+	f["eye_h"] = clampf(float(f["eye_h"]), 0.075, 0.125)
+	f["eye_dx"] = clampf(float(f["eye_dx"]), 0.39, 0.49)
+	f["nose_w"] = clampf(float(f["nose_w"]), 0.72, 1.5)
+	f["nose_len"] = clampf(float(f["nose_len"]), 0.245, 0.4)
+	f["mouth_w"] = clampf(float(f["mouth_w"]), 0.245, 0.405)
+	f["lip_u"] = clampf(float(f["lip_u"]), 0.02, 0.075)
+	f["lip_l"] = clampf(float(f["lip_l"]), 0.032, 0.1)
 	return f
 
 
