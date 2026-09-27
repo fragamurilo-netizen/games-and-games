@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 5
+const PORTRAIT_RENDER_VERSION := 6
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -643,7 +643,8 @@ func _hw(v: float) -> float:
 	var jaw: float = f["jaw"]
 	var jv: float = f["jaw_v"]
 	var sq: float = f["chin_sq"]
-	jaw *= 0.95
+	# A mandíbula adulta é larga, mas raramente forma a caixa quase vertical do avatar antigo.
+	jaw *= 0.91
 	var w: float
 	if v <= jv:
 		# Começa a afinar já abaixo das maçãs, sem a lateral reta de "caixa"
@@ -652,8 +653,8 @@ func _hw(v: float) -> float:
 		# Da mandíbula ao queixo em linha quase reta, com a ponta arredondada: o queixo tem
 		# largura própria (mais largo no queixo quadrado) em vez de um "U" cheio
 		var q := clampf((v - jv) / (1.0 - jv), 0.0, 1.0)
-		var chin := jaw * lerpf(0.42, 0.58, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
-		var e := 3.0 + sq
+		var chin := jaw * lerpf(0.39, 0.54, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
+		var e := 2.7 + sq * 0.85
 		w = lerpf(jaw, chin, pow(q, 1.1)) * pow(maxf(0.0, 1.0 - pow(q, e)), 1.0 / e)
 	w += 0.03 * float(f["cheekbone"]) * _g(v - 0.08, 0.16)
 	w *= 1.0 + float(f["fat"]) * 0.11 * _g(v - 0.5, 0.3)
@@ -1135,7 +1136,7 @@ func _hair_light(hair: Color) -> void:
 	var skip := tex in ["braid", "braid_zig", "waves", "locs"]
 	var lw := maxf(0.5, _s * 0.0024)
 	if not skip:
-		var n := int((170 if not kinky else 120) * clampf(_det, 0.4, 1.7))
+		var n := int((82 if not kinky else 68) * clampf(_det, 0.4, 1.7))
 		for i in n:
 			var t := rng.randf_range(0.06, 0.94)
 			var w0 := rng.randf_range(0.3, 0.85)
@@ -2359,8 +2360,8 @@ func _eyes() -> void:
 		_r_circle(inner + Vector2(sx * ew * 0.1, eh * 0.05), maxf(0.55, eh * 0.16), Color(0.85, 0.5, 0.5, 0.4))
 		# Linha dos cílios (mais grossa por fora) e cílios
 		var lash := Color("#2B1D15").lerp(_skin.darkened(0.7), 0.25)
-		_r_polyline(upper, Color(lash, 0.62), lw * 0.9, true)
-		_r_polyline(upper.slice(7), Color(lash, 0.5), lw * 1.25, true)
+		_r_polyline(upper, Color(lash, 0.48), lw * 0.82, true)
+		_r_polyline(upper.slice(7), Color(lash, 0.38), lw * 1.08, true)
 		var ln := float(f["lashes"]) * 0.7
 		for k in (3 if _s > 110.0 else 0):
 			var t := 0.62 + k * 0.08
@@ -2368,7 +2369,7 @@ func _eyes() -> void:
 			var p0: Vector2 = upper[mini(i, 14)]
 			_r_line(p0, p0 + Vector2(sx * 0.6, -1.0).normalized() * eh * 0.45 * ln, Color(lash, 0.75), lw * 0.7, true)
 		_r_line(outer, outer + Vector2(sx * ew * 0.08, -eh * 0.12), Color(lash, 0.4), lw * 0.9, true)
-		_r_polyline(lower, Color(lash, 0.22), lw * 0.7, true)
+		_r_polyline(lower, Color(lash, 0.14), lw * 0.62, true)
 		var wl := PackedVector2Array()
 		for p in lower.slice(2, 13):
 			wl.append(p + Vector2(0, lw * 0.6))
@@ -2893,7 +2894,7 @@ func _beard_mesh() -> void:
 		# varia em manchinhas e a malha fica um pouco mais transparente (os fios completam)
 		var q := _uv(p)
 		var grain := 0.7 + 0.3 * _vnoise(q.x * 16.0 + 3.1, q.y * 16.0)
-		return Color(px, px.a * edge * grain * 0.9)
+		return Color(px, px.a * edge * grain * 0.72)
 	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, int(54 * clampf(_det, 0.35, 1.3)), int(60 * clampf(_det, 0.35, 1.3)), shade)
 
 
@@ -3010,8 +3011,8 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 	if cand.is_empty():
 		return
 	var patchy := minf(1.0, _beard_patchiness(P) * 1.6)
-	var n := int((420 if tx == 0 else 420 + ln * 420.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6) * (1.0 + patchy * 0.4))
-	var w := maxf(0.6, _s * 0.0036)
+	var n := int((500 if tx == 0 else 520 + ln * 520.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6) * (1.0 + patchy * 0.4))
+	var w := maxf(0.5, _s * 0.003)
 	# Estilos de contorno marcado espalham menos: o fio não "vaza" para fora do desenho
 	var jit := _fw * lerpf(0.045, 0.014, float(P["sh"]))
 	for k in n:
@@ -3030,7 +3031,7 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 		if tx == 0:
 			# Pelos curtos: tracinhos finos e claros, não pontos grossos
 			var dd := Vector2(rng.randf_range(-0.3, 0.3), 1.0).normalized() * _s * rng.randf_range(0.003, 0.006)
-			_r_line(p, p + dd, Color(col.darkened(0.1), rng.randf_range(0.18, 0.38) * (0.5 + op)), maxf(0.5, _s * 0.0022), true)
+			_r_line(p, p + dd, Color(col.darkened(0.1), rng.randf_range(0.16, 0.34) * (0.5 + op)), maxf(0.45, _s * 0.0018), true)
 			continue
 		var u := qp.x
 		var v := qp.y
@@ -3443,8 +3444,10 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 	var part := 0.5 + float(f["part_side"]) * 0.19
 	match tex:
 		"str", "wavy":
-			var n := int(200 * k)
-			w = maxf(0.6, _s * 0.0026)
+			# A massa do cabelo faz o volume; mostramos só uma parte das mechas. Centenas de linhas
+			# paralelas davam aparência de pente/escova em vez de cabelo fotografado.
+			var n := int(105 * k)
+			w = maxf(0.5, _s * 0.0019)
 			var hl_on: bool = bool(f.get("highlights", false))
 			var hl_col := Color("#D8B46A").lerp(hair, 0.35)
 			var streaks: Array = []
@@ -3457,8 +3460,8 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 				if hl_on and rng.randf() < 0.45:
 					t0 = clampf(float(streaks[rng.randi() % streaks.size()]) + rng.randf_range(-0.035, 0.035), 0.0, 1.0)
 					streak = true
-				var w0 := rng.randf_range(0.0, 0.25)
-				var w1 := rng.randf_range(0.65, 1.0)
+				var w0 := rng.randf_range(0.04, 0.42)
+				var w1 := minf(1.0, w0 + rng.randf_range(0.28, 0.66))
 				var pts := PackedVector2Array()
 				var ok := true
 				for j in 7:
@@ -3484,13 +3487,13 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 					c = hl_col.lerp(hair, rng.randf_range(0.0, 0.3))
 				elif roll < 0.45:
 					c = _hair_col(pts[3], 0.6, t0, 0.3).lerp(hair.lightened(0.5), 0.15)
-				elif roll < 0.55:
-					c = hair.lightened(0.6).lerp(Color(0.9, 0.9, 0.95), 0.2)
+				elif roll < 0.49:
+					c = hair.lightened(0.52).lerp(Color(0.9, 0.9, 0.95), 0.14)
 				else:
 					c = hair.darkened(rng.randf_range(0.2, 0.45))
-				var a := rng.randf_range(0.2, 0.45) if not streak else rng.randf_range(0.25, 0.42)
-				if roll >= 0.45 and roll < 0.55 and not streak:
-					a *= 0.6
+				var a := rng.randf_range(0.1, 0.28) if not streak else rng.randf_range(0.16, 0.3)
+				if roll >= 0.45 and roll < 0.49 and not streak:
+					a *= 0.55
 				_r_polyline(pts, Color(c, a), w, true)
 			if int(f["hair_i"]) not in FaceGen.DYED and float(f["gray"]) > 0.15:
 				for i in int(55 * k * float(f["gray"])):
