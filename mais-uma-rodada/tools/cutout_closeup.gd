@@ -1,10 +1,18 @@
 extends SceneTree
 ## Cutouts grandes para conferir realismo: cabelos, barbas e camisa com a luz de estúdio.
 ## xvfb-run godot --path . --resolution 1280x660 --script res://tools/cutout_closeup.gd -- --out=/tmp/closeup.png
-## --size=N (lado de cada retrato), --only=a,b (só esses casos)
+## --size=N (lado de cada retrato), --only=a,b (só esses casos), --clean (rostos limpos)
 
 var _out := "user://closeup.png"
 var _frames := 0
+
+## Com --clean: rostos sem barba e com cabelo curto, para julgar só o rosto.
+const CLEAN: Array = [
+	{"eth": 0, "age": 24, "look": {"hs": 3, "bd": 0}, "kit": {"pattern": "plain", "c1": "#B3122E", "c2": "#FFFFFF", "c3": "#FFFFFF", "collar": "round", "sleeve": "same"}},
+	{"eth": 2, "age": 28, "look": {"hs": 8, "bd": 0}, "kit": {"pattern": "plain", "c1": "#0B2A6B", "c2": "#FFFFFF", "c3": "#FFFFFF", "collar": "v", "sleeve": "same"}},
+	{"eth": 6, "age": 23, "look": {"hs": 1, "bd": 0}, "kit": {"pattern": "plain", "c1": "#FFFFFF", "c2": "#111111", "c3": "#111111", "collar": "round", "sleeve": "same"}},
+	{"eth": 4, "age": 31, "look": {"hs": 5, "bd": 0}, "kit": {"pattern": "plain", "c1": "#1C7A3A", "c2": "#FFFFFF", "c3": "#FFFFFF", "collar": "polo", "sleeve": "same"}},
+]
 
 const CASES: Array = [
 	{"eth": 0, "age": 27, "look": {"hs": 6, "bd": 3, "hc": 1}, "kit": {"pattern": "stripes_v", "c1": "#B3122E", "c2": "#FFFFFF", "c3": "#111111", "collar": "crossover", "sleeve": "cuff"}},
@@ -21,11 +29,14 @@ const CASES: Array = [
 func _initialize() -> void:
 	var px := 310
 	var only: Array = []
+	var cases: Array = CASES
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--out="):
 			_out = a.substr(6)
 		elif a.begins_with("--size="):
 			px = int(a.substr(7))
+		elif a == "--clean":
+			cases = CLEAN
 		elif a.begins_with("--only="):
 			only = Array(a.substr(7).split(",")).map(func(x): return int(x))
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
@@ -34,10 +45,10 @@ func _initialize() -> void:
 	bg.size = Vector2(6000, 6000)
 	root.add_child(bg)
 	var crest := {"shape": "shield", "symbol": "star", "c1": "#222222", "c2": "#FFFFFF", "border": "thin", "initials": "FC"}
-	var ids: Array = only if not only.is_empty() else range(CASES.size())
+	var ids: Array = only if not only.is_empty() else range(cases.size())
 	for slot in ids.size():
 		var i: int = ids[slot]
-		var cs: Dictionary = CASES[i]
+		var cs: Dictionary = cases[i]
 		var k: Dictionary = cs["kit"].duplicate()
 		k["sp"] = {"n": "Banco Sul", "c": "#FFFFFF", "t": "#111111"}
 		k["sup"] = {"n": "Volt", "logo": "curva", "c": "#FFFFFF"}

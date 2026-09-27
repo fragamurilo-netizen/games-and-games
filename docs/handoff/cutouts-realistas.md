@@ -50,14 +50,34 @@ Sombra marcada só sob o nariz, o lábio e o queixo. Tudo isso fica no fim de `_
 `HEAD_W = 0.87` deixa o rosto um pouco mais estreito.
 `_dE` desce a linha de cima da barba nas bochechas junto com os olhos.
 
+### Versão 2.0 (forma do rosto e realismo, mesma tecnologia)
+Tudo continua sendo desenho procedural do `PortraitView`. A API e o modo cutout do PR #42 continuam iguais.
+- **Relevo do rosto**: `_face_h(u, v)` é um mapa de altura (cúpula suave com norma p=5 e perfil
+  `1 - th^3.4`, arco das sobrancelhas, órbitas, globo ocular, dorso/ponta/asas do nariz, maçãs,
+  cavidade sob a maçã, focinho, dobra sob o lábio, queixo, têmporas). `_face_normal` tira a normal
+  por diferenças centrais, e `_skin_px` usa essa normal em vez da cúpula radial. É daí que vem a forma
+  real do nariz, das órbitas e das maçãs.
+- **Pele**: `_skin_grain` põe poros e variação de tom (textura `_noise_texture(0)`, 256 px, em
+  cache estático) e `_photo_grain` põe granulação de foto no fim. Nenhuma das duas roda em headless.
+- **Detalhes**: colunas e sulco do filtro labial, borda clara do lábio, volume da pálpebra (a partir de
+  90 px), sobrancelha em gradiente (não mais um bloco sólido), lábios sombreados pela luz.
+- **Contorno**: maçã do rosto mais alta, leve ângulo na mandíbula para rostos quadrados, queixo mais
+  definido (`_hw`). O afinamento para a mandíbula foi mantido como antes: alargar deixava a parte de
+  baixo do rosto inchada.
+- **Luz**: menos borda clara e menos rebatimento (menos cara de plástico), brilho especular mais largo e suave.
+- **Cabelo e barba**: fios soltos na borda do cabelo curto e liso (a partir de 90 px). A barba tem
+  textura de ruído na massa e o dobro de fios, então não fica mais um bloco sólido.
+- `tools/cutout_closeup.gd --clean` gera 4 rostos sem barba para julgar só o rosto.
+
 ## O que ainda está aberto
 - O Calitos ainda não aprovou a última rodada (proporções do FM). Numa rodada anterior, "nariz mais
   comprido e luz lateral forte", ele disse que piorou, e ela foi revertida.
 - Com os olhos mais baixos a testa ficou maior. Se ele reclamar, o primeiro ajuste é o 0,43 em `_E`.
 - Nas barbas cheias ficou uma faixa sem pelo no alto da bochecha. Confira no caso 0 do
   `cutout_closeup`.
-- Nas fotos de referência a barba é textura de pontos e fios, não uma massa sólida. Isso ainda não
-  foi feito.
+- 2.0 esperando o ok do Calitos. Se ele achar o relevo forte demais, os pesos ficam em `_face_h`
+  (maçã 0,035, focinho 0,03) e no expoente do perfil (3,4).
+- Folhas 2.0 em `/mnt/project-files/cutouts-realistas/v2-*.png` (antes e depois).
 
 ## Como gerar as folhas de antes e depois
 Precisa do Godot 4.7.2 (binário oficial para Linux) e de `xvfb-run`:
