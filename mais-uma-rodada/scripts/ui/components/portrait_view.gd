@@ -199,7 +199,7 @@ const STYLE_P: Array = [
 ]
 
 const LIGHT := Vector3(-0.28, -0.55, 0.79)
-const HEAD_SCALE := 0.88
+const HEAD_SCALE := 0.97
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
 const HEAD_W := 0.87
@@ -679,7 +679,7 @@ func _setup(c: Vector2, s: float) -> void:
 	# Cabeça um pouco menor e mais alta, para caber pescoço e ombros como numa foto de ficha
 	_fw = float(f["fw"]) * s * HEAD_SCALE * HEAD_W
 	_fh = float(f["fh"]) * s * HEAD_SCALE
-	_hc = c + Vector2(0, -s * 0.1)
+	_hc = c + Vector2(0, -s * 0.085)
 	_det = clampf(s / 140.0, 0.3, 2.0)
 	_light = LIGHT.normalized()
 	# Proporções de foto de rosto real (medidas em retratos de estúdio de jogadores): da linha do
@@ -687,11 +687,13 @@ func _setup(c: Vector2, s: float) -> void:
 	# salvos pelo FaceGen continuam os mesmos; eles só variam em volta dessas médias.
 	var hl := float(f["hairline"])
 	var H := 1.0 - hl
-	_E = hl + H * 0.43 + (float(f["eye_y"]) + 0.02) * 0.5
+	# Cânone de Loomis (topo do crânio ao queixo = 1): olhos na metade, base do nariz a ~0,71,
+	# boca a ~0,8. Em v (-1,02 no alto, 1 no queixo): olhos ~0, nariz ~0,42, boca ~0,62.
+	_E = -0.02 + (float(f["eye_y"]) + 0.02) * 0.6 + (hl + 0.55) * 0.1
 	_X = float(f["eye_dx"]) * 1.02
 	_dE = (_E - float(f["eye_y"])) * 0.8
-	_N = _E + H * 0.26 * (float(f["nose_len"]) / 0.305)
-	_M = _N + H * 0.105 * (1.0 + (float(f["mouth_y"]) - 0.58) * 2.0)
+	_N = _E + 0.4 * lerpf(1.0, float(f["nose_len"]) / 0.305, 0.6)
+	_M = _N + 0.19 * (1.0 + (float(f["mouth_y"]) - 0.58) * 1.5)
 	_NW = float(f["nose_w"]) * 1.5
 	_BW = float(f["bridge_w"]) * 1.1
 	_MW = float(f["mouth_w"]) * 1.25
@@ -878,7 +880,9 @@ func _hw(v: float) -> float:
 	var jv: float = float(f["jaw_v"])
 	var sq: float = f["chin_sq"]
 	# Mandíbula larga, quase da largura das maçãs, e queixo com ponta de ~0,4 da largura do rosto
-	jaw = minf(jaw * 1.05, cw * 0.97)
+	jaw = minf(jaw * 1.02, cw * 0.9)
+	# Mandíbula real: o ângulo fica na altura da boca ou abaixo, não no meio da bochecha
+	jv = maxf(jv, _M - 0.02)
 	var w: float
 	if v <= jv:
 		# O rosto é mais largo nas maçãs e afina da altura do nariz até o ângulo da mandíbula
@@ -888,8 +892,9 @@ func _hw(v: float) -> float:
 		# Da mandíbula ao queixo em linha quase reta, com a ponta arredondada: o queixo tem
 		# largura própria (mais largo no queixo quadrado) em vez de um "U" cheio
 		var q := clampf((v - jv) / (1.0 - jv), 0.0, 1.0)
-		var chin := jaw * lerpf(0.46, 0.58, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
-		var e := 2.3 + sq * 0.65
+		var chin := jaw * lerpf(0.42, 0.56, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
+		# Expoente menor = ponta do queixo arredondada (valores altos deixavam o fundo reto, de caixa)
+		var e := 1.8 + sq * 0.3
 		w = lerpf(jaw, chin, pow(q, 1.1)) * pow(maxf(0.0, 1.0 - pow(q, e)), 1.0 / e)
 	w += 0.03 * float(f["cheekbone"]) * _g(v - (_E + _N) * 0.5 + 0.04, 0.16)
 	# Ângulo da mandíbula marcado (um pouco para fora) nos rostos mais quadrados
@@ -1153,7 +1158,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	b = (v - cheek_v) / 0.1
 	var tip_hl := _g2(un + 0.02, v - (N - 0.06), NW * 0.35, 0.05)
 	spec = spec * 0.6 + 0.35 * (fore * 0.9 + ridge_hl * 0.8 + tip_hl + 0.7 * exp(-a * a - b * b))
-	spec *= k[13] * 0.95
+	spec *= k[13] * 0.55
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
 
 
@@ -2329,8 +2334,8 @@ func _ears() -> void:
 func _eyes() -> void:
 	var f := _f
 	# Olho de ~0,21 da largura do rosto, abertura de ~0,07: a íris grande mostra pouco branco
-	var ew := _fw * float(f["eye_w"]) * 0.92
-	var eh := _fw * float(f["eye_h"]) * 0.85
+	var ew := _fw * float(f["eye_w"]) * 0.98
+	var eh := _fw * float(f["eye_h"]) * 0.95
 	var tilt := _fw * float(f["eye_tilt"])
 	var iris_main: Color = f["eye"]
 	var ring: float = f.get("eye_ring", 0.0)
@@ -2482,7 +2487,7 @@ func _brows(rng: RandomNumberGenerator) -> void:
 		col = (f["hair"] as Color).darkened(0.35)
 	col = col.lerp(_skin, 0.12)
 	var ew := _fw * float(f["eye_w"])
-	var th := _fw * float(f["brow_t"])
+	var th := _fw * float(f["brow_t"]) * 0.78
 	var arch := _fw * float(f["brow_arch"])
 	var tilt := _fw * float(f["brow_tilt"])
 	var blen := ew * 2.3 * (float(f["brow_len"]) / 0.45)
@@ -2500,7 +2505,7 @@ func _brows(rng: RandomNumberGenerator) -> void:
 	for sx: float in [-1.0, 1.0]:
 		var cx := _hc.x + sx * _X * _fw
 		# Sobrancelha baixa e perto do olho, como nos homens adultos em foto
-		var by := _hc.y + (_E - float(f["brow_gap"]) * 0.8) * _fh - sx * asym * _fh * 0.018
+		var by := _hc.y + (_E - float(f["brow_gap"]) * 1.0) * _fh - sx * asym * _fh * 0.018
 		# Expressão: sobrancelhas sobem (surpresa), descem e se juntam (bravo), uma sobe (desconfiado)
 		by -= raise * _fh * 0.07 + (_fh * 0.06 if uneven != 0.0 and signf(uneven) == sx else 0.0)
 		var x0 := cx - sx * ew * 1.05
