@@ -799,3 +799,53 @@ static func tile_grid(tiles: Array, cols: int = 2) -> GridContainer:
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		g.add_child(t)
 	return g
+
+
+## Grade de opções escolhíveis (foco de treino, setor de captação...): cada opção é um ladrilho
+## com ícone, nome e uma linha de efeito; a escolhida fica destacada. Substitui fileiras de chips
+## quando a escolha merece explicação. `items` = [[chave, título, subtítulo, ícone], ...].
+static func option_grid(items: Array, selected: String, cb: Callable, cols: int = 2) -> GridContainer:
+	var grid := GridContainer.new()
+	grid.columns = cols
+	grid.add_theme_constant_override(&"h_separation", UITokens.S3)
+	grid.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for it: Array in items:
+		var key := String(it[0])
+		var on := key == selected
+		var v := vbox(2)
+		var head := hbox(10)
+		if it.size() > 3 and String(it[3]) != "":
+			head.add_child(icon_rect(String(it[3]), 24, UIColors.ACCENT if on else UIColors.MUTED))
+		var t := label(String(it[1]), "H3")
+		t.clip_text = true
+		t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		if on:
+			head.add_child(icon_rect("check", 22, UIColors.ACCENT))
+		v.add_child(head)
+		if it.size() > 2 and String(it[2]) != "":
+			var s := label(String(it[2]), "Small", true)
+			s.max_lines_visible = 2
+			v.add_child(s)
+		var tile := tap_row(v, func(): cb.call(key), "CardHighlight" if on else "CardFlat")
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(tile)
+	return grid
+
+
+## Efeitos em porcentagem como selos coloridos ("Evolução +10%" em verde, "Lesão +15%" em
+## vermelho). `items` = [[nome, delta_em_%, maior_é_melhor], ...]; zeros ficam de fora.
+static func effect_pills(items: Array) -> HFlowContainer:
+	var f := flow(8)
+	for it: Array in items:
+		var d := int(it[1])
+		if d == 0:
+			continue
+		var good := (d > 0) == bool(it[2])
+		f.add_child(pill("%s %+d%%" % [tr_static(String(it[0])), d], UIColors.GREEN if good else UIColors.RED, 16))
+	return f
+
+
+static func tr_static(s: String) -> String:
+	return I18n.t(s)

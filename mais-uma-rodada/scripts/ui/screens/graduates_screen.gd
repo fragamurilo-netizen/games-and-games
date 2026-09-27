@@ -32,14 +32,9 @@ func refresh() -> void:
 	var list := Graduates.of_club(w, club.id)
 	var retired := Graduates.retired_of(w, club.id)
 	c.add_child(_header(w, club, list, retired))
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in [["active", "Em atividade · %d" % list.size()], ["retired", "Aposentados · %d" % retired.size()]]:
-		var key: String = t[0]
-		row.add_child(UIKit.chip(t[1], key == _filter, g, func():
-			_filter = key
-			refresh()))
-	c.add_child(row)
+	c.add_child(UIKit.tabs([["active", tr("Em atividade · %d") % list.size()], ["retired", tr("Aposentados · %d") % retired.size()]], _filter, func(k: String):
+		_filter = k
+		refresh()))
 	if _filter == "active":
 		c.add_child(_active(w, club, list))
 	else:
