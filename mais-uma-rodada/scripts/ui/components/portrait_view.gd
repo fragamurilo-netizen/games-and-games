@@ -418,7 +418,7 @@ func _light_pass() -> void:
 	for p in head:
 		var q := _uv(p)
 		if q.x > 0.2 and q.y > maxf(-0.35, hair_low) and q.y < 0.95:
-			var a := 0.06 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))
+			var a := 0.16 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))
 			if bearded:
 				a *= 1.0 - smoothstep(0.05, 0.3, _beard_dens(q.x, q.y, _beard_p, false))
 			rim.append(_cl(p + Vector2(-lw * 0.9, 0)))
@@ -464,7 +464,7 @@ func _skin_grain(head: PackedVector2Array) -> void:
 	for q in pts:
 		uvm.append((q - origin) / (_fw * 5.2 * clampf(gs, 0.9, 1.25)))
 	uvm = _fit_uvs(uvm, off / NOISE_PX)
-	var am := clampf(0.35 + _zones * 0.45 + float(_f["aging"]) * 0.3 - clear * 0.3, 0.15, 0.95)
+	var am := clampf(0.2 + _zones * 0.25 + float(_f["aging"]) * 0.25 - clear * 0.3, 0.1, 0.6)
 	_r_colored_polygon(pts, Color(1, 1, 1, am * fade), uvm, mottle)
 	# Poros (escala da pele: um poro tem sempre mais ou menos o mesmo tamanho na tela)
 	var tex := _noise_texture(0)
@@ -474,7 +474,7 @@ func _skin_grain(head: PackedVector2Array) -> void:
 		uvs.append((q - origin) / (NOISE_PX * texel))
 	uvs = _fit_uvs(uvs, off / NOISE_PX)
 	# Pele lisa (jovem, "bonita") mostra menos poro; idade e pele oleosa mostram mais
-	var a := clampf(0.3 + _pores * 0.5 + float(_f["aging"]) * 0.3 - clear * 0.25, 0.25, 0.95)
+	var a := clampf(0.25 + _pores * 0.35 + float(_f["aging"]) * 0.3 - clear * 0.25, 0.2, 0.75)
 	_r_colored_polygon(pts, Color(1, 1, 1, a * smoothstep(90.0, 220.0, _s)), uvs, tex)
 
 
@@ -951,27 +951,16 @@ static func _shade(base: Color, lum: float) -> Color:
 func _hw(v: float) -> float:
 	var f := _f
 	var cw: float = f["cheek_w"]
-	var jaw: float = f["jaw"]
-	# Ângulo da mandíbula perto da altura da boca (o valor do FaceGen foi pensado para os olhos altos)
-	var jv: float = float(f["jaw_v"])
-	var sq: float = f["chin_sq"]
-	# Mandíbula larga, quase da largura das maçãs, e queixo com ponta de ~0,4 da largura do rosto
-	jaw = minf(jaw * 1.05, cw * 0.97)
-	var w: float
-	if v <= jv:
-		# O rosto é mais largo nas maçãs e afina da altura do nariz até o ângulo da mandíbula
-		var cv := (_E + _N) * 0.5
-		w = lerpf(cw, jaw, smoothstep(minf(cv - 0.42, -0.2), jv, v))
-	else:
-		# Da mandíbula ao queixo em linha quase reta, com a ponta arredondada: o queixo tem
-		# largura própria (mais largo no queixo quadrado) em vez de um "U" cheio
-		var q := clampf((v - jv) / (1.0 - jv), 0.0, 1.0)
-		var chin := jaw * lerpf(0.46, 0.58, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
-		var e := 2.3 + sq * 0.65
-		w = lerpf(jaw, chin, pow(q, 1.1)) * pow(maxf(0.0, 1.0 - pow(q, e)), 1.0 / e)
+	# Contorno contínuo em "U": largo nas maçãs, afina pela bochecha e fecha arredondado no queixo
+	var jt := clampf((float(f["jaw"]) - 0.63) / 0.33, 0.0, 1.0)
+	var sq := clampf((float(f["chin_sq"]) - 1.25) / 1.6, 0.0, 1.0)
+	var v0 := clampf((_E + _N) * 0.5, 0.05, 0.3)
+	var q := clampf((v - v0) / (1.0 - v0), 0.0, 1.0)
+	var n := 1.55 + 0.5 * jt + 0.3 * sq
+	var w := cw * pow(maxf(0.0, 1.0 - pow(q, n)), 1.0 / n)
+	var chin := cw * lerpf(0.2, 0.28, sq) * smoothstep(0.55, 1.0, q)
+	w = maxf(w, chin * pow(maxf(0.0, 1.0 - pow(q, 6.0)), 1.0 / 6.0))
 	w += 0.03 * float(f["cheekbone"]) * _g(v - (_E + _N) * 0.5 + 0.04, 0.16)
-	# Ângulo da mandíbula marcado (um pouco para fora) nos rostos mais quadrados
-	w += 0.015 * clampf(sq - 1.4, 0.0, 1.0) * _g(v - jv, 0.07)
 	w *= 1.0 + float(f["fat"]) * 0.11 * _g(v - 0.5, 0.3)
 	# Gordo: bochecha e mandíbula cheias; fino: afunda logo abaixo das maçãs
 	w *= 1.0 + float(f.get("heavy", 0.0)) * 0.15 * _g(v - 0.72, 0.2)
@@ -1058,8 +1047,12 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
 	# Luz de estúdio: principal forte no alto à esquerda (lado da sombra mais fundo que antes) e um
 	# rebatedor fraco à direita, que abre a sombra sem achatá-la
-	var lum := 0.36 + 0.72 * diff
-	lum += 0.07 * maxf(0.0, nx * FILL.x + ny * FILL.y + nz * FILL.z)
+	# Contraste de foto de estúdio (principal ~2 pontos acima do rebatedor)
+	# Luz de retrato de jogo de futebol (estilo FIFA): principal grande e macia quase de frente,
+	# rebatedor quente, sombras suaves e só uma leve oclusão na borda do rosto
+	var lum := 0.46 + 0.62 * diff
+	lum += 0.1 * maxf(0.0, nx * FILL.x + ny * FILL.y + nz * FILL.z)
+	lum -= 0.05 * smoothstep(0.8, 1.0, t)
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
 	lum -= 0.06 * smoothstep(0.78, 1.0, t)
@@ -1217,7 +1210,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	col = col.lerp(Color(col.r * 0.9, col.g * 0.85, col.b * 0.93), 0.35 * zn * under_eye)
 	if v > N - 0.02:
 		var jaw_m := smoothstep(N - 0.02, N + 0.12, v) * (1.0 - _g2(u / maxf(0.05, MW * 1.1), (v - M) / 0.08, 1.0, 1.0))
-		col = col.lerp(Color(col.r * 0.93, col.g * 0.96, col.b * 1.0), 0.3 * zn * jaw_m * (1.0 - k[12] * 0.5))
+		col = col.lerp(Color(col.r * 0.96, col.g * 0.98, col.b * 1.0), 0.1 * zn * jaw_m)
 	# Rubor nas bochechas, nariz e queixo
 	a = (au - 0.52) / 0.22
 	b = (v - cheek_v - 0.1) / 0.13
@@ -1249,7 +1242,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var sharp := pow(ndh, 16.0 + oil * 26.0) * (0.3 + 0.6 * oil)
 	var broad := pow(ndh, 5.0) * 0.1
 	var spec := (sharp * (0.35 + 0.9 * tzone) + broad * (0.4 + 0.6 * tzone)) * (0.55 + 0.45 * diff)
-	spec *= k[13] * 1.5
+	spec *= k[13] * 1.9 + 0.03
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
 
 

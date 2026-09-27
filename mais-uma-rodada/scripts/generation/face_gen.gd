@@ -700,11 +700,11 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["chin_sq"] = rng.randf_range(1.25, 2.0) + (0.35 if rng.randf() < 0.25 else 0.0) # queixo quadrado ↔ fino
 	f["chin_cleft"] = rng.randf() < 0.12
 	f["forehead"] = rng.randf_range(0.9, 0.98)
-	f["fat"] = clampf(rng.randf_range(0.0, 0.6) + youth * 0.2 + aging * 0.15, 0.0, 1.0)
+	f["fat"] = clampf(rng.randf_range(0.0, 0.45) + youth * 0.03 + aging * 0.15, 0.0, 1.0)
 	f["cheekbone"] = rng.randf_range(0.6, 1.2) * float(ETH_CHEEK[e])
 	f["ridge"] = rng.randf_range(0.6, 1.2) * float(ETH_RIDGE[e]) * (1.0 - youth * 0.4)
 	f["ear"] = rng.randf_range(0.88, 1.12) + aging * 0.06
-	f["ear_out"] = rng.randf_range(0.0, 1.0) * (1.0 if rng.randf() < 0.35 else 0.4)
+	f["ear_out"] = rng.randf_range(0.0, 0.6) * (1.0 if rng.randf() < 0.2 else 0.4)
 	# Beleza: harmonia, simetria e pele. Não depende da etnia; muda proporções mais adiante.
 	var brng := RandomNumberGenerator.new()
 	brng.seed = hash([seed_value, "beleza"])
@@ -1060,7 +1060,7 @@ static func _apply_identity(f: Dictionary, seed_value: int) -> void:
 	f["brow_tilt"] = float(f["brow_tilt"]) + tri.call(0.03)
 	f["brow_gap"] = float(f["brow_gap"]) * (1.0 + tri.call(0.15))
 	f["brow_len"] = float(f["brow_len"]) * (1.0 + tri.call(0.12))
-	f["ear"] = float(f["ear"]) * (1.0 + tri.call(0.1))
+	f["ear"] = minf(float(f["ear"]) * (1.0 + tri.call(0.06)), 1.08)
 	# Pele: cada pessoa tem a sua (oleosa ou seca, poros finos ou abertos, mais ou menos corada),
 	# e o tom varia por região: testa mais amarelada, nariz e bochechas mais vermelhos, a região
 	# da barba mais fria. É o que tira o ar de "boneco pintado de uma cor só".
@@ -1077,7 +1077,8 @@ static func _apply_identity(f: Dictionary, seed_value: int) -> void:
 ## entre ~0,75 e 0,9) e mandíbula e maçãs sem afinar além do plausível.
 static func _proportion_floor(f: Dictionary) -> void:
 	var fh := float(f["fh"])
-	f["fw"] = clampf(float(f["fw"]), fh * 0.73, fh * 0.92)
+	# Rosto real: largura entre ~74% e ~84% da altura (acima disso vira cara de bebê)
+	f["fw"] = clampf(float(f["fw"]), fh * 0.74, fh * 0.84)
 	f["jaw"] = maxf(float(f["jaw"]), 0.7)
 	f["cheek_w"] = maxf(float(f["cheek_w"]), 0.97)
 
