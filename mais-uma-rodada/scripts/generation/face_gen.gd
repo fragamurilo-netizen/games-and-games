@@ -700,7 +700,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["chin_sq"] = rng.randf_range(1.25, 2.0) + (0.35 if rng.randf() < 0.25 else 0.0) # queixo quadrado ↔ fino
 	f["chin_cleft"] = rng.randf() < 0.12
 	f["forehead"] = rng.randf_range(0.9, 0.98)
-	f["fat"] = clampf(rng.randf_range(0.0, 0.45) + youth * 0.03 + aging * 0.15, 0.0, 1.0)
+	# Atletas: rosto magro na maioria (quem é mais cheio vem de _apply_mass)
+	f["fat"] = clampf(rng.randf_range(0.0, 0.38) + youth * 0.03 + aging * 0.15, 0.0, 1.0)
 	f["cheekbone"] = rng.randf_range(0.6, 1.2) * float(ETH_CHEEK[e])
 	f["ridge"] = rng.randf_range(0.6, 1.2) * float(ETH_RIDGE[e]) * (1.0 - youth * 0.4)
 	f["ear"] = rng.randf_range(0.88, 1.12) + aging * 0.06
@@ -719,7 +720,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		beauty = clampf(float(look["bt"]), 0.0, 1.0)
 	var ugly := 1.0 - beauty
 	f["beauty"] = beauty
-	f["asym"] = rng.randf_range(-1.0, 1.0) * (0.3 + ugly * 1.5)
+	# Assimetria real existe, mas grande vira caricatura; a fina fica em FaceVariation
+	f["asym"] = rng.randf_range(-1.0, 1.0) * (0.14 + ugly * 0.6)
 
 	# --- Olhos ------------------------------------------------------------------
 	var eye_i := RngUtil.weighted_index(rng, ETH_EYES[e])
@@ -1019,48 +1021,14 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	return f
 
 
-## Identidade: cada traço ganha uma variação própria e mais larga, sorteada à parte, para que
-## dois jogadores da mesma etnia e do mesmo tipo de rosto não saiam com cara de gêmeos. A
-## distribuição é triangular (os extremos são raros) e a média continua a mesma. Também sorteia
-## a pele de cada um: oleosidade, poros, vermelhidão e tom por região do rosto.
+## Identidade: anatomia correlacionada, variação de cada traço e assimetria sutil (FaceVariation),
+## mais a pele de cada pessoa: oleosidade, poros, vermelhidão e tom por região do rosto.
 static func _apply_identity(f: Dictionary, seed_value: int) -> void:
+	FaceVariation.apply(f, seed_value)
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([seed_value, "identidade"])
 	var tri := func(amp: float) -> float:
 		return (r.randf() + r.randf() - 1.0) * amp
-	# Proporções gerais: rosto mais comprido ou mais curto, testa alta ou baixa
-	f["fh"] = float(f["fh"]) * (1.0 + tri.call(0.06))
-	f["fw"] = float(f["fw"]) * (1.0 + tri.call(0.05))
-	f["hairline"] = float(f["hairline"]) + tri.call(0.05)
-	f["cheekbone"] = float(f["cheekbone"]) * (1.0 + tri.call(0.3))
-	f["chin_len"] = float(f.get("chin_len", 0.0)) + tri.call(0.035)
-	f["jaw"] = float(f["jaw"]) + tri.call(0.06)
-	# Olhos: distância entre eles, tamanho, altura e inclinação
-	f["eye_dx"] = float(f["eye_dx"]) + tri.call(0.035)
-	f["eye_w"] = float(f["eye_w"]) * (1.0 + tri.call(0.12))
-	f["eye_h"] = float(f["eye_h"]) * (1.0 + tri.call(0.18))
-	f["eye_y"] = float(f["eye_y"]) + tri.call(0.035)
-	f["eye_tilt"] = float(f["eye_tilt"]) + tri.call(0.02)
-	# Nariz: comprimento, largura, dorso e ponta
-	f["nose_len"] = float(f["nose_len"]) * (1.0 + tri.call(0.14))
-	f["nose_w"] = float(f["nose_w"]) * (1.0 + tri.call(0.18))
-	f["bridge_w"] = float(f["bridge_w"]) * (1.0 + tri.call(0.25))
-	f["bridge"] = clampf(float(f["bridge"]) * (1.0 + tri.call(0.3)), 0.2, 1.5)
-	f["nose_tip"] = float(f["nose_tip"]) * (1.0 + tri.call(0.25))
-	f["nose_dx"] = float(f.get("nose_dx", 0.0)) + (tri.call(0.03) if r.randf() < 0.25 else 0.0)
-	# Boca: largura, altura e espessura dos lábios (de cima e de baixo, separadas)
-	f["mouth_w"] = float(f["mouth_w"]) * (1.0 + tri.call(0.14))
-	f["mouth_y"] = float(f["mouth_y"]) + tri.call(0.025)
-	f["lip_u"] = float(f["lip_u"]) * (1.0 + tri.call(0.3))
-	f["lip_l"] = float(f["lip_l"]) * (1.0 + tri.call(0.28))
-	f["bow"] = clampf(float(f["bow"]) + tri.call(0.4), 0.0, 1.2)
-	# Sobrancelhas: grossura, arco, inclinação, distância do olho e comprimento
-	f["brow_t"] = float(f["brow_t"]) * (1.0 + tri.call(0.3))
-	f["brow_arch"] = maxf(0.0, float(f["brow_arch"]) + tri.call(0.04))
-	f["brow_tilt"] = float(f["brow_tilt"]) + tri.call(0.03)
-	f["brow_gap"] = float(f["brow_gap"]) * (1.0 + tri.call(0.15))
-	f["brow_len"] = float(f["brow_len"]) * (1.0 + tri.call(0.12))
-	f["ear"] = minf(float(f["ear"]) * (1.0 + tri.call(0.06)), 1.08)
 	# Pele: cada pessoa tem a sua (oleosa ou seca, poros finos ou abertos, mais ou menos corada),
 	# e o tom varia por região: testa mais amarelada, nariz e bochechas mais vermelhos, a região
 	# da barba mais fria. É o que tira o ar de "boneco pintado de uma cor só".
