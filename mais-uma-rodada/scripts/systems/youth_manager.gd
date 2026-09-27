@@ -223,8 +223,10 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 	var imp := float(reg["import"])
 	var nat := club.nation
 	if age >= 16 and rng.randf() < imp:
-		nat = PlayerGenerator.pick_import(rng, club.nation)
-		if age < min_foreign_age(nat, club.nation):
+		var pool: Dictionary = PlayerGenerator.YOUTH_IMPORTS.get(club.nation, {})
+		# Captação internacional: metade pelas rotas de sempre, metade pelos vizinhos e pela diáspora
+		nat = String(RngUtil.weighted_key(rng, pool)) if not pool.is_empty() and rng.randf() < 0.5 else PlayerGenerator.pick_import(rng, club.nation)
+		if DatabaseManager.nation(nat).is_empty() or age < min_foreign_age(nat, club.nation):
 			nat = club.nation
 	var p := PlayerGenerator.create(world, rng, pos, target, age, nat, club.city, used)
 	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used)
