@@ -85,3 +85,55 @@ static func apply(f: Dictionary, seed_value: int) -> void:
 		if f.has(key):
 			var lim: Array = LIMITS[key]
 			f[key] = clampf(float(f[key]), float(lim[0]), float(lim[1]))
+
+
+## Último passe do DNA: resolve as combinações que cada sorteio sozinho não enxerga (as mesmas que
+## FaceDNA.validate procura). Mexe o mínimo, sempre no traço que menos muda a cara da pessoa.
+static func fit(f: Dictionary) -> void:
+	# Olho: abertura no máximo ~metade da largura (acima disso vira olho de boneco)
+	f["eye_h"] = minf(float(f["eye_h"]), float(f["eye_w"]) * 0.6)
+	# Nariz: as asas não passam da linha das pupilas
+	f["nose_w"] = minf(float(f["nose_w"]), float(f["eye_dx"]) * 1.02 / (0.8 * 1.5) * 0.98)
+	# Filtro (entre o nariz e o lábio de cima): nunca some; primeiro afina o lábio, depois desce a boca
+	var lm := FaceDNA.landmarks(f)
+	var gap := float(lm["M"]) - float(f["lip_u"]) * 1.7 - float(lm["N"])
+	if gap < PHILTRUM_MIN:
+		var lip := maxf(0.02, float(f["lip_u"]) - (PHILTRUM_MIN - gap) / 1.7)
+		gap += (float(f["lip_u"]) - lip) * 1.7
+		f["lip_u"] = lip
+		if gap < PHILTRUM_MIN:
+			var H := 1.0 - float(f["hairline"])
+			f["mouth_y"] = minf(float(LIMITS["mouth_y"][1]), float(f["mouth_y"]) + (PHILTRUM_MIN - gap) / (H * 0.21))
+	# Queixo: entre o lábio de baixo e a ponta do queixo sempre cabe um queixo. Primeiro alonga o
+	# queixo, depois encurta o nariz (sobe a boca junto) e, por último, afina o lábio de baixo.
+	var short := _chin_short(f)
+	if short > 0.0:
+		var cl := float(f.get("chin_len", 0.0))
+		var grow := minf(short, maxf(0.0, 0.1 - cl))
+		f["chin_len"] = cl + grow
+		short -= grow
+	if short > 0.0:
+		var H := 1.0 - float(f["hairline"])
+		var nl := maxf(0.25, float(f["nose_len"]) - short / (H * 0.26 / 0.305))
+		f["nose_len"] = minf(float(f["nose_len"]), nl)
+		short = _chin_short(f)
+	if short > 0.0:
+		f["lip_l"] = maxf(0.035, float(f["lip_l"]) - short / 1.55)
+	# Cabelo: volume que passaria da borda do retrato é contido (o penteado continua o mesmo)
+	var vol := float(f.get("vol", 0.5))
+	while vol > 0.0 and FaceDNA.hair_top(f) > FaceDNA.HAIR_TOP_MAX - 0.005:
+		vol = maxf(0.0, vol - 0.1)
+		f["vol"] = vol
+
+
+## Espaço mínimo entre a base do nariz e o contorno do lábio de cima (unidades de altura do rosto).
+const PHILTRUM_MIN := 0.045
+## Espaço mínimo entre o lábio de baixo e a ponta do queixo.
+const CHIN_MIN := 0.165
+
+
+## Quanto falta de queixo (0 = cabe).
+static func _chin_short(f: Dictionary) -> float:
+	var lm := FaceDNA.landmarks(f)
+	return maxf(0.0, float(lm["M"]) + float(f["lip_l"]) * 1.55 + CHIN_MIN - float(lm["vb"]))
+

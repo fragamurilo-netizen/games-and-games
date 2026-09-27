@@ -1018,6 +1018,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_expression(f, seed_value, age, look)
 	_apply_identity(f, seed_value)
 	_proportion_floor(f)
+	FaceVariation.fit(f)
 	return f
 
 

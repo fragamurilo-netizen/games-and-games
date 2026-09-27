@@ -862,16 +862,15 @@ func _setup(c: Vector2, s: float) -> void:
 	# Proporções de foto de rosto real (medidas em retratos de estúdio de jogadores): da linha do
 	# cabelo ao queixo, os olhos ficam a ~43%, a base do nariz a ~69%, a boca a ~79%. Os valores
 	# salvos pelo FaceGen continuam os mesmos; eles só variam em volta dessas médias.
-	var hl := float(f["hairline"])
-	var H := 1.0 - hl
-	_E = hl + H * 0.43 + (float(f["eye_y"]) + 0.02) * 0.5
-	_X = float(f["eye_dx"]) * 1.02
-	_dE = (_E - float(f["eye_y"])) * 0.8
-	_N = _E + H * 0.26 * (float(f["nose_len"]) / 0.305)
-	_M = _N + H * 0.105 * (1.0 + (float(f["mouth_y"]) - 0.58) * 2.0)
-	_NW = float(f["nose_w"]) * 1.5
-	_BW = float(f["bridge_w"]) * 1.1
-	_MW = float(f["mouth_w"]) * 1.25
+	var lm := FaceDNA.landmarks(f)
+	_E = lm["E"]
+	_X = lm["X"]
+	_dE = lm["dE"]
+	_N = lm["N"]
+	_M = lm["M"]
+	_NW = lm["NW"]
+	_BW = lm["BW"]
+	_MW = lm["MW"]
 	_skin = FaceColorSystem.photo_skin(f["skin"])
 	# Índice fora da tabela (save antigo, catálogo novo) cai no último item em vez de travar o
 	# _setup no meio: com o _setup interrompido a pele do rosto saía toda preta.

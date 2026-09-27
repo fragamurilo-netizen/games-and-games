@@ -18,6 +18,8 @@ const FILL_K := 0.08
 const WRAP := 0.22
 ## Opacidade máxima da sombra projetada do nariz (0,05 a 0,16 pedido; fica em 0,11).
 const NOSE_SHADOW_MAX := 0.11
+## Escurecimento da borda do rosto/mandíbula (a sombra do nariz fica sempre abaixo dele).
+const JAW_EDGE_AO := 0.12
 const RIM := 0.08
 
 
@@ -28,7 +30,7 @@ static func uniforms(contrast: float = 1.0) -> Dictionary:
 		"key_dir": KEY,
 		"fill_dir": FILL,
 		"light_k": Vector4(AMBIENT, KEY_K, FILL_K, WRAP),
-		"light_k2": Vector4(NOSE_SHADOW_MAX, RIM, contrast, 0.0),
+		"light_k2": Vector4(NOSE_SHADOW_MAX, RIM, contrast, JAW_EDGE_AO),
 	}
 
 

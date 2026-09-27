@@ -46,7 +46,7 @@ uniform float rtab[128];                             // raio do contorno do rost
 uniform vec3 key_dir = vec3(-0.35, -0.65, 1.0);
 uniform vec3 fill_dir = vec3(0.45, -0.15, 1.0);
 uniform vec4 light_k = vec4(0.25, 0.72, 0.1, 0.3);  // ambiente, principal, rebatedor, "wrap" (maciez)
-uniform vec4 light_k2 = vec4(0.11, 0.1, 1.0, 0.0);  // sombra máx. do nariz, contraluz, contraste, -
+uniform vec4 light_k2 = vec4(0.11, 0.1, 1.0, 0.12); // sombra máx. do nariz, contraluz, contraste, sombra da borda/mandíbula
 
 float g1(float x, float s) {
 	return exp(-(x * x) / (s * s));
@@ -273,7 +273,7 @@ void fragment() {
 		float ao = 1.0;   // oclusão (ambiente e, em parte, a luz direta)
 		float sh = 1.0;   // sombra projetada na luz principal
 		// Borda: o rosto vira para longe da câmera
-		ao *= 1.0 - 0.12 * smoothstep(0.8, 1.0, th);
+		ao *= 1.0 - light_k2.w * smoothstep(0.8, 1.0, th);
 		// Órbitas (olhos fundos escurecem mais) e canto interno do olho junto ao nariz
 		float ey = v - eyv + 0.01;
 		ao *= 1.0 - 0.17 * relief.x * (g2(u - eyx, ey, 0.26, 0.105) + g2(u + eyx, ey, 0.26, 0.105));
