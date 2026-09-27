@@ -306,15 +306,19 @@
 			"capacity": 55000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "iberian",
-				"field": "stripes_tri:6",
+				"shape": "french",
+				"field": "stripes_tri:9",
 				"symbol": "none",
-				"chief_text": "GREMIO",
-				"cc": "#FFFFFF",
+				"chief_text": "GRÊMIO",
+				"cc": "#0D80BF",
 				"c1": "#0D80BF",
 				"fc": "#111111",
 				"c3": "#FFFFFF",
-				"stars": 1
+				"c2": "#FFFFFF",
+				"stars": 1,
+				"star_c": "#E4B43A",
+				"ribbon": "PORTO ALEGRENSE",
+				"border": "double"
 			},
 			"rivals": [
 				"BRA_COL"

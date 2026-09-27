@@ -106,6 +106,11 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["mono"] = bool(cr.get("mono", false))
 	sp["sub"] = String(cr.get("sub", ""))
 	sp["line_art"] = bool(cr.get("line_art", false))
+	sp["ribbon_top"] = String(cr.get("ribbon_top", "")) # faixa acima do escudo (MANCHESTER)
+	sp["top_style"] = String(cr.get("top_style", "")) # "gates": portão em arco atrás da faixa de cima (Liverpool)
+	sp["flames"] = bool(cr.get("flames", false)) # chamas dos dois lados (Liverpool)
+	sp["chief_sym"] = String(cr.get("chief_sym", "")) # símbolo no chefe (navio do United)
+	sp["chief_sc"] = Color(String(cr.get("chief_sc", "#C8102E")))
 	sp["staff"] = bool(cr.get("staff", false)) # cajado atrás do leão (Chelsea)
 	sp["ring_deco"] = String(cr.get("ring_deco", "")) # "roses": rosas e bolas embaixo do anel # símbolo em traço (Ajax), sem preenchimento
 	sp["star_c"] = Color(String(cr.get("star_c", ""))) if String(cr.get("star_c", "")) != "" else sp["c3"]
@@ -138,8 +143,10 @@ func _render(s: float) -> void:
 		top += 0.2
 	if int(sp["stars"]) > 0:
 		top += 0.12 if not small else 0.1
+	if String(sp["ribbon_top"]) != "" and not small:
+		top += 0.2 if String(sp["top_style"]) == "gates" else 0.13
 	var bottom := 0.1 if String(sp["ribbon"]) != "" and not small else 0.0
-	var side := 0.14 if bool(sp["laurel"]) else 0.0
+	var side := 0.14 if bool(sp["laurel"]) else (0.13 if bool(sp["flames"]) else 0.0)
 	var box_s := s * minf(1.0 - top - bottom, 1.0 - side * 2.0)
 	var box := Rect2(Vector2((s - box_s) * 0.5, s * top + (s * (1.0 - top - bottom) - box_s) * 0.5), Vector2(box_s, box_s))
 	var unit := unit_shape(shape)
@@ -161,7 +168,7 @@ func _render(s: float) -> void:
 	_field(inner, box, sp, s)
 	# Chefe com texto
 	var charge_box := _inner_box(box, shape)
-	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief":
+	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief" or String(sp["chief_sym"]) != "":
 		var chief_h := 0.24
 		var band := _xf(PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, chief_h), Vector2(0, chief_h)]), box)
 		var cc: Color = sp["cc"]
@@ -171,6 +178,10 @@ func _render(s: float) -> void:
 			var ink := contrast(cc, c1, c3)
 			var narrow := shape in ["round", "oval", "ring", "oval_ring", "octagon", "hexagon", "diamond"]
 			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.56), box.size.x * (0.46 if narrow else 0.62), box.size.y * 0.15, ink)
+		if String(sp["chief_sym"]) != "" and CrestArt.has(String(sp["chief_sym"])):
+			var ccen := box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.55)
+			for pp: PackedVector2Array in CrestArt.polys(String(sp["chief_sym"])):
+				_poly(_xf_c(pp, ccen, box.size.y * chief_h * 0.42), sp["chief_sc"])
 		charge_box = Rect2(charge_box.position + Vector2(0, box.size.y * 0.12), charge_box.size * Vector2(1.0, 0.86))
 	# Símbolo
 	match String(sp["sym_pos"]):
@@ -252,6 +263,36 @@ func _render(s: float) -> void:
 				_poly(_star(Vector2(x - r * 0.12, sy + dy - r * 0.12), r * 0.45, r * 0.19, 5), Color(sc.lightened(0.5), 0.55))
 	if bool(sp["laurel"]):
 		_laurel(box, c3, s)
+	if bool(sp["flames"]) and not small:
+		# Chamas eternas dos dois lados do escudo
+		for sx: float in [-1.0, 1.0]:
+			var base := Vector2(box.get_center().x + sx * box.size.x * 0.56, box.position.y + box.size.y * 0.78)
+			var fh := box.size.y * 0.38
+			var fw := box.size.x * 0.1
+			_poly(PackedVector2Array([base + Vector2(-fw, 0), base + Vector2(-fw * 0.8, -fh * 0.45), base + Vector2(-fw * 0.2, -fh * 0.7), base + Vector2(0, -fh), base + Vector2(fw * 0.35, -fh * 0.62), base + Vector2(fw * 0.9, -fh * 0.4), base + Vector2(fw, 0)]), Color("#E0301E"))
+			_poly(PackedVector2Array([base + Vector2(-fw * 0.55, 0), base + Vector2(-fw * 0.3, -fh * 0.45), base + Vector2(0, -fh * 0.62), base + Vector2(fw * 0.3, -fh * 0.4), base + Vector2(fw * 0.55, 0)]), Color("#F9A12E"))
+			_poly(PackedVector2Array([base + Vector2(-fw * 1.2, 0), base + Vector2(fw * 1.2, 0), base + Vector2(fw * 0.8, fh * 0.12), base + Vector2(-fw * 0.8, fh * 0.12)]), c3)
+	if String(sp["ribbon_top"]) != "" and not small:
+		var rt_h := s * 0.1
+		var rt := Rect2(Vector2(s * 0.14, y_cursor - rt_h - s * 0.015), Vector2(s * 0.72, rt_h))
+		if String(sp["top_style"]) == "gates":
+			# Portão em arco (grade vertical) atrás da faixa
+			var gc := Color("#1F8A7A")
+			var arc_c := Vector2(s * 0.5, rt.end.y)
+			var ar := s * 0.3
+			var pts := PackedVector2Array()
+			for i in 17:
+				var a := PI + PI * i / 16.0
+				pts.append(arc_c + Vector2(cos(a) * ar, sin(a) * ar * 0.6))
+			_polyline(pts, gc, maxf(1.5, s * 0.02))
+			for i in 9:
+				var x := arc_c.x - ar + ar * 2.0 * (i + 0.5) / 9.0
+				var dy := sqrt(maxf(0.0, 1.0 - pow((x - arc_c.x) / ar, 2.0))) * ar * 0.6
+				_polyline(PackedVector2Array([Vector2(x, arc_c.y), Vector2(x, arc_c.y - dy)]), gc, maxf(1.0, s * 0.01))
+			rt = Rect2(Vector2(s * 0.12, arc_c.y - ar * 0.6 - rt_h * 0.4), Vector2(s * 0.76, rt_h))
+			_ribbon(String(sp["ribbon_top"]), rt, gc, Color.WHITE)
+		else:
+			_ribbon(String(sp["ribbon_top"]), rt, c3, c1)
 
 
 ## Área útil para o símbolo dentro de cada formato (evita a ponta e o anel).
