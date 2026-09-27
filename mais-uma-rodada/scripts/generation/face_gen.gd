@@ -1017,6 +1017,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
 	_apply_identity(f, seed_value)
+	if look.has("lab") and look["lab"] is Dictionary:
+		FaceVariation.apply_lab(f, look["lab"])
 	_proportion_floor(f)
 	FaceVariation.fit(f)
 	return f

@@ -3,11 +3,13 @@ extends SceneTree
 ## xvfb-run godot --path . --resolution 1600x1000 --script res://tools/face_grid.gd -- --n=50 --cols=10 --size=160 --out=/tmp/grade.png
 ## Opções: --seed=N (primeira semente), --n=N, --cols=N, --size=PX, --ages=16,38 (faixa),
 ## --eth=0,3,7 (só essas etnias), --plain (fundo neutro, sem camisa de clube), --legacy (sem o
-## shader da pele, para comparar). Imprime o tempo médio de geração por retrato.
+## shader da pele, para comparar), --cache (usa o FaceCache: espera todos virarem textura antes da
+## foto, para comparar com o desenho ao vivo). Imprime o tempo médio de geração por retrato.
 
 var _out := "user://face_grid.png"
 var _n := 50
 var _views: Array = []
+var _cache := false
 
 
 func _initialize() -> void:
@@ -39,6 +41,9 @@ func _initialize() -> void:
 			plain = true
 		elif a == "--legacy":
 			PortraitView.use_skin_shader = false
+		elif a == "--cache":
+			_cache = true
+	FaceCache.enabled = _cache
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var bg := ColorRect.new()
 	bg.color = Color("#111418")
@@ -76,8 +81,21 @@ func _process(_delta: float) -> bool:
 	if _frames == 2:
 		var ms := (Time.get_ticks_usec() - _t0) / 1000.0
 		print("FACE_GRID %d retratos em %.0f ms (média %.1f ms por retrato)" % [_n, ms, ms / maxf(1.0, _n)])
-	if _frames == 10:
+	var shot := 10
+	if _cache:
+		# Espera todos os retratos virarem textura (um por quadro) e mais alguns quadros
+		var pending := _views.filter(func(v: PortraitView) -> bool: return FaceCache.lookup(v.cache_key()) == null or v._cached_tex == null)
+		if not pending.is_empty() and _frames < 4 * _n + 40:
+			return false
+		if _done_at == 0:
+			_done_at = _frames
+			print("FACE_CACHE %s" % str(FaceCache.stats))
+		shot = _done_at + 4
+	if _frames == shot:
 		root.get_viewport().get_texture().get_image().save_png(_out)
 		print("ok ", _out)
 		return true
 	return false
+
+
+var _done_at := 0

@@ -107,11 +107,18 @@ func on_show() -> void:
 	if not _built:
 		_build()
 	set_process(true)
+	# Partida rolando: nada de gerar retratos em segundo plano (a fila do cache anda depois)
+	FaceCache.hold = true
 
 
 func on_hide() -> void:
 	set_process(false)
 	AudioManager.crowd_stop()
+	FaceCache.hold = false
+
+
+func _exit_tree() -> void:
+	FaceCache.hold = false
 
 
 ## Chamado quando a tela troca de ponto de quebra (girar o aparelho): só rearruma.

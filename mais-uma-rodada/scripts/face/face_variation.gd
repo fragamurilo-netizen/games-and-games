@@ -137,3 +137,30 @@ static func _chin_short(f: Dictionary) -> float:
 	var lm := FaceDNA.landmarks(f)
 	return maxf(0.0, float(lm["M"]) + float(f["lip_l"]) * 1.55 + CHIN_MIN - float(lm["vb"]))
 
+
+## Ajustes do laboratório de rostos (-1 a 1 cada; 0 = como o DNA gerou). Guardados em
+## look["lab"], então valem também para o editor e entram na chave do cache.
+const LAB_KEYS := ["fw", "fh", "jaw", "chin", "cheek", "eye_dx", "eye_size", "nose_w", "nose_len", "mouth_w"]
+
+
+static func apply_lab(f: Dictionary, lab: Dictionary) -> void:
+	var x := func(k: String) -> float:
+		return clampf(float(lab.get(k, 0.0)), -1.0, 1.0)
+	f["fw"] = float(f["fw"]) * (1.0 + 0.08 * x.call("fw"))
+	f["fh"] = float(f["fh"]) * (1.0 + 0.06 * x.call("fh"))
+	f["jaw"] = float(f["jaw"]) + 0.1 * x.call("jaw")
+	f["chin_len"] = float(f.get("chin_len", 0.0)) + 0.05 * x.call("chin")
+	f["chin_sq"] = float(f["chin_sq"]) + 0.35 * x.call("chin")
+	f["cheekbone"] = float(f["cheekbone"]) * (1.0 + 0.3 * x.call("cheek"))
+	f["cheek_w"] = float(f["cheek_w"]) * (1.0 + 0.02 * x.call("cheek"))
+	f["eye_dx"] = float(f["eye_dx"]) + 0.03 * x.call("eye_dx")
+	f["eye_w"] = float(f["eye_w"]) * (1.0 + 0.1 * x.call("eye_size"))
+	f["eye_h"] = float(f["eye_h"]) * (1.0 + 0.12 * x.call("eye_size"))
+	f["nose_w"] = float(f["nose_w"]) * (1.0 + 0.15 * x.call("nose_w"))
+	f["nose_len"] = float(f["nose_len"]) * (1.0 + 0.12 * x.call("nose_len"))
+	f["mouth_w"] = float(f["mouth_w"]) * (1.0 + 0.12 * x.call("mouth_w"))
+	for key: String in LIMITS:
+		if f.has(key):
+			var lim: Array = LIMITS[key]
+			f[key] = clampf(float(f[key]), float(lim[0]), float(lim[1]))
+

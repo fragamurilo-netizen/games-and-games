@@ -287,6 +287,15 @@ var _cap_out := PackedVector2Array()
 # Estampas prontas para imprimir no peito (texturas do DecalCache)
 var _crest_tex: Texture2D = null
 var _sponsor_tex: Texture2D = null
+# Retrato pronto em textura (FaceCache): chave do desenho atual, textura em uso e se este nó é a
+# cópia desenhada fora da tela para o cache
+var _cache_key := 0
+var _cached_tex: Texture2D = null
+var _cache_render := false
+## Sempre ao vivo, sem passar pelo FaceCache (laboratório de rostos: cada ajuste é um rosto novo).
+var no_cache := false
+## Tempo do último desenho deste retrato (µs), gerado ou reproduzido; o laboratório mostra.
+var last_draw_usec := 0
 
 
 func set_player(p: Player, club: Club, year: int) -> void:
@@ -326,6 +335,12 @@ func _invalidate() -> void:
 # ---------------------------------------------------------------------------
 
 func _draw() -> void:
+	var t0 := Time.get_ticks_usec()
+	_draw_portrait()
+	last_draw_usec = Time.get_ticks_usec() - t0
+
+
+func _draw_portrait() -> void:
 	_clear_items()
 	var s := minf(size.x, size.y)
 	if s <= 4.0:
@@ -342,11 +357,30 @@ func _draw() -> void:
 	_ensure_items()
 	# Três camadas com cache próprio: fundo + cabelo de trás + orelhas, corpo + roupa, rosto +
 	# cabelo. Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
-	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, FaceDNA.VERSION, use_skin_shader])
+	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, FaceDNA.VERSION, use_skin_shader, FaceLighting.contrast])
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest,
 		_crest_tex != null, _sponsor_tex != null])
 	var k_front := hash(["front", face_key])
+	# Já existe em textura? Então é só ela (sem malhas nem shaders). Senão desenha ao vivo e, com as
+	# estampas prontas, pede a cópia em textura para as próximas vezes.
+	_cache_key = 0
+	_cached_tex = null
+	if not _cache_render and not no_cache and FaceCache.active():
+		var px := int(ceil(s * _screen_scale()))
+		_cache_key = (hash([k_back, k_body, px]) << 31) ^ hash([k_front, px, "fc"])
+		var tex := FaceCache.lookup(_cache_key)
+		if tex != null:
+			_cached_tex = tex
+			RenderingServer.canvas_item_set_material(_items[0], FaceCache.premult_material().get_rid())
+			RenderingServer.canvas_item_set_material(_items[2], RID())
+			RenderingServer.canvas_item_add_texture_rect(_items[0], Rect2(o, Vector2(s, s)), tex.get_rid())
+			return
+		if _decals_settled(s):
+			FaceCache.request(self, _cache_key, px, float(px) / s)
+	_skin_mat = null
+	_hair_mat = null
+	_bind_materials()
 	var ready := false
 	for pair: Array in [[k_back, 0], [k_body, 1], [k_front, 2]]:
 		var key: int = pair[0]
@@ -386,6 +420,58 @@ func _draw() -> void:
 			_cmd_cache.erase(old)
 			_mat_cache.erase(old)
 		_rec = []
+
+
+## Chave do retrato em textura que está na tela (0 = desenho ao vivo sem cache).
+func cache_key() -> int:
+	return _cache_key
+
+
+## Cópia para o FaceCache desenhar fora da tela: mesmos dados, mesmo tamanho lógico (reaproveita os
+## comandos já gravados); o quadrado do retrato fica na origem do SubViewport.
+func cache_clone() -> PortraitView:
+	var v := PortraitView.new()
+	v._cache_render = true
+	v.face_seed = face_seed
+	v.eth = eth
+	v.age = age
+	v.look = look
+	v.shirt_color = shirt_color
+	v.trim_color = trim_color
+	v.bg_color = bg_color
+	v.suit = suit
+	v.kit_collar = kit_collar
+	v.kit_pattern = kit_pattern
+	v.kit = kit
+	v.crest = crest
+	v.cutout = cutout
+	v.size = size
+	var s := minf(size.x, size.y)
+	v.position = -Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
+	return v
+
+
+## Pixels de tela por unidade do retrato (densidade do aparelho), em degraus de 1/4, entre 1 e 4.
+## Animações de escala menores que 1 não baixam a resolução (vale a do aparelho).
+func _screen_scale() -> float:
+	var k := absf(get_screen_transform().get_scale().x)
+	var vp := get_viewport()
+	if vp != null:
+		k = maxf(k, absf(vp.get_final_transform().get_scale().x))
+	return clampf(ceil(k * 4.0) / 4.0, 1.0, 4.0)
+
+
+## As estampas do peito (escudo, patrocinador) que este tamanho mostra já estão prontas? Só então o
+## retrato vai para o cache (senão a textura guardaria a camisa sem o escudo).
+func _decals_settled(s: float) -> bool:
+	if suit or s < 70.0:
+		return true
+	if not crest.is_empty() and _crest_tex == null:
+		return false
+	var sp: Variant = kit.get("sp", {})
+	if s >= 90.0 and sp is Dictionary and String((sp as Dictionary).get("n", "")) != "" and _sponsor_tex == null:
+		return false
+	return true
 
 
 # ---------------------------------------------------------------------------

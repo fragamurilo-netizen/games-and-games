@@ -23,9 +23,13 @@ const JAW_EDGE_AO := 0.12
 const RIM := 0.08
 
 
-## Uniformes de luz para o shader da pele. `contrast` 1 = padrão do jogo; o laboratório de rostos
-## permite variar para comparar (0 = luz chapada, 1,4 = mais dramática).
-static func uniforms(contrast: float = 1.0) -> Dictionary:
+## Contraste da luz (1 = padrão do jogo). O laboratório de rostos muda para comparar (0 = luz
+## chapada, 1,5 = mais dramática); entra na chave dos caches de retrato.
+static var contrast := 1.0
+
+
+## Uniformes de luz para o shader da pele.
+static func uniforms() -> Dictionary:
 	return {
 		"key_dir": KEY,
 		"fill_dir": FILL,
