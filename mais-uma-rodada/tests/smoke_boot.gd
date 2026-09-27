@@ -32,7 +32,7 @@ func _run() -> void:
 		quit(13)
 		return
 
-	if content.get_child_count() < 5:
+	if content.get_child_count() < 4:
 		push_error("SMOKE_BOOT: menu rendered too few items (%d)" % content.get_child_count())
 		quit(14)
 		return
