@@ -33,14 +33,12 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in TABS:
-		var key: String = t[0]
-		row.add_child(UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh()))
-	c.add_child(row)
+	max_content_width = 1700
+	c.add_child(_hero(w, nat_rank))
+	c.add_child(UIKit.tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()))
+	var start := c.get_child_count()
 	match _tab:
 		"tours":
 			_tours(w, c)
@@ -50,6 +48,29 @@ func refresh() -> void:
 			c.add_child(_ranking(w))
 		"squad":
 			_squad(w, c)
+	columnize(c, start, 2, 2 if _tab == "tours" else 0)
+
+
+## Cabeçalho da seleção: bandeira grande, nome, posição no ranking e confederação, no fundo
+## com as cores da bandeira (como a tela de seleção de um jogo de futebol licenciado).
+func _hero(w: GameWorld, rank: int) -> Control:
+	var v := UIKit.card("Card", 10)
+	var row := UIKit.hbox(18)
+	var fl := UIKit.flag(_nation, 120)
+	fl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(fl)
+	var col := UIKit.vbox(2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_child(UIKit.eyebrow("Seleção"))
+	col.add_child(UIKit.label(DatabaseManager.nation_name(_nation).to_upper(), "Title", true))
+	row.add_child(col)
+	var rk := UIKit.stat_tile("%dº" % rank, "Ranking", UIColors.ACCENT)
+	rk.size_flags_horizontal = Control.SIZE_SHRINK_END
+	rk.custom_minimum_size.x = 140
+	row.add_child(rk)
+	v.add_child(row)
+	return UIKit.card_panel(v)
 
 
 # ---------------------------------------------------------------------------
@@ -80,14 +101,12 @@ func _tours(w: GameWorld, c: VBoxContainer) -> void:
 	if _tour == "":
 		var tours: Array = NationalTeamManager.data(w)["tours"]
 		_tour = String(tours[tours.size() - 1]["t"]) if not tours.is_empty() else String(ids[0])
-	var g := ButtonGroup.new()
-	var flow := UIKit.flow(8)
+	var items: Array = []
 	for id in ids:
-		var key: String = id
-		flow.add_child(UIKit.chip(String(NationalTeamManager.tcfg(key).get("short", key)), key == _tour, g, func():
-			_tour = key
-			refresh()))
-	c.add_child(flow)
+		items.append([String(id), String(NationalTeamManager.tcfg(String(id)).get("short", id))])
+	c.add_child(UIKit.scroll_tabs(items, _tour, func(k: String):
+		_tour = k
+		refresh()))
 	var rec := NationalTeamManager.last_edition(w, _tour)
 	if rec.is_empty():
 		c.add_child(UIKit.label("A primeira edição da %s no save será em %d." % [NationalTeamManager.tournament_name(_tour), NationalTeamManager.next_edition(_tour, w.year + 1)], "Muted", true))
