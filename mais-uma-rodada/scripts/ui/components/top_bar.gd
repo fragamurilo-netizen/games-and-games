@@ -13,19 +13,51 @@ signal back_pressed
 
 func _ready() -> void:
 	back_btn.icon = UIKit.icon("back")
+	title_lbl.uppercase = true
+	title_lbl.add_theme_font_override(&"font", get_theme_font(&"font", &"Title"))
+	title_lbl.add_theme_font_size_override(&"font_size", 32)
+	money_lbl.add_theme_font_size_override(&"font_size", 28)
+	$Row.resized.connect(queue_redraw)
+	money_lbl.item_rect_changed.connect(queue_redraw)
 	back_btn.pressed.connect(func():
 		AudioManager.click()
 		back_pressed.emit())
 
 
-## Faixa fina nas cores do clube embaixo da barra.
+## Fundo com a identidade do clube: a cor principal nasce atrás do escudo e se dissolve para a
+## direita, com riscas diagonais discretas na segunda cor; filete nas duas cores na base e
+## o saldo numa cápsula.
 func _draw() -> void:
-	if UIColors.TEAM_1.a <= 0.0:
-		return
-	var h := 4.0
-	var y := size.y - h
-	draw_rect(Rect2(0, y, size.x * 0.68, h), UIColors.TEAM_1)
-	draw_rect(Rect2(size.x * 0.68, y, size.x * 0.32, h), UIColors.TEAM_2)
+	var has_team := UIColors.TEAM_1.a > 0.0
+	if has_team:
+		var c1 := UIColors.ACCENT
+		var steps := 20
+		for i in steps:
+			var t := float(i) / steps
+			var col := c1
+			col.a = (0.5 if not UIColors.light else 0.26) * pow(1.0 - t, 1.6)
+			draw_rect(Rect2(size.x * 0.75 * t, 0, size.x * 0.75 / steps + 1.0, size.y), col)
+		var band := Color.WHITE if not UIColors.light else Color.BLACK
+		band.a = 0.035
+		var x := -size.y
+		while x < size.x * 0.6:
+			draw_colored_polygon(PackedVector2Array([Vector2(x + size.y, 0), Vector2(x + size.y + 10.0, 0), Vector2(x + 10.0, size.y), Vector2(x, size.y)]), band)
+			x += 26.0
+		var h := 3.0
+		var y := size.y - h
+		draw_rect(Rect2(0, y, size.x * 0.68, h), UIColors.TEAM_1)
+		draw_rect(Rect2(size.x * 0.68, y, size.x * 0.32, h), UIColors.TEAM_2)
+	else:
+		draw_rect(Rect2(0, size.y - 1.0, size.x, 1.0), UITokens.HAIRLINE if not UIColors.light else UIColors.LINE)
+	if money_lbl != null and money_lbl.visible:
+		var r := Rect2(money_lbl.position + $Row.position, money_lbl.size).grow_individual(14, 2, 14, 2)
+		var pill := StyleBoxFlat.new()
+		pill.bg_color = Color(0, 0, 0, 0.35) if not UIColors.light else Color(1, 1, 1, 0.85)
+		pill.border_color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+		pill.set_border_width_all(1)
+		pill.set_corner_radius_all(int(r.size.y * 0.5))
+		pill.anti_aliasing = true
+		draw_style_box(pill, r)
 
 
 func set_state(title: String, subtitle: String, show_back: bool, club: Club) -> void:

@@ -1338,13 +1338,11 @@ func _tab_list() -> Array:
 
 func _build_tabs() -> void:
 	UIKit.clear(_tabs_row)
-	var g := ButtonGroup.new()
-	for t in _tab_list():
-		var key: String = t[0]
-		var chip := UIKit.chip(t[1], key == _tab, g, func(): _set_tab(key))
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		_tabs_row.add_child(chip)
+	var t := UIKit.tabs(_tab_list(), _tab, func(key: String): _set_tab(key))
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for b in t.get_children():
+		(b as Button).custom_minimum_size.y = 56
+	_tabs_row.add_child(t)
 
 
 func _set_tab(key: String) -> void:

@@ -58,15 +58,12 @@ func refresh() -> void:
 
 func _tabs_row(p: Player) -> Control:
 	var row := UIKit.hbox(8)
-	var g := ButtonGroup.new()
-	for t in TABS:
-		var key: String = t[0]
-		var ch := UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh()
-			scroll_to_top())
-		ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(ch)
+	var t := UIKit.tabs(TABS, _tab, func(key: String):
+		_tab = key
+		refresh()
+		scroll_to_top())
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(t)
 	var pid := p.id
 	row.add_child(UIKit.icon_button("swap", func(): UIManager.push("compare", {"a": pid}), "Comparar"))
 	return row
@@ -78,8 +75,12 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	row.add_child(UIKit.portrait(p, club, w.year, 132))
 	var col := UIKit.vbox(4)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(p.display_name(), "Title"))
-	col.add_child(UIKit.label(p.full_name(), "Small", true))
+	var nm := UIKit.label(p.display_name(), "Title")
+	nm.uppercase = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(nm)
+	if p.full_name() != p.display_name():
+		col.add_child(UIKit.label(p.full_name(), "Small", true))
 	var r1 := UIKit.hbox(8)
 	r1.add_child(UIKit.pos_badge(p.position))
 	r1.add_child(UIKit.label(Pos.name_of(p.position), "Small", true))

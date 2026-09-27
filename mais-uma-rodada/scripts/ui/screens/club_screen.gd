@@ -54,14 +54,21 @@ func refresh() -> void:
 
 
 func _identity_card(w: GameWorld, club: Club) -> Control:
+	var out := UIKit.vbox(16)
+	# Cabeçalho: escudo grande sobre o degradê do clube, nome em caixa alta e a identidade.
 	var card := UIKit.card("Card", 12)
-	var row := UIKit.hbox(16)
-	row.add_child(UIKit.crest(club, 128))
-	var col := UIKit.vbox(2)
+	var row := UIKit.hbox(18)
+	var cr := UIKit.crest(club, 140)
+	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(cr)
+	var col := UIKit.vbox(4)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(club.name, "Title", true))
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if club.nickname != "":
-		col.add_child(UIKit.label("\"%s\"" % club.nickname, "Accent"))
+		col.add_child(UIKit.eyebrow(club.nickname))
+	var nm := UIKit.label(club.name, "Title", true)
+	nm.uppercase = true
+	col.add_child(nm)
 	var place := UIKit.hbox(8)
 	place.add_child(UIKit.flag(club.nation, 30))
 	place.add_child(UIKit.label("%s, %s · fundado em %d" % [club.city, DatabaseManager.nation_name(club.nation), club.founded], "Small", true))
@@ -70,10 +77,6 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	stars.star_size = 22.0
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
 	col.add_child(stars)
-	var rpos := ClubRanking.world_position(w, club.id)
-	if rpos > 0:
-		var rk := UIKit.label("%dº no ranking mundial" % rpos, "Small")
-		col.add_child(UIKit.tap_row(rk, func(): UIManager.goto("table", {"rank": ""}), "CardFlat"))
 	row.add_child(col)
 	card.add_child(row)
 	var arch := club.arch()
@@ -83,37 +86,54 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(tags)
 	if arch.has("desc"):
 		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
-	var kits := UIKit.hbox(12)
+	out.add_child(HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1))
+	# Números rápidos: ranking mundial, estádio e ingresso.
+	var tiles := UIKit.hbox(10)
+	var rpos := ClubRanking.world_position(w, club.id)
+	if rpos > 0:
+		var rk := UIKit.stat_tile("%dº" % rpos, "Ranking mundial", UIColors.ACCENT)
+		var rk_tap := UIKit.tap_row(rk, func(): UIManager.goto("table", {"rank": ""}), "PanelContainer")
+		rk_tap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tiles.add_child(rk_tap)
+	tiles.add_child(UIKit.stat_tile(Fmt.thousands(club.capacity), "Lugares"))
+	tiles.add_child(UIKit.stat_tile(Fmt.money(FinanceManager.ticket_price(club)), "Ingresso"))
+	out.add_child(tiles)
+	# Estádio e uniformes da temporada.
+	var kc := UIKit.card("Card", 12)
+	kc.add_child(UIKit.section_header(club.stadium))
+	var kits := UIKit.hbox(8)
 	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.third_kit(), "Terceiro"], [club.gk_kit(), "Goleiro"]]:
-		var v := UIKit.vbox(2)
+		var v := UIKit.vbox(4)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var kv := UIKit.kit(k[0], 72, 0, club.crest)
+		var kv := UIKit.kit(k[0], 96, 0, club.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(kv)
-		var l := UIKit.label(k[1], "Small")
+		var l := UIKit.label(String(k[1]).to_upper(), "Caps")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(l)
 		kits.add_child(v)
-	var st := UIKit.vbox(2)
-	st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	st.add_child(UIKit.label(club.stadium, "H3", true))
-	st.add_child(UIKit.label("%s lugares" % Fmt.thousands(club.capacity), "Small"))
-	st.add_child(UIKit.label("Ingresso: %s" % Fmt.money(FinanceManager.ticket_price(club)), "Small"))
-	kits.add_child(st)
-	card.add_child(kits)
+	kc.add_child(kits)
 	if _own():
 		var pre := SponsorManager.is_preseason(w)
-		card.add_child(UIKit.button("Uniformes e patrocínios" + (" (pré-temporada)" if pre else ""), "PrimaryButton" if pre else "GhostButton", func(): UIManager.push("kit"), "shirt"))
+		if pre:
+			kc.add_child(UIKit.button("Uniformes e patrocínios", "PrimaryButton", func(): UIManager.push("kit"), "shirt"))
+	out.add_child(UIKit.card_panel(kc))
+	# Atalhos do clube como lista de menu.
 	var cid := club.id
-	if not club.kit_history.is_empty():
-		card.add_child(UIKit.button("Uniformes por temporada", "GhostButton", func(): UIManager.push("kit_history", {"id": cid}), "shirt"))
-	card.add_child(UIKit.button("Elencos anteriores", "GhostButton", func(): UIManager.push("past_squads", {"id": cid}), "clock"))
-	card.add_child(UIKit.button("Revelados pela base", "GhostButton", func(): UIManager.push("graduates", {"id": cid}), "up"))
+	var rows: Array = []
 	if _own():
-		card.add_child(UIKit.button("Apresentação do clube", "GhostButton", func(): UIManager.push("welcome"), "info"))
+		rows.append(UIKit.menu_row("shirt", "Uniformes e patrocínios", "Modelos, cores e contratos de patrocínio", func(): UIManager.push("kit")))
+	if not club.kit_history.is_empty():
+		rows.append(UIKit.menu_row("palette", "Uniformes por temporada", "Todas as camisas do clube, ano a ano", func(): UIManager.push("kit_history", {"id": cid})))
+	rows.append(UIKit.menu_row("clock", "Elencos anteriores", "Quem vestiu a camisa em cada temporada", func(): UIManager.push("past_squads", {"id": cid})))
+	rows.append(UIKit.menu_row("up", "Revelados pela base", "Crias da casa e onde estão hoje", func(): UIManager.push("graduates", {"id": cid})))
+	if _own():
+		rows.append(UIKit.menu_row("info", "Apresentação do clube", "História, objetivos e expectativas", func(): UIManager.push("welcome")))
+	out.add_child(UIKit.menu_group(rows))
 	var pol := ClubPolicy.of(club)
 	if not pol.is_empty():
-		card.add_child(UIKit.section("Filosofia"))
+		var pcard := UIKit.card("Card", 10)
+		pcard.add_child(UIKit.section("Filosofia"))
 		var prow := UIKit.hbox(10)
 		prow.add_child(UIKit.icon_rect("star" if pol.has("only") else "info", 30, UIColors.ACCENT))
 		var pc := UIKit.vbox(0)
@@ -121,14 +141,17 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		pc.add_child(UIKit.label(String(pol.get("name", "")), "H3"))
 		pc.add_child(UIKit.label(String(pol.get("desc", "")), "Small", true))
 		prow.add_child(pc)
-		card.add_child(prow)
+		pcard.add_child(prow)
+		out.add_child(UIKit.card_panel(pcard))
 	# Rivais de origem e rivalidades que nasceram no save, da mais quente para a mais fria
 	var rivals := Rivalry.of_club(w, club.id).slice(0, 4)
 	if not rivals.is_empty():
-		card.add_child(UIKit.section("Rivais"))
+		var rc := UIKit.card("Card", 10)
+		rc.add_child(UIKit.section("Rivais"))
 		for e: Dictionary in rivals:
-			card.add_child(RivalryView.club_row(w, club.id, e))
-	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1)
+			rc.add_child(RivalryView.club_row(w, club.id, e))
+		out.add_child(UIKit.card_panel(rc))
+	return out
 
 
 ## DNA: o que o clube é (filosofia, mercado, escola, números) e as viradas da sua história.

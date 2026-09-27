@@ -40,20 +40,16 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	c.add_child(_banner(w, club))
-	var gt := ButtonGroup.new()
-	var trow := UIKit.hbox(8)
 	var n_offers := TransferManager.pending_offers(w).size()
+	var items: Array = []
 	for t in TABS:
-		var key: String = t[0]
 		var text: String = t[1]
-		if key == "offers" and n_offers > 0:
+		if t[0] == "offers" and n_offers > 0:
 			text += " (%d)" % n_offers
-		var chip := UIKit.chip(text, key == _tab, gt, func():
-			_tab = key
-			refresh())
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		trow.add_child(chip)
+		items.append([t[0], text])
+	var trow := UIKit.scroll_tabs(items, _tab, func(key: String):
+		_tab = key
+		refresh())
 	c.add_child(trow)
 	match _tab:
 		"free":
@@ -111,16 +107,12 @@ func _origin_chips(c: VBoxContainer, club: Club) -> void:
 
 
 func _group_chips(c: VBoxContainer) -> void:
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
+	var items: Array = []
 	for i in GROUPS.size():
-		var idx := i
-		var chip := UIKit.chip(GROUPS[i], i == _group, g, func():
-			_group = idx
-			refresh())
-		UIKit.shrink_button(chip)
-		row.add_child(chip)
-	c.add_child(row)
+		items.append([str(i), GROUPS[i]])
+	c.add_child(UIKit.segment(items, str(_group), func(key: String):
+		_group = int(key)
+		refresh()))
 
 
 ## Overall do seu titular mais fraco em cada setor (referência de "reforço").
