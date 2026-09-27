@@ -849,3 +849,44 @@ static func effect_pills(items: Array) -> HFlowContainer:
 
 static func tr_static(s: String) -> String:
 	return I18n.t(s)
+
+
+## Linha de comparação entre dois lados (estatísticas de jogo): valores nas pontas, o nome no
+## meio e uma barra dividida na proporção, com o lado maior em destaque.
+static func versus_row(caption: String, a_text: String, b_text: String, a_val: float, b_val: float) -> VBoxContainer:
+	var v := vbox(4)
+	var r := hbox(8)
+	var total := a_val + b_val
+	var a_win := a_val > b_val
+	var b_win := b_val > a_val
+	var a := label(a_text, "H3")
+	a.custom_minimum_size.x = 90
+	if a_win:
+		a.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	r.add_child(a)
+	var n := label(caption, "Caps")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	r.add_child(n)
+	var b := label(b_text, "H3")
+	b.custom_minimum_size.x = 90
+	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if b_win:
+		b.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	r.add_child(b)
+	v.add_child(r)
+	var bars := hbox(4)
+	var left := ColorRect.new()
+	left.color = UIColors.ACCENT if a_win else UIColors.SURFACE_3
+	left.custom_minimum_size.y = 6
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = maxf(0.05, a_val / total) if total > 0.0 else 1.0
+	var right := ColorRect.new()
+	right.color = UIColors.ACCENT if b_win else UIColors.SURFACE_3
+	right.custom_minimum_size.y = 6
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.size_flags_stretch_ratio = maxf(0.05, b_val / total) if total > 0.0 else 1.0
+	bars.add_child(left)
+	bars.add_child(right)
+	v.add_child(bars)
+	return v
