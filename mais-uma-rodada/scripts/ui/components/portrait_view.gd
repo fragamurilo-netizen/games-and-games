@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.28, -0.22, 0.94)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 12
+const PORTRAIT_RENDER_VERSION := 13
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -726,205 +726,116 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var u := (p.x - _hc.x) / _fw
 	var v := (p.y - _hc.y) / _fh
 	var au := absf(u)
-	# Mantém a direção radial para a luz de rebote, mas a normal principal vem de um
-	# mapa de relevo anatômico: órbitas, nariz, maçãs, boca e queixo deixam de parecer pintados.
-	var dx := 0.0
-	var dy := 0.0
-	if t > 0.0 and i < _mesh_b.size():
-		var d := (_mesh_b[i] - _mesh_c).normalized()
-		dx = d.x
-		dy = d.y
+	var f := _f
+
+	# Luz-base contínua. Nada aqui usa uma faixa horizontal ou troca brusca de fórmula por altura.
 	var fn := _face_normal(u, v)
-	var nx := fn.x
-	var ny := fn.y
-	var nz := fn.z
-	# Luz "enrolada": a pele espalha a luz por dentro, então a passagem para a sombra é gradual
-	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
-	var lum := 0.64 + 0.38 * diff
-	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
-	# o rosto do fundo como numa foto
-	lum -= 0.04 * smoothstep(0.78, 1.0, t)
-	lum += 0.035 * smoothstep(0.86, 1.0, t) * maxf(0.0, dx) * (1.0 - smoothstep(0.3, 0.9, -dy))
+	var diff := clampf((fn.x * _light.x + fn.y * _light.y + fn.z * _light.z + 0.35) / 1.35, 0.0, 1.0)
+	var lum := 0.72 + 0.31 * diff
+	lum -= 0.045 * smoothstep(0.72, 1.0, t)
+
 	var E := _E
 	var X := _X
 	var N := _N
 	var M := _M
-	var BW := _BW
-	var NW := _NW
-	var MW := _MW
-	var k := _k
-	var a := 0.0
-	var b := 0.0
-	# Órbitas e arco superciliar
-	var ey := v - E + 0.01
-	a = (u - X) / 0.27
-	b = (u + X) / 0.27
-	var ey2 := ey * ey / 0.0121
-	lum -= 0.13 * k[0] * (exp(-a * a - ey2) + exp(-b * b - ey2))
-	a = (au - 0.2) / 0.08
-	b = (v - E) / 0.08
-	lum -= 0.05 * exp(-a * a - b * b)
-	b = (v - E + 0.19) / 0.05
-	var bb := b * b
-	a = (u + X * 0.95) / 0.26
-	var a2 := (u - X * 0.95) / 0.26
-	lum += 0.07 * k[1] * (exp(-a * a - bb) * 1.2 + exp(-a2 * a2 - bb) * 0.6)
-	# Testa e têmporas
-	a = (u + 0.2) / 0.38
-	b = (v + 0.55) / 0.2
-	var fore := exp(-a * a - b * b)
-	lum += 0.07 * fore
-	a = (au - 0.92) / 0.14
-	b = (v + 0.28) / 0.22
-	lum -= 0.05 * exp(-a * a - b * b)
-	# Nariz: dorso claro, lateral direita na sombra, ponta, asas e sombra embaixo
+	var BW := maxf(_BW, 0.035)
+	var NW := maxf(_NW, 0.22)
+	var MW := maxf(_MW, 0.2)
 	var un := u - _ND * smoothstep(E - 0.05, N, v)
-	var wv := smoothstep(E - 0.06, E + 0.1, v) * (1.0 - smoothstep(N - 0.1, N - 0.01, v))
-	var ridge_hl := 0.0
-	if wv > 0.0:
-		a = (un + 0.03) / BW
-		ridge_hl = exp(-a * a) * wv
-		var hump := 0.0
-		if k[2] > 0.0:
-			b = (v - (E + N) * 0.5) / 0.06
-			hump = 0.05 * exp(-b * b)
-		lum += (0.1 * k[3] + hump) * ridge_hl
-		a = (un - BW * 1.7) / (BW * 0.9)
-		lum -= 0.2 * k[3] * exp(-a * a) * wv
-		a = (un + BW * 1.9) / (BW * 0.9)
-		lum -= 0.05 * k[3] * exp(-a * a) * wv
-	if v > N - 0.18 and v < N + 0.08:
-		# Brilho da ponta do nariz: curto e concentrado.
-		a = (un + 0.01) / maxf(NW * 0.38 * k[4], 0.03)
-		b = (v - (N - 0.06)) / 0.045
-		lum += 0.07 * exp(-a * a - b * b)
-		# Laterais das narinas. A sombra fica separada em dois lóbulos, sem atravessar
-		# horizontalmente a região acima do lábio.
-		b = (v - (N - 0.02)) / 0.04
-		bb = b * b
-		a = (un - NW * 0.62) / maxf(NW * 0.22, 0.025)
-		a2 = (un + NW * 0.62) / maxf(NW * 0.22, 0.025)
-		lum -= 0.075 * (exp(-a * a - bb) + exp(-a2 * a2 - bb) * 0.82)
-		# Sombra infranasal só sob a columela. Antes era larga e forte o bastante para
-		# parecer um bigode/buço em praticamente qualquer rosto.
-		a = un / maxf(NW * 0.30, 0.035)
-		b = (v - (N + 0.006)) / 0.015
-		lum -= 0.032 * exp(-a * a - b * b)
-	# Sulco nasolabial (mais marcado com a idade e o sorriso)
-	if v > N - 0.1 and v < M + 0.15:
-		var nl_d := _seg_dist(Vector2(au, v), Vector2(NW * 1.25, N - 0.02), Vector2(MW * 1.12, M + 0.04)) / 0.045
-		lum -= k[5] * (1.0 if u > 0.0 else 0.55) * exp(-nl_d * nl_d)
-	# Maçãs do rosto e bochechas
-	var cheek_v := (_E + _N) * 0.5
-	b = (v - cheek_v) / 0.1
-	a = (u + 0.5) / 0.25
-	a2 = (u - 0.5) / 0.25
-	lum += k[6] * (0.07 * exp(-a * a - b * b) + 0.03 * exp(-a2 * a2 - b * b))
-	a = (au - 0.64) / 0.17
-	b = (v - cheek_v - 0.28) / 0.13
-	lum -= k[7] * exp(-a * a - b * b)
-	# Boca e queixo
-	if v > M - 0.15:
-		a = u / (MW * 0.55)
-		b = (v - (M + k[8] * 2.0 + 0.06)) / 0.035
-		lum -= 0.11 * exp(-a * a - b * b)
-		a = (au - MW * 1.05) / 0.05
-		b = (v - M) / 0.04
-		lum -= 0.08 * exp(-a * a - b * b)
-		a = (u + 0.06) / 0.2
-		b = (v - 0.86) / 0.07
-		lum += 0.07 * exp(-a * a - b * b)
-		if k[9] > 0.0:
-			a = u / 0.025
-			b = (v - 0.9) / 0.06
-			lum -= 0.08 * exp(-a * a - b * b)
-	a = (u + 0.04) / 0.04
-	b = (v - (N + M) * 0.5) / 0.05
-	lum += 0.03 * exp(-a * a - b * b)
-	# Olheiras e flacidez com a idade
-	if k[10] > 0.0:
-		a = (au - X) / 0.18
-		b = (v - (E + 0.13)) / 0.035
-		lum -= 0.07 * k[10] * exp(-a * a - b * b)
-		a = (au - MW * 1.3) / 0.12
-		b = (v - 0.8) / 0.1
-		lum -= 0.05 * k[10] * exp(-a * a - b * b)
-	if k[14] > 0.05:
-		a = (au - X * 0.9) / 0.2
-		b = (v - (E + 0.11)) / 0.045
-		lum -= 0.09 * k[14] * exp(-a * a - b * b)
-	# Rosto fino: maçãs saltadas e bochecha funda
-	if k[15] > 0.01:
-		lum -= 0.12 * k[15] * _g2(au - 0.6, v - 0.43, 0.13, 0.13)
-		lum += 0.07 * k[15] * _g2(au - 0.58, v - 0.12, 0.16, 0.06)
-		lum -= 0.05 * k[15] * _g2(au - 0.88, v + 0.28, 0.1, 0.14)
-	# Idade: papada lateral, bolsas sob os olhos e têmporas fundas
-	if k[16] > 0.01:
-		lum -= 0.1 * k[16] * _g2(au - MW * 1.55, v - 0.84, 0.09, 0.07)
-		lum += 0.03 * k[16] * _g2(au - MW * 1.8, v - 0.72, 0.1, 0.06)
-	if k[17] > 0.01:
-		lum -= 0.07 * k[17] * _g2(au - X, v - (E + 0.17), 0.12, 0.022)
-		lum += 0.04 * k[17] * _g2(au - X, v - (E + 0.12), 0.12, 0.03)
-	if k[18] > 0.01:
-		lum -= 0.06 * k[18] * _g2(au - 0.86, v + 0.3, 0.1, 0.15)
-	# Sorriso: as maçãs sobem e ganham luz
-	if k[19] > 0.01:
-		lum += 0.06 * k[19] * _g2(au - 0.45, v - 0.2, 0.14, 0.08)
-		lum -= 0.03 * k[19] * _g2(au - 0.45, v - 0.32, 0.14, 0.04)
-	# Gordo: bochechas cheias e dobra do queixo duplo
-	if k[20] > 0.01:
-		lum += 0.05 * k[20] * _g2(au - 0.55, v - 0.45, 0.2, 0.15)
-		lum -= 0.1 * k[20] * _g2(u, v - 1.0, 0.36, 0.04)
-		lum -= 0.05 * k[20] * _g2(au - 0.8, v - 0.75, 0.12, 0.15)
-	# Manchas de tom (pele não é uniforme); pele bonita é mais uniforme
+	var aging := clampf(float(f.get("aging", 0.0)), 0.0, 1.0)
+	var deep := float(f.get("deep", 0.8))
+	var ridge := float(f.get("ridge", 0.8))
+	var cheek := float(f.get("cheekbone", 0.8))
+	var thin := float(f.get("thin", 0.0))
+	var heavy := float(f.get("heavy", 0.0))
+	var dark_circles := float(f.get("dark_circles", 0.0))
+	var eyebags := float(f.get("eyebags", 0.0))
+	var smile := maxf(0.0, float(f.get("smile", 0.0)))
+
+	# Órbitas e arco superciliar: volumes ovais, nunca barras retas.
+	lum -= 0.055 * deep * _g2(au - X, v - E, 0.23, 0.085)
+	lum += 0.032 * ridge * _g2(au - X, v - (E - 0.16), 0.25, 0.06)
+	lum -= 0.028 * _g2(au - 0.9, v + 0.27, 0.13, 0.2)
+
+	# Nariz: dorso, ponta e narinas em volumes locais. A sombra infranasal fica minúscula
+	# e não pode alcançar as bochechas ou o lábio superior inteiro.
+	var nose_on := smoothstep(E - 0.07, E + 0.08, v) * (1.0 - smoothstep(N - 0.08, N + 0.015, v))
+	var ridge_hl := _g(un + 0.015, BW * 1.35) * nose_on
+	lum += 0.065 * float(f.get("bridge", 0.9)) * ridge_hl
+	lum -= 0.045 * float(f.get("bridge", 0.9)) * _g2(un - BW * 1.9, v - (E + N) * 0.5, BW * 1.25, 0.18)
+	lum += 0.042 * _g2(un, v - (N - 0.065), NW * 0.42, 0.055)
+	lum -= 0.05 * (
+		_g2(un - NW * 0.68, v - (N - 0.015), NW * 0.23, 0.038) +
+		_g2(un + NW * 0.68, v - (N - 0.015), NW * 0.23, 0.038)
+	)
+	lum -= 0.028 * _g2(un, v - (N + 0.012), NW * 0.28, 0.017)
+
+	# Maçãs e cavidade abaixo delas.
+	var cheek_v := (E + N) * 0.5
+	lum += 0.052 * cheek * _g2(au - 0.5, v - cheek_v, 0.22, 0.1)
+	lum -= 0.055 * (0.35 + thin * 0.65) * _g2(au - 0.62, v - (cheek_v + 0.27), 0.17, 0.14)
+	lum += 0.025 * heavy * _g2(au - 0.55, v - 0.45, 0.22, 0.16)
+
+	# Boca e queixo: sombra curta sob o lábio inferior e luz no centro do queixo.
+	var lip_l := float(f.get("lip_l", 0.06)) * 2.0
+	lum -= 0.065 * _g2(u, v - (M + lip_l + 0.055), MW * 0.65, 0.038)
+	lum -= 0.045 * _g2(au - MW * 1.05, v - M, 0.065, 0.05)
+	lum += 0.045 * _g2(u + 0.03, v - 0.88, 0.23, 0.085)
+
+	# Sulco nasolabial só quando idade/expressão pedem, desenhado como duas curvas laterais.
+	var nl_strength := 0.01 + aging * 0.05 + maxf(0.0, smile - 0.55) * 0.025
+	if nl_strength > 0.012 and v > N - 0.02 and v < M + 0.12:
+		var nl_d := _seg_dist(Vector2(au, v), Vector2(NW * 1.08, N + 0.005), Vector2(MW * 1.08, M + 0.045)) / 0.05
+		lum -= nl_strength * exp(-nl_d * nl_d)
+
+	# Idade, olheiras e bolsas, também locais.
+	if dark_circles > 0.01:
+		lum -= 0.055 * dark_circles * _g2(au - X, v - (E + 0.115), 0.18, 0.038)
+	if eyebags > 0.01:
+		lum -= 0.05 * eyebags * _g2(au - X, v - (E + 0.165), 0.14, 0.025)
+		lum += 0.025 * eyebags * _g2(au - X, v - (E + 0.125), 0.14, 0.03)
+	if aging > 0.3:
+		lum -= 0.025 * aging * _g2(au - MW * 1.45, v - 0.82, 0.12, 0.1)
+
+	# Variação natural de tom já sorteada por pessoa.
 	for bl: Array in _blotches:
-		a = (u - float(bl[0])) / float(bl[2])
-		b = (v - float(bl[1])) / float(bl[2])
-		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
+		var a := (u - float(bl[0])) / float(bl[2])
+		var b := (v - float(bl[1])) / float(bl[2])
+		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - float(f.get("skin_clear", 0.0)) * 0.7)
+
 	var col := _shade(_skin, lum)
-	# Pele humana perde mais azul e verde na sombra; isso evita a aparência cinza/plástica.
-	col = col.lerp(Color(col.r, col.g * 0.92, col.b * 0.86), 0.2 * (1.0 - diff))
-	# Rubor nas bochechas, nariz e queixo
-	a = (au - 0.52) / 0.22
-	b = (v - cheek_v - 0.1) / 0.13
-	var blush := 0.55 * exp(-a * a - b * b)
-	a = u / NW
-	b = (v - (N - 0.05)) / 0.06
-	blush += 0.35 * exp(-a * a - b * b)
-	a = u / 0.2
-	b = (v - 0.9) / 0.08
-	blush += 0.2 * exp(-a * a - b * b)
-	col = col.lerp(Color(0.85, 0.32, 0.3), clampf(blush * k[11] * 0.18, 0.0, 0.3))
-	# Sombra de barba recém-feita. Ela deve aparecer na mandíbula e no queixo, nunca como
-	# uma faixa horizontal embaixo do nariz. O desenho antigo começava perto de N e acabava
-	# produzindo exatamente o "buço gigante" visto nos retratos.
-	if k[12] > 0.02:
+	col = col.lerp(Color(col.r, col.g * 0.93, col.b * 0.88), 0.16 * (1.0 - diff))
+
+	# Rubor discreto e localizado.
+	var blush := 0.42 * _g2(au - 0.52, v - (cheek_v + 0.02), 0.23, 0.14)
+	blush += 0.22 * _g2(un, v - (N - 0.04), NW * 0.85, 0.075)
+	blush += 0.12 * _g2(u, v - 0.9, 0.22, 0.09)
+	col = col.lerp(Color(0.86, 0.36, 0.32), clampf(blush * float(f.get("rosy", 0.4)) * 0.12, 0.0, 0.18))
+
+	# Sombra de barba recém-feita apenas na mandíbula/queixo. Nunca acima da boca.
+	var beard_shadow := float(f.get("shadow", 0.0))
+	if beard_shadow > 0.02:
 		var th_face := _th(u, v)
-		# Laterais da barba: abaixo da boca e perto do contorno da mandíbula.
-		var side_beard := smoothstep(MW * 0.85, MW * 1.55, au)
-		side_beard *= smoothstep(M - 0.015, M + 0.15, v)
-		side_beard *= smoothstep(0.48, 0.86, th_face)
-		# Queixo: centro da parte inferior, também longe do lábio superior.
-		var chin_beard := 1.0 - smoothstep(MW * 0.9, MW * 1.45, au)
-		chin_beard *= smoothstep(M + 0.07, M + 0.28, v)
+		var side_beard := smoothstep(MW * 0.86, MW * 1.55, au)
+		side_beard *= smoothstep(M + 0.015, M + 0.17, v)
+		side_beard *= smoothstep(0.5, 0.87, th_face)
+		var chin_beard := (1.0 - smoothstep(MW * 0.95, MW * 1.45, au))
+		chin_beard *= smoothstep(M + 0.08, M + 0.3, v)
 		chin_beard *= smoothstep(0.55, 0.9, th_face)
-		var dens := maxf(side_beard, chin_beard)
-		# Some gradualmente na ponta do queixo e mantém a pele visível.
-		dens *= 1.0 - 0.35 * smoothstep(0.93, 1.04, th_face)
-		col = col.lerp(_shadow_col, dens * k[12] * 0.18)
-	# Brilho especular (mais visível em pele escura)
+		var bd := maxf(side_beard, chin_beard) * (1.0 - 0.3 * smoothstep(0.94, 1.04, th_face))
+		col = col.lerp(_shadow_col, bd * beard_shadow * 0.15)
+
+	# Brilho suave de pele, concentrado em testa, nariz e maçã do lado da luz.
 	var hx := _half.x
 	var hy := _half.y
 	var hz := _half.z
-	var spec := pow(maxf(0.0, nx * hx + ny * hy + nz * hz), 18.0) * 0.55
-	# Reflexo de pele fotografada: testa, dorso/ponta do nariz e maçã do lado da luz.
-	a = (u + 0.5) / 0.2
-	b = (v - cheek_v) / 0.1
-	var tip_hl := _g2(un + 0.02, v - (N - 0.06), NW * 0.35, 0.05)
-	spec = spec * 0.52 + 0.24 * (fore * 0.85 + ridge_hl * 0.75 + tip_hl + 0.65 * exp(-a * a - b * b))
-	spec *= k[13] * 0.82
+	var spec := pow(maxf(0.0, fn.x * hx + fn.y * hy + fn.z * hz), 22.0) * 0.16
+	var fore_hl := _g2(u + 0.16, v + 0.55, 0.42, 0.24)
+	var tip_hl := _g2(un, v - (N - 0.06), NW * 0.38, 0.055)
+	var cheek_hl := _g2(u + 0.48, v - cheek_v, 0.2, 0.11)
+	spec *= 0.45 + fore_hl + ridge_hl * 0.85 + tip_hl + cheek_hl * 0.65
+	spec *= 0.7 + clampf(float(f.get("skin_i", 4.0)) / 9.0, 0.0, 1.0) * 0.35
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
-
 
 func _face_h(u: float, v: float) -> float:
 	# Cúpula facial contínua. A versão anterior trocava a equação exatamente no eixo dos olhos,
