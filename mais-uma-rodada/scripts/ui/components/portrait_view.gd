@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.28, -0.22, 0.94)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 9
+const PORTRAIT_RENDER_VERSION := 10
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -895,14 +895,23 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	b = (v - 0.9) / 0.08
 	blush += 0.2 * exp(-a * a - b * b)
 	col = col.lerp(Color(0.85, 0.32, 0.3), clampf(blush * k[11] * 0.18, 0.0, 0.3))
-	# Sombra da barba feita (zona da barba, bem suave)
-	if k[12] > 0.02 and v > N - 0.05:
-		var line := lerpf(N + 0.02, 0.2, smoothstep(MW * 0.8, MW * 1.5, au)) - 0.16 * smoothstep(0.55, 1.0, au)
-		var dens := smoothstep(line - 0.08, line + 0.08, v)
-		a = u / MW
-		b = (v - M) / (k[8] * 2.2 + 0.03)
-		dens *= smoothstep(0.8, 1.1, sqrt(a * a + b * b))
-		col = col.lerp(_shadow_col, dens * k[12] * 0.32)
+	# Sombra de barba recém-feita. Ela deve aparecer na mandíbula e no queixo, nunca como
+	# uma faixa horizontal embaixo do nariz. O desenho antigo começava perto de N e acabava
+	# produzindo exatamente o "buço gigante" visto nos retratos.
+	if k[12] > 0.02:
+		var th_face := _th(u, v)
+		# Laterais da barba: abaixo da boca e perto do contorno da mandíbula.
+		var side_beard := smoothstep(MW * 0.85, MW * 1.55, au)
+		side_beard *= smoothstep(M - 0.015, M + 0.15, v)
+		side_beard *= smoothstep(0.48, 0.86, th_face)
+		# Queixo: centro da parte inferior, também longe do lábio superior.
+		var chin_beard := 1.0 - smoothstep(MW * 0.9, MW * 1.45, au)
+		chin_beard *= smoothstep(M + 0.07, M + 0.28, v)
+		chin_beard *= smoothstep(0.55, 0.9, th_face)
+		var dens := maxf(side_beard, chin_beard)
+		# Some gradualmente na ponta do queixo e mantém a pele visível.
+		dens *= 1.0 - 0.35 * smoothstep(0.93, 1.04, th_face)
+		col = col.lerp(_shadow_col, dens * k[12] * 0.18)
 	# Brilho especular (mais visível em pele escura)
 	var hx := _half.x
 	var hy := _half.y
