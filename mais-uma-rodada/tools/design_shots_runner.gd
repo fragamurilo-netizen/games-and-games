@@ -222,6 +222,9 @@ func _only_pass() -> void:
 				if star == null or p.ovr_f > star.ovr_f:
 					star = p
 			args["id"] = star.id
+		if route == "rivalry":
+			var u := w.user_club()
+			args = {"a": u.id, "b": int(u.rivals[0]) if not u.rivals.is_empty() else w.clubs_in_league(u.league_id)[0].id}
 		if route in UIManager.TABS:
 			UIManager.goto(route, args)
 		else:
