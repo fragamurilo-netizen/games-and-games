@@ -34,10 +34,11 @@ jobs:
               apt-get install -y --no-install-recommends xvfb libfontconfig1 libgl1-mesa-dri libglx-mesa0 libxcursor1 libxinerama1 libxi6 libxrandr2 libxrender1 libxext6 libx11-6 libxfixes3 libxkbcommon0 libxkbcommon-x11-0 libwayland-client0 >/dev/null
               rm -rf .godot
               godot --headless --path . --import
+              test "$(find .godot/imported -type f -name "*.fontdata" | wc -l)" -ge 4
               mkdir -p build
-              timeout 25s xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/crests.tscn -- --render-proof || test -s build/visual-proof-crests.png
+              timeout 25s xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/crests.tscn || test -s build/visual-proof-crests.png
               test -s build/visual-proof-crests.png
-              timeout 25s xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/dashboard.tscn -- --render-proof || test -s build/visual-proof-ui.png
+              timeout 25s xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/dashboard.tscn || test -s build/visual-proof-ui.png
               test -s build/visual-proof-ui.png
             '
 
