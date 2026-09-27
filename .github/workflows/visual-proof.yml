@@ -1,0 +1,61 @@
+name: Render Godot Visual Proof
+
+on:
+  push:
+    branches:
+      - test/godot-visual-proof
+    paths:
+      - ".github/workflows/visual-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/godot-visual-proof
+          fetch-depth: 0
+
+      - name: Render proof scenes in Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 \
+            bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends xvfb libfontconfig1 libgl1-mesa-dri libglx-mesa0 >/dev/null
+              rm -rf .godot
+              godot --headless --path . --import
+              mkdir -p build
+              xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/crests.tscn -- --render-proof
+              test -s build/visual-proof-crests.png
+              xvfb-run -a -s "-screen 0 900x1600x24" godot --path . --rendering-method gl_compatibility res://tests/visual_proof/dashboard.tscn -- --render-proof
+              test -s build/visual-proof-ui.png
+            '
+
+      - name: Upload proof screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-visual-proof
+          path: |
+            mais-uma-rodada/build/visual-proof-crests.png
+            mais-uma-rodada/build/visual-proof-ui.png
+          retention-days: 30
+
+      - name: Save screenshots to proof branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Godot Visual Proof"
+          git config user.email "actions@users.noreply.github.com"
+          git add -f mais-uma-rodada/build/visual-proof-crests.png mais-uma-rodada/build/visual-proof-ui.png
+          git commit -m "test: render real Godot visual proof [skip ci]" || true
+          git push origin HEAD:test/godot-visual-proof
