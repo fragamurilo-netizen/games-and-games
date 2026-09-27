@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.28, -0.22, 0.94)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 8
+const PORTRAIT_RENDER_VERSION := 9
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -793,18 +793,23 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		lum -= 0.2 * k[3] * exp(-a * a) * wv
 		a = (un + BW * 1.9) / (BW * 0.9)
 		lum -= 0.05 * k[3] * exp(-a * a) * wv
-	if v > N - 0.25 and v < N + 0.12:
-		a = (un + 0.02) / (NW * 0.45 * k[4])
-		b = (v - (N - 0.07)) / 0.05
-		lum += 0.09 * exp(-a * a - b * b)
-		b = (v - (N - 0.035)) / 0.055
+	if v > N - 0.18 and v < N + 0.08:
+		# Brilho da ponta do nariz: curto e concentrado.
+		a = (un + 0.01) / maxf(NW * 0.38 * k[4], 0.03)
+		b = (v - (N - 0.06)) / 0.045
+		lum += 0.07 * exp(-a * a - b * b)
+		# Laterais das narinas. A sombra fica separada em dois lóbulos, sem atravessar
+		# horizontalmente a região acima do lábio.
+		b = (v - (N - 0.02)) / 0.04
 		bb = b * b
-		a = (un - NW * 0.85) / (NW * 0.3)
-		a2 = (un + NW * 0.85) / (NW * 0.3)
-		lum -= 0.14 * (exp(-a * a - bb) + exp(-a2 * a2 - bb) * 0.6)
-		a = (un - 0.02) / (NW * 0.8)
-		b = (v - (N + 0.035)) / 0.034
-		lum -= 0.28 * exp(-a * a - b * b)
+		a = (un - NW * 0.62) / maxf(NW * 0.22, 0.025)
+		a2 = (un + NW * 0.62) / maxf(NW * 0.22, 0.025)
+		lum -= 0.075 * (exp(-a * a - bb) + exp(-a2 * a2 - bb) * 0.82)
+		# Sombra infranasal só sob a columela. Antes era larga e forte o bastante para
+		# parecer um bigode/buço em praticamente qualquer rosto.
+		a = un / maxf(NW * 0.30, 0.035)
+		b = (v - (N + 0.006)) / 0.015
+		lum -= 0.032 * exp(-a * a - b * b)
 	# Sulco nasolabial (mais marcado com a idade e o sorriso)
 	if v > N - 0.1 and v < M + 0.15:
 		var nl_d := _seg_dist(Vector2(au, v), Vector2(NW * 1.25, N - 0.02), Vector2(MW * 1.12, M + 0.04)) / 0.045
@@ -2537,8 +2542,10 @@ func _nose() -> void:
 		var nc := _pxn(sx * _NW * 0.45, _N + 0.004 - nup * 0.012 + hook * 0.012)
 		var rx := _NW * _fw * 0.2 * nostril
 		var ry := _fh * 0.02 * (1.0 + nup * 0.6) * (1.0 - hook * 0.4)
-		_fill(_ellipse(nc, rx * 1.6, ry * 1.6, 12), Color(dark, 0.14))
-		_fill(_ellipse(nc + Vector2(sx * rx * 0.1, 0), rx, ry, 12), Color(dark, 0.5))
+		# Narina com halo menor e menos opaco. O sombreado geral do rosto já fornece
+		# profundidade, então aqui só marcamos a abertura real da narina.
+		_fill(_ellipse(nc, rx * 1.35, ry * 1.3, 12), Color(dark, 0.055))
+		_fill(_ellipse(nc + Vector2(sx * rx * 0.08, 0), rx * 0.82, ry * 0.78, 12), Color(dark, 0.31))
 		# Asa do nariz
 		var wc := _pxn(sx * _NW * 0.82, _N - 0.03)
 		var a0 := PI * 0.5 - sx * 0.6
