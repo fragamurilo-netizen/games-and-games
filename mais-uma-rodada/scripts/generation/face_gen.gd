@@ -703,8 +703,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["fat"] = clampf(rng.randf_range(0.0, 0.6) + youth * 0.2 + aging * 0.15, 0.0, 1.0)
 	f["cheekbone"] = rng.randf_range(0.6, 1.2) * float(ETH_CHEEK[e])
 	f["ridge"] = rng.randf_range(0.6, 1.2) * float(ETH_RIDGE[e]) * (1.0 - youth * 0.4)
-	f["ear"] = rng.randf_range(0.88, 1.12) + aging * 0.06
-	f["ear_out"] = rng.randf_range(0.0, 1.0) * (1.0 if rng.randf() < 0.35 else 0.4)
+	f["ear"] = rng.randf_range(0.88, 1.06) + aging * 0.045
+	f["ear_out"] = rng.randf_range(0.0, 0.78) * (1.0 if rng.randf() < 0.28 else 0.34)
 	# Beleza: harmonia, simetria e pele. Não depende da etnia; muda proporções mais adiante.
 	var brng := RandomNumberGenerator.new()
 	brng.seed = hash([seed_value, "beleza"])
@@ -719,7 +719,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		beauty = clampf(float(look["bt"]), 0.0, 1.0)
 	var ugly := 1.0 - beauty
 	f["beauty"] = beauty
-	f["asym"] = rng.randf_range(-1.0, 1.0) * (0.3 + ugly * 1.5)
+	# Assimetria real existe, mas extremos grandes deixam o retrato com aparência de caricatura.
+	f["asym"] = rng.randf_range(-1.0, 1.0) * (0.16 + ugly * 0.72)
 
 	# --- Olhos ------------------------------------------------------------------
 	var eye_i := RngUtil.weighted_index(rng, ETH_EYES[e])
@@ -750,9 +751,10 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["hetero_side"] = -1.0 if erng.randf() < 0.5 else 1.0
 	f["hetero_ang"] = erng.randf_range(0.0, TAU)
 	var eye_open: float = ETH_EYE_OPEN[e]
-	f["eye_w"] = rng.randf_range(0.21, 0.255)
-	f["eye_h"] = rng.randf_range(0.095, 0.125) * eye_open * (1.0 - aging * 0.1)
-	f["eye_dx"] = rng.randf_range(0.4, 0.47)
+	# Faixa mais próxima da anatomia adulta: menos olhos grandes de boneco e mais variação sutil.
+	f["eye_w"] = rng.randf_range(0.198, 0.238)
+	f["eye_h"] = rng.randf_range(0.084, 0.108) * eye_open * (1.0 - aging * 0.1)
+	f["eye_dx"] = rng.randf_range(0.405, 0.465)
 	f["eye_y"] = rng.randf_range(-0.06, 0.02)
 	f["eye_tilt"] = rng.randf_range(-0.015, 0.035) + (0.03 if e == E_EAS or e == E_SEA else 0.0)
 	f["monolid"] = rng.randf() < float(ETH_MONOLID[e])
@@ -771,8 +773,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["unibrow"] = rng.randf() < 0.04 and e in [E_ARB, E_MED, E_SAS]
 
 	# --- Nariz ------------------------------------------------------------------
-	f["nose_w"] = rng.randf_range(0.85, 1.2) * float(ETH_NOSE_W[e]) + aging * 0.01
-	f["nose_len"] = rng.randf_range(0.26, 0.35)
+	f["nose_w"] = rng.randf_range(0.88, 1.16) * float(ETH_NOSE_W[e]) + aging * 0.01
+	f["nose_len"] = rng.randf_range(0.275, 0.355)
 	f["bridge"] = clampf(rng.randf_range(0.7, 1.25) * float(ETH_BRIDGE[e]), 0.2, 1.4)
 	f["bridge_w"] = rng.randf_range(0.055, 0.085) * (1.3 if float(ETH_BRIDGE[e]) < 0.6 else 1.0)
 	f["aquiline"] = rng.randf() < float(ETH_AQUILINE[e])
@@ -780,12 +782,13 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 
 	# --- Boca -------------------------------------------------------------------
 	var lips: float = ETH_LIPS[e]
-	f["mouth_w"] = rng.randf_range(0.27, 0.36) * (1.0 + (lips - 1.0) * 0.3)
-	f["mouth_y"] = rng.randf_range(0.55, 0.61)
-	f["lip_u"] = rng.randf_range(0.032, 0.05) * lips * (1.0 - aging * 0.2)
-	f["lip_l"] = rng.randf_range(0.05, 0.075) * lips * (1.0 - aging * 0.15)
-	f["bow"] = rng.randf_range(0.2, 1.0)
-	f["smile"] = rng.randf_range(-0.35, 0.8)
+	f["mouth_w"] = rng.randf_range(0.28, 0.35) * (1.0 + (lips - 1.0) * 0.26)
+	f["mouth_y"] = rng.randf_range(0.565, 0.615)
+	f["lip_u"] = rng.randf_range(0.029, 0.045) * lips * (1.0 - aging * 0.2)
+	f["lip_l"] = rng.randf_range(0.046, 0.068) * lips * (1.0 - aging * 0.15)
+	f["bow"] = rng.randf_range(0.25, 0.9)
+	# Retrato de ficha tende a expressão neutra; sorrisos grandes ficam para estados/eventos.
+	f["smile"] = rng.randf_range(-0.18, 0.46)
 
 	# --- Variedade: formato dos olhos e proporções (sorteio próprio) -----------
 	var vrng := RandomNumberGenerator.new()
@@ -815,19 +818,19 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		8: # encapuzado: a pálpebra de cima desce sobre o olho
 			f["hooded"] = true
 			f["lid"] = vrng.randf_range(0.25, 0.45)
-		9: # saltado: olho grande, aparece branco embaixo
-			f["eye_h"] = float(f["eye_h"]) * 1.12
-			f["bulge"] = vrng.randf_range(0.5, 1.0)
+		9: # saltado: olho um pouco maior, com mais esclera inferior
+			f["eye_h"] = float(f["eye_h"]) * 1.08
+			f["bulge"] = vrng.randf_range(0.3, 0.7)
 		10: # pequenos
-			f["eye_h"] = float(f["eye_h"]) * 0.82
-			f["eye_w"] = float(f["eye_w"]) * 0.88
-		11: # triste: canto de fora bem caído
-			f["eye_tilt"] = float(f["eye_tilt"]) - 0.06
-			f["lid"] = vrng.randf_range(0.1, 0.25)
-		12: # felino: alongado e puxado para cima
-			f["eye_w"] = float(f["eye_w"]) * 1.08
-			f["eye_h"] = float(f["eye_h"]) * 0.86
-			f["eye_tilt"] = float(f["eye_tilt"]) + 0.05
+			f["eye_h"] = float(f["eye_h"]) * 0.88
+			f["eye_w"] = float(f["eye_w"]) * 0.92
+		11: # triste: canto de fora caído, sem exagero de caricatura
+			f["eye_tilt"] = float(f["eye_tilt"]) - 0.04
+			f["lid"] = vrng.randf_range(0.08, 0.2)
+		12: # felino: alongado e levemente puxado para cima
+			f["eye_w"] = float(f["eye_w"]) * 1.05
+			f["eye_h"] = float(f["eye_h"]) * 0.9
+			f["eye_tilt"] = float(f["eye_tilt"]) + 0.035
 		13: # semicerrado
 			f["lid"] = vrng.randf_range(0.35, 0.55)
 	f["fw"] = float(f["fw"]) * vrng.randf_range(0.95, 1.06)
@@ -1380,15 +1383,16 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 	var ugly := 1.0 - beauty
 	var bad := smoothstep(0.45, 1.0, ugly) # só os realmente feios ganham defeitos marcantes
 	var good := smoothstep(0.55, 1.0, beauty)
-	f["eye_h"] = float(f["eye_h"]) * lerpf(0.76, 1.0, smoothstep(0.0, 0.5, beauty)) * (1.0 + good * 0.1)
-	f["eye_w"] = float(f["eye_w"]) * lerpf(0.88, 1.0, smoothstep(0.0, 0.5, beauty)) * (1.0 + good * 0.04)
-	f["eye_dx"] = clampf(float(f["eye_dx"]) + bad * (0.05 if r.randf() < 0.5 else -0.05), 0.36, 0.52)
-	f["nose_w"] = float(f["nose_w"]) * (1.0 + bad * 0.5) * (1.0 - good * 0.1)
-	f["nose_len"] = float(f["nose_len"]) * (1.0 + bad * 0.15) * (1.0 - good * 0.04)
-	f["nose_tip"] = float(f["nose_tip"]) * (1.0 + bad * 0.35)
-	f["nose_dx"] = r.randf_range(0.04, 0.1) * bad * (1.0 if r.randf() < 0.5 else -1.0) if r.randf() < 0.6 else 0.0
-	f["lip_u"] = float(f["lip_u"]) * (1.0 - bad * 0.35) * (1.0 + good * 0.15)
-	f["lip_l"] = float(f["lip_l"]) * (1.0 - bad * 0.25) * (1.0 + good * 0.12)
+	# Atratividade muda harmonia e acabamento, não transforma a anatomia em caricatura.
+	f["eye_h"] = float(f["eye_h"]) * lerpf(0.88, 1.0, smoothstep(0.0, 0.5, beauty)) * (1.0 + good * 0.055)
+	f["eye_w"] = float(f["eye_w"]) * lerpf(0.94, 1.0, smoothstep(0.0, 0.5, beauty)) * (1.0 + good * 0.025)
+	f["eye_dx"] = clampf(float(f["eye_dx"]) + bad * (0.028 if r.randf() < 0.5 else -0.028), 0.38, 0.5)
+	f["nose_w"] = float(f["nose_w"]) * (1.0 + bad * 0.22) * (1.0 - good * 0.055)
+	f["nose_len"] = float(f["nose_len"]) * (1.0 + bad * 0.08) * (1.0 - good * 0.025)
+	f["nose_tip"] = float(f["nose_tip"]) * (1.0 + bad * 0.16)
+	f["nose_dx"] = r.randf_range(0.025, 0.065) * bad * (1.0 if r.randf() < 0.5 else -1.0) if r.randf() < 0.45 else 0.0
+	f["lip_u"] = float(f["lip_u"]) * (1.0 - bad * 0.2) * (1.0 + good * 0.09)
+	f["lip_l"] = float(f["lip_l"]) * (1.0 - bad * 0.16) * (1.0 + good * 0.075)
 	f["brow_gap"] = float(f["brow_gap"]) - bad * 0.04 + good * 0.01
 	f["mouth_w"] = float(f["mouth_w"]) * lerpf(r.randf_range(0.85, 1.12), 1.0, beauty)
 	f["cheekbone"] = float(f["cheekbone"]) * lerpf(0.7, 1.3, beauty)
@@ -1396,8 +1400,8 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 	f["jaw_v"] = float(f["jaw_v"]) - beauty * 0.04
 	f["jaw"] = float(f["jaw"]) - bad * r.randf_range(0.0, 0.1) if r.randf() < 0.5 else float(f["jaw"])
 	f["fat"] = clampf(float(f["fat"]) * (1.0 - good * 0.8) + bad * r.randf_range(0.2, 0.8), 0.0, 1.0)
-	f["ear_out"] = clampf(float(f["ear_out"]) * (1.0 - good * 0.7) + bad * r.randf_range(0.3, 1.0), 0.0, 1.0)
-	f["ear"] = float(f["ear"]) * lerpf(1.0, 1.12, bad)
+	f["ear_out"] = clampf(float(f["ear_out"]) * (1.0 - good * 0.7) + bad * r.randf_range(0.15, 0.55), 0.0, 0.9)
+	f["ear"] = float(f["ear"]) * lerpf(1.0, 1.06, bad)
 	f["brow_dens"] = clampf(float(f["brow_dens"]) * lerpf(0.85, 1.1, beauty), 0.4, 1.0)
 	if bad > 0.3 and r.randf() < 0.12:
 		f["unibrow"] = true
@@ -1413,11 +1417,11 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 	if good > 0.3:
 		f["nose_dx"] = 0.0
 		f["brow_messy"] = 0.0
-	f["eye_uneven"] = bad * r.randf_range(0.3, 1.0) if r.randf() < 0.7 else 0.0
-	f["mouth_tilt"] = bad * r.randf_range(-1.0, 1.0)
+	f["eye_uneven"] = bad * r.randf_range(0.18, 0.55) if r.randf() < 0.6 else 0.0
+	f["mouth_tilt"] = bad * r.randf_range(-0.55, 0.55)
 	if bad > 0.3:
-		f["chin_len"] = float(f.get("chin_len", 0.0)) + (bad * r.randf_range(-0.07, 0.07))
-		f["cheekbone"] = float(f["cheekbone"]) * (1.0 - bad * 0.3)
+		f["chin_len"] = float(f.get("chin_len", 0.0)) + (bad * r.randf_range(-0.04, 0.04))
+		f["cheekbone"] = float(f["cheekbone"]) * (1.0 - bad * 0.16)
 
 
 ## Pesos dos penteados para uma pessoa (etnia + textura + idade).
