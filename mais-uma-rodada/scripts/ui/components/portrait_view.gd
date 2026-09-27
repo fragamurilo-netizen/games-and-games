@@ -199,6 +199,8 @@ const STYLE_P: Array = [
 ]
 
 const LIGHT := Vector3(-0.45, -0.52, 0.72)
+## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
+const PORTRAIT_RENDER_VERSION := 3
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -303,7 +305,7 @@ func _draw() -> void:
 	_prepare_decals(s)
 	# Três camadas com cache próprio: fundo + cabelo de trás, corpo + roupa, rosto + cabelo.
 	# Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
-	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout])
+	var face_key := hash([PORTRAIT_RENDER_VERSION, face_seed, eth, age, look, size, bg_color, cutout])
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest,
 		_crest_tex != null, _sponsor_tex != null])
@@ -355,12 +357,14 @@ func _layer_front() -> void:
 	_rim(_radial(_hc, head, _rings(11), _skin_px), head.size())
 	_age_lines()
 	_marks(rng)
+	_skin_microdetail()
 	# Barba (malha com densidade suave), depois os traços por cima
 	if int(f["beard"]) != FaceGen.B_NONE:
 		_beard_mesh()
 	_eyes()
 	_brows(rng)
 	_nose()
+	_midface_details()
 	_mouth()
 	if int(f["beard"]) != FaceGen.B_NONE:
 		_beard_hairs(rng)
@@ -388,8 +392,8 @@ func _light_pass() -> void:
 	_radial(_c, circle, 4 if _s < 90.0 else 6, func(p: Vector2, _t: float, _i: int) -> Color:
 		var d := (p - key) / (_s * 0.9)
 		var fall := clampf(d.length(), 0.0, 1.3)
-		var warm := Color(1.0, 0.9, 0.76, 0.07 * (1.0 - smoothstep(0.0, 0.6, fall)))
-		var shade := 0.2 * smoothstep(0.45, 1.25, fall)
+		var warm := Color(1.0, 0.9, 0.76, 0.045 * (1.0 - smoothstep(0.0, 0.6, fall)))
+		var shade := 0.13 * smoothstep(0.45, 1.25, fall)
 		if shade > warm.a:
 			return Color(0.04, 0.06, 0.12, shade)
 		return warm)
@@ -402,7 +406,7 @@ func _light_pass() -> void:
 		var q := _uv(p)
 		if q.x > 0.2 and q.y > -0.35 and q.y < 0.95:
 			rim.append(_cl(p + Vector2(-lw * 0.6, 0)))
-			rc.append(Color(0.8, 0.88, 1.0, 0.28 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))))
+			rc.append(Color(0.8, 0.88, 1.0, 0.18 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))))
 	if rim.size() > 2:
 		_r_polyline_colors(rim, rc, lw, true)
 	if not suit:
@@ -415,7 +419,7 @@ func _light_pass() -> void:
 			if p.y < _ysp - _s * 0.03 or p.x < _hc.x + _nwt:
 				continue
 			sp.append(_cl(p + Vector2(-lw * 0.7, lw * 0.3)))
-			sc.append(Color(0.8, 0.88, 1.0, 0.22 * (1.0 - smoothstep(_ysp, _ysp + _s * 0.18, p.y))))
+			sc.append(Color(0.8, 0.88, 1.0, 0.14 * (1.0 - smoothstep(_ysp, _ysp + _s * 0.18, p.y))))
 		if sp.size() > 2:
 			_r_polyline_colors(sp, sc, lw * 1.2, true)
 
@@ -731,7 +735,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var nz := sqrt(maxf(0.0, 1.0 - tilt * tilt))
 	# Luz "enrolada": a pele espalha a luz por dentro, então a passagem para a sombra é gradual
 	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
-	var lum := 0.47 + 0.6 * diff
+	var lum := 0.51 + 0.54 * diff
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
 	lum -= 0.06 * smoothstep(0.78, 1.0, t)
@@ -890,10 +894,10 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var hx := _half.x
 	var hy := _half.y
 	var hz := _half.z
-	var spec := pow(maxf(0.0, nx * hx + ny * hy + nz * hz), 26.0)
+	var spec := pow(maxf(0.0, nx * hx + ny * hy + nz * hz), 36.0)
 	a = (u + 0.5) / 0.2
 	b = (v - 0.08) / 0.1
-	spec *= k[13] * (0.6 + 0.8 * (fore * 0.9 + ridge_hl + exp(-a * a - b * b)))
+	spec *= 0.72 * k[13] * (0.6 + 0.8 * (fore * 0.9 + ridge_hl + exp(-a * a - b * b)))
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
 
 
@@ -920,6 +924,72 @@ static func _seg_dist(p: Vector2, a: Vector2, b: Vector2) -> float:
 	var ab := b - a
 	var t := clampf((p - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
 	return p.distance_to(a + ab * t)
+
+
+## Microtextura de pele muito sutil: poros, pequenas variações de tom e irregularidade
+## quebram o aspecto de "plástico" sem virar ruído visível em retratos pequenos.
+func _skin_microdetail() -> void:
+	if _s < 82.0:
+		return
+	var f := _f
+	var r := RandomNumberGenerator.new()
+	r.seed = int(f["texture_seed"]) + 1701
+	var clear := clampf(float(f.get("skin_clear", 0.0)), 0.0, 1.0)
+	var count := clampi(int(70.0 * clampf(_det, 0.55, 1.5) * (1.0 - clear * 0.35)), 30, 120)
+	for i in count:
+		var u := r.randf_range(-0.86, 0.86)
+		var v := r.randf_range(-0.72, 0.83)
+		if _th(u, v) > 0.9:
+			continue
+		var near_eye := minf(absf(u - _X), absf(u + _X)) < 0.24 and absf(v - _E) < 0.15
+		var near_lip := absf(u) < _MW * 1.25 and absf(v - _M) < 0.13
+		if near_eye or near_lip:
+			continue
+		# Poros aparecem mais no centro do rosto, bochechas e testa, menos nas bordas.
+		var pore_zone := 0.32 + 0.42 * _g2(absf(u) - 0.34, v - 0.16, 0.34, 0.3)
+		pore_zone += 0.26 * _g2(u, v + 0.46, 0.5, 0.28)
+		if r.randf() > clampf(pore_zone, 0.0, 1.0):
+			continue
+		var p := _px(u, v)
+		var rad := maxf(0.28, _s * r.randf_range(0.0009, 0.0019))
+		var darker := r.randf() < 0.62
+		var pc := _skin.darkened(r.randf_range(0.07, 0.2)) if darker else _skin.lightened(r.randf_range(0.04, 0.12))
+		var alpha := r.randf_range(0.018, 0.043) * (1.0 - clear * 0.45)
+		_r_circle(p, rad, Color(pc, alpha))
+
+
+## Pequenos volumes que o sombreamento geral não consegue desenhar sozinho: sulco lacrimal,
+## filtro entre nariz e boca e calor vascular perto das narinas. São detalhes discretos, não linhas.
+func _midface_details() -> void:
+	if _s < 68.0:
+		return
+	var f := _f
+	var lw := maxf(0.5, _s * 0.0032)
+	var aging := clampf(float(f.get("aging", 0.0)), 0.0, 1.0)
+	var dark := _skin.darkened(0.38)
+	# Sulco lacrimal: começa perto do canto interno e se perde na maçã, sem contorno completo.
+	for sx: float in [-1.0, 1.0]:
+		var tear := PackedVector2Array([
+			_px(sx * (_X - 0.1), _E + 0.105),
+			_px(sx * (_X + 0.01), _E + 0.135),
+			_px(sx * (_X + 0.17), _E + 0.18)
+		])
+		_r_polyline(tear, Color(dark, 0.045 + aging * 0.055), lw, true)
+	# Filtro: dois sulcos curtíssimos sob o septo e um brilho central.
+	var top_v := _N + 0.065
+	var bottom_v := _M - float(f["lip_u"]) * 2.2 - 0.022
+	if bottom_v > top_v:
+		for sx: float in [-1.0, 1.0]:
+			var ph := PackedVector2Array([
+				_px(sx * 0.028, top_v),
+				_px(sx * 0.038, lerpf(top_v, bottom_v, 0.55)),
+				_px(sx * 0.055, bottom_v)
+			])
+			_r_polyline(ph, Color(dark, 0.105), lw * 0.8, true)
+		_r_line(_px(0.0, top_v + 0.01), _px(0.0, bottom_v - 0.01), Color(_skin.lightened(0.18), 0.06), lw * 0.65, true)
+	# Calor vascular discreto ao redor das asas do nariz.
+	var warm := Color("#A96058").lerp(_skin, 0.62)
+	_fill(_ellipse(_pxn(0.0, _N + 0.006), _fw * _NW * 0.58, _fh * 0.042, 18), Color(warm, 0.026 + float(f["rosy"]) * 0.012))
 
 
 func _age_lines() -> void:
@@ -1884,8 +1954,8 @@ func _ears() -> void:
 	for sx: float in [-1.0, 1.0]:
 		var ek := er * (1.0 + sx * asym * 0.03)
 		var ec := _px(sx * (float(f["cheek_w"]) * 0.97 + out * 0.07), 0.04)
-		var ew := _fw * (0.15 + out * 0.04) * ek
-		var eh := _fh * 0.2 * ek
+		var ew := _fw * (0.135 + out * 0.035) * ek
+		var eh := _fh * 0.185 * ek
 		var pts := PackedVector2Array()
 		var en := 12 if _s < 90.0 else 20
 		for i in en:
@@ -1977,7 +2047,7 @@ func _eyes() -> void:
 		var iris_col := eye_b if het == 1 and sx == het_side else iris_main
 		var sector := het == 2 and sx == het_side
 		var ic := Vector2(cx + float(f["gaze"]) * ew * 0.3, cy + eh * 0.12 - bulge * eh * 0.08)
-		var ir := minf(eh * 1.3, ew * 0.47)
+		var ir := minf(eh * 1.12, ew * 0.4)
 		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir, ir, 12 if _s < 90.0 else 20), sclera):
 			if not Geometry2D.is_point_in_polygon(ic, piece):
 				_fill(piece, iris_col.darkened(0.3))
@@ -1995,7 +2065,7 @@ func _eyes() -> void:
 				# Anel central (heterocromia central, comum em olhos claros)
 				base = base.lerp(ring_col, ring * (1.0 - smoothstep(0.4, 0.62, r)))
 				return _shade(base, lum))
-		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.4, ir * 0.4, 14), sclera):
+		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.33, ir * 0.33, 14), sclera):
 			_fill(piece, Color("#070505"))
 		# Anel límbico: a borda da íris escurece e fica suave (só onde a íris aparece)
 		if _s >= 90.0:
@@ -2007,16 +2077,16 @@ func _eyes() -> void:
 				if Geometry2D.is_point_in_polygon(rp, sclera):
 					run.append(rp)
 				elif run.size() > 1:
-					_r_polyline(run, ring_c, maxf(0.7, ir * 0.12), true)
+					_r_polyline(run, ring_c, maxf(0.65, ir * 0.085), true)
 					run = PackedVector2Array()
 				else:
 					run = PackedVector2Array()
 			if run.size() > 1:
-				_r_polyline(run, ring_c, maxf(0.7, ir * 0.12), true)
-		_r_circle(ic + Vector2(-ir * 0.34, -ir * 0.36), maxf(0.7, ir * 0.2), Color(1, 1, 1, 0.9))
-		_r_circle(ic + Vector2(ir * 0.3, ir * 0.25), maxf(0.4, ir * 0.09), Color(1, 1, 1, 0.35))
+				_r_polyline(run, ring_c, maxf(0.65, ir * 0.085), true)
+		_r_circle(ic + Vector2(-ir * 0.3, -ir * 0.34), maxf(0.55, ir * 0.12), Color(1, 1, 1, 0.82))
+		_r_circle(ic + Vector2(ir * 0.26, ir * 0.22), maxf(0.3, ir * 0.05), Color(1, 1, 1, 0.24))
 		# Carúncula
-		_r_circle(inner + Vector2(sx * ew * 0.1, eh * 0.05), maxf(0.6, eh * 0.18), Color(0.85, 0.5, 0.5, 0.55))
+		_r_circle(inner + Vector2(sx * ew * 0.1, eh * 0.05), maxf(0.55, eh * 0.16), Color(0.85, 0.5, 0.5, 0.4))
 		# Linha dos cílios (mais grossa por fora) e cílios
 		var lash := Color("#2B1D15").lerp(_skin.darkened(0.7), 0.25)
 		_r_polyline(upper, Color(lash, 0.62), lw * 0.9, true)
@@ -2190,12 +2260,12 @@ func _nose() -> void:
 		var a0 := PI * 0.5 - sx * 0.6
 		_r_arc(wc, _NW * _fw * 0.28, a0 - sx * PI * 0.9, a0 + sx * 0.2, 10, Color(_skin.darkened(0.4), 0.14 if sx < 0 else 0.24), lw, true)
 	var side := PackedVector2Array([_pxn(_BW * 1.1, _E + 0.1), _pxn(_BW * 1.3, (_E + _N) * 0.5), _pxn(_NW * 0.75, _N - 0.07)])
-	_r_polyline(side, Color(_skin.darkened(0.45), 0.14), lw * 1.2, true)
+	_r_polyline(side, Color(_skin.darkened(0.45), 0.1), lw * 1.05, true)
 	var tip := PackedVector2Array()
 	for i in 9:
 		var t := float(i) / 8.0
 		tip.append(_pxn(lerpf(-_NW * 0.35, _NW * 0.35, t), _N + 0.018 + sin(PI * t) * 0.012))
-	_r_polyline(tip, Color(_skin.darkened(0.4), 0.25), lw, true)
+	_r_polyline(tip, Color(_skin.darkened(0.4), 0.16), lw * 0.9, true)
 
 
 func _mouth() -> void:
@@ -2211,7 +2281,7 @@ func _mouth() -> void:
 	var sk := _shade(_skin, 0.86)
 	var red := Color("#A8585A")
 	var rr := sk.get_luminance() / maxf(0.05, red.get_luminance())
-	var lip := sk.lerp(Color(minf(1.0, red.r * rr), minf(1.0, red.g * rr), minf(1.0, red.b * rr)), 0.38 - darkness * 0.12).darkened(0.06 + darkness * 0.06)
+	var lip := sk.lerp(Color(minf(1.0, red.r * rr), minf(1.0, red.g * rr), minf(1.0, red.b * rr)), 0.3 - darkness * 0.09).darkened(0.045 + darkness * 0.055)
 	var lip_up := lip.darkened(0.1 + darkness * 0.14)
 	# Em pele escura o lábio de baixo puxa para o rosado, mas no mesmo brilho do lábio (clarear
 	# demais parece boca aberta)
@@ -2300,7 +2370,7 @@ func _mouth() -> void:
 	var lc := PackedColorArray()
 	for i in line.size():
 		var t := float(i) / 14.0
-		lc.append(Color("#3A1C1B", 0.3 + 0.35 * sin(PI * t)))
+		lc.append(Color("#3A1C1B", 0.22 + 0.27 * sin(PI * t)))
 	if gap <= 0.5:
 		_r_polyline_colors(line, lc, lw, true)
 	for sx: float in [-1.0, 1.0]:
