@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.28, -0.22, 0.94)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 11
+const PORTRAIT_RENDER_VERSION := 12
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -2777,7 +2777,17 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 		var yr := smoothstep(top_y - soft, top_y + soft, v) * (1.0 - smoothstep(bot_y - soft * 0.5, bot_y + soft * 0.5, v + au * 0.1))
 		var xr := 1.0 - smoothstep(wx - soft, wx + soft, au)
 		var dm := yr * xr
-		if mu == 2 or mu == 5:
+		if mu == 1:
+			# Bigode natural em dois lóbulos. A versão retangular preenchia toda a área sob o
+			# nariz e parecia uma sombra/buço gigante, principalmente em barba por fazer.
+			var k1 := clampf(au / maxf(wx, 0.01), 0.0, 1.0)
+			var top1 := top_y + 0.016 * (1.0 - k1)
+			var bot1 := bot_y - 0.028 * k1 + 0.008 * sin(k1 * PI)
+			var vertical := smoothstep(top1 - soft, top1 + soft, v) * (1.0 - smoothstep(bot1 - soft * 0.45, bot1 + soft * 0.45, v))
+			var center_gap := smoothstep(0.045, 0.13, au)
+			var side_taper := 1.0 - smoothstep(0.78, 1.0, k1)
+			dm = vertical * xr * center_gap * lerpf(0.72, 1.0, side_taper)
+		elif mu == 2 or mu == 5:
 			dm *= lerpf(0.55, 1.0, smoothstep(0.0, 0.035, au))
 		# Pontas do bigode descendo nos cantos
 		dm = maxf(dm, (1.0 - smoothstep(0.05, 0.05 + soft, absf(au - _MW * 1.02))) * smoothstep(_N + 0.06, _N + 0.1, v) * (1.0 - smoothstep(_M + 0.02, _M + 0.06, v)) * (0.0 if mu == 2 or mu == 5 else 1.0))
@@ -2942,8 +2952,12 @@ func _beard_px(p: Vector2, P: Dictionary, col: Color, gray: float, short: bool, 
 	# Os primeiros fios brancos aparecem nos cantos do queixo
 	c = c.lerp(Color("#D9D6D0"), gray * _g2(absf(q.x) - 0.3, q.y - 0.95, 0.16, 0.22))
 	if short:
-		# Barba por fazer vista de longe é uma sombra fria na pele, não uma mancha marrom
+		# Barba por fazer vista de longe é uma sombra fria na pele, não uma mancha marrom.
+		# Na região do bigode a massa fica muito mais transparente; os fios individuais
+		# dão a leitura de pelo sem formar uma tarja horizontal.
 		c = c.lerp(_shadow_col, 0.4)
+		if q.y < _M + 0.015:
+			dens *= 0.28
 	return Color(c, dens * op)
 
 
