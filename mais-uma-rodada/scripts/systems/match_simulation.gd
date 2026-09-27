@@ -92,7 +92,7 @@ const LIVE_XG := 0.72
 static func damp(x: float) -> float:
 	return 1.0 + (x - 1.0) * MOD_DAMP
 ## Contra o time do usuário a IA se motiva mais conforme a dificuldade (fácil, normal, difícil).
-const USER_OPP_BOOST: Array[float] = [0.99, 1.01, 1.025]
+const USER_OPP_BOOST: Array[float] = [1.0, 1.035, 1.07]
 ## Força do efeito do placar (no começo do jogo e somado até o fim).
 const STATE_BASE := 0.04
 const STATE_LATE := 0.07
@@ -138,6 +138,9 @@ var year: int = 2026
 var crowd: float = 0.8
 ## Cultura da liga (LeagueCulture): multiplicadores de chances e de cartões.
 var goal_f: float = 1.0
+## Clima da partida (Weather.for_fixture): muda gols, erros, cansaço, faltas, lesões e jogadas.
+var wx: Dictionary = {}
+var wx_fx: Dictionary = {"goals": 1.0, "fatigue": 1.0, "errors": 1.0, "long": 1.0, "cross": 1.0, "pass": 1.0, "fouls": 1.0, "injury": 1.0}
 var card_f: float = 1.0
 var ref: Array = [] # árbitro [nação, id] (Referees)
 var ref_pens: float = 1.0
@@ -198,6 +201,13 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 	card_f *= float(rf["cards"])
 	ref_pens = float(rf["pens"])
 	ref_fouls = float(rf["fouls"])
+	wx = ctx.get("wx", {})
+	if not wx.is_empty():
+		wx_fx = wx.get("fx", wx_fx)
+		goal_f *= float(wx_fx["goals"])
+		ref_fouls *= float(wx_fx["fouls"])
+		_type_w[CH_LONG] = BASE_TYPE_W[CH_LONG] * float(wx_fx["long"])
+		_type_w[CH_CROSS] = BASE_TYPE_W[CH_CROSS] * float(wx_fx["cross"])
 	crowd *= float(cul["home"])
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	teams[0].home_f = 1.0 + adv * crowd * 0.5
@@ -215,6 +225,10 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		t.vuln = TacticalScout.vulnerability(world, opp_club)
 		t.study = TacticalScout.study(world, t.club)
 		t.adapt = float(ClubPhilosophy.of(t.club).get("adapt", 0.4))
+		# Contra o time do usuário a IA estuda mais (e mais ainda nas dificuldades altas).
+		if teams[1 - t.side].is_user and not t.is_user:
+			t.study = minf(1.0, t.study + 0.05 + 0.1 * clampi(world.difficulty, 0, 2))
+			t.adapt = minf(1.0, t.adapt + 0.1 * clampi(world.difficulty, 0, 2))
 	for t: MatchTeam in teams:
 		t.refresh_tactics()
 		t.recompute_units()
@@ -614,7 +628,7 @@ func _simulate_minute() -> void:
 	if detail:
 		pressure.append([half, minute, danger if s == 0 else -danger])
 	for t: MatchTeam in teams:
-		if rng.randf() < INJURY_RATE * t.i_fatigue:
+		if rng.randf() < INJURY_RATE * t.i_fatigue * float(wx_fx["injury"]):
 			_injury(t, _pick_injury_victim(t))
 
 
@@ -651,7 +665,7 @@ func _live_minute() -> void:
 		danger = maxf(danger, minf(1.0, (teams[s].xg - float(xg0[s])) * 2.5 + 0.2))
 		pressure.append([half, minute, danger if s == 0 else -danger])
 	for t: MatchTeam in teams:
-		if rng.randf() < INJURY_RATE * t.i_fatigue:
+		if rng.randf() < INJURY_RATE * t.i_fatigue * float(wx_fx["injury"]):
 			_injury(t, _pick_injury_victim(t))
 			live.sync_teams()
 
@@ -840,7 +854,7 @@ func live_keeper_claim(gk: MatchPlayer) -> void:
 func _time_factor() -> float:
 	if half >= 3:
 		return 1.05
-	return 0.9 + 0.2 * clampf(float(minute) / 90.0, 0.0, 1.0)
+	return 0.86 + 0.28 * clampf(float(minute) / 90.0, 0.0, 1.0)
 
 
 ## Raio-X: laterais que sobem ao ataque e chegadas ao último terço (só vis_rng: não muda o jogo).
@@ -954,13 +968,20 @@ func _game_state() -> void:
 			continue
 		var k := (STATE_BASE + STATE_LATE * t_f) * (1.0 if absi(diff) == 1 else 1.35)
 		if diff < 0:
-			t.g_rate = 1.0 + k * 0.7
-			t.g_quality = 1.0 - k * 0.75
+			# Atrás: ocupa o campo e finaliza mais (de fora, com a área cheia). Perdendo de muito,
+			# o time desanima e a pressão perde força.
+			t.g_rate = 1.0 + k * (1.5 if diff == -1 else 0.7)
+			t.g_quality = 1.0 - k * 0.5
 			t.g_poss = k * 0.15
 		else:
-			t.g_rate = 1.0 - k * 0.6
-			t.g_quality = 1.0 + k * 0.9
+			# Na frente: recua e explora o contra-ataque. Com dois ou três gols de vantagem, tira o pé.
+			t.g_rate = 1.0 - k * 0.7
+			t.g_quality = 1.0 + k * 0.35
 			t.g_poss = -k * 0.15
+			if diff == 2:
+				t.g_rate *= 0.88
+			elif diff >= 3:
+				t.g_rate *= 0.72
 
 
 ## Recalcula as probabilidades por minuto (chamado quando setores ou táticas mudam).
@@ -1023,7 +1044,7 @@ func _foul_prob(dfn: MatchTeam) -> float:
 
 ## Fadiga aplicada em blocos de `minutes` minutos (barato e suficiente).
 func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
-	var mult: float = FATIGUE_RATE * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
+	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
 	for mp: MatchPlayer in t.slots:
 		if mp == null:
 			continue
@@ -1107,7 +1128,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var s := att.side
 	var ctype := forced_type
 	# Erro defensivo: zaga indecisa entrega a bola.
-	if ctype < 0 and rng.randf() < 0.04 * clampf((75.0 - dfn.avg_decision) / 25.0 + 0.6, 0.4, 1.6):
+	if ctype < 0 and rng.randf() < 0.04 * clampf((75.0 - dfn.avg_decision) / 25.0 + 0.6, 0.4, 1.6) * float(wx_fx["errors"]):
 		ctype = CH_ERROR
 	if ctype < 0:
 		ctype = _pick_chance_type(att, dfn)
@@ -1521,6 +1542,14 @@ func _send_off(t: MatchTeam, mp: MatchPlayer, second_yellow: bool) -> void:
 				var vslot := victim.slot
 				_do_sub(t, victim, gk_bench, 0)
 				t.slots[vslot] = null
+	# Técnico reage à expulsão: quem ficou com dez fecha a casinha (se não estiver perdendo no
+	# fim); o rival com um a mais se lança.
+	var o: MatchTeam = teams[1 - t.side]
+	var d0: int = score[t.side] - score[o.side]
+	if not t.is_user and not (d0 < 0 and minute >= 70) and t.mentality > 1:
+		set_mentality(t.side, t.mentality - 1)
+	if not o.is_user and d0 >= 0 and o.mentality < 3:
+		set_mentality(o.side, o.mentality + 1)
 	t.recompute_units()
 	_refresh_rates()
 
@@ -1995,7 +2024,7 @@ func _retune(t: MatchTeam, x: Dictionary, label: String, pid: int = -1) -> void:
 ## domínio sem gol, bloco baixo que não se abre. No máximo uma mudança por leitura; técnico
 ## que estuda mais (TacticalScout.study) enxerga mais e reage mais.
 func _ai_read(t: MatchTeam) -> void:
-	if t.ai_reads >= 3 or t.on_pitch_count < 10:
+	if t.ai_reads >= 4 or t.on_pitch_count < 10:
 		return
 	t.ai_reads += 1
 	if rng.randf() > 0.3 + t.study * 0.65:
@@ -2107,9 +2136,17 @@ func _ai_decisions() -> void:
 		for t: MatchTeam in teams:
 			if t.is_user:
 				_user_plan(t)
+	# Primeiro tempo: quem está levando um baile não espera o intervalo para mexer.
+	if half == 1 and minute == 32:
+		for t: MatchTeam in teams:
+			if not t.is_user and (score[t.side] - score[1 - t.side] <= -2 or teams[1 - t.side].xg - t.xg >= 1.0):
+				_ai_read(t)
 	if half != 2:
 		return
 	for t: MatchTeam in teams:
+		# Conversa do intervalo: o técnico corrige o que viu no primeiro tempo.
+		if minute == 46 and not t.is_user:
+			_ai_read(t)
 		if (minute == 60 or minute == 68 or minute == 76 or minute == 84) and (not t.is_user or t.auto_subs):
 			_auto_subs(t)
 		if t.is_user:
@@ -2161,7 +2198,10 @@ func _auto_subs(t: MatchTeam) -> void:
 	for mp: MatchPlayer in t.slots:
 		if mp != null and mp.slot != 0 and mp.start_min == 0:
 			cands.append(mp)
-	cands.sort_custom(func(a, b): return a.cond < b.cond)
+	# Sai primeiro quem está gasto, quem está jogando mal e quem está pendurado com cartão.
+	var urgency := func(mp: MatchPlayer) -> float:
+		return mp.cond + mp.rating_pts * 8.0 - (12.0 if mp.yellow > 0 and mp.w_def >= 0.5 else 0.0)
+	cands.sort_custom(func(a, b): return urgency.call(a) < urgency.call(b))
 	var per_window := 2 if minute < 84 else 3
 	var done := 0
 	for mp: MatchPlayer in cands:
@@ -2175,6 +2215,8 @@ func _auto_subs(t: MatchTeam) -> void:
 		var cur := mp.p.rating_at(mp.pos) * (0.72 + 0.28 * c1 * c1)
 		var new_v := sub.p.rating_at(mp.pos) * (0.72 + 0.28 * c2 * c2)
 		var need := 0.92 if mp.yellow == 0 else 0.85
+		if mp.rating_pts <= -0.8:
+			need -= 0.06 # jogando mal: troca mesmo que o reserva seja um pouco pior
 		if new_v >= cur * need:
 			_do_sub(t, mp, sub, mp.slot)
 			done += 1
