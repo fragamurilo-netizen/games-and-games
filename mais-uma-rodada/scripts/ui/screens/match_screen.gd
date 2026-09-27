@@ -285,7 +285,7 @@ func _build() -> void:
 func _open_intro() -> void:
 	BroadcastIntro.show(world(), _sim, _fx, _stadium, func():
 		if not _sim.started and _sim.can_talk(_user_side):
-			_open_talk(false))
+			_open_talk(false), [_colors[0], _colors[1], _colors[2], _colors[3]])
 
 
 ## Texto do selo da emissora: "AO VIVO", "INTERVALO" ou "FIM DE JOGO".
@@ -533,7 +533,6 @@ func _conditions_row() -> Control:
 	else:
 		bits.append("portões fechados")
 	var l := UIKit.label(" · ".join(bits), "Small")
-	l.clip_text = true
 	row.add_child(l)
 	return row
 

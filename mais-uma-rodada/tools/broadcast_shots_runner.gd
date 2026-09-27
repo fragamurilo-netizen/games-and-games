@@ -27,6 +27,16 @@ func _shot(shot_name: String) -> void:
 	get_viewport().get_texture().get_image().save_png("%s/%s.png" % [opt_out, shot_name])
 
 
+func _find_button(n: Node, text: String) -> Button:
+	if n is Button and (n as Button).text == text and (n as Button).is_visible_in_tree():
+		return n
+	for c in n.get_children():
+		var r := _find_button(c, text)
+		if r != null:
+			return r
+	return null
+
+
 func _run() -> void:
 	await _frames(2)
 	var main: Node = load("res://scenes/main.tscn").instantiate()
@@ -49,6 +59,17 @@ func _run() -> void:
 	UIManager.replace("match")
 	await _frames(12)
 	await _shot("b01_abertura")
+	# Etapas da abertura: entrada dos times e escalações
+	for k in 4:
+		var nb := _find_button(get_tree().root, "Próximo")
+		if nb == null:
+			break
+		nb.pressed.emit()
+		await _frames(40 if k == 0 else 6)
+		if k == 0:
+			for j in 150:
+				await get_tree().process_frame
+		await _shot("b01_etapa%d" % (k + 2))
 	var ms: BaseScreen = UIManager.current()
 	UIManager.close_all_modals()
 	await _frames(4)

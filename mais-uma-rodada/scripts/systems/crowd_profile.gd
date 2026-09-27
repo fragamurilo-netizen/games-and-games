@@ -75,6 +75,7 @@ static func for_club(c: Club) -> Dictionary:
 	# Tamanho da torcida pesa no volume: clubes grandes cantam mais alto
 	var loud := clampf(0.7 + c.reputation / 160.0, 0.7, 1.25)
 	var prof := {
+		"club": c.key, "league": c.league_id, "nation": c.nation,
 		"style": style,
 		"bpm": _base_bpm(style) + float(h % 13) - 6.0,
 		"pitch": 180.0 + float((h / 13) % 70),
