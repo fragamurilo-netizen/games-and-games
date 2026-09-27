@@ -25,27 +25,20 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	c.add_child(_chips(TABS, _tab, func(k: String): _tab = k))
+	max_content_width = 1700
+	c.add_child(UIKit.tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()))
 	if w.has_user():
-		c.add_child(_chips(SCOPES, _scope, func(k: String): _scope = k))
+		c.add_child(UIKit.segment(SCOPES, _scope, func(k: String):
+			_scope = k
+			refresh()))
+	var start := c.get_child_count()
 	if _tab == "free":
 		_free(w, c)
 	else:
 		_moves(w, c)
-
-
-func _chips(opts: Array, cur: String, set_fn: Callable) -> Control:
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
-	for o in opts:
-		var key: String = o[0]
-		var chip := UIKit.chip(o[1], key == cur, g, func():
-			set_fn.call(key)
-			refresh())
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		row.add_child(chip)
-	return row
+	columnize(c, start)
 
 
 func _in_scope(w: GameWorld, club: Club) -> bool:

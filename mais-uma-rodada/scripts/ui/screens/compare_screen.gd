@@ -42,6 +42,8 @@ func refresh() -> void:
 	c.add_child(_attrs(w, pa, pb))
 	c.add_child(_season(w, pa, pb))
 	c.add_child(_career_card(w, pa, pb))
+	max_content_width = 1600
+	columnize(c, 0, 2, 1)
 	var f := footer()
 	UIKit.clear(f)
 	var row := UIKit.hbox(10)
@@ -159,16 +161,25 @@ func _seen_ovr(w: GameWorld, p: Player) -> int:
 
 
 func _heads(w: GameWorld, pa: Player, pb: Player) -> Control:
-	var card := UIKit.card("Card", 10)
+	var ca := w.club(pa.club_id) if pa.club_id >= 0 else null
+	var cb := w.club(pb.club_id) if pb.club_id >= 0 else null
+	# Frente a frente, como a tela de confronto de um jogo de futebol: cada lado na cor do clube.
+	var comp := ca.league_id if ca != null else (cb.league_id if cb != null else w.user_club().league_id)
+	var hero := MatchHero.wrap(w, comp, ca, cb)
+	var band: HBoxContainer = hero[1]
+	var bl := UIKit.label(tr("Frente a frente").to_upper(), "Caps")
+	bl.add_theme_color_override(&"font_color", Color.WHITE)
+	bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(bl)
+	var card: VBoxContainer = hero[2]
 	var row := UIKit.hbox(8)
 	row.add_child(_head(w, pa, HORIZONTAL_ALIGNMENT_LEFT))
-	var vs := UIKit.label("×", "Title")
+	var vs := UIKit.label("VS", "Title")
 	vs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	vs.add_theme_color_override(&"font_color", UIColors.DIM)
 	row.add_child(vs)
 	row.add_child(_head(w, pb, HORIZONTAL_ALIGNMENT_RIGHT))
 	card.add_child(row)
-	var ca := w.club(pa.club_id) if pa.club_id >= 0 else null
-	var cb := w.club(pb.club_id) if pb.club_id >= 0 else null
 	for r in [
 		["Overall", _seen_ovr(w, pa), _seen_ovr(w, pb), true, ""],
 		["Idade", pa.age(w.year), pb.age(w.year), false, ""],
@@ -180,25 +191,35 @@ func _heads(w: GameWorld, pa: Player, pb: Player) -> Control:
 	card.add_child(_text_line("Clube", ca.short_name if ca != null else "—", cb.short_name if cb != null else "—"))
 	card.add_child(_text_line("Posição", Pos.name_of(pa.position), Pos.name_of(pb.position)))
 	card.add_child(_text_line("Estilo", PlayStyle.of(pa), PlayStyle.of(pb)))
-	return UIKit.card_panel(card)
+	return hero[0]
 
 
 func _head(w: GameWorld, p: Player, align: int) -> Control:
 	var col := UIKit.vbox(4)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var cl := w.club(p.club_id) if p.club_id >= 0 else null
-	var top := UIKit.hbox(6)
+	var top := UIKit.hbox(8)
 	top.alignment = BoxContainer.ALIGNMENT_BEGIN if align == HORIZONTAL_ALIGNMENT_LEFT else BoxContainer.ALIGNMENT_END
-	top.add_child(UIKit.portrait(p, cl, w.year, 110))
+	var pv := UIKit.portrait(p, cl, w.year, 128)
+	var badge := UIKit.badge(_seen_ovr(w, p), 60, 44, 28)
+	badge.size_flags_vertical = Control.SIZE_SHRINK_END
+	if align == HORIZONTAL_ALIGNMENT_LEFT:
+		top.add_child(pv)
+		top.add_child(badge)
+	else:
+		top.add_child(badge)
+		top.add_child(pv)
 	col.add_child(top)
-	var n := UIKit.label(p.display_name(), "H3")
+	var n := UIKit.label(p.display_name().to_upper(), "H3")
 	n.horizontal_alignment = align
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(n)
+	var sub := UIKit.label("%s · %s" % [Pos.code(p.position), cl.short_name if cl != null else tr("Sem clube")], "Caps")
+	sub.horizontal_alignment = align
+	col.add_child(sub)
 	var pid := p.id
-	var b := UIKit.button("Perfil", "GhostButton", func(): UIManager.push("player", {"id": pid}))
-	col.add_child(b)
-	return col
+	# O rosto abre o perfil (o botão "Perfil" separado sai: menos ruído no confronto).
+	return UIKit.tap_row(col, func(): UIManager.push("player", {"id": pid}), "RowPanel")
 
 
 ## Linha numérica: o melhor lado fica destacado (higher_better decide a direção).

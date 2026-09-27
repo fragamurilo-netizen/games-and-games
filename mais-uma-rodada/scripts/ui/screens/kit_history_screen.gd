@@ -33,14 +33,18 @@ func refresh() -> void:
 		card.add_child(UIKit.label("Ainda não há uniformes no histórico. Eles entram aqui quando estreiam em campo, no primeiro jogo de cada temporada.", "", true))
 		c.add_child(UIKit.card_panel(card))
 		return
+	max_content_width = 1700
 	for h in hist:
 		c.add_child(_season_card(w, club, int(h[0]), h[1]))
+	columnize(c, 0)
 
 
 func _season_card(w: GameWorld, club: Club, year: int, kits: Dictionary) -> Control:
 	var card := UIKit.card("CardHighlight" if year == w.year else "Card", 8)
 	var head := UIKit.hbox(10)
-	var t := UIKit.label(("Temporada %d" % year) + (" (atual)" if year == w.year else ""), "H3")
+	var t := UIKit.label(str(year), "H2")
+	if year == w.year:
+		t.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	var coach := String(kits.get("coach", ""))
