@@ -97,16 +97,13 @@
 				"shape": "shield",
 				"field": "plain",
 				"symbol": "liverbird",
-				"c1": "#FFFFFF",
-				"c2": "#C8102E",
-				"c3": "#E4B43A",
-				"sc": "#C8102E",
-				"sym_scale": 1.02,
+				"c1": "#C8102E",
+				"c2": "#FFFFFF",
+				"c3": "#F6EB61",
+				"sc": "#FFFFFF",
+				"sym_scale": 1.08,
 				"border": "gold",
-				"ribbon": "EST · 1892",
-				"ribbon_top": "YOU'LL NEVER WALK ALONE",
-				"top_style": "gates",
-				"flames": true
+				"ribbon": "YNWA"
 			},
 			"rivals": [
 				"ENG_MSB",
