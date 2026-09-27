@@ -52,14 +52,18 @@
 			"capacity": 75000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "IM",
 				"c1": "#0068A8",
 				"c2": "#111111",
-				"sc": "#FFFFFF",
-				"border": "double"
+				"c3": "#E2B84A",
+				"sc": "#E2B84A",
+				"tc": "#E2B84A",
+				"text": "INTERNAZIONALE",
+				"text2": "MILANO",
+				"border": "gold"
 			},
 			"rivals": [
 				"ITA_MRN",
@@ -150,11 +154,18 @@
 			"capacity": 25000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "A",
-				"sc": "#FFFFFF"
+				"c1": "#1E71B8",
+				"c2": "#111111",
+				"fc": "#111111",
+				"sc": "#FFFFFF",
+				"plate": "none",
+				"text": "ATALANTA",
+				"text2": "BERGAMO",
+				"tc": "#FFFFFF"
 			},
 			"rivals": []
 		},
@@ -297,10 +308,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"field": "plain",
-				"symbol": "letter",
-				"initials": "C",
-				"sc": "#FFFFFF"
+				"field": "chief",
+				"chief_text": "COMO",
+				"cc": "#FFFFFF",
+				"symbol": "cross_plain",
+				"c1": "#003DA5",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"border": "thin"
 			},
 			"rivals": []
 		},
@@ -405,11 +420,14 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "letter",
-				"initials": "HV",
-				"c1": "#1D3F91",
+				"symbol": "stairs",
+				"c1": "#002F6C",
 				"c2": "#FFD100",
-				"sc": "#FFD100"
+				"sc": "#FFD100",
+				"border": "gold",
+				"c3": "#FFD100",
+				"chief_text": "HELLAS",
+				"cc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -512,11 +530,15 @@
 			"capacity": 21500,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"field": "stripes:3",
+				"shape": "ring",
+				"field": "stripes:5",
 				"symbol": "letter",
 				"initials": "S",
-				"sc": "#FFFFFF"
+				"c1": "#00A752",
+				"c2": "#111111",
+				"fc": "#111111",
+				"text": "U.S. SASSUOLO",
+				"year": "1920"
 			},
 			"rivals": []
 		},
@@ -698,10 +720,14 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "EFC"
+				"initials": "E",
+				"c1": "#0057B8",
+				"c2": "#FFFFFF",
+				"text": "EMPOLI F.C.",
+				"year": "1920"
 			}
 		},
 		{

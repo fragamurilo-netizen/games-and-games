@@ -669,7 +669,7 @@
 			"capacity": 40000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "CFC",
@@ -912,7 +912,7 @@
 			"capacity": 29000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "GFC",
@@ -1062,7 +1062,7 @@
 			"capacity": 11000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "VNFC"
@@ -1704,7 +1704,7 @@
 			"capacity": 3000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "TFC"
@@ -2048,7 +2048,7 @@
 			"capacity": 20000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SEG"
@@ -2077,7 +2077,7 @@
 			"capacity": 16000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "MC",
@@ -2317,7 +2317,7 @@
 			"capacity": 5000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "MEC",
@@ -2348,7 +2348,7 @@
 			"capacity": 7000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NIFC"
@@ -2490,7 +2490,7 @@
 			"capacity": 18000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "PEL",
@@ -2576,7 +2576,7 @@
 			"capacity": 6000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AVE",
@@ -2660,7 +2660,7 @@
 			"capacity": 18000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "PAR",
@@ -2744,7 +2744,7 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CAS",
@@ -2828,7 +2828,7 @@
 			"capacity": 6000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "MDI",
@@ -2912,7 +2912,7 @@
 			"capacity": 4000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "BRR",
@@ -2996,7 +2996,7 @@
 			"capacity": 5000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "PRJ",
@@ -3080,7 +3080,7 @@
 			"capacity": 53000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "UBE",
@@ -3164,7 +3164,7 @@
 			"capacity": 15000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CAL",
@@ -3248,7 +3248,7 @@
 			"capacity": 10000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "GSO",
@@ -3332,7 +3332,7 @@
 			"capacity": 7000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "HOR",
@@ -3416,7 +3416,7 @@
 			"capacity": 8000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "GNS",
@@ -3500,7 +3500,7 @@
 			"capacity": 8000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "JZE",
@@ -3584,7 +3584,7 @@
 			"capacity": 16000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "FLF",
@@ -3672,7 +3672,7 @@
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "RET",
@@ -3756,7 +3756,7 @@
 			"capacity": 19000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CPN",
@@ -3842,7 +3842,7 @@
 			"capacity": 40000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "MAC",
@@ -3926,7 +3926,7 @@
 			"capacity": 44000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "FPI",
@@ -4010,7 +4010,7 @@
 			"capacity": 6000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AGM",
@@ -4094,7 +4094,7 @@
 			"capacity": 6000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NAM",
@@ -4178,7 +4178,7 @@
 			"capacity": 10000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "LUV",
@@ -4262,7 +4262,7 @@
 			"capacity": 5000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CEI",
@@ -4346,7 +4346,7 @@
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SCT",
@@ -4430,7 +4430,7 @@
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NOR",

@@ -1004,7 +1004,7 @@
 			"capacity": 18400,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "QPR",

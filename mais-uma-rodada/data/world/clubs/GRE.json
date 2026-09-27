@@ -21,15 +21,16 @@
 			"capacity": 32100,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "O",
-				"c1": "#FFFFFF",
-				"c2": "#E30613",
-				"sc": "#E30613",
-				"c3": "#E30613",
-				"laurel": true
+				"initials": "OSFP",
+				"c1": "#E30613",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"text": "OLYMPIACOS",
+				"text2": "PIRAEUS",
+				"border": "thin"
 			},
 			"rivals": [
 				"GRE_ATH",
@@ -143,7 +144,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ARIS",
@@ -170,7 +171,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "OFI",
@@ -216,7 +217,17 @@
 			"stadium": "Theodoros Kolokotronis",
 			"capacity": 7400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"c1": "#FFD100",
+				"c2": "#111111",
+				"sc": "#111111",
+				"border": "thick",
+				"chief_text": "ASTERAS",
+				"cc": "#111111"
+			},
 			"rivals": []
 		},
 		{

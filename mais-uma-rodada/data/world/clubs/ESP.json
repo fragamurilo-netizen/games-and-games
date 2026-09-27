@@ -184,8 +184,12 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "VCF",
+				"c1": "#FFE667",
+				"c2": "#005187",
 				"sc": "#005187",
-				"border": "thick"
+				"border": "thick",
+				"crown": 1,
+				"c3": "#E2B84A"
 			},
 			"rivals": [
 				"ESP_VLC"
@@ -364,11 +368,17 @@
 			"capacity": 23500,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
+				"shape": "iberian",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CAO",
-				"sc": "#FFD100"
+				"c1": "#D91A21",
+				"c2": "#0A346F",
+				"sc": "#FFFFFF",
+				"border": "gold",
+				"c3": "#E2B84A",
+				"chief_text": "OSASUNA",
+				"cc": "#0A346F"
 			},
 			"rivals": [
 				"ESP_BIL",
@@ -454,11 +464,15 @@
 			"capacity": 16500,
 			"kit": "plain",
 			"crest": {
-				"shape": "shield",
+				"shape": "iberian",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "GCF",
-				"sc": "#FFFFFF"
+				"c1": "#005999",
+				"c2": "#FFFFFF",
+				"crown": 1,
+				"c3": "#E2B84A",
+				"border": "thin"
 			},
 			"rivals": [
 				"ESP_LEG"
@@ -891,9 +905,13 @@
 			"crest": {
 				"shape": "iberian",
 				"field": "plain",
-				"symbol": "letter",
-				"initials": "CCF",
-				"sc": "#0055A5"
+				"symbol": "columns",
+				"c1": "#FFE600",
+				"c2": "#0045A5",
+				"sc": "#0045A5",
+				"border": "thick",
+				"chief_text": "CÁDIZ C.F.",
+				"cc": "#0045A5"
 			},
 			"rivals": []
 		},
@@ -972,7 +990,7 @@
 			"capacity": 5700,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CDM",
@@ -1135,7 +1153,7 @@
 			"capacity": 12500,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CDL",

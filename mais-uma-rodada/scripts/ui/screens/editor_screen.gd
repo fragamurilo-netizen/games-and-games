@@ -304,6 +304,7 @@ func _crest_card(cl: Club) -> Control:
 			flow.add_child(UIKit.chip(String(labels[i]), current == val, g, func():
 				cl.crest[key] = val
 				cl.crest.erase("stripes")
+				cl.crest["edited"] = true
 				_mark("crest")
 				refresh()))
 		card.add_child(flow)
@@ -315,11 +316,13 @@ func _crest_card(cl: Club) -> Control:
 	var stars := int(cl.crest.get("stars", 0))
 	st.add_child(UIKit.button("−", "GhostButton", func():
 		cl.crest["stars"] = maxi(0, stars - 1)
+		cl.crest["edited"] = true
 		_mark("crest")
 		refresh()))
 	st.add_child(UIKit.label(str(stars), ""))
 	st.add_child(UIKit.button("+", "GhostButton", func():
 		cl.crest["stars"] = mini(7, stars + 1)
+		cl.crest["edited"] = true
 		_mark("crest")
 		refresh()))
 	card.add_child(st)
@@ -331,6 +334,7 @@ func _crest_card(cl: Club) -> Control:
 	cb.button_pressed = int(cl.crest.get("crown", 0)) > 0
 	cb.toggled.connect(func(on: bool):
 		cl.crest["crown"] = 1 if on else 0
+		cl.crest["edited"] = true
 		_mark("crest")
 		refresh())
 	cw.add_child(cb)
@@ -350,6 +354,7 @@ func _set_club_field(cl: Club, key: String, t: String) -> void:
 		"abbr":
 			cl.abbr = v.to_upper()
 			cl.crest["initials"] = v.to_upper().substr(0, 3)
+			cl.crest["edited"] = true
 		"nick":
 			cl.nickname = v
 		"city":

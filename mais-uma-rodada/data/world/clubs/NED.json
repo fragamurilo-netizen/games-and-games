@@ -21,12 +21,16 @@
 			"capacity": 55000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "AJAX",
+				"initials": "A",
+				"c1": "#FFFFFF",
+				"c2": "#D2122E",
 				"sc": "#D2122E",
-				"border": "thick"
+				"text": "AJAX",
+				"text2": "AMSTERDAM",
+				"border": "thin"
 			},
 			"rivals": [
 				"NED_ROT",
@@ -115,7 +119,7 @@
 			"capacity": 19500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AZ"
@@ -223,7 +227,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "NEC",
@@ -307,7 +311,7 @@
 			"kit": "halves",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "FCG",
@@ -334,7 +338,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FS",
@@ -361,7 +365,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "PEC"
@@ -414,7 +418,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NAC",

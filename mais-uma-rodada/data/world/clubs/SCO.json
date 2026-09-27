@@ -86,11 +86,15 @@
 			"capacity": 20900,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "A",
-				"sc": "#FFFFFF"
+				"c1": "#D2001F",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"text": "ABERDEEN F.C.",
+				"year": "1903"
 			},
 			"rivals": []
 		},

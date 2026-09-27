@@ -146,11 +146,17 @@
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "LOSC",
-				"sc": "#FFFFFF"
+				"c1": "#E01E13",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"text": "LILLE",
+				"text2": "MÉTROPOLE",
+				"border": "thin",
+				"tc": "#1B2A5B"
 			},
 			"rivals": [
 				"FRA_LEN"
@@ -320,7 +326,12 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AJA",
-				"sc": "#0055A4"
+				"c1": "#FFFFFF",
+				"c2": "#0056A6",
+				"sc": "#0056A6",
+				"border": "thick",
+				"chief_text": "AUXERRE",
+				"cc": "#0056A6"
 			},
 			"rivals": []
 		},
@@ -428,7 +439,7 @@
 			"capacity": 25200,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "HAC",
@@ -543,7 +554,11 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ASSE",
-				"sc": "#FFFFFF"
+				"c1": "#00A551",
+				"c2": "#FFFFFF",
+				"border": "thick",
+				"stars": 10,
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"FRA_LYO"
@@ -568,7 +583,7 @@
 			"capacity": 32900,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "MHSC",
@@ -597,7 +612,7 @@
 			"capacity": 21000,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "SR",
@@ -624,7 +639,7 @@
 			"capacity": 18400,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "EAG",
@@ -728,7 +743,7 @@
 			"capacity": 18000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SL"
@@ -807,7 +822,7 @@
 			"capacity": 15600,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCA"
@@ -995,7 +1010,7 @@
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "LMFC",

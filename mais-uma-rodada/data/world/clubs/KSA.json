@@ -50,11 +50,14 @@
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AN",
-				"sc": "#0055A5"
+				"c1": "#FFD100",
+				"c2": "#0055A5",
+				"sc": "#0055A5",
+				"border": "thin"
 			},
 			"rivals": [
 				"KSA_AZR"
@@ -140,7 +143,7 @@
 				"KSA_ETT"
 			],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "Q"
@@ -168,7 +171,7 @@
 				"KSA_QAD"
 			],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "E",
@@ -197,7 +200,7 @@
 				"KSA_AZR"
 			],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "S",
@@ -224,7 +227,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "T"
@@ -325,7 +328,7 @@
 			"kit": "halves",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "R",
@@ -354,7 +357,7 @@
 				"KSA_HAZ"
 			],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "K"
@@ -407,7 +410,7 @@
 				"KSA_KHO"
 			],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "H"

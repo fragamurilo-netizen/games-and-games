@@ -226,7 +226,7 @@
 			"capacity": 30000,
 			"kit": "halves",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "SL",
@@ -311,7 +311,13 @@
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "A",
-				"sc": "#FFFFFF"
+				"c1": "#D31145",
+				"c2": "#111111",
+				"fc": "#111111",
+				"plate": "disc",
+				"pc": "#111111",
+				"sc": "#FFFFFF",
+				"border": "thin"
 			},
 			"rivals": [
 				"MEX_GDL"
@@ -493,7 +499,7 @@
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ASL",
