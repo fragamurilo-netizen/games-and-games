@@ -729,3 +729,35 @@ static func _weight(n: Node) -> float:
 		elif ch is Control and not (ch is Container) and (ch as Control).custom_minimum_size.y > 0:
 			h += (ch as Control).custom_minimum_size.y * 0.6
 	return h
+
+
+static var _sized_icons: Dictionary = {}
+
+
+## Ícone redimensionado para `px` (campos de texto e outros lugares que desenham a textura no
+## tamanho original, sem escala).
+static func icon_sized(name: String, px: int) -> Texture2D:
+	var key := "%s@%d" % [name, px]
+	if not _sized_icons.has(key):
+		var tex := icon(name)
+		if tex == null:
+			return null
+		var img := tex.get_image()
+		if img.is_compressed():
+			img.decompress()
+		img.resize(px, px, Image.INTERPOLATE_LANCZOS)
+		_sized_icons[key] = ImageTexture.create_from_image(img)
+	return _sized_icons[key]
+
+
+## Grade de ladrilhos de número: 2 por linha no celular em retrato, todos lado a lado em
+## telas largas.
+static func stat_grid(tiles: Array, width: float) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = tiles.size() if UILayout.columns_for(width) > 1 or tiles.size() <= 3 else 2
+	g.add_theme_constant_override(&"h_separation", 10)
+	g.add_theme_constant_override(&"v_separation", 10)
+	for t: Control in tiles:
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		g.add_child(t)
+	return g

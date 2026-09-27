@@ -14,7 +14,11 @@ var nav_tab: String = ""
 
 ## Largura máxima do conteúdo em telas largas (o resto vira margem, centralizando). Telas
 ## que distribuem cartões em colunas (UIKit.columns) aumentam este valor.
-var max_content_width := 1100.0
+var max_content_width := 1100.0:
+	set(v):
+		if not is_equal_approx(v, max_content_width):
+			max_content_width = v
+			_fit_content_width()
 
 
 func _notification(what: int) -> void:
