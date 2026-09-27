@@ -348,8 +348,11 @@ static func on_color(bg: Color) -> Color:
 static func club_tone(c: Club) -> Color:
 	if c == null:
 		return ACCENT
-	var a := Color(c.color1)
-	var b := Color(c.color2)
+	return tone_of(Color(c.color1), Color(c.color2))
+
+
+## Tom de identidade a partir das duas cores de um clube (também para saves, sem o Club).
+static func tone_of(a: Color, b: Color) -> Color:
 	if a.s < 0.2 and b.s >= 0.2:
 		return b
 	if b.s > a.s + 0.25:

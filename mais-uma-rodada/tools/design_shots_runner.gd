@@ -79,6 +79,16 @@ func _run() -> void:
 			club_id = c.id
 	AppSettings.tutorial_done = true
 	GameManager.start_career(w, club_id, "Murilo", GameWorld.DIFF_NORMAL, 5)
+	GameManager.save_now()
+	UIManager.goto("welcome")
+	await _frames(8)
+	await _shot(prefix + "03_boas_vindas")
+	UIManager.push("load")
+	await _frames(8)
+	await _shot(prefix + "03b_carregar")
+	UIManager.goto("settings")
+	await _frames(8)
+	await _shot(prefix + "03c_opcoes")
 	if prefix != "":
 		await _wide_pass(w)
 		get_tree().quit()

@@ -21,36 +21,48 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	StadiumBackdrop.attach(self, UIColors.club_tone(club))
+	max_content_width = 1600.0
 	c.add_child(_hero(w, club))
-	c.add_child(_expectations(w, club))
-	c.add_child(_traits(w, club))
-	c.add_child(_squad(w, club))
+	UIKit.columns(c, [_expectations(w, club), _traits(w, club), _squad(w, club)], content_width())
 	_footer(w)
 
 
+## Apresentação: o escudo grande no centro, sobre o estádio nas cores do clube.
 func _hero(w: GameWorld, club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	var row := UIKit.hbox(16)
-	row.add_child(UIKit.crest(club, 140))
-	var col := UIKit.vbox(2)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label("Bem-vindo ao", "Small"))
-	col.add_child(UIKit.label(club.name, "Title", true))
+	var v := UIKit.vbox(6)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(UIKit.gap(10))
+	var cr := UIKit.crest(club, 180)
+	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(cr)
+	var hi := UIKit.eyebrow("Bem-vindo ao")
+	hi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hi)
+	var nm := UIKit.label(club.name, "Display", true)
+	nm.uppercase = true
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(nm)
 	if club.nickname != "":
-		col.add_child(UIKit.label("\"%s\"" % club.nickname, "Accent"))
+		var nk := UIKit.label("\"%s\"" % club.nickname, "Accent")
+		nk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(nk)
 	var place := UIKit.hbox(8)
+	place.alignment = BoxContainer.ALIGNMENT_CENTER
 	place.add_child(UIKit.flag(club.nation, 30))
-	place.add_child(UIKit.label("%s · desde %d" % [club.city, club.founded], "Small", true))
-	col.add_child(place)
+	place.add_child(UIKit.label("%s · desde %d" % [club.city, club.founded], "Small"))
+	v.add_child(place)
 	var stars := StarsView.new()
-	stars.star_size = 22.0
+	stars.star_size = 24.0
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
-	col.add_child(stars)
-	row.add_child(col)
-	card.add_child(row)
-	card.add_child(UIKit.label("%s, treinador do %s. %s lugares no %s, %s e uma história para honrar." % [
-		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true))
-	return HeroBackdrop.attach(UIKit.card_panel(card), club)
+	stars.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(stars)
+	var intro := UIKit.label("%s, treinador do %s. %s lugares no %s, %s e uma história para honrar." % [
+		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true)
+	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(intro)
+	v.add_child(UIKit.gap(6))
+	return v
 
 
 func _fans_text(club: Club) -> String:
@@ -68,15 +80,19 @@ func _expectations(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("O que esperam de você"))
 	var goal := SeasonManager.goal_of(w, club.id)
-	card.add_child(UIKit.kv("Meta da diretoria", String(goal[0])))
+	var gl := UIKit.label(String(goal[0]), "H2", true)
+	gl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	card.add_child(gl)
+	card.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(Fmt.money(club.transfer_budget), "Verba"),
+		UIKit.stat_tile(Fmt.money(club.wage_budget), "Teto / mês"),
+		UIKit.stat_tile(FinanceManager.health_label(w, club), "Finanças"),
+	], content_width()))
 	var pr := People.president(w, club.id)
 	if not pr.is_empty():
 		var st := People.pres_style(w, club.id)
 		card.add_child(UIKit.kv("Presidente", "%s · %s" % [String(pr.get("n", "")), String(st.get("name", ""))]))
 		card.add_child(UIKit.label(String(st.get("desc", "")), "Small", true))
-	card.add_child(UIKit.kv("Verba para contratações", Fmt.money(club.transfer_budget)))
-	card.add_child(UIKit.kv("Teto salarial", "%s/mês" % Fmt.money(club.wage_budget)))
-	card.add_child(UIKit.kv("Finanças", FinanceManager.health_label(w, club)))
 	var rival := w.club(club.main_rival())
 	if rival != null:
 		var rr := UIKit.hbox(10)
