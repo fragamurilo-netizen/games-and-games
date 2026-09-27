@@ -25,6 +25,8 @@ const PATHS := {
 	"news": "res://data/text/news.json",
 }
 const CLUBS_DIR := "res://data/world/clubs/"
+## Uniformes reais dos clubes autorais, por nação (titular, reserva, terceiro, goleiro e alternativos).
+const KITS_DIR := "res://data/world/kits/"
 
 const POS_BY_CODE := {
 	"GK": Pos.GK, "RB": Pos.RB, "CB": Pos.CB, "LB": Pos.LB, "DM": Pos.DM, "CM": Pos.CM,
@@ -46,6 +48,7 @@ static var _league_nations: Array[String] = []
 ## Ficam fora de league_ids/leagues_of_nation (não têm tabela, acesso nem prêmios).
 static var _pool_order: Array[String] = []
 static var _club_data: Dictionary = {} # nação -> Array de dicionários de clube
+static var _kits: Dictionary = {} # nação -> {chave do clube: {h, a, t, g, alt}}
 
 
 static func load_all() -> void:
@@ -65,6 +68,7 @@ static func load_all() -> void:
 ## Relê todos os dados (depois de ligar ou desligar um mod). Só sem carreira aberta.
 static func reload() -> void:
 	_cache.clear()
+	_kits.clear()
 	_formations.clear()
 	_formation_order.clear()
 	_loaded = false
@@ -243,6 +247,17 @@ static func club_data(code: String) -> Array:
 	return _club_data.get(code, [])
 
 
+## Uniformes reais de um clube autoral ({h, a, t, g, alt}), ou {} para clubes gerados.
+## A nação vem da chave ("BRA_RNC" → data/world/kits/BRA.json); cada arquivo é lido uma vez.
+static func club_kits(key: String) -> Dictionary:
+	var code := key.get_slice("_", 0)
+	if not _kits.has(code):
+		var path := KITS_DIR + code + ".json"
+		var d: Variant = Mods.apply_to(path, read_json(path)) if FileAccess.file_exists(path) else null
+		_kits[code] = d.get("kits", {}) if d is Dictionary else {}
+	return _kits[code].get(key, {})
+
+
 static func _prepare_leagues() -> void:
 	_league_by_id.clear()
 	_league_order.clear()
@@ -274,6 +289,10 @@ static func _prepare_clubs() -> void:
 			continue
 		var d: Variant = Mods.apply_to(path, read_json(path))
 		_club_data[n] = d.get("clubs", []) if d is Dictionary else []
+	# Uniformes reais já lidos aqui (a geração do mundo roda em outra thread).
+	_kits.clear()
+	for n in _league_nations:
+		club_kits(n + "_")
 
 
 # ---------------------------------------------------------------------------
