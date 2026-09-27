@@ -222,11 +222,15 @@
 				"shape": "ring",
 				"field": "plain",
 				"symbol": "lion",
+				"staff": true,
+				"ring_deco": "roses",
 				"text": "CHELSEA FOOTBALL CLUB",
-				"c1": "#034694",
+				"text2": " ",
+				"c1": "#FFFFFF",
 				"c2": "#034694",
 				"c3": "#DBA111",
-				"sc": "#FFFFFF",
+				"sc": "#034694",
+				"sym_scale": 0.95,
 				"border": "gold"
 			},
 			"rivals": [

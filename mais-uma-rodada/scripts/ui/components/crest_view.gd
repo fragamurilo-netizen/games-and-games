@@ -105,7 +105,9 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["sym_scale"] = float(cr.get("sym_scale", 1.0))
 	sp["mono"] = bool(cr.get("mono", false))
 	sp["sub"] = String(cr.get("sub", ""))
-	sp["line_art"] = bool(cr.get("line_art", false)) # símbolo em traço (Ajax), sem preenchimento
+	sp["line_art"] = bool(cr.get("line_art", false))
+	sp["staff"] = bool(cr.get("staff", false)) # cajado atrás do leão (Chelsea)
+	sp["ring_deco"] = String(cr.get("ring_deco", "")) # "roses": rosas e bolas embaixo do anel # símbolo em traço (Ajax), sem preenchimento
 	sp["star_c"] = Color(String(cr.get("star_c", ""))) if String(cr.get("star_c", "")) != "" else sp["c3"]
 	return sp
 
@@ -209,9 +211,23 @@ func _render(s: float) -> void:
 		if bottom_text != "":
 			_arc_text(bottom_text, cc, rr - fs * 0.35, fs * 0.9, ink, false)
 		# Pontinhos separando os textos
-		for sx: float in [-1.0, 1.0]:
-			var a := PI * (0.5 - 0.42 * sx) + PI
-			_circle(cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.3), fs * 0.12, ink)
+		if String(sp["ring_deco"]) == "roses":
+			# Rosas vermelhas e bolas de futebol na parte de baixo do anel
+			for k in 5:
+				var a := PI * 0.5 + (k - 2) * 0.32
+				var pc := cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.35)
+				if k % 2 == 0:
+					for j in 5:
+						var aa := TAU * j / 5.0
+						_circle(pc + Vector2(cos(aa), sin(aa)) * fs * 0.22, fs * 0.2, Color("#D0202E"))
+					_circle(pc, fs * 0.14, Color("#F2C14E"))
+				else:
+					_circle(pc, fs * 0.34, Color.WHITE)
+					_circle(pc, fs * 0.12, Color("#15171B"))
+		else:
+			for sx: float in [-1.0, 1.0]:
+				var a := PI * (0.5 - 0.42 * sx) + PI
+				_circle(cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.3), fs * 0.12, ink)
 	# Faixa embaixo
 	if bottom > 0.0:
 		_ribbon(String(sp["ribbon"]), Rect2(Vector2(s * 0.12, s * (1.0 - bottom - 0.03)), Vector2(s * 0.76, s * bottom)), c3, c1)
@@ -348,27 +364,29 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 				var o := -0.5 + i * bw * 2.0 + bw
 				parts.append([PackedVector2Array([Vector2(o, 1.1), Vector2(o + bw, 1.1), Vector2(o + bw + 1.2, -0.1), Vector2(o + 1.2, -0.1)]), c2])
 		"barca":
-			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa do meio clara
+			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa FCB no meio
+			var gold := Color("#E4B43A")
 			for i in 7:
 				if i % 2 == 1:
-					parts.append([_rect(i / 7.0, 0.5, 1.0 / 7.0 + 0.001, 0.6), c2])
-			parts.append([_rect(-0.1, -0.1, 0.6, 0.46), Color("#F4F1E8")])
-			parts.append([_rect(0.21, -0.1, 0.08, 0.46), Color("#D7191F")])
-			parts.append([_rect(-0.1, 0.13, 0.6, 0.08), Color("#D7191F")])
-			parts.append([_rect(0.5, -0.1, 0.6, 0.46), Color("#FCD116")])
+					parts.append([_rect(i / 7.0, 0.47, 1.0 / 7.0 + 0.001, 0.6), c2])
+			parts.append([_rect(-0.1, -0.1, 0.6, 0.43), Color("#F7F4EC")])
+			parts.append([_rect(0.215, -0.1, 0.07, 0.43), Color("#D21F26")])
+			parts.append([_rect(-0.1, 0.11, 0.6, 0.07), Color("#D21F26")])
+			parts.append([_rect(0.5, -0.1, 0.6, 0.43), Color("#FCD116")])
 			for i in 4:
-				parts.append([_rect(0.5 + (1 + i * 2) * 0.5 / 9.0, -0.1, 0.5 / 9.0, 0.46), Color("#D7191F")])
-			parts.append([_rect(-0.1, 0.36, 1.2, 0.14), Color("#F4F1E8")])
-			parts.append([_rect(-0.1, 0.355, 1.2, 0.012), Color(0, 0, 0, 0.5)])
-			parts.append([_rect(-0.1, 0.495, 1.2, 0.012), Color(0, 0, 0, 0.5)])
-			parts.append([_rect(0.494, -0.1, 0.012, 0.46), Color(0, 0, 0, 0.5)])
+				parts.append([_rect(0.5 + (1 + i * 2) * 0.5 / 9.0, -0.1, 0.5 / 9.0, 0.43), Color("#D21F26")])
+			parts.append([_rect(-0.1, 0.33, 1.2, 0.14), Color("#F4EEDC")])
+			# Frisos dourados entre as partes, como o esmalte do escudo
+			parts.append([_rect(-0.1, 0.322, 1.2, 0.016), gold])
+			parts.append([_rect(-0.1, 0.462, 1.2, 0.016), gold])
+			parts.append([_rect(0.492, -0.1, 0.016, 0.43), gold])
 		"bordure":
 			pass
 	for part: Array in parts:
 		for piece in Geometry2D.intersect_polygons(_xf(part[0], box), poly):
 			_poly(piece, part[1])
 	if kind == "barca" and s >= 36.0:
-		_text_center(String(sp["text"]) if String(sp["text"]) != "" else "FCB", box.position + box.size * Vector2(0.5, 0.43), box.size.x * 0.5, box.size.y * 0.12, Color("#15171B"))
+		_text_center(String(sp["text"]) if String(sp["text"]) != "" else "FCB", box.position + box.size * Vector2(0.5, 0.405), box.size.x * 0.46, box.size.y * 0.115, Color("#1A1A1A"))
 	if kind == "bordure":
 		var inner := Geometry2D.offset_polygon(poly, -box.size.x * 0.07)
 		for piece in inner:
@@ -433,6 +451,20 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			var y := -0.35 + k * 0.6
 			_polyline(PackedVector2Array([cen + Vector2(-r, (y - 0.4) * r), cen + Vector2(0, (y + 0.2) * r), cen + Vector2(r, (y - 0.4) * r)]), col, maxf(2.0, r * 0.26))
 		return
+	# Bola antiga de couro, com os gomos costurados (Barça)
+	if sym == "ball_old":
+		var bc := cen
+		var br := r * 0.62
+		_circle(bc + Vector2(br * 0.06, br * 0.08), br, Color(0, 0, 0, 0.3))
+		_circle(bc, br, Color("#7A4A12"))
+		_circle(bc, br * 0.92, Color("#E9A93B"))
+		_circle(bc + Vector2(-br * 0.28, -br * 0.3), br * 0.35, Color(1, 0.9, 0.6, 0.35))
+		var seam := Color("#6B3F0E")
+		var lw := maxf(1.0, br * 0.07)
+		_polyline(PackedVector2Array([bc + Vector2(-br * 0.88, -br * 0.2), bc + Vector2(-br * 0.3, -br * 0.05), bc + Vector2(br * 0.3, -br * 0.05), bc + Vector2(br * 0.88, -br * 0.2)]), seam, lw)
+		_polyline(PackedVector2Array([bc + Vector2(-br * 0.7, br * 0.55), bc + Vector2(-br * 0.2, br * 0.35), bc + Vector2(br * 0.2, br * 0.35), bc + Vector2(br * 0.7, br * 0.55)]), seam, lw)
+		_polyline(PackedVector2Array([bc + Vector2(0, -br * 0.9), bc + Vector2(-br * 0.08, -br * 0.05), bc + Vector2(0, br * 0.35), bc + Vector2(br * 0.05, br * 0.9)]), seam, lw)
+		return
 	# Galo em cima da bola (Tottenham)
 	if sym == "rooster_ball":
 		var rc := cen + Vector2(0, -r * 0.18)
@@ -462,6 +494,12 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 	if not CrestArt.has(sym):
 		sym = "star"
 		det = "star_d"
+	if bool(sp["staff"]):
+		# Cajado com ponteira, na diagonal, atrás do leão
+		var a0 := cen + Vector2(r * 0.78, -r * 0.95)
+		var a1 := cen + Vector2(-r * 0.45, r * 0.95)
+		_polyline(PackedVector2Array([a0, a1]), col, maxf(1.2, r * 0.08))
+		_poly(_xf_c(PackedVector2Array([Vector2(0, -1), Vector2(0.5, 0), Vector2(0, 1), Vector2(-0.5, 0)]), a0, r * 0.14), col)
 	var polys: Array = CrestArt.polys(sym)
 	var shade := col.darkened(0.45) if col.get_luminance() > 0.35 else col.lightened(0.35)
 	# Contorno fino para destacar sobre campo dividido
@@ -658,17 +696,17 @@ static func unit_shape(shape: String) -> PackedVector2Array:
 				pts.append(Vector2(0.5 + cos(a) * 0.4, 0.56 + sin(a) * 0.42))
 			pts.append(Vector2(0.1, 0.56))
 		"barca":
-			# Pontas no alto, topo côncavo, cintura e fundo arredondado em ponta (formato de ânfora)
+			# Ânfora: pontas do alto abertas para fora, topo côncavo, cintura na faixa FCB e fundo bojudo em ponta
 			for i in 13:
-				pts.append(_bezier(Vector2(0.07, 0.02), Vector2(0.5, 0.14), Vector2(0.93, 0.02), i / 12.0))
+				pts.append(_bezier(Vector2(0.02, 0.0), Vector2(0.5, 0.16), Vector2(0.98, 0.0), i / 12.0))
 			for i in range(1, 9):
-				pts.append(_bezier(Vector2(0.93, 0.02), Vector2(0.84, 0.3), Vector2(0.91, 0.52), i / 8.0))
+				pts.append(_bezier(Vector2(0.98, 0.0), Vector2(0.86, 0.2), Vector2(0.87, 0.42), i / 8.0))
 			for i in range(1, 14):
-				pts.append(_bezier(Vector2(0.91, 0.52), Vector2(0.93, 0.9), Vector2(0.5, 0.98), i / 13.0))
+				pts.append(_bezier(Vector2(0.87, 0.42), Vector2(0.97, 0.78), Vector2(0.5, 0.99), i / 13.0))
 			for i in range(1, 14):
-				pts.append(_bezier(Vector2(0.5, 0.98), Vector2(0.07, 0.9), Vector2(0.09, 0.52), i / 13.0))
+				pts.append(_bezier(Vector2(0.5, 0.99), Vector2(0.03, 0.78), Vector2(0.13, 0.42), i / 13.0))
 			for i in range(1, 8):
-				pts.append(_bezier(Vector2(0.09, 0.52), Vector2(0.16, 0.3), Vector2(0.07, 0.02), i / 8.0))
+				pts.append(_bezier(Vector2(0.13, 0.42), Vector2(0.14, 0.2), Vector2(0.02, 0.0), i / 8.0))
 		"swiss":
 			pts.append(Vector2(0.08, 0.05))
 			pts.append(Vector2(0.5, 0.1))

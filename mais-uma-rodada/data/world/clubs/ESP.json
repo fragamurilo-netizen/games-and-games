@@ -58,12 +58,12 @@
 			"crest": {
 				"shape": "barca",
 				"field": "barca",
-				"symbol": "ball",
+				"symbol": "ball_old",
 				"sym_pos": "low",
+				"sym_scale": 1.05,
 				"c1": "#004D98",
 				"c2": "#A50044",
-				"c3": "#EDBB00",
-				"sc": "#EDBB00",
+				"c3": "#E4B43A",
 				"border": "gold"
 			},
 			"rivals": [
