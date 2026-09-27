@@ -45,6 +45,22 @@ const SOUTH: Array[String] = ["BRA", "ARG", "URU", "PAR", "CHI", "RSA", "AUS", "
 const BRA_SOUTH_UF: Array[String] = ["RS", "SC", "PR"]
 
 
+## Altitude (metros) das cidades onde ela pesa: o visitante sem costume cansa muito mais.
+const ALTITUDE := {"La Paz": 3640, "El Alto": 4150, "Potosí": 4090, "Oruro": 3700, "Sucre": 2810, "Cochabamba": 2560,
+	"Quito": 2850, "Cuenca": 2560, "Ambato": 2580, "Latacunga": 2750, "Riobamba": 2750, "Bogotá": 2640, "Tunja": 2800, "Pasto": 2530,
+	"Manizales": 2150, "Cusco": 3400, "Juliaca": 3825, "Huancayo": 3250, "Arequipa": 2330, "Cajamarca": 2750, "Ciudad de México": 2240,
+	"Toluca": 2660, "Pachuca": 2400, "Puebla": 2135}
+
+
+## Efeito da altitude no visitante que vem do nível do mar (multiplica o cansaço dele).
+static func altitude_fatigue(home: Club, away: Club) -> float:
+	var h := float(ALTITUDE.get(home.city, 0))
+	var a := float(ALTITUDE.get(away.city, 0)) if away != null else 0.0
+	if h < 2000.0 or a >= h - 800.0:
+		return 1.0
+	return 1.0 + (h - maxf(a, 0.0) - 1000.0) / 3000.0 * 0.35
+
+
 ## Clima de um jogo do calendário (determinístico: o mesmo jogo tem sempre o mesmo tempo).
 static func for_fixture(world: GameWorld, f: Fixture) -> Dictionary:
 	var home := world.club(f.home)
@@ -53,7 +69,13 @@ static func for_fixture(world: GameWorld, f: Fixture) -> Dictionary:
 		var mv := world.season.month_of(f.slot)
 		month = (mv - 1) % 12 + 1 if mv > 0 else 0
 	var continental := world.league(f.comp) == null and f.comp != "F"
-	return roll(home, month, continental, hash([world.world_seed, world.year, f.home, f.away, f.slot, "clima"]))
+	var wx := roll(home, month, continental, hash([world.world_seed, world.year, f.home, f.away, f.slot, "clima"]))
+	if not f.neutral:
+		var alt := altitude_fatigue(home, world.club(f.away))
+		if alt > 1.0:
+			wx["alt"] = int(ALTITUDE.get(home.city, 0))
+			wx["away_fatigue"] = alt
+	return wx
 
 
 static func roll(home: Club, month: int, continental: bool, seed_value: int) -> Dictionary:

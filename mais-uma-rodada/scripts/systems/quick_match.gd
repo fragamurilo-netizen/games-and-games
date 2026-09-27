@@ -218,6 +218,11 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	# Chances por minuto de cada time (posse × taxa de chance do motor completo) e a conversão média
 	# da chance; o produto é o mesmo gol esperado de antes, mas agora cada lance acontece de verdade.
 	var rate: Array = [poss * _chance_rate(sides[0], sides[1], true, crowd), (1.0 - poss) * _chance_rate(sides[1], sides[0], false, crowd)]
+	# Altitude: o visitante sem costume cansa e o mandante cresce no segundo tempo
+	var alt := float(wx.get("away_fatigue", 1.0))
+	if alt > 1.0:
+		rate[0] *= 1.0 + (alt - 1.0) * 0.5
+		rate[1] *= 1.0 - (alt - 1.0) * 0.4
 	var conv: Array = [0.0, 0.0]
 	var cw: Array = [[], []] # peso de cada tipo de chance
 	var cq: Array = [[], []] # qualidade (xG) de cada tipo

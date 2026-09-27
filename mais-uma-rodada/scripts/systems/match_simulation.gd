@@ -826,7 +826,7 @@ func _foul_prob(dfn: MatchTeam) -> float:
 
 ## Fadiga aplicada em blocos de `minutes` minutos (barato e suficiente).
 func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
-	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * (1.25 if half >= 3 else 1.0) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
+	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * (1.25 if half >= 3 else 1.0) * (float(wx.get("away_fatigue", 1.0)) if t.side == 1 else 1.0) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
 	for mp: MatchPlayer in t.slots:
 		if mp == null:
 			continue
