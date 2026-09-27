@@ -21,7 +21,7 @@
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "WAC",
@@ -105,7 +105,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "RSB",
@@ -132,7 +132,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FUS"
@@ -158,7 +158,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "MAS",
@@ -185,7 +185,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "HUSA"

@@ -52,7 +52,7 @@
 			"capacity": 34000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "AL",
@@ -81,7 +81,7 @@
 			"capacity": 18000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SC",
@@ -216,7 +216,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SH"
@@ -295,7 +295,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "LC"

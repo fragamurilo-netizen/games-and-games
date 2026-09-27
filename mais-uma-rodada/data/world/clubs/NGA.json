@@ -21,7 +21,7 @@
 			"capacity": 16000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "EFC"
@@ -47,7 +47,7 @@
 			"capacity": 22000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "R"

@@ -103,7 +103,7 @@
 			"capacity": 26800,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "KF",
@@ -160,7 +160,7 @@
 			"capacity": 39700,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "G",
@@ -190,7 +190,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "S",

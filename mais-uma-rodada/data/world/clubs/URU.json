@@ -81,7 +81,7 @@
 			"capacity": 18000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "DSC"

@@ -54,11 +54,14 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "letter",
-				"initials": "LAFC",
+				"symbol": "wings",
+				"c1": "#111111",
+				"c2": "#C39E6D",
 				"sc": "#C39E6D",
 				"border": "gold",
-				"c3": "#C39E6D"
+				"c3": "#C39E6D",
+				"chief_text": "LAFC",
+				"cc": "#111111"
 			},
 			"rivals": [
 				"USA_LAS"
@@ -142,7 +145,7 @@
 			"capacity": 42500,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "A",
@@ -319,7 +322,7 @@
 			"capacity": 18500,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "U",
@@ -432,7 +435,7 @@
 			"capacity": 22000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "H",
@@ -514,7 +517,7 @@
 			"capacity": 20200,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "RSL",
@@ -767,7 +770,7 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "TFC",
