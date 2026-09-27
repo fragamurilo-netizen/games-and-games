@@ -23,10 +23,13 @@
 			"crest": {
 				"shape": "round",
 				"field": "plain",
-				"symbol": "letter",
-				"initials": "AJAX",
+				"symbol": "warrior",
+				"line_art": true,
+				"c1": "#FFFFFF",
+				"c2": "#D2122E",
 				"sc": "#D2122E",
-				"border": "thick"
+				"sym_scale": 1.15,
+				"border": "double"
 			},
 			"rivals": [
 				"NED_ROT",

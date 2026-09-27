@@ -6,7 +6,7 @@ extends RefCounted
 ## A síntese é pesada para o GDScript, então roda numa thread e o resultado fica em cache.
 
 const RATE := 22050
-const TRACKS: Array[String] = ["Vestiário", "Arquibancada", "Noite de decisão"]
+const TRACKS: Array[String] = ["Dia de jogo", "Arquibancada", "Noite de final"]
 const BARS := 16
 
 var _buf := PackedFloat32Array()
@@ -49,39 +49,44 @@ static func _hz(midi: float) -> float:
 
 ## Lo-fi calmo em Fá maior, com swing: piano elétrico, baixo redondo e bateria abafada.
 func _vestiario() -> void:
-	_setup(84.0)
+	# Trilha de "dia de jogo": bateria de estádio, baixo pulsante e metais originais.
+	# A ideia é lembrar uma transmissão/entrada em campo sem imitar hino ou música existente.
+	_setup(116.0)
 	var prog := [
-		[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59],
-		[46, 50, 53, 57], [45, 48, 52, 55], [43, 46, 50, 53], [48, 52, 55, 58],
+		[50, 53, 57], [46, 50, 53], [48, 52, 55], [45, 50, 53],
+		[50, 53, 57], [46, 50, 53], [43, 48, 52], [45, 49, 52],
 	]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1201
 	for bar in BARS:
 		var ch: Array = prog[bar % prog.size()]
-		for m in ch:
-			_epiano(m + 12, _t(bar, 0.0), _beat * 1.6, 0.11)
-			_epiano(m + 12, _t(bar, 2.5), _beat * 1.2, 0.07)
-		_bass(ch[0] - 12, _t(bar, 0.0), _beat * 1.4, 0.34)
-		_bass(ch[0] - 12, _t(bar, 2.5), _beat * 0.8, 0.26)
-		_bass(ch[2] - 12, _t(bar, 3.5), _beat * 0.45, 0.2)
-		_kick(_t(bar, 0.0), 0.5)
-		_kick(_t(bar, 1.5 + 0.08), 0.28)
-		_kick(_t(bar, 2.5), 0.42)
-		_snare(_t(bar, 1.0), 0.16, true)
-		_snare(_t(bar, 3.0), 0.16, true)
+		# Baixo em pulsos como vinheta esportiva.
+		_bass(ch[0] - 12, _t(bar, 0.0), _beat * 0.75, 0.36)
+		_bass(ch[0] - 12, _t(bar, 2.0), _beat * 0.75, 0.31)
+		_bass(ch[2] - 12, _t(bar, 3.0), _beat * 0.6, 0.24)
+		# Bumbo e caixa com sensação de marcha/entrada no estádio.
+		for b in [0.0, 2.0]:
+			_kick(_t(bar, b), 0.48)
+		_snare(_t(bar, 1.0), 0.18, false)
+		_snare(_t(bar, 3.0), 0.21, false)
 		for e in 8:
-			var swing := 0.1 if e % 2 == 1 else 0.0
-			_hat(_t(bar, e * 0.5 + swing), 0.05 if e % 2 == 0 else 0.03)
-		# Melodia só na segunda metade: o loop "respira" antes de voltar ao começo.
-		if bar >= 8:
-			_melody(rng, bar, ch, [65, 67, 69, 72, 74, 76, 77], 0.1, 0.45)
-	_vinyl(0.012)
+			_hat(_t(bar, e * 0.5), 0.038 if e % 2 == 0 else 0.026)
+		# Metais em chamadas curtas, com resposta no final do compasso.
+		for m in ch:
+			_brass(m + 12, _t(bar, 0.0), _beat * 0.62, 0.065)
+		if bar % 2 == 1:
+			_brass(ch[0] + 19, _t(bar, 3.0), _beat * 0.5, 0.07)
+			_brass(ch[1] + 19, _t(bar, 3.5), _beat * 0.42, 0.055)
+		# Pequena melodia só a partir do quarto compasso para não cansar.
+		if bar >= 4 and bar % 2 == 0:
+			_melody(rng, bar, ch, [62, 65, 67, 69, 72, 74], 0.065, 0.62, true)
 
 
 ## Samba-pop em Sol maior: surdo marcando o segundo tempo, ganzá em semicolcheias,
 ## cavaquinho (corda dedilhada) no balanço e baixo alternando tônica e quinta.
 func _arquibancada() -> void:
-	_setup(104.0)
+	# Fan zone/arquibancada: percussão brasileira, palmas e metais, sem usar canto real.
+	_setup(108.0)
 	var prog := [
 		[55, 59, 62, 67], [52, 55, 59, 64], [48, 52, 55, 60], [50, 54, 57, 62],
 		[55, 59, 62, 67], [47, 50, 55, 59], [48, 52, 55, 60], [50, 54, 57, 60],
@@ -92,26 +97,29 @@ func _arquibancada() -> void:
 	for bar in BARS:
 		var ch: Array = prog[bar % prog.size()]
 		for k in strum.size():
-			var accent := 0.085 if k % 3 == 0 else 0.06
+			var accent := 0.07 if k % 3 == 0 else 0.05
 			for i in ch.size():
-				_pluck(ch[i] + 12, _t(bar, strum[k]) + i * 0.012, _beat * 0.6, accent, 0.62)
-		_bass(ch[0] - 12, _t(bar, 0.0), _beat * 0.9, 0.34)
-		_bass(ch[0] - 5, _t(bar, 2.0), _beat * 0.9, 0.3)
-		_bass(ch[0] - 12, _t(bar, 3.5), _beat * 0.4, 0.22)
-		_kick(_t(bar, 0.0), 0.35)
-		_surdo(_t(bar, 1.0), 0.22)
+				_pluck(ch[i] + 12, _t(bar, strum[k]) + i * 0.01, _beat * 0.48, accent, 0.68)
+		_bass(ch[0] - 12, _t(bar, 0.0), _beat * 0.85, 0.32)
+		_bass(ch[0] - 5, _t(bar, 2.0), _beat * 0.85, 0.29)
+		_kick(_t(bar, 0.0), 0.34)
+		_surdo(_t(bar, 1.0), 0.25)
 		_surdo(_t(bar, 3.0), 0.45)
-		_snare(_t(bar, 1.75), 0.08, true)
-		_snare(_t(bar, 3.25), 0.07, true)
+		_snare(_t(bar, 1.5), 0.11, true)
+		_snare(_t(bar, 3.5), 0.10, true)
 		for s in 16:
-			_shaker(_t(bar, s * 0.25), 0.045 if s % 4 == 0 else (0.03 if s % 2 == 0 else 0.022))
-		if bar >= 4:
-			_melody(rng, bar, ch, [67, 69, 71, 74, 76, 79, 81], 0.07, 0.6, true)
+			_shaker(_t(bar, s * 0.25), 0.035 if s % 4 == 0 else 0.021)
+		if bar % 4 in [1, 3]:
+			_brass(ch[0] + 24, _t(bar, 0.0), _beat * 0.45, 0.05)
+			_brass(ch[2] + 24, _t(bar, 1.0), _beat * 0.45, 0.045)
+		if bar >= 6:
+			_melody(rng, bar, ch, [67, 69, 71, 74, 76, 79, 81], 0.055, 0.68, true)
 
 
 ## Tensão de noite de decisão em Lá menor: pad sustentado, arpejo em colcheias e bumbo reto.
 func _noite() -> void:
-	_setup(96.0)
+	# Final noturna: tensão de transmissão, bumbo reto, cordas/pad e metais em crescendos.
+	_setup(100.0)
 	var prog := [
 		[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62],
 		[57, 60, 64], [53, 57, 60], [50, 53, 57], [52, 56, 59],
@@ -119,20 +127,20 @@ func _noite() -> void:
 	for bar in BARS:
 		var ch: Array = prog[bar % prog.size()]
 		for m in ch:
-			_pad(m, _t(bar, 0.0), _beat * 4.0, 0.07)
+			_pad(m, _t(bar, 0.0), _beat * 4.0, 0.055)
 		var arp := [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[1] + 24, ch[2] + 12, ch[1] + 12, ch[0] + 24, ch[2] + 12]
 		for e in 8:
-			_pluck(arp[e], _t(bar, e * 0.5), _beat * 0.9, 0.055 if bar < 4 else 0.075, 0.5)
-		_bass(ch[0] - 12, _t(bar, 0.0), _beat * 1.8, 0.3)
-		_bass(ch[0] - 12, _t(bar, 2.0), _beat * 1.8, 0.26)
+			_pluck(arp[e], _t(bar, e * 0.5), _beat * 0.78, 0.045 if bar < 4 else 0.063, 0.55)
+		_bass(ch[0] - 12, _t(bar, 0.0), _beat * 1.7, 0.28)
+		_bass(ch[0] - 12, _t(bar, 2.0), _beat * 1.7, 0.25)
+		for b in 4:
+			_kick(_t(bar, float(b)), 0.28 if bar < 4 else 0.36)
 		if bar >= 4:
-			for b in 4:
-				_kick(_t(bar, b), 0.36)
-			for b in 4:
-				_hat(_t(bar, b + 0.5), 0.035)
-		if bar >= 8:
-			_snare(_t(bar, 1.0), 0.1, false)
-			_snare(_t(bar, 3.0), 0.1, false)
+			_snare(_t(bar, 1.0), 0.12, false)
+			_snare(_t(bar, 3.0), 0.13, false)
+		if bar in [3, 7, 11, 15]:
+			for m in ch:
+				_brass(m + 12, _t(bar, 2.5), _beat * 1.15, 0.065 if bar < 11 else 0.085)
 
 
 ## Frase curta sobre o acorde: notas da escala, com preferência pelas do acorde.
@@ -234,6 +242,25 @@ func _pluck(midi: float, t0: float, dur: float, vol: float, bright: float) -> vo
 		idx = (idx + 1) % period
 		var t := float(i) / RATE
 		var env := 1.0 if t < dur else maxf(0.0, 1.0 - (t - dur) / 0.15)
+		_add(s0 + i, s * env * vol)
+
+
+## Metal esportivo original: ataque curto, harmônicos fortes e leve desafinação de seção.
+func _brass(midi: float, t0: float, dur: float, vol: float) -> void:
+	var f := _hz(midi)
+	var s0 := int(t0 * RATE)
+	var n := int((dur + 0.09) * RATE)
+	var ph1 := 0.0
+	var ph2 := 0.0
+	for i in n:
+		var t := float(i) / RATE
+		var env := minf(1.0, t / 0.018) * exp(-maxf(0.0, t - dur * 0.65) * 8.0)
+		if t > dur:
+			env *= maxf(0.0, 1.0 - (t - dur) / 0.09)
+		ph1 += TAU * f / RATE
+		ph2 += TAU * f * 1.006 / RATE
+		var s := (sin(ph1) + sin(ph2)) * 0.45
+		s += (sin(2.0 * ph1) * 0.38 + sin(3.0 * ph1) * 0.22 + sin(4.0 * ph1) * 0.10)
 		_add(s0 + i, s * env * vol)
 
 

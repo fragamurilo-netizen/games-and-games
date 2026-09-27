@@ -99,6 +99,23 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["crown"] = int(cr.get("crown", 0))
 	sp["laurel"] = bool(cr.get("laurel", false))
 	sp["border"] = String(cr.get("border", "thin"))
+	# Onde fica o símbolo ("" centro, "tl" canto de cima à esquerda, "low" metade de baixo), escala,
+	# letras entrelaçadas (monograma) e um texto curto embaixo das letras ("09")
+	sp["sym_pos"] = String(cr.get("sym_pos", ""))
+	sp["sym_scale"] = float(cr.get("sym_scale", 1.0))
+	sp["mono"] = bool(cr.get("mono", false))
+	sp["sub"] = String(cr.get("sub", ""))
+	sp["line_art"] = bool(cr.get("line_art", false))
+	sp["ribbon_top"] = String(cr.get("ribbon_top", "")) # faixa acima do escudo (MANCHESTER)
+	sp["top_style"] = String(cr.get("top_style", "")) # "gates": portão em arco atrás da faixa de cima (Liverpool)
+	sp["flames"] = bool(cr.get("flames", false)) # chamas dos dois lados (Liverpool)
+	sp["chief_sym"] = String(cr.get("chief_sym", ""))
+	sp["chief_text2"] = String(cr.get("chief_text2", "")) # segunda linha menor no chefe
+	sp["chief_h"] = float(cr.get("chief_h", 0.24)) # símbolo no chefe (navio do United)
+	sp["chief_sc"] = Color(String(cr.get("chief_sc", "#C8102E")))
+	sp["staff"] = bool(cr.get("staff", false)) # cajado atrás do leão (Chelsea)
+	sp["ring_deco"] = String(cr.get("ring_deco", "")) # "roses": rosas e bolas embaixo do anel # símbolo em traço (Ajax), sem preenchimento
+	sp["star_c"] = Color(String(cr.get("star_c", ""))) if String(cr.get("star_c", "")) != "" else sp["c3"]
 	return sp
 
 
@@ -128,17 +145,20 @@ func _render(s: float) -> void:
 		top += 0.2
 	if int(sp["stars"]) > 0:
 		top += 0.12 if not small else 0.1
+	if String(sp["ribbon_top"]) != "" and not small:
+		top += 0.2 if String(sp["top_style"]) == "gates" else 0.13
 	var bottom := 0.1 if String(sp["ribbon"]) != "" and not small else 0.0
-	var side := 0.14 if bool(sp["laurel"]) else 0.0
+	var side := 0.14 if bool(sp["laurel"]) else (0.13 if bool(sp["flames"]) else 0.0)
 	var box_s := s * minf(1.0 - top - bottom, 1.0 - side * 2.0)
 	var box := Rect2(Vector2((s - box_s) * 0.5, s * top + (s * (1.0 - top - bottom) - box_s) * 0.5), Vector2(box_s, box_s))
 	var unit := unit_shape(shape)
 	var poly := _xf(unit, box)
-	# Sombra e base
-	var shadow := PackedVector2Array()
-	for p in poly:
-		shadow.append(p + Vector2(0, s * 0.03))
-	_poly(shadow, Color(0, 0, 0, 0.28))
+	# Sombra suave (duas camadas) e base
+	for k in 2:
+		var shadow := PackedVector2Array()
+		for p in poly:
+			shadow.append(p + Vector2(s * 0.004 * (k + 1), s * (0.022 + 0.018 * k)))
+		_poly(shadow, Color(0, 0, 0, 0.2 - 0.08 * k))
 	var ring := shape == "ring" or shape == "oval_ring"
 	var inner := poly
 	if ring:
@@ -150,8 +170,8 @@ func _render(s: float) -> void:
 	_field(inner, box, sp, s)
 	# Chefe com texto
 	var charge_box := _inner_box(box, shape)
-	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief":
-		var chief_h := 0.24
+	if String(sp["chief_text"]) != "" or String(sp["field"]) == "chief" or String(sp["chief_sym"]) != "":
+		var chief_h := float(sp["chief_h"])
 		var band := _xf(PackedVector2Array([Vector2(0, 0), Vector2(1, 0), Vector2(1, chief_h), Vector2(0, chief_h)]), box)
 		var cc: Color = sp["cc"]
 		for piece in Geometry2D.intersect_polygons(band, inner):
@@ -159,12 +179,42 @@ func _render(s: float) -> void:
 		if String(sp["chief_text"]) != "" and not small:
 			var ink := contrast(cc, c1, c3)
 			var narrow := shape in ["round", "oval", "ring", "oval_ring", "octagon", "hexagon", "diamond"]
-			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.56), box.size.x * (0.46 if narrow else 0.62), box.size.y * 0.15, ink)
+			var t2 := String(sp["chief_text2"])
+			var ty := chief_h * (0.42 if t2 != "" else 0.56)
+			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * ty), box.size.x * (0.46 if narrow else 0.66), box.size.y * (0.14 if t2 != "" else 0.15), ink)
+			if t2 != "":
+				_text_center(t2, box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.8), box.size.x * 0.7, box.size.y * 0.06, ink)
+		if String(sp["chief_sym"]) != "" and CrestArt.has(String(sp["chief_sym"])):
+			var ccen := box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.55)
+			for pp: PackedVector2Array in CrestArt.polys(String(sp["chief_sym"])):
+				_poly(_xf_c(pp, ccen, box.size.y * chief_h * 0.42), sp["chief_sc"])
 		charge_box = Rect2(charge_box.position + Vector2(0, box.size.y * 0.12), charge_box.size * Vector2(1.0, 0.86))
 	# Símbolo
+	match String(sp["sym_pos"]):
+		"tl":
+			charge_box = Rect2(box.position + box.size * Vector2(0.13, 0.1), box.size * 0.4)
+		"low":
+			charge_box = Rect2(box.position + box.size * Vector2(0.3, 0.55), box.size * 0.4)
+	if float(sp["sym_scale"]) != 1.0:
+		var cc0 := charge_box.get_center()
+		charge_box = Rect2(cc0 - charge_box.size * 0.5 * float(sp["sym_scale"]), charge_box.size * float(sp["sym_scale"]))
 	_charge(sp, charge_box, inner, s)
+	# Acabamento: luz de cima, sombra embaixo e um brilho no alto (dá volume, como escudo bordado)
+	if not small:
+		_poly_grad(inner, Color(1, 1, 1, 0.13), Color(0, 0, 0, 0.2))
+		var gloss := PackedVector2Array()
+		for i in 24:
+			var a := TAU * i / 24.0
+			gloss.append(box.position + Vector2(box.size.x * (0.36 + 0.42 * cos(a)), box.size.y * (0.04 + 0.26 * sin(a))))
+		for piece in Geometry2D.intersect_polygons(gloss, inner):
+			_poly(piece, Color(1, 1, 1, 0.07))
 	# Borda
 	_border(poly, inner, ring, sp, s)
+	# Chanfro: filete claro por dentro da borda e contorno escuro por fora
+	if not small:
+		for piece in Geometry2D.offset_polygon(poly, -s * 0.034):
+			_polyline_closed(piece, Color(1, 1, 1, 0.16), maxf(0.8, s * 0.007))
+		_polyline_closed(poly, Color(0, 0, 0, 0.35), maxf(0.8, s * 0.006))
 	# Texto do anel
 	if ring and not small:
 		var cc := box.get_center()
@@ -178,9 +228,23 @@ func _render(s: float) -> void:
 		if bottom_text != "":
 			_arc_text(bottom_text, cc, rr - fs * 0.35, fs * 0.9, ink, false)
 		# Pontinhos separando os textos
-		for sx: float in [-1.0, 1.0]:
-			var a := PI * (0.5 - 0.42 * sx) + PI
-			_circle(cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.3), fs * 0.12, ink)
+		if String(sp["ring_deco"]) == "roses":
+			# Rosas vermelhas e bolas de futebol na parte de baixo do anel
+			for k in 5:
+				var a := PI * 0.5 + (k - 2) * 0.32
+				var pc := cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.35)
+				if k % 2 == 0:
+					for j in 5:
+						var aa := TAU * j / 5.0
+						_circle(pc + Vector2(cos(aa), sin(aa)) * fs * 0.22, fs * 0.2, Color("#D0202E"))
+					_circle(pc, fs * 0.14, Color("#F2C14E"))
+				else:
+					_circle(pc, fs * 0.34, Color.WHITE)
+					_circle(pc, fs * 0.12, Color("#15171B"))
+		else:
+			for sx: float in [-1.0, 1.0]:
+				var a := PI * (0.5 - 0.42 * sx) + PI
+				_circle(cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.3), fs * 0.12, ink)
 	# Faixa embaixo
 	if bottom > 0.0:
 		_ribbon(String(sp["ribbon"]), Rect2(Vector2(s * 0.12, s * (1.0 - bottom - 0.03)), Vector2(s * 0.76, s * bottom)), c3, c1)
@@ -195,13 +259,46 @@ func _render(s: float) -> void:
 		var n: int = mini(int(sp["stars"]), 7)
 		var r := s * (0.045 if not small else 0.05)
 		var sy := y_cursor - r * 1.25
-		var sc: Color = c3 if int(sp["stars"]) > 0 else c2
+		var sc: Color = sp["star_c"]
 		for i in n:
 			var x := s * 0.5 + (i - (n - 1) * 0.5) * r * 2.3
 			var dy := -absf(i - (n - 1) * 0.5) * r * 0.25 * -1.0
 			_poly(_star(Vector2(x, sy + dy), r, r * 0.42, 5), sc)
+			if not small:
+				# Brilho metálico na estrela
+				_poly(_star(Vector2(x - r * 0.12, sy + dy - r * 0.12), r * 0.45, r * 0.19, 5), Color(sc.lightened(0.5), 0.55))
 	if bool(sp["laurel"]):
 		_laurel(box, c3, s)
+	if bool(sp["flames"]) and not small:
+		# Chamas eternas dos dois lados do escudo
+		for sx: float in [-1.0, 1.0]:
+			var base := Vector2(box.get_center().x + sx * box.size.x * 0.56, box.position.y + box.size.y * 0.78)
+			var fh := box.size.y * 0.38
+			var fw := box.size.x * 0.1
+			_poly(PackedVector2Array([base + Vector2(-fw, 0), base + Vector2(-fw * 0.8, -fh * 0.45), base + Vector2(-fw * 0.2, -fh * 0.7), base + Vector2(0, -fh), base + Vector2(fw * 0.35, -fh * 0.62), base + Vector2(fw * 0.9, -fh * 0.4), base + Vector2(fw, 0)]), Color("#E0301E"))
+			_poly(PackedVector2Array([base + Vector2(-fw * 0.55, 0), base + Vector2(-fw * 0.3, -fh * 0.45), base + Vector2(0, -fh * 0.62), base + Vector2(fw * 0.3, -fh * 0.4), base + Vector2(fw * 0.55, 0)]), Color("#F9A12E"))
+			_poly(PackedVector2Array([base + Vector2(-fw * 1.2, 0), base + Vector2(fw * 1.2, 0), base + Vector2(fw * 0.8, fh * 0.12), base + Vector2(-fw * 0.8, fh * 0.12)]), c3)
+	if String(sp["ribbon_top"]) != "" and not small:
+		var rt_h := s * 0.1
+		var rt := Rect2(Vector2(s * 0.14, y_cursor - rt_h - s * 0.015), Vector2(s * 0.72, rt_h))
+		if String(sp["top_style"]) == "gates":
+			# Portão em arco (grade vertical) atrás da faixa
+			var gc := Color("#1F8A7A")
+			var arc_c := Vector2(s * 0.5, rt.end.y)
+			var ar := s * 0.3
+			var pts := PackedVector2Array()
+			for i in 17:
+				var a := PI + PI * i / 16.0
+				pts.append(arc_c + Vector2(cos(a) * ar, sin(a) * ar * 0.6))
+			_polyline(pts, gc, maxf(1.5, s * 0.02))
+			for i in 9:
+				var x := arc_c.x - ar + ar * 2.0 * (i + 0.5) / 9.0
+				var dy := sqrt(maxf(0.0, 1.0 - pow((x - arc_c.x) / ar, 2.0))) * ar * 0.6
+				_polyline(PackedVector2Array([Vector2(x, arc_c.y), Vector2(x, arc_c.y - dy)]), gc, maxf(1.0, s * 0.01))
+			rt = Rect2(Vector2(s * 0.12, arc_c.y - ar * 0.6 - rt_h * 0.4), Vector2(s * 0.76, rt_h))
+			_ribbon(String(sp["ribbon_top"]), rt, gc, Color.WHITE)
+		else:
+			_ribbon(String(sp["ribbon_top"]), rt, c3, c1)
 
 
 ## Área útil para o símbolo dentro de cada formato (evita a ponta e o anel).
@@ -306,11 +403,37 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 			for i in n:
 				if i % 3 != 0:
 					parts.append([_rect(w3 * i, -0.1, w3 + 0.001, 1.2), c2 if i % 3 == 1 else c3])
+		"bends":
+			# Faixas diagonais (Athletico): n faixas da segunda cor
+			n = maxi(n, 3)
+			var bw := 1.0 / (n * 2)
+			for i in n:
+				var o := -0.5 + i * bw * 2.0 + bw
+				parts.append([PackedVector2Array([Vector2(o, 1.1), Vector2(o + bw, 1.1), Vector2(o + bw + 1.2, -0.1), Vector2(o + 1.2, -0.1)]), c2])
+		"barca":
+			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa FCB no meio
+			var gold := Color("#E4B43A")
+			for i in 7:
+				if i % 2 == 1:
+					parts.append([_rect(i / 7.0, 0.47, 1.0 / 7.0 + 0.001, 0.6), c2])
+			parts.append([_rect(-0.1, -0.1, 0.6, 0.43), Color("#F7F4EC")])
+			parts.append([_rect(0.215, -0.1, 0.07, 0.43), Color("#D21F26")])
+			parts.append([_rect(-0.1, 0.11, 0.6, 0.07), Color("#D21F26")])
+			parts.append([_rect(0.5, -0.1, 0.6, 0.43), Color("#FCD116")])
+			for i in 4:
+				parts.append([_rect(0.5 + (1 + i * 2) * 0.5 / 9.0, -0.1, 0.5 / 9.0, 0.43), Color("#D21F26")])
+			parts.append([_rect(-0.1, 0.33, 1.2, 0.14), Color("#F4EEDC")])
+			# Frisos dourados entre as partes, como o esmalte do escudo
+			parts.append([_rect(-0.1, 0.322, 1.2, 0.016), gold])
+			parts.append([_rect(-0.1, 0.462, 1.2, 0.016), gold])
+			parts.append([_rect(0.492, -0.1, 0.016, 0.43), gold])
 		"bordure":
 			pass
 	for part: Array in parts:
 		for piece in Geometry2D.intersect_polygons(_xf(part[0], box), poly):
 			_poly(piece, part[1])
+	if kind == "barca" and s >= 36.0:
+		_text_center(String(sp["text"]) if String(sp["text"]) != "" else "FCB", box.position + box.size * Vector2(0.5, 0.405), box.size.x * 0.46, box.size.y * 0.115, Color("#1A1A1A"))
 	if kind == "bordure":
 		var inner := Geometry2D.offset_polygon(poly, -box.size.x * 0.07)
 		for piece in inner:
@@ -339,7 +462,23 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 	if sym == "letter" or sym == "letters":
 		var txt := String(sp["initials"])
 		var fs := r * (1.25 if txt.length() <= 2 else (1.0 if txt.length() == 3 else 0.8))
-		_text_center(txt, cen + Vector2(0, r * 0.05), cb.size.x * 1.05, fs, col, outline, Color("#15171B") if col.get_luminance() > 0.5 else Color.WHITE)
+		var ink_out := Color("#15171B") if col.get_luminance() > 0.5 else Color.WHITE
+		var sub := String(sp["sub"])
+		if sub != "":
+			cen.y -= r * 0.2
+		if bool(sp["mono"]) and txt.length() >= 2:
+			# Monograma: letras grandes entrelaçadas, cada uma um pouco deslocada, contorno na cor do fundo
+			var n := txt.length()
+			var fsm := r * (1.5 if n <= 3 else 1.2)
+			var step := fsm * 0.36
+			for i in n:
+				var dx := (i - (n - 1) * 0.5) * step
+				var dy := (r * 0.14) * (1.0 if i % 2 == 1 else -1.0) if n >= 3 else 0.0
+				_text_center(txt[i], cen + Vector2(dx, r * 0.05 + dy), cb.size.x, fsm, col, true, c1)
+		else:
+			_text_center(txt, cen + Vector2(0, r * 0.05), cb.size.x * 1.05, fs, col, outline, ink_out)
+		if sub != "":
+			_text_center(sub, cen + Vector2(0, r * 0.95), cb.size.x * 0.6, fs * 0.55, col)
 		return
 	if sym.begins_with("stars:"):
 		var n := clampi(int(sym.get_slice(":", 1)), 1, 5)
@@ -359,13 +498,55 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			var y := -0.35 + k * 0.6
 			_polyline(PackedVector2Array([cen + Vector2(-r, (y - 0.4) * r), cen + Vector2(0, (y + 0.2) * r), cen + Vector2(r, (y - 0.4) * r)]), col, maxf(2.0, r * 0.26))
 		return
+	# Bola antiga de couro, com os gomos costurados (Barça)
+	if sym == "ball_old":
+		var bc := cen
+		var br := r * 0.62
+		_circle(bc + Vector2(br * 0.06, br * 0.08), br, Color(0, 0, 0, 0.3))
+		_circle(bc, br, Color("#7A4A12"))
+		_circle(bc, br * 0.92, Color("#E9A93B"))
+		_circle(bc + Vector2(-br * 0.28, -br * 0.3), br * 0.35, Color(1, 0.9, 0.6, 0.35))
+		var seam := Color("#6B3F0E")
+		var lw := maxf(1.0, br * 0.07)
+		_polyline(PackedVector2Array([bc + Vector2(-br * 0.88, -br * 0.2), bc + Vector2(-br * 0.3, -br * 0.05), bc + Vector2(br * 0.3, -br * 0.05), bc + Vector2(br * 0.88, -br * 0.2)]), seam, lw)
+		_polyline(PackedVector2Array([bc + Vector2(-br * 0.7, br * 0.55), bc + Vector2(-br * 0.2, br * 0.35), bc + Vector2(br * 0.2, br * 0.35), bc + Vector2(br * 0.7, br * 0.55)]), seam, lw)
+		_polyline(PackedVector2Array([bc + Vector2(0, -br * 0.9), bc + Vector2(-br * 0.08, -br * 0.05), bc + Vector2(0, br * 0.35), bc + Vector2(br * 0.05, br * 0.9)]), seam, lw)
+		return
+	# Galo em cima da bola (Tottenham)
+	if sym == "rooster_ball":
+		var rc := cen + Vector2(0, -r * 0.18)
+		for p: PackedVector2Array in CrestArt.polys("rooster"):
+			_poly(_xf_c(p, rc, r * 0.8), col)
+		var bc := cen + Vector2(r * 0.02, r * 0.72)
+		_circle(bc, r * 0.26, col)
+		_circle(bc, r * 0.2, c1)
+		_circle(bc, r * 0.07, col)
+		for k in 5:
+			var a := TAU * k / 5.0 - PI * 0.5
+			_polyline(PackedVector2Array([bc + Vector2(cos(a), sin(a)) * r * 0.07, bc + Vector2(cos(a), sin(a)) * r * 0.2]), col, maxf(1.0, r * 0.03))
+		return
 	var det := sym + "_d"
+	if bool(sp["line_art"]) and CrestArt.has(sym):
+		# Desenho só em traços: contorno e detalhes na cor do símbolo
+		var lw := maxf(1.2, r * 0.075)
+		for p: PackedVector2Array in CrestArt.polys(sym):
+			_polyline_closed(_xf_c(p, cen, r), col, lw)
+		if CrestArt.has(det) and s >= 28.0:
+			for p: PackedVector2Array in CrestArt.polys(det):
+				_poly(_xf_c(p, cen, r), col)
+		return
 	if sym == "tiger":
 		sym = "cat"
 		det = "tiger_d"
 	if not CrestArt.has(sym):
 		sym = "star"
 		det = "star_d"
+	if bool(sp["staff"]):
+		# Cajado com ponteira, na diagonal, atrás do leão
+		var a0 := cen + Vector2(r * 0.78, -r * 0.95)
+		var a1 := cen + Vector2(-r * 0.45, r * 0.95)
+		_polyline(PackedVector2Array([a0, a1]), col, maxf(1.2, r * 0.08))
+		_poly(_xf_c(PackedVector2Array([Vector2(0, -1), Vector2(0.5, 0), Vector2(0, 1), Vector2(-0.5, 0)]), a0, r * 0.14), col)
 	var polys: Array = CrestArt.polys(sym)
 	var shade := col.darkened(0.45) if col.get_luminance() > 0.35 else col.lightened(0.35)
 	# Contorno fino para destacar sobre campo dividido
@@ -561,6 +742,18 @@ static func unit_shape(shape: String) -> PackedVector2Array:
 				var a := PI * float(i) / 16.0
 				pts.append(Vector2(0.5 + cos(a) * 0.4, 0.56 + sin(a) * 0.42))
 			pts.append(Vector2(0.1, 0.56))
+		"barca":
+			# Ânfora: pontas do alto abertas para fora, topo côncavo, cintura na faixa FCB e fundo bojudo em ponta
+			for i in 13:
+				pts.append(_bezier(Vector2(0.02, 0.0), Vector2(0.5, 0.16), Vector2(0.98, 0.0), i / 12.0))
+			for i in range(1, 9):
+				pts.append(_bezier(Vector2(0.98, 0.0), Vector2(0.86, 0.2), Vector2(0.87, 0.42), i / 8.0))
+			for i in range(1, 14):
+				pts.append(_bezier(Vector2(0.87, 0.42), Vector2(0.97, 0.78), Vector2(0.5, 0.99), i / 13.0))
+			for i in range(1, 14):
+				pts.append(_bezier(Vector2(0.5, 0.99), Vector2(0.03, 0.78), Vector2(0.13, 0.42), i / 13.0))
+			for i in range(1, 8):
+				pts.append(_bezier(Vector2(0.13, 0.42), Vector2(0.14, 0.2), Vector2(0.02, 0.0), i / 8.0))
 		"swiss":
 			pts.append(Vector2(0.08, 0.05))
 			pts.append(Vector2(0.5, 0.1))
@@ -692,6 +885,21 @@ func _poly(pts: PackedVector2Array, col: Color) -> void:
 	_rec.append([0, pts, col])
 
 
+## Polígono com degradê vertical (cor de cima para a de baixo, por vértice).
+func _poly_grad(pts: PackedVector2Array, top: Color, bot: Color) -> void:
+	if pts.size() < 3 or Geometry2D.triangulate_polygon(pts).is_empty():
+		return
+	var y0 := INF
+	var y1 := -INF
+	for p in pts:
+		y0 = minf(y0, p.y)
+		y1 = maxf(y1, p.y)
+	var cols := PackedColorArray()
+	for p in pts:
+		cols.append(top.lerp(bot, clampf((p.y - y0) / maxf(1.0, y1 - y0), 0.0, 1.0)))
+	_rec.append([6, pts, cols])
+
+
 func _polyline(pts: PackedVector2Array, col: Color, w: float) -> void:
 	_rec.append([1, pts, col, w])
 
@@ -734,6 +942,8 @@ func _replay(cmds: Array, off: Vector2) -> void:
 				draw_string(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5])
 			4:
 				draw_string_outline(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5], c[6])
+			6:
+				draw_polygon(c[1], c[2])
 			5:
 				var p: Vector2 = c[2]
 				draw_set_transform(off + p, c[3], Vector2.ONE)

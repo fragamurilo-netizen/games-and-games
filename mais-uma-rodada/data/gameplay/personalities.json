@@ -115,6 +115,31 @@
       "name": "Ídolo da torcida", "weight": 0,
       "desc": "Anos de clube e a torcida canta o nome dele. Dificilmente quer sair. Surge com o tempo de casa.",
       "loyalty": 35, "big_game": 0.02, "greed": 0.92, "ambition": -10
+    },
+    "vaidoso": {
+      "name": "Vaidoso", "weight": 4,
+      "desc": "Vive para as redes sociais e a imagem. Atrai patrocínio, mas se distrai e cobra holofote.",
+      "ambition": 10, "greed": 1.1, "consistency": -1, "morale_volatility": 1.15
+    },
+    "brincalhao": {
+      "name": "Brincalhão", "weight": 4,
+      "desc": "A alegria do vestiário: segura o astral do grupo nas fases ruins.",
+      "leadership": 6, "morale_volatility": 0.85, "loyalty": 5
+    },
+    "caseiro": {
+      "name": "Caseiro", "weight": 4,
+      "desc": "Família em primeiro lugar. Estável e fiel, mas sofre longe de casa.",
+      "loyalty": 15, "card_mult": 0.85, "consistency": 1, "injury_mult": 0.95
+    },
+    "polemico": {
+      "name": "Polêmico", "weight": 3,
+      "desc": "Fala o que pensa, na hora errada. Rende manchete e dor de cabeça.",
+      "card_mult": 1.15, "morale_volatility": 1.2, "loyalty": -5
+    },
+    "frio": {
+      "name": "Sangue frio", "weight": 3,
+      "desc": "Nada o abala: pênalti decisivo, final, estádio contra. Rende igual.",
+      "clutch": 0.05, "big_game": 0.02, "morale_volatility": 0.8
     }
   },
   "conflicts": [
@@ -123,7 +148,9 @@
     ["esforcado", "acomodado"], ["lider", "inseguro"], ["competitivo", "acomodado"], ["timido", "jogos_grandes"],
     ["inseguro", "decisivo"], ["leal", "ambicioso"],
     ["idolo", "mercenario"], ["cascudo", "inseguro"], ["cascudo", "timido"], ["perfeccionista", "acomodado"],
-    ["perfeccionista", "festeiro"], ["resiliente", "inseguro"], ["mentor", "rebelde"], ["mentor", "estrela"]
+    ["perfeccionista", "festeiro"], ["resiliente", "inseguro"], ["mentor", "rebelde"], ["mentor", "estrela"],
+    ["vaidoso", "disciplinado"], ["caseiro", "mercenario"], ["polemico", "timido"], ["frio", "timido"],
+    ["frio", "temperamental"], ["brincalhao", "inseguro"], ["polemico", "disciplinado"]
   ],
   "secondary_chance": 0.45
 }

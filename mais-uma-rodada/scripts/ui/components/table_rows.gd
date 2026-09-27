@@ -113,6 +113,12 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			if not last:
 				l.add_theme_color_override(&"font_color", UIColors.MUTED)
+			elif int(r.get("ded", 0)) > 0:
+				# Pontos perdidos fora de campo (punição): número em vermelho e o desconto ao lado
+				l.add_theme_color_override(&"font_color", UIColors.RED)
+				l.tooltip_text = "-%d pontos de punição" % int(r["ded"])
+				var dl := UIKit.colored("-%d" % int(r["ded"]), UIColors.RED, "Small")
+				h.add_child(dl)
 			h.add_child(l)
 	var cid := club_id
 	var tap := on_tap

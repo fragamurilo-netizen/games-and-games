@@ -376,6 +376,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
 	WeeklyAwards.after_matchday(world, md, slot)
+	ClubEvents.after_matchday(world, slot)
+	NextGen.after_matchday(world, slot)
 	FootballMemory.after_matchday(world, md["entries"])
 	tt = _time("aplicar", tt)
 	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube
@@ -453,7 +455,9 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	Rivalry.on_cup_events(world, cup_events)
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
+	Achievements.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
+	CoachStories.after_matchday(world, md["entries"])
 	AwardVoting.maybe_announce(world)
 	PressRoom.after_matchday(world)
 	tt = _time("copas_noticias", tt)
@@ -482,6 +486,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
 		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
 		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
+		report["feats"] = ManagerFeats.on_user_match(world, md["user"], String(report["user"]["result"]))
+		CoachStories.after_user_match(world, md["user"], String(report["user"]["result"]))
 		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
 		InboxManager.after_user_turn(world, report, md["user"])
 	return report
@@ -533,6 +539,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
@@ -541,6 +548,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
 		TacticsManager.after_match(club, club.sheet, String(club.training.get("focus", "")) == "tatico")
+		TeamEvolution.after_match(world, club, world.club(f.away if side == 0 else f.home), result, side == 0)
 		# Torcida
 		var patience := float(club.arch().get("fan_patience", 50))
 		var swing := 1.0 + (50.0 - patience) / 100.0
@@ -895,7 +903,11 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
 	PressRoom.on_season_end(world, summary)
 	CoachCareer.on_titles(world, hist_leagues, hist_cups) # títulos na carreira de quem está no banco
+	CoachStories.season_awards(world, hist_leagues, wcoach)
 	People.on_season_end(world, summary)
+	CoachStories.on_season_end(world, moves, hist_leagues, hist_cups) # arcos, despedidas e o mercado de técnicos
+	if world.has_user():
+		summary["user"]["prestige"] = ManagerFeats.on_season_end(world, summary["user"])
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
 	if uc != null:
@@ -942,6 +954,16 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var review_y := PlayerDevelopment.yearly_review(world)
 	for p in review_y["explosions"]:
 		NewsManager.on_explosion(world, p)
+	for p: Player in review_y["late"]:
+		var lc := world.club(p.club_id)
+		NewsManager.post_raw(world, "%s floresce aos %d anos" % [p.display_name(), p.age(world.year)],
+			"Tratado por anos como jogador comum, %s viveu a melhor temporada da carreira no %s e subiu de patamar. Os grandes já perguntam o preço." % [p.display_name(), lc.short_name if lc != null else "clube"],
+			p.club_id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(p.club_id) else NewsEvent.IMP_NORMAL, "jogador")
+	for p: Player in review_y["derail"]:
+		var dc := world.club(p.club_id)
+		NewsManager.post_raw(world, "O que houve com %s?" % p.display_name(),
+			"Há pouco tempo apontado como futuro craque, %s perdeu espaço e rendimento no %s. A imprensa fala em falta de foco; o jogador diz que só precisa de sequência." % [p.display_name(), dc.short_name if dc != null else "clube"],
+			p.club_id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(p.club_id) else NewsEvent.IMP_NORMAL, "jogador")
 	# Aposentadorias
 	var retired := PlayerDevelopment.process_retirements(world)
 	world.stat_add("retirements", retired.size())
@@ -958,6 +980,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		NewsManager.post(world, "contrato_fim", {"player": p.display_name(), "club": world.user_club().short_name, "apps": p.career_apps}, world.user_club_id, p.id, NewsEvent.IMP_HIGH)
 	# DNA dos clubes reage à temporada (antes da troca de divisões)
 	ClubDNA.season_end(world, moves)
+	TeamEvolution.season_end(world)
 	# Investimentos em estrutura/base e depreciação
 	FinanceManager.yearly_investments(world)
 	# Mudança de divisões
@@ -1032,6 +1055,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	# Mercado das férias: os outros clubes fazem a maior parte dos negócios antes da bola rolar.
 	MarketAI.offseason(world)
 	compute_goals(world)
+	TeamEvolution.season_start(world)
 	SponsorManager.open_preseason(world)
 	BoardObjectives.list(world) # metas da diretoria fixadas no começo do ano
 	if world.has_user():

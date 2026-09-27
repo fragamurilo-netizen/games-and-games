@@ -79,6 +79,9 @@ func refresh() -> void:
 		_footer(w)
 		return
 	c.add_child(_user_card(w, year))
+	var pr: Dictionary = _summary.get("user", {}).get("prestige", {})
+	if not pr.is_empty():
+		c.add_child(_prestige_card(w, pr))
 	var rv: Dictionary = _summary.get("review", {})
 	if not rv.is_empty():
 		c.add_child(_grade_card(rv))
@@ -114,6 +117,21 @@ func refresh() -> void:
 	if mine != null:
 		c.add_child(mine)
 	_footer(w)
+
+
+func _prestige_card(w: GameWorld, pr: Dictionary) -> Control:
+	var card := UIKit.card("Card", 6)
+	var head := UIKit.hbox(8)
+	head.add_child(UIKit.section("Prestígio da temporada"))
+	head.add_child(UIKit.spacer())
+	head.add_child(UIKit.pill("+%d" % int(pr.get("xp", 0)), UIColors.ACCENT, 18))
+	card.add_child(head)
+	for ln in pr.get("lines", []):
+		card.add_child(UIKit.label(String(ln), "Small", true))
+	if int(pr.get("lv1", 0)) > int(pr.get("lv0", 0)):
+		card.add_child(UIKit.colored("Subiu para o nível %d (%s)!" % [int(pr["lv1"]), ManagerFeats.level_name(int(pr["lv1"]))], UIColors.GREEN, "H3", true))
+	card.add_child(PrestigeCard.level_row(w))
+	return UIKit.card_panel(card)
 
 
 func _user_card(w: GameWorld, year: int) -> Control:
@@ -557,5 +575,5 @@ func _career_card(w: GameWorld) -> Control:
 	card.add_child(row)
 	var games := maxi(1, int(ms.get("games", 0)))
 	card.add_child(UIKit.label("%dV %dE %dD · aproveitamento de %d%% · %d de %d conquistas" % [int(ms.get("w", 0)), int(ms.get("d", 0)), int(ms.get("l", 0)),
-		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), SeasonReview.ACH_ORDER.size()], "Small", true))
+		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), Achievements.CATALOG.size()], "Small", true))
 	return UIKit.card_panel(card)

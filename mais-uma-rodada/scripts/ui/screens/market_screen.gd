@@ -1,18 +1,27 @@
 extends BaseScreen
-## Mercado: busca de jogadores, livres, propostas recebidas e jogadores à venda.
+## Mercado: busca de jogadores, livres, pré-contratos, lista de observação, olheiros, propostas
+## recebidas e jogadores à venda.
+## A busca abre ordenada por relevância (quanto o jogador melhora seu time e se cabe no bolso),
+## com busca por nome, faixa de preço, sugestões do diretor de futebol e, em cada linha, a
+## comparação com o seu titular no setor e o preço pedido na cor do orçamento.
 
-const TABS := [["search", "Buscar"], ["free", "Livres"], ["scout", "Olheiros"], ["offers", "Propostas"], ["listed", "À venda"]]
+const TABS := [["search", "Buscar"], ["free", "Livres"], ["pre", "Pré-contrato"], ["watch", "Lista"], ["scout", "Olheiros"], ["offers", "Propostas"], ["listed", "À venda"]]
 const GROUPS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 const AGES := [["Todas", 99], ["≤ 21", 21], ["≤ 25", 25], ["≤ 29", 29]]
-const SORTS := [["ovr", "Nível"], ["value", "Valor"], ["age", "Idade"]]
+const SORTS := [["rel", "Relevância"], ["ovr", "Nível"], ["value", "Valor"], ["age", "Idade"]]
+## Faixa de preço pedido em relação à verba: qualquer, até a verba, até 2x a verba.
+const PRICES := [["Qualquer preço", 0.0], ["Cabe na verba", 1.0], ["Até 2x a verba", 2.0]]
 const MAX_ROWS := 40
 
 var _tab := "search"
 var _group := 0
 var _age := 0
-var _sort := "ovr"
+var _sort := "rel"
 var _upgrades := false
-var _affordable := false
+var _price := 0
+var _query := ""
+var _sug_turn := -1
+var _sug: Dictionary = {}
 var _origin := "all"
 var _scouted_only := false
 
@@ -41,23 +50,28 @@ func refresh() -> void:
 	UIKit.clear(c)
 	c.add_child(_banner(w, club))
 	var gt := ButtonGroup.new()
-	var trow := UIKit.hbox(8)
+	var trow := UIKit.flow(8)
 	var n_offers := TransferManager.pending_offers(w).size()
 	for t in TABS:
 		var key: String = t[0]
 		var text: String = t[1]
 		if key == "offers" and n_offers > 0:
 			text += " (%d)" % n_offers
+		elif key == "watch" and not _watch(w).is_empty():
+			text += " (%d)" % _watch(w).size()
 		var chip := UIKit.chip(text, key == _tab, gt, func():
 			_tab = key
 			refresh())
-		UIKit.shrink_button(chip)
 		chip.add_theme_font_size_override(&"font_size", 18)
 		trow.add_child(chip)
 	c.add_child(trow)
 	match _tab:
 		"free":
 			_free_tab(c, w)
+		"pre":
+			_pre_tab(c, w, club)
+		"watch":
+			_watch_tab(c, w, club)
 		"scout":
 			_scout_tab(c, w, club)
 		"offers":
@@ -140,10 +154,30 @@ func _weakest_starter_by_group(w: GameWorld, club: Club) -> Array:
 
 
 func _search_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
+	# Busca por nome
+	var srow := UIKit.hbox(8)
+	var le := LineEdit.new()
+	le.placeholder_text = "Buscar pelo nome (mín. 3 letras)"
+	le.text = _query
+	le.clear_button_enabled = true
+	le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	le.custom_minimum_size.y = 64
+	le.text_submitted.connect(func(t: String):
+		_query = t.strip_edges()
+		refresh())
+	srow.add_child(le)
+	srow.add_child(UIKit.icon_button("search", func():
+		_query = le.text.strip_edges()
+		refresh(), "Buscar"))
+	c.add_child(srow)
+	if _query.length() < 3 and _sort == "rel":
+		var sug := _suggest_card(w, club)
+		if sug != null:
+			c.add_child(sug)
 	_group_chips(c)
 	_origin_chips(c, club)
 	var ga := ButtonGroup.new()
-	var arow := UIKit.hbox(6)
+	var arow := UIKit.flow(6)
 	arow.add_child(UIKit.label("Idade", "Small"))
 	for i in AGES.size():
 		var idx := i
@@ -153,23 +187,28 @@ func _search_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		chip.add_theme_font_size_override(&"font_size", 17)
 		arow.add_child(chip)
 	c.add_child(arow)
-	var frow := UIKit.hbox(6)
+	var prow := UIKit.flow(6)
+	var gp := ButtonGroup.new()
+	for i in PRICES.size():
+		var idx := i
+		var chip := UIKit.chip(PRICES[i][0], i == _price, gp, func():
+			_price = idx
+			refresh())
+		chip.add_theme_font_size_override(&"font_size", 17)
+		prow.add_child(chip)
 	var up := UIKit.chip("Só reforços", _upgrades, null, func():
 		_upgrades = not _upgrades
 		refresh())
 	up.add_theme_font_size_override(&"font_size", 17)
-	frow.add_child(up)
-	var af := UIKit.chip("Cabe no orçamento", _affordable, null, func():
-		_affordable = not _affordable
-		refresh())
-	af.add_theme_font_size_override(&"font_size", 17)
-	frow.add_child(af)
+	prow.add_child(up)
 	var sc := UIKit.chip("Observados", _scouted_only, null, func():
 		_scouted_only = not _scouted_only
 		refresh())
 	sc.add_theme_font_size_override(&"font_size", 17)
-	frow.add_child(sc)
-	frow.add_child(UIKit.spacer())
+	prow.add_child(sc)
+	c.add_child(prow)
+	var frow := UIKit.flow(6)
+	frow.add_child(UIKit.label("Ordem", "Small"))
 	var gs := ButtonGroup.new()
 	for s in SORTS:
 		var key: String = s[0]
@@ -181,9 +220,14 @@ func _search_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	c.add_child(frow)
 	var weakest := _weakest_starter_by_group(w, club)
 	var max_age: int = AGES[_age][1]
+	var budget := float(maxi(1, club.transfer_budget))
+	var cap := float(PRICES[_price][1])
+	var q := _query.to_lower() if _query.length() >= 3 else ""
 	var list: Array = []
 	for p: Player in w.players.values():
 		if p.club_id < 0 or p.club_id == club.id or p.retiring:
+			continue
+		if q != "" and p.display_name().to_lower().find(q) < 0 and (p.first_name + " " + p.display_name()).to_lower().find(q) < 0:
 			continue
 		if _group > 0 and Pos.group(p.position) != _group - 1:
 			continue
@@ -191,26 +235,194 @@ func _search_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 			continue
 		if _scouted_only and not Scouting.is_scouted(w, p):
 			continue
+		# O valor de mercado é um filtro barato antes do preço pedido (que depende do vendedor)
+		if cap > 0.0 and float(p.value) > budget * cap * 1.6:
+			continue
 		var est := PlayerRowView.estimate(w, p, p.overall)
-		if _upgrades and est <= weakest[Pos.group(p.position)]:
+		var gain := float(est) - float(weakest[Pos.group(p.position)])
+		if _upgrades and gain <= 0.0:
 			continue
-		if _affordable and TransferManager.asking_price(w, p) > club.transfer_budget:
+		if cap > 0.0 and float(TransferManager.asking_price(w, p)) > budget * cap:
 			continue
-		list.append([p, est])
+		list.append([p, est, _relevance(w, p, gain, budget)])
 	match _sort:
 		"value":
 			list.sort_custom(func(a, b): return a[0].value > b[0].value)
 		"age":
 			list.sort_custom(func(a, b): return a[0].age(w.year) < b[0].age(w.year) or (a[0].age(w.year) == b[0].age(w.year) and a[1] > b[1]))
-		_:
+		"ovr":
 			list.sort_custom(func(a, b): return a[1] > b[1] or (a[1] == b[1] and a[0].value < b[0].value))
+		_:
+			list.sort_custom(func(a, b): return float(a[2]) > float(b[2]))
 	c.add_child(UIKit.label("%s encontrados%s. O nível de jogadores de outros clubes é uma estimativa dos seus olheiros." % [Fmt.plural(list.size(), "jogador", "jogadores"), " (mostrando %d)" % MAX_ROWS if list.size() > MAX_ROWS else ""], "Small", true))
 	for i in mini(MAX_ROWS, list.size()):
-		var p: Player = list[i][0]
-		var pid := p.id
-		c.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+		c.add_child(_market_row(w, club, list[i][0], weakest))
 	if list.is_empty():
 		c.add_child(UIKit.label("Ninguém com esse perfil. Tente afrouxar os filtros.", "Muted", true))
+
+
+## Relevância: o quanto melhora o time (ou promete, se for jovem), com desconto pelo que custa
+## além da verba. Jogador que não melhora nada ainda aparece, mas lá embaixo.
+func _relevance(w: GameWorld, p: Player, gain: float, budget: float) -> float:
+	var v := clampf(gain, -12.0, 12.0) * 2.0
+	var age := p.age(w.year)
+	if age <= 22:
+		v += clampf(float(p.potential_estimate(0.5) - p.overall), 0.0, 15.0) * 0.4
+	elif age >= 32:
+		v -= float(age - 31) * 1.5
+	var ratio := float(p.value) / budget
+	if ratio > 1.0:
+		v -= log(ratio) / log(2.0) * 9.0
+	if Scouting.is_scouted(w, p):
+		v += 1.0
+	return v
+
+
+## Linha do mercado: a linha padrão do jogador e, embaixo, a comparação com seu titular no setor,
+## preço pedido e salário pretendido nas cores do orçamento, e a estrela da lista de observação.
+func _market_row(w: GameWorld, club: Club, p: Player, weakest: Array) -> Control:
+	var pid := p.id
+	var box := UIKit.vbox(2)
+	box.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+	var info := UIKit.hbox(10)
+	var est := PlayerRowView.estimate(w, p, p.overall)
+	var ref := float(weakest[Pos.group(p.position)])
+	if ref < 98.0:
+		var d := est - int(round(ref))
+		var txt := ("+%d sobre seu pior titular no setor" % d) if d > 0 else ("mesmo nível do seu titular" if d == 0 else "%d abaixo do seu titular" % d)
+		info.add_child(UIKit.colored(txt, UIColors.GREEN if d > 0 else (UIColors.MUTED if d == 0 else UIColors.ORANGE), "Small"))
+	info.add_child(UIKit.spacer())
+	if p.club_id >= 0:
+		var ask := TransferManager.asking_price(w, p)
+		var col := UIColors.GREEN if ask <= club.transfer_budget else (UIColors.ORANGE if ask <= club.transfer_budget * 2 else UIColors.RED)
+		info.add_child(UIKit.colored("pedem " + Fmt.money(ask), col, "Small"))
+	var wage := TransferManager.wage_ask(w, p, club)
+	var fin := FinanceManager.summary(w, club)
+	var room := int(fin["wage_budget"]) - int(fin["wage_bill"])
+	info.add_child(UIKit.colored(Fmt.money_month(wage), UIColors.TEXT if wage <= room else UIColors.ORANGE, "Small"))
+	var on := _watch(w).has(pid)
+	var star := UIKit.icon_button("star", func():
+		_toggle_watch(w, pid)
+		refresh(), "Lista de observação")
+	star.custom_minimum_size = Vector2(48, 44)
+	star.modulate = UIColors.ACCENT if on else Color(1, 1, 1, 0.35)
+	info.add_child(star)
+	box.add_child(UIKit.margin(info, 12, 0, 8, 4))
+	return box
+
+
+# Lista de observação: ids em world.stats["watch"]
+func _watch(w: GameWorld) -> Array:
+	return w.stats.get("watch", [])
+
+
+func _toggle_watch(w: GameWorld, pid: int) -> void:
+	var arr: Array = w.stats.get("watch", [])
+	if arr.has(pid):
+		arr.erase(pid)
+		UIManager.toast("Saiu da lista de observação.")
+	else:
+		arr.append(pid)
+		UIManager.toast("Adicionado à lista de observação.", UIColors.ACCENT)
+	w.stats["watch"] = arr
+
+
+func _watch_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
+	var weakest := _weakest_starter_by_group(w, club)
+	var list: Array = []
+	var gone: Array = []
+	for pid in _watch(w):
+		var p := w.player(int(pid))
+		if p == null or p.retiring or p.club_id == club.id:
+			gone.append(pid)
+			continue
+		list.append(p)
+	# Quem já veio para o seu clube ou se aposentou sai sozinho da lista
+	for pid in gone:
+		_watch(w).erase(pid)
+	if list.is_empty():
+		c.add_child(UIKit.label("Sua lista está vazia. Toque na estrela de um jogador na busca para acompanhá-lo aqui: preço, salário e situação de contrato num lugar só.", "Muted", true))
+		return
+	list.sort_custom(func(a: Player, b: Player): return PlayerRowView.estimate(w, a, a.overall) > PlayerRowView.estimate(w, b, b.overall))
+	c.add_child(UIKit.label("%s na lista." % Fmt.plural(list.size(), "jogador", "jogadores"), "Small"))
+	for p: Player in list:
+		var card := UIKit.card("CardFlat", 4)
+		card.add_child(_market_row(w, club, p, weakest))
+		var bits: Array = []
+		if p.club_id < 0:
+			bits.append("livre: sem taxa")
+		elif p.contract_end <= w.year:
+			bits.append("contrato termina nesta temporada")
+			if TransferManager.precontract_block(w, p, club) == "":
+				bits.append("aceita pré-contrato")
+		else:
+			bits.append("contrato até %d" % p.contract_end)
+		if p.transfer_listed:
+			bits.append("à venda")
+		if p.injury_weeks > 0:
+			bits.append("lesionado (%d sem.)" % p.injury_weeks)
+		var pre := TransferManager.precontract_of(w, p)
+		if not pre.is_empty():
+			var pc := w.club(int(pre.get("club", -1)))
+			bits.append("já assinou com o %s" % (pc.short_name if pc != null else "outro clube"))
+		card.add_child(UIKit.margin(UIKit.label(" · ".join(bits), "Caps", true), 12, 0, 8, 4))
+		c.add_child(UIKit.card_panel(card))
+
+
+## Jogadores em último ano de contrato: podem assinar pré-contrato a partir da metade da temporada.
+func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
+	var prog := TransferManager.season_progress(w)
+	var head := UIKit.card("Card", 6)
+	head.add_child(UIKit.section("Contratos terminando"))
+	if prog < 0.5:
+		head.add_child(UIKit.label("Estes jogadores ficam livres no fim da temporada. O pré-contrato pode ser proposto a partir da metade da temporada; até lá, só dá para comprá-los (mais barato, pelo contrato curto).", "Small", true))
+	else:
+		head.add_child(UIKit.label("Já é possível propor pré-contrato: o jogador chega de graça na próxima temporada. Abra o perfil e toque em \"Propor pré-contrato\".", "Small", true))
+	c.add_child(UIKit.card_panel(head))
+	_group_chips(c)
+	var weakest := _weakest_starter_by_group(w, club)
+	var budget := float(maxi(1, club.transfer_budget))
+	var list: Array = []
+	var signed := 0
+	for p: Player in w.players.values():
+		if p.club_id < 0 or p.club_id == club.id or p.retiring or p.contract_end > w.year or not p.loan.is_empty():
+			continue
+		if _group > 0 and Pos.group(p.position) != _group - 1:
+			continue
+		if not TransferManager.precontract_of(w, p).is_empty():
+			signed += 1
+			continue
+		var est := PlayerRowView.estimate(w, p, p.overall)
+		list.append([p, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget * 4.0)])
+	list.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
+	c.add_child(UIKit.label("%s disponíveis%s." % [Fmt.plural(list.size(), "jogador", "jogadores"), (" · %d já assinaram com outros clubes" % signed) if signed > 0 else ""], "Small", true))
+	for i in mini(MAX_ROWS, list.size()):
+		c.add_child(_market_row(w, club, list[i][0], weakest))
+	if list.is_empty():
+		c.add_child(UIKit.label("Ninguém nesse setor com contrato terminando.", "Muted", true))
+
+
+## Sugestões do diretor de futebol: o setor mais carente e nomes que cabem no bolso.
+func _suggest_card(w: GameWorld, club: Club) -> Control:
+	if _sug_turn != w.current_turn():
+		_sug = BoardRequests.suggestions(w)
+		_sug_turn = w.current_turn()
+	var ids: Array = _sug.get("ids", [])
+	if ids.is_empty():
+		return null
+	var d := BoardRequests.director(w)
+	var card := UIKit.card("Card", 6)
+	var head := UIKit.hbox(10)
+	head.add_child(UIKit.icon_rect("chat", 28, UIColors.ACCENT))
+	head.add_child(UIKit.label("%s, diretor de futebol: \"Onde mais precisamos: %s. Estes cabem no nosso bolso.\"" % [String(d.get("name", "O diretor")), ["goleiro", "defesa", "meio-campo", "ataque"][int(_sug.get("group", 1))]], "Small", true))
+	head.get_child(1).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_child(head)
+	var weakest := _weakest_starter_by_group(w, club)
+	for pid in ids.slice(0, 3):
+		var p := w.player(int(pid))
+		if p != null:
+			card.add_child(_market_row(w, club, p, weakest))
+	return UIKit.card_panel(card)
 
 
 func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
@@ -226,10 +438,9 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 		list.append(p)
 	list.sort_custom(func(a: Player, b: Player): return a.overall > b.overall)
 	c.add_child(UIKit.label("Sem taxa de transferência, só salário.", "Small", true))
+	var weakest := _weakest_starter_by_group(w, club)
 	for i in mini(MAX_ROWS, list.size()):
-		var p: Player = list[i]
-		var pid := p.id
-		c.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+		c.add_child(_market_row(w, club, list[i], weakest))
 	if list.is_empty():
 		c.add_child(UIKit.label("Nenhum jogador livre nessa posição agora.", "Muted"))
 

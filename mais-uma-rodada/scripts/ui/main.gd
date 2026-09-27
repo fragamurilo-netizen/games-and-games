@@ -11,6 +11,7 @@ extends Control
 
 var _safe := Rect2()
 var _keyboard_up := false
+var _wake_id := 0
 var _shadow: TextureRect
 var _fade: TextureRect
 
@@ -181,10 +182,32 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		UIManager.handle_back()
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_wake_render()
 		_relayout.call_deferred()
 		# Tema "do aparelho": o sistema pode ter trocado entre claro e escuro.
 		if AppSettings.theme_mode == AppSettings.THEME_SYSTEM and AppSettings.wants_light() != UIColors.light:
 			UIManager.apply_look.call_deferred()
+
+
+## Na volta do segundo plano o Android recria a superfície de desenho. Com o modo de baixo
+## processamento o Godot só redesenha quando algo muda, e a tela ficava preta até um toque: aqui
+## desenha continuamente por um instante, redesenha tudo e repinta as estampas em cache.
+func _wake_render() -> void:
+	OS.low_processor_usage_mode = false
+	DecalCache.refresh()
+	_redraw_all(get_tree().root)
+	_wake_id += 1
+	var id := _wake_id
+	get_tree().create_timer(1.5, true).timeout.connect(func():
+		if id == _wake_id:
+			OS.low_processor_usage_mode = ProjectSettings.get_setting("application/run/low_processor_mode", true))
+
+
+func _redraw_all(n: Node) -> void:
+	if n is CanvasItem:
+		(n as CanvasItem).queue_redraw()
+	for c in n.get_children():
+		_redraw_all(c)
 
 
 func _unhandled_input(event: InputEvent) -> void:

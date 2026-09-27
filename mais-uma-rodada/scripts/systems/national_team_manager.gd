@@ -7,12 +7,12 @@ extends RefCounted
 ##
 ## As seleções jogam num modelo próprio e leve (força do time titular → gols de Poisson), sem
 ## passar pelo motor de clubes. Tudo fica em world.stats["intl"]:
-##   elo: {nação: pontos}, pl: {id do jogador: [jogos, gols]}, squads: {nação: [ids]},
+##   elo: {nação: pontos}, pl: {id do jogador: [jogos, gols, assistências]}, squads: {nação: [ids]},
 ##   camps: eliminatórias em andamento, tours: torneios já disputados (mais recente no fim),
 ##   fifa: datas FIFA já disputadas na temporada.
 
 const KEY := "intl"
-const SQUAD_SIZE := 26
+const SQUAD_SIZE := 26 # lista de 26 (3 goleiros), como nas Copas recentes
 const SQUAD_SHAPE := [3, 9, 8, 6] # goleiros, defensores, meias, atacantes
 const XI_SHAPE := [1, 4, 3, 3]
 const HOME_BONUS := 2.5 # pontos de força para o mandante (sede do torneio ou jogo em casa)
@@ -78,13 +78,23 @@ static func host_of(id: String, year: int) -> String:
 	return String(hosts[posmod(idx, hosts.size())])
 
 
-## Jogos e gols de um jogador pela seleção.
+## Jogos, gols e assistências de um jogador pela seleção.
 static func caps_of(world: GameWorld, pid: int) -> Array:
 	var pl: Dictionary = data(world)["pl"]
 	var v: Variant = pl.get(pid, null)
 	if v == null:
 		v = pl.get(str(pid), null)
-	return [int(v[0]), int(v[1])] if v != null else [0, 0]
+	if v == null:
+		return [0, 0, 0]
+	return [int(v[0]), int(v[1]), int(v[2]) if v.size() > 2 else 0]
+
+
+## Soma ao registro do jogador pela seleção (saves antigos guardavam só jogos e gols).
+static func add_caps(world: GameWorld, pid: int, caps: int, goals: int, assists: int) -> void:
+	var pl: Dictionary = data(world)["pl"]
+	var v := caps_of(world, pid)
+	pl.erase(str(pid))
+	pl[pid] = [v[0] + caps, v[1] + goals, v[2] + assists]
 
 
 static func elo_of(world: GameWorld, code: String) -> float:
@@ -312,14 +322,12 @@ static func _credit_players(env: Env, code: String, goals: int, res: Dictionary)
 	var used: Array = xi.duplicate()
 	for i in mini(3, bench.size()):
 		used.append(bench[env.rng.randi_range(0, bench.size() - 1)])
-	var pl: Dictionary = data(env.world)["pl"]
 	var seen := {}
 	for p: Player in used:
 		if seen.has(p.id):
 			continue
 		seen[p.id] = true
-		var v: Array = pl.get(p.id, [0, 0])
-		pl[p.id] = [int(v[0]) + 1, int(v[1])]
+		add_caps(env.world, p.id, 1, 0, 0)
 		env.called[p.id] = true
 	var weights: Array = []
 	for p: Player in xi:
@@ -332,10 +340,23 @@ static func _credit_players(env: Env, code: String, goals: int, res: Dictionary)
 		if idx < 0:
 			continue
 		var s: Player = xi[idx]
-		var v: Array = pl[s.id]
-		pl[s.id] = [int(v[0]), int(v[1]) + 1]
+		add_caps(env.world, s.id, 0, 1, 0)
 		env.goals[s.id] = int(env.goals.get(s.id, 0)) + 1
 		res["sc"].append([s.id, code])
+		# ~70% dos gols têm assistência: meias criativos e pontas acima de todos
+		if env.rng.randf() < 0.7:
+			var aw: Array = []
+			for q: Player in used:
+				if q == s:
+					aw.append(0.0)
+					continue
+				var base: float = [0.05, 0.6, 1.5, 1.2][Pos.group(q.position)]
+				if q.position in [Pos.AM, Pos.RW, Pos.LW]:
+					base *= 1.4
+				aw.append(base * (q.attr(Attr.PAS) + q.attr(Attr.VIS) + 50.0) / 150.0)
+			var ai := RngUtil.weighted_index(env.rng, aw)
+			if ai >= 0:
+				add_caps(env.world, (used[ai] as Player).id, 0, 0, 1)
 
 
 static func _update_elo(env: Env, a: String, b: String, ga: int, gb: int, a_home: bool, b_home: bool, winner: String) -> void:
@@ -550,9 +571,12 @@ static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
 			free.append(code)
 	RngUtil.shuffle(env.rng, free)
 	env.k = 12.0
+	var friendlies: Array = []
 	for i in range(0, free.size() - 1, 2):
-		play(env, free[i], free[i + 1], true, false)
-	_after_date(world, env, lines)
+		var fr := play(env, free[i], free[i + 1], true, false)
+		fr["fr"] = true
+		friendlies.append(fr)
+	_after_date(world, env, lines + friendlies)
 	return lines
 
 
@@ -582,8 +606,9 @@ static func _close_campaign(world: GameWorld, camp: Dictionary) -> void:
 	var user_nat := _user_nation(world)
 	if user_nat != "" and _in_campaign(camp, user_nat):
 		var ok: bool = camp["q"].has(user_nat)
-		NewsManager.post_raw(world, "%s %s para a %s %d" % [DatabaseManager.nation_name(user_nat), "se classifica" if ok else "fica fora", tournament_name(camp["t"]), int(camp["y"])],
+		var qn := NewsManager.post_raw(world, "%s %s para a %s %d" % [DatabaseManager.nation_name(user_nat), "se classifica" if ok else "fica fora", tournament_name(camp["t"]), int(camp["y"])],
 			"Terminaram as %s. Classificados: %s." % [String(camp["name"]).to_lower(), _names(camp["q"])], -1, -1, NewsEvent.IMP_HIGH, "selecao")
+		qn.media = {"type": "nation", "code": user_nat}
 
 
 static func _in_campaign(camp: Dictionary, code: String) -> bool:
@@ -643,6 +668,8 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 		var p := world.player(int(pid))
 		if p != null and p.club_id == world.user_club_id:
 			mine.append(p)
+	if mine.size() >= 5:
+		Achievements.unlock(world, "vitrine")
 	if not mine.is_empty():
 		mine.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
 		var parts: Array = mine.map(func(p: Player): return "%s (%s)" % [p.display_name(), DatabaseManager.nation_name(p.nationality)])
@@ -653,8 +680,57 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 	var mine_r: Array = results.filter(func(r): return r["a"] == nat or r["b"] == nat)
 	if not mine_r.is_empty():
 		var txt: Array = mine_r.map(func(r): return result_text(r))
-		NewsManager.post_raw(world, "Eliminatórias: %s" % txt[0], "Resultados da %s na data FIFA: %s." % [DatabaseManager.nation_name(nat), "; ".join(txt)],
+		var en := NewsManager.post_raw(world, "%s: %s" % ["Amistoso" if bool(mine_r[0].get("fr", false)) else "Eliminatórias", txt[0]], "Resultados da %s na data FIFA: %s." % [DatabaseManager.nation_name(nat), "; ".join(txt)],
 			-1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		var r0: Dictionary = mine_r[0]
+		en.media = {"type": "nation", "code": String(r0["a"]), "vs": String(r0["b"]), "ga": int(r0["ga"]), "gb": int(r0["gb"])}
+	_world_nat_news(world, env, results, nat)
+
+
+## Pelo mundo das seleções: a lista de convocados do país do usuário e os resultados que
+## chamaram a atenção entre as seleções fortes (goleadas e zebras).
+static func _world_nat_news(world: GameWorld, env: Env, results: Array, nat: String) -> void:
+	var called: Array = []
+	for pid in env.called:
+		var p := world.player(int(pid))
+		if p != null and p.nationality == nat:
+			called.append(p)
+	if called.size() >= 11:
+		called.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+		var names: Array = []
+		for i in mini(5, called.size()):
+			var p: Player = called[i]
+			var c := world.club(p.club_id)
+			names.append("%s (%s)" % [p.display_name(), c.short_name if c != null else "sem clube"])
+		var cn := NewsManager.post_raw(world, "%s divulga a lista de convocados" % DatabaseManager.nation_name(nat),
+			"%d nomes para a data FIFA. Os destaques: %s." % [called.size(), ", ".join(names)], -1, int(called[0].id), NewsEvent.IMP_NORMAL, "selecao")
+		cn.media = {"type": "nation", "code": nat}
+	var rank := ranking(world)
+	var pos := {}
+	for i in rank.size():
+		pos[rank[i][0]] = i + 1
+	var picks: Array = []
+	for r: Dictionary in results:
+		if r["a"] == nat or r["b"] == nat:
+			continue
+		var ra := int(pos.get(r["a"], 99))
+		var rb := int(pos.get(r["b"], 99))
+		if mini(ra, rb) > 15:
+			continue
+		var diff := int(r["ga"]) - int(r["gb"])
+		var upset := (diff > 0 and ra - rb >= 12) or (diff < 0 and rb - ra >= 12)
+		if upset or absi(diff) >= 3:
+			picks.append([r, 2 if upset else 1])
+	picks.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	for k in mini(2, picks.size()):
+		var r: Dictionary = picks[k][0]
+		var upset: bool = int(picks[k][1]) == 2
+		var a := DatabaseManager.nation_name(r["a"])
+		var b := DatabaseManager.nation_name(r["b"])
+		var title := ("Zebra: %s" % result_text(r)) if upset else result_text(r)
+		var body := "Resultado de peso na data FIFA entre %s (%dº no ranking) e %s (%dº)." % [a, int(pos.get(r["a"], 0)), b, int(pos.get(r["b"], 0))]
+		var n := NewsManager.post_raw(world, title, body, -1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		n.media = {"type": "nation", "code": String(r["a"]), "vs": String(r["b"]), "ga": int(r["ga"]), "gb": int(r["gb"])}
 
 
 static func result_text(r: Dictionary) -> String:
@@ -753,8 +829,10 @@ static func _playoff(world: GameWorld, env: Env, qualified: Array, n: int, id: S
 		if winners.size() >= n:
 			break
 	if not lines.is_empty():
-		NewsManager.post_raw(world, "Repescagem da %s %d" % [tournament_name(id), y], "Classificados na repescagem: %s. Jogos: %s." % [_names(winners), "; ".join(lines)],
+		var rn := NewsManager.post_raw(world, "Repescagem da %s %d" % [tournament_name(id), y], "Classificados na repescagem: %s. Jogos: %s." % [_names(winners), "; ".join(lines)],
 			-1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		if not winners.is_empty():
+			rn.media = {"type": "nation", "code": String(winners[0])}
 	return winners
 
 
@@ -891,7 +969,8 @@ static func _tournament_effects(world: GameWorld, env: Env, rec: Dictionary) -> 
 	var nat := _user_nation(world)
 	if champ == nat or String(rec["t"]) == "WC":
 		imp = NewsEvent.IMP_HEADLINE
-	NewsManager.post_raw(world, "%s é campeã da %s %d" % [DatabaseManager.nation_name(champ), rec["name"], int(rec["y"])], body, -1, -1, imp, "selecao")
+	var cn := NewsManager.post_raw(world, "%s é campeã da %s %d" % [DatabaseManager.nation_name(champ), rec["name"], int(rec["y"])], body, -1, -1, imp, "selecao")
+	cn.media = {"type": "nation", "code": String(champ), "trophy": true}
 	if world.has_user():
 		var mine: Array = []
 		for code in rec["teams"]:

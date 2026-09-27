@@ -302,7 +302,9 @@ static func manager_rep(world: GameWorld) -> float:
 static var _chain := 0
 
 
-static func replace_coach(world: GameWorld, club: Club, reason: String, note: String = "") -> Dictionary:
+## `forced`: técnico já escolhido (o mercado de fim de temporada de CoachStories); se estiver
+## empregado, sai do clube dele com multa e a troca continua lá.
+static func replace_coach(world: GameWorld, club: Club, reason: String, note: String = "", forced: Dictionary = {}) -> Dictionary:
 	var pp := data(world)
 	var r := rng(world, 3)
 	var old: Dictionary = pp["coaches"].get(club.id, {})
@@ -323,7 +325,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 			if code != "apo":
 				pp["free"].append(old)
 	# Interino: no meio do ano, o auxiliar segura o time por alguns jogos enquanto o clube procura.
-	if reason in ["resultados", "res"] and r.randf() < 0.45:
+	if forced.is_empty() and reason in ["resultados", "res"] and r.randf() < 0.45:
 		var it := _new_coach(world, r, club.nation, club.reputation - 14.0, club.archetype)
 		it["int"] = true
 		it["left"] = r.randi_range(1, 3)
@@ -336,9 +338,11 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		CoachCareer.log_move(world, club, old, it, reason)
 		_announce_change(world, club, old, it, reason, note)
 		return it
-	var best: Dictionary = {}
-	var best_score := -INF
+	var best: Dictionary = forced
+	var best_score := INF if not forced.is_empty() else -INF
 	for f: Dictionary in pp["free"]:
+		if not forced.is_empty():
+			break
 		if int(f.get("id", -1)) == int(old.get("id", -2)):
 			continue
 		if float(f["rep"]) > club.reputation + 18.0:
@@ -350,7 +354,11 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 			best = f
 	# Quem está bem num clube menor chama atenção: o clube maior paga a multa e leva.
 	var from_club: Club = null
-	if _chain < 2 and reason != "usuario" and r.randf() < 0.35:
+	if not forced.is_empty():
+		from_club = world.club(int(forced.get("c", -1)))
+		if from_club != null and not is_same(pp["coaches"].get(from_club.id, {}), forced):
+			from_club = null
+	elif _chain < 2 and reason != "usuario" and r.randf() < 0.35:
 		for cid in pp["coaches"]:
 			var co: Dictionary = pp["coaches"][cid]
 			var t := world.club(int(cid))
@@ -375,7 +383,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		club.balance -= fee
 		from_club.balance += fee
 		best["rep"] = minf(99.0, float(best["rep"]) + 2.0)
-	elif best.is_empty() or r.randf() < 0.25:
+	elif forced.is_empty() and (best.is_empty() or r.randf() < 0.25):
 		best = _new_coach(world, r, club.nation, club.reputation, club.archetype)
 		CoachCareer.fresh_past(world, r, best, club)
 	else:
@@ -396,6 +404,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		pp["free"].pop_front()
 	CoachCareer.log_move(world, club, old, best, reason, from_club.id if from_club != null else -1, fee)
 	_announce_change(world, club, old, best, reason, note, from_club, fee)
+	CoachStories.on_hired(world, club, best, reason, from_club)
 	# Efeito dominó: o clube que perdeu o técnico vai atrás de outro.
 	if from_club != null:
 		_chain += 1
@@ -413,7 +422,7 @@ static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_
 		return
 	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio",
 		"usuario": "após a saída de %s" % world.manager_name, "res": "que pediu demissão", "efetivo": "que era interino",
-		"perdeu": "que foi contratado pelo %s" % note}.get(reason, "")
+		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube"}.get(reason, "")
 	var nm := String(new_coach["n"])
 	var title := ""
 	var body := ""

@@ -293,6 +293,12 @@ static func award_name(k: String) -> String:
 			return "Treinador da temporada"
 		"coach_world":
 			return "Treinador do ano"
+		"nextgen":
+			return "Next Generation"
+		"nxgn":
+			return "Lista NXGN"
+		"nxgn_win":
+			return "Melhor jovem do mundo (NXGN)"
 	return k
 
 
@@ -312,8 +318,10 @@ static func award_where(world: GameWorld, a: Dictionary) -> String:
 ## Peso de um prêmio no currículo (usado para destacar os mais importantes e na moral).
 static func award_weight(k: String) -> int:
 	match k:
-		"potm":
+		"potm", "nextgen", "nxgn":
 			return 2
+		"nxgn_win":
+			return 5
 		"ballon":
 			return 10
 		"boot", "world_young", "gk_world":

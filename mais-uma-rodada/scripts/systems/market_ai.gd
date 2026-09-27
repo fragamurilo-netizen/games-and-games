@@ -61,6 +61,52 @@ static func premium(c: Club) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Coerência: quem pode querer quem, e quanto vale uma aposta
+# ---------------------------------------------------------------------------
+
+## O jogador serve para o clube? O nível que o mercado enxerga (jovens pelo que podem virar) tem de
+## estar perto do nível do elenco: gigante não vai atrás de reserva de quarta divisão.
+static func fits_level(world: GameWorld, c: Club, p: Player, below: float = 4.0, above: float = 14.0) -> bool:
+	var r := Valuation.perceived_rating(p, world.year) + Valuation.shift
+	var lvl := PlayerGenerator.club_level(c)
+	return r >= lvl - below and r <= lvl + above
+
+
+## Clube realista para sondar o jogador (eventos e rumores): reputação mínima, nível compatível e
+## filosofia que aceita o jogador. Sorteia entre os de nível mais próximo. null se ninguém faria sentido.
+static func realistic_suitor(world: GameWorld, p: Player, min_rep: float, rng: RandomNumberGenerator, below: float = 4.0, filter: Callable = Callable()) -> Club:
+	var r := Valuation.perceived_rating(p, world.year) + Valuation.shift
+	var cands: Array = []
+	for c: Club in world.clubs:
+		if c.id == p.club_id or world.is_user_club(c.id) or c.reputation < min_rep:
+			continue
+		if not fits_level(world, c, p, below) or not ClubPolicy.ai_wants(world, c, p):
+			continue
+		if filter.is_valid() and not filter.call(c):
+			continue
+		cands.append(c)
+	if cands.is_empty():
+		return null
+	cands.sort_custom(func(a: Club, b: Club):
+		var da := absf(r - PlayerGenerator.club_level(a) - 2.0)
+		var db := absf(r - PlayerGenerator.club_level(b) - 2.0)
+		return da < db if da != db else a.id < b.id)
+	return cands[rng.randi_range(0, mini(cands.size(), 6) - 1)]
+
+
+## Quanto um clube paga por um garoto que nem estreou no profissional: aposta no potencial, com
+## desconto por não ter jogado nada. Nem a maior joia custa mais que um titular pronto dez pontos
+## abaixo do potencial dela, nem mais que 20% da verba do comprador.
+static func academy_fee(world: GameWorld, p: Player, buyer: Club, rng: RandomNumberGenerator) -> int:
+	var pot := float(p.potential) + p.scout_noise * 0.5
+	var eff := p.ovr_f + maxf(0.0, pot - p.ovr_f) * 0.4
+	var v := Valuation.VALUE_BASE * pow(Valuation.VALUE_GROWTH, eff - Valuation.shift - 40.0) * Valuation.age_factor(p.age(world.year))
+	v *= rng.randf_range(0.9, 1.35) * (0.85 + buyer.reputation / 400.0)
+	var cap := minf(float(Valuation.market_value_of_rating(pot - 10.0)), float(buyer.transfer_budget) * 0.2)
+	return Valuation.round_value(clampf(v, 50_000.0, maxf(50_000.0, cap)))
+
+
+# ---------------------------------------------------------------------------
 # Entrada: um fim de semana de mercado
 # ---------------------------------------------------------------------------
 
@@ -307,6 +353,8 @@ static func _pick_need(world: GameWorld, c: Club, free_only: bool) -> Dictionary
 
 
 static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dictionary, deadline: bool, free_only: bool) -> Transfer:
+	if ClubEvents.banned(world, c):
+		return null # transfer ban: não pode inscrever reforços
 	var need := _pick_need(world, c, free_only)
 	var mismanaged := world.rng.randf() < float(c.arch().get("mismanagement", 0.0)) * 0.2
 	if need.is_empty():
@@ -352,7 +400,8 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 		var rating := p.rating_at(target_pos) if target_pos >= 0 else p.ovr_f
 		var eff := rating + (float(p.potential) - rating) * pot_w * (0.6 if age <= 23 else 0.0)
 		eff += ClubPolicy.preference_bonus(world, c, p)
-		if eff < min_rating and not mismanaged:
+		# Diretoria bagunçada erra a mão, mas não a ponto de buscar quem nem serviria para o elenco.
+		if eff < min_rating - (6.0 if mismanaged else 0.0):
 			continue
 		var price := 0.0
 		var seller: Club = null
@@ -698,14 +747,24 @@ static func max_bid(world: GameWorld, buyer: Club, p: Player, urgency: float, de
 	var level := PlayerGenerator.club_level(buyer)
 	if p.squad_status == Player.STATUS_STAR or p.ovr_f >= level + 4.0:
 		m *= 1.0 + float(buyer.arch().get("star_pref", 0.5)) * 0.25
-	if p.age(world.year) <= 23 and p.potential >= p.overall + 6:
-		m *= 1.1 # ágio pela promessa
+	var age := p.age(world.year)
+	if age <= 23 and p.potential >= p.overall + 6:
+		if p.ovr_f >= level - 6.0:
+			m *= 1.1 # ágio pela promessa que já joga
+		else:
+			# Ainda não está pronto para este time: paga-se a aposta, não o craque que ele pode virar.
+			m *= 0.8 if p.career_apps >= 30 else 0.65
 	if deadline:
 		m *= 1.1
 	if mismanaged:
 		m *= 1.25
 	if not world.is_user_club(buyer.id):
 		m *= ClubDNA.bid_mult(buyer, p, level)
+	# Ninguém paga ágio por jogador passado dos 30: o valor de revenda é zero.
+	if age >= 30:
+		m *= 0.88 if age == 30 else (0.78 if age <= 32 else 0.68)
+	# Os ágios não se empilham sem fim: nem no leilão mais doido alguém paga muito mais que ~1,6× o valor.
+	m = minf(m, 1.4)
 	return minf(float(p.value) * m * 1.15, float(buyer.transfer_budget) * (1.3 if mismanaged else 1.0))
 
 

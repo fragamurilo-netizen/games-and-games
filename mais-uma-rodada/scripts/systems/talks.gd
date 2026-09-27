@@ -46,17 +46,17 @@ static func start(world: GameWorld, kind: String, target: int = -1) -> Dictionar
 	People.ensure(world)
 	match kind:
 		"player":
-			return _player_start(world, target)
+			return AmbientStorytelling.enrich_conversation(world, _player_start(world, target), kind, target)
 		"board":
-			return _board_start(world)
+			return AmbientStorytelling.enrich_conversation(world, _board_start(world), kind, target)
 		"staff":
-			return _staff_start(world, target)
+			return AmbientStorytelling.enrich_conversation(world, _staff_start(world, target), kind, target)
 		"fans":
-			return _fans_start(world)
+			return AmbientStorytelling.enrich_conversation(world, _fans_start(world), kind, target)
 		"coach":
-			return _coach_start(world, target)
+			return AmbientStorytelling.enrich_conversation(world, _coach_start(world, target), kind, target)
 		"press":
-			return _press_start(world)
+			return AmbientStorytelling.enrich_conversation(world, _press_start(world), kind, target)
 	var c := _new(kind, target, "", "")
 	_finish(c)
 	return c
@@ -121,13 +121,11 @@ static func _player_start(world: GameWorld, pid: int) -> Dictionary:
 	if requested:
 		_say(conv, "npc", _complaint(world, p))
 	elif t >= 70.0:
-		_say(conv, "npc", _pick(world, ["Fala, professor! Pode falar.", "Opa, chefe. Tô à disposição.", "Bom te ver, professor. O que manda?"]))
+		_say(conv, "npc", SquadVoice.say(world, p, "greet_hi", _r(world)))
 	elif t >= 45.0:
-		_say(conv, "npc", _pick(world, ["Pois não, professor?", "Pode falar, professor.", "Diga, professor."]))
-	elif t >= 28.0:
-		_say(conv, "npc", _pick(world, ["...Oi. O senhor queria falar comigo?", "Diga.", "Tô ouvindo."]))
+		_say(conv, "npc", SquadVoice.say(world, p, "greet_mid", _r(world)))
 	else:
-		_say(conv, "npc", _pick(world, ["Se for para pedir paciência de novo, nem começa.", "Achei que o senhor nem lembrava que eu existia.", "Fala logo, professor."]))
+		_say(conv, "npc", SquadVoice.say(world, p, "greet_low", _r(world)))
 	_player_topics(world, conv, p)
 	return conv
 
@@ -444,16 +442,17 @@ static func _player_outcome(world: GameWorld, conv: Dictionary, p: Player, topic
 			pos_line = "Deixa comigo. Vou cuidar dele como cuidaram de mim."
 			neu_line = "Vou ver o que dá para fazer."
 			neg_line = "Já tenho muita coisa para resolver, professor."
+	# A fala final ganha o jeito do jogador (tímido, esquentado, líder, estrela, gringo...).
 	var fx: Dictionary
 	if s > 0.35:
 		fx = pos_fx
-		_say(conv, "npc", pos_line)
+		_say(conv, "npc", pos_line if r.randf() < 0.55 else SquadVoice.say(world, p, "agree", r))
 	elif s < -0.15:
 		fx = neg_fx
-		_say(conv, "npc", neg_line)
+		_say(conv, "npc", neg_line if r.randf() < 0.55 else SquadVoice.say(world, p, "refuse", r))
 	else:
 		fx = neu_fx
-		_say(conv, "npc", neu_line)
+		_say(conv, "npc", neu_line if r.randf() < 0.55 else SquadVoice.say(world, p, "neutral", r))
 	_apply_player_fx(world, conv, p, fx)
 	if head == "rival" and s < -0.15 and HiddenPersona.hot_head(p):
 		_fx(conv, "Ele saiu batendo a porta")

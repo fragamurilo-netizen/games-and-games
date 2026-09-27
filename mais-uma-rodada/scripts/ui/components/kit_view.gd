@@ -44,10 +44,11 @@ extends Control
 ## [chave, nome] — a ordem é a do editor.
 const PATTERNS: Array = [
 	["plain", "Lisa"], ["stripes_v", "Listras"], ["pinstripes", "Listras finas"], ["wide_stripes", "Listras largas"],
-	["center_stripe", "Listra central"], ["twin_stripes", "Listras gêmeas"], ["tricolor_v", "Tricolor vertical"],
+	["center_stripe", "Listra central"], ["center_stripe_edged", "Listra central com filetes"], ["twin_stripes", "Listras gêmeas"],
+	["tricolor_v", "Tricolor vertical"], ["stripes_tri", "Listras tricolores"],
 	["halves", "Metades"], ["quarters", "Quartos"],
 	["stripes_h", "Faixas horizontais"], ["hoops_thin", "Faixas finas"], ["hoops_pin", "Riscas"], ["hoop_fade", "Faixas em degradê"],
-	["faixa", "Faixa no peito"], ["double_band", "Faixa dupla"], ["band_low", "Faixa baixa"], ["tricolor_h", "Tricolor horizontal"],
+	["faixa", "Faixa no peito"], ["faixa_duo", "Faixa bicolor no peito"], ["double_band", "Faixa dupla"], ["band_low", "Faixa baixa"], ["tricolor_h", "Tricolor horizontal"],
 	["bottom_half", "Duas cores (h)"], ["yoke", "Ombros"], ["shoulder_band", "Faixa nos ombros"],
 	["diagonal", "Faixa diagonal"], ["diagonal_rev", "Diagonal invertida"], ["sash_thin", "Diagonal fina"],
 	["sash_double", "Diagonal dupla"], ["diagonal_split", "Diagonal dividida"], ["chevron", "Chevron"], ["v_big", "V largo"],
@@ -77,7 +78,7 @@ const SOCKS_STYLES: Array = [["plain", "Liso"], ["hoops", "Listrado"], ["top_ban
 	["two_tone", "Duas cores"], ["stripes3", "Frisos"], ["hoops_thin", "Duas faixas"], ["band_mid", "Faixa central"],
 	["chevron", "Chevron"], ["foot", "Pé contrastante"]]
 ## Estampas que atravessam as mangas (faixas horizontais e ombros).
-const CARRY := ["stripes_h", "hoops_thin", "hoops_pin", "hoop_fade", "faixa", "double_band", "yoke", "shoulder_band", "tricolor_h"]
+const CARRY := ["stripes_h", "hoops_thin", "hoops_pin", "hoop_fade", "faixa", "faixa_duo", "double_band", "yoke", "shoulder_band", "tricolor_h"]
 ## Estampas pintadas com degradê (desenho próprio; pattern_bands dá só uma aproximação).
 const GRADIENTS := ["gradient", "fade_up"]
 
@@ -634,42 +635,8 @@ func _draw_supplier(c: Vector2, u: float, sp: Dictionary, bg: Color) -> void:
 	var col := _ink(sp, bg)
 	if String(kit.get("supc", "")) != "":
 		col = Color(String(kit["supc"]))
-	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * u
-	match String(sp.get("logo", "")):
-		"curva":
-			draw_colored_polygon(PackedVector2Array([P.call(-1.0, 0.1), P.call(-0.6, 0.6), P.call(0.2, 0.4), P.call(1.1, -0.5), P.call(0.1, 0.1), P.call(-0.55, 0.3)]), col)
-		"barras":
-			for i in 3:
-				var x := -0.8 + i * 0.6
-				var hh := 0.5 + i * 0.35
-				draw_colored_polygon(PackedVector2Array([P.call(x, 0.6), P.call(x + 0.35, 0.6), P.call(x + 0.35 + hh * 0.5, 0.6 - hh), P.call(x + hh * 0.5, 0.6 - hh)]), col)
-		"triangulo":
-			for i in 3:
-				var y := 0.6 - i * 0.45
-				var hw := 1.0 - i * 0.33
-				draw_colored_polygon(PackedVector2Array([P.call(-hw, y), P.call(hw, y), P.call(hw * 0.8, y - 0.3), P.call(-hw * 0.8, y - 0.3)]), col)
-		"raio":
-			draw_colored_polygon(PackedVector2Array([P.call(0.3, -0.9), P.call(-0.6, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.9), P.call(0.6, -0.2), P.call(0.05, -0.2)]), col)
-		"asas":
-			draw_colored_polygon(PackedVector2Array([P.call(-1.0, -0.5), P.call(0.0, 0.1), P.call(1.0, -0.5), P.call(0.0, 0.6)]), col)
-		"diamante":
-			draw_polyline(PackedVector2Array([P.call(0, -0.8), P.call(0.7, 0), P.call(0, 0.8), P.call(-0.7, 0), P.call(0, -0.8)]), col, maxf(1.0, u * 0.25), true)
-		"trevo":
-			for a in [-PI / 2.0, PI / 6.0, PI * 5.0 / 6.0]:
-				draw_circle(c + Vector2(cos(a), sin(a)) * u * 0.42, u * 0.38, col)
-		"estrela":
-			var pts := PackedVector2Array()
-			for i in 10:
-				var rr := 0.9 if i % 2 == 0 else 0.38
-				var a := -PI / 2.0 + i * PI / 5.0
-				pts.append(c + Vector2(cos(a), sin(a)) * u * rr)
-			draw_colored_polygon(pts, col)
-		"chevron":
-			for i in 2:
-				var y := -0.3 + i * 0.55
-				draw_polyline(PackedVector2Array([P.call(-0.8, y), P.call(0, y + 0.45), P.call(0.8, y)]), col, maxf(1.0, u * 0.28), true)
-		_:
-			_draw_text_centered(String(sp.get("n", "")).substr(0, 1).to_upper(), c, u * 2.0, int(u * 1.6), col, &"Big")
+	if not BrandMark.draw(self, String(sp.get("logo", "")), c, u, col, bg):
+		_draw_text_centered(String(sp.get("n", "")).substr(0, 1).to_upper(), c, u * 2.0, int(u * 1.6), col, &"Big")
 
 
 ## Texto centrado em `center`, encolhido até caber em `max_w`.
@@ -830,6 +797,12 @@ static func pattern_bands(pattern: String) -> Array:
 			out.append(_rect(0.66, 0, 0.14, 1))
 		"center_stripe":
 			out.append(_rect(0.44, 0, 0.12, 1))
+		"center_stripe_edged":
+			out.append(_rect(0.415, 0, 0.03, 1))
+			out.append(_rect(0.555, 0, 0.03, 1))
+		"stripes_tri":
+			for i in 3:
+				out.append(_rect(0.225 + i * 0.19, 0, 0.075, 1))
 		"twin_stripes":
 			out.append(_rect(0.405, 0, 0.055, 1))
 			out.append(_rect(0.54, 0, 0.055, 1))
@@ -849,6 +822,8 @@ static func pattern_bands(pattern: String) -> Array:
 				out.append(_rect(0, 0.14 + i * 0.1, 1, 0.07 - i * 0.0075))
 		"faixa":
 			out.append(_rect(0, 0.36, 1, 0.14))
+		"faixa_duo":
+			out.append(_rect(0, 0.33, 1, 0.075))
 		"double_band":
 			out.append(_rect(0, 0.3, 1, 0.07))
 			out.append(_rect(0, 0.43, 1, 0.07))
@@ -993,6 +968,12 @@ static func pattern_bands3(pattern: String) -> Array:
 			return [_rect(0.5834, 0, 0.3, 1)]
 		"tricolor_h":
 			return [_rect(0, 0.65, 1, 0.4)]
+		"stripes_tri":
+			return [_rect(0.32, 0, 0.075, 1), _rect(0.51, 0, 0.075, 1), _rect(0.7, 0, 0.075, 1)]
+		"faixa_duo":
+			return [_rect(0, 0.425, 1, 0.075)]
+		"center_stripe_edged":
+			return [_rect(0.445, 0, 0.11, 1)]
 	return []
 
 

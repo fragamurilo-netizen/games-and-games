@@ -570,7 +570,7 @@ const GROUP_MOUTH_W: Array = [
 	[4, 1.0, 1.0, 1.0, 0.8, 1.0, 1.0, 0.6, 0.8, 0.4],
 	[3, 0.4, 1.8, 1.2, 0.4, 1.4, 0.5, 0.6, 0.3, 1.6],
 ]
-const TATTOOS: Array[String] = ["Sem tatuagem", "Escrita", "Tribal", "Estrela", "Asas"]
+const TATTOOS: Array[String] = ["Sem tatuagem", "Escrita", "Tribal", "Estrela", "Asas", "Rosa", "Cruz", "Coroa", "Números romanos", "Terço", "Ramo de folhas", "Manga no ombro", "Nome do filho"]
 const FACE_SHAPE_W: Array[float] = [4.0, 1.8, 2.2, 1.4, 1.1, 1.6, 0.7, 1.4, 1.2, 1.0, 0.9, 0.8]
 const EYE_NAMES: Array[String] = ["Castanho-escuro", "Castanho", "Mel", "Verde", "Azul", "Cinza", "Quase preto",
 	"Âmbar", "Avelã", "Azul-claro", "Azul-acinzentado", "Verde-acinzentado"]
@@ -640,7 +640,7 @@ const ETH_RIDGE: Array[float] = [1.0, 0.95, 0.95, 1.05, 0.85, 0.8, 0.8, 0.8, 0.3
 const ETH_MONOLID: Array[float] = [0.0, 0.0, 0.0, 0.0, 0.02, 0.15, 0.03, 0.0, 0.72, 0.0, 0.0, 0.05, 0.35]
 const ETH_AQUILINE: Array[float] = [0.1, 0.12, 0.2, 0.35, 0.08, 0.3, 0.05, 0.02, 0.0, 0.15, 0.18, 0.02, 0.0]
 ## Genética de barba (média) e de calvície (média).
-const ETH_BEARD_GENE: Array[float] = [0.75, 0.8, 0.9, 0.95, 0.7, 0.35, 0.62, 0.55, 0.28, 0.88, 0.45, 0.55, 0.28]
+const ETH_BEARD_GENE: Array[float] = [0.75, 0.8, 0.9, 0.95, 0.7, 0.35, 0.62, 0.55, 0.16, 0.88, 0.45, 0.55, 0.18]
 const ETH_BALD_GENE: Array[float] = [0.45, 0.45, 0.45, 0.42, 0.35, 0.25, 0.35, 0.32, 0.25, 0.38, 0.3, 0.3, 0.25]
 
 
@@ -911,8 +911,13 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if look.has("sl"):
 		slit = int(look["sl"])
 	f["brow_slit"] = slit
-	var tat_p := 0.07 * (1.4 if age >= 21 and age <= 33 else 0.5)
-	var tattoo := 1 + RngUtil.weighted_index(xrng, [0.4, 0.25, 0.2, 0.15]) if xrng.randf() < tat_p else 0
+	# Tatuagem visível no pescoço/ombro: comum no futebol de hoje (menos no leste asiático e no mundo árabe)
+	var tat_p := 0.13 * (1.4 if age >= 21 and age <= 33 else 0.55)
+	if e in [E_LAT, E_MIX, E_AFR, E_HAE, E_EUR, E_NOR, E_MED]:
+		tat_p *= 1.3
+	elif e in [E_EAS, E_SEA, E_ARB, E_SAS]:
+		tat_p *= 0.45
+	var tattoo := 1 + RngUtil.weighted_index(xrng, [0.16, 0.12, 0.1, 0.08, 0.1, 0.09, 0.07, 0.07, 0.06, 0.05, 0.06, 0.04]) if xrng.randf() < tat_p else 0
 	if look.has("tt"):
 		tattoo = clampi(int(look["tt"]), 0, TATTOOS.size() - 1)
 	f["tattoo"] = tattoo
@@ -952,10 +957,14 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 			w *= 2.0 if cap < 0.55 else 0.4
 		if age >= 30 and i in [B_WALRUS, B_HANDLEBAR, B_VERDI, B_WALRUS_SHORT, B_HANDLEBAR_BEARD, B_FORKED]:
 			w *= 1.6
-		if (e == E_ARB or e == E_SAS) and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED]:
+		if (e == E_ARB or e == E_SAS) and i in [B_FULL, B_SHORT, B_BOXED, B_CURTAIN, B_MEDIUM, B_FADED, B_ROUNDED,
+				B_SHORT_SHARP, B_MEDIUM_CUT]:
 			w *= 1.8
 		if age >= 33 and i in [B_FULL, B_SHORT, B_HEAVY_STUBBLE]:
 			w *= 1.4
+		w *= _beard_realism()[i]
+		if (e == E_EAS or e == E_SEA) and i != B_NONE and i not in [B_WISPY, B_PEACH, B_STUBBLE]:
+			w *= 0.4 # leste e sudeste asiático: barba rala e pouco comum no futebol
 		bw.append(w)
 	var beard := RngUtil.weighted_index(phase_rng, bw)
 	if beard < 0:
@@ -1005,7 +1014,18 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_mass(f, seed_value, age, look)
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
+	_proportion_floor(f)
 	return f
+
+
+## Cabeça humana tem proporção: os ajustes (magro, rosto estreito, alongado, etnia) somados
+## deixavam alguns rostos finos demais. Largura mínima de ~73% da altura (rosto real fica
+## entre ~0,75 e 0,9) e mandíbula e maçãs sem afinar além do plausível.
+static func _proportion_floor(f: Dictionary) -> void:
+	var fh := float(f["fh"])
+	f["fw"] = clampf(float(f["fw"]), fh * 0.73, fh * 0.92)
+	f["jaw"] = maxf(float(f["jaw"]), 0.7)
+	f["cheek_w"] = maxf(float(f["cheek_w"]), 0.97)
 
 
 ## Corpo: a maioria é atleta, mas há rostos muito finos (chupados, maçãs saltadas) e gordos
@@ -1034,7 +1054,7 @@ static func _apply_mass(f: Dictionary, seed_value: int, age: int, look: Dictiona
 	f["thin"] = thin
 	f["heavy"] = heavy
 	f["fat"] = clampf(float(f["fat"]) * (1.0 - thin) + heavy * 0.85, 0.0, 1.0)
-	f["fw"] = float(f["fw"]) * (1.0 - thin * 0.13) * (1.0 + heavy * 0.2)
+	f["fw"] = float(f["fw"]) * (1.0 - thin * 0.07) * (1.0 + heavy * 0.2)
 	f["fh"] = float(f["fh"]) * (1.0 + heavy * 0.04) * (1.0 + thin * 0.02)
 	f["cheekbone"] = float(f["cheekbone"]) * (1.0 + thin * 0.35) * (1.0 - heavy * 0.4)
 	f["jaw"] = lerpf(float(f["jaw"]), 0.96, heavy * 0.6) - thin * 0.04
@@ -1192,7 +1212,7 @@ static func _apply_shape(f: Dictionary, r: RandomNumberGenerator, look: Dictiona
 			f["chin_sq"] = r.randf_range(2.2, 2.8)
 			f["forehead"] = r.randf_range(0.96, 0.99)
 		8: # estreito
-			f["fw"] = float(f["fw"]) * 0.9
+			f["fw"] = float(f["fw"]) * 0.95
 			f["fh"] = float(f["fh"]) * 1.03
 			f["jaw"] = r.randf_range(0.66, 0.76)
 			f["cheek_w"] = float(f["cheek_w"]) * 0.97
@@ -1412,33 +1432,86 @@ static func _apply_beauty(f: Dictionary, beauty: float, r: RandomNumberGenerator
 
 
 ## Pesos dos penteados para uma pessoa (etnia + textura + idade).
+## Frequência real entre jogadores profissionais: cortes chamativos (moicano, descolorido, mullet,
+## tigela, desenhos...) são raros (~3-4% no total) e cabelo longo/coque é minoria (~5%).
+const FLASHY_STYLE_NAMES := ["Moicano", "Nevou (descolorido)", "Espetado descolorido", "Descolorido com desenho",
+	"Moicano espetado", "Moicano trançado", "Moicano de dreads", "Moicano cacheado", "Mullet", "Mullet com degradê",
+	"Mullet cacheado", "Tigela", "Samurai", "High top", "Black power alto", "Dois puffs", "Afro puff", "Espetado com gel",
+	"Máquina com desenho", "Cachos com luzes", "Chanel", "Faux hawk", "Sidecut", "Nagô em zigue-zague", "Arrepiado"]
+const LONG_STYLE_NAMES := ["Longo", "Coque", "Rabo de cavalo", "Surfista", "Cacheado longo", "Meio preso",
+	"Longo para trás", "Longo ondulado", "Coque baixo", "Longo com franja", "Coque com undercut",
+	"Undercut com coque baixo", "Coque alto com degradê", "Cacheado longo com franja", "Flow para trás"]
+static var _style_mult := PackedFloat32Array()
+
+
+static func _style_realism() -> PackedFloat32Array:
+	if _style_mult.size() == HAIR_STYLES.size():
+		return _style_mult
+	var m := PackedFloat32Array()
+	m.resize(HAIR_STYLES.size())
+	for i in HAIR_STYLES.size():
+		var n: String = HAIR_STYLES[i]
+		m[i] = 0.3 if n in FLASHY_STYLE_NAMES else (0.6 if n in LONG_STYLE_NAMES else 1.0)
+	_style_mult = m
+	return m
+
+
 static func _style_weights(e: int, tex: int, age: int) -> Array:
 	var sw: Array = []
+	var real := _style_realism()
 	for i in HAIR_STYLES.size():
-		var w: float = float((STYLE_TEX_W[i] as Array)[tex])
+		var w: float = float((STYLE_TEX_W[i] as Array)[tex]) * real[i]
 		sw.append(w)
 	if e == E_EAS or e == E_SEA:
-		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE]:
+		for i in [H_FRINGE, H_SPIKY, H_MIDPART, H_BOWL, H_CROP, H_TEXT_FRINGE, H_LONG_SIDE_FRINGE, H_CURTAIN, H_LONG_FRINGE, H_BOB]:
 			sw[i] = float(sw[i]) * 2.0
 	if e == E_PAC:
 		for i in [H_LONG_CURLY, H_BUN, H_TOPKNOT, H_CURLY]:
 			sw[i] = float(sw[i]) * 2.0
 	if e == E_ARB or e == E_MED or e == E_SAS:
-		for i in [H_SLICK, H_FADE, H_UNDERCUT, H_WAVY_BACK]:
+		for i in [H_SLICK, H_FADE, H_UNDERCUT, H_WAVY_BACK, H_WET_BACK, H_IVY]:
 			sw[i] = float(sw[i]) * 1.5
 	if age >= 32:
 		for i in [H_MOHAWK, H_HIGHTOP, H_BRAIDS, H_TWISTS, H_SPIKY, H_BOWL, H_TOPKNOT, H_MULLET, H_EDGAR,
 				H_BLEACHED, H_FADE_MULLET, H_FAUX_HAWK, H_CURLY_FRINGE, H_GEL_SPIKES, H_BRAID_HAWK, H_SIDECUT,
-				H_DREAD_HAWK, H_FROSTED, H_AFRO_PUFF, H_SPONGE, H_ZIGZAG_ROWS, H_TEXT_FRINGE]:
+				H_DREAD_HAWK, H_FROSTED, H_AFRO_PUFF, H_SPONGE, H_ZIGZAG_ROWS, H_TEXT_FRINGE, H_SPIKY_HAWK, H_BIG_AFRO,
+				H_LONG_TWISTS, H_BLEACH_DESIGN, H_TWO_PUFFS, H_CURLY_MULLET]:
 			sw[i] = float(sw[i]) * 0.35
-		for i in [H_SHORT, H_PART, H_CREW, H_BUZZ, H_BALD]:
+		for i in [H_SHORT, H_PART, H_CREW, H_BUZZ, H_BALD, H_IVY, H_CAESAR]:
 			sw[i] = float(sw[i]) * 1.5
 	if age < 24:
 		for i in [H_FADE, H_CROP, H_FADE_PART, H_UNDERCUT, H_TWISTS, H_MULLET, H_EDGAR, H_CURLY_FADE, H_FADE_MULLET,
-				H_CURLY_FRINGE, H_BLEACHED, H_TEXT_FRINGE, H_FROSTED, H_SPONGE, H_TEXT_QUIFF, H_BLOWOUT, H_TWIST_OUT]:
+				H_CURLY_FRINGE, H_BLEACHED, H_TEXT_FRINGE, H_FROSTED, H_SPONGE, H_TEXT_QUIFF, H_BLOWOUT, H_TWIST_OUT,
+				H_SKIN_FADE, H_CURTAIN, H_BLEACH_DESIGN, H_AFRO_PART, H_FREEFORM_FADE, H_WAVES_FADE, H_QUIFF_BURST]:
 			sw[i] = float(sw[i]) * 1.4
 		sw[H_BALD] = float(sw[H_BALD]) * 0.3
 	return sw
+
+
+## Barbas: no futebol real a maioria tem rosto limpo, barba por fazer ou barba curta/cheia bem
+## aparada; bigodão, costeleta, barba longa e desenhos exóticos são raros (<5% somados).
+static var _beard_mult := PackedFloat32Array()
+
+
+static func _beard_realism() -> PackedFloat32Array:
+	if _beard_mult.size() == BEARDS.size():
+		return _beard_mult
+	var m := PackedFloat32Array()
+	m.resize(BEARDS.size())
+	var plain := [B_NONE, B_WISPY, B_PEACH, B_STUBBLE, B_HEAVY_STUBBLE, B_DENSE_STUBBLE, B_WEEK, B_FADED, B_PATCHY]
+	var beards := [B_SHORT, B_FULL, B_BOXED, B_MEDIUM, B_TRIMMED, B_SQUARE, B_ROUNDED, B_SHORT_SHARP, B_LINE_CUT]
+	var classic := [B_GOATEE, B_MUSTACHE, B_VANDYKE, B_CHINSTRAP, B_SOUL, B_CIRCLE, B_BALBO, B_ANCHOR]
+	for i in BEARDS.size():
+		if i in plain:
+			m[i] = 1.0
+		elif i in beards:
+			m[i] = 1.5
+		elif i in classic:
+			m[i] = 0.9
+		else:
+			m[i] = 0.18
+	_beard_mult = m
+	return m
 
 
 static func skin_at(v: float) -> Color:

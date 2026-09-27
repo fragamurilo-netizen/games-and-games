@@ -13,6 +13,12 @@ static var vibration: bool = true
 static var match_speed: int = SPEED_FAST
 static var tutorial_done: bool = false
 static var language: String = I18n.DEFAULT
+## Moeda de exibição. A economia interna usa euro-base para manter o save determinístico.
+const CURRENCY_EUR := 0
+const CURRENCY_BRL := 1
+const CURRENCY_USD := 2
+const CURRENCY_NAMES: Array[String] = ["Euro (€)", "Real (R$)", "Dólar (US$)"]
+static var currency: int = CURRENCY_EUR
 ## Interface nas cores do clube durante a carreira.
 static var team_colors: bool = true
 ## Editar jogadores e clubes do save durante a carreira (desligado = carreira "limpa"; o Editor do menu
@@ -51,6 +57,7 @@ static func load_settings() -> void:
 	match_speed = cfg.get_value("game", "match_speed", SPEED_FAST)
 	tutorial_done = cfg.get_value("game", "tutorial_done", false)
 	language = cfg.get_value("game", "language", I18n.DEFAULT)
+	currency = clampi(int(cfg.get_value("game", "currency", CURRENCY_EUR)), CURRENCY_EUR, CURRENCY_USD)
 	team_colors = cfg.get_value("game", "team_colors", true)
 	career_edit = cfg.get_value("game", "career_edit", false)
 	theme_mode = cfg.get_value("look", "theme_mode", THEME_DARK)
@@ -70,6 +77,7 @@ static func save_settings() -> void:
 	cfg.set_value("game", "match_speed", match_speed)
 	cfg.set_value("game", "tutorial_done", tutorial_done)
 	cfg.set_value("game", "language", language)
+	cfg.set_value("game", "currency", currency)
 	cfg.set_value("game", "team_colors", team_colors)
 	cfg.set_value("game", "career_edit", career_edit)
 	cfg.set_value("look", "theme_mode", theme_mode)

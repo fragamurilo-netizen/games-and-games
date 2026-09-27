@@ -55,6 +55,15 @@ func refresh() -> void:
 		lrow.add_child(lchip)
 	card0.add_child(lrow)
 	c.add_child(UIKit.card_panel(card0))
+	var currency_card := UIKit.card("Card", 12)
+	currency_card.add_child(UIKit.section("Moeda"))
+	currency_card.add_child(UIKit.label("Valores de mercado, salários e finanças", "Muted"))
+	currency_card.add_child(_chips(AppSettings.CURRENCY_NAMES, AppSettings.currency, func(i: int):
+		AppSettings.currency = i
+		AppSettings.save_settings()
+		refresh()))
+	currency_card.add_child(UIKit.label("A moeda muda apenas a exibição. A economia é calculada em euro-base e usa o câmbio de referência do BCE de %s." % Fmt.FX_DATE, "Small", true))
+	c.add_child(UIKit.card_panel(currency_card))
 	var card_ed := UIKit.card("Card", 12)
 	card_ed.add_child(UIKit.section("Editor"))
 	card_ed.add_child(_toggle("Editar jogadores e clubes durante a carreira", AppSettings.career_edit, func(v: bool):

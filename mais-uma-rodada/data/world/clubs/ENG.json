@@ -57,11 +57,17 @@
 				"shape": "shield",
 				"field": "plain",
 				"symbol": "devil",
+				"c1": "#DA020E",
 				"c2": "#111111",
-				"c3": "#FFD100",
-				"sc": "#FFD100",
-				"border": "thick",
-				"ribbon": "MANCHESTER UNITED"
+				"c3": "#FBE122",
+				"sc": "#FBE122",
+				"chief_sym": "ship",
+				"chief_sc": "#DA020E",
+				"cc": "#FBE122",
+				"sym_scale": 0.9,
+				"border": "gold",
+				"ribbon": "UNITED",
+				"ribbon_top": "MANCHESTER"
 			},
 			"rivals": [
 				"ENG_MSK",
@@ -88,12 +94,15 @@
 			"capacity": 61000,
 			"kit": "plain",
 			"crest": {
-				"shape": "iberian",
+				"shape": "shield",
 				"field": "plain",
-				"symbol": "bird",
+				"symbol": "liverbird",
+				"c1": "#C8102E",
 				"c2": "#FFFFFF",
-				"c3": "#00A398",
+				"c3": "#F6EB61",
 				"sc": "#FFFFFF",
+				"sym_scale": 1.08,
+				"border": "gold",
 				"ribbon": "YNWA"
 			},
 			"rivals": [
@@ -183,10 +192,14 @@
 			"capacity": 62000,
 			"kit": "plain",
 			"crest": {
-				"shape": "modern",
+				"shape": "tall",
 				"field": "plain",
-				"symbol": "rooster",
-				"sc": "#132257"
+				"symbol": "rooster_ball",
+				"c1": "#FFFFFF",
+				"c2": "#132257",
+				"sc": "#132257",
+				"sym_scale": 1.1,
+				"border": "thin"
 			},
 			"rivals": [
 				"ENG_NLR",
@@ -215,10 +228,16 @@
 				"shape": "ring",
 				"field": "plain",
 				"symbol": "lion",
+				"staff": true,
+				"ring_deco": "roses",
 				"text": "CHELSEA FOOTBALL CLUB",
-				"c2": "#FFFFFF",
+				"text2": " ",
+				"c1": "#FFFFFF",
+				"c2": "#034694",
 				"c3": "#DBA111",
-				"sc": "#FFFFFF"
+				"sc": "#034694",
+				"sym_scale": 0.95,
+				"border": "gold"
 			},
 			"rivals": [
 				"ENG_NLR",

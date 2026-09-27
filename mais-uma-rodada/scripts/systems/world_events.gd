@@ -12,7 +12,7 @@ const INVESTORS := ["Grupo Atlas Capital", "Fundo Horizonte Sports", "Consórcio
 	"Fundo Soberano de Qamar", "Blue Harbor Capital", "Grupo Aurora", "Iron Bridge Sports", "Família Montenegro",
 	"Sunrise Asia Holdings", "Lakeview Partners"]
 ## Chance semanal de o mundo sortear um candidato a cada tipo de acontecimento.
-const P_TAKEOVER := 0.16
+const P_TAKEOVER := 0.3
 const P_EXIT := 0.03
 const P_PRESIDENT := 0.25
 const P_USER_PRESIDENT := 0.004
@@ -28,8 +28,9 @@ static func weekly(world: GameWorld) -> void:
 	var rng := world.rng
 	if rng.randf() < P_TAKEOVER:
 		var c: Club = RngUtil.pick(rng, world.clubs)
-		if _can_be_bought(world, c) and (FinanceManager.in_trouble(c) or rng.randf() < 0.5):
-			takeover(world, c, RngUtil.pick(rng, INVESTORS))
+		# Onde se compra clube de verdade: Inglaterra e SAFs no Brasil muito mais que na Alemanha (50+1)
+		if _can_be_bought(world, c) and rng.randf() < ClubEvents.takeover_appeal(c) and (FinanceManager.in_trouble(c) or rng.randf() < 0.5):
+			takeover(world, c, ClubEvents.investor_for(c, rng))
 	if rng.randf() < P_EXIT:
 		_investor_exit(world)
 	if rng.randf() < P_PRESIDENT:
@@ -38,6 +39,54 @@ static func weekly(world: GameWorld) -> void:
 			new_president(world, c)
 	if world.has_user() and rng.randf() < P_USER_PRESIDENT:
 		new_president(world, world.user_club())
+
+
+## Situação real no começo do jogo (nomes de pessoas e empresas fictícios, a situação é a de
+## verdade): SAFs brasileiras, a volta do Vasco à associação em recuperação judicial, a
+## patrocinadora que manda no Palmeiras e os donos estrangeiros dos grandes europeus.
+const REAL_OWNERS := {
+	"BRA_ESQ": ["Grupo Celeste Global (multiclubes)", 2023, true],
+	"BRA_RAP": ["o empresário Paulo Lindenberg, dono de rede de supermercados", 2024, true],
+	"BRA_GAL": ["Galo Holding (quatro empresários mineiros)", 2023, true],
+	"BRA_GLO": ["Eagle Bay Football (multiclubes americano)", 2022, true],
+	"BRA_MBR": ["Grupo Touro Energético", 2019, false],
+	"ENG_MSK": ["Fundo Soberano do Golfo", 2008, false],
+	"ENG_TYN": ["Sahara Investment Authority", 2021, false],
+	"FRA_PCF": ["Oásis Sports Holding", 2011, false],
+	"ENG_WLB": ["Blue Harbor Partners", 2022, false],
+	"ENG_MSR": ["Northstar Sports Group", 2010, false],
+	"ENG_NLR": ["Titan Ventures", 2018, false],
+	"ENG_MRD": ["Meridian Football Partners", 2005, false],
+	"ENG_AST": ["Lionheart Equity", 2018, false],
+	"ITA_MRN": ["Eagle Bay Football", 2022, false],
+	"ITA_RGR": ["Northstar Sports Group", 2020, false],
+	"ITA_MNZ": ["Titan Ventures", 2024, false],
+	"ITA_COM": ["Dragão Dourado Holdings", 2019, false],
+	"FRA_LYO": ["Eagle Bay Football", 2022, false],
+}
+
+
+static func seed_real_situation(world: GameWorld) -> void:
+	var owners: Dictionary = world.stats.get("owners", {})
+	for c: Club in world.clubs:
+		if REAL_OWNERS.has(c.key):
+			var o: Array = REAL_OWNERS[c.key]
+			owners[str(c.id)] = {"y": int(o[1]), "who": String(o[0]), "arch": c.archetype, "saf": bool(o[2])}
+			if bool(o[2]):
+				c.affairs["saf"] = int(o[1])
+		match c.key:
+			"BRA_CMA":
+				# Vasco: o investidor da SAF quebrou, o clube retomou o futebol e pediu recuperação judicial
+				c.affairs["rj"] = world.year - 1
+				c.affairs["ex_owner"] = "Sete Estrelas Partners"
+				c.debt = maxi(c.debt, int(FinanceManager.expected_revenue(c) * 2.2))
+			"BRA_VPA":
+				# Palmeiras: a financeira patrocinadora banca a camisa e a presidência vem de lá
+				c.income_sponsor = int(c.income_sponsor * 1.35)
+				c.affairs["pres"] = "Luísa Pereira Neves"
+				c.affairs["pres_note"] = "presidente e dona da patrocinadora master"
+				c.affairs["master"] = "Crédito Fácil"
+	world.stats["owners"] = owners
 
 
 static func owner_of(world: GameWorld, club_id: int) -> Dictionary:
@@ -203,10 +252,15 @@ static func _judicial_recovery(world: GameWorld, c: Club, revenue: float) -> voi
 			listed.append(p.display_name())
 	world.stat_add("judicial_recoveries")
 	ClubDNA.on_crisis(world, c)
+	var ded := ClubEvents.insolvency_penalty(world, c)
 	var body := "Afundado em dívidas (%s, mais de um ano de receita), o %s entrou em recuperação judicial. %s da dívida foram renegociados, mas o clube terá de apertar o cinto." % [
 		Fmt.money(total), c.name, Fmt.money(forgiven)]
 	if not listed.is_empty():
 		body += " %s estão à venda." % " e ".join(listed)
+	if ded > 0:
+		body += " A liga tirou %d pontos do clube, proibido de inscrever reforços até o fim da temporada." % ded
+	else:
+		body += " O clube está proibido de inscrever reforços até o fim da temporada."
 	if world.is_user_club(c.id):
 		body += " Sem verba para contratações até o caixa voltar ao azul."
 		NewsManager.post_raw(world, "%s em recuperação judicial" % c.short_name, body, c.id, -1, NewsEvent.IMP_HEADLINE, "clube")

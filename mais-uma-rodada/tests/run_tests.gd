@@ -2048,7 +2048,7 @@ func _test_faces() -> void:
 		var adult := FaceGen.features(i * 104729, i % FaceGen.ETH_COUNT, 31)
 		if int(adult["beard"]) == FaceGen.B_NONE:
 			adult_none += 1
-		if int(adult["beard"]) in [FaceGen.B_FULL, FaceGen.B_SHORT, FaceGen.B_BOXED, FaceGen.B_LONG]:
+		if int(adult["beard"]) in [FaceGen.B_FULL, FaceGen.B_SHORT, FaceGen.B_BOXED, FaceGen.B_LONG, FaceGen.B_MEDIUM, FaceGen.B_SQUARE, FaceGen.B_TRIMMED, FaceGen.B_ROUNDED, FaceGen.B_SHORT_SHARP, FaceGen.B_LUMBERJACK, FaceGen.B_WEEK, FaceGen.B_HOLLYWOOD]:
 			adult_full += 1
 	check(teen_beards <= 6, "barba demais aos 15 anos (%d)" % teen_beards)
 	check(adult_none >= 40 and adult_full >= 25, "barbas adultas sem variedade (sem %d, cheias %d)" % [adult_none, adult_full])

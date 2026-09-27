@@ -78,6 +78,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var team_f := MatchSimulation.damp(float(tac["i_perf"])) * MatchSimulation.damp((0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08) * TacticsManager.fam_factor(club, sheet)) * MatchSimulation.damp(home_f)
 	# Dia do time (mesmo sorteio do MatchSimulation.DAY_SIGMA).
 	team_f *= MatchSimulation.damp(clampf(rng.randfn(1.0, MatchSimulation.DAY_SIGMA), 0.93, 1.07))
+	team_f *= TeamEvolution.factor(world, club)
 	var pl: Array = [] # [Player, slot_pos, f, w_def, w_att, shoot_w, assist_w, foul_w, rating, c_fin]
 	var d := 0.0
 	var dw := 0.0
@@ -89,6 +90,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var fin := 0.0
 	var fin_n := 0
 	var dis := 0.0
+	var ptech := 0.0
 	for i in slots.size():
 		var pid: int = sheet.starters[i] if i < sheet.starters.size() and sheet.starters[i] != null else -1
 		var p: Player = world.players.get(pid, null)
@@ -149,6 +151,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		if not ins.is_empty():
 			shoot *= float(ins["shoot"])
 		dis += at[Attr.DIS]
+		ptech += at[Attr.TEC] * 0.45 + (at[Attr.PAS] + at[Attr.VIS]) * 0.175 + at[Attr.DEC] * 0.2
 		pl.append([p, pos, f, w_def, w_att, shoot, assist, foul, p.rating_at(pos) * perf, c_fin])
 	var n := maxi(1, pl.size() - 1)
 	var bench: Array = []
@@ -164,6 +167,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		"fin": fin / fin_n if fin_n > 0 else 45.0,
 		"discipline": dis / n,
 		"count": pl.size(),
+		"mu": {"tech": ptech / n, "mid": mw, "pressing": sheet.pressing, "style": sheet.style, "mentality": sheet.mentality, "line": sheet.line, "width": sheet.width},
 	}
 
 
@@ -205,85 +209,85 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var tilt_h := float(th["m_poss"]) + float(th["s_poss"]) + float(th["l_poss"]) + (0.0 if bool(ta["ignores_press"]) else float(th["pr_poss"]))
 	var tilt_a := float(ta["m_poss"]) + float(ta["s_poss"]) + float(ta["l_poss"]) + (0.0 if bool(th["ignores_press"]) else float(ta["pr_poss"]))
 	var x := MatchSimulation.GAMMA * (float(sides[0]["mid"]) - float(sides[1]["mid"]))
-	var poss := clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd, 0.25, 0.75)
+	# Confronto de ideias e estudo do rival (os mesmos do minuto a minuto).
+	var mu := TacticalMatchup.edges(sides[0]["mu"], sides[1]["mu"])
+	var poss := clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd + float(mu["poss"]), 0.25, 0.75)
+	var wx: Dictionary = ctx.get("wx", {})
+	var wfx: Dictionary = wx.get("fx", {}) if not wx.is_empty() else {}
 	var lam: Array = [_lambda(sides[0], sides[1], poss, true, crowd) * (1.0 + (HOME_BOOST - 1.0) * crowd / 0.9) * float(cul["goals"]), _lambda(sides[1], sides[0], 1.0 - poss, false, crowd) * float(cul["goals"])]
+	# Chances por minuto de cada time (posse × taxa de chance do motor completo) e a conversão média
+	# da chance; o produto é o mesmo gol esperado de antes, mas agora cada lance acontece de verdade.
+	var rate: Array = [poss * _chance_rate(sides[0], sides[1], true, crowd), (1.0 - poss) * _chance_rate(sides[1], sides[0], false, crowd)]
+	# Altitude: o visitante sem costume cansa e o mandante cresce no segundo tempo
+	var alt := float(wx.get("away_fatigue", 1.0))
+	if alt > 1.0:
+		rate[0] *= 1.0 + (alt - 1.0) * 0.5
+		rate[1] *= 1.0 - (alt - 1.0) * 0.4
+	var conv: Array = [0.0, 0.0]
+	var cw: Array = [[], []] # peso de cada tipo de chance
+	var cq: Array = [[], []] # qualidade (xG) de cada tipo
+	for s in 2:
+		var club_s: Club = sides[s]["club"]
+		var types := TacticalScout.style_types(int(sides[s]["mu"]["style"]))
+		var ex := TacticalScout.exploit(types, TacticalScout.vulnerability(world, sides[1 - s]["club"]), TacticalScout.study(world, club_s))
+		lam[s] *= float(ex[2]) * float(mu["rate_a" if s == 0 else "rate_b"]) * float(wfx.get("goals", 1.0))
+		for i in 6:
+			var w := MatchSimulation.BASE_TYPE_W[i] * types[i] * float(ex[0][i])
+			if i == MatchSimulation.CH_LONG:
+				w *= float(wfx.get("long", 1.0))
+			elif i == MatchSimulation.CH_CROSS:
+				w *= float(wfx.get("cross", 1.0))
+			cw[s].append(w)
+			cq[s].append(MatchSimulation.BASE_XG[i] * float(ex[1][i]))
+		cw[s].append(0.2) # escanteio que vira chance
+		cq[s].append(MatchSimulation.BASE_XG[MatchSimulation.CH_CORNER])
+		cw[s].append(0.07) # falta perigosa
+		cq[s].append(MatchSimulation.BASE_XG[MatchSimulation.CH_FREEKICK])
+		var sw := 0.0
+		var sq := 0.0
+		for i in cw[s].size():
+			sw += float(cw[s][i])
+			sq += float(cw[s][i]) * float(cq[s][i])
+		# Normaliza a qualidade: a média ponderada vale 1 e a conversão carrega o nível do confronto
+		for i in cq[s].size():
+			cq[s][i] = float(cq[s][i]) / maxf(0.001, sq / sw)
+		conv[s] = lam[s] / maxf(0.001, float(rate[s]) * MINUTES) * 0.97
 	# Estado por jogador: [Player, pos, f, w_def, w_att, shoot, assist, foul, rating, c_fin, on(0/1), start_min, end_min, g, a, y, red, inj, pts]
 	var lines: Array = [[], []]
 	for s in 2:
 		for e in sides[s]["pl"]:
 			lines[s].append(e + [1, 0, -1, 0, 0, 0, false, 0, 0.0])
+	# Lesões e trocas têm hora marcada pelo cansaço; cartões e gols nascem do jogo, minuto a minuto
 	var timeline: Array = []
+	var card_rate: Array = [0.0, 0.0]
 	for s in 2:
-		for _g in _poisson(rng, lam[s]):
-			timeline.append([_goal_minute(rng), 0, s])
 		var tac: Dictionary = sides[s]["tac"]
-		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"]) * float(rf["cards"])
-		for _y in _poisson(rng, 1.75 * fouls_f):
-			timeline.append([rng.randi_range(3, 92), 1, s])
-		if rng.randf() < 0.035 * fouls_f:
-			timeline.append([rng.randi_range(10, 90), 2, s])
-		if rng.randf() < 1.0 - exp(-MatchSimulation.INJURY_RATE * 95.0 * float(tac["i_fatigue"])):
+		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"]) * float(rf["cards"]) * float(wfx.get("fouls", 1.0))
+		card_rate[s] = 1.75 * fouls_f / MINUTES
+		if rng.randf() < 1.0 - exp(-MatchSimulation.INJURY_RATE * 95.0 * float(tac["i_fatigue"]) * float(wfx.get("injury", 1.0))):
 			timeline.append([rng.randi_range(5, 90), 3, s])
 		var n_subs := rng.randi_range(3, mini(5, sides[s]["bench"].size()))
 		for _k in n_subs:
 			timeline.append([rng.randi_range(55, 86), 4, s])
 	timeline.sort_custom(func(p, q): return p[0] < q[0] or (p[0] == q[0] and p[1] > q[1]))
-	var score: Array = [0, 0]
-	var goals: Array = []
-	var yc: Array = [0, 0]
-	var rc: Array = [0, 0]
-	var used_bench: Array = [{}, {}]
-	var subs_used: Array = [0, 0]
-	for ev in timeline:
-		var mnt: int = ev[0]
-		var s: int = ev[2]
-		match int(ev[1]):
-			0:
-				_goal(rng, sides, lines, s, mnt, score, goals)
-			1:
-				var v: Variant = _pick(rng, lines[s], 7)
-				if v != null:
-					v[15] += 1
-					v[18] -= 0.35
-					if v[15] >= 2:
-						_send_off(v, mnt)
-						rc[s] += 1
-					else:
-						yc[s] += 1
-			2:
-				var v: Variant = _pick(rng, lines[s], 7)
-				if v != null:
-					_send_off(v, mnt)
-					rc[s] += 1
-			3:
-				var v: Variant = _pick_injured(rng, lines[s])
-				if v != null:
-					v[17] = InjuryTable.roll_weeks(rng)
-					if subs_used[s] < 5:
-						if _substitute(sides[s], lines[s], used_bench[s], v, mnt):
-							subs_used[s] += 1
-					else:
-						v[10] = 0
-						v[12] = mnt
-			4:
-				if subs_used[s] < 5:
-					var out: Variant = _tired_starter(lines[s])
-					if out != null and _substitute(sides[s], lines[s], used_bench[s], out, mnt):
-						subs_used[s] += 1
+	var st := {"rng": rng, "sides": sides, "lines": lines, "rate": rate, "conv": conv, "cw": cw, "cq": cq, "card": card_rate,
+		"score": [0, 0], "goals": [], "yc": [0, 0], "rc": [0, 0], "used": [{}, {}], "subs": [0, 0], "tl": timeline, "ti": 0,
+		"xg": [0.0, 0.0], "shots": [0, 0], "cts": [], "pen": 0.012, "react": [0, 0]}
 	var end_min := 90 + rng.randi_range(2, 6)
+	_period(st, 1, 45 + rng.randi_range(0, 3), 1)
+	_period(st, 46, end_min, 2)
+	var score: Array = st["score"]
+	var goals: Array = st["goals"]
+	var yc: Array = st["yc"]
+	var rc: Array = st["rc"]
 	var et := false
 	var pens: Array = []
 	if bool(ctx.get("ko", false)):
 		var agg: Array = ctx.get("agg", [0, 0])
 		if score[0] + int(agg[0]) == score[1] + int(agg[1]):
 			et = true
-			var extra: Array = []
-			for s in 2:
-				for _g in _poisson(rng, lam[s] * 0.3):
-					extra.append([rng.randi_range(91, 120), s])
-			extra.sort_custom(func(p, q): return p[0] < q[0])
-			for g in extra:
-				_goal(rng, sides, lines, g[1], g[0], score, goals)
+			_period(st, 91, 105, 3)
+			_period(st, 106, 120, 4)
 			end_min = 120 + rng.randi_range(0, 2)
 			if score[0] + int(agg[0]) == score[1] + int(agg[1]):
 				pens = _shootout(rng, sides, lines)
@@ -332,8 +336,192 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 			if mv > motm_v:
 				motm_v = mv
 				motm_pid = p.id
+	# Tipo de jogada de cada gol (diário tático): o lance que de fato aconteceu.
+	var cts: Array = st["cts"]
 	return {"hg": score[0], "ag": score[1], "att": att_n, "goals": goals, "motm": motm_pid, "et": et, "pens": pens,
-		"derby": derby, "importance": importance, "yc": yc, "rc": rc, "lines": out_lines, "poss": poss, "ref": ref}
+		"derby": derby, "importance": importance, "yc": yc, "rc": rc, "lines": out_lines, "poss": poss, "ref": ref,
+		"tac": {"ct": cts, "xg": [snappedf(float(st["xg"][0]), 0.01), snappedf(float(st["xg"][1]), 0.01)]}, "wx": wx}
+
+
+## Taxa de chance por minuto de posse (a mesma fórmula do MatchSimulation, sem a conversão).
+static func _chance_rate(att: Dictionary, dfn: Dictionary, home: bool, crowd: float) -> float:
+	var ta: Dictionary = att["tac"]
+	var td: Dictionary = dfn["tac"]
+	var diff := float(att["att"]) * MatchSimulation.damp(float(ta["m_att"])) - float(dfn["def"]) * MatchSimulation.damp(float(td["m_def"]))
+	var p := MatchSimulation.BASE_CHANCE * MatchSimulation.chance_mult(diff) * float(ta["s_rate"])
+	p *= float(td["l_opp_rate"]) * float(td["pr_opp_rate"])
+	p *= (1.0 + MatchSimulation.HOME_CHANCE * crowd) if home else (1.0 - MatchSimulation.AWAY_CHANCE * crowd)
+	return clampf(p, 0.02, 0.6)
+
+
+static func _on_count(lines: Array) -> int:
+	var n := 0
+	for v in lines:
+		if v[10] == 1:
+			n += 1
+	return n
+
+
+## Joga um trecho da partida minuto a minuto: a cada minuto cada time pode criar uma chance
+## (pela força de ataque contra a defesa, posse, mando, cansaço, placar e expulsões); a chance tem
+## um tipo (enfiada, cruzamento, chute de fora, contra-ataque...), um finalizador escolhido pelos
+## atributos e uma qualidade; vira gol ou não pelo que o finalizador faz contra o goleiro. Cartões
+## saem das faltas do minuto (mais quando o time perde, no clássico e com juiz rigoroso).
+static func _period(st: Dictionary, m0: int, m1: int, half: int) -> void:
+	var rng: RandomNumberGenerator = st["rng"]
+	var sides: Array = st["sides"]
+	var lines: Array = st["lines"]
+	var score: Array = st["score"]
+	var tl: Array = st["tl"]
+	for m in range(m0, m1 + 1):
+		while int(st["ti"]) < tl.size() and int(tl[int(st["ti"])][0]) <= m:
+			_timeline_event(st, tl[int(st["ti"])])
+			st["ti"] = int(st["ti"]) + 1
+		var t_f := clampf(float(m) / 90.0, 0.0, 1.3)
+		var time_f := 1.05 if half >= 3 else 0.86 + 0.28 * minf(t_f, 1.0)
+		for s in 2:
+			var diff: int = score[s] - score[1 - s]
+			var rate_m := 1.0
+			var qual_m := 1.0
+			if diff == 0:
+				rate_m = 0.9 if m >= 80 and half == 2 else 1.0
+			else:
+				var k := (MatchSimulation.STATE_BASE + MatchSimulation.STATE_LATE * t_f) * (1.0 if absi(diff) == 1 else 1.35)
+				if diff < 0:
+					rate_m = 1.0 + k * (1.5 if diff == -1 else 0.7)
+					qual_m = 1.0 - k * 0.5
+				else:
+					rate_m = (1.0 - k * 0.7) * (0.88 if diff == 2 else (0.72 if diff >= 3 else 1.0))
+					qual_m = 1.0 + k * 0.35
+			# Reação: quem acabou de sofrer o gol se lança nos minutos seguintes
+			if m < int(st["react"][s]):
+				rate_m *= 1.18
+			var n_att := _on_count(lines[s])
+			var n_def := _on_count(lines[1 - s])
+			var p: float = float(st["rate"][s]) * time_f * rate_m * (1.0 + (11 - n_def) * 0.08) * (1.0 - (11 - n_att) * 0.06)
+			if rng.randf() < p:
+				_chance(st, s, m, half, qual_m)
+			# Cartões: faltas do minuto (quem perde se desespera no fim)
+			var cr: float = float(st["card"][s]) * (1.25 if diff < 0 and m >= 70 else 1.0)
+			if rng.randf() < cr:
+				_card(st, s, m)
+			elif rng.randf() < cr * 0.02:
+				var v: Variant = _pick(rng, lines[s], 7)
+				if v != null:
+					_send_off(v, m)
+					st["rc"][s] += 1
+
+
+static func _chance(st: Dictionary, s: int, m: int, half: int, qual_m: float) -> void:
+	var rng: RandomNumberGenerator = st["rng"]
+	var sides: Array = st["sides"]
+	var lines: Array = st["lines"]
+	var score: Array = st["score"]
+	st["shots"][s] += 1
+	# Pênalti: falta na área (juiz mais ou menos rigoroso)
+	if rng.randf() < float(st["pen"]) * float(sides[s].get("ref_pens", 1.0)):
+		var sheet: TeamSheet = sides[s]["sheet"]
+		var taker: Variant = null
+		for v in lines[s]:
+			if v[10] == 1 and v[0].id == sheet.penalty_taker:
+				taker = v
+		if taker == null:
+			taker = _pick(rng, lines[s], 5)
+		if taker == null:
+			return
+		st["xg"][s] += 0.76
+		var gk_p: Player = null
+		for v in lines[1 - s]:
+			if v[10] == 1 and int(v[1]) == Pos.GK:
+				gk_p = v[0]
+		var pk := PenaltyKick.kick(rng, taker[0], gk_p, {"f": float(taker[2]), "cond": 90.0 - m * 0.3, "pressure": 0.3 + (0.3 if m >= 80 and score[s] <= score[1 - s] else 0.0), "away": s == 1})
+		if String(pk["res"]) == "goal":
+			taker[13] += 1
+			taker[18] += 0.85
+			score[s] += 1
+			st["react"][1 - s] = m + 10
+			st["goals"].append([m, s, taker[0].id, Fixture.GOAL_PENALTY, half])
+			st["cts"].append([s, MatchSimulation.CH_PENALTY, m, half])
+		else:
+			taker[18] -= 0.5
+		return
+	var k := RngUtil.weighted_index(rng, st["cw"][s])
+	var ctype := k if k < 6 else (MatchSimulation.CH_CORNER if k == 6 else MatchSimulation.CH_FREEKICK)
+	var shooter: Variant = _pick(rng, lines[s], 5)
+	if shooter == null:
+		return
+	# Qualidade: o tipo de chance, o confronto (conv) e o finalizador contra a média do time
+	var fin_f := clampf(exp(MatchSimulation.EPS * (float(shooter[9]) * float(shooter[2]) - float(sides[s]["fin"]))), 0.7, 1.45)
+	var xg := clampf(float(st["conv"][s]) * float(st["cq"][s][k]) * qual_m * fin_f, 0.005, 0.85)
+	st["xg"][s] += xg
+	if rng.randf() >= xg:
+		return
+	# Gol contra: cruzamento desviado pelo zagueiro
+	if (ctype == MatchSimulation.CH_CROSS or ctype == MatchSimulation.CH_CORNER) and rng.randf() < OWN_GOAL_SHARE * 3.0:
+		var og: Variant = _pick(rng, lines[1 - s], 7)
+		if og != null:
+			og[18] -= 1.0
+			score[s] += 1
+			st["react"][1 - s] = m + 10
+			st["goals"].append([m, s, og[0].id, Fixture.GOAL_OWN, half])
+			st["cts"].append([s, MatchSimulation.CH_CROSS, m, half])
+			return
+	shooter[13] += 1
+	shooter[18] += 1.1
+	var assist_p := ASSIST_SHARE
+	match ctype:
+		MatchSimulation.CH_CROSS, MatchSimulation.CH_CORNER, MatchSimulation.CH_THROUGH:
+			assist_p = 0.9
+		MatchSimulation.CH_LONG, MatchSimulation.CH_DRIBBLE, MatchSimulation.CH_FREEKICK:
+			assist_p = 0.35
+		MatchSimulation.CH_SCRAMBLE:
+			assist_p = 0.5
+	if rng.randf() < assist_p:
+		var assister: Variant = _pick(rng, lines[s], 6, shooter)
+		if assister != null:
+			assister[14] += 1
+			assister[18] += 0.65
+	score[s] += 1
+	st["react"][1 - s] = m + 10
+	st["goals"].append([m, s, shooter[0].id, Fixture.GOAL_NORMAL, half])
+	st["cts"].append([s, ctype, m, half])
+
+
+static func _card(st: Dictionary, s: int, m: int) -> void:
+	var v: Variant = _pick(st["rng"], st["lines"][s], 7)
+	if v == null:
+		return
+	v[15] += 1
+	v[18] -= 0.35
+	if v[15] >= 2:
+		_send_off(v, m)
+		st["rc"][s] += 1
+	else:
+		st["yc"][s] += 1
+
+
+static func _timeline_event(st: Dictionary, ev: Array) -> void:
+	var rng: RandomNumberGenerator = st["rng"]
+	var mnt: int = ev[0]
+	var s: int = ev[2]
+	var lines: Array = st["lines"]
+	var subs: Array = st["subs"]
+	match int(ev[1]):
+		3:
+			var v: Variant = _pick_injured(rng, lines[s])
+			if v != null:
+				v[17] = InjuryTable.roll_weeks(rng)
+				if subs[s] < 5:
+					if _substitute(st["sides"][s], lines[s], st["used"][s], v, mnt):
+						subs[s] += 1
+				else:
+					v[10] = 0
+					v[12] = mnt
+		4:
+			if subs[s] < 5:
+				var out: Variant = _tired_starter(lines[s])
+				if out != null and _substitute(st["sides"][s], lines[s], st["used"][s], out, mnt):
+					subs[s] += 1
 
 
 static func _poisson(rng: RandomNumberGenerator, lam: float) -> int:
@@ -517,11 +705,14 @@ static func _shootout(rng: RandomNumberGenerator, sides: Array, lines: Array) ->
 		if ks.is_empty():
 			break
 		var k: Array = ks[taken[s] % ks.size()]
-		var p := clampf(0.76 + (float(k[9]) * float(k[2]) - float(sides[1 - s]["gk"])) * 0.004, 0.55, 0.9)
-		if taken[s] >= 5:
-			p -= 0.03
+		var gk_p: Player = null
+		for v in lines[1 - s]:
+			if v[10] == 1 and int(v[1]) == Pos.GK:
+				gk_p = v[0]
+		var pressure := 0.55 + 0.05 * mini(taken[s], 4) + (0.2 if taken[s] >= 5 else 0.0)
+		var pk := PenaltyKick.kick(rng, k[0], gk_p, {"f": float(k[2]), "cond": 60.0, "pressure": pressure, "away": s == 1})
 		taken[s] += 1
-		if rng.randf() < p:
+		if String(pk["res"]) == "goal":
 			ps[s] += 1
 		var a: int = taken[0]
 		var b: int = taken[1]

@@ -18,6 +18,12 @@ var preview_world: GameWorld = null
 var _gen_task: int = -1
 var _gen_result: GameWorld = null
 var _gen_callback: Callable
+## Save em segundo plano: pedido pendente, job em andamento e a thread que grava o arquivo.
+var _save_dirty := false
+var _save_busy := false
+var _save_writer = null # SaveManager.Writer do save em andamento
+var _save_gen := 0 # troca a cada carreira aberta/fechada: um job antigo não grava por cima
+var _save_phase := 0 # 0 parado, 1 montando os blocos, 2 gravando na thread
 
 
 func _ready() -> void:
@@ -76,6 +82,7 @@ func ensure_preview_world(done: Callable) -> void:
 # ---------------------------------------------------------------------------
 
 func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int) -> void:
+	_cancel_save()
 	world = w
 	world.user_club_id = club_id
 	world.manager_name = manager_name.strip_edges() if manager_name.strip_edges() != "" else "Treinador"
@@ -117,6 +124,7 @@ func load_career(save_slot: int) -> bool:
 	var w := SaveManager.load_world(save_slot)
 	if w == null:
 		return false
+	_cancel_save()
 	world = w
 	slot = save_slot
 	matchday = {}
@@ -127,25 +135,117 @@ func load_career(save_slot: int) -> bool:
 	HeartClubs.ensure_all(world) # saves de antes dos times de coração
 	SponsorManager.ensure_all(world) # saves de antes dos patrocínios da IA
 	Valuation.refresh_shift(world)
+	var market_migrated := MarketReality.ensure_world(world)
+	if market_migrated:
+		for c: Club in world.clubs:
+			MarketReality.migrate_budget(world, c)
 	world_changed.emit()
 	return true
 
 
+## Pede um save. Não trava a tela: os pedidos da mesma hora se juntam num só, os jogadores são
+## serializados aos poucos (alguns milissegundos por quadro) e a compressão e a escrita rodam em
+## outra thread. Sem vídeo (testes) grava na hora.
 func save_now() -> bool:
 	if world == null or slot <= 0 or not matchday.is_empty():
 		return false
-	return SaveManager.save_world(world, slot) == OK
+	if DisplayServer.get_name() == "headless":
+		return SaveManager.save_world(world, slot) == OK
+	_save_dirty = true
+	if not _save_busy:
+		_save_busy = true
+		_run_save.call_deferred()
+	return true
+
+
+## Termina o que estiver pendente agora mesmo (fechar a carreira, app indo para o fundo).
+func save_blocking() -> void:
+	var need := _save_dirty or _save_phase >= 1
+	if _save_writer != null:
+		_save_writer.abort() # fecha o arquivo do save em andamento antes de gravar de uma vez
+		_save_writer = null
+	if need and world != null and slot > 0 and matchday.is_empty():
+		SaveManager.save_world(world, slot)
+	_save_gen += 1 # o job que estava no meio fica sem efeito
+	_save_busy = false
+	_save_dirty = false
+	_save_phase = 0
+
+
+## Troca de carreira: espera a gravação em curso e descarta o job (ele é da carreira anterior).
+func _cancel_save() -> void:
+	if _save_writer != null:
+		_save_writer.abort()
+		_save_writer = null
+	_save_gen += 1
+	_save_busy = false
+	_save_dirty = false
+	_save_phase = 0
+
+
+func _run_save() -> void:
+	var gen := _save_gen
+	var w := world
+	var s := slot
+	_save_dirty = false
+	_save_phase = 1
+	# Cada clube/jogador é serializado, comprimido e gravado na hora (alguns ms por quadro):
+	# nada de juntar o mundo inteiro na memória.
+	var wr := SaveManager.Writer.open(s, w.clubs.size(), w.players.size())
+	_save_writer = wr
+	if wr == null:
+		_save_phase = 0
+		_save_busy = false
+		return
+	var budget := 6
+	var t0 := Time.get_ticks_msec()
+	var items: Array = w.clubs.duplicate()
+	items.append_array(w.players.values())
+	for it in items:
+		wr.add(it.to_dict())
+		if Time.get_ticks_msec() - t0 >= budget:
+			await get_tree().process_frame
+			if gen != _save_gen:
+				wr.abort() # (já cancelado por quem trocou a geração)
+				return
+			t0 = Time.get_ticks_msec()
+	if gen != _save_gen or w != world or not matchday.is_empty() or w.players.size() + w.clubs.size() != items.size():
+		# Mudou no meio (carreira trocada, partida começou, jogador novo): grava de novo depois
+		wr.abort()
+		if _save_writer == wr:
+			_save_writer = null
+		if gen == _save_gen:
+			_save_phase = 0
+			_save_busy = false
+			if w == world and matchday.is_empty():
+				_save_dirty = true
+				_run_save.call_deferred()
+				_save_busy = true
+		return
+	_save_phase = 2
+	if wr.finish(w) == OK:
+		SaveManager.write_meta(w, s)
+	if _save_writer == wr:
+		_save_writer = null
+	_save_phase = 0
+	if _save_dirty:
+		_run_save.call_deferred()
+	else:
+		_save_busy = false
 
 
 func save_copy(to_slot: int) -> bool:
 	if world == null:
 		return false
+	save_blocking()
 	var ok := SaveManager.save_world(world, to_slot) == OK
 	return ok
 
 
 func close_career() -> void:
 	save_now()
+	save_blocking()
+	_save_gen += 1
 	world = null
 	slot = -1
 	matchday = {}
@@ -284,10 +384,12 @@ func end_season() -> Dictionary:
 
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
+		NOTIFICATION_APPLICATION_PAUSED:
+			# Só grava na hora se houver algo pendente (os saves normais já rodam em segundo plano).
 			if matchday.is_empty():
-				save_now()
+				save_blocking()
 		NOTIFICATION_WM_CLOSE_REQUEST:
 			if matchday.is_empty():
 				save_now()
+				save_blocking()
 			get_tree().quit()

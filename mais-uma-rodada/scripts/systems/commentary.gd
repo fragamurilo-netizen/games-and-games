@@ -59,6 +59,8 @@ func _fill(text: String, ev: Dictionary) -> String:
 		p2_side = 1 - side
 	out = out.replace("{p2}", _name(p2_side, int(ev.get("p2", -1))))
 	out = out.replace("{gk}", gk_name)
+	if x.has("d"):
+		out = out.replace("{d}", _name(1 - side, int(x["d"])))
 	out = out.replace("{culprit}", _name(1 - side, int(x.get("culprit", -1))))
 	out = out.replace("{TEAM}", team.club.short_name.to_upper())
 	out = out.replace("{team}", team.club.short_name)
@@ -128,7 +130,7 @@ func lines_for(ev: Dictionary) -> Array:
 		MatchSimulation.EV_SHOOT_KICK:
 			var ps: Array = x.get("ps", [0, 0])
 			var txt := _pick("shoot_ok" if x.get("ok", false) else "shoot_miss")
-			out.append(_line(txt + "  (%d x %d)" % [int(ps[0]), int(ps[1])], ev, "big", 0.0))
+			out.append(_line(txt + pen_detail(x) + "  (%d x %d)" % [int(ps[0]), int(ps[1])], ev, "big", 0.0))
 		MatchSimulation.EV_FULLTIME:
 			out.append(_line(_pick("fulltime"), ev, "big", 0.0))
 		MatchSimulation.EV_POSSESSION:
@@ -189,10 +191,10 @@ func lines_for(ev: Dictionary) -> Array:
 				out.append(_pundit("pundit_save", ev, 1.4))
 		MatchSimulation.EV_PEN_SAVE:
 			out.append(_line(_pick("build_penalty"), ev, "chance", 0.0))
-			out.append(_line(_pick("pen_save"), ev, "big", 0.6))
+			out.append(_line(_pick("pen_save") + pen_detail(x), ev, "big", 0.6))
 		MatchSimulation.EV_PEN_MISS:
 			out.append(_line(_pick("build_penalty"), ev, "chance", 0.0))
-			out.append(_line(_pick("pen_miss"), ev, "big", 0.6))
+			out.append(_line(_pick("pen_miss") + pen_detail(x), ev, "big", 0.6))
 		MatchSimulation.EV_PENALTY_AWARDED:
 			out.append(_line(_pick("penalty_awarded"), ev, "big", 0.0))
 		MatchSimulation.EV_FOUL:
@@ -224,6 +226,8 @@ func lines_for(ev: Dictionary) -> Array:
 			out.append(_line(_pick("keeper"), ev, "normal", 0.0))
 		MatchSimulation.EV_KNOCK:
 			out.append(_line(_pick("knock"), ev, "normal", 0.0))
+		MatchSimulation.EV_CRAMP:
+			out.append(_line(_pick("cramp"), ev, "normal", 0.0))
 		MatchSimulation.EV_CROWD:
 			out.append(_line(_pick("crowd_" + String(x.get("kind", "home"))), ev, "crowd", 0.0))
 		MatchSimulation.EV_VAR:
@@ -246,6 +250,16 @@ func lines_for(ev: Dictionary) -> Array:
 				cat3 = "tactic_formation"
 			elif x.has("style"):
 				cat3 = "tactic_style"
+			elif x.has("pressing"):
+				cat3 = "tactic_press_up" if int(x["pressing"]) == 2 else "tactic_press_down"
+			elif x.has("line"):
+				cat3 = "tactic_line_high" if int(x["line"]) == 2 else "tactic_line_low"
+			elif x.has("width"):
+				cat3 = "tactic_width_open" if int(x["width"]) == 2 else ("tactic_width_closed" if int(x["width"]) == 0 else "tactic_other")
+			elif x.has("intensity"):
+				cat3 = "tactic_intensity"
+			elif x.has("instr"):
+				cat3 = "tactic_instr"
 			elif m >= 3:
 				cat3 = "tactic_attack"
 			elif m >= 0 and m <= 1:
@@ -368,6 +382,32 @@ func _shout_lines(ev: Dictionary, x: Dictionary) -> Array:
 	if not bad.is_empty():
 		lines.append(_line(I18n.t("%s sente o grito e abaixa a cabeça.") % ", ".join(bad.slice(0, 2)), ev, "info", 0.4))
 	return lines
+
+
+## Como foi a cobrança: canto, altura e para onde o goleiro foi.
+static func pen_detail(x: Dictionary) -> String:
+	if not x.has("dir"):
+		return ""
+	var d := int(x["dir"])
+	var dv := int(x.get("dive", -1))
+	var res := String(x.get("res", ""))
+	if bool(x.get("panenka", false)):
+		return " — de cavadinha!"
+	var where := "no meio" if d == 1 else "no canto %s" % ["esquerdo", "", "direito"][d]
+	match res:
+		"goal":
+			if dv < 0 or dv == d:
+				return " — %s, sem chance." % where
+			return " — %s, goleiro foi para o outro lado." % where
+		"save":
+			return " — %s, e o goleiro adivinhou." % where
+		"post":
+			return " — %s, na trave!" % where
+		"over":
+			return " — por cima do gol."
+		"wide":
+			return " — %s, para fora." % where
+	return ""
 
 
 func _line(text: String, ev: Dictionary, style: String, delay: float) -> Dictionary:

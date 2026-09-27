@@ -124,7 +124,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 			if age >= 30:
 				var mins: int = minutes.get(p.id, 0)
 				load_f = 1.08 if mins >= 80 else (0.95 if mins == 0 else 1.0)
-			var expected := (5.0 + (age - dstart) * 4.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
+			# Real (Transfermarkt/FC): ~-1 por ano logo depois do auge, -2 aos 33-34, -3 perto dos 36
+			var expected := (8.0 + (age - dstart) * 5.5) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
 			while expected > 0.0:
 				if rng.randf() < minf(1.0, expected):
 					apply_decline(rng, p)
@@ -399,12 +400,14 @@ static func apply_decline(rng: RandomNumberGenerator, p: Player) -> void:
 ## Retorna {"explosions": [Player], "busts": [Player]}.
 static func yearly_review(world: GameWorld) -> Dictionary:
 	var rng := world.rng
-	var out := {"explosions": [], "busts": []}
+	var out := {"explosions": [], "busts": [], "late": [], "derail": []}
 	var full := FinanceManager.WEEKS * 90.0
 	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
 		if age > 24:
+			_late_turns(world, p, age, p.minutes_season / full, out)
+			_form_swing(world, p, age, p.minutes_season / full)
 			continue
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
@@ -445,12 +448,92 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 		if rng.randf() < 0.025:
 			p.potential = maxi(p.overall, p.potential - rng.randi_range(3, 6))
 			out["busts"].append(p)
+		elif age <= 17 and p.potential >= 86 and share >= 0.25 and rng.randf() < 0.25 + share * 0.3:
+			# Prodígio que ganhou minutos cedo (o caso Yamal): salto grande de uma vez
+			var b0 := p.overall
+			apply_growth(world, p, rng.randf_range(4.0, 8.0))
+			if p.overall > b0:
+				out["explosions"].append(p)
 		elif age <= 21 and p.potential - p.overall >= 6 and rng.randf() < 0.02 + share * 0.02:
 			var before := p.overall
 			apply_growth(world, p, rng.randf_range(2.0, 5.0))
 			if p.overall > before:
 				out["explosions"].append(p)
+		if age >= 21:
+			_derail(world, p, age, share, out)
 	return out
+
+
+## Florescimento tardio (o caso Vardy): depois dos 24, quem joga muito e bem pode ainda subir de
+## patamar. Raro; mais provável na curva tardia, com cabeça forte e titular absoluto.
+static func _late_turns(world: GameWorld, p: Player, age: int, share: float, out: Dictionary) -> void:
+	if age > 29 or p.club_id < 0 or share < 0.45 or p.avg_rating() < 6.95:
+		return
+	var rng := world.rng
+	var ch := 0.004
+	if p.dev_curve == Player.CURVE_TARDIO:
+		ch = 0.035
+	elif p.dev_curve == Player.CURVE_LONGEVO:
+		ch = 0.012
+	if p.hid("det") >= 15:
+		ch *= 1.6
+	if p.avg_rating() >= 7.3:
+		ch *= 1.8
+	if rng.randf() < ch:
+		var gain := rng.randi_range(3, 7)
+		p.potential = mini(92, maxi(p.potential, p.overall) + gain)
+		var before := p.overall
+		apply_growth(world, p, rng.randf_range(2.0, 4.5))
+		if p.overall > before:
+			out["late"].append(p)
+	elif age <= 26:
+		_derail(world, p, age, share, out)
+
+
+## Ninguém é igual todo ano: no auge, uma temporada iluminada sobe um ou dois pontos e uma
+## apagada (sem ritmo, cabeça fora, lesões chatas) tira. Média levemente negativa.
+static func _form_swing(world: GameWorld, p: Player, age: int, share: float) -> void:
+	if age > 32 or p.club_id < 0:
+		return
+	var rng := world.rng
+	var avg := p.avg_rating()
+	var good := 0.07 + (0.06 if share >= 0.6 and avg >= 7.1 else 0.0)
+	var bad := 0.08 + (0.07 if share < 0.25 else 0.0) + (0.04 if p.morale < 40.0 else 0.0)
+	var r := rng.randf()
+	if r < good:
+		p.potential = mini(94, maxi(p.potential, p.overall + 1))
+		apply_growth(world, p, rng.randf_range(0.8, 2.0))
+	elif r < good + bad:
+		for i in rng.randi_range(4, 12):
+			apply_decline(rng, p)
+
+
+## Descarrilhou depois de chegar lá (o caso Sancho): jovem que já era bom perde espaço e rumo.
+## Nada roteirizado: sem minutos, cabeça ruim, pouca dedicação e clube novo onde não se encaixou
+## aumentam a chance; mesmo assim é incomum e às vezes ele volta.
+static func _derail(world: GameWorld, p: Player, age: int, share: float, out: Dictionary) -> void:
+	if age > 26 or p.overall < 76 or p.club_id < 0:
+		return
+	var rng := world.rng
+	var ch := 0.0
+	if share < 0.2:
+		ch += 0.07
+	if p.morale < 40.0:
+		ch += 0.05
+	if p.hid("pro") <= 6:
+		ch += 0.05
+	if p.trait_mult("dev_mult") <= 0.95:
+		ch += 0.03
+	if p.joined_year == world.year and share < 0.35:
+		ch += 0.06 # contratação cara que não se adaptou
+	if ch <= 0.0 or rng.randf() >= ch:
+		return
+	var drops := rng.randi_range(2, 5)
+	for i in drops:
+		apply_decline(rng, p)
+	p.recompute_overall()
+	p.potential = maxi(p.overall + 1, p.potential - rng.randi_range(3, 7))
+	out["derail"].append(p)
 
 
 # ---------------------------------------------------------------------------

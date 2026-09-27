@@ -34,14 +34,20 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 		PlayerGenerator.create_free_agent(w, rng, random_league_level(rng), used_names)
 	PlayerMods.apply(w) # jogadores do Editor geral e de mods (RNG próprio: o sorteio não muda)
 	Valuation.refresh_shift(w)
+	MarketReality.ensure_world(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
 	w.stats["short_names"] = true # nomes dos clubes já vêm curtos dos dados (GameWorld.from_dict)
+	w.stats["kits_real"] = 1 # uniformes reais já vêm dos dados (ClubGenerator.upgrade_kits)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
 	HeartClubs.ensure_all(w)
 	SeasonManager.setup_first_season(w)
 	SponsorManager.ensure_all(w) # patrocinadores e fornecedoras da IA, por país
+	if world_type == "padrao":
+		WorldEvents.seed_real_situation(w) # donos, SAFs e crises que já existem no começo do jogo
+	for p: Player in w.players.values():
+		p.compact() # histórico compactado na memória (o celular agradece)
 	return w
 
 

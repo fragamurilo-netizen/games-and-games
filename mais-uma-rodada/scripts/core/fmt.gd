@@ -3,19 +3,44 @@ extends RefCounted
 ## Formatação de textos exibidos ao usuário (pt-BR; inglês e espanhol via I18n.lang).
 
 
-## Dinheiro compacto: $ 850, $ 12 mil, $ 1,2 mi, $ -3,4 mi.
+## A economia do jogo é euro-base. A preferência muda só a exibição.
+## Câmbio de referência do BCE em 25/09/2026: €1 = R$ 5,9091 = US$ 1,1403.
+const EUR_TO_BRL := 5.9091
+const EUR_TO_USD := 1.1403
+const FX_DATE := "25/09/2026"
+
+static func currency_rate() -> float:
+	match AppSettings.currency:
+		AppSettings.CURRENCY_BRL:
+			return EUR_TO_BRL
+		AppSettings.CURRENCY_USD:
+			return EUR_TO_USD
+	return 1.0
+
+static func currency_symbol() -> String:
+	match AppSettings.currency:
+		AppSettings.CURRENCY_BRL:
+			return "R$"
+		AppSettings.CURRENCY_USD:
+			return "US$"
+	return "€"
+
 static func money(v: float) -> String:
-	var neg := v < 0.0
-	var a := absf(v)
+	var shown := v * currency_rate()
+	var neg := shown < 0.0
+	var a := absf(shown)
 	var s := ""
-	if a >= 1_000_000.0:
+	if a >= 1_000_000_000.0:
+		var b := a / 1_000_000_000.0
+		s = _decimal(b, 2 if b < 10.0 else 1) + (" bi" if I18n.lang in ["pt", "es"] else "B")
+	elif a >= 1_000_000.0:
 		var m := a / 1_000_000.0
-		s = _decimal(m, 1 if m < 100.0 else 0) + (" mi" if I18n.lang == "pt" else "M")
+		s = _decimal(m, 1 if m < 100.0 else 0) + (" mi" if I18n.lang in ["pt", "es"] else "M")
 	elif a >= 1_000.0:
 		s = str(int(round(a / 1_000.0))) + ("K" if I18n.lang == "en" else " mil")
 	else:
 		s = str(int(round(a)))
-	return ("-$ " if neg else "$ ") + s
+	return ("-" if neg else "") + currency_symbol() + " " + s
 
 
 static func money_month(v: float) -> String:

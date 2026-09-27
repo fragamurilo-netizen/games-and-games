@@ -7,7 +7,7 @@ const DIFF_EASY := 0
 const DIFF_NORMAL := 1
 const DIFF_HARD := 2
 const DIFF_NAMES: Array[String] = ["Fácil", "Normal", "Difícil"]
-const MAX_NEWS := 160
+const MAX_NEWS := 240
 
 var version: int = SAVE_VERSION
 var world_seed: int = 0
@@ -48,6 +48,10 @@ var people: Dictionary = {}
 var rivalries: Dictionary = {}
 ## Caixa de entrada do treinador (InboxManager): mensagens pessoais, mais recente no fim.
 var inbox: Array = []
+## Contratações importantes do usuário esperando a apresentação animada (não vai para o save).
+var pending_signings: Array = []
+## Conquistas recém-desbloqueadas esperando o aviso na tela (não vai para o save).
+var pending_achievements: Array = []
 ## Football Memory: confrontos, recordes, momentos e linha do tempo dos atletas (ver FootballMemory).
 var memory: Dictionary = {}
 
@@ -306,13 +310,15 @@ func stat_add(key: String, amount: float = 1.0) -> void:
 # Serialização
 # ---------------------------------------------------------------------------
 
-func to_dict() -> Dictionary:
+## `bulk` false deixa clubes e jogadores de fora: o save os grava em blocos separados (SaveManager).
+func to_dict(bulk := true) -> Dictionary:
 	var cl: Array = []
-	for c in clubs:
-		cl.append(c.to_dict())
 	var pl: Array = []
-	for p in players.values():
-		pl.append(p.to_dict())
+	if bulk:
+		for c in clubs:
+			cl.append(c.to_dict())
+		for p in players.values():
+			pl.append(p.to_dict())
 	var nw: Array = []
 	for n in news:
 		nw.append(n.to_dict())
@@ -336,7 +342,8 @@ func to_dict() -> Dictionary:
 	}
 
 
-static func from_dict(d: Dictionary) -> GameWorld:
+## `pre_clubs`/`pre_players`: já montados (save em fluxo, carregado bloco a bloco sem juntar tudo).
+static func from_dict(d: Dictionary, pre_clubs: Array = [], pre_players: Array = []) -> GameWorld:
 	var w := GameWorld.new()
 	w.version = int(d.get("version", SAVE_VERSION))
 	w.world_seed = int(d.get("seed", 0))
@@ -345,6 +352,10 @@ static func from_dict(d: Dictionary) -> GameWorld:
 	w.rng.state = int(d.get("rng_state", 0))
 	w.year = int(d.get("year", 2026))
 	w.season_number = int(d.get("sn", 1))
+	for c in pre_clubs:
+		w.clubs.append(c)
+	for p in pre_players:
+		w.players[(p as Player).id] = p
 	for cd in d.get("clubs", []):
 		w.clubs.append(Club.from_dict(cd))
 	for pd in d.get("players", []):

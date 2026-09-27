@@ -133,14 +133,44 @@ var ovr_start: int = -1
 # Estatísticas e memória
 var stats: PackedInt32Array = PackedInt32Array() # liga (temporada)
 var cup_stats: Dictionary = {} # copa -> PackedInt32Array (temporada)
-var history: Array = [] # [{y, c (club id), cn (nome), a, g, as, r}]
-var spells: Array = [] # passagens por clube [{c, cn, from, to, a, g, as}]
+var history: Array: # [{y, c (club id), cn (nome), a, g, as, r}]
+	get:
+		if _history_raw != null:
+			_history = SaveCodec.unpack_rows(_history_raw)
+			_history_raw = null
+		return _history
+	set(v):
+		_history = v
+		_history_raw = null
+var _history: Array = []
+var _history_raw: Variant = null # compactado do save; só abre quando alguém lê
+var spells: Array: # passagens por clube [{c, cn, from, to, a, g, as}]
+	get:
+		if _spells_raw != null:
+			_spells = SaveCodec.unpack_rows(_spells_raw)
+			_spells_raw = null
+		return _spells
+	set(v):
+		_spells = v
+		_spells_raw = null
+var _spells: Array = []
+var _spells_raw: Variant = null # compactado do save; só abre quando alguém lê
 var career_apps: int = 0
 var career_goals: int = 0
 var career_assists: int = 0
 var titles: int = 0
 ## Títulos com o clube ou a seleção: [{y, k (chave do título: "L:BRA1", "C:LIB", "N:WC"...), c (clube, -1 seleção)}]
-var trophies: Array = []
+var trophies: Array:
+	get:
+		if _trophies_raw != null:
+			_trophies = SaveCodec.unpack_rows(_trophies_raw)
+			_trophies_raw = null
+		return _trophies
+	set(v):
+		_trophies = v
+		_trophies_raw = null
+var _trophies: Array = []
+var _trophies_raw: Variant = null # compactado do save; só abre quando alguém lê
 ## Prêmios individuais: [{y, k (ver AwardManager.award_name), l (liga ou copa)}]
 var awards: Array = []
 ## Mudanças de personalidade ao longo da carreira: [{y, t (traço), add (bool), why}]
@@ -564,7 +594,7 @@ func specialties() -> Array:
 # ---------------------------------------------------------------------------
 
 func to_dict() -> Dictionary:
-	return {
+	var d := {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
@@ -575,9 +605,46 @@ func to_dict() -> Dictionary:
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
-		"stats": stats, "cs": cup_stats, "hist": history, "spells": spells,
-		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": trophies,
+		"stats": stats, "cs": cup_stats, "hist": _packed(_history_raw, _history), "spells": _packed(_spells_raw, _spells),
+		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_trophies_raw, _trophies),
 	}
+	# Campos vazios ou no padrão ficam de fora (from_dict usa o mesmo padrão): save menor e mais rápido
+	for k in d.keys():
+		var v: Variant = d[k]
+		match typeof(v):
+			TYPE_ARRAY, TYPE_DICTIONARY, TYPE_STRING:
+				if v.is_empty():
+					d.erase(k)
+			TYPE_BOOL:
+				if not v:
+					d.erase(k)
+			TYPE_INT, TYPE_FLOAT:
+				if v == 0 and k in ZERO_DEFAULT:
+					d.erase(k)
+	return d
+
+
+## Compacta o histórico na memória (mesmos dados; abre de novo quando alguém lê). Usado depois de
+## gerar o mundo: ~27 mil jogadores com décadas de histórico em dicionários pesam ~180 MB.
+func compact() -> void:
+	if _history_raw == null and _history.size() >= 2:
+		_history_raw = SaveCodec.pack_rows(_history)
+		_history = []
+	if _spells_raw == null and _spells.size() >= 2:
+		_spells_raw = SaveCodec.pack_rows(_spells)
+		_spells = []
+	if _trophies_raw == null and _trophies.size() >= 2:
+		_trophies_raw = SaveCodec.pack_rows(_trophies)
+		_trophies = []
+
+
+## Lista ainda fechada desde o load vai para o save do jeito que veio (sem abrir e compactar de novo).
+static func _packed(raw: Variant, rows: Array) -> Variant:
+	return raw if raw != null else SaveCodec.pack_rows(rows)
+
+
+## Campos numéricos cujo padrão no from_dict é zero.
+const ZERO_DEFAULT: Array[String] = ["sh", "ask", "rc", "iw", "sus", "ya", "uw", "min", "acc", "sn", "val", "ca", "cg", "cas", "tt", "wage", "ce", "jy"]
 
 
 static func from_dict(d: Dictionary) -> Player:
@@ -647,14 +714,14 @@ static func from_dict(d: Dictionary) -> Player:
 	for k in cs:
 		if cs[k] is PackedInt32Array and cs[k].size() == C_COUNT:
 			p.cup_stats[k] = cs[k]
-	p.history = Array(d.get("hist", []))
-	p.spells = Array(d.get("spells", []))
+	p._history_raw = d.get("hist", null)
+	p._spells_raw = d.get("spells", null)
 	p.career_apps = int(d.get("ca", 0))
 	p.career_goals = int(d.get("cg", 0))
 	p.career_assists = int(d.get("cas", 0))
 	p.titles = int(d.get("tt", 0))
 	p.awards = Array(d.get("aw", []))
-	p.trophies = Array(d.get("tro", []))
+	p._trophies_raw = d.get("tro", null)
 	p.persona_log = Array(d.get("pl", []))
 	p.recompute_overall()
 	p.ovr_start = int(d.get("o0", p.overall))

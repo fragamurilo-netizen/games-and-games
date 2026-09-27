@@ -9,8 +9,8 @@ extends RefCounted
 ## O texto e as opções são montados na hora (describe) a partir dos dados; resolver aplica as
 ## consequências e devolve uma frase para a interface. Ao expirar vale a opção padrão.
 
-const MAX_PENDING := 3
-const COOLDOWN := 7 # jogos entre dois eventos do mesmo tipo
+const MAX_PENDING := 4
+const COOLDOWN := 6 # jogos entre dois eventos do mesmo tipo
 const LIFETIME := 3 # jogos para decidir
 
 const KINDS := {
@@ -35,6 +35,17 @@ const KINDS := {
 	"mercenary": {"w": 0.55, "icon": "money", "color": "ORANGE"},
 	"want_leave": {"w": 0.5, "icon": "swap", "color": "RED"},
 	"fight": {"w": 0.45, "icon": "card", "color": "RED"},
+	"party": {"w": 0.5, "icon": "card", "color": "RED"},
+	"betting": {"w": 0.18, "icon": "search", "color": "RED"},
+	"baby": {"w": 0.35, "icon": "heart", "color": "GREEN"},
+	"social": {"w": 0.55, "icon": "news", "color": "BLUE"},
+	"extra": {"w": 0.45, "icon": "star", "color": "GREEN"},
+	"rebel": {"w": 0.45, "icon": "card", "color": "RED"},
+	"chairman": {"w": 0.3, "icon": "shield", "color": "ORANGE"},
+	"captain_meeting": {"w": 0.65, "icon": "shirt", "color": "BLUE"},
+	"training_star": {"w": 0.7, "icon": "star", "color": "GREEN"},
+	"academy_path": {"w": 0.55, "icon": "star", "color": "GREEN"},
+	"media_leak": {"w": 0.45, "icon": "news", "color": "RED"},
 }
 ## Ligas que pagam acima do mercado (propostas "irrecusáveis").
 const RICH_NATIONS := ["KSA", "QAT", "UAE"]
@@ -63,9 +74,10 @@ static func after_user_turn(world: GameWorld, result: String) -> Array:
 	_check_promises(world, turn, result)
 	_expire(world, turn)
 	_random_happenings(world)
+	AmbientStorytelling.after_user_turn(world, result)
 	if world.events.size() >= MAX_PENDING:
 		return out
-	var p_new := 0.3 if world.events.is_empty() else 0.14
+	var p_new := 0.36 if world.events.is_empty() else 0.18
 	if world.rng.randf() >= p_new:
 		return out
 	var cands: Array = []
@@ -182,12 +194,9 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 					star = p
 			if star == null or star.age(world.year) > 31:
 				return {}
-			var buyer: Club = null
-			for tries in 30:
-				var c: Club = RngUtil.pick(rng, world.clubs)
-				if c.id != club.id and c.reputation >= club.reputation + 8.0 and c.tier == 1:
-					buyer = c
-					break
+			# Só sonda quem tem nível para o elenco do interessado (ninguém liga da Europa por um reserva da Série D).
+			var buyer := MarketAI.realistic_suitor(world, star, club.reputation + 8.0, rng, 4.0,
+				func(c: Club): return c.tier == 1)
 			if buyer == null:
 				return {}
 			ev["p"] = star.id
@@ -275,10 +284,9 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 					best = p
 			if best == null or best.overall < 62:
 				return {}
-			var rich: Club = null
-			for c: Club in world.clubs:
-				if RICH_NATIONS.has(c.nation) and c.tier == 1 and (rich == null or c.reputation + rng.randf() * 8.0 > rich.reputation):
-					rich = c
+			# Clube do Golfo que tenha o jogador no nível do elenco dele.
+			var rich := MarketAI.realistic_suitor(world, best, 0.0, rng, 6.0,
+				func(c: Club): return RICH_NATIONS.has(c.nation) and c.tier == 1)
 			if rich == null:
 				return {}
 			ev["p"] = best.id
@@ -296,13 +304,11 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 					star = p
 			if star == null:
 				return {}
-			var bigger: Array = []
-			for c: Club in world.clubs:
-				if c.id != club.id and c.tier == 1 and c.reputation >= minf(club.reputation + 10.0, 92.0) and c.reputation > club.reputation:
-					bigger.append(c)
-			if bigger.is_empty():
+			# O sonho é um clube maior, mas ao alcance dele (um degrau acima, não o gigante europeu).
+			var big := MarketAI.realistic_suitor(world, star, minf(club.reputation + 10.0, 92.0), rng, 6.0,
+				func(c: Club): return c.tier == 1 and c.reputation > club.reputation)
+			if big == null:
 				return {}
-			var big: Club = RngUtil.pick(rng, bigger)
 			ev["p"] = star.id
 			ev["d"] = {"club": big.id}
 		"fight":
@@ -324,13 +330,117 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			ev["p"] = a1.id
 			ev["p2"] = a2.id
 			ev["d"] = {"fine": Valuation.round_wage(maxf(5000.0, a1.wage * 0.5))}
+		"party":
+			# Balada filmada: festeiros e quem acabou de perder têm mais chance
+			var pool2: Array = []
+			for q: Player in squad:
+				if q.has_trait("festeiro") or q.has_trait("vaidoso") or (q.age(world.year) <= 25 and q.hid("pro") <= 8):
+					pool2.append(q)
+			if pool2.is_empty():
+				return {}
+			var pp: Player = RngUtil.pick(rng, pool2)
+			ev["p"] = pp.id
+			ev["d"] = {"fine": Valuation.round_wage(maxf(3000.0, pp.wage * 0.4)), "where": RngUtil.pick(rng, ["numa boate", "num aniversário de famoso", "num camarote de show", "numa festa em casa com dezenas de convidados"])}
+		"betting":
+			# Investigação de apostas (raro): quem tem pouca disciplina e muita polêmica
+			var pool3: Array = []
+			for q: Player in squad:
+				if q.hid("pro") <= 7 or q.hid("pol") >= 14:
+					pool3.append(q)
+			if pool3.is_empty() or rng.randf() > 0.35:
+				return {}
+			ev["p"] = (RngUtil.pick(rng, pool3) as Player).id
+		"baby":
+			var pool4: Array = []
+			for q: Player in squad:
+				var a := q.age(world.year)
+				if a >= 22 and a <= 35:
+					pool4.append(q)
+			if pool4.is_empty():
+				return {}
+			ev["p"] = (RngUtil.pick(rng, pool4) as Player).id
+		"social":
+			# Post polêmico: vaidosos, polêmicos e quem está fora do time
+			var pool5: Array = []
+			for q: Player in squad:
+				if q.has_trait("vaidoso") or q.has_trait("polemico") or q.has_trait("provocador") or (q.squad_status <= Player.STATUS_STARTER and q.minutes_season < 180 and world.current_turn() > 6):
+					pool5.append(q)
+			if pool5.is_empty():
+				return {}
+			ev["p"] = (RngUtil.pick(rng, pool5) as Player).id
+			ev["d"] = {"what": rng.randi_range(0, 2)}
+		"extra":
+			# Jovem dedicado pede treino extra com especialista
+			var pool6: Array = []
+			for q: Player in squad:
+				if q.age(world.year) <= 23 and (q.has_trait("esforcado") or q.has_trait("perfeccionista") or q.hid("det") >= 15) and q.potential - q.overall >= 4:
+					pool6.append(q)
+			if pool6.is_empty():
+				return {}
+			var px: Player = RngUtil.pick(rng, pool6)
+			ev["p"] = px.id
+			ev["d"] = {"cost": Valuation.round_value(maxf(40000.0, float(FinanceManager.expected_revenue(club)) * 0.004))}
+		"rebel":
+			# O rebelde barrado que se recusa a treinar
+			var pool7: Array = []
+			for q: Player in squad:
+				if (q.has_trait("rebelde") or q.has_trait("estrela") or HiddenPersona.hot_head(q)) and q.minutes_season < 360 and world.current_turn() > 4:
+					pool7.append(q)
+			if pool7.is_empty():
+				return {}
+			ev["p"] = (RngUtil.pick(rng, pool7) as Player).id
+		"chairman":
+			# Estrela bate de frente com o presidente (salário atrasado, renovação travada, venda forçada)
+			var pool8: Array = []
+			for q: Player in squad:
+				if q.squad_status <= Player.STATUS_STARTER and (q.hid("pol") >= 11 or q.has_trait("estrela") or q.has_trait("lider") or club.balance < 0):
+					pool8.append(q)
+			if pool8.is_empty():
+				return {}
+			ev["p"] = (RngUtil.pick(rng, pool8) as Player).id
+			ev["d"] = {"why": 0 if club.balance < 0 else rng.randi_range(1, 2)}
+		"captain_meeting":
+			if turn < 4:
+				return {}
+			var leaders: Array = []
+			for q: Player in squad:
+				if q.age(world.year) >= 27 and (q.has_trait("lider") or q.squad_status <= Player.STATUS_STARTER):
+					leaders.append(q)
+			if leaders.is_empty():
+				return {}
+			ev["p"] = (RngUtil.pick(rng, leaders) as Player).id
+			ev["d"] = {"topic": rng.randi_range(0, 2)}
+		"training_star":
+			var hot: Array = []
+			for q: Player in squad:
+				if not q.is_injured() and q.form() >= 6.8 and q.morale >= 45.0:
+					hot.append(q)
+			if hot.is_empty():
+				return {}
+			ev["p"] = (RngUtil.pick(rng, hot) as Player).id
+		"academy_path":
+			var kid: Player = YouthManager.best_prospect(world, club)
+			if kid == null or kid.age(world.year) > 20:
+				return {}
+			ev["p"] = kid.id
+			ev["d"] = {"age": kid.age(world.year)}
+		"media_leak":
+			if turn < 5:
+				return {}
+			var nf := FixtureManager.next_fixture_for(world, club.id)
+			if nf == null:
+				return {}
+			var no := world.club(nf.opponent_of(club.id))
+			if no == null:
+				return {}
+			ev["d"] = {"opp": no.short_name, "what": rng.randi_range(0, 2)}
 		"takeover":
 			# Raro: investidores só aparecem de tempos em tempos e não logo depois de uma troca de dono.
 			var own := WorldEvents.owner_of(world, club.id)
 			if turn < 4 or rng.randf() > 0.25 or (not own.is_empty() and world.year - int(own.get("y", 0)) < WorldEvents.OWNER_COOLDOWN):
 				return {}
 			var revenue := float(FinanceManager.expected_revenue(club))
-			ev["d"] = {"who": RngUtil.pick(rng, WorldEvents.INVESTORS), "money": Valuation.round_value(revenue * rng.randf_range(0.8, 1.8) + maxi(0, -club.balance))}
+			ev["d"] = {"who": ClubEvents.investor_for(club, rng), "money": Valuation.round_value(revenue * rng.randf_range(0.8, 1.8) + maxi(0, -club.balance))}
 		"stadium":
 			if club.fan_base < club.capacity or world.stats.has("stadium_work"):
 				return {}
@@ -448,6 +558,55 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 					{"t": "Multar os dois", "hint": "Multa de %s cada · os dois ficam chateados" % Fmt.money(int(d.get("fine", 0)))},
 					{"t": "Afastar %s do próximo jogo" % pn, "hint": "Ele cumpre suspensão interna · o grupo aprova"},
 					{"t": "Conversar e deixar passar", "hint": "Sem punição · entrosamento sofre"}]}
+		"party":
+			return {"title": "%s flagrado na balada" % pn, "def": 1,
+				"body": "Um vídeo de %s %s, dois dias antes do jogo, viralizou. A torcida cobra e a imprensa quer saber o que o treinador vai fazer." % [pn, d.get("where", "numa festa")],
+				"options": [
+					{"t": "Multar e deixar no banco", "hint": "Multa de %s · ele fica fora de um jogo · grupo aprova" % Fmt.money(int(d.get("fine", 0)))},
+					{"t": "Multar em particular", "hint": "Moral dele cai um pouco · torcida acha pouco"},
+					{"t": "Defender o jogador", "hint": "Ele fica grato · torcida e diretoria reclamam"}]}
+		"betting":
+			return {"title": "%s investigado por apostas" % pn, "def": 1,
+				"body": "A polícia e a justiça desportiva investigam apostas suspeitas ligadas a cartões de %s. Ainda não há acusação formal." % pn,
+				"options": [
+					{"t": "Afastar até a investigação acabar", "hint": "Fora por 3 jogos · protege o clube"},
+					{"t": "Manter e apoiar publicamente", "hint": "Ele joga · se for punido, a suspensão é longa"},
+					{"t": "Rescindir o contrato", "hint": "Sai sem custo · o elenco estranha a pressa"}]}
+		"baby":
+			return {"title": "Nasceu o filho de %s" % pn, "def": 0,
+				"body": "%s pediu para acompanhar o nascimento do filho, justo na semana do próximo jogo." % pn,
+				"options": [
+					{"t": "Liberar", "hint": "Fica fora de um jogo · volta nas nuvens"},
+					{"t": "Pedir que fique para o jogo", "hint": "Ele joga · a moral cai e o grupo não gosta"}]}
+		"social":
+			var what: String = ["uma indireta sobre ficar no banco", "um vídeo reclamando da tática", "curtidas em críticas ao treinador"][int(d.get("what", 0)) % 3]
+			return {"title": "Polêmica nas redes: %s" % pn, "def": 1,
+				"body": "%s postou %s. Os prints rodam os grupos de torcedores e a imprensa pergunta se há racha no elenco." % [pn, what],
+				"options": [
+					{"t": "Enquadrar em público", "hint": "Autoridade reforçada · ele fica chateado"},
+					{"t": "Conversar em particular", "hint": "Clima acalma · parte da imprensa acha fraqueza"},
+					{"t": "Ignorar", "hint": "Nada muda agora · outros podem se sentir à vontade"}]}
+		"extra":
+			return {"title": "%s quer treino extra" % pn, "def": 1,
+				"body": "%s pediu para contratar um especialista e treinar depois do expediente. Custo: %s." % [pn, Fmt.money(int(d.get("cost", 0)))],
+				"options": [
+					{"t": "Bancar o especialista", "hint": "Evolui mais rápido · moral sobe"},
+					{"t": "Agradecer e recusar", "hint": "Sem custo · ele fica um pouco frustrado"}]}
+		"rebel":
+			return {"title": "%s se recusa a treinar" % pn, "def": 0,
+				"body": "Sem jogar, %s não apareceu no treino de hoje e mandou recado pelo empresário: quer ser titular ou sair." % pn,
+				"options": [
+					{"t": "Afastar do elenco por uma semana", "hint": "Fica fora de um jogo · o grupo apoia o treinador"},
+					{"t": "Prometer minutos", "hint": "Ele volta · precisa começar 2 dos próximos 5 jogos"},
+					{"t": "Colocar à venda", "hint": "Entra na lista de transferências"}]}
+		"chairman":
+			var why2: String = ["os salários atrasados", "a renovação que a diretoria travou", "a venda de um companheiro sem consultar o grupo"][int(d.get("why", 0)) % 3]
+			return {"title": "%s bate de frente com o presidente" % pn, "def": 2,
+				"body": "Em entrevista, %s criticou o presidente por %s. A diretoria ficou irritada e espera que o treinador se posicione." % [pn, why2],
+				"options": [
+					{"t": "Ficar do lado do jogador", "hint": "Elenco fecha com você · diretoria perde confiança"},
+					{"t": "Ficar do lado da diretoria", "hint": "Presidente agradece · ele e parte do elenco se chateiam"},
+					{"t": "Mediar uma reunião", "hint": "Clima melhora aos poucos · ninguém sai 100% satisfeito"}]}
 		"medical":
 			return {"title": "Departamento médico", "def": 1,
 				"body": "O médico sugere um tratamento intensivo para acelerar a volta dos lesionados. Custo: %s." % Fmt.money(int(d.get("cost", 0))),
@@ -499,6 +658,37 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 				"options": [
 					{"t": "Subir para o elenco", "hint": "Entra no time principal"},
 					{"t": "Manter na base mais um tempo", "hint": "Segue evoluindo com a base"}]}
+		"captain_meeting":
+			var topic := int(d.get("topic", 0))
+			var issue: String = ["o grupo sentiu a cobrança das últimas semanas", "alguns reservas estão ficando impacientes", "os mais jovens estão precisando de liderança"][topic % 3]
+			return {"title": "O capitão pediu uma conversa", "def": 1,
+				"body": "%s veio falar em nome do vestiário: %s. Ele quer saber como você pretende conduzir o grupo." % [pn, issue],
+				"options": [
+					{"t": "Abrir o jogo com o elenco", "hint": "Confiança do grupo sobe · você divide a responsabilidade"},
+					{"t": "Pedir que o capitão acalme o vestiário", "hint": "Liderança dele ganha peso · efeito moderado"},
+					{"t": "Dizer que cada um deve cuidar do próprio trabalho", "hint": "Autoridade sobe · moral do grupo pode cair"}]}
+		"training_star":
+			return {"title": "%s voando no treino" % pn, "def": 1,
+				"body": "A comissão destacou %s como o melhor dos últimos treinos. Intensidade, confiança e execução chamaram atenção." % pn,
+				"options": [
+					{"t": "Prometer uma chance no time", "hint": "Precisa começar 1 dos próximos 3 jogos"},
+					{"t": "Elogiar e manter a disputa aberta", "hint": "Moral sobe sem promessa"},
+					{"t": "Manter a hierarquia", "hint": "Sem promessa · ele pode se frustrar"}]}
+		"academy_path":
+			return {"title": "Plano para %s" % pn, "def": 1,
+				"body": "A base quer uma definição para %s, de %d anos. O garoto está evoluindo e pergunta qual é o próximo passo." % [pn, int(d.get("age", 0))],
+				"options": [
+					{"t": "Integrar aos treinos do profissional", "hint": "Moral e desenvolvimento sobem"},
+					{"t": "Manter na base com plano individual", "hint": "Desenvolvimento sobe um pouco"},
+					{"t": "Dizer que ainda não está pronto", "hint": "Sem mudança técnica · moral cai"}]}
+		"media_leak":
+			var leak: String = ["a provável escalação", "uma mudança tática treinada a portas fechadas", "a lista de jogadores poupados"][int(d.get("what", 0)) % 3]
+			return {"title": "Vazamento antes do jogo", "def": 1,
+				"body": "A imprensa publicou %s para o jogo contra o %s. A informação saiu de dentro do clube." % [leak, d.get("opp", "adversário")],
+				"options": [
+					{"t": "Mudar o plano de última hora", "hint": "Evita previsibilidade · grupo perde um pouco de confiança"},
+					{"t": "Manter o plano e blindar o elenco", "hint": "Confiança do grupo sobe"},
+					{"t": "Abrir investigação interna", "hint": "Diretoria aprova · ambiente fica tenso"}]}
 		"takeover":
 			var saf := club.nation == "BRA"
 			return {"title": "Proposta de compra do clube", "def": 1,
@@ -815,6 +1005,64 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 					skip.append(p.id)
 					world.stats["ev_skip"] = skip
 				msg = "Ele segue na base."
+		"captain_meeting":
+			if p == null or p.club_id != club.id:
+				return "O capitão já não está no clube."
+			match opt:
+				0:
+					_team_morale(world, club, 5.0)
+					People.add_trust(world, p, 6.0)
+					msg = "A conversa franca foi bem recebida pelo grupo."
+				1:
+					_team_morale(world, club, 2.0)
+					People.add_trust(world, p, 4.0)
+					msg = "%s assumiu a responsabilidade de conversar com o elenco." % p.display_name()
+				_:
+					_team_morale(world, club, -4.0)
+					club.board_confidence = clampf(club.board_confidence + 1.0, 0.0, 100.0)
+					msg = "O recado foi firme, mas parte do vestiário não gostou."
+		"training_star":
+			if p == null or p.club_id != club.id:
+				return "O jogador já não está no clube."
+			match opt:
+				0:
+					_morale(p, 9.0)
+					world.promises.append({"k": "minutes", "p": p.id, "until": turn + 3, "need": 1, "s0": p.stat(Player.S_STARTS) + _cup_starts(p)})
+					msg = "Promessa feita: %s terá uma chance nos próximos 3 jogos." % p.display_name()
+				1:
+					_morale(p, 6.0)
+					People.add_trust(world, p, 3.0)
+					msg = "%s saiu motivado da conversa." % p.display_name()
+				_:
+					_morale(p, -3.0)
+					msg = "%s entendeu, mas esperava uma recompensa pelo treino." % p.display_name()
+		"academy_path":
+			if p == null:
+				return "O jogador já não está disponível."
+			match opt:
+				0:
+					p.dev_acc += 0.8
+					_morale(p, 8.0)
+					msg = "%s passa a treinar mais perto do elenco profissional." % p.display_name()
+				1:
+					p.dev_acc += 0.45
+					_morale(p, 3.0)
+					msg = "A base montou um plano individual para %s." % p.display_name()
+				_:
+					_morale(p, -5.0)
+					msg = "%s ficou decepcionado, mas segue trabalhando na base." % p.display_name()
+		"media_leak":
+			match opt:
+				0:
+					_team_morale(world, club, -2.0)
+					msg = "A comissão ajustou o plano. O adversário terá menos certezas, mas o grupo sentiu a mudança."
+				1:
+					_team_morale(world, club, 3.0)
+					msg = "Você manteve a ideia e blindou o elenco publicamente."
+				_:
+					club.board_confidence = clampf(club.board_confidence + 2.0, 0.0, 100.0)
+					_team_morale(world, club, -1.0)
+					msg = "A diretoria abriu uma investigação interna sobre o vazamento."
 		"takeover":
 			var sold := opt == 0 or (opt == 1 and world.rng.randf() < 0.5)
 			if sold:
@@ -826,6 +1074,10 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 				msg = "O conselho barrou a venda. A torcida aplaudiu sua posição."
 			else:
 				msg = "O conselho recusou a proposta."
+		"party", "betting", "baby", "social", "extra", "rebel", "chairman":
+			if p == null or p.club_id != club.id:
+				return "Ele já não está no clube."
+			msg = _resolve_player_event(world, club, p, String(ev["k"]), opt, d, turn)
 		"stadium":
 			var cost := int(d.get("cost", 0))
 			if opt == 0 and club.balance >= cost:
@@ -835,6 +1087,115 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 			else:
 				msg = "Ampliação adiada."
 	return msg
+
+
+static func _resolve_player_event(world: GameWorld, club: Club, p: Player, k: String, opt: int, d: Dictionary, turn: int) -> String:
+	var pn := p.display_name()
+	match k:
+		"party":
+			match opt:
+				0:
+					p.suspension = maxi(p.suspension, 1)
+					world.mark_suspended(p)
+					_morale(p, -8.0)
+					_team_morale(world, club, 1.0)
+					return "%s foi multado e fica fora do próximo jogo." % pn
+				1:
+					_morale(p, -3.0)
+					club.fan_mood = clampf(club.fan_mood - 2.0, 0.0, 100.0)
+					return "Multa discreta. A torcida esperava mais rigor."
+				_:
+					_morale(p, 6.0)
+					club.fan_mood = clampf(club.fan_mood - 4.0, 0.0, 100.0)
+					club.board_confidence = clampf(club.board_confidence - 3.0, 0.0, 100.0)
+					return "Você defendeu %s. Ele agradeceu; a torcida e a diretoria, não." % pn
+		"betting":
+			var guilty := world.rng.randf() < (0.55 if p.hid("pro") <= 5 else 0.3)
+			match opt:
+				0:
+					p.suspension = maxi(p.suspension, 3)
+					world.mark_suspended(p)
+					if guilty:
+						p.suspension = maxi(p.suspension, 10)
+						return "Afastado por precaução; a investigação confirmou a suspeita e %s pegou 10 jogos de suspensão." % pn
+					return "%s ficou fora de 3 jogos e foi inocentado." % pn
+				1:
+					if guilty:
+						p.suspension = maxi(p.suspension, 12)
+						world.mark_suspended(p)
+						club.board_confidence = clampf(club.board_confidence - 6.0, 0.0, 100.0)
+						return "A justiça puniu %s com 12 jogos de suspensão. O apoio público pegou mal." % pn
+					_morale(p, 8.0)
+					return "Nada foi provado contra %s, que agradeceu o apoio." % pn
+				_:
+					TransferManager.release_free(world, p)
+					_team_morale(world, club, -2.0)
+					return "Contrato de %s rescindido." % pn
+		"baby":
+			if opt == 0:
+				p.suspension = maxi(p.suspension, 1)
+				world.mark_suspended(p)
+				_morale(p, 12.0)
+				_team_morale(world, club, 1.0)
+				return "%s foi liberado e volta radiante." % pn
+			_morale(p, -10.0)
+			_team_morale(world, club, -1.5)
+			return "%s ficou para o jogo, mas a cabeça está longe." % pn
+		"social":
+			match opt:
+				0:
+					_morale(p, -7.0)
+					_team_morale(world, club, 1.0)
+					return "Enquadrado em público. O recado foi dado ao grupo todo."
+				1:
+					_morale(p, 3.0)
+					return "Conversa franca. %s apagou o post." % pn
+				_:
+					_team_morale(world, club, -1.5)
+					return "Você ignorou. A polêmica esfriou, mas a hierarquia sofreu."
+		"extra":
+			if opt == 0:
+				var cost := int(d.get("cost", 0))
+				club.add_ledger("investimentos", -cost)
+				PlayerDevelopment.apply_growth(world, p, world.rng.randf_range(0.6, 1.4))
+				_morale(p, 6.0)
+				return "%s treina com o especialista e já mostra evolução." % pn
+			_morale(p, -3.0)
+			return "%s entendeu, mas ficou frustrado." % pn
+		"rebel":
+			match opt:
+				0:
+					p.suspension = maxi(p.suspension, 1)
+					world.mark_suspended(p)
+					_morale(p, -10.0)
+					_team_morale(world, club, 1.5)
+					return "%s afastado por uma semana. O grupo apoiou." % pn
+				1:
+					_morale(p, 10.0)
+					world.promises.append({"k": "minutes", "p": p.id, "until": turn + 5, "need": 2, "s0": p.stat(Player.S_STARTS) + _cup_starts(p)})
+					return "%s voltou aos treinos com a promessa de jogar." % pn
+				_:
+					p.transfer_listed = true
+					p.asking_price = TransferManager.asking_price(world, p)
+					_morale(p, -4.0)
+					return "%s está à venda." % pn
+		"chairman":
+			match opt:
+				0:
+					_team_morale(world, club, 3.0)
+					_morale(p, 8.0)
+					club.board_confidence = clampf(club.board_confidence - 8.0, 0.0, 100.0)
+					return "Você ficou com o jogador. O vestiário fechou com você; o presidente não gostou."
+				1:
+					_morale(p, -12.0)
+					_team_morale(world, club, -2.0)
+					club.board_confidence = clampf(club.board_confidence + 5.0, 0.0, 100.0)
+					return "Você apoiou a diretoria. %s ficou isolado." % pn
+				_:
+					_morale(p, 3.0)
+					club.board_confidence = clampf(club.board_confidence + 1.0, 0.0, 100.0)
+					return "Reunião feita. As partes baixaram o tom."
+	return ""
 
 
 static func _morale(p: Player, delta: float) -> void:
