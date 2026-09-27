@@ -47,8 +47,8 @@ jobs:
             bash -lc '
               set -euo pipefail
               apt-get update -qq
-              apt-get install -y --no-install-recommends libfontconfig1 xvfb >/dev/null
-              xvfb-run -a godot --path /workspace/mais-uma-rodada --resolution 800x800 \
+              apt-get install -y --no-install-recommends libfontconfig1 xvfb libxcursor1 libxinerama1 libxi6 libxrandr2 libxrender1 libxext6 libgl1 >/dev/null
+              xvfb-run -a godot --display-driver x11 --path /workspace/mais-uma-rodada --resolution 800x800 \
                 --script res://tools/face_sheet.gd -- \
                 --out=/workspace/portrait-realism-sheet.png \
                 --size=190 --cols=4 --eth=1,4,7,8 --ages=21,24,28,32
