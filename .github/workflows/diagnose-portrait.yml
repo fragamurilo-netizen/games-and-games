@@ -52,13 +52,20 @@ jobs:
                 --script res://tools/face_sheet.gd -- \
                 --out=/workspace/portrait-realism-sheet.png \
                 --size=190 --cols=4 --eth=1,4,7,8 --ages=21,24,28,32
+              xvfb-run -a godot --display-driver x11 --path /workspace/mais-uma-rodada --resolution 800x800 \
+                --script res://tools/face_sheet.gd -- \
+                --out=/workspace/portrait-realism-closeup.png \
+                --size=360 --cols=2 --eth=1,7 --ages=23,29
             '
           test -s portrait-realism-sheet.png
+          test -s portrait-realism-closeup.png
 
-      - name: Upload portrait realism sheet
+      - name: Upload portrait realism previews
         uses: actions/upload-artifact@v4
         with:
           name: portrait-realism-sheet
-          path: portrait-realism-sheet.png
+          path: |
+            portrait-realism-sheet.png
+            portrait-realism-closeup.png
           if-no-files-found: error
           retention-days: 14
