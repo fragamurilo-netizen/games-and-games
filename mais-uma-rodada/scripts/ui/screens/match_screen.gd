@@ -7,7 +7,6 @@ const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
-const USE_LIVE_ENGINE := false
 
 var _sim: MatchSimulation
 var _fx: Fixture
@@ -47,11 +46,6 @@ var _strip_chips: Array = [] # {e, panel, score, info, box, flash, total}
 var _strip_t := 0.0
 var _strip_hold := 0.0
 var _strip_x := 0.0
-## Motor posicional ligado: o campo reproduz os quadros do LiveEngine (trecho do minuto com os
-## lances importantes em velocidade quase real; minutos calmos em ritmo acelerado).
-var _live := false
-var _live_start := 0.0
-var _live_speed := 1.0
 var _sub_out := -1
 var _built := false
 var _tab := "feed" # feed | stats | round | table
@@ -120,8 +114,71 @@ func on_hide() -> void:
 	AudioManager.crowd_stop()
 
 
+## Chamado quando a tela troca de ponto de quebra (girar o aparelho): só rearruma.
 func refresh() -> void:
-	pass
+	if _built:
+		_responsive_layout()
+
+
+var _wide_body: HBoxContainer = null
+
+
+## Paisagem e tablet: campo e números à esquerda, abas e narração numa coluna à direita.
+## No celular em retrato fica tudo empilhado (o placar em cima e os controles embaixo sempre).
+func _responsive_layout() -> void:
+	var wide := UILayout.is_wide()
+	if wide == (_wide_body != null):
+		return
+	var left_nodes: Array = []
+	var right_nodes: Array = []
+	var pitch_box := _pitch.get_parent()
+	left_nodes.append(pitch_box)
+	var stats_box := _stats_box.get_parent()
+	var tabs_box := _tabs_row.get_parent()
+	var strip: Node = null
+	var idx_pitch := pitch_box.get_index()
+	if idx_pitch + 1 < _root.get_child_count() and _root.get_child(idx_pitch + 1) != stats_box:
+		strip = _root.get_child(idx_pitch + 1)
+	if strip != null:
+		left_nodes.append(strip)
+	left_nodes.append(stats_box)
+	right_nodes = [tabs_box, _feed_scroll, _tab_scroll]
+	if wide:
+		var at := pitch_box.get_index()
+		_wide_body = UIKit.hbox(0)
+		_wide_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		var lv := UIKit.vbox(0)
+		lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lv.size_flags_stretch_ratio = 1.4
+		var rv := UIKit.vbox(0)
+		rv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for n: Node in left_nodes:
+			_root.remove_child(n)
+			lv.add_child(n)
+		for n: Node in right_nodes:
+			_root.remove_child(n)
+			rv.add_child(n)
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL
+		_wide_body.add_child(lv)
+		var sep := ColorRect.new()
+		sep.color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+		sep.custom_minimum_size.x = 1
+		sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_wide_body.add_child(sep)
+		_wide_body.add_child(rv)
+		_root.add_child(_wide_body)
+		_root.move_child(_wide_body, at)
+	else:
+		var at := _wide_body.get_index()
+		var order: Array = left_nodes + right_nodes
+		for n: Node in order:
+			n.get_parent().remove_child(n)
+			_root.add_child(n)
+			_root.move_child(n, at)
+			at += 1
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_FILL
+		_wide_body.queue_free()
+		_wide_body = null
 
 
 # ---------------------------------------------------------------------------
@@ -157,10 +214,7 @@ func _build() -> void:
 	var seed_base := (_fx.home * 131 + _fx.away) * 7919 + _fx.round * 97 + w.year
 	_com = Commentary.new(_sim, home.stadium, seed_base)
 	# Motor da partida: o minuto a minuto estatístico (o mesmo dos outros jogos do mundo), encenado
-	# pelo PitchMotion. O LiveEngine posicional segue no código, mas desligado.
-	if USE_LIVE_ENGINE and _sim.live == null and not _sim.started:
-		_sim.enable_live(seed_base * 13 + 7)
-	_live = _sim.live != null
+	# pelo PitchMotion.
 	_aux_state = {"seed": seed_base, "ev": 0, "given": {}}
 	_vis_rng.seed = seed_base * 31 + 17
 
@@ -172,7 +226,7 @@ func _build() -> void:
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
 	_pitch.horizontal = true
-	_pitch.custom_minimum_size = Vector2(0, 440)
+	_pitch.custom_minimum_size = Vector2(0, 330)
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
 	_pitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -189,6 +243,7 @@ func _build() -> void:
 	_pitch.motion = PitchMotion.new(seed_base * 7 + 3)
 	_pitch.motion.tempo = TEMPO[_pace]
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
+	StadiumStyle.apply_weather(_stadium, _sim.wx)
 	_pitch.stadium = _stadium
 	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
 	AudioManager.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
@@ -228,12 +283,12 @@ func _build() -> void:
 	_stats_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_stats_box.add_child(_stats_lbl)
 	_momentum = MomentumView.new()
-	_momentum.custom_minimum_size = Vector2(0, 50)
+	_momentum.custom_minimum_size = Vector2(0, 30)
 	_momentum.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_momentum.home_color = _side_color(0)
 	_momentum.away_color = _side_color(1)
 	_stats_box.add_child(_momentum)
-	_root.add_child(UIKit.margin(_stats_box, 20, 2, 20, 6))
+	_root.add_child(UIKit.margin(_stats_box, 20, 0, 20, 2))
 	# Abas: lances, números, outros jogos e tabela ao vivo (o jogo segue rolando em todas)
 	_tabs_row = UIKit.hbox(6)
 	_root.add_child(UIKit.margin(_tabs_row, 14, 0, 14, 4))
@@ -243,7 +298,7 @@ func _build() -> void:
 	_feed_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_feed_scroll.scroll_deadzone = 14
 	_feed_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_feed = UIKit.vbox(8)
+	_feed = UIKit.vbox(12)
 	_feed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_feed_scroll.add_child(UIKit.margin(_feed, 18, 6, 18, 12))
 	(_feed.get_parent() as Control).size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -268,6 +323,7 @@ func _build() -> void:
 	_controls_panel.add_child(_controls)
 	_root.add_child(_controls_panel)
 	_build_controls()
+	_responsive_layout()
 	# Comemoração por cima de tudo
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
@@ -293,7 +349,7 @@ func _build() -> void:
 func _open_intro() -> void:
 	BroadcastIntro.show(world(), _sim, _fx, _stadium, func():
 		if not _sim.started and _sim.can_talk(_user_side):
-			_open_talk(false))
+			_open_talk(false), [_colors[0], _colors[1], _colors[2], _colors[3]])
 
 
 ## Texto do selo da emissora: "AO VIVO", "INTERVALO" ou "FIM DE JOGO".
@@ -374,8 +430,8 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	sb.border_width_bottom = 4
 	sb.content_margin_left = 16
 	sb.content_margin_right = 16
-	sb.content_margin_top = 10
-	sb.content_margin_bottom = 8
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 4
 	match layout:
 		"tv":
 			sb.border_width_bottom = 0
@@ -435,10 +491,10 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	strip.add_child(srow)
 	v.add_child(strip)
 	var row := UIKit.hbox(8)
-	row.add_child(UIKit.crest(home, 58))
+	row.add_child(UIKit.crest(home, 40))
 	if layout == "tv" or layout == "angular":
 		row.add_child(_team_block(_colors[0], _colors[1], layout))
-	_home_name = UIKit.label(home.short_name, "H2")
+	_home_name = UIKit.label(home.short_name, "H3")
 	_home_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_home_name.clip_text = true
 	row.add_child(_home_name)
@@ -480,6 +536,7 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 			clock_col = Color("#FFB000")
 	score_box.add_theme_stylebox_override(&"panel", sbx)
 	_score_lbl = UIKit.label("0 – 0", "Score")
+	_score_lbl.add_theme_font_size_override(&"font_size", 40)
 	_score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_score_lbl.add_theme_color_override(&"font_color", score_col)
 	score_box.add_child(_score_lbl)
@@ -500,14 +557,14 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	else:
 		mid.add_child(_clock_lbl)
 	row.add_child(mid)
-	_away_name = UIKit.label(away.short_name, "H2")
+	_away_name = UIKit.label(away.short_name, "H3")
 	_away_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_away_name.clip_text = true
 	row.add_child(_away_name)
 	if layout == "tv" or layout == "angular":
 		row.add_child(_team_block(_colors[2], _colors[3], layout))
-	row.add_child(UIKit.crest(away, 58))
+	row.add_child(UIKit.crest(away, 40))
 	v.add_child(row)
 	var sc := UIKit.hbox(8)
 	_home_scorers = UIKit.label("", "Small", true)
@@ -516,11 +573,33 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 	_away_scorers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	sc.add_child(_away_scorers)
 	v.add_child(sc)
+	v.add_child(_conditions_row())
 	_ticker = UIKit.label("", "Small")
 	_ticker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_ticker.clip_text = true
 	v.add_child(_ticker)
 	return panel
+
+
+## Condições do jogo: clima (ícone), temperatura, dia/noite, altitude e público.
+func _conditions_row() -> Control:
+	var row := UIKit.hbox(8)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var wx: Dictionary = _sim.wx
+	var bits: Array = []
+	if not wx.is_empty():
+		row.add_child(WeatherIcon.new(String(wx.get("kind", "cloud")), bool(wx.get("night", false)), 26))
+		bits.append("%s · %d°C" % [Weather.NAMES.get(String(wx.get("kind", "")), ""), int(wx.get("temp", 20))])
+		bits.append("%dh" % int(wx.get("hour", 16)))
+		if wx.has("alt"):
+			bits.append("%s m de altitude" % Fmt.thousands(int(wx["alt"])))
+	if _sim.attendance > 0:
+		bits.append("%s torcedores" % Fmt.thousands(_sim.attendance))
+	else:
+		bits.append("portões fechados")
+	var l := UIKit.label(" · ".join(bits), "Small")
+	row.add_child(l)
+	return row
 
 
 ## Bloco com as duas cores do time ao lado do nome (placares de TV e angular).
@@ -551,22 +630,29 @@ func _build_controls() -> void:
 		cont.custom_minimum_size.y = 92
 		_controls.add_child(cont)
 		return
-	_play_btn = UIKit.button("", "", _toggle_play, "pause")
-	_speed_btn = UIKit.button(PACE_NAMES[_pace], "", _cycle_speed, "fast")
-	_tac_btn = UIKit.button("Tática", "", _open_tactics, "tactics")
-	_shout_btn = UIKit.button("Gritar", "", _open_shouts, "whistle")
-	_sound_btn = UIKit.button("Som", "", _toggle_match_sound, "sound")
-	_skip_btn = UIKit.button("Fim", "", _confirm_skip, "skip")
-	_skip_btn.text = ""
+	_play_btn = _ctl_btn("Pausar", "pause", _toggle_play)
+	_speed_btn = _ctl_btn(PACE_NAMES[_pace], "fast", _cycle_speed)
+	_tac_btn = _ctl_btn("Tática", "tactics", _open_tactics)
+	_shout_btn = _ctl_btn("Gritar", "whistle", _open_shouts)
+	_sound_btn = _ctl_btn("Som", "sound", _toggle_match_sound)
+	_skip_btn = _ctl_btn("Fim", "skip", _confirm_skip)
 	_skip_btn.tooltip_text = "Ir para o fim"
 	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _sound_btn, _skip_btn]:
-		var icon_only: bool = b == _play_btn or b == _skip_btn
-		b.size_flags_horizontal = Control.SIZE_FILL if icon_only else Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size = Vector2(88 if icon_only else 0, 80)
-		b.add_theme_font_size_override(&"font_size", 21)
 		_controls.add_child(b)
 	_update_play_button()
 	_update_sound_button()
+
+
+## Botão da barra: ícone em cima e o nome embaixo (cabe em qualquer largura de celular).
+func _ctl_btn(text: String, icon_name: String, cb: Callable) -> Button:
+	var b := UIKit.button(text, "", cb, icon_name)
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size = Vector2(0, 88)
+	b.clip_text = false
+	b.add_theme_font_size_override(&"font_size", 16)
+	return b
 
 
 func _toggle_match_sound() -> void:
@@ -586,16 +672,16 @@ func _update_sound_button() -> void:
 func _update_play_button() -> void:
 	if _play_btn == null or _done:
 		return
-	_play_btn.text = ""
 	if _halftime:
-		_play_btn.tooltip_text = "2º tempo"
+		_play_btn.text = "2º tempo"
 		_play_btn.icon = UIKit.icon("play")
 	elif _paused:
-		_play_btn.tooltip_text = "Seguir"
+		_play_btn.text = "Seguir"
 		_play_btn.icon = UIKit.icon("play")
 	else:
-		_play_btn.tooltip_text = "Pausar"
+		_play_btn.text = "Pausar"
 		_play_btn.icon = UIKit.icon("pause")
+	_play_btn.tooltip_text = _play_btn.text
 
 
 static func _cdist(a: Color, b: Color) -> float:
@@ -697,10 +783,7 @@ func _advance() -> void:
 	_sim.step()
 	# Primeiro o campo encena o lance; a narração do desfecho sai quando a jogada termina.
 	_play_delay = 0.0
-	if _live:
-		_play_live()
-	else:
-		_script_play()
+	_script_play()
 	_drain(false)
 	_play_delay = 0.0
 	_after_step()
@@ -766,10 +849,7 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 			_add_line(line)
 			continue
 		var d := float(line["delay"]) * _delay_scale()
-		if _live and ev.has("sec"):
-			# Narração no instante do lance dentro do trecho reproduzido
-			d = float(line["delay"]) * 0.3 + maxf(0.0, (float(ev["sec"]) - _live_start) / _live_speed)
-		elif scripted:
+		if scripted:
 			# Preparação no meio da jogada; desfecho quando a bola chega.
 			d = d + _play_delay if d > 0.0 or style in ["goal", "card_y", "card_r", "big"] else _play_delay * 0.5
 		_enqueue(line, ev, d)
@@ -937,41 +1017,7 @@ func _find_ev(types: Array) -> Dictionary:
 	return {}
 
 
-## Traduz a fase do minuto (e os eventos dele) numa jogada encenada pelo PitchMotion.
-## Escolhe o trecho do minuto a mostrar: dos 8 s antes do primeiro lance importante até logo
-## depois do último, quase em tempo real; minuto sem lance passa acelerado (só o fim dele).
-func _play_live() -> void:
-	if _sim.live == null:
-		return
-	var fr: Array = _sim.live.frames
-	if fr.is_empty():
-		return
-	var last_t := float(fr.back()[0])
-	var k0 := INF
-	var k1 := -1.0
-	for k in _sim.live.keys:
-		if float(k[1]) >= 0.45:
-			k0 = minf(k0, float(k[0]))
-			k1 = maxf(k1, float(k[0]))
-	var a := 0.0
-	var b := last_t
-	var sp := 1.0
-	if k1 >= 0.0 and _pace < 2:
-		a = maxf(0.0, k0 - 8.0)
-		b = minf(last_t, k1 + 3.5)
-		sp = [1.35, 2.3][_pace]
-	else:
-		sp = [5.0, 9.0, 16.0][_pace]
-		a = maxf(0.0, last_t - PACE[_pace] * sp)
-	_live_start = a
-	_live_speed = sp
-	_pitch.motion.play_frames(fr, a, b, sp)
-	_clock = maxf(PACE[_pace], (b - a) / sp)
-
-
 func _script_play() -> void:
-	if _live:
-		return
 	var ph: Dictionary = _sim.last_phase
 	if ph.is_empty() or is_same(ph, _last_phase):
 		return
@@ -1065,6 +1111,8 @@ func _on_event_visual(ev: Dictionary) -> void:
 					a.hurt = 3.5
 		MatchSimulation.EV_KNOCK:
 			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p2", -1))), 2.2)
+		MatchSimulation.EV_CRAMP:
+			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p", -1))), 3.0)
 		MatchSimulation.EV_VAR:
 			_pitch.motion.var_check(2.0)
 
@@ -1127,6 +1175,8 @@ func _update_board() -> void:
 		_pitch.board = {"h": _sim.teams[0].club.abbr, "a": _sim.teams[1].club.abbr, "hs": _shown_score[0], "as": _shown_score[1], "clock": _clock_lbl.text}
 	_home_scorers.text = _scorer_text(0)
 	_away_scorers.text = _scorer_text(1)
+	# Linha dos goleadores só aparece quando alguém marcou (placar compacto)
+	(_home_scorers.get_parent() as Control).visible = _home_scorers.text != "" or _away_scorers.text != ""
 	var ph := _sim.possession_pct(0)
 	_poss_home.size_flags_stretch_ratio = maxf(0.05, ph)
 	_poss_away.size_flags_stretch_ratio = maxf(0.05, 1.0 - ph)
@@ -1198,11 +1248,15 @@ func _add_line(line: Dictionary) -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(bar)
 	var m := UIKit.label(String(line.get("minute", "")), "Mono")
-	m.custom_minimum_size.x = 76
+	m.custom_minimum_size.x = 70
+	m.add_theme_font_size_override(&"font_size", 22)
 	m.add_theme_color_override(&"font_color", UIColors.DIM)
 	row.add_child(m)
 	var variation := "H3" if style in ["goal", "big"] else ""
 	var t := UIKit.label(String(line.get("text", "")), variation, true)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if variation == "":
+		t.add_theme_font_size_override(&"font_size", 24)
 	var col := UIColors.TEXT
 	match style:
 		"info":
@@ -1478,13 +1532,11 @@ func _tab_list() -> Array:
 
 func _build_tabs() -> void:
 	UIKit.clear(_tabs_row)
-	var g := ButtonGroup.new()
-	for t in _tab_list():
-		var key: String = t[0]
-		var chip := UIKit.chip(t[1], key == _tab, g, func(): _set_tab(key))
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		_tabs_row.add_child(chip)
+	var t := UIKit.tabs(_tab_list(), _tab, func(key: String): _set_tab(key))
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for b in t.get_children():
+		(b as Button).custom_minimum_size.y = 56
+	_tabs_row.add_child(t)
 
 
 func _set_tab(key: String) -> void:
@@ -1784,8 +1836,6 @@ func _skip_to_end() -> void:
 	_hold = 0.0
 	_halftime = false
 	_pending_halftime = false
-	_sim.live = null # o resto do jogo sai do sorteio rápido
-	_live = false
 	_sim.run_to_end()
 	_drain(true)
 	_rebuild_scorers()
@@ -2206,6 +2256,10 @@ func _build_summary() -> void:
 	if _sim.derby:
 		top.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 18))
 	_feed.add_child(top)
+	# Mesa-redonda dos comentaristas nos jogos grandes
+	if Pundits.is_big(_sim):
+		var lg := world().league(_fx.comp)
+		_feed.add_child(Pundits.card("Mesa-redonda", Pundits.review(world(), _sim, lg.nation if lg != null else _sim.teams[0].club.nation)))
 	# Gols
 	var goals := UIKit.card("Card", 6)
 	goals.add_child(UIKit.section("Gols"))

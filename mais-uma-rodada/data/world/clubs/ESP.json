@@ -56,15 +56,14 @@
 			"capacity": 99000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "iberian",
-				"field": "stripes:3",
-				"symbol": "ball",
-				"chief_text": "FCB",
-				"cc": "#FFD100",
+				"shape": "barca",
+				"field": "barca",
+				"symbol": "ball_old",
+				"sym_pos": "low",
+				"sym_scale": 1.05,
 				"c1": "#004D98",
 				"c2": "#A50044",
-				"c3": "#A50044",
-				"sc": "#FFD100",
+				"c3": "#E4B43A",
 				"border": "gold"
 			},
 			"rivals": [

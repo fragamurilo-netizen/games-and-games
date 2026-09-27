@@ -19,6 +19,9 @@ var _match_muted := false # mute temporário da tela de partida; não altera as 
 var _fade: Tween
 ## Torcida da partida: loop dos donos da casa e da visitante, com volume que reage ao jogo.
 var _crowd_p: Array[AudioStreamPlayer] = []
+var _crowd_real: Array = [{}, {}] # perfil das torcidas que têm gravação de verdade
+var _crowd_prof: Array = [{}, {}]
+var _clip_p: AudioStreamPlayer = null
 var _crowd_task: Array[int] = [-1, -1]
 var _crowd_out: Array = [[], []] # resultado da thread: [PackedByteArray]
 var _crowd_cache: Dictionary = {} # chave do perfil -> AudioStreamWAV
@@ -254,12 +257,21 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 	_crowd_on = true
 	set_process(true)
 	var profs := [home, away]
+	_crowd_prof = [home, away]
 	var f := clampf(fill, 0.15, 1.0)
 	_crowd_base[0] = clampf(0.55 * float(home.get("loud", 1.0)) * (0.45 + 0.55 * f) * (1.0 - away_share * 0.6), 0.1, 0.95)
 	_crowd_base[1] = clampf(0.9 * float(away.get("loud", 1.0)) * away_share * (0.5 + 0.5 * f), 0.03, 0.6)
 	for i in 2:
 		_crowd_level[i] = 0.0
 		_crowd_boost[i] = 0.0
+		# Gravação de verdade da torcida (clube, liga ou país), se existir
+		var real := CrowdAudio.loop_for(profs[i])
+		if real != null:
+			_crowd_real[i] = profs[i]
+			_crowd_keys[i] = ""
+			_crowd_play(i, real)
+			continue
+		_crowd_real[i] = {}
 		var key := CrowdProfile.key_of(profs[i])
 		_crowd_keys[i] = key
 		if _crowd_cache.has(key):
@@ -295,6 +307,7 @@ func crowd_event(kind: String, side: int) -> void:
 		"goal":
 			_push(s, 0.6, 22.0)
 			_push(o, -0.55, 25.0)
+			crowd_clip(s, "gol")
 		"foul", "card":
 			# Falta/cartão do visitante: a casa vaia; da casa: a casa reclama do juiz
 			if s == 1 or kind == "card":
@@ -320,10 +333,28 @@ func _push(i: int, amount: float, secs: float) -> void:
 	_crowd_boost_t[i] = secs
 
 
-func _crowd_play(i: int, wav: AudioStreamWAV) -> void:
+func _crowd_play(i: int, wav: AudioStream) -> void:
 	_crowd_p[i].stream = wav
 	_crowd_p[i].volume_db = -60.0
 	_crowd_p[i].play(randf() * wav.get_length() * 0.9)
+
+
+## Toca o trecho gravado do clube ("entrada" antes do jogo, "gol" na comemoração). true se tocou.
+func crowd_clip(side: int, kind: String) -> bool:
+	if not _crowd_on or _match_muted or not AppSettings.sound:
+		return false
+	var prof: Dictionary = _crowd_real[clampi(side, 0, 1)] if not _crowd_real[clampi(side, 0, 1)].is_empty() else _crowd_prof[clampi(side, 0, 1)]
+	var st := CrowdAudio.clip_for(prof, kind)
+	if st == null:
+		return false
+	if _clip_p == null:
+		_clip_p = AudioStreamPlayer.new()
+		_clip_p.bus = _crowd_p[0].bus
+		add_child(_clip_p)
+	_clip_p.stream = st
+	_clip_p.volume_db = -4.0
+	_clip_p.play()
+	return true
 
 
 func _crowd_tick(delta: float) -> void:

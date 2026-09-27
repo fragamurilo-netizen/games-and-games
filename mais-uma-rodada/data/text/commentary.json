@@ -681,28 +681,39 @@
 		"Virada de jogo de {p}, a bola atravessa o campo.",
 		"{p} muda o lado da jogada e acha o companheiro livre.",
 		"Belo lançamento de {p} de um lado para o outro.",
-		"{team} vira o jogo e procura o corredor vazio."
+		"{team} vira o jogo e procura o corredor vazio.",
+		"{p} vira o jogo para {p2}, do outro lado.",
+		"Inversão de {p}: a bola cai nos pés de {p2}.",
+		"{p} cruza o campo com um passe de 40 metros."
 	],
 	"poss_long": [
 		"{p} dá o chutão para frente.",
 		"Ligação direta do {team}: {p} lança para o ataque.",
 		"{p} lança longo, a zaga afasta.",
 		"{team} aposta na bola longa em busca do centroavante.",
-		"Bola esticada por {p} para a disputa no alto."
+		"Bola esticada por {p} para a disputa no alto.",
+		"{p} lança nas costas da zaga, a bola fica com o goleiro.",
+		"Bola longa de {p}, disputa no alto com vantagem da zaga."
 	],
 	"poss_press": [
 		"O {opp} marca em cima e o {team} sofre para sair jogando.",
 		"Pressão alta! {p} se livra no aperto.",
 		"{p} é cercado por três, mas consegue tocar.",
 		"O {team} sai jogando sob muita pressão.",
-		"Marcação sufocante do {opp} na saída de bola."
+		"Marcação sufocante do {opp} na saída de bola.",
+		"{p} perde no aperto, mas recupera.",
+		"O {opp} sobe a marcação, {p} dá o chutão.",
+		"Linha alta do {opp}: {p} não tem para onde tocar."
 	],
 	"poss_build": [
 		"{team} sai jogando desde o goleiro.",
 		"{p} recua para o goleiro e o {team} reinicia a jogada.",
 		"Saída de três do {team}, com {p} entre os zagueiros.",
 		"{p} desce para buscar a bola e organiza a saída.",
-		"{team} constrói com calma desde a defesa."
+		"{team} constrói com calma desde a defesa.",
+		"O goleiro toca curto, {p} recebe e gira.",
+		"{p} baixa entre os zagueiros para iniciar.",
+		"Saída limpa do {team}, a bola chega a {p}."
 	],
 	"poss_throw": [
 		"Lateral para o {team}.",
@@ -720,7 +731,10 @@
 		"{p} recua a bola para a zaga.",
 		"{team} volta a bola e recomeça a jogada.",
 		"Sem espaço, {p} toca para trás.",
-		"{team} troca passes entre os zagueiros."
+		"{team} troca passes entre os zagueiros.",
+		"{p} volta para o goleiro, o {opp} pressiona.",
+		"{p} recua, o {team} recomeça tudo.",
+		"Sem opção, {p} devolve para trás."
 	],
 	"goal_counter": [
 		"GOL DE CONTRA-ATAQUE! {p} fecha a jogada em velocidade!",
@@ -938,5 +952,123 @@
 		"Repórter: o auxiliar do {team} passou orientações para os laterais.",
 		"O técnico do {team} chamou o capitão para conversar na beira do campo.",
 		"Repórter: mudança no {team} foi pedida pelos próprios jogadores, segundo o banco."
+	],
+	"cramp": [
+		"{p} sente câimbra e pede atendimento. Vai jogar no sacrifício.",
+		"Câimbra em {p}! O corpo não aguenta mais.",
+		"{p} cai com câimbra: o banco já se mexe.",
+		"Perna travada: {p} está com câimbra."
+	],
+	"poss_tabela": [
+		"{p} tabela com {p2} e ganha o espaço.",
+		"Tabelinha entre {p} e {p2}! Bonito de ver.",
+		"{p} toca, {p2} devolve de primeira.",
+		"{p2} e {p} trocam passes curtos na intermediária.",
+		"Um-dois rápido entre {p} e {p2}.",
+		"{p} aciona {p2} e pede de volta.",
+		"{p} e {p2} se entendem bem nessa tabela.",
+		"Triangulação do {team}: {p}, {p2} e a bola girando.",
+		"{p} arrasta a marcação e deixa com {p2}.",
+		"Toque de primeira de {p2} para {p}."
+	],
+	"poss_wing": [
+		"{p} abre com {p2} na ponta.",
+		"{p2} recebe aberto pelo lado e encara a marcação.",
+		"A bola chega a {p2}, colado na linha lateral.",
+		"{p} procura {p2} no corredor.",
+		"{team} leva o jogo pelo lado com {p2}.",
+		"{p2} avança pela beirada, o lateral acompanha.",
+		"{p} espeta a bola para {p2} correr.",
+		"{p2} recebe do {p} e segura a bola esperando apoio.",
+		"Passe longo de {p} para {p2}, aberto.",
+		"O {team} insiste pelo lado de {p2}."
+	],
+	"poss_carry": [
+		"{p} conduz a bola pelo meio.",
+		"{p} carrega e ganha metros.",
+		"{p} avança com a bola dominada, ninguém chega.",
+		"Arrancada de {p} até a intermediária.",
+		"{p} puxa o contra-ataque, mas o {opp} recompõe.",
+		"{p} leva a bola, olha, e espera o companheiro.",
+		"{p} passa por um e continua conduzindo.",
+		"{p} dá um tapa para frente e acelera.",
+		"{p} gira sobre a marcação e sai jogando.",
+		"{p} conduz com personalidade."
+	],
+	"poss_hold": [
+		"{p} segura a bola de costas e espera a subida.",
+		"{p} protege a bola com o corpo.",
+		"{p} prende a bola na frente, o time sobe junto.",
+		"{p} aguenta a pancada e mantém a posse.",
+		"{p} cadencia o jogo.",
+		"{p} pisa na bola e pensa a jogada.",
+		"{p} esconde a bola do marcador.",
+		"{p} faz o pivô e devolve."
+	],
+	"poss_patience": [
+		"{team} troca passes com paciência.",
+		"O {team} roda a bola procurando espaço.",
+		"Posse longa do {team}, o {opp} fechadinho.",
+		"{team} gira a bola de um lado para o outro.",
+		"O {opp} espera, o {team} toca de lado.",
+		"{team} não tem pressa, mantém a bola.",
+		"O {team} busca a brecha na defesa do {opp}.",
+		"Muitos toques do {team}, mas pouca profundidade."
+	],
+	"poss_intercept": [
+		"{d} lê a jogada e intercepta o passe de {p}.",
+		"Passe de {p} interceptado por {d}.",
+		"{d} antecipa e rouba a bola.",
+		"{p} tenta o passe, {d} corta no meio do caminho.",
+		"{d} estica a perna e corta a trama do {team}.",
+		"Bola roubada por {d}, que já sai jogando.",
+		"{d} chega antes de {p2} e fica com a bola.",
+		"Boa leitura de {d}: o passe de {p} não passou."
+	],
+	"poss_cross_cut": [
+		"{p} cruza, {d} afasta de cabeça.",
+		"Cruzamento de {p} cortado por {d}.",
+		"{p} levanta na área, {d} tira.",
+		"{d} sobe mais alto e manda para longe.",
+		"{p} tenta o cruzamento, a bola bate em {d}.",
+		"Cruzamento fechado demais de {p}, {d} fica com ela.",
+		"{d} afasta o perigo depois do cruzamento de {p}.",
+		"{p} cruza rasteiro, {d} corta de carrinho."
+	],
+	"poss_read_dom": [
+		"O {team} gosta mais do jogo neste momento.",
+		"Domínio do {team}: o {opp} só se defende.",
+		"O {team} empurra o {opp} para o próprio campo.",
+		"Quem manda na partida agora é o {team}.",
+		"O {opp} não consegue passar do meio-campo.",
+		"O {team} tem a bola e o controle."
+	],
+	"poss_read_even": [
+		"Jogo equilibrado, ninguém se impõe.",
+		"Partida muito estudada até aqui.",
+		"Poucas chances, muita disputa no meio.",
+		"Jogo travado: as duas defesas estão bem.",
+		"Os dois times se respeitam.",
+		"Meio-campo congestionado, a bola não chega às áreas."
+	],
+	"poss_read_danger": [
+		"O {team} é mais perigoso: o gol parece questão de tempo.",
+		"O {opp} está sofrendo, o {team} chega com frequência.",
+		"O {team} cria mais e ameaça o tempo todo.",
+		"Se alguém vai marcar, parece que é o {team}."
+	],
+	"poss_read_tense": [
+		"Tensão no ar: o empate segura os dois times.",
+		"Ninguém quer arriscar e perder o ponto.",
+		"Jogo nervoso na reta final.",
+		"Cada bola agora vale ouro.",
+		"O relógio corre e o placar não sai do lugar."
+	],
+	"poss_read_rough": [
+		"Jogo pegado, muitas faltas.",
+		"O árbitro tem trabalho: partida muito faltosa.",
+		"Muita pancada e pouca bola.",
+		"Jogo truncado, cheio de interrupções.",
+		"Os ânimos estão exaltados em campo."
 	]
 }

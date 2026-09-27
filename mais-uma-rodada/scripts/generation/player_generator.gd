@@ -114,6 +114,51 @@ static func pick_nationality(rng: RandomNumberGenerator, club: Club) -> String:
 	return pick_import(rng, club.nation)
 
 
+## Base: garotos são quase todos do país. Estrangeiro na base vem de vizinho, de ex-colônia ou da
+## diáspora (irlandeses e escoceses na Inglaterra, PALOP em Portugal, latinos nos EUA...). A FIFA
+## só deixa transferir menor entre países da UE/EEE a partir dos 16; fora dela, aos 18.
+const YOUTH_FOREIGN := {"ENG": 0.14, "ESP": 0.06, "FRA": 0.07, "GER": 0.1, "ITA": 0.07, "POR": 0.12, "NED": 0.08,
+	"BEL": 0.12, "SCO": 0.1, "SUI": 0.12, "AUT": 0.1, "USA": 0.1, "CAN": 0.08, "MEX": 0.03, "TUR": 0.04,
+	"GRE": 0.04, "DEN": 0.06, "SWE": 0.06, "NOR": 0.05, "BRA": 0.01, "ARG": 0.02, "URU": 0.03, "JPN": 0.01,
+	"KOR": 0.005, "KSA": 0.01, "QAT": 0.03, "UAE": 0.03, "CHN": 0.005, "AUS": 0.06}
+const YOUTH_IMPORTS := {
+	"ENG": {"IRL": 3.0, "SCO": 2.0, "WAL": 2.0, "NED": 0.6, "FRA": 0.8, "ESP": 0.6, "POR": 0.5, "BEL": 0.4, "NGA": 0.4, "JAM": 0.4, "DEN": 0.4, "GER": 0.4},
+	"SCO": {"ENG": 3.0, "IRL": 2.0, "WAL": 0.5},
+	"ESP": {"MAR": 1.5, "ARG": 1.0, "FRA": 0.8, "POR": 0.6, "CRO": 0.4, "COL": 0.5, "VEN": 0.5},
+	"FRA": {"BEL": 1.0, "SEN": 1.0, "CIV": 0.8, "MLI": 0.6, "POR": 0.8, "ALG": 0.8, "MAR": 0.8, "CMR": 0.5, "COD": 0.5},
+	"GER": {"AUT": 1.0, "TUR": 1.0, "POL": 0.8, "NED": 0.6, "CRO": 0.6, "SUI": 0.5, "BIH": 0.5, "ENG": 0.4, "USA": 0.3},
+	"ITA": {"ALB": 1.0, "ROU": 0.8, "SUI": 0.5, "FRA": 0.5, "CRO": 0.5, "SEN": 0.4, "ARG": 0.5},
+	"POR": {"ANG": 1.2, "CPV": 1.2, "GNB": 1.2, "MOZ": 0.8, "BRA": 1.0, "FRA": 0.5},
+	"NED": {"BEL": 1.5, "MAR": 0.8, "GER": 0.5},
+	"BEL": {"NED": 1.5, "FRA": 1.2, "COD": 1.0, "MAR": 0.8, "CMR": 0.3},
+	"SUI": {"GER": 1.0, "FRA": 1.0, "ITA": 1.0, "ALB": 0.6, "POR": 0.6},
+	"AUT": {"GER": 1.5, "BIH": 0.8, "CRO": 0.8, "TUR": 0.6, "SRB": 0.6},
+	"USA": {"MEX": 2.5, "CAN": 1.0, "JAM": 0.8, "HON": 0.5},
+	"CAN": {"USA": 1.5, "JAM": 0.6},
+	"MEX": {"USA": 2.0, "ARG": 0.5, "COL": 0.3},
+	"TUR": {"GER": 1.0, "NED": 0.5, "BIH": 0.3},
+	"BRA": {"PAR": 1.0, "URU": 0.8, "ARG": 0.6, "BOL": 0.5, "VEN": 0.5},
+	"ARG": {"PAR": 1.2, "URU": 1.0, "BOL": 0.6, "CHI": 0.4},
+	"URU": {"ARG": 1.5},
+	"DEN": {"SWE": 1.0, "NOR": 0.8, "ISL": 0.3},
+	"SWE": {"NOR": 1.0, "DEN": 1.0, "FIN": 0.6},
+	"NOR": {"SWE": 1.0, "DEN": 1.0},
+	"AUS": {"NZL": 1.5, "ENG": 0.5},
+}
+
+
+## Nacionalidade de um garoto da base do clube (captação da IA e jovens na criação do mundo).
+static func pick_youth_nationality(rng: RandomNumberGenerator, club: Club, age: int) -> String:
+	if rng.randf() >= float(YOUTH_FOREIGN.get(club.nation, 0.04)):
+		return club.nation
+	var pool: Dictionary = YOUTH_IMPORTS.get(club.nation, {})
+	var nat := String(RngUtil.weighted_key(rng, pool)) if not pool.is_empty() else pick_import(rng, club.nation)
+	var eu := String(DatabaseManager.nation(nat).get("confed", "")) == "UEFA" and String(DatabaseManager.nation(club.nation).get("confed", "")) == "UEFA"
+	if DatabaseManager.nation(nat).is_empty() or age < (16 if eu else 18) and rng.randf() < 0.8:
+		return club.nation # menor estrangeiro: só com a família morando no país (raro)
+	return nat
+
+
 static func pick_import(rng: RandomNumberGenerator, nation: String) -> String:
 	var imports: Dictionary = DatabaseManager.nation(nation).get("imports", {})
 	if imports.is_empty():
@@ -439,7 +484,8 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 			else:
 				age = clampi(int(round(rng.randfn(27.0, 2.6))), 22, 31) # craques no auge
 		target -= age_penalty(age, pos)
-		var nat := pick_nationality(rng, club)
+		# Garotos do elenco vêm quase todos da base local; os mais velhos seguem as rotas de importação
+		var nat := pick_youth_nationality(rng, club, age) if age <= 19 else pick_nationality(rng, club)
 		if nat != club.nation:
 			target += 1.5
 		target = clampf(soft_cap(target, star_ceiling(club)), 25.0, 93.0)
@@ -618,7 +664,7 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	var nation_bonus := float(DatabaseManager.nation(club.nation).get("youth", 0.0))
 	var target := level - 17.0 + club.youth_level * 0.06 + rng.randfn(0.0, 4.0) + (age - 16) * 1.5 - drift + nation_bonus * 0.4
 	target = clampf(target, 22.0, 72.0)
-	var nat := club.nation if rng.randf() < 0.95 else pick_import(rng, club.nation)
+	var nat := pick_youth_nationality(rng, club, age)
 	var p := create(world, rng, pos, target, age, nat, club.city, used_names)
 	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
 	p.potential = youth_potential(rng, p.overall, club.youth_level, drift, nation_bonus)

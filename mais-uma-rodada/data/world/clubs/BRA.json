@@ -26,7 +26,14 @@
 				"field": "hoops:4",
 				"symbol": "letter",
 				"initials": "CRF",
-				"sc": "#FFFFFF"
+				"mono": true,
+				"sym_pos": "tl",
+				"sc": "#FFFFFF",
+				"c1": "#C8102E",
+				"c2": "#111111",
+				"c3": "#F2C230",
+				"stars": 1,
+				"border": "thin"
 			},
 			"rivals": [
 				"BRA_TRL",
@@ -134,7 +141,10 @@
 				"c1": "#E30613",
 				"c2": "#FFFFFF",
 				"fc": "#FFFFFF",
-				"c3": "#111111"
+				"c3": "#111111",
+				"stars": 3,
+				"border": "double",
+				"star_c": "#E2B84A"
 			},
 			"rivals": [
 				"BRA_TIM",
@@ -296,15 +306,18 @@
 			"capacity": 55000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "iberian",
-				"field": "stripes_tri:6",
+				"shape": "ring",
+				"field": "stripes_tri:9",
 				"symbol": "none",
-				"chief_text": "GREMIO",
-				"cc": "#FFFFFF",
-				"c1": "#0D80BF",
+				"text": "GRÊMIO FOOT-BALL",
+				"text2": "PORTO ALEGRENSE",
+				"c1": "#FFFFFF",
 				"fc": "#111111",
-				"c3": "#FFFFFF",
-				"stars": 1
+				"c3": "#0D80BF",
+				"c2": "#0D80BF",
+				"stars": 1,
+				"star_c": "#E4B43A",
+				"border": "double"
 			},
 			"rivals": [
 				"BRA_COL"
@@ -334,6 +347,10 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SCI",
+				"mono": true,
+				"sym_scale": 1.1,
+				"c1": "#E30613",
+				"c2": "#FFFFFF",
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
@@ -554,9 +571,12 @@
 			"capacity": 42000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "modern",
-				"field": "hoops:4",
-				"symbol": "none"
+				"shape": "hexagon",
+				"field": "bends:4",
+				"symbol": "none",
+				"c1": "#111111",
+				"c2": "#C8102E",
+				"border": "thick"
 			},
 			"rivals": [
 				"BRA_COX"

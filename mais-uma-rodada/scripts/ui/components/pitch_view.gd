@@ -222,6 +222,20 @@ func _grass_colors() -> Array:
 		if stadium.get("rain", false):
 			a = a.darkened(0.12)
 			b = b.darkened(0.12)
+		match String(stadium.get("wx", "")):
+			"storm":
+				a = a.darkened(0.1).lerp(Color("#3E4A3A"), 0.15)
+				b = b.darkened(0.1).lerp(Color("#3E4A3A"), 0.15)
+			"snow":
+				a = a.lerp(Color("#DDE6EA"), 0.45)
+				b = b.lerp(Color("#CFD9DE"), 0.45)
+			"heat", "sun":
+				if not stadium.get("night", false):
+					a = a.lightened(0.05).lerp(Color("#7D9A3A"), 0.08 if stadium.get("wx", "") == "heat" else 0.0)
+					b = b.lightened(0.05).lerp(Color("#7D9A3A"), 0.08 if stadium.get("wx", "") == "heat" else 0.0)
+		if stadium.get("night", false):
+			a = a.darkened(0.06)
+			b = b.darkened(0.06)
 	return [a, b]
 
 
@@ -717,13 +731,72 @@ func _draw_shade(r: Rect2) -> void:
 
 
 func _draw_weather() -> void:
-	if not stadium.get("rain", false):
-		return
-	var n := 90
-	for i in n:
-		var x := fposmod(i * 97.31 + _t * 60.0, size.x)
-		var y := fposmod(i * 57.17 + _t * 520.0 + i * i * 0.37, size.y)
-		draw_line(Vector2(x, y), Vector2(x - 3.0, y + 11.0), Color(0.8, 0.88, 1.0, 0.22), 1.0)
+	var k := String(stadium.get("wx", "rain" if stadium.get("rain", false) else ""))
+	var night: bool = stadium.get("night", false)
+	match k:
+		"rain", "storm":
+			var n := 90 if k == "rain" else 170
+			var slant := 3.0 if k == "rain" else 7.0
+			for i in n:
+				var x := fposmod(i * 97.31 + _t * (60.0 if k == "rain" else 140.0), size.x)
+				var y := fposmod(i * 57.17 + _t * (520.0 if k == "rain" else 760.0) + i * i * 0.37, size.y)
+				draw_line(Vector2(x, y), Vector2(x - slant, y + (11.0 if k == "rain" else 15.0)), Color(0.8, 0.88, 1.0, 0.22 if k == "rain" else 0.3), 1.0)
+			# Respingos nas poças
+			for i in 14:
+				var ph := fposmod(_t * 1.3 + i * 0.37, 1.0)
+				var c := Vector2(fposmod(i * 131.7, size.x), fposmod(i * 71.3 + 40.0, size.y))
+				draw_arc(c, 2.0 + ph * 6.0, 0.0, TAU, 12, Color(0.85, 0.92, 1.0, 0.25 * (1.0 - ph)), 1.0)
+			if k == "storm":
+				draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.07, 0.12, 0.18))
+				# Relâmpago de vez em quando
+				var fl := fposmod(_t, 9.0)
+				if fl < 0.12 or (fl > 0.2 and fl < 0.26):
+					draw_rect(Rect2(Vector2.ZERO, size), Color(0.9, 0.95, 1.0, 0.35))
+		"snow":
+			for i in 120:
+				var sway := sin(_t * 1.4 + i * 1.7) * 8.0
+				var x := fposmod(i * 83.7 + sway + _t * 12.0, size.x)
+				var y := fposmod(i * 61.3 + _t * (38.0 + float(i % 5) * 9.0), size.y)
+				draw_circle(Vector2(x, y), 1.2 + float(i % 3) * 0.7, Color(1, 1, 1, 0.75))
+			draw_rect(Rect2(Vector2.ZERO, size), Color(0.85, 0.9, 1.0, 0.06))
+		"fog":
+			for band in 5:
+				var yy := size.y * (0.1 + band * 0.2) + sin(_t * 0.3 + band) * 12.0
+				draw_rect(Rect2(Vector2(0, yy - 40.0), Vector2(size.x, 80.0)), Color(0.9, 0.92, 0.94, 0.07))
+			draw_rect(Rect2(Vector2.ZERO, size), Color(0.88, 0.9, 0.92, 0.18))
+		"heat":
+			if not night:
+				draw_rect(Rect2(Vector2.ZERO, size), Color(1.0, 0.72, 0.3, 0.07))
+				# Ar tremendo sobre o gramado
+				for i in 10:
+					var y := fposmod(i * 47.0 - _t * 18.0, size.y)
+					var pts := PackedVector2Array()
+					for j in 16:
+						var x := size.x * j / 15.0
+						pts.append(Vector2(x, y + sin(_t * 4.0 + j * 0.9 + i) * 2.0))
+					draw_polyline(pts, Color(1, 0.95, 0.85, 0.06), 2.0)
+				_draw_sun()
+		"sun":
+			if not night:
+				_draw_sun()
+		"wind":
+			for i in 22:
+				var x := fposmod(i * 113.0 + _t * 260.0, size.x + 80.0) - 40.0
+				var y := fposmod(i * 53.0 + sin(_t + i) * 10.0, size.y)
+				draw_line(Vector2(x, y), Vector2(x + 28.0, y - 2.0), Color(1, 1, 1, 0.1), 1.0)
+	if night:
+		# Noite: fora do gramado mais escuro e o brilho dos refletores nos cantos
+		for c in [Vector2(0, 0), Vector2(size.x, 0), Vector2(0, size.y), Vector2(size.x, size.y)]:
+			for ring in 4:
+				draw_circle(c, 40.0 + ring * 34.0, Color(1.0, 0.98, 0.85, 0.03))
+
+
+## Sol forte: brilho no canto de onde vem a luz e um véu quente.
+func _draw_sun() -> void:
+	var c := Vector2(size.x * 0.92, size.y * 0.04)
+	for ring in 6:
+		draw_circle(c, 30.0 + ring * 40.0, Color(1.0, 0.95, 0.75, 0.05))
+	draw_circle(c, 18.0, Color(1.0, 0.98, 0.88, 0.35))
 
 
 ## Textura da torcida: fileiras, setores, lugares vazios conforme o público, torcida visitante

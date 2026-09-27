@@ -42,6 +42,7 @@ const EV_KEEPER := 29 # goleiro p fica com a bola
 const EV_CROWD := 30 # clima: x = {kind}
 const EV_VAR := 31 # revisão do VAR: x = {kind}
 const EV_KNOCK := 32 # p2 fica caído após falta de p, mas segue em campo
+const EV_CRAMP := 33 # p sente câimbra (fim de jogo e prorrogação): rende muito menos até sair
 
 # --- Tipos de chance ---
 const CH_THROUGH := 0
@@ -92,7 +93,7 @@ const LIVE_XG := 0.72
 static func damp(x: float) -> float:
 	return 1.0 + (x - 1.0) * MOD_DAMP
 ## Contra o time do usuário a IA se motiva mais conforme a dificuldade (fácil, normal, difícil).
-const USER_OPP_BOOST: Array[float] = [0.99, 1.01, 1.025]
+const USER_OPP_BOOST: Array[float] = [1.0, 1.035, 1.07]
 ## Força do efeito do placar (no começo do jogo e somado até o fim).
 const STATE_BASE := 0.04
 const STATE_LATE := 0.07
@@ -138,6 +139,9 @@ var year: int = 2026
 var crowd: float = 0.8
 ## Cultura da liga (LeagueCulture): multiplicadores de chances e de cartões.
 var goal_f: float = 1.0
+## Clima da partida (Weather.for_fixture): muda gols, erros, cansaço, faltas, lesões e jogadas.
+var wx: Dictionary = {}
+var wx_fx: Dictionary = {"goals": 1.0, "fatigue": 1.0, "errors": 1.0, "long": 1.0, "cross": 1.0, "pass": 1.0, "fouls": 1.0, "injury": 1.0}
 var card_f: float = 1.0
 var ref: Array = [] # árbitro [nação, id] (Referees)
 var ref_pens: float = 1.0
@@ -161,12 +165,6 @@ var _rate_foul: Array[float] = [0.2, 0.2]
 var _rate_off: Array[float] = [0.03, 0.03]
 var _rate_corner: Array[float] = [0.04, 0.04]
 var _poss_base: float = 0.5
-## Motor posicional (LiveEngine) da partida assistida: quando ligado, os lances de cada minuto
-## saem do campo simulado em vez do sorteio estatístico. `live_sec` é o segundo do lance dentro
-## do minuto (vai nos eventos, para a tela encenar no tempo certo).
-var live: LiveEngine = null
-var live_sec: float = -1.0
-
 
 # ---------------------------------------------------------------------------
 # Montagem
@@ -198,6 +196,13 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 	card_f *= float(rf["cards"])
 	ref_pens = float(rf["pens"])
 	ref_fouls = float(rf["fouls"])
+	wx = ctx.get("wx", {})
+	if not wx.is_empty():
+		wx_fx = wx.get("fx", wx_fx)
+		goal_f *= float(wx_fx["goals"])
+		ref_fouls *= float(wx_fx["fouls"])
+		_type_w[CH_LONG] = BASE_TYPE_W[CH_LONG] * float(wx_fx["long"])
+		_type_w[CH_CROSS] = BASE_TYPE_W[CH_CROSS] * float(wx_fx["cross"])
 	crowd *= float(cul["home"])
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	teams[0].home_f = 1.0 + adv * crowd * 0.5
@@ -215,6 +220,10 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		t.vuln = TacticalScout.vulnerability(world, opp_club)
 		t.study = TacticalScout.study(world, t.club)
 		t.adapt = float(ClubPhilosophy.of(t.club).get("adapt", 0.4))
+		# Contra o time do usuário a IA estuda mais (e mais ainda nas dificuldades altas).
+		if teams[1 - t.side].is_user and not t.is_user:
+			t.study = minf(1.0, t.study + 0.05 + 0.1 * clampi(world.difficulty, 0, 2))
+			t.adapt = minf(1.0, t.adapt + 0.1 * clampi(world.difficulty, 0, 2))
 	for t: MatchTeam in teams:
 		t.refresh_tactics()
 		t.recompute_units()
@@ -375,9 +384,6 @@ func step() -> Array:
 		for t: MatchTeam in teams:
 			if not t.is_user:
 				_ai_read(t)
-		if live != null:
-			live.sync_teams()
-			live.kickoff(1)
 		_emit(EV_SECOND_HALF, 1, -1)
 		if detail:
 			last_phase = {"side": 1, "from": 0.5, "to": 0.5, "ev": EV_SECOND_HALF}
@@ -395,9 +401,6 @@ func step() -> Array:
 					mp.cond = minf(100.0, mp.cond + 3.0)
 			t.recompute_units()
 		_refresh_rates()
-		if live != null:
-			live.sync_teams()
-			live.kickoff(0)
 		_emit(EV_EXTRA_TIME, 0, -1)
 		if detail:
 			last_phase = {"side": 0, "from": 0.5, "to": 0.5, "ev": EV_EXTRA_TIME}
@@ -427,8 +430,6 @@ func step() -> Array:
 	elif half == 3 and stoppage[2] > 0 and minute >= 105 + stoppage[2]:
 		half = 4
 		minute = 105
-		if live != null:
-			live.kickoff(1)
 		_emit(EV_ET_SECOND, 1, -1)
 	elif half == 4 and stoppage[3] > 0 and minute >= 120 + stoppage[3]:
 		if _needs_decision():
@@ -499,6 +500,17 @@ func set_shootout_order(side: int, ids: Array) -> bool:
 	return true
 
 
+## Última cobrança da disputa (canto, goleiro, resultado), para a tela encenar.
+var last_pen: Dictionary = {}
+
+
+## Lado da próxima cobrança da disputa (-1 fora dela).
+func next_kick_side() -> int:
+	if not shootout:
+		return -1
+	return 0 if pen_taken[0] == pen_taken[1] else 1
+
+
 func _pen_skill(mp: MatchPlayer) -> float:
 	return mp.attr(Attr.FIN) * 0.45 + mp.attr(Attr.FRI) * 0.35 + mp.attr(Attr.DEC) * 0.1 + mp.attr(Attr.INT) * 0.1 + mp.clutch * 20.0 + HiddenPersona.penalty_nerve(mp.p) * 60.0
 
@@ -511,12 +523,16 @@ func _shootout_kick() -> void:
 		return
 	var kicker: MatchPlayer = order[pen_taken[side] % order.size()]
 	var gk := teams[1 - side].goalkeeper()
-	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
-	# Na disputa, os nervos pesam o dobro: quem treme sob pressão erra muito mais.
-	var p := clampf(0.76 + (kicker.finishing() * kicker.f - gk_val) * 0.004 + kicker.clutch * 0.05 + HiddenPersona.penalty_nerve(kicker.p) * 2.0, 0.5, 0.92)
-	if pen_taken[side] >= 5:
-		p -= 0.03 # alternadas: pressão máxima
-	var ok := rng.randf() < p
+	# Na disputa a pressão cresce a cada cobrança; nas alternadas e no "se errar, acabou", é máxima
+	var pressure := 0.55 + 0.05 * mini(pen_taken[side], 4) + (0.2 if pen_taken[side] >= 5 else 0.0)
+	var left_me := maxi(0, 5 - pen_taken[side])
+	if pen_score[side] + left_me < pen_score[1 - side] + maxi(0, 5 - pen_taken[1 - side]) + 1:
+		pressure += 0.1 # errar pode eliminar
+	var pk := PenaltyKick.kick(rng, kicker.p, gk.p if gk != null else null, {"f": kicker.f, "gk_f": gk.f if gk != null else 1.0,
+		"cond": kicker.cond, "pressure": clampf(pressure + importance * 0.2, 0.0, 1.0), "away": side == 1 and not neutral,
+		"study": teams[1 - side].study})
+	var ok := String(pk["res"]) == "goal"
+	last_pen = pk
 	pen_taken[side] += 1
 	if ok:
 		pen_score[side] += 1
@@ -525,7 +541,7 @@ func _shootout_kick() -> void:
 		kicker.rating_pts -= 0.4
 		if gk != null:
 			gk.rating_pts += 0.35
-	_emit(EV_SHOOT_KICK, side, kicker.p.id, gk.p.id if gk != null else -1, {"ok": ok, "n": pen_taken[side], "ps": [pen_score[0], pen_score[1]]})
+	_emit(EV_SHOOT_KICK, side, kicker.p.id, gk.p.id if gk != null else -1, {"ok": ok, "n": pen_taken[side], "ps": [pen_score[0], pen_score[1]], "res": String(pk["res"]), "dir": int(pk["dir"]), "dive": int(pk["dive"]), "panenka": bool(pk["panenka"])})
 	# Decidido?
 	var a := pen_taken[0]
 	var b := pen_taken[1]
@@ -577,9 +593,6 @@ func _simulate_minute() -> void:
 			_game_state()
 			_refresh_rates()
 	_ai_decisions()
-	if live != null:
-		_live_minute()
-		return
 	var poss := clampf(_poss_base + (momentum[0] - momentum[1]) * 0.15, 0.25, 0.75)
 	var s := 0 if rng.randf() < poss else 1
 	var att: MatchTeam = teams[s]
@@ -614,225 +627,8 @@ func _simulate_minute() -> void:
 	if detail:
 		pressure.append([half, minute, danger if s == 0 else -danger])
 	for t: MatchTeam in teams:
-		if rng.randf() < INJURY_RATE * t.i_fatigue:
+		if rng.randf() < INJURY_RATE * t.i_fatigue * float(wx_fx["injury"]):
 			_injury(t, _pick_injury_victim(t))
-
-
-# ---------------------------------------------------------------------------
-# Motor posicional (partida assistida)
-# ---------------------------------------------------------------------------
-
-var live_poss: Array[float] = [0.0, 0.0]
-
-
-## Liga o motor posicional (a partir do minuto atual). Desligar (live = null) volta ao sorteio
-## estatístico — é o que o "pular para o fim" faz para terminar na hora.
-func enable_live(seed_value: int) -> void:
-	live = LiveEngine.new(self, seed_value)
-	if half == 2:
-		live.kickoff(1)
-
-
-func _live_minute() -> void:
-	var p0 := live.poss_t.duplicate()
-	var xg0 := [teams[0].xg, teams[1].xg]
-	live.run_minute()
-	live_sec = -1.0
-	var d0: float = live.poss_t[0] - float(p0[0])
-	var d1: float = live.poss_t[1] - float(p0[1])
-	live_poss[0] += d0
-	live_poss[1] += d1
-	var s := 0 if d0 >= d1 else 1
-	teams[s].poss_ticks += 1
-	if detail:
-		var danger := 0.12
-		for k in live.keys:
-			danger = maxf(danger, float(k[1]) * 0.7)
-		danger = maxf(danger, minf(1.0, (teams[s].xg - float(xg0[s])) * 2.5 + 0.2))
-		pressure.append([half, minute, danger if s == 0 else -danger])
-	for t: MatchTeam in teams:
-		if rng.randf() < INJURY_RATE * t.i_fatigue:
-			_injury(t, _pick_injury_victim(t))
-			live.sync_teams()
-
-
-func _mp_team(mp: MatchPlayer) -> MatchTeam:
-	return teams[0] if teams[0].by_id.get(mp.p.id, null) == mp else teams[1]
-
-
-## Chute do motor posicional: o xG vem da geometria (distância, ângulo, marcação); o duelo
-## finalizador × goleiro e o bloqueio decidem. Retorna "goal", "save", "post", "block" ou "miss".
-func live_shot(side: int, shooter: MatchPlayer, assister: MatchPlayer, xg: float, ctype: int, block: float, gk: MatchPlayer, header: bool) -> String:
-	var att: MatchTeam = teams[side]
-	var dfn: MatchTeam = teams[1 - side]
-	xg *= goal_f * LIVE_XG
-	var skill: float = shooter.heading() if header else (shooter.long_shot() if ctype == CH_LONG or ctype == CH_FREEKICK else shooter.finishing())
-	skill *= shooter.f
-	if shooter.clutch > 0.0 and half == 2 and minute >= 75 and absi(score[0] - score[1]) <= 1:
-		skill *= 1.0 + shooter.clutch * 0.2
-	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
-	var p_goal := clampf(xg * exp(EPS * (skill - gk_val)), 0.004, 0.9)
-	att.shots += 1
-	att.xg += xg
-	shooter.shots += 1
-	if OPEN_PLAY.has(ctype):
-		xr_box[side] += 1
-	var rec := {}
-	if xray_on:
-		rec = _xr_record(att, dfn, ctype, 1, xg, shooter, assister)
-	if rng.randf() < p_goal:
-		_goal(att, dfn, shooter, assister, ctype, null)
-		if not rec.is_empty():
-			rec["r"] = "gol"
-		return "goal"
-	var res := "miss"
-	var ev := EV_MISS
-	var r := rng.randf()
-	if r < block:
-		res = "block"
-		ev = EV_BLOCK
-	else:
-		var r2 := rng.randf()
-		if r2 < 0.05:
-			res = "post"
-			ev = EV_POST
-			shooter.rating_pts += 0.05
-		elif r2 < 0.05 + clampf(0.34 + xg * 0.9, 0.3, 0.72):
-			res = "save"
-			ev = EV_SAVE
-			att.on_target += 1
-			shooter.shots_on += 1
-			shooter.rating_pts += 0.15
-			if gk != null:
-				gk.saves += 1
-				gk.rating_pts += 0.25 + xg * 0.8
-				dfn.saves += 1
-		else:
-			shooter.rating_pts -= 0.03
-	if assister != null:
-		assister.rating_pts += 0.06
-	if not rec.is_empty():
-		rec["r"] = {EV_SAVE: "defesa", EV_POST: "trave", EV_BLOCK: "bloqueio"}.get(ev, "fora")
-	_emit(ev, side, shooter.p.id, assister.p.id if assister != null else -1, {"ct": ctype, "xg": snappedf(xg, 0.01), "gk": gk.p.id if gk != null else -1})
-	return res
-
-
-func live_penalty(side: int, taker: MatchPlayer, gk: MatchPlayer) -> String:
-	var att: MatchTeam = teams[side]
-	var dfn: MatchTeam = teams[1 - side]
-	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
-	var p_goal := clampf(0.75 + (taker.finishing() - gk_val) * 0.004 + HiddenPersona.penalty_nerve(taker.p) * (1.0 + importance), 0.5, 0.92)
-	att.shots += 1
-	att.xg += 0.76
-	taker.shots += 1
-	if rng.randf() < p_goal:
-		_goal(att, dfn, taker, null, CH_PENALTY, null)
-		return "goal"
-	taker.rating_pts -= 0.6
-	if rng.randf() < 0.7:
-		att.on_target += 1
-		taker.shots_on += 1
-		if gk != null:
-			gk.saves += 1
-			gk.rating_pts += 0.7
-			dfn.saves += 1
-		_emit(EV_PEN_SAVE, side, taker.p.id, -1, {"ct": CH_PENALTY, "gk": gk.p.id if gk != null else -1})
-		return "save"
-	_emit(EV_PEN_MISS, side, taker.p.id, -1, {"ct": CH_PENALTY})
-	return "miss"
-
-
-## Falta marcada no motor posicional: cartões e pênalti como no sorteio (mesmas taxas por jogador).
-func live_foul(fouler: MatchPlayer, victim: MatchPlayer, in_box: bool, danger: bool) -> Dictionary:
-	var dfn := _mp_team(fouler)
-	var att := _mp_team(victim)
-	dfn.fouls += 1
-	fouler.fouls += 1
-	fouler.rating_pts -= 0.05
-	half_events += 0 # (faltas comuns não mexem nos acréscimos)
-	_emit(EV_FOUL, dfn.side, fouler.p.id, victim.p.id, {"danger": danger or in_box})
-	var dis := fouler.a_dis
-	var p_yellow := 0.155 * fouler.card_mult * card_f * (1.4 - dis / 100.0) * (1.15 if dfn.intensity == 2 else 1.0)
-	var p_red := 0.0045 * fouler.card_mult * card_f * (1.3 - dis / 100.0)
-	if danger or in_box:
-		p_yellow *= 1.3
-	if fouler.yellow >= 1:
-		p_yellow *= 0.55
-	if rng.randf() < p_red:
-		_send_off(dfn, fouler, false)
-	elif rng.randf() < p_yellow:
-		fouler.yellow += 1
-		dfn.yellows += 1
-		fouler.rating_pts -= 0.35
-		half_events += 1
-		if fouler.yellow >= 2:
-			_send_off(dfn, fouler, true)
-		else:
-			_emit(EV_YELLOW, dfn.side, fouler.p.id)
-	if victim.on_pitch and rng.randf() < 0.005:
-		_injury(att, victim)
-	elif victim.on_pitch and vis_rng.randf() < 0.07:
-		_emit(EV_KNOCK, att.side, fouler.p.id, victim.p.id)
-	var pen := in_box and rng.randf() < clampf(0.8 * ref_pens, 0.4, 1.0)
-	if pen:
-		_emit(EV_PENALTY_AWARDED, att.side, victim.p.id, fouler.p.id)
-		if vis_rng.randf() < 0.35:
-			_emit(EV_VAR, att.side, victim.p.id, fouler.p.id, {"kind": "pen_ok"})
-	if live != null:
-		live.sync_teams()
-	return {"pen": pen}
-
-
-func live_freekick(side: int, taker: MatchPlayer) -> void:
-	_emit(EV_FREEKICK, side, taker.p.id)
-
-
-func live_corner(side: int) -> void:
-	var att: MatchTeam = teams[side]
-	att.corners += 1
-	var taker := att.by_id.get(att.sheet.corner_taker, null) as MatchPlayer
-	if taker == null or not taker.on_pitch:
-		taker = _best_on_pitch(att, "corner")
-	_emit(EV_CORNER, side, taker.p.id if taker != null else -1)
-
-
-func live_offside(side: int, who: MatchPlayer) -> void:
-	teams[side].offsides += 1
-	_emit(EV_OFFSIDE, side, who.p.id, -1, {})
-
-
-func live_cross(_side: int, from: MatchPlayer, _to: MatchPlayer) -> void:
-	from.rating_pts += 0.01
-
-
-func live_pass(from: MatchPlayer, to: MatchPlayer, ok: bool, key: bool) -> void:
-	if ok:
-		from.rating_pts += 0.0015 + (0.025 if key else 0.0)
-	else:
-		from.rating_pts -= 0.01
-
-
-func live_intercept(mp: MatchPlayer) -> void:
-	mp.rating_pts += 0.025
-
-
-func live_tackle(dfn_mp: MatchPlayer, att_mp: MatchPlayer, won: bool) -> void:
-	if won:
-		dfn_mp.rating_pts += 0.03
-		att_mp.rating_pts -= 0.02
-		if vis_rng.randf() < 0.18:
-			_emit(EV_TACKLE, _mp_team(dfn_mp).side, dfn_mp.p.id, att_mp.p.id)
-	else:
-		dfn_mp.rating_pts -= 0.02
-		att_mp.rating_pts += 0.02
-		if vis_rng.randf() < 0.18:
-			_emit(EV_SKILL, _mp_team(att_mp).side, att_mp.p.id, dfn_mp.p.id)
-
-
-func live_keeper_claim(gk: MatchPlayer) -> void:
-	gk.rating_pts += 0.03
-	if vis_rng.randf() < 0.3:
-		_emit(EV_KEEPER, _mp_team(gk).side, gk.p.id)
 
 
 ## O jogo abre com o tempo: pernas cansadas, espaços e pressa. Começa ~10% abaixo da média e
@@ -840,7 +636,7 @@ func live_keeper_claim(gk: MatchPlayer) -> void:
 func _time_factor() -> float:
 	if half >= 3:
 		return 1.05
-	return 0.9 + 0.2 * clampf(float(minute) / 90.0, 0.0, 1.0)
+	return 0.86 + 0.28 * clampf(float(minute) / 90.0, 0.0, 1.0)
 
 
 ## Raio-X: laterais que sobem ao ataque e chegadas ao último terço (só vis_rng: não muda o jogo).
@@ -892,30 +688,61 @@ func _pick_lane(att: MatchTeam, dfn: MatchTeam, ctype: int) -> Array:
 ## Minuto sem lance de perigo: troca de passes, dribles, desarmes, goleiro e torcida.
 ## Só apresentação (vis_rng): assistir nunca muda o placar.
 func _flavor(att: MatchTeam, dfn: MatchTeam) -> void:
+	# Narração do minuto sem lance de perigo: quase todo minuto tem alguma coisa para contar
+	# (só vis_rng: não mexe no resultado). Os nomes vêm de quem está com a bola de verdade.
 	var s := att.side
 	var r := vis_rng.randf()
-	if r < 0.15:
-		var carrier := _pick_weighted(att, PK_MID, vis_rng)
-		var kinds := ["", "", "switch", "long", "press", "build", "throw", "goalkick", "back"]
-		_emit(EV_POSSESSION, s, carrier.p.id if carrier != null else -1, -1, {"kind": kinds[vis_rng.randi_range(0, kinds.size() - 1)]})
-	elif r < 0.21:
+	var carrier := _pick_weighted(att, PK_MID, vis_rng)
+	var mate := _pick_weighted(att, PK_PASS, vis_rng)
+	if mate == carrier:
+		mate = _pick_weighted(att, PK_COUNTER, vis_rng)
+	var cid := carrier.p.id if carrier != null else -1
+	var mid := mate.p.id if mate != null and mate != carrier else -1
+	if r < 0.46:
+		var kinds := ["switch", "long", "press", "build", "throw", "goalkick", "back", "tabela", "wing", "carry", "hold", "patience",
+			"tabela", "wing", "carry", "build", "back"]
+		var k: String = kinds[vis_rng.randi_range(0, kinds.size() - 1)]
+		if (k in ["tabela", "wing"]) and mid < 0:
+			k = "carry"
+		_emit(EV_POSSESSION, s, cid, mid, {"kind": k})
+	elif r < 0.56:
+		var d := _pick_weighted(dfn, PK_DEFEND, vis_rng)
+		_emit(EV_POSSESSION, s, cid, mid, {"kind": "intercept" if vis_rng.randf() < 0.6 else "cross_cut", "d": d.p.id if d != null else -1})
+	elif r < 0.66:
 		var dr := _pick_weighted(att, PK_DRIBBLE, vis_rng)
 		var dm := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 		if dr != null and dm != null:
 			_emit(EV_SKILL, s, dr.p.id, dm.p.id)
-	elif r < 0.27:
+	elif r < 0.76:
 		var dm2 := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 		var vic := _pick_weighted(att, PK_DRIBBLE, vis_rng)
 		if dm2 != null and vic != null:
 			_emit(EV_TACKLE, dfn.side, dm2.p.id, vic.p.id)
-	elif r < 0.30:
+	elif r < 0.81:
 		var gk := dfn.goalkeeper()
 		if gk != null:
 			_emit(EV_KEEPER, dfn.side, gk.p.id)
-	elif r < 0.335:
+	elif r < 0.87:
 		var cr := crowd_mood()
 		if not cr.is_empty():
 			_emit(EV_CROWD, int(cr["side"]), -1, -1, {"kind": cr["kind"]})
+	elif r < 0.95:
+		# Leitura do jogo: quem manda, jogo truncado, ritmo
+		var poss := possession_pct(s)
+		var k2 := "read_even"
+		if poss >= 0.58:
+			k2 = "read_dom"
+		elif att.xg - dfn.xg >= 0.6:
+			k2 = "read_danger"
+		elif minute >= 70 and score[0] == score[1]:
+			k2 = "read_tense"
+		elif fouls_total() >= minute / 4:
+			k2 = "read_rough"
+		_emit(EV_POSSESSION, s, cid, mid, {"kind": k2})
+
+
+func fouls_total() -> int:
+	return teams[0].fouls + teams[1].fouls
 
 
 ## Clima do estádio conforme placar e minuto: {side, kind} ou vazio.
@@ -954,13 +781,20 @@ func _game_state() -> void:
 			continue
 		var k := (STATE_BASE + STATE_LATE * t_f) * (1.0 if absi(diff) == 1 else 1.35)
 		if diff < 0:
-			t.g_rate = 1.0 + k * 0.7
-			t.g_quality = 1.0 - k * 0.75
+			# Atrás: ocupa o campo e finaliza mais (de fora, com a área cheia). Perdendo de muito,
+			# o time desanima e a pressão perde força.
+			t.g_rate = 1.0 + k * (1.5 if diff == -1 else 0.7)
+			t.g_quality = 1.0 - k * 0.5
 			t.g_poss = k * 0.15
 		else:
-			t.g_rate = 1.0 - k * 0.6
-			t.g_quality = 1.0 + k * 0.9
+			# Na frente: recua e explora o contra-ataque. Com dois ou três gols de vantagem, tira o pé.
+			t.g_rate = 1.0 - k * 0.7
+			t.g_quality = 1.0 + k * 0.35
 			t.g_poss = -k * 0.15
+			if diff == 2:
+				t.g_rate *= 0.88
+			elif diff >= 3:
+				t.g_rate *= 0.72
 
 
 ## Recalcula as probabilidades por minuto (chamado quando setores ou táticas mudam).
@@ -1023,12 +857,17 @@ func _foul_prob(dfn: MatchTeam) -> float:
 
 ## Fadiga aplicada em blocos de `minutes` minutos (barato e suficiente).
 func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
-	var mult: float = FATIGUE_RATE * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
+	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * (1.25 if half >= 3 else 1.0) * (float(wx.get("away_fatigue", 1.0)) if t.side == 1 else 1.0) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
 	for mp: MatchPlayer in t.slots:
 		if mp == null:
 			continue
 		var gk_f := 0.35 if mp.slot == 0 else 1.0
 		mp.cond = maxf(5.0, mp.cond - mult * (1.25 - mp.a_res / 100.0 * 0.6) * gk_f)
+		# Câimbra: perna no limite no fim do jogo e, principalmente, na prorrogação
+		if mp.slot != 0 and mp.cond < 32.0 and (half >= 3 or minute >= 80) and rng.randf() < (0.05 if half >= 3 else 0.02) * minutes / 5.0:
+			mp.cond = minf(mp.cond, 10.0)
+			mp.rating_pts -= 0.1
+			_emit(EV_CRAMP, t.side, mp.p.id)
 
 
 # ---------------------------------------------------------------------------
@@ -1107,7 +946,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var s := att.side
 	var ctype := forced_type
 	# Erro defensivo: zaga indecisa entrega a bola.
-	if ctype < 0 and rng.randf() < 0.04 * clampf((75.0 - dfn.avg_decision) / 25.0 + 0.6, 0.4, 1.6):
+	if ctype < 0 and rng.randf() < 0.04 * clampf((75.0 - dfn.avg_decision) / 25.0 + 0.6, 0.4, 1.6) * float(wx_fx["errors"]):
 		ctype = CH_ERROR
 	if ctype < 0:
 		ctype = _pick_chance_type(att, dfn)
@@ -1169,8 +1008,14 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var gk := dfn.goalkeeper()
 	var gk_val := gk.gk_comp() * gk.f if gk != null else 20.0
 	var p_goal := clampf(xg * exp(EPS * (skill - gk_val)), 0.01, 0.92)
+	var pk := {}
 	if ctype == CH_PENALTY:
-		p_goal = clampf(0.75 + (shooter.finishing() - gk_val) * 0.004 + HiddenPersona.penalty_nerve(shooter.p) * (1.0 + importance), 0.5, 0.92)
+		# Cobrança de verdade: canto, goleiro, pressão do momento, cansaço e torcida
+		var must := half == 2 and minute >= 80 and score[s] <= score[1 - s]
+		pk = PenaltyKick.kick(rng, shooter.p, gk.p if gk != null else null, {"f": shooter.f, "gk_f": gk.f if gk != null else 1.0,
+			"cond": shooter.cond, "pressure": clampf(importance * 0.6 + (0.3 if must else 0.0) + (0.15 if derby else 0.0), 0.0, 1.0),
+			"away": s == 1 and not neutral, "study": dfn.study})
+		p_goal = 1.0 if String(pk["res"]) == "goal" else 0.0
 	att.shots += 1
 	att.xg += xg
 	shooter.shots += 1
@@ -1192,7 +1037,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var r := rng.randf()
 	var ev := EV_MISS
 	if ctype == CH_PENALTY:
-		if r < 0.7:
+		if String(pk.get("res", "save")) == "save":
 			ev = EV_PEN_SAVE
 			att.on_target += 1
 			shooter.shots_on += 1
@@ -1225,6 +1070,10 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		rec["r"] = {EV_SAVE: "defesa", EV_POST: "trave", EV_BLOCK: "bloqueio", EV_PEN_SAVE: "defesa"}.get(ev, "fora")
 	if detail:
 		var ex := {"ct": ctype, "xg": snappedf(xg, 0.01), "gk": gk.p.id if gk != null else -1}
+		if not pk.is_empty():
+			ex["res"] = String(pk["res"])
+			ex["dir"] = int(pk["dir"])
+			ex["dive"] = int(pk["dive"])
 		if ev == EV_BLOCK and xg >= 0.1 and vis_rng.randf() < 0.25:
 			var cl := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 			if cl != null:
@@ -1521,6 +1370,14 @@ func _send_off(t: MatchTeam, mp: MatchPlayer, second_yellow: bool) -> void:
 				var vslot := victim.slot
 				_do_sub(t, victim, gk_bench, 0)
 				t.slots[vslot] = null
+	# Técnico reage à expulsão: quem ficou com dez fecha a casinha (se não estiver perdendo no
+	# fim); o rival com um a mais se lança.
+	var o: MatchTeam = teams[1 - t.side]
+	var d0: int = score[t.side] - score[o.side]
+	if not t.is_user and not (d0 < 0 and minute >= 70) and t.mentality > 1:
+		set_mentality(t.side, t.mentality - 1)
+	if not o.is_user and d0 >= 0 and o.mentality < 3:
+		set_mentality(o.side, o.mentality + 1)
 	t.recompute_units()
 	_refresh_rates()
 
@@ -1995,7 +1852,7 @@ func _retune(t: MatchTeam, x: Dictionary, label: String, pid: int = -1) -> void:
 ## domínio sem gol, bloco baixo que não se abre. No máximo uma mudança por leitura; técnico
 ## que estuda mais (TacticalScout.study) enxerga mais e reage mais.
 func _ai_read(t: MatchTeam) -> void:
-	if t.ai_reads >= 3 or t.on_pitch_count < 10:
+	if t.ai_reads >= 4 or t.on_pitch_count < 10:
 		return
 	t.ai_reads += 1
 	if rng.randf() > 0.3 + t.study * 0.65:
@@ -2107,9 +1964,17 @@ func _ai_decisions() -> void:
 		for t: MatchTeam in teams:
 			if t.is_user:
 				_user_plan(t)
+	# Primeiro tempo: quem está levando um baile não espera o intervalo para mexer.
+	if half == 1 and minute == 32:
+		for t: MatchTeam in teams:
+			if not t.is_user and (score[t.side] - score[1 - t.side] <= -2 or teams[1 - t.side].xg - t.xg >= 1.0):
+				_ai_read(t)
 	if half != 2:
 		return
 	for t: MatchTeam in teams:
+		# Conversa do intervalo: o técnico corrige o que viu no primeiro tempo.
+		if minute == 46 and not t.is_user:
+			_ai_read(t)
 		if (minute == 60 or minute == 68 or minute == 76 or minute == 84) and (not t.is_user or t.auto_subs):
 			_auto_subs(t)
 		if t.is_user:
@@ -2161,7 +2026,10 @@ func _auto_subs(t: MatchTeam) -> void:
 	for mp: MatchPlayer in t.slots:
 		if mp != null and mp.slot != 0 and mp.start_min == 0:
 			cands.append(mp)
-	cands.sort_custom(func(a, b): return a.cond < b.cond)
+	# Sai primeiro quem está gasto, quem está jogando mal e quem está pendurado com cartão.
+	var urgency := func(mp: MatchPlayer) -> float:
+		return mp.cond + mp.rating_pts * 8.0 - (12.0 if mp.yellow > 0 and mp.w_def >= 0.5 else 0.0)
+	cands.sort_custom(func(a, b): return urgency.call(a) < urgency.call(b))
 	var per_window := 2 if minute < 84 else 3
 	var done := 0
 	for mp: MatchPlayer in cands:
@@ -2175,6 +2043,8 @@ func _auto_subs(t: MatchTeam) -> void:
 		var cur := mp.p.rating_at(mp.pos) * (0.72 + 0.28 * c1 * c1)
 		var new_v := sub.p.rating_at(mp.pos) * (0.72 + 0.28 * c2 * c2)
 		var need := 0.92 if mp.yellow == 0 else 0.85
+		if mp.rating_pts <= -0.8:
+			need -= 0.06 # jogando mal: troca mesmo que o reserva seja um pouco pior
 		if new_v >= cur * need:
 			_do_sub(t, mp, sub, mp.slot)
 			done += 1
@@ -2294,8 +2164,6 @@ func man_of_the_match() -> MatchPlayer:
 
 func possession_pct(side: int) -> float:
 	var total: int = teams[0].poss_ticks + teams[1].poss_ticks
-	if live_poss[0] + live_poss[1] > 0.0:
-		return live_poss[side] / (live_poss[0] + live_poss[1])
 	if total == 0:
 		return 0.5
 	return float(teams[side].poss_ticks) / total
@@ -2303,8 +2171,6 @@ func possession_pct(side: int) -> float:
 
 func _emit(type: int, side: int, pid: int, pid2: int = -1, extra: Dictionary = {}) -> void:
 	var ev := {"t": type, "m": minute, "h": half, "s": side, "p": pid, "p2": pid2, "hs": score[0], "as": score[1]}
-	if live != null and live_sec >= 0.0:
-		ev["sec"] = live_sec
 	if not extra.is_empty():
 		ev["x"] = extra
 	events.append(ev)

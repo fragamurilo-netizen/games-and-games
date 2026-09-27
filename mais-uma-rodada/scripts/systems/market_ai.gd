@@ -760,8 +760,11 @@ static func max_bid(world: GameWorld, buyer: Club, p: Player, urgency: float, de
 		m *= 1.25
 	if not world.is_user_club(buyer.id):
 		m *= ClubDNA.bid_mult(buyer, p, level)
-	# Os ágios não se empilham sem fim: nem no leilão mais doido alguém paga muito mais que ~1,75× o valor.
-	m = minf(m, 1.52)
+	# Ninguém paga ágio por jogador passado dos 30: o valor de revenda é zero.
+	if age >= 30:
+		m *= 0.88 if age == 30 else (0.78 if age <= 32 else 0.68)
+	# Os ágios não se empilham sem fim: nem no leilão mais doido alguém paga muito mais que ~1,6× o valor.
+	m = minf(m, 1.4)
 	return minf(float(p.value) * m * 1.15, float(buyer.transfer_budget) * (1.3 if mismanaged else 1.0))
 
 

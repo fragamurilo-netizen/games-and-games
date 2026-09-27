@@ -38,6 +38,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
 	w.stats["short_names"] = true # nomes dos clubes já vêm curtos dos dados (GameWorld.from_dict)
+	w.stats["kits_real"] = 1 # uniformes reais já vêm dos dados (ClubGenerator.upgrade_kits)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
 	HeartClubs.ensure_all(w)

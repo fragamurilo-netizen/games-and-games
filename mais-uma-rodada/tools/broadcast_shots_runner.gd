@@ -4,6 +4,9 @@ extends Node
 var opt_out := ""
 var opt_league := "ARG1"
 var opt_days := "3"
+var opt_wx := "" # força o clima: sun, cloud, rain, storm, snow, heat, wind, fog
+var opt_night := "0"
+var opt_quick := "0" # 1: só abertura, placar e um trecho do jogo
 var shots := false
 
 
@@ -24,6 +27,16 @@ func _shot(shot_name: String) -> void:
 	get_viewport().get_texture().get_image().save_png("%s/%s.png" % [opt_out, shot_name])
 
 
+func _find_button(n: Node, text: String) -> Button:
+	if n is Button and (n as Button).text == text and (n as Button).is_visible_in_tree():
+		return n
+	for c in n.get_children():
+		var r := _find_button(c, text)
+		if r != null:
+			return r
+	return null
+
+
 func _run() -> void:
 	await _frames(2)
 	var main: Node = load("res://scenes/main.tscn").instantiate()
@@ -40,15 +53,38 @@ func _run() -> void:
 	await _frames(6)
 	UIManager.close_all_modals()
 	GameManager.begin_match()
+	if opt_wx != "":
+		var sim0 := GameManager.user_sim()
+		sim0.wx = {"kind": opt_wx, "night": opt_night == "1", "temp": 20, "fx": Weather.effects(opt_wx, 20.0)}
 	UIManager.replace("match")
 	await _frames(12)
 	await _shot("b01_abertura")
+	# Etapas da abertura: entrada dos times e escalações
+	for k in 4:
+		var nb := _find_button(get_tree().root, "Próximo")
+		if nb == null:
+			break
+		nb.pressed.emit()
+		await _frames(40 if k == 0 else 6)
+		if k == 0:
+			for j in 150:
+				await get_tree().process_frame
+		await _shot("b01_etapa%d" % (k + 2))
 	var ms: BaseScreen = UIManager.current()
 	UIManager.close_all_modals()
 	await _frames(4)
 	UIManager.close_all_modals()
 	await _frames(4)
 	await _shot("b02_placar_emissora")
+	if opt_quick == "1":
+		ms.set("_pace", 1)
+		for i in 240:
+			await get_tree().process_frame
+			if UIManager.has_modal():
+				UIManager.close_all_modals()
+		await _shot("b03_jogo")
+		get_tree().quit()
+		return
 	ms.set("_pace", 1)
 	var got_goal := false
 	var got_half := false

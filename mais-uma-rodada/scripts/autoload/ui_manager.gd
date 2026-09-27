@@ -32,6 +32,7 @@ const SCREENS := {
 	"numbers": "res://scenes/screens/numbers.tscn",
 	"contracts": "res://scenes/screens/contracts.tscn",
 	"nextgen": "res://scenes/screens/nextgen.tscn",
+	"dressing_room": "res://scenes/screens/dressing_room.tscn",
 	"past_squads": "res://scenes/screens/past_squads.tscn",
 	"paywall": "res://scenes/screens/paywall.tscn",
 	"manager": "res://scenes/screens/manager.tscn",
@@ -156,7 +157,7 @@ func refresh_chrome() -> void:
 ## Aplica tema claro/escuro e tamanho da interface das Opções e redesenha tudo.
 func apply_look() -> void:
 	UIColors.set_light(AppSettings.wants_light())
-	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale]
+	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
 	if main != null:
 		main.restyle()
 	var cur := current()
