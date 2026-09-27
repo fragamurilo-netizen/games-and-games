@@ -306,20 +306,18 @@
 			"capacity": 55000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
+				"shape": "ring",
 				"field": "stripes_tri:9",
 				"symbol": "none",
-				"chief_text": "GRÊMIO",
-				"chief_text2": "FOOT-BALL PORTO ALEGRENSE",
-				"chief_h": 0.3,
-				"cc": "#0D80BF",
-				"c1": "#0D80BF",
+				"text": "GRÊMIO FOOT-BALL",
+				"text2": "PORTO ALEGRENSE",
+				"c1": "#FFFFFF",
 				"fc": "#111111",
-				"c2": "#111111",
-				"c3": "#FFFFFF",
+				"c3": "#0D80BF",
+				"c2": "#0D80BF",
 				"stars": 1,
 				"star_c": "#E4B43A",
-				"border": "thick"
+				"border": "double"
 			},
 			"rivals": [
 				"BRA_COL"
