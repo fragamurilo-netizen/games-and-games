@@ -68,8 +68,28 @@ func _tabs_row(p: Player) -> Control:
 		ch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(ch)
 	var pid := p.id
+	var w := world()
+	if w != null and w.has_user() and not w.is_user_club(p.club_id) and not w.academy.has(p.id) and not p.retiring:
+		row.add_child(_shortlist_button(w, p))
 	row.add_child(UIKit.icon_button("swap", func(): UIManager.push("compare", {"a": pid}), "Comparar"))
 	return row
+
+
+## Estrela da lista de observação do mercado (acesa = jogador na lista).
+func _shortlist_button(w: GameWorld, p: Player) -> Button:
+	var on := Shortlist.has(w, p)
+	var b := UIKit.icon_button("star", func():
+		if not Shortlist.has(w, p) and Shortlist.is_full(w):
+			UIManager.toast("Sua lista está cheia (%d). Tire alguém no Mercado > Lista." % Shortlist.MAX_ENTRIES, UIColors.ORANGE)
+			return
+		var added := Shortlist.toggle(w, p)
+		UIManager.toast("%s entrou na sua lista de observação." % p.display_name() if added else "%s saiu da sua lista." % p.display_name(), UIColors.GREEN if added else UIColors.TEXT)
+		GameManager.save_now()
+		refresh(), "Tirar da lista" if on else "Pôr na lista")
+	var tint := UIColors.ACCENT if on else UIColors.MUTED
+	for k in [&"icon_normal_color", &"icon_hover_color", &"icon_pressed_color", &"icon_focus_color"]:
+		b.add_theme_color_override(k, tint)
+	return b
 
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
