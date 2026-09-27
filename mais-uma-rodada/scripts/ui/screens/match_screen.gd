@@ -7,7 +7,6 @@ const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
-const USE_LIVE_ENGINE := false
 
 var _sim: MatchSimulation
 var _fx: Fixture
@@ -47,11 +46,6 @@ var _strip_chips: Array = [] # {e, panel, score, info, box, flash, total}
 var _strip_t := 0.0
 var _strip_hold := 0.0
 var _strip_x := 0.0
-## Motor posicional ligado: o campo reproduz os quadros do LiveEngine (trecho do minuto com os
-## lances importantes em velocidade quase real; minutos calmos em ritmo acelerado).
-var _live := false
-var _live_start := 0.0
-var _live_speed := 1.0
 var _sub_out := -1
 var _built := false
 var _tab := "feed" # feed | stats | round | table
@@ -157,10 +151,7 @@ func _build() -> void:
 	var seed_base := (_fx.home * 131 + _fx.away) * 7919 + _fx.round * 97 + w.year
 	_com = Commentary.new(_sim, home.stadium, seed_base)
 	# Motor da partida: o minuto a minuto estatístico (o mesmo dos outros jogos do mundo), encenado
-	# pelo PitchMotion. O LiveEngine posicional segue no código, mas desligado.
-	if USE_LIVE_ENGINE and _sim.live == null and not _sim.started:
-		_sim.enable_live(seed_base * 13 + 7)
-	_live = _sim.live != null
+	# pelo PitchMotion.
 	_aux_state = {"seed": seed_base, "ev": 0, "given": {}}
 	_vis_rng.seed = seed_base * 31 + 17
 
@@ -697,10 +688,7 @@ func _advance() -> void:
 	_sim.step()
 	# Primeiro o campo encena o lance; a narração do desfecho sai quando a jogada termina.
 	_play_delay = 0.0
-	if _live:
-		_play_live()
-	else:
-		_script_play()
+	_script_play()
 	_drain(false)
 	_play_delay = 0.0
 	_after_step()
@@ -766,10 +754,7 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 			_add_line(line)
 			continue
 		var d := float(line["delay"]) * _delay_scale()
-		if _live and ev.has("sec"):
-			# Narração no instante do lance dentro do trecho reproduzido
-			d = float(line["delay"]) * 0.3 + maxf(0.0, (float(ev["sec"]) - _live_start) / _live_speed)
-		elif scripted:
+		if scripted:
 			# Preparação no meio da jogada; desfecho quando a bola chega.
 			d = d + _play_delay if d > 0.0 or style in ["goal", "card_y", "card_r", "big"] else _play_delay * 0.5
 		_enqueue(line, ev, d)
@@ -937,41 +922,7 @@ func _find_ev(types: Array) -> Dictionary:
 	return {}
 
 
-## Traduz a fase do minuto (e os eventos dele) numa jogada encenada pelo PitchMotion.
-## Escolhe o trecho do minuto a mostrar: dos 8 s antes do primeiro lance importante até logo
-## depois do último, quase em tempo real; minuto sem lance passa acelerado (só o fim dele).
-func _play_live() -> void:
-	if _sim.live == null:
-		return
-	var fr: Array = _sim.live.frames
-	if fr.is_empty():
-		return
-	var last_t := float(fr.back()[0])
-	var k0 := INF
-	var k1 := -1.0
-	for k in _sim.live.keys:
-		if float(k[1]) >= 0.45:
-			k0 = minf(k0, float(k[0]))
-			k1 = maxf(k1, float(k[0]))
-	var a := 0.0
-	var b := last_t
-	var sp := 1.0
-	if k1 >= 0.0 and _pace < 2:
-		a = maxf(0.0, k0 - 8.0)
-		b = minf(last_t, k1 + 3.5)
-		sp = [1.35, 2.3][_pace]
-	else:
-		sp = [5.0, 9.0, 16.0][_pace]
-		a = maxf(0.0, last_t - PACE[_pace] * sp)
-	_live_start = a
-	_live_speed = sp
-	_pitch.motion.play_frames(fr, a, b, sp)
-	_clock = maxf(PACE[_pace], (b - a) / sp)
-
-
 func _script_play() -> void:
-	if _live:
-		return
 	var ph: Dictionary = _sim.last_phase
 	if ph.is_empty() or is_same(ph, _last_phase):
 		return
@@ -1784,8 +1735,6 @@ func _skip_to_end() -> void:
 	_hold = 0.0
 	_halftime = false
 	_pending_halftime = false
-	_sim.live = null # o resto do jogo sai do sorteio rápido
-	_live = false
 	_sim.run_to_end()
 	_drain(true)
 	_rebuild_scorers()
