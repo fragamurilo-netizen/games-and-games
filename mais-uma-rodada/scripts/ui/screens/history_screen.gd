@@ -34,15 +34,13 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in TABS:
-		var key: String = t[0]
-		row.add_child(UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh()))
-	c.add_child(row)
+	max_content_width = 1700
+	c.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()))
+	# Acesso ao NXGN continua em largura total; o conteúdo da aba passa a usar duas colunas.
 	c.add_child(UIKit.button("Joias do futebol: NXGN e Next Generation", "GhostButton", func(): UIManager.push("nextgen"), "star"))
+	var start := c.get_child_count()
 	match _tab:
 		"career":
 			c.add_child(_career(w))
@@ -58,6 +56,8 @@ func refresh() -> void:
 			_encyclopedia(w, c)
 		"legends":
 			c.add_child(_legends(w))
+	# Temporadas e campeões têm seletores próprios no topo; o restante se adapta em duas colunas.
+	columnize(c, start, 2, 2 if _tab in ["seasons", "champions"] else 0)
 
 
 # ---------------------------------------------------------------------------
