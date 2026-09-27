@@ -200,7 +200,7 @@ const STYLE_P: Array = [
 
 const LIGHT := Vector3(-0.28, -0.22, 0.94)
 ## Incrementar quando o desenho do rosto muda, para não reaproveitar comandos antigos em hot reload.
-const PORTRAIT_RENDER_VERSION := 10
+const PORTRAIT_RENDER_VERSION := 11
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -2718,6 +2718,11 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	if ch > 0.0:
 		var line := lerpf(_N + 0.02, -0.02 + ch * 0.75, smoothstep(_MW * 0.8, _MW * 1.5, au)) - 0.16 * smoothstep(0.55, 1.0, au)
 		var dc := smoothstep(line - soft, line + soft, v)
+		# Bochecha é lateral. Sem esta máscara, a massa de barba atravessava o centro do
+		# rosto logo abaixo do nariz e virava uma faixa horizontal parecida com um buço.
+		# Bigode e queixo têm máscaras próprias mais abaixo e continuam intactos.
+		var cheek_side := smoothstep(_MW * 0.72, _MW * 1.08, au)
+		dc *= cheek_side
 		if cn <= 0.0:
 			dc *= smoothstep(_MW * 1.15, _MW * 1.5, au)
 		d = maxf(d, dc)
