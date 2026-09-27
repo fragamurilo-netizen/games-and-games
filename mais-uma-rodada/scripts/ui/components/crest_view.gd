@@ -20,7 +20,7 @@ extends Control
 ##   stars  estrelas acima do escudo            crown  1 coroa real, 2 coroa mural
 ##   laurel  louros em volta                    border  none|thin|thick|double|gold
 ##   plate  auto|band|disc|none — placa atrás do monograma (auto: só em campo listrado/dividido)
-##   pc     cor da placa                         finish  false tira o brilho e o filete interno
+##   pc     cor da placa                         finish  false tira o filete interno
 ##   tc     cor do texto do anel
 ##   canton cor do cantão (quadrado no alto à esquerda)   canton_sym  símbolo dentro dele
 ##   field pale_cross:L|R  metade com cruz (lado L/R) e metade listrada (Milan, Bologna)
@@ -189,17 +189,15 @@ func _render(s: float) -> void:
 			var narrow := shape in ["round", "oval", "ring", "oval_ring", "octagon", "hexagon", "diamond"]
 			_text_center(String(sp["chief_text"]), box.position + Vector2(box.size.x * 0.5, box.size.y * chief_h * 0.56), box.size.x * (0.46 if narrow else 0.62), box.size.y * 0.15, ink)
 		charge_box = Rect2(charge_box.position + Vector2(0, box.size.y * 0.12), charge_box.size * Vector2(1.0, 0.86))
-	# Placa atrás do monograma (faixa ou disco), para as letras não se perderem nas listras
+	# Filete interno fino (estilo chapado)
 	if bool(sp["finish"]) and s >= 30.0 and not ring and String(sp["border"]) in ["thin", "thick", "none"]:
 		_rim(inner, sp, s)
+	# Placa atrás do monograma (faixa ou disco), para as letras não se perderem nas listras
 	var plate := plate_mode(sp)
 	if plate != "" and not small:
 		_plate(plate, sp, charge_box, box, inner, s)
 	# Símbolo
 	_charge(sp, charge_box, inner, s, box)
-	# Acabamento: brilho em cima, sombra embaixo e filete interno (escudo de metal esmaltado)
-	if bool(sp["finish"]) and s >= 30.0:
-		_gloss(inner, box, s)
 	# Borda
 	_border(poly, inner, ring, sp, s)
 	# Texto do anel
@@ -214,10 +212,6 @@ func _render(s: float) -> void:
 		var bottom_text := String(sp["text2"]) if String(sp["text2"]) != "" else String(sp["year"])
 		if bottom_text != "":
 			_arc_text(bottom_text, cc, rr - fs * 0.35, fs * 0.9, ink, false)
-		# Pontinhos separando os textos
-		for sx: float in [-1.0, 1.0]:
-			var a := PI * (0.5 - 0.42 * sx) + PI
-			_circle(cc + Vector2(cos(a), sin(a)) * (rr - fs * 0.3), fs * 0.12, ink)
 	# Faixa embaixo
 	if bottom > 0.0:
 		_ribbon(String(sp["ribbon"]), Rect2(Vector2(s * 0.12, s * (1.0 - bottom - 0.03)), Vector2(s * 0.76, s * bottom)), c3, c1)
@@ -453,7 +447,8 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			_polyline_closed(pts, c1.darkened(0.3) if c1.get_luminance() < 0.6 else Color(0, 0, 0, 0.6), maxf(1.0, r * 0.07))
 	for p: PackedVector2Array in polys:
 		_poly(_xf_c(p, cen, r), col)
-	if CrestArt.has(det) and s >= 28.0:
+	# Montanha clara: o pico cinza fica sujo, então vai sem detalhe
+	if CrestArt.has(det) and s >= 28.0 and not (sym == "mountain" and col.get_luminance() > 0.75):
 		for p: PackedVector2Array in CrestArt.polys(det):
 			_poly(_xf_c(p, cen, r), shade if sym != "ball" else Color("#15171B"))
 
@@ -471,6 +466,9 @@ static func plate_mode(sp: Dictionary) -> String:
 	var field := String(sp["field"])
 	# Uma faixa só no meio (hoops:2, tricolor_h) já faz o papel de placa
 	if String(sp["chief_text"]) != "" or field == "hoops:2" or field == "tricolor_h" or not field.get_slice(":", 0) in BUSY_FIELDS:
+		return ""
+	# No anel o disco de dentro já é pequeno: letras com contorno, sem placa
+	if String(sp["shape"]) in ["ring", "oval_ring"]:
 		return ""
 	return "disc" if String(sp["shape"]) in ROUNDISH else "band"
 
@@ -540,20 +538,6 @@ func _rim(inner: PackedVector2Array, sp: Dictionary, s: float) -> void:
 		_polyline_closed(piece, col, maxf(1.0, s * 0.011))
 
 
-## Brilho suave em arco no alto e sombra em degradê embaixo.
-func _gloss(inner: PackedVector2Array, box: Rect2, s: float) -> void:
-	var arc := PackedVector2Array()
-	for i in 40:
-		var a := TAU * i / 40.0
-		arc.append(Vector2(0.28 + cos(a) * 0.95, -0.42 + sin(a) * 0.9))
-	for piece in Geometry2D.intersect_polygons(_xf(arc, box), inner):
-		_poly(piece, Color(1, 1, 1, 0.08))
-	for k in 3:
-		var y := 0.66 + k * 0.1
-		for piece in Geometry2D.intersect_polygons(_xf(_rect(-0.1, y, 1.2, 1.2 - y), box), inner):
-			_poly(piece, Color(0, 0, 0, 0.05))
-
-
 static func _outer_edge(sp: Dictionary) -> Color:
 	var c1: Color = sp["c1"]
 	var c2: Color = sp["c2"]
@@ -570,7 +554,7 @@ func _border(poly: PackedVector2Array, inner: PackedVector2Array, ring: bool, sp
 	# Contorno escuro por fora: recorta o escudo de qualquer fundo (tema claro ou escuro)
 	if b != "none" and s >= 20.0:
 		var lw := {"thick": 0.06, "gold": 0.045, "double": 0.03}.get(b, 0.03) as float
-		_polyline_closed(poly, _outer_edge(sp), maxf(2.0, s * lw) + maxf(1.5, s * 0.022))
+		_polyline_closed(poly, _outer_edge(sp), maxf(1.5, s * lw) + maxf(1.0, s * 0.012))
 	match b:
 		"none":
 			pass
@@ -831,7 +815,7 @@ func _text_center(txt: String, center: Vector2, max_w: float, size_px: float, co
 		return
 	var pos := center + Vector2(-tw * 0.5, fs * 0.36)
 	if shadow:
-		_string(font, pos + Vector2(fs * 0.03, fs * 0.07), txt, fs, Color(0, 0, 0, 0.32))
+		_string(font, pos + Vector2(fs * 0.03, fs * 0.07), txt, fs, Color(0, 0, 0, 0.2))
 	if outline:
 		_string_outline(font, pos, txt, fs, maxi(1, int(fs * 0.12)), out_col)
 	_string(font, pos, txt, fs, col)
