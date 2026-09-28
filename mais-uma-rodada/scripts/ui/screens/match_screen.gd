@@ -129,7 +129,7 @@ func _exit_tree() -> void:
 
 
 func _set_live(on: bool) -> void:
-	if UIManager.main != null and UIManager.main.has_method("set_live"):
+	if is_instance_valid(UIManager.main) and not UIManager.main.is_queued_for_deletion() and UIManager.main.has_method("set_live"):
 		UIManager.main.set_live(on)
 
 

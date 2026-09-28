@@ -483,6 +483,10 @@ func end_season() -> Dictionary:
 # Ciclo de vida do app: autosave ao pausar/fechar
 # ---------------------------------------------------------------------------
 
+func _exit_tree() -> void:
+	I18n.release()
+
+
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_APPLICATION_PAUSED:

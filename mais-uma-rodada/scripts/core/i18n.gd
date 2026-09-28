@@ -47,6 +47,14 @@ static func apply(code: String) -> void:
 	TranslationServer.set_locale(_LOCALES[code])
 
 
+## Fechando o app: tira as tabelas do TranslationServer antes de os scripts serem descarregados
+## (uma PatternTranslation ainda registrada derrubava o jogo ao sair em inglês ou espanhol).
+static func release() -> void:
+	for code in _tables:
+		TranslationServer.remove_translation(_tables[code])
+	_tables.clear()
+
+
 ## Traduz um texto fora dos Controls (narração, notícias, sons de texto desenhados à mão).
 static func t(text: String) -> String:
 	if lang == DEFAULT or text == "":

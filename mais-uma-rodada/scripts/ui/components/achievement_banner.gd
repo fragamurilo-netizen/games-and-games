@@ -21,6 +21,10 @@ static func notify(w: GameWorld) -> void:
 	if DisplayServer.get_name() == "headless" or UIManager.main == null:
 		w.pending_achievements.clear()
 		return
+	# Desbloqueio vindo da thread do "Simular": a árvore de nós só pode ser mexida na principal.
+	if OS.get_thread_caller_id() != OS.get_main_thread_id():
+		notify.call_deferred(w)
+		return
 	var tree := Engine.get_main_loop() as SceneTree
 	if tree == null:
 		return
