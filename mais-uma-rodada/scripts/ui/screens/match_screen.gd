@@ -80,6 +80,7 @@ var _clock_lbl: Label
 var _home_scorers: Label
 var _away_scorers: Label
 var _ticker: Label
+var _board: ScoreboardView # placar da transmissão (desenha o estado; os rótulos acima são dele)
 var _pitch: PitchView
 var _poss_home: ColorRect
 var _poss_away: ColorRect
@@ -426,168 +427,18 @@ func _build_l3() -> PanelContainer:
 
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
-	# Placar com a cara da competição: cores da liga/copa e um desenho próprio (faixa, TV,
-	# angular, cápsula ou clássico), como os grafismos de cada transmissão.
-	var th := ScoreboardTheme.for_competition(world(), _fx.comp)
-	var layout := String(th.get("layout", "faixa"))
-	var accent: Color = th["accent"]
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = "TopBar"
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = th["bg"]
-	sb.border_color = accent
-	sb.border_width_bottom = 4
-	sb.content_margin_left = 16
-	sb.content_margin_right = 16
-	sb.content_margin_top = 6
-	sb.content_margin_bottom = 4
-	match layout:
-		"tv":
-			sb.border_width_bottom = 0
-			sb.border_width_top = 3
-		"capsula":
-			sb.corner_radius_bottom_left = 26
-			sb.corner_radius_bottom_right = 26
-			sb.shadow_color = Color(accent.r, accent.g, accent.b, 0.35)
-			sb.shadow_size = 6
-		"classico":
-			sb.bg_color = Color("#0B0B0B")
-			sb.border_color = Color("#3A3A3A")
-			sb.border_width_bottom = 5
-	panel.add_theme_stylebox_override(&"panel", sb)
-	var v := UIKit.vbox(2)
-	panel.add_child(v)
-	var strip := PanelContainer.new()
-	var ss := StyleBoxFlat.new()
-	ss.bg_color = th["bg2"]
-	ss.set_corner_radius_all(8)
-	ss.content_margin_left = 10
-	ss.content_margin_right = 10
-	ss.content_margin_top = 3
-	ss.content_margin_bottom = 3
-	var caps_col: Color = th["caps"]
-	match layout:
-		"tv":
-			ss.bg_color = accent
-			ss.set_corner_radius_all(0)
-			caps_col = UIColors.on_color(accent)
-		"angular":
-			ss.bg_color = accent
-			ss.skew = Vector2(0.35, 0)
-			ss.set_corner_radius_all(0)
-			caps_col = UIColors.on_color(accent)
-		"capsula":
-			ss.set_corner_radius_all(20)
-			ss.border_color = accent
-			ss.set_border_width_all(2)
-		"classico":
-			ss.bg_color = Color("#000000")
-			ss.set_corner_radius_all(2)
-			ss.border_color = Color("#3A3A3A")
-			ss.set_border_width_all(1)
-			caps_col = Color("#FFB000")
-	strip.add_theme_stylebox_override(&"panel", ss)
-	var comp_lbl := UIKit.label(CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO", "Caps")
-	comp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	comp_lbl.clip_text = true
-	comp_lbl.add_theme_color_override(&"font_color", caps_col)
-	comp_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# Selo da emissora no canto, como numa transmissão
-	var srow := UIKit.hbox(8)
-	_bug = Broadcaster.bug(Broadcaster.for_competition(world(), _fx.comp), true)
-	srow.add_child(_bug)
-	srow.add_child(comp_lbl)
-	strip.add_child(srow)
-	v.add_child(strip)
-	var row := UIKit.hbox(8)
-	row.add_child(UIKit.crest(home, 40))
-	if layout == "tv" or layout == "angular":
-		row.add_child(_team_block(_colors[0], _colors[1], layout))
-	_home_name = UIKit.label(home.short_name, "H3")
-	_home_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_home_name.clip_text = true
-	row.add_child(_home_name)
-	var mid := UIKit.vbox(0)
-	var score_box := PanelContainer.new()
-	var sbx := StyleBoxFlat.new()
-	sbx.bg_color = th["bg2"]
-	sbx.border_color = accent
-	sbx.set_border_width_all(2)
-	sbx.set_corner_radius_all(10)
-	sbx.content_margin_left = 14
-	sbx.content_margin_right = 14
-	var score_col: Color = th["text"]
-	var clock_col := accent
-	match layout:
-		"tv":
-			sbx.bg_color = accent
-			sbx.set_corner_radius_all(0)
-			sbx.set_border_width_all(0)
-			score_col = UIColors.on_color(accent)
-		"angular":
-			sbx.skew = Vector2(0.22, 0)
-			sbx.set_corner_radius_all(0)
-			sbx.border_width_top = 0
-			sbx.border_width_bottom = 0
-			sbx.border_width_left = 5
-			sbx.border_width_right = 5
-		"capsula":
-			sbx.set_corner_radius_all(24)
-			sbx.set_border_width_all(3)
-			sbx.shadow_color = Color(accent.r, accent.g, accent.b, 0.45)
-			sbx.shadow_size = 8
-		"classico":
-			sbx.bg_color = Color("#050505")
-			sbx.border_color = Color("#FFB000").darkened(0.5)
-			sbx.set_corner_radius_all(3)
-			sbx.set_border_width_all(3)
-			score_col = Color("#FFB000")
-			clock_col = Color("#FFB000")
-	score_box.add_theme_stylebox_override(&"panel", sbx)
-	_score_lbl = UIKit.label("0 – 0", "Score")
-	_score_lbl.add_theme_font_size_override(&"font_size", 40)
-	_score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_score_lbl.add_theme_color_override(&"font_color", score_col)
-	score_box.add_child(_score_lbl)
-	mid.add_child(score_box)
-	_clock_lbl = UIKit.label("0'", "Accent" if layout != "classico" else "Mono")
-	_clock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_clock_lbl.add_theme_color_override(&"font_color", clock_col)
-	if layout == "tv":
-		# Relógio numa aba própria, como na barra de TV.
-		var tab := PanelContainer.new()
-		var tb := StyleBoxFlat.new()
-		tb.bg_color = th["bg2"]
-		tb.content_margin_left = 8
-		tb.content_margin_right = 8
-		tab.add_theme_stylebox_override(&"panel", tb)
-		tab.add_child(_clock_lbl)
-		mid.add_child(tab)
-	else:
-		mid.add_child(_clock_lbl)
-	row.add_child(mid)
-	_away_name = UIKit.label(away.short_name, "H3")
-	_away_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_away_name.clip_text = true
-	row.add_child(_away_name)
-	if layout == "tv" or layout == "angular":
-		row.add_child(_team_block(_colors[2], _colors[3], layout))
-	row.add_child(UIKit.crest(away, 40))
-	v.add_child(row)
-	var sc := UIKit.hbox(8)
-	_home_scorers = UIKit.label("", "Small", true)
-	sc.add_child(_home_scorers)
-	_away_scorers = UIKit.label("", "Small", true)
-	_away_scorers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	sc.add_child(_away_scorers)
-	v.add_child(sc)
-	v.add_child(_conditions_row())
-	_ticker = UIKit.label("", "Small")
-	_ticker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_ticker.clip_text = true
-	v.add_child(_ticker)
-	return panel
+	# Placar da transmissão com a cara da competição (desenho e cores dos dados, mods ou Editor).
+	var title := CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO"
+	_board = ScoreboardView.make(world(), _fx.comp, title, home, away, _colors, _conditions_row(), true, _fx.leg == 1)
+	_score_lbl = _board.score_proxy
+	_clock_lbl = _board.clock_proxy
+	_home_name = _board.home_name
+	_away_name = _board.away_name
+	_home_scorers = _board.home_scorers
+	_away_scorers = _board.away_scorers
+	_ticker = _board.ticker
+	_bug = _board.bug
+	return _board
 
 
 ## Condições do jogo: clima (ícone), temperatura, dia/noite, altitude e público.
@@ -609,21 +460,6 @@ func _conditions_row() -> Control:
 	var l := UIKit.label(" · ".join(bits), "Small")
 	row.add_child(l)
 	return row
-
-
-## Bloco com as duas cores do time ao lado do nome (placares de TV e angular).
-func _team_block(c1: Color, c2: Color, layout: String) -> Control:
-	var p := PanelContainer.new()
-	var st := StyleBoxFlat.new()
-	st.bg_color = c1
-	st.border_color = c2
-	st.border_width_bottom = 5
-	if layout == "angular":
-		st.skew = Vector2(0.3, 0)
-	p.add_theme_stylebox_override(&"panel", st)
-	p.custom_minimum_size = Vector2(12, 44)
-	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	return p
 
 
 func _build_controls() -> void:
@@ -1294,6 +1130,8 @@ func _update_board() -> void:
 	_away_scorers.text = _scorer_text(1)
 	# Linha dos goleadores só aparece quando alguém marcou (placar compacto)
 	(_home_scorers.get_parent() as Control).visible = _home_scorers.text != "" or _away_scorers.text != ""
+	if _board != null:
+		_board.sync(_sim, _shown_score, _halftime, _done)
 	var ph := _sim.possession_pct(0)
 	_poss_home.size_flags_stretch_ratio = maxf(0.05, ph)
 	_poss_away.size_flags_stretch_ratio = maxf(0.05, 1.0 - ph)

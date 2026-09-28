@@ -49,6 +49,7 @@ static var _league_nations: Array[String] = []
 static var _pool_order: Array[String] = []
 static var _club_data: Dictionary = {} # nação -> Array de dicionários de clube
 static var _kits: Dictionary = {} # nação -> {chave do clube: {h, a, t, g, alt}}
+static var _club_by_key: Dictionary = {} # chave -> dicionário do clube (já normalizado)
 
 
 static func load_all() -> void:
@@ -69,6 +70,8 @@ static func load_all() -> void:
 static func reload() -> void:
 	_cache.clear()
 	_kits.clear()
+	_club_by_key.clear()
+	CustomAssets.clear_cache()
 	_formations.clear()
 	_formation_order.clear()
 	_loaded = false
@@ -78,9 +81,16 @@ static func reload() -> void:
 static func _load_json(key: String) -> Variant:
 	if _cache.has(key):
 		return _cache[key]
-	var data: Variant = Mods.apply_to(PATHS[key], read_json(PATHS[key]))
+	var data: Variant = read_modded(PATHS[key])
 	_cache[key] = data if data != null else {}
 	return _cache[key]
+
+
+## Um arquivo de dados com os mods ligados aplicados. O arquivo pode existir só num mod
+## (ex.: clubes de um país novo): aí o jogo usa o do mod.
+static func read_modded(path: String) -> Variant:
+	var base: Variant = read_json(path) if FileAccess.file_exists(path) else null
+	return Mods.apply_to(path, base)
 
 
 static func read_json(path: String) -> Variant:
@@ -249,13 +259,26 @@ static func club_data(code: String) -> Array:
 
 ## Uniformes reais de um clube autoral ({h, a, t, g, alt}), ou {} para clubes gerados.
 ## A nação vem da chave ("BRA_RNC" → data/world/kits/BRA.json); cada arquivo é lido uma vez.
+## Uniformes escritos no próprio clube ("kits" no arquivo de clubes) valem por cima do arquivo de
+## uniformes, e os do Editor (Overrides) por cima de tudo.
 static func club_kits(key: String) -> Dictionary:
 	var code := key.get_slice("_", 0)
 	if not _kits.has(code):
-		var path := KITS_DIR + code + ".json"
-		var d: Variant = Mods.apply_to(path, read_json(path)) if FileAccess.file_exists(path) else null
+		var d: Variant = read_modded(KITS_DIR + code + ".json")
 		_kits[code] = d.get("kits", {}) if d is Dictionary else {}
-	return _kits[code].get(key, {})
+	var out: Dictionary = _kits[code].get(key, {})
+	var ov: Variant = Overrides.club(key).get("kits", {})
+	if ov is Dictionary and not ov.is_empty():
+		out = out.duplicate(true)
+		for w in ov:
+			out[w] = ov[w]
+	return out
+
+
+## Dicionário de um clube dos dados pela chave ({} se não existir).
+static func club_entry(key: String) -> Dictionary:
+	load_all()
+	return _club_by_key.get(key, {})
 
 
 static func _prepare_leagues() -> void:
@@ -282,17 +305,25 @@ static func _prepare_leagues() -> void:
 
 static func _prepare_clubs() -> void:
 	_club_data.clear()
+	_club_by_key.clear()
 	for n in _league_nations:
-		var path := CLUBS_DIR + n + ".json"
-		if not FileAccess.file_exists(path):
-			_club_data[n] = []
-			continue
-		var d: Variant = Mods.apply_to(path, read_json(path))
-		_club_data[n] = d.get("clubs", []) if d is Dictionary else []
+		var d: Variant = read_modded(CLUBS_DIR + n + ".json")
+		var list: Array = d.get("clubs", []) if d is Dictionary else []
+		for cd in list:
+			if cd is Dictionary:
+				LicensedData.normalize_club(cd)
+				_club_by_key[String(cd.get("key", ""))] = cd
+		_club_data[n] = list.filter(func(cd): return cd is Dictionary)
 	# Uniformes reais já lidos aqui (a geração do mundo roda em outra thread).
 	_kits.clear()
 	for n in _league_nations:
 		club_kits(n + "_")
+		for cd in _club_data[n]:
+			if cd.get("kits", null) is Dictionary:
+				var k := String(cd.get("key", ""))
+				var cur: Dictionary = Dictionary(_kits[n].get(k, {})).duplicate(true)
+				cur.merge(cd["kits"], true)
+				_kits[n][k] = cur
 
 
 # ---------------------------------------------------------------------------
