@@ -172,3 +172,168 @@ static func _formation_width(fname: String) -> float:
 
 static func _style_name(i: int) -> String:
 	return String(DatabaseManager.tactics()["styles"][clampi(i, 0, 5)]["name"])
+
+
+# ---------------------------------------------------------------------------
+# Instruções de equipe (ritmo, passe, marcação, perda da bola, foco, cera, escanteios)
+# ---------------------------------------------------------------------------
+
+## Propriedade do TeamSheet = lista de mesmo nome em tactics.json (ordem de TeamSheet.deep_values).
+const DEEP: Array[String] = ["tempo", "passing", "marking", "transition", "focus", "time_waste", "corners"]
+const DEEP_TITLES := {"tempo": "Ritmo", "passing": "Passe", "marking": "Marcação", "transition": "Na perda da bola",
+	"focus": "Foco do ataque", "time_waste": "Ganhar tempo", "corners": "Escanteios"}
+const DEEP_DEFAULT: Array[int] = [1, 1, 0, 1, 1, 0, 0]
+## Peso do encaixe do elenco numa instrução: por ponto de atributo acima/abaixo do overall.
+const DEEP_FIT_K := 0.004
+const DEEP_FIT_MAX := 0.035
+
+static var _deep_cache: Dictionary = {}
+
+
+static func deep_options(key: String) -> Array:
+	return DatabaseManager.tactics().get(key, [])
+
+
+static func deep_option(key: String, i: int) -> Dictionary:
+	var opts := deep_options(key)
+	if opts.is_empty():
+		return {}
+	return opts[clampi(i, 0, opts.size() - 1)]
+
+
+## Nome curto da opção escolhida ("Acelerado", "Contrapressão"...).
+static func deep_name(key: String, i: int) -> String:
+	return String(deep_option(key, i).get("name", ""))
+
+
+## Multiplicadores somados das instruções de equipe (cacheado pela combinação). Os efeitos que
+## dependem do elenco (encaixe "fit") e do placar (cera) ficam listados para o MatchTeam aplicar.
+static func deep_mods(vals: Array) -> Dictionary:
+	var key := str(vals)
+	if _deep_cache.has(key):
+		return _deep_cache[key]
+	var out := {
+		"rate": 1.0, "quality": 1.0, "opp_rate": 1.0, "opp_quality": 1.0, "poss": 0.0, "fatigue": 1.0, "fouls": 1.0,
+		"offside": 1.0, "offside_own": 1.0, "lanes": [1.0, 1.0, 1.0], "lead_rate": 1.0, "lead_opp_rate": 1.0, "lead_cards": 1.0,
+		"corner_ch": 1.0, "corner_q": 1.0, "aerial": 1.0, "fits": [],
+		"types": PackedFloat32Array([1, 1, 1, 1, 1, 1]), "opp_types": PackedFloat32Array([1, 1, 1, 1, 1, 1]),
+	}
+	for k in DEEP.size():
+		var v: int = int(vals[k]) if k < vals.size() else DEEP_DEFAULT[k]
+		var o := deep_option(DEEP[k], v)
+		if o.is_empty():
+			continue
+		for f in ["rate", "quality", "opp_rate", "opp_quality"]:
+			out[f] = float(out[f]) * MatchSimulation.damp(float(o.get(f, 1.0)))
+		out["poss"] = float(out["poss"]) + float(o.get("poss", 0.0)) * MatchSimulation.MOD_DAMP
+		for f in ["fatigue", "fouls", "offside", "offside_own", "lead_rate", "lead_opp_rate", "lead_cards", "corner_ch", "corner_q", "aerial"]:
+			out[f] = float(out[f]) * float(o.get(f, 1.0))
+		if o.has("lanes"):
+			var ln: Array = out["lanes"]
+			for i in 3:
+				ln[i] = float(ln[i]) * float(o["lanes"][i])
+		for pair in [["types", "types"], ["opp_types", "opp_types"]]:
+			var arr: PackedFloat32Array = out[pair[0]]
+			var src: Dictionary = o.get(pair[1], {})
+			for i in MatchSimulation.CH_KEYS.size():
+				arr[i] *= float(src.get(MatchSimulation.CH_KEYS[i], 1.0))
+			out[pair[0]] = arr
+		if o.has("fit"):
+			var ids: Array = []
+			for code in o["fit"]:
+				ids.append(DatabaseManager.attr_index(code))
+			out["fits"].append([ids, String(o.get("fit_on", "quality"))])
+	_deep_cache[key] = out
+	return out
+
+
+## Encaixe (pontos de atributo acima do overall, média) → ajuste de -3,5% a +3,5%.
+static func fit_bonus(fit_points: float) -> float:
+	return clampf(fit_points * DEEP_FIT_K, -DEEP_FIT_MAX, DEEP_FIT_MAX)
+
+
+## Choque de ideias entre quem ataca (a) e quem defende (d): multiplicador da taxa de chances de
+## quem ataca. Descrições: MatchTeam.clash_desc / QuickMatch (passing, pressing, line, marking,
+## transition, tech, pace_att, pace_def, lane_rel).
+static func clash(a: Dictionary, d: Dictionary) -> float:
+	var m := 1.0
+	var tech := float(a.get("tech", 64.0))
+	var passing := int(a.get("passing", 1))
+	# Passe curto contra pressão alta: o time técnico sai jogando e acha espaço; o sem técnica se enrola.
+	if passing == 0 and int(d.get("pressing", 1)) == 2:
+		m *= 1.0 - 0.05 * clampf((66.0 - tech) / 12.0, -0.6, 1.0)
+	# Bola direta contra linha alta: velocidade dos atacantes contra a dos zagueiros.
+	if passing == 2:
+		var line := int(d.get("line", 1))
+		if line == 2:
+			m *= 1.0 + 0.05 * clampf((float(a.get("pace_att", 60.0)) - float(d.get("pace_def", 60.0))) / 12.0, -0.5, 1.0)
+		elif line == 0:
+			m *= 0.97
+	# Marcação individual contra time técnico: o drible arrasta o marcador. Contra time sem técnica, sufoca.
+	if int(d.get("marking", 0)) == 1:
+		m *= 1.0 + 0.04 * clampf((tech - 64.0) / 10.0, -1.0, 1.0)
+	# Contrapressão: a bola direta passa por cima; o passe curto cai na armadilha.
+	if int(d.get("transition", 1)) == 2:
+		m *= 1.03 if passing == 2 else (0.98 if passing == 0 else 1.0)
+	# Foco num corredor: rende contra o lado fraco do rival, trava contra o forte.
+	m *= clampf(1.0 + 0.25 * (float(a.get("lane_rel", 1.0)) - 1.0), 0.94, 1.06)
+	return m
+
+
+## Resumo das instruções de equipe fora do padrão ("Acelerado · Contrapressão · Foco: esquerda").
+static func deep_summary(sheet: TeamSheet) -> String:
+	var vals := sheet.deep_values()
+	var parts: Array = []
+	for k in DEEP.size():
+		if int(vals[k]) == DEEP_DEFAULT[k]:
+			continue
+		var nm := deep_name(DEEP[k], int(vals[k]))
+		match DEEP[k]:
+			"focus":
+				nm = "Foco: " + nm.to_lower()
+			"corners":
+				nm = "Escanteio " + nm.to_lower()
+			"marking":
+				nm = "Marcação " + nm.to_lower()
+			"passing":
+				nm = "Passe " + nm.to_lower()
+		parts.append(nm)
+	return " · ".join(PackedStringArray(parts))
+
+
+## Instruções de equipe da IA a partir da filosofia (campos opcionais tempo/passing/marking/
+## transition/corners em philosophies.json) e do jogo: azarão recompõe e faz cera, time cansado
+## não faz contrapressão, time baixo não cruza no segundo pau. Determinístico.
+static func ai_deep(world: GameWorld, club: Club, sheet: TeamSheet, ph: Dictionary, diff: float, roll: float) -> void:
+	var adapt := float(ph.get("adapt", 0.3))
+	sheet.tempo = clampi(int(ph.get("tempo", 1)), 0, 2)
+	sheet.passing = clampi(int(ph.get("passing", 1)), 0, 2)
+	sheet.marking = clampi(int(ph.get("marking", 0)), 0, 1)
+	sheet.transition = clampi(int(ph.get("transition", 1)), 0, 2)
+	sheet.focus = 1
+	sheet.corners = clampi(int(ph.get("corners", 0)), 0, 3)
+	sheet.time_waste = 0
+	# Azarão pragmático: recompõe sempre e segura o resultado quando estiver na frente.
+	if diff <= -6.0 and roll < adapt + 0.2:
+		sheet.transition = 0
+		sheet.time_waste = 1
+		if sheet.tempo == 2 and diff <= -10.0:
+			sheet.tempo = 1
+	elif sheet.mentality <= TeamSheet.MENT_DEFENSIVA:
+		sheet.time_waste = 1 if roll < adapt else 0
+	# Sem fôlego, nada de contrapressão.
+	if sheet.transition == 2 and ClubPhilosophy._avg_condition(world, sheet) < 82.0:
+		sheet.transition = 1
+	# Escanteio pelo tamanho do time: baixinhos batem curto ou no primeiro pau.
+	var h := 0.0
+	var n := 0
+	for pid in sheet.starters:
+		var p := world.player(pid)
+		if p != null and p.position != Pos.GK:
+			h += p.height
+			n += 1
+	h = h / n if n > 0 else 181.0
+	if sheet.corners == 2 and h < 180.0:
+		sheet.corners = 1
+	elif sheet.corners == 0 and h >= 184.0 and roll < 0.6:
+		sheet.corners = 2

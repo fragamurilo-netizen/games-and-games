@@ -180,7 +180,7 @@ static func vulnerability(world: GameWorld, club: Club) -> PackedFloat32Array:
 ## Qualidade do estudo de quem prepara o time (0..1): o técnico da IA ou o auxiliar do usuário.
 static func study(world: GameWorld, club: Club) -> float:
 	if world.is_user_club(club.id):
-		return clampf(People.staff_level(world, "auxiliar") * 0.9 + 0.1, 0.1, 1.0)
+		return clampf(People.staff_level(world, "auxiliar") * 0.9 + 0.1 + TrainingManager.study_bonus(world, club), 0.1, 1.0)
 	var co := People.coach_of(world, club.id)
 	if co.is_empty():
 		return 0.4

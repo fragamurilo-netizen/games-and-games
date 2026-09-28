@@ -123,6 +123,8 @@ static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_ho
 	sheet.line = clampi(line, 0, 2)
 	sheet.intensity = clampi(intensity, 0, 2)
 	sheet.width = 1
+	# Ritmo, passe, marcação, perda da bola, cera e escanteios (instruções de equipe).
+	TacticsManager.ai_deep(world, club, sheet, ph, diff, roll)
 	# Estudo do rival: o técnico lê o adversário e ajusta o plano para este jogo.
 	if with_study and opponent != null:
 		var roll2 := float(absi(club.id * 3571 + day * 7907 + opponent.id * 613) % 1000) / 1000.0

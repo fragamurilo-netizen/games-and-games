@@ -51,7 +51,7 @@ func refresh() -> void:
 			c.add_child(_career(w, p))
 			c.add_child(_memory(w, p))
 		"atributos":
-			UIKit.columns(c, [_attributes(w, p, own), _positions_card(w, p, own)], content_width())
+			UIKit.columns(c, [_attributes(w, p, own), _style_card(p), _positions_card(w, p, own)], content_width())
 		"perfil":
 			var cards: Array = [_personality(w, p, own), _rep_card(w, p)]
 			if own:
@@ -364,6 +364,25 @@ func _tile(value: String, caption: String, color: Color = UIColors.TEXT, fill: f
 
 ## "Esse jogador é bom para meu time?"
 ## Onde ele joga: mini campo com a posição principal, as secundárias e as vizinhas, pé e rendimento.
+## Estilo de jogo e traço: o que o jogador faz em campo e como isso muda o jogo do time.
+func _style_card(p: Player) -> Control:
+	var d := PlayStyle.describe(p)
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Estilo de jogo"))
+	var head := UIKit.flow(8)
+	head.add_child(UIKit.pill(String(d["name"]).to_upper(), UIColors.BLUE, 16))
+	if String(d["trait"]) != "":
+		head.add_child(UIKit.pill(String(d["trait"]).to_upper(), UIColors.ACCENT, 16))
+	card.add_child(head)
+	card.add_child(UIKit.label(String(d["desc"]), "", true))
+	card.add_child(UIKit.colored("Em campo: " + String(d["effect"]), UIColors.MUTED, "Small", true))
+	if String(d["trait"]) != "" and String(d["trait_effect"]).begins_with("Sem") == false:
+		card.add_child(UIKit.colored("%s: %s" % [String(d["trait"]), String(d["trait_effect"]).to_lower()], UIColors.MUTED, "Small", true))
+	if String(d["instruction_name"]) != "":
+		card.add_child(UIKit.colored("Combina com a instrução \"%s\" (rende mais com ela)." % String(d["instruction_name"]), UIColors.GREEN, "Small", true))
+	return UIKit.card_panel(card)
+
+
 func _positions_card(w: GameWorld, p: Player, own: bool) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Posições"))
