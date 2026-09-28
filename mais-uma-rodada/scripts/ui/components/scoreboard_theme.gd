@@ -9,6 +9,10 @@ extends RefCounted
 ##   angular  — peças inclinadas, como os grafismos modernos de TV
 ##   capsula  — tudo arredondado, com brilho na cor da competição (noites de copa)
 ##   classico — placar de estádio antigo: caixa preta e números âmbar
+##   compacto — selo pequeno no canto, siglas em fichas coloridas (ScoreboardView)
+##   painel   — um time por linha, relógio numa coluna
+##   neon     — vidro escuro e filetes acesos
+## O desenho de cada um fica em ScoreboardView.
 ##
 ## Dados (todos opcionais, do mais forte para o mais fraco):
 ##   "scoreboard" na própria competição (leagues.json, continental.json, domestic.json ou Editor):
@@ -25,20 +29,24 @@ const CUPS := {
 	"CWC": ["#2A1F00", "#4A3700", "#F2C94C"],
 }
 const DEFAULT := ["#0F1012", "#18191C", "#FFC940"]
-const LAYOUTS: Array[String] = ["faixa", "tv", "angular", "capsula", "classico"]
-const LAYOUT_NAMES := {"faixa": "Faixa", "tv": "TV", "angular": "Angular", "capsula": "Cápsula", "classico": "Clássico"}
+const LAYOUTS: Array[String] = ["faixa", "tv", "angular", "capsula", "classico", "compacto", "painel", "neon"]
+const LAYOUT_NAMES := {"faixa": "Faixa", "tv": "TV", "angular": "Angular", "capsula": "Cápsula", "classico": "Clássico",
+	"compacto": "Compacto", "painel": "Painel", "neon": "Neon"}
 const LAYOUT_HINTS := {
 	"faixa": "Faixa arredondada com o nome da competição e o placar numa caixa com borda.",
 	"tv": "Barra reta de transmissão, blocos na cor de cada time e placar cheio na cor da liga.",
 	"angular": "Peças inclinadas, como os grafismos modernos de TV.",
 	"capsula": "Tudo arredondado, com brilho na cor da competição (noites de copa).",
 	"classico": "Placar de estádio antigo: caixa preta e números âmbar.",
+	"compacto": "Selo no canto: logo, siglas em fichas coloridas, placar e relógio numa linha só.",
+	"painel": "Um time por linha, com o placar empilhado e o relógio numa coluna ao lado.",
+	"neon": "Vidro escuro, filetes acesos na cor da competição e números grandes.",
 }
 const LAYOUT_OF := {
 	"UCL": "capsula", "LIB": "classico", "CWC": "capsula", "CCC": "angular", "CAF": "tv", "AFC": "angular",
-	"ENG1": "tv", "ENG2": "faixa", "ESP1": "angular", "GER1": "tv", "ITA1": "capsula", "FRA1": "angular",
-	"POR1": "faixa", "NED1": "faixa", "BRA1": "classico", "BRA2": "tv", "ARG1": "classico", "MEX1": "angular",
-	"USA1": "tv", "KSA1": "capsula", "JPN1": "angular", "TUR1": "classico",
+	"ENG1": "compacto", "ENG2": "faixa", "ESP1": "angular", "GER1": "tv", "ITA1": "neon", "FRA1": "angular",
+	"POR1": "faixa", "NED1": "painel", "BRA1": "compacto", "BRA2": "tv", "ARG1": "classico", "MEX1": "angular",
+	"USA1": "painel", "KSA1": "neon", "JPN1": "angular", "TUR1": "classico", "UEL": "neon", "SUD": "painel",
 }
 
 

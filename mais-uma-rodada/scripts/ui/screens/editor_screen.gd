@@ -1222,6 +1222,7 @@ func _scoreboard_card() -> Control:
 	card.add_child(UIKit.section("Placar da TV"))
 	var own := ScoreboardTheme.comp_style(_comp_id).duplicate(true)
 	var th := ScoreboardTheme.for_competition(_w(), _comp_id)
+	card.add_child(ScoreboardView.preview(_w(), _comp_id))
 	card.add_child(UIKit.label("Desenho", "Small"))
 	var g := ButtonGroup.new()
 	var flow := UIKit.flow(8)

@@ -183,8 +183,22 @@ Ligas (`data/world/leagues.json`, lista `leagues`, por `id`) e copas (`continent
 | `logo_design` | Logo desenhado, no formato do escudo (`shape`, `c1`, `c2`, `symbol`, `text`, `text2`…). |
 | `scoreboard` | Placar da TV: `{"layout": "...", "colors": ["#fundo", "#fundo2", "#destaque"], "text": "#hex"}`. |
 
-`scoreboard.layout` escolhe o desenho do placar da partida (ver a lista no Editor → Competições →
-Placar da TV, ou `LAYOUTS` em `scripts/ui/components/scoreboard_theme.gd`). Sem `scoreboard`, valem
+`scoreboard.layout` escolhe o desenho do placar da partida (prévia no Editor → Competições →
+Placar da TV; o desenho fica em `scripts/ui/components/scoreboard_view.gd`):
+
+| `layout` | Placar |
+| --- | --- |
+| `faixa` | Faixa arredondada, placar numa caixa com borda, filete na cor de cada time. |
+| `tv` | Barra reta, blocos na cor dos times e placar cheio na cor da competição. |
+| `angular` | Peças inclinadas. |
+| `capsula` | Tudo arredondado, com brilho na cor da competição. |
+| `classico` | Placar de estádio antigo: caixa preta e números âmbar. |
+| `compacto` | Selo no canto: logo, siglas em fichas coloridas, placar e relógio numa linha. |
+| `painel` | Um time por linha (placar empilhado) e o relógio numa coluna. |
+| `neon` | Vidro escuro, filetes acesos e números grandes. |
+
+Todos mostram o logo da competição, o acréscimo ("+4"), o aviso de gol, intervalo/fim/pênaltis e o
+agregado nos mata-matas de ida e volta. Sem `scoreboard`, valem
 `identity.json` (`scoreboard` e `scoreboard_layout` por id) e, por fim, as cores da liga ou da bandeira.
 
 ```json
