@@ -43,6 +43,8 @@ const SCREENS := {
 	"coach_moves": "res://scenes/screens/coach_moves.tscn",
 	"xray": "res://scenes/screens/xray.tscn",
 	"rivalry": "res://scenes/screens/rivalry.tscn",
+	"reputation": "res://scenes/screens/reputation.tscn",
+	"team_stats": "res://scenes/screens/team_stats.tscn",
 }
 ## Telas que avançam a carreira: depois da temporada de demonstração, levam à compra.
 const GATED := ["prematch", "match", "preseason"]

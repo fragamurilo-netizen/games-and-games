@@ -26,6 +26,7 @@ static func setup_first_season(world: GameWorld) -> void:
 	NationalTeamManager.start_season(world)
 	for c in world.clubs:
 		c.reset_season_state()
+		FinanceManager.market_wages(world, c, true)
 		FinanceManager.set_budgets(world, c)
 	for p: Player in world.players.values():
 		p.ovr_start = p.overall
@@ -743,6 +744,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var champ := world.club(LeagueFormat.champion(league, ids))
 		Rivalry.on_league_end(world, league, champ.id, LeagueFormat.runner_up(league, ids))
 		champ.add_title("L:" + id)
+		# Título de liga forte vale mais reputação (Premier ≫ liga média ≫ divisão de baixo).
+		champ.reputation = clampf(champ.reputation + Reputation.title_rep_gain("L:" + id), 5.0, 99.0)
 		for pid in champ.player_ids:
 			var p := world.player(pid)
 			if p != null and p.stats[Player.S_APPS] >= 5:
@@ -1038,6 +1041,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		c.cohesion = maxf(35.0, c.cohesion - 8.0)
 		KitDesign.renew_ai(world, c) # uniformes novos na IA; o usuário decide os dele no lançamento
 		SponsorManager.renew_ai(world, c) # patrocínios da IA com marcas do país
+		FinanceManager.market_wages(world, c)
 		FinanceManager.set_budgets(world, c)
 		if not world.is_user_club(c.id):
 			PlayerGenerator.assign_statuses(world, c)

@@ -59,6 +59,8 @@ static func open() -> void:
 		["swap", "Técnicos", "coach_moves", {}, 0],
 		["shield", "Seleções", "national", {}, 0],
 		["trophy", "História", "history", {}, 0],
+		["star", "Reputação", "reputation", {}, 0],
+		["table", "Estatísticas", "team_stats", {}, 0],
 		["ball", "Joias", "nextgen", {}, 0],
 	])
 	v.add_child(UIKit.section("Jogo"))

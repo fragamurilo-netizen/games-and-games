@@ -4,6 +4,10 @@ extends BaseScreen
 const HOOK_ICONS := {"derby": "bolt", "table": "table", "streak": "up", "player": "shirt", "market": "swap", "contract": "clock", "season": "trophy"}
 
 
+## Aba da tela inicial: resumo do dia, a temporada e o que acontece em volta do clube.
+static var _tab := "today"
+
+
 func _init() -> void:
 	nav_tab = "hub"
 
@@ -45,6 +49,7 @@ func refresh() -> void:
 		return
 	var cards: Array = []
 	var preseason := PreseasonManager.is_active(w)
+	# O próximo jogo fica sempre no alto; o resto se divide em abas curtas.
 	if Store.locked(w):
 		cards.append(_paywall_card(w))
 	elif preseason:
@@ -55,34 +60,48 @@ func refresh() -> void:
 		cards.append(_season_over_card(w))
 	else:
 		cards.append(_next_match_card(w, club))
-	var decisions := _decisions_card(w)
-	if decisions != null:
-		cards.append(decisions)
-	cards.append(_inbox_card(w))
-	cards.append(RelationsScreen.pending_card(w, func(): refresh(), true))
-	cards.append(_status_card(w, club))
-	var alerts := _alerts_card(w, club)
-	if alerts != null:
-		cards.append(alerts)
-	if not preseason:
-		cards.append(_mini_table_card(w, club))
-		var stars := _highlights_card(w, club)
-		if stars != null:
-			cards.append(stars)
-	var upcoming := _upcoming_card(w, club)
-	if upcoming != null:
-		cards.append(upcoming)
-	var cups := _cups_card(w, club)
-	if cups != null:
-		cards.append(cups)
-	cards.append(_shortcuts_card(w))
-	cards.append(_news_card(w))
-	var social := _social_card(w)
-	if social != null:
-		cards.append(social)
-	cards.append(_form_card(w, club))
+	for card in cards:
+		c.add_child(card)
+	cards.clear()
+	c.add_child(UIKit.tabs([["today", "Hoje"], ["season", "Temporada"], ["club", "Clube"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	var box := UIKit.vbox(UITokens.S4)
+	c.add_child(box)
+	match _tab:
+		"today":
+			var decisions := _decisions_card(w)
+			if decisions != null:
+				cards.append(decisions)
+			var alerts := _alerts_card(w, club)
+			if alerts != null:
+				cards.append(alerts)
+			cards.append(_inbox_card(w))
+			cards.append(RelationsScreen.pending_card(w, func(): refresh(), true))
+			cards.append(_status_card(w, club))
+		"season":
+			if not preseason:
+				cards.append(_mini_table_card(w, club))
+			var upcoming := _upcoming_card(w, club)
+			if upcoming != null:
+				cards.append(upcoming)
+			var cups := _cups_card(w, club)
+			if cups != null:
+				cards.append(cups)
+			cards.append(_form_card(w, club))
+			if not preseason:
+				var stars := _highlights_card(w, club)
+				if stars != null:
+					cards.append(stars)
+		"club":
+			cards.append(_shortcuts_card(w))
+			cards.append(_news_card(w))
+			var social := _social_card(w)
+			if social != null:
+				cards.append(social)
+	cards = cards.filter(func(x) -> bool: return x != null)
 	max_content_width = 1800.0
-	UIKit.columns(c, cards, content_width())
+	UIKit.columns(box, cards, content_width())
 
 
 ## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.

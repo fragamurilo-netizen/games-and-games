@@ -8,6 +8,9 @@ var _b := -1
 var _query := ""
 
 
+var _tab := "attrs"
+
+
 func _init() -> void:
 	show_nav = false
 	screen_title = "Comparar"
@@ -39,11 +42,17 @@ func refresh() -> void:
 	screen_subtitle = "%s × %s" % [pa.display_name(), pb.display_name()]
 	UIManager.refresh_chrome()
 	c.add_child(_heads(w, pa, pb))
-	c.add_child(_attrs(w, pa, pb))
-	c.add_child(_season(w, pa, pb))
-	c.add_child(_career_card(w, pa, pb))
+	c.add_child(UIKit.tabs([["attrs", "Atributos"], ["season", "Temporada"], ["career", "Carreira"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	match _tab:
+		"attrs":
+			c.add_child(_attrs(w, pa, pb))
+		"season":
+			c.add_child(_season(w, pa, pb))
+		_:
+			c.add_child(_career_card(w, pa, pb))
 	max_content_width = 1600
-	columnize(c, 0, 2, 1)
 	var f := footer()
 	UIKit.clear(f)
 	var row := UIKit.hbox(10)

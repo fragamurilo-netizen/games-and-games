@@ -4,6 +4,9 @@ extends BaseScreen
 
 
 var _club_id := -1
+## Aba aberta: cada parte do clube numa aba, em vez de uma tela comprida.
+static var _tab_own := "overview"
+var _tab := "overview"
 
 
 func _init() -> void:
@@ -14,6 +17,7 @@ func _init() -> void:
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_club_id = int(p.get("id", -1))
+	_tab = String(p.get("tab", _tab_own if _club_id < 0 else "overview"))
 
 
 func _own() -> bool:
@@ -33,32 +37,56 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var cards: Array = []
-	var ident := _identity_card(w, club)
-	for ch in ident.get_children():
-		ident.remove_child(ch)
-		cards.append(ch)
-	ident.free()
-	cards.append(_dna_card(w, club))
-	cards.append(SocialPost.mini_card(w, club.id, -1))
+	var items: Array = [["overview", "Visão geral"]]
 	if _own():
-		cards.append(_board_card(w, club))
-		cards.append(_finance_card(w, club))
-		cards.append(_director_card(w, club))
-		cards.append(_structure_card(w, club))
+		items.append_array([["manage", "Gestão"], ["stats", "Estatísticas"], ["history", "História"], ["career", "Carreira"]])
 	else:
-		cards.append(_season_card(w, club))
-		cards.append(_squad_card(w, club))
-		cards.append(_youth_card(w, club))
-	cards.append(_history_card(w, club))
-	var idols := _idols_card(w, club)
-	if idols != null:
-		cards.append(idols)
-	if _own():
-		cards.append(_manager_card(w))
-		cards.append(_career_card(w))
+		items.append_array([["squad", "Elenco"], ["stats", "Estatísticas"], ["history", "História"]])
+	var keys: Array = items.map(func(it: Array) -> String: return String(it[0]))
+	if not _tab in keys:
+		_tab = "overview"
+	c.add_child(UIKit.scroll_tabs(items, _tab, func(key: String):
+		_tab = key
+		if _own():
+			_tab_own = key
+		refresh()
+		scroll_to_top()))
+	var box := UIKit.vbox(UITokens.S4)
+	c.add_child(box)
+	var cards: Array = []
+	match _tab:
+		"overview":
+			var ident := _identity_card(w, club)
+			for ch in ident.get_children():
+				ident.remove_child(ch)
+				cards.append(ch)
+			ident.free()
+			if not _own():
+				cards.append(_season_card(w, club))
+			cards.append(ReputationScreen.club_card(w, club))
+			cards.append(_dna_card(w, club))
+			cards.append(SocialPost.mini_card(w, club.id, -1))
+		"manage":
+			cards.append(_finance_card(w, club))
+			cards.append(_board_card(w, club))
+			cards.append(_director_card(w, club))
+			cards.append(_structure_card(w, club))
+		"squad":
+			cards.append(_squad_card(w, club))
+			cards.append(_youth_card(w, club))
+		"stats":
+			for card in TeamStatsScreen.cards(w, club):
+				cards.append(card)
+		"history":
+			cards.append(_history_card(w, club))
+			var idols := _idols_card(w, club)
+			if idols != null:
+				cards.append(idols)
+		"career":
+			cards.append(_manager_card(w))
+			cards.append(_career_card(w))
 	max_content_width = 1800.0
-	UIKit.columns(c, cards, content_width(), 2, 1)
+	UIKit.columns(box, cards, content_width(), 2, 1 if _tab == "overview" else 0)
 
 
 func _identity_card(w: GameWorld, club: Club) -> Control:

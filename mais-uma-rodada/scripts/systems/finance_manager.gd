@@ -64,6 +64,8 @@ static func level_of_rep(cfg: Dictionary, rep: float) -> float:
 	var lr: Array = cfg.get("level", [55, 65])
 	var rr: Array = cfg.get("rep", [40, 70])
 	var t := clampf((rep - float(rr[0])) / maxf(1.0, float(rr[1]) - float(rr[0])), -0.3, 1.04)
+	if t < 0.0:
+		t *= 0.4 # abaixo da faixa cai devagar: nem o lanterna de uma liga forte vira time de divisão inferior
 	return float(lr[0]) + (float(lr[1]) - float(lr[0])) * t
 
 
@@ -251,7 +253,8 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 		budget *= clampf(1.0 - dr * 0.25, 0.75, 0.95)
 	club.wage_budget = int(budget)
 	# Teto por temporada: contratações limitadas a uma fração da receita anual, por mais rico que o clube seja.
-	var cap_mult := 1.4
+	# IA: no máximo ~90% da receita anual em compras (os gigantes de verdade não gastam mais que isso por ano).
+	var cap_mult := 0.9
 	if world.is_user_club(club.id):
 		cap_mult = [2.0, 1.6, 1.3][world.difficulty]
 	var tb := club.balance * spend
@@ -264,6 +267,31 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 	var market_budget := float(MarketReality.budget_reference(world, club, revenue))
 	# Mistura sustentabilidade financeira com poder de compra coerente com o valor do elenco.
 	club.transfer_budget = int(clampf(lerpf(legacy_budget, market_budget, 0.60), 0.0, revenue * cap_mult))
+
+
+## Salários de mercado: numa liga rica até o clube pequeno paga bem (a TV da Premier League
+## banca salários altos para jogadores medianos). Quem gasta com a folha bem menos do que a
+## receita permite renegocia os contratos para cima, aos poucos: a folha caminha para ~50% da
+## receita, como nos clubes reais, em vez de o caixa virar uma montanha parada.
+const WAGE_SHARE_MIN := 0.42
+const WAGE_SHARE_TARGET := 0.52
+
+
+static func market_wages(world: GameWorld, club: Club, first: bool = false) -> void:
+	if world.is_user_club(club.id) and not first:
+		return
+	var revenue := float(expected_revenue(club) + club.income_tv - tv_income(club))
+	var bill := float(wage_bill(world, club)) * 12.0
+	if revenue <= 0.0 or bill <= 0.0 or bill >= revenue * WAGE_SHARE_MIN:
+		return
+	# Na geração o salto é maior (os contratos já nascem no patamar da liga); depois, 40% do caminho por ano.
+	var gap := revenue * WAGE_SHARE_TARGET / bill
+	var k := clampf(1.0 + (gap - 1.0) * (0.85 if first else 0.55), 1.0, 3.0 if first else 1.7)
+	for pid in club.player_ids:
+		var p: Player = world.players.get(pid, null)
+		if p == null or not p.loan.is_empty():
+			continue
+		p.wage = Valuation.round_wage(p.wage * k)
 
 
 ## Dívida total (empréstimos + caixa no vermelho) em anos de receita (0 = sem dívida).

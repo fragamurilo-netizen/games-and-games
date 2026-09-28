@@ -13,6 +13,9 @@ var _look_card: Control = null
 var _look_slot: VBoxContainer = null
 
 
+var _tab := "id"
+
+
 func _init() -> void:
 	show_nav = false
 	screen_title = "Seu treinador"
@@ -34,14 +37,21 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	_look_slot = null
 	c.add_child(_preview(w, m))
-	c.add_child(_identity(w, m))
-	_look_slot = UIKit.vbox(0)
-	c.add_child(_look_slot)
-	_rebuild_look(w, m)
-	c.add_child(_styles(w, m))
+	c.add_child(UIKit.tabs([["id", "Identidade"], ["look", "Aparência"], ["style", "Estilo"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	match _tab:
+		"id":
+			c.add_child(_identity(w, m))
+		"look":
+			_look_slot = UIKit.vbox(0)
+			c.add_child(_look_slot)
+			_rebuild_look(w, m)
+		_:
+			c.add_child(_styles(w, m))
 	max_content_width = 1600
-	columnize(c, 0, 2, 1)
 
 
 ## Marca para salvar na saída e redesenha só a prévia.

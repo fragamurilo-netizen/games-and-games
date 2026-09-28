@@ -6,6 +6,7 @@ extends BaseScreen
 
 var _club := -1
 var _coach := -1
+var _tab := "profile"
 
 
 func _init() -> void:
@@ -56,13 +57,18 @@ func refresh() -> void:
 	screen_subtitle = club.short_name if club != null else "Sem clube"
 	UIManager.refresh_chrome()
 	c.add_child(_hero(w, co, club))
-	if club != null:
-		c.add_child(_work(w, co, club))
-	c.add_child(_stories(w, co))
-	c.add_child(_career(w, co))
-	c.add_child(_style_card(w, co))
+	c.add_child(UIKit.tabs([["profile", "Perfil"], ["career", "Carreira"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	if _tab == "profile":
+		if club != null:
+			c.add_child(_work(w, co, club))
+		c.add_child(_style_card(w, co))
+	else:
+		c.add_child(_career(w, co))
+		c.add_child(_stories(w, co))
 	max_content_width = 1600
-	columnize(c, 0, 2, 1)
+	columnize(c, 2, 2, 0)
 	if club != null:
 		var cid := club.id
 		f.add_child(UIKit.button("Conversar", "PrimaryButton", func(): TalkDialog.open("coach", cid, func(): refresh()), "mail"))

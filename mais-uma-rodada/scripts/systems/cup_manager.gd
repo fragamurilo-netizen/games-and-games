@@ -1099,13 +1099,12 @@ static func _crown(world: GameWorld, cup: Cup, final_tie: Dictionary) -> void:
 	var champ := world.club(cup.champion)
 	champ.add_title(title_key(cup.id))
 	champ.add_ledger("premiacao", prize_of(cup.id, "champion"))
-	var rep_def := 4.0 if cup.id == CWC else 3.0
+	# O peso do título depende da copa (Campeões ≫ Libertadores ≫ copa nacional ≫ supercopa).
+	var rep_def := Reputation.title_rep_gain(title_key(cup.id))
 	var fan_def := 15.0
 	if is_super(cup.id):
-		rep_def = 0.5
 		fan_def = 5.0
 	elif is_domestic(cup.id):
-		rep_def = 1.5 if String(cfg(cup.id).get("kind", "")) == "national" else 0.8
 		fan_def = 10.0 if String(cfg(cup.id).get("kind", "")) == "national" else 6.0
 	champ.reputation = clampf(champ.reputation + float(cfg(cup.id).get("rep_bonus", rep_def)), 5.0, 99.0)
 	champ.fan_mood = clampf(champ.fan_mood + float(cfg(cup.id).get("fan_bonus", fan_def)), 0.0, 100.0)

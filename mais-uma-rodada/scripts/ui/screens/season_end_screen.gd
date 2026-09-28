@@ -7,6 +7,9 @@ var _overlay: GoalOverlay
 var _celebrated := false
 
 
+var _tab := "mine"
+
+
 func _init() -> void:
 	show_nav = false
 	screen_title = "Fim de temporada"
@@ -120,16 +123,16 @@ func refresh() -> void:
 			others.append(d)
 	if not others.is_empty():
 		world_cards.append(_world_card(w, others))
-	if not mine_cards.is_empty():
-		c.add_child(UIKit.section_header("Sua temporada"))
-		var box := UIKit.vbox(UITokens.S4)
-		c.add_child(box)
-		UIKit.columns(box, mine_cards, content_width())
-	if not world_cards.is_empty():
-		c.add_child(UIKit.section_header("Campeões e prêmios"))
-		var box2 := UIKit.vbox(UITokens.S4)
-		c.add_child(box2)
-		UIKit.columns(box2, world_cards, content_width())
+	# Duas abas no lugar de uma rolagem comprida: a sua temporada e o resto do mundo.
+	if mine_cards.is_empty():
+		_tab = "world"
+	c.add_child(UIKit.tabs([["mine", "Sua temporada"], ["world", "Campeões e prêmios"]], _tab, func(key: String):
+		_tab = key
+		refresh()
+		scroll_to_top()))
+	var box := UIKit.vbox(UITokens.S4)
+	c.add_child(box)
+	UIKit.columns(box, mine_cards if _tab == "mine" else world_cards, content_width())
 	_footer(w)
 
 
