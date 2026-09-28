@@ -6,6 +6,7 @@ var _edit := false
 var _pitch: PitchView
 var _notes: Array = []
 var _extras_open := false
+var _deep_open := false
 ## Tocar numa vaga do campinho muda a posição dela (formação personalizada) em vez do jogador.
 var _pos_edit := false
 
@@ -160,6 +161,7 @@ func refresh() -> void:
 		auto_subs.button_pressed = sheet.auto_subs
 		auto_subs.toggled.connect(func(v): sheet.auto_subs = v)
 		c.add_child(auto_subs)
+	_deep_section(c, w, sheet)
 	_plan_section(c, sheet)
 	_instructions_section(c, w, sheet)
 	# Bola parada
@@ -296,6 +298,29 @@ func _assistant_card(w: GameWorld, f: Fixture) -> Control:
 
 
 ## Plano de jogo: o que fazer sozinho a partir de certo minuto conforme o placar.
+## Instruções de equipe (ritmo, passe, marcação, perda da bola, foco, cera, escanteios).
+func _deep_section(c: VBoxContainer, w: GameWorld, sheet: TeamSheet) -> void:
+	c.add_child(UIKit.section("Instruções de equipe"))
+	var summary := TacticsManager.deep_summary(sheet)
+	c.add_child(UIKit.colored(summary if summary != "" else "Tudo no padrão: o time joga conforme o estilo.", UIColors.ACCENT if summary != "" else UIColors.MUTED, "Small", true))
+	var btn := UIKit.button(("Esconder" if _deep_open else "Mostrar") + " ritmo, passe, marcação e bola parada", "GhostButton", func():
+		_deep_open = not _deep_open
+		refresh())
+	c.add_child(btn)
+	if not _deep_open:
+		return
+	var vals := sheet.deep_values()
+	for k in TacticsManager.DEEP.size():
+		var key: String = TacticsManager.DEEP[k]
+		var opts := TacticsManager.deep_options(key)
+		if opts.is_empty():
+			continue
+		_segment(c, String(TacticsManager.DEEP_TITLES[key]), opts, int(vals[k]), func(i): sheet.set(key, i))
+		var cur: Dictionary = opts[clampi(int(vals[k]), 0, opts.size() - 1)]
+		if cur.has("fit"):
+			c.add_child(_style_fit_label(w, sheet, cur))
+
+
 func _plan_section(c: VBoxContainer, sheet: TeamSheet) -> void:
 	var tac := DatabaseManager.tactics()
 	c.add_child(UIKit.section("Plano de jogo"))
@@ -496,10 +521,15 @@ func _instructions_section(c: VBoxContainer, w: GameWorld, sheet: TeamSheet) -> 
 			continue
 		var row := UIKit.hbox(10)
 		row.add_child(UIKit.pos_badge(int(slots[i]["pos"])))
+		var nc := UIKit.vbox(0)
+		nc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var nl := UIKit.label(p.display_name(), "")
-		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		row.add_child(nl)
+		nc.add_child(nl)
+		var sl := UIKit.label(PlayStyle.full(p), "Small")
+		sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		nc.add_child(sl)
+		row.add_child(nc)
 		var ins := sheet.instruction_of(p.id)
 		row.add_child(UIKit.colored(String(ins.get("name", "Padrão da função")), UIColors.ACCENT if not ins.is_empty() else UIColors.MUTED, "Small"))
 		var pid := p.id
@@ -512,6 +542,9 @@ func _pick_instruction(pid: int) -> void:
 	var p := w.player(pid)
 	var v := UIKit.vbox(8)
 	v.add_child(UIKit.label("Instrução para %s" % p.display_name(), "Title", true))
+	var st := PlayStyle.describe(p)
+	v.add_child(UIKit.label("%s: %s" % [String(st["name"]), String(st["desc"])], "Small", true))
+	var match_key := String(st["instruction"])
 	v.add_child(UIKit.button("Padrão da função", "GhostButton", func():
 		sheet.instr.erase(pid)
 		UIManager.close_modal()
@@ -521,7 +554,13 @@ func _pick_instruction(pid: int) -> void:
 		var d: Dictionary = TeamSheet.INSTRUCTIONS[key]
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(d["name"]), "H3"))
+		if key == match_key:
+			var hr := UIKit.hbox(8)
+			hr.add_child(UIKit.label(String(d["name"]), "H3"))
+			hr.add_child(UIKit.pill("COMBINA COM O ESTILO", UIColors.GREEN, 13))
+			col.add_child(hr)
+		else:
+			col.add_child(UIKit.label(String(d["name"]), "H3"))
 		col.add_child(UIKit.label(String(d["desc"]), "Small", true))
 		v.add_child(UIKit.tap_row(col, func():
 			sheet.instr[pid] = key

@@ -105,6 +105,36 @@ var pr_poss: float = 0.0
 var pr_fatigue: float = 1.0
 var pr_opp_rate: float = 1.0
 var pr_fouls: float = 1.0
+# --- Instruções de equipe (TacticsManager.deep_mods) + estilos dos jogadores em campo ---
+var deep: Array = [1, 1, 0, 1, 1, 0, 0] # TeamSheet.deep_values()
+var _dm: Dictionary = {}
+var x_rate: float = 1.0
+var x_quality: float = 1.0
+var x_opp_rate: float = 1.0
+var x_opp_quality: float = 1.0
+var x_poss: float = 0.0
+var x_fatigue: float = 1.0
+var x_fouls: float = 1.0
+var x_cards: float = 1.0
+var x_offside: float = 1.0 # impedimentos do rival (armadilha da própria linha)
+var x_offside_own: float = 1.0
+var x_corner_ch: float = 1.0
+var x_corner_q: float = 1.0
+var x_aerial: float = 1.0
+## Peso final de cada tipo de jogada do time e do rival (instruções × estilos dos jogadores).
+var t_types: PackedFloat32Array = PackedFloat32Array([1, 1, 1, 1, 1, 1])
+var t_opp_types: PackedFloat32Array = PackedFloat32Array([1, 1, 1, 1, 1, 1])
+var leading: bool = false
+## Adversário (referência fraca: sem ciclo entre os dois times) para a marcação individual.
+var opp_ref: WeakRef = null
+## Corredores antes do foco de ataque (para medir se o foco vai no lado fraco do rival).
+var lane_raw: Array[float] = [1.0, 1.0, 1.0]
+# Somas dos estilos em campo (recompute_units)
+var _ps_t: PackedFloat32Array = PackedFloat32Array([0, 0, 0, 0, 0, 0])
+var _ps_o: PackedFloat32Array = PackedFloat32Array([0, 0, 0, 0, 0, 0])
+var _ps_poss: float = 0.0
+var _ps_off: float = 0.0
+var _fit_pts: Array = []
 
 # --- Setores (pontos de rating) ---
 var u_def: float = 50.0
@@ -181,6 +211,79 @@ func refresh_tactics() -> void:
 	pr_fatigue = float(p["fatigue"])
 	pr_opp_rate = MatchSimulation.damp(float(p["opp_rate"]))
 	pr_fouls = float(p["fouls"])
+	_dm = TacticsManager.deep_mods(deep)
+	x_corner_ch = float(_dm["corner_ch"])
+	x_corner_q = float(_dm["corner_q"])
+	x_aerial = float(_dm["aerial"])
+	_apply_deep()
+
+
+## Junta instruções de equipe, encaixe do elenco, estilos em campo e placar (cera) nos números
+## que o motor lê. Barato: chamado quando táticas, jogadores ou placar mudam.
+func _apply_deep() -> void:
+	if _dm.is_empty():
+		return
+	x_rate = float(_dm["rate"])
+	x_quality = float(_dm["quality"])
+	x_opp_rate = float(_dm["opp_rate"])
+	x_opp_quality = float(_dm["opp_quality"])
+	x_poss = float(_dm["poss"]) + clampf(_ps_poss, -0.04, 0.04) * MatchSimulation.MOD_DAMP
+	x_fatigue = float(_dm["fatigue"])
+	x_fouls = float(_dm["fouls"])
+	x_cards = 1.0
+	x_offside = float(_dm["offside"])
+	x_offside_own = float(_dm["offside_own"]) * (1.0 + clampf(_ps_off, 0.0, 0.4))
+	var fits: Array = _dm["fits"]
+	for j in mini(fits.size(), _fit_pts.size()):
+		var b := TacticsManager.fit_bonus(float(_fit_pts[j]))
+		match String(fits[j][1]):
+			"quality":
+				x_quality *= 1.0 + b
+			"rate":
+				x_rate *= 1.0 + b
+			"opp_quality":
+				x_opp_quality *= 1.0 - b
+			"opp_rate":
+				x_opp_rate *= 1.0 - b
+	if leading:
+		x_rate *= float(_dm["lead_rate"])
+		x_opp_rate *= float(_dm["lead_opp_rate"])
+		x_cards *= float(_dm["lead_cards"])
+	var dt: PackedFloat32Array = _dm["types"]
+	var dot: PackedFloat32Array = _dm["opp_types"]
+	for i in 6:
+		t_types[i] = dt[i] * clampf(1.0 + _ps_t[i], 0.85, 1.2)
+		t_opp_types[i] = dot[i] * clampf(1.0 + _ps_o[i], 0.85, 1.15)
+
+
+## Placar mudou (MatchSimulation._game_state): a cera só vale para quem está vencendo.
+func apply_state(diff: int) -> void:
+	var l := diff > 0 and int(deep[5]) == 1
+	if l != leading:
+		leading = l
+		_apply_deep()
+
+
+## Descrição para o choque de instruções (TacticsManager.clash).
+func clash_desc(opp: MatchTeam) -> Dictionary:
+	var rel := 1.0
+	var f := int(deep[4])
+	if f != 1 and opp != null:
+		var fl := 0 if f == 0 else (1 if f == 2 else 2)
+		var mean := 0.0
+		var r := [0.0, 0.0, 0.0]
+		for l in 3:
+			r[l] = lane_raw[l] / maxf(1.0, opp.lane_def[2 - l])
+			mean += float(r[l]) * float(MatchSimulation.LANE_BASE[l])
+		rel = float(r[fl]) / maxf(0.01, mean)
+	return {"passing": int(deep[1]), "pressing": pressing, "line": line, "marking": int(deep[2]), "transition": int(deep[3]),
+		"tech": press_tech, "pace_att": pace_att, "pace_def": pace_def, "lane_rel": rel}
+
+
+## Muda uma instrução de equipe durante o jogo (índice em TacticsManager.DEEP).
+func set_deep(k: int, v: int) -> void:
+	deep[k] = v
+	refresh_tactics()
 
 
 ## Descrição para o confronto de ideias (TacticalMatchup).
@@ -197,11 +300,39 @@ func goalkeeper() -> MatchPlayer:
 ## Fator individual: familiaridade × físico × (moral, forma, desempenho do dia, contexto) × time.
 func refresh_factors() -> void:
 	var team_f := MatchSimulation.damp(i_perf) * MatchSimulation.damp(cohesion_f) * MatchSimulation.damp(home_f) * evo_f
+	_refresh_marking()
 	for mp: MatchPlayer in slots:
 		if mp == null:
 			continue
 		var c := clampf(mp.cond, 0.0, 100.0) / 100.0
-		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f * mp.sh_f * mp.talk_f * mp.sc_f
+		mp.f = mp.fam * (0.84 + 0.16 * c * c) * MatchSimulation.damp(mp.base_f) * team_f * mp.sh_f * mp.talk_f * mp.sc_f * mp.mk_f
+
+
+## Marcação individual do rival ("Marcar o craque"): cada marcador em campo pega o jogador mais
+## perigoso ainda livre deste time. Bom marcador contra craque sem drible = craque some (até -8%).
+func _refresh_marking() -> void:
+	for mp: MatchPlayer in slots:
+		if mp != null:
+			mp.mk_f = 1.0
+	var opp: MatchTeam = opp_ref.get_ref() if opp_ref != null else null
+	if opp == null:
+		return
+	for om: MatchPlayer in opp.slots:
+		if om == null or om.slot <= 0 or not bool(om.instr.get("mark", false)):
+			continue
+		var target: MatchPlayer = null
+		var best := -1.0
+		for mp: MatchPlayer in slots:
+			if mp == null or mp.slot <= 0 or mp.mk_f < 1.0:
+				continue
+			var threat := mp.slot_rating * (mp.w_att + 0.5 * mp.w_mid)
+			if threat > best:
+				best = threat
+				target = mp
+		if target == null:
+			continue
+		var edge := (om.attr(Attr.MAR) + om.attr(Attr.DES)) * 0.5 - (target.attr(Attr.TEC) + target.attr(Attr.DRI)) * 0.5
+		target.mk_f = 1.0 - clampf(0.045 + edge * 0.002, 0.015, 0.08)
 
 
 ## Recalcula os setores a partir de quem está em campo.
@@ -229,12 +360,30 @@ func recompute_units() -> void:
 	var pt_sum := 0.0
 	var n := 0
 	u_gk = 15.0
+	_ps_t.fill(0.0)
+	_ps_o.fill(0.0)
+	_ps_poss = 0.0
+	_ps_off = 0.0
+	var fits: Array = _dm.get("fits", [])
+	_fit_pts.resize(fits.size())
+	_fit_pts.fill(0.0)
 	for mp: MatchPlayer in slots:
 		if mp == null:
 			continue
+		for i in 6:
+			_ps_t[i] += mp.fx_t[i]
+			_ps_o[i] += mp.fx_o[i]
+		_ps_poss += mp.fx_poss
 		if mp.slot == 0:
 			u_gk = mp.c_gk * mp.f
 			continue
+		_ps_off += mp.fx_offside
+		for j in fits.size():
+			var ids: Array = fits[j][0]
+			var fs := 0.0
+			for ai in ids:
+				fs += mp.p.attrs[ai]
+			_fit_pts[j] = float(_fit_pts[j]) + fs / maxf(1.0, ids.size()) - mp.slot_rating
 		n += 1
 		d += mp.c_def * mp.f * mp.w_def
 		dw += mp.w_def
@@ -276,6 +425,9 @@ func recompute_units() -> void:
 	discipline = dis_sum / maxf(1.0, n)
 	avg_decision = dec_sum / dec_n if dec_n > 0.0 else 50.0
 	style_fit = clampf((fit_sum - ovr_sum) / maxf(1.0, n) * 0.006, -0.06, 0.06) if n > 0 and not s_fit_attrs.is_empty() else 0.0
+	for j in _fit_pts.size():
+		_fit_pts[j] = float(_fit_pts[j]) / maxf(1.0, n)
+	_apply_deep()
 	_rebuild_pick_tables()
 
 
@@ -318,6 +470,7 @@ func _rebuild_pick_tables() -> void:
 						v = (mp.w_mid + 0.1) * mp.f
 					8:
 						v = (mp.w_def + 0.05) * (110.0 - mp.a_dec)
+				v *= mp.pick_m[m]
 			arr[i] = v
 			total += v
 		pick_w[m] = arr
@@ -365,7 +518,10 @@ func _recompute_lanes() -> void:
 			la[l] += att + mp.c_att * mp.f * mp.w_wide * 0.3
 			ld[l] += lane_dfv
 			ld[1] += dfv * 0.15
+	var focus: Array = _dm.get("lanes", [1.0, 1.0, 1.0])
 	for i in 3:
-		lane_att[i] = maxf(5.0, la[i])
+		lane_raw[i] = maxf(5.0, la[i])
+		# Foco do ataque: mais jogadas pelo corredor escolhido (TacticsManager.clash mede se compensa).
+		lane_att[i] = lane_raw[i] * float(focus[i])
 		lane_def[i] = maxf(5.0, ld[i])
 

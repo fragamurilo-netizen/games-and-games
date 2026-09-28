@@ -2123,6 +2123,10 @@ func _render_tactics() -> void:
 		["Linha defensiva", tac["line"], t.line, func(i): _sim.set_line(_user_side, i)],
 		["Largura", [{"name": TeamSheet.WIDTH_NAMES[0]}, {"name": TeamSheet.WIDTH_NAMES[1]}, {"name": TeamSheet.WIDTH_NAMES[2]}], t.width_i, func(i): _sim.set_width(_user_side, i)],
 		["Intensidade", tac["intensity"], t.intensity, func(i): _sim.set_intensity(_user_side, i)]]
+	# Instruções de equipe (ritmo, passe, marcação, perda da bola, foco, cera, escanteios)
+	for k in TacticsManager.DEEP.size():
+		var dkey: String = TacticsManager.DEEP[k]
+		fine.append([String(TacticsManager.DEEP_TITLES[dkey]), TacticsManager.deep_options(dkey), int(t.deep[k]), func(i): _sim.set_deep(_user_side, dkey, i)])
 	for item in fine:
 		_tac_box.add_child(UIKit.section(String(item[0])))
 		var g := ButtonGroup.new()

@@ -220,6 +220,7 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		t.vuln = TacticalScout.vulnerability(world, opp_club)
 		t.study = TacticalScout.study(world, t.club)
 		t.adapt = float(ClubPhilosophy.of(t.club).get("adapt", 0.4))
+		t.opp_ref = weakref(teams[1 - t.side])
 		# Contra o time do usuário a IA estuda mais (e mais ainda nas dificuldades altas).
 		if teams[1 - t.side].is_user and not t.is_user:
 			t.study = minf(1.0, t.study + 0.05 + 0.1 * clampi(world.difficulty, 0, 2))
@@ -269,6 +270,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.line = sheet.line
 	t.pressing = sheet.pressing
 	t.width_i = sheet.width
+	t.deep = sheet.deep_values()
 	t.evo_f = TeamEvolution.factor(world, club)
 	t.cohesion_base = 0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08
 	t.cohesion_f = t.cohesion_base * TacticsManager.fam_factor(club, sheet)
@@ -795,24 +797,26 @@ func _game_state() -> void:
 				t.g_rate *= 0.88
 			elif diff >= 3:
 				t.g_rate *= 0.72
+	for t: MatchTeam in teams:
+		t.apply_state(score[t.side] - score[1 - t.side]) # cera de quem vence (instrução de equipe)
 
 
 ## Recalcula as probabilidades por minuto (chamado quando setores ou táticas mudam).
 func _refresh_rates() -> void:
 	var h: MatchTeam = teams[0]
 	var a: MatchTeam = teams[1]
-	var tilt_h := h.m_poss + h.s_poss + h.l_poss + (0.0 if a.s_ignores_press else h.pr_poss) + h.g_poss + h.sh_poss
-	var tilt_a := a.m_poss + a.s_poss + a.l_poss + (0.0 if h.s_ignores_press else a.pr_poss) + a.g_poss + a.sh_poss
+	var tilt_h := h.m_poss + h.s_poss + h.l_poss + (0.0 if a.s_ignores_press else h.pr_poss) + h.g_poss + h.sh_poss + h.x_poss
+	var tilt_a := a.m_poss + a.s_poss + a.l_poss + (0.0 if h.s_ignores_press else a.pr_poss) + a.g_poss + a.sh_poss + a.x_poss
 	var x := GAMMA * (h.u_mid - a.u_mid)
 	var mu := TacticalMatchup.edges(h.matchup_desc(), a.matchup_desc())
 	_poss_base = clampf(1.0 / (1.0 + exp(-x)) + (tilt_h - tilt_a) * 0.8 + 0.02 * crowd + float(mu["poss"]), 0.25, 0.75)
 	for s in 2:
 		var att: MatchTeam = teams[s]
 		var dfn: MatchTeam = teams[1 - s]
-		_rate_chance[s] = _chance_prob(att, dfn) * goal_f * float(mu["rate_a" if s == 0 else "rate_b"])
+		_rate_chance[s] = _chance_prob(att, dfn) * goal_f * float(mu["rate_a" if s == 0 else "rate_b"]) * TacticsManager.clash(att.clash_desc(dfn), dfn.clash_desc(att))
 		_rate_foul[s] = _foul_prob(att)
 		var direct := att.style == TeamSheet.STYLE_DIRETO or att.style == TeamSheet.STYLE_CONTRA or att.style == TeamSheet.STYLE_LONGA
-		_rate_off[s] = 0.028 * dfn.l_offside * (1.25 if direct else 1.0)
+		_rate_off[s] = 0.028 * dfn.l_offside * (1.25 if direct else 1.0) * dfn.x_offside * att.x_offside_own
 		_rate_corner[s] = 0.04 * clampf(0.6 + att.width / 4.0, 0.6, 1.5)
 
 
@@ -840,7 +844,7 @@ func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
 	# Jogo pelos lados contra formação estreita.
 	if att.style == TeamSheet.STYLE_LADOS and dfn.width < 2.0:
 		p *= 1.0 + att.s_vs_narrow
-	p *= dfn.l_opp_rate * dfn.pr_opp_rate * dfn.sh_opp_rate
+	p *= dfn.l_opp_rate * dfn.pr_opp_rate * dfn.sh_opp_rate * att.x_rate * dfn.x_opp_rate
 	p *= 1.0 + HOME_CHANCE * crowd if att.side == 0 else 1.0 - AWAY_CHANCE * crowd
 	# Time com menos jogadores sofre mais.
 	p *= 1.0 + (11 - dfn.on_pitch_count) * 0.08
@@ -849,7 +853,7 @@ func _chance_prob(att: MatchTeam, dfn: MatchTeam) -> float:
 
 
 func _foul_prob(dfn: MatchTeam) -> float:
-	var p := FOUL_RATE * dfn.i_fouls * dfn.pr_fouls * dfn.sh_fouls * ref_fouls * (1.3 - dfn.discipline / 100.0 * 0.6)
+	var p := FOUL_RATE * dfn.i_fouls * dfn.pr_fouls * dfn.sh_fouls * dfn.x_fouls * ref_fouls * (1.3 - dfn.discipline / 100.0 * 0.6)
 	if derby:
 		p *= 1.12
 	return clampf(p, 0.05, 0.45)
@@ -857,11 +861,11 @@ func _foul_prob(dfn: MatchTeam) -> float:
 
 ## Fadiga aplicada em blocos de `minutes` minutos (barato e suficiente).
 func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
-	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * (1.25 if half >= 3 else 1.0) * (float(wx.get("away_fatigue", 1.0)) if t.side == 1 else 1.0) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue
+	var mult: float = FATIGUE_RATE * float(wx_fx["fatigue"]) * (1.25 if half >= 3 else 1.0) * (float(wx.get("away_fatigue", 1.0)) if t.side == 1 else 1.0) * minutes * t.i_fatigue * t.s_fatigue * t.pr_fatigue * t.sh_fatigue * t.x_fatigue
 	for mp: MatchPlayer in t.slots:
 		if mp == null:
 			continue
-		var gk_f := 0.35 if mp.slot == 0 else 1.0
+		var gk_f := (0.35 if mp.slot == 0 else 1.0) * mp.fat_f
 		mp.cond = maxf(5.0, mp.cond - mult * (1.25 - mp.a_res / 100.0 * 0.6) * gk_f)
 		# Câimbra: perna no limite no fim do jogo e, principalmente, na prorrogação
 		if mp.slot != 0 and mp.cond < 32.0 and (half >= 3 or minute >= 80) and rng.randf() < (0.05 if half >= 3 else 0.02) * minutes / 5.0:
@@ -877,7 +881,7 @@ func _apply_fatigue(t: MatchTeam, minutes: float) -> void:
 func _pick_chance_type(att: MatchTeam, dfn: MatchTeam) -> int:
 	var w: Array = []
 	for i in 6:
-		var v: float = _type_w[i] * att.s_types[i] * att.exploit_w[i]
+		var v: float = _type_w[i] * att.s_types[i] * att.exploit_w[i] * att.t_types[i] * dfn.t_opp_types[i]
 		match i:
 			CH_CROSS:
 				v *= clampf(0.5 + att.width / 4.0, 0.5, 1.6)
@@ -980,13 +984,15 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	var xg: float = _xg[ctype] * lane_f
 	if ctype != CH_PENALTY and ctype != CH_FREEKICK:
 		xg *= clampf(exp(DELTA * (_att_power(att) - _def_power(dfn))), 0.6, 1.6)
-		xg *= att.s_quality * dfn.l_opp_quality * att.g_quality
+		xg *= att.s_quality * dfn.l_opp_quality * att.g_quality * att.x_quality * dfn.x_opp_quality
 		# Linha alta sofre com atacantes rápidos.
 		if dfn.line == 2 and (ctype == CH_THROUGH or ctype == CH_COUNTER):
 			xg *= 1.0 + clampf((att.pace_att - dfn.pace_def) / 100.0, 0.0, 0.25)
 		# O jogo aéreo decide cruzamentos e escanteios.
-		if ctype == CH_CROSS or ctype == CH_CORNER:
+		if ctype == CH_CROSS:
 			xg *= clampf(exp(0.012 * (att.aerial_att - dfn.aerial_def)), 0.7, 1.4)
+		elif ctype == CH_CORNER: # jogada ensaiada: 1º pau, 2º pau ou curto (peso da altura e qualidade)
+			xg *= clampf(exp(0.012 * att.x_aerial * (att.aerial_att - dfn.aerial_def)), 0.6, 1.5) * att.x_corner_q
 	if ctype < 6:
 		xg *= att.exploit_q[ctype]
 	# Leitura do jogo: onde e como cada time está sofrendo.
@@ -1256,7 +1262,7 @@ func _resolve_foul(att: MatchTeam, dfn: MatchTeam) -> void:
 	if detail:
 		_emit(EV_FOUL, dfn.side, fouler.p.id, victim.p.id if victim != null else -1, {"danger": dangerous})
 	var dis := fouler.a_dis
-	var p_yellow := 0.155 * fouler.card_mult * card_f * (1.4 - dis / 100.0) * (1.15 if dfn.intensity == 2 else 1.0)
+	var p_yellow := 0.155 * fouler.card_mult * card_f * (1.4 - dis / 100.0) * (1.15 if dfn.intensity == 2 else 1.0) * dfn.x_cards
 	var p_red := 0.0045 * fouler.card_mult * card_f * (1.3 - dis / 100.0)
 	if dangerous:
 		p_yellow *= 1.3
@@ -1398,7 +1404,7 @@ func _corner(att: MatchTeam, dfn: MatchTeam) -> void:
 		_emit(EV_CORNER, att.side, taker.p.id if taker != null else -1)
 	if detail:
 		last_phase = {"side": att.side, "from": 0.9, "to": 0.97, "ev": EV_CORNER}
-	if rng.randf() < 0.28:
+	if rng.randf() < 0.28 * att.x_corner_ch:
 		_resolve_chance(att, dfn, CH_CORNER)
 
 
@@ -1822,6 +1828,19 @@ func set_intensity(side: int, v: int) -> void:
 		return
 	t.intensity = v
 	_retune(t, {"intensity": v}, "Intensidade %s" % String(DatabaseManager.tactics()["intensity"][v]["name"]).to_lower())
+
+
+## Instrução de equipe no meio do jogo (key = TacticsManager.DEEP: "tempo", "passing"...).
+func set_deep(side: int, key: String, v: int) -> void:
+	var t: MatchTeam = teams[side]
+	var k := TacticsManager.DEEP.find(key)
+	if k < 0:
+		return
+	v = clampi(v, 0, TacticsManager.deep_options(key).size() - 1)
+	if int(t.deep[k]) == v:
+		return
+	t.set_deep(k, v)
+	_retune(t, {key: v}, "%s: %s" % [String(TacticsManager.DEEP_TITLES[key]), TacticsManager.deep_name(key, v).to_lower()])
 
 
 ## Instrução individual no meio do jogo ("" tira a instrução).

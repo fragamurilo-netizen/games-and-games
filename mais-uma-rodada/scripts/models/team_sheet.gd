@@ -40,6 +40,14 @@ var plan_minute: int = 70
 var instr: Dictionary = {}
 ## Largura do time: 0 fechado, 1 normal, 2 aberto.
 var width: int = 1
+## Instruções de equipe (índices das listas de mesmo nome em tactics.json; ver TacticsManager.DEEP).
+var tempo: int = 1 # 0 cadenciado, 1 normal, 2 acelerado
+var passing: int = 1 # 0 curto, 1 misto, 2 direto
+var marking: int = 0 # 0 por zona, 1 individual
+var transition: int = 1 # na perda da bola: 0 recompor, 1 normal, 2 contrapressão
+var focus: int = 1 # 0 esquerda, 1 variado, 2 pelo meio, 3 direita
+var time_waste: int = 0 # 0 não, 1 ganhar tempo quando vencer
+var corners: int = 0 # 0 variado, 1 primeiro pau, 2 segundo pau, 3 curto
 
 ## Instruções individuais: ajustes nos pesos de defesa/meio/ataque da vaga, nas faltas e nos chutes.
 ## "gap": espaço que o jogador deixa (ou fecha) no próprio corredor quando o time perde a bola.
@@ -49,8 +57,21 @@ const INSTRUCTIONS := {
 	"chutar": {"name": "Arriscar de longe", "desc": "Finaliza de fora da área sempre que puder.", "def": 0.0, "mid": -0.03, "att": 0.06, "foul": 1.0, "shoot": 1.35},
 	"marcar": {"name": "Marcação forte", "desc": "Cola no adversário e não deixa jogar. Faz mais faltas.", "def": 0.08, "mid": 0.0, "att": -0.04, "foul": 1.35, "shoot": 1.0},
 	"prender": {"name": "Prender a bola", "desc": "Segura a posse e cadencia o jogo.", "def": 0.0, "mid": 0.12, "att": -0.05, "foul": 1.0, "shoot": 0.9},
+	# Efeitos extras (MatchPlayer.apply_side / MatchTeam): "types" = tipos de jogada do time,
+	# "pick" = peso de escolha por modo, "fat" = cansaço, "wide" = largura, "offside" = impedimentos,
+	# "mark" = persegue o jogador mais perigoso do rival.
+	"frente": {"name": "Ficar na frente", "desc": "Não volta para marcar: espera o contra-ataque lá na frente. Cansa menos, mas o time defende com um a menos.",
+		"def": -0.25, "mid": -0.05, "att": 0.08, "foul": 1.0, "shoot": 1.05, "gap": 0.6, "types": {"counter": 0.06}, "fat": 0.85},
+	"abrir": {"name": "Jogar aberto", "desc": "Cola na linha lateral: estica a defesa rival e cruza mais. Aparece menos por dentro.",
+		"def": 0.0, "mid": -0.05, "att": 0.02, "foul": 1.0, "shoot": 0.9, "wide": 0.35, "types": {"cross": 0.04}, "pick": {6: 1.25}},
+	"infiltrar": {"name": "Atacar o espaço", "desc": "Corre nas costas da zaga o tempo todo: mais bolas em profundidade e mais impedimentos. Cansa mais.",
+		"def": -0.04, "mid": -0.04, "att": 0.08, "foul": 1.0, "shoot": 1.1, "gap": 0.15, "types": {"through": 0.05}, "offside": 0.12, "pick": {4: 1.2}, "fat": 1.05},
+	"recuar": {"name": "Recuar para armar", "desc": "Sai da área para buscar o jogo, como um falso 9: finaliza menos e cria mais.",
+		"def": 0.02, "mid": 0.15, "att": -0.1, "foul": 1.0, "shoot": 0.8, "types": {"through": 0.04}, "pick": {5: 1.3}},
+	"perseguir": {"name": "Marcar o craque", "desc": "Persegue o jogador mais perigoso do rival. Quanto melhor marcador, mais o craque some. Faz faltas e abre o setor.",
+		"def": 0.02, "mid": -0.04, "att": -0.1, "foul": 1.25, "shoot": 0.9, "gap": 0.2, "mark": true, "fat": 1.05},
 }
-const INSTRUCTION_ORDER: Array[String] = ["avancar", "segurar", "chutar", "marcar", "prender"]
+const INSTRUCTION_ORDER: Array[String] = ["avancar", "segurar", "chutar", "marcar", "prender", "frente", "abrir", "infiltrar", "recuar", "perseguir"]
 const WIDTH_NAMES: Array[String] = ["Fechado", "Normal", "Aberto"]
 
 
@@ -76,6 +97,7 @@ func to_dict() -> Dictionary:
 		"cap": captain, "pen": penalty_taker, "fk": freekick_taker, "ck": corner_taker,
 		"m": mentality, "st": style, "i": intensity, "l": line, "p": pressing, "as": auto_subs,
 		"so": shootout_order.duplicate(), "pl": plan_losing, "pw": plan_winning, "pm": plan_minute, "ins": instr.duplicate(), "wd": width,
+		"tp": tempo, "pa": passing, "mk": marking, "tr": transition, "fo": focus, "tw": time_waste, "cr": corners,
 	}
 
 
@@ -103,4 +125,17 @@ static func from_dict(d: Dictionary) -> TeamSheet:
 	for k in ins:
 		t.instr[int(k)] = String(ins[k])
 	t.width = int(d.get("wd", 1))
+	# Instruções de equipe (saves antigos: padrão neutro)
+	t.tempo = int(d.get("tp", 1))
+	t.passing = int(d.get("pa", 1))
+	t.marking = int(d.get("mk", 0))
+	t.transition = int(d.get("tr", 1))
+	t.focus = int(d.get("fo", 1))
+	t.time_waste = int(d.get("tw", 0))
+	t.corners = int(d.get("cr", 0))
 	return t
+
+
+## Instruções de equipe na ordem de TacticsManager.DEEP.
+func deep_values() -> Array:
+	return [tempo, passing, marking, transition, focus, time_waste, corners]

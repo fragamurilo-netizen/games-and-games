@@ -49,7 +49,10 @@ static var _tac_cache: Dictionary = {}
 
 
 static func _tactics(sheet: TeamSheet) -> Dictionary:
+	var dv := sheet.deep_values()
 	var key := sheet.mentality * 10000 + sheet.style * 1000 + sheet.intensity * 100 + sheet.line * 10 + sheet.pressing
+	for v in dv:
+		key = key * 5 + int(v)
 	if _tac_cache.has(key):
 		return _tac_cache[key]
 	var t := DatabaseManager.tactics()
@@ -66,6 +69,12 @@ static func _tactics(sheet: TeamSheet) -> Dictionary:
 		"l_opp_rate": MatchSimulation.damp(float(l["opp_rate"])), "l_opp_quality": MatchSimulation.damp(float(l["opp_quality"])), "l_poss": float(l["poss"]) * MatchSimulation.MOD_DAMP,
 		"pr_poss": float(p["poss"]) * MatchSimulation.MOD_DAMP, "pr_fatigue": float(p["fatigue"]), "pr_opp_rate": MatchSimulation.damp(float(p["opp_rate"])), "pr_fouls": float(p["fouls"]),
 	}
+	# Instruções de equipe (as partes que dependem do elenco e do placar ficam só no minuto a minuto).
+	var dm := TacticsManager.deep_mods(dv)
+	for f in ["rate", "quality", "opp_rate", "opp_quality", "poss", "fatigue", "fouls"]:
+		out["x_" + f] = dm[f]
+	out["x_types"] = dm["types"]
+	out["x_opp_types"] = dm["opp_types"]
 	_tac_cache[key] = out
 	return out
 
@@ -91,6 +100,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var fin_n := 0
 	var dis := 0.0
 	var ptech := 0.0
+	var pace := [0.0, 0.0, 0.0, 0.0] # velocidade de quem ataca / de quem defende (soma, quantidade)
 	for i in slots.size():
 		var pid: int = sheet.starters[i] if i < sheet.starters.size() and sheet.starters[i] != null else -1
 		var p: Player = world.players.get(pid, null)
@@ -113,6 +123,7 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		w_wide *= [0.7, 1.0, 1.3][clampi(sheet.width, 0, 2)]
 		var ins := sheet.instruction_of(p.id)
 		if not ins.is_empty() and i > 0:
+			w_wide += float(ins.get("wide", 0.0))
 			w_def = maxf(0.0, w_def + float(ins["def"]))
 			w_mid = maxf(0.0, w_mid + float(ins["mid"]))
 			w_att = maxf(0.0, w_att + float(ins["att"]))
@@ -132,6 +143,11 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		if w_att >= 0.45:
 			fin += c_fin * f
 			fin_n += 1
+			pace[0] += at[Attr.VEL] - heavy
+			pace[1] += 1.0
+		if w_def >= 0.5:
+			pace[2] += at[Attr.VEL] - heavy
+			pace[3] += 1.0
 		var c_head: float = at[Attr.CAB] * 0.7 + at[Attr.POS] * 0.2 + at[Attr.FOR] * 0.1 + Physique.aerial(p) * 0.6
 		var shoot := (w_att + 0.04) * c_fin * f * (1.6 if pos == Pos.ST else 1.0) + 0.35 * (w_att + (0.35 if pos == Pos.CB else 0.0) + 0.05) * c_head * f
 		var assist := (w_mid + w_att * 0.5 + 0.05) * (at[Attr.PAS] + at[Attr.VIS]) * f + (w_wide + 0.05) * (at[Attr.CRU] + float(side[0])) * f * 0.5
@@ -168,6 +184,8 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		"discipline": dis / n,
 		"count": pl.size(),
 		"mu": {"tech": ptech / n, "mid": mw, "pressing": sheet.pressing, "style": sheet.style, "mentality": sheet.mentality, "line": sheet.line, "width": sheet.width},
+		"cd": {"passing": sheet.passing, "pressing": sheet.pressing, "line": sheet.line, "marking": sheet.marking, "transition": sheet.transition,
+			"tech": ptech / n, "pace_att": pace[0] / pace[1] if pace[1] > 0.0 else 60.0, "pace_def": pace[2] / pace[3] if pace[3] > 0.0 else 60.0},
 	}
 
 
@@ -177,12 +195,12 @@ static func _lambda(att: Dictionary, dfn: Dictionary, poss: float, home: bool, c
 	var td: Dictionary = dfn["tac"]
 	var diff := float(att["att"]) * MatchSimulation.damp(float(ta["m_att"])) - float(dfn["def"]) * MatchSimulation.damp(float(td["m_def"]))
 	var p := MatchSimulation.BASE_CHANCE * MatchSimulation.chance_mult(diff) * float(ta["s_rate"])
-	p *= float(td["l_opp_rate"]) * float(td["pr_opp_rate"])
+	p *= float(td["l_opp_rate"]) * float(td["pr_opp_rate"]) * float(ta["x_rate"]) * float(td["x_opp_rate"]) * TacticsManager.clash(att["cd"], dfn["cd"])
 	p *= (1.0 + MatchSimulation.HOME_CHANCE * crowd) if home else (1.0 - MatchSimulation.AWAY_CHANCE * crowd)
 	p *= 1.0 + (11 - int(dfn["count"])) * 0.08
 	p *= 1.0 - (11 - int(att["count"])) * 0.06
 	p = clampf(p, 0.02, 0.6)
-	var conv := CONV * clampf(exp(MatchSimulation.DELTA * diff), 0.6, 1.6) * float(ta["s_quality"]) * float(td["l_opp_quality"])
+	var conv := CONV * clampf(exp(MatchSimulation.DELTA * diff), 0.6, 1.6) * float(ta["s_quality"]) * float(td["l_opp_quality"]) * float(ta["x_quality"]) * float(td["x_opp_quality"])
 	conv *= exp(MatchSimulation.EPS * (float(att["fin"]) - float(dfn["gk"])))
 	return MINUTES * poss * p * conv * CAL
 
@@ -206,8 +224,8 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 		sd["ref_pens"] = float(rf["pens"])
 	var th: Dictionary = sides[0]["tac"]
 	var ta: Dictionary = sides[1]["tac"]
-	var tilt_h := float(th["m_poss"]) + float(th["s_poss"]) + float(th["l_poss"]) + (0.0 if bool(ta["ignores_press"]) else float(th["pr_poss"]))
-	var tilt_a := float(ta["m_poss"]) + float(ta["s_poss"]) + float(ta["l_poss"]) + (0.0 if bool(th["ignores_press"]) else float(ta["pr_poss"]))
+	var tilt_h := float(th["m_poss"]) + float(th["s_poss"]) + float(th["l_poss"]) + (0.0 if bool(ta["ignores_press"]) else float(th["pr_poss"])) + float(th["x_poss"])
+	var tilt_a := float(ta["m_poss"]) + float(ta["s_poss"]) + float(ta["l_poss"]) + (0.0 if bool(th["ignores_press"]) else float(ta["pr_poss"])) + float(ta["x_poss"])
 	var x := MatchSimulation.GAMMA * (float(sides[0]["mid"]) - float(sides[1]["mid"]))
 	# Confronto de ideias e estudo do rival (os mesmos do minuto a minuto).
 	var mu := TacticalMatchup.edges(sides[0]["mu"], sides[1]["mu"])
@@ -232,7 +250,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 		var ex := TacticalScout.exploit(types, TacticalScout.vulnerability(world, sides[1 - s]["club"]), TacticalScout.study(world, club_s))
 		lam[s] *= float(ex[2]) * float(mu["rate_a" if s == 0 else "rate_b"]) * float(wfx.get("goals", 1.0))
 		for i in 6:
-			var w := MatchSimulation.BASE_TYPE_W[i] * types[i] * float(ex[0][i])
+			var w := MatchSimulation.BASE_TYPE_W[i] * types[i] * float(ex[0][i]) * float(sides[s]["tac"]["x_types"][i]) * float(sides[1 - s]["tac"]["x_opp_types"][i])
 			if i == MatchSimulation.CH_LONG:
 				w *= float(wfx.get("long", 1.0))
 			elif i == MatchSimulation.CH_CROSS:
@@ -262,7 +280,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var card_rate: Array = [0.0, 0.0]
 	for s in 2:
 		var tac: Dictionary = sides[s]["tac"]
-		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"]) * float(rf["cards"]) * float(wfx.get("fouls", 1.0))
+		var fouls_f := (1.3 - float(sides[s]["discipline"]) / 100.0 * 0.6) * float(tac["i_fouls"]) * float(tac["pr_fouls"]) * float(tac["x_fouls"]) * (1.12 if derby else 1.0) * float(cul["cards"]) * float(rf["cards"]) * float(wfx.get("fouls", 1.0))
 		card_rate[s] = 1.75 * fouls_f / MINUTES
 		if rng.randf() < 1.0 - exp(-MatchSimulation.INJURY_RATE * 95.0 * float(tac["i_fatigue"]) * float(wfx.get("injury", 1.0))):
 			timeline.append([rng.randi_range(5, 90), 3, s])
@@ -308,7 +326,7 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 				cnt += 1
 		avg = avg / maxf(1.0, cnt)
 		var tac: Dictionary = sides[s]["tac"]
-		var fat := MatchSimulation.FATIGUE_RATE * 18.0 * float(tac["i_fatigue"]) * float(tac["s_fatigue"]) * float(tac["pr_fatigue"])
+		var fat := MatchSimulation.FATIGUE_RATE * 18.0 * float(tac["i_fatigue"]) * float(tac["s_fatigue"]) * float(tac["pr_fatigue"]) * float(tac["x_fatigue"])
 		var saves := maxf(0.0, lam[1 - s] * 2.2 - conceded)
 		for v in lines[s]:
 			var p: Player = v[0]
@@ -349,7 +367,7 @@ static func _chance_rate(att: Dictionary, dfn: Dictionary, home: bool, crowd: fl
 	var td: Dictionary = dfn["tac"]
 	var diff := float(att["att"]) * MatchSimulation.damp(float(ta["m_att"])) - float(dfn["def"]) * MatchSimulation.damp(float(td["m_def"]))
 	var p := MatchSimulation.BASE_CHANCE * MatchSimulation.chance_mult(diff) * float(ta["s_rate"])
-	p *= float(td["l_opp_rate"]) * float(td["pr_opp_rate"])
+	p *= float(td["l_opp_rate"]) * float(td["pr_opp_rate"]) * float(ta["x_rate"]) * float(td["x_opp_rate"]) * TacticsManager.clash(att["cd"], dfn["cd"])
 	p *= (1.0 + MatchSimulation.HOME_CHANCE * crowd) if home else (1.0 - MatchSimulation.AWAY_CHANCE * crowd)
 	return clampf(p, 0.02, 0.6)
 
