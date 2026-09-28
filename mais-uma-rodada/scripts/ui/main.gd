@@ -154,6 +154,10 @@ func _on_tab(tab: String) -> void:
 ## Responsivo: mede o viewport e, ao cruzar um ponto de quebra, leva a navegação para a
 ## lateral (telas largas) ou de volta para baixo, e reconstrói a tela atual.
 func _update_layout() -> void:
+	# Tablet girado: a escala de retrato e a de paisagem são diferentes
+	var want := AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
+	if not is_equal_approx(get_tree().root.content_scale_factor, want):
+		get_tree().root.content_scale_factor = want
 	UILayout.viewport = get_viewport_rect().size
 	var sc := UILayout.size_class()
 	if sc == _size_class:

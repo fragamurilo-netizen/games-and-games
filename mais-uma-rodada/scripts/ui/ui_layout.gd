@@ -17,6 +17,8 @@ const BP_EXPANDED := 1500.0
 const COLUMN_MAX := 820.0
 ## Largura da navegação lateral.
 const RAIL_W := 132.0
+## Largura de conteúdo a partir da qual cabem três colunas de cartões.
+const COL3_MIN := 2000.0
 
 ## Quem mede: a raiz da interface (main.gd) atualiza a cada mudança de tamanho.
 static var viewport := Vector2(720, 1280)
@@ -41,28 +43,42 @@ static func is_landscape() -> bool:
 
 
 ## Colunas de cartões para a largura disponível `w` (a área de conteúdo, sem a navegação).
-static func columns_for(w: float, max_cols: int = 2) -> int:
-	if w >= COLUMN_MAX * 2.6 and max_cols >= 3:
+## Três colunas só cabem no tablet deitado (e em monitores muito largos).
+static func columns_for(w: float, max_cols: int = 3) -> int:
+	if w >= COL3_MIN and max_cols >= 3:
 		return 3
 	if w >= BP_MEDIUM - RAIL_W and max_cols >= 2:
 		return 2
 	return 1
 
 
-## Tablet: tela física com 7 polegadas ou mais na diagonal (ou forçado).
+## Tablet: tela física com 7 polegadas ou mais na diagonal, ou com o lado menor de 600 dp ou
+## mais (a regra do Android para tablet), ou forçado.
 static func is_tablet() -> bool:
 	if force_tablet:
 		return true
 	if not OS.has_feature("mobile"):
 		return false
+	var px := Vector2(DisplayServer.screen_get_size())
 	var dpi := float(DisplayServer.screen_get_dpi())
 	if dpi <= 0.0:
-		return false
-	var px := Vector2(DisplayServer.screen_get_size())
-	return px.length() / dpi >= 7.0
+		# Sem DPI: tela grande em pixels já é tablet
+		return minf(px.x, px.y) >= 1200.0
+	var short_dp := minf(px.x, px.y) / (dpi / 160.0)
+	return px.length() / dpi >= 7.0 or short_dp >= 600.0
 
 
-## Escala extra da interface: no tablet tudo fica um pouco menor para aproveitar a tela
-## (mais conteúdo por vez, como nos jogos de gestão em tablet).
+## Escala extra da interface: no tablet tudo fica menor para aproveitar a tela (mais conteúdo
+## por vez, como nos jogos de gestão em tablet). Em retrato a escala menor faz caber a navegação
+## lateral e duas colunas.
 static func device_scale() -> float:
-	return 0.8 if is_tablet() else 1.0
+	if not is_tablet():
+		return 1.0
+	var px := Vector2(DisplayServer.window_get_size())
+	return 0.66 if px.y > px.x else 0.72
+
+
+## Quanto as telas podem alargar além da largura máxima delas: no tablet deitado o conteúdo
+## ocupa mais da tela; no retrato e no celular fica como está.
+static func width_boost() -> float:
+	return 1.25 if is_tablet() and is_landscape() else 1.0

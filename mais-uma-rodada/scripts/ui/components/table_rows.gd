@@ -5,6 +5,9 @@ extends RefCounted
 const COLS_COMPACT := ["J", "SG", "PTS"]
 const COLS_FULL := ["J", "V", "E", "D", "SG", "PTS"]
 const COLS_FORM := ["ÚLTIMOS 5", "APR", "PTS"]
+## Tela larga (tablet): gols pró e contra e os últimos jogos na própria classificação.
+const COLS_WIDE := ["J", "V", "E", "D", "GP", "GC", "SG", "ÚLTIMOS 5", "PTS"]
+const COLS_WIDE_SIDE := ["J", "V", "E", "D", "GP", "GC", "SG", "PTS"]
 ## Visões da classificação: geral, só jogos em casa, só fora, e o momento (últimos 5 jogos).
 const VIEW_ALL := "all"
 const VIEW_HOME := "home"
@@ -30,7 +33,18 @@ static func _col_width(col: String, compact: bool) -> int:
 	return 40
 
 
-static func header(compact: bool, view: String = VIEW_ALL) -> HBoxContainer:
+## Colunas de números de uma visão da classificação.
+static func _cols(compact: bool, view: String, wide: bool) -> Array:
+	if compact:
+		return COLS_COMPACT
+	if view == VIEW_FORM:
+		return COLS_FORM
+	if wide:
+		return COLS_WIDE if view == VIEW_ALL else COLS_WIDE_SIDE
+	return COLS_FULL
+
+
+static func header(compact: bool, view: String = VIEW_ALL, wide: bool = false) -> HBoxContainer:
 	var h := UIKit.hbox(6)
 	var gap := Control.new()
 	# Mesma soma da linha: margem, faixa da zona, posição e escudo (com os espaçamentos).
@@ -39,7 +53,7 @@ static func header(compact: bool, view: String = VIEW_ALL) -> HBoxContainer:
 	var n := UIKit.label("CLUBE", "Caps")
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(n)
-	var cols: Array = COLS_COMPACT if compact else (COLS_FORM if view == VIEW_FORM else COLS_FULL)
+	var cols: Array = _cols(compact, view, wide)
 	for col in cols:
 		var l := UIKit.label(col, "Caps")
 		l.custom_minimum_size.x = _col_width(col, compact)
@@ -59,7 +73,7 @@ static func row(w: GameWorld, league: League, club_id: int, pos: int, compact: b
 ## `move`: posições ganhas (+) ou perdidas (-) desde a rodada anterior. `on_tap` troca o destino
 ## do toque (por padrão abre o clube).
 static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compact: bool, zone: Color,
-		view: String = VIEW_ALL, move: int = 0, on_tap: Callable = Callable()) -> Control:
+		view: String = VIEW_ALL, move: int = 0, on_tap: Callable = Callable(), wide: bool = false) -> Control:
 	var cl := w.club(club_id)
 	var is_user := w.is_user_club(club_id)
 	var h := UIKit.hbox(6)
@@ -100,10 +114,18 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 		h.add_child(pt)
 	else:
 		var sg: int = int(r["gf"]) - int(r["ga"])
-		var values: Array = [r["pl"], sg, r["pts"]] if compact else [r["pl"], r["w"], r["d"], r["l"], sg, r["pts"]]
-		var cols: Array = COLS_COMPACT if compact else COLS_FULL
+		var cols: Array = _cols(compact, view, wide)
+		var by_col := {"J": r["pl"], "V": r["w"], "E": r["d"], "D": r["l"], "GP": r["gf"], "GC": r["ga"], "SG": sg, "PTS": r["pts"]}
+		var values: Array = []
+		for col in cols:
+			values.append(by_col.get(col, 0))
 		for i in values.size():
 			var last := i == values.size() - 1
+			if cols[i] == "ÚLTIMOS 5":
+				var fdw := form_dots(String(r.get("form", "")), 18)
+				fdw.custom_minimum_size.x = W_FORM
+				h.add_child(fdw)
+				continue
 			var txt := str(values[i])
 			var is_sg: bool = cols[i] == "SG"
 			if is_sg:

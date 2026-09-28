@@ -715,8 +715,9 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 ## Responsivo: coloca os cartões em `c` numa coluna (celular em retrato) ou distribui em
 ## colunas lado a lado (paisagem, tablet), sempre equilibrando a altura das colunas.
 ## `pinned` = quantos dos primeiros cartões ocupam a largura toda (o destaque da tela).
-static func columns(c: Container, cards: Array, width: float, max_cols: int = 2, pinned: int = 0) -> void:
-	var n := UILayout.columns_for(width, max_cols)
+static func columns(c: Container, cards: Array, width: float, max_cols: int = 3, pinned: int = 0) -> void:
+	# Nunca mais colunas que cartões (uma coluna vazia só estreitaria as outras)
+	var n := mini(UILayout.columns_for(width, max_cols), maxi(1, cards.size() - pinned))
 	var i := 0
 	while i < mini(pinned, cards.size()):
 		c.add_child(cards[i])

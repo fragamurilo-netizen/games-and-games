@@ -25,6 +25,8 @@ var _expiring_only := false
 var _query := ""
 var _move_scope := "league"
 var _move_sort := "recent"
+## Colunas de números (jogos, gols, assistências, nota) nas linhas quando sobra largura (tablet).
+var _row_cols := 0
 
 
 func _init() -> void:
@@ -165,6 +167,7 @@ func _small_chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 func _search_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	# Filtros num cartão (na lateral em telas largas) e a lista de resultados ao lado ou abaixo.
 	var wide := UILayout.columns_for(content_width()) > 1
+	_row_cols = 4 if wide and content_width() - 460.0 >= 1000.0 else 0
 	var fc := UIKit.card("Card", 10)
 	var panel := UIKit.card_panel(fc)
 	# Busca pelo nome: só a lista é refeita enquanto digita, para o campo não perder o foco.
@@ -285,6 +288,8 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 		_:
 			list.sort_custom(func(a, b): return float(a[3]) > float(b[3]))
 	results.add_child(UIKit.label("%s encontrados" % Fmt.plural(list.size(), "jogador", "jogadores"), "Small", true))
+	if _row_cols > 0 and not list.is_empty():
+		results.add_child(PlayerRowView.stat_header("market", _row_cols))
 	for i in mini(MAX_ROWS, list.size()):
 		results.add_child(_market_row(w, club, list[i][0], weakest))
 	if list.is_empty():
@@ -661,7 +666,7 @@ func _relevance(w: GameWorld, p: Player, gain: float, budget: float) -> float:
 func _market_row(w: GameWorld, club: Club, p: Player, weakest: Array) -> Control:
 	var pid := p.id
 	var box := UIKit.vbox(2)
-	box.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+	box.add_child(PlayerRowView.make(w, p, {"mode": "market", "cols": _row_cols}, func(): UIManager.push("player", {"id": pid})))
 	var info := UIKit.hbox(10)
 	var est := PlayerRowView.estimate(w, p, p.overall)
 	var ref := float(weakest[Pos.group(p.position)])
@@ -718,6 +723,9 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		list.append([p, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget * 4.0)])
 	list.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
 	c.add_child(UIKit.label("%s disponíveis%s." % [Fmt.plural(list.size(), "jogador", "jogadores"), (" · %d já assinaram com outros clubes" % signed) if signed > 0 else ""], "Small", true))
+	_row_cols = 4 if content_width() >= 1000.0 else 0
+	if _row_cols > 0 and not list.is_empty():
+		c.add_child(PlayerRowView.stat_header("market", _row_cols))
 	for i in mini(MAX_ROWS, list.size()):
 		c.add_child(_market_row(w, club, list[i][0], weakest))
 	if list.is_empty():

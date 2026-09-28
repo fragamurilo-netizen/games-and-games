@@ -667,7 +667,9 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	hp.add_theme_constant_override(&"margin_bottom", 6)
 	hp.add_child(head)
 	card.add_child(hp)
-	card.add_child(TableRows.header(false, _view))
+	# Tela larga (tablet): gols pró e contra e os últimos jogos na própria linha
+	var wide := content_width() >= 900.0
+	card.add_child(TableRows.header(false, _view, wide))
 	var side := _view == TableRows.VIEW_HOME or _view == TableRows.VIEW_AWAY
 	var t: Dictionary = TableRows.side_table(league, _view) if side else league.table
 	var ids: Array = CompetitionManager.sort_table(league.club_ids, t) if side else CompetitionManager.sorted_ids(league)
@@ -697,7 +699,7 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 			move = int(prev[cid]) - (i + 1)
 		var lg := league
 		card.add_child(TableRows.table_row(w, t[cid], cid, i + 1, false, CompetitionManager.zone_color(zone), _view, move,
-			func(): _club_sheet(w, lg, cid)))
+			func(): _club_sheet(w, lg, cid), wide))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(TableRows.legend(league))
 	var fdesc := LeagueFormat.describe(league)

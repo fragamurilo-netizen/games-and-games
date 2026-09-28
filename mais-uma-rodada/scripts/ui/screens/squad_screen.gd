@@ -16,6 +16,7 @@ var _view := 0
 func _init() -> void:
 	nav_tab = "squad"
 	screen_title = "Elenco"
+	max_content_width = 1700.0
 
 
 ## Resumo do elenco: tamanho, idade, estrangeiros (com a regra da liga), crias da casa, força do
@@ -106,6 +107,16 @@ func _passes_quick(w: GameWorld, p: Player) -> bool:
 	return true
 
 
+## Colunas de números nas linhas conforme a largura (tablet): jogos, gols, assistências e nota;
+## com mais espaço, também valor e salário.
+static func stat_cols(width: float) -> int:
+	if width >= 1250.0:
+		return 6
+	if width >= 980.0:
+		return 4
+	return 0
+
+
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_sort = p.get("sort", "pos")
@@ -182,6 +193,10 @@ func refresh() -> void:
 			list.append(p)
 	if list.is_empty():
 		c.add_child(UIKit.label("Ninguém nesse recorte.", "Muted", true))
+	# Tela larga (tablet): jogos, gols, assistências, nota, valor e salário na própria linha
+	var ncols := stat_cols(content_width())
+	if ncols > 0 and not list.is_empty():
+		c.add_child(PlayerRowView.stat_header("squad", ncols))
 	var y := w.year
 	match _sort:
 		"ovr":
@@ -215,7 +230,7 @@ func refresh() -> void:
 					ovr += q.overall
 			c.add_child(UIKit.section("%s · %d · média %d" % [Pos.GROUP_NAMES[last_group], cnt, int(round(float(ovr) / maxi(1, cnt)))]))
 		var pid := p.id
-		c.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
+		c.add_child(PlayerRowView.make(w, p, {"mode": "squad", "cols": ncols}, func(): UIManager.push("player", {"id": pid})))
 	var out := TransferManager.loaned_out(w)
 	if not out.is_empty():
 		c.add_child(UIKit.section("Emprestados"))

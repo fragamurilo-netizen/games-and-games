@@ -1,11 +1,23 @@
 class_name PlayerRowView
 extends RefCounted
 ## Linha de jogador: número, posição, nome, situação, físico e overall.
-## opts: {mode: "squad"|"market"|"pick", pos: int (rende nesta posição), known: bool (dados exatos)}
+## opts: {mode: "squad"|"market"|"pick", pos: int (rende nesta posição), known: bool (dados exatos),
+##        cols: int (tela larga: quantas colunas de números da temporada, alinhadas com stat_header)}
+
+## Colunas extras da tela larga: [título, largura].
+const WIDE_SQUAD := [["J", 46], ["G", 46], ["A", 46], ["Nota", 60], ["Valor", 128], ["Salário", 150]]
+const WIDE_MARKET := [["J", 46], ["G", 46], ["A", 46], ["Nota", 60]]
+const W_ICONS := 3 * 22 + 2 * 4
+const W_COND := 56
+## Na tela larga o físico tem largura fixa ("Excelente" e "Boa" não deslocam as colunas).
+const W_COND_WIDE := 88
+const W_PRICE := 120
 
 
 static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> PanelContainer:
 	var mode: String = opts.get("mode", "squad")
+	var ncols: int = opts.get("cols", 0)
+	var wide := ncols > 0
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
 	var row := UIKit.hbox(10)
 	if mode != "market":
@@ -55,23 +67,34 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		icons.add_child(UIKit.icon_rect("heart", 22, UIColors.MUTED))
 	if not own and Shortlist.has(w, p):
 		icons.add_child(UIKit.icon_rect("star", 22, UIColors.ACCENT))
-	if icons.get_child_count() > 0:
+	if wide:
+		# Largura fixa para as colunas seguintes ficarem alinhadas com o cabeçalho
+		icons.custom_minimum_size.x = W_ICONS
+		icons.alignment = BoxContainer.ALIGNMENT_END
+		row.add_child(icons)
+		_wide_cells(row, w, p, mode, ncols)
+	elif icons.get_child_count() > 0:
 		row.add_child(icons)
 	if mode != "market":
 		var cond := UIKit.vbox(2)
 		cond.alignment = BoxContainer.ALIGNMENT_CENTER
-		cond.custom_minimum_size.x = 56
+		cond.custom_minimum_size.x = W_COND_WIDE if wide else W_COND
 		var bar := UIKit.bar(p.condition, 100.0, _cond_color(p.condition), 8)
 		cond.add_child(bar)
 		var mor := UIKit.label(UIColors.morale_label(p.morale), "Caps")
 		mor.add_theme_color_override(&"font_color", UIColors.morale_color(p.morale))
 		mor.add_theme_font_size_override(&"font_size", 14)
+		if wide:
+			mor.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			mor.clip_text = true
 		cond.add_child(mor)
 		row.add_child(cond)
 	else:
 		# Mercado: o preço que o clube pede hoje (livres: o valor de mercado, sem taxa).
 		var pcol2 := UIKit.vbox(0)
 		pcol2.alignment = BoxContainer.ALIGNMENT_CENTER
+		if wide:
+			pcol2.custom_minimum_size.x = W_PRICE
 		var free := p.club_id < 0 or not p.loan.is_empty() # emprestado: não está à venda por quem o tem
 		var val := UIKit.label(Fmt.money(p.value if free else TransferManager.asking_price(w, p)), "Stat")
 		val.add_theme_font_size_override(&"font_size", 24)
@@ -93,6 +116,64 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		b.text_override = "~%d" % est
 		row.add_child(b)
 	return UIKit.tap_row(row, cb)
+
+
+## Números da temporada lado a lado (tela larga): jogos, gols, assistências, nota média e,
+## no elenco, valor e salário.
+static func _wide_cells(row: HBoxContainer, w: GameWorld, p: Player, mode: String, n: int) -> void:
+	var t := p.season_totals()
+	var apps := int(t[0])
+	var nota := ClubRecords.rating(p, apps)
+	var vals: Array = [str(apps), str(t[1]), str(t[2]), Fmt.rating(nota) if apps > 0 else "–"]
+	if mode != "market":
+		vals.append(Fmt.money(p.value))
+		vals.append(Fmt.money_month(p.wage))
+	var cols: Array = WIDE_MARKET if mode == "market" else WIDE_SQUAD
+	for i in mini(n, cols.size()):
+		var l := UIKit.label(String(vals[i]), "")
+		l.custom_minimum_size.x = int(cols[i][1])
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		l.clip_text = true
+		if i == 3 and apps > 0:
+			l.add_theme_color_override(&"font_color", Fmt.match_rating_color(nota))
+		elif i != 1 or int(t[1]) == 0:
+			l.add_theme_color_override(&"font_color", UIColors.MUTED)
+		row.add_child(l)
+
+
+## Cabeçalho das colunas da tela larga, com as mesmas larguras e margens da linha.
+static func stat_header(mode: String, n: int) -> Control:
+	var m := MarginContainer.new()
+	var th := ThemeDB.get_project_theme()
+	var pad_l := 14.0
+	var pad_r := 14.0
+	if th != null and th.has_stylebox(&"panel", &"RowPanel"):
+		var sb := th.get_stylebox(&"panel", &"RowPanel")
+		pad_l = sb.get_margin(SIDE_LEFT)
+		pad_r = sb.get_margin(SIDE_RIGHT)
+	m.add_theme_constant_override(&"margin_left", int(pad_l))
+	m.add_theme_constant_override(&"margin_right", int(pad_r))
+	var h := UIKit.hbox(10)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(gap)
+	var sp := Control.new()
+	sp.custom_minimum_size.x = W_ICONS
+	h.add_child(sp)
+	var cols: Array = (WIDE_MARKET if mode == "market" else WIDE_SQUAD).slice(0, n)
+	cols.append(["Preço", W_PRICE] if mode == "market" else ["Físico", W_COND_WIDE])
+	cols.append(["OVR", 56])
+	for col in cols:
+		var l := UIKit.label(String(col[0]), "Caps")
+		l.uppercase = true
+		l.custom_minimum_size.x = int(col[1])
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if col[0] != "Físico" and col[0] != "OVR" else HORIZONTAL_ALIGNMENT_CENTER
+		l.clip_text = true
+		h.add_child(l)
+	m.add_child(h)
+	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return m
 
 
 static func subtitle(w: GameWorld, p: Player, mode: String) -> String:

@@ -59,7 +59,15 @@ func refresh() -> void:
 			cards.append(SocialPost.mini_card(w, -1, p.id))
 			UIKit.columns(c, cards, content_width())
 		_:
-			UIKit.columns(c, [_summary(w, p, own), _fit_card(w, p, own)], content_width())
+			var ov: Array = [_summary(w, p, own), _fit_card(w, p, own)]
+			# Tablet deitado: os atributos já aparecem ao lado (resumo e encaixe empilhados à
+			# esquerda), sem trocar de aba
+			if UILayout.columns_for(content_width()) >= 3:
+				var left := UIKit.vbox(UITokens.S4)
+				for card: Control in ov:
+					left.add_child(card)
+				ov = [left, _attributes(w, p, own)]
+			UIKit.columns(c, ov, content_width(), 2)
 	_actions(w, p, own)
 
 
