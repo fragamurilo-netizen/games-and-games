@@ -196,9 +196,49 @@ const STYLE_P: Array = [
 	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "waves", "op": 0.9}, # waves com degradê
 	{"tp": 0.24, "sd": 0.02, "fd": 2, "sp": 3, "tx": "curl"}, # cachos com luzes
 	{"tp": 0.04, "sd": 0.0, "fd": 1, "tx": "coil", "bk": "puffs2", "fl": 3}, # dois puffs
+	{"tp": 0.11, "sd": 0.04, "fd": 1, "sp": 5, "fl": 1}, # curto texturizado
+	{"tp": 0.1, "sd": 0.0, "fd": 2, "fr": "quiff", "ph": 0.8}, # degradê com topete baixo
+	{"tp": 0.07, "sd": 0.03, "fd": 1, "fl": 1, "op": 0.95}, # social curto
+	{"tp": 0.1, "sd": 0.03, "fd": 2, "fl": 1, "fr": "part"}, # repartido baixo
+	{"tp": 0.09, "sd": 0.05, "hl": 0.12, "fd": 1, "fr": "crop", "fl": 2, "fc": 0.8}, # franja curta reta
+	{"tp": 0.18, "sd": 0.04, "fd": 1, "fr": "quiff", "ph": 1.15, "gl": 0.2}, # topete com volume
+	{"tp": 0.18, "sd": 0.1, "sp": 3, "tx": "curl", "sb": 0.03}, # cacheado curto
+	{"tp": 0.22, "sd": 0.0, "fd": 5, "sp": 3, "tx": "curl"}, # cachos com degradê navalhado
+	{"tp": 0.1, "sd": 0.06, "sp": 3, "tx": "coil", "fd": 1}, # crespo curto
+	{"tp": 0.12, "sd": 0.0, "fd": 5, "tx": "coil", "sp": 3}, # crespo com degradê alto
+	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "waves", "op": 0.9, "fr": "shaved_part"}, # waves com risco
+	{"tp": 0.14, "sd": 0.03, "fd": 2, "tx": "coil", "fr": "twists"}, # twists curtos
+	{"tp": 0.14, "sd": 0.1, "tx": "locs", "bk": "dreads", "sb": 0.12, "fd": 1}, # locs médios
+	{"tp": 0.13, "sd": 0.07, "tx": "wavy", "fd": 1, "fl": 1}, # ondulado curto
+	{"tp": 0.15, "sd": 0.08, "tx": "wavy", "fl": 1, "fr": "part"}, # ondulado repartido
+	{"tp": 0.15, "sd": 0.08, "sb": 0.12, "fl": 1, "fr": "side_fringe"}, # liso médio de lado
+	{"tp": 0.08, "sd": 0.03, "fd": 1, "gl": 0.25, "fl": 0}, # para trás curto
+	{"tp": 0.08, "sd": 0.02, "fd": 1, "fl": 1}, # degradê baixo
+	{"tp": 0.09, "sd": 0.0, "fd": 2, "fl": 1}, # degradê médio
+	{"tp": 0.05, "sd": 0.02, "tx": "dots", "op": 0.9, "fd": 1}, # máquina 3
+	{"tp": 0.015, "sd": 0.0, "tx": "dots", "op": 0.45}, # raspado rente
+	{"tp": 0.13, "sd": 0.02, "fd": 2, "sp": 5, "fl": 0}, # topete bagunçado curto
+	{"tp": 0.11, "sd": 0.05, "hl": 0.18, "fd": 1, "fr": "fringe", "fl": 2, "sp": 5}, # franja desfiada
+	{"tp": 0.17, "sd": 0.12, "sb": 0.14, "sp": 5, "fl": 1, "fr": "locks", "lk": 0.35}, # médio desarrumado
+	{"tp": 0.36, "sd": 0.3, "sp": 3, "tx": "curl", "sb": 0.12}, # cacheado volumoso
+	{"tp": 0.34, "sd": 0.28, "sp": 3, "tx": "coil"}, # afro médio
+	{"tp": 0.3, "sd": 0.1, "fd": 1, "sp": 3, "tx": "coil"}, # afro com degradê baixo
+	{"tp": 0.035, "sd": 0.0, "fd": 1, "tx": "braid", "op": 0.8}, # nagô reto com degradê
+	{"tp": 0.05, "sd": 0.0, "fd": 2, "bk": "bun_low", "gl": 0.25, "fl": 0}, # coque baixo com degradê
+	{"tp": 0.1, "sd": 0.1, "sb": 0.28, "bk": "long", "fr": "locks", "lk": 1.2, "fl": 3}, # longo solto repartido
+	{"tp": 0.15, "sd": 0.1, "sb": 0.14, "tx": "wavy", "gl": 0.2, "fr": "locks", "lk": 0.25, "fl": 0}, # médio ondulado para trás
+	{"tp": 0.16, "sd": 0.03, "fd": 2, "tx": "wavy", "fr": "quiff"}, # topete ondulado
+	{"tp": 0.16, "sd": 0.0, "hl": 0.12, "fd": 2, "sp": 3, "tx": "curl", "fr": "curl_fringe"}, # crop cacheado
+	{"tp": 0.08, "sd": 0.02, "fd": 1, "fl": 1, "fr": "part", "fr2": "shaved_part"}, # social com risco
+	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "dots", "op": 0.75, "fr": "shaved_part"}, # buzz com risco lateral
+	{"tp": 0.1, "sd": 0.03, "hl": 0.08, "fd": 2, "fr": "side_fringe", "fl": 1}, # curto com franja lateral
+	{"tp": 0.1, "sd": 0.03, "sp": 2, "fd": 1, "gl": 0.2}, # espetado curto
+	{"tp": 0.14, "sd": 0.1, "sb": 0.16, "fl": 3, "fr": "curtain"}, # médio com franja cortina
+	{"tp": 0.26, "sd": 0.2, "sp": 3, "tx": "curl", "sb": 0.18, "bc": 1}, # cachos soltos médios
+	{"tp": 0.12, "sd": 0.0, "fd": 5, "tx": "coil", "fr": "sponge"}, # esponja com degradê
 ]
 
-const LIGHT := Vector3(-0.45, -0.52, 0.72)
+const LIGHT := Vector3(-0.4, -0.5, 0.77)
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -388,8 +428,8 @@ func _light_pass() -> void:
 	_radial(_c, circle, 4 if _s < 90.0 else 6, func(p: Vector2, _t: float, _i: int) -> Color:
 		var d := (p - key) / (_s * 0.9)
 		var fall := clampf(d.length(), 0.0, 1.3)
-		var warm := Color(1.0, 0.9, 0.76, 0.07 * (1.0 - smoothstep(0.0, 0.6, fall)))
-		var shade := 0.2 * smoothstep(0.45, 1.25, fall)
+		var warm := Color(1.0, 0.92, 0.8, 0.1 * (1.0 - smoothstep(0.0, 0.65, fall)))
+		var shade := 0.12 * smoothstep(0.55, 1.35, fall)
 		if shade > warm.a:
 			return Color(0.04, 0.06, 0.12, shade)
 		return warm)
@@ -730,8 +770,9 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var ny := dy * tilt
 	var nz := sqrt(maxf(0.0, 1.0 - tilt * tilt))
 	# Luz "enrolada": a pele espalha a luz por dentro, então a passagem para a sombra é gradual
-	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
-	var lum := 0.47 + 0.6 * diff
+	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.3) / 1.3, 0.0, 1.0)
+	# Luz principal suave e um rebatedor na frente: a sombra fica macia, sem "meia cara escura"
+	var lum := 0.56 + 0.5 * diff
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
 	lum -= 0.06 * smoothstep(0.78, 1.0, t)
@@ -867,6 +908,9 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		b = (v - float(bl[1])) / float(bl[2])
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
 	var col := _shade(_skin, lum)
+	# Pele translúcida: na passagem da luz para a sombra o tom esquenta um pouco (sangue sob a pele)
+	var term := 4.0 * diff * (1.0 - diff)
+	col = col.lerp(Color(0.78, 0.36, 0.28), 0.07 * term)
 	# Rubor nas bochechas, nariz e queixo
 	a = (au - 0.52) / 0.22
 	b = (v - 0.25) / 0.13
@@ -2701,7 +2745,7 @@ func _hair_col(p: Vector2, w: float, t: float, gloss: float) -> Color:
 	var hair: Color = f["hair"]
 	var q := _uv(p)
 	var dn := Vector2(q.x, q.y * 0.9).normalized() if q.length() > 0.001 else Vector2(0, -1)
-	var lum := 0.66 + 0.36 * dn.dot(Vector2(-0.55, -0.83))
+	var lum := 0.7 + 0.32 * dn.dot(Vector2(-0.55, -0.83))
 	lum *= 0.78 + 0.22 * smoothstep(0.0, 0.45, w)
 	lum *= 1.0 - 0.12 * smoothstep(0.85, 1.0, w)
 	var c := hair.lerp(Color.BLACK, clampf((1.0 - lum) * 0.75, 0.0, 0.9))
