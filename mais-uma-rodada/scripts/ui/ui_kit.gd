@@ -438,6 +438,7 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	b.focus_mode = Control.FOCUS_NONE
 	b.toggle_mode = toggle
 	b.name = "Tap"
+	_fit_overlay(p, b)
 	press_fx(b, p, 0.98)
 	if cb.is_valid():
 		b.pressed.connect(func():
@@ -445,6 +446,30 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 			cb.call())
 	p.add_child(b)
 	return p
+
+
+## A camada clicável fica dentro das margens do painel; os estados dela (passar por cima,
+## selecionado) crescem até a borda do painel, com o mesmo arredondamento, para o destaque
+## cobrir a linha inteira em vez de um contorno solto por dentro.
+static func _fit_overlay(p: PanelContainer, b: Button) -> void:
+	var th := ThemeDB.get_project_theme()
+	if th == null or not th.has_stylebox(&"panel", p.theme_type_variation):
+		return
+	var ps := th.get_stylebox(&"panel", p.theme_type_variation)
+	var rad := 0
+	if ps is StyleBoxFlat:
+		rad = (ps as StyleBoxFlat).corner_radius_top_left
+	for st in [&"hover", &"pressed", &"hover_pressed"]:
+		var src := th.get_stylebox(st, &"RowOverlay") as StyleBoxFlat
+		if src == null:
+			continue
+		var box := src.duplicate() as StyleBoxFlat
+		box.expand_margin_left = ps.content_margin_left
+		box.expand_margin_right = ps.content_margin_right
+		box.expand_margin_top = ps.content_margin_top
+		box.expand_margin_bottom = ps.content_margin_bottom
+		box.set_corner_radius_all(rad)
+		b.add_theme_stylebox_override(st, box)
 
 
 static func set_row_selected(row: PanelContainer, selected: bool) -> void:

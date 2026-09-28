@@ -195,13 +195,10 @@ func _buttons(th: Theme) -> void:
 	# Segmento (seletor compacto dentro de uma cápsula "Segment")
 	th.add_type("SegmentButton")
 	th.set_type_variation("SegmentButton", "Button")
-	# Selecionado: superfície elevada com filete na cor do clube (antes só um cinza, que sumia
-	# no modo claro).
-	var seg_on := sb(UIColors.SURFACE_3, UITokens.R_SM, Color(UIColors.ACCENT, 0.7), 1, 10, 6)
-	seg_on.border_width_bottom = 3
+	# Selecionado: cápsula cheia na cor do clube, texto no contraste dela.
 	_button_states(th, "SegmentButton", sb(clear, UITokens.R_SM, clear, 0, 10, 6), sb(Color(1, 1, 1, 0.04), UITokens.R_SM, clear, 0, 10, 6),
-		seg_on, sb(clear, UITokens.R_SM, clear, 0, 10, 6))
-	_button_colors(th, "SegmentButton", UIColors.MUTED, UIColors.TEXT)
+		sb(UIColors.ACCENT, UITokens.R_SM, clear, 0, 10, 6), sb(clear, UITokens.R_SM, clear, 0, 10, 6))
+	_button_colors(th, "SegmentButton", UIColors.MUTED, UIColors.ON_ACCENT)
 	th.set_font(&"font", "SegmentButton", f_semi)
 	th.set_font_size(&"font_size", "SegmentButton", 20)
 	# Navegação inferior (o indicador da aba ativa é desenhado pela BottomNav)
@@ -224,8 +221,8 @@ func _buttons(th: Theme) -> void:
 	# Camada clicável transparente sobre linhas (ver UIKit.tap_row)
 	th.add_type("RowOverlay")
 	th.set_type_variation("RowOverlay", "Button")
-	_button_states(th, "RowOverlay", empty, sb(Color(1, 1, 1, 0.035), r, clear, 0, 0, 0),
-		sb(Color(1, 0.79, 0.25, 0.08), r, UIColors.ACCENT, 2, 0, 0), empty)
+	_button_states(th, "RowOverlay", empty, sb(Color(1, 1, 1, 0.035), UITokens.R_MD, clear, 0, 0, 0),
+		sb(Color(UIColors.ACCENT, 0.12), UITokens.R_MD, UIColors.ACCENT, 2, 0, 0), empty)
 	_button_colors(th, "RowOverlay", UIColors.TEXT, UIColors.TEXT)
 	# Ícone (barra superior)
 	th.add_type("IconButton")

@@ -84,26 +84,19 @@ func select(tab: String) -> void:
 	queue_redraw()
 
 
-## Indicador da aba ativa: um traço na cor do clube no topo da aba e um brilho suave atrás
-## do ícone.
+## Indicador da aba ativa: só uma cápsula suave na cor do clube atrás do ícone (o texto
+## também fica na cor do clube). Na lateral, a cápsula ocupa a largura do botão.
 func _draw() -> void:
 	if not _buttons.has(_active):
 		return
 	var b: Button = _buttons[_active]
 	var r := Rect2(b.position + (get_node("Row") as Control).position, b.size)
-	var bar := StyleBoxFlat.new()
-	bar.bg_color = UIColors.ACCENT
-	if vertical:
-		bar.corner_radius_top_right = 3
-		bar.corner_radius_bottom_right = 3
-		draw_style_box(bar, Rect2(0, r.get_center().y - 28.0, 4, 56))
-	else:
-		var w := minf(56.0, r.size.x * 0.5)
-		bar.corner_radius_bottom_left = 3
-		bar.corner_radius_bottom_right = 3
-		draw_style_box(bar, Rect2(r.get_center().x - w * 0.5, 0, w, 4))
-	var glow := StyleBoxFlat.new()
-	glow.bg_color = Color(UIColors.ACCENT, 0.12)
-	glow.set_corner_radius_all(18)
-	glow.anti_aliasing = true
-	draw_style_box(glow, Rect2(r.get_center().x - 36.0, r.position.y + 10.0, 72.0, 44.0))
+	var icon_h := 34.0
+	var text_h := b.get_theme_font_size(&"font_size") * 1.25
+	var top := r.position.y + (r.size.y - icon_h - text_h) * 0.5 # conteúdo centralizado no botão
+	var pill := StyleBoxFlat.new()
+	pill.bg_color = Color(UIColors.ACCENT, 0.18)
+	pill.set_corner_radius_all(20)
+	pill.anti_aliasing = true
+	var w := 76.0 if not vertical else minf(96.0, r.size.x - 16.0)
+	draw_style_box(pill, Rect2(r.get_center().x - w * 0.5, top - 5.0, w, icon_h + 10.0))
