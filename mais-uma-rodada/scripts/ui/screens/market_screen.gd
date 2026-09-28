@@ -1,7 +1,7 @@
 extends BaseScreen
 ## Mercado: busca de jogadores, livres, propostas recebidas e jogadores à venda.
 
-const TABS := [["search", "Buscar"], ["free", "Livres"], ["pre", "Pré-contrato"], ["scout", "Olheiros"], ["shortlist", "Lista"], ["offers", "Propostas"], ["listed", "À venda"], ["moves", "Movimentações"]]
+const TABS := [["search", "Buscar"], ["moneyball", "Moneyball"], ["free", "Livres"], ["pre", "Pré-contrato"], ["scout", "Olheiros"], ["shortlist", "Lista"], ["offers", "Propostas"], ["listed", "À venda"], ["moves", "Movimentações"]]
 const GROUPS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 const AGES := [["Todas", 99], ["≤ 21", 21], ["≤ 25", 25], ["≤ 29", 29]]
 const SORTS := [["rel", "Relevância"], ["ovr", "Nível"], ["value", "Valor"], ["price", "Preço"], ["age", "Idade"]]
@@ -80,6 +80,8 @@ func refresh() -> void:
 			_shortlist_tab(c, w)
 		"moves":
 			_moves_tab(c, w, club)
+		"moneyball":
+			c.add_child(MoneyballView.build(w, club, content_width(), func(): refresh()))
 		_:
 			_search_tab(c, w, club)
 

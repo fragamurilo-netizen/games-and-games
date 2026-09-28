@@ -89,10 +89,13 @@ static func table_rows(w: GameWorld, club: Club, year: int) -> Array:
 		for p: Player in w.squad(club):
 			var t := p.season_totals()
 			var mins := p.stats[Player.S_MINUTES]
+			var rsum := p.stats[Player.S_RATING_SUM]
 			for k in p.cup_stats:
-				mins += (p.cup_stats[k] as PackedInt32Array)[Player.C_MINUTES]
+				var st: PackedInt32Array = p.cup_stats[k]
+				mins += st[Player.C_MINUTES]
+				rsum += st[Player.C_RATING]
 			rows.append({"id": p.id, "n": p.short_name(), "pos": p.position, "a": int(t[0]), "g": int(t[1]),
-				"as": int(t[2]), "r": p.avg_rating(), "m": mins, "yc": p.stats[Player.S_YELLOWS]})
+				"as": int(t[2]), "r": rsum / 10.0 / int(t[0]) if int(t[0]) > 0 else 0.0, "m": mins, "yc": p.stats[Player.S_YELLOWS]})
 		return rows
 	var seen := {}
 	for r: Dictionary in club.squad_archive.get(str(year), []):
