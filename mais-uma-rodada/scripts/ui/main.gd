@@ -199,6 +199,11 @@ func _update_safe_area() -> void:
 func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 	# Interface nas cores do clube durante a carreira (dourado no menu)
 	UIColors.apply_context(GameManager.user_club() if GameManager.has_career() else null, screen.color_context() if GameManager.has_career() else {})
+	if $Background.color != UIColors.BG: # fundo tingido acompanha a cor do contexto
+		$Background.color = UIColors.BG
+		var g := (_fade.texture as GradientTexture2D).gradient
+		g.set_color(0, Color(UIColors.BG, 0.0))
+		g.set_color(1, Color(UIColors.BG, 0.92))
 	top_bar.visible = screen.show_top
 	bottom_nav.visible = screen.show_nav and GameManager.has_career()
 	if screen.show_top:
