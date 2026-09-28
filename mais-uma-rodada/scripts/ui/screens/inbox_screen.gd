@@ -112,7 +112,7 @@ func refresh() -> void:
 	if shown.is_empty():
 		var empty := UIKit.card("CardFlat", 10)
 		empty.add_child(UIKit.icon_rect("mail", 48, UIColors.DIM))
-		empty.add_child(UIKit.label("Nenhuma mensagem aqui." if _filter != "all" else "A caixa de entrada está vazia. Relatórios, pedidos e propostas chegam aqui ao longo da temporada.", "Muted", true))
+		empty.add_child(UIKit.label("Nenhuma mensagem aqui." if _filter != "all" else "Caixa de entrada vazia.", "Muted", true))
 		list.add_child(UIKit.card_panel(empty))
 	if not wide:
 		c.add_child(list)

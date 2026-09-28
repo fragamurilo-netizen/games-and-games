@@ -93,7 +93,7 @@ func _picker(w: GameWorld, pa: Player, c: VBoxContainer) -> void:
 		if list.is_empty():
 			results.add_child(UIKit.label("Ninguém encontrado.", "Muted"))
 		if q.strip_edges().length() < 3:
-			results.add_child(UIKit.label("Mesma posição no seu elenco e os melhores do mundo na função", "Caps"))
+			results.add_child(UIKit.label("Mesma posição", "Caps"))
 		for p: Player in list:
 			results.add_child(_pick_row(w, p))
 	le.text_changed.connect(func(t: String): fill.call(t))

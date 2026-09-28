@@ -87,21 +87,21 @@ func _go(view: String) -> void:
 # ---------------------------------------------------------------------------
 
 func _home(c: VBoxContainer) -> void:
-	screen_subtitle = "Personalize o seu futebol" if has_career() else "Mundo padrão das novas carreiras"
+	screen_subtitle = "" if has_career() else "Mundo padrão das novas carreiras"
 	var items: Array = []
 	var edit_ok := not has_career() or AppSettings.career_edit
 	if has_career():
-		items.append(["shield", "Meu clube", "Nome, cores, escudo, estádio e uniformes", func():
+		items.append(["shield", "Meu clube", "", func():
 			_club = world().user_club()
 			_club_dirty.clear()
 			_go("club")])
 	if edit_ok:
 		items.append(["search", "Clubes", "Qualquer clube do mundo" + ("" if has_career() else ": nomes, escudos, estádios e uniformes"), func(): _go("pick_club")])
-		items.append(["shirt", "Jogadores", "Editar qualquer jogador ou criar jogadores reais: nome, posições, físico, atributos, foto e aparência" if not has_career() else "Nome, posição, físico, atributos, foto e personalidade", func(): _go("pick_player")])
+		items.append(["shirt", "Jogadores", "", func(): _go("pick_player")])
 	items.append(["trophy", "Competições", "Nomes, logos, cores e placar da TV", func(): _go("pick_comp")])
 	if has_career():
 		items.append(["star", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
-	items.append(["list", "Mods", "Instalar, ligar e criar mods; exportar suas personalizações", func(): _go("mods")])
+	items.append(["list", "Mods", "", func(): _go("mods")])
 	# Início do editor: um ladrilho grande por área (como o hub de criação de um jogo de esporte).
 	max_content_width = 1500
 	c.add_child(UIKit.eyebrow("O que você quer editar?"))
@@ -111,7 +111,7 @@ func _home(c: VBoxContainer) -> void:
 	c.add_child(UIKit.tile_grid(tiles, 3 if UILayout.is_wide() else 2))
 	var info := UIKit.card("Card", 6)
 	if has_career() and not AppSettings.career_edit:
-		info.add_child(UIKit.label("Para editar jogadores e outros clubes nesta carreira, ligue \"Editar jogadores e clubes durante a carreira\" em Opções. No Editor do menu inicial você sempre edita o mundo padrão das novas carreiras.", "Small", true))
+		info.add_child(UIKit.label("Edição na carreira desligada em Opções.", "Small", true))
 		c.add_child(UIKit.card_panel(info))
 
 
@@ -173,7 +173,7 @@ func _club_picker(c: VBoxContainer) -> void:
 			_club_dirty.clear()
 			_go("club")))
 	if card.get_child_count() == 0:
-		card.add_child(UIKit.label("Esta liga só tem clubes gerados na hora da carreira: edite-os com uma carreira aberta.", "Muted", true))
+		card.add_child(UIKit.label("Clubes gerados só na carreira.", "Muted", true))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 
@@ -286,7 +286,7 @@ func _crest_card(cl: Club) -> Control:
 			refresh()))
 	card.add_child(row)
 	if img != "":
-		card.add_child(UIKit.label("Usando a imagem importada. As opções abaixo valem para o escudo desenhado.", "Small", true))
+		card.add_child(UIKit.label("Usando a imagem importada.", "Small", true))
 	for group in [["shape", "Formato", ClubGenerator.CREST_SHAPES, ClubGenerator.CREST_SHAPE_NAMES],
 			["field", "Campo", ClubGenerator.CREST_FIELDS, ClubGenerator.CREST_FIELD_NAMES],
 			["symbol", "Símbolo", ClubGenerator.CREST_SYMBOLS, ClubGenerator.CREST_SYMBOL_NAMES],
@@ -383,7 +383,6 @@ func _stadium_card(cl: Club) -> Control:
 			_mark("venue")
 			refresh()))
 	card.add_child(flow)
-	card.add_child(UIKit.label(String(LicensedData.VENUE_KIND_PITCH.get(cur, "")), "Small", true))
 	var row := UIKit.hbox(10)
 	row.add_child(UIKit.button("Importar foto", "", func():
 		ImagePicker.pick("stadium", func(file: String):
@@ -459,7 +458,6 @@ func _kits_card(cl: Club) -> Control:
 				k["c3"] = hex
 			_mark("kits")
 			refresh()))
-	card.add_child(UIKit.label("Patrocínios ficam de fora: são contratos da carreira, não desenho. Em mods, os uniformes ficam em data/world/kits/<PAÍS>.json.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -577,7 +575,7 @@ func _player_picker(c: VBoxContainer) -> void:
 	if w == null:
 		var wait := UIKit.card("Card", 8)
 		wait.add_child(UIKit.label("Carregando o mundo padrão…", "H2"))
-		wait.add_child(UIKit.label("Uns segundos: o editor monta os 692 clubes com os elencos que as novas carreiras vão receber, já com as suas personalizações.", "Small", true))
+		wait.add_child(UIKit.label("Montando os clubes…", "Small", true))
 		c.add_child(UIKit.card_panel(wait))
 		c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 		GameManager.ensure_preview_world(func():
@@ -669,7 +667,7 @@ func _player_picker(c: VBoxContainer) -> void:
 				list.append_array(YouthManager.academy(w))
 			c.add_child(_player_list_card(w, club.name, list, club))
 		else:
-			c.add_child(UIKit.label("Toque num clube para ver o elenco.", "Muted", true))
+			c.add_child(UIKit.label("Escolha um clube.", "Muted", true))
 	c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 
 
@@ -780,7 +778,7 @@ func _player_editor(c: VBoxContainer) -> void:
 			refresh()))
 	head.add_child(prow)
 	if not has_career():
-		head.add_child(UIKit.label("Editor geral: salvar grava este jogador no mundo padrão das próximas carreiras (e entra em \"Exportar como mod\").", "Small", true))
+		head.add_child(UIKit.label("Mundo padrão das novas carreiras.", "Small", true))
 	c.add_child(UIKit.card_panel(head))
 	_update_ovr_label(p)
 	# Identidade
@@ -1190,7 +1188,6 @@ func _comp_editor(c: VBoxContainer) -> void:
 			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], "", colors_v)
 			refresh()))
 	card.add_child(row)
-	card.add_child(UIKit.label("Vale para todas as carreiras.", "Small", true))
 	c.add_child(UIKit.card_panel(card))
 	var colors := UIKit.card("Card", 8)
 	colors.add_child(UIKit.section("Cores"))
@@ -1202,7 +1199,6 @@ func _comp_editor(c: VBoxContainer) -> void:
 			colors_v[idx] = hex
 			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], logo_v[0], colors_v)
 			refresh()))
-	colors.add_child(UIKit.label("As cores aparecem no selo da competição, nas tabelas e na próxima partida.", "Small", true))
 	c.add_child(UIKit.card_panel(colors))
 	c.add_child(_scoreboard_card())
 	var f := footer()
@@ -1240,7 +1236,6 @@ func _scoreboard_card() -> Control:
 			Overrides.store_scoreboard(_comp_kind, _comp_id, own)
 			refresh()))
 	card.add_child(flow)
-	card.add_child(UIKit.label(ScoreboardTheme.layout_hint(String(th["layout"])), "Small", true))
 	var bg: Color = th["bg"]
 	var acc: Color = th["accent"]
 	for i in 2:
@@ -1268,12 +1263,12 @@ func _mods_view(c: VBoxContainer) -> void:
 	if not Store.unlocked():
 		var lk := UIKit.card("CardHighlight", 10)
 		lk.add_child(UIKit.label("Mods fazem parte da Carreira Completa", "Title", true))
-		lk.add_child(UIKit.label("Instale mods, ligue e desligue e exporte suas personalizações depois de desbloquear a Carreira Completa (pagamento único de %s)." % Store.price(), "Muted", true))
+		lk.add_child(UIKit.label("Requer a Carreira Completa (%s)." % Store.price(), "Muted", true))
 		lk.add_child(UIKit.button("VER A CARREIRA COMPLETA", "PrimaryButton", func(): UIManager.push("paywall", {"reason": "mods"}), "star"))
 		c.add_child(UIKit.card_panel(lk))
 		return
 	var intro := UIKit.card("Card", 6)
-	intro.add_child(UIKit.label("Mods mudam os dados do jogo (clubes, ligas, copas, regras, textos) e colocam jogadores reais nos elencos. Os ligados valem na ordem da lista: o de baixo ganha.", "Small", true))
+	intro.add_child(UIKit.label("O de baixo na lista ganha.", "Small", true))
 	if has_career():
 		intro.add_child(UIKit.label("Com carreira aberta, vale para as próximas.", "Small", true))
 	c.add_child(UIKit.card_panel(intro))
@@ -1374,7 +1369,7 @@ func _pick_mod_file() -> void:
 func _export_mod_dialog() -> void:
 	var v := UIKit.vbox(12)
 	v.add_child(UIKit.label("Exportar como mod", "Title"))
-	v.add_child(UIKit.label("Junta num arquivo só os clubes, competições e jogadores que você editou no padrão, com as imagens. Quem instalar recebe tudo igual.", "Small", true))
+	v.add_child(UIKit.label("Clubes, competições e jogadores editados, com as imagens.", "Small", true))
 	var name_v := ["Meu mod"]
 	var author_v := [world().manager_name if has_career() else ""]
 	v.add_child(_field("Nome do mod", name_v[0], 40, func(t: String): name_v[0] = t.strip_edges()))
@@ -1392,7 +1387,7 @@ func _export_mod_dialog() -> void:
 func _export_folder_dialog() -> void:
 	var v := UIKit.vbox(12)
 	v.add_child(UIKit.label("Exportar como pasta", "Title"))
-	v.add_child(UIKit.label("Cria uma pasta de mod com os arquivos JSON separados (clubes, uniformes, competições, placares, jogadores) e as imagens em img/, prontos para editar à mão. A pasta entra desligada, porque as mesmas personalizações já valem pelo Editor; um .zip dela fica em exports/ para compartilhar.", "Small", true))
+	v.add_child(UIKit.label("Pasta com JSON e imagens para editar à mão; um .zip fica em exports/.", "Small", true))
 	var name_v := ["Meu mod"]
 	var author_v := [world().manager_name if has_career() else ""]
 	v.add_child(_field("Nome do mod", name_v[0], 40, func(t: String): name_v[0] = t.strip_edges()))

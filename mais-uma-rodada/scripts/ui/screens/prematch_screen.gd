@@ -59,7 +59,6 @@ func refresh() -> void:
 	c.add_child(_pitch)
 	var strength := ClubAI.lineup_strength(w, sheet.formation, sheet.starters) / 11.0
 	var hint := UIKit.hbox(8)
-	hint.add_child(UIKit.label("Toque numa vaga para mudar a posição dela." if _pos_edit else "Toque em um jogador para trocar.", "Small"))
 	hint.add_child(UIKit.spacer())
 	hint.add_child(UIKit.label("Força do time: %d" % int(round(strength)), "H3"))
 	c.add_child(hint)
@@ -67,7 +66,7 @@ func refresh() -> void:
 	if rule != "":
 		var used := SquadRules.count(w, club, sheet.starters + sheet.bench)
 		var lim := int(SquadRules.limit(club)["max"])
-		c.add_child(UIKit.colored("%s: %d/%d%s" % [rule, used, lim, " — acima do limite, o assistente ajusta antes do jogo." if used > lim else ""], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
+		c.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
 	var tools := UIKit.hbox(8)
 	var auto := UIKit.button("Escalação automática", "GhostButton", func():
 		club.sheet = ClubAI.auto_sheet(w, club, sheet.formation)
@@ -87,7 +86,7 @@ func refresh() -> void:
 	tools.add_child(rest)
 	c.add_child(tools)
 	var pe := CheckButton.new()
-	pe.text = "Editar posições no campo (formação personalizada)"
+	pe.text = "Editar posições no campo"
 	pe.button_pressed = _pos_edit
 	pe.toggled.connect(func(v):
 		_pos_edit = v
@@ -103,7 +102,6 @@ func refresh() -> void:
 		var fn: String = fname
 		fl.add_child(UIKit.chip(fn + ("*" if custom and fn == base else ""), fn == base, gf, func(): _set_formation(fn)))
 	c.add_child(fl)
-	c.add_child(UIKit.label(String(DatabaseManager.formation(sheet.formation)["desc"]), "Small", true))
 	if custom:
 		var ov := DatabaseManager.formation_overrides(sheet.formation)
 		var base_slots: Array = DatabaseManager.formation(base)["slots"]
@@ -124,7 +122,6 @@ func refresh() -> void:
 			sheet.mentality = idx
 			refresh()))
 	c.add_child(ml)
-	c.add_child(UIKit.label(String(tac["mentalities"][sheet.mentality]["desc"]), "Small", true))
 	# Estilo
 	c.add_child(UIKit.section("Estilo de jogo"))
 	var gs := ButtonGroup.new()
@@ -136,11 +133,8 @@ func refresh() -> void:
 			refresh()))
 	c.add_child(sl)
 	var st: Dictionary = tac["styles"][sheet.style]
-	c.add_child(UIKit.label(String(st["desc"]), "Small", true))
 	c.add_child(_style_fit_label(w, sheet, st))
 	c.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
-	if TacticsManager.sheet_fam(club, sheet) < 45.0:
-		c.add_child(UIKit.colored("Pouco entrosamento com esta ideia de jogo: o time rende menos.", UIColors.ORANGE, "Small", true))
 	# Ajustes finos
 	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes: intensidade, linha, pressão", "GhostButton", func():
 		_extras_open = not _extras_open
@@ -151,10 +145,9 @@ func refresh() -> void:
 		_segment(c, "Intensidade", tac["intensity"], sheet.intensity, func(i): sheet.intensity = i)
 		_segment(c, "Linha defensiva", tac["line"], sheet.line, func(i): sheet.line = i)
 		_segment(c, "Pressão", tac["pressing"], sheet.pressing, func(i): sheet.pressing = i)
-		var wdesc := ["Time compacto por dentro: fecha o meio e ataca menos pelos lados.", "Largura da formação escolhida.", "Campo aberto: mais jogadas pelas pontas, cruzamentos e escanteios; deixa espaços por dentro."]
 		var wopts: Array = []
 		for wi in TeamSheet.WIDTH_NAMES.size():
-			wopts.append({"name": TeamSheet.WIDTH_NAMES[wi], "desc": wdesc[wi]})
+			wopts.append({"name": TeamSheet.WIDTH_NAMES[wi]})
 		_segment(c, "Largura", wopts, sheet.width, func(i): sheet.width = i)
 		var auto_subs := CheckButton.new()
 		auto_subs.text = "Assistente faz substituições por cansaço e lesão"
@@ -202,7 +195,9 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 		row.add_child(fd)
 	card.add_child(row)
 	if MatchEngine.is_derby(w, f.home, f.away):
-		card.add_child(UIKit.colored("CLÁSSICO: jogadores de jogos grandes crescem; os tímidos sentem.", UIColors.RED, "Small"))
+		var derby := UIKit.pill("CLÁSSICO", UIColors.RED, 14)
+		derby.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.add_child(derby)
 	card.add_child(RivalryView.summary(w, club.id, opp.id))
 	var opp_sheet := opp.sheet
 	if opp_sheet != null:
@@ -302,7 +297,7 @@ func _assistant_card(w: GameWorld, f: Fixture) -> Control:
 func _deep_section(c: VBoxContainer, w: GameWorld, sheet: TeamSheet) -> void:
 	c.add_child(UIKit.section("Instruções de equipe"))
 	var summary := TacticsManager.deep_summary(sheet)
-	c.add_child(UIKit.colored(summary if summary != "" else "Tudo no padrão: o time joga conforme o estilo.", UIColors.ACCENT if summary != "" else UIColors.MUTED, "Small", true))
+	c.add_child(UIKit.colored(summary if summary != "" else "Padrão", UIColors.ACCENT if summary != "" else UIColors.MUTED, "Small", true))
 	var btn := UIKit.button(("Esconder" if _deep_open else "Mostrar") + " ritmo, passe, marcação e bola parada", "GhostButton", func():
 		_deep_open = not _deep_open
 		refresh())
@@ -324,7 +319,6 @@ func _deep_section(c: VBoxContainer, w: GameWorld, sheet: TeamSheet) -> void:
 func _plan_section(c: VBoxContainer, sheet: TeamSheet) -> void:
 	var tac := DatabaseManager.tactics()
 	c.add_child(UIKit.section("Plano de jogo"))
-	c.add_child(UIKit.label("O time muda a mentalidade sozinho conforme o placar. Empatando, volta ao que você escolheu.", "Small", true))
 	var minutes := [60, 70, 80]
 	c.add_child(UIKit.label("A partir do minuto", "Caps"))
 	var gmin := ButtonGroup.new()
@@ -370,7 +364,7 @@ func _style_fit_label(w: GameWorld, sheet: TeamSheet, st: Dictionary) -> Label:
 		ovr_sum += p.rating_at(slots[i]["pos"])
 		n += 1
 	var diff := (fit_sum - ovr_sum) / maxf(1.0, n)
-	var txt := "Seu elenco se encaixa bem neste estilo." if diff >= 2.0 else ("Encaixe razoável com o seu elenco." if diff >= -2.0 else "Seu elenco não tem o perfil ideal para este estilo.")
+	var txt := "Encaixe bom" if diff >= 2.0 else ("Encaixe razoável" if diff >= -2.0 else "Encaixe ruim")
 	return UIKit.colored(txt, UIColors.GREEN if diff >= 2.0 else (UIColors.MUTED if diff >= -2.0 else UIColors.ORANGE), "Small")
 
 
@@ -386,7 +380,6 @@ func _segment(c: VBoxContainer, title: String, options: Array, current: int, set
 		UIKit.shrink_button(chip)
 		row.add_child(chip)
 	c.add_child(row)
-	c.add_child(UIKit.label(String(options[current]["desc"]), "Small", true))
 
 
 func _taker_row(w: GameWorld, sheet: TeamSheet, label_text: String, key: String) -> Control:
@@ -452,7 +445,7 @@ func _pick_shootout_order() -> void:
 	var sheet := _sheet()
 	var auto := ShootoutOrderView.ordered(_shootout_players(w, sheet), [])
 	_show_sheet(ShootoutOrderView.build("Batedores na disputa de pênaltis",
-		"Vale para mata-mata que terminar empatado. Quem não estiver em campo na hora é pulado.",
+		"",
 		_shootout_players(w, sheet), auto, func(ids: Array):
 			sheet.shootout_order = ids
 			UIManager.close_modal()
@@ -543,7 +536,7 @@ func _pick_instruction(pid: int) -> void:
 	var v := UIKit.vbox(8)
 	v.add_child(UIKit.label("Instrução para %s" % p.display_name(), "Title", true))
 	var st := PlayStyle.describe(p)
-	v.add_child(UIKit.label("%s: %s" % [String(st["name"]), String(st["desc"])], "Small", true))
+	v.add_child(UIKit.label(String(st["name"]), "Small", true))
 	var match_key := String(st["instruction"])
 	v.add_child(UIKit.button("Padrão da função", "GhostButton", func():
 		sheet.instr.erase(pid)
@@ -579,7 +572,6 @@ func _pick_slot_position(index: int) -> void:
 	var base_pos: int = DatabaseManager.formation(base)["slots"][index]["pos"]
 	var v := UIKit.vbox(8)
 	v.add_child(UIKit.label("Nova posição da vaga", "Title"))
-	v.add_child(UIKit.label("O time leva um tempo para se acostumar: cada vaga mudada custa um pouco de entrosamento.", "Small", true))
 	var fl := UIKit.flow(8)
 	for pos in Pos.DISPLAY_ORDER:
 		if pos == Pos.GK:
@@ -611,7 +603,6 @@ func _on_slot(index: int) -> void:
 	var current: int = sheet.starters[index]
 	var v := UIKit.vbox(8)
 	v.add_child(UIKit.label("Escolher %s" % Pos.name_of(pos), "Title"))
-	v.add_child(UIKit.label("Ordenado por rendimento nesta posição.", "Small"))
 	var cands: Array = []
 	for pid in w.user_club().player_ids:
 		if pid != current:

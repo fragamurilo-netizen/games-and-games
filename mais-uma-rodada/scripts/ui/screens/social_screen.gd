@@ -86,7 +86,7 @@ func _list(w: GameWorld, c: VBoxContainer, posts: Array) -> void:
 	if posts.is_empty():
 		var empty := UIKit.card("CardFlat", 10)
 		empty.add_child(UIKit.icon_rect("chat", 48, UIColors.DIM))
-		empty.add_child(UIKit.label("Nada por aqui ainda. Jogos, contratações, coletivas e lançamentos de uniforme viram posts ao longo da temporada.", "Muted", true))
+		empty.add_child(UIKit.label("Nada por aqui ainda.", "Muted", true))
 		c.add_child(UIKit.card_panel(empty))
 		return
 	for i in mini(_limit, posts.size()):

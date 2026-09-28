@@ -50,7 +50,7 @@ func _meeting_card(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Reunião com o elenco"))
 	var wait := DressingRoom.wait_turns(w)
 	if wait > 0:
-		card.add_child(UIKit.label("Nova reunião em %d rodada(s): reunião demais perde o efeito." % wait, "Small", true))
+		card.add_child(UIKit.label("Nova reunião em %d rodada(s)." % wait, "Small", true))
 		return UIKit.card_panel(card)
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -62,7 +62,6 @@ func _meeting_card(w: GameWorld) -> Control:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		grid.add_child(b)
 	card.add_child(grid)
-	card.add_child(UIKit.label("Cobrança funciona com os líderes do seu lado e o time devendo; em boa fase soa injusta.", "Small", true))
 	return UIKit.card_panel(card)
 
 

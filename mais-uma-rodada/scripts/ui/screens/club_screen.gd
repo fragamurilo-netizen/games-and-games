@@ -80,8 +80,8 @@ func refresh() -> void:
 		"history":
 			var hid := club.id
 			cards.append(UIKit.menu_group([
-				UIKit.menu_row("star", "Melhor 11 de sempre e ano a ano", "Os maiores nomes do clube em cada temporada", func(): UIManager.push("club_records", {"id": hid, "tab": "xi"})),
-				UIKit.menu_row("swap", "Histórico de transferências", "Chegadas, saídas, gastos e maiores negócios", func(): UIManager.push("club_records", {"id": hid, "tab": "transfers"})),
+				UIKit.menu_row("star", "Melhor 11 de sempre e ano a ano", "", func(): UIManager.push("club_records", {"id": hid, "tab": "xi"})),
+				UIKit.menu_row("swap", "Histórico de transferências", "", func(): UIManager.push("club_records", {"id": hid, "tab": "transfers"})),
 			]))
 			cards.append(_history_card(w, club))
 			var idols := _idols_card(w, club)
@@ -89,7 +89,7 @@ func refresh() -> void:
 				cards.append(idols)
 		"career":
 			cards.append(_manager_card(w))
-			cards.append(UIKit.menu_group([UIKit.menu_row("swap", "Minhas transferências", "Tudo o que você comprou e vendeu em todos os clubes", func(): UIManager.push("club_records", {"mode": "manager"}))]))
+			cards.append(UIKit.menu_group([UIKit.menu_row("swap", "Minhas transferências", "", func(): UIManager.push("club_records", {"mode": "manager"}))]))
 			cards.append(_career_card(w))
 	max_content_width = 1800.0
 	UIKit.columns(box, cards, content_width(), 2, 1 if _tab == "overview" else 0)
@@ -126,8 +126,6 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	tags.add_child(UIKit.pill(String(arch.get("tag", "")).to_upper(), UIColors.ACCENT, 16))
 	tags.add_child(UIKit.pill("FINANÇAS: " + FinanceManager.health_label(w, club).to_upper(), _health_color(FinanceManager.health_label(w, club)), 16))
 	card.add_child(tags)
-	if arch.has("desc"):
-		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
 	out.add_child(HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1))
 	# Números rápidos: ranking mundial, estádio e ingresso.
 	var tiles := UIKit.hbox(10)
@@ -183,15 +181,15 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	var cid := club.id
 	var rows: Array = []
 	if _own():
-		rows.append(UIKit.menu_row("shirt", "Uniformes e patrocínios", "Modelos, cores e contratos de patrocínio", func(): UIManager.push("kit")))
+		rows.append(UIKit.menu_row("shirt", "Uniformes e patrocínios", "", func(): UIManager.push("kit")))
 	if not club.kit_history.is_empty():
-		rows.append(UIKit.menu_row("palette", "Uniformes por temporada", "Todas as camisas do clube, ano a ano", func(): UIManager.push("kit_history", {"id": cid})))
-	rows.append(UIKit.menu_row("star", "Melhor 11 de sempre e ano a ano", "Os maiores nomes do clube em cada temporada", func(): UIManager.push("club_records", {"id": cid, "tab": "xi"})))
-	rows.append(UIKit.menu_row("swap", "Histórico de transferências", "Chegadas, saídas, gastos e maiores negócios", func(): UIManager.push("club_records", {"id": cid, "tab": "transfers"})))
-	rows.append(UIKit.menu_row("clock", "Elencos anteriores", "Quem vestiu a camisa em cada temporada", func(): UIManager.push("past_squads", {"id": cid})))
-	rows.append(UIKit.menu_row("up", "Revelados pela base", "Crias da casa e onde estão hoje", func(): UIManager.push("graduates", {"id": cid})))
+		rows.append(UIKit.menu_row("palette", "Uniformes por temporada", "", func(): UIManager.push("kit_history", {"id": cid})))
+	rows.append(UIKit.menu_row("star", "Melhor 11 de sempre e ano a ano", "", func(): UIManager.push("club_records", {"id": cid, "tab": "xi"})))
+	rows.append(UIKit.menu_row("swap", "Histórico de transferências", "", func(): UIManager.push("club_records", {"id": cid, "tab": "transfers"})))
+	rows.append(UIKit.menu_row("clock", "Elencos anteriores", "", func(): UIManager.push("past_squads", {"id": cid})))
+	rows.append(UIKit.menu_row("up", "Revelados pela base", "", func(): UIManager.push("graduates", {"id": cid})))
 	if _own():
-		rows.append(UIKit.menu_row("info", "Apresentação do clube", "História, objetivos e expectativas", func(): UIManager.push("welcome")))
+		rows.append(UIKit.menu_row("info", "Apresentação do clube", "", func(): UIManager.push("welcome")))
 	out.add_child(UIKit.menu_group(rows))
 	var pol := ClubPolicy.of(club)
 	if not pol.is_empty():
@@ -227,10 +225,8 @@ func _dna_card(w: GameWorld, club: Club) -> Control:
 	era_row.add_child(UIKit.pill(ClubDNA.name_of("eras", era_id).to_upper(), _era_color(era_id), 16))
 	era_row.add_child(UIKit.label("desde %d" % int(d.get("since", w.year)), "Small"))
 	card.add_child(era_row)
-	card.add_child(UIKit.label(String(ClubDNA.info("eras", era_id).get("desc", "")), "Small", true))
 	for item in [["rec", "Filosofia de elenco", ClubDNA.rec(club)], ["mkt", "Alcance do mercado", ClubDNA.mkt(club)], ["tac", "Escola tática", ClubDNA.tac(club)]]:
 		card.add_child(UIKit.kv(item[1], ClubDNA.name_of(item[0], item[2])))
-		card.add_child(UIKit.label(String(ClubDNA.info(item[0], item[2]).get("desc", "")), "Small", true))
 	for k in ClubDNA.PARAMS:
 		var v := ClubDNA.val(club, k)
 		var head := UIKit.hbox(8)
@@ -243,7 +239,7 @@ func _dna_card(w: GameWorld, club: Club) -> Control:
 	var lg: Array = d.get("log", [])
 	card.add_child(UIKit.section("Linha do tempo"))
 	if lg.is_empty():
-		card.add_child(UIKit.label("Nenhuma virada ainda. A história do clube começa agora.", "Muted", true))
+		card.add_child(UIKit.label("Nenhuma virada ainda.", "Muted", true))
 	for i in range(lg.size() - 1, maxi(-1, lg.size() - 7), -1):
 		var e: Dictionary = lg[i]
 		var row := UIKit.hbox(10)
@@ -299,7 +295,9 @@ func _board_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(row)
 	card.add_child(UIKit.bar(conf, 100.0, BoardManager.color(conf), 12))
 	if conf < BoardManager.ULTIMATUM:
-		card.add_child(UIKit.colored("Ultimato: sem reação, a diretoria pode trocar o treinador a qualquer momento.", UIColors.RED, "Small"))
+		var ult := UIKit.pill("ULTIMATO", UIColors.RED, 14)
+		ult.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.add_child(ult)
 	var frow := UIKit.hbox(10)
 	frow.add_child(UIKit.label("Torcida", "Muted"))
 	frow.add_child(UIKit.spacer())
@@ -344,13 +342,13 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	if club.affairs.has("rj"):
 		card.add_child(UIKit.colored("Em recuperação judicial desde %d%s." % [int(club.affairs["rj"]), (" (depois da saída da %s, dona da SAF)" % club.affairs["ex_owner"]) if club.affairs.has("ex_owner") else ""], UIColors.ORANGE, "Small", true))
 	if ClubEvents.banned(w, club):
-		card.add_child(UIKit.colored("Transfer ban: o clube não pode inscrever reforços até o fim da temporada.", UIColors.RED, "Small", true))
+		card.add_child(UIKit.colored("Transfer ban", UIColors.RED, "Small", true))
 	if int(club.affairs.get("closed", 0)) > 0:
 		card.add_child(UIKit.colored("Punido com %d jogo(s) de portões fechados." % int(club.affairs["closed"]), UIColors.ORANGE, "Small", true))
 	if club.balance < 0:
-		card.add_child(UIKit.colored("Com o caixa no vermelho, a diretoria não libera contratações e paga juros de cheque especial. No fim do ano o rombo vira empréstimo.", UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored("Caixa no vermelho: contratações bloqueadas.", UIColors.ORANGE, "Small", true))
 	elif FinanceManager.debt_ratio(club, float(fin["expected_revenue"])) > 1.0:
-		card.add_child(UIKit.colored("A dívida passa de um ano de receita: os bancos exigem contenção na folha e metade da verba de contratações.", UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored("Dívida acima de um ano de receita.", UIColors.ORANGE, "Small", true))
 	card.add_child(UIKit.separator())
 	card.add_child(UIKit.label("Temporada %d" % w.year, "Caps"))
 	var any := false
@@ -395,8 +393,7 @@ func _sponsor_lines(w: GameWorld, club: Club, card: VBoxContainer) -> void:
 func _structure_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Estrutura · decisão do presidente"))
-	card.add_child(UIKit.label("CT, base e estádio são do clube: você pede, o diretor de futebol leva e o presidente %s decide." % BoardRequests.chairman_name(w), "Small", true))
-	for item in [["facilities", "Centro de treinamento", club.facilities, "Acelera a evolução de todo o elenco."], ["youth", "Categorias de base", club.youth_level, "Revela mais jovens, e melhores, a cada temporada."], ["stadium", "Estádio", club.capacity, "Mais lugares, mais bilheteria (se a torcida lotar)."]]:
+	for item in [["facilities", "Centro de treinamento", club.facilities], ["youth", "Categorias de base", club.youth_level], ["stadium", "Estádio", club.capacity]]:
 		var kind: String = item[0]
 		var level: int = item[2]
 		var head := UIKit.hbox(8)
@@ -406,7 +403,6 @@ func _structure_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(head)
 		if kind != "stadium":
 			card.add_child(UIKit.bar(level, 100.0, UIColors.BLUE, 10))
-		card.add_child(UIKit.label(item[3], "Small", true))
 		var cost := BoardRequests.cost_of(w, kind)
 		var wait := BoardRequests.wait_turns(w, kind)
 		var od := BoardRequests.odds(w, kind)
@@ -422,7 +418,6 @@ func _structure_card(w: GameWorld, club: Club) -> Control:
 		if wait == 0:
 			var mood := "boa" if chance >= 0.6 else ("difícil" if chance < 0.3 else "incerta")
 			card.add_child(UIKit.label("Chance %s%s" % [mood, (" — " + String(od[1])) if String(od[1]) != "" else ""], "Small", true))
-	card.add_child(UIKit.label("A estrutura se desgasta um pouco a cada ano.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -468,10 +463,10 @@ func _show_suggestions() -> void:
 	var root := UIKit.vbox(10)
 	var names := ["Goleiro", "Defesa", "Meio-campo", "Ataque"]
 	root.add_child(UIKit.label("Carência: %s" % names[int(s["group"])], "H2", true))
-	root.add_child(UIKit.label("Nomes que o diretor conhece e cabem no orçamento (%s)." % Fmt.money(w.user_club().transfer_budget), "Small", true))
+	root.add_child(UIKit.kv("Orçamento", Fmt.money(w.user_club().transfer_budget)))
 	var ids: Array = s["ids"]
 	if ids.is_empty():
-		root.add_child(UIKit.label("Ninguém que melhore o time dentro do orçamento agora.", "Muted", true))
+		root.add_child(UIKit.label("Ninguém no orçamento.", "Muted", true))
 	for pid in ids:
 		var p := w.player(int(pid))
 		if p == null:
@@ -507,7 +502,7 @@ func _youth_card(w: GameWorld, club: Club) -> Control:
 	var prec := 0.35 + float(BoardRequests.director(w).get("net", 50)) / 250.0
 	kids.sort_custom(func(a: Player, b: Player): return a.potential_estimate(prec) > b.potential_estimate(prec))
 	if kids.is_empty():
-		card.add_child(UIKit.label("Nenhum garoto da base no elenco principal agora.", "Muted", true))
+		card.add_child(UIKit.label("Nenhum garoto da base no elenco.", "Muted", true))
 	for p: Player in kids.slice(0, 6):
 		var h := UIKit.hbox(10)
 		h.add_child(UIKit.pos_badge(p.position))
@@ -591,9 +586,8 @@ func _history_card(w: GameWorld, club: Club) -> Control:
 	if any_title:
 		card.add_child(TrophyView.cabinet(w, club, 64))
 	else:
-		card.add_child(UIKit.label("Nenhum título registrado desde %d. Ainda." % DatabaseManager.start_year(), "Muted"))
+		card.add_child(UIKit.label("Nenhum título desde %d." % DatabaseManager.start_year(), "Muted"))
 	if club.history.is_empty():
-		card.add_child(UIKit.label("A primeira temporada deste save está em andamento.", "Small"))
 		return UIKit.card_panel(card)
 	var best: Dictionary = {}
 	for h in club.history:
@@ -752,7 +746,6 @@ func _save_copy() -> void:
 	var v := UIKit.vbox(10)
 	v.custom_minimum_size.x = 600
 	v.add_child(UIKit.label("Salvar cópia", "Title"))
-	v.add_child(UIKit.label("A carreira continua no espaço atual; a cópia fica guardada no espaço escolhido.", "Small", true))
 	for s in range(1, SaveManager.SLOTS + 1):
 		if s == GameManager.slot:
 			continue

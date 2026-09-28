@@ -5,11 +5,6 @@ extends BaseScreen
 const CONFEDS: Array = [["UEFA", "Europa"], ["CONMEBOL", "América do Sul"], ["CONCACAF", "América do Norte"], ["CAF", "África"], ["AFC", "Ásia"]]
 
 const STEPS := [["setup", "Carreira"], ["nation", "País"], ["club", "Clube"]]
-const DIFF_DESC := [
-	"Mais dinheiro, diretoria paciente e negociações mais fáceis.",
-	"O equilíbrio pensado para o jogo.",
-	"Caixa curto, cobrança alta e ninguém dá desconto.",
-]
 
 var _world: GameWorld = null
 var _type := "padrao"
@@ -33,7 +28,7 @@ var _built := false
 
 func _init() -> void:
 	screen_title = "Nova carreira"
-	screen_subtitle = "Escolha um país, uma divisão e um clube"
+	screen_subtitle = ""
 	show_nav = false
 
 
@@ -154,19 +149,17 @@ func _build_setup(c: VBoxContainer) -> void:
 		var tv := UIKit.vbox(0)
 		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tv.add_child(UIKit.label(GameWorld.DIFF_NAMES[i], "H3"))
-		tv.add_child(UIKit.label(DIFF_DESC[i], "Small", true))
 		inner.add_child(tv)
 		var r := UIKit.tap_row(inner, func():
 			_difficulty = idx
 			_build(), "RowPanel", true)
 		UIKit.set_row_selected(r, i == _difficulty)
 		who.add_child(r)
-	who.add_child(UIKit.label("A dificuldade muda orçamento, paciência da diretoria e margem nas negociações — nunca a força dos adversários.", "Small", true))
 	cards.append(UIKit.card_panel(who))
 	var wc := UIKit.card("Card", 10)
 	wc.add_child(UIKit.section("Mundo"))
 	wc.add_child(UIKit.segment([["padrao", "Mundo padrão"], ["aleatorio", "Mundo aleatório"]], _type, func(k: String): _set_type(k)))
-	wc.add_child(UIKit.label("Mesmo seed = mesmo universo. %d países, %d ligas e %d clubes reais. No mundo aleatório" % _world_counts() + " as reputações e os perfis dos clubes mudam e todos os jogadores são outros.", "Small", true))
+	wc.add_child(UIKit.label("%d países · %d ligas · %d clubes" % _world_counts(), "Small", true))
 	var seed_row := UIKit.hbox(10)
 	seed_row.add_child(UIKit.label("Seed", "Muted"))
 	_seed_edit = LineEdit.new()
@@ -412,7 +405,7 @@ func _update_details() -> void:
 		_details.add_child(UIKit.label(line, "Small"))
 		return
 	if _world == null or _selected < 0:
-		_details.add_child(UIKit.label("Toque em um clube para ver os detalhes.", "Muted"))
+		_details.add_child(UIKit.label("Escolha um clube.", "Muted"))
 		return
 	var cl: Club = _world.club(_selected)
 	var head := UIKit.hbox(12)
@@ -422,7 +415,6 @@ func _update_details() -> void:
 	var nm := UIKit.label(cl.short_name, "H2")
 	nm.uppercase = true
 	t.add_child(nm)
-	t.add_child(UIKit.label(String(cl.arch().get("desc", "")), "Small", true))
 	head.add_child(t)
 	_details.add_child(head)
 	var stats := UIKit.hbox(8)

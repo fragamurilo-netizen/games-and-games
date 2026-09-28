@@ -62,7 +62,6 @@ func _header(w: GameWorld, club: Club) -> Control:
 		UIKit.stat_tile(_pos_text(w, "u20"), "No sub-20"),
 		UIKit.stat_tile(_pos_text(w, "u17"), "No sub-17"),
 	], content_width()))
-	v.add_child(UIKit.label("Estrelas: estimativa da comissão, não o teto real.", "Caps", true))
 	return v
 
 
@@ -84,7 +83,7 @@ func _players(w: GameWorld, club: Club, cat: Array) -> Control:
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section_header("%s · %s · %d" % [cat[1], cat[2], list.size()]))
 	if list.is_empty():
-		card.add_child(UIKit.label("Nenhum garoto nesta categoria. Novos garotos chegam na virada da temporada ou pela peneira.", "Muted", true))
+		card.add_child(UIKit.label("Nenhum garoto nesta categoria.", "Muted", true))
 		return UIKit.card_panel(card)
 	for p: Player in list:
 		card.add_child(UIKit.tap_row(_kid_row(w, club, p), func(): _actions(p)))
@@ -137,20 +136,18 @@ func _actions(p: Player) -> void:
 	head.add_child(UIKit.badge(p.overall))
 	v.add_child(head)
 	var yrs := YouthManager.years_in(w, p)
-	var pr := YouthManager.precision(w, p)
-	var know := "Ainda conhecemos pouco dele." if pr < 0.5 else ("Já dá para ter uma boa ideia do teto dele." if pr < 0.75 else "Conhecemos bem o garoto.")
-	v.add_child(UIKit.label("%s na base. %s" % ["Chegou nesta temporada" if yrs == 0 else ("%d ano(s)" % yrs), know], "Small", true))
+	v.add_child(UIKit.label("%s na base" % ["Chegou nesta temporada" if yrs == 0 else ("%d ano(s)" % yrs)], "Small", true))
 	if p.stats[Player.S_APPS] > 0:
 		v.add_child(UIKit.label("Temporada: %d jogos · %d gols · %d assistências · nota %.1f · %d min" % [p.stats[Player.S_APPS], p.stats[Player.S_GOALS], p.stats[Player.S_ASSISTS], p.avg_rating(), p.stats[Player.S_MINUTES]], "Small", true))
 	var pf := YouthManager.play_factor(w, p)
 	if pf < 0.95:
-		v.add_child(UIKit.colored("Joga pouco e está evoluindo menos que os outros.", UIColors.ORANGE, "Small", true))
+		v.add_child(UIKit.colored("Joga pouco", UIColors.ORANGE, "Small", true))
 	elif pf > 1.08:
-		v.add_child(UIKit.colored("Titular da categoria: os jogos aceleram a evolução.", UIColors.GREEN, "Small", true))
+		v.add_child(UIKit.colored("Titular da categoria", UIColors.GREEN, "Small", true))
 	var weakest := 99
 	for q: Player in w.squad(w.user_club()):
 		weakest = mini(weakest, q.overall)
-	v.add_child(UIKit.label("O jogador mais fraco do elenco principal tem %d." % weakest, "Small", true))
+	v.add_child(UIKit.label("Mais fraco do elenco: %d" % weakest, "Small", true))
 	v.add_child(UIKit.button("SUBIR AO PROFISSIONAL", "PrimaryButton", func():
 		UIManager.close_modal()
 		UIManager.toast(YouthManager.promote(w, p))
@@ -174,7 +171,7 @@ func _actions(p: Player) -> void:
 func _table(w: GameWorld, key: String) -> Control:
 	var card := UIKit.card("Card", 4)
 	if not YouthManager.has_league(w, key):
-		card.add_child(UIKit.label("Sem liga %s nesta temporada. Ela começa na próxima." % ("sub-20" if key == "u20" else "sub-17"), "Muted", true))
+		card.add_child(UIKit.label("Sem liga %s nesta temporada." % ("sub-20" if key == "u20" else "sub-17"), "Muted", true))
 		return UIKit.card_panel(card)
 	var yl := YouthManager.league(w, key)
 	card.add_child(UIKit.section(String(yl["name"])))
@@ -305,17 +302,15 @@ func _trial(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Peneira"))
 	var cands := YouthManager.candidates(w)
 	if YouthManager.can_trial(w):
-		card.add_child(UIKit.label("Uma por temporada, para garotos de 14 a 17 anos.", "Small", true))
 		card.add_child(UIKit.button("FAZER PENEIRA · %s" % Fmt.money(YouthManager.trial_cost(w)), "PrimaryButton", func():
 			var got := YouthManager.run_trial(w)
 			UIManager.toast("%d garotos se destacaram na peneira." % got.size())
 			GameManager.save_now()
 			refresh(), "search"))
 	elif cands.is_empty():
-		card.add_child(UIKit.label("A peneira desta temporada já foi feita. A próxima abre na temporada que vem.", "Muted", true))
+		card.add_child(UIKit.label("Próxima na temporada que vem.", "Muted", true))
 	if cands.is_empty():
 		return UIKit.card_panel(card)
-	card.add_child(UIKit.label("Destaques da peneira. Aprove quem quiser: ele entra na base agora.", "Small", true))
 	var club := w.user_club()
 	for p: Player in cands:
 		var row := UIKit.hbox(10)

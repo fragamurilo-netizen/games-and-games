@@ -322,7 +322,7 @@ static func _ranks_card(w: GameWorld, club: Club, league: League) -> Control:
 		rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(rl)
 		card.add_child(row)
-	card.add_child(UIKit.label("Posição entre os %d clubes da liga." % n, "Small"))
+	card.add_child(UIKit.label("Entre %d clubes" % n, "Small"))
 	return UIKit.card_panel(card)
 
 

@@ -48,7 +48,9 @@ static func summary(w: GameWorld, cid: int, other: int) -> Control:
 	if mem != "":
 		v.add_child(UIKit.label(mem + ".", "Small", true))
 	if h >= Rivalry.DERBY_AT:
-		v.add_child(UIKit.colored("Ingressos disputados: a diretoria trata este jogo como prioridade.", UIColors.ORANGE, "Small", true))
+		var dp := UIKit.pill("CLÁSSICO", UIColors.ORANGE, 13)
+		dp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		v.add_child(dp)
 	return v
 
 

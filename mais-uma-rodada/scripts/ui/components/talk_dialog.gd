@@ -64,7 +64,7 @@ static func _render(root: VBoxContainer, conv: Dictionary, on_done: Callable) ->
 		var v := UIKit.vbox(2)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(UIKit.label(String(o["t"]), "H3", true))
-		if String(o.get("hint", "")) != "":
+		if EventDialog.has_terms(String(o.get("hint", ""))):
 			v.add_child(UIKit.label(String(o["hint"]), "Small", true))
 		h.add_child(v)
 		h.add_child(UIKit.icon_rect("chat", 22, UIColors.DIM))

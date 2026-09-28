@@ -342,7 +342,6 @@ static func show_launch(w: GameWorld) -> void:
 	var t := UIKit.vbox(0)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.add_child(UIKit.label("Uniformes %d apresentados" % w.year, "Title", true))
-	t.add_child(UIKit.label("O post oficial já está nas redes. Veja como a torcida recebeu.", "Small", true))
 	head.add_child(t)
 	v.add_child(head)
 	var scroll := ScrollContainer.new()

@@ -53,10 +53,12 @@ static func open(ev: Dictionary, on_done: Callable = Callable()) -> void:
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(o["t"]), "H3", true))
-		if String(o.get("hint", "")) != "":
+		if has_terms(String(o.get("hint", ""))):
 			col.add_child(UIKit.label(String(o["hint"]), "Small", true))
 		if i == def:
-			col.add_child(UIKit.label("Se você não responder, fica esta.", "Caps"))
+			var dp := UIKit.pill("PADRÃO", UIColors.MUTED, 13)
+			dp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			col.add_child(dp)
 		row.add_child(col)
 		row.add_child(UIKit.icon_rect("forward", 22, UIColors.DIM))
 		var idx := i
@@ -84,3 +86,11 @@ static func color_of(ev: Dictionary) -> Color:
 		"BLUE":
 			return UIColors.BLUE
 	return UIColors.ACCENT
+
+
+## Só mostra a dica da opção quando ela traz termos concretos (valores, prazos, números).
+static func has_terms(h: String) -> bool:
+	for ch in h:
+		if ch >= "0" and ch <= "9":
+			return true
+	return false

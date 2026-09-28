@@ -1598,7 +1598,7 @@ func _render_stats_tab() -> void:
 
 func _render_round_tab() -> void:
 	if not GameManager.ai_ready():
-		_tab_box.add_child(UIKit.label("Outros jogos em andamento… os placares aparecem em instantes.", "Muted", true))
+		_tab_box.add_child(UIKit.label("Outros jogos em andamento…", "Muted", true))
 		return
 	var minute := _sim.minute if _sim.half <= 2 else 90
 	var half := mini(_sim.half, 2)
@@ -1834,7 +1834,7 @@ func _show_shootout_order() -> void:
 		players.append(mp.p)
 	var auto := ShootoutOrderView.ordered(players, [])
 	var v := ShootoutOrderView.build("Disputa de pênaltis",
-		"Escolha quem bate. Os cinco primeiros cobram as regulares; depois vêm as alternadas.",
+		"",
 		players, auto, func(ids: Array):
 			_sim.set_shootout_order(_user_side, ids)
 			UIManager.close_modal())
@@ -1859,7 +1859,12 @@ func _show_halftime() -> void:
 	if km != null:
 		v.add_child(km)
 	var aux := _halftime_assistant()
-	v.add_child(aux if aux.get_child_count() > 0 else _halftime_hint())
+	if aux.get_child_count() > 0:
+		v.add_child(aux)
+	else:
+		var hint := _halftime_hint()
+		if hint != null:
+			v.add_child(hint)
 	var others := _other_scores(90 if et else 45, 2 if et else 1)
 	if others != null:
 		v.add_child(others)
@@ -1943,29 +1948,16 @@ func _key_moments(max_half: int) -> VBoxContainer:
 	return v
 
 
-## Leitura rápida do primeiro tempo para ajudar a decidir (sem números mágicos escondidos).
+## Cansaço no intervalo (só quando pesa).
 func _halftime_hint() -> Label:
 	var me: MatchTeam = _sim.teams[_user_side]
-	var op: MatchTeam = _sim.teams[1 - _user_side]
-	var diff: int = _sim.score[_user_side] - _sim.score[1 - _user_side]
-	var txt := ""
-	if me.shots + 3 <= op.shots:
-		txt = "O adversário finaliza muito mais. Reforçar a defesa ou mudar o estilo pode segurar a pressão."
-	elif me.shots >= op.shots + 3 and diff <= 0:
-		txt = "Vocês dominam, mas o gol não saiu. Mais presença na área pode transformar volume em gols."
-	elif diff > 0:
-		txt = "Vantagem no placar. Controlar o jogo pode ser mais valioso que buscar o segundo gol."
-	elif diff < 0:
-		txt = "Atrás no placar. Uma mentalidade mais ofensiva abre espaços dos dois lados."
-	else:
-		txt = "Jogo equilibrado. Observe o cansaço dos seus jogadores antes do segundo tempo."
 	var tired := 0
 	for mp: MatchPlayer in me.slots:
 		if mp != null and mp.cond < 72.0:
 			tired += 1
-	if tired >= 2:
-		txt += " %d jogadores já mostram cansaço." % tired
-	return UIKit.label(txt, "Small", true)
+	if tired < 2:
+		return null
+	return UIKit.colored("%d cansados" % tired, UIColors.ORANGE, "Small")
 
 
 func _stats_table(full: bool) -> VBoxContainer:
@@ -2054,7 +2046,6 @@ func _open_talk(halftime: bool) -> void:
 				_show_halftime(), "")
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		v.add_child(b)
-		v.add_child(UIKit.label(String(cfg["desc"]), "Small", true))
 	v.add_child(UIKit.button("Sem palestra", "GhostButton", func():
 		UIManager.close_modal()
 		if halftime:
@@ -2078,7 +2069,7 @@ func _open_shouts() -> void:
 		v.add_child(UIKit.colored("Em vigor: %s (até %d')" % [String(MatchSimulation.SHOUTS[t.sh_key]["short"]), t.sh_until], UIColors.ACCENT, "Small"))
 	var wait := _sim.shout_wait(_user_side)
 	if wait > 0:
-		v.add_child(UIKit.label("O time ainda está digerindo o último grito: mais %d min." % wait, "Muted", true))
+		v.add_child(UIKit.label("Próximo grito em %d min." % wait, "Muted", true))
 	for key in MatchSimulation.SHOUT_ORDER:
 		var k: String = key
 		var cfg: Dictionary = MatchSimulation.SHOUTS[k]
@@ -2093,10 +2084,8 @@ func _open_shouts() -> void:
 		b.disabled = wait > 0
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		v.add_child(b)
-		var d := String(cfg["desc"])
 		if uses >= 1:
-			d += " Já usado %s." % Fmt.plural(uses, "vez", "vezes")
-		v.add_child(UIKit.label(d, "Small", true))
+			v.add_child(UIKit.label("Já usado %s." % Fmt.plural(uses, "vez", "vezes"), "Small", true))
 	UIManager.show_modal(v, true)
 
 
@@ -2166,7 +2155,6 @@ func _render_tactics() -> void:
 			_drain(false)
 			_render_tactics()))
 	_tac_box.add_child(sl)
-	_tac_box.add_child(UIKit.label(String(tac["styles"][t.style]["desc"]), "Small", true))
 	# Ajustes finos também no meio do jogo
 	var fine := [["Pressão", tac["pressing"], t.pressing, func(i): _sim.set_pressing(_user_side, i)],
 		["Linha defensiva", tac["line"], t.line, func(i): _sim.set_line(_user_side, i)],

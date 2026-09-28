@@ -9,7 +9,7 @@ func _init() -> void:
 
 
 func refresh() -> void:
-	screen_subtitle = "Valem para todas as carreiras"
+	screen_subtitle = ""
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -22,7 +22,6 @@ func refresh() -> void:
 		AppSettings.theme_mode = i
 		AppSettings.save_settings()
 		UIManager.apply_look()))
-	cl.add_child(UIKit.label("Claro e escuro têm contraste alto para ler no sol ou à noite. \"Do aparelho\" segue o modo do celular.", "Small", true))
 	cl.add_child(UIKit.label("Cores da interface", "Muted"))
 	cl.add_child(_chips(AppSettings.COLOR_SOURCE_NAMES, AppSettings.color_source, func(i: int):
 		AppSettings.color_source = i
@@ -34,7 +33,6 @@ func refresh() -> void:
 		AppSettings.bg_tint = i
 		AppSettings.save_settings()
 		UIManager.apply_look()))
-	cl.add_child(UIKit.label("Destaques, fundo e menus tomam as cores do seu clube ou da sua liga durante a carreira.", "Small", true))
 	cl.add_child(UIKit.label("Tamanho da interface", "Muted"))
 	cl.add_child(_chips(AppSettings.UI_SCALE_NAMES, AppSettings.ui_scale, func(i: int):
 		AppSettings.ui_scale = i
@@ -43,7 +41,6 @@ func refresh() -> void:
 	cl.add_child(_toggle("Animações reduzidas", AppSettings.reduce_motion, func(v: bool):
 		AppSettings.reduce_motion = v
 		AppSettings.save_settings()))
-	cl.add_child(UIKit.label("Telas sem deslizar e comemorações de gol curtas.", "Small", true))
 	cards.append(UIKit.card_panel(cl))
 	var card0 := UIKit.card("Card", 12)
 	card0.add_child(UIKit.section("Idioma"))
@@ -67,7 +64,6 @@ func refresh() -> void:
 		AppSettings.currency = i
 		AppSettings.save_settings()
 		refresh()))
-	currency_card.add_child(UIKit.label("A moeda muda apenas a exibição. A economia é calculada em euro-base e usa o câmbio de referência do BCE de %s." % Fmt.FX_DATE, "Small", true))
 	cards.append(UIKit.card_panel(currency_card))
 	var card_ed := UIKit.card("Card", 12)
 	card_ed.add_child(UIKit.section("Editor"))
@@ -75,7 +71,6 @@ func refresh() -> void:
 		AppSettings.career_edit = v
 		AppSettings.save_settings()
 		refresh()))
-	card_ed.add_child(UIKit.label("Desligado, a carreira fica sem atalhos: o botão Editar some dos perfis e o editor dentro da carreira só mexe no visual do seu clube. O Editor do menu inicial sempre edita o mundo padrão das novas carreiras.", "Small", true))
 	cards.append(UIKit.card_panel(card_ed))
 	var cm := UIKit.card("Card", 12)
 	cm.add_child(UIKit.section("Música"))
@@ -99,7 +94,6 @@ func refresh() -> void:
 		cm.add_child(_toggle("Tocar também durante as partidas", AppSettings.music_in_match, func(v: bool):
 			AppSettings.music_in_match = v
 			AppSettings.save_settings()))
-	cm.add_child(UIKit.label("As músicas são compostas e tocadas pelo próprio jogo, sem arquivos de terceiros.", "Small", true))
 	cards.append(UIKit.card_panel(cm))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
@@ -127,14 +121,13 @@ func refresh() -> void:
 		AppSettings.match_speed = i
 		AppSettings.save_settings())
 	card2.add_child(row)
-	card2.add_child(UIKit.label("Dá para trocar durante a partida.", "Small", true))
 	cards.append(UIKit.card_panel(card2))
 	var cs := UIKit.card("Card", 12)
 	cs.add_child(UIKit.section("Compras"))
 	if Store.owned or not Store.enforced():
 		cs.add_child(UIKit.colored("Carreira Completa liberada. Obrigado!", UIColors.GREEN, "H3", true))
 	else:
-		cs.add_child(UIKit.label("Primeira temporada grátis. A Carreira Completa libera as temporadas seguintes e os mods, com pagamento único de %s." % Store.price(), "Small", true))
+		cs.add_child(UIKit.label("Carreira Completa · %s" % Store.price(), "Small", true))
 		cs.add_child(UIKit.button("Ver a Carreira Completa", "GhostButton", func(): UIManager.push("paywall", {"reason": "settings"}), "star"))
 	cs.add_child(UIKit.menu_group([
 		UIKit.menu_row("save", "Restaurar compras", "", func(): Store.restore()),

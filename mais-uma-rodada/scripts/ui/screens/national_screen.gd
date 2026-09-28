@@ -109,7 +109,7 @@ func _tours(w: GameWorld, c: VBoxContainer) -> void:
 		refresh()))
 	var rec := NationalTeamManager.last_edition(w, _tour)
 	if rec.is_empty():
-		c.add_child(UIKit.label("A primeira edição da %s no save será em %d." % [NationalTeamManager.tournament_name(_tour), NationalTeamManager.next_edition(_tour, w.year + 1)], "Muted", true))
+		c.add_child(UIKit.label("Primeira edição em %d." % NationalTeamManager.next_edition(_tour, w.year + 1), "Muted", true))
 	else:
 		c.add_child(_edition(w, rec))
 	c.add_child(_champions_list(w, _tour))
@@ -242,7 +242,7 @@ func _champions_list(w: GameWorld, id: String) -> Control:
 func _quals(w: GameWorld, c: VBoxContainer) -> void:
 	var camps: Array = NationalTeamManager.data(w)["camps"].duplicate()
 	if camps.is_empty():
-		c.add_child(UIKit.label("Nenhuma eliminatória em andamento. Elas acontecem nas datas FIFA das temporadas antes de cada torneio.", "Muted", true))
+		c.add_child(UIKit.label("Nenhuma eliminatória em andamento.", "Muted", true))
 		return
 	# A confederação do usuário primeiro
 	var confed := String(DatabaseManager.nation(_nation).get("confed", ""))
@@ -360,7 +360,7 @@ func _squad(w: GameWorld, c: VBoxContainer) -> void:
 		head.add_child(tf)
 	c.add_child(UIKit.card_panel(head))
 	if squad.is_empty():
-		c.add_child(UIKit.label("Nenhum jogador desta nacionalidade atua em clubes do mundo do jogo.", "Muted", true))
+		c.add_child(UIKit.label("Nenhum jogador desta nacionalidade.", "Muted", true))
 		return
 	squad.sort_custom(func(a, b): return Pos.DISPLAY_ORDER.find(a.position) < Pos.DISPLAY_ORDER.find(b.position) or (a.position == b.position and a.ovr_f > b.ovr_f))
 	var card := UIKit.card("Card", 4)

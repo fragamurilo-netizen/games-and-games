@@ -253,7 +253,7 @@ func _paywall_card(w: GameWorld) -> Control:
 	var card := UIKit.card("CardHighlight", 12)
 	card.add_child(UIKit.section("Temporada %d" % w.year))
 	card.add_child(UIKit.label("Mais uma temporada?", "Title", true))
-	card.add_child(UIKit.label("A primeira temporada é grátis. Com a Carreira Completa você segue com o %s por quantos anos quiser, pagando uma vez só." % w.user_club().short_name, "Muted", true))
+	card.add_child(UIKit.label("Siga com o %s por quantos anos quiser." % w.user_club().short_name, "Muted", true))
 	var b := UIKit.button("CONTINUAR A CARREIRA · %s" % Store.price(), "PrimaryButton", func(): UIManager.push("paywall"), "star")
 	b.custom_minimum_size.y = 104
 	card.add_child(b)
@@ -334,7 +334,7 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 	var fired: Dictionary = w.stats.get("fired", {})
 	var old := w.club(int(fired.get("from", -1)))
 	card.add_child(UIKit.label("A diretoria do %s decidiu trocar o comando técnico." % (old.short_name if old != null else "clube"), "Title", true))
-	card.add_child(UIKit.label("Alguns clubes querem conversar. Escolha onde recomeçar — a carreira, os números e a história continuam com você.", "Muted", true))
+	card.add_child(UIKit.label("Alguns clubes querem conversar.", "Muted", true))
 	for cid in jobs:
 		var cl := w.club(int(cid))
 		if cl == null:
@@ -481,7 +481,7 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 	var items: Array = []
 	if SponsorManager.is_preseason(w):
 		if not KitDesign.launched(w):
-			items.append(["shirt", UIColors.ACCENT, "Pré-temporada: apresente os uniformes de %d antes do primeiro jogo" % w.year, func(): UIManager.push("kit", {"launch": true})])
+			items.append(["shirt", UIColors.ACCENT, "Apresente os uniformes de %d" % w.year, func(): UIManager.push("kit", {"launch": true})])
 	var offers := TransferManager.pending_offers(w)
 	if not offers.is_empty():
 		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
@@ -510,7 +510,7 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 	if bill > club.wage_budget:
 		items.append(["money", UIColors.RED, "Folha salarial acima do limite da diretoria", func(): UIManager.goto("club")])
 	if club.board_confidence < BoardManager.ULTIMATUM:
-		items.append(["info", UIColors.RED, "Ultimato da diretoria: sem reação, o cargo pode cair a qualquer momento", func(): UIManager.push("relations", {"tab": "board"})])
+		items.append(["info", UIColors.RED, "Ultimato da diretoria", func(): UIManager.push("relations", {"tab": "board"})])
 	if items.is_empty():
 		return null
 	var card := UIKit.card("Card", 8)
@@ -548,7 +548,7 @@ func _inbox_card(w: GameWorld) -> Control:
 		card.add_child(InboxScreen.row(w, m, func(): refresh()))
 		shown += 1
 	if shown == 0:
-		card.add_child(UIKit.label("Nenhuma mensagem nova." if unread == 0 else "As mensagens novas pedem resposta: veja os cartões acima.", "Muted", true))
+		card.add_child(UIKit.label("Nenhuma mensagem nova." if unread == 0 else "Respostas pendentes acima.", "Muted", true))
 	card.add_child(UIKit.button("Abrir caixa de entrada", "GhostButton", func(): UIManager.push("inbox"), "mail"))
 	return UIKit.card_panel(card)
 
@@ -634,7 +634,7 @@ func _preseason_card(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Pré-temporada %d" % w.year))
 	card.add_child(UIKit.label("Prepare o time antes da estreia", "Title", true))
 	var steps := PreseasonManager.steps(w)
-	var names := ["Raio-x e planejamento do elenco", "Intertemporada (físico, tático, excursão ou base)", "Três amistosos de preparação"]
+	var names := ["Raio-x e planejamento do elenco", "Intertemporada", "Três amistosos de preparação"]
 	for i in 3:
 		var row := UIKit.hbox(10)
 		row.add_child(UIKit.icon_rect("check" if steps[i] else "clock", 26, UIColors.GREEN if steps[i] else UIColors.MUTED))
@@ -796,7 +796,7 @@ func _kit_launch_prompt(w: GameWorld) -> void:
 	head.add_child(UIKit.icon_rect("shirt", 56, UIColors.ACCENT))
 	head.add_child(UIKit.label("Uniformes %d" % w.year, "Title", true))
 	v.add_child(head)
-	v.add_child(UIKit.label("Pré-temporada é época de lançamento. %s mandou três coleções para a nova temporada. Escolha uma, desenhe do seu jeito ou mantenha os uniformes atuais." % brand, "", true))
+	v.add_child(UIKit.label("%s mandou três coleções para a nova temporada." % brand, "", true))
 	var row := UIKit.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	for k in [club.kit_home, club.kit_away, club.third_kit()]:

@@ -100,10 +100,10 @@ func _menu() -> VBoxContainer:
 		card.add_child(cont)
 		v.add_child(UIKit.card_panel(card))
 	var tiles: Array = [
-		UIKit.action_tile("plus", "Nova carreira", "Escolha o país, o clube e comece", func(): UIManager.push("new_career"), latest <= 0),
-		UIKit.action_tile("save", "Carregar jogo", "%d espaços de save" % SaveManager.SLOTS, func(): UIManager.push("load")),
-		UIKit.action_tile("shield", "Editor e mods", "Escudos, nomes, ligas e fotos", func(): UIManager.push("editor")),
-		UIKit.action_tile("gear", "Opções", "Idioma, tema, som e interface", func(): UIManager.push("settings")),
+		UIKit.action_tile("plus", "Nova carreira", "", func(): UIManager.push("new_career"), latest <= 0),
+		UIKit.action_tile("save", "Carregar jogo", "", func(): UIManager.push("load")),
+		UIKit.action_tile("shield", "Editor e mods", "", func(): UIManager.push("editor")),
+		UIKit.action_tile("gear", "Opções", "", func(): UIManager.push("settings")),
 	]
 	v.add_child(UIKit.tile_grid(tiles, 2))
 	return v

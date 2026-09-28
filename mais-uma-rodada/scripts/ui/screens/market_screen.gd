@@ -93,10 +93,10 @@ func _banner(w: GameWorld, club: Club) -> Control:
 	row.add_child(UIKit.pill("JANELA ABERTA" if open else "JANELA FECHADA", UIColors.GREEN if open else UIColors.ORANGE, 16))
 	var txt := ""
 	if open:
-		txt = "Janela aberta até a rodada %d." % (w.window_end_day() + 1)
+		txt = "Até a rodada %d" % (w.window_end_day() + 1)
 	else:
 		var nxt := w.next_window_day()
-		txt = "Janela fechada. Reabre na rodada %d; até lá, só jogadores livres." % (nxt + 1) if nxt >= 0 else "Janela fechada. Reabre na próxima temporada; até lá, só jogadores livres."
+		txt = "Reabre na rodada %d" % (nxt + 1) if nxt >= 0 else "Reabre na próxima temporada"
 	row.add_child(UIKit.label(txt, "Small", true))
 	out.add_child(row)
 	var fin := FinanceManager.summary(w, club)
@@ -284,11 +284,11 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 			list.sort_custom(func(a, b): return a[1] > b[1] or (a[1] == b[1] and a[0].value < b[0].value))
 		_:
 			list.sort_custom(func(a, b): return float(a[3]) > float(b[3]))
-	results.add_child(UIKit.label("%s encontrados%s. O nível de jogadores de outros clubes é uma estimativa dos seus olheiros; o preço é o que o clube pede hoje." % [Fmt.plural(list.size(), "jogador", "jogadores"), " (mostrando %d)" % MAX_ROWS if list.size() > MAX_ROWS else ""], "Small", true))
+	results.add_child(UIKit.label("%s encontrados" % Fmt.plural(list.size(), "jogador", "jogadores"), "Small", true))
 	for i in mini(MAX_ROWS, list.size()):
 		results.add_child(_market_row(w, club, list[i][0], weakest))
 	if list.is_empty():
-		results.add_child(UIKit.label("Ninguém com esse perfil. Tente afrouxar os filtros.", "Muted", true))
+		results.add_child(UIKit.label("Ninguém com esse perfil.", "Muted", true))
 
 
 func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
@@ -303,7 +303,6 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 			continue
 		list.append(p)
 	list.sort_custom(func(a: Player, b: Player): return a.overall > b.overall)
-	c.add_child(UIKit.label("Sem taxa de transferência, só salário.", "Small", true))
 	for i in mini(MAX_ROWS, list.size()):
 		var p: Player = list[i]
 		var pid := p.id
@@ -344,7 +343,7 @@ func _offer_card(w: GameWorld, o: TransferOffer) -> Control:
 	var pid := p.id
 	card.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
 	if p.trait_sum("ambition") >= 25.0 and buyer.reputation > w.user_club().reputation:
-		card.add_child(UIKit.colored("%s é ambicioso: recusar a chance de ir para um clube maior vai abalar a moral dele." % p.display_name(), UIColors.ORANGE, "Small"))
+		card.add_child(UIKit.colored("%s quer ir." % p.display_name(), UIColors.ORANGE, "Small"))
 	if not o.raised and o.rounds < TransferManager.MAX_COUNTERS:
 		var left := TransferManager.MAX_COUNTERS - o.rounds
 		card.add_child(UIKit.label("Contraproposta (%s):" % Fmt.plural(left, "rodada restante", "rodadas restantes"), "Small"))
@@ -391,9 +390,8 @@ func _listed_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		if p.transfer_listed:
 			list.append(p)
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhum jogador anunciado. Para vender, abra o perfil de um jogador do seu elenco e toque em \"Vender\".", "Muted", true))
+		c.add_child(UIKit.label("Nenhum jogador anunciado.", "Muted", true))
 		return
-	c.add_child(UIKit.label("Jogadores anunciados recebem propostas durante a janela.", "Small", true))
 	for p: Player in list:
 		var card := UIKit.card("CardFlat", 6)
 		var pid := p.id
@@ -416,9 +414,8 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	head.add_child(UIKit.icon_rect("search", 32, UIColors.ACCENT))
 	var lvl := People.staff_level(w, "olheiro")
 	var q := "excelente" if lvl >= 0.85 else ("bom" if lvl >= 0.6 else ("regular" if lvl >= 0.4 else "fraco"))
-	head.add_child(UIKit.label("Olheiro-chefe %s: observa até %s por missão, uma missão por rodada." % [q, Fmt.plural(Scouting.capacity(w), "jogador", "jogadores")], "", true))
+	head.add_child(UIKit.label("Olheiro-chefe %s · %s por missão" % [q, Fmt.plural(Scouting.capacity(w), "jogador", "jogadores")], "", true))
 	card.add_child(head)
-	card.add_child(UIKit.label("Escolha o perfil. Ele volta com os melhores nomes que o clube pode pagar e com avaliação quase exata de nível e potencial.", "Small", true))
 	_group_chips(card)
 	_origin_chips(card, club)
 	var ga := ButtonGroup.new()
@@ -433,7 +430,7 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		arow.add_child(chip)
 	card.add_child(arow)
 	var ready := Scouting.can_send(w)
-	var go := UIKit.button("Enviar olheiro" if ready else "Olheiro em campo até a próxima rodada", "PrimaryButton" if ready else "GhostButton", func():
+	var go := UIKit.button("Enviar olheiro" if ready else "Olheiro em campo", "PrimaryButton" if ready else "GhostButton", func():
 		if not Scouting.can_send(w):
 			return
 		var found := Scouting.send_mission(w, _origin, _group - 1, int(AGES[_age][1]))
@@ -450,7 +447,7 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	list.sort_custom(func(a: Player, b: Player): return PlayerRowView.estimate(w, a, a.overall) > PlayerRowView.estimate(w, b, b.overall))
 	c.add_child(UIKit.section("Relatórios (%d)" % list.size()))
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhum relatório ainda. Envie o olheiro para começar.", "Muted", true))
+		c.add_child(UIKit.label("Nenhum relatório ainda.", "Muted", true))
 		return
 	for p: Player in list:
 		var pid := p.id
@@ -480,9 +477,9 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 func _shortlist_tab(c: VBoxContainer, w: GameWorld) -> void:
 	var list := Shortlist.players(w)
 	if list.is_empty():
-		c.add_child(UIKit.label("Sua lista está vazia. Abra o perfil de um jogador de outro clube e toque na estrela para acompanhá-lo: aqui você vê o preço, a chance de ele topar vir e tudo o que mudar (venda, fim de contrato, troca de clube).", "Muted", true))
+		c.add_child(UIKit.label("Sua lista está vazia.", "Muted", true))
 		return
-	c.add_child(UIKit.label("%s na lista (máx. %d). Novidades desde que cada um entrou aparecem em destaque." % [Fmt.plural(list.size(), "jogador", "jogadores"), Shortlist.MAX_ENTRIES], "Small", true))
+	c.add_child(UIKit.label("%s na lista · máx. %d" % [Fmt.plural(list.size(), "jogador", "jogadores"), Shortlist.MAX_ENTRIES], "Small", true))
 	# Quem tem novidade primeiro, depois pelo nível estimado.
 	var rows: Array = []
 	for p: Player in list:
@@ -565,11 +562,11 @@ func _moves_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		list.sort_custom(func(a: Transfer, b: Transfer): return a.fee > b.fee)
 	else:
 		list.sort_custom(func(a: Transfer, b: Transfer): return a.year > b.year or (a.year == b.year and a.day > b.day))
-	c.add_child(UIKit.label("%s nesta temporada e na anterior%s." % [Fmt.plural(list.size(), "transferência", "transferências"), " (mostrando %d)" % MAX_ROWS if list.size() > MAX_ROWS else ""], "Small", true))
+	c.add_child(UIKit.label(Fmt.plural(list.size(), "transferência", "transferências"), "Small", true))
 	for i in mini(MAX_ROWS, list.size()):
 		c.add_child(_move_row(w, list[i], club))
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhuma transferência por aqui ainda.", "Muted", true))
+		c.add_child(UIKit.label("Nenhuma transferência.", "Muted", true))
 
 
 ## Gastos e receitas do seu clube com transferências na temporada.
@@ -700,10 +697,9 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var prog := TransferManager.season_progress(w)
 	var head := UIKit.card("Card", 6)
 	head.add_child(UIKit.section("Contratos terminando"))
-	if prog < 0.5:
-		head.add_child(UIKit.label("Estes jogadores ficam livres no fim da temporada. O pré-contrato pode ser proposto a partir da metade da temporada; até lá, só dá para comprá-los (mais barato, pelo contrato curto).", "Small", true))
-	else:
-		head.add_child(UIKit.label("Já é possível propor pré-contrato: o jogador chega de graça na próxima temporada. Abra o perfil e toque em \"Propor pré-contrato\".", "Small", true))
+	var pre_pill := UIKit.pill("PRÉ-CONTRATO LIBERADO" if prog >= 0.5 else "PRÉ-CONTRATO NO 2º TURNO", UIColors.GREEN if prog >= 0.5 else UIColors.ORANGE, 15)
+	pre_pill.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	head.add_child(pre_pill)
 	c.add_child(UIKit.card_panel(head))
 	_group_chips(c)
 	var weakest := _weakest_starter_by_group(w, club)
@@ -725,7 +721,7 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	for i in mini(MAX_ROWS, list.size()):
 		c.add_child(_market_row(w, club, list[i][0], weakest))
 	if list.is_empty():
-		c.add_child(UIKit.label("Ninguém nesse setor com contrato terminando.", "Muted", true))
+		c.add_child(UIKit.label("Ninguém nesse setor.", "Muted", true))
 
 
 ## Sugestões do diretor de futebol: o setor mais carente e nomes que cabem no bolso.
@@ -740,7 +736,7 @@ func _suggest_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 6)
 	var head := UIKit.hbox(10)
 	head.add_child(UIKit.icon_rect("chat", 28, UIColors.ACCENT))
-	head.add_child(UIKit.label("%s, diretor de futebol: \"Onde mais precisamos: %s. Estes cabem no nosso bolso.\"" % [String(d.get("name", "O diretor")), ["goleiro", "defesa", "meio-campo", "ataque"][int(_sug.get("group", 1))]], "Small", true))
+	head.add_child(UIKit.label("%s · carência: %s" % [String(d.get("name", "O diretor")), ["goleiro", "defesa", "meio-campo", "ataque"][int(_sug.get("group", 1))]], "Small", true))
 	head.get_child(1).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.add_child(head)
 	var weakest := _weakest_starter_by_group(w, club)

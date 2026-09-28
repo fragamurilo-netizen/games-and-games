@@ -37,9 +37,9 @@ func refresh() -> void:
 		if txt != "" and (w.is_user_club(int(ev.get("club", -1))) or ev.get("t", "") == "cwc"):
 			c.add_child(_notice("trophy", UIColors.ACCENT, txt))
 	if _report.get("window_opened", false):
-		c.add_child(_notice("swap", UIColors.GREEN, "A janela de transferências abriu. Até %s você pode comprar e vender." % w.season.date_label(w.window_end_day(), false)))
+		c.add_child(_notice("swap", UIColors.GREEN, "Janela de transferências aberta até %s." % w.season.date_label(w.window_end_day(), false)))
 	elif _report.get("window_closed", false):
-		c.add_child(_notice("swap", UIColors.ORANGE, "A janela de transferências fechou. Agora só jogadores livres podem ser contratados."))
+		c.add_child(_notice("swap", UIColors.ORANGE, "Janela de transferências fechada."))
 	if f != null:
 		c.add_child(_round_card(w, f))
 		if f.is_league():

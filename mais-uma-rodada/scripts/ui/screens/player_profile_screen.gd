@@ -305,7 +305,7 @@ func _rep_card(w: GameWorld, p: Player) -> Control:
 		var k: String = keys[i]
 		card.add_child(UIKit.kv("%dx %s" % [int(best[k][0]), Reputation.comp_name(w, k)], "%d pts cada" % int(round(float(best[k][1])))))
 	if keys.is_empty():
-		card.add_child(UIKit.label("Ainda sem títulos. Um título de liga forte pesa muito mais que o de uma liga fraca.", "Small", true))
+		card.add_child(UIKit.label("Ainda sem títulos.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -375,11 +375,8 @@ func _style_card(p: Player) -> Control:
 		head.add_child(UIKit.pill(String(d["trait"]).to_upper(), UIColors.ACCENT, 16))
 	card.add_child(head)
 	card.add_child(UIKit.label(String(d["desc"]), "", true))
-	card.add_child(UIKit.colored("Em campo: " + String(d["effect"]), UIColors.MUTED, "Small", true))
-	if String(d["trait"]) != "" and String(d["trait_effect"]).begins_with("Sem") == false:
-		card.add_child(UIKit.colored("%s: %s" % [String(d["trait"]), String(d["trait_effect"]).to_lower()], UIColors.MUTED, "Small", true))
 	if String(d["instruction_name"]) != "":
-		card.add_child(UIKit.colored("Combina com a instrução \"%s\" (rende mais com ela)." % String(d["instruction_name"]), UIColors.GREEN, "Small", true))
+		card.add_child(UIKit.colored("Instrução ideal: %s" % String(d["instruction_name"]), UIColors.GREEN, "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -411,7 +408,7 @@ func _positions_card(w: GameWorld, p: Player, own: bool) -> Control:
 		col.add_child(r)
 	var frow := UIKit.hbox(10)
 	frow.add_child(FootView.make(p.foot, 34))
-	frow.add_child(UIKit.label(["Destro", "Canhoto", "Ambidestro: chuta bem com os dois"][p.foot], "Small", true))
+	frow.add_child(UIKit.label(["Destro", "Canhoto", "Ambidestro"][p.foot], "Small", true))
 	col.add_child(frow)
 	row.add_child(col)
 	card.add_child(row)
@@ -451,7 +448,7 @@ func _fit_card(w: GameWorld, p: Player, own: bool) -> Control:
 		elif better < starters_in_group:
 			text = "Titular: %dº melhor do setor." % (better + 1)
 		else:
-			text = "Reserva: %d companheiros de setor rendem mais." % better
+			text = "Reserva: %d à frente no setor." % better
 			color = UIColors.MUTED
 	else:
 		card.add_child(UIKit.section("Bom para o seu time?"))
@@ -465,10 +462,10 @@ func _fit_card(w: GameWorld, p: Player, own: bool) -> Control:
 				text += " Hoje, o %dº titular do setor é %s (%d)." % [mini(starters_in_group, mine.size()), ref.display_name(), int(round(ref.rating_at(p.position)))]
 		elif better < starters_in_group + 2:
 			color = UIColors.ACCENT
-			text = "Brigaria por vaga: seria opção de banco forte."
+			text = "Brigaria por vaga."
 		else:
 			color = UIColors.MUTED
-			text = "Não melhora o seu time hoje: %d jogadores do elenco rendem mais no setor." % better
+			text = "Não melhora o time: %d à frente no setor." % better
 		if p.age(w.year) <= 21 and p.potential_estimate(0.2) >= user.reputation * 0.2 + 60:
 			text += " Jovem com margem para crescer."
 	var l := UIKit.label(text, "H3", true)
@@ -552,13 +549,13 @@ func _personality(w: GameWorld, p: Player, own: bool) -> Control:
 	# Personalidade oculta: nunca o número, só o que a comissão percebe com a convivência.
 	card.add_child(UIKit.label("O que a comissão percebe", "Caps"))
 	if not own:
-		card.add_child(UIKit.label("Por dentro, só a convivência revela. Contrate para conhecer.", "Muted", true))
+		card.add_child(UIKit.label("Desconhecido.", "Muted", true))
 	elif not HiddenPersona.known(w, p):
-		card.add_child(UIKit.label("Ainda conhecendo o jogador. A comissão precisa de mais tempo com ele.", "Muted", true))
+		card.add_child(UIKit.label("Em observação.", "Muted", true))
 	else:
 		var rep_lines := HiddenPersona.report(p)
 		if rep_lines.is_empty():
-			card.add_child(UIKit.label("Nada fora do comum: um jogador equilibrado por dentro.", "Muted", true))
+			card.add_child(UIKit.label("Equilibrado.", "Muted", true))
 		for ln: Array in rep_lines:
 			card.add_child(UIKit.colored(String(ln[0]), UIColors.GREEN if ln[1] else UIColors.RED, "Small", true))
 	if not p.persona_log.is_empty():
@@ -626,7 +623,7 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			card.add_child(row_d)
 			var diff := p.stats[Player.S_GOALS] - p.xg()
 			if p.stats[Player.S_SHOTS] >= 15 and absf(diff) >= 2.0:
-				card.add_child(UIKit.colored(("Marcando %.1f gols acima do esperado: fase iluminada." if diff > 0 else "%.1f gols abaixo do esperado: está desperdiçando chances.") % absf(diff), UIColors.GREEN if diff > 0 else UIColors.ORANGE, "Small", true))
+				card.add_child(UIKit.colored("Gols vs. esperado: %+.1f" % diff, UIColors.GREEN if diff > 0 else UIColors.ORANGE, "Small", true))
 	var tot := p.season_totals()
 	if int(tot[0]) > p.stats[Player.S_APPS]:
 		card.add_child(UIKit.label("Com as copas: %d jogos, %d gols e %d assistências." % [int(tot[0]), int(tot[1]), int(tot[2])], "Small", true))
@@ -896,8 +893,6 @@ func _memory(w: GameWorld, p: Player) -> Control:
 	card.add_child(UIKit.separator())
 	var events: Array = tl["events"]
 	var start := maxi(0, events.size() - 30)
-	if start > 0:
-		card.add_child(UIKit.label("(%d momentos mais antigos omitidos)" % start, "Small"))
 	var last_y := -1
 	for i in range(start, events.size()):
 		var e: Dictionary = events[i]
@@ -987,12 +982,12 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 		return
 	if own and not p.loan.is_empty():
 		var owner := w.club(int(p.loan.get("from", -1)))
-		f.add_child(UIKit.label("Emprestado pelo %s até o fim da temporada." % (owner.short_name if owner != null else "clube"), "Small", true))
+		f.add_child(UIKit.label("Emprestado pelo %s." % (owner.short_name if owner != null else "clube"), "Small", true))
 		var tb := UIKit.button("Treino individual", "", func(): TrainingSheet.open(p, refresh_cb), "tactics")
 		f.add_child(tb)
 		return
 	if not own and not p.loan.is_empty() and w.is_user_club(int(p.loan.get("from", -1))):
-		f.add_child(UIKit.label("Seu jogador, emprestado até o fim da temporada. Volta ao clube na virada do ano.", "Small", true))
+		f.add_child(UIKit.label("Emprestado até o fim da temporada.", "Small", true))
 		return
 	if own:
 		# Uma fileira só de ações compactas (ícone em cima, nome embaixo): a ficha ganha tela

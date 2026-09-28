@@ -64,14 +64,13 @@ func _xi(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 		refresh()))
 	var cands: Array = ClubRecords.all_time(w, club) if _year == "all" else ClubRecords.season_candidates(w, club, int(_year))
 	if cands.size() < 11:
-		c.add_child(UIKit.label("Ainda não há jogos suficientes nesta temporada para montar o time. O melhor 11 de cada ano é guardado no fim da temporada.", "Muted", true))
+		c.add_child(UIKit.label("Jogos insuficientes nesta temporada.", "Muted", true))
 		if cands.is_empty():
 			return
 	var slots := ClubRecords.pick_xi(cands)
 	var card := UIKit.card("Card", 12)
 	var title := "Melhor 11 de sempre" if _year == "all" else "Melhor 11 de %s" % _year
 	card.add_child(UIKit.section_header(title))
-	card.add_child(UIKit.label("4-3-3 · %s" % ("regularidade, nota, gols, assistências e anos de casa" if _year == "all" else "nota média pesada pelos jogos"), "Small", true))
 	var pitch := UIKit.vbox(10)
 	var chip_w := clampf((content_width() - 240.0) / 4.0, 100.0, 170.0)
 	for line: Array in [[8, 10, 9], [6, 5, 7], [4, 1, 2, 3], [0]]:
@@ -101,8 +100,6 @@ func _xi(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 	for i in mini(15, sorted.size()):
 		lc.add_child(_rank_row(w, i + 1, sorted[i], _year == "all"))
 	c.add_child(UIKit.card_panel(lc))
-	if _year == "all":
-		c.add_child(UIKit.label("Conta as temporadas guardadas do clube (os que mais jogaram em cada ano) e a temporada atual.", "Small", true))
 
 
 func _chip(w: GameWorld, club: Club, slot: Array, all_time: bool, cw: float) -> Control:
@@ -252,14 +249,12 @@ func _transfers(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 		sc.add_child(UIKit.kv("Maior venda", "%s · %s (%d)" % [t.player_name, Fmt.money(t.fee), t.year]))
 	c.add_child(UIKit.card_panel(sc))
 	var lc := UIKit.card("Card", 4)
-	lc.add_child(UIKit.label("%s%s" % [Fmt.plural(list.size(), "negociação", "negociações"), " (mostrando %d)" % MAX_ROWS if list.size() > MAX_ROWS else ""], "Caps"))
+	lc.add_child(UIKit.label(Fmt.plural(list.size(), "negociação", "negociações"), "Caps"))
 	if list.is_empty():
-		lc.add_child(UIKit.label("Nenhuma negociação registrada com esses filtros." if not _manager else "Suas contratações e vendas aparecem aqui assim que você fechar a primeira.", "Muted", true))
+		lc.add_child(UIKit.label("Nenhuma negociação.", "Muted", true))
 	for i in mini(MAX_ROWS, list.size()):
 		lc.add_child(_move_row(w, list[i][0], int(list[i][1])))
 	c.add_child(UIKit.card_panel(lc))
-	if not _manager:
-		c.add_child(UIKit.label("Negociações anteriores a esta versão do jogo ficam só nas duas últimas temporadas.", "Small", true))
 
 
 func _move_row(w: GameWorld, t: Transfer, ours: int) -> Control:
