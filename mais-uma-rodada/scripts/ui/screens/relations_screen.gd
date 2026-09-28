@@ -176,7 +176,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 			"press":
 				text = "Imprensa na zona mista: fale sobre o jogo" if q.get("post", false) else "Coletiva de imprensa antes do próximo jogo"
 				icon = "news"
-		card.add_child(UIKit.menu_row(icon, text, "Toque para conversar", func(): TalkDialog.open(kind, target, on_done), UIKit.pill("AGORA", UIColors.ORANGE, 14)))
+		card.add_child(UIKit.menu_row(icon, text, "", func(): TalkDialog.open(kind, target, on_done), UIKit.pill("AGORA", UIColors.ORANGE, 14)))
 	if always:
 		var b := UIKit.button("Vestiário, diretoria, torcida e imprensa", "GhostButton", func(): UIManager.push("relations"), "heart")
 		card.add_child(b)
@@ -315,7 +315,6 @@ func _staff(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		stars.stars = clampf(float(s.get("sk", 0.0)) / 20.0, 0.5, 5.0)
 		row.add_child(stars)
 		card.add_child(row)
-		card.add_child(UIKit.label(String(info["desc"]), "Small", true))
 		var brow := UIKit.hbox(10)
 		var idx := i
 		var talk := UIKit.button("Pedir relatório", "GhostButton", func(): TalkDialog.open("staff", idx, cb), "list")
@@ -334,7 +333,7 @@ static func _candidates(w: GameWorld, role: String, cb: Callable) -> void:
 	v.add_child(UIKit.label("Candidatos: %s" % String(People.STAFF_ROLES[role]["name"]).to_lower(), "Title", true))
 	var sev := People.staff_severance(w, role)
 	if sev > 0:
-		v.add_child(UIKit.label("Rescisão do atual: %s (três salários)." % Fmt.money(sev), "Small", true))
+		v.add_child(UIKit.label("Rescisão: %s" % Fmt.money(sev), "Small", true))
 	for cand: Dictionary in People.candidates(w, role):
 		var row := UIKit.hbox(12)
 		var col := UIKit.vbox(2)
@@ -376,7 +375,6 @@ func _board(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	var tags := UIKit.flow(8)
 	tags.add_child(UIKit.pill(String(st["name"]).to_upper(), UIColors.ACCENT, 16))
 	card.add_child(tags)
-	card.add_child(UIKit.label(String(st["desc"]), "Small", true))
 	var rel := float(pr.get("rel", 50.0))
 	var rr := UIKit.hbox(10)
 	rr.add_child(UIKit.label("Relação pessoal", "Muted"))
@@ -394,9 +392,11 @@ func _board(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	card.add_child(UIKit.kv("Meta da temporada", String(SeasonManager.goal_of(w, club.id)[0])))
 	var grace := int(People.data(w).get("grace", -1))
 	if grace >= w.current_turn():
-		card.add_child(UIKit.colored("Prazo dado pelo presidente: mais %d jogo(s) sem risco de demissão." % (grace - w.current_turn()), UIColors.GREEN, "Small", true))
+		card.add_child(UIKit.colored("Prazo: %d jogo(s)" % (grace - w.current_turn()), UIColors.GREEN, "Small", true))
 	elif conf < BoardManager.ULTIMATUM:
-		card.add_child(UIKit.colored("Ultimato: sem reação, a diretoria pode trocar o técnico a qualquer momento.", UIColors.RED, "Small", true))
+		var ult := UIKit.pill("ULTIMATO", UIColors.RED, 14)
+		ult.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.add_child(ult)
 	card.add_child(UIKit.button("Pedir uma reunião", "PrimaryButton", func(): TalkDialog.open("board", -1, cb), "shield"))
 	c.add_child(UIKit.card_panel(card))
 	# Metas da temporada com a situação de cada uma
@@ -581,7 +581,6 @@ func _coaches(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	stars.star_size = 22.0
 	stars.stars = clampf(rep / 20.0, 0.5, 5.0)
 	me.add_child(stars)
-	me.add_child(UIKit.label("Sua reputação decide quem te procura quando um clube troca de técnico.", "Small", true))
 	me.add_child(UIKit.button("Dança das cadeiras", "", func(): UIManager.push("coach_moves"), "swap"))
 	c.add_child(UIKit.card_panel(me))
 	var club := w.user_club()

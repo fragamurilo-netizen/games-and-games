@@ -31,9 +31,9 @@ static func build(w: GameWorld, club: Club, width: float, redo: Callable) -> Con
 			redo.call(), "search"))
 		nc.add_child(h)
 	if shown == 0:
-		nc.add_child(UIKit.label("Elenco equilibrado: nenhuma vaga abaixo da média da liga.", "Muted", true))
+		nc.add_child(UIKit.label("Elenco equilibrado.", "Muted", true))
 	# Resumo por vaga
-	nc.add_child(UIKit.label("Titular por vaga (você × média da liga)", "Caps"))
+	nc.add_child(UIKit.label("Você × média da liga", "Caps"))
 	for nd: Dictionary in needs:
 		var row := UIKit.hbox(8)
 		var nm := UIKit.label(String(nd["label"]), "Small")
@@ -88,7 +88,7 @@ static func build(w: GameWorld, club: Club, width: float, redo: Callable) -> Con
 	var rc := UIKit.card("Card", 4)
 	rc.add_child(UIKit.label("%d nomes · ordenados por custo-benefício" % res.size(), "Caps"))
 	if res.is_empty():
-		rc.add_child(UIKit.label("Ninguém com esse perfil dentro dos filtros. Tente outra idade ou tire o limite de orçamento.", "Muted", true))
+		rc.add_child(UIKit.label("Ninguém com esse perfil.", "Muted", true))
 	for e: Dictionary in res:
 		var p: Player = e["p"]
 		var cl := w.club(p.club_id) if p.club_id >= 0 else null
@@ -108,7 +108,6 @@ static func build(w: GameWorld, club: Club, width: float, redo: Callable) -> Con
 		h.add_child(UIKit.pill(str(int(round(cb))), UIColors.GREEN if cb >= 70.0 else (UIColors.ACCENT if cb >= 50.0 else UIColors.MUTED), 15))
 		var pid := p.id
 		rc.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
-	rc.add_child(UIKit.label("O selo verde é o custo-benefício (0 a 100): desempenho no perfil comparado ao custo (taxa + dois anos de salário), entre os nomes buscados.", "Small", true))
 	v.add_child(UIKit.card_panel(rc))
 	return v
 

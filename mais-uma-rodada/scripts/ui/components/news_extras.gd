@@ -297,8 +297,6 @@ static func _table(w: GameWorld, m: Dictionary) -> Control:
 			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			h.add_child(l)
 		v.add_child(h)
-	if zc > 0:
-		v.add_child(UIKit.colored("Em vermelho: zona de rebaixamento", UIColors.RED, "Small"))
 	return UIKit.card_panel(v)
 
 
@@ -354,7 +352,7 @@ static func _derby(w: GameWorld, n: NewsEvent, m: Dictionary) -> Control:
 	if int(hh["games"]) == 0:
 		var first := UIKit.hbox(10)
 		first.add_child(UIKit.crest(h, 36))
-		var l := UIKit.label("Primeiro encontro registrado entre os dois: o retrospecto começa agora.", "Small", true)
+		var l := UIKit.label("Primeiro encontro entre os dois.", "Small", true)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		first.add_child(l)
 		first.add_child(UIKit.crest(a, 36))

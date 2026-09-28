@@ -28,11 +28,11 @@ static func round_card(w: GameWorld, rep: Dictionary) -> Control:
 	head.add_child(UIKit.pill("+%d" % int(rep.get("xp", 0)), UIColors.ACCENT, 18))
 	card.add_child(head)
 	if String(rep.get("why", "")) != "":
-		card.add_child(UIKit.colored("Jogo de peso (%s): tudo vale %s" % [String(rep["why"]), "%d%% a mais" % int(round((float(rep.get("weight", 1.0)) - 1.0) * 100.0))], UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored("%s · +%d%%" % [String(rep["why"]), int(round((float(rep.get("weight", 1.0)) - 1.0) * 100.0))], UIColors.ORANGE, "Small", true))
 	if bool(rep.get("up", false)):
 		var up := UIKit.hbox(10)
 		up.add_child(UIKit.icon_rect("up", 26, UIColors.GREEN))
-		up.add_child(UIKit.colored("Subiu para o nível %d! Diretoria e torcida comemoram com você." % int(rep.get("lv1", 1)), UIColors.GREEN, "H3", true))
+		up.add_child(UIKit.colored("Subiu para o nível %d!" % int(rep.get("lv1", 1)), UIColors.GREEN, "H3", true))
 		card.add_child(up)
 	card.add_child(level_row(w))
 	for ft: Dictionary in feats:
@@ -78,5 +78,5 @@ static func career_card(w: GameWorld) -> Control:
 	for i in range(lg.size() - 1, maxi(-1, lg.size() - 6), -1):
 		card.add_child(UIKit.label("%d · %s" % [int(lg[i]["y"]), String(lg[i]["t"])], "Small", true))
 	if lg.is_empty():
-		card.add_child(UIKit.label("Zebras, viradas, clássicos e sequências viram prestígio aqui.", "Muted", true))
+		card.add_child(UIKit.label("Nada ainda.", "Muted", true))
 	return UIKit.card_panel(card)

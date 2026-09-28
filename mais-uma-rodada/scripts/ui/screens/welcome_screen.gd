@@ -92,7 +92,6 @@ func _expectations(w: GameWorld, club: Club) -> Control:
 	if not pr.is_empty():
 		var st := People.pres_style(w, club.id)
 		card.add_child(UIKit.kv("Presidente", "%s · %s" % [String(pr.get("n", "")), String(st.get("name", ""))]))
-		card.add_child(UIKit.label(String(st.get("desc", "")), "Small", true))
 	var rival := w.club(club.main_rival())
 	if rival != null:
 		var rr := UIKit.hbox(10)
@@ -100,7 +99,7 @@ func _expectations(w: GameWorld, club: Club) -> Control:
 		var rc := UIKit.vbox(0)
 		rc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		rc.add_child(UIKit.label("Maior rival", "Caps"))
-		rc.add_child(UIKit.label("%s — vencer o clássico vale mais que três pontos para a torcida." % rival.name, "Small", true))
+		rc.add_child(UIKit.label(rival.name, "Small", true))
 		rr.add_child(rc)
 		card.add_child(rr)
 	return UIKit.card_panel(card)
@@ -121,8 +120,6 @@ func _traits(w: GameWorld, club: Club) -> Control:
 	if FinanceManager.in_trouble(club):
 		tags.add_child(UIKit.pill("ENDIVIDADO", UIColors.ORANGE, 16))
 	card.add_child(tags)
-	if arch.has("desc"):
-		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
 	var pol := ClubPolicy.of(club)
 	if not pol.is_empty():
 		card.add_child(UIKit.label("Filosofia: %s" % String(pol.get("name", "")), "H3", true))
@@ -130,7 +127,7 @@ func _traits(w: GameWorld, club: Club) -> Control:
 	card.add_child(UIKit.kv("Categorias de base", "%d/100" % club.youth_level))
 	card.add_child(UIKit.kv("Centro de treinamento", "%d/100" % club.facilities))
 	var patience := float(arch.get("fan_patience", 50))
-	card.add_child(UIKit.label("Torcida %s." % ("exigente: não perdoa sequência ruim" if patience < 40 else ("paciente com trabalho a longo prazo" if patience > 60 else "apaixonada, cobra mas apoia")), "Small", true))
+	card.add_child(UIKit.kv("Torcida", "Exigente" if patience < 40 else ("Paciente" if patience > 60 else "Apaixonada")))
 	return UIKit.card_panel(card)
 
 
@@ -176,9 +173,9 @@ func _squad(w: GameWorld, club: Club) -> Control:
 		var weak: Array = []
 		for nd in needs.slice(0, 2):
 			weak.append(FAM_NAMES[int(nd["fam"])])
-		card.add_child(UIKit.colored("Carência: o elenco pede reforço de %s." % " e ".join(PackedStringArray(weak)), UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored("Carência: %s" % " e ".join(PackedStringArray(weak)), UIColors.ORANGE, "Small", true))
 	else:
-		card.add_child(UIKit.colored("Elenco equilibrado: nenhuma posição urgente.", UIColors.GREEN, "Small", true))
+		card.add_child(UIKit.colored("Elenco equilibrado", UIColors.GREEN, "Small", true))
 	return UIKit.card_panel(card)
 
 

@@ -177,7 +177,7 @@ func refresh() -> void:
 		c.add_child(_editor_card(club))
 	else:
 		var info := UIKit.card("Card", 8)
-		info.add_child(UIKit.label("Os uniformes de %d já foram apresentados e estão em campo. Dá para redesenhar tudo na próxima pré-temporada." % w.year, "", true))
+		info.add_child(UIKit.label("Uniformes de %d já em campo." % w.year, "", true))
 		c.add_child(UIKit.card_panel(info))
 	c.add_child(_history_card(club))
 	c.add_child(_sponsors_card(w, club, pre))
@@ -326,7 +326,6 @@ func _clash_card(club: Club) -> Control:
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	card.add_child(head)
-	card.add_child(UIKit.label("Cada uniforme precisa de uma cor principal própria para os jogos em que as camisas se confundem. Troque a cor principal ou deixe o jogo ajustar mantendo o desenho.", "Small", true))
 	card.add_child(UIKit.button("Ajustar cores automaticamente", "PrimaryButton", func():
 		_edit_many(["away", "third"], func(): _fix_all(club)), "bolt"))
 	return UIKit.card_panel(card)
@@ -449,7 +448,6 @@ func _editor_card(club: Club) -> Control:
 		"collections":
 			_collections(card, club)
 		"models":
-			card.add_child(UIKit.label("Modelos prontos nas cores do clube. Depois, ajuste cada detalhe nas outras abas.", "Small", true))
 			card.add_child(_template_grid(club, k))
 		"shirt":
 			var groups: Array = []
@@ -479,7 +477,6 @@ func _editor_card(club: Club) -> Control:
 			_options(card, "Comprimento da manga", KitView.SLEEVE_LENGTHS, String(k.get("sleeve_len", "short")), "sleeve_len")
 			_options(card, "Vivos", KitView.TRIMS, String(k.get("trim", "none")), "trim")
 			card.add_child(UIKit.section("Microdetalhes"))
-			card.add_child(UIKit.label("Cor de cada logo sobre o tecido. \"Auto\" usa a cor da marca que mais contrasta.", "Small", true))
 			_palette(card, club, "Patrocínio master (peito)", "spc", String(k.get("spc", "")), true)
 			_palette(card, club, "Patrocínio da manga", "spmc", String(k.get("spmc", "")), true)
 			_palette(card, club, "Patrocínio das costas", "spcc", String(k.get("spcc", "")), true)
@@ -529,7 +526,7 @@ func _collections(card: VBoxContainer, club: Club) -> void:
 	var w := world()
 	var sup: Dictionary = club.sponsors.get("fornecedor", {})
 	var brand := String(sup.get("n", "")) if not sup.is_empty() else "A fornecedora"
-	card.add_child(UIKit.label("%s apresentou três coleções para %d. Cada uma traz titular, reserva e terceiro do mesmo molde, sem repetir cores. Escolha uma e ajuste o que quiser nas outras abas." % [brand, w.year], "Small", true))
+	card.add_child(UIKit.label("%s apresentou três coleções para %d." % [brand, w.year], "Small", true))
 	for i in 3:
 		var col := KitDesign.collection(club, w.year, i + _proposal_round * 3)
 		var box := UIKit.vbox(8)
@@ -898,7 +895,7 @@ func _history_card(club: Club) -> Control:
 	var hist := KitDesign.history(club)
 	var past: Array = hist.filter(func(h): return int(h[0]) != world().year)
 	if past.is_empty():
-		card.add_child(UIKit.label("Os uniformes entram no histórico do clube quando estreiam em campo. A partir da próxima temporada eles aparecem aqui.", "Small", true))
+		card.add_child(UIKit.label("Nenhum uniforme no histórico ainda.", "Small", true))
 		return UIKit.card_panel(card)
 	for h in past.slice(0, 3):
 		var row := UIKit.hbox(10)
@@ -997,13 +994,12 @@ func _sponsors_card(w: GameWorld, club: Club, _pre: bool) -> Control:
 	var mk := SponsorManager.market_label(club)
 	card.add_child(UIKit.kv("Receita de patrocínio na temporada", Fmt.money(club.income_sponsor), UIColors.GREEN))
 	card.add_child(UIKit.kv("Momento comercial", String(mk[0]), mk[1]))
-	card.add_child(UIKit.label("Contratos negociados pela diretoria. Campanhas fortes e títulos valorizam as próximas renovações.", "Small", true))
 	for s in SponsorManager.SLOTS:
 		var slot: String = s[0]
 		card.add_child(UIKit.label(String(s[1]).to_upper(), "Caps"))
 		var cur: Dictionary = club.sponsors.get(slot, {})
 		if cur.is_empty():
-			card.add_child(UIKit.label("Espaço livre: a diretoria negocia na próxima pré-temporada.", "Muted", true))
+			card.add_child(UIKit.label("Espaço livre.", "Muted", true))
 			continue
 		var terms: Array = ["até %d" % int(cur.get("y", w.year))]
 		if float(cur.get("tb", 0.0)) > 0.0:

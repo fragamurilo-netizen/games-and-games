@@ -61,7 +61,7 @@ func _summary_card(w: GameWorld, club: Club, squad: Array) -> Control:
 	if rule != "":
 		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
 		var lim := int(SquadRules.limit(club)["max"])
-		card.add_child(UIKit.colored("%s: %d/%d na escalação atual." % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
+		card.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
 	# Alertas viram atalhos para o recorte da lista.
 	var alerts := UIKit.hbox(8)
 	if hurt > 0:
@@ -218,7 +218,7 @@ func refresh() -> void:
 		c.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
 	var out := TransferManager.loaned_out(w)
 	if not out.is_empty():
-		c.add_child(UIKit.section("Emprestados (voltam no fim da temporada)"))
+		c.add_child(UIKit.section("Emprestados"))
 		for p: Player in out:
 			var pid := p.id
 			c.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
@@ -226,7 +226,6 @@ func refresh() -> void:
 
 ## Profundidade: os três melhores por posição e onde falta gente boa.
 func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
-	c.add_child(UIKit.label("Em laranja: falta reposição.", "Small", true))
 	for row in SquadManager.depth(w, club):
 		var card := UIKit.card("Card", 4)
 		var head := UIKit.hbox(8)
@@ -257,7 +256,6 @@ func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 
 ## Papéis: o que foi prometido a cada jogador. Mexer aqui mexe na moral.
 func _build_roles(w: GameWorld, club: Club, c: VBoxContainer) -> void:
-	c.add_child(UIKit.label("Promover anima; rebaixar derruba a moral.", "Small", true))
 	var want := SquadManager.wants_more_minutes(w, club)
 	if not want.is_empty():
 		var names: Array = []
@@ -297,7 +295,6 @@ func _pick_status(p: Player) -> void:
 		elif react != "":
 			head.add_child(UIKit.colored(react, UIColors.GREEN if react == "Vai gostar." else UIColors.ORANGE, "Small"))
 		box.add_child(head)
-		box.add_child(UIKit.label(SquadManager.STATUS_DESC[s], "Small", true))
 		v.add_child(UIKit.tap_row(box, func():
 			var err := SquadManager.set_status(w, club, p, s)
 			if err != "":

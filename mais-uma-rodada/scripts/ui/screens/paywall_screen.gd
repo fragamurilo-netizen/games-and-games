@@ -43,9 +43,9 @@ func refresh() -> void:
 	if mods:
 		lead = "Instalar e ligar mods faz parte da Carreira Completa."
 	elif w != null and w.user_club() != null:
-		lead = "Sua primeira temporada no %s acabou. A carreira está salva e continua exatamente de onde parou." % w.user_club().short_name
+		lead = "Sua primeira temporada no %s acabou." % w.user_club().short_name
 	else:
-		lead = "A temporada de demonstração acabou. A carreira está salva e continua de onde parou."
+		lead = "A temporada de demonstração acabou."
 	var l := UIKit.label(lead, "Muted", true)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hero.add_child(l)

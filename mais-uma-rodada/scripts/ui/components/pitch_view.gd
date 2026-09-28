@@ -278,10 +278,6 @@ func _draw_broadcast() -> void:
 		if fmod(_t, 1.0) < 0.6:
 			draw_circle(dot, fs * 0.22, Color("#E5484D"))
 		draw_string(font, badge.position + Vector2(fs * 1.05, fs * 1.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(comp_accent))
-		var hint := "Toque para pular"
-		var hfs := int(fs * 0.7)
-		var hw := small.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, hfs).x
-		draw_string(small, Vector2(size.x - hw - 14, size.y - bar_h * 0.5 + hfs * 0.35), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, hfs, Color(1, 1, 1, 0.8))
 		var pw := size.x * 0.4
 		var pr := Rect2(Vector2(14, size.y - bar_h * 0.5 - 2), Vector2(pw, 4))
 		draw_rect(pr, Color(1, 1, 1, 0.2))

@@ -146,10 +146,7 @@ func _style_card(w: GameWorld, co: Dictionary) -> Control:
 	var st: Dictionary = People.COACH_STYLES.get(String(co["st"]), {})
 	card.add_child(UIKit.section("Estilo de trabalho"))
 	card.add_child(UIKit.label(String(st.get("name", "")), "H3"))
-	if st.has("desc"):
-		card.add_child(UIKit.label(String(st["desc"]), "Small", true))
 	card.add_child(UIKit.label("Temperamento: " + CoachStories.temper_name(w, co), "H3"))
-	card.add_child(UIKit.label(CoachStories.temper_desc(w, co), "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -166,8 +163,6 @@ func _stories(w: GameWorld, co: Dictionary) -> Control:
 		for l in ls.slice(0, 4):
 			fl.add_child(UIKit.pill(String(l["n"]).to_upper(), UIColors.ACCENT, 13))
 		card.add_child(fl)
-		for l in ls.slice(0, 4):
-			card.add_child(UIKit.label("%s: %s" % [String(l["n"]), String(l["d"])], "Small", true))
 	var aw: Array = co.get("aw", [])
 	for a in aw:
 		var what := "Treinador do ano" if String(a[1]) == "coach_world" else "Treinador da temporada (%s)" % w.league_short(String(a[2]))
@@ -176,7 +171,7 @@ func _stories(w: GameWorld, co: Dictionary) -> Control:
 	for i in range(tl.size() - 1, -1, -1):
 		card.add_child(UIKit.label("%d · %s" % [int(tl[i]["y"]), String(tl[i]["t"])], "Small", true))
 	if arc == "" and ls.is_empty() and aw.is_empty() and tl.is_empty():
-		card.add_child(UIKit.label("Ainda sem capítulos marcantes. Cada temporada pode mudar isso.", "Muted", true))
+		card.add_child(UIKit.label("Ainda sem capítulos marcantes.", "Muted", true))
 	return UIKit.card_panel(card)
 
 
@@ -196,7 +191,7 @@ func _career(w: GameWorld, co: Dictionary) -> Control:
 		card.add_child(UIKit.kv("Demissões", str(int(t["dem"]))))
 	if int(co.get("pid", -1)) >= 0:
 		var pid := int(co["pid"])
-		card.add_child(UIKit.tap_row(UIKit.label("Ex-jogador: ver a carreira dele em campo", "Small", true), func(): UIManager.push("player", {"id": pid}), "CardFlat"))
+		card.add_child(UIKit.tap_row(UIKit.label("Ex-jogador · ver carreira", "Small", true), func(): UIManager.push("player", {"id": pid}), "CardFlat"))
 	else:
 		card.add_child(UIKit.label(CoachCareer.player_text(co), "Small", true))
 	var car: Array = co.get("car", [])

@@ -103,13 +103,13 @@ func _render() -> void:
 			else:
 				_render_terms("Taxa acertada: %s. Agora, o contrato:" % Fmt.money(agreed_fee))
 		"free":
-			_render_terms("Jogador livre: sem taxa de transferência.")
+			_render_terms("Jogador livre.")
 		"pre":
-			_render_terms("O contrato dele acaba em %d: assinando agora, chega de graça no fim da temporada." % p.contract_end)
+			_render_terms("Chega de graça no fim da temporada.")
 		"renew":
 			_render_terms("Contrato atual: %s até %d." % [Fmt.money_month(p.wage), p.contract_end])
 		"sell":
-			_render_fee("Preço pedido", "Clubes interessados farão propostas durante a janela.")
+			_render_fee("Preço pedido", "")
 	if message != "":
 		var m := UIKit.label(message, "H3", true)
 		m.add_theme_color_override(&"font_color", message_color)
@@ -153,12 +153,13 @@ func _render_fee(caption: String, hint: String) -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		quick.add_child(b)
 	box.add_child(quick)
-	box.add_child(UIKit.label(hint, "Small", true))
+	if hint != "":
+		box.add_child(UIKit.label(hint, "Small", true))
 	if mode == "buy":
 		box.add_child(UIKit.section("Condições"))
 		box.add_child(_choice("Pagamento", [["À vista", 1], ["2 parcelas", 2], ["3 parcelas", 3]], int(deal["inst"]), func(v): deal["inst"] = int(v)))
 		box.add_child(_choice("Revenda para o %s" % w.club(p.club_id).short_name, [["0%", 0.0], ["10%", 0.1], ["20%", 0.2]], float(deal["sell_on"]), func(v): deal["sell_on"] = float(v)))
-		box.add_child(UIKit.label("Sai do caixa agora: %s (1ª parcela + 5%% do empresário). Parcelar deixa a oferta menos atraente; dar %% de revenda deixa mais." % Fmt.money(TransferManager.upfront_cost(fee, deal)), "Small", true))
+		box.add_child(UIKit.kv("Sai do caixa agora", Fmt.money(TransferManager.upfront_cost(fee, deal))))
 		_render_swap_summary()
 	if counter_fee > 0 and mode == "buy":
 		box.add_child(UIKit.button("Aceitar contraproposta de %s" % Fmt.money(counter_fee), "", func():
@@ -186,7 +187,6 @@ func _render_fee(caption: String, hint: String) -> void:
 			_render(), "swap")
 		shop.disabled = not w.transfer_window_open()
 		box.add_child(shop)
-		box.add_child(UIKit.label("Quem tiver interesse responde na hora, em geral abaixo do valor.", "Small", true))
 
 
 ## Linha de opções mutuamente exclusivas.
@@ -211,8 +211,6 @@ func _render_swap_summary() -> void:
 	var seller := w.club(p.club_id)
 	var swaps := TransferManager.swap_players(w, deal)
 	box.add_child(UIKit.section("Troca (opcional)"))
-	if swaps.is_empty():
-		box.add_child(UIKit.label("Inclua até %d jogadores do seu elenco para baixar o dinheiro da proposta." % MAX_SWAP, "Small", true))
 	for sp: Player in swaps:
 		var row := UIKit.hbox(10)
 		row.add_child(UIKit.pos_badge(sp.position))
@@ -236,7 +234,6 @@ func _render_swap_summary() -> void:
 func _render_swap_picker() -> void:
 	var seller := w.club(p.club_id)
 	box.add_child(UIKit.section("Quem vai para o %s?" % seller.short_name))
-	box.add_child(UIKit.label("Valor que o %s enxerga em cada um (depende da carência deles na posição, idade e nível)." % seller.short_name, "Small", true))
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size.y = 560
@@ -329,9 +326,7 @@ func _render_terms(caption: String) -> void:
 	box.add_child(UIKit.section("Luvas (pagas na assinatura)"))
 	var monthly := maxi(wage, 1)
 	box.add_child(_choice("", [["Nenhuma", 0], ["3 salários", monthly * 3], ["6 salários", monthly * 6], ["12 salários", monthly * 12]], int(deal["bonus"]), func(v): deal["bonus"] = int(v)))
-	box.add_child(UIKit.label("Luvas reduzem o salário pedido: dinheiro agora em troca de uma folha mais leve.", "Small", true))
 	box.add_child(_choice("Multa rescisória", [["Sem multa", 0], ["2× valor", 2], ["3× valor", 3], ["5× valor", 5]], int(deal["clause"]), func(v): deal["clause"] = int(v)))
-	box.add_child(UIKit.label("Multa baixa agrada o jogador, mas um clube rico pode pagá-la e levá-lo.", "Small", true))
 	var fin := FinanceManager.summary(w, w.user_club())
 	var bill: int = fin["wage_bill"] - (p.wage if mode == "renew" else 0) + wage
 	var fits: bool = bill <= int(fin["wage_budget"] * 1.02)

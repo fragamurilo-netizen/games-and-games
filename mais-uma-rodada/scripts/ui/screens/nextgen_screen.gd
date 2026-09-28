@@ -51,12 +51,10 @@ func refresh() -> void:
 	var card := UIKit.card("Card", 6)
 	if _list == "nx":
 		card.add_child(UIKit.section("NXGN %d · portal Golaço" % _year))
-		card.add_child(UIKit.label("Os 50 melhores jogadores sub-21 do mundo, em ordem.", "Small", true))
 	else:
 		card.add_child(UIKit.section("Next Generation %d · The Albion Post" % _year))
-		card.add_child(UIKit.label("Os melhores talentos nascidos em %d, um por clube (sem ordem)." % (_year - 17), "Small", true))
 	if ids.is_empty():
-		card.add_child(UIKit.label("A lista %s sai %s da temporada." % ["NXGN" if _list == "nx" else "Next Generation", "na segunda metade" if _list == "nx" else "no começo"], "Muted", true))
+		card.add_child(UIKit.label("Lista ainda não publicada.", "Muted", true))
 	for i in ids.size():
 		var p := w.player(int(ids[i]))
 		if p != null:

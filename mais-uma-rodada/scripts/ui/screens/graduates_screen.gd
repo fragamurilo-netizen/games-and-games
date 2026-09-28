@@ -74,7 +74,7 @@ func _header(w: GameWorld, club: Club, list: Array, retired: Array) -> Control:
 func _active(w: GameWorld, club: Club, list: Array) -> Control:
 	var card := UIKit.card("Card", 6)
 	if list.is_empty():
-		card.add_child(UIKit.label("Nenhum jogador em atividade saiu da base deste clube.", "Muted", true))
+		card.add_child(UIKit.label("Nenhum jogador em atividade.", "Muted", true))
 		return UIKit.card_panel(card)
 	for p: Player in list.slice(0, 60):
 		var row := UIKit.hbox(10)
@@ -108,7 +108,7 @@ func _active(w: GameWorld, club: Club, list: Array) -> Control:
 func _retired(w: GameWorld, retired: Array) -> Control:
 	var card := UIKit.card("Card", 6)
 	if retired.is_empty():
-		card.add_child(UIKit.label("Nenhum aposentado notável formado aqui (ainda).", "Muted", true))
+		card.add_child(UIKit.label("Nenhum aposentado notável.", "Muted", true))
 		return UIKit.card_panel(card)
 	for r in retired.slice(0, 40):
 		var row := UIKit.hbox(10)

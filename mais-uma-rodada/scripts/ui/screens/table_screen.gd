@@ -364,7 +364,7 @@ func _league_history(c: VBoxContainer, w: GameWorld, league: League) -> void:
 			row.add_child(UIKit.icon_rect("forward", 24, UIColors.MUTED))
 			list.add_child(UIKit.tap_row(row, func(): _season_modal(w, league, yy, lgc), "CardFlat"))
 	if seasons.is_empty():
-		list.add_child(UIKit.label("Sem campeões registrados antes do início do jogo nesta liga.", "Muted", true))
+		list.add_child(UIKit.label("Sem campeões registrados.", "Muted", true))
 	c.add_child(UIKit.card_panel(list))
 
 
@@ -581,7 +581,7 @@ func _numbers(c: VBoxContainer, w: GameWorld) -> void:
 func _teams(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var card := UIKit.card("Card", 8)
 	if league.id != w.user_league_id() and league.tier != 1:
-		card.add_child(UIKit.label("As seleções da rodada e do mês saem na liga do seu clube e nas primeiras divisões.", "Muted", true))
+		card.add_child(UIKit.label("Só na sua liga e nas primeiras divisões.", "Muted", true))
 		c.add_child(UIKit.card_panel(card))
 		return
 	var teams := WeeklyAwards.league_teams(w, league.id)
@@ -612,7 +612,7 @@ func _teams(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		sel = tw
 		title = "Seleção da %dª rodada" % int(tw.get("r", 0))
 	if sel.is_empty():
-		card.add_child(UIKit.label("As seleções aparecem depois da primeira rodada.", "Muted", true))
+		card.add_child(UIKit.label("Nada ainda.", "Muted", true))
 		c.add_child(UIKit.card_panel(card))
 		return
 	card.add_child(UIKit.section(title))
@@ -700,10 +700,6 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 			func(): _club_sheet(w, lg, cid)))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(TableRows.legend(league))
-	var tip := "Toque num clube para ver a campanha em casa e fora, os últimos jogos e os próximos."
-	if not prev.is_empty():
-		tip = "As setas comparam com a rodada anterior. " + tip
-	c.add_child(UIKit.label(tip, "Small", true))
 	var fdesc := LeagueFormat.describe(league)
 	if fdesc != "":
 		c.add_child(_format_card(league.id, fdesc))
@@ -984,7 +980,6 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 		var apps: int = p.stats[Player.S_APPS]
 		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(apps, "jogo", "jogos")]))
 	c.add_child(UIKit.card_panel(card))
-	c.add_child(UIKit.label("Empate: fica à frente quem jogou menos minutos.", "Small", true))
 
 
 func _rounds(c: VBoxContainer, w: GameWorld, league: League) -> void:
@@ -1198,7 +1193,6 @@ func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	var state_q: Array = CupManager.state_qualified(cup) if CupManager.is_state(cup.id) else []
 	if CupManager.is_state(cup.id):
 		var n := int(CupManager.cfg(cup.id).get("qualify", 4))
-		c.add_child(UIKit.label(("Os %d primeiros vão à semifinal." if cup.groups.size() == 1 else "Avançam os líderes dos grupos e os melhores entre os demais, até completar %d semifinalistas.") % n, "Small", true))
 	for g in cup.groups:
 		var card := UIKit.card("Card", 2)
 		card.add_child(UIKit.section("Grupo %s" % g["n"]))
@@ -1216,13 +1210,12 @@ func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 		for f in mine:
 			card.add_child(_fixture_row(w, f))
 		c.add_child(UIKit.card_panel(card))
-	c.add_child(UIKit.label("Os dois primeiros de cada grupo avançam ao mata-mata.", "Small", true))
 
 
 func _cup_ko(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	if cup.ties.is_empty():
 		var card := UIKit.card("Card", 6)
-		card.add_child(UIKit.label("O mata-mata é sorteado depois da fase de grupos.", "Muted", true))
+		card.add_child(UIKit.label("Sorteio após a fase de grupos.", "Muted", true))
 		c.add_child(UIKit.card_panel(card))
 		return
 	for r in cup.round_names.size():
@@ -1335,7 +1328,6 @@ func _rank_view(c: VBoxContainer, w: GameWorld) -> void:
 				card.add_child(_rank_row(w, table[i], i + 1))
 				break
 	c.add_child(UIKit.card_panel(card))
-	c.add_child(UIKit.label("Soma das últimas %d temporadas, contando a atual: posição na liga (pesa mais nas ligas fortes) e campanhas continentais e no Mundial. A seta compara com o ranking ao fim da temporada passada." % ClubRanking.SEASONS, "Small", true))
 
 
 func _rank_row(w: GameWorld, entry: Dictionary, pos: int) -> Control:

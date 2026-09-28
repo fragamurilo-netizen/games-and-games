@@ -72,8 +72,7 @@ func _head(w: GameWorld, club: Club) -> Control:
 	var p := w.player(_sel) if _sel >= 0 else null
 	if p == null or p.club_id != club.id:
 		_sel = -1
-		card.add_child(UIKit.label("Toque num jogador e depois na camisa nova.", "H3", true))
-		card.add_child(UIKit.label("Se o número tiver dono, os dois trocam.", "Muted", true))
+		card.add_child(UIKit.label("Escolha um jogador.", "H3", true))
 		return UIKit.card_panel(card)
 	var row := UIKit.hbox(12)
 	row.add_child(UIKit.portrait(p, club, w.year, 72))
@@ -81,7 +80,6 @@ func _head(w: GameWorld, club: Club) -> Control:
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(p.display_name(), "Title", true))
 	col.add_child(UIKit.label("%s · hoje com a %d" % [Pos.name_of(p.position), p.shirt], "Small", true))
-	col.add_child(UIKit.colored("Escolha a camisa nova abaixo.", UIColors.ACCENT, "Small", true))
 	row.add_child(col)
 	row.add_child(UIKit.button("Cancelar", "GhostButton", func():
 		_sel = -1

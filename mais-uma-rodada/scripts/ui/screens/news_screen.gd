@@ -389,7 +389,7 @@ func _opinion(w: GameWorld, c: VBoxContainer) -> void:
 	var cards: Array = []
 	var started := int(lg.table[int(ids[0])]["pl"]) >= 3
 	if not started:
-		c.add_child(UIKit.label("As colunas começam depois das primeiras rodadas da %s." % w.league_short(lg.id), "Muted", true))
+		c.add_child(UIKit.label("Ainda sem colunas.", "Muted", true))
 		return
 	# Power ranking: pontos recentes (forma) + posição
 	var pr: Array = []
@@ -401,7 +401,6 @@ func _opinion(w: GameWorld, c: VBoxContainer) -> void:
 	pr.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
 	var pc := UIKit.card("Card", 6)
 	pc.add_child(UIKit.section_header("Power ranking"))
-	pc.add_child(UIKit.label("Quem chega melhor: forma nos últimos cinco jogos pesa mais que a tabela.", "Small", true))
 	for i in mini(6, pr.size()):
 		var cl: Club = pr[i][0]
 		pc.add_child(UIKit.kv("%d. %s" % [i + 1, cl.short_name], "%s · %dº" % [cl.results.right(5), ids.find(cl.id) + 1]))

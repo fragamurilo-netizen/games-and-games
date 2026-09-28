@@ -258,7 +258,6 @@ func _styles(_w: GameWorld, m: Dictionary) -> Control:
 		var nl := UIKit.label(String(People.COACH_STYLES[key]["name"]), "H3")
 		names[key] = nl
 		col.add_child(nl)
-		col.add_child(UIKit.label(String(People.COACH_STYLES[key]["desc"]), "Small", true))
 		col.add_child(UIKit.colored(String(ManagerProfile.STYLE_FX.get(key, "")), UIColors.GREEN, "Small", true))
 		var line := UIKit.hbox(10)
 		line.add_child(col)

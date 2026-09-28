@@ -79,7 +79,6 @@ func _intro_card(w: GameWorld, pre: Dictionary) -> Control:
 func _plan_card(w: GameWorld) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Raio-x do elenco"))
-	card.add_child(UIKit.label("Titulares de cada setor contra a média da liga.", "Small", true))
 	for g in PreseasonManager.squad_plan(w):
 		var tone := int(g["tone"])
 		var color := UIColors.GREEN if tone > 0 else (UIColors.RED if tone < 0 else UIColors.BLUE)
@@ -115,10 +114,10 @@ func _plan_card(w: GameWorld) -> Control:
 func _notes_card(w: GameWorld) -> Control:
 	var n := PreseasonManager.squad_notes(w)
 	var blocks: Array = [
-		["expiring", "Contrato termina nesta temporada", "Renove quem é importante antes que o interesse de fora cresça.", UIColors.ORANGE, "clock"],
-		["veterans", "Veteranos em queda", "Acima de 32 anos e abaixo dos titulares do setor: bom momento para vender ou dar minutos a outros.", UIColors.MUTED, "down"],
-		["surplus", "Sobrando no elenco", "Reservas num setor lotado. Vender ou emprestar libera folha salarial.", UIColors.BLUE, "swap"],
-		["prospects", "Promessas para dar minutos", "Jovens com potencial bem acima do nível atual.", UIColors.GREEN, "up"],
+		["expiring", "Contrato termina nesta temporada", "", UIColors.ORANGE, "clock"],
+		["veterans", "Veteranos em queda", "", UIColors.MUTED, "down"],
+		["surplus", "Sobrando no elenco", "", UIColors.BLUE, "swap"],
+		["prospects", "Promessas para dar minutos", "", UIColors.GREEN, "up"],
 	]
 	var any := false
 	for b in blocks:
@@ -135,7 +134,6 @@ func _notes_card(w: GameWorld) -> Control:
 		head.add_child(UIKit.icon_rect(String(b[4]), 26, b[3]))
 		head.add_child(UIKit.colored(String(b[1]).to_upper() + " (%d)" % list.size(), b[3], "Caps"))
 		card.add_child(head)
-		card.add_child(UIKit.label(String(b[2]), "Small", true))
 		for p: Player in list.slice(0, 4):
 			var pid := p.id
 			card.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
@@ -160,7 +158,6 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 		row.add_child(col)
 		card.add_child(row)
 		return UIKit.card_panel(card)
-	card.add_child(UIKit.label("Uma por temporada.", "Small", true))
 	for key in PreseasonManager.CAMP_ORDER:
 		var cfg: Dictionary = PreseasonManager.CAMPS[key]
 		var row := UIKit.hbox(14)
@@ -172,7 +169,6 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(cfg["name"]), "H3", true))
-		col.add_child(UIKit.label(String(cfg["desc"]), "Small", true))
 		col.add_child(UIKit.colored("+ " + String(cfg["pros"]), UIColors.GREEN, "Small", true))
 		col.add_child(UIKit.colored("− " + String(cfg["cons"]), UIColors.ORANGE, "Small", true))
 		row.add_child(col)

@@ -28,7 +28,6 @@ func refresh() -> void:
 		var empty := UIKit.card("CardHighlight", 14)
 		empty.add_child(UIKit.icon_rect("save", 56, UIColors.ACCENT))
 		empty.add_child(UIKit.label("Nenhuma carreira salva ainda", "H3"))
-		empty.add_child(UIKit.label("Escolha um país, assuma um clube e o jogo salva sozinho a cada rodada.", "Muted", true))
 		empty.add_child(UIKit.button("NOVA CARREIRA", "PrimaryButton", func(): UIManager.replace("new_career"), "plus"))
 		c.add_child(UIKit.card_panel(empty))
 	var cards: Array = []
@@ -47,11 +46,8 @@ func refresh() -> void:
 		c.add_child(UIKit.section_header("Espaços livres"))
 		var rows: Array = []
 		for s: int in free:
-			rows.append(UIKit.menu_row("plus", "Espaço %d" % s, "Livre para uma nova carreira", func(): UIManager.replace("new_career")))
+			rows.append(UIKit.menu_row("plus", "Espaço %d" % s, "Livre", func(): UIManager.replace("new_career")))
 		c.add_child(UIKit.menu_group(rows))
-	var note := UIKit.label("Salvo a cada rodada, com cópia de segurança.", "Caps", true)
-	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	c.add_child(note)
 
 
 static func _meta_color(v: Variant, fallback: Color) -> Color:

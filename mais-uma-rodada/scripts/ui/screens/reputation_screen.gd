@@ -39,7 +39,6 @@ func _comps(w: GameWorld, c: VBoxContainer) -> void:
 		_comp_kind = k
 		_all = false
 		refresh()))
-	c.add_child(UIKit.label("Cada título soma pontos de prestígio ao clube e aos jogadores. Quanto maior a reputação da competição, mais o título vale.", "Muted", true))
 	var rows: Array = []
 	if _comp_kind == "leagues":
 		for id in DatabaseManager.league_ids():
@@ -117,7 +116,6 @@ func _players(w: GameWorld, c: VBoxContainer) -> void:
 		if p.club_id >= 0 and p.overall >= 76:
 			pool.append([Reputation.player_rep(w, p), p])
 	pool.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
-	c.add_child(UIKit.label("Mistura nível, clube, títulos (pesados pela competição) e prêmios individuais.", "Muted", true))
 	var list := UIKit.card("Card", 4)
 	var n := mini(100 if _all else 40, pool.size())
 	for i in n:
@@ -161,7 +159,7 @@ static func club_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.kv("Liga", "%s · %d (%s)" % [w.league_short(club.league_id), int(round(lr)), Reputation.label(lr)]))
 	var best := Reputation.club_titles_by_value(club)
 	if best.is_empty():
-		card.add_child(UIKit.label("Sem títulos ainda. Uma liga forte vale muito mais prestígio que uma fraca.", "Small", true))
+		card.add_child(UIKit.label("Sem títulos ainda.", "Small", true))
 	else:
 		card.add_child(UIKit.label("Títulos que mais pesam", "Caps"))
 		for i in mini(3, best.size()):

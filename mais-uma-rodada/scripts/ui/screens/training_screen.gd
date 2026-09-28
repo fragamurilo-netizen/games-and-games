@@ -79,19 +79,19 @@ func _balance_card(w: GameWorld, club: Club) -> Control:
 	card.add_child(_meter("Evolução", growth, true))
 	card.add_child(_meter("Recuperação física", rec, true))
 	card.add_child(_meter("Risco de lesão", inj, false))
-	var notes: Array = []
+	var flags := UIKit.flow(8)
 	if inj * People.injury_mult(w) > 0.95:
-		notes.append("Carga alta: pode haver lesões no próprio treino, principalmente em quem está cansado.")
+		flags.add_child(UIKit.pill("CARGA ALTA", UIColors.ORANGE, 15))
 	var tired := 0
 	for p: Player in w.squad(club):
 		if not p.is_injured() and p.condition < 70.0:
 			tired += 1
 	if tired >= 4 and rec < 1.0:
-		notes.append("%d jogadores estão cansados e a semana recupera pouco." % tired)
-	if notes.is_empty():
-		notes.append("Semana equilibrada: nada fora do normal.")
-	for n in notes:
-		card.add_child(UIKit.label(String(n), "Small", true))
+		flags.add_child(UIKit.pill("%d CANSADOS" % tired, UIColors.ORANGE, 15))
+	if flags.get_child_count() > 0:
+		card.add_child(flags)
+	else:
+		flags.free()
 	return UIKit.card_panel(card)
 
 
@@ -124,17 +124,22 @@ func _focus_card(club: Club) -> Control:
 		refresh(), 2))
 	var f := TrainingManager.focus_of(club)
 	var detail := UIKit.card("CardInset", 8)
-	detail.add_child(UIKit.eyebrow(String(f["name"])))
-	detail.add_child(UIKit.label(String(f["desc"]), "", true))
 	if not Array(f["attrs"]).is_empty():
 		var names: Array = []
 		for a in f["attrs"]:
 			names.append(Attr.NAMES[int(a)])
 		detail.add_child(UIKit.label(tr("Prioriza: %s") % ", ".join(names), "Small", true))
-	detail.add_child(UIKit.effect_pills([["Evolução", _pct(f["growth"]), true], ["Recuperação", _pct(f["recovery"]), true], ["Risco de lesão", _pct(f["injury"]), false]]))
+	var fx := UIKit.effect_pills([["Evolução", _pct(f["growth"]), true], ["Recuperação", _pct(f["recovery"]), true], ["Risco de lesão", _pct(f["injury"]), false]])
+	if fx.get_child_count() > 0:
+		detail.add_child(fx)
+	else:
+		fx.free()
 	if float(f["cohesion"]) > 0.0:
 		detail.add_child(UIKit.pill("Entrosamento sobe mais rápido", UIColors.GREEN, 16))
-	card.add_child(UIKit.card_panel(detail))
+	if detail.get_child_count() > 0:
+		card.add_child(UIKit.card_panel(detail))
+	else:
+		detail.free()
 	return UIKit.card_panel(card)
 
 
@@ -151,7 +156,7 @@ func _intensity_card(club: Club) -> Control:
 	var it: Dictionary = TrainingManager.INTENSITY[cur]
 	card.add_child(UIKit.effect_pills([["Evolução", _pct(it["growth"]), true], ["Recuperação", _pct(it["recovery"]), true], ["Risco de lesão", _pct(it["injury"]), false]]))
 	if float(it["morale"]) != 0.0:
-		card.add_child(UIKit.label("O elenco %s com essa carga." % ("gosta" if float(it["morale"]) > 0.0 else "reclama"), "Small", true))
+		card.add_child(UIKit.colored("Elenco gosta" if float(it["morale"]) > 0.0 else "Elenco reclama", UIColors.GREEN if float(it["morale"]) > 0.0 else UIColors.ORANGE, "Small"))
 	return UIKit.card_panel(card)
 
 
@@ -169,7 +174,6 @@ func _prep_card(w: GameWorld, club: Club) -> Control:
 			club.training["prep"] = k
 		refresh()))
 	var pr := TrainingManager.prep_of(club)
-	card.add_child(UIKit.label(String(pr["desc"]), "Small", true))
 	var pills: Array = [["Evolução", _pct(pr["growth"]), true]]
 	var sp := TrainingManager.set_piece_bonus(w, club)
 	if sp > 0.0:
@@ -178,8 +182,6 @@ func _prep_card(w: GameWorld, club: Club) -> Control:
 	if st > 0.0:
 		pills.append(["Leitura do rival", int(round(st * 100.0)), true])
 	card.add_child(UIKit.effect_pills(pills))
-	if cur != "":
-		card.add_child(UIKit.label("Vale para todos os jogos enquanto estiver marcada. Rende mais com um treino de qualidade.", "Small", true))
 	return UIKit.card_panel(card)
 
 
@@ -197,20 +199,14 @@ func _quality_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.bar(v, 100.0, UIColors.morale_color(v), 8))
 	var lm := TrainingManager.learn_mult(w, club)
 	var d := _pct(lm)
-	var txt := "Treino na média: posições e estilos novos saem no ritmo normal."
-	if d >= 2:
-		txt = "Posições e estilos novos saem %d%% mais rápido e a preparação para o jogo rende mais." % d
-	elif d <= -2:
-		txt = "Posições e estilos novos saem %d%% mais devagar e a preparação para o jogo rende menos." % -d
-	card.add_child(UIKit.label(txt, "Small", true))
-	card.add_child(UIKit.label("Melhore o CT e a comissão técnica para treinar melhor.", "Small", true))
+	if absi(d) >= 2:
+		card.add_child(UIKit.effect_pills([["Aprendizado", d, true]]))
 	return UIKit.card_panel(card)
 
 
 func _players_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section_header("Treino individual"))
-	card.add_child(UIKit.label("Toque num jogador para mudar a carga, o foco, o estilo ou ensinar uma posição nova.", "Small", true))
 	var squad := w.squad(club)
 	squad.sort_custom(func(a: Player, b: Player): return a.position < b.position if a.position != b.position else a.overall > b.overall)
 	var last_group := -1
@@ -270,7 +266,7 @@ func _evolution_cards(w: GameWorld, club: Club) -> Array:
 		if Array(p.train.get("oh", [])).size() >= 2:
 			with_hist.append(p)
 	if with_hist.is_empty():
-		return [UIKit.empty_state("up", "Sem histórico ainda", "Depois da primeira semana de treino aparece aqui quem está evoluindo e o que mudou em cada jogador.")]
+		return [UIKit.empty_state("up", "Sem histórico ainda", "")]
 	var weeks := 0
 	for p: Player in with_hist:
 		weeks = maxi(weeks, Array(p.train.get("oh", [])).size() - 1)
@@ -286,8 +282,8 @@ func _evolution_cards(w: GameWorld, club: Club) -> Array:
 		if TrainingManager.trend(p) <= -0.1 and down.size() < 5:
 			down.append(p)
 	var out: Array = []
-	out.append(_trend_card("Em alta", "Maior evolução nas últimas %d semana(s)." % weeks, up, "Ninguém subiu de nível ainda."))
-	out.append(_trend_card("Em queda", "Perdendo rendimento (idade, lesões ou falta de jogo).", down, "Ninguém caiu de nível."))
+	out.append(_trend_card("Em alta", "Últimas %d semana(s)" % weeks, up, "Ninguém."))
+	out.append(_trend_card("Em queda", "", down, "Ninguém."))
 	# Últimas mudanças de atributo no elenco
 	var all_ch: Array = []
 	for p: Player in squad:
@@ -325,7 +321,8 @@ func _evolution_cards(w: GameWorld, club: Club) -> Array:
 func _trend_card(title: String, sub: String, list: Array, empty: String) -> Control:
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section_header(title))
-	card.add_child(UIKit.label(sub, "Small", true))
+	if sub != "":
+		card.add_child(UIKit.label(sub, "Small", true))
 	if list.is_empty():
 		card.add_child(UIKit.label(empty, "Muted"))
 	for p: Player in list:

@@ -31,7 +31,7 @@ func refresh() -> void:
 	UIKit.clear(c)
 	var years := seasons_of(w, club)
 	if years.is_empty():
-		c.add_child(UIKit.label("Ainda não há temporadas encerradas para mostrar.", "Muted", true))
+		c.add_child(UIKit.label("Nenhuma temporada encerrada.", "Muted", true))
 		return
 	if _year == 0 or not years.has(_year):
 		_year = years[0]

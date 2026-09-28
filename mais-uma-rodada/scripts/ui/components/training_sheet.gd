@@ -45,11 +45,10 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer) -> void:
 			p.train["ld"] = int(k)
 		rebuild.call()))
 	var lo: Dictionary = TrainingManager.LOAD[ld]
-	body.add_child(UIKit.label(String(lo["desc"]), "Small", true))
 	if ld != 1:
 		body.add_child(UIKit.effect_pills([["Evolução", _pct(lo["growth"]), true], ["Recuperação", _pct(lo["recovery"]), true], ["Risco de lesão", _pct(lo["injury"]), false]]))
 	if p.condition < 70.0 and ld == 2:
-		body.add_child(UIKit.colored("Está cansado (%d%%): carga extra agora aumenta o risco de lesão no treino." % int(p.condition), UIColors.ORANGE, "Small", true))
+		body.add_child(UIKit.colored("Cansado · %d%%" % int(p.condition), UIColors.ORANGE, "Small", true))
 	# Foco de atributos
 	body.add_child(UIKit.section("Foco individual"))
 	var fg := ButtonGroup.new()
@@ -70,7 +69,7 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer) -> void:
 	# Estilo de jogo
 	body.add_child(UIKit.section("Estilo de jogo"))
 	var target := String(p.train.get("st", ""))
-	body.add_child(UIKit.label("Hoje: %s. Escolha um estilo para o treino puxar os atributos dele." % PlayStyle.of(p), "Small", true))
+	body.add_child(UIKit.label("Hoje: %s" % PlayStyle.of(p), "Small", true))
 	var sg := ButtonGroup.new()
 	var sflow := UIKit.flow(8)
 	sflow.add_child(UIKit.chip("Nenhum", target == "", sg, func():
@@ -94,10 +93,7 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer) -> void:
 		var inset := UIKit.card("CardInset", 6)
 		inset.add_child(UIKit.label("%s: %d%%" % [String(te["n"]), int(prog * 100.0)], "H3"))
 		inset.add_child(UIKit.bar(prog, 1.0, UIColors.GREEN, 10))
-		inset.add_child(UIKit.label(String(te["d"]), "Small", true))
 		inset.add_child(UIKit.label("Trabalha: " + " · ".join(PackedStringArray(names)), "Small", true))
-		if p.age(w.year) >= 29:
-			inset.add_child(UIKit.colored("Com %d anos ele muda devagar: o treino troca pontos do estilo antigo pelos do novo." % p.age(w.year), UIColors.MUTED, "Small", true))
 		body.add_child(UIKit.card_panel(inset))
 	# Posição nova
 	body.add_child(UIKit.section("Aprender posição"))
@@ -108,8 +104,6 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer) -> void:
 		var weeks := int(ceil((1.0 - pprog) / maxf(0.001, rate)))
 		body.add_child(UIKit.label("Aprendendo %s: %d%% · cerca de %d semana(s)" % [Pos.name_of(learning), int(pprog * 100.0), weeks], "", true))
 		body.add_child(UIKit.bar(pprog, 1.0, UIColors.GREEN, 10))
-	else:
-		body.add_child(UIKit.label("Aprende uma posição nova em algumas semanas (mais rápido na mesma faixa do campo, com treino melhor e em jovens).", "Small", true))
 	var pg := ButtonGroup.new()
 	var pflow := UIKit.flow(8)
 	pflow.add_child(UIKit.chip("Nenhuma", learning < 0, pg, func():

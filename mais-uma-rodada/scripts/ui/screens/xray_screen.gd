@@ -16,7 +16,7 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	if rep.is_empty():
-		c.add_child(UIKit.empty_state("search", "Raio-X ainda vazio", "Depois de cada partida, o Raio-X mostra onde o jogo foi ganho ou perdido: chutes, posse, duelos e o que a comissão sugere mudar."))
+		c.add_child(UIKit.empty_state("search", "Raio-X ainda vazio", ""))
 		return
 	var opp := w.club(int(rep["opp"]))
 	var sc: Array = rep["score"]
@@ -25,7 +25,7 @@ func refresh() -> void:
 	c.add_child(_numbers(w, rep, opp))
 	var ins: Array = rep.get("insights", [])
 	if ins.is_empty():
-		c.add_child(UIKit.label("Jogo equilibrado, sem um padrão claro a corrigir.", "Muted", true))
+		c.add_child(UIKit.label("Jogo equilibrado.", "Muted", true))
 	for i in ins.size():
 		c.add_child(_insight(w, rep, ins[i]))
 	c.add_child(_map_card(rep))
