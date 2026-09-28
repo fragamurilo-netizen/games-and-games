@@ -90,7 +90,7 @@ func _next() -> bool:
 		return _next()
 	var col := Achievements.tier_color(id)
 	_medal.setup(id, true)
-	_title.text = "CONQUISTA DESBLOQUEADA · " + String(Achievements.TIERS[a["tier"]]["name"]).to_upper()
+	_title.text = (I18n.t("Conquista desbloqueada") + " · " + I18n.t(String(Achievements.TIERS[a["tier"]]["name"]))).to_upper()
 	_title.add_theme_color_override(&"font_color", col)
 	(_panel.get_theme_stylebox(&"panel") as StyleBoxFlat).border_color = col
 	_name.text = String(a["name"])
