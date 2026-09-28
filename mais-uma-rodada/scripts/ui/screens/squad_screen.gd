@@ -131,7 +131,7 @@ func refresh() -> void:
 	var top := GridContainer.new()
 	top.columns = 4
 	top.add_theme_constant_override(&"h_separation", 8)
-	for it in [["Estatísticas", "team_stats", "table"], ["Camisas", "numbers", "shirt"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
+	for it in [["Estatísticas", "team_stats", "chart"], ["Camisas", "numbers", "hash"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
 		var dest := String(it[1])
 		var b := UIKit.button(String(it[0]), "GhostButton", func(): UIManager.push(dest), String(it[2]))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL

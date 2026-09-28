@@ -82,6 +82,8 @@ func _ready() -> void:
 
 
 func _next() -> bool:
+	if GameManager.is_simulating(): # a thread do "Simular" está mexendo no mundo
+		return false
 	if world == null or world.pending_achievements.is_empty():
 		return false
 	var id := String(world.pending_achievements.pop_front())

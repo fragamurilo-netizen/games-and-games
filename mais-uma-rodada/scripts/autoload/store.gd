@@ -1,6 +1,7 @@
 extends Node
-## Compras na Google Play: a Carreira Completa (libera da 2ª temporada em diante e os mods) e o
-## café (gorjeta consumível). A compra fica guardada no aparelho para o jogo seguir offline e é
+## Compras na Google Play: a Carreira Completa (libera da 2ª temporada em diante e os mods), o
+## Editor na carreira (editar jogadores e clubes com a carreira em andamento) e o café (gorjeta
+## consumível). A compra fica guardada no aparelho para o jogo seguir offline e é
 ## conferida com a Play sempre que houver conexão (restaura ao reinstalar, revoga se reembolsada).
 ## Fora da versão de loja (editor, PC, builds de debug) tudo vem liberado.
 
@@ -9,15 +10,17 @@ signal message(text: String)
 
 const FULL := "carreira_completa"
 const TIP := "cafe"
-const PRODUCTS := [FULL, TIP]
+const EDITOR := "editor_carreira"
+const PRODUCTS := [FULL, EDITOR, TIP]
 const FILE := "user://store.cfg"
 const SALT := "mais-uma-rodada/1"
 
 ## -1 = automático; 0 = nunca cobra; 1 = sempre cobra (testes).
 var enforce_override: int = -1
 var owned: bool = false
+var editor_owned: bool = false
 var pending: bool = false
-var prices := {FULL: "R$ 9,99", TIP: "R$ 2,99"}
+var prices := {FULL: "R$ 9,99", EDITOR: "R$ 3,99", TIP: "R$ 2,99"}
 
 var _client: Object = null
 var _products_ready := false
@@ -57,6 +60,16 @@ func unlocked() -> bool:
 	return owned or not enforced()
 
 
+## Editor na carreira comprado (ou versão sem cobrança).
+func editor_unlocked() -> bool:
+	return editor_owned or not enforced()
+
+
+## Edição de jogadores e clubes durante a carreira: ligada nas Opções e comprada.
+func career_edit_on() -> bool:
+	return AppSettings.career_edit and editor_unlocked()
+
+
 ## A carreira passou da temporada de demonstração e ainda não foi comprada.
 func locked(w: GameWorld) -> bool:
 	return w != null and w.season_number >= 2 and not unlocked()
@@ -69,6 +82,8 @@ func price(id: String = FULL) -> String:
 func buy(id: String = FULL) -> void:
 	if not enforced():
 		owned = true if id == FULL else owned
+		if id == EDITOR:
+			_unlock_editor()
 		_save()
 		changed.emit()
 		return
@@ -121,6 +136,7 @@ func _on_purchases_query(r: Dictionary) -> void:
 	if int(r.get("response_code", -1)) != 0:
 		return
 	var has_full := false
+	var has_editor := false
 	pending = false
 	for p in r.get("purchases", []):
 		if _has(p, FULL):
@@ -128,9 +144,12 @@ func _on_purchases_query(r: Dictionary) -> void:
 				has_full = true
 			elif int(p.get("purchase_state", 0)) == 2:
 				pending = true
+		if _has(p, EDITOR) and int(p.get("purchase_state", 0)) == 1:
+			has_editor = true
 		_handle(p, false)
-	if has_full != owned:
+	if has_full != owned or has_editor != editor_owned:
 		owned = has_full
+		editor_owned = has_editor
 		_save()
 	changed.emit()
 
@@ -168,10 +187,25 @@ func _handle(p: Dictionary, fresh: bool) -> void:
 				message.emit("Carreira Completa liberada. Bom jogo!")
 		if not bool(p.get("is_acknowledged", false)):
 			_client.acknowledge_purchase(token)
+	if _has(p, EDITOR):
+		if not editor_owned:
+			_unlock_editor()
+			_save()
+			if fresh:
+				message.emit("Editor na carreira liberado. Bom trabalho!")
+		if not bool(p.get("is_acknowledged", false)):
+			_client.acknowledge_purchase(token)
 	if _has(p, TIP):
 		_client.consume_purchase(token)
 		if fresh:
 			message.emit("Valeu pelo café! Isso ajuda muito o jogo a continuar.")
+
+
+## Comprou o editor: ele já vem ligado (dá para desligar em Opções).
+func _unlock_editor() -> void:
+	editor_owned = true
+	AppSettings.career_edit = true
+	AppSettings.save_settings()
 
 
 static func _has(p: Dictionary, id: String) -> bool:
@@ -193,8 +227,8 @@ static func _error_text(code: int) -> String:
 	return "Não foi possível concluir a compra (código %d)." % code
 
 
-func _sig(v: bool) -> String:
-	return ("%s|%s|%s" % [SALT, OS.get_unique_id(), "1" if v else "0"]).sha256_text()
+func _sig(v: bool, item: String = "") -> String:
+	return ("%s|%s|%s%s" % [SALT, OS.get_unique_id(), "1" if v else "0", item]).sha256_text()
 
 
 func _load() -> void:
@@ -202,9 +236,11 @@ func _load() -> void:
 	if cf.load(FILE) != OK:
 		return
 	owned = String(cf.get_value("store", "full", "")) == _sig(true)
+	editor_owned = String(cf.get_value("store", "editor", "")) == _sig(true, EDITOR)
 
 
 func _save() -> void:
 	var cf := ConfigFile.new()
 	cf.set_value("store", "full", _sig(owned))
+	cf.set_value("store", "editor", _sig(editor_owned, EDITOR))
 	cf.save(FILE)

@@ -17,7 +17,7 @@ Mais Uma Rodada é um simulador de gestão de futebol feito para o celular. Joga
 
 ★ PARTIDAS QUE CONTAM UMA HISTÓRIA
 • Motor minuto a minuto: táticas, cansaço, cartões, lesões, pênaltis e acréscimos
-• Jogo ao vivo em campo 2D com narração, placar dos outros jogos e três velocidades
+• Jogo ao vivo em campo 2D com narração, placar dos outros jogos e velocidade normal, rápida, turbo ou resultado direto
 • Pause para mudar a tática ou fazer substituições
 • Zebras acontecem, mas o time mais forte costuma ganhar, como no futebol de verdade
 
@@ -45,9 +45,11 @@ Comece de graça e jogue uma temporada completa. Gostou? Desbloqueie a Carreira 
 
 Os clubes, jogadores e competições do jogo são fictícios ou inspirados no futebol real, sem vínculo com nenhuma entidade oficial.
 
-NOVIDADES (0.2.1)
-• Força dos clubes e dos jogadores calibrada com a vida real
-• Uniforme de goleiro para cada clube
-• Jogos e gols pela seleção no perfil do jogador
-• Filosofias de contratação dos clubes
-• Todas as copas nacionais e supercopas
+NOVIDADES (0.4.0)
+• Menu reorganizado por assunto: tudo numa tela, sem rolar
+• Opções em abas: partidas, idioma, visual, som e sobre
+• "Simular" muito mais fluido: a tela não trava e o botão Parar responde na hora
+• Velocidade Turbo que fica salva para os próximos jogos
+• Mundo novo, save e carregamento bem mais rápidos em celulares com vários núcleos
+• Idioma na tela inicial; na primeira abertura o jogo já usa o idioma do celular
+• Editor na carreira: edite jogadores e clubes com a carreira em andamento (compra à parte)

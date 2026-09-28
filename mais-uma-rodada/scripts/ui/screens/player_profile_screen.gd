@@ -976,7 +976,7 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 			refresh(), "up")
 		up.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		arow.add_child(up)
-		if AppSettings.career_edit:
+		if Store.career_edit_on():
 			arow.add_child(UIKit.button("Editar", "", func(): UIManager.push("editor", {"player": p.id}), "gear"))
 		f.add_child(arow)
 		return
@@ -1009,7 +1009,7 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 				if r["ok"]:
 					GameManager.save_now()
 					UIManager.back())))
-		if AppSettings.career_edit:
+		if Store.career_edit_on():
 			row.add_child(_act("Editar", "gear", func(): UIManager.push("editor", {"player": p.id})))
 		row.add_child(_act("Rescindir", "close", func():
 			var cost := TransferManager.release_cost(w, p)

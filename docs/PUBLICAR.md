@@ -5,6 +5,7 @@
 | ID na Play Console | Tipo | Preço | O que faz |
 |---|---|---|---|
 | `carreira_completa` | Produto único, não consumível | R$ 9,99 · US$ 2,99 | Libera da 2ª temporada em diante e os mods |
+| `editor_carreira` | Produto único, não consumível | R$ 3,99 · US$ 0,99 | Liga o editor de jogadores e clubes durante a carreira (Opções → Partidas) |
 | `cafe` | Produto único, consumível | R$ 2,99 · US$ 0,99 | Gorjeta; não muda nada no jogo |
 
 O código fica em `mais-uma-rodada/scripts/autoload/store.gd` (autoload `Store`):
@@ -14,6 +15,9 @@ O código fica em `mais-uma-rodada/scripts/autoload/store.gd` (autoload `Store`)
   (`paywall_screen.gd`).
 - A compra fica salva no aparelho (`user://store.cfg`, assinada com o id do aparelho) para funcionar offline e é
   conferida com a Play a cada abertura: restaura ao reinstalar e volta a travar se a compra for reembolsada.
+- O Editor na carreira (`Store.editor_unlocked()`, `Store.career_edit_on()`) é vendido à parte: sem ele, o
+  Editor com carreira aberta mostra só Meu clube, Competições, Treinador e Mods, mais o botão de compra; ao
+  comprar, a edição já vem ligada (desliga em Opções). Fica salvo no mesmo `user://store.cfg`, assinado.
 - Compras são confirmadas (acknowledge) na hora; o café é consumido para poder ser comprado de novo.
 - Só a versão de loja cobra: no editor, no PC e em builds de debug tudo vem liberado
   (`Store.enforce_override` força um lado nos testes).
@@ -48,7 +52,7 @@ A cada versão nova, aumente `version/code` nos dois presets de `export_presets.
 
 1. Criar o app: nome "Mais Uma Rodada: Técnico", jogo, gratuito, idioma padrão português (Brasil).
 2. Ativar a Assinatura de apps do Google Play e enviar o AAB num teste fechado.
-3. Criar os dois produtos acima em Monetizar → Produtos → Produtos no app, com os preços.
+3. Criar os três produtos acima em Monetizar → Produtos → Produtos no app, com os preços.
 4. Ficha da loja: textos de `store/play-store-pt-BR.txt` e `store/play-store-en-US.txt`, ícone
    `store/icon-512.png`, banner `store/feature-graphic-1024x500.png` e de 2 a 8 capturas de tela.
 5. Conteúdo do app: política de privacidade (`store/politica-de-privacidade.html` publicada num link

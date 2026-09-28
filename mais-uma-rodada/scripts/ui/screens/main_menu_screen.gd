@@ -106,7 +106,25 @@ func _menu() -> VBoxContainer:
 		UIKit.action_tile("gear", "Opções", "", func(): UIManager.push("settings")),
 	]
 	v.add_child(UIKit.tile_grid(tiles, 2))
+	v.add_child(_language_row())
 	return v
+
+
+## Idioma direto na tela inicial (cada nome sempre na própria língua).
+func _language_row() -> Control:
+	var items: Array = []
+	for i in I18n.LANGS.size():
+		items.append([I18n.LANGS[i], I18n.LANG_NAMES[i]])
+	var row := UIKit.segment(items, AppSettings.language, func(code: String):
+		if code == AppSettings.language:
+			return
+		AppSettings.language = code
+		AppSettings.save_settings()
+		I18n.apply(code)
+		refresh.call_deferred())
+	for b in row.find_children("*", "Button", true, false):
+		(b as Button).auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	return row
 
 
 ## Créditos do jogo (também abertos pelas Opções).

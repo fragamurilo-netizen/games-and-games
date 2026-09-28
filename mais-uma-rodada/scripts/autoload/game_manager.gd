@@ -24,6 +24,12 @@ var _save_busy := false
 var _save_writer = null # SaveManager.Writer do save em andamento
 var _save_gen := 0 # troca a cada carreira aberta/fechada: um job antigo não grava por cima
 var _save_phase := 0 # 0 parado, 1 montando os blocos, 2 gravando na thread
+## "Simular" em lote: cada data roda numa thread de trabalho (a tela segue fluida e o "Parar"
+## responde) e o save fica para o fim do lote, em vez de um save completo a cada jogo.
+var _sim_task := -1
+var _sim_report: Dictionary = {}
+var _batch := false
+var _batch_save := false
 
 
 func _ready() -> void:
@@ -149,6 +155,9 @@ func load_career(save_slot: int) -> bool:
 func save_now() -> bool:
 	if world == null or slot <= 0 or not matchday.is_empty():
 		return false
+	if _batch:
+		_batch_save = true
+		return true
 	if DisplayServer.get_name() == "headless":
 		return SaveManager.save_world(world, slot) == OK
 	_save_dirty = true
@@ -160,6 +169,7 @@ func save_now() -> bool:
 
 ## Termina o que estiver pendente agora mesmo (fechar a carreira, app indo para o fundo).
 func save_blocking() -> void:
+	_wait_sim()
 	var need := _save_dirty or _save_phase >= 1
 	if _save_writer != null:
 		_save_writer.abort() # fecha o arquivo do save em andamento antes de gravar de uma vez
@@ -197,18 +207,23 @@ func _run_save() -> void:
 		_save_phase = 0
 		_save_busy = false
 		return
-	var budget := 6
-	var t0 := Time.get_ticks_msec()
 	var items: Array = w.clubs.duplicate()
 	items.append_array(w.players.values())
-	for it in items:
-		wr.add(it.to_dict())
-		if Time.get_ticks_msec() - t0 >= budget:
-			await get_tree().process_frame
-			if gen != _save_gen:
-				wr.abort() # (já cancelado por quem trocou a geração)
-				return
-			t0 = Time.get_ticks_msec()
+	# Por quadro, um lote que cabe em ~6 ms: serializado e comprimido em todos os núcleos (o
+	# mundo não muda enquanto o lote roda, a tela espera só por ele). O lote se ajusta ao aparelho.
+	var batch := 64
+	var i := 0
+	while i < items.size():
+		var t0 := Time.get_ticks_usec()
+		var j := mini(items.size(), i + batch)
+		wr.add_all(SaveManager.encode_all(items.slice(i, j)))
+		i = j
+		var spent := maxf(0.2, (Time.get_ticks_usec() - t0) / 1000.0)
+		batch = clampi(int(batch * 6.0 / spent), 16, 2048)
+		await get_tree().process_frame
+		if gen != _save_gen:
+			wr.abort() # (já cancelado por quem trocou a geração)
+			return
 	if gen != _save_gen or w != world or not matchday.is_empty() or w.players.size() + w.clubs.size() != items.size():
 		# Mudou no meio (carreira trocada, partida começou, jogador novo): grava de novo depois
 		wr.abort()
@@ -243,6 +258,7 @@ func save_copy(to_slot: int) -> bool:
 
 
 func close_career() -> void:
+	end_batch()
 	save_now()
 	save_blocking()
 	_save_gen += 1
@@ -322,6 +338,17 @@ func ai_ready() -> bool:
 ## Encerra a data do usuário e já joga as datas seguintes em que ele não entra em campo
 ## (o relatório traz também as viradas de janela e os eventos de copa dessas datas).
 func finish_match() -> Dictionary:
+	var report := _finish_core()
+	if report.is_empty():
+		return {}
+	save_now()
+	matchday_finished.emit(report)
+	world_changed.emit()
+	return report
+
+
+## A parte pura de finish_match (sem save nem sinais): pode rodar numa thread de trabalho.
+func _finish_core() -> Dictionary:
 	if matchday.is_empty():
 		return {}
 	_wait_ai()
@@ -336,9 +363,6 @@ func finish_match() -> Dictionary:
 		report["retiring"].append_array(r["retiring"])
 		report["cups"].append_array(r["cups"])
 	last_report = report
-	save_now()
-	matchday_finished.emit(report)
-	world_changed.emit()
 	return report
 
 
@@ -349,6 +373,83 @@ func play_instant() -> Dictionary:
 	if sim != null:
 		sim.run_to_end()
 	return finish_match()
+
+
+# ---------------------------------------------------------------------------
+# Simulação em lote (tela "Simular")
+# ---------------------------------------------------------------------------
+
+## Abre um lote: os saves pedidos durante ele viram um só, no end_batch(). Um save que estava
+## no meio é descartado (o mundo vai mudar) e refeito no fim.
+func begin_batch() -> void:
+	if _batch:
+		return
+	if _save_busy or _save_dirty:
+		_cancel_save()
+		_batch_save = true
+	_batch = true
+
+
+func end_batch() -> void:
+	_wait_sim()
+	if not _batch:
+		return
+	_batch = false
+	if _batch_save:
+		_batch_save = false
+		save_now()
+	world_changed.emit()
+
+
+func in_batch() -> bool:
+	return _batch
+
+
+## Mundo sendo alterado por uma thread de trabalho: a interface não deve lê-lo agora.
+func is_simulating() -> bool:
+	return _sim_task >= 0
+
+
+## Joga a próxima data do usuário numa thread de trabalho. Acompanhe com sim_step_poll().
+func sim_step_start() -> bool:
+	if _sim_task >= 0 or world == null:
+		return false
+	_sim_report = {}
+	_sim_task = WorkerThreadPool.add_task(_sim_step_work, true, "simular_data")
+	return true
+
+
+func _sim_step_work() -> void:
+	begin_match()
+	var sim := user_sim()
+	if sim != null:
+		sim.run_to_end()
+	_sim_report = _finish_core()
+
+
+## null enquanto a data ainda roda; depois, o relatório (igual ao de play_instant).
+func sim_step_poll() -> Variant:
+	if _sim_task < 0:
+		return null
+	if not WorkerThreadPool.is_task_completed(_sim_task):
+		return null
+	WorkerThreadPool.wait_for_task_completion(_sim_task)
+	_sim_task = -1
+	var report := _sim_report
+	_sim_report = {}
+	if not report.is_empty():
+		save_now()
+		matchday_finished.emit(report)
+		world_changed.emit()
+	return report
+
+
+func _wait_sim() -> void:
+	if _sim_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_sim_task)
+		_sim_task = -1
+		if not _sim_report.is_empty():
+			save_now()
 
 
 func season_over() -> bool:
@@ -386,9 +487,15 @@ func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_APPLICATION_PAUSED:
 			# Só grava na hora se houver algo pendente (os saves normais já rodam em segundo plano).
+			# No meio de um "Simular", o que já foi jogado é gravado agora (o sistema pode matar o app).
+			_wait_sim()
+			if _batch_save:
+				_save_dirty = true
 			if matchday.is_empty():
 				save_blocking()
 		NOTIFICATION_WM_CLOSE_REQUEST:
+			_wait_sim()
+			_batch = false
 			if matchday.is_empty():
 				save_now()
 				save_blocking()

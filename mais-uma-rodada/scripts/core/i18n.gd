@@ -19,6 +19,15 @@ static var lang: String = DEFAULT
 static var _tables: Dictionary = {} # idioma → PatternTranslation
 
 
+## Idioma do aparelho entre os do jogo (português, espanhol; qualquer outro vira inglês).
+## Usado na primeira abertura, antes de o jogador escolher.
+static func system_language() -> String:
+	var code := OS.get_locale_language().to_lower()
+	if code in LANGS:
+		return code
+	return "en"
+
+
 ## Aplica o idioma salvo nas opções (chamado ao abrir o app e ao trocar nas Opções).
 static func apply(code: String) -> void:
 	if code not in LANGS:

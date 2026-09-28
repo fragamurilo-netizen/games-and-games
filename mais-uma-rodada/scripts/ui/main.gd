@@ -16,6 +16,8 @@ var _wake_id := 0
 var _shadow: TextureRect
 var _fade: TextureRect
 var _size_class := -1
+## Partida ao vivo na tela: desenho contínuo no ritmo da tela (fora dela, o modo econômico).
+var _live := false
 
 
 func _ready() -> void:
@@ -233,8 +235,15 @@ func _wake_render() -> void:
 	_wake_id += 1
 	var id := _wake_id
 	get_tree().create_timer(1.5, true).timeout.connect(func():
-		if id == _wake_id:
+		if id == _wake_id and not _live:
 			OS.low_processor_usage_mode = ProjectSettings.get_setting("application/run/low_processor_mode", true))
+
+
+## A partida ao vivo anima o tempo todo: sem o modo econômico ela roda no ritmo da tela (vsync);
+## nos menus o modo econômico volta e o jogo acorda no máximo ~80 vezes por segundo (era ~144).
+func set_live(on: bool) -> void:
+	_live = on
+	OS.low_processor_usage_mode = not on and ProjectSettings.get_setting("application/run/low_processor_mode", true)
 
 
 func _redraw_all(n: Node) -> void:

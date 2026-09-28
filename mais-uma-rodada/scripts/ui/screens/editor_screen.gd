@@ -28,6 +28,27 @@ var _ovr_label: Label = null
 var _kit_sel := "h" # uniforme aberto no editor de clube: h, a, t, g
 
 
+func _ready() -> void:
+	Store.changed.connect(_on_store_changed)
+	Store.message.connect(_on_store_message)
+
+
+func _exit_tree() -> void:
+	if Store.changed.is_connected(_on_store_changed):
+		Store.changed.disconnect(_on_store_changed)
+	if Store.message.is_connected(_on_store_message):
+		Store.message.disconnect(_on_store_message)
+
+
+## Editor na carreira comprado: o início ganha Clubes e Jogadores (sem mexer numa edição aberta).
+func _on_store_changed() -> void:
+	if _view == "home":
+		refresh.call_deferred()
+
+
+func _on_store_message(text: String) -> void:
+	UIManager.toast(text)
+
 func _init() -> void:
 	show_nav = false
 	screen_title = "Editor"
@@ -89,7 +110,7 @@ func _go(view: String) -> void:
 func _home(c: VBoxContainer) -> void:
 	screen_subtitle = "" if has_career() else "Mundo padrão das novas carreiras"
 	var items: Array = []
-	var edit_ok := not has_career() or AppSettings.career_edit
+	var edit_ok := not has_career() or Store.career_edit_on()
 	if has_career():
 		items.append(["shield", "Meu clube", "", func():
 			_club = world().user_club()
@@ -100,7 +121,7 @@ func _home(c: VBoxContainer) -> void:
 		items.append(["shirt", "Jogadores", "", func(): _go("pick_player")])
 	items.append(["trophy", "Competições", "Nomes, logos, cores e placar da TV", func(): _go("pick_comp")])
 	if has_career():
-		items.append(["star", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
+		items.append(["user", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
 	items.append(["list", "Mods", "", func(): _go("mods")])
 	# Início do editor: um ladrilho grande por área (como o hub de criação de um jogo de esporte).
 	max_content_width = 1500
@@ -110,7 +131,11 @@ func _home(c: VBoxContainer) -> void:
 		tiles.append(UIKit.action_tile(String(it[0]), String(it[1]), String(it[2]), it[3], tiles.is_empty()))
 	c.add_child(UIKit.tile_grid(tiles, 3 if UILayout.is_wide() else 2))
 	var info := UIKit.card("Card", 6)
-	if has_career() and not AppSettings.career_edit:
+	if has_career() and not Store.editor_unlocked():
+		info.add_child(UIKit.label("Editar jogadores e clubes durante a carreira", "H3", true))
+		info.add_child(UIKit.button("Editor na carreira · %s" % Store.price(Store.EDITOR), "PrimaryButton", func(): Store.buy(Store.EDITOR), "palette"))
+		c.add_child(UIKit.card_panel(info))
+	elif has_career() and not AppSettings.career_edit:
 		info.add_child(UIKit.label("Edição na carreira desligada em Opções.", "Small", true))
 		c.add_child(UIKit.card_panel(info))
 

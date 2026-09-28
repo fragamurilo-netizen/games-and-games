@@ -47,9 +47,17 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	LicensedData.apply_sponsors(w) # patrocinadores fixos dos dados/mods (campo "sponsors" do clube)
 	if world_type == "padrao":
 		WorldEvents.seed_real_situation(w) # donos, SAFs e crises que já existem no começo do jogo
-	for p: Player in w.players.values():
-		p.compact() # histórico compactado na memória (o celular agradece)
+	compact_all(w)
 	return w
+
+
+## Histórico compactado na memória (o celular agradece), em paralelo: cada jogador é independente.
+static func compact_all(w: GameWorld) -> void:
+	var all: Array = w.players.values()
+	Parallel.map_chunks(all.size(), func(a: int, b: int) -> Array:
+		for i in range(a, b):
+			(all[i] as Player).compact()
+		return [], 400)
 
 
 ## Nível médio de uma liga sorteada pelo número de vagas (para agentes livres).
