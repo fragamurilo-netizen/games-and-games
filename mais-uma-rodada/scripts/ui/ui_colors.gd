@@ -78,6 +78,10 @@ static var TEAM_1 := Color(0, 0, 0, 0)
 static var TEAM_2 := Color(0, 0, 0, 0)
 static var _theme_refs: Array = [] # [objeto, propriedade ou [tipo, nome], cor original]
 static var _applied := ""
+## Fundo e menus tingidos com a cor do clube/liga (0 = neutro). Guarda a cor-base do tingimento.
+static var tint := 0.0
+static var _tint_col := Color(0, 0, 0, 0)
+const TINT_KEYS := ["BG", "SURFACE", "SURFACE_2", "SURFACE_3", "LINE"]
 const PITCH_A := Color("#2E7D4B")
 const PITCH_B := Color("#2A7445")
 const PITCH_LINE := Color(0.87, 0.95, 0.89, 0.75)
@@ -139,7 +143,7 @@ static func set_light(on: bool) -> void:
 	RED = pal["RED"]
 	BLUE = pal["BLUE"]
 	ORANGE = pal["ORANGE"]
-	RenderingServer.set_default_clear_color(BG)
+	_apply_palette()
 	# Recalcula o destaque (a cor do clube muda de tom com o modo) e repinta o tema.
 	var key := _applied
 	_applied = "~"
@@ -148,21 +152,68 @@ static func set_light(on: bool) -> void:
 	else:
 		var parts := key.split("|")
 		_set_accent(Color(parts[0]), Color(parts[1]))
+		_tint_col = ACCENT
+		_apply_palette()
 	_applied = key
 	_repaint_theme()
 
 
 ## Pinta a interface com as cores do clube (ou volta ao dourado com `club` nulo).
-static func apply_club(club: Club) -> void:
-	var key := "" if club == null else "%s|%s" % [club.color1, club.color2]
+static func apply_club(club: Club, tint_amount := 0.0) -> void:
+	if club == null:
+		apply_colors(null, null, 0.0)
+	else:
+		apply_colors(Color(club.color1), Color(club.color2), tint_amount)
+
+
+## Cores da interface conforme as opções: dourado, do clube ou da liga do clube, com o tingimento
+## escolhido para fundo e menus. `club` nulo (menu principal) = dourado.
+static func apply_colors_for(club: Club) -> void:
+	var t: float = AppSettings.TINT_AMOUNTS[AppSettings.bg_tint]
+	if club == null or AppSettings.color_source == 0:
+		apply_colors(null, null, 0.0)
+		return
+	if AppSettings.color_source == 2:
+		var cols: Array = DatabaseManager.league_cfg(club.league_id).get("colors", [])
+		if cols.size() >= 2:
+			apply_colors(Color(String(cols[0])), Color(String(cols[1])), t)
+			return
+	apply_colors(Color(club.color1), Color(club.color2), t)
+
+
+## Destaque com duas cores (clube, liga) e, opcionalmente, fundo e menus tingidos com elas.
+static func apply_colors(c1: Variant, c2: Variant, tint_amount := 0.0) -> void:
+	var key := "" if c1 == null else "#%s|#%s|%.2f" % [(c1 as Color).to_html(false), (c2 as Color).to_html(false), tint_amount]
 	if key == _applied:
 		return
 	_applied = key
-	if club == null:
-		_set_accent(null, null)
-	else:
-		_set_accent(Color(club.color1), Color(club.color2))
+	tint = tint_amount if c1 != null else 0.0
+	_set_accent(c1, c2)
+	_tint_col = ACCENT if c1 != null else Color(0, 0, 0, 0)
+	_apply_palette()
 	_repaint_theme()
+
+
+## Fundo, superfícies e linhas da paleta atual, com o tingimento aplicado.
+static func _apply_palette() -> void:
+	var pal: Dictionary = LIGHT if light else DARK
+	BG = _tinted(pal["BG"])
+	SURFACE = _tinted(pal["SURFACE"])
+	SURFACE_2 = _tinted(pal["SURFACE_2"])
+	SURFACE_3 = _tinted(pal["SURFACE_3"])
+	LINE = _tinted(pal["LINE"])
+	RenderingServer.set_default_clear_color(BG)
+
+
+## Mesmo brilho, com o matiz da cor do time (fundos continuam escuros no modo escuro e claros no claro).
+static func _tinted(c: Color) -> Color:
+	if tint <= 0.0 or _tint_col.a <= 0.0:
+		return c
+	var target := Color.from_hsv(_tint_col.h, clampf(_tint_col.s, 0.3, 0.85), c.v)
+	# O fundo quase preto precisa de um pouco mais de luz para a cor aparecer.
+	if not light:
+		target = Color.from_hsv(_tint_col.h, clampf(_tint_col.s, 0.3, 0.85), minf(1.0, c.v * (1.0 + tint * 1.2) + 0.02 * tint))
+	return c.lerp(target, tint)
 
 
 static func _set_accent(c1: Variant, c2: Variant) -> void:
@@ -270,6 +321,12 @@ static func themed(orig: Color) -> Color:
 		# Véus brancos translúcidos (realces sobre o fundo escuro) viram véus pretos.
 		if not found and orig.a < 1.0 and _same_rgb(orig, Color.WHITE):
 			nc = Color.BLACK
+	if tint > 0.0:
+		var pal: Dictionary = LIGHT if light else DARK
+		for k: String in TINT_KEYS:
+			if _same_rgb(nc, pal[k]):
+				nc = _tinted(pal[k])
+				break
 	nc.a = orig.a
 	return nc
 

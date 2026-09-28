@@ -21,6 +21,12 @@ const CURRENCY_NAMES: Array[String] = ["Euro (€)", "Real (R$)", "Dólar (US$)"
 static var currency: int = CURRENCY_EUR
 ## Interface nas cores do clube durante a carreira.
 static var team_colors: bool = true
+## De onde vêm as cores da interface: 0 dourado, 1 clube, 2 liga. E quanto tingem fundo e menus.
+const COLOR_SOURCE_NAMES := ["Dourado", "Meu clube", "Minha liga"]
+const TINT_NAMES := ["Sem cor", "Suave", "Forte"]
+const TINT_AMOUNTS := [0.0, 0.35, 0.7]
+static var color_source: int = 1
+static var bg_tint: int = 1
 ## Editar jogadores e clubes do save durante a carreira (desligado = carreira "limpa"; o Editor do menu
 ## continua mudando o padrão das novas carreiras).
 static var career_edit: bool = false
@@ -59,6 +65,8 @@ static func load_settings() -> void:
 	language = cfg.get_value("game", "language", I18n.DEFAULT)
 	currency = clampi(int(cfg.get_value("game", "currency", CURRENCY_EUR)), CURRENCY_EUR, CURRENCY_USD)
 	team_colors = cfg.get_value("game", "team_colors", true)
+	color_source = clampi(int(cfg.get_value("look", "color_source", 1 if team_colors else 0)), 0, 2)
+	bg_tint = clampi(int(cfg.get_value("look", "bg_tint", 1)), 0, 2)
 	career_edit = cfg.get_value("game", "career_edit", false)
 	theme_mode = cfg.get_value("look", "theme_mode", THEME_DARK)
 	ui_scale = clampi(cfg.get_value("look", "ui_scale", 0), 0, UI_SCALES.size() - 1)
@@ -78,7 +86,9 @@ static func save_settings() -> void:
 	cfg.set_value("game", "tutorial_done", tutorial_done)
 	cfg.set_value("game", "language", language)
 	cfg.set_value("game", "currency", currency)
-	cfg.set_value("game", "team_colors", team_colors)
+	cfg.set_value("game", "team_colors", color_source != 0)
+	cfg.set_value("look", "color_source", color_source)
+	cfg.set_value("look", "bg_tint", bg_tint)
 	cfg.set_value("game", "career_edit", career_edit)
 	cfg.set_value("look", "theme_mode", theme_mode)
 	cfg.set_value("look", "ui_scale", ui_scale)

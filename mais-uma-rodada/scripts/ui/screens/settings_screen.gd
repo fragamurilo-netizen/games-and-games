@@ -23,11 +23,18 @@ func refresh() -> void:
 		AppSettings.save_settings()
 		UIManager.apply_look()))
 	cl.add_child(UIKit.label("Claro e escuro têm contraste alto para ler no sol ou à noite. \"Do aparelho\" segue o modo do celular.", "Small", true))
-	cl.add_child(_toggle("Interface nas cores do meu clube", AppSettings.team_colors, func(v: bool):
-		AppSettings.team_colors = v
+	cl.add_child(UIKit.label("Cores da interface", "Muted"))
+	cl.add_child(_chips(AppSettings.COLOR_SOURCE_NAMES, AppSettings.color_source, func(i: int):
+		AppSettings.color_source = i
+		AppSettings.team_colors = i != 0
 		AppSettings.save_settings()
-		UIManager.refresh_chrome()
-		refresh()))
+		UIManager.apply_look()))
+	cl.add_child(UIKit.label("Cor no fundo e nos menus", "Muted"))
+	cl.add_child(_chips(AppSettings.TINT_NAMES, AppSettings.bg_tint, func(i: int):
+		AppSettings.bg_tint = i
+		AppSettings.save_settings()
+		UIManager.apply_look()))
+	cl.add_child(UIKit.label("Destaques, fundo e menus tomam as cores do seu clube ou da sua liga durante a carreira.", "Small", true))
 	cl.add_child(UIKit.label("Tamanho da interface", "Muted"))
 	cl.add_child(_chips(AppSettings.UI_SCALE_NAMES, AppSettings.ui_scale, func(i: int):
 		AppSettings.ui_scale = i
