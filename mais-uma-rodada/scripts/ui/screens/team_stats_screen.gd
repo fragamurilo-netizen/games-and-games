@@ -401,3 +401,7 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 	if not any:
 		card.add_child(UIKit.label("A temporada ainda não começou.", "Muted"))
 	return UIKit.card_panel(card)
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)

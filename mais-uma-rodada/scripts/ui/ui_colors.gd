@@ -181,6 +181,28 @@ static func apply_colors_for(club: Club) -> void:
 	apply_colors(Color(club.color1), Color(club.color2), t)
 
 
+## Cor da tela conforme o contexto: por padrão o clube do usuário; tabelas e competições nas
+## cores da liga; outro clube (ou jogador de outro clube) nas cores dele.
+## ctx: {} | {"club": Club} | {"league": id de liga ou copa}
+static func apply_context(user: Club, ctx: Dictionary) -> void:
+	if user == null or AppSettings.color_source == 0:
+		apply_colors_for(user)
+		return
+	var t: float = AppSettings.TINT_AMOUNTS[AppSettings.bg_tint]
+	var c: Variant = ctx.get("club", null)
+	if c != null and c is Club:
+		apply_colors(Color((c as Club).color1), Color((c as Club).color2), t)
+		return
+	var lid := String(ctx.get("league", ""))
+	if lid != "":
+		var cfg: Dictionary = DatabaseManager.league_cfg(lid) if DatabaseManager.has_league(lid) else DatabaseManager.cup_cfg(lid)
+		var cols: Array = cfg.get("colors", [])
+		if cols.size() >= 2:
+			apply_colors(Color(String(cols[0])), Color(String(cols[1])), t)
+			return
+	apply_colors_for(user)
+
+
 ## Destaque com duas cores (clube, liga) e, opcionalmente, fundo e menus tingidos com elas.
 static func apply_colors(c1: Variant, c2: Variant, tint_amount := 0.0) -> void:
 	var key := "" if c1 == null else "#%s|#%s|%.2f" % [(c1 as Color).to_html(false), (c2 as Color).to_html(false), tint_amount]

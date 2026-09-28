@@ -293,3 +293,7 @@ func _move_row(w: GameWorld, t: Transfer, ours: int) -> Control:
 	if w.player(pid) == null:
 		return UIKit.margin(row, 8, 6, 8, 6)
 	return UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}), "RowPanel")
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)

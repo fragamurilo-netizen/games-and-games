@@ -251,3 +251,7 @@ func _spell_row(w: GameWorld, sp: Dictionary) -> Control:
 static func _stars(sk: float) -> String:
 	var n := clampi(int(round((sk - 20.0) / 15.0)), 1, 5)
 	return "★".repeat(n) + "☆".repeat(5 - n)
+
+
+func color_context() -> Dictionary:
+	return club_context(_club)

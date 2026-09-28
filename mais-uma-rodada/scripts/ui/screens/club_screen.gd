@@ -772,3 +772,7 @@ func _save_copy() -> void:
 				UIManager.confirm("Sobrescrever espaço %d?" % slot, "O save que está lá será substituído.", "Sobrescrever", do_save)))
 	v.add_child(UIKit.button("Cancelar", "GhostButton", func(): UIManager.close_modal()))
 	UIManager.show_modal(v)
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)

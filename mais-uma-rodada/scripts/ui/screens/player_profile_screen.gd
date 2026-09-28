@@ -1051,3 +1051,9 @@ func _act(text: String, icon_name: String, cb: Callable, variation: String = "")
 	b.add_theme_constant_override(&"h_separation", 2)
 	b.clip_text = true
 	return b
+
+
+func color_context() -> Dictionary:
+	var w := GameManager.world
+	var p := w.player(_pid) if w != null else null
+	return club_context(p.club_id) if p != null else {}

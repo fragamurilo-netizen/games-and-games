@@ -44,6 +44,7 @@ func refresh() -> void:
 		_cup_id = ""
 		_league_id = w.user_league_id()
 		_tab = "table"
+	UIManager.refresh_chrome() # cores da competição antes de montar a tela
 	var c := content()
 	UIKit.clear(c)
 	_tint = [] if _rank_scope != "-" else CompText.colors(_cup_id if _cup_id != "" else _league_id)
@@ -1372,3 +1373,8 @@ func _rank_row(w: GameWorld, entry: Dictionary, pos: int) -> Control:
 			UIManager.goto("club")
 		else:
 			UIManager.push("club", {"id": cid}), "CardFlat")
+
+
+func color_context() -> Dictionary:
+	var comp := _cup_id if _cup_id != "" else _league_id
+	return {"league": comp} if comp != "" else {}

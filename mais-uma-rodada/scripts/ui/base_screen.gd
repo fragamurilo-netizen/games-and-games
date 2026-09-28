@@ -57,6 +57,20 @@ func setup(p: Dictionary) -> void:
 	params = p
 
 
+## Contexto de cor da tela (ver UIColors.apply_context): {} usa o clube do usuário.
+func color_context() -> Dictionary:
+	return {}
+
+
+## Contexto de um clube: outro clube pinta a tela com as cores dele; o do usuário, o padrão.
+func club_context(club_id: int) -> Dictionary:
+	var w := GameManager.world
+	if w == null or club_id < 0 or w.is_user_club(club_id):
+		return {}
+	var c := w.club(club_id)
+	return {"club": c} if c != null else {}
+
+
 ## Chamado sempre que a tela aparece (inclusive ao voltar de outra).
 func on_show() -> void:
 	refresh()

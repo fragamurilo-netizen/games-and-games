@@ -127,16 +127,6 @@ static func _open(w: GameWorld, n: NewsEvent) -> void:
 	UIManager.show_modal(article(w, n), true)
 
 
-const FAN_LINES := {
-	"good": ["Que fase! Ninguém segura esse time.", "Eu avisei desde o começo da temporada.", "Assim dá gosto de acompanhar.", "Isso é trabalho, não é sorte.", "Tem que valorizar esse elenco."],
-	"bad": ["Precisa mudar alguma coisa, e rápido.", "Já vi esse filme antes e não termina bem.", "Diretoria tem que se mexer.", "Sem cobrança não vai.", "Paciência tem limite."],
-	"market": ["Grande contratação, se vier na forma de antes.", "Esse preço tá fora da realidade.", "Pode dar muito certo ou muito errado.", "Vai ser titular em duas semanas.", "Não era a prioridade do elenco."],
-	"social": ["Ídolo demais!", "Esse aí é gente como a gente.", "Posta menos e joga mais.", "Mensagem bonita, respeito.", "Tô de olho nesse post aí..."],
-	"neutral": ["Vamos ver no campo.", "Notícia interessante, mas é cedo pra julgar.", "Quero ver o próximo jogo.", "Segue o jogo.", "Isso muda a briga na tabela."],
-}
-const FAN_NAMES := ["Arquibancada Raiz", "Torcedor de Sofá", "Tático de Bar", "Dona Tabela", "Estatístico Amador", "Velha Guarda", "Ultra da Curva", "Olheiro de Fim de Semana"]
-
-
 ## Matéria completa: chapéu, título, texto, quem aparece, repercussão e relacionadas.
 static func article(w: GameWorld, n: NewsEvent) -> Control:
 	var v := UIKit.vbox(12)
@@ -169,28 +159,6 @@ static func article(w: GameWorld, n: NewsEvent) -> Control:
 		links.add_child(bc)
 	if links.get_child_count() > 0:
 		v.add_child(links)
-	# Repercussão da torcida (fixa por notícia)
-	var mood := "neutral"
-	if n.category == "social":
-		mood = "social"
-	elif MARKET_CATS.has(n.category):
-		mood = "market"
-	elif n.category in BAD_CATS:
-		mood = "bad"
-	elif n.category in GOOD_CATS or n.category in ["goleada", "sequencia_vitorias", "hattrick", "lider", "classico_vitoria", "despedida"]:
-		mood = "good"
-	var rc := UIKit.card("CardInset", 6)
-	rc.add_child(UIKit.label("Repercussão", "Caps"))
-	var h := absi(hash(n.title + str(n.year)))
-	var pool: Array = FAN_LINES[mood]
-	for i in 3:
-		var row := UIKit.vbox(0)
-		row.add_child(UIKit.label(String(FAN_NAMES[(h + i * 3) % FAN_NAMES.size()]), "H3"))
-		row.add_child(UIKit.label(String(pool[(h / 7 + i * 2) % pool.size()]), "Small", true))
-		rc.add_child(row)
-	var likes := 40 + h % 900
-	rc.add_child(UIKit.label("%d curtidas · %d comentários" % [likes, likes / 6 + 3], "Small"))
-	v.add_child(UIKit.card_panel(rc))
 	# Relacionadas
 	var rel: Array = []
 	for i in range(w.news.size() - 1, -1, -1):

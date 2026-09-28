@@ -873,3 +873,10 @@ func _encyclopedia(w: GameWorld, c: VBoxContainer) -> void:
 		var e: Array = all[i]
 		rows.append(_mem_row(0, "%d. %s · %d jogos" % [i + 1, String(e[1]), int(e[3])], "%d gols" % int(e[0]), int(e[2])))
 	c.add_child(_list_card("Artilheiros de todos os tempos", rows, "Sem artilheiros registrados ainda."))
+
+
+func color_context() -> Dictionary:
+	var w := GameManager.world
+	if w != null and w.league(_comp) != null:
+		return {"league": _comp}
+	return {}

@@ -121,3 +121,7 @@ func _retired(w: GameWorld, retired: Array) -> Control:
 		row.add_child(UIKit.badge(int(r.get("ovr", 0)), 50, 36, 20))
 		card.add_child(row)
 	return UIKit.card_panel(card)
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)

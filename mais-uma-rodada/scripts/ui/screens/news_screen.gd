@@ -452,3 +452,11 @@ func _opinion(w: GameWorld, c: VBoxContainer) -> void:
 		dc.add_child(_leader_row(w, young, "nota %.2f" % young.avg_rating()))
 	cards.append(UIKit.card_panel(dc))
 	UIKit.columns(c, cards, content_width())
+
+
+func color_context() -> Dictionary:
+	var w := GameManager.world
+	if w == null or _nation == "" or (w.has_user() and _nation == w.user_nation()):
+		return {}
+	var lid := Reputation.top_league_of(_nation)
+	return {"league": lid} if lid != "" else {}

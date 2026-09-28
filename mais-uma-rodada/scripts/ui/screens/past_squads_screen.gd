@@ -181,3 +181,7 @@ static func _campaign(w: GameWorld, club: Club, y: int) -> Array:
 	if out.is_empty():
 		out.append("Temporada %d" % y)
 	return out
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)
