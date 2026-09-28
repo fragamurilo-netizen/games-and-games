@@ -139,9 +139,11 @@ static func takeover(world: GameWorld, c: Club, who: String) -> int:
 		("A dívida de %s foi quitada" % Fmt.money(paid_debt)) if paid_debt > 0 else "O clube não devia nada"]
 	if world.is_user_club(c.id):
 		body += " O recado para o treinador: quer títulos logo."
-		NewsManager.post_raw(world, title, body, c.id, -1, NewsEvent.IMP_HEADLINE, "clube")
+		var un := NewsManager.post_raw(world, title, body, c.id, -1, NewsEvent.IMP_HEADLINE, "clube")
+		un.media = {"type": "crest", "club": c.id, "rc": "Investimento prometido", "rv": Fmt.money(money), "rx": who}
 	elif newsworthy(world, c):
-		NewsManager.post_raw(world, title, body, c.id, -1, NewsEvent.IMP_HIGH, "clube")
+		var n := NewsManager.post_raw(world, title, body, c.id, -1, NewsEvent.IMP_HIGH, "clube")
+		n.media = {"type": "crest", "club": c.id, "rc": "Investimento prometido", "rv": Fmt.money(money), "rx": who}
 	return money
 
 

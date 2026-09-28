@@ -7,7 +7,7 @@ const DIFF_EASY := 0
 const DIFF_NORMAL := 1
 const DIFF_HARD := 2
 const DIFF_NAMES: Array[String] = ["Fácil", "Normal", "Difícil"]
-const MAX_NEWS := 240
+const MAX_NEWS := 320
 
 var version: int = SAVE_VERSION
 var world_seed: int = 0

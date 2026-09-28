@@ -563,12 +563,22 @@ func _news_card(w: GameWorld) -> Control:
 	if unread > 0:
 		head.add_child(UIKit.colored("%d nova(s)" % unread, UIColors.ACCENT, "Small"))
 	card.add_child(head)
-	var items: Array = w.news.duplicate()
-	items.reverse()
-	var shown := 0
-	for n: NewsEvent in items:
-		if shown >= 4:
+	# O que importa primeiro: notícias do seu país e as grandes; o mundo completa se faltar.
+	var picked: Array = []
+	var rest: Array = []
+	for i in range(w.news.size() - 1, maxi(-1, w.news.size() - 60), -1):
+		var n: NewsEvent = w.news[i]
+		if picked.size() >= 4:
 			break
+		if n.importance >= NewsEvent.IMP_HIGH or (n.importance >= NewsEvent.IMP_NORMAL and not NewsRow.is_foreign(w, n)):
+			picked.append(n)
+		elif rest.size() < 4:
+			rest.append(n)
+	while picked.size() < 4 and not rest.is_empty():
+		picked.append(rest.pop_front())
+	picked.sort_custom(func(a: NewsEvent, b: NewsEvent): return w.news.find(a) > w.news.find(b))
+	var shown := 0
+	for n: NewsEvent in picked:
 		card.add_child(NewsRow.make(w, n, true))
 		shown += 1
 	if shown == 0:

@@ -211,6 +211,9 @@ func _only_pass() -> void:
 	await _frames(6)
 	UIManager.close_all_modals()
 	for spec in only.split(","):
+		if spec.begins_with("~article"):
+			await _article_shot(w, spec.substr(9))
+			continue
 		if spec.begins_with("~"):
 			await _dialog_shot(w, spec.substr(1))
 			continue
@@ -307,4 +310,33 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
 	await _shot(prefix + "dlg_" + kind)
+	UIManager.close_all_modals()
+
+
+## Matéria completa aberta por cima do portal: ~article (a mais recente com blocos de dados) ou
+## ~article:categoria / ~article:chave (a mais recente daquela categoria ou com aquela chave na mídia).
+func _article_shot(w: GameWorld, what: String) -> void:
+	UIManager.close_all_modals()
+	UIManager.goto("hub")
+	await _frames(2)
+	UIManager.push("news")
+	await _frames(6)
+	var pick: NewsEvent = null
+	for i in range(w.news.size() - 1, -1, -1):
+		var n: NewsEvent = w.news[i]
+		var ok := n.category == what or n.media.has(what)
+		if what == "":
+			var blocks := NewsExtras.blocks(w, n)
+			ok = not blocks.is_empty()
+			for b: Control in blocks:
+				b.free()
+		if ok:
+			pick = n
+			break
+	if pick == null:
+		print("[tela] sem notícia para ", what)
+		return
+	UIManager.show_modal(NewsRow.article(w, pick), true)
+	await _frames(6)
+	await _shot(prefix + "article_" + (what if what != "" else "any"))
 	UIManager.close_all_modals()

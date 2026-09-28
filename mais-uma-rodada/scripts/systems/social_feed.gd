@@ -20,7 +20,7 @@ const OUTLET_INT := ["Matchday Live", "Full Time Feed", "Terrace Talk"]
 
 ## Notícias que falam de uma pessoa ou clube específico (podem sair várias no mesmo dia).
 const PERSONAL := ["transferencia", "transferencia_livre", "venda_usuario", "rumor", "hattrick", "primeiro_gol", "marco_gols",
-	"lesao_grave", "aposentadoria", "aposentadoria_anuncio", "campeao", "acesso", "copa_campeao", "estadual_campeao", "novo_tecnico", "demissao"]
+	"lesao_grave", "aposentadoria", "aposentadoria_anuncio", "campeao", "acesso", "copa_campeao", "estadual_campeao", "novo_tecnico", "demissao", "social", "renovacao", "joia", "recorde"]
 
 const FAN_FIRST := ["joao", "lucas", "bia", "rafa", "duda", "gabi", "leo", "nanda", "caio", "vini", "carol", "tiago",
 	"mari", "pedro", "ju", "dani", "gui", "bruno", "lari", "fe", "matheus", "isa", "davi", "paulinha"]
@@ -390,6 +390,20 @@ static func _news_post(world: GameWorld, n: NewsEvent, c: Club, pl: Player, key:
 			else:
 				p = _post(key, _journo(world, js, r, "critico"), n.title + ("\n" + n.body if n.body != "" else ""), n.year, n.day)
 			mood = "bad"
+		"social":
+			# Post do próprio jogador (o texto está na notícia)
+			if pl != null and String(n.media.get("tx", "")) != "":
+				p = _post(key, player_acc(world, pl), String(n.media["tx"]), n.year, n.day)
+				mood = "player"
+			else:
+				p = _post(key, outlet_acc(world), n.title, n.year, n.day)
+		"renovacao":
+			if c != null and pl != null and pl.club_id == c.id:
+				p = _post(key, club_acc(c), "Renovado! %s segue com a gente até %d.\n%s" % [pl.display_name(), pl.contract_end, _tags(c, "Renovado")], n.year, n.day)
+				p["media"] = {"type": "player", "player": pl.id}
+				mood = "good"
+			else:
+				p = _post(key, outlet_acc(world), n.title, n.year, n.day)
 		"lesao_grave":
 			if c != null and pl != null:
 				p = _post(key, club_acc(c), "Boletim médico: %s passou por exames e será desfalque. Força, %s!" % [pl.display_name(), pl.short_name()], n.year, n.day)
