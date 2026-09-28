@@ -34,10 +34,13 @@ func _draw() -> void:
 	var fg: Color
 	if color_override.a > 0.0:
 		# Etiqueta (posição, zona): fundo tingido, sem borda, texto na cor.
-		var col := UIColors.ink(color_override)
-		box.bg_color = Color(col.r, col.g, col.b, 0.2 if not UIColors.light else 0.14)
+		var tint_a := 0.2 if not UIColors.light else 0.14
+		box.bg_color = Color(color_override.r, color_override.g, color_override.b, tint_a)
 		box.set_corner_radius_all(int(minf(size.y * 0.22, 7)))
-		fg = col
+		# Texto na cor da etiqueta, ajustada para ler sobre o próprio fundo tingido (em cima de
+		# cartões e linhas, claros ou escuros).
+		var under := UIColors.SURFACE_2.lerp(Color(color_override, 1.0), tint_a)
+		fg = UIColors.readable_on(color_override, [under, UIColors.SURFACE.lerp(Color(color_override, 1.0), tint_a)], 4.5)
 	else:
 		# Overall: ladrilho cheio na cor da faixa, como nas cartas dos jogos de futebol.
 		var col := Fmt._rating_color(value)
@@ -45,7 +48,7 @@ func _draw() -> void:
 		box.border_color = col.darkened(0.3)
 		box.border_width_bottom = 3
 		box.set_corner_radius_all(int(minf(size.y * 0.22, 8)))
-		fg = Color("#0B0E12") if col.get_luminance() > 0.45 else Color.WHITE
+		fg = UIColors.on_color(col)
 	draw_style_box(box, r)
 	var font := get_theme_font(&"font", &"StatBig")
 	var w := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x

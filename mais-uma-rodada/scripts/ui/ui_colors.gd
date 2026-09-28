@@ -13,7 +13,7 @@ const D_SURFACE_3 := Color("#242A34")
 const D_LINE := Color("#2B313C")
 const D_TEXT := Color("#F3F5F8")
 const D_MUTED := Color("#9AA2AF")
-const D_DIM := Color("#646C79")
+const D_DIM := Color("#848C99")
 const D_GOLD := Color("#FFC940")
 const D_GOLD_DARK := Color("#C99A1E")
 const D_GREEN := Color("#34C77B")
@@ -37,7 +37,7 @@ const DARK := {
 const LEGACY := {
 	"0A0B0D": "BG", "141518": "SURFACE", "1C1D21": "SURFACE_2", "26282D": "SURFACE_3",
 	"2F3137": "LINE", "F2F3F5": "TEXT", "9EA2AA": "MUTED", "63676F": "DIM", "3DBE7A": "GREEN",
-	"E5484D": "RED", "4EA8DE": "BLUE", "F0A35E": "ORANGE",
+	"E5484D": "RED", "4EA8DE": "BLUE", "F0A35E": "ORANGE", "646C79": "DIM",
 }
 ## Cores do tema escuro que não são da paleta acima e seus pares no modo claro.
 const LIGHT_EXTRA := [
@@ -82,6 +82,10 @@ static var _applied := ""
 static var tint := 0.0
 static var _tint_col := Color(0, 0, 0, 0)
 const TINT_KEYS := ["BG", "SURFACE", "SURFACE_2", "SURFACE_3", "LINE"]
+## Cores de texto conferidas contra o fundo tingido (ver _apply_palette).
+const INK_KEYS := ["MUTED", "DIM", "GOLD", "GREEN", "RED", "BLUE", "ORANGE"]
+## Valor atual (tingido/ajustado) de cada chave da paleta em TINT_KEYS e INK_KEYS.
+static var _cur := {}
 const PITCH_A := Color("#2E7D4B")
 const PITCH_B := Color("#2A7445")
 const PITCH_LINE := Color(0.87, 0.95, 0.89, 0.75)
@@ -216,26 +220,75 @@ static func apply_colors(c1: Variant, c2: Variant, tint_amount := 0.0) -> void:
 	_repaint_theme()
 
 
-## Fundo, superfícies e linhas da paleta atual, com o tingimento aplicado.
+## Fundo, superfícies e linhas da paleta atual, com o tingimento aplicado; depois os textos
+## (secundário, apagado e as cores de estado) são conferidos contra esses fundos, porque o
+## tingimento forte aproxima o fundo do tom dos textos.
 static func _apply_palette() -> void:
 	var pal: Dictionary = LIGHT if light else DARK
-	BG = _tinted(pal["BG"])
-	SURFACE = _tinted(pal["SURFACE"])
-	SURFACE_2 = _tinted(pal["SURFACE_2"])
-	SURFACE_3 = _tinted(pal["SURFACE_3"])
-	LINE = _tinted(pal["LINE"])
+	for k: String in TINT_KEYS:
+		_cur[k] = _tinted(pal[k])
+	BG = _cur["BG"]
+	SURFACE = _cur["SURFACE"]
+	SURFACE_2 = _cur["SURFACE_2"]
+	SURFACE_3 = _cur["SURFACE_3"]
+	LINE = _cur["LINE"]
+	var grounds := [BG, SURFACE, SURFACE_2]
+	for k: String in INK_KEYS:
+		var bgs := grounds + [SURFACE_3] if k == "MUTED" else grounds
+		_cur[k] = readable_on(pal[k], bgs, 4.5) if tint > 0.0 else pal[k]
+	TEXT = pal["TEXT"]
+	MUTED = _cur["MUTED"]
+	DIM = _cur["DIM"]
+	GOLD = _cur["GOLD"]
+	GREEN = _cur["GREEN"]
+	RED = _cur["RED"]
+	BLUE = _cur["BLUE"]
+	ORANGE = _cur["ORANGE"]
 	RenderingServer.set_default_clear_color(BG)
+	# Com o fundo tingido o contraste do destaque muda: confere de novo.
+	_fit_accent()
 
 
-## Mesmo brilho, com o matiz da cor do time (fundos continuam escuros no modo escuro e claros no claro).
+## Mesmo brilho, com o matiz da cor do time (fundos continuam escuros no modo escuro e claros no
+## claro). A luminância fica perto da original: matizes escuros (azul, vermelho) escureciam demais
+## o modo claro e clareavam demais o escuro, e o texto perdia contraste.
 static func _tinted(c: Color) -> Color:
 	if tint <= 0.0 or _tint_col.a <= 0.0:
 		return c
-	var target := Color.from_hsv(_tint_col.h, clampf(_tint_col.s, 0.3, 0.85), c.v)
+	# Destaque sem cor (clube de preto e branco): nada de matiz inventado (o vermelho do h = 0).
+	# No claro a saturação é menor: com o brilho mantido, um verde forte virava menta néon.
+	var sat := clampf(_tint_col.s, 0.3, 0.55 if light else 0.85) if _tint_col.s >= 0.15 else 0.0
+	var target := Color.from_hsv(_tint_col.h, sat, c.v)
 	# O fundo quase preto precisa de um pouco mais de luz para a cor aparecer.
 	if not light:
-		target = Color.from_hsv(_tint_col.h, clampf(_tint_col.s, 0.3, 0.85), minf(1.0, c.v * (1.0 + tint * 1.2) + 0.02 * tint))
-	return c.lerp(target, tint)
+		target = Color.from_hsv(_tint_col.h, sat, minf(1.0, c.v * (1.0 + tint * 1.2) + 0.02 * tint))
+	var col := c.lerp(target, tint)
+	var l0 := _lin_lum(c)
+	var lo := l0 * (1.0 - 0.12 * tint) if light else l0
+	var hi := l0 if light else l0 * (1.0 + 1.6 * tint) + 0.002 * tint
+	var l := _lin_lum(col)
+	if l >= lo and l <= hi:
+		return col
+	# Busca binária pelo quanto clarear (ou escurecer) até voltar à faixa.
+	var want := clampf(l, lo, hi)
+	var a := 0.0
+	var b := 1.0
+	var best := col
+	for _i in 14:
+		var m := (a + b) * 0.5
+		var t := col.lightened(m) if l < lo else col.darkened(m)
+		best = t
+		var lt := _lin_lum(t)
+		if (lt < want) == (l < lo):
+			a = m
+		else:
+			b = m
+	return best
+
+
+static func _lin_lum(c: Color) -> float:
+	var l := c.srgb_to_linear()
+	return 0.2126 * l.r + 0.7152 * l.g + 0.0722 * l.b
 
 
 static func _set_accent(c1: Variant, c2: Variant) -> void:
@@ -245,12 +298,32 @@ static func _set_accent(c1: Variant, c2: Variant) -> void:
 		ON_ACCENT = Color.WHITE if light else ON_GOLD
 		TEAM_1 = Color(0, 0, 0, 0)
 		TEAM_2 = Color(0, 0, 0, 0)
+		_fit_accent()
 		return
 	ACCENT = team_accent(c1, c2)
-	ACCENT_DARK = ACCENT.darkened(0.25)
-	ON_ACCENT = Color("#12161C") if ACCENT.get_luminance() > 0.5 else Color.WHITE
 	TEAM_1 = c1
 	TEAM_2 = c2
+	_fit_accent()
+
+
+## Ajusta o destaque para ser legível como texto sobre o fundo e as superfícies (4,5:1) e
+## escolhe o texto que vai por cima dele (quase preto ou branco, o de maior contraste).
+## Clubes de branco, amarelo ou preto continuam com a sua cor, só com o tom corrigido.
+static func _fit_accent() -> void:
+	ACCENT = readable_on(ACCENT, [BG, SURFACE, SURFACE_2], 4.5)
+	ON_ACCENT = on_color(ACCENT)
+	if ON_ACCENT.get_luminance() < 0.5 and _same_rgb(ACCENT, D_GOLD):
+		ON_ACCENT = ON_GOLD # dourado mantém o texto marrom-escuro de sempre
+	# Tom pressionado/base do botão primário: mais escuro, sem perder a leitura do texto.
+	ACCENT_DARK = ACCENT
+	for amt: float in [0.25, 0.2, 0.15, 0.1, 0.06]:
+		var d := ACCENT.darkened(amt)
+		if contrast(ON_ACCENT, d) >= 3.0:
+			ACCENT_DARK = d
+			break
+	if ACCENT.get_luminance() < 0.08:
+		# Destaque quase preto: escurecer não aparece, então o tom pressionado clareia.
+		ACCENT_DARK = ACCENT.lightened(0.18)
 
 
 ## Troca, no tema do projeto, cada cor da paleta escura original pela cor atual: o dourado
@@ -275,6 +348,7 @@ static func _repaint_theme() -> void:
 			(r[0] as Theme).set_color(r[1][1], r[1][0], nc)
 		else:
 			(r[0] as Object).set(String(r[1]), nc)
+	_fix_states(th)
 	# Interruptores desenhados aqui: o padrão do Godot some no fundo claro e não usa o destaque.
 	var on := _switch_icon(ACCENT, ON_ACCENT if ON_ACCENT.get_luminance() > 0.5 else Color.WHITE, true)
 	var off := _switch_icon(Color("#AEB4BD") if light else Color("#3A3D44"), Color.WHITE if light else Color("#B4B8C0"), false)
@@ -284,6 +358,42 @@ static func _repaint_theme() -> void:
 	th.set_icon(&"unchecked_disabled", "CheckButton", off)
 	th.set_icon(&"checked_mirrored", "CheckButton", on)
 	th.set_icon(&"unchecked_mirrored", "CheckButton", off)
+
+
+## Estados dos botões que não saem do simples troca-cor: o "passar por cima" do primário acompanha
+## o destaque (antes era sempre amarelo) e, em telas de toque, o passar por cima some. No celular o
+## Godot deixa o ponteiro onde foi o último toque, então o botão ficava "aceso" depois de solto.
+static func _fix_states(th: Theme) -> void:
+	var ph := th.get_stylebox(&"hover", &"PrimaryButton") as StyleBoxFlat
+	if ph != null:
+		ph.bg_color = hover_of(ACCENT)
+		ph.border_color = ACCENT_DARK
+	if not touch_only():
+		return
+	for type in th.get_type_list():
+		if not (th.has_stylebox(&"normal", type) and th.has_stylebox(&"hover", type)) or type == &"LineEdit":
+			continue
+		th.set_stylebox(&"hover", type, th.get_stylebox(&"normal", type))
+		if th.has_stylebox(&"pressed", type):
+			th.set_stylebox(&"hover_pressed", type, th.get_stylebox(&"pressed", type))
+		for pair: Array in [[&"font_hover_color", &"font_color"], [&"font_hover_pressed_color", &"font_pressed_color"],
+				[&"icon_hover_color", &"icon_normal_color"], [&"icon_hover_pressed_color", &"icon_pressed_color"]]:
+			if th.has_color(pair[1], type):
+				th.set_color(pair[0], type, th.get_color(pair[1], type))
+
+
+## Aparelho só de toque (celular, tablet, navegador no celular): sem estado de "passar por cima".
+static func touch_only() -> bool:
+	return OS.has_feature("mobile") or OS.has_feature("web_android") or OS.has_feature("web_ios")
+
+
+## Fundo de "passar por cima" de um botão cheio na cor `c`: um passo na direção que aumenta o
+## contraste com o texto dele (clareia sob texto escuro, escurece sob texto branco).
+static func hover_of(c: Color) -> Color:
+	var fg := on_color(c)
+	if fg.get_luminance() < 0.5:
+		return c.lightened(0.16) if c.get_luminance() < 0.92 else c.darkened(0.07)
+	return c.darkened(0.14) if c.get_luminance() > 0.1 else c.lightened(0.14)
 
 
 ## Interruptor (trilho arredondado + botão), com borda suavizada; ligado = botão à direita.
@@ -321,9 +431,10 @@ static func themed(orig: Color) -> Color:
 	if legacy != "":
 		orig = Color(DARK[legacy], orig.a)
 		nc = orig
-		if not light:
-			return nc
+		found = not light
 	for k in accents.size():
+		if found:
+			break
 		if _same_rgb(orig, accents[k]):
 			nc = news[k]
 			found = true
@@ -343,11 +454,12 @@ static func themed(orig: Color) -> Color:
 		# Véus brancos translúcidos (realces sobre o fundo escuro) viram véus pretos.
 		if not found and orig.a < 1.0 and _same_rgb(orig, Color.WHITE):
 			nc = Color.BLACK
-	if tint > 0.0:
+	# Fundos tingidos e textos ajustados ao tingimento.
+	if not _cur.is_empty() and not _same_rgb(nc, ACCENT):
 		var pal: Dictionary = LIGHT if light else DARK
-		for k: String in TINT_KEYS:
+		for k: String in _cur:
 			if _same_rgb(nc, pal[k]):
-				nc = _tinted(pal[k])
+				nc = _cur[k]
 				break
 	nc.a = orig.a
 	return nc
@@ -407,19 +519,61 @@ static func fans_label(m: float) -> String:
 ## Cor usada como texto (ou traço fino) sobre o fundo da interface: no modo claro, tons claros
 ## escurecem até ficarem legíveis sobre o branco; no escuro a cor fica como está.
 static func ink(c: Color) -> Color:
-	if not light:
-		return c
+	return readable_on(c, [SURFACE, SURFACE_2], 4.5)
+
+
+## Cor legível (quase preta ou branca) sobre um fundo: a de maior contraste.
+static func on_color(bg: Color) -> Color:
+	var dark := Color("#111111")
+	return dark if contrast(dark, bg) >= contrast(Color.WHITE, bg) else Color.WHITE
+
+
+## Luminância relativa (WCAG), com o fundo da interface por trás de cores translúcidas.
+static func rel_luminance(c: Color) -> float:
 	var col := c
-	for _i in 10:
-		if col.get_luminance() <= 0.42:
+	if col.a < 1.0:
+		col = BG.lerp(Color(col.r, col.g, col.b), col.a)
+	var l := col.srgb_to_linear()
+	return 0.2126 * l.r + 0.7152 * l.g + 0.0722 * l.b
+
+
+## Razão de contraste entre duas cores (1 a 21; texto comum pede 4,5, texto grande e ícones 3).
+static func contrast(a: Color, b: Color) -> float:
+	var la := rel_luminance(a)
+	var lb := rel_luminance(b)
+	return (maxf(la, lb) + 0.05) / (minf(la, lb) + 0.05)
+
+
+## A mesma cor, clareada ou escurecida só o necessário para ter `ratio` de contraste com
+## todos os fundos de `bgs` (mantém o matiz: o verde continua verde).
+static func readable_on(c: Color, bgs: Array, ratio: float = 4.5) -> Color:
+	if _min_contrast(c, bgs) >= ratio:
+		return c
+	# Fundos claros pedem texto mais escuro; escuros, mais claro.
+	var bg_l := 0.0
+	for bg: Color in bgs:
+		bg_l += rel_luminance(bg)
+	var to_dark := bg_l / maxf(1.0, bgs.size()) > 0.18
+	# Anda pelo brilho (HSV) antes de tirar saturação: o marinho vira um azul vivo, não um cinza.
+	var col := Color(c, 1.0)
+	for i in 40:
+		if to_dark:
+			col.v = maxf(0.0, col.v - 0.04)
+		elif col.v < 1.0:
+			col.v = minf(1.0, col.v + 0.04)
+		else:
+			col.s = maxf(0.0, col.s - 0.05)
+		if _min_contrast(col, bgs) >= ratio:
 			break
-		col = col.darkened(0.12)
+	col.a = c.a
 	return col
 
 
-## Cor legível (preta ou branca) sobre um fundo.
-static func on_color(bg: Color) -> Color:
-	return Color("#111111") if bg.get_luminance() > 0.6 else Color.WHITE
+static func _min_contrast(c: Color, bgs: Array) -> float:
+	var m := 99.0
+	for bg: Color in bgs:
+		m = minf(m, contrast(c, bg))
+	return m
 
 
 ## Cor que identifica o clube em fundos e degradês: a mais saturada das duas; em clubes de

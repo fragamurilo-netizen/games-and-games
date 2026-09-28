@@ -101,13 +101,13 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 	row.add_child(UIKit.stat(Fmt.money_month(total), "folha"))
 	row.add_child(UIKit.stat(Fmt.money_month(club.wage_budget), "teto da diretoria"))
 	var pct := float(total) / maxf(1.0, club.wage_budget)
-	var col := UIColors.GREEN if pct <= 0.9 else (Color("#E8C547") if pct <= 1.0 else UIColors.RED)
+	var col := UIColors.GREEN if pct <= 0.9 else (UIColors.ink(Color("#E8C547")) if pct <= 1.0 else UIColors.RED)
 	row.add_child(UIKit.stat("%d%%" % int(round(pct * 100.0)), "do teto", col))
 	card.add_child(row)
 	card.add_child(UIKit.bar(minf(pct, 1.2), 1.2, col, 10))
 	var row2 := UIKit.hbox(4)
 	row2.add_child(UIKit.stat(str(expiring), "vencem nesta", UIColors.RED if expiring > 0 else UIColors.TEXT))
-	row2.add_child(UIKit.stat(str(next_year), "vencem na próxima", Color("#E8C547") if next_year > 0 else UIColors.TEXT))
+	row2.add_child(UIKit.stat(str(next_year), "vencem na próxima", UIColors.ink(Color("#E8C547")) if next_year > 0 else UIColors.TEXT))
 	row2.add_child(UIKit.stat(Fmt.money_month(total / maxi(1, squad.size())), "média"))
 	card.add_child(row2)
 	if top != null:
@@ -171,7 +171,7 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 	wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(wl)
 	var yrs := p.contract_end - w.year
-	var col := UIColors.RED if yrs <= 0 else (Color("#E8C547") if yrs == 1 else UIColors.GREEN)
+	var col := UIColors.RED if yrs <= 0 else (UIColors.ink(Color("#E8C547")) if yrs == 1 else UIColors.GREEN)
 	var el := UIKit.colored("até %d" % p.contract_end if yrs > 0 else "vence nesta temporada", col, "Small")
 	el.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(el)

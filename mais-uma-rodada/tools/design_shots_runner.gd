@@ -12,6 +12,10 @@ var prefix := ""
 ## --only=rota,rota:aba,...: só essas telas (depois de --rounds=N rodadas jogadas), modo escuro.
 var only := ""
 var rounds := 3
+## Com --only: modo claro, clube pelo nome (parte do nome basta) e tingimento do fundo (-1 = o salvo).
+var light := false
+var club_name := ""
+var tint := -1
 
 
 func _ready() -> void:
@@ -202,8 +206,24 @@ func _only_pass() -> void:
 	for c: Club in w.clubs_in_league("BRA1"):
 		if c.archetype == "tradicional_decadente" or club_id < 0:
 			club_id = c.id
+	if club_name != "":
+		# Nome exato primeiro ("Remo" não pode cair na Cremonese); senão, parte do nome.
+		var partial := -1
+		for c: Club in w.clubs:
+			if c.name.to_lower() == club_name.to_lower():
+				partial = c.id
+				break
+			if partial < 0 and c.name.to_lower().contains(club_name.to_lower()):
+				partial = c.id
+		if partial >= 0:
+			club_id = partial
 	AppSettings.tutorial_done = true
+	AppSettings.color_source = 1
+	if tint >= 0:
+		AppSettings.bg_tint = tint
+	AppSettings.theme_mode = AppSettings.THEME_LIGHT if light else AppSettings.THEME_DARK
 	GameManager.start_career(w, club_id, "Murilo", GameWorld.DIFF_NORMAL, 5)
+	UIManager.apply_look()
 	for i in rounds:
 		GameManager.play_instant()
 		await _frames(2)
