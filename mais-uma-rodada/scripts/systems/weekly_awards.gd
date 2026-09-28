@@ -126,11 +126,16 @@ static func close_month(world: GameWorld) -> void:
 	bp.morale = clampf(bp.morale + 5.0, 0.0, 100.0)
 	var label := month_label(month)
 	var club := world.club(bp.club_id)
-	NewsManager.post_raw(world, "%s é o craque do mês" % bp.display_name(),
+	var pn := NewsManager.post_raw(world, "%s é o craque do mês" % bp.display_name(),
 		"%s, do %s, foi eleito o melhor jogador da %s em %s. A seleção do mês tem %d jogador(es) do %s." % [
 			bp.display_name(), club.short_name if club != null else "?", world.league_name(world.user_league_id()), label,
 			_count_club(world, ids, world.user_club_id), world.user_club().short_name],
 		bp.club_id, bp.id, NewsEvent.IMP_HIGH if world.is_user_club(bp.club_id) else NewsEvent.IMP_NORMAL, "premio")
+	# Números do mês na matéria: [jogos, gols, assist., nota×10]
+	var ba: Array = acc.get(str(bp.id), acc.get(bp.id, [0, 0, 0, 0]))
+	if int(ba[1]) > 0:
+		pn.media = {"type": "player", "player": bp.id, "club": bp.club_id, "rc": "Craque do mês", "rv": label,
+			"st": [int(ba[1]), int(ba[2]), int(ba[3]), int(round(float(ba[0]) / float(ba[1])))]}
 
 
 static func _count_club(world: GameWorld, ids: Array, club_id: int) -> int:

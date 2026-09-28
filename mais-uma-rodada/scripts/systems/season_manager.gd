@@ -428,6 +428,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		report["youth"] = YouthManager.play_slot(world, slot)
 		report["transfers"] = TransferManager.process_matchday(world)
 		tt = _time("mercado", tt)
+		WorldPulse.weekly(world) # histórias do mundo, rumores, giro e recordes
+		tt = _time("mundo", tt)
 		report["intl"] = NationalTeamManager.after_weekend(world, _weekend_index(s, slot))
 		tt = _time("selecoes", tt)
 		if _weekend_index(s, slot) % 4 == 3:
@@ -456,6 +458,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	Rivalry.on_cup_events(world, cup_events)
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
+	WorldPulse.after_matchday(world, md["entries"])
 	Achievements.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
 	CoachStories.after_matchday(world, md["entries"])
@@ -1033,6 +1036,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.stats.erase("neg")
 	var taxes := FinanceManager.season_taxes(world)
 	WorldEvents.season_start(world)
+	WorldPulse.season_start(world)
 	for c: Club in world.clubs:
 		c.reset_season_state()
 		if taxes.has(c.id):

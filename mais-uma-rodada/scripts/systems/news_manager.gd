@@ -79,13 +79,13 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 		if MatchEngine.is_derby(world, f.home, f.away):
 			if diff == 0:
 				data["score"] = "%d x %d" % [f.hg, f.ag]
-				_with_score(post(world, "classico_empate", data, home.id, -1, imp), f)
+				_with_score(post(world, "classico_empate", data, home.id, -1, imp), f, world)
 			else:
-				_with_score(post(world, "classico_vitoria", data, winner.id, -1, imp), f)
+				_with_score(post(world, "classico_vitoria", data, winner.id, -1, imp), f, world)
 			posted += 1
 			continue
 		if absi(diff) >= 4:
-			_with_score(post(world, "goleada", data, winner.id, -1, imp), f)
+			_with_score(post(world, "goleada", data, winner.id, -1, imp), f, world)
 			posted += 1
 			continue
 		if diff != 0 and f.comp == lid:
@@ -94,7 +94,7 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 			if pw - pl >= 10 and pl <= 4:
 				data["pos_w"] = pw
 				data["pos_l"] = pl
-				_with_score(post(world, "zebra", data, winner.id, -1, imp), f)
+				_with_score(post(world, "zebra", data, winner.id, -1, imp), f, world)
 				posted += 1
 		# Hat-trick e primeiro gol (do usuário ou da liga)
 		for side in 2:
@@ -106,8 +106,8 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 				var g: int = ln[QuickMatch.L_G]
 				if g >= 3:
 					var opp := world.club(f.opponent_of(club.id))
-					post(world, "hattrick", {"player": _pname(p), "club": club.short_name, "shirt": p.shirt,
-						"score": "%d x %d" % [mine, theirs], "opponent": opp.short_name}, club.id, p.id, imp)
+					_with_score(post(world, "hattrick", {"player": _pname(p), "club": club.short_name, "shirt": p.shirt,
+						"score": "%d x %d" % [mine, theirs], "opponent": opp.short_name}, club.id, p.id, imp), f, world)
 				if g >= 1 and p.career_goals == g and p.age(world.year) <= 21 and club.id == user.id:
 					post(world, "primeiro_gol", {"player": _pname(p), "age": p.age(world.year), "club": club.short_name}, club.id, p.id, NewsEvent.IMP_HIGH)
 	if not league_day:
@@ -117,8 +117,9 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 	var last_leader: int = int(world.stats.get("leader_" + lid, -1))
 	if leader != last_leader and league.rounds_played() >= 3:
 		var row: Dictionary = league.table[leader]
-		post(world, "lider", {"club": world.club(leader).short_name, "division": league.name, "pts": row["pts"], "rounds": row["pl"]}, leader, -1,
+		var ln := post(world, "lider", {"club": world.club(leader).short_name, "division": league.name, "pts": row["pts"], "rounds": row["pl"]}, leader, -1,
 			NewsEvent.IMP_HIGH if leader == user.id else NewsEvent.IMP_NORMAL)
+		ln.media = {"type": "crest", "club": leader, "tb": WorldPulse.table_rows(league, ids, 0, 5), "lg": lid, "hl": [leader]}
 	world.stats["leader_" + lid] = leader
 	# Sequências (uma notícia por tipo)
 	var best_streak: Club = null
@@ -141,7 +142,8 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 		var top := CompetitionManager.player_ranking(world, lid, Player.S_GOALS, 1)
 		if not top.is_empty():
 			var p: Player = top[0]
-			post(world, "artilheiro", {"player": _pname(p), "n": p.stats[Player.S_GOALS], "club": world.club(p.club_id).short_name, "division": league.name}, p.club_id, p.id)
+			var an := post(world, "artilheiro", {"player": _pname(p), "n": p.stats[Player.S_GOALS], "club": world.club(p.club_id).short_name, "division": league.name}, p.club_id, p.id)
+			an.media = {"type": "player", "player": p.id, "club": p.club_id, "tp": WorldPulse._scorers(world, lid, 5)}
 
 
 ## Copas: classificação, eliminação e títulos do usuário; campeões continentais e mundial para todos.
@@ -187,13 +189,21 @@ static func on_cup_events(world: GameWorld, events: Array) -> void:
 					post(world, "mundial_classificado", {"club": user.short_name}, user.id, -1, NewsEvent.IMP_HEADLINE)
 
 
-static func _with_score(n: NewsEvent, f: Fixture) -> NewsEvent:
-	n.media = score_media(f)
+static func _with_score(n: NewsEvent, f: Fixture, world: GameWorld = null) -> NewsEvent:
+	n.media = score_media(f, world)
 	return n
 
 
-static func score_media(f: Fixture) -> Dictionary:
-	return {"type": "score", "home": f.home, "away": f.away, "hg": f.hg, "ag": f.ag, "comp": f.comp}
+static func score_media(f: Fixture, w: GameWorld = null) -> Dictionary:
+	var m := {"type": "score", "home": f.home, "away": f.away, "hg": f.hg, "ag": f.ag, "comp": f.comp}
+	# Gols com nome (o jogador pode se aposentar ou mudar de nome de exibição): [[minuto, lado, nome, tipo]]
+	var gl: Array = []
+	for g in (f.goals if w != null else []):
+		var p: Player = w.player(int(g[2]))
+		gl.append([int(g[0]), int(g[1]), p.short_name() if p != null else "", int(g[3])])
+	if not gl.is_empty():
+		m["g"] = gl
+	return m
 
 
 ## Pelo mundo: nas grandes ligas estrangeiras, líder novo e goleadas de gigantes viram notícia.
@@ -220,7 +230,7 @@ static func world_roundup(world: GameWorld, results: Array) -> void:
 		var scorer := _top_scorer_name(world, f, winner.id)
 		var body := "Pela %s, o %s atropelou o %s%s." % [lg.name, winner.short_name, loser.short_name, (" com %s decisivo" % scorer) if scorer != "" else ""]
 		var n := post_raw(world, "%s aplica %s no %s" % [winner.short_name, sc, loser.short_name], body, winner.id, -1, NewsEvent.IMP_NORMAL, "goleada")
-		n.media = score_media(f)
+		n.media = score_media(f, world)
 		posted += 1
 	for lid in leagues_today:
 		var lg: League = leagues_today[lid]
@@ -241,7 +251,7 @@ static func world_roundup(world: GameWorld, results: Array) -> void:
 			"Com %d pontos em %d jogos, o %s passa o %s e lidera o campeonato %s." % [int(row["pts"]), int(row["pl"]), c.short_name,
 			world.club(last).short_name if world.club(last) != null else "antigo líder", DatabaseManager.nation_adj(lg.nation)],
 			leader, -1, NewsEvent.IMP_NORMAL, "lider")
-		n.media = {"type": "crest", "club": leader}
+		n.media = {"type": "crest", "club": leader, "tb": WorldPulse.table_rows(lg, ids, 0, 5), "lg": lg.id, "hl": [leader]}
 
 
 static func _top_scorer_name(world: GameWorld, f: Fixture, club_id: int) -> String:
@@ -299,8 +309,29 @@ static func on_transfer(world: GameWorld, t: Transfer) -> void:
 		n = post(world, "transferencia", data, t.to_id, p.id, imp)
 	if to != null:
 		n.media = signing_media(p, to, t.fee, t.from_id)
+		enrich_signing(world, n.media, p)
+		if t.fee > 0 and _club_record(world, t):
+			n.media["rc"] = 1
+			n.body += " É a contratação mais cara da história do %s." % to.short_name
 	if major:
 		world.pending_signings.append({"player": p.id, "club": to.id, "fee": t.fee, "from": t.from_id, "n": p.shirt})
+
+
+## Ficha da matéria de transferência: salário, contrato e os números da temporada até aqui.
+static func enrich_signing(world: GameWorld, m: Dictionary, p: Player) -> void:
+	m["wg"] = p.wage
+	m["ce"] = p.contract_end
+	m["ov"] = p.overall
+	var t := p.season_totals()
+	if int(t[0]) > 0:
+		m["st"] = [int(t[0]), int(t[1]), int(t[2]), int(round(p.avg_rating() * 10.0))]
+
+
+## A compra bateu o recorde do clube (e havia um recorde antes para bater)?
+static func _club_record(world: GameWorld, t: Transfer) -> bool:
+	var cr: Dictionary = FootballMemory.data(world).get("cr", {}).get(t.to_id, {})
+	var buys: Array = cr.get("buy", [])
+	return buys.size() >= 2 and int(buys[0][1]) == t.player_id and int(buys[0][0]) == t.fee
 
 
 ## Mídia de apresentação (foto do jogador segurando a camisa do clube novo).
@@ -343,15 +374,19 @@ static func on_offer_received(world: GameWorld, o: TransferOffer) -> void:
 
 
 static func on_injury(world: GameWorld, p: Player) -> void:
-	if not world.has_user() or p.injury_weeks < 4:
+	if not world.has_user() or p.injury_weeks < 3:
 		return
 	var c := world.club(p.club_id)
 	if c == null:
 		return
-	if not world.is_user_club(c.id) and not (c.league_id == world.user_league_id() and p.overall >= PlayerGenerator.league_level(c) + 2.0):
+	var local := world.is_user_club(c.id) or (c.league_id == world.user_league_id() and p.overall >= PlayerGenerator.league_level(c) + 2.0)
+	# Craques do mundo: estrela de clube grande de liga forte (ou do país do usuário) também vira notícia.
+	var star := p.squad_status == Player.STATUS_STAR and c.tier == 1 and c.reputation >= 72.0 and WorldEvents.newsworthy(world, c)
+	if not (local and p.injury_weeks >= 4) and not star:
 		return
-	post(world, "lesao_grave", {"player": _pname(p), "club": c.short_name, "weeks": p.injury_weeks, "injury": p.injury_name},
+	var n := post(world, "lesao_grave", {"player": _pname(p), "club": c.short_name, "weeks": p.injury_weeks, "injury": p.injury_name},
 		c.id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(c.id) else NewsEvent.IMP_NORMAL)
+	n.media = {"type": "player", "player": p.id, "club": c.id, "wk": p.injury_weeks, "inj": p.injury_name}
 
 
 static func on_retirement_announced(world: GameWorld, p: Player) -> void:
@@ -361,15 +396,17 @@ static func on_retirement_announced(world: GameWorld, p: Player) -> void:
 	var notable := p.career_apps >= 250 or (c != null and world.is_user_club(c.id)) or (c != null and c.league_id == world.user_league_id() and p.overall >= PlayerGenerator.league_level(c))
 	if not notable:
 		return
-	post(world, "aposentadoria_anuncio", {"player": _pname(p), "age": p.age(world.year), "apps": p.career_apps, "goals": p.career_goals},
+	var n := post(world, "aposentadoria_anuncio", {"player": _pname(p), "age": p.age(world.year), "apps": p.career_apps, "goals": p.career_goals},
 		p.club_id, p.id, NewsEvent.IMP_HIGH if c != null and world.is_user_club(c.id) else NewsEvent.IMP_NORMAL)
+	n.media = {"type": "player", "player": p.id, "club": p.club_id, "cr": [p.career_apps, p.career_goals, p.titles]}
+	WorldPulse.on_retirement(world, p)
 
 
 static func on_explosion(world: GameWorld, p: Player) -> void:
 	if not world.has_user() or p.club_id < 0:
 		return
 	var c := world.club(p.club_id)
-	if not world.is_user_club(c.id) and c.league_id != world.user_league_id():
+	if not world.is_user_club(c.id) and c.league_id != world.user_league_id() and not (p.potential >= 82 and WorldEvents.newsworthy(world, c)):
 		return
 	post(world, "jovem_explode", {"player": _pname(p), "age": p.age(world.year), "club": c.short_name}, c.id, p.id,
 		NewsEvent.IMP_HIGH if world.is_user_club(c.id) else NewsEvent.IMP_NORMAL)

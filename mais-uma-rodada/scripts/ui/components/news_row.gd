@@ -12,10 +12,20 @@ const CAT_ICON := {
 	"jovem_explode": "star", "contrato_fim": "clock", "base": "star", "janela_abre": "swap", "janela_fecha": "swap",
 	"marco_gols": "trophy", "temporada": "whistle", "diretoria_ultimato": "info", "demissao": "close", "novo_tecnico": "whistle",
 	"copa_classificado": "trophy", "copa_avanca": "trophy", "copa_eliminado": "close", "copa_campeao": "trophy", "estadual_classificado": "trophy", "estadual_avanca": "trophy", "estadual_eliminado": "close", "estadual_campeao": "trophy", "mundial_classificado": "trophy", "mundial_campeao": "trophy",
+	"renovacao": "check", "impasse": "clock", "atrito": "bolt", "protesto": "chat", "investimento": "money", "estadio": "home",
+	"social": "heart", "recorde": "star", "joia": "star", "rumor_ok": "check", "rumor_nao": "close", "despedida": "clock",
+	"aniversario": "trophy", "giro": "news", "briga_titulo": "trophy", "briga_z": "down", "classico_previa": "bolt",
+	"tecnicos": "whistle", "torcida": "chat", "clube": "home", "personalidade": "chat", "mercado": "swap", "jogador": "shirt", "liga": "table",
 }
 
 
-const MARKET_CATS := ["transferencia", "transferencia_rival", "transferencia_livre", "venda_usuario", "proposta_recebida", "janela_abre", "janela_fecha", "contrato_fim", "rumor"]
+const MARKET_CATS := ["transferencia", "transferencia_rival", "transferencia_livre", "venda_usuario", "proposta_recebida", "janela_abre", "janela_fecha", "contrato_fim", "rumor",
+	"renovacao", "impasse", "rumor_ok", "rumor_nao", "mercado"]
+## Notícias ruins (cor vermelha e torcida pessimista) e boas (verde e torcida animada).
+const BAD_CATS := ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao", "copa_eliminado", "estadual_eliminado",
+	"atrito", "protesto", "briga_z"]
+const GOOD_CATS := ["campeao", "acesso", "jovem_explode", "primeiro_gol", "copa_campeao", "estadual_campeao", "mundial_campeao",
+	"renovacao", "investimento", "recorde", "joia", "rumor_ok", "aniversario"]
 const KICKERS := {
 	"selecao": "SELEÇÕES", "goleada": "RODADA", "zebra": "RODADA", "classico_vitoria": "CLÁSSICO", "classico_empate": "CLÁSSICO",
 	"rivalidade": "CLÁSSICO", "lider": "LIDERANÇA", "sequencia_vitorias": "RODADA", "sequencia_derrotas": "RODADA", "sem_vencer": "RODADA",
@@ -23,25 +33,33 @@ const KICKERS := {
 	"lesao_grave": "DEPARTAMENTO MÉDICO", "aposentadoria_anuncio": "CARREIRA", "aposentadoria": "CARREIRA", "campeao": "TÍTULO",
 	"acesso": "ACESSO", "rebaixamento": "REBAIXAMENTO", "jovem_explode": "BASE", "base": "BASE", "temporada": "TEMPORADA",
 	"diretoria_ultimato": "BASTIDORES", "demissao": "TÉCNICOS", "novo_tecnico": "TÉCNICOS", "imprensa": "BASTIDORES",
+	"atrito": "VESTIÁRIO", "protesto": "TORCIDA", "investimento": "BASTIDORES", "estadio": "ESTÁDIO", "social": "REDES SOCIAIS",
+	"recorde": "RECORDE", "joia": "REVELAÇÃO", "despedida": "DESPEDIDA", "aniversario": "MEMÓRIA", "giro": "PELO MUNDO",
+	"briga_titulo": "CORRIDA PELO TÍTULO", "briga_z": "LUTA CONTRA A QUEDA", "classico_previa": "CLÁSSICO", "tecnicos": "TÉCNICOS",
+	"torcida": "TORCIDA", "jogador": "JOGADOR", "liga": "LIGA", "clube": "BASTIDORES", "personalidade": "VESTIÁRIO",
 }
 
 
 ## Editoria resumida usada pelos novos cards e pela manchete.
 static func section_of(n: NewsEvent) -> String:
 	var cat := n.category
-	if cat.begins_with("transferencia") or cat in ["venda_usuario", "proposta_recebida", "janela_abre", "janela_fecha", "contrato_fim", "rumor"]:
+	if cat.begins_with("transferencia") or MARKET_CATS.has(cat):
 		return "Mercado"
 	if cat.begins_with("copa") or cat.begins_with("estadual") or cat.begins_with("mundial"):
 		return "Copas"
-	if cat in ["diretoria_ultimato", "demissao", "novo_tecnico"]:
+	if cat in ["diretoria_ultimato", "demissao", "novo_tecnico", "atrito", "protesto", "investimento", "estadio", "tecnicos", "torcida", "clube", "personalidade"]:
 		return "Bastidores"
+	if cat == "social":
+		return "Redes"
+	if cat == "giro":
+		return "Mundo"
 	if cat == "selecao":
 		return "Seleções"
-	if cat in ["premio", "campeao", "acesso", "rebaixamento", "lider", "artilheiro", "marco_gols", "temporada"]:
+	if cat in ["premio", "campeao", "acesso", "rebaixamento", "lider", "artilheiro", "marco_gols", "temporada", "recorde", "briga_titulo", "briga_z", "aniversario", "liga"]:
 		return "Campeonato"
-	if cat in ["jovem_explode", "base", "primeiro_gol"]:
+	if cat in ["jovem_explode", "base", "primeiro_gol", "joia"]:
 		return "Revelações"
-	if cat in ["lesao_grave", "aposentadoria", "aposentadoria_anuncio"]:
+	if cat in ["lesao_grave", "aposentadoria", "aposentadoria_anuncio", "despedida", "jogador"]:
 		return "Elenco"
 	if cat == "imprensa":
 		return "Imprensa"
@@ -49,9 +67,9 @@ static func section_of(n: NewsEvent) -> String:
 
 
 static func _tone(n: NewsEvent) -> Color:
-	if n.category in ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao", "copa_eliminado", "estadual_eliminado"]:
+	if n.category in BAD_CATS:
 		return UIColors.RED
-	if n.category in ["campeao", "acesso", "jovem_explode", "primeiro_gol", "copa_campeao", "estadual_campeao", "mundial_campeao"]:
+	if n.category in GOOD_CATS:
 		return UIColors.GREEN
 	return UIColors.ACCENT
 
@@ -97,9 +115,9 @@ static func when(n: NewsEvent) -> String:
 
 static func _icon_color(n: NewsEvent) -> Color:
 	var col := UIColors.ACCENT if n.importance >= NewsEvent.IMP_HIGH else UIColors.MUTED
-	if n.category in ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao", "copa_eliminado"]:
+	if n.category in BAD_CATS:
 		col = UIColors.RED
-	elif n.category in ["campeao", "acesso", "jovem_explode", "primeiro_gol"]:
+	elif n.category in GOOD_CATS:
 		col = UIColors.GREEN
 	return col
 
@@ -113,6 +131,7 @@ const FAN_LINES := {
 	"good": ["Que fase! Ninguém segura esse time.", "Eu avisei desde o começo da temporada.", "Assim dá gosto de acompanhar.", "Isso é trabalho, não é sorte.", "Tem que valorizar esse elenco."],
 	"bad": ["Precisa mudar alguma coisa, e rápido.", "Já vi esse filme antes e não termina bem.", "Diretoria tem que se mexer.", "Sem cobrança não vai.", "Paciência tem limite."],
 	"market": ["Grande contratação, se vier na forma de antes.", "Esse preço tá fora da realidade.", "Pode dar muito certo ou muito errado.", "Vai ser titular em duas semanas.", "Não era a prioridade do elenco."],
+	"social": ["Ídolo demais!", "Esse aí é gente como a gente.", "Posta menos e joga mais.", "Mensagem bonita, respeito.", "Tô de olho nesse post aí..."],
 	"neutral": ["Vamos ver no campo.", "Notícia interessante, mas é cedo pra julgar.", "Quero ver o próximo jogo.", "Segue o jogo.", "Isso muda a briga na tabela."],
 }
 const FAN_NAMES := ["Arquibancada Raiz", "Torcedor de Sofá", "Tático de Bar", "Dona Tabela", "Estatístico Amador", "Velha Guarda", "Ultra da Curva", "Olheiro de Fim de Semana"]
@@ -127,6 +146,9 @@ static func article(w: GameWorld, n: NewsEvent) -> Control:
 	v.add_child(UIKit.label(n.title, "H1", true))
 	v.add_child(UIKit.label(source(w, n) + "  ·  " + when(n), "Small"))
 	v.add_child(UIKit.label(n.body if n.body != "" else n.title, "", true))
+	# Blocos com os dados da notícia (placar, ficha da transferência, tabela, recorde...)
+	for blk: Control in NewsExtras.blocks(w, n):
+		v.add_child(blk)
 	# Quem aparece na matéria
 	var p := w.player(n.player_id) if n.player_id >= 0 else null
 	var c := w.club(n.club_id) if n.club_id >= 0 else null
@@ -149,11 +171,13 @@ static func article(w: GameWorld, n: NewsEvent) -> Control:
 		v.add_child(links)
 	# Repercussão da torcida (fixa por notícia)
 	var mood := "neutral"
-	if MARKET_CATS.has(n.category):
+	if n.category == "social":
+		mood = "social"
+	elif MARKET_CATS.has(n.category):
 		mood = "market"
-	elif n.category in ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao", "copa_eliminado", "estadual_eliminado"]:
+	elif n.category in BAD_CATS:
 		mood = "bad"
-	elif n.category in ["campeao", "acesso", "jovem_explode", "primeiro_gol", "goleada", "sequencia_vitorias", "hattrick", "lider", "classico_vitoria"]:
+	elif n.category in GOOD_CATS or n.category in ["goleada", "sequencia_vitorias", "hattrick", "lider", "classico_vitoria", "despedida"]:
 		mood = "good"
 	var rc := UIKit.card("CardInset", 6)
 	rc.add_child(UIKit.label("Repercussão", "Caps"))
