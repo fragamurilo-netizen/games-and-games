@@ -38,6 +38,10 @@ func refresh() -> void:
 	screen_subtitle = club.short_name if club != null else "Sem clube"
 	UIManager.refresh_chrome()
 	max_content_width = 1800.0
+	if club != null:
+		var nav := _squad_nav(w, p, club)
+		if nav != null:
+			c.add_child(nav)
 	c.add_child(_header(w, p, club))
 	c.add_child(_tabs_row(p))
 	match _tab:
@@ -57,6 +61,52 @@ func refresh() -> void:
 		_:
 			UIKit.columns(c, [_summary(w, p, own), _fit_card(w, p, own)], content_width())
 	_actions(w, p, own)
+
+
+## Setas para o jogador anterior/seguinte do mesmo elenco (na ordem de posição e nível),
+## sem empilhar telas: troca o perfil no lugar e mantém a aba aberta.
+func _squad_nav(w: GameWorld, p: Player, club: Club) -> Control:
+	var sq: Array = w.squad(club)
+	if sq.size() < 2:
+		return null
+	sq.sort_custom(func(a: Player, b: Player):
+		var ia := Pos.DISPLAY_ORDER.find(a.position)
+		var ib := Pos.DISPLAY_ORDER.find(b.position)
+		if ia != ib:
+			return ia < ib
+		return a.ovr_f > b.ovr_f)
+	var i := sq.find(p)
+	if i < 0:
+		return null
+	var prev: Player = sq[(i - 1 + sq.size()) % sq.size()]
+	var next: Player = sq[(i + 1) % sq.size()]
+	var row := UIKit.hbox(8)
+	var bp := UIKit.button("%s %s" % [Pos.code(prev.position), prev.short_name()], "GhostButton", func(): _go(prev.id), "back")
+	bp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bp.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	bp.clip_text = true
+	bp.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	bp.custom_minimum_size.y = 60
+	row.add_child(bp)
+	var pos := UIKit.label("%d/%d" % [i + 1, sq.size()], "Caps")
+	pos.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(pos)
+	var bn := UIKit.button("%s %s" % [next.short_name(), Pos.code(next.position)], "GhostButton", func(): _go(next.id), "forward")
+	bn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bn.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	bn.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	bn.clip_text = true
+	bn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	bn.custom_minimum_size.y = 60
+	row.add_child(bn)
+	return row
+
+
+func _go(pid: int) -> void:
+	_pid = pid
+	params["id"] = pid
+	refresh()
+	scroll_to_top()
 
 
 func _tabs_row(p: Player) -> Control:
