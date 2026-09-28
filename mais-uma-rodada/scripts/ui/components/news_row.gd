@@ -106,10 +106,90 @@ static func _icon_color(n: NewsEvent) -> Color:
 
 static func _open(w: GameWorld, n: NewsEvent) -> void:
 	n.read = true
-	if n.player_id >= 0 and w.player(n.player_id) != null:
-		UIManager.push("player", {"id": n.player_id})
-	elif n.club_id >= 0:
-		UIManager.push("club", {"id": n.club_id})
+	UIManager.show_modal(article(w, n), true)
+
+
+const FAN_LINES := {
+	"good": ["Que fase! Ninguém segura esse time.", "Eu avisei desde o começo da temporada.", "Assim dá gosto de acompanhar.", "Isso é trabalho, não é sorte.", "Tem que valorizar esse elenco."],
+	"bad": ["Precisa mudar alguma coisa, e rápido.", "Já vi esse filme antes e não termina bem.", "Diretoria tem que se mexer.", "Sem cobrança não vai.", "Paciência tem limite."],
+	"market": ["Grande contratação, se vier na forma de antes.", "Esse preço tá fora da realidade.", "Pode dar muito certo ou muito errado.", "Vai ser titular em duas semanas.", "Não era a prioridade do elenco."],
+	"neutral": ["Vamos ver no campo.", "Notícia interessante, mas é cedo pra julgar.", "Quero ver o próximo jogo.", "Segue o jogo.", "Isso muda a briga na tabela."],
+}
+const FAN_NAMES := ["Arquibancada Raiz", "Torcedor de Sofá", "Tático de Bar", "Dona Tabela", "Estatístico Amador", "Velha Guarda", "Ultra da Curva", "Olheiro de Fim de Semana"]
+
+
+## Matéria completa: chapéu, título, texto, quem aparece, repercussão e relacionadas.
+static func article(w: GameWorld, n: NewsEvent) -> Control:
+	var v := UIKit.vbox(12)
+	var k := UIKit.label(kicker(w, n), "Caps")
+	k.add_theme_color_override(&"font_color", _icon_color(n))
+	v.add_child(k)
+	v.add_child(UIKit.label(n.title, "H1", true))
+	v.add_child(UIKit.label(source(w, n) + "  ·  " + when(n), "Small"))
+	v.add_child(UIKit.label(n.body if n.body != "" else n.title, "", true))
+	# Quem aparece na matéria
+	var p := w.player(n.player_id) if n.player_id >= 0 else null
+	var c := w.club(n.club_id) if n.club_id >= 0 else null
+	var links := UIKit.hbox(10)
+	if p != null:
+		var pid := p.id
+		var bp := UIKit.button("Ver " + p.display_name(), "GhostButton", func():
+			UIManager.close_modal()
+			UIManager.push("player", {"id": pid}), "shirt")
+		bp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		links.add_child(bp)
+	if c != null:
+		var cid := c.id
+		var bc := UIKit.button("Ver " + c.short_name, "GhostButton", func():
+			UIManager.close_modal()
+			UIManager.push("club", {"id": cid}), "shield")
+		bc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		links.add_child(bc)
+	if links.get_child_count() > 0:
+		v.add_child(links)
+	# Repercussão da torcida (fixa por notícia)
+	var mood := "neutral"
+	if MARKET_CATS.has(n.category):
+		mood = "market"
+	elif n.category in ["sequencia_derrotas", "rebaixamento", "lesao_grave", "sem_vencer", "diretoria_ultimato", "demissao", "copa_eliminado", "estadual_eliminado"]:
+		mood = "bad"
+	elif n.category in ["campeao", "acesso", "jovem_explode", "primeiro_gol", "goleada", "sequencia_vitorias", "hattrick", "lider", "classico_vitoria"]:
+		mood = "good"
+	var rc := UIKit.card("CardInset", 6)
+	rc.add_child(UIKit.label("Repercussão", "Caps"))
+	var h := absi(hash(n.title + str(n.year)))
+	var pool: Array = FAN_LINES[mood]
+	for i in 3:
+		var row := UIKit.vbox(0)
+		row.add_child(UIKit.label(String(FAN_NAMES[(h + i * 3) % FAN_NAMES.size()]), "H3"))
+		row.add_child(UIKit.label(String(pool[(h / 7 + i * 2) % pool.size()]), "Small", true))
+		rc.add_child(row)
+	var likes := 40 + h % 900
+	rc.add_child(UIKit.label("%d curtidas · %d comentários" % [likes, likes / 6 + 3], "Small"))
+	v.add_child(UIKit.card_panel(rc))
+	# Relacionadas
+	var rel: Array = []
+	for i in range(w.news.size() - 1, -1, -1):
+		var o: NewsEvent = w.news[i]
+		if o == n:
+			continue
+		if (n.club_id >= 0 and o.club_id == n.club_id) or (n.player_id >= 0 and o.player_id == n.player_id):
+			rel.append(o)
+			if rel.size() >= 3:
+				break
+	if not rel.is_empty():
+		v.add_child(UIKit.label("Leia também", "Caps"))
+		for o: NewsEvent in rel:
+			var on := o
+			var b := UIKit.button(o.title, "GhostButton", func():
+				UIManager.close_modal()
+				_open(w, on))
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			v.add_child(b)
+	var close := UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal())
+	v.add_child(close)
+	return v
 
 
 static func _meta(w: GameWorld, n: NewsEvent, with_source: bool) -> Label:
