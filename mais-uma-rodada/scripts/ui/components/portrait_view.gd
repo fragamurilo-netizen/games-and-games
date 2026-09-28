@@ -2471,12 +2471,20 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	var lip_u: float = f["lip_u"] * 2.0
 	var lip_l: float = f["lip_l"] * 2.0
 	var d := 0.0
+	var d_chin := 0.0
 	# Bochechas
 	var ch: float = P["ch"]
 	var cn: float = P["cn"]
 	if ch > 0.0:
 		var line := lerpf(_N + 0.02, -0.02 + ch * 0.75, smoothstep(_MW * 0.8, _MW * 1.5, au)) - 0.16 * smoothstep(0.55, 1.0, au)
-		var dc := smoothstep(line - soft, line + soft, v)
+		var soft_c := soft
+		if float(P.get("cl", 0.0)) > 0.0:
+			# Linha da bochecha natural: desce em diagonal do canto do nariz até a costeleta, sem o
+			# degrau reto ao lado do bigode, e a borda de cima se desfaz aos poucos
+			var t := smoothstep(_MW * 0.9, _MW * 2.6, au)
+			line = lerpf(_M - 0.03, -0.02 + ch * 0.75, sqrt(t)) - 0.16 * smoothstep(0.55, 1.0, au)
+			soft_c = soft * 1.6
+		var dc := smoothstep(line - soft_c, line + soft_c, v)
 		if cn <= 0.0:
 			dc *= smoothstep(_MW * 1.15, _MW * 1.5, au)
 		d = maxf(d, dc)
@@ -2505,7 +2513,8 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 		rx *= lerpf(1.0, 0.35, clampf((v - cy) / ry, 0.0, 1.0) * float(P.get("tri", 0.0)))
 		var ke := 2.0 + 2.5 * float(P.get("sq", 0.0)) * float(v > cy)
 		var e := pow(pow(absf(u / rx), ke) + pow(absf((v - cy) / ry), ke), 1.0 / ke)
-		d = maxf(d, 1.0 - smoothstep(1.0 - soft * 3.0, 1.0 + soft, e))
+		d_chin = 1.0 - smoothstep(1.0 - soft * 3.0, 1.0 + soft, e)
+		d = maxf(d, d_chin)
 	# Bigode
 	var mu: int = int(P["mu"])
 	if mu > 0:
@@ -2584,6 +2593,13 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	# pescoço, a barba comprida desce
 	if th > 1.0:
 		var reach := lerpf(0.012 + ln * 0.55, (0.03 + ln * 0.9) / 0.6, over_neck)
+		if float(P.get("cl", 0.0)) > 0.0:
+			# Embaixo do queixo a barba desce em toda a largura do queixo (não numa faixa da largura
+			# do pescoço) e, se for curta, só arredonda o contorno
+			reach = lerpf(0.012 + ln * 0.55, 0.015 + ln * 1.3, smoothstep(0.62, 0.9, v))
+			# Abaixo da ponta do queixo vale só o formato do queixo (arredondado), nunca um bloco reto
+			if v > 0.96:
+				d = minf(d, lerpf(d, d_chin, smoothstep(0.96, 1.02, v)))
 		d *= 1.0 - smoothstep(reach * 0.2, reach, th - 1.0)
 	# Risco raspado na bochecha
 	if float(P.get("cut", 0.0)) > 0.0:
