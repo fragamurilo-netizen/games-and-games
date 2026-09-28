@@ -243,11 +243,11 @@ const STYLE_P: Array = [
 	{"tp": 0.07, "sd": 0.0, "fd": 2, "tx": "coil", "lu": 1}, # crespo baixo com degradê
 	{"tp": 0.035, "sd": 0.0, "fd": 5, "tx": "dots", "op": 0.95, "lu": 1}, # buzz navalhado
 	{"tp": 0.07, "sd": 0.02, "fd": 1, "gl": 0.35, "fl": 0, "sb": 0.05}, # liso para trás rente
-	{"tp": 0.2, "sd": 0.0, "fd": 3, "sp": 4, "gl": 0.1}, # moicano desfiado
+	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "gl": 0.1}, # moicano desfiado
 	{"tp": 0.26, "sd": 0.0, "fd": 5, "tx": "locs", "fr": "locs_top", "sp": 3, "lu": 1}, # twists caídos com degradê
 	{"tp": 0.14, "sd": 0.02, "hl": 0.14, "fd": 2, "fr": "fringe", "fl": 2, "sp": 5}, # franja bagunçada com degradê
 	{"tp": 0.1, "sd": 0.0, "hl": 0.14, "fd": 5, "fr": "crop", "fl": 2, "fc": 0.9}, # french crop navalhado
-	{"tp": 0.2, "sd": 0.0, "hl": 0.14, "fd": 5, "sp": 3, "tx": "curl", "fr": "curl_fringe"}, # franja cacheada navalhada
+	{"tp": 0.2, "sd": 0.0, "hl": 0.2, "fd": 5, "sp": 3, "tx": "curl"}, # franja cacheada navalhada
 	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.7, "lu": 1}, # máquina 1 com contorno
 	{"tp": 0.15, "sd": 0.0, "hl": 0.04, "fd": 2, "sp": 5, "fl": 1}, # texturizado de lado com degradê
 	{"tp": 0.56, "sd": 0.5, "sp": 3, "tx": "coil", "bk": "afro", "lu": 1}, # black power redondo
@@ -258,7 +258,7 @@ const STYLE_P: Array = [
 	{"tp": 0.2, "sd": 0.0, "fd": 2, "tx": "coil", "fr": "sponge", "lu": 1}, # esponja alta
 	{"tp": 0.16, "sd": 0.02, "fd": 5, "tx": "locs", "bk": "dreads", "sb": 0.08}, # locs com degradê navalhado
 	{"tp": 0.05, "sd": 0.0, "fd": 5, "tx": "coil", "bk": "puff", "lu": 1}, # afro puff com degradê
-	{"tp": 0.035, "sd": 0.01, "tx": "waves", "op": 1.0, "lu": 1}, # waves 360
+	{"tp": 0.025, "sd": 0.0, "fd": 1, "tx": "waves", "op": 0.9}, # waves 360
 	{"tp": 0.24, "sd": 0.14, "sp": 3, "tx": "coil", "fr": "shaved_part", "lu": 1}, # crespo médio com risco
 	{"tp": 0.3, "sd": 0.0, "fd": 3, "sp": 4, "tx": "coil", "lu": 1}, # frohawk
 	{"tp": 0.28, "sd": 0.0, "fd": 2, "sp": 3, "tx": "curl", "lu": 1}, # cachos definidos com degradê
@@ -266,7 +266,7 @@ const STYLE_P: Array = [
 	{"tp": 0.34, "sd": 0.0, "fd": 4, "sp": 3, "tx": "curl", "lu": 1}, # high top cacheado com pontas descoloridas
 	{"tp": 0.08, "sd": 0.03, "sb": 0.18, "bk": "long", "gl": 0.65, "fl": 0}, # longo liso molhado para trás
 	{"tp": 0.1, "sd": 0.07, "hl": 0.16, "fd": 0, "fr": "crop", "fl": 1, "fc": 1.0, "lu": 1}, # franja reta curta
-	{"tp": 0.06, "sd": 0.0, "fd": 3, "sp": 4, "ck": "spikes"}, # moicano com pontas descoloridas
+	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "ck": "spikes"}, # moicano com pontas descoloridas
 	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.5, "fr": "halfmoon"}, # meia-lua na franja
 	{"tp": 0.14, "sd": 0.0, "fd": 2, "fr": "quiff", "ph": 1.1, "gl": 0.2, "dz": 1}, # topete descolorido com laterais escuras
 	{"tp": 0.24, "sd": 0.0, "fd": 2, "sp": 3, "tx": "curl", "dz": 1}, # cachinhos descoloridos no alto
@@ -281,7 +281,7 @@ const STYLE_P: Array = [
 	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "hh": 1.9, "gl": 0.35}, # crista alta
 	{"tp": 0.5, "sd": 0.45, "sp": 3, "tx": "curl", "bk": "afro_curl", "ar": 1.3, "fr": "curl_fringe", "hl": 0.06, "bc": 1}, # afro gigante loiro
 	{"tp": 0.55, "sd": 0.5, "sp": 3, "tx": "coil", "bk": "afro", "ar": 1.45}, # black power gigante
-	{"tp": 0.42, "sd": 0.4, "sp": 3, "tx": "curl", "bk": "afro_curl", "ar": 1.02, "bc": 1, "fr": "curl_fringe", "hl": 0.08}, # cachos armados gigantes
+	{"tp": 0.42, "sd": 0.4, "sp": 3, "tx": "curl", "bk": "afro_curl", "ar": 1.02, "bc": 1, "hl": 0.1}, # cachos armados gigantes
 	{"tp": 0.16, "sd": 0.14, "tx": "locs", "bk": "dreads", "fr": "braid_locks", "lk": 1.1, "sb": 0.2}, # dreads longos volumosos
 	{"tp": 0.12, "sd": 0.1, "tx": "locs", "bk": "dreads", "sb": 0.1, "fr": "band"}, # dreads com faixa
 	{"tp": 0.1, "sd": 0.1, "sb": 0.25, "bk": "long", "fr": "locks", "lk": 1.2, "fl": 3, "fr2": "band"}, # longo com faixa
