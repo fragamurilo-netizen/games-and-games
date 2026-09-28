@@ -80,7 +80,7 @@ var cutout: bool = false:
 ## Parâmetros de cada penteado: tp/sd = volume no alto/nas laterais, hl = franja (desce a linha do
 ## cabelo), sb = até onde descem as laterais, fd = degradê (1 leve, 2 alto, 3 lateral raspada),
 ## tx = textura forçada, sp = silhueta (1 reto no alto, 2 espetado, 3 cacheado, 4 crista),
-## bk = parte de trás, fr = peça da frente, fl = direção dos fios (0 para trás, 1 de lado, 2 para
+## lu = contorno marcado (line-up), bk = parte de trás, fr = peça da frente, fl = direção dos fios (0 para trás, 1 de lado, 2 para
 ## baixo, 3 repartido ao meio), op = opacidade, gl = brilho extra, lk = comprimento das mechas.
 const STYLE_P: Array = [
 	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.6}, # raspado
@@ -236,6 +236,31 @@ const STYLE_P: Array = [
 	{"tp": 0.14, "sd": 0.1, "sb": 0.16, "fl": 3, "fr": "curtain"}, # médio com franja cortina
 	{"tp": 0.26, "sd": 0.2, "sp": 3, "tx": "curl", "sb": 0.18, "bc": 1}, # cachos soltos médios
 	{"tp": 0.12, "sd": 0.0, "fd": 5, "tx": "coil", "fr": "sponge"}, # esponja com degradê
+	{"tp": 0.17, "sd": 0.0, "fd": 5, "fr": "quiff", "ph": 1.1, "gl": 0.3, "fl": 0, "lu": 1}, # topete penteado navalhado
+	{"tp": 0.12, "sd": 0.07, "fl": 1, "sb": 0.06}, # social natural
+	{"tp": 0.07, "sd": 0.0, "fd": 2, "tx": "coil", "lu": 1}, # crespo baixo com degradê
+	{"tp": 0.035, "sd": 0.0, "fd": 5, "tx": "dots", "op": 0.95, "lu": 1}, # buzz navalhado
+	{"tp": 0.07, "sd": 0.02, "fd": 1, "gl": 0.35, "fl": 0, "sb": 0.05}, # liso para trás rente
+	{"tp": 0.2, "sd": 0.0, "fd": 3, "sp": 4, "gl": 0.1}, # moicano desfiado
+	{"tp": 0.26, "sd": 0.0, "fd": 5, "tx": "locs", "fr": "locs_top", "sp": 3, "lu": 1}, # twists caídos com degradê
+	{"tp": 0.14, "sd": 0.02, "hl": 0.14, "fd": 2, "fr": "fringe", "fl": 2, "sp": 5}, # franja bagunçada com degradê
+	{"tp": 0.1, "sd": 0.0, "hl": 0.14, "fd": 5, "fr": "crop", "fl": 2, "fc": 0.9}, # french crop navalhado
+	{"tp": 0.2, "sd": 0.0, "hl": 0.14, "fd": 5, "sp": 3, "tx": "curl", "fr": "curl_fringe"}, # franja cacheada navalhada
+	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.7, "lu": 1}, # máquina 1 com contorno
+	{"tp": 0.15, "sd": 0.0, "hl": 0.04, "fd": 2, "sp": 5, "fl": 1}, # texturizado de lado com degradê
+	{"tp": 0.56, "sd": 0.5, "sp": 3, "tx": "coil", "bk": "afro", "lu": 1}, # black power redondo
+	{"tp": 0.4, "sd": 0.0, "fd": 5, "sp": 3, "tx": "coil", "lu": 1}, # afro alto navalhado
+	{"tp": 0.5, "sd": 0.0, "fd": 5, "sp": 1, "tx": "coil", "lu": 1}, # high top navalhado
+	{"tp": 0.22, "sd": 0.12, "tx": "coil", "fr": "twists", "sb": 0.1}, # twists médios
+	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "braid_zig", "op": 0.8}, # nagô em zigue-zague com degradê
+	{"tp": 0.2, "sd": 0.0, "fd": 2, "tx": "coil", "fr": "sponge", "lu": 1}, # esponja alta
+	{"tp": 0.16, "sd": 0.02, "fd": 5, "tx": "locs", "bk": "dreads", "sb": 0.08}, # locs com degradê navalhado
+	{"tp": 0.05, "sd": 0.0, "fd": 5, "tx": "coil", "bk": "puff", "lu": 1}, # afro puff com degradê
+	{"tp": 0.035, "sd": 0.01, "tx": "waves", "op": 1.0, "lu": 1}, # waves 360
+	{"tp": 0.24, "sd": 0.14, "sp": 3, "tx": "coil", "fr": "shaved_part", "lu": 1}, # crespo médio com risco
+	{"tp": 0.3, "sd": 0.0, "fd": 3, "sp": 4, "tx": "coil", "lu": 1}, # frohawk
+	{"tp": 0.28, "sd": 0.0, "fd": 2, "sp": 3, "tx": "curl", "lu": 1}, # cachos definidos com degradê
+	{"tp": 0.26, "sd": 0.2, "sp": 3, "tx": "coil", "sb": 0.06}, # crespo médio natural
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)
@@ -2782,7 +2807,7 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 	var crown: float = f["crown"]
 	if crown > 0.0:
 		a *= 1.0 - minf(1.0, crown * 1.3) * _g(q.x, 0.7) * smoothstep(0.35, 0.8, h) * smoothstep(0.05, 0.4, w)
-	var sharp: bool = bool(f["lineup"]) or _hs("tx", "") in ["braid", "braid_zig", "waves"]
+	var sharp: bool = bool(f["lineup"]) or int(_hs("lu", 0)) == 1 or _hs("tx", "") in ["braid", "braid_zig", "waves"]
 	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa).
 	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
 	# Costeletas afinam até sumir. Em line-up/tranças/waves a ponta fica um pouco mais marcada.
@@ -2842,7 +2867,7 @@ func _build_cap() -> void:
 			y -= rec * 0.12 + rec * 0.3 * smoothstep(0.15, 0.66, absf(u))
 			if bool(f["widow"]):
 				y += 0.05 * _g(u, 0.09)
-			if not bool(f["lineup"]):
+			if not bool(f["lineup"]) and int(_hs("lu", 0)) != 1:
 				y += 0.012 * sin(t * 23.0 + seed) + 0.008 * sin(t * 41.0 + seed * 0.7)
 		if int(_hs("fl", 0)) == 3:
 			# Repartido ao meio: o cabelo cai para os lados e deixa um "V" de testa no centro
@@ -3026,7 +3051,7 @@ func _hairline_v(u: float) -> float:
 ## Fios finos e curtos que atravessam a linha do cabelo (testa e têmporas): ligam o cabelo à pele
 ## como numa foto, em vez de uma borda recortada. Cortes marcados (lineup, tranças) ficam limpos.
 func _hairline_wisps(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
-	if _s < 80.0 or bool(_f["lineup"]) or tex in ["braid", "braid_zig", "waves", "dots", "locs"]:
+	if _s < 80.0 or bool(_f["lineup"]) or int(_hs("lu", 0)) == 1 or tex in ["braid", "braid_zig", "waves", "dots", "locs"]:
 		return
 	var w := maxf(0.5, _s * 0.0026)
 	var n := int(70 * clampf(_det, 0.5, 1.6))

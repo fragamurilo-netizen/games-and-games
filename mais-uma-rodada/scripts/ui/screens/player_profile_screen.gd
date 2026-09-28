@@ -5,7 +5,7 @@ extends BaseScreen
 var _pid := -1
 var _tab := "geral"
 var _season_filter := 0 # temporada a temporada: 0 todas, 1 liga, 2 outras competições
-const TABS := [["geral", "Visão geral"], ["numeros", "Números"], ["carreira", "Carreira"]]
+const TABS := [["geral", "Visão geral"], ["atributos", "Atributos"], ["perfil", "Perfil"], ["numeros", "Números"], ["carreira", "Carreira"]]
 
 
 func _init() -> void:
@@ -46,18 +46,22 @@ func refresh() -> void:
 		"carreira":
 			c.add_child(_career(w, p))
 			c.add_child(_memory(w, p))
-		_:
-			var cards: Array = [_summary(w, p, own), _fit_card(w, p, own), _positions_card(w, p, own),
-				_attributes(w, p, own), _personality(w, p, own), SocialPost.mini_card(w, -1, p.id)]
+		"atributos":
+			UIKit.columns(c, [_attributes(w, p, own), _positions_card(w, p, own)], content_width())
+		"perfil":
+			var cards: Array = [_personality(w, p, own), _rep_card(w, p)]
 			if own:
 				cards.append(RelationsScreen.player_card(w, p, func(): refresh()))
+			cards.append(SocialPost.mini_card(w, -1, p.id))
 			UIKit.columns(c, cards, content_width())
+		_:
+			UIKit.columns(c, [_summary(w, p, own), _fit_card(w, p, own)], content_width())
 	_actions(w, p, own)
 
 
 func _tabs_row(p: Player) -> Control:
 	var row := UIKit.hbox(8)
-	var t := UIKit.tabs(TABS, _tab, func(key: String):
+	var t := UIKit.scroll_tabs(TABS, _tab, func(key: String):
 		_tab = key
 		refresh()
 		scroll_to_top())
@@ -224,6 +228,35 @@ func _ovr_block(w: GameWorld, p: Player, own: bool) -> Control:
 	pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(pl)
 	return v
+
+
+## Reputação do jogador: nível, clube, títulos pesados pela competição e prêmios.
+func _rep_card(w: GameWorld, p: Player) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section_header("Reputação", "Ranking", func(): UIManager.push("reputation")))
+	var rep := Reputation.player_rep(w, p)
+	var honours := 0.0
+	var best: Dictionary = {}
+	for t in p.trophies:
+		var k := String(t.get("k", ""))
+		var v := Reputation.title_value(k)
+		honours += v
+		if not best.has(k):
+			best[k] = [0, v]
+		best[k][0] += 1
+	card.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(str(int(round(rep))), Reputation.player_label(rep), Reputation.color(rep)),
+		UIKit.stat_tile(str(p.titles), "títulos"),
+		UIKit.stat_tile(str(int(round(honours))), "prestígio"),
+	], 600))
+	var keys := best.keys()
+	keys.sort_custom(func(a, b): return float(best[a][1]) > float(best[b][1]))
+	for i in mini(4, keys.size()):
+		var k: String = keys[i]
+		card.add_child(UIKit.kv("%dx %s" % [int(best[k][0]), Reputation.comp_name(w, k)], "%d pts cada" % int(round(float(best[k][1])))))
+	if keys.is_empty():
+		card.add_child(UIKit.label("Ainda sem títulos. Um título de liga forte pesa muito mais que o de uma liga fraca.", "Small", true))
+	return UIKit.card_panel(card)
 
 
 func _summary(w: GameWorld, p: Player, own: bool) -> Control:

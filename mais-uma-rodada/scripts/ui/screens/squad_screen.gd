@@ -85,7 +85,7 @@ func refresh() -> void:
 	# A ação principal (escalar) em destaque; os atalhos do elenco numa fileira de mesma largura.
 	c.add_child(UIKit.button("Escalação e tática", "PrimaryButton", func(): UIManager.push("prematch", {"edit": true}), "tactics"))
 	var top := UIKit.hbox(10)
-	for it in [["Numeração", "numbers", "shirt"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
+	for it in [["Números", "team_stats", "table"], ["Numeração", "numbers", "shirt"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
 		var dest := String(it[1])
 		var b := UIKit.button(String(it[0]), "GhostButton", func(): UIManager.push(dest), String(it[2]))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL

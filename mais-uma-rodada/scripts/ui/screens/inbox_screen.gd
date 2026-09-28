@@ -97,7 +97,9 @@ func refresh() -> void:
 			group = []
 			last_key = key
 			list.add_child(UIKit.eyebrow(date_of(w, m), UIColors.DIM))
-		var cb := on_change
+		# No celular o toque abre a folha da mensagem (row() cai em open_message quando cb é vazio);
+		# passar on_change aqui fazia o toque só recarregar a lista, sem abrir nada.
+		var cb := Callable()
 		if wide:
 			var mid := int(m["id"])
 			cb = func():

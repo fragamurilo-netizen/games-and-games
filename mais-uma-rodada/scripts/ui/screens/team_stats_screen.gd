@@ -50,9 +50,148 @@ static func cards(w: GameWorld, club: Club) -> Array:
 	if league != null and league.table.has(club.id):
 		out.append(_season_card(w, club, league))
 		out.append(_ranks_card(w, club, league))
+	out.append(squad_table(w, club))
 	out.append(_squad_card(w, club))
 	out.append(_leaders_card(w, club))
 	return out
+
+
+# ---------------------------------------------------------------------------
+# Tabela do elenco: jogos, gols, assistências, minutos e nota, desta temporada ou das anteriores.
+# ---------------------------------------------------------------------------
+
+static var _tbl_club := -1
+static var _tbl_year := 0
+static var _tbl_sort := "a"
+
+
+## Temporadas anteriores com registro: arquivo do clube (seu time) e a carreira de quem está no
+## elenco hoje (só o elenco atual, para não abrir o histórico do mundo inteiro).
+static func past_years(w: GameWorld, club: Club) -> Array:
+	var ys := {}
+	for k in club.squad_archive:
+		ys[int(k)] = true
+	for p: Player in w.squad(club):
+		for h: Dictionary in p.history:
+			if int(h.get("c", -1)) == club.id:
+				ys[int(h.get("y", 0))] = true
+	ys.erase(w.year)
+	var out: Array = ys.keys()
+	out.sort()
+	out.reverse()
+	return out
+
+
+## Linhas {id, n, pos, a, g, as, r, m} do elenco numa temporada (0 = a atual, liga + copas).
+static func table_rows(w: GameWorld, club: Club, year: int) -> Array:
+	var rows: Array = []
+	if year == 0 or year == w.year:
+		for p: Player in w.squad(club):
+			var t := p.season_totals()
+			var mins := p.stats[Player.S_MINUTES]
+			for k in p.cup_stats:
+				mins += (p.cup_stats[k] as PackedInt32Array)[Player.C_MINUTES]
+			rows.append({"id": p.id, "n": p.short_name(), "pos": p.position, "a": int(t[0]), "g": int(t[1]),
+				"as": int(t[2]), "r": p.avg_rating(), "m": mins, "yc": p.stats[Player.S_YELLOWS]})
+		return rows
+	var seen := {}
+	for r: Dictionary in club.squad_archive.get(str(year), []):
+		var row := r.duplicate()
+		row["m"] = -1
+		rows.append(row)
+		seen[int(r.get("id", -1))] = true
+	for p: Player in w.squad(club):
+		if seen.has(p.id):
+			continue
+		for h: Dictionary in p.history:
+			if int(h.get("c", -1)) == club.id and int(h.get("y", 0)) == year:
+				rows.append({"id": p.id, "n": p.short_name(), "pos": p.position, "m": -1,
+					"a": int(h.get("a", 0)) + int(h.get("ca", 0)), "g": int(h.get("g", 0)) + int(h.get("cg", 0)),
+					"as": int(h.get("as", 0)) + int(h.get("cas", 0)), "r": float(h.get("r", 0.0))})
+				break
+	return rows
+
+
+static func squad_table(w: GameWorld, club: Club) -> Control:
+	if _tbl_club != club.id:
+		_tbl_club = club.id
+		_tbl_year = 0
+	var card := UIKit.card("Card", 8)
+	var body := UIKit.vbox(8)
+	card.add_child(UIKit.section_header("Estatísticas do elenco"))
+	card.add_child(body)
+	_fill_table(w, club, body)
+	return UIKit.card_panel(card)
+
+
+static func _fill_table(w: GameWorld, club: Club, body: VBoxContainer) -> void:
+	UIKit.clear(body)
+	var redo := func(): _fill_table(w, club, body)
+	var years := past_years(w, club)
+	var items: Array = [["0", "%d (atual)" % w.year]]
+	for y in years.slice(0, 12):
+		items.append([str(y), str(y)])
+	body.add_child(UIKit.scroll_tabs(items, str(_tbl_year), func(k: String):
+		_tbl_year = int(k)
+		redo.call()))
+	body.add_child(UIKit.segment([["a", "Jogos"], ["g", "Gols"], ["as", "Assist."], ["r", "Nota"]], _tbl_sort, func(k: String):
+		_tbl_sort = k
+		redo.call()))
+	var rows := table_rows(w, club, _tbl_year)
+	var key := _tbl_sort
+	rows.sort_custom(func(a, b):
+		var va := float(a.get(key, 0))
+		var vb := float(b.get(key, 0))
+		return va > vb if va != vb else int(a.get("a", 0)) > int(b.get("a", 0)))
+	if rows.is_empty():
+		body.add_child(UIKit.label("Sem registros desta temporada para este clube.", "Muted", true))
+		return
+	var current := _tbl_year == 0
+	var head := UIKit.hbox(6)
+	var hn := UIKit.label("JOGADOR", "Caps")
+	hn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(hn)
+	var cols := ["J", "G", "A", "NOTA"] + (["MIN"] if current else [])
+	for t in cols:
+		head.add_child(_cell(t, "Caps", 58 if t == "MIN" else 46))
+	body.add_child(head)
+	var tot := [0, 0, 0]
+	for r: Dictionary in rows:
+		tot[0] += int(r.get("a", 0))
+		tot[1] += int(r.get("g", 0))
+		tot[2] += int(r.get("as", 0))
+		var h := UIKit.hbox(6)
+		h.add_child(UIKit.pos_badge(int(r.get("pos", 0))))
+		var nm := UIKit.label(String(r.get("n", "")), "")
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		nm.custom_minimum_size.x = 40
+		h.add_child(nm)
+		h.add_child(_cell(str(int(r.get("a", 0))), "", 46))
+		h.add_child(_cell(str(int(r.get("g", 0))), "H3" if int(r.get("g", 0)) > 0 else "", 46))
+		h.add_child(_cell(str(int(r.get("as", 0))), "", 46))
+		var rt := float(r.get("r", 0.0))
+		var rl := _cell("%.2f" % rt if rt > 0.0 else "—", "", 46)
+		if rt >= 7.2:
+			rl.add_theme_color_override(&"font_color", UIColors.GREEN)
+		elif rt > 0.0 and rt < 6.3:
+			rl.add_theme_color_override(&"font_color", UIColors.RED)
+		h.add_child(rl)
+		if current:
+			h.add_child(_cell(str(int(r.get("m", 0))), "Small", 58))
+		var pid := int(r.get("id", -1))
+		if w.player(pid) != null:
+			body.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
+		else:
+			body.add_child(h)
+	body.add_child(UIKit.label("Total: %d jogos · %d gols · %d assistências (liga e copas)" % tot, "Small", true))
+
+
+static func _cell(t: String, variation: String, wdt: int) -> Label:
+	var l := UIKit.label(t, variation)
+	l.custom_minimum_size.x = wdt
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	return l
 
 
 static func _pct(a: float, b: float) -> String:
