@@ -29,8 +29,11 @@ func refresh() -> void:
 		menu.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(logo)
 		row.add_child(menu)
-		c.add_child(UIKit.gap(40))
+		var top := UIKit.gap(40)
+		c.add_child(top)
 		c.add_child(row)
+		# Tablet e paisagem: o bloco fica no meio da altura, não colado no topo
+		_center_vertically(top)
 	else:
 		c.add_child(UIKit.gap(36))
 		c.add_child(logo)
@@ -40,6 +43,15 @@ func refresh() -> void:
 	var credit := UIKit.label("Desenvolvido por %s · versão %s" % [DEVELOPER, ProjectSettings.get_setting("application/config/version", "0.1.0")], "Small")
 	credit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	c.add_child(UIKit.tap_row(credit, show_credits, "PanelContainer"))
+
+
+func _center_vertically(top: Control) -> void:
+	await get_tree().process_frame
+	var c := content()
+	if c == null or not is_instance_valid(top):
+		return
+	var rest := c.get_combined_minimum_size().y - top.custom_minimum_size.y
+	top.custom_minimum_size.y = maxf(40.0, (size.y - rest) * 0.3)
 
 
 func _logo(wide: bool) -> VBoxContainer:
