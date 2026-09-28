@@ -10,6 +10,11 @@ extends RefCounted
 ##   players.json                     jogadores extras ou editados (ver PlayerMods)
 ##   img/**                           imagens (escudos, uniformes, estádios, logos, fotos): os dados
 ##                                    citam o caminho a partir de img/ ("escudos/meu_clube.png")
+## Pacote de licenciamento (tudo opcional; uma pasta só com imagens já é um pacote):
+##   pack.json                        {"name", "author", "priority", "clubs": {chave: {...}},
+##                                    "leagues": {id: {...}}, "cups": {id: {...}}, "players": [...]}
+##   names.csv                        planilha de nomes (Gerar modelo): tipo,id,atual,nome,curto,...
+##   crests/ logos/ cutouts/ kits/ stadiums/   imagens pelo nome do dono (ver DropIns)
 ## Um mod também pode vir num arquivo único (.json) com {"mod": {...}, "files": {"data/...": {...}},
 ## "players": [...], "images": {"arquivo.png": "<base64>"}} — é o formato de "Exportar como mod".
 ## Os mods ligados valem na ordem da lista (o último ganha) e entram quando os dados são carregados.
@@ -54,7 +59,21 @@ static func list() -> Array:
 ## mod.json de um mod instalado ({} se ilegível).
 static func manifest(id: String) -> Dictionary:
 	var meta: Variant = _read("%s/%s/mod.json" % [DIR, id])
-	return meta if meta is Dictionary else {}
+	if meta is Dictionary:
+		return meta
+	var pack: Variant = _read("%s/%s/pack.json" % [DIR, id])
+	if pack is Dictionary:
+		var out := {}
+		for k in ["name", "author", "version", "description", "priority", "enabled"]:
+			if pack.has(k):
+				out[k] = pack[k]
+		return out
+	return {}
+
+
+## Pastas de mods instaladas (com mod.json, pack.json, names.csv ou alguma pasta de imagens soltas).
+static func installed_ids() -> Array:
+	return _installed()
 
 
 static func _installed() -> Array:
@@ -63,9 +82,24 @@ static func _installed() -> Array:
 	if d == null:
 		return ids
 	for sub in d.get_directories():
-		if FileAccess.file_exists("%s/%s/mod.json" % [DIR, sub]):
+		if is_pack_dir("%s/%s" % [DIR, sub]):
 			ids.append(sub)
 	return ids
+
+
+const PACK_FILES: Array[String] = ["mod.json", "pack.json", "names.csv"]
+
+
+static func is_pack_dir(root: String) -> bool:
+	for f in PACK_FILES:
+		if FileAccess.file_exists(root + "/" + f):
+			return true
+	var d := DirAccess.open(root)
+	if d != null:
+		for sub in d.get_directories():
+			if DropIns.kind_of_folder(sub) != "":
+				return true
+	return false
 
 
 static func enabled_ids() -> Array:
@@ -76,7 +110,7 @@ static func enabled_ids() -> Array:
 		_enabled = Array(e) if e is Array else (Array(e.get("order", [])) if e is Dictionary else [])
 		_off = Array(e.get("off", [])) if e is Dictionary else []
 		# Mods apagados à mão somem da lista
-		_enabled = _enabled.filter(func(id): return FileAccess.file_exists("%s/%s/mod.json" % [DIR, id]))
+		_enabled = _enabled.filter(func(id): return is_pack_dir("%s/%s" % [DIR, id]))
 		_discover()
 	return _enabled
 
@@ -123,6 +157,7 @@ static func set_enabled(id: String, on: bool) -> void:
 	else:
 		_off.append(id)
 	_save_enabled()
+	DropIns.rescan()
 
 
 ## Move um mod ligado para cima (-1) ou para baixo (+1) na ordem de aplicação.
@@ -135,6 +170,7 @@ static func move(id: String, delta: int) -> void:
 	e.remove_at(i)
 	e.insert(j, id)
 	_save_enabled()
+	DropIns.rescan()
 
 
 static func any_enabled() -> bool:
@@ -144,7 +180,9 @@ static func any_enabled() -> bool:
 ## Relê a pasta de mods (depois de copiar um mod à mão ou instalar um).
 static func rescan() -> void:
 	_enabled_loaded = false
+	_pack_cache.clear()
 	enabled_ids()
+	DropIns.rescan()
 
 
 static func _save_enabled() -> void:
@@ -159,6 +197,8 @@ static func remove(id: String) -> void:
 	_off.erase(id)
 	_save_enabled()
 	_remove_dir("%s/%s" % [DIR, id])
+	_pack_cache.erase(id)
+	DropIns.rescan()
 
 
 static func _remove_dir(path: String) -> void:
@@ -177,8 +217,24 @@ static func _remove_dir(path: String) -> void:
 static func problems(id: String) -> Array:
 	var out: Array = []
 	var root := "%s/%s" % [DIR, id]
-	if manifest(id).is_empty():
+	if FileAccess.file_exists(root + "/mod.json") and not (_read(root + "/mod.json") is Dictionary):
 		out.append({"file": "mod.json", "msg": "mod.json ilegível"})
+	if FileAccess.file_exists(root + "/pack.json") and not (_read(root + "/pack.json") is Dictionary):
+		out.append({"file": "pack.json", "msg": "JSON inválido"})
+	var pk := pack_data(id)
+	out.append_array(pk["problems"])
+	var unknown: Array = []
+	for key in pk["clubs"]:
+		if DatabaseManager.club_entry(String(key)).is_empty():
+			unknown.append(key)
+	for lid in pk["leagues"]:
+		if not DatabaseManager.has_league(String(lid)):
+			unknown.append(lid)
+	for cid in pk["cups"]:
+		if DatabaseManager.cup_cfg(String(cid)).is_empty():
+			unknown.append(cid)
+	if not unknown.is_empty():
+		out.append({"file": "ids", "msg": "%d desconhecido(s): %s" % [unknown.size(), ", ".join(unknown.slice(0, 4).map(func(x): return String(x)))]})
 	for rel in _files_under(root + "/data", "data"):
 		if not rel.ends_with(".json"):
 			continue
@@ -236,6 +292,187 @@ static func apply_to(res_path: String, data: Variant) -> Variant:
 			var p: Variant = _read(patch)
 			if p != null:
 				data = merge(data, p)
+		data = _apply_pack(id, rel, data)
+	return data
+
+
+# ---------------------------------------------------------------------------
+# Pacote de licenciamento (pack.json + names.csv)
+# ---------------------------------------------------------------------------
+
+const CSV_COLUMNS: Array[String] = ["tipo", "id", "atual", "nome", "curto", "sigla", "cor1", "cor2", "estadio", "capacidade"]
+const CSV_ALIASES := {
+	"type": "tipo", "current": "atual", "name": "nome", "short": "curto", "abbr": "sigla",
+	"color1": "cor1", "color2": "cor2", "stadium": "estadio", "estádio": "estadio", "capacity": "capacidade",
+}
+const CSV_TYPES := {
+	"clube": "club", "club": "club", "liga": "league", "league": "league", "copa": "cup", "cup": "cup",
+	"jogador": "player", "player": "player",
+}
+
+static var _pack_cache: Dictionary = {}
+
+
+static func clear_pack_cache() -> void:
+	_pack_cache.clear()
+
+
+## Dados de um pacote: pack.json e names.csv juntos (a planilha ganha).
+## {clubs: {chave: campos}, leagues: {id: campos}, cups: {id: campos}, players: [...], problems: [...]}
+static func pack_data(id: String) -> Dictionary:
+	if _pack_cache.has(id):
+		return _pack_cache[id]
+	var out := {"clubs": {}, "leagues": {}, "cups": {}, "players": [], "problems": []}
+	var root := "%s/%s" % [DIR, id]
+	var pj: Variant = _read(root + "/pack.json")
+	if pj is Dictionary:
+		for k in ["clubs", "leagues", "cups"]:
+			if pj.get(k, null) is Dictionary:
+				for key in pj[k]:
+					if pj[k][key] is Dictionary:
+						out[k][String(key)] = pj[k][key].duplicate(true)
+		if pj.get("players", null) is Array:
+			out["players"] = Array(pj["players"]).filter(func(e): return e is Dictionary)
+	if FileAccess.file_exists(root + "/names.csv"):
+		_read_names_csv(root + "/names.csv", out)
+	_pack_cache[id] = out
+	return out
+
+
+## Planilha de nomes: separador vírgula ou ponto e vírgula (Excel em português), UTF-8.
+## Célula vazia = não muda.
+static func _read_names_csv(path: String, out: Dictionary) -> void:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return
+	var first := f.get_line()
+	var delim := ";" if first.count(";") > first.count(",") else ","
+	f.seek(0)
+	var head := f.get_csv_line(delim)
+	var cols: Array = []
+	for h in head:
+		var c := String(h).replace("\ufeff", "").strip_edges().to_lower()
+		cols.append(String(CSV_ALIASES.get(c, c)))
+	if not cols.has("tipo") or not cols.has("id"):
+		out["problems"].append({"file": "names.csv", "msg": "faltam as colunas tipo e id"})
+		return
+	var line := 1
+	var bad := 0
+	while not f.eof_reached():
+		var row := f.get_csv_line(delim)
+		line += 1
+		if row.size() <= 1 and (row.is_empty() or String(row[0]).strip_edges() == ""):
+			continue
+		var r := {}
+		for i in mini(row.size(), cols.size()):
+			var v := String(row[i]).strip_edges()
+			if v != "":
+				r[cols[i]] = v
+		var kind := String(CSV_TYPES.get(String(r.get("tipo", "")).to_lower(), ""))
+		var rid := String(r.get("id", ""))
+		if kind == "" or rid == "":
+			bad += 1
+			continue
+		var e := {}
+		for pair in [["nome", "name"], ["curto", "short"], ["sigla", "abbr"]]:
+			if r.has(pair[0]):
+				e[pair[1]] = r[pair[0]]
+		for c in ["cor1", "cor2"]:
+			if r.has(c):
+				var hex := String(r[c])
+				if not hex.begins_with("#"):
+					hex = "#" + hex
+				if Color.html_is_valid(hex):
+					e["c1" if c == "cor1" else "c2"] = hex
+				else:
+					bad += 1
+		if kind == "club":
+			if r.has("estadio"):
+				e["stadium"] = r["estadio"]
+			if r.has("capacidade") and String(r["capacidade"]).replace(".", "").is_valid_int():
+				e["capacity"] = int(String(r["capacidade"]).replace(".", ""))
+		if kind == "player":
+			var club := rid.get_slice("/", 0) if rid.contains("/") else ""
+			var who := rid.substr(club.length() + 1) if rid.contains("/") else rid
+			var pe := {"club": club, "match": who}
+			if e.has("name"):
+				var parts := String(e["name"]).split(" ", false, 1)
+				pe["first"] = parts[0]
+				pe["last"] = parts[1] if parts.size() > 1 else ""
+			if e.has("short"):
+				pe["known"] = e["short"]
+			if pe.size() > 2:
+				out["players"].append(pe)
+			continue
+		if e.is_empty():
+			continue
+		var bucket: Dictionary = out[{"club": "clubs", "league": "leagues", "cup": "cups"}[kind]]
+		var cur: Dictionary = bucket.get(rid, {})
+		cur.merge(e, true)
+		bucket[rid] = cur
+	if bad > 0:
+		out["problems"].append({"file": "names.csv", "msg": "%d linha(s) ignorada(s)" % bad})
+
+
+## Campos do pacote por cima de um clube/competição dos dados. c1/c2 trocam uma cor só.
+static func _apply_fields(d: Dictionary, e: Dictionary) -> void:
+	for k in e:
+		var v: Variant = e[k]
+		match String(k):
+			"c1", "c2":
+				var cur: Variant = d.get("colors", null)
+				var cols: Array = Array(cur) if cur is Array else []
+				if cur is Dictionary:
+					cols = [String(cur.get("primary", v)), String(cur.get("secondary", v))]
+				while cols.size() < 2:
+					cols.append(String(v))
+				cols[0 if k == "c1" else 1] = String(v)
+				d["colors"] = cols
+			"stadium":
+				if v is String and d.get("stadium", null) is Dictionary:
+					d["stadium"]["name"] = v
+				else:
+					d["stadium"] = _copy(v)
+			"capacity":
+				d["capacity"] = int(v)
+				if d.get("stadium", null) is Dictionary:
+					d["stadium"]["capacity"] = int(v)
+			"kits":
+				if v is Dictionary:
+					var kits: Dictionary = d.get("kits", {}) if d.get("kits", null) is Dictionary else {}
+					for slot in v:
+						kits[slot] = _copy(v[slot])
+					d["kits"] = kits
+			_:
+				d[k] = merge(d.get(k, null), v) if v is Dictionary else _copy(v)
+
+
+static func _apply_pack(id: String, rel: String, data: Variant) -> Variant:
+	if not (data is Dictionary):
+		return data
+	var pk := pack_data(id)
+	if rel.begins_with("data/world/clubs/"):
+		if not (data.get("clubs", null) is Array):
+			return data
+		for cd in data["clubs"]:
+			if not (cd is Dictionary):
+				continue
+			var e: Dictionary = pk["clubs"].get(String(cd.get("key", "")), {})
+			if not e.is_empty():
+				_apply_fields(cd, e)
+			var kj := DropIns.kit_json_for(id, cd)
+			if not kj.is_empty():
+				_apply_fields(cd, {"kits": kj})
+	elif rel == "data/world/leagues.json" and not pk["leagues"].is_empty():
+		for l in data.get("leagues", []):
+			if l is Dictionary and pk["leagues"].has(String(l.get("id", ""))):
+				_apply_fields(l, pk["leagues"][String(l["id"])])
+	elif (rel == "data/world/continental.json" or rel == "data/world/domestic.json") and not pk["cups"].is_empty():
+		var cups: Variant = data.get("cups", null)
+		if cups is Dictionary:
+			for cid in pk["cups"]:
+				if cups.get(cid, null) is Dictionary:
+					_apply_fields(cups[cid], pk["cups"][cid])
 	return data
 
 
@@ -299,6 +536,7 @@ static func players() -> Array:
 			out.append_array(p)
 		elif p is Dictionary:
 			out.append_array(Array(p.get("players", [])))
+		out.append_array(pack_data(id)["players"])
 	return out
 
 
@@ -306,18 +544,63 @@ static func players() -> Array:
 # Instalar e exportar
 # ---------------------------------------------------------------------------
 
-## Instala um mod a partir de um .zip (com mod.json na raiz ou numa pasta) ou de um .json único.
+## Instala um mod ou pacote: .zip (mod.json, pack.json, names.csv ou pastas de imagens, na raiz
+## ou numa pasta), .json de mod em arquivo único, pack.json (copia a pasta dele) ou só a planilha .csv.
 ## Retorna {ok, id, msg}.
 static func install(src_path: String) -> Dictionary:
 	var ext := src_path.get_extension().to_lower()
 	if ext == "zip":
 		return _install_zip(src_path)
+	if ext == "csv":
+		var id := _new_id(src_path.get_file().get_basename())
+		DirAccess.make_dir_recursive_absolute("%s/%s" % [DIR, id])
+		DirAccess.copy_absolute(src_path, "%s/%s/names.csv" % [DIR, id])
+		_write("%s/%s/pack.json" % [DIR, id], {"name": src_path.get_file().get_basename(), "priority": 50})
+		return _installed_ok(id)
 	if ext == "json":
 		var data: Variant = _read(src_path)
 		if not (data is Dictionary):
-			return {"ok": false, "msg": "O arquivo não é um mod válido (JSON ilegível)."}
+			return {"ok": false, "msg": "JSON ilegível."}
+		if src_path.get_file().to_lower() == "pack.json" or src_path.get_file().to_lower() == "mod.json":
+			return _install_folder(src_path.get_base_dir(), data)
+		if not data.has("files") and not data.has("mod") and (data.has("clubs") or data.has("leagues") or data.has("cups")):
+			var id := _new_id(String(data.get("name", "pacote")))
+			DirAccess.make_dir_recursive_absolute("%s/%s" % [DIR, id])
+			_write("%s/%s/pack.json" % [DIR, id], data)
+			return _installed_ok(id)
 		return install_bundle(data)
-	return {"ok": false, "msg": "Use um arquivo .zip ou .json de mod."}
+	return {"ok": false, "msg": "Use .zip, .json ou .csv."}
+
+
+static func _installed_ok(id: String) -> Dictionary:
+	_pack_cache.erase(id)
+	set_enabled(id, true)
+	return {"ok": true, "id": id, "msg": "\"%s\" instalado." % String(manifest(id).get("name", id))}
+
+
+## Pasta de pacote escolhida pelo pack.json/mod.json: copia o que o jogo usa.
+static func _install_folder(src_dir: String, meta: Dictionary) -> Dictionary:
+	var id := _new_id(String(meta.get("name", src_dir.get_file())))
+	var root := "%s/%s" % [DIR, id]
+	for rel in _files_under(src_dir, ""):
+		var r := String(rel).trim_prefix("/")
+		if _pack_path_ok(r):
+			DirAccess.make_dir_recursive_absolute((root + "/" + r).get_base_dir())
+			DirAccess.copy_absolute(src_dir + "/" + r, root + "/" + r)
+	return _installed_ok(id)
+
+
+## Caminhos aceitos dentro de um pacote (o resto do .zip/pasta é ignorado).
+static func _pack_path_ok(rel: String) -> bool:
+	if rel.begins_with("..") or rel.begins_with("/") or rel.contains("/../"):
+		return false
+	if rel in ["mod.json", "pack.json", "names.csv", "players.json"] or rel.begins_with("data/"):
+		return true
+	var kind := DropIns.kind_of_folder(rel.get_slice("/", 0))
+	var ext := rel.get_extension().to_lower()
+	if kind != "" and rel.contains("/"):
+		return CustomAssets.EXTENSIONS.has(ext) or (kind == "kits" and ext == "json")
+	return false
 
 
 static func install_bundle(data: Dictionary) -> Dictionary:
@@ -358,36 +641,58 @@ static func _install_zip(src_path: String) -> Dictionary:
 	if zr.open(src_path) != OK:
 		return {"ok": false, "msg": "Não foi possível abrir o .zip."}
 	var files := zr.get_files()
+	# Raiz do pacote: a pasta mais rasa com mod.json/pack.json/names.csv ou uma pasta de imagens.
 	var prefix := ""
+	var best := 9999
 	for f in files:
-		if f.get_file() == "mod.json" and (prefix == "" or f.length() < prefix.length() + 8):
-			prefix = f.get_base_dir()
-	if not files.has(prefix.path_join("mod.json") if prefix != "" else "mod.json"):
+		var depth := -1
+		var base := ""
+		if PACK_FILES.has(f.get_file()):
+			base = f.get_base_dir()
+			depth = f.count("/")
+		else:
+			var parts := f.split("/")
+			for i in parts.size() - 1:
+				if _is_drop_folder(parts[i]):
+					base = "/".join(parts.slice(0, i))
+					depth = i
+					break
+		if depth >= 0 and depth < best:
+			best = depth
+			prefix = base
+	if best == 9999:
 		zr.close()
-		return {"ok": false, "msg": "O .zip não tem um mod.json."}
-	var meta: Variant = JSON.parse_string(zr.read_file(prefix.path_join("mod.json") if prefix != "" else "mod.json").get_string_from_utf8())
-	var id := _new_id(String(meta.get("name", "mod")) if meta is Dictionary else "mod")
+		return {"ok": false, "msg": "O .zip não tem mod.json, pack.json, names.csv nem pastas de imagens."}
+	var meta: Variant = null
+	for mf in ["mod.json", "pack.json"]:
+		var mp: String = prefix.path_join(mf) if prefix != "" else mf
+		if meta == null and files.has(mp):
+			meta = JSON.parse_string(zr.read_file(mp).get_string_from_utf8())
+	var fallback := prefix.get_file() if prefix != "" else src_path.get_file().get_basename()
+	var id := _new_id(String(meta.get("name", fallback)) if meta is Dictionary else fallback)
 	var root := "%s/%s" % [DIR, id]
+	DirAccess.make_dir_recursive_absolute(root)
 	for f in files:
 		if f.ends_with("/") or (prefix != "" and not f.begins_with(prefix + "/")):
 			continue
-		var rel := f.substr(prefix.length() + 1) if prefix != "" else f
-		rel = rel.simplify_path()
-		if rel.begins_with("..") or rel.begins_with("/"):
-			continue
+		var rel := (f.substr(prefix.length() + 1) if prefix != "" else f).simplify_path()
 		if rel.begins_with("img/"):
 			_store_image(root, rel.substr(4), zr.read_file(f))
 			continue
-		var ok_path := rel == "mod.json" or rel == "players.json" or rel.begins_with("data/")
-		if not ok_path:
+		if not _pack_path_ok(rel):
 			continue
 		DirAccess.make_dir_recursive_absolute((root + "/" + rel).get_base_dir())
 		var out := FileAccess.open(root + "/" + rel, FileAccess.WRITE)
 		if out != null:
 			out.store_buffer(zr.read_file(f))
 	zr.close()
-	set_enabled(id, true)
-	return {"ok": true, "id": id, "msg": "Mod \"%s\" instalado e ligado." % (String(meta.get("name", id)) if meta is Dictionary else id)}
+	if not is_pack_dir(root):
+		_write(root + "/pack.json", {"name": fallback})
+	return _installed_ok(id)
+
+
+static func _is_drop_folder(name: String) -> bool:
+	return DropIns.kind_of_folder(name) != ""
 
 
 ## Suas personalizações do editor (clubes, estádios, uniformes, competições, placares, jogadores e

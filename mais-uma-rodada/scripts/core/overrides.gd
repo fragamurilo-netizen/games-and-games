@@ -207,4 +207,5 @@ static func _apply_colors(cfg: Dictionary, o: Dictionary) -> void:
 
 static func logo_of(id: String) -> Texture2D:
 	var cfg: Dictionary = DatabaseManager.league_cfg(id) if DatabaseManager.has_league(id) else DatabaseManager.cup_cfg(id)
-	return CustomAssets.texture(String(cfg.get("logo", "")))
+	var t := CustomAssets.texture(String(cfg.get("logo", "")))
+	return t if t != null else CustomAssets.texture(DropIns.comp_ref(id))

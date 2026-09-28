@@ -5,8 +5,8 @@ está em arquivos JSON dentro de `mais-uma-rodada/data/`. Um **mod** muda esses 
 jogo instalado: dá para trocar nomes e cores, mudar regras, criar competições e colocar jogadores
 reais nos elencos.
 
-No jogo: **Editor → Mods** lista os mods instalados, liga/desliga, muda a ordem, instala um arquivo
-(`.zip` ou `.json`), aponta arquivos com erro e exporta as suas personalizações do editor como mod —
+No jogo: **Editor → Mods** lista os mods instalados, liga/desliga, muda a ordem, importa um arquivo
+(`.zip`, `.json` ou `.csv`), aponta arquivos com erro e exporta as suas personalizações do editor como mod —
 em arquivo único para compartilhar ou **como pasta**, com os JSON separados, para continuar editando à mão.
 
 O mundo padrão do jogo é o dos arquivos de `data/`. Todos os campos detalhados descritos abaixo
@@ -14,11 +14,104 @@ O mundo padrão do jogo é o dos arquivos de `data/`. Todos os campos detalhados
 placar da TV) são **opcionais**: sem eles o jogo gera o que faltar. Eles existem para que um pacote de
 dados licenciados possa trocar o mundo inteiro só com arquivos, sem mexer no código.
 
+## Licenciamento: imagens e nomes sem editar JSON
+
+**Editor → Mods → Licenciamento**: Recarregar, Importar, Exportar, Gerar modelo, Abrir pasta (PC) e
+quantas imagens casaram (ⓘ em cada pacote lista arquivo → dono e os sem dono).
+
+### Pastas
+
+Qualquer pasta em `user://mods/` com pelo menos um destes itens já é um pacote (sem `mod.json`):
+
+```text
+user://mods/<pacote>/
+  pack.json        opcional: nome, autor, prioridade, nomes/cores/uniformes/jogadores (abaixo)
+  names.csv        opcional: planilha de nomes (abaixo)
+  crests/          escudos de clubes              (também: escudos/)
+  logos/           logos de ligas e copas
+  cutouts/         fotos de jogadores             (também: fotos/, faces/, players/, jogadores/)
+  kits/            camisas em imagem e uniformes em JSON   (também: uniformes/)
+  stadiums/        fotos de estádios              (também: estadios/)
+```
+
+Imagens: `.png`, `.jpg`, `.jpeg`, `.webp` (subpastas valem). Recortes com fundo transparente ficam
+sobre a cor do clube; o rosto deve ficar no alto da imagem. Imagens grandes são reduzidas na memória
+(512 px; estádios 1280 px). Arquivo ilegível é ignorado e aparece como sem dono.
+
+### Nome do arquivo
+
+O nome vale sem acento, maiúsculas, espaços ou símbolos: `São Paulo.png` = `sao-paulo.webp` =
+`SAO_PAULO.jpg`. Casa com, nesta ordem:
+
+| Pasta | Nomes aceitos |
+| --- | --- |
+| `crests/`, `stadiums/` | chave (`BRA_RNC`), nome, nome curto, nome oficial, sigla; `stadiums/` também o nome do estádio |
+| `logos/` | id (`BRA1`, `LIB`), nome, nome curto |
+| `cutouts/` | id do jogador, nome completo (`Nome Sobrenome`), nome de camisa, apelido |
+| `kits/` | como `crests/`, com sufixo do uniforme: nada ou `_home` titular, `_away` reserva, `_third` terceiro, `_gk` goleiro (`_titular`, `_reserva`, `_terceiro`, `_goleiro` também) |
+
+`kits/<clube>.json` traz uniformes no formato de `data/world/kits` (`{"h": {...}, "a": {...}}`) e vale
+para carreiras novas. Os nomes usados são os atuais (depois dos pacotes): se o pacote renomeia um
+clube, a imagem pode ter o nome novo ou a chave.
+
+Imagens soltas valem na hora, também em carreiras abertas (Recarregar). Escudo ou logo escolhido no
+Editor ou citado nos dados (`crest_img`, `logo`) ganha da imagem solta. Entre pacotes, ganha o de baixo.
+Sem o arquivo, volta o desenho do jogo — o save guarda só a referência (`"@crests/flamengo"`).
+
+### names.csv
+
+Gerado por **Gerar modelo** (pacote `modelo_licenciamento`, já ligado): todas as ligas, copas,
+clubes e os jogadores do mundo padrão, com id e nome atual. Preencha só o que quer mudar; célula
+vazia não muda nada. UTF-8; separador `,` ou `;` (Excel em português).
+
+```csv
+tipo,id,atual,nome,curto,sigla,cor1,cor2,estadio,capacidade
+liga,BRA1,Campeonato Nacional,Brasileirão Série A,Brasileirão,,#0B6E4F,#F2C94C,,
+clube,BRA_RNC,Rubro-Negro,Clube de Regatas do Flamengo,Flamengo,FLA,#C8102E,#111111,Maracanã,78838
+jogador,BRA_RNC/Nome Sobrenome,Nome Sobrenome,Giorgian de Arrascaeta,Arrascaeta,,,,,
+```
+
+| Coluna | Uso |
+| --- | --- |
+| `tipo` | `liga`, `copa`, `clube` ou `jogador` (`league`, `cup`, `club`, `player`). |
+| `id` | Chave da liga/copa/clube; jogador: `<chave do clube>/<nome original>` (não mude). |
+| `atual` | Só referência; ignorada. |
+| `nome` | Nome completo. Jogador: primeira palavra = nome, o resto = sobrenome. |
+| `curto` | Nome curto; jogador: nome de camisa. |
+| `sigla`, `estadio`, `capacidade` | Só clubes. |
+| `cor1`, `cor2` | `#RRGGBB` (o `#` é opcional). |
+
+Nomes de clubes, competições e jogadores valem para carreiras novas; renomear jogadores vale para
+carreiras no mundo padrão (semente inicial), onde os nomes originais existem.
+
+### pack.json
+
+```json
+{ "name": "Brasil real", "author": "Eu", "version": "1.0", "priority": 10,
+  "clubs": { "BRA_RNC": { "name": "Flamengo", "short": "Flamengo", "abbr": "FLA", "colors": ["#C8102E", "#111111"],
+                          "stadium": "Maracanã", "capacity": 78838, "kits": { "h": { "pattern": "hoops_thin" } } } },
+  "leagues": { "BRA1": { "name": "Brasileirão", "short": "Série A", "colors": ["#0B6E4F", "#F2C94C"] } },
+  "cups": { "CDB": { "name": "Copa do Brasil" } },
+  "players": [ { "club": "BRA_RNC", "match": "Nome Sobrenome", "first": "Giorgian", "last": "de Arrascaeta" } ] }
+```
+
+`clubs`, `leagues` e `cups` aceitam qualquer campo dos dados (ver "Clubes em detalhe" e
+"Competições em detalhe"); só mudam itens que existem. `players` segue o `players.json`.
+Ordem dentro do pacote: arquivos `data/`, depois `pack.json`, depois `names.csv`.
+
+### Importar e exportar
+
+- **Importar**: `.zip` (com `pack.json`, `names.csv`, `mod.json` ou as pastas de imagens, na raiz ou
+  numa pasta), `pack.json` (copia a pasta dele), `.csv` sozinho ou mod `.json`. Entra ligado, por último.
+- **Exportar**: `user://exports/<nome>/` + `.zip` com `pack.json` (só o que difere dos dados originais:
+  pacotes ligados + Editor), jogadores, e as imagens em uso renomeadas pela chave/id
+  (`crests/BRA_RNC.png`, `logos/BRA1.png`, `stadiums/BRA_RNC.jpg`, `kits/BRA_RNC_away.png`, `cutouts/…`).
+
 ## O caminho mais curto
 
 1. No **Editor** do menu inicial, edite clubes (nome, cores, escudo, estádio, uniformes), competições
    (nome, logo, cores, placar da TV) e jogadores.
-2. **Editor → Mods → Exportar como pasta de mod**. O jogo cria `user://mods/<id>/` com os arquivos no
+2. **Editor → Mods → Exportar como pasta**. O jogo cria `user://mods/<id>/` com os arquivos no
    formato deste documento (e um `.zip` em `user://exports/`).
 3. Abra os JSON, copie o padrão para os outros clubes e competições e ligue o mod.
 
@@ -41,10 +134,10 @@ pelo Editor (`user://custom/img`).
 
 `user://` é a pasta de dados do jogo (no PC: `%APPDATA%/Godot/app_userdata/Mais Uma Rodada` no Windows,
 `~/.local/share/godot/app_userdata/Mais Uma Rodada` no Linux; no Android, a pasta interna do app — use
-**Instalar mod** para copiar um arquivo para lá).
+**Importar** para copiar um arquivo para lá).
 
 Mods ligados valem na ordem da lista: o último ganha. Uma pasta copiada à mão para `user://mods/`
-aparece ligada na próxima vez que o jogo abrir (ou em **Procurar mods novos na pasta**), na posição do
+aparece ligada na próxima vez que o jogo abrir (ou em **Recarregar**), na posição do
 seu `priority`; `"enabled": false` no `mod.json` faz ela entrar desligada. Os dados são relidos quando você liga ou desliga
 um mod no menu (sem carreira aberta); em carreiras já começadas, só valem as mudanças que o save não
 guarda (nomes de competições, textos, regras).

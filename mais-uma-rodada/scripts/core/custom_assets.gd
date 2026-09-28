@@ -5,6 +5,7 @@ extends RefCounted
 ##   "crest_123.png"          importada pelo editor (user://custom/img)
 ##   "escudos/meu_clube.png"  de um mod ligado (user://mods/<id>/img/escudos/meu_clube.png)
 ##   "res://..." / "user://..." caminho completo (pacotes de imagens que venham com o jogo)
+##   "@crests/flamengo"       imagem solta numa pasta de pacote (ver DropIns)
 ## Importadas pelo editor viram PNG quadrado de até 256 px (estádios: até 640 px, sem cortar).
 
 const DIR := "user://custom/img"
@@ -25,6 +26,8 @@ static func clear_cache() -> void:
 static func path_of(file: String) -> String:
 	if file == "" or file.contains(".."):
 		return ""
+	if file.begins_with("@"):
+		return DropIns.path_of_ref(file)
 	if file.begins_with("res://") or file.begins_with("user://"):
 		return file if FileAccess.file_exists(file) or ResourceLoader.exists(file) else ""
 	var own := "%s/%s" % [DIR, file]
@@ -46,9 +49,19 @@ static func texture(file: String) -> Texture2D:
 	elif path != "":
 		var img := Image.load_from_file(path)
 		if img != null and not img.is_empty():
+			if file.begins_with("@"):
+				_shrink(img, DropIns.MAX_WIDE if file.begins_with("@stadiums/") else DropIns.MAX_SIDE)
 			tex = ImageTexture.create_from_image(img)
 	_cache[file] = tex
 	return tex
+
+
+## Fotos grandes soltas nas pastas dos pacotes ficam menores na memória.
+static func _shrink(img: Image, max_side: int) -> void:
+	var big := maxi(img.get_width(), img.get_height())
+	if big > max_side:
+		var k := float(max_side) / big
+		img.resize(maxi(1, int(img.get_width() * k)), maxi(1, int(img.get_height() * k)), Image.INTERPOLATE_BILINEAR)
 
 
 ## Importa uma imagem do aparelho: recorta o centro em quadrado, reduz e salva.

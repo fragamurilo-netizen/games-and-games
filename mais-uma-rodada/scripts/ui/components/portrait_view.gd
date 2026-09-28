@@ -323,6 +323,8 @@ func set_player(p: Player, club: Club, year: int) -> void:
 	age = p.age(year)
 	look = p.look
 	photo = CustomAssets.texture(String(p.look.get("photo", "")))
+	if photo == null:
+		photo = CustomAssets.texture(DropIns.player_ref(p)) # recorte solto em cutouts/ de um pacote
 	if club != null:
 		shirt_color = club.primary_color()
 		trim_color = club.secondary_color()
@@ -554,14 +556,36 @@ func _rings(n: int) -> int:
 	return maxi(3, int(round(n * clampf(_det, 0.4, 1.2))))
 
 
+static var _alpha_cache: Dictionary = {}
+
+
+## Foto com fundo transparente (recorte de verdade)? Conferido uma vez por textura.
+static func _has_alpha(t: Texture2D) -> bool:
+	var id := t.get_instance_id()
+	if not _alpha_cache.has(id):
+		var img := t.get_image()
+		_alpha_cache[id] = img != null and img.detect_alpha() != Image.ALPHA_NONE
+	return _alpha_cache[id]
+
+
 func _draw_photo(c: Vector2, s: float) -> void:
-	var pts := _ellipse(c, s * 0.5, s * 0.5, 48)
 	var ts := photo.get_size()
+	if cutout and _has_alpha(photo):
+		# Recorte (apresentação, notícias): a imagem inteira, apoiada embaixo, sem o círculo.
+		var k := minf(size.x / ts.x, size.y / ts.y)
+		var sz := ts * k
+		draw_texture_rect(photo, Rect2(Vector2((size.x - sz.x) * 0.5, size.y - sz.y), sz), false)
+		return
+	var pts := _ellipse(c, s * 0.5, s * 0.5, 48)
+	# Fundo do círculo: recortes em PNG transparente ficam sobre a cor do clube.
+	draw_colored_polygon(pts, bg_color)
+	# Quadrado do tamanho do lado menor, centrado na largura e apoiado no alto (rosto em cima).
 	var side := minf(ts.x, ts.y)
+	var top := Vector2((ts.x - side) * 0.5, 0.0)
 	var uvs := PackedVector2Array()
 	for p in pts:
-		var rel := (p - c) / s # -0.5..0.5
-		var px := ts * 0.5 + rel * side
+		var rel := (p - c) / s + Vector2(0.5, 0.5) # 0..1
+		var px := top + rel * side
 		uvs.append(Vector2(px.x / ts.x, px.y / ts.y))
 	_fill(pts, Color.WHITE, uvs, photo)
 	_r_arc(c, s * 0.5 - 1.0, 0.0, TAU, 48, Color(bg_color.lightened(0.25), 0.6), maxf(1.0, s * 0.012), true)

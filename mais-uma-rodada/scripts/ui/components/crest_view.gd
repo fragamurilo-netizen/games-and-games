@@ -51,7 +51,11 @@ func _draw() -> void:
 	var off := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
 	var img := CustomAssets.texture(String(crest.get("img", "")))
 	if img != null:
-		draw_texture_rect(img, Rect2(off, Vector2(s, s)), false)
+		# Escudos em imagem de qualquer proporção cabem no quadrado sem deformar.
+		var ts := img.get_size()
+		var k := s / maxf(ts.x, ts.y)
+		var sz := ts * k
+		draw_texture_rect(img, Rect2(off + (Vector2(s, s) - sz) * 0.5, sz), false)
 		return
 	var key := hash([crest, s])
 	if _cache.has(key):

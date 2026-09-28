@@ -131,6 +131,22 @@ static func group_patterns(group: int) -> Array:
 
 
 func _draw() -> void:
+	# Camisa em imagem (pasta kits/ de um pacote): no lugar da camisa desenhada, de frente.
+	var img: Texture2D = CustomAssets.texture(String(kit.get("img", ""))) if kit.has("img") and not back else null
+	if img != null:
+		_place_crest(Rect2())
+		var box := Rect2(Vector2.ZERO, size)
+		if full:
+			var fh := minf(size.y, size.x / FULL_ASPECT)
+			var fr := Rect2((size.x - fh * FULL_ASPECT) * 0.5, (size.y - fh) * 0.5, fh * FULL_ASPECT, fh)
+			_draw_legs(fr)
+			var fs := fh * FULL_SHIRT
+			box = Rect2(fr.position + Vector2((fr.size.x - fs) * 0.5, 0.0), Vector2(fs, fs))
+		var ts := img.get_size()
+		var k := minf(box.size.x / ts.x, box.size.y / ts.y)
+		var sz := ts * k
+		draw_texture_rect(img, Rect2(box.position + (box.size - sz) * 0.5, sz), false)
+		return
 	if full:
 		var h := minf(size.y, size.x / FULL_ASPECT)
 		var w := h * FULL_ASPECT

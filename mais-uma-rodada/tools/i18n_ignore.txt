@@ -145,3 +145,11 @@ career
 ambition
 pick
 groups
+%s|%d
+@%s/%s
+@stadiums/
+[^a-z0-9]
+estádio
+ids
+ß=ss,æ=ae,œ=oe,þ=th
+áàâãäåāąăéèêëēęěėíìîïīıįóòôõöøōőúùûüūůűųçćčñńňłśšşșźżžğřťțďđýÿð
