@@ -265,6 +265,9 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 		tb *= 0.5
 	var legacy_budget := float(clampf(tb, 0.0, revenue * cap_mult))
 	var market_budget := float(MarketReality.budget_reference(world, club, revenue))
+	# Caixa no vermelho: a verba de mercado some conforme o rombo (zera com 25% da receita anual).
+	if club.balance < 0:
+		market_budget *= clampf(1.0 + float(club.balance) / maxf(1.0, revenue * 0.25), 0.0, 1.0)
 	# Mistura sustentabilidade financeira com poder de compra coerente com o valor do elenco.
 	club.transfer_budget = int(clampf(lerpf(legacy_budget, market_budget, 0.60), 0.0, revenue * cap_mult))
 

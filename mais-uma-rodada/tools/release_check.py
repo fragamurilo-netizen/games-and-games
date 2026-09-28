@@ -167,8 +167,11 @@ for path in sorted(glob.glob(os.path.join(STORE, "play-store-*.txt"))):
             err("%s: bloco %s vazio" % (name, kind))
         elif len(val) > LIMITS[kind]:
             err("%s: %s com %d caracteres (máximo %d)" % (name, kind, len(val), LIMITS[kind]))
-    if version not in text:
+    news = [parts[h] for h in heads[3:] if version in h]
+    if not news:
         warn("%s: sem as novidades da versão %s" % (name, version))
+    elif len(news[0]) > 500:
+        err("%s: novidades com %d caracteres (máximo 500)" % (name, len(news[0])))
 
 for fname, want in (("icon-512.png", (512, 512)), ("feature-graphic-1024x500.png", (1024, 500))):
     p = os.path.join(STORE, fname)
@@ -189,6 +192,11 @@ for p in shots:
 
 if not os.path.exists(os.path.join(STORE, "politica-de-privacidade.html")):
     err("store/politica-de-privacidade.html ausente (obrigatória com compras no app)")
+else:
+    # Cópia publicada pelo GitHub Pages (Settings → Pages → main, pasta /docs)
+    pages = os.path.join(os.path.dirname(ROOT), "docs", "privacidade", "index.html")
+    if not os.path.exists(pages) or open(pages, "rb").read() != open(os.path.join(STORE, "politica-de-privacidade.html"), "rb").read():
+        err("docs/privacidade/index.html diferente de store/politica-de-privacidade.html (copie de novo)")
 
 # --- Traduções e segredos --------------------------------------------------------
 for p in glob.glob(os.path.join(ROOT, "data", "i18n", "*.json")):

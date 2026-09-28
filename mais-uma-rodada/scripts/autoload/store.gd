@@ -19,6 +19,8 @@ const SALT := "mais-uma-rodada/1"
 var enforce_override: int = -1
 var owned: bool = false
 var editor_owned: bool = false
+## Cafés pagos neste aparelho: só aparece o agradecimento nos créditos (não muda nada no jogo).
+var tips: int = 0
 var pending: bool = false
 var prices := {FULL: "R$ 9,99", EDITOR: "R$ 3,99", TIP: "R$ 2,99"}
 
@@ -84,6 +86,8 @@ func buy(id: String = FULL) -> void:
 		owned = true if id == FULL else owned
 		if id == EDITOR:
 			_unlock_editor()
+		if id == TIP:
+			tips += 1
 		_save()
 		changed.emit()
 		return
@@ -197,6 +201,8 @@ func _handle(p: Dictionary, fresh: bool) -> void:
 			_client.acknowledge_purchase(token)
 	if _has(p, TIP):
 		_client.consume_purchase(token)
+		tips += 1
+		_save()
 		if fresh:
 			message.emit("Valeu pelo café! Isso ajuda muito o jogo a continuar.")
 
@@ -237,10 +243,12 @@ func _load() -> void:
 		return
 	owned = String(cf.get_value("store", "full", "")) == _sig(true)
 	editor_owned = String(cf.get_value("store", "editor", "")) == _sig(true, EDITOR)
+	tips = int(cf.get_value("store", "tips", 0))
 
 
 func _save() -> void:
 	var cf := ConfigFile.new()
 	cf.set_value("store", "full", _sig(owned))
 	cf.set_value("store", "editor", _sig(editor_owned, EDITOR))
+	cf.set_value("store", "tips", tips)
 	cf.save(FILE)

@@ -164,6 +164,10 @@ func refresh() -> void:
 	else:
 		cs.add_child(UIKit.label("Carreira Completa · %s" % Store.price(), "Small", true))
 		cs.add_child(UIKit.button("Ver a Carreira Completa", "GhostButton", func(): UIManager.push("paywall", {"reason": "settings"}), "star"))
+	if Store.editor_owned or not Store.enforced():
+		cs.add_child(UIKit.colored("Editor na carreira liberado.", UIColors.GREEN, "Small", true))
+	else:
+		cs.add_child(UIKit.button("Editor na carreira · %s" % Store.price(Store.EDITOR), "GhostButton", func(): Store.buy(Store.EDITOR), "palette"))
 	cs.add_child(UIKit.menu_group([
 		UIKit.menu_row("save", "Restaurar compras", "", func(): Store.restore()),
 		UIKit.menu_row("star", "Pagar um café pro desenvolvedor · %s" % Store.price(Store.TIP), "", func(): Store.buy(Store.TIP)),

@@ -117,7 +117,13 @@ static func enrich_conversation(world: GameWorld, conv: Dictionary, kind: String
 		return conv
 	var line := _context_line(world, kind, target)
 	if line != "":
-		conv["lines"].append(["npc", line])
+		# Entra antes da pergunta de abertura: as respostas oferecidas respondem a ela, então ela
+		# precisa ser a última fala (na coletiva pós-jogo, a pergunta sobre o placar).
+		var lines: Array = conv["lines"]
+		if not lines.is_empty() and String(lines.back()[0]) == "npc":
+			lines.insert(lines.size() - 1, ["npc", line])
+		else:
+			lines.append(["npc", line])
 	return conv
 
 

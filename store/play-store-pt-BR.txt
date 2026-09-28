@@ -50,6 +50,6 @@ NOVIDADES (0.4.0)
 • Opções em abas: partidas, idioma, visual, som e sobre
 • "Simular" muito mais fluido: a tela não trava e o botão Parar responde na hora
 • Velocidade Turbo que fica salva para os próximos jogos
-• Mundo novo, save e carregamento bem mais rápidos em celulares com vários núcleos
-• Idioma na tela inicial; na primeira abertura o jogo já usa o idioma do celular
+• Mundo novo, save e carregamento mais rápidos
+• Idioma na tela inicial; abre no idioma do celular
 • Editor na carreira: edite jogadores e clubes com a carreira em andamento (compra à parte)
