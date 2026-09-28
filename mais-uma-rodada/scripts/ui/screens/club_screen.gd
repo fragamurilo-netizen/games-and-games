@@ -137,6 +137,25 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	# Estádio e uniformes da temporada.
 	var kc := UIKit.card("Card", 12)
 	kc.add_child(UIKit.section_header(club.stadium))
+	# Foto e ficha do estádio, quando os dados (mods/licenciamento) ou o Editor trazem.
+	var photo := CustomAssets.texture(String(club.venue.get("photo", "")))
+	if photo != null:
+		var tr := TextureRect.new()
+		tr.texture = photo
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tr.custom_minimum_size = Vector2(0, 180)
+		tr.clip_contents = true
+		kc.add_child(tr)
+	var vbits: Array = []
+	if String(club.venue.get("nick", "")) != "":
+		vbits.append("\"%s\"" % club.venue["nick"])
+	if int(club.venue.get("built", 0)) > 0:
+		vbits.append("inaugurado em %d" % int(club.venue["built"]))
+	if LicensedData.venue_kind(club) != "":
+		vbits.append(String(LicensedData.VENUE_KIND_NAMES[LicensedData.venue_kind(club)]).to_lower())
+	if not vbits.is_empty():
+		kc.add_child(UIKit.label(" · ".join(vbits), "Small", true))
 	var kits := UIKit.hbox(8)
 	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.third_kit(), "Terceiro"], [club.gk_kit(), "Goleiro"]]:
 		var v := UIKit.vbox(4)

@@ -29,9 +29,13 @@ static func comp_short(w: GameWorld, comp: String) -> String:
 	return CupManager.cup_short(comp)
 
 
-## Logo desenhado de uma competição (formato do CrestView): o de identity.json, ou um selo gerado
-## com as cores oficiais e as iniciais.
+## Logo desenhado de uma competição (formato do CrestView): o "logo_design" da própria competição
+## nos dados, o de identity.json, ou um selo gerado com as cores oficiais e as iniciais.
+## (Logo em imagem: campo "logo" da competição, ver Overrides.logo_of.)
 static func logo(comp: String) -> Dictionary:
+	var own_cfg: Dictionary = DatabaseManager.league_cfg(comp) if DatabaseManager.has_league(comp) else DatabaseManager.cup_cfg(comp)
+	if own_cfg.get("logo_design", null) is Dictionary and not (own_cfg["logo_design"] as Dictionary).is_empty():
+		return own_cfg["logo_design"]
 	var logos: Dictionary = DatabaseManager.get_data("identity").get("logos", {})
 	if logos.has(comp):
 		return logos[comp]

@@ -104,6 +104,7 @@ static func from_data(_world: GameWorld, rng: RandomNumberGenerator, data: Dicti
 	# não do nome oficial ("Club de Regatas do Flamengo" daria CRF).
 	if not (data.get("crest", {}) as Dictionary).has("initials"):
 		c.crest["initials"] = String(data.get("initials", _short_initials(c)))
+	LicensedData.apply_club(c, data) # nome oficial, estádio detalhado, escudo em imagem
 	return c
 
 
@@ -348,6 +349,11 @@ static func real_kits(c: Club) -> Dictionary:
 	if c == null or c.key == "":
 		return {}
 	var d := DatabaseManager.club_kits(c.key)
+	# Uniformes da temporada inicial ("seasons": {"2026": {...}}) valem desde o começo.
+	var first := season_spec(c, DatabaseManager.start_year())
+	if not first.is_empty():
+		d = d.duplicate(true)
+		d.merge(first, true)
 	if d.is_empty() or not d.has("h") or not d.has("a"):
 		return {}
 	var out := {}
@@ -368,6 +374,25 @@ static func real_kits(c: Club) -> Dictionary:
 		i += 1
 	out["alt"] = alts
 	return out
+
+
+## Uniformes escritos para uma temporada ("seasons": {"2027": {h, a, t, g}} no arquivo de uniformes
+## ou no clube), já completos: {h?, a?, t?, g?} com só os que a temporada define.
+static func season_kits(c: Club, year: int) -> Dictionary:
+	var spec := season_spec(c, year)
+	var out := {}
+	for w in ["h", "a", "t", "g"]:
+		if spec.get(w, null) is Dictionary:
+			out[w] = real_kit(c, spec[w], w)
+	return out
+
+
+static func season_spec(c: Club, year: int) -> Dictionary:
+	var seasons: Variant = DatabaseManager.club_kits(c.key).get("seasons", {})
+	if not (seasons is Dictionary):
+		return {}
+	var s: Variant = seasons.get(str(year), {})
+	return s if s is Dictionary else {}
 
 
 ## Um uniforme do arquivo de uniformes reais, com os campos que faltam preenchidos.

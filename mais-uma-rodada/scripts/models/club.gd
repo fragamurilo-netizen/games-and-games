@@ -24,6 +24,12 @@ var rivals: Array = [] # ids de clubes rivais (o primeiro é o maior)
 
 var stadium: String = ""
 var capacity: int = 10000
+## Dados extras do estádio vindos dos dados/mods ou do editor (todos opcionais):
+## {kind: arena|caldeirao|olimpico|acanhado (muda o desenho e o corte do gramado), photo: imagem,
+##  city, built (ano), nick (apelido do estádio)}. Ver LicensedData.
+var venue: Dictionary = {}
+## Nome oficial completo (licenciamento), quando diferente do nome de exibição.
+var official: String = ""
 
 var balance: int = 0
 ## Dívida de longo prazo (empréstimos, bancos, parcelamentos): paga juros e amortização toda semana,
@@ -225,7 +231,7 @@ func to_dict() -> Dictionary:
 		"id": id, "key": key, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
 		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
 		"cmk": snappedf(commercial, 0.001), "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
-		"rivals": rivals, "stadium": stadium, "cap": capacity,
+		"rivals": rivals, "stadium": stadium, "cap": capacity, "ven": venue, "off": official,
 		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
@@ -261,6 +267,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.rivals = Array(d.get("rivals", []))
 	c.stadium = d.get("stadium", "")
 	c.capacity = int(d.get("cap", 10000))
+	c.venue = Dictionary(d.get("ven", {})).duplicate(true)
+	c.official = String(d.get("off", ""))
 	c.balance = int(d.get("bal", 0))
 	c.debt = int(d.get("debt", 0))
 	c.transfer_budget = int(d.get("tb", 0))

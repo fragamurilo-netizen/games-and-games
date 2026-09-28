@@ -278,6 +278,12 @@ static func renew_ai(world: GameWorld, c: Club) -> void:
 	if clash(h, a):
 		a = ClubGenerator.away_kit(kr, c, h)
 	recolor_distinct(c, t, [h, a])
+	# Uniformes escritos para esta temporada nos dados (licenciamento) valem como estão.
+	var season := ClubGenerator.season_kits(c, world.year)
+	h = season.get("h", h)
+	a = season.get("a", a)
+	t = season.get("t", t)
+	g = season.get("g", g)
 	h.merge(sp_h, true)
 	a.merge(sp_a, true)
 	t.merge(sp_t, true)

@@ -35,6 +35,10 @@ static func apply_weather(st: Dictionary, wx: Dictionary) -> void:
 static func kind_for(w: GameWorld, home: Club, neutral: bool) -> String:
 	if neutral:
 		return "nacional"
+	# Tipo escolhido nos dados ("stadium": {"kind": ...}) ou no Editor.
+	var own := LicensedData.venue_kind(home)
+	if own != "":
+		return own
 	var name := home.stadium
 	for word in TRACK_WORDS:
 		if name.contains(word) and not name.begins_with("Parc"):
