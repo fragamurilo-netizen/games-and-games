@@ -10,6 +10,8 @@ extends Control
 ## Na partida, `swapped` espelha o desenho: no segundo tempo o mandante ataca para a esquerda.
 
 signal slot_tapped(index: int)
+## Toque no campo durante o replay (a tela encerra o replay).
+signal replay_skipped
 
 @export_enum("lineup", "match") var mode: String = "lineup":
 	set(v):
@@ -65,6 +67,15 @@ var swapped: bool = false:
 ## Siglas mostradas no fundo de cada campo de defesa (quem defende aquele gol).
 var home_label: String = ""
 var away_label: String = ""
+## Câmera da transmissão: aproxima no ataque perigoso, na comemoração e no replay.
+var cam_zoom := 1.0
+var cam_focus := Vector2(PitchMotion.L * 0.5, PitchMotion.W * 0.5) # metros
+var _cam_xf := Transform2D.IDENTITY # transformação da câmera no _draw (desenhos girados compõem com ela)
+## Letreiro que pisca sobre o campo ("NA TRAVE!", "QUE DEFESA!"): {text, color, t, dur}
+var callout: Dictionary = {}
+## Selo de pressão: "PRESSÃO DO FLA" quando um time empurra o outro (vazio = nada).
+var pressure_text := ""
+var pressure_color := Color.WHITE
 var _t := 0.0
 var _crowd_tex: ImageTexture = null
 var _crowd_size := Vector2.ZERO
@@ -83,6 +94,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	motion.update(delta)
+	_update_camera(delta)
+	if not callout.is_empty():
+		callout["t"] = float(callout["t"]) + delta
+		if float(callout["t"]) >= float(callout["dur"]):
+			callout = {}
 	flash = maxf(0.0, flash - delta * 1.2)
 	net_shake = maxf(0.0, net_shake - delta * 1.5)
 	if motion.net_t > 0.0 and motion.net_hit >= 0:
@@ -121,6 +137,34 @@ func goal_effect(side: int, color: Color) -> void:
 func reset_kickoff() -> void:
 	motion.kickoff(motion.poss, false)
 
+
+## Letreiro grande sobre o campo por `dur` segundos.
+func show_callout(text: String, col: Color, dur: float = 1.4) -> void:
+	callout = {"text": text, "color": col, "t": 0.0, "dur": dur}
+
+
+## Zoom e foco da câmera: replay bem perto da bola, ataque perigoso perto da área,
+## comemoração acompanhando quem fez o gol; o resto do jogo com o campo inteiro.
+func _update_camera(delta: float) -> void:
+	var mm := motion
+	var target := 1.0
+	var focus := Vector2(PitchMotion.L * 0.5, PitchMotion.W * 0.5)
+	if mm.replaying:
+		target = 1.75
+		focus = mm.ball
+	elif mm.mode == "goal" and mm.celebr_pos() != Vector2.INF:
+		target = 1.4
+		focus = mm.celebr_pos()
+	elif mm.chance_live and PitchMotion.depth(mm.poss, mm.ball) >= 0.62:
+		target = 1.3
+		focus = mm.ball.lerp(Vector2(PitchMotion.goal_x(mm.poss), PitchMotion.W * 0.5), 0.35)
+	if AppSettings.reduce_motion:
+		target = 1.0
+	var k := clampf(delta * (4.0 if mm.replaying else 2.2), 0.0, 1.0)
+	cam_zoom = lerpf(cam_zoom, target, k)
+	if target <= 1.001 and cam_zoom < 1.01:
+		cam_zoom = 1.0
+	cam_focus = cam_focus.lerp(focus, clampf(delta * 3.0, 0.0, 1.0))
 
 # ---------------------------------------------------------------------------
 # Geometria
@@ -181,6 +225,18 @@ func _wid_px(r: Rect2) -> float:
 func _draw() -> void:
 	var r := pitch_rect()
 	var in_match := mode == "match" and not stadium.is_empty()
+	var zoomed := mode == "match" and cam_zoom > 1.005
+	if zoomed:
+		# Câmera: aproxima em torno do foco sem mostrar nada além das bordas do controle.
+		var z := cam_zoom
+		var c := size * 0.5
+		var fp := M(cam_focus, r)
+		fp.x = clampf(fp.x, size.x / (2.0 * z), size.x - size.x / (2.0 * z))
+		fp.y = clampf(fp.y, size.y / (2.0 * z), size.y - size.y / (2.0 * z))
+		_cam_xf = Transform2D(0.0, Vector2(z, z), 0.0, c - fp * z)
+	else:
+		_cam_xf = Transform2D.IDENTITY
+	draw_set_transform_matrix(_cam_xf)
 	if in_match:
 		_draw_stadium(r)
 	_draw_pitch(r)
@@ -194,6 +250,65 @@ func _draw() -> void:
 			_draw_weather()
 	if flash > 0.0:
 		draw_rect(r, Color(flash_color.r, flash_color.g, flash_color.b, flash * 0.25))
+	if zoomed:
+		_cam_xf = Transform2D.IDENTITY
+		draw_set_transform_matrix(_cam_xf)
+	if mode == "match":
+		_draw_broadcast()
+
+
+# ---------------------------------------------------------------------------
+# Grafismo da transmissão (fora do zoom): replay, letreiros e pressão
+# ---------------------------------------------------------------------------
+
+func _draw_broadcast() -> void:
+	var font := get_theme_font(&"font", &"Stat")
+	var small := get_theme_font(&"font", &"H3")
+	if motion.replaying:
+		# Tarjas de cinema, selo REPLAY piscando e barra de progresso.
+		var bar_h := maxf(size.y * 0.09, 32.0)
+		draw_rect(Rect2(0, 0, size.x, bar_h), Color(0, 0, 0, 0.72))
+		draw_rect(Rect2(0, size.y - bar_h, size.x, bar_h), Color(0, 0, 0, 0.72))
+		var fs := int(clampf(bar_h * 0.58, 18.0, 30.0))
+		var txt := "REPLAY"
+		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var badge := Rect2(Vector2(12, (bar_h - fs * 1.3) * 0.5), Vector2(tw + fs * 1.6, fs * 1.3))
+		draw_rect(badge, comp_accent)
+		var dot := badge.position + Vector2(fs * 0.55, badge.size.y * 0.5)
+		if fmod(_t, 1.0) < 0.6:
+			draw_circle(dot, fs * 0.22, Color("#E5484D"))
+		draw_string(font, badge.position + Vector2(fs * 1.05, fs * 1.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(comp_accent))
+		var hint := "Toque para pular"
+		var hfs := int(fs * 0.7)
+		var hw := small.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, hfs).x
+		draw_string(small, Vector2(size.x - hw - 14, size.y - bar_h * 0.5 + hfs * 0.35), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, hfs, Color(1, 1, 1, 0.8))
+		var pw := size.x * 0.4
+		var pr := Rect2(Vector2(14, size.y - bar_h * 0.5 - 2), Vector2(pw, 4))
+		draw_rect(pr, Color(1, 1, 1, 0.2))
+		draw_rect(Rect2(pr.position, Vector2(pw * motion.replay_k, 4)), comp_accent)
+	elif pressure_text != "" and callout.is_empty():
+		var pfs := int(clampf(size.y * 0.04, 12.0, 20.0))
+		var pw2 := small.get_string_size(pressure_text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x
+		var a := 0.65 + 0.35 * absf(sin(_t * 3.0))
+		var pr2 := Rect2(Vector2((size.x - pw2) * 0.5 - 12, 6), Vector2(pw2 + 24, pfs * 1.5))
+		draw_rect(pr2, Color(0.03, 0.035, 0.04, 0.75 * a))
+		draw_rect(Rect2(pr2.position, Vector2(4, pr2.size.y)), pressure_color)
+		draw_string(small, pr2.position + Vector2(12, pfs * 1.1), pressure_text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs, Color(1, 1, 1, a))
+	if not callout.is_empty():
+		var t := float(callout["t"])
+		var dur := float(callout["dur"])
+		var pop := minf(1.0, t / 0.16)
+		var sc := 1.35 - 0.35 * pop
+		var alpha := clampf((dur - t) / 0.35, 0.0, 1.0) * pop
+		var cfs := int(clampf(size.y * 0.11, 26.0, 64.0) * sc)
+		var txt2 := String(callout["text"])
+		var cw := font.get_string_size(txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
+		var col: Color = callout["color"]
+		var base := Vector2((size.x - cw) * 0.5, size.y * 0.5 + cfs * 0.35)
+		var band := Rect2(Vector2(0, size.y * 0.5 - cfs * 0.75), Vector2(size.x, cfs * 1.5))
+		draw_rect(band, Color(0, 0, 0, 0.45 * alpha))
+		draw_string(font, base + Vector2(3, 3), txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs, Color(0, 0, 0, 0.7 * alpha))
+		draw_string(font, base, txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs, Color(col.r, col.g, col.b, alpha))
 
 
 func _rect_ab(a0: float, b0: float, a1: float, b1: float, r: Rect2) -> Rect2:
@@ -432,13 +547,13 @@ func _draw_fence_banners(bands: Array) -> void:
 			var bg := Color(String(b.get("c", "#EEEEEE")))
 			var tx := Color(String(b.get("t", "#111111")))
 			var sag := 0.03 * (1 if (i + k) % 2 == 0 else -1)
-			draw_set_transform(rr.get_center(), sag, Vector2.ONE)
+			draw_set_transform_matrix(_cam_xf * Transform2D(sag, rr.get_center()))
 			draw_rect(Rect2(-rr.size * 0.5, rr.size), bg.darkened(0.08))
 			draw_rect(Rect2(-rr.size * 0.5, rr.size), Color(0, 0, 0, 0.35), false, 1.0)
 			for cx in [-0.5, 0.5]:
 				draw_circle(Vector2(rr.size.x * cx * 0.94, -rr.size.y * 0.38), 1.0, Color(0.85, 0.85, 0.85, 0.9))
 			_board_logo(b, rr.size.x, rr.size.y, int(clampf(h * 0.55, 6.0, 16.0)), font, tx, bg)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_set_transform_matrix(_cam_xf)
 
 
 func _draw_fence(fence: Rect2, boards: Rect2) -> void:
@@ -549,9 +664,9 @@ func _draw_boards(boards: Rect2, inner: Rect2, bt: float, kind: String) -> void:
 			var rot := 0.0
 			if vertical:
 				rot = -PI / 2.0 if seg.position.x < size.x * 0.5 else PI / 2.0
-			draw_set_transform(seg.get_center(), rot, Vector2.ONE)
+			draw_set_transform_matrix(_cam_xf * Transform2D(rot, seg.get_center()))
 			_board_logo(b, along, thick, fs, font, tcol, bg)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_set_transform_matrix(_cam_xf)
 
 
 ## Nome da marca com o símbolo dela à esquerda, centrados numa placa de `along` x `thick`
@@ -594,9 +709,9 @@ func _draw_carpets(r: Rect2, grass: Rect2) -> void:
 			var bg := Color(String(b.get("c", "#1B1B1B")))
 			draw_rect(rr, Color(bg.r, bg.g, bg.b, 0.85))
 			var fs := int(clampf(gap * 0.55, 6.0, 16.0))
-			draw_set_transform(rr.get_center(), -PI / 2.0 if left else PI / 2.0, Vector2.ONE)
+			draw_set_transform_matrix(_cam_xf * Transform2D(-PI / 2.0 if left else PI / 2.0, rr.get_center()))
 			_board_logo(b, rr.size.y, rr.size.x, fs, font, Color(String(b.get("t", "#FFFFFF"))), bg)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_set_transform_matrix(_cam_xf)
 
 
 func _draw_dugouts(r: Rect2, grass: Rect2) -> void:
@@ -1085,6 +1200,13 @@ func _draw_end_labels(r: Rect2, font: Font, fs: int) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
+	if mode == "match":
+		# Durante o replay, um toque no campo volta ao vivo.
+		if motion.replaying and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			accept_event()
+			motion.stop_replay()
+			replay_skipped.emit()
+		return
 	if mode != "lineup":
 		return
 	# Toques chegam como clique emulado (emulate_mouse_from_touch): tratamos só o mouse.

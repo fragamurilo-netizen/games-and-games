@@ -63,6 +63,13 @@ var _aux_text: Label
 var _aux_btn: Button
 var _aux_act: Dictionary = {}
 var _aux_timer := 0.0
+## Replay dos gols: recortes gravados pelo PitchMotion (chave do gol -> recorte), a linha do gol
+## na narração (para o botão "Rever") e o que fazer quando o replay acaba.
+var _clips: Dictionary = {}
+var _goal_rows: Dictionary = {}
+var _replay_on := false
+var _replay_after: Callable = Callable()
+var _pressure_side := -1
 
 # Nós
 var _root: VBoxContainer
@@ -230,7 +237,8 @@ func _build() -> void:
 	_pitch.custom_minimum_size = Vector2(0, 330)
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
-	_pitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pitch.mouse_filter = Control.MOUSE_FILTER_PASS # toque no campo pula o replay
+	_pitch.replay_skipped.connect(_on_replay_skipped)
 	_pitch.home_color = _colors[0]
 	_pitch.home_color2 = _colors[1]
 	_pitch.away_color = _colors[2]
@@ -742,7 +750,15 @@ func _process(delta: float) -> void:
 		_aux_timer -= delta
 		if _aux_timer <= 0.0:
 			_hide_aux()
-	_pitch.motion.frozen = _paused or _halftime or _done or UIManager.has_modal()
+	# O replay roda mesmo com o jogo pausado (botão "Rever"), mas não por baixo de um modal.
+	_pitch.motion.frozen = UIManager.has_modal() or ((_paused or _halftime or _done) and not _replay_on)
+	if _replay_on and not _pitch.motion.replaying:
+		_replay_on = false
+		_hold = minf(_hold, 0.25)
+		var after := _replay_after
+		_replay_after = Callable()
+		if after.is_valid():
+			after.call()
 	if _highlight_timer > 0.0:
 		_highlight_timer -= delta
 		if _highlight_timer <= 0.0:
@@ -877,6 +893,8 @@ func _flush_lines() -> void:
 		var line: Dictionary = item["line"]
 		var ev: Dictionary = item["ev"]
 		_add_line(line)
+		if String(line.get("style", "")) == "goal" and not ev.is_empty() and _feed.get_child_count() > 0:
+			_goal_rows[_goal_key(ev)] = _feed.get_child(0)
 		_on_line_shown(line, ev)
 
 
@@ -885,6 +903,8 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 		return
 	var t: int = ev["t"]
 	var style: String = line["style"]
+	if line.has("hl") and _pace < 2:
+		_callout(String(line["hl"]), int(ev.get("s", -1)))
 	match style:
 		"goal":
 			_celebrate(ev)
@@ -920,6 +940,98 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 		AudioManager.crowd_event("end", 0 if hs >= as_ else 1)
 
 
+const CALLOUTS := {
+	"post": ["NA TRAVE!", "#FFE08A"], "post_bar": ["NO TRAVESSÃO!", "#FFE08A"], "post_inside_out": ["NÃO ENTROU!", "#FFE08A"],
+	"save_big": ["QUE DEFESA!", "#9AD0FF"], "save_double": ["DEFESA DUPLA!", "#9AD0FF"], "save_fingertip": ["PONTA DOS DEDOS!", "#9AD0FF"],
+	"save_one_on_one": ["FECHOU O GOL!", "#9AD0FF"], "miss_big": ["UUUUH!", "#FFFFFF"], "miss_sky": ["ISOLOU!", "#FFFFFF"],
+	"block_line": ["EM CIMA DA LINHA!", "#9AD0FF"], "block_last_ditch": ["SALVOU!", "#9AD0FF"], "var_goal": ["GOL?", "#FFFFFF"],
+	"var_off": ["ANULADO!", "#E5484D"], "offside_goal": ["IMPEDIDO!", "#E5484D"], "pen": ["PÊNALTI!", "#FFC940"],
+	"pen_save": ["DEFENDEU!", "#9AD0FF"], "pen_miss": ["PERDEU!", "#FFFFFF"], "red": ["EXPULSO!", "#E5484D"],
+}
+
+
+## Letreiro sobre o campo nos lances de destaque, com a reação da torcida.
+func _callout(kind: String, side: int) -> void:
+	var key := kind
+	if not CALLOUTS.has(key):
+		if kind.begins_with("save"):
+			key = "save_big"
+		elif kind.begins_with("miss"):
+			key = "miss_big"
+		elif kind.begins_with("post"):
+			key = "post"
+		elif kind.begins_with("block"):
+			key = "block_line"
+		else:
+			return
+	var c: Array = CALLOUTS[key]
+	_pitch.show_callout(String(c[0]), Color(String(c[1])), 1.5 if _pace == 0 else 1.1)
+	if key in ["post", "post_bar", "post_inside_out", "miss_big", "miss_sky", "var_off"] and side >= 0:
+		_pitch.crowd_jump = maxf(_pitch.crowd_jump, 0.45)
+		_pitch.crowd_side = side
+	AudioManager.vibrate(15)
+
+
+func _goal_key(ev: Dictionary) -> String:
+	return "%d:%d:%d:%d" % [int(ev.get("h", 1)), int(ev.get("m", 0)), int(ev.get("s", 0)), int(ev.get("p", -1))]
+
+
+## Depois da comemoração: replay do lance (ritmos normal e rápido), a tarja do artilheiro
+## durante o replay e a saída de bola quando ele acaba.
+func _after_goal(ev: Dictionary) -> void:
+	var side := int(ev["s"])
+	var clip: Dictionary = _pitch.motion.goal_clip() if _pace < 2 else {}
+	if int(ev["t"]) == MatchSimulation.EV_GOAL:
+		_lower_third(ev)
+	var resume := func(): _pitch.motion.kickoff(1 - side, false)
+	if clip.is_empty():
+		resume.call()
+		return
+	var key := _goal_key(ev)
+	_clips[key] = clip
+	_add_replay_button(key)
+	_play_replay(clip, resume)
+
+
+func _play_replay(clip: Dictionary, after: Callable) -> void:
+	var dur := _pitch.motion.start_replay(clip)
+	if dur <= 0.0:
+		if after.is_valid():
+			after.call()
+		return
+	_replay_on = true
+	_replay_after = after
+	_hold = maxf(_hold, dur + 0.3)
+
+
+func _on_replay_skipped() -> void:
+	# O PitchView já encerrou o replay; o _process devolve o jogo no próximo quadro.
+	_hold = minf(_hold, 0.25)
+
+
+## "Rever gol" na linha do gol da narração.
+func _add_replay_button(key: String) -> void:
+	var node: Control = _goal_rows.get(key, null)
+	if node == null or not is_instance_valid(node):
+		return
+	var row: HBoxContainer = node.get_child(0) as HBoxContainer if node is PanelContainer else node as HBoxContainer
+	if row == null or row.has_node("Rever"):
+		return
+	var b := UIKit.button("Rever", "ChipButton", _rewatch.bind(key), "play")
+	b.name = "Rever"
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(b)
+
+
+func _rewatch(key: String) -> void:
+	if _replay_on or _overlay.is_playing() or _done:
+		return
+	var clip: Dictionary = _clips.get(key, {})
+	if clip.is_empty():
+		return
+	_play_replay(clip, Callable())
+
+
 func _celebrate(ev: Dictionary) -> void:
 	_record_scorer(ev)
 	_shown_score = [int(ev["hs"]), int(ev["as"])]
@@ -951,9 +1063,7 @@ func _celebrate(ev: Dictionary) -> void:
 		_hold += 1.8 # tempo de ver os times voltando para a saída
 	var tw := create_tween()
 	tw.tween_interval(dur)
-	tw.tween_callback(func(): _pitch.motion.kickoff(1 - side, false))
-	if int(ev["t"]) == MatchSimulation.EV_GOAL:
-		tw.tween_callback(_lower_third.bind(ev))
+	tw.tween_callback(_after_goal.bind(ev))
 
 
 func _player_name(side: int, pid: int) -> String:
@@ -1049,10 +1159,16 @@ func _script_play() -> void:
 			info["line"] = _slot_of(1 - side, int(x["line"]))
 		if x.has("culprit"):
 			info["culprit"] = _slot_of(1 - side, int(x["culprit"]))
+		if x.has("fin"):
+			info["fin"] = String(x["fin"])
+		# Chance clara (gol, trave, xG alto): o chute sai em câmera lenta no ritmo normal.
+		if _pace == 0 and (t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_POST] or float(x.get("xg", 0.0)) >= 0.3):
+			info["big"] = true
 		if int(info["ct"]) == MatchSimulation.CH_PENALTY:
 			var pa := _find_ev([MatchSimulation.EV_PENALTY_AWARDED])
 			if not pa.is_empty():
-				info["pen"] = {"victim": _slot_of(side, int(pa["p"])), "fouler": _slot_of(1 - side, int(pa.get("p2", -1)))}
+				info["pen"] = {"victim": _slot_of(side, int(pa["p"])), "fouler": _slot_of(1 - side, int(pa.get("p2", -1))),
+					"how": String(pa.get("x", {}).get("how", ""))}
 	elif ev == MatchSimulation.EV_FOUL:
 		var f := _find_ev([MatchSimulation.EV_FOUL])
 		if f.is_empty():
@@ -1095,7 +1211,7 @@ func _script_play() -> void:
 	if _pace == 0:
 		_play_delay = minf(bt, 3.4)
 	elif _pace == 1 and String(info.get("res", "")) == "goal":
-		_play_delay = minf(bt, 1.6)
+		_play_delay = minf(bt, 3.2) # o gol inteiro no campo (e no replay)
 
 
 ## Efeitos no campo que não dependem da jogada: lesão, jogador caído, VAR.
@@ -1185,9 +1301,34 @@ func _update_board() -> void:
 	_poss_lbl_a.text = Fmt.percent(1.0 - ph)
 	var h: MatchTeam = _sim.teams[0]
 	var a: MatchTeam = _sim.teams[1]
-	_stats_lbl.text = "Finalizações %d – %d  ·  No gol %d – %d  ·  Escanteios %d – %d" % [h.shots, a.shots, h.on_target, a.on_target, h.corners, a.corners]
+	_stats_lbl.text = "Finalizações %d – %d  ·  No gol %d – %d  ·  xG %s – %s" % [h.shots, a.shots, h.on_target, a.on_target, TacticalXRay.dec(h.xg, 1), TacticalXRay.dec(a.xg, 1)]
+	_update_pressure()
 	if _momentum != null:
 		_momentum.refresh(_sim.pressure, _goal_marks())
+
+
+## Selo "PRESSÃO" no campo quando um time empurra o outro nos últimos minutos (mesma
+## leitura do gráfico de momento). Some quando o jogo equilibra.
+func _update_pressure() -> void:
+	if _pitch == null:
+		return
+	var pr: Array = _sim.pressure
+	var n := mini(6, pr.size())
+	var sum := 0.0
+	for i in n:
+		sum += float(pr[pr.size() - 1 - i][2])
+	var avg := sum / maxf(1.0, float(n))
+	var side := -1
+	if n >= 4 and absf(avg) >= 0.26:
+		side = 0 if avg > 0.0 else 1
+	elif _pressure_side >= 0 and absf(avg) >= 0.18 and (avg > 0.0) == (_pressure_side == 0):
+		side = _pressure_side # histerese: não fica piscando
+	_pressure_side = side
+	if side < 0 or _done or _sim.finished:
+		_pitch.pressure_text = ""
+		return
+	_pitch.pressure_text = "PRESSÃO DO %s" % _sim.teams[side].club.abbr
+	_pitch.pressure_color = _side_color(side)
 
 
 func _goal_marks() -> Array:
@@ -1833,6 +1974,9 @@ func _confirm_skip() -> void:
 
 func _skip_to_end() -> void:
 	_overlay.skip()
+	_pitch.motion.stop_replay()
+	_replay_on = false
+	_replay_after = Callable()
 	_queue.clear()
 	_hold = 0.0
 	_halftime = false
@@ -1873,6 +2017,9 @@ func _show_halftime() -> void:
 	sc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sc)
 	v.add_child(_stats_table(false))
+	var km := _key_moments(3 if et else 1)
+	if km != null:
+		v.add_child(km)
 	var aux := _halftime_assistant()
 	v.add_child(aux if aux.get_child_count() > 0 else _halftime_hint())
 	var others := _other_scores(90 if et else 45, 2 if et else 1)
@@ -1892,6 +2039,70 @@ func _show_halftime() -> void:
 	row.add_child(UIKit.button("INICIAR PRORROGAÇÃO" if et else "INICIAR 2º TEMPO", "PrimaryButton", _start_second_half, "whistle"))
 	v.add_child(row)
 	UIManager.show_modal(v, false, false)
+
+
+## Lances que marcaram o jogo até o intervalo: gols, bolas na trave, defesaças, gols anulados,
+## pênaltis perdidos e expulsões (os mais recentes por último, no máximo seis).
+func _key_moments(max_half: int) -> VBoxContainer:
+	var rows: Array = []
+	for ev in _sim.events:
+		if int(ev["h"]) > max_half:
+			continue
+		var t := int(ev["t"])
+		var x: Dictionary = ev.get("x", {})
+		var side := int(ev["s"])
+		if side < 0:
+			continue
+		var who := _player_name(side, int(ev.get("p", -1)))
+		var what := ""
+		match t:
+			MatchSimulation.EV_GOAL:
+				what = "Gol de %s" % who
+			MatchSimulation.EV_OWN_GOAL:
+				what = "Gol contra de %s" % who
+			MatchSimulation.EV_POST:
+				what = "Bola na trave de %s" % who
+			MatchSimulation.EV_SAVE:
+				if float(x.get("xg", 0.0)) >= 0.3 or String(x.get("fin", "")) in ["double", "fingertip", "one_on_one"]:
+					what = "Defesaça em chute de %s" % who
+			MatchSimulation.EV_MISS:
+				if String(x.get("fin", "")) == "var_off":
+					what = "Gol de %s anulado pelo VAR" % who
+				elif float(x.get("xg", 0.0)) >= 0.35:
+					what = "%s perde chance clara" % who
+			MatchSimulation.EV_BLOCK:
+				if x.has("line"):
+					what = "Bola salva em cima da linha"
+			MatchSimulation.EV_PEN_SAVE, MatchSimulation.EV_PEN_MISS:
+				what = "%s perde pênalti" % who
+			MatchSimulation.EV_RED:
+				what = "%s expulso" % who
+			MatchSimulation.EV_OFFSIDE:
+				if x.get("goal", false):
+					what = "Gol de %s anulado (impedimento)" % who
+		if what != "":
+			rows.append([Fmt.minute(int(ev["m"]), int(ev["h"])), side, what, t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL])
+	if rows.is_empty():
+		return null
+	var v := UIKit.vbox(4)
+	v.add_child(UIKit.section("Lances do jogo"))
+	for r in rows.slice(maxi(0, rows.size() - 6)):
+		var row := UIKit.hbox(10)
+		var bar := ColorRect.new()
+		bar.custom_minimum_size = Vector2(4, 0)
+		bar.color = _side_color(int(r[1]))
+		row.add_child(bar)
+		var m := UIKit.label(String(r[0]), "Mono")
+		m.custom_minimum_size.x = 64
+		m.add_theme_color_override(&"font_color", UIColors.DIM)
+		row.add_child(m)
+		var l := UIKit.label(String(r[2]), "H3" if bool(r[3]) else "", true)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if bool(r[3]):
+			l.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		row.add_child(l)
+		v.add_child(row)
+	return v
 
 
 ## Leitura rápida do primeiro tempo para ajudar a decidir (sem números mágicos escondidos).
