@@ -76,6 +76,8 @@ func _run() -> void:
 	var sim0: MatchSimulation = ms.get("_sim")
 	var seen := 0
 	var goal_seq := 0
+	var replays := 0
+	var callouts := 0
 	var next_shot := Time.get_ticks_msec() + int(secs * 1000.0 / 6.0)
 	while Time.get_ticks_msec() - t0 < int(secs * 1000.0) and not bool(ms.get("_done")):
 		await get_tree().process_frame
@@ -88,6 +90,20 @@ func _run() -> void:
 				for j in 5:
 					await _wait(0.45)
 					await _shot("gol%d_%d" % [goal_seq, j])
+		# Replay do gol: fotografa o selo, o zoom e a câmera lenta.
+		if pitch.motion.replaying and replays < 2:
+			replays += 1
+			for j in 4:
+				await _wait(0.8)
+				await _shot("replay%d_%d" % [replays, j])
+			while pitch.motion.replaying:
+				await get_tree().process_frame
+			await _wait(0.6)
+			await _shot("replay%d_depois" % replays)
+		# Letreiros dos lances de destaque ("NA TRAVE!", "QUE DEFESA!").
+		if not pitch.callout.is_empty() and callouts < 4 and float(pitch.callout["t"]) > 0.2:
+			callouts += 1
+			await _shot("letreiro%d" % callouts)
 		if Time.get_ticks_msec() < next_shot:
 			continue
 		next_shot = Time.get_ticks_msec() + int(secs * 1000.0 / 6.0)

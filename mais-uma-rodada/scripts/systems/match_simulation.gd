@@ -1078,11 +1078,89 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 			var cl := _pick_weighted(dfn, PK_DEFEND, vis_rng)
 			if cl != null:
 				ex["line"] = cl.p.id # salvou em cima da linha
+		if ctype != CH_PENALTY and not ex.has("line"):
+			var fin := _finish_kind(ctype, ev, shooter, xg)
+			if fin != "":
+				ex["fin"] = fin
 		_emit(ev, s, shooter.p.id, assister.p.id if assister != null else -1, ex)
 	if detail:
 		last_phase = {"side": s, "from": z_from, "to": vis_rng.randf_range(0.85, 0.98), "ev": ev, "ct": ctype}
 	if (ev == EV_SAVE and rng.randf() < 0.3) or (ev == EV_BLOCK and rng.randf() < 0.4):
 		_corner(att, dfn)
+
+
+# ---------------------------------------------------------------------------
+# Variações de lance (só apresentação: vis_rng e só com detail)
+# ---------------------------------------------------------------------------
+
+## Como o lance termina na tela e na narração: cavadinha, voleio, bicicleta, rebote, arrancada,
+## travessão, defesa dupla, gol anulado pelo VAR... O placar, as finalizações e o xG já foram
+## decididos antes; aqui só se escolhe a encenação, pelo tipo de jogada e pelas qualidades de
+## quem finaliza. "" = encenação padrão.
+func _finish_kind(ctype: int, ev: int, shooter: MatchPlayer, xg: float) -> String:
+	var tec := shooter.a_tec if shooter != null else 50.0
+	var vel := shooter.a_vel if shooter != null else 50.0
+	var opts: Array = []
+	match ev:
+		EV_GOAL:
+			match ctype:
+				CH_THROUGH:
+					opts = [["", 3.0], ["chip", 0.6 + maxf(0.0, tec - 65.0) / 25.0], ["round_gk", 0.9], ["rebound", 0.7], ["near", 0.6]]
+				CH_CROSS:
+					opts = [["", 2.6], ["diving", 0.8], ["volley", 0.5 + maxf(0.0, tec - 65.0) / 30.0], ["flick", 0.7],
+						["bicycle", 0.12 if tec >= 70.0 else 0.0]]
+				CH_LONG:
+					opts = [["", 1.6], ["screamer", 1.4], ["curler", 1.2], ["deflected", 0.6]]
+				CH_DRIBBLE:
+					opts = [["", 2.0], ["solo", 0.35 + maxf(0.0, vel - 68.0) / 20.0], ["cut_inside", 1.2], ["round_gk", 0.6]]
+				CH_COUNTER:
+					opts = [["", 2.0], ["square", 1.3], ["chip", 0.5], ["solo", 0.25 + maxf(0.0, vel - 72.0) / 25.0]]
+				CH_SCRAMBLE:
+					opts = [["", 1.5], ["rebound", 1.5], ["tap_in", 1.2], ["deflected", 0.6]]
+				CH_CORNER:
+					opts = [["", 2.5], ["flick", 0.8], ["volley", 0.5], ["diving", 0.4]]
+				CH_FREEKICK:
+					opts = [["top_corner", 2.0], ["under_wall", 0.5], ["power", 1.0], ["", 0.8]]
+		EV_SAVE:
+			match ctype:
+				CH_CROSS, CH_CORNER:
+					opts = [["", 2.0], ["reflex", 1.0], ["punch", 1.0]]
+				CH_LONG, CH_FREEKICK:
+					opts = [["", 1.6], ["fingertip", 1.6]]
+				CH_THROUGH, CH_COUNTER, CH_DRIBBLE, CH_ERROR:
+					opts = [["", 2.0], ["one_on_one", 1.4 if xg >= 0.15 else 0.4], ["reflex", 0.7], ["double", 0.35]]
+				_:
+					opts = [["", 2.0], ["reflex", 1.0], ["double", 0.5]]
+		EV_MISS:
+			if xg >= 0.12 and vis_rng.randf() < 0.06:
+				return "var_off" # a bola entrou, mas o VAR anula (no placar sempre foi para fora)
+			match ctype:
+				CH_FREEKICK:
+					opts = [["", 1.0], ["wall", 1.4]]
+				CH_CROSS, CH_CORNER:
+					opts = [["", 2.0], ["header_over", 1.0]]
+				_:
+					opts = [["", 2.0], ["sky", 0.6 if xg >= 0.2 else 0.2], ["fresh_air", 0.12]]
+		EV_POST:
+			opts = [["", 1.4], ["bar", 1.2], ["inside_out", 0.35]]
+		EV_BLOCK:
+			opts = [["", 2.0], ["last_ditch", 0.9]]
+	if opts.is_empty():
+		return ""
+	var w: Array = []
+	for o in opts:
+		w.append(float(o[1]))
+	var i := RngUtil.weighted_index(vis_rng, w)
+	return String(opts[i][0]) if i >= 0 else ""
+
+
+## Como saiu o pênalti (só narração e encenação): arrancada na área, calço, puxão, mão na bola
+## ou carrinho atrasado.
+func _penalty_how(victim: MatchPlayer) -> Dictionary:
+	var dri := victim.a_tec if victim != null else 50.0
+	var w := [0.8 + maxf(0.0, dri - 60.0) / 15.0, 1.0, 0.6, 0.7, 0.5]
+	var i := RngUtil.weighted_index(vis_rng, w)
+	return {"how": ["dribble", "trip", "pull", "hand", "late"][maxi(0, i)]}
 
 
 ## Registro da chance para o Raio-X, com o contexto do corredor do lado de quem defendeu:
@@ -1199,8 +1277,12 @@ func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: Match
 	if ctype == CH_COUNTER:
 		tags.append("counter")
 	half_events += 1
-	_emit(EV_OWN_GOAL if own_goal else EV_GOAL, s, shooter.p.id, assister.p.id if assister != null else -1,
-		{"ct": ctype, "imp": imp, "tags": tags, "culprit": culprit.p.id if culprit != null else -1})
+	var gx := {"ct": ctype, "imp": imp, "tags": tags, "culprit": culprit.p.id if culprit != null else -1}
+	if detail and not own_goal:
+		var fin := _finish_kind(ctype, EV_GOAL, shooter, 0.0)
+		if fin != "":
+			gx["fin"] = fin
+	_emit(EV_OWN_GOAL if own_goal else EV_GOAL, s, shooter.p.id, assister.p.id if assister != null else -1, gx)
 	if detail:
 		if vis_rng.randf() < 0.2:
 			_emit(EV_VAR, s, shooter.p.id, -1, {"kind": "goal_ok"})
@@ -1279,7 +1361,7 @@ func _resolve_foul(att: MatchTeam, dfn: MatchTeam) -> void:
 		_emit(EV_KNOCK, att.side, fouler.p.id, victim.p.id)
 	if dangerous:
 		if rng.randf() < 0.045 * ref_pens:
-			_emit(EV_PENALTY_AWARDED, att.side, victim.p.id if victim != null else -1, fouler.p.id)
+			_emit(EV_PENALTY_AWARDED, att.side, victim.p.id if victim != null else -1, fouler.p.id, _penalty_how(victim) if detail else {})
 			if detail and vis_rng.randf() < 0.35:
 				_emit(EV_VAR, att.side, victim.p.id if victim != null else -1, fouler.p.id, {"kind": "pen_ok"})
 			var taker := att.by_id.get(att.sheet.penalty_taker, null) as MatchPlayer

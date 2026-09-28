@@ -2,6 +2,7 @@ extends SceneTree
 ## Relatório de realismo do motor minuto a minuto (médias, placares, viradas, zebras).
 ## Uso: godot --headless --path . --script res://tools/engine_report.gd [-- --quick --n=1500] [-- --quick] [-- --n=1500]
 ## --quick: mede o modo rápido (QuickMatch, os jogos da IA) em vez do minuto a minuto.
+## --detail: minuto a minuto com a narração ligada (o jogo assistido); deve dar os mesmos números.
 
 
 func _initialize() -> void:
@@ -23,10 +24,13 @@ func _initialize() -> void:
 	var gaps := 0
 	var formation_changes := 0
 	var quick := false
+	var detail := false
 	var total := 1500
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--quick":
 			quick = true
+		elif arg == "--detail":
+			detail = true
 		elif arg.begins_with("--n="):
 			total = int(arg.substr(4))
 	var t0 := Time.get_ticks_msec()
@@ -38,7 +42,7 @@ func _initialize() -> void:
 		var b: Club = cl[rng.randi_range(0, cl.size() - 1)]
 		if a == b:
 			continue
-		var res := MatchEngine.test_match(w, a, b, rng.randi(), quick)
+		var res := _detail_match(w, a, b, rng.randi()) if detail else MatchEngine.test_match(w, a, b, rng.randi(), quick)
 		n += 1
 		var hg := int(res["hg"])
 		var ag := int(res["ag"])
@@ -80,3 +84,13 @@ func _initialize() -> void:
 	print("jogos %d | gols/jogo %.2f | mandante %.1f%% | empates %.1f%% | 0x0 %.1f%% | 5+ gols %.1f%%" % [n, float(goals) / n, 100.0 * hw / n, 100.0 * dr / n, 100.0 * nil / n, 100.0 * big / n])
 	print("gols no 2º tempo %.1f%% | a partir dos 76' %.1f%% | viradas (quem sofreu o 1º venceu) %.1f%% | zebras (gap>=6) %.1f%% de %d" % [100.0 * second_half / goals, 100.0 * late / goals, 100.0 * comeback / maxf(1, first_scored), 100.0 * upsets / maxf(1, gaps), gaps])
 	quit()
+
+
+## Mesmo jogo de teste do MatchEngine.quick_match, mas com detail = true (eventos de apresentação).
+static func _detail_match(world: GameWorld, home: Club, away: Club, seed_value: int) -> Dictionary:
+	var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
+	var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+	var sim := MatchSimulation.new()
+	sim.setup(world, home, away, hs, as_, MatchEngine._test_ctx(home), seed_value, true)
+	sim.run_to_end()
+	return sim.to_result()
