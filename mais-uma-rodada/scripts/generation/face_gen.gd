@@ -700,12 +700,11 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["chin_sq"] = rng.randf_range(1.25, 2.0) + (0.35 if rng.randf() < 0.25 else 0.0) # queixo quadrado ↔ fino
 	f["chin_cleft"] = rng.randf() < 0.12
 	f["forehead"] = rng.randf_range(0.9, 0.98)
-	# Atletas: rosto magro na maioria (quem é mais cheio vem de _apply_mass)
-	f["fat"] = clampf(rng.randf_range(0.0, 0.38) + youth * 0.03 + aging * 0.15, 0.0, 1.0)
+	f["fat"] = clampf(rng.randf_range(0.0, 0.6) + youth * 0.2 + aging * 0.15, 0.0, 1.0)
 	f["cheekbone"] = rng.randf_range(0.6, 1.2) * float(ETH_CHEEK[e])
 	f["ridge"] = rng.randf_range(0.6, 1.2) * float(ETH_RIDGE[e]) * (1.0 - youth * 0.4)
 	f["ear"] = rng.randf_range(0.88, 1.12) + aging * 0.06
-	f["ear_out"] = rng.randf_range(0.0, 0.6) * (1.0 if rng.randf() < 0.2 else 0.4)
+	f["ear_out"] = rng.randf_range(0.0, 1.0) * (1.0 if rng.randf() < 0.35 else 0.4)
 	# Beleza: harmonia, simetria e pele. Não depende da etnia; muda proporções mais adiante.
 	var brng := RandomNumberGenerator.new()
 	brng.seed = hash([seed_value, "beleza"])
@@ -720,8 +719,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		beauty = clampf(float(look["bt"]), 0.0, 1.0)
 	var ugly := 1.0 - beauty
 	f["beauty"] = beauty
-	# Assimetria real existe, mas grande vira caricatura; a fina fica em FaceVariation
-	f["asym"] = rng.randf_range(-1.0, 1.0) * (0.14 + ugly * 0.6)
+	f["asym"] = rng.randf_range(-1.0, 1.0) * (0.3 + ugly * 1.5)
 
 	# --- Olhos ------------------------------------------------------------------
 	var eye_i := RngUtil.weighted_index(rng, ETH_EYES[e])
@@ -1016,31 +1014,8 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	_apply_mass(f, seed_value, age, look)
 	_apply_aging(f, seed_value, age)
 	_apply_expression(f, seed_value, age, look)
-	_apply_identity(f, seed_value)
-	if look.has("lab") and look["lab"] is Dictionary:
-		FaceVariation.apply_lab(f, look["lab"])
 	_proportion_floor(f)
-	FaceVariation.fit(f)
 	return f
-
-
-## Identidade: anatomia correlacionada, variação de cada traço e assimetria sutil (FaceVariation),
-## mais a pele de cada pessoa: oleosidade, poros, vermelhidão e tom por região do rosto.
-static func _apply_identity(f: Dictionary, seed_value: int) -> void:
-	FaceVariation.apply(f, seed_value)
-	var r := RandomNumberGenerator.new()
-	r.seed = hash([seed_value, "identidade"])
-	var tri := func(amp: float) -> float:
-		return (r.randf() + r.randf() - 1.0) * amp
-	# Pele: cada pessoa tem a sua (oleosa ou seca, poros finos ou abertos, mais ou menos corada),
-	# e o tom varia por região: testa mais amarelada, nariz e bochechas mais vermelhos, a região
-	# da barba mais fria. É o que tira o ar de "boneco pintado de uma cor só".
-	f["oil"] = clampf(0.5 + tri.call(0.5), 0.0, 1.0)
-	f["pores"] = clampf(0.5 + tri.call(0.5) + float(f.get("aging", 0.0)) * 0.3, 0.0, 1.2)
-	f["zones"] = clampf(0.55 + tri.call(0.45), 0.1, 1.0)
-	f["rosy"] = clampf(float(f["rosy"]) * (1.0 + tri.call(0.5)), 0.0, 1.3)
-	f["grain_off"] = Vector2(r.randf_range(0.0, 256.0), r.randf_range(0.0, 256.0))
-	f["grain_scale"] = r.randf_range(0.8, 1.25)
 
 
 ## Cabeça humana tem proporção: os ajustes (magro, rosto estreito, alongado, etnia) somados
@@ -1048,8 +1023,7 @@ static func _apply_identity(f: Dictionary, seed_value: int) -> void:
 ## entre ~0,75 e 0,9) e mandíbula e maçãs sem afinar além do plausível.
 static func _proportion_floor(f: Dictionary) -> void:
 	var fh := float(f["fh"])
-	# Rosto real: largura entre ~74% e ~84% da altura (acima disso vira cara de bebê)
-	f["fw"] = clampf(float(f["fw"]), fh * 0.74, fh * 0.84)
+	f["fw"] = clampf(float(f["fw"]), fh * 0.73, fh * 0.92)
 	f["jaw"] = maxf(float(f["jaw"]), 0.7)
 	f["cheek_w"] = maxf(float(f["cheek_w"]), 0.97)
 

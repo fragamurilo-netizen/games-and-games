@@ -7,11 +7,6 @@ extends Control
 ## nariz, maçãs, sombra sob o lábio e o queixo. Cabelo, sobrancelhas e barba ganham fios por cima.
 ## Os traços vêm de FaceGen (semente + etnia + idade); uma foto importada no editor substitui tudo.
 ## O retrato pronto (malhas e traços) fica num cache global de comandos de desenho.
-##
-## Camadas: o próprio nó desenha fundo, cabelo de trás, orelhas, pescoço e camisa; uma camada
-## filha (RenderingServer) desenha a pele do rosto com o shader FaceSkin (pixel a pixel: relevo,
-## luz de estúdio, nariz, poros, barba feita); outra camada filha desenha por cima os olhos, a boca,
-## a barba, o cabelo da frente e os acabamentos.
 
 @export var face_seed: int = 12345:
 	set(v):
@@ -72,11 +67,6 @@ var look: Dictionary = {}:
 		look = v
 		_dirty = true
 		_invalidate()
-## Usa o retrato 3D realista quando disponível (Face3DStudio); desligue para forçar o desenho 2D.
-var use_3d := false:
-	set(v):
-		use_3d = v
-		queue_redraw()
 var photo: Texture2D = null:
 	set(v):
 		photo = v
@@ -208,13 +198,7 @@ const STYLE_P: Array = [
 	{"tp": 0.04, "sd": 0.0, "fd": 1, "tx": "coil", "bk": "puffs2", "fl": 3}, # dois puffs
 ]
 
-const LIGHT := FaceLighting.KEY
-## Rebatedor (luz de preenchimento) do lado direito, bem mais fraco que a principal.
-const FILL := FaceLighting.FILL
-const SKIN_SHADER := preload("res://scripts/face/face_skin.gdshader")
-const HAIR_SHADER := preload("res://scripts/face/face_hair.gdshader")
-## Suavização dos cantos do perfil da mandíbula (média de 5 amostras em ±2 passos).
-const JAW_SMOOTH := 0.028
+const LIGHT := Vector3(-0.28, -0.55, 0.79)
 const HEAD_SCALE := 0.88
 ## Rosto um pouco mais estreito que o gerado: a proporção largura/altura fica mais perto da de
 ## uma cabeça real e o retrato perde o ar "inchado".
@@ -248,32 +232,7 @@ var _blotches: Array = []
 var _k := PackedFloat32Array()
 var _half := Vector3.ZERO
 var _shadow_col := Color.BLACK
-# Pele de cada pessoa (FaceGen._apply_identity): oleosidade, poros e força do tom por região
-var _oil := 0.5
-var _pores := 0.5
-var _zones := 0.5
 var _beard_data: Array = []
-# Perfil anatômico da mandíbula (FaceRenderer): níveis e larguras relativas
-var _jv_c := 0.2
-var _jv_g := 0.7
-var _jv_k := 0.87
-var _jw_g := 0.82
-var _jw_k := 0.33
-var _jce := 2.4
-var _jpc := 1.2
-var _vb := 1.0
-var _hw0 := 1.0
-var _jaw_tab := PackedFloat32Array()
-var _rtab := PackedFloat32Array()
-# Camadas filhas (RenderingServer): pele com shader e traços por cima
-enum { T_SELF, T_SKIN, T_OVER, T_HAIR, T_TOP }
-var _target := T_SELF
-var _items: Array[RID] = []
-var _skin_mat: ShaderMaterial = null
-var _hair_mat: ShaderMaterial = null
-static var _mat_cache: Dictionary = {}
-## Desliga o shader da pele (volta à malha com cor por vértice): testes e comparação.
-static var use_skin_shader := true
 # Gravação dos comandos de desenho: o retrato pronto fica num cache global e é só reproduzido
 # quando a tela o recria (listas de elenco, mercado, etc.).
 var _rec: Array = []
@@ -292,15 +251,6 @@ var _cap_out := PackedVector2Array()
 # Estampas prontas para imprimir no peito (texturas do DecalCache)
 var _crest_tex: Texture2D = null
 var _sponsor_tex: Texture2D = null
-# Retrato pronto em textura (FaceCache): chave do desenho atual, textura em uso e se este nó é a
-# cópia desenhada fora da tela para o cache
-var _cache_key := 0
-var _cached_tex: Texture2D = null
-var _cache_render := false
-## Sempre ao vivo, sem passar pelo FaceCache (laboratório de rostos: cada ajuste é um rosto novo).
-var no_cache := false
-## Tempo do último desenho deste retrato (µs), gerado ou reproduzido; o laboratório mostra.
-var last_draw_usec := 0
 
 
 func set_player(p: Player, club: Club, year: int) -> void:
@@ -340,13 +290,6 @@ func _invalidate() -> void:
 # ---------------------------------------------------------------------------
 
 func _draw() -> void:
-	var t0 := Time.get_ticks_usec()
-	_draw_portrait()
-	last_draw_usec = Time.get_ticks_usec() - t0
-
-
-func _draw_portrait() -> void:
-	_clear_items()
 	var s := minf(size.x, size.y)
 	if s <= 4.0:
 		return
@@ -355,64 +298,28 @@ func _draw_portrait() -> void:
 	if photo != null:
 		_draw_photo(c, s)
 		return
-	# Rosto 3D realista (estúdio): enquanto a foto não fica pronta, segue o retrato 2D
-	if use_3d and not Engine.is_editor_hint():
-		var t3 := Face3DStudio.request(_spec3d(), self)
-		if t3 != null:
-			_draw_3d(c, s, t3)
-			return
 	if _dirty or _f.is_empty():
 		_f = FaceGen.features(face_seed, eth, age, look)
 		_dirty = false
 	_prepare_decals(s)
-	_ensure_items()
-	# Três camadas com cache próprio: fundo + cabelo de trás + orelhas, corpo + roupa, rosto +
-	# cabelo. Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
-	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, FaceDNA.VERSION, use_skin_shader, FaceLighting.contrast])
+	# Três camadas com cache próprio: fundo + cabelo de trás, corpo + roupa, rosto + cabelo.
+	# Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
+	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout])
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest,
 		_crest_tex != null, _sponsor_tex != null])
 	var k_front := hash(["front", face_key])
-	# Já existe em textura? Então é só ela (sem malhas nem shaders). Senão desenha ao vivo e, com as
-	# estampas prontas, pede a cópia em textura para as próximas vezes.
-	_cache_key = 0
-	_cached_tex = null
-	if not _cache_render and not no_cache and FaceCache.active():
-		var px := int(ceil(s * _screen_scale()))
-		_cache_key = (hash([k_back, k_body, px]) << 31) ^ hash([k_front, px, "fc"])
-		var tex := FaceCache.lookup(_cache_key)
-		if tex != null:
-			_cached_tex = tex
-			RenderingServer.canvas_item_set_material(_items[0], FaceCache.premult_material().get_rid())
-			RenderingServer.canvas_item_set_material(_items[2], RID())
-			RenderingServer.canvas_item_add_texture_rect(_items[0], Rect2(o, Vector2(s, s)), tex.get_rid())
-			return
-		if _decals_settled(s):
-			FaceCache.request(self, _cache_key, px, float(px) / s)
-	_skin_mat = null
-	_hair_mat = null
-	_bind_materials()
 	var ready := false
 	for pair: Array in [[k_back, 0], [k_body, 1], [k_front, 2]]:
 		var key: int = pair[0]
-		if _cmd_cache.has(key) and (int(pair[1]) != 2 or _mat_cache.has(key) or not use_skin_shader):
-			if int(pair[1]) == 2 and use_skin_shader:
-				var mats: Array = _mat_cache[key]
-				_skin_mat = mats[0]
-				_hair_mat = mats[1]
-				_bind_materials()
+		if _cmd_cache.has(key):
 			_replay(_cmd_cache[key])
 			continue
 		if not ready:
 			_setup(c, s)
 			ready = true
-		if int(pair[1]) == 2:
-			_skin_mat = null
-			_hair_mat = null
-			_bind_materials()
 		_rec = []
 		_recording = true
-		_target = T_SELF
 		match int(pair[1]):
 			0:
 				_layer_back()
@@ -421,107 +328,11 @@ func _draw_portrait() -> void:
 			2:
 				_layer_front()
 		_recording = false
-		_target = T_SELF
 		_cmd_cache[key] = _rec
 		_cmd_cache_order.append(key)
-		if int(pair[1]) == 2 and _skin_mat != null:
-			_mat_cache[key] = [_skin_mat, _hair_mat]
 		if _cmd_cache_order.size() > CMD_CACHE_MAX:
-			var old: int = _cmd_cache_order.pop_front()
-			_cmd_cache.erase(old)
-			_mat_cache.erase(old)
+			_cmd_cache.erase(_cmd_cache_order.pop_front())
 		_rec = []
-
-
-## Chave do retrato em textura que está na tela (0 = desenho ao vivo sem cache).
-func cache_key() -> int:
-	return _cache_key
-
-
-## Cópia para o FaceCache desenhar fora da tela: mesmos dados, mesmo tamanho lógico (reaproveita os
-## comandos já gravados); o quadrado do retrato fica na origem do SubViewport.
-func cache_clone() -> PortraitView:
-	var v := PortraitView.new()
-	v._cache_render = true
-	v.face_seed = face_seed
-	v.eth = eth
-	v.age = age
-	v.look = look
-	v.shirt_color = shirt_color
-	v.trim_color = trim_color
-	v.bg_color = bg_color
-	v.suit = suit
-	v.kit_collar = kit_collar
-	v.kit_pattern = kit_pattern
-	v.kit = kit
-	v.crest = crest
-	v.cutout = cutout
-	v.size = size
-	var s := minf(size.x, size.y)
-	v.position = -Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
-	return v
-
-
-## Pixels de tela por unidade do retrato (densidade do aparelho), em degraus de 1/4, entre 1 e 4.
-## Animações de escala menores que 1 não baixam a resolução (vale a do aparelho).
-func _screen_scale() -> float:
-	var k := absf(get_screen_transform().get_scale().x)
-	var vp := get_viewport()
-	if vp != null:
-		k = maxf(k, absf(vp.get_final_transform().get_scale().x))
-	return clampf(ceil(k * 4.0) / 4.0, 1.0, 4.0)
-
-
-## As estampas do peito (escudo, patrocinador) que este tamanho mostra já estão prontas? Só então o
-## retrato vai para o cache (senão a textura guardaria a camisa sem o escudo).
-func _decals_settled(s: float) -> bool:
-	if suit or s < 70.0:
-		return true
-	if not crest.is_empty() and _crest_tex == null:
-		return false
-	var sp: Variant = kit.get("sp", {})
-	if s >= 90.0 and sp is Dictionary and String((sp as Dictionary).get("n", "")) != "" and _sponsor_tex == null:
-		return false
-	return true
-
-
-# ---------------------------------------------------------------------------
-# Camadas filhas (pele com shader e traços por cima)
-# ---------------------------------------------------------------------------
-
-func _ensure_items() -> void:
-	if not _items.is_empty():
-		return
-	for i in 4:
-		var ci := RenderingServer.canvas_item_create()
-		RenderingServer.canvas_item_set_parent(ci, get_canvas_item())
-		# Antes de nós filhos (selos, emblemas), depois do desenho do próprio retrato
-		RenderingServer.canvas_item_set_draw_index(ci, -20 + i)
-		_items.append(ci)
-
-
-func _clear_items() -> void:
-	for ci in _items:
-		RenderingServer.canvas_item_clear(ci)
-
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		for ci in _items:
-			RenderingServer.free_rid(ci)
-		_items.clear()
-
-
-func _item(t: int) -> RID:
-	return get_canvas_item() if t == T_SELF or _items.is_empty() else _items[t - 1]
-
-
-## Materiais das camadas com shader (pele e cabelo); sem material a camada desenha normal.
-func _bind_materials() -> void:
-	if _items.size() < 4:
-		return
-	RenderingServer.canvas_item_set_material(_items[0], _skin_mat.get_rid() if _skin_mat != null else RID())
-	RenderingServer.canvas_item_set_material(_items[2], _hair_mat.get_rid() if _hair_mat != null else RID())
 
 
 func _layer_back() -> void:
@@ -531,8 +342,6 @@ func _layer_back() -> void:
 		_background()
 		_backdrop_depth()
 	_back_hair(rng)
-	# Orelhas atrás do rosto (a pele do rosto é desenhada numa camada acima)
-	_ears()
 
 
 func _layer_front() -> void:
@@ -541,14 +350,10 @@ func _layer_front() -> void:
 	rng.seed = int(f["texture_seed"]) + 7
 	var style: int = f["style"]
 	var hair: Color = f["hair"]
-	# Rosto: pele pixel a pixel no shader (ou, sem ele, a malha antiga com cor por vértice)
+	_ears()
+	# Rosto
 	var head := _head_contour(_contour_k())
-	if use_skin_shader:
-		_skin_surface(head)
-	else:
-		_rim(_radial(_hc, head, maxi(3, int(round(11.0 * clampf(_det, 0.4, 2.0)))), _skin_px), head.size())
-		_skin_grain(head)
-	_target = T_OVER
+	_rim(_radial(_hc, head, _rings(11), _skin_px), head.size())
 	_age_lines()
 	_marks(rng)
 	# Barba (malha com densidade suave), depois os traços por cima
@@ -560,19 +365,14 @@ func _layer_front() -> void:
 	_mouth()
 	if int(f["beard"]) != FaceGen.B_NONE:
 		_beard_hairs(rng)
-	# Cabelo da frente (a calota vai para a camada do cabelo; o resto fica por cima dela)
+	# Cabelo da frente
 	if style != FaceGen.H_BALD:
 		_front_hair(rng, hair)
-		_target = T_TOP
 		_hair_light(hair)
 	else:
-		_target = T_TOP
 		_scalp_shine()
 	_accessories()
 	_light_pass()
-	_photo_grain()
-	if use_skin_shader:
-		_skin_hairline()
 	if cutout:
 		return
 	# Borda
@@ -609,15 +409,14 @@ func _light_pass() -> void:
 	for p in head:
 		var q := _uv(p)
 		if q.x > 0.2 and q.y > maxf(-0.35, hair_low) and q.y < 0.95:
-			var a := 0.16 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))
+			var a := 0.2 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))
 			if bearded:
 				a *= 1.0 - smoothstep(0.05, 0.3, _beard_dens(q.x, q.y, _beard_p, false))
 			rim.append(_cl(p + Vector2(-lw * 0.9, 0)))
 			rc.append(Color(0.8, 0.88, 1.0, a))
-	if rim.size() > 2 and not use_skin_shader:
-		# Faixa larga e fraca: luz que "abraça" a borda, não um fio desenhado (com o shader da pele
-		# a contraluz sai do próprio relevo, sem fio por cima)
-		_r_polyline_colors(rim, rc, lw, true)
+	if rim.size() > 2:
+		# Faixa larga e fraca: luz que "abraça" a borda, não um fio desenhado
+		_r_polyline_colors(rim, rc, lw * 1.7, true)
 	if not suit:
 		_body_setup()
 		var side := _torso_side(0.06, false)
@@ -631,156 +430,6 @@ func _light_pass() -> void:
 			sc.append(Color(0.8, 0.88, 1.0, 0.22 * (1.0 - smoothstep(_ysp, _ysp + _s * 0.18, p.y))))
 		if sp.size() > 2:
 			_r_polyline_colors(sp, sc, lw * 1.2, true)
-
-
-## Textura de pele sobre o rosto já sombreado, em duas camadas translúcidas (a luz de baixo continua
-## valendo): manchas finas de tom (vermelhidão, pintinhas, variação de melanina) e poros. Cada
-## pessoa tem o próprio recorte da textura e a própria intensidade: dois rostos não repetem o
-## mesmo padrão. Só aparece em retratos grandes o bastante para o detalhe existir.
-func _skin_grain(head: PackedVector2Array) -> void:
-	if true:
-		return # estilo ilustrado: sem textura fotográfica
-	var pts := PackedVector2Array()
-	for p in head:
-		pts.append(_cl(p))
-	if Geometry2D.triangulate_polygon(pts).is_empty():
-		return
-	var off: Vector2 = _f.get("grain_off", Vector2.ZERO)
-	var gs := float(_f.get("grain_scale", 1.0))
-	var origin := _hc - Vector2(_fw * 1.3, _fh * 1.2)
-	var fade := smoothstep(80.0, 200.0, _s)
-	var clear := float(_f.get("skin_clear", 0.0))
-	# Manchas de tom (escala do rosto: não depende da resolução)
-	var mottle := _noise_texture(2)
-	var uvm := PackedVector2Array()
-	for q in pts:
-		uvm.append((q - origin) / (_fw * 5.2 * clampf(gs, 0.9, 1.25)))
-	uvm = _fit_uvs(uvm, off / NOISE_PX)
-	var am := clampf(0.2 + _zones * 0.25 + float(_f["aging"]) * 0.25 - clear * 0.3, 0.1, 0.6)
-	_r_colored_polygon(pts, Color(1, 1, 1, am * fade), uvm, mottle)
-	# Poros (escala da pele: um poro tem sempre mais ou menos o mesmo tamanho na tela)
-	var tex := _noise_texture(0)
-	var texel := maxf(1.0, _s / 420.0) * maxf(gs, 1.0)
-	var uvs := PackedVector2Array()
-	for q in pts:
-		uvs.append((q - origin) / (NOISE_PX * texel))
-	uvs = _fit_uvs(uvs, off / NOISE_PX)
-	# Pele lisa (jovem, "bonita") mostra menos poro; idade e pele oleosa mostram mais
-	var a := clampf(0.25 + _pores * 0.35 + float(_f["aging"]) * 0.3 - clear * 0.25, 0.2, 0.75)
-	_r_colored_polygon(pts, Color(1, 1, 1, a * smoothstep(90.0, 220.0, _s)), uvs, tex)
-
-
-## Coloca as coordenadas de textura dentro de 0..1 (a textura não repete) num ponto próprio de
-## cada pessoa (`pick` de 0 a 1) e espelha conforme a sorte: cada rosto usa outro pedaço.
-static func _fit_uvs(uvs: PackedVector2Array, pick: Vector2) -> PackedVector2Array:
-	if uvs.is_empty():
-		return uvs
-	var lo := uvs[0]
-	var hi := uvs[0]
-	for q in uvs:
-		lo = lo.min(q)
-		hi = hi.max(q)
-	var ext := hi - lo
-	var room := (Vector2.ONE - ext).max(Vector2.ZERO)
-	var start := Vector2(fposmod(pick.x, 1.0) * room.x, fposmod(pick.y, 1.0) * room.y)
-	var flip_x := fposmod(pick.x * 7.0, 1.0) > 0.5
-	var flip_y := fposmod(pick.y * 5.0, 1.0) > 0.5
-	var out := PackedVector2Array()
-	for q in uvs:
-		var t := q - lo
-		if flip_x:
-			t.x = ext.x - t.x
-		if flip_y:
-			t.y = ext.y - t.y
-		out.append(start + t)
-	return out
-
-
-## Granulado de foto sobre o retrato inteiro (rosto, cabelo e camisa), bem fraco.
-func _photo_grain() -> void:
-	if _s < 110.0 or DisplayServer.get_name() == "headless":
-		return
-	var tex := _noise_texture(1)
-	var texel := maxf(1.0, _s / NOISE_PX)
-	var origin := _c - Vector2(_R, _R)
-	var pts := _ellipse(_c, _R - 1.0, _R - 1.0, 48)
-	var uvs := PackedVector2Array()
-	for p in pts:
-		uvs.append((p - origin) / (NOISE_PX * texel))
-	_r_colored_polygon(pts, Color(1, 1, 1, 0.5), uvs, tex)
-
-
-const NOISE_PX := 256
-static var _noise_cache: Array = [null, null, null]
-
-
-## 0: poros de pele (pontinhos escuros, variação de tom e brilho fino); 1: granulado de foto;
-## 2: manchas de tom da pele (vermelhidão e melanina em nuvens, sem padrão repetido visível).
-static func _noise_texture(kind: int) -> Texture2D:
-	if _noise_cache[kind] != null:
-		return _noise_cache[kind]
-	var data := PackedByteArray()
-	data.resize(NOISE_PX * NOISE_PX * 4)
-	for y in NOISE_PX:
-		for x in NOISE_PX:
-			var i := (y * NOISE_PX + x) * 4
-			var h := _hash2(x + kind * 7919, y)
-			var r := 0
-			var a := 0.0
-			if kind == 2:
-				# Nuvens em três escalas; o tom puxa para o vermelho (capilares) ou para o marrom
-				# (melanina), com pintinhas raras
-				var m := _vnoise_wrap(x / 32.0, y / 32.0, 8) * 0.5 + _vnoise_wrap(x / 12.8, y / 12.8, 20) * 0.32 + _vnoise_wrap(x / 5.12, y / 5.12, 50) * 0.18
-				var red := _vnoise_wrap(x / 21.33 + 3.0, y / 21.33 + 7.0, 12)
-				if h < 0.004:
-					data[i] = 70
-					data[i + 1] = 38
-					data[i + 2] = 24
-					data[i + 3] = 90
-				elif red > 0.6:
-					data[i] = 190
-					data[i + 1] = 60
-					data[i + 2] = 55
-					data[i + 3] = clampi(int((red - 0.6) * 0.5 * 255.0), 0, 255)
-				elif m < 0.44:
-					data[i] = 95
-					data[i + 1] = 60
-					data[i + 2] = 40
-					data[i + 3] = clampi(int((0.44 - m) * 0.42 * 255.0), 0, 255)
-				elif m > 0.6:
-					data[i] = 255
-					data[i + 1] = 235
-					data[i + 2] = 215
-					data[i + 3] = clampi(int((m - 0.6) * 0.3 * 255.0), 0, 255)
-				continue
-			if kind == 0:
-				var n := _vnoise(x / 5.0, y / 5.0) * 0.6 + _vnoise(x / 1.7 + 40.0, y / 1.7) * 0.4
-				if h < 0.045:
-					a = 0.2 # poro
-				elif n < 0.45:
-					a = (0.45 - n) * 0.28
-				elif n > 0.62:
-					r = 255
-					a = (n - 0.62) * 0.3
-			else:
-				if h < 0.5:
-					a = (0.5 - h) * 0.12
-				else:
-					r = 255
-					a = (h - 0.5) * 0.09
-			var g := r
-			var b := r
-			if r == 0 and kind == 0:
-				r = 40 # sombra do poro puxa para o marrom avermelhado
-				g = 14
-				b = 8
-			data[i] = r
-			data[i + 1] = g
-			data[i + 2] = b
-			data[i + 3] = clampi(int(a * 255.0), 0, 255)
-	var img := Image.create_from_data(NOISE_PX, NOISE_PX, false, Image.FORMAT_RGBA8, data)
-	_noise_cache[kind] = ImageTexture.create_from_image(img)
-	return _noise_cache[kind]
 
 
 ## Volume do cabelo de trás (longo, black power): sombra no lado direito e embaixo, luz quente no
@@ -837,10 +486,22 @@ func _hair_light(hair: Color) -> void:
 	# Com cabelo de trás (longo, black power, coque…) a borda da calota fica dentro do volume: ali a
 	# luz some aos poucos para não desenhar um "capacete", e a luz de recorte fica para o volume.
 	var behind := String(_hs("bk", "")) in ["long", "long_short", "curly_long", "afro", "dreads", "braids"]
-	var sh := use_skin_shader and _hair_mat != null
 	# 1) Forma
-	if not sh:
-		_hair_shape_light(hair, behind, key)
+	_strip(_cap_in, _cap_out, _rings(6), func(p: Vector2, _t: float, w: float) -> Color:
+		var a := _cap_alpha(p, w)
+		if behind:
+			a *= 1.0 - smoothstep(0.55, 0.95, w)
+		if a <= 0.01:
+			return Color(0, 0, 0, 0)
+		var q := _uv(p)
+		var dn := Vector2(q.x, q.y * 0.9).normalized() if q.length() > 0.001 else Vector2(0, -1)
+		var lam := dn.dot(key)
+		var sh := 0.4 * smoothstep(0.1, -0.8, lam) + 0.2 * smoothstep(-0.25, 0.25, q.y)
+		sh += 0.14 * (1.0 - smoothstep(0.0, 0.3, w)) * smoothstep(-0.2, 0.4, lam + 0.3)
+		var lit := 0.14 * smoothstep(0.35, 0.95, lam) * smoothstep(0.3, 0.9, w)
+		if lit > sh:
+			return Color(hair.lightened(0.5).lerp(Color(1.0, 0.93, 0.8), 0.4), lit * a)
+		return Color(0.06, 0.04, 0.03, clampf(sh, 0.0, 0.45) * a))
 	# 2) Reflexo em mechas
 	var dark := hair.get_luminance() < 0.2
 	var spec := hair.lightened(0.42).lerp(Color(1.0, 0.95, 0.86), 0.15)
@@ -849,7 +510,7 @@ func _hair_light(hair: Color) -> void:
 	var kinky := tex in ["curl", "coil", "dots"]
 	var skip := tex in ["braid", "braid_zig", "waves", "locs"]
 	var lw := maxf(0.5, _s * 0.0024)
-	if not skip and not sh:
+	if not skip:
 		var n := int((170 if not kinky else 120) * clampf(_det, 0.4, 1.7))
 		for i in n:
 			var t := rng.randf_range(0.06, 0.94)
@@ -875,25 +536,8 @@ func _hair_light(hair: Color) -> void:
 				pts.append(_cl(_cap_pt(t + drift * e, ww)))
 				cols.append(Color(spec, a * sin(PI * e)))
 			_r_polyline_colors(pts, cols, lw * rng.randf_range(0.7, 1.3), true)
-	# 3) Fios soltos quebrando a silhueta: cabelo de verdade não termina numa curva lisa de capacete
-	if not behind and not kinky and not skip and _s >= 90.0:
-		var ne := int(70 * clampf(_det, 0.5, 1.7))
-		for i in ne:
-			var t := rng.randf_range(0.04, 0.96)
-			var base := _cap_pt(t, rng.randf_range(0.8, 0.94))
-			if _cap_alpha(base, 0.9) < 0.6:
-				continue
-			var outward := (_cap_pt(t, 1.0) - _cap_pt(t, 0.6)).normalized()
-			var along := (_cap_pt(t + 0.02, 0.95) - _cap_pt(t - 0.02, 0.95)).normalized()
-			var dir := (outward * rng.randf_range(0.4, 0.9) + along * rng.randf_range(-0.9, 0.9)).normalized()
-			var ln := _s * rng.randf_range(0.008, 0.022)
-			var tip := base + dir * ln
-			var mid := base + dir * ln * 0.5 + dir.orthogonal() * ln * rng.randf_range(-0.15, 0.15)
-			var hc := _hair_col(base, 0.95, t, 0.0)
-			_r_polyline_colors(PackedVector2Array([_cl(base), _cl(mid), _cl(tip)]),
-				PackedColorArray([Color(hc, 0.7), Color(hc, 0.45), Color(hc, 0.0)]), lw * rng.randf_range(0.7, 1.1), true)
-	# 4) Luz de recorte fria no lado direito da silhueta (os crespos têm cachos por cima da borda)
-	if behind or kinky or skip or sh:
+	# 3) Luz de recorte fria no lado direito da silhueta (os crespos têm cachos por cima da borda)
+	if behind or kinky or skip:
 		return
 	var rim := PackedVector2Array()
 	var rc := PackedColorArray()
@@ -907,25 +551,6 @@ func _hair_light(hair: Color) -> void:
 		rc.append(Color(0.82, 0.9, 1.0, 0.3 * smoothstep(0.1, 0.6, q.x) * _cap_alpha(p, 0.95) * (1.0 - smoothstep(-0.6, -0.3, q.y))))
 	if rim.size() > 2:
 		_r_polyline_colors(rim, rc, lw * 1.4, true)
-
-
-## Forma da calota com cor por vértice (caminho sem shader): sombra embaixo e à direita, luz no alto.
-func _hair_shape_light(hair: Color, behind: bool, key: Vector2) -> void:
-	_strip(_cap_in, _cap_out, _rings(6), func(p: Vector2, _t: float, w: float) -> Color:
-		var a := _cap_alpha(p, w)
-		if behind:
-			a *= 1.0 - smoothstep(0.55, 0.95, w)
-		if a <= 0.01:
-			return Color(0, 0, 0, 0)
-		var q := _uv(p)
-		var dn := Vector2(q.x, q.y * 0.9).normalized() if q.length() > 0.001 else Vector2(0, -1)
-		var lam := dn.dot(key)
-		var sh := 0.4 * smoothstep(0.1, -0.8, lam) + 0.2 * smoothstep(-0.25, 0.25, q.y)
-		sh += 0.14 * (1.0 - smoothstep(0.0, 0.3, w)) * smoothstep(-0.2, 0.4, lam + 0.3)
-		var lit := 0.14 * smoothstep(0.35, 0.95, lam) * smoothstep(0.3, 0.9, w)
-		if lit > sh:
-			return Color(hair.lightened(0.5).lerp(Color(1.0, 0.93, 0.8), 0.4), lit * a)
-		return Color(0.06, 0.04, 0.03, clampf(sh, 0.0, 0.45) * a))
 
 
 ## Pede ao DecalCache o escudo e o patrocínio em textura; só usa quando já foram desenhados.
@@ -959,16 +584,17 @@ func _setup(c: Vector2, s: float) -> void:
 	# Proporções de foto de rosto real (medidas em retratos de estúdio de jogadores): da linha do
 	# cabelo ao queixo, os olhos ficam a ~43%, a base do nariz a ~69%, a boca a ~79%. Os valores
 	# salvos pelo FaceGen continuam os mesmos; eles só variam em volta dessas médias.
-	var lm := FaceDNA.landmarks(f)
-	_E = lm["E"]
-	_X = lm["X"]
-	_dE = lm["dE"]
-	_N = lm["N"]
-	_M = lm["M"]
-	_NW = lm["NW"]
-	_BW = lm["BW"]
-	_MW = lm["MW"]
-	_skin = FaceColorSystem.photo_skin(f["skin"])
+	var hl := float(f["hairline"])
+	var H := 1.0 - hl
+	_E = hl + H * 0.43 + (float(f["eye_y"]) + 0.02) * 0.5
+	_X = float(f["eye_dx"]) * 1.02
+	_dE = (_E - float(f["eye_y"])) * 0.8
+	_N = _E + H * 0.26 * (float(f["nose_len"]) / 0.305)
+	_M = _N + H * 0.105 * (1.0 + (float(f["mouth_y"]) - 0.58) * 2.0)
+	_NW = float(f["nose_w"]) * 1.5
+	_BW = float(f["bridge_w"]) * 1.1
+	_MW = float(f["mouth_w"]) * 1.25
+	_skin = f["skin"]
 	# Índice fora da tabela (save antigo, catálogo novo) cai no último item em vez de travar o
 	# _setup no meio: com o _setup interrompido a pele do rosto saía toda preta.
 	_beard_p = FaceGen.BEARD_PARTS[clampi(int(f["beard"]), 0, FaceGen.BEARD_PARTS.size() - 1)]
@@ -976,9 +602,6 @@ func _setup(c: Vector2, s: float) -> void:
 	_hair_style = STYLE_P[clampi(int(f["style"]), 0, STYLE_P.size() - 1)]
 	_half = (_light + Vector3(0, 0, 1)).normalized()
 	_shadow_col = Color(0.2, 0.22, 0.28).lerp(_skin.darkened(0.5), 0.5)
-	_oil = float(f.get("oil", 0.5))
-	_pores = float(f.get("pores", 0.5))
-	_zones = float(f.get("zones", 0.5))
 	var ag: float = f["aging"]
 	var shadow: float = f["shadow"] if int(f["beard"]) != FaceGen.B_STUBBLE else 0.0
 	_k = PackedFloat32Array([
@@ -990,7 +613,6 @@ func _setup(c: Vector2, s: float) -> void:
 		float(f.get("eyebags", 0.0)), float(f.get("temple", 0.0)), clampf(float(f["smile"]) - 0.5, 0.0, 1.0) + float(f.get("squint", 0.0)) * 0.3,
 		float(f.get("heavy", 0.0)), float(f.get("skin_clear", 0.0))])
 	_ND = float(f.get("nose_dx", 0.0)) + float(f.get("nose_dx_t", 0.0))
-	_jaw_setup()
 	_blotches.clear()
 	var br := RandomNumberGenerator.new()
 	br.seed = int(f["blotch_seed"])
@@ -1004,35 +626,6 @@ func _contour_k() -> int:
 
 func _rings(n: int) -> int:
 	return maxi(3, int(round(n * clampf(_det, 0.4, 1.2))))
-
-
-func _spec3d() -> Dictionary:
-	return {"seed": face_seed, "eth": eth, "age": age, "look": look, "kit": {} if suit else kit, "crest": {} if suit else crest,
-		"suit": suit, "shirt": shirt_color, "trim": trim_color}
-
-
-func _draw_3d(c: Vector2, s: float, tex: Texture2D) -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	var r := Rect2(c - Vector2(s, s) * 0.5, Vector2(s, s))
-	if cutout:
-		draw_texture_rect(tex, r, false)
-		return
-	# fundo redondo com a cor do clube e luz suave vinda de cima
-	var n := 48
-	var pts := _ellipse(c, s * 0.5, s * 0.5, n)
-	var cols := PackedColorArray()
-	for p in pts:
-		var d := (p - c) / (s * 0.5)
-		var lum := 0.92 + 0.12 * (-d.y) + 0.05 * (-d.x)
-		cols.append(Color(minf(bg_color.r * lum, 1.0), minf(bg_color.g * lum, 1.0), minf(bg_color.b * lum, 1.0)))
-	draw_polygon(pts, cols)
-	var glow := Color(1, 1, 1, 0.06)
-	draw_circle(c + Vector2(-s * 0.08, -s * 0.12), s * 0.3, glow)
-	var uvs := PackedVector2Array()
-	for p in pts:
-		uvs.append((p - r.position) / s)
-	draw_colored_polygon(pts, Color.WHITE, uvs, tex)
-	draw_arc(c, s * 0.5 - 1.0, 0.0, TAU, n, Color(bg_color.lightened(0.25), 0.6), maxf(1.0, s * 0.012), true)
 
 
 func _draw_photo(c: Vector2, s: float) -> void:
@@ -1175,70 +768,28 @@ static func _shade(base: Color, lum: float) -> Color:
 # Formato da cabeça
 # ---------------------------------------------------------------------------
 
-## Marcos anatômicos da metade de baixo do rosto, tirados do DNA: nível das maçãs, ângulo da
-## mandíbula (gônio, um pouco abaixo da boca), canto do queixo e fundo do queixo, com as larguras
-## relativas às maçãs. Mandíbula larga, queixo quadrado ou fino e bochecha cheia ou funda saem daqui.
-func _jaw_setup() -> void:
-	var f := _f
-	var sq := clampf((float(f["chin_sq"]) - 1.1) / 2.0, 0.0, 1.0)
-	var jv := float(f.get("jaw_v", 0.55))
-	_vb = 1.0 + float(f.get("chin_len", 0.0))
-	_jv_c = clampf((_E + _N) * 0.5 - 0.02, 0.02, 0.32)
-	# Gônio um pouco abaixo da boca; largura da mandíbula entre ~68% e ~88% das maçãs (medida
-	# de rostos reais: bigoníaca / bizigomática ≈ 0,7–0,85)
-	_jv_g = clampf(_M + 0.05 + (jv - 0.55) * 0.2 + float(f.get("gonion_v", 0.0)), _M, _M + 0.14)
-	_jw_g = lerpf(0.68, 0.88, clampf((float(f["jaw"]) - 0.63) / 0.35, 0.0, 1.0))
-	_jw_k = lerpf(0.3, 0.44, sq) * float(f.get("chin_w", 1.0))
-	_jce = lerpf(2.0, 3.0, sq)
-	_jv_k = _vb - lerpf(0.12, 0.08, sq)
-	_jpc = clampf(1.05 + 0.5 * float(f["fat"]) - 0.3 * float(f.get("thin", 0.0)) + 0.2 * (float(f["cheekbone"]) - 1.0), 0.75, 1.7)
-	_hw0 = 1.0
-	_hw0 = _hw(0.0)
-	# Altura da linha do maxilar para cada |u| (para a sombra no pescoço)
-	_jaw_tab.resize(41)
-	for i in 41:
-		var au := float(i) / 40.0 * 1.2
-		var lo := _jv_c
-		var hi := _vb
-		for it in 14:
-			var mid := (lo + hi) * 0.5
-			if _hw(mid) > au:
-				lo = mid
-			else:
-				hi = mid
-		_jaw_tab[i] = (lo + hi) * 0.5
-
-
-## Altura (v) da linha do maxilar na coluna |u| (tabela montada em _jaw_setup).
-func _jaw_v_at(au: float) -> float:
-	var x := clampf(au / 1.2, 0.0, 1.0) * 40.0
-	var i := mini(int(x), 39)
-	return lerpf(_jaw_tab[i], _jaw_tab[i + 1], x - i)
-
-
-## Perfil da metade de baixo do rosto em trechos: maçã → ângulo da mandíbula → canto do queixo →
-## fundo do queixo (quarto de superelipse). Mesmo desenho do shader da pele (FaceSkin.profile).
-func _jaw_profile(v: float) -> float:
-	var cw: float = _f["cheek_w"]
-	if v <= _jv_c:
-		return cw
-	if v <= _jv_g:
-		return lerpf(cw, _jw_g * cw, pow((v - _jv_c) / maxf(_jv_g - _jv_c, 0.01), _jpc))
-	if v <= _jv_k:
-		return lerpf(_jw_g * cw, _jw_k * cw, (v - _jv_g) / maxf(_jv_k - _jv_g, 0.01))
-	var t := clampf((v - _jv_k) / maxf(_vb - _jv_k, 0.01), 0.0, 1.0)
-	return _jw_k * cw * pow(maxf(0.0, 1.0 - pow(t, _jce)), 1.0 / _jce)
-
-
-## Meia largura do rosto (em fw) na altura v (0 = centro da cabeça, _vb = fundo do queixo). Os
-## cantos (ângulo da mandíbula, canto do queixo) ficam arredondados pela média de 5 amostras.
+## Meia largura do rosto (em fw) na altura v (0 = centro da cabeça, 1 = queixo).
 func _hw(v: float) -> float:
 	var f := _f
-	var d := JAW_SMOOTH
-	var avg := (_jaw_profile(v - 2.0 * d) + _jaw_profile(v - d) + _jaw_profile(v) + _jaw_profile(v + d) + _jaw_profile(v + 2.0 * d)) * 0.2
-	var w := lerpf(avg, _jaw_profile(v), smoothstep(_jv_k - 0.01, _jv_k + 0.05, v))
-	w += 0.03 * float(f["cheekbone"]) * _g(v - (_E + _N) * 0.5 + 0.04, 0.16)
-	w *= 1.0 + float(f["fat"]) * 0.07 * _g(v - 0.5, 0.3)
+	var cw: float = f["cheek_w"]
+	var jaw: float = f["jaw"]
+	var jv: float = f["jaw_v"]
+	var sq: float = f["chin_sq"]
+	# Mandíbula larga, quase da largura das maçãs, e queixo com ponta de ~0,4 da largura do rosto
+	jaw = minf(jaw * 1.05, cw * 0.97)
+	var w: float
+	if v <= jv:
+		# Começa a afinar já abaixo das maçãs, sem a lateral reta de "caixa"
+		w = lerpf(cw, jaw, smoothstep(-0.2, jv, v))
+	else:
+		# Da mandíbula ao queixo em linha quase reta, com a ponta arredondada: o queixo tem
+		# largura própria (mais largo no queixo quadrado) em vez de um "U" cheio
+		var q := clampf((v - jv) / (1.0 - jv), 0.0, 1.0)
+		var chin := jaw * lerpf(0.46, 0.58, clampf((sq - 1.25) / 1.6, 0.0, 1.0))
+		var e := 3.0 + sq
+		w = lerpf(jaw, chin, pow(q, 1.1)) * pow(maxf(0.0, 1.0 - pow(q, e)), 1.0 / e)
+	w += 0.03 * float(f["cheekbone"]) * _g(v - 0.08, 0.16)
+	w *= 1.0 + float(f["fat"]) * 0.11 * _g(v - 0.5, 0.3)
 	# Gordo: bochecha e mandíbula cheias; fino: afunda logo abaixo das maçãs
 	w *= 1.0 + float(f.get("heavy", 0.0)) * 0.15 * _g(v - 0.72, 0.2)
 	w *= 1.0 - float(f.get("thin", 0.0)) * 0.12 * _g(v - 0.42, 0.14)
@@ -1249,7 +800,7 @@ func _hw(v: float) -> float:
 
 ## Queixo mais comprido (proeminente) ou mais curto (recuado): desloca só a ponta do rosto.
 func _chin_v(v: float) -> float:
-	return v
+	return v + float(_f.get("chin_len", 0.0)) * smoothstep(0.7, 1.0, v)
 
 
 ## Expoente do crânio visto de frente: um pouco "quadrado" (superelipse), largo nas têmporas e
@@ -1260,7 +811,7 @@ const SKULL_N := 2.35
 ## Meia largura do crânio (em fw) na altura `up` (0 = meio da cabeça, 1 = topo): a testa só
 ## estreita perto do alto, como num crânio real.
 func _skull_rx(up: float) -> float:
-	return lerpf(_hw0, float(_f["forehead"]), pow(clampf(up, 0.0, 1.0), 1.6))
+	return lerpf(float(_f["cheek_w"]), float(_f["forehead"]), pow(clampf(up, 0.0, 1.0), 1.6))
 
 
 ## Ponto do alto da cabeça no ângulo `a` (de -PI a 0), em unidades do rosto.
@@ -1279,8 +830,8 @@ func _head_contour(k: int) -> PackedVector2Array:
 		right.append(_skull_pt(a))
 	for i in k + 1:
 		var q := float(i) / k
-		var v := sin(q * PI * 0.5) * _vb
-		right.append(Vector2(_hw(v), v))
+		var v := sin(q * PI * 0.5)
+		right.append(Vector2(_hw(v), _chin_v(v)))
 	var pts := PackedVector2Array()
 	for p in right:
 		pts.append(_px(p.x, p.y))
@@ -1293,8 +844,8 @@ func _head_contour(k: int) -> PackedVector2Array:
 func _th(u: float, v: float) -> float:
 	if v >= 0.0:
 		# Perto do queixo a largura tende a zero; um piso evita uma "agulha" de barba no pescoço
-		var hw := maxf(_hw(minf(v, _vb)), maxf(0.001, 0.32 * smoothstep(0.8, 1.0, v / _vb)))
-		return maxf(absf(u) / hw, v / _vb)
+		var hw := maxf(_hw(minf(v, 1.0)), maxf(0.001, 0.32 * smoothstep(0.8, 1.0, v)))
+		return maxf(absf(u) / hw, v / (1.0 + float(_f.get("chin_len", 0.0)) * smoothstep(0.7, 1.0, v)))
 	var rx := _skull_rx(-v / 1.02)
 	return pow(pow(absf(u / rx), SKULL_N) + pow(absf(v / 1.02), SKULL_N), 1.0 / SKULL_N)
 
@@ -1302,113 +853,6 @@ func _th(u: float, v: float) -> float:
 # ---------------------------------------------------------------------------
 # Pele
 # ---------------------------------------------------------------------------
-
-## Pele do rosto: um polígono com as coordenadas do rosto nos UVs; o shader FaceSkin calcula cada
-## pixel (relevo, luz, nariz, textura, barba feita). Uma franja de ~1 px em volta (alfa 1 → 0)
-## suaviza a silhueta, já que o 2D não tem MSAA.
-func _skin_surface(head: PackedVector2Array) -> void:
-	var pts := PackedVector2Array()
-	var uvs := PackedVector2Array()
-	for p in head:
-		var q := _cl(p)
-		pts.append(q)
-		uvs.append(_uv(q))
-	var idx := Geometry2D.triangulate_polygon(pts)
-	_rtab = _angle_radius_table(Vector2.ZERO, uvs, 128)
-	if idx.is_empty() or _items.is_empty():
-		# Contorno impossível de triangular (traços extremos): volta à malha antiga
-		_target = T_OVER
-		_rim(_radial(_hc, head, maxi(3, int(round(11.0 * clampf(_det, 0.4, 2.0)))), _skin_px), head.size())
-		return
-	_skin_mat = ShaderMaterial.new()
-	_skin_mat.shader = SKIN_SHADER
-	var params := _skin_params()
-	for key: String in params:
-		_skin_mat.set_shader_parameter(key, params[key])
-	_bind_materials()
-	_target = T_SKIN
-	var cols := PackedColorArray()
-	cols.resize(pts.size())
-	cols.fill(Color.WHITE)
-	_r_tex_tri(idx, pts, cols, uvs, null)
-	# Franja antisserrilhada
-	var n := pts.size()
-	var area := 0.0
-	for i in n:
-		area += pts[i].cross(pts[(i + 1) % n])
-	var sgn := 1.0 if area > 0.0 else -1.0
-	var verts := PackedVector2Array(pts)
-	var vcols := PackedColorArray(cols)
-	var vuvs := PackedVector2Array(uvs)
-	var w := 1.1
-	for i in n:
-		var a := pts[(i - 1 + n) % n]
-		var b := pts[i]
-		var c := pts[(i + 1) % n]
-		var nm := (b - a).orthogonal().normalized() + (c - b).orthogonal().normalized()
-		nm = nm.normalized() if nm.length_squared() > 1e-4 else (c - b).orthogonal().normalized()
-		var o := b + nm * sgn * w
-		verts.append(o)
-		vcols.append(Color(1, 1, 1, 0))
-		vuvs.append(_uv(o))
-	var fidx := PackedInt32Array()
-	for i in n:
-		var j := (i + 1) % n
-		fidx.append_array([i, n + i, n + j, i, n + j, j])
-	_r_tex_tri(fidx, verts, vcols, vuvs, null)
-
-
-## Parâmetros do shader da pele para este rosto (geometria, relevo, cor, luz).
-func _skin_params() -> Dictionary:
-	var f := _f
-	var k := _k
-	var d := FaceLighting.uniforms()
-	d["feat"] = Vector4(_E, _X, _N, _M)
-	d["feat2"] = Vector4(_NW, _BW, _MW, _ND)
-	d["shape"] = Vector4(float(f["cheek_w"]), float(f["forehead"]), _vb, _fw / maxf(_fh, 0.001))
-	d["mass"] = Vector4(float(f["cheekbone"]), float(f["fat"]), float(f.get("heavy", 0.0)), float(f.get("thin", 0.0)))
-	d["relief"] = Vector4(k[0], k[1], k[3], k[4])
-	d["relief2"] = Vector4(k[2], k[5], k[7], k[8])
-	d["relief3"] = Vector4(k[9], k[10], k[17], k[18])
-	d["relief4"] = Vector4(k[14], k[19], k[16], k[21])
-	d["nose"] = Vector4(float(f.get("nostril", 1.0)), float(f.get("nose_up", 0.0)), float(f.get("nose_hook", 0.0)), float(f.get("alar", 1.0)))
-	d["lips"] = Vector4(float(f["lip_u"]), float(f["lip_l"]), float(f["bow"]), float(f["smile"]))
-	d["eyes"] = Vector4(float(f["eye_w"]), float(f["eye_h"]), float(f["eye_tilt"]), float(f.get("lid", 0.0)))
-	d["skin_col"] = _skin
-	var off: Vector2 = f.get("grain_off", Vector2.ZERO)
-	d["skin_p"] = Vector4(float(f["rosy"]), _zones, _oil, _pores)
-	d["skin_p2"] = Vector4(0.15 + clampf(float(f["skin_i"]) / 9.0, 0.0, 1.0) * 0.2, 1.0 if bool(f["freckles"]) else 0.0, off.x * 0.37, off.y * 0.29)
-	d["shadow_col"] = _shadow_col
-	d["beard"] = Vector4(k[12], 0.2 + _dE, 0.0, float(int(f["beard_seed"]) % 1000) * 0.13)
-	var hl := PackedFloat32Array()
-	for i in 9:
-		hl.append(float(f["hairline"]))
-	d["hl"] = hl
-	d["hair_k"] = 0.0
-	var bl := PackedVector4Array()
-	for b: Array in _blotches:
-		bl.append(Vector4(float(b[0]), float(b[1]), float(b[2]), float(b[3])))
-	d["bl"] = bl
-	d["rtab"] = _rtab
-	return d
-
-
-## Depois que o cabelo da frente foi montado: a sombra de contato na testa segue a linha do
-## cabelo deste penteado (careca não tem; máquina, quase nada; franja e cabelo cheio, mais).
-func _skin_hairline() -> void:
-	if _skin_mat == null:
-		return
-	var style: int = _f["style"]
-	if style == FaceGen.H_BALD or _cap_in.size() < 3:
-		_skin_mat.set_shader_parameter("hair_k", 0.0)
-		return
-	var hl := PackedFloat32Array()
-	for i in 9:
-		hl.append(_hairline_v(-1.0 + i * 0.25))
-	var thin: bool = _hs("tx", "") == "dots"
-	_skin_mat.set_shader_parameter("hl", hl)
-	_skin_mat.set_shader_parameter("hair_k", (0.06 if thin else 0.16) * float(_hs("op", 1.0)))
-
 
 func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var u := (p.x - _hc.x) / _fw
@@ -1421,26 +865,17 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		var d := (_mesh_b[i] - _mesh_c).normalized()
 		dx = d.x
 		dy = d.y
-	# Normal tirada de um relevo de rosto (cúpula + arco das sobrancelhas, órbitas, nariz, maçãs,
-	# boca e queixo): a luz esculpe as formas de verdade, em vez de só clarear o meio de um balão
-	var fn := _face_normal(u, v)
-	var nx := fn.x
-	var ny := fn.y
-	var nz := fn.z
+	var tilt := pow(t, 1.8)
+	var nx := dx * tilt
+	var ny := dy * tilt
+	var nz := sqrt(maxf(0.0, 1.0 - tilt * tilt))
 	# Luz "enrolada": a pele espalha a luz por dentro, então a passagem para a sombra é gradual
 	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.18) / 1.18, 0.0, 1.0)
-	# Luz de estúdio: principal forte no alto à esquerda (lado da sombra mais fundo que antes) e um
-	# rebatedor fraco à direita, que abre a sombra sem achatá-la
-	# Contraste de foto de estúdio (principal ~2 pontos acima do rebatedor)
-	# Luz de retrato de jogo de futebol (estilo FIFA): principal grande e macia quase de frente,
-	# rebatedor quente, sombras suaves e só uma leve oclusão na borda do rosto
-	var lum := 0.46 + 0.62 * diff
-	lum += 0.1 * maxf(0.0, nx * FILL.x + ny * FILL.y + nz * FILL.z)
-	lum -= 0.05 * smoothstep(0.8, 1.0, t)
+	var lum := 0.44 + 0.64 * diff
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
 	lum -= 0.06 * smoothstep(0.78, 1.0, t)
-	lum += 0.035 * smoothstep(0.9, 1.0, t) * maxf(0.0, dx) * (1.0 - smoothstep(0.3, 0.9, -dy))
+	lum += 0.07 * smoothstep(0.86, 1.0, t) * maxf(0.0, dx) * (1.0 - smoothstep(0.3, 0.9, -dy))
 	var E := _E
 	var X := _X
 	var N := _N
@@ -1532,13 +967,6 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	a = (u + 0.04) / 0.04
 	b = (v - (N + M) * 0.5) / 0.05
 	lum += 0.03 * exp(-a * a - b * b)
-	# Filtro (as duas colunas do buço com o sulco no meio) e a borda clara em cima do lábio
-	var lip_top := M - float(_f["lip_u"]) * 1.7
-	if v > N and v < lip_top + 0.03:
-		var band := smoothstep(N + 0.01, N + 0.05, v) * (1.0 - smoothstep(lip_top - 0.01, lip_top + 0.01, v))
-		lum += 0.045 * _g(au - 0.075, 0.028) * band * (1.0 if u < 0.0 else 0.6)
-		lum -= 0.035 * _g(u, 0.03) * band
-	lum += 0.05 * _g2(u / maxf(0.05, MW * 0.85), v - lip_top + 0.012, 1.0, 0.012)
 	# Olheiras e flacidez com a idade
 	if k[10] > 0.0:
 		a = (au - X) / 0.18
@@ -1581,20 +1009,7 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
 	var col := _shade(_skin, lum)
 	# Sombra quente (marrom avermelhado, nunca cinza): a luz rebate dentro da pele
-	col = col.lerp(Color(col.r, col.g * 0.87, col.b * 0.78), 0.4 * (1.0 - diff))
-	# Espalhamento sob a pele: na passagem da luz para a sombra aparece uma faixa mais saturada e
-	# avermelhada (o que separa pele de plástico numa foto)
-	col = col.lerp(Color(minf(col.r * 1.08, 1.0), col.g * 0.84, col.b * 0.72), 0.3 * _g(diff - 0.42, 0.16))
-	# Tom por região: testa mais amarelada, olheira levemente arroxeada e a região da barba mais
-	# fria (os pelos por baixo da pele), com a força de cada pessoa
-	var zn := _zones
-	var fore_m := 1.0 - smoothstep(E - 0.34, E - 0.14, v)
-	col = col.lerp(Color(col.r * 1.02, col.g * 1.0, col.b * 0.86), 0.28 * zn * fore_m)
-	var under_eye := _g2(au - X, v - (E + 0.1), 0.14, 0.05)
-	col = col.lerp(Color(col.r * 0.9, col.g * 0.85, col.b * 0.93), 0.35 * zn * under_eye)
-	if v > N - 0.02:
-		var jaw_m := smoothstep(N - 0.02, N + 0.12, v) * (1.0 - _g2(u / maxf(0.05, MW * 1.1), (v - M) / 0.08, 1.0, 1.0))
-		col = col.lerp(Color(col.r * 0.96, col.g * 0.98, col.b * 1.0), 0.1 * zn * jaw_m)
+	col = col.lerp(Color(col.r, col.g * 0.87, col.b * 0.78), 0.45 * (1.0 - diff))
 	# Rubor nas bochechas, nariz e queixo
 	a = (au - 0.52) / 0.22
 	b = (v - cheek_v - 0.1) / 0.13
@@ -1605,106 +1020,33 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	a = u / 0.2
 	b = (v - 0.9) / 0.08
 	blush += 0.2 * exp(-a * a - b * b)
-	col = col.lerp(Color(0.85, 0.32, 0.3), clampf(blush * k[11] * (0.12 + 0.14 * _zones), 0.0, 0.32))
+	col = col.lerp(Color(0.85, 0.32, 0.3), clampf(blush * k[11] * 0.18, 0.0, 0.3))
 	# Sombra da barba feita (zona da barba, bem suave)
 	if k[12] > 0.02 and v > N - 0.05:
 		var line := lerpf(N + 0.02, 0.2 + _dE, smoothstep(MW * 0.8, MW * 1.5, au)) - 0.16 * smoothstep(0.55, 1.0, au)
-		var dens := smoothstep(line - 0.14, line + 0.12, v)
+		var dens := smoothstep(line - 0.08, line + 0.08, v)
 		a = u / MW
 		b = (v - M) / (k[8] * 2.2 + 0.03)
 		dens *= smoothstep(0.8, 1.1, sqrt(a * a + b * b))
-		col = col.lerp(_shadow_col, dens * k[12] * 0.26)
-	# Brilho especular (mais visível em pele escura). Vem do relevo: só brilha onde a superfície
-	# está virada para a luz (dorso e ponta do nariz, testa, maçãs, queixo), mais forte e mais
-	# concentrado na zona T e em quem tem pele oleosa; pele seca fica fosca.
-	var ndh := maxf(0.0, nx * _half.x + ny * _half.y + nz * _half.z)
+		col = col.lerp(_shadow_col, dens * k[12] * 0.32)
+	# Brilho especular (mais visível em pele escura)
+	var hx := _half.x
+	var hy := _half.y
+	var hz := _half.z
+	var spec := pow(maxf(0.0, nx * hx + ny * hy + nz * hz), 26.0)
+	# Pele com brilho de foto: reflexo em "T" (testa, dorso e ponta do nariz) e nas maçãs
 	a = (u + 0.5) / 0.2
 	b = (v - cheek_v) / 0.1
 	var tip_hl := _g2(un + 0.02, v - (N - 0.06), NW * 0.35, 0.05)
-	var tzone := clampf(fore * 0.9 + ridge_hl * 0.8 + tip_hl + 0.45 * exp(-a * a - b * b) + 0.3 * _g2(u + 0.04, v - 0.86, 0.16, 0.06), 0.0, 1.0)
-	var oil := _oil
-	var sharp := pow(ndh, 16.0 + oil * 26.0) * (0.3 + 0.6 * oil)
-	var broad := pow(ndh, 5.0) * 0.1
-	var spec := (sharp * (0.35 + 0.9 * tzone) + broad * (0.4 + 0.6 * tzone)) * (0.55 + 0.45 * diff)
+	spec = spec * 0.6 + 0.35 * (fore * 0.9 + ridge_hl * 0.8 + tip_hl + 0.7 * exp(-a * a - b * b))
+	spec *= k[13] * 1.6
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
-
-
-## Relevo do rosto em unidades da meia largura (0 na borda, ~0,9 no meio): serve para tirar a normal.
-func _face_h(u: float, v: float) -> float:
-	# Distância suave ao contorno (o `_th` usa um max() que deixaria um vinco na diagonal do rosto)
-	var th := minf(_th_smooth(u, v), 1.0)
-	# Calota arredondada (seção de cabeça real), sem o meio achatado de máscara
-	var h := 0.85 * (1.0 - pow(th, 2.4))
-	var au := absf(u)
-	var un := u - _ND * smoothstep(_E - 0.05, _N, v)
-	var fat: float = float(_f["fat"])
-	# Arco das sobrancelhas, órbitas e o globo do olho dentro delas
-	h += 0.05 * _g2(au - _X, v - (_E - 0.16), 0.3, 0.06)
-	h -= 0.09 * _g2(au - _X, v - _E, 0.25, 0.1)
-	h += 0.035 * _g2(au - _X, v - _E, 0.13, 0.055)
-	# Nariz: dorso que se projeta mais perto da ponta, ponta arredondada e asas
-	var along := smoothstep(_E - 0.02, _N, v)
-	var nose_on := smoothstep(_E - 0.1, _E + 0.06, v) * (1.0 - smoothstep(_N - 0.02, _N + 0.03, v))
-	h += (0.04 + 0.12 * along) * _g(un, _BW * 1.2 + 0.05 * along) * nose_on
-	h += 0.06 * _g2(un, v - (_N - 0.07), _NW * 0.42, 0.055)
-	h += 0.03 * _g2(absf(un) - _NW * 0.8, v - (_N - 0.04), _NW * 0.28, 0.045)
-	# Maçãs e a parte funda logo abaixo delas
-	var cheek_v := (_E + _N) * 0.5
-	h += 0.035 * _g2(au - 0.5, v - cheek_v + 0.03, 0.2, 0.1)
-	h -= 0.03 * (1.0 - fat) * _g2(au - 0.62, v - _N - 0.1, 0.15, 0.12)
-	# Boca (o arco dos dentes empurra a região para frente), dobra sob o lábio e queixo
-	h += 0.03 * _g2(u / maxf(0.05, _MW * 1.4), (v - _M) / 0.16, 1.0, 1.0)
-	h -= 0.025 * _g2(u, v - _M - 0.1, 0.18, 0.03)
-	h += 0.04 * _g2(u, v - 0.9, 0.2, 0.09)
-	# Têmporas
-	h -= 0.03 * _g2(au - 0.86, v + 0.3, 0.1, 0.18)
-	return h
-
-
-## Distância suave ao contorno (1 na borda) com uma fórmula só da testa ao queixo: o expoente muda
-## aos poucos em volta de v = 0 (trocar de fórmula ali deixava um vinco na altura dos olhos).
-func _th_smooth(u: float, v: float) -> float:
-	var n := lerpf(SKULL_N, 3.0, smoothstep(-0.25, 0.25, v))
-	var w: float
-	var ve: float
-	if v >= 0.0:
-		w = maxf(_hw(minf(v, _vb)), maxf(0.001, 0.32 * smoothstep(0.8, 1.0, v / _vb)))
-		ve = _vb
-	else:
-		w = _skull_rx(-v / 1.02)
-		ve = 1.02
-	return pow(pow(absf(u) / w, n) + pow(absf(v) / ve, n), 1.0 / n)
-
-
-## Normal do relevo `_face_h` no ponto (u, v) do rosto, em coordenadas de tela (x, y, z para a câmera).
-func _face_normal(u: float, v: float) -> Vector3:
-	var e := 0.012
-	var dhu := (_face_h(u + e, v) - _face_h(u - e, v)) / (2.0 * e)
-	var dhv := (_face_h(u, v + e) - _face_h(u, v - e)) / (2.0 * e)
-	return Vector3(-dhu, -dhv * _fw / maxf(_fh, 0.001), 1.0).normalized()
 
 
 static func _hash2(x: int, y: int) -> float:
 	var h := (x * 374761393 + y * 668265263) & 0x7fffffff
 	h = ((h ^ (h >> 13)) * 1274126177) & 0x7fffffff
 	return float(h & 0xffff) / 65535.0
-
-
-## Ruído suave que se repete a cada `period` células: a textura pode ladrilhar sem emenda.
-static func _vnoise_wrap(x: float, y: float, period: int) -> float:
-	var ix := floori(x)
-	var iy := floori(y)
-	var fx := x - ix
-	var fy := y - iy
-	fx = fx * fx * (3.0 - 2.0 * fx)
-	fy = fy * fy * (3.0 - 2.0 * fy)
-	var x0 := posmod(ix, period)
-	var y0 := posmod(iy, period)
-	var x1 := posmod(ix + 1, period)
-	var y1 := posmod(iy + 1, period)
-	var a := lerpf(_hash2(x0, y0), _hash2(x1, y0), fx)
-	var b := lerpf(_hash2(x0, y1), _hash2(x1, y1), fx)
-	return lerpf(a, b, fy)
 
 
 ## Ruído suave (0..1) para manchas e falhas com aparência natural.
@@ -1818,7 +1160,7 @@ func _age_spots() -> void:
 
 func _marks(rng: RandomNumberGenerator) -> void:
 	var f := _f
-	if bool(f["freckles"]) and not use_skin_shader:
+	if bool(f["freckles"]):
 		var n := int(40 * clampf(_det, 0.5, 1.5))
 		for i in n:
 			var sx := -1.0 if i % 2 == 0 else 1.0
@@ -1909,7 +1251,7 @@ func _body_setup() -> void:
 	_nwt = _fw * float(f.get("neck_w", 0.68)) * (1.0 + 0.1 * float(f["fat"]))
 	# Pescoço de atleta: nunca um "palito" embaixo de um rosto fino, mas também nunca mais largo que
 	# a mandíbula (aí vira uma "coluna")
-	_nwt = minf(maxf(_nwt, _fw * 0.6), _fw * _jw_g * float(f["cheek_w"]) * 0.9)
+	_nwt = minf(maxf(_nwt, _fw * 0.68), _fw * float(f["jaw"]) * 1.05 * 0.92)
 	_ynb = _chin_y + s * (0.058 + 0.01 * build)
 	_ynotch = _chin_y + s * (0.1 + 0.01 * build)
 	_sw = s * (0.41 + 0.07 * build)
@@ -2037,11 +1379,10 @@ func _skin_torso_col(p: Vector2) -> Color:
 	else:
 		var dx := x / _sw
 		lum = 0.84 - 0.16 * dx - 0.12 * smoothstep(0.3, 1.0, absf(dx))
-	# Sombra da mandíbula e do queixo sobre o pescoço: acompanha a linha real do maxilar (a luz vem
-	# de cima, então logo abaixo do osso fica escuro e clareia descendo)
-	var yj := _hc.y + _fh * _jaw_v_at(absf(x) / _fw)
-	var dj := (y - yj) / s
-	lum -= (0.3 + 0.05 * fat) * (1.0 - smoothstep(0.004, 0.05 + 0.015 * fat, dj))
+	# Sombra do queixo e da mandíbula sobre o pescoço
+	var nx := clampf(x / (_fw * 0.9), -1.0, 1.0)
+	var sh_y := _chin_y + s * (0.018 + 0.015 * fat) - s * 0.03 * nx * nx
+	lum -= 0.24 * (1.0 - smoothstep(sh_y - s * 0.025, sh_y + s * 0.018, y))
 	lum -= 0.06 * (1.0 - smoothstep(_chin_y, _ynb, y)) * smoothstep(0.3, 1.0, absf(x) / _nwt)
 	# Trapézio
 	lum += 0.05 * _g2((absf(x) - _nwt * 1.5) / (s * 0.05), (y - _ynb - s * 0.02) / (s * 0.02), 1.0, 1.0)
@@ -2780,7 +2121,7 @@ func _ears() -> void:
 	var cauli: float = float(f.get("cauli", 0.0))
 	var asym: float = float(f["asym"])
 	for sx: float in [-1.0, 1.0]:
-		var ek := er * (1.0 + sx * asym * 0.03) * (1.0 + sx * float(f.get("ear_asym", 0.0)))
+		var ek := er * (1.0 + sx * asym * 0.03)
 		var ec := _px(sx * (float(f["cheek_w"]) * 0.97 + out * 0.07), (_E - 0.14 + _N) * 0.5)
 		var ew := _fw * (0.15 + out * 0.04) * ek
 		var eh := _fh * 0.2 * ek
@@ -2802,14 +2143,13 @@ func _ears() -> void:
 		var lit := -sx
 		var em := _radial(ec, pts, _rings(3), func(p: Vector2, t: float, _i: int) -> Color:
 			var d := (p - ec) / Vector2(ew, eh)
-			var lum := 0.7 + 0.12 * lit
-			lum -= 0.26 * _g2(d.x + sx * 0.15, d.y + 0.05, 0.4, 0.45)
-			lum += 0.08 * smoothstep(0.6, 0.95, t) * (1.0 if d.y < 0.3 else 0.3)
-			lum -= 0.1 * smoothstep(0.1, 0.9, d.y)
+			var lum := 0.8 + 0.1 * lit
+			lum -= 0.22 * _g2(d.x + sx * 0.15, d.y + 0.05, 0.4, 0.45)
+			lum += 0.1 * smoothstep(0.6, 0.95, t) * (1.0 if d.y < 0.3 else 0.3)
 			# Orelha de lutador: cartilagem inchada, com caroços e sombras
 			lum += cauli * 0.1 * sin(d.x * 9.0 + d.y * 7.0) * (1.0 - t)
 			var c := _shade(_skin, lum)
-			return c.lerp(c * Color(1.1, 0.78, 0.74), 0.35 + 0.2 * float(f["rosy"])))
+			return c.lerp(Color(0.85, 0.35, 0.3), 0.08 + 0.05 * float(f["rosy"])))
 		_rim(em, pts.size())
 		var lw := maxf(0.8, _s * 0.006)
 		var a0 := -PI * 0.5 if sx > 0 else PI * 0.5
@@ -2826,9 +2166,9 @@ func _ears() -> void:
 
 func _eyes() -> void:
 	var f := _f
-	# Abertura do olho: ~0,21 da largura do rosto; a íris tem ~42% da abertura (proporção real)
-	var ew := _fw * float(f["eye_w"])
-	var eh := _fw * float(f["eye_h"]) * 1.1
+	# Olho de ~0,21 da largura do rosto, abertura de ~0,07: a íris grande mostra pouco branco
+	var ew := _fw * float(f["eye_w"]) * 0.92
+	var eh := _fw * float(f["eye_h"]) * 0.85
 	var tilt := _fw * float(f["eye_tilt"])
 	var iris_main: Color = f["eye"]
 	var ring: float = f.get("eye_ring", 0.0)
@@ -2838,7 +2178,7 @@ func _eyes() -> void:
 	var het_side: float = f.get("hetero_side", 1.0)
 	var het_ang: float = f.get("hetero_ang", 0.0)
 	var eye_b: Color = f.get("eye_b", iris_main)
-	var lw := maxf(0.7, _s * 0.0055)
+	var lw := maxf(0.9, _s * 0.009)
 	var mono: bool = f["monolid"]
 	var hooded: bool = f["hooded"]
 	var asym: float = f["asym"]
@@ -2847,11 +2187,9 @@ func _eyes() -> void:
 	var bulge: float = float(f.get("bulge", 0.0))
 	var uneven: float = float(f.get("eye_uneven", 0.0))
 	var eh0 := eh
-	var lash := Color("#241810").lerp(_skin.darkened(0.7), 0.3)
-	var ldir := FaceLighting.screen_dir()
 	for sx: float in [-1.0, 1.0]:
-		# Olhos desiguais (feios): um menor e um pouco mais baixo; assimetria natural bem pequena
-		eh = eh0 * (1.0 - (uneven * 0.2 if sx > 0.0 else 0.0)) * (1.0 + sx * float(f.get("eye_asym", 0.0)))
+		# Olhos desiguais (feios): um menor e um pouco mais baixo
+		eh = eh0 * (1.0 - (uneven * 0.2 if sx > 0.0 else 0.0))
 		var cx := _hc.x + sx * _X * _fw
 		var cy := _hc.y + _E * _fh + sx * asym * _fh * 0.012 + (uneven * _fh * 0.018 if sx > 0.0 else 0.0)
 		# Pálpebra de cima baixa (encapuzado, cansado, semicerrado) e de baixo subindo no sorriso
@@ -2871,121 +2209,97 @@ func _eyes() -> void:
 		for i in range(lower.size() - 2, 0, -1):
 			sclera.append(lower[i])
 		var ecen := Vector2(cx, cy)
-		var top_y := cy - eh * up_k
-		var bot_y := cy + eh * 0.52 * lo_k
-		# Esclera: branco quente e acinzentado (nunca branco puro), mais escura nos cantos e na parte
-		# de cima, onde a pálpebra faz sombra sobre o globo; canto de dentro levemente rosado
-		var sc_base := FaceColorSystem.sclera(_skin)
-		_radial(ecen, sclera, 2 if _s < 90.0 else 4, func(p: Vector2, t: float, _i: int) -> Color:
-			var ry := clampf((p.y - top_y) / maxf(1.0, bot_y - top_y), 0.0, 1.0)
-			var lum := 0.97 - 0.3 * t * t - 0.3 * (1.0 - smoothstep(0.0, 0.6, ry))
-			lum -= 0.06 * smoothstep(0.2, 1.0, (p.x - cx) * sx / ew)
-			var c := _shade(sc_base, lum)
-			var in_k := smoothstep(0.35, 1.0, (cx - p.x) * sx / ew)
-			return c.lerp(Color(0.86, 0.6, 0.58), 0.25 * in_k))
-		# Íris com fibras, anel límbico, centro claro e sombra da pálpebra
+		var sc_base := Color("#DCD3C6").lerp(_skin, 0.25)
+		_radial(ecen, sclera, 2 if _s < 90.0 else 3, func(p: Vector2, t: float, _i: int) -> Color:
+			var lum := 1.0 - 0.32 * t * t - (0.28 if p.y < cy else 0.0) * t
+			return _shade(sc_base, lum))
+		# Íris com anel escuro, centro claro e sombra da pálpebra
 		var iris_col := eye_b if het == 1 and sx == het_side else iris_main
 		var sector := het == 2 and sx == het_side
-		var ic := Vector2(cx + float(f["gaze"]) * ew * 0.3, cy + eh * 0.1 - bulge * eh * 0.08)
-		var ir := minf(eh * 1.25, ew * 0.43)
-		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir, ir, 12 if _s < 90.0 else 24), sclera):
+		var ic := Vector2(cx + float(f["gaze"]) * ew * 0.3, cy + eh * 0.12 - bulge * eh * 0.08)
+		var ir := minf(eh * 1.3, ew * 0.47)
+		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir, ir, 12 if _s < 90.0 else 20), sclera):
 			if not Geometry2D.is_point_in_polygon(ic, piece):
-				_fill(piece, iris_col.darkened(0.35))
+				_fill(piece, iris_col.darkened(0.3))
 				continue
-			_radial(ic, piece, 2 if _s < 90.0 else 5, func(p: Vector2, _t: float, _i: int) -> Color:
+			_radial(ic, piece, 2 if _s < 90.0 else 4, func(p: Vector2, _t: float, _i: int) -> Color:
 				var d := p - ic
 				var r := d.length() / ir
 				var ang := atan2(d.y, d.x)
-				var lum := 1.0 + 0.3 * (1.0 - smoothstep(0.32, 0.72, r)) - (0.3 + 0.4 * limbal) * smoothstep(0.74, 1.0, r)
-				# Sombra da pálpebra de cima sobre a íris e luz do lado oposto à fonte
-				lum -= 0.45 * (1.0 - smoothstep(-ir * 0.95, -ir * 0.05, d.y))
-				lum += 0.12 * smoothstep(0.2, 0.9, r) * clampf(d.normalized().dot(-ldir), 0.0, 1.0)
-				lum += (0.08 * sin(ang * 17.0 + sx * 3.0) + 0.05 * sin(ang * 31.0 + 1.7) + 0.03 * sin(ang * 53.0)) * (1.0 - r) * (r * 3.0)
+				var lum := 1.0 + 0.28 * (1.0 - smoothstep(0.3, 0.7, r)) - (0.25 + 0.4 * limbal) * smoothstep(0.72, 1.0, r)
+				lum -= 0.4 * (1.0 - smoothstep(-ir * 0.9, -ir * 0.1, d.y))
+				lum += (0.08 * sin(ang * 17.0 + sx * 3.0) + 0.05 * sin(ang * 31.0 + 1.7)) * (1.0 - r)
 				var base := iris_col
 				if sector:
 					base = base.lerp(eye_b, (1.0 - smoothstep(0.35, 0.65, absf(angle_difference(ang, het_ang)))) * smoothstep(0.3, 0.45, r))
 				# Anel central (heterocromia central, comum em olhos claros)
 				base = base.lerp(ring_col, ring * (1.0 - smoothstep(0.4, 0.62, r)))
 				return _shade(base, lum))
-		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.38, ir * 0.38, 16), sclera):
-			_fill(piece, Color("#080506"))
+		for piece in Geometry2D.intersect_polygons(_ellipse(ic, ir * 0.4, ir * 0.4, 14), sclera):
+			_fill(piece, Color("#070505"))
 		# Anel límbico: a borda da íris escurece e fica suave (só onde a íris aparece)
 		if _s >= 90.0:
 			var run := PackedVector2Array()
-			var ring_c := Color(iris_col.darkened(0.6), 0.3 + 0.35 * limbal)
-			for j in 33:
-				var a := TAU * j / 32.0
+			var ring_c := Color(iris_col.darkened(0.55), 0.35 + 0.35 * limbal)
+			for j in 29:
+				var a := TAU * j / 28.0
 				var rp := ic + Vector2(cos(a), sin(a)) * ir * 0.97
 				if Geometry2D.is_point_in_polygon(rp, sclera):
 					run.append(rp)
 				elif run.size() > 1:
-					_r_polyline(run, ring_c, maxf(0.7, ir * 0.11), true)
+					_r_polyline(run, ring_c, maxf(0.7, ir * 0.12), true)
 					run = PackedVector2Array()
 				else:
 					run = PackedVector2Array()
 			if run.size() > 1:
-				_r_polyline(run, ring_c, maxf(0.7, ir * 0.11), true)
-		# Sombra da pálpebra de cima sobre o globo inteiro (dá profundidade ao olho)
-		var ls_top := PackedVector2Array()
-		var ls_bot := PackedVector2Array()
-		for p in upper:
-			ls_top.append(p)
-			ls_bot.append(p + Vector2(0, eh * (0.42 + lid * 0.3)))
-		_strip(ls_top, ls_bot, 3, func(_p: Vector2, t: float, w: float) -> Color:
-			return Color(0.12, 0.07, 0.05, (0.22 + 0.2 * lid) * sin(PI * clampf(t, 0.0, 1.0)) * (1.0 - w) * (1.0 - w)))
-		# Reflexo da luz: do lado de onde ela vem (mesma direção nos dois olhos), pequeno e macio
-		var cl := ic + Vector2(ldir.x, ldir.y).normalized() * ir * 0.42
-		if Geometry2D.is_point_in_polygon(cl, sclera):
-			_r_circle(cl, maxf(0.6, ir * 0.2), Color(1, 1, 1, 0.18))
-			_r_circle(cl, maxf(0.5, ir * 0.11), Color(1, 1, 1, 0.88))
-		var cl2 := ic - Vector2(ldir.x, ldir.y).normalized() * ir * 0.5
-		if Geometry2D.is_point_in_polygon(cl2, sclera):
-			_r_circle(cl2, maxf(0.4, ir * 0.07), Color(1, 1, 1, 0.16))
+				_r_polyline(run, ring_c, maxf(0.7, ir * 0.12), true)
+		_r_circle(ic + Vector2(-ir * 0.25, -ir * 0.42), maxf(0.6, ir * 0.13), Color(1, 1, 1, 0.9))
+		_r_circle(ic + Vector2(ir * 0.3, ir * 0.25), maxf(0.4, ir * 0.09), Color(1, 1, 1, 0.35))
 		# Carúncula
-		_r_circle(inner + Vector2(sx * ew * 0.1, eh * 0.05), maxf(0.6, eh * 0.16), Color(0.82, 0.48, 0.47, 0.5))
-		# Linha dos cílios: fina, mais marcada no terço de fora; a de baixo quase não aparece
-		_r_polyline(upper, Color(lash, 0.5), lw, true)
-		_r_polyline(upper.slice(8), Color(lash, 0.45), lw * 1.3, true)
-		var ln := float(f["lashes"]) * 0.6
-		for k in (4 if _s > 110.0 else 0):
-			var t := 0.6 + k * 0.08
+		_r_circle(inner + Vector2(sx * ew * 0.1, eh * 0.05), maxf(0.6, eh * 0.18), Color(0.85, 0.5, 0.5, 0.55))
+		# Linha dos cílios (mais grossa por fora) e cílios
+		var lash := Color("#2B1D15").lerp(_skin.darkened(0.7), 0.25)
+		_r_polyline(upper, Color(lash, 0.62), lw * 0.9, true)
+		_r_polyline(upper.slice(7), Color(lash, 0.5), lw * 1.25, true)
+		var ln := float(f["lashes"]) * 0.7
+		for k in (3 if _s > 110.0 else 0):
+			var t := 0.62 + k * 0.08
 			var i := int(t * 14.0)
 			var p0: Vector2 = upper[mini(i, 14)]
-			_r_line(p0, p0 + Vector2(sx * 0.7, -1.0).normalized() * eh * 0.38 * ln, Color(lash, 0.55), lw * 0.6, true)
-		_r_line(outer, outer + Vector2(sx * ew * 0.07, -eh * 0.1), Color(lash, 0.3), lw * 0.8, true)
-		_r_polyline(lower.slice(3, 14), Color(lash, 0.12), lw * 0.6, true)
-		# Linha d'água (borda úmida da pálpebra de baixo)
+			_r_line(p0, p0 + Vector2(sx * 0.6, -1.0).normalized() * eh * 0.45 * ln, Color(lash, 0.75), lw * 0.7, true)
+		_r_line(outer, outer + Vector2(sx * ew * 0.08, -eh * 0.12), Color(lash, 0.4), lw * 0.9, true)
+		_r_polyline(lower, Color(lash, 0.22), lw * 0.7, true)
 		var wl := PackedVector2Array()
 		for p in lower.slice(2, 13):
-			wl.append(p + Vector2(0, lw * 0.5))
-		_r_polyline(wl, Color(Color(0.95, 0.78, 0.74), 0.22), lw * 0.6, true)
+			wl.append(p + Vector2(0, lw * 0.6))
+		_r_polyline(wl, Color(_skin.lightened(0.25), 0.25), lw * 0.6, true)
+		# Dobra da pálpebra
+		# Sombra da pálpebra pesada sobre a íris
+		if lid > 0.15:
+			var ls := PackedVector2Array()
+			for p in upper.slice(2, 13):
+				ls.append(p + Vector2(0, lw * 0.9))
+			_r_polyline(ls, Color(0, 0, 0, 0.18 * lid), lw * 1.6, true)
 		if squint > 0.2:
 			var sq := PackedVector2Array()
 			for p in lower.slice(3, 12):
 				sq.append(p + Vector2(0, eh * 0.28))
-			_r_polyline(sq, Color(_skin.darkened(0.35), 0.22 * squint), lw * 0.8, true)
+			_r_polyline(sq, Color(_skin.darkened(0.35), 0.25 * squint), lw * 0.8, true)
 		if not mono:
 			var crease := PackedVector2Array()
 			var off := eh * (0.38 if hooded else 0.62) * (1.0 - lid * 0.4)
 			for p in upper.slice(2, 13):
 				crease.append(p + Vector2(0, -off))
-			# Pálpebra com volume: a pele da pálpebra pega luz e escurece até o sulco (a órbita)
-			if _s >= 90.0:
-				var lid_lo := PackedVector2Array()
-				for p in upper.slice(2, 13):
-					lid_lo.append(p + Vector2(0, -lw * 0.6))
-				var lit_side := 1.0 if sx < 0.0 else 0.7
-				_strip(lid_lo, crease, 3, func(_p: Vector2, t: float, w: float) -> Color:
-					var edge := sin(PI * clampf(t, 0.0, 1.0))
-					if w < 0.55:
-						return Color(_skin.lightened(0.12), 0.2 * lit_side * edge * sin(PI * w / 0.55))
-					return Color(_skin.darkened(0.55).lerp(Color(0.3, 0.12, 0.08), 0.3), 0.24 * edge * smoothstep(0.55, 1.0, w)))
-			_r_polyline(crease, Color(_skin.darkened(0.4), 0.26), lw * 0.9, true)
+			_r_polyline(crease, Color(_skin.darkened(0.4), 0.38), lw * 0.8, true)
+			var hl := PackedVector2Array()
+			for p in crease.slice(2, 9):
+				hl.append(p + Vector2(0, -lw * 1.2))
+			_r_polyline(hl, Color(_skin.lightened(0.3), 0.12), lw, true)
 		else:
 			var fold := PackedVector2Array()
 			for p in upper.slice(0, 7):
 				fold.append(p + Vector2(0, -eh * 0.12))
-			_r_polyline(fold, Color(_skin.darkened(0.3), 0.24), lw * 0.9, true)
+			_r_polyline(fold, Color(_skin.darkened(0.3), 0.3), lw * 0.8, true)
 
 
 func _brows(rng: RandomNumberGenerator) -> void:
@@ -2993,14 +2307,14 @@ func _brows(rng: RandomNumberGenerator) -> void:
 	var col: Color = (f["beard_col"] as Color).darkened(0.12)
 	if int(f["hair_i"]) in [4, 5, 9, FaceGen.HC_HONEY]: # loiros naturais: sobrancelha no tom do cabelo; tinta não muda a sobrancelha
 		col = (f["hair"] as Color).darkened(0.35)
-	col = col.lerp(_skin, 0.2)
+	col = col.lerp(_skin, 0.12)
 	var ew := _fw * float(f["eye_w"])
 	var th := _fw * float(f["brow_t"])
 	var arch := _fw * float(f["brow_arch"])
 	var tilt := _fw * float(f["brow_tilt"])
 	var blen := ew * 2.3 * (float(f["brow_len"]) / 0.45)
 	var dens: float = f["brow_dens"]
-	var wline := maxf(0.5, _s * 0.0028)
+	var wline := maxf(0.6, _s * 0.0034)
 	var asym: float = f["asym"]
 	var peak: float = float(f.get("brow_peak", 0.0))
 	var messy: float = float(f.get("brow_messy", 0.0))
@@ -3013,7 +2327,7 @@ func _brows(rng: RandomNumberGenerator) -> void:
 	for sx: float in [-1.0, 1.0]:
 		var cx := _hc.x + sx * _X * _fw
 		# Sobrancelha baixa e perto do olho, como nos homens adultos em foto
-		var by := _hc.y + (_E - float(f["brow_gap"]) * 0.8) * _fh - sx * asym * _fh * 0.018 - sx * float(f.get("brow_asym", 0.0)) * _fh
+		var by := _hc.y + (_E - float(f["brow_gap"]) * 0.8) * _fh - sx * asym * _fh * 0.018
 		# Expressão: sobrancelhas sobem (surpresa), descem e se juntam (bravo), uma sobe (desconfiado)
 		by -= raise * _fh * 0.07 + (_fh * 0.06 if uneven != 0.0 and signf(uneven) == sx else 0.0)
 		var x0 := cx - sx * ew * 1.05
@@ -3041,7 +2355,7 @@ func _brows(rng: RandomNumberGenerator) -> void:
 			cuts.append(g.x)
 			cuts.append(g.y)
 		cuts.append(1.0)
-		var base_a := 0.3 + (0.25 if _s < 90.0 else 0.0)
+		var base_a := 0.42 + (0.3 if _s < 90.0 else 0.0)
 		for c in range(0, cuts.size(), 2):
 			var ta: float = cuts[c]
 			var tb: float = cuts[c + 1]
@@ -3060,15 +2374,10 @@ func _brows(rng: RandomNumberGenerator) -> void:
 				# O risco corta na diagonal (o pelo de cima inclina para fora)
 				top.append(p + Vector2(0, -tk * 0.5))
 				bot.append(p + Vector2(0, tk * 0.5))
-			# Base da sobrancelha em degradê: densa no meio e rala nas bordas (sem contorno de adesivo)
-			var ba := base_a * dens + 0.1
-			var mid := PackedVector2Array()
-			for j in top.size():
-				mid.append(top[j].lerp(bot[j], 0.55))
-			_strip(top, mid, 2, func(_p: Vector2, t: float, w: float) -> Color:
-				return Color(col, ba * w * lerpf(1.0, 0.55, t)))
-			_strip(mid, bot, 2, func(_p: Vector2, t: float, w: float) -> Color:
-				return Color(col, ba * (1.0 - w * 0.85) * lerpf(1.0, 0.55, t)))
+			bot.reverse()
+			var poly := PackedVector2Array(top)
+			poly.append_array(bot)
+			_fill(poly, Color(col, base_a * dens + 0.1))
 		var n := int(75 * dens * clampf(_det, 0.4, 1.6))
 		for k in n:
 			var t := pow(rng.randf(), 0.85)
@@ -3094,7 +2403,7 @@ func _brows(rng: RandomNumberGenerator) -> void:
 				# Desgrenhada: pelos longos apontando para todo lado
 				dir = dir.rotated(rng.randf_range(-1.2, 1.2))
 				ln *= rng.randf_range(1.3, 2.0)
-			_r_line(p, p + dir.normalized() * ln, Color(col.darkened(rng.randf_range(0.0, 0.2)), rng.randf_range(0.25, 0.55)), wline, true)
+			_r_line(p, p + dir.normalized() * ln, Color(col.darkened(rng.randf_range(0.0, 0.2)), rng.randf_range(0.35, 0.7)), wline, true)
 	if bool(f["unibrow"]):
 		for k in int(10 * clampf(_det, 0.5, 1.5)):
 			var p := _px(rng.randf_range(-0.15, 0.15), _E - float(f["brow_gap"]) + rng.randf_range(-0.02, 0.02))
@@ -3102,10 +2411,6 @@ func _brows(rng: RandomNumberGenerator) -> void:
 
 
 func _nose() -> void:
-	# Com o shader da pele, nariz, narinas, asas e a sombra projetada são calculados pixel a pixel;
-	# os traços antigos (linha sob a ponta, halos nas narinas) formavam o "bigode" e ficam de fora.
-	if use_skin_shader:
-		return
 	var f := _f
 	var lw := maxf(0.8, _s * 0.007)
 	var dark := _skin.darkened(0.62)
@@ -3140,13 +2445,20 @@ func _mouth() -> void:
 	var mw := _MW * _fw * (1.0 + maxf(0.0, smile - 0.6) * 0.18)
 	var mouth_y := _hc.y + _M * _fh
 	var ul := _fh * float(f["lip_u"]) * 1.7
-	var ll := _fh * float(f["lip_l"]) * 1.55
+	var ll := _fh * float(f["lip_l"]) * 1.8
 	var darkness := clampf(float(f["skin_i"]) / 9.0, 0.0, 1.0)
 	# O lábio parte da pele já sombreada em volta da boca (a pele "crua" é mais clara que a região
 	# da boca e deixava o lábio parecendo aceso) e puxa o tom para o vermelho sem mudar o brilho
-	var lip_cols := FaceColorSystem.lips(_skin, darkness)
-	var lip_up: Color = lip_cols[0]
-	var lip_lo: Color = lip_cols[1]
+	var sk := _shade(_skin, 0.86)
+	var red := Color("#A8585A")
+	var rr := sk.get_luminance() / maxf(0.05, red.get_luminance())
+	var lip := sk.lerp(Color(minf(1.0, red.r * rr), minf(1.0, red.g * rr), minf(1.0, red.b * rr)), 0.28 - darkness * 0.1).darkened(0.1 + darkness * 0.06)
+	var lip_up := lip.darkened(0.1 + darkness * 0.14)
+	# Em pele escura o lábio de baixo puxa para o rosado, mas no mesmo brilho do lábio (clarear
+	# demais parece boca aberta)
+	var rose := Color("#9A5A5E")
+	var rk := lip.get_luminance() / maxf(0.05, rose.get_luminance())
+	var lip_lo := lip.lerp(Color(minf(1.0, rose.r * rk), minf(1.0, rose.g * rk), minf(1.0, rose.b * rk)), darkness * 0.3)
 	var corner_y := mouth_y - smile * _fh * 0.03 + float(f.get("corner", 0.0)) * _fh * 0.022
 	var bow: float = f["bow"]
 	# Canto de um lado mais alto (sorriso de canto) ou boca torta
@@ -3201,39 +2513,35 @@ func _mouth() -> void:
 	# Lábio superior (cor por vértice: mais escuro junto à linha da boca)
 	var upper := PackedVector2Array(up)
 	var ucol := PackedColorArray()
-	# A boca pega a mesma luz do rosto: o lado direito cai na sombra
-	var lit := func(c: Color, p: Vector2) -> Color:
-		return _shade(c, 1.03 - 0.22 * smoothstep(-mw, mw * 1.1, p.x - _hc.x))
 	for i in up.size():
-		ucol.append(lit.call(lip_up.lightened(0.02), up[i]))
+		ucol.append(lip_up.lightened(0.05))
 	for i in range(line.size() - 1, -1, -1):
 		upper.append(line[i])
-		ucol.append(lit.call(lip_up.darkened(0.18), line[i]))
+		ucol.append(lip_up.darkened(0.15))
 	_poly_colors(upper, ucol)
 	# Lábio inferior (claro no meio, com brilho)
 	var lower := PackedVector2Array(bot)
 	var lcol := PackedColorArray()
 	for i in bot.size():
-		lcol.append(lit.call(lip_lo.darkened(0.16), bot[i]))
+		lcol.append(lip_lo.darkened(0.12))
 	var lo_r := lo.duplicate()
 	lo_r.reverse()
 	for i in lo_r.size():
 		var t := float(i) / 14.0
-		lcol.append(lit.call(lip_lo.lightened(0.03 * sin(PI * t)).darkened(0.1 * (1.0 - sin(PI * t))), lo_r[i]))
+		lcol.append(lip_lo.lightened(0.05 * sin(PI * t)).darkened(0.08 * (1.0 - sin(PI * t))))
 	lower.append_array(lo_r)
 	_poly_colors(lower, lcol)
-	# Brilho do lábio de baixo do lado da luz, macio
-	_fill(_ellipse(Vector2(_hc.x - mw * 0.22, mouth_y + ll * 0.42 + gap), mw * 0.2, ll * 0.12, 14), Color(1, 0.95, 0.92, 0.045 + darkness * 0.03))
-	# Contornos quase invisíveis: lábio de verdade não tem linha em volta
-	var lw := maxf(0.7, _s * 0.006)
+	_fill(_ellipse(Vector2(_hc.x - mw * 0.14, mouth_y + ll * 0.48 + gap), mw * 0.22, ll * 0.14, 12), Color(1, 1, 1, 0.07 + darkness * 0.03))
+	# Contornos suaves
+	var lw := maxf(0.8, _s * 0.007)
 	var ol := PackedVector2Array(up)
-	_r_polyline(ol, Color(lip_up.darkened(0.1), 0.12), lw * 0.8, true)
+	_r_polyline(ol, Color(lip_up.darkened(0.1), 0.35), lw * 0.8, true)
 	var olo := PackedVector2Array(lo)
-	_r_polyline(olo, Color(lip_lo, 0.1), lw * 0.8, true)
+	_r_polyline(olo, Color(lip_lo, 0.35), lw * 0.8, true)
 	var lc := PackedColorArray()
 	for i in line.size():
 		var t := float(i) / 14.0
-		lc.append(Color("#3A1C1B", 0.22 + 0.3 * sin(PI * t)))
+		lc.append(Color("#3A1C1B", 0.3 + 0.35 * sin(PI * t)))
 	if gap <= 0.5:
 		_r_polyline_colors(line, lc, lw, true)
 	for sx: float in [-1.0, 1.0]:
@@ -3405,7 +2713,7 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	var over_lip := 0.0
 	if mu == 8:
 		over_lip = (1.0 - smoothstep(_MW * 1.3 - soft, _MW * 1.3 + soft, au)) * smoothstep(_N + 0.02 - soft, _N + 0.02 + soft, v) * (1.0 - smoothstep(_M + lip_l * 0.25 + 0.02, _M + lip_l * 0.25 + 0.05, v))
-	d *= smoothstep(0.93, 1.04, le)
+	d *= smoothstep(0.85, 1.05, le)
 	d = maxf(d, over_lip)
 	# Nunca acima da linha das maçãs
 	d *= smoothstep(_E + 0.08, _E + 0.2, v) if au < 0.8 else 1.0
@@ -3423,7 +2731,7 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 func _neck_half() -> float:
 	var f := _f
 	var nw := float(f.get("neck_w", 0.68)) * (1.0 + 0.1 * float(f["fat"]))
-	return minf(maxf(nw, 0.6), _jw_g * float(f["cheek_w"]) * 0.9)
+	return minf(maxf(nw, 0.68), float(f["jaw"]) * 1.05 * 0.92)
 
 
 func _beard_patchiness(P: Dictionary) -> float:
@@ -3466,18 +2774,8 @@ func _beard_mesh() -> void:
 		if edge <= 0.0:
 			return Color(col, 0.0)
 		var px: Color = _beard_px(p, P, col, gray, short, patchy, op)
-		# Barba de foto é trama de pelos com pele aparecendo, não uma massa lisa: a densidade
-		# varia em manchinhas e a malha fica um pouco mais transparente (os fios completam)
-		var q := _uv(p)
-		var grain := 0.7 + 0.3 * _vnoise(q.x * 16.0 + 3.1, q.y * 16.0)
-		return Color(px, px.a * edge * grain * 0.9)
-	var gnu := int(54 * clampf(_det, 0.35, 1.3))
-	var gnv := int(60 * clampf(_det, 0.35, 1.3))
-	# Barba curta com o shader da pele: nada de malha por cima (os pelos saem no shader, pixel a pixel)
-	var in_shader := use_skin_shader and short and _skin_mat != null
-	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, gnu, gnv, shade, not in_shader)
-	if use_skin_shader and _skin_mat != null:
-		_beard_mask(-1.4, 1.4, -0.42, vmax + 0.04, gnu, gnv, _beard_data[2], short)
+		return Color(px, px.a * edge)
+	_beard_data = _grid(-1.4, 1.4, -0.42, vmax + 0.04, int(54 * clampf(_det, 0.35, 1.3)), int(60 * clampf(_det, 0.35, 1.3)), shade)
 
 
 ## Cor da barba num ponto da malha (densidade no alfa).
@@ -3543,7 +2841,7 @@ func _inside_star(center: Vector2, tab: PackedFloat32Array, p: Vector2) -> float
 
 
 ## Grade retangular (em coordenadas do rosto) com cor por vértice; só emite as células com algo visível.
-func _grid(u0: float, u1: float, v0: float, v1: float, nu: int, nv: int, shader: Callable, emit: bool = true) -> Array:
+func _grid(u0: float, u1: float, v0: float, v1: float, nu: int, nv: int, shader: Callable) -> Array:
 	var pts := PackedVector2Array()
 	var cols := PackedColorArray()
 	var idx := PackedInt32Array()
@@ -3560,37 +2858,12 @@ func _grid(u0: float, u1: float, v0: float, v1: float, nu: int, nv: int, shader:
 				continue
 			idx.append_array([a, a + row, a + row + 1, a, a + row + 1, a + 1])
 	var m := [idx, pts, cols]
-	if emit:
-		_emit(m)
+	_emit(m)
 	return m
-
-
-## Máscara da barba para o shader da pele: a mesma grade de densidade vira uma textura pequena
-## (alfa = densidade) posicionada em coordenadas do rosto.
-func _beard_mask(u0: float, u1: float, v0: float, v1: float, nu: int, nv: int, cols: PackedColorArray, short: bool) -> void:
-	if _skin_mat == null or cols.size() < (nu + 1) * (nv + 1):
-		return
-	var img := Image.create(nu + 1, nv + 1, false, Image.FORMAT_RGBA8)
-	for j in nv + 1:
-		for i in nu + 1:
-			var c := cols[j * (nu + 1) + i]
-			img.set_pixel(i, j, Color(1, 1, 1, c.a))
-	var tex := ImageTexture.create_from_image(img)
-	_skin_mat.set_shader_parameter("beard_mask", tex)
-	_skin_mat.set_shader_parameter("beard_rect", Vector4(u0, v0, u1 - u0, v1 - v0))
-	var bc: Color = _f["beard_col"]
-	# Pelo curto visto de longe: tom mais frio (a raiz escura por baixo da pele), não marrom
-	if short:
-		bc = bc.lerp(_shadow_col, 0.4)
-	_skin_mat.set_shader_parameter("beard_col", bc)
-	# Curta: o shader desenha a barba toda; comprida: só escurece a pele por baixo dos fios
-	_skin_mat.set_shader_parameter("beard2", Vector4(1.0, 0.78 if short else 0.75, 1.0 if short else 0.4, 0.0))
 
 
 func _beard_hairs(rng: RandomNumberGenerator) -> void:
 	if _beard_data.size() < 3:
-		return
-	if use_skin_shader and _skin_mat != null and int(_beard_p["tx"]) == 0 and float(_beard_p.get("wild", 0.0)) <= 0.0:
 		return
 	if float(_beard_p.get("wild", 0.0)) > 0.0:
 		var wc: Color = _f["beard_col"]
@@ -3616,7 +2889,7 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 	if cand.is_empty():
 		return
 	var patchy := minf(1.0, _beard_patchiness(P) * 1.6)
-	var n := int((420 if tx == 0 else 420 + ln * 420.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6) * (1.0 + patchy * 0.4))
+	var n := int((420 if tx == 0 else 300 + ln * 300.0) * clampf(_det, 0.35, 1.8) * (0.6 + op * 0.6) * (1.0 + patchy * 0.4))
 	var w := maxf(0.6, _s * 0.0036)
 	# Estilos de contorno marcado espalham menos: o fio não "vaza" para fora do desenho
 	var jit := _fw * lerpf(0.045, 0.014, float(P["sh"]))
@@ -3798,136 +3071,6 @@ func _build_cap() -> void:
 		_cap_out.append(_px(o.x, o.y))
 
 
-## Calota do cabelo no shader FaceHair: faixa da linha do cabelo até um pouco além da silhueta
-## (as pontas quebram o contorno), com (t, w) nos UVs e o degradê do corte no alfa dos vértices.
-func _hair_surface(tex: String, gloss: float) -> void:
-	var f := _f
-	var n := _cap_in.size()
-	if n < 3 or _cap_out.size() != n:
-		return
-	var layers := maxi(4, _rings(7))
-	var ext := _fw * 0.07
-	var pts := PackedVector2Array()
-	var cols := PackedColorArray()
-	var uvs := PackedVector2Array()
-	for l in layers + 1:
-		var wl := float(l) / layers
-		for i in n:
-			var a := _cap_in[i]
-			var b := _cap_out[i]
-			var d := b - a
-			var ln := maxf(d.length(), 0.001)
-			var p := a.lerp(b + d / ln * ext, wl)
-			var w := wl * (ln + ext) / ln
-			pts.append(_cl(p))
-			uvs.append(Vector2(float(i) / (n - 1), w))
-			cols.append(Color(1, 1, 1, _cap_alpha(p, minf(w, 1.0))))
-	var idx := PackedInt32Array()
-	for l in layers:
-		var b0 := l * n
-		var b1 := (l + 1) * n
-		for i in n - 1:
-			idx.append_array([b0 + i, b1 + i, b1 + i + 1, b0 + i, b1 + i + 1, b0 + i + 1])
-	var hair: Color = f["hair"]
-	var tid := {"str": 0, "wavy": 1, "curl": 2, "coil": 3, "dots": 4}.get(tex, 5) as int
-	var ti: int = int(f["texture"])
-	var gl := float([0.5, 0.36, 0.2, 0.1][ti]) + gloss
-	var behind := String(_hs("bk", "")) in ["long", "long_short", "curly_long", "afro", "dreads", "braids"]
-	var gray := float(f["gray"]) if int(f["hair_i"]) not in FaceGen.DYED else 0.0
-	_hair_mat = ShaderMaterial.new()
-	_hair_mat.shader = HAIR_SHADER
-	_hair_mat.set_shader_parameter("hair_col", hair)
-	_hair_mat.set_shader_parameter("hair_p", Vector4(gl, tid, int(_hs("fl", 0)), 0.5 + float(f["part_side"]) * 0.19))
-	_hair_mat.set_shader_parameter("hair_p2", Vector4(1.0 if bool(f["tips"]) else 0.0, 1.0 if bool(f.get("highlights", false)) else 0.0, gray, float(int(f["hair_seed"]) % 1000) * 0.37))
-	_hair_mat.set_shader_parameter("hair_p3", Vector4(1.0 if behind else 0.0, 1.0 if hair.get_luminance() < 0.2 else 0.0, 0.0, 0.0))
-	_hair_mat.set_shader_parameter("head", Vector4(_hc.x, _hc.y, _fw, _fh))
-	_hair_mat.set_shader_parameter("tips_col", Color("#E2C98C"))
-	_hair_mat.set_shader_parameter("streak_col", Color("#D8B46A").lerp(hair, 0.35))
-	_hair_mat.set_shader_parameter("scalp_col", _skin.darkened(0.08))
-	_hair_mat.set_shader_parameter("key_dir", FaceLighting.KEY)
-	_bind_materials()
-	_target = T_HAIR
-	_r_tex_tri(idx, pts, cols, uvs, null)
-
-
-## Peça de cabelo (mecha, franja, tufo) na camada do shader do cabelo: faixa entre `lower` e
-## `upper` com (através, ao longo) nos UVs — os fios seguem o comprimento da peça. `alpha(t, ww)`
-## dá a opacidade; `bright` escurece fileiras de trás. Sem o shader, devolve false.
-func _hair_piece(lower: PackedVector2Array, upper: PackedVector2Array, layers: int, alpha: Callable, bright: float = 1.0) -> bool:
-	if not (use_skin_shader and _hair_mat != null and _items.size() >= 4):
-		return false
-	var n := mini(lower.size(), upper.size())
-	if n < 2:
-		return true
-	var across := 0.0
-	for i in n:
-		across += lower[i].distance_to(upper[i])
-	across /= n
-	var k := across / maxf(1.0, 2.2 * _fw)
-	var off := fposmod(lower[0].x * 0.013 + lower[0].y * 0.007 + n * 0.137, 1.0) * 3.0
-	var pts := PackedVector2Array()
-	var cols := PackedColorArray()
-	var uvs := PackedVector2Array()
-	layers = maxi(layers, 4)
-	for l in layers + 1:
-		var ww := float(l) / layers
-		for i in n:
-			var t := float(i) / (n - 1)
-			pts.append(_cl(lower[i].lerp(upper[i], ww)))
-			uvs.append(Vector2(off + ww * k, lerpf(0.3, 0.85, t)))
-			# Bordas macias através da peça (sem serrilhado e sem recorte de papel)
-			var soft := smoothstep(0.0, 0.2, ww) * (1.0 - smoothstep(0.8, 1.0, ww))
-			cols.append(Color(0.0, bright, 1.0, float(alpha.call(t, ww)) * soft))
-	var idx := PackedInt32Array()
-	for l in layers:
-		var b0 := l * n
-		var b1 := (l + 1) * n
-		for i in n - 1:
-			idx.append_array([b0 + i, b1 + i, b1 + i + 1, b0 + i, b1 + i + 1, b0 + i + 1])
-	var prev := _target
-	_target = T_HAIR
-	_r_tex_tri(idx, pts, cols, uvs, null)
-	_target = prev
-	return true
-
-
-## Peça em malha radial (topete, pompadour) na camada do cabelo, com fios na vertical.
-func _hair_radial(center: Vector2, boundary: PackedVector2Array, rings: int, alpha: Callable, v_base: float, v_span: float) -> bool:
-	if not (use_skin_shader and _hair_mat != null and _items.size() >= 4):
-		return false
-	var n := boundary.size()
-	var pts := PackedVector2Array()
-	var cols := PackedColorArray()
-	var uvs := PackedVector2Array()
-	var uv_of := func(p: Vector2) -> Vector2:
-		var q := _uv(p)
-		return Vector2(0.5 + (p.x - _hc.x) / maxf(1.0, 2.2 * _fw), 0.3 + 0.55 * clampf((v_base - q.y) / maxf(0.01, v_span), 0.0, 1.0))
-	pts.append(_cl(center))
-	uvs.append(uv_of.call(center))
-	cols.append(Color(0, 1, 1, float(alpha.call(0.0, 0))))
-	for r in range(1, rings + 1):
-		var t := float(r) / rings
-		for i in n:
-			var p := center + (boundary[i] - center) * t
-			pts.append(_cl(p))
-			uvs.append(uv_of.call(p))
-			cols.append(Color(0, 1, 1, float(alpha.call(t, i))))
-	var idx := PackedInt32Array()
-	for i in n:
-		idx.append_array([0, 1 + i, 1 + (i + 1) % n])
-	for r in range(1, rings):
-		var b0 := 1 + (r - 1) * n
-		var b1 := 1 + r * n
-		for i in n:
-			var j := (i + 1) % n
-			idx.append_array([b0 + i, b1 + i, b1 + j, b0 + i, b1 + j, b0 + j])
-	var prev := _target
-	_target = T_HAIR
-	_r_tex_tri(idx, pts, cols, uvs, null)
-	_target = prev
-	return true
-
-
 static func _resample(pts: PackedVector2Array, n: int) -> PackedVector2Array:
 	var lens := PackedFloat32Array([0.0])
 	for i in range(1, pts.size()):
@@ -3974,16 +3117,6 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 	_build_cap()
 	var gloss: float = float(_hs("gl", 0.0))
 	_hair_shadow()
-	var tex := String(_hs("tx", ["str", "wavy", "curl", "coil"][int(f["texture"])]))
-	if use_skin_shader and _items.size() >= 4:
-		_hair_surface(tex, gloss)
-		_target = T_TOP
-		_cap_texture(rng, tex, hair)
-		var wr0 := RandomNumberGenerator.new()
-		wr0.seed = int(f["texture_seed"]) + 31
-		_hairline_wisps(wr0, tex, hair)
-		_front_hair_pieces(rng, hair, gloss)
-		return
 	_strip(_cap_in, _cap_out, _rings(7), func(p: Vector2, t: float, w: float) -> Color:
 		var c := _hair_col(p, w, t, gloss)
 		return Color(c, _cap_alpha(p, w)))
@@ -3998,16 +3131,11 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 				i = k
 		var t := float(i) / maxf(1.0, nc - 1.0)
 		return Color(_hair_col(p, 1.0, t, gloss), _cap_alpha(p, 1.0)))
+	var tex := String(_hs("tx", ["str", "wavy", "curl", "coil"][int(f["texture"])]))
 	_cap_texture(rng, tex, hair)
 	var wr := RandomNumberGenerator.new()
 	wr.seed = int(f["texture_seed"]) + 31 # gerador próprio: não mexe nos sorteios das outras peças
 	_hairline_wisps(wr, tex, hair)
-	_front_hair_pieces(rng, hair, gloss)
-
-
-## Peças da frente (franja, mechas, topete…), silhueta espetada/crista e brilho da careca rala.
-func _front_hair_pieces(rng: RandomNumberGenerator, hair: Color, gloss: float) -> void:
-	var f := _f
 	_front_piece(rng, String(_hs("fr", "")), hair, gloss)
 	_front_piece(rng, String(_hs("fr2", "")), hair, gloss)
 	# Silhueta espetada / crista
@@ -4145,10 +3273,6 @@ func _tuft(base: Vector2, tip: Vector2, half_w: float, bend: float, col: Color) 
 		right.append(_cl(c + nrm * hw))
 		mid.append(_cl(c))
 	var lit := 1.0 if nrm.dot(Vector2(_light.x, _light.y)) < 0.0 else -1.0
-	var bright := clampf(col.get_luminance() / maxf(0.02, (_f["hair"] as Color).get_luminance()), 0.6, 1.15)
-	if _hair_piece(left, right, 2, func(t: float, _ww: float) -> float:
-			return 1.0 - 0.7 * t * t, bright):
-		return
 	var pts := PackedVector2Array(left)
 	var cols := PackedColorArray()
 	# A ponta afina também na opacidade: mecha de verdade termina em fios, não numa quina
@@ -4171,7 +3295,7 @@ func _tuft(base: Vector2, tip: Vector2, half_w: float, bend: float, col: Color) 
 ## Sombra suave que o cabelo projeta na testa e nas têmporas (integra a calota ao rosto).
 func _hair_shadow() -> void:
 	var n := _cap_in.size()
-	if n < 3 or use_skin_shader:
+	if n < 3:
 		return
 	var thin: bool = _hs("tx", "") == "dots"
 	var strength := (0.07 if thin else 0.17) * float(_hs("op", 1.0))
@@ -4196,12 +3320,9 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 	var k := clampf(_det * _det, 0.1, 2.0)
 	var flow := int(_hs("fl", 0))
 	var part := 0.5 + float(f["part_side"]) * 0.19
-	var sh := use_skin_shader and _hair_mat != null
-	if sh and tex == "dots":
-		return
 	match tex:
 		"str", "wavy":
-			var n := int(200 * k * (0.22 if sh else 1.0))
+			var n := int(200 * k)
 			w = maxf(0.6, _s * 0.0026)
 			var hl_on: bool = bool(f.get("highlights", false))
 			var hl_col := Color("#D8B46A").lerp(hair, 0.35)
@@ -4237,8 +3358,6 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 				if not ok:
 					continue
 				var roll := rng.randf()
-				if sh and (streak or roll < 0.55):
-					continue
 				var c: Color
 				if streak:
 					c = hl_col.lerp(hair, rng.randf_range(0.0, 0.3))
@@ -4282,7 +3401,7 @@ func _cap_texture(rng: RandomNumberGenerator, tex: String, hair: Color) -> void:
 					_r_arc(_cl(p), r * 0.3, a0, a0 + PI, 5, Color(hair.darkened(0.35), 0.4), w, true)
 			_outline_bumps(rng, hair, 0.075 if not big else 0.095, 26)
 		"coil":
-			for i in int(420 * k * (0.15 if sh else 1.0)):
+			for i in int(420 * k):
 				var ww := rng.randf_range(0.05, 1.0)
 				var tt := rng.randf()
 				var p := _cap_pt(tt, ww)
@@ -4441,14 +3560,11 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 			for p in pts:
 				clean.append(_cl(p))
 			var cen := _px(-sx * 0.1, hl0 - 0.12 - hh * 0.4)
-			var q_sh := _hair_radial(cen, clean, _rings(5), func(t: float, i: int) -> float:
-				return 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if i < 15 else 0.0), hl0, hh + 0.2)
-			if not q_sh:
-				_radial(cen, clean, _rings(5), func(p: Vector2, t: float, _i: int) -> Color:
-					var q := _uv(p)
-					var up := clampf((hl0 - q.y) / (hh + 0.2), 0.0, 1.0)
-					var c := _hair_col(p, 0.35 + up * 0.6, float(_i) / 32.0, gloss + 0.25)
-					return Color(c, 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if _i < 15 else 0.0)))
+			_radial(cen, clean, _rings(5), func(p: Vector2, t: float, _i: int) -> Color:
+				var q := _uv(p)
+				var up := clampf((hl0 - q.y) / (hh + 0.2), 0.0, 1.0)
+				var c := _hair_col(p, 0.35 + up * 0.6, float(_i) / 32.0, gloss + 0.25)
+				return Color(c, 1.0 - smoothstep(0.7, 1.0, t) * (1.0 if _i < 15 else 0.0)))
 			_strands_in_poly(rng, clean, hair, Vector2(-sx * 0.25, -1.0), 30 if big else 22)
 		"fringe", "crop":
 			# Mechas que caem sobre a testa: duas fileiras de tufos curvos que se sobrepõem (a de trás
@@ -4488,14 +3604,11 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 					var thick := lerpf(0.3, 0.06, pow(t, 1.4)) * (0.8 if braid else 1.0)
 					inner.append(_px(sx * ix, v))
 					outer.append(_px(sx * (ix + thick + 0.06 * sin(PI * t)), v + 0.03 * t))
-				var lk_sh := _hair_piece(inner, outer, 4, func(t: float, ww: float) -> float:
-					return smoothstep(0.0, 0.3, ww) * (1.0 - smoothstep(0.8, 1.0, t) * 0.75) * smoothstep(0.0, 0.1, t))
-				if not lk_sh:
-					_strip(inner, outer, 4, func(p: Vector2, t: float, ww: float) -> Color:
-						var c := _hair_col(p, 0.55 + ww * 0.3, t, gloss)
-						# Borda do lado do rosto e pontas desfiadas: nada de painel recortado
-						var a := smoothstep(0.0, 0.3, ww) * (1.0 - smoothstep(0.8, 1.0, t) * 0.75) * smoothstep(0.0, 0.1, t)
-						return Color(c.darkened(0.08 * t), a))
+				_strip(inner, outer, 4, func(p: Vector2, t: float, ww: float) -> Color:
+					var c := _hair_col(p, 0.55 + ww * 0.3, t, gloss)
+					# Borda do lado do rosto e pontas desfiadas: nada de painel recortado
+					var a := smoothstep(0.0, 0.3, ww) * (1.0 - smoothstep(0.8, 1.0, t) * 0.75) * smoothstep(0.0, 0.1, t)
+					return Color(c.darkened(0.08 * t), a))
 				var n := int(18 * clampf(_det, 0.4, 1.6))
 				for j in n:
 					var ww := rng.randf()
@@ -4660,13 +3773,10 @@ func _swoop(rng: RandomNumberGenerator, hair: Color, gloss: float, hl: float, lo
 	for k in range(3, n - 2):
 		sh.append(_cl(lower[k] + Vector2(0, _fh * 0.03)))
 	_r_polyline(sh, Color(0, 0, 0, 0.1), _fh * 0.045, true)
-	var in_sh := _hair_piece(lower, upper, 4, func(t: float, _ww: float) -> float:
-		return smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.88, 1.0, t) * 0.5))
-	if not in_sh:
-		_strip(lower, upper, 4, func(p: Vector2, t: float, ww: float) -> Color:
-			var c := _hair_col(p, 0.85 + ww * 0.15, t, gloss + 0.3).lightened(0.06)
-			return Color(c.darkened(0.08 * (1.0 - ww)), smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.88, 1.0, t) * 0.5)))
-	for j in int(24 * clampf(_det, 0.3, 1.6) * (0.35 if in_sh else 1.0)):
+	_strip(lower, upper, 4, func(p: Vector2, t: float, ww: float) -> Color:
+		var c := _hair_col(p, 0.85 + ww * 0.15, t, gloss + 0.3).lightened(0.06)
+		return Color(c.darkened(0.08 * (1.0 - ww)), smoothstep(0.0, 0.15, t) * (1.0 - smoothstep(0.88, 1.0, t) * 0.5)))
+	for j in int(24 * clampf(_det, 0.3, 1.6)):
 		var ww := rng.randf_range(0.08, 0.92)
 		var pts := PackedVector2Array()
 		var end := n - rng.randi_range(0, 4)
@@ -4850,129 +3960,92 @@ func _accessories() -> void:
 # Desenho gravado
 # ---------------------------------------------------------------------------
 
-# Cada comando gravado é [camada, operação, argumentos...]: o próprio nó desenha com draw_*, as
-# camadas filhas (pele, por cima) recebem o mesmo comando pelo RenderingServer.
-
 func _r_line(a: Vector2, b: Vector2, col: Color, w: float = -1.0, aa: bool = false) -> void:
-	_op_line(_target, a, b, col, w, aa)
+	draw_line(a, b, col, w, aa)
 	if _recording:
-		_rec.append([_target, 0, a, b, col, w, aa])
+		_rec.append([0, a, b, col, w, aa])
 
 
 func _r_polyline(pts: PackedVector2Array, col: Color, w: float = -1.0, aa: bool = false) -> void:
-	_op_polyline(_target, pts, PackedColorArray([col]), w, aa)
+	draw_polyline(pts, col, w, aa)
 	if _recording:
-		_rec.append([_target, 1, pts, PackedColorArray([col]), w, aa])
+		_rec.append([1, pts, col, w, aa])
 
 
 func _r_polyline_colors(pts: PackedVector2Array, cols: PackedColorArray, w: float = -1.0, aa: bool = false) -> void:
-	_op_polyline(_target, pts, cols, w, aa)
+	draw_polyline_colors(pts, cols, w, aa)
 	if _recording:
-		_rec.append([_target, 1, pts, cols, w, aa])
+		_rec.append([2, pts, cols, w, aa])
 
 
 func _r_circle(p: Vector2, r: float, col: Color) -> void:
-	_op_circle(_target, p, r, col)
+	draw_circle(p, r, col, true, -1.0, true)
 	if _recording:
-		_rec.append([_target, 3, p, r, col])
+		_rec.append([3, p, r, col])
 
 
 func _r_arc(c: Vector2, r: float, a0: float, a1: float, n: int, col: Color, w: float = -1.0, aa: bool = false) -> void:
-	var pts := PackedVector2Array()
-	for i in n + 1:
-		var a := lerpf(a0, a1, float(i) / n)
-		pts.append(c + Vector2(cos(a), sin(a)) * r)
-	_r_polyline(pts, col, w, aa)
+	draw_arc(c, r, a0, a1, n, col, w, aa)
+	if _recording:
+		_rec.append([4, c, r, a0, a1, n, col, w, aa])
 
 
 func _r_polygon(pts: PackedVector2Array, cols: PackedColorArray) -> void:
-	_op_polygon(_target, pts, cols, PackedVector2Array(), null)
+	draw_polygon(pts, cols)
 	if _recording:
-		_rec.append([_target, 5, pts, cols, PackedVector2Array(), null])
+		_rec.append([5, pts, cols])
 
 
 func _r_colored_polygon(pts: PackedVector2Array, col: Color, uvs: PackedVector2Array = PackedVector2Array(), tex: Texture2D = null) -> void:
-	_op_polygon(_target, pts, PackedColorArray([col]), uvs, tex)
+	draw_colored_polygon(pts, col, uvs, tex)
 	if _recording:
-		_rec.append([_target, 5, pts, PackedColorArray([col]), uvs, tex])
+		_rec.append([6, pts, col, uvs, tex])
 
 
 func _r_string(font: Font, pos: Vector2, text: String, fs: int, col: Color) -> void:
-	font.draw_string(_item(_target), pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+	draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 	if _recording:
-		_rec.append([_target, 8, font, pos, text, fs, col])
+		_rec.append([8, font, pos, text, fs, col])
 
 
 func _r_tri(idx: PackedInt32Array, pts: PackedVector2Array, cols: PackedColorArray) -> void:
-	RenderingServer.canvas_item_add_triangle_array(_item(_target), idx, pts, cols)
+	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols)
 	if _recording:
-		_rec.append([_target, 7, idx, pts, cols, PackedVector2Array(), null])
+		_rec.append([7, idx, pts, cols])
 
 
 func _r_tex_tri(idx: PackedInt32Array, pts: PackedVector2Array, cols: PackedColorArray, uvs: PackedVector2Array, tex: Texture2D) -> void:
-	RenderingServer.canvas_item_add_triangle_array(_item(_target), idx, pts, cols, uvs, PackedInt32Array(), PackedFloat32Array(), tex.get_rid() if tex != null else RID())
+	RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), idx, pts, cols, uvs, PackedInt32Array(), PackedFloat32Array(), tex.get_rid())
 	if _recording:
-		_rec.append([_target, 7, idx, pts, cols, uvs, tex])
-
-
-func _op_line(t: int, a: Vector2, b: Vector2, col: Color, w: float, aa: bool) -> void:
-	if t == T_SELF:
-		draw_line(a, b, col, w, aa)
-	else:
-		RenderingServer.canvas_item_add_line(_item(t), a, b, col, w, aa)
-
-
-func _op_polyline(t: int, pts: PackedVector2Array, cols: PackedColorArray, w: float, aa: bool) -> void:
-	if t == T_SELF:
-		if cols.size() == 1:
-			draw_polyline(pts, cols[0], w, aa)
-		else:
-			draw_polyline_colors(pts, cols, w, aa)
-	else:
-		RenderingServer.canvas_item_add_polyline(_item(t), pts, cols, w, aa)
-
-
-func _op_circle(t: int, p: Vector2, r: float, col: Color) -> void:
-	if t == T_SELF:
-		draw_circle(p, r, col, true, -1.0, true)
-	else:
-		RenderingServer.canvas_item_add_circle(_item(t), p, r, col, true)
-
-
-func _op_polygon(t: int, pts: PackedVector2Array, cols: PackedColorArray, uvs: PackedVector2Array, tex: Texture2D) -> void:
-	if t == T_SELF:
-		if cols.size() == 1:
-			draw_colored_polygon(pts, cols[0], uvs, tex)
-		else:
-			draw_polygon(pts, cols, uvs, tex)
-	else:
-		RenderingServer.canvas_item_add_polygon(_item(t), pts, cols, uvs, tex.get_rid() if tex != null else RID())
+		_rec.append([9, idx, pts, cols, uvs, tex])
 
 
 func _replay(cmds: Array) -> void:
+	var ci := get_canvas_item()
 	for c: Array in cmds:
-		var t: int = c[0]
-		match int(c[1]):
+		match int(c[0]):
 			0:
-				_op_line(t, c[2], c[3], c[4], c[5], c[6])
+				draw_line(c[1], c[2], c[3], c[4], c[5])
 			1:
-				_op_polyline(t, c[2], c[3], c[4], c[5])
+				draw_polyline(c[1], c[2], c[3], c[4])
+			2:
+				draw_polyline_colors(c[1], c[2], c[3], c[4])
 			3:
-				_op_circle(t, c[2], c[3], c[4])
+				draw_circle(c[1], c[2], c[3], true, -1.0, true)
+			4:
+				draw_arc(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8])
 			5:
-				_op_polygon(t, c[2], c[3], c[4], c[5])
+				draw_polygon(c[1], c[2])
+			6:
+				draw_colored_polygon(c[1], c[2], c[3], c[4])
 			7:
-				var tex: Texture2D = c[6]
-				var uvs: PackedVector2Array = c[5]
-				if tex != null:
-					RenderingServer.canvas_item_add_triangle_array(_item(t), c[2], c[3], c[4], uvs, PackedInt32Array(), PackedFloat32Array(), tex.get_rid())
-				elif not uvs.is_empty():
-					RenderingServer.canvas_item_add_triangle_array(_item(t), c[2], c[3], c[4], uvs)
-				else:
-					RenderingServer.canvas_item_add_triangle_array(_item(t), c[2], c[3], c[4])
+				RenderingServer.canvas_item_add_triangle_array(ci, c[1], c[2], c[3])
 			8:
-				var font: Font = c[2]
-				font.draw_string(_item(t), c[3], c[4], HORIZONTAL_ALIGNMENT_LEFT, -1, c[5], c[6])
+				draw_string(c[1], c[2], c[3], HORIZONTAL_ALIGNMENT_LEFT, -1, c[4], c[5])
+			9:
+				var tex: Texture2D = c[5]
+				if tex != null:
+					RenderingServer.canvas_item_add_triangle_array(ci, c[1], c[2], c[3], c[4], PackedInt32Array(), PackedFloat32Array(), tex.get_rid())
 
 
 # ---------------------------------------------------------------------------

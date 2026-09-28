@@ -101,7 +101,6 @@ func _home(c: VBoxContainer) -> void:
 	if has_career():
 		items.append(["star", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
 	items.append(["list", "Mods", "Instalar, ligar e criar mods; exportar suas personalizações", func(): _go("mods")])
-	items.append(["palette", "Laboratório de rostos", "Gerador de rostos: sementes, DNA facial, ajustes finos e grade de 100", func(): UIManager.push("face_lab")])
 	# Início do editor: um ladrilho grande por área (como o hub de criação de um jogo de esporte).
 	max_content_width = 1500
 	c.add_child(UIKit.eyebrow("O que você quer editar?"))
