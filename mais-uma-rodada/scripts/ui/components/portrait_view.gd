@@ -72,6 +72,11 @@ var look: Dictionary = {}:
 		look = v
 		_dirty = true
 		_invalidate()
+## Usa o retrato 3D realista quando disponível (Face3DStudio); desligue para forçar o desenho 2D.
+var use_3d := false:
+	set(v):
+		use_3d = v
+		queue_redraw()
 var photo: Texture2D = null:
 	set(v):
 		photo = v
@@ -350,6 +355,12 @@ func _draw_portrait() -> void:
 	if photo != null:
 		_draw_photo(c, s)
 		return
+	# Rosto 3D realista (estúdio): enquanto a foto não fica pronta, segue o retrato 2D
+	if use_3d and not Engine.is_editor_hint():
+		var t3 := Face3DStudio.request(_spec3d(), self)
+		if t3 != null:
+			_draw_3d(c, s, t3)
+			return
 	if _dirty or _f.is_empty():
 		_f = FaceGen.features(face_seed, eth, age, look)
 		_dirty = false
@@ -993,6 +1004,35 @@ func _contour_k() -> int:
 
 func _rings(n: int) -> int:
 	return maxi(3, int(round(n * clampf(_det, 0.4, 1.2))))
+
+
+func _spec3d() -> Dictionary:
+	return {"seed": face_seed, "eth": eth, "age": age, "look": look, "kit": {} if suit else kit, "crest": {} if suit else crest,
+		"suit": suit, "shirt": shirt_color, "trim": trim_color}
+
+
+func _draw_3d(c: Vector2, s: float, tex: Texture2D) -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	var r := Rect2(c - Vector2(s, s) * 0.5, Vector2(s, s))
+	if cutout:
+		draw_texture_rect(tex, r, false)
+		return
+	# fundo redondo com a cor do clube e luz suave vinda de cima
+	var n := 48
+	var pts := _ellipse(c, s * 0.5, s * 0.5, n)
+	var cols := PackedColorArray()
+	for p in pts:
+		var d := (p - c) / (s * 0.5)
+		var lum := 0.92 + 0.12 * (-d.y) + 0.05 * (-d.x)
+		cols.append(Color(minf(bg_color.r * lum, 1.0), minf(bg_color.g * lum, 1.0), minf(bg_color.b * lum, 1.0)))
+	draw_polygon(pts, cols)
+	var glow := Color(1, 1, 1, 0.06)
+	draw_circle(c + Vector2(-s * 0.08, -s * 0.12), s * 0.3, glow)
+	var uvs := PackedVector2Array()
+	for p in pts:
+		uvs.append((p - r.position) / s)
+	draw_colored_polygon(pts, Color.WHITE, uvs, tex)
+	draw_arc(c, s * 0.5 - 1.0, 0.0, TAU, n, Color(bg_color.lightened(0.25), 0.6), maxf(1.0, s * 0.012), true)
 
 
 func _draw_photo(c: Vector2, s: float) -> void:

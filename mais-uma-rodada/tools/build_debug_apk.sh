@@ -26,8 +26,8 @@ mkdir -p "$WORK/proj"
 sed -i 's#^enabled=PackedStringArray("res://addons/GodotGooglePlayBilling/plugin.cfg")#enabled=PackedStringArray()#' "$WORK/proj/project.godot"
 sed -i 's/^gradle_build\/use_gradle_build=true/gradle_build\/use_gradle_build=false/; s/^package\/signed=true/package\/signed=false/; s/^gradle_build\/export_format=1/gradle_build\/export_format=0/' "$WORK/proj/export_presets.cfg"
 godot --headless --path "$WORK/proj" --import >/dev/null 2>&1 || true
-godot --headless --path "$WORK/proj" --export-debug "Android" "$WORK/unsigned.apk"
+godot --headless --path "$WORK/proj" "--export-${MODE:-debug}" "Android" "$WORK/unsigned.apk"
 java -jar "$SIGNER" -a "$WORK/unsigned.apk" -o "$WORK/signed" --allowResign
 mkdir -p "$(dirname "$OUT")"
-cp "$WORK"/signed/*-aligned-debugSigned.apk "$OUT"
+cp "$WORK"/signed/*-aligned-*.apk "$OUT"
 echo "APK: $OUT"
