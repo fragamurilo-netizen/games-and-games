@@ -204,6 +204,7 @@ static func load_world(slot: int) -> GameWorld:
 				continue
 			ClubGenerator.upgrade_crests(w3)
 			KitDesign.ensure_all(w3)
+			DropIns.apply_world(w3)
 			return w3
 		var f := FileAccess.open_compressed(path, FileAccess.READ, FileAccess.COMPRESSION_ZSTD)
 		if f == null:
@@ -224,6 +225,7 @@ static func load_world(slot: int) -> GameWorld:
 		ClubGenerator.upgrade_crests(w)
 		ClubGenerator.upgrade_kits(w) # saves de antes dos uniformes reais
 		KitDesign.ensure_all(w) # saves antigos: reservas da cor do titular
+		DropIns.apply_world(w)
 		return w
 	return null
 

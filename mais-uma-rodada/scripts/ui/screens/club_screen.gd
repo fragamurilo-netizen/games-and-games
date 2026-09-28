@@ -142,7 +142,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	var kc := UIKit.card("Card", 12)
 	kc.add_child(UIKit.section_header(club.stadium))
 	# Foto e ficha do estádio, quando os dados (mods/licenciamento) ou o Editor trazem.
-	var photo := CustomAssets.texture(String(club.venue.get("photo", "")))
+	var photo := DropIns.venue_photo(club)
 	if photo != null:
 		var tr := TextureRect.new()
 		tr.texture = photo

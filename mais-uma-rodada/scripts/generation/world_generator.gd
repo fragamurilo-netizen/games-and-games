@@ -45,6 +45,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	SeasonManager.setup_first_season(w)
 	SponsorManager.ensure_all(w) # patrocinadores e fornecedoras da IA, por país
 	LicensedData.apply_sponsors(w) # patrocinadores fixos dos dados/mods (campo "sponsors" do clube)
+	DropIns.apply_world(w) # escudos e camisas soltos nas pastas dos pacotes
 	if world_type == "padrao":
 		WorldEvents.seed_real_situation(w) # donos, SAFs e crises que já existem no começo do jogo
 	for p: Player in w.players.values():

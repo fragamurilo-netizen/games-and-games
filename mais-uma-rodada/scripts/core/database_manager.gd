@@ -64,6 +64,7 @@ static func load_all() -> void:
 	_prepare_cups()
 	_loaded = true
 	Overrides.apply_db()
+	DropIns.ensure() # índice das imagens soltas pronto antes das threads de geração
 
 
 ## Relê todos os dados (depois de ligar ou desligar um mod). Só sem carreira aberta.
@@ -71,7 +72,8 @@ static func reload() -> void:
 	_cache.clear()
 	_kits.clear()
 	_club_by_key.clear()
-	CustomAssets.clear_cache()
+	Mods.clear_pack_cache()
+	DropIns.rescan()
 	_formations.clear()
 	_formation_order.clear()
 	_loaded = false
