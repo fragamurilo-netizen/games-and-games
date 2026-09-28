@@ -1,0 +1,49 @@
+name: Mobile fixes regression and APK
+on:
+  push:
+    branches: [codex/mobile-performance-0.4.1-20260928]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mobile-fixes-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import, regression tests, and Android export
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p validation mais-uma-rodada/build
+          git rev-parse HEAD > validation/source-commit.txt
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 > /workspace/validation/dependencies.log
+              godot --version | tee /workspace/validation/engine.txt
+              timeout 300s godot --headless --path . --import 2>&1 | tee /workspace/validation/import.log
+              timeout 180s godot --headless --path . --script res://tests/mobile_regression.gd 2>&1 | tee /workspace/validation/mobile-tests.log
+              grep -q MOBILE_REGRESSION_OK /workspace/validation/mobile-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|MOBILE_FAIL" /workspace/validation/mobile-tests.log; then exit 1; fi
+              godot --headless --path . --export-debug "Android arm64" build/MaisUmaRodada-0.4.0-mobile-fixes-candidate.apk 2>&1 | tee /workspace/validation/export.log
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-0.4.0-mobile-fixes-candidate.apk
+          sha256sum mais-uma-rodada/build/MaisUmaRodada-0.4.0-mobile-fixes-candidate.apk > validation/apk-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-validation-${{ github.sha }}
+          path: validation/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: MaisUmaRodada-mobile-fixes-candidate
+          path: mais-uma-rodada/build/MaisUmaRodada-0.4.0-mobile-fixes-candidate.apk
+          if-no-files-found: error
+          retention-days: 14
