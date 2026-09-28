@@ -86,6 +86,10 @@ var history: Array = []
 var titles: Dictionary = {}
 ## Elencos encerrados (clube do usuário): {"ano": [{id, n, pos, sh, a, g, as, r, o}]}
 var squad_archive: Dictionary = {}
+## Principais jogadores de cada temporada (todos os clubes; ver ClubRecords): {"ano": [[id, nome, pos, j, g, a, nota×100, ovr]]}
+var xi_hist: Dictionary = {}
+## Transferências antigas (as que já saíram do world.transfer_log), em Transfer.to_dict()
+var tr_hist: Array = []
 ## Ranking mundial: pontos das últimas temporadas (mais recente no fim) e posição ao fim da anterior.
 var rank_hist: Array = []
 var rank_prev: int = 0
@@ -237,6 +241,7 @@ func to_dict() -> Dictionary:
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
 		"rk": rank_hist, "rkp": rank_prev, "sqa": squad_archive,
+		"xh": xi_hist, "trh": tr_hist,
 	}
 
 
@@ -306,4 +311,6 @@ static func from_dict(d: Dictionary) -> Club:
 	c.rank_hist = Array(d.get("rk", []))
 	c.rank_prev = int(d.get("rkp", 0))
 	c.squad_archive = d.get("sqa", {})
+	c.xi_hist = d.get("xh", {})
+	c.tr_hist = Array(d.get("trh", []))
 	return c

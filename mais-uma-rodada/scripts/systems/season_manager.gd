@@ -911,6 +911,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	CoachStories.on_season_end(world, moves, hist_leagues, hist_cups) # arcos, despedidas e o mercado de técnicos
 	if world.has_user():
 		summary["user"]["prestige"] = ManagerFeats.on_season_end(world, summary["user"])
+	ClubRecords.snapshot_season(world) # melhor 11 do ano e de sempre, em todos os clubes
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
 	if uc != null:
@@ -1028,6 +1029,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.season = build_season(world)
 	NationalTeamManager.start_season(world)
 	YouthManager.build_league(world)
+	ClubRecords.archive_transfers(world, world.year - 1)
 	world.transfer_log = world.transfer_log.filter(func(t): return t.year >= world.year - 1)
 	world.offers.clear()
 	world.stats.erase("neg")

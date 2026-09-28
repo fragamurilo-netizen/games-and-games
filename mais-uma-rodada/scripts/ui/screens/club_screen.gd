@@ -78,12 +78,18 @@ func refresh() -> void:
 			for card in TeamStatsScreen.cards(w, club):
 				cards.append(card)
 		"history":
+			var hid := club.id
+			cards.append(UIKit.menu_group([
+				UIKit.menu_row("star", "Melhor 11 de sempre e ano a ano", "Os maiores nomes do clube em cada temporada", func(): UIManager.push("club_records", {"id": hid, "tab": "xi"})),
+				UIKit.menu_row("swap", "Histórico de transferências", "Chegadas, saídas, gastos e maiores negócios", func(): UIManager.push("club_records", {"id": hid, "tab": "transfers"})),
+			]))
 			cards.append(_history_card(w, club))
 			var idols := _idols_card(w, club)
 			if idols != null:
 				cards.append(idols)
 		"career":
 			cards.append(_manager_card(w))
+			cards.append(UIKit.menu_group([UIKit.menu_row("swap", "Minhas transferências", "Tudo o que você comprou e vendeu em todos os clubes", func(): UIManager.push("club_records", {"mode": "manager"}))]))
 			cards.append(_career_card(w))
 	max_content_width = 1800.0
 	UIKit.columns(box, cards, content_width(), 2, 1 if _tab == "overview" else 0)
@@ -161,6 +167,8 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		rows.append(UIKit.menu_row("shirt", "Uniformes e patrocínios", "Modelos, cores e contratos de patrocínio", func(): UIManager.push("kit")))
 	if not club.kit_history.is_empty():
 		rows.append(UIKit.menu_row("palette", "Uniformes por temporada", "Todas as camisas do clube, ano a ano", func(): UIManager.push("kit_history", {"id": cid})))
+	rows.append(UIKit.menu_row("star", "Melhor 11 de sempre e ano a ano", "Os maiores nomes do clube em cada temporada", func(): UIManager.push("club_records", {"id": cid, "tab": "xi"})))
+	rows.append(UIKit.menu_row("swap", "Histórico de transferências", "Chegadas, saídas, gastos e maiores negócios", func(): UIManager.push("club_records", {"id": cid, "tab": "transfers"})))
 	rows.append(UIKit.menu_row("clock", "Elencos anteriores", "Quem vestiu a camisa em cada temporada", func(): UIManager.push("past_squads", {"id": cid})))
 	rows.append(UIKit.menu_row("up", "Revelados pela base", "Crias da casa e onde estão hoje", func(): UIManager.push("graduates", {"id": cid})))
 	if _own():

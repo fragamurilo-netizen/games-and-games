@@ -515,6 +515,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	var kind := Transfer.KIND_BUY if seller != null else Transfer.KIND_FREE
 	var t := Transfer.make(world.year, world.current_day(), p, seller_id, buyer.id, fee, kind)
 	world.transfer_log.append(t)
+	ClubRecords.on_transfer(world, t)
 	CoachIdentity.on_transfer(world, p, buyer, seller, fee)
 	FootballMemory.on_transfer(world, t)
 	world.stat_add("transfers")
@@ -668,6 +669,7 @@ static func release(world: GameWorld, p: Player) -> int:
 	_close_spell(world, p)
 	var t := Transfer.make(world.year, world.current_day(), p, club.id, -1, 0, Transfer.KIND_RELEASE)
 	world.transfer_log.append(t)
+	ClubRecords.on_transfer(world, t)
 	p.club_id = -1
 	p.wage = 0
 	p.transfer_listed = false
