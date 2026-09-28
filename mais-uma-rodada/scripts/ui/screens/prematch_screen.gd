@@ -14,6 +14,7 @@ var _pos_edit := false
 func _init() -> void:
 	show_nav = false
 	screen_title = "Escalação"
+	max_content_width = 1600.0
 
 
 func setup(p: Dictionary) -> void:
@@ -43,11 +44,23 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	# Tela larga (tablet deitado): campo e banco à esquerda, adversário e tática à direita
+	var left := c
+	var right := c
+	if content_width() >= 1250.0:
+		var split := UIKit.hbox(UITokens.S4)
+		var gap := c.get_theme_constant(&"separation")
+		left = UIKit.vbox(gap)
+		right = UIKit.vbox(gap)
+		for col: VBoxContainer in [left, right]:
+			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			split.add_child(col)
+		c.add_child(split)
 	if f != null and not _edit:
-		c.add_child(_opponent_card(w, f))
-		c.add_child(_assistant_card(w, f))
+		right.add_child(_opponent_card(w, f))
+		right.add_child(_assistant_card(w, f))
 	for n in _notes:
-		c.add_child(UIKit.colored(n, UIColors.ORANGE, "Small"))
+		left.add_child(UIKit.colored(n, UIColors.ORANGE, "Small"))
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "lineup"
@@ -56,17 +69,17 @@ func refresh() -> void:
 	_pitch.chip_color = club.primary_color()
 	_update_chips()
 	_pitch.slot_tapped.connect(_on_slot)
-	c.add_child(_pitch)
+	left.add_child(_pitch)
 	var strength := ClubAI.lineup_strength(w, sheet.formation, sheet.starters) / 11.0
 	var hint := UIKit.hbox(8)
 	hint.add_child(UIKit.spacer())
 	hint.add_child(UIKit.label("Força do time: %d" % int(round(strength)), "H3"))
-	c.add_child(hint)
+	left.add_child(hint)
 	var rule := SquadRules.describe(club)
 	if rule != "":
 		var used := SquadRules.count(w, club, sheet.starters + sheet.bench)
 		var lim := int(SquadRules.limit(club)["max"])
-		c.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
+		left.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
 	var tools := UIKit.hbox(8)
 	var auto := UIKit.button("Escalação automática", "GhostButton", func():
 		club.sheet = ClubAI.auto_sheet(w, club, sheet.formation)
@@ -84,36 +97,36 @@ func refresh() -> void:
 		refresh(), "heart")
 	rest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(rest)
-	c.add_child(tools)
+	left.add_child(tools)
 	var pe := CheckButton.new()
 	pe.text = "Editar posições no campo"
 	pe.button_pressed = _pos_edit
 	pe.toggled.connect(func(v):
 		_pos_edit = v
 		refresh())
-	c.add_child(pe)
+	left.add_child(pe)
 	# Formação
 	var base := DatabaseManager.formation_base(sheet.formation)
 	var custom := sheet.formation.begins_with("C:")
-	c.add_child(UIKit.section("Formação" + (" · variação do %s" % base if custom else "")))
+	right.add_child(UIKit.section("Formação" + (" · variação do %s" % base if custom else "")))
 	var gf := ButtonGroup.new()
 	var fl := UIKit.flow(8)
 	for fname in DatabaseManager.formation_names():
 		var fn: String = fname
 		fl.add_child(UIKit.chip(fn + ("*" if custom and fn == base else ""), fn == base, gf, func(): _set_formation(fn)))
-	c.add_child(fl)
+	right.add_child(fl)
 	if custom:
 		var ov := DatabaseManager.formation_overrides(sheet.formation)
 		var base_slots: Array = DatabaseManager.formation(base)["slots"]
 		var changes: Array = []
 		for k in ov:
 			changes.append("%s → %s" % [Pos.code(int(base_slots[int(k)]["pos"])), Pos.code(DatabaseManager.POS_BY_CODE[ov[k]])])
-		c.add_child(UIKit.label("Mudanças: %s" % ", ".join(PackedStringArray(changes)), "Small", true))
-		c.add_child(UIKit.button("Voltar ao %s original" % base, "GhostButton", func(): _set_formation(base), "back"))
-	c.add_child(_fam_row("Entrosamento com o %s" % base, TacticsManager.formation_fam(club, sheet.formation)))
+		right.add_child(UIKit.label("Mudanças: %s" % ", ".join(PackedStringArray(changes)), "Small", true))
+		right.add_child(UIKit.button("Voltar ao %s original" % base, "GhostButton", func(): _set_formation(base), "back"))
+	right.add_child(_fam_row("Entrosamento com o %s" % base, TacticsManager.formation_fam(club, sheet.formation)))
 	# Mentalidade
 	var tac := DatabaseManager.tactics()
-	c.add_child(UIKit.section("Mentalidade"))
+	right.add_child(UIKit.section("Mentalidade"))
 	var gm := ButtonGroup.new()
 	var ml := UIKit.flow(8)
 	for i in 5:
@@ -121,9 +134,9 @@ func refresh() -> void:
 		ml.add_child(UIKit.chip(String(tac["mentalities"][i]["name"]), i == sheet.mentality, gm, func():
 			sheet.mentality = idx
 			refresh()))
-	c.add_child(ml)
+	right.add_child(ml)
 	# Estilo
-	c.add_child(UIKit.section("Estilo de jogo"))
+	right.add_child(UIKit.section("Estilo de jogo"))
 	var gs := ButtonGroup.new()
 	var sl := UIKit.flow(8)
 	for i in 6:
@@ -131,45 +144,45 @@ func refresh() -> void:
 		sl.add_child(UIKit.chip(String(tac["styles"][i]["short"]), i == sheet.style, gs, func():
 			sheet.style = idx
 			refresh()))
-	c.add_child(sl)
+	right.add_child(sl)
 	var st: Dictionary = tac["styles"][sheet.style]
-	c.add_child(_style_fit_label(w, sheet, st))
-	c.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
+	right.add_child(_style_fit_label(w, sheet, st))
+	right.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
 	# Ajustes finos
 	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes: intensidade, linha, pressão", "GhostButton", func():
 		_extras_open = not _extras_open
 		refresh())
 	more.text = ("Esconder" if _extras_open else "Mostrar") + " ajustes: intensidade, linha, pressão"
-	c.add_child(more)
+	right.add_child(more)
 	if _extras_open:
-		_segment(c, "Intensidade", tac["intensity"], sheet.intensity, func(i): sheet.intensity = i)
-		_segment(c, "Linha defensiva", tac["line"], sheet.line, func(i): sheet.line = i)
-		_segment(c, "Pressão", tac["pressing"], sheet.pressing, func(i): sheet.pressing = i)
+		_segment(right, "Intensidade", tac["intensity"], sheet.intensity, func(i): sheet.intensity = i)
+		_segment(right, "Linha defensiva", tac["line"], sheet.line, func(i): sheet.line = i)
+		_segment(right, "Pressão", tac["pressing"], sheet.pressing, func(i): sheet.pressing = i)
 		var wopts: Array = []
 		for wi in TeamSheet.WIDTH_NAMES.size():
 			wopts.append({"name": TeamSheet.WIDTH_NAMES[wi]})
-		_segment(c, "Largura", wopts, sheet.width, func(i): sheet.width = i)
+		_segment(right, "Largura", wopts, sheet.width, func(i): sheet.width = i)
 		var auto_subs := CheckButton.new()
 		auto_subs.text = "Assistente faz substituições por cansaço e lesão"
 		auto_subs.button_pressed = sheet.auto_subs
 		auto_subs.toggled.connect(func(v): sheet.auto_subs = v)
-		c.add_child(auto_subs)
-	_deep_section(c, w, sheet)
-	_plan_section(c, sheet)
-	_instructions_section(c, w, sheet)
+		right.add_child(auto_subs)
+	_deep_section(right, w, sheet)
+	_plan_section(right, sheet)
+	_instructions_section(right, w, sheet)
 	# Bola parada
-	c.add_child(UIKit.section("Capitão e bola parada"))
+	right.add_child(UIKit.section("Capitão e bola parada"))
 	for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
-		c.add_child(_taker_row(w, sheet, item[0], item[1]))
-	c.add_child(_shootout_row(w, sheet))
+		right.add_child(_taker_row(w, sheet, item[0], item[1]))
+	right.add_child(_shootout_row(w, sheet))
 	# Banco
-	c.add_child(UIKit.section("Banco de reservas (%d)" % sheet.bench.size()))
+	left.add_child(UIKit.section("Banco de reservas (%d)" % sheet.bench.size()))
 	for i in sheet.bench.size():
 		var p := w.player(sheet.bench[i])
 		if p == null:
 			continue
 		var bi := i
-		c.add_child(PlayerRowView.make(w, p, {"mode": "pick"}, func(): _pick_for_bench(bi)))
+		left.add_child(PlayerRowView.make(w, p, {"mode": "pick"}, func(): _pick_for_bench(bi)))
 	_build_footer(w)
 
 
