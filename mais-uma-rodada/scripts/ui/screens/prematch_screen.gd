@@ -689,7 +689,7 @@ func _build_footer(w: GameWorld) -> void:
 			UIManager.back(), "check"))
 		return
 	var items: Array = []
-	for i in 3:
+	for i in AppSettings.SPEED_ORDER:
 		items.append([str(i), AppSettings.SPEED_NAMES[i]])
 	var row := UIKit.segment(items, str(AppSettings.match_speed), func(key: String):
 		AppSettings.match_speed = int(key)

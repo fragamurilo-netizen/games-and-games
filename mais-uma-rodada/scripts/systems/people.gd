@@ -335,6 +335,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		CoachCareer.fresh_past(world, r, it, club, true)
 		CoachCareer.open_spell(world, it, club, "int")
 		pp["coaches"][club.id] = it
+		ClubDNA.on_coach_change(club) # o interino também é uma troca no banco
 		CoachCareer.log_move(world, club, old, it, reason)
 		_announce_change(world, club, old, it, reason, note)
 		return it

@@ -101,13 +101,32 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not _running:
 		return
+	# A data roda numa thread de trabalho; aqui só se confere se ela acabou.
+	if GameManager.is_simulating():
+		var report = GameManager.sim_step_poll()
+		if report == null:
+			return
+		_after_step(report)
 	if _stop_reason == "":
 		_step()
-	if _stop_reason != "":
+	if _stop_reason != "" and not GameManager.is_simulating():
 		_running = false
+		GameManager.end_batch()
 		_finish()
 
 
+## Fechada no meio (troca de tela): termina a data em curso e grava o que já foi jogado.
+func _exit_tree() -> void:
+	if _running:
+		_running = false
+		GameManager.end_batch()
+
+
+var _offers_before := 0
+var _injured_before := {}
+
+
+## Confere se é hora de parar e, se não, dispara a próxima data.
 func _step() -> void:
 	var w := GameManager.world
 	if GameManager.season_over():
@@ -140,12 +159,19 @@ func _step() -> void:
 		club.sheet = ClubAI.auto_sheet(w, club, club.sheet.formation)
 	else:
 		ClubAI.validate_user_sheet(w, club)
-	var offers_before := TransferManager.pending_offers(w).size()
-	var injured_before := {}
+	_offers_before = TransferManager.pending_offers(w).size()
+	_injured_before = {}
 	for p: Player in w.squad(club):
 		if p.is_injured():
-			injured_before[p.id] = true
-	var report := GameManager.play_instant()
+			_injured_before[p.id] = true
+	GameManager.begin_batch()
+	GameManager.sim_step_start()
+
+
+## Depois de cada data: resultado na lista e as paradas automáticas.
+func _after_step(report: Dictionary) -> void:
+	var w := GameManager.world
+	var club := w.user_club()
 	if report.is_empty():
 		_stop_reason = "Nada a simular."
 		return
@@ -156,14 +182,16 @@ func _step() -> void:
 	_status.text = "%d jogo(s) · %s" % [_results.size(), w.season.date_label(w.season.day, false)]
 	_bar.value = _progress(w)
 	_new_events.append_array(report.get("events", []))
+	if _stop_reason != "":
+		return # "Parar" tocado durante a data
 	if stop_on_events:
 		if not report.get("events", []).is_empty():
 			_stop_reason = "Uma decisão espera por você."
-		elif TransferManager.pending_offers(w).size() > offers_before:
+		elif TransferManager.pending_offers(w).size() > _offers_before:
 			_stop_reason = "Chegou uma proposta por um jogador seu."
 		else:
 			for p: Player in w.squad(club):
-				if p.injury_weeks >= 3 and not injured_before.has(p.id) and p.squad_status <= Player.STATUS_STARTER:
+				if p.injury_weeks >= 3 and not _injured_before.has(p.id) and p.squad_status <= Player.STATUS_STARTER:
 					_stop_reason = "%s se lesionou (%d semanas)." % [p.display_name(), p.injury_weeks]
 					break
 

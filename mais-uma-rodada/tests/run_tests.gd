@@ -1530,7 +1530,10 @@ func _test_squad_events() -> void:
 			for q: Player in squad:
 				q.traits = []
 				q.morale = 70.0
-			var a: Player = squad[3 + opt * 2]
+			# Um dos melhores do elenco (a força real, ovr_f, é o que os clubes interessados olham).
+			var by_ovr := squad.duplicate()
+			by_ovr.sort_custom(func(x: Player, y: Player): return x.ovr_f > y.ovr_f)
+			var a: Player = by_ovr[opt]
 			# Condições de cada evento
 			a.nationality = "ARG" if c.nation != "ARG" else "URU"
 			a.morale = 40.0

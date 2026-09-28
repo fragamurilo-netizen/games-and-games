@@ -1599,7 +1599,7 @@ const SHOUTS := {
 	"calma": {"name": "Calma, toca a bola!", "short": "Calma", "icon": "clock", "desc": "Mais posse e menos faltas; ataca um pouco menos.",
 		"poss": 0.035, "att": 0.97, "fouls": 0.88, "fatigue": 0.9},
 	"frente": {"name": "Pra frente! Vamos buscar!", "short": "Pra frente", "icon": "up", "desc": "Mais gente no ataque. Deixa espaço atrás.",
-		"att": 1.06, "def": 0.95, "fatigue": 1.1},
+		"att": 1.09, "def": 0.94, "fatigue": 1.1},
 	"atencao": {"name": "Concentração atrás!", "short": "Atenção", "icon": "shield", "desc": "Fecha a defesa; o ataque perde força.",
 		"def": 1.06, "att": 0.96},
 	"incentivo": {"name": "Vamos, acredita!", "short": "Incentivar", "icon": "heart", "desc": "Levanta quem está abatido. Rende mais atrás no placar.", "rx": "inc"},

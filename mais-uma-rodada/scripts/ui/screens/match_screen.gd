@@ -115,11 +115,22 @@ func on_show() -> void:
 	if not _built:
 		_build()
 	set_process(true)
+	_set_live(true)
 
 
 func on_hide() -> void:
 	set_process(false)
 	AudioManager.crowd_stop()
+	_set_live(false)
+
+
+func _exit_tree() -> void:
+	_set_live(false)
+
+
+func _set_live(on: bool) -> void:
+	if is_instance_valid(UIManager.main) and not UIManager.main.is_queued_for_deletion() and UIManager.main.has_method("set_live"):
+		UIManager.main.set_live(on)
 
 
 
@@ -216,7 +227,7 @@ func _build() -> void:
 		elif f.is_league() and user_nation != "" and w.league(f.comp) != null and w.league(f.comp).nation == user_nation:
 			_day_entries.append(e)
 	_user_side = 0 if _fx.home == w.user_club_id else 1
-	_pace = 0 if AppSettings.match_speed == AppSettings.SPEED_NORMAL else 1
+	_pace = {AppSettings.SPEED_NORMAL: 0, AppSettings.SPEED_TURBO: 2}.get(AppSettings.match_speed, 1)
 	var home: Club = _sim.teams[0].club
 	var away: Club = _sim.teams[1].club
 	_colors = _team_colors(home, away)
@@ -1798,10 +1809,9 @@ func _cycle_speed() -> void:
 	_speed_btn.text = PACE_NAMES[_pace]
 	_clock = minf(_clock, PACE[_pace])
 	_pitch.motion.tempo = TEMPO[_pace]
-	# A preferência padrão acompanha a escolha (Normal/Rápido); o turbo é só desta partida.
-	if _pace < 2:
-		AppSettings.match_speed = AppSettings.SPEED_NORMAL if _pace == 0 else AppSettings.SPEED_FAST
-		AppSettings.save_settings()
+	# A preferência padrão acompanha a escolha: o próximo jogo começa no mesmo ritmo.
+	AppSettings.match_speed = [AppSettings.SPEED_NORMAL, AppSettings.SPEED_FAST, AppSettings.SPEED_TURBO][_pace]
+	AppSettings.save_settings()
 
 
 func _confirm_skip() -> void:

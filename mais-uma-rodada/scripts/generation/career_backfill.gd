@@ -23,14 +23,49 @@ const ROUTES := {
 
 
 static func build(world: GameWorld) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash(world.world_seed * 53 + 11)
 	var ctx := _context(world)
 	var ids: Array = world.players.keys()
 	ids.sort()
+	var players: Array = []
 	for pid in ids:
-		var p: Player = world.players[pid]
-		_backfill(world, rng, ctx, p)
+		players.append(world.players[pid])
+	# Caches preguiçosos aquecidos antes das threads (elas só leem)
+	for lid in DatabaseManager.league_ids():
+		_rounds(lid)
+	DatabaseManager.personalities()
+	DatabaseManager.nations()
+	# Cada jogador tem um RNG próprio (semeado pelo mundo e pelo id): o passado sai igual com
+	# qualquer número de núcleos, e os jogadores são processados em paralelo.
+	var base_seed := hash(world.world_seed * 53 + 11)
+	var parts := Parallel.map_chunks(players.size(), func(a: int, b: int) -> Array:
+		var local := ctx.duplicate()
+		local["rows"] = {}
+		local["wcache"] = {}
+		local["caps"] = {}
+		var rng := RandomNumberGenerator.new()
+		for i in range(a, b):
+			var p: Player = players[i]
+			rng.seed = hash("%d:%d" % [base_seed, p.id])
+			_backfill(world, rng, local, p)
+		return [[local["rows"], local["caps"]]], 400)
+	# Junta na ordem dos jogadores (e das chaves): mesmo resultado em qualquer aparelho.
+	var rows := {}
+	var nt_pl: Dictionary = NationalTeamManager.data(world)["pl"]
+	for part: Array in parts:
+		var pr: Dictionary = part[0]
+		for key in pr:
+			if not rows.has(key):
+				rows[key] = []
+			(rows[key] as Array).append_array(pr[key])
+		var caps: Dictionary = part[1]
+		for pid in caps:
+			nt_pl[pid] = caps[pid]
+	var keys: Array = rows.keys()
+	keys.sort()
+	var sorted_rows := {}
+	for k in keys:
+		sorted_rows[k] = rows[k]
+	ctx["rows"] = sorted_rows
 	_season_awards(world, ctx)
 
 
@@ -374,7 +409,7 @@ static func _national_caps(world: GameWorld, rng: RandomNumberGenerator, ctx: Di
 		goals += _poisson(rng, n * per_goal)
 		assists += _poisson(rng, n * per_assist)
 	if caps > 0:
-		NationalTeamManager.data(world)["pl"][p.id] = [caps, goals, assists]
+		ctx["caps"][p.id] = [caps, goals, assists]
 
 
 ## Ano com Copa do Mundo ou com o torneio continental da confederação.

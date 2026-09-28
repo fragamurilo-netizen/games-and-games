@@ -37,8 +37,7 @@ static func save_world(world: GameWorld, slot: int) -> Error:
 		return ERR_CANT_OPEN
 	for c in world.clubs:
 		wr.add(c.to_dict())
-	for pl in world.players.values():
-		wr.add(pl.to_dict())
+	wr.add_all(encode_all(world.players.values()))
 	var err := wr.finish(world)
 	if err == OK:
 		write_meta(world, slot)
@@ -70,11 +69,18 @@ class Writer:
 		return w
 
 	func add(d: Dictionary) -> void:
-		var raw := var_to_bytes(d)
-		var z := raw.compress(FileAccess.COMPRESSION_ZSTD)
-		f.store_32(raw.size())
+		add_encoded(SaveManager.encode(d))
+
+	## Bloco já pronto ([tamanho original, bytes zstd], de SaveManager.encode).
+	func add_encoded(e: Array) -> void:
+		var z: PackedByteArray = e[1]
+		f.store_32(int(e[0]))
 		f.store_32(z.size())
 		f.store_buffer(z)
+
+	func add_all(blocks: Array) -> void:
+		for e in blocks:
+			add_encoded(e)
 
 	func abort() -> void:
 		if closed:
@@ -103,6 +109,22 @@ class Writer:
 		return d.rename(tmp.get_file(), path.get_file())
 
 
+## Um bloco do save: [tamanho original, bytes comprimidos].
+static func encode(d: Dictionary) -> Array:
+	var raw := var_to_bytes(d)
+	return [raw.size(), raw.compress(FileAccess.COMPRESSION_ZSTD)]
+
+
+## Serializa e comprime jogadores (ou clubes) em paralelo, na ordem. Ninguém pode mexer no
+## mundo enquanto isso roda (quem chama espera o resultado).
+static func encode_all(items: Array) -> Array:
+	return Parallel.map_chunks(items.size(), func(a: int, b: int) -> Array:
+		var out: Array = []
+		for i in range(a, b):
+			out.append(encode(items[i].to_dict()))
+		return out, 128)
+
+
 static func _read_block(f: FileAccess) -> Variant:
 	var raw_n := f.get_32()
 	var z_n := f.get_32()
@@ -125,12 +147,27 @@ static func _load_v3(path: String) -> GameWorld:
 		if not cd is Dictionary:
 			return null
 		clubs.append(Club.from_dict(cd))
-	var players: Array = []
+	# Lê os blocos dos jogadores em sequência (disco) e abre em paralelo (CPU).
+	var sizes := PackedInt32Array()
+	sizes.resize(n_players)
+	var blobs: Array = []
+	blobs.resize(n_players)
 	for i in n_players:
-		var pd: Variant = _read_block(f)
-		if not pd is Dictionary:
+		var raw_n := f.get_32()
+		var z_n := f.get_32()
+		if raw_n <= 0 or z_n <= 0 or f.get_position() + z_n > f.get_length():
 			return null
-		players.append(Player.from_dict(pd))
+		sizes[i] = raw_n
+		blobs[i] = f.get_buffer(z_n)
+	var players := Parallel.map_chunks(n_players, func(a: int, b: int) -> Array:
+		var out: Array = []
+		for i in range(a, b):
+			var pd: Variant = bytes_to_var((blobs[i] as PackedByteArray).decompress(sizes[i], FileAccess.COMPRESSION_ZSTD))
+			out.append(Player.from_dict(pd) if pd is Dictionary else null)
+		return out, 128)
+	blobs.clear()
+	if players.size() != n_players or players.has(null):
+		return null
 	var head: Variant = _read_block(f)
 	f.close()
 	if not head is Dictionary:

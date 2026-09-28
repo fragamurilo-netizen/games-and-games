@@ -106,7 +106,25 @@ func _menu() -> VBoxContainer:
 		UIKit.action_tile("gear", "Opções", "", func(): UIManager.push("settings")),
 	]
 	v.add_child(UIKit.tile_grid(tiles, 2))
+	v.add_child(_language_row())
 	return v
+
+
+## Idioma direto na tela inicial (cada nome sempre na própria língua).
+func _language_row() -> Control:
+	var items: Array = []
+	for i in I18n.LANGS.size():
+		items.append([I18n.LANGS[i], I18n.LANG_NAMES[i]])
+	var row := UIKit.segment(items, AppSettings.language, func(code: String):
+		if code == AppSettings.language:
+			return
+		AppSettings.language = code
+		AppSettings.save_settings()
+		I18n.apply(code)
+		refresh.call_deferred())
+	for b in row.find_children("*", "Button", true, false):
+		(b as Button).auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	return row
 
 
 ## Créditos do jogo (também abertos pelas Opções).
@@ -126,6 +144,9 @@ static func show_credits() -> void:
 	v.add_child(UIKit.section("Criação e desenvolvimento"))
 	v.add_child(UIKit.label(DEVELOPER, "H2"))
 	v.add_child(UIKit.label("Design de jogo, programação, simulação, interface e dados.", "Muted", true))
+	if Store.tips > 0:
+		v.add_child(UIKit.section("Apoio"))
+		v.add_child(UIKit.colored("Obrigado pelo café! Você ajuda o jogo a continuar.", UIColors.GREEN, "H3", true))
 	v.add_child(UIKit.section("Tecnologia"))
 	v.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby (SIL Open Font License 1.1).", "Small", true))
 	v.add_child(UIKit.section("Aviso"))

@@ -3,9 +3,33 @@ extends BaseScreen
 ## velocidade padrão das partidas, dicas e créditos.
 
 
+## Aba aberta: partidas (velocidade, editor), idioma e moeda, visual, som ou sobre (compras, ajuda).
+static var _tab := "game"
+
+
 func _init() -> void:
 	show_nav = false
 	screen_title = "Opções"
+
+
+func _ready() -> void:
+	Store.changed.connect(_on_store_changed)
+	Store.message.connect(_on_store_message)
+
+
+func _exit_tree() -> void:
+	if Store.changed.is_connected(_on_store_changed):
+		Store.changed.disconnect(_on_store_changed)
+	if Store.message.is_connected(_on_store_message):
+		Store.message.disconnect(_on_store_message)
+
+
+func _on_store_changed() -> void:
+	refresh.call_deferred()
+
+
+func _on_store_message(text: String) -> void:
+	UIManager.toast(text)
 
 
 func refresh() -> void:
@@ -14,6 +38,10 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	max_content_width = 1600.0
+	c.add_child(UIKit.tabs([["game", "Partidas"], ["lang", "Idioma"], ["look", "Visual"], ["sound", "Som"], ["about", "Sobre"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	var tabs := {"game": [], "lang": [], "look": [], "sound": [], "about": []}
 	var cards: Array = []
 	var cl := UIKit.card("Card", 12)
 	cl.add_child(UIKit.section("Aparência"))
@@ -41,7 +69,7 @@ func refresh() -> void:
 	cl.add_child(_toggle("Animações reduzidas", AppSettings.reduce_motion, func(v: bool):
 		AppSettings.reduce_motion = v
 		AppSettings.save_settings()))
-	cards.append(UIKit.card_panel(cl))
+	tabs["look"].append(UIKit.card_panel(cl))
 	var card0 := UIKit.card("Card", 12)
 	card0.add_child(UIKit.section("Idioma"))
 	var lrow := _chips(I18n.LANG_NAMES, I18n.LANGS.find(AppSettings.language), func(i: int):
@@ -56,7 +84,7 @@ func refresh() -> void:
 	for b in lrow.find_children("*", "Button", true, false):
 		(b as Button).auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	card0.add_child(lrow)
-	cards.append(UIKit.card_panel(card0))
+	tabs["lang"].append(UIKit.card_panel(card0))
 	var currency_card := UIKit.card("Card", 12)
 	currency_card.add_child(UIKit.section("Moeda"))
 	currency_card.add_child(UIKit.label("Valores de mercado, salários e finanças", "Muted"))
@@ -64,14 +92,18 @@ func refresh() -> void:
 		AppSettings.currency = i
 		AppSettings.save_settings()
 		refresh()))
-	cards.append(UIKit.card_panel(currency_card))
+	tabs["lang"].append(UIKit.card_panel(currency_card))
 	var card_ed := UIKit.card("Card", 12)
 	card_ed.add_child(UIKit.section("Editor"))
-	card_ed.add_child(_toggle("Editar jogadores e clubes durante a carreira", AppSettings.career_edit, func(v: bool):
-		AppSettings.career_edit = v
-		AppSettings.save_settings()
-		refresh()))
-	cards.append(UIKit.card_panel(card_ed))
+	if Store.editor_unlocked():
+		card_ed.add_child(_toggle("Editar jogadores e clubes durante a carreira", AppSettings.career_edit, func(v: bool):
+			AppSettings.career_edit = v
+			AppSettings.save_settings()
+			refresh()))
+	else:
+		card_ed.add_child(UIKit.label("Editar jogadores e clubes durante a carreira", "Small", true))
+		card_ed.add_child(UIKit.button("Editor na carreira · %s" % Store.price(Store.EDITOR), "PrimaryButton", func(): Store.buy(Store.EDITOR), "palette"))
+	tabs["game"].append(UIKit.card_panel(card_ed))
 	var cm := UIKit.card("Card", 12)
 	cm.add_child(UIKit.section("Música"))
 	cm.add_child(_toggle("Música de fundo", AppSettings.music, func(v: bool):
@@ -94,7 +126,7 @@ func refresh() -> void:
 		cm.add_child(_toggle("Tocar também durante as partidas", AppSettings.music_in_match, func(v: bool):
 			AppSettings.music_in_match = v
 			AppSettings.save_settings()))
-	cards.append(UIKit.card_panel(cm))
+	tabs["sound"].append(UIKit.card_panel(cm))
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("Som e vibração"))
 	card.add_child(_toggle("Efeitos sonoros e torcida", AppSettings.sound, func(v: bool):
@@ -113,15 +145,18 @@ func refresh() -> void:
 		AppSettings.vibration = v
 		AppSettings.save_settings()
 		AudioManager.vibrate(60)))
-	cards.append(UIKit.card_panel(card))
+	tabs["sound"].append(UIKit.card_panel(card))
 	var card2 := UIKit.card("Card", 12)
 	card2.add_child(UIKit.section("Partidas"))
 	card2.add_child(UIKit.label("Velocidade padrão ao iniciar um jogo", "Muted"))
-	var row := _chips(AppSettings.SPEED_NAMES, AppSettings.match_speed, func(i: int):
-		AppSettings.match_speed = i
+	var speeds: Array = []
+	for i in AppSettings.SPEED_ORDER:
+		speeds.append([str(i), AppSettings.SPEED_NAMES[i]])
+	var row := UIKit.segment(speeds, str(AppSettings.match_speed), func(k: String):
+		AppSettings.match_speed = int(k)
 		AppSettings.save_settings())
 	card2.add_child(row)
-	cards.append(UIKit.card_panel(card2))
+	tabs["game"].push_front(UIKit.card_panel(card2)) # partidas primeiro: a opção mais usada
 	var cs := UIKit.card("Card", 12)
 	cs.add_child(UIKit.section("Compras"))
 	if Store.owned or not Store.enforced():
@@ -129,11 +164,15 @@ func refresh() -> void:
 	else:
 		cs.add_child(UIKit.label("Carreira Completa · %s" % Store.price(), "Small", true))
 		cs.add_child(UIKit.button("Ver a Carreira Completa", "GhostButton", func(): UIManager.push("paywall", {"reason": "settings"}), "star"))
+	if Store.editor_owned or not Store.enforced():
+		cs.add_child(UIKit.colored("Editor na carreira liberado.", UIColors.GREEN, "Small", true))
+	else:
+		cs.add_child(UIKit.button("Editor na carreira · %s" % Store.price(Store.EDITOR), "GhostButton", func(): Store.buy(Store.EDITOR), "palette"))
 	cs.add_child(UIKit.menu_group([
 		UIKit.menu_row("save", "Restaurar compras", "", func(): Store.restore()),
 		UIKit.menu_row("star", "Pagar um café pro desenvolvedor · %s" % Store.price(Store.TIP), "", func(): Store.buy(Store.TIP)),
 	]))
-	cards.append(UIKit.card_panel(cs))
+	tabs["about"].append(UIKit.card_panel(cs))
 	var card3 := UIKit.card("Card", 12)
 	card3.add_child(UIKit.section("Ajuda"))
 	card3.add_child(UIKit.menu_group([
@@ -144,15 +183,23 @@ func refresh() -> void:
 		UIKit.menu_row("list", "Como jogar", "", func(): Tutorial.show_all()),
 		UIKit.menu_row("star", "Créditos", "", func(): MainMenuScreen.show_credits()),
 	]))
-	cards.append(UIKit.card_panel(card3))
+	tabs["about"].append(UIKit.card_panel(card3))
 	var card4 := UIKit.card("Card", 8)
 	card4.add_child(UIKit.section("Sobre"))
 	card4.add_child(UIKit.label("Mais Uma Rodada · versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "H3"))
 	card4.add_child(UIKit.label("Clubes, estádios e ligas usam os nomes reais apenas como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
 	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
 	card4.add_child(UIKit.label("Tudo roda offline e o jogo não coleta dados. As compras são processadas pela Google Play.", "Small", true))
-	cards.append(UIKit.card_panel(card4))
-	UIKit.columns(c, cards, content_width())
+	tabs["about"].append(UIKit.card_panel(card4))
+	cards = tabs.get(_tab, tabs["game"])
+	var box := UIKit.vbox(UITokens.S4)
+	c.add_child(box)
+	UIKit.columns(box, cards, content_width())
+	# As abas não mostradas saem da memória (os cartões foram montados só para escolher).
+	for k in tabs:
+		if k != _tab:
+			for card_panel: Control in tabs[k]:
+				card_panel.free()
 
 
 ## Fileira de opções exclusivas (chips); `cb` recebe o índice escolhido.

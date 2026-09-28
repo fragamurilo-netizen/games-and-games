@@ -6,7 +6,10 @@ const PATH := "user://settings.cfg"
 const SPEED_INSTANT := 0
 const SPEED_FAST := 1
 const SPEED_NORMAL := 2
-const SPEED_NAMES: Array[String] = ["Instantâneo", "Rápido", "Normal"]
+const SPEED_TURBO := 3
+const SPEED_NAMES: Array[String] = ["Instantâneo", "Rápido", "Normal", "Turbo"]
+## Ordem nas opções: do mais lento ao resultado direto.
+const SPEED_ORDER: Array[int] = [SPEED_NORMAL, SPEED_FAST, SPEED_TURBO, SPEED_INSTANT]
 
 static var sound: bool = true
 static var vibration: bool = true
@@ -57,12 +60,13 @@ static func load_settings() -> void:
 	_loaded = true
 	var cfg := ConfigFile.new()
 	if cfg.load(PATH) != OK:
+		language = I18n.system_language() # primeira abertura: o idioma do aparelho
 		return
 	sound = cfg.get_value("audio", "sound", true)
 	vibration = cfg.get_value("audio", "vibration", true)
-	match_speed = cfg.get_value("game", "match_speed", SPEED_FAST)
+	match_speed = clampi(int(cfg.get_value("game", "match_speed", SPEED_FAST)), SPEED_INSTANT, SPEED_TURBO)
 	tutorial_done = cfg.get_value("game", "tutorial_done", false)
-	language = cfg.get_value("game", "language", I18n.DEFAULT)
+	language = cfg.get_value("game", "language", I18n.system_language())
 	currency = clampi(int(cfg.get_value("game", "currency", CURRENCY_EUR)), CURRENCY_EUR, CURRENCY_USD)
 	team_colors = cfg.get_value("game", "team_colors", true)
 	color_source = clampi(int(cfg.get_value("look", "color_source", 1 if team_colors else 0)), 0, 2)
