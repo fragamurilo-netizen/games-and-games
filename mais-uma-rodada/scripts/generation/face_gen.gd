@@ -634,12 +634,12 @@ const BEARD_PARTS: Array = [
 	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.7, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.0, "op": 0.55, "sh": 0.2, "pt": 0.4, "tx": 1}, # cavanhaque ralo
 	{"ch": 0.0, "sd": 1.0, "jw": 0.0, "cn": 0.0, "mu": 0, "so": 0.0, "nk": 0.0, "ln": 0.0, "op": 0.9, "sh": 0.6, "pt": 0.0, "tx": 1, "sdl": 1.0}, # costeletas longas
 	{"ch": 0.35, "sd": 0.7, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.2, "ln": 0.02, "op": 0.6, "sh": 0.5, "pt": 0.45, "tx": 1}, # barba rala com bigode
-	{"ch": 0.1, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 1.0, "ln": 0.55, "op": 0.98, "sh": 0.1, "pt": 0.0, "tx": 1, "rd": 1.35}, # cheia longa e volumosa
-	{"ch": 0.14, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.8, "ln": 0.3, "op": 0.96, "sh": 0.1, "pt": 0.0, "tx": 1, "rd": 1.3, "cr": 1.0}, # cheia cacheada volumosa
-	{"ch": 0.2, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.5, "ln": 0.06, "op": 0.94, "sh": 0.3, "pt": 0.0, "tx": 1, "cr": 1.0}, # crespa curta
-	{"ch": 0.12, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 1.0, "ln": 0.45, "op": 0.97, "sh": 0.05, "pt": 0.0, "tx": 1, "rd": 1.25, "cr": 1.0}, # crespa longa
+	{"ch": 0.1, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.32, "op": 0.98, "sh": 0.1, "pt": 0.0, "tx": 1, "rd": 1.35, "cnw": 1.9, "hw": 0.9}, # cheia longa e volumosa
+	{"ch": 0.14, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.3, "ln": 0.07, "op": 0.96, "sh": 0.1, "pt": 0.0, "tx": 1, "rd": 1.3, "cr": 1.0, "cnw": 1.6, "hw": 0.9}, # cheia cacheada volumosa
+	{"ch": 0.2, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.03, "op": 0.94, "sh": 0.3, "pt": 0.0, "tx": 1, "cr": 1.0}, # crespa curta
+	{"ch": 0.12, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.16, "op": 0.97, "sh": 0.05, "pt": 0.0, "tx": 1, "rd": 1.25, "cr": 1.0, "cnw": 1.9, "hw": 0.9}, # crespa longa
 	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.8, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.12, "op": 0.92, "sh": 0.4, "pt": 0.0, "tx": 1, "cr": 1.0}, # cavanhaque crespo
-	{"ch": 0.2, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.2, "ln": 0.08, "op": 0.95, "sh": 1.0, "pt": 0.0, "tx": 1, "cr": 1.0}, # crespa com contorno navalhado
+	{"ch": 0.2, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.0, "ln": 0.08, "op": 0.95, "sh": 1.0, "pt": 0.0, "tx": 1, "cr": 1.0}, # crespa com contorno navalhado
 	{"ch": 0.28, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.0, "op": 0.42, "sh": 0.0, "pt": 0.1, "tx": 0, "ov": 4}, # por fazer com cavanhaque
 	{"ch": 0.28, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.0, "op": 0.42, "sh": 0.0, "pt": 0.1, "tx": 0, "ov": 7}, # por fazer com bigode e cavanhaque
 	{"ch": 0.28, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.0, "op": 0.42, "sh": 0.0, "pt": 0.1, "tx": 0, "ov": 21}, # por fazer com bigode grosso
@@ -654,7 +654,7 @@ const BEARD_PARTS: Array = [
 	{"ch": 0.14, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.5, "ln": 0.28, "op": 0.96, "sh": 1.0, "pt": 0.0, "tx": 1, "pp": 1.0}, # pontuda desenhada
 	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.8, "ln": 0.2, "op": 0.94, "sh": 0.0, "pt": 0.04, "tx": 1, "rd": 1.1, "wild": 0.7}, # cheia média desalinhada
 	{"ch": 0.22, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.4, "ln": 0.18, "op": 0.93, "sh": 0.4, "pt": 0.0, "tx": 1, "fd": 1.0, "pp": 1.0}, # curta com queixo pontudo
-	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.7, "ln": 0.3, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "pp": 1.0, "cr": 1.0}, # crespa pontuda
+	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.12, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "pp": 1.0, "cr": 1.0, "cnw": 1.3, "hw": 0.6}, # crespa pontuda
 ]
 ## Barbas de fio crespo: combinam com cabelo cacheado/crespo.
 const CURLY_BEARDS: Array[int] = [121, 122, 123, 124, 125, 140]

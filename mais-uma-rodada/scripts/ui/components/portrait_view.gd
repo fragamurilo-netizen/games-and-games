@@ -2574,7 +2574,8 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 		d = maxf(d, so * (1.0 - smoothstep(0.7, 1.1, sqrt(pow(u / (0.07 - 0.015 * (sl - 1.0) * float(v > sy)), 2.0) + pow((v - sy) / (0.05 * sl), 2.0)))))
 	# Pescoço
 	var nk: float = P["nk"]
-	var neck_half := _neck_half()
+	# "hw": barba cheia que desce larga (da largura da mandíbula), em vez de uma faixa da largura do pescoço
+	var neck_half := _neck_half() * (1.0 + float(P.get("hw", 0.0)))
 	var over_neck := smoothstep(0.62, 0.9, v) * (1.0 - smoothstep(neck_half * 0.8, neck_half * 1.02, au))
 	if nk > 0.0 and v > 0.6:
 		d = maxf(d, nk * over_neck * smoothstep(0.98, 1.04, th) * (1.0 - smoothstep(1.1 + ln, 1.3 + ln, v)))
