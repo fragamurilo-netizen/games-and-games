@@ -279,3 +279,50 @@ static func effect_text(fx: Dictionary) -> String:
 		return "Sem efeito especial: rende pelos atributos."
 	var s := "; ".join(PackedStringArray(parts))
 	return s.substr(0, 1).to_upper() + s.substr(1) + "."
+
+
+# ---------------------------------------------------------------------------
+# Treino de estilo (TrainingManager): estilos possíveis para o jogador e distância até cada um
+# ---------------------------------------------------------------------------
+
+## Estilos que o jogador pode desenvolver na função natural (o "ponta invertido" só para quem
+## joga do lado trocado; os estilos-padrão da função, sem atributos, ficam de fora).
+static func options_for(p: Player) -> Array:
+	var out: Array = []
+	var inv := _inverted(p)
+	for e: Dictionary in BY_ROLE[_role(p.position)]:
+		if Dictionary(e.get("w", {})).is_empty():
+			continue
+		if bool(e.get("inv", false)) and not inv:
+			continue
+		out.append(e)
+	return out
+
+
+static func find(p: Player, key: String) -> Dictionary:
+	for e: Dictionary in BY_ROLE[_role(p.position)]:
+		if String(e["k"]) == key:
+			return e
+	return {}
+
+
+## Quanto falta para o estilo `key` virar o principal (pontos de perfil; 0 = já é).
+static func gap_to(p: Player, key: String) -> float:
+	var e := find(p, key)
+	if e.is_empty():
+		return 0.0
+	var main := primary(p)
+	if String(main["k"]) == key:
+		return 0.0
+	return maxf(0.0, _score(p, main) - _score(p, e))
+
+
+## Atributos do estilo, do mais importante ao menos.
+static func attrs_of(e: Dictionary) -> Array:
+	var w: Dictionary = e.get("w", {})
+	var ks: Array = w.keys()
+	ks.sort_custom(func(a, b): return float(w[a]) > float(w[b]))
+	var out: Array = []
+	for k in ks:
+		out.append(int(k))
+	return out

@@ -277,6 +277,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	var um := TrainingManager.unit_mults(world, club)
 	t.train_att = damp(float(um[0]))
 	t.train_def = damp(float(um[1]))
+	t.sp_bonus = TrainingManager.set_piece_bonus(world, club)
 	var inj_m := TrainingManager.injury_mult(world, club.id)
 	var norms := DatabaseManager.formation_norms()
 	t.norm_def = float(norms["def"])
@@ -290,7 +291,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		if pl == null:
 			t.slots.append(null)
 			continue
-		var mp := _make_mp(pl, big, inj_m)
+		var mp := _make_mp(pl, big, inj_m * TrainingManager.player_injury_mult(world, pl))
 		mp.instr = sheet.instruction_of(pl.id)
 		_assign_slot(mp, i, fslots[i])
 		mp.on_pitch = true
@@ -303,7 +304,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		var pl: Player = world.player(pid)
 		if pl == null or t.by_id.has(pid):
 			continue
-		var mp := _make_mp(pl, big, inj_m)
+		var mp := _make_mp(pl, big, inj_m * TrainingManager.player_injury_mult(world, pl))
 		mp.instr = sheet.instruction_of(pl.id)
 		t.bench.append(mp)
 		t.all.append(mp)
@@ -993,6 +994,8 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 			xg *= clampf(exp(0.012 * (att.aerial_att - dfn.aerial_def)), 0.7, 1.4)
 		elif ctype == CH_CORNER: # jogada ensaiada: 1º pau, 2º pau ou curto (peso da altura e qualidade)
 			xg *= clampf(exp(0.012 * att.x_aerial * (att.aerial_att - dfn.aerial_def)), 0.6, 1.5) * att.x_corner_q
+	if ctype == CH_CORNER or ctype == CH_FREEKICK:
+		xg *= 1.0 + att.sp_bonus # bola parada ensaiada no treino
 	if ctype < 6:
 		xg *= att.exploit_q[ctype]
 	# Leitura do jogo: onde e como cada time está sofrendo.
@@ -1404,7 +1407,7 @@ func _corner(att: MatchTeam, dfn: MatchTeam) -> void:
 		_emit(EV_CORNER, att.side, taker.p.id if taker != null else -1)
 	if detail:
 		last_phase = {"side": att.side, "from": 0.9, "to": 0.97, "ev": EV_CORNER}
-	if rng.randf() < 0.28 * att.x_corner_ch:
+	if rng.randf() < 0.28 * att.x_corner_ch * (1.0 + att.sp_bonus * 0.5):
 		_resolve_chance(att, dfn, CH_CORNER)
 
 

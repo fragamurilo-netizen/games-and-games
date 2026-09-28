@@ -214,6 +214,10 @@ func _only_pass() -> void:
 		if spec.begins_with("~"):
 			await _dialog_shot(w, spec.substr(1))
 			continue
+		var pages := 2
+		if spec.contains("@"):
+			pages = int(spec.get_slice("@", 1))
+			spec = spec.get_slice("@", 0)
 		var parts := spec.split(":")
 		var route := parts[0]
 		var args := {}
@@ -246,12 +250,19 @@ func _only_pass() -> void:
 			UIManager.push(route, args)
 		await _frames(8)
 		UIManager.close_all_modals()
+		for prop in ["_deep_open", "_extras_open"]:
+			if prop in _screen():
+				_screen().set(prop, true)
+				_screen().refresh()
+		await _frames(4)
 		var shot_name := prefix + spec.replace(":", "_")
 		await _shot(shot_name)
 		var sc := _screen().scroll()
-		if sc != null and sc.get_v_scroll_bar().max_value > sc.size.y + 200:
-			sc.scroll_vertical = int(sc.size.y * 0.85)
-			await _shot(shot_name + "_b")
+		for pg in range(1, pages):
+			if sc == null or sc.scroll_vertical + sc.size.y >= sc.get_v_scroll_bar().max_value - 20:
+				break
+			sc.scroll_vertical = int(sc.size.y * 0.85 * pg)
+			await _shot(shot_name + "_" + "bcdefghij"[pg - 1])
 
 
 ## Diálogos e folhas por cima do hub (~confirm, ~event, ~sim, ~tutorial, ~buy, ~talk, ~toast).
@@ -282,6 +293,17 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					break
 		"talk":
 			TalkDialog.open("board", -1)
+		"training":
+			var sq := w.squad(u)
+			sq.sort_custom(func(a, b): return a.age(w.year) < b.age(w.year))
+			var yp: Player = sq[0]
+			yp.train["ld"] = 2
+			var opts := PlayStyle.options_for(yp)
+			for e: Dictionary in opts:
+				if String(e["k"]) != String(PlayStyle.primary(yp)["k"]):
+					TrainingManager.set_style_target(yp, String(e["k"]))
+					break
+			TrainingSheet.open(yp)
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
 	await _shot(prefix + "dlg_" + kind)

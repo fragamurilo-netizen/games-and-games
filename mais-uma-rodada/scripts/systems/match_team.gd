@@ -38,6 +38,8 @@ var cohesion_base: float = 1.0
 ## Ajuste de setor pelo foco de treino da semana (só no time do usuário).
 var train_att: float = 1.0
 var train_def: float = 1.0
+## Bola parada ensaiada no treino (TrainingManager.set_piece_bonus): escanteios e faltas.
+var sp_bonus: float = 0.0
 var home_f: float = 1.0
 ## Dia do time (inspirado ou apagado), sorteado antes do jogo: dá variação real aos resultados.
 var day_f: float = 1.0
