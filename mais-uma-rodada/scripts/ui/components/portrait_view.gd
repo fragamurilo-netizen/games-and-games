@@ -2599,7 +2599,18 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 			reach = lerpf(0.012 + ln * 0.55, 0.015 + ln * 1.3, smoothstep(0.62, 0.9, v))
 			# Abaixo da ponta do queixo vale só o formato do queixo (arredondado), nunca um bloco reto
 			if v > 0.96:
-				d = minf(d, lerpf(d, d_chin, smoothstep(0.96, 1.02, v)))
+				if ln >= 0.12 and cn > 0.0:
+					# Barba comprida: embaixo do queixo continua da largura da mandíbula e só afina
+					# perto da ponta (formato de U/V), em vez de pendurar uma faixa estreita
+					var bot := 1.02 + ln * 0.9
+					var k := clampf((v - 0.96) / maxf(bot - 0.96, 0.02), 0.0, 1.0)
+					var w0 := _hw(0.9) * 0.92
+					var wv := lerpf(w0, w0 * lerpf(0.5, 0.18, float(P.get("pp", 0.0))), k * k)
+					var hang := (1.0 - smoothstep(wv - soft * 2.0, wv + soft, au)) * (1.0 - smoothstep(bot - soft * 2.0, bot + soft, v))
+					d = lerpf(d, hang, smoothstep(0.96, 1.02, v))
+					reach = maxf(reach, (au / 0.32 - 1.0) + 0.05)
+				else:
+					d = minf(d, lerpf(d, d_chin, smoothstep(0.96, 1.02, v)))
 		d *= 1.0 - smoothstep(reach * 0.2, reach, th - 1.0)
 	# Risco raspado na bochecha
 	if float(P.get("cut", 0.0)) > 0.0:
@@ -2780,6 +2791,10 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 			var a := rng.randf_range(0.15, PI - 0.15)
 			var r := rng.randf_range(0.85, 1.35)
 			var p := _px(cos(a) * float(_f["cheek_w"]) * r * 0.9, 0.55 + sin(a) * (0.55 + float(_beard_p["ln"])) * r)
+			# Fio rebelde só na borda da barba (não solto sobre a camisa)
+			var qw := _uv(p)
+			if _beard_dens(qw.x, qw.y, _beard_p, false) < 0.25:
+				continue
 			var dir := Vector2(cos(a), sin(a) * 1.2).normalized()
 			_r_line(_cl(p), _cl(p + dir * _s * rng.randf_range(0.015, 0.035)), Color(wc.lightened(rng.randf_range(0.0, 0.2)), 0.35), maxf(0.6, _s * 0.003), true)
 	_beard_strands(rng, _beard_p)
