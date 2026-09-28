@@ -332,6 +332,16 @@ static func _repaint_theme() -> void:
 	var th := ThemeDB.get_project_theme()
 	if th == null:
 		return
+	# Cada set_color/stylebox emite "changed" no tema, e cada "changed" refaz o cache de tema de
+	# todos os nós da árvore (e remonta o texto de cada Label): com ~450 cores isso levava de 1 a
+	# 9 s por troca de tela no celular. Com os sinais do tema presos, a árvore é avisada uma vez só.
+	th.set_block_signals(true)
+	_repaint_theme_items(th)
+	th.set_block_signals(false)
+	th.emit_changed()
+
+
+static func _repaint_theme_items(th: Theme) -> void:
 	if _theme_refs.is_empty():
 		for type in th.get_type_list():
 			for nm in th.get_stylebox_list(type):

@@ -1085,6 +1085,10 @@ static func complete_precontracts(world: GameWorld) -> Array:
 	var moved: Array = []
 	var pre: Dictionary = world.stats.get("pre", {})
 	for k in pre.keys():
+		# stats["pre"] também guarda o estado da pré-temporada (y, camp, done...): só entradas
+		# de pré-contrato (dicionário com "club") contam; o resto fica como está.
+		if not (pre[k] is Dictionary and (pre[k] as Dictionary).has("club")):
+			continue
 		var p := world.player(int(k))
 		var d: Dictionary = pre[k]
 		var c := world.club(int(d.get("club", -1)))

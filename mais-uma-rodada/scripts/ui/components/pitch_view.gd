@@ -223,6 +223,9 @@ func _wid_px(r: Rect2) -> float:
 # ---------------------------------------------------------------------------
 
 func _draw() -> void:
+	# Sem tamanho ainda (antes do layout): as contas com fposmod/size dariam NaN.
+	if size.x < 1.0 or size.y < 1.0:
+		return
 	var r := pitch_rect()
 	var in_match := mode == "match" and not stadium.is_empty()
 	var zoomed := mode == "match" and cam_zoom > 1.005
