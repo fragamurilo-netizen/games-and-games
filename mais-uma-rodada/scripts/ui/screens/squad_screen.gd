@@ -2,10 +2,13 @@ extends BaseScreen
 ## Elenco: filtros por setor, ordenação e acesso rápido a escalação e perfil.
 
 const FILTERS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
-const VIEWS := ["Lista", "Profundidade", "Papéis"]
-const SORTS := [["pos", "Posição"], ["ovr", "Overall"], ["age", "Idade"], ["contract", "Contrato"], ["value", "Valor"]]
+const VIEWS := ["Lista", "Números", "Profundidade", "Papéis"]
+const SORTS := [["pos", "Posição"], ["ovr", "Overall"], ["form", "Nota"], ["cond", "Condição"], ["age", "Idade"], ["contract", "Contrato"], ["value", "Valor"]]
+## Recortes rápidos da lista (tocáveis também nos alertas do resumo).
+const QUICK := [["all", "Todos"], ["ok", "Disponíveis"], ["hurt", "Lesionados"], ["exp", "Contrato acabando"], ["u21", "Sub-21"], ["tired", "Cansados"]]
 
 var _filter := 0
+var _quick := "all"
 var _sort := "pos"
 var _view := 0
 
@@ -35,24 +38,38 @@ func _summary_card(w: GameWorld, club: Club, squad: Array) -> Control:
 	var xi := 0.0
 	if club.sheet != null:
 		xi = ClubAI.lineup_strength(w, club.sheet.formation, club.sheet.starters) / 11.0
+	var ages := 0.0
+	var cond := 0.0
+	var mor := 0.0
+	for p: Player in squad:
+		ages += p.age(w.year)
+		cond += p.condition
+		mor += p.morale
+	var n := maxf(1.0, squad.size())
 	var r1 := UIKit.hbox(4)
 	r1.add_child(UIKit.stat(str(squad.size()), "jogadores"))
-	r1.add_child(UIKit.stat(str(foreign), "estrangeiros"))
-	r1.add_child(UIKit.stat(str(home), "crias da casa", UIColors.GREEN))
+	r1.add_child(UIKit.stat(Fmt._decimal(ages / n, 1), "idade média"))
 	r1.add_child(UIKit.stat(str(int(round(xi))), "força titular", UIColors.ACCENT))
 	card.add_child(r1)
+	var r2 := UIKit.hbox(4)
+	r2.add_child(UIKit.stat(str(foreign), "estrangeiros"))
+	r2.add_child(UIKit.stat(str(home), "crias da casa", UIColors.GREEN))
+	r2.add_child(UIKit.stat("%d%%" % int(round(cond / n)), "condição", UIColors.GREEN if cond / n >= 85.0 else UIColors.ORANGE))
+	r2.add_child(UIKit.stat(UIColors.morale_label(mor / n), "moral"))
+	card.add_child(r2)
 	var rule := SquadRules.describe(club)
 	if rule != "":
 		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
 		var lim := int(SquadRules.limit(club)["max"])
 		card.add_child(UIKit.colored("%s: %d/%d na escalação atual." % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
-	var alerts: Array = []
+	# Alertas viram atalhos para o recorte da lista.
+	var alerts := UIKit.hbox(8)
 	if hurt > 0:
-		alerts.append("%d lesionado(s)" % hurt)
+		alerts.add_child(_alert_chip(Fmt.plural(hurt, "lesionado", "lesionados"), "hurt"))
 	if expiring > 0:
-		alerts.append("%d contrato(s) acabando" % expiring)
-	if not alerts.is_empty():
-		card.add_child(UIKit.colored(" · ".join(PackedStringArray(alerts)), UIColors.ORANGE, "Small", true))
+		alerts.add_child(_alert_chip(Fmt.plural(expiring, "contrato acabando", "contratos acabando"), "exp"))
+	if alerts.get_child_count() > 0:
+		card.add_child(alerts)
 	var fin := FinanceManager.summary(w, club)
 	var bill := UIKit.hbox(8)
 	bill.add_child(UIKit.label("Folha salarial", "Muted"))
@@ -64,9 +81,36 @@ func _summary_card(w: GameWorld, club: Club, squad: Array) -> Control:
 	return UIKit.card_panel(card)
 
 
+func _alert_chip(text: String, key: String) -> Control:
+	var b := UIKit.button(text, "ChipButton", func():
+		_quick = key
+		_view = 0
+		refresh())
+	b.add_theme_color_override(&"font_color", UIColors.ORANGE)
+	b.add_theme_font_size_override(&"font_size", 17)
+	return b
+
+
+func _passes_quick(w: GameWorld, p: Player) -> bool:
+	match _quick:
+		"ok":
+			return p.is_available()
+		"hurt":
+			return p.injury_weeks > 0
+		"exp":
+			return p.contract_end <= w.year
+		"u21":
+			return p.age(w.year) <= 21
+		"tired":
+			return p.condition < 85.0
+	return true
+
+
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_sort = p.get("sort", "pos")
+	if p.has("tab"):
+		_view = clampi(int(p["tab"]), 0, VIEWS.size() - 1)
 
 
 func refresh() -> void:
@@ -82,15 +126,19 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	# A ação principal (escalar) em destaque; os atalhos do elenco numa fileira de mesma largura.
+	# A ação principal (escalar) em destaque; os atalhos do elenco em blocos iguais, ícone sobre o texto.
 	c.add_child(UIKit.button("Escalação e tática", "PrimaryButton", func(): UIManager.push("prematch", {"edit": true}), "tactics"))
-	c.add_child(UIKit.button("Estatísticas do elenco (gols, assistências, temporadas)", "GhostButton", func(): UIManager.push("team_stats"), "table"))
-	var top := UIKit.hbox(10)
-	for it in [["Numeração", "numbers", "shirt"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
+	var top := GridContainer.new()
+	top.columns = 4
+	top.add_theme_constant_override(&"h_separation", 8)
+	for it in [["Estatísticas", "team_stats", "table"], ["Camisas", "numbers", "shirt"], ["Contratos", "contracts", "money"], ["Vestiário", "dressing_room", "heart"]]:
 		var dest := String(it[1])
 		var b := UIKit.button(String(it[0]), "GhostButton", func(): UIManager.push(dest), String(it[2]))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.size_flags_stretch_ratio = 1.0
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		b.custom_minimum_size.y = 92
+		b.add_theme_font_size_override(&"font_size", 17)
 		b.clip_text = true
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		top.add_child(b)
@@ -104,9 +152,12 @@ func refresh() -> void:
 		refresh())
 	c.add_child(vrow)
 	if _view == 1:
-		_build_depth(w, club, c)
+		c.add_child(TeamStatsScreen.squad_table(w, club))
 		return
 	if _view == 2:
+		_build_depth(w, club, c)
+		return
+	if _view == 3:
 		_build_roles(w, club, c)
 		return
 	var fitems: Array = []
@@ -116,27 +167,31 @@ func refresh() -> void:
 		_filter = int(key)
 		refresh())
 	c.add_child(frow)
-	var g2 := ButtonGroup.new()
-	var srow := UIKit.hbox(6)
-	srow.add_child(UIKit.label("Ordenar", "Small"))
-	for s in SORTS:
-		var key: String = s[0]
-		var chip := UIKit.chip(s[1], key == _sort, g2, func():
-			_sort = key
-			refresh())
-		chip.add_theme_font_size_override(&"font_size", 17)
-		srow.add_child(chip)
-	c.add_child(srow)
+	c.add_child(UIKit.scroll_tabs(QUICK, _quick, func(k: String):
+		_quick = k
+		refresh()))
+	var sitems: Array = []
+	for so in SORTS:
+		sitems.append([so[0], "↓ " + String(so[1])])
+	c.add_child(UIKit.scroll_tabs(sitems, _sort, func(k: String):
+		_sort = k
+		refresh()))
 	var list: Array = []
 	for p in squad:
-		if _filter == 0 or Pos.group(p.position) == _filter - 1:
+		if (_filter == 0 or Pos.group(p.position) == _filter - 1) and _passes_quick(w, p):
 			list.append(p)
+	if list.is_empty():
+		c.add_child(UIKit.label("Ninguém nesse recorte.", "Muted", true))
 	var y := w.year
 	match _sort:
 		"ovr":
 			list.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
 		"age":
 			list.sort_custom(func(a, b): return a.age(y) < b.age(y))
+		"form":
+			list.sort_custom(func(a, b): return ClubRecords.rating(a, int(a.season_totals()[0])) > ClubRecords.rating(b, int(b.season_totals()[0])))
+		"cond":
+			list.sort_custom(func(a, b): return a.condition < b.condition)
 		"contract":
 			list.sort_custom(func(a, b): return a.contract_end < b.contract_end or (a.contract_end == b.contract_end and a.ovr_f > b.ovr_f))
 		"value":
@@ -152,7 +207,13 @@ func refresh() -> void:
 	for p: Player in list:
 		if _sort == "pos" and Pos.group(p.position) != last_group:
 			last_group = Pos.group(p.position)
-			c.add_child(UIKit.section(Pos.GROUP_NAMES[last_group]))
+			var cnt := 0
+			var ovr := 0
+			for q: Player in list:
+				if Pos.group(q.position) == last_group:
+					cnt += 1
+					ovr += q.overall
+			c.add_child(UIKit.section("%s · %d · média %d" % [Pos.GROUP_NAMES[last_group], cnt, int(round(float(ovr) / maxi(1, cnt)))]))
 		var pid := p.id
 		c.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
 	var out := TransferManager.loaned_out(w)
