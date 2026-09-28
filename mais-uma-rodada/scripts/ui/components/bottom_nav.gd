@@ -63,6 +63,8 @@ func set_vertical(on: bool) -> void:
 	var cur: BoxContainer = get_node("Row")
 	cur.add_theme_constant_override(&"separation", 6 if on else 0)
 	custom_minimum_size = Vector2(UILayout.RAIL_W, 0) if on else Vector2.ZERO
+	# Sem a cópia anterior: ela guardava as cores do modo antigo (a barra ficava escura no claro).
+	remove_theme_stylebox_override(&"panel")
 	var sb := (get_theme_stylebox(&"panel", &"BottomBar") as StyleBoxFlat).duplicate() as StyleBoxFlat
 	if on:
 		sb.border_width_top = 0

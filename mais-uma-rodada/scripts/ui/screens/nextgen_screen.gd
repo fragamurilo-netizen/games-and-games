@@ -71,7 +71,7 @@ func _row(w: GameWorld, p: Player, rank: int) -> Control:
 		r.custom_minimum_size.x = 48
 		r.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if rank == 1:
-			r.add_theme_color_override(&"font_color", Color("#E8C547"))
+			r.add_theme_color_override(&"font_color", UIColors.ink(Color("#E8C547")))
 		h.add_child(r)
 	var cl := w.club(p.club_id)
 	if cl != null:

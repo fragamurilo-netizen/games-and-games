@@ -329,7 +329,7 @@ static func separator() -> HSeparator:
 static func stat(value: String, caption: String, color: Color = UIColors.TEXT) -> VBoxContainer:
 	var v := vbox(0)
 	var l := label(value, "Stat")
-	l.add_theme_color_override(&"font_color", color)
+	l.add_theme_color_override(&"font_color", UIColors.ink(color))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var c := label(caption.to_upper(), "Caps")
 	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -403,7 +403,7 @@ static func kv(key: String, value: String, value_color: Color = UIColors.TEXT) -
 	k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(k)
 	var v := label(value, "H3")
-	v.add_theme_color_override(&"font_color", value_color)
+	v.add_theme_color_override(&"font_color", UIColors.ink(value_color))
 	if value.length() > 22:
 		# Valor longo quebra em linhas à direita em vez de alargar a tela.
 		k.size_flags_horizontal = Control.SIZE_FILL
@@ -466,6 +466,9 @@ static func pill(text: String, color: Color, font_size: int = 18) -> PanelContai
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(color.r, color.g, color.b, 0.16)
 	box.border_color = Color(color.r, color.g, color.b, 0.7)
+	# Texto legível sobre o fundo tingido (cores claras escurecem no modo claro e vice-versa).
+	var under := UIColors.SURFACE.lerp(Color(color, 1.0), 0.16)
+	color = UIColors.readable_on(color, [under, UIColors.SURFACE_2.lerp(Color(color, 1.0), 0.16)], 4.5)
 	box.set_border_width_all(1)
 	box.set_corner_radius_all(16)
 	box.content_margin_left = 12
@@ -640,7 +643,7 @@ static func stat_tile(value: String, caption: String, color: Color = Color(0, 0,
 	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var v := vbox(2)
 	var l := label(value, "Stat")
-	l.add_theme_color_override(&"font_color", color if color.a > 0.0 else UIColors.TEXT)
+	l.add_theme_color_override(&"font_color", UIColors.ink(color) if color.a > 0.0 else UIColors.TEXT)
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(l)
 	var c := label(caption.to_upper(), "Caps")

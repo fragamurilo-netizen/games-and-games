@@ -5,6 +5,8 @@ extends SceneTree
 ## Headless (só teste):  godot --headless --path . --script res://tools/screenshot_tour.gd
 ## Com capturas:         xvfb-run godot --path . --resolution 720x1280 --script res://tools/screenshot_tour.gd -- --out=/tmp/shots
 ## Em outro idioma:      acrescente --lang=en (ou es) depois do "--".
+## Com --only=...: --light (modo claro), --club=nome (clube escolhido pelo nome, em qualquer liga)
+## e --tint=0|1|2 (tingimento do fundo com a cor do clube).
 ##
 ## A lógica fica em design_shots_runner.gd, carregado só depois do primeiro quadro: scripts usados
 ## direto por um --script são compilados antes dos autoloads existirem.
@@ -29,6 +31,12 @@ func _start() -> void:
 			runner.set("only", a.substr(7))
 		if a.begins_with("--rounds="):
 			runner.set("rounds", int(a.substr(9)))
+		if a == "--light":
+			runner.set("light", true)
+		if a.begins_with("--club="):
+			runner.set("club_name", a.substr(7))
+		if a.begins_with("--tint="):
+			runner.set("tint", int(a.substr(7)))
 		if a.begins_with("--lang="):
 			runner.set("lang", a.substr(7))
 	var out: String = runner.get("out_dir")
