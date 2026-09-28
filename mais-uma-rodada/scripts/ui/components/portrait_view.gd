@@ -261,6 +261,10 @@ const STYLE_P: Array = [
 	{"tp": 0.3, "sd": 0.0, "fd": 3, "sp": 4, "tx": "coil", "lu": 1}, # frohawk
 	{"tp": 0.28, "sd": 0.0, "fd": 2, "sp": 3, "tx": "curl", "lu": 1}, # cachos definidos com degradê
 	{"tp": 0.26, "sd": 0.2, "sp": 3, "tx": "coil", "sb": 0.06}, # crespo médio natural
+	{"tp": 0.34, "sd": 0.0, "fd": 4, "sp": 3, "tx": "curl", "lu": 1}, # high top cacheado com pontas descoloridas
+	{"tp": 0.08, "sd": 0.03, "sb": 0.18, "bk": "long", "gl": 0.65, "fl": 0}, # longo liso molhado para trás
+	{"tp": 0.1, "sd": 0.07, "hl": 0.16, "fd": 0, "fr": "crop", "fl": 1, "fc": 1.0, "lu": 1}, # franja reta curta
+	{"tp": 0.06, "sd": 0.0, "fd": 3, "sp": 4, "ck": "spikes"}, # moicano com pontas descoloridas
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)
