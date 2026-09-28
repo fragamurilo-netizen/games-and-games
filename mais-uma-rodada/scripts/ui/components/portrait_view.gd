@@ -2598,19 +2598,19 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 			# do pescoço) e, se for curta, só arredonda o contorno
 			reach = lerpf(0.012 + ln * 0.55, 0.015 + ln * 1.3, smoothstep(0.62, 0.9, v))
 			# Abaixo da ponta do queixo vale só o formato do queixo (arredondado), nunca um bloco reto
-			if v > 0.96:
-				if ln >= 0.12 and cn > 0.0:
-					# Barba comprida: embaixo do queixo continua da largura da mandíbula e só afina
-					# perto da ponta (formato de U/V), em vez de pendurar uma faixa estreita
-					var bot := 1.02 + ln * 0.9
-					var k := clampf((v - 0.96) / maxf(bot - 0.96, 0.02), 0.0, 1.0)
-					var w0 := _hw(0.9) * 0.92
-					var wv := lerpf(w0, w0 * lerpf(0.5, 0.18, float(P.get("pp", 0.0))), k * k)
-					var hang := (1.0 - smoothstep(wv - soft * 2.0, wv + soft, au)) * (1.0 - smoothstep(bot - soft * 2.0, bot + soft, v))
-					d = lerpf(d, hang, smoothstep(0.96, 1.02, v))
-					reach = maxf(reach, (au / 0.32 - 1.0) + 0.05)
-				else:
-					d = minf(d, lerpf(d, d_chin, smoothstep(0.96, 1.02, v)))
+			if v > 0.9 and ln >= 0.12 and cn > 0.0:
+				# Barba comprida: embaixo do queixo continua da largura da mandíbula e só afina
+				# perto da ponta (formato de U/V), em vez de pendurar uma faixa estreita
+				var bot := 1.02 + ln * 0.9
+				var k := clampf((v - 0.96) / maxf(bot - 0.96, 0.02), 0.0, 1.0)
+				var w0 := _hw(0.72) * 0.95
+				var wv := lerpf(w0, w0 * lerpf(0.82, 0.45, float(P.get("pp", 0.0))), pow(k, 3.0))
+				var hang := (1.0 - smoothstep(wv - soft * 2.0, wv + soft, au)) * (1.0 - smoothstep(bot - soft * 2.0, bot + soft, v))
+				var d_cut := d * (1.0 - smoothstep(reach * 0.2, reach, th - 1.0))
+				d = lerpf(d_cut, maxf(hang, d_cut), smoothstep(0.9, 0.98, v))
+				reach = 99.0 # já recortado acima
+			elif v > 0.96:
+				d = minf(d, lerpf(d, d_chin, smoothstep(0.96, 1.02, v)))
 		d *= 1.0 - smoothstep(reach * 0.2, reach, th - 1.0)
 	# Risco raspado na bochecha
 	if float(P.get("cut", 0.0)) > 0.0:
@@ -2685,7 +2685,11 @@ func _beard_mesh() -> void:
 		# Bifurcada: duas pontas, com o meio mais curto.
 		ext *= 1.0 - float(P.get("fk", 0.0)) * (0.55 * _g(q.x, 0.1) - 0.2 * _g(absf(q.x) - 0.22, 0.1))
 		var dir := (p - _hc).normalized()
-		grown.append(p + Vector2(dir.x * _fw, dir.y * _fh) * ext + Vector2(0, _fh * ext * 0.6 * float(q.y > 0.5)))
+		var gp := p + Vector2(dir.x * _fw, dir.y * _fh) * ext + Vector2(0, _fh * ext * 0.6 * float(q.y > 0.5))
+		if float(P.get("cl", 0.0)) > 0.0 and ln >= 0.12:
+			# Barba comprida e cheia: a área desenhável desce reta a partir da mandíbula
+			gp.y += _fh * (ln * 0.95 + 0.04) * smoothstep(0.5, 0.85, q.y) * (1.0 - smoothstep(0.85, 1.0, q.y) * 0.5)
+		grown.append(gp)
 	# Grade fina na metade de baixo do rosto (a malha radial era grossa demais perto da boca e
 	# picotava bigodes finos e contornos em pontinhos). O contorno "crescido" dá a forma de fora.
 	var bound := _angle_radius_table(_hc, grown, 128)
