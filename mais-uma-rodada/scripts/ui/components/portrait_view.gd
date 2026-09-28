@@ -81,7 +81,9 @@ var cutout: bool = false:
 ## cabelo), sb = até onde descem as laterais, fd = degradê (1 leve, 2 alto, 3 lateral raspada),
 ## tx = textura forçada, sp = silhueta (1 reto no alto, 2 espetado, 3 cacheado, 4 crista),
 ## lu = contorno marcado (line-up), bk = parte de trás, fr = peça da frente, fl = direção dos fios (0 para trás, 1 de lado, 2 para
-## baixo, 3 repartido ao meio), op = opacidade, gl = brilho extra, lk = comprimento das mechas.
+## baixo, 3 repartido ao meio), op = opacidade, gl = brilho extra, lk = comprimento das mechas,
+## dz = parte tingida (1 só o alto, 2 listra no meio) na cor dc, hh = altura da crista do moicano,
+## sa = quanto sobra nas laterais raspadas (fd 3 e crista), mk = crista estreita de moicano mesmo sem fd 3.
 const STYLE_P: Array = [
 	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.6}, # raspado
 	{"tp": 0.09, "sd": 0.05, "fd": 1, "fl": 1}, # curto
@@ -265,6 +267,35 @@ const STYLE_P: Array = [
 	{"tp": 0.08, "sd": 0.03, "sb": 0.18, "bk": "long", "gl": 0.65, "fl": 0}, # longo liso molhado para trás
 	{"tp": 0.1, "sd": 0.07, "hl": 0.16, "fd": 0, "fr": "crop", "fl": 1, "fc": 1.0, "lu": 1}, # franja reta curta
 	{"tp": 0.06, "sd": 0.0, "fd": 3, "sp": 4, "ck": "spikes"}, # moicano com pontas descoloridas
+	{"tp": 0.02, "sd": 0.0, "tx": "dots", "op": 0.5, "fr": "halfmoon"}, # meia-lua na franja
+	{"tp": 0.14, "sd": 0.0, "fd": 2, "fr": "quiff", "ph": 1.1, "gl": 0.2, "dz": 1}, # topete descolorido com laterais escuras
+	{"tp": 0.24, "sd": 0.0, "fd": 2, "sp": 3, "tx": "curl", "dz": 1}, # cachinhos descoloridos no alto
+	{"tp": 0.2, "sd": 0.0, "fd": 5, "sp": 3, "tx": "coil", "dz": 1, "lu": 1}, # crespo descolorido no alto
+	{"tp": 0.03, "sd": 0.0, "fd": 1, "tx": "braid", "op": 0.82}, # tranças nagô descoloridas
+	{"tp": 0.2, "sd": 0.04, "fd": 2, "tx": "coil", "fr": "twists"}, # twists com pontas descoloridas
+	{"tp": 0.22, "sd": 0.06, "fd": 1, "tx": "coil", "fr": "twists"}, # twists tingidos de vermelho
+	{"tp": 0.16, "sd": 0.0, "fd": 5, "fr": "quiff", "ph": 1.3, "sp": 2, "gl": 0.3, "lu": 1}, # topete alto arrepiado com degradê
+	{"tp": 0.13, "sd": 0.03, "sp": 2, "fd": 1, "gl": 0.2}, # espetado com luzes
+	{"tp": 0.04, "sd": 0.0, "fd": 3, "sp": 4, "tx": "coil", "hh": 0.8}, # moicano descolorido
+	{"tp": 0.03, "sd": 0.0, "fd": 1, "sp": 4, "mk": 1, "fr": "design_both", "tx": "dots", "op": 0.9, "sa": 0.85}, # moicano com desenhos laterais
+	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "hh": 1.9, "gl": 0.35}, # crista alta
+	{"tp": 0.5, "sd": 0.45, "sp": 3, "tx": "curl", "bk": "afro_curl", "ar": 1.3, "fr": "curl_fringe", "hl": 0.06, "bc": 1}, # afro gigante loiro
+	{"tp": 0.55, "sd": 0.5, "sp": 3, "tx": "coil", "bk": "afro", "ar": 1.45}, # black power gigante
+	{"tp": 0.42, "sd": 0.4, "sp": 3, "tx": "curl", "bk": "afro_curl", "ar": 1.02, "bc": 1, "fr": "curl_fringe", "hl": 0.08}, # cachos armados gigantes
+	{"tp": 0.16, "sd": 0.14, "tx": "locs", "bk": "dreads", "fr": "braid_locks", "lk": 1.1, "sb": 0.2}, # dreads longos volumosos
+	{"tp": 0.12, "sd": 0.1, "tx": "locs", "bk": "dreads", "sb": 0.1, "fr": "band"}, # dreads com faixa
+	{"tp": 0.1, "sd": 0.1, "sb": 0.25, "bk": "long", "fr": "locks", "lk": 1.2, "fl": 3, "fr2": "band"}, # longo com faixa
+	{"tp": 0.26, "sd": 0.26, "sp": 3, "tx": "curl", "sb": 0.3, "bk": "curly_long", "fr": "band"}, # cacheado longo com faixa
+	{"tp": 0.06, "sd": 0.04, "bk": "pony", "gl": 0.2, "fr": "locks", "lk": 0.3, "fl": 3, "sb": 0.1}, # preso para trás com mechas soltas
+	{"tp": 0.08, "sd": 0.04, "fd": 1, "fl": 1, "bk": "rattail"}, # rabinho trançado na nuca
+	{"tp": 0.0, "sd": 0.0, "fd": 3, "sp": 4, "ck": "spikes"}, # moicano tingido de azul
+	{"tp": 0.1, "sd": 0.03, "fd": 1, "sp": 5, "fl": 1, "dz": 2, "dc": "#B8222C"}, # listra tingida de vermelho no meio
+	{"tp": 0.14, "sd": 0.0, "fd": 3, "gl": 0.5, "fl": 0, "fr": "shaved_part"}, # undercut para trás com risco
+	{"tp": 0.14, "sd": 0.0, "fd": 5, "tx": "coil", "fr": "sponge", "lu": 1}, # esponja descolorida
+	{"tp": 0.05, "sd": 0.02, "fd": 1, "tx": "braid", "op": 0.8, "fr": "bunches"}, # tufinhos trançados tingidos de verde
+	{"tp": 0.36, "sd": 0.28, "sp": 3, "tx": "coil", "sb": 0.42}, # black power com costeletas longas
+	{"tp": 0.16, "sd": 0.06, "gl": 0.55, "fl": 0, "bk": "mullet", "sb": 0.1}, # para trás volumoso até a nuca
+	{"tp": 0.12, "sd": 0.05, "sb": 0.05, "tx": "wavy", "bk": "long", "fl": 1, "fr": "part", "gl": 0.15}, # longo ondulado atrás das orelhas
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)
@@ -314,6 +345,8 @@ var _mesh_b := PackedVector2Array()
 var _blob_c := Vector2.ZERO
 var _blob_r := 1.0
 var _hair_style: Dictionary = {}
+## Cor da barba já com a tinta do estilo (descolorida), sem mexer na sobrancelha.
+var _bcol := Color.BLACK
 var _cap_in := PackedVector2Array()
 var _cap_out := PackedVector2Array()
 # Estampas prontas para imprimir no peito (texturas do DecalCache)
@@ -532,6 +565,7 @@ func _setup(c: Vector2, s: float) -> void:
 	_beard_p = FaceGen.BEARD_PARTS[clampi(int(f["beard"]), 0, FaceGen.BEARD_PARTS.size() - 1)]
 	_shadow_p = FaceGen.BEARD_PARTS[FaceGen.B_STUBBLE]
 	_hair_style = STYLE_P[clampi(int(f["style"]), 0, STYLE_P.size() - 1)]
+	_bcol = (f["beard_col"] as Color).lerp(Color("#E4D6AE"), float(_beard_p.get("bl", 0.0)))
 	_half = (_light + Vector3(0, 0, 1)).normalized()
 	_shadow_col = Color(0.2, 0.22, 0.28).lerp(_skin.darkened(0.5), 0.5)
 	var ag: float = f["aging"]
@@ -2554,6 +2588,12 @@ func _beard_dens(u: float, v: float, P: Dictionary, patches: bool = true) -> flo
 	if float(P.get("cut", 0.0)) > 0.0:
 		var cd := _seg_dist(Vector2(au, v), Vector2(0.78, 0.05), Vector2(0.52, 0.42))
 		d *= smoothstep(0.012, 0.028, cd)
+		if float(P["cut"]) >= 2.0:
+			# Dois riscos paralelos
+			d *= smoothstep(0.012, 0.028, _seg_dist(Vector2(au, v), Vector2(0.88, 0.16), Vector2(0.64, 0.5)))
+	# Risco raspado no meio do cavanhaque
+	if float(P.get("gap", 0.0)) > 0.0:
+		d *= lerpf(1.0, smoothstep(0.012, 0.026, au), smoothstep(_M + lip_l * 0.6, _M + lip_l + 0.05, v))
 	# Barba bifurcada: abre no meio, abaixo do queixo
 	var fk := float(P.get("fk", 0.0))
 	if fk > 0.0:
@@ -2598,7 +2638,7 @@ func _beard_mesh() -> void:
 	var P := _beard_p
 	var ln: float = P["ln"]
 	var op: float = P["op"]
-	var col: Color = f["beard_col"]
+	var col: Color = _bcol
 	var gray := clampf(float(f["gray"]) * 1.6, 0.0, 0.8)
 	var short := int(P["tx"]) == 0
 	# Barba rala: a malha é só uma sombra leve e contínua; quem desenha as falhas são os fios.
@@ -2637,7 +2677,12 @@ func _beard_mesh() -> void:
 func _beard_px(p: Vector2, P: Dictionary, col: Color, gray: float, short: bool, patchy: float, op: float) -> Color:
 	var q := _uv(p)
 	var dens := _beard_dens(q.x, q.y, P, false)
-	if dens <= 0.0:
+	# Estilo por cima (por fazer com cavanhaque): a outra barba entra cheia sobre a sombra
+	var d2 := 0.0
+	if P.has("ov"):
+		var P2: Dictionary = FaceGen.BEARD_PARTS[int(P["ov"])]
+		d2 = _beard_dens(q.x, q.y, P2, false) * float(P2["op"])
+	if dens <= 0.0 and d2 <= 0.0:
 		return Color(col, 0.0)
 	dens *= 1.0 - 0.5 * patchy * smoothstep(0.15, 0.45, absf(q.x))
 	var lum := 0.95 - 0.22 * clampf(q.x, -1.0, 1.0) - 0.2 * smoothstep(0.6, 1.3, q.y) + 0.12 * _g2(q.x + 0.3, q.y - 0.5, 0.3, 0.2)
@@ -2647,10 +2692,11 @@ func _beard_px(p: Vector2, P: Dictionary, col: Color, gray: float, short: bool, 
 	c = c.lerp(col.lightened(0.18).lerp(Color("#8A5A3A"), 0.15), 0.25 * smoothstep(0.7, 1.2, q.y) + 0.1 * smoothstep(0.4, 0.8, absf(q.x)))
 	# Os primeiros fios brancos aparecem nos cantos do queixo
 	c = c.lerp(Color("#D9D6D0"), gray * _g2(absf(q.x) - 0.3, q.y - 0.95, 0.16, 0.22))
+	var k2 := clampf(d2 / maxf(dens * op + d2, 0.001), 0.0, 1.0) if d2 > 0.0 else 0.0
 	if short:
 		# Barba por fazer vista de longe é uma sombra fria na pele, não uma mancha marrom
-		c = c.lerp(_shadow_col, 0.4)
-	return Color(c, dens * op)
+		c = c.lerp(_shadow_col, 0.4 * (1.0 - k2))
+	return Color(c, maxf(dens * op, d2))
 
 
 ## Tabela raio-por-ângulo de um contorno "estrelado" a partir de `center`.
@@ -2712,16 +2758,24 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 	if _beard_data.size() < 3:
 		return
 	if float(_beard_p.get("wild", 0.0)) > 0.0:
-		var wc: Color = _f["beard_col"]
+		var wc: Color = _bcol
 		for i in int(40 * clampf(_det, 0.4, 1.6)):
 			var a := rng.randf_range(0.15, PI - 0.15)
 			var r := rng.randf_range(0.85, 1.35)
 			var p := _px(cos(a) * float(_f["cheek_w"]) * r * 0.9, 0.55 + sin(a) * (0.55 + float(_beard_p["ln"])) * r)
 			var dir := Vector2(cos(a), sin(a) * 1.2).normalized()
 			_r_line(_cl(p), _cl(p + dir * _s * rng.randf_range(0.015, 0.035)), Color(wc.lightened(rng.randf_range(0.0, 0.2)), 0.35), maxf(0.6, _s * 0.003), true)
+	_beard_strands(rng, _beard_p)
+	if _beard_p.has("ov"):
+		_beard_strands(rng, FaceGen.BEARD_PARTS[int(_beard_p["ov"])])
+	if float(_beard_p.get("brd", 0.0)) > 0.0:
+		_beard_braid(float(_beard_p["brd"]))
+
+
+## Fios da barba `P` sobre a malha já montada.
+func _beard_strands(rng: RandomNumberGenerator, P: Dictionary) -> void:
 	var f := _f
-	var P := _beard_p
-	var col: Color = f["beard_col"]
+	var col: Color = _bcol
 	var ln: float = P["ln"]
 	var op: float = P["op"]
 	var tx: int = int(P["tx"])
@@ -2781,7 +2835,38 @@ func _beard_hairs(rng: RandomNumberGenerator) -> void:
 		var c := col.lightened(rng.randf_range(0.05, 0.2)) if light else col.darkened(rng.randf_range(0.05, 0.25))
 		var mid := p + dir * length * 0.5 + bend
 		var a := rng.randf_range(0.22, 0.5) * op * (0.45 + 0.55 * minf(dp, maxf(dt, 0.2)))
+		if float(P.get("cr", 0.0)) > 0.0:
+			# Barba crespa/cacheada: voltinhas curtas em vez de fios retos
+			var r := _s * rng.randf_range(0.004, 0.007) * (1.0 + ln * 1.2)
+			var a0 := rng.randf() * TAU
+			_r_arc(p + dir * r, r, a0, a0 + PI * 1.4, 6, Color(c, minf(1.0, a * 1.5)), w, true)
+			continue
 		_r_polyline(PackedVector2Array([p, mid, tip]), Color(c, a), w * 0.85, true)
+
+
+## Trança pendurada no queixo (cavanhaque ou barba longa trançada).
+func _beard_braid(extra: float) -> void:
+	var ln: float = float(_beard_p["ln"])
+	var col := _bcol
+	var top := _px(0.0, 1.0 + ln * 0.55)
+	var bot := _px(0.03, 1.08 + ln * 0.9 + extra)
+	var n := 5 + int(extra * 10.0)
+	var seg := (bot - top) / float(n)
+	var hw := _fw * 0.075
+	var w := maxf(0.7, _s * 0.004)
+	for k in n:
+		var c := top + seg * (float(k) + 0.5)
+		var side := 1.0 if k % 2 == 0 else -1.0
+		var sz := hw * lerpf(1.0, 0.7, float(k) / n)
+		var e := _ellipse(_cl(c + Vector2(side * sz * 0.3, 0.0)), sz, seg.length() * 0.62, 10)
+		_fill(e, col.darkened(0.12 + 0.1 * float(k % 2)))
+		_r_line(_cl(c + Vector2(-side * sz * 0.5, -seg.y * 0.35)), _cl(c + Vector2(side * sz * 0.7, seg.y * 0.3)), Color(col.lightened(0.25), 0.5), w, true)
+		_r_line(_cl(c + Vector2(-side * sz * 0.8, seg.y * 0.1)), _cl(c + Vector2(side * sz * 0.2, seg.y * 0.5)), Color(col.darkened(0.45), 0.45), w, true)
+	# Elástico e a pontinha solta
+	_r_line(_cl(bot + Vector2(-hw * 0.6, -seg.y * 0.1)), _cl(bot + Vector2(hw * 0.6, -seg.y * 0.1)), Color("#2A2A30"), maxf(1.0, _s * 0.009), true)
+	for i in 5:
+		var x := lerpf(-0.5, 0.5, i / 4.0) * hw
+		_r_line(_cl(bot + Vector2(x * 0.6, 0)), _cl(bot + Vector2(x, _fh * 0.06)), Color(col.darkened(0.1), 0.7), w * 1.2, true)
 
 
 # ---------------------------------------------------------------------------
@@ -2810,6 +2895,15 @@ func _hair_col(p: Vector2, w: float, t: float, gloss: float) -> Color:
 	c = c.lerp(hair.lightened(0.55).lerp(Color(0.8, 0.8, 0.85), 0.15 if hair.v < 0.2 else 0.0), clampf(sheen * gl, 0.0, 0.7))
 	if bool(f["tips"]):
 		c = c.lerp(Color("#E2C98C"), smoothstep(0.35, 0.95, w) * 0.85)
+	var dz := int(_hs("dz", 0))
+	if dz > 0:
+		# Parte tingida: 1 = só o alto (laterais escuras), 2 = uma listra no meio da cabeça
+		var hq := -q.y
+		var k := smoothstep(0.5, 0.64, hq) if dz == 1 else (1.0 - smoothstep(0.13, 0.19, absf(q.x))) * smoothstep(0.3, 0.45, hq)
+		if k > 0.0:
+			var dcol := Color(String(_hs("dc", "#E4D6AE")))
+			var dy := dcol.lerp(Color.BLACK, clampf((1.0 - lum) * 0.6, 0.0, 0.8)).lerp(dcol.lightened(0.35), clampf(sheen * 0.6, 0.0, 0.5))
+			c = c.lerp(dy, k * 0.95)
 	return c
 
 
@@ -2825,13 +2919,13 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 		2:
 			a *= lerpf(0.1, 1.0, smoothstep(0.35, 0.72, h))
 		3:
-			a *= lerpf(0.16, 1.0, smoothstep(0.62, 0.7, h))
+			a *= lerpf(float(_hs("sa", 0.16)), 1.0, smoothstep(0.62, 0.7, h))
 		4: # burst: raspado em volta da orelha, cheio no alto e na nuca
 			a *= lerpf(0.1, 1.0, maxf(smoothstep(0.3, 0.55, h), 1.0 - smoothstep(0.55, 0.8, absf(q.x))))
 		5: # navalhado: pele lisa nas laterais e transição curta
 			a *= lerpf(0.02, 1.0, smoothstep(0.52, 0.64, h))
 	if int(_hs("sp", 0)) == 4:
-		a *= lerpf(0.14, 1.0, 1.0 - smoothstep(0.22, 0.3, absf(q.x)))
+		a *= lerpf(float(_hs("sa", 0.14)), 1.0, 1.0 - smoothstep(0.22, 0.3, absf(q.x)))
 	var crown: float = f["crown"]
 	if crown > 0.0:
 		a *= 1.0 - minf(1.0, crown * 1.3) * _g(q.x, 0.7) * smoothstep(0.35, 0.8, h) * smoothstep(0.05, 0.4, w)
@@ -3007,8 +3101,8 @@ func _front_hair(rng: RandomNumberGenerator, hair: Color) -> void:
 					_tuft(base, tip, _fw * rng.randf_range(0.06, 0.08), rng.randf_range(-0.25, 0.25), tc)
 		4:
 			var hl0: float = float(f["hairline"])
-			var faux := int(_hs("fd", 0)) != 3
-			var h := (0.16 + float(f["vol"]) * 0.12) * (0.55 if faux else 1.0)
+			var faux := int(_hs("fd", 0)) != 3 and int(_hs("mk", 0)) == 0
+			var h := (0.16 + float(f["vol"]) * 0.12) * (0.55 if faux else 1.0) * float(_hs("hh", 1.0))
 			var cw := 1.7 if faux else 1.0
 			var shape := [Vector2(-0.2 * cw, hl0 + 0.02), Vector2(-0.25 * cw, -0.75), Vector2(-0.22 * cw, -1.05 - h * 0.6), Vector2(-0.1, -1.05 - h), Vector2(0.1, -1.05 - h), Vector2(0.22 * cw, -1.05 - h * 0.6), Vector2(0.25 * cw, -0.75), Vector2(0.2 * cw, hl0 + 0.02)]
 			if faux:
@@ -3567,6 +3661,72 @@ func _front_piece(rng: RandomNumberGenerator, kind: String, hair: Color, gloss: 
 				_r_arc(_cl(p), r * 0.55, PI * 1.05, PI * 1.85, 6, Color(bc.lightened(0.28), 0.6), maxf(0.6, _s * 0.0035), true)
 		"side_fringe_long":
 			_swoop(rng, hair, gloss, hl, true)
+		"design_both":
+			# Desenhos raspados nas duas laterais: três riscos em zigue-zague de cada lado
+			var lw := maxf(1.0, _s * 0.008)
+			for side: float in [-1.0, 1.0]:
+				for k in 3:
+					var pts := PackedVector2Array()
+					for i in 9:
+						var t := float(i) / 8.0
+						var tc := 0.1 + 0.2 * t
+						var ww := 0.28 + k * 0.2 + 0.07 * (1.0 if i % 2 == 0 else -1.0) * float(k != 1) + 0.05 * sin(PI * t * 2.0) * float(k == 1)
+						pts.append(_cl(_cap_pt(tc if side < 0.0 else 1.0 - tc, ww)))
+					_r_polyline(pts, Color(_skin.lightened(0.08), 0.9), lw, true)
+		"halfmoon":
+			# Tufo em meia-lua na frente, com o resto da cabeça raspado
+			var hl0 := float(f["hairline"])
+			var pts := PackedVector2Array()
+			for i in 9:
+				var u := lerpf(-0.3, 0.3, float(i) / 8.0)
+				pts.append(_cl(_px(u, hl0 + 0.03 + 0.02 * sin(PI * float(i) / 8.0))))
+			for i in 15:
+				var a := float(i) / 14.0 * PI
+				pts.append(_cl(_px(0.31 * cos(a), hl0 - 0.03 - 0.36 * pow(sin(a), 0.8))))
+			var cen := _px(0.0, hl0 - 0.12)
+			_rim(_radial(cen, pts, _rings(4), func(p: Vector2, t: float, _i: int) -> Color:
+				var q := _uv(p)
+				var up := clampf((hl0 - q.y) / 0.36, 0.0, 1.0)
+				return Color(_hair_col(p, 0.3 + up * 0.55, float(_i) / 24.0, gloss + 0.1), 1.0 - smoothstep(0.8, 1.0, t) * 0.5)), pts.size(), 0.6)
+			_strands_in_poly(rng, pts, hair, Vector2(0.0, -1.0), 26)
+		"band":
+			# Faixa de cabelo (elástico) atravessando o alto da cabeça, um pouco atrás da linha do cabelo
+			var bcols := [Color("#EDEDED"), Color("#1B1B20"), Color("#B8202A"), Color("#2449A8")]
+			var bc: Color = bcols[int(f["hair_seed"]) % bcols.size()]
+			var lo := PackedVector2Array()
+			var hi := PackedVector2Array()
+			for i in 21:
+				var t := lerpf(0.06, 0.94, float(i) / 20.0)
+				lo.append(_cap_pt(t, 0.26))
+				hi.append(_cap_pt(t, 0.46))
+			_strip(lo, hi, 3, func(p: Vector2, t: float, ww: float) -> Color:
+				var q := _uv(p)
+				var lum := 0.8 + 0.25 * Vector2(q.x, q.y).normalized().dot(Vector2(-0.55, -0.83)) - 0.15 * absf(ww - 0.5)
+				return Color(bc.lerp(Color.BLACK, clampf(1.0 - lum, 0.0, 0.6)) if lum < 1.0 else bc.lightened(lum - 1.0), 0.97 * smoothstep(0.0, 0.04, t) * (1.0 - smoothstep(0.96, 1.0, t))))
+			_r_polyline(lo, Color(bc.darkened(0.45), 0.5), w, true)
+			_r_polyline(hi, Color(bc.darkened(0.3), 0.4), w, true)
+		"bunches":
+			# Tufinhos trançados espetados, presos com elástico na base
+			var hn := 6
+			for i in hn:
+				var t := lerpf(0.16, 0.84, float(i) / (hn - 1)) + rng.randf_range(-0.015, 0.015)
+				var base := _cap_pt(t, 0.8)
+				var out := (_cap_pt(t, 1.0) - _px(0.0, -0.2)).normalized()
+				var ln := _fw * rng.randf_range(0.2, 0.28)
+				var tip := base + out * ln
+				var th := _fw * 0.09
+				var bc := _hair_col(base, 0.8, t, 0.1)
+				var segs := 4
+				for k in segs:
+					var a := base.lerp(tip, float(k) / segs)
+					var b := base.lerp(tip, float(k + 1) / segs)
+					var m := a.lerp(b, 0.5)
+					var sz := th * lerpf(1.0, 0.6, float(k) / segs)
+					_fill(_ellipse(_cl(m), sz, (b - a).length() * 0.6, 8), bc.darkened(0.1 + 0.1 * float(k % 2)))
+					var side := (b - a).orthogonal().normalized() * sz * 0.7
+					_r_line(_cl(a - side), _cl(b + side * 0.3), Color(bc.lightened(0.3), 0.5), w, true)
+				_r_circle(_cl(tip + out * th * 0.3), th * 0.45, bc.darkened(0.15))
+				_r_line(_cl(base - out.orthogonal() * th * 0.9), _cl(base + out.orthogonal() * th * 0.9), Color("#1A1A1E"), maxf(1.0, _s * 0.008), true)
 		"twists", "locs_top":
 			# Mechas curtas torcidas, caindo a partir do alto da cabeça
 			var n := int(22 * clampf(_det, 0.5, 1.4))
@@ -3712,6 +3872,53 @@ func _back_hair(rng: RandomNumberGenerator) -> void:
 				var a := TAU * i / 48.0
 				var p := cen + Vector2(cos(a), sin(a) * 0.95) * _fw * r * 0.98
 				_r_circle(_cl(p), _fw * r * 0.07, _hair_col(p, 0.9, float(i) / 48.0, 0.0))
+		"afro_curl":
+			# Cabeleira cacheada gigante: bola de cachos grandes que desce até a altura do queixo
+			var r := (1.4 + float(f["vol"]) * 0.15) * float(_hs("ar", 1.0))
+			var cen := _px(0.0, -0.2)
+			var ry := r * 1.0
+			_blob(cen, _fw * r, _fw * ry, 0.0, 0.5, float(int(f["hair_seed"]) % 100))
+			for i in int(160 * clampf(_det, 0.4, 1.6)):
+				var a := rng.randf() * TAU
+				var rr := sqrt(rng.randf()) * 0.97
+				var p := cen + Vector2(cos(a) * _fw * r, sin(a) * _fw * ry) * rr
+				var cr := _fw * rng.randf_range(0.07, 0.11)
+				var bc := _hair_col(p, 0.35 + 0.6 * rr, float(i) / 160.0, 0.0).darkened(0.18)
+				_fill(_ellipse(_cl(p + Vector2(cr * 0.15, cr * 0.3)), cr, cr * 0.85, 10), Color(hair.darkened(0.55), 0.25))
+				_fill(_ellipse(_cl(p), cr * 0.92, cr * 0.8, 10), Color(bc, 0.92))
+				var a0 := rng.randf() * TAU
+				_r_arc(_cl(p), cr * 0.58, PI * 1.05 + a0 * 0.2, PI * 1.8 + a0 * 0.2, 6, Color(bc.lightened(0.28), 0.45), maxf(0.7, _s * 0.004), true)
+				if rng.randf() < 0.5:
+					_r_arc(_cl(p), cr * 0.3, a0, a0 + PI, 5, Color(hair.darkened(0.4), 0.4), maxf(0.6, _s * 0.0035), true)
+			for i in 44:
+				var a := TAU * i / 44.0
+				var p := cen + Vector2(cos(a) * _fw * r, sin(a) * _fw * ry) * 0.97
+				var cr := _fw * rng.randf_range(0.08, 0.12)
+				var bc := _hair_col(p, 0.9, float(i) / 44.0, 0.0).darkened(0.2)
+				_fill(_ellipse(_cl(p), cr, cr * 0.85, 10), bc)
+				_r_arc(_cl(p), cr * 0.55, PI * 1.1, PI * 1.8, 6, Color(bc.lightened(0.25), 0.45), maxf(0.7, _s * 0.004), true)
+		"rattail":
+			# Rabinho trançado fino que desce da nuca por cima do ombro
+			var pts := PackedVector2Array()
+			for i in 9:
+				var t := float(i) / 8.0
+				pts.append(_px(0.62 + 0.3 * t + 0.04 * sin(t * PI), 0.35 + 0.85 * t))
+			var th := _fw * 0.07
+			var w := maxf(0.7, _s * 0.004)
+			for k in 8:
+				var a := pts[k]
+				var b := pts[k + 1]
+				var m := a.lerp(b, 0.5)
+				var sz := th * lerpf(1.0, 0.65, float(k) / 8.0)
+				var bc := _hair_col(m, 0.6, float(k) / 8.0, gloss).darkened(0.15 + 0.1 * float(k % 2))
+				_fill(_ellipse(_cl(m), sz, (b - a).length() * 0.62, 8), bc)
+				var side := (b - a).orthogonal().normalized() * sz * 0.7 * (1.0 if k % 2 == 0 else -1.0)
+				_r_line(_cl(a - side), _cl(b + side * 0.3), Color(bc.lightened(0.3), 0.5), w, true)
+			var end := pts[8]
+			_r_line(_cl(end + Vector2(-th * 0.6, 0)), _cl(end + Vector2(th * 0.6, 0)), Color("#1A1A1E"), maxf(1.0, _s * 0.008), true)
+			for i in 4:
+				var x := lerpf(-0.5, 0.5, i / 3.0) * th
+				_r_line(_cl(end), _cl(end + Vector2(x, _fh * 0.07)), Color(hair.darkened(0.1), 0.7), w, true)
 		"dreads", "braids":
 			var braids := String(_hs("bk", "")) == "braids"
 			var n := 18 if braids else 15
