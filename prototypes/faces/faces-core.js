@@ -79,7 +79,8 @@
   function makeGenome(seed, opts = {}) {
     const r = makeRng(typeof seed === "number" ? seed : hash32(String(seed)))
     const sex = opts.sex || (r.chance(0.5) ? "F" : "M")
-    const anc = ANCESTRY[opts.ancestry || r.pick(Object.keys(ANCESTRY))]
+    const ancestry = opts.ancestry || r.pick(Object.keys(ANCESTRY))
+    const anc = ANCESTRY[ancestry]
     const z = {}
     for (const k of Z_KEYS) z[k] = r.z()
     z.lidFold = clamp(anc.lid + r.z(0.6), -2.6, 2.6)
@@ -139,6 +140,8 @@
     g.pref = defaultPrefs(g, r)
     if (opts.hair) g.pref.hair = opts.hair
     if (opts.beard) g.pref.beard = opts.beard
+    Object.assign(g.body, bodyTraits(g))
+    g.ancestry = { [ancestry]: 1 }
     return g
   }
 
@@ -182,6 +185,14 @@
       pref: {},
     }
     g.pref = defaultPrefs(g, r)
+    const inheritedBody = makeRng(hash32(g.id + ":body:inherit"))
+    const mb = bodyTraits(mother), fb = bodyTraits(father)
+    for (const key of Object.keys(mb)) {
+      g.body[key] = clamp((mb[key] + fb[key]) / 2 + inheritedBody.normal() * 0.12, 0, 1)
+    }
+    const ma = mother.ancestry || {}, fa = father.ancestry || {}
+    g.ancestry = Object.fromEntries([...new Set([...Object.keys(ma), ...Object.keys(fa)])].map(k => [k, ((ma[k] || 0) + (fa[k] || 0)) / 2]))
+    g.parents = [mother.id, father.id]
     return g
   }
 
@@ -381,6 +392,8 @@
         ? ["black-power-curto", "maquina-2", "degrade-navalhado", "twists-curtos", "dreads-curtos", "dreads-longos", "black-power", "raspado-zero", "trancas-nago", "flat-top"]
         : ["social-curto", "risca-lado", "topete", "militar", "crop-texturizado", "degrade-navalhado", "undercut", "espetado", "lambido", "cesar", "surfista", "cortina", "atras-orelha", "coque-masculino", "maquina-2", "mullet", "pompadour", "longo-liso", "cacheado-curto"]
     }
+    const additional = HAIR_STYLES.filter(s => s.catalogTexture != null && (F ? s.len > .4 : s.len < .9) && (tex > 2 ? s.special || s.catalogTexture >= 2 : !s.special)).map(s => s.id)
+    pool = [...pool, ...additional]
     const beards = BEARD_STYLES.map((b) => b.id)
     return {
       hair: r.pick(pool),
@@ -404,7 +417,14 @@
       const kidM = tex > 2 ? ["black-power-curto", "maquina-2", "twists-curtos"] : ["infantil-franjinha", "infantil-arrepiado", "tigela", "social-curto", "maquina-2"]
       return HAIR_BY_ID[r.pick(g.sex === "F" ? kidF : kidM)]
     }
+    const balding = sexBalding(g, age)
+    if (balding > 0.78) return HAIR_BY_ID.calvo
+    if (balding > 0.4) return HAIR_BY_ID["calvo-ralo"]
     return HAIR_BY_ID[g.pref.hair]
+  }
+
+  function sexBalding(g, age) {
+    return g.sex === "M" ? smooth(g.hair.baldOnset, g.hair.baldOnset + 30, age) * g.hair.bald : 0
   }
 
   // ---------- geometria dependente de idade/peso ----------
@@ -451,7 +471,7 @@
     const mouthY = noseY + Ht * lerp(0.07, 0.08, gr) * (1 + 0.06 * z.mouthY) + old * 2
     const eyeW = rx * 2 * lerp(0.225, 0.2, gr) * (1 + 0.06 * z.eyeSize) * (1 - old * 0.05)
     const eyeOff = eyeW * (1.0 + 0.1 * z.eyeSpace) * lerp(0.98, 1, gr)
-    const open = clamp(lerp(0.54, 0.4, gr) * (1 + 0.11 * z.eyeOpen) - old * 0.07 - fat * 0.05, 0.18, 0.6)
+    const open = clamp(lerp(0.43, 0.29, gr) * (1 + 0.13 * z.eyeOpen) - old * 0.045 - fat * 0.035, 0.15, 0.48)
     const hairlineY = browY - (chinY - browY) * lerp(0.66, 0.45, gr) * (1 + 0.1 * z.forehead)
 
     const jowl = old * (0.4 + fat * 0.8)
@@ -489,8 +509,8 @@
     const shoulderW = rx * lerp(1.55, F ? 2.05 : 2.35, gr) * (1 + fat * 0.28)
 
     const earH = (noseY - browY) * (1 + 0.08 * z.earSize) * (1 + old * 0.14) * lerp(1.08, 1, gr)
-    const earW = earH * 0.5
-    const earOut = 0.15 + 0.12 * z.earOut
+    const earW = earH * 0.36
+    const earOut = clamp(0.12 + 0.07 * z.earOut, 0.02, 0.38)
 
     const mouthW = eyeW * 2 * 0.74 * (1 + 0.07 * z.mouthW) * lerp(0.72, 1, gr) + fat * 2
     const lipU = mouthW * 0.13 * (1 + 0.22 * z.lipU) * (1 - old * 0.4) * (F ? 1.1 : 1)
@@ -551,9 +571,44 @@
     return adult * f - shrink
   }
 
+  // Independent stream: new body traits never change the existing face genome.
+  function bodyTraits(g) {
+    const r = makeRng(hash32(g.id + ":body"))
+    const traits = {}
+    for (const key of ["muscle", "frame", "shoulders", "hips", "legLength", "armLength", "waist", "posture"]) {
+      traits[key] = g.body[key] ?? clamp(0.5 + r.normal() * 0.16)
+    }
+    return traits
+  }
+
+  // Normalized anatomy, shared by the renderer and future simulation adapters.
+  function bodyLayout(g, opts = {}) {
+    const age = clamp(opts.age ?? 30, 0, 110)
+    const b = bodyTraits(g), adult = smooth(3, 19, age), puberty = smooth(10, 19, age)
+    const old = smooth(55, 105, age), F = g.sex === "F"
+    const fat = bodyFatAt(g, age, opts.fat)
+    const muscle = clamp(opts.muscle ?? b.muscle) * smooth(5, 19, age) * (1 - old * 0.4)
+    const head = lerp(0.25, 0.132, adult)
+    const shoulders = lerp(0.105, F ? 0.113 : 0.133, adult) + b.shoulders * 0.018 + muscle * 0.022 + fat * 0.013
+    const hips = lerp(0.098, F ? 0.121 : 0.103, puberty) + b.hips * 0.013 + fat * 0.032
+    const waist = lerp(0.091, F ? 0.076 : 0.086, puberty) + b.waist * 0.012 + fat * 0.067 + muscle * 0.008
+    const crotch = lerp(0.61, 0.505 + (0.5 - b.legLength) * 0.055, adult)
+    return {
+      age, adult, old, fat, muscle, F, height: heightCm(g, age), head, shoulders, hips, waist,
+      chest: shoulders * 0.83 + fat * 0.02, neck: lerp(0.034, 0.027, adult) + fat * 0.012 + muscle * 0.006,
+      shoulderY: head + lerp(0.028, 0.043, adult), chestY: lerp(0.38, 0.285, adult),
+      waistY: crotch - 0.12, hipY: crotch - 0.041, crotch,
+      kneeY: crotch + (0.956 - crotch) * 0.53, ankleY: 0.956,
+      upperArm: 0.022 + fat * 0.02 + muscle * 0.014, wrist: 0.013 + fat * 0.004,
+      thigh: 0.038 + fat * 0.028 + muscle * 0.011, calf: 0.023 + fat * 0.012 + muscle * 0.009,
+      elbowY: crotch - 0.13, wristY: crotch + 0.065 + (b.armLength - 0.5) * 0.035,
+      stoop: old * 0.026 + (b.posture - 0.5) * 0.007,
+    }
+  }
+
   root.FaceCore = {
     clamp, lerp, smooth, hash32, makeRng, makeGenome, childGenome, phenotype, skinRGB, hairRGB, eyeRGB,
     HAIR_STYLES, BEARD_STYLES, HAIR_BY_ID, BEARD_BY_ID, hairForAge, layout, faceHalfWidth, catmull, bodyFatAt, heightCm,
-    ANCESTRY,
+    ANCESTRY, bodyTraits, bodyLayout,
   }
 })(typeof window !== "undefined" ? window : globalThis)
