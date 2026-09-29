@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/screens/match_screen.gd" id="1_screen"]
+[ext_resource type="Script" path="res://scripts/ui/screens/mobile_match_screen.gd" id="1_screen"]
 
 [node name="MatchScreen" type="Control"]
 layout_mode = 3

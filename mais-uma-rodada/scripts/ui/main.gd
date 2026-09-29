@@ -1,6 +1,5 @@
 extends Control
-## Raiz da interface: fundo, área segura (notch/barras do Android), barra superior,
-## área das telas, navegação inferior e camadas de modais/toasts.
+## Raiz da interface: área segura, navegação e relayout coalescido fora do sinal de resize.
 
 @onready var safe_area: MarginContainer = $SafeArea
 @onready var top_bar: TopBar = $SafeArea/Layout/TopBar
@@ -12,32 +11,44 @@ extends Control
 
 var _safe := Rect2()
 var _keyboard_up := false
-var _wake_id := 0
 var _shadow: TextureRect
 var _fade: TextureRect
 var _size_class := -1
-## Partida ao vivo na tela: desenho contínuo no ritmo da tela (fora dela, o modo econômico).
 var _live := false
-## Modo econômico pedido ao abrir (o do projeto; as ferramentas de captura o desligam antes).
 var _lp_wanted := true
+var _layout_pending := false
+var _refresh_pending := false
+var _last_landscape := false
+var _guard_elapsed := 0.0
+var _wake_pending := false
+var _wake_timer: Timer
+const GUARD_INTERVAL := 0.15
+const MOBILE_PORTRAIT_LAYERS := 240
 
 
 func _ready() -> void:
 	UIManager.register_main(self)
 	_lp_wanted = OS.low_processor_usage_mode
+	if OS.has_feature("mobile"):
+		Engine.max_fps = 60
 	UIColors.set_light(AppSettings.wants_light())
-	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
+	_configure_window()
+	UILayout.viewport = get_viewport_rect().size
 	$Background.color = UIColors.BG
 	add_child(TouchScroll.new())
 	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
 	_fade = _edge(Color(UIColors.BG, 0.0), Color(UIColors.BG, 0.92))
-	# Tocar na barra superior leva a tela de volta ao topo.
+	_wake_timer = Timer.new()
+	_wake_timer.one_shot = true
+	_wake_timer.wait_time = 1.5
+	_wake_timer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_wake_timer)
+	_wake_timer.timeout.connect(_finish_wake)
 	top_bar.gui_input.connect(func(ev: InputEvent):
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 			var cur := UIManager.current()
-			if cur != null:
+			if is_instance_valid(cur):
 				cur.scroll_to_top())
-	get_viewport().size_changed.connect(_update_safe_area)
 	get_viewport().size_changed.connect(_update_layout)
 	_update_safe_area()
 	_update_layout()
@@ -49,7 +60,23 @@ func _ready() -> void:
 	UIManager.goto("menu")
 
 
-## Depois de trocar entre claro e escuro: fundo, esmaecido do pé e barras redesenhados.
+func _configure_window() -> bool:
+	var window := get_tree().root
+	if window.size.x <= 0 or window.size.y <= 0:
+		return false
+	var base := UILayout.base_size_for(window.size, UILayout.is_tablet())
+	var index := clampi(AppSettings.ui_scale, 0, AppSettings.UI_SCALES.size() - 1)
+	var factor: float = AppSettings.UI_SCALES[index] * UILayout.device_scale()
+	var changed := false
+	if window.content_scale_size != base:
+		window.content_scale_size = base
+		changed = true
+	if not is_equal_approx(window.content_scale_factor, factor):
+		window.content_scale_factor = factor
+		changed = true
+	return changed
+
+
 func restyle() -> void:
 	$Background.color = UIColors.BG
 	var g := (_fade.texture as GradientTexture2D).gradient
@@ -59,11 +86,6 @@ func restyle() -> void:
 	UIManager._redraw_tree(self)
 
 
-
-
-## Bordas da área rolável: uma sombra sob a barra superior quando o conteúdo rolou por
-## baixo dela, e um esmaecido no pé quando ainda há conteúdo abaixo (sinal de que dá para
-## descer).
 func _edge(from: Color, to: Color) -> TextureRect:
 	var g := Gradient.new()
 	g.set_color(0, from)
@@ -85,13 +107,18 @@ func _edge(from: Color, to: Color) -> TextureRect:
 	return r
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var cur := UIManager.current()
-	_guard_layout(cur)
-	var sc: ScrollContainer = cur.scroll() if cur != null else null
+	_guard_elapsed += delta
+	if _guard_elapsed >= GUARD_INTERVAL:
+		_guard_elapsed = 0.0
+		_guard_layout(cur)
+		if OS.has_feature("mobile"):
+			_trim_portrait_cache(MOBILE_PORTRAIT_LAYERS)
+	var sc: ScrollContainer = cur.scroll() if is_instance_valid(cur) else null
 	var top := 0.0
 	var bottom := 0.0
-	if sc != null and sc.is_visible_in_tree():
+	if is_instance_valid(sc) and sc.is_visible_in_tree():
 		var area := Rect2(sc.get_global_rect().position - screen_host.global_position, sc.size)
 		_shadow.position = area.position
 		_shadow.size = Vector2(area.size.x, 18)
@@ -104,9 +131,6 @@ func _process(_delta: float) -> void:
 	_ease_alpha(_fade, bottom)
 
 
-## Proteção contra a "tela com zoom": nada pode ficar maior que o espaço que tem. A raiz volta
-## ao tamanho da janela, a tela atual ao tamanho da área das telas (textos que empurravam a
-## largura passam a cortar com "…") e, quando o teclado do celular fecha, tudo é recalculado.
 func _guard_layout(cur: BaseScreen) -> void:
 	var vp := get_viewport_rect().size
 	if not size.is_equal_approx(vp) or not position.is_zero_approx():
@@ -117,10 +141,12 @@ func _guard_layout(cur: BaseScreen) -> void:
 		if _keyboard_up and not up:
 			_relayout()
 		_keyboard_up = up
-	if cur == null or not cur.is_visible_in_tree():
+	if not is_instance_valid(cur) or not cur.is_visible_in_tree() or cur.is_queued_for_deletion():
 		return
 	var host_w := screen_host.size.x
-	if host_w > 0.0 and (cur.size.x > host_w + 0.5 or UIKit.layout_need(cur) > host_w + 0.5):
+	# get_combined_minimum_size usa o cache do Control. A versão anterior percorria
+	# recursivamente todos os descendentes com UIKit.layout_need a cada quadro.
+	if host_w > 0.0 and (cur.size.x > host_w + 0.5 or cur.get_combined_minimum_size().x > host_w + 0.5):
 		UIKit.fit_width(cur, host_w)
 		var px := cur.position.x
 		cur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -130,11 +156,11 @@ func _guard_layout(cur: BaseScreen) -> void:
 
 
 func _relayout() -> void:
-	_update_safe_area()
+	_update_layout()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	safe_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var cur := UIManager.current()
-	if cur != null:
+	if is_instance_valid(cur):
 		cur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
@@ -145,41 +171,62 @@ func _ease_alpha(r: TextureRect, want: float) -> void:
 
 func _on_tab(tab: String) -> void:
 	var cur := UIManager.current()
-	if cur != null and cur.screen_name == tab:
+	if is_instance_valid(cur) and cur.screen_name == tab:
 		cur.scroll_to_top()
 		return
 	UIManager.goto(tab)
 
 
-## Responsivo: mede o viewport e, ao cruzar um ponto de quebra, leva a navegação para a
-## lateral (telas largas) ou de volta para baixo, e reconstrói a tela atual.
+## Resize pode ser emitido de novo quando a escala muda. Nunca reconstruir a árvore
+## dentro desse sinal; agrupar notificações e aplicar depois que o viewport estabilizar.
 func _update_layout() -> void:
-	# Tablet girado: a escala de retrato e a de paisagem são diferentes
-	var want := AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
-	if not is_equal_approx(get_tree().root.content_scale_factor, want):
-		get_tree().root.content_scale_factor = want
-	UILayout.viewport = get_viewport_rect().size
-	var sc := UILayout.size_class()
-	if sc == _size_class:
+	if _layout_pending or not is_inside_tree():
 		return
+	_layout_pending = true
+	_apply_layout.call_deferred()
+
+
+func _apply_layout() -> void:
+	_layout_pending = false
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	if _configure_window():
+		_update_layout()
+		return
+	UILayout.viewport = get_viewport_rect().size
+	_update_safe_area()
+	var sc := UILayout.size_class()
+	var landscape := UILayout.is_landscape()
 	var first := _size_class < 0
+	var changed := sc != _size_class or landscape != _last_landscape
 	_size_class = sc
+	_last_landscape = landscape
+	if not changed:
+		return
 	var wide := sc != UILayout.COMPACT
-	var layout := $SafeArea/Layout
-	bottom_nav.get_parent().remove_child(bottom_nav)
-	if wide:
-		middle.add_child(bottom_nav)
-		middle.move_child(bottom_nav, 0)
-	else:
-		layout.add_child(bottom_nav)
+	var target: Node = middle if wide else $SafeArea/Layout
+	if bottom_nav.get_parent() != target:
+		bottom_nav.reparent(target, false)
+		if wide:
+			target.move_child(bottom_nav, 0)
 	bottom_nav.set_vertical(wide)
-	if not first:
-		var cur := UIManager.current()
-		if cur != null:
-			cur.refresh.call_deferred()
+	if not first and not _refresh_pending:
+		_refresh_pending = true
+		_refresh_current_layout.call_deferred()
 
 
-## Margens seguras (em coordenadas do viewport): position.y = topo, size.y = base.
+func _refresh_current_layout() -> void:
+	_refresh_pending = false
+	var cur := UIManager.current()
+	if not is_instance_valid(cur) or cur.is_queued_for_deletion():
+		return
+	var sc := cur.scroll()
+	var old_scroll := sc.scroll_vertical if is_instance_valid(sc) else 0
+	cur.refresh()
+	if is_instance_valid(sc):
+		sc.set_deferred("scroll_vertical", old_scroll)
+
+
 func safe_margins() -> Rect2:
 	return _safe
 
@@ -191,24 +238,24 @@ func _update_safe_area() -> void:
 	var bottom := 0.0
 	var left := 0.0
 	var right := 0.0
-	if OS.has_feature("mobile") and win_size.x > 0:
-		var safe := Rect2(DisplayServer.get_display_safe_area())
-		var k := vp_size.x / win_size.x
-		top = safe.position.y * k
-		left = safe.position.x * k
-		bottom = maxf(0.0, (win_size.y - safe.end.y) * k)
-		right = maxf(0.0, (win_size.x - safe.end.x) * k)
+	if OS.has_feature("mobile") and win_size.x > 0.0 and win_size.y > 0.0:
+		var safe := Rect2(DisplayServer.get_display_safe_area()).intersection(Rect2(Vector2.ZERO, win_size))
+		if safe.has_area():
+			var k := vp_size / win_size
+			top = maxf(0.0, safe.position.y * k.y)
+			left = maxf(0.0, safe.position.x * k.x)
+			bottom = maxf(0.0, (win_size.y - safe.end.y) * k.y)
+			right = maxf(0.0, (win_size.x - safe.end.x) * k.x)
 	_safe = Rect2(left, top, right, bottom)
-	safe_area.add_theme_constant_override(&"margin_top", int(top))
-	safe_area.add_theme_constant_override(&"margin_bottom", int(bottom))
-	safe_area.add_theme_constant_override(&"margin_left", int(left))
-	safe_area.add_theme_constant_override(&"margin_right", int(right))
+	for entry in [[&"margin_top", top], [&"margin_bottom", bottom], [&"margin_left", left], [&"margin_right", right]]:
+		var value := int(entry[1])
+		if safe_area.get_theme_constant(entry[0]) != value:
+			safe_area.add_theme_constant_override(entry[0], value)
 
 
 func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
-	# Interface nas cores do clube durante a carreira (dourado no menu)
 	UIColors.apply_context(GameManager.user_club() if GameManager.has_career() else null, screen.color_context() if GameManager.has_career() else {})
-	if $Background.color != UIColors.BG: # fundo tingido acompanha a cor do contexto
+	if $Background.color != UIColors.BG:
 		$Background.color = UIColors.BG
 		var g := (_fade.texture as GradientTexture2D).gradient
 		g.set_color(0, Color(UIColors.BG, 0.0))
@@ -222,43 +269,55 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+	if not is_node_ready():
+		return
+	if what == NOTIFICATION_OS_MEMORY_WARNING:
+		# São somente comandos de desenho regeneráveis, nunca dados da carreira.
+		_trim_portrait_cache(0)
+	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		UIManager.handle_back()
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		_wake_render()
-		_relayout.call_deferred()
-		# Tema "do aparelho": o sistema pode ter trocado entre claro e escuro.
+		if not _wake_pending:
+			_wake_pending = true
+			_wake_render.call_deferred()
+		_relayout()
 		if AppSettings.theme_mode == AppSettings.THEME_SYSTEM and AppSettings.wants_light() != UIColors.light:
 			UIManager.apply_look.call_deferred()
 
 
-## Na volta do segundo plano o Android recria a superfície de desenho. Com o modo de baixo
-## processamento o Godot só redesenha quando algo muda, e a tela ficava preta até um toque: aqui
-## desenha continuamente por um instante, redesenha tudo e repinta as estampas em cache.
+func _trim_portrait_cache(limit: int) -> void:
+	# Cache de três camadas por retrato, originalmente limitado a 720 camadas.
+	# FIFO mantém o contrato do PortraitView e evita manter retratos antigos sem limite útil.
+	while PortraitView._cmd_cache_order.size() > limit:
+		PortraitView._cmd_cache.erase(PortraitView._cmd_cache_order.pop_front())
+	if limit == 0:
+		PortraitView._cmd_cache.clear()
+
+
 func _wake_render() -> void:
+	_wake_pending = false
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
 	OS.low_processor_usage_mode = false
 	DecalCache.refresh()
 	_redraw_all(get_tree().root)
-	_wake_id += 1
-	var id := _wake_id
-	get_tree().create_timer(1.5, true).timeout.connect(func():
-		if id == _wake_id and not _live:
-			OS.low_processor_usage_mode = _lp_wanted)
+	_wake_timer.start()
 
 
-## A partida ao vivo anima o tempo todo: sem o modo econômico ela roda no ritmo da tela (vsync);
-## nos menus o modo econômico volta e o jogo acorda no máximo ~80 vezes por segundo (era ~144).
-## Ao sair, volta ao estado de antes (ferramentas de captura desligam o modo econômico de propósito).
+func _finish_wake() -> void:
+	OS.low_processor_usage_mode = _lp_wanted and not _live
+
+
 func set_live(on: bool) -> void:
 	_live = on
-	OS.low_processor_usage_mode = _lp_wanted and not on
+	OS.low_processor_usage_mode = _lp_wanted and not on and (not is_instance_valid(_wake_timer) or _wake_timer.is_stopped())
 
 
 func _redraw_all(n: Node) -> void:
 	if n is CanvasItem:
 		(n as CanvasItem).queue_redraw()
-	for c in n.get_children():
-		_redraw_all(c)
+	for child in n.get_children():
+		_redraw_all(child)
 
 
 func _unhandled_input(event: InputEvent) -> void:
