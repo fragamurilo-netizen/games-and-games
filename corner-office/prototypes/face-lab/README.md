@@ -23,3 +23,49 @@ Referência: fotos oficiais dos 200 atletas ranqueados em ufc.com.br/rankings (2
 ## Rodada 4 — corpo realista
 
 `drawFigure` reescrito: membros com perfil anatômico (deltoide, bíceps/tríceps, braquiorradial, quadríceps, vasto medial, panturrilha), tronco com trapézio, dorsal em V, peitoral, abdômen, oblíquos, serrátil, linhas do V e clavículas, luz vinda da esquerda, luvas de MMA com dedos e velcro, pés, calção com fenda e cordão. Novo `face.body = {muscle, fat, hair, height}` e presets por categoria (mosca, leve, médio, pesado).
+
+
+## Estúdio — anatomia contínua e materiais
+
+O novo modo **Estúdio** é o padrão do laboratório. A–D continuam disponíveis para
+comparar a direção original. O Estúdio é uma ilustração procedural em Canvas 2D,
+sem dependências de execução e sem imagens de atletas reais.
+
+- Silhueta única para tronco, pescoço, braços e pernas, com volumes suaves em vez
+  de peças articuladas desenhadas separadamente. Proporções e poses refeitas.
+- Mãos abertas ou fechadas conforme a pose, quatro dedos e polegar; cinco dedos
+  em cada pé. Escolha entre mãos livres e luvas de MMA com dedos aparentes.
+- Fios de cabelo e barba determinísticos, stubble, sobrancelhas, poros, íris,
+  sombras de pálpebra e variação de volume facial. Detalhe limitado pelo tamanho
+  renderizado para preservar a legibilidade nos avatares pequenos.
+- Silhuetas Natural, Atlética, Curvilínea e Potente. Controles independentes de
+  cintura, quadril, tórax, pernas, ombros e alcance. Top esportivo com volume,
+  costuras e caimento; calção com dobras, cós e material camuflado.
+- Prévia de corpo inteiro, retrato, mão e pés. As duas vistas de detalhe são
+  exclusivas do Estúdio. Exportação PNG em 1440 × 2088 (corpo) ou 1440 × 1656
+  (demais enquadramentos), usando o mesmo estilo e os parâmetros atuais.
+
+`studio.js` concentra os materiais e o novo corpo; `index.html` mantém a
+biblioteca facial, os estilos anteriores e a interface. A geometria facial e o
+seed permanecem a identidade do atleta ao longo da carreira.
+
+O JSON continua em `v: 1`, com campos aditivos em `body`: `shoulders`, `reach`,
+`legs`, `waist`, `hips`, `legMass` e `chest` (0–1). `kit.hands` aceita `bare` ou
+`mma`. Aparências antigas recebem valores padrão. Luz e enquadramento não
+alteram o JSON. Estes campos pertencem ao protótipo; o porte para a Godot ainda
+é a tarefa indicada no roadmap.
+
+### Verificação do renderer
+
+O laboratório continua abrindo diretamente pelo `index.html`. Node é necessário
+apenas para os testes opcionais:
+
+```sh
+npm install
+npm test
+```
+
+Os testes verificam determinismo, ausência de mutação da aparência, resposta dos
+controles anatômicos, ambos os sexos, limites do canvas nas oito poses e nos
+biotipos extremos, todos os estilos, os dez atletas canônicos e os 56 cabelos.
+A validação visual no navegador cobre também os controles, o PNG e o layout mobile.

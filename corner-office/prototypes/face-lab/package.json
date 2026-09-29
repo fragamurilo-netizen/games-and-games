@@ -1,0 +1,11 @@
+{
+  "name": "corner-office-face-lab",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node tests/render.cjs"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "1.0.9"
+  }
+}
