@@ -212,6 +212,7 @@ func _table_card(w: GameWorld, club: Club, f: Fixture) -> Control:
 		var cup: Cup = w.season.cups.get(f.comp, null)
 		var g: Dictionary = cup.group_of(club.id) if cup != null else {}
 		if g.is_empty():
+			UIKit.card_panel(card).free() # nada a mostrar: o cartão não fica solto na memória
 			return null
 		card.add_child(UIKit.section("%s · Grupo %s" % [cup.short_name, g["n"]]))
 		card.add_child(TableRows.header(true))
@@ -223,6 +224,7 @@ func _table_card(w: GameWorld, club: Club, f: Fixture) -> Control:
 		card.add_child(UIKit.button("Ver a copa", "GhostButton", func(): UIManager.goto("table", {"cup": cid}), "trophy"))
 		return UIKit.card_panel(card)
 	if f != null and f.stage == Fixture.STAGE_KO:
+		UIKit.card_panel(card).free()
 		return null
 	var league := w.league_of(club.id)
 	card.add_child(UIKit.section("Classificação · %s" % league.short_name))

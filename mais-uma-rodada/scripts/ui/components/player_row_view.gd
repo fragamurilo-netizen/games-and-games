@@ -75,6 +75,8 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		_wide_cells(row, w, p, mode, ncols)
 	elif icons.get_child_count() > 0:
 		row.add_child(icons)
+	else:
+		icons.free() # sem ícone: o contêiner vazio ficava solto na memória (um por linha)
 	if mode != "market":
 		var cond := UIKit.vbox(2)
 		cond.alignment = BoxContainer.ALIGNMENT_CENTER
