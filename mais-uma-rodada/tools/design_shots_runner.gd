@@ -347,6 +347,8 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					TrainingManager.set_style_target(yp, String(e["k"]))
 					break
 			TrainingSheet.open(yp, Callable(), "st" if kind == "training_st" else "")
+		"nav":
+			NavMenu.open()
 		"focus":
 			# Contorno de foco de teclado: o primeiro botão visível da tela recebe foco.
 			for b in _screen().find_children("*", "Button", true, false):

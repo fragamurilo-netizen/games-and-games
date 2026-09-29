@@ -84,7 +84,13 @@ static func open() -> void:
 		UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
 			GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), false, 0))
 	r.add_child(game)
-	v.add_child(cols if wide else left)
+	if wide:
+		v.add_child(cols)
+	else:
+		# Celular: uma coluna só. `left` nasceu dentro de `cols`; sai de lá antes de entrar na folha.
+		cols.remove_child(left)
+		cols.free()
+		v.add_child(left)
 	UIManager.show_modal(v, true)
 
 
