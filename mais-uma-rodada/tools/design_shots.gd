@@ -6,7 +6,7 @@ extends SceneTree
 ## Com capturas:         xvfb-run godot --path . --resolution 720x1280 --script res://tools/screenshot_tour.gd -- --out=/tmp/shots
 ## Em outro idioma:      acrescente --lang=en (ou es) depois do "--".
 ## Com --only=...: --light (modo claro), --club=nome (clube escolhido pelo nome, em qualquer liga)
-## e --tint=0|1|2 (tingimento do fundo com a cor do clube).
+## e --tint=0|1|2 (tingimento do fundo com a cor do clube); --nt=BRA: o técnico também comanda a seleção.
 ##
 ## A lógica fica em design_shots_runner.gd, carregado só depois do primeiro quadro: scripts usados
 ## direto por um --script são compilados antes dos autoloads existirem.
@@ -33,6 +33,8 @@ func _start() -> void:
 			runner.set("rounds", int(a.substr(9)))
 		if a == "--light":
 			runner.set("light", true)
+		if a.begins_with("--nt="):
+			runner.set("nt", a.substr(5))
 		if a.begins_with("--club="):
 			runner.set("club_name", a.substr(7))
 		if a.begins_with("--tint="):

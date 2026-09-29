@@ -118,6 +118,8 @@ var recent_ratings: Array = [] # últimas 5 notas
 var injury_weeks: int = 0
 var injury_name: String = ""
 var suspension: int = 0
+## A serviço da seleção (data FIFA sem pausa no calendário do clube): fora dos jogos do clube.
+var intl_duty: bool = false
 var yellow_acc: int = 0
 var retiring: bool = false
 var unhappy_weeks: int = 0
@@ -330,7 +332,7 @@ func is_injured() -> bool:
 
 
 func is_available() -> bool:
-	return injury_weeks <= 0 and suspension <= 0
+	return injury_weeks <= 0 and suspension <= 0 and not intl_duty
 
 
 func form() -> float:
@@ -518,7 +520,7 @@ func to_dict() -> Dictionary:
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
-		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
+		"sus": suspension, "nd": intl_duty, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
 		"stats": stats, "cs": cup_stats, "hist": _packed(_history_raw, _history), "spells": _packed(_spells_raw, _spells),
 		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_trophies_raw, _trophies),
@@ -614,6 +616,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.injury_weeks = int(d.get("iw", 0))
 	p.injury_name = d.get("in", "")
 	p.suspension = int(d.get("sus", 0))
+	p.intl_duty = bool(d.get("nd", false))
 	p.yellow_acc = int(d.get("ya", 0))
 	p.retiring = bool(d.get("ret", false))
 	p.unhappy_weeks = int(d.get("uw", 0))

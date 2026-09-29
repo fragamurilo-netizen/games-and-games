@@ -10,6 +10,11 @@ extends RefCounted
 ##   elo: {nação: pontos}, pl: {id do jogador: [jogos, gols, assistências]}, squads: {nação: [ids]},
 ##   camps: eliminatórias em andamento, tours: torneios já disputados (mais recente no fim),
 ##   fifa: datas FIFA já disputadas na temporada.
+##   next: listas anunciadas para a próxima data FIFA ({nação: [ids]}), nw: índice dessa data,
+##   duty: {until: dia do ano, ids} convocados fora dos clubes (calendário sem pausa),
+##   log: jogos recentes [ano, a, b, ga, gb, pa, pb, rótulo], coach: o usuário como técnico
+##   de seleção (NationalCoach), kits: uniformes editados pelo usuário (NationalKits),
+##   hype: anúncios da contagem regressiva já feitos.
 
 const KEY := "intl"
 const SQUAD_SIZE := 26 # lista de 26 (3 goleiros), como nas Copas recentes
@@ -36,6 +41,76 @@ static func data(world: GameWorld) -> Dictionary:
 
 static func cfg() -> Dictionary:
 	return DatabaseManager.international_cfg()
+
+
+# ---------------------------------------------------------------------------
+# Datas FIFA no calendário
+# ---------------------------------------------------------------------------
+
+## Datas FIFA (índice do fim de semana de liga) de um modelo de calendário: cada calendário do
+## rules.json pode ter as suas; sem isso, vale a lista padrão do international.json.
+static func fifa_dates_for(kind: String) -> Array:
+	var cc := DatabaseManager.calendar_cfg(kind)
+	var src: Array = cc.get("fifa_dates", cfg().get("fifa_dates", []))
+	return src.map(func(x): return int(x))
+
+
+static func fifa_dates(world: GameWorld) -> Array:
+	return fifa_dates_for(SeasonManager.calendar_kind(world))
+
+
+## As ligas param nas datas FIFA (Europa)? Sem pausa (Brasil), os convocados desfalcam os clubes.
+static func league_pauses(world: GameWorld) -> bool:
+	return bool(DatabaseManager.calendar_cfg(SeasonManager.calendar_kind(world)).get("fifa_pause", false))
+
+
+## Datas FIFA da temporada: [{slot (fim de semana antes da data), w (índice), from, to (dia do ano)}].
+static func windows(world: GameWorld) -> Array:
+	var out: Array = []
+	var s := world.season
+	if s == null:
+		return out
+	var dates := fifa_dates(world)
+	var wk := 0
+	for i in s.calendar.size():
+		if s.calendar[i]["t"] != "W":
+			continue
+		if dates.has(wk):
+			var d := int(s.calendar[i]["d"])
+			out.append({"slot": i, "w": wk, "from": d + 2, "to": d + 10})
+		wk += 1
+	return out
+
+
+## Próxima data FIFA ainda não disputada ({} se a temporada não tem mais).
+static func next_window(world: GameWorld) -> Dictionary:
+	for win in windows(world):
+		if int(win["slot"]) >= world.season.day:
+			return win
+	return {}
+
+
+## Data FIFA em andamento (convocados fora dos clubes), ou {}.
+static func active_window(world: GameWorld) -> Dictionary:
+	var du: Dictionary = data(world).get("duty", {})
+	if du.is_empty() or world.season == null:
+		return {}
+	for win in windows(world):
+		if int(win["to"]) == int(du.get("until", -1)):
+			return win
+	return {}
+
+
+## "12 set" para um dia do ano da temporada.
+static func day_label(world: GameWorld, doy: int) -> String:
+	var y := world.season.year if world.season != null else world.year
+	var unix := Time.get_unix_time_from_datetime_dict({"year": y, "month": 1, "day": 1}) + doy * 86400
+	var dt := Time.get_datetime_dict_from_unix_time(unix)
+	return "%d %s" % [int(dt["day"]), SeasonState.MONTHS_I18N.get(I18n.lang, SeasonState.MONTHS)[int(dt["month"]) - 1]]
+
+
+static func window_label(world: GameWorld, win: Dictionary) -> String:
+	return "%s a %s" % [day_label(world, int(win["from"])), day_label(world, int(win["to"]))]
 
 
 static func tournament_ids() -> Array:
@@ -164,6 +239,50 @@ static func call_up(pool: Array) -> Array:
 	return out
 
 
+## Listas para a próxima data FIFA das seleções pedidas: as anunciadas, senão a última convocação,
+## senão quem seria chamado hoje (telas e avisos; não mexe no save).
+static func expected_lists(world: GameWorld, codes: Array) -> Dictionary:
+	var d := data(world)
+	if d.has("next"):
+		return d["next"]
+	var out := {}
+	var missing: Array = []
+	for code in codes:
+		var last: Array = d["squads"].get(code, [])
+		if last.is_empty():
+			missing.append(code)
+		else:
+			out[code] = last
+	if not missing.is_empty():
+		var pool := _pool(world)
+		for code in missing:
+			out[code] = squad_for(world, code, pool).map(func(p: Player): return p.id)
+	return out
+
+
+## Lista de uma seleção para a próxima data: a do usuário, se ele comanda a seleção (completada com
+## os melhores disponíveis quando falta gente), ou a do técnico da IA.
+static func squad_for(world: GameWorld, code: String, pool: Dictionary) -> Array:
+	var avail: Array = pool.get(code, [])
+	if NationalCoach.nation(world) != code:
+		return call_up(avail)
+	var ok := {}
+	for p: Player in avail:
+		ok[p.id] = p
+	var out: Array = []
+	for pid in NationalCoach.state(world).get("list", []):
+		if ok.has(int(pid)) and out.size() < SQUAD_SIZE:
+			out.append(ok[int(pid)])
+	if out.size() >= 18:
+		return out
+	for p: Player in call_up(avail):
+		if out.size() >= SQUAD_SIZE:
+			break
+		if not out.has(p):
+			out.append(p)
+	return out
+
+
 ## Time titular (1-4-3-3) de uma lista de convocados.
 static func starting_xi(squad: Array) -> Array:
 	var by_group: Array = [[], [], [], []]
@@ -226,12 +345,16 @@ class Env:
 	var k := 30.0 # peso do jogo no ranking
 	var called := {} # id -> true (quem entrou em campo nesta data ou torneio)
 	var goals := {} # id -> gols nesta data ou torneio
+	var tag := "" # rótulo dos jogos no histórico (Amistoso, Eliminatórias, fase do torneio)
+	var cuts := {} # nação -> [[cortado, substituto]] (lesões entre o anúncio e a data)
 
 	func squad(code: String) -> Array:
 		return squads.get(code, [])
 
 
-static func _make_env(world: GameWorld, seed_key: int, k: float) -> Env:
+## `preset`: listas já anunciadas ({nação: [ids]}); quem se machucou depois do anúncio é cortado
+## e dá lugar ao melhor disponível do mesmo setor.
+static func _make_env(world: GameWorld, seed_key: int, k: float, preset: Dictionary = {}) -> Env:
 	var env := Env.new()
 	env.world = world
 	env.rng.seed = RngUtil.hash_i(world.world_seed, world.year * 131 + seed_key, 7719)
@@ -240,11 +363,43 @@ static func _make_env(world: GameWorld, seed_key: int, k: float) -> Env:
 	_ensure_elo(world, pool)
 	var squads_d: Dictionary = data(world)["squads"]
 	for code in DatabaseManager.nations():
-		var sq := call_up(pool.get(code, []))
+		var sq: Array
+		if preset.has(code):
+			sq = _from_preset(env, code, preset[code], pool.get(code, []))
+		else:
+			sq = squad_for(world, code, pool)
 		env.squads[code] = sq
 		env.strength[code] = strength_of(code, sq)
 		squads_d[code] = sq.map(func(p: Player): return p.id)
 	return env
+
+
+static func _from_preset(env: Env, code: String, ids: Array, avail: Array) -> Array:
+	var ok := {}
+	for p: Player in avail:
+		ok[p.id] = p
+	var out: Array = []
+	var lost: Array = []
+	for pid in ids:
+		if ok.has(int(pid)):
+			out.append(ok[int(pid)])
+		else:
+			var p := env.world.player(int(pid))
+			if p != null:
+				lost.append(p)
+	for p: Player in lost:
+		var best: Player = null
+		for q: Player in avail:
+			if out.has(q) or Pos.group(q.position) != Pos.group(p.position):
+				continue
+			if best == null or q.ovr_f > best.ovr_f:
+				best = q
+		if best != null:
+			out.append(best)
+			if not env.cuts.has(code):
+				env.cuts[code] = []
+			env.cuts[code].append([p.id, best.id])
+	return out
 
 
 static func _poisson(rng: RandomNumberGenerator, lam: float) -> int:
@@ -295,7 +450,36 @@ static func play(env: Env, a: String, b: String, home_adv: bool, ko: bool) -> Di
 	_credit_players(env, a, int(res["ga"]), res)
 	_credit_players(env, b, int(res["gb"]), res)
 	_update_elo(env, a, b, int(res["ga"]), int(res["gb"]), a_home, b_home, String(res["w"]))
+	_log(env, res)
+	NationalCoach.on_result(env.world, res, env.tag)
 	return res
+
+
+const LOG_MAX := 900
+
+
+## Guarda o jogo no histórico recente das seleções (tela de seleções, "Jogos").
+static func _log(env: Env, r: Dictionary) -> void:
+	var d := data(env.world)
+	if not d.has("log"):
+		d["log"] = []
+	var log: Array = d["log"]
+	log.append([env.world.year, String(r["a"]), String(r["b"]), int(r["ga"]), int(r["gb"]), int(r["pa"]), int(r["pb"]), env.tag])
+	if log.size() > LOG_MAX:
+		d["log"] = log.slice(log.size() - LOG_MAX)
+
+
+## Últimos jogos de uma seleção (mais recente primeiro): [{y, a, b, ga, gb, pa, pb, tag}].
+static func recent_games(world: GameWorld, code: String, n: int = 12) -> Array:
+	var out: Array = []
+	var log: Array = data(world).get("log", [])
+	for i in range(log.size() - 1, -1, -1):
+		var e: Array = log[i]
+		if e[1] == code or e[2] == code:
+			out.append({"y": int(e[0]), "a": String(e[1]), "b": String(e[2]), "ga": int(e[3]), "gb": int(e[4]), "pa": int(e[5]), "pb": int(e[6]), "tag": String(e[7])})
+			if out.size() >= n:
+				break
+	return out
 
 
 static func _shootout(env: Env) -> Array:
@@ -481,6 +665,11 @@ static func _rounds(size: int, turns: int) -> Array:
 static func start_season(world: GameWorld) -> void:
 	var d := data(world)
 	d["fifa"] = 0
+	release_duty(world)
+	d.erase("next")
+	d.erase("nw")
+	NationalCoach.season_offers(world)
+	WorldCupBuildup.on_season_start(world)
 	for id in tournament_ids():
 		var c := tcfg(id)
 		var q: Dictionary = c.get("qualifying", {})
@@ -537,47 +726,200 @@ static func _open_campaigns(world: GameWorld, id: String, y: int) -> void:
 
 ## Datas FIFA restantes (esta temporada incluída) até o fim da campanha.
 static func _fifa_left(world: GameWorld, camp: Dictionary) -> int:
-	var per := (cfg().get("fifa_dates", []) as Array).size()
+	var per := fifa_dates(world).size()
 	var this_season := maxi(0, per - int(data(world)["fifa"]))
 	return this_season + per * maxi(0, int(camp["end"]) - world.year)
 
 
-## Depois de cada fim de semana: se for data FIFA, joga as rodadas das eliminatórias.
-## Retorna as notícias relevantes ao usuário (convocações e resultados da sua nação).
+## Depois de cada fim de semana: uma semana antes da data FIFA, as seleções anunciam as listas;
+## no fim de semana da data, joga as rodadas das eliminatórias e os amistosos.
+## Retorna os jogos das eliminatórias disputados.
 static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
-	var dates: Array = cfg().get("fifa_dates", []).map(func(x): return int(x))
+	var dates := fifa_dates(world)
+	WorldCupBuildup.after_weekend(world, weekend_index, dates)
+	if dates.has(weekend_index + 1):
+		announce(world, weekend_index + 1)
 	if not dates.has(weekend_index):
 		return []
 	var d := data(world)
+	var preset: Dictionary = d.get("next", {}) if int(d.get("nw", -1)) == weekend_index else {}
+	d.erase("next")
+	d.erase("nw")
 	var active: Array = d["camps"].filter(func(c): return not bool(c["done"]))
-	var env := _make_env(world, 1000 + weekend_index, 30.0)
+	var env := _make_env(world, 1000 + weekend_index, 30.0, preset)
 	var lines: Array = []
 	for camp in active:
 		var left := _fifa_left(world, camp)
 		var remaining := int(camp["mdt"]) - int(camp["md"])
 		var n := remaining if left <= 1 else int(ceil(float(remaining) / left))
+		env.tag = "Eliminatórias"
 		for i in n:
 			lines.append_array(_play_matchday(env, camp))
 	d["fifa"] = int(d["fifa"]) + 1
-	# Amistosos para quem não tem eliminatória (mantêm o ranking e os jogos dos convocados vivos).
-	var busy := {}
-	for camp in active:
-		for g in camp["groups"]:
-			for t in g["teams"]:
-				busy[t] = true
-	var free: Array = []
-	for code in DatabaseManager.nations():
-		if not busy.has(code):
-			free.append(code)
-	RngUtil.shuffle(env.rng, free)
+	# Amistosos completam a janela: cada seleção faz dois jogos por data FIFA, como nas janelas reais.
+	var games := {}
+	for r in lines:
+		games[r["a"]] = int(games.get(r["a"], 0)) + 1
+		games[r["b"]] = int(games.get(r["b"], 0)) + 1
 	env.k = 12.0
+	env.tag = "Amistoso"
 	var friendlies: Array = []
-	for i in range(0, free.size() - 1, 2):
-		var fr := play(env, free[i], free[i + 1], true, false)
-		fr["fr"] = true
-		friendlies.append(fr)
-	_after_date(world, env, lines + friendlies)
+	for rnd in 2:
+		var free: Array = []
+		for code in DatabaseManager.nations():
+			if int(games.get(code, 0)) < 2:
+				free.append(code)
+		RngUtil.shuffle(env.rng, free)
+		for i in range(0, free.size() - 1, 2):
+			var fr := play(env, free[i], free[i + 1], rnd == 0, false)
+			fr["fr"] = true
+			friendlies.append(fr)
+			games[free[i]] = int(games.get(free[i], 0)) + 1
+			games[free[i + 1]] = int(games.get(free[i + 1], 0)) + 1
+	_after_date(world, env, lines + friendlies, weekend_index)
 	return lines
+
+
+## Convocações anunciadas uma semana antes da data FIFA: listas de todas as seleções, moral de quem
+## foi chamado (e de quem ficou de fora) e o aviso ao usuário de quem vai desfalcar o clube.
+static func announce(world: GameWorld, weekend_index: int) -> void:
+	var d := data(world)
+	var pool := _pool(world)
+	_ensure_elo(world, pool)
+	var prev: Dictionary = d["squads"]
+	var next := {}
+	for code in DatabaseManager.nations():
+		var sq := squad_for(world, code, pool)
+		next[code] = sq.map(func(p: Player): return p.id)
+	# Moral: chamado sobe (estreante sobe mais); quem estava na última lista e caiu, sente.
+	var firsts: Array = []
+	var dropped: Array = []
+	for code in next:
+		var before: Array = prev.get(code, [])
+		for pid in next[code]:
+			var p := world.player(int(pid))
+			if p == null:
+				continue
+			var first: bool = caps_of(world, p.id)[0] == 0 and not before.has(p.id)
+			p.morale = clampf(p.morale + (6.0 if first else 2.0), 0.0, 100.0)
+			if first:
+				firsts.append(p)
+		for pid in before:
+			if (next[code] as Array).has(int(pid)):
+				continue
+			var p := world.player(int(pid))
+			if p != null and p.club_id >= 0 and p.injury_weeks == 0 and not p.retiring:
+				p.morale = clampf(p.morale - 3.0, 0.0, 100.0)
+				dropped.append(p)
+	d["next"] = next
+	d["nw"] = weekend_index
+	_announce_news(world, next, firsts, dropped, weekend_index)
+
+
+## Notícias e mensagens das convocações que importam ao usuário.
+static func _announce_news(world: GameWorld, next: Dictionary, firsts: Array, dropped: Array, weekend_index: int) -> void:
+	if not world.has_user():
+		return
+	var win := {}
+	for w in windows(world):
+		if int(w["w"]) == weekend_index:
+			win = w
+	var when := (" (%s)" % window_label(world, win)) if not win.is_empty() else ""
+	var coach_nat := NationalCoach.nation(world)
+	var shown := {}
+	for code in [coach_nat, _user_nation(world)]:
+		if code == "" or shown.has(code) or not next.has(code):
+			continue
+		shown[code] = true
+		var ids: Array = next[code]
+		if ids.size() < 11:
+			continue
+		var mine: bool = code == coach_nat
+		var title := "%s divulga os %d convocados" % [DatabaseManager.nation_name(code), ids.size()]
+		if mine:
+			title = "%s: sua lista com %d convocados" % [DatabaseManager.nation_name(code), ids.size()]
+		var n := NewsManager.post_raw(world, title, "Lista para a data FIFA%s. %s" % [when, squad_text(world, ids)], -1, int(ids[0]),
+			NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "selecao")
+		n.media = {"type": "nation", "code": code}
+	# Jogadores do clube do usuário: quem vai, quem estreia e quem ficou fora
+	var club := world.user_club()
+	var going: Array = []
+	for code in next:
+		for pid in next[code]:
+			var p := world.player(int(pid))
+			if p != null and p.club_id == world.user_club_id:
+				going.append(p)
+	var body: Array = []
+	if not going.is_empty():
+		going.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+		body.append("Convocados do elenco:\n" + "\n".join(going.map(func(p: Player): return "· %s (%s)%s" % [p.display_name(), DatabaseManager.nation_name(p.nationality), " — primeira convocação" if firsts.has(p) else ""])))
+		if league_pauses(world):
+			body.append("A liga para durante a data FIFA%s. Eles se reapresentam para o jogo seguinte, mas quem jogar pode voltar cansado." % when)
+		else:
+			body.append("O campeonato não para: eles desfalcam o time nos jogos da data FIFA%s." % when)
+	var out: Array = dropped.filter(func(p: Player): return p.club_id == world.user_club_id)
+	if not out.is_empty():
+		body.append("Ficaram fora da lista desta vez: %s. Vale uma conversa, a moral caiu." % ", ".join(out.map(func(p: Player): return p.display_name())))
+	if body.is_empty():
+		return
+	var subj := ("Data FIFA: %d convocado(s) do elenco" % going.size()) if not going.is_empty() else "Data FIFA: ninguém do elenco na lista"
+	InboxManager.send(world, "federacao", subj, "\n\n".join(body), {"k": "screen", "s": "national", "args": {"tab": "squad"}},
+		int(going[0].id) if not going.is_empty() else -1, club.id)
+
+
+## Lista por setor: "Goleiros: A (Clube), B... Defensores: ..."
+static func squad_text(world: GameWorld, ids: Array) -> String:
+	var groups: Array = [[], [], [], []]
+	for pid in ids:
+		var p := world.player(int(pid))
+		if p == null:
+			continue
+		var c := world.club(p.club_id) if p.club_id >= 0 else null
+		groups[Pos.group(p.position)].append("%s (%s)" % [p.display_name(), c.short_name if c != null else "sem clube"])
+	var names := ["Goleiros", "Defensores", "Meio-campistas", "Atacantes"]
+	var parts: Array = []
+	for i in 4:
+		if not groups[i].is_empty():
+			parts.append("%s: %s." % [names[i], ", ".join(groups[i])])
+	return " ".join(parts)
+
+
+## Calendário sem pausa: os convocados ficam fora dos jogos do clube até o fim da data FIFA.
+static func _send_on_duty(world: GameWorld, env: Env, weekend_index: int) -> void:
+	if league_pauses(world) or world.season == null:
+		return
+	var until := -1
+	for w in windows(world):
+		if int(w["w"]) == weekend_index:
+			until = int(w["to"])
+	if until < 0:
+		return
+	var ids: Array = []
+	for code in env.squads:
+		for p: Player in env.squads[code]:
+			p.intl_duty = true
+			ids.append(p.id)
+	data(world)["duty"] = {"until": until, "ids": ids}
+
+
+## Depois de cada data do calendário: terminada a data FIFA, os convocados voltam aos clubes.
+static func after_day(world: GameWorld) -> void:
+	var du: Dictionary = data(world).get("duty", {})
+	if du.is_empty():
+		return
+	var s := world.season
+	if s == null or s.day >= s.calendar.size() or int(s.calendar[s.day]["d"]) > int(du.get("until", 0)):
+		release_duty(world)
+
+
+static func release_duty(world: GameWorld) -> void:
+	var d := data(world)
+	var du: Dictionary = d.get("duty", {})
+	for pid in du.get("ids", []):
+		var p := world.player(int(pid))
+		if p != null:
+			p.intl_duty = false
+	d.erase("duty")
 
 
 static func _play_matchday(env: Env, camp: Dictionary) -> Array:
@@ -603,6 +945,7 @@ static func _play_matchday(env: Env, camp: Dictionary) -> Array:
 static func _close_campaign(world: GameWorld, camp: Dictionary) -> void:
 	camp["done"] = true
 	camp["q"] = _best_by_position(camp["groups"], int(camp["spots"]))
+	NationalCoach.on_campaign_closed(world, camp)
 	var user_nat := _user_nation(world)
 	if user_nat != "" and _in_campaign(camp, user_nat):
 		var ok: bool = camp["q"].has(user_nat)
@@ -646,13 +989,20 @@ static func _names(codes: Array) -> String:
 	return ", ".join(codes.map(func(c): return DatabaseManager.nation_name(String(c))))
 
 
-## Efeitos de uma data FIFA: moral de quem foi convocado, lesões raras e notícias para o usuário.
-static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
+## Efeitos de uma data FIFA: cansaço e moral de quem jogou, lesões raras e notícias para o usuário.
+static func _after_date(world: GameWorld, env: Env, results: Array, weekend_index: int = -1) -> void:
 	for pid in env.called:
 		var p := world.player(int(pid))
 		if p == null:
 			continue
 		p.morale = clampf(p.morale + 2.0, 0.0, 100.0)
+		# Viagem e dois jogos em poucos dias: quem cruza o oceano volta mais cansado.
+		var tired := 7.0 + env.rng.randf() * 4.0
+		var cl := world.club(p.club_id) if p.club_id >= 0 else null
+		if cl != null and String(DatabaseManager.nation(cl.nation).get("confed", "")) != String(DatabaseManager.nation(p.nationality).get("confed", "")):
+			tired += 6.0
+		p.condition = maxf(55.0, p.condition - tired)
+		world.mark_tired(p)
 		if env.rng.randf() < 0.012 * (0.6 + p.injury_prone / 20.0):
 			p.injury_weeks = maxi(p.injury_weeks, env.rng.randi_range(1, 4))
 			p.injury_name = InjuryTable.name_for(p.injury_weeks, p.id + world.year)
@@ -660,51 +1010,62 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 				NewsManager.post_raw(world, "%s volta machucado da seleção" % p.display_name(),
 					"O jogador se lesionou a serviço da seleção (%s) e desfalca o time por %d semana(s)." % [DatabaseManager.nation_name(p.nationality), p.injury_weeks],
 					world.user_club_id, p.id, NewsEvent.IMP_HIGH, "selecao")
+	_send_on_duty(world, env, weekend_index)
 	if not world.has_user():
 		return
-	# Convocados do clube do usuário
+	# Convocados do clube do usuário: relatório do preparador físico
 	var mine: Array = []
-	for pid in env.called:
-		var p := world.player(int(pid))
-		if p != null and p.club_id == world.user_club_id:
-			mine.append(p)
+	for code in env.squads:
+		for p: Player in env.squads[code]:
+			if p.club_id == world.user_club_id:
+				mine.append(p)
 	if mine.size() >= 5:
 		Achievements.unlock(world, "vitrine")
 	if not mine.is_empty():
-		mine.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
-		var parts: Array = mine.map(func(p: Player): return "%s (%s)" % [p.display_name(), DatabaseManager.nation_name(p.nationality)])
-		NewsManager.post_raw(world, "Data FIFA: %d convocado(s) do %s" % [mine.size(), world.user_club().short_name],
-			"Defenderam suas seleções: %s." % ", ".join(parts), world.user_club_id, int(mine[0].id), NewsEvent.IMP_NORMAL, "selecao")
-	# Resultados da seleção do país do usuário
+		mine.sort_custom(func(a, b): return a.condition < b.condition)
+		var lines: Array = mine.map(func(p: Player): return "· %s (%s): %s, condição %d%%" % [p.display_name(), DatabaseManager.nation_name(p.nationality),
+			"jogou" if env.called.has(p.id) else "não saiu do banco", int(round(p.condition))])
+		var tail := "Os que jogaram voltam desgastados: vale poupar alguém na próxima rodada." if env.called.size() > 0 else ""
+		if not league_pauses(world):
+			tail = "Eles só se reapresentam depois da data FIFA. " + tail
+		InboxManager.send(world, "preparador", "Data FIFA: como voltam os %d convocados" % mine.size(),
+			"%s\n\n%s" % ["\n".join(lines), tail], {"k": "screen", "s": "squad", "args": {}}, int(mine[0].id), world.user_club_id)
+	# Cortes por lesão na seleção do usuário ou na que ele comanda
+	var coach_nat := NationalCoach.nation(world)
+	for code in [_user_nation(world), coach_nat]:
+		if code == "" or not env.cuts.has(code):
+			continue
+		var cut_txt: Array = []
+		for pair in env.cuts[code]:
+			var a := world.player(int(pair[0]))
+			var b := world.player(int(pair[1]))
+			if a != null and b != null:
+				cut_txt.append("%s, lesionado, dá lugar a %s" % [a.display_name(), b.display_name()])
+		if not cut_txt.is_empty():
+			NewsManager.post_raw(world, "%s: corte na lista" % DatabaseManager.nation_name(code), "%s." % "; ".join(cut_txt), -1, int(env.cuts[code][0][1]), NewsEvent.IMP_NORMAL, "selecao")
+	# Resultados da seleção do país do usuário (e da que ele comanda)
 	var nat := _user_nation(world)
-	var mine_r: Array = results.filter(func(r): return r["a"] == nat or r["b"] == nat)
-	if not mine_r.is_empty():
+	var codes: Array = []
+	for code in [coach_nat, nat]:
+		if code != "" and not codes.has(code):
+			codes.append(code)
+	for code in codes:
+		var mine_r: Array = results.filter(func(r): return r["a"] == code or r["b"] == code)
+		if mine_r.is_empty():
+			continue
 		var txt: Array = mine_r.map(func(r): return result_text(r))
-		var en := NewsManager.post_raw(world, "%s: %s" % ["Amistoso" if bool(mine_r[0].get("fr", false)) else "Eliminatórias", txt[0]], "Resultados da %s na data FIFA: %s." % [DatabaseManager.nation_name(nat), "; ".join(txt)],
-			-1, -1, NewsEvent.IMP_NORMAL, "selecao")
+		var own: bool = code == coach_nat
+		var head := "Amistoso" if bool(mine_r[0].get("fr", false)) else "Eliminatórias"
+		var lead := ("%s com você no comando" if own else "%s") % DatabaseManager.nation_name(code)
+		var en := NewsManager.post_raw(world, "%s: %s" % [head, txt[0]], "%s na data FIFA: %s." % [lead, "; ".join(txt)],
+			-1, -1, NewsEvent.IMP_HIGH if own else NewsEvent.IMP_NORMAL, "selecao")
 		var r0: Dictionary = mine_r[0]
 		en.media = {"type": "nation", "code": String(r0["a"]), "vs": String(r0["b"]), "ga": int(r0["ga"]), "gb": int(r0["gb"])}
 	_world_nat_news(world, env, results, nat)
 
 
-## Pelo mundo das seleções: a lista de convocados do país do usuário e os resultados que
-## chamaram a atenção entre as seleções fortes (goleadas e zebras).
+## Pelo mundo das seleções: resultados que chamaram a atenção entre as seleções fortes (goleadas e zebras).
 static func _world_nat_news(world: GameWorld, env: Env, results: Array, nat: String) -> void:
-	var called: Array = []
-	for pid in env.called:
-		var p := world.player(int(pid))
-		if p != null and p.nationality == nat:
-			called.append(p)
-	if called.size() >= 11:
-		called.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
-		var names: Array = []
-		for i in mini(5, called.size()):
-			var p: Player = called[i]
-			var c := world.club(p.club_id)
-			names.append("%s (%s)" % [p.display_name(), c.short_name if c != null else "sem clube"])
-		var cn := NewsManager.post_raw(world, "%s divulga a lista de convocados" % DatabaseManager.nation_name(nat),
-			"%d nomes para a data FIFA. Os destaques: %s." % [called.size(), ", ".join(names)], -1, int(called[0].id), NewsEvent.IMP_NORMAL, "selecao")
-		cn.media = {"type": "nation", "code": nat}
 	var rank := ranking(world)
 	var pos := {}
 	for i in rank.size():
@@ -820,6 +1181,7 @@ static func _playoff(world: GameWorld, env: Env, qualified: Array, n: int, id: S
 		if confed != "UEFA":
 			pool.append_array(nations_of(confed))
 	var cands := _top_ranked(world, pool, qualified, n * 2)
+	env.tag = "Repescagem"
 	var winners: Array = []
 	var lines: Array = []
 	for i in range(0, cands.size() - 1, 2):
@@ -852,9 +1214,11 @@ static func _play_tournament(world: GameWorld, id: String, y: int) -> Dictionary
 			return false
 		return elo_of(world, a) > elo_of(world, b) or (elo_of(world, a) == elo_of(world, b) and a < b))
 	var groups := _draw_groups(env.rng, seeded, n_groups)
+	WorldCupBuildup.final_lists(world, env, id, y, teams)
 	var matches: Array = [] # [fase, a, b, ga, gb, pa, pb, et]
 	for gi in groups.size():
 		var g: Dictionary = groups[gi]
+		env.tag = "%s · Grupo %s" % [String(c.get("short", id)), g["n"]]
 		for rnd in _rounds(g["teams"].size(), 1):
 			for pair in rnd:
 				var a: String = g["teams"][pair[0]]
@@ -887,6 +1251,7 @@ static func _play_tournament(world: GameWorld, id: String, y: int) -> Dictionary
 	var semis: Array = []
 	while alive.size() >= 2:
 		var rname: String = ROUND_NAMES.get(alive.size(), "Mata-mata")
+		env.tag = "%s · %s" % [String(c.get("short", id)), rname]
 		var next: Array = []
 		var round_res: Array = []
 		for i in range(0, alive.size(), 2):
@@ -917,10 +1282,26 @@ static func _play_tournament(world: GameWorld, id: String, y: int) -> Dictionary
 	for g in groups:
 		gs.append({"n": g["n"], "order": sort_group(g), "table": g["table"]})
 	var rec := {"t": id, "y": y, "name": tournament_name(id), "host": env.host, "teams": teams, "champion": champion, "runner_up": runner_up,
-		"semis": semis, "scorer": scorer, "groups": gs, "ko": ko_rounds,
+		"semis": semis, "scorer": scorer, "groups": gs, "ko": ko_rounds, "stage": _stages(teams, gs, ko_rounds, champion),
 		"squad": env.squad(champion).map(func(p: Player): return p.id)}
 	_tournament_effects(world, env, rec)
+	WorldCupBuildup.campaign_news(world, rec)
+	NationalCoach.on_tournament(world, rec)
 	return rec
+
+
+## Até onde cada seleção foi: "Campeã", "Vice", "Semifinal", "Quartas de final"... ou "Fase de grupos".
+static func _stages(teams: Array, groups: Array, ko: Array, champion: String) -> Dictionary:
+	var out := {}
+	for t in teams:
+		out[t] = "Fase de grupos"
+	for rd in ko:
+		for m in rd["m"]:
+			var loser: String = m[0] if m[7] == m[1] else m[1]
+			out[loser] = "Vice" if String(rd["n"]) == "Final" else String(rd["n"])
+	if champion != "":
+		out[champion] = "Campeã"
+	return out
 
 
 ## Chave do mata-mata: cabeças de chave em lados opostos; evita duelo de grupo na primeira fase.
