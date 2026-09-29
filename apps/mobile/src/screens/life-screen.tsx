@@ -14,7 +14,7 @@ export default function LifeScreen() {
     style={({ pressed }) => [styles.action, (busy || disabled) && styles.disabled, pressed && styles.pressed]}>
     <Text style={styles.actionText}>{label}</Text>
   </Pressable>
-  return <SafeAreaView style={styles.root}>
+  return <SafeAreaView edges={["top", "left", "right"]} style={styles.root}>
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.wordmark}>PARALELO</Text>
       {!life ? <View style={styles.section}>
@@ -35,7 +35,7 @@ export default function LifeScreen() {
         {notice && <Text accessibilityLiveRegion="polite" style={styles.secondary}>{notice}</Text>}
         <View style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>Agora</Text>
-          <View style={styles.actions}>{action("Descansar · 2 horas", { type: "rest" })}{action("Seguir o dia · 4 horas", { type: "wait", minutes: 240 })}</View>
+          <View style={styles.actions}>{action("Descansar · 2 horas", { type: "rest" })}{action("Dormir · 8 horas", { type: "sleep" })}{action("Almoçar · R$ 18,00", { type: "meal" })}{action("Seguir o dia · 4 horas", { type: "wait", minutes: 240 })}</View>
           <Text style={styles.secondary}>O tempo para quando chega uma mensagem importante.</Text>
         </View>
         <View style={styles.section}>

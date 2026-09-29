@@ -6,8 +6,9 @@ A fonte de verdade do projeto é a **bíblia de design**:
 [`docs/PARALELO_MASTER_DESIGN_BIBLE.md`](docs/PARALELO_MASTER_DESIGN_BIBLE.md)
 (original em `.docx` na mesma pasta). Leia antes de mexer em arquitetura.
 
-> Status: **fundação jogável**, com motor puro, relógio, RNG, pessoas, relações,
-> timeline e save SQLite. A tela VIDA já executa comandos reais.
+> Status: **primeira campanha jogável**, com motor puro, relógio, RNG, 100 pessoas,
+> relações/memórias, carreira, cursos, extrato e save SQLite. As cinco áreas do app
+> executam ou consultam o estado real da campanha.
 > Continuidade para colegas: [`docs/CONTINUIDADE.md`](docs/CONTINUIDADE.md).
 
 ## Estrutura (bíblia §80)

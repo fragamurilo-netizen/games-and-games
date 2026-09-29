@@ -1,4 +1,4 @@
-import type { HouseholdId, PersonId, RelationshipId, ResidenceId, ScheduleId, TimelineId } from "@paralelo/shared"
+import type { CompanyId, CourseId, EmploymentId, HouseholdId, LedgerId, MemoryId, PersonId, RelationshipId, ResidenceId, ScheduleId, TimelineId, VacancyId } from "@paralelo/shared"
 import type { RngState } from "../rng"
 
 // Dia 0 = 05/01/2026. Minutos inteiros; nenhum tempo de sistema no domínio.
@@ -30,7 +30,7 @@ export type Relationship = Readonly<{
 export type TimelineEntry = Readonly<{
   id: TimelineId
   at: GameDate
-  kind: "chapter" | "action" | "relationship" | "message"
+  kind: "chapter" | "action" | "relationship" | "message" | "career" | "finance" | "education"
   text: string
   personIds: readonly PersonId[]
   cause: string
@@ -38,7 +38,7 @@ export type TimelineEntry = Readonly<{
 export type ScheduledEvent = Readonly<{
   id: ScheduleId
   at: GameDate
-  kind: "mother-message"
+  kind: "mother-message" | "daily-social" | "monthly-finance"
   personId: PersonId
   interrupts: boolean
 }>
@@ -46,8 +46,13 @@ export type Command =
   | Readonly<{ type: "wait"; minutes: number }>
   | Readonly<{ type: "rest" }>
   | Readonly<{ type: "contact"; personId: PersonId }>
+  | Readonly<{ type: "sleep" }>
+  | Readonly<{ type: "meal" }>
+  | Readonly<{ type: "apply-job"; vacancyId: VacancyId }>
+  | Readonly<{ type: "work" }>
+  | Readonly<{ type: "study"; courseId: CourseId }>
 export type CommandRecord = Readonly<{ revision: number; at: GameDate; command: Command }>
-export type WorldState = Readonly<{
+export type WorldStateV1 = Readonly<{
   schemaVersion: 1
   seed: string
   clock: GameDate
@@ -63,4 +68,23 @@ export type WorldState = Readonly<{
   scheduled: readonly ScheduledEvent[]
   timeline: readonly TimelineEntry[]
   recentCommands: readonly CommandRecord[]
+}>
+
+export type Skills = Readonly<{ organization: number; communication: number }>
+export type Company = Readonly<{ id: CompanyId; name: string; district: string }>
+export type Vacancy = Readonly<{ id: VacancyId; companyId: CompanyId; roleId: string; open: boolean }>
+export type Employment = Readonly<{ id: EmploymentId; personId: PersonId; companyId: CompanyId; roleId: string; startedAt: GameDate; lastWorkedDay: number | null; accruedCents: number; shiftsWorked: number; performance: number }>
+export type LedgerEntry = Readonly<{ id: LedgerId; at: GameDate; amountCents: number; category: "salary" | "rent" | "food" | "education"; text: string; cause: string }>
+export type Memory = Readonly<{ id: MemoryId; at: GameDate; personId: PersonId; otherId: PersonId; text: string; salience: number; cause: string }>
+export type WorldState = Omit<WorldStateV1, "schemaVersion"> & Readonly<{
+  schemaVersion: 2
+  skills: Readonly<Record<string, Skills>>
+  tiers: Readonly<Record<string, "player" | "close" | "background">>
+  companies: Readonly<Record<string, Company>>
+  vacancies: Readonly<Record<string, Vacancy>>
+  employment: Employment | null
+  applications: readonly Readonly<{ vacancyId: VacancyId; at: GameDate; accepted: boolean }>[]
+  finance: Readonly<{ openingBalanceCents: number; balanceCents: number; monthlyRentCents: number; ledger: readonly LedgerEntry[] }>
+  training: Readonly<Record<string, Readonly<{ sessions: number; lastStudiedDay: number | null }>>>
+  memories: readonly Memory[]
 }>

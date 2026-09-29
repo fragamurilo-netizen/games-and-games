@@ -29,7 +29,8 @@ export class GameSession {
         const loaded = await this.saves.load()
         if (!loaded.ok) { this.publish({ busy: false, error: loaded.error.message }); return }
         const world = loaded.value?.world ?? createWorld(this.initialSeed)
-        if (!loaded.value) {
+        // Também materializa migração ou recuperação; save igual preserva backup.
+        {
           const saved = await this.saves.save(world)
           if (!saved.ok) { this.publish({ busy: false, error: saved.error.message }); return }
         }

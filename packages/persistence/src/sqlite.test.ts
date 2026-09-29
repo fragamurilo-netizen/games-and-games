@@ -11,7 +11,7 @@ const rest = (world: WorldState) => {
   if (!result.ok) throw new Error(result.error.message)
   return result.value
 }
-describe("SQLite real e snapshot v1", () => {
+describe("SQLite real e snapshot versionado", () => {
   it("cria banco, salva, carrega e continua com o mesmo RNG", async () => {
     const { db, native } = fixture(), repo = new SqliteSaveRepository(db)
     expect(await repo.load()).toEqual({ ok: true, value: null })
@@ -57,11 +57,11 @@ describe("SQLite real e snapshot v1", () => {
   it("recusa versão futura sem restaurar silenciosamente uma versão anterior", async () => {
     const { db, native } = fixture(), repo = new SqliteSaveRepository(db)
     await repo.save(createWorld("s")); await repo.save(rest(createWorld("s")))
-    native.prepare("UPDATE saves SET payload = ? WHERE slot = ?").run('{"schemaVersion":2}', "current")
+    native.prepare("UPDATE saves SET payload = ? WHERE slot = ?").run('{"schemaVersion":3}', "current")
     expect(await repo.load()).toMatchObject({ ok: false, error: { code: "unsupported-version" } })
     native.exec("PRAGMA user_version = 2")
     expect(await new SqliteSaveRepository(db).load()).toMatchObject({ ok: false, error: { code: "storage" } })
-    expect(native.prepare("SELECT payload FROM saves WHERE slot = 'current'").get()?.payload).toBe('{"schemaVersion":2}')
+    expect(native.prepare("SELECT payload FROM saves WHERE slot = 'current'").get()?.payload).toBe('{"schemaVersion":3}')
   })
   it("detecta corrupção, referências inválidas e adulteração de hash", async () => {
     const world = createWorld("s")
