@@ -1,0 +1,117 @@
+name: Mais Uma Rodada - Claude base 29-09 APK
+on:
+  push:
+    branches: [build/mais-uma-rodada-base-2b8f81b-20260929]
+    paths:
+      - .github/workflows/build-youth-snapshot.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: youth-snapshot-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify unchanged Claude source and prepare independent test package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p validation mais-uma-rodada/build
+          SOURCE=2b8f81b9c0805f0e01a7f586e8b6ceb364f516e6
+          git cat-file -e "$SOURCE^{commit}"
+          git diff --exit-code "$SOURCE" HEAD -- mais-uma-rodada
+          printf '%s\n' "$SOURCE" > validation/source-commit.txt
+          git rev-parse HEAD > validation/build-commit.txt
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root = Path('mais-uma-rodada')
+          paths = ['scripts/systems/youth_academy.gd', 'scripts/systems/youth_cups.gd', 'scripts/systems/youth_manager.gd', 'scripts/systems/deal_terms.gd', 'scripts/ui/screens/academy_screen.gd']
+          hashes = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in paths}
+          Path('validation/source-hashes.json').write_text(json.dumps(hashes, indent=2))
+          p = root / 'export_presets.cfg'
+          text = p.read_text()
+          old = 'package/unique_name="com.maisumarodada.futebol"'
+          assert text.count(old) == 2, 'Unexpected Android package settings'
+          text = text.replace(old, 'package/unique_name="com.maisumarodada.futebol.baseteste"')
+          text = text.replace('package/name="Mais Uma Rodada"', 'package/name="Mais Uma Rodada Base"')
+          p.write_text(text)
+          PY
+          git diff -- mais-uma-rodada/export_presets.cfg > validation/test-package.patch
+      - name: Import and validate scripts, mobile layout, youth competitions and negotiations
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/workspace/validation/dependencies.log
+              godot --version | tee /workspace/validation/engine.txt
+              timeout 300s godot --headless --path . --import > /workspace/validation/import.log 2>&1
+              if grep -E "SCRIPT ERROR|Parse Error" /workspace/validation/import.log; then exit 1; fi
+              timeout 180s godot --headless --path . --script res://tools/check_scripts.gd 2>&1 | tee /workspace/validation/scripts.log
+              grep -q "com erro: 0" /workspace/validation/scripts.log
+              if grep -E "SCRIPT ERROR|Parse Error|FALHOU" /workspace/validation/scripts.log; then exit 1; fi
+              timeout 180s godot --headless --path . --script res://tests/mobile_regression.gd 2>&1 | tee /workspace/validation/mobile.log
+              grep -q MOBILE_REGRESSION_OK /workspace/validation/mobile.log
+              if grep -E "SCRIPT ERROR|Parse Error|MOBILE_FAIL" /workspace/validation/mobile.log; then exit 1; fi
+              timeout 240s godot --headless --path . --script res://tools/youth_deals_smoke.gd 2>&1 | tee /workspace/validation/youth-brazil.log
+              grep -q "ok em" /workspace/validation/youth-brazil.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/youth-brazil.log; then exit 1; fi
+              timeout 240s godot --headless --path . --script res://tools/youth_deals_smoke.gd -- --club=Benfica 2>&1 | tee /workspace/validation/youth-europe.log
+              grep -q "ok em" /workspace/validation/youth-europe.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/youth-europe.log; then exit 1; fi
+              timeout 240s godot --headless --path . --script res://tools/youth_deals_smoke.gd -- --deals 2>&1 | tee /workspace/validation/deals.log
+              grep -q "virada: a receber" /workspace/validation/deals.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/deals.log; then exit 1; fi
+              timeout 300s godot --headless --path . --script res://tools/youth_deals_smoke.gd -- --career 2>&1 | tee /workspace/validation/career.log
+              grep -q "rodada 0" /workspace/validation/career.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/career.log; then exit 1; fi
+            '
+      - name: Export signed Android arm64 test APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              timeout 300s godot --headless --path . --export-debug "Android arm64" build/MaisUmaRodada-base-Claude-2026-09-29-arm64.apk 2>&1 | tee /workspace/validation/export.log
+              if grep -E "SCRIPT ERROR|Parse Error|Failed to export|Export failed" /workspace/validation/export.log; then exit 1; fi
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-base-Claude-2026-09-29-arm64.apk
+          sha256sum mais-uma-rodada/build/MaisUmaRodada-base-Claude-2026-09-29-arm64.apk > validation/apk-sha256.txt
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          apk = Path('mais-uma-rodada/build/MaisUmaRodada-base-Claude-2026-09-29-arm64.apk')
+          with zipfile.ZipFile(apk) as z:
+              assert z.testzip() is None, 'Corrupt APK archive'
+              names = z.namelist()
+              assert 'AndroidManifest.xml' in names
+              assert any(name.startswith('lib/arm64-v8a/') for name in names)
+              Path('validation/apk-entries.txt').write_text('\n'.join(names))
+          Path('validation/build.json').write_text(json.dumps({'version': '0.4.0', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'build_commit': Path('validation/build-commit.txt').read_text().strip(), 'source_branch': 'claude/project-thread-nzso8z', 'package': 'com.maisumarodada.futebol.baseteste', 'app_name': 'Mais Uma Rodada Base', 'source_logic_modified': False, 'separate_saved_games': True, 'physical_android_tested': False, 'apk_bytes': apk.stat().st_size}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MaisUmaRodada-base-Claude-validacao
+          path: validation/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaisUmaRodada-base-Claude-2026-09-29-arm64
+          path: mais-uma-rodada/build/MaisUmaRodada-base-Claude-2026-09-29-arm64.apk
+          if-no-files-found: error
+          retention-days: 14
