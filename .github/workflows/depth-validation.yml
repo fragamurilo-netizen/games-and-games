@@ -20,14 +20,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Apply exact integrity-checked source changes
+      - name: Apply exact integrity-checked source changes and preserve concurrent tablet updates
         run: |
           set -euo pipefail
           test "$GITHUB_REF_NAME" = codex/football-depth-0.5.0-20260928
           mkdir -p validation mais-uma-rodada/build
           git rev-parse HEAD > validation/input-commit.txt
           python3 .ci/apply_depth_edits.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # These three reviewed commits arrived on the source branch during development.
+          # Integrate INTO the isolated branch only. Conflicts must fail, never auto-resolve.
+          git merge --no-commit --no-ff 4f90c3eec4c4cc891f6e4d9710bf7a681742a838
+          echo 4f90c3eec4c4cc891f6e4d9710bf7a681742a838 > validation/integrated-base.txt
           git diff --check
+          git diff --cached --check
       - name: Import and run full depth and mobile regression gates
         shell: bash
         run: |
@@ -57,8 +64,8 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           mapfile -t SOURCE_PATHS < validation/source-paths.txt
           git add -- "${SOURCE_PATHS[@]}"
-          if ! git diff --cached --quiet; then
-            git commit -m 'Implement validated 0.5.0 tactical intelligence, talent projection, national careers and youth competitions'
+          if ! git diff --cached --quiet || test -f .git/MERGE_HEAD; then
+            git commit -m 'Integrate reviewed latest tablet updates into validated football depth 0.5.0'
             git push origin HEAD:codex/football-depth-0.5.0-20260928
           fi
           git rev-parse HEAD > validation/source-commit.txt
@@ -95,7 +102,7 @@ jobs:
           with zipfile.ZipFile(apk) as z:
               assert z.testzip() is None
               assert 'AndroidManifest.xml' in z.namelist()
-          Path('validation/build.json').write_text(json.dumps({'version': '0.5.0', 'code': 13, 'package': 'com.maisumarodada.futebol.depthtest', 'name': 'Mais Uma Rodada 0.5 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'physical_android_tested': False}, indent=2))
+          Path('validation/build.json').write_text(json.dumps({'version': '0.5.0', 'code': 13, 'package': 'com.maisumarodada.futebol.depthtest', 'name': 'Mais Uma Rodada 0.5 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'integrated_source_base': '4f90c3eec4c4cc891f6e4d9710bf7a681742a838', 'physical_android_tested': False}, indent=2))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
