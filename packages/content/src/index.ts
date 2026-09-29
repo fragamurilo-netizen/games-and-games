@@ -1,6 +1,7 @@
 // Conteúdo data-driven: eventos, empregos, cursos, traços, textos (bíblia §41).
 // Conteúdo inicial da fundação, sem lógica de simulação.
 export * from "./events"
+export * from "./routine"
 export const starterContent = {
   city: "Santa Aurora",
   district: "Vila das Flores",

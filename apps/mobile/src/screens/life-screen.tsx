@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { queryDecision, queryLife, type Command } from "@paralelo/simulation"
+import { queryDecision, queryLife, queryRoutine, type Command } from "@paralelo/simulation"
 import { ActionButton } from "../components/screen-frame"
 import { useGame } from "../hooks/game-context"
 import { colors, space, fonts } from "../theme"
@@ -10,6 +10,7 @@ export default function LifeScreen() {
   const { world, busy, error, notice, dispatch, retry } = useGame()
   const life = useMemo(() => world ? queryLife(world) : null, [world])
   const decision = useMemo(() => world ? queryDecision(world) : null, [world])
+  const routine = useMemo(() => world ? queryRoutine(world) : null, [world])
   const action = (label: string, command: Command, disabled = false) => <Pressable
     accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled: busy || disabled || !!decision }}
     disabled={busy || disabled || !!decision} onPress={() => { void dispatch(command) }}
@@ -33,6 +34,8 @@ export default function LifeScreen() {
         </View>
         <Text style={styles.body}>{life.energy}</Text>
         <Text style={styles.secondary}>{life.stress}</Text>
+        <Text style={styles.body}>{life.hunger}</Text>
+        <Text style={styles.secondary}>{life.sleep}</Text>
         {error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
         {notice && <Text accessibilityLiveRegion="polite" style={styles.secondary}>{notice}</Text>}
         {decision && <View style={styles.section}>
@@ -43,8 +46,23 @@ export default function LifeScreen() {
         </View>}
         <View style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>Agora</Text>
-          <View style={styles.actions}>{action("Descansar · 2 horas", { type: "rest" })}{action("Dormir · 8 horas", { type: "sleep" })}{action("Almoçar · R$ 18,00", { type: "meal" })}{action("Seguir o dia · 4 horas", { type: "wait", minutes: 240 })}</View>
-          <Text style={styles.secondary}>O tempo para quando chega uma mensagem importante.</Text>
+          <View style={styles.actions}>{action("Descansar · 2 horas", { type: "rest" })}{action("Dormir · 8 horas", { type: "sleep" })}{action("Seguir o dia · 4 horas", { type: "wait", minutes: 240 })}</View>
+          <Text style={styles.secondary}>Avançar pausa em decisões e avisos importantes. Dormir ou fazer uma tarefa consome o tempo inteiro; os compromissos continuam.</Text>
+        </View>
+        {routine && <View style={styles.section}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>Refeições e despensa</Text>
+          <Text style={styles.body}>{routine.pantry}</Text>
+          {routine.meals.map(meal => <View key={meal.source}>
+            <ActionButton label={meal.label} command={{ type: "meal", source: meal.source }} disabled={!meal.canEat} />
+            {meal.reason && <Text style={styles.secondary}>{meal.reason}</Text>}
+          </View>)}
+          <ActionButton label={routine.groceries.label} command={{ type: "buy-groceries" }} disabled={!routine.groceries.canBuy} />
+          {routine.groceries.reason && <Text style={styles.secondary}>{routine.groceries.reason}</Text>}
+          {routine.showCommunityWait && <ActionButton label={`Avançar até o almoço comunitário · ${routine.communityDate}, 11h`} command={{ type: "wait", minutes: routine.communityWait }} />}
+        </View>}
+        <View style={styles.section}>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>Na agenda</Text>
+          {life.agenda.map(item => <View key={item.id} style={styles.person}><Text style={styles.secondary}>{item.date} · {item.time}</Text><Text style={styles.body}>{item.label}</Text></View>)}
         </View>
         <View style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>Pessoas próximas</Text>

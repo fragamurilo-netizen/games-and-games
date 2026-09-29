@@ -1,11 +1,11 @@
 import type { GameDate, WorldState } from "../domain/world"
 import { absoluteMinute, fromMinute } from "../time"
-import { applyElapsed } from "../systems/needs"
+import { applyElapsed, type Activity } from "../systems/needs"
 import { processScheduled } from "../systems/periodic"
 export { appendEntry } from "../timeline"
 
 // Eventos vencidos em ordem estável. Skip pausa no primeiro fato importante.
-export function advance(world: WorldState, target: GameDate, options: { resting?: boolean; interruptible?: boolean } = {}): WorldState {
+export function advance(world: WorldState, target: GameDate, options: { activity?: Activity; interruptible?: boolean } = {}): WorldState {
   let next = world
   const end = absoluteMinute(target)
   // Reconsultar a fila inclui eventos recorrentes criados durante o próprio skip.
@@ -14,10 +14,12 @@ export function advance(world: WorldState, target: GameDate, options: { resting?
     if (!event) break
     const at = absoluteMinute(event.at)
     if (at > end) break
-    next = { ...applyElapsed(next, at - absoluteMinute(next.clock), options.resting), clock: event.at,
+    next = { ...applyElapsed(next, at - absoluteMinute(next.clock), options.activity), clock: event.at,
       scheduled: next.scheduled.filter(item => item.id !== event.id) }
+    const previousEntries = next.timeline.length
     next = processScheduled(next, event)
-    if (options.interruptible && (event.interrupts || next.events.pending)) return next
+    const workNotice = event.kind === "work-reminder" || event.kind === "work-attendance"
+    if (options.interruptible && ((event.interrupts && (!workNotice || next.timeline.length > previousEntries)) || next.events.pending)) return next
   }
-  return { ...applyElapsed(next, end - absoluteMinute(next.clock), options.resting), clock: fromMinute(end) }
+  return { ...applyElapsed(next, end - absoluteMinute(next.clock), options.activity), clock: fromMinute(end) }
 }

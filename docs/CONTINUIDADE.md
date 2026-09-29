@@ -7,7 +7,7 @@ Branch compartilhada: `claude/inspiring-cray-82ewil` no remoto `origin`.
 Atualize este documento e faça commit/push de cada entrega validada. Nunca
 confunda sistemas planejados com funcionalidades já implementadas.
 
-## Entrega atual: campanha Android com decisões
+## Entrega atual: rotina, alimentação e presença no trabalho
 
 - Núcleo TS puro em `packages/simulation`: relógio Gregorian sem Date do sistema,
   RNG de seis streams independentes, IDs estáveis, pessoas, relações, agenda,
@@ -21,7 +21,7 @@ confunda sistemas planejados com funcionalidades já implementadas.
   envia comandos; persistência precede a publicação da transição.
 - Expo Router e cinco áreas VIDA/PESSOAS/CARREIRA/DINHEIRO/MUNDO em `apps/mobile/src/app`; SQLite Android/web na borda,
   via `apps/mobile/src/persistence`. Web exige WASM e COOP/COEP, configurados no Metro.
-- Save v3: snapshot integral em SQLite, atualização e backup anterior em uma
+- Save v4: snapshot integral em SQLite, atualização e backup anterior em uma
   transação. IDs/referências/intervalos/hash são verificados na carga. Save
   futuro é recusado; corrupção tenta backup sem substituir a cópia válida por
   dados danificados. Se ambas as cópias falharem, nenhuma é sobrescrita.
@@ -30,6 +30,27 @@ confunda sistemas planejados com funcionalidades já implementadas.
   Habilidades condicionam candidaturas; seleção é determinística e tem cooldown.
   Contratação fecha a vaga. Trabalho tem turno de oito horas, dias úteis e limite
   de um turno por dia. Cada turno acumula 1/20 do salário de referência.
+- Sono acumulado e fome em `Person.needs`, junto de energia e stress. Descansar
+  e dormir são atividades distintas. Integração de intervalos mantém os efeitos
+  consistentes quando há eventos no meio de uma ação. Só o jogador tem essas
+  necessidades processadas; NPCs continuam seguindo seus tiers anteriores.
+- Despensa começa com quatro porções. Comprar seis custa R$ 48 e leva uma hora;
+  preparar comida usa uma porção e 35 minutos. Restaurante: R$ 18/45 minutos.
+  Almoço comunitário: gratuito, uma vez por dia, entrada entre 11h e 14h. Há
+  caminho de recuperação mesmo sem saldo. Estoque máximo: 30 refeições.
+- Agenda de trabalho real: lembrete às 8h e conferência de presença às 14h01,
+  apenas em dias úteis. Entrada é permitida das 6h às 14h. A cobrança começa
+  no próximo dia útil, inclusive para empregos migrados. Presença é registrada
+  antes de processar as oito horas para não marcar falta durante um turno.
+- Primeira falta gera aviso; segunda, advertência; terceira seguida encerra
+  o contrato. Trabalhar interrompe a sequência. A saída liquida o salário
+  acumulado uma vez, reabre a vaga, remove a agenda antiga e entra no histórico
+  profissional. Nova candidatura à mesma empresa tem intervalo de sete dias.
+  Sono, alimentação, stress e energia afetam o desempenho; nenhum sorteio é
+  usado para essas faltas. As regras são parâmetros de gameplay em `content/routine.ts`.
+- VIDA mostra os próximos turnos e pagamento/aluguel, sem revelar eventos
+  internos dos NPCs. CARREIRA explica a situação da presença e exibe contratos
+  encerrados. Lembretes sem novidade não interrompem a passagem de tempo.
 - Dia 1 às 8h: pagamento dos turnos efetivamente cumpridos, seguido do aluguel.
   Todos os valores são inteiros em centavos; saldo precisa conferir com o ledger.
   Saldo negativo é explícito. Refeições e aulas são bloqueadas sem saldo suficiente.
@@ -60,17 +81,19 @@ Use Node 24 e execute `npm ci`, `npm test`, `npm run typecheck`,
 `npm --workspace apps/mobile run web`. O laboratório abre separadamente com
 `python -m http.server 8765 --bind 127.0.0.1` dentro de `prototypes/faces`.
 
-Há 37 testes cobrindo determinismo, relógio, eventos, comandos recusados,
+Há 49 testes cobrindo determinismo, relógio, eventos, comandos recusados,
 read models isolados, SQLite real, rollback, backup, saves futuros/corrompidos,
 duplo toque, falha de gravação e integridade durante 1, 5 e 20 anos.
 As corridas longas verificam integridade financeira e social; não demonstram
 balanceamento de uma vida completa. Ainda não há macroeconomia ou envelhecimento
-com morte/legado. Também há testes de curso, contratação, turno e conservação do ledger.
+com morte/legado. Também há curso, contratação, turno, presença, demissão,
+despensa, sono e conservação do ledger. Um cenário de 90 dias trabalha,
+compra comida, dorme, responde decisões e recebe três pagamentos mensais.
 
 ## Save e migrações
 
 SQLite `PRAGMA user_version = 1`: tabela `saves(slot, payload)`; slots `current`
-e `previous`. Envelope JSON `schemaVersion = 3`, hash e WorldState v3. O save
+e `previous`. Envelope JSON `schemaVersion = 4`, hash e WorldState v4. O save
 do laboratório (`paralelo-character`) é independente do save da campanha.
 Migração v1 -> v2 em `systems/slice.ts`: preserva pessoas originais, relações,
 timeline, seed, relógio e cursores RNG. Acrescenta cidade/finanças/carreira via
@@ -80,6 +103,11 @@ verificam migração, persistência e preservação da versão antiga como backu
 Migração v2 -> v3 em `systems/events.ts`: preserva os sistemas existentes e
 acrescenta estado/agenda de decisões sem consumir RNG. Fixture v2 gerada no
 checkpoint `82e83c6`; decisões pendentes e follow-ups são salvos integralmente.
+Migração v3 -> v4 em `systems/routine.ts`: acrescenta fome/sono, despensa e
+controle de presença sem consumir RNG nem aplicar faltas passadas. Fixture v3
+produzida no checkpoint `99a5700`, com emprego ativo e R$ 90 a receber, está em
+`tests/fixtures/legacy-save-v3.json`. Pessoas antigas mantêm todos os campos
+anteriores; só recebem as novas necessidades. A versão anterior fica no backup.
 Ao adicionar campos obrigatórios, criar migração explícita e teste de fixture
 da versão anterior; não aceitar silenciosamente dados incompletos.
 
@@ -92,10 +120,14 @@ nesta máquina. Perfis EAS development/preview APK/production AAB já existem.
 Não foi disparado build EAS remoto nesta entrega. Web é ambiente auxiliar de
 inspeção. O retrato vetorial ainda não é integrado à campanha.
 Person e Relationship são modelos iniciais; crenças, macroeconomia, mensagens
-respondíveis gerais, Utility AI completa, promoção/demissão e troca de emprego faltam.
+respondíveis gerais, Utility AI completa, promoções e troca voluntária de emprego faltam.
+Demissão implementada apenas por faltas consecutivas; crise da empresa, licença,
+justificativa de ausência e desligamento por desempenho ainda não existem.
 Empregos e contas só são simulados para o jogador. Moradia é fixa. O registro
 MUNDO deriva de fatos da campanha, não é um sistema de jornalismo da cidade.
-As taxas de energia/stress são provisórias e não representam rotina de sono.
+As taxas de necessidades são parâmetros abstratos de jogo e precisam de
+balanceamento com uso real. Não há doença, desmaio ou morte por negligenciar
+alimentação/sono nesta versão. Não foram acrescentadas dependências nativas.
 O hash de diagnóstico não é criptográfico. Histórico de comandos guarda os
 últimos 256; timeline persistida é integral e query mostra os últimos 80.
 
@@ -103,9 +135,9 @@ O hash de diagnóstico não é criptográfico. Histórico de comandos guarda os
 
 1. Validar APK/emulador Android: abertura offline, fonte ampliada, voltar,
    background, retomada, duplo toque e SQLite real no aparelho.
-2. Ampliar rotina, necessidades e agenda; fome e obrigações de trabalho pendentes.
+2. Ampliar agenda com compromissos pessoais, licenças e justificativas de falta.
 3. Utility AI, empregos/finanças dos NPCs, mensagens respondíveis e crenças.
-4. Promoções/demissões, despesas detalhadas, dívidas, macroeconomia e mudanças.
+4. Promoções, desligamentos por outros motivos, despesas detalhadas, dívidas e mudanças.
 5. Completar o slice de §48: promover 20 NPCs relevantes, educação aprofundada,
    notícias da cidade e campanhas de três meses com trabalho e decisões.
 6. Portar renderer/genoma vetorial para TS e react-native-svg sem duplicar a
@@ -113,18 +145,25 @@ O hash de diagnóstico não é criptográfico. Histórico de comandos guarda os
 
 ## Validação e performance desta entrega
 
-`npm test`: 37 testes, incluindo as 60 escolhas dos 30 eventos, cadeia completa,
-replay de decisão recusado, opção sem saldo, retomada pendente e migrações v1/v2.
+`npm test`: 49 testes, incluindo as 60 escolhas dos 30 eventos, cadeia completa,
+replay recusado, opção sem saldo, retomada pendente e migrações v1/v2/v3.
+Rotina: refeições e compras, sono vs pausa, intervalos de necessidade, contrato
+às 14h, fim de semana, advertência, recuperação de presença, acerto único,
+vaga reaberta, agenda corrompida e campanha ativa de três meses.
 `npm run typecheck`: todos os workspaces.
 `npm --workspace apps/mobile run lint` e `npx expo install --check`: executados.
 Web: navegação, ações, extrato, autosave e retomada/migração inspecionados no browser.
-Em campanha separada de QA, decisão interrompeu às 19h, permaneceu pendente após
-reabrir e gerou entrada de R$ 50 às 21h após duas horas de serviço. As cinco fontes
-carregaram e não houve erros no console. Campanha do usuário foi preservada.
-CLI seed `flores`, 90 dias, `--auto-choice first`: mundo válido e cadeias
+Em campanha separada de QA v3, a atualização preservou saldo de R$ 850, acrescentou
+quatro porções, consumiu uma e comprou seis por R$ 48 (saldo R$ 802). Contratação
+na Padaria Aurora e turno de oito horas geraram R$ 95 a receber, sem falta falsa
+às 14h01. Faltar no dia seguinte mostrou aviso na área CARREIRA.
+Reabrir a rota CARREIRA preservou o emprego, a falta e os R$ 95 acumulados.
+A campanha principal foi migrada mantendo 16/01/2026 às 19h55, com histórico
+anterior intacto, quatro porções iniciais e nenhum erro de console.
+CLI seed `rotina-v4`, 90 dias, `--auto-choice first`: mundo válido e cadeias
 contextuais. Sem essa opção, a CLI pausa na decisão do jogador; `safe` usa a
 última alternativa disponível para testar fast-forward sem impor gastos.
-Benchmark CPU local: 1.000 mundos de 100 pessoas em aproximadamente 414 ms.
+Benchmark CPU local: 1.000 mundos de 100 pessoas em aproximadamente 420 ms.
 Não representa FPS nem desempenho Android. Export Android/Hermes passou:
 bundle cerca de 3 MB, mais assets/fontes. Saídas em `output/`, ignoradas pelo Git.
 
@@ -133,8 +172,9 @@ bundle cerca de 3 MB, mais assets/fontes. Saídas em `output/`, ignoradas pelo G
 - `7df361c`: laboratório vetorial revisado.
 - `1670156`: fundação e save v1.
 - `82e83c6`: carreira, cursos, ledger, autonomia social e save v2.
-- Entrega atual: motor de decisões/save v3 e fontes autorais Android; localizar
-  em `git log` pelo título "Adiciona decisoes encadeadas e tipografia autoral para Android".
+- `99a5700`: motor de decisões/save v3 e fontes autorais Android.
+- Entrega atual: localizar em `git log` pelo título
+  "Implementa rotina alimentar sono e presenca profissional com save v4".
   Nunca force-push desta branch compartilhada.
 
 Registre aqui resultados medidos e novos limites ao concluir cada entrega.

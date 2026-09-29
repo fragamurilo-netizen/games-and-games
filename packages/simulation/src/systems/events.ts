@@ -1,6 +1,6 @@
 import { lifeEvents, validateLifeEvents, type EventChoice, type EventDefinition } from "@paralelo/content"
 import type { DecisionId, PersonId, ScheduleId } from "@paralelo/shared"
-import type { ScheduledEvent, WorldState, WorldStateV2 } from "../domain/world"
+import type { ScheduledEvent, WorldState, WorldStateV2, WorldStateV3 } from "../domain/world"
 import { draw } from "../rng"
 import { advance } from "../scheduling"
 import { addMinutes, formatDate } from "../time"
@@ -10,7 +10,7 @@ import { remember } from "./memory"
 import { changeNeeds } from "./needs"
 import { updateRelationship } from "./relationships"
 
-export function upgradeWorldV2(base: WorldStateV2): WorldState {
+export function upgradeWorldV2(base: WorldStateV2): WorldStateV3 {
   const errors = validateLifeEvents()
   if (errors.length) throw new Error(errors.join(" "))
   return { ...base, schemaVersion: 3, events: { contentVersion: 1, seen: [], lastOfferedDay: null, pending: null },
@@ -60,7 +60,7 @@ export function resolveDecision(world: WorldState, option: EventChoice): WorldSt
   const pending = world.events.pending!, definition = lifeEvents.find(event => event.id === pending.definitionId)!
   let next = advance({ ...world, events: { ...world.events, pending: null } }, addMinutes(world.clock, option.effect.minutes))
   if (option.effect.moneyCents) next = postLedger(next, { amountCents: option.effect.moneyCents, category: "event", text: definition.title, cause: `event.choice:${pending.id}:${option.id}` })
-  next = changeNeeds(next, { energy: option.effect.energy ?? 0, stress: option.effect.stress ?? 0 })
+  next = changeNeeds(next, { energy: option.effect.energy ?? 0, stress: option.effect.stress ?? 0, hunger: option.effect.hunger ?? 0 })
   const skills = next.skills[next.playerId]!, clamp = (n: number) => Math.max(0, Math.min(1, n))
   next = { ...next, skills: { ...next.skills, [next.playerId]: { organization: clamp(skills.organization + (option.effect.organization ?? 0)), communication: clamp(skills.communication + (option.effect.communication ?? 0)) } } }
   if (pending.actorId) {

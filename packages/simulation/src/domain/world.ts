@@ -3,7 +3,7 @@ import type { RngState } from "../rng"
 
 // Dia 0 = 05/01/2026. Minutos inteiros; nenhum tempo de sistema no domínio.
 export type GameDate = Readonly<{ day: number; minute: number }>
-export type Person = Readonly<{
+export type PersonV3 = Readonly<{
   id: PersonId
   name: string
   birthDate: GameDate
@@ -13,6 +13,9 @@ export type Person = Readonly<{
   personality: Readonly<{ sociability: number; discipline: number; sensitivity: number }>
   needs: Readonly<{ energy: number; stress: number }>
   relationshipIds: readonly RelationshipId[]
+}>
+export type Person = Omit<PersonV3, "needs"> & Readonly<{
+  needs: PersonV3["needs"] & Readonly<{ hunger: number; sleepPressure: number }>
 }>
 export type Relationship = Readonly<{
   id: RelationshipId
@@ -38,7 +41,8 @@ export type TimelineEntry = Readonly<{
 export type ScheduledEvent = Readonly<{
   id: ScheduleId
   at: GameDate
-  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup"
+  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance"
+  employmentId?: EmploymentId
   eventId?: string
   actorId?: PersonId | null
   personId: PersonId
@@ -49,7 +53,8 @@ export type Command =
   | Readonly<{ type: "rest" }>
   | Readonly<{ type: "contact"; personId: PersonId }>
   | Readonly<{ type: "sleep" }>
-  | Readonly<{ type: "meal" }>
+  | Readonly<{ type: "meal"; source?: "home" | "restaurant" | "community" }>
+  | Readonly<{ type: "buy-groceries" }>
   | Readonly<{ type: "apply-job"; vacancyId: VacancyId }>
   | Readonly<{ type: "work" }>
   | Readonly<{ type: "study"; courseId: CourseId }>
@@ -63,7 +68,7 @@ export type WorldStateV1 = Readonly<{
   nextId: number
   playerId: PersonId
   city: string
-  people: Readonly<Record<string, Person>>
+  people: Readonly<Record<string, PersonV3>>
   households: Readonly<Record<string, Readonly<{ id: HouseholdId; memberIds: readonly PersonId[] }>>>
   residences: Readonly<Record<string, Readonly<{ id: ResidenceId; district: string }>>>
   relationships: Readonly<Record<string, Relationship>>
@@ -76,7 +81,9 @@ export type WorldStateV1 = Readonly<{
 export type Skills = Readonly<{ organization: number; communication: number }>
 export type Company = Readonly<{ id: CompanyId; name: string; district: string }>
 export type Vacancy = Readonly<{ id: VacancyId; companyId: CompanyId; roleId: string; open: boolean }>
-export type Employment = Readonly<{ id: EmploymentId; personId: PersonId; companyId: CompanyId; roleId: string; startedAt: GameDate; lastWorkedDay: number | null; accruedCents: number; shiftsWorked: number; performance: number }>
+export type EmploymentV3 = Readonly<{ id: EmploymentId; personId: PersonId; companyId: CompanyId; roleId: string; startedAt: GameDate; lastWorkedDay: number | null; accruedCents: number; shiftsWorked: number; performance: number }>
+export type Employment = EmploymentV3 & Readonly<{ requiredFromDay: number; consecutiveAbsences: number; lastAssessedDay: number | null }>
+export type EmploymentRecord = Readonly<{ id: EmploymentId; companyId: CompanyId; roleId: string; startedAt: GameDate; endedAt: GameDate; reason: "absence"; settledCents: number }>
 export type LedgerEntry = Readonly<{ id: LedgerId; at: GameDate; amountCents: number; category: "salary" | "rent" | "food" | "education" | "event"; text: string; cause: string }>
 export type Memory = Readonly<{ id: MemoryId; at: GameDate; personId: PersonId; otherId: PersonId; text: string; salience: number; cause: string }>
 export type WorldStateV2 = Omit<WorldStateV1, "schemaVersion"> & Readonly<{
@@ -85,14 +92,21 @@ export type WorldStateV2 = Omit<WorldStateV1, "schemaVersion"> & Readonly<{
   tiers: Readonly<Record<string, "player" | "close" | "background">>
   companies: Readonly<Record<string, Company>>
   vacancies: Readonly<Record<string, Vacancy>>
-  employment: Employment | null
+  employment: EmploymentV3 | null
   applications: readonly Readonly<{ vacancyId: VacancyId; at: GameDate; accepted: boolean }>[]
   finance: Readonly<{ openingBalanceCents: number; balanceCents: number; monthlyRentCents: number; ledger: readonly LedgerEntry[] }>
   training: Readonly<Record<string, Readonly<{ sessions: number; lastStudiedDay: number | null }>>>
   memories: readonly Memory[]
 }>
 export type PendingDecision = Readonly<{ id: DecisionId; definitionId: string; actorId: PersonId | null; at: GameDate }>
-export type WorldState = Omit<WorldStateV2, "schemaVersion"> & Readonly<{
+export type WorldStateV3 = Omit<WorldStateV2, "schemaVersion"> & Readonly<{
   schemaVersion: 3
   events: Readonly<{ contentVersion: 1; seen: readonly string[]; lastOfferedDay: number | null; pending: PendingDecision | null }>
+}>
+export type WorldState = Omit<WorldStateV3, "schemaVersion" | "people" | "employment"> & Readonly<{
+  schemaVersion: 4
+  people: Readonly<Record<string, Person>>
+  employment: Employment | null
+  employmentHistory: readonly EmploymentRecord[]
+  routine: Readonly<{ pantryMeals: number; lastCommunityMealDay: number | null }>
 }>

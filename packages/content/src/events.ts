@@ -2,7 +2,7 @@ export type EventCondition =
   | Readonly<{ type: "employed"; value: boolean }>
   | Readonly<{ type: "energy" | "money" | "stress"; min?: number; max?: number }>
 export type EventEffect = Readonly<{
-  minutes: number; moneyCents?: number; energy?: number; stress?: number
+  minutes: number; moneyCents?: number; energy?: number; stress?: number; hunger?: number
   organization?: number; communication?: number; affection?: number; trust?: number
 }>
 export type EventChoice = Readonly<{ id: string; label: string; outcome: string; effect: EventEffect; followUp?: string }>
@@ -38,7 +38,7 @@ export const lifeEvents: readonly EventDefinition[] = [
     choice("light", "Manter a conversa leve", "Vocês falaram de coisas pequenas. Hoje você não quis abrir essa parte da vida.", { minutes: 15, affection: 1 }),
   ]),
   event("receita", "Uma receita no celular", "Sua mãe mandou uma receita simples e disse onde costuma encontrar os ingredientes mais baratos.", "mother", false, [], [
-    choice("cook", "Fazer a receita · R$ 25,00, 1 hora", "Você fez a receita e mandou uma foto para sua mãe. A cozinha começou a parecer sua.", { minutes: 60, moneyCents: -2500, energy: 10, stress: -4, affection: 2 }),
+    choice("cook", "Fazer a receita · R$ 25,00, 1 hora", "Você fez a receita, comeu e mandou uma foto para sua mãe. A cozinha começou a parecer sua.", { minutes: 60, moneyCents: -2500, energy: 10, stress: -4, affection: 2, hunger: -60 }),
     choice("save", "Guardar a receita para outra semana", "Você guardou a receita. Sua mãe respondeu que não tem pressa.", { minutes: 5, affection: 1 }),
   ]),
   event("oficina", "Uma oficina no centro comunitário", "O centro comunitário abriu uma oficina curta sobre organização no trabalho. Cabe nesta noite, mas tem uma taxa de material.", null, true, [{ type: "employed", value: false }], [
@@ -82,7 +82,7 @@ export const lifeEvents: readonly EventDefinition[] = [
     choice("later", "Deixar essa revisão para outro dia", "Você fechou o extrato. O próximo aluguel continua na sua cabeça.", { minutes: 5, stress: 2 }),
   ]),
   event("compras", "Cozinhar pode caber na semana", "Você fez uma lista curta de compras. Os ingredientes custam R$ 35,00; preparar tudo leva uma hora e meia.", null, false, [], [
-    choice("prepare", "Comprar e preparar · R$ 35,00, 90 min", "Você comprou os ingredientes e preparou comida em casa. O gasto ficou registrado no extrato.", { minutes: 90, moneyCents: -3500, energy: 12, organization: .01 }, "rotina-compras"),
+    choice("prepare", "Comprar e preparar · R$ 35,00, 90 min", "Você comprou os ingredientes, preparou comida e sentou para comer. O gasto ficou registrado no extrato.", { minutes: 90, moneyCents: -3500, energy: 12, organization: .01, hunger: -60 }, "rotina-compras"),
     choice("hold", "Adiar a compra e preservar o saldo", "Você guardou a lista e decidiu preservar o saldo disponível.", { minutes: 5 }),
   ]),
   event("rotina-compras", "A lista ficou mais simples", "Depois de cozinhar, você percebeu quais compras realmente usa no dia a dia.", null, false, [], [
@@ -134,7 +134,7 @@ export const lifeEvents: readonly EventDefinition[] = [
     choice("later", "Deixar essa parte para depois", "Você preferiu aproveitar o corredor livre e descansar.", { minutes: 20, energy: 5 }),
   ]),
   event("casa-pronta", "Uma casa para receber", "{person} perguntou se já pode conhecer a casa. Você pode preparar algo simples ou só convidar para uma conversa.", "friend", false, [], [
-    choice("meal", "Preparar algo para receber · R$ 35,00, 2 horas", "{person} conheceu a casa. Vocês comeram e conversaram sem o corredor cheio de caixas.", { minutes: 120, moneyCents: -3500, affection: 4, stress: -5, energy: -8 }),
+    choice("meal", "Preparar algo para receber · R$ 35,00, 2 horas", "{person} conheceu a casa. Vocês comeram e conversaram sem o corredor cheio de caixas.", { minutes: 120, moneyCents: -3500, affection: 4, stress: -5, energy: -8, hunger: -60 }),
     choice("simple", "Receber sem preparar comida · 1 hora", "{person} passou para conhecer a casa. Vocês conversaram e deixaram a comida para outro dia.", { minutes: 60, affection: 2, stress: -2, energy: -4 }),
   ]),
 ]

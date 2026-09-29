@@ -3,12 +3,13 @@ import type { Command, WorldState } from "../domain/world"
 import { draw } from "../rng"
 import { absoluteMinute, addMinutes } from "../time"
 import { advance, appendEntry } from "../scheduling"
-import { courses, lifeEvents } from "@paralelo/content"
+import { courses, lifeEvents, routineRules } from "@paralelo/content"
 import { choiceReason, resolveDecision } from "../systems/events"
 import { applicationReason, applyForJob, completeShift, workReason } from "../systems/career"
 import { postLedger } from "../systems/finance"
 import { remember } from "../systems/memory"
 import { updateRelationship } from "../systems/relationships"
+import { finishGroceries, finishMeal, groceriesReason, mealReason } from "../systems/routine"
 
 export type CommandError = Readonly<{ code: "invalid-duration" | "unknown-person" | "no-relationship" | "cooldown" | "exhausted" | "invalid-command" | "unavailable" | "insufficient-money" | "pending-decision"; message: string }>
 export function contactAvailability(world: WorldState, personId: PersonId): CommandError | null {
@@ -42,22 +43,26 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       break
     }
     case "rest": {
-      next = advance(world, addMinutes(world.clock, 120), { resting: true })
-      next = appendEntry(next, { at: next.clock, kind: "action", text: "Você desligou o celular e descansou por duas horas. As caixas podem esperar.", personIds: [world.playerId], cause: "command.rest" })
+      next = advance(world, addMinutes(world.clock, 120), { activity: "rest" })
+      next = appendEntry(next, { at: next.clock, kind: "action", text: "Você deixou as tarefas de lado e descansou por duas horas.", personIds: [world.playerId], cause: "command.rest" })
       break
     }
     case "sleep": {
-      next = advance(world, addMinutes(world.clock, 480), { resting: true })
-      next = appendEntry(next, { at: next.clock, kind: "action", text: "Você dormiu oito horas. Ao acordar, a casa parecia menos urgente.", personIds: [world.playerId], cause: "command.sleep" })
+      next = advance(world, addMinutes(world.clock, 480), { activity: "sleep" })
+      next = appendEntry(next, { at: next.clock, kind: "action", text: "Você dormiu oito horas e retomou o dia depois de acordar.", personIds: [world.playerId], cause: "command.sleep" })
       break
     }
     case "meal": {
-      if (world.finance.balanceCents < 1800) return err({ code: "insufficient-money", message: "Faltam R$ 18,00 disponíveis para essa refeição." })
-      next = advance(world, addMinutes(world.clock, 45))
-      next = postLedger(next, { amountCents: -1800, category: "food", text: "Refeição no restaurante do bairro", cause: "command.meal" })
-      const player = next.people[next.playerId]!
-      next = { ...next, people: { ...next.people, [player.id]: { ...player, needs: { energy: Math.min(100, player.needs.energy + 10), stress: Math.max(0, player.needs.stress - 4) } } } }
-      next = appendEntry(next, { at: next.clock, kind: "action", text: "Você almoçou no restaurante da esquina. O prato do dia custou R$ 18,00.", personIds: [world.playerId], cause: "command.meal" })
+      const source = command.source ?? "restaurant"
+      const reason = mealReason(world, source)
+      if (reason) return err({ code: source === "restaurant" && world.finance.balanceCents < 1800 ? "insufficient-money" : "unavailable", message: reason })
+      next = finishMeal(advance(world, addMinutes(world.clock, routineRules.meals[source].minutes)), source, world.clock.day)
+      break
+    }
+    case "buy-groceries": {
+      const reason = groceriesReason(world)
+      if (reason) return err({ code: world.finance.balanceCents < routineRules.groceries.priceCents ? "insufficient-money" : "unavailable", message: reason })
+      next = finishGroceries(advance(world, addMinutes(world.clock, routineRules.groceries.minutes)))
       break
     }
     case "apply-job": {
@@ -70,7 +75,10 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       const reason = workReason(world)
       if (reason) return err({ code: "unavailable", message: reason })
       // Turno iniciado em uma data; o scheduler conserva todos os fatos no intervalo.
-      next = completeShift(advance(world, addMinutes(world.clock, 480)), world.clock.day)
+      // Presença registrada no início: a cobrança das 14h01 pode ocorrer durante
+      // o turno. O comando inteiro só é publicado depois do save bem-sucedido.
+      const checkedIn = { ...world, employment: { ...world.employment!, lastWorkedDay: world.clock.day } }
+      next = completeShift(advance(checkedIn, addMinutes(world.clock, routineRules.work.shiftMinutes)), world.clock.day)
       break
     }
     case "study": {

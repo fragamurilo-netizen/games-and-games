@@ -7,7 +7,8 @@ A fonte de verdade do projeto é a **bíblia de design**:
 (original em `.docx` na mesma pasta). Leia antes de mexer em arquitetura.
 
 > Status: **primeira campanha jogável**, com motor puro, relógio, RNG, 100 pessoas,
-> relações/memórias, carreira, cursos, extrato, 30 eventos/10 cadeias e save SQLite. As cinco áreas do app
+> relações/memórias, carreira com presença e demissão, cursos, alimentação, sono,
+> despensa, extrato, 30 eventos/10 cadeias e save SQLite v4. As cinco áreas do app
 > executam ou consultam o estado real da campanha.
 > Continuidade para colegas: [`docs/CONTINUIDADE.md`](docs/CONTINUIDADE.md).
 
@@ -82,3 +83,16 @@ npm --workspace apps/mobile run lint
 O laboratório vetorial continua em [`prototypes/faces`](prototypes/faces/README.md).
 Ainda é um protótipo independente; sua integração aos retratos mobile é uma tarefa
 explicitamente registrada no documento de continuidade.
+
+## Rotina da campanha
+
+Na área VIDA, descansar recupera energia e dormir reduz o sono acumulado.
+Preparar comida usa a despensa; compras abastecem seis refeições por R$ 48.
+O restaurante custa R$ 18 e o centro comunitário oferece um almoço gratuito
+por dia, com entrada das 11h às 14h. Os efeitos aparecem em texto e no extrato.
+
+Empregos têm turnos de oito horas de segunda a sexta, com entrada entre 6h e 14h.
+A presença passa a ser cobrada no próximo dia útil após a contratação ou a
+migração de uma campanha antiga. Há avisos na primeira e segunda falta seguida;
+a terceira encerra o contrato, paga os turnos acumulados e reabre a vaga.
+Saves v1, v2 e v3 são migrados preservando o histórico e o saldo.

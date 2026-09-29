@@ -1,6 +1,6 @@
 import { cityNames, companies as companyNames, jobRoles, courses, validateStarterContent, starterContent } from "@paralelo/content"
 import type { CompanyId, CourseId, HouseholdId, PersonId, ResidenceId, ScheduleId, VacancyId } from "@paralelo/shared"
-import type { Company, Person, Skills, Vacancy, WorldStateV2, WorldStateV1 } from "../domain/world"
+import type { Company, PersonV3, Skills, Vacancy, WorldStateV2, WorldStateV1 } from "../domain/world"
 import { hashText } from "../rng"
 import { calendarDate, dayFromCalendar } from "../time"
 
@@ -10,7 +10,7 @@ export function upgradeWorldV1(base: WorldStateV1): WorldStateV2 {
   const invalid = validateStarterContent()
   if (invalid.length) throw new Error(invalid.join(" "))
   const value = (key: string) => hashText(`${base.seed}/slice-v2/${key}`) / 4294967296
-  const people: Record<string, Person> = { ...base.people }
+  const people: Record<string, PersonV3> = { ...base.people }
   const households = { ...base.households }, residences = { ...base.residences }
   for (let i = 0; i < 96; i++) {
     const id = `person:city-${i + 1}` as PersonId

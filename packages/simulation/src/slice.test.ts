@@ -45,7 +45,7 @@ describe("carreira, educação, dinheiro e autonomia", () => {
     const other = Object.values(first.vacancies).find(v => v.open)!
     expect(executeCommand(first, { type: "apply-job", vacancyId: other.id }).ok).toBe(false)
   })
-  it("registra turno uma só vez, paga o acumulado e conserva o ledger", () => {
+  it("registra turno uma só vez e conserva salário devido mesmo após faltas", () => {
     const start = hired()
     const worked = apply(start, { type: "work" })
     expect(worked.employment?.shiftsWorked).toBe(1)
@@ -55,7 +55,8 @@ describe("carreira, educação, dinheiro e autonomia", () => {
     const end = worked.scheduled.find(e => e.kind === "monthly-finance")!
     const paid = waitUntil(worked, absoluteMinute(end.at))
     expect(paid.finance.ledger.map(e => [e.category, e.amountCents])).toEqual([["salary", salary], ["rent", -75000]])
-    expect(paid.employment?.accruedCents).toBe(0)
+    expect(paid.employment).toBeNull()
+    expect(paid.employmentHistory[0]?.settledCents).toBe(salary)
     expect(paid.finance.balanceCents).toBe(80000 + salary - 75000)
     expect(validateWorld(paid).ok).toBe(true)
   })
@@ -78,7 +79,8 @@ describe("carreira, educação, dinheiro e autonomia", () => {
     let completed = first
     for (let i = 1; i < courses[0]!.sessions; i++) {
       completed = waitUntil(completed, (completed.clock.day + 1) * 1440 + 480)
-      completed = apply(completed, { type: "rest" })
+      completed = apply(completed, { type: "sleep" })
+      completed = apply(completed, { type: "meal" })
       completed = apply(completed, { type: "study", courseId: id })
     }
     expect(completed.training[id]?.sessions).toBe(10)

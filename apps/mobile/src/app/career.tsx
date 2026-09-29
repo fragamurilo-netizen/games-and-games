@@ -14,6 +14,8 @@ export default function CareerScreen() {
       <Text style={s.secondary}>{career.employment.salary} por 20 turnos · segunda a sexta</Text>
       <Text style={s.secondary}>Turnos do mês: {career.employment.shifts} · A receber: {career.employment.accrued}</Text>
       <Text style={s.body}>{career.employment.performance}</Text>
+      <Text accessibilityRole={career.employment.warning ? "alert" : undefined} style={career.employment.warning ? s.error : s.secondary}>{career.employment.presence}</Text>
+      <Text style={s.secondary}>Três faltas seguidas encerram o contrato. Os turnos cumpridos são pagos no acerto; faltar não gera salário.</Text>
       <ActionButton label="Ir trabalhar · 8 horas" command={{ type: "work" }} disabled={!career.canWork} />
       {career.unavailableReason && <Text style={s.secondary}>{career.unavailableReason}</Text>}
       {career.nextWork.waitMinutes > 0 && <ActionButton label={`Avançar até ${career.nextWork.date}, ${career.nextWork.time}`} command={{ type: "wait", minutes: career.nextWork.waitMinutes }} />}
@@ -34,5 +36,8 @@ export default function CareerScreen() {
         {vacancy.reason && <Text style={s.secondary}>{vacancy.reason}</Text>}
       </View>)}
     </Section>
+    {!!career.history.length && <Section title="Por onde você passou">
+      {career.history.map(job => <View style={s.row} key={job.id}><Text style={s.heading}>{job.title} · {job.company}</Text><Text style={s.secondary}>Saída em {job.ended}</Text><Text style={s.body}>{job.reason}</Text><Text style={s.secondary}>Acerto dos turnos: {job.settlement}</Text></View>)}
+    </Section>}
   </ScreenFrame>
 }
