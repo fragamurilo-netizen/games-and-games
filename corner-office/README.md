@@ -4,7 +4,7 @@
 
 Simulador mobile (Android primeiro) em que o jogador preside uma organização de MMA: matchmaking, contratos, eventos, finanças, mídia, rankings, scouting e expansão. As lutas são simuladas; o jogo está nas decisões antes e depois delas.
 
-**Status:** estrutura inicial pronta — nenhum sistema de jogo implementado ainda. Próximo passo: Milestone 1 (ver [docs/ROADMAP.md](docs/ROADMAP.md)).
+**Status:** estrutura inicial e laboratórios visuais prontos para iteração; motor de combate ainda pendente. Próximo passo: Milestone 1 (ver [docs/ROADMAP.md](docs/ROADMAP.md)).
 
 ## Documentos (leia antes de codar)
 
@@ -19,6 +19,12 @@ Simulador mobile (Android primeiro) em que o jogador preside uma organização d
 | [CLAUDE.md](CLAUDE.md) | Regras para agentes de IA trabalhando no projeto. |
 
 Os `.docx` originais das bíblias estão em `docs/bible/`. Os `.md` foram convertidos deles — se atualizar um, atualize o outro.
+
+## Laboratórios visuais
+
+- [Face Lab](prototypes/face-lab/): identidade, materiais e anatomia.
+- [Fight Studio](prototypes/fight-lab/): movimentos pareados, sete arenas e player de replay.
+- [Guia para continuar](docs/FIGHT_VISUALS.md): contrato, testes, limites e integração com o motor.
 
 ## Stack
 

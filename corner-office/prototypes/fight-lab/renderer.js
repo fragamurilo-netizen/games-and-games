@@ -1,0 +1,640 @@
+/* Canvas presentation only. Game Bible §§5,15–17. Shared faces from face-lab.
+ * Arena identity lives in content/arena_profiles.json; no organization literals.
+ */
+(function (root) {
+  "use strict";
+  class FightRenderer {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext("2d");
+      this.heads = new Map();
+      this.camera = "broadcast";
+      this.showRig = false;
+    }
+    head(f) {
+      const key = JSON.stringify(f);
+      if (this.heads.has(key)) return this.heads.get(key);
+      const cv = document.createElement("canvas");
+      cv.width = 256;
+      cv.height = 320;
+      drawFace(cv.getContext("2d"), 256, 320, f, STYLES.studio, {
+        S: 101,
+        ox: 128,
+        oy: 146,
+        noBody: true,
+        skipNeck: true,
+      });
+      this.heads.set(key, cv);
+      return cv;
+    }
+    render(frame, arena, appearances) {
+      const cv = this.canvas,
+        c = this.ctx,
+        dpr = Math.min(2, window.devicePixelRatio || 1),
+        W = cv.clientWidth || 960,
+        H = cv.clientHeight || 600;
+      if (
+        cv.width !== Math.round(W * dpr) ||
+        cv.height !== Math.round(H * dpr)
+      ) {
+        cv.width = Math.round(W * dpr);
+        cv.height = Math.round(H * dpr);
+      }
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.clearRect(0, 0, W, H);
+      this.W = W;
+      this.H = H;
+      this.S =
+        Math.min(W / 8.8, H / 4.5) *
+        (this.camera === "detail"
+          ? 1.65
+          : this.camera === "tactical"
+            ? 0.85
+            : 1.2);
+      this.floor = H * 0.76;
+      const bg = c.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, "#101418");
+      bg.addColorStop(0.7, "#252F36");
+      bg.addColorStop(1, "#0C1013");
+      c.fillStyle = bg;
+      c.fillRect(0, 0, W, H);
+      // Seeded crowd pattern is static and independent from the simulation RNG.
+      for (let row = 0; row < 5; row++)
+        for (let i = 0; i < 65; i++) {
+          const x = ((i + 0.5) * W) / 65 + (row % 2) * 6,
+            y = H * 0.2 + row * 11;
+          const n = (i * 71 + row * 113) % 29;
+          c.fillStyle = n < 6 ? "#48525B" : n < 18 ? "#29343D" : "#1B242B";
+          c.beginPath();
+          c.ellipse(x, y, 3.3, 4.2, 0, 0, Math.PI * 2);
+          c.fill();
+          c.fillRect(x - 4, y + 4, 8, 6);
+        }
+      for (const side of [-1, 1]) {
+        const g = c.createLinearGradient(
+          W * 0.5 + side * W * 0.26,
+          0,
+          W * 0.5,
+          H,
+        );
+        g.addColorStop(0, "rgba(232,231,209,.08)");
+        g.addColorStop(1, "rgba(232,231,209,0)");
+        c.fillStyle = g;
+        c.beginPath();
+        c.moveTo(W * 0.5 + side * W * 0.26, 0);
+        c.lineTo(W * 0.5 + side * W * 0.48, H * 0.75);
+        c.lineTo(W * 0.5 - side * W * 0.08, H * 0.75);
+        c.fill();
+      }
+      this.arena(arena, false);
+      const ids = Object.keys(frame.poses),
+        location = frame.state.location,
+        offset = location === "center" ? 0 : arena.radius_m * 0.53;
+      for (const id of ids) {
+        const p = frame.poses[id];
+        const [x, y] = this.project(p.root[0] + offset, 0, 0.06);
+        c.fillStyle = "rgba(9,13,15,.29)";
+        c.beginPath();
+        c.ellipse(
+          x,
+          y,
+          this.S * (FightReplay.ground.has(frame.state.position) ? 0.58 : 0.38),
+          this.S * 0.075,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        c.fill();
+      }
+      // Bottom fighter first, top fighter last for occlusion in grappling.
+      ids.sort(
+        (a, b) =>
+          (a === frame.state.top_id ? 1 : 0) -
+          (b === frame.state.top_id ? 1 : 0),
+      );
+      for (const id of ids)
+        this.fighter(
+          frame.poses[id],
+          appearances[id],
+          id === frame.fighter_ids[0] ? arena.red_corner : arena.blue_corner,
+          offset,
+          frame.state.damage[id],
+        );
+      this.arena(arena, true);
+      if (frame.clip.category === "official")
+        this.referee(frame.progress, frame.event.technique_id, offset);
+      c.fillStyle = "rgba(12,16,19,.70)";
+      c.fillRect(18, 18, 170, 29);
+      c.fillStyle = "#E6E3DB";
+      c.font = "600 11px system-ui";
+      c.fillText(
+        arena.venue === "ring" ? "RINGUE · 4 CORDAS" : "ARENA · 8 LADOS",
+        30,
+        37,
+      );
+      c.textAlign = "right";
+      c.fillStyle = "#CFD3D6";
+      c.font = "11px system-ui";
+      c.fillText(
+        this.camera === "detail"
+          ? "CÂMERA DE DETALHE"
+          : this.camera === "tactical"
+            ? "VISTA TÁTICA"
+            : "TRANSMISSÃO",
+        W - 22,
+        37,
+      );
+      c.textAlign = "left";
+    }
+    project(x, y, z = 0) {
+      return [
+        this.W * 0.5 + x * this.S,
+        this.floor - y * this.S + z * this.S * 0.42,
+      ];
+    }
+    line(a, b, color, width = 1, alpha = 1) {
+      const c = this.ctx;
+      c.save();
+      c.globalAlpha = alpha;
+      c.strokeStyle = color;
+      c.lineWidth = width;
+      c.beginPath();
+      c.moveTo(...a);
+      c.lineTo(...b);
+      c.stroke();
+      c.restore();
+    }
+    polygon(points, fill, stroke, width = 1) {
+      const c = this.ctx;
+      c.beginPath();
+      points.forEach((p, i) => (i ? c.lineTo(...p) : c.moveTo(...p)));
+      c.closePath();
+      if (fill) {
+        c.fillStyle = fill;
+        c.fill();
+      }
+      if (stroke) {
+        c.strokeStyle = stroke;
+        c.lineWidth = width;
+        c.stroke();
+      }
+    }
+    arena(a, front) {
+      const c = this.ctx,
+        N = a.sides,
+        R = a.radius_m,
+        vertices = Array.from({ length: N }, (_, i) => {
+          const angle = ((i + 0.5) * Math.PI * 2) / N;
+          return [Math.cos(angle) * R, Math.sin(angle) * R];
+        });
+      if (!front) {
+        const points = vertices.map(([x, z]) => this.project(x, 0, z));
+        const apron = vertices.map(([x, z]) =>
+          this.project(x * 1.06, -0.18, z * 1.06),
+        );
+        this.polygon(apron, a.apron);
+        this.polygon(points, a.mat, a.accent, 5);
+        c.save();
+        c.translate(this.W * 0.5, this.floor);
+        c.scale(1, 0.43);
+        c.strokeStyle = a.accent;
+        c.lineWidth = 2;
+        c.globalAlpha = 0.35;
+        c.beginPath();
+        c.arc(0, 0, this.S * 1.29, 0, Math.PI * 2);
+        c.stroke();
+        c.globalAlpha = 0.85;
+        c.textAlign = "center";
+        c.fillStyle = a.ink;
+        c.font = `800 ${Math.round(this.S * 0.4)}px 'Arial Narrow',sans-serif`;
+        c.fillText(a.short_name, 0, -this.S * 0.42);
+        c.font = `600 ${Math.round(this.S * 0.12)}px system-ui`;
+        c.fillText("CORNER OFFICE · OPEN ERA", 0, -this.S * 0.17);
+        // Geometric, fictional center insignia and corner stripes.
+        c.strokeStyle = a.accent;
+        c.lineWidth = this.S * 0.035;
+        c.beginPath();
+        const n =
+          {
+            crown: 5,
+            ascent: 3,
+            valley: 3,
+            sun: 16,
+            lines: 4,
+            hex: 6,
+            wave: 9,
+          }[a.mark] || 6;
+        for (let i = 0; i < n; i++) {
+          const t = (i * Math.PI * 2) / n,
+            r = this.S * 0.38;
+          const x = Math.cos(t) * r,
+            y = Math.sin(t) * r + this.S * 0.49;
+          i ? c.lineTo(x, y) : c.moveTo(x, y);
+        }
+        c.closePath();
+        c.stroke();
+        c.restore();
+      }
+      for (let i = 0; i < N; i++) {
+        const v = vertices[i],
+          w = vertices[(i + 1) % N],
+          isFront = (v[1] + w[1]) / 2 > 0;
+        if (isFront !== front) continue;
+        const foot = this.project(v[0], 0, v[1]),
+          top = this.project(v[0], a.height_m, v[1]),
+          nextFoot = this.project(w[0], 0, w[1]),
+          nextTop = this.project(w[0], a.height_m, w[1]);
+        if (a.venue === "ring") {
+          for (let r = 1; r <= a.ropes; r++) {
+            const h = 0.3 + r * 0.31;
+            this.line(
+              this.project(v[0], h, v[1]),
+              this.project(w[0], h, w[1]),
+              r % 2 ? a.accent : "#DDDAD2",
+              Math.max(2, this.S * 0.018),
+              front ? 0.45 : 0.85,
+            );
+          }
+        } else {
+          this.polygon(
+            [foot, nextFoot, nextTop, top],
+            front ? "rgba(15,20,23,.015)" : "rgba(17,24,28,.12)",
+          );
+          c.save();
+          c.beginPath();
+          [foot, nextFoot, nextTop, top].forEach((p, j) =>
+            j ? c.lineTo(...p) : c.moveTo(...p),
+          );
+          c.closePath();
+          c.clip();
+          const minX = Math.min(foot[0], top[0], nextTop[0]),
+            maxX = Math.max(nextFoot[0], foot[0]),
+            minY = Math.min(top[1], nextTop[1]),
+            maxY = Math.max(foot[1], nextFoot[1]);
+          for (
+            let x = minX - (maxY - minY);
+            x < maxX + (maxY - minY);
+            x += 12
+          ) {
+            this.line(
+              [x, minY],
+              [x + (maxY - minY) * 0.6, maxY],
+              a.steel,
+              0.65,
+              front ? 0.1 : 0.35,
+            );
+            this.line(
+              [x, minY],
+              [x - (maxY - minY) * 0.6, maxY],
+              a.steel,
+              0.65,
+              front ? 0.1 : 0.35,
+            );
+          }
+          c.restore();
+          this.line(top, nextTop, a.apron, this.S * 0.065, front ? 0.5 : 1);
+          this.line(foot, nextFoot, a.steel, this.S * 0.025, 0.8);
+        }
+        this.line(
+          foot,
+          top,
+          i === 1 ? a.red_corner : i === N - 2 ? a.blue_corner : a.apron,
+          this.S * 0.083,
+          front ? 0.58 : 1,
+        );
+        if (!front) {
+          c.save();
+          c.translate(top[0], top[1] + this.S * 0.34);
+          c.rotate(Math.PI / 2);
+          c.fillStyle = "#D7DBD9";
+          c.font = `700 ${Math.max(8, this.S * 0.07)}px system-ui`;
+          c.fillText(a.short_name, 0, 0);
+          c.restore();
+        }
+      }
+    }
+    fighter(p, f, corner, offset, damage) {
+      const c = this.ctx,
+        s = FightReplay.skeleton(p, f),
+        scale = this.S,
+        body = f.body || {},
+        muscle = body.muscle ?? 0.65,
+        fat = body.fat ?? 0.14,
+        fem = f.sex === "f",
+        skin = SKIN[f.skin]?.[0] || "#B7805D",
+        P = (v) => this.project(v[0] + offset, v[1]),
+        skinGrad = (x, r) => studioGradient(c, skin, x, 0, r);
+      const hip = P(s.hip),
+        neck = P(s.neck);
+      const size = (0.072 + muscle * 0.024 + fat * 0.028) * scale;
+      const tube = (points, radii, fill) => {
+        const path = new Path2D();
+        const l = [],
+          r = [];
+        for (let i = 0; i < points.length; i++) {
+          const before = points[Math.max(0, i - 1)],
+            after = points[Math.min(points.length - 1, i + 1)],
+            dx = after[0] - before[0],
+            dy = after[1] - before[1],
+            len = Math.hypot(dx, dy) || 1;
+          l.push([
+            points[i][0] - (dy / len) * radii[i],
+            points[i][1] + (dx / len) * radii[i],
+          ]);
+          r.push([
+            points[i][0] + (dy / len) * radii[i],
+            points[i][1] - (dx / len) * radii[i],
+          ]);
+        }
+        const outline = [...l, ...r.reverse()];
+        const start = outline[outline.length - 1];
+        path.moveTo(
+          (start[0] + outline[0][0]) / 2,
+          (start[1] + outline[0][1]) / 2,
+        );
+        for (let i = 0; i < outline.length; i++) {
+          const current = outline[i],
+            next = outline[(i + 1) % outline.length];
+          path.quadraticCurveTo(
+            ...current,
+            (current[0] + next[0]) / 2,
+            (current[1] + next[1]) / 2,
+          );
+        }
+        path.closePath();
+        c.fillStyle = fill || skinGrad(points[0][0], size * 2);
+        c.fill(path);
+        c.save();
+        c.clip(path);
+        const mid = points[1];
+        studioSoft(
+          c,
+          mid[0] - size * 0.25,
+          mid[1],
+          size * 0.66,
+          size * 1.5,
+          lighten(skin, 0.26),
+          0.32,
+        );
+        c.restore();
+        return path;
+      };
+      const limb = (origin, limb, radii) => {
+        const points = [P(origin), P(limb.joint), P(limb.end)];
+        tube(points, radii);
+        return points;
+      };
+      const foot = (limb, i) => {
+        const a = P(limb.end);
+        c.save();
+        c.translate(...a);
+        const direction = i ? 1 : -1;
+        c.fillStyle = skinGrad(0, size);
+        c.beginPath();
+        c.ellipse(
+          direction * size * 0.35,
+          0,
+          size * 0.65,
+          size * 0.31,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        c.fill();
+        for (let k = 0; k < 5; k++) {
+          c.beginPath();
+          c.ellipse(
+            direction * (size * 0.52 + k * size * 0.1),
+            size * (-0.19 + k * 0.095),
+            size * (0.15 - k * 0.018),
+            size * 0.065,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          c.fill();
+        }
+        c.restore();
+      };
+      limb(s.hips[0], s.legs[0], [size * 1.26, size * 0.74, size * 0.43]);
+      foot(s.legs[0], 0);
+      limb(s.shoulders[0], s.arms[0], [size * 0.97, size * 0.63, size * 0.42]);
+      limb(s.hips[1], s.legs[1], [size * 1.28, size * 0.76, size * 0.43]);
+      foot(s.legs[1], 1);
+      // Continuous torso from hips through shoulders and the neck.
+      const angle = (p.lean * Math.PI) / 180;
+      c.save();
+      c.translate(...hip);
+      c.rotate(angle);
+      c.scale(1, s.h);
+      const shoulder =
+          (fem ? 0.17 : 0.195) * scale +
+          (body.shoulders ?? 0.5) * scale * 0.025,
+        waist = (fem ? 0.12 : 0.145) * scale + fat * scale * 0.05,
+        hips =
+          (fem ? 0.17 : 0.155) * scale + (body.hips ?? 0.5) * scale * 0.035;
+      c.fillStyle = studioGradient(c, skin, 0, -0.3 * scale, shoulder);
+      c.beginPath();
+      c.moveTo(-hips, 0.04 * scale);
+      c.bezierCurveTo(
+        -waist,
+        -0.16 * scale,
+        -waist,
+        -0.3 * scale,
+        -shoulder,
+        -0.43 * scale,
+      );
+      c.quadraticCurveTo(
+        -shoulder * 0.7,
+        -0.53 * scale,
+        -0.07 * scale,
+        -0.5 * scale,
+      );
+      c.lineTo(-0.06 * scale, -0.64 * scale);
+      c.lineTo(0.06 * scale, -0.64 * scale);
+      c.lineTo(0.07 * scale, -0.5 * scale);
+      c.quadraticCurveTo(
+        shoulder * 0.7,
+        -0.53 * scale,
+        shoulder,
+        -0.43 * scale,
+      );
+      c.bezierCurveTo(
+        waist,
+        -0.3 * scale,
+        waist,
+        -0.16 * scale,
+        hips,
+        0.04 * scale,
+      );
+      c.closePath();
+      c.fill();
+      c.save();
+      c.clip();
+      studioSoft(
+        c,
+        -0.07 * scale,
+        -0.38 * scale,
+        0.12 * scale,
+        0.075 * scale,
+        lighten(skin, 0.33),
+        0.35,
+      );
+      studioSoft(
+        c,
+        0.13 * scale,
+        -0.25 * scale,
+        0.06 * scale,
+        0.22 * scale,
+        darken(skin, 0.7),
+        0.32,
+      );
+      for (let i = 0; i < 3; i++)
+        for (const side of [-1, 1])
+          studioSoft(
+            c,
+            side * 0.037 * scale,
+            (-0.28 + i * 0.08) * scale,
+            0.034 * scale,
+            0.038 * scale,
+            lighten(skin, 0.25),
+            0.22 * muscle,
+          );
+      c.restore();
+      if (fem) {
+        const kitColor = SHORTS[f.kit?.shorts]?.[0] || corner;
+        c.fillStyle = studioGradient(c, kitColor, 0, 0, shoulder);
+        c.beginPath();
+        c.moveTo(-shoulder * 0.88, -0.43 * scale);
+        c.quadraticCurveTo(0, -0.36 * scale, shoulder * 0.88, -0.43 * scale);
+        c.lineTo(waist * 1.03, -0.29 * scale);
+        c.quadraticCurveTo(0, -0.25 * scale, -waist * 1.03, -0.29 * scale);
+        c.closePath();
+        c.fill();
+        for (const x of [-1, 1])
+          this.line(
+            [x * 0.11 * scale, -0.49 * scale],
+            [x * 0.12 * scale, -0.39 * scale],
+            kitColor,
+            scale * 0.026,
+          );
+      }
+      const kit = SHORTS[f.kit?.shorts]?.[0] || corner;
+      c.fillStyle = studioGradient(c, kit, 0, 0, hips);
+      c.beginPath();
+      c.moveTo(-hips, -0.035 * scale);
+      c.lineTo(hips, -0.035 * scale);
+      c.lineTo(hips * 1.1, 0.2 * scale);
+      c.lineTo(0.025 * scale, 0.2 * scale);
+      c.lineTo(0, 0.1 * scale);
+      c.lineTo(-0.025 * scale, 0.2 * scale);
+      c.lineTo(-hips * 1.1, 0.2 * scale);
+      c.closePath();
+      c.fill();
+      this.line(
+        [-hips, -0.026 * scale],
+        [hips, -0.026 * scale],
+        lighten(kit, 0.35),
+        scale * 0.028,
+      );
+      for (const sign of [-1, 1])
+        this.line(
+          [sign * hips * 0.87, 0.02 * scale],
+          [sign * hips * 0.9, 0.17 * scale],
+          lighten(kit, 0.45),
+          1,
+        );
+      c.restore();
+      limb(s.shoulders[1], s.arms[1], [size, size * 0.65, size * 0.43]);
+      for (const arm of s.arms) {
+        const hand = P(arm.end);
+        c.save();
+        c.translate(...hand);
+        c.rotate(
+          Math.atan2(arm.end[1] - arm.joint[1], arm.end[0] - arm.joint[0]) * -1,
+        );
+        c.fillStyle = studioGradient(c, "#23282D", 0, 0, size * 0.8);
+        c.beginPath();
+        c.ellipse(0, 0, size * 0.59, size * 0.47, 0, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = corner;
+        c.fillRect(-size * 0.48, -size * 0.42, size * 0.19, size * 0.84);
+        c.fillStyle = skin;
+        for (let k = 0; k < 4; k++) {
+          c.beginPath();
+          c.ellipse(
+            size * 0.43,
+            -size * 0.26 + k * size * 0.17,
+            size * 0.18,
+            size * 0.085,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          c.fill();
+        }
+        c.restore();
+      }
+      const head = P(s.head);
+      c.save();
+      c.translate(...head);
+      c.rotate(((p.lean + p.head) * Math.PI) / 180);
+      const sprite = this.head(f),
+        headW = scale * 0.32,
+        headH = scale * 0.4;
+      c.drawImage(sprite, -headW / 2, -headH * 0.54, headW, headH);
+      if ((damage?.head || 0) > 0.35) {
+        c.fillStyle = "rgba(117,42,45,.26)";
+        c.beginPath();
+        c.ellipse(
+          headW * 0.17,
+          headH * 0.02,
+          headW * 0.1,
+          headW * 0.08,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        c.fill();
+      }
+      c.restore();
+      if (this.showRig) {
+        for (const [origin, limb] of [
+          ...s.arms.map((x, i) => [s.shoulders[i], x]),
+          ...s.legs.map((x, i) => [s.hips[i], x]),
+        ]) {
+          this.line(P(origin), P(limb.joint), "#E4D7A1", 1.5);
+          this.line(P(limb.joint), P(limb.end), "#E4D7A1", 1.5);
+        }
+        this.line(hip, neck, "#E4D7A1", 1.5);
+      }
+    }
+    referee(t, id, offset) {
+      const c = this.ctx,
+        p = this.project(offset - 1.7, 0.02, 0.7),
+        s = this.S;
+      c.save();
+      c.translate(...p);
+      c.fillStyle = "#10171D";
+      c.fillRect(-0.13 * s, -1.2 * s, 0.26 * s, 0.64 * s);
+      this.line([-0.08 * s, -0.6 * s], [-0.19 * s, 0], "#161D23", 0.12 * s);
+      this.line([0.08 * s, -0.6 * s], [0.2 * s, 0], "#161D23", 0.12 * s);
+      c.fillStyle = "#AA886C";
+      c.beginPath();
+      c.ellipse(0, -1.36 * s, 0.105 * s, 0.14 * s, 0, 0, Math.PI * 2);
+      c.fill();
+      for (const side of [-1, 1])
+        this.line(
+          [side * 0.13 * s, -1.13 * s],
+          [
+            side * (0.24 + t * 0.16) * s,
+            -s * (id === "referee_stop" ? 1.05 : 0.74),
+          ],
+          "#172128",
+          0.09 * s,
+        );
+      c.restore();
+    }
+  }
+  root.FightRenderer = FightRenderer;
+})(window);

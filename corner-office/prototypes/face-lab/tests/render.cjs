@@ -5,7 +5,7 @@ const {createHash} = require('node:crypto');
 // Run the real drawing functions on a CPU Canvas; no DOM stubs for rendering primitives.
 const {createCanvas,Path2D} = require(process.env.CANVAS_MODULE_PATH || '@napi-rs/canvas');
 const lab = require('node:path').resolve(__dirname, '..');
-const source = fs.readFileSync(lab+'/index.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1].split('/* ================= estado e UI ================= */')[0];
+const source = fs.readFileSync(lab+'/identity.js','utf8');
 const context = vm.createContext({console,Path2D,window:{devicePixelRatio:1},document:{createElement:()=>createCanvas(1,1)}});
 vm.runInContext(fs.readFileSync(lab+'/studio.js','utf8'),context);
 vm.runInContext(source+'\nthis.api={CANON,STYLES,POSES,HAIR_STYLES,SKIN,genFace,drawFigure,drawFace,renderPortrait,background};',context);

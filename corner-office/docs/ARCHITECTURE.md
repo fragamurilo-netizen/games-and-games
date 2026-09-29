@@ -85,3 +85,10 @@ Faltam (criar quando o sistema precisar): `Ruleset`, `Jurisdiction`, `MediaDeal`
 - Listas longas com virtualização/pooling.
 - Cache de retratos; re-render só quando a aparência muda.
 - Processos pesados (avançar semanas, gerar mundo) distribuídos por frames — ou em `WorkerThreadPool` desde que não toquem na SceneTree.
+
+## Apresentação de luta
+
+`presentation/fight/FightReplayPlayer` consome o contrato descrito em
+[FIGHT_VISUALS.md](FIGHT_VISUALS.md), utilizando keyframes JSON compartilhados
+com o Fight Studio web. Valida continuidade, faz seek determinístico e nunca
+resolve ações nem modifica o mundo. O motor e a cena nativa continuam no M1.

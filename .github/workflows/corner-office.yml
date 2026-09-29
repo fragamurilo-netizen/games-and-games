@@ -22,3 +22,16 @@ jobs:
 
       - name: Run tests
         run: corner-office/tools/run_tests.sh
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify motion catalog and replay contract
+        run: node corner-office/prototypes/fight-lab/tests/replay.cjs
+
+      - name: Verify reproducible visual content
+        run: |
+          python3 corner-office/tools/build_motion_catalog.py
+          python3 corner-office/tools/build_replay_examples.py
+          git diff --exit-code -- corner-office/game/content

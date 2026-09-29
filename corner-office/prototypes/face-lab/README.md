@@ -45,8 +45,8 @@ sem dependências de execução e sem imagens de atletas reais.
   exclusivas do Estúdio. Exportação PNG em 1440 × 2088 (corpo) ou 1440 × 1656
   (demais enquadramentos), usando o mesmo estilo e os parâmetros atuais.
 
-`studio.js` concentra os materiais e o novo corpo; `index.html` mantém a
-biblioteca facial, os estilos anteriores e a interface. A geometria facial e o
+`studio.js` concentra os materiais e o novo corpo; `identity.js` contém a
+biblioteca facial compartilhada com o Fight Studio; `index.html` mantém a interface. A geometria facial e o
 seed permanecem a identidade do atleta ao longo da carreira.
 
 O JSON continua em `v: 1`, com campos aditivos em `body`: `shoulders`, `reach`,

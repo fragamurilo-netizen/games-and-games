@@ -1,0 +1,676 @@
+{
+  "version": 1,
+  "id": "women",
+  "title": "Atletas · clinch e chão",
+  "source": "authored_preview",
+  "organization_id": "org_ascend",
+  "ruleset_id": "unified",
+  "fighter_ids": [
+    "red",
+    "blue"
+  ],
+  "fighters": {
+    "red": {
+      "appearance_index": 4,
+      "stance": "orthodox"
+    },
+    "blue": {
+      "appearance_index": 6,
+      "stance": "southpaw"
+    }
+  },
+  "initial_state": {
+    "position": "pocket",
+    "top_id": null,
+    "location": "center",
+    "stamina": {
+      "red": 1,
+      "blue": 1
+    },
+    "damage": {
+      "red": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      },
+      "blue": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "women_000",
+      "at_ms": 0,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 300,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "jab",
+      "outcome": "blocked",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 1
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_001",
+      "at_ms": 1600,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 299,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "cross",
+      "outcome": "landed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_002",
+      "at_ms": 3200,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 297,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "enter_clinch",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_003",
+      "at_ms": 4800,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 296,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "collar_tie",
+      "outcome": "held",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_004",
+      "at_ms": 6400,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 294,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "clinch_knee_body",
+      "outcome": "landed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.946,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_005",
+      "at_ms": 8000,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 292,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "hip_throw",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.946,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_006",
+      "at_ms": 10400,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 290,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "guard_recover",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_007",
+      "at_ms": 12700,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 288,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "guard_open",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "half_guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.91,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_008",
+      "at_ms": 15000,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 285,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "knee_slice",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "half_guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.91,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_009",
+      "at_ms": 17300,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 283,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "mount_advance",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "mount_back",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.874,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "women_010",
+      "at_ms": 19600,
+      "duration_ms": 3000,
+      "round": 1,
+      "clock_s": 281,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "armbar_mount",
+      "outcome": "tapped",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "mount_back",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.874,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "reset",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.856,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.075,
+            "leg": 0
+          }
+        }
+      }
+    }
+  ],
+  "result": {
+    "method": "submission",
+    "winner_id": "red"
+  }
+}

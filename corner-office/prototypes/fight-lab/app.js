@@ -1,0 +1,452 @@
+/* Preview/catalog UI; no combat controls. Game Design Bible §15. */
+"use strict";
+(async () => {
+  const $ = (id) => document.getElementById(id),
+    clone = (x) => JSON.parse(JSON.stringify(x)),
+    base = "../../game/content/";
+  const labels = {
+    landed: "Acertou",
+    blocked: "Bloqueado",
+    evaded: "Esquivado",
+    missed: "Errou",
+    knockdown: "Knockdown",
+    stoppage: "Interrupção",
+    completed: "Concluído",
+    defended: "Defendido",
+    held: "Controle mantido",
+    escaped: "Escape",
+    threatened: "Ameaça mantida",
+    tapped: "Desistência",
+  };
+  const positions = {
+    long_range: "Distância",
+    pocket: "Pocket",
+    cage_striking: "Trocação na grade",
+    clinch: "Clinch",
+    open_wrestling: "Wrestling no centro",
+    cage_wrestling: "Wrestling na grade",
+    guard: "Guarda",
+    half_guard: "Meia-guarda",
+    side_control: "Controle lateral",
+    mount_back: "Montada / costas",
+    scramble: "Scramble",
+    reset: "Separação",
+  };
+  const get = async (path) => {
+    const r = await fetch(base + path);
+    if (!r.ok)
+      throw new Error(`Não foi possível carregar ${path} (${r.status}).`);
+    return r.json();
+  };
+  let catalog,
+    arenas,
+    index,
+    examples,
+    player,
+    renderer,
+    selected,
+    log,
+    time = 0,
+    playing = false,
+    last = 0,
+    appearances = {},
+    lastEvent = -1;
+  function option(select, value, text) {
+    const o = document.createElement("option");
+    o.value = value;
+    o.textContent = text;
+    select.append(o);
+  }
+  function message(text) {
+    $("error").hidden = !text;
+    $("error").textContent = text;
+  }
+  function clock(s) {
+    s = Math.max(0, Math.floor(s));
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+  function name(id) {
+    return appearances[id]?.name || log.fighters[id]?.name || id;
+  }
+  function activeArena() {
+    return arenas.arenas.find((a) => a.id === log.organization_id);
+  }
+  function buildAppearances() {
+    appearances = {};
+    for (const id of log.fighter_ids) {
+      const f = log.fighters?.[id] || {},
+        idx = f.appearance_index ?? 0;
+      appearances[id] = clone(
+        f.appearance || CANON[Math.max(0, Math.min(CANON.length - 1, idx))],
+      );
+      if (f.name) appearances[id].name = f.name;
+      appearances[id].marks = (appearances[id].marks || []).filter(
+        (x) => !["brinco", "argola", "piercing", "nose_ring"].includes(x),
+      );
+    }
+  }
+  function load(replay) {
+    try {
+      const next = new FightReplay.Player(replay, catalog, arenas);
+      player = next;
+      log = clone(replay);
+      buildAppearances();
+      time = 0;
+      lastEvent = -1;
+      message("");
+      $("arena").value = log.organization_id;
+      $("seek").max = player.duration;
+      $("source").textContent =
+        log.source === "simulation"
+          ? "REPLAY · registro da simulação"
+          : "DEMONSTRAÇÃO · sequência autoral";
+      for (const id of ["arena", "fighter-red", "fighter-blue", "sequence"])
+        $(id).disabled = log.source === "simulation";
+      for (const [i, id] of log.fighter_ids.entries()) {
+        $("name-" + (i ? "blue" : "red")).textContent = name(id);
+        $("fighter-" + (i ? "blue" : "red")).value = String(
+          log.fighters[id].appearance_index ?? 0,
+        );
+      }
+      $("org-label").textContent = activeArena().short_name;
+      renderEvents();
+      draw();
+    } catch (e) {
+      message(e.message);
+    }
+  }
+  function renderEvents() {
+    const body = $("events");
+    body.replaceChildren();
+    log.events.forEach((e, i) => {
+      const row = document.createElement("tr");
+      row.dataset.event = String(i);
+      const data = [
+        `R${e.round} · ${clock(e.clock_s)}`,
+        name(e.actor_id),
+        catalog.clips.find((c) => c.id === e.technique_id).label,
+        labels[e.outcome],
+        positions[e.after.position],
+      ];
+      data.forEach((text, j) => {
+        const cell = document.createElement("td");
+        if (j === 2) {
+          const b = document.createElement("button");
+          b.textContent = text;
+          b.addEventListener("click", () => {
+            time = e.at_ms;
+            playing = false;
+            syncPlay();
+            draw();
+          });
+          cell.append(b);
+        } else cell.textContent = text;
+        row.append(cell);
+      });
+      body.append(row);
+    });
+  }
+  function draw() {
+    if (!player) return;
+    const frame = player.sample(time);
+    renderer.render(frame, activeArena(), appearances);
+    $("action").textContent = frame.clip.label;
+    $("phase").textContent =
+      catalog.categories[frame.clip.category].toUpperCase();
+    $("outcome").textContent = labels[frame.event.outcome];
+    $("round").textContent = "ROUND " + frame.event.round;
+    $("clock").textContent = clock(frame.event.clock_s);
+    $("time").textContent =
+      `${clock(time / 1000)} / ${clock(player.duration / 1000)}`;
+    $("seek").value = time;
+    $("position").textContent =
+      positions[frame.state.position] +
+      (frame.state.top_id ? " · por cima: " + name(frame.state.top_id) : "");
+    for (const [i, id] of log.fighter_ids.entries()) {
+      const side = i ? "blue" : "red";
+      $("stamina-" + side).value = frame.state.stamina[id];
+      const d = frame.state.damage[id];
+      $("damage-" + side).textContent =
+        `Dano · cabeça ${Math.round(d.head * 100)} · corpo ${Math.round(d.body * 100)} · perna ${Math.round(d.leg * 100)}`;
+    }
+    $("result").textContent = frame.result
+      ? (frame.result.winner_id ? name(frame.result.winner_id) + " · " : "") +
+        ({
+          ko_tko: "KO/TKO",
+          submission: "Finalização",
+          decision: "Decisão",
+          draw: "Empate",
+          nc: "No contest",
+          dq: "Desclassificação",
+        }[frame.result.method] || "")
+      : "";
+    if (lastEvent !== frame.event_index) {
+      lastEvent = frame.event_index;
+      for (const row of $("events").children)
+        row.classList.toggle(
+          "current",
+          Number(row.dataset.event) === lastEvent,
+        );
+    }
+  }
+  function syncPlay() {
+    $("play").textContent = playing ? "Pausar" : "Reproduzir";
+    $("play").setAttribute(
+      "aria-label",
+      playing ? "Pausar reprodução" : "Iniciar reprodução",
+    );
+  }
+  function tick(now) {
+    if (last && playing && player) {
+      time += Math.min(100, now - last) * Number($("speed").value);
+      if (time >= player.duration) {
+        time = player.duration;
+        if ($("loop").checked) time = 0;
+        else {
+          playing = false;
+          syncPlay();
+        }
+      }
+    }
+    last = now;
+    if (playing) draw();
+    requestAnimationFrame(tick);
+  }
+  function selectClip(c) {
+    selected = c;
+    $("clip-name").textContent = c.label;
+    $("clip-path").textContent =
+      `${positions[c.from_positions[0]]} → ${positions[c.to_position]} · ${c.actor_role === "bottom" ? "ataque por baixo" : c.actor_role === "top" ? "controle por cima" : "em pé"} · ${c.duration_ms / 1000}s`;
+    $("response").replaceChildren();
+    c.outcomes.forEach((o) => option($("response"), o, labels[o]));
+    for (const b of $("categories").children)
+      b.setAttribute("aria-pressed", String(b.dataset.clip === c.id));
+  }
+  function filter() {
+    const search = $("search")
+        .value.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase(),
+      cat = $("category").value,
+      style = $("style").value;
+    const list = catalog.clips.filter(
+      (c) =>
+        (!cat || c.category === cat) &&
+        (!style || c.styles.includes(style)) &&
+        (c.label + " " + c.id)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .includes(search),
+    );
+    $("categories").replaceChildren();
+    for (const c of list) {
+      const b = document.createElement("button");
+      b.dataset.clip = c.id;
+      b.setAttribute("aria-pressed", String(selected?.id === c.id));
+      const sm = document.createElement("small");
+      sm.textContent = catalog.categories[c.category];
+      const title = document.createElement("strong");
+      title.textContent = c.label;
+      b.append(sm, title);
+      b.addEventListener("click", () => selectClip(c));
+      $("categories").append(b);
+    }
+    $("count").textContent =
+      `${list.length} de ${catalog.clips.length} técnicas`;
+  }
+  function previewClip() {
+    if (!selected) return;
+    const c = selected,
+      ids = ["red", "blue"],
+      state = {
+        position: c.from_positions[0],
+        top_id: FightReplay.ground.has(c.from_positions[0])
+          ? c.actor_role === "bottom"
+            ? "blue"
+            : "red"
+          : null,
+        location: "center",
+        stamina: { red: 1, blue: 1 },
+        damage: {
+          red: { head: 0, body: 0, leg: 0 },
+          blue: { head: 0, body: 0, leg: 0 },
+        },
+      };
+    const e = {
+      id: "preview_001",
+      at_ms: 0,
+      duration_ms: c.duration_ms,
+      round: 1,
+      clock_s: 300,
+      actor_id: "red",
+      target_id: "blue",
+      technique_id: c.id,
+      outcome: $("response").value,
+      rules_approved: true,
+      reason_codes: ["AUTHORED_PREVIEW"],
+      before: clone(state),
+      after: clone(state),
+    };
+    e.after.position = FightReplay.expectedPosition(c, e);
+    e.after.top_id = FightReplay.ground.has(e.after.position)
+      ? state.top_id || "red"
+      : null;
+    const a = arenas.arenas.find((a) => a.id === $("arena").value);
+    const r = {
+      version: 1,
+      id: "technique_preview",
+      title: c.label,
+      source: "authored_preview",
+      organization_id: a.id,
+      ruleset_id: a.ruleset_id,
+      fighter_ids: ids,
+      fighters: Object.fromEntries(
+        ids.map((id) => [
+          id,
+          {
+            appearance_index: Number($("fighter-" + id).value),
+            stance: "orthodox",
+          },
+        ]),
+      ),
+      initial_state: state,
+      events: [e],
+    };
+    load(r);
+    playing = true;
+    syncPlay();
+    $("fight").scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+  try {
+    [catalog, arenas, index] = await Promise.all([
+      get("fight_visuals.json"),
+      get("arena_profiles.json"),
+      get("replays/index.json"),
+    ]);
+    examples = await Promise.all(index.map((x) => get("replays/" + x.file)));
+    renderer = new FightRenderer($("fight"));
+    $("inventory").textContent =
+      `${catalog.clips.length} técnicas · ${arenas.arenas.length} arenas · ${catalog.styles.length} bases`;
+    arenas.arenas.forEach((a) =>
+      option(
+        $("arena"),
+        a.id,
+        a.name + (a.venue === "ring" ? " · ringue" : ""),
+      ),
+    );
+    index.forEach((x, i) => option($("sequence"), String(i), x.title));
+    CANON.forEach((f, i) => {
+      option($("fighter-red"), String(i), f.name);
+      option($("fighter-blue"), String(i), f.name);
+    });
+    Object.entries(catalog.categories).forEach(([k, v]) =>
+      option($("category"), k, v),
+    );
+    catalog.styles.forEach((s) => option($("style"), s.id, s.label));
+    $("play").onclick = () => {
+      if (time >= player.duration) time = 0;
+      playing = !playing;
+      syncPlay();
+      draw();
+    };
+    $("restart").onclick = () => {
+      time = 0;
+      draw();
+    };
+    $("instant").onclick = () => {
+      time = player.duration;
+      playing = false;
+      syncPlay();
+      draw();
+    };
+    $("seek").oninput = () => {
+      time = Number($("seek").value);
+      draw();
+    };
+    $("camera").onchange = () => {
+      renderer.camera = $("camera").value;
+      draw();
+    };
+    $("rig").onchange = () => {
+      renderer.showRig = $("rig").checked;
+      draw();
+    };
+    $("sequence").onchange = () => {
+      load(examples[Number($("sequence").value)]);
+      playing = true;
+      syncPlay();
+    };
+    $("arena").onchange = () => {
+      const a = arenas.arenas.find((x) => x.id === $("arena").value);
+      const r = clone(
+        a.venue === "ring" ? examples.find((x) => x.id === "shinsei") : log,
+      );
+      r.source = "authored_preview";
+      r.organization_id = a.id;
+      r.ruleset_id = a.ruleset_id;
+      for (const state of [
+        r.initial_state,
+        ...r.events.flatMap((e) => [e.before, e.after]),
+      ])
+        if (state.location !== "center")
+          state.location = a.venue === "ring" ? "ropes" : "cage";
+      load(r);
+    };
+    for (const side of ["red", "blue"])
+      $("fighter-" + side).onchange = () => {
+        const id = log.fighter_ids[side === "blue" ? 1 : 0];
+        log.fighters[id] = {
+          appearance_index: Number($("fighter-" + side).value),
+          stance: "orthodox",
+        };
+        load(log);
+      };
+    for (const id of ["search", "category", "style"])
+      $(id).addEventListener(id === "search" ? "input" : "change", filter);
+    $("inspect").onclick = previewClip;
+    $("response").onchange = () => {
+      if (log.id === "technique_preview") previewClip();
+    };
+    $("import").onchange = async () => {
+      const file = $("import").files[0];
+      if (!file) return;
+      if (file.size > 8_000_000) {
+        message("O replay ultrapassa o limite de 8 MB.");
+        return;
+      }
+      try {
+        load(JSON.parse(await file.text()));
+        playing = false;
+        syncPlay();
+      } catch (e) {
+        message("JSON inválido: " + e.message);
+      }
+    };
+    $("export").onclick = () => {
+      const blob = new Blob([JSON.stringify(log, null, 2)], {
+          type: "application/json",
+        }),
+        url = URL.createObjectURL(blob),
+        a = document.createElement("a");
+      a.href = url;
+      a.download = "corner-office-replay.json";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+    new ResizeObserver(draw).observe($("fight"));
+    document.addEventListener("visibilitychange", () => {
+      last = 0;
+    });
+    load(examples[0]);
+    selectClip(catalog.clips.find((c) => c.id === "jab"));
+    filter();
+    syncPlay();
+    requestAnimationFrame(tick);
+  } catch (e) {
+    message(
+      e.message +
+        "\nInicie o servidor na pasta corner-office: python -m http.server 8767",
+    );
+  }
+})();

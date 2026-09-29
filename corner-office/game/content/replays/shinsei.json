@@ -1,0 +1,448 @@
+{
+  "version": 1,
+  "id": "shinsei",
+  "title": "Shinsei · ringue e grappling",
+  "source": "authored_preview",
+  "organization_id": "org_shinsei",
+  "ruleset_id": "shinsei_ring",
+  "fighter_ids": [
+    "red",
+    "blue"
+  ],
+  "fighters": {
+    "red": {
+      "appearance_index": 5,
+      "stance": "orthodox"
+    },
+    "blue": {
+      "appearance_index": 7,
+      "stance": "southpaw"
+    }
+  },
+  "initial_state": {
+    "position": "clinch",
+    "top_id": null,
+    "location": "center",
+    "stamina": {
+      "red": 1,
+      "blue": 1
+    },
+    "damage": {
+      "red": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      },
+      "blue": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "shinsei_000",
+      "at_ms": 0,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 300,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "collar_tie",
+      "outcome": "held",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 1
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "shinsei_001",
+      "at_ms": 1600,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 299,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "foot_sweep",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "clinch",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "shinsei_002",
+      "at_ms": 4000,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 296,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "guard_recover",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "shinsei_003",
+      "at_ms": 6300,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 294,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "guard_posture",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "shinsei_004",
+      "at_ms": 8600,
+      "duration_ms": 3000,
+      "round": 1,
+      "clock_s": 292,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "triangle",
+      "outcome": "threatened",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "shinsei_005",
+      "at_ms": 11600,
+      "duration_ms": 3000,
+      "round": 1,
+      "clock_s": 289,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "triangle",
+      "outcome": "escaped",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "shinsei_006",
+      "at_ms": 14600,
+      "duration_ms": 3000,
+      "round": 1,
+      "clock_s": 286,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "armbar_guard",
+      "outcome": "tapped",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "reset",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.91
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    }
+  ],
+  "result": {
+    "method": "submission",
+    "winner_id": "blue"
+  }
+}
