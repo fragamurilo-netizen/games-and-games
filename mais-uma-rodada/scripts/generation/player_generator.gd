@@ -333,10 +333,10 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 	vals[Attr.DIS] = dis
 	# Normaliza para que o overall bata com o alvo (desloca só atributos relevantes).
 	var w: Array = Pos.WEIGHTS[pos]
-	for _iter in 4:
+	for _iter in 6:
 		var ovr := 0.0
 		for i in Attr.COUNT:
-			ovr += w[i] * clampf(vals[i], 1.0, 99.0)
+			ovr += w[i] * soft_attr(vals[i])
 		var d := target - ovr
 		if absf(d) < 0.3:
 			break
@@ -344,11 +344,18 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 			if w[i] > 0.0:
 				vals[i] += d
 	for i in Attr.COUNT:
-		var hi := 99.0
 		if (i == Attr.GOL or i == Attr.REF) and pos != Pos.GK:
 			vals[i] = clampf(vals[i], 1.0, 25.0)
-		p.attrs[i] = int(clampf(round(vals[i]), 1.0, hi))
+		p.attrs[i] = int(round(soft_attr(vals[i])))
 	p.recompute_overall()
+
+
+## Acima de 90 cada ponto de atributo fica mais raro: o craque tem dois ou três números na casa dos
+## 90, e 97–99 é só para o que ele faz de melhor no mundo (não quatro atributos de uma vez).
+static func soft_attr(v: float) -> float:
+	if v > 90.0:
+		v = 90.0 + (v - 90.0) * 0.6
+	return clampf(v, 1.0, 99.0)
 
 
 static func _pick_secondary(rng: RandomNumberGenerator, pos: int) -> Array:
@@ -371,18 +378,16 @@ static func _pick_secondary(rng: RandomNumberGenerator, pos: int) -> Array:
 	return out
 
 
+## Distância média até o teto por idade (FC/Transfermarkt): grande aos 17–18, some aos 27.
+const POT_GAP := {17: [10.0, 5.0], 18: [9.5, 5.0], 19: [8.0, 4.6], 20: [6.8, 4.2], 21: [5.4, 3.6], 22: [4.2, 3.0],
+	23: [3.0, 2.4], 24: [2.0, 1.9], 25: [1.2, 1.3], 26: [0.7, 1.0], 27: [0.3, 0.8]}
+
+
 static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> int:
 	var gap := 0.0
-	if age <= 18:
-		gap = rng.randfn(9.0, 5.0)
-	elif age <= 20:
-		gap = rng.randfn(6.5, 4.2)
-	elif age <= 22:
-		gap = rng.randfn(4.0, 3.0)
-	elif age <= 24:
-		gap = rng.randfn(2.2, 2.0)
-	elif age <= 27:
-		gap = rng.randfn(0.8, 1.0)
+	var g: Array = POT_GAP.get(clampi(age, 17, 99), [])
+	if not g.is_empty():
+		gap = rng.randfn(float(g[0]), float(g[1]))
 	if age <= 20 and rng.randf() < 0.012:
 		gap += rng.randf_range(6.0, 12.0) # joia rara
 	gap = maxf(0.0, gap)
@@ -403,6 +408,18 @@ static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: i
 	if pot > 85.0:
 		pot = 85.0 + (pot - 85.0) * 0.6
 	return clampi(int(round(pot)), ovr + 2, 94)
+
+
+## Potencial de um garoto que a IA sobe da base: o teto está longe (quanto mais novo, mais longe) e
+## a base boa acrescenta um pouco. Acima de 85 cada ponto é mais raro; joia rara em qualquer clube.
+static func intake_potential(rng: RandomNumberGenerator, ovr: int, age: int, youth_level: int, drift: float = 0.0, nation_bonus: float = 0.0) -> int:
+	var gap := rng.randfn(12.0 - (age - 16) * 1.5 + youth_level * 0.04 - drift * 0.8 + nation_bonus, 6.0)
+	if rng.randf() < 0.004 + youth_level * 0.0001 + nation_bonus * 0.001:
+		gap += rng.randf_range(8.0, 16.0)
+	var pot := float(ovr) + maxf(3.0, gap)
+	if pot > 85.0:
+		pot = 85.0 + (pot - 85.0) * 0.6
+	return clampi(int(round(pot)), ovr + 3, 94)
 
 
 # ---------------------------------------------------------------------------
@@ -457,7 +474,9 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 			starters.append(i)
 	var star_w: Array = []
 	for i in starters:
-		star_w.append(2.2 if slots[i][0] in [Pos.ST, Pos.AM, Pos.RW, Pos.LW, Pos.CM] else 1.0)
+		# Craque de verdade costuma ser do meio para a frente; lateral e goleiro de elite são raros.
+		var sp: int = slots[i][0]
+		star_w.append(2.2 if sp in [Pos.ST, Pos.AM, Pos.RW, Pos.LW, Pos.CM] else (0.6 if sp in [Pos.RB, Pos.LB, Pos.GK] else 1.0))
 	var boost := {}
 	for k in n_stars:
 		var j := RngUtil.weighted_index(rng, star_w)
@@ -662,12 +681,14 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	var level := league_level(club)
 	var drift := clampf(float(world.stats.get("talent_drift", 0.0)), -8.0, 8.0)
 	var nation_bonus := float(DatabaseManager.nation(club.nation).get("youth", 0.0))
-	var target := level - 17.0 + club.youth_level * 0.06 + rng.randfn(0.0, 4.0) + (age - 16) * 1.5 - drift + nation_bonus * 0.4
-	target = clampf(target, 22.0, 72.0)
+	# O garoto que sobe no gigante tem ~60 aos 16 (não 70: quase ninguém chega pronto); o do clube
+	# pequeno, ~35–40. A diferença entre as bases é menor que a entre os times principais.
+	var target := 6.0 + level * 0.6 + club.youth_level * 0.05 + rng.randfn(0.0, 4.5) + (age - 16) * 2.0 - drift + nation_bonus * 0.4
+	target = clampf(target, 22.0, 70.0)
 	var nat := pick_youth_nationality(rng, club, age)
 	var p := create(world, rng, pos, target, age, nat, club.city, used_names)
 	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
-	p.potential = youth_potential(rng, p.overall, club.youth_level, drift, nation_bonus)
+	p.potential = intake_potential(rng, p.overall, age, club.youth_level, drift, nation_bonus)
 	p.squad_status = Player.STATUS_PROSPECT
 	sign_to_club(world, rng, p, club, false)
 	p.contract_end = world.year + 3

@@ -36,15 +36,41 @@ func _real(w: GameWorld) -> void:
 	print("\n== %d temporadas completas ==" % opt_real)
 	print("ano   méd.clubes  méd.titulares  top5 XI  melhor  90+  85+  80+  75+  jogadores  top valor  ≥100M")
 	_year_line(w)
+	var delta := {} # idade -> [soma, n, soma 75+, n 75+]
 	for s in opt_real:
 		var guard := 0
 		var t0 := Time.get_ticks_msec()
+		var before := {}
+		for p: Player in w.players.values():
+			before[p.id] = [p.ovr_f, p.age(w.year), p.club_id >= 0 and p.overall >= 75]
 		while not w.season.finished and guard < 400:
 			SeasonManager.play_matchday_instant(w)
 			guard += 1
 		SeasonManager.end_season(w)
+		for p: Player in w.players.values():
+			if not before.has(p.id):
+				continue
+			var b: Array = before[p.id]
+			var k: int = clampi(b[1], 16, 37) + (100 if p.position == Pos.GK else 0)
+			if not delta.has(k):
+				delta[k] = [0.0, 0, 0.0, 0]
+			delta[k][0] += p.ovr_f - float(b[0])
+			delta[k][1] += 1
+			if b[2]:
+				delta[k][2] += p.ovr_f - float(b[0])
+				delta[k][3] += 1
 		_year_line(w)
-		print("  (%.0fs)" % ((Time.get_ticks_msec() - t0) / 1000.0))
+		print("  (%.0fs) drift %.2f (raw %.2f) · shift %.2f" % [(Time.get_ticks_msec() - t0) / 1000.0, float(w.stats.get("talent_drift", 0.0)), float(w.stats.get("talent_raw", 0.0)), Valuation.shift])
+	print("Δ overall por temporada, por idade: todos (75+) · goleiros")
+	var line := ""
+	for a in range(16, 38):
+		var d: Array = delta.get(a, [0.0, 1, 0.0, 1])
+		var g: Array = delta.get(a + 100, [0.0, 1, 0.0, 1])
+		line += "%d: %+.1f (%+.1f) g%+.1f  " % [a, d[0] / maxf(1, d[1]), d[2] / maxf(1, d[3]), g[0] / maxf(1, g[1])]
+		if a % 4 == 3:
+			print(line)
+			line = ""
+	print(line)
 	_leagues(w)
 	_world_top(w)
 	_potential(w)
