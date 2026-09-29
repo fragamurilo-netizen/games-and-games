@@ -1,0 +1,137 @@
+name: Realism 0.5.1 validation and test APK
+on:
+  push:
+    branches: [codex/realism-integration-0.5.1-20260929]
+    paths:
+      - .github/workflows/realism-validation.yml
+      - .ci/apply_realism_edits.py
+      - .ci/realism-edits/**
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: realism-validation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply all reviewed source changes with exact base and output hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/realism-integration-0.5.1-20260929
+          mkdir -p validation/screens mais-uma-rodada/build
+          git rev-parse HEAD > validation/input-commit.txt
+          python3 .ci/apply_realism_edits.py
+          git diff --check
+      - name: Import, simulation, budget, data and rotation regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/workspace/validation/dependencies.log
+              godot --version | tee /workspace/validation/engine.txt
+              timeout 300s godot --headless --path . --import > /workspace/validation/import.log 2>&1
+              test "$(find .godot/imported -type f -name "*.fontdata" | wc -l)" -ge 4
+              export DEPTH_REPORT=/workspace/validation/depth-validation.json
+              timeout 600s godot --headless --path . --script res://tests/depth_bootstrap.gd 2>&1 | tee /workspace/validation/depth-tests.log
+              grep -q DEPTH_REGRESSION_OK /workspace/validation/depth-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|DEPTH_FAIL" /workspace/validation/depth-tests.log; then exit 1; fi
+              export REALISM_REPORT=/workspace/validation/realism-validation.json
+              timeout 600s godot --headless --path . --script res://tests/realism_bootstrap.gd 2>&1 | tee /workspace/validation/realism-tests.log
+              grep -q REALISM_REGRESSION_OK /workspace/validation/realism-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|REALISM_FAIL" /workspace/validation/realism-tests.log; then exit 1; fi
+              timeout 180s godot --headless --path . --script res://tests/mobile_regression.gd 2>&1 | tee /workspace/validation/mobile-tests.log
+              grep -q MOBILE_REGRESSION_OK /workspace/validation/mobile-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|MOBILE_FAIL" /workspace/validation/mobile-tests.log; then exit 1; fi
+            '
+      - name: Render actual landscape and tablet interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e LIBGL_ALWAYS_SOFTWARE=true -e GODOT_SILENCE_ROOT_WARNING=1 \
+            -e REALISM_SHOTS=/workspace/validation/screens barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 xvfb xauth libgl1-mesa-dri libgl1 libglx-mesa0 libxcursor1 libxinerama1 libxrandr2 libxi6 libxrender1 libxfixes3 libxkbcommon0 libxext6 libx11-6 >/workspace/validation/render-dependencies.log
+              timeout 300s xvfb-run -a -s "-screen 0 1920x1440x24" \
+                godot --path . --display-driver x11 --rendering-method gl_compatibility --audio-driver Dummy \
+                --script res://tests/render_realism_ui.gd 2>&1 | tee /workspace/validation/ui-render.log
+              grep -q REALISM_UI_RENDER_OK /workspace/validation/ui-render.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|Shader compilation failed" /workspace/validation/ui-render.log; then exit 1; fi
+              test "$(find /workspace/validation/screens -name "*.png" | wc -l)" -eq 6
+            '
+      - name: Commit verified readable source only to the isolated development branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/realism-integration-0.5.1-20260929
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mapfile -t SOURCE_PATHS < validation/source-paths.txt
+          git add -- "${SOURCE_PATHS[@]}"
+          if ! git diff --cached --quiet; then
+            git diff --cached --check
+            git commit -m 'Integrate validated 0.5.1 realism: board budgets, idempotent stats, national careers, factual roster pilot and UI'
+            git push origin HEAD:codex/realism-integration-0.5.1-20260929
+          fi
+          git rev-parse HEAD > validation/source-commit.txt
+          git show --stat --oneline HEAD > validation/commit-summary.txt
+          git diff --binary 39dc959cea476dceba7c98b7c187662522a18eaa HEAD -- mais-uma-rodada docs/REALISM-0.5.1.md docs/DEPTH-0.5.0.md > validation/realism-0.5.1.patch
+          cp docs/REALISM-0.5.1.md validation/
+      - name: Export Android arm64 test application with independent data
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('mais-uma-rodada/export_presets.cfg')
+          text = p.read_text()
+          assert text.count('package/unique_name="com.maisumarodada.futebol"') == 2
+          assert text.count('version/name="0.5.1"') == 2
+          assert text.count('version/code=14') == 2
+          text = text.replace('package/unique_name="com.maisumarodada.futebol"', 'package/unique_name="com.maisumarodada.futebol.realismtest"')
+          text = text.replace('package/name="Mais Uma Rodada"', 'package/name="Mais Uma Rodada 0.5.1 Teste"')
+          p.write_text(text)
+          PY
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              timeout 300s godot --headless --path . --export-debug "Android arm64" build/MaisUmaRodada-0.5.1-realismo-teste.apk 2>&1 | tee /workspace/validation/export.log
+              if grep -E "SCRIPT ERROR|Parse Error|Failed to export|Export failed" /workspace/validation/export.log; then exit 1; fi
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-teste.apk
+          sha256sum mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-teste.apk > validation/apk-sha256.txt
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          apk = Path('mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-teste.apk')
+          with zipfile.ZipFile(apk) as z:
+              assert z.testzip() is None
+              assert 'AndroidManifest.xml' in z.namelist()
+          Path('validation/build.json').write_text(json.dumps({'version': '0.5.1', 'code': 14, 'package': 'com.maisumarodada.futebol.realismtest', 'name': 'Mais Uma Rodada 0.5.1 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'base': '39dc959cea476dceba7c98b7c187662522a18eaa', 'physical_android_tested': False, 'real_players_pilot': 52, 'real_clubs_pilot': 2, 'real_coaches_pilot': 2, 'commercial_license_obtained': False, 'ratings_are_game_estimates': True}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: realism-0.5.1-validation
+          path: validation/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaisUmaRodada-0.5.1-realismo-teste
+          path: mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-teste.apk
+          if-no-files-found: error
+          retention-days: 14
