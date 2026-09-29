@@ -26,9 +26,9 @@ static func edges(a: Dictionary, b: Dictionary) -> Dictionary:
 	rb *= pb[1] * pa[2]
 	# Bloco baixo contra quem propõe
 	if _low_block(b) and _proposes(a):
-		ra *= 0.95
+		ra *= 0.93
 	if _low_block(a) and _proposes(b):
-		rb *= 0.95
+		rb *= 0.93
 	# Amplitude contra time fechado
 	if _wide(a) and int(b["width"]) == 0:
 		ra *= 1.03
@@ -42,10 +42,13 @@ static func _press(p: Dictionary, r: Dictionary) -> Array:
 	var presses := int(p["pressing"]) == 2 or int(p["style"]) == TeamSheet.STYLE_PRESSAO
 	if not presses or int(r["style"]) == TeamSheet.STYLE_LONGA:
 		return [0.0, 1.0, 1.0]
-	var edge := (62.0 - float(r["tech"])) / 100.0
+	# Pressionar funciona contra quem tem menos qualidade com a bola do que você (e não por um número
+	# absoluto): o favorito que pressiona o fraco rouba bolas perto do gol; o fraco que pressiona um
+	# time mais técnico é driblado e deixa espaço atrás.
+	var edge := (float(p["tech"]) - float(r["tech"]) + 2.0) / 100.0
 	if edge >= 0.0:
-		return [minf(0.02, edge * 0.2), 1.0 + minf(0.07, edge * 0.5), 1.0]
-	return [0.0, 1.0, 1.0 + minf(0.06, -edge * 0.4)]
+		return [minf(0.025, edge * 0.3), 1.0 + minf(0.07, edge * 0.7), 1.0]
+	return [0.0, 1.0, 1.0 + minf(0.06, -edge * 0.6)]
 
 
 static func _low_block(t: Dictionary) -> bool:

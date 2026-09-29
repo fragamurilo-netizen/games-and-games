@@ -455,9 +455,9 @@ func _rebuild_pick_tables() -> void:
 			if mp != null and mp.slot != 0:
 				match m:
 					0:
-						v = (mp.w_att + 0.04) * mp.c_fin * mp.f * (1.6 if mp.pos == Pos.ST else 1.0)
+						v = (mp.w_att + 0.04) * mp.c_fin * mp.f * (MatchSimulation.ST_SHOOT if mp.pos == Pos.ST else 1.0)
 					1:
-						v = (mp.w_att + (0.35 if mp.pos == Pos.CB else 0.0) + 0.05) * mp.c_head * mp.f
+						v = (mp.w_att + (MatchSimulation.CB_HEAD if mp.pos == Pos.CB else 0.0) + 0.05) * mp.c_head * mp.f
 					2:
 						v = (mp.w_mid + mp.w_att * 0.6 + 0.05) * mp.c_long * mp.f
 					3:
