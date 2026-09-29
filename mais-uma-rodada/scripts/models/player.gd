@@ -136,7 +136,7 @@ var cup_stats: Dictionary = {} # copa -> PackedInt32Array (temporada)
 var history: Array: # [{y, c (club id), cn (nome), a, g, as, r}]
 	get:
 		if _history_raw != null:
-			_history = SaveCodec.unpack_rows(_history_raw)
+			_history = SaveCodec.unpack_rows(_raw_out(_history_raw))
 			_history_raw = null
 		return _history
 	set(v):
@@ -147,7 +147,7 @@ var _history_raw: Variant = null # compactado do save; só abre quando alguém l
 var spells: Array: # passagens por clube [{c, cn, from, to, a, g, as}]
 	get:
 		if _spells_raw != null:
-			_spells = SaveCodec.unpack_rows(_spells_raw)
+			_spells = SaveCodec.unpack_rows(_raw_out(_spells_raw))
 			_spells_raw = null
 		return _spells
 	set(v):
@@ -163,7 +163,7 @@ var titles: int = 0
 var trophies: Array:
 	get:
 		if _trophies_raw != null:
-			_trophies = SaveCodec.unpack_rows(_trophies_raw)
+			_trophies = SaveCodec.unpack_rows(_raw_out(_trophies_raw))
 			_trophies_raw = null
 		return _trophies
 	set(v):
@@ -509,6 +509,9 @@ func specialties() -> Array:
 # ---------------------------------------------------------------------------
 
 func to_dict() -> Dictionary:
+	# O save já precisa das listas compactadas: elas voltam fechadas para a memória também (as
+	# passagens abrem a cada jogo para somar os números e ficavam abertas até o fim do jogo).
+	compact()
 	var d := {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
@@ -520,8 +523,8 @@ func to_dict() -> Dictionary:
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
 		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
-		"stats": stats, "cs": cup_stats, "hist": _packed(_history_raw, _history), "spells": _packed(_spells_raw, _spells),
-		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_trophies_raw, _trophies),
+		"stats": stats, "cs": cup_stats, "hist": _packed(_raw_out(_history_raw), _history), "spells": _packed(_raw_out(_spells_raw), _spells),
+		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_raw_out(_trophies_raw), _trophies),
 	}
 	# Campos vazios ou no padrão ficam de fora (from_dict usa o mesmo padrão): save menor e mais rápido
 	for k in d.keys():
@@ -542,9 +545,9 @@ func to_dict() -> Dictionary:
 ## Acrescenta linhas ao histórico (fica com as `keep` últimas) sem abrir o compactado.
 func append_history(rows: Array, keep: int) -> void:
 	if _history_raw != null:
-		var packed: Variant = SaveCodec.append_rows(_history_raw, rows, keep)
+		var packed: Variant = SaveCodec.append_rows(_raw_out(_history_raw), rows, keep)
 		if packed != null:
-			_history_raw = packed
+			_history_raw = _raw_in(packed)
 			return
 	var h := history
 	h.append_array(rows)
@@ -556,14 +559,25 @@ func append_history(rows: Array, keep: int) -> void:
 ## gerar o mundo: ~27 mil jogadores com décadas de histórico em dicionários pesam ~180 MB.
 func compact() -> void:
 	if _history_raw == null and _history.size() >= 2:
-		_history_raw = SaveCodec.pack_rows(_history)
+		_history_raw = _raw_in(SaveCodec.pack_rows(_history))
 		_history = []
 	if _spells_raw == null and _spells.size() >= 2:
-		_spells_raw = SaveCodec.pack_rows(_spells)
+		_spells_raw = _raw_in(SaveCodec.pack_rows(_spells))
 		_spells = []
 	if _trophies_raw == null and _trophies.size() >= 2:
-		_trophies_raw = SaveCodec.pack_rows(_trophies)
+		_trophies_raw = _raw_in(SaveCodec.pack_rows(_trophies))
 		_trophies = []
+
+
+## Na memória, a lista compactada (dicionário de colunas do SaveCodec) fica serializada num
+## PackedByteArray: um bloco só por lista em vez de dezenas de arrays e textos por jogador
+## (~150 MB a menos no mundo inteiro). No save continua o dicionário de sempre.
+static func _raw_in(v: Variant) -> Variant:
+	return var_to_bytes(v) if v is Dictionary else v
+
+
+static func _raw_out(v: Variant) -> Variant:
+	return bytes_to_var(v) if v is PackedByteArray else v
 
 
 ## Lista ainda fechada desde o load vai para o save do jeito que veio (sem abrir e compactar de novo).
@@ -642,14 +656,14 @@ static func from_dict(d: Dictionary) -> Player:
 	for k in cs:
 		if cs[k] is PackedInt32Array and cs[k].size() == C_COUNT:
 			p.cup_stats[k] = cs[k]
-	p._history_raw = d.get("hist", null)
-	p._spells_raw = d.get("spells", null)
+	p._history_raw = _raw_in(d.get("hist", null))
+	p._spells_raw = _raw_in(d.get("spells", null))
 	p.career_apps = int(d.get("ca", 0))
 	p.career_goals = int(d.get("cg", 0))
 	p.career_assists = int(d.get("cas", 0))
 	p.titles = int(d.get("tt", 0))
 	p.awards = Array(d.get("aw", []))
-	p._trophies_raw = d.get("tro", null)
+	p._trophies_raw = _raw_in(d.get("tro", null))
 	p.persona_log = Array(d.get("pl", []))
 	p.recompute_overall()
 	p.ovr_start = int(d.get("o0", p.overall))

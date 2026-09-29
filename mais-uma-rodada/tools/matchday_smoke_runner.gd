@@ -49,6 +49,8 @@ func _run() -> void:
 					ms.call("_start_second_half")
 				else:
 					UIManager.close_all_modals()
+		while GameManager.is_busy(): # a data fecha numa thread de trabalho
+			await get_tree().process_frame
 		print("[etapa] fim da partida %d" % day)
 		await _frames(10)
 		UIManager.close_all_modals()

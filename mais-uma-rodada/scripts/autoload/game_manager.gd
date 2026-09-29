@@ -42,6 +42,7 @@ var _work_done: Callable
 var _work_mutex := Mutex.new()
 var _work_in_fn := false
 var _save_on_finish := false
+var _resave_after_work := false
 ## Texto do aviso "processando" (só lido na thread principal).
 var work_label := ""
 
@@ -99,6 +100,11 @@ func run_work(work: Callable, done: Callable = Callable(), label: String = "") -
 	Warmup.run() # caches preguiçosos prontos antes: a thread e a tela não os montam ao mesmo tempo
 	_work_in_fn = true
 	_save_on_finish = false
+	if _save_busy:
+		# Save aos poucos no meio: ele lê o mundo entre um quadro e outro, e a thread vai mudá-lo.
+		# Descarta e grava de novo quando o trabalho acabar.
+		_cancel_save()
+		_resave_after_work = true
 	_work_task = WorkerThreadPool.add_task(_work_body.bind(work), true, "trabalho")
 	busy_changed.emit(true)
 	return true
@@ -139,6 +145,9 @@ func _complete_work() -> void:
 	if cb.is_valid():
 		cb.call(r)
 	if _work_task < 0: # (o done pode ter emendado outro trabalho)
+		if _resave_after_work:
+			_resave_after_work = false
+			save_now()
 		busy_changed.emit(false)
 
 
