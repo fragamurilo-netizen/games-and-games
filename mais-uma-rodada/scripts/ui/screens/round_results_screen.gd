@@ -130,6 +130,10 @@ func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 		card.add_child(UIKit.kv("Craque do jogo", "%s (%s)" % [motm.display_name(), w.club(motm.club_id).short_name if motm.club_id >= 0 else "—"], UIColors.ACCENT))
 	var before := int(user.get("pos_before", 0))
 	var after := int(user.get("pos_after", 0))
+	# Antes da estreia na liga (estaduais, copas) a "posição" é só a ordem inicial da tabela
+	var ul := w.league_of(w.user_club_id)
+	if ul == null or not ul.table.has(w.user_club_id) or int(ul.table[w.user_club_id]["pl"]) == 0:
+		after = 0
 	if after > 0:
 		var prow := UIKit.hbox(10)
 		prow.add_child(UIKit.label("Posição na tabela", "Muted"))
