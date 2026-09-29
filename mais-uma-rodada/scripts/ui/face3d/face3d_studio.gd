@@ -9,6 +9,7 @@ extends Node
 const VERSION := 3
 const PX := 448
 const MEM_MAX := 260
+const MOBILE_MEM_MAX := 48 # ~49 MiB of RGBA portraits including mipmaps
 const DISK_DIR := "user://face3d/"
 const SCALP_LAYERS := 22
 const BEARD_LAYERS := 12
@@ -17,6 +18,7 @@ static var _inst: Face3DStudio = null
 static var _mem := {}
 static var _mem_order: Array = []
 static var enabled := true
+static var match_active := false
 ## Qualidade das mechas (1 = cheio; celulares fracos podem usar menos).
 static var quality := 1.0
 
@@ -40,6 +42,10 @@ static func request(spec: Dictionary, who: CanvasItem) -> Texture2D:
 	var key := key_of(spec)
 	if _mem.has(key):
 		return _mem[key]
+	# Reuse ready portraits during live play, but avoid mesh/shader/upload spikes
+	# competing with the match renderer on mobile GPUs.
+	if match_active:
+		return null
 	var disk := DISK_DIR + "%d.webp" % key
 	if FileAccess.file_exists(disk):
 		var img := Image.load_from_file(disk)
@@ -55,6 +61,9 @@ static func request(spec: Dictionary, who: CanvasItem) -> Texture2D:
 		st._waiting[key] = []
 		st._queue.append([key, spec])
 	if who != null:
+		for wr: WeakRef in st._waiting[key]:
+			if wr.get_ref() == who:
+				return null
 		(st._waiting[key] as Array).append(weakref(who))
 	return null
 
@@ -67,7 +76,8 @@ static func key_of(spec: Dictionary) -> int:
 static func _remember(key: int, tex: Texture2D) -> void:
 	_mem[key] = tex
 	_mem_order.append(key)
-	if _mem_order.size() > MEM_MAX:
+	var limit := MOBILE_MEM_MAX if OS.has_feature("mobile") else MEM_MAX
+	while _mem_order.size() > limit:
 		_mem.erase(_mem_order.pop_front())
 
 
@@ -187,11 +197,22 @@ func _build_stage() -> void:
 
 
 func _process(_delta: float) -> void:
-	if _busy or _queue.is_empty():
+	if _busy or _queue.is_empty() or match_active:
+		return
+	var job: Array = _queue.pop_front()
+	if not _has_viewer(int(job[0])):
+		_waiting.erase(int(job[0]))
 		return
 	_busy = true
-	var job: Array = _queue.pop_front()
 	_shoot(int(job[0]), job[1])
+
+
+func _has_viewer(key: int) -> bool:
+	for wr: WeakRef in _waiting.get(key, []):
+		var ci: Variant = wr.get_ref()
+		if is_instance_valid(ci) and ci.is_visible_in_tree() and not ci.is_queued_for_deletion():
+			return true
+	return false
 
 
 func _shoot(key: int, spec: Dictionary) -> void:
@@ -200,7 +221,8 @@ func _shoot(key: int, spec: Dictionary) -> void:
 	while not WorkerThreadPool.is_task_completed(tid):
 		await get_tree().process_frame
 	WorkerThreadPool.wait_for_task_completion(tid)
-	if not box.has("d"):
+	if not box.has("d") or match_active or not _has_viewer(key):
+		_waiting.erase(key)
 		_busy = false
 		return
 	_apply(spec, box["d"])

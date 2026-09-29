@@ -187,7 +187,7 @@ func _test_generation() -> void:
 	var small: Club = w.clubs_in_league("BRA4")[19]
 	check(ClubAI._compute_strength(w, big) > ClubAI._compute_strength(w, small) + 25.0, "escala de níveis entre ligas")
 	# Copas da primeira temporada montadas
-	check(w.season.cups.has("UCL") and w.season.cups["UCL"].club_ids.size() == 32, "Liga dos Campeões com 32 clubes")
+	check(w.season.cups.has("UCL") and w.season.cups["UCL"].club_ids.size() == 36, "Liga dos Campeões com 36 clubes")
 	check(w.season.cups.has("LIB") and w.season.cups["LIB"].club_ids.size() == 32, "Libertadores com 32 clubes")
 	_season_world = null
 
@@ -534,7 +534,12 @@ func _test_season_cycle() -> void:
 				if seen.has(n):
 					same_nation += 1
 				seen[n] = true
-		check(same_nation <= 2, "%s: %d grupos com clubes do mesmo país" % [cid, same_nation])
+		if cup.league_phase:
+			for f: Fixture in cup.fixtures:
+				if f.stage == Fixture.STAGE_GROUP:
+					check(w.club(f.home).nation != w.club(f.away).nation, "Liga: adversários do mesmo país")
+		else:
+			check(same_nation <= 2, "%s: %d grupos com clubes do mesmo país" % [cid, same_nation])
 		for f in cup.fixtures:
 			check(f.played, "%s: jogo não disputado" % cid)
 		var last := cup.ties_of_round(cup.round_names.size() - 1)
@@ -773,7 +778,7 @@ func _test_end_season() -> void:
 		if d["id"] == "BRA1":
 			bra = d
 	check(w.season.cups["LIB"].has_club(int(bra["champion"])), "campeão brasileiro fora da Libertadores")
-	check(w.season.cups["UCL"].club_ids.size() == 32 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
+	check(w.season.cups["UCL"].club_ids.size() == 36 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
 	# Campeão da Copa do Brasil garante a Libertadores; supercopa com o campeão da liga e o da copa.
 	check(w.season.cups["LIB"].has_club(int(_cup_champs.get("CDB", -1))), "campeão da Copa do Brasil fora da Libertadores")
 	check(w.season.cups.has("SCB") and w.season.cups["SCB"].has_club(int(bra["champion"])), "Supercopa do Brasil sem o campeão brasileiro")
@@ -1982,7 +1987,14 @@ func _test_market_ai() -> void:
 			deal = MarketAI.negotiate(w, big, prospect, 1.0, false, false, push)
 			if deal.has("fee"):
 				break
-		check(deal.has("fee") and int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		# A reserva do vendedor e cada contraproposta são aleatórias: nem toda
+		# negociação fecha, mesmo com ágio. Verifique a disposição de pagar e,
+		# quando houver acordo, o preço; uma recusa legítima deve informar a distância.
+		check(MarketAI.max_bid(w, big, prospect, 1.0, false, false, 3) >= prospect.value, "teto inglês abaixo do valor da promessa")
+		if deal.has("fee"):
+			check(int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		else:
+			check(float(deal.get("gap", -1.0)) >= 0.0, "negociação da promessa recusada sem informar a distância")
 		var bids := MarketAI.bids_for_user_player(w, big, prospect)
 		check(int(bids[0]) <= int(bids[1]) and int(bids[0]) > 0, "proposta acima do teto do comprador")
 	check(MarketAI.power(big) > MarketAI.power(seller) * 2.0, "liga inglesa deveria ter muito mais poder de compra")

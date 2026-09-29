@@ -110,6 +110,8 @@ func _picker_row(w: GameWorld) -> Control:
 	var tabs: Array = LEAGUE_TABS
 	if _cup_id != "":
 		tabs = CUP_TABS.filter(func(t): return t[0] != "groups" or not w.season.cups[_cup_id].groups.is_empty())
+		if w.season.cups[_cup_id].league_phase:
+			tabs = [["groups", "Classificação"], ["rounds", "Jogos"], ["ko", "Mata-mata"], ["scorers", "Artilharia"]]
 	var trow := UIKit.scroll_tabs(tabs, _tab, func(key: String):
 		_tab = key
 		refresh())
@@ -1037,6 +1039,8 @@ func _cup_view(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	match _tab:
 		"ko":
 			_cup_ko(c, w, cup)
+		"rounds":
+			_cup_league_games(c, w, cup)
 		"scorers":
 			_cup_scorers(c, w, cup)
 		_:
@@ -1045,6 +1049,8 @@ func _cup_view(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 			else:
 				_cup_groups(c, w, cup)
 	var fmt := String(CupManager.cfg(cup.id).get("format", ""))
+	if cup.id == "UCL" and not cup.league_phase:
+		fmt = "Esta temporada mantém o formato do save: 8 grupos de 4, com os 2 primeiros nas oitavas. A fase de liga com 36 clubes começa na próxima temporada."
 	if fmt != "":
 		c.add_child(_format_card(cup.id, fmt))
 
@@ -1173,6 +1179,9 @@ func _format_card(comp: String, text: String) -> Control:
 
 
 func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	if cup.league_phase:
+		_cup_league_table(c, w, cup)
+		return
 	# Estaduais: avançam os líderes de grupo e os melhores dos demais (não os 2 de cada grupo).
 	var state_q: Array = CupManager.state_qualified(cup) if CupManager.is_state(cup.id) else []
 	if CupManager.is_state(cup.id):
@@ -1196,10 +1205,61 @@ func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 		c.add_child(UIKit.card_panel(card))
 
 
+func _cup_league_table(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	var order := LeaguePhase.sorted_ids(cup)
+	var table: Dictionary = cup.groups[0]["table"]
+	var compact := content_width() < 720.0
+	c.add_child(UIKit.label("Fase de liga", "Section"))
+	c.add_child(TableRows.header(compact))
+	for i in order.size():
+		if i in [0, 8, 24]:
+			var label: String = {0: "1–8  Oitavas de final", 8: "9–24  Playoffs", 24: "25–36  Eliminados"}[i]
+			c.add_child(UIKit.label(label, "Small"))
+		var zone := UIColors.GREEN if i < 8 else (UIColors.ORANGE if i < 24 else Color.TRANSPARENT)
+		c.add_child(TableRows.table_row(w, table[order[i]], order[i], i + 1, compact, zone))
+
+
+func _cup_league_games(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
+	if not cup.league_phase:
+		_cup_ko(c, w, cup)
+		return
+	if _round < 0:
+		_round = 7
+		for f: Fixture in cup.fixtures:
+			if f.stage == Fixture.STAGE_GROUP and not f.played:
+				_round = mini(_round, f.round)
+	_round = clampi(_round, 0, 7)
+	var row := UIKit.hbox(UITokens.S2)
+	var prev := UIKit.button("Anterior", "GhostButton", func():
+		_round -= 1
+		refresh())
+	prev.disabled = _round == 0
+	row.add_child(prev)
+	var title := UIKit.label("%dª rodada de 8" % (_round + 1), "H3")
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(title)
+	var next := UIKit.button("Próxima", "GhostButton", func():
+		_round += 1
+		refresh())
+	next.disabled = _round == 7
+	row.add_child(next)
+	c.add_child(row)
+	var shown_date := false
+	for f: Fixture in cup.fixtures:
+		if f.stage == Fixture.STAGE_GROUP and f.round == _round:
+			if not shown_date:
+				c.add_child(UIKit.label(w.season.date_label(f.slot), "Muted"))
+				shown_date = true
+			var match_row := _fixture_row(w, f)
+			match_row.custom_minimum_size.y = UITokens.H_ROW
+			c.add_child(match_row)
+
+
 func _cup_ko(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	if cup.ties.is_empty():
 		var card := UIKit.card("Card", 6)
-		card.add_child(UIKit.label("Sorteio após a fase de grupos.", "Muted", true))
+		card.add_child(UIKit.label("Os playoffs serão definidos após a 8ª rodada." if cup.league_phase else "Sorteio após a fase de grupos.", "Muted", true))
 		c.add_child(UIKit.card_panel(card))
 		return
 	for r in cup.round_names.size():

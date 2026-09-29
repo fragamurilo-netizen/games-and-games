@@ -99,7 +99,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
-	return out
+	return LeaguePhase.extend_calendar(out)
 
 
 ## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
@@ -549,7 +549,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			league.table[f.away]["yc"] += int(yc[1])
 			league.table[f.away]["rc"] += int(rc[1])
 	elif world.league(f.comp) == null:
-		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
+		CupManager.apply_result(world, f, res) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
 	FootballMemory.on_match(world, f)
 	Referees.record(world, res)
 	var derby := bool(res.get("derby", false))
@@ -1140,7 +1140,7 @@ static func _stage_reached(cup: Cup, club_id: int) -> String:
 		if int(t["a"]) == club_id or int(t["b"]) == club_id:
 			best = maxi(best, int(t["r"]))
 	if best < 0:
-		return "Fase de grupos" if not cup.groups.is_empty() else "Primeira fase"
+		return "Fase de liga" if cup.league_phase else ("Fase de grupos" if not cup.groups.is_empty() else "Primeira fase")
 	return cup.round_names[best]
 
 

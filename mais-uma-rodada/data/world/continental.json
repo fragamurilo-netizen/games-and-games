@@ -5,16 +5,16 @@
 			"name": "Liga dos Campeões",
 			"short": "Campeões",
 			"confed": "UEFA",
-			"teams": 32,
-			"groups": 8,
+			"teams": 36,
+			"groups": 0,
 			"alloc": {
 				"ENG": 4,
 				"ESP": 4,
 				"GER": 4,
 				"ITA": 4,
-				"FRA": 3,
-				"POR": 2,
-				"NED": 2,
+				"FRA": 4,
+				"POR": 3,
+				"NED": 3,
 				"TUR": 1,
 				"BEL": 1,
 				"SCO": 1,
@@ -23,7 +23,8 @@
 				"SUI": 1,
 				"UKR": 1,
 				"CRO": 1,
-				"SRB": 1
+				"SRB": 1,
+				"CZE": 1
 			},
 			"prize": {
 				"group": 15000000,
@@ -40,7 +41,9 @@
 				"#C9D6EA"
 			],
 			"trophy": "orelhuda",
-			"level": 1
+			"level": 1,
+			"format_type": "league_phase",
+			"format": "36 clubes em tabela única. Cada equipe enfrenta 8 adversários, com 4 jogos em casa e 4 fora, contra 2 clubes de cada pote. 1º ao 8º: oitavas. 9º ao 24º: playoffs de ida e volta. 25º ao 36º: eliminados. Mata-mata de ida e volta, sem gol fora como desempate; final única em campo neutro."
 		},
 		"UEL": {
 			"name": "Liga Europa",

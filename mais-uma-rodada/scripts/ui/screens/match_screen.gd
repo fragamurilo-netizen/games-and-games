@@ -101,6 +101,7 @@ var _skip_btn: Button
 var _overlay: GoalOverlay
 var _tac_box: VBoxContainer
 var _momentum: MomentumView
+var _conditions: Control
 var _tabs_row: HBoxContainer
 var _tab_scroll: ScrollContainer
 var _tab_box: VBoxContainer
@@ -141,31 +142,32 @@ func refresh() -> void:
 
 
 var _wide_body: HBoxContainer = null
+var _field_nodes: Array[Control] = []
 
 
 ## Paisagem e tablet: campo e números à esquerda, abas e narração numa coluna à direita.
 ## No celular em retrato fica tudo empilhado (o placar em cima e os controles embaixo sempre).
 func _responsive_layout() -> void:
-	var wide := UILayout.is_wide()
+	var wide := UILayout.is_wide() and UILayout.is_landscape()
+	var short_view := wide and get_viewport_rect().size.y < 720.0
+	# Em paisagem no celular, preserve campo e comandos. Os detalhes seguem no painel.
+	if is_instance_valid(_conditions):
+		_conditions.visible = not short_view
+	if is_instance_valid(_stats_lbl):
+		_stats_lbl.visible = not short_view
+	if is_instance_valid(_momentum):
+		_momentum.visible = not short_view
 	# O campo é o protagonista: em pé ele fica vertical e ocupa a maior parte da altura.
 	_pitch.horizontal = wide
 	_pitch.custom_minimum_size.y = _pitch_height()
 	if wide == (_wide_body != null):
 		return
-	var left_nodes: Array = []
-	var right_nodes: Array = []
 	var pitch_box := _pitch.get_parent()
-	left_nodes.append(pitch_box)
-	var stats_box := _stats_box.get_parent()
 	var tabs_box := _tabs_row.get_parent()
-	var strip: Node = null
-	var idx_pitch := pitch_box.get_index()
-	if idx_pitch + 1 < _root.get_child_count() and _root.get_child(idx_pitch + 1) != stats_box:
-		strip = _root.get_child(idx_pitch + 1)
-	if strip != null:
-		left_nodes.append(strip)
-	left_nodes.append(stats_box)
-	right_nodes = [tabs_box, _feed_scroll, _tab_scroll]
+	# Keep stable references: after rotation these nodes no longer belong to _root.
+	# Looking them up by sibling index could select the wide container itself and
+	# delete the goal banner when rotating back to portrait.
+	var right_nodes: Array = [tabs_box, _feed_scroll, _tab_scroll]
 	if wide:
 		var at := pitch_box.get_index()
 		_wide_body = UIKit.hbox(0)
@@ -175,8 +177,8 @@ func _responsive_layout() -> void:
 		lv.size_flags_stretch_ratio = 1.4
 		var rv := UIKit.vbox(0)
 		rv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		for n: Node in left_nodes:
-			_root.remove_child(n)
+		for n: Node in _field_nodes:
+			n.get_parent().remove_child(n)
 			lv.add_child(n)
 		for n: Node in right_nodes:
 			_root.remove_child(n)
@@ -193,21 +195,22 @@ func _responsive_layout() -> void:
 		_root.move_child(_wide_body, at)
 	else:
 		var at := _wide_body.get_index()
-		var order: Array = left_nodes + right_nodes
+		var order: Array = _field_nodes + right_nodes
 		for n: Node in order:
 			n.get_parent().remove_child(n)
 			_root.add_child(n)
 			_root.move_child(n, at)
 			at += 1
 		(pitch_box as Control).size_flags_vertical = Control.SIZE_FILL
+		_root.remove_child(_wide_body)
 		_wide_body.queue_free()
 		_wide_body = null
 
 
 ## Altura do campo: deitado ele enche a coluna; em pé fica com ~55% da tela e a narração embaixo.
 func _pitch_height() -> float:
-	if UILayout.is_wide():
-		return 330.0
+	if UILayout.is_wide() and UILayout.is_landscape():
+		return 120.0 if get_viewport_rect().size.y < 720.0 else 220.0
 	return clampf(get_viewport_rect().size.y * 0.5, 420.0, 760.0)
 
 
@@ -278,11 +281,11 @@ func _build() -> void:
 	_pitch.stadium = _stadium
 	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
 	Sfx.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
-	_root.add_child(UIKit.margin(_pitch, 0, 6, 0, 4))
+	_add_field_node(UIKit.margin(_pitch, 0, 6, 0, 4))
 	_l3 = _build_l3()
-	_root.add_child(UIKit.margin(_l3, 8, 0, 8, 4))
+	_add_field_node(UIKit.margin(_l3, 8, 0, 8, 4))
 	if not _div_entries.is_empty() or not _day_entries.is_empty():
-		_root.add_child(UIKit.margin(_build_strip(), 8, 0, 8, 4))
+		_add_field_node(UIKit.margin(_build_strip(), 8, 0, 8, 4))
 		_ticker.visible = false
 	# Posse e números
 	_stats_box = UIKit.vbox(4)
@@ -319,7 +322,7 @@ func _build() -> void:
 	_momentum.home_color = _side_color(0)
 	_momentum.away_color = _side_color(1)
 	_stats_box.add_child(_momentum)
-	_root.add_child(UIKit.margin(_stats_box, 20, 0, 20, 2))
+	_add_field_node(UIKit.margin(_stats_box, 20, 0, 20, 2))
 	# Abas: lances, números, outros jogos e tabela ao vivo (o jogo segue rolando em todas)
 	_tabs_row = UIKit.hbox(6)
 	_root.add_child(UIKit.margin(_tabs_row, 14, 0, 14, 4))
@@ -375,6 +378,11 @@ func _build() -> void:
 	if not _sim.started:
 		# Abertura da transmissão e, depois dela, a palestra
 		_open_intro.call_deferred()
+
+
+func _add_field_node(node: Control) -> void:
+	_field_nodes.append(node)
+	_root.add_child(node)
 
 
 func _open_intro() -> void:
@@ -450,7 +458,8 @@ func _build_l3() -> PanelContainer:
 func _build_scoreboard(home: Club, away: Club) -> Control:
 	# Placar da transmissão com a cara da competição (desenho e cores dos dados, mods ou Editor).
 	var title := CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO"
-	_board = ScoreboardView.make(world(), _fx.comp, title, home, away, _colors, _conditions_row(), true, _fx.leg == 1)
+	_conditions = _conditions_row()
+	_board = ScoreboardView.make(world(), _fx.comp, title, home, away, _colors, _conditions, true, _fx.leg == 1)
 	_score_lbl = _board.score_proxy
 	_clock_lbl = _board.clock_proxy
 	_home_name = _board.home_name
@@ -516,7 +525,7 @@ func _build_controls() -> void:
 ## Controle secundário (tempo, menu): só o ícone, estreito; o nome fica na dica.
 func _compact(b: Button) -> void:
 	b.size_flags_horizontal = Control.SIZE_FILL
-	b.custom_minimum_size.x = 60
+	b.custom_minimum_size.x = UITokens.H_BUTTON
 	b.theme_type_variation = "GhostButton"
 	b.tooltip_text = b.text
 	b.set_meta(&"compact", true)
@@ -1754,6 +1763,7 @@ func _render_table_tab() -> void:
 	var base: Dictionary = {}
 	var title := ""
 	var league: League = null
+	var cup: Cup = null
 	if _fx.is_league():
 		league = w.league(_fx.comp)
 		if league == null:
@@ -1762,15 +1772,17 @@ func _render_table_tab() -> void:
 		base = league.table
 		title = "Tabela ao vivo · %s" % league.short_name
 	else:
-		var cup: Cup = w.season.cups.get(_fx.comp, null)
+		cup = w.season.cups.get(_fx.comp, null)
 		var g: Dictionary = cup.group_of(_fx.home) if cup != null else {}
 		if g.is_empty():
 			return
 		ids = g["clubs"]
 		base = g["table"]
-		title = "Grupo %s ao vivo · %s" % [g["n"], cup.short_name]
-	var before := CompetitionManager.sort_table(ids, base)
+		title = "Fase de liga ao vivo · %s" % cup.short_name if cup.league_phase else "Grupo %s ao vivo · %s" % [g["n"], cup.short_name]
+	var modern := cup != null and cup.league_phase
+	var before := LeaguePhase.sorted_ids(cup) if modern else CompetitionManager.sort_table(ids, base)
 	var live: Dictionary = {}
+	var live_scores := {}
 	for cid in ids:
 		live[cid] = base[cid].duplicate()
 	var entries: Array = _div_entries.duplicate()
@@ -1787,13 +1799,14 @@ func _render_table_tab() -> void:
 			if not GameManager.ai_ready():
 				pending = true
 			sc = _score_of(e, minute, half)
+		live_scores[f] = sc
 		var tmp := Fixture.new()
 		tmp.home = f.home
 		tmp.away = f.away
 		tmp.hg = int(sc[0])
 		tmp.ag = int(sc[1])
 		CompetitionManager.apply_to_table(live, tmp)
-	var order := CompetitionManager.sort_table(ids, live)
+	var order := LeaguePhase.sorted_ids(cup, live, live_scores) if modern else CompetitionManager.sort_table(ids, live)
 	var card := UIKit.card("Card", 2)
 	card.add_child(UIKit.section(title))
 	if pending:
@@ -1804,8 +1817,10 @@ func _render_table_tab() -> void:
 		var zone := Color(0, 0, 0, 0)
 		if league != null:
 			zone = CompetitionManager.zone_color(CompetitionManager.zone_of(league, pos))
-		elif pos <= 2:
+		elif pos <= (8 if modern else 2):
 			zone = CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION)
+		elif modern and pos <= 24:
+			zone = UIColors.ORANGE
 		card.add_child(_live_row(cid, pos, before.find(cid) + 1, live[cid], zone))
 	if league != null:
 		card.add_child(UIKit.gap(6))

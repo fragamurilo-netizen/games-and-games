@@ -15,6 +15,8 @@ static func fixture_title(w: GameWorld, f: Fixture) -> String:
 	if cup == null:
 		return CupManager.cup_short(f.comp)
 	if f.stage == Fixture.STAGE_GROUP:
+		if cup.league_phase:
+			return "%s · Fase de liga · %dª rodada" % [cup.short_name, f.round + 1]
 		return "%s · Grupo %s · %dª rodada" % [cup.short_name, cup.group_of(f.home).get("n", "?"), f.round + 1]
 	var stage: String = cup.round_names[f.round] if f.round < cup.round_names.size() else ""
 	if f.neutral:
@@ -110,6 +112,8 @@ static func cup_event_text(w: GameWorld, ev: Dictionary) -> String:
 			return "%s é o campeão %s %s." % [w.club(club).short_name, da, cup_name]
 		"advance":
 			if w.is_user_club(club):
+				if ev.has("direct"):
+					return "Classificado às oitavas da %s." % cup_name if bool(ev["direct"]) else "Seu time vai aos playoffs da %s." % cup_name
 				return "Classificado! Seu time passou da %s %s %s." % [String(ev.get("stage", "")).to_lower(), "no" if da == "do" else "na", cup_name]
 		"out":
 			if w.is_user_club(club):

@@ -20,6 +20,9 @@ var round_names: Array = []
 var plan: Array = []
 var plan_slots: Array = []
 var byes: Array = []
+## Stored on the season: legacy 32-team group stages keep their original rules.
+var league_phase := false
+var league_rank: Array = []
 var champion: int = -1
 var runner_up: int = -1
 var finished: bool = false
@@ -73,6 +76,8 @@ func fixtures_of_tie(t: Dictionary) -> Array:
 func is_alive(club_id: int) -> bool:
 	if finished or not club_ids.has(club_id):
 		return false
+	if league_phase and not league_rank.is_empty() and league_rank.find(club_id) >= 24:
+		return false
 	for t in ties:
 		var w := int(t["w"])
 		if w >= 0 and (int(t["a"]) == club_id or int(t["b"]) == club_id) and w != club_id:
@@ -92,7 +97,7 @@ func to_dict() -> Dictionary:
 		gs.append({"n": g["n"], "clubs": g["clubs"], "table": tb})
 	return {"id": id, "name": name, "short": short_name, "clubs": club_ids, "groups": gs, "fx": fx, "ties": ties,
 		"rn": round_names, "champ": champion, "ru": runner_up, "fin": finished,
-		"plan": plan, "ps": plan_slots, "byes": byes}
+		"plan": plan, "ps": plan_slots, "byes": byes, "lp": league_phase, "lr": league_rank}
 
 
 static func from_dict(d: Dictionary) -> Cup:
@@ -117,4 +122,6 @@ static func from_dict(d: Dictionary) -> Cup:
 	c.plan = Array(d.get("plan", []))
 	c.plan_slots = Array(d.get("ps", []))
 	c.byes = Array(d.get("byes", []))
+	c.league_phase = bool(d.get("lp", false))
+	c.league_rank = Array(d.get("lr", []))
 	return c

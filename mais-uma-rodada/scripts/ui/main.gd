@@ -283,6 +283,8 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_OS_MEMORY_WARNING:
 		# São somente comandos de desenho regeneráveis, nunca dados da carreira.
 		_trim_portrait_cache(0)
+		Face3DStudio._mem.clear()
+		Face3DStudio._mem_order.clear()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		UIManager.handle_back()
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
@@ -319,6 +321,7 @@ func _finish_wake() -> void:
 
 func set_live(on: bool) -> void:
 	_live = on
+	Face3DStudio.match_active = on
 	OS.low_processor_usage_mode = _lp_wanted and not on and (not is_instance_valid(_wake_timer) or _wake_timer.is_stopped())
 
 

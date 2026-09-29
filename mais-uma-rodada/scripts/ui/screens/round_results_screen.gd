@@ -218,11 +218,14 @@ func _table_card(w: GameWorld, club: Club, f: Fixture) -> Control:
 		if g.is_empty():
 			UIKit.card_panel(card).free() # nada a mostrar: o cartão não fica solto na memória
 			return null
-		card.add_child(UIKit.section("%s · Grupo %s" % [cup.short_name, g["n"]]))
+		card.add_child(UIKit.section("%s · Fase de liga" % cup.short_name if cup.league_phase else "%s · Grupo %s" % [cup.short_name, g["n"]]))
 		card.add_child(TableRows.header(true))
-		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
+		var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
 		for i in order.size():
-			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if i < 2 else Color(0, 0, 0, 0)
+			# Around the user's position is enough here; the full 36-team table has its own screen.
+			if cup.league_phase and absi(i - order.find(club.id)) > 2:
+				continue
+			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if i < (8 if cup.league_phase else 2) else (UIColors.ORANGE if cup.league_phase and i < 24 else Color.TRANSPARENT)
 			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, true, zone))
 		var cid := cup.id
 		card.add_child(UIKit.button("Ver a copa", "GhostButton", func(): UIManager.goto("table", {"cup": cid}), "trophy"))
