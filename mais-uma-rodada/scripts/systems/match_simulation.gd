@@ -693,7 +693,7 @@ func _pick_lane(att: MatchTeam, dfn: MatchTeam, ctype: int) -> Array:
 	var tw := 0.0
 	for l in 3:
 		var rel := float(ratio[l]) / maxf(0.01, mean)
-		var wl := float(base[l]) * clampf(rel, 0.5, 2.0)
+		var wl := float(base[l]) * clampf(pow(rel, 1.3), 0.5, 2.0) # o lado aberto atrai as jogadas
 		var fl := clampf(pow(rel, 0.3), 0.82, 1.22)
 		w.append(wl)
 		fac.append(fl)

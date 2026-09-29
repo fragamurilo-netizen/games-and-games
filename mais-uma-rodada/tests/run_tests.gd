@@ -1718,9 +1718,9 @@ func _test_xray() -> void:
 			rb = int(c.sheet.starters[i])
 		if int(slots[i]["pos"]) == Pos.RW:
 			rw = int(c.sheet.starters[i])
-	# Referência: os mesmos jogos sem a instrução
+	# Referência: os mesmos jogos sem a instrução (amostra inteira: 60 jogos oscilam demais)
 	var right0 := 0
-	for k in 60:
+	for k in 120:
 		var foe0: Club = w.clubs_in_league("BRA1")[k % 3]
 		if foe0.id == c.id:
 			foe0 = w.clubs_in_league("BRA1")[3]
@@ -1730,7 +1730,6 @@ func _test_xray() -> void:
 		right0 += int(TacticalXRay.analyze(w, sim0)["against"]["lanes"][2])
 	c.sheet.instr[rb] = "avancar"
 	var right := 0
-	var right60 := 0
 	var left := 0
 	var reports := 0
 	var fb_flagged := 0
@@ -1749,8 +1748,6 @@ func _test_xray() -> void:
 		var la: Array = rep["against"]["lanes"]
 		left += int(la[0])
 		right += int(la[2])
-		if k < 60:
-			right60 += int(la[2])
 		var total := 0
 		for ch in rep["chances"]:
 			if not bool(ch["mine"]) and int(ch["ul"]) >= 0:
@@ -1760,7 +1757,7 @@ func _test_xray() -> void:
 		check(total == int(la[0]) + int(la[1]) + int(la[2]), "corredores não somam as chances do adversário")
 		check(not Array(rep["segments"]).is_empty(), "raio-x sem trechos")
 	check(reports == 120, "raio-x não gerado em todas as partidas (%d)" % reports)
-	check(right60 > right0 * 1.07, "lateral no ataque não abriu o corredor (dir %d com × %d sem)" % [right60, right0])
+	check(right > right0 * 1.07, "lateral no ataque não abriu o corredor (dir %d com × %d sem)" % [right, right0])
 	check(fb_flagged > 0, "raio-x não apontou o lateral no ataque")
 	# Correção: aplicar a sugestão muda a escalação
 	var fix := {"type": "instr", "pid": rb, "instr": "segurar", "label": "segurar"}
