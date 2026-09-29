@@ -45,7 +45,7 @@ export function buildBody(L: FaceLayout, female: boolean, age: number, shirt: Sh
     section: (y) => {
       const t = clamp((y - neckBaseY) / Math.max(1, shoulderY + 4 - neckBaseY))
       const w = y < shoulderY + 4 ? lerp(neckR * 1.05, chestW, Math.pow(smooth(0, 1, t), 0.8)) : chestW * (1 + fat * 0.05)
-      const depthK = lerp(0.62, 0.5, growth) + fat * 0.22
+      const depthK = lerp(0.72, 0.64, growth) + fat * 0.24
       let zF = w * depthK
       const zB = -w * (depthK - 0.04)
       if (bust > 0) zF += bust * rx * 0.2 * Math.exp(-Math.pow((y - (shoulderY + 70)) / 24, 2))

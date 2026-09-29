@@ -12,6 +12,7 @@ export function queryLife(world: WorldState) {
   const player = world.people[world.playerId]!
   return {
     name: player.name, age: ageAt(player.birthDate, world.clock), city: world.city,
+    appearance: { seed: player.appearanceSeed, sex: player.sex },
     date: formatDate(world.clock), time: formatTime(world.clock),
     energy: player.needs.energy < 20 ? "Você precisa descansar." : player.needs.energy < 50 ? "O cansaço começa a pesar." : "Você ainda tem disposição.",
     stress: player.needs.stress > 65 ? "Está difícil desligar a cabeça." : player.needs.stress < 20 ? "Hoje a cabeça está mais tranquila." : "Você está conseguindo lidar com as preocupações do dia.",
@@ -21,7 +22,7 @@ export function queryLife(world: WorldState) {
     people: Object.values(world.relationships).filter(r => r.a === player.id || r.b === player.id).map(r => {
       const person = world.people[r.a === player.id ? r.b : r.a]!
       const unavailable = contactAvailability(world, person.id)
-      return { id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock),
+      return { id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock), appearance: { seed: person.appearanceSeed, sex: person.sex },
         description: r.tags.includes("family") ? "Sua mãe" : "Amizade de antes da mudança",
         state: r.lastInteractionAt && absoluteMinute(world.clock) - absoluteMinute(r.lastInteractionAt) < 10080 ? "Vocês tiveram contato recentemente." : r.lastInteractionAt ? "Faz um tempo que vocês não se falam." : r.trust > 65 ? "Existe confiança entre vocês." : "Vocês ainda têm muito para conversar.",
         canContact: !unavailable, unavailableReason: unavailable?.message ?? null,

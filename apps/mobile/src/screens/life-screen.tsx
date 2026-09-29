@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { queryDecision, queryLife, queryRoutine, type Command } from "@paralelo/simulation"
 import { ActionButton } from "../components/screen-frame"
+import { Portrait } from "../components/portrait"
 import { useGame } from "../hooks/game-context"
 import { colors, space, fonts } from "../theme"
 
@@ -25,12 +26,16 @@ export default function LifeScreen() {
         {error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
         {!busy && <Pressable accessibilityRole="button" onPress={() => { void retry() }} style={styles.action}><Text style={styles.actionText}>Tentar novamente</Text></Pressable>}
       </View> : <>
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>VIDA · {life.city.toLocaleUpperCase("pt-BR")}</Text>
-          <Text accessibilityRole="header" style={styles.title}>{life.name}</Text>
-          <Text style={styles.body}>{life.age} anos · Morando por conta própria</Text>
-          <Text style={styles.date}>{life.date}</Text>
-          <Text style={styles.time}>{life.time}</Text>
+        <View style={[styles.header, styles.headerRow]}>
+          <View style={styles.headerText}>
+            <Text style={styles.eyebrow}>VIDA · {life.city.toLocaleUpperCase("pt-BR")}</Text>
+            <Text accessibilityRole="header" style={styles.title}>{life.name}</Text>
+            <Text style={styles.body}>{life.age} anos · Morando por conta própria</Text>
+            <Text style={styles.date}>{life.date}</Text>
+            <Text style={styles.time}>{life.time}</Text>
+          </View>
+          <Portrait seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} size={112} rotatable
+            accessibilityLabel={`Retrato de ${life.name}, ${life.age} anos`} />
         </View>
         <Text style={styles.body}>{life.energy}</Text>
         <Text style={styles.secondary}>{life.stress}</Text>
@@ -90,6 +95,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: space[6], paddingTop: space[6], paddingBottom: space[12], maxWidth: 680, width: "100%", alignSelf: "center" },
   wordmark: { color: colors.text, fontFamily: fonts.label, fontSize: 14, letterSpacing: 4, paddingBottom: space[8], borderBottomColor: colors.rule, borderBottomWidth: 1 },
   header: { paddingVertical: space[8] },
+  headerRow: { flexDirection: "row", alignItems: "flex-end", gap: space[4] },
+  headerText: { flex: 1, minWidth: 0 },
   eyebrow: { color: colors.textSecondary, fontFamily: fonts.label, fontSize: 11, letterSpacing: 2, marginBottom: space[3] },
   title: { color: colors.text, fontSize: 36, lineHeight: 44, fontFamily: fonts.title, marginBottom: space[2] },
   body: { color: colors.text, fontFamily: fonts.body, fontSize: 16, lineHeight: 25 },
