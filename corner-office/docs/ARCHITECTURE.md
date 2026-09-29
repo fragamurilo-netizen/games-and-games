@@ -91,4 +91,10 @@ Faltam (criar quando o sistema precisar): `Ruleset`, `Jurisdiction`, `MediaDeal`
 `presentation/fight/FightReplayPlayer` consome o contrato descrito em
 [FIGHT_VISUALS.md](FIGHT_VISUALS.md), utilizando keyframes JSON compartilhados
 com o Fight Studio web. Valida continuidade, faz seek determinístico e nunca
-resolve ações nem modifica o mundo. O motor e a cena nativa continuam no M1.
+resolve ações nem modifica o mundo. `FightReplayView` entrega o replay ao renderer Canvas original empacotado; no Android o plugin Java hospeda a transmissão offline. Não há um renderer nativo alternativo.
+
+## Serviços da carreira regional
+
+`CareerActions.perform` é a porta comum para UI Godot e adaptador HTTP (`tools/career_session.gd`). `WorldSim` executa cards anunciados, valida disponibilidade antes de qualquer luta e liquida uma vez. `PopulationGenerator` cria o mercado; contratos, matchmaking, economia, rankings e mídia possuem implementação inicial testada. A tabela de módulos acima descreve responsabilidades de longo prazo; o estado detalhado atual está em [HANDOFF.md](HANDOFF.md).
+
+`tools/build_studio_bundle.py` incorpora os arquivos originais do laboratório sem tradução do renderer, fontes e catálogo em gzip determinístico. O replay é inserido como JSON inerte com `<` escapado. `android-studio-plugin` bloqueia navegação externa, acesso a arquivos e rede. JavaScript só pode solicitar o fechamento da transmissão; não tem acesso de escrita à carreira.

@@ -30,3 +30,15 @@ func save_game(slot: String) -> Error:
 
 func has_world() -> bool:
 	return world != null
+
+
+func perform_action(action: String, params: Dictionary={}) -> Dictionary:
+	if world==null:return {"ok":false,"message":"Nenhuma carreira aberta."}
+	var result:=CareerActions.perform(world,action,params)
+	if result.get("ok") and action not in ["state","evaluate"]:
+		var error:=save_game("autosave")
+		if error!=OK:result.message="Decisão aplicada, mas o save falhou. Não feche o jogo."
+	return result
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_APPLICATION_PAUSED and has_world():save_game("autosave")

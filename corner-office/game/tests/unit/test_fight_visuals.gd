@@ -62,3 +62,19 @@ func test_every_clip_has_paired_tracks_and_stable_ids() -> void:
 			check_eq(frames[-1].t, 1, "Fim da animação")
 			for frame: Dictionary in frames:
 				check(frame.has("a") and frame.has("b"), "Dois atletas sincronizados")
+
+func test_replay_blood_requires_recorded_cuts_and_is_seek_stable() -> void:
+	var replay: Dictionary=ContentDB.load_json("replays/sim_exchange.json")
+	var player:=FightReplayPlayer.new()
+	check(player.load_replay(replay),"Blood replay validates")
+	var marks: Array=player.seek_ms(player.duration_ms).stains
+	check(not marks.is_empty(),"Recorded cuts leave mat stains")
+	check_eq(player.seek_ms(0).stains.size(),0,"No future blood at initial frame")
+	check_eq(player.seek_ms(player.duration_ms).stains,marks,"Seeking reproduces exact marks")
+	var dry:=replay.duplicate(true)
+	for event: Dictionary in dry.events:
+		for state: Dictionary in [event.before,event.after]:
+			for id: String in dry.fighter_ids:state.cuts[id]=0.0
+	for id: String in dry.fighter_ids:dry.initial_state.cuts[id]=0.0
+	check(player.load_replay(dry),"Dry replay validates")
+	check_eq(player.seek_ms(player.duration_ms).stains.size(),0,"No blood invented without recorded cuts")

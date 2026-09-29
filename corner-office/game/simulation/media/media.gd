@@ -22,3 +22,14 @@ func publish(world: WorldState, topic: String, facts: Array, entity_ids: Array) 
 func scan_triggers(_world: WorldState) -> Array:
 	# TODO(M1)
 	return []
+
+
+func event_report(world: WorldState, ev: FightEvent) -> NewsItem:
+	for existing: NewsItem in world.news.values():
+		if existing.topic=="event_completed" and ev.id in existing.entity_ids:return existing
+	if ev.status!="completed" or ev.actual.is_empty():return null
+	var item:=publish(world,"event_completed",[Reason.make("EVENT_COMPLETED",ev.fight_ids.size(),{"margin":ev.actual.margin})],[ev.id])
+	var template: Dictionary=ContentDB.load_json("career_tuning.json").story
+	item.headline=str(template.event_completed).format({"event":ev.name})
+	item.body=str(template.event_body).format({"bouts":ev.fight_ids.size(),"revenue":ev.actual.revenue,"margin":ev.actual.margin})
+	return item

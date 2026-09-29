@@ -1,17 +1,66 @@
 class_name Economy
 extends RefCounted
-## Economia (Game Design Bible §12; MMA Bible §16–17).
-## Cada evento tem projeção pré-evento e fechamento pós-evento (P&L).
-## Receitas: media rights, gate, site fee, hospitality, partnerships, licensing, PPV.
-## Custos: bolsas/bônus, produção, arena, viagem/visto, oficiais, marketing, seguro.
+## Event projection/settlement. Game Bible §12; MMA Bible §§16–17.
 
+func _purses(world: WorldState, fight: Fight) -> Dictionary:
+	for r: Dictionary in fight.reasons:
+		if r.code=="PURSE_AGREEMENT": return r.data.purses.duplicate(true)
+	var result: Dictionary={}
+	for id: String in [fight.fighter_a_id,fight.fighter_b_id]:
+		var f: Fighter=world.fighters[id]
+		var c: Contract=world.contracts.get(f.contract_id)
+		result[id]={"show":c.show_money if c else Contracts.market_price(world,f),"win":c.win_bonus if c else 0}
+	return result
 
-func project_event(_world: WorldState, _ev: FightEvent) -> Dictionary:
-	# TODO(M1)
-	return {"revenue": 0, "costs": 0, "margin": 0, "lines": {}, "reasons": []}
-
+func project_event(world: WorldState, ev: FightEvent) -> Dictionary:
+	var cfg: Dictionary=ContentDB.load_json("career_tuning.json").event
+	var org: Organization=world.organizations[ev.organization_id]
+	var fame:=0.0
+	var purses:=0
+	var athletes:=0
+	for id: String in ev.fight_ids:
+		var fight: Fight=world.fights[id]
+		for fighter_id: String in [fight.fighter_a_id,fight.fighter_b_id]:
+			var f: Fighter=world.fighters[fighter_id]
+			fame+=float(f.popularity_by_region.get(ev.region,0))+f.charisma*.12
+			athletes+=1
+		for offer: Dictionary in _purses(world,fight).values(): purses+=int(offer.show+offer.win)
+	var attendance:=clampi(int(cfg.capacity*(.24+org.reputation*.006+fame*.0009)),0,int(cfg.capacity))
+	var revenues: Dictionary={"gate":attendance*int(cfg.ticket_price),"media":int(cfg.media_guarantee),"sponsors":int(cfg.sponsor_base+fame*42)}
+	var costs: Dictionary={"purses":purses,"production":int(cfg.production),"venue":int(cfg.venue_cost),"travel":athletes*int(cfg.travel_per_fighter),"officials":int(cfg.officials),"marketing":int(cfg.marketing)}
+	var revenue:=0;var total_cost:=0
+	for value in revenues.values():revenue+=int(value)
+	for value in costs.values():total_cost+=int(value)
+	return {"revenue":revenue,"costs":total_cost,"margin":revenue-total_cost,"attendance":attendance,"audience":attendance*18+int(fame*40),"lines":{"revenue":revenues,"costs":costs},"reasons":[Reason.make("EVENT_PROJECTION",revenue-total_cost)]}
 
 func settle_event(world: WorldState, ev: FightEvent) -> Dictionary:
-	# TODO(M1): calcular actual, pagar bolsas/bônus e atualizar org.cash.
-	ev.actual = project_event(world, ev)
-	return ev.actual
+	if not ev.actual.is_empty():return ev.actual
+	for id: String in ev.fight_ids:
+		if world.fights[id].status!="completed":return {}
+	var actual:=project_event(world,ev)
+	var paid:=0
+	for id: String in ev.fight_ids:
+		var fight: Fight=world.fights[id]
+		var purses:=_purses(world,fight)
+		for fighter_id: String in [fight.fighter_a_id,fight.fighter_b_id]:
+			paid+=int(purses[fighter_id].show)
+			if fight.winner_id==fighter_id:paid+=int(purses[fighter_id].win)
+			var f: Fighter=world.fighters[fighter_id]
+			var contract: Contract=world.contracts.get(f.contract_id)
+			if contract and contract.active:contract.bouts_remaining=maxi(0,contract.bouts_remaining-1)
+			var rest: Dictionary=ContentDB.load_json("career_tuning.json").medical_rest
+			var rest_days:=int(rest.ko_loser_days if fight.method=="ko_tko" and fight.winner_id!=fighter_id else rest.standard_days)
+			f.medical_suspension_until=GameDate.add_days(ev.date,rest_days)
+	var attendance:=clampi(int(actual.attendance*world.rng.range_f(.82,1.12)),0,int(ContentDB.load_json("career_tuning.json").event.capacity))
+	actual.lines.revenue.gate=attendance*int(ContentDB.load_json("career_tuning.json").event.ticket_price)
+	actual.lines.costs.purses=paid
+	actual.audience+=18*(attendance-int(actual.attendance))
+	actual.attendance=attendance
+	actual.revenue=0;actual.costs=0
+	for amount in actual.lines.revenue.values():actual.revenue+=int(amount)
+	for amount in actual.lines.costs.values():actual.costs+=int(amount)
+	actual.margin=actual.revenue-actual.costs
+	actual.reasons=[Reason.make("EVENT_SETTLED",actual.margin,{"paid_purses":paid})]
+	ev.actual=actual
+	world.organizations[ev.organization_id].cash+=int(actual.margin)
+	return actual

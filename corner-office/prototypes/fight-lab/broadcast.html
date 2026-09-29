@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Corner Office · Transmissão</title>
+<link rel="stylesheet" href="broadcast.css">
+<script src="../face-lab/studio.js"></script><script src="../face-lab/identity.js"></script><script src="replay.js"></script><script src="appearance.js"></script><script src="renderer.js"></script>
+</head><body>
+<header><button id="back" type="button">← CARREIRA</button><strong>CO<span>SPORTS</span></strong><small>FIGHT NIGHT · REPLAY</small></header>
+<main><div class="stage"><canvas id="fight" aria-label="Transmissão da luta simulada"></canvas><div class="scorebug"><strong id="red"></strong><div><span id="round"></span><b id="clock"></b></div><strong id="blue"></strong></div></div>
+<div class="commentary"><strong id="action">Carregando transmissão…</strong><span id="outcome"></span></div>
+<div id="result" hidden></div><div id="error" role="alert" hidden></div>
+<label class="timeline"><span id="time">0:00</span><input id="seek" type="range" min="0" max="1" value="0" aria-label="Momento da luta"></label>
+<div class="controls"><button id="play" type="button">REPRODUZIR</button><select id="speed" aria-label="Velocidade"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option></select><button id="instant" type="button">RESULTADO</button><select id="camera" aria-label="Câmera"><option value="broadcast">TV</option><option value="detail">Próxima</option><option value="tactical">Arena</option></select></div>
+</main>
+<!-- Build tool replaces the scripts below with a single offline payload. -->
+<script src="broadcast.js"></script></body></html>

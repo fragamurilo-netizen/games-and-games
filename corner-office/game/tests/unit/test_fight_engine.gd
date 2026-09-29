@@ -11,8 +11,8 @@ func _bout(world: WorldState) -> Fight:
 
 func test_seed_replay_and_resolution_are_immutable() -> void:
 	var engine := FightEngine.new()
-	var w1 := WorldGenerator.generate(2027,"regional_promoter")
-	var w2 := WorldGenerator.generate(2027,"regional_promoter")
+	var w1 := WorldGenerator.generate(2027,"regional_promoter",false)
+	var w2 := WorldGenerator.generate(2027,"regional_promoter",false)
 	var f1 := engine.simulate(w1,_bout(w1))
 	var f2 := engine.simulate(w2,_bout(w2))
 	check_eq(f1.to_dict(),f2.to_dict(),"Same seed, same entire historical fight")
@@ -55,7 +55,7 @@ func test_judges_prioritize_effect_not_empty_control() -> void:
 	check_eq(judge.score_round(log,rng),judge.score_round(log,rng),"Judging does not roll a random winner")
 
 func test_invalid_bookings_do_not_mutate_fighters() -> void:
-	var world := WorldGenerator.generate(7,"regional_promoter")
+	var world := WorldGenerator.generate(7,"regional_promoter",false)
 	var fight := _bout(world)
 	fight.fighter_b_id = fight.fighter_a_id
 	var original: Dictionary = world.fighters.ftr_carter.to_dict()

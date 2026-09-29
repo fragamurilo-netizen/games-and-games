@@ -13,24 +13,27 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 
 ## M1 — Loop jogável
 
-- [ ] `WorldGenerator`: 100+ lutadores procedurais coerentes por região/estilo + 3 organizações ativas
+- [x] `WorldGenerator`: 141 atletas, elenco regional e free agents
+- [ ] Organizações rivais ativas (elencos existem; IA de eventos pendente)
 - [x] Protótipo da biblioteca de rostos (`prototypes/face-lab/`)
 - [x] Fight Studio: catálogo 2D pareado, arenas das sete organizações, replays autorais e sampler Godot ([guia](FIGHT_VISUALS.md))
 - [x] Perfis de combate do roster canônico e adaptador de eventos reais para o Fight Studio
-- [ ] Arte final das animações e renderer nativo
+- [x] Reutilização do renderer original do Fight Studio em pacote offline para Android
+- [ ] Arte final, desempenho da transmissão e QA em aparelho
 - [ ] `FaceGenerator`: portar o protótipo para Godot (e/ou integrar o gerador do Mais Uma Rodada — auditar licença/estrutura primeiro)
-- [ ] Tela Lutadores: roster, perfil (bottom sheet), rankings
-- [ ] `Contracts`: oferta e renovação com BATNA simples
-- [ ] Tela Eventos: montar evento com 6–10 lutas
-- [ ] `Matchmaking`: sporting fit / acceptance / commercial fit + recusa com reason codes
+- [x] Tela Lutadores: roster, perfil (página; bottom sheet pendente), rankings
+- [x] `Contracts`: oferta, contraproposta por preço e renovação
+- [ ] BATNA com ofertas rivais e memória
+- [x] Tela Eventos: montar evento com 6–10 lutas
+- [x] `Matchmaking`: sporting fit / acceptance / commercial fit + recusa com reason codes
 - [x] Protótipo `FightEngine` + `Judge`: trocas, dano, KO/TKO/submissão, decisões e scorecards
-- [ ] Tela de luta: round a round em 1x/2x/5x/instantâneo
-- [ ] `Rankings`: atualização pós-evento + snapshots
-- [ ] `Economy`: P&L projetado e real
-- [ ] `Media`: notícias com triggers factuais
-- [ ] Avançar semana e repetir
+- [x] Tela de luta: round a round em 1x/2x/5x/instantâneo
+- [x] `Rankings`: atualização pós-evento + snapshots (fórmula inicial; WCI completo pendente)
+- [x] `Economy`: P&L projetado e real
+- [x] `Media`: notícias com triggers factuais
+- [x] Avançar semana e repetir
 - [ ] Testes de simulação: milhares de lutas (distribuição KO/sub/decisão, upsets > 0)
-- [ ] Screenshots portrait/landscape
+- [x] Screenshots portrait/landscape
 
 ## M2 — Mercado vivo
 
@@ -60,3 +63,5 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 - [ ] Direitos de mídia
 - [ ] Realism tiers (Accessible / Promoter / Simulation)
 - [ ] Modding (bancos externos)
+
+Estado detalhado e verificações: [HANDOFF.md](HANDOFF.md). M1 não está encerrado.

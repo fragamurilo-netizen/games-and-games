@@ -2,6 +2,8 @@ extends SceneTree
 ## godot --headless --path game -s res://tools/preview_fight.gd -- input.json output.json
 ## Laboratory matchup: outside career eligibility/matchmaking, same combat engine.
 func _initialize() -> void:
+	# Runtime load: CLI entry scripts are parsed before autoload identifiers.
+	var generator: GDScript=load("res://simulation/world/world_generator.gd")
 	var args := OS.get_cmdline_user_args()
 	if args.size() != 2:
 		push_error("Expected input.json output.json")
@@ -11,7 +13,7 @@ func _initialize() -> void:
 	if not config is Dictionary:
 		quit(1)
 		return
-	var world := WorldGenerator.generate(int(config.get("seed",2027)),"regional_promoter")
+	var world: WorldState = generator.generate(int(config.get("seed",2027)),"regional_promoter",false)
 	var fight := Fight.new()
 	fight.id = "lab_%d" % world.seed_value
 	fight.fighter_a_id = str(config.get("red","ftr_carter"))

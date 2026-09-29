@@ -4,7 +4,7 @@
 
 Simulador mobile (Android primeiro) em que o jogador preside uma organização de MMA: matchmaking, contratos, eventos, finanças, mídia, rankings, scouting e expansão. As lutas são simuladas; o jogo está nas decisões antes e depois delas.
 
-**Status:** motor de combate e laboratórios visuais funcionais; integração do loop de carreira e renderer nativo ainda em desenvolvimento. Próximo passo: Milestone 1 (ver [docs/ROADMAP.md](docs/ROADMAP.md)).
+**Status:** carreira regional jogável (contratos → card → luta → finanças/rankings → próxima noite), menus Godot para Android e transmissão original do Fight Studio. Integração offline Android em validação; veja [continuidade](docs/HANDOFF.md) e [identidade visual](docs/VISUAL_IDENTITY.md). M1 ainda exige QA em aparelho e testes de escala.
 
 ## Documentos (leia antes de codar)
 
@@ -30,11 +30,14 @@ Os `.docx` originais das bíblias estão em `docs/bible/`. Os `.md` foram conver
 
 - **Godot 4.4** (GDScript), renderer *Compatibility* (roda em Android de entrada).
 - Alvo: Android (arm64-v8a + armeabi-v7a), minSdk 21 / targetSdk 34. Portrait + landscape.
-- Sem dependências externas / addons.
+- Módulo Android próprio `CornerOfficeStudio` para hospedar o Canvas original em WebView offline. Fontes locais SIL OFL.
 
 ## Rodando
 
 ```bash
+# Atualize a transmissão offline após editar o Fight Studio
+python tools/build_studio_bundle.py
+
 # Editor
 godot --path game --editor
 
@@ -81,3 +84,7 @@ Todo ponto pendente está marcado no código como `TODO(M1)`, `TODO(M2)`… (mil
 ```bash
 grep -rn "TODO(M" game/
 ```
+
+## Carreira no navegador (desenvolvimento)
+
+`python tools/fight_lab_server.py --godot /caminho/absoluto/godot --port 8768` e abra `http://127.0.0.1:8768/prototypes/promoter/`. As regras e resultados continuam no Godot; o servidor preserva o save anterior em caso de falha. [Continuidade e próximos passos](docs/HANDOFF.md).

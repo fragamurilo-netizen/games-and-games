@@ -13,7 +13,7 @@ Resumo operacional de Game Design Bible §15, §16 e §24. Implementado em `game
 | Tabelas e scoreboards esportivos | Bento grid |
 | Acento metálico/dourado raro | Dourado "luxo" em excesso |
 
-Mistura de broadcast esportivo, bastidores de promoção e sala de matchmaking. Nada que lembre UFC ou outras promoções reais.
+Mistura de broadcast esportivo, bastidores de promoção e sala de matchmaking. Por orientação do usuário, estudar a linguagem dos menus de UFC Undisputed 3 (2012); usar marca, arte e universo próprios. Ver [pesquisa visual](docs/VISUAL_IDENTITY.md).
 
 ## Cores (`Tokens`)
 
@@ -30,8 +30,8 @@ Mistura de broadcast esportivo, bastidores de promoção e sala de matchmaking. 
 
 ## Tipografia
 
-- Display: família condensada forte (placares, nomes de evento, rankings). **A definir** — colocar em `game/ui/theme/fonts/` (licença OFL ou similar).
-- UI/Data: sans humanista legível com numerais tabulares. **A definir.**
+- Display: **Chakra Petch Bold**, angular, incorporada em `game/ui/theme/fonts/` com licença SIL OFL. Alternativa próxima autorizada; não afirmar que é a fonte original do Undisputed 3.
+- UI/Data: **Chakra Petch Medium**, local/offline, com acentos em português. Barlow não faz parte da identidade.
 - CAIXA ALTA só em placar, categoria, round e micro-labels.
 
 ## Navegação
@@ -57,3 +57,7 @@ Mistura de broadcast esportivo, bastidores de promoção e sala de matchmaking. 
 
 - Monograma **CO**: dois blocos que se encaram separados por uma linha central (divisória de fight card). Sem luvas, octógono literal ou silhuetas de lutador. `game/icon.svg` é um **placeholder** desse conceito.
 - Aplicações a criar: logo + monograma, app icon, splash, key art, template de fight card, breaking news, scoreboard, cinturões fictícios por organização, ícones de categorias de peso, banners de evento, social cards.
+
+## Implementado
+
+Menu inicial com key art própria, cabeçalho recortado, cinco abas, tipografia local e transmissão CO Sports. A simulação visual é sempre o Fight Studio original, inclusive no Android via pacote offline. Ver `docs/VISUAL_IDENTITY.md` para referências e `docs/HANDOFF.md` para limites reais.

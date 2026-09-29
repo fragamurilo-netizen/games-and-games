@@ -69,7 +69,7 @@
     return appearances[id]?.name || log.fighters[id]?.name || id;
   }
   function activeArena() {
-    return arenas.arenas.find((a) => a.id === log.organization_id);
+    return FightReplay.arenaFor(log, arenas);
   }
   function buildAppearances() {
     appearances = {};
@@ -88,6 +88,9 @@
       lastEvent = -1;
       $("verdict").hidden = true;
       message("");
+      for (const o of [...$("arena").options]) if (!arenas.arenas.some(a => a.id === o.value)) o.remove();
+      if (![...$("arena").options].some(o => o.value === log.organization_id))
+        option($("arena"), log.organization_id, activeArena().name);
       $("arena").value = log.organization_id;
       $("seek").max = player.duration;
       $("source").textContent =
@@ -446,7 +449,7 @@
     e.after.top_id = FightReplay.ground.has(e.after.position)
       ? state.top_id || "red"
       : null;
-    const a = arenas.arenas.find((a) => a.id === $("arena").value);
+    const a = arenas.arenas.find((a) => a.id === $("arena").value) || arenas.arenas.find(a => a.id === log.arena_template_id);
     const r = {
       version: 1,
       id: "technique_preview",
@@ -609,6 +612,18 @@
     selectClip(catalog.clips.find((c) => c.id === "jab"));
     filter();
     syncPlay();
+    const careerFight = new URLSearchParams(location.search).get("career_fight");
+    if (careerFight) {
+      const response = await fetch("/api/career", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"replay",fight_id:careerFight})});
+      const result = await response.json();
+      if (!response.ok || !result.replay) throw new Error(result.error || "Replay indisponível.");
+      load(result.replay);
+      document.body.classList.add("broadcast-mode");
+      $("broadcast-mode").textContent = "Voltar ao laboratório";
+      $("broadcast-mode").setAttribute("aria-pressed", "true");
+      const back = document.createElement("a"); back.href="../promoter/"; back.textContent="← Voltar à carreira";
+      $("broadcast-mode").before(back);
+    }
     requestAnimationFrame(tick);
   } catch (e) {
     message(

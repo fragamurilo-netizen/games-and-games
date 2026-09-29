@@ -12,7 +12,7 @@ var country := ""
 var region := ""
 var jurisdiction_id := ""
 var fight_ids: Array = []      # ordem = ordem do card (último = main event)
-var status := "planned"        # planned | announced | completed | cancelled
+var status := "planned"        # planned | announced | postponed | completed | cancelled
 
 var projected := {}            # {gate, audience, purses, production, sponsors, margin}
 var actual := {}

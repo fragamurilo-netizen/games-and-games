@@ -4,6 +4,8 @@ extends MarginContainer
 ## `refresh()` é chamado sempre que a aba fica visível.
 
 var body: VBoxContainer
+var feedback:=""
+var _working:=false
 
 
 func _init() -> void:
@@ -28,15 +30,19 @@ func build() -> void:
 
 func refresh() -> void:
 	for c in body.get_children():
+		body.remove_child(c)
 		c.queue_free()
 	add_heading(title())
+	if not feedback.is_empty():add_text(feedback,Tokens.MUTED)
 	build()
 
 
 func add_heading(text: String) -> Label:
 	var l := Label.new()
 	l.text = text
+	l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	l.add_theme_font_size_override("font_size", Tokens.FONT_TITLE)
+	l.add_theme_font_override("font",Tokens.DISPLAY_FONT)
 	body.add_child(l)
 	return l
 
@@ -52,3 +58,42 @@ func add_text(text: String, color: Color = Tokens.INK) -> Label:
 
 func add_todo(text: String) -> void:
 	add_text("TODO — " + text, Tokens.MUTED)
+
+
+func add_button(text: String, callback: Callable) -> Button:
+	var button:=Button.new()
+	button.text=text;button.custom_minimum_size.y=Tokens.TOUCH_MIN
+	button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	button.pressed.connect(callback);body.add_child(button)
+	return button
+
+func add_input(label: String, value: String="") -> LineEdit:
+	add_text(label,Tokens.MUTED)
+	var input:=LineEdit.new();input.text=value
+	input.custom_minimum_size.y=Tokens.TOUCH_MIN;body.add_child(input)
+	return input
+
+func add_number(label: String, value: float, minimum: float, maximum: float) -> SpinBox:
+	add_text(label,Tokens.MUTED)
+	var input:=SpinBox.new();input.min_value=minimum;input.max_value=maximum;input.value=value
+	input.custom_minimum_size.y=Tokens.TOUCH_MIN;body.add_child(input)
+	return input
+
+func add_select(label: String, options: Array, selected: String="") -> OptionButton:
+	add_text(label,Tokens.MUTED)
+	var input:=OptionButton.new();input.custom_minimum_size.y=Tokens.TOUCH_MIN
+	input.fit_to_longest_item=false;input.clip_text=true
+	for option: Dictionary in options:
+		input.add_item(str(option.label));input.set_item_metadata(input.item_count-1,option.id)
+		if str(option.id)==selected:input.select(input.item_count-1)
+	body.add_child(input);return input
+
+func run_action(action: String, params: Dictionary={}) -> Dictionary:
+	if _working:return {}
+	_working=true;feedback="Atualizando a carreira…"
+	for node in body.get_children():
+		if node is BaseButton:node.disabled=true
+	await get_tree().process_frame
+	var result:=Game.perform_action(action,params)
+	feedback=CareerText.result(result);_working=false
+	return result

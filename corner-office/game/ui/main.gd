@@ -19,9 +19,13 @@ var _layout: BoxContainer
 var _screens := {}
 var _buttons := {}
 var _current := ""
+var _stage: VBoxContainer
+var _header: BrandBanner
+var _safe: MarginContainer
 
 
 func _ready() -> void:
+	get_tree().quit_on_go_back=false
 	theme = Tokens.build_theme()
 	var bg := ColorRect.new()
 	bg.color = Tokens.CANVAS
@@ -39,12 +43,25 @@ func _ready() -> void:
 		_content.add_child(screen)
 		_screens[tab.id] = screen
 
+	_stage=VBoxContainer.new()
+	_stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_stage.add_theme_constant_override("separation",0)
+	_safe=MarginContainer.new();_safe.set_anchors_and_offsets_preset(PRESET_FULL_RECT);add_child(_safe);_safe.add_child(_stage)
+	_header=BrandBanner.new();_header.custom_minimum_size.y=78
+	_stage.add_child(_header)
 	if not Game.has_world():
-		Game.new_game(Time.get_ticks_usec())
+		if Game.load_game("autosave")!=OK:
+			Game.new_game(Time.get_ticks_usec())
+			Game.save_game("autosave")
 
 	get_viewport().size_changed.connect(_rebuild_layout)
+	get_viewport().size_changed.connect(_update_safe_area)
+	EventBus.day_advanced.connect(func(_date):_refresh_header())
+	EventBus.world_loaded.connect(_refresh_header)
+	_update_safe_area()
 	_rebuild_layout()
 	show_tab("home")
+	if not OS.get_cmdline_user_args().has("capture"):_open_menu()
 
 
 func show_tab(id: String) -> void:
@@ -55,6 +72,7 @@ func show_tab(id: String) -> void:
 	_current = id
 	_screens[id].visible = true
 	_screens[id].refresh()
+	_refresh_header()
 	for tab_id in _buttons:
 		_buttons[tab_id].button_pressed = tab_id == id
 
@@ -72,20 +90,21 @@ func _rebuild_layout() -> void:
 		_layout.remove_child(_content)
 		_layout.queue_free()
 	_layout = HBoxContainer.new() if landscape else VBoxContainer.new()
-	_layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_layout.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	_layout.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_layout.add_theme_constant_override("separation", 0)
-	add_child(_layout)
+	_stage.add_child(_layout)
 
 	_nav = VBoxContainer.new() if landscape else HBoxContainer.new()
 	_nav.add_theme_constant_override("separation", 0)
 	_buttons.clear()
 	for tab in TABS:
 		var b := Button.new()
-		b.text = tab.label
+		b.text = tab.label.to_upper()
 		b.toggle_mode = true
-		b.custom_minimum_size = Vector2(160 if landscape else 0, Tokens.TOUCH_MIN)
+		b.custom_minimum_size = Vector2(168 if landscape else 0, Tokens.TOUCH_MIN)
 		b.size_flags_horizontal = Control.SIZE_FILL if landscape else Control.SIZE_EXPAND_FILL
-		b.add_theme_font_size_override("font_size", Tokens.FONT_SMALL)
+		b.add_theme_font_size_override("font_size", 18 if not landscape else Tokens.FONT_SMALL)
 		b.pressed.connect(show_tab.bind(tab.id))
 		b.button_pressed = tab.id == _current
 		_nav.add_child(b)
@@ -97,3 +116,30 @@ func _rebuild_layout() -> void:
 	else:
 		_layout.add_child(_content)
 		_layout.add_child(_nav)
+
+
+func _open_menu() -> void:
+	var menu:=GameMenu.new();menu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(menu)
+	menu.continued.connect(func():_current="";show_tab("home"))
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_WM_GO_BACK_REQUEST:
+		if get_tree().root.get_children().any(func(node):return node is FightReplayView):return
+		get_viewport().set_input_as_handled()
+		if not get_children().any(func(node):return node is GameMenu):_open_menu()
+
+
+func _refresh_header() -> void:
+	if _header and Game.has_world():
+		_header.subtitle=Game.world.player_org().short_name+" / "+GameDate.format(Game.world.date)+" / CARREIRA REGIONAL"
+		_header.queue_redraw()
+
+func _update_safe_area() -> void:
+	if OS.get_name()!="Android":return
+	var safe:=DisplayServer.get_display_safe_area()
+	var window:=DisplayServer.window_get_size()
+	var scale:=get_viewport_rect().size/Vector2(window)
+	_safe.add_theme_constant_override("margin_left",int(safe.position.x*scale.x))
+	_safe.add_theme_constant_override("margin_top",int(safe.position.y*scale.y))
+	_safe.add_theme_constant_override("margin_right",int(maxi(0,window.x-safe.end.x)*scale.x))
+	_safe.add_theme_constant_override("margin_bottom",int(maxi(0,window.y-safe.end.y)*scale.y))

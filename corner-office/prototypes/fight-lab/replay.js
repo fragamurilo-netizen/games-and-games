@@ -63,6 +63,17 @@
       return c.to_position;
     return e.before.position;
   }
+  function arenaFor(replay, arenas) {
+    const known = arenas.arenas.find(a => a.id === replay.organization_id);
+    if (known) return known;
+    const template = replay.organization_id === "org_player" &&
+      arenas.arenas.find(a => a.id === replay.arena_template_id);
+    if (!template || !replay.organization) return null;
+    return {...template, id: replay.organization_id,
+      name: String(replay.organization.name || ""),
+      short_name: String(replay.organization.short_name || ""),
+      city: String(replay.organization.city || "")};
+  }
   function validate(replay, catalog, arenas) {
     const errors = [];
     const check = (condition, message) => {
@@ -84,7 +95,7 @@
       "Dois atletas distintos são obrigatórios.",
     );
     if (!Array.isArray(ids) || ids.length !== 2) return errors;
-    const arena = arenas.arenas.find((x) => x.id === replay.organization_id);
+    const arena = arenaFor(replay, arenas);
     check(!!arena, "Organização sem arena.");
     if (arena)
       check(
@@ -304,7 +315,7 @@
       this.stains = bloodMarks(
         this.log,
         this.clips,
-        arenas.arenas.find((a) => a.id === replay.organization_id),
+        arenaFor(replay, arenas),
       );
       this.ends = this.log.events.map((e) => {
         const c = this.clips.get(e.technique_id),
@@ -469,6 +480,7 @@
   return {
     Player,
     bloodMarks,
+    arenaFor,
     validate,
     expectedPosition,
     mixPose,

@@ -1,0 +1,276 @@
+{
+  "population": 128,
+  "player_divisions": [
+    "m_lightweight",
+    "m_welterweight",
+    "w_flyweight",
+    "w_bantamweight"
+  ],
+  "player_organization": {
+    "name": "Nova Promoção",
+    "short_name": "NP",
+    "base_country": "BR",
+    "base_city": "São Paulo",
+    "arena_template_id": "org_frontline"
+  },
+  "event": {
+    "name": "Noite de Combate",
+    "venue": "Arena Municipal",
+    "city": "São Paulo",
+    "country": "BR",
+    "region": "brazil",
+    "minimum_bouts": 6,
+    "maximum_bouts": 10,
+    "notice_days": 42,
+    "production": 48000,
+    "venue_cost": 22000,
+    "travel_per_fighter": 900,
+    "officials": 9500,
+    "marketing": 12000,
+    "ticket_price": 65,
+    "capacity": 2800,
+    "media_guarantee": 55000,
+    "sponsor_base": 11000
+  },
+  "contracts": {
+    "minimum_show": 900,
+    "skill_multiplier": 24,
+    "popularity_multiplier": 55,
+    "win_bonus_ratio": 0.5,
+    "term_days": 540,
+    "bouts": 4
+  },
+  "division_height": {
+    "m_lightweight": 178,
+    "m_welterweight": 182,
+    "w_flyweight": 166,
+    "w_bantamweight": 170,
+    "m_middleweight": 185,
+    "m_heavyweight": 192,
+    "m_featherweight": 173,
+    "w_strawweight": 160
+  },
+  "names": [
+    {
+      "country": "BR",
+      "region": "brazil",
+      "city": "Curitiba",
+      "male": [
+        "Caio",
+        "Bruno",
+        "Lucas",
+        "Renan",
+        "Diego",
+        "André",
+        "Vitor",
+        "Igor"
+      ],
+      "female": [
+        "Lara",
+        "Marina",
+        "Bianca",
+        "Luiza",
+        "Camila",
+        "Renata",
+        "Aline",
+        "Yasmin"
+      ],
+      "last": [
+        "Duarte",
+        "Nunes",
+        "Almeida",
+        "Teixeira",
+        "Pereira",
+        "Moura",
+        "Batista",
+        "Vieira"
+      ]
+    },
+    {
+      "country": "US",
+      "region": "usa",
+      "city": "Phoenix",
+      "male": [
+        "Evan",
+        "Miles",
+        "Dylan",
+        "Logan",
+        "Adrian",
+        "Noah",
+        "Owen",
+        "Tyler"
+      ],
+      "female": [
+        "Nora",
+        "Chloe",
+        "Maya",
+        "Lauren",
+        "Avery",
+        "Brooke",
+        "Stella",
+        "Harper"
+      ],
+      "last": [
+        "Mercer",
+        "Hayes",
+        "Bennett",
+        "Foster",
+        "Quinn",
+        "Ellis",
+        "Sullivan",
+        "Brooks"
+      ]
+    },
+    {
+      "country": "JP",
+      "region": "japan_korea",
+      "city": "Osaka",
+      "male": [
+        "Ren",
+        "Haruto",
+        "Kaito",
+        "Daichi",
+        "Yuto",
+        "Sota",
+        "Riku",
+        "Toma"
+      ],
+      "female": [
+        "Hana",
+        "Mei",
+        "Yui",
+        "Rina",
+        "Sakura",
+        "Aoi",
+        "Mio",
+        "Emi"
+      ],
+      "last": [
+        "Mori",
+        "Takeda",
+        "Ishida",
+        "Okada",
+        "Ueda",
+        "Fujita",
+        "Kondo",
+        "Arai"
+      ]
+    },
+    {
+      "country": "MX",
+      "region": "mexico",
+      "city": "Monterrey",
+      "male": [
+        "Emilio",
+        "Javier",
+        "Diego",
+        "Sergio",
+        "Luis",
+        "Marco",
+        "Hugo",
+        "Iván"
+      ],
+      "female": [
+        "Valeria",
+        "Lucía",
+        "Elena",
+        "Isabel",
+        "Daniela",
+        "Camila",
+        "Renata",
+        "Abril"
+      ],
+      "last": [
+        "Vargas",
+        "Mendoza",
+        "Navarro",
+        "Aguilar",
+        "Cruz",
+        "Salinas",
+        "Ortega",
+        "Serrano"
+      ]
+    },
+    {
+      "country": "GB",
+      "region": "europe",
+      "city": "Manchester",
+      "male": [
+        "Callum",
+        "Oliver",
+        "Finn",
+        "Arthur",
+        "Lewis",
+        "Jamie",
+        "Oscar",
+        "Toby"
+      ],
+      "female": [
+        "Freya",
+        "Alice",
+        "Ruby",
+        "Grace",
+        "Imogen",
+        "Holly",
+        "Beth",
+        "Iris"
+      ],
+      "last": [
+        "Ward",
+        "Palmer",
+        "Holt",
+        "Clarke",
+        "Walsh",
+        "Bishop",
+        "Reeves",
+        "Shaw"
+      ]
+    },
+    {
+      "country": "KZ",
+      "region": "central_asia",
+      "city": "Almaty",
+      "male": [
+        "Arman",
+        "Daniyar",
+        "Nurlan",
+        "Samat",
+        "Timur",
+        "Aslan",
+        "Ruslan",
+        "Marat"
+      ],
+      "female": [
+        "Aida",
+        "Alina",
+        "Dana",
+        "Amina",
+        "Kamila",
+        "Zarina",
+        "Mira",
+        "Saule"
+      ],
+      "last": [
+        "Akhmetov",
+        "Karimov",
+        "Sadykov",
+        "Omarov",
+        "Bekov",
+        "Isayev",
+        "Nuriev",
+        "Aripov"
+      ]
+    }
+  ],
+  "story": {
+    "event_completed": "Noite encerrada: {event}",
+    "event_body": "{bouts} lutas concluídas. Receita de US$ {revenue}; resultado operacional de US$ {margin}.",
+    "contract_signed": "{fighter} assina com {organization}",
+    "event_postponed": "Evento adiado: {event}",
+    "postponed_body": "O card precisa de revisão: um atleta ficou indisponível. Reagende a noite ou substitua o confronto."
+  },
+  "medical_rest": {
+    "standard_days": 28,
+    "ko_loser_days": 60
+  }
+}

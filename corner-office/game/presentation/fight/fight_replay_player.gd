@@ -12,6 +12,7 @@ var _clips: Dictionary = {}
 var _ends: Array = []
 var _catalog: Dictionary = {}
 var _arenas: Dictionary = {}
+var _stains: Array=[]
 
 func _init() -> void:
 	_catalog = ContentDB.load_json("fight_visuals.json")
@@ -24,6 +25,9 @@ func load_replay(data: Dictionary) -> bool:
 	if not errors.is_empty():
 		return false
 	_log = data.duplicate(true)
+	for arena: Dictionary in _arenas.arenas:
+		if arena.id==data.organization_id or arena.id==data.get("arena_template_id"):
+			_stains=FightBlood.build(data,_catalog,arena)
 	_ends.clear()
 	duration_ms = 0.0
 	for event: Dictionary in _log.events:
@@ -43,7 +47,7 @@ func validate(data: Dictionary) -> Array[String]:
 		return out
 	var arena := {}
 	for profile: Dictionary in _arenas.arenas:
-		if profile.id == data.get("organization_id"):
+		if profile.id == data.get("organization_id") or (data.get("organization_id") == "org_player" and profile.id == data.get("arena_template_id")):
 			arena = profile
 	if arena.is_empty() or arena.get("ruleset_id") != data.get("ruleset_id"):
 		out.append("Arena/ruleset mismatch")
@@ -184,7 +188,7 @@ func seek_ms(milliseconds: float) -> Dictionary:
 	for id: String in _log.fighter_ids:
 		poses[id].facing = 1 if id == _log.fighter_ids[0] else -1
 		poses[id].bend = [-poses[id].facing, poses[id].facing, poses[id].facing, poses[id].facing]
-	return {"time": time, "event_index": index, "event": event.duplicate(true), "clip_id": clip.id, "progress": progress, "poses": poses, "state": (event.after if progress >= 1.0 else event.before).duplicate(true), "finished": time >= duration_ms, "result": _log.get("result", {}).duplicate(true) if time >= duration_ms and _log.get("result") is Dictionary else null}
+	return {"stains":_stains.filter(func(mark):return mark.at_ms<=time).duplicate(true),"time": time, "event_index": index, "event": event.duplicate(true), "clip_id": clip.id, "progress": progress, "poses": poses, "state": (event.after if progress >= 1.0 else event.before).duplicate(true), "finished": time >= duration_ms, "result": _log.get("result", {}).duplicate(true) if time >= duration_ms and _log.get("result") is Dictionary else null}
 
 static func _blend(a: Variant, b: Variant, t: float) -> Variant:
 	if a is Dictionary:

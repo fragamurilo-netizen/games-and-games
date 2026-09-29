@@ -9,7 +9,7 @@ func test_varied_fights_finish_and_have_valid_replays() -> void:
 	var orgs := ["org_crown","org_ascend","org_vale","org_shinsei","org_frontline","org_iron","org_pfl"]
 	var observed := {}
 	for seed_value in 160:
-		var world := WorldGenerator.generate(seed_value,"regional_promoter")
+		var world := WorldGenerator.generate(seed_value,"regional_promoter",false)
 		var pair: Array = pairs[seed_value % pairs.size()]
 		var event := FightEvent.new()
 		event.id = "event_test"
