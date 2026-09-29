@@ -66,10 +66,26 @@ func _career() -> void:
 	AppSettings.tutorial_done = true
 	GameManager.start_career(w, club.id, "Teste", GameWorld.DIFF_NORMAL, 5)
 	print("dia %d · comps %s" % [w.season.day, str(YouthCups.keys(w))])
-	for i in 12:
+	var full := "--full" in OS.get_cmdline_user_args()
+	var t0 := Time.get_ticks_msec()
+	var i := 0
+	while not GameManager.season_over() and (full or i < 12):
 		GameManager.play_instant()
+		GameManager.advance_to_end()
 		var d := YouthCups.comp(w, "cup20")
-		print("rodada %d · dia %d · copinha: %s · próxima %d" % [i, w.season.day, YouthCups.result_text(w, d), YouthCups.next_slot(w, d)])
+		if i % 10 == 0:
+			print("rodada %d · dia %d · copinha: %s · próxima %d" % [i, w.season.day, YouthCups.result_text(w, d), YouthCups.next_slot(w, d)])
+		i += 1
+	if full:
+		print("temporada jogada em %d s" % ((Time.get_ticks_msec() - t0) / 1000))
+		var sm := GameManager.end_season()
+		print("fim: base %s" % str(sm.get("youth_league", {}).get("cups", [])))
+		print("novas copas: %s · ano %d" % [str(YouthCups.keys(w)), w.year])
+		# Salva e carrega (formato do save com os campos novos)
+		GameManager.save_blocking()
+		print("save ok; carregando...")
+		print("carregou: %s" % str(GameManager.load_career(GameManager.slot)))
+		print("comps após carregar: %s" % str(YouthCups.keys(GameManager.world)))
 	get_tree().quit()
 
 
