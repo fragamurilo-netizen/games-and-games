@@ -40,12 +40,12 @@ static var shift: float = 0.0
 
 ## Overall "percebido" pelo mercado: jovens valem pelo que podem virar (com ruído de avaliação).
 static func perceived_rating(p: Player, year: int) -> float:
-	var age := p.age(year)
 	var eff := p.ovr_f
-	if age <= 23:
-		var pot := float(p.potential) + p.scout_noise * 0.5
-		var w := clampf((24 - age) * 0.09, 0.0, 0.55)
-		eff = maxf(eff, eff + (pot - eff) * w)
+	if p.age(year) <= 23:
+		var estimate := TalentAssessment.projection(p, year)
+		var premium := maxf(0.0, float(estimate["center"]) - eff)
+		var belief := 0.22 + 0.20 * float(estimate["confidence"])
+		eff += minf(5.0, premium * belief)
 	return eff - shift
 
 
@@ -129,7 +129,7 @@ static func position_factor(pos: int) -> float:
 static func market_value(p: Player, year: int) -> int:
 	var eff := perceived_rating(p, year)
 	var v := VALUE_BASE * pow(VALUE_GROWTH, eff - 40.0)
-	v *= age_factor(p.age(year))
+	v *= age_factor(p.age(year) - (2 if p.position == Pos.GK else 0))
 	# Garoto que já é craque vale uma fortuna (o mercado paga os anos de auge pela frente)
 	var ag := p.age(year)
 	if ag <= 23:
@@ -140,6 +140,7 @@ static func market_value(p: Player, year: int) -> int:
 	# Forma recente pesa um pouco (quem está voando fica mais caro).
 	v *= clampf(1.0 + (p.form() - 6.5) * 0.08, 0.85, 1.2)
 	v *= season_factor(p)
+	v *= clampf(1.0 - p.injury_weeks * 0.018, 0.62, 1.0)
 	return round_value(v)
 
 

@@ -262,7 +262,7 @@ static func _invest(world: GameWorld, c: Club, rng: RandomNumberGenerator) -> bo
 	var amount := Valuation.round_value(FinanceManager.expected_revenue(c) * rng.randf_range(0.06, 0.15))
 	if amount <= 0:
 		return false
-	c.transfer_budget += amount
+	BoardBudget.grant(world,c,amount,"Reforço de verba aprovado","world_pulse:"+str(world.current_turn()))
 	c.affairs["inv"] = world.year
 	var own := WorldEvents.owner_of(world, c.id)
 	var who := String(own.get("who", "")) if not own.is_empty() else "A diretoria"

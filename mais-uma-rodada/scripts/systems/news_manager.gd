@@ -108,7 +108,7 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 					var opp := world.club(f.opponent_of(club.id))
 					_with_score(post(world, "hattrick", {"player": _pname(p), "club": club.short_name, "shirt": p.shirt,
 						"score": "%d x %d" % [mine, theirs], "opponent": opp.short_name}, club.id, p.id, imp), f, world)
-				if g >= 1 and p.career_goals == g and p.age(world.year) <= 21 and club.id == user.id:
+				if g >= 1 and p.career_goals == g and p.age(world.year) <= 21 and club.id == user.id and not RealWorldData.is_real(world,p.id):
 					post(world, "primeiro_gol", {"player": _pname(p), "age": p.age(world.year), "club": club.short_name}, club.id, p.id, NewsEvent.IMP_HIGH)
 	if not league_day:
 		return

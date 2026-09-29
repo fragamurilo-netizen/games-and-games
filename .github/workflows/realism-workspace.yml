@@ -1,0 +1,33 @@
+name: Realism integration workspace
+on:
+  push:
+    branches: [codex/realism-integration-0.5.1-20260929]
+    paths: [.github/workflows/realism-workspace.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Package reviewed sources and runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p workspace-artifact
+          git rev-parse HEAD > workspace-artifact/workspace-commit.txt
+          git log --format='%h %cs %s' 4f90c3eec4c4cc891f6e4d9710bf7a681742a838..39dc959cea476dceba7c98b7c187662522a18eaa > workspace-artifact/recent-changes.txt
+          git archive HEAD mais-uma-rodada .github docs/DEPTH-0.5.0.md 2>/dev/null | gzip > workspace-artifact/latest.tar.gz || git archive HEAD mais-uma-rodada .github | gzip > workspace-artifact/latest.tar.gz
+          git archive 6e3f472d6532090e73d799c1f0f6c221e97c0ec7 mais-uma-rodada docs/DEPTH-0.5.0.md | gzip > workspace-artifact/depth.tar.gz
+          git diff --binary 4f90c3eec4c4cc891f6e4d9710bf7a681742a838 6e3f472d6532090e73d799c1f0f6c221e97c0ec7 -- mais-uma-rodada docs/DEPTH-0.5.0.md > workspace-artifact/depth.patch
+          git archive 4f90c3eec4c4cc891f6e4d9710bf7a681742a838 mais-uma-rodada | gzip > workspace-artifact/common.tar.gz
+          docker run --rm -v "$PWD/workspace-artifact:/output" barichello/godot-ci:4.7 bash -lc 'cp "$(command -v godot)" /output/godot; chmod +x /output/godot; godot --version > /output/engine.txt'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: realism-dev-workspace
+          path: workspace-artifact/
+          retention-days: 1

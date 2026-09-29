@@ -217,22 +217,8 @@ static func fill_suggested(world: GameWorld) -> void:
 
 ## Chama ou dispensa um jogador. Retorna false se a lista já está cheia.
 static func toggle(world: GameWorld, pid: int) -> bool:
-	var st := state(world)
-	if (st.get("list", []) as Array).is_empty():
-		st["list"] = current_list(world).map(func(p: Player): return p.id)
-	var list: Array = st["list"]
-	if list.has(pid):
-		list.erase(pid)
-		return true
-	if list.size() >= NationalTeamManager.SQUAD_SIZE:
-		return false
-	list.append(pid)
-	return true
+	return InternationalCareer.toggle(world,pid) == ""
 
-
-# ---------------------------------------------------------------------------
-# Resultados e cobrança
-# ---------------------------------------------------------------------------
 
 static func on_result(world: GameWorld, r: Dictionary, tag: String) -> void:
 	var code := nation(world)

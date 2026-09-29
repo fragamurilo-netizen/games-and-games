@@ -59,6 +59,10 @@ static func _build(world: GameWorld) -> void:
 	var busy := {} # id do técnico -> {meia-temporada: true}
 	var occ: Dictionary = ctx["occ"] # "clube:meia" -> true (um técnico por clube por vez)
 	for co: Dictionary in pool:
+		if co.has("real_source"):
+			co["pl"]={}
+			co["car"]=[_spell(world.club(int(co["c"])),world.year,0)]
+			continue # não inclui uma pessoa real em sorteios de carreiras passadas
 		co["car"] = []
 		_playing_career(world, r, ctx, co)
 		var nat := String(co.get("nat", ""))
@@ -114,6 +118,7 @@ static func _build(world: GameWorld) -> void:
 		cr["coaches"] = all.slice(maxi(0, all.size() - FootballMemory.COACHES_MAX))
 	# Cada técnico: começo de carreira (base, auxiliar, clubes menores) e como saiu de cada lugar.
 	for co: Dictionary in pool:
+		if co.has("real_source"): continue
 		_early_career(world, r, ctx, co, y0)
 		_endings(world, r, co)
 

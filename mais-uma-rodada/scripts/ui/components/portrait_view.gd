@@ -296,6 +296,14 @@ const STYLE_P: Array = [
 	{"tp": 0.36, "sd": 0.28, "sp": 3, "tx": "coil", "sb": 0.42}, # black power com costeletas longas
 	{"tp": 0.16, "sd": 0.06, "gl": 0.55, "fl": 0, "bk": "mullet", "sb": 0.1}, # para trás volumoso até a nuca
 	{"tp": 0.12, "sd": 0.05, "sb": 0.05, "tx": "wavy", "bk": "long", "fl": 1, "fr": "part", "gl": 0.15}, # longo ondulado atrás das orelhas
+	{"tp":0.08,"sd":0.02,"fd":1,"fl":1}, # taper baixo natural
+	{"tp":0.15,"sd":0.09,"sp":3,"tx":"curl","sb":0.04},
+	{"tp":0.12,"sd":0.05,"fl":1,"fr":"part","gl":0.10},
+	{"tp":0.07,"sd":0.02,"hl":0.10,"fd":1,"fr":"crop","fl":2},
+	{"tp":0.12,"sd":0.06,"tx":"wavy","fl":1,"gl":0.08},
+	{"tp":0.18,"sd":0.13,"sp":3,"tx":"coil","sb":0.03},
+	{"tp":0.035,"sd":0.015,"tx":"braid","bk":"bun","op":0.82},
+	{"tp":0.08,"sd":0.035,"fd":1,"bk":"mullet","fl":1},
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)

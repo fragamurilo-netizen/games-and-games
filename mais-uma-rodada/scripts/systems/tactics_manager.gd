@@ -171,7 +171,7 @@ static func _formation_width(fname: String) -> float:
 
 
 static func _style_name(i: int) -> String:
-	return String(DatabaseManager.tactics()["styles"][clampi(i, 0, 5)]["name"])
+	return String(DatabaseManager.tactics()["styles"][clampi(i, 0, DatabaseManager.tactics()["styles"].size() - 1)]["name"])
 
 
 # ---------------------------------------------------------------------------

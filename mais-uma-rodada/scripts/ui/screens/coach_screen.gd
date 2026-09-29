@@ -29,6 +29,8 @@ static func portrait(world: GameWorld, co: Dictionary, club: Club, px: int) -> P
 	v.custom_minimum_size = Vector2(px, px)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.set_person(rng.randi() & 0x7FFFFFFF, int(origin["eth"]), world.year - int(co.get("by", world.year - 50)), club)
+	if co.has("real_source"):
+		v.look=co.get("look",{})
 	return v
 
 

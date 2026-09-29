@@ -145,4 +145,4 @@ static func migrate_budget(world: GameWorld, club: Club) -> void:
 	var ref := budget_reference(world, club)
 	if ref <= 0:
 		return
-	club.transfer_budget = maxi(0, int(lerpf(float(club.transfer_budget), float(ref), 0.35)))
+	BoardBudget.sync(world,club)

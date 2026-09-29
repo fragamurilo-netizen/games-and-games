@@ -75,6 +75,7 @@ static func after_user_turn(world: GameWorld, result: String) -> Array:
 	_expire(world, turn)
 	_random_happenings(world)
 	AmbientStorytelling.after_user_turn(world, result)
+	GroundedEvents.after_turn(world)
 	if world.events.size() >= MAX_PENDING:
 		return out
 	var p_new := 0.36 if world.events.is_empty() else 0.18
@@ -89,6 +90,7 @@ static func after_user_turn(world: GameWorld, result: String) -> Array:
 		var ev := _build(world, k)
 		if ev.is_empty():
 			continue
+		if k in ["apostas","betting"] and RealWorldData.is_real(world,int(ev.get("p",-1))): continue
 		cands.append(ev)
 		weights.append(float(KINDS[k]["w"]))
 	if cands.is_empty():

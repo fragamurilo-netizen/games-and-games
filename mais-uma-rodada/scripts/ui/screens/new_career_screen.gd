@@ -132,6 +132,7 @@ func _build_footer() -> void:
 # --- Passo 1: treinador, dificuldade e mundo ----------------------------------------
 
 func _build_setup(c: VBoxContainer) -> void:
+	c.add_child(UIKit.label(RealWorldData.description(),"Small",true))
 	var cards: Array = []
 	var who := UIKit.card("Card", 10)
 	who.add_child(UIKit.section("Seu nome"))

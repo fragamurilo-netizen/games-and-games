@@ -107,7 +107,7 @@ static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_ho
 	# Mesma filosofia contra mesma filosofia: o pragmático tenta o antídoto.
 	if roll < adapt and opponent != null and int(opp_ph.get("style", -1)) == TeamSheet.STYLE_PRESSAO and style == TeamSheet.STYLE_POSSE:
 		style = TeamSheet.STYLE_LONGA if adapt >= 0.8 else style2
-	sheet.style = clampi(style, 0, 5)
+	sheet.style = clampi(style, 0, DatabaseManager.tactics()["styles"].size() - 1)
 	sheet.mentality = clampi(m, 0, 4)
 	var pressing := int(ph.get("pressing", 1))
 	var line := int(ph.get("line", 1))

@@ -3,7 +3,7 @@ extends BaseScreen
 ## torneios (Copa do Mundo, Eurocopa, Copa América...), eliminatórias em andamento, ranking de
 ## seleções e a convocação de cada país (editável na seleção que o usuário comanda).
 
-const TABS := [["overview", "Visão geral"], ["squad", "Convocação"], ["tours", "Torneios"], ["quals", "Eliminatórias"], ["ranking", "Ranking"]]
+const TABS := [["overview", "Visão geral"], ["squad", "Convocação"], ["plan", "Plano tático"], ["calendar", "Datas FIFA"], ["tours", "Torneios"], ["quals", "Eliminatórias"], ["ranking", "Ranking"]]
 
 var _tab := "overview"
 var _tour := ""
@@ -45,8 +45,12 @@ func refresh() -> void:
 		refresh()))
 	var start := c.get_child_count()
 	match _tab:
-		"overview":
+		"overview", "command", "kits":
 			_overview(w, c)
+		"plan":
+			_plan(w,c)
+		"calendar":
+			_calendar(w,c)
 		"tours":
 			_tours(w, c)
 		"quals":
@@ -653,3 +657,60 @@ func _pick_row(w: GameWorld, p: Player, called: bool) -> Control:
 		refresh(), "Dispensar" if called else "Convocar")
 	h.add_child(btn)
 	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat")
+
+
+func _choice(c: VBoxContainer, title: String, names: Array, selected: int, action: Callable) -> void:
+	c.add_child(UIKit.label(title,"H3"))
+	var options := OptionButton.new()
+	options.custom_minimum_size.y = 54
+	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for text in names: options.add_item(String(text))
+	options.select(clampi(selected,0,maxi(0,names.size()-1)))
+	options.item_selected.connect(action)
+	c.add_child(options)
+
+
+func _calendar(w: GameWorld, c: VBoxContainer) -> void:
+	var now := InternationalCalendar.season_date(w)
+	var box := UIKit.card("Card",10)
+	box.add_child(UIKit.label("Calendário de seleções","H2"))
+	box.add_child(UIKit.label("Datas de 2026 a 2030 seguem as janelas masculinas publicadas pela FIFA. Após 2030, o jogo usa uma projeção. Formatos das eliminatórias permanecem uma adaptação do jogo.","Small",true))
+	for win in InternationalCalendar.upcoming(now).slice(0,5):
+		box.add_child(UIKit.label("%s a %s · até %d jogos%s" % [win["start"],win["end"],win["max_matches"]," · projeção" if win["projected"] else ""],"H3",true))
+		box.add_child(UIKit.label("Convocação: a partir de "+InternationalCalendar.iso(int(win["a"])-14*86400),"Small"))
+	c.add_child(UIKit.card_panel(box))
+	var history := UIKit.card("Card",8)
+	history.add_child(UIKit.label("Convocações anunciadas","H2"))
+	for item in InternationalCareer.data(w)["announcements"]:
+		history.add_child(UIKit.label("%s · %s · %d jogadores" % [item["window"],DatabaseManager.nation_name(item["nation"]),item["players"].size()],"",true))
+	c.add_child(UIKit.card_panel(history))
+
+
+
+func _plan(w: GameWorld, c: VBoxContainer) -> void:
+	var code := NationalCoach.nation(w)
+	if code == "":
+		c.add_child(UIKit.empty_state("Assuma uma seleção", "Aceite um convite ou escolha uma seleção ao iniciar a carreira para definir seu plano tático.", "globe"))
+		return
+	var config := InternationalCareer.plan(w,code)
+	var card := UIKit.card("Card",12)
+	card.add_child(UIKit.label("Plano de " + DatabaseManager.nation_name(code), "H2", true))
+	card.add_child(UIKit.label("A partida da sua seleção usa o motor completo. Escolha o plano antes do jogo; o comando internacional ao vivo ainda não está disponível.", "Small", true))
+	var forms: Array = DatabaseManager.formation_names()
+	_choice(card,"Formação", forms, forms.find(config["formation"]),func(i): InternationalCareer.set_plan(w,"formation",forms[i]); GameManager.save_now(); refresh())
+	var tactics := DatabaseManager.tactics()
+	for field in [["style","Estilo","styles"],["mentality","Mentalidade","mentalities"],["pressing","Pressão","pressing"],["line","Linha defensiva","line"],["width","Amplitude","width"],["passing","Passes","passing"]]:
+		var key: String = field[0]
+		var rows: Array = tactics.get(field[2],[])
+		if rows.is_empty(): continue
+		var names: Array = rows.map(func(row): return String(row.get("name",row.get("n",""))) if row is Dictionary else str(row))
+		_choice(card,field[1],names,int(config[key]),func(i): InternationalCareer.set_plan(w,key,i); GameManager.save_now(); refresh())
+	card.add_child(UIKit.kv("Entrosamento com o plano", "%d%%" % int(config["cohesion"])))
+	var roster := InternationalCareer.squad_for(w,code,InternationalCareer.eligible(w,code))
+	var selected := InternationalCareer.sheet(w,code,roster)
+	card.add_child(UIKit.label("Titulares preferidos", "H3"))
+	for pid in selected.starters:
+		var player := w.player(int(pid))
+		if player != null:
+			card.add_child(UIKit.label("%s · %s" % [Pos.name_of(player.position),player.display_name()], "", true))
+	c.add_child(UIKit.card_panel(card))

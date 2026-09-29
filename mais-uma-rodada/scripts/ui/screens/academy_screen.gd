@@ -2,7 +2,7 @@ extends BaseScreen
 ## Categorias de base: os garotos por categoria, as ligas sub-20 e sub-17, os jogos, a captação
 ## (com a peneira) e os revelados pela base.
 
-const TABS := [["players", "Garotos"], ["u20", "Sub-20"], ["u17", "Sub-17"], ["games", "Jogos"], ["scout", "Captação"], ["grads", "Revelados"]]
+const TABS := [["players", "Garotos"], ["u20", "Sub-20"], ["u17", "Sub-17"], ["games", "Jogos"], ["scout", "Captação"], ["grads", "Revelados"], ["competitions", "Outras competições"]]
 
 var _tab := "players"
 
@@ -51,6 +51,8 @@ func refresh() -> void:
 			c.add_child(_trial(w))
 		"grads":
 			c.add_child(_grads(w))
+		"competitions":
+			_more_competitions(w,c)
 	columnize(c, start)
 
 
@@ -383,3 +385,29 @@ func _grads(w: GameWorld) -> Control:
 		else:
 			card.add_child(row)
 	return UIKit.card_panel(card)
+
+
+func _more_competitions(w: GameWorld,c: VBoxContainer) -> void:
+	c.add_child(UIKit.label("Formatos de desenvolvimento próprios do jogo. Adversários usam elencos de base agregados; o seu clube escala garotos elegíveis, com intervalo mínimo entre partidas.","Small",true))
+	var comps:=YouthCompetitions.competitions(w)
+	if comps.is_empty():
+		c.add_child(UIKit.label("Sem datas suficientes nesta temporada. As novas competições entram no próximo calendário.","Muted",true))
+	for comp: Dictionary in comps:
+		var box:=UIKit.card("Card",8)
+		box.add_child(UIKit.label(comp["name"],"H2",true))
+		box.add_child(UIKit.label("Até %d anos · %d clubes · %s" % [comp["age"],comp["clubs"].size(),"pontos corridos" if comp["kind"]=="league" else "mata-mata"],"Small",true))
+		if int(comp["champion"])>=0: box.add_child(UIKit.label("Campeão: "+w.club(comp["champion"]).short_name,"H3",true))
+		if comp["kind"]=="league":
+			for cid in YouthCompetitions.standings(comp):
+				var row: Dictionary=comp["table"][cid]
+				box.add_child(UIKit.kv(w.club(cid).short_name,"%d pts · %d jogos · %d:%d" % [row["pts"],row["pl"],row["gf"],row["ga"]]))
+		for r in comp["rounds"].size():
+			for g: Array in comp["rounds"][r]:
+				if not w.is_user_club(g[0]) and not w.is_user_club(g[1]): continue
+				var score: String="%d x %d" % [g[2],g[3]] if int(g[2])>=0 else "x"
+				box.add_child(UIKit.label("%s · %s %s %s" % [w.season.date_label(int(comp["slots"][r])),w.club(g[0]).short_name,score,w.club(g[1]).short_name],"",true))
+		var records: Array=comp["records"].values()
+		records.sort_custom(func(a,b): return int(a["minutes"])>int(b["minutes"]))
+		for record: Dictionary in records.slice(0,5):
+			box.add_child(UIKit.label("%s: %d min · %d gols" % [record["name"],record["minutes"],record["goals"]],"Small",true))
+		c.add_child(UIKit.card_panel(box))

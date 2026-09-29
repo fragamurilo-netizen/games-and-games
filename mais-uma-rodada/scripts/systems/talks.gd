@@ -598,7 +598,7 @@ static func _board_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 					s += 0.15 if style == "vaidoso" else (-0.2 if style == "empresario" else 0.0)
 					if s > 0.25 and club.balance > 0:
 						var add := int(maxf(club.transfer_budget * 0.2, FinanceManager.expected_revenue(club) * 0.03))
-						club.transfer_budget += add
+						add = BoardBudget.grant(world,club,add,"Pedido de reforço de verba","manager_request")
 						_say(conv, "npc", "Vou liberar %s. Mas agora não há mais desculpas." % Fmt.money(add))
 						_fx(conv, "Verba para contratações +%s" % Fmt.money(add))
 						club.board_confidence = clampf(club.board_confidence - 2.0, 0.0, 100.0)
@@ -668,7 +668,7 @@ static func _board_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 			yes = s > 0.3
 			if yes:
 				var add := int(maxf(club.transfer_budget * 0.25, FinanceManager.expected_revenue(club) * 0.04))
-				club.transfer_budget += add
+				add = BoardBudget.grant(world,club,add,"Pedido de reforço de verba","manager_request")
 				_say(conv, "npc", "Está bem. Libero mais %s. Não me decepcione." % Fmt.money(add))
 				_fx(conv, "Verba para contratações: %s" % Fmt.money(club.transfer_budget))
 				People.add_pres_rel(world, -1.0)
