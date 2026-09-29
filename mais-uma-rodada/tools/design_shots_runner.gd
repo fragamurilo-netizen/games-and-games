@@ -336,7 +336,7 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					break
 		"talk":
 			TalkDialog.open("board", -1)
-		"training":
+		"training", "training_st":
 			var sq := w.squad(u)
 			sq.sort_custom(func(a, b): return a.age(w.year) < b.age(w.year))
 			var yp: Player = sq[0]
@@ -346,7 +346,7 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 				if String(e["k"]) != String(PlayStyle.primary(yp)["k"]):
 					TrainingManager.set_style_target(yp, String(e["k"]))
 					break
-			TrainingSheet.open(yp)
+			TrainingSheet.open(yp, Callable(), "st" if kind == "training_st" else "")
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
 		"buy_cond", "buy_terms", "buy_loan":

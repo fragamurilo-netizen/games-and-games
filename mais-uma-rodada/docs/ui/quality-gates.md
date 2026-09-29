@@ -55,13 +55,15 @@ clube de nome comprido, lesão, suspensão, folha estourada).
   das colunas volta deitado e no tablet.
 - **Relações**: a grade de cartões-medidor virou faixa de números (vestiário, diretoria,
   torcida, imprensa) com abas comuns embaixo.
+- **Olheiros** (Mercado): missão em linhas que abrem folhas; relatórios na tabela do mercado,
+  jogador ao lado na tela larga e em folha no celular (com "Descartar relatório").
+- **Folha de treino individual**: resumo com carga, foco, estilo e posição em linhas; cada uma
+  abre a lista de opções dentro da própria folha, com volta. Sem grades de chips.
 
 ## Pendente
 
 - Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
   de toque e de teclado; precisa de um controle no `main.gd`.
-- Olheiros (aba do Mercado) e a folha de treino individual ainda usam chips em grade; ficam
-  para a próxima passada.
 - `tools/match_shots.gd` termina com erros de script ao fechar ("lock" em nulo, "main" liberado):
   a ferramenta sai enquanto a rodada ainda fecha na thread. Já acontecia antes da UI 2.0; a
   captura "fim" sai preta pelo mesmo motivo.
