@@ -198,7 +198,9 @@ static func campaign_news(world: GameWorld, rec: Dictionary) -> void:
 					parts.append("%s: %s" % [String(rd["n"]).to_lower(), NationalTeamManager.result_text(r)])
 		var stage := String(rec.get("stage", {}).get(c, ""))
 		var mine: bool = c == NationalCoach.nation(world)
-		var head := "campeã" if stage == "Campeã" else ("vice-campeã" if stage == "Vice" else ("fora na fase de grupos" if stage == "Fase de grupos" else "parou na %s" % stage.to_lower()))
+		var stops := {"16 avos de final": "parou nos 16 avos de final", "Oitavas de final": "parou nas oitavas de final",
+			"Quartas de final": "parou nas quartas de final", "Semifinal": "parou na semifinal", "Vice": "vice-campeã", "Campeã": "campeã"}
+		var head := String(stops.get(stage, "fora na fase de grupos"))
 		var n := NewsManager.post_raw(world, "%s na %s: %s" % [DatabaseManager.nation_name(c), rec["name"], head],
 			"%s%s." % ["Sua campanha no comando: " if mine else "A campanha: ", "; ".join(parts)], -1, -1,
 			NewsEvent.IMP_HEADLINE if mine else NewsEvent.IMP_HIGH, "selecao")

@@ -239,6 +239,27 @@ static func call_up(pool: Array) -> Array:
 	return out
 
 
+## Listas para a próxima data FIFA das seleções pedidas: as anunciadas, senão a última convocação,
+## senão quem seria chamado hoje (telas e avisos; não mexe no save).
+static func expected_lists(world: GameWorld, codes: Array) -> Dictionary:
+	var d := data(world)
+	if d.has("next"):
+		return d["next"]
+	var out := {}
+	var missing: Array = []
+	for code in codes:
+		var last: Array = d["squads"].get(code, [])
+		if last.is_empty():
+			missing.append(code)
+		else:
+			out[code] = last
+	if not missing.is_empty():
+		var pool := _pool(world)
+		for code in missing:
+			out[code] = squad_for(world, code, pool).map(func(p: Player): return p.id)
+	return out
+
+
 ## Lista de uma seleção para a próxima data: a do usuário, se ele comanda a seleção (completada com
 ## os melhores disponíveis quando falta gente), ou a do técnico da IA.
 static func squad_for(world: GameWorld, code: String, pool: Dictionary) -> Array:
@@ -735,26 +756,26 @@ static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
 		for i in n:
 			lines.append_array(_play_matchday(env, camp))
 	d["fifa"] = int(d["fifa"]) + 1
-	# Amistosos para quem não tem eliminatória (mantêm o ranking e os jogos dos convocados vivos).
-	var busy := {}
-	for camp in active:
-		for g in camp["groups"]:
-			for t in g["teams"]:
-				busy[t] = true
-	var free: Array = []
-	for code in DatabaseManager.nations():
-		if not busy.has(code):
-			free.append(code)
+	# Amistosos completam a janela: cada seleção faz dois jogos por data FIFA, como nas janelas reais.
+	var games := {}
+	for r in lines:
+		games[r["a"]] = int(games.get(r["a"], 0)) + 1
+		games[r["b"]] = int(games.get(r["b"], 0)) + 1
 	env.k = 12.0
 	env.tag = "Amistoso"
 	var friendlies: Array = []
-	# Dois amistosos por data, como nas janelas reais (um em casa, outro fora).
 	for rnd in 2:
+		var free: Array = []
+		for code in DatabaseManager.nations():
+			if int(games.get(code, 0)) < 2:
+				free.append(code)
 		RngUtil.shuffle(env.rng, free)
 		for i in range(0, free.size() - 1, 2):
 			var fr := play(env, free[i], free[i + 1], rnd == 0, false)
 			fr["fr"] = true
 			friendlies.append(fr)
+			games[free[i]] = int(games.get(free[i], 0)) + 1
+			games[free[i + 1]] = int(games.get(free[i + 1], 0)) + 1
 	_after_date(world, env, lines + friendlies, weekend_index)
 	return lines
 

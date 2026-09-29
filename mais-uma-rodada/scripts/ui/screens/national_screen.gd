@@ -204,7 +204,11 @@ func _windows_card(w: GameWorld) -> Control:
 	# Quem do clube do usuário está (ou deve estar) na próxima lista
 	if w.has_user() and (not nxt.is_empty() or not active.is_empty()):
 		var d := NationalTeamManager.data(w)
-		var src: Dictionary = d.get("next", {}) if d.has("next") else d["squads"]
+		var nats: Array = []
+		for p in w.squad(w.user_club()):
+			if not nats.has(p.nationality):
+				nats.append(p.nationality)
+		var src := NationalTeamManager.expected_lists(w, nats)
 		var mine: Array = []
 		for p in w.squad(w.user_club()):
 			if (src.get(p.nationality, []) as Array).has(p.id):

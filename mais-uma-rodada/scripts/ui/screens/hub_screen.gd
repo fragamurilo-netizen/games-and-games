@@ -509,7 +509,11 @@ func _fifa_alert(w: GameWorld, club: Club) -> Array:
 		return ["globe", UIColors.ACCENT, "%s: monte a lista para a data FIFA de %s" % [DatabaseManager.nation_name(code), NationalTeamManager.window_label(w, nxt)],
 			func(): UIManager.push("national", {"tab": "squad", "nation": code})]
 	var d := NationalTeamManager.data(w)
-	var src: Dictionary = d.get("next", d["squads"])
+	var nats: Array = []
+	for p in w.squad(club):
+		if not nats.has(p.nationality):
+			nats.append(p.nationality)
+	var src := NationalTeamManager.expected_lists(w, nats)
 	var n := 0
 	for p in w.squad(club):
 		if (src.get(p.nationality, []) as Array).has(p.id):
