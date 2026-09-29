@@ -670,3 +670,177 @@ input[type="number"] {
   padding: 10px 12px;
   font: inherit;
 }
+
+/* Original Corner Office broadcast package. Game Bible §§15,16,24. */
+.channel-bug {
+  position: absolute;
+  right: 22px;
+  top: 52px;
+  z-index: 2;
+  text-align: right;
+  color: #f4f1e8;
+  pointer-events: none;
+}
+.channel-bug > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    italic 800 25px Impact,
+    "Arial Narrow",
+    sans-serif;
+  border-bottom: 3px solid #c83b3b;
+  padding: 3px 9px;
+  background: #111417e8;
+}
+.channel-bug b span {
+  font:
+    700 10px "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.12em;
+}
+.channel-bug small {
+  display: block;
+  margin-top: 5px;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+}
+.tv-scorebug {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: minmax(95px, 1fr) 72px minmax(95px, 1fr);
+  width: min(580px, 94%);
+  color: #f4f1e8;
+  box-shadow: 0 5px 20px #0005;
+  background: #111417f2;
+  pointer-events: none;
+}
+.tv-name {
+  padding: 9px 16px;
+  border-bottom: 4px solid #c83b3b;
+  min-width: 0;
+}
+.tv-name strong {
+  display: block;
+  font:
+    25px Impact,
+    "Arial Narrow",
+    sans-serif;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tv-name small {
+  font-size: 8px;
+  color: #b8c3cc;
+  letter-spacing: 0.08em;
+}
+.blue-name {
+  text-align: right;
+  border-color: #426d8b;
+}
+.tv-time {
+  display: grid;
+  text-align: center;
+  align-content: center;
+  background: #e8e4d9;
+  color: #14191d;
+  gap: 1px;
+}
+.tv-time span {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.tv-time b {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.caption {
+  bottom: 96px;
+  padding: 7px 10px;
+}
+.caption strong {
+  font-size: 17px;
+}
+.caption span {
+  font-size: 8px;
+}
+.tv-ticker {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  background: #1b2025;
+  gap: 18px;
+  border-bottom: 1px solid #46535e;
+  font-size: 11px;
+  letter-spacing: 0.025em;
+  padding-right: 12px;
+}
+.tv-ticker > b {
+  background: #963638;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.tv-ticker > span {
+  padding: 8px 0;
+}
+.broadcast-mode main {
+  max-width: 1440px;
+  padding: 12px;
+}
+.broadcast-mode header,
+.broadcast-mode aside,
+.broadcast-mode .library,
+.broadcast-mode .events,
+.broadcast-mode footer,
+.broadcast-mode .scoreboard {
+  display: none;
+}
+.broadcast-mode .workspace {
+  display: block;
+}
+.broadcast-mode canvas {
+  height: min(72vh, 820px);
+}
+@media (max-width: 600px) {
+  .channel-bug {
+    right: 12px;
+    top: 48px;
+  }
+  .channel-bug > b {
+    font-size: 19px;
+  }
+  .tv-name {
+    padding: 8px;
+  }
+  .tv-name strong {
+    font-size: 20px;
+  }
+  .tv-name small {
+    font-size: 7px;
+  }
+  .tv-scorebug {
+    grid-template-columns: minmax(70px, 1fr) 60px minmax(70px, 1fr);
+  }
+  .tv-ticker {
+    font-size: 9px;
+    gap: 10px;
+  }
+  .tv-ticker > b {
+    padding: 0 8px;
+  }
+  .caption {
+    bottom: 93px;
+    left: 14px;
+  }
+  .broadcast-mode canvas {
+    height: 65vh;
+  }
+}

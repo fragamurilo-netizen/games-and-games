@@ -87,6 +87,7 @@
         c.fill();
       }
       this.arena(arena, false);
+      this.blood(frame.stains || []);
       const ids = Object.keys(frame.poses),
         location = frame.state.location,
         offset = location === "center" ? 0 : arena.radius_m * 0.53;
@@ -146,6 +147,24 @@
         37,
       );
       c.textAlign = "left";
+    }
+    blood(marks) {
+      const c = this.ctx;
+      c.save();
+      for (const m of marks) {
+        const point = this.project(m.x, 0.003, m.z);
+        c.save();
+        c.translate(...point);
+        c.scale(1, 0.42);
+        c.rotate(m.angle);
+        c.globalAlpha = m.opacity;
+        c.fillStyle = "#692D30";
+        c.beginPath();
+        c.ellipse(0, 0, m.rx * this.S, m.rz * this.S, 0, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+      }
+      c.restore();
     }
     project(x, y, z = 0) {
       return [
@@ -327,7 +346,8 @@
         skinGrad = (x, r) => studioGradient(c, skin, x, 0, r);
       const hip = P(s.hip),
         neck = P(s.neck);
-      const size = (0.072 + muscle * 0.024 + fat * 0.028) * scale;
+      const size =
+        (0.072 + muscle * 0.024 + fat * 0.028) * scale * (fem ? 0.86 : 1);
       const tube = (points, radii, fill) => {
         const path = new Path2D();
         const l = [],
@@ -369,6 +389,7 @@
         c.fillStyle =
           fill || skinGrad((minX + maxX) * 0.5, (maxX - minX) * 0.5 + size);
         c.fill(path);
+        if (fill) return path;
         c.save();
         c.clip(path);
         const mid = points[1];
@@ -484,6 +505,49 @@
           Math.min(0.4, damage.leg * 0.5),
         );
       }
+      // Each cloth leg follows the solved hip/knee segment, including kicks and ground poses.
+      const shortsColor = SHORTS[f.kit?.shorts]?.[0] || corner;
+      for (let i = 0; i < 2; i++) {
+        const a = P(s.hips[i]),
+          b = P(s.legs[i].joint),
+          v = [b[0] - a[0], b[1] - a[1]],
+          length = Math.hypot(...v) || 1;
+        const point = (t) => [a[0] + v[0] * t, a[1] + v[1] * t];
+        const hem = point(fem ? 0.38 : 0.43),
+          middle = point(0.19),
+          radius = size * 1.28;
+        const shape = tube(
+          [a, middle, hem],
+          [radius * 1.07, radius, radius * 0.94],
+          studioGradient(c, shortsColor, middle[0], middle[1], radius),
+        );
+        c.save();
+        c.clip(shape);
+        studioSoft(
+          c,
+          middle[0] - size * 0.25,
+          middle[1],
+          radius * 0.55,
+          length * 0.23,
+          lighten(shortsColor, 0.4),
+          0.35,
+          Math.atan2(v[1], v[0]) - Math.PI / 2,
+        );
+        c.restore();
+        const normal = [-v[1] / length, v[0] / length];
+        this.line(
+          [
+            hem[0] - normal[0] * radius * 0.82,
+            hem[1] - normal[1] * radius * 0.82,
+          ],
+          [
+            hem[0] + normal[0] * radius * 0.82,
+            hem[1] + normal[1] * radius * 0.82,
+          ],
+          lighten(shortsColor, 0.28),
+          scale * 0.008,
+        );
+      }
       // Continuous torso from hips through shoulders and the neck.
       const angle = (p.lean * Math.PI) / 180;
       c.save();
@@ -491,11 +555,11 @@
       c.rotate(angle);
       c.scale(1, s.h);
       const shoulder =
-          (fem ? 0.17 : 0.195) * scale +
+          (fem ? 0.151 : 0.195) * scale +
           (body.shoulders ?? 0.5) * scale * 0.025,
-        waist = (fem ? 0.12 : 0.145) * scale + fat * scale * 0.05,
+        waist = (fem ? 0.106 : 0.145) * scale + fat * scale * 0.05,
         hips =
-          (fem ? 0.17 : 0.155) * scale + (body.hips ?? 0.5) * scale * 0.035;
+          (fem ? 0.191 : 0.155) * scale + (body.hips ?? 0.5) * scale * 0.035;
       c.fillStyle = studioGradient(c, skin, 0, -0.3 * scale, shoulder);
       c.beginPath();
       c.moveTo(-hips, 0.04 * scale);
@@ -513,8 +577,8 @@
         -0.07 * scale,
         -0.5 * scale,
       );
-      c.lineTo(-0.06 * scale, -0.64 * scale);
-      c.lineTo(0.06 * scale, -0.64 * scale);
+      c.lineTo(-0.06 * scale, -0.57 * scale);
+      c.lineTo(0.06 * scale, -0.57 * scale);
       c.lineTo(0.07 * scale, -0.5 * scale);
       c.quadraticCurveTo(
         shoulder * 0.84,
@@ -576,11 +640,27 @@
         c.fillStyle = studioGradient(c, kitColor, 0, 0, shoulder);
         c.beginPath();
         c.moveTo(-shoulder * 0.88, -0.43 * scale);
-        c.quadraticCurveTo(0, -0.36 * scale, shoulder * 0.88, -0.43 * scale);
+        c.quadraticCurveTo(0, -0.385 * scale, shoulder * 0.88, -0.43 * scale);
         c.lineTo(waist * 1.03, -0.29 * scale);
         c.quadraticCurveTo(0, -0.25 * scale, -waist * 1.03, -0.29 * scale);
         c.closePath();
         c.fill();
+        for (const side of [-1, 1])
+          studioSoft(
+            c,
+            side * scale * 0.068,
+            -scale * 0.364,
+            scale * 0.062,
+            scale * 0.052,
+            lighten(kitColor, 0.35),
+            0.3,
+          );
+        this.line(
+          [-waist * 0.97, -scale * 0.282],
+          [waist * 0.97, -scale * 0.282],
+          darken(kitColor, 0.4),
+          scale * 0.024,
+        );
         for (const x of [-1, 1])
           this.line(
             [x * 0.11 * scale, -0.49 * scale],
@@ -589,31 +669,22 @@
             scale * 0.026,
           );
       }
-      const kit = SHORTS[f.kit?.shorts]?.[0] || corner;
+      const kit = shortsColor;
       c.fillStyle = studioGradient(c, kit, 0, 0, hips);
       c.beginPath();
-      c.moveTo(-hips, -0.035 * scale);
-      c.lineTo(hips, -0.035 * scale);
-      c.lineTo(hips * 1.1, 0.2 * scale);
-      c.lineTo(0.025 * scale, 0.2 * scale);
-      c.lineTo(0, 0.1 * scale);
-      c.lineTo(-0.025 * scale, 0.2 * scale);
-      c.lineTo(-hips * 1.1, 0.2 * scale);
-      c.closePath();
+      c.moveTo(-hips, -scale * 0.038);
+      c.lineTo(hips, -scale * 0.038);
+      c.quadraticCurveTo(hips * 1.04, scale * 0.04, hips * 0.75, scale * 0.09);
+      c.quadraticCurveTo(0, scale * 0.13, -hips * 0.75, scale * 0.09);
+      c.quadraticCurveTo(-hips * 1.04, scale * 0.04, -hips, -scale * 0.038);
       c.fill();
       this.line(
-        [-hips, -0.026 * scale],
-        [hips, -0.026 * scale],
+        [-hips, -scale * 0.023],
+        [hips, -scale * 0.023],
         lighten(kit, 0.35),
         scale * 0.028,
       );
-      for (const sign of [-1, 1])
-        this.line(
-          [sign * hips * 0.87, 0.02 * scale],
-          [sign * hips * 0.9, 0.17 * scale],
-          lighten(kit, 0.45),
-          1,
-        );
+      this.line([0, 0], [0, scale * 0.055], darken(kit, 0.4), scale * 0.008);
       c.restore();
       limb(s.shoulders[1], s.arms[1], [size * 0.74, size * 0.49, size * 0.33]);
       for (const arm of s.arms) {

@@ -28,7 +28,9 @@ jobs:
           node-version: '22'
 
       - name: Verify motion catalog and replay contract
-        run: node corner-office/prototypes/fight-lab/tests/replay.cjs
+        run: |
+          node corner-office/prototypes/fight-lab/tests/replay.cjs
+          node corner-office/prototypes/fight-lab/tests/presentation.cjs
 
       - name: Verify reproducible visual content
         run: |

@@ -130,7 +130,7 @@ def add(id,label,category,styles,froms,family='strike',target='head',hand=0,to=N
         if family in ['strike','kick'] and outcome not in ['missed','evaded']:
             a,b=impact
             if category!='gnp':
-                angle=math.radians(b['lean']); head=[b['root'][0]+math.sin(angle)*.69,b['root'][1]+math.cos(angle)*.69]
+                angle=math.radians(b['lean']); head=[b['root'][0]+math.sin(angle)*.62,b['root'][1]+math.cos(angle)*.62]
                 contact=[head[0]-.09,head[1]-.03] if target=='head' else [b['root'][0]-.06,b['root'][1]+.23] if target=='body' else [b['root'][0]-.08,.40]
                 if outcome=='blocked':contact=[contact[0]-.12,contact[1]];b['hands'][0]=contact
                 eff='hands' if family=='strike' else 'feet';a[eff][hand]=contact

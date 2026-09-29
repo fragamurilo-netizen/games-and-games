@@ -8,6 +8,7 @@
     <script src="../face-lab/studio.js"></script>
     <script src="../face-lab/identity.js"></script>
     <script src="replay.js"></script>
+    <script src="appearance.js"></script>
     <script src="renderer.js"></script>
     <script src="app.js" defer></script>
   </head>
@@ -61,18 +62,42 @@
             </div>
           </div>
           <div class="viewport">
+            <div class="channel-bug">
+              <b>CO<span>SPORTS</span></b
+              ><small>FIGHT NIGHT · REPLAY</small>
+            </div>
             <canvas
               id="fight"
               role="img"
               aria-label="Dois atletas reproduzem os movimentos registrados na arena"
             ></canvas>
+            <div class="tv-scorebug" aria-label="Placar da transmissão">
+              <div class="tv-name red-name">
+                <small id="tv-red-style"></small
+                ><strong id="tv-red-name"></strong>
+              </div>
+              <div class="tv-time">
+                <span id="tv-round"></span><b id="tv-clock"></b>
+              </div>
+              <div class="tv-name blue-name">
+                <small id="tv-blue-style"></small
+                ><strong id="tv-blue-name"></strong>
+              </div>
+            </div>
             <div class="caption">
               <span id="phase">POCKET</span
               ><strong id="action">Carregando…</strong
               ><span id="outcome"></span>
             </div>
           </div>
+          <div class="tv-ticker">
+            <b>CO / FIGHT DESK</b
+            ><span id="tv-stats">Estatísticas oficiais do replay</span>
+          </div>
           <div class="transport">
+            <button id="broadcast-mode" aria-pressed="false">
+              Modo transmissão
+            </button>
             <button id="play" class="primary" aria-label="Pausar reprodução">
               Pausar</button
             ><button id="restart">Reiniciar</button

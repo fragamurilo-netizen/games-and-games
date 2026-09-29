@@ -222,3 +222,24 @@ pequenos na branch de trabalho, com instruções e limitações no mesmo commit.
   clips; 1× é velocidade de animação, não reprodução em tempo real de quinze minutos.
 - O laboratório permite confronto de exibição; não substitui a validação futura
   de peso, contrato, elegibilidade e agenda no matchmaking da carreira.
+
+## Broadcast, sangue e identidade corporal
+
+O pacote CO Sports usa placar sobre a imagem, bug de canal, faixa de estatísticas e
+modo transmissão. É uma identidade fictícia própria. Todos os números vêm dos
+eventos já exibidos; não há antecipação de resultado na faixa.
+
+O replay exporta sexo e biometria explicitamente. `appearance.js` impede que um
+índice visual masculino antigo substitua uma atleta feminina. O rig diferencia
+quadril e ombros, e o renderer diferencia cintura, distribuição de volume e top
+esportivo; essas proporções não influenciam os atributos de combate.
+
+Manchas de sangue são efeitos cosméticos de golpes com cortes registrados. Um
+hash estável do evento determina as pequenas gotas na lona, sem consumir RNG da
+simulação. Voltar no tempo remove manchas futuras; trocar de luta limpa a lona.
+O teste `presentation.cjs` cobre identidade feminina, ausência de sangue inventado,
+limites da arena, repetibilidade e preservação do registro original.
+
+O pescoço foi encurtado no rig e no tronco; os pontos de contato de golpes altos
+acompanham a nova altura. Cada perna do short segue o segmento quadril–joelho,
+com barra e costura próprias. O cós acompanha a pelve e o top gira com o tronco.

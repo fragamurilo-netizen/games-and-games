@@ -74,15 +74,8 @@
   function buildAppearances() {
     appearances = {};
     for (const id of log.fighter_ids) {
-      const f = log.fighters?.[id] || {},
-        idx = f.appearance_index ?? 0;
-      appearances[id] = clone(
-        f.appearance || CANON[Math.max(0, Math.min(CANON.length - 1, idx))],
-      );
-      if (f.name) appearances[id].name = f.name;
-      appearances[id].marks = (appearances[id].marks || []).filter(
-        (x) => !["brinco", "argola", "piercing", "nose_ring"].includes(x),
-      );
+      const f = log.fighters?.[id] || {};
+      appearances[id] = FightAppearance.resolve(f, CANON, genFace);
     }
   }
   function load(replay) {
@@ -157,6 +150,31 @@
     $("outcome").textContent = labels[frame.event.outcome];
     $("round").textContent = "ROUND " + frame.event.round;
     $("clock").textContent = clock(frame.event.clock_s);
+    $("tv-clock").textContent = clock(frame.event.clock_s);
+    $("tv-round").textContent =
+      `R${frame.event.round}${log.scheduled_rounds ? " / " + log.scheduled_rounds : ""}`;
+    for (const [i, id] of log.fighter_ids.entries()) {
+      const side = i ? "blue" : "red",
+        f = log.fighters[id];
+      $("tv-" + side + "-name").textContent = name(id)
+        .split(" ")
+        .at(-1)
+        .toUpperCase();
+      $("tv-" + side + "-style").textContent =
+        catalog.styles.find((s) => s.id === f.martial_base)?.label ||
+        (i ? "CORNER AZUL" : "CORNER VERMELHO");
+    }
+    const landed = log.fighter_ids.map(
+      (id) =>
+        log.events.filter(
+          (e) =>
+            e.actor_id === id &&
+            e.at_ms + e.duration_ms <= time &&
+            ["landed", "knockdown", "stoppage"].includes(e.outcome),
+        ).length,
+    );
+    $("tv-stats").textContent =
+      `GOLPES CONECTADOS  ${landed[0]} — ${landed[1]}  ·  ${positions[frame.state.position].toUpperCase()}`;
     $("time").textContent =
       `${clock(time / 1000)} / ${clock(player.duration / 1000)}`;
     $("seek").value = time;
@@ -482,6 +500,15 @@
       option($("category"), k, v),
     );
     catalog.styles.forEach((s) => option($("style"), s.id, s.label));
+    $("broadcast-mode").onclick = () => {
+      const enabled = document.body.classList.toggle("broadcast-mode");
+      $("broadcast-mode").setAttribute("aria-pressed", String(enabled));
+      $("broadcast-mode").textContent = enabled
+        ? "Voltar ao laboratório"
+        : "Modo transmissão";
+      $("fight").scrollIntoView({ block: "center" });
+      draw();
+    };
     $("play").onclick = () => {
       if (time >= player.duration) time = 0;
       playing = !playing;

@@ -238,6 +238,59 @@
     }
     return errors;
   }
+  // Fixed event hashes place cosmetic drops; never consume the world's random stream.
+  function bloodMarks(log, clips, arena) {
+    const marks = [];
+    const hash = (s) => {
+      let h = 2166136261;
+      for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+      return h >>> 0;
+    };
+    for (const e of log.events) {
+      const clip = clips.get(e.technique_id);
+      if (!["landed", "knockdown", "stoppage"].includes(e.outcome)) continue;
+      for (const id of log.fighter_ids) {
+        const cut = e.after.cuts?.[id] || 0,
+          prior = e.before.cuts?.[id] || 0;
+        if (
+          cut <= 0 ||
+          id !== e.target_id ||
+          (cut <= prior && clip.target !== "head")
+        )
+          continue;
+        const frames = clip.tracks[e.outcome],
+          key = frames.find((k) => k.t === clip.contact_t) || frames[2];
+        const flip =
+          (e.actor_id !== log.fighter_ids[0]) !==
+          (clip.actor_role === "bottom");
+        const pose = flip ? reflect(key.b) : key.b;
+        const offset =
+          e.before.location === "center" ? 0 : arena.radius_m * 0.53;
+        const base = hash(e.id + id),
+          count = cut > prior ? 5 + Math.floor((cut - prior) * 18) : 2;
+        for (let i = 0; i < count; i++) {
+          const v = hash(String(base) + ":" + i),
+            u = (v % 1000) / 1000,
+            w = ((v >>> 10) % 1000) / 1000;
+          marks.push({
+            at_ms: e.at_ms + e.duration_ms * (clip.contact_t || 0.56),
+            x: clamp(
+              pose.root[0] + offset + (u - 0.5) * 0.48,
+              -arena.radius_m * 0.78,
+              arena.radius_m * 0.78,
+            ),
+            z: (w - 0.5) * 0.42,
+            rx: 0.007 + u * 0.024,
+            rz: 0.012 + w * 0.05,
+            angle: u * 6.28,
+            opacity: 0.32 + w * 0.22,
+            source_event: e.id,
+          });
+        }
+      }
+    }
+    return marks;
+  }
   class Player {
     constructor(replay, catalog, arenas) {
       const errors = validate(replay, catalog, arenas);
@@ -247,6 +300,11 @@
       this.clips = new Map(catalog.clips.map((c) => [c.id, c]));
       this.duration = Math.max(
         ...replay.events.map((e) => e.at_ms + e.duration_ms),
+      );
+      this.stains = bloodMarks(
+        this.log,
+        this.clips,
+        arenas.arenas.find((a) => a.id === replay.organization_id),
       );
       this.ends = this.log.events.map((e) => {
         const c = this.clips.get(e.technique_id),
@@ -329,6 +387,7 @@
       }
       const state = clone(progress >= 1 ? e.after : e.before);
       return {
+        stains: clone(this.stains.filter((mark) => mark.at_ms <= t)),
         fighter_ids: this.log.fighter_ids,
         time: t,
         event_index: lo,
@@ -376,12 +435,15 @@
     ];
     const hip = p.root,
       neck = add(hip, 0, 0.53 * h),
-      head = add(neck, 0, 0.16 * h);
+      head = add(neck, 0, 0.09 * h);
     const shoulders = [
         add(neck, -shoulder, -0.065),
         add(neck, shoulder, -0.065),
       ],
-      hips = [add(hip, -0.092, 0), add(hip, 0.092, 0)];
+      hips = [
+        add(hip, fem ? -0.114 : -0.092, 0),
+        add(hip, fem ? 0.114 : 0.092, 0),
+      ];
     const arms = shoulders.map((s, i) => {
       const candidates = [
         ik(s, p.hands[i], 0.305 * h, 0.285 * h, -1),
@@ -406,6 +468,7 @@
   }
   return {
     Player,
+    bloodMarks,
     validate,
     expectedPosition,
     mixPose,
