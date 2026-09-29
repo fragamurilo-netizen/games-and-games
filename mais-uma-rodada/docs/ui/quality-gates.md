@@ -28,7 +28,17 @@ clube de nome comprido, lesão, suspensão, folha estourada).
   seleção e indicadores.
 - Clube de camisa clara usa a segunda cor no bloco de identidade.
 
-## Pendente (antes de aplicar às outras telas)
+## Telas já recompostas depois dos gates
+
+- **Mercado**: abas Buscar, Lista, Olheiros, Vendas, Histórico; Livres, Fim de contrato e
+  Moneyball como modos da busca; tabela com poucas colunas no celular; deitado, o jogador ao
+  lado com "Fazer proposta" e "Acompanhar"; estados vazios que dizem o que fazer.
+- **Partida**: campo vertical e grande no celular em pé; barra com Tática, Instruções e
+  Substituir em destaque (Pausar, velocidade e "Mais" compactos); substituição em dois toques
+  (quem sai, quem entra); painel de números numa folha (Mais › Painel da partida).
+  Captura das folhas: `tools/match_shots.gd -- --sheets=1`.
+
+## Pendente
 
 - Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
   de toque e de teclado; precisa de um controle no `main.gd`.

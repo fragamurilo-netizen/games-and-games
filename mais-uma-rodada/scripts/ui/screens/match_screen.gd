@@ -147,6 +147,9 @@ var _wide_body: HBoxContainer = null
 ## No celular em retrato fica tudo empilhado (o placar em cima e os controles embaixo sempre).
 func _responsive_layout() -> void:
 	var wide := UILayout.is_wide()
+	# O campo é o protagonista: em pé ele fica vertical e ocupa a maior parte da altura.
+	_pitch.horizontal = wide
+	_pitch.custom_minimum_size.y = _pitch_height()
 	if wide == (_wide_body != null):
 		return
 	var left_nodes: Array = []
@@ -201,6 +204,13 @@ func _responsive_layout() -> void:
 		_wide_body = null
 
 
+## Altura do campo: deitado ele enche a coluna; em pé fica com ~55% da tela e a narração embaixo.
+func _pitch_height() -> float:
+	if UILayout.is_wide():
+		return 330.0
+	return clampf(get_viewport_rect().size.y * 0.5, 420.0, 760.0)
+
+
 # ---------------------------------------------------------------------------
 # Montagem
 # ---------------------------------------------------------------------------
@@ -245,8 +255,8 @@ func _build() -> void:
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
-	_pitch.horizontal = true
-	_pitch.custom_minimum_size = Vector2(0, 330)
+	_pitch.horizontal = UILayout.is_wide()
+	_pitch.custom_minimum_size = Vector2(0, _pitch_height())
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
 	_pitch.mouse_filter = Control.MOUSE_FILTER_PASS # toque no campo pula o replay
@@ -340,7 +350,7 @@ func _build() -> void:
 	# Controles
 	_controls_panel = PanelContainer.new()
 	_controls_panel.theme_type_variation = "BottomBar"
-	_controls = UIKit.hbox(8)
+	_controls = UIKit.hbox(UITokens.S1)
 	_controls_panel.add_child(_controls)
 	_root.add_child(_controls_panel)
 	_build_controls()
@@ -486,17 +496,67 @@ func _build_controls() -> void:
 		cont.custom_minimum_size.y = 92
 		_controls.add_child(cont)
 		return
+	# As três decisões do jogo em destaque; tempo e o resto, compactos (DESIGN.md › Partida).
 	_play_btn = _ctl_btn("Pausar", "pause", _toggle_play)
 	_speed_btn = _ctl_btn(PACE_NAMES[_pace], "fast", _cycle_speed)
+	for b in [_play_btn, _speed_btn]:
+		_compact(b)
 	_tac_btn = _ctl_btn("Tática", "tactics", _open_tactics)
-	_shout_btn = _ctl_btn("Gritar", "whistle", _open_shouts)
-	_sound_btn = _ctl_btn("Som", "sound", _toggle_match_sound)
-	_skip_btn = _ctl_btn("Fim", "skip", _confirm_skip)
-	_skip_btn.tooltip_text = "Ir para o fim"
-	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _sound_btn, _skip_btn]:
+	_shout_btn = _ctl_btn("Instruções", "whistle", _open_shouts)
+	var sub := _ctl_btn("Substituir", "swap", _open_subs)
+	var more := _ctl_btn("Mais", "menu", _match_menu)
+	_compact(more)
+	_sound_btn = null
+	_skip_btn = null
+	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, sub, more]:
 		_controls.add_child(b)
 	_update_play_button()
-	_update_sound_button()
+
+
+## Controle secundário (tempo, menu): só o ícone, estreito; o nome fica na dica.
+func _compact(b: Button) -> void:
+	b.size_flags_horizontal = Control.SIZE_FILL
+	b.custom_minimum_size.x = 60
+	b.theme_type_variation = "GhostButton"
+	b.tooltip_text = b.text
+	b.set_meta(&"compact", true)
+	b.text = ""
+
+
+## Menu do resto: painel com os números, som e ir para o fim.
+func _match_menu() -> void:
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Partida", "Section"))
+	v.add_child(UIKit.gap(UITokens.S1))
+	var muted := Sfx.match_muted()
+	var items := [
+		["Painel da partida", "Posse, finalizações, xG e notas dos jogadores", _open_panel],
+		["Ligar o som" if muted else "Desligar o som", "", _toggle_match_sound],
+		["Ir para o fim", "Simula o resto do jogo", _confirm_skip],
+	]
+	for it in items:
+		var box := UIKit.vbox(0)
+		box.add_child(UIKit.label(String(it[0]), "H3"))
+		if String(it[1]) != "":
+			box.add_child(UIKit.label(String(it[1]), "Muted"))
+		var cb: Callable = it[2]
+		var row := UIKit.tap_row(box, func():
+			UIManager.close_modal()
+			cb.call())
+		row.custom_minimum_size.y = UITokens.H_ROW
+		v.add_child(row)
+	UIManager.show_modal(v, true)
+
+
+## Painel da partida numa folha: os números sem tirar o campo da tela.
+func _open_panel() -> void:
+	var keep := _tab_box
+	var v := UIKit.vbox(UITokens.S2)
+	v.add_child(UIKit.label("Painel da partida", "Section"))
+	_tab_box = v
+	_render_stats_tab()
+	_tab_box = keep
+	UIManager.show_modal(v, true)
 
 
 ## Botão da barra: ícone em cima e o nome embaixo (cabe em qualquer largura de celular).
@@ -507,7 +567,16 @@ func _ctl_btn(text: String, icon_name: String, cb: Callable) -> Button:
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.custom_minimum_size = Vector2(0, 88)
 	b.clip_text = false
-	b.add_theme_font_size_override(&"font_size", 16)
+	b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.add_theme_font_size_override(&"font_size", 17)
+	# Margem interna menor que a do botão comum: o nome inteiro cabe no celular.
+	for st in [&"normal", &"hover", &"pressed", &"hover_pressed", &"disabled"]:
+		var sb := b.get_theme_stylebox(st)
+		if sb != null:
+			var d := sb.duplicate()
+			d.content_margin_left = 6
+			d.content_margin_right = 6
+			b.add_theme_stylebox_override(st, d)
 	return b
 
 
@@ -517,6 +586,8 @@ func _toggle_match_sound() -> void:
 
 
 func _update_sound_button() -> void:
+	if _sound_btn == null or not is_instance_valid(_sound_btn):
+		return
 	if _sound_btn == null:
 		return
 	var muted := Sfx.match_muted()
@@ -538,6 +609,8 @@ func _update_play_button() -> void:
 		_play_btn.text = "Pausar"
 		_play_btn.icon = UIKit.icon("pause")
 	_play_btn.tooltip_text = _play_btn.text
+	if _play_btn.has_meta(&"compact"):
+		_play_btn.text = ""
 
 
 static func _cdist(a: Color, b: Color) -> float:
@@ -1513,7 +1586,7 @@ func _entry_text(e: Dictionary, sc: Array) -> String:
 # ---------------------------------------------------------------------------
 
 func _tab_list() -> Array:
-	var out: Array = [["feed", "Lances"], ["stats", "Números"]]
+	var out: Array = [["feed", "Lances"]]
 	if not _div_entries.is_empty() or not _day_entries.is_empty():
 		out.append(["round", "Rodada"])
 	if _fx.is_league() or _fx.stage == Fixture.STAGE_GROUP:
@@ -1806,7 +1879,9 @@ func _start_second_half() -> void:
 
 func _cycle_speed() -> void:
 	_pace = (_pace + 1) % PACE.size()
-	_speed_btn.text = PACE_NAMES[_pace]
+	_speed_btn.tooltip_text = PACE_NAMES[_pace]
+	if not _speed_btn.has_meta(&"compact"):
+		_speed_btn.text = PACE_NAMES[_pace]
 	_clock = minf(_clock, PACE[_pace])
 	_pitch.motion.tempo = TEMPO[_pace]
 	# A preferência padrão acompanha a escolha: o próximo jogo começa no mesmo ritmo.
@@ -2099,9 +2174,30 @@ func _open_shouts() -> void:
 	UIManager.show_modal(v, true)
 
 
+var _subs_only := false
+
+
+## Substituir: lista de quem está em campo; toque em quem sai e depois em quem entra.
+func _open_subs() -> void:
+	if _done:
+		return
+	_subs_only = true
+	_sub_out = -1
+	_tac_box = UIKit.vbox(12)
+	_tac_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_render_tactics()
+	var s := ScrollContainer.new()
+	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	s.custom_minimum_size = Vector2(0, 880)
+	s.scroll_deadzone = 14
+	s.add_child(_tac_box)
+	UIManager.show_modal(s, true)
+
+
 func _open_tactics() -> void:
 	if _done:
 		return
+	_subs_only = false
 	_sub_out = -1
 	_tac_box = UIKit.vbox(12)
 	_tac_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -2120,13 +2216,16 @@ func _render_tactics() -> void:
 	UIKit.clear(_tac_box)
 	var t: MatchTeam = _sim.teams[_user_side]
 	var head := UIKit.hbox(10)
-	var title := UIKit.label("Ajustes da partida" if _sub_out < 0 else "Quem entra?", "Title")
+	var title := UIKit.label(("Substituir" if _subs_only else "Tática") if _sub_out < 0 else "Quem entra?", "Section")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
 	_tac_box.add_child(head)
 	if _sub_out >= 0:
 		_render_bench_choice(t)
+		return
+	if _subs_only:
+		_render_subs(t)
 		return
 	var tac := DatabaseManager.tactics()
 	_tac_box.add_child(UIKit.section("Formação"))
@@ -2187,6 +2286,10 @@ func _render_tactics() -> void:
 				_drain(false)
 				_render_tactics()))
 		_tac_box.add_child(fl2)
+
+
+## Quem está em campo, com fôlego, nota e cartão: tocar escolhe quem sai.
+func _render_subs(t: MatchTeam) -> void:
 	var auto := CheckButton.new()
 	auto.text = "Assistente troca jogadores cansados"
 	auto.button_pressed = t.auto_subs
@@ -2194,7 +2297,7 @@ func _render_tactics() -> void:
 	auto.toggled.connect(func(v: bool): t.auto_subs = v)
 	_tac_box.add_child(auto)
 	var left := t.max_subs - t.subs_used
-	_tac_box.add_child(UIKit.section("Em campo · substituições %d/%d" % [t.subs_used, t.max_subs]))
+	_tac_box.add_child(UIKit.label("Quem sai? %d de %d trocas feitas." % [t.subs_used, t.max_subs], "Muted"))
 	if left <= 0:
 		_tac_box.add_child(UIKit.label("Sem substituições restantes.", "Muted"))
 	for mp: MatchPlayer in t.slots:

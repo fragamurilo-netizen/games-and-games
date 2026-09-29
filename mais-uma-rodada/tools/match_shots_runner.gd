@@ -9,6 +9,8 @@ var opt_secs := "40"
 var opt_night := ""
 var opt_skip := ""
 var opt_rain := ""
+## --sheets=1: captura também as folhas da partida (Substituir, quem entra, Painel, Mais).
+var opt_sheets := ""
 var shots := false
 var n := 0
 
@@ -118,6 +120,29 @@ func _run() -> void:
 		var ov: GoalOverlay = ms.get("_overlay")
 		if not got_goal and ov != null and ov.is_playing():
 			got_goal = true
+	if opt_sheets == "1":
+		ms.call("_toggle_play")
+		ms.call("_open_subs")
+		await _frames(6)
+		await _shot("folha_substituir")
+		var t = ms.get("_sim").teams[int(ms.get("_user_side"))]
+		for mp in t.slots:
+			if mp != null:
+				ms.set("_sub_out", mp.p.id)
+				break
+		ms.call("_render_tactics")
+		await _frames(6)
+		await _shot("folha_quem_entra")
+		UIManager.close_all_modals()
+		ms.call("_open_panel")
+		await _frames(6)
+		await _shot("folha_painel")
+		UIManager.close_all_modals()
+		ms.call("_match_menu")
+		await _frames(6)
+		await _shot("folha_mais")
+		UIManager.close_all_modals()
+		ms.call("_toggle_play")
 	if opt_skip == "1":
 		ms.call("_skip_to_end")
 	# Resto do jogo em turbo (confere que roda até o fim sem erro).
