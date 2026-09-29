@@ -478,9 +478,11 @@ func _slot_buttons() -> Array:
 
 
 func _begin(slot: int) -> void:
-	GameManager.start_career(_world, _selected, _manager, _difficulty, slot)
-	if _nt != "":
-		NationalCoach.accept(_world, _nt)
-		GameManager.save_now()
-	UIManager.goto("welcome")
-	UIManager.toast("Bem-vindo ao %s! Boa sorte, %s." % [_world.user_club().short_name, _world.manager_name])
+	var w := _world
+	var nt := _nt
+	GameManager.start_career_async(w, _selected, _manager, _difficulty, slot, func() -> void:
+		if nt != "":
+			NationalCoach.accept(w, nt)
+			GameManager.save_now()
+		UIManager.goto("welcome")
+		UIManager.toast("Bem-vindo ao %s! Boa sorte, %s." % [w.user_club().short_name, w.manager_name]))

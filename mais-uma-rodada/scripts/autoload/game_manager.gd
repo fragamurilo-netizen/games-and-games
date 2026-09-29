@@ -180,6 +180,28 @@ func ensure_preview_world(done: Callable) -> void:
 func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int) -> void:
 	_cancel_save()
 	world = w
+	_start_core(club_id, manager_name, difficulty, save_slot)
+	save_now()
+	world_changed.emit()
+
+
+## Mesmo começo de carreira numa thread (vários segundos no celular: temporada, base, pré-temporada
+## e o avanço até o primeiro jogo); `done()` na principal, já com o save pedido.
+func start_career_async(w: GameWorld, club_id: int, manager_name: String, difficulty: int, save_slot: int, done: Callable) -> void:
+	_cancel_save()
+	world = w
+	var after := func(_r: Variant) -> void:
+		save_now()
+		world_changed.emit()
+		done.call()
+	if not run_work(func() -> bool:
+			_start_core(club_id, manager_name, difficulty, save_slot)
+			return true, after, "Preparando a carreira..."):
+		_start_core(club_id, manager_name, difficulty, save_slot)
+		after.call(true)
+
+
+func _start_core(club_id: int, manager_name: String, difficulty: int, save_slot: int) -> void:
 	world.user_club_id = club_id
 	world.manager_name = manager_name.strip_edges() if manager_name.strip_edges() != "" else "Treinador"
 	world.difficulty = difficulty
@@ -213,8 +235,6 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 	PreseasonManager.open(world)
 	InboxManager.on_new_job(world)
 	SeasonManager.advance_to_user(world)
-	save_now()
-	world_changed.emit()
 
 
 func load_career(save_slot: int) -> bool:
