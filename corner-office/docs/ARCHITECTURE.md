@@ -23,8 +23,8 @@ content/*.json ─► simulation (models + systems) ─► EventBus / Game.world
 | Módulo | Arquivo | Responsabilidade | Status |
 |---|---|---|---|
 | WorldSim | `simulation/world/world_sim.gd` | Tempo, eventos globais, geração e aposentadoria | relógio pronto; sistemas TODO |
-| FightEngine | `simulation/fight/fight_engine.gd` | Simulação por round, dano, resultado | TODO(M1) |
-| Judge | `simulation/fight/judge.gd` | 10-point must por juiz, perfis de juiz | TODO(M1) |
+| FightEngine | `simulation/fight/fight_engine.gd` | Simulação por trocas, dano, resultados e histórico | protótipo funcional + testes de distribuição |
+| Judge | `simulation/fight/judge.gd` | 10-point must / avaliação global, perfis de juiz | funcional + testes de prioridade de critérios |
 | Matchmaking | `simulation/matchmaking/matchmaking.gd` | Elegibilidade, 3 scores, propostas | TODO(M1) |
 | Rankings | `simulation/rankings/rankings.gd` | Rankings por org + World Combat Index | TODO(M1) |
 | Contracts | `simulation/contracts/contracts.gd` | Ofertas, BATNA, agentes, free agency | `sign()` pronto; resto TODO |

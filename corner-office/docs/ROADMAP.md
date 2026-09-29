@@ -13,16 +13,17 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 
 ## M1 — Loop jogável
 
-- [ ] `WorldGenerator`: 100+ lutadores procedurais coerentes por região/estilo + 3 organizações ativas; atributos para o roster canônico
+- [ ] `WorldGenerator`: 100+ lutadores procedurais coerentes por região/estilo + 3 organizações ativas
 - [x] Protótipo da biblioteca de rostos (`prototypes/face-lab/`)
 - [x] Fight Studio: catálogo 2D pareado, arenas das sete organizações, replays autorais e sampler Godot ([guia](FIGHT_VISUALS.md))
-- [ ] Arte final das animações e renderer nativo; ligar eventos reais do FightEngine ao replay
+- [x] Perfis de combate do roster canônico e adaptador de eventos reais para o Fight Studio
+- [ ] Arte final das animações e renderer nativo
 - [ ] `FaceGenerator`: portar o protótipo para Godot (e/ou integrar o gerador do Mais Uma Rodada — auditar licença/estrutura primeiro)
 - [ ] Tela Lutadores: roster, perfil (bottom sheet), rankings
 - [ ] `Contracts`: oferta e renovação com BATNA simples
 - [ ] Tela Eventos: montar evento com 6–10 lutas
 - [ ] `Matchmaking`: sporting fit / acceptance / commercial fit + recusa com reason codes
-- [ ] `FightEngine` + `Judge`: simulação por round, métodos de vitória, scorecards
+- [x] Protótipo `FightEngine` + `Judge`: trocas, dano, KO/TKO/submissão, decisões e scorecards
 - [ ] Tela de luta: round a round em 1x/2x/5x/instantâneo
 - [ ] `Rankings`: atualização pós-evento + snapshots
 - [ ] `Economy`: P&L projetado e real

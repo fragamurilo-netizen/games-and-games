@@ -34,4 +34,5 @@ jobs:
         run: |
           python3 corner-office/tools/build_motion_catalog.py
           python3 corner-office/tools/build_replay_examples.py
+          python3 corner-office/tools/build_simulated_replays.py
           git diff --exit-code -- corner-office/game/content

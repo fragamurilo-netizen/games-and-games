@@ -93,6 +93,7 @@
       buildAppearances();
       time = 0;
       lastEvent = -1;
+      $("verdict").hidden = true;
       message("");
       $("arena").value = log.organization_id;
       $("seek").max = player.duration;
@@ -100,7 +101,7 @@
         log.source === "simulation"
           ? "REPLAY · registro da simulação"
           : "DEMONSTRAÇÃO · sequência autoral";
-      for (const id of ["arena", "fighter-red", "fighter-blue", "sequence"])
+      for (const id of ["arena", "fighter-red", "fighter-blue"])
         $(id).disabled = log.source === "simulation";
       for (const [i, id] of log.fighter_ids.entries()) {
         $("name-" + (i ? "blue" : "red")).textContent = name(id);
@@ -180,6 +181,17 @@
           dq: "Desclassificação",
         }[frame.result.method] || "")
       : "";
+    showVerdict(frame.result);
+    const threat = frame.state.submission;
+    $("fight-story").textContent = threat?.technique_id
+      ? `${name(threat.attacker_id)} trabalha ${catalog.clips.find((c) => c.id === threat.technique_id)?.label || "a finalização"} · pressão ${Math.round(threat.progress * 100)}%`
+      : frame.event.reason_codes.includes("KNOCKDOWN")
+        ? "Knockdown! A continuidade depende da reação e da defesa."
+        : frame.clip.family === "entry" && frame.event.outcome === "defended"
+          ? `${name(frame.event.target_id)} defende a queda e tenta retomar a iniciativa.`
+          : frame.clip.category === "official"
+            ? frame.clip.label
+            : `${name(frame.event.actor_id)} · ${frame.clip.label} · ${labels[frame.event.outcome].toLowerCase()}`;
     if (lastEvent !== frame.event_index) {
       lastEvent = frame.event_index;
       for (const row of $("events").children)
@@ -188,6 +200,130 @@
           Number(row.dataset.event) === lastEvent,
         );
     }
+  }
+  function showVerdict(result) {
+    $("verdict").hidden = !result;
+    if (!result) return;
+    const types = {
+      ko: "Nocaute",
+      referee_tko: "TKO · interrupção do árbitro",
+      body_tko: "TKO · golpes no corpo",
+      leg_tko: "TKO · dano nas pernas",
+      unanimous: "Decisão unânime",
+      split: "Decisão dividida",
+      majority: "Decisão majoritária",
+    };
+    $("verdict-title").textContent = result.winner_id
+      ? name(result.winner_id) + " vence"
+      : "Empate";
+    const detail =
+      types[result.detail] ||
+      catalog.clips.find((c) => c.id === result.detail)?.label ||
+      {
+        ko_tko: "KO/TKO",
+        submission: "Finalização",
+        decision: "Decisão",
+        draw: "Empate",
+        nc: "No contest",
+        dq: "Desclassificação",
+      }[result.method] ||
+      "";
+    $("verdict-detail").textContent =
+      `${detail}${result.round ? " · R" + result.round : ""}${result.time_s != null ? " · " + clock(result.time_s) : ""}`;
+    const signature = JSON.stringify(result);
+    if ($("scorecards").dataset.result === signature) return;
+    $("scorecards").dataset.result = signature;
+    $("scorecards").replaceChildren();
+    (result.scorecards || []).forEach((card, i) => {
+      const panel = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = `Juiz ${i + 1} · ${card.total.join("–")}`;
+      const scores = document.createElement("p");
+      scores.textContent =
+        card.scoring === "whole_fight"
+          ? "Avaliação global da luta"
+          : card.rounds.map((s, i) => `R${i + 1}: ${s.join("–")}`).join(" · ");
+      panel.append(title, scores);
+      $("scorecards").append(panel);
+    });
+  }
+  async function setupSimulation() {
+    const roster = await get("canonical_fighters.json");
+    const visible = [
+      "carter",
+      "moreira",
+      "arsanov",
+      "reyes",
+      "costa",
+      "sato",
+      "monroe",
+      "volkovic",
+      "markovic",
+      "cole",
+    ].map((x) => "ftr_" + x);
+    for (const f of roster.filter((f) => visible.includes(f.id)))
+      for (const side of ["red", "blue"])
+        option($("match-" + side), f.id, f.first_name + " " + f.last_name);
+    $("match-red").value = "ftr_carter";
+    $("match-blue").value = "ftr_moreira";
+    for (const a of arenas.arenas) option($("match-org"), a.id, a.name);
+    for (const style of catalog.styles)
+      for (const side of ["red", "blue"])
+        option($("match-" + side + "-style"), style.id, style.label);
+    $("match-org").onchange = () => {
+      const ring =
+        arenas.arenas.find((a) => a.id === $("match-org").value).venue ===
+        "ring";
+      $("match-rounds").options[1].disabled = ring;
+      if (ring) $("match-rounds").value = "3";
+    };
+    try {
+      const response = await fetch("/api/status");
+      if (!response.ok || (await response.json()).engine !== "godot")
+        throw new Error();
+      $("engine-status").textContent =
+        "Motor conectado. Prepare o confronto e acompanhe.";
+    } catch {
+      $("simulate").disabled = true;
+      $("engine-status").textContent =
+        "Replays prontos disponíveis abaixo. Para criar novos confrontos, inicie tools/fight_lab_server.py conforme o guia da equipe.";
+    }
+    $("match-form").onsubmit = async (e) => {
+      e.preventDefault();
+      $("simulate").disabled = true;
+      $("engine-status").textContent = "Simulando o confronto…";
+      try {
+        const response = await fetch("/api/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            seed: Number($("match-seed").value),
+            red: $("match-red").value,
+            blue: $("match-blue").value,
+            organization: $("match-org").value,
+            rounds: Number($("match-rounds").value),
+            red_style: $("match-red-style").value,
+            blue_style: $("match-blue-style").value,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.error || "Não foi possível simular.");
+        load(data);
+        playing = true;
+        $("loop").checked = false;
+        syncPlay();
+        $("engine-status").textContent =
+          `Luta pronta · seed ${data.seed} · ${data.events.length} trocas registradas.`;
+        $("fight").scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch (error) {
+        message(error.message);
+        $("engine-status").textContent =
+          "Não foi possível concluir. Confira os dados do confronto.";
+      } finally {
+        $("simulate").disabled = false;
+      }
+    };
   }
   function syncPlay() {
     $("play").textContent = playing ? "Pausar" : "Reproduzir";
@@ -324,6 +460,8 @@
       get("arena_profiles.json"),
       get("replays/index.json"),
     ]);
+    const simulatedIndex = await get("replays/simulated_index.json");
+    index.push(...simulatedIndex);
     examples = await Promise.all(index.map((x) => get("replays/" + x.file)));
     renderer = new FightRenderer($("fight"));
     $("inventory").textContent =
@@ -438,7 +576,9 @@
     document.addEventListener("visibilitychange", () => {
       last = 0;
     });
-    load(examples[0]);
+    await setupSimulation();
+    load(examples.find((x) => x.source === "simulation") || examples[0]);
+    $("sequence").value = String(examples.findIndex((x) => x.id === log.id));
     selectClip(catalog.clips.find((c) => c.id === "jab"));
     filter();
     syncPlay();

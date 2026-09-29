@@ -1,0 +1,22 @@
+[
+  {
+    "id": "sim_pressure",
+    "title": "Simulação · boxe × jiu-jítsu",
+    "file": "sim_pressure.json"
+  },
+  {
+    "id": "sim_exchange",
+    "title": "Simulação · pressão e interrupção",
+    "file": "sim_exchange.json"
+  },
+  {
+    "id": "sim_women",
+    "title": "Simulação · Costa × Markovic",
+    "file": "sim_women.json"
+  },
+  {
+    "id": "sim_distance",
+    "title": "Simulação · Arsanov × Sato",
+    "file": "sim_distance.json"
+  }
+]

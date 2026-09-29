@@ -1,24 +1,28 @@
 # Fight Studio
 
-Laboratório de movimentos, interações e arenas do Corner Office. Execute um
-servidor na pasta `corner-office` e abra `/prototypes/fight-lab/`.
+Laboratório visual ligado ao motor de combate Godot. Na pasta `corner-office`:
 
 ```sh
-python -m http.server 8767 --bind 127.0.0.1
+godot --headless --path game --editor --import
+python tools/fight_lab_server.py --godot /caminho/absoluto/godot --port 8768
+# http://127.0.0.1:8768/prototypes/fight-lab/
 ```
 
-Catálogo procedural 2D com 156 técnicas, 478 respostas pareadas, dez bases,
-sete arenas e seis replays autorais. O player só ilustra eventos resolvidos.
-Use filtros para encontrar uma técnica e inspecione suas respostas; importar
-JSON permite testar o contrato destinado ao futuro FightEngine.
+Escolha dois atletas, organização, rounds, plano e seed; clique **Simular confronto**.
+A luta é autônoma. O mesmo motor gera o resultado e o registro que o player reproduz.
+Há KO/TKO, quinze técnicas de submissão, dano regional, fadiga e cartões dos juízes.
+O plano muda preferências táticas, preservando os atributos originais do atleta.
 
-- Play/pause, seek, 0,25×, 1×, 2×, 5× e resultado instantâneo.
-- Câmeras de transmissão, detalhe e arena; visualização opcional do rig.
-- Rostos compartilhados com face-lab, atletas masculinos e femininos.
-- Cages das seis organizações e ringue da Shinsei.
-- Exportação do registro JSON; nenhuma ação controla golpes de uma partida.
+Sem Godot, `python -m http.server 8767 --bind 127.0.0.1` permite assistir aos quatro
+replays reais pré-calculados e às seis demonstrações autorais. Não gera novas lutas.
 
-O protótipo usa poses 2D paramétricas, sem física de colisão ou motion capture.
-O renderer nativo na Godot e o motor de combate ainda precisam ser ligados.
+- 158 técnicas, 486 respostas pareadas, dez bases e sete arenas fictícias.
+- Reprodução, pausa, seek, 0,25×/1×/2×/5× e resultado instantâneo.
+- Rostos compartilhados com Face Lab; materiais anatômicos, membros conectados,
+  recuperação da guarda, bruising regional e cortes discretos.
+- Exportação/importação do registro completo; a velocidade não altera o vencedor.
+- O render é 2D paramétrico. Contato fino, oclusão e rotações de chão ainda precisam
+  de refinamento artístico; o renderer nativo Godot permanece no roadmap.
 
 [Contrato, testes e passagem de trabalho](../../docs/FIGHT_VISUALS.md).
+[Pesquisa em relatos oficiais de lutas reais](../../docs/FIGHT_BEHAVIOR_RESEARCH.md).

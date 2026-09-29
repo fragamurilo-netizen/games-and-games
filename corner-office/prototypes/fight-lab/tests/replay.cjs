@@ -7,7 +7,10 @@ const D = path.resolve(__dirname, "../../../game/content"),
 const R = require("../replay"),
   catalog = read("fight_visuals.json"),
   arenas = read("arena_profiles.json"),
-  examples = read("replays/index.json").map((x) => read("replays/" + x.file));
+  examples = [
+    ...read("replays/index.json"),
+    ...read("replays/simulated_index.json"),
+  ].map((x) => read("replays/" + x.file));
 const clone = (x) => JSON.parse(JSON.stringify(x));
 let samples = 0;
 assert.equal(

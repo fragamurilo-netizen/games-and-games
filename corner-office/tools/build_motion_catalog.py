@@ -45,7 +45,7 @@ clips=[]
 def add(id,label,category,styles,froms,family='strike',target='head',hand=0,to=None,duration=1600,variant=0):
     if isinstance(froms,str):froms=[froms]
     source=froms[0];dest=to or source
-    bottom_ids={'triangle','armbar_guard','omoplata','guillotine','guard_recover','half_guard_recover','hip_escape','bridge_escape','scissor_sweep','butterfly_sweep','hip_bump_sweep','kimura_sweep','back_escape','technical_stand','wall_walk','wrestle_up'}
+    bottom_ids={'knockdown_recover','triangle','armbar_guard','omoplata','guillotine','guard_recover','half_guard_recover','hip_escape','bridge_escape','scissor_sweep','butterfly_sweep','hip_bump_sweep','kimura_sweep','back_escape','technical_stand','wall_walk','wrestle_up'}
     actor_role='bottom' if id in bottom_ids else 'top' if source in ['guard','half_guard','side_control','mount_back','scramble'] else 'either'
     outcomes={'strike':['landed','blocked','evaded','missed','knockdown','stoppage'],'kick':['landed','blocked','evaded','missed','knockdown','stoppage'],'entry':['completed','defended'],'transition':['completed','defended'],'submission':['threatened','escaped','tapped'],'control':['held','escaped'],'defense':['completed'],'move':['completed'],'official':['completed']}[family]
     frames={}
@@ -134,16 +134,35 @@ def add(id,label,category,styles,froms,family='strike',target='head',hand=0,to=N
                 contact=[head[0]-.09,head[1]-.03] if target=='head' else [b['root'][0]-.06,b['root'][1]+.23] if target=='body' else [b['root'][0]-.08,.40]
                 if outcome=='blocked':contact=[contact[0]-.12,contact[1]];b['hands'][0]=contact
                 eff='hands' if family=='strike' else 'feet';a[eff][hand]=contact
-                needed=contact[0]-(.45 if family=='strike' else .54)
+                needed=contact[0]-(.58 if family=='strike' else .45 if target=='head' else .64)
                 delta=needed-a['root'][0];a['root'][0]=needed
-                if family=='kick' and target=='head':a['root'][1]=1.05
+                if family=='kick' and target=='head':a['root'][1]=.90
                 for pt in a['hands']:
                     if pt is not a[eff][hand]:pt[0]+=delta*.6
                 for j,pt in enumerate(a['feet']):
                     if eff!='feet' or j!=hand:pt[0]+=delta*.75
             if 'spinning' in id or id=='wheel_kick':wind[0]['lean']=-32;wind[0]['head']=-30;impact[0]['head']=25
-            if 'knee' in id:impact[0]['root'][1]+= .12;impact[0]['feet'][hand][0]-=.12
+            if family=='kick' and target=='head':
+                a['feet'][1-hand]=[a['root'][0]-.16,.055]
+            if 'knee' in id:
+                a['lean']=8;a['root']=[contact[0]-.32,1.2 if id=='flying_knee' else .89]
+                hip=[a['root'][0]+(.092 if hand else -.092),a['root'][1]]
+                dx,dy=contact[0]-hip[0],contact[1]-hip[1];length=max(.01,math.hypot(dx,dy))
+                knee=[hip[0]+dx/length*.44,hip[1]+dy/length*.44]
+                a['feet'][hand]=[knee[0]-.22,knee[1]-.37]
+                a['feet'][1-hand]=[a['root'][0]-.16,.24 if id=='flying_knee' else .055]
+                a['hands']=[[a['root'][0]+.11,1.43],[a['root'][0]+.25,1.49]]
         frames[outcome]=[dict(t=0,a=start[0],b=start[1]),dict(t=.26,a=wind[0],b=wind[1]),dict(t=.56,a=impact[0],b=impact[1]),dict(t=1,a=end[0],b=end[1])]
+        if family in ['strike','kick']:
+            # Hands accelerate late, then recoil. Feet have a lift instead of sliding through the mat.
+            frames[outcome].insert(2,dict(t=.43,a=cp(wind[0]),b=cp(wind[1])))
+            if outcome not in ['knockdown','stoppage']:
+                frames[outcome].insert(-1,dict(t=.82,a=cp(end[0]),b=cp(end[1])))
+        if family=='move':
+            for phase in [wind,impact]:
+                phase[0]['feet'][variant%2][1]+=.055
+            frames[outcome][1]['a']=wind[0]
+            frames[outcome][2]['a']=impact[0]
     clips.append(dict(id=id,label=label,category=category,actor_role=actor_role,styles=styles.split(),from_positions=froms,to_position=dest,family=family,target=target,limb=hand,duration_ms=duration,contact_t=.56,outcomes=outcomes,tracks=frames,notes='Resultado e legalidade fornecidos pelo motor; variação visual não resolve combate.'))
 # Stable technique ids, not every outcome counted as a new movement.
 for i,(id,label) in enumerate([('step_in','Avançar medindo distância'),('step_out','Recuo em guarda'),('circle_left','Circular à esquerda'),('circle_right','Circular à direita'),('pivot','Pivô e saída lateral'),('switch_stance','Troca de base'),('feint_jab','Finta de jab'),('feint_level','Finta de queda'),('cut_cage','Cortar a grade'),('bounce','Base móvel'),('reset_distance','Recompor distância'),('touch_gloves','Toque de luvas')]):add(id,label,'movement','mma boxing karate taekwondo','long_range','move',variant=i)
@@ -169,7 +188,18 @@ add('enter_pocket','Fechar a distância','movement','mma','long_range','transiti
 add('exit_pocket','Sair do pocket','movement','mma','pocket','transition',to='long_range')
 add('cage_separate','Separar as pegadas na grade','clinch','mma','cage_wrestling','transition',to='cage_striking')
 add('leave_cage','Sair da grade','movement','mma','cage_striking','transition',to='pocket')
+add('knockdown_followup','Ataque após knockdown','gnp','mma wrestling','scramble','strike','head',1)
+add('knockdown_recover','Recuperar a base após knockdown','scramble','mma','scramble','transition',to='pocket')
+for c in clips:
+    c['selection_weight']=2.2 if c['id'] in ['jab','cross','body_cross','outside_low','calf_kick','teep','double_leg','single_leg','guard_punch','mount_punch','rear_naked_choke'] else .18 if any(x in c['id'] for x in ['spinning','wheel','flying','crescent','backfist','slicer']) else 1.0
+    if c['category']=='official':
+        c['from_positions']=['reset','long_range','pocket','cage_striking','clinch','open_wrestling','cage_wrestling','guard','half_guard','side_control','mount_back','scramble']
+        c['to_position']='long_range' if c['id']=='round_start' else 'reset'
+        if c['id']=='round_start':
+            for frames in c['tracks'].values():
+                end=pair('long_range');frames[-1]['a'],frames[-1]['b']=end
 save('fight_visuals.json',dict(version=1,units='metres_y_up',source='Game Design Bible §§5–6,15,17; MMA Bible §§7,20',positions=['long_range','pocket','cage_striking','clinch','open_wrestling','cage_wrestling','guard','half_guard','side_control','mount_back','scramble','reset'],categories=PHASES,styles=[dict(id=i,label=l,description=d) for i,l,d in STYLES],clips=clips))
+save('fight_techniques.json',dict(version=1,clips=[{k:v for k,v in c.items() if k not in ['tracks','notes','contact_t']} for c in clips]))
 orgs=json.loads((CONTENT/'organizations.json').read_text(encoding='utf-8'))
 palettes=[('#B88B46','#22282D','#DBD6C9'),('#427B86','#1A3039','#D7E1E2'),('#477C58','#203A2B','#DDDCD1'),('#B3453E','#342529','#ECE5D7'),('#A45B44','#352A29','#DAD5CD'),('#658087','#243038','#CDD1CA'),('#327C83','#1D3439','#DCE1D8')]
 arenas=[]

@@ -45,7 +45,7 @@
       this.W = W;
       this.H = H;
       this.S =
-        Math.min(W / 8.8, H / 4.5) *
+        Math.min(W / (W < 600 ? 4.8 : 8.8), H / 4.5) *
         (this.camera === "detail"
           ? 1.65
           : this.camera === "tactical"
@@ -119,6 +119,7 @@
           id === frame.fighter_ids[0] ? arena.red_corner : arena.blue_corner,
           offset,
           frame.state.damage[id],
+          frame.state.cuts?.[id] || 0,
         );
       this.arena(arena, true);
       if (frame.clip.category === "official")
@@ -313,7 +314,7 @@
         }
       }
     }
-    fighter(p, f, corner, offset, damage) {
+    fighter(p, f, corner, offset, damage, cuts = 0) {
       const c = this.ctx,
         s = FightReplay.skeleton(p, f),
         scale = this.S,
@@ -362,7 +363,11 @@
           );
         }
         path.closePath();
-        c.fillStyle = fill || skinGrad(points[0][0], size * 2);
+        const xs = points.map((p) => p[0]),
+          minX = Math.min(...xs),
+          maxX = Math.max(...xs);
+        c.fillStyle =
+          fill || skinGrad((minX + maxX) * 0.5, (maxX - minX) * 0.5 + size);
         c.fill(path);
         c.save();
         c.clip(path);
@@ -380,22 +385,67 @@
         return path;
       };
       const limb = (origin, limb, radii) => {
-        const points = [P(origin), P(limb.joint), P(limb.end)];
-        tube(points, radii);
+        const a = P(origin),
+          j = P(limb.joint),
+          e = P(limb.end);
+        const lerp = (x, y, t) => x.map((v, i) => v + (y[i] - v) * t);
+        const points = [a, lerp(a, j, 0.4), j, lerp(j, e, 0.36), e];
+        const shape = tube(points, [
+          radii[0],
+          radii[0] * 1.09,
+          radii[1],
+          radii[1] * 1.12,
+          radii[2],
+        ]);
+        c.save();
+        c.clip(shape);
+        // Broad anatomical planes follow the actual bones, including bent elbows/knees.
+        const v = [j[0] - a[0], j[1] - a[1]],
+          length = Math.hypot(...v);
+        studioSoft(
+          c,
+          a[0] + v[0] * 0.43 - size * 0.16,
+          a[1] + v[1] * 0.43,
+          radii[0] * 0.49,
+          length * 0.35,
+          lighten(skin, 0.3),
+          0.28,
+          Math.atan2(v[1], v[0]) - Math.PI / 2,
+        );
+        const v2 = [e[0] - j[0], e[1] - j[1]],
+          l2 = Math.hypot(...v2);
+        studioSoft(
+          c,
+          j[0] + v2[0] * 0.4 - size * 0.14,
+          j[1] + v2[1] * 0.4,
+          radii[1] * 0.5,
+          l2 * 0.35,
+          lighten(skin, 0.3),
+          0.27,
+          Math.atan2(v2[1], v2[0]) - Math.PI / 2,
+        );
+        c.restore();
         return points;
       };
       const foot = (limb, i) => {
         const a = P(limb.end);
         c.save();
         c.translate(...a);
-        const direction = i ? 1 : -1;
+        const direction = p.facing || 1;
+        if (limb.end[1] > 0.19)
+          c.rotate(
+            -Math.atan2(
+              limb.end[1] - limb.joint[1],
+              limb.end[0] - limb.joint[0],
+            ) + (direction > 0 ? 0 : Math.PI),
+          );
         c.fillStyle = skinGrad(0, size);
         c.beginPath();
         c.ellipse(
-          direction * size * 0.35,
+          direction * size * 0.57,
           0,
-          size * 0.65,
-          size * 0.31,
+          size * 0.97,
+          size * 0.32,
           0,
           0,
           Math.PI * 2,
@@ -404,7 +454,7 @@
         for (let k = 0; k < 5; k++) {
           c.beginPath();
           c.ellipse(
-            direction * (size * 0.52 + k * size * 0.1),
+            direction * (size * 1.18 + k * size * 0.05),
             size * (-0.19 + k * 0.095),
             size * (0.15 - k * 0.018),
             size * 0.065,
@@ -418,9 +468,22 @@
       };
       limb(s.hips[0], s.legs[0], [size * 1.26, size * 0.74, size * 0.43]);
       foot(s.legs[0], 0);
-      limb(s.shoulders[0], s.arms[0], [size * 0.97, size * 0.63, size * 0.42]);
+      limb(s.shoulders[0], s.arms[0], [size * 0.72, size * 0.47, size * 0.33]);
       limb(s.hips[1], s.legs[1], [size * 1.28, size * 0.76, size * 0.43]);
       foot(s.legs[1], 1);
+      if ((damage?.leg || 0) > 0.12) {
+        const a = P(s.hips[1]),
+          b = P(s.legs[1].joint);
+        studioSoft(
+          c,
+          a[0] * 0.4 + b[0] * 0.6,
+          a[1] * 0.4 + b[1] * 0.6,
+          size * 0.7,
+          size * 1.0,
+          "#794E58",
+          Math.min(0.4, damage.leg * 0.5),
+        );
+      }
       // Continuous torso from hips through shoulders and the neck.
       const angle = (p.lean * Math.PI) / 180;
       c.save();
@@ -445,8 +508,8 @@
         -0.43 * scale,
       );
       c.quadraticCurveTo(
-        -shoulder * 0.7,
-        -0.53 * scale,
+        -shoulder * 0.84,
+        -0.54 * scale,
         -0.07 * scale,
         -0.5 * scale,
       );
@@ -454,8 +517,8 @@
       c.lineTo(0.06 * scale, -0.64 * scale);
       c.lineTo(0.07 * scale, -0.5 * scale);
       c.quadraticCurveTo(
-        shoulder * 0.7,
-        -0.53 * scale,
+        shoulder * 0.84,
+        -0.54 * scale,
         shoulder,
         -0.43 * scale,
       );
@@ -471,35 +534,42 @@
       c.fill();
       c.save();
       c.clip();
-      studioSoft(
+      studioTorso(
         c,
-        -0.07 * scale,
-        -0.38 * scale,
-        0.12 * scale,
-        0.075 * scale,
-        lighten(skin, 0.33),
-        0.35,
+        scale * 0.175,
+        0,
+        -scale * 0.76,
+        skin,
+        shoulder / (scale * 0.175),
+        waist / (scale * 0.175),
+        fat,
+        muscle,
+        fem,
+        f.seed || 17,
       );
-      studioSoft(
-        c,
-        0.13 * scale,
-        -0.25 * scale,
-        0.06 * scale,
-        0.22 * scale,
-        darken(skin, 0.7),
-        0.32,
-      );
-      for (let i = 0; i < 3; i++)
-        for (const side of [-1, 1])
-          studioSoft(
-            c,
-            side * 0.037 * scale,
-            (-0.28 + i * 0.08) * scale,
-            0.034 * scale,
-            0.038 * scale,
-            lighten(skin, 0.25),
-            0.22 * muscle,
-          );
+      // Local bruising follows the torso instead of floating in screen coordinates.
+      if ((damage?.body || 0) > 0.12) {
+        studioSoft(
+          c,
+          scale * 0.065,
+          -scale * 0.21,
+          scale * 0.078,
+          scale * 0.055,
+          "#813F48",
+          Math.min(0.4, damage.body * 0.5),
+          -0.3,
+        );
+        studioSoft(
+          c,
+          -scale * 0.09,
+          -scale * 0.35,
+          scale * 0.055,
+          scale * 0.038,
+          "#946D61",
+          Math.min(0.33, damage.body * 0.45),
+          0.3,
+        );
+      }
       c.restore();
       if (fem) {
         const kitColor = SHORTS[f.kit?.shorts]?.[0] || corner;
@@ -545,7 +615,7 @@
           1,
         );
       c.restore();
-      limb(s.shoulders[1], s.arms[1], [size, size * 0.65, size * 0.43]);
+      limb(s.shoulders[1], s.arms[1], [size * 0.74, size * 0.49, size * 0.33]);
       for (const arm of s.arms) {
         const hand = P(arm.end);
         c.save();
@@ -596,6 +666,15 @@
           Math.PI * 2,
         );
         c.fill();
+      }
+      if (cuts > 0.04) {
+        this.line(
+          [-headW * 0.17, -headH * 0.08],
+          [-headW * 0.02, -headH * 0.11],
+          "#7E2C30",
+          Math.max(1, scale * 0.006),
+          Math.min(0.85, 0.3 + cuts),
+        );
       }
       c.restore();
       if (this.showRig) {

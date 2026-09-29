@@ -29,7 +29,7 @@ func load_replay(data: Dictionary) -> bool:
 	for event: Dictionary in _log.events:
 		duration_ms = maxf(duration_ms, event.at_ms + event.duration_ms)
 		var last: Dictionary = _clips[event.technique_id].tracks[event.outcome][-1]
-		var flip: bool = event.actor_id != _log.fighter_ids[0]
+		var flip: bool = (event.actor_id != _log.fighter_ids[0]) != (_clips[event.technique_id].actor_role == "bottom")
 		_ends.append({event.actor_id: _reflect(last.a) if flip else last.a.duplicate(true), event.target_id: _reflect(last.b) if flip else last.b.duplicate(true)})
 	return true
 
@@ -165,7 +165,7 @@ func seek_ms(milliseconds: float) -> Dictionary:
 	weight = weight * weight * (3.0 - 2.0 * weight)
 	var a: Dictionary = _blend(frames[n].a, frames[n + 1].a, weight)
 	var b: Dictionary = _blend(frames[n].b, frames[n + 1].b, weight)
-	if event.actor_id != _log.fighter_ids[0]:
+	if (event.actor_id != _log.fighter_ids[0]) != (clip.actor_role == "bottom"):
 		a = _reflect(a)
 		b = _reflect(b)
 	var poses := {event.actor_id: a, event.target_id: b}
@@ -174,6 +174,13 @@ func seek_ms(milliseconds: float) -> Dictionary:
 		entry_weight = entry_weight * entry_weight * (3.0 - 2.0 * entry_weight)
 		for id: String in _log.fighter_ids:
 			poses[id] = _blend(_ends[index - 1][id], poses[id], entry_weight)
+	if index > 0 and clip.family == "submission" and _log.events[index-1].technique_id == clip.id and _log.events[index-1].actor_id == event.actor_id and _log.events[index-1].outcome == "threatened" and progress < .56:
+		var contact: Dictionary = clip.tracks[event.outcome][2]
+		var flip: bool = (event.actor_id != _log.fighter_ids[0]) != (clip.actor_role == "bottom")
+		var hold_weight := progress/.56
+		hold_weight = hold_weight*hold_weight*(3.0-2.0*hold_weight)
+		poses[event.actor_id] = _blend(_ends[index-1][event.actor_id],_reflect(contact.a) if flip else contact.a,hold_weight)
+		poses[event.target_id] = _blend(_ends[index-1][event.target_id],_reflect(contact.b) if flip else contact.b,hold_weight)
 	for id: String in _log.fighter_ids:
 		poses[id].facing = 1 if id == _log.fighter_ids[0] else -1
 		poses[id].bend = [-poses[id].facing, poses[id].facing, poses[id].facing, poses[id].facing]

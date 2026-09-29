@@ -4,9 +4,9 @@ Referências: Game Design Bible §§3, 5–6, 15–18 e 22; MMA Research Bible �
 
 ## Estado desta entrega
 
-O laboratório reproduz uma biblioteca procedural 2D de **156 técnicas**, com
-**478 trilhas pareadas de resposta**, dez bases marciais e seis sequências
-exemplificativas. Esses números contam técnicas e respostas, não 478 golpes
+O laboratório reproduz uma biblioteca procedural 2D de **158 técnicas**, com
+**486 trilhas pareadas de resposta**, dez bases marciais e seis sequências
+exemplificativas. Esses números contam técnicas e respostas, não 486 golpes
 diferentes. Movimentos relacionados compartilham poses-base, e cada técnica
 pode ter várias respostas visuais. É um protótipo de apresentação, não captura
 de movimento, física de contato ou animação 3D final.
@@ -15,20 +15,31 @@ Há seis arenas octogonais e o ringue de quatro cordas da Shinsei, seguindo
 `organizations.json` e `rulesets.json`. Cada organização tem cores, inscrições,
 pads, lona, marca geométrica e apron próprios. Somente marcas fictícias.
 
-O `FightEngine.simulate()` ainda está no TODO(M1). Os exemplos são registros
-**autorais**, claramente identificados na tela, e não resultados de partidas.
-O player, o catálogo e o contrato de dados já estão disponíveis para a ligação
-com o motor. A cena de luta nativa na Godot e o porte visual do corpo/rosto
-continuam separados desta entrega: há um player GDScript funcional e testado,
-mas o renderer de atletas e arenas desta etapa roda no laboratório web.
+O `FightEngine.simulate()` agora resolve trocas, dano regional, fadiga, knockdowns,
+KO/TKO, submissões progressivas e decisões. `Judge` lê os mesmos efeitos ofensivos:
+três cartões por round ou avaliação global na Shinsei. Os dez estilos influenciam
+intenções; os atributos individuais resolvem os confrontos. O roster canônico
+recebe perfis de combate em `combat_profiles.json`, separados da aparência.
+
+Há seis demonstrações autorais e quatro replays produzidos pelo motor, identificados
+na interface. `FightReplayBuilder` copia o histórico resolvido para o contrato visual.
+O servidor local executa o mesmo motor Godot para criar novos confrontos pelo browser;
+a UI não calcula resultados. A cena/renderização nativa Godot continua pendente: o
+sampler GDScript funciona, mas os atletas e arenas desta etapa são desenhados no web lab.
+
+A pesquisa e os limites da calibração estão em [FIGHT_BEHAVIOR_RESEARCH.md](FIGHT_BEHAVIOR_RESEARCH.md).
+Os movimentos permanecem paramétricos: pegadas, oclusão e rotações de chão ainda
+precisam de arte específica antes de serem tratados como animação final.
 
 ## Abrir e testar
 
 Na pasta `corner-office`:
 
 ```sh
-python -m http.server 8767 --bind 127.0.0.1
-# http://127.0.0.1:8767/prototypes/fight-lab/
+godot --headless --path game --editor --import
+python tools/fight_lab_server.py --godot /caminho/absoluto/godot --port 8768
+# http://127.0.0.1:8768/prototypes/fight-lab/
+# Alternativa sem novas simulações: python -m http.server 8767 --bind 127.0.0.1
 node prototypes/fight-lab/tests/replay.cjs
 tools/run_tests.sh
 ```
@@ -55,7 +66,14 @@ JSONs gerados correspondem aos scripts de autoria.
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `tools/build_motion_catalog.py` | Autoria de técnicas, poses e arenas; gera os dois catálogos |
+| `tools/build_motion_catalog.py` | Gera técnicas sem poses, catálogo visual e arenas |
+| `game/content/fight_techniques.json` | Metadados táticos, compatibilidade e frequência de técnicas |
+| `game/content/fight_tuning.json` | Probabilidades e preferências dos dez estilos |
+| `game/content/combat_profiles.json` | Atributos e biometrias do roster fictício |
+| `tools/fight_lab_server.py` | Servidor local; delega a simulação à Godot |
+| `game/tools/preview_fight.gd` | Entrada headless do laboratório |
+| `tools/build_simulated_replays.py` | Quatro fixtures reproduzíveis do motor |
+| `game/presentation/fight/fight_replay_builder.gd` | Adaptador de histórico resolvido para replay |
 | `tools/build_replay_examples.py` | Seis registros autorais consistentes para QA |
 | `game/content/fight_visuals.json` | IDs estáveis, fases, bases e keyframes dos dois atletas |
 | `game/content/arena_profiles.json` | Identidade das sete arenas; nenhuma regra de combate |
@@ -71,6 +89,7 @@ Não editar os JSONs gerados isoladamente. Alterar os scripts de autoria e rodar
 ```sh
 python tools/build_motion_catalog.py
 python tools/build_replay_examples.py
+python tools/build_simulated_replays.py --godot /caminho/absoluto/godot
 ```
 
 ## Contrato v1
@@ -126,15 +145,17 @@ Não há substituição silenciosa nem inferência de vencedor.
 
 ## Ligação com o motor
 
-1. O motor resolve a troca usando `world.rng`, atributos e regras.
-2. Só depois associa um `technique_id` compatível, `outcome`, reason codes e
+1. O motor escolhe uma intenção/técnica compatível em `fight_techniques.json`,
+   depois resolve a troca usando `world.rng`, atributos e regras.
+2. Registra o `technique_id` escolhido, `outcome`, reason codes e
    snapshots. Base marcial é uma preferência, não uma classe limitante.
 3. Persiste os eventos append-only em `Fight.round_log` e o resultado em Fight.
    Este trabalho não mudou o save nem inseriu fixtures no mundo persistente.
 4. Um adaptador de apresentação transforma os logs por round no envelope v1.
-   Esse adaptador deve mapear campos explicitamente quando o FightEngine for
-   implementado; não gerar trocas para preencher lacunas do motor.
-5. A UI reage a `EventBus.fight_resolved`, lê o log e entrega ao player:
+   `FightReplayBuilder.build(world, fight)` faz o mapeamento explícito e não
+   gera ataques para preencher lacunas.
+5. No laboratório, a API devolve o envelope validado. Na futura cena nativa,
+   a UI deve reagir a `EventBus.fight_resolved`, ler o log e entregar ao player:
 
 ```gdscript
 var playback := FightReplayPlayer.new()
@@ -145,8 +166,8 @@ else:
     push_error(str(playback.errors))
 ```
 
-Apresentação nunca importa `WorldState`, avança RNG, resolve colisões de
-combate, calcula dano, pontua ou escolhe o vencedor. Os materiais podem mudar
+O sampler e o renderer nunca avançam RNG, resolvem colisões de
+combate, calculam dano, pontuam ou escolhem o vencedor. O adaptador apenas lê o mundo. Os materiais podem mudar
 sem reescrever a luta.
 
 ## Rig e continuidade
@@ -170,14 +191,34 @@ não garante anatomia bonita; revisar também imagens e playback em câmera lent
 
 ## Para quem continuar
 
-- Implementar FightEngine + Judge e o mapeamento de `round_log`, conforme M1.
+- Expandir a calibração do motor com mais adversários e métricas por fase.
+- Integrar elegibilidade, lesões pós-luta e suspensão médica ao loop de carreira.
 - Portar/implementar o renderer nativo utilizando o sampler GDScript existente.
 - Refinar a coreografia de cada família com contato e orientação em profundidade,
   preservando os IDs, os eventos autoritativos e os testes de continuidade.
 - Expandir os eventos de árbitro/corner, estender o contrato para contatos finos
-  e gravar fixtures reais quando o motor produzir lutas.
+  e ampliar as fixtures geradas pelo motor.
 - Manter Shinsei separada: ringue, regras e apresentação não são sinônimos.
 
 Antes de publicar: testes Node + Godot, render do face-lab se alterar identidade,
 inspeção de pelo menos striking/clinch/queda/chão, desktop e mobile. Commits
 pequenos na branch de trabalho, com instruções e limitações no mesmo commit.
+
+## Comportamento implementado e limites
+
+- Dano em cabeça/corpo/pernas, abalo recuperável, cortes visuais e fadiga. Golpes
+  no corpo consomem energia; dano nas pernas prejudica defesa de quedas. Isso é
+  abstração de gameplay, não cálculo médico de lesões.
+- Tentativas de submissão acumulam pressão, permitem escape e perdem progresso
+  se a posição/ataque muda. Quinze técnicas têm caminhos de ameaça/escape/desistência.
+- Jab, direto, low kick e entradas básicas são mais comuns que golpes giratórios.
+  Cansaço, dano e trocas anteriores alteram escolhas. Não há árvore de combos rígida.
+- KO, TKO e submissão encerram as trocas. Decisões unânimes, divididas, majoritárias
+  e empate vêm dos cartões. DQ/NC constam no contrato para importação; o motor ainda
+  não gera faltas, acidentes ou interrupções médicas.
+- `Fight.round_log`, `stats`, `damage`, cartões e históricos usam os campos existentes
+  do save; a resolução é idempotente. Teste de round trip preserva o replay inteiro.
+- O relógio oficial vem do motor. A duração de exibição é comprimida e depende dos
+  clips; 1× é velocidade de animação, não reprodução em tempo real de quinze minutos.
+- O laboratório permite confronto de exibição; não substitui a validação futura
+  de peso, contrato, elegibilidade e agenda no matchmaking da carreira.

@@ -251,7 +251,9 @@
       this.ends = this.log.events.map((e) => {
         const c = this.clips.get(e.technique_id),
           last = c.tracks[e.outcome].at(-1),
-          flip = e.actor_id !== this.log.fighter_ids[0];
+          flip =
+            (e.actor_id !== this.log.fighter_ids[0]) !==
+            (c.actor_role === "bottom");
         return {
           [e.actor_id]: flip ? reflect(last.a) : clone(last.a),
           [e.target_id]: flip ? reflect(last.b) : clone(last.b),
@@ -280,7 +282,9 @@
       u = u * u * (3 - 2 * u);
       let a = mixPose(f.a, g.a, u),
         b = mixPose(f.b, g.b, u);
-      const first = e.actor_id === this.log.fighter_ids[0];
+      const first =
+        (e.actor_id === this.log.fighter_ids[0]) !==
+        (c.actor_role === "bottom");
       if (!first) {
         a = reflect(a);
         b = reflect(b);
@@ -295,6 +299,30 @@
           poses[id] = mixPose(this.ends[lo - 1][id], poses[id], blend);
       }
 
+      // A maintained submission keeps the established grip instead of restarting its entry.
+      if (
+        lo > 0 &&
+        c.family === "submission" &&
+        es[lo - 1].technique_id === c.id &&
+        es[lo - 1].actor_id === e.actor_id &&
+        es[lo - 1].outcome === "threatened" &&
+        progress < 0.56
+      ) {
+        const contact = c.tracks[e.outcome].find((k) => k.t === 0.56);
+        const flip = !first;
+        let u = progress / 0.56;
+        u = u * u * (3 - 2 * u);
+        poses[e.actor_id] = mixPose(
+          this.ends[lo - 1][e.actor_id],
+          flip ? reflect(contact.a) : contact.a,
+          u,
+        );
+        poses[e.target_id] = mixPose(
+          this.ends[lo - 1][e.target_id],
+          flip ? reflect(contact.b) : contact.b,
+          u,
+        );
+      }
       for (const id of this.log.fighter_ids) {
         poses[id].facing = id === this.log.fighter_ids[0] ? 1 : -1;
         poses[id].bend = [-1, 1, 1, 1].map((v) => v * poses[id].facing);
@@ -359,6 +387,8 @@
         ik(s, p.hands[i], 0.305 * h, 0.285 * h, -1),
         ik(s, p.hands[i], 0.305 * h, 0.285 * h, 1),
       ];
+      if (Math.abs(p.lean) < 55 && p.root[1] > 0.65)
+        return candidates[(p.facing ?? 1) > 0 ? 0 : 1];
       const viable = candidates.filter((k) => k.joint[1] >= 0.025);
       return (viable.length ? viable : candidates).sort(
         (a, b) =>

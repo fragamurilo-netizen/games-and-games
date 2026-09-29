@@ -3,7 +3,9 @@ extends TestCase
 
 func test_all_authored_replays_load_and_preserve_results() -> void:
 	var player := FightReplayPlayer.new()
-	for item: Dictionary in ContentDB.load_json("replays/index.json"):
+	var fixtures: Array = ContentDB.load_json("replays/index.json")
+	fixtures.append_array(ContentDB.load_json("replays/simulated_index.json"))
+	for item: Dictionary in fixtures:
 		var data: Dictionary = ContentDB.load_json("replays/" + item.file)
 		var original := data.duplicate(true)
 		check(player.load_replay(data), "Replay %s: %s" % [item.id, player.errors])

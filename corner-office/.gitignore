@@ -14,3 +14,7 @@ game/android/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Python tooling caches
+__pycache__/
+*.pyc

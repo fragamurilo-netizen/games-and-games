@@ -18,8 +18,13 @@ static func generate(seed_value: int, start_mode: String) -> WorldState:
 		w.add("gyms", Gym.new().load_dict(g))
 	for a in ContentDB.load_json("agencies.json"):
 		w.add("agents", Agent.new().load_dict(a))
+	var combat_profiles: Dictionary = ContentDB.load_json("combat_profiles.json").fighters
 	for f in ContentDB.load_json("canonical_fighters.json"):
 		var fighter := Fighter.new().load_dict(f) as Fighter
+		var profile: Dictionary = combat_profiles.get(fighter.id, {})
+		for key: String in ["martial_base", "height_cm", "reach_cm", "striking", "grappling", "jiu_jitsu", "physical", "mental"]:
+			if profile.has(key) and not f.has(key):
+				fighter.set(key, profile[key])
 		w.add("fighters", fighter)
 		var org: Organization = w.organizations.get(fighter.organization_id)
 		if org:

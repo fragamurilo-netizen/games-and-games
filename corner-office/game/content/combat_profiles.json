@@ -1,0 +1,721 @@
+{
+  "version": 1,
+  "note": "Atributos de design do roster fictício. Sem relação com aparência, nacionalidade ou sexo.",
+  "fighters": {
+    "ftr_carter": {
+      "martial_base": "boxing",
+      "height_cm": 183,
+      "reach_cm": 191,
+      "appearance_index": 0,
+      "striking": {
+        "boxing": 87,
+        "jab": 83,
+        "combinations": 83,
+        "defense": 85,
+        "accuracy": 87,
+        "power": 85,
+        "kicks": 65,
+        "low_kicks": 83,
+        "knees": 83,
+        "elbows": 83,
+        "countering": 83
+      },
+      "grappling": {
+        "takedown_offense": 73,
+        "takedown_defense": 85,
+        "clinch": 73,
+        "cage_control": 73,
+        "top_control": 73,
+        "scramble": 73,
+        "ground_and_pound": 73
+      },
+      "jiu_jitsu": {
+        "guard": 73,
+        "transitions": 73,
+        "submission_offense": 73,
+        "submission_defense": 73,
+        "back_control": 73,
+        "leg_locks": 73
+      },
+      "physical": {
+        "strength": 73,
+        "explosiveness": 73,
+        "speed": 73,
+        "cardio": 84,
+        "durability": 87,
+        "chin": 87,
+        "recovery": 82,
+        "mobility": 79
+      },
+      "mental": {
+        "fight_iq": 87,
+        "discipline": 73,
+        "adaptation": 73,
+        "composure": 85,
+        "aggression": 72,
+        "patience": 73,
+        "clutch": 73
+      }
+    },
+    "ftr_moreira": {
+      "martial_base": "bjj",
+      "height_cm": 180,
+      "reach_cm": 184,
+      "appearance_index": 1,
+      "striking": {
+        "boxing": 74,
+        "jab": 74,
+        "combinations": 74,
+        "defense": 74,
+        "accuracy": 74,
+        "power": 74,
+        "kicks": 74,
+        "low_kicks": 74,
+        "knees": 74,
+        "elbows": 74,
+        "countering": 74
+      },
+      "grappling": {
+        "takedown_offense": 85,
+        "takedown_defense": 85,
+        "clinch": 85,
+        "cage_control": 85,
+        "top_control": 85,
+        "scramble": 85,
+        "ground_and_pound": 85
+      },
+      "jiu_jitsu": {
+        "guard": 83,
+        "transitions": 83,
+        "submission_offense": 88,
+        "submission_defense": 83,
+        "back_control": 83,
+        "leg_locks": 83
+      },
+      "physical": {
+        "strength": 74,
+        "explosiveness": 74,
+        "speed": 74,
+        "cardio": 85,
+        "durability": 88,
+        "chin": 88,
+        "recovery": 83,
+        "mobility": 80
+      },
+      "mental": {
+        "fight_iq": 88,
+        "discipline": 74,
+        "adaptation": 74,
+        "composure": 86,
+        "aggression": 72,
+        "patience": 74,
+        "clutch": 74
+      }
+    },
+    "ftr_arsanov": {
+      "martial_base": "wrestling",
+      "height_cm": 181,
+      "reach_cm": 185,
+      "appearance_index": 2,
+      "striking": {
+        "boxing": 76,
+        "jab": 76,
+        "combinations": 76,
+        "defense": 76,
+        "accuracy": 76,
+        "power": 76,
+        "kicks": 76,
+        "low_kicks": 76,
+        "knees": 76,
+        "elbows": 76,
+        "countering": 76
+      },
+      "grappling": {
+        "takedown_offense": 87,
+        "takedown_defense": 87,
+        "clinch": 87,
+        "cage_control": 87,
+        "top_control": 87,
+        "scramble": 87,
+        "ground_and_pound": 87
+      },
+      "jiu_jitsu": {
+        "guard": 85,
+        "transitions": 85,
+        "submission_offense": 81,
+        "submission_defense": 85,
+        "back_control": 85,
+        "leg_locks": 85
+      },
+      "physical": {
+        "strength": 76,
+        "explosiveness": 76,
+        "speed": 76,
+        "cardio": 87,
+        "durability": 90,
+        "chin": 90,
+        "recovery": 85,
+        "mobility": 82
+      },
+      "mental": {
+        "fight_iq": 90,
+        "discipline": 76,
+        "adaptation": 76,
+        "composure": 88,
+        "aggression": 72,
+        "patience": 76,
+        "clutch": 76
+      }
+    },
+    "ftr_reyes": {
+      "martial_base": "boxing",
+      "height_cm": 180,
+      "reach_cm": 187,
+      "appearance_index": 3,
+      "striking": {
+        "boxing": 79,
+        "jab": 75,
+        "combinations": 75,
+        "defense": 77,
+        "accuracy": 79,
+        "power": 77,
+        "kicks": 57,
+        "low_kicks": 75,
+        "knees": 75,
+        "elbows": 75,
+        "countering": 75
+      },
+      "grappling": {
+        "takedown_offense": 65,
+        "takedown_defense": 77,
+        "clinch": 65,
+        "cage_control": 65,
+        "top_control": 65,
+        "scramble": 65,
+        "ground_and_pound": 65
+      },
+      "jiu_jitsu": {
+        "guard": 65,
+        "transitions": 65,
+        "submission_offense": 65,
+        "submission_defense": 65,
+        "back_control": 65,
+        "leg_locks": 65
+      },
+      "physical": {
+        "strength": 65,
+        "explosiveness": 65,
+        "speed": 65,
+        "cardio": 76,
+        "durability": 79,
+        "chin": 79,
+        "recovery": 74,
+        "mobility": 71
+      },
+      "mental": {
+        "fight_iq": 79,
+        "discipline": 65,
+        "adaptation": 65,
+        "composure": 77,
+        "aggression": 72,
+        "patience": 65,
+        "clutch": 65
+      }
+    },
+    "ftr_holloway": {
+      "martial_base": "kickboxing",
+      "height_cm": 178,
+      "reach_cm": 183,
+      "appearance_index": 0,
+      "striking": {
+        "boxing": 73,
+        "jab": 79,
+        "combinations": 79,
+        "defense": 81,
+        "accuracy": 83,
+        "power": 81,
+        "kicks": 83,
+        "low_kicks": 79,
+        "knees": 79,
+        "elbows": 79,
+        "countering": 79
+      },
+      "grappling": {
+        "takedown_offense": 69,
+        "takedown_defense": 81,
+        "clinch": 69,
+        "cage_control": 69,
+        "top_control": 69,
+        "scramble": 69,
+        "ground_and_pound": 69
+      },
+      "jiu_jitsu": {
+        "guard": 69,
+        "transitions": 69,
+        "submission_offense": 69,
+        "submission_defense": 69,
+        "back_control": 69,
+        "leg_locks": 69
+      },
+      "physical": {
+        "strength": 69,
+        "explosiveness": 69,
+        "speed": 69,
+        "cardio": 80,
+        "durability": 83,
+        "chin": 83,
+        "recovery": 78,
+        "mobility": 75
+      },
+      "mental": {
+        "fight_iq": 83,
+        "discipline": 69,
+        "adaptation": 69,
+        "composure": 81,
+        "aggression": 72,
+        "patience": 69,
+        "clutch": 69
+      }
+    },
+    "ftr_sato": {
+      "martial_base": "judo",
+      "height_cm": 175,
+      "reach_cm": 178,
+      "appearance_index": 5,
+      "striking": {
+        "boxing": 70,
+        "jab": 70,
+        "combinations": 70,
+        "defense": 70,
+        "accuracy": 70,
+        "power": 70,
+        "kicks": 70,
+        "low_kicks": 70,
+        "knees": 70,
+        "elbows": 70,
+        "countering": 70
+      },
+      "grappling": {
+        "takedown_offense": 81,
+        "takedown_defense": 81,
+        "clinch": 81,
+        "cage_control": 81,
+        "top_control": 81,
+        "scramble": 81,
+        "ground_and_pound": 81
+      },
+      "jiu_jitsu": {
+        "guard": 79,
+        "transitions": 79,
+        "submission_offense": 75,
+        "submission_defense": 79,
+        "back_control": 79,
+        "leg_locks": 79
+      },
+      "physical": {
+        "strength": 70,
+        "explosiveness": 70,
+        "speed": 70,
+        "cardio": 81,
+        "durability": 84,
+        "chin": 84,
+        "recovery": 79,
+        "mobility": 76
+      },
+      "mental": {
+        "fight_iq": 84,
+        "discipline": 70,
+        "adaptation": 70,
+        "composure": 82,
+        "aggression": 72,
+        "patience": 70,
+        "clutch": 70
+      }
+    },
+    "ftr_cole": {
+      "martial_base": "wrestling",
+      "height_cm": 188,
+      "reach_cm": 198,
+      "appearance_index": 9,
+      "striking": {
+        "boxing": 56,
+        "jab": 56,
+        "combinations": 56,
+        "defense": 56,
+        "accuracy": 56,
+        "power": 56,
+        "kicks": 56,
+        "low_kicks": 56,
+        "knees": 56,
+        "elbows": 56,
+        "countering": 56
+      },
+      "grappling": {
+        "takedown_offense": 67,
+        "takedown_defense": 67,
+        "clinch": 67,
+        "cage_control": 67,
+        "top_control": 67,
+        "scramble": 67,
+        "ground_and_pound": 67
+      },
+      "jiu_jitsu": {
+        "guard": 65,
+        "transitions": 65,
+        "submission_offense": 61,
+        "submission_defense": 65,
+        "back_control": 65,
+        "leg_locks": 65
+      },
+      "physical": {
+        "strength": 56,
+        "explosiveness": 56,
+        "speed": 56,
+        "cardio": 67,
+        "durability": 70,
+        "chin": 70,
+        "recovery": 65,
+        "mobility": 62
+      },
+      "mental": {
+        "fight_iq": 70,
+        "discipline": 56,
+        "adaptation": 56,
+        "composure": 68,
+        "aggression": 72,
+        "patience": 56,
+        "clutch": 56
+      }
+    },
+    "ftr_costa": {
+      "martial_base": "muay_thai",
+      "height_cm": 168,
+      "reach_cm": 170,
+      "appearance_index": 4,
+      "striking": {
+        "boxing": 78,
+        "jab": 84,
+        "combinations": 84,
+        "defense": 86,
+        "accuracy": 88,
+        "power": 86,
+        "kicks": 88,
+        "low_kicks": 84,
+        "knees": 84,
+        "elbows": 84,
+        "countering": 84
+      },
+      "grappling": {
+        "takedown_offense": 74,
+        "takedown_defense": 86,
+        "clinch": 74,
+        "cage_control": 74,
+        "top_control": 74,
+        "scramble": 74,
+        "ground_and_pound": 74
+      },
+      "jiu_jitsu": {
+        "guard": 74,
+        "transitions": 74,
+        "submission_offense": 74,
+        "submission_defense": 74,
+        "back_control": 74,
+        "leg_locks": 74
+      },
+      "physical": {
+        "strength": 74,
+        "explosiveness": 74,
+        "speed": 74,
+        "cardio": 85,
+        "durability": 88,
+        "chin": 88,
+        "recovery": 83,
+        "mobility": 80
+      },
+      "mental": {
+        "fight_iq": 88,
+        "discipline": 74,
+        "adaptation": 74,
+        "composure": 86,
+        "aggression": 72,
+        "patience": 74,
+        "clutch": 74
+      }
+    },
+    "ftr_markovic": {
+      "martial_base": "wrestling",
+      "height_cm": 173,
+      "reach_cm": 177,
+      "appearance_index": 8,
+      "striking": {
+        "boxing": 77,
+        "jab": 77,
+        "combinations": 77,
+        "defense": 77,
+        "accuracy": 77,
+        "power": 77,
+        "kicks": 77,
+        "low_kicks": 77,
+        "knees": 77,
+        "elbows": 77,
+        "countering": 77
+      },
+      "grappling": {
+        "takedown_offense": 88,
+        "takedown_defense": 88,
+        "clinch": 88,
+        "cage_control": 88,
+        "top_control": 88,
+        "scramble": 88,
+        "ground_and_pound": 88
+      },
+      "jiu_jitsu": {
+        "guard": 86,
+        "transitions": 86,
+        "submission_offense": 82,
+        "submission_defense": 86,
+        "back_control": 86,
+        "leg_locks": 86
+      },
+      "physical": {
+        "strength": 77,
+        "explosiveness": 77,
+        "speed": 77,
+        "cardio": 88,
+        "durability": 91,
+        "chin": 91,
+        "recovery": 86,
+        "mobility": 83
+      },
+      "mental": {
+        "fight_iq": 91,
+        "discipline": 77,
+        "adaptation": 77,
+        "composure": 89,
+        "aggression": 72,
+        "patience": 77,
+        "clutch": 77
+      }
+    },
+    "ftr_monroe": {
+      "martial_base": "kickboxing",
+      "height_cm": 170,
+      "reach_cm": 175,
+      "appearance_index": 6,
+      "striking": {
+        "boxing": 63,
+        "jab": 69,
+        "combinations": 69,
+        "defense": 71,
+        "accuracy": 73,
+        "power": 71,
+        "kicks": 73,
+        "low_kicks": 69,
+        "knees": 69,
+        "elbows": 69,
+        "countering": 69
+      },
+      "grappling": {
+        "takedown_offense": 59,
+        "takedown_defense": 71,
+        "clinch": 59,
+        "cage_control": 59,
+        "top_control": 59,
+        "scramble": 59,
+        "ground_and_pound": 59
+      },
+      "jiu_jitsu": {
+        "guard": 59,
+        "transitions": 59,
+        "submission_offense": 59,
+        "submission_defense": 59,
+        "back_control": 59,
+        "leg_locks": 59
+      },
+      "physical": {
+        "strength": 59,
+        "explosiveness": 59,
+        "speed": 59,
+        "cardio": 70,
+        "durability": 73,
+        "chin": 73,
+        "recovery": 68,
+        "mobility": 65
+      },
+      "mental": {
+        "fight_iq": 73,
+        "discipline": 59,
+        "adaptation": 59,
+        "composure": 71,
+        "aggression": 72,
+        "patience": 59,
+        "clutch": 59
+      }
+    },
+    "ftr_volkovic": {
+      "martial_base": "sambo",
+      "height_cm": 193,
+      "reach_cm": 200,
+      "appearance_index": 7,
+      "striking": {
+        "boxing": 67,
+        "jab": 67,
+        "combinations": 67,
+        "defense": 67,
+        "accuracy": 67,
+        "power": 67,
+        "kicks": 67,
+        "low_kicks": 67,
+        "knees": 67,
+        "elbows": 67,
+        "countering": 67
+      },
+      "grappling": {
+        "takedown_offense": 78,
+        "takedown_defense": 78,
+        "clinch": 78,
+        "cage_control": 78,
+        "top_control": 78,
+        "scramble": 78,
+        "ground_and_pound": 78
+      },
+      "jiu_jitsu": {
+        "guard": 76,
+        "transitions": 76,
+        "submission_offense": 72,
+        "submission_defense": 76,
+        "back_control": 76,
+        "leg_locks": 76
+      },
+      "physical": {
+        "strength": 67,
+        "explosiveness": 67,
+        "speed": 67,
+        "cardio": 78,
+        "durability": 81,
+        "chin": 81,
+        "recovery": 76,
+        "mobility": 73
+      },
+      "mental": {
+        "fight_iq": 81,
+        "discipline": 67,
+        "adaptation": 67,
+        "composure": 79,
+        "aggression": 72,
+        "patience": 67,
+        "clutch": 67
+      }
+    },
+    "ftr_ramos": {
+      "martial_base": "bjj",
+      "height_cm": 181,
+      "reach_cm": 185,
+      "appearance_index": 1,
+      "striking": {
+        "boxing": 64,
+        "jab": 64,
+        "combinations": 64,
+        "defense": 64,
+        "accuracy": 64,
+        "power": 64,
+        "kicks": 64,
+        "low_kicks": 64,
+        "knees": 64,
+        "elbows": 64,
+        "countering": 64
+      },
+      "grappling": {
+        "takedown_offense": 75,
+        "takedown_defense": 75,
+        "clinch": 75,
+        "cage_control": 75,
+        "top_control": 75,
+        "scramble": 75,
+        "ground_and_pound": 75
+      },
+      "jiu_jitsu": {
+        "guard": 73,
+        "transitions": 73,
+        "submission_offense": 78,
+        "submission_defense": 73,
+        "back_control": 73,
+        "leg_locks": 73
+      },
+      "physical": {
+        "strength": 64,
+        "explosiveness": 64,
+        "speed": 64,
+        "cardio": 75,
+        "durability": 78,
+        "chin": 78,
+        "recovery": 73,
+        "mobility": 70
+      },
+      "mental": {
+        "fight_iq": 78,
+        "discipline": 64,
+        "adaptation": 64,
+        "composure": 76,
+        "aggression": 72,
+        "patience": 64,
+        "clutch": 64
+      }
+    },
+    "ftr_reed": {
+      "martial_base": "boxing",
+      "height_cm": 182,
+      "reach_cm": 189,
+      "appearance_index": 0,
+      "striking": {
+        "boxing": 80,
+        "jab": 76,
+        "combinations": 76,
+        "defense": 78,
+        "accuracy": 80,
+        "power": 78,
+        "kicks": 58,
+        "low_kicks": 76,
+        "knees": 76,
+        "elbows": 76,
+        "countering": 76
+      },
+      "grappling": {
+        "takedown_offense": 66,
+        "takedown_defense": 78,
+        "clinch": 66,
+        "cage_control": 66,
+        "top_control": 66,
+        "scramble": 66,
+        "ground_and_pound": 66
+      },
+      "jiu_jitsu": {
+        "guard": 66,
+        "transitions": 66,
+        "submission_offense": 66,
+        "submission_defense": 66,
+        "back_control": 66,
+        "leg_locks": 66
+      },
+      "physical": {
+        "strength": 66,
+        "explosiveness": 66,
+        "speed": 66,
+        "cardio": 77,
+        "durability": 80,
+        "chin": 80,
+        "recovery": 75,
+        "mobility": 72
+      },
+      "mental": {
+        "fight_iq": 80,
+        "discipline": 66,
+        "adaptation": 66,
+        "composure": 78,
+        "aggression": 72,
+        "patience": 66,
+        "clutch": 66
+      }
+    }
+  }
+}
