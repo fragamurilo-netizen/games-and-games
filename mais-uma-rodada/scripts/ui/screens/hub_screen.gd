@@ -481,7 +481,7 @@ static func _team_morale(w: GameWorld, club: Club) -> float:
 static func _nt_line(w: GameWorld) -> String:
 	var code := NationalCoach.nation(w)
 	if code != "":
-		return "Técnico da %s · %dº" % [DatabaseManager.nation_name(code), NationalTeamManager.rank_of(w, code)]
+		return "Técnico: %s · %dº" % [DatabaseManager.nation_name(code), NationalTeamManager.rank_of(w, code)]
 	if not NationalCoach.offers(w).is_empty():
 		return "%d convite(s) de seleção" % NationalCoach.offers(w).size()
 	return "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())]
@@ -506,7 +506,7 @@ func _fifa_alert(w: GameWorld, club: Club) -> Array:
 		return []
 	var code := NationalCoach.nation(w)
 	if code != "" and not NationalTeamManager.data(w).has("next"):
-		return ["globe", UIColors.ACCENT, "Monte a lista da %s para a data FIFA de %s" % [DatabaseManager.nation_name(code), NationalTeamManager.window_label(w, nxt)],
+		return ["globe", UIColors.ACCENT, "%s: monte a lista para a data FIFA de %s" % [DatabaseManager.nation_name(code), NationalTeamManager.window_label(w, nxt)],
 			func(): UIManager.push("national", {"tab": "squad", "nation": code})]
 	var d := NationalTeamManager.data(w)
 	var src: Dictionary = d.get("next", d["squads"])

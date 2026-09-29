@@ -11,6 +11,8 @@ var tablet := false
 var prefix := ""
 ## --only=rota,rota:aba,...: só essas telas (depois de --rounds=N rodadas jogadas), modo escuro.
 var only := ""
+## --nt=BRA: o técnico também comanda essa seleção (telas de seleções e uniforme da seleção).
+var nt := ""
 var rounds := 3
 ## Com --only: modo claro, clube pelo nome (parte do nome basta) e tingimento do fundo (-1 = o salvo).
 var light := false
@@ -223,6 +225,8 @@ func _only_pass() -> void:
 		AppSettings.bg_tint = tint
 	AppSettings.theme_mode = AppSettings.THEME_LIGHT if light else AppSettings.THEME_DARK
 	GameManager.start_career(w, club_id, "Murilo", GameWorld.DIFF_NORMAL, 5)
+	if nt != "":
+		NationalCoach.accept(w, nt)
 	UIManager.apply_look()
 	for i in rounds:
 		GameManager.play_instant()
@@ -258,6 +262,8 @@ func _only_pass() -> void:
 				if oc.id != u2.id:
 					args = {"club": oc.id}
 					break
+		if route == "kit" and nt != "":
+			args["nation"] = nt
 		if route == "compare":
 			var sq := w.squad(w.user_club())
 			sq.sort_custom(func(a, b): return a.overall > b.overall)

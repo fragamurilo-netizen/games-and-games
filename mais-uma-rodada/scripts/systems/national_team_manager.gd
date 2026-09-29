@@ -816,7 +816,7 @@ static func _announce_news(world: GameWorld, next: Dictionary, firsts: Array, dr
 		var mine: bool = code == coach_nat
 		var title := "%s divulga os %d convocados" % [DatabaseManager.nation_name(code), ids.size()]
 		if mine:
-			title = "Sua lista: %d convocados da %s" % [ids.size(), DatabaseManager.nation_name(code)]
+			title = "%s: sua lista com %d convocados" % [DatabaseManager.nation_name(code), ids.size()]
 		var n := NewsManager.post_raw(world, title, "Lista para a data FIFA%s. %s" % [when, squad_text(world, ids)], -1, int(ids[0]),
 			NewsEvent.IMP_HIGH if mine else NewsEvent.IMP_NORMAL, "selecao")
 		n.media = {"type": "nation", "code": code}
@@ -1021,7 +1021,7 @@ static func _after_date(world: GameWorld, env: Env, results: Array, weekend_inde
 			if a != null and b != null:
 				cut_txt.append("%s, lesionado, dá lugar a %s" % [a.display_name(), b.display_name()])
 		if not cut_txt.is_empty():
-			NewsManager.post_raw(world, "Corte na %s" % DatabaseManager.nation_name(code), "%s." % "; ".join(cut_txt), -1, int(env.cuts[code][0][1]), NewsEvent.IMP_NORMAL, "selecao")
+			NewsManager.post_raw(world, "%s: corte na lista" % DatabaseManager.nation_name(code), "%s." % "; ".join(cut_txt), -1, int(env.cuts[code][0][1]), NewsEvent.IMP_NORMAL, "selecao")
 	# Resultados da seleção do país do usuário (e da que ele comanda)
 	var nat := _user_nation(world)
 	var codes: Array = []
@@ -1035,7 +1035,7 @@ static func _after_date(world: GameWorld, env: Env, results: Array, weekend_inde
 		var txt: Array = mine_r.map(func(r): return result_text(r))
 		var own: bool = code == coach_nat
 		var head := "Amistoso" if bool(mine_r[0].get("fr", false)) else "Eliminatórias"
-		var lead := ("Seus resultados no comando da %s" if own else "Resultados da %s") % DatabaseManager.nation_name(code)
+		var lead := ("%s com você no comando" if own else "%s") % DatabaseManager.nation_name(code)
 		var en := NewsManager.post_raw(world, "%s: %s" % [head, txt[0]], "%s na data FIFA: %s." % [lead, "; ".join(txt)],
 			-1, -1, NewsEvent.IMP_HIGH if own else NewsEvent.IMP_NORMAL, "selecao")
 		var r0: Dictionary = mine_r[0]

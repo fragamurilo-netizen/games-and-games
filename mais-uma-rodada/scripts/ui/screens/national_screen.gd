@@ -108,8 +108,8 @@ func _job_card(w: GameWorld) -> Control:
 		h.add_child(UIKit.flag(code, 56))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label("Técnico da %s" % DatabaseManager.nation_name(code), "H2", true))
-		col.add_child(UIKit.label("Desde %d, junto com o %s" % [int(st.get("since", w.year)), w.user_club().short_name], "Small", true))
+		col.add_child(UIKit.label(DatabaseManager.nation_name(code), "H2", true))
+		col.add_child(UIKit.label("Você é o técnico desde %d, junto com o %s" % [int(st.get("since", w.year)), w.user_club().short_name], "Small", true))
 		h.add_child(col)
 		card.add_child(h)
 		card.add_child(UIKit.stat_grid([
@@ -128,7 +128,7 @@ func _job_card(w: GameWorld) -> Control:
 			refresh(), "users"))
 		row.add_child(UIKit.button("Uniformes", "GhostButton", func(): UIManager.push("kit", {"nation": code}), "shirt"))
 		row.add_child(UIKit.button("Deixar o cargo", "GhostButton", func():
-			UIManager.confirm("Deixar a seleção", "Você deixa o comando da %s e segue só no clube." % DatabaseManager.nation_name(code), "Sair da seleção", func():
+			UIManager.confirm("Deixar a seleção", "Você deixa o comando da seleção (%s) e segue só no clube." % DatabaseManager.nation_name(code), "Sair da seleção", func():
 				NationalCoach.resign(w)
 				GameManager.save_now()
 				refresh()), "close"))
@@ -137,7 +137,7 @@ func _job_card(w: GameWorld) -> Control:
 		card.add_child(UIKit.section("Seleção"))
 		card.add_child(UIKit.label("Você não comanda nenhuma seleção. No começo de cada temporada, federações que trocam de técnico sondam nomes pela reputação (a sua: %d)." % int(round(People.manager_rep(w))), "", true))
 		var need := NationalCoach.required_rep(w, _nation)
-		card.add_child(UIKit.kv("A %s pede reputação" % DatabaseManager.nation_name(_nation), str(int(round(need))), UIColors.GREEN if People.manager_rep(w) >= need else UIColors.MUTED))
+		card.add_child(UIKit.kv("%s pede reputação" % DatabaseManager.nation_name(_nation), str(int(round(need))), UIColors.GREEN if People.manager_rep(w) >= need else UIColors.MUTED))
 	var offers: Array = NationalCoach.offers(w)
 	if not offers.is_empty():
 		card.add_child(UIKit.section("Convites"))

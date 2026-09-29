@@ -96,8 +96,8 @@ static func season_offers(world: GameWorld) -> void:
 		var code: String = c[0]
 		st["offers"].append({"n": code, "y": world.year})
 		InboxManager.send(world, "federacao", "Convite da seleção: %s" % DatabaseManager.nation_name(code),
-			"A federação da %s procura um técnico e quer você no comando, acumulando com o clube. A seleção é a %dª do ranking.\n\nMeta: %s.\n\nO convite vale até o fim da temporada." % [DatabaseManager.nation_name(code), int(c[1]), expectation(world, code).to_lower()],
-			{"k": "screen", "s": "national", "args": {"tab": "coach", "nation": code}}, -1, -1, "Federação da %s" % DatabaseManager.nation_name(code))
+			"%s procura um técnico e a federação quer você no comando, acumulando com o clube. A seleção é a %dª do ranking.\n\nMeta: %s.\n\nO convite vale até o fim da temporada." % [DatabaseManager.nation_name(code), int(c[1]), expectation(world, code).to_lower()],
+			{"k": "screen", "s": "national", "args": {"tab": "coach", "nation": code}}, -1, -1, "Federação · %s" % DatabaseManager.nation_name(code))
 
 
 ## Seleções que decepcionaram no último torneio (trocam de técnico com mais frequência).
@@ -136,7 +136,7 @@ static func accept(world: GameWorld, code: String, quiet: bool = false) -> void:
 	if quiet:
 		return
 	_add_rep(world, 1.0)
-	var n := NewsManager.post_raw(world, "%s é o novo técnico da %s" % [world.manager_name, DatabaseManager.nation_name(code)],
+	var n := NewsManager.post_raw(world, "%s anuncia %s como novo técnico" % [DatabaseManager.nation_name(code), world.manager_name],
 		"A federação anunciou o treinador, que vai acumular o cargo com o %s. Meta: %s." % [world.user_club().short_name, expectation(world, code).to_lower()],
 		world.user_club_id, -1, NewsEvent.IMP_HEADLINE, "selecao")
 	n.media = {"type": "nation", "code": code}
@@ -152,7 +152,7 @@ static func resign(world: GameWorld) -> void:
 	if code == "":
 		return
 	_close(world, "Pediu demissão")
-	NewsManager.post_raw(world, "%s deixa a %s" % [world.manager_name, DatabaseManager.nation_name(code)],
+	NewsManager.post_raw(world, "%s: %s pede demissão" % [DatabaseManager.nation_name(code), world.manager_name],
 		"O treinador pediu para sair e agora se dedica só ao %s." % world.user_club().short_name, world.user_club_id, -1, NewsEvent.IMP_HIGH, "selecao")
 
 
@@ -173,11 +173,11 @@ static func _fire(world: GameWorld, why: String) -> void:
 	var code := nation(world)
 	_close(world, "Demitido")
 	_add_rep(world, -3.0)
-	var n := NewsManager.post_raw(world, "%s é demitido da %s" % [world.manager_name, DatabaseManager.nation_name(code)],
+	var n := NewsManager.post_raw(world, "%s demite %s" % [DatabaseManager.nation_name(code), world.manager_name],
 		"%s A federação vai atrás de outro nome." % why, world.user_club_id, -1, NewsEvent.IMP_HEADLINE, "selecao")
 	n.media = {"type": "nation", "code": code}
 	InboxManager.send(world, "federacao", "Fim do trabalho na seleção", "%s\n\nObrigado pelo trabalho. O clube segue com você." % why,
-		{}, -1, -1, "Federação da %s" % DatabaseManager.nation_name(code))
+		{}, -1, -1, "Federação · %s" % DatabaseManager.nation_name(code))
 
 
 # ---------------------------------------------------------------------------
@@ -276,7 +276,7 @@ static func on_campaign_closed(world: GameWorld, camp: Dictionary) -> void:
 	_add_rep(world, -1.5)
 	var favored := NationalTeamManager.rank_of(world, code) <= 24
 	if float(st["sat"]) < 30.0 or favored:
-		_fire(world, "A %s ficou fora da %s %d." % [DatabaseManager.nation_name(code), NationalTeamManager.tournament_name(camp["t"]), int(camp["y"])])
+		_fire(world, "%s ficou fora da %s %d." % [DatabaseManager.nation_name(code), NationalTeamManager.tournament_name(camp["t"]), int(camp["y"])])
 
 
 static func _expected_level(world: GameWorld, rec: Dictionary, code: String) -> int:

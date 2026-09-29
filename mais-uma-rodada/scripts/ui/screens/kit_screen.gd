@@ -1093,7 +1093,7 @@ func _nation_card(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Uniformes da seleção"))
 	var h := UIKit.hbox(12)
 	h.add_child(UIKit.flag(_nation, 48))
-	h.add_child(UIKit.label("Titular e reserva partem das cores tradicionais da %s; reserva e titular não podem ficar da mesma cor." % DatabaseManager.nation_name(_nation), "Small", true))
+	h.add_child(UIKit.label("Titular e reserva partem das cores tradicionais do país; reserva e titular não podem ficar da mesma cor.", "Small", true))
 	(h.get_child(1) as Control).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.add_child(h)
 	if _editable(w):

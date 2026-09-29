@@ -172,7 +172,7 @@ static func final_lists(world: GameWorld, env: NationalTeamManager.Env, id: Stri
 			continue
 		var mine: bool = c == NationalCoach.nation(world)
 		var title := ("Sua lista final para a %s" % tname) if mine else ("%s anuncia a lista final para a %s" % [DatabaseManager.nation_name(c), tname])
-		var n := NewsManager.post_raw(world, title, "Os %d nomes da %s para a %s %d: %s" % [ids.size(), DatabaseManager.nation_name(c), tname, y, NationalTeamManager.squad_text(world, ids)],
+		var n := NewsManager.post_raw(world, title, "%s: os %d nomes para a %s %d. %s" % [DatabaseManager.nation_name(c), ids.size(), tname, y, NationalTeamManager.squad_text(world, ids)],
 			-1, int(ids[0]), NewsEvent.IMP_HIGH, "selecao")
 		n.media = {"type": "nation", "code": c}
 
