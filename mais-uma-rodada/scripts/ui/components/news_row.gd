@@ -264,7 +264,7 @@ static func make(w: GameWorld, n: NewsEvent, compact: bool) -> Control:
 	var v := UIKit.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var head := UIKit.hbox(8)
-	var sec := UIKit.label(section_of(n).to_upper(), "Caps")
+	var sec := UIKit.label(section_of(n), "Caps")
 	var tone := _tone(n)
 	sec.add_theme_color_override(&"font_color", tone if tone != UIColors.MUTED else UIColors.DIM)
 	head.add_child(sec)

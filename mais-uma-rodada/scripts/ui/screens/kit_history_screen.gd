@@ -60,7 +60,7 @@ func _season_card(w: GameWorld, club: Club, year: int, kits: Dictionary) -> Cont
 		kv.custom_minimum_size = Vector2(110, 186)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		vb.add_child(kv)
-		var l := UIKit.label(String(NAMES[key]).to_upper(), "Caps")
+		var l := UIKit.label(String(NAMES[key]), "Caps")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		vb.add_child(l)
 		var k := kd

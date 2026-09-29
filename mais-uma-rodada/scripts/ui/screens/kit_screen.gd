@@ -1039,7 +1039,7 @@ func _sponsors_card(w: GameWorld, club: Club, _pre: bool) -> Control:
 	card.add_child(UIKit.kv("Momento comercial", String(mk[0]), mk[1]))
 	for s in SponsorManager.SLOTS:
 		var slot: String = s[0]
-		card.add_child(UIKit.label(String(s[1]).to_upper(), "Caps"))
+		card.add_child(UIKit.label(String(s[1]), "Caps"))
 		var cur: Dictionary = club.sponsors.get(slot, {})
 		if cur.is_empty():
 			card.add_child(UIKit.label("Espaço livre.", "Muted", true))

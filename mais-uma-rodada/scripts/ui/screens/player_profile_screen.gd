@@ -256,7 +256,7 @@ func _fact(value: String, caption: String, lead: Control = null) -> Control:
 		top.add_child(lead)
 	top.add_child(UIKit.label(value, "H3"))
 	v.add_child(top)
-	var c := UIKit.label(caption.to_upper(), "Caps")
+	var c := UIKit.label(caption, "Caps")
 	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	c.add_theme_font_size_override(&"font_size", 13)
 	v.add_child(c)
@@ -515,7 +515,7 @@ func _attributes(w: GameWorld, p: Player, own: bool) -> Control:
 	for gi in groups.size():
 		var g: Array = groups[gi]
 		var head := UIKit.hbox(8)
-		var gl := UIKit.label(String(g[0]).to_upper(), "Caps")
+		var gl := UIKit.label(String(g[0]), "Caps")
 		gl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		head.add_child(gl)
 		head.add_child(UIKit.badge(int(avgs[gi]), 48, 30, 18))

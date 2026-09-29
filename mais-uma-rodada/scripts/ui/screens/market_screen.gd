@@ -130,7 +130,7 @@ func _origin_chips(c: VBoxContainer, club: Club) -> void:
 
 ## Rótulo pequeno acima de um grupo de filtros.
 func _filter_label(text: String) -> Label:
-	return UIKit.label(text.to_upper(), "Caps")
+	return UIKit.label(text, "Caps")
 
 
 func _group_chips(c: VBoxContainer) -> void:

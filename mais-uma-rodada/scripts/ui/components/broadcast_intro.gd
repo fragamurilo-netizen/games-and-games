@@ -128,7 +128,7 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 			row.add_child(UIKit.portrait(star, t.club, w.year, 96))
 			var col := UIKit.vbox(0)
 			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			col.add_child(UIKit.label(t.club.short_name.to_upper(), "Caps"))
+			col.add_child(UIKit.label(t.club.short_name, "Caps"))
 			col.add_child(UIKit.label(star.display_name(), "H2"))
 			var sg: int = star.stats[Player.S_GOALS] if star.stats.size() > Player.S_GOALS else 0
 			var sa: int = star.stats[Player.S_ASSISTS] if star.stats.size() > Player.S_ASSISTS else 0

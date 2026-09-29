@@ -167,7 +167,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		var kv := UIKit.kit(k[0], 96, 0, club.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(kv)
-		var l := UIKit.label(String(k[1]).to_upper(), "Caps")
+		var l := UIKit.label(String(k[1]), "Caps")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(l)
 		kits.add_child(v)

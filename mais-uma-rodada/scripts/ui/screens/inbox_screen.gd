@@ -194,7 +194,7 @@ static func row(w: GameWorld, m: Dictionary, on_change: Callable, tap: Callable 
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var who := String(m.get("n", ""))
 	var role := InboxManager.role_of(m)
-	var from := UIKit.label((who + ((" · " + role) if role != "" and role != who else "")).to_upper(), "Caps")
+	var from := UIKit.label((who + ((" · " + role) if role != "" and role != who else "")), "Caps")
 	from.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if unread:
 		from.add_theme_color_override(&"font_color", UIColors.ACCENT)

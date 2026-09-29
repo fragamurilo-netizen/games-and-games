@@ -85,7 +85,7 @@ func _summary(w: GameWorld, got: int, total: int) -> Control:
 	var top := UIKit.hbox(16)
 	var big := UIKit.vbox(0)
 	big.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	big.add_child(UIKit.label("CARREIRA DE %s" % w.manager_name.to_upper(), "Caps"))
+	big.add_child(UIKit.label("CARREIRA DE %s" % w.manager_name, "Caps"))
 	big.add_child(UIKit.label("%d / %d" % [got, total], "Big"))
 	big.add_child(UIKit.label("%d de %d pontos" % [Achievements.points(w), Achievements.max_points()], "Small"))
 	top.add_child(big)

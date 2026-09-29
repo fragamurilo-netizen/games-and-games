@@ -259,7 +259,7 @@ static func kit_stage(w: GameWorld, c: Club, m: Dictionary, year: int) -> Contro
 
 static func _score(w: GameWorld, m: Dictionary) -> Control:
 	var v := UIKit.vbox(6)
-	var comp := UIKit.label(FootballMemory.comp_name(w, String(m.get("comp", ""))).to_upper(), "Caps")
+	var comp := UIKit.label(FootballMemory.comp_name(w, String(m.get("comp", ""))), "Caps")
 	comp.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(comp)
 	var row := UIKit.hbox(14)

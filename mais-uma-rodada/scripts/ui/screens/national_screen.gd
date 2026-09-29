@@ -265,7 +265,7 @@ func _kits_card(w: GameWorld) -> Control:
 		kv.full = true
 		kv.custom_minimum_size = Vector2(104, 104 / KitView.FULL_ASPECT)
 		v.add_child(kv)
-		var l := UIKit.label(String(pair[1]).to_upper(), "Caps")
+		var l := UIKit.label(String(pair[1]), "Caps")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(l)
 		row.add_child(v)

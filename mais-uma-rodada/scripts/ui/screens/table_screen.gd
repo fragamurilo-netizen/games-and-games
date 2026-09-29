@@ -514,7 +514,7 @@ func _season_detail(v: VBoxContainer, w: GameWorld, league: League, y: int, lg: 
 func _award_cell(title: String, pname: String, sub: String, pid: int) -> Control:
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(title.to_upper(), "Caps"))
+	col.add_child(UIKit.label(title, "Caps"))
 	var nl := UIKit.label(pname, "H3")
 	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(nl)
@@ -689,7 +689,7 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		var zpos := CompetitionManager.position_of(league, cid) if side else i + 1
 		var zone := CompetitionManager.zone_of(league, zpos)
 		if starts.has(i):
-			card.add_child(UIKit.label(String(starts[i]).to_upper(), "Caps"))
+			card.add_child(UIKit.label(String(starts[i]), "Caps"))
 		elif not side and i > 0 and zone != last_zone:
 			# Fronteira entre zonas (vaga, acesso, rebaixamento): uma linha fina ajuda a ler o corte.
 			card.add_child(_zone_line())
@@ -1087,7 +1087,7 @@ func _playoff_card(w: GameWorld, league: League) -> Control:
 		var r := int(t["r"])
 		if r != last_r:
 			last_r = r
-			card.add_child(UIKit.label(String(LeagueFormat.KO_NAMES.get(ko[clampi(r, 0, ko.size() - 1)], "Fase")).to_upper(), "Caps"))
+			card.add_child(UIKit.label(String(LeagueFormat.KO_NAMES.get(ko[clampi(r, 0, ko.size() - 1)], "Fase")), "Caps"))
 		var row := UIKit.hbox(8)
 		var a := w.club(int(t["a"]))
 		var b := w.club(int(t["b"]))

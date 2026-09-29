@@ -11,7 +11,7 @@ var band_bg2 := Color("#18191C")
 var band_accent := Color("#FFC940")
 var left_color := Color(0, 0, 0, 0)
 var right_color := Color(0, 0, 0, 0)
-var radius := float(UITokens.R_LG)
+var radius := float(UITokens.R_MD)
 
 
 ## Monta o painel: devolve [painel, caixa da faixa, caixa do corpo]. Os filhos vão nas caixas.
@@ -19,9 +19,7 @@ static func wrap(w: GameWorld, comp: String, home: Club, away: Club) -> Array:
 	var p := PanelContainer.new()
 	var box := StyleBoxFlat.new()
 	box.bg_color = UIColors.SURFACE
-	box.set_corner_radius_all(UITokens.R_LG)
-	box.border_color = UIColors.ACCENT
-	box.set_border_width_all(2)
+	box.set_corner_radius_all(UITokens.R_MD)
 	box.anti_aliasing = true
 	box.corner_detail = 8
 	p.add_theme_stylebox_override(&"panel", box)
@@ -57,7 +55,7 @@ func _ready() -> void:
 func _draw() -> void:
 	if size.x <= 1.0:
 		return
-	var inset := 2.0 # borda do cartão
+	var inset := 0.0 # o cartão não tem borda
 	var w := size.x - inset * 2.0
 	var r := radius - inset
 	var top := inset + band_h + 12.0

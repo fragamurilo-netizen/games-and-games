@@ -453,7 +453,7 @@ func _kits_card(cl: Club) -> Control:
 		var kv := UIKit.kit(it[2], 84, 0, cl.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(kv)
-		var l := UIKit.label(String(it[1]).to_upper(), "Caps")
+		var l := UIKit.label(String(it[1]), "Caps")
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		if which == _kit_sel:
 			l.add_theme_color_override(&"font_color", UIColors.ACCENT)
@@ -1065,7 +1065,7 @@ func _attrs_card(p: Player) -> Control:
 	if p.position == Pos.GK:
 		groups.push_front(["Goleiro", [Attr.GOL]])
 	for grp in groups:
-		card.add_child(UIKit.label(String(grp[0]).to_upper(), "Caps"))
+		card.add_child(UIKit.label(String(grp[0]), "Caps"))
 		for ai_v in grp[1]:
 			var ai: int = ai_v
 			var row := UIKit.hbox(10)

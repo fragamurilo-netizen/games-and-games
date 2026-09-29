@@ -1,4 +1,4 @@
-# Continuar daqui (atualizado em 29/09/2026)
+# Continuar daqui (atualizado em 29/09/2026, à tarde)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
@@ -51,11 +51,17 @@ Os testes completos (`tests/run_tests.gd`) passam de 30 minutos, por isso rode s
   - O técnico de seleção vem pelo mercado de técnicos (`scripts/systems/national_coach.gd`): vagas, candidaturas e escolha pela reputação. Não dá para escolher seleção no início da carreira.
   - O calendário europeu agora começa em 1º de agosto, sem pausa de inverno, e termina em 31 de maio. Isso ainda espera o OK do dono.
 
+## Feito na tarde de 29/09
+
+- **Testes e ferramentas voltaram a rodar.** Com `--script`, o Godot compila o script principal antes de registrar os autoloads. Os sistemas passaram a depender de componentes de interface (`scouting` → `player_row_view` → `ui_kit` → `AudioManager`), e com isso `tests/run_tests.gd`, `tools/realism_report.gd` e as outras ferramentas paravam de compilar. Agora o som passa por `Sfx` (`scripts/core/sfx.gd`), que procura o autoload na hora. **Não escreva `AudioManager.` fora do próprio autoload.**
+- **Ratings.** Meia dúzia de jogadores passa de 90 (antes o máximo era 89). Os titulares mudam de nível conforme a função (`STARTER_SHIFT`), e o craque do elenco quase nunca é lateral. Antes os três melhores do mundo eram laterais-esquerdos.
+- **Estilos novos.** Volante líbero, armador itinerante, trequartista, intérprete de espaços, ponta de área e cabeceador. Cada um fica com 6 a 8% da função.
+
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:
 
-1. Ratings, potenciais, atributos, valores e mais estilos de jogador. Em andamento. Depois de mexer, rodar `tools/realism_report.gd` e conferir que os gols continuam realistas.
+1. Ratings, potenciais, atributos, valores e mais estilos de jogador. Primeira parte feita em 29/09 à tarde (veja acima). Os valores e o potencial dos jovens foram medidos e estão plausíveis. Depois de mexer, rodar `tools/realism_report.gd` e conferir que os gols continuam realistas.
 2. Categorias de base: mais competições (sub-17, sub-20, Copinha, liga jovem europeia), academia e negociações mais profundas (parcelas, bônus, percentual de revenda, cláusula, empréstimo com opção de compra). Em andamento.
 3. Interface.
    - Legibilidade, estados de hover e cores de destaque, a tela de números, paisagem e tablet.

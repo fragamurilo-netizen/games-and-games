@@ -81,7 +81,7 @@ func _gauges(w: GameWorld) -> Control:
 		var v := UIKit.vbox(6)
 		var head := UIKit.hbox(8)
 		head.add_child(UIKit.icon_rect(String(TAB_ICONS[key]), 22, UIColors.ACCENT if key == _tab else UIColors.MUTED))
-		var name_l := UIKit.label(String(t[1]).to_upper(), "Caps")
+		var name_l := UIKit.label(String(t[1]), "Caps")
 		name_l.clip_text = true
 		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		head.add_child(name_l)
@@ -305,7 +305,7 @@ func _staff(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		row.add_child(UIKit.icon_rect(String(info["icon"]), 36, UIColors.ACCENT))
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(info["name"]).to_upper(), "Caps"))
+		col.add_child(UIKit.label(String(info["name"]), "Caps"))
 		col.add_child(UIKit.label(String(s.get("n", "Vago")), "H3", true))
 		if not s.is_empty():
 			col.add_child(UIKit.label("%d anos · %s/mês · sintonia %s" % [w.year - int(s["by"]), Fmt.money(int(s["w"])), People.rel_label(float(s.get("rel", 50.0))).to_lower()], "Small", true))

@@ -23,6 +23,15 @@ static func label(text: String, variation: String = "", wrap: bool = false) -> L
 	return l
 
 
+## Texto em caixa alta vira caixa normal, já traduzido ("EM CASA" -> "Em casa"). Siglas curtas
+## (UEFA, MLS, VAR) ficam como estão. Quem usa desliga a tradução automática do nó.
+static func soften(text: String) -> String:
+	var t := I18n.t(text)
+	if t.length() <= 4 or t != t.to_upper() or t == t.to_lower():
+		return t
+	return t.substr(0, 1) + t.substr(1).to_lower()
+
+
 static func colored(text: String, color: Color, variation: String = "", wrap: bool = false) -> Label:
 	var l := label(text, variation, wrap)
 	l.add_theme_color_override(&"font_color", color)
@@ -32,17 +41,24 @@ static func colored(text: String, color: Color, variation: String = "", wrap: bo
 static func button(text: String, variation: String = "", cb: Callable = Callable(), icon_name: String = "") -> Button:
 	var b := Button.new()
 	b.text = text
+	if variation == "PrimaryButton":
+		b.text = soften(text)
+		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	if variation != "":
 		b.theme_type_variation = variation
-	if icon_name != "":
+	# O primário é só o texto; nos outros o ícone anda junto do texto, à esquerda (ícone colado na
+	# borda com o texto centralizado solto no meio é cara de modelo pronto).
+	if icon_name != "" and variation != "PrimaryButton":
 		b.icon = icon(icon_name)
 		b.expand_icon = false # largura limitada por icon_max_width do tema
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	if cb.is_valid():
 		b.pressed.connect(func():
 			Sfx.click()
 			cb.call())
 	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
 	b.focus_mode = Control.FOCUS_NONE
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b)
 	return b
 
@@ -55,6 +71,7 @@ static func icon_button(icon_name: String, cb: Callable, tip: String = "") -> Bu
 	b.custom_minimum_size = Vector2(64, 64)
 	b.tooltip_text = tip
 	b.focus_mode = Control.FOCUS_NONE
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b, null, 0.9)
 	if cb.is_valid():
 		b.pressed.connect(func():
@@ -73,6 +90,7 @@ static func chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 	b.button_pressed = pressed
 	b.custom_minimum_size.y = 52
 	b.focus_mode = Control.FOCUS_NONE
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b, null, 0.94)
 	if cb.is_valid():
 		b.pressed.connect(func():
@@ -314,9 +332,9 @@ static func bar(value: float, max_value: float, color: Color, h: int = 10) -> Pr
 	return pb
 
 
-## Título de seção dentro de cartões: caixa alta espaçada na cor de destaque do clube.
+## Título de seção dentro de cartões: texto normal em cor secundária.
 static func section(text: String) -> Label:
-	return label(text.to_upper(), "Eyebrow")
+	return label(text, "Eyebrow")
 
 
 static func separator() -> HSeparator:
@@ -331,7 +349,7 @@ static func stat(value: String, caption: String, color: Color = UIColors.TEXT) -
 	var l := label(value, "Stat")
 	l.add_theme_color_override(&"font_color", UIColors.ink(color))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var c := label(caption.to_upper(), "Caps")
+	var c := label(caption, "Caps")
 	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	c.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(l)
@@ -436,6 +454,7 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	var b := Button.new()
 	b.theme_type_variation = "RowOverlay"
 	b.focus_mode = Control.FOCUS_NONE
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.toggle_mode = toggle
 	b.name = "Tap"
 	_fit_overlay(p, b)
@@ -485,26 +504,20 @@ static func _ignore_mouse(n: Node) -> void:
 		_ignore_mouse(c)
 
 
-## Etiqueta arredondada que se ajusta ao texto (tags de perfil, arquétipos, zonas).
+## Etiqueta de estado ("Em casa", "Lesionado", arquétipo): só o texto na cor do estado, sem
+## cápsula. Com tudo virando pílula a tela perde a hierarquia.
 static func pill(text: String, color: Color, font_size: int = 18) -> PanelContainer:
 	var p := PanelContainer.new()
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(color.r, color.g, color.b, 0.16)
-	box.border_color = Color(color.r, color.g, color.b, 0.7)
-	# Texto legível sobre o fundo tingido (cores claras escurecem no modo claro e vice-versa).
-	var under := UIColors.SURFACE.lerp(Color(color, 1.0), 0.16)
-	color = UIColors.readable_on(color, [under, UIColors.SURFACE_2.lerp(Color(color, 1.0), 0.16)], 4.5)
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(16)
-	box.content_margin_left = 12
-	box.content_margin_right = 12
-	box.content_margin_top = 3
-	box.content_margin_bottom = 3
+	var box := StyleBoxEmpty.new()
+	box.content_margin_top = 1
+	box.content_margin_bottom = 1
 	p.add_theme_stylebox_override(&"panel", box)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var l := label(text, "Caps")
+	color = UIColors.readable_on(color, [UIColors.SURFACE, UIColors.SURFACE_2, UIColors.BG], 4.5)
+	var l := label(soften(text), "Caps")
+	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.add_theme_color_override(&"font_color", color)
-	l.add_theme_font_size_override(&"font_size", font_size)
+	l.add_theme_font_size_override(&"font_size", font_size + 1)
 	p.add_child(l)
 	return p
 
@@ -520,9 +533,9 @@ static func flow(sep: int = 8) -> HFlowContainer:
 
 # --- Sistema de design: componentes compostos -------------------------------------------
 
-## Rótulo pequeno em caixa alta na cor de destaque (acima de títulos: "PRÓXIMA PARTIDA").
+## Rótulo pequeno acima de títulos ("Próxima partida"), em cor secundária.
 static func eyebrow(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
-	var l := label(text.to_upper(), "Eyebrow")
+	var l := label(text, "Eyebrow")
 	if color.a > 0.0:
 		l.add_theme_color_override(&"font_color", color)
 	return l
@@ -533,23 +546,16 @@ static func eyebrow(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
 static func section_header(text: String, action: String = "", cb: Callable = Callable()) -> HBoxContainer:
 	var h := hbox(10)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tick := ColorRect.new()
-	tick.color = UIColors.ACCENT
-	tick.custom_minimum_size = Vector2(4, 20)
-	tick.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tick.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	h.add_child(tick)
-	var l := label(text.to_upper(), "Caps")
-	l.add_theme_color_override(&"font_color", UIColors.MUTED)
-	l.add_theme_font_size_override(&"font_size", 18)
+	var l := label(text, "Eyebrow")
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	h.add_child(l)
 	if action != "" and cb.is_valid():
 		var b := Button.new()
 		b.theme_type_variation = "TextButton"
-		b.text = action.to_upper()
+		b.text = action
 		b.focus_mode = Control.FOCUS_NONE
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.pressed.connect(func():
 			Sfx.click()
 			cb.call())
@@ -570,6 +576,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
 		b.focus_mode = Control.FOCUS_NONE
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.custom_minimum_size.y = UITokens.H_TAB
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.clip_text = true
@@ -596,6 +603,7 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
 		b.focus_mode = Control.FOCUS_NONE
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.custom_minimum_size.y = 48
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		# Rótulo bem mais longo que os outros ganha um pouco mais de largura ("Instantâneo" cortava
@@ -667,14 +675,16 @@ static func menu_group(rows: Array) -> PanelContainer:
 ## Ladrilho de número: valor grande, legenda em caixa alta embaixo.
 static func stat_tile(value: String, caption: String, color: Color = Color(0, 0, 0, 0)) -> PanelContainer:
 	var p := PanelContainer.new()
-	p.theme_type_variation = "CardFlat"
+	var box := StyleBoxEmpty.new()
+	box.set_content_margin_all(4)
+	p.add_theme_stylebox_override(&"panel", box)
 	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var v := vbox(2)
 	var l := label(value, "Stat")
 	l.add_theme_color_override(&"font_color", UIColors.ink(color) if color.a > 0.0 else UIColors.TEXT)
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(l)
-	var c := label(caption.to_upper(), "Caps")
+	var c := label(caption, "Caps")
 	c.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(c)
 	p.add_child(v)
@@ -700,6 +710,7 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
 		b.focus_mode = Control.FOCUS_NONE
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.custom_minimum_size = Vector2(0, UITokens.H_TAB)
 		var key: String = it[0]
 		b.pressed.connect(func():
@@ -801,13 +812,7 @@ static func action_tile(icon_name: String, title: String, subtitle: String, cb: 
 	var tile := PanelContainer.new()
 	tile.theme_type_variation = "IconTile"
 	tile.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	tile.add_child(icon_rect(icon_name, 30, UIColors.ON_ACCENT if highlight else UIColors.ACCENT))
-	if highlight:
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = UIColors.ACCENT
-		sb.set_corner_radius_all(UITokens.R_SM)
-		sb.set_content_margin_all(10)
-		tile.add_theme_stylebox_override(&"panel", sb)
+	tile.add_child(icon_rect(icon_name, 28, UIColors.ACCENT if highlight else UIColors.MUTED))
 	v.add_child(tile)
 	var t := label(title, "H3")
 	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS

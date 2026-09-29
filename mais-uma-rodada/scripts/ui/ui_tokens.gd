@@ -15,11 +15,12 @@ const S8 := 32
 ## Margem lateral das telas.
 const GUTTER := 20
 
-## Cantos: pequenos e retos, no estilo das transmissões esportivas.
-const R_XS := 6
-const R_SM := 8
-const R_MD := 12
-const R_LG := 16
+## Cantos: quase retos, como em software esportivo e grafismo de transmissão (nada de 12-24 px
+## em tudo).
+const R_XS := 3
+const R_SM := 4
+const R_MD := 6
+const R_LG := 8
 
 ## Tipografia (px no viewport de 720 de largura).
 const F_DISPLAY := 56

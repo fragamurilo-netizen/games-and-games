@@ -633,7 +633,7 @@ func _on_slot(index: int) -> void:
 			row.modulate = Color(1, 1, 1, 0.45)
 		if tag != "":
 			var box := UIKit.vbox(2)
-			box.add_child(UIKit.label(tag.to_upper(), "Caps"))
+			box.add_child(UIKit.label(tag, "Caps"))
 			box.add_child(row)
 			v.add_child(box)
 		else:

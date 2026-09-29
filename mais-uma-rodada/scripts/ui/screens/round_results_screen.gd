@@ -94,7 +94,7 @@ func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 	# Placar final no cartão de dia de jogo: faixa da competição e os lados nas cores dos clubes.
 	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
 	var band: HBoxContainer = hero[1]
-	var ft := UIKit.label(tr("Fim de jogo").to_upper(), "Caps")
+	var ft := UIKit.label(tr("Fim de jogo"), "Caps")
 	ft.add_theme_color_override(&"font_color", Color.WHITE)
 	ft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ft.size_flags_vertical = Control.SIZE_SHRINK_CENTER

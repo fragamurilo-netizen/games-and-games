@@ -569,7 +569,7 @@ func _stars_card(w: GameWorld, rv: Dictionary) -> Control:
 			row.add_child(UIKit.pos_badge(int(st.get("pos", 0))))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(names[k]).to_upper(), "Caps"))
+		col.add_child(UIKit.label(String(names[k]), "Caps"))
 		col.add_child(UIKit.label(String(st["name"]), "H3", true))
 		row.add_child(col)
 		row.add_child(UIKit.colored(String(st["text"]), UIColors.ACCENT, "H3"))

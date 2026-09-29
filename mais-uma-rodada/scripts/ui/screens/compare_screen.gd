@@ -176,7 +176,7 @@ func _heads(w: GameWorld, pa: Player, pb: Player) -> Control:
 	var comp := ca.league_id if ca != null else (cb.league_id if cb != null else w.user_club().league_id)
 	var hero := MatchHero.wrap(w, comp, ca, cb)
 	var band: HBoxContainer = hero[1]
-	var bl := UIKit.label(tr("Frente a frente").to_upper(), "Caps")
+	var bl := UIKit.label(tr("Frente a frente"), "Caps")
 	bl.add_theme_color_override(&"font_color", Color.WHITE)
 	bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	band.add_child(bl)

@@ -33,7 +33,7 @@ func refresh() -> void:
 	# Cabeçalho: o clássico no fundo das cores dos dois clubes, com a faixa da liga.
 	var hero := MatchHero.wrap(w, ca.league_id, ca, cb)
 	var band: HBoxContainer = hero[1]
-	var bl := UIKit.label(tr("Clássico").to_upper() if ca.is_rival(_b) or cb.is_rival(_a) else tr("Rivalidade").to_upper(), "Caps")
+	var bl := UIKit.label(tr("Clássico").to_upper() if ca.is_rival(_b) or cb.is_rival(_a) else tr("Rivalidade"), "Caps")
 	bl.add_theme_color_override(&"font_color", Color.WHITE)
 	bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	band.add_child(bl)
