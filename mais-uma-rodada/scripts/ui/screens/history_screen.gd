@@ -208,6 +208,7 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 				row.add_child(TrophyView.make(String(ln[2]), 34, w))
 				var ll := UIKit.label(String(ln[0]), "Small")
 				ll.custom_minimum_size.x = 170
+				ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 				row.add_child(ll)
 				row.add_child(UIKit.crest(ln[1], 28))
 				var nl := UIKit.label((ln[1] as Club).name, "", true)
@@ -382,6 +383,7 @@ func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:
 				var row := UIKit.hbox(10)
 				var kl := UIKit.label(AwardManager.award_name(k), "Small")
 				kl.custom_minimum_size.x = 170
+				kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 				row.add_child(kl)
 				var nl := UIKit.label("%s (%s)" % [ad["name"], ad["club"]], "", true)
 				nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -393,6 +395,7 @@ func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:
 				var row := UIKit.hbox(10)
 				var kl := UIKit.label(AwardManager.award_name("coach"), "Small")
 				kl.custom_minimum_size.x = 170
+				kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 				row.add_child(kl)
 				var nl := UIKit.label("%s (%s)" % [co["n"], co["cn"]], "", true)
 				nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -577,6 +580,7 @@ func _awards(w: GameWorld) -> Control:
 			var wrow := UIKit.hbox(10)
 			var wl := UIKit.label(AwardManager.award_name(wk[1]), "Small")
 			wl.custom_minimum_size.x = 170
+			wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 			wrow.add_child(wl)
 			wrow.add_child(UIKit.label("%s (%s)" % [wd["name"], wd["club"]], "", true))
 			if wd.has("goals"):
@@ -597,6 +601,7 @@ func _awards(w: GameWorld) -> Control:
 				var row := UIKit.hbox(10)
 				var kl := UIKit.label(AwardManager.award_name(k), "Small")
 				kl.custom_minimum_size.x = 170
+				kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 				row.add_child(kl)
 				var nl := UIKit.label("%s (%s)" % [a["name"], a["club"]], "", true)
 				nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL

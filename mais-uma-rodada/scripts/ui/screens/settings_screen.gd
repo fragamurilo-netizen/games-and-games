@@ -242,6 +242,8 @@ func _toggle(text: String, value: bool, cb: Callable) -> CheckButton:
 	t.button_pressed = value
 	t.focus_mode = Control.FOCUS_NONE
 	t.custom_minimum_size.y = 64
+	# Texto longo quebra: sem isso a coluna do interruptor alargava e espremia a vizinha no tablet
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	t.toggled.connect(func(v: bool):
 		AudioManager.click()
 		cb.call(v))

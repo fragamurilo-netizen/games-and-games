@@ -197,6 +197,7 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 		p.scout_noise = int(p.scout_noise * 0.3) # você conhece melhor o próprio elenco
 	YouthManager.ensure_academy(world)
 	YouthManager.build_league(world)
+	NationalCoach.season_offers(world) # federações sondam o técnico recém-chegado
 	slot = save_slot if save_slot > 0 else SaveManager.first_free_slot()
 	if slot <= 0:
 		slot = 1
@@ -703,6 +704,9 @@ func _after_season(r: Variant) -> Dictionary:
 # ---------------------------------------------------------------------------
 
 func _exit_tree() -> void:
+	if _gen_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_gen_task)
+		_gen_task = -1
 	I18n.release()
 
 

@@ -109,10 +109,12 @@ func _edge(from: Color, to: Color) -> TextureRect:
 
 func _process(delta: float) -> void:
 	var cur := UIManager.current()
+	# A proteção roda a cada quadro (é barata: só a tela e o corpo dela); esperar o intervalo
+	# deixava a tela nova aparecer "com zoom" por alguns quadros.
+	_guard_layout(cur)
 	_guard_elapsed += delta
 	if _guard_elapsed >= GUARD_INTERVAL:
 		_guard_elapsed = 0.0
-		_guard_layout(cur)
 		if OS.has_feature("mobile"):
 			_trim_portrait_cache(MOBILE_PORTRAIT_LAYERS)
 	var sc: ScrollContainer = cur.scroll() if is_instance_valid(cur) else null
@@ -144,9 +146,9 @@ func _guard_layout(cur: BaseScreen) -> void:
 	if not is_instance_valid(cur) or not cur.is_visible_in_tree() or cur.is_queued_for_deletion():
 		return
 	var host_w := screen_host.size.x
-	# get_combined_minimum_size usa o cache do Control. A versão anterior percorria
-	# recursivamente todos os descendentes com UIKit.layout_need a cada quadro.
-	if host_w > 0.0 and (cur.size.x > host_w + 0.5 or cur.get_combined_minimum_size().x > host_w + 0.5):
+	# A tela é um Control simples: o mínimo dela não inclui o corpo (Body). layout_need olha só a
+	# tela e os filhos diretos (mínimos em cache), sem percorrer a árvore.
+	if host_w > 0.0 and (cur.size.x > host_w + 0.5 or UIKit.layout_need(cur) > host_w + 0.5):
 		UIKit.fit_width(cur, host_w)
 		var px := cur.position.x
 		cur.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

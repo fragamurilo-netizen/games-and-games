@@ -60,9 +60,9 @@ func refresh() -> void:
 			UIKit.columns(c, cards, content_width())
 		_:
 			var ov: Array = [_summary(w, p, own), _fit_card(w, p, own)]
-			# Tablet deitado: os atributos já aparecem ao lado (resumo e encaixe empilhados à
-			# esquerda), sem trocar de aba
-			if UILayout.columns_for(content_width()) >= 3:
+			# Tablet: os atributos já aparecem ao lado (resumo e encaixe empilhados à esquerda),
+			# sem trocar de aba; em duas colunas o resumo não cabe espremido ao lado do encaixe
+			if UILayout.columns_for(content_width()) >= 2:
 				var left := UIKit.vbox(UITokens.S4)
 				for card: Control in ov:
 					left.add_child(card)
@@ -361,7 +361,8 @@ func _tile(value: String, caption: String, color: Color = UIColors.TEXT, fill: f
 	l.custom_minimum_size.x = 40
 	v.add_child(l)
 	var c := UIKit.label(caption, "Small")
-	c.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	# Legenda quebra em vez de cortar ("valor de mer...") quando o bloco fica estreito
+	c.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	c.custom_minimum_size.x = 40
 	v.add_child(c)
 	if fill >= 0.0:

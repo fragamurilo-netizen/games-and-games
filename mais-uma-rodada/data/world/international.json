@@ -1,12 +1,10 @@
 {
-	"_doc": "Futebol de seleções. fifa_dates: após quais fins de semana da temporada (índice do fim de semana, a partir de 0) há data FIFA; cada data FIFA joga uma ou mais rodadas das eliminatórias em andamento. tournaments: every = intervalo em anos, first = primeira edição no jogo, teams/groups = formato da fase final (grupos de 4, os dois primeiros e os melhores terceiros avançam), hosts = sedes por ordem de edição (a sede entra direto), entry = vagas por confederação, guests = convidados de outra confederação (os melhores do ranking), playoff = vagas decididas na repescagem intercontinental (jogo único entre os melhores não classificados fora da UEFA). qualifying = eliminatórias por confederação: seasons = temporadas de duração, groups = número de grupos (1 = pontos corridos). Sem entrada em qualifying, a confederação classifica pelo ranking.",
+	"_doc": "Futebol de seleções. fifa_dates: após quais fins de semana da temporada (índice do fim de semana, a partir de 0) há data FIFA (padrão; cada calendário em rules.json pode ter as suas); cada data FIFA joga uma ou mais rodadas das eliminatórias em andamento. tournaments: every = intervalo em anos, first = primeira edição no jogo, teams/groups = formato da fase final (grupos de 4, os dois primeiros e os melhores terceiros avançam), hosts = sedes por ordem de edição (a sede entra direto), entry = vagas por confederação, guests = convidados de outra confederação (os melhores do ranking), playoff = vagas decididas na repescagem intercontinental (jogo único entre os melhores não classificados fora da UEFA). qualifying = eliminatórias por confederação: seasons = temporadas de duração, groups = número de grupos (1 = pontos corridos). Sem entrada em qualifying, a confederação classifica pelo ranking.",
 	"fifa_dates": [
-		3,
-		8,
+		4,
+		9,
 		13,
-		19,
-		27,
-		34
+		29
 	],
 	"tournaments": {
 		"WC": {

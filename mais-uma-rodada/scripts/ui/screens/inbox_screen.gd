@@ -9,6 +9,7 @@ const FILTERS := [["all", "Todas"], ["unread", "Não lidas"], ["reply", "A respo
 const SCREEN_LABELS := {
 	"relations": "Falar com a diretoria", "kit": "Abrir uniforme e patrocínios", "squad": "Ver elenco",
 	"prematch": "Escalação e tática", "training": "Abrir treino", "market": "Abrir mercado",
+	"national": "Abrir seleções",
 }
 
 const GROUP_NAMES := {"diretoria": "Diretoria", "comissao": "Comissão técnica", "elenco": "Elenco", "mercado": "Mercado"}

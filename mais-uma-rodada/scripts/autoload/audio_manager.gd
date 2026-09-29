@@ -213,6 +213,18 @@ func goal(importance: float, ours: bool) -> void:
 		vibrate(60)
 
 
+## Ao fechar, espera as faixas e torcidas ainda sendo geradas: a tarefa usa este nó e o jogo
+## abortava ao sair no meio da geração.
+func _exit_tree() -> void:
+	if _music_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_music_task)
+		_music_task = -1
+	for i in 2:
+		if _crowd_task[i] >= 0:
+			WorkerThreadPool.wait_for_task_completion(_crowd_task[i])
+			_crowd_task[i] = -1
+
+
 func _notification(what: int) -> void:
 	# No Android o jogo em segundo plano não deve continuar tocando.
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:

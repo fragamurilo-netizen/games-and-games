@@ -54,6 +54,10 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var slots: Array = cc["slots"]
 	var brk := int(cc.get("winter_break_after", -1))
 	var first_w := true
+	# Datas FIFA: marcadas no fim de semana que as antecede; com "fifa_pause" as ligas param na semana seguinte.
+	var fifa: Array = NationalTeamManager.fifa_dates_for(kind)
+	var fifa_pause := bool(cc.get("fifa_pause", false))
+	var wk := 0
 	for i in slots.size():
 		var t: String = slots[i]
 		if t == "_":
@@ -61,6 +65,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 			continue
 		if t == "W~":
 			out.append({"t": "W", "d": sat + 3, "mid": true})
+			wk += 1
 			continue
 		if t.ends_with("@"):
 			if not first_w:
@@ -73,6 +78,11 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 				sat += 7
 			first_w = false
 			out.append({"t": t, "d": sat})
+			if fifa.has(wk):
+				out[out.size() - 1]["fifa"] = true
+				if fifa_pause:
+					sat += 7
+			wk += 1
 		elif t == "U0":
 			out.append({"t": t, "d": sat - 10}) # quarta-feira, dez dias antes da estreia
 		elif t == "U1":
@@ -472,6 +482,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	s.day += 1
 	if s.day >= s.calendar.size():
 		s.finished = true
+	NationalTeamManager.after_day(world) # fim da data FIFA: convocados voltam aos clubes
 	var now_open := world.transfer_window_open()
 	if now_open and not was_open:
 		report["window_opened"] = true
