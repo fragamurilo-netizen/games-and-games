@@ -117,7 +117,7 @@ figure.p .nm, figure.p .sub { overflow: hidden; text-overflow: ellipsis; white-s
   <header class="hero">
     <div class="kicker"><i></i><span class="label">Corner Office · Identidade de personagem · Bíblia §5</span></div>
     <h1>Laboratório de rostos</h1>
-    <p>Biblioteca procedural dos retratos. Monte um rosto no editor ou clique nas opções do catálogo: cada miniatura mostra a variação aplicada ao rosto atual. Estilo padrão A (Broadcast) no jogo e B (Recorte) nas peças de evento.</p>
+    <p>Biblioteca procedural dos retratos. Nova rodada: 14 cortes e 3 cores tirados das tendências do ranking atual do MMA (marcados como “novo” no catálogo), sem reproduzir nenhum atleta real. Monte um rosto no editor ou clique nas opções do catálogo: cada miniatura mostra a variação aplicada ao rosto atual. Estilo padrão A (Broadcast) no jogo e B (Recorte) nas peças de evento.</p>
     <div class="stats" id="stats"></div>
   </header>
 
@@ -228,6 +228,7 @@ const HAIR_COLORS={
  preto:['#17110e','Preto'],castanho_escuro:['#35231a','Castanho escuro'],castanho:['#5a3a22','Castanho'],castanho_claro:['#7d5a3a','Castanho claro'],
  ruivo_escuro:['#7a3a20','Ruivo escuro'],ruivo:['#a24a22','Ruivo'],loiro_escuro:['#94733f','Loiro escuro'],loiro:['#c7a15f','Loiro'],
  platinado:['#e3d7bb','Platinado'],grisalho:['#8e8a84','Grisalho'],branco:['#d8d5cf','Branco'],tingido_vermelho:['#8e1f2b','Tingido vermelho'],tingido_azul:['#23466e','Tingido azul'],
+ tingido_rosa:['#c2507e','Tingido rosa'],tingido_verde:['#2f7a4f','Tingido verde'],multicolor:['#a2508a','Mechas coloridas'],
 };
 const IRIS={escuro:['#24170f','Castanho escuro'],castanho:['#4a2e1a','Castanho'],mel:['#7a5420','Mel'],verde:['#5a6b3e','Verde'],azul:['#4d6d8c','Azul'],cinza:['#6d7b83','Cinza']};
 
@@ -294,6 +295,10 @@ const HAIR_STYLES={
  nago:{n:'Trança nagô'},box_braids:{n:'Box braids'},dreads_curtos:{n:'Dreads curtos'},dreads_longos:{n:'Dreads longos'},
  coque_masc:{n:'Coque alto'},coque:{n:'Coque'},rabo:{n:'Rabo de cavalo'},longo_liso:{n:'Longo liso'},
  longo_ondulado:{n:'Longo ondulado'},cacheado_longo:{n:'Cacheado longo'},mullet:{n:'Mullet'},coroa:{n:'Calvície de coroa'},
+ undercut:{n:'Undercut para trás',novo:1},mullet_moderno:{n:'Mullet moderno',novo:1},crop_frances:{n:'Crop francês',novo:1},espetado:{n:'Espetado',novo:1},
+ degrade_risca:{n:'Degradê com risca',novo:1},high_top:{n:'High top',novo:1},moicano_cacheado:{n:'Moicano cacheado',novo:1},dreads_presos:{n:'Dreads presos no alto',novo:1},
+ meio_coque:{n:'Meio coque',novo:1},duas_trancas:{n:'Duas tranças',novo:1},tranca_unica:{n:'Trança única',novo:1},coque_baixo:{n:'Coque baixo',novo:1},
+ pixie:{n:'Pixie',novo:1},undercut_lateral:{n:'Lateral raspada',novo:1},
 };
 const BEARDS={
  nenhuma:{n:'Sem barba'},sombra:{n:'Sombra'},por_fazer:{n:'Por fazer'},cheia_curta:{n:'Cheia curta'},cheia_longa:{n:'Cheia longa'},
@@ -362,8 +367,8 @@ function drawFace(ctx,W,H,f,st,opts={}){
   const shade=darken(skin,dk?.3:.24), deep=darken(skin,dk?.5:.45), light=lighten(skin,dk?.14:.2);
   const lipC=mix(skin,dk?'#4a1d20':'#7a2c33',dk?.3:.34);
   const hairBase=HAIR_COLORS[f.hair.color]?.[0]||'#17110e';
-  const hairC=mix(hairBase,'#c6c2ba',f.hair.color.startsWith('tingido')||f.hair.color==='platinado'?0:A.gray);
-  const beardBase=HAIR_COLORS[f.beard.color||f.hair.color]?.[0]||hairBase;
+  const hairC=mix(hairBase,'#c6c2ba',f.hair.color.startsWith('tingido')||['platinado','multicolor'].includes(f.hair.color)?0:A.gray);
+  const beardBase=HAIR_COLORS[f.beard.color||(f.hair.color==='multicolor'?'castanho_escuro':f.hair.color)]?.[0]||hairBase;
   const beardC=mix(beardBase,'#cfcbc3',Math.min(.9,A.gray*1.15));
   const build=f.build??.5, nw=.3+.2*build;
   const marks=new Set(f.marks||[]);
@@ -382,7 +387,10 @@ function drawFace(ctx,W,H,f,st,opts={}){
     if(sketch){P.begin();fn();ctx.clip();hatch(alpha*1.3)}else{P.begin();fn();ctx.globalAlpha=clamp(alpha*contrast,0,1);ctx.fillStyle=color;ctx.fill()}ctx.restore()}
   function line(fn,color,lw,alpha=1){ctx.save();P.begin();fn();ctx.strokeStyle=sketch?INK:color;ctx.globalAlpha=alpha;ctx.lineWidth=S*lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.restore()}
   const hairInk=darken(hairC,.5);
-  const hpaint=(fn,o={})=>paint(fn,hairC,{ink:hairInk,...o});
+  let hairFill=hairC;
+  if(f.hair.color==='multicolor'&&!sketch){hairFill=ctx.createLinearGradient(ox-hw*S*1.2,oy-1.2*S,ox+hw*S*1.2,oy+.2*S);
+    [['#d9489a',0],['#f0b43c',.3],['#3fb3c9',.6],['#8a4fd0',1]].forEach(([c,t])=>hairFill.addColorStop(t,c))}
+  const hpaint=(fn,o={})=>paint(fn,hairFill,{ink:hairInk,...o});
 
   const head=()=>{P.m(-hw,-.27);P.e(0,-.27,hw,cr,Math.PI,Math.PI*2,false);
     P.c(hw*cb,.12,jw+.06,.42,jw,.6);P.q(jw-.06,chinY-.06,cw,chinY);P.q(0,chinY+.06,-cw,chinY);
@@ -416,6 +424,12 @@ function drawFace(ctx,W,H,f,st,opts={}){
   if(hs==='coque')hpaint(()=>P.e(hw*.1,topY-.05,.26,.2));
   if(hs==='coque_masc')hpaint(()=>P.e(0,topY-.02,.2,.15));
   if(hs==='rabo')hpaint(()=>{P.m(hw*.55,-.85);P.q(hw*1.35,-.3,hw*1.05,.6);P.q(hw*.95,1.1,hw*1.2,1.4);P.l(hw*1.0,1.42);P.q(hw*.7,.8,hw*.8,.2);P.q(hw*.9,-.4,hw*.3,-.8);P.close()});
+  if(hs==='meio_coque')hpaint(()=>{P.m(-hw*1.04,-.4);P.q(-hw*1.2,.6,-hw*1.02,1.25);P.l(hw*1.02,1.25);P.q(hw*1.2,.6,hw*1.04,-.4);P.close()});
+  if(hs==='mullet_moderno')hpaint(()=>{P.m(-hw*.85,.05);P.q(-hw*.95,.7,-nw*1.2,1.05);P.l(nw*1.2,1.05);P.q(hw*.95,.7,hw*.85,.05);P.close()});
+  if(hs==='duas_trancas')for(const s of[-1,1]){const x0=s*hw*.82;hpaint(rope(x0,-.2,1.45,s,.075),{lw:.8});
+    if(!sketch)for(let k=0;k<8;k++){const yy=-.05+k*.17;line(()=>{P.m(x0-s*.04,yy);P.q(x0+s*.04,yy+.06,x0+s*.12,yy+.01)},darken(hairC,.5),.016,.8)}}
+  if(hs==='coque_baixo')hpaint(()=>P.e(hw*.86,.08,.16,.17));
+  if(hs==='dreads_presos'){for(let i=-3;i<=3;i++)hpaint(rope(i*.09,topY-.18,.22,i<0?-1:1,.04),{lw:.6})}
   if(hs==='mullet')hpaint(()=>{P.m(-hw*.95,0);P.q(-hw*1.12,.8,-nw*1.45,1.18);P.l(nw*1.45,1.18);P.q(hw*1.12,.8,hw*.95,0);P.close()});
 
   /* ---------- pescoço, ombros, tatuagens do corpo ---------- */
@@ -439,6 +453,8 @@ function drawFace(ctx,W,H,f,st,opts={}){
     paint(top,'#2E3942',{ink:'#141a1f'});
     for(const s of[-1,1])line(()=>{P.m(s*.98,1.74);P.l(s*.78,1.18)},'#2E3942',.08,1);
   }
+  if(hs==='tranca_unica'){const br=()=>{P.m(hw*.55,.1);P.q(hw*1.05,.8,hw*.95,1.7);P.l(hw*.78,1.72);P.q(hw*.85,.8,hw*.35,.2);P.close()};hpaint(br,{lw:.8});
+    if(!sketch)for(let k=0;k<9;k++){const yy=.3+k*.15,xx=hw*(.62+k*.035);line(()=>{P.m(xx-.06,yy);P.q(xx,yy+.06,xx+.07,yy)},darken(hairC,.5),.016,.8)}}
   if(marks.has('neck')){
     line(()=>{P.m(-nw*.95,.7);P.q(-nw*.3,.8,-nw*.7,1.0);P.q(-nw*1.1,1.1,-nw*.55,1.22)},tc,.028,.85);
     line(()=>{P.m(-nw*.85,.86);P.q(-nw*.55,.9,-nw*.62,.98)},tc,.022,.85);
@@ -522,9 +538,9 @@ function drawFace(ctx,W,H,f,st,opts={}){
   /* ---------- cabelo: frente ---------- */
   if(hs!=='raspado'){
     const rec=A.recede, hl=-.56+rec*.28, cyc=hl-rec*.18+.02;
-    const volBy={maquina:0,degrade_baixo:.02,degrade_alto:.02,militar:.03,curto:.06,risca:.06,topete:.05,para_tras:.03,franja:.07,nago:.01,box_braids:.02,coque:.02,coque_masc:.02,rabo:.02,longo_liso:.05,longo_ondulado:.06,cacheado_longo:.1,mullet:.05,afro_curto:.12,black_power:.2,twists:.06,dreads_curtos:.05,dreads_longos:.05,cacheado_curto:.05,moicano:0,fauxhawk:.02,coroa:.02};
+    const volBy={maquina:0,degrade_baixo:.02,degrade_alto:.02,militar:.03,curto:.06,risca:.06,topete:.05,para_tras:.03,franja:.07,nago:.01,box_braids:.02,coque:.02,coque_masc:.02,rabo:.02,longo_liso:.05,longo_ondulado:.06,cacheado_longo:.1,mullet:.05,afro_curto:.12,black_power:.2,twists:.06,dreads_curtos:.05,dreads_longos:.05,cacheado_curto:.05,moicano:0,fauxhawk:.02,coroa:.02,undercut:.02,mullet_moderno:.03,crop_frances:.02,espetado:.04,degrade_risca:.02,high_top:.02,moicano_cacheado:0,dreads_presos:.04,meio_coque:.03,duas_trancas:.02,tranca_unica:.02,coque_baixo:.02,pixie:.05,undercut_lateral:.04};
     const vol=volBy[hs]??.05;
-    const sb=hs==='maquina'||hs.startsWith('degrade')?-.05:.08;
+    const sb=hs==='maquina'||hs.startsWith('degrade')||['undercut','mullet_moderno','crop_frances','high_top','moicano_cacheado','espetado'].includes(hs)?-.05:.08;
     const fringe=hs==='franja';
     const cap=(hly=hl)=>()=>{P.m(-hw*1.3,sb);P.l(-hw*.95,sb);P.q(-hw*.9,-.3,-hw*.72,-.38);
       if(fringe){P.q(-.5,-.3,-.3,-.28);P.l(-.18,-.34);P.l(-.08,-.27);P.l(.05,-.33);P.l(.18,-.27);P.l(.32,-.31);P.q(.5,-.3,hw*.72,-.38)}
@@ -532,7 +548,7 @@ function drawFace(ctx,W,H,f,st,opts={}){
       P.q(hw*.9,-.3,hw*.95,sb);P.l(hw*1.3,sb);P.l(hw*1.3,-2.2);P.l(-hw*1.3,-2.2);P.close()};
     const topOnly=(y)=>()=>{P.m(-2,y);P.l(2,y);P.l(2,-2.5);P.l(-2,-2.5);P.close()};
     ctx.save();P.begin();cranium(vol);ctx.clip();
-    const sides=a=>{if(sketch){ctx.save();P.begin();cap()();ctx.clip();hatch(a*.8,-.6);ctx.restore()}else paint(cap(),hairC,{alpha:a,stroke:false})};
+    const sides=a=>{if(sketch){ctx.save();P.begin();cap()();ctx.clip();hatch(a*.8,-.6);ctx.restore()}else paint(cap(),hairFill,{alpha:a,stroke:false})};
     const solidTop=y=>{ctx.save();P.begin();topOnly(y)();ctx.clip();hpaint(cap(),{stroke:!sketch&&false});if(sketch){P.begin();cap()();ctx.clip();hatch(.55,-.6)}ctx.restore()};
     switch(hs){
       case'maquina':sides(.72);break;
@@ -541,6 +557,15 @@ function drawFace(ctx,W,H,f,st,opts={}){
       case'militar':sides(.5);solidTop(-.6);break;
       case'moicano':sides(.1);break;
       case'fauxhawk':sides(.35);break;
+      case'undercut':sides(.12);break;
+      case'mullet_moderno':sides(.22);solidTop(-.6);break;
+      case'crop_frances':sides(.3);solidTop(-.55);break;
+      case'espetado':sides(.45);solidTop(-.55);break;
+      case'degrade_risca':sides(.14);solidTop(-.68);break;
+      case'high_top':sides(.1);break;
+      case'moicano_cacheado':sides(.12);break;
+      case'undercut_lateral':{ctx.save();P.begin();P.m(-hw*.42,-3);P.l(3,-3);P.l(3,3);P.l(-hw*.42,3);P.close();ctx.clip();hpaint(cap(),{stroke:false});ctx.restore();
+        ctx.save();P.begin();P.m(-hw*.42,-3);P.l(-3,-3);P.l(-3,3);P.l(-hw*.42,3);P.close();ctx.clip();sides(.14);ctx.restore();break}
       case'coroa':ctx.save();P.begin();P.m(-2,-.55+rec*.1);P.l(-hw*.6,-.55+rec*.1);P.l(-hw*.6,1);P.l(-2,1);P.close();P.m(2,-.55+rec*.1);P.l(hw*.6,-.55+rec*.1);P.l(hw*.6,1);P.l(2,1);P.close();ctx.clip();hpaint(cap(-.2),{stroke:false});ctx.restore();break;
       default:
         hpaint(cap());
@@ -555,6 +580,20 @@ function drawFace(ctx,W,H,f,st,opts={}){
     if(hs==='twists')for(let i=-4;i<=4;i++){const x=i*.13;hpaint(()=>{P.m(x-.045,topY+.25);P.l(x-.05,topY-.08+Math.abs(i)*.03);P.q(x,topY-.14+Math.abs(i)*.03,x+.05,topY-.08+Math.abs(i)*.03);P.l(x+.045,topY+.25);P.close()},{lw:.6})}
     if(hs==='risca'){line(()=>{P.m(-.32,hl+.04);P.q(-.36,-.8,-.3,topY+.05)},lighten(skin,.1),.02,.9);hpaint(()=>{P.m(-.3,topY+.05);P.q(.3,topY-.12,hw*.9,-.62);P.q(.3,-.8,-.3,-.72);P.close()},{stroke:false})}
     if(hs==='topete')hpaint(()=>{P.m(-hw*.8,-.6);P.q(-hw*.7,topY-.28,0,topY-.3);P.q(hw*.75,topY-.26,hw*.82,-.6);P.q(0,-.45,-hw*.8,-.6);P.close()});
+    if(hs==='undercut'||hs==='mullet_moderno')hpaint(()=>{P.m(-hw*.7,-.5);P.q(-hw*.78,topY-.02,0,topY-.08);P.q(hw*.78,topY-.02,hw*.7,-.5);P.q(0,hl-.04,-hw*.7,-.5);P.close()});
+    if(hs==='undercut')for(let i=-2;i<=2;i++)line(()=>{P.m(i*.14,hl+.02);P.q(i*.17,-.9,i*.1,topY-.04)},lighten(hairC,.22),.014,.5);
+    if(hs==='mullet_moderno'||hs==='espetado')for(let i=-3;i<=3;i++){const x=i*.12,yb=hs==='espetado'?topY+.06+Math.abs(i)*.04:hl-.02;
+      hpaint(()=>{if(hs==='espetado'){P.m(x-.06,yb+.12);P.l(x+i*.03,yb-.16);P.l(x+.06,yb+.12)}else{P.m(x-.06,yb);P.l(x+.01,yb+.09);P.l(x+.06,yb)}P.close()},{stroke:false})}
+    if(hs==='crop_frances'){hpaint(()=>{P.m(-.42,-.6);P.l(.42,-.6);P.l(.4,-.37);P.l(-.4,-.37);P.close()},{stroke:false});for(let i=-3;i<=3;i++)line(()=>{P.m(i*.11,-.39);P.l(i*.11+.02,-.46)},darken(hairC,.35),.014,.8)}
+    if(hs==='degrade_risca')line(()=>{P.m(-hw*.82,-.58);P.q(-hw*.6,-.72,-hw*.25,-.8)},lighten(skin,.1),.022,1);
+    if(hs==='high_top')hpaint(()=>{P.m(-hw*.72,-.55);P.l(-hw*.78,topY-.34);P.l(hw*.78,topY-.34);P.l(hw*.72,-.55);P.q(0,hl-.02,-hw*.72,-.55);P.close()});
+    if(hs==='moicano_cacheado'){const r=rngOf(f.seed||1);for(let i=0;i<16;i++){const t=i/15,y=hl-.02+(topY-.12-hl)*t;hpaint(()=>P.e((r()-.5)*.22,y+(r()-.5)*.05,.085,.075),{lw:.6})}}
+    if(hs==='dreads_presos'){hpaint(()=>P.e(0,topY-.2,.3,.17));for(let i=-2;i<=2;i++)line(()=>{P.m(i*.16,hl+.02);P.q(i*.18,-.85,i*.08,topY-.05)},darken(hairC,.4),.02,.7)}
+    if(hs==='meio_coque'){hpaint(()=>P.e(0,topY-.03,.17,.12));line(()=>{P.m(0,hl);P.l(0,topY+.02)},lighten(skin,.1),.018,.8)}
+    if(hs==='duas_trancas')for(const s of[-1,1]){for(let k=0;k<6;k++){const t=k/5,x=s*(.14+t*.2),y=hl+.02+(topY+.08-hl)*t;hpaint(()=>P.e(x,y,.085,.06),{lw:.6})}}
+    if(hs==='tranca_unica'||hs==='coque_baixo')for(let i=-2;i<=2;i++)line(()=>{P.m(i*.16,hl+.03);P.q(i*.2,-.9,i*.1+.1,topY+.05)},lighten(hairC,.2),.015,.45);
+    if(hs==='pixie')hpaint(()=>{P.m(-hw*.85,-.28);P.q(-.3,-.5,.42,-.42);P.q(.1,-.66,-hw*.8,-.62);P.close()});
+    if(hs==='undercut_lateral')hpaint(()=>{P.m(-hw*.42,-.62);P.q(.1,topY-.1,hw*.85,-.4);P.q(.3,-.55,-hw*.42,-.62);P.close()});
     if(hs==='moicano')hpaint(()=>{P.m(-.16,hl);P.l(-.2,topY-.3);P.q(0,topY-.4,.2,topY-.3);P.l(.16,hl);P.close()});
     if(hs==='fauxhawk')hpaint(()=>{P.m(-.36,hl);P.q(-.3,topY-.1,0,topY-.24);P.q(.3,topY-.1,.36,hl);P.close()});
     if(hs==='coque_masc'||hs==='para_tras'||hs==='rabo')for(let i=-2;i<=2;i++)line(()=>{P.m(i*.18,hl+.03);P.q(i*.2,-.9,i*.1,topY+.04)},hl2,.015,.45);
@@ -690,6 +729,15 @@ const POPS={
  sul_asiatico:{n:'Sul da Ásia',skin:{t06:2,t07:2,t08:3,t09:3,t10:2,t11:2,t12:1},hairC:{preto:5,castanho_escuro:3},m:{curto:3,para_tras:2,degrade_baixo:2,cacheado_curto:2,risca:1,topete:1},f:{longo_liso:3,rabo:2,coque:2,longo_ondulado:1},eyes:{amendoado:4,redondo:2,grande:2,profundo:1},nose:{reto:2,aquilino:3,romano:2,largo:1,carnudo:1},mouth:{neutra:3,carnuda:2,arco:1,canto:1},brows:{grossa:3,arqueada:2,espessa:1,reta:1},beard:{cheia_curta:3,por_fazer:3,sombra:1,nenhuma:2,cavanhaque_bigode:1,bigode:1},iris:{escuro:4,castanho:2,mel:.5,verde:.3},heads:{oval:3,alongado:1,redondo:1,diamante:1},beardP:.75},
  polinesia:{n:'Polinésia / Pacífico',skin:{t07:2,t08:3,t09:3,t10:2,t11:1},hairC:{preto:5,castanho_escuro:2},m:{cacheado_curto:3,coque_masc:3,degrade_baixo:2,maquina:2,dreads_curtos:1,longo_ondulado:1,mullet:1},f:{longo_ondulado:3,cacheado_longo:2,coque:2,rabo:2},eyes:{amendoado:3,redondo:2,encapuzado:1,profundo:1},nose:{largo:4,reto:1,carnudo:2,achatado:1},mouth:{carnuda:3,neutra:2,larga:2},brows:{grossa:2,reta:2,espessa:1},beard:{nenhuma:2,por_fazer:2,cheia_curta:2,cavanhaque_bigode:2,sombra:1},iris:{escuro:4,castanho:1},heads:{redondo:3,quadrado:3,oval:1},beardP:.6,build:.7,tattoo:.45},
 };
+// Tendências observadas no MMA atual (ranking UFC, set/2026), aplicadas por cima das distribuições regionais.
+const AFRO=['africa_ocidental','africa_oriental','afro_diaspora'];
+for(const[k,p]of Object.entries(POPS)){
+  Object.assign(p.f,{duas_trancas:3,tranca_unica:2,coque_baixo:2,pixie:.4,undercut_lateral:.4});
+  if(AFRO.includes(k))Object.assign(p.m,{degrade_risca:2,high_top:.7,dreads_presos:.8,moicano_cacheado:.5});
+  else Object.assign(p.m,{undercut:1.2,crop_frances:1,mullet_moderno:.6,espetado:.4});
+  if(['latino','mediterraneo','polinesia','europa_norte','leste_europeu'].includes(k))p.m.meio_coque=.7;
+  p.hairC.multicolor=.08;p.hairC.tingido_rosa=.05;p.hairC.tingido_verde=.04;
+}
 POPS.misto={n:'Misto (qualquer origem)'};
 function genFace(seed,popId,sex){
   const r=rngOf(seed);
@@ -741,8 +789,8 @@ const CATS=[
  {id:'nose',n:'Nariz',items:Object.entries(NOSES).map(([k,v])=>[k,v.n]),get:f=>f.nose.shape,set:(f,k)=>f.nose.shape=k,view:VIEW_NOSE},
  {id:'mouth',n:'Boca',items:Object.entries(MOUTHS).map(([k,v])=>[k,v.n]),get:f=>f.mouth.shape,set:(f,k)=>f.mouth.shape=k,view:VIEW_MOUTH},
  {id:'ears',n:'Orelha',items:Object.entries(EARS).map(([k,v])=>[k,v.n]),get:f=>f.ears.shape,set:(f,k)=>f.ears.shape=k,view:VIEW_EARS},
- {id:'hair',n:'Cabelo',items:Object.entries(HAIR_STYLES).map(([k,v])=>[k,v.n]),get:f=>f.hair.style,set:(f,k)=>f.hair.style=k,view:VIEW_FULL},
- {id:'hairColor',n:'Cor do cabelo',items:Object.entries(HAIR_COLORS).map(([k,v])=>[k,v[1]]),get:f=>f.hair.color,set:(f,k)=>f.hair.color=k,view:VIEW_FULL},
+ {id:'hair',n:'Cabelo',items:Object.entries(HAIR_STYLES).map(([k,v])=>[k,v.n+(v.novo?' · novo':'')]),get:f=>f.hair.style,set:(f,k)=>f.hair.style=k,view:VIEW_FULL},
+ {id:'hairColor',n:'Cor do cabelo',items:Object.entries(HAIR_COLORS).map(([k,v])=>[k,v[1]+(['tingido_rosa','tingido_verde','multicolor'].includes(k)?' · novo':'')]),get:f=>f.hair.color,set:(f,k)=>f.hair.color=k,view:VIEW_FULL},
  {id:'beard',n:'Barba',items:Object.entries(BEARDS).map(([k,v])=>[k,v.n]),get:f=>f.beard.style,set:(f,k)=>f.beard.style=k,view:VIEW_LOWER,note:'Barba só aparece em rostos masculinos.'},
  {id:'beardColor',n:'Cor da barba',items:[['__hair','Igual ao cabelo'],...Object.entries(HAIR_COLORS).filter(([k])=>!k.startsWith('tingido')).map(([k,v])=>[k,v[1]])],get:f=>f.beard.color||'__hair',set:(f,k)=>f.beard.color=k==='__hair'?null:k,view:VIEW_LOWER},
  {id:'marks',n:'Marcas',multi:true,items:MARKS.map(m=>[m[0],m[1]]),get:f=>f.marks,set:(f,k)=>{const s=new Set(f.marks);if(s.has(k))s.delete(k);else{if(k==='sardas')s.delete('sardas_leves');if(k==='sardas_leves')s.delete('sardas');s.add(k)}f.marks=[...s]},view:VIEW_FULL,note:'Seleção múltipla: clique de novo para remover.'},
@@ -828,7 +876,7 @@ function renderAll(){update();renderPopGrid();renderCanon()}
 
 document.querySelectorAll('[data-style]').forEach(b=>b.addEventListener('click',()=>{style=b.dataset.style;document.querySelectorAll('[data-style]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderAll()}));
 document.querySelectorAll('[data-sex]').forEach(b=>b.addEventListener('click',()=>{face.sex=b.dataset.sex;
-  if(face.sex==='f'){face.beard.style='nenhuma';face.recede=0;if(!['coque','rabo','longo_liso','longo_ondulado','cacheado_longo','box_braids','nago','afro_curto','black_power','twists','franja'].includes(face.hair.style))face.hair.style='rabo'}
+  if(face.sex==='f'){face.beard.style='nenhuma';face.recede=0;if(!['coque','rabo','longo_liso','longo_ondulado','cacheado_longo','box_braids','nago','afro_curto','black_power','twists','franja','duas_trancas','tranca_unica','coque_baixo','pixie','undercut_lateral','meio_coque','maquina','raspado','dreads_longos'].includes(face.hair.style))face.hair.style='duas_trancas'}
   update()}));
 $('post').addEventListener('change',e=>{post=e.target.checked;renderAll()});
 $('rand').addEventListener('click',()=>{face=genFace(Math.floor(Math.random()*1e9),$('pop-sel').value);update()});
