@@ -51,12 +51,17 @@ clube de nome comprido, lesão, suspensão, folha estourada).
 - **Seleções**: cabeçalho enxuto; convocação na tabela de jogadores (clube no lugar da
   situação, jogos e gols pela seleção); marcadores em texto.
 - **Histórico**: desfecho (campeão, acesso, queda) em texto de cor; carreira em faixa de números.
+- **Competições**: celular em pé mostra J, SG e PTS, e o nome do clube cabe inteiro; o resto
+  das colunas volta deitado e no tablet.
+- **Relações**: a grade de cartões-medidor virou faixa de números (vestiário, diretoria,
+  torcida, imprensa) com abas comuns embaixo.
 
 ## Pendente
 
 - Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
   de toque e de teclado; precisa de um controle no `main.gd`.
-- Conversas, Competições (resto) e a aba Olheiros do Mercado ainda não foram recompostas.
+- Olheiros (aba do Mercado) e a folha de treino individual ainda usam chips em grade; ficam
+  para a próxima passada.
 - `tools/match_shots.gd` termina com erros de script ao fechar ("lock" em nulo, "main" liberado):
   a ferramenta sai enquanto a rodada ainda fecha na thread. Já acontecia antes da UI 2.0; a
   captura "fim" sai preta pelo mesmo motivo.

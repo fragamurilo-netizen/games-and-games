@@ -15,7 +15,8 @@ static func make(items: Array) -> HBoxContainer:
 		if i > 0:
 			var sep := ColorRect.new()
 			sep.color = UIColors.LINE
-			sep.custom_minimum_size = Vector2(1, 44)
+			# 2 px: com a tela reduzida (canvas 600 num aparelho de 390 dp), 1 px some em alguns pontos.
+			sep.custom_minimum_size = Vector2(2, 44)
 			sep.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			h.add_child(sep)

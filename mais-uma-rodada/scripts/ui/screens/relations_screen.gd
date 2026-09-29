@@ -28,8 +28,7 @@ func refresh() -> void:
 	var c := content()
 	UIKit.clear(c)
 	max_content_width = 1700
-	# Painel das relações: um medidor por frente (vestiário, diretoria, torcida, imprensa...).
-	# Cada medidor é também a aba: tocar abre os detalhes daquela frente.
+	# Painel das relações: como está cada frente (vestiário, diretoria, torcida, imprensa) e as abas.
 	c.add_child(_gauges(w))
 	var pend := pending_card(w, func(): refresh(), false)
 	if pend != null:
@@ -52,9 +51,6 @@ func refresh() -> void:
 	columnize(c, start)
 
 
-const TAB_ICONS := {"squad": "shirt", "staff": "tactics", "board": "shield", "fans": "heart", "press": "news", "coaches": "whistle"}
-
-
 func _gauges(w: GameWorld) -> Control:
 	var club := w.user_club()
 	var squad := w.squad(club)
@@ -71,37 +67,19 @@ func _gauges(w: GameWorld) -> Control:
 		"fans": [People.support_label(sup), sup, UIColors.morale_color(sup)],
 		"press": [PressRoom.heat_label(heat), 100.0 - heat, UIColors.RED if heat >= PressRoom.HOT else (UIColors.ACCENT if heat >= 50.0 else UIColors.GREEN)],
 	}
-	var grid := GridContainer.new()
-	grid.columns = 6 if UILayout.is_wide() else 3
-	grid.add_theme_constant_override(&"h_separation", UITokens.S3)
-	grid.add_theme_constant_override(&"v_separation", UITokens.S3)
-	for t in TABS:
-		var key: String = t[0]
-		var v := UIKit.vbox(6)
-		var head := UIKit.hbox(8)
-		head.add_child(UIKit.icon_rect(String(TAB_ICONS[key]), 22, UIColors.ACCENT if key == _tab else UIColors.MUTED))
-		var name_l := UIKit.label(String(t[1]), "Caps")
-		name_l.clip_text = true
-		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		head.add_child(name_l)
-		v.add_child(head)
-		if vals.has(key):
-			var d: Array = vals[key]
-			var vl := UIKit.colored(String(d[0]), d[2], "H3")
-			vl.clip_text = true
-			vl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			v.add_child(vl)
-			v.add_child(UIKit.bar(float(d[1]), 100.0, d[2], 6))
-		else:
-			var more := UIKit.label("Ver" if key != "staff" else "Equipe", "Muted")
-			v.add_child(more)
-			v.add_child(UIKit.gap(6))
-		var tile := UIKit.tap_row(v, func():
-			_tab = key
-			refresh(), "CardHighlight" if key == _tab else "CardFlat")
-		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		grid.add_child(tile)
-	return grid
+	# Uma faixa de números com as quatro frentes e, embaixo, abas comuns (não um cartão por métrica).
+	var v := UIKit.vbox(UITokens.S2)
+	var items: Array = []
+	for key in ["squad", "board", "fans", "press"]:
+		var d: Array = vals[key]
+		var name: String = {"squad": "Vestiário", "board": "Diretoria", "fans": "Torcida", "press": "Imprensa"}[key]
+		items.append([name, String(d[0]), d[2]])
+	v.add_child(StatStrip.make(items))
+	v.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()
+		scroll_to_top()))
+	return v
 
 
 static func _trust_color(t: float) -> Color:

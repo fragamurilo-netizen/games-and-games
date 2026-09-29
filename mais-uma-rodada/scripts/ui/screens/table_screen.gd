@@ -649,7 +649,9 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	card.add_child(hp)
 	# Tela larga (tablet): gols pró e contra e os últimos jogos na própria linha
 	var wide := content_width() >= 900.0
-	card.add_child(TableRows.header(false, _view, wide))
+	# Celular em pé: J, SG e PTS, para o nome do clube caber inteiro.
+	var compact := content_width() < 560.0
+	card.add_child(TableRows.header(compact, _view, wide))
 	var side := _view == TableRows.VIEW_HOME or _view == TableRows.VIEW_AWAY
 	var t: Dictionary = TableRows.side_table(league, _view) if side else league.table
 	var ids: Array = CompetitionManager.sort_table(league.club_ids, t) if side else CompetitionManager.sorted_ids(league)
@@ -678,7 +680,7 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		if prev.has(cid):
 			move = int(prev[cid]) - (i + 1)
 		var lg := league
-		card.add_child(TableRows.table_row(w, t[cid], cid, i + 1, false, CompetitionManager.zone_color(zone), _view, move,
+		card.add_child(TableRows.table_row(w, t[cid], cid, i + 1, compact, CompetitionManager.zone_color(zone), _view, move,
 			func(): _club_sheet(w, lg, cid), wide))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(TableRows.legend(league))
@@ -1178,12 +1180,12 @@ func _cup_groups(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	for g in cup.groups:
 		var card := UIKit.card("Card", 2)
 		card.add_child(UIKit.section("Grupo %s" % g["n"]))
-		card.add_child(TableRows.header(false))
+		card.add_child(TableRows.header(content_width() < 560.0))
 		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
 		for i in order.size():
 			var qualifies: bool = state_q.has(order[i]) if CupManager.is_state(cup.id) else i < 2
 			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if qualifies else Color(0, 0, 0, 0)
-			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, false, zone))
+			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, content_width() < 560.0, zone))
 		# Jogos do grupo com o usuário (ou os próximos) ficam a um toque
 		var mine: Array = []
 		for f: Fixture in cup.fixtures:
