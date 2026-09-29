@@ -279,6 +279,9 @@ func _only_pass() -> void:
 			var sq := w.squad(w.user_club())
 			sq.sort_custom(func(a, b): return a.overall > b.overall)
 			args = {"a": sq[0].id, "b": sq[1].id}
+		if route == "market" and String(args.get("tab", "")) == "scout" and Scouting.reports(w).is_empty() and Scouting.can_send(w):
+			# Relatórios para a captura: uma missão aberta (qualquer setor, origem e idade).
+			Scouting.send_mission(w, "all", -1, 99)
 		if route == "rivalry":
 			var u := w.user_club()
 			args = {"a": u.id, "b": int(u.rivals[0]) if not u.rivals.is_empty() else w.clubs_in_league(u.league_id)[0].id}

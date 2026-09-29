@@ -241,6 +241,9 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 		if Shortlist.has(w, p):
 			return ["Na sua lista", UIColors.TEXT]
 		if Scouting.is_scouted(w, p):
+			# Até 25 anos, o que o olheiro viu (potencial) diz mais que "observado".
+			if p.age(w.year) <= 25:
+				return [Player.potential_label(p.potential_estimate(0.75)), UIColors.MUTED]
 			return ["Observado", UIColors.MUTED]
 		return [PlayStyle.of(p), UIColors.MUTED]
 	return [Player.STATUS_NAMES[p.squad_status], UIColors.MUTED]

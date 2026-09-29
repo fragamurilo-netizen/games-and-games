@@ -27,6 +27,8 @@ var _sug: Dictionary = {}
 var _upgrades := false
 var _affordable := false
 var _origin := "all"
+## Ordenação da tabela de relatórios dos olheiros.
+var _scout_state := {}
 var _scouted_only := false
 var _listed_only := false
 var _expiring_only := false
@@ -84,7 +86,7 @@ func refresh() -> void:
 	# Tela larga: resultados à esquerda, o jogador escolhido à direita (proposta a um toque).
 	var main: VBoxContainer = c
 	_side = null
-	if content_width() >= 1000.0 and _tab in ["search", "shortlist"]:
+	if content_width() >= 1000.0 and _tab in ["search", "shortlist", "scout"]:
 		var split := UIKit.hbox(UITokens.S6)
 		main = UIKit.vbox(UITokens.S3)
 		main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -134,6 +136,8 @@ func _show_brief(p: Player) -> void:
 		return
 	UIKit.clear(_side)
 	_side.add_child(PlayerBrief.make(world(), p, false, func(): refresh()))
+	if _tab == "scout":
+		_side.add_child(_discard_button(p))
 
 
 ## Primeiro jogador de uma lista vai para o painel se nada estiver escolhido.
@@ -635,28 +639,47 @@ func _listed_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		c.add_child(UIKit.card_panel(card))
 
 
+const GROUP_NAMES := ["Todos os setores", "Goleiros", "Defesa", "Meio-campo", "Ataque"]
+
+
+## Olheiros: a próxima missão em linhas que abrem folhas (setor, origem, idade), como o plano da
+## Tática e do Treino; os relatórios na tabela do mercado, com o potencial que o olheiro viu.
 func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
-	var card := UIKit.card("Card", 8)
-	var head := UIKit.hbox(12)
-	head.add_child(UIKit.icon_rect("search", 32, UIColors.ACCENT))
 	var lvl := People.staff_level(w, "olheiro")
 	var q := "excelente" if lvl >= 0.85 else ("bom" if lvl >= 0.6 else ("regular" if lvl >= 0.4 else "fraco"))
-	head.add_child(UIKit.label("Olheiro-chefe %s · %s por missão" % [q, Fmt.plural(Scouting.capacity(w), "jogador", "jogadores")], "", true))
-	card.add_child(head)
-	_group_chips(card)
-	_origin_chips(card, club)
-	var ga := ButtonGroup.new()
-	var arow := UIKit.hbox(6)
-	arow.add_child(UIKit.label("Idade", "Small"))
-	for i in AGES.size():
-		var idx := i
-		var chip := UIKit.chip(AGES[i][0], i == _age, ga, func():
-			_age = idx
-			refresh())
-		chip.add_theme_font_size_override(&"font_size", 17)
-		arow.add_child(chip)
-	card.add_child(arow)
 	var ready := Scouting.can_send(w)
+	c.add_child(UIKit.label("Olheiro-chefe %s: observa %s por missão. %s" % [q, Fmt.plural(Scouting.capacity(w), "jogador", "jogadores"),
+		"Pronto para a próxima." if ready else "Está em campo; o relatório chega na próxima rodada."], "Muted", true))
+	var card := UIKit.card("Card", 0)
+	card.add_child(UIKit.label("Próxima missão", "Section"))
+	card.add_child(UIKit.gap(UITokens.S1))
+	var origin_name := ""
+	for o in Scouting.ORIGINS:
+		if String(o[0]) == _origin:
+			origin_name = String(o[1])
+	if _origin == "nat":
+		origin_name = "Só %s" % DatabaseManager.nation_name(club.nation)
+	card.add_child(_mission_row("Setor", GROUP_NAMES[_group], func():
+		var items: Array = []
+		for n in GROUP_NAMES:
+			items.append([n, ""])
+		_option_sheet("Setor", items, _group, func(i: int): _group = i)))
+	card.add_child(_mission_row("Origem", origin_name, func():
+		var items: Array = []
+		var cur := 0
+		for i in Scouting.ORIGINS.size():
+			var k := String(Scouting.ORIGINS[i][0])
+			if k == _origin:
+				cur = i
+			var sub: String = {"all": "Onde a rede do clube alcança.", "nat": "Só jogadores de %s." % DatabaseManager.nation_name(club.nation), "for": "Só jogadores de fora do país."}.get(k, "")
+			items.append([String(Scouting.ORIGINS[i][1]), sub])
+		_option_sheet("Origem", items, cur, func(i: int): _origin = String(Scouting.ORIGINS[i][0]))))
+	card.add_child(_mission_row("Idade", "Qualquer" if _age == 0 else "Até %d anos" % int(AGES[_age][1]), func():
+		var items: Array = []
+		for a in AGES:
+			items.append(["Qualquer idade" if int(a[1]) >= 99 else "Até %d anos" % int(a[1]), ""])
+		_option_sheet("Idade", items, _age, func(i: int): _age = i)))
+	card.add_child(UIKit.gap(UITokens.S2))
 	var go := UIKit.button("Enviar olheiro" if ready else "Olheiro em campo", "PrimaryButton" if ready else "GhostButton", func():
 		if not Scouting.can_send(w):
 			return
@@ -666,35 +689,97 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		else:
 			UIManager.toast("Relatório pronto: %s." % Fmt.plural(found.size(), "jogador observado", "jogadores observados"), UIColors.GREEN)
 		GameManager.save_now()
-		refresh(), "search")
+		refresh())
 	go.disabled = not ready
 	card.add_child(go)
 	c.add_child(UIKit.card_panel(card))
 	var list := Scouting.reports(w)
-	list.sort_custom(func(a: Player, b: Player): return PlayerRowView.estimate(w, a, a.overall) > PlayerRowView.estimate(w, b, b.overall))
-	c.add_child(UIKit.section("Relatórios (%d)" % list.size()))
+	c.add_child(UIKit.label("Relatórios (%d)" % list.size(), "Section"))
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhum relatório ainda.", "Muted", true))
+		c.add_child(UIKit.state_block("empty", "Nenhum relatório ainda.", "Escolha o perfil acima e envie o olheiro: os jogadores observados aparecem aqui, com o potencial que ele viu."))
 		return
-	for p: Player in list:
-		var pid := p.id
-		var row_card := UIKit.card("CardFlat", 4)
-		row_card.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
-		var info := UIKit.hbox(8)
-		var pot := p.potential_estimate(0.75)
+	_default_brief(list)
+	if _scout_state.is_empty():
+		_scout_state = {"sort": "ovr", "desc": true}
+	var t := PlayerTable.make(w, list, "market", _scout_state, func(p: Player): _open_report(p), [_pot_col(w)] if content_width() >= 760.0 else [], "", _wide_table())
+	t.highlight = func(p: Player) -> bool: return _side != null and p.id == _sel
+	c.add_child(t)
+
+
+func _mission_row(title: String, value: String, cb: Callable) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	var t := UIKit.label(title, "Muted")
+	t.custom_minimum_size.x = 150
+	h.add_child(t)
+	var v := UIKit.label(value)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	h.add_child(v)
+	h.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
+	var row := UIKit.tap_row(h, cb)
+	row.custom_minimum_size.y = UITokens.H_ROW
+	return row
+
+
+## Folha de opções: uma linha por opção, a atual marcada; escolher fecha e aplica.
+func _option_sheet(title: String, items: Array, current: int, pick: Callable) -> void:
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label(title, "H2"))
+	v.add_child(UIKit.gap(UITokens.S1))
+	for i in items.size():
+		var it: Array = items[i]
+		var box := UIKit.vbox(0)
+		var name := UIKit.label(String(it[0]))
+		if i == current:
+			name.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		box.add_child(name)
+		if String(it[1]) != "":
+			box.add_child(UIKit.label(String(it[1]), "Muted", true))
+		var idx := i
+		var row := UIKit.tap_row(box, func():
+			UIManager.close_modal()
+			pick.call(idx)
+			refresh())
+		row.custom_minimum_size.y = 72
+		v.add_child(row)
+	UIManager.show_modal(v, true)
+
+
+## Potencial pelo olho do olheiro (só faz sentido até 25 anos; depois, a fase da carreira).
+func _pot_col(w: GameWorld) -> Dictionary:
+	var txt := func(p: Player) -> String:
 		var age := p.age(w.year)
-		var pot_txt := Player.potential_label(pot) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
-		var price := "sem taxa" if p.club_id < 0 else "pedem %s" % Fmt.money(TransferManager.asking_price(w, p))
-		info.add_child(UIKit.label("%s · %s · %s" % [DatabaseManager.nation_adj(p.nationality), pot_txt, price], "Small", true))
-		info.get_child(0).size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var drop := UIKit.button("Descartar", "GhostButton", func():
-			Scouting.forget(w, p)
-			refresh(), "close")
-		UIKit.shrink_button(drop)
-		drop.add_theme_font_size_override(&"font_size", 17)
-		info.add_child(drop)
-		row_card.add_child(info)
-		c.add_child(UIKit.card_panel(row_card))
+		return Player.potential_label(p.potential_estimate(0.75)) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
+	return {"key": "spot", "title": "Potencial", "w": 150, "align": "l",
+		"text": txt,
+		"sort": func(p: Player) -> float: return p.potential_estimate(0.75) if p.age(w.year) <= 25 else 0.0,
+		"color": func(p: Player) -> Color: return UIColors.TEXT if p.age(w.year) <= 25 else UIColors.MUTED}
+
+
+## Relatório aberto: ao lado (tela larga) ou numa folha com o resumo do jogador e o descarte.
+func _open_report(p: Player) -> void:
+	if _side != null:
+		_open(p)
+		refresh()
+		return
+	var v := UIKit.vbox(UITokens.S2)
+	v.add_child(PlayerBrief.make(world(), p, false, func():
+		UIManager.close_modal()
+		refresh()))
+	v.add_child(_discard_button(p, true))
+	UIManager.show_modal(v, true)
+
+
+func _discard_button(p: Player, in_sheet: bool = false) -> Control:
+	var w := world()
+	var b := UIKit.button("Descartar relatório", "TextButton", func():
+		if in_sheet:
+			UIManager.close_modal()
+		Scouting.forget(w, p)
+		GameManager.save_now()
+		refresh())
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	return b
 
 
 # ---------------------------------------------------------------------------
