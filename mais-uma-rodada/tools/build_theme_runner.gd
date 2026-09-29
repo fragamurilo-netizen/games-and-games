@@ -252,22 +252,16 @@ func _panels(th: Theme) -> void:
 	var hair := UITokens.HAIRLINE
 	th.set_stylebox(&"panel", "PanelContainer", StyleBoxEmpty.new())
 	th.set_stylebox(&"panel", "Panel", sb(UIColors.SURFACE, UITokens.R_LG))
-	# Blocos em vez de cartões: a seção é marcada por um filete em cima, sem fundo próprio,
-	# como uma página de jornal esportivo ou um sistema interno. O conteúdo alinha na margem.
-	var blk := sb(clear, 0, clear, 0, 0, 14)
-	blk.border_color = UIColors.LINE
-	blk.border_width_top = 1
-	blk.content_margin_top = 16
-	_panel_var(th, "Card", blk)
-	# Superfície de verdade (placar, campinho, caixa de negociação): um tom acima do fundo.
-	_panel_var(th, "CardFlat", sb(UIColors.SURFACE, UITokens.R_XS, clear, 0, 14, 10))
-	# Destaque: o filete de cima vem na cor do clube e mais grosso.
-	var hl := sb(clear, 0, clear, 0, 0, 14)
+	# Painel: um objeto do jogo (o jogo, o jogador, o clube, a notícia, a lista de pendências).
+	# Um tom acima do fundo, canto quase reto, sem borda nem sombra. Dentro dele, linhas finas.
+	_panel_var(th, "Card", sb(UIColors.SURFACE, UITokens.R_SM, clear, 0, 18, 16))
+	_panel_var(th, "CardFlat", sb(UIColors.SURFACE_2, UITokens.R_XS, clear, 0, 14, 10))
+	# Destaque: o mesmo painel com a faixa do clube em cima.
+	var hl := sb(UIColors.SURFACE, UITokens.R_SM, clear, 0, 18, 16)
 	hl.border_color = UIColors.ACCENT
-	hl.border_width_top = 3
-	hl.content_margin_top = 16
+	hl.border_width_top = 4
 	_panel_var(th, "CardHighlight", hl)
-	_panel_var(th, "CardInset", sb(UIColors.SURFACE, UITokens.R_XS, clear, 0, 14, 10))
+	_panel_var(th, "CardInset", sb(UIColors.BG, UITokens.R_XS, clear, 0, 14, 10))
 	# Linha de lista: sem fundo, um filete fino embaixo separa da próxima.
 	var row := sb(clear, 0, clear, 0, 4, 10)
 	row.border_color = UITokens.HAIRLINE

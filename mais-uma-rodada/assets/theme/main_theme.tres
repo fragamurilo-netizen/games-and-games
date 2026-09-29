@@ -71,13 +71,15 @@ corner_radius_bottom_left = 6
 corner_detail = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xamdb"]
-content_margin_left = 0.0
+content_margin_left = 18.0
 content_margin_top = 16.0
-content_margin_right = 0.0
-content_margin_bottom = 14.0
-bg_color = Color(0, 0, 0, 0)
-border_width_top = 1
-border_color = Color(0.16862746, 0.19215687, 0.23529412, 1)
+content_margin_right = 18.0
+content_margin_bottom = 16.0
+bg_color = Color(0.07058824, 0.08235294, 0.105882354, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 corner_detail = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kvm4y"]
@@ -85,7 +87,7 @@ content_margin_left = 14.0
 content_margin_top = 10.0
 content_margin_right = 14.0
 content_margin_bottom = 10.0
-bg_color = Color(0.07058824, 0.08235294, 0.105882354, 1)
+bg_color = Color(0.101960786, 0.11764706, 0.14901961, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -93,13 +95,17 @@ corner_radius_bottom_left = 3
 corner_detail = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5hith"]
-content_margin_left = 0.0
+content_margin_left = 18.0
 content_margin_top = 16.0
-content_margin_right = 0.0
-content_margin_bottom = 14.0
-bg_color = Color(0, 0, 0, 0)
-border_width_top = 3
+content_margin_right = 18.0
+content_margin_bottom = 16.0
+bg_color = Color(0.07058824, 0.08235294, 0.105882354, 1)
+border_width_top = 4
 border_color = Color(1, 0.7882353, 0.2509804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 corner_detail = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dywde"]
@@ -107,7 +113,7 @@ content_margin_left = 14.0
 content_margin_top = 10.0
 content_margin_right = 14.0
 content_margin_bottom = 10.0
-bg_color = Color(0.07058824, 0.08235294, 0.105882354, 1)
+bg_color = Color(0.03529412, 0.043137256, 0.05882353, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3

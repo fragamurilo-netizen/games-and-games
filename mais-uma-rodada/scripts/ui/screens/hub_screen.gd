@@ -123,8 +123,8 @@ func _attention(w: GameWorld, club: Club) -> Control:
 		rows.append([UIColors.MUTED, Fmt.plural(unread, "mensagem não lida", "mensagens não lidas"), "", func(): UIManager.push("inbox")])
 	if rows.is_empty():
 		return null
-	var v := UIKit.vbox(0)
-	v.add_child(UIKit.section_header("Precisa da sua atenção"))
+	var v := UIKit.card("CardHighlight", 0)
+	v.add_child(UIKit.section_header("Precisa da sua atenção · %d" % rows.size()))
 	for r in rows:
 		var h := UIKit.hbox(14)
 		var mark := ColorRect.new()
@@ -143,7 +143,7 @@ func _attention(w: GameWorld, club: Club) -> Control:
 		var row := UIKit.tap_row(h, r[3])
 		row.custom_minimum_size.y = UITokens.H_ROW
 		v.add_child(row)
-	return v
+	return UIKit.card_panel(v)
 
 
 ## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.
@@ -203,46 +203,63 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(adv)
 		return UIKit.card_panel(card)
 	var derby := MatchEngine.is_derby(w, f.home, f.away)
-	# Bloco de jogo como na grade de uma transmissão: competição, os dois times em linhas
-	# (mandante em cima), campanha e forma alinhadas à direita, local e data, e a ação.
-	var v := UIKit.vbox(10)
-	var head := UIKit.hbox(10)
-	head.add_child(UIKit.comp_logo(f.comp, 30))
+	# Dia de jogo como objeto do jogo: faixa da competição (cores da transmissão), os dois
+	# clubes com escudo grande sobre as cores deles, e a ação de jogar.
+	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
+	var band: HBoxContainer = hero[1]
+	var st := ScoreboardTheme.for_competition(w, f.comp)
+	band.add_child(UIKit.comp_logo(f.comp, 36))
+	var bt := UIKit.vbox(-2)
+	bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var ct := UIKit.label(CompText.fixture_title(w, f), "H3")
-	ct.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ct.add_theme_color_override(&"font_color", st["caps"])
 	ct.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	head.add_child(ct)
-	var where := "Campo neutro" if f.neutral else ("Em casa" if f.home == club.id else "Fora")
-	head.add_child(UIKit.colored(where, UIColors.GREEN if f.home == club.id and not f.neutral else UIColors.MUTED, "Small"))
-	v.add_child(head)
-	for cid in [f.home, f.away]:
-		v.add_child(_club_tap(w, _team_line(w, w.club(cid), f, cid == club.id), cid))
-	var info := "%s · %s" % [w.season.date_label(f.slot), "Campo neutro" if f.neutral else "%s, %s" % [w.club(f.home).stadium, w.club(f.home).city]]
-	v.add_child(UIKit.label(info, "Muted", true))
+	bt.add_child(ct)
+	var dl := UIKit.label(w.season.date_label(f.slot), "Small")
+	dl.add_theme_color_override(&"font_color", Color(st["text"], 0.8))
+	bt.add_child(dl)
+	band.add_child(bt)
+	var where := "Neutro" if f.neutral else ("Em casa" if f.home == club.id else "Fora")
+	var wl := UIKit.label(where, "Caps")
+	wl.add_theme_color_override(&"font_color", Color(st["text"], 0.9))
+	wl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(wl)
+	var body: VBoxContainer = hero[2]
+	var row := UIKit.hbox(6)
+	row.add_child(_club_tap(w, _team_block(w, w.club(f.home), f), f.home))
+	var vs := UIKit.label("×", "Title")
+	vs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	vs.add_theme_color_override(&"font_color", UIColors.DIM)
+	row.add_child(vs)
+	row.add_child(_club_tap(w, _team_block(w, w.club(f.away), f), f.away))
+	body.add_child(row)
+	var venue := UIKit.label("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city], "Muted")
+	venue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(venue)
 	if derby:
-		v.add_child(UIKit.colored("Clássico", UIColors.RED, "H3"))
+		var d := UIKit.label("Clássico", "H2")
+		d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		d.add_theme_color_override(&"font_color", UIColors.RED)
+		body.add_child(d)
 	for hk in StoryHooks.for_next_match(w):
 		if hk["kind"] == "derby":
 			continue
 		var line := UIKit.hbox(10)
-		var dot := ColorRect.new()
-		dot.color = _hook_color(String(hk["kind"]))
-		dot.custom_minimum_size = Vector2(4, 22)
-		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		line.add_child(dot)
+		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 24, _hook_color(String(hk["kind"]))))
 		line.add_child(UIKit.label(hk["text"], "", true))
-		v.add_child(line)
+		body.add_child(line)
 	var act := UIKit.hbox(10)
-	var play := UIKit.button("Jogar", "PrimaryButton", func(): UIManager.push("prematch"))
+	var play := UIKit.button("Jogar", "PrimaryButton", func(): UIManager.push("prematch"), "whistle")
 	play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	play.custom_minimum_size.y = 92
 	act.add_child(play)
 	var quick := UIKit.button("Simular", "GhostButton", func(): SimDialog.open(func(): refresh()), "fast")
 	quick.tooltip_text = "Joga um ou vários jogos sem assistir"
+	quick.custom_minimum_size.y = 92
 	act.add_child(quick)
-	v.add_child(act)
-	var block := UIKit.card("CardHighlight", 0)
-	block.add_child(v)
-	return UIKit.card_panel(block)
+	body.add_child(act)
+	return hero[0]
 
 
 ## Uma linha de time no bloco do jogo: escudo, nome, campanha e forma recente.

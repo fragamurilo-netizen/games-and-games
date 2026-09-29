@@ -55,12 +55,12 @@ func refresh() -> void:
 		"calendar":
 			cards.append(_calendar(w, club))
 		"overview":
-			if _own():
-				cards.append(_sections(w, club))
 			var ident := _identity_card(w, club)
 			for ch in ident.get_children():
 				ident.remove_child(ch)
 				cards.append(ch)
+				if _own() and cards.size() == 1:
+					cards.append(_sections(w, club)) # logo abaixo do cabeçalho do clube
 			ident.free()
 			if not _own():
 				cards.append(_season_card(w, club))
@@ -169,8 +169,9 @@ func _calendar(w: GameWorld, club: Club) -> Control:
 func _identity_card(w: GameWorld, club: Club) -> Control:
 	var out := UIKit.vbox(16)
 	# Cabeçalho do clube: escudo, nome, lugar, perfil e saúde financeira em texto.
-	var card := UIKit.card("Card", 10)
-	var row := UIKit.hbox(18)
+	var hero := IdentityBand.wrap(club, 104.0, 144.0)
+	var card: VBoxContainer = hero[1]
+	var row := UIKit.hbox(48)
 	var cr := UIKit.crest(club, 112)
 	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(cr)
@@ -202,7 +203,7 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.tap_row(rk, func(): UIManager.push("table", {"rank": ""}), "PanelContainer"))
 	card.add_child(UIKit.kv("Estádio", "%s · %s lugares" % [club.stadium, Fmt.thousands(club.capacity)]))
 	card.add_child(UIKit.kv("Ingresso", Fmt.money(FinanceManager.ticket_price(club))))
-	out.add_child(UIKit.card_panel(card))
+	out.add_child(hero[0])
 	# Estádio e uniformes da temporada.
 	var kc := UIKit.card("Card", 12)
 	kc.add_child(UIKit.section_header(club.stadium))

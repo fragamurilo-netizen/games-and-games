@@ -155,7 +155,9 @@ func _shortlist_button(w: GameWorld, p: Player) -> Button:
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
-	var card := UIKit.card("Card", 12)
+	# Ficha com a identidade do clube atrás do retrato, como a carta de um jogador.
+	var hero := IdentityBand.wrap(club, 118.0, 200.0)
+	var card: VBoxContainer = hero[1]
 	var row := UIKit.hbox(18)
 	var pv := UIKit.portrait(p, club, w.year, 168)
 	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -229,7 +231,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	for t in p.traits:
 		tags.append(String(DatabaseManager.trait_data(t).get("name", t)))
 	card.add_child(UIKit.label(" · ".join(PackedStringArray(tags)), "Muted", true))
-	return UIKit.card_panel(card)
+	return hero[0]
 
 
 ## Quadrinho de dado do cabeçalho: valor em destaque e legenda embaixo, centralizados.

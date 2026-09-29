@@ -36,9 +36,14 @@ func _ready() -> void:
 		menu_pressed.emit())
 
 
-## Só um filete na base; a identidade vem do escudo, não de um degradê.
+## Faixa nas duas cores do clube na base da barra (a identidade do save, sempre à vista).
 func _draw() -> void:
-	draw_rect(Rect2(0, size.y - 1.0, size.x, 1.0), UITokens.HAIRLINE if not UIColors.light else UIColors.LINE)
+	if UIColors.TEAM_1.a > 0.0:
+		var h := 4.0
+		draw_rect(Rect2(0, size.y - h, size.x * 0.72, h), UIColors.TEAM_1)
+		draw_rect(Rect2(size.x * 0.72, size.y - h, size.x * 0.28, h), UIColors.TEAM_2)
+	else:
+		draw_rect(Rect2(0, size.y - 1.0, size.x, 1.0), UITokens.HAIRLINE if not UIColors.light else UIColors.LINE)
 
 
 ## Contador de não lidos: número pequeno no canto do sino, sem cápsula.

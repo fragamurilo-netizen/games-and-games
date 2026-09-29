@@ -650,6 +650,7 @@ static func menu_row(icon_name: String, title: String, subtitle: String, cb: Cal
 ## Grupo de linhas de menu dentro de um único cartão, separadas por filetes.
 static func menu_group(rows: Array) -> PanelContainer:
 	var p := PanelContainer.new()
+	p.theme_type_variation = "Card"
 	var v := vbox(0)
 	for i in rows.size():
 		var r: PanelContainer = rows[i]

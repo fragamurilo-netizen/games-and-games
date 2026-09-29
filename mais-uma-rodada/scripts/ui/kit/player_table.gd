@@ -15,7 +15,7 @@ const ROW_H := 88
 static func make(w: GameWorld, players: Array, mode: String, state: Dictionary, on_tap: Callable, extra: Array = []) -> DataTable:
 	var t := DataTable.new()
 	t.row_height = ROW_H
-	t.lead_width = 330.0
+	t.lead_width = 390.0
 	if not state.has("sort") and mode != "market":
 		state["sort"] = "pos"
 		state["desc"] = false
@@ -128,6 +128,11 @@ static func lead_cell(w: GameWorld, p: Player, mode: String) -> Control:
 		var fl := UIKit.flag(p.nationality, 28)
 		fl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(fl)
+	else:
+		# O rosto do jogador: o elenco é gente, não uma planilha.
+		var face := UIKit.portrait(p, w.club(p.club_id) if p.club_id >= 0 else null, w.year, 60)
+		face.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(face)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override(&"separation", -2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
