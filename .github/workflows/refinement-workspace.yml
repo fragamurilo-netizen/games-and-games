@@ -1,0 +1,26 @@
+name: Refinement development workspace
+on:
+  push:
+    branches: [codex/realism-refinement-0.5.1-20260928]
+    paths: [.github/workflows/refinement-workspace.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare source and validation engine
+        run: |
+          set -euo pipefail
+          mkdir -p refinement-workspace
+          git rev-parse HEAD > refinement-workspace/commit.txt
+          tar --exclude=.git --exclude=builds --exclude=docs/catalogo-rostos --exclude=refinement-workspace -czf refinement-workspace/source.tar.gz .
+          docker run --rm -v "$PWD/refinement-workspace:/output" barichello/godot-ci:4.7 bash -lc 'cp "$(command -v godot)" /output/godot; chmod +x /output/godot; godot --version > /output/engine.txt'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: refinement-workspace
+          path: refinement-workspace/
+          retention-days: 1
