@@ -78,7 +78,7 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 	var is_user := w.is_user_club(club_id)
 	var h := UIKit.hbox(6)
 	var bar := ColorRect.new()
-	bar.custom_minimum_size = Vector2(5, 0)
+	bar.custom_minimum_size = Vector2(3, 0)
 	bar.color = zone
 	h.add_child(bar)
 	var pl := UIKit.label(str(pos), "H3")
@@ -91,7 +91,7 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	n.clip_text = true
 	if is_user:
-		n.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		n.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
 	h.add_child(n)
 	if move != 0:
 		var up := move > 0
@@ -150,18 +150,20 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 		elif w.is_user_club(cid):
 			UIManager.goto("club")
 		else:
-			UIManager.push("club", {"id": cid}), "CardFlat")
-	if is_user:
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = UIColors.SURFACE_2
-		sb.border_color = UIColors.ACCENT
-		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(14)
-		sb.content_margin_left = ROW_PAD
-		sb.content_margin_right = ROW_PAD
-		sb.content_margin_top = 10
-		sb.content_margin_bottom = 10
-		row.add_theme_stylebox_override(&"panel", sb)
+			UIManager.push("club", {"id": cid}), "RowPanel")
+	# Linha de tabela clássica: filete embaixo; o clube do usuário ganha só um fundo tingido.
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(UIColors.ACCENT, 0.12) if is_user else Color(0, 0, 0, 0)
+	sb.border_color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+	sb.border_width_bottom = 1
+	sb.content_margin_left = ROW_PAD
+	sb.content_margin_right = ROW_PAD
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	row.add_theme_stylebox_override(&"panel", sb)
+	for l in h.get_children():
+		if l is Label and (l as Label).text.is_valid_int() or (l is Label and (l as Label).text.begins_with("+")):
+			(l as Label).add_theme_font_override(&"font", DataTable.tabular_font())
 	return row
 
 
@@ -275,7 +277,7 @@ static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, capti
 	h.add_child(col)
 	h.add_child(UIKit.label(value, "Stat"))
 	var pid := p.id
-	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat")
+	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel")
 
 
 ## Detalhes de um jogo (gols, craque, público) ou a prévia (campanhas) se ainda não aconteceu.

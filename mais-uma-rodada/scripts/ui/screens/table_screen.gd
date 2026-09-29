@@ -21,8 +21,8 @@ var _tint: Array = []
 
 
 func _init() -> void:
-	nav_tab = "table"
-	screen_title = "Tabelas"
+	nav_tab = "club"
+	screen_title = "Competições"
 
 
 func setup(p: Dictionary) -> void:
@@ -81,7 +81,7 @@ func _picker_row(w: GameWorld) -> Control:
 		l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		row.add_child(l)
 		screen_subtitle = "%s · temporada %d" % [cfg.get("name", _league_id), w.year]
-	row.add_child(UIKit.button("Trocar", "GhostButton", func(): _open_picker(w), "table"))
+	row.add_child(UIKit.button("Trocar", "TextButton", func(): _open_picker(w)))
 	var v := UIKit.vbox(8)
 	v.add_child(_banner(row))
 	# Divisões e copas do país: a liga e a copa nacional ficam a um toque uma da outra.
@@ -121,19 +121,16 @@ func _picker_row(w: GameWorld) -> Control:
 func _banner(row: Control) -> Control:
 	var p := PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	var main := _banner_color()
-	sb.bg_color = main
-	sb.set_corner_radius_all(18)
-	sb.border_width_bottom = 6
-	sb.border_color = Color(_tint[1]) if _tint.size() > 1 else UIColors.ACCENT
-	sb.content_margin_left = 16
-	sb.content_margin_right = 12
-	sb.content_margin_top = 12
-	sb.content_margin_bottom = 12
+	# Sem painel colorido: só a faixa da competição embaixo do nome, como numa transmissão.
+	sb.bg_color = Color(0, 0, 0, 0)
+	sb.border_width_bottom = 3
+	sb.border_color = Color(_tint[0]) if not _tint.is_empty() else UIColors.ACCENT
+	if not _tint.is_empty() and Color(_tint[0]).get_luminance() < 0.12 and _tint.size() > 1:
+		sb.border_color = Color(_tint[1])
+	sb.content_margin_top = 4
+	sb.content_margin_bottom = 10
 	p.add_theme_stylebox_override(&"panel", sb)
 	p.add_child(row)
-	for l in row.find_children("*", "Label", true, false):
-		(l as Label).add_theme_color_override(&"font_color", Color.WHITE)
 	return p
 
 
@@ -145,26 +142,9 @@ func _banner_color() -> Color:
 	return main
 
 
-## Fundo da tela: a cor da competição descendo do topo e faixas diagonais na cor de destaque.
+## Fundo neutro: a identidade da competição fica só na faixa do cabeçalho.
 func _draw() -> void:
-	if _tint.size() < 2:
-		return
-	var sz := size
-	var h := minf(sz.y * 0.75, 1400.0)
-	var top := Color(_banner_color(), 0.55)
-	var clear := Color(top, 0.0)
-	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(sz.x, 0), Vector2(sz.x, h), Vector2(0, h)]),
-		PackedColorArray([top, top, clear, clear]))
-	var acc: Color = _tint[1]
-	var a0 := Color(acc, 0.10)
-	var a1 := Color(acc, 0.0)
-	var slant := h * 0.45
-	var x := sz.x * 0.45
-	for i in 3:
-		var w0 := 70.0 - i * 18.0
-		draw_polygon(PackedVector2Array([Vector2(x, 0), Vector2(x + w0, 0), Vector2(x + w0 - slant, h), Vector2(x - slant, h)]),
-			PackedColorArray([a0, a0, a1, a1]))
-		x += w0 + 46.0
+	pass
 
 
 # ---------------------------------------------------------------------------

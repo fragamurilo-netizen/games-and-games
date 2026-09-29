@@ -34,11 +34,11 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var items: Array = [["overview", "Visão geral"]]
+	var items: Array = [["overview", "Clube"]]
 	if _own():
-		items.append_array([["manage", "Gestão"], ["stats", "Estatísticas"], ["history", "História"], ["career", "Carreira"]])
+		items.append_array([["calendar", "Calendário"], ["manage", "Finanças e diretoria"], ["stats", "Estatísticas"], ["history", "História"], ["career", "Carreira"]])
 	else:
-		items.append_array([["squad", "Elenco"], ["stats", "Estatísticas"], ["history", "História"]])
+		items.append_array([["squad", "Elenco"], ["calendar", "Calendário"], ["stats", "Estatísticas"], ["history", "História"]])
 	var keys: Array = items.map(func(it: Array) -> String: return String(it[0]))
 	if not _tab in keys:
 		_tab = "overview"
@@ -52,7 +52,11 @@ func refresh() -> void:
 	c.add_child(box)
 	var cards: Array = []
 	match _tab:
+		"calendar":
+			cards.append(_calendar(w, club))
 		"overview":
+			if _own():
+				cards.append(_sections(w, club))
 			var ident := _identity_card(w, club)
 			for ch in ident.get_children():
 				ident.remove_child(ch)
@@ -92,49 +96,113 @@ func refresh() -> void:
 	UIKit.columns(box, cards, content_width(), 2, 1 if _tab == "overview" else 0)
 
 
+## Seções do próprio clube numa lista: competições, calendário, finanças, estrutura e o mundo.
+func _sections(w: GameWorld, club: Club) -> Control:
+	var league := w.league_of(club.id)
+	var pos_txt := ""
+	if league != null and int(league.table[club.id]["pl"]) > 0:
+		pos_txt = "%dº · %d pts" % [CompetitionManager.position_of(league, club.id), int(league.table[club.id]["pts"])]
+	var fin := FinanceManager.summary(w, club)
+	return UIKit.menu_group([
+		UIKit.menu_row("", "Competições", w.league_name(club.league_id) + ((" · " + pos_txt) if pos_txt != "" else ""), func(): UIManager.push("table")),
+		UIKit.menu_row("", "Calendário", "", func():
+			_tab = "calendar"
+			_tab_own = "calendar"
+			refresh()),
+		UIKit.menu_row("", "Finanças e diretoria", "Caixa %s · %s" % [Fmt.money(club.balance), FinanceManager.health_label(w, club).to_lower()], func():
+			_tab = "manage"
+			_tab_own = "manage"
+			refresh()),
+		UIKit.menu_row("", "Base", "%d garotos" % w.academy.size(), func(): UIManager.push("academy")),
+		UIKit.menu_row("", "Treino", String(TrainingManager.focus_of(club)["name"]), func(): UIManager.push("training")),
+		UIKit.menu_row("", "Seleções", "", func(): UIManager.push("national")),
+		UIKit.menu_row("", "Ranking de clubes", "", func(): UIManager.push("table", {"rank": ""})),
+		UIKit.menu_row("", "História do futebol", "", func(): UIManager.push("history")),
+	])
+
+
+## Calendário do clube na temporada: data, competição, adversário, mando e resultado.
+func _calendar(w: GameWorld, club: Club) -> Control:
+	var v := UIKit.vbox(0)
+	var list: Array = FixtureManager.season_fixtures(w, club.id)
+	if list.is_empty():
+		v.add_child(UIKit.state_block("empty", "Sem jogos marcados nesta temporada."))
+		return v
+	var next := FixtureManager.next_fixture_for(w, club.id)
+	for f: Fixture in list:
+		var opp := w.club(f.opponent_of(club.id))
+		if opp == null:
+			continue
+		var h := UIKit.hbox(12)
+		var d := UIKit.label(w.season.date_label(f.slot, false), "Muted")
+		d.custom_minimum_size.x = 92
+		h.add_child(d)
+		h.add_child(UIKit.comp_logo(f.comp, 26))
+		h.add_child(UIKit.crest(opp, 30))
+		var col := UIKit.vbox(-2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var nm := UIKit.label(("" if f.neutral else ("vs " if f.home == club.id else "@ ")) + opp.short_name)
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		if f == next:
+			nm.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		col.add_child(nm)
+		var ct := UIKit.label(CompText.fixture_title(w, f), "Small")
+		ct.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		col.add_child(ct)
+		h.add_child(col)
+		if f.played:
+			var gf := f.hg if f.home == club.id else f.ag
+			var ga := f.ag if f.home == club.id else f.hg
+			var res := UIKit.label("%d–%d" % [gf, ga])
+			res.add_theme_font_override(&"font", DataTable.tabular_font())
+			res.add_theme_color_override(&"font_color", UIColors.GREEN if gf > ga else (UIColors.RED if gf < ga else UIColors.MUTED))
+			h.add_child(res)
+		elif f == next:
+			h.add_child(UIKit.colored("próximo", UIColors.ink(UIColors.ACCENT), "Small"))
+		var cid := opp.id
+		var row := UIKit.tap_row(h, func(): _open_club(cid))
+		row.custom_minimum_size.y = 72
+		v.add_child(row)
+	return v
+
+
 func _identity_card(w: GameWorld, club: Club) -> Control:
 	var out := UIKit.vbox(16)
-	# Cabeçalho: escudo grande sobre o degradê do clube, nome em caixa alta e a identidade.
-	var card := UIKit.card("Card", 12)
+	# Cabeçalho do clube: escudo, nome, lugar, perfil e saúde financeira em texto.
+	var card := UIKit.card("Card", 10)
 	var row := UIKit.hbox(18)
-	var cr := UIKit.crest(club, 140)
+	var cr := UIKit.crest(club, 112)
 	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(cr)
-	var col := UIKit.vbox(4)
+	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	if club.nickname != "":
-		col.add_child(UIKit.eyebrow(club.nickname))
 	var nm := UIKit.label(club.name, "Title", true)
-	nm.uppercase = true
 	col.add_child(nm)
+	if club.nickname != "":
+		col.add_child(UIKit.label(club.nickname, "Muted", true))
 	var place := UIKit.hbox(8)
 	place.add_child(UIKit.flag(club.nation, 30))
 	place.add_child(UIKit.label("%s, %s · fundado em %d" % [club.city, DatabaseManager.nation_name(club.nation), club.founded], "Small", true))
 	col.add_child(place)
-	var stars := StarsView.new()
-	stars.star_size = 22.0
-	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
-	col.add_child(stars)
 	row.add_child(col)
 	card.add_child(row)
 	var arch := club.arch()
-	var tags := UIKit.flow(8)
-	tags.add_child(UIKit.pill(String(arch.get("tag", "")).to_upper(), UIColors.ACCENT, 16))
-	tags.add_child(UIKit.pill("FINANÇAS: " + FinanceManager.health_label(w, club).to_upper(), _health_color(FinanceManager.health_label(w, club)), 16))
-	card.add_child(tags)
-	out.add_child(HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1))
-	# Números rápidos: ranking mundial, estádio e ingresso.
-	var tiles := UIKit.hbox(10)
+	var health := FinanceManager.health_label(w, club)
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override(&"separation", 8)
+	line.add_child(UIKit.label(String(arch.get("tag", "")), "Muted"))
+	line.add_child(UIKit.label("·", "Muted"))
+	line.add_child(UIKit.colored("finanças: " + health.to_lower(), _health_color(health), "Small"))
+	card.add_child(line)
+	# Números do clube em linhas: ranking, estádio, ingresso.
 	var rpos := ClubRanking.world_position(w, club.id)
 	if rpos > 0:
-		var rk := UIKit.stat_tile("%dº" % rpos, "Ranking mundial", UIColors.ACCENT)
-		var rk_tap := UIKit.tap_row(rk, func(): UIManager.goto("table", {"rank": ""}), "PanelContainer")
-		rk_tap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tiles.add_child(rk_tap)
-	tiles.add_child(UIKit.stat_tile(Fmt.thousands(club.capacity), "Lugares"))
-	tiles.add_child(UIKit.stat_tile(Fmt.money(FinanceManager.ticket_price(club)), "Ingresso"))
-	out.add_child(tiles)
+		var rk := UIKit.kv("Ranking mundial", "%dº" % rpos)
+		card.add_child(UIKit.tap_row(rk, func(): UIManager.push("table", {"rank": ""}), "PanelContainer"))
+	card.add_child(UIKit.kv("Estádio", "%s · %s lugares" % [club.stadium, Fmt.thousands(club.capacity)]))
+	card.add_child(UIKit.kv("Ingresso", Fmt.money(FinanceManager.ticket_price(club))))
+	out.add_child(UIKit.card_panel(card))
 	# Estádio e uniformes da temporada.
 	var kc := UIKit.card("Card", 12)
 	kc.add_child(UIKit.section_header(club.stadium))

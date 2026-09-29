@@ -417,10 +417,11 @@ static func clear(node: Node) -> void:
 ## Linha "rótulo ........ valor".
 static func kv(key: String, value: String, value_color: Color = UIColors.TEXT) -> HBoxContainer:
 	var h := hbox(8)
+	h.custom_minimum_size.y = 44
 	var k := label(key, "Muted")
 	k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(k)
-	var v := label(value, "H3")
+	var v := label(value)
 	v.add_theme_color_override(&"font_color", UIColors.ink(value_color))
 	if value.length() > 22:
 		# Valor longo quebra em linhas à direita em vez de alargar a tela.

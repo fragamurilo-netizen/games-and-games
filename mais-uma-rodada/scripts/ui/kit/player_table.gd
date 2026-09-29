@@ -10,11 +10,13 @@ extends RefCounted
 const ROW_H := 88
 
 
-static func make(w: GameWorld, players: Array, mode: String, state: Dictionary, on_tap: Callable) -> DataTable:
+## `extra`: colunas a mais logo depois de Geral/Idade (o mercado põe a comparação com o
+## titular e o salário pedido). Sem "sort" no estado, mantém a ordem recebida (relevância).
+static func make(w: GameWorld, players: Array, mode: String, state: Dictionary, on_tap: Callable, extra: Array = []) -> DataTable:
 	var t := DataTable.new()
 	t.row_height = ROW_H
 	t.lead_width = 330.0
-	if not state.has("sort"):
+	if not state.has("sort") and mode != "market":
 		state["sort"] = "pos"
 		state["desc"] = false
 	t.marker = func(p: Player) -> Color:
@@ -22,7 +24,10 @@ static func make(w: GameWorld, players: Array, mode: String, state: Dictionary, 
 			return UIColors.RED
 		return Color(0, 0, 0, 0)
 	t.row_pressed.connect(func(p: Variant): on_tap.call(p))
-	return t.setup(columns(w, mode), players, state)
+	var cols := columns(w, mode)
+	for i in extra.size():
+		cols.insert(3 + i, extra[i])
+	return t.setup(cols, players, state)
 
 
 static func columns(w: GameWorld, mode: String) -> Array:
@@ -164,7 +169,12 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 	if p.retiring:
 		return ["Vai se aposentar", UIColors.MUTED]
 	if mode == "market":
-		return [PlayStyle.of(p) + (" · observado" if Scouting.is_scouted(w, p) else ""), UIColors.MUTED]
+		var tags: Array = [PlayStyle.of(p)]
+		if Scouting.is_scouted(w, p):
+			tags.append("observado")
+		if Shortlist.has(w, p):
+			tags.append("na sua lista")
+		return [" · ".join(tags), UIColors.MUTED]
 	return ["%s · %s" % [PlayStyle.of(p), Player.STATUS_NAMES[p.squad_status]], UIColors.MUTED]
 
 

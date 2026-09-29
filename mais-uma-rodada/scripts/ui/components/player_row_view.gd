@@ -21,8 +21,13 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
 	var row := UIKit.hbox(10)
 	if mode != "market":
-		# Costas da camisa com o número, nas cores do clube
-		row.add_child(UIKit.shirt_back(w.club(p.club_id), p.shirt, 50, false, p.position == Pos.GK))
+		# Número da camisa em algarismos de tabela, sem desenho de camisa em cada linha.
+		var num := UIKit.label(str(p.shirt) if p.shirt > 0 else "", "Muted")
+		num.custom_minimum_size.x = 34
+		num.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		num.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		num.add_theme_font_override(&"font", DataTable.tabular_font())
+		row.add_child(num)
 	# Posição principal e, embaixo, as secundárias
 	var pcol := UIKit.vbox(2)
 	pcol.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -46,10 +51,12 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		row.add_child(fl)
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UIKit.label(p.display_name(), "H3")
+	var nm := UIKit.label(p.display_name())
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(nm)
-	col.add_child(UIKit.label(subtitle(w, p, mode), "Small"))
+	var sub := UIKit.label(subtitle(w, p, mode), "Small")
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(sub)
 	row.add_child(col)
 	# Ícones de situação
 	var icons := UIKit.hbox(4)

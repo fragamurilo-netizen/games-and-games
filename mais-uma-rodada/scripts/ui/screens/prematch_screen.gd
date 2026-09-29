@@ -107,68 +107,26 @@ func refresh() -> void:
 		_pos_edit = v
 		refresh())
 	left.add_child(pe)
-	# Formação
+	# Banco logo abaixo do campo: quem entra é parte da escalação.
+	left.add_child(UIKit.section_header("Banco · %d" % sheet.bench.size()))
+	for i in sheet.bench.size():
+		var p := w.player(sheet.bench[i])
+		if p == null:
+			continue
+		var bi := i
+		left.add_child(PlayerRowView.make(w, p, {"mode": "pick"}, func(): _pick_for_bench(bi)))
+	# Painel rápido: cada escolha é uma linha com o valor atual; tocar abre as opções numa folha.
+	var tac := DatabaseManager.tactics()
 	var base := DatabaseManager.formation_base(sheet.formation)
 	var custom := sheet.formation.begins_with("C:")
-	right.add_child(UIKit.section("Formação" + (" · variação do %s" % base if custom else "")))
-	var gf := ButtonGroup.new()
-	var fl := UIKit.flow(8)
-	for fname in DatabaseManager.formation_names():
-		var fn: String = fname
-		fl.add_child(UIKit.chip(fn + ("*" if custom and fn == base else ""), fn == base, gf, func(): _set_formation(fn)))
-	right.add_child(fl)
-	if custom:
-		var ov := DatabaseManager.formation_overrides(sheet.formation)
-		var base_slots: Array = DatabaseManager.formation(base)["slots"]
-		var changes: Array = []
-		for k in ov:
-			changes.append("%s → %s" % [Pos.code(int(base_slots[int(k)]["pos"])), Pos.code(DatabaseManager.POS_BY_CODE[ov[k]])])
-		right.add_child(UIKit.label("Mudanças: %s" % ", ".join(PackedStringArray(changes)), "Small", true))
-		right.add_child(UIKit.button("Voltar ao %s original" % base, "GhostButton", func(): _set_formation(base), "back"))
-	right.add_child(_fam_row("Entrosamento com o %s" % base, TacticsManager.formation_fam(club, sheet.formation)))
-	# Mentalidade
-	var tac := DatabaseManager.tactics()
-	right.add_child(UIKit.section("Mentalidade"))
-	var gm := ButtonGroup.new()
-	var ml := UIKit.flow(8)
-	for i in 5:
-		var idx := i
-		ml.add_child(UIKit.chip(String(tac["mentalities"][i]["name"]), i == sheet.mentality, gm, func():
-			sheet.mentality = idx
-			refresh()))
-	right.add_child(ml)
-	# Estilo
-	right.add_child(UIKit.section("Estilo de jogo"))
-	var gs := ButtonGroup.new()
-	var sl := UIKit.flow(8)
-	for i in 6:
-		var idx := i
-		sl.add_child(UIKit.chip(String(tac["styles"][i]["short"]), i == sheet.style, gs, func():
-			sheet.style = idx
-			refresh()))
-	right.add_child(sl)
+	right.add_child(UIKit.section_header("Plano de jogo"))
+	right.add_child(_picker_row("Formação", base + (" (variação)" if custom else ""), TacticsManager.formation_fam(club, sheet.formation), _formation_sheet))
+	right.add_child(_picker_row("Mentalidade", String(tac["mentalities"][sheet.mentality]["name"]), -1.0, _mentality_sheet))
+	right.add_child(_picker_row("Estilo", String(tac["styles"][sheet.style]["short"]), TacticsManager.style_fam(club, sheet.style), _style_sheet))
 	var st: Dictionary = tac["styles"][sheet.style]
 	right.add_child(_style_fit_label(w, sheet, st))
-	right.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
-	# Ajustes finos
-	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes: intensidade, linha, pressão", "GhostButton", func():
-		_extras_open = not _extras_open
-		refresh())
-	more.text = ("Esconder" if _extras_open else "Mostrar") + " ajustes: intensidade, linha, pressão"
-	right.add_child(more)
-	if _extras_open:
-		_segment(right, "Intensidade", tac["intensity"], sheet.intensity, func(i): sheet.intensity = i)
-		_segment(right, "Linha defensiva", tac["line"], sheet.line, func(i): sheet.line = i)
-		_segment(right, "Pressão", tac["pressing"], sheet.pressing, func(i): sheet.pressing = i)
-		var wopts: Array = []
-		for wi in TeamSheet.WIDTH_NAMES.size():
-			wopts.append({"name": TeamSheet.WIDTH_NAMES[wi]})
-		_segment(right, "Largura", wopts, sheet.width, func(i): sheet.width = i)
-		var auto_subs := CheckButton.new()
-		auto_subs.text = "Assistente faz substituições por cansaço e lesão"
-		auto_subs.button_pressed = sheet.auto_subs
-		auto_subs.toggled.connect(func(v): sheet.auto_subs = v)
-		right.add_child(auto_subs)
+	var adj := "%s · linha %s · pressão %s" % [String(tac["intensity"][sheet.intensity]["name"]).to_lower(), String(tac["line"][sheet.line]["name"]).to_lower(), String(tac["pressing"][sheet.pressing]["name"]).to_lower()]
+	right.add_child(_picker_row("Ajustes", adj, -1.0, _extras_sheet))
 	_deep_section(right, w, sheet)
 	_plan_section(right, sheet)
 	_instructions_section(right, w, sheet)
@@ -177,15 +135,114 @@ func refresh() -> void:
 	for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
 		right.add_child(_taker_row(w, sheet, item[0], item[1]))
 	right.add_child(_shootout_row(w, sheet))
-	# Banco
-	left.add_child(UIKit.section("Banco de reservas (%d)" % sheet.bench.size()))
-	for i in sheet.bench.size():
-		var p := w.player(sheet.bench[i])
-		if p == null:
-			continue
-		var bi := i
-		left.add_child(PlayerRowView.make(w, p, {"mode": "pick"}, func(): _pick_for_bench(bi)))
 	_build_footer(w)
+
+
+## Linha do painel rápido: nome à esquerda, valor e entrosamento à direita.
+func _picker_row(title: String, value: String, fam: float, cb: Callable) -> Control:
+	var h := UIKit.hbox(12)
+	var t := UIKit.label(title, "Muted")
+	t.custom_minimum_size.x = 170
+	h.add_child(t)
+	var v := UIKit.label(value)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	h.add_child(v)
+	if fam >= 0.0:
+		h.add_child(UIKit.colored(TacticsManager.fam_label(fam), TacticsManager.fam_color(fam), "Small"))
+	h.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
+	var row := UIKit.tap_row(h, cb)
+	row.custom_minimum_size.y = UITokens.H_ROW
+	return row
+
+
+## Folha de opções: uma linha por opção, a atual marcada; escolher fecha e aplica.
+func _option_sheet(title: String, items: Array, current: int, pick: Callable, extra: Control = null) -> void:
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label(title, "H2"))
+	v.add_child(UIKit.gap(8))
+	if extra != null:
+		v.add_child(extra)
+	for i in items.size():
+		var it: Array = items[i]
+		var box := UIKit.vbox(0)
+		var name := UIKit.label(String(it[0]))
+		if i == current:
+			name.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		box.add_child(name)
+		if it.size() > 1 and String(it[1]) != "":
+			box.add_child(UIKit.label(String(it[1]), "Muted", true))
+		var idx := i
+		var row := UIKit.tap_row(box, func():
+			UIManager.close_modal()
+			pick.call(idx)
+			refresh())
+		row.custom_minimum_size.y = 72
+		v.add_child(row)
+	UIManager.show_modal(v, true)
+
+
+func _formation_sheet() -> void:
+	var sheet := _sheet()
+	var club := world().user_club()
+	var names: Array = DatabaseManager.formation_names()
+	var base := DatabaseManager.formation_base(sheet.formation)
+	var items: Array = []
+	for fname in names:
+		items.append([String(fname), TacticsManager.fam_label(TacticsManager.formation_fam(club, String(fname)))])
+	var extra: Control = null
+	if sheet.formation.begins_with("C:"):
+		var ov := DatabaseManager.formation_overrides(sheet.formation)
+		var base_slots: Array = DatabaseManager.formation(base)["slots"]
+		var changes: Array = []
+		for k in ov:
+			changes.append("%s → %s" % [Pos.code(int(base_slots[int(k)]["pos"])), Pos.code(DatabaseManager.POS_BY_CODE[ov[k]])])
+		extra = UIKit.label("Variação do %s: %s. Escolher uma formação desfaz a variação." % [base, ", ".join(PackedStringArray(changes))], "Muted", true)
+	_option_sheet("Formação", items, names.find(base), func(i: int): _set_formation(String(names[i])), extra)
+
+
+func _mentality_sheet() -> void:
+	var sheet := _sheet()
+	var tac := DatabaseManager.tactics()
+	var items: Array = []
+	for m: Dictionary in tac["mentalities"]:
+		items.append([String(m["name"]), String(m.get("desc", ""))])
+	_option_sheet("Mentalidade", items, sheet.mentality, func(i: int): sheet.mentality = i)
+
+
+func _style_sheet() -> void:
+	var sheet := _sheet()
+	var club := world().user_club()
+	var tac := DatabaseManager.tactics()
+	var items: Array = []
+	for i in 6:
+		var st: Dictionary = tac["styles"][i]
+		items.append([String(st["name"]), "%s · %s" % [String(st.get("desc", "")), TacticsManager.fam_label(TacticsManager.style_fam(club, i))]])
+	_option_sheet("Estilo de jogo", items, sheet.style, func(i: int): sheet.style = i)
+
+
+## Intensidade, linha, pressão, largura e substituições do assistente, numa folha só.
+func _extras_sheet() -> void:
+	var sheet := _sheet()
+	var tac := DatabaseManager.tactics()
+	var v := UIKit.vbox(10)
+	v.add_child(UIKit.label("Ajustes", "H2"))
+	_segment(v, "Intensidade", tac["intensity"], sheet.intensity, func(i): sheet.intensity = i)
+	_segment(v, "Linha defensiva", tac["line"], sheet.line, func(i): sheet.line = i)
+	_segment(v, "Pressão", tac["pressing"], sheet.pressing, func(i): sheet.pressing = i)
+	var wopts: Array = []
+	for wi in TeamSheet.WIDTH_NAMES.size():
+		wopts.append({"name": TeamSheet.WIDTH_NAMES[wi]})
+	_segment(v, "Largura", wopts, sheet.width, func(i): sheet.width = i)
+	var auto_subs := CheckButton.new()
+	auto_subs.text = "Assistente faz substituições por cansaço e lesão"
+	auto_subs.button_pressed = sheet.auto_subs
+	auto_subs.toggled.connect(func(on): sheet.auto_subs = on)
+	v.add_child(auto_subs)
+	v.add_child(UIKit.button("Pronto", "PrimaryButton", func():
+		UIManager.close_modal()
+		refresh()))
+	UIManager.show_modal(v, true)
 
 
 func _opponent_card(w: GameWorld, f: Fixture) -> Control:
