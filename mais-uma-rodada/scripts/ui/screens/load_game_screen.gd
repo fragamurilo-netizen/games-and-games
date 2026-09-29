@@ -139,7 +139,8 @@ static func _date(iso: String) -> String:
 
 func _load(s: int) -> void:
 	if GameManager.has_career():
-		GameManager.close_career()
+		GameManager.close_career_async(_load.bind(s))
+		return
 	GameManager.load_career_async(s, func(ok: bool) -> void:
 		if ok:
 			AudioManager.play("whistle", -6.0)

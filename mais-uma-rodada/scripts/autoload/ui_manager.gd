@@ -257,8 +257,7 @@ func handle_back() -> void:
 		goto("hub")
 	elif cur.screen_name == "hub":
 		confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
-			GameManager.close_career()
-			goto("menu"))
+			GameManager.close_career_async(func() -> void: goto("menu")))
 	elif cur.screen_name == "match":
 		toast("A partida está em andamento.")
 

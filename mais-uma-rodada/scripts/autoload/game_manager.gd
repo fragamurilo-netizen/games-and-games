@@ -37,6 +37,11 @@ signal busy_changed(on: bool)
 var _work_task := -1
 var _work_result: Variant = null
 var _work_done: Callable
+## App foi para o segundo plano com um trabalho no meio: a própria thread grava o save ao acabar
+## (a tela principal não espera; o Android fecha o app que demora a pausar).
+var _work_mutex := Mutex.new()
+var _work_in_fn := false
+var _save_on_finish := false
 ## Texto do aviso "processando" (só lido na thread principal).
 var work_label := ""
 
@@ -92,9 +97,30 @@ func run_work(work: Callable, done: Callable = Callable(), label: String = "") -
 	work_label = label
 	SeasonManager.progress = 0
 	Warmup.run() # caches preguiçosos prontos antes: a thread e a tela não os montam ao mesmo tempo
-	_work_task = WorkerThreadPool.add_task(func(): _work_result = work.call(), true, "trabalho")
+	_work_in_fn = true
+	_save_on_finish = false
+	_work_task = WorkerThreadPool.add_task(_work_body.bind(work), true, "trabalho")
 	busy_changed.emit(true)
 	return true
+
+
+func _work_body(work: Callable) -> void:
+	var r: Variant = work.call()
+	_work_mutex.lock()
+	_work_in_fn = false
+	var save := _save_on_finish
+	_save_on_finish = false
+	_work_mutex.unlock()
+	if save:
+		_save_core()
+	_work_result = r
+
+
+## Save completo numa thread de trabalho (a tela fica congelada enquanto ele lê o mundo).
+func _save_core() -> bool:
+	if world == null or slot <= 0 or not matchday.is_empty():
+		return false
+	return SaveManager.save_world(world, slot) == OK
 
 
 ## Mundo sendo alterado por uma thread de trabalho: a interface não deve lê-lo agora.
@@ -330,14 +356,72 @@ func save_copy(to_slot: int) -> bool:
 	return ok
 
 
+## Cópia do save em outro espaço, numa thread (são dois saves completos). `done(ok)` depois.
+func save_copy_async(to_slot: int, done: Callable) -> void:
+	if world == null:
+		done.call(false)
+		return
+	_wait_work()
+	var need := _save_dirty or _save_phase >= 1 or _batch_save
+	_cancel_save()
+	var work := func() -> bool:
+		if need:
+			_save_core()
+		return SaveManager.save_world(world, to_slot) == OK
+	if not run_work(work, done, "Salvando..."):
+		done.call(false)
+
+
 func close_career() -> void:
 	end_batch()
 	save_now()
 	save_blocking()
+	_drop_career()
+
+
+func _drop_career() -> void:
 	_save_gen += 1
 	world = null
 	slot = -1
 	matchday = {}
+
+
+## Sai da carreira gravando numa thread (o save completo leva segundos no celular); `done` depois.
+func close_career_async(done: Callable) -> void:
+	end_batch()
+	_wait_work()
+	var need := _save_dirty or _save_phase >= 1 or _batch_save
+	_cancel_save()
+	if need and world != null and slot > 0 and matchday.is_empty() \
+			and run_work(_save_core, func(_r: Variant) -> void:
+				_drop_career()
+				done.call(), "Salvando..."):
+		return
+	_drop_career()
+	done.call()
+
+
+## App indo para o segundo plano: grava sem travar a thread principal. Um trabalho em curso grava
+## ao acabar (na própria thread); senão, o save pendente roda numa thread, com a tela congelada.
+func _save_on_pause() -> void:
+	if world == null or slot <= 0:
+		return
+	_work_mutex.lock()
+	var running := _work_task >= 0 and _work_in_fn
+	if running:
+		_save_on_finish = true
+	_work_mutex.unlock()
+	if running:
+		return
+	if _work_task >= 0:
+		_complete_work() # a conta já acabou: entrega agora (é rápido)
+	if _work_task >= 0:
+		return # (o done emendou outro trabalho)
+	var need := _save_dirty or _save_phase >= 1 or _batch_save
+	if not need or not matchday.is_empty():
+		return
+	_cancel_save()
+	run_work(_save_core, Callable(), "Salvando...")
 
 
 # ---------------------------------------------------------------------------
@@ -616,13 +700,9 @@ func _exit_tree() -> void:
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_APPLICATION_PAUSED:
-			# Só grava na hora se houver algo pendente (os saves normais já rodam em segundo plano).
-			# No meio de um "Simular", o que já foi jogado é gravado agora (o sistema pode matar o app).
-			_wait_work()
-			if _batch_save:
-				_save_dirty = true
-			if matchday.is_empty():
-				save_blocking()
+			# Só grava se houver algo pendente (os saves normais já rodam em segundo plano), e numa
+			# thread: pausar não pode esperar um save inteiro (o Android fecha o app que não pausa).
+			_save_on_pause()
 		NOTIFICATION_WM_CLOSE_REQUEST:
 			_wait_work()
 			_batch = false

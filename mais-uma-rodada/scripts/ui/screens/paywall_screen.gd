@@ -94,8 +94,7 @@ func _footer() -> void:
 
 func _leave() -> void:
 	if world() != null and String(params.get("reason", "")) != "mods":
-		GameManager.close_career()
-		UIManager.goto("menu")
+		GameManager.close_career_async(func() -> void: UIManager.goto("menu"))
 	elif not UIManager.back():
 		UIManager.goto("menu")
 

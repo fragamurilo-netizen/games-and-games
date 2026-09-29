@@ -80,8 +80,7 @@ static func open() -> void:
 		_chip("back", "Sair", func():
 			UIManager.close_modal()
 			UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
-				GameManager.close_career()
-				UIManager.goto("menu")), false),
+				GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), false),
 	]
 	v.add_child(_grid(game_row, game_row.size()))
 	UIManager.show_modal(v, true)

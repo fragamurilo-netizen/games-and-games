@@ -737,8 +737,7 @@ func _career_card(w: GameWorld) -> Control:
 	card.add_child(UIKit.button("Configurações", "GhostButton", func(): UIManager.push("settings"), "gear"))
 	card.add_child(UIKit.button("Sair para o menu", "GhostButton", func():
 		UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
-			GameManager.close_career()
-			UIManager.goto("menu")), "back"))
+			GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), "back"))
 	return UIKit.card_panel(card)
 
 
@@ -755,10 +754,11 @@ func _save_copy() -> void:
 		v.add_child(UIKit.button(txt, "", func():
 			var do_save := func():
 				UIManager.close_all_modals()
-				if GameManager.save_copy(slot):
-					UIManager.toast("Cópia salva no espaço %d." % slot, UIColors.GREEN)
-				else:
-					UIManager.toast("Falha ao salvar a cópia.", UIColors.RED)
+				GameManager.save_copy_async(slot, func(ok: bool) -> void:
+					if ok:
+						UIManager.toast("Cópia salva no espaço %d." % slot, UIColors.GREEN)
+					else:
+						UIManager.toast("Falha ao salvar a cópia.", UIColors.RED))
 			if meta.is_empty():
 				do_save.call()
 			else:
