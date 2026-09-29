@@ -16,8 +16,15 @@ func _init() -> void:
 
 
 func on_show() -> void:
+	if _summary.is_empty() and GameManager.season_over():
+		# A virada do ano é a operação mais pesada do jogo: roda numa thread, com o aviso.
+		GameManager.end_season_async(func(summary: Dictionary) -> void:
+			_summary = summary
+			if is_inside_tree() and not is_queued_for_deletion():
+				on_show())
+		return
 	if _summary.is_empty():
-		_summary = GameManager.end_season() if GameManager.season_over() else GameManager.last_summary
+		_summary = GameManager.last_summary
 	refresh()
 	if not _celebrated:
 		_celebrated = true

@@ -59,6 +59,63 @@ var _scene_cache: Dictionary = {}
 
 func register_main(m: Node) -> void:
 	main = m
+	if not GameManager.busy_changed.is_connected(_on_busy):
+		GameManager.busy_changed.connect(_on_busy)
+
+
+# ---------------------------------------------------------------------------
+# Tela congelada enquanto uma thread de trabalho mexe no mundo
+# ---------------------------------------------------------------------------
+
+var _frozen: BaseScreen = null
+var _stale := false # pediram para reconstruir a tela durante o trabalho: refaz no fim
+var _busy_modal: Control = null
+
+
+## Durante um trabalho em thread (fechar rodada, simular, fim de temporada, carregar) a tela atual
+## fica oculta e parada: nada dela lê o mundo (girar o aparelho, voltar ao app, animações) enquanto
+## a thread o altera. Reconstruções pedidas nesse meio tempo ficam para o fim.
+func _on_busy(on: bool) -> void:
+	if on:
+		var cur := current()
+		if is_instance_valid(cur) and _frozen != cur:
+			_frozen = cur
+			cur.visible = false
+			cur.process_mode = Node.PROCESS_MODE_DISABLED
+		if GameManager.work_label != "" and main != null and not is_instance_valid(_busy_modal):
+			var b := BusyNote.new()
+			b.text = GameManager.work_label
+			_busy_modal = show_modal(b, false, false)
+		return
+	if is_instance_valid(_busy_modal):
+		_modals.erase(_busy_modal)
+		_busy_modal.queue_free()
+	_busy_modal = null
+	if GameManager.in_batch():
+		return # "Simular": a tela segue congelada entre uma data e outra, até o fim do lote
+	var f := _frozen
+	_frozen = null
+	if is_instance_valid(f) and not f.is_queued_for_deletion():
+		f.process_mode = Node.PROCESS_MODE_INHERIT
+		if f == current():
+			f.visible = true
+			if _stale:
+				_stale = false
+				_apply_chrome(f)
+				f.refresh()
+	_stale = false
+
+
+## Reconstrói a tela atual agora, ou no fim do trabalho em thread se houver um em curso.
+func refresh_current() -> bool:
+	var cur := current()
+	if not is_instance_valid(cur) or cur.is_queued_for_deletion():
+		return false
+	if GameManager.is_busy():
+		_stale = true
+		return false
+	cur.refresh()
+	return true
 
 
 func current() -> BaseScreen:
@@ -107,6 +164,10 @@ func replace(name: String, params: Dictionary = {}) -> void:
 
 
 func back() -> bool:
+	if GameManager.is_busy() or GameManager.in_batch():
+		# No meio de um trabalho em thread nada fecha; no "Simular", "voltar" é o "Parar".
+		SimDialog.request_stop()
+		return true
 	if not _modals.is_empty():
 		close_modal()
 		return true
@@ -153,6 +214,9 @@ func _apply_chrome(screen: BaseScreen) -> void:
 ## Atualiza título/barras da tela atual (quando os dados mudam).
 func refresh_chrome() -> void:
 	var cur := current()
+	if GameManager.is_busy():
+		_stale = true
+		return
 	if cur != null:
 		_apply_chrome(cur)
 
@@ -164,7 +228,9 @@ func apply_look() -> void:
 	if main != null:
 		main.restyle()
 	var cur := current()
-	if cur != null:
+	if cur != null and GameManager.is_busy():
+		_stale = true
+	elif cur != null:
 		_apply_chrome(cur)
 		cur.refresh()
 	for m in _modals:

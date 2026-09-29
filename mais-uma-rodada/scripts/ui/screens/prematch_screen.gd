@@ -725,8 +725,8 @@ func _start() -> void:
 		return
 	AudioManager.play("whistle", -4.0)
 	if AppSettings.match_speed == AppSettings.SPEED_INSTANT:
-		var report := GameManager.play_instant()
-		UIManager.replace("results", {"report": report})
+		GameManager.play_instant_async(func(report: Dictionary) -> void:
+			UIManager.replace("results", {"report": report}))
 	else:
 		GameManager.begin_match()
 		UIManager.replace("match")

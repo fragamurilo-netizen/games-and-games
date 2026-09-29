@@ -2276,7 +2276,14 @@ func _on_final() -> void:
 	_set_bug("FIM DE JOGO", UIColors.MUTED)
 	_hide_aux() # sugestão tática não faz sentido depois do apito final
 	UIManager.close_all_modals()
-	_report = GameManager.finish_match()
+	# A data inteira fecha numa thread de trabalho (a tela não trava; o aviso mostra o andamento).
+	GameManager.finish_match_async(_after_final)
+
+
+func _after_final(report: Dictionary) -> void:
+	_report = report
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
 	var mine: int = _sim.score[_user_side]
 	var theirs: int = _sim.score[1 - _user_side]
 	if mine > theirs:

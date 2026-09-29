@@ -26,10 +26,19 @@ var _save_gen := 0 # troca a cada carreira aberta/fechada: um job antigo não gr
 var _save_phase := 0 # 0 parado, 1 montando os blocos, 2 gravando na thread
 ## "Simular" em lote: cada data roda numa thread de trabalho (a tela segue fluida e o "Parar"
 ## responde) e o save fica para o fim do lote, em vez de um save completo a cada jogo.
-var _sim_task := -1
-var _sim_report: Dictionary = {}
 var _batch := false
 var _batch_save := false
+var _sim_has := false # relatório de uma data do "Simular" esperando o SimDialog buscar
+var _sim_report: Dictionary = {}
+## Trabalho pesado numa thread (fechar a rodada, fim de temporada, carregar, simular): a tela
+## principal nunca trava (o Android fecha o app que fica ~5 s sem responder). Enquanto roda, o
+## mundo é da thread: a interface não o lê (ver UIManager, que congela a tela atual).
+signal busy_changed(on: bool)
+var _work_task := -1
+var _work_result: Variant = null
+var _work_done: Callable
+## Texto do aviso "processando" (só lido na thread principal).
+var work_label := ""
 
 
 func _ready() -> void:
@@ -65,6 +74,52 @@ func _process(_delta: float) -> void:
 		_gen_task = -1
 		if _gen_callback.is_valid():
 			_gen_callback.call(_gen_result)
+	if _work_task >= 0 and WorkerThreadPool.is_task_completed(_work_task):
+		_complete_work()
+
+
+# ---------------------------------------------------------------------------
+# Trabalho em thread (a tela segue respondendo)
+# ---------------------------------------------------------------------------
+
+## Roda `work` numa thread de trabalho e chama `done(resultado)` na thread principal quando acabar.
+## `label` não vazio mostra o aviso "processando" por cima da tela. Um trabalho por vez.
+func run_work(work: Callable, done: Callable = Callable(), label: String = "") -> bool:
+	if _work_task >= 0:
+		return false
+	_work_result = null
+	_work_done = done
+	work_label = label
+	SeasonManager.progress = 0
+	Warmup.run() # caches preguiçosos prontos antes: a thread e a tela não os montam ao mesmo tempo
+	_work_task = WorkerThreadPool.add_task(func(): _work_result = work.call(), true, "trabalho")
+	busy_changed.emit(true)
+	return true
+
+
+## Mundo sendo alterado por uma thread de trabalho: a interface não deve lê-lo agora.
+func is_busy() -> bool:
+	return _work_task >= 0
+
+
+func _complete_work() -> void:
+	WorkerThreadPool.wait_for_task_completion(_work_task)
+	_work_task = -1
+	var r: Variant = _work_result
+	_work_result = null
+	var cb := _work_done
+	_work_done = Callable()
+	work_label = ""
+	if cb.is_valid():
+		cb.call(r)
+	if _work_task < 0: # (o done pode ter emendado outro trabalho)
+		busy_changed.emit(false)
+
+
+## Espera o trabalho em curso terminar agora (app indo para o fundo, fechando a carreira).
+func _wait_work() -> void:
+	if _work_task >= 0:
+		_complete_work()
 
 
 func is_generating() -> bool:
@@ -127,24 +182,42 @@ func start_career(w: GameWorld, club_id: int, manager_name: String, difficulty: 
 
 
 func load_career(save_slot: int) -> bool:
+	return _adopt_loaded(_load_core(save_slot), save_slot)
+
+
+## Carrega numa thread (o save grande leva vários segundos no celular); `done(ok)` na principal.
+func load_career_async(save_slot: int, done: Callable) -> void:
+	if not run_work(_load_core.bind(save_slot), func(w: Variant) -> void:
+			done.call(_adopt_loaded(w, save_slot)), "Carregando a carreira..."):
+		done.call(false)
+
+
+## A parte pesada do carregamento: só mexe no mundo novo (ainda fora do GameManager).
+func _load_core(save_slot: int) -> GameWorld:
 	var w := SaveManager.load_world(save_slot)
 	if w == null:
+		return null
+	# Entropia nova a cada abertura: reabrir o save não repete os mesmos jogos, gols e minutos.
+	var fresh := RandomNumberGenerator.new()
+	fresh.randomize()
+	w.rng.seed = w.rng.randi() ^ fresh.randi()
+	HeartClubs.ensure_all(w) # saves de antes dos times de coração
+	SponsorManager.ensure_all(w) # saves de antes dos patrocínios da IA
+	Valuation.refresh_shift(w)
+	var market_migrated := MarketReality.ensure_world(w)
+	if market_migrated:
+		for c: Club in w.clubs:
+			MarketReality.migrate_budget(w, c)
+	return w
+
+
+func _adopt_loaded(w: Variant, save_slot: int) -> bool:
+	if not w is GameWorld:
 		return false
 	_cancel_save()
 	world = w
 	slot = save_slot
 	matchday = {}
-	# Entropia nova a cada abertura: reabrir o save não repete os mesmos jogos, gols e minutos.
-	var fresh := RandomNumberGenerator.new()
-	fresh.randomize()
-	world.rng.seed = world.rng.randi() ^ fresh.randi()
-	HeartClubs.ensure_all(world) # saves de antes dos times de coração
-	SponsorManager.ensure_all(world) # saves de antes dos patrocínios da IA
-	Valuation.refresh_shift(world)
-	var market_migrated := MarketReality.ensure_world(world)
-	if market_migrated:
-		for c: Club in world.clubs:
-			MarketReality.migrate_budget(world, c)
 	world_changed.emit()
 	return true
 
@@ -169,7 +242,7 @@ func save_now() -> bool:
 
 ## Termina o que estiver pendente agora mesmo (fechar a carreira, app indo para o fundo).
 func save_blocking() -> void:
-	_wait_sim()
+	_wait_work()
 	var need := _save_dirty or _save_phase >= 1
 	if _save_writer != null:
 		_save_writer.abort() # fecha o arquivo do save em andamento antes de gravar de uma vez
@@ -347,6 +420,28 @@ func finish_match() -> Dictionary:
 	return report
 
 
+## finish_match numa thread de trabalho, com o aviso "processando"; `done(relatório)` na principal.
+func finish_match_async(done: Callable) -> void:
+	if matchday.is_empty() or not run_work(_finish_core, _after_report.bind(done), "Fechando a rodada..."):
+		done.call(finish_match())
+
+
+## Joga a rodada inteira sem assistir (modo instantâneo), numa thread de trabalho.
+func play_instant_async(done: Callable) -> void:
+	if not run_work(_sim_step_work, _after_report.bind(done), "Jogando a rodada..."):
+		done.call({})
+
+
+func _after_report(r: Variant, done: Callable) -> void:
+	var report: Dictionary = r if r is Dictionary else {}
+	if not report.is_empty():
+		save_now()
+		matchday_finished.emit(report)
+		world_changed.emit()
+	if done.is_valid():
+		done.call(report)
+
+
 ## A parte pura de finish_match (sem save nem sinais): pode rodar numa thread de trabalho.
 func _finish_core() -> Dictionary:
 	if matchday.is_empty():
@@ -391,7 +486,7 @@ func begin_batch() -> void:
 
 
 func end_batch() -> void:
-	_wait_sim()
+	_wait_work()
 	if not _batch:
 		return
 	_batch = false
@@ -399,57 +494,50 @@ func end_batch() -> void:
 		_batch_save = false
 		save_now()
 	world_changed.emit()
+	busy_changed.emit(false) # a tela congelada durante o lote volta
 
 
 func in_batch() -> bool:
 	return _batch
 
 
-## Mundo sendo alterado por uma thread de trabalho: a interface não deve lê-lo agora.
+## Mundo sendo alterado por uma thread de trabalho (nome antigo de is_busy).
 func is_simulating() -> bool:
-	return _sim_task >= 0
+	return is_busy()
 
 
 ## Joga a próxima data do usuário numa thread de trabalho. Acompanhe com sim_step_poll().
 func sim_step_start() -> bool:
-	if _sim_task >= 0 or world == null:
+	if is_busy() or world == null:
 		return false
+	_sim_has = false
 	_sim_report = {}
-	_sim_task = WorkerThreadPool.add_task(_sim_step_work, true, "simular_data")
-	return true
+	return run_work(_sim_step_work, func(r: Variant) -> void:
+		_sim_report = r if r is Dictionary else {}
+		_sim_has = true
+		if not _sim_report.is_empty():
+			save_now()
+			matchday_finished.emit(_sim_report)
+			world_changed.emit())
 
 
-func _sim_step_work() -> void:
+func _sim_step_work() -> Dictionary:
 	begin_match()
 	var sim := user_sim()
 	if sim != null:
 		sim.run_to_end()
-	_sim_report = _finish_core()
+	return _finish_core()
 
 
-## null enquanto a data ainda roda; depois, o relatório (igual ao de play_instant).
+## null enquanto a data ainda roda (ou se nenhuma foi pedida); depois, uma vez, o relatório
+## (igual ao de play_instant).
 func sim_step_poll() -> Variant:
-	if _sim_task < 0:
+	if not _sim_has:
 		return null
-	if not WorkerThreadPool.is_task_completed(_sim_task):
-		return null
-	WorkerThreadPool.wait_for_task_completion(_sim_task)
-	_sim_task = -1
+	_sim_has = false
 	var report := _sim_report
 	_sim_report = {}
-	if not report.is_empty():
-		save_now()
-		matchday_finished.emit(report)
-		world_changed.emit()
 	return report
-
-
-func _wait_sim() -> void:
-	if _sim_task >= 0:
-		WorkerThreadPool.wait_for_task_completion(_sim_task)
-		_sim_task = -1
-		if not _sim_report.is_empty():
-			save_now()
 
 
 func season_over() -> bool:
@@ -465,14 +553,52 @@ func advance_to_end() -> void:
 	world_changed.emit()
 
 
+## Avança até o fim numa thread de trabalho (o resto do calendário pode ter muitas datas).
+func advance_to_end_async(done: Callable) -> void:
+	var ok := world != null and world.season != null and matchday.is_empty() and not Store.locked(world)
+	if ok and run_work(_advance_core, _after_advance.bind(done), "Avançando o calendário..."):
+		return
+	advance_to_end()
+	if done.is_valid():
+		done.call()
+
+
+func _advance_core() -> bool:
+	SeasonManager.advance_to_user(world)
+	return true
+
+
+func _after_advance(_r: Variant, done: Callable) -> void:
+	save_now()
+	world_changed.emit()
+	if done.is_valid():
+		done.call()
+
+
 func end_season() -> Dictionary:
 	if not season_over():
 		return {}
-	last_summary = SeasonManager.end_season(world)
+	return _after_season(_end_season_core())
+
+
+## Fim de temporada numa thread de trabalho (é a operação mais pesada do jogo).
+func end_season_async(done: Callable) -> void:
+	if not season_over() or not run_work(_end_season_core, func(r: Variant) -> void:
+			done.call(_after_season(r)), "Encerrando a temporada..."):
+		done.call(end_season() if season_over() else last_summary)
+
+
+func _end_season_core() -> Dictionary:
+	var summary := SeasonManager.end_season(world)
 	PreseasonManager.open(world)
 	var c := world.user_club()
 	c.sheet = ClubAI.auto_sheet(world, c, c.sheet.formation if c.sheet != null else "")
 	SeasonManager.advance_to_user(world)
+	return summary
+
+
+func _after_season(r: Variant) -> Dictionary:
+	last_summary = r if r is Dictionary else {}
 	save_now()
 	season_finished.emit(last_summary)
 	world_changed.emit()
@@ -492,13 +618,13 @@ func _notification(what: int) -> void:
 		NOTIFICATION_APPLICATION_PAUSED:
 			# Só grava na hora se houver algo pendente (os saves normais já rodam em segundo plano).
 			# No meio de um "Simular", o que já foi jogado é gravado agora (o sistema pode matar o app).
-			_wait_sim()
+			_wait_work()
 			if _batch_save:
 				_save_dirty = true
 			if matchday.is_empty():
 				save_blocking()
 		NOTIFICATION_WM_CLOSE_REQUEST:
-			_wait_sim()
+			_wait_work()
 			_batch = false
 			if matchday.is_empty():
 				save_now()

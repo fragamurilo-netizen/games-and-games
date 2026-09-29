@@ -140,11 +140,12 @@ static func _date(iso: String) -> String:
 func _load(s: int) -> void:
 	if GameManager.has_career():
 		GameManager.close_career()
-	if GameManager.load_career(s):
-		AudioManager.play("whistle", -6.0)
-		UIManager.goto("hub")
-	else:
-		UIManager.info("Não foi possível carregar", "O save do espaço %d não pôde ser lido (nem a cópia de segurança)." % s)
+	GameManager.load_career_async(s, func(ok: bool) -> void:
+		if ok:
+			AudioManager.play("whistle", -6.0)
+			UIManager.goto("hub")
+		else:
+			UIManager.info("Não foi possível carregar", "O save do espaço %d não pôde ser lido (nem a cópia de segurança)." % s))
 
 
 func _delete(s: int, meta: Dictionary) -> void:

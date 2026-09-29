@@ -9,6 +9,9 @@ const MAJOR_COEF := 70
 
 ## Tempo acumulado (µs) por etapa do processamento das datas — medição de desempenho (simulador).
 static var timings: Dictionary = {}
+## Andamento (0-100) do trabalho pesado em curso, para a barra do aviso "processando". Só inteiros:
+## a thread de trabalho escreve e a tela lê.
+static var progress := 0
 
 
 static func _time(key: String, t0: int) -> int:

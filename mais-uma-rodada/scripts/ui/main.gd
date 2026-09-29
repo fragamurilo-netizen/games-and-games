@@ -222,7 +222,9 @@ func _refresh_current_layout() -> void:
 		return
 	var sc := cur.scroll()
 	var old_scroll := sc.scroll_vertical if is_instance_valid(sc) else 0
-	cur.refresh()
+	# Girar o aparelho no meio de um trabalho em thread: a tela é refeita quando ele acabar.
+	if not UIManager.refresh_current():
+		return
 	if is_instance_valid(sc):
 		sc.set_deferred("scroll_vertical", old_scroll)
 

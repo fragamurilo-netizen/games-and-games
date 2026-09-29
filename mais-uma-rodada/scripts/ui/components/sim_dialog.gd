@@ -11,6 +11,7 @@ const MODE_SEASON := 4
 
 static var stop_on_events := true
 static var auto_lineup := true
+static var _active: SimDialog = null
 
 var mode := MODE_GAMES
 var games_target := 1
@@ -98,18 +99,28 @@ func _ready() -> void:
 	_running = true
 
 
+## "Voltar" do Android no meio do "Simular": para depois da data em curso.
+static func request_stop() -> void:
+	if is_instance_valid(_active) and _active._running and _active._stop_reason == "":
+		_active._stop_reason = "Simulação interrompida."
+
+
+func _enter_tree() -> void:
+	_active = self
+
+
 func _process(_delta: float) -> void:
 	if not _running:
 		return
 	# A data roda numa thread de trabalho; aqui só se confere se ela acabou.
-	if GameManager.is_simulating():
-		var report = GameManager.sim_step_poll()
-		if report == null:
-			return
+	var report = GameManager.sim_step_poll()
+	if report != null:
 		_after_step(report)
+	if GameManager.is_busy():
+		return
 	if _stop_reason == "":
 		_step()
-	if _stop_reason != "" and not GameManager.is_simulating():
+	if _stop_reason != "" and not GameManager.is_busy():
 		_running = false
 		GameManager.end_batch()
 		_finish()
@@ -117,6 +128,8 @@ func _process(_delta: float) -> void:
 
 ## Fechada no meio (troca de tela): termina a data em curso e grava o que já foi jogado.
 func _exit_tree() -> void:
+	if _active == self:
+		_active = null
 	if _running:
 		_running = false
 		GameManager.end_batch()
@@ -135,8 +148,8 @@ func _step() -> void:
 	var club := w.user_club()
 	var f := FixtureManager.next_fixture_for(w, club.id)
 	if f == null:
-		GameManager.advance_to_end()
 		_stop_reason = "Seu time não joga mais nesta temporada."
+		GameManager.advance_to_end_async(Callable())
 		return
 	match mode:
 		MODE_GAMES:

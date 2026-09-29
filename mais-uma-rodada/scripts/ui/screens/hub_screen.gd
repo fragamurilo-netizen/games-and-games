@@ -154,8 +154,9 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.label("Seu time não joga mais nesta temporada.", "Title", true))
 		card.add_child(UIKit.label("Outras ligas e copas ainda estão em andamento.", "Muted", true))
 		var adv := UIKit.button("AVANÇAR ATÉ O FIM DA TEMPORADA", "PrimaryButton", func():
-			GameManager.advance_to_end()
-			refresh(), "fast")
+			GameManager.advance_to_end_async(func() -> void:
+				if is_inside_tree():
+					refresh()), "fast")
 		adv.custom_minimum_size.y = 104
 		card.add_child(adv)
 		return UIKit.card_panel(card)
@@ -242,10 +243,9 @@ func _instant() -> void:
 	var msgs := ClubAI.validate_user_sheet(w, w.user_club())
 	for m in msgs:
 		UIManager.toast(m)
-	var report := GameManager.play_instant()
-	if report.is_empty():
-		return
-	UIManager.push("results", {"report": report})
+	GameManager.play_instant_async(func(report: Dictionary) -> void:
+		if not report.is_empty():
+			UIManager.push("results", {"report": report}))
 
 
 ## Temporada de demonstração encerrada: o convite para seguir com a Carreira Completa.
