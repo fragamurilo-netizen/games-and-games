@@ -777,11 +777,13 @@ static func _build_index(world: GameWorld) -> Dictionary:
 	return {"band": band, "nat": nat}
 
 
+## Família de cada posição (índice em FAMILIES), na ordem de Pos: GK, RB, CB, LB, DM, CM, AM, RM,
+## LM, RW, LW, ST. O mercado consulta isto dezenas de milhares de vezes por janela.
+const FAM_OF: Array[int] = [0, 2, 1, 2, 3, 3, 4, 4, 4, 4, 4, 5]
+
+
 static func _family_of(pos: int) -> int:
-	for i in FAMILIES.size():
-		if FAMILIES[i][0].has(pos):
-			return i
-	return 3
+	return FAM_OF[pos] if pos >= 0 and pos < FAM_OF.size() else 3
 
 
 static func _family_min(pos: int) -> int:
@@ -791,8 +793,9 @@ static func _family_min(pos: int) -> int:
 static func _family_count(world: GameWorld, club: Club, pos: int) -> int:
 	var fam := _family_of(pos)
 	var n := 0
-	for p in world.squad(club):
-		if _family_of(p.position) == fam and p.injury_weeks < 6:
+	for pid in club.player_ids:
+		var p: Player = world.players.get(pid, null)
+		if p != null and p.injury_weeks < 6 and _family_of(p.position) == fam:
 			n += 1
 	return n
 

@@ -312,9 +312,32 @@ static func tie_summary(cup: Cup, t: Dictionary) -> String:
 static func scorers(world: GameWorld, cup_id: String, count: int) -> Array:
 	var out: Array = []
 	for p: Player in world.players.values():
+		if p.cup_stats.is_empty():
+			continue
 		var st: Variant = p.cup_stats.get(cup_id, null)
 		if st != null and int(st[Player.C_GOALS]) > 0:
 			out.append(p)
+	return _rank_scorers(out, cup_id, count)
+
+
+## Artilheiros de todas as copas numa passada só pelos jogadores: {copa: [Player]} (o fim de
+## temporada consultava copa a copa, varrendo o mundo inteiro dezenas de vezes).
+static func scorers_all(world: GameWorld, count: int) -> Dictionary:
+	var by_cup := {}
+	for p: Player in world.players.values():
+		if p.cup_stats.is_empty():
+			continue
+		for cid in p.cup_stats:
+			if int(p.cup_stats[cid][Player.C_GOALS]) > 0:
+				if not by_cup.has(cid):
+					by_cup[cid] = []
+				by_cup[cid].append(p)
+	for cid in by_cup:
+		by_cup[cid] = _rank_scorers(by_cup[cid], cid, count)
+	return by_cup
+
+
+static func _rank_scorers(out: Array, cup_id: String, count: int) -> Array:
 	out.sort_custom(func(a, b):
 		var ga: int = a.cup_stats[cup_id][Player.C_GOALS]
 		var gb: int = b.cup_stats[cup_id][Player.C_GOALS]

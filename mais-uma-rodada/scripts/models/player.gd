@@ -539,6 +539,19 @@ func to_dict() -> Dictionary:
 	return d
 
 
+## Acrescenta linhas ao histórico (fica com as `keep` últimas) sem abrir o compactado.
+func append_history(rows: Array, keep: int) -> void:
+	if _history_raw != null:
+		var packed: Variant = SaveCodec.append_rows(_history_raw, rows, keep)
+		if packed != null:
+			_history_raw = packed
+			return
+	var h := history
+	h.append_array(rows)
+	if h.size() > keep:
+		history = h.slice(h.size() - keep)
+
+
 ## Compacta o histórico na memória (mesmos dados; abre de novo quando alguém lê). Usado depois de
 ## gerar o mundo: ~27 mil jogadores com décadas de histórico em dicionários pesam ~180 MB.
 func compact() -> void:

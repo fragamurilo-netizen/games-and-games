@@ -184,7 +184,15 @@ static func expected_attendance(club: Club, opponent: Club, derby: bool, rng: Ra
 
 
 static func expected_revenue(club: Club) -> int:
-	return tv_income(club) + sponsor_income(club) + expected_prize(club) + expected_gate(club) + merch_income(club)
+	# Mesma conta de sponsor_income, sem refazer TV, prêmios, bilheteria e loja (o mercado da IA
+	# consulta isto dezenas de milhares de vezes por janela).
+	var tv := tv_income(club)
+	var prize := expected_prize(club)
+	var gate := expected_gate(club)
+	var merch := merch_income(club)
+	var target := club_revenue_target(club)
+	var sponsor := int(maxf(target * 0.08, target - tv - prize - gate - merch) * club.commercial)
+	return tv + sponsor + prize + gate + merch
 
 
 ## Lançamentos semanais (datas de liga) — salários, TV, patrocínio, manutenção e juros.

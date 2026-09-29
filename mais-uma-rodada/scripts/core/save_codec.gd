@@ -147,6 +147,73 @@ static func _col_type(rows: Array, k: Variant) -> String:
 	return "s" if strs else "v"
 
 
+## Acrescenta linhas a uma lista já compactada sem abri-la (e fica com as `keep` últimas). Devolve
+## null quando não dá (tipo diferente na coluna): aí quem chama abre, acrescenta e compacta.
+## O fim de temporada acrescenta o ano de ~20 mil jogadores: abrir todos custava segundos e ~170 MB.
+static func append_rows(v: Variant, rows: Array, keep: int) -> Variant:
+	if not (v is Dictionary and v.has(TAG)):
+		return null
+	var n := int(v[TAG])
+	var keys: PackedStringArray = v["k"]
+	var types: String = v["t"]
+	var cols: Array = (v["c"] as Array).duplicate()
+	for r in rows:
+		if not r is Dictionary:
+			return null
+		for k in r:
+			if not k is String:
+				return null
+			if keys.find(k) < 0:
+				keys.append(k)
+				types += "v"
+				var fresh: Array = []
+				fresh.resize(n)
+				cols.append(fresh)
+	for j in keys.size():
+		var k := keys[j]
+		match types[j]:
+			"i":
+				var c: PackedInt32Array = cols[j]
+				for r: Dictionary in rows:
+					if not r.has(k):
+						c.append(NO_INT)
+						continue
+					var x: Variant = r[k]
+					if typeof(x) != TYPE_INT or x <= NO_INT or x >= 2147483647:
+						return null
+					c.append(x)
+				cols[j] = c
+			"f":
+				var c: PackedFloat64Array = cols[j]
+				for r: Dictionary in rows:
+					if not r.has(k):
+						c.append(NAN)
+						continue
+					var x: Variant = r[k]
+					if typeof(x) != TYPE_FLOAT:
+						return null
+					c.append(x)
+				cols[j] = c
+			"s":
+				var c: PackedStringArray = cols[j]
+				for r: Dictionary in rows:
+					if not r.has(k) or typeof(r[k]) != TYPE_STRING:
+						return null
+					c.append(r[k])
+				cols[j] = c
+			_:
+				var c: Array = (cols[j] as Array).duplicate()
+				for r: Dictionary in rows:
+					c.append(r.get(k, null))
+				cols[j] = c
+	n += rows.size()
+	if n > keep:
+		for j in cols.size():
+			cols[j] = cols[j].slice(n - keep)
+		n = keep
+	return {TAG: n, "k": keys, "t": types, "c": cols}
+
+
 static func unpack_rows(v: Variant) -> Array:
 	if v is Array:
 		return v

@@ -114,6 +114,7 @@ static func academy_fee(world: GameWorld, p: Player, buyer: Club, rng: RandomNum
 static func matchday(world: GameWorld) -> Array:
 	var window := world.transfer_window_open()
 	var index := TransferManager._build_index(world)
+	index["memo"] = new_memo()
 	var done: Array = []
 	var st := _state(world, window)
 	st["rumors"] = 0
@@ -407,7 +408,7 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 		var seller: Club = null
 		if p.club_id >= 0:
 			seller = world.club(p.club_id)
-			price = float(p.value) * _seller_mult(world, seller, p, c, false)
+			price = float(p.value) * _seller_mult(world, seller, p, c, false, index["memo"])
 			if price > budget * (1.3 if mismanaged else 1.0) and not _loanable(world, p, c):
 				continue
 			# Titular de clube muito mais rico não sai para um clube pequeno.
@@ -710,7 +711,9 @@ static func player_interest(world: GameWorld, p: Player, buyer: Club) -> float:
 # ---------------------------------------------------------------------------
 
 ## Multiplicador (sobre o valor de mercado) do mínimo que o vendedor aceita.
-static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club, deadline: bool) -> float:
+## `memo` (opcional, de uma rodada de mercado): guarda o que é do clube vendedor (aperto financeiro,
+## elenco por família) enquanto o caixa e o elenco dele não mudam; o resultado é o mesmo.
+static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club, deadline: bool, memo: Dictionary = {}) -> float:
 	var m := float(seller.arch().get("sell_mult", 1.0)) * STATUS_ASK[clampi(p.squad_status, 0, 4)]
 	if not world.is_user_club(seller.id):
 		m *= ClubDNA.sell_mult(world, seller, p) # venda de jovens, moneyball, ambição
@@ -723,9 +726,9 @@ static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club,
 		m *= 1.08
 	if p.transfer_listed:
 		m *= 0.85
-	if FinanceManager.in_trouble(seller):
+	if _memo_trouble(seller, memo):
 		m *= 0.8
-	if TransferManager._family_count(world, seller, p.position) <= TransferManager._family_min(p.position):
+	if _memo_family_count(world, seller, p.position, memo) <= TransferManager._family_min(p.position):
 		m *= 1.6 # sem reposição na posição
 	if seller.is_rival(buyer.id) or buyer.is_rival(seller.id):
 		m *= 1.5
@@ -739,6 +742,39 @@ static func _seller_mult(world: GameWorld, seller: Club, p: Player, buyer: Club,
 	if p.squad_status == Player.STATUS_STAR and gap < 1.2:
 		m *= 1.4 # inegociável, salvo loucura
 	return m
+
+
+static func _memo_trouble(c: Club, memo: Dictionary) -> bool:
+	if memo.is_empty() and not memo.has("on"):
+		return FinanceManager.in_trouble(c)
+	var key := [c.id, c.balance, c.debt]
+	var t: Dictionary = memo["trouble"]
+	if not t.has(key):
+		t[key] = FinanceManager.in_trouble(c)
+	return t[key]
+
+
+static func _memo_family_count(world: GameWorld, c: Club, pos: int, memo: Dictionary) -> int:
+	if memo.is_empty() and not memo.has("on"):
+		return TransferManager._family_count(world, c, pos)
+	var fams: Dictionary = memo["fam"]
+	var h := c.player_ids.hash()
+	var e: Array = fams.get(c.id, [])
+	if e.is_empty() or int(e[0]) != h:
+		var counts := PackedInt32Array()
+		counts.resize(TransferManager.FAMILIES.size())
+		for pid in c.player_ids:
+			var q: Player = world.players.get(pid, null)
+			if q != null and q.injury_weeks < 6:
+				counts[TransferManager._family_of(q.position)] += 1
+		e = [h, counts]
+		fams[c.id] = e
+	return (e[1] as PackedInt32Array)[TransferManager._family_of(pos)]
+
+
+## Memória de uma rodada de mercado (lesões não mudam no meio dela; caixa e elenco entram na chave).
+static func new_memo() -> Dictionary:
+	return {"on": true, "trouble": {}, "fam": {}}
 
 
 ## Teto que o comprador paga.
