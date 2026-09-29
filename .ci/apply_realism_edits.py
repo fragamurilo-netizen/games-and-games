@@ -18,6 +18,14 @@ compressed = base64.b64decode("".join(p.read_text().strip() for p in parts), val
 assert hashlib.sha256(compressed).hexdigest() == EXPECTED, "Transport checksum mismatch"
 edits = json.loads(lzma.decompress(compressed))
 assert len(edits) == 75, "Unexpected source file count"
+# Formatting-only correction caught by git diff --check, after transport validation.
+# This changes two excess EOF newlines, not gameplay. Both versions have pinned hashes.
+for item in edits:
+    if item["path"] == "mais-uma-rodada/scripts/systems/national_team_manager.gd":
+        assert item["after"] == "89b5413d7f62a77b2c96af563c1790961ad8f87ff23aa1d05996b31a69a38eb0"
+        assert item["edits"][-1][2].endswith("\treturn results\n\n\n")
+        item["edits"][-1][2] = item["edits"][-1][2].rstrip("\n") + "\n"
+        item["after"] = "3f71c7325cce13b481ab358099f089bc850f6aa9017aee6d41f361ed0806ddb5"
 allowed_prefixes = ("mais-uma-rodada/scripts/", "mais-uma-rodada/tests/", "mais-uma-rodada/data/")
 allowed_exact = {"mais-uma-rodada/project.godot", "mais-uma-rodada/export_presets.cfg", "docs/DEPTH-0.5.0.md", "docs/REALISM-0.5.1.md"}
 prepared = []
