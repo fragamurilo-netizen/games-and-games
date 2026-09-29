@@ -25,6 +25,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "dono", "n": "Dono da área", "d": "Sai do gol nos cruzamentos e manda na pequena área.", "w": {Attr.CAB: 0.5, Attr.FOR: 0.5}, "b": 6.5, "h": 0.8, "fx": {"o": {"cross": -0.07}}},
 		{"k": "colocado", "n": "Bem colocado", "d": "Sempre no lugar certo: chute de longe quase nunca o surpreende.", "w": {Attr.POS: 1.0, Attr.INT: 0.4}, "b": 0.0, "fx": {"o": {"long": -0.08}}},
 		{"k": "penaltis", "n": "Pegador de pênalti", "d": "Frio e rápido nas cobranças: pênalti contra ele é drama.", "w": {Attr.REF: 0.5, Attr.FRI: 0.6}, "b": 0.5, "fx": {}},
+		{"k": "seguro", "n": "Goleiro seguro", "d": "Encaixa quase tudo e não dá rebote: raramente falha.", "w": {Attr.GOL: 0.6, Attr.DEC: 0.4}, "b": -0.5, "fx": {"o": {"scramble": -0.03}}},
 	],
 	"CB": [
 		{"k": "classico", "n": "Zagueiro clássico", "d": "Zagueiro sem firula: marca, cobre e rebate.", "w": {}, "b": 2.0, "fx": {}},
@@ -34,6 +35,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "stopper", "n": "Zagueiro stopper", "d": "Sai da linha para dar o bote antes do atacante girar. Às vezes chega atrasado.", "w": {Attr.DES: 0.7, Attr.FOR: 0.3, Attr.ACE: 0.3}, "b": -0.5, "fx": {"o": {"dribble": -0.07}, "t": {"scramble": 0.02}, "cards": 1.15}},
 		{"k": "rapido", "n": "Zagueiro rápido", "d": "Corre atrás de qualquer um: cobre as costas da defesa.", "w": {Attr.VEL: 0.6, Attr.ACE: 0.6}, "b": 2.5, "fx": {"o": {"counter": -0.06}}},
 		{"k": "artilheiro", "n": "Zagueiro artilheiro", "d": "Perigo nas bolas paradas: aparece na área para cabecear.", "w": {Attr.CAB: 0.6, Attr.FIN: 0.4, Attr.FRI: 0.2}, "b": 8.0, "fx": {"k": {1: 1.5}}},
+		{"k": "antecipacao", "n": "Zagueiro de antecipação", "d": "Lê o passe e rouba a bola antes de ela chegar ao atacante.", "w": {Attr.INT: 0.5, Attr.DES: 0.4, Attr.ACE: 0.3}, "b": 3.5, "fx": {"o": {"through": -0.04}, "k": {8: 0.9}}},
 	],
 	"FB": [
 		{"k": "equilibrado", "n": "Lateral equilibrado", "d": "Apoia e marca na medida certa.", "w": {}, "b": 3.5, "fx": {}},
@@ -43,6 +45,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "invertido", "n": "Lateral invertido", "d": "Fecha por dentro como um volante a mais e ajuda a ter a bola.", "w": {Attr.PAS: 0.6, Attr.TEC: 0.4, Attr.DEC: 0.4, Attr.VIS: 0.2}, "b": 4.5, "fx": {"t": {"through": 0.03}, "poss": 0.01, "k": {5: 1.2, 6: 0.8}}, "ins": "prender"},
 		{"k": "veloz", "n": "Lateral veloz", "d": "Recupera na corrida e puxa contra-ataques pelo lado.", "w": {Attr.VEL: 0.6, Attr.ACE: 0.6}, "b": -2.0, "fx": {"o": {"counter": -0.04}, "t": {"counter": 0.03}}},
 		{"k": "incansavel", "n": "Lateral incansável", "d": "Não para de correr: chega inteiro no fim do jogo.", "w": {Attr.RES: 1.0, Attr.DES: 0.2}, "b": -1.0, "fx": {"fat": 0.88, "t": {"cross": 0.02}}},
+		{"k": "terceiro", "n": "Lateral zagueiro", "d": "Fecha por dentro como terceiro zagueiro quando o time ataca pelo outro lado.", "w": {Attr.MAR: 0.4, Attr.FOR: 0.4, Attr.CAB: 0.4}, "b": 5.0, "h": 0.2, "fx": {"o": {"cross": -0.03, "counter": -0.03}}, "ins": "segurar"},
 	],
 	"DM": [
 		{"k": "primeiro", "n": "Primeiro volante", "d": "Protege a zaga e distribui simples.", "w": {}, "b": 2.5, "fx": {"o": {"through": -0.03}}},
@@ -51,6 +54,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "regista", "n": "Regista", "d": "Organiza de trás: dita o ritmo e acha o passe que ninguém vê.", "w": {Attr.PAS: 0.7, Attr.VIS: 0.6, Attr.TEC: 0.2}, "b": 1.0, "fx": {"t": {"through": 0.05, "long": 0.02}, "poss": 0.015, "k": {5: 1.3}}, "ins": "prender"},
 		{"k": "segundo", "n": "Segundo volante", "d": "Sai para o jogo e chega de trás para finalizar.", "w": {Attr.RES: 0.5, Attr.CHL: 0.4, Attr.VEL: 0.2, Attr.FIN: 0.2}, "b": 4.0, "fx": {"t": {"scramble": 0.03}, "k": {2: 1.2}}, "ins": "avancar"},
 		{"k": "lancador", "n": "Volante lançador", "d": "Vira o jogo e acha o atacante com lançamentos longos.", "w": {Attr.PAS: 0.5, Attr.VIS: 0.3, Attr.CRU: 0.3, Attr.FOR: 0.2}, "b": 4.5, "fx": {"t": {"long": 0.07}, "k": {5: 1.1}}},
+		{"k": "recuado", "n": "Volante que recua", "d": "Baixa entre os zagueiros para sair jogando e ganha as bolas altas na frente da área.", "w": {Attr.CAB: 0.4, Attr.PAS: 0.4, Attr.POS: 0.3, Attr.FOR: 0.2}, "b": 2.0, "fx": {"o": {"cross": -0.03}, "poss": 0.01}},
 	],
 	"CM": [
 		{"k": "meio", "n": "Meio-campista", "d": "Faz de tudo um pouco no meio.", "w": {}, "b": 3.0, "fx": {}},
@@ -60,6 +64,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "maestro", "n": "Maestro", "d": "Pensa o jogo: tudo passa por ele.", "w": {Attr.PAS: 0.6, Attr.VIS: 0.6, Attr.DEC: 0.3}, "b": -2.0, "fx": {"t": {"through": 0.05}, "poss": 0.01, "k": {5: 1.3}}, "ins": "prender"},
 		{"k": "chegador", "n": "Meia chegador", "d": "Aparece de surpresa na entrada da área para chutar.", "w": {Attr.CHL: 0.6, Attr.FIN: 0.4, Attr.POS: 0.2}, "b": 2.0, "fx": {"t": {"long": 0.04}, "k": {2: 1.3, 0: 1.1}}, "ins": "chutar"},
 		{"k": "condutor", "n": "Condutor", "d": "Recebe, gira e carrega a bola pelo meio.", "w": {Attr.DRI: 0.6, Attr.ACE: 0.4, Attr.FOR: 0.2}, "b": 2.8, "fx": {"t": {"dribble": 0.04, "counter": 0.02}, "k": {3: 1.2}}},
+		{"k": "recuperador", "n": "Meia recuperador", "d": "Ganha a segunda bola e recupera a posse logo depois de perdê-la.", "w": {Attr.DES: 0.4, Attr.RES: 0.4, Attr.INT: 0.2, Attr.ACE: 0.2}, "b": 1.5, "fx": {"t": {"scramble": 0.03}, "o": {"counter": -0.02}, "fat": 1.03}},
 	],
 	"AM": [
 		{"k": "meia", "n": "Meia-atacante", "d": "Liga o meio ao ataque.", "w": {}, "b": 3.0, "fx": {}},
@@ -68,6 +73,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "chutador", "n": "Meia chutador", "d": "Chute forte de fora da área.", "w": {Attr.CHL: 0.8, Attr.TEC: 0.2}, "b": -1.5, "fx": {"t": {"long": 0.05}, "k": {2: 1.4}}, "ins": "chutar"},
 		{"k": "infiltrador", "n": "Infiltrador", "d": "Meia que vira atacante: ataca a área sem a bola.", "w": {Attr.POS: 0.5, Attr.FIN: 0.5, Attr.ACE: 0.3}, "b": 4.0, "fx": {"t": {"through": 0.03, "scramble": 0.02}, "k": {0: 1.3}}, "ins": "avancar"},
 		{"k": "pressao", "n": "Meia de pressão", "d": "Primeiro a pressionar a saída do rival: rouba bolas perto do gol.", "w": {Attr.RES: 0.5, Attr.DES: 0.4, Attr.VEL: 0.2}, "b": 9.0, "fx": {"t": {"scramble": 0.05}, "fat": 1.05}},
+		{"k": "enganche", "n": "Enganche", "d": "Camisa 10 à moda antiga: segura a bola, atrai a marcação e solta no tempo certo. Não corre, pensa.", "w": {Attr.TEC: 0.5, Attr.VIS: 0.4, Attr.FRI: 0.3, Attr.DEC: 0.2}, "b": 0.5, "fx": {"t": {"through": 0.03, "dribble": 0.02}, "poss": 0.01, "k": {5: 1.2, 3: 1.1}}, "ins": "prender"},
 	],
 	"W": [
 		{"k": "ponta", "n": "Ponta", "d": "Ponta de ofício: abre o campo e busca o fundo.", "w": {}, "b": 4.0, "fx": {}},
@@ -78,6 +84,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "finalizador", "n": "Ponta finalizador", "d": "Ponta com faro de gol: fecha na segunda trave.", "w": {Attr.FIN: 0.7, Attr.FRI: 0.3, Attr.POS: 0.2}, "b": 4.0, "fx": {"k": {0: 1.3, 1: 1.1}}},
 		{"k": "cruzador", "n": "Ponta cruzador", "d": "Chega à linha de fundo e põe a bola na cabeça do centroavante.", "w": {Attr.CRU: 0.9}, "b": -1.0, "fx": {"t": {"cross": 0.06}, "k": {6: 1.35}}, "ins": "abrir"},
 		{"k": "incansavel", "n": "Ala incansável", "d": "Volta para marcar o lateral e ainda aparece no ataque.", "w": {Attr.RES: 0.6, Attr.DES: 0.3, Attr.MAR: 0.2}, "b": 4.5, "fx": {"o": {"cross": -0.04}, "fat": 0.9}},
+		{"k": "falso", "n": "Falso ponta", "d": "Parte da ponta para o meio e vira mais um meia: tabela, prende e deixa o corredor para o lateral.", "w": {Attr.PAS: 0.4, Attr.TEC: 0.4, Attr.DEC: 0.3}, "b": 4.0, "fx": {"t": {"through": 0.03}, "poss": 0.01, "k": {5: 1.2, 6: 0.85}}, "ins": "prender"},
 	],
 	"ST": [
 		{"k": "tecnico", "n": "Atacante técnico", "d": "Centroavante completo, sem uma marca só.", "w": {}, "b": 3.5, "fx": {}},
@@ -88,6 +95,7 @@ const BY_ROLE: Dictionary = {
 		{"k": "matador", "n": "Matador", "d": "Não precisa de muitas: é chance e gol.", "w": {Attr.FIN: 0.7, Attr.FRI: 0.5}, "b": -1.5, "fx": {"k": {0: 1.25}}},
 		{"k": "segundo", "n": "Segundo atacante", "d": "Circula atrás do centroavante, dribla e chuta de fora.", "w": {Attr.DRI: 0.4, Attr.CHL: 0.4, Attr.PAS: 0.3}, "b": 4.5, "fx": {"t": {"long": 0.03, "dribble": 0.03}, "k": {2: 1.2, 5: 1.15}}},
 		{"k": "pressao", "n": "Atacante de pressão", "d": "Primeiro defensor do time: persegue zagueiro e goleiro até o erro.", "w": {Attr.RES: 0.5, Attr.DES: 0.3, Attr.ACE: 0.3}, "b": 10.0, "fx": {"t": {"scramble": 0.05}, "poss": 0.01, "fat": 1.05}},
+		{"k": "movel", "n": "Atacante móvel", "d": "Cai pelos lados, puxa o zagueiro para fora e abre espaço para quem chega de trás.", "w": {Attr.VEL: 0.4, Attr.DRI: 0.4, Attr.CRU: 0.3}, "b": 4.5, "fx": {"t": {"dribble": 0.03, "cross": 0.02}, "k": {3: 1.15, 6: 1.1, 0: 0.9}}},
 	],
 }
 
@@ -103,6 +111,9 @@ const TRAITS: Array = [
 	{"k": "roubo", "n": "Roubo de bola", "w": {Attr.DES: 0.7, Attr.INT: 0.3}, "fx": {"k": {8: 0.85}}},
 	{"k": "frieza", "n": "Frieza", "w": {Attr.FRI: 0.7, Attr.DEC: 0.3}, "fx": {"k": {0: 1.08}}},
 	{"k": "lideranca", "n": "Liderança", "w": {Attr.INT: 0.4, Attr.DEC: 0.3, Attr.DIS: 0.3}, "b": -1.5, "fx": {"k": {8: 0.9}}},
+	{"k": "bolaparada", "n": "Bola parada", "w": {Attr.CHL: 0.5, Attr.CRU: 0.3, Attr.TEC: 0.2}, "b": -0.5, "fx": {"k": {2: 1.08, 6: 1.08}}},
+	{"k": "leitura", "n": "Leitura de jogo", "w": {Attr.INT: 0.5, Attr.POS: 0.5}, "b": -0.5, "fx": {"k": {8: 0.92}}},
+	{"k": "corpo", "n": "Força física", "w": {Attr.FOR: 1.0}, "b": -0.5, "fx": {"k": {1: 1.06}}},
 ]
 const GK_TRAITS: Array = [
 	{"k": "pes", "n": "Jogo com os pés", "w": {Attr.PAS: 0.7, Attr.TEC: 0.3}, "b": 12.0, "fx": {}},
