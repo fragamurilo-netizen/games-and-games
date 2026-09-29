@@ -27,6 +27,7 @@ const FROM := {
 	"empresario": {"role": "Empresário", "icon": "search", "group": "mercado"},
 	"clube": {"role": "Outro clube", "icon": "swap", "group": "mercado"},
 	"imprensa": {"role": "Imprensa", "icon": "news", "group": "outros"},
+	"federacao": {"role": "Federação", "icon": "globe", "group": "outros"},
 	"torcida": {"role": "Torcida organizada", "icon": "heart", "group": "outros"},
 }
 

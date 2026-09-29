@@ -95,18 +95,21 @@
 		"windows": [
 			[
 				0,
-				7
+				10
 			],
 			[
-				36,
-				46
+				37,
+				47
 			]
 		],
 		"retire_announce": 56,
 		"start_month": 8,
-		"start_day": 15,
+		"start_day": 1,
 		"winter_break_after": 33,
-		"winter_break_days": 14
+		"winter_break_days": 0,
+		"fifa_dates": [4, 9, 13, 29],
+		"fifa_pause": true,
+		"_fifa_doc": "Datas FIFA (índice do fim de semana de liga, a partir de 0) de setembro, outubro, novembro e março. fifa_pause: as ligas param na semana seguinte (a data FIFA ocupa a pausa); por isso a temporada começa no início de agosto e não tem pausa de inverno."
 	},
 	"money": {
 		"value_base": 21000,
@@ -230,7 +233,10 @@
 			"start_month": 1,
 			"start_day": 17,
 			"winter_break_after": -1,
-			"winter_break_days": 0
+			"winter_break_days": 0,
+			"fifa_dates": [13, 26, 33, 38],
+			"fifa_pause": false,
+			"_fifa_doc": "Como no Brasileirão, a liga não para nas datas FIFA de junho, setembro, outubro e novembro: os convocados desfalcam os clubes nos jogos da janela."
 		}
 	}
 }
