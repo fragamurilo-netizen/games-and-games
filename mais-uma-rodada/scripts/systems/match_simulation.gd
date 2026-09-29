@@ -71,7 +71,7 @@ const PK_MID := 7
 const PK_DEFEND := 8
 
 # --- Calibração (ver tests/season_simulator.gd) ---
-const BASE_CHANCE := 0.19 # prob. de chance por minuto de posse, times iguais
+const BASE_CHANCE := 0.196 # prob. de chance por minuto de posse, times iguais
 const BETA := 0.05 # sensibilidade da taxa de chances à diferença ATA×DEF (por ponto)
 const GAMMA := 0.021 # sensibilidade da posse à diferença de meio-campo (por ponto)
 const DELTA := 0.005 # sensibilidade da qualidade da chance
@@ -2020,6 +2020,12 @@ func _ai_read(t: MatchTeam) -> void:
 	# 7. Vencendo e sofrendo muito: baixa a linha e fecha o meio
 	if diff > 0 and o.xg - t.xg >= 0.7 and t.line > 0:
 		set_line(t.side, t.line - 1)
+		return
+	# 8. Saiu para o jogo e está levando sufoco sem estar atrás: um degrau mais cauteloso
+	# (vale para o resto da partida: o plano base muda, não só o momento).
+	if diff >= 0 and o.xg - t.xg >= 1.0 and t.base_mentality >= TeamSheet.MENT_OFENSIVA:
+		t.base_mentality -= 1
+		set_mentality(t.side, t.base_mentality)
 
 
 ## Lateral (ou ala/meia aberto) que cobre o corredor `lane` (do ponto de vista de quem defende).

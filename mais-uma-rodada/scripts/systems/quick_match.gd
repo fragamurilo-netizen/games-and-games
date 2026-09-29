@@ -37,9 +37,9 @@ const L_DEFN := 22
 
 ## Conversão média de uma chance e ajuste fino (escanteios, faltas e pênaltis do motor completo).
 const CONV := 0.118
-const CAL := 1.11
+const CAL := 1.12
 ## O minuto a minuto dá ao mandante um pouco mais do que as taxas médias sugerem (momento, torcida).
-const HOME_BOOST := 1.03
+const HOME_BOOST := 1.0
 const MINUTES := 93.0
 const PENALTY_SHARE := 0.075
 const OWN_GOAL_SHARE := 0.035
@@ -59,7 +59,7 @@ const SHOT_F := 1.22
 const PEN_P := 0.0125 # pênalti por lance de perigo
 ## O minuto a minuto amortece a diferença de nível (o técnico do favorito administra, o do azarão
 ## mexe no time e se fecha); o modo rápido, sem essas decisões, amortece a diferença aqui.
-const GAP_F := 0.85
+const GAP_F := 0.8
 
 static var _tac_cache: Dictionary = {}
 
