@@ -1,0 +1,16 @@
+# Godot
+game/.godot/
+game/build/
+game/android/
+*.import.tmp
+
+# Builds e assinaturas
+*.apk
+*.aab
+*.idsig
+*.keystore
+*.jks
+
+# Sistema
+.DS_Store
+Thumbs.db

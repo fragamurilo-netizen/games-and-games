@@ -1,0 +1,6 @@
+[
+  {"id": "agt_blackstone", "name": "Blackstone Sports", "profile": "Estrelas globais", "behavior": "Agressiva; maximiza garantias."},
+  {"id": "agt_northstar", "name": "Northstar Management", "profile": "Prospects", "behavior": "Busca atividade e desenvolvimento."},
+  {"id": "agt_morales", "name": "Morales Sports", "profile": "América Latina", "behavior": "Relacionamentos regionais fortes."},
+  {"id": "agt_crownking", "name": "Crown & King", "profile": "Pequena e combativa", "behavior": "Usa competição entre promotoras."}
+]

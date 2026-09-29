@@ -1,0 +1,8 @@
+[
+  {"id": "ppv", "name": "PPV", "use": "Grandes cards e cinturões", "economy": "Alta receita potencial, alto custo."},
+  {"id": "fight_night", "name": "Fight Night", "use": "Desenvolvimento e frequência", "economy": "Streaming/TV, custo controlado."},
+  {"id": "international", "name": "International Series", "use": "Construir mercados", "economy": "Receita variável, forte ganho regional."},
+  {"id": "stadium", "name": "Stadium Event", "use": "Superlutas", "economy": "Altíssimo risco e gate potencial."},
+  {"id": "prospect_series", "name": "Prospect Series", "use": "Descoberta de talentos", "economy": "Baixo custo, geração de pipeline."},
+  {"id": "grand_prix", "name": "Grand Prix", "use": "Formato de torneio", "economy": "Narrativa forte, logística e lesões elevadas."}
+]
