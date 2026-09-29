@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
       - name: Verify unchanged Claude source and prepare independent test package
         shell: bash
@@ -55,8 +55,12 @@ jobs:
               apt-get update -qq
               apt-get install -y --no-install-recommends libfontconfig1 >/workspace/validation/dependencies.log
               godot --version | tee /workspace/validation/engine.txt
-              timeout 300s godot --headless --path . --import > /workspace/validation/import.log 2>&1
-              if grep -E "SCRIPT ERROR|Parse Error" /workspace/validation/import.log; then exit 1; fi
+              # On a clean checkout, the editor can inspect the theme before font imports exist.
+              # Bootstrap resource imports, then require a clean second pass and compiled fonts.
+              timeout 300s godot --headless --path . --import > /workspace/validation/import-bootstrap.log 2>&1
+              test "$(find .godot/imported -type f -name "*.fontdata" | wc -l)" -ge 4
+              timeout 180s godot --headless --path . --import > /workspace/validation/import.log 2>&1
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/import.log; then exit 1; fi
               timeout 180s godot --headless --path . --script res://tools/check_scripts.gd 2>&1 | tee /workspace/validation/scripts.log
               grep -q "com erro: 0" /workspace/validation/scripts.log
               if grep -E "SCRIPT ERROR|Parse Error|FALHOU" /workspace/validation/scripts.log; then exit 1; fi
