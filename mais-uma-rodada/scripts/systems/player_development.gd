@@ -108,7 +108,7 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				# A cabeça conta: moral, confiança no treinador e o nível de quem treina ao lado.
 				var mind_f := mind_factor(world, p)
 				var env_f := environment_factor(world, p)
-				p.dev_acc += g * play_f * growth_f * fac_f * train_f * perf_f * mentor_f * mind_f * env_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
+				p.dev_acc += TalentAssessment.growth_environment(p, mins) * g * play_f * growth_f * fac_f * train_f * perf_f * mentor_f * mind_f * env_f * p.trait_mult("dev_mult") * rng.randf_range(0.6, 1.4)
 				if p.dev_acc >= 0.15:
 					var before := p.overall
 					apply_growth(world, p, p.dev_acc, TrainingManager.bias_for(world, p) if cid == world.user_club_id else [])

@@ -59,7 +59,7 @@ func refresh() -> void:
 			cards.append(SocialPost.mini_card(w, -1, p.id))
 			UIKit.columns(c, cards, content_width())
 		_:
-			var ov: Array = [_summary(w, p, own), _fit_card(w, p, own)]
+			var ov: Array = [_summary(w, p, own), _fit_card(w, p, own), _projection_card(w,p)]
 			# Tablet deitado: os atributos já aparecem ao lado (resumo e encaixe empilhados à
 			# esquerda), sem trocar de aba
 			if UILayout.columns_for(content_width()) >= 3:
@@ -1060,3 +1060,12 @@ func color_context() -> Dictionary:
 	var w := GameManager.world
 	var p := w.player(_pid) if w != null else null
 	return club_context(p.club_id) if p != null else {}
+
+
+func _projection_card(w: GameWorld, p: Player) -> Control:
+	var estimate := TalentAssessment.projection(p,w.year)
+	var box := UIKit.card("Card",10)
+	box.add_child(UIKit.label("Projeção de desenvolvimento","H2",true))
+	box.add_child(UIKit.label("Faixa observada: %d a %d · confiança %d%%" % [int(round(estimate["low"])),int(round(estimate["high"])),int(round(estimate["confidence"]*100))],"H3",true))
+	box.add_child(UIKit.label("Estimativa por idade, minutos, forma e evolução observada. Não revela o teto oculto nem garante que o jogador chegue a esse nível. Lesões, treino, profissionalismo e oportunidades alteram a trajetória.","Small",true))
+	return UIKit.card_panel(box)

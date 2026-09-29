@@ -290,7 +290,18 @@ func set_deep(k: int, v: int) -> void:
 
 ## Descrição para o confronto de ideias (TacticalMatchup).
 func matchup_desc() -> Dictionary:
-	return {"tech": press_tech, "mid": mid_mass, "pressing": pressing, "style": style, "mentality": mentality, "line": line, "width": width_i}
+	var stamina := 0.0
+	var condition := 0.0
+	var n := 0
+	for mp: MatchPlayer in slots:
+		if mp != null:
+			stamina += mp.p.attrs[Attr.RES]
+			condition += mp.cond
+			n += 1
+	return {"tech": press_tech, "mid": mid_mass, "pressing": pressing, "style": style, "mentality": mentality,
+		"line": line, "width": width_i, "passing": deep[1], "pace_att": pace_att, "pace_def": pace_def,
+		"aerial_att": aerial_att, "aerial_def": aerial_def, "decision": avg_decision,
+		"condition": condition / maxf(1.0, n), "stamina": stamina / maxf(1.0, n), "cohesion": club.cohesion}
 
 
 func goalkeeper() -> MatchPlayer:

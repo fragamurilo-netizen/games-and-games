@@ -135,7 +135,7 @@ static func is_called(world: GameWorld, p: Player) -> bool:
 static func _pool(world: GameWorld) -> Dictionary:
 	var out := {}
 	for p: Player in world.players.values():
-		if p.club_id < 0 or p.injury_weeks > 0 or p.retiring:
+		if p.injury_weeks > 0 or p.retiring:
 			continue
 		if not out.has(p.nationality):
 			out[p.nationality] = []
@@ -226,6 +226,8 @@ class Env:
 	var k := 30.0 # peso do jogo no ranking
 	var called := {} # id -> true (quem entrou em campo nesta data ou torneio)
 	var goals := {} # id -> gols nesta data ou torneio
+	var minutes := {} # international minutes in this window
+	var native_players := {} # already evaluated by the full injury model
 
 	func squad(code: String) -> Array:
 		return squads.get(code, [])
@@ -240,7 +242,7 @@ static func _make_env(world: GameWorld, seed_key: int, k: float) -> Env:
 	_ensure_elo(world, pool)
 	var squads_d: Dictionary = data(world)["squads"]
 	for code in DatabaseManager.nations():
-		var sq := call_up(pool.get(code, []))
+		var sq := InternationalCareer.squad_for(world, code, pool.get(code, []))
 		env.squads[code] = sq
 		env.strength[code] = strength_of(code, sq)
 		squads_d[code] = sq.map(func(p: Player): return p.id)
@@ -265,7 +267,15 @@ static func _lambda(env: Env, a: String, b: String, a_home: bool, b_home: bool) 
 		diff += HOME_BONUS
 	if b_home:
 		diff -= HOME_BONUS
-	return clampf(BASE_GOALS * exp(GOAL_SLOPE * diff), 0.15, 4.5)
+	var sa := InternationalCareer.snapshot(env.world,a,env.squad(a))
+	var sb := InternationalCareer.snapshot(env.world,b,env.squad(b))
+	var edge := TacticalMatchup.edges(sa,sb)
+	var styles: Array = DatabaseManager.tactics()["styles"]
+	var st: Dictionary = styles[int(sa["style"])]
+	var risk := 1.0 + (int(sa["mentality"])-2)*0.055 + (int(sb["mentality"])-2)*0.045
+	var execution := clampf(0.91 + float(sa["condition"])*0.001,0.91,1.01)
+	return clampf(BASE_GOALS * exp(GOAL_SLOPE * diff) * float(edge["rate_a"]) * risk * execution
+		* MatchSimulation.damp(float(st["rate"])*float(st["quality"])),0.15,4.5)
 
 
 ## Joga uma partida. home_adv: o mandante `a` joga em casa (eliminatórias) — em torneio só a sede tem.
@@ -273,6 +283,14 @@ static func _lambda(env: Env, a: String, b: String, a_home: bool, b_home: bool) 
 static func play(env: Env, a: String, b: String, home_adv: bool, ko: bool) -> Dictionary:
 	var a_home := home_adv or a == env.host
 	var b_home := (not home_adv) and b == env.host
+	var managed := InternationalCareer.nation(env.world)
+	var expected := 1.0 / (1.0 + pow(10.0,(elo_of(env.world,b)-elo_of(env.world,a))/400.0))
+	if managed in [a,b] and env.squad(a).size() >= 11 and env.squad(b).size() >= 11:
+		var native := InternationalMatch.play(env,a,b,a_home,b_home,ko)
+		if not native.is_empty():
+			_update_elo(env,a,b,int(native["ga"]),int(native["gb"]),a_home,b_home,String(native["w"]))
+			InternationalCareer.after_result(env.world,native,expected if managed == a else 1.0-expected)
+			return native
 	var la := _lambda(env, a, b, a_home, b_home)
 	var lb := _lambda(env, b, a, b_home, a_home)
 	var ga := _poisson(env.rng, la)
@@ -294,7 +312,9 @@ static func play(env: Env, a: String, b: String, home_adv: bool, ko: bool) -> Di
 		res["w"] = a if int(res["pa"]) > int(res["pb"]) else b
 	_credit_players(env, a, int(res["ga"]), res)
 	_credit_players(env, b, int(res["gb"]), res)
+	res["engine"] = "tactical_quick"
 	_update_elo(env, a, b, int(res["ga"]), int(res["gb"]), a_home, b_home, String(res["w"]))
+	InternationalCareer.after_result(env.world,res,expected if managed == a else 1.0-expected)
 	return res
 
 
@@ -317,11 +337,25 @@ static func _credit_players(env: Env, code: String, goals: int, res: Dictionary)
 	var sq := env.squad(code)
 	if sq.is_empty():
 		return
-	var xi := starting_xi(sq)
+	var selected := InternationalCareer.sheet(env.world, code, sq)
+	var xi: Array = []
+	for pid in selected.starters:
+		var p := env.world.player(int(pid))
+		if p != null: xi.append(p)
 	var bench: Array = sq.filter(func(p): return not xi.has(p) and Pos.group(p.position) != Pos.G_GK)
 	var used: Array = xi.duplicate()
 	for i in mini(3, bench.size()):
-		used.append(bench[env.rng.randi_range(0, bench.size() - 1)])
+		var index := env.rng.randi_range(0, bench.size() - 1)
+		used.append(bench.pop_at(index))
+	var duration := 120 if bool(res.get("et", false)) else 90
+	var minutes := {}
+	for p: Player in xi: minutes[p.id] = duration
+	var off: Array = xi.filter(func(p): return p.position != Pos.GK)
+	for p: Player in used.slice(xi.size()):
+		minutes[p.id] = 20
+		if not off.is_empty():
+			var leaving: Player = off.pop_at(env.rng.randi_range(0,off.size()-1))
+			minutes[leaving.id] -= 20
 	var seen := {}
 	for p: Player in used:
 		if seen.has(p.id):
@@ -329,6 +363,7 @@ static func _credit_players(env: Env, code: String, goals: int, res: Dictionary)
 		seen[p.id] = true
 		add_caps(env.world, p.id, 1, 0, 0)
 		env.called[p.id] = true
+		env.minutes[p.id] = int(env.minutes.get(p.id, 0)) + int(minutes.get(p.id,0))
 	var weights: Array = []
 	for p: Player in xi:
 		var gw: float = [0.0, 0.45, 1.4, 4.0][Pos.group(p.position)]
@@ -537,47 +572,58 @@ static func _open_campaigns(world: GameWorld, id: String, y: int) -> void:
 
 ## Datas FIFA restantes (esta temporada incluída) até o fim da campanha.
 static func _fifa_left(world: GameWorld, camp: Dictionary) -> int:
-	var per := (cfg().get("fifa_dates", []) as Array).size()
+	var per := InternationalCalendar.windows(world.year).size()
 	var this_season := maxi(0, per - int(data(world)["fifa"]))
 	return this_season + per * maxi(0, int(camp["end"]) - world.year)
 
 
 ## Depois de cada fim de semana: se for data FIFA, joga as rodadas das eliminatórias.
 ## Retorna as notícias relevantes ao usuário (convocações e resultados da sua nação).
-static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
-	var dates: Array = cfg().get("fifa_dates", []).map(func(x): return int(x))
-	if not dates.has(weekend_index):
-		return []
+static func after_weekend(world: GameWorld, _weekend_index: int) -> Array:
+	return InternationalCareer.before_slot(world, world.season.day)
+
+
+static func play_window(world: GameWorld, window: Dictionary) -> Array:
 	var d := data(world)
+	var env := _make_env(world, String(window["id"]).hash(), 30.0)
+	var results: Array = []
+	var played := {}
+	var limit := int(window["max_matches"])
 	var active: Array = d["camps"].filter(func(c): return not bool(c["done"]))
-	var env := _make_env(world, 1000 + weekend_index, 30.0)
-	var lines: Array = []
+	active.sort_custom(func(a,b): return int(a["y"]) < int(b["y"]))
 	for camp in active:
-		var left := _fifa_left(world, camp)
-		var remaining := int(camp["mdt"]) - int(camp["md"])
-		var n := remaining if left <= 1 else int(ceil(float(remaining) / left))
-		for i in n:
-			lines.append_array(_play_matchday(env, camp))
-	d["fifa"] = int(d["fifa"]) + 1
-	# Amistosos para quem não tem eliminatória (mantêm o ranking e os jogos dos convocados vivos).
-	var busy := {}
-	for camp in active:
-		for g in camp["groups"]:
-			for t in g["teams"]:
-				busy[t] = true
-	var free: Array = []
-	for code in DatabaseManager.nations():
-		if not busy.has(code):
-			free.append(code)
-	RngUtil.shuffle(env.rng, free)
+		var left := maxi(1,_fifa_left(world,camp))
+		var remaining := int(camp["mdt"])-int(camp["md"])
+		var count := mini(limit,maxi(1,int(ceil(float(remaining)/left))))
+		for _i in count:
+			if bool(camp["done"]): break
+			var codes := {}
+			for fixture in camp["fx"]:
+				if int(fixture[0]) == int(camp["md"]):
+					codes[fixture[2]] = true; codes[fixture[3]] = true
+			if codes.keys().any(func(code): return int(played.get(code,0)) >= limit): break
+			var round_results := _play_matchday(env,camp)
+			for r in round_results:
+				played[r["a"]] = int(played.get(r["a"],0))+1
+				played[r["b"]] = int(played.get(r["b"],0))+1
+			results.append_array(round_results)
+	d["fifa"] = int(d["fifa"])+1
 	env.k = 12.0
-	var friendlies: Array = []
-	for i in range(0, free.size() - 1, 2):
-		var fr := play(env, free[i], free[i + 1], true, false)
-		fr["fr"] = true
-		friendlies.append(fr)
-	_after_date(world, env, lines + friendlies)
-	return lines
+	# Nations without qualifying get two friendlies, never exceed their window allowance.
+	for round_index in mini(2,limit):
+		var free: Array = []
+		for code in DatabaseManager.nations():
+			if int(played.get(code,0)) < mini(2,limit): free.append(code)
+		RngUtil.shuffle(env.rng,free)
+		for i in range(0,free.size()-1,2):
+			var r := play(env,free[i],free[i+1],true,false)
+			r["fr"] = true
+			results.append(r)
+			played[free[i]] = int(played.get(free[i],0))+1
+			played[free[i+1]] = int(played.get(free[i+1],0))+1
+	_after_date(world,env,results)
+	InternationalCareer.data(world)["last_window_counts"] = played
+	return results
 
 
 static func _play_matchday(env: Env, camp: Dictionary) -> Array:
@@ -639,7 +685,7 @@ static func _best_by_position(groups: Array, n: int) -> Array:
 
 
 static func _user_nation(world: GameWorld) -> String:
-	return world.user_nation() if world.has_user() else ""
+	return InternationalCareer.nation(world) if InternationalCareer.nation(world) != "" else (world.user_nation() if world.has_user() else "")
 
 
 static func _names(codes: Array) -> String:
@@ -653,7 +699,9 @@ static func _after_date(world: GameWorld, env: Env, results: Array) -> void:
 		if p == null:
 			continue
 		p.morale = clampf(p.morale + 2.0, 0.0, 100.0)
-		if env.rng.randf() < 0.012 * (0.6 + p.injury_prone / 20.0):
+		p.condition = maxf(20.0, p.condition - float(env.minutes.get(p.id, 0)) * 0.045)
+		world.mark_tired(p)
+		if not env.native_players.has(p.id) and env.rng.randf() < 0.012 * (0.6 + p.injury_prone / 20.0):
 			p.injury_weeks = maxi(p.injury_weeks, env.rng.randi_range(1, 4))
 			p.injury_name = InjuryTable.name_for(p.injury_weeks, p.id + world.year)
 			if world.has_user() and p.club_id == world.user_club_id:

@@ -287,8 +287,15 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 	var vals: Array = []
 	var tpl: Array = TEMPLATE[pos]
 	var profile: Dictionary = RngUtil.pick(rng, PROFILES[pos])
+	# Correlated tools: pace/acceleration or vision/passing are not independent dice rolls.
+	var athletic := rng.randfn(0.0, 2.5)
+	var technical := rng.randfn(0.0, 2.5)
+	var reading := rng.randfn(0.0, 2.3)
 	for i in Attr.COUNT:
-		var v: float = target + tpl[i] + rng.randfn(0.0, 5.0)
+		var v: float = target + tpl[i] + rng.randfn(0.0, 4.0)
+		if i in [Attr.VEL, Attr.ACE, Attr.RES]: v += athletic
+		if i in [Attr.PAS, Attr.TEC, Attr.DRI, Attr.CRU]: v += technical
+		if i in [Attr.VIS, Attr.INT, Attr.DEC, Attr.POS]: v += reading
 		v += float(profile.get(i, 0)) + float(sig.get(i, 0))
 		vals.append(v)
 	# Idade: jovens mais físicos/menos maduros; veteranos mais inteligentes e mais lentos.
@@ -385,6 +392,9 @@ static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> i
 		gap = rng.randfn(0.8, 1.0)
 	if age <= 20 and rng.randf() < 0.012:
 		gap += rng.randf_range(6.0, 12.0) # joia rara
+	# Some prospects are early developers with little headroom. Potential is not a promise.
+	if age <= 22 and rng.randf() < 0.18:
+		gap *= 0.3
 	gap = maxf(0.0, gap)
 	# Acima de 85 cada ponto de potencial é mais raro (só os fenômenos passam de 90).
 	var pot := float(ovr) + gap
@@ -402,7 +412,7 @@ static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: i
 	var pot := float(ovr) + maxf(2.0, gap)
 	if pot > 85.0:
 		pot = 85.0 + (pot - 85.0) * 0.6
-	return clampi(int(round(pot)), ovr + 2, 94)
+	return clampi(int(round(pot)), ovr, maxi(94, ovr))
 
 
 # ---------------------------------------------------------------------------

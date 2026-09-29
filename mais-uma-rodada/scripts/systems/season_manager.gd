@@ -86,7 +86,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
-	return out
+	return InternationalCalendar.reserve(out, year)
 
 
 ## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
@@ -176,7 +176,7 @@ static func build_season(world: GameWorld) -> SeasonState:
 			# Playoffs de acesso depois da temporada regular (datas que sobram no fim do calendário)
 			var after: Array = []
 			for i in range(int(weekends.back()) + 1, s.calendar.size()):
-				after.append(i)
+				if s.calendar[i]["t"] not in ["I","IA"]: after.append(i)
 			l.phase_slots = after.slice(0, extra)
 		elif extra > 0:
 			l.phase_slots = weekends.slice(weekends.size() - extra)
@@ -430,12 +430,14 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		tt = _time("mercado", tt)
 		WorldPulse.weekly(world) # histórias do mundo, rumores, giro e recordes
 		tt = _time("mundo", tt)
-		report["intl"] = NationalTeamManager.after_weekend(world, _weekend_index(s, slot))
+		# International windows run after every date, not by an arbitrary league-round index.
 		tt = _time("selecoes", tt)
 		if _weekend_index(s, slot) % 4 == 3:
 			for p: Player in world.players.values():
 				Valuation.update_value(p, world.year)
 		tt = _time("valores", tt)
+	report["youth_extra"] = YouthCompetitions.play_slot(world, slot)
+	report["intl"] = InternationalCareer.before_slot(world, slot)
 	# Veteranos anunciam aposentadoria
 	if s.is_retire_slot(slot):
 		var ann := PlayerDevelopment.announce_retirements(world)
