@@ -20,6 +20,11 @@ var status: int = PENDING
 var raised: bool = false # comprador já aumentou a oferta uma vez
 var max_fee: int = 0 # teto secreto do comprador (IA)
 var rounds: int = 0 # contrapropostas do usuário já feitas
+## Estrutura (DealTerms): parcelas, bônus por metas, % de revenda e preço de recompra pedidos.
+var inst: int = 1
+var addon: int = 0
+var so: float = 0.0
+var bb: int = 0
 
 
 func is_pending() -> bool:
@@ -30,6 +35,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "p": player_id, "b": buyer_id, "s": seller_id, "fee": fee,
 		"cd": created_day, "ed": expires_day, "st": status, "rs": raised, "mx": max_fee, "rd": rounds,
+		"in": inst, "ad": addon, "so": so, "bb": bb,
 	}
 
 
@@ -46,4 +52,8 @@ static func from_dict(d: Dictionary) -> TransferOffer:
 	o.raised = bool(d.get("rs", false))
 	o.max_fee = int(d.get("mx", 0))
 	o.rounds = int(d.get("rd", 0))
+	o.inst = int(d.get("in", 1))
+	o.addon = int(d.get("ad", 0))
+	o.so = float(d.get("so", 0.0))
+	o.bb = int(d.get("bb", 0))
 	return o

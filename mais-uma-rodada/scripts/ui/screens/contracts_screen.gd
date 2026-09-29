@@ -32,6 +32,9 @@ func refresh() -> void:
 			lent.append(p)
 	c.add_child(_summary(w, club, squad))
 	c.add_child(_projection(w, squad))
+	var deals := _deals_card(w)
+	if deals != null:
+		c.add_child(deals)
 	# Filtros e ordem
 	var gf := ButtonGroup.new()
 	var fr := UIKit.flow(8)
@@ -157,6 +160,12 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 	var bits: Array = ["%d anos" % p.age(w.year), Player.STATUS_NAMES[clampi(p.squad_status, 0, Player.STATUS_NAMES.size() - 1)]]
 	if p.release_clause > 0:
 		bits.append("multa " + Fmt.money(p.release_clause))
+	if int(p.clauses.get("ab", 0)) > 0 or int(p.clauses.get("gb", 0)) > 0:
+		bits.append("bônus por jogo/gol")
+	if p.clauses.has("pr"):
+		bits.append("prometido: " + DealTerms.role_name(int(p.clauses["pr"])).to_lower())
+	if not p.loan.is_empty() and p.loan.has("opt") and int(p.loan.get("from", -1)) != club.id:
+		bits.append(("obrigação" if bool(p.loan.get("obl", false)) else "opção") + " de compra " + Fmt.money(int(p.loan["opt"])))
 	if not p.loan.is_empty():
 		var other := w.club(int(p.loan.get("from", -1)) if int(p.loan.get("from", -1)) != club.id else p.club_id)
 		bits.append(("emprestado ao %s" if int(p.loan.get("from", -1)) == club.id else "emprestado pelo %s") % (other.short_name if other != null else "?"))
@@ -186,3 +195,22 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 		rb.size_flags_horizontal = Control.SIZE_SHRINK_END
 		outer.add_child(rb)
 	return outer
+
+
+## Compromissos dos negócios: parcelas a pagar e a receber e bônus por metas pendentes.
+func _deals_card(w: GameWorld) -> Control:
+	var pay := TransferManager.pending_installments(w)
+	var recv := DealTerms.pending_receivables(w)
+	var addons := DealTerms.user_addons(w)
+	if pay <= 0 and recv <= 0 and addons.is_empty():
+		return null
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Compromissos de transferências"))
+	if pay > 0:
+		card.add_child(UIKit.kv("Parcelas a pagar", Fmt.money(pay), UIColors.RED))
+	if recv > 0:
+		card.add_child(UIKit.kv("Parcelas a receber", Fmt.money(recv), UIColors.GREEN))
+	for e in addons:
+		var what := "paga %s" % Fmt.money(int(e["v"])) if bool(e["pay"]) else "recebe %s" % Fmt.money(int(e["v"]))
+		card.add_child(UIKit.kv("Bônus por metas · %s" % e["pn"], "%s em %d jogos" % [what, int(e["left"])], UIColors.RED if bool(e["pay"]) else UIColors.GREEN))
+	return UIKit.card_panel(card)

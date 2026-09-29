@@ -364,6 +364,12 @@ func _awards_card(w: GameWorld) -> Control:
 		var champ17 := w.club(int(y17.get("champion", -1)))
 		if champ17 != null:
 			card.add_child(UIKit.kv(String(y17.get("name", "Sub-17")), "%s · seu time %dº" % [champ17.short_name, int(y17.get("user_pos", 0))], UIColors.ACCENT if w.is_user_club(champ17.id) else UIColors.TEXT))
+		# Copas de base: campeão e a campanha do seu clube
+		for e: Dictionary in yl.get("cups", []):
+			var ch: Variant = e.get("champion", -1)
+			var who := DatabaseManager.nation_name(String(ch)) if ch is String else (w.club(int(ch)).short_name if w.club(int(ch)) != null else "?")
+			var mine := String(e.get("user", ""))
+			card.add_child(UIKit.kv(String(e["name"]), who + ((" · " + mine.to_lower()) if mine != "" and mine != "Não classificado" else ""), UIColors.ACCENT if mine == "Campeão" else UIColors.TEXT))
 	return UIKit.card_panel(card)
 
 
