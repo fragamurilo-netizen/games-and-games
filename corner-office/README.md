@@ -48,6 +48,7 @@ corner-office/
 ├── CLAUDE.md  DESIGN.md  README.md
 ├── docs/                    bíblias (.md + .docx), arquitetura, roadmap, android
 ├── tools/                   run_tests.sh (usado também pela CI)
+├── prototypes/face-lab/     laboratório de rostos (HTML) — referência para o FaceGenerator
 └── game/                    projeto Godot (abra esta pasta no editor)
     ├── project.godot  export_presets.cfg  icon.svg
     ├── autoload/            EventBus (sinais globais), Game (estado atual)

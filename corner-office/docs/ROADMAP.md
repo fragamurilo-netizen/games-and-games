@@ -14,7 +14,8 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 ## M1 — Loop jogável
 
 - [ ] `WorldGenerator`: 100+ lutadores procedurais coerentes por região/estilo + 3 organizações ativas; atributos para o roster canônico
-- [ ] `FaceGenerator`: portar/adaptar o gerador do Mais Uma Rodada (auditar licença/estrutura primeiro)
+- [x] Protótipo da biblioteca de rostos (`prototypes/face-lab/`)
+- [ ] `FaceGenerator`: portar o protótipo para Godot (e/ou integrar o gerador do Mais Uma Rodada — auditar licença/estrutura primeiro)
 - [ ] Tela Lutadores: roster, perfil (bottom sheet), rankings
 - [ ] `Contracts`: oferta e renovação com BATNA simples
 - [ ] Tela Eventos: montar evento com 6–10 lutas
