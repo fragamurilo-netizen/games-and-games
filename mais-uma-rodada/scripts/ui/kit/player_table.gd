@@ -49,7 +49,11 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 		"contrato":
 			keys = ["contract", "wage", "value"]
 		_:
-			keys = ["ovr", "age", "price", "club", "form", "apps", "goals", "value"] if mode == "market" else ["ovr", "age", "cond", "morale", "form", "apps", "goals", "assists", "contract", "wage", "value"]
+			if mode == "market":
+				# Celular: o que decide olhar o jogador (nível, idade, preço). Com espaço, o resto.
+				keys = ["ovr", "age", "price", "club", "form", "value"] if wide else ["ovr", "age", "price"]
+			else:
+				keys = ["ovr", "age", "cond", "morale", "form", "apps", "goals", "assists", "contract", "wage", "value"]
 	# Com espaço sobrando (tablet em pé, desktop), a visão ganha colunas em vez de vazio.
 	if wide and view != "":
 		var more: Dictionary = {"geral": ["age", "form", "apps", "contract"], "forma": ["age", "cond", "morale"],

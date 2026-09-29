@@ -1,7 +1,10 @@
 extends BaseScreen
 ## Mercado: busca de jogadores, livres, propostas recebidas e jogadores à venda.
 
-const TABS := [["search", "Buscar"], ["moneyball", "Moneyball"], ["free", "Livres"], ["pre", "Pré-contrato"], ["scout", "Olheiros"], ["shortlist", "Lista"], ["offers", "Propostas"], ["listed", "À venda"], ["moves", "Movimentações"]]
+## Mercado = busca + observação + vendas + transferências (DESIGN.md). Livres, fim de contrato e
+## Moneyball são modos da busca, não abas próprias.
+const TABS := [["search", "Buscar"], ["shortlist", "Lista"], ["scout", "Olheiros"], ["sales", "Vendas"], ["moves", "Histórico"]]
+const POOLS := [["all", "Contratar"], ["free", "Livres"], ["pre", "Fim de contrato"], ["moneyball", "Moneyball"]]
 const GROUPS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 const AGES := [["Todas", 99], ["≤ 21", 21], ["≤ 25", 25], ["≤ 29", 29]]
 const SORTS := [["rel", "Relevância"], ["ovr", "Nível"], ["value", "Valor"], ["price", "Preço"], ["age", "Idade"]]
@@ -11,6 +14,10 @@ const MOVE_SORTS := [["recent", "Recentes"], ["fee", "Maiores"]]
 const MAX_ROWS := 200
 
 var _tab := "search"
+var _pool := "all"
+## Mestre/detalhe (tela larga): jogador aberto no painel lateral e o próprio painel.
+var _sel := -1
+var _side: VBoxContainer = null
 var _filters_open := false
 var _group := 0
 var _age := 0
@@ -38,6 +45,13 @@ func _init() -> void:
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_tab = p.get("tab", "search")
+	# Endereços antigos continuam valendo (inbox, atalhos, testes).
+	match _tab:
+		"offers", "listed":
+			_tab = "sales"
+		"free", "pre", "moneyball":
+			_pool = _tab
+			_tab = "search"
 	_group = int(p.get("group", 0))
 	_upgrades = bool(p.get("upgrades", false))
 	_origin = String(p.get("origin", "all"))
@@ -52,69 +66,110 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	max_content_width = 1700.0
+	max_content_width = 1800.0
 	c.add_child(_banner(w, club))
 	var n_offers := TransferManager.pending_offers(w).size()
 	var n_short := Shortlist.news_count(w)
 	var items: Array = []
 	for t in TABS:
 		var text: String = t[1]
-		if t[0] == "offers" and n_offers > 0:
+		if t[0] == "sales" and n_offers > 0:
 			text += " (%d)" % n_offers
 		elif t[0] == "shortlist" and n_short > 0:
 			text += " (%d)" % n_short
 		items.append([t[0], text])
-	var trow := UIKit.scroll_tabs(items, _tab, func(key: String):
+	c.add_child(UIKit.tabs(items, _tab, func(key: String):
 		_tab = key
-		refresh())
-	c.add_child(trow)
+		refresh()))
+	# Tela larga: resultados à esquerda, o jogador escolhido à direita (proposta a um toque).
+	var main: VBoxContainer = c
+	_side = null
+	if content_width() >= 1000.0 and _tab in ["search", "shortlist"]:
+		var split := UIKit.hbox(UITokens.S6)
+		main = UIKit.vbox(UITokens.S3)
+		main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		main.size_flags_stretch_ratio = 1.6
+		_side = UIKit.vbox(UITokens.S3)
+		_side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		split.add_child(main)
+		split.add_child(_side)
+		c.add_child(split)
 	match _tab:
-		"free":
-			_free_tab(c, w)
-		"pre":
-			_pre_tab(c, w, club)
 		"scout":
-			_scout_tab(c, w, club)
-		"offers":
-			_offers_tab(c, w)
-		"listed":
-			_listed_tab(c, w, club)
+			_scout_tab(main, w, club)
+		"sales":
+			_sales_tab(main, w, club)
 		"shortlist":
-			_shortlist_tab(c, w)
+			_shortlist_tab(main, w)
 		"moves":
-			_moves_tab(c, w, club)
-		"moneyball":
-			c.add_child(MoneyballView.build(w, club, content_width(), func(): refresh()))
+			_moves_tab(main, w, club)
 		_:
-			_search_tab(c, w, club)
+			main.add_child(UIKit.segment(POOLS, _pool, func(key: String):
+				_pool = key
+				refresh()))
+			match _pool:
+				"free":
+					_free_tab(main, w)
+				"pre":
+					_pre_tab(main, w, club)
+				"moneyball":
+					main.add_child(MoneyballView.build(w, club, content_width(), func(): refresh()))
+				_:
+					_search_tab(main, w, club)
+	if _side != null and _side.get_child_count() == 0:
+		_side.add_child(UIKit.state_block("empty", "Escolha um jogador na lista.", "O resumo e a proposta aparecem aqui."))
 
 
-## Situação do mercado em duas linhas: janela e dinheiro. Nada de painel de indicadores.
+## Toque num jogador: na tela larga abre no painel ao lado; no celular, o perfil.
+func _open(p: Player) -> void:
+	if _side != null:
+		_sel = p.id
+		_show_brief(p)
+	else:
+		UIManager.push("player", {"id": p.id})
+
+
+func _show_brief(p: Player) -> void:
+	if _side == null or p == null:
+		return
+	UIKit.clear(_side)
+	_side.add_child(PlayerBrief.make(world(), p, false, func(): refresh()))
+
+
+## Primeiro jogador de uma lista vai para o painel se nada estiver escolhido.
+func _default_brief(players: Array) -> void:
+	if _side == null or players.is_empty():
+		return
+	var cur := world().player(_sel)
+	if cur == null or not players.has(cur):
+		cur = players[0]
+		_sel = cur.id
+	_show_brief(cur)
+
+
+## Colunas de números conforme o espaço: poucas no celular e no mestre/detalhe.
+func _wide_table() -> bool:
+	return _side == null and content_width() >= 760.0
+
+
+## Situação do mercado em duas frases: janela e dinheiro. Nada de painel de indicadores.
 func _banner(w: GameWorld, club: Club) -> Control:
 	var out := UIKit.vbox(0)
 	var open := w.transfer_window_open()
 	var txt := ""
 	if open:
-		txt = "Janela aberta até a rodada %d" % (w.window_end_day() + 1)
+		txt = "Janela aberta até a rodada %d." % (w.window_end_day() + 1)
 	else:
 		var nxt := w.next_window_day()
-		txt = "Janela fechada · reabre na rodada %d" % (nxt + 1) if nxt >= 0 else "Janela fechada · reabre na próxima temporada"
-	out.add_child(UIKit.colored(txt, UIColors.GREEN if open else UIColors.ORANGE, "", true))
+		txt = ("Janela fechada, reabre na rodada %d." % (nxt + 1)) if nxt >= 0 else "Janela fechada até a próxima temporada."
+	out.add_child(UIKit.colored(txt, UIColors.GREEN if open else UIColors.ORANGE, "H3", true))
 	var fin := FinanceManager.summary(w, club)
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
 	var rules := DatabaseManager.squad_rules()
-	var line := RichTextLabel.new()
-	line.bbcode_enabled = true
-	line.fit_content = true
-	line.scroll_active = false
-	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.add_theme_color_override(&"default_color", UIColors.MUTED)
-	var hi := UIColors.TEXT.to_html(false)
-	line.text = "Verba [color=#%s]%s[/color] · folha [color=#%s]%s[/color] de %s · elenco %d (%d–%d)" % [
-		hi, Fmt.money(club.transfer_budget), (UIColors.RED if over else UIColors.TEXT).to_html(false), Fmt.money_month(fin["wage_bill"]),
-		Fmt.money(fin["wage_budget"]), club.player_ids.size(), int(rules["min_players"]), int(rules["max_players"])]
-	out.add_child(line)
+	out.add_child(UIKit.label("Verba de %s para contratar. Folha de %s por mês, limite de %s. Elenco com %d (de %d a %d)." % [
+		Fmt.money(club.transfer_budget), Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"]), club.player_ids.size(), int(rules["min_players"]), int(rules["max_players"])], "Muted", true))
+	if over:
+		out.add_child(UIKit.colored("A folha passou do limite: salário novo depende de vender alguém.", UIColors.RED, "Small", true))
 	return out
 
 
@@ -344,9 +399,10 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var players: Array = []
 	for i in shown:
 		players.append(list[i][0])
-	var tbl := PlayerTable.make(w, players, "market", _table_state, func(p: Player): UIManager.push("player", {"id": p.id}), _market_cols(w, club, weakest))
+	var tbl := PlayerTable.make(w, players, "market", _table_state, _open, _market_cols(w, club, weakest) if _wide_table() else [], "", _wide_table())
 	tbl.sort_changed.connect(func(_k: String, _d: bool): _fill_search.call_deferred(results, w, club))
 	results.add_child(tbl)
+	_default_brief(players)
 
 
 ## Colunas do mercado além das comuns: quanto melhora o seu pior titular no setor e o salário
@@ -446,16 +502,25 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 		c.add_child(UIKit.state_block("empty", "Nenhum jogador livre nessa posição agora."))
 		return
 	c.add_child(UIKit.label(Fmt.plural(list.size(), "jogador livre", "jogadores livres"), "Muted"))
-	c.add_child(PlayerTable.make(w, list.slice(0, MAX_ROWS), "market", _free_state, func(p: Player): UIManager.push("player", {"id": p.id})))
+	c.add_child(PlayerTable.make(w, list.slice(0, MAX_ROWS), "market", _free_state, _open, [], "", _wide_table()))
+	_default_brief(list)
+
+
+## Vendas: propostas recebidas (cada uma é um objeto com decisão) e os jogadores anunciados.
+func _sales_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
+	c.add_child(UIKit.label("Propostas recebidas", "Section"))
+	_offers_tab(c, w)
+	c.add_child(UIKit.gap(UITokens.S2))
+	c.add_child(UIKit.label("À venda", "Section"))
+	_listed_tab(c, w, club)
 
 
 func _offers_tab(c: VBoxContainer, w: GameWorld) -> void:
 	var offers := TransferManager.pending_offers(w)
 	if offers.is_empty():
-		c.add_child(UIKit.label("Nenhuma proposta pelo seu elenco.", "Muted", true))
+		c.add_child(UIKit.state_block("empty", "Nenhuma proposta pelo seu elenco.", "Jogador anunciado à venda recebe proposta mais rápido.", "Anunciar pelo elenco", func(): UIManager.switch_area("squad")))
 		return
-	for o: TransferOffer in offers:
-		c.add_child(_offer_card(w, o))
+	UIKit.columns(c, offers.map(func(o: TransferOffer) -> Control: return _offer_card(w, o)), content_width())
 
 
 func _offer_card(w: GameWorld, o: TransferOffer) -> Control:
@@ -552,7 +617,7 @@ func _listed_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		if p.transfer_listed:
 			list.append(p)
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhum jogador anunciado.", "Muted", true))
+		c.add_child(UIKit.state_block("empty", "Ninguém anunciado.", "Use \"Pôr à venda\" no perfil de um jogador do elenco."))
 		return
 	for p: Player in list:
 		var card := UIKit.card("CardFlat", 6)
@@ -639,9 +704,12 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 func _shortlist_tab(c: VBoxContainer, w: GameWorld) -> void:
 	var list := Shortlist.players(w)
 	if list.is_empty():
-		c.add_child(UIKit.label("Sua lista está vazia.", "Muted", true))
+		c.add_child(UIKit.state_block("empty", "Sua lista de observação está vazia.", "Toque em \"Acompanhar\" num jogador de outro clube e as mudanças dele (lesão, contrato, preço) aparecem aqui.", "Buscar jogadores", func():
+			_tab = "search"
+			refresh()))
 		return
-	c.add_child(UIKit.label("%s na lista · máx. %d" % [Fmt.plural(list.size(), "jogador", "jogadores"), Shortlist.MAX_ENTRIES], "Small", true))
+	c.add_child(UIKit.label("%s de no máximo %d." % [Fmt.plural(list.size(), "jogador na lista", "jogadores na lista"), Shortlist.MAX_ENTRIES], "Muted", true))
+	_default_brief(list)
 	# Quem tem novidade primeiro, depois pelo nível estimado.
 	var rows: Array = []
 	for p: Player in list:
@@ -656,18 +724,19 @@ func _shortlist_tab(c: VBoxContainer, w: GameWorld) -> void:
 func _shortlist_card(w: GameWorld, p: Player, changes: Array) -> Control:
 	var card := UIKit.card("CardFlat", 6)
 	var pid := p.id
-	card.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+	card.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): _open(p)))
 	if not changes.is_empty():
-		var tags := UIKit.flow(6)
+		# Novidades desde que entrou na lista, em texto na cor do tipo (sem pílulas).
+		var parts: Array = []
 		for ch in changes:
-			tags.add_child(UIKit.pill(ch[0], ch[1], 16))
-		card.add_child(tags)
+			parts.append(String(ch[0]))
+		card.add_child(UIKit.colored("Novidade: " + ", ".join(parts).to_lower() + ".", changes[0][1], "Small", true))
 	var info := UIKit.hbox(8)
 	var il := Shortlist.interest_label(w, p)
 	var txt := UIKit.label("Livre, sem taxa de transferência" if p.club_id < 0 else "Contrato até %d · %s" % [p.contract_end, Player.STATUS_NAMES[p.squad_status].to_lower()], "Small", true)
 	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(txt)
-	info.add_child(UIKit.pill(il[0], il[1], 16))
+	info.add_child(UIKit.colored(String(il[0]), il[1], "Small"))
 	card.add_child(info)
 	var brow := UIKit.hbox(8)
 	var can_bid := p.club_id < 0 or w.transfer_window_open()
@@ -857,12 +926,7 @@ func _market_row(w: GameWorld, club: Club, p: Player, weakest: Array) -> Control
 ## Jogadores em último ano de contrato: podem assinar pré-contrato a partir da metade da temporada.
 func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var prog := TransferManager.season_progress(w)
-	var head := UIKit.card("Card", 6)
-	head.add_child(UIKit.section("Contratos terminando"))
-	var pre_pill := UIKit.pill("PRÉ-CONTRATO LIBERADO" if prog >= 0.5 else "PRÉ-CONTRATO NO 2º TURNO", UIColors.GREEN if prog >= 0.5 else UIColors.ORANGE, 15)
-	pre_pill.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	head.add_child(pre_pill)
-	c.add_child(UIKit.card_panel(head))
+	c.add_child(UIKit.colored("Pré-contrato liberado: quem assinar chega de graça no fim da temporada." if prog >= 0.5 else "Pré-contrato só a partir do 2º turno. Dá para observar e planejar desde já.", UIColors.GREEN if prog >= 0.5 else UIColors.ORANGE, "Small", true))
 	_group_chips(c)
 	var weakest := _weakest_starter_by_group(w, club)
 	var budget := float(maxi(1, club.transfer_budget))
@@ -881,14 +945,15 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var total := list.size()
 	list = _top(list, func(e: Array) -> float: return float(e[1]), true)
 	list.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
-	c.add_child(UIKit.label("%s disponíveis%s." % [Fmt.plural(total, "jogador", "jogadores"), (" · %d já assinaram com outros clubes" % signed) if signed > 0 else ""], "Small", true))
+	c.add_child(UIKit.label("%s disponíveis.%s" % [Fmt.plural(total, "jogador", "jogadores"), (" %d já assinaram com outros clubes." % signed) if signed > 0 else ""], "Muted", true))
 	if list.is_empty():
 		c.add_child(UIKit.state_block("empty", "Ninguém nesse setor."))
 		return
 	var players: Array = []
 	for e in list.slice(0, MAX_ROWS):
 		players.append(e[0])
-	c.add_child(PlayerTable.make(w, players, "market", _pre_state, func(p: Player): UIManager.push("player", {"id": p.id}), _market_cols(w, club, weakest)))
+	c.add_child(PlayerTable.make(w, players, "market", _pre_state, _open, _market_cols(w, club, weakest) if _wide_table() else [], "", _wide_table()))
+	_default_brief(players)
 
 
 ## Sugestões do diretor de futebol: o setor mais carente e nomes que cabem no bolso.
@@ -910,6 +975,6 @@ func _suggest_card(w: GameWorld, club: Club) -> Control:
 			players.append(p)
 	if players.is_empty():
 		return null
-	v.add_child(PlayerTable.make(w, players, "market", {}, func(p: Player): UIManager.push("player", {"id": p.id}), _market_cols(w, club, weakest)))
+	v.add_child(PlayerTable.make(w, players, "market", {}, _open, _market_cols(w, club, weakest) if _wide_table() else [], "", _wide_table()))
 	v.add_child(UIKit.gap(12))
 	return v
