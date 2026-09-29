@@ -749,6 +749,10 @@ static func user_strength(world: GameWorld, key: String = "u20") -> float:
 static func play_slot(world: GameWorld, slot: int) -> Array:
 	var played: Array = []
 	var used := {}
+	var date := InternationalCalendar.season_date(world,slot)
+	var recent: Dictionary = world.youth.get("match_rest_v1", {})
+	for pid in recent:
+		if date-int(recent[pid])<3*86400: used[int(pid)] = true
 	for key in ["u20", "u17"]:
 		var yl := league(world, key)
 		if yl.is_empty():
@@ -769,8 +773,10 @@ static func play_slot(world: GameWorld, slot: int) -> Array:
 					team = pick_team(world, key, used)
 					for e in team["xi"]:
 						used[e[0].id] = true
+						recent[e[0].id] = date
 					for bp: Player in team["bench"]:
 						used[bp.id] = true
+						recent[bp.id] = date
 				sh = float(team["str"]) if world.is_user_club(h) else _strength(world, yl, h)
 				sa = float(team["str"]) if world.is_user_club(a) else _strength(world, yl, a)
 				var lh := 1.45 * exp((sh - sa) / 11.0) * 1.08
@@ -794,6 +800,8 @@ static func play_slot(world: GameWorld, slot: int) -> Array:
 					_credit_goals(world, yl, a, int(g[3]))
 				if world.is_user_club(h) or world.is_user_club(a):
 					played.append(g)
+	world.youth["used_this_slot"] = {"slot":slot,"players":used}
+	world.youth["match_rest_v1"] = recent
 	return played
 
 

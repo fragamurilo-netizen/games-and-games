@@ -92,8 +92,8 @@ const LIVE_XG := 0.72
 
 static func damp(x: float) -> float:
 	return 1.0 + (x - 1.0) * MOD_DAMP
-## Contra o time do usuário a IA se motiva mais conforme a dificuldade (fácil, normal, difícil).
-const USER_OPP_BOOST: Array[float] = [1.0, 1.035, 1.07]
+## Dificuldade altera a leitura da IA, nunca a força dos jogadores.
+const USER_OPP_BOOST: Array[float] = [1.0, 1.0, 1.0] # legacy API; no hidden ability boost
 ## Força do efeito do placar (no começo do jogo e somado até o fim).
 const STATE_BASE := 0.04
 const STATE_LATE := 0.07
@@ -103,6 +103,10 @@ var rng := RandomNumberGenerator.new()
 ## Sorteios só de apresentação (posição da bola, lances sem perigo): usar um gerador separado
 ## garante que assistir à partida (detail) nunca muda o resultado em relação ao instantâneo.
 var vis_rng := RandomNumberGenerator.new()
+var _international := false
+var _national_user := ""
+var ai_level: int = 1
+var coach_log: Array = []
 var detail: bool = false
 var teams: Array[MatchTeam] = [] # [casa, fora]
 var minute: int = 0
@@ -172,6 +176,9 @@ var _poss_base: float = 0.5
 
 func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away_sheet: TeamSheet, ctx: Dictionary, seed_value: int, with_detail: bool) -> void:
 	rng.seed = seed_value
+	ai_level = clampi(world.difficulty, 0, 2)
+	_international = bool(ctx.get("international",false))
+	_national_user = String(ctx.get("national_user",""))
 	vis_rng.seed = seed_value ^ 0x5bd1e995
 	detail = with_detail
 	year = world.year
@@ -188,7 +195,7 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		_build_team(world, 1, away, away_sheet),
 	]
 	crowd = 0.0 if neutral else 0.6 + 0.4 * clampf(float(attendance) / maxf(1.0, home.capacity), 0.0, 1.0)
-	var cul := LeagueCulture.for_match(world, competition, home)
+	var cul := LeagueCulture.NEUTRAL if _international else LeagueCulture.for_match(world, competition, home)
 	goal_f = float(cul["goals"])
 	card_f = float(cul["cards"])
 	ref = Array(ctx.get("ref", []))
@@ -209,22 +216,18 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 	teams[1].home_f = 1.0
 	for t: MatchTeam in teams:
 		t.day_f = clampf(rng.randfn(1.0, DAY_SIGMA), 0.93, 1.07) # entra no home_f, atenuado em refresh_factors
-	for side in 2:
-		if teams[side].is_user and not teams[1 - side].is_user:
-			teams[1 - side].day_f *= USER_OPP_BOOST[clampi(world.difficulty, 0, 2)]
 	for t: MatchTeam in teams:
 		t.home_f *= t.day_f
 	# Os times se estudaram: cada um sabe onde o outro sofre (TacticalScout).
 	for t: MatchTeam in teams:
 		var opp_club: Club = teams[1 - t.side].club
-		t.vuln = TacticalScout.vulnerability(world, opp_club)
-		t.study = TacticalScout.study(world, t.club)
-		t.adapt = float(ClubPhilosophy.of(t.club).get("adapt", 0.4))
+		t.vuln = PackedFloat32Array([1, 1, 1, 1, 1, 1]) if _international else TacticalScout.vulnerability(world, opp_club)
+		t.study = 0.6 if _international else TacticalScout.study(world, t.club)
+		t.adapt = 0.6 if _international else float(ClubPhilosophy.of(t.club).get("adapt", 0.4))
 		t.opp_ref = weakref(teams[1 - t.side])
-		# Contra o time do usuário a IA estuda mais (e mais ainda nas dificuldades altas).
-		if teams[1 - t.side].is_user and not t.is_user:
-			t.study = minf(1.0, t.study + 0.05 + 0.1 * clampi(world.difficulty, 0, 2))
-			t.adapt = minf(1.0, t.adapt + 0.1 * clampi(world.difficulty, 0, 2))
+		# All AI managers use this decision budget, including AI vs AI matches.
+		if not t.is_user:
+			t.study = clampf(t.study * [0.65, 0.9, 1.15][ai_level], 0.15, 0.95)
 	for t: MatchTeam in teams:
 		t.refresh_tactics()
 		t.recompute_units()
@@ -261,7 +264,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.formation = DatabaseManager.formation(sheet.formation)
 	t.formation_name = sheet.formation if DatabaseManager.has_formation(sheet.formation) else "4-4-2"
 	t.max_subs = int(DatabaseManager.squad_rules()["max_subs"])
-	t.is_user = world.is_user_club(club.id)
+	t.is_user = club.key == _national_user if _international else world.is_user_club(club.id)
 	t.auto_subs = sheet.auto_subs if t.is_user else true
 	t.mentality = sheet.mentality
 	t.base_mentality = sheet.mentality
@@ -271,14 +274,14 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 	t.pressing = sheet.pressing
 	t.width_i = sheet.width
 	t.deep = sheet.deep_values()
-	t.evo_f = TeamEvolution.factor(world, club)
+	t.evo_f = 1.0 if _international else TeamEvolution.factor(world, club)
 	t.cohesion_base = 0.96 + clampf(club.cohesion, 0.0, 100.0) / 100.0 * 0.08
 	t.cohesion_f = t.cohesion_base * TacticsManager.fam_factor(club, sheet)
-	var um := TrainingManager.unit_mults(world, club)
+	var um := [1.0,1.0] if _international else TrainingManager.unit_mults(world, club)
 	t.train_att = damp(float(um[0]))
 	t.train_def = damp(float(um[1]))
-	t.sp_bonus = TrainingManager.set_piece_bonus(world, club)
-	var inj_m := TrainingManager.injury_mult(world, club.id)
+	t.sp_bonus = 0.0 if _international else TrainingManager.set_piece_bonus(world, club)
+	var inj_m := 1.0 if _international else TrainingManager.injury_mult(world, club.id)
 	var norms := DatabaseManager.formation_norms()
 	t.norm_def = float(norms["def"])
 	t.norm_mid = float(norms["mid"])
@@ -291,7 +294,7 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		if pl == null:
 			t.slots.append(null)
 			continue
-		var mp := _make_mp(pl, big, inj_m * TrainingManager.player_injury_mult(world, pl))
+		var mp := _make_mp(pl, big, inj_m * (1.0 if _international else TrainingManager.player_injury_mult(world, pl)))
 		mp.instr = sheet.instruction_of(pl.id)
 		_assign_slot(mp, i, fslots[i])
 		mp.on_pitch = true
@@ -304,12 +307,12 @@ func _build_team(world: GameWorld, side: int, club: Club, sheet: TeamSheet) -> M
 		var pl: Player = world.player(pid)
 		if pl == null or t.by_id.has(pid):
 			continue
-		var mp := _make_mp(pl, big, inj_m * TrainingManager.player_injury_mult(world, pl))
+		var mp := _make_mp(pl, big, inj_m * (1.0 if _international else TrainingManager.player_injury_mult(world, pl)))
 		mp.instr = sheet.instruction_of(pl.id)
 		t.bench.append(mp)
 		t.all.append(mp)
 		t.by_id[pid] = mp
-	var cm := ManagerProfile.card_mult(world, club.id)
+	var cm := 1.0 if _international else ManagerProfile.card_mult(world, club.id)
 	if cm != 1.0:
 		for mp2: MatchPlayer in t.all:
 			mp2.card_mult *= cm
@@ -773,33 +776,12 @@ func crowd_mood() -> Dictionary:
 ## fora, com a área cheia), quem está na frente recua e acha espaço no contra-ataque.
 ## Cresce com o tempo de jogo e com a diferença (até 2 gols).
 func _game_state() -> void:
-	var t_f := clampf(float(minute) / 90.0, 0.0, 1.3)
+	# A score alone never grants/suppresses chances. Risk changes require actual instructions.
 	for t: MatchTeam in teams:
-		var diff: int = score[t.side] - score[1 - t.side]
-		if diff == 0:
-			# Empate nos minutos finais: ninguém quer se expor (o empate real é mais comum que o sorteio puro).
-			t.g_rate = 0.9 if minute >= 80 and half == 2 else 1.0
-			t.g_quality = 1.0
-			t.g_poss = 0.0
-			continue
-		var k := (STATE_BASE + STATE_LATE * t_f) * (1.0 if absi(diff) == 1 else 1.35)
-		if diff < 0:
-			# Atrás: ocupa o campo e finaliza mais (de fora, com a área cheia). Perdendo de muito,
-			# o time desanima e a pressão perde força.
-			t.g_rate = 1.0 + k * (1.5 if diff == -1 else 0.7)
-			t.g_quality = 1.0 - k * 0.5
-			t.g_poss = k * 0.15
-		else:
-			# Na frente: recua e explora o contra-ataque. Com dois ou três gols de vantagem, tira o pé.
-			t.g_rate = 1.0 - k * 0.7
-			t.g_quality = 1.0 + k * 0.35
-			t.g_poss = -k * 0.15
-			if diff == 2:
-				t.g_rate *= 0.88
-			elif diff >= 3:
-				t.g_rate *= 0.72
-	for t: MatchTeam in teams:
-		t.apply_state(score[t.side] - score[1 - t.side]) # cera de quem vence (instrução de equipe)
+		t.g_rate = 1.0
+		t.g_quality = 1.0
+		t.g_poss = 0.0
+		t.apply_state(score[t.side] - score[1 - t.side])
 
 
 ## Recalcula as probabilidades por minuto (chamado quando setores ou táticas mudam).
@@ -1819,7 +1801,7 @@ func set_style(side: int, st: int) -> void:
 	var t: MatchTeam = teams[side]
 	if t.style == st:
 		return
-	t.style = clampi(st, 0, 5)
+	t.style = clampi(st, 0, DatabaseManager.tactics()["styles"].size() - 1)
 	_refresh_fam(t)
 	t.refresh_tactics()
 	t.recompute_units()
@@ -2064,39 +2046,30 @@ func _ai_formation(t: MatchTeam) -> void:
 
 
 func _ai_decisions() -> void:
-	if half >= 2:
-		for t: MatchTeam in teams:
-			if t.is_user:
-				_user_plan(t)
-	# Primeiro tempo: quem está levando um baile não espera o intervalo para mexer.
-	if half == 1 and minute == 32:
-		for t: MatchTeam in teams:
-			if not t.is_user and (score[t.side] - score[1 - t.side] <= -2 or teams[1 - t.side].xg - t.xg >= 1.0):
-				_ai_read(t)
-	if half != 2:
-		return
+	var interval: int = [16, 10, 6][ai_level]
 	for t: MatchTeam in teams:
-		# Conversa do intervalo: o técnico corrige o que viu no primeiro tempo.
-		if minute == 46 and not t.is_user:
-			_ai_read(t)
-		if (minute == 60 or minute == 68 or minute == 76 or minute == 84) and (not t.is_user or t.auto_subs):
-			_auto_subs(t)
 		if t.is_user:
-			continue
-		if minute == 58 or minute == 70:
-			_ai_read(t)
-		_ai_formation(t)
-		if minute % 10 == 0 and minute >= 60:
-			var diff: int = score[t.side] - score[1 - t.side]
-			var target := t.base_mentality
-			if diff < 0:
-				target = maxi(t.base_mentality, 3 if minute < 80 else 4)
-			elif diff == 1 and minute >= 75:
-				target = mini(t.base_mentality, 1)
-			elif diff >= 2:
-				target = mini(t.base_mentality, 2)
-			if target != t.mentality:
-				set_mentality(t.side, target)
+			if half >= 2:
+				_user_plan(t)
+		elif minute >= 16 and (minute + t.side * 3) % interval == 0:
+			var opp := teams[1 - t.side]
+			var d := AdaptiveCoach.read(t.matchup_desc(), opp.matchup_desc(), minute,
+				score[t.side] - score[opp.side], t.xg - opp.xg)
+			if not d.is_empty() and rng.randf() <= [0.48, 0.73, 0.94][ai_level]:
+				var v := int(d["value"])
+				match String(d["key"]):
+					"pressing": set_pressing(t.side, v)
+					"line": set_line(t.side, v)
+					"width": set_width(t.side, v)
+					"mentality": set_mentality(t.side, v)
+					"passing": set_deep(t.side, "passing", v)
+				coach_log.append({"minute": minute, "side": t.side, "reason": d["reason"]})
+			else:
+				_ai_read(t)
+		if half >= 2 and minute in [60, 68, 76, 84] and (not t.is_user or t.auto_subs):
+			_auto_subs(t)
+		if not t.is_user and half == 2:
+			_ai_formation(t)
 
 
 ## Plano de jogo do usuário: muda a mentalidade quando o placar muda de situação

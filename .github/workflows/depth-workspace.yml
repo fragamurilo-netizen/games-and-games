@@ -1,0 +1,25 @@
+name: Depth development workspace
+on:
+  push:
+    branches: [codex/football-depth-0.5.0-20260928]
+    paths: [.github/workflows/depth-workspace.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare source and validation runtime
+        run: |
+          mkdir -p workspace-artifact
+          git rev-parse HEAD > workspace-artifact/commit.txt
+          tar --exclude=.git --exclude=builds --exclude=docs/catalogo-rostos --exclude=workspace-artifact -czf workspace-artifact/source.tar.gz .
+          docker run --rm -v "$PWD/workspace-artifact:/output" barichello/godot-ci:4.7 bash -lc 'cp "$(command -v godot)" /output/godot; chmod +x /output/godot; godot --version > /output/engine.txt'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: depth-dev-workspace
+          path: workspace-artifact/
+          retention-days: 1

@@ -1,0 +1,119 @@
+name: Football depth 0.5 validation and test APK
+on:
+  push:
+    branches: [codex/football-depth-0.5.0-20260928]
+    paths:
+      - .github/workflows/depth-validation.yml
+      - .ci/apply_depth_edits.py
+      - .ci/depth-edits/**
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: depth-validation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply exact integrity-checked source changes and preserve concurrent tablet updates
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/football-depth-0.5.0-20260928
+          mkdir -p validation mais-uma-rodada/build
+          git rev-parse HEAD > validation/input-commit.txt
+          python3 .ci/apply_depth_edits.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # These three reviewed commits arrived on the source branch during development.
+          # Integrate INTO the isolated branch only. Conflicts must fail, never auto-resolve.
+          git merge --no-commit --no-ff 4f90c3eec4c4cc891f6e4d9710bf7a681742a838
+          echo 4f90c3eec4c4cc891f6e4d9710bf7a681742a838 > validation/integrated-base.txt
+          git diff --check
+          git diff --cached --check
+      - name: Import and run full depth and mobile regression gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/workspace/validation/dependencies.log
+              godot --version | tee /workspace/validation/engine.txt
+              timeout 300s godot --headless --path . --import > /workspace/validation/import.log 2>&1
+              test "$(find .godot/imported -type f -name "*.fontdata" | wc -l)" -ge 4
+              export DEPTH_REPORT=/workspace/validation/depth-validation.json
+              timeout 600s godot --headless --path . --script res://tests/depth_bootstrap.gd 2>&1 | tee /workspace/validation/depth-tests.log
+              grep -q DEPTH_REGRESSION_OK /workspace/validation/depth-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|DEPTH_FAIL" /workspace/validation/depth-tests.log; then exit 1; fi
+              timeout 180s godot --headless --path . --script res://tests/mobile_regression.gd 2>&1 | tee /workspace/validation/mobile-tests.log
+              grep -q MOBILE_REGRESSION_OK /workspace/validation/mobile-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|MOBILE_FAIL" /workspace/validation/mobile-tests.log; then exit 1; fi
+            '
+      - name: Commit validated source only to the isolated development branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/football-depth-0.5.0-20260928
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mapfile -t SOURCE_PATHS < validation/source-paths.txt
+          git add -- "${SOURCE_PATHS[@]}"
+          if ! git diff --cached --quiet || test -f .git/MERGE_HEAD; then
+            git commit -m 'Integrate reviewed latest tablet updates into validated football depth 0.5.0'
+            git push origin HEAD:codex/football-depth-0.5.0-20260928
+          fi
+          git rev-parse HEAD > validation/source-commit.txt
+          git show --stat --oneline HEAD > validation/commit-summary.txt
+      - name: Export a separate Android test app without changing production package
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('mais-uma-rodada/export_presets.cfg')
+          text = p.read_text()
+          assert text.count('package/unique_name="com.maisumarodada.futebol"') == 2
+          assert text.count('version/name="0.5.0"') == 2
+          assert text.count('version/code=13') == 2
+          text = text.replace('package/unique_name="com.maisumarodada.futebol"', 'package/unique_name="com.maisumarodada.futebol.depthtest"')
+          text = text.replace('package/name="Mais Uma Rodada"', 'package/name="Mais Uma Rodada 0.5 Teste"')
+          p.write_text(text)
+          PY
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              timeout 300s godot --headless --path . --export-debug "Android arm64" build/MaisUmaRodada-0.5.0-profundidade-teste.apk 2>&1 | tee /workspace/validation/export.log
+              if grep -E "SCRIPT ERROR|Parse Error|Failed to export|Export failed" /workspace/validation/export.log; then exit 1; fi
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-0.5.0-profundidade-teste.apk
+          sha256sum mais-uma-rodada/build/MaisUmaRodada-0.5.0-profundidade-teste.apk > validation/apk-sha256.txt
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          apk = Path('mais-uma-rodada/build/MaisUmaRodada-0.5.0-profundidade-teste.apk')
+          with zipfile.ZipFile(apk) as z:
+              assert z.testzip() is None
+              assert 'AndroidManifest.xml' in z.namelist()
+          Path('validation/build.json').write_text(json.dumps({'version': '0.5.0', 'code': 13, 'package': 'com.maisumarodada.futebol.depthtest', 'name': 'Mais Uma Rodada 0.5 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'integrated_source_base': '4f90c3eec4c4cc891f6e4d9710bf7a681742a838', 'physical_android_tested': False}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: football-depth-validation
+          path: validation/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaisUmaRodada-0.5.0-profundidade-teste
+          path: mais-uma-rodada/build/MaisUmaRodada-0.5.0-profundidade-teste.apk
+          if-no-files-found: error
+          retention-days: 14
