@@ -48,6 +48,8 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 			keys = ["apps", "goals", "assists", "form"]
 		"contrato":
 			keys = ["contract", "wage", "value"]
+		"treino":
+			keys = ["ovr", "age", "cond", "morale"] if wide else ["ovr"]
 		"base":
 			keys = ["ovr", "pot", "age", "apps", "goals", "form"] if wide else ["ovr", "pot", "age"]
 		_:
