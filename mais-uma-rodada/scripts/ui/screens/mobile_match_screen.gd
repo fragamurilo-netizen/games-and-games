@@ -32,8 +32,12 @@ func _responsive_layout() -> void:
 		_mobile_right.assign([_tabs_row.get_parent(), _feed_scroll, _tab_scroll])
 		_mobile_portrait_pitch_height = _pitch.custom_minimum_size.y
 		_mobile_rotation_ready = true
-	var wide := UILayout.is_wide()
+	# Duas colunas só deitado: no tablet em pé o campo esticava na coluna estreita (arquibancada
+	# ocupando meia tela) e a faixa de placares cortava; em pé fica empilhado como no celular.
+	var wide := UILayout.is_wide() and UILayout.is_landscape()
 	if wide == is_instance_valid(_wide_body):
+		if not wide:
+			_pitch.custom_minimum_size.y = _portrait_pitch_height()
 		return
 	if wide:
 		var at := pitch_box.get_index()
@@ -67,11 +71,18 @@ func _responsive_layout() -> void:
 			_root.move_child(node, at)
 			at += 1
 		pitch_box.size_flags_vertical = Control.SIZE_FILL
-		_pitch.custom_minimum_size.y = _mobile_portrait_pitch_height
+		_pitch.custom_minimum_size.y = _portrait_pitch_height()
 		var old := _wide_body
 		_wide_body = null
 		_root.remove_child(old)
 		old.queue_free()
+
+
+## Tablet em pé: a tela é mais larga, então o campo empilhado pode crescer.
+func _portrait_pitch_height() -> float:
+	if UILayout.is_wide():
+		return maxf(_mobile_portrait_pitch_height, 560.0)
+	return _mobile_portrait_pitch_height
 
 
 func _process(delta: float) -> void:
