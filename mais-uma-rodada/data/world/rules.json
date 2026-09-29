@@ -234,9 +234,9 @@
 			"start_day": 17,
 			"winter_break_after": -1,
 			"winter_break_days": 0,
-			"fifa_dates": [13, 26, 33, 38],
+			"fifa_dates": [14, 26, 33, 38],
 			"fifa_pause": false,
-			"_fifa_doc": "Como no Brasileirão, a liga não para nas datas FIFA de junho, setembro, outubro e novembro: os convocados desfalcam os clubes nos jogos da janela."
+			"_fifa_doc": "Como no Brasileirão, a liga não para nas datas FIFA de setembro, outubro e novembro: os convocados desfalcam os clubes nos jogos da janela (a de junho cai na pausa do meio do ano)."
 		}
 	}
 }

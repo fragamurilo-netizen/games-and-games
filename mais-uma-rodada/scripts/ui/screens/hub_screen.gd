@@ -297,7 +297,7 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["up", "Base", "%d garotos%s" % [w.academy.size(), (" · %dº" % yl_pos) if yl_pos > 0 and YouthManager.has_league(w) and int(w.youth_league["table"][w.user_club_id]["pl"]) > 0 else ""], func(): UIManager.push("academy")],
 		["money", "Finanças", Fmt.money(w.user_club().balance), func(): UIManager.goto("club")],
 		["book", "História", "Campeões e prêmios", func(): UIManager.push("history")],
-		["globe", "Seleções", "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())], func(): UIManager.push("national")],
+		["globe", "Seleções", _nt_line(w), func(): UIManager.push("national")],
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
 		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
 		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
@@ -477,6 +477,47 @@ static func _team_morale(w: GameWorld, club: Club) -> float:
 	return s / maxf(1.0, n)
 
 
+## Atalho de seleções: a que o usuário comanda (com a posição no ranking) ou a do país do clube.
+static func _nt_line(w: GameWorld) -> String:
+	var code := NationalCoach.nation(w)
+	if code != "":
+		return "Técnico da %s · %dº" % [DatabaseManager.nation_name(code), NationalTeamManager.rank_of(w, code)]
+	if not NationalCoach.offers(w).is_empty():
+		return "%d convite(s) de seleção" % NationalCoach.offers(w).size()
+	return "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())]
+
+
+## Data FIFA chegando (ou em andamento): datas, convocados do elenco e a lista do técnico de seleção.
+func _fifa_alert(w: GameWorld, club: Club) -> Array:
+	var active := NationalTeamManager.active_window(w)
+	if not active.is_empty():
+		var away := 0
+		for p in w.squad(club):
+			if p.intl_duty:
+				away += 1
+		return ["globe", UIColors.ACCENT, "Data FIFA até %s: %d jogador(es) a serviço da seleção" % [NationalTeamManager.day_label(w, int(active["to"])), away],
+			func(): UIManager.push("national")]
+	var nxt := NationalTeamManager.next_window(w)
+	if nxt.is_empty() or w.season == null:
+		return []
+	# Só avisa nas duas semanas anteriores (o anúncio das listas sai uma semana antes).
+	var today := int(w.season.calendar[mini(w.season.day, w.season.calendar.size() - 1)]["d"])
+	if int(nxt["from"]) - today > 16:
+		return []
+	var code := NationalCoach.nation(w)
+	if code != "" and not NationalTeamManager.data(w).has("next"):
+		return ["globe", UIColors.ACCENT, "Monte a lista da %s para a data FIFA de %s" % [DatabaseManager.nation_name(code), NationalTeamManager.window_label(w, nxt)],
+			func(): UIManager.push("national", {"tab": "squad", "nation": code})]
+	var d := NationalTeamManager.data(w)
+	var src: Dictionary = d.get("next", d["squads"])
+	var n := 0
+	for p in w.squad(club):
+		if (src.get(p.nationality, []) as Array).has(p.id):
+			n += 1
+	return ["globe", UIColors.ACCENT, "Data FIFA de %s: %d %s do elenco" % [NationalTeamManager.window_label(w, nxt), n, "convocado(s)" if d.has("next") else "provável(is) convocado(s)"],
+		func(): UIManager.push("national")]
+
+
 func _alerts_card(w: GameWorld, club: Club) -> Control:
 	var items: Array = []
 	if SponsorManager.is_preseason(w):
@@ -487,6 +528,9 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
 	if w.transfer_window_open():
 		items.append(["swap", UIColors.GREEN, "Janela de transferências aberta até %s" % w.season.date_label(w.window_end_day(), false), func(): UIManager.goto("market")])
+	var fifa := _fifa_alert(w, club)
+	if not fifa.is_empty():
+		items.append(fifa)
 	var injured: Array = []
 	var suspended: Array = []
 	var expiring := 0

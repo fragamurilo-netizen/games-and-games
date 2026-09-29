@@ -745,14 +745,16 @@ static func after_weekend(world: GameWorld, weekend_index: int) -> Array:
 	for code in DatabaseManager.nations():
 		if not busy.has(code):
 			free.append(code)
-	RngUtil.shuffle(env.rng, free)
 	env.k = 12.0
 	env.tag = "Amistoso"
 	var friendlies: Array = []
-	for i in range(0, free.size() - 1, 2):
-		var fr := play(env, free[i], free[i + 1], true, false)
-		fr["fr"] = true
-		friendlies.append(fr)
+	# Dois amistosos por data, como nas janelas reais (um em casa, outro fora).
+	for rnd in 2:
+		RngUtil.shuffle(env.rng, free)
+		for i in range(0, free.size() - 1, 2):
+			var fr := play(env, free[i], free[i + 1], rnd == 0, false)
+			fr["fr"] = true
+			friendlies.append(fr)
 	_after_date(world, env, lines + friendlies, weekend_index)
 	return lines
 

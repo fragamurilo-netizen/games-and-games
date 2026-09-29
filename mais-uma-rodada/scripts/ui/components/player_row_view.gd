@@ -55,6 +55,8 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 	var icons := UIKit.hbox(4)
 	if p.injury_weeks > 0:
 		icons.add_child(UIKit.icon_rect("cross", 22, UIColors.RED))
+	if p.intl_duty:
+		icons.add_child(UIKit.icon_rect("globe", 22, UIColors.ACCENT))
 	if p.suspension > 0:
 		icons.add_child(UIKit.icon_rect("card", 22, UIColors.RED))
 	elif p.yellow_acc >= int(DatabaseManager.squad_rules()["yellow_limit"]) - 1 and own:
@@ -186,6 +188,8 @@ static func subtitle(w: GameWorld, p: Player, mode: String) -> String:
 		parts.append("lesionado (%d sem.)" % p.injury_weeks)
 	elif p.suspension > 0:
 		parts.append("suspenso")
+	elif p.intl_duty:
+		parts.append("na seleção")
 	else:
 		parts.append(Player.STATUS_NAMES[p.squad_status])
 	if p.club_id >= 0 and w.is_user_club(p.club_id):

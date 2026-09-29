@@ -5,6 +5,8 @@ extends BaseScreen
 ## gola e mangas, calção e meiões. Reserva e terceiro nunca ficam da cor do titular: as cores que
 ## causariam isso aparecem bloqueadas, e o jogo avisa (e ajusta) antes de apresentar os uniformes.
 ## Fora da pré-temporada, só mostra o que vale. Mostra também o histórico das temporadas.
+## Com "nation", edita titular, reserva e goleiro da seleção que o usuário comanda (NationalKits):
+## sem patrocínios, coleções nem histórico, e liberado a qualquer momento.
 
 const PALETTE: Array[String] = [
 	"#FFFFFF", "#F4F1E8", "#E8DCC4", "#D9D9D9", "#8D99AE", "#5C6770", "#3A3F47", "#2B2F36", "#111111",
@@ -143,6 +145,8 @@ var _proposal_round := 0 # "Pedir outras propostas"
 var _launch := false # aberto pelo convite de lançamento da temporada
 var _history: Array = [] # [{qual: cópia do uniforme}, qual estava aberto] para desfazer
 var _stage: PanelContainer
+var _nation := "" # seleção em edição ("" = clube do usuário)
+var _proxy: Club = null
 
 
 func _init() -> void:
@@ -153,16 +157,41 @@ func _init() -> void:
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_launch = bool(p.get("launch", false))
+	_nation = String(p.get("nation", ""))
 	_part = String(p.get("part", "collections" if _launch else "models"))
+	if _nation != "" and _part == "collections":
+		_part = "models"
+
+
+## O clube cujos uniformes estão na tela (na seleção, um clube de mentira com os uniformes dela).
+func _club() -> Club:
+	if _nation == "":
+		return world().user_club()
+	if _proxy == null:
+		_proxy = NationalKits.proxy_club(world(), _nation)
+	return _proxy
+
+
+func _order() -> Array:
+	return ["home", "away", "gk"] if _nation != "" else KIT_ORDER
+
+
+## Dá para editar agora? Clube: na pré-temporada. Seleção: quando o usuário é o técnico dela.
+func _editable(w: GameWorld) -> bool:
+	if _nation != "":
+		return NationalCoach.nation(w) == _nation
+	return SponsorManager.is_preseason(w)
 
 
 func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
-	var club := w.user_club()
-	var pre := SponsorManager.is_preseason(w)
-	if _launch and pre:
+	var club := _club()
+	var pre := _editable(w)
+	if _nation != "":
+		screen_subtitle = "Seleção · %s" % DatabaseManager.nation_name(_nation)
+	elif _launch and pre:
 		screen_subtitle = "Lançamento %d" % w.year
 	else:
 		screen_subtitle = "Pré-temporada %d" % w.year if pre else "Temporada %d" % w.year
@@ -177,16 +206,19 @@ func refresh() -> void:
 		c.add_child(_editor_card(club))
 	else:
 		var info := UIKit.card("Card", 8)
-		info.add_child(UIKit.label("Uniformes de %d já em campo." % w.year, "", true))
+		info.add_child(UIKit.label("Só o técnico da seleção muda os uniformes." if _nation != "" else "Uniformes de %d já em campo." % w.year, "", true))
 		c.add_child(UIKit.card_panel(info))
-	c.add_child(_history_card(club))
-	c.add_child(_sponsors_card(w, club, pre))
+	if _nation == "":
+		c.add_child(_history_card(club))
+		c.add_child(_sponsors_card(w, club, pre))
+	else:
+		c.add_child(_nation_card(w))
 	max_content_width = 1700
 	columnize(c, 0, 2, 0)
 	var f := footer()
 	UIKit.clear(f)
 	var txt := "PRONTO"
-	if pre and not KitDesign.launched(w):
+	if pre and _nation == "" and not KitDesign.launched(w):
 		txt = "APRESENTAR UNIFORMES %d" % w.year
 	f.add_child(UIKit.button(txt, "PrimaryButton", func(): _finish(), "check"))
 
@@ -194,8 +226,8 @@ func refresh() -> void:
 ## Sai da tela. Na pré-temporada, não deixa reserva ou terceiro da cor do titular.
 func _finish() -> void:
 	var w := world()
-	var club := w.user_club()
-	if not SponsorManager.is_preseason(w):
+	var club := _club()
+	if not _editable(w):
 		UIManager.back()
 		return
 	var bad := _clashes(club)
@@ -210,6 +242,10 @@ func _finish() -> void:
 
 
 func _done(w: GameWorld) -> void:
+	if _nation != "":
+		GameManager.save_now()
+		UIManager.back()
+		return
 	var first := not KitDesign.launched(w)
 	KitDesign.mark_launched(w)
 	GameManager.save_now()
@@ -220,6 +256,8 @@ func _done(w: GameWorld) -> void:
 
 ## Nome do camisa 10 do elenco, para a prévia de costas.
 func _ten_name() -> String:
+	if _nation != "":
+		return ""
 	for p in world().squad(world().user_club()):
 		if p.shirt == 10:
 			return p.display_name()
@@ -228,7 +266,7 @@ func _ten_name() -> String:
 
 ## O uniforme guardado no clube (o dicionário que o editor altera).
 func _stored(which: String) -> Dictionary:
-	var club := world().user_club()
+	var club := _club()
 	match which:
 		"gk":
 			club.gk_kit() # gera na primeira vez
@@ -296,6 +334,8 @@ func _clashes(club: Club) -> Array:
 	var out: Array = []
 	if KitDesign.clash(club.kit_home, club.kit_away):
 		out.append("away")
+	if _nation != "":
+		return out
 	var t := club.third_kit()
 	if KitDesign.clash(club.kit_home, t) or KitDesign.clash(club.kit_away, t):
 		out.append("third")
@@ -311,6 +351,8 @@ static func _names(which: Array) -> String:
 
 func _fix_all(club: Club) -> void:
 	KitDesign.recolor_distinct(club, club.kit_away, [club.kit_home])
+	if _nation != "":
+		return
 	club.third_kit()
 	KitDesign.recolor_distinct(club, club.kit_third, [club.kit_home, club.kit_away])
 
@@ -356,7 +398,7 @@ func _build_stage(club: Club, pre: bool) -> void:
 	# Os quatro uniformes: toque para escolher qual editar
 	var bad := _clashes(club)
 	var row := UIKit.hbox(8)
-	for key: String in KIT_ORDER:
+	for key: String in _order():
 		var inner := UIKit.vbox(0)
 		var kv := UIKit.kit(_shown(club, key), 62, 0, club.crest)
 		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -437,7 +479,7 @@ func _editor_card(club: Club) -> Control:
 	var card := UIKit.card("Card", 12)
 	var parts: Array = []
 	for p in PARTS:
-		if String(p[0]) == "collections" and _which == "gk":
+		if String(p[0]) == "collections" and (_which == "gk" or _nation != ""):
 			continue
 		parts.append([String(p[0]), String(p[1])])
 	card.add_child(UIKit.scroll_tabs(parts, _part, func(k: String):
@@ -476,12 +518,13 @@ func _editor_card(club: Club) -> Control:
 			card.add_child(_style_grid(k, "sleeve", KitView.SLEEVES, "same", false))
 			_options(card, "Comprimento da manga", KitView.SLEEVE_LENGTHS, String(k.get("sleeve_len", "short")), "sleeve_len")
 			_options(card, "Vivos", KitView.TRIMS, String(k.get("trim", "none")), "trim")
-			card.add_child(UIKit.section("Microdetalhes"))
-			_palette(card, club, "Patrocínio master (peito)", "spc", String(k.get("spc", "")), true)
-			_palette(card, club, "Patrocínio da manga", "spmc", String(k.get("spmc", "")), true)
-			_palette(card, club, "Patrocínio das costas", "spcc", String(k.get("spcc", "")), true)
-			_palette(card, club, "Patrocínio do calção", "spsc", String(k.get("spsc", "")), true)
-			_palette(card, club, "Logo da fornecedora", "supc", String(k.get("supc", "")), true)
+			if _nation == "":
+				card.add_child(UIKit.section("Microdetalhes"))
+				_palette(card, club, "Patrocínio master (peito)", "spc", String(k.get("spc", "")), true)
+				_palette(card, club, "Patrocínio da manga", "spmc", String(k.get("spmc", "")), true)
+				_palette(card, club, "Patrocínio das costas", "spcc", String(k.get("spcc", "")), true)
+				_palette(card, club, "Patrocínio do calção", "spsc", String(k.get("spsc", "")), true)
+				_palette(card, club, "Logo da fornecedora", "supc", String(k.get("supc", "")), true)
 		"shorts":
 			card.add_child(_style_grid(k, "shorts_style", KitView.SHORTS_STYLES, "plain", true))
 			_palette(card, club, "Cor do calção", "shorts", String(k.get("shorts", k.get("c2", "#111111"))))
@@ -504,7 +547,7 @@ func _editor_card(club: Club) -> Control:
 	# Copiar o estilo (sem as cores) de outro uniforme do clube
 	var copy := UIKit.flow(8)
 	copy.add_child(UIKit.label("Copiar o desenho do", "Small"))
-	for key: String in KIT_ORDER:
+	for key: String in _order():
 		if key == _which:
 			continue
 		var src := key
@@ -1042,3 +1085,21 @@ func _sponsor_row(o: Dictionary, caption: String, cb: Callable) -> Control:
 	if cb.is_valid():
 		return UIKit.tap_row(row, cb)
 	return row
+
+
+## Seleção: de onde vêm as cores e como voltar ao uniforme tradicional.
+func _nation_card(w: GameWorld) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Uniformes da seleção"))
+	var h := UIKit.hbox(12)
+	h.add_child(UIKit.flag(_nation, 48))
+	h.add_child(UIKit.label("Titular e reserva partem das cores tradicionais da %s; reserva e titular não podem ficar da mesma cor." % DatabaseManager.nation_name(_nation), "Small", true))
+	(h.get_child(1) as Control).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_child(h)
+	if _editable(w):
+		card.add_child(UIKit.button("Voltar ao tradicional", "GhostButton", func():
+			NationalKits.reset(w, _nation)
+			_proxy = null
+			_history.clear()
+			refresh(), "back"))
+	return UIKit.card_panel(card)

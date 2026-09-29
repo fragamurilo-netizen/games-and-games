@@ -648,7 +648,7 @@ func _assign(index: int, pid: int) -> void:
 	if p == null:
 		return
 	if not p.is_available():
-		UIManager.toast("%s está %s." % [p.display_name(), "lesionado" if p.is_injured() else "suspenso"], UIColors.RED)
+		UIManager.toast("%s está %s." % [p.display_name(), "lesionado" if p.is_injured() else ("a serviço da seleção" if p.intl_duty else "suspenso")], UIColors.RED)
 		return
 	var old: int = sheet.starters[index]
 	var j := sheet.starters.find(pid)
