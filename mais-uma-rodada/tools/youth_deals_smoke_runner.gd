@@ -3,6 +3,9 @@ extends Node
 
 
 func _ready() -> void:
+	if "--career" in OS.get_cmdline_user_args():
+		_career()
+		return
 	var t0 := Time.get_ticks_msec()
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
 	var club: Club = w.clubs_in_league("BRA1")[0]
@@ -50,4 +53,18 @@ func _ready() -> void:
 	print("  nova temporada: %s" % str(YouthCups.keys(w)))
 	print("honrarias: %s" % str(w.youth.get("hon", [])))
 	print("ok em %d ms" % (Time.get_ticks_msec() - t0))
+	get_tree().quit()
+
+
+## Carreira de verdade (GameManager): algumas rodadas e o estado das copas de base.
+func _career() -> void:
+	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
+	var club: Club = w.clubs_in_league("BRA1")[3]
+	AppSettings.tutorial_done = true
+	GameManager.start_career(w, club.id, "Teste", GameWorld.DIFF_NORMAL, 5)
+	print("dia %d · comps %s" % [w.season.day, str(YouthCups.keys(w))])
+	for i in 12:
+		GameManager.play_instant()
+		var d := YouthCups.comp(w, "cup20")
+		print("rodada %d · dia %d · copinha: %s · próxima %d" % [i, w.season.day, YouthCups.result_text(w, d), YouthCups.next_slot(w, d)])
 	get_tree().quit()

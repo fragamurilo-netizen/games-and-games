@@ -335,6 +335,16 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 			TrainingSheet.open(yp)
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
+		"kid":
+			UIManager.push("academy")
+			await _frames(6)
+			var kids := YouthManager.academy(w)
+			kids.sort_custom(func(a, b): return a.stats[Player.S_APPS] > b.stats[Player.S_APPS])
+			_screen().call("_actions", kids[0])
+		"coach":
+			UIManager.push("academy", {"tab": "staff"})
+			await _frames(6)
+			_screen().call("_coach_picker", YouthManager.CAT_U20)
 	await _shot(prefix + "dlg_" + kind)
 	UIManager.close_all_modals()
 

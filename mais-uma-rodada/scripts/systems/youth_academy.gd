@@ -112,7 +112,7 @@ static func coach_level(world: GameWorld, cat: String) -> int:
 
 ## Salário anual de um técnico da base desse nível.
 static func coach_wage(world: GameWorld, level: int) -> int:
-	var base := maxf(12000.0, FinanceManager.expected_revenue(world.user_club()) * 0.0009)
+	var base := maxf(20000.0, FinanceManager.expected_revenue(world.user_club()) * 0.0015)
 	return Valuation.round_wage(base * COACH_WAGE[clampi(level, 1, COACH_LEVELS) - 1])
 
 
