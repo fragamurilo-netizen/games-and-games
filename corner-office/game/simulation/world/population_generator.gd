@@ -14,7 +14,9 @@ static func populate(world: WorldState, mode_id: String) -> void:
 	var org_ids: Array = world.organizations.keys().filter(func(id):return id!=world.player_org_id)
 	var used_names := {}
 	for old: Fighter in world.fighters.values(): used_names[old.first_name+" "+old.last_name] = true
-	for i in int(cfg.population):
+	# Rivais globais recebem elencos extras (Bible §2: organizações globais têm elencos profundos).
+	var total := int(cfg.population) + int(cfg.get("rival_extra_per_org", 0)) * org_ids.size()
+	for i in total:
 		var f := Fighter.new()
 		f.id = world.new_id("ftr")
 		var region: Dictionary = world.rng.pick(cfg.names)

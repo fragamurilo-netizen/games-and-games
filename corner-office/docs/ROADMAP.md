@@ -13,8 +13,8 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 
 ## M1 — Loop jogável
 
-- [x] `WorldGenerator`: 141 atletas, elenco regional e free agents
-- [ ] Organizações rivais ativas (elencos existem; IA de eventos pendente)
+- [x] `WorldGenerator`: 211 atletas, elenco regional, elencos rivais e free agents
+- [x] Organizações rivais ativas (`OrgAI`: agenda, cards, caixa, adiamentos, renovações, contratações)
 - [x] Protótipo da biblioteca de rostos (`prototypes/face-lab/`)
 - [x] Fight Studio: catálogo 2D pareado, arenas das sete organizações, replays autorais e sampler Godot ([guia](FIGHT_VISUALS.md))
 - [x] Perfis de combate do roster canônico e adaptador de eventos reais para o Fight Studio
@@ -40,7 +40,7 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 - [ ] Agentes com memória
 - [ ] Free agency concorrida
 - [ ] Scouting (faixas + confiança)
-- [ ] Organizações rivais operacionais (IA sem informação privilegiada)
+- [x] Organizações rivais operacionais (IA sem informação privilegiada) — base; falta BATNA/memória
 - [ ] Lesões, quedas de luta e substitutos (tela de crise)
 - [ ] Weight & camp engine (pesagem, catchweight, multas)
 - [ ] Popularidade regional

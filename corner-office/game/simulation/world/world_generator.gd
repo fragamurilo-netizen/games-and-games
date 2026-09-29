@@ -12,6 +12,11 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 
 	for o in ContentDB.load_json("organizations.json"):
 		var org := Organization.new().load_dict(o) as Organization
+		var rival: Dictionary = ContentDB.load_json("career_tuning.json").rival_ai
+		if org.cash == 0:
+			org.cash = int(org.reputation * float(rival.cash_per_reputation))
+		if org.event_count == 0:
+			org.event_count = int(org.reputation * float(rival.event_number_per_reputation))
 		w.add("organizations", org)
 	for g in ContentDB.load_json("gyms.json"):
 		w.add("gyms", Gym.new().load_dict(g))
@@ -35,6 +40,8 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 		for division: Dictionary in ContentDB.load_json("weight_classes.json"):
 			Rankings.new().update(w,w.player_org_id,division.id)
 			Rankings.new().update(w,"wci",division.id)
+		# O mundo já começa em movimento: rivais anunciam as primeiras noites.
+		OrgAI.new().tick(w)
 	return w
 
 

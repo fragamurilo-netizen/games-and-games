@@ -8,7 +8,7 @@ Usar **a simulação que já criamos no laboratório**. A alternativa nativa sim
 
 ## Entregue neste marco
 
-- Carreira regional com 141 atletas fictícios (128 gerados + 13 canônicos), 30 no elenco inicial, free agency e divisões masculinas/femininas.
+- Carreira regional com 211 atletas fictícios (128 gerados + 70 de elenco extra das rivais + 13 canônicos), 30 no elenco inicial, free agency e divisões masculinas/femininas.
 - Serviços Godot de contratação/renovação, proposta de luta, aceitação individual, scores esportivo/comercial separados e motivos de recusa.
 - Eventos de 6–10 lutas: montar, remover confronto, anunciar, avançar até a data, simular, ver resultado e replay, repetir após repouso.
 - P&L previsto/real, reserva de caixa de cards anunciados, pagamento e consumo de contratos uma única vez.
@@ -51,12 +51,27 @@ git diff --exit-code -- game/content game/presentation/fight/studio.html.gz
 
 Capturas Godot portrait 720×1280 e landscape 1280×720: `godot --path game -s res://tools/capture_mobile.gd -- /destino capture`. O capturador cria mundo efêmero; não toca no autosave. Não usar capturas antigas de `native-fight.png` como produto: mostram a alternativa descartada. Transmissão original foi verificada no browser em 390×844 e em desktop; validar também no WebView de aparelho Android.
 
+## IA das organizações rivais (Claude, 30/09/2026)
+
+`simulation/organizations/org_ai.gd` roda uma vez por dia no `WorldSim` e na criação do mundo. Cada rival:
+
+- agenda a próxima noite conforme a cadência dos traços executivos (`career_tuning.json › rival_ai.cadence_days`);
+- monta o card com o **mesmo** `Matchmaking.evaluate/propose` do jogador, pareando pela ordem pública (ranking oficial; popularidade para `star_first`/`spectacle_first`), sem revanche imediata; contraproposta com prêmio de 1,3×;
+- corta os confrontos menos comerciais até caber no caixa; cancela se não fechar 4 lutas; noites adiadas são consertadas ou canceladas;
+- renova contratos no fim (libera quem tem 3+ derrotas a mais que vitórias; o atleta pode recusar) e contrata agentes livres quando o elenco fica abaixo de 20 (`aggressive_buyer` paga 1,2× e mantém elenco maior).
+
+Só usa dados públicos (cartel, ranking, popularidade) — teste `test_rival_ai_ignores_hidden_skill`. Eventos rivais passam pelo mesmo `run_event`: resultados, balanço, WCI e notícias. A tela Início mostra a agenda do mercado.
+
+Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações rivais, elencos entre 12 e 30.
+
+**Achado de calibragem (não corrigido):** nas lutas entre atletas gerados, ~50% terminam por finalização (real: ~20%). O teste com o roster canônico dá ~37%. Ver prioridade 4 abaixo.
+
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.
 2. Sessão de jogo completa em aparelho: contratar, montar card misto, anunciar, assistir e organizar a segunda noite. Medir legibilidade e fluidez antes de expandir sistemas.
 3. Melhorar perfis nativos com os retratos do gerador existente. Hoje as listas Godot são textuais; o protótipo web já usa os retratos.
-4. Rival AI: organizações já possuem elencos, mas não organizam eventos autonomamente. Depois: ofertas concorrentes/BATNA e memória de agentes.
+4. Calibrar o `FightEngine` com milhares de lutas entre atletas gerados (finalizações ~50% hoje; alvo de referência KO/TKO ~30%, finalização ~20%, decisão ~50%), sem mudar resultados para acomodar animação. Depois: ofertas concorrentes/BATNA e memória de agentes sobre a IA rival já existente.
 5. Separar modelos completos de ranking oficial e WCI: hoje listas/elegibilidade são distintas, mas compartilham uma fórmula inicial de resultados/oposição. Falta o composto completo e tratamento de inatividade da bíblia.
 6. Popularidade dinâmica, campeões/títulos, peso/camp, lesões detalhadas e substituições. Suspensão atual é regra inicial de pós-luta, não um sistema médico completo.
 7. Economia de longo prazo, contratos de mídia/sponsors, custos fixos e falência. Receitas atuais são parametrização regional inicial; não representam simulação econômica validada de décadas.

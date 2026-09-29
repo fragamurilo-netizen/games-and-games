@@ -24,3 +24,7 @@ var titles := {}               # division -> {champion_id, interim_id}
 var media_deal_ids: Array = []
 var market_popularity := {}    # region -> 0..100
 var brand_colors := {}
+
+# IA rival (simulation/organizations/org_ai.gd): numeração de eventos e agenda.
+var event_count := 0
+var ai_state := {}               # next_event_after, next_signing_after (datas)

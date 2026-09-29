@@ -11,6 +11,7 @@ var contracts := Contracts.new()
 var economy := Economy.new()
 var popularity := Popularity.new()
 var media := Media.new()
+var org_ai := OrgAI.new()
 
 
 func _init(w: WorldState) -> void:
@@ -21,7 +22,8 @@ func advance_day() -> void:
 	world.date = GameDate.add_days(world.date, 1)
 	_expire_contracts()
 	_run_scheduled_events()
-	# TODO(M2): lesões, camps, negociações e IA das organizações rivais.
+	org_ai.tick(world)
+	# TODO(M2): lesões, camps e negociações com memória de agentes.
 	EventBus.day_advanced.emit(world.date)
 
 

@@ -21,3 +21,4 @@ var exclusive := true
 # Promessas: [{type: "title_shot"|"main_event"|"home_event"|"activity", due: date, kept: null|bool}]
 var promises: Array = []
 var active := true
+var ai_renewal_tried := false   # IA rival já tentou renovar este contrato
