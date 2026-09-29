@@ -135,9 +135,7 @@ func _job_card(w: GameWorld) -> Control:
 		card.add_child(row)
 	else:
 		card.add_child(UIKit.section("Seleção"))
-		card.add_child(UIKit.label("Você não comanda nenhuma seleção. No começo de cada temporada, federações que trocam de técnico sondam nomes pela reputação (a sua: %d)." % int(round(People.manager_rep(w))), "", true))
-		var need := NationalCoach.required_rep(w, _nation)
-		card.add_child(UIKit.kv("%s pede reputação" % DatabaseManager.nation_name(_nation), str(int(round(need))), UIColors.GREEN if People.manager_rep(w) >= need else UIColors.MUTED))
+		card.add_child(UIKit.kv("Sua reputação", str(int(round(People.manager_rep(w))))))
 	var offers: Array = NationalCoach.offers(w)
 	if not offers.is_empty():
 		card.add_child(UIKit.section("Convites"))
@@ -167,6 +165,7 @@ func _job_card(w: GameWorld) -> Control:
 		no.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		br.add_child(no)
 		card.add_child(br)
+	_vacancies(w, card)
 	var hist: Array = st.get("hist", [])
 	if not hist.is_empty():
 		card.add_child(UIKit.section("Passagens"))
@@ -174,6 +173,37 @@ func _job_card(w: GameWorld) -> Control:
 			var e: Dictionary = hist[i]
 			card.add_child(UIKit.kv("%s (%d-%d)" % [DatabaseManager.nation_name(e["n"]), int(e["from"]), int(e["to"])], "%d-%d-%d · %s" % [int(e["w"]), int(e["d"]), int(e["l"]), e["why"]]))
 	return UIKit.card_panel(card)
+
+
+## Vagas abertas no mercado de técnicos de seleção: o usuário se candidata e a federação responde.
+func _vacancies(w: GameWorld, card: VBoxContainer) -> void:
+	var list: Array = NationalCoach.vacancies(w)
+	card.add_child(UIKit.section("Vagas abertas (%d)" % list.size()))
+	if list.is_empty():
+		card.add_child(UIKit.label("Nenhuma seleção procura técnico agora.", "Muted", true))
+		return
+	for code in list.slice(0, 8):
+		var oc := String(code)
+		if NationalCoach.has_offer(w, oc):
+			continue
+		var h := UIKit.hbox(10)
+		h.add_child(UIKit.flag(oc, 36))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var nl := UIKit.label(DatabaseManager.nation_name(oc), "H3")
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		col.add_child(nl)
+		col.add_child(UIKit.label("%dº no ranking · %s · pede reputação %d · chance %s" % [NationalTeamManager.rank_of(w, oc),
+			NationalCoach.vacancy_reason(w, oc).to_lower(), int(round(NationalCoach.required_rep(w, oc))), NationalCoach.chance_label(w, oc)], "Small", true))
+		h.add_child(col)
+		if NationalCoach.applied(w, oc):
+			h.add_child(UIKit.colored("Candidatura enviada", UIColors.MUTED, "Small"))
+		else:
+			h.add_child(UIKit.button("Candidatar", "GhostButton", func():
+				NationalCoach.apply(w, oc)
+				GameManager.save_now()
+				refresh()))
+		card.add_child(h)
 
 
 ## Datas FIFA da temporada, com a próxima em destaque e quem do clube deve ir.

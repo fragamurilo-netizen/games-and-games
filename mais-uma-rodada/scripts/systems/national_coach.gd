@@ -1,12 +1,14 @@
 class_name NationalCoach
 extends RefCounted
 ## O usuário também como técnico de seleção (acumulando com o clube, como já fizeram tantos
-## treinadores): convites das federações conforme a reputação dele, escolha da seleção no início da
-## carreira, a lista de convocados escolhida por ele, cobrança por resultados e demissão.
+## treinadores). O cargo vem pelo mercado de técnicos: seleções abrem vaga quando demitem ou
+## quando o ciclo da Copa acaba, o usuário se candidata (ou é sondado, se a reputação sobra) e a
+## federação escolhe entre os nomes. Depois: a lista de convocados, cobrança por resultados e demissão.
 ##
 ## Tudo em world.stats["intl"]["coach"]:
 ##   nation (""), since, w, d, l, gf, ga, sat (confiança da federação, 0..100), list [ids da lista],
-##   titles [[torneio, ano]], offers [{n: nação, y: ano}], hist [{n, from, to, w, d, l, why, titles}]
+##   titles [[torneio, ano]], offers [{n: nação, y: ano}], hist [{n, from, to, w, d, l, why, titles}],
+##   jobs {nação: {y: ano em que abriu, why}} (vagas abertas), apps [{n, left}] (candidaturas)
 
 ## Degraus de campanha num torneio (maior é melhor).
 const STAGE_LEVEL := {"Fase de grupos": 0, "16 avos de final": 1, "Oitavas de final": 2, "Quartas de final": 3, "Semifinal": 4, "Vice": 5, "Campeã": 6}
@@ -64,8 +66,9 @@ static func expectation(world: GameWorld, code: String) -> String:
 # Convites
 # ---------------------------------------------------------------------------
 
-## Início de temporada: federações que trocaram de técnico sondam o usuário, se a reputação dele
-## bate com o tamanho da seleção. Quem já comanda uma seleção só recebe convite de uma bem maior.
+## Início de temporada: o mercado de técnicos se mexe. Vagas antigas são preenchidas, seleções
+## que decepcionaram ou fecharam o ciclo da Copa abrem vaga, e só quem tem reputação de sobra é
+## sondado sem se candidatar.
 static func season_offers(world: GameWorld) -> void:
 	if not world.has_user():
 		return
@@ -73,31 +76,165 @@ static func season_offers(world: GameWorld) -> void:
 	st["offers"] = []
 	var rng := RandomNumberGenerator.new()
 	rng.seed = RngUtil.hash_i(world.world_seed, world.year, 4242)
+	var jobs := _jobs(world)
+	# Vaga aberta há mais de uma temporada: a federação já contratou alguém
+	for code in jobs.keys():
+		if int(jobs[code].get("y", world.year)) < world.year - 1 or rng.randf() < 0.35:
+			_fill(world, String(code), false)
+	var cur := nation(world)
+	var flops := _flops(world)
+	var cycle_end := _cup_just_ended(world)
+	for code in DatabaseManager.nations():
+		if code == cur or jobs.has(code):
+			continue
+		var p := 0.05
+		if flops.has(code):
+			p = 0.55
+		elif cycle_end:
+			p = 0.3
+		if rng.randf() < p:
+			_open(world, code, "Fim de ciclo" if cycle_end and not flops.has(code) else ("Campanha ruim" if flops.has(code) else "Saída do técnico"))
+	_scout_user(world, rng)
+
+
+## Federações com vaga sondam o usuário direto só quando a reputação dele passa com folga do que
+## pedem (as outras esperam a candidatura).
+static func _scout_user(world: GameWorld, rng: RandomNumberGenerator) -> void:
+	var st := state(world)
 	var rep := _rep(world)
-	var cur := String(st.get("nation", ""))
+	var cur := nation(world)
 	var cur_rank := NationalTeamManager.rank_of(world, cur) if cur != "" else 999
 	var home_nat := String(ManagerProfile.data(world).get("nat", ""))
-	var flops := _flops(world)
-	var cands: Array = []
-	for code in DatabaseManager.nations():
-		if code == cur:
+	for code in vacancies(world):
+		if has_offer(world, code) or (st.get("offers", []) as Array).size() >= 1:
 			continue
-		var rank := NationalTeamManager.rank_of(world, code)
-		if cur != "" and rank > cur_rank - 12:
+		if cur != "" and NationalTeamManager.rank_of(world, code) > cur_rank - 12:
 			continue
 		var need := required_rep(world, code) - (6.0 if code == home_nat else 0.0)
-		if rep < need:
+		if rep >= need + 8.0 and rng.randf() < 0.3:
+			_offer(world, String(code), "A federação quer você no comando, acumulando com o clube.")
+
+
+# ---------------------------------------------------------------------------
+# Mercado de técnicos de seleção
+# ---------------------------------------------------------------------------
+
+static func _jobs(world: GameWorld) -> Dictionary:
+	var st := state(world)
+	if not st.has("jobs"):
+		st["jobs"] = {}
+	return st["jobs"]
+
+
+## Vagas abertas, das seleções mais fortes para as mais fracas.
+static func vacancies(world: GameWorld) -> Array:
+	var out: Array = _jobs(world).keys()
+	out.sort_custom(func(a, b): return NationalTeamManager.rank_of(world, a) < NationalTeamManager.rank_of(world, b))
+	return out
+
+
+static func vacancy_reason(world: GameWorld, code: String) -> String:
+	return String(_jobs(world).get(code, {}).get("why", ""))
+
+
+static func _open(world: GameWorld, code: String, why: String) -> void:
+	_jobs(world)[code] = {"y": world.year, "why": why}
+	if NationalTeamManager.rank_of(world, code) <= 30:
+		NewsManager.post_raw(world, "%s procura técnico" % DatabaseManager.nation_name(code),
+			"A federação confirmou a saída do treinador (%s) e abriu a busca por um substituto." % why.to_lower(), -1, -1, NewsEvent.IMP_NORMAL, "selecao")
+
+
+## A federação fecha a vaga com outro nome (e descarta a candidatura do usuário, se houver).
+static func _fill(world: GameWorld, code: String, notify_user: bool) -> void:
+	_jobs(world).erase(code)
+	var st := state(world)
+	st["apps"] = (st.get("apps", []) as Array).filter(func(a): return String(a["n"]) != code)
+	st["offers"] = (st.get("offers", []) as Array).filter(func(o): return String(o["n"]) != code)
+	if notify_user:
+		InboxManager.send(world, "federacao", "%s escolheu outro técnico" % DatabaseManager.nation_name(code),
+			"Obrigado pelo interesse. A federação fechou com outro treinador para o cargo.", {}, -1, -1, "Federação · %s" % DatabaseManager.nation_name(code))
+
+
+static func applied(world: GameWorld, code: String) -> bool:
+	for a in state(world).get("apps", []):
+		if String(a["n"]) == code:
+			return true
+	return false
+
+
+## Chance de a federação escolher o usuário: reputação contra o que ela pede, com vantagem para
+## técnico da casa e desconto para quem já comanda outra seleção.
+static func chance(world: GameWorld, code: String) -> float:
+	var need := required_rep(world, code)
+	var home_nat := String(ManagerProfile.data(world).get("nat", ""))
+	var c := 0.45 + (_rep(world) - need) / 14.0
+	if code == home_nat:
+		c += 0.15
+	if nation(world) != "":
+		c -= 0.1
+	return clampf(c, 0.03, 0.92)
+
+
+static func chance_label(world: GameWorld, code: String) -> String:
+	var c := chance(world, code)
+	return "alta" if c >= 0.65 else ("média" if c >= 0.35 else "baixa")
+
+
+## Candidatura: a federação responde depois de conversar com os outros nomes.
+static func apply(world: GameWorld, code: String) -> void:
+	if not _jobs(world).has(code) or applied(world, code):
+		return
+	var st := state(world)
+	if not st.has("apps"):
+		st["apps"] = []
+	st["apps"].append({"n": code, "left": 2})
+
+
+static func _offer(world: GameWorld, code: String, lead: String) -> void:
+	var st := state(world)
+	st["offers"].append({"n": code, "y": world.year})
+	InboxManager.send(world, "federacao", "Convite da seleção: %s" % DatabaseManager.nation_name(code),
+		"%s A seleção é a %dª do ranking.\n\nMeta: %s." % [lead, NationalTeamManager.rank_of(world, code), expectation(world, code).to_lower()],
+		{"k": "screen", "s": "national", "args": {"tab": "coach", "nation": code}}, -1, -1, "Federação · %s" % DatabaseManager.nation_name(code))
+
+
+## A cada rodada: candidaturas respondidas e vagas preenchidas por outros nomes.
+static func after_turn(world: GameWorld) -> void:
+	if not world.has_user():
+		return
+	var st := state(world)
+	var jobs := _jobs(world)
+	if jobs.is_empty() and (st.get("apps", []) as Array).is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = RngUtil.hash_i(world.world_seed, world.year * 1000 + world.current_turn(), 4243)
+	var still: Array = []
+	for a in st.get("apps", []):
+		var code := String(a["n"])
+		if not jobs.has(code):
 			continue
-		var p := 0.12 + (0.4 if flops.has(code) else 0.0) + (0.15 if code == home_nat else 0.0)
-		if rng.randf() < p:
-			cands.append([code, rank])
-	cands.sort_custom(func(a, b): return int(a[1]) < int(b[1]))
-	for c in cands.slice(0, 2):
-		var code: String = c[0]
-		st["offers"].append({"n": code, "y": world.year})
-		InboxManager.send(world, "federacao", "Convite da seleção: %s" % DatabaseManager.nation_name(code),
-			"%s procura um técnico e a federação quer você no comando, acumulando com o clube. A seleção é a %dª do ranking.\n\nMeta: %s.\n\nO convite vale até o fim da temporada." % [DatabaseManager.nation_name(code), int(c[1]), expectation(world, code).to_lower()],
-			{"k": "screen", "s": "national", "args": {"tab": "coach", "nation": code}}, -1, -1, "Federação · %s" % DatabaseManager.nation_name(code))
+		a["left"] = int(a["left"]) - 1
+		if int(a["left"]) > 0:
+			still.append(a)
+			continue
+		if rng.randf() < chance(world, code):
+			_offer(world, code, "Depois das entrevistas, a federação escolheu você.")
+		else:
+			_fill(world, code, true)
+	st["apps"] = still
+	for code in jobs.keys():
+		if applied(world, String(code)) or has_offer(world, String(code)):
+			continue
+		if rng.randf() < 0.05:
+			_fill(world, String(code), false)
+
+
+## A Copa do Mundo terminou na temporada anterior (fim de ciclo: muitas seleções trocam de técnico).
+static func _cup_just_ended(world: GameWorld) -> bool:
+	for r in NationalTeamManager.data(world)["tours"]:
+		if String(r.get("t", "")) == "WC" and int(r.get("y", 0)) >= world.year - 1:
+			return true
+	return false
 
 
 ## Seleções que decepcionaram no último torneio (trocam de técnico com mais frequência).
@@ -133,6 +270,8 @@ static func accept(world: GameWorld, code: String, quiet: bool = false) -> void:
 	st["list"] = []
 	st["titles"] = []
 	st["offers"] = []
+	_jobs(world).erase(code)
+	st["apps"] = []
 	if quiet:
 		return
 	_add_rep(world, 1.0)
@@ -167,6 +306,7 @@ static func _close(world: GameWorld, why: String) -> void:
 		"l": int(st.get("l", 0)), "why": why, "titles": st.get("titles", []).duplicate()})
 	st["nation"] = ""
 	st["list"] = []
+	_jobs(world)[code] = {"y": world.year, "why": why}
 
 
 static func _fire(world: GameWorld, why: String) -> void:
@@ -264,6 +404,14 @@ static func on_result(world: GameWorld, r: Dictionary, tag: String) -> void:
 
 ## Fim das eliminatórias: vaga garantida dá fôlego; ficar fora pode custar o cargo.
 static func on_campaign_closed(world: GameWorld, camp: Dictionary) -> void:
+	# Quem era para ir à Copa e ficou fora costuma trocar de técnico
+	if world.has_user():
+		var rng := RandomNumberGenerator.new()
+		rng.seed = RngUtil.hash_i(world.world_seed, world.year, 4244)
+		for c in DatabaseManager.nations():
+			if c != nation(world) and NationalTeamManager._in_campaign(camp, c) and not (camp["q"] as Array).has(c) \
+					and NationalTeamManager.rank_of(world, c) <= 40 and not _jobs(world).has(c) and rng.randf() < 0.6:
+				_open(world, c, "Fora da %s" % NationalTeamManager.tournament_name(camp["t"]))
 	var code := nation(world)
 	if code == "" or not NationalTeamManager._in_campaign(camp, code):
 		return

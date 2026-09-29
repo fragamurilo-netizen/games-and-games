@@ -904,6 +904,7 @@ static func _send_on_duty(world: GameWorld, env: Env, weekend_index: int) -> voi
 
 ## Depois de cada data do calendário: terminada a data FIFA, os convocados voltam aos clubes.
 static func after_day(world: GameWorld) -> void:
+	NationalCoach.after_turn(world) # mercado de técnicos: candidaturas e vagas
 	var du: Dictionary = data(world).get("duty", {})
 	if du.is_empty():
 		return

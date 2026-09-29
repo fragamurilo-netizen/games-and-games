@@ -15,7 +15,6 @@ var _nation := "BRA"
 var _league := "BRA1"
 var _selected := -1
 var _manager := "Treinador"
-var _nt := "" # seleção que o técnico também comanda ("" = só o clube)
 var _step := 0
 var _nations_box: Control
 var _leagues_row: Control
@@ -175,34 +174,7 @@ func _build_setup(c: VBoxContainer) -> void:
 		_apply_seed(), "Seed aleatório"))
 	wc.add_child(seed_row)
 	cards.append(UIKit.card_panel(wc))
-	cards.append(_nt_card())
 	UIKit.columns(c, cards, content_width())
-
-
-## Opcional: comandar também uma seleção desde o começo (acumulando com o clube).
-func _nt_card() -> Control:
-	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Seleção (opcional)"))
-	card.add_child(UIKit.label("Acumule o clube com o comando de uma seleção: você monta a lista de cada data FIFA e disputa eliminatórias e torneios. Sem seleção agora, as federações sondam técnicos conforme a reputação.", "Small", true))
-	var h := UIKit.hbox(10)
-	var fl := UIKit.flag(_nt if _nt != "" else "BRA", 40)
-	fl.visible = _nt != ""
-	h.add_child(fl)
-	var ob := OptionButton.new()
-	ob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ob.add_item("Só o clube", 0)
-	var codes: Array = DatabaseManager.nations().keys()
-	codes.sort_custom(func(a, b): return DatabaseManager.nation_name(a) < DatabaseManager.nation_name(b))
-	for i in codes.size():
-		ob.add_item(DatabaseManager.nation_name(codes[i]), i + 1)
-		if codes[i] == _nt:
-			ob.select(i + 1)
-	ob.item_selected.connect(func(i: int):
-		_nt = "" if i == 0 else String(codes[i - 1])
-		_build())
-	h.add_child(ob)
-	card.add_child(h)
-	return UIKit.card_panel(card)
 
 
 # --- Passo 2: continente, país e divisão ------------------------------------------
@@ -430,8 +402,6 @@ func _update_details() -> void:
 	if _step < 2:
 		var cfg := DatabaseManager.league_cfg(_league)
 		var line := "%s · %s · %s" % [GameWorld.DIFF_NAMES[_difficulty], DatabaseManager.nation_name(_nation), cfg.get("name", _league)]
-		if _nt != "":
-			line += " · seleção: %s" % DatabaseManager.nation_name(_nt)
 		_details.add_child(UIKit.label(line, "Small"))
 		return
 	if _world == null or _selected < 0:
@@ -479,10 +449,6 @@ func _slot_buttons() -> Array:
 
 func _begin(slot: int) -> void:
 	var w := _world
-	var nt := _nt
 	GameManager.start_career_async(w, _selected, _manager, _difficulty, slot, func() -> void:
-		if nt != "":
-			NationalCoach.accept(w, nt)
-			GameManager.save_now()
 		UIManager.goto("welcome")
 		UIManager.toast("Bem-vindo ao %s! Boa sorte, %s." % [w.user_club().short_name, w.manager_name]))
