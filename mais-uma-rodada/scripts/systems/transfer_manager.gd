@@ -24,7 +24,9 @@ const FAMILIES: Array = [
 # ---------------------------------------------------------------------------
 
 ## Quanto o clube dono pede pelo jogador.
-static func asking_price(world: GameWorld, p: Player) -> int:
+## `memo` (opcional): guarda o aperto financeiro de cada clube enquanto o mundo não muda (telas
+## que listam milhares de jogadores). O resultado é o mesmo.
+static func asking_price(world: GameWorld, p: Player, memo: Dictionary = {}) -> int:
 	if p.club_id < 0:
 		return 0
 	var club := world.club(p.club_id)
@@ -38,7 +40,14 @@ static func asking_price(world: GameWorld, p: Player) -> int:
 		mult *= 0.7
 	elif years == 1:
 		mult *= 0.9
-	if FinanceManager.in_trouble(club):
+	var trouble: bool
+	if memo.is_empty():
+		trouble = FinanceManager.in_trouble(club)
+	else:
+		if not memo.has(club.id):
+			memo[club.id] = FinanceManager.in_trouble(club)
+		trouble = memo[club.id]
+	if trouble:
 		mult *= 0.85
 	if not world.is_user_club(club.id) and world.has_user():
 		mult *= [0.92, 1.0, 1.1][world.difficulty]

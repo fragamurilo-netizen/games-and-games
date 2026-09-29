@@ -254,46 +254,116 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 		if sug != null:
 			results.add_child(sug)
 	var list: Array = []
-	for p: Player in w.players.values():
-		if p.club_id < 0 or p.club_id == club.id or p.retiring:
-			continue
-		if q != "" and not p.display_name().to_lower().contains(q) and not p.full_name().to_lower().contains(q):
+	# O mundo tem ~27 mil jogadores: a avaliação e a relevância de cada um ficam guardadas enquanto
+	# a tela está aberta (trocar filtro, ordem ou digitar o nome só filtra de novo), e o preço
+	# pedido só é calculado para "cabe no orçamento" e "preço".
+	var need_ask := _affordable or _sort == "price"
+	var scouted: Dictionary = w.stats["scouting"]["ids"] if w.stats.has("scouting") else {}
+	var ask_memo := {"on": true}
+	for e: Array in _search_base(w, club, weakest, budget, scouted):
+		var p: Player = e[0]
+		if q != "" and not _name_key(p).contains(q):
 			continue
 		if _group > 0 and Pos.group(p.position) != _group - 1:
 			continue
 		if p.age(w.year) > max_age or not Scouting.origin_ok(p, club, _origin):
 			continue
-		if _scouted_only and not Scouting.is_scouted(w, p):
+		if _scouted_only and not scouted.has(str(p.id)):
 			continue
 		if _listed_only and not p.transfer_listed:
 			continue
 		if _expiring_only and p.contract_years_left(w.year) > 0:
 			continue
-		var est := PlayerRowView.estimate(w, p, p.overall)
+		var est: int = e[1]
 		if _upgrades and est <= weakest[Pos.group(p.position)]:
 			continue
-		var ask := TransferManager.asking_price(w, p)
+		var ask := TransferManager.asking_price(w, p, ask_memo) if need_ask else 0
 		if _affordable and ask > club.transfer_budget:
 			continue
-		list.append([p, est, ask, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget)])
+		list.append([p, est, ask, e[2]])
+	var total := list.size()
+	# Só as MAX_ROWS primeiras aparecem: um corte pela chave principal (ordenação nativa de números)
+	# e a ordem completa só entre quem passou do corte (antes: ordenar os ~26 mil com lambdas).
 	match _sort:
 		"value":
+			list = _top(list, func(e: Array) -> float: return float(e[0].value), true)
 			list.sort_custom(func(a, b): return a[0].value > b[0].value)
 		"price":
+			list = _top(list, func(e: Array) -> float: return float(e[2]), false)
 			list.sort_custom(func(a, b): return a[2] < b[2] or (a[2] == b[2] and a[1] > b[1]))
 		"age":
+			list = _top(list, func(e: Array) -> float: return float(e[0].age(w.year)), false)
 			list.sort_custom(func(a, b): return a[0].age(w.year) < b[0].age(w.year) or (a[0].age(w.year) == b[0].age(w.year) and a[1] > b[1]))
 		"ovr":
+			list = _top(list, func(e: Array) -> float: return float(e[1]), true)
 			list.sort_custom(func(a, b): return a[1] > b[1] or (a[1] == b[1] and a[0].value < b[0].value))
 		_:
+			list = _top(list, func(e: Array) -> float: return float(e[3]), true)
 			list.sort_custom(func(a, b): return float(a[3]) > float(b[3]))
-	results.add_child(UIKit.label("%s encontrados" % Fmt.plural(list.size(), "jogador", "jogadores"), "Small", true))
+	results.add_child(UIKit.label("%s encontrados" % Fmt.plural(total, "jogador", "jogadores"), "Small", true))
 	if _row_cols > 0 and not list.is_empty():
 		results.add_child(PlayerRowView.stat_header("market", _row_cols))
 	for i in mini(MAX_ROWS, list.size()):
 		results.add_child(_market_row(w, club, list[i][0], weakest))
 	if list.is_empty():
 		results.add_child(UIKit.label("Ninguém com esse perfil.", "Muted", true))
+
+
+var _base: Array = [] # [jogador, avaliação, relevância] de quem pode ser contratado
+var _base_key := ""
+
+
+## Base da busca: todos os jogadores de outros clubes com avaliação e relevância, refeita quando
+## algo que pesa nelas muda (rodada, verba, elenco, olheiros, jogadores novos) ou a tela reaparece.
+func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scouted: Dictionary) -> Array:
+	var key := "%d|%d|%d|%d|%d|%s" % [w.current_turn(), club.transfer_budget, w.players.size(), scouted.size(), club.player_ids.size(), str(weakest)]
+	if key == _base_key:
+		return _base
+	_base_key = key
+	_base = []
+	for p: Player in w.players.values():
+		if p.club_id < 0 or p.club_id == club.id or p.retiring:
+			continue
+		var est := PlayerRowView.estimate(w, p, p.overall)
+		_base.append([p, est, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget)])
+	return _base
+
+
+func on_show() -> void:
+	_base_key = "" # voltando de outra tela (negociação, perfil): o mundo pode ter mudado
+	super.on_show()
+
+
+## Nome e nome completo em minúsculas, guardados enquanto a tela existe: a busca por nome roda a
+## cada letra digitada e passava por todos os jogadores montando os textos de novo.
+var _names := {}
+
+
+func _name_key(p: Player) -> String:
+	var k: Variant = _names.get(p.id)
+	if k == null:
+		k = p.display_name().to_lower() + "\n" + p.full_name().to_lower()
+		_names[p.id] = k
+	return k
+
+
+## Quem pode estar entre as MAX_ROWS primeiras pela chave principal `key` (maior primeiro se
+## `desc`): todos os empatados no corte entram, então a ordem completa depois dá o mesmo topo.
+static func _top(list: Array, key: Callable, desc: bool) -> Array:
+	if list.size() <= MAX_ROWS:
+		return list
+	var keys := PackedFloat64Array()
+	keys.resize(list.size())
+	for i in list.size():
+		keys[i] = key.call(list[i])
+	var sorted := keys.duplicate()
+	sorted.sort()
+	var cut: float = sorted[sorted.size() - MAX_ROWS] if desc else sorted[MAX_ROWS - 1]
+	var out: Array = []
+	for i in list.size():
+		if (keys[i] >= cut) if desc else (keys[i] <= cut):
+			out.append(list[i])
+	return out
 
 
 func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
@@ -721,8 +791,10 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 			continue
 		var est := PlayerRowView.estimate(w, p, p.overall)
 		list.append([p, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget * 4.0)])
+	var total := list.size()
+	list = _top(list, func(e: Array) -> float: return float(e[1]), true)
 	list.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
-	c.add_child(UIKit.label("%s disponíveis%s." % [Fmt.plural(list.size(), "jogador", "jogadores"), (" · %d já assinaram com outros clubes" % signed) if signed > 0 else ""], "Small", true))
+	c.add_child(UIKit.label("%s disponíveis%s." % [Fmt.plural(total, "jogador", "jogadores"), (" · %d já assinaram com outros clubes" % signed) if signed > 0 else ""], "Small", true))
 	_row_cols = 4 if content_width() >= 1000.0 else 0
 	if _row_cols > 0 and not list.is_empty():
 		c.add_child(PlayerRowView.stat_header("market", _row_cols))
