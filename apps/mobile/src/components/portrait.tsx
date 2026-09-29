@@ -10,12 +10,14 @@ type Props = {
   /** largura em pontos; a altura segue a proporção do desenho */
   size: number
   accessibilityLabel: string
+  /** fundo creme do laboratório; nas telas escuras o personagem fica solto */
+  background?: boolean
   style?: ViewStyle
 }
 
 // Retrato do personagem. O desenho vem inteiro do genoma (seed + sexo) e da idade.
-export const Portrait = memo(function Portrait({ seed, sex, age, size, accessibilityLabel, style }: Props) {
-  const drawing = useMemo(() => drawCharacter({ seed, sex, age }), [seed, sex, age])
+export const Portrait = memo(function Portrait({ seed, sex, age, size, accessibilityLabel, background = false, style }: Props) {
+  const drawing = useMemo(() => drawCharacter({ seed, sex, age, background }), [seed, sex, age, background])
   const height = size * (drawing.height / drawing.width)
   return <View style={[{ width: size, height }, style]} accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
     <SvgXml xml={drawing.svg} width={size} height={height} />

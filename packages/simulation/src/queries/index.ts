@@ -1,24 +1,38 @@
 import { contactAvailability } from "../commands"
 import type { WorldState } from "../domain/world"
-import { ageAt, formatDate, formatTime } from "../time"
+import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
 import { courses, jobRoles, routineRules } from "@paralelo/content"
 import { applicationReason, nextWorkTime, workReason } from "../systems/career"
 import { formatMoney } from "../systems/finance"
 import { groceriesReason, mealReason, type MealSource } from "../systems/routine"
 
+// Resumo do corpo em linguagem: só o que pede atenção entra (bíblia §2.3, §32).
+function bodySummary(needs: WorldState["people"][string]["needs"], minute: number): string {
+  const parts: string[] = []
+  if (needs.energy < 20) parts.push("O corpo pede descanso.")
+  else if (needs.energy < 50) parts.push("O cansaço já pesa.")
+  if (needs.hunger >= 75) parts.push("A fome tira a concentração.")
+  else if (needs.hunger >= 45) parts.push("Já dá fome.")
+  if (needs.sleepPressure >= 80) parts.push("O sono atrasado pesa nos olhos.")
+  else if (needs.sleepPressure >= 55) parts.push("Bate um sono.")
+  if (needs.stress > 65) parts.push("A cabeça não desliga.")
+  if (parts.length) return parts.join(" ")
+  return minute < 720 ? "Energia em dia e nenhuma fome. O dia está pela frente." : minute < 1080 ? "Tudo em ordem por enquanto." : "O dia foi tranquilo até aqui."
+}
+
 // Read model novo a cada consulta; nada retornado compartilha objetos mutáveis do mundo.
 export function queryLife(world: WorldState) {
   const player = world.people[world.playerId]!
   return {
     name: player.name, age: ageAt(player.birthDate, world.clock), city: world.city,
-    appearance: { seed: player.appearanceSeed, sex: player.sex },
-    date: formatDate(world.clock), time: formatTime(world.clock),
+    appearance: { seed: player.appearanceSeed, sex: player.sex }, body: bodySummary(player.needs, world.clock.minute),
+    date: formatDate(world.clock), time: formatTime(world.clock), dayTitle: formatDayHeading(world.clock), year: formatDate(world.clock).slice(-4),
     energy: player.needs.energy < 20 ? "Você precisa descansar." : player.needs.energy < 50 ? "O cansaço começa a pesar." : "Você ainda tem disposição.",
     stress: player.needs.stress > 65 ? "Está difícil desligar a cabeça." : player.needs.stress < 20 ? "Hoje a cabeça está mais tranquila." : "Você está conseguindo lidar com as preocupações do dia.",
     hunger: player.needs.hunger >= 75 ? "A fome está tirando sua disposição. Reserve tempo para comer." : player.needs.hunger >= 45 ? "Já está na hora de pensar na próxima refeição." : "Você está sem fome por enquanto.",
     sleep: player.needs.sleepPressure >= 80 ? "O sono acumulado está atrapalhando. Uma pausa não substitui dormir." : player.needs.sleepPressure >= 55 ? "Você começa a sentir sono." : "Você está conseguindo se manter desperto.",
-    timeline: world.timeline.slice(-80).reverse().map(entry => ({ id: entry.id, date: formatDate(entry.at), time: formatTime(entry.at), text: entry.text, kind: entry.kind })),
+    timeline: world.timeline.slice(-80).reverse().map(entry => ({ id: entry.id, date: formatDate(entry.at), day: relativeDay(entry.at, world.clock), time: formatTime(entry.at), text: entry.text, kind: entry.kind })),
     people: Object.values(world.relationships).filter(r => r.a === player.id || r.b === player.id).map(r => {
       const person = world.people[r.a === player.id ? r.b : r.a]!
       const unavailable = contactAvailability(world, person.id)
@@ -83,7 +97,13 @@ export function queryRoutine(world: WorldState) {
 }
 
 export function queryMoney(world: WorldState) {
+  const now = calendarDate(world.clock.day)
+  const thisMonth = world.finance.ledger.filter(entry => { const c = calendarDate(entry.at.day); return c.year === now.year && c.month === now.month })
+  const incoming = thisMonth.filter(e => e.amountCents > 0).reduce((sum, e) => sum + e.amountCents, 0)
+  const outgoing = thisMonth.filter(e => e.amountCents < 0).reduce((sum, e) => sum - e.amountCents, 0)
   return { balance: formatMoney(world.finance.balanceCents), negative: world.finance.balanceCents < 0,
+    monthName: ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"][now.month - 1]!,
+    month: { incoming: formatMoney(incoming), outgoing: formatMoney(outgoing), result: formatMoney(incoming - outgoing), positive: incoming >= outgoing },
     rent: formatMoney(world.finance.monthlyRentCents), accrued: formatMoney(world.employment?.accruedCents ?? 0),
     warning: world.finance.balanceCents < 0 ? "A conta ficou negativa. Os débitos continuam no extrato; receber salário ajuda a cobrir o saldo." : world.finance.balanceCents < world.finance.monthlyRentCents ? "O saldo disponível ainda não cobre o próximo aluguel." : "O próximo aluguel cabe no saldo disponível.",
     ledger: [...world.finance.ledger].reverse().slice(0, 100).map(entry => ({ id: entry.id, date: formatDate(entry.at), time: formatTime(entry.at), text: entry.text, amount: formatMoney(entry.amountCents), incoming: entry.amountCents > 0, cause: entry.cause })),

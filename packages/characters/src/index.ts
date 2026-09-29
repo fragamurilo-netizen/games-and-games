@@ -18,12 +18,12 @@ type Renderer = {
 }
 const api = globalThis as unknown as Renderer
 
-export type CharacterInput = Readonly<{ seed: string; sex: CharacterSex; age: number; view?: CharacterView }>
+export type CharacterInput = Readonly<{ seed: string; sex: CharacterSex; age: number; view?: CharacterView; background?: boolean }>
 export type CharacterDrawing = Readonly<{ svg: string; width: number; height: number; heightCm: number }>
 
 /** Desenho determinístico de uma pessoa: mesma seed, sexo e idade produzem o mesmo SVG. */
-export function drawCharacter({ seed, sex, age, view = "portrait" }: CharacterInput): CharacterDrawing {
+export function drawCharacter({ seed, sex, age, view = "portrait", background = true }: CharacterInput): CharacterDrawing {
   const genome = api.FaceCore.makeGenome(seed, { sex })
-  const result = api.VectorCharacter.build(genome, { age: Math.max(0, Math.min(110, age)), view })
+  const result = api.VectorCharacter.build(genome, { age: Math.max(0, Math.min(110, age)), view, bg: background })
   return { svg: result.svg, width: result.width, height: result.height, heightCm: result.info.height }
 }

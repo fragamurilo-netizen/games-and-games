@@ -33,3 +33,18 @@ export function formatDate(date: GameDate): string {
   const c = calendarDate(date.day)
   return `${c.day} de ${["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"][c.month - 1]} de ${c.year}`
 }
+// Dia 0 (05/01/2026) é uma segunda-feira.
+const WEEKDAYS = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"] as const
+export const weekdayOf = (date: GameDate): string => WEEKDAYS[((date.day % 7) + 7) % 7]!
+const MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"] as const
+/** "Segunda, 5 de janeiro" */
+export function formatDayHeading(date: GameDate): string {
+  const c = calendarDate(date.day), w = weekdayOf(date)
+  return `${w[0]!.toUpperCase()}${w.slice(1)}, ${c.day} de ${MONTHS[c.month - 1]}`
+}
+/** Rótulo relativo ao dia atual: "Hoje", "Ontem" ou a data. */
+export function relativeDay(date: GameDate, now: GameDate): string {
+  if (date.day === now.day) return "Hoje"
+  if (date.day === now.day - 1) return "Ontem"
+  return formatDayHeading(date)
+}
