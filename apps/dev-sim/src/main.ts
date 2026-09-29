@@ -2,7 +2,7 @@
 // inspecionar pessoas e rodar benchmarks sem UI.
 import { readFileSync, writeFileSync } from "node:fs"
 import { performance } from "node:perf_hooks"
-import { createWorld, executeCommand, queryLife, validateWorld, worldHash, type Command } from "@paralelo/simulation"
+import { createWorld, executeCommand, queryDecision, queryLife, validateWorld, worldHash, type Command } from "@paralelo/simulation"
 import { decodeSnapshot, encodeSnapshot } from "@paralelo/persistence"
 
 function option(name: string): string | undefined {
@@ -14,7 +14,7 @@ function option(name: string): string | undefined {
 }
 function main() {
   if (process.argv.includes("--help")) {
-    console.log("npm run sim -- --seed flores --days 7 --save campanha.json\nOpções: --load arquivo --inspect person:player --benchmark 1000 --rest --contact person:mother")
+    console.log("npm run sim -- --seed flores --days 7 --auto-choice safe --save campanha.json\nOpções: --load arquivo --inspect person:player --benchmark 1000 --rest --contact person:mother --auto-choice first|safe")
     return
   }
   const loadedFile = option("load")
@@ -40,7 +40,18 @@ function main() {
   if (!Number.isSafeInteger(days) || days < 0 || days > 7305) throw new Error("--days deve estar entre 0 e 7305.")
   // Fast-forward continua após pausas narrativas, sem pular eventos vencidos.
   const target = world.clock.day * 1440 + world.clock.minute + days * 1440
-  while (world.clock.day * 1440 + world.clock.minute < target) apply({ type: "wait", minutes: Math.min(10080, target - (world.clock.day * 1440 + world.clock.minute)) })
+  const autoChoice = option("auto-choice")
+  if (autoChoice && autoChoice !== "first" && autoChoice !== "safe") throw new Error("--auto-choice deve ser first ou safe.")
+  while (world.clock.day * 1440 + world.clock.minute < target) {
+    const pending = queryDecision(world)
+    if (pending) {
+      if (!autoChoice) break
+      const available = pending.choices.filter(choice => choice.canChoose)
+      const choice = autoChoice === "first" ? available[0] : available.at(-1)
+      if (!choice) throw new Error("Decisão sem alternativa disponível.")
+      apply({ type: "decide", decisionId: pending.id, choiceId: choice.id })
+    } else apply({ type: "wait", minutes: Math.min(10080, target - (world.clock.day * 1440 + world.clock.minute)) })
+  }
   const benchmark = Number(option("benchmark") ?? "0")
   if (!Number.isSafeInteger(benchmark) || benchmark < 0 || benchmark > 100000) throw new Error("--benchmark deve estar entre 0 e 100000.")
   if (benchmark) {
@@ -58,6 +69,8 @@ function main() {
   const life = queryLife(world)
   console.log(`${life.name}, ${life.age} anos · ${life.city}\n${life.date}, ${life.time}\nSeed: ${world.seed} · Revisão: ${world.revision} · Hash: ${worldHash(world)}`)
   for (const entry of [...life.timeline].reverse()) console.log(`${entry.date} ${entry.time} · ${entry.text}`)
+  const pending = queryDecision(world)
+  if (pending) console.log(`\nDecisão pendente: ${pending.title}\n${pending.text}\nUse --auto-choice first ou safe para fast-forward com decisões.`)
   const saveFile = option("save")
   if (saveFile) writeFileSync(saveFile, encodeSnapshot(world), "utf8")
 }

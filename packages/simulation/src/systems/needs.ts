@@ -8,3 +8,7 @@ export function applyElapsed(world: WorldState, minutes: number, resting = false
   const stress = clamp(player.needs.stress + minutes * (resting ? -.08 : .003))
   return { ...world, people: { ...world.people, [player.id]: { ...player, needs: { energy, stress } } } }
 }
+export function changeNeeds(world: WorldState, change: { energy: number; stress: number }): WorldState {
+  const player = world.people[world.playerId]!
+  return { ...world, people: { ...world.people, [player.id]: { ...player, needs: { energy: clamp(player.needs.energy + change.energy), stress: clamp(player.needs.stress + change.stress) } } } }
+}

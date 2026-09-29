@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { courses, jobRoles, validateStarterContent } from "@paralelo/content"
 import type { CourseId } from "@paralelo/shared"
-import { absoluteMinute, createWorld, executeCommand, queryCareer, validateWorld, worldHash, type Command, type WorldState } from "."
+import { absoluteMinute, createWorld, executeCommand, queryCareer, queryDecision, validateWorld, worldHash, type Command, type WorldState } from "."
 
 function apply(world: WorldState, command: Command): WorldState {
   const result = executeCommand(world, command)
@@ -9,7 +9,12 @@ function apply(world: WorldState, command: Command): WorldState {
   return result.value
 }
 function waitUntil(world: WorldState, minute: number): WorldState {
-  while (absoluteMinute(world.clock) < minute) world = apply(world, { type: "wait", minutes: Math.min(10080, minute - absoluteMinute(world.clock)) })
+  while (absoluteMinute(world.clock) < minute) {
+    const pending = queryDecision(world)
+    const choice = pending?.choices.at(-1)
+    world = pending && choice ? apply(world, { type: "decide", decisionId: pending.id, choiceId: choice.id })
+      : apply(world, { type: "wait", minutes: Math.min(10080, minute - absoluteMinute(world.clock)) })
+  }
   return world
 }
 function hired(seed = "work"): WorldState {
@@ -86,7 +91,7 @@ describe("carreira, educação, dinheiro e autonomia", () => {
     expect(world.rng.ai).toBeGreaterThan(0)
     expect(world.memories.length).toBeGreaterThan(0)
     expect(world.timeline.some(e => e.cause.startsWith("ai.contact:"))).toBe(true)
-    expect(world.recentCommands.every(c => c.command.type === "wait")).toBe(true)
+    expect(world.recentCommands.every(c => c.command.type !== "contact")).toBe(true)
     expect(worldHash(waitUntil(createWorld("autonomy"), 60 * 1440))).toBe(worldHash(world))
   })
   it("recusa saldo inconsistente, vaga órfã e curso com progresso impossível", () => {

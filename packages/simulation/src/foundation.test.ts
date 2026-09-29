@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { lifeEvents } from "@paralelo/content"
 import { addMinutes, ageAt, calendarDate, createRng, createWorld, dayFromCalendar, draw, executeCommand, queryLife, validateWorld, worldHash, type Command, type WorldState } from "."
 
 const apply = (world: WorldState, command: Command): WorldState => {
@@ -28,7 +29,8 @@ describe("fundação determinística", () => {
     expect(rng.health).toBe(0)
   })
   it("pausa skip na mensagem e a processa uma só vez", () => {
-    const start = createWorld("s")
+    const generated = createWorld("s")
+    const start = { ...generated, events: { ...generated.events, seen: lifeEvents.map(event => event.id) } }
     const paused = apply(start, { type: "wait", minutes: 10080 })
     expect(paused.clock).toEqual({ day: 0, minute: 1080 })
     expect(paused.timeline.filter(e => e.kind === "message")).toHaveLength(1)

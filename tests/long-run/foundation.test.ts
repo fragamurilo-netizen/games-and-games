@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { absoluteMinute, createWorld, executeCommand, validateWorld, worldHash } from "@paralelo/simulation"
+import { absoluteMinute, createWorld, executeCommand, queryDecision, validateWorld, worldHash } from "@paralelo/simulation"
 import { decodeSnapshot, encodeSnapshot } from "@paralelo/persistence"
 
 describe("fundação de vida longa", () => {
@@ -8,7 +8,9 @@ describe("fundação de vida longa", () => {
     const end = absoluteMinute(world.clock) + days * 1440
     let reloaded = false
     while (absoluteMinute(world.clock) < end) {
-      const result = executeCommand(world, { type: "wait", minutes: Math.min(10080, end - absoluteMinute(world.clock)) })
+      const pending = queryDecision(world), choice = pending?.choices.at(-1)
+      const result = executeCommand(world, pending && choice ? { type: "decide", decisionId: pending.id, choiceId: choice.id }
+        : { type: "wait", minutes: Math.min(10080, end - absoluteMinute(world.clock)) })
       expect(result.ok).toBe(true)
       if (!result.ok) return
       world = result.value

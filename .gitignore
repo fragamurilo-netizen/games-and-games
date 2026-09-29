@@ -9,3 +9,4 @@ apps/mobile/ios/
 *.apk
 *.aab
 coverage/
+output/

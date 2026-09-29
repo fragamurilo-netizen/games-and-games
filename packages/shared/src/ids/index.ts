@@ -13,3 +13,4 @@ export type ScheduleId = Brand<string, "ScheduleId">
 export type VacancyId = Brand<string, "VacancyId">
 export type CourseId = Brand<string, "CourseId">
 export type LedgerId = Brand<string, "LedgerId">
+export type DecisionId = Brand<string, "DecisionId">

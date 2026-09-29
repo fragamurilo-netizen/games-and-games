@@ -3,13 +3,14 @@ import type { Command, WorldState } from "../domain/world"
 import { draw } from "../rng"
 import { absoluteMinute, addMinutes } from "../time"
 import { advance, appendEntry } from "../scheduling"
-import { courses } from "@paralelo/content"
+import { courses, lifeEvents } from "@paralelo/content"
+import { choiceReason, resolveDecision } from "../systems/events"
 import { applicationReason, applyForJob, completeShift, workReason } from "../systems/career"
 import { postLedger } from "../systems/finance"
 import { remember } from "../systems/memory"
 import { updateRelationship } from "../systems/relationships"
 
-export type CommandError = Readonly<{ code: "invalid-duration" | "unknown-person" | "no-relationship" | "cooldown" | "exhausted" | "invalid-command" | "unavailable" | "insufficient-money"; message: string }>
+export type CommandError = Readonly<{ code: "invalid-duration" | "unknown-person" | "no-relationship" | "cooldown" | "exhausted" | "invalid-command" | "unavailable" | "insufficient-money" | "pending-decision"; message: string }>
 export function contactAvailability(world: WorldState, personId: PersonId): CommandError | null {
   const person = world.people[personId]
   if (!person || personId === world.playerId) return { code: "unknown-person", message: "Essa pessoa não está disponível." }
@@ -21,8 +22,19 @@ export function contactAvailability(world: WorldState, personId: PersonId): Comm
   return null
 }
 export function executeCommand(world: WorldState, command: Command): Result<WorldState, CommandError> {
+  if (world.events.pending && command.type !== "decide") return err({ code: "pending-decision", message: "Uma decisão espera sua resposta na área VIDA." })
   let next: WorldState
   switch (command.type) {
+    case "decide": {
+      const pending = world.events.pending
+      if (!pending || pending.id !== command.decisionId) return err({ code: "unavailable", message: "Essa decisão já foi respondida ou não está mais disponível." })
+      const option = lifeEvents.find(event => event.id === pending.definitionId)?.choices.find(option => option.id === command.choiceId)
+      if (!option) return err({ code: "unavailable", message: "Esta escolha não existe." })
+      const reason = choiceReason(world, option)
+      if (reason) return err({ code: "insufficient-money", message: reason })
+      next = resolveDecision(world, option)
+      break
+    }
     case "wait": {
       if (!Number.isSafeInteger(command.minutes) || command.minutes < 1 || command.minutes > 10080)
         return err({ code: "invalid-duration", message: "Avance entre 1 minuto e 7 dias por vez." })
@@ -84,12 +96,17 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       next = advance({ ...world, rng: roll.state }, addMinutes(world.clock, answered ? 30 : 5))
       next = updateRelationship(next, rel.id, { familiarity: answered ? 1 : 0, affection: answered ? 2 : 0, trust: answered ? 1 : 0 }, next.clock)
       const person = next.people[command.personId]!
-      const text = answered ? rel.tags.includes("family")
+      const text = world.clock.day >= 14 ? answered ? rel.tags.includes("family")
+        ? `${person.name} atendeu. Vocês conversaram sobre a semana e sobre como você está cuidando da casa.`
+        : world.employment ? `${person.name} atendeu. Você comentou como estão os turnos em ${world.companies[world.employment.companyId]!.name}.`
+        : `${person.name} atendeu. Vocês falaram da semana e de como a rotina tem andado.`
+        : `${person.name} não atendeu. Você deixou uma mensagem perguntando como está a semana.`
+        : answered ? rel.tags.includes("family")
         ? `${person.name} atendeu. Você contou da mudança; ela pediu para você comer alguma coisa antes de desfazer o resto das caixas.`
         : `${person.name} atendeu. Vocês falaram da mudança e combinaram de se ver quando a semana acalmar.`
         : `${person.name} não atendeu. Você deixou uma mensagem dizendo que já chegou bem.`
       next = appendEntry(next, { at: next.clock, kind: "relationship", text, personIds: [world.playerId, person.id], cause: `command.contact:${rel.id}` })
-      next = remember(next, person.id, world.playerId, answered ? "Você ligou e contou como estava a mudança." : "Você deixou uma mensagem dizendo que chegou bem.", `command.contact:${rel.id}`)
+      next = remember(next, person.id, world.playerId, text, `command.contact:${rel.id}`)
       break
     }
     default: return err({ code: "invalid-command", message: "Comando desconhecido." })

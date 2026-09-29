@@ -1,5 +1,6 @@
 // Conteúdo data-driven: eventos, empregos, cursos, traços, textos (bíblia §41).
 // Conteúdo inicial da fundação, sem lógica de simulação.
+export * from "./events"
 export const starterContent = {
   city: "Santa Aurora",
   district: "Vila das Flores",
@@ -13,6 +14,32 @@ export const starterContent = {
 export const cityNames = {
   first: ["Ana", "Bruno", "Carolina", "Daniel", "Elisa", "Felipe", "Gabriela", "Hugo", "Isabela", "João", "Karina", "Lucas", "Marta", "Nicolas", "Olívia", "Paulo", "Renata", "Samuel", "Teresa", "Vinícius"],
   last: ["Almeida", "Barros", "Campos", "Dias", "Esteves", "Freitas", "Gomes", "Henrique", "Lima", "Moraes", "Nunes", "Oliveira", "Pires", "Ramos", "Santos", "Teixeira", "Vieira", "Costa", "Duarte", "Melo"],
+} as const
+export const socialTexts = {
+  family: [
+    "{person} ligou para saber como você está. A conversa foi parar nas pequenas coisas da semana.",
+    "{person} perguntou se você está conseguindo comer e descansar direito. Você contou como os dias têm sido.",
+    "{person} puxou conversa sobre a casa e ouviu o que ainda falta resolver.",
+    "{person} procurou você sem um assunto urgente. Vocês conversaram um pouco antes de voltar ao dia.",
+  ],
+  arrival: [
+    "{person} perguntou das caixas da mudança. Você contou o que já conseguiu arrumar.",
+    "{person} quis saber como é o bairro novo. Vocês conversaram sobre as ruas perto da sua casa.",
+    "{person} mandou mensagem para saber se você já se sente em casa.",
+    "{person} procurou você para saber como está sendo morar por conta própria.",
+  ],
+  employed: [
+    "{person} perguntou como está o trabalho em {company}. Você contou um pouco da rotina.",
+    "{person} quis saber se os turnos têm deixado algum tempo livre. Vocês falaram de como a semana mudou.",
+    "{person} procurou você e a conversa acabou passando pelo expediente de hoje.",
+    "{person} perguntou se você está conseguindo separar o trabalho do resto da vida.",
+  ],
+  everyday: [
+    "{person} perguntou como foi sua semana. Vocês acabaram conversando mais do que esperavam.",
+    "{person} procurou você no fim da tarde. Não havia nada urgente; só fazia um tempo que não se falavam.",
+    "{person} mandou mensagem perguntando da casa. Você contou uma coisa pequena do dia.",
+    "{person} puxou conversa para saber como você está levando a rotina.",
+  ],
 } as const
 export const companies = ["Mercado do Bairro", "Padaria Aurora", "Clínica São Bento", "Oficina Central", "Livraria Travessa", "Logística Horizonte", "Café da Praça", "Escritório Mendonça", "Hotel Primavera", "Tecidos Flores"] as const
 export const jobRoles = [

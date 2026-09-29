@@ -29,3 +29,12 @@ export const radius = {
   md: 8,
   lg: 12,
 } as const
+
+// Fonte autoral da campanha. Arquivos estáticos incorporados no app, sem CDN.
+export const fonts = {
+  body: "Commissioner_400Regular",
+  medium: "Commissioner_500Medium",
+  label: "Commissioner_600SemiBold",
+  narrative: "Newsreader_400Regular",
+  title: "Newsreader_600SemiBold",
+} as const

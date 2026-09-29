@@ -7,7 +7,7 @@ A fonte de verdade do projeto é a **bíblia de design**:
 (original em `.docx` na mesma pasta). Leia antes de mexer em arquitetura.
 
 > Status: **primeira campanha jogável**, com motor puro, relógio, RNG, 100 pessoas,
-> relações/memórias, carreira, cursos, extrato e save SQLite. As cinco áreas do app
+> relações/memórias, carreira, cursos, extrato, 30 eventos/10 cadeias e save SQLite. As cinco áreas do app
 > executam ou consultam o estado real da campanha.
 > Continuidade para colegas: [`docs/CONTINUIDADE.md`](docs/CONTINUIDADE.md).
 
@@ -72,9 +72,9 @@ vão para o git; configure tudo via `apps/mobile/app.json`.
 12. testes de determinismo e save ✅
 
 ```bash
-npm run sim -- --seed flores --days 7 --save campanha.json
+npm run sim -- --seed flores --days 7 --auto-choice safe --save campanha.json
 npm run sim -- --load campanha.json --rest --contact person:mother
-npm run sim -- --seed flores --days 7305 --benchmark 1000
+npm run sim -- --seed flores --days 7305 --auto-choice safe --benchmark 1000
 npm --workspace apps/mobile run web
 npm --workspace apps/mobile run lint
 ```

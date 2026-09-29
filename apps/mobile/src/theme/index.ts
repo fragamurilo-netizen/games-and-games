@@ -1,1 +1,1 @@
-export { colors, space, radius } from "@paralelo/ui"
+export { colors, space, radius, fonts } from "@paralelo/ui"

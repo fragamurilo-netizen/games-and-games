@@ -1,5 +1,5 @@
 import type { ScheduleId } from "@paralelo/shared"
-import { starterContent } from "@paralelo/content"
+import { socialTexts, starterContent } from "@paralelo/content"
 import type { ScheduledEvent, WorldState } from "../domain/world"
 import { draw } from "../rng"
 import { absoluteMinute, calendarDate, dayFromCalendar } from "../time"
@@ -7,8 +7,10 @@ import { appendEntry } from "../timeline"
 import { formatMoney, postLedger } from "./finance"
 import { remember } from "./memory"
 import { updateRelationship } from "./relationships"
+import { processLifeEvent } from "./events"
 
 export function processScheduled(world: WorldState, event: ScheduledEvent): WorldState {
+  if (event.kind === "daily-events" || event.kind === "event-followup") return processLifeEvent(world, event)
   if (event.kind === "mother-message") return appendEntry(world, { at: world.clock, kind: "message", text: starterContent.reminder, personIds: [event.personId], cause: event.id })
   if (event.kind === "monthly-finance") {
     let next = world
@@ -41,11 +43,16 @@ export function processScheduled(world: WorldState, event: ScheduledEvent): Worl
     next = { ...next, rng: chance.state }
     const recent = selected.lastInteractionAt && absoluteMinute(world.clock) - absoluteMinute(selected.lastInteractionAt) < 1440
     if (!recent && chance.value < .08 + other.personality.sociability * .2) {
-      const text = selected.tags.includes("family")
-        ? `${other.name} ligou para saber da casa. Você contou o que conseguiu resolver desde a mudança.`
-        : `${other.name} puxou assunto: \"E aí, já conseguiu arrumar aquelas caixas?\" Vocês acabaram conversando um pouco.`
+      const pool = selected.tags.includes("family") ? socialTexts.family : world.clock.day < 14 ? socialTexts.arrival : world.employment ? socialTexts.employed : socialTexts.everyday
+      const recentTexts = next.memories.filter(memory => memory.personId === other.id).slice(-3).map(memory => memory.text)
+      const texts = pool.map(text => text.replaceAll("{person}", other.name).replaceAll("{company}", world.employment ? world.companies[world.employment.companyId]!.name : "a empresa"))
+      const fresh = texts.filter(text => !recentTexts.includes(text))
+      const variant = draw(world.seed, next.rng, "ai")
+      next = { ...next, rng: variant.state }
+      const options = fresh.length ? fresh : texts
+      const text = options[Math.floor(variant.value * options.length)]!
       next = updateRelationship(next, selected.id, { affection: 1, familiarity: 1 }, world.clock)
-      next = remember(next, other.id, world.playerId, "Procurou você para saber como estava a casa.", event.id)
+      next = remember(next, other.id, world.playerId, text, event.id)
       next = appendEntry(next, { at: world.clock, kind: "relationship", text, personIds: [world.playerId, other.id], cause: `ai.contact:${selected.id}` })
     }
   }

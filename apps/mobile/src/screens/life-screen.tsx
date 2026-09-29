@@ -1,17 +1,19 @@
 import { useMemo } from "react"
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { queryLife, type Command } from "@paralelo/simulation"
+import { queryDecision, queryLife, type Command } from "@paralelo/simulation"
+import { ActionButton } from "../components/screen-frame"
 import { useGame } from "../hooks/game-context"
-import { colors, space } from "../theme"
+import { colors, space, fonts } from "../theme"
 
 export default function LifeScreen() {
   const { world, busy, error, notice, dispatch, retry } = useGame()
   const life = useMemo(() => world ? queryLife(world) : null, [world])
+  const decision = useMemo(() => world ? queryDecision(world) : null, [world])
   const action = (label: string, command: Command, disabled = false) => <Pressable
-    accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled: busy || disabled }}
-    disabled={busy || disabled} onPress={() => { void dispatch(command) }}
-    style={({ pressed }) => [styles.action, (busy || disabled) && styles.disabled, pressed && styles.pressed]}>
+    accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled: busy || disabled || !!decision }}
+    disabled={busy || disabled || !!decision} onPress={() => { void dispatch(command) }}
+    style={({ pressed }) => [styles.action, (busy || disabled || !!decision) && styles.disabled, pressed && styles.pressed]}>
     <Text style={styles.actionText}>{label}</Text>
   </Pressable>
   return <SafeAreaView edges={["top", "left", "right"]} style={styles.root}>
@@ -33,6 +35,12 @@ export default function LifeScreen() {
         <Text style={styles.secondary}>{life.stress}</Text>
         {error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
         {notice && <Text accessibilityLiveRegion="polite" style={styles.secondary}>{notice}</Text>}
+        {decision && <View style={styles.section}>
+          <Text style={styles.eyebrow}>{decision.date} · UMA ESCOLHA</Text>
+          <Text accessibilityRole="header" style={styles.sectionTitle}>{decision.title}</Text>
+          <Text style={styles.story}>{decision.text}</Text>
+          {decision.choices.map(choice => <View key={choice.id}><ActionButton label={choice.label} command={{ type: "decide", decisionId: decision.id, choiceId: choice.id }} disabled={!choice.canChoose} />{choice.reason && <Text style={styles.secondary}>{choice.reason}</Text>}</View>)}
+        </View>}
         <View style={styles.section}>
           <Text accessibilityRole="header" style={styles.sectionTitle}>Agora</Text>
           <View style={styles.actions}>{action("Descansar · 2 horas", { type: "rest" })}{action("Dormir · 8 horas", { type: "sleep" })}{action("Almoçar · R$ 18,00", { type: "meal" })}{action("Seguir o dia · 4 horas", { type: "wait", minutes: 240 })}</View>
@@ -62,26 +70,26 @@ export default function LifeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: space[6], paddingTop: space[6], paddingBottom: space[12], maxWidth: 680, width: "100%", alignSelf: "center" },
-  wordmark: { color: colors.text, fontSize: 14, letterSpacing: 4, fontWeight: "700", paddingBottom: space[8], borderBottomColor: colors.rule, borderBottomWidth: 1 },
+  wordmark: { color: colors.text, fontFamily: fonts.label, fontSize: 14, letterSpacing: 4, paddingBottom: space[8], borderBottomColor: colors.rule, borderBottomWidth: 1 },
   header: { paddingVertical: space[8] },
-  eyebrow: { color: colors.textSecondary, fontSize: 11, letterSpacing: 2, marginBottom: space[3] },
-  title: { color: colors.text, fontSize: 34, lineHeight: 42, fontFamily: "serif", marginBottom: space[2] },
-  body: { color: colors.text, fontSize: 16, lineHeight: 24 },
-  secondary: { color: colors.textSecondary, fontSize: 14, lineHeight: 21 },
-  date: { color: colors.text, fontSize: 18, marginTop: space[6] },
-  time: { color: colors.accent, fontSize: 38, marginTop: space[1], fontVariant: ["tabular-nums"] },
+  eyebrow: { color: colors.textSecondary, fontFamily: fonts.label, fontSize: 11, letterSpacing: 2, marginBottom: space[3] },
+  title: { color: colors.text, fontSize: 36, lineHeight: 44, fontFamily: fonts.title, marginBottom: space[2] },
+  body: { color: colors.text, fontFamily: fonts.body, fontSize: 16, lineHeight: 25 },
+  secondary: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 14, lineHeight: 22 },
+  date: { color: colors.text, fontFamily: fonts.medium, fontSize: 18, marginTop: space[6] },
+  time: { color: colors.accent, fontFamily: fonts.medium, fontSize: 38, marginTop: space[1], fontVariant: ["tabular-nums"] },
   section: { borderTopColor: colors.rule, borderTopWidth: 1, paddingTop: space[6], marginTop: space[8] },
-  sectionTitle: { color: colors.text, fontSize: 20, fontFamily: "serif", marginBottom: space[4] },
+  sectionTitle: { color: colors.text, fontSize: 24, fontFamily: fonts.title, marginBottom: space[4] },
   actions: { gap: space[2], marginBottom: space[3] },
   action: { borderColor: colors.rule, borderWidth: 1, paddingHorizontal: space[4], paddingVertical: space[3], minHeight: 48, justifyContent: "center", marginVertical: space[2] },
-  actionText: { color: colors.text, fontSize: 15 },
+  actionText: { color: colors.text, fontFamily: fonts.medium, fontSize: 15, lineHeight: 23 },
   disabled: { opacity: .45 }, pressed: { backgroundColor: colors.surfaceRaised },
   person: { paddingVertical: space[4], borderBottomColor: colors.rule, borderBottomWidth: 1 },
-  personName: { color: colors.text, fontSize: 19, marginBottom: space[1] },
+  personName: { color: colors.text, fontFamily: fonts.medium, fontSize: 19, marginBottom: space[1] },
   entry: { borderBottomColor: colors.rule, borderBottomWidth: 1, paddingVertical: space[6] },
-  entryTime: { color: colors.textSecondary, fontSize: 12, marginBottom: space[3] },
-  story: { color: colors.text, fontSize: 17, lineHeight: 27 },
-  chapter: { fontFamily: "serif", fontSize: 22, lineHeight: 32 },
-  error: { color: colors.danger, marginVertical: space[4], fontSize: 15, lineHeight: 23 },
-  footer: { color: colors.textSecondary, fontSize: 12, marginTop: space[8] },
+  entryTime: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 12, marginBottom: space[3] },
+  story: { color: colors.text, fontFamily: fonts.narrative, fontSize: 21, lineHeight: 29 },
+  chapter: { fontFamily: fonts.narrative, fontSize: 25, lineHeight: 34 },
+  error: { color: colors.danger, fontFamily: fonts.body, marginVertical: space[4], fontSize: 15, lineHeight: 23 },
+  footer: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 12, marginTop: space[8] },
 })

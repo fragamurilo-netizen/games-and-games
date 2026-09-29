@@ -1,12 +1,12 @@
 import { cityNames, companies as companyNames, jobRoles, courses, validateStarterContent, starterContent } from "@paralelo/content"
 import type { CompanyId, CourseId, HouseholdId, PersonId, ResidenceId, ScheduleId, VacancyId } from "@paralelo/shared"
-import type { Company, Person, Skills, Vacancy, WorldState, WorldStateV1 } from "../domain/world"
+import type { Company, Person, Skills, Vacancy, WorldStateV2, WorldStateV1 } from "../domain/world"
 import { hashText } from "../rng"
 import { calendarDate, dayFromCalendar } from "../time"
 
 // Migração aditiva v1 -> v2 e criação da cidade usam uma namespace própria;
 // não consomem os cursores de RNG que a campanha antiga já salvou.
-export function upgradeWorldV1(base: WorldStateV1): WorldState {
+export function upgradeWorldV1(base: WorldStateV1): WorldStateV2 {
   const invalid = validateStarterContent()
   if (invalid.length) throw new Error(invalid.join(" "))
   const value = (key: string) => hashText(`${base.seed}/slice-v2/${key}`) / 4294967296
@@ -22,7 +22,7 @@ export function upgradeWorldV1(base: WorldStateV1): WorldState {
     households[householdId] = { id: householdId, memberIds: [id] }
     residences[residenceId] = { id: residenceId, district: i % 2 ? "Centro" : starterContent.district }
   }
-  const skills: Record<string, Skills> = {}, tiers: Record<string, WorldState["tiers"][string]> = {}
+  const skills: Record<string, Skills> = {}, tiers: Record<string, WorldStateV2["tiers"][string]> = {}
   for (const person of Object.values(people)) {
     skills[person.id] = { organization: .15 + value(`${person.id}/organization`) * .3, communication: .15 + value(`${person.id}/communication`) * .3 }
     tiers[person.id] = person.id === base.playerId ? "player" : person.relationshipIds.length ? "close" : "background"
@@ -38,7 +38,7 @@ export function upgradeWorldV1(base: WorldStateV1): WorldState {
   })
   const now = calendarDate(base.clock.day)
   const nextMonth = now.month === 12 ? dayFromCalendar(now.year + 1, 1, 1) : dayFromCalendar(now.year, now.month + 1, 1)
-  const training: Record<string, WorldState["training"][string]> = {}
+  const training: Record<string, WorldStateV2["training"][string]> = {}
   for (const course of courses) training[`course:${course.id}` as CourseId] = { sessions: 0, lastStudiedDay: null }
   return { ...base, schemaVersion: 2, people, households, residences, skills, tiers, companies, vacancies, employment: null,
     applications: [], finance: { openingBalanceCents: 80000, balanceCents: 80000, monthlyRentCents: 75000, ledger: [] }, training, memories: [],

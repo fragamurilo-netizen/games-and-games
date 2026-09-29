@@ -17,7 +17,7 @@ export function advance(world: WorldState, target: GameDate, options: { resting?
     next = { ...applyElapsed(next, at - absoluteMinute(next.clock), options.resting), clock: event.at,
       scheduled: next.scheduled.filter(item => item.id !== event.id) }
     next = processScheduled(next, event)
-    if (options.interruptible && event.interrupts) return next
+    if (options.interruptible && (event.interrupts || next.events.pending)) return next
   }
   return { ...applyElapsed(next, end - absoluteMinute(next.clock), options.resting), clock: fromMinute(end) }
 }
