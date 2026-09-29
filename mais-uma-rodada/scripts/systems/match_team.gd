@@ -455,7 +455,7 @@ func _rebuild_pick_tables() -> void:
 			if mp != null and mp.slot != 0:
 				match m:
 					0:
-						v = (mp.w_att + 0.04) * mp.c_fin * mp.f * (MatchSimulation.ST_SHOOT if mp.pos == Pos.ST else 1.0)
+						v = (mp.w_att + 0.04) * MatchSimulation.shot_share(mp.c_fin) * mp.f * (MatchSimulation.ST_SHOOT if mp.pos == Pos.ST else 1.0)
 					1:
 						v = (mp.w_att + (MatchSimulation.CB_HEAD if mp.pos == Pos.CB else 0.0) + 0.05) * mp.c_head * mp.f
 					2:
@@ -465,7 +465,7 @@ func _rebuild_pick_tables() -> void:
 					4:
 						v = (mp.w_att + 0.05) * mp.a_vel_fin * mp.f
 					5:
-						v = (mp.w_mid + mp.w_att * 0.5 + 0.05) * mp.a_pas_vis * mp.f
+						v = (mp.w_mid + mp.w_att * 0.5 + 0.05) * pow(mp.a_pas_vis / 100.0, MatchSimulation.CREATOR_EXP) * 100.0 * mp.f
 					6:
 						v = (mp.w_wide + 0.05) * mp.a_cru * mp.f
 					7:

@@ -37,7 +37,7 @@ const L_DEFN := 22
 
 ## Conversão média de uma chance e ajuste fino (escanteios, faltas e pênaltis do motor completo).
 const CONV := 0.118
-const CAL := 1.12
+const CAL := 1.1
 ## O minuto a minuto dá ao mandante um pouco mais do que as taxas médias sugerem (momento, torcida).
 const HOME_BOOST := 1.0
 const MINUTES := 93.0
@@ -76,12 +76,12 @@ static func mode_weights(p: Player, pos: int, w_att: float, w_mid: float, w_wide
 	var tec_vel: float = at[Attr.TEC] * 0.4 + at[Attr.DRI] * 0.6 + vel * 0.5 + (at[Attr.ACE] - heavy) * 0.5 + float(side[3])
 	var out := PackedFloat32Array()
 	out.resize(7)
-	out[M_SHOOT] = (w_att + 0.04) * c_fin * f * (MatchSimulation.ST_SHOOT if pos == Pos.ST else 1.0) * ins_shoot
+	out[M_SHOOT] = (w_att + 0.04) * MatchSimulation.shot_share(c_fin) * f * (MatchSimulation.ST_SHOOT if pos == Pos.ST else 1.0) * ins_shoot
 	out[M_HEAD] = (w_att + (MatchSimulation.CB_HEAD if pos == Pos.CB else 0.0) + 0.05) * c_head * f
 	out[M_LONG] = (w_mid + w_att * 0.6 + 0.05) * c_long * f * ins_shoot
 	out[M_DRIBBLE] = (w_att + w_wide * 0.3 + 0.05) * tec_vel * f
 	out[M_COUNTER] = (w_att + 0.05) * (vel + at[Attr.FIN]) * f
-	out[M_PASS] = (w_mid + w_att * 0.5 + 0.05) * (at[Attr.PAS] + at[Attr.VIS]) * f
+	out[M_PASS] = (w_mid + w_att * 0.5 + 0.05) * pow(float(at[Attr.PAS] + at[Attr.VIS]) / 100.0, MatchSimulation.CREATOR_EXP) * 100.0 * f
 	out[M_CROSS] = (w_wide + 0.05) * (at[Attr.CRU] + float(side[0])) * f
 	return out
 

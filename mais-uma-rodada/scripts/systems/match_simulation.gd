@@ -90,6 +90,13 @@ const MOD_DAMP := 0.35
 const LIVE_XG := 0.72
 
 
+## Peso de finalização pela qualidade do finalizador, com retorno decrescente: o bom atacante chuta
+## mais que o comum, mas não fica com todas as bolas (quem converte mais já é premiado no gol).
+## Evita artilheiros de 40+ gols por temporada como regra.
+static func shot_share(c_fin: float) -> float:
+	return pow(maxf(1.0, c_fin) / 60.0, 0.6) * 60.0
+
+
 static func damp(x: float) -> float:
 	return 1.0 + (x - 1.0) * MOD_DAMP
 ## Contra o time do usuário a IA se motiva mais conforme a dificuldade (fácil, normal, difícil).
@@ -100,6 +107,8 @@ const USER_OPP_BOOST: Array[float] = [1.0, 1.035, 1.07]
 const ST_SHOOT := 1.3
 const OWN_GOAL_P := 0.1
 const CB_HEAD := 0.5
+## Quem dá o último passe: os criadores (passe + visão) concentram as assistências.
+const CREATOR_EXP := 1.6
 const STATE_BASE := 0.04
 const STATE_LATE := 0.07
 const STATE_BEATEN := 0.3 # quem perde de 2+ ainda empurra, mas sem a mesma força
