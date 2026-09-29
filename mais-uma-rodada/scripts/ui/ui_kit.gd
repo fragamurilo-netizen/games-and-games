@@ -598,6 +598,9 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 		b.focus_mode = Control.FOCUS_NONE
 		b.custom_minimum_size.y = 48
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Rótulo bem mais longo que os outros ganha um pouco mais de largura ("Instantâneo" cortava
+		# no tablet em duas colunas); os curtos continuam do mesmo tamanho entre si.
+		b.size_flags_stretch_ratio = maxf(7.0, I18n.t(b.text).length()) / 7.0
 		b.clip_text = true
 		var key: String = it[0]
 		b.pressed.connect(func():
