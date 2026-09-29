@@ -1,0 +1,48 @@
+name: Real game face lighting previews
+on:
+  push:
+    branches: [codex/faces-lighting-preview-20260928]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: face-lighting-preview-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render original face plus four lighting presets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p face-lighting
+          git rev-parse HEAD > face-lighting/preview-commit.txt
+          git diff --name-only 0721da80a98148912aa954101185cf6531633e5b HEAD > face-lighting/changed-files.txt || true
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e LIBGL_ALWAYS_SOFTWARE=true -e GODOT_SILENCE_ROOT_WARNING=1 \
+            barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 xvfb xauth libgl1-mesa-dri libgl1 mesa-utils >/workspace/face-lighting/dependencies.log
+              godot --version | tee /workspace/face-lighting/engine.txt
+              timeout 300s godot --headless --path . --import > /workspace/face-lighting/import.log 2>&1
+              test -s assets/face3d/body.bin
+              timeout 480s xvfb-run -a -s "-screen 0 1280x1024x24" \
+                godot --path . --display-driver x11 --rendering-method gl_compatibility \
+                --audio-driver Dummy --script res://tools/face_lighting_preview.gd \
+                2>&1 | tee /workspace/face-lighting/render.log
+              grep -q FACE_LIGHTING_OK /workspace/face-lighting/render.log
+              if grep -E "SCRIPT ERROR|Parse Error|Shader compilation failed|FACE_LIGHTING_FAIL" /workspace/face-lighting/render.log; then exit 1; fi
+              test "$(find /workspace/face-lighting -name "jogador_*.png" | wc -l)" -eq 10
+            '
+          sha256sum face-lighting/jogador_*.png > face-lighting/image-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-game-face-lighting
+          path: face-lighting/
+          if-no-files-found: error
+          retention-days: 14
