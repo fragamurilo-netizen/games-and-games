@@ -14,9 +14,10 @@ export type PersonV3 = Readonly<{
   needs: Readonly<{ energy: number; stress: number }>
   relationshipIds: readonly RelationshipId[]
 }>
-export type Person = Omit<PersonV3, "needs"> & Readonly<{
+export type PersonV4 = Omit<PersonV3, "needs"> & Readonly<{
   needs: PersonV3["needs"] & Readonly<{ hunger: number; sleepPressure: number }>
 }>
+export type Person = PersonV4 & Readonly<{ sex: "F" | "M" }>
 export type Relationship = Readonly<{
   id: RelationshipId
   a: PersonId
@@ -103,10 +104,14 @@ export type WorldStateV3 = Omit<WorldStateV2, "schemaVersion"> & Readonly<{
   schemaVersion: 3
   events: Readonly<{ contentVersion: 1; seen: readonly string[]; lastOfferedDay: number | null; pending: PendingDecision | null }>
 }>
-export type WorldState = Omit<WorldStateV3, "schemaVersion" | "people" | "employment"> & Readonly<{
+export type WorldStateV4 = Omit<WorldStateV3, "schemaVersion" | "people" | "employment"> & Readonly<{
   schemaVersion: 4
-  people: Readonly<Record<string, Person>>
+  people: Readonly<Record<string, PersonV4>>
   employment: Employment | null
   employmentHistory: readonly EmploymentRecord[]
   routine: Readonly<{ pantryMeals: number; lastCommunityMealDay: number | null }>
+}>
+export type WorldState = Omit<WorldStateV4, "schemaVersion" | "people"> & Readonly<{
+  schemaVersion: 5
+  people: Readonly<Record<string, Person>>
 }>

@@ -1,13 +1,13 @@
 import { routineRules } from "@paralelo/content"
-import type { WorldState, WorldStateV3 } from "../domain/world"
+import type { WorldState, WorldStateV3, WorldStateV4 } from "../domain/world"
 import { nextWeekday, scheduleWorkDay } from "./career"
 import { changeNeeds } from "./needs"
 import { postLedger } from "./finance"
 import { appendEntry } from "../timeline"
 
 // A campanha antiga recebe recursos iniciais, sem inventar necessidades ou faltas passadas.
-export function upgradeWorldV3(base: WorldStateV3): WorldState {
-  const world: WorldState = { ...base, schemaVersion: 4,
+export function upgradeWorldV3(base: WorldStateV3): WorldStateV4 {
+  const world: WorldStateV4 = { ...base, schemaVersion: 4,
     people: Object.fromEntries(Object.entries(base.people).map(([id, person]) => [id, { ...person, needs: { ...person.needs, hunger: 20, sleepPressure: 30 } }])),
     routine: { pantryMeals: routineRules.initialPantryMeals, lastCommunityMealDay: null }, employmentHistory: [],
     employment: base.employment ? { ...base.employment, requiredFromDay: nextWeekday(base.clock.day + 1), consecutiveAbsences: 0, lastAssessedDay: null } : null }

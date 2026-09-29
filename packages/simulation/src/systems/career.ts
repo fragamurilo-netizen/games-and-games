@@ -11,7 +11,7 @@ export function nextWeekday(day: number): number {
   while (day % 7 >= 5) day++
   return day
 }
-export function scheduleWorkDay(world: WorldState, day: number): WorldState {
+export function scheduleWorkDay<W extends Pick<WorldState, "employment" | "playerId" | "scheduled">>(world: W, day: number): W {
   const employment = world.employment!
   const make = (kind: "work-reminder" | "work-attendance", minute: number): ScheduledEvent => ({ id: `schedule:${employment.id}:${kind}` as ScheduleId, kind, at: { day, minute }, personId: world.playerId, employmentId: employment.id, interrupts: true })
   return { ...world, scheduled: [...world.scheduled, make("work-reminder", routineRules.work.reminderMinute), make("work-attendance", routineRules.work.lastStartMinute + 1)] }

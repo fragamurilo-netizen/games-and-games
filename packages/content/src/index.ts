@@ -16,6 +16,13 @@ export const cityNames = {
   first: ["Ana", "Bruno", "Carolina", "Daniel", "Elisa", "Felipe", "Gabriela", "Hugo", "Isabela", "João", "Karina", "Lucas", "Marta", "Nicolas", "Olívia", "Paulo", "Renata", "Samuel", "Teresa", "Vinícius"],
   last: ["Almeida", "Barros", "Campos", "Dias", "Esteves", "Freitas", "Gomes", "Henrique", "Lima", "Moraes", "Nunes", "Oliveira", "Pires", "Ramos", "Santos", "Teixeira", "Vieira", "Costa", "Duarte", "Melo"],
 } as const
+// Sexo usado pela aparência dos personagens criados a partir destas listas.
+export const firstNameSex: Readonly<Record<string, "F" | "M">> = {
+  Alex: "M", Joana: "F", Rafael: "M", Marina: "F", Helena: "F", Bia: "F", Caio: "M", Lia: "F", "André": "M",
+  Ana: "F", Bruno: "M", Carolina: "F", Daniel: "M", Elisa: "F", Felipe: "M", Gabriela: "F", Hugo: "M", Isabela: "F", "João": "M",
+  Karina: "F", Lucas: "M", Marta: "F", Nicolas: "M", "Olívia": "F", Paulo: "M", Renata: "F", Samuel: "M", Teresa: "F", "Vinícius": "M",
+}
+
 export const socialTexts = {
   family: [
     "{person} ligou para saber como você está. A conversa foi parar nas pequenas coisas da semana.",

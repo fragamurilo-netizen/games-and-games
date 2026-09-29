@@ -1,5 +1,5 @@
 import { err, ok, type Result } from "@paralelo/shared"
-import type { WorldState, WorldStateV1, WorldStateV2, WorldStateV3 } from "./domain/world"
+import type { WorldState, WorldStateV1, WorldStateV2, WorldStateV3, WorldStateV4 } from "./domain/world"
 import { jobRoles, courses, lifeEvents, routineRules } from "@paralelo/content"
 import { RNG_STREAMS } from "./rng"
 import { absoluteMinute } from "./time"
@@ -15,7 +15,7 @@ const command = (value: unknown): boolean => object(value) &&
   (["rest", "sleep", "work", "buy-groceries"].includes(String(value.type)) || (value.type === "meal" && (value.source === undefined || ["home", "restaurant", "community"].includes(String(value.source)))) || (value.type === "wait" && integer(value.minutes, 1, 10080)) || (value.type === "contact" && id(value.personId)) || (value.type === "apply-job" && id(value.vacancyId)) || (value.type === "study" && id(value.courseId)) || (value.type === "decide" && id(value.decisionId) && text(value.choiceId)))
 
 // Valida forma e referências antes de converter dados externos em domínio.
-function validateBase(input: unknown, version: 1 | 2 | 3 | 4): Result<unknown, readonly string[]> {
+function validateBase(input: unknown, version: 1 | 2 | 3 | 4 | 5): Result<unknown, readonly string[]> {
   const errors: string[] = []
   if (!object(input)) return err(["Save não é um objeto."])
   if (input.schemaVersion !== version) return err(["Versão de save não suportada; é necessário um migrador explícito."])
@@ -97,7 +97,7 @@ export function validateWorldV1(input: unknown): Result<WorldStateV1, readonly s
   return result.ok ? ok(result.value as WorldStateV1) : result
 }
 
-function validateSlice(input: unknown, version: 2 | 3 | 4): Result<unknown, readonly string[]> {
+function validateSlice(input: unknown, version: 2 | 3 | 4 | 5): Result<unknown, readonly string[]> {
   const base = validateBase(input, version)
   if (!base.ok) return base
   if (!object(input)) return err(["Mundo inválido."])
@@ -159,7 +159,7 @@ export function validateWorldV2(input: unknown): Result<WorldStateV2, readonly s
   const result = validateSlice(input, 2)
   return result.ok ? ok(result.value as WorldStateV2) : result
 }
-function validateEvents(input: unknown, version: 3 | 4): Result<unknown, readonly string[]> {
+function validateEvents(input: unknown, version: 3 | 4 | 5): Result<unknown, readonly string[]> {
   const result = validateSlice(input, version)
   if (!result.ok) return result
   if (!object(input) || !object(input.events)) return err(["Estado de eventos ausente."])
@@ -180,8 +180,8 @@ export function validateWorldV3(input: unknown): Result<WorldStateV3, readonly s
   const result = validateEvents(input, 3)
   return result.ok ? ok(result.value as WorldStateV3) : result
 }
-export function validateWorld(input: unknown): Result<WorldState, readonly string[]> {
-  const result = validateEvents(input, 4)
+function validateRoutine(input: unknown, version: 4 | 5): Result<unknown, readonly string[]> {
+  const result = validateEvents(input, version)
   if (!result.ok) return result
   if (!object(input) || !date(input.clock)) return err(["Mundo inválido."])
   const clock = input.clock, errors: string[] = []
@@ -224,5 +224,16 @@ export function validateWorld(input: unknown): Result<WorldState, readonly strin
       }
     }
   }
+  return errors.length ? err(errors) : ok(input)
+}
+export function validateWorldV4(input: unknown): Result<WorldStateV4, readonly string[]> {
+  const result = validateRoutine(input, 4)
+  return result.ok ? ok(result.value as WorldStateV4) : result
+}
+export function validateWorld(input: unknown): Result<WorldState, readonly string[]> {
+  const result = validateRoutine(input, 5)
+  if (!result.ok) return result
+  const people = object(input) && object(input.people) ? input.people : {}
+  const errors = Object.entries(people).filter(([, person]) => !object(person) || (person.sex !== "F" && person.sex !== "M")).map(([key]) => `Sexo inválido: ${key}.`)
   return errors.length ? err(errors) : ok(input as unknown as WorldState)
 }

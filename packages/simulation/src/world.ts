@@ -4,6 +4,7 @@ import type { PersonV3, Relationship, WorldState, WorldStateV1 } from "./domain/
 import { upgradeWorldV1 } from "./systems/slice"
 import { upgradeWorldV2 } from "./systems/events"
 import { upgradeWorldV3 } from "./systems/routine"
+import { upgradeWorldV4 } from "./systems/appearance"
 import { createRng, draw } from "./rng"
 import { dayFromCalendar } from "./time"
 
@@ -41,8 +42,8 @@ export function createWorld(seed: string): WorldState {
     }
   })
   const clock = { day: 0, minute: 480 }
-  return upgradeWorldV3(upgradeWorldV2(upgradeWorldV1({ schemaVersion: 1, seed, clock, revision: 0, nextId: 2, playerId, city: starterContent.city,
+  return upgradeWorldV4(upgradeWorldV3(upgradeWorldV2(upgradeWorldV1({ schemaVersion: 1, seed, clock, revision: 0, nextId: 2, playerId, city: starterContent.city,
     people, households, residences, relationships, rng,
     scheduled: [{ id: "schedule:mother-first-day" as ScheduleId, at: { day: 0, minute: 1080 }, kind: "mother-message", personId: ids[1]!, interrupts: true }],
-    timeline: [{ id: "timeline:1" as TimelineId, at: clock, kind: "chapter", text: starterContent.opening, personIds: [playerId], cause: "world.created" }], recentCommands: [] } satisfies WorldStateV1)))
+    timeline: [{ id: "timeline:1" as TimelineId, at: clock, kind: "chapter", text: starterContent.opening, personIds: [playerId], cause: "world.created" }], recentCommands: [] } satisfies WorldStateV1))))
 }
