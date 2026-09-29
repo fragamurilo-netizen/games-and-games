@@ -156,8 +156,8 @@ func _head_cell(c: Dictionary, lead: bool) -> Control:
 	b.focus_mode = Control.FOCUS_NONE
 	b.flat = true
 	b.clip_text = true
-	var arrow := ("  ↓" if bool(state.get("desc", true)) else "  ↑") if cur else ""
-	b.text = String(c.get("title", "")) + arrow
+	var arrow := ("↓" if bool(state.get("desc", true)) else "↑") if cur else ""
+	b.text = String(c.get("title", "")) + ((" " + arrow) if arrow != "" else "")
 	b.tooltip_text = String(c.get("tip", ""))
 	b.alignment = _align(String(c.get("align", "l" if lead else "r")))
 	b.custom_minimum_size = Vector2(0.0 if lead else float(c.get("w", 72)), HEAD_H)

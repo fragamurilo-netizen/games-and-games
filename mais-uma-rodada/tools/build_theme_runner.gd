@@ -213,7 +213,7 @@ func _buttons(th: Theme) -> void:
 	# Cabeçalho de tabela (DataTable): texto pequeno, sem fundo; a coluna ordenada acende.
 	th.add_type("TableHead")
 	th.set_type_variation("TableHead", "Button")
-	var thd := sb(clear, 0, clear, 0, 6, 4)
+	var thd := sb(clear, 0, clear, 0, 2, 4)
 	thd.border_color = UIColors.LINE
 	thd.border_width_bottom = 1
 	_button_states(th, "TableHead", thd, thd, thd, thd)

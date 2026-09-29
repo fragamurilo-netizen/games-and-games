@@ -48,6 +48,8 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 			keys = ["apps", "goals", "assists", "form"]
 		"contrato":
 			keys = ["contract", "wage", "value"]
+		"base":
+			keys = ["ovr", "pot", "age", "apps", "goals", "form"] if wide else ["ovr", "pot", "age"]
 		_:
 			if mode == "market":
 				# Celular: o que decide olhar o jogador (nível, idade, preço). Com espaço, o resto.
@@ -76,6 +78,15 @@ static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
 	c["ovr"] = {"key": "ovr", "title": "Geral", "w": 66, "tip": "Overall",
 		"sort": func(p: Player) -> float: return p.ovr_f if exact else float(PlayerRowView.estimate(w, p, p.overall)),
 		"cell": func(p: Player) -> Control: return ovr_cell(w, p, exact)}
+	c["pot"] = {"key": "pot", "title": "Potencial", "w": 100, "tip": "Estimativa da comissão",
+		"sort": func(p: Player) -> float: return YouthManager.potential_stars(w, p),
+		"cell": func(p: Player) -> Control:
+			var st := StarsView.new()
+			st.star_size = 17.0
+			st.stars = YouthManager.potential_stars(w, p)
+			st.color = UIColors.GOLD
+			st.tooltip_text = YouthManager.potential_label_of(w, p)
+			return st}
 	c["age"] = {"key": "age", "title": "Idade", "w": 60, "first": "asc",
 		"text": func(p: Player) -> String: return str(p.age(y)),
 		"sort": func(p: Player) -> int: return p.age(y)}
@@ -202,6 +213,10 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 		return ["Suspenso, %d jogo(s)" % p.suspension, UIColors.RED]
 	if p.intl_duty:
 		return ["Na seleção", UIColors.MUTED]
+	if mode == "youth":
+		if p.age(w.year) >= YouthManager.MAX_AGE:
+			return ["Última temporada na base", UIColors.ORANGE]
+		return [YouthManager.potential_label_of(w, p), UIColors.MUTED]
 	if not p.loan.is_empty():
 		var from := w.club(int(p.loan.get("from", -1))) if p.loan.has("from") else null
 		return [("Emprestado pelo " + from.short_name) if from != null else "Emprestado", UIColors.ORANGE]

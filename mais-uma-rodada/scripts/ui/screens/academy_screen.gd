@@ -3,11 +3,13 @@ extends BaseScreen
 ## juniores, liga jovem continental e Mundial de seleções), os jogos, a estrutura (técnicos por
 ## categoria), a captação (com a peneira) e os revelados pela base.
 
-const TABS := [["players", "Garotos"], ["comps", "Competições"], ["games", "Jogos"], ["staff", "Estrutura"], ["scout", "Captação"], ["grads", "Revelados"]]
+const TABS := [["players", "Garotos"], ["comps", "Torneios"], ["games", "Jogos"], ["staff", "Estrutura"], ["scout", "Captação"]]
 
 var _tab := "players"
 ## Competição aberta na aba de competições ("u20", "u17" ou uma chave de YouthCups).
 var _comp := "u20"
+## Estado das tabelas de cada categoria (ordenação, quantas linhas).
+var _states := {}
 
 
 func _init() -> void:
@@ -34,9 +36,17 @@ func refresh() -> void:
 	UIKit.clear(c)
 	max_content_width = 1700
 	c.add_child(_header(w, club))
-	c.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
-		_tab = k
-		refresh()))
+	if _tab == "grads":
+		# Revelados: seção aberta pelo pé da lista; volta com um toque.
+		var back := UIKit.button("Voltar aos garotos", "TextButton", func():
+			_tab = "players"
+			refresh(), "back")
+		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		c.add_child(back)
+	else:
+		c.add_child(UIKit.tabs(TABS, _tab, func(k: String):
+			_tab = k
+			refresh()))
 	var start := c.get_child_count()
 	match _tab:
 		"players":
@@ -44,6 +54,9 @@ func refresh() -> void:
 				var box := _players(w, club, cat)
 				if box != null:
 					c.add_child(box)
+			c.add_child(UIKit.menu_group([UIKit.menu_row("", "Revelados pela base", "Quem subiu daqui e onde está hoje", func():
+				_tab = "grads"
+				refresh())]))
 		"comps":
 			YouthCups.ensure(w)
 			c.add_child(_comp_picker(w))
@@ -69,14 +82,19 @@ func refresh() -> void:
 	columnize(c, start)
 
 
+## A base numa frase: vagas, estrutura e campanha nas ligas (sem painel de indicadores).
 func _header(w: GameWorld, club: Club) -> Control:
-	var v := UIKit.vbox(6)
-	v.add_child(UIKit.stat_grid([
-		UIKit.stat_tile(str(club.youth_level), "Base · %s" % YouthAcademy.tier_name(club), UIColors.ACCENT),
-		UIKit.stat_tile("%d/%d" % [w.academy.size(), YouthManager.MAX_SIZE], "Garotos"),
-		UIKit.stat_tile(_pos_text(w, "u20"), "No sub-20"),
-		UIKit.stat_tile(_pos_text(w, "u17"), "No sub-17"),
-	], content_width()))
+	var v := UIKit.vbox(2)
+	var bits: Array = ["%d de %d vagas ocupadas." % [w.academy.size(), YouthManager.MAX_SIZE],
+		"Estrutura %s, %d de 100." % [YouthAcademy.tier_name(club).to_lower(), club.youth_level]]
+	var camp: Array = []
+	for key in [["u20", "sub-20"], ["u17", "sub-17"]]:
+		var t := _pos_text(w, String(key[0]))
+		if t != "—":
+			camp.append("%s na liga %s" % [t, key[1]])
+	if not camp.is_empty():
+		bits.append(", ".join(camp).capitalize().substr(0, 1) + ", ".join(camp).substr(1) + ".")
+	v.add_child(UIKit.label(" ".join(bits), "Muted", true))
 	return v
 
 
@@ -93,16 +111,26 @@ func _pos_text(w: GameWorld, key: String) -> String:
 # Garotos
 # ---------------------------------------------------------------------------
 
+## Uma categoria: título e a mesma tabela do elenco profissional (rosto, nome, posição), com o
+## potencial estimado em estrelas. Tocar abre a ficha do garoto.
 func _players(w: GameWorld, club: Club, cat: Array) -> Control:
 	var list := YouthManager.in_category(w, String(cat[0]))
-	var card := UIKit.card("Card", 6)
-	card.add_child(UIKit.section_header("%s · %s · %d" % [cat[1], cat[2], list.size()]))
+	var v := UIKit.vbox(UITokens.S1)
+	var head := UIKit.hbox(UITokens.S2)
+	var t := UIKit.label(String(cat[1]), "Section")
+	head.add_child(t)
+	var sub := UIKit.label("%s, %d" % [cat[2], list.size()], "Muted")
+	sub.size_flags_vertical = Control.SIZE_SHRINK_END
+	head.add_child(sub)
+	v.add_child(head)
 	if list.is_empty():
-		card.add_child(UIKit.label("Nenhum garoto nesta categoria.", "Muted", true))
-		return UIKit.card_panel(card)
-	for p: Player in list:
-		card.add_child(UIKit.tap_row(_kid_row(w, club, p), func(): _actions(p)))
-	return UIKit.card_panel(card)
+		v.add_child(UIKit.state_block("empty", "Nenhum garoto nesta categoria.", "A captação traz novos nomes a cada temporada."))
+		return v
+	var key := String(cat[0])
+	if not _states.has(key):
+		_states[key] = {"sort": "ovr", "desc": true}
+	v.add_child(PlayerTable.make(w, list, "youth", _states[key], func(p: Player): _actions(p), [], "base", content_width() >= 760.0))
+	return v
 
 
 func _kid_row(w: GameWorld, club: Club, p: Player) -> Control:
@@ -382,8 +410,11 @@ func _scouting(w: GameWorld) -> Control:
 		refresh(), 2 if UILayout.is_wide() else 1))
 	card.add_child(UIKit.section_header("Setor prioritário"))
 	var fitems: Array = []
+	# Siglas no seletor (cabem no celular); o nome inteiro fica na dica do botão.
+	var short := {"gol": "GOL", "defesa": "DEF", "meio": "MEI", "ataque": "ATA"}
 	for fk in YouthManager.FOCUS_ORDER:
-		fitems.append([fk, String(YouthManager.FOCUS[fk]["name"])])
+		var nm := String(YouthManager.FOCUS[fk]["name"])
+		fitems.append([fk, String(short.get(fk, nm))])
 	card.add_child(UIKit.segment(fitems, String(s["focus"]), func(fk: String):
 		YouthManager.set_focus(w, fk)
 		GameManager.save_now()

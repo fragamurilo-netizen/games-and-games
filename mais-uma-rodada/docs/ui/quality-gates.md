@@ -37,12 +37,15 @@ clube de nome comprido, lesão, suspensão, folha estourada).
   Substituir em destaque (Pausar, velocidade e "Mais" compactos); substituição em dois toques
   (quem sai, quem entra); painel de números numa folha (Mais › Painel da partida).
   Captura das folhas: `tools/match_shots.gd -- --sheets=1`.
+- **Base**: abas Garotos, Torneios, Jogos, Estrutura, Captação; cabeçalho em frase; garotos por
+  categoria na mesma tabela do elenco (Geral, Potencial em estrelas, Idade; mais colunas no
+  tablet), duas categorias lado a lado deitado; "Revelados pela base" como atalho.
 
 ## Pendente
 
 - Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
   de toque e de teclado; precisa de um controle no `main.gd`.
-- Base, Treino, Finanças, Diretoria, Notícias, Conversas, Seleções, Competições e Histórico
+- Treino, Finanças, Diretoria, Notícias, Conversas, Seleções, Competições e Histórico
   ainda usam o sistema, mas não foram recompostos (fase seguinte).
 - `tools/match_shots.gd` termina com erros de script ao fechar ("lock" em nulo, "main" liberado):
   a ferramenta sai enquanto a rodada ainda fecha na thread. Já acontecia antes da UI 2.0; a
