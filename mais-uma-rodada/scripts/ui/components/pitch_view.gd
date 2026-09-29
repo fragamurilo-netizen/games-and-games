@@ -1023,8 +1023,10 @@ func _draw_chips(r: Rect2) -> void:
 		var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, p + Vector2(-nw * 0.5, fs * 0.5), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
 		var rating: int = int(ch.get("rating", 0))
-		var nm: String = ch.get("name", "")
 		var nfs := int(maxf(15.0, rad * 0.62))
+		# Nome de camisa: sobrenome composto vira a última palavra; se ainda não couber no espaço
+		# entre dois jogadores, corta com reticências (o nome inteiro está no toque/perfil).
+		var nm := _shirt_name(String(ch.get("name", "")), small, nfs, _wid_px(r) * 0.2)
 		var label := nm + ("  %d" % rating if rating > 0 else "")
 		var tw := small.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
 		var top := p.y + sz * 0.5 + 4.0
@@ -1039,6 +1041,23 @@ func _draw_chips(r: Rect2) -> void:
 			var by := top + nfs * 1.3 + 3.0
 			draw_rect(Rect2(p.x - bw * 0.5, by, bw, 4), Color(0, 0, 0, 0.5))
 			draw_rect(Rect2(p.x - bw * 0.5, by, bw * cond / 100.0, 4), UIColors.D_ORANGE if cond >= 70.0 else UIColors.D_RED)
+
+
+func _shirt_name(full: String, font: Font, fs: int, max_w: float) -> String:
+	var cap := ""
+	if full.ends_with(" (C)"):
+		cap = " (C)"
+		full = full.trim_suffix(" (C)")
+	var nm := full
+	if font.get_string_size(nm + cap, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		var parts := nm.replace("-", " ").split(" ", false)
+		if parts.size() > 1:
+			nm = parts[parts.size() - 1]
+	while nm.length() > 3 and font.get_string_size(nm + "…" + cap, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		nm = nm.substr(0, nm.length() - 1)
+	if nm != full and not full.ends_with(nm):
+		nm += "…"
+	return nm + cap
 
 
 ## Camisa de futebol vista de frente: corpo na cor principal, mangas e gola na segunda cor,

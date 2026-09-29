@@ -62,8 +62,18 @@ func refresh() -> void:
 		split.add_child(right)
 		c.add_child(split)
 	left.add_child(_formation_header(w, club, sheet))
-	for n in _notes:
-		left.add_child(UIKit.colored(n, UIColors.ORANGE, "Small", true))
+	# Avisos da escalação: dois à vista; o resto num popover junto deles (o campo não desce).
+	var note_box: VBoxContainer = right if wide else left
+	for n in _notes.slice(0, 2):
+		note_box.add_child(UIKit.colored(n, UIColors.ORANGE, "Small", true))
+	if _notes.size() > 2:
+		var rest: Array = _notes.slice(2)
+		var more := UIKit.button("E mais %d aviso(s)" % rest.size(), "TextButton", Callable())
+		more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		more.pressed.connect(func():
+			var l := UIKit.label("\n".join(PackedStringArray(rest)), "", true)
+			UIManager.popover(l, more))
+		note_box.add_child(more)
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "lineup"

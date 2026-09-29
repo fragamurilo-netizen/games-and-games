@@ -265,6 +265,8 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 		g.set_color(0, Color(UIColors.BG, 0.0))
 		g.set_color(1, Color(UIColors.BG, 0.92))
 	top_bar.visible = screen.show_top
+	# Celular deitado: a altura é curta, a barra superior encolhe.
+	top_bar.custom_minimum_size.y = 72 if UILayout.is_landscape() and not UILayout.is_tablet() else 88
 	bottom_nav.visible = screen.show_nav and GameManager.has_career()
 	if screen.show_top:
 		var club: Club = GameManager.user_club() if GameManager.has_career() else null

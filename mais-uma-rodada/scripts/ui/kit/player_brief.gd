@@ -9,7 +9,7 @@ static func make(w: GameWorld, p: Player, exact: bool) -> Control:
 	var club := w.club(p.club_id) if p.club_id >= 0 else null
 	var hero := IdentityBand.wrap(club, 104.0, 150.0)
 	var body: VBoxContainer = hero[1]
-	var top := UIKit.hbox(UITokens.S3)
+	var top := UIKit.hbox(UITokens.S6)
 	var pv := UIKit.portrait(p, club, w.year, 118)
 	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	top.add_child(pv)

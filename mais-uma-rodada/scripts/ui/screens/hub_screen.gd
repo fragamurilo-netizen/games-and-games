@@ -163,8 +163,8 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(cr)
 	var n := UIKit.label(cl.short_name, "H2")
-	n.uppercase = true
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	n.tooltip_text = cl.name
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(n)
 	var text := ""

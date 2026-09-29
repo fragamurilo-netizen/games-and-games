@@ -31,6 +31,8 @@ func _start() -> void:
 			runner.set("only", a.substr(7))
 		if a.begins_with("--rounds="):
 			runner.set("rounds", int(a.substr(9)))
+		if a == "--ugly":
+			runner.set("ugly", true)
 		if a == "--light":
 			runner.set("light", true)
 		if a.begins_with("--nt="):

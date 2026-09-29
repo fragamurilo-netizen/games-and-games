@@ -171,7 +171,9 @@ func refresh() -> void:
 				refresh()
 			else:
 				UIManager.push("player", {"id": p.id})
-		var tbl := PlayerTable.make(w, list, "squad", _table_state, tap, [], _cols, wide)
+		# Sem painel de detalhe mas com largura de sobra (tablet em pé): mais colunas.
+		var dense := wide or content_width() >= 760.0
+		var tbl := PlayerTable.make(w, list, "squad", _table_state, tap, [], _cols, dense and not wide or content_width() >= 1500.0)
 		if wide:
 			tbl.highlight = func(p: Player) -> bool: return p.id == _sel
 			tbl._build()

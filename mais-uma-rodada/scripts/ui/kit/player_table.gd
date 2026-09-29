@@ -50,8 +50,13 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 			keys = ["contract", "wage", "value"]
 		_:
 			keys = ["ovr", "age", "price", "club", "form", "apps", "goals", "value"] if mode == "market" else ["ovr", "age", "cond", "morale", "form", "apps", "goals", "assists", "contract", "wage", "value"]
-	if wide and view != "" and not "age" in keys:
-		keys.insert(1 if keys[0] == "ovr" else 0, "age")
+	# Com espaço sobrando (tablet em pé, desktop), a visão ganha colunas em vez de vazio.
+	if wide and view != "":
+		var more: Dictionary = {"geral": ["age", "form", "apps", "contract"], "forma": ["age", "cond", "morale"],
+			"temporada": ["age", "ovr"], "contrato": ["age", "ovr", "morale"]}
+		for k in more.get(view, []):
+			if not k in keys:
+				keys.append(k)
 	var out: Array = [c["pos"]]
 	for k in keys:
 		if c.has(k):
@@ -197,7 +202,7 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 		var from := w.club(int(p.loan.get("from", -1))) if p.loan.has("from") else null
 		return [("Emprestado pelo " + from.short_name) if from != null else "Emprestado", UIColors.ORANGE]
 	if own and p.contract_end <= w.year:
-		return ["Fim de contrato", UIColors.ORANGE]
+		return ["Último ano", UIColors.ORANGE]
 	if p.yellow_acc >= int(DatabaseManager.squad_rules()["yellow_limit"]) - 1 and own:
 		return ["Pendurado", UIColors.ORANGE]
 	if p.transfer_listed:

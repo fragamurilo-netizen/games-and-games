@@ -16,6 +16,9 @@ var nt := ""
 var rounds := 3
 ## Com --only: modo claro, clube pelo nome (parte do nome basta) e tingimento do fundo (-1 = o salvo).
 var light := false
+## Dados feios de propósito (nomes enormes, clube de nome comprido, lesão, suspensão,
+## empréstimo), só em memória, para testar colisões e cortes.
+var ugly := false
 var club_name := ""
 var tint := -1
 
@@ -234,6 +237,14 @@ func _only_pass() -> void:
 	UIManager.goto("hub")
 	await _frames(6)
 	UIManager.close_all_modals()
+	if ugly:
+		_uglify(w)
+	# Capturas de layout sem avisos de conquista pendentes por cima (o aviso tem captura própria).
+	w.pending_achievements.clear()
+	for b in ["AchievementBanner", "AchievementBannerDone"]:
+		var n := get_tree().root.get_node_or_null(b)
+		if n != null:
+			n.queue_free()
 	for spec in only.split(","):
 		if spec.begins_with("~article"):
 			await _article_shot(w, spec.substr(9))
@@ -425,3 +436,31 @@ func _article_shot(w: GameWorld, what: String) -> void:
 	await _frames(6)
 	await _shot(prefix + "article_" + (what if what != "" else "any"))
 	UIManager.close_all_modals()
+
+
+func _uglify(w: GameWorld) -> void:
+	var sq := w.squad(w.user_club())
+	sq.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+	var names := [["Trenton", "Alexandre-Arnaldo"], ["João Pedro", "da Silva Oliveira Albuquerque"], ["Maximiliano", "Wojciechowski-Bergkamp"]]
+	for i in mini(names.size(), sq.size()):
+		var p: Player = sq[i]
+		p.first_name = names[i][0]
+		p.last_name = names[i][1]
+		p.known_as = ""
+	if sq.size() > 5:
+		sq[3].injury_weeks = 6
+		sq[3].injury_name = "Lesão muscular na coxa"
+		sq[4].suspension = 2
+		sq[5].contract_end = w.year
+		sq[5].wage = 1_450_000
+	var opp_ids := w.clubs_in_league(w.user_club().league_id)
+	for c: Club in opp_ids.slice(0, 3):
+		if not w.is_user_club(c.id):
+			c.short_name = "Gimnasia y Esgrima de La Plata"
+			c.name = "Club de Gimnasia y Esgrima de La Plata Sur"
+			break
+	var nf := FixtureManager.next_fixture_for(w, w.user_club_id)
+	if nf != null:
+		var o := w.club(nf.opponent_of(w.user_club_id))
+		o.short_name = "Sportverein Mönchenwaldbach"
+		o.name = "Sportverein Mönchenwaldbach 1900 e.V."
