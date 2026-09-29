@@ -43,10 +43,10 @@ const LAYOUT_HINTS := {
 	"neon": "Vidro escuro, filetes acesos na cor da competição e números grandes.",
 }
 const LAYOUT_OF := {
-	"UCL": "capsula", "LIB": "classico", "CWC": "capsula", "CCC": "angular", "CAF": "tv", "AFC": "angular",
-	"ENG1": "compacto", "ENG2": "faixa", "ESP1": "angular", "GER1": "tv", "ITA1": "neon", "FRA1": "angular",
+	"UCL": "faixa", "LIB": "classico", "CWC": "faixa", "CCC": "angular", "CAF": "tv", "AFC": "angular",
+	"ENG1": "compacto", "ENG2": "faixa", "ESP1": "angular", "GER1": "tv", "ITA1": "painel", "FRA1": "angular",
 	"POR1": "faixa", "NED1": "painel", "BRA1": "compacto", "BRA2": "tv", "ARG1": "classico", "MEX1": "angular",
-	"USA1": "painel", "KSA1": "neon", "JPN1": "angular", "TUR1": "classico", "UEL": "neon", "SUD": "painel",
+	"USA1": "painel", "KSA1": "tv", "JPN1": "angular", "TUR1": "classico", "UEL": "angular", "UECL": "tv", "SUD": "painel",
 }
 
 
@@ -105,7 +105,10 @@ static func layout_for(comp: String, with_editor: bool = true) -> String:
 		return String(custom[comp])
 	if LAYOUT_OF.has(comp):
 		return String(LAYOUT_OF[comp])
-	return LAYOUTS[absi(hash(comp)) % LAYOUTS.size()]
+	# Lower divisions share the country's broadcast grammar instead of choosing
+	# arbitrary effects from a hash. Competition/editor overrides still win.
+	var nation := String(DatabaseManager.league_cfg(comp).get("nation", "")) if DatabaseManager.has_league(comp) else String(DatabaseManager.cup_cfg(comp).get("nation", ""))
+	return String(LAYOUT_OF.get(nation + "1", "tv"))
 
 
 ## Liga: fundo escuro na cor da marca da liga e destaque com a segunda cor (como a transmissão

@@ -394,6 +394,7 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 		card.add_child(UIKit.label("Costuma jogar no %s, %s." % [opp_sheet.formation, String(tac["styles"][opp_sheet.style]["name"]).to_lower()], "Small"))
 	card.add_child(UIKit.label("Filosofia: " + ClubPhilosophy.summary(opp), "Small", true))
 	var h2h := FootballMemory.head_to_head(w, club.id, opp.id)
+	card.add_child(UIKit.button("Ver confrontos anteriores", "GhostButton", func(): UIManager.push("rivalry", {"a": club.id, "b": opp.id}), "ball"))
 	if int(h2h["games"]) > 0:
 		var last: Array = h2h["recent"]
 		var tail := ""

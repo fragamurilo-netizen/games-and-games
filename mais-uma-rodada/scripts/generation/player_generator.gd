@@ -97,7 +97,7 @@ static func _hometown_table(nation: String) -> Array:
 
 ## Cidade natal: às vezes a cidade do clube (se for do mesmo país), senão uma cidade do país pelo tamanho.
 static func pick_hometown(rng: RandomNumberGenerator, nation: String, club_city: String) -> String:
-	if club_city != "" and rng.randf() < 0.3:
+	if club_city != "" and NationalityManager.city_in(club_city, nation) and rng.randf() < 0.3:
 		return club_city
 	var t := _hometown_table(nation)
 	if t[0].is_empty():
@@ -221,6 +221,7 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.last_name = names["last"]
 	p.nickname = names["nickname"]
 	p.known_as = names["known_as"]
+	NationalityManager.generate(p)
 	return p
 
 
@@ -608,6 +609,7 @@ static func sign_to_club(world: GameWorld, rng: RandomNumberGenerator, p: Player
 	p.contract_end = world.year + years
 	p.wage = Valuation.initial_wage(p, club, world.year, rng)
 	p.spells = [{"c": club.id, "cn": club.short_name, "from": p.joined_year, "to": 0, "a": 0, "g": 0, "as": 0}]
+	NationalityManager.sync_residence(world, p)
 	Valuation.update_value(p, world.year)
 
 
@@ -681,7 +683,7 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	sign_to_club(world, rng, p, club, false)
 	p.contract_end = world.year + 3
 	p.wage = Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5)))
-	if p.nationality == club.nation and rng.randf() < 0.55 and not ClubPolicy.of(club).has("only"):
+	if NationalityManager.birth_country(p) == club.nation and rng.randf() < 0.55 and not ClubPolicy.of(club).has("only"):
 		p.hometown = club.city
 	return p
 

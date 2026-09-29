@@ -72,6 +72,7 @@ func refresh() -> void:
 			ident.free()
 			if not _own():
 				cards.append(_season_card(w, club))
+				cards.append(UIKit.button("Confrontos com o meu clube", "GhostButton", func(): UIManager.push("rivalry", {"a": w.user_club_id, "b": club.id}), "ball"))
 			cards.append(ReputationScreen.club_card(w, club))
 			cards.append(_dna_card(w, club))
 			cards.append(SocialPost.mini_card(w, club.id, -1))
@@ -140,6 +141,7 @@ func _club_home(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 		["Comissão técnica", "", func(): UIManager.push("relations", {"tab": "staff"})],
 	])
 	_group(right, "Competição", [
+		["Confrontos", "Retrospecto por adversário", func(): UIManager.push("rivalry", {"a": club.id})],
 		["Calendário", ("Próximo: " + next_txt) if next_txt != "" else "Temporada encerrada", func(): UIManager.push("club", {"tab": "calendar"})],
 		["Classificação", "%s no %s" % [pos_txt, w.league_name(club.league_id)] if played else w.league_name(club.league_id), func(): UIManager.push("table")],
 		["Seleções", "", func(): UIManager.push("national")],

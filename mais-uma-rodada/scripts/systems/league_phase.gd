@@ -53,7 +53,42 @@ static func extend_calendar(calendar: Array) -> Array:
 	return calendar
 
 
-static func draw(world: GameWorld, ids: Array) -> Array:
+static func rounds_for(id: String) -> Array:
+	if id != "UECL":
+		return ROUNDS
+	# Six pots of six: one opponent per pot. The pot round-robin supplies
+	# five dates; the sixth pairs clubs inside their own pot. Orient cycles
+	# so every club has one home and one away against each paired pot (1/2,3/4,5/6).
+	var rounds: Array = []
+	var own: Array = []
+	for p in 6:
+		for i in range(0, 6, 2):
+			var pair := [p * 6 + i, p * 6 + i + 1]
+			own.append(pair if p % 2 == 0 else [pair[1], pair[0]])
+	rounds.append(own)
+	var pots := [0, 1, 2, 3, 4, 5]
+	for r in 5:
+		var games: Array = []
+		for k in 3:
+			var a: int = mini(pots[k], pots[5 - k])
+			var b: int = maxi(pots[k], pots[5 - k])
+			for i in 6:
+				var home_a := (i % 2 != 0) if a / 2 == b / 2 else (a % 2 == b % 2)
+				games.append([a * 6 + i, b * 6 + i] if home_a else [b * 6 + i, a * 6 + i])
+		rounds.append(games)
+		pots.insert(1, pots.pop_back())
+	return rounds
+
+
+static func matchdays(cup: Cup) -> int:
+	var count := 0
+	for f: Fixture in cup.fixtures:
+		if f.stage == Fixture.STAGE_GROUP:
+			count = maxi(count, f.round + 1)
+	return count
+
+
+static func draw(world: GameWorld, ids: Array, id: String = "UCL") -> Array:
 	if ids.size() != 36:
 		return []
 	var seeds := ids.duplicate()
@@ -61,14 +96,16 @@ static func draw(world: GameWorld, ids: Array) -> Array:
 		var ca := CupManager._coef(world, a)
 		var cb := CupManager._coef(world, b)
 		return ca > cb or (is_equal_approx(ca, cb) and a < b))
-	var holder := CupManager.last_winner(world, "C:UCL")
+	var holder := CupManager.last_winner(world, "C:" + id)
 	if seeds.has(holder):
 		seeds.erase(holder)
 		seeds.push_front(holder)
 	var neighbours: Array = []
 	for i in 36:
 		neighbours.append([])
-	for row in ROUNDS:
+	var rounds := rounds_for(id)
+	var pot_size := 6 if id == "UECL" else 9
+	for row in rounds:
 		for pair in row:
 			neighbours[pair[0]].append(pair[1])
 			neighbours[pair[1]].append(pair[0])
@@ -77,8 +114,8 @@ static func draw(world: GameWorld, ids: Array) -> Array:
 	# Swap only within pots, preserving sporting seeding and all fixture invariants.
 	for attempt in 40:
 		var order: Array = []
-		for p in 4:
-			var pot := seeds.slice(p * 9, p * 9 + 9)
+		for p in 36 / pot_size:
+			var pot := seeds.slice(p * pot_size, (p + 1) * pot_size)
 			RngUtil.shuffle(world.rng, pot)
 			order.append_array(pot)
 		var nations: Array = []
@@ -92,7 +129,7 @@ static func draw(world: GameWorld, ids: Array) -> Array:
 			if score == 0:
 				return order
 			var a := world.rng.randi_range(0, 35)
-			var b := (a / 9) * 9 + world.rng.randi_range(0, 8)
+			var b := (a / pot_size) * pot_size + world.rng.randi_range(0, pot_size - 1)
 			if nations[a] == nations[b]:
 				continue
 			var affected: Array = [a, b]
@@ -110,7 +147,7 @@ static func draw(world: GameWorld, ids: Array) -> Array:
 				_swap(nations, a, b)
 	# A mod can create an impossible association distribution. Keep the complete
 	# 36-team schedule rather than falling into an invalid 18-tie knockout bracket.
-	push_warning("Champions draw: association restrictions relaxed for custom participant distribution.")
+	push_warning("%s draw: association restrictions relaxed for custom participant distribution." % id)
 	return best
 
 
@@ -135,7 +172,7 @@ static func _cost(nations: Array, neighbours: Array, vertices: Array) -> int:
 
 
 static func setup(world: GameWorld, season: SeasonState, cup: Cup) -> bool:
-	var ids := draw(world, cup.club_ids)
+	var ids := draw(world, cup.club_ids, cup.id)
 	if ids.is_empty():
 		return false
 	cup.league_phase = true
@@ -149,8 +186,9 @@ static func setup(world: GameWorld, season: SeasonState, cup: Cup) -> bool:
 		table[cid]["coef"] = CupManager._coef(world, cid)
 		table[cid]["name"] = world.club(cid).short_name
 	cup.groups = [{"n": "Fase de liga", "clubs": ids.duplicate(), "table": table}]
-	for r in 8:
-		for pair in ROUNDS[r]:
+	var rounds := rounds_for(cup.id)
+	for r in rounds.size():
+		for pair in rounds[r]:
 			var f := Fixture.new()
 			f.home = ids[pair[0]]
 			f.away = ids[pair[1]]

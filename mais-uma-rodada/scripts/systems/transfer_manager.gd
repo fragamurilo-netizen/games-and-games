@@ -504,6 +504,7 @@ static func _move_loan(world: GameWorld, p: Player, owner: Club, borrower: Club)
 	owner.player_ids.erase(p.id)
 	borrower.player_ids.append(p.id)
 	p.club_id = borrower.id
+	NationalityManager.sync_residence(world, p, true)
 	p.loan = {"from": owner.id, "until": world.year}
 	p.transfer_listed = false
 	p.spells.append({"c": borrower.id, "cn": borrower.short_name + " (empr.)", "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0, "k": "e"})
@@ -530,9 +531,11 @@ static func return_loans(world: GameWorld) -> Array:
 		p.loan = {}
 		if owner == null:
 			p.club_id = -1
+			NationalityManager.sync_residence(world, p, true)
 			continue
 		owner.player_ids.append(p.id)
 		p.club_id = owner.id
+		NationalityManager.sync_residence(world, p, true)
 		p.spells.append({"c": owner.id, "cn": owner.short_name, "from": world.year, "to": 0, "a": 0, "g": 0, "as": 0})
 		if world.is_user_club(owner.id):
 			back.append(p)
@@ -571,6 +574,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	buyer.player_ids.append(p.id)
 	buyer.cohesion = maxf(20.0, buyer.cohesion - 2.5)
 	p.club_id = buyer.id
+	NationalityManager.sync_residence(world, p, true)
 	p.wage = wage
 	p.contract_end = world.year + clampi(years, 1, 5)
 	p.joined_year = world.year
@@ -748,6 +752,7 @@ static func release(world: GameWorld, p: Player) -> int:
 	world.transfer_log.append(t)
 	ClubRecords.on_transfer(world, t)
 	p.club_id = -1
+	NationalityManager.sync_residence(world, p, true)
 	p.wage = 0
 	p.transfer_listed = false
 	p.contract_end = world.year
@@ -1237,6 +1242,7 @@ static func release_free(world: GameWorld, p: Player) -> void:
 		club.player_ids.erase(p.id)
 	_close_spell(world, p)
 	p.club_id = -1
+	NationalityManager.sync_residence(world, p, true)
 	p.wage = 0
 	p.transfer_listed = false
 	world.mark_free_agents_dirty()

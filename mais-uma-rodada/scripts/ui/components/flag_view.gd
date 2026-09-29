@@ -28,6 +28,13 @@ func _draw() -> void:
 	var fh := fw / 1.5
 	var r := Rect2((w - fw) * 0.5, (h - fh) * 0.5, fw, fh)
 	var spec := _spec
+	if spec.is_empty():
+		# A federation without artwork is identified by its code, never a made-up flag.
+		var font := ThemeDB.fallback_font
+		var fs := maxi(8, int(fh * 0.55))
+		var label_size := font.get_string_size(code, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+		draw_string(font, Vector2(r.get_center().x - label_size.x * 0.5, r.get_center().y + fs * 0.35), code, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.TEXT)
+		return
 	var cols: Array = spec.get("c", ["#888888"])
 	var p: String = spec.get("p", "solid")
 	match p:

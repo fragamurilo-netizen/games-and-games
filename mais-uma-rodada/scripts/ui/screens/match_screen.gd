@@ -473,7 +473,11 @@ func _build_scoreboard(home: Club, away: Club) -> Control:
 
 ## Condições do jogo: clima (ícone), temperatura, dia/noite, altitude e público.
 func _conditions_row() -> Control:
-	var row := UIKit.hbox(8)
+	var body := UIKit.vbox(UITokens.S1)
+	var venue := UIKit.label("Campo neutro" if _sim.neutral else _sim.teams[0].club.stadium, "Small", true)
+	venue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(venue)
+	var row := UIKit.hbox(UITokens.S1)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	var wx: Dictionary = _sim.wx
 	var bits: Array = []
@@ -487,9 +491,12 @@ func _conditions_row() -> Control:
 		bits.append("%s torcedores" % Fmt.thousands(_sim.attendance))
 	else:
 		bits.append("portões fechados")
-	var l := UIKit.label(" · ".join(bits), "Small")
+	var l := UIKit.label(" · ".join(bits), "Small", true)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(l)
-	return row
+	body.add_child(row)
+	return body
 
 
 func _build_controls() -> void:

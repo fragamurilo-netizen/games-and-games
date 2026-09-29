@@ -828,7 +828,11 @@ func _player_editor(c: VBoxContainer) -> void:
 		if String(codes[i]) == p.nationality:
 			nob.select(i)
 	nob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	nob.item_selected.connect(func(i: int): p.nationality = String(codes[i]))
+	nob.item_selected.connect(func(i: int):
+		NationalityManager.ensure(w, p)
+		p.nationality = String(codes[i])
+		# Editing citizenship does not rewrite birthplace or the international record.
+		p.origin["passports"][p.nationality] = {"since": p.birth_year, "basis":"parent", "eligible":true})
 	nat_row.add_child(nob)
 	names.add_child(nat_row)
 	names.add_child(_stepper("Ano de nascimento", p.birth_year, w.year - 45, w.year - 15, func(v: int): p.birth_year = v,

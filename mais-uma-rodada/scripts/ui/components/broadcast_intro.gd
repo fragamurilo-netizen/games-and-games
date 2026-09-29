@@ -9,6 +9,8 @@ extends RefCounted
 
 const RITUAL_TEXT := {
 	"ucl": "Toca o hino da competição. Noite de gala no estádio.",
+	"uel": "Liga Europa: os times entram para a noite europeia.",
+	"uecl": "Conference League: começa a caminhada continental.",
 	"libertad": "Papel picado e sinalizadores: noite de copa continental.",
 	"samba": "Bandeirões, bateria e fogos: a torcida recebe o time.",
 	"hinchada": "Papelitos e fumaça: a hinchada canta sem parar.",
@@ -78,6 +80,9 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 	vs.add_child(x)
 	vs.add_child(_side(away, _table_text(w, fx, away)))
 	root.add_child(vs)
+	var record := FootballMemory.head_to_head(w, home.id, away.id)
+	if int(record["games"]) > 0:
+		root.add_child(UIKit.label("Últimos encontros: %d vitórias do %s, %d empates, %d do %s." % [record["wins"], home.short_name, record["draws"], away.short_name], "Small", true))
 	if sim.derby:
 		var d := UIKit.pill("CLÁSSICO", UIColors.RED, 18)
 		d.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -129,7 +134,8 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 			var col := UIKit.vbox(0)
 			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			col.add_child(UIKit.label(t.club.short_name, "Caps"))
-			col.add_child(UIKit.label(star.display_name(), "H2"))
+			col.add_child(UIKit.label(star.display_name(), "H2", true))
+			col.add_child(UIKit.label(star.club_tenure(w.year), "Small", true))
 			var sg: int = star.stats[Player.S_GOALS] if star.stats.size() > Player.S_GOALS else 0
 			var sa: int = star.stats[Player.S_ASSISTS] if star.stats.size() > Player.S_ASSISTS else 0
 			col.add_child(UIKit.label("%s · %d gols · %d assistências na temporada" % [Pos.code(star.position), sg, sa], "Small", true))

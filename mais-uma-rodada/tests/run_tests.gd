@@ -1340,7 +1340,7 @@ func _test_hearts_manager() -> void:
 		if p.heart >= 0:
 			fans += 1
 			var hc := w.club(p.heart)
-			check(hc != null and hc.nation == p.nationality, "time de coração de outro país")
+			check(hc != null and hc.nation == NationalityManager.birth_country(p), "time de coração fora do país onde cresceu")
 			if hc != null and hc.city == p.hometown:
 				local += 1
 		if p.heart_known:
@@ -2345,7 +2345,8 @@ func _test_preseason() -> void:
 func _test_second_cups() -> void:
 	var w := WorldGenerator.generate(4242, "padrao")
 	for cid in ["UEL", "UECL", "SUD"]:
-		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == 32, "%s sem 32 clubes" % cid)
+		var expected := 32 if cid == "SUD" else 36
+		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == expected, "%s sem %d clubes" % [cid, expected])
 	var seen := {}
 	for cid in w.season.cups:
 		if not CupManager.is_international(cid):
@@ -2363,6 +2364,12 @@ func _test_second_cups() -> void:
 	uel.champion = uel.club_ids[0]
 	var q := CupManager.compute_qualified(w)
 	check(q["UCL"].has(uel.champion) and not q["UEL"].has(uel.champion), "campeão da Europa League fora da Liga dos Campeões")
+	var uecl: Cup = w.season.cups["UECL"]
+	uecl.champion = uecl.club_ids[-1]
+	q = CupManager.compute_qualified(w)
+	check(q["UEL"].has(uecl.champion) or q["UCL"].has(uecl.champion), "campeão da Conference sem vaga superior")
+	for id in ["UCL", "UEL", "UECL"]:
+		check(q[id].size() == 36, "vagas de campeão alteraram tamanho de " + id)
 	var all := {}
 	for cid in q:
 		for club in q[cid]:
@@ -2392,7 +2399,7 @@ func _test_national_teams() -> void:
 	if tours.has("WC2030"):
 		var wc: Dictionary = tours["WC2030"]
 		check((wc["teams"] as Array).size() == 48 and wc["teams"].has("ESP"), "Copa do Mundo sem 48 seleções ou sem a sede")
-		check((wc["ko"] as Array).size() == 5 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "", "mata-mata da Copa incompleto")
+		check((wc["ko"] as Array).size() == 6 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "" and String(wc.get("third", "")) != "", "mata-mata da Copa incompleto (inclui terceiro lugar)")
 		var uefa := 0
 		for t in wc["teams"]:
 			if DatabaseManager.nation(t).get("confed", "") == "UEFA":

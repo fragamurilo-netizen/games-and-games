@@ -384,11 +384,16 @@ static func compute_qualified(world: GameWorld) -> Dictionary:
 		if cup == null or cup.champion < 0:
 			continue
 		var dest: String = id if cup_level(id) == 1 else _top_cup_of_confed(String(cfg(id).get("confed", "")))
+		if id == "UECL":
+			dest = "UEL"
+			# A Champions place already earned through the league takes precedence.
+			if Array(out.get("UCL", [])).has(cup.champion):
+				continue
 		holders.append([cup.champion, dest])
 	for h in holders:
 		_place_holder(world, out, int(h[0]), String(h[1]), protected)
 		protected.append(int(h[0]))
-	return out
+	return _complete_qualified(world, out, protected)
 
 
 ## Primeira temporada: não há tabela anterior — classificam os de maior reputação de cada país.
@@ -402,6 +407,39 @@ static func initial_qualified(world: GameWorld) -> Dictionary:
 		ids.sort_custom(func(a, b): return world.club(a).reputation > world.club(b).reputation or (world.club(a).reputation == world.club(b).reputation and a < b))
 		ranked[nation] = ids
 	return _fill_by_level(world, ranked)
+
+
+## Title-holder cascades can leave vacancies or a 37th club. Keep protected
+## winners, fill vacancies from eligible domestic leagues and avoid duplicates.
+static func _complete_qualified(world: GameWorld, out: Dictionary, protected: Array) -> Dictionary:
+	var used := {}
+	var ids := continental_ids()
+	ids.sort_custom(func(a, b): return cup_level(a) < cup_level(b))
+	for id in ids:
+		var target := int(cfg(id).get("teams", out[id].size()))
+		var list: Array = out[id].filter(func(cid): return not used.has(cid))
+		while list.size() > target:
+			var remove_at := list.size() - 1
+			while remove_at >= 0 and protected.has(list[remove_at]):
+				remove_at -= 1
+			if remove_at < 0:
+				break
+			list.remove_at(remove_at)
+		var pool: Array = []
+		for nation in cfg(id).get("alloc", {}):
+			var league := world.league(DatabaseManager.league_at(nation, 1))
+			if league != null:
+				pool.append_array(CompetitionManager.sorted_ids(league))
+		pool.sort_custom(func(a, b): return _coef(world, a) > _coef(world, b) or (_coef(world, a) == _coef(world, b) and a < b))
+		for cid in pool:
+			if list.size() >= target:
+				break
+			if not list.has(cid) and not used.has(cid) and not protected.has(cid):
+				list.append(cid)
+		out[id] = list
+		for cid in list:
+			used[cid] = true
+	return out
 
 
 ## Nações com vaga em alguma copa continental.
@@ -489,7 +527,7 @@ static func setup_season(world: GameWorld, s: SeasonState) -> void:
 	var qualified: Dictionary = world.stats.get("qualified", {})
 	if qualified.is_empty():
 		qualified = initial_qualified(world)
-	elif Array(qualified.get("UCL", [])).size() != 36:
+	elif Array(qualified.get("UCL", [])).size() != 36 or Array(qualified.get("UEL", [])).size() != 36 or Array(qualified.get("UECL", [])).size() != 36:
 		# An old save may contain next-season qualification calculated under the
 		# 32-team rules. Recompute all levels together so no club enters two cups.
 		qualified = compute_qualified(world) if world.season != null else initial_qualified(world)

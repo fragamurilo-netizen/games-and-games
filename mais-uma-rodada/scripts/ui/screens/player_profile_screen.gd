@@ -5,7 +5,7 @@ extends BaseScreen
 var _pid := -1
 var _tab := "geral"
 var _season_filter := 0 # temporada a temporada: 0 todas, 1 liga, 2 outras competições
-const TABS := [["geral", "Visão"], ["atributos", "Atributos"], ["numeros", "Forma"], ["contrato", "Contrato"], ["carreira", "Histórico"]]
+const TABS := [["geral", "Visão"], ["atributos", "Atributos"], ["numeros", "Forma"], ["origem", "Origem"], ["contrato", "Contrato"], ["carreira", "Histórico"]]
 
 
 func _init() -> void:
@@ -33,6 +33,7 @@ func refresh() -> void:
 		hide_footer()
 		return
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
+	NationalityManager.ensure(w, p)
 	var club := w.club(p.club_id) if p.club_id >= 0 else null
 	screen_title = p.display_name()
 	screen_subtitle = club.short_name if club != null else "Sem clube"
@@ -45,6 +46,8 @@ func refresh() -> void:
 	c.add_child(_header(w, p, club))
 	c.add_child(_tabs_row(p))
 	match _tab:
+		"origem":
+			c.add_child(_origin_card(w, p))
 		"numeros":
 			c.add_child(_stats(w, p))
 		"carreira":
@@ -98,7 +101,7 @@ func _squad_nav(w: GameWorld, p: Player, club: Club) -> Control:
 	bp.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	bp.clip_text = true
 	bp.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	bp.custom_minimum_size.y = 60
+	bp.custom_minimum_size.y = UITokens.H_BUTTON
 	row.add_child(bp)
 	var pos := UIKit.label("%d/%d" % [i + 1, sq.size()], "Caps")
 	pos.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -109,7 +112,7 @@ func _squad_nav(w: GameWorld, p: Player, club: Club) -> Control:
 	bn.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	bn.clip_text = true
 	bn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	bn.custom_minimum_size.y = 60
+	bn.custom_minimum_size.y = UITokens.H_BUTTON
 	row.add_child(bn)
 	return row
 
@@ -158,10 +161,10 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var own := p.club_id >= 0 and w.is_user_club(p.club_id)
 	# Ficha com a identidade do clube atrás do retrato. Ao lado: nome, posição e o geral.
 	# Embaixo, em largura total: nacionalidade, clube e corpo, uma informação por linha.
-	var hero := IdentityBand.wrap(club, 110.0, 186.0)
+	var hero := IdentityBand.wrap(club, 90.0, 150.0)
 	var card: VBoxContainer = hero[1]
 	var row := UIKit.hbox(UITokens.S3)
-	var pv := UIKit.portrait(p, club, w.year, 150)
+	var pv := UIKit.portrait(p, club, w.year, 120)
 	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(pv)
 	var names := UIKit.vbox(0)
@@ -169,29 +172,33 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var nl := UIKit.label(p.display_name(), "Title", true)
 	nl.max_lines_visible = 2
+	nl.tooltip_text = p.full_name()
 	names.add_child(nl)
 	if p.full_name() != p.display_name():
 		var fn := UIKit.label(p.full_name(), "Muted")
 		fn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		names.add_child(fn)
 	var r1 := UIKit.hbox(UITokens.S1)
-	r1.add_child(UIKit.colored(Pos.code(p.position), Pos.group_color(p.position), "Caps"))
-	r1.add_child(UIKit.label("%s, %d anos" % [Pos.name_of(p.position), p.age(w.year)], "Small", true))
+	var position := UIKit.label("%s\n%d anos" % [Pos.name_of(p.position), p.age(w.year)], "Small", true)
+	position.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r1.add_child(position)
+	r1.add_child(_ovr_block(w, p, own))
 	names.add_child(r1)
 	row.add_child(names)
-	row.add_child(_ovr_block(w, p, own))
 	card.add_child(row)
 	# Uma informação por linha, com o ícone que a identifica (bandeira, escudo).
-	var nat := NameGenerator.nationality_name(p.nationality)
+	var nat := NationalityManager.names(p)
 	if p.nationality != "":
 		var nrow := UIKit.hbox(UITokens.S1)
 		nrow.add_child(UIKit.flag(p.nationality, 30))
-		var born := p.hometown if p.hometown != "" and p.hometown != nat else ""
-		nrow.add_child(UIKit.label(nat + ((", nascido em " + born) if born != "" else ""), "", true))
+		var nationality := UIKit.label(nat, "", true)
+		nationality.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nrow.add_child(nationality)
 		var caps_h := NationalTeamManager.caps_of(w, p.id)
 		if caps_h[0] > 0:
-			nrow.add_child(UIKit.label("%d jogos pela seleção" % caps_h[0], "Muted"))
+			nationality.text += "\n%s · %d jogos" % [DatabaseManager.nation_name(NationalityManager.team(p)), int(p.origin.get("records", {}).get(NationalityManager.team(p), {}).get("apps", caps_h[0]))]
 		card.add_child(nrow)
+		card.add_child(UIKit.label("Nascimento: " + NationalityManager.birthplace(p), "Small", true))
 	if club != null:
 		var cr := UIKit.hbox(UITokens.S1)
 		cr.add_child(UIKit.crest(club, 30))
@@ -209,6 +216,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		cr.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
 		var cid := club.id
 		card.add_child(UIKit.tap_row(cr, func(): UIManager.push("club", {"id": cid}), "PanelContainer"))
+		card.add_child(UIKit.label(p.club_tenure(w.year), "Small", true))
 	var heart_txt := HeartClubs.known_text(w, p)
 	if heart_txt != "":
 		var hc := HeartClubs.club_of(w, p)
@@ -260,7 +268,7 @@ func _ovr_block(w: GameWorld, p: Player, own: bool) -> Control:
 	var pot := p.potential_estimate(precision)
 	var age := p.age(w.year)
 	var pot_label := Player.potential_label(pot) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
-	var pl := UIKit.colored(pot_label, UIColors.ACCENT if pot >= p.overall + 8 and age <= 25 else UIColors.MUTED, "Small")
+	var pl := UIKit.colored(pot_label, UIColors.MUTED, "Small")
 	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pl.custom_minimum_size.x = 96
 	pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -633,6 +641,64 @@ func _stats(w: GameWorld, p: Player) -> Control:
 
 
 ## Aba Carreira: números da carreira, seleção, prêmios, títulos, transferências e ano a ano.
+func _origin_card(w: GameWorld, p: Player) -> Control:
+	var card := UIKit.card("Card", UITokens.S2)
+	card.add_child(UIKit.section("Origem e seleção"))
+	card.add_child(UIKit.label("Nascimento", "Small"))
+	card.add_child(UIKit.label(NationalityManager.birthplace(p), "H3", true))
+	card.add_child(UIKit.separator())
+	card.add_child(UIKit.section("Nacionalidades"))
+	for code in NationalityManager.passports(p):
+		var row := UIKit.hbox(UITokens.S2)
+		row.add_child(UIKit.flag(code, 40))
+		var info: Dictionary = p.origin["passports"].get(code, {})
+		var basis := String(info.get("basis", "birth"))
+		var detail := "Desde o nascimento" if basis == "birth" else "Vínculo familiar" if basis == "parent" else "Naturalizado em %d" % int(info.get("since", w.year))
+		var text := UIKit.label(DatabaseManager.nation_name(code) + "\n" + detail, "", true)
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		card.add_child(row)
+	card.add_child(UIKit.separator())
+	card.add_child(UIKit.section("Seleção: " + DatabaseManager.nation_name(NationalityManager.team(p))))
+	for code in p.origin.get("records", {}):
+		var rec: Dictionary = p.origin["records"][code]
+		card.add_child(UIKit.label("%s · %d jogos · %d gols · %d assistências" % [DatabaseManager.nation_name(code),int(rec.get("apps",0)),int(rec.get("goals",0)),int(rec.get("assists",0))], "", true))
+	var alternatives: Array = []
+	for code in NationalityManager.passports(p):
+		if code != NationalityManager.team(p) and NationalityManager.eligible(w, p, code): alternatives.append(DatabaseManager.nation_name(code))
+	if not alternatives.is_empty():
+		card.add_child(UIKit.label("Também pode representar: " + ", ".join(alternatives), "Small", true))
+	elif NationalTeamManager.caps_of(w, p.id)[0] > 0:
+		card.add_child(UIKit.label("Vinculado à seleção atual pelo histórico internacional.", "Small", true))
+	var coach := NationalCoach.nation(w)
+	if coach != "" and coach != NationalityManager.team(p) and NationalityManager.eligible(w, p, coach):
+		card.add_child(UIKit.button("Convidar para " + DatabaseManager.nation_name(coach), "PrimaryButton", func():
+			if NationalityManager.choose(w, p, coach):
+				GameManager.save_now()
+				refresh()))
+	var status := NationalityManager.progress(w, p)
+	var nation := String(status["nation"])
+	if nation != "" and not NationalityManager.passports(p).has(nation):
+		card.add_child(UIKit.separator())
+		card.add_child(UIKit.section("Residência em " + DatabaseManager.nation_name(nation)))
+		card.add_child(UIKit.label("Desde %d · %d temporadas completas" % [int(p.origin["residence"].get("since", w.year)),int(status["years"])], "", true))
+		if bool(status["paused"]):
+			card.add_child(UIKit.label("Sem registro atual de residência para continuar a contagem.", "Small", true))
+		elif int(status["required"]) > 0:
+			var left := maxi(0, int(status["required"]) - int(status["years"]))
+			card.add_child(UIKit.label("Pode solicitar naturalização." if bool(status["ready"]) else "Prazo de naturalização na carreira: %d temporada(s) restante(s)." % left, "Small", true))
+			if bool(status["ready"]) and w.is_user_club(p.club_id):
+				card.add_child(UIKit.button("Solicitar naturalização", "PrimaryButton", func():
+					if NationalityManager.naturalize(w, p):
+						GameManager.save_now()
+						refresh()))
+		else:
+			card.add_child(UIKit.label("Sem naturalização automática por tempo de clube neste país.", "Small", true))
+	for event: Dictionary in p.origin.get("events", []):
+		card.add_child(UIKit.label("%d · %s %s" % [int(event["y"]),"Obteve a nacionalidade de" if event["kind"] == "citizenship" else "Escolheu representar",DatabaseManager.nation_name(event["nation"])], "Small", true))
+	return UIKit.card_panel(card)
+
+
 func _career(w: GameWorld, p: Player) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Carreira"))
@@ -645,7 +711,7 @@ func _career(w: GameWorld, p: Player) -> Control:
 	var caps := NationalTeamManager.caps_of(w, p.id)
 	var nt_titles := NationalTeamManager.player_titles(w, p.id)
 	if caps[0] > 0 or NationalTeamManager.is_called(w, p):
-		card.add_child(UIKit.section("Seleção · %s" % DatabaseManager.nation_name(p.nationality)))
+		card.add_child(UIKit.section("Carreira internacional"))
 		var row3 := UIKit.hbox(4)
 		row3.add_child(UIKit.stat(str(caps[0]), "jogos"))
 		row3.add_child(UIKit.stat(str(caps[1]), "gols"))
@@ -678,7 +744,7 @@ func _career(w: GameWorld, p: Player) -> Control:
 			total += int(sp.get("fee", 0))
 			top = maxi(top, int(sp.get("fee", 0)))
 		if total > 0:
-			var fr := UIKit.hbox(4)
+			var fr := UIKit.flow(UITokens.S2)
 			fr.add_child(UIKit.stat(Fmt.money(total), "em transferências"))
 			fr.add_child(UIKit.stat(Fmt.money(top), "maior valor pago"))
 			fr.add_child(UIKit.stat(Fmt.money(p.value), "valor hoje", UIColors.GREEN))
@@ -737,6 +803,8 @@ func _season_nums(h: Dictionary) -> Array:
 
 
 func _season_header() -> Control:
+	if content_width() < 850:
+		return UIKit.label("Temporadas", "Small")
 	var h := UIKit.hbox(6)
 	var a := UIKit.label("TEMPORADA", "Caps")
 	a.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -749,6 +817,7 @@ func _season_header() -> Control:
 func _season_row(w: GameWorld, p: Player, h: Dictionary, shade: bool) -> Control:
 	var box := UIKit.vbox(4)
 	var row := UIKit.hbox(6)
+	var compact := content_width() < 850
 	var y := UIKit.label(str(h.get("y", "")), "H3")
 	y.custom_minimum_size.x = 60
 	row.add_child(y)
@@ -769,27 +838,34 @@ func _season_row(w: GameWorld, p: Player, h: Dictionary, shade: bool) -> Control
 	if not sub.is_empty():
 		names.add_child(UIKit.label(" · ".join(sub), "Small"))
 	row.add_child(names)
+	if compact:
+		box.add_child(row)
+		row = UIKit.hbox(UITokens.S2)
 	var nums := _season_nums(h)
 	var apps: int = nums[0]
 	var goals: int = nums[1]
 	var ast: int = nums[2]
 	var rated: bool = nums[3] and int(h.get("a", 0)) > 0
 	var dim := UIColors.MUTED
-	row.add_child(_num_cell(str(apps), 50, UIColors.TEXT if apps > 0 else dim))
-	row.add_child(_num_cell(str(goals), 50, UIColors.TEXT if goals > 0 else dim))
-	row.add_child(_num_cell(str(ast), 50, UIColors.TEXT if ast > 0 else dim))
-	var r := float(h.get("r", 0.0))
-	row.add_child(_num_cell(Fmt.rating(r) if rated and r > 0.0 else "—", 70, Fmt.match_rating_color(r) if rated and r > 0.0 else dim))
-	var o := int(h.get("o", 0))
-	var ov := UIKit.vbox(0)
-	ov.custom_minimum_size.x = 82
-	var ol := _num_cell("—" if o <= 0 else str(o), 82, Fmt.rating_color(o) if o > 0 else dim)
-	ov.add_child(ol)
-	if o > 0 and h.has("o0"):
-		var dd := o - int(h["o0"])
-		if dd != 0:
-			ov.add_child(_num_cell(("+%d" if dd > 0 else "%d") % dd, 82, UIColors.GREEN if dd > 0 else UIColors.RED, "Small"))
-	row.add_child(ov)
+	if compact:
+		for value in [[str(apps),"Jogos"],[str(goals),"Gols"],[str(ast),"Assist."],[Fmt.rating(float(h.get("r", 0.0))) if rated else "—","Nota"],[str(h.get("o", "—")),"OVR"]]:
+			row.add_child(UIKit.stat(value[0], value[1]))
+	else:
+		row.add_child(_num_cell(str(apps), 50, UIColors.TEXT if apps > 0 else dim))
+		row.add_child(_num_cell(str(goals), 50, UIColors.TEXT if goals > 0 else dim))
+		row.add_child(_num_cell(str(ast), 50, UIColors.TEXT if ast > 0 else dim))
+		var r := float(h.get("r", 0.0))
+		row.add_child(_num_cell(Fmt.rating(r) if rated and r > 0.0 else "—", 70, Fmt.match_rating_color(r) if rated and r > 0.0 else dim))
+		var o := int(h.get("o", 0))
+		var ov := UIKit.vbox(0)
+		ov.custom_minimum_size.x = 82
+		var ol := _num_cell("—" if o <= 0 else str(o), 82, Fmt.rating_color(o) if o > 0 else dim)
+		ov.add_child(ol)
+		if o > 0 and h.has("o0"):
+			var dd := o - int(h["o0"])
+			if dd != 0:
+				ov.add_child(_num_cell(("+%d" if dd > 0 else "%d") % dd, 82, UIColors.GREEN if dd > 0 else UIColors.RED, "Small"))
+		row.add_child(ov)
 	box.add_child(row)
 	# Destaques do ano em chips: prêmios e craque do jogo em dourado, jogos sem sofrer gol em azul,
 	# lesões em vermelho (e não tudo na cor do clube, que parecia erro)
@@ -835,7 +911,7 @@ func _season_totals(p: Player) -> Control:
 			rs += float(h["r"]) * la
 			rn += la
 	var row := UIKit.hbox(6)
-	var t := UIKit.label("TOTAL · %d temporadas" % p.history.size(), "Caps")
+	var t := UIKit.label("Total · %d temporadas" % p.history.size(), "Caps", true)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(t)
 	row.add_child(_num_cell(str(apps), 50))
@@ -864,7 +940,7 @@ func _spell_row(w: GameWorld, s: Dictionary, _current: bool) -> Control:
 	var name_l := UIKit.label(String(s.get("cn", "?")).replace(" (empr.)", ""), "H3")
 	name_l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(name_l)
-	col.add_child(UIKit.label("%s · %d jogos · %d gols" % [years, int(s.get("a", 0)), int(s.get("g", 0))], "Small"))
+	col.add_child(UIKit.label("%s · %d jogos · %d gols" % [years, int(s.get("a", 0)), int(s.get("g", 0))], "Small", true))
 	line.add_child(col)
 	var k := String(s.get("k", ""))
 	if k == "" and (bool(s.get("lo", false)) or String(s.get("cn", "")).ends_with("(empr.)")):

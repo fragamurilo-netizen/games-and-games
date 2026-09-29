@@ -31,6 +31,8 @@ var terms_tab := "base"
 var picking_swap := false
 ## A multa rescisória foi paga (o vendedor não pode recusar).
 var clause_paid := false
+var _money: MoneyInput
+var _money_summary: VBoxContainer
 const MAX_SWAP := 2
 ## Última negociação aberta (capturas de tela).
 static var last: Negotiation = null
@@ -44,7 +46,6 @@ static func open(world: GameWorld, player: Player, kind: String, done: Callable)
 	n.on_done = done
 	n._init_values()
 	n.box = UIKit.vbox(14)
-	n.box.custom_minimum_size.x = 600
 	n._render()
 	last = n
 	UIManager.show_modal(n.box, true)
@@ -92,6 +93,8 @@ func _wage_step(v: int) -> int:
 
 
 func _render() -> void:
+	_money = null
+	_money_summary = null
 	UIKit.clear(box)
 	var head := UIKit.hbox(12)
 	var club := w.club(p.club_id) if p.club_id >= 0 else null
@@ -100,8 +103,8 @@ func _render() -> void:
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var titles := {"buy": "Proposta por", "free": "Contratar", "renew": "Renovar com", "sell": "Colocar à venda", "pre": "Pré-contrato com", "buyback": "Recompra de"}
 	t.add_child(UIKit.eyebrow(titles.get(mode, "")))
-	t.add_child(UIKit.label(p.display_name().to_upper(), "Title"))
-	t.add_child(UIKit.label("%s · %d anos · valor %s" % [Pos.code(p.position), p.age(w.year), Fmt.money(p.value)], "Small"))
+	t.add_child(UIKit.label(p.display_name(), "Title", true))
+	t.add_child(UIKit.label("%s, %d anos\nValor: %s" % [Pos.code(p.position), p.age(w.year), Fmt.money(p.value)], "Small", true))
 	head.add_child(t)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
 	box.add_child(head)
@@ -140,34 +143,48 @@ func _render() -> void:
 		box.add_child(m)
 
 
-func _stepper(value_text: String, minus: Callable, plus: Callable) -> HBoxContainer:
-	var row := UIKit.hbox(10)
-	var mb := UIKit.icon_button("minus", minus)
-	mb.theme_type_variation = "Button"
-	mb.custom_minimum_size = Vector2(84, 76)
-	row.add_child(mb)
-	var l := UIKit.label(value_text, "Big")
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_color_override(&"font_color", UIColors.ACCENT)
-	var inset := PanelContainer.new()
-	inset.theme_type_variation = "CardInset"
-	inset.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	inset.add_child(l)
-	row.add_child(inset)
-	var pb := UIKit.icon_button("plus", plus)
-	pb.theme_type_variation = "Button"
-	pb.custom_minimum_size = Vector2(84, 76)
-	row.add_child(pb)
-	return row
+func _amount_input(salary: bool) -> MoneyInput:
+	_money = MoneyInput.create(wage if salary else fee, "Salário mensal" if salary else "Valor da proposta", _wage_step(wage) if salary else _step(fee), 300 if salary else 0)
+	_money.amount_changed.connect(func(value: int):
+		if salary:
+			wage = value
+		else:
+			fee = value
+		_update_money_summary(salary))
+	_money.committed.connect(_render)
+	return _money
+
+
+func _valid_amount() -> bool:
+	if is_instance_valid(_money) and not _money.valid:
+		_money.edit.grab_focus()
+		return false
+	return true
+
+
+func _update_money_summary(salary: bool) -> void:
+	if not is_instance_valid(_money_summary):
+		return
+	UIKit.clear(_money_summary)
+	if salary:
+		_sync_bonus()
+		var fin := FinanceManager.summary(w, w.user_club())
+		var bill: int = fin["wage_bill"] - (p.wage if mode == "renew" else 0) + wage
+		_money_summary.add_child(UIKit.kv("Salário mensal", Fmt.money_month(wage)))
+		_money_summary.add_child(UIKit.kv("Luvas", Fmt.money(int(deal["bonus"]))))
+		_money_summary.add_child(UIKit.kv("Comissão do empresário", Fmt.money(DealTerms.agent_cost(w, p, maxi(0, agreed_fee), String(deal.get("mode", mode)), wage, deal))))
+		_money_summary.add_child(UIKit.kv("Folha após o acordo", Fmt.money_month(bill), UIColors.RED if bill > int(fin["wage_budget"] * 1.02) else UIColors.TEXT))
+		_money_summary.add_child(UIKit.kv("Limite da folha", Fmt.money_month(fin["wage_budget"])))
+	else:
+		_money_summary.add_child(UIKit.kv("Proposta", Fmt.money(fee)))
+		_money_summary.add_child(UIKit.kv("Comissão do empresário", Fmt.money(int(fee * float(deal.get("agent_pct", 0.0)) * float(deal["agent"])))))
+		var cost := TransferManager.upfront_cost(fee, deal)
+		_money_summary.add_child(UIKit.kv("Sai do caixa agora", Fmt.money(cost), UIColors.RED if cost > w.user_club().transfer_budget else UIColors.TEXT))
 
 
 func _render_fee(caption: String, hint: String) -> void:
 	box.add_child(UIKit.section_header(caption))
-	box.add_child(_stepper(Fmt.money(fee), func():
-		fee = maxi(0, fee - _step(fee))
-		_render(), func():
-		fee += _step(fee)
-		_render()))
+	box.add_child(_amount_input(false))
 	var quick := UIKit.hbox(8)
 	for q in [["Valor", 1.0], ["+10%", 1.1], ["+25%", 1.25], ["-10%", 0.9]]:
 		var mult: float = q[1]
@@ -182,7 +199,9 @@ func _render_fee(caption: String, hint: String) -> void:
 
 
 func _render_sell_buttons() -> void:
-	box.add_child(UIKit.button("ANUNCIAR POR %s" % Fmt.money(fee), "PrimaryButton", func():
+	box.add_child(UIKit.button("Anunciar jogador", "PrimaryButton", func():
+		if not _valid_amount():
+			return
 		p.transfer_listed = true
 		p.asking_price = fee
 		UIManager.close_modal()
@@ -253,13 +272,13 @@ func _render_buy() -> void:
 	if hint != "":
 		box.add_child(UIKit.colored(hint, UIColors.ORANGE, "Small", true))
 	var sum := UIKit.card("CardInset", 2)
-	sum.add_child(UIKit.kv("Proposta", Fmt.money(fee) + ("" if int(deal["inst"]) == 1 else " em %d parcelas" % int(deal["inst"]))))
-	sum.add_child(UIKit.kv("Comissão do empresário", Fmt.money(int(fee * float(deal["agent_pct"]) * float(deal["agent"])))))
-	sum.add_child(UIKit.kv("Sai do caixa agora", Fmt.money(TransferManager.upfront_cost(fee, deal)), UIColors.ACCENT))
+	_money_summary = sum
+	_update_money_summary(false)
 	box.add_child(UIKit.card_panel(sum))
 	if counter_fee > 0:
 		box.add_child(UIKit.button("Aceitar contraproposta de %s" % Fmt.money(counter_fee), "", func():
 			fee = counter_fee
+			if _money != null: _money.set_amount(fee)
 			_send_bid()))
 	box.add_child(UIKit.button("ENVIAR PROPOSTA", "PrimaryButton", _send_bid, "swap"))
 
@@ -385,6 +404,8 @@ func _loan_choice(caption: String, opts: Array, current: Variant, key: String) -
 
 
 func _send_bid() -> void:
+	if not _valid_amount():
+		return
 	var r := TransferManager.user_bid(w, p, fee, deal)
 	message = r["msg"]
 	match r["result"]:
@@ -416,11 +437,7 @@ func _render_terms(caption: String) -> void:
 	var club := w.user_club()
 	if terms_tab == "base":
 		box.add_child(UIKit.section("Salário mensal"))
-		box.add_child(_stepper(Fmt.money(wage), func():
-			wage = maxi(300, wage - _wage_step(wage))
-			_render(), func():
-			wage += _wage_step(wage)
-			_render()))
+		box.add_child(_amount_input(true))
 		box.add_child(UIKit.section("Duração"))
 		var g := ButtonGroup.new()
 		var yrow := UIKit.hbox(8)
@@ -432,7 +449,7 @@ func _render_terms(caption: String) -> void:
 			yrow.add_child(chip)
 		box.add_child(yrow)
 		var monthly := maxi(wage, 1)
-		box.add_child(_choice("Luvas (pagas na assinatura)", [["Nenhuma", 0], ["3 salários", monthly * 3], ["6 salários", monthly * 6], ["12 salários", monthly * 12]], int(deal["bonus"]), func(v): deal["bonus"] = int(v)))
+		box.add_child(_choice("Luvas (pagas na assinatura)", [["Nenhuma", 0], ["3 salários", 3], ["6 salários", 6], ["12 salários", 12]], int(deal["bonus"]) / monthly, func(v): deal["bonus"] = int(v) * wage))
 		box.add_child(_choice("Multa rescisória", [["Sem multa", 0], ["2× valor", 2], ["3× valor", 3], ["5× valor", 5]], int(deal["clause"]), func(v): deal["clause"] = int(v)))
 	else:
 		var abo := DealTerms.bonus_options("ab", wage)
@@ -454,32 +471,20 @@ func _render_terms(caption: String) -> void:
 		box.add_child(_choice("Comissão do empresário (cheia: %s)" % Fmt.money(lump), _agent_opts(), float(deal["agent"]), func(v): deal["agent"] = float(v)))
 		if float(deal["agent"]) < 1.0:
 			box.add_child(UIKit.label("Cortar a comissão faz o empresário pedir um salário maior; pela metade, ele pode travar o acordo.", "Small", true))
-	var fin := FinanceManager.summary(w, club)
-	var bill: int = fin["wage_bill"] - (p.wage if mode == "renew" else 0) + wage
-	var fits: bool = bill <= int(fin["wage_budget"] * 1.02)
-	var sum := UIKit.card("CardInset", 2)
-	sum.add_child(UIKit.kv("Contrato", "%s/mês · %d ano%s" % [Fmt.money(wage), years, "" if years == 1 else "s"]))
-	var extras: Array = []
-	if int(deal["ab"]) > 0:
-		extras.append("%s/jogo" % Fmt.money(int(deal["ab"])))
-	if int(deal["gb"]) > 0:
-		extras.append("%s/gol" % Fmt.money(int(deal["gb"])))
-	if int(deal["role"]) >= 0:
-		extras.append("promessa: " + DealTerms.role_name(int(deal["role"])).to_lower())
-	if not extras.is_empty():
-		sum.add_child(UIKit.kv("Extras", ", ".join(PackedStringArray(extras))))
-	sum.add_child(UIKit.kv("Comissão do empresário", Fmt.money(DealTerms.agent_cost(w, p, agreed_fee if agreed_fee > 0 else 0, String(deal.get("mode", mode)), wage, deal))))
-	var bl := UIKit.kv("Folha após o acordo", "%s / %s" % [Fmt.money_month(bill), Fmt.money(fin["wage_budget"])], UIColors.TEXT if fits else UIColors.RED)
-	sum.add_child(bl)
-	box.add_child(UIKit.card_panel(sum))
+	_money_summary = UIKit.card("CardInset", UITokens.S1)
+	box.add_child(UIKit.card_panel(_money_summary))
+	_update_money_summary(true)
 	if counter_wage > 0:
 		box.add_child(UIKit.button("Aceitar pedido de %s" % Fmt.money_month(counter_wage), "", func():
 			wage = counter_wage
+			if _money != null: _money.set_amount(wage)
 			_send_terms()))
 	box.add_child(UIKit.button("OFERECER CONTRATO", "PrimaryButton", _send_terms, "check"))
 
 
 func _send_terms() -> void:
+	if not _valid_amount():
+		return
 	_sync_bonus()
 	var r: Dictionary
 	match mode:

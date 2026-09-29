@@ -24,6 +24,7 @@ func _run() -> void:
 	var n := int(opt_games)
 	SimDialog.stop_on_events = false
 	var turn0 := w.season.turn
+	SeasonManager.timings.clear()
 	SimDialog.start(SimDialog.MODE_GAMES, n, func(): pass)
 	var t0 := Time.get_ticks_msec()
 	var worst := 0
@@ -43,7 +44,10 @@ func _run() -> void:
 			break
 	var played := w.season.turn - turn0
 	print("jogos: %d em %d ms · %d quadros · maior quadro %d ms" % [played, Time.get_ticks_msec() - t0, frames, worst])
+	print("TEMPOS_US ", SeasonManager.timings)
 	var ok := played == n and not GameManager.in_batch()
+	GameManager.save_blocking()
+	ok = ok and FileAccess.file_exists(SaveManager.slot_path(SLOT))
 	print("save no fim: ", FileAccess.file_exists(SaveManager.slot_path(SLOT)))
 	SaveManager.delete_slot(SLOT)
 	print("SIM_DIALOG_CHECK ", "OK" if ok else "FALHOU")

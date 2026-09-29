@@ -4270,6 +4270,20 @@
 						"mix": 5
 					}
 				}
+			],
+			"cities": [
+				[
+					"Cardiff",
+					3
+				],
+				[
+					"Swansea",
+					2
+				],
+				[
+					"Newport",
+					2
+				]
 			]
 		},
 		"IRL": {
@@ -4308,6 +4322,20 @@
 						"mix": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Dublin",
+					3
+				],
+				[
+					"Cork",
+					2
+				],
+				[
+					"Galway",
+					2
+				]
 			]
 		},
 		"NOR": {
@@ -4367,6 +4395,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Oslo",
+					3
+				],
+				[
+					"Bergen",
+					2
+				],
+				[
+					"Trondheim",
+					2
+				]
 			]
 		},
 		"SWE": {
@@ -4432,6 +4474,20 @@
 						"med": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Stockholm",
+					3
+				],
+				[
+					"Göteborg",
+					2
+				],
+				[
+					"Malmö",
+					2
+				]
 			]
 		},
 		"ISL": {
@@ -4454,6 +4510,16 @@
 						"nor": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Reykjavík",
+					3
+				],
+				[
+					"Akureyri",
+					2
+				]
 			]
 		},
 		"FIN": {
@@ -4489,6 +4555,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Helsinki",
+					3
+				],
+				[
+					"Tampere",
+					2
+				],
+				[
+					"Turku",
+					2
+				]
 			]
 		},
 		"POL": {
@@ -4518,6 +4598,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Warszawa",
+					3
+				],
+				[
+					"Kraków",
+					2
+				],
+				[
+					"Łódź",
+					2
+				]
 			]
 		},
 		"SVK": {
@@ -4555,6 +4649,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Bratislava",
+					3
+				],
+				[
+					"Košice",
+					2
+				],
+				[
+					"Žilina",
+					2
+				]
 			]
 		},
 		"SVN": {
@@ -4585,6 +4693,20 @@
 						"nor": 20
 					}
 				}
+			],
+			"cities": [
+				[
+					"Ljubljana",
+					3
+				],
+				[
+					"Maribor",
+					2
+				],
+				[
+					"Koper",
+					2
+				]
 			]
 		},
 		"HUN": {
@@ -4615,6 +4737,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Budapest",
+					3
+				],
+				[
+					"Debrecen",
+					2
+				],
+				[
+					"Szeged",
+					2
+				]
 			]
 		},
 		"ROU": {
@@ -4645,6 +4781,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"București",
+					3
+				],
+				[
+					"Cluj-Napoca",
+					2
+				],
+				[
+					"Timișoara",
+					2
+				]
 			]
 		},
 		"BIH": {
@@ -4674,6 +4824,20 @@
 						"nor": 15
 					}
 				}
+			],
+			"cities": [
+				[
+					"Sarajevo",
+					3
+				],
+				[
+					"Banja Luka",
+					2
+				],
+				[
+					"Mostar",
+					2
+				]
 			]
 		},
 		"MNE": {
@@ -4702,6 +4866,20 @@
 						"nor": 10
 					}
 				}
+			],
+			"cities": [
+				[
+					"Podgorica",
+					3
+				],
+				[
+					"Nikšić",
+					2
+				],
+				[
+					"Bar",
+					2
+				]
 			]
 		},
 		"MKD": {
@@ -4736,6 +4914,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Skopje",
+					3
+				],
+				[
+					"Bitola",
+					2
+				],
+				[
+					"Tetovo",
+					2
+				]
 			]
 		},
 		"ALB": {
@@ -4764,6 +4956,20 @@
 						"med": 15
 					}
 				}
+			],
+			"cities": [
+				[
+					"Tiranë",
+					3
+				],
+				[
+					"Durrës",
+					2
+				],
+				[
+					"Shkodër",
+					2
+				]
 			]
 		},
 		"KOS": {
@@ -4799,6 +5005,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Prishtina",
+					3
+				],
+				[
+					"Prizren",
+					2
+				],
+				[
+					"Peja",
+					2
+				]
 			]
 		},
 		"GEO": {
@@ -4821,6 +5041,20 @@
 						"med": 40
 					}
 				}
+			],
+			"cities": [
+				[
+					"Tbilisi",
+					3
+				],
+				[
+					"Kutaisi",
+					2
+				],
+				[
+					"Batumi",
+					2
+				]
 			]
 		},
 		"RUS": {
@@ -4851,6 +5085,20 @@
 						"eur": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Moskva",
+					3
+				],
+				[
+					"Sankt-Peterburg",
+					2
+				],
+				[
+					"Kazan",
+					2
+				]
 			]
 		},
 		"BRA": {
@@ -7295,6 +7543,20 @@
 						"eas": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Toronto",
+					3
+				],
+				[
+					"Montréal",
+					2
+				],
+				[
+					"Vancouver",
+					2
+				]
 			]
 		},
 		"CRC": {
@@ -7328,6 +7590,20 @@
 						"afr": 10
 					}
 				}
+			],
+			"cities": [
+				[
+					"San José",
+					3
+				],
+				[
+					"Alajuela",
+					2
+				],
+				[
+					"Cartago",
+					2
+				]
 			]
 		},
 		"JAM": {
@@ -7352,6 +7628,20 @@
 						"mix": 10
 					}
 				}
+			],
+			"cities": [
+				[
+					"Kingston",
+					3
+				],
+				[
+					"Montego Bay",
+					2
+				],
+				[
+					"Spanish Town",
+					2
+				]
 			]
 		},
 		"HON": {
@@ -7383,6 +7673,20 @@
 						"mix": 10
 					}
 				}
+			],
+			"cities": [
+				[
+					"Tegucigalpa",
+					3
+				],
+				[
+					"San Pedro Sula",
+					2
+				],
+				[
+					"La Ceiba",
+					2
+				]
 			]
 		},
 		"PAN": {
@@ -7408,6 +7712,20 @@
 						"lat": 20
 					}
 				}
+			],
+			"cities": [
+				[
+					"Ciudad de Panamá",
+					3
+				],
+				[
+					"Colón",
+					2
+				],
+				[
+					"David",
+					2
+				]
 			]
 		},
 		"EGY": {
@@ -8170,6 +8488,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Accra",
+					3
+				],
+				[
+					"Kumasi",
+					2
+				],
+				[
+					"Tamale",
+					2
+				]
 			]
 		},
 		"CIV": {
@@ -8192,6 +8524,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Abidjan",
+					3
+				],
+				[
+					"Bouaké",
+					2
+				],
+				[
+					"Yamoussoukro",
+					2
+				]
 			]
 		},
 		"CMR": {
@@ -8221,6 +8567,24 @@
 						"afr": 2
 					}
 				}
+			],
+			"cities": [
+				[
+					"Douala",
+					3
+				],
+				[
+					"Yaoundé",
+					2
+				],
+				[
+					"Garoua",
+					2
+				],
+				[
+					"Bamenda",
+					2
+				]
 			]
 		},
 		"MLI": {
@@ -8243,6 +8607,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Bamako",
+					3
+				],
+				[
+					"Sikasso",
+					2
+				],
+				[
+					"Ségou",
+					2
+				]
 			]
 		},
 		"ALG": {
@@ -8272,6 +8650,20 @@
 						"afr": 5
 					}
 				}
+			],
+			"cities": [
+				[
+					"Alger",
+					3
+				],
+				[
+					"Oran",
+					2
+				],
+				[
+					"Constantine",
+					2
+				]
 			]
 		},
 		"GUI": {
@@ -8294,6 +8686,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Conakry",
+					3
+				],
+				[
+					"Kankan",
+					2
+				],
+				[
+					"Labé",
+					2
+				]
 			]
 		},
 		"BFA": {
@@ -8322,6 +8728,16 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Ouagadougou",
+					3
+				],
+				[
+					"Bobo-Dioulasso",
+					2
+				]
 			]
 		},
 		"COD": {
@@ -8351,6 +8767,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Kinshasa",
+					3
+				],
+				[
+					"Lubumbashi",
+					2
+				],
+				[
+					"Kisangani",
+					2
+				]
 			]
 		},
 		"GAB": {
@@ -8373,6 +8803,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Libreville",
+					3
+				],
+				[
+					"Port-Gentil",
+					2
+				],
+				[
+					"Franceville",
+					2
+				]
 			]
 		},
 		"ANG": {
@@ -8401,6 +8845,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Luanda",
+					3
+				],
+				[
+					"Benguela",
+					2
+				],
+				[
+					"Huambo",
+					2
+				]
 			]
 		},
 		"CPV": {
@@ -8440,6 +8898,16 @@
 						"afr": 30
 					}
 				}
+			],
+			"cities": [
+				[
+					"Praia",
+					3
+				],
+				[
+					"Mindelo",
+					2
+				]
 			]
 		},
 		"MOZ": {
@@ -8465,6 +8933,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Maputo",
+					3
+				],
+				[
+					"Beira",
+					2
+				],
+				[
+					"Nampula",
+					2
+				]
 			]
 		},
 		"GNB": {
@@ -8494,6 +8976,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Bissau",
+					3
+				],
+				[
+					"Bafatá",
+					2
+				],
+				[
+					"Gabú",
+					2
+				]
 			]
 		},
 		"ZIM": {
@@ -8520,6 +9016,20 @@
 						"afr": 1
 					}
 				}
+			],
+			"cities": [
+				[
+					"Harare",
+					3
+				],
+				[
+					"Bulawayo",
+					2
+				],
+				[
+					"Mutare",
+					2
+				]
 			]
 		},
 		"KSA": {
@@ -9588,6 +10098,20 @@
 						"eur": 10
 					}
 				}
+			],
+			"cities": [
+				[
+					"Tehran",
+					3
+				],
+				[
+					"Mashhad",
+					2
+				],
+				[
+					"Isfahan",
+					2
+				]
 			]
 		},
 		"NZL": {
@@ -9632,7 +10156,973 @@
 						"pac": 14
 					}
 				}
+			],
+			"cities": [
+				[
+					"Auckland",
+					3
+				],
+				[
+					"Wellington",
+					2
+				],
+				[
+					"Christchurch",
+					2
+				]
 			]
+		},
+		"NIR": {
+			"name": "Irlanda do Norte",
+			"confed": "UEFA",
+			"coef": 57,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BUL": {
+			"name": "Bulgária",
+			"confed": "UEFA",
+			"coef": 54,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BLR": {
+			"name": "Belarus",
+			"confed": "UEFA",
+			"coef": 42,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"EST": {
+			"name": "Estônia",
+			"confed": "UEFA",
+			"coef": 38,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LVA": {
+			"name": "Letônia",
+			"confed": "UEFA",
+			"coef": 37,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LTU": {
+			"name": "Lituânia",
+			"confed": "UEFA",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LUX": {
+			"name": "Luxemburgo",
+			"confed": "UEFA",
+			"coef": 44,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MDA": {
+			"name": "Moldávia",
+			"confed": "UEFA",
+			"coef": 38,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ARM": {
+			"name": "Armênia",
+			"confed": "UEFA",
+			"coef": 48,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"AZE": {
+			"name": "Azerbaijão",
+			"confed": "UEFA",
+			"coef": 45,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CYP": {
+			"name": "Chipre",
+			"confed": "UEFA",
+			"coef": 42,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ISR": {
+			"name": "Israel",
+			"confed": "UEFA",
+			"coef": 60,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"KAZ": {
+			"name": "Cazaquistão",
+			"confed": "UEFA",
+			"coef": 45,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MLT": {
+			"name": "Malta",
+			"confed": "UEFA",
+			"coef": 31,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"AND": {
+			"name": "Andorra",
+			"confed": "UEFA",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LIE": {
+			"name": "Liechtenstein",
+			"confed": "UEFA",
+			"coef": 20,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"FRO": {
+			"name": "Ilhas Faroé",
+			"confed": "UEFA",
+			"coef": 35,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GIB": {
+			"name": "Gibraltar",
+			"confed": "UEFA",
+			"coef": 21,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SMR": {
+			"name": "San Marino",
+			"confed": "UEFA",
+			"coef": 15,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"KEN": {
+			"name": "Quênia",
+			"confed": "CAF",
+			"coef": 41,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"UGA": {
+			"name": "Uganda",
+			"confed": "CAF",
+			"coef": 43,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TAN": {
+			"name": "Tanzânia",
+			"confed": "CAF",
+			"coef": 41,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ZAM": {
+			"name": "Zâmbia",
+			"confed": "CAF",
+			"coef": 56,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BEN": {
+			"name": "Benim",
+			"confed": "CAF",
+			"coef": 46,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BOT": {
+			"name": "Botsuana",
+			"confed": "CAF",
+			"coef": 36,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BDI": {
+			"name": "Burundi",
+			"confed": "CAF",
+			"coef": 34,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CTA": {
+			"name": "República Centro-Africana",
+			"confed": "CAF",
+			"coef": 33,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CHA": {
+			"name": "Chade",
+			"confed": "CAF",
+			"coef": 29,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"COM": {
+			"name": "Comores",
+			"confed": "CAF",
+			"coef": 43,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CGO": {
+			"name": "Congo",
+			"confed": "CAF",
+			"coef": 45,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"DJI": {
+			"name": "Djibuti",
+			"confed": "CAF",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"EQG": {
+			"name": "Guiné Equatorial",
+			"confed": "CAF",
+			"coef": 49,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ERI": {
+			"name": "Eritreia",
+			"confed": "CAF",
+			"coef": 25,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SWZ": {
+			"name": "Essuatíni",
+			"confed": "CAF",
+			"coef": 29,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ETH": {
+			"name": "Etiópia",
+			"confed": "CAF",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GAM": {
+			"name": "Gâmbia",
+			"confed": "CAF",
+			"coef": 43,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LES": {
+			"name": "Lesoto",
+			"confed": "CAF",
+			"coef": 30,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LBR": {
+			"name": "Libéria",
+			"confed": "CAF",
+			"coef": 34,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LBY": {
+			"name": "Líbia",
+			"confed": "CAF",
+			"coef": 43,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MAD": {
+			"name": "Madagascar",
+			"confed": "CAF",
+			"coef": 44,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MWI": {
+			"name": "Malawi",
+			"confed": "CAF",
+			"coef": 38,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MTN": {
+			"name": "Mauritânia",
+			"confed": "CAF",
+			"coef": 40,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MRI": {
+			"name": "Maurício",
+			"confed": "CAF",
+			"coef": 29,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"NAM": {
+			"name": "Namíbia",
+			"confed": "CAF",
+			"coef": 41,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"NIG": {
+			"name": "Níger",
+			"confed": "CAF",
+			"coef": 35,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"RWA": {
+			"name": "Ruanda",
+			"confed": "CAF",
+			"coef": 36,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"STP": {
+			"name": "São Tomé e Príncipe",
+			"confed": "CAF",
+			"coef": 23,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SEY": {
+			"name": "Seicheles",
+			"confed": "CAF",
+			"coef": 20,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SLE": {
+			"name": "Serra Leoa",
+			"confed": "CAF",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SOM": {
+			"name": "Somália",
+			"confed": "CAF",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SSD": {
+			"name": "Sudão do Sul",
+			"confed": "CAF",
+			"coef": 28,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SDN": {
+			"name": "Sudão",
+			"confed": "CAF",
+			"coef": 42,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TOG": {
+			"name": "Togo",
+			"confed": "CAF",
+			"coef": 43,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"AFG": {
+			"name": "Afeganistão",
+			"confed": "AFC",
+			"coef": 30,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BAN": {
+			"name": "Bangladesh",
+			"confed": "AFC",
+			"coef": 26,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BHU": {
+			"name": "Butão",
+			"confed": "AFC",
+			"coef": 20,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BRU": {
+			"name": "Brunei",
+			"confed": "AFC",
+			"coef": 19,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CAM": {
+			"name": "Camboja",
+			"confed": "AFC",
+			"coef": 27,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TPE": {
+			"name": "Taipé Chinês",
+			"confed": "AFC",
+			"coef": 27,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GUM": {
+			"name": "Guam",
+			"confed": "AFC",
+			"coef": 20,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"HKG": {
+			"name": "Hong Kong",
+			"confed": "AFC",
+			"coef": 35,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"IND": {
+			"name": "Índia",
+			"confed": "AFC",
+			"coef": 42,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"IDN": {
+			"name": "Indonésia",
+			"confed": "AFC",
+			"coef": 47,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"IRQ": {
+			"name": "Iraque",
+			"confed": "AFC",
+			"coef": 63,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"JOR": {
+			"name": "Jordânia",
+			"confed": "AFC",
+			"coef": 61,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"KUW": {
+			"name": "Kuwait",
+			"confed": "AFC",
+			"coef": 44,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"KGZ": {
+			"name": "Quirguistão",
+			"confed": "AFC",
+			"coef": 41,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LAO": {
+			"name": "Laos",
+			"confed": "AFC",
+			"coef": 24,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LBN": {
+			"name": "Líbano",
+			"confed": "AFC",
+			"coef": 45,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MAC": {
+			"name": "Macau",
+			"confed": "AFC",
+			"coef": 20,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MAS": {
+			"name": "Malásia",
+			"confed": "AFC",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MDV": {
+			"name": "Maldivas",
+			"confed": "AFC",
+			"coef": 28,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MNG": {
+			"name": "Mongólia",
+			"confed": "AFC",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MYA": {
+			"name": "Myanmar",
+			"confed": "AFC",
+			"coef": 29,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"NEP": {
+			"name": "Nepal",
+			"confed": "AFC",
+			"coef": 25,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"PRK": {
+			"name": "Coreia do Norte",
+			"confed": "AFC",
+			"coef": 47,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"OMA": {
+			"name": "Omã",
+			"confed": "AFC",
+			"coef": 53,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"PAK": {
+			"name": "Paquistão",
+			"confed": "AFC",
+			"coef": 23,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"PLE": {
+			"name": "Palestina",
+			"confed": "AFC",
+			"coef": 46,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"PHI": {
+			"name": "Filipinas",
+			"confed": "AFC",
+			"coef": 34,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SGP": {
+			"name": "Singapura",
+			"confed": "AFC",
+			"coef": 32,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SRI": {
+			"name": "Sri Lanka",
+			"confed": "AFC",
+			"coef": 21,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SYR": {
+			"name": "Síria",
+			"confed": "AFC",
+			"coef": 49,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TJK": {
+			"name": "Tajiquistão",
+			"confed": "AFC",
+			"coef": 47,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"THA": {
+			"name": "Tailândia",
+			"confed": "AFC",
+			"coef": 49,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TLS": {
+			"name": "Timor-Leste",
+			"confed": "AFC",
+			"coef": 20,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TKM": {
+			"name": "Turcomenistão",
+			"confed": "AFC",
+			"coef": 38,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"UZB": {
+			"name": "Uzbequistão",
+			"confed": "AFC",
+			"coef": 63,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"VIE": {
+			"name": "Vietnã",
+			"confed": "AFC",
+			"coef": 42,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"YEM": {
+			"name": "Iêmen",
+			"confed": "AFC",
+			"coef": 30,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BHR": {
+			"name": "Bahrein",
+			"confed": "AFC",
+			"coef": 50,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"NMI": {
+			"name": "Ilhas Marianas do Norte",
+			"confed": "AFC",
+			"coef": 15,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"FIJ": {
+			"name": "Fiji",
+			"confed": "OFC",
+			"coef": 37,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"NCL": {
+			"name": "Nova Caledônia",
+			"confed": "OFC",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"PNG": {
+			"name": "Papua-Nova Guiné",
+			"confed": "OFC",
+			"coef": 32,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SOL": {
+			"name": "Ilhas Salomão",
+			"confed": "OFC",
+			"coef": 37,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TAH": {
+			"name": "Taiti",
+			"confed": "OFC",
+			"coef": 36,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"VAN": {
+			"name": "Vanuatu",
+			"confed": "OFC",
+			"coef": 35,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"COK": {
+			"name": "Ilhas Cook",
+			"confed": "OFC",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SAM": {
+			"name": "Samoa",
+			"confed": "OFC",
+			"coef": 23,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ASA": {
+			"name": "Samoa Americana",
+			"confed": "OFC",
+			"coef": 17,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TGA": {
+			"name": "Tonga",
+			"confed": "OFC",
+			"coef": 18,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"HAI": {
+			"name": "Haiti",
+			"confed": "CONCACAF",
+			"coef": 54,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TRI": {
+			"name": "Trinidad e Tobago",
+			"confed": "CONCACAF",
+			"coef": 47,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CUW": {
+			"name": "Curaçao",
+			"confed": "CONCACAF",
+			"coef": 51,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"NCA": {
+			"name": "Nicarágua",
+			"confed": "CONCACAF",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"DOM": {
+			"name": "República Dominicana",
+			"confed": "CONCACAF",
+			"coef": 39,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GUA": {
+			"name": "Guatemala",
+			"confed": "CONCACAF",
+			"coef": 48,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SUR": {
+			"name": "Suriname",
+			"confed": "CONCACAF",
+			"coef": 46,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"MTQ": {
+			"name": "Martinica",
+			"confed": "CONCACAF",
+			"coef": 44,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"SLV": {
+			"name": "El Salvador",
+			"confed": "CONCACAF",
+			"coef": 43,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GUY": {
+			"name": "Guiana",
+			"confed": "CONCACAF",
+			"coef": 36,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"PUR": {
+			"name": "Porto Rico",
+			"confed": "CONCACAF",
+			"coef": 34,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"DMA": {
+			"name": "Dominica",
+			"confed": "CONCACAF",
+			"coef": 26,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CAY": {
+			"name": "Ilhas Cayman",
+			"confed": "CONCACAF",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GLP": {
+			"name": "Guadalupe",
+			"confed": "CONCACAF",
+			"coef": 42,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"BER": {
+			"name": "Bermudas",
+			"confed": "CONCACAF",
+			"coef": 31,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"LCA": {
+			"name": "Santa Lúcia",
+			"confed": "CONCACAF",
+			"coef": 28,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BRB": {
+			"name": "Barbados",
+			"confed": "CONCACAF",
+			"coef": 28,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"CUB": {
+			"name": "Cuba",
+			"confed": "CONCACAF",
+			"coef": 37,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"GRN": {
+			"name": "Granada",
+			"confed": "CONCACAF",
+			"coef": 28,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SKN": {
+			"name": "São Cristóvão e Névis",
+			"confed": "CONCACAF",
+			"coef": 32,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BOE": {
+			"name": "Bonaire",
+			"confed": "CONCACAF",
+			"coef": 22,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"GUF": {
+			"name": "Guiana Francesa",
+			"confed": "CONCACAF",
+			"coef": 35,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"VIN": {
+			"name": "São Vicente e Granadinas",
+			"confed": "CONCACAF",
+			"coef": 28,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"BLZ": {
+			"name": "Belize",
+			"confed": "CONCACAF",
+			"coef": 27,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SMA": {
+			"name": "Sint Maarten",
+			"confed": "CONCACAF",
+			"coef": 21,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"MSR": {
+			"name": "Montserrat",
+			"confed": "CONCACAF",
+			"coef": 27,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"TCA": {
+			"name": "Ilhas Turcas e Caicos",
+			"confed": "CONCACAF",
+			"coef": 17,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"VGB": {
+			"name": "Ilhas Virgens Britânicas",
+			"confed": "CONCACAF",
+			"coef": 16,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ATG": {
+			"name": "Antígua e Barbuda",
+			"confed": "CONCACAF",
+			"coef": 30,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"ARU": {
+			"name": "Aruba",
+			"confed": "CONCACAF",
+			"coef": 27,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"AIA": {
+			"name": "Anguilla",
+			"confed": "CONCACAF",
+			"coef": 14,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"SMN": {
+			"name": "Saint Martin",
+			"confed": "CONCACAF",
+			"coef": 21,
+			"national_only": true,
+			"fifa_member": false
+		},
+		"BAH": {
+			"name": "Bahamas",
+			"confed": "CONCACAF",
+			"coef": 21,
+			"national_only": true,
+			"fifa_member": true
+		},
+		"VIR": {
+			"name": "Ilhas Virgens Americanas",
+			"confed": "CONCACAF",
+			"coef": 17,
+			"national_only": true,
+			"fifa_member": true
 		}
 	},
 	"lang": {

@@ -470,7 +470,7 @@ func begin_match() -> Dictionary:
 
 
 ## Called only by the owner of the world (UI thread or the active worker).
-func _begin_match_core() -> Dictionary:
+func _begin_match_core(with_detail: bool = true) -> Dictionary:
 	if world == null or world.season == null or world.season.finished or Store.locked(world):
 		return {}
 	if not matchday.is_empty():
@@ -478,7 +478,7 @@ func _begin_match_core() -> Dictionary:
 	SeasonManager.advance_to_user(world)
 	if world.season.finished or not SeasonManager.user_plays_now(world):
 		return {}
-	matchday = SeasonManager.begin_matchday(world)
+	matchday = SeasonManager.begin_matchday(world, with_detail)
 	_ai_queue.clear()
 	for e in matchday["entries"]:
 		if e != matchday["user"]:
@@ -658,7 +658,7 @@ func sim_step_start() -> bool:
 
 
 func _sim_step_work() -> Dictionary:
-	_begin_match_core()
+	_begin_match_core(false)
 	var sim := user_sim()
 	if sim != null:
 		sim.run_to_end()

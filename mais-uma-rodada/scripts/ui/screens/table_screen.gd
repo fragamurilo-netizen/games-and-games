@@ -1049,7 +1049,7 @@ func _cup_view(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 			else:
 				_cup_groups(c, w, cup)
 	var fmt := String(CupManager.cfg(cup.id).get("format", ""))
-	if cup.id == "UCL" and not cup.league_phase:
+	if cup.id in ["UCL", "UEL", "UECL"] and not cup.league_phase:
 		fmt = "Esta temporada mantém o formato do save: 8 grupos de 4, com os 2 primeiros nas oitavas. A fase de liga com 36 clubes começa na próxima temporada."
 	if fmt != "":
 		c.add_child(_format_card(cup.id, fmt))
@@ -1223,26 +1223,27 @@ func _cup_league_games(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	if not cup.league_phase:
 		_cup_ko(c, w, cup)
 		return
+	var last_round := LeaguePhase.matchdays(cup) - 1
 	if _round < 0:
-		_round = 7
+		_round = last_round
 		for f: Fixture in cup.fixtures:
 			if f.stage == Fixture.STAGE_GROUP and not f.played:
 				_round = mini(_round, f.round)
-	_round = clampi(_round, 0, 7)
+	_round = clampi(_round, 0, last_round)
 	var row := UIKit.hbox(UITokens.S2)
 	var prev := UIKit.button("Anterior", "GhostButton", func():
 		_round -= 1
 		refresh())
 	prev.disabled = _round == 0
 	row.add_child(prev)
-	var title := UIKit.label("%dª rodada de 8" % (_round + 1), "H3")
+	var title := UIKit.label("%dª rodada de %d" % [_round + 1, last_round + 1], "H3")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(title)
 	var next := UIKit.button("Próxima", "GhostButton", func():
 		_round += 1
 		refresh())
-	next.disabled = _round == 7
+	next.disabled = _round == last_round
 	row.add_child(next)
 	c.add_child(row)
 	var shown_date := false
@@ -1259,7 +1260,7 @@ func _cup_league_games(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 func _cup_ko(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 	if cup.ties.is_empty():
 		var card := UIKit.card("Card", 6)
-		card.add_child(UIKit.label("Os playoffs serão definidos após a 8ª rodada." if cup.league_phase else "Sorteio após a fase de grupos.", "Muted", true))
+		card.add_child(UIKit.label(("Os playoffs serão definidos após a %dª rodada." % LeaguePhase.matchdays(cup)) if cup.league_phase else "Sorteio após a fase de grupos.", "Muted", true))
 		c.add_child(UIKit.card_panel(card))
 		return
 	for r in cup.round_names.size():

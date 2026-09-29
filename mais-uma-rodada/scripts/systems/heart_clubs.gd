@@ -48,9 +48,9 @@ static func ensure_all(world: GameWorld) -> void:
 static func assign_one(world: GameWorld, p: Player) -> void:
 	var by_city := {}
 	var by_nation := {}
-	var ck := "%s|%s" % [p.nationality, p.hometown]
+	var ck := "%s|%s" % [NationalityManager.birth_country(p), p.hometown]
 	for c: Club in world.clubs:
-		if c.nation != p.nationality:
+		if c.nation != NationalityManager.birth_country(p):
 			continue
 		if not by_nation.has(c.nation):
 			by_nation[c.nation] = []
@@ -67,8 +67,8 @@ static func _assign(world: GameWorld, p: Player, by_city: Dictionary, by_nation:
 	p.heart = -1
 	if r.randf() >= HAS_CHANCE:
 		return
-	var local: Array = by_city.get("%s|%s" % [p.nationality, p.hometown], []) if p.hometown != "" else []
-	var pool: Array = local if not local.is_empty() and r.randf() < HOMETOWN_CHANCE else by_nation.get(p.nationality, [])
+	var local: Array = by_city.get("%s|%s" % [NationalityManager.birth_country(p), p.hometown], []) if p.hometown != "" else []
+	var pool: Array = local if not local.is_empty() and r.randf() < HOMETOWN_CHANCE else by_nation.get(NationalityManager.birth_country(p), [])
 	if pool.is_empty():
 		return
 	var w: Array = []
@@ -81,7 +81,7 @@ static func _assign(world: GameWorld, p: Player, by_city: Dictionary, by_nation:
 ## questão de contar (sócio-torcedor desde pequeno).
 static func assign_academy_kid(world: GameWorld, p: Player, club: Club) -> void:
 	var r := _rng(world, p)
-	if p.hometown == club.city and p.nationality == club.nation and r.randf() < 0.65:
+	if p.hometown == club.city and NationalityManager.birth_country(p) == club.nation and r.randf() < 0.65:
 		p.heart = club.id
 		p.heart_known = r.randf() < 0.5
 	else:

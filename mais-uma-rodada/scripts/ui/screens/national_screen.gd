@@ -310,11 +310,12 @@ func _tours(w: GameWorld, c: VBoxContainer) -> void:
 		var host := NationalTeamManager.host_of(id, y)
 		var h := UIKit.hbox(10)
 		h.add_child(UIKit.flag(host, 36))
-		var l := UIKit.label("%s %d" % [NationalTeamManager.tournament_name(id), y], "H3")
+		var l := UIKit.label("%s %d" % [NationalTeamManager.tournament_name(id), y], "H3", true)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(l)
-		h.add_child(UIKit.label("sede: %s" % DatabaseManager.nation_name(host), "Small"))
 		next.add_child(h)
+		if host != "":
+			next.add_child(UIKit.label("Sede: " + NationalTeamManager._names(NationalTeamManager.hosts_of(id, y)), "Small", true))
 	c.add_child(UIKit.card_panel(next))
 	var ids := NationalTeamManager.tournament_ids()
 	if _tour == "":
@@ -327,6 +328,18 @@ func _tours(w: GameWorld, c: VBoxContainer) -> void:
 		_tour = k
 		refresh()))
 	var rec := NationalTeamManager.last_edition(w, _tour)
+	c.add_child(UIKit.label(String(NationalTeamManager.tcfg(_tour).get("format", "")), "Small", true))
+	if _tour in NationalLeagues.IDS:
+		var live: Dictionary = NationalLeagues.states(w).get(_tour, {})
+		if not live.is_empty() and not bool(live.get("done", false)):
+			c.add_child(UIKit.label("Em disputa — %d" % int(live["y"]), "Section"))
+			for group in live["groups"]:
+				var table := UIKit.vbox(UITokens.S1)
+				table.add_child(UIKit.section_header("Liga %s — Grupo %s" % ["ABCD"[int(group["level"])], group["n"]]))
+				var order := NationalTeamManager.sort_group(group)
+				for i in order.size():
+					table.add_child(_nation_table_row(w, order[i], group["table"][order[i]], i + 1, i == 0))
+				c.add_child(table)
 	if rec.is_empty():
 		c.add_child(UIKit.label("Primeira edição em %d." % NationalTeamManager.next_edition(_tour, w.year + 1), "Muted", true))
 	else:
@@ -337,12 +350,15 @@ func _tours(w: GameWorld, c: VBoxContainer) -> void:
 func _edition(w: GameWorld, rec: Dictionary) -> Control:
 	var out := UIKit.vbox(12)
 	var head := UIKit.card("CardHighlight", 8)
-	head.add_child(UIKit.label("%s %d" % [rec["name"], int(rec["y"])], "Title"))
-	head.add_child(UIKit.label("Sede: %s · %d seleções" % [DatabaseManager.nation_name(rec["host"]), (rec["teams"] as Array).size()], "Small"))
+	head.add_child(UIKit.label("%s %d" % [rec["name"], int(rec["y"])], "Title", true))
+	head.add_child(UIKit.label("%d seleções" % (rec["teams"] as Array).size(), "Small"))
+	if String(rec.get("host", "")) != "":
+		head.add_child(UIKit.label("Sede: " + NationalTeamManager._names(rec.get("hosts", [rec["host"]])), "Small", true))
 	var ch := UIKit.hbox(12)
 	ch.add_child(UIKit.icon_rect("trophy", 36, UIColors.ACCENT))
 	ch.add_child(UIKit.flag(rec["champion"], 48))
-	var cl := UIKit.label("%s campeã" % DatabaseManager.nation_name(rec["champion"]), "H2")
+	var cl := UIKit.label("%s campeã" % DatabaseManager.nation_name(rec["champion"]), "H2", true)
+	cl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cl.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	ch.add_child(cl)
 	head.add_child(ch)

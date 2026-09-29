@@ -50,8 +50,8 @@
 			"short": "Liga Europa",
 			"confed": "UEFA",
 			"level": 2,
-			"teams": 32,
-			"groups": 8,
+			"teams": 36,
+			"groups": 0,
 			"alloc": {
 				"ENG": 2,
 				"ESP": 2,
@@ -67,10 +67,10 @@
 				"UKR": 2,
 				"CZE": 2,
 				"DEN": 2,
-				"SCO": 1,
-				"GRE": 1,
-				"CRO": 1,
-				"SRB": 1
+				"SCO": 2,
+				"GRE": 2,
+				"CRO": 2,
+				"SRB": 2
 			},
 			"prize": {
 				"group": 4300000,
@@ -86,21 +86,23 @@
 				"#F26B0F",
 				"#1B1B1B"
 			],
-			"trophy": "taca_prata"
+			"trophy": "taca_prata",
+			"format_type": "league_phase",
+			"format": "36 clubes em tabela única. 8 adversários, 2 por pote; 4 jogos em casa e 4 fora. Os 8 primeiros vão às oitavas, do 9º ao 24º disputam playoffs de ida e volta. Os demais são eliminados. Mata-mata sem gol fora; final única."
 		},
 		"UECL": {
 			"name": "Liga Conferência",
 			"short": "Conferência",
 			"confed": "UEFA",
 			"level": 3,
-			"teams": 32,
-			"groups": 8,
+			"teams": 36,
+			"groups": 0,
 			"alloc": {
 				"ENG": 2,
-				"ESP": 1,
-				"GER": 1,
-				"ITA": 1,
-				"FRA": 1,
+				"ESP": 2,
+				"GER": 2,
+				"ITA": 2,
+				"FRA": 2,
 				"POR": 2,
 				"NED": 2,
 				"TUR": 2,
@@ -129,7 +131,9 @@
 				"#00A650",
 				"#0A2E1F"
 			],
-			"trophy": "taca_verde"
+			"trophy": "taca_verde",
+			"format_type": "league_phase",
+			"format": "36 clubes em tabela única. 6 adversários, 1 de cada pote; 3 jogos em casa e 3 fora. Os 8 primeiros vão às oitavas, do 9º ao 24º disputam playoffs de ida e volta. Os demais são eliminados. Mata-mata sem gol fora; final única."
 		},
 		"LIB": {
 			"name": "Copa Libertadores",
