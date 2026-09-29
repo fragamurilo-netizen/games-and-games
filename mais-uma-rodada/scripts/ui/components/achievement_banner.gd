@@ -104,8 +104,8 @@ func _next() -> bool:
 	_t = 0.0
 	_busy = true
 	_panel.visible = true
-	AudioManager.play("title", -8.0)
-	AudioManager.vibrate(60)
+	Sfx.play("title", -8.0)
+	Sfx.vibrate(60)
 	return true
 
 

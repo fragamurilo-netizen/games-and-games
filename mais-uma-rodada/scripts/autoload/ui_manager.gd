@@ -208,7 +208,7 @@ func _apply_chrome(screen: BaseScreen) -> void:
 	if main == null:
 		return
 	main.apply_chrome(screen, stack.size() > 1)
-	AudioManager.screen_changed(screen.screen_name)
+	Sfx.screen_changed(screen.screen_name)
 
 
 ## Atualiza título/barras da tela atual (quando os dados mudam).

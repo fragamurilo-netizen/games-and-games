@@ -157,7 +157,7 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 				body.remove_child(pg)
 		body.add_child(pages[step[0]])
 		if pages[step[0]] is VBoxContainer and pages[step[0]].get_child_count() > 1 and pages[step[0]].get_child(1) is WalkoutView:
-			AudioManager.crowd_clip(0, "entrada"))
+			Sfx.crowd_clip(0, "entrada"))
 	nav.add_child(skip_btn)
 	nav.add_child(next_btn)
 	body.add_child(pages[0])

@@ -240,7 +240,7 @@ static func hero(w: GameWorld, n: NewsEvent) -> Control:
 	tap.theme_type_variation = "RowOverlay"
 	tap.focus_mode = Control.FOCUS_NONE
 	tap.pressed.connect(func():
-		AudioManager.click()
+		Sfx.click()
 		_open(w, n))
 	panel.add_child(tap)
 	return panel

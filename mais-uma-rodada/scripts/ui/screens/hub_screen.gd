@@ -352,7 +352,7 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 			UIManager.confirm("Assumir o %s?" % cl.short_name, "Você será o novo treinador do clube a partir de agora.", "Assumir", func():
 				BoardManager.take_job(w, ccid)
 				GameManager.save_now()
-				AudioManager.play("sign")
+				Sfx.play("sign")
 				UIManager.goto("hub")), "Card"))
 	return UIKit.card_panel(card)
 

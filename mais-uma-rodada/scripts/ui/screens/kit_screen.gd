@@ -506,7 +506,7 @@ func _editor_card(club: Club) -> Control:
 			tonal.custom_minimum_size.y = 56
 			tonal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			tonal.toggled.connect(func(v: bool):
-				AudioManager.click()
+				Sfx.click()
 				_edit(func(kk: Dictionary): kk["tonal"] = v))
 			card.add_child(tonal)
 		"colors":
@@ -906,7 +906,7 @@ func _palette(card: VBoxContainer, club: Club, caption: String, field: String, c
 			if blocked:
 				UIManager.toast("Essa cor deixa o %s igual ao titular" % String(KIT_NAMES[_which]).to_lower(), UIColors.RED)
 				return
-			AudioManager.click()
+			Sfx.click()
 			_edit(func(kk: Dictionary): kk[field] = hh), "", blocked))
 	# Cor livre: roda de cores
 	var pick := UIKit.icon_button("palette", func():

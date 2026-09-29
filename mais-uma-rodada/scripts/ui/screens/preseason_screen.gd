@@ -178,7 +178,7 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 			UIManager.confirm(String(cfg["name"]) + "?", String(cfg["pros"]) + "\n" + String(cfg["cons"]), "Escolher", func():
 				var notes := PreseasonManager.choose_camp(world(), k)
 				if not notes.is_empty():
-					AudioManager.play("whistle")
+					Sfx.play("whistle")
 					UIManager.toast(String(notes[0]), UIColors.GREEN)
 				GameManager.save_now()
 				refresh()), "CardFlat"))
@@ -226,7 +226,7 @@ func _friendlies_card(w: GameWorld, pre: Dictionary) -> Control:
 		var wins := 0
 		for r in res:
 			wins += 1 if r["r"] == "V" else 0
-		AudioManager.play("win" if wins >= 2 else "whistle")
+		Sfx.play("win" if wins >= 2 else "whistle")
 		GameManager.save_now()
 		refresh(), "play")
 	card.add_child(b)

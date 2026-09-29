@@ -120,7 +120,7 @@ func on_show() -> void:
 
 func on_hide() -> void:
 	set_process(false)
-	AudioManager.crowd_stop()
+	Sfx.crowd_stop()
 	_set_live(false)
 
 
@@ -267,7 +267,7 @@ func _build() -> void:
 	StadiumStyle.apply_weather(_stadium, _sim.wx)
 	_pitch.stadium = _stadium
 	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
-	AudioManager.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
+	Sfx.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
 	_root.add_child(UIKit.margin(_pitch, 0, 6, 0, 4))
 	_l3 = _build_l3()
 	_root.add_child(UIKit.margin(_l3, 8, 0, 8, 4))
@@ -512,14 +512,14 @@ func _ctl_btn(text: String, icon_name: String, cb: Callable) -> Button:
 
 
 func _toggle_match_sound() -> void:
-	AudioManager.set_match_muted(not AudioManager.match_muted())
+	Sfx.set_match_muted(not Sfx.match_muted())
 	_update_sound_button()
 
 
 func _update_sound_button() -> void:
 	if _sound_btn == null:
 		return
-	var muted := AudioManager.match_muted()
+	var muted := Sfx.match_muted()
 	_sound_btn.text = "Mudo" if muted else "Som"
 	_sound_btn.tooltip_text = "Ligar som da partida" if muted else "Desligar som da partida"
 	_sound_btn.modulate.a = 0.58 if muted else 1.0
@@ -703,7 +703,7 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 	if t in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF, MatchSimulation.EV_EXTRA_TIME, MatchSimulation.EV_ET_SECOND]:
 		_pitch.motion.kickoff(0 if _sim.half % 2 == 1 else 1, true)
 		if not silent:
-			AudioManager.play("whistle", -4.0)
+			Sfx.play("whistle", -4.0)
 	var scripted := _play_delay > 0.0 and t in SCRIPTED_EVENTS
 	for line in _com.lines_for(ev):
 		var style: String = line["style"]
@@ -756,35 +756,35 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 		"goal":
 			_celebrate(ev)
 		"card_y", "card_r":
-			AudioManager.crowd_event("card", int(ev["s"]))
-			AudioManager.play("card", -6.0)
-			AudioManager.vibrate(25)
+			Sfx.crowd_event("card", int(ev["s"]))
+			Sfx.play("card", -6.0)
+			Sfx.vibrate(25)
 			_hold = maxf(_hold, 0.5 * _delay_scale())
 		"big":
 			if t == MatchSimulation.EV_PEN_SAVE or t == MatchSimulation.EV_PEN_MISS or t == MatchSimulation.EV_PENALTY_AWARDED:
-				AudioManager.play("chance", -4.0)
+				Sfx.play("chance", -4.0)
 				_hold = maxf(_hold, 0.9 * _delay_scale())
 		"chance":
-			AudioManager.crowd_event("danger", int(ev["s"]))
+			Sfx.crowd_event("danger", int(ev["s"]))
 			if t == MatchSimulation.EV_SAVE and int(ev["s"]) == 1:
-				AudioManager.crowd_event("save", 0) # defesa do goleiro da casa: aplausos
+				Sfx.crowd_event("save", 0) # defesa do goleiro da casa: aplausos
 			if t == MatchSimulation.EV_POST or (ev.has("x") and float(ev["x"].get("xg", 0.0)) >= 0.3):
-				AudioManager.play("chance", -8.0)
+				Sfx.play("chance", -8.0)
 		"var":
 			_hold = maxf(_hold, 0.8 * _delay_scale())
 	if t == MatchSimulation.EV_OFFSIDE and style == "big":
-		AudioManager.play("whistle", -8.0)
+		Sfx.play("whistle", -8.0)
 		_hold = maxf(_hold, 0.9 * _delay_scale())
 	if t == MatchSimulation.EV_FOUL:
-		AudioManager.crowd_event("foul", int(ev["s"]))
+		Sfx.crowd_event("foul", int(ev["s"]))
 	if t == MatchSimulation.EV_HALFTIME:
-		AudioManager.play("whistle", -4.0)
-		AudioManager.crowd_event("half", 0)
+		Sfx.play("whistle", -4.0)
+		Sfx.crowd_event("half", 0)
 	elif t == MatchSimulation.EV_FULLTIME:
-		AudioManager.play("whistle_end", -3.0)
+		Sfx.play("whistle_end", -3.0)
 		var hs := int(_sim.score[0])
 		var as_ := int(_sim.score[1])
-		AudioManager.crowd_event("end", 0 if hs >= as_ else 1)
+		Sfx.crowd_event("end", 0 if hs >= as_ else 1)
 
 
 const CALLOUTS := {
@@ -816,7 +816,7 @@ func _callout(kind: String, side: int) -> void:
 	if key in ["post", "post_bar", "post_inside_out", "miss_big", "miss_sky", "var_off"] and side >= 0:
 		_pitch.crowd_jump = maxf(_pitch.crowd_jump, 0.45)
 		_pitch.crowd_side = side
-	AudioManager.vibrate(15)
+	Sfx.vibrate(15)
 
 
 func _goal_key(ev: Dictionary) -> String:
@@ -904,8 +904,8 @@ func _celebrate(ev: Dictionary) -> void:
 	_pitch.goal_effect(side, c1)
 	var sc_mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
 	_pitch.motion.celebrate(side, sc_mp.slot if sc_mp != null and sc_mp.on_pitch and int(ev["t"]) == MatchSimulation.EV_GOAL else -1)
-	AudioManager.goal(imp if level != 3 else maxf(imp, 0.8), ours)
-	AudioManager.crowd_event("goal", side)
+	Sfx.goal(imp if level != 3 else maxf(imp, 0.8), ours)
+	Sfx.crowd_event("goal", side)
 	if _pace == 0:
 		_hold += 1.8 # tempo de ver os times voltando para a saída
 	var tw := create_tween()
@@ -1796,7 +1796,7 @@ func _toggle_play() -> void:
 
 func _start_second_half() -> void:
 	_set_bug("● AO VIVO", Color("#FF4B4B"))
-	AudioManager.crowd_event("second", 0)
+	Sfx.crowd_event("second", 0)
 	_halftime = false
 	_paused = false
 	_clock = 0.5
@@ -2287,9 +2287,9 @@ func _after_final(report: Dictionary) -> void:
 	var mine: int = _sim.score[_user_side]
 	var theirs: int = _sim.score[1 - _user_side]
 	if mine > theirs:
-		AudioManager.play("win", -4.0)
+		Sfx.play("win", -4.0)
 	elif mine < theirs:
-		AudioManager.play("lose", -6.0)
+		Sfx.play("lose", -6.0)
 	_update_board()
 	_pitch.visible = false
 	(_pitch.get_parent() as Control).visible = false

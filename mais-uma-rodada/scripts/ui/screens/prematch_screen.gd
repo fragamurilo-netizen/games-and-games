@@ -723,7 +723,7 @@ func _start() -> void:
 	if missing > 0:
 		UIManager.info("Escalação incompleta", "Faltam %d jogador(es) no time titular." % missing)
 		return
-	AudioManager.play("whistle", -4.0)
+	Sfx.play("whistle", -4.0)
 	if AppSettings.match_speed == AppSettings.SPEED_INSTANT:
 		GameManager.play_instant_async(func(report: Dictionary) -> void:
 			UIManager.replace("results", {"report": report}))

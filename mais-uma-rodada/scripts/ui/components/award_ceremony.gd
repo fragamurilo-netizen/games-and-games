@@ -100,7 +100,7 @@ func _show(i: int) -> void:
 		add_child(_crest)
 	_rng.seed = hash([it.get("id", -1), _i])
 	_confetti.clear()
-	AudioManager.play("whistle", -10.0)
+	Sfx.play("whistle", -10.0)
 	set_process(true)
 
 
@@ -128,8 +128,8 @@ func _burst() -> void:
 		var ang := _rng.randf_range(-PI * 0.95, -PI * 0.05)
 		var spd := _rng.randf_range(380, 900)
 		_confetti.append([pos, Vector2(cos(ang), sin(ang)) * spd, _rng.randf() * TAU, _rng.randf_range(-8, 8), palette[k % palette.size()], Vector2(_rng.randf_range(8, 15), _rng.randf_range(12, 22))])
-	AudioManager.play("title", -6.0)
-	AudioManager.vibrate(120)
+	Sfx.play("title", -6.0)
+	Sfx.vibrate(120)
 
 
 func _process(delta: float) -> void:

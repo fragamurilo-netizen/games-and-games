@@ -6356,7 +6356,7 @@
 	"Ponta cruzador": "Crossing winger",
 	"Flecha": "Speedster",
 	"Centroavante veloz": "Pacey striker",
-	"Cabeceador": "Aerial threat",
+	"Cabeceador": "Aerial striker",
 	"Uma temporada de alto nível acabou com a insegurança.": "A high-level season put the insecurity to rest.",
 	"O prêmio deu a confiança que faltava.": "The award gave him the confidence he was missing.",
 	"Sossegou: agora cuida mais do corpo.": "He's settled down: now takes better care of his body.",
@@ -10073,5 +10073,16 @@
 	"dz": "dz",
 	"sa": "sa",
 	"mk": "mk",
-	"hh": "hh"
+	"hh": "hh",
+	"Volante líbero": "Half-back",
+	"Desce entre os zagueiros para sair jogando e fecha o meio quando o time perde a bola.": "Drops between the centre-backs to build play and shuts the middle when the ball is lost.",
+	"Armador itinerante": "Roaming playmaker",
+	"Aparece em todo o campo para receber: arma de trás, carrega e ainda chega na frente.": "Shows up all over the pitch: builds from deep, carries the ball and still arrives up front.",
+	"Trequartista": "Trequartista",
+	"Livre para flutuar atrás dos atacantes. Cria muito e quase não volta para marcar.": "Free to float behind the strikers. Creates a lot and hardly tracks back.",
+	"Intérprete de espaços": "Space interpreter",
+	"Some do jogo e aparece livre na área na hora certa. Pouco drible, muito gol.": "Disappears from the game and turns up unmarked in the box at the right moment. Little dribbling, lots of goals.",
+	"Ponta de área": "Wide target man",
+	"Abre pela ponta e fecha na segunda trave para cabecear os cruzamentos do outro lado.": "Starts wide and attacks the far post to head in crosses from the other flank.",
+	"Gol de cabeça é a especialidade: o time procura a cabeça dele em todo cruzamento.": "Headed goals are his speciality: the team looks for his head with every cross."
 }

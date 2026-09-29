@@ -56,7 +56,7 @@ func _ready() -> void:
 	top_bar.menu_pressed.connect(NavMenu.open)
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
-	AudioManager.start_music()
+	Sfx.start_music()
 	UIManager.goto("menu")
 
 

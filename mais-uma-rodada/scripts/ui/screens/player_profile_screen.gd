@@ -1002,7 +1002,7 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 						var r := DealTerms.exercise_option(w, p)
 						UIManager.toast(String(r["msg"]), UIColors.GREEN if r["ok"] else UIColors.RED)
 						if r["ok"]:
-							AudioManager.play("sign")
+							Sfx.play("sign")
 							GameManager.save_now()
 						refresh()), "check"))
 		var tb := UIKit.button("Treino individual", "", func(): TrainingSheet.open(p, refresh_cb), "tactics")

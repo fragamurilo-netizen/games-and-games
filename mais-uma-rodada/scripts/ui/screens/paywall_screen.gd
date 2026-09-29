@@ -107,7 +107,7 @@ func _on_store_changed() -> void:
 	if not is_inside_tree():
 		return
 	if Store.unlocked():
-		AudioManager.play("title")
+		Sfx.play("title")
 		if String(params.get("reason", "")) == "mods":
 			if not UIManager.back():
 				UIManager.goto("menu")

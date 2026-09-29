@@ -425,7 +425,7 @@ func _ask(kind: String) -> void:
 	var w := world()
 	UIManager.confirm("Levar o pedido ao presidente?", "O diretor de futebol %s leva o pedido. Custo: %s." % [BoardRequests.director(w)["name"], Fmt.money(BoardRequests.cost_of(w, kind))], "Pedir", func():
 		var r := BoardRequests.request(w, kind)
-		AudioManager.play("sign" if r["ok"] else "lose", -6.0)
+		Sfx.play("sign" if r["ok"] else "lose", -6.0)
 		UIManager.toast(String(r["msg"]), UIColors.GREEN if r["ok"] and not r["partial"] else (UIColors.ORANGE if r["ok"] else UIColors.RED))
 		GameManager.save_now()
 		refresh())

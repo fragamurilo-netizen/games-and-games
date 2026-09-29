@@ -59,6 +59,11 @@ const SIGNATURES: Array = [
 	["garcom", [Pos.AM, Pos.CM, Pos.RW, Pos.LW, Pos.RM, Pos.LM], {Attr.PAS: 10, Attr.VIS: 9, Attr.CRU: 4, Attr.FIN: -6}, 0],
 ]
 const SIGNATURE_CHANCE := 0.17
+## Nível dos titulares por função em relação ao time (como no futebol real, os melhores de cada
+## elenco quase sempre são meias e atacantes; laterais raramente estão entre os melhores do mundo).
+## O time inteiro continua na média do clube (calibrate_xi).
+const STARTER_SHIFT := {Pos.GK: 0.0, Pos.RB: -2.0, Pos.LB: -2.0, Pos.CB: -0.5, Pos.DM: -0.5, Pos.CM: 0.5,
+	Pos.AM: 1.0, Pos.RM: 0.0, Pos.LM: 0.0, Pos.RW: 1.0, Pos.LW: 1.0, Pos.ST: 1.0}
 const CURVE_WEIGHTS: Array = [15.0, 52.0, 13.0, 10.0, 10.0]
 
 ## Modelo de elenco (25 vagas): [posição, deslocamento de qualidade em relação ao nível do clube, "nível" 0 titular/1 reserva/2 jovem]
@@ -457,7 +462,8 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 			starters.append(i)
 	var star_w: Array = []
 	for i in starters:
-		star_w.append(2.2 if slots[i][0] in [Pos.ST, Pos.AM, Pos.RW, Pos.LW, Pos.CM] else 1.0)
+		var sp: int = slots[i][0]
+		star_w.append(2.2 if sp in [Pos.ST, Pos.AM, Pos.RW, Pos.LW, Pos.CM] else (0.3 if sp in [Pos.RB, Pos.LB] else 1.0))
 	var boost := {}
 	for k in n_stars:
 		var j := RngUtil.weighted_index(rng, star_w)
@@ -478,6 +484,8 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 		if pol_age.has("buy_age_min") and tier == 0:
 			age = maxi(age, int(pol_age["buy_age_min"]) + 1) # estrelas experientes
 		var target: float = level + float(s[1]) + rng.randfn(0.0, 2.4) + float(boost.get(si, 0.0))
+		if tier == 0:
+			target += float(STARTER_SHIFT.get(pos, 0.0))
 		if boost.has(si):
 			if pos == Pos.GK:
 				age = clampi(int(round(rng.randfn(29.5, 2.6))), 25, 34) # goleiro craque é experiente
@@ -522,11 +530,12 @@ static func star_ceiling(club: Club) -> float:
 
 
 ## Acima do teto o nível cresce devagar (poucos chegam a 90 no mundo).
+## Acima do joelho o alvo cresce devagar: craques existem, mas 90+ é para meia dúzia no mundo.
 static func soft_cap(target: float, ceiling: float) -> float:
-	var knee := ceiling - 5.0
+	var knee := ceiling - 3.5
 	if target <= knee:
 		return target
-	return knee + (target - knee) * 0.45
+	return knee + (target - knee) * 0.5
 
 
 ## Média do time titular provável (melhor goleiro + 10 melhores de linha).

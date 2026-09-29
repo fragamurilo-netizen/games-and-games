@@ -56,13 +56,13 @@ func _celebrate() -> void:
 		tag = "RUMO À %s" % w.league_name(club.league_id).to_upper()
 	if title == "":
 		if u.get("relegated", false):
-			AudioManager.play("lose", -4.0)
+			Sfx.play("lose", -4.0)
 		_ceremony.call_deferred()
 		return
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
-	AudioManager.play("title")
-	AudioManager.vibrate(400)
+	Sfx.play("title")
+	Sfx.vibrate(400)
 	_overlay.play(3, title, club.short_name, tag, "Temporada %d" % int(_summary.get("year", w.year - 1)), club.primary_color(), club.secondary_color(), 1.0)
 	_overlay.finished.connect(_ceremony, CONNECT_ONE_SHOT)
 

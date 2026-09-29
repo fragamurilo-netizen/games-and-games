@@ -109,20 +109,20 @@ func refresh() -> void:
 	cm.add_child(_toggle("Música de fundo", AppSettings.music, func(v: bool):
 		AppSettings.music = v
 		AppSettings.save_settings()
-		AudioManager.start_music()
+		Sfx.start_music()
 		refresh()))
 	if AppSettings.music:
 		cm.add_child(UIKit.label("Faixa", "Muted"))
 		cm.add_child(_chips(MusicSynth.TRACKS, AppSettings.music_track, func(i: int):
 			AppSettings.music_track = i
 			AppSettings.save_settings()
-			if not AudioManager.music_ready(i):
+			if not Sfx.music_ready(i):
 				UIManager.toast("Compondo a faixa… começa em instantes.")
-			AudioManager.start_music()))
+			Sfx.start_music()))
 		cm.add_child(_slider("Volume da música", AppSettings.music_volume, func(v: int):
 			AppSettings.music_volume = v
-			AudioManager.apply_volumes()
-			AudioManager.start_music(), func(): AppSettings.save_settings()))
+			Sfx.apply_volumes()
+			Sfx.start_music(), func(): AppSettings.save_settings()))
 		cm.add_child(_toggle("Tocar também durante as partidas", AppSettings.music_in_match, func(v: bool):
 			AppSettings.music_in_match = v
 			AppSettings.save_settings()))
@@ -133,18 +133,18 @@ func refresh() -> void:
 		AppSettings.sound = v
 		AppSettings.save_settings()
 		if v:
-			AudioManager.play("whistle", -6.0)
+			Sfx.play("whistle", -6.0)
 		refresh()))
 	if AppSettings.sound:
 		card.add_child(_slider("Volume dos efeitos", AppSettings.sfx_volume, func(v: int):
 			AppSettings.sfx_volume = v
-			AudioManager.apply_volumes(), func():
+			Sfx.apply_volumes(), func():
 			AppSettings.save_settings()
-			AudioManager.play("whistle", -6.0)))
+			Sfx.play("whistle", -6.0)))
 	card.add_child(_toggle("Vibrar nos gols e cartões", AppSettings.vibration, func(v: bool):
 		AppSettings.vibration = v
 		AppSettings.save_settings()
-		AudioManager.vibrate(60)))
+		Sfx.vibrate(60)))
 	tabs["sound"].append(UIKit.card_panel(card))
 	var card2 := UIKit.card("Card", 12)
 	card2.add_child(UIKit.section("Partidas"))
@@ -245,6 +245,6 @@ func _toggle(text: String, value: bool, cb: Callable) -> CheckButton:
 	# Texto longo quebra: sem isso a coluna do interruptor alargava e espremia a vizinha no tablet
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	t.toggled.connect(func(v: bool):
-		AudioManager.click()
+		Sfx.click()
 		cb.call(v))
 	return t

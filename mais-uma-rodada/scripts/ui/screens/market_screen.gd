@@ -472,7 +472,7 @@ func _respond(o: TransferOffer, action: String, counter_fee: int) -> void:
 		var pname := p.display_name() if p != null else "o jogador"
 		UIManager.confirm("Vender %s?" % pname, "Por %s ao %s. Essa decisão não pode ser desfeita." % [Fmt.money(o.fee), w.club(o.buyer_id).short_name], "Vender", func():
 			var msg := TransferManager.respond_offer(w, o, "accept")
-			AudioManager.play("sign")
+			Sfx.play("sign")
 			UIManager.toast(msg, UIColors.GREEN)
 			GameManager.save_now()
 			refresh())

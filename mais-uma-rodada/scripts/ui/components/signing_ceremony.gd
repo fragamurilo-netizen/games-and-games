@@ -103,7 +103,7 @@ func start() -> void:
 	for st in [&"font_color", &"font_hover_color", &"font_pressed_color", &"font_hover_pressed_color"]:
 		skip.add_theme_color_override(st, UIColors.D_TEXT)
 	add_child(skip)
-	AudioManager.play("whistle", -8.0)
+	Sfx.play("whistle", -8.0)
 	set_process(true)
 	_layout()
 
@@ -134,9 +134,9 @@ func _burst() -> void:
 		var ang := _rng.randf_range(-PI * 0.95, -PI * 0.05)
 		var spd := _rng.randf_range(320, 860)
 		_confetti.append([pos, Vector2(cos(ang), sin(ang)) * spd, _rng.randf() * TAU, _rng.randf_range(-8, 8), palette[k % palette.size()], Vector2(_rng.randf_range(8, 15), _rng.randf_range(12, 22))])
-	AudioManager.play("sign")
-	AudioManager.play("title", -6.0)
-	AudioManager.vibrate(160)
+	Sfx.play("sign")
+	Sfx.play("title", -6.0)
+	Sfx.vibrate(160)
 
 
 func _process(delta: float) -> void:

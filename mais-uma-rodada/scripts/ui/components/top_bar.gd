@@ -22,11 +22,11 @@ func _ready() -> void:
 	$Row.resized.connect(queue_redraw)
 	money_lbl.item_rect_changed.connect(queue_redraw)
 	back_btn.pressed.connect(func():
-		AudioManager.click()
+		Sfx.click()
 		back_pressed.emit())
 	menu_btn.icon = UIKit.icon("menu")
 	menu_btn.pressed.connect(func():
-		AudioManager.click()
+		Sfx.click()
 		menu_pressed.emit())
 
 

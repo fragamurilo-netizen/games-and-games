@@ -143,7 +143,7 @@ func _load(s: int) -> void:
 		return
 	GameManager.load_career_async(s, func(ok: bool) -> void:
 		if ok:
-			AudioManager.play("whistle", -6.0)
+			Sfx.play("whistle", -6.0)
 			UIManager.goto("hub")
 		else:
 			UIManager.info("Não foi possível carregar", "O save do espaço %d não pôde ser lido (nem a cópia de segurança)." % s))

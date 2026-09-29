@@ -171,7 +171,7 @@ static func show_credits() -> void:
 func _load(slot: int) -> void:
 	GameManager.load_career_async(slot, func(ok: bool) -> void:
 		if ok:
-			AudioManager.play("whistle", -6.0)
+			Sfx.play("whistle", -6.0)
 			UIManager.goto("hub")
 		else:
 			UIManager.info("Não foi possível carregar", "O arquivo do slot %d parece corrompido." % slot))

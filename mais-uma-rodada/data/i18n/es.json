@@ -6356,7 +6356,7 @@
 	"Ponta cruzador": "Extremo centrador",
 	"Flecha": "Flecha",
 	"Centroavante veloz": "Delantero veloz",
-	"Cabeceador": "Especialista en el juego aéreo",
+	"Cabeceador": "Cabeceador",
 	"Uma temporada de alto nível acabou com a insegurança.": "Una temporada de alto nivel terminó con la inseguridad.",
 	"O prêmio deu a confiança que faltava.": "El premio le dio la confianza que le faltaba.",
 	"Sossegou: agora cuida mais do corpo.": "Se calmó: ahora se cuida más el cuerpo.",
@@ -10073,5 +10073,16 @@
 	"dz": "dz",
 	"sa": "sa",
 	"mk": "mk",
-	"hh": "hh"
+	"hh": "hh",
+	"Volante líbero": "Mediocentro líbero",
+	"Desce entre os zagueiros para sair jogando e fecha o meio quando o time perde a bola.": "Baja entre los centrales para salir jugando y cierra el medio cuando se pierde la pelota.",
+	"Armador itinerante": "Organizador itinerante",
+	"Aparece em todo o campo para receber: arma de trás, carrega e ainda chega na frente.": "Aparece por todo el campo: arma desde atrás, conduce y todavía llega arriba.",
+	"Trequartista": "Trequartista",
+	"Livre para flutuar atrás dos atacantes. Cria muito e quase não volta para marcar.": "Libre para flotar detrás de los delanteros. Crea mucho y casi no baja a defender.",
+	"Intérprete de espaços": "Intérprete de espacios",
+	"Some do jogo e aparece livre na área na hora certa. Pouco drible, muito gol.": "Desaparece del partido y aparece solo en el área en el momento justo. Poco regate, mucho gol.",
+	"Ponta de área": "Extremo de área",
+	"Abre pela ponta e fecha na segunda trave para cabecear os cruzamentos do outro lado.": "Abre por la banda y cierra en el segundo palo para cabecear los centros del otro lado.",
+	"Gol de cabeça é a especialidade: o time procura a cabeça dele em todo cruzamento.": "El gol de cabeza es su especialidad: el equipo busca su cabeza en cada centro."
 }

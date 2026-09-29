@@ -427,7 +427,7 @@ func _update_details() -> void:
 func _start() -> void:
 	if _world == null or _selected < 0:
 		return
-	AudioManager.play("whistle", -4.0)
+	Sfx.play("whistle", -4.0)
 	var slot := SaveManager.first_free_slot()
 	if slot < 0:
 		UIManager.dialog("Todos os slots estão ocupados", "Escolha um slot para substituir (a carreira antiga será apagada).", _slot_buttons())

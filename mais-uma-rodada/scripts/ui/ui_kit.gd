@@ -39,7 +39,7 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 		b.expand_icon = false # largura limitada por icon_max_width do tema
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
 	b.focus_mode = Control.FOCUS_NONE
@@ -58,7 +58,7 @@ static func icon_button(icon_name: String, cb: Callable, tip: String = "") -> Bu
 	press_fx(b, null, 0.9)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	return b
 
@@ -76,7 +76,7 @@ static func chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 	press_fx(b, null, 0.94)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	return b
 
@@ -442,7 +442,7 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	press_fx(b, p, 0.98)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	p.add_child(b)
 	return p
@@ -551,7 +551,7 @@ static func section_header(text: String, action: String = "", cb: Callable = Cal
 		b.text = action.to_upper()
 		b.focus_mode = Control.FOCUS_NONE
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 		h.add_child(b)
 	return h
@@ -576,7 +576,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var key: String = it[0]
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call(key))
 		h.add_child(b)
 	return h
@@ -604,7 +604,7 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 		b.clip_text = true
 		var key: String = it[0]
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call(key))
 		h.add_child(b)
 	p.add_child(h)
@@ -703,7 +703,7 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 		b.custom_minimum_size = Vector2(0, UITokens.H_TAB)
 		var key: String = it[0]
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call(key))
 		h.add_child(b)
 		if b.button_pressed:

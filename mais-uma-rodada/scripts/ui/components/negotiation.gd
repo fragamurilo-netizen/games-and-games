@@ -369,7 +369,7 @@ func _render_loan() -> void:
 		var res := TransferManager.loan_in(w, p, loan_terms)
 		if res["ok"]:
 			UIManager.close_modal()
-			AudioManager.play("sign")
+			Sfx.play("sign")
 			UIManager.toast(res["msg"], UIColors.GREEN)
 			_done()
 		else:
@@ -392,7 +392,7 @@ func _send_bid() -> void:
 			agreed_fee = fee
 			message_color = UIColors.GREEN
 			wage = TransferManager.wage_ask(w, p, w.user_club())
-			AudioManager.play("sign", -6.0)
+			Sfx.play("sign", -6.0)
 		"counter":
 			counter_fee = int(r["fee"])
 			message_color = UIColors.ACCENT
@@ -499,8 +499,8 @@ func _send_terms() -> void:
 				r = {"ok": false, "msg": rr["msg"], "wage": rr.get("wage", 0), "result": rr["result"]}
 	if r.get("ok", false):
 		UIManager.close_modal()
-		AudioManager.play("sign")
-		AudioManager.vibrate(40)
+		Sfx.play("sign")
+		Sfx.vibrate(40)
 		if not SigningCeremony.play_pending(w):
 			UIManager.toast(r["msg"], UIColors.GREEN)
 		_done()
