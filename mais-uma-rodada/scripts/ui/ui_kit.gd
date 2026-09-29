@@ -42,7 +42,7 @@ static func button(text: String, variation: String = "", cb: Callable = Callable
 			AudioManager.click()
 			cb.call())
 	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
 	press_fx(b)
 	return b
 
@@ -54,7 +54,7 @@ static func icon_button(icon_name: String, cb: Callable, tip: String = "") -> Bu
 	b.expand_icon = false
 	b.custom_minimum_size = Vector2(64, 64)
 	b.tooltip_text = tip
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
 	press_fx(b, null, 0.9)
 	if cb.is_valid():
 		b.pressed.connect(func():
@@ -72,7 +72,7 @@ static func chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 	b.button_group = group
 	b.button_pressed = pressed
 	b.custom_minimum_size.y = 52
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
 	press_fx(b, null, 0.94)
 	if cb.is_valid():
 		b.pressed.connect(func():
@@ -435,7 +435,7 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	p.add_child(inner)
 	var b := Button.new()
 	b.theme_type_variation = "RowOverlay"
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
 	b.toggle_mode = toggle
 	b.name = "Tap"
 	_fit_overlay(p, b)
@@ -549,7 +549,7 @@ static func section_header(text: String, action: String = "", cb: Callable = Cal
 		var b := Button.new()
 		b.theme_type_variation = "TextButton"
 		b.text = action.to_upper()
-		b.focus_mode = Control.FOCUS_NONE
+		b.focus_mode = Control.FOCUS_ALL
 		b.pressed.connect(func():
 			AudioManager.click()
 			cb.call())
@@ -569,7 +569,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
-		b.focus_mode = Control.FOCUS_NONE
+		b.focus_mode = Control.FOCUS_ALL
 		b.custom_minimum_size.y = UITokens.H_TAB
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.clip_text = true
@@ -595,7 +595,7 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
-		b.focus_mode = Control.FOCUS_NONE
+		b.focus_mode = Control.FOCUS_ALL
 		b.custom_minimum_size.y = 48
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.clip_text = true
@@ -696,7 +696,7 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
-		b.focus_mode = Control.FOCUS_NONE
+		b.focus_mode = Control.FOCUS_ALL
 		b.custom_minimum_size = Vector2(0, UITokens.H_TAB)
 		var key: String = it[0]
 		b.pressed.connect(func():

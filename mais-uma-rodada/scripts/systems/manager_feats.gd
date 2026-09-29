@@ -175,7 +175,8 @@ static func on_user_match(world: GameWorld, entry: Dictionary, result: String) -
 		var ft2 := _streak_feat("invicto", "%d jogos sem perder." % n, n * 4, n * 0.06, n * 0.4, n * 0.3, 2.0)
 		if n >= 10:
 			var bonus := Valuation.round_value(maxf(50000.0, club.wage_budget * (n / 10.0) * 0.5))
-			club.transfer_budget += bonus
+			# An unbeaten run earns reputation, not money created without board approval.
+			bonus = FinanceManager.authorize_extra(world,club,bonus,"sporting_review")
 			ft2["cash"] = bonus
 		out.append(ft2)
 	if WINS_AT.has(int(st["w"])):

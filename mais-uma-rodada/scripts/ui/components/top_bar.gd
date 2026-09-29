@@ -77,5 +77,6 @@ func set_state(title: String, subtitle: String, show_back: bool, club: Club, sho
 	money_lbl.visible = club != null
 	if club != null:
 		crest.set_club(club)
-		money_lbl.text = Fmt.money(club.balance)
-		money_lbl.add_theme_color_override(&"font_color", UIColors.GREEN if club.balance >= 0 else UIColors.RED)
+		money_lbl.text = "Verba " + Fmt.money(club.transfer_budget)
+		money_lbl.tooltip_text = "Orçamento de transferências autorizado pela diretoria. O caixa do clube fica em Finanças."
+		money_lbl.add_theme_color_override(&"font_color", UIColors.ACCENT if club.transfer_budget > 0 else UIColors.MUTED)

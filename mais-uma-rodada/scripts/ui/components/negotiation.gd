@@ -31,7 +31,7 @@ static func open(world: GameWorld, player: Player, kind: String, done: Callable)
 	n.on_done = done
 	n._init_values()
 	n.box = UIKit.vbox(14)
-	n.box.custom_minimum_size.x = 600
+	n.box.custom_minimum_size.x = minf(600.0, maxf(260.0, UILayout.viewport.x - 96.0))
 	n._render()
 	UIManager.show_modal(n.box, true)
 
@@ -85,6 +85,8 @@ func _render() -> void:
 	head.add_child(t)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
 	box.add_child(head)
+	if UILayout.viewport.y < 900:
+		box.add_child(UIKit.label("Deslize para conferir todas as condições e enviar a proposta.","Small",true))
 	var user := w.user_club()
 	if picking_swap:
 		_render_swap_picker()
@@ -160,6 +162,8 @@ func _render_fee(caption: String, hint: String) -> void:
 		box.add_child(_choice("Pagamento", [["À vista", 1], ["2 parcelas", 2], ["3 parcelas", 3]], int(deal["inst"]), func(v): deal["inst"] = int(v)))
 		box.add_child(_choice("Revenda para o %s" % w.club(p.club_id).short_name, [["0%", 0.0], ["10%", 0.1], ["20%", 0.2]], float(deal["sell_on"]), func(v): deal["sell_on"] = float(v)))
 		box.add_child(UIKit.kv("Sai do caixa agora", Fmt.money(TransferManager.upfront_cost(fee, deal))))
+		box.add_child(UIKit.kv("Compromete a verba total", Fmt.money(TransferManager.budget_cost(fee, deal))))
+		box.add_child(UIKit.label("Parcelar muda o fluxo de caixa, não aumenta a autorização de gasto. Comissão e luvas também consomem verba.", "Small", true))
 		_render_swap_summary()
 	if counter_fee > 0 and mode == "buy":
 		box.add_child(UIKit.button("Aceitar contraproposta de %s" % Fmt.money(counter_fee), "", func():
@@ -319,7 +323,8 @@ func _render_terms(caption: String) -> void:
 	for y in range(1, 6):
 		var yy := y
 		var chip := UIKit.chip("%d ano%s" % [y, "" if y == 1 else "s"], y == years, g, func():
-			years = yy)
+			years = yy
+			_render())
 		UIKit.shrink_button(chip)
 		yrow.add_child(chip)
 	box.add_child(yrow)
@@ -327,6 +332,11 @@ func _render_terms(caption: String) -> void:
 	var monthly := maxi(wage, 1)
 	box.add_child(_choice("", [["Nenhuma", 0], ["3 salários", monthly * 3], ["6 salários", monthly * 6], ["12 salários", monthly * 12]], int(deal["bonus"]), func(v): deal["bonus"] = int(v)))
 	box.add_child(_choice("Multa rescisória", [["Sem multa", 0], ["2× valor", 2], ["3× valor", 3], ["5× valor", 5]], int(deal["clause"]), func(v): deal["clause"] = int(v)))
+	var contract_fee := maxi(0, agreed_fee) if mode == "buy" else 0
+	box.add_child(UIKit.kv("Compromisso de contratação", Fmt.money(TransferManager.budget_cost(contract_fee, deal))))
+	box.add_child(UIKit.kv("Salários por ano", Fmt.money(wage * 12)))
+	box.add_child(UIKit.kv("Custo total do contrato", Fmt.money(TransferManager.budget_cost(contract_fee, deal) + wage * 12 * years)))
+	box.add_child(UIKit.label("Custo nominal antes de reajustes e bônus futuros. O pedido salarial não é sorteado de novo a cada clique.", "Small", true))
 	var fin := FinanceManager.summary(w, w.user_club())
 	var bill: int = fin["wage_bill"] - (p.wage if mode == "renew" else 0) + wage
 	var fits: bool = bill <= int(fin["wage_budget"] * 1.02)

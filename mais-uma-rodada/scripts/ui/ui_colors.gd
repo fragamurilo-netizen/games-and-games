@@ -318,7 +318,7 @@ static func _fit_accent() -> void:
 	ACCENT_DARK = ACCENT
 	for amt: float in [0.25, 0.2, 0.15, 0.1, 0.06]:
 		var d := ACCENT.darkened(amt)
-		if contrast(ON_ACCENT, d) >= 3.0:
+		if contrast(ON_ACCENT, d) >= 4.5:
 			ACCENT_DARK = d
 			break
 	if ACCENT.get_luminance() < 0.08:
@@ -378,6 +378,7 @@ static func _fix_states(th: Theme) -> void:
 	if ph != null:
 		ph.bg_color = hover_of(ACCENT)
 		ph.border_color = ACCENT_DARK
+	_readable_states(th)
 	if not touch_only():
 		return
 	for type in th.get_type_list():
@@ -390,6 +391,34 @@ static func _fix_states(th: Theme) -> void:
 				[&"icon_hover_color", &"icon_normal_color"], [&"icon_hover_pressed_color", &"icon_pressed_color"]]:
 			if th.has_color(pair[1], type):
 				th.set_color(pair[0], type, th.get_color(pair[1], type))
+
+
+## Estados compartilhados: contraste calculado no fundo de cada estado, não na cor da marca.
+static func _readable_states(th: Theme) -> void:
+	for type in th.get_type_list():
+		if not th.has_stylebox(&"normal", type) or type == &"LineEdit":
+			continue
+		for entry in [["normal", "font_color", "icon_normal_color"], ["hover", "font_hover_color", "icon_hover_color"], ["pressed", "font_pressed_color", "icon_pressed_color"], ["hover_pressed", "font_hover_pressed_color", "icon_hover_pressed_color"]]:
+			if not th.has_stylebox(entry[0], type):
+				continue
+			var style := th.get_stylebox(entry[0], type) as StyleBoxFlat
+			if style == null:
+				continue
+			var bg := SURFACE.blend(style.bg_color)
+			var fg := th.get_color(entry[1], type) if th.has_color(entry[1], type) else TEXT
+			if contrast(bg, fg) < 4.5:
+				fg = on_color(bg)
+			th.set_color(entry[1], type, fg)
+			th.set_color(entry[2], type, fg)
+		var focus := th.get_stylebox(&"focus", type) as StyleBoxFlat if th.has_stylebox(&"focus", type) else null
+		if focus == null:
+			focus = StyleBoxFlat.new()
+			focus.bg_color = Color.TRANSPARENT
+			focus.set_corner_radius_all(10)
+			th.set_stylebox(&"focus", type, focus)
+		focus.set_border_width_all(2)
+		focus.border_color = ACCENT
+		focus.draw_center = false
 
 
 ## Aparelho só de toque (celular, tablet, navegador no celular): sem estado de "passar por cima".

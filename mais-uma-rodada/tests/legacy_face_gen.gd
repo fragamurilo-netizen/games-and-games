@@ -1,4 +1,4 @@
-class_name FaceGen
+class_name LegacyFaceGen
 extends RefCounted
 ## Traços do rosto de uma pessoa (jogador, técnico, dirigente), derivados da semente do rosto,
 ## da etnia e da idade — o mesmo jogador tem sempre o mesmo rosto e envelhece com ele.
@@ -51,7 +51,6 @@ const HAIR_STYLES: Array[String] = [
 	"High top cacheado com pontas descoloridas", "Longo liso molhado para trás", "Franja reta curta", "Moicano com pontas descoloridas",
 	# 182+
 	"Meia-lua na franja", "Topete descolorido com laterais escuras", "Cachinhos descoloridos no alto", "Crespo descolorido no alto", "Tranças nagô descoloridas", "Twists com pontas descoloridas", "Twists tingidos de vermelho", "Topete alto arrepiado com degradê", "Espetado com luzes", "Moicano descolorido", "Moicano com desenhos laterais", "Crista alta", "Afro gigante loiro", "Black power gigante", "Cachos armados gigantes", "Dreads longos volumosos", "Dreads com faixa", "Longo com faixa", "Cacheado longo com faixa", "Preso para trás com mechas soltas", "Rabinho trançado na nuca", "Moicano tingido de azul", "Listra tingida de vermelho no meio", "Undercut para trás com risco", "Esponja descolorida", "Tufinhos trançados tingidos de verde", "Black power com costeletas longas", "Para trás volumoso até a nuca", "Longo ondulado atrás das orelhas",
-	"Crop baixo irregular", "Taper ondulado natural", "Cachos curtos redondos", "Torcidinhos baixos", "Social com entradas suaves", "Tranças curtas laterais",
 ]
 const H_BUZZ := 0
 const H_SHORT := 1
@@ -385,8 +384,7 @@ const STYLE_TEX_W: Array = [
 	[0.0, 0.0, 0.0, 0.3], # tufinhos trançados tingidos de verde
 	[0.0, 0.0, 0.2, 0.6], # black power com costeletas longas
 	[0.8, 1.0, 0.2, 0.0], # para trás volumoso até a nuca
-	[0.3, 0.8, 0.2, 0.0], # longo ondulado atrás das orelhas,
-	[1.0, 0.8, 0.15, 0.0], [0.3, 1.0, 0.25, 0.0], [0.0, 0.2, 1.0, 0.65], [0.0, 0.0, 0.25, 1.0], [1.0, 0.85, 0.2, 0.0], [0.1, 0.15, 0.5, 0.8],
+	[0.3, 0.8, 0.2, 0.0], # longo ondulado atrás das orelhas
 ]
 ## Penteados que exigem cabelo (somem com calvície avançada).
 const NEEDS_HAIR: Array[int] = [H_QUIFF, H_CURLY, H_AFRO, H_LONG, H_BUN, H_FRINGE, H_POMPADOUR, H_WAVY,
@@ -401,9 +399,7 @@ const NEEDS_HAIR: Array[int] = [H_QUIFF, H_CURLY, H_AFRO, H_LONG, H_BUN, H_FRING
 	H_QUIFF_BURST, H_UNDERCUT_LOWBUN, H_CURLY_LONG_FRINGE, H_FREEFORM_FADE, H_FROSTED_CURLS, H_TWO_PUFFS,
 	113, 114, 116, 117, 118, 119, 120, 124, 125, 126, 127, 128, 134, 135, 136, 137, 138, 139, 141, 142, 143, 144, 145, 146, 148, 150, 151, 152,
 	153, 154, 157, 158, 159, 160, 161, 162, 164, 165, 166, 167, 168, 170, 171, 172, 174, 175, 176, 177, 178, 179, 180, 181,
-	182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210,
-	211, 212, 213, 214, 216
-]
+	182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210]
 
 # ---------------------------------------------------------------------------
 # Barbas
@@ -430,7 +426,6 @@ const BEARDS: Array[String] = [
 	"Cheia longa e volumosa",
 	# 121+
 	"Cheia cacheada volumosa", "Crespa curta", "Crespa longa", "Cavanhaque crespo", "Crespa com contorno navalhado", "Por fazer com cavanhaque", "Por fazer com bigode e cavanhaque", "Por fazer com bigode grosso", "Por fazer com mosca", "Cavanhaque descolorido", "Curta descolorida", "Bigode e cavanhaque descoloridos", "Barba com dois riscos", "Cavanhaque com risco no meio", "Cavanhaque trançado", "Longa com trança no queixo", "Pontuda desenhada", "Cheia média desalinhada", "Curta com queixo pontudo", "Crespa pontuda",
-	"Degradê suave nas bochechas", "Bigode discreto e barba curta", "Por fazer com falhas naturais", "Cavanhaque curto desconectado",
 ]
 const B_NONE := 0
 const B_STUBBLE := 1
@@ -659,11 +654,7 @@ const BEARD_PARTS: Array = [
 	{"ch": 0.14, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.28, "op": 0.96, "sh": 1.0, "pt": 0.0, "tx": 1, "pp": 1.0, "cl": 1.0, "hw": 0.9, "cnw": 1.5}, # pontuda desenhada
 	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.2, "op": 0.94, "sh": 0.0, "pt": 0.04, "tx": 1, "rd": 1.1, "wild": 0.7, "cl": 1.0, "hw": 0.9, "cnw": 1.5}, # cheia média desalinhada
 	{"ch": 0.22, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.18, "op": 0.93, "sh": 0.4, "pt": 0.0, "tx": 1, "fd": 1.0, "pp": 1.0, "cl": 1.0, "hw": 0.9, "cnw": 1.5}, # curta com queixo pontudo
-	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.12, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "pp": 1.0, "cr": 1.0, "cnw": 1.5, "hw": 0.6, "cl": 1.0}, # crespa pontuda,
-	{"ch": 0.54, "sd": 0.7, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 0.7, "nk": 0.05, "ln": 0.035, "op": 0.46, "sh": 0.1, "pt": 0.24, "tx": 1, "fd": 1.0, "cl": 1.0},
-	{"ch": 0.56, "sd": 0.65, "jw": 0.75, "cn": 0.65, "mu": 2, "so": 0.65, "nk": 0.04, "ln": 0.025, "op": 0.4, "sh": 0.16, "pt": 0.18, "tx": 1, "cl": 1.0},
-	{"ch": 0.62, "sd": 0.65, "jw": 0.8, "cn": 0.8, "mu": 1, "so": 0.4, "nk": 0.15, "ln": 0.0, "op": 0.20, "sh": 0.0, "pt": 0.65, "tx": 0, "cl": 1.0},
-	{"ch": 0.0, "sd": 0.0, "jw": 0.0, "cn": 0.65, "mu": 2, "so": 0.55, "nk": 0.0, "ln": 0.025, "op": 0.75, "sh": 0.35, "pt": 0.08, "tx": 1, "gap": 1.0},
+	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.12, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "pp": 1.0, "cr": 1.0, "cnw": 1.5, "hw": 0.6, "cl": 1.0}, # crespa pontuda
 ]
 ## Barbas de fio crespo: combinam com cabelo cacheado/crespo.
 const CURLY_BEARDS: Array[int] = [121, 122, 123, 124, 125, 140]
@@ -675,9 +666,7 @@ const BEARD_MIN_CAP: Array[float] = [0.0, 0.22, 0.55, 0.72, 0.42, 0.5, 0.55, 0.5
 	0.6, 0.35, 0.9, 0.85, 0.48, 0.66, 0.7, 0.6, 0.45, 0.7,
 	0.15, 0.4, 0.6, 0.55, 0.72, 0.7, 0.2, 0.35, 0.45, 0.45, 0.55, 0.5, 0.62, 0.5, 0.2, 0.5, 0.75, 0.8, 0.55, 0.5, 0.35, 0.45, 0.5, 0.85,
 	0.5, 0.5, 0.4, 0.55, 0.6, 0.65, 0.6, 0.55, 0.5, 0.1, 0.55, 0.85, 0.7, 0.25, 0.45, 0.3, 0.9,
-	0.8, 0.6, 0.85, 0.45, 0.62, 0.45, 0.5, 0.5, 0.3, 0.42, 0.55, 0.5, 0.6, 0.5, 0.55, 0.85, 0.8, 0.78, 0.65, 0.8,
-	0.5, 0.4, 0.2, 0.35
-]
+	0.8, 0.6, 0.85, 0.45, 0.62, 0.45, 0.5, 0.5, 0.3, 0.42, 0.55, 0.5, 0.6, 0.5, 0.55, 0.85, 0.8, 0.78, 0.65, 0.8]
 ## Popularidade dos estilos entre quem pode tê-los.
 const BEARD_POP: Array[float] = [5.0, 3.2, 2.4, 1.3, 0.8, 0.35, 0.45, 0.7, 1.0, 0.25, 2.4, 0.12, 0.25, 0.12, 0.3, 0.2, 0.12, 1.2, 0.3, 0.15, 0.8, 0.25, 0.2, 0.7, 0.25, 1.4, 1.6, 1.8,
 	0.12, 0.25, 0.45, 0.08, 0.4, 0.3, 0.35, 0.15, 1.0, 0.1,
@@ -686,9 +675,7 @@ const BEARD_POP: Array[float] = [5.0, 3.2, 2.4, 1.3, 0.8, 0.35, 0.45, 0.7, 1.0, 
 	0.08, 0.2, 0.06, 0.05, 0.2, 0.5, 0.6, 0.3, 0.5, 0.12,
 	2.0, 2.0, 1.2, 1.2, 0.8, 1.0, 0.8, 0.6, 0.4, 0.3, 0.4, 0.3, 1.0, 1.2, 0.8, 0.2, 0.4, 0.25, 0.1, 0.35, 1.4, 0.7, 0.25, 0.5,
 	0.9, 0.8, 0.5, 0.5, 1.2, 1.0, 0.2, 1.2, 0.5, 2.0, 0.2, 0.3, 0.6, 0.9, 0.1, 1.0, 0.25,
-	0.6, 1.0, 0.25, 0.4, 0.6, 0.5, 0.5, 0.2, 0.3, 0.08, 0.08, 0.06, 0.1, 0.1, 0.05, 0.04, 0.3, 0.3, 0.6, 0.2,
-	1.2, 0.8, 1.4, 0.65
-]
+	0.6, 1.0, 0.25, 0.4, 0.6, 0.5, 0.5, 0.2, 0.3, 0.08, 0.08, 0.06, 0.1, 0.1, 0.05, 0.04, 0.3, 0.3, 0.6, 0.2]
 
 # ---------------------------------------------------------------------------
 # Cores
@@ -1104,8 +1091,6 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["gray"] = gray
 	# Penteado: o "de sempre" e o da fase (muda a cada ~4 anos)
 	var sw := _style_weights(e, tex, age)
-	if int(look.get("catalog", 1)) < 2:
-		sw = sw.slice(0, 211) # preserve the face of existing saves/seeds
 	var base_style := RngUtil.weighted_index(rng, sw)
 	var phase_rng := RandomNumberGenerator.new()
 	var phase_off := rng.randi_range(0, 3)
@@ -1188,7 +1173,7 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	f["beard_cap"] = cap
 	var pref := rng.randf() # < 0.3 gosta de rosto limpo, > 0.75 gosta de barba
 	var bw: Array[float] = []
-	for i in (BEARDS.size() if int(look.get("catalog", 1)) >= 2 else 141):
+	for i in BEARDS.size():
 		var w: float = BEARD_POP[i] if cap >= BEARD_MIN_CAP[i] else 0.0
 		if i == B_NONE:
 			w *= 1.8 if pref < 0.3 else (0.4 if pref > 0.75 else 1.0)

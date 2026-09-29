@@ -98,7 +98,7 @@ static func realistic_suitor(world: GameWorld, p: Player, min_rep: float, rng: R
 ## desconto por não ter jogado nada. Nem a maior joia custa mais que um titular pronto dez pontos
 ## abaixo do potencial dela, nem mais que 20% da verba do comprador.
 static func academy_fee(world: GameWorld, p: Player, buyer: Club, rng: RandomNumberGenerator) -> int:
-	var pot := float(p.potential) + p.scout_noise * 0.5
+	var pot := float(TalentAssessment.projection(p, world.year)["center"]) + p.scout_noise * 0.15
 	var eff := p.ovr_f + maxf(0.0, pot - p.ovr_f) * 0.4
 	var v := Valuation.VALUE_BASE * pow(Valuation.VALUE_GROWTH, eff - Valuation.shift - 40.0) * Valuation.age_factor(p.age(world.year))
 	v *= rng.randf_range(0.9, 1.35) * (0.85 + buyer.reputation / 400.0)
@@ -268,7 +268,7 @@ static func _plan_loans(world: GameWorld, owner: Club) -> void:
 			return
 		if not p.loan.is_empty() or p.transfer_listed or p.age(world.year) > 21:
 			continue
-		if p.potential < p.overall + 5 or p.ovr_f >= level - 3.0 or p.squad_status <= Player.STATUS_ROTATION:
+		if float(TalentAssessment.projection(p,world.year)["center"]) < p.ovr_f + 5.0 or p.ovr_f >= level - 3.0 or p.squad_status <= Player.STATUS_ROTATION:
 			continue
 		if TransferManager._family_count(world, owner, p.position) <= TransferManager._family_min(p.position) + 1:
 			continue
@@ -507,7 +507,7 @@ static func _close_deal(world: GameWorld, st: Dictionary, c: Club, p: Player, ur
 ## Leilão: outros clubes com dinheiro e interesse entram na disputa. Quem paga mais leva.
 ## Retorna {club, fee} com o vencedor e o preço final, ou {} se ninguém mais apareceu.
 static func _auction(world: GameWorld, buyer: Club, p: Player, fee: int, buyer_top: float, deadline: bool) -> Dictionary:
-	if p.squad_status > Player.STATUS_STARTER and p.potential < p.overall + 6:
+	if p.squad_status > Player.STATUS_STARTER and float(TalentAssessment.projection(p,world.year)["center"]) < p.ovr_f + 6.0:
 		return {}
 	var seller := world.club(p.club_id)
 	var r := Valuation.perceived_rating(p, world.year) + Valuation.shift
@@ -616,7 +616,7 @@ static func _resume_talks(world: GameWorld, st: Dictionary, deadline: bool) -> A
 static func _loanable(world: GameWorld, p: Player, c: Club) -> bool:
 	if p.club_id < 0 or not p.loan.is_empty() or p.squad_status <= Player.STATUS_STARTER or p.age(world.year) < 20:
 		return false
-	return TransferManager.loan_fee(p) <= c.transfer_budget and not world.is_user_club(p.club_id)
+	return TransferManager.loan_fee(p) <= mini(c.transfer_budget,maxi(0,c.balance)) and TransferManager._wage_fits(world,c,p,p.wage) and not world.is_user_club(p.club_id)
 
 
 ## Sem dinheiro para a compra agora: empréstimo até o fim da temporada com opção de compra.
@@ -632,8 +632,9 @@ static func _loan_with_option(world: GameWorld, c: Club, p: Player) -> bool:
 		return false
 	var fee := TransferManager.loan_fee(p)
 	c.add_ledger("compras", -fee)
-	c.transfer_budget = maxi(0, c.transfer_budget - fee)
+	FinanceManager.commit_budget(world,c,fee)
 	owner.add_ledger("vendas", fee)
+	FinanceManager.on_sale(world,owner,fee)
 	TransferManager._move_loan(world, p, owner, c)
 	p.loan["opt"] = Valuation.round_value(p.value * float(owner.arch().get("sell_mult", 1.0)) * world.rng.randf_range(0.9, 1.1))
 	TransferManager._set_status_on_arrival(world, p, c)
@@ -748,7 +749,7 @@ static func max_bid(world: GameWorld, buyer: Club, p: Player, urgency: float, de
 	if p.squad_status == Player.STATUS_STAR or p.ovr_f >= level + 4.0:
 		m *= 1.0 + float(buyer.arch().get("star_pref", 0.5)) * 0.25
 	var age := p.age(world.year)
-	if age <= 23 and p.potential >= p.overall + 6:
+	if age <= 23 and float(TalentAssessment.projection(p,world.year)["center"]) >= p.ovr_f + 6.0:
 		if p.ovr_f >= level - 6.0:
 			m *= 1.1 # ágio pela promessa que já joga
 		else:
@@ -861,7 +862,7 @@ static func find_buyer_for(world: GameWorld, p: Player) -> Club:
 ## exportadoras (vitrine) chamam muito mais atenção; no último fim de semana, mais ainda.
 static func extra_offer_chance(world: GameWorld, p: Player) -> float:
 	var add := 0.0
-	if p.age(world.year) <= 23 and p.potential >= p.overall + 5 and p.ovr_f >= PlayerGenerator.club_level(world.club(p.club_id)) - 6.0:
+	if p.age(world.year) <= 23 and float(TalentAssessment.projection(p,world.year)["center"]) >= p.ovr_f + 5.0 and p.ovr_f >= PlayerGenerator.club_level(world.club(p.club_id)) - 6.0:
 		add += 0.03
 	if p.squad_status <= Player.STATUS_STARTER:
 		add += 0.01

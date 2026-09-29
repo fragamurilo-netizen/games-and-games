@@ -134,10 +134,7 @@ func load_career(save_slot: int) -> bool:
 	world = w
 	slot = save_slot
 	matchday = {}
-	# Entropia nova a cada abertura: reabrir o save não repete os mesmos jogos, gols e minutos.
-	var fresh := RandomNumberGenerator.new()
-	fresh.randomize()
-	world.rng.seed = world.rng.randi() ^ fresh.randi()
+	# Retoma o estado aleatório salvo. Reabrir não rerrola adversários, eventos ou resultados.
 	HeartClubs.ensure_all(world) # saves de antes dos times de coração
 	SponsorManager.ensure_all(world) # saves de antes dos patrocínios da IA
 	Valuation.refresh_shift(world)
@@ -145,6 +142,7 @@ func load_career(save_slot: int) -> bool:
 	if market_migrated:
 		for c: Club in world.clubs:
 			MarketReality.migrate_budget(world, c)
+	FinanceManager.ensure_budget_policy(world)
 	world_changed.emit()
 	return true
 

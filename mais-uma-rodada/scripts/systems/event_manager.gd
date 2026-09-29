@@ -14,6 +14,10 @@ const COOLDOWN := 6 # jogos entre dois eventos do mesmo tipo
 const LIFETIME := 3 # jogos para decidir
 
 const KINDS := {
+	"ref_workload": {"w":0.7,"icon":"cross","color":"ORANGE"},
+	"ref_contract": {"w":0.6,"icon":"clock","color":"BLUE"},
+	"ref_academy": {"w":0.5,"icon":"star","color":"GREEN"},
+	"ref_budget": {"w":0.7,"icon":"money","color":"BLUE"},
 	"raise": {"w": 1.2, "icon": "money", "color": "ORANGE"},
 	"minutes": {"w": 1.0, "icon": "clock", "color": "ORANGE"},
 	"sponsor": {"w": 0.0, "icon": "money", "color": "GREEN"}, # patrocínio é da diretoria (fica só para saves antigos)
@@ -71,6 +75,7 @@ static func after_user_turn(world: GameWorld, result: String) -> Array:
 	if not world.has_user():
 		return out
 	var turn := world.current_turn()
+	RefinementEvents.tick(world)
 	_check_promises(world, turn, result)
 	_expire(world, turn)
 	_random_happenings(world)
@@ -107,6 +112,8 @@ static func after_user_turn(world: GameWorld, result: String) -> Array:
 
 ## Monta um evento de um tipo se ele fizer sentido agora ({} se não).
 static func _build(world: GameWorld, k: String) -> Dictionary:
+	if k in RefinementEvents.KINDS:
+		return RefinementEvents.build(world,k)
 	var club := world.user_club()
 	var rng := world.rng
 	var squad: Array = world.squad(club)
@@ -373,7 +380,7 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 			# Jovem dedicado pede treino extra com especialista
 			var pool6: Array = []
 			for q: Player in squad:
-				if q.age(world.year) <= 23 and (q.has_trait("esforcado") or q.has_trait("perfeccionista") or q.hid("det") >= 15) and q.potential - q.overall >= 4:
+				if q.age(world.year) <= 23 and (q.has_trait("esforcado") or q.has_trait("perfeccionista") or q.hid("det") >= 15) and float(TalentAssessment.projection(q,world.year)["center"]) - q.overall >= 4:
 					pool6.append(q)
 			if pool6.is_empty():
 				return {}
@@ -458,6 +465,8 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 
 ## {title, body, options: [{t, hint}], def}
 static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
+	if String(ev.get("k","")) in RefinementEvents.KINDS:
+		return RefinementEvents.describe(world,ev)
 	var club := world.user_club()
 	var p: Player = world.player(int(ev.get("p", -1)))
 	var p2: Player = world.player(int(ev.get("p2", -1)))
@@ -714,7 +723,16 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 
 ## Aplica a escolha `opt` e retira o evento. Retorna o texto do resultado.
 static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
+	if ev.has("id"):
+		var done: Dictionary=world.stats.get("resolved_events_v1",{})
+		var key:="%d:%d:%d:%s" % [world.year,world.user_club_id,int(ev["id"]),String(ev.get("k",""))]
+		if done.has(key):return "Essa decisão já foi aplicada."
+		done[key]=true
+		if done.size()>256:done.erase(done.keys()[0])
+		world.stats["resolved_events_v1"]=done
 	world.events.erase(ev)
+	if String(ev.get("k","")) in RefinementEvents.KINDS:
+		return RefinementEvents.resolve(world,ev,opt)
 	var club := world.user_club()
 	var p: Player = world.player(int(ev.get("p", -1)))
 	var p2: Player = world.player(int(ev.get("p2", -1)))
@@ -727,6 +745,8 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 				return "Ele já não está no clube."
 			match opt:
 				0:
+					if not TransferManager._wage_fits(world,club,p,int(d.get("wage", p.wage))):
+						return "A diretoria não autorizou aumento acima do teto salarial e dos compromissos assumidos."
 					p.wage = int(d.get("wage", p.wage))
 					_morale(p, 18.0)
 					msg = "%s ganhou o aumento e está motivado." % p.display_name()
@@ -873,6 +893,8 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 					TransferManager.complete_transfer(world, p, rich, int(d.get("fee", 0)), int(d.get("their_wage", p.wage)), 3)
 					msg = "%s foi vendido ao %s por %s." % [p.display_name(), rich.short_name, Fmt.money(int(d.get("fee", 0)))]
 				1:
+					if not TransferManager._wage_fits(world,club,p,maxi(p.wage, int(d.get("raise", p.wage)))):
+						return "A diretoria não autorizou aumento acima do teto salarial e dos compromissos assumidos."
 					p.wage = maxi(p.wage, int(d.get("raise", p.wage)))
 					_morale(p, 6.0)
 					msg = "%s aceitou ficar com o aumento. Salário: %s/mês." % [p.display_name(), Fmt.money(p.wage)]
@@ -989,6 +1011,8 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 				1:
 					msg = YouthManager.promote(world, p)
 					if not world.academy.has(p.id):
+						if not TransferManager._wage_fits(world,club,p,Valuation.round_wage(p.wage * 1.6)):
+							return "A diretoria não autorizou aumento acima do teto salarial e dos compromissos assumidos."
 						p.wage = Valuation.round_wage(p.wage * 1.6)
 						p.contract_end = world.year + 4
 						_morale(p, 10.0)
@@ -1157,9 +1181,9 @@ static func _resolve_player_event(world: GameWorld, club: Club, p: Player, k: St
 			if opt == 0:
 				var cost := int(d.get("cost", 0))
 				club.add_ledger("investimentos", -cost)
-				PlayerDevelopment.apply_growth(world, p, world.rng.randf_range(0.6, 1.4))
+				p.train["f"] = "mental" if p.position == Pos.GK else "finalizacao"
 				_morale(p, 6.0)
-				return "%s treina com o especialista e já mostra evolução." % pn
+				return "%s terá trabalho individual com o especialista. O efeito depende das próximas semanas de treino." % pn
 			_morale(p, -3.0)
 			return "%s entendeu, mas ficou frustrado." % pn
 		"rebel":

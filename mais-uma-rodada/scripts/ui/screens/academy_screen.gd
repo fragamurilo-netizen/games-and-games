@@ -146,10 +146,7 @@ func _actions(p: Player) -> void:
 		v.add_child(UIKit.colored("Joga pouco", UIColors.ORANGE, "Small", true))
 	elif pf > 1.08:
 		v.add_child(UIKit.colored("Titular da categoria", UIColors.GREEN, "Small", true))
-	var weakest := 99
-	for q: Player in w.squad(w.user_club()):
-		weakest = mini(weakest, q.overall)
-	v.add_child(UIKit.label("Mais fraco do elenco: %d" % weakest, "Small", true))
+	v.add_child(AcademyPlan.controls(w,p))
 	v.add_child(UIKit.button("SUBIR AO PROFISSIONAL", "PrimaryButton", func():
 		UIManager.close_modal()
 		UIManager.toast(YouthManager.promote(w, p))

@@ -278,7 +278,7 @@ static func goal_of(world: GameWorld, club_id: int) -> Array:
 ## (MatchSimulation detalhada); as demais ficam na fila do modo rápido (run_entry).
 ## Retorna {"day", "entries": [{f, seed, ctx, sim}], "user": entrada do usuário ou {}, "notes"}.
 static func begin_matchday(world: GameWorld) -> Dictionary:
-	var md := {"day": world.season.day, "entries": [], "user": {}, "notes": []}
+	var md := {"year": world.year, "day": world.season.day, "entries": [], "user": {}, "notes": []}
 	for f: Fixture in world.season.fixtures_at(world.season.day):
 		if not f.played and (world.is_user_club(f.home) or world.is_user_club(f.away)):
 			if SponsorManager.is_preseason(world):
@@ -333,6 +333,11 @@ static func entry_done(entry: Dictionary) -> bool:
 
 ## Aplica tudo o que aconteceu na data e avança o calendário. Retorna um relatório para a UI.
 static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
+	# Duplo toque/retorno de modal não pode aplicar a mesma data, receitas ou gols duas vezes.
+	if md.has("_completed_report"):
+		return md["_completed_report"]
+	if world.season == null or int(md.get("day", -1)) != world.season.day or int(md.get("year", world.year)) != world.year:
+		return {"stale": true, "day": int(md.get("day", -1)), "user": {}}
 	var tt := Time.get_ticks_usec()
 	for e in md["entries"]:
 		run_entry(world, e)
@@ -496,6 +501,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		CoachStories.after_user_match(world, md["user"], String(report["user"]["result"]))
 		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
 		InboxManager.after_user_turn(world, report, md["user"])
+	md["_completed_report"] = report
 	return report
 
 
@@ -514,6 +520,8 @@ static func _weekend_index(s: SeasonState, slot: int) -> int:
 
 
 static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: Dictionary, newly_suspended: Dictionary) -> void:
+	if f.played:
+		return
 	f.played = true
 	f.hg = int(res["hg"])
 	f.ag = int(res["ag"])
@@ -545,6 +553,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	PerformanceLedger.record(world, f, res)
 	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
@@ -575,6 +584,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 		for ln in res["lines"][side]:
 			var p: Player = ln[QuickMatch.L_P]
 			var mins: int = ln[QuickMatch.L_MINS]
+			if mins <= 0:
+				continue
 			var g: int = ln[QuickMatch.L_G]
 			var a: int = ln[QuickMatch.L_A]
 			var r: float = ln[QuickMatch.L_R]

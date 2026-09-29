@@ -810,6 +810,18 @@ static func chance_mult(diff: float) -> float:
 	return exp(BETA * d)
 
 
+## Saturação simétrica dos multiplicadores de qualidade. Combinar várias instruções
+## favoráveis não transforma chances comuns em oportunidades quase certas. Nenhum placar,
+## usuário, meta de artilharia ou resultado futuro entra nesta calibração do modelo.
+static func calibrated_xg(ctype: int, raw: float) -> float:
+	if ctype == CH_PENALTY:
+		return clampf(raw, 0.0, 1.0)
+	var base: float = BASE_XG[clampi(ctype, 0, BASE_XG.size()-1)]
+	var gain := maxf(0.0, raw) / maxf(0.001, base) - 1.0
+	var bounded := 1.0 + gain / (1.0 + absf(gain) * 0.65)
+	return clampf(base * bounded * 0.94, 0.005, 0.85)
+
+
 func _att_power(t: MatchTeam) -> float:
 	return t.u_att * t.m_att * t.sh_att * (1.0 + t.style_fit * MOD_DAMP)
 
@@ -980,6 +992,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		xg *= 1.0 + att.sp_bonus # bola parada ensaiada no treino
 	if ctype < 6:
 		xg *= att.exploit_q[ctype]
+	xg = calibrated_xg(ctype, xg)
 	# Leitura do jogo: onde e como cada time está sofrendo.
 	dfn.ct_conc[ctype] += 1
 	dfn.xg_conc += xg
@@ -1010,6 +1023,11 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 	att.shots += 1
 	att.xg += xg
 	shooter.shots += 1
+	shooter.expected_goals += xg
+	if ctype == CH_PENALTY:
+		shooter.penalty_xg += xg
+	if assister != null:
+		assister.expected_assists += xg
 	var rec := {}
 	if xray_on:
 		rec = _xr_record(att, dfn, ctype, lane, xg, shooter, assister)
@@ -1025,6 +1043,8 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		if detail:
 			last_phase = {"side": s, "from": z_from, "to": 1.0, "ev": EV_GOAL, "ct": ctype}
 		return
+	if assister != null:
+		assister.key_passes += 1 # passe para finalização que NÃO virou gol
 	var r := rng.randf()
 	var ev := EV_MISS
 	if ctype == CH_PENALTY:
@@ -1211,9 +1231,11 @@ func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: Match
 			assister = null
 	score[s] += 1
 	_score_mood()
-	att.on_target += 1
 	if not own_goal:
+		att.on_target += 1
 		shooter.goals += 1
+		if ctype == CH_PENALTY:
+			shooter.penalty_goals += 1
 		shooter.shots_on += 1
 		shooter.rating_pts += 0.85 if ctype == CH_PENALTY else 1.1
 		if assister != null:
@@ -2205,8 +2227,8 @@ func to_result() -> Dictionary:
 	for t: MatchTeam in teams:
 		for mp: MatchPlayer in t.all:
 			if mp.used:
-				pstats[mp.p.id] = [mp.shots, mp.shots_on, mp.saves]
-	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats,
+				pstats[mp.p.id] = [mp.shots, mp.shots_on, mp.saves, mp.expected_goals, mp.key_passes, mp.expected_assists, mp.penalty_xg, mp.penalty_goals]
+	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats, "stats_observed": true,
 		"et": half >= 3, "pens": [pen_score[0], pen_score[1]] if pen_taken[0] + pen_taken[1] > 0 else [],
 		"derby": derby, "importance": importance, "yc": [teams[0].yellows, teams[1].yellows], "rc": [teams[0].reds, teams[1].reds],
 		"lines": lines, "poss": possession_pct(0), "ref": ref, "tac": tactical_result()}

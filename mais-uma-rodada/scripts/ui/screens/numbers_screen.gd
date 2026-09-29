@@ -1,7 +1,6 @@
 extends BaseScreen
 ## Numeração do elenco. Toque num jogador e depois na camisa: se o número já tem dono, os dois
-## trocam. Camisa de peso mexe com o ego — o centroavante que ganha a 9 (ou o craque que ganha
-## a 10) fica orgulhoso; o titular que perde a camisa dele pode não gostar.
+## trocam mediante confirmação. Alterar números não gera bônus artificial de moral.
 
 ## Camisas históricas e quem "combina" com elas.
 const HEAVY := {
@@ -37,25 +36,15 @@ func refresh() -> void:
 	c.add_child(_head(w, club))
 	# Jogadores
 	max_content_width = 1700
-	c.add_child(UIKit.section_header("Jogadores"))
-	var flow := UIKit.flow(8)
-	for p: Player in squad:
-		var inner := UIKit.hbox(6)
-		inner.add_child(UIKit.pos_badge(p.position))
-		inner.add_child(UIKit.label(p.short_name(), "H3" if p.id == _sel else ""))
-		var num := UIKit.pill(str(p.shirt), UIColors.ACCENT if p.id == _sel else UIColors.BLUE, 16)
-		inner.add_child(num)
-		var pid := p.id
-		var row := UIKit.tap_row(inner, func():
-			_sel = pid if _sel != pid else -1
-			refresh(), "CardHighlight" if p.id == _sel else "CardFlat")
-		flow.add_child(row)
-	c.add_child(flow)
+	c.add_child(UIKit.label("Selecione um jogador e escolha uma camisa. Números ocupados exigem confirmação da troca.", "Small", true))
+	c.add_child(UIKit.button("Selecionar outro jogador" if _sel >= 0 else "Selecionar jogador", "GhostButton", _pick_player, "users"))
+
 	# Camisas
 	var last := 99 if _all else maxi(40, top + 5)
 	c.add_child(UIKit.section_header("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
-	grid.columns = 10 if UILayout.is_wide() else 5
+	grid.columns = grid_columns(content_width())
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):
@@ -67,18 +56,34 @@ func refresh() -> void:
 			refresh(), "plus"))
 
 
+func _pick_player() -> void:
+	var w:=world()
+	if w==null:return
+	var col:=UIKit.vbox(8)
+	col.add_child(UIKit.section_header("Escolha quem vai trocar de número"))
+	for p:Player in w.squad(w.user_club()):
+		var pid:=p.id
+		col.add_child(UIKit.button("%02d · %s · %s" % [p.shirt,Pos.code(p.position),p.display_name()],"GhostButton",func():
+			UIManager.close_modal()
+			if not is_inside_tree() or is_queued_for_deletion():return
+			_sel=pid
+			refresh()
+			scroll_to_top()))
+	UIManager.show_modal(col,true)
+
+
 func _head(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("CardHighlight", 8)
 	var p := w.player(_sel) if _sel >= 0 else null
 	if p == null or p.club_id != club.id:
 		_sel = -1
-		card.add_child(UIKit.label("Escolha um jogador.", "H3", true))
+		card.add_child(UIKit.label("Escolha uma camisa ou selecione um jogador.", "H3", true))
 		return UIKit.card_panel(card)
 	var row := UIKit.hbox(12)
 	row.add_child(UIKit.portrait(p, club, w.year, 72))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(p.display_name(), "Title", true))
+	col.add_child(UIKit.label(p.display_name(), "H2", true))
 	col.add_child(UIKit.label("%s · hoje com a %d" % [Pos.name_of(p.position), p.shirt], "Small", true))
 	row.add_child(col)
 	row.add_child(UIKit.button("Cancelar", "GhostButton", func():
@@ -98,7 +103,7 @@ func _cell(club: Club, n: int, owner: Player) -> Control:
 	kit.back_name = owner.short_name() if owner != null else ""
 	kit.number = n
 	kit.crest = club.crest
-	kit.custom_minimum_size = Vector2(96, 100)
+	kit.custom_minimum_size = Vector2(104, 112)
 	kit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owner == null:
 		kit.modulate = Color(1, 1, 1, 0.38)
@@ -107,14 +112,17 @@ func _cell(club: Club, n: int, owner: Player) -> Control:
 	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	who.clip_text = true
 	who.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	who.custom_minimum_size.x = 96
+	who.custom_minimum_size.x = 104
+	who.tooltip_text = owner.display_name() if owner != null else "Número disponível"
 	if owner != null and owner.id == _sel:
 		who.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	elif owner == null:
 		who.add_theme_color_override(&"font_color", UIColors.MUTED)
 	col.add_child(who)
 	var variation := "CardHighlight" if owner != null and owner.id == _sel else "CardFlat"
-	return UIKit.tap_row(col, func(): _tap_number(n), variation)
+	var tile := UIKit.tap_row(col, func(): _tap_number(n), variation)
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return tile
 
 
 func _tap_number(n: int) -> void:
@@ -135,23 +143,43 @@ func _tap_number(n: int) -> void:
 		_sel = -1
 		refresh()
 		return
+	var pid := p.id
+	var oid := owner.id if owner != null else -1
+	if owner != null:
+		UIManager.confirm("Confirmar troca de camisas?", "%s passa para a %d. %s fica com a %d." % [p.display_name(), n, owner.display_name(), p.shirt], "Trocar", func(): _assign_number(n, pid, oid))
+	else:
+		_assign_number(n, pid, oid)
+
+
+static func grid_columns(available: float) -> int:
+	# Largura de cada célula inclui margem do painel, texto e espaço entre camisas.
+	return clampi(int(floor((maxf(0.0, available) + 8.0) / 152.0)), 2, 8)
+
+
+func _assign_number(n: int, player_id: int, owner_id: int) -> void:
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	var w := world()
+	if w == null or n < 1 or n > 99:
+		return
+	var club := w.user_club()
+	var p := w.player(player_id)
+	if p == null or p.club_id != club.id:
+		return
+	var owner: Player = null
+	for q: Player in w.squad(club):
+		if q.shirt == n:
+			owner = q
+	if (owner.id if owner != null else -1) != owner_id or owner == p:
+		UIManager.toast("A numeração mudou. Selecione novamente.")
+		refresh()
+		return
 	var old := p.shirt
 	p.shirt = n
-	var msg := "%s agora veste a %d." % [p.display_name(), n]
 	if owner != null:
 		owner.shirt = old
-		msg = "%s fica com a %d e %s com a %d." % [p.short_name(), n, owner.short_name(), old]
-	var color := UIColors.GREEN
-	# Ego: camisa de peso para quem combina com ela
-	if HEAVY.has(n) and (HEAVY[n] as Array).has(p.position) and p.squad_status <= Player.STATUS_STARTER:
-		p.morale = clampf(p.morale + 4.0, 0.0, 100.0)
-		msg += " Ele gostou da camisa de peso."
-	if owner != null and HEAVY.has(n) and (HEAVY[n] as Array).has(owner.position) and owner.squad_status <= Player.STATUS_STARTER:
-		var hit := 6.0 if owner.has_trait("estrela") or owner.has_trait("ambicioso") else 3.0
-		owner.morale = clampf(owner.morale - hit, 0.0, 100.0)
-		msg += " %s não gostou de perder a %d." % [owner.short_name(), n]
-		color = UIColors.ORANGE
+	# Operação administrativa, não uma fonte repetível de pontos de moral.
 	_sel = -1
-	UIManager.toast(msg, color)
+	UIManager.toast("Numeração atualizada.", UIColors.GREEN)
 	GameManager.save_now()
 	refresh()

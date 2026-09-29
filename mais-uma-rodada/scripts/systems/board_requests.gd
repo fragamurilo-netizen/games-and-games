@@ -83,6 +83,12 @@ static func odds(world: GameWorld, kind: String) -> Array:
 
 ## Faz o pedido. Retorna {ok (bool), partial (bool), msg}.
 static func request(world: GameWorld, kind: String) -> Dictionary:
+	if kind not in ["facilities","youth","stadium"]:
+		return {"ok":false,"partial":false,"msg":"Pedido inválido."}
+	if wait_turns(world,kind)>0:
+		return {"ok":false,"partial":false,"msg":"A diretoria já avaliou esse pedido. Aguarde o intervalo de revisão."}
+	if kind=="stadium" and cost_of(world,kind)>maxi(0,world.user_club().balance):
+		return {"ok":false,"partial":false,"msg":"A diretoria não autoriza a obra sem financiamento disponível."}
 	var club := world.user_club()
 	var cd: Dictionary = world.stats.get("req_cd", {})
 	cd[kind] = world.current_turn()
@@ -147,7 +153,7 @@ static func suggestions(world: GameWorld) -> Dictionary:
 			continue
 		if rng.randf() > reach:
 			continue
-		cands.append([p, float(p.overall) + float(p.potential - p.overall) * 0.3 - float(p.value) / maxf(1.0, budget) * 4.0])
+		cands.append([p, float(p.overall) + maxf(0.0,float(TalentAssessment.projection(p,world.year)["center"])-p.ovr_f) * 0.3 - float(p.value) / maxf(1.0, budget) * 4.0])
 	cands.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
 	var ids: Array = []
 	for c in cands.slice(0, 5):

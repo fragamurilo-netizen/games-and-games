@@ -23,10 +23,13 @@ static func _mem(world: GameWorld, key: String) -> Dictionary:
 static func _snap(world: GameWorld, p: Player) -> Dictionary:
 	var tot := p.season_totals()
 	var club := world.club(p.club_id)
+	var total_ratings := int(p.stats[Player.S_RATING_SUM])
+	for cup in p.cup_stats.values():
+		total_ratings += int(cup[Player.C_RATING])
 	return {"c": p.club_id, "cn": club.short_name if club != null else "", "l": club.league_id if club != null else "", "lo": not p.loan.is_empty(),
 		"a": p.stats[Player.S_APPS], "g": p.stats[Player.S_GOALS], "as": p.stats[Player.S_ASSISTS], "st": p.stats[Player.S_STARTS],
 		"mi": p.minutes_season, "mo": p.stats[Player.S_MOTM], "cs": p.stats[Player.S_CLEAN], "yc": p.stats[Player.S_YELLOWS],
-		"rc": p.stats[Player.S_REDS], "rs": p.stats[Player.S_RATING_SUM], "ta": int(tot[0]), "tg": int(tot[1]), "tas": int(tot[2])}
+		"trs": total_ratings, "rc": p.stats[Player.S_REDS], "rs": p.stats[Player.S_RATING_SUM], "ta": int(tot[0]), "tg": int(tot[1]), "tas": int(tot[2])}
 
 
 ## Jogador vai sair do clube (venda, empréstimo) com a temporada em andamento.
@@ -93,6 +96,8 @@ static func _diff(world: GameWorld, s: Dictionary, prev: Dictionary) -> Dictiona
 		"a": a, "g": d.call("g"), "as": d.call("as"), "r": snappedf(rs / 10.0 / a if a > 0 else 0.0, 0.01),
 		"ca": d.call("ta") - a, "cg": d.call("tg") - int(d.call("g")), "cas": d.call("tas") - int(d.call("as")),
 		"mi": d.call("mi"), "st": d.call("st"), "mo": d.call("mo"), "cs": d.call("cs"), "yc": d.call("yc"), "rc": d.call("rc")}
+	if s.has("trs") and (prev.is_empty() or prev.has("trs")):
+		row["rsum"] = d.call("trs")
 	if bool(s.get("lo", false)):
 		row["lo"] = true
 	return row

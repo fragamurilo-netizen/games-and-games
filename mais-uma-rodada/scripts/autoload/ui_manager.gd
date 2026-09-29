@@ -58,11 +58,19 @@ var _scene_cache: Dictionary = {}
 
 
 func register_main(m: Node) -> void:
+	if not is_instance_valid(main):
+		stack.clear()
+		_modals.clear()
 	main = m
 
 
 func current() -> BaseScreen:
-	return stack.back() if not stack.is_empty() else null
+	while not stack.is_empty():
+		var node = stack.back()
+		if is_instance_valid(node) and not node.is_queued_for_deletion():
+			return node
+		stack.pop_back()
+	return null
 
 
 func _instance(name: String, params: Dictionary) -> BaseScreen:
@@ -81,7 +89,10 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 func goto(name: String, params: Dictionary = {}) -> void:
 	close_all_modals()
 	for s in stack:
-		s.queue_free()
+		if is_instance_valid(s) and not s.is_queued_for_deletion():
+			s.on_hide()
+			s.visible = false
+			s.queue_free()
 	stack.clear()
 	_show(_instance(name, params), 0.0)
 
@@ -102,19 +113,27 @@ func replace(name: String, params: Dictionary = {}) -> void:
 	var cur := current()
 	if cur != null:
 		stack.pop_back()
+		cur.on_hide()
+		cur.visible = false
 		cur.queue_free()
 	_show(_instance(name, params), 24.0)
 
 
 func back() -> bool:
+	current() # discard stale entries before navigating
 	if not _modals.is_empty():
 		close_modal()
 		return true
 	if stack.size() <= 1:
 		return false
 	var cur: BaseScreen = stack.pop_back()
+	cur.on_hide()
+	cur.visible = false
 	cur.queue_free()
 	var prev := current()
+	if prev == null:
+		goto("menu")
+		return true
 	prev.visible = true
 	_apply_chrome(prev)
 	prev.on_show()
@@ -127,7 +146,8 @@ func _show(screen: BaseScreen, from_x: float) -> void:
 	main.screen_host.add_child(screen)
 	_apply_chrome(screen)
 	screen.on_show()
-	_animate_in(screen, from_x)
+	if is_instance_valid(screen) and not screen.is_queued_for_deletion():
+		_animate_in(screen, from_x)
 
 
 ## Transição curta: a tela entra deslizando do lado de onde veio (avançar = da direita,
@@ -144,7 +164,7 @@ func _animate_in(screen: Control, from_x: float) -> void:
 
 
 func _apply_chrome(screen: BaseScreen) -> void:
-	if main == null:
+	if not is_instance_valid(main) or main.is_queued_for_deletion():
 		return
 	main.apply_chrome(screen, stack.size() > 1)
 	AudioManager.screen_changed(screen.screen_name)
@@ -227,6 +247,7 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	dim.add_child(holder)
 	var box := VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_theme_constant_override("separation",0)
 	holder.add_child(box)
 	var top_spacer := Control.new()
 	top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -260,6 +281,14 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 		bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		bottom_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		box.add_child(bottom_spacer)
+	var sizing := ModalLayout.new()
+	sizing.holder=holder
+	sizing.panel=panel
+	sizing.body=body as ScrollContainer
+	sizing.content=content
+	sizing.main=main
+	sizing.sheet=as_sheet
+	panel.add_child(sizing)
 	if dismissable:
 		dim.gui_input.connect(func(ev: InputEvent):
 			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
@@ -277,34 +306,26 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 ## Limita a altura do conteúdo do modal ao espaço da tela. Se o conteúdo já é uma rolagem
 ## (listas longas), só limita sua altura; senão, embrulha num ScrollContainer que cresce
 ## junto com o conteúdo até o limite e então passa a rolar.
-func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, reserved: float) -> Control:
-	var max_h := func() -> float:
-		var style := panel.get_theme_stylebox(&"panel")
-		var pad := style.get_minimum_size().y if style != null else 0.0
-		return maxf(200.0, layer.get_viewport_rect().size.y - reserved - pad)
+func _fit_to_screen(content: Control, _layer: Control, _panel: PanelContainer, _reserved: float) -> Control:
 	if content is ScrollContainer:
-		var want := content.custom_minimum_size.y
-		content.custom_minimum_size.y = minf(want, max_h.call()) if want > 0.0 else want
+		content.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO
 		return content
-	var sc := ScrollContainer.new()
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.scroll_deadzone = 14
-	sc.follow_focus = true
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sc:=ScrollContainer.new()
+	sc.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	sc.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO
+	sc.scroll_deadzone=14
+	sc.follow_focus=true
+	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	sc.add_child(content)
-	var fit := func() -> void:
-		if is_instance_valid(sc) and is_instance_valid(content):
-			sc.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, max_h.call())
-	content.minimum_size_changed.connect(fit)
-	sc.ready.connect(fit)
 	return sc
 
 
 func close_modal() -> void:
 	if _modals.is_empty():
 		return
-	var m: Control = _modals.pop_back()
-	m.queue_free()
+	var m = _modals.pop_back()
+	if is_instance_valid(m) and not m.is_queued_for_deletion():
+		m.queue_free()
 
 
 func close_all_modals() -> void:

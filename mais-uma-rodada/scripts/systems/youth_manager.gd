@@ -120,7 +120,7 @@ static func precision(world: GameWorld, p: Player) -> float:
 static func estimate(world: GameWorld, p: Player) -> int:
 	var pr := precision(world, p)
 	var err := float(p.scout_noise) * (1.0 - pr * 0.65)
-	return clampi(int(round(p.potential + err)), p.overall, 94)
+	return clampi(int(round(float(TalentAssessment.projection(p, world.year)["center"]) + err)), p.overall, 94)
 
 
 ## Estrelas (0,5 a 5, de meia em meia) do potencial estimado.
@@ -342,6 +342,9 @@ static func promote(world: GameWorld, p: Player) -> String:
 		return "Ele não está mais na base."
 	if club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return "Elenco cheio: libere uma vaga antes de subir %s." % p.display_name()
+	var planned_wage := Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage",0.5)))
+	if FinanceManager.wage_bill(world,club)+planned_wage > club.wage_budget:
+		return "A promoção exige espaço no teto salarial da diretoria."
 	world.academy.erase(p.id)
 	var years_home := years_in(world, p)
 	p.reset_season_stats()
@@ -364,8 +367,15 @@ static func promote(world: GameWorld, p: Player) -> String:
 ## Vende um garoto da base para outro clube (proposta aceita). Fica com % de uma revenda futura.
 static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: float = 0.2) -> String:
 	var club := world.user_club()
-	if not world.academy.has(p.id) or buyer == null:
+	if not world.academy.has(p.id) or buyer == null or buyer.id == club.id:
 		return "Negócio desfeito."
+	if fee < 0 or fee > mini(buyer.transfer_budget,maxi(0,buyer.balance)):
+		return "O comprador não tem autorização financeira para concluir."
+	if p.age(world.year)<18 and buyer.nation!=club.nation:
+		return "Transferência internacional de menor não disponível neste modelo."
+	var proposed_wage := Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(buyer.league_cfg().get("wage",0.5)))
+	if FinanceManager.wage_bill(world,buyer)+TransferManager.pending_wages(world,buyer.id)+proposed_wage>buyer.wage_budget:
+		return "A folha do comprador não comporta o contrato."
 	var years_home := years_in(world, p)
 	world.academy.erase(p.id)
 	p.reset_season_stats()
@@ -378,6 +388,8 @@ static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: fl
 		p.clauses = {"so": club.id, "pct": sell_on}
 	club.add_ledger("vendas", fee)
 	buyer.add_ledger("compras", -fee)
+	FinanceManager.on_sale(world,club,fee)
+	FinanceManager.commit_budget(world,buyer,fee)
 	if HeartClubs.is_fan(p, buyer.id):
 		HeartClubs.reveal(world, p, "assinatura", false)
 	world.stat_add("youth_sold")
@@ -425,11 +437,11 @@ static func sales_total(world: GameWorld) -> int:
 static func bid_target(world: GameWorld) -> Player:
 	var best: Player = null
 	for p: Player in world.academy.values():
-		if p.age(world.year) < 15 or p.potential < 68:
+		if p.age(world.year) < 15 or estimate(world, p) < 68:
 			continue
 		if int(Dictionary(world.stats.get("yb_skip", {})).get(str(p.id), 0)) == world.year:
 			continue # no máximo uma proposta por garoto em cada temporada
-		if best == null or p.potential > best.potential:
+		if best == null or estimate(world,p) > estimate(world,best):
 			best = p
 	return best
 
@@ -440,7 +452,7 @@ static func bid_target(world: GameWorld) -> Player:
 static func bid_buyer(world: GameWorld, p: Player) -> Club:
 	var club := world.user_club()
 	var age := p.age(world.year)
-	var pot := float(p.potential) + p.scout_noise * 0.5
+	var pot := float(TalentAssessment.projection(p, world.year)["center"]) + p.scout_noise * 0.15
 	var cands: Array = []
 	for c: Club in world.clubs:
 		if c.id == club.id or c.tier != 1 or c.reputation < club.reputation + 10.0:
@@ -494,6 +506,7 @@ static func weekly(world: GameWorld) -> void:
 	var club := world.user_club()
 	var focus := TrainingManager.youth_mult(world) * ManagerProfile.youth_mult(world)
 	for p: Player in world.academy.values():
+		AcademyPlan.weekly(world,p)
 		var gap := float(p.potential) - p.ovr_f
 		if gap <= 0.0:
 			continue
@@ -504,7 +517,8 @@ static func weekly(world: GameWorld) -> void:
 		elif age <= 17 and p.dev_curve == Player.CURVE_TARDIO:
 			age_f *= 0.8
 		var budget := gap * 0.005 * age_f * (0.75 + club.youth_level / 250.0) * play_factor(world, p) * focus * p.trait_mult("dev_mult") + p.dev_acc
-		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget))
+		budget = (budget-p.dev_acc)*AcademyPlan.training_factor(world,p)+p.dev_acc
+		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget), AcademyPlan.bias(world,p))
 		p.morale = clampf(p.morale + (65.0 - p.morale) * 0.1, 0.0, 100.0)
 
 
@@ -538,11 +552,11 @@ static func yearly_review(world: GameWorld) -> Array:
 			down += 0.05
 		var r := rng.randf()
 		if r < up:
-			var d := rng.randi_range(3, 7) if p.dev_curve == Player.CURVE_TARDIO else rng.randi_range(2, 5)
+			var d := rng.randi_range(1, 3) if p.dev_curve == Player.CURVE_TARDIO else rng.randi_range(1, 2)
 			p.potential = mini(94, p.potential + d)
 			var why := "Deu o estirão: ganhou corpo e velocidade." if age <= 17 else "Temporada de afirmação: o teto dele subiu."
 			if age <= 17:
-				PlayerDevelopment.apply_growth(world, p, 1.5, [[Attr.VEL, 3.0], [Attr.FOR, 3.0], [Attr.RES, 3.0]])
+				PlayerDevelopment.apply_growth(world, p, 0.35, [[Attr.VEL, 1.5], [Attr.FOR, 1.5], [Attr.RES, 1.5]])
 			elif apps >= 8 and avg >= 7.0:
 				why = "Brilhou nos jogos da base (nota %.1f): o teto dele subiu." % avg
 			out.append({"p": p, "up": true, "d": d, "why": why})

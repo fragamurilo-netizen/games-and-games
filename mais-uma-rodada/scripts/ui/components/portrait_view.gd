@@ -295,7 +295,13 @@ const STYLE_P: Array = [
 	{"tp": 0.05, "sd": 0.02, "fd": 1, "tx": "braid", "op": 0.8, "fr": "bunches"}, # tufinhos trançados tingidos de verde
 	{"tp": 0.36, "sd": 0.28, "sp": 3, "tx": "coil", "sb": 0.42}, # black power com costeletas longas
 	{"tp": 0.16, "sd": 0.06, "gl": 0.55, "fl": 0, "bk": "mullet", "sb": 0.1}, # para trás volumoso até a nuca
-	{"tp": 0.12, "sd": 0.05, "sb": 0.05, "tx": "wavy", "bk": "long", "fl": 1, "fr": "part", "gl": 0.15}, # longo ondulado atrás das orelhas
+	{"tp": 0.12, "sd": 0.05, "sb": 0.05, "tx": "wavy", "bk": "long", "fl": 1, "fr": "part", "gl": 0.15}, # longo ondulado atrás das orelhas,
+	{"tp": 0.07, "sd": 0.025, "fd": 1, "fr": "crop", "hl": 0.12, "fl": 2, "sp": 5},
+	{"tp": 0.13, "sd": 0.055, "fd": 1, "tx": "wavy", "fl": 1, "gl": 0.12},
+	{"tp": 0.18, "sd": 0.075, "fd": 1, "tx": "curl", "sp": 3, "sb": 0.03},
+	{"tp": 0.09, "sd": 0.015, "fd": 2, "tx": "coil", "fr": "twists", "lk": 0.35},
+	{"tp": 0.06, "sd": 0.025, "fd": 1, "fr": "part", "fl": 1, "gl": 0.08},
+	{"tp": 0.03, "sd": 0.025, "fd": 1, "tx": "braid", "op": 0.8, "fl": 1},
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)

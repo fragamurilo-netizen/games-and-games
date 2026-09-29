@@ -35,6 +35,12 @@ var assists: int = 0
 var shots: int = 0
 var shots_on: int = 0
 var saves: int = 0
+## Contadores observados no lance, independentes do placar e da apresentação.
+var expected_goals: float = 0.0
+var expected_assists: float = 0.0
+var key_passes: int = 0
+var penalty_xg: float = 0.0
+var penalty_goals: int = 0
 var fouls: int = 0
 var yellow: int = 0
 var red: bool = false

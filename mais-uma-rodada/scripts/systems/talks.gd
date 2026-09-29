@@ -598,8 +598,8 @@ static func _board_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 					s += 0.15 if style == "vaidoso" else (-0.2 if style == "empresario" else 0.0)
 					if s > 0.25 and club.balance > 0:
 						var add := int(maxf(club.transfer_budget * 0.2, FinanceManager.expected_revenue(club) * 0.03))
-						club.transfer_budget += add
-						_say(conv, "npc", "Vou liberar %s. Mas agora não há mais desculpas." % Fmt.money(add))
+						add = FinanceManager.authorize_extra(world,club,add,"board_conversation")
+						_say(conv, "npc", ("Vou liberar %s, dentro da autorização anual." % Fmt.money(add)) if add>0 else "Sem folga financeira para ampliar a verba agora.")
 						_fx(conv, "Verba para contratações +%s" % Fmt.money(add))
 						club.board_confidence = clampf(club.board_confidence - 2.0, 0.0, 100.0)
 					else:
@@ -668,15 +668,15 @@ static func _board_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 			yes = s > 0.3
 			if yes:
 				var add := int(maxf(club.transfer_budget * 0.25, FinanceManager.expected_revenue(club) * 0.04))
-				club.transfer_budget += add
-				_say(conv, "npc", "Está bem. Libero mais %s. Não me decepcione." % Fmt.money(add))
+				add = FinanceManager.authorize_extra(world,club,add,"board_conversation")
+				_say(conv, "npc", ("Libero mais %s, preservando os compromissos do clube." % Fmt.money(add)) if add>0 else "A autorização atual já usa a folga financeira disponível.")
 				_fx(conv, "Verba para contratações: %s" % Fmt.money(club.transfer_budget))
 				People.add_pres_rel(world, -1.0)
 		"folha":
 			yes = s > 0.35
 			if yes:
-				club.wage_budget = int(club.wage_budget * 1.06)
-				_say(conv, "npc", "Um pequeno aumento no teto. Use com cabeça.")
+				FinanceManager.authorize_wages(world,club,int(club.wage_budget*1.06))
+				_say(conv, "npc", "O teto foi revisto dentro da capacidade financeira. Sem folga, mantemos o atual.")
 				_fx(conv, "Teto salarial: %s/mês" % Fmt.money(club.wage_budget))
 				People.add_pres_rel(world, -1.0)
 		"facilities", "youth":

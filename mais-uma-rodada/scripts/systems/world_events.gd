@@ -124,12 +124,13 @@ static func takeover(world: GameWorld, c: Club, who: String) -> int:
 	c.fan_mood = clampf(c.fan_mood + 8.0, 0.0, 100.0)
 	if world.is_user_club(c.id):
 		# O novo dono libera parte do dinheiro já e quer resultado rápido.
-		c.transfer_budget += int(money * 0.4)
+		FinanceManager.authorize_extra(world,c,int(money*0.4),"new_owner")
 		c.board_confidence = clampf(c.board_confidence - 5.0, 0.0, 100.0)
 	else:
 		c.archetype = "rico_promovido"
 		c.board_confidence = 55.0
 		FinanceManager.set_budgets(world, c)
+		FinanceManager.authorize_extra(world,c,int(money*0.4),"new_owner")
 	world.stat_add("takeovers_total")
 	ClubDNA.on_takeover(world, c, who)
 	var saf := c.nation == "BRA"

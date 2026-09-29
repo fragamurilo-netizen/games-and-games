@@ -262,12 +262,13 @@ static func _invest(world: GameWorld, c: Club, rng: RandomNumberGenerator) -> bo
 	var amount := Valuation.round_value(FinanceManager.expected_revenue(c) * rng.randf_range(0.06, 0.15))
 	if amount <= 0:
 		return false
-	c.transfer_budget += amount
+	amount = FinanceManager.authorize_extra(world,c,amount,"sporting_review")
+	if amount<=0:return false
 	c.affairs["inv"] = world.year
 	var own := WorldEvents.owner_of(world, c.id)
 	var who := String(own.get("who", "")) if not own.is_empty() else "A diretoria"
 	var title := "%s libera %s para reforços no %s" % [who if who != "A diretoria" else "Diretoria", Fmt.money(amount), c.short_name]
-	var body := "Com o time %s, %s decidiu reforçar o caixa do futebol. O dinheiro extra vai para contratações%s." % [
+	var body := "Com o time %s, %s autorizou parte dos recursos disponíveis para o futebol. A verba vai para contratações%s." % [
 		("em %dº" % pos) if pos > 0 else "embalado", who.to_lower() if who == "A diretoria" else who,
 		" já nesta janela" if world.transfer_window_open() else " na próxima janela"]
 	var n := NewsManager.post_raw(world, title, body, c.id, -1, _imp(world, c), "investimento")

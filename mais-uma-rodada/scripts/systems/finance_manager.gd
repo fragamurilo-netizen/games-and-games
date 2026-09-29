@@ -222,54 +222,102 @@ static func promotion_bonus(new_league_id: String) -> int:
 
 
 ## Orçamentos definidos pela diretoria no início da temporada (e as receitas fixas do ano).
+## Verba pertence à diretoria, não ao treinador. Caixa do clube continua no balanço.
+## A sobra de verba NÃO é somada à autorização do ano seguinte.
+static func board_limits(world: GameWorld, club: Club) -> Dictionary:
+	var revenue := maxf(0.0, float(expected_revenue(club) + club.income_tv - tv_income(club)))
+	var payroll := float(wage_bill(world, club))
+	var service := debt_service(club)
+	var obligations := float(TransferManager.pending_installments(world, club.id))
+	var operating := maxf(0.0, revenue - club.cost_upkeep - service)
+	var ratio := clampf(float(club.arch().get("wage_ratio", 0.62)), 0.42, 0.68)
+	var monthly := maxf(0.0, operating * ratio / 12.0)
+	# Contratos vigentes não desaparecem quando a diretoria aperta o teto.
+	var wage_ceiling := maxi(0, int(monthly))
+	var reserve := payroll * 3.0 + float(club.cost_upkeep + service) * 0.25
+	var spendable := maxf(0.0, float(club.balance) - reserve - obligations)
+	var surplus := maxf(0.0, operating - payroll * 12.0 - obligations)
+	var spend := clampf(float(club.arch().get("spend_rate", 0.35)) * ClubDNA.spend_mult(club), 0.15, 0.60)
+	var cap := revenue * clampf(spend, 0.15, 0.45)
+	var allowance := (spendable * spend + surplus * 0.20) / (1.0 + debt_ratio(club, revenue))
+	allowance = minf(allowance, maxf(0.0, float(club.balance)))
+	return {"transfer": int(clampf(allowance, 0.0, cap)), "wages": wage_ceiling,
+		"cap": int(cap), "reserve": int(reserve), "obligations": int(obligations)}
+
+
 static func set_budgets(world: GameWorld, club: Club) -> void:
 	club.income_tv = int(tv_income(club) * tv_deal(world, club.league_id))
 	club.income_sponsor = sponsor_income(club)
 	club.cost_upkeep = maintenance_cost(club)
-	var arch := club.arch()
-	var revenue := float(expected_revenue(club) + club.income_tv - tv_income(club))
-	var ratio := float(arch.get("wage_ratio", 0.62))
-	var spend := float(arch.get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
-	if world.is_user_club(club.id):
-		ratio = [0.95, 0.86, 0.8][world.difficulty]
-		spend = [0.6, 0.45, 0.35][world.difficulty]
-	var current := float(wage_bill(world, club))
-	# A parcela da dívida sai antes da folha: o que sobra da receita é o que dá para gastar.
-	var service := debt_service(club)
-	# Parcela da dívida e custos operacionais (staff, viagens, base) além do básico saem antes da folha.
-	var free := maxf(revenue * 0.5, revenue - service - maxf(0.0, club.cost_upkeep - revenue * 0.06))
-	var dr := debt_ratio(club, revenue)
-	# Reservas viram poder de fogo salarial (dinheiro parado circula), dívida aperta o cinto.
-	var reserve := minf(maxf(0.0, club.balance) * 0.12, revenue * 0.35)
-	var budget := (free * ratio + reserve) / 12.0
-	if club.balance >= 0:
-		# Clube saudável pode manter a folha atual mesmo um pouco acima do ideal.
-		budget = maxf(budget, minf(current, budget * 1.1))
-		if dr > 1.0:
-			# Caixa em dia, mas dívida acima de um ano de receita: os bancos pedem contenção.
-			budget *= clampf(1.1 - dr * 0.15, 0.8, 1.0)
-	else:
-		# Caixa no vermelho: o teto cai conforme o tamanho da dívida e força cortes (vendas, não renovações).
-		budget *= clampf(1.0 - dr * 0.25, 0.75, 0.95)
-	club.wage_budget = int(budget)
-	# Teto por temporada: contratações limitadas a uma fração da receita anual, por mais rico que o clube seja.
-	# IA: no máximo ~90% da receita anual em compras (os gigantes de verdade não gastam mais que isso por ano).
-	var cap_mult := 0.9
-	if world.is_user_club(club.id):
-		cap_mult = [2.0, 1.6, 1.3][world.difficulty]
-	var tb := club.balance * spend
-	# Sobra prevista do ano (receita − folha − custos − parcela da dívida) também vira verba, com cautela.
-	if club.balance >= 0:
-		tb += maxf(0.0, revenue - current * 12.0 - club.cost_upkeep - service) * 0.2
-	if dr > 1.0:
-		tb *= 0.5
-	var legacy_budget := float(clampf(tb, 0.0, revenue * cap_mult))
-	var market_budget := float(MarketReality.budget_reference(world, club, revenue))
-	# Caixa no vermelho: a verba de mercado some conforme o rombo (zera com 25% da receita anual).
-	if club.balance < 0:
-		market_budget *= clampf(1.0 + float(club.balance) / maxf(1.0, revenue * 0.25), 0.0, 1.0)
-	# Mistura sustentabilidade financeira com poder de compra coerente com o valor do elenco.
-	club.transfer_budget = int(clampf(lerpf(legacy_budget, market_budget, 0.60), 0.0, revenue * cap_mult))
+	var limits := board_limits(world, club)
+	var budgets: Dictionary = world.stats.get("board_budgets_v1", {})
+	var key := str(club.id)
+	var old: Dictionary = budgets.get(key, {})
+	if int(old.get("year", -1)) == world.year:
+		# Mudar de emprego/reabrir a tela não repõe verba já comprometida.
+		club.transfer_budget = mini(club.transfer_budget, maxi(0, int(limits["cap"]) - int(old.get("spent", 0))))
+		return
+	club.wage_budget = int(limits["wages"])
+	club.transfer_budget = int(limits["transfer"])
+	budgets[key] = {"year": world.year, "initial": club.transfer_budget, "authorized": club.transfer_budget, "spent": 0, "reviewed": false, "sale_share": sale_share(club)}
+	world.stats["board_budgets_v1"] = budgets
+
+
+## Migração limitada à política de orçamento: mantém caixa, jogadores e histórico intactos.
+static func ensure_budget_policy(world: GameWorld) -> void:
+	for club: Club in world.clubs:
+		var rows: Dictionary=world.stats.get("board_budgets_v1",{})
+		if int(rows.get(str(club.id),{}).get("year",-1))==world.year:
+			continue
+		var previous:=club.transfer_budget
+		var spent:=maxi(0,-int(club.ledger.get("compras",0)))+maxi(0,-int(club.ledger.get("luvas",0)))
+		set_budgets(world,club)
+		var row: Dictionary=world.stats["board_budgets_v1"][str(club.id)]
+		row["spent"]=spent
+		club.transfer_budget=mini(previous,mini(club.transfer_budget,maxi(0,int(board_limits(world,club)["cap"])-spent)))
+		row["authorized"]=spent+club.transfer_budget
+
+
+static func commit_budget(world: GameWorld, club: Club, cost: int) -> void:
+	cost = maxi(0, cost)
+	club.transfer_budget = maxi(0, club.transfer_budget - cost)
+	var budgets: Dictionary = world.stats.get("board_budgets_v1", {})
+	var row: Dictionary = budgets.get(str(club.id), {})
+	if int(row.get("year", -1)) == world.year:
+		row["spent"] = int(row.get("spent", 0)) + cost
+
+
+## All optional board grants use the same cash/commitment/annual-limit rule.
+static func authorize_extra(world: GameWorld, club: Club, requested: int, reason: String) -> int:
+	var budgets: Dictionary=world.stats.get("board_budgets_v1",{})
+	var row: Dictionary=budgets.get(str(club.id),{})
+	if int(row.get("year",-1))!=world.year:
+		set_budgets(world,club)
+		row=world.stats["board_budgets_v1"][str(club.id)]
+	var grants: Dictionary=row.get("grants",{})
+	if grants.has(reason):return 0
+	var limits:=board_limits(world,club)
+	var room:=maxi(0,int(limits["cap"])-int(row.get("spent",0))-club.transfer_budget)
+	var free:=maxi(0,club.balance-int(limits["reserve"])-int(limits["obligations"])-club.transfer_budget)
+	var amount:=mini(maxi(0,requested),mini(room,free))
+	if amount<=0:return 0
+	club.transfer_budget+=amount
+	row["authorized"]=int(row.get("spent",0))+club.transfer_budget
+	grants[reason]=amount
+	row["grants"]=grants
+	return amount
+
+static func authorize_wages(world: GameWorld, club: Club, requested: int) -> int:
+	var old:=club.wage_budget
+	club.wage_budget=maxi(old,mini(requested,int(board_limits(world,club)["wages"])))
+	return club.wage_budget-old
+
+
+static func sale_share(club: Club) -> float:
+	# Uma política comum a todos os clubes. Dívida e caixa, não a dificuldade, decidem a retenção.
+	var debt := debt_ratio(club)
+	var share := clampf(0.65 - debt * 0.20, 0.20, 0.65)
+	return share * 0.5 if club.balance < 0 else share
 
 
 ## Salários de mercado: numa liga rica até o clube pequeno paga bem (a TV da Premier League
@@ -340,17 +388,25 @@ static func refinance(world: GameWorld, club: Club) -> int:
 ## Revisão de meio de temporada (abertura da janela de inverno): a diretoria ajusta a verba
 ## ao que entrou e saiu até aqui — premiações e vendas liberam dinheiro, prejuízo aperta.
 static func mid_season_review(world: GameWorld, club: Club) -> void:
-	var revenue := float(expected_revenue(club))
-	if club.balance < 0:
-		club.transfer_budget = 0
-		if debt_ratio(club, revenue) > 0.4:
-			club.wage_budget = int(club.wage_budget * 0.95)
+	var budgets: Dictionary = world.stats.get("board_budgets_v1", {})
+	var row: Dictionary = budgets.get(str(club.id), {})
+	if row.is_empty() or int(row.get("year", -1)) != world.year:
+		set_budgets(world, club)
+		budgets = world.stats.get("board_budgets_v1", {})
+		row = budgets.get(str(club.id), {})
+	if bool(row.get("reviewed", false)):
 		return
-	var spend := float(club.arch().get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
+	row["reviewed"] = true
+	var limits := board_limits(world, club)
+	var old := club.transfer_budget
+	var cap_room := maxi(0, int(limits["cap"]) - int(row.get("spent", 0)))
+	var extra := int(maxf(0.0, float(projected_balance(world, club)) - float(limits["reserve"]) - float(limits["obligations"])) * 0.10)
+	club.transfer_budget = mini(old + extra, mini(cap_room, maxi(0, club.balance - int(limits["reserve"]) - int(limits["obligations"]))))
+	row["authorized"] = int(row.get("spent", 0)) + club.transfer_budget
+	if club.balance < 0:
+		club.wage_budget = mini(club.wage_budget, int(limits["wages"]))
 	if world.is_user_club(club.id):
-		spend = [0.6, 0.45, 0.35][world.difficulty]
-	var fresh := int(minf(club.balance * spend * 0.5, revenue * 0.5))
-	club.transfer_budget = mini(maxi(club.transfer_budget, fresh), club.balance)
+		NewsManager.post_raw(world, "Diretoria revisa a verba", "Autorização para contratações: %s. A diretoria preservou reservas e compromissos futuros; o caixa não é uma carteira do treinador." % Fmt.money(club.transfer_budget), club.id, -1, NewsEvent.IMP_NORMAL, "clube")
 
 
 ## Projeção do caixa no fim da temporada: saldo atual + o que ainda falta entrar e sair.
@@ -387,12 +443,17 @@ static func renegotiate_tv(world: GameWorld) -> Array:
 
 ## Parte de uma venda que a diretoria libera para novas contratações.
 static func on_sale(world: GameWorld, club: Club, fee: int) -> void:
-	var share := 0.8
-	if world.is_user_club(club.id):
-		share = [0.85, 0.7, 0.6][world.difficulty]
-	if club.balance < 0:
-		share *= 0.5
-	club.transfer_budget += int(fee * share)
+	if fee <= 0:
+		return
+	var share := sale_share(club)
+	var budgets: Dictionary = world.stats.get("board_budgets_v1", {})
+	var row: Dictionary = budgets.get(str(club.id), {})
+	var spent := int(row.get("spent", 0)) if int(row.get("year", -1)) == world.year else 0
+	var cap := int(float(expected_revenue(club)) * 0.45)
+	club.transfer_budget = mini(club.transfer_budget + int(fee * share), maxi(0, cap - spent))
+	if not row.is_empty():
+		row["authorized"] = spent + club.transfer_budget
+		row["sale_share"] = share
 
 
 static func summary(world: GameWorld, club: Club) -> Dictionary:

@@ -57,9 +57,12 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 			row.fill(0)
 			rows[(ln[QuickMatch.L_P] as Player).id] = row
 		_shots(rng, lines, rows, real, shots, on)
-		_spread(rng, lines, rows, KP, maxi(0, int(round(shots * 0.72)) - _assists(lines)), QuickMatch.L_ASSIST, true)
-		for ln in lines:
-			rows[(ln[QuickMatch.L_P] as Player).id][KP] += int(ln[QuickMatch.L_A])
+		if bool(res.get("stats_observed", false)):
+			for ln in lines:
+				var observed: Array = real.get((ln[QuickMatch.L_P] as Player).id, [])
+				rows[(ln[QuickMatch.L_P] as Player).id][KP] = int(observed[4]) if observed.size() > 4 else 0
+		else:
+			_spread(rng, lines, rows, KP, maxi(0, int(round(shots * 0.72)) - _assists(lines)), QuickMatch.L_ASSIST, true)
 		_spread(rng, lines, rows, TK, maxi(4, int(round(rng.randfn(16.0 + (0.5 - ps) * 10.0, 3.0)))), QuickMatch.L_DEF, false)
 		_spread(rng, lines, rows, IT, maxi(2, int(round(rng.randfn(9.0 + (0.5 - ps) * 6.0, 2.5)))), QuickMatch.L_DEF, false)
 		_spread(rng, lines, rows, DR, maxi(1, int(round(rng.randfn(8.0 + (ps - 0.5) * 6.0, 2.5)))), QuickMatch.L_ATT, false, true)
@@ -67,7 +70,9 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 			var p: Player = ln[QuickMatch.L_P]
 			var row: Array = rows[p.id]
 			row[PP] = _pass_pct(rng, p, int(ln[QuickMatch.L_POS]), ps)
-			row[XG] = int(round((int(ln[QuickMatch.L_G]) * 0.3 + int(row[SH]) * 0.075 + int(row[SO]) * 0.06) * 100.0 * rng.randf_range(0.85, 1.15)))
+			var measured: Array = real.get(p.id, [])
+			# Saves antigos sem xG pessoal só recebem estimativa por finalização, nunca por gols.
+			row[XG] = int(round(float(measured[3]) * 100.0)) if measured.size() > 3 else int(round(int(row[SH]) * 10.0))
 			out[p.id] = row
 	# Defesas: o que o goleiro segurou do que foi no alvo
 	for side in 2:

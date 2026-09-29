@@ -33,7 +33,7 @@ static func is_landscape() -> bool:
 static func columns_for(w: float, max_cols: int = 3) -> int:
 	if w >= COL3_MIN and max_cols >= 3:
 		return 3
-	if w >= BP_MEDIUM - RAIL_W and max_cols >= 2:
+	if w >= 1080.0 and max_cols >= 2:
 		return 2
 	return 1
 

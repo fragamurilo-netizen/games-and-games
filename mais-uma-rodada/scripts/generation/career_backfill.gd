@@ -526,7 +526,8 @@ static func _season_row(rng: RandomNumberGenerator, p: Player, y: int, e: Array,
 	share *= 1.0 - clampf((p.injury_prone - 10) * 0.025, -0.05, 0.25) * rng.randf()
 	var apps := int(round(rounds * clampf(share, 0.0, 1.0)))
 	var starts := int(round(apps * clampf(0.35 + share * 0.7, 0.0, 1.0)))
-	var fin := float(p.attrs[Attr.FIN])
+	var relative_level := clampf(o / maxf(1.0,p.ovr_f), 0.55, 1.1)
+	var fin := float(p.attrs[Attr.FIN]) * relative_level
 	var g_rate := 0.0
 	var a_rate := 0.0
 	match Pos.group(p.position):
@@ -547,8 +548,9 @@ static func _season_row(rng: RandomNumberGenerator, p: Player, y: int, e: Array,
 		a_rate *= 1.5
 	# Em time melhor que ele marca menos; em time mais fraco, é a referência
 	var k := clampf(1.0 + q * 0.03, 0.7, 1.3) * (0.55 + 0.45 * float(starts) / maxf(1.0, apps))
-	var goals := _poisson(rng, apps * g_rate * k)
-	var assists := _poisson(rng, apps * a_rate * k)
+	var full_matches := starts * 0.82 + maxi(0,apps-starts) * 0.24
+	var goals := _poisson(rng, full_matches * g_rate * k)
+	var assists := _poisson(rng, full_matches * a_rate * k)
 	var rating := clampf(6.45 + q * 0.045 + rng.randfn(0.0, 0.18) + minf(0.35, goals * 0.012), 5.8, 8.3)
 	var row := {"y": y, "c": int(e[0]), "cn": String(e[1]), "a": apps, "g": goals, "as": assists,
 		"r": snappedf(rating if apps > 0 else 0.0, 0.01), "o": int(round(o)), "o0": int(round(o0)), "pre": true}

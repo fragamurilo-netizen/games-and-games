@@ -51,6 +51,7 @@ static func cards(w: GameWorld, club: Club) -> Array:
 		out.append(_season_card(w, club, league))
 		out.append(_ranks_card(w, club, league))
 	out.append(squad_table(w, club))
+	out.append(PerformanceLedger.card(w, club))
 	out.append(_squad_card(w, club))
 	out.append(_leaders_card(w, club))
 	return out
@@ -86,17 +87,8 @@ static func past_years(w: GameWorld, club: Club) -> Array:
 static func table_rows(w: GameWorld, club: Club, year: int) -> Array:
 	var rows: Array = []
 	if year == 0 or year == w.year:
-		for p: Player in w.squad(club):
-			var t := p.season_totals()
-			var mins := p.stats[Player.S_MINUTES]
-			var rsum := p.stats[Player.S_RATING_SUM]
-			for k in p.cup_stats:
-				var st: PackedInt32Array = p.cup_stats[k]
-				mins += st[Player.C_MINUTES]
-				rsum += st[Player.C_RATING]
-			rows.append({"id": p.id, "n": p.short_name(), "pos": p.position, "a": int(t[0]), "g": int(t[1]),
-				"as": int(t[2]), "r": rsum / 10.0 / int(t[0]) if int(t[0]) > 0 else 0.0, "m": mins, "yc": p.stats[Player.S_YELLOWS]})
-		return rows
+		return current_club_rows(w, club)
+
 	var seen := {}
 	for r: Dictionary in club.squad_archive.get(str(year), []):
 		var row := r.duplicate()
@@ -113,6 +105,38 @@ static func table_rows(w: GameWorld, club: Club, year: int) -> Array:
 					"as": int(h.get("as", 0)) + int(h.get("cas", 0)), "r": float(h.get("r", 0.0))})
 				break
 	return rows
+
+
+## Cumulative player counters include earlier clubs. Career cuts isolate this club's contribution.
+static func current_club_rows(w: GameWorld, club: Club, league_only: bool = false) -> Array:
+	var ids: Dictionary = {}
+	for id in club.player_ids: ids[int(id)] = true
+	for key in w.memory.get("split", {}):
+		for cut in w.memory["split"][key]:
+			if int(cut.get("c", -1)) == club.id: ids[int(key)] = true
+	var out: Array = []
+	for id in ids:
+		var p := w.player(int(id))
+		if p == null: continue
+		var row := {"id":p.id,"n":p.short_name(),"pos":p.position,"a":0,"g":0,"as":0,"m":0,"yc":0,"r":0.0,"rs":0.0,"rated":0,"mo":0}
+		for cut: Dictionary in PlayerCareer.season_rows(w,p):
+			if int(cut["c"]) != club.id: continue
+			var apps := int(cut["a"]) + (0 if league_only else int(cut["ca"]))
+			row["a"] += apps
+			row["g"] += int(cut["g"]) + (0 if league_only else int(cut["cg"]))
+			row["as"] += int(cut["as"]) + (0 if league_only else int(cut["cas"]))
+			row["m"] += int(cut.get("mi",0))
+			row["yc"] += int(cut.get("yc",0))
+			row["mo"] += int(cut.get("mo",0))
+			if not league_only and cut.has("rsum"):
+				row["rs"] += float(cut["rsum"]) / 10.0
+				row["rated"] += apps
+			else:
+				row["rs"] += float(cut["r"]) * int(cut["a"])
+				row["rated"] += int(cut["a"])
+		row["r"] = float(row["rs"]) / int(row["rated"]) if int(row["rated"])>0 else 0.0
+		out.append(row)
+	return out
 
 
 static func squad_table(w: GameWorld, club: Club) -> Control:
@@ -187,7 +211,7 @@ static func _fill_table(w: GameWorld, club: Club, body: VBoxContainer) -> void:
 			body.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
 		else:
 			body.add_child(h)
-	body.add_child(UIKit.label("Total: %d jogos · %d gols · %d assistências (liga e copas)" % tot, "Small", true))
+	body.add_child(UIKit.label("Total dos jogadores: %d participações · %d gols · %d assistências (liga e copas; sem gols contra)" % tot, "Small", true))
 
 
 static func _cell(t: String, variation: String, wdt: int) -> Label:
@@ -362,46 +386,15 @@ static func _squad_card(w: GameWorld, club: Club) -> Control:
 
 static func _leaders_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.section_header("Destaques da temporada (liga)"))
-	var sq := w.squad(club)
-	var any := false
-	var cats := [
-		["Artilheiro", func(p: Player) -> float: return p.stat(Player.S_GOALS), func(p: Player) -> String: return "%d gols" % p.stat(Player.S_GOALS)],
-		["Assistências", func(p: Player) -> float: return p.stat(Player.S_ASSISTS), func(p: Player) -> String: return "%d assist." % p.stat(Player.S_ASSISTS)],
-		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%.2f em %d jogos" % [p.avg_rating(), p.stat(Player.S_APPS)]],
-		["Mais minutos", func(p: Player) -> float: return p.stat(Player.S_MINUTES), func(p: Player) -> String: return "%d min" % p.stat(Player.S_MINUTES)],
-		["Craque do jogo", func(p: Player) -> float: return p.stat(Player.S_MOTM), func(p: Player) -> String: return "%dx" % p.stat(Player.S_MOTM)],
-		["Desarmes", func(p: Player) -> float: return p.stat(Player.S_TACKLES), func(p: Player) -> String: return "%d" % p.stat(Player.S_TACKLES)],
-		["Defesas (goleiro)", func(p: Player) -> float: return p.stat(Player.S_SAVES), func(p: Player) -> String: return "%d" % p.stat(Player.S_SAVES)],
-		["Cartões", func(p: Player) -> float: return p.stat(Player.S_YELLOWS) + 3 * p.stat(Player.S_REDS), func(p: Player) -> String: return "%d amarelos · %d vermelhos" % [p.stat(Player.S_YELLOWS), p.stat(Player.S_REDS)]],
-	]
-	for cat: Array in cats:
-		var f: Callable = cat[1]
-		var best: Player = null
-		var bv := 0.0
-		for p: Player in sq:
-			var v := float(f.call(p))
-			if v > bv:
-				bv = v
-				best = p
-		if best == null:
-			continue
-		any = true
-		var pid := best.id
-		var h := UIKit.hbox(10)
-		var k := UIKit.label(String(cat[0]), "Muted")
-		k.custom_minimum_size.x = 150
-		h.add_child(k)
-		var nm := UIKit.label(best.short_name(), "H3")
-		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		h.add_child(nm)
-		h.add_child(UIKit.label((cat[2] as Callable).call(best), "Small"))
-		card.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
-	if not any:
-		card.add_child(UIKit.label("A temporada ainda não começou.", "Muted"))
+	card.add_child(UIKit.section_header("Destaques deste clube na liga"))
+	var rows := current_club_rows(w,club,true)
+	for spec in [["Artilheiro","g"],["Assistências","as"],["Melhor nota","r"],["Craque do jogo","mo"]]:
+		var key: String=spec[1]
+		var eligible:=rows.filter(func(r):return int(r["a"])>=3 if key=="r" else int(r.get(key,0))>0)
+		eligible.sort_custom(func(a,b):return float(a[key])>float(b[key]))
+		if eligible.is_empty():continue
+		var row:Dictionary=eligible[0]
+		var val: String="%.2f" % float(row[key]) if key=="r" else str(int(row[key]))
+		card.add_child(UIKit.kv(String(spec[0]),String(row["n"])+" · "+val))
+	card.add_child(UIKit.label("Somente a contribuição pelo clube selecionado. Inclui atletas que saíram durante o ano.","Small",true))
 	return UIKit.card_panel(card)
-
-
-func color_context() -> Dictionary:
-	return club_context(_club_id)

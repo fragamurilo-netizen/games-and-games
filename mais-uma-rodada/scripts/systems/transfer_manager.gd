@@ -40,8 +40,6 @@ static func asking_price(world: GameWorld, p: Player) -> int:
 		mult *= 0.9
 	if FinanceManager.in_trouble(club):
 		mult *= 0.85
-	if not world.is_user_club(club.id) and world.has_user():
-		mult *= [0.92, 1.0, 1.1][world.difficulty]
 	return Valuation.round_value(p.value * mult)
 
 
@@ -146,7 +144,7 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 		return {"result": "rejected", "fee": 0, "msg": "A janela de transferências está fechada."}
 	if p.loan.size() > 0:
 		return {"result": "rejected", "fee": 0, "msg": "Ele está emprestado e não pode ser negociado agora."}
-	if upfront_cost(fee, deal) > user.transfer_budget:
+	if budget_cost(fee, deal) > user.transfer_budget or upfront_cost(fee, deal) > maxi(0, user.balance):
 		return {"result": "rejected", "fee": 0, "msg": "A diretoria não libera esse valor agora. Orçamento: %s." % Fmt.money(user.transfer_budget)}
 	var neg: Dictionary = world.stats.get("neg", {})
 	var key := str(p.id)
@@ -216,7 +214,7 @@ static func swap_worth(world: GameWorld, sp: Player, seller: Club) -> int:
 	var age := sp.age(world.year)
 	if age >= 32:
 		f *= 0.7
-	elif age <= 22 and sp.potential >= sp.overall + 6:
+	elif age <= 22 and float(TalentAssessment.projection(sp, world.year)["center"]) >= sp.overall + 3:
 		f *= 1.1
 	if sp.contract_years_left(world.year) <= 0:
 		f *= 0.8
@@ -233,6 +231,10 @@ static func swap_value(world: GameWorld, swaps: Array, seller: Club) -> float:
 ## Termos pessoais. Retorna {result: "accepted"|"counter"|"rejected", wage, msg}.
 static func user_terms(world: GameWorld, p: Player, wage: int, years: int, deal: Dictionary = {}) -> Dictionary:
 	var user := world.user_club()
+	if wage <= 0 or years < 1 or years > 5:
+		return {"result": "rejected", "wage": 0, "msg": "Contrato inválido."}
+	if maxi(0, int(deal.get("bonus", 0))) > mini(user.transfer_budget, maxi(0, user.balance)):
+		return {"result": "rejected", "wage": wage, "msg": "Luvas excedem a verba autorizada pela diretoria."}
 	var i := interest(world, p, user)
 	if i < 0.18:
 		return {"result": "rejected", "wage": 0, "msg": "%s não tem interesse em jogar no %s." % [p.display_name(), user.short_name]}
@@ -245,16 +247,24 @@ static func user_terms(world: GameWorld, p: Player, wage: int, years: int, deal:
 		return {"result": "rejected", "wage": demand, "msg": "Folha salarial estourada: a diretoria limita a %s/mês." % Fmt.money(user.wage_budget)}
 	if wage >= demand:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou os termos!" % p.display_name()}
-	if wage >= demand * 0.9 and world.rng.randf() < 0.5:
+	if wage >= demand * reservation_factor(world, p, user, years):
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou, mesmo pedindo um pouco mais." % p.display_name()}
 	return {"result": "counter", "wage": demand, "msg": "%s quer %s por %d ano(s)." % [p.display_name(), Fmt.money_month(demand), years]}
 
 
+static func pending_wages(world: GameWorld, club_id: int) -> int:
+	var total := 0
+	for entry in world.stats.get("pre", {}).values():
+		if entry is Dictionary and int(entry.get("club", -1)) == club_id:
+			total += maxi(0, int(entry.get("wage", 0)))
+	return total
+
+
 static func _wage_fits(world: GameWorld, club: Club, p: Player, wage: int) -> bool:
-	var bill := FinanceManager.wage_bill(world, club)
+	var bill := FinanceManager.wage_bill(world, club) + pending_wages(world, club.id)
 	if p.club_id == club.id:
 		bill -= p.wage
-	return bill + wage <= int(club.wage_budget * 1.02)
+	return bill + wage <= club.wage_budget
 
 
 # ---------------------------------------------------------------------------
@@ -275,7 +285,7 @@ static func deal_value(fee: int, deal: Dictionary) -> float:
 ## O que sai do caixa agora: primeira parcela + comissão do empresário.
 static func upfront_cost(fee: int, deal: Dictionary) -> int:
 	var inst := clampi(int(deal.get("inst", 1)), 1, 3)
-	return int(ceil(float(fee) / inst)) + int(fee * AGENT_FEE)
+	return int(ceil(float(maxi(0, fee)) / inst)) + int(maxi(0, fee) * AGENT_FEE) + maxi(0, int(deal.get("bonus", 0)))
 
 
 ## Pedido salarial ajustado por luvas (dinheiro na assinatura) e multa rescisória.
@@ -298,55 +308,76 @@ static func adjust_demand(demand: int, years: int, deal: Dictionary) -> int:
 
 
 ## Aplica as condições depois de fechado o contrato (parcelas, luvas, multa, revenda).
+static func budget_cost(fee: int, deal: Dictionary) -> int:
+	return maxi(0, fee) + int(maxi(0, fee) * AGENT_FEE) + maxi(0, int(deal.get("bonus", 0)))
+
+
+## Reserva salarial individual estável: repetir a mesma oferta não sorteia outra resposta.
+static func reservation_factor(world: GameWorld, p: Player, buyer: Club, years: int) -> float:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([world.world_seed, p.id, buyer.id, world.year, years, "salary_reservation"])
+	return rng.randf_range(0.93, 1.0)
+
+
 static func apply_deal(world: GameWorld, p: Player, buyer: Club, seller_id: int, fee: int, deal: Dictionary) -> void:
-	var inst := clampi(int(deal.get("inst", 1)), 1, 3)
-	if fee > 0:
-		# Comissão do empresário
-		buyer.add_ledger("compras", -int(fee * AGENT_FEE))
-		if inst > 1:
-			# complete_transfer cobrou tudo; devolve o que fica para as próximas temporadas
-			var later := fee - int(ceil(float(fee) / inst))
-			buyer.add_ledger("compras", later)
-			buyer.transfer_budget += later
-			var sched: Array = world.stats.get("installments", [])
-			var part := int(later / (inst - 1))
-			var seller := world.club(seller_id)
-			for k in inst - 1:
-				sched.append({"y": world.year + 1 + k, "v": part, "p": p.display_name(), "cn": seller.short_name if seller != null else ""})
-			world.stats["installments"] = sched
-	var so := float(deal.get("sell_on", 0.0))
-	if so > 0.0 and seller_id >= 0:
-		p.clauses = {"so": seller_id, "pct": so}
-	var bonus := int(deal.get("bonus", 0))
+	# Idempotente no mesmo contrato: não cobra luvas/comissão de novo por duplo callback.
+	var key := "%d:%d:%d:%d:%d" % [p.id, buyer.id, p.contract_end, p.wage, world.current_day()]
+	var applied: Dictionary = world.stats.get("applied_terms_v1", {})
+	if int(applied.get("year", -1)) != world.year:
+		applied = {"year": world.year, "keys": {}}
+	if applied["keys"].has(key):
+		return
+	applied["keys"][key] = true
+	world.stats["applied_terms_v1"] = applied
+	var commission := int(maxi(0, fee) * AGENT_FEE)
+	var bonus := maxi(0, int(deal.get("bonus", 0)))
+	if commission > 0:
+		buyer.add_ledger("compras", -commission)
 	if bonus > 0:
 		buyer.add_ledger("luvas", -bonus)
-	var cm := int(deal.get("clause", 0))
+	FinanceManager.commit_budget(world, buyer, commission + bonus)
+	var so := clampf(float(deal.get("sell_on", 0.0)), 0.0, 0.3)
+	if so > 0.0 and seller_id >= 0:
+		p.clauses = {"so": seller_id, "pct": so}
+	var cm := clampi(int(deal.get("clause", 0)), 0, 5)
 	p.release_clause = Valuation.round_value(p.value * cm) if cm > 0 else 0
 
 
-## Parcelas de compras antigas vencem na virada do ano.
 static func pay_installments(world: GameWorld) -> int:
-	var sched: Array = world.stats.get("installments", [])
-	if sched.is_empty() or not world.has_user():
-		return 0
+	var schedule: Array = world.stats.get("installments", [])
 	var total := 0
 	var keep: Array = []
-	for e in sched:
-		if int(e["y"]) <= world.year:
-			total += int(e["v"])
-		else:
+	for e in schedule:
+		if int(e.get("y", 0)) > world.year:
 			keep.append(e)
+			continue
+		# Parcelas antigas não tinham devedor/credor: preserva o comportamento legado sem inventar vendedor.
+		var buyer := world.club(int(e.get("buyer", world.user_club_id)))
+		if buyer == null:
+			keep.append(e)
+			continue
+		var amount := maxi(0, int(e.get("v", 0)))
+		buyer.add_ledger("compras", -amount)
+		if bool(e.get("v2", false)):
+			var seller := world.club(int(e.get("seller", -1)))
+			if seller != null:
+				seller.add_ledger("vendas", amount)
+				FinanceManager.on_sale(world, seller, amount)
+		if world.is_user_club(buyer.id):
+			total += amount
 	world.stats["installments"] = keep
 	if total > 0:
-		world.user_club().add_ledger("compras", -total)
-		NewsManager.post_raw(world, "Parcelas de transferências", "O clube pagou %s em parcelas de contratações antigas." % Fmt.money(total), world.user_club_id, -1, NewsEvent.IMP_NORMAL)
+		NewsManager.post_raw(world, "Parcelas de transferências", "O clube pagou %s de compromissos já assumidos. Trocar de treinador não transfere a dívida." % Fmt.money(total), world.user_club_id, -1, NewsEvent.IMP_NORMAL)
 	return total
 
 
-static func pending_installments(world: GameWorld) -> int:
+static func pending_installments(world: GameWorld, club_id: int = -1) -> int:
+	if club_id < 0:
+		club_id = world.user_club_id
 	var total := 0
 	for e in world.stats.get("installments", []):
-		total += int(e["v"])
+		if int(e.get("buyer", world.user_club_id)) == club_id:
+			total += maxi(0, int(e.get("v", 0)))
 	return total
 
 
@@ -374,7 +405,7 @@ static func loan_in_terms(world: GameWorld, p: Player) -> Dictionary:
 		return {"ok": false, "msg": "Elenco cheio."}
 	if interest(world, p, user) < 0.25:
 		return {"ok": false, "msg": "%s não quer ir para o %s." % [p.display_name(), user.short_name]}
-	if loan_fee(p) > user.transfer_budget:
+	if loan_fee(p) > mini(user.transfer_budget,maxi(0,user.balance)):
 		return {"ok": false, "msg": "Taxa de empréstimo acima do orçamento."}
 	if not _wage_fits(world, user, p, p.wage):
 		return {"ok": false, "msg": "O salário dele (%s) estoura a folha." % Fmt.money_month(p.wage)}
@@ -389,8 +420,9 @@ static func loan_in(world: GameWorld, p: Player) -> Dictionary:
 	var owner := world.club(p.club_id)
 	var fee := loan_fee(p)
 	user.add_ledger("compras", -fee)
-	user.transfer_budget = maxi(0, user.transfer_budget - fee)
+	FinanceManager.commit_budget(world,user,fee)
 	owner.add_ledger("vendas", fee)
+	FinanceManager.on_sale(world,owner,fee)
 	_move_loan(world, p, owner, user)
 	var ln := NewsManager.post_raw(world, "%s chega emprestado" % p.display_name(), "%s vai defender o %s até o fim da temporada, emprestado pelo %s." % [p.display_name(), user.short_name, owner.short_name], user.id, p.id, NewsEvent.IMP_HIGH, "transferencia")
 	ln.media = NewsManager.signing_media(p, user, 0, owner.id)
@@ -411,6 +443,8 @@ static func loan_out(world: GameWorld, p: Player) -> Dictionary:
 	for _k in 40:
 		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
 		if c.id == user.id or c.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
+			continue
+		if not _wage_fits(world,c,p,p.wage) or (p.age(world.year)<18 and c.nation!=user.nation):
 			continue
 		var level := PlayerGenerator.club_level(c)
 		if p.ovr_f < level - 3.0 or p.ovr_f > level + 10.0:
@@ -474,27 +508,55 @@ static func loaned_out(world: GameWorld) -> Array:
 	return out
 
 
+## Pagamento com partidas dobradas: parcelas conservam centavos/unidades e seus credores.
+static func _settle_fee(world: GameWorld, p: Player, seller: Club, buyer: Club, fee: int, deal: Dictionary) -> void:
+	fee = maxi(0, fee)
+	var receivers: Array = []
+	var sell_on := world.club(int(p.clauses.get("so", -1)))
+	var share := 0
+	if seller != null:
+		if sell_on != null and sell_on.id != buyer.id and sell_on.id != seller.id:
+			share = int(fee * clampf(float(p.clauses.get("pct", 0.0)), 0.0, 0.3))
+			receivers.append({"club": sell_on.id, "total": share})
+		receivers.append({"club": seller.id, "total": fee - share})
+	var inst := clampi(int(deal.get("inst", 1)), 1, 3)
+	var schedule: Array = world.stats.get("installments", [])
+	for receiver in receivers:
+		var creditor := world.club(int(receiver["club"]))
+		var total := int(receiver["total"])
+		var previous := 0
+		for i in inst:
+			# A diferença entre fronteiras cumulativas evita perda de unidade por arredondamento.
+			var boundary := int(ceil(float(total) * (i + 1) / inst))
+			var amount := boundary - previous
+			previous = boundary
+			if amount <= 0:
+				continue
+			if i == 0:
+				buyer.add_ledger("compras", -amount)
+				creditor.add_ledger("vendas", amount)
+				FinanceManager.on_sale(world, creditor, amount)
+			else:
+				schedule.append({"y": world.year + i, "v": amount, "p": p.display_name(), "cn": creditor.short_name,
+					"buyer": buyer.id, "seller": creditor.id, "v2": true})
+	world.stats["installments"] = schedule
+	FinanceManager.commit_budget(world, buyer, fee)
+	# Sem vendedor (livre) a taxa é zero. Comissão e luvas entram em apply_deal.
+
+
 ## Executa a transferência (qualquer clube). fee pode ser 0 (livre).
-static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int, wage: int, years: int) -> Transfer:
+static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int, wage: int, years: int, deal: Dictionary = {}) -> Transfer:
+	if p == null or buyer == null or p.club_id == buyer.id:
+		return null
 	var seller_id := p.club_id
 	var seller := world.club(seller_id) if seller_id >= 0 else null
 	Rivalry.on_transfer(world, p, seller, buyer)
+	fee = maxi(0, fee)
+	_settle_fee(world, p, seller, buyer, fee, deal)
 	if seller != null:
 		seller.player_ids.erase(p.id)
-		seller.add_ledger("vendas", fee)
-		FinanceManager.on_sale(world, seller, fee)
 		_close_spell(world, p)
-		# Percentual de revenda para um ex-clube
-		var so_club := world.club(int(p.clauses.get("so", -1)))
-		if so_club != null and so_club.id != buyer.id and fee > 0:
-			var share := int(fee * float(p.clauses.get("pct", 0.0)))
-			seller.add_ledger("vendas", -share)
-			so_club.add_ledger("vendas", share)
-			if world.is_user_club(so_club.id):
-				NewsManager.post_raw(world, "Dinheiro da revenda de %s" % p.display_name(), "O %s recebeu %s pela cláusula de revenda." % [so_club.short_name, Fmt.money(share)], so_club.id, p.id, NewsEvent.IMP_HIGH, "transferencia")
-		p.clauses = {}
-	buyer.add_ledger("compras", -fee)
-	buyer.transfer_budget = maxi(0, buyer.transfer_budget - fee)
+	p.clauses = {}
 	buyer.player_ids.append(p.id)
 	buyer.cohesion = maxf(20.0, buyer.cohesion - 2.5)
 	p.club_id = buyer.id
@@ -600,7 +662,9 @@ static func user_sign_free(world: GameWorld, p: Player, wage: int, years: int, d
 ## Contratação com clube (depois de proposta aceita). Retorna {ok, msg}.
 static func user_sign(world: GameWorld, p: Player, fee: int, wage: int, years: int, deal: Dictionary = {}) -> Dictionary:
 	var user := world.user_club()
-	if upfront_cost(fee, deal) > user.transfer_budget:
+	if p == null or p.club_id < 0 or p.club_id == user.id or not p.loan.is_empty() or not world.transfer_window_open() or fee < 0:
+		return {"ok": false, "msg": "O negócio mudou ou a janela fechou. Reabra a negociação."}
+	if budget_cost(fee, deal) > user.transfer_budget or upfront_cost(fee, deal) > maxi(0, user.balance):
 		return {"ok": false, "msg": "Orçamento insuficiente."}
 	var swaps := swap_players(world, deal)
 	if user.player_ids.size() - swaps.size() >= int(DatabaseManager.squad_rules()["max_players"]):
@@ -613,7 +677,7 @@ static func user_sign(world: GameWorld, p: Player, fee: int, wage: int, years: i
 		return {"ok": false, "msg": r["msg"], "wage": r.get("wage", 0), "result": r["result"]}
 	var seller_id := p.club_id
 	var seller := world.club(seller_id)
-	complete_transfer(world, p, user, fee, wage, years)
+	complete_transfer(world, p, user, fee, wage, years, deal)
 	apply_deal(world, p, user, seller_id, fee, deal)
 	var names: Array = []
 	for sp: Player in swaps:
@@ -627,6 +691,8 @@ static func user_sign(world: GameWorld, p: Player, fee: int, wage: int, years: i
 
 ## Renovação de contrato. Retorna {result, wage, msg}.
 static func renewal_terms(world: GameWorld, p: Player, wage: int, years: int, deal: Dictionary = {}) -> Dictionary:
+	if maxi(0, int(deal.get("bonus", 0))) > mini(world.user_club().transfer_budget, maxi(0, world.user_club().balance)):
+		return {"result": "rejected", "wage": wage, "msg": "Luvas excedem a verba da diretoria."}
 	var club := world.club(p.club_id)
 	var demand := float(Valuation.wage_demand(p, club, world.year))
 	demand *= 1.0 + maxf(0.0, (55.0 - p.morale) / 100.0)
@@ -1039,13 +1105,25 @@ static func user_precontract(world: GameWorld, p: Player, wage: int, years: int,
 	var r := user_terms(world, p, wage, years, deal)
 	if r["result"] != "accepted":
 		return {"ok": false, "msg": r["msg"], "wage": r.get("wage", 0), "result": r["result"]}
-	_register_pre(world, p, user, wage, years, deal)
+	if not _register_pre(world, p, user, wage, years, deal):
+		return {"ok":false,"msg":"Compromissos futuros excedem a autorização da diretoria."}
 	return {"ok": true, "msg": "%s assinou pré-contrato: chega de graça no fim da temporada!" % p.display_name()}
 
 
-static func _register_pre(world: GameWorld, p: Player, c: Club, wage: int, years: int, deal: Dictionary) -> void:
+static func _register_pre(world: GameWorld, p: Player, c: Club, wage: int, years: int, deal: Dictionary) -> bool:
+	if p == null or c == null or wage <= 0 or years < 1 or years > 5 or not precontract_of(world,p).is_empty():
+		return false
+	var bonus := maxi(0,int(deal.get("bonus",0)))
+	if bonus > mini(c.transfer_budget,maxi(0,c.balance)) or not _wage_fits(world,c,p,wage):
+		return false
+	# Luvas remuneram a assinatura agora; os salários futuros ficam reservados.
+	var terms := deal.duplicate(true)
+	if bonus > 0:
+		c.add_ledger("luvas",-bonus)
+		FinanceManager.commit_budget(world,c,bonus)
+		terms["bonus"] = 0
 	var pre: Dictionary = world.stats.get("pre", {})
-	pre[str(p.id)] = {"club": c.id, "wage": wage, "years": years, "deal": deal}
+	pre[str(p.id)] = {"club": c.id, "wage": wage, "years": years, "deal": terms,"bonus_paid":bonus}
 	world.stats["pre"] = pre
 	var from := world.club(p.club_id)
 	var body := "%s, que termina contrato com o %s, assinou pré-contrato e defende o %s a partir da próxima temporada." % [p.display_name(), from.short_name if from != null else "?", c.short_name]
@@ -1054,6 +1132,7 @@ static func _register_pre(world: GameWorld, p: Player, c: Club, wage: int, years
 		NewsManager.post_raw(world, "%s acerta com o %s" % [p.display_name(), c.short_name], body, c.id, p.id, NewsEvent.IMP_HIGH if near else NewsEvent.IMP_NORMAL, "mercado")
 	if world.is_user_club(p.club_id):
 		InboxManager.send(world, "diretoria", "%s assinou pré-contrato" % p.display_name(), body + " Sem renovação, ele sai de graça.")
+	return true
 
 
 ## IA: clubes assinam pré-contrato com jogadores em fim de contrato (inclusive os do usuário que
@@ -1069,8 +1148,6 @@ static func ai_precontracts(world: GameWorld) -> void:
 		if not precontract_of(world, p).is_empty() or not p.loan.is_empty() or p.retiring:
 			continue
 		var ch := 0.012 + maxf(0.0, float(p.overall) - 70.0) * 0.002
-		if world.is_user_club(p.club_id):
-			ch *= 1.5 # o empresário do jogador sem renovação ouve propostas
 		if rng.randf() >= ch:
 			continue
 		var cur := world.club(p.club_id)

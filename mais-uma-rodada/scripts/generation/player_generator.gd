@@ -188,6 +188,7 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	var p := Player.new()
 	p.id = world.new_player_id()
 	p.face_seed = rng.randi()
+	p.look["catalog"] = 2 # new players may use appended cosmetic styles
 	p.position = pos
 	p.birth_year = world.year - age
 	p.nationality = nationality
