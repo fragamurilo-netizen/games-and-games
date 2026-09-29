@@ -6,8 +6,9 @@ A fonte de verdade do projeto é a **bíblia de design**:
 [`docs/PARALELO_MASTER_DESIGN_BIBLE.md`](docs/PARALELO_MASTER_DESIGN_BIBLE.md)
 (original em `.docx` na mesma pasta). Leia antes de mexer em arquitetura.
 
-> Status: **só estrutura**. Nenhum sistema de jogo foi implementado ainda.
-> Próximo passo: Fase 0 do roadmap (bíblia §49 e §67).
+> Status: **fundação jogável**, com motor puro, relógio, RNG, pessoas, relações,
+> timeline e save SQLite. A tela VIDA já executa comandos reais.
+> Continuidade para colegas: [`docs/CONTINUIDADE.md`](docs/CONTINUIDADE.md).
 
 ## Estrutura (bíblia §80)
 
@@ -33,7 +34,7 @@ Fluxo obrigatório: `UI -> Command -> Simulation -> World State -> Query -> UI`.
 
 ## Como rodar
 
-Requisitos: Node 20+ e npm.
+Requisitos: Node 22.13+ e npm; Node 24 recomendado para os testes com SQLite nativo.
 
 ```bash
 npm install          # instala todos os workspaces
@@ -54,17 +55,29 @@ npm run mobile       # servidor Expo
 As pastas nativas `android/` e `ios/` são geradas (`npx expo prebuild`) e não
 vão para o git; configure tudo via `apps/mobile/app.json`.
 
-## Primeira entrega recomendada (bíblia §67)
+## Primeira entrega (bíblia §67)
 
 1. monorepo ✅
-2. pacote simulation (esqueleto ✅)
-3. relógio determinístico
-4. RNG com streams nomeados
+2. pacote simulation puro ✅
+3. relógio determinístico ✅
+4. RNG com streams nomeados ✅
 5. IDs (tipos ✅)
-6. Person
-7. Relationship
-8. WorldState
-9. comando simples
-10. timeline mínima
-11. SQLite/save inicial
-12. testes de determinismo
+6. Person inicial ✅
+7. Relationship inicial ✅
+8. WorldState ✅
+9. comandos de descanso, contato e passagem de tempo ✅
+10. timeline mínima ✅
+11. SQLite/save inicial com backup ✅
+12. testes de determinismo e save ✅
+
+```bash
+npm run sim -- --seed flores --days 7 --save campanha.json
+npm run sim -- --load campanha.json --rest --contact person:mother
+npm run sim -- --seed flores --days 7305 --benchmark 1000
+npm --workspace apps/mobile run web
+npm --workspace apps/mobile run lint
+```
+
+O laboratório vetorial continua em [`prototypes/faces`](prototypes/faces/README.md).
+Ainda é um protótipo independente; sua integração aos retratos mobile é uma tarefa
+explicitamente registrada no documento de continuidade.

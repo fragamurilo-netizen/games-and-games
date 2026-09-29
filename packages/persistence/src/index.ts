@@ -1,2 +1,3 @@
 // Save em SQLite com schemaVersion, migrações e backup (bíblia §40).
-export {}
+export * from "./snapshot"
+export * from "./sqlite"

@@ -6,3 +6,7 @@ export type CompanyId = Brand<string, "CompanyId">
 export type RelationshipId = Brand<string, "RelationshipId">
 export type MemoryId = Brand<string, "MemoryId">
 export type EmploymentId = Brand<string, "EmploymentId">
+export type HouseholdId = Brand<string, "HouseholdId">
+export type ResidenceId = Brand<string, "ResidenceId">
+export type TimelineId = Brand<string, "TimelineId">
+export type ScheduleId = Brand<string, "ScheduleId">

@@ -4,5 +4,5 @@
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "dependencies": { "@paralelo/shared": "*" }
+  "dependencies": { "@paralelo/shared": "*", "@paralelo/content": "*" }
 }
