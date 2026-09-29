@@ -484,6 +484,9 @@ func end_season() -> Dictionary:
 # ---------------------------------------------------------------------------
 
 func _exit_tree() -> void:
+	if _gen_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_gen_task)
+		_gen_task = -1
 	I18n.release()
 
 
