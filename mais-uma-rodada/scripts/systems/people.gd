@@ -106,6 +106,7 @@ static func ensure(world: GameWorld) -> void:
 		var c: Club = world.clubs[r.randi_range(0, world.clubs.size() - 1)]
 		var coach := _new_coach(world, r, c.nation, c.reputation - r.randf_range(0.0, 15.0), "")
 		pp["free"].append(coach)
+	RealWorldData.apply_new_coaches(world)
 	CoachCareer.ensure(world)
 	if world.has_user():
 		_setup_user(world)

@@ -115,6 +115,37 @@ const GK_TRAITS: Array = [
 const TRAIT_MIN := 3.0
 
 
+
+const EXTRA_ROLES := {
+	"GK": [
+		{"k":"gk_curto", "n":"Goleiro de apoio", "d":"Dá saída curta, mas não domina o jogo aéreo.", "w":{Attr.PAS:0.5,Attr.DEC:0.3,Attr.TEC:0.2}, "b":7.0, "fx":{"poss":0.014,"o":{"cross":0.04}}},
+		{"k":"gk_lancador", "n":"Goleiro lançador", "d":"Acelera transições com reposições; menos retenção.", "w":{Attr.PAS:0.5,Attr.VIS:0.3,Attr.FOR:0.2}, "b":5.0, "fx":{"t":{"counter":0.08,"through":-0.03},"poss":-0.006}}],
+	"CB": [
+		{"k":"zagueiro_lado", "n":"Zagueiro de cobertura lateral", "d":"Protege o corredor; menos domínio aéreo.", "w":{Attr.VEL:0.4,Attr.ACE:0.25,Attr.DES:0.35}, "b":-0.5, "fx":{"o":{"counter":-0.06,"cross":0.03}},"ins":"segurar"},
+		{"k":"zagueiro_quebra", "n":"Zagueiro quebra-linhas", "d":"Encontra o meio com passes verticais; arrisca a saída.", "w":{Attr.PAS:0.4,Attr.VIS:0.35,Attr.DEC:0.25}, "fx":{"t":{"through":0.07},"o":{"scramble":0.05}}}],
+	"FB": [
+		{"k":"lateral_tabela", "n":"Lateral de associação", "d":"Tabelas curtas pelo lado em vez de cruzar sempre.", "w":{Attr.PAS:0.4,Attr.TEC:0.35,Attr.DEC:0.25}, "b":1.0, "fx":{"t":{"through":0.08,"cross":-0.05}},"ins":"recuar"},
+		{"k":"lateral_fundo", "n":"Lateral de linha de fundo", "d":"Vai ao fundo e cruza para trás; exige fôlego.", "w":{Attr.ACE:0.35,Attr.CRU:0.4,Attr.RES:0.25}, "fx":{"t":{"cross":0.1},"fat":1.08},"ins":"avancar"}],
+	"DM": [
+		{"k":"volante_cobertura", "n":"Volante de cobertura", "d":"Protege o espaço abandonado pelos laterais.", "w":{Attr.POS:0.4,Attr.DEC:0.3,Attr.VEL:0.3}, "b":1.0,"fx":{"o":{"counter":-0.08},"t":{"through":-0.02}},"ins":"segurar"},
+		{"k":"volante_pressao", "n":"Volante resistente à pressão", "d":"Gira e sai pressionado; não é um destruidor puro.", "w":{Attr.TEC:0.4,Attr.DRI:0.3,Attr.DEC:0.3}, "fx":{"poss":0.015,"o":{"scramble":-0.06,"dribble":0.025}}}],
+	"CM": [
+		{"k":"meia_terceiro", "n":"Meia do terceiro homem", "d":"Passa e aparece para receber entre linhas.", "w":{Attr.PAS:0.3,Attr.DEC:0.4,Attr.POS:0.3}, "b":1.0,"fx":{"t":{"through":0.09,"long":-0.06}},"ins":"infiltrar"},
+		{"k":"meia_inverte", "n":"Inversor de jogo", "d":"Muda o lado da jogada; evita conduções longas.", "w":{Attr.PAS:0.4,Attr.VIS:0.4,Attr.CRU:0.2},"fx":{"t":{"cross":0.07,"dribble":-0.05}},"ins":"prender"}],
+	"AM": [
+		{"k":"meia_bolsao", "n":"Especialista entrelinhas", "d":"Recebe nos bolsões; participa menos da recomposição.", "w":{Attr.POS:0.35,Attr.TEC:0.3,Attr.DEC:0.35},"fx":{"t":{"through":0.1},"o":{"counter":0.035}},"ins":"infiltrar"}],
+	"W": [
+		{"k":"ponta_pausa", "n":"Ponta de pausa", "d":"Atrai o marcador e solta na hora; menos corrida em transição.", "w":{Attr.TEC:0.4,Attr.PAS:0.25,Attr.DEC:0.35},"fx":{"t":{"through":0.09,"counter":-0.06}},"ins":"prender"},
+		{"k":"ponta_area", "n":"Ponta de ataque ao segundo poste", "d":"Ataca o lado oposto para finalizar; cria menos fora da área.", "w":{Attr.POS:0.4,Attr.FIN:0.35,Attr.CAB:0.25},"fx":{"t":{"cross":0.08},"k":{"0":1.08,"6":0.94}},"ins":"infiltrar"}],
+	"ST": [
+		{"k":"nove_pressao", "n":"Centroavante pressionante", "d":"Inicia a pressão e disputa sobras; custa energia.", "w":{Attr.RES:0.4,Attr.DES:0.3,Attr.ACE:0.3},"b":4.0,"fx":{"t":{"scramble":0.12},"fat":1.1}},
+		{"k":"nove_apoio", "n":"Centroavante de apoio", "d":"Faz a parede e acha o terceiro homem; ataca menos a profundidade.", "w":{Attr.PAS:0.3,Attr.FOR:0.3,Attr.TEC:0.4},"fx":{"t":{"through":0.1,"counter":-0.06}},"ins":"recuar"},
+		{"k":"nove_ombro", "n":"Atacante do último defensor", "d":"Vive no ombro do zagueiro e dispara no espaço.", "w":{Attr.ACE:0.4,Attr.POS:0.3,Attr.FRI:0.3},"fx":{"t":{"through":0.09,"cross":-0.06}},"ins":"frente"}]
+}
+
+static func role_options(role: String) -> Array:
+	return BY_ROLE.get(role, []) + EXTRA_ROLES.get(role, [])
+
 static func _role(pos: int) -> String:
 	match pos:
 		Pos.GK:
@@ -163,7 +194,7 @@ static func _score(p: Player, e: Dictionary) -> float:
 
 ## Estilo principal (dicionário de BY_ROLE) pela posição natural do jogador.
 static func primary(p: Player) -> Dictionary:
-	var list: Array = BY_ROLE[_role(p.position)]
+	var list: Array = role_options(_role(p.position))
 	var best: Dictionary = list[0]
 	var best_v := -1e9
 	var inv := _inverted(p)
@@ -290,7 +321,7 @@ static func effect_text(fx: Dictionary) -> String:
 static func options_for(p: Player) -> Array:
 	var out: Array = []
 	var inv := _inverted(p)
-	for e: Dictionary in BY_ROLE[_role(p.position)]:
+	for e: Dictionary in role_options(_role(p.position)):
 		if Dictionary(e.get("w", {})).is_empty():
 			continue
 		if bool(e.get("inv", false)) and not inv:
@@ -300,7 +331,7 @@ static func options_for(p: Player) -> Array:
 
 
 static func find(p: Player, key: String) -> Dictionary:
-	for e: Dictionary in BY_ROLE[_role(p.position)]:
+	for e: Dictionary in role_options(_role(p.position)):
 		if String(e["k"]) == key:
 			return e
 	return {}

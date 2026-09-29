@@ -44,6 +44,10 @@ func refresh() -> void:
 			c.add_child(nav)
 	c.add_child(_header(w, p, club))
 	c.add_child(_tabs_row(p))
+	if RealWorldData.is_real(w,p.id):
+		var note := UIKit.label("Identidade factual • estimativas de jogo. Histórico e estatísticas contam só a carreira simulada, não o passado real.","Small",true)
+		note.tooltip_text = "Fonte: "+String(RealWorldData.identity(w,p.id).get("source",""))+" | consulta 29/09/2026"
+		c.add_child(note)
 	match _tab:
 		"numeros":
 			c.add_child(_stats(w, p))
@@ -59,7 +63,7 @@ func refresh() -> void:
 			cards.append(SocialPost.mini_card(w, -1, p.id))
 			UIKit.columns(c, cards, content_width())
 		_:
-			var ov: Array = [_summary(w, p, own), _fit_card(w, p, own)]
+			var ov: Array = [_summary(w, p, own), _fit_card(w, p, own), _projection_card(w, p)]
 			# Tablet: os atributos já aparecem ao lado (resumo e encaixe empilhados à esquerda),
 			# sem trocar de aba; em duas colunas o resumo não cabe espremido ao lado do encaixe
 			if UILayout.columns_for(content_width()) >= 2:
@@ -588,7 +592,7 @@ static func _level(v: int, inverted: bool) -> String:
 
 func _stats(w: GameWorld, p: Player) -> Control:
 	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Temporada %d" % w.year))
+	card.add_child(UIKit.section("Liga · Temporada %d" % w.year))
 	var row := UIKit.hbox(4)
 	row.add_child(UIKit.stat(str(p.stats[Player.S_APPS]), "jogos"))
 	row.add_child(UIKit.stat(str(p.stats[Player.S_GOALS]), "gols"))
@@ -608,6 +612,15 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	var d := p.season_delta()
 	row_b.add_child(UIKit.stat(("+%d" % d) if d > 0 else str(d), "overall no ano", UIColors.GREEN if d > 0 else (UIColors.RED if d < 0 else UIColors.TEXT)))
 	card.add_child(row_b)
+	if mins>=270:
+		var rate:=UIKit.hbox(8)
+		rate.add_child(UIKit.stat("%.2f" % (p.stats[Player.S_GOALS]*90.0/mins),"gols /90"))
+		rate.add_child(UIKit.stat("%.2f" % (p.stats[Player.S_ASSISTS]*90.0/mins),"assist. /90"))
+		rate.add_child(UIKit.stat("%.2f" % (p.xg()*90.0/mins),"xG /90 (estim.)"))
+		card.add_child(rate)
+	else:
+		card.add_child(UIKit.label("Taxas por 90 minutos: amostra insuficiente para comparação (mínimo 270 min).","Small",true))
+	card.add_child(UIKit.label("Gols, assistências e minutos vêm dos jogos simulados. xG individual, passes decisivos, desarmes, interceptações, dribles e acerto de passes incluem estimativas do modelo.","Small",true))
 	if p.stats[Player.S_APPS] > 0:
 		card.add_child(UIKit.label("Números detalhados (liga)", "Caps"))
 		var gk := p.position == Pos.GK
@@ -1061,3 +1074,12 @@ func color_context() -> Dictionary:
 	var w := GameManager.world
 	var p := w.player(_pid) if w != null else null
 	return club_context(p.club_id) if p != null else {}
+
+
+func _projection_card(w: GameWorld, p: Player) -> Control:
+	var estimate := TalentAssessment.projection(p,w.year)
+	var box := UIKit.card("Card",10)
+	box.add_child(UIKit.label("Projeção de desenvolvimento","H2",true))
+	box.add_child(UIKit.label("Faixa observada: %d a %d · confiança %d%%" % [int(round(estimate["low"])),int(round(estimate["high"])),int(round(estimate["confidence"]*100))],"H3",true))
+	box.add_child(UIKit.label("Estimativa por idade, minutos, forma e evolução observada. Não revela o teto oculto nem garante que o jogador chegue a esse nível. Lesões, treino, profissionalismo e oportunidades alteram a trajetória.","Small",true))
+	return UIKit.card_panel(box)

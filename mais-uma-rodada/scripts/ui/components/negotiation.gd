@@ -160,6 +160,9 @@ func _render_fee(caption: String, hint: String) -> void:
 		box.add_child(_choice("Pagamento", [["À vista", 1], ["2 parcelas", 2], ["3 parcelas", 3]], int(deal["inst"]), func(v): deal["inst"] = int(v)))
 		box.add_child(_choice("Revenda para o %s" % w.club(p.club_id).short_name, [["0%", 0.0], ["10%", 0.1], ["20%", 0.2]], float(deal["sell_on"]), func(v): deal["sell_on"] = float(v)))
 		box.add_child(UIKit.kv("Sai do caixa agora", Fmt.money(TransferManager.upfront_cost(fee, deal))))
+		box.add_child(UIKit.kv("Custo fixo comprometido", Fmt.money(TransferManager.committed_cost(fee,deal))))
+		box.add_child(UIKit.kv("Parcelas futuras", Fmt.money(maxi(0,fee-int(ceil(float(fee)/maxi(1,int(deal.get("inst",1)))))))))
+		box.add_child(UIKit.label("Parcelar reduz a entrada, não aumenta a verba aprovada pela diretoria. Luvas e comissão também consomem orçamento.","Small",true))
 		_render_swap_summary()
 	if counter_fee > 0 and mode == "buy":
 		box.add_child(UIKit.button("Aceitar contraproposta de %s" % Fmt.money(counter_fee), "", func():

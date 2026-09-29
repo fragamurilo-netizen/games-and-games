@@ -88,14 +88,12 @@ static func mode_weights(p: Player, pos: int, w_att: float, w_mid: float, w_wide
 
 static func _tactics(sheet: TeamSheet) -> Dictionary:
 	var dv := sheet.deep_values()
-	var key := sheet.mentality * 10000 + sheet.style * 1000 + sheet.intensity * 100 + sheet.line * 10 + sheet.pressing
-	for v in dv:
-		key = key * 5 + int(v)
+	var key := hash([sheet.mentality, sheet.style, sheet.intensity, sheet.line, sheet.pressing, sheet.width, dv])
 	if _tac_cache.has(key):
 		return _tac_cache[key]
 	var t := DatabaseManager.tactics()
 	var m: Dictionary = t["mentalities"][clampi(sheet.mentality, 0, 4)]
-	var s: Dictionary = t["styles"][clampi(sheet.style, 0, 5)]
+	var s: Dictionary = t["styles"][clampi(sheet.style, 0, t["styles"].size() - 1)]
 	var i: Dictionary = t["intensity"][clampi(sheet.intensity, 0, 2)]
 	var l: Dictionary = t["line"][clampi(sheet.line, 0, 2)]
 	var p: Dictionary = t["pressing"][clampi(sheet.pressing, 0, 2)]
@@ -140,6 +138,10 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 	var fin_n := 0
 	var dis := 0.0
 	var ptech := 0.0
+	var stamina := 0.0
+	var conditioning := 0.0
+	var decision := 0.0
+	var aerial := [0.0, 0.0, 0, 0]
 	var pace := [0.0, 0.0, 0.0, 0.0] # velocidade de quem ataca / de quem defende (soma, quantidade)
 	for i in slots.size():
 		var pid: int = sheet.starters[i] if i < sheet.starters.size() and sheet.starters[i] != null else -1
@@ -209,6 +211,15 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		var foul := base_foul * p.trait_mult("card_mult") * (1.5 - at[Attr.DIS] / 100.0) * (float(ins["foul"]) if not ins.is_empty() else 1.0)
 		dis += at[Attr.DIS]
 		ptech += at[Attr.TEC] * 0.45 + (at[Attr.PAS] + at[Attr.VIS]) * 0.175 + at[Attr.DEC] * 0.2
+		stamina += at[Attr.RES]
+		conditioning += p.condition
+		decision += at[Attr.DEC]
+		if w_att >= 0.45:
+			aerial[0] += (at[Attr.CAB] + at[Attr.FOR]) * 0.5
+			aerial[2] += 1
+		if w_def >= 0.5:
+			aerial[1] += (at[Attr.CAB] + at[Attr.FOR]) * 0.5
+			aerial[3] += 1
 		pl.append([p, pos, f, w_def, w_att, shoot, assist, foul, p.rating_at(pos) * perf, c_fin])
 	var n := maxi(1, pl.size() - 1)
 	var bench: Array = []
@@ -224,7 +235,10 @@ static func _side(world: GameWorld, club: Club, sheet: TeamSheet, home_f: float,
 		"fin": fin / fin_n if fin_n > 0 else 45.0,
 		"discipline": dis / n,
 		"count": pl.size(),
-		"mu": {"tech": ptech / n, "mid": mw, "pressing": sheet.pressing, "style": sheet.style, "mentality": sheet.mentality, "line": sheet.line, "width": sheet.width},
+		"mu": {"tech": ptech / n, "mid": mw, "pressing": sheet.pressing, "style": sheet.style, "mentality": sheet.mentality, "line": sheet.line, "width": sheet.width,
+			"passing":sheet.passing,"condition":conditioning/n,"stamina":stamina/n,"decision":decision/n,"cohesion":club.cohesion,
+			"pace_att":pace[0]/pace[1] if pace[1]>0 else 60.0,"pace_def":pace[2]/pace[3] if pace[3]>0 else 60.0,
+			"aerial_att":aerial[0]/aerial[2] if aerial[2]>0 else 60.0,"aerial_def":aerial[1]/aerial[3] if aerial[3]>0 else 60.0},
 		"cd": {"passing": sheet.passing, "pressing": sheet.pressing, "line": sheet.line, "marking": sheet.marking, "transition": sheet.transition,
 			"tech": ptech / n, "pace_att": pace[0] / pace[1] if pace[1] > 0.0 else 60.0, "pace_def": pace[2] / pace[3] if pace[3] > 0.0 else 60.0},
 	}
@@ -440,19 +454,16 @@ static func _period(st: Dictionary, m0: int, m1: int, half: int) -> void:
 		var time_f := 1.05 if half >= 3 else 0.86 + 0.28 * minf(t_f, 1.0)
 		for s in 2:
 			var diff: int = score[s] - score[1 - s]
-			var sm := MatchSimulation.state_mods(diff, m, half)
-			var rate_m: float = sm[0]
-			var qual_m: float = sm[1]
-			# Reação: quem acabou de sofrer o gol se lança nos minutos seguintes
-			if m < int(st["react"][s]):
-				rate_m *= 1.18
+			var rate_m := 1.0
+			var qual_m := 1.0
+			# No artificial equalizer, reaction bonus or suppression of a leading team.
 			var n_att := _on_count(lines[s])
 			var n_def := _on_count(lines[1 - s])
 			var p: float = float(st["rate"][s]) * time_f * rate_m * (1.0 + (11 - n_def) * 0.08) * (1.0 - (11 - n_att) * 0.06)
 			if rng.randf() < p:
 				_chance(st, s, m, half, qual_m)
 			# Cartões: faltas do minuto (quem perde se desespera no fim)
-			var cr: float = float(st["card"][s]) * (1.25 if diff < 0 and m >= 70 else 1.0)
+			var cr: float = float(st["card"][s]) * (1.0 + clampf((70.0-float(sides[s]["discipline"]))/200.0,0.0,0.15) if diff < 0 and m >= 70 else 1.0)
 			if rng.randf() < cr:
 				_card(st, s, m)
 			elif rng.randf() < cr * 0.015:

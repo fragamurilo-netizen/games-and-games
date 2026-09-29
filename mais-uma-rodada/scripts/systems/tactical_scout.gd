@@ -219,7 +219,7 @@ static func exploit(style_types: PackedFloat32Array, vuln: PackedFloat32Array, s
 
 
 static func style_types(style: int) -> PackedFloat32Array:
-	var s: Dictionary = DatabaseManager.tactics()["styles"][clampi(style, 0, 5)]
+	var s: Dictionary = DatabaseManager.tactics()["styles"][clampi(style, 0, DatabaseManager.tactics()["styles"].size() - 1)]
 	var t: Dictionary = s["types"]
 	return PackedFloat32Array([float(t.get("through", 1.0)), float(t.get("cross", 1.0)), float(t.get("long", 1.0)),
 		float(t.get("dribble", 1.0)), float(t.get("counter", 1.0)), float(t.get("scramble", 1.0))])

@@ -45,6 +45,7 @@ static func build(world: GameWorld) -> void:
 		var rng := RandomNumberGenerator.new()
 		for i in range(a, b):
 			var p: Player = players[i]
+			if RealWorldData.is_real(world,p.id): continue # passado não verificado é desconhecido
 			rng.seed = hash("%d:%d" % [base_seed, p.id])
 			_backfill(world, rng, local, p)
 		return [[local["rows"], local["caps"]]], 400)

@@ -1,63 +1,67 @@
 class_name TacticalMatchup
 extends RefCounted
-## Confronto de ideias de jogo, igual nos dois motores (MatchSimulation e QuickMatch).
-## Cada lado é descrito por: tech (qualidade com a bola sob pressão), mid (massa de meio-campo),
-## pressing, style, mentality, line, width. Retorna quanto a posse pende para `a` e os
-## multiplicadores da taxa de chances de cada lado. Valores moderados, quase simétricos:
-##   - Meio-campo com mais gente fica mais com a bola (3 contra 2 no meio).
-##   - Pressão alta contra quem sai mal jogando rouba bolas perto do gol; contra quem toca bem,
-##     é driblada e deixa espaço atrás. A bola longa pula a pressão.
-##   - Bloco baixo (retranca, linha baixa) tira chances de quem quer a bola; o contra-ataque dele
-##     já é tratado pelo estilo.
-##   - Time aberto contra time fechado por dentro acha os lados.
-
+## Symmetric, bounded tactical interactions. No score, user flag or future RNG is consulted.
+## Values are game-model calibration, not measured real-world probabilities.
 
 static func edges(a: Dictionary, b: Dictionary) -> Dictionary:
-	var poss := 0.0
-	var ra := 1.0
-	var rb := 1.0
-	# Meio-campo
-	poss += clampf((float(a["mid"]) - float(b["mid"])) * 0.02, -0.03, 0.03)
-	# Pressão contra saída de bola
 	var pa := _press(a, b)
 	var pb := _press(b, a)
-	poss += pa[0] - pb[0]
-	ra *= pa[1] * pb[2]
-	rb *= pb[1] * pa[2]
-	# Bloco baixo contra quem propõe
-	if _low_block(b) and _proposes(a):
-		ra *= 0.93
-	if _low_block(a) and _proposes(b):
-		rb *= 0.93
-	# Amplitude contra time fechado
-	if _wide(a) and int(b["width"]) == 0:
-		ra *= 1.03
-	if _wide(b) and int(a["width"]) == 0:
-		rb *= 1.03
-	return {"poss": poss, "rate_a": ra, "rate_b": rb}
+	var ra := float(pa[1]) * float(pb[2]) * _space(a, b)
+	var rb := float(pb[1]) * float(pa[2]) * _space(b, a)
+	var poss := clampf((_v(a, "mid", 4.0) - _v(b, "mid", 4.0)) * 0.018, -0.035, 0.035)
+	poss += float(pa[0]) - float(pb[0])
+	return {"poss": clampf(poss, -0.09, 0.09), "rate_a": clampf(ra, 0.76, 1.28), "rate_b": clampf(rb, 0.76, 1.28)}
 
+static func _v(d: Dictionary, key: String, fallback: float = 60.0) -> float:
+	return float(d.get(key, fallback))
 
-## [posse para quem pressiona, chances de quem pressiona, chances do pressionado].
 static func _press(p: Dictionary, r: Dictionary) -> Array:
-	var presses := int(p["pressing"]) == 2 or int(p["style"]) == TeamSheet.STYLE_PRESSAO
-	if not presses or int(r["style"]) == TeamSheet.STYLE_LONGA:
+	var presses := int(p.get("pressing", 1)) == 2 or int(p.get("style", 0)) in [3, 7]
+	if not presses:
 		return [0.0, 1.0, 1.0]
-	# Pressionar funciona contra quem tem menos qualidade com a bola do que você (e não por um número
-	# absoluto): o favorito que pressiona o fraco rouba bolas perto do gol; o fraco que pressiona um
-	# time mais técnico é driblado e deixa espaço atrás.
-	var edge := (float(p["tech"]) - float(r["tech"]) + 2.0) / 100.0
-	if edge >= 0.0:
-		return [minf(0.025, edge * 0.3), 1.0 + minf(0.07, edge * 0.7), 1.0]
-	return [0.0, 1.0, 1.0 + minf(0.06, -edge * 0.6)]
+	var condition := _v(p, "condition", 90.0)
+	var work := _v(p, "stamina") * 0.35 + _v(p, "decision") * 0.2 + _v(p, "cohesion", 60.0) * 0.15 + condition * 0.3
+	var escape := _v(r, "tech") * 0.65 + _v(r, "decision") * 0.35
+	var edge := clampf((work - escape) / 100.0, -0.38, 0.38)
+	var direct := int(r.get("style", 0)) in [5, 10] or int(r.get("passing", 1)) == 2
+	var tired := clampf((72.0 - condition) / 100.0, 0.0, 0.45)
+	var recovery := maxf(0.0, edge) * (0.12 if direct else 0.38)
+	var exposure := maxf(0.0, -edge) * 0.4 + tired * 0.35
+	return [clampf(edge * (0.025 if direct else 0.09) - tired * 0.025, -0.035, 0.035),
+		1.0 + recovery - tired * 0.18, 1.0 + exposure]
 
+static func _space(a: Dictionary, b: Dictionary) -> float:
+	var rate := 1.0
+	var style := int(a.get("style", 0))
+	var line := int(b.get("line", 1))
+	var runs := clampf((_v(a, "pace_att") - _v(b, "pace_def")) / 80.0, -0.3, 0.3)
+	var supply := clampf((_v(a, "tech") + _v(a, "decision")) / 140.0, 0.35, 1.2)
+	# A high line gives up space only if runners and passers can exploit it.
+	if line == 2:
+		rate *= 1.0 + runs * supply * (0.65 if style in [1, 2, 8, 9] else 0.4)
+	if style in [4, 5, 10]:
+		var aerial := clampf((_v(a, "aerial_att") - _v(b, "aerial_def")) / 90.0, -0.22, 0.22)
+		rate *= 1.0 + aerial * (0.65 if style in [5, 10] else 0.42)
+	if _low_block(b):
+		if style in [2, 8, 9]:
+			rate *= 0.94 # there is no open field simply because the button says counterattack
+		elif style in [0, 6, 11, 12]:
+			var invention := (_v(a, "tech") + _v(a, "decision")) * 0.5 - _v(b, "decision")
+			rate *= clampf(0.95 + invention * 0.0035, 0.87, 1.1)
+	if _wide(a) and int(b.get("width", 1)) == 0:
+		rate *= clampf(1.02 + (_v(a, "tech") - _v(b, "pace_def")) * 0.0015, 0.97, 1.08)
+	# Patient build-up needs players who can actually retain the ball.
+	if style in [6, 11, 12]:
+		rate *= clampf(1.0 + (_v(a, "tech") - 65.0) * 0.002, 0.92, 1.055)
+	if style == 7 and _v(a, "condition", 90.0) < 70.0:
+		rate *= 0.94
+	return clampf(rate, 0.82, 1.2)
 
 static func _low_block(t: Dictionary) -> bool:
-	return int(t["mentality"]) <= TeamSheet.MENT_DEFENSIVA and int(t["line"]) == 0
-
+	return int(t.get("mentality", 2)) <= 1 and int(t.get("line", 1)) == 0
 
 static func _proposes(t: Dictionary) -> bool:
-	return int(t["style"]) == TeamSheet.STYLE_POSSE or int(t["mentality"]) >= TeamSheet.MENT_OFENSIVA
-
+	return int(t.get("style", 0)) in [0, 6, 11, 12] or int(t.get("mentality", 2)) >= 3
 
 static func _wide(t: Dictionary) -> bool:
-	return int(t["width"]) == 2 or int(t["style"]) == TeamSheet.STYLE_LADOS
+	return int(t.get("width", 1)) == 2 or int(t.get("style", 0)) in [4, 9]

@@ -318,12 +318,12 @@ static func _fit_accent() -> void:
 	ACCENT_DARK = ACCENT
 	for amt: float in [0.25, 0.2, 0.15, 0.1, 0.06]:
 		var d := ACCENT.darkened(amt)
-		if contrast(ON_ACCENT, d) >= 3.0:
+		if contrast(ON_ACCENT, d) >= 4.5:
 			ACCENT_DARK = d
 			break
 	if ACCENT.get_luminance() < 0.08:
-		# Destaque quase preto: escurecer não aparece, então o tom pressionado clareia.
-		ACCENT_DARK = ACCENT.lightened(0.18)
+		var pressed := ACCENT.lightened(0.12)
+		if contrast(ON_ACCENT,pressed)>=4.5: ACCENT_DARK=pressed
 
 
 ## Troca, no tema do projeto, cada cor da paleta escura original pela cor atual: o dourado
@@ -378,6 +378,18 @@ static func _fix_states(th: Theme) -> void:
 	if ph != null:
 		ph.bg_color = hover_of(ACCENT)
 		ph.border_color = ACCENT_DARK
+	# Cada estado usa um texto calculado para seu próprio fundo, inclusive hover/pressionado.
+	for state in ["normal","hover","pressed","hover_pressed"]:
+		var sb := th.get_stylebox(state,"PrimaryButton") as StyleBoxFlat
+		if sb != null:
+			var key := {"normal":"font_color","hover":"font_hover_color","pressed":"font_pressed_color","hover_pressed":"font_hover_pressed_color"}
+			th.set_color(key[state],"PrimaryButton",on_color(sb.bg_color))
+	for type in th.get_type_list():
+		if th.has_stylebox("focus",type):
+			var focus := th.get_stylebox("focus",type) as StyleBoxFlat
+			if focus != null:
+				focus.border_color=ACCENT
+				focus.set_border_width_all(2)
 	if not touch_only():
 		return
 	for type in th.get_type_list():

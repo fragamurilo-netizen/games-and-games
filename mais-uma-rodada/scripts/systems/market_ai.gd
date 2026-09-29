@@ -633,7 +633,7 @@ static func _loan_with_option(world: GameWorld, c: Club, p: Player) -> bool:
 		return false
 	var fee := TransferManager.loan_fee(p)
 	c.add_ledger("compras", -fee)
-	c.transfer_budget = maxi(0, c.transfer_budget - fee)
+	BoardBudget.spend(world,c,fee,"Custo de contratação")
 	owner.add_ledger("vendas", fee)
 	TransferManager._move_loan(world, p, owner, c)
 	p.loan["opt"] = Valuation.round_value(p.value * float(owner.arch().get("sell_mult", 1.0)) * world.rng.randf_range(0.9, 1.1))

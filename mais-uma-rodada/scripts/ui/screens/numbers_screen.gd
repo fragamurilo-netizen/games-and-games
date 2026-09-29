@@ -13,6 +13,10 @@ var _sel := -1
 var _all := false
 
 
+static func grid_columns(available: float) -> int:
+	return clampi(int((maxf(0.0,available)+10.0)/148.0),2,10)
+
+
 func _init() -> void:
 	show_nav = false
 	screen_title = "Numeração"
@@ -23,6 +27,7 @@ func refresh() -> void:
 	if w == null:
 		return
 	var club := w.user_club()
+	if club==null: return
 	screen_subtitle = club.short_name
 	UIManager.refresh_chrome()
 	var c := content()
@@ -55,7 +60,8 @@ func refresh() -> void:
 	var last := 99 if _all else maxi(40, top + 5)
 	c.add_child(UIKit.section_header("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
-	grid.columns = 10 if UILayout.is_wide() else 5
+	grid.columns = grid_columns(content_width())
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):
@@ -98,12 +104,16 @@ func _cell(club: Club, n: int, owner: Player) -> Control:
 	kit.back_name = owner.short_name() if owner != null else ""
 	kit.number = n
 	kit.crest = club.crest
-	kit.custom_minimum_size = Vector2(96, 100)
+	kit.custom_minimum_size = Vector2(96, 112)
+	kit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	kit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owner == null:
 		kit.modulate = Color(1, 1, 1, 0.38)
 	col.add_child(kit)
-	var who := UIKit.label(owner.short_name() if owner != null else "livre", "Small")
+	var who := UIKit.label(owner.short_name() if owner != null else "Disponível", "Small", true)
+	who.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	who.max_lines_visible = 2
+	who.tooltip_text = owner.display_name() if owner != null else "Camisa disponível"
 	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	who.clip_text = true
 	who.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -114,7 +124,9 @@ func _cell(club: Club, n: int, owner: Player) -> Control:
 		who.add_theme_color_override(&"font_color", UIColors.MUTED)
 	col.add_child(who)
 	var variation := "CardHighlight" if owner != null and owner.id == _sel else "CardFlat"
-	return UIKit.tap_row(col, func(): _tap_number(n), variation)
+	var cell := UIKit.tap_row(col, func(): _tap_number(n), variation)
+	cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return cell
 
 
 func _tap_number(n: int) -> void:
@@ -143,10 +155,10 @@ func _tap_number(n: int) -> void:
 		msg = "%s fica com a %d e %s com a %d." % [p.short_name(), n, owner.short_name(), old]
 	var color := UIColors.GREEN
 	# Ego: camisa de peso para quem combina com ela
-	if HEAVY.has(n) and (HEAVY[n] as Array).has(p.position) and p.squad_status <= Player.STATUS_STARTER:
+	if HEAVY.has(n) and (HEAVY[n] as Array).has(p.position) and p.squad_status <= Player.STATUS_STARTER and _react_once(w,p.id):
 		p.morale = clampf(p.morale + 4.0, 0.0, 100.0)
 		msg += " Ele gostou da camisa de peso."
-	if owner != null and HEAVY.has(n) and (HEAVY[n] as Array).has(owner.position) and owner.squad_status <= Player.STATUS_STARTER:
+	if owner != null and HEAVY.has(n) and (HEAVY[n] as Array).has(owner.position) and owner.squad_status <= Player.STATUS_STARTER and _react_once(w,owner.id):
 		var hit := 6.0 if owner.has_trait("estrela") or owner.has_trait("ambicioso") else 3.0
 		owner.morale = clampf(owner.morale - hit, 0.0, 100.0)
 		msg += " %s não gostou de perder a %d." % [owner.short_name(), n]
@@ -155,3 +167,13 @@ func _tap_number(n: int) -> void:
 	UIManager.toast(msg, color)
 	GameManager.save_now()
 	refresh()
+
+
+static func _react_once(w: GameWorld, pid: int) -> bool:
+	var d: Dictionary = w.stats.get("shirt_reactions",{})
+	if int(d.get("year",-1)) != w.year: d={"year":w.year,"players":{}}
+	w.stats["shirt_reactions"]=d
+	var key := str(pid)
+	if d["players"].has(key): return false
+	d["players"][key]=true
+	return true

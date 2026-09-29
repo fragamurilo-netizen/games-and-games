@@ -51,6 +51,8 @@ const HAIR_STYLES: Array[String] = [
 	"High top cacheado com pontas descoloridas", "Longo liso molhado para trás", "Franja reta curta", "Moicano com pontas descoloridas",
 	# 182+
 	"Meia-lua na franja", "Topete descolorido com laterais escuras", "Cachinhos descoloridos no alto", "Crespo descolorido no alto", "Tranças nagô descoloridas", "Twists com pontas descoloridas", "Twists tingidos de vermelho", "Topete alto arrepiado com degradê", "Espetado com luzes", "Moicano descolorido", "Moicano com desenhos laterais", "Crista alta", "Afro gigante loiro", "Black power gigante", "Cachos armados gigantes", "Dreads longos volumosos", "Dreads com faixa", "Longo com faixa", "Cacheado longo com faixa", "Preso para trás com mechas soltas", "Rabinho trançado na nuca", "Moicano tingido de azul", "Listra tingida de vermelho no meio", "Undercut para trás com risco", "Esponja descolorida", "Tufinhos trançados tingidos de verde", "Black power com costeletas longas", "Para trás volumoso até a nuca", "Longo ondulado atrás das orelhas",
+	"Taper baixo natural", "Cachos curtos definidos", "Social com volume discreto", "Crop com textura leve",
+	"Ondulado curto lateral", "Black curto arredondado", "Tranças baixas presas", "Mullet curto discreto",
 ]
 const H_BUZZ := 0
 const H_SHORT := 1
@@ -385,6 +387,8 @@ const STYLE_TEX_W: Array = [
 	[0.0, 0.0, 0.2, 0.6], # black power com costeletas longas
 	[0.8, 1.0, 0.2, 0.0], # para trás volumoso até a nuca
 	[0.3, 0.8, 0.2, 0.0], # longo ondulado atrás das orelhas
+	[1.4,1.4,1.3,1.2], [0.0,0.2,1.5,0.7], [1.4,1.3,0.3,0.1], [1.2,1.1,0.8,0.3],
+	[0.3,1.4,0.7,0.0], [0.0,0.0,0.3,1.5], [0.0,0.1,0.7,1.0], [1.0,1.1,0.7,0.2],
 ]
 ## Penteados que exigem cabelo (somem com calvície avançada).
 const NEEDS_HAIR: Array[int] = [H_QUIFF, H_CURLY, H_AFRO, H_LONG, H_BUN, H_FRINGE, H_POMPADOUR, H_WAVY,
@@ -426,6 +430,7 @@ const BEARDS: Array[String] = [
 	"Cheia longa e volumosa",
 	# 121+
 	"Cheia cacheada volumosa", "Crespa curta", "Crespa longa", "Cavanhaque crespo", "Crespa com contorno navalhado", "Por fazer com cavanhaque", "Por fazer com bigode e cavanhaque", "Por fazer com bigode grosso", "Por fazer com mosca", "Cavanhaque descolorido", "Curta descolorida", "Bigode e cavanhaque descoloridos", "Barba com dois riscos", "Cavanhaque com risco no meio", "Cavanhaque trançado", "Longa com trança no queixo", "Pontuda desenhada", "Cheia média desalinhada", "Curta com queixo pontudo", "Crespa pontuda",
+	"Barba curta com degradê suave", "Cavanhaque curto discreto", "Barba média aparada natural", "Bigode fino com sombra curta",
 ]
 const B_NONE := 0
 const B_STUBBLE := 1
@@ -655,6 +660,10 @@ const BEARD_PARTS: Array = [
 	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.2, "op": 0.94, "sh": 0.0, "pt": 0.04, "tx": 1, "rd": 1.1, "wild": 0.7, "cl": 1.0, "hw": 0.9, "cnw": 1.5}, # cheia média desalinhada
 	{"ch": 0.22, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.18, "op": 0.93, "sh": 0.4, "pt": 0.0, "tx": 1, "fd": 1.0, "pp": 1.0, "cl": 1.0, "hw": 0.9, "cnw": 1.5}, # curta com queixo pontudo
 	{"ch": 0.16, "sd": 1.0, "jw": 1.0, "cn": 1.0, "mu": 1, "so": 1.0, "nk": 0.25, "ln": 0.12, "op": 0.95, "sh": 0.1, "pt": 0.0, "tx": 1, "pp": 1.0, "cr": 1.0, "cnw": 1.5, "hw": 0.6, "cl": 1.0}, # crespa pontuda
+	{"ch":0.72,"sd":0.38,"jw":0.62,"cn":0.72,"mu":0.65,"so":0.45,"nk":0.0,"ln":0.08,"op":0.85},
+	{"ch":0.52,"sd":0.0,"jw":0.08,"cn":0.55,"mu":0.60,"so":0.30,"nk":0.0,"ln":0.08,"op":0.85},
+	{"ch":0.92,"sd":0.70,"jw":0.86,"cn":0.90,"mu":0.88,"so":0.70,"nk":0.08,"ln":0.18,"op":0.92},
+	{"ch":0.22,"sd":0.12,"jw":0.15,"cn":0.2,"mu":0.58,"so":0.10,"nk":0.0,"ln":0.02,"op":0.62},
 ]
 ## Barbas de fio crespo: combinam com cabelo cacheado/crespo.
 const CURLY_BEARDS: Array[int] = [121, 122, 123, 124, 125, 140]
@@ -666,7 +675,9 @@ const BEARD_MIN_CAP: Array[float] = [0.0, 0.22, 0.55, 0.72, 0.42, 0.5, 0.55, 0.5
 	0.6, 0.35, 0.9, 0.85, 0.48, 0.66, 0.7, 0.6, 0.45, 0.7,
 	0.15, 0.4, 0.6, 0.55, 0.72, 0.7, 0.2, 0.35, 0.45, 0.45, 0.55, 0.5, 0.62, 0.5, 0.2, 0.5, 0.75, 0.8, 0.55, 0.5, 0.35, 0.45, 0.5, 0.85,
 	0.5, 0.5, 0.4, 0.55, 0.6, 0.65, 0.6, 0.55, 0.5, 0.1, 0.55, 0.85, 0.7, 0.25, 0.45, 0.3, 0.9,
-	0.8, 0.6, 0.85, 0.45, 0.62, 0.45, 0.5, 0.5, 0.3, 0.42, 0.55, 0.5, 0.6, 0.5, 0.55, 0.85, 0.8, 0.78, 0.65, 0.8]
+	0.8, 0.6, 0.85, 0.45, 0.62, 0.45, 0.5, 0.5, 0.3, 0.42, 0.55, 0.5, 0.6, 0.5, 0.55, 0.85, 0.8, 0.78, 0.65, 0.8 ,
+	0.45, 0.35, 0.60, 0.25,
+]
 ## Popularidade dos estilos entre quem pode tê-los.
 const BEARD_POP: Array[float] = [5.0, 3.2, 2.4, 1.3, 0.8, 0.35, 0.45, 0.7, 1.0, 0.25, 2.4, 0.12, 0.25, 0.12, 0.3, 0.2, 0.12, 1.2, 0.3, 0.15, 0.8, 0.25, 0.2, 0.7, 0.25, 1.4, 1.6, 1.8,
 	0.12, 0.25, 0.45, 0.08, 0.4, 0.3, 0.35, 0.15, 1.0, 0.1,
@@ -675,7 +686,9 @@ const BEARD_POP: Array[float] = [5.0, 3.2, 2.4, 1.3, 0.8, 0.35, 0.45, 0.7, 1.0, 
 	0.08, 0.2, 0.06, 0.05, 0.2, 0.5, 0.6, 0.3, 0.5, 0.12,
 	2.0, 2.0, 1.2, 1.2, 0.8, 1.0, 0.8, 0.6, 0.4, 0.3, 0.4, 0.3, 1.0, 1.2, 0.8, 0.2, 0.4, 0.25, 0.1, 0.35, 1.4, 0.7, 0.25, 0.5,
 	0.9, 0.8, 0.5, 0.5, 1.2, 1.0, 0.2, 1.2, 0.5, 2.0, 0.2, 0.3, 0.6, 0.9, 0.1, 1.0, 0.25,
-	0.6, 1.0, 0.25, 0.4, 0.6, 0.5, 0.5, 0.2, 0.3, 0.08, 0.08, 0.06, 0.1, 0.1, 0.05, 0.04, 0.3, 0.3, 0.6, 0.2]
+	0.6, 1.0, 0.25, 0.4, 0.6, 0.5, 0.5, 0.2, 0.3, 0.08, 0.08, 0.06, 0.1, 0.1, 0.05, 0.04, 0.3, 0.3, 0.6, 0.2 ,
+	1.0, 0.7, 0.6, 0.8,
+]
 
 # ---------------------------------------------------------------------------
 # Cores

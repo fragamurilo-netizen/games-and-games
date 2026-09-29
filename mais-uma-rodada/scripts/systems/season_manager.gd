@@ -56,7 +56,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var first_w := true
 	# Datas FIFA: marcadas no fim de semana que as antecede; com "fifa_pause" as ligas param na semana seguinte.
 	var fifa: Array = NationalTeamManager.fifa_dates_for(kind)
-	var fifa_pause := bool(cc.get("fifa_pause", false))
+	var fifa_pause := false # Janelas por data civil são reservadas abaixo, uma única vez.
 	var wk := 0
 	for i in slots.size():
 		var t: String = slots[i]
@@ -99,7 +99,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
-	return out
+	return InternationalCalendar.reserve(out, year)
 
 
 ## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
@@ -189,7 +189,7 @@ static func build_season(world: GameWorld) -> SeasonState:
 			# Playoffs de acesso depois da temporada regular (datas que sobram no fim do calendário)
 			var after: Array = []
 			for i in range(int(weekends.back()) + 1, s.calendar.size()):
-				after.append(i)
+				if s.calendar[i]["t"] not in ["I","IA"]: after.append(i)
 			l.phase_slots = after.slice(0, extra)
 		elif extra > 0:
 			l.phase_slots = weekends.slice(weekends.size() - extra)
@@ -346,6 +346,10 @@ static func entry_done(entry: Dictionary) -> bool:
 
 ## Aplica tudo o que aconteceu na data e avança o calendário. Retorna um relatório para a UI.
 static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
+	# A UI pode repetir a conclusão após voltar do segundo plano; a data é uma transação.
+	if md.has("finished_report"): return md["finished_report"]
+	if world.season == null or int(md.get("day",-1)) != world.season.day:
+		return {"day":int(md.get("day",-1)),"user":{},"events":[],"stale":true}
 	var tt := Time.get_ticks_usec()
 	for e in md["entries"]:
 		run_entry(world, e)
@@ -382,6 +386,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	for e in md["entries"]:
 		var f: Fixture = e["f"]
 		var res: Dictionary = e["res"]
+		if f.played: continue
 		_apply_match(world, f, res, played, newly_suspended)
 		clubs_played[f.home] = true
 		clubs_played[f.away] = true
@@ -443,12 +448,15 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		tt = _time("mercado", tt)
 		WorldPulse.weekly(world) # histórias do mundo, rumores, giro e recordes
 		tt = _time("mundo", tt)
-		report["intl"] = NationalTeamManager.after_weekend(world, _weekend_index(s, slot))
+		WorldCupBuildup.after_weekend(world, _weekend_index(s, slot), NationalTeamManager.fifa_dates(world))
+		# Janelas processadas uma vez por data, depois do trabalho da rodada.
 		tt = _time("selecoes", tt)
 		if _weekend_index(s, slot) % 4 == 3:
 			for p: Player in world.players.values():
 				Valuation.update_value(p, world.year)
 		tt = _time("valores", tt)
+	report["youth_extra"] = YouthCompetitions.play_slot(world, slot)
+	report["intl"] = InternationalCareer.before_slot(world, slot)
 	# Veteranos anunciam aposentadoria
 	if s.is_retire_slot(slot):
 		var ann := PlayerDevelopment.announce_retirements(world)
@@ -508,6 +516,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		CoachStories.after_user_match(world, md["user"], String(report["user"]["result"]))
 		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
 		InboxManager.after_user_turn(world, report, md["user"])
+	md["finished_report"] = report
 	return report
 
 
@@ -526,6 +535,7 @@ static func _weekend_index(s: SeasonState, slot: int) -> int:
 
 
 static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: Dictionary, newly_suspended: Dictionary) -> void:
+	if f.played: return # evita duplicar gols, assistências, carreira e classificação
 	f.played = true
 	f.hg = int(res["hg"])
 	f.ag = int(res["ag"])

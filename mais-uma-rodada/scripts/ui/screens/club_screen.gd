@@ -29,6 +29,12 @@ func refresh() -> void:
 	if w == null:
 		return
 	var club := w.user_club() if _own() else w.club(_club_id)
+	if club==null:
+		var missing:=content()
+		UIKit.clear(missing)
+		missing.add_child(UIKit.label("Clube não encontrado nesta carreira.","Muted",true))
+		hide_footer()
+		return
 	if not _own():
 		nav_tab = ""
 		show_nav = false
@@ -315,10 +321,17 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Finanças"))
 	var row := UIKit.hbox(8)
-	row.add_child(UIKit.stat(Fmt.money(fin["balance"]), "em caixa", UIColors.RED if int(fin["balance"]) < 0 else UIColors.TEXT))
-	row.add_child(UIKit.stat(Fmt.money(fin["transfer_budget"]), "p/ contratar", UIColors.ACCENT))
+	row.add_child(UIKit.stat(Fmt.money(fin["balance"]), "caixa do clube", UIColors.RED if int(fin["balance"]) < 0 else UIColors.TEXT))
+	row.add_child(UIKit.stat(Fmt.money(fin["transfer_budget"]), "verba autorizada", UIColors.ACCENT))
 	row.add_child(UIKit.stat(Fmt.money(fin["expected_revenue"]), "receita/ano"))
 	card.add_child(row)
+	var auth := BoardBudget.state(w,club)
+	card.add_child(UIKit.label("O caixa pertence ao clube. A diretoria define a verba; parcelar não reduz o custo comprometido.","Small",true))
+	card.add_child(UIKit.kv("Autorização inicial",Fmt.money(int(auth["approved"]))))
+	card.add_child(UIKit.kv("Custos fixos contratados",Fmt.money(int(auth["spent"]))))
+	card.add_child(UIKit.kv("Vendas liberadas pela diretoria",Fmt.money(int(auth["sales"]))))
+	card.add_child(UIKit.kv("Caixa livre após reservas",Fmt.money(BoardBudget.available_cash(w,club))))
+	card.add_child(UIKit.kv("Parcelas futuras a pagar",Fmt.money(BoardBudget.pending(w,club))))
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
 	card.add_child(UIKit.kv("Folha salarial (mês)", "%s / %s" % [Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])], UIColors.RED if over else UIColors.TEXT))
 	var share := float(fin["wage_bill"]) * 12.0 / maxf(1.0, float(fin["expected_revenue"]))

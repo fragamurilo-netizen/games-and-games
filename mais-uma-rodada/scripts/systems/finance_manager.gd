@@ -234,56 +234,22 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 	club.income_tv = int(tv_income(club) * tv_deal(world, club.league_id))
 	club.income_sponsor = sponsor_income(club)
 	club.cost_upkeep = maintenance_cost(club)
-	var arch := club.arch()
-	var revenue := float(expected_revenue(club) + club.income_tv - tv_income(club))
-	var ratio := float(arch.get("wage_ratio", 0.62))
-	var spend := float(arch.get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
-	if world.is_user_club(club.id):
-		ratio = [0.95, 0.86, 0.8][world.difficulty]
-		spend = [0.6, 0.45, 0.35][world.difficulty]
-	var current := float(wage_bill(world, club))
-	# A parcela da dívida sai antes da folha: o que sobra da receita é o que dá para gastar.
+	var revenue := float(expected_revenue(club)+club.income_tv-tv_income(club))
 	var service := debt_service(club)
-	# Parcela da dívida e custos operacionais (staff, viagens, base) além do básico saem antes da folha.
-	var free := maxf(revenue * 0.5, revenue - service - maxf(0.0, club.cost_upkeep - revenue * 0.06))
-	var dr := debt_ratio(club, revenue)
-	# Reservas viram poder de fogo salarial (dinheiro parado circula), dívida aperta o cinto.
-	var reserve := minf(maxf(0.0, club.balance) * 0.12, revenue * 0.35)
-	var budget := (free * ratio + reserve) / 12.0
-	if club.balance >= 0:
-		# Clube saudável pode manter a folha atual mesmo um pouco acima do ideal.
-		budget = maxf(budget, minf(current, budget * 1.1))
-		if dr > 1.0:
-			# Caixa em dia, mas dívida acima de um ano de receita: os bancos pedem contenção.
-			budget *= clampf(1.1 - dr * 0.15, 0.8, 1.0)
-	else:
-		# Caixa no vermelho: o teto cai conforme o tamanho da dívida e força cortes (vendas, não renovações).
-		budget *= clampf(1.0 - dr * 0.25, 0.75, 0.95)
-	club.wage_budget = int(budget)
-	# Teto por temporada: contratações limitadas a uma fração da receita anual, por mais rico que o clube seja.
-	# IA: no máximo ~90% da receita anual em compras (os gigantes de verdade não gastam mais que isso por ano).
-	var cap_mult := 0.9
-	if world.is_user_club(club.id):
-		cap_mult = [2.0, 1.6, 1.3][world.difficulty]
-	var tb := club.balance * spend
-	# Sobra prevista do ano (receita − folha − custos − parcela da dívida) também vira verba, com cautela.
-	if club.balance >= 0:
-		tb += maxf(0.0, revenue - current * 12.0 - club.cost_upkeep - service) * 0.2
-	if dr > 1.0:
-		tb *= 0.5
-	var legacy_budget := float(clampf(tb, 0.0, revenue * cap_mult))
-	var market_budget := float(MarketReality.budget_reference(world, club, revenue))
-	# Caixa no vermelho: a verba de mercado some conforme o rombo (zera com 25% da receita anual).
-	if club.balance < 0:
-		market_budget *= clampf(1.0 + float(club.balance) / maxf(1.0, revenue * 0.25), 0.0, 1.0)
-	# Mistura sustentabilidade financeira com poder de compra coerente com o valor do elenco.
-	club.transfer_budget = int(clampf(lerpf(legacy_budget, market_budget, 0.60), 0.0, revenue * cap_mult))
+	var current := float(wage_bill(world,club))
+	var wage_ratio := clampf(float(club.arch().get("wage_ratio",0.62)),0.45,0.72)
+	var affordable := maxf(0.0,revenue-club.cost_upkeep-service-BoardBudget.pending(world,club,world.year))
+	club.wage_budget = int(maxf(0.0,affordable*wage_ratio/12.0))
+	if club.balance>=0:
+		club.wage_budget = int(maxf(club.wage_budget,minf(current,club.wage_budget*1.10)))
+	var spend := clampf(float(club.arch().get("spend_rate",0.35))*ClubDNA.spend_mult(club),0.20,0.65)
+	var cash := float(BoardBudget.available_cash(world,club))
+	var surplus := maxf(0.0,affordable-current*12.0-BoardBudget.pending(world,club,world.year+1))
+	var proposal := minf(cash*spend+surplus*0.20,revenue*0.45)
+	if debt_ratio(club,revenue)>1.0: proposal*=0.6
+	BoardBudget.open_year(world,club,int(maxf(0.0,proposal)))
 
 
-## Salários de mercado: numa liga rica até o clube pequeno paga bem (a TV da Premier League
-## banca salários altos para jogadores medianos). Quem gasta com a folha bem menos do que a
-## receita permite renegocia os contratos para cima, aos poucos: a folha caminha para ~50% da
-## receita, como nos clubes reais, em vez de o caixa virar uma montanha parada.
 const WAGE_SHARE_MIN := 0.42
 const WAGE_SHARE_TARGET := 0.52
 
@@ -348,20 +314,9 @@ static func refinance(world: GameWorld, club: Club) -> int:
 ## Revisão de meio de temporada (abertura da janela de inverno): a diretoria ajusta a verba
 ## ao que entrou e saiu até aqui — premiações e vendas liberam dinheiro, prejuízo aperta.
 static func mid_season_review(world: GameWorld, club: Club) -> void:
-	var revenue := float(expected_revenue(club))
-	if club.balance < 0:
-		club.transfer_budget = 0
-		if debt_ratio(club, revenue) > 0.4:
-			club.wage_budget = int(club.wage_budget * 0.95)
-		return
-	var spend := float(club.arch().get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
-	if world.is_user_club(club.id):
-		spend = [0.6, 0.45, 0.35][world.difficulty]
-	var fresh := int(minf(club.balance * spend * 0.5, revenue * 0.5))
-	club.transfer_budget = mini(maxi(club.transfer_budget, fresh), club.balance)
+	BoardBudget.review(world,club)
 
 
-## Projeção do caixa no fim da temporada: saldo atual + o que ainda falta entrar e sair.
 static func projected_balance(world: GameWorld, club: Club) -> int:
 	var s := world.season
 	if s == null:
@@ -395,12 +350,7 @@ static func renegotiate_tv(world: GameWorld) -> Array:
 
 ## Parte de uma venda que a diretoria libera para novas contratações.
 static func on_sale(world: GameWorld, club: Club, fee: int) -> void:
-	var share := 0.8
-	if world.is_user_club(club.id):
-		share = [0.85, 0.7, 0.6][world.difficulty]
-	if club.balance < 0:
-		share *= 0.5
-	club.transfer_budget += int(fee * share)
+	BoardBudget.on_sale(world,club,fee)
 
 
 static func summary(world: GameWorld, club: Club) -> Dictionary:
