@@ -14,6 +14,17 @@ SCENARIOS = [
 ]
 
 
+def canonical(value):
+    """Round floats so fixtures do not depend on the platform's last-digit libm/printf behaviour."""
+    if isinstance(value, float):
+        return round(value, 6)
+    if isinstance(value, list):
+        return [canonical(v) for v in value]
+    if isinstance(value, dict):
+        return {k: canonical(v) for k, v in value.items()}
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--godot', default='godot')
@@ -28,7 +39,7 @@ def main():
             if run.returncode or 'SCRIPT ERROR' in run.stderr:
                 raise RuntimeError(run.stdout + run.stderr)
             # Canonical JSON makes comparison independent of Godot dictionary formatting.
-            log = json.loads(result.read_text(encoding='utf-8'))
+            log = canonical(json.loads(result.read_text(encoding='utf-8')))
             log['title'] = title
             result.write_text(json.dumps(log,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n',encoding='utf-8')
             index.append(dict(id=name,title=title,file=name+'.json'))
