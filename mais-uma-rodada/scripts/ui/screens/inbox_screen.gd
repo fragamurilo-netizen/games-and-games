@@ -42,12 +42,12 @@ func refresh() -> void:
 	for m: Dictionary in w.inbox:
 		if InboxManager.action_open(w, m):
 			pending += 1
-	# Resumo no topo: o que pede atenção agora.
-	c.add_child(UIKit.stat_grid([
-		UIKit.stat_tile(str(unread), "Não lidas", UIColors.ACCENT if unread > 0 else Color(0, 0, 0, 0)),
-		UIKit.stat_tile(str(pending), "A responder", UIColors.ORANGE if pending > 0 else Color(0, 0, 0, 0)),
-		UIKit.stat_tile(str(w.inbox.size()), "Mensagens"),
-	], content_width()))
+	# Resumo em frase: o que pede atenção agora (as contagens também ficam nas abas).
+	var bits: Array = []
+	bits.append(tr("Nenhuma mensagem nova.") if unread == 0 else (tr("1 mensagem nova.") if unread == 1 else tr("%d mensagens novas.") % unread))
+	if pending > 0:
+		bits.append(tr("1 pede resposta sua.") if pending == 1 else tr("%d pedem resposta sua.") % pending)
+	c.add_child(UIKit.label(" ".join(bits), "Muted", true))
 	var tabs: Array = []
 	for f in FILTERS:
 		var label: String = tr(f[1])

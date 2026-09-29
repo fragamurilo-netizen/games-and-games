@@ -74,17 +74,15 @@ func _career(w: GameWorld) -> Control:
 	hc.add_child(UIKit.label("Treinador · %s · %s" % [ManagerProfile.style_name(ManagerProfile.style(w)), GameWorld.DIFF_NAMES[w.difficulty]], "Small", true))
 	var fame := CoachIdentity.headline(w)
 	if fame != "":
-		var fp := UIKit.pill(fame.to_upper(), UIColors.ACCENT, 14)
-		fp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		hc.add_child(fp)
+		hc.add_child(UIKit.label(fame, "H3", true))
 	head.add_child(hc)
 	card.add_child(head)
-	var r1 := UIKit.hbox(4)
-	r1.add_child(UIKit.stat(str(int(ms.get("seasons", 0))), "temporadas"))
-	r1.add_child(UIKit.stat(str(int(ms.get("games", 0))), "jogos"))
-	r1.add_child(UIKit.stat(str(int(ms.get("titles", 0))), "títulos", UIColors.ACCENT))
-	r1.add_child(UIKit.stat(str(int(ms.get("promotions", 0))), "acessos", UIColors.GREEN))
-	card.add_child(r1)
+	card.add_child(StatStrip.make([
+		["Temporadas", str(int(ms.get("seasons", 0)))],
+		["Jogos", str(int(ms.get("games", 0)))],
+		["Títulos", str(int(ms.get("titles", 0)))],
+		["Acessos", str(int(ms.get("promotions", 0)))],
+	]))
 	var games := maxi(1, int(ms.get("games", 0)))
 	var wins := int(ms.get("w", 0))
 	card.add_child(UIKit.kv("Vitórias / empates / derrotas", "%d / %d / %d" % [wins, int(ms.get("d", 0)), int(ms.get("l", 0))]))
@@ -115,17 +113,34 @@ func _career(w: GameWorld) -> Control:
 		if not bits.is_empty():
 			col.add_child(UIKit.label(" · ".join(bits), "Small", true))
 		row.add_child(col)
-		if u.get("champion", false):
-			row.add_child(UIKit.pill("CAMPEÃO", UIColors.ACCENT, 16))
-		elif u.get("promoted", false):
-			row.add_child(UIKit.pill("ACESSO", UIColors.GREEN, 16))
-		elif u.get("relegated", false):
-			row.add_child(UIKit.pill("QUEDA", UIColors.RED, 16))
+		var oc := _outcome(u)
+		if oc != null:
+			row.add_child(oc)
 		tl.add_child(row)
 	if not any:
 		tl.add_child(UIKit.label("Primeira temporada em andamento.", "Muted", true))
 	out.add_child(UIKit.card_panel(tl))
 	return out
+
+
+## Desfecho da temporada em texto de cor (sem pílula): campeão, acesso ou queda.
+func _outcome(u: Dictionary) -> Control:
+	var t := ""
+	var col := UIColors.TEXT
+	if u.get("champion", false):
+		t = "Campeão"
+		col = UIColors.GOLD
+	elif u.get("promoted", false):
+		t = "Acesso"
+		col = UIColors.GREEN
+	elif u.get("relegated", false):
+		t = "Queda"
+		col = UIColors.RED
+	if t == "":
+		return null
+	var l := UIKit.colored(t, col, "H3")
+	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return l
 
 
 # ---------------------------------------------------------------------------
@@ -176,12 +191,9 @@ func _seasons(w: GameWorld, c: VBoxContainer) -> void:
 		col.add_child(UIKit.label("%dº na %s" % [int(u.get("pos", 0)), String(u.get("league_name", ""))], "H3", true))
 		col.add_child(UIKit.label("Meta: %s · %s" % [String(u.get("goal", "")), "cumprida" if u.get("goal_met", false) else "não cumprida"], "Small", true))
 		row.add_child(col)
-		if u.get("champion", false):
-			row.add_child(UIKit.pill("CAMPEÃO", UIColors.ACCENT, 16))
-		elif u.get("promoted", false):
-			row.add_child(UIKit.pill("ACESSO", UIColors.GREEN, 16))
-		elif u.get("relegated", false):
-			row.add_child(UIKit.pill("QUEDA", UIColors.RED, 16))
+		var oc := _outcome(u)
+		if oc != null:
+			row.add_child(oc)
 		uc.add_child(row)
 		var cp: Dictionary = h.get("cp", {})
 		if not cp.is_empty():

@@ -77,6 +77,8 @@ func refresh() -> void:
 			cards.append(SocialPost.mini_card(w, club.id, -1))
 		"manage":
 			cards.append(_finance_card(w, club))
+			cards.append(_ledger_card(w, club))
+			cards.append(_sponsor_card(club))
 			cards.append(_board_card(w, club))
 			cards.append(_director_card(w, club))
 			cards.append(_structure_card(w, club))
@@ -460,42 +462,33 @@ static func _health_color(label_text: String) -> Color:
 
 
 func _board_card(w: GameWorld, club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Diretoria e torcida"))
+	var card := UIKit.card("Card", UITokens.S2)
+	card.add_child(UIKit.label("Diretoria e torcida", "Section"))
+	var conf := club.board_confidence
+	card.add_child(StatStrip.make([
+		["Diretoria", BoardManager.label(conf), BoardManager.color(conf)],
+		["Torcida", UIColors.fans_label(club.fan_mood), UIColors.morale_color(club.fan_mood)],
+	]))
+	if conf < BoardManager.ULTIMATUM:
+		card.add_child(UIKit.colored("Ultimato: mais um tropeço e a diretoria demite o técnico.", UIColors.RED, "Small", true))
 	var goal := SeasonManager.goal_of(w, club.id)
 	card.add_child(UIKit.kv("Meta da temporada", String(goal[0])))
-	var conf := club.board_confidence
-	var row := UIKit.hbox(10)
-	row.add_child(UIKit.label("Confiança", "Muted"))
-	row.add_child(UIKit.spacer())
-	row.add_child(UIKit.colored(BoardManager.label(conf), BoardManager.color(conf), "H3"))
-	card.add_child(row)
-	card.add_child(UIKit.bar(conf, 100.0, BoardManager.color(conf), 12))
-	if conf < BoardManager.ULTIMATUM:
-		var ult := UIKit.pill("ULTIMATO", UIColors.RED, 14)
-		ult.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		card.add_child(ult)
-	var frow := UIKit.hbox(10)
-	frow.add_child(UIKit.label("Torcida", "Muted"))
-	frow.add_child(UIKit.spacer())
-	frow.add_child(UIKit.colored(UIColors.fans_label(club.fan_mood), UIColors.morale_color(club.fan_mood), "H3"))
-	card.add_child(frow)
-	card.add_child(UIKit.bar(club.fan_mood, 100.0, UIColors.morale_color(club.fan_mood), 12))
 	var pr := People.president(w, club.id)
 	card.add_child(UIKit.kv("Presidente", "%s (%s)" % [String(pr["n"]), String(People.pres_style(w, club.id)["name"]).to_lower()]))
-	card.add_child(UIKit.button("Relações: presidente, comissão, torcida e imprensa", "GhostButton", func(): UIManager.push("relations", {"tab": "board"}), "heart"))
+	card.add_child(UIKit.button("Relações e conversas", "GhostButton", func(): UIManager.push("relations", {"tab": "board"}), "heart"))
 	return UIKit.card_panel(card)
 
 
 func _finance_card(w: GameWorld, club: Club) -> Control:
 	var fin := FinanceManager.summary(w, club)
-	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.section("Finanças"))
-	var row := UIKit.hbox(8)
-	row.add_child(UIKit.stat(Fmt.money(fin["balance"]), "em caixa", UIColors.RED if int(fin["balance"]) < 0 else UIColors.TEXT))
-	row.add_child(UIKit.stat(Fmt.money(fin["transfer_budget"]), "p/ contratar", UIColors.ACCENT))
-	row.add_child(UIKit.stat(Fmt.money(fin["expected_revenue"]), "receita/ano"))
-	card.add_child(row)
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Caixa", "Section"))
+	card.add_child(StatStrip.make([
+		["Em caixa", Fmt.money(fin["balance"]), UIColors.RED if int(fin["balance"]) < 0 else UIColors.TEXT],
+		["Para contratar", Fmt.money(fin["transfer_budget"])],
+		["Receita por ano", Fmt.money(fin["expected_revenue"])],
+	]))
+	card.add_child(UIKit.gap(UITokens.S1))
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
 	card.add_child(UIKit.kv("Folha salarial (mês)", "%s / %s" % [Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])], UIColors.RED if over else UIColors.TEXT))
 	var share := float(fin["wage_bill"]) * 12.0 / maxf(1.0, float(fin["expected_revenue"]))
@@ -526,8 +519,14 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.colored("Caixa no vermelho: contratações bloqueadas.", UIColors.ORANGE, "Small", true))
 	elif FinanceManager.debt_ratio(club, float(fin["expected_revenue"])) > 1.0:
 		card.add_child(UIKit.colored("Dívida acima de um ano de receita.", UIColors.ORANGE, "Small", true))
-	card.add_child(UIKit.separator())
-	card.add_child(UIKit.label("Temporada %d" % w.year, "Caps"))
+	return UIKit.card_panel(card)
+
+
+## Entradas e saídas da temporada, categoria a categoria.
+func _ledger_card(w: GameWorld, club: Club) -> Control:
+	var fin := FinanceManager.summary(w, club)
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Temporada %d" % w.year, "Section"))
 	var any := false
 	for k in FinanceManager.INCOME_CATS:
 		var v := int(club.ledger.get(k, 0))
@@ -543,15 +542,15 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.label("Nenhuma movimentação ainda nesta temporada.", "Muted"))
 	else:
 		var net: int = int(fin["income"]) - int(fin["expense"])
+		card.add_child(UIKit.separator())
 		card.add_child(UIKit.kv("Resultado", ("+" if net >= 0 else "−") + Fmt.money(absi(net)), UIColors.GREEN if net >= 0 else UIColors.RED))
-	_sponsor_lines(w, club, card)
 	return UIKit.card_panel(card)
 
 
 ## Contratos de patrocínio e material esportivo que compõem a receita de patrocínio.
-func _sponsor_lines(w: GameWorld, club: Club, card: VBoxContainer) -> void:
-	card.add_child(UIKit.separator())
-	card.add_child(UIKit.label("Patrocínios (por ano)", "Caps"))
+func _sponsor_card(club: Club) -> Control:
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Patrocínios por ano", "Section"))
 	var total := 0
 	for b: Dictionary in SponsorManager.breakdown(club):
 		var cap := String(b["name"])
@@ -562,24 +561,28 @@ func _sponsor_lines(w: GameWorld, club: Club, card: VBoxContainer) -> void:
 			val += " (+%s bônus)" % Fmt.money(int(b["e"]))
 		card.add_child(UIKit.kv(cap, val, UIColors.GREEN))
 		total += int(b["v"]) + int(b["e"])
-	card.add_child(UIKit.kv("Total de patrocínio", Fmt.money(total), UIColors.GREEN))
+	card.add_child(UIKit.separator())
+	card.add_child(UIKit.kv("Total", Fmt.money(total), UIColors.GREEN))
 	var mk := SponsorManager.market_label(club)
 	card.add_child(UIKit.kv("Momento comercial", String(mk[0]), mk[1]))
+	return UIKit.card_panel(card)
 
 
 func _structure_card(w: GameWorld, club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	card.add_child(UIKit.section("Estrutura · decisão do presidente"))
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.label("Estrutura", "Section"))
+	card.add_child(UIKit.label("Obras e investimentos são decisão do presidente: o diretor de futebol leva o pedido.", "Muted", true))
 	for item in [["facilities", "Centro de treinamento", club.facilities], ["youth", "Categorias de base", club.youth_level], ["stadium", "Estádio", club.capacity]]:
 		var kind: String = item[0]
 		var level: int = item[2]
+		card.add_child(UIKit.gap(UITokens.S2))
 		var head := UIKit.hbox(8)
 		head.add_child(UIKit.label(item[1], "H3"))
 		head.add_child(UIKit.spacer())
 		head.add_child(UIKit.label(("%d/100" % level) if kind != "stadium" else ("%s lugares" % Fmt.thousands(level)), "H3"))
 		card.add_child(head)
 		if kind != "stadium":
-			card.add_child(UIKit.bar(level, 100.0, UIColors.BLUE, 10))
+			card.add_child(UIKit.bar(level, 100.0, UIColors.BLUE, 6))
 		var cost := BoardRequests.cost_of(w, kind)
 		var wait := BoardRequests.wait_turns(w, kind)
 		var od := BoardRequests.odds(w, kind)
@@ -589,12 +592,21 @@ func _structure_card(w: GameWorld, club: Club) -> Control:
 			label = "Novo pedido em %d rodada(s)" % wait
 		elif kind == "stadium" and w.stats.has("stadium_work"):
 			label = "Obras em andamento"
-		var b := UIKit.button(label, "GhostButton", func(): _ask(kind), "up")
-		b.disabled = wait > 0 or level >= 99 and kind != "stadium" or (kind == "stadium" and w.stats.has("stadium_work"))
-		card.add_child(b)
+		# Celular: botão na largura toda e a chance embaixo; com espaço, lado a lado.
+		var act: BoxContainer = UIKit.hbox(UITokens.S2) if content_width() >= 760.0 else UIKit.vbox(UITokens.S1)
+		var note := UIKit.label("", "Small", true)
+		note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if wait == 0:
 			var mood := "boa" if chance >= 0.6 else ("difícil" if chance < 0.3 else "incerta")
-			card.add_child(UIKit.label("Chance %s%s" % [mood, (" — " + String(od[1])) if String(od[1]) != "" else ""], "Small", true))
+			note.text = "Chance %s%s" % [mood, (". " + String(od[1]).substr(0, 1).to_upper() + String(od[1]).substr(1)) if String(od[1]) != "" else ""]
+		act.add_child(note)
+		var b := UIKit.button(label, "GhostButton", func(): _ask(kind))
+		b.disabled = wait > 0 or level >= 99 and kind != "stadium" or (kind == "stadium" and w.stats.has("stadium_work"))
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		act.add_child(b)
+		if act is VBoxContainer:
+			act.move_child(b, 0)
+		card.add_child(act)
 	return UIKit.card_panel(card)
 
 
@@ -610,27 +622,18 @@ func _ask(kind: String) -> void:
 
 func _director_card(w: GameWorld, club: Club) -> Control:
 	var d := BoardRequests.director(w)
-	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.section("Diretor de futebol"))
-	var h := UIKit.hbox(10)
+	var card := UIKit.card("Card", UITokens.S2)
+	card.add_child(UIKit.label("Diretor de futebol", "Section"))
 	var v := UIKit.vbox(0)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_child(UIKit.label(String(d["name"]), "H3"))
-	v.add_child(UIKit.label("%d anos · no clube desde %d" % [int(d["age"]), int(d["since"])], "Small"))
-	h.add_child(v)
-	card.add_child(h)
-	for a in [["neg", "Negociação", "Arranca desconto nas compras"], ["net", "Rede de olheiros", "Conhece mais nomes para sugerir"], ["rel", "Relação com a diretoria", "Ajuda a aprovar pedidos"]]:
-		var r := UIKit.hbox(8)
-		var l := UIKit.label(a[1], "")
-		l.custom_minimum_size.x = 260
-		r.add_child(l)
-		var bar := UIKit.bar(float(d[a[0]]), 100.0, UIColors.GREEN if int(d[a[0]]) >= 65 else (UIColors.BLUE if int(d[a[0]]) >= 45 else UIColors.ORANGE), 10)
-		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		r.add_child(bar)
-		r.add_child(UIKit.label(str(int(d[a[0]])), "H3"))
-		card.add_child(r)
-	card.add_child(UIKit.button("Sugestões de reforço do diretor", "GhostButton", func(): _show_suggestions(), "search"))
+	v.add_child(UIKit.label("%d anos, no clube desde %d" % [int(d["age"]), int(d["since"])], "Muted"))
+	card.add_child(v)
+	var items: Array = []
+	for a in [["neg", "Negociação"], ["net", "Olheiros"], ["rel", "Com a diretoria"]]:
+		items.append([a[1], str(int(d[a[0]])), Fmt.rating_color(int(d[a[0]]))])
+	card.add_child(StatStrip.make(items))
+	card.add_child(UIKit.label("Negociação arranca desconto nas compras; a rede de olheiros traz mais nomes; a relação com a diretoria ajuda a aprovar pedidos.", "Small", true))
+	card.add_child(UIKit.button("Sugestões de reforço", "GhostButton", func(): _show_suggestions(), "search"))
 	return UIKit.card_panel(card)
 
 

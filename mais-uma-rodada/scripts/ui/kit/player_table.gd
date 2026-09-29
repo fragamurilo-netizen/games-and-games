@@ -5,7 +5,8 @@ extends RefCounted
 ## situação na segunda linha (lesionado, suspenso, emprestado...), sem ícones soltos.
 ##
 ## mode: "squad" (dados exatos do próprio elenco), "market" (overall estimado e preço),
-## "club" (outro clube, estimado, sem preço), "youth" (base).
+## "club" (outro clube, estimado, sem preço), "youth" (base), "national" (convocação: sem número,
+## o clube no lugar da situação).
 
 const ROW_H := 88
 
@@ -48,6 +49,8 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 			keys = ["apps", "goals", "assists", "form"]
 		"contrato":
 			keys = ["contract", "wage", "value"]
+		"selecao":
+			keys = ["ovr", "age"] if wide else ["ovr"]
 		"treino":
 			keys = ["ovr", "age", "cond", "morale"] if wide else ["ovr"]
 		"base":
@@ -161,7 +164,7 @@ static func lead_cell(w: GameWorld, p: Player, mode: String) -> Control:
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override(&"separation", 10)
 	h.tooltip_text = p.full_name()
-	if mode != "market":
+	if mode != "market" and mode != "national":
 		var num := Label.new()
 		num.text = str(p.shirt) if p.shirt > 0 else ""
 		num.custom_minimum_size.x = 28
@@ -213,6 +216,10 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 		return ["Lesionado, %d sem." % p.injury_weeks, UIColors.RED]
 	if p.suspension > 0:
 		return ["Suspenso, %d jogo(s)" % p.suspension, UIColors.RED]
+	if mode == "national":
+		# Na seleção, o que situa o jogador é o clube onde joga.
+		var cl := w.club(p.club_id) if p.club_id >= 0 else null
+		return [cl.short_name if cl != null else "Sem clube", UIColors.TEXT if own else UIColors.MUTED]
 	if p.intl_duty:
 		return ["Na seleção", UIColors.MUTED]
 	if mode == "youth":

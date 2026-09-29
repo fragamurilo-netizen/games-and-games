@@ -9,6 +9,7 @@ var _tab := "overview"
 var _tour := ""
 var _camp := 0
 var _nation := ""
+var _squad_state := {}
 
 
 func _init() -> void:
@@ -61,26 +62,24 @@ func refresh() -> void:
 ## com as cores da bandeira (como a tela de seleção de um jogo de futebol licenciado).
 func _hero(w: GameWorld, rank: int) -> Control:
 	var v := UIKit.card("Card", 10)
-	var row := UIKit.hbox(18)
-	var fl := UIKit.flag(_nation, 120)
+	var row := UIKit.hbox(UITokens.S3)
+	var fl := UIKit.flag(_nation, 96)
 	fl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(fl)
-	var col := UIKit.vbox(2)
+	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	col.add_child(UIKit.eyebrow("Seleção"))
-	col.add_child(UIKit.label(DatabaseManager.nation_name(_nation).to_upper(), "Title", true))
-	var coach := NationalCoach.nation(w)
-	if coach == _nation:
-		col.add_child(UIKit.label("Técnico: %s" % w.manager_name, "Small"))
+	var nm := UIKit.label(DatabaseManager.nation_name(_nation), "Title")
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	col.add_child(nm)
+	var line := tr("%dº no ranking") % rank
+	if NationalCoach.nation(w) == _nation:
+		line += " · " + tr("técnico: %s") % w.manager_name
+	col.add_child(UIKit.label(line, "Muted", true))
 	row.add_child(col)
 	var kv := UIKit.kit(NationalKits.home(w, _nation), 84)
 	kv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(kv)
-	var rk := UIKit.stat_tile("%dº" % rank, "Ranking", UIColors.ACCENT)
-	rk.size_flags_horizontal = Control.SIZE_SHRINK_END
-	rk.custom_minimum_size.x = 140
-	row.add_child(rk)
 	v.add_child(row)
 	return UIKit.card_panel(v)
 
@@ -111,10 +110,10 @@ func _job_card(w: GameWorld) -> Control:
 		col.add_child(UIKit.label("Você é o técnico desde %d, junto com o %s" % [int(st.get("since", w.year)), w.user_club().short_name], "Small", true))
 		h.add_child(col)
 		card.add_child(h)
-		card.add_child(UIKit.stat_grid([
-			UIKit.stat("%d-%d-%d" % [int(st.get("w", 0)), int(st.get("d", 0)), int(st.get("l", 0))], "V-E-D"),
-			UIKit.stat("%d:%d" % [int(st.get("gf", 0)), int(st.get("ga", 0))], "gols"),
-			UIKit.stat(str((st.get("titles", []) as Array).size()), "títulos", UIColors.ACCENT)], content_width()))
+		card.add_child(StatStrip.make([
+			["V-E-D", "%d-%d-%d" % [int(st.get("w", 0)), int(st.get("d", 0)), int(st.get("l", 0))]],
+			["Gols", "%d:%d" % [int(st.get("gf", 0)), int(st.get("ga", 0))]],
+			["Títulos", str((st.get("titles", []) as Array).size())]]))
 		var sat := float(st.get("sat", 60.0))
 		var sc := UIColors.GREEN if sat >= 60.0 else (UIColors.ACCENT if sat >= 35.0 else UIColors.RED)
 		card.add_child(UIKit.kv("Confiança da federação", "%d%%" % int(round(sat)), sc))
@@ -228,7 +227,7 @@ func _windows_card(w: GameWorld) -> Control:
 		h.add_child(l)
 		var tag := "em andamento" if win == active else ("próxima" if is_next else ("disputada" if done else ""))
 		if tag != "":
-			h.add_child(UIKit.pill(tag, UIColors.ACCENT if tag != "disputada" else UIColors.MUTED, 14))
+			h.add_child(UIKit.colored(tag.capitalize(), UIColors.TEXT if tag != "disputada" else UIColors.DIM, "Small"))
 		card.add_child(h)
 	# Quem do clube do usuário está (ou deve estar) na próxima lista
 	if w.has_user() and (not nxt.is_empty() or not active.is_empty()):
@@ -520,7 +519,7 @@ func _ranking(w: GameWorld) -> Control:
 		h.add_child(n)
 		var titles := NationalTeamManager.titles_of(w, code).size()
 		if titles > 0:
-			h.add_child(UIKit.pill("%d título(s)" % titles, UIColors.ACCENT, 14))
+			h.add_child(UIKit.colored(tr("%d título(s)") % titles, UIColors.MUTED, "Small"))
 		var pts := UIKit.label(str(int(round(float(r[i][1])))), "H3")
 		pts.custom_minimum_size.x = 70
 		pts.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -566,47 +565,37 @@ func _squad(w: GameWorld, c: VBoxContainer) -> void:
 			if p.nationality == _nation and p.club_id >= 0 and p.injury_weeks == 0:
 				pool.append(p)
 		squad = NationalTeamManager.call_up(pool)
-	var head := UIKit.card("CardHighlight", 6)
-	var hh := UIKit.hbox(12)
-	hh.add_child(UIKit.flag(_nation, 64))
-	var col := UIKit.vbox(2)
-	col.add_child(UIKit.label(DatabaseManager.nation_name(_nation), "Title"))
-	col.add_child(UIKit.label("%dº no ranking · força %d · %s" % [NationalTeamManager.rank_of(w, _nation), int(round(NationalTeamManager.strength_of(_nation, squad))),
-		"lista provável" if fresh else "última convocação"], "Small"))
-	hh.add_child(col)
-	head.add_child(hh)
+	# O cabeçalho da tela já mostra bandeira e nome: aqui só o que é da lista.
+	var bits: Array = [tr("Força %d.") % int(round(NationalTeamManager.strength_of(_nation, squad))),
+		tr("Lista provável, se a convocação fosse hoje.") if fresh else tr("Última convocação.")]
 	var titles := NationalTeamManager.titles_of(w, _nation)
 	if not titles.is_empty():
-		var tf := UIKit.flow(6)
+		var tt: Array = []
 		for t in titles:
-			tf.add_child(UIKit.pill("%s %d" % [String(NationalTeamManager.tcfg(t[0]).get("short", t[0])), int(t[1])], UIColors.ACCENT, 14))
-		head.add_child(tf)
-	c.add_child(UIKit.card_panel(head))
+			tt.append("%s %d" % [String(NationalTeamManager.tcfg(t[0]).get("short", t[0])), int(t[1])])
+		bits.append(tr("Títulos: %s.") % ", ".join(tt))
+	c.add_child(UIKit.label(" ".join(bits), "Muted", true))
 	if squad.is_empty():
-		c.add_child(UIKit.label("Nenhum jogador desta nacionalidade.", "Muted", true))
+		c.add_child(UIKit.state_block("empty", "Nenhum jogador desta nacionalidade.", "Só entram jogadores com clube."))
 		return
-	squad.sort_custom(func(a, b): return Pos.DISPLAY_ORDER.find(a.position) < Pos.DISPLAY_ORDER.find(b.position) or (a.position == b.position and a.ovr_f > b.ovr_f))
-	var card := UIKit.card("Card", 4)
-	card.add_child(UIKit.section("%d convocados" % squad.size()))
-	for p: Player in squad:
-		var h := UIKit.hbox(10)
-		h.add_child(UIKit.pos_badge(p.position))
-		var cl: Club = w.club(p.club_id) if p.club_id >= 0 else null
-		h.add_child(UIKit.crest(cl, 30))
-		var v := UIKit.vbox(0)
-		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var n := UIKit.label(p.display_name(), "H3")
-		n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		if w.has_user() and p.club_id == w.user_club_id:
-			n.add_theme_color_override(&"font_color", UIColors.ACCENT)
-		v.add_child(n)
-		var caps := NationalTeamManager.caps_of(w, p.id)
-		v.add_child(UIKit.label("%s · %d anos · %d jogos · %d gols · %d assist." % [cl.short_name if cl != null else "sem clube", p.age(w.year), caps[0], caps[1], caps[2]], "Small"))
-		h.add_child(v)
-		h.add_child(UIKit.badge(p.overall, 52, 36, 22))
-		var pid := p.id
-		card.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
-	c.add_child(UIKit.card_panel(card))
+	var v := UIKit.vbox(UITokens.S1)
+	v.add_child(UIKit.label("%d convocados" % squad.size(), "Section"))
+	v.add_child(PlayerTable.make(w, squad, "national", _squad_state, func(p: Player): UIManager.push("player", {"id": p.id}),
+		_caps_cols(w), "selecao", content_width() >= 760.0))
+	c.add_child(v)
+
+
+## Jogos e gols pela seleção, no fim da tabela de convocados.
+func _caps_cols(w: GameWorld) -> Array:
+	return [
+		{"key": "caps", "title": "Jogos", "w": 60, "tip": "Jogos pela seleção",
+			"text": func(p: Player) -> String: return str(int(NationalTeamManager.caps_of(w, p.id)[0])),
+			"sort": func(p: Player) -> int: return int(NationalTeamManager.caps_of(w, p.id)[0])},
+		{"key": "ngoals", "title": "Gols", "w": 52, "tip": "Gols pela seleção",
+			"text": func(p: Player) -> String: return str(int(NationalTeamManager.caps_of(w, p.id)[1])),
+			"sort": func(p: Player) -> int: return int(NationalTeamManager.caps_of(w, p.id)[1]),
+			"color": func(p: Player) -> Color: return UIColors.TEXT if int(NationalTeamManager.caps_of(w, p.id)[1]) > 0 else UIColors.DIM},
+	]
 
 
 ## Lista do técnico usuário: chama e dispensa jogadores; vale para a próxima data FIFA.

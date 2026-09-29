@@ -78,17 +78,31 @@ func _masthead(w: GameWorld) -> Control:
 	var v := UIKit.vbox(8)
 	var lid := Reputation.top_league_of(_nation)
 	var cols: Array = DatabaseManager.league_cfg(lid).get("colors", []) if lid != "" else []
-	var bar := UIKit.hbox(10)
-	bar.add_child(UIKit.flag(_nation, 44))
+	var bar := UIKit.hbox(UITokens.S2)
 	var t := UIKit.label(portal_name(_nation).to_upper(), "Title")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if cols.size() >= 2:
 		t.add_theme_color_override(&"font_color", Color(String(cols[1])) if Color(String(cols[1])).get_luminance() > 0.35 else UIColors.ACCENT)
 	bar.add_child(t)
+	# País do portal: um botão com a bandeira, que abre a lista (não uma segunda fila de abas).
+	var pick := UIKit.hbox(UITokens.S1)
+	pick.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pick.add_child(UIKit.flag(_nation, 36))
+	pick.add_child(UIKit.label(DatabaseManager.nation_name(_nation), "Muted"))
+	pick.add_child(UIKit.icon_rect("down", 18, UIColors.DIM))
+	var nat_btn := UIKit.tap_row(pick, func(): _nation_sheet(w))
+	nat_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+	nat_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bar.add_child(nat_btn)
 	v.add_child(bar)
 	if cols.size() >= 2:
 		var stripe := UIKit.comp_stripe(lid, 6)
 		v.add_child(stripe)
+	return v
+
+
+func _nation_sheet(w: GameWorld) -> void:
 	# Países: o seu primeiro, depois as ligas mais fortes com notícias
 	var nations: Array = []
 	if w.has_user():
@@ -98,15 +112,30 @@ func _masthead(w: GameWorld) -> Control:
 			nations.append(code)
 	if not nations.has(_nation):
 		nations.append(_nation)
-	var items: Array = []
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Portal de qual país?", "H2"))
+	v.add_child(UIKit.gap(UITokens.S1))
 	for code in nations:
-		items.append([code, DatabaseManager.nation_name(code)])
-	v.add_child(UIKit.scroll_tabs(items, _nation, func(k: String):
-		_nation = k
-		_limit = PAGE
-		refresh()
-		scroll_to_top()))
-	return v
+		var h := UIKit.hbox(UITokens.S2)
+		h.add_child(UIKit.flag(code, 36))
+		var box := UIKit.vbox(0)
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var nm := UIKit.label(DatabaseManager.nation_name(code))
+		if code == _nation:
+			nm.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		box.add_child(nm)
+		box.add_child(UIKit.label(portal_name(code), "Muted"))
+		h.add_child(box)
+		var k: String = code
+		var row := UIKit.tap_row(h, func():
+			UIManager.close_modal()
+			_nation = k
+			_limit = PAGE
+			refresh()
+			scroll_to_top())
+		row.custom_minimum_size.y = 72
+		v.add_child(row)
+	UIManager.show_modal(v, true)
 
 
 ## País de uma notícia ("" se não der para saber).

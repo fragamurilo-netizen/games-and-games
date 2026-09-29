@@ -41,12 +41,22 @@ clube de nome comprido, lesão, suspensão, folha estourada).
   categoria na mesma tabela do elenco (Geral, Potencial em estrelas, Idade; mais colunas no
   tablet), duas categorias lado a lado deitado; "Revelados pela base" como atalho.
 
+- **Treino**: resumo em frase; plano da semana em linhas que abrem folhas (cada opção com o
+  efeito); efeito da semana em faixa de números; jogadores na tabela do elenco com a coluna do
+  treino individual.
+- **Finanças e diretoria**: caixa, temporada e patrocínios em blocos separados; diretoria,
+  torcida e diretor de futebol em faixa de números; ultimato em texto, não em pílula.
+- **Notícias**: país do portal num botão com bandeira (folha), não numa segunda fila de abas.
+- **Caixa de entrada**: contadores viraram frase (as contagens seguem nas abas).
+- **Seleções**: cabeçalho enxuto; convocação na tabela de jogadores (clube no lugar da
+  situação, jogos e gols pela seleção); marcadores em texto.
+- **Histórico**: desfecho (campeão, acesso, queda) em texto de cor; carreira em faixa de números.
+
 ## Pendente
 
 - Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
   de toque e de teclado; precisa de um controle no `main.gd`.
-- Treino, Finanças, Diretoria, Notícias, Conversas, Seleções, Competições e Histórico
-  ainda usam o sistema, mas não foram recompostos (fase seguinte).
+- Conversas, Competições (resto) e a aba Olheiros do Mercado ainda não foram recompostas.
 - `tools/match_shots.gd` termina com erros de script ao fechar ("lock" em nulo, "main" liberado):
   a ferramenta sai enquanto a rodada ainda fecha na thread. Já acontecia antes da UI 2.0; a
   captura "fim" sai preta pelo mesmo motivo.
