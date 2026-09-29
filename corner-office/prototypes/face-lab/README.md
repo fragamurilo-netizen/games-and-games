@@ -19,3 +19,7 @@ Referência de porte: toda a geometria está em unidades normalizadas (cabeça �
 Referência: fotos oficiais dos 200 atletas ranqueados em ufc.com.br/rankings (29/09/2026). Entraram 14 cortes (topete curto, franja longa, cogumelo, na altura do ombro, ondulado médio, cachos volumosos, dreads soltos, twists altos, afro puff, rabo alto, coque bagunçado, curto de lado, volumoso espetado, tranças nas laterais), 4 cores (duas cores, pontas descoloridas, acaju, prata) e 4 barbas (desenhada, longa sem bigode, bigode grosso, cavanhaque longo).
 
 **Corpo inteiro** (`drawFigure`): reaproveita `drawFace` com `noBody` para a cabeça e desenha tronco, braços, luvas, calção e pernas. Poses sem cinturão: media day, guarda, braços cruzados, vitória. Com cinturão: no peito, no ombro, erguido, na cintura. O cinturão é fictício (placa dourada com o monograma CO) — nada de placa octogonal ou logos reais. `face.kit` guarda cor do calção e das luvas.
+
+## Rodada 4 — corpo realista
+
+`drawFigure` reescrito: membros com perfil anatômico (deltoide, bíceps/tríceps, braquiorradial, quadríceps, vasto medial, panturrilha), tronco com trapézio, dorsal em V, peitoral, abdômen, oblíquos, serrátil, linhas do V e clavículas, luz vinda da esquerda, luvas de MMA com dedos e velcro, pés, calção com fenda e cordão. Novo `face.body = {muscle, fat, hair, height}` e presets por categoria (mosca, leve, médio, pesado).

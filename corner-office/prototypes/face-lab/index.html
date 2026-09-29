@@ -120,7 +120,7 @@ figure.p .nm, figure.p .sub { overflow: hidden; text-overflow: ellipsis; white-s
   <header class="hero">
     <div class="kicker"><i></i><span class="label">Corner Office · Identidade de personagem · Bíblia §5</span></div>
     <h1>Laboratório de rostos</h1>
-    <p>Biblioteca procedural dos retratos. Rodada nova, baseada nas fotos dos 200 atletas do ranking atual: mais 14 cortes, 4 cores e 4 barbas (marcados como “novo”), e o corpo inteiro com poses com e sem cinturão. Nenhum estilo reproduz um atleta real. Monte um rosto no editor ou clique nas opções do catálogo: cada miniatura mostra a variação aplicada ao rosto atual. Estilo padrão A (Broadcast) no jogo e B (Recorte) nas peças de evento.</p>
+    <p>Biblioteca procedural dos retratos. Baseada nas fotos dos 200 atletas do ranking atual: 56 cortes, 20 cores e 19 barbas, e corpo inteiro anatômico (musculatura, gordura, pelos, altura e presets por categoria) com poses com e sem cinturão. Nenhum estilo reproduz um atleta real. Monte um rosto no editor ou clique nas opções do catálogo: cada miniatura mostra a variação aplicada ao rosto atual. Estilo padrão A (Broadcast) no jogo e B (Recorte) nas peças de evento.</p>
     <div class="stats" id="stats"></div>
   </header>
 
@@ -175,6 +175,19 @@ figure.p .nm, figure.p .sub { overflow: hidden; text-overflow: ellipsis; white-s
       <span class="label">Corpo inteiro</span>
       <h2>Poses com e sem cinturão</h2>
       <p class="muted">O rosto atual em corpo inteiro, no formato das fotos oficiais de ranking: pose de media day, guarda de luta, braços cruzados e vitória, e quatro jeitos de segurar o cinturão. O cinturão é fictício do Corner Office (placa dourada com o monograma CO) e só deve aparecer para campeões.</p>
+    </div>
+    <div class="ctl-row" role="group" aria-label="Categoria de peso">
+      <span class="label">Preset</span>
+      <button class="btn ghost" data-preset="mosca">Peso mosca</button>
+      <button class="btn ghost" data-preset="leve">Peso leve</button>
+      <button class="btn ghost" data-preset="medio">Peso médio</button>
+      <button class="btn ghost" data-preset="pesado">Peso pesado</button>
+    </div>
+    <div class="sliders">
+      <label for="sl-muscle"><span>Musculatura <output id="o-muscle"></output></span><input type="range" id="sl-muscle" min="0" max="1" step="0.05"></label>
+      <label for="sl-fat"><span>Gordura corporal <output id="o-fat"></output></span><input type="range" id="sl-fat" min="0" max="1" step="0.05"></label>
+      <label for="sl-bhair"><span>Pelos no corpo <output id="o-bhair"></output></span><input type="range" id="sl-bhair" min="0" max="1" step="0.05"></label>
+      <label for="sl-height"><span>Altura <output id="o-height"></output></span><input type="range" id="sl-height" min="0" max="1" step="0.05"></label>
     </div>
     <div class="ctl-row">
       <label class="toggle" for="kit-shorts">Calção <select id="kit-shorts"></select></label>
@@ -756,104 +769,201 @@ const POSES={
 };
 function drawFigure(ctx,W,H,f,st,opts){
   const pose=opts.pose||'oficial', high=pose==='vitoria'||pose==='cinturao_erguido';
-  const S=H/(high?12.2:10.9), ox=W/2, oy=H*(high?.2:.125);
+  const B=f.body||{muscle:.6,fat:.2,hair:0,height:.5};
+  const m=B.muscle??.6, fat=B.fat??.2, legK=.95+(B.height??.5)*.1;
+  const S=H/((high?12.3:11.0)+(legK-1)*8), ox=W/2, oy=H*(high?.2:.12);
   const rng=rngOf((f.seed||1)*5), P=makePen(ctx,S,ox,oy,st.pen,rng);
   const sketch=st.mode==='sketch', INK=PAL.ink, contrast=st.contrast||1, fem=f.sex==='f', build=f.build??.5;
   const skin=SKIN[f.skin]?.[0]||SKIN.t06[0], dk=lum(skin)<.42;
-  const shade=darken(skin,dk?.3:.24), deep=darken(skin,dk?.5:.45);
+  const shade=darken(skin,dk?.32:.26), deep=darken(skin,dk?.52:.47), light=lighten(skin,dk?.16:.22), outlineC=darken(skin,.62);
   const kit=f.kit||{shorts:'preto',gloves:'preto'};
   const shortsC=SHORTS[kit.shorts]?.[0]||'#1c1f23', gloveC=GLOVES[kit.gloves]?.[0]||'#151719';
+  const bodyHairC=HAIR_COLORS[f.beard?.color||(['multicolor','bicolor','pontas_claras','platinado','prata'].includes(f.hair?.color)||String(f.hair?.color).startsWith('tingido')?'castanho_escuro':f.hair?.color)]?.[0]||'#17110e';
   const marks=new Set(f.marks||[]), tc=sketch?INK:mix(skin,'#1d2b30',dk?.55:.75);
-  const sh=(fem?1.22:1.42)+build*.38, wa=(fem?.78:.92)+build*.26, hip=wa+(fem?.22:.08), nw=.3+.2*build;
-  const armW=(fem?.3:.36)+build*.16, legW=(fem?.5:.54)+build*.16;
+  const def=clamp(m*1.25-fat*1.7,0,1)*(fem?.7:1);
+  const sh=(fem?1.16:1.3)+build*.5+m*.1, nw=.3+.2*build;
+  const wa=(fem?.64:.76)+build*.26+fat*.45, hip=wa+(fem?.3:.1)+fat*.05, lat=sh-.24+m*.1-(fem?.08:0);
+  const aK=(fem?.84:1)*(.86+build*.36+fat*.12), lK=(fem?1.08:1)*1.3*(.88+build*.3+fat*.1);
   const X=x=>ox+x*S, Y=y=>oy+y*S;
+  const add=(a,b)=>[a[0]+b[0],a[1]+b[1]], sub=(a,b)=>[a[0]-b[0],a[1]-b[1]], mul=(a,k)=>[a[0]*k,a[1]*k], nrm=a=>{const l=Math.hypot(a[0],a[1])||1;return[a[0]/l,a[1]/l]};
+
   function paint(fn,color,o={}){ctx.save();P.begin();fn();
-    if(sketch){ctx.globalAlpha=(o.alpha??1)*.34;ctx.fillStyle=color;ctx.fill();if(o.stroke!==false){ctx.globalAlpha=1;ctx.strokeStyle=INK;ctx.lineWidth=S*.03;ctx.lineJoin='round';ctx.stroke()}}
-    else{ctx.globalAlpha=o.alpha??1;ctx.fillStyle=color;ctx.fill();if(st.outline&&o.stroke!==false){ctx.globalAlpha=1;ctx.strokeStyle=o.ink||darken(typeof color==='string'?color:'#b88b46',.62);ctx.lineWidth=S*.045;ctx.lineJoin='round';ctx.stroke()}}
+    if(sketch){ctx.globalAlpha=(o.alpha??1)*.3;ctx.fillStyle=color;ctx.fill();if(o.stroke!==false){ctx.globalAlpha=1;ctx.strokeStyle=INK;ctx.lineWidth=S*.028;ctx.lineJoin='round';ctx.stroke()}}
+    else{ctx.globalAlpha=o.alpha??1;ctx.fillStyle=color;ctx.fill();if(st.outline&&o.stroke!==false){ctx.globalAlpha=1;ctx.strokeStyle=o.ink||darken(typeof color==='string'?color:'#b88b46',.62);ctx.lineWidth=S*(o.lw||.04);ctx.lineJoin='round';ctx.stroke()}}
     ctx.restore()}
-  function shadeIn(clip,fn,color,alpha){ctx.save();P.begin();clip();ctx.clip();P.begin();fn();
-    if(sketch){ctx.clip();ctx.strokeStyle=INK;ctx.globalAlpha=alpha;ctx.lineWidth=Math.max(1,S*.02);ctx.beginPath();for(let x=-W;x<W*2;x+=S*.12){ctx.moveTo(x,0);ctx.lineTo(x+H*.5,H)}ctx.stroke()}
+  function shadeIn(clip,fn,color,alpha){if(alpha<=0.01)return;ctx.save();P.begin();clip();ctx.clip();P.begin();fn();
+    if(sketch){ctx.clip();ctx.strokeStyle=INK;ctx.globalAlpha=clamp(alpha*1.1,0,1);ctx.lineWidth=Math.max(1,S*.018);ctx.beginPath();for(let x=-W;x<W*2;x+=S*.11){ctx.moveTo(x,0);ctx.lineTo(x+H*.5,H)}ctx.stroke()}
     else{ctx.globalAlpha=clamp(alpha*contrast,0,1);ctx.fillStyle=color;ctx.fill()}ctx.restore()}
-  function line(fn,color,lw,alpha=1){ctx.save();P.begin();fn();ctx.strokeStyle=sketch?INK:color;ctx.globalAlpha=alpha;ctx.lineWidth=S*lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.restore()}
-  function limb(pts,w0,w1){
-    const seg=(a,b,w,col,alpha=1,off=0)=>{ctx.save();ctx.lineCap='round';ctx.strokeStyle=col;ctx.globalAlpha=alpha;ctx.lineWidth=w*S;P.begin();P.m(a[0]+off,a[1]);P.l(b[0]+off,b[1]);ctx.stroke();ctx.restore()};
-    const ws=[w0,w1??w0];
-    for(let i=0;i<pts.length-1;i++)if(st.outline||sketch)seg(pts[i],pts[i+1],ws[i]+.09,sketch?INK:darken(skin,.62));
-    for(let i=0;i<pts.length-1;i++)seg(pts[i],pts[i+1],ws[i],sketch?mix(PAL.paper,skin,.4):skin);
-    if(!sketch)for(let i=0;i<pts.length-1;i++)seg(pts[i],pts[i+1],ws[i]*.35,shade,.45*contrast,ws[i]*.26);
+  function line(fn,color,lw,alpha=1){if(alpha<=0.02)return;ctx.save();P.begin();fn();ctx.strokeStyle=sketch?INK:color;ctx.globalAlpha=clamp(alpha,0,1);ctx.lineWidth=S*lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();ctx.restore()}
+  function smooth(pts){const n=pts.length,mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];const m0=mid(pts[n-1],pts[0]);P.m(m0[0],m0[1]);
+    for(let i=0;i<n;i++){const p=pts[i],q=pts[(i+1)%n],mm=mid(p,q);P.q(p[0],p[1],mm[0],mm[1])}P.close()}
+  function poly(pts){P.m(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)P.l(pts[i][0],pts[i][1]);P.close()}
+  function prof(pr,t){for(let i=0;i<pr.length-1;i++)if(t<=pr[i+1][0]){const a=pr[i],b=pr[i+1],k=(t-a[0])/(b[0]-a[0]||1);return[a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k]}const l=pr[pr.length-1];return[l[1],l[2]]}
+  // membro anatômico: perfil lateral/medial ao longo do osso, sombra do lado direito (luz da esquerda)
+  function limb(A,Bp,pr,s,k,capA,capB,extra){
+    const d=nrm(sub(Bp,A));let n=[-d[1],d[0]];
+    const nOut=Math.abs(n[0])>.25?(Math.sign(n[0])===s?n:mul(n,-1)):(n[1]>0?n:mul(n,-1)), nMed=mul(nOut,-1);
+    const N=16,out=[],med=[],cen=[];
+    for(let i=0;i<=N;i++){const t=i/N,c=add(A,mul(sub(Bp,A),t)),[wo,wm]=prof(pr,t);out.push(add(c,mul(nOut,wo*k)));med.push(add(c,mul(nMed,wm*k)));cen.push([c,wo*k,wm*k])}
+    const pts=[add(A,mul(d,-capA)),...out,add(Bp,mul(d,capB)),...med.slice().reverse()];
+    const shape=()=>smooth(pts);
+    paint(shape,skin,{ink:outlineC,lw:.035});
+    const shadowOut=nOut[0]>0, sideArr=shadowOut?out:med, nS=shadowOut?nOut:nMed, nL=mul(nS,-1);
+    const band=[...sideArr,...cen.slice().reverse().map(([c,wo,wm])=>add(c,mul(nS,(shadowOut?wo:wm)*.15)))];
+    shadeIn(shape,()=>poly(band),shade,.5);
+    const litArr=shadowOut?med:out;
+    if(!sketch)line(()=>{const p=litArr.map((q,i)=>add(q,mul(nS,(cen[i][1]+cen[i][2])*.22)));P.m(p[2][0],p[2][1]);for(let i=3;i<p.length-2;i++)P.l(p[i][0],p[i][1])},light,.05,.28);
+    if(extra)extra({A,B:Bp,d,nOut,nMed,out,med,cen,shape});
+    return shape;
   }
-  function glove(h,e,big=1){const dx=h[0]-e[0],dy=h[1]-e[1],L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
-    paint(()=>P.e(h[0]-ux*.26,h[1]-uy*.26,.19*big,.19*big),'#e9e6df',{ink:'#8a8a8a'});
-    paint(()=>P.e(h[0],h[1],.27*big,.25*big),gloveC,{ink:'#050505'});
-    if(!sketch)line(()=>{P.m(h[0]-.14*big,h[1]-.04);P.q(h[0],h[1]-.12*big,h[0]+.14*big,h[1]-.04)},lighten(gloveC,.35),.03,.8)}
+  const UPPER=[[0,.31+.1*m,.23],[.18,.33+.12*m,.21+.04*m],[.45,.23+.06*m+fat*.05,.2+.11*m+fat*.05],[.8,.17+.03*m,.15+.05*m],[1,.14,.13]];
+  const FORE=[[0,.15+.03*m,.14],[.25,.19+.06*m,.16+.04*m],[.7,.12,.11],[1,.085,.08]];
+  const THIGH=[[0,.37+.08*m+fat*.08,.31+fat*.06],[.3,.38+.1*m+fat*.08,.3+.04*m+fat*.06],[.75,.27+.04*m,.26+.08*m],[1,.23,.22]];
+  const SHIN=[[0,.22,.21],[.25,.22+.06*m,.24+.08*m],[.7,.13,.13],[1,.09,.09]];
+
+  function glove(h,e,big=1,s=1){const u=nrm(sub(h,e)),ang=Math.atan2(u[1],u[0])-Math.PI/2;
+    ctx.save();ctx.translate(X(h[0]),Y(h[1]));ctx.rotate(ang);ctx.scale(S*big,S*big);
+    const rr=(x,y,w,hh,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+hh-r);ctx.quadraticCurveTo(x+w,y+hh,x+w-r,y+hh);ctx.lineTo(x+r,y+hh);ctx.quadraticCurveTo(x,y+hh,x,y+hh-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()};
+    const inkC=sketch?INK:'#060606', lwid=.035;
+    rr(-.19,-.46,.38,.3,.06);ctx.fillStyle=sketch?PAL.paper:(kit.gloves==='branco'?'#1c1f23':'#e6e2d8');ctx.fill();ctx.lineWidth=lwid;ctx.strokeStyle=inkC;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-.19,-.31);ctx.lineTo(.19,-.31);ctx.strokeStyle=sketch?INK:'rgba(0,0,0,.35)';ctx.lineWidth=.02;ctx.stroke();
+    for(let i=0;i<4;i++){const x=-.14+i*.093;ctx.beginPath();ctx.ellipse(x,.26,.05,.06,0,0,Math.PI*2);ctx.fillStyle=sketch?PAL.paper:skin;ctx.fill();ctx.lineWidth=.02;ctx.strokeStyle=sketch?INK:outlineC;ctx.stroke()}
+    ctx.beginPath();ctx.moveTo(-.23,-.18);ctx.quadraticCurveTo(-.3,.06,-.24,.2);ctx.quadraticCurveTo(0,.3,.24,.2);ctx.quadraticCurveTo(.3,.06,.23,-.18);ctx.closePath();
+    const g=sketch?PAL.paper:(()=>{const gg=ctx.createLinearGradient(-.25,0,.25,0);gg.addColorStop(0,lighten(gloveC,.25));gg.addColorStop(1,darken(gloveC,.2));return gg})();
+    ctx.fillStyle=g;ctx.fill();ctx.lineWidth=lwid;ctx.strokeStyle=inkC;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(-.18,.1);ctx.quadraticCurveTo(0,.18,.18,.1);ctx.strokeStyle=sketch?INK:lighten(gloveC,.4);ctx.lineWidth=.025;ctx.globalAlpha=.7;ctx.stroke();ctx.globalAlpha=1;
+    ctx.beginPath();ctx.ellipse(-s*.25,-.02,.07,.12,s*.3,0,Math.PI*2);ctx.fillStyle=sketch?PAL.paper:darken(gloveC,.1);ctx.fill();ctx.lineWidth=.02;ctx.strokeStyle=inkC;ctx.stroke();
+    ctx.restore()}
   function plate(cx,cy,w,h,rot=0){
     ctx.save();ctx.translate(X(cx),Y(cy));ctx.rotate(rot);ctx.scale(S,S);
     const rr=(x,y,ww,hh,r)=>{ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+ww-r,y);ctx.quadraticCurveTo(x+ww,y,x+ww,y+r);ctx.lineTo(x+ww,y+hh-r);ctx.quadraticCurveTo(x+ww,y+hh,x+ww-r,y+hh);ctx.lineTo(x+r,y+hh);ctx.quadraticCurveTo(x,y+hh,x,y+hh-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()};
-    const g=ctx.createLinearGradient(0,-h/2,0,h/2);g.addColorStop(0,'#e2c07a');g.addColorStop(.5,'#b88b46');g.addColorStop(1,'#7c5a26');
+    const g=ctx.createLinearGradient(-w/2,-h/2,w/2,h/2);g.addColorStop(0,'#f0d48f');g.addColorStop(.35,'#c79a52');g.addColorStop(.6,'#8e6a2e');g.addColorStop(1,'#d6b36c');
     rr(-w/2,-h/2,w,h,.18);ctx.fillStyle=sketch?mix(PAL.paper,'#b88b46',.45):g;ctx.fill();ctx.lineWidth=.05;ctx.strokeStyle=sketch?INK:'#4a3514';ctx.stroke();
-    rr(-w/2+.14,-h/2+.14,w-.28,h-.28,.1);ctx.fillStyle=sketch?PAL.paper:'#1b2025';ctx.fill();
-    const bw=w*.2,bh=h*.42;ctx.fillStyle=sketch?INK:'#d9b872';ctx.fillRect(-bw-.07,-bh/2,bw,bh);ctx.fillRect(.07,-bh/2,bw,bh);
+    rr(-w/2+.13,-h/2+.13,w-.26,h-.26,.1);ctx.fillStyle=sketch?PAL.paper:'#1b2025';ctx.fill();
+    const bw=w*.2,bh=h*.42;ctx.fillStyle=sketch?INK:'#e2c47e';ctx.fillRect(-bw-.07,-bh/2,bw,bh);ctx.fillRect(.07,-bh/2,bw,bh);
     ctx.fillStyle=sketch?INK:'#C83B3B';ctx.fillRect(-.025,-bh/2-.06,.05,bh+.12);
-    ctx.fillStyle=sketch?INK:'#e2c07a';for(const[x,y]of[[-w/2+.08,-h/2+.08],[w/2-.08,-h/2+.08],[-w/2+.08,h/2-.08],[w/2-.08,h/2-.08]]){ctx.beginPath();ctx.arc(x,y,.05,0,Math.PI*2);ctx.fill()}
+    if(!sketch){ctx.globalAlpha=.45;ctx.fillStyle='#fff6d8';ctx.beginPath();ctx.ellipse(-w*.28,-h*.32,w*.18,h*.05,-.2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+    ctx.fillStyle=sketch?INK:'#e2c07a';for(const[x,y]of[[-w/2+.08,-h/2+.08],[w/2-.08,-h/2+.08],[-w/2+.08,h/2-.08],[w/2-.08,h/2-.08]]){ctx.beginPath();ctx.arc(x,y,.045,0,Math.PI*2);ctx.fill()}
     ctx.restore()}
   function strap(pts,w=.5){
     ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
-    P.begin();P.m(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)P.l(pts[i][0],pts[i][1]);
-    ctx.strokeStyle=sketch?INK:'#0e0f10';ctx.lineWidth=(w+.06)*S;ctx.stroke();
-    P.begin();P.m(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)P.l(pts[i][0],pts[i][1]);
-    ctx.strokeStyle=sketch?PAL.paper:'#1c1d1f';ctx.lineWidth=w*S;ctx.stroke();ctx.restore();
-    for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;paint(()=>P.e(mx,my,w*.34,w*.3),'#b88b46',{ink:'#4a3514'})}}
+    const pth=()=>{P.begin();P.m(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)P.l(pts[i][0],pts[i][1])};
+    pth();ctx.strokeStyle=sketch?INK:'#060606';ctx.lineWidth=(w+.06)*S;ctx.stroke();
+    pth();ctx.strokeStyle=sketch?PAL.paper:'#1c1d1f';ctx.lineWidth=w*S;ctx.stroke();
+    if(!sketch){pth();ctx.strokeStyle='#3a3b3e';ctx.lineWidth=w*.25*S;ctx.globalAlpha=.6;ctx.stroke();ctx.globalAlpha=1}
+    ctx.restore();
+    for(let i=0;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;paint(()=>P.e(mx,my,w*.36,w*.3),'#c9a05a',{ink:'#4a3514'})}}
 
+  const shA=[-sh+.1,1.64], shB=[sh-.1,1.64];
   const pz={
-    oficial:{L:[[-sh+.12,1.72],[-sh-.2,3.1],[-sh-.14,4.35]],R:[[sh-.12,1.72],[sh+.2,3.1],[sh+.14,4.35]],legs:0},
-    guarda:{L:[[-sh+.12,1.72],[-sh+.02,2.75],[-.52,1.3]],R:[[sh-.12,1.72],[sh-.12,2.6],[.46,1.02]],legs:1,front:1},
-    bracos_cruzados:{R:[[sh-.12,1.72],[sh+.12,3.0],[-.72,2.78]],L:[[-sh+.12,1.72],[-sh-.12,3.0],[.72,2.58]],legs:0},
-    vitoria:{L:[[-sh+.12,1.72],[-sh-.62,.62],[-sh-.72,-1.15]],R:[[sh-.12,1.72],[sh+.62,.62],[sh+.72,-1.15]],legs:0},
-    cinturao_peito:{L:[[-sh+.12,1.72],[-sh-.12,3.1],[-.72,2.95]],R:[[sh-.12,1.72],[sh+.12,3.1],[.74,2.72]],legs:0,belt:'peito'},
-    cinturao_ombro:{L:[[-sh+.12,1.72],[-sh-.16,3.25],[-.62,3.2]],R:[[sh-.12,1.72],[sh+.2,3.1],[sh+.14,4.35]],legs:0,belt:'ombro'},
-    cinturao_erguido:{L:[[-sh+.12,1.72],[-sh-.45,.5],[-.95,-1.4]],R:[[sh-.12,1.72],[sh+.45,.5],[.95,-1.4]],legs:0,belt:'alto'},
-    cinturao_cintura:{L:[[-sh+.12,1.72],[-sh-.62,2.95],[-wa-.12,4.0]],R:[[sh-.12,1.72],[sh+.62,2.95],[wa+.12,4.0]],legs:0,belt:'cintura'},
+    oficial:{L:[shA,[-sh-.14,3.05],[-sh-.04,4.3]],R:[shB,[sh+.14,3.05],[sh+.04,4.3]],legs:0},
+    guarda:{L:[shA,[-sh+.18,2.6],[-.44,1.22]],R:[shB,[sh-.26,2.48],[.38,.98]],legs:1,front:1},
+    bracos_cruzados:{R:[shB,[sh+.06,2.95],[-.62,2.66]],L:[shA,[-sh-.06,2.95],[.62,2.48]],legs:0},
+    vitoria:{L:[shA,[-sh-.55,.55],[-sh-.62,-1.15]],R:[shB,[sh+.55,.55],[sh+.62,-1.15]],legs:0},
+    cinturao_peito:{L:[shA,[-sh-.06,3.05],[-.74,2.92]],R:[shB,[sh+.06,3.0],[.74,2.72]],legs:0,belt:'peito'},
+    cinturao_ombro:{L:[shA,[-sh-.1,3.18],[-.62,3.18]],R:[shB,[sh+.14,3.05],[sh+.04,4.3]],legs:0,belt:'ombro'},
+    cinturao_erguido:{L:[shA,[-sh-.42,.45],[-.94,-1.4]],R:[shB,[sh+.42,.45],[.94,-1.4]],legs:0,belt:'alto'},
+    cinturao_cintura:{L:[shA,[-sh-.55,2.9],[-wa-.1,3.95]],R:[shB,[sh+.55,2.9],[wa+.1,3.95]],legs:0,belt:'cintura'},
   }[pose];
 
-  // pernas
-  const spread=pz.legs?1:0;
-  const legL=[[-.52,5.3],[-.6-spread*.35,6.95],[-.62-spread*.6,8.5]], legR=[[.52,5.3],[.6+spread*.3,6.95],[.62+spread*.55,8.5]];
-  for(const lg of[legL,legR]){limb(lg,legW,legW*.72);paint(()=>P.e(lg[2][0]+(lg[2][0]<0?-.06:.06),lg[2][1]+.12,.24,.11),skin,{ink:darken(skin,.62)})}
-  // shorts
-  const sp=spread*.3;
-  const shorts=()=>{P.m(-hip-.05,4.22);P.l(hip+.05,4.22);P.l(hip+.2+sp,5.8);P.l(.1,5.85);P.l(0,5.25);P.l(-.1,5.85);P.l(-hip-.2-sp,5.8);P.close()};
-  paint(shorts,shortsC,{ink:darken(shortsC,.6)});
-  shadeIn(shorts,()=>{P.m(-2,4.2);P.l(2,4.2);P.l(2,4.46);P.l(-2,4.46);P.close()},darken(shortsC,.4),.6);
-  shadeIn(shorts,()=>{P.m(hip-.05,4.2);P.l(hip+.12,4.2);P.l(hip+.35+sp,5.9);P.l(hip+.12+sp,5.9);P.close()},kit.shorts==='branco'?'#1c1f23':'#e9e6df',.5);
-  // tronco
-  const torso=()=>{P.m(-nw*1.3,1.12);P.q(-sh*.7,1.3,-sh,1.62);P.q(-sh-.1,2.1,-sh+.18,2.55);P.q(-wa-.05,3.3,-wa,4.02);P.l(-hip,4.35);P.l(hip,4.35);P.l(wa,4.02);P.q(wa+.05,3.3,sh-.18,2.55);P.q(sh+.1,2.1,sh,1.62);P.q(sh*.7,1.3,nw*1.3,1.12);P.close()};
-  paint(torso,skin);
-  shadeIn(torso,()=>{P.m(.15,1);P.q(.5,2.6,.3,4.4);P.l(3,4.4);P.l(3,1);P.close()},shade,.35);
-  for(const s2 of[-1,1])paint(()=>P.e(s2*(sh-.1),1.85,armW*.72,armW*.8),skin,{stroke:false});
-  if(!fem){
-    for(const s2 of[-1,1])line(()=>{P.m(s2*.06,1.95);P.q(s2*.25,2.6,s2*(sh-.4),2.45)},shade,.035,.55);
-    line(()=>{P.m(0,2.75);P.l(0,3.9)},shade,.03,.4);
-    for(const y of[3.05,3.4,3.72])for(const s2 of[-1,1])line(()=>{P.m(s2*.08,y);P.q(s2*.25,y+.04,s2*.36,y-.02)},shade,.025,.35+build*.2);
-  }else{
-    const top=()=>{P.m(-sh+.12,2.02);P.q(-.4,1.86,0,2.12);P.q(.4,1.86,sh-.12,2.02);P.l(sh-.16,2.88);P.q(0,2.98,-sh+.16,2.88);P.close()};
-    paint(top,'#2E3942',{ink:'#141a1f'});for(const s2 of[-1,1])line(()=>{P.m(s2*.55,2.02);P.l(s2*.5,1.25)},'#2E3942',.12,1);
-    for(const y of[3.3,3.7])line(()=>{P.m(-.25,y);P.q(0,y+.04,.25,y)},shade,.02,.3);
+  /* pernas */
+  const sp=pz.legs?1:0, kneeY=4.95+2.0*legK-sp*.15, ankY=4.95+3.6*legK;
+  for(const s of[-1,1]){
+    const hipJ=[s*(.5+fat*.06),4.95],knee=[s*(.56+sp*.3),kneeY],ank=[s*(.6+sp*.55),ankY];
+    limb(knee,ank,SHIN,s,lK,.05,.02,L=>{
+      line(()=>{P.m(knee[0]+s*.2,kneeY+.35);P.q(knee[0]+s*.3,kneeY+.8,ank[0]+s*.14,kneeY+1.3)},shade,.028,.35*def+.1);
+      line(()=>{P.m(knee[0]-s*.02,kneeY+.25);P.l(ank[0]-s*.01,ankY-.25)},light,.03,.2);
+    });
+    limb(hipJ,knee,THIGH,s,lK,.1,.05,L=>{
+      line(()=>{P.m(hipJ[0]-s*.02,5.35);P.q(hipJ[0]+s*.05,6.1,knee[0]-s*.04,kneeY-.3)},shade,.03,.35*def);
+      line(()=>{P.m(knee[0]-s*.2,kneeY-.45);P.q(knee[0]-s*.26,kneeY-.2,knee[0]-s*.12,kneeY-.05)},shade,.03,.4*def);
+    });
+    paint(()=>P.e(knee[0]+s*.02,kneeY-.04,.12*lK,.1*lK),mix(skin,light,.25),{stroke:false,alpha:.8});
+    line(()=>{P.m(knee[0]-.1,kneeY+.07);P.q(knee[0],kneeY+.13,knee[0]+.1,kneeY+.07)},shade,.025,.45);
+    const fx=ank[0]+s*.05, fy=ankY;
+    const foot=()=>{P.m(fx-.12,fy-.02);P.q(fx-.2-s*.02,fy+.15,fx-.2,fy+.28);P.q(fx+s*.02,fy+.37,fx+.21,fy+.28);P.q(fx+.2,fy+.13,fx+.12,fy-.02);P.close()};
+    paint(foot,skin,{ink:outlineC,lw:.03});shadeIn(foot,()=>{P.m(fx,fy-.1);P.l(fx+.4,fy-.1);P.l(fx+.4,fy+.5);P.l(fx,fy+.5);P.close()},shade,.35);
+    for(let i=0;i<4;i++)line(()=>{const x=fx-.12+i*.08;P.m(x,fy+.25);P.l(x+.005,fy+.31)},deep,.018,.5);
   }
-  paint(()=>P.e(0,3.95,.04,.05),deep,{stroke:false,alpha:.7});
-  if(marks.has('chest')&&!fem){line(()=>{P.m(-.7,2.1);P.q(0,1.9,.7,2.1)},tc,.06,.85);line(()=>{P.m(-.45,2.25);P.q(0,2.2,.45,2.28)},tc,.035,.8)}
-  if(pz.belt==='cintura'){paint(()=>{P.m(-wa-.1,3.86);P.q(0,4.0,wa+.1,3.86);P.l(wa+.1,4.26);P.q(0,4.4,-wa-.1,4.26);P.close()},'#1c1d1f',{ink:'#050505'});plate(0,4.08,1.35,.88)}
-  // braços
-  const armOrder=pose==='bracos_cruzados'?['R','L']:['L','R'];
-  for(const k of armOrder){const a=pz[k];limb(a,armW,armW*.86);
-    if(marks.has('shoulders'))for(let j=0;j<3;j++)line(()=>{P.m(a[0][0]+(a[1][0]-a[0][0])*(.2+j*.18)-armW*.4,a[0][1]+(a[1][1]-a[0][1])*(.2+j*.18));P.l(a[0][0]+(a[1][0]-a[0][0])*(.2+j*.18)+armW*.4,a[0][1]+(a[1][1]-a[0][1])*(.2+j*.18)+.06)},tc,.05,.8)}
-  // cinturão na frente
+
+  /* calção */
+  const tO=(.38+.1*m+fat*.08)*lK-.02;
+  const shorts=()=>{P.m(-hip-.06,4.2);P.q(0,4.25,hip+.06,4.2);P.q(hip+.2,4.9,.5+tO+.1+sp*.3,5.95);P.l(.14+sp*.1,6.02);P.q(.04,5.5,0,5.3);P.q(-.04,5.5,-.14-sp*.1,6.02);P.l(-.5-tO-.1-sp*.3,5.95);P.q(-hip-.2,4.9,-hip-.06,4.2);P.close()};
+  paint(shorts,shortsC,{ink:darken(shortsC,.65)});
+  shadeIn(shorts,()=>{P.m(.05,4.1);P.q(.3,5.2,.2,6.2);P.l(3,6.2);P.l(3,4.1);P.close()},darken(shortsC,.45),.35);
+  shadeIn(shorts,()=>{P.m(-2,4.15);P.l(2,4.15);P.l(2,4.45);P.l(-2,4.45);P.close()},darken(shortsC,.5),.55);
+  for(const s of[-1,1]){
+    shadeIn(shorts,()=>{P.m(s*(hip+.02),4.45);P.l(s*(hip+.12),4.45);P.l(s*(.5+tO+.14+sp*.3),6);P.l(s*(.5+tO+sp*.3),6);P.close()},kit.shorts==='branco'?'#1c1f23':'#e9e6df',.55);
+    line(()=>{P.m(s*(.5+tO+.02+sp*.3),5.95);P.l(s*(.44+tO+sp*.3),5.62)},darken(shortsC,.6),.03,.8);
+    line(()=>{P.m(s*.14,5.9);P.q(s*.25,5.4,s*.18,4.95)},darken(shortsC,.5),.022,.45);
+  }
+  line(()=>{P.m(-.05,4.34);P.q(-.08,4.5,-.1,4.62);P.m(.05,4.34);P.q(.08,4.5,.1,4.62)},'#e9e6df',.02,.8);
+
+  /* tronco */
+  const torso=()=>{P.m(-nw*1.3,1.12);P.q(-sh*.62,1.18-.1*m,-sh+.02,1.52);P.q(-sh-.08,1.95,-sh+.22,2.35);P.q(-lat-.02,2.58,-lat,2.8);
+    P.q(-wa-.08+fat*.12,3.3,-wa,3.78);P.q(-wa-.02-fat*.16,4.08,-hip,4.36);P.l(hip,4.36);
+    P.q(wa+.02+fat*.16,4.08,wa,3.78);P.q(wa+.08-fat*.12,3.3,lat,2.8);P.q(lat+.02,2.58,sh-.22,2.35);P.q(sh+.08,1.95,sh-.02,1.52);P.q(sh*.62,1.18-.1*m,nw*1.3,1.12);P.close()};
+  paint(torso,skin,{ink:outlineC,lw:.035});
+  shadeIn(torso,()=>{P.m(.12,1);P.q(.5,2.4,.3,4.45);P.l(3,4.45);P.l(3,1);P.close()},shade,.4);
+  shadeIn(torso,()=>P.e(-sh*.42,2.35,.55,.95),light,sketch?0:.22);
+  // clavículas e esterno
+  for(const s of[-1,1]){line(()=>{P.m(s*.12,1.34);P.q(s*sh*.5,1.24,s*(sh-.22),1.4)},light,.04,.35);line(()=>{P.m(s*.14,1.42);P.q(s*sh*.5,1.34,s*(sh-.25),1.48)},shade,.025,.35)}
+  line(()=>{P.m(-.05,1.3);P.q(0,1.36,.05,1.3)},deep,.02,.5);
+  if(!fem){
+    for(const s of[-1,1]){
+      const pec=()=>{P.m(s*.05,1.72);P.q(s*sh*.55,1.56,s*(sh-.26),1.8);P.q(s*(sh-.1),2.2,s*(sh-.34),2.46);P.q(s*sh*.42,2.7+fat*.12,s*.07,2.5);P.close()};
+      shadeIn(torso,pec,light,sketch?0:.12+.1*m);
+      line(()=>{P.m(s*(sh-.34),2.46);P.q(s*sh*.42,2.72+fat*.12,s*.07,2.52)},deep,.06,.18+.3*m*(1-fat));
+      paint(()=>P.e(s*sh*.47,2.28+fat*.08,.05,.04),mix(skin,dk?'#2a1712':'#8a4a3a',.45),{stroke:false,alpha:.7});
+      for(let i=0;i<3;i++)line(()=>{const y=2.42+i*.17;P.m(s*(lat-.02),y);P.l(s*(lat-.16),y+.1)},shade,.03,.35*def*m);
+    }
+    line(()=>{P.m(0,1.75);P.l(0,2.5)},shade,.03,.3*m);
+  }
+  // abdômen
+  line(()=>{P.m(0,2.62);P.l(0,3.95)},shade,.03,.4*def);
+  for(const y of[2.86,3.2,3.54])for(const s of[-1,1])line(()=>{P.m(s*.04,y);P.q(s*.18,y+.04,s*.3,y-.02)},shade,.03,.38*def);
+  for(const s of[-1,1]){
+    line(()=>{P.m(s*.33,2.62);P.q(s*.38,3.3,s*.28,3.98)},shade,.03,.32*def);
+    shadeIn(torso,()=>{P.m(s*lat,2.8);P.q(s*(wa+.02),3.3,s*(wa-.02),3.95);P.l(s*(wa-.22),3.9);P.q(s*(lat-.25),3.3,s*(lat-.18),2.8);P.close()},shade,.28*def+.08);
+    line(()=>{P.m(s*(wa-.16),3.72);P.q(s*(wa-.3),4.08,s*.2,4.4)},shade,.03,.4*def);
+  }
+  if(fat>.3)line(()=>{P.m(-wa+.12,3.55);P.q(0,4.25+fat*.25,wa-.12,3.55)},shade,.035,(fat-.3)*.9);
+  paint(()=>P.e(0,3.86+fat*.12,.045,.035+fat*.02),deep,{stroke:false,alpha:.7});
+  // pelos
+  if(!fem&&(B.hair||0)>.15){const r=rngOf((f.seed||1)*29);ctx.save();ctx.strokeStyle=sketch?INK:bodyHairC;ctx.lineWidth=Math.max(.6,S*.013);
+    const n=Math.round(260*B.hair);for(let i=0;i<n;i++){let x,y;if(i<n*.7){const a=r()*Math.PI*2,rad=Math.sqrt(r());x=Math.cos(a)*rad*sh*.55;y=2.15+Math.sin(a)*rad*.38}else{x=(r()-.5)*.14;y=3.5+r()*.85}
+      ctx.globalAlpha=.25+r()*.35;ctx.beginPath();ctx.moveTo(X(x),Y(y));ctx.quadraticCurveTo(X(x+(r()-.5)*.06),Y(y+.04),X(x+(r()-.5)*.08),Y(y+.07+r()*.04));ctx.stroke()}ctx.restore()}
+  if(marks.has('chest')&&!fem){line(()=>{P.m(-.72,2.08);P.q(0,1.88,.72,2.08)},tc,.06,.85);line(()=>{P.m(-.45,2.22);P.q(0,2.16,.45,2.24)},tc,.035,.8)}
+  if(fem){
+    const top=()=>{P.m(-sh+.2,1.98);P.q(-.55,1.78,-.05,2.1);P.l(.05,2.1);P.q(.55,1.78,sh-.2,1.98);P.q(sh-.08,2.5,lat-.04,2.88);P.q(0,2.98,-lat+.04,2.88);P.q(-sh+.08,2.5,-sh+.2,1.98);P.close()};
+    paint(top,'#2E3942',{ink:'#141a1f'});
+    shadeIn(top,()=>{P.m(.05,1.8);P.q(.4,2.5,.3,3.1);P.l(3,3.1);P.l(3,1.8);P.close()},'#11161a',.4);
+    line(()=>{P.m(-lat+.06,2.7);P.q(0,2.8,lat-.06,2.7)},'#1a2127',.04,.9);
+    for(const s of[-1,1]){line(()=>{P.m(s*.5,2.0);P.q(s*.46,1.6,s*.42,1.22)},'#2E3942',.13,1);line(()=>{P.m(s*.08,2.12);P.q(s*.35,2.4,s*(lat-.1),2.62)},'#11161a',.02,.5)}
+  }
+  if(pz.belt==='cintura'){paint(()=>{P.m(-wa-.12,3.84);P.q(0,4.0,wa+.12,3.84);P.l(wa+.12,4.26);P.q(0,4.42,-wa-.12,4.26);P.close()},'#1c1d1f',{ink:'#050505'});plate(0,4.07,1.35,.88)}
+
+  /* braços */
+  const order=pose==='bracos_cruzados'?['R','L']:['L','R'];
+  for(const k of order){const a=pz[k],s=k==='L'?-1:1;
+    limb(a[1],a[2],FORE,s,aK,.06,.02,L=>{
+      line(()=>{const p1=add(L.A,add(mul(L.d,.1),mul(L.nOut,.08))),p2=add(L.A,add(mul(L.d,.7),mul(L.nOut,.02)));P.m(p1[0],p1[1]);P.l(p2[0],p2[1])},shade,.025,.3*def);
+      if(marks.has('shoulders')){ctx.save();P.begin();L.shape();ctx.clip();const c=add(L.A,mul(sub(L.B,L.A),.35));line(()=>{const p1=add(c,mul(L.nOut,.3)),p2=add(c,mul(L.nMed,.3));P.m(p1[0],p1[1]);P.l(p2[0],p2[1])},tc,.07,.8);ctx.restore()}
+    });
+    limb(a[0],a[1],UPPER,s,aK,.22,.04,L=>{
+      line(()=>{const p1=add(L.A,add(mul(L.d,.55),mul(L.nMed,.02))),p2=add(L.A,add(mul(L.d,1.1),mul(L.nMed,.08)));P.m(p1[0],p1[1]);P.l(p2[0],p2[1])},shade,.03,.35*def+.1);
+      line(()=>{const p1=add(L.A,add(mul(L.d,.1),mul(L.nOut,.18))),p2=add(L.A,add(mul(L.d,.5),mul(L.nOut,.08)));P.m(p1[0],p1[1]);P.l(p2[0],p2[1])},shade,.028,.3*def);
+      if(marks.has('shoulders')){ctx.save();P.begin();L.shape();ctx.clip();
+        for(let j=0;j<4;j++){const t=.15+j*.2,c=add(L.A,mul(sub(L.B,L.A),t));line(()=>{const p1=add(c,mul(L.nOut,.45)),p2=add(c,mul(L.nMed,.45)),q=add(c,mul(L.d,.14));P.m(p1[0],p1[1]);P.q(q[0],q[1],p2[0],p2[1])},tc,.07-j*.01,.8)}
+        ctx.restore()}
+    });
+  }
   if(pz.belt==='peito'){strap([[0,2.9],[0,4.55]],.52);plate(0,2.42,1.55,1.05)}
   if(pz.belt==='ombro'){strap([[-sh+.45,1.3],[-.6,2.35]],.5);strap([[-.35,3.15],[-.22,4.7]],.5);plate(-.45,2.75,1.4,.95,-.28)}
   if(pz.belt==='alto'){strap([[-.8,-1.7],[-1.1,-.6],[-1.2,.3]],.46);strap([[.8,-1.7],[1.1,-.6],[1.2,.3]],.46);plate(0,-1.72,1.6,1.05)}
-  if(!pz.front)for(const k of['L','R'])glove(pz[k][2],pz[k][1]);
-  // cabeça (mesma função dos retratos, sem ombros)
-  const Sh=S*1.12;drawFace(ctx,W,H,f,st,{...opts,noBody:true,S:Sh,ox,oy:oy+1.3*S-1.4*Sh});
-  if(pz.front)for(const k of['L','R'])glove(pz[k][2],pz[k][1],1.15);
+  if(!pz.front)for(const k of['L','R'])glove(pz[k][2],pz[k][1],1,k==='L'?-1:1);
+  const Sh=S*1.1;drawFace(ctx,W,H,f,st,{...opts,noBody:true,S:Sh,ox,oy:oy+1.3*S-1.4*Sh});
+  if(pz.front)for(const k of['L','R'])glove(pz[k][2],pz[k][1],1.12,k==='L'?-1:1);
 }
 
 /* ================= estilos ================= */
@@ -953,22 +1063,22 @@ function genFace(seed,popId,sex){
     eyes:{shape:pickW(r,Pp.eyes),iris:pickW(r,Pp.iris)},brows:{shape:pickW(r,Pp.brows)},
     nose:{shape:pickW(r,Pp.nose),broken:r()<.3?+(r()*.8).toFixed(1):0},mouth:{shape:pickW(r,Pp.mouth)},
     ears:{shape:pickW(r,{normal:6,pequena:2,abano:1,grande:1}),cauli:r()<.35?1+Math.floor(r()*3):0},
-    hair:{style,color:hairColor},beard:{style:beard,color:null},marks,recede:fem?0:+(r()*.7).toFixed(1),kit:{shorts:pickW(r,{preto:4,vermelho:2,azul:2,branco:1,verde:1,dourado:.5,roxo:.5,camuflado:.5}),gloves:pickW(r,{preto:6,vermelho:1,azul:1,branco:.5})}};
+    hair:{style,color:hairColor},beard:{style:beard,color:null},marks,recede:fem?0:+(r()*.7).toFixed(1),body:{muscle:+(.45+r()*.45).toFixed(2),fat:+(.05+r()*.3).toFixed(2),hair:fem?0:+(r()<(Pp.beardP||.5)*.6?r():0).toFixed(2),height:+r().toFixed(2)},kit:{shorts:pickW(r,{preto:4,vermelho:2,azul:2,branco:1,verde:1,dourado:.5,roxo:.5,camuflado:.5}),gloves:pickW(r,{preto:6,vermelho:1,azul:1,branco:.5})}};
 }
 
 /* ================= roster canônico ================= */
-const C=(o)=>({v:1,pop:'misto',build:.5,kit:{shorts:'preto',gloves:'preto'},head:{shape:'oval',width:0,jaw:0,chin:0},eyes:{shape:'amendoado',iris:'escuro'},brows:{shape:'reta'},nose:{shape:'reto',broken:0},mouth:{shape:'neutra'},ears:{shape:'normal',cauli:0},hair:{style:'curto',color:'preto'},beard:{style:'nenhuma',color:null},marks:[],recede:0,...o});
+const C=(o)=>({v:1,pop:'misto',build:.5,body:{muscle:.65,fat:.15,hair:0,height:.5},kit:{shorts:'preto',gloves:'preto'},head:{shape:'oval',width:0,jaw:0,chin:0},eyes:{shape:'amendoado',iris:'escuro'},brows:{shape:'reta'},nose:{shape:'reto',broken:0},mouth:{shape:'neutra'},ears:{shape:'normal',cauli:0},hair:{style:'curto',color:'preto'},beard:{style:'nenhuma',color:null},marks:[],recede:0,...o});
 const CANON=[
- C({name:'Malik Carter',kit:{shorts:'vermelho',gloves:'preto'},cc:'EUA',rec:'24-1',seed:11,sex:'m',age:31,skin:'t12',pop:'afro_diaspora',head:{shape:'oval',width:0,jaw:.4,chin:0},nose:{shape:'largo',broken:0},mouth:{shape:'canto'},ears:{shape:'normal',cauli:1},hair:{style:'degrade_alto',color:'preto'},beard:{style:'cavanhaque_bigode',color:null},marks:['brow_r','argola'],recede:.1}),
- C({name:'Rafael Moreira',kit:{shorts:'verde',gloves:'preto'},cc:'BRA',rec:'20-2',seed:22,sex:'m',age:31,skin:'t06',pop:'latino',head:{shape:'quadrado',width:.2,jaw:0,chin:0},eyes:{shape:'profundo',iris:'castanho'},brows:{shape:'grossa'},nose:{shape:'achatado',broken:.8},ears:{shape:'normal',cauli:3},hair:{style:'maquina',color:'castanho_escuro'},beard:{style:'por_fazer',color:null},marks:['cheek_l'],recede:.4}),
- C({name:'Magomed Arsanov',kit:{shorts:'preto',gloves:'preto'},cc:'CAZ',rec:'18-0',seed:33,sex:'m',age:30,skin:'t03',pop:'caucaso',head:{shape:'quadrado',width:0,jaw:.2,chin:.3},eyes:{shape:'encapuzado',iris:'escuro'},brows:{shape:'espessa'},nose:{shape:'aquilino',broken:.3},mouth:{shape:'seria'},ears:{shape:'normal',cauli:3},hair:{style:'raspado',color:'preto'},beard:{style:'sem_bigode',color:null}}),
- C({name:'Mateo Reyes',kit:{shorts:'vermelho',gloves:'vermelho'},cc:'MEX',rec:'17-1',seed:44,sex:'m',age:26,skin:'t08',pop:'latino',head:{shape:'diamante',width:0,jaw:0,chin:0},brows:{shape:'arqueada'},nose:{shape:'reto',broken:0},mouth:{shape:'canto'},hair:{style:'topete',color:'preto'},beard:{style:'bigode',color:null},marks:['neck','chest']}),
- C({name:'Ana Costa',kit:{shorts:'dourado',gloves:'preto'},cc:'BRA',rec:'16-1',seed:55,sex:'f',age:29,skin:'t11',pop:'afro_diaspora',head:{shape:'oval',width:-.2,jaw:0,chin:0},eyes:{shape:'grande',iris:'escuro'},brows:{shape:'arqueada'},nose:{shape:'carnudo',broken:0},mouth:{shape:'carnuda'},hair:{style:'box_braids',color:'preto'},marks:['brinco']}),
- C({name:'Kenji Sato',kit:{shorts:'branco',gloves:'preto'},cc:'JAP',rec:'29-5',seed:66,sex:'m',age:35,skin:'t03',pop:'leste_asiatico',head:{shape:'retangular',width:0,jaw:0,chin:0},eyes:{shape:'monolid',iris:'escuro'},nose:{shape:'botao',broken:.3},mouth:{shape:'seria'},ears:{shape:'normal',cauli:2},hair:{style:'para_tras',color:'preto'},marks:['cheek_r','brow_l'],recede:.3}),
- C({name:'Jessica Monroe',kit:{shorts:'azul',gloves:'preto'},cc:'EUA',rec:'13-0',seed:77,sex:'f',age:25,skin:'t02',pop:'europa_norte',head:{shape:'coracao',width:0,jaw:0,chin:0},eyes:{shape:'redondo',iris:'azul'},brows:{shape:'alta'},nose:{shape:'arrebitado',broken:0},mouth:{shape:'arco'},hair:{style:'rabo',color:'loiro'},marks:['sardas_leves']}),
- C({name:'Aleksandr Volkovic',kit:{shorts:'preto',gloves:'preto'},cc:'SRV',rec:'Lenda',seed:88,sex:'m',age:40,skin:'t02',pop:'leste_europeu',build:1,head:{shape:'quadrado',width:.6,jaw:.6,chin:.4},eyes:{shape:'profundo',iris:'cinza'},brows:{shape:'baixa'},nose:{shape:'achatado',broken:1},mouth:{shape:'fina'},ears:{shape:'grande',cauli:3},hair:{style:'raspado',color:'castanho'},beard:{style:'sombra',color:null},marks:['brow_l','brow_r','cheek_l','nose']}),
- C({name:'Sofia Markovic',kit:{shorts:'roxo',gloves:'preto'},cc:'SRV',rec:'18-2',seed:99,sex:'f',age:30,skin:'t02',pop:'leste_europeu',head:{shape:'quadrado',width:0,jaw:-.2,chin:0},eyes:{shape:'amendoado',iris:'verde'},brows:{shape:'reta'},nose:{shape:'romano',broken:.2},mouth:{shape:'seria'},ears:{shape:'normal',cauli:1},hair:{style:'nago',color:'castanho_escuro'}}),
- C({name:'Darius Cole',kit:{shorts:'camuflado',gloves:'preto'},cc:'EUA',rec:'12-0',seed:111,sex:'m',age:24,skin:'t10',pop:'afro_diaspora',build:.75,head:{shape:'retangular',width:0,jaw:.3,chin:.2},nose:{shape:'reto',broken:0},mouth:{shape:'neutra'},hair:{style:'twists',color:'preto'},beard:{style:'contorno',color:null},marks:['shoulders']}),
+ C({name:'Malik Carter',body:{muscle:0.8,fat:0.08,hair:0,height:0.55},kit:{shorts:'vermelho',gloves:'preto'},cc:'EUA',rec:'24-1',seed:11,sex:'m',age:31,skin:'t12',pop:'afro_diaspora',head:{shape:'oval',width:0,jaw:.4,chin:0},nose:{shape:'largo',broken:0},mouth:{shape:'canto'},ears:{shape:'normal',cauli:1},hair:{style:'degrade_alto',color:'preto'},beard:{style:'cavanhaque_bigode',color:null},marks:['brow_r','argola'],recede:.1}),
+ C({name:'Rafael Moreira',body:{muscle:0.7,fat:0.14,hair:0.35,height:0.5},kit:{shorts:'verde',gloves:'preto'},cc:'BRA',rec:'20-2',seed:22,sex:'m',age:31,skin:'t06',pop:'latino',head:{shape:'quadrado',width:.2,jaw:0,chin:0},eyes:{shape:'profundo',iris:'castanho'},brows:{shape:'grossa'},nose:{shape:'achatado',broken:.8},ears:{shape:'normal',cauli:3},hair:{style:'maquina',color:'castanho_escuro'},beard:{style:'por_fazer',color:null},marks:['cheek_l'],recede:.4}),
+ C({name:'Magomed Arsanov',body:{muscle:0.75,fat:0.1,hair:0.5,height:0.55},kit:{shorts:'preto',gloves:'preto'},cc:'CAZ',rec:'18-0',seed:33,sex:'m',age:30,skin:'t03',pop:'caucaso',head:{shape:'quadrado',width:0,jaw:.2,chin:.3},eyes:{shape:'encapuzado',iris:'escuro'},brows:{shape:'espessa'},nose:{shape:'aquilino',broken:.3},mouth:{shape:'seria'},ears:{shape:'normal',cauli:3},hair:{style:'raspado',color:'preto'},beard:{style:'sem_bigode',color:null}}),
+ C({name:'Mateo Reyes',body:{muscle:0.62,fat:0.07,hair:0,height:0.35},kit:{shorts:'vermelho',gloves:'vermelho'},cc:'MEX',rec:'17-1',seed:44,sex:'m',age:26,skin:'t08',pop:'latino',head:{shape:'diamante',width:0,jaw:0,chin:0},brows:{shape:'arqueada'},nose:{shape:'reto',broken:0},mouth:{shape:'canto'},hair:{style:'topete',color:'preto'},beard:{style:'bigode',color:null},marks:['neck','chest']}),
+ C({name:'Ana Costa',body:{muscle:0.62,fat:0.1,hair:0,height:0.3},kit:{shorts:'dourado',gloves:'preto'},cc:'BRA',rec:'16-1',seed:55,sex:'f',age:29,skin:'t11',pop:'afro_diaspora',head:{shape:'oval',width:-.2,jaw:0,chin:0},eyes:{shape:'grande',iris:'escuro'},brows:{shape:'arqueada'},nose:{shape:'carnudo',broken:0},mouth:{shape:'carnuda'},hair:{style:'box_braids',color:'preto'},marks:['brinco']}),
+ C({name:'Kenji Sato',body:{muscle:0.58,fat:0.08,hair:0.05,height:0.3},kit:{shorts:'branco',gloves:'preto'},cc:'JAP',rec:'29-5',seed:66,sex:'m',age:35,skin:'t03',pop:'leste_asiatico',head:{shape:'retangular',width:0,jaw:0,chin:0},eyes:{shape:'monolid',iris:'escuro'},nose:{shape:'botao',broken:.3},mouth:{shape:'seria'},ears:{shape:'normal',cauli:2},hair:{style:'para_tras',color:'preto'},marks:['cheek_r','brow_l'],recede:.3}),
+ C({name:'Jessica Monroe',body:{muscle:0.55,fat:0.12,hair:0,height:0.35},kit:{shorts:'azul',gloves:'preto'},cc:'EUA',rec:'13-0',seed:77,sex:'f',age:25,skin:'t02',pop:'europa_norte',head:{shape:'coracao',width:0,jaw:0,chin:0},eyes:{shape:'redondo',iris:'azul'},brows:{shape:'alta'},nose:{shape:'arrebitado',broken:0},mouth:{shape:'arco'},hair:{style:'rabo',color:'loiro'},marks:['sardas_leves']}),
+ C({name:'Aleksandr Volkovic',body:{muscle:0.62,fat:0.48,hair:0.7,height:0.85},kit:{shorts:'preto',gloves:'preto'},cc:'SRV',rec:'Lenda',seed:88,sex:'m',age:40,skin:'t02',pop:'leste_europeu',build:1,head:{shape:'quadrado',width:.6,jaw:.6,chin:.4},eyes:{shape:'profundo',iris:'cinza'},brows:{shape:'baixa'},nose:{shape:'achatado',broken:1},mouth:{shape:'fina'},ears:{shape:'grande',cauli:3},hair:{style:'raspado',color:'castanho'},beard:{style:'sombra',color:null},marks:['brow_l','brow_r','cheek_l','nose']}),
+ C({name:'Sofia Markovic',body:{muscle:0.7,fat:0.12,hair:0,height:0.45},kit:{shorts:'roxo',gloves:'preto'},cc:'SRV',rec:'18-2',seed:99,sex:'f',age:30,skin:'t02',pop:'leste_europeu',head:{shape:'quadrado',width:0,jaw:-.2,chin:0},eyes:{shape:'amendoado',iris:'verde'},brows:{shape:'reta'},nose:{shape:'romano',broken:.2},mouth:{shape:'seria'},ears:{shape:'normal',cauli:1},hair:{style:'nago',color:'castanho_escuro'}}),
+ C({name:'Darius Cole',body:{muscle:0.92,fat:0.06,hair:0.05,height:0.7},kit:{shorts:'camuflado',gloves:'preto'},cc:'EUA',rec:'12-0',seed:111,sex:'m',age:24,skin:'t10',pop:'afro_diaspora',build:.75,head:{shape:'retangular',width:0,jaw:.3,chin:.2},nose:{shape:'reto',broken:0},mouth:{shape:'neutra'},hair:{style:'twists',color:'preto'},beard:{style:'contorno',color:null},marks:['shoulders']}),
 ];
 
 /* ================= catálogo ================= */
@@ -1064,8 +1174,12 @@ function renderRank(){
     r.querySelector('b').textContent=f.name||names[i];r.querySelector('.who span').textContent=f.cc||POPS[f.pop]?.n||'';r.querySelector('.rec').textContent=f.rec||'';
     el.append(r);renderPortrait(r.querySelector('canvas'),f,style,{avatar:true,zoom:1.5,post})});
 }
+const BODY_SL=[['muscle','muscle'],['fat','fat'],['bhair','hair'],['height','height']];
+const PRESETS={mosca:{build:.15,muscle:.6,fat:.07,height:.15},leve:{build:.35,muscle:.72,fat:.09,height:.4},medio:{build:.6,muscle:.82,fat:.11,height:.6},pesado:{build:1,muscle:.66,fat:.42,height:.85}};
 function renderPoses(){
   if(!face.kit)face.kit={shorts:'preto',gloves:'preto'};
+  if(!face.body)face.body={muscle:.65,fat:.15,hair:0,height:.5};
+  for(const[id,k]of BODY_SL){$('sl-'+id).value=face.body[k]??0;$('o-'+id).textContent=Math.round((face.body[k]??0)*100)+'%'}
   $('kit-shorts').value=face.kit.shorts;$('kit-gloves').value=face.kit.gloves;
   for(const[el,belt]of[[$('poses-plain'),0],[$('poses-belt'),1]]){el.innerHTML='';
     for(const[k,v]of Object.entries(POSES).filter(([,v])=>v.belt===belt)){
@@ -1083,6 +1197,8 @@ document.querySelectorAll('[data-sex]').forEach(b=>b.addEventListener('click',()
 $('post').addEventListener('change',e=>{post=e.target.checked;renderAll()});
 $('rand').addEventListener('click',()=>{face=genFace(Math.floor(Math.random()*1e9),$('pop-sel').value);update()});
 $('pop-grid-sel').addEventListener('change',renderPopGrid);
+for(const[id,k]of BODY_SL)$('sl-'+id).addEventListener('input',e=>{face.body={...(face.body||{}),[k]:+e.target.value};syncControls();renderPoses()});
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{const pr=PRESETS[b.dataset.preset];face.build=pr.build;face.body={...(face.body||{}),muscle:pr.muscle,fat:pr.fat,height:pr.height};update()}));
 for(const[id,obj,key]of[['kit-shorts',SHORTS,'shorts'],['kit-gloves',GLOVES,'gloves']]){const sel=$(id);
   for(const[k,v]of Object.entries(obj)){const o=document.createElement('option');o.value=k;o.textContent=v[1];sel.append(o)}
   sel.addEventListener('change',e=>{face.kit={...(face.kit||{}),[key]:e.target.value};syncControls();renderPoses()})}
