@@ -1,0 +1,127 @@
+name: Realism refinement 0.5.1 validation and APK
+on:
+  push:
+    branches: [codex/realism-refinement-0.5.1-20260928]
+    paths:
+      - .github/workflows/refinement-validation.yml
+      - .ci/apply_refinement_edits.py
+      - .ci/refinement-edits/**
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: refinement-validation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply integrity-checked source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/realism-refinement-0.5.1-20260928
+          mkdir -p validation mais-uma-rodada/build
+          git rev-parse HEAD > validation/input-commit.txt
+          python3 .ci/apply_refinement_edits.py
+          git diff --check
+      - name: Validate accounting, full world season, mobile layout and actual OpenGL captures
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 -e LIBGL_ALWAYS_SOFTWARE=true \
+            barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 xvfb xauth libgl1-mesa-dri libgl1 mesa-utils libxcursor1 libxinerama1 libxrandr2 libxi6 libxrender1 libxfixes3 libxkbcommon0 libxext6 libx11-6 libglx-mesa0 > /workspace/validation/dependencies.log
+              godot --version | tee /workspace/validation/engine.txt
+              timeout 300s godot --headless --path . --import > /workspace/validation/import.log 2>&1
+              test "$(find .godot/imported -type f -name "*.fontdata" | wc -l)" -ge 4
+              export REFINEMENT_REPORT=/workspace/validation/refinement.json
+              export DEPTH_REPORT=/workspace/validation/depth.json
+              timeout 600s godot --headless --path . --script res://tests/refinement_bootstrap.gd 2>&1 | tee /workspace/validation/refinement-tests.log
+              grep -q REFINEMENT_REGRESSION_OK /workspace/validation/refinement-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|REFINEMENT_FAIL" /workspace/validation/refinement-tests.log; then exit 1; fi
+              timeout 180s godot --headless --path . --script res://tests/mobile_regression.gd 2>&1 | tee /workspace/validation/mobile-tests.log
+              grep -q MOBILE_REGRESSION_OK /workspace/validation/mobile-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|MOBILE_FAIL" /workspace/validation/mobile-tests.log; then exit 1; fi
+              export REFINEMENT_SEASON_REPORT=/workspace/validation/season.json
+              timeout 600s godot --headless --path . --script res://tests/refinement_season_bootstrap.gd 2>&1 | tee /workspace/validation/season-tests.log
+              grep -q REFINEMENT_SEASON_OK /workspace/validation/season-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:|REFINEMENT_SEASON_FAIL" /workspace/validation/season-tests.log; then exit 1; fi
+              export REFINEMENT_SHOTS=/workspace/validation/screenshots
+              mkdir -p "$REFINEMENT_SHOTS"
+              timeout 480s xvfb-run -a -s "-screen 0 1800x1800x24" \
+                godot --path . --display-driver x11 --rendering-method gl_compatibility --audio-driver Dummy \
+                --script res://tests/refinement_visual.gd 2>&1 | tee /workspace/validation/visual-tests.log
+              grep -q REFINEMENT_VISUAL_OK /workspace/validation/visual-tests.log
+              if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/visual-tests.log; then exit 1; fi
+              test "$(find /workspace/validation/screenshots -name "*.png" | wc -l)" -eq 16
+            '
+      - name: Commit validated readable source to isolated development branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = codex/realism-refinement-0.5.1-20260928
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mapfile -t SOURCE_PATHS < validation/source-paths.txt
+          git add -- "${SOURCE_PATHS[@]}"
+          if ! git diff --cached --quiet; then
+            git commit -m 'Refine 0.5.1 scoring attribution, board budgets, installment accounting, academy plans and responsive UI'
+            git push origin HEAD:codex/realism-refinement-0.5.1-20260928
+          fi
+          git rev-parse HEAD > validation/source-commit.txt
+          git show --stat --oneline HEAD > validation/commit-summary.txt
+      - name: Export separate Android test application
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('mais-uma-rodada/export_presets.cfg')
+          text = p.read_text()
+          assert text.count('package/unique_name="com.maisumarodada.futebol"') == 2
+          assert text.count('version/name="0.5.1"') == 2
+          assert text.count('version/code=14') == 2
+          text = text.replace('package/unique_name="com.maisumarodada.futebol"', 'package/unique_name="com.maisumarodada.futebol.refinetest"')
+          text = text.replace('package/name="Mais Uma Rodada"', 'package/name="Mais Uma Rodada 0.5.1 Teste"')
+          p.write_text(text)
+          PY
+          docker run --rm -v "$PWD:/workspace" -w /workspace/mais-uma-rodada \
+            -e GODOT_SILENCE_ROOT_WARNING=1 barichello/godot-ci:4.7 bash -lc '
+              set -euo pipefail
+              apt-get update -qq
+              apt-get install -y --no-install-recommends libfontconfig1 >/dev/null
+              timeout 300s godot --headless --path . --export-debug "Android arm64" build/MaisUmaRodada-0.5.1-realismo-refinamento-teste.apk 2>&1 | tee /workspace/validation/export.log
+              if grep -E "SCRIPT ERROR|Parse Error|Failed to export|Export failed" /workspace/validation/export.log; then exit 1; fi
+            '
+          test -s mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-refinamento-teste.apk
+          sha256sum mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-refinamento-teste.apk > validation/apk-sha256.txt
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          apk = Path('mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-refinamento-teste.apk')
+          with zipfile.ZipFile(apk) as z:
+              assert z.testzip() is None
+              assert 'AndroidManifest.xml' in z.namelist()
+          Path('validation/build.json').write_text(json.dumps({'version': '0.5.1', 'code': 14, 'package': 'com.maisumarodada.futebol.refinetest', 'name': 'Mais Uma Rodada 0.5.1 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'base_commit': '6e3f472d6532090e73d799c1f0f6c221e97c0ec7', 'physical_android_tested': False}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: realism-refinement-validation
+          path: validation/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaisUmaRodada-0.5.1-realismo-refinamento-teste
+          path: mais-uma-rodada/build/MaisUmaRodada-0.5.1-realismo-refinamento-teste.apk
+          if-no-files-found: error
+          retention-days: 14
