@@ -7,7 +7,6 @@ var _limit := 30
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Redes sociais"
 
 

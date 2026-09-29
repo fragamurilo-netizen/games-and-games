@@ -13,7 +13,6 @@ var _month_pick := 0 # seleção do mês mostrada na aba Temporadas
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "História"
 
 

@@ -7,7 +7,6 @@ const NAMES := {"h": "Titular", "a": "Reserva", "t": "Terceiro", "g": "Goleiro"}
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Uniformes por temporada"
 
 

@@ -1,16 +1,16 @@
 class_name BottomNav
 extends PanelContainer
-## Navegação principal: JOGAR · ELENCO · MERCADO · TABELA · CLUBE. Embaixo no celular em
-## retrato; em telas largas (paisagem, tablet) vira uma coluna na lateral esquerda.
+## Navegação principal: Início · Elenco · Tática · Mercado · Clube. Embaixo no celular em
+## retrato; em telas largas (paisagem, tablet) vira um trilho estreito na lateral esquerda.
 
 signal tab_selected(tab: String)
 
 const TABS := [
-	["hub", "JOGAR", "ball"],
-	["squad", "ELENCO", "shirt"],
-	["market", "MERCADO", "swap"],
-	["table", "TABELA", "table"],
-	["club", "CLUBE", "shield"],
+	["hub", "Início", "home"],
+	["squad", "Elenco", "shirt"],
+	["tactics", "Tática", "tactics"],
+	["market", "Mercado", "swap"],
+	["club", "Clube", "shield"],
 ]
 
 var _buttons: Dictionary = {}
@@ -73,7 +73,7 @@ func set_vertical(on: bool) -> void:
 	add_theme_stylebox_override(&"panel", sb)
 	for b: Button in _buttons.values():
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size = Vector2(0, 112 if on else UITokens.H_NAV - 8)
+		b.custom_minimum_size = Vector2(0, 104 if on else UITokens.H_NAV - 8)
 	queue_redraw()
 
 
@@ -84,19 +84,15 @@ func select(tab: String) -> void:
 	queue_redraw()
 
 
-## Indicador da aba ativa: só uma cápsula suave na cor do clube atrás do ícone (o texto
-## também fica na cor do clube). Na lateral, a cápsula ocupa a largura do botão.
+## Aba ativa: filete na cor do clube na borda (em cima da aba na barra de baixo, à esquerda
+## no trilho lateral). Sem cápsula atrás do ícone.
 func _draw() -> void:
 	if not _buttons.has(_active):
 		return
 	var b: Button = _buttons[_active]
 	var r := Rect2(b.position + (get_node("Row") as Control).position, b.size)
-	var icon_h := 34.0
-	var text_h := b.get_theme_font_size(&"font_size") * 1.25
-	var top := r.position.y + (r.size.y - icon_h - text_h) * 0.5 # conteúdo centralizado no botão
-	var pill := StyleBoxFlat.new()
-	pill.bg_color = Color(UIColors.ACCENT, 0.18)
-	pill.set_corner_radius_all(20)
-	pill.anti_aliasing = true
-	var w := 76.0 if not vertical else minf(96.0, r.size.x - 16.0)
-	draw_style_box(pill, Rect2(r.get_center().x - w * 0.5, top - 5.0, w, icon_h + 10.0))
+	if vertical:
+		draw_rect(Rect2(0, r.position.y + 10.0, 3.0, r.size.y - 20.0), UIColors.ACCENT)
+	else:
+		var w := minf(56.0, r.size.x - 24.0)
+		draw_rect(Rect2(r.get_center().x - w * 0.5, 0, w, 3.0), UIColors.ACCENT)

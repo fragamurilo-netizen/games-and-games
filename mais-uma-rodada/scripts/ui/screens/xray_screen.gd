@@ -4,7 +4,6 @@ extends BaseScreen
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Raio-X tático"
 
 
@@ -79,7 +78,7 @@ func _insight(w: GameWorld, rep: Dictionary, ins: Dictionary) -> Control:
 			var msg := TacticalXRay.apply_fix(w, fix)
 			GameManager.save_now()
 			UIManager.toast(msg if msg != "" else "Ajuste aplicado.")
-			UIManager.push("prematch", {"edit": true}), "check"))
+			UIManager.switch_area("tactics"), "check"))
 	return UIKit.card_panel(card)
 
 

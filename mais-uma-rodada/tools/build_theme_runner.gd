@@ -167,9 +167,9 @@ func _buttons(th: Theme) -> void:
 	_button_states(th, "ChipButton",
 		sb(UIColors.SURFACE, UITokens.R_SM, clear, 0, 14, 6),
 		sb(UIColors.SURFACE_3, UITokens.R_SM, clear, 0, 14, 6),
-		sb(UIColors.ACCENT, UITokens.R_SM, UIColors.ACCENT, 1, 14, 6),
+		sb(UIColors.SURFACE_3, UITokens.R_SM, UIColors.LINE, 1, 14, 6),
 		sb(UIColors.SURFACE, UITokens.R_SM, UITokens.HAIRLINE, 1, 14, 6))
-	_button_colors(th, "ChipButton", UIColors.MUTED, UIColors.ON_ACCENT)
+	_button_colors(th, "ChipButton", UIColors.MUTED, UIColors.TEXT)
 	th.set_font(&"font", "ChipButton", f_semi)
 	th.set_font_size(&"font_size", "ChipButton", 19)
 	# Abas (seções de uma tela): texto em caixa alta com sublinhado na cor do clube.
@@ -191,20 +191,30 @@ func _buttons(th: Theme) -> void:
 	# Segmento (seletor compacto dentro de uma cápsula "Segment")
 	th.add_type("SegmentButton")
 	th.set_type_variation("SegmentButton", "Button")
-	# Selecionado: cápsula cheia na cor do clube, texto no contraste dela.
-	_button_states(th, "SegmentButton", sb(clear, UITokens.R_SM, clear, 0, 10, 6), sb(Color(1, 1, 1, 0.04), UITokens.R_SM, clear, 0, 10, 6),
-		sb(UIColors.ACCENT, UITokens.R_SM, clear, 0, 10, 6), sb(clear, UITokens.R_SM, clear, 0, 10, 6))
-	_button_colors(th, "SegmentButton", UIColors.MUTED, UIColors.ON_ACCENT)
+	# Selecionado: um tom acima, texto cheio. A cor do clube fica para o que é ação.
+	_button_states(th, "SegmentButton", sb(clear, UITokens.R_XS, clear, 0, 10, 6), sb(Color(1, 1, 1, 0.04), UITokens.R_XS, clear, 0, 10, 6),
+		sb(UIColors.SURFACE_3, UITokens.R_XS, clear, 0, 10, 6), sb(clear, UITokens.R_XS, clear, 0, 10, 6))
+	_button_colors(th, "SegmentButton", UIColors.DIM, UIColors.TEXT)
 	th.set_font(&"font", "SegmentButton", f_semi)
 	th.set_font_size(&"font_size", "SegmentButton", 20)
 	# Navegação inferior (o indicador da aba ativa é desenhado pela BottomNav)
 	th.add_type("NavButton")
 	th.set_type_variation("NavButton", "Button")
 	_button_states(th, "NavButton", empty, sb(Color(1, 1, 1, 0.03), UITokens.R_MD, clear, 0, 4, 6), sb(clear, UITokens.R_MD, clear, 0, 4, 6), empty)
-	_button_colors(th, "NavButton", UIColors.DIM, UIColors.ACCENT)
-	th.set_font(&"font", "NavButton", _spaced(f_cond, 1))
-	th.set_font_size(&"font_size", "NavButton", 17)
-	th.set_constant(&"icon_max_width", "NavButton", 34)
+	_button_colors(th, "NavButton", UIColors.DIM, UIColors.TEXT)
+	th.set_font(&"font", "NavButton", f_semi)
+	th.set_font_size(&"font_size", "NavButton", 19)
+	th.set_constant(&"icon_max_width", "NavButton", 30)
+	# Cabeçalho de tabela (DataTable): texto pequeno, sem fundo; a coluna ordenada acende.
+	th.add_type("TableHead")
+	th.set_type_variation("TableHead", "Button")
+	var thd := sb(clear, 0, clear, 0, 6, 4)
+	thd.border_color = UIColors.LINE
+	thd.border_width_bottom = 1
+	_button_states(th, "TableHead", thd, thd, thd, thd)
+	_button_colors(th, "TableHead", UIColors.DIM, UIColors.TEXT)
+	th.set_font(&"font", "TableHead", f_semi)
+	th.set_font_size(&"font_size", "TableHead", 18)
 	# Linha clicável (listas)
 	th.add_type("RowButton")
 	th.set_type_variation("RowButton", "Button")
@@ -218,10 +228,10 @@ func _buttons(th: Theme) -> void:
 	th.add_type("RowOverlay")
 	th.set_type_variation("RowOverlay", "Button")
 	# Selecionado/pressionado: filete na cor do clube só à esquerda (como uma lista de verdade).
-	var ov_p := sb(Color(UIColors.ACCENT, 0.10), UITokens.R_MD, clear, 0, 0, 0)
+	var ov_p := sb(Color(UIColors.ACCENT, 0.10), 0, clear, 0, 0, 0)
 	ov_p.border_color = UIColors.ACCENT
-	ov_p.border_width_left = 4
-	_button_states(th, "RowOverlay", empty, sb(Color(UIColors.LINE, 0.55), UITokens.R_MD, clear, 0, 0, 0), ov_p, empty)
+	ov_p.border_width_left = 3
+	_button_states(th, "RowOverlay", empty, sb(Color(UIColors.LINE, 0.45), 0, clear, 0, 0, 0), ov_p, empty)
 	_button_colors(th, "RowOverlay", UIColors.TEXT, UIColors.TEXT)
 	# Ícone (barra superior)
 	th.add_type("IconButton")
@@ -242,16 +252,27 @@ func _panels(th: Theme) -> void:
 	var hair := UITokens.HAIRLINE
 	th.set_stylebox(&"panel", "PanelContainer", StyleBoxEmpty.new())
 	th.set_stylebox(&"panel", "Panel", sb(UIColors.SURFACE, UITokens.R_LG))
-	# Cartões chapados: a diferença de tom separa do fundo, sem filete em volta de tudo.
-	_panel_var(th, "Card", sb(UIColors.SURFACE, UITokens.R_MD, clear, 0, 16, 12))
-	_panel_var(th, "CardFlat", sb(UIColors.SURFACE_2, UITokens.R_SM, clear, 0, 14, 10))
-	# Destaque: só uma barra fina na cor do clube em cima, não uma borda acesa em volta.
-	var hl := sb(UIColors.SURFACE, UITokens.R_MD, clear, 0, 16, 12)
+	# Blocos em vez de cartões: a seção é marcada por um filete em cima, sem fundo próprio,
+	# como uma página de jornal esportivo ou um sistema interno. O conteúdo alinha na margem.
+	var blk := sb(clear, 0, clear, 0, 0, 14)
+	blk.border_color = UIColors.LINE
+	blk.border_width_top = 1
+	blk.content_margin_top = 16
+	_panel_var(th, "Card", blk)
+	# Superfície de verdade (placar, campinho, caixa de negociação): um tom acima do fundo.
+	_panel_var(th, "CardFlat", sb(UIColors.SURFACE, UITokens.R_XS, clear, 0, 14, 10))
+	# Destaque: o filete de cima vem na cor do clube e mais grosso.
+	var hl := sb(clear, 0, clear, 0, 0, 14)
 	hl.border_color = UIColors.ACCENT
 	hl.border_width_top = 3
+	hl.content_margin_top = 16
 	_panel_var(th, "CardHighlight", hl)
-	_panel_var(th, "CardInset", sb(UIColors.BG, UITokens.R_SM, clear, 0, 16, 12))
-	_panel_var(th, "RowPanel", sb(UIColors.SURFACE_2, UITokens.R_SM, clear, 0, 14, 10))
+	_panel_var(th, "CardInset", sb(UIColors.SURFACE, UITokens.R_XS, clear, 0, 14, 10))
+	# Linha de lista: sem fundo, um filete fino embaixo separa da próxima.
+	var row := sb(clear, 0, clear, 0, 4, 10)
+	row.border_color = UITokens.HAIRLINE
+	row.border_width_bottom = 1
+	_panel_var(th, "RowPanel", row)
 	_panel_var(th, "Pill", sb(UIColors.SURFACE_3, UITokens.R_XS, clear, 0, 10, 3))
 	# Cápsula que agrupa SegmentButtons
 	_panel_var(th, "Segment", sb(UIColors.SURFACE, UITokens.R_SM, clear, 0, 4, 4))
@@ -268,6 +289,7 @@ func _panels(th: Theme) -> void:
 	sheet.corner_radius_top_right = UITokens.R_LG
 	_panel_var(th, "Sheet", sheet)
 	_panel_var(th, "Dialog", sb(UIColors.SURFACE, UITokens.R_LG, UIColors.LINE, 1, 22, 20))
+	_panel_var(th, "Popover", sb(UIColors.SURFACE_2, UITokens.R_SM, UIColors.LINE, 1, 18, 14))
 	_panel_var(th, "Toast", sb(Color("#20252F"), UITokens.R_MD, UIColors.LINE, 1, 22, 14))
 
 

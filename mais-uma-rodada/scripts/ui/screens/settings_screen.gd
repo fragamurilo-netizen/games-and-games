@@ -8,7 +8,6 @@ static var _tab := "game"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Opções"
 
 

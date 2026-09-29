@@ -4,7 +4,6 @@ extends BaseScreen
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Treino"
 
 

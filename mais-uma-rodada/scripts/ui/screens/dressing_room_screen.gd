@@ -6,7 +6,6 @@ const TIER_COL := {"capitão": Color("#E8C547"), "líder": Color("#3DBE5A"), "in
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Vestiário"
 
 

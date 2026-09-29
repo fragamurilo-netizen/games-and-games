@@ -571,7 +571,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 	for it: Array in items:
 		var b := Button.new()
 		b.theme_type_variation = "TabButton"
-		b.text = String(it[1]).to_upper()
+		b.text = String(it[1])
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
@@ -621,43 +621,40 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 
 ## Linha de menu: ícone num ladrilho, título (e subtítulo) alinhados à esquerda e uma seta.
 static func menu_row(icon_name: String, title: String, subtitle: String, cb: Callable, trailing: Control = null) -> PanelContainer:
-	var h := hbox(14)
+	var h := hbox(16)
 	if icon_name != "":
-		var tile := PanelContainer.new()
-		tile.theme_type_variation = "IconTile"
-		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		tile.add_child(icon_rect(icon_name, 28, UIColors.ACCENT))
-		h.add_child(tile)
+		var ic := icon_rect(icon_name, 26, UIColors.MUTED)
+		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(ic)
 	var tv := vbox(0)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var t := label(title, "H3")
+	var t := label(title)
 	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tv.add_child(t)
 	if subtitle != "":
-		var s := label(subtitle, "Small")
+		var s := label(subtitle, "Muted")
 		s.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		tv.add_child(s)
 	h.add_child(tv)
 	if trailing != null:
 		trailing.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(trailing)
-	h.add_child(icon_rect("forward", 22, UIColors.DIM))
+	h.add_child(icon_rect("forward", 20, UIColors.DIM))
 	var row := tap_row(h, cb)
-	row.custom_minimum_size.y = 76
+	row.custom_minimum_size.y = UITokens.H_ROW
 	return row
 
 
 ## Grupo de linhas de menu dentro de um único cartão, separadas por filetes.
 static func menu_group(rows: Array) -> PanelContainer:
 	var p := PanelContainer.new()
-	p.theme_type_variation = "CardFlat"
 	var v := vbox(0)
 	for i in rows.size():
 		var r: PanelContainer = rows[i]
 		var clear := StyleBoxEmpty.new()
-		clear.content_margin_left = 6
-		clear.content_margin_right = 6
+		clear.content_margin_left = 0
+		clear.content_margin_right = 4
 		clear.content_margin_top = 8
 		clear.content_margin_bottom = 8
 		r.add_theme_stylebox_override(&"panel", clear)
@@ -705,7 +702,7 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 	for it: Array in items:
 		var b := Button.new()
 		b.theme_type_variation = "TabButton"
-		b.text = String(it[1]).to_upper()
+		b.text = String(it[1])
 		b.toggle_mode = true
 		b.button_group = g
 		b.button_pressed = String(it[0]) == selected
@@ -827,27 +824,34 @@ static func action_tile(icon_name: String, title: String, subtitle: String, cb: 
 
 
 ## Estado vazio: ícone num círculo, título, explicação e (opcional) um botão para resolver.
-static func empty_state(icon_name: String, title: String, body: String, action: String = "", cb: Callable = Callable()) -> PanelContainer:
-	var box := card("Card", 10)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	var ic := PanelContainer.new()
-	ic.theme_type_variation = "IconTile"
-	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	ic.add_child(icon_rect(icon_name, 40, UIColors.ACCENT))
-	box.add_child(gap(8))
-	box.add_child(ic)
+static func empty_state(_icon_name: String, title: String, body: String, action: String = "", cb: Callable = Callable()) -> PanelContainer:
+	return state_block("empty", title, body, action, cb)
+
+
+## Estados de uma área da tela: "empty" (nada ainda), "error" (algo falhou) e "loading".
+## Texto alinhado à esquerda, direto, sem ilustração. A ação, quando há, é um botão comum.
+static func state_block(kind: String, title: String, body: String = "", action: String = "", cb: Callable = Callable()) -> PanelContainer:
+	var p := PanelContainer.new()
+	var sbx := StyleBoxEmpty.new()
+	sbx.content_margin_top = 24
+	sbx.content_margin_bottom = 24
+	p.add_theme_stylebox_override(&"panel", sbx)
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var v := vbox(8)
 	var t := label(title, "H3", true)
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(t)
+	if kind == "error":
+		t.add_theme_color_override(&"font_color", UIColors.RED)
+	elif kind == "loading":
+		t.add_theme_color_override(&"font_color", UIColors.MUTED)
+	v.add_child(t)
 	if body != "":
-		var b := label(body, "Muted", true)
-		b.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		box.add_child(b)
+		v.add_child(label(body, "Muted", true))
 	if action != "" and cb.is_valid():
-		var btn := button(action, "PrimaryButton", cb)
-		box.add_child(btn)
-	box.add_child(gap(4))
-	return card_panel(box)
+		var btn := button(action, "GhostButton", cb)
+		btn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		v.add_child(btn)
+	p.add_child(v)
+	return p
 
 
 ## Grade de ladrilhos com colunas fixas (2 no celular, mais em telas largas).

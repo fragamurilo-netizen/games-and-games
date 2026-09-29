@@ -150,7 +150,6 @@ var _proxy: Club = null
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Uniformes"
 
 

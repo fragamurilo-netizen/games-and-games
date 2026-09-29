@@ -29,9 +29,6 @@ func refresh() -> void:
 	if w == null:
 		return
 	var club := w.user_club() if _own() else w.club(_club_id)
-	if not _own():
-		nav_tab = ""
-		show_nav = false
 	screen_title = club.short_name
 	screen_subtitle = "%s · %s" % [w.league_name(club.league_id), club.city]
 	UIManager.refresh_chrome()

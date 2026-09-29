@@ -1,9 +1,7 @@
 class_name NavMenu
 extends RefCounted
-## Menu do botão ☰ da barra superior: atalho para todas as telas da carreira, de qualquer
-## lugar (as telas internas escondem a navegação inferior). No alto, as cinco abas principais;
-## depois as telas agrupadas pelo assunto (caixa de entrada, elenco, clube, carreira e mundo);
-## no pé, as ações do jogo. Tudo cabe numa tela sem rolar; a tela atual fica destacada.
+## Menu do botão ☰ da barra superior: lista de todas as telas da carreira que não estão na
+## barra de navegação, agrupadas pelo assunto, e as ações do jogo no pé.
 
 ## Telas em que o menu fica escondido: fluxos que precisam terminar antes de sair.
 const HIDDEN_ON := ["menu", "new_career", "match", "welcome", "season_end", "preseason", "paywall"]
@@ -23,87 +21,101 @@ static func open() -> void:
 	if w == null or not w.has_user():
 		return
 	var cid := w.user_club_id
-	var v := UIKit.vbox(10)
+	var v := UIKit.vbox(6)
 	var head := UIKit.hbox(8)
-	var t := UIKit.label("Menu", "Title")
+	var t := UIKit.label("Menu", "H2")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal(), "Fechar"))
 	v.add_child(head)
-	# As cinco abas principais numa fileira curta (as telas internas escondem a barra de baixo).
-	var main_row: Array = []
-	for tab in BottomNav.TABS:
-		main_row.append(_chip(String(tab[2]), _tab_name(String(tab[0])), _go.bind(String(tab[0]), {}), _here(String(tab[0]))))
-	v.add_child(_grid(main_row, main_row.size()))
-	_group(v, "Caixa de entrada", [
-		["mail", "Mensagens", "inbox", {}, InboxManager.unread_count(w)],
-		["news", "Notícias", "news", {}, w.unread_news_count()],
-		["chat", "Redes", "social", {}, 0],
-	], 3)
-	_group(v, "Elenco", [
-		["tactics", "Treino", "training", {}, 0],
-		["up", "Base", "academy", {}, 0],
-		["star", "Revelados", "graduates", {"id": cid}, 0],
-		["money", "Contratos", "contracts", {}, 0],
-		["hash", "Numeração", "numbers", {}, 0],
-		["heart", "Vestiário", "dressing_room", {}, 0],
-		["users", "Relações", "relations", {}, 0],
-		["search", "Raio-X", "xray", {}, 0],
+	# Lista em duas colunas quando cabe; as cinco áreas já estão na barra de navegação.
+	var cols := UIKit.hbox(28)
+	var left := UIKit.vbox(6)
+	var right := UIKit.vbox(6)
+	for c: VBoxContainer in [left, right]:
+		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cols.add_child(c)
+	var wide: bool = UIManager.main != null and UIManager.main.get_viewport_rect().size.x >= 1000.0
+	_group(left, "Caixa de entrada", [
+		["Mensagens", "inbox", {}, InboxManager.unread_count(w)],
+		["Notícias", "news", {}, w.unread_news_count()],
+		["Redes", "social", {}, 0],
 	])
-	_group(v, "Clube", [
-		["shirt", "Uniformes", "kit", {}, 0],
-		["clock", "Camisas antigas", "kit_history", {"id": cid}, 0],
-		["archive", "Elencos antigos", "past_squads", {"id": cid}, 0],
-		["chart", "Estatísticas", "team_stats", {}, 0],
+	_group(left, "Elenco", [
+		["Treino", "training", {}, 0],
+		["Base", "academy", {}, 0],
+		["Contratos", "contracts", {}, 0],
+		["Numeração", "numbers", {}, 0],
+		["Vestiário", "dressing_room", {}, 0],
+		["Relações", "relations", {}, 0],
+		["Raio-X tático", "xray", {}, 0],
+		["Revelados pela base", "graduates", {"id": cid}, 0],
 	])
-	_group(v, "Carreira e mundo", [
-		["user", "Treinador", "manager", {}, 0],
-		["medal", "Reputação", "reputation", {}, 0],
-		["trophy", "Conquistas", "achievements", {}, 0],
-		["whistle", "Técnicos", "coach_moves", {}, 0],
-		["globe", "Seleções", "national", {}, 0],
-		["book", "História", "history", {}, 0],
-		["gem", "Joias", "nextgen", {}, 0],
+	var r := right if wide else left
+	_group(r, "Clube", [
+		["Competições", "table", {}, 0],
+		["Estatísticas", "team_stats", {}, 0],
+		["Uniformes", "kit", {}, 0],
+		["Camisas antigas", "kit_history", {"id": cid}, 0],
+		["Elencos antigos", "past_squads", {"id": cid}, 0],
 	])
-	# Ações do jogo: fileira curta no pé, sempre à mão.
-	v.add_child(UIKit.separator())
-	var game_row: Array = [
-		_chip("save", "Salvar", func():
-			UIManager.close_modal()
-			if GameManager.save_now():
-				UIManager.toast("Jogo salvo.", UIColors.GREEN)
-			else:
-				UIManager.toast("Não foi possível salvar agora.", UIColors.RED), false),
-		_chip("list", "Carregar", _go.bind("load", {}), _here("load")),
-		_chip("palette", "Editor", _go.bind("editor", {}), _here("editor")),
-		_chip("gear", "Opções", _go.bind("settings", {}), _here("settings")),
-		_chip("back", "Sair", func():
-			UIManager.close_modal()
-			UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
-				GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), false),
-	]
-	v.add_child(_grid(game_row, game_row.size()))
+	_group(r, "Carreira e mundo", [
+		["Treinador", "manager", {}, 0],
+		["Reputação", "reputation", {}, 0],
+		["Conquistas", "achievements", {}, 0],
+		["Seleções", "national", {}, 0],
+		["Dança das cadeiras", "coach_moves", {}, 0],
+		["História", "history", {}, 0],
+		["Joias", "nextgen", {}, 0],
+	])
+	var game := UIKit.vbox(0)
+	game.add_child(UIKit.section_header("Jogo"))
+	game.add_child(_row("Salvar", func():
+		UIManager.close_modal()
+		if GameManager.save_now():
+			UIManager.toast("Jogo salvo.", UIColors.GREEN)
+		else:
+			UIManager.toast("Não foi possível salvar agora.", UIColors.RED), false, 0))
+	game.add_child(_row("Carregar", _go.bind("load", {}), _here("load"), 0))
+	game.add_child(_row("Editor", _go.bind("editor", {}), _here("editor"), 0))
+	game.add_child(_row("Opções", _go.bind("settings", {}), _here("settings"), 0))
+	game.add_child(_row("Sair para o menu", func():
+		UIManager.close_modal()
+		UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
+			GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), false, 0))
+	r.add_child(game)
+	v.add_child(cols if wide else left)
 	UIManager.show_modal(v, true)
 
 
-static func _tab_name(tab: String) -> String:
-	return {"hub": "Início", "squad": "Elenco", "market": "Mercado", "table": "Tabelas", "club": "Clube"}.get(tab, tab)
-
-
-static func _group(v: VBoxContainer, title: String, items: Array, cols: int = 4) -> void:
-	v.add_child(UIKit.section(title))
-	var tiles: Array = []
+static func _group(v: VBoxContainer, title: String, items: Array) -> void:
+	var g := UIKit.vbox(0)
+	g.add_child(UIKit.section_header(title))
 	for it in items:
-		var screen := String(it[2])
-		tiles.append(_tile(String(it[0]), String(it[1]), _go.bind(screen, it[3]), _here(screen), int(it[4])))
-	v.add_child(_grid(tiles, cols))
+		var screen := String(it[1])
+		g.add_child(_row(String(it[0]), _go.bind(screen, it[2]), _here(screen), int(it[3])))
+	g.add_child(UIKit.gap(10))
+	v.add_child(g)
 
 
-static func _grid(tiles: Array, cols: int = 4) -> GridContainer:
-	var g := UIKit.tile_grid(tiles, cols)
-	g.add_theme_constant_override(&"h_separation", 8)
-	g.add_theme_constant_override(&"v_separation", 8)
-	return g
+## Linha do menu: nome à esquerda, contador de não lidos à direita. A tela atual fica marcada.
+static func _row(title: String, cb: Callable, here: bool, badge: int) -> PanelContainer:
+	var h := UIKit.hbox(10)
+	var l := UIKit.label(title)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if here:
+		l.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+	h.add_child(l)
+	if badge > 0:
+		h.add_child(UIKit.colored(str(badge) if badge < 100 else "99+", UIColors.RED, "Caps"))
+	var row := UIKit.tap_row(h, cb)
+	row.custom_minimum_size.y = 64
+	return row
+
+
+static func _tab_name(tab: String) -> String:
+	return {"hub": "Início", "squad": "Elenco", "tactics": "Tática", "market": "Mercado", "club": "Clube"}.get(tab, tab)
 
 
 static func _here(screen: String) -> bool:
@@ -119,61 +131,3 @@ static func _go(screen: String, params: Dictionary) -> void:
 		UIManager.goto(screen, params)
 	else:
 		UIManager.push(screen, params)
-
-
-## Ladrilho compacto: ícone e nome curto, contador de não lidos no canto.
-static func _tile(icon_name: String, title: String, cb: Callable, here: bool, badge: int) -> PanelContainer:
-	var box := UIKit.vbox(6)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	var ic := UIKit.icon_rect(icon_name, 30, UIColors.ON_ACCENT if here else UIColors.ACCENT)
-	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	box.add_child(ic)
-	var l := UIKit.label(title, "Small")
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.max_lines_visible = 2
-	l.add_theme_color_override(&"font_color", UIColors.ON_ACCENT if here else UIColors.TEXT)
-	box.add_child(l)
-	var row := UIKit.tap_row(box, cb, "CardHighlight" if here else "Card")
-	if here:
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = UIColors.ACCENT
-		sb.set_corner_radius_all(UITokens.R_SM)
-		sb.set_content_margin_all(8)
-		row.add_theme_stylebox_override(&"panel", sb)
-	else:
-		var sb := row.get_theme_stylebox(&"panel") as StyleBoxFlat
-		if sb != null:
-			sb = sb.duplicate()
-			sb.set_content_margin_all(8)
-			row.add_theme_stylebox_override(&"panel", sb)
-	row.custom_minimum_size = Vector2(0, 96)
-	if badge > 0:
-		var b := UIKit.pill(str(badge) if badge < 100 else "99+", UIColors.RED, 16)
-		b.size_flags_horizontal = Control.SIZE_SHRINK_END
-		b.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		row.add_child(b)
-		row.move_child(b, 1)
-	return row
-
-
-## Botão curto (abas principais e ações do jogo): ícone pequeno e nome embaixo, sem cartão.
-static func _chip(icon_name: String, title: String, cb: Callable, here: bool) -> PanelContainer:
-	var box := UIKit.vbox(2)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	var ic := UIKit.icon_rect(icon_name, 26, UIColors.ON_ACCENT if here else UIColors.TEXT)
-	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	box.add_child(ic)
-	var l := UIKit.label(title, "Small")
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	l.add_theme_color_override(&"font_color", UIColors.ON_ACCENT if here else UIColors.MUTED)
-	box.add_child(l)
-	var row := UIKit.tap_row(box, cb, "CardFlat")
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = UIColors.ACCENT if here else UIColors.SURFACE_2
-	sb.set_corner_radius_all(UITokens.R_SM)
-	sb.set_content_margin_all(6)
-	row.add_theme_stylebox_override(&"panel", sb)
-	row.custom_minimum_size = Vector2(0, 72)
-	return row

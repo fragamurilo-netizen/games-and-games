@@ -14,7 +14,6 @@ var _all := false
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Numeração"
 
 

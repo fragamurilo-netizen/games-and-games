@@ -9,7 +9,7 @@ const TABS := [["geral", "Visão geral"], ["atributos", "Atributos"], ["perfil",
 
 
 func _init() -> void:
-	show_nav = false
+	pass
 
 
 func setup(p: Dictionary) -> void:

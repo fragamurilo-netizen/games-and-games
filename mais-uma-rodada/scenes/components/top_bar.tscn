@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scripts/ui/components/crest_view.gd" id="2_crest"]
 
 [node name="TopBar" type="PanelContainer"]
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 88)
 theme_type_variation = &"TopBar"
 script = ExtResource("1_top")
 
@@ -54,6 +54,16 @@ text = "$ 0"
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
 mouse_filter = 2
+
+[node name="Bell" type="Button" parent="Row"]
+visible = false
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+theme_type_variation = &"IconButton"
+tooltip_text = "Mensagens e notícias"
+expand_icon = true
 
 [node name="Menu" type="Button" parent="Row"]
 visible = false

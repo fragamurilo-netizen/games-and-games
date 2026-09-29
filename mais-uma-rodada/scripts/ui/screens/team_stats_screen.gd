@@ -8,7 +8,6 @@ var _club_id := -1
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Estatísticas da equipe"
 
 

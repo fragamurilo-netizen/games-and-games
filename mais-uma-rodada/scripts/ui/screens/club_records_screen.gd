@@ -15,7 +15,6 @@ var _dir := "all"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Memória do clube"
 
 

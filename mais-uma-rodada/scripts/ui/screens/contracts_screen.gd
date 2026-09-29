@@ -12,7 +12,6 @@ var _sort := 0
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Contratos"
 
 

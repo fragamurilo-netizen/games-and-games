@@ -46,13 +46,20 @@ const SCREENS := {
 	"reputation": "res://scenes/screens/reputation.tscn",
 	"team_stats": "res://scenes/screens/team_stats.tscn",
 	"club_records": "res://scenes/screens/club_records.tscn",
+	"tactics": "res://scenes/screens/prematch.tscn",
 }
 ## Telas que avançam a carreira: depois da temporada de demonstração, levam à compra.
 const GATED := ["prematch", "match", "preseason"]
-const TABS := ["hub", "squad", "market", "table", "club"]
+## As cinco áreas da carreira. Cada uma guarda a própria pilha: trocar de área e voltar
+## devolve a tela como o jogador deixou (filtros, busca, rolagem).
+const TABS := ["hub", "squad", "tactics", "market", "club"]
+## Telas que abrem já dentro de uma área quando chamadas por goto().
+const AREA_OF := {"table": "club"}
 
 var main: Node = null # scripts/ui/main.gd
-var stack: Array = [] # BaseScreen
+var area := "hub"
+var stacks: Dictionary = {} # área -> Array[BaseScreen]
+var stack: Array = [] # pilha da área atual (a mesma instância de stacks[area])
 var _modals: Array = []
 var _scene_cache: Dictionary = {}
 
@@ -134,13 +141,111 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 	return node
 
 
-## Troca a pilha inteira pela nova tela (abas, menu).
+## Abre uma tela do zero. Área (Início, Elenco...): recomeça a pilha dela. Fora das áreas
+## (menu, boas-vindas, nova carreira): descarta todas as pilhas.
 func goto(name: String, params: Dictionary = {}) -> void:
 	close_all_modals()
-	for s in stack:
-		s.queue_free()
-	stack.clear()
+	if AREA_OF.has(name) and not stack.is_empty() and GameManager.has_career():
+		push(name, params) # tabela aberta do Início: volta para o Início
+		return
+	if name in TABS or AREA_OF.has(name):
+		var a: String = name if name in TABS else AREA_OF[name]
+		_hide_top()
+		_free_stack(a)
+		_set_area(a)
+		if name != a:
+			stack.append(_instance(a, {}))
+			main.screen_host.add_child(stack[0])
+			stack[0].visible = false
+			_show(_instance(name, params), 56.0)
+		else:
+			_show(_instance(name, params), 0.0)
+		return
+	for a in stacks.keys():
+		_free_stack(a)
+	_set_area("hub")
 	_show(_instance(name, params), 0.0)
+
+
+## Toque na barra de navegação: volta à área como ela estava. Tocar na área atual sobe
+## para a raiz dela (ou para o topo da lista, se já estiver na raiz).
+func switch_area(a: String) -> void:
+	close_all_modals()
+	if a == area:
+		if stack.size() > 1:
+			pop_to_root()
+		elif current() != null:
+			current().scroll_to_top()
+		return
+	_hide_top()
+	_set_area(a)
+	if stack.is_empty():
+		_show(_instance(a, {}), 0.0)
+		return
+	var top := current()
+	top.visible = true
+	top.process_mode = Node.PROCESS_MODE_INHERIT
+	_apply_chrome(top)
+	top.on_show()
+	_restore_scroll(top)
+	_animate_in(top, 0.0)
+
+
+func pop_to_root() -> void:
+	close_all_modals()
+	while stack.size() > 1:
+		var s: BaseScreen = stack.pop_back()
+		s.queue_free()
+	var root := current()
+	root.visible = true
+	_apply_chrome(root)
+	root.on_show()
+	_animate_in(root, -40.0)
+
+
+## A tela reconstrói o conteúdo ao reaparecer; a rolagem volta ao ponto em que o jogador estava.
+func _remember_scroll(s: BaseScreen) -> void:
+	var sc := s.scroll()
+	if sc != null:
+		s.set_meta(&"scroll_y", sc.scroll_vertical)
+
+
+func _restore_scroll(s: BaseScreen) -> void:
+	var y := int(s.get_meta(&"scroll_y", 0))
+	var sc := s.scroll()
+	if y <= 0 or sc == null:
+		return
+	for i in 2:
+		await get_tree().process_frame
+		if not is_instance_valid(sc):
+			return
+	sc.scroll_vertical = y
+
+
+func _set_area(a: String) -> void:
+	area = a
+	if not stacks.has(a):
+		stacks[a] = []
+	stack = stacks[a]
+
+
+func _hide_top() -> void:
+	var cur := current()
+	if cur != null:
+		_remember_scroll(cur)
+		cur.visible = false
+		cur.on_hide()
+		# Telas de outras áreas ficam guardadas, paradas.
+		cur.process_mode = Node.PROCESS_MODE_DISABLED
+
+
+func _free_stack(a: String) -> void:
+	for s in stacks.get(a, []):
+		if s == _frozen:
+			_frozen = null
+		s.queue_free()
+	if stacks.has(a):
+		stacks[a].clear()
 
 
 ## Empilha uma tela (perfil, negociação...). "Voltar" retorna à anterior.
@@ -148,6 +253,7 @@ func push(name: String, params: Dictionary = {}) -> void:
 	close_all_modals()
 	var cur := current()
 	if cur != null:
+		_remember_scroll(cur)
 		cur.visible = false
 		cur.on_hide()
 	_show(_instance(name, params), 56.0)
@@ -177,8 +283,10 @@ func back() -> bool:
 	cur.queue_free()
 	var prev := current()
 	prev.visible = true
+	prev.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(prev)
 	prev.on_show()
+	_restore_scroll(prev)
 	_animate_in(prev, -40.0)
 	return true
 
@@ -253,8 +361,8 @@ func handle_back() -> void:
 		return
 	if cur.screen_name == "menu":
 		get_tree().quit()
-	elif TABS.has(cur.screen_name) and cur.screen_name != "hub":
-		goto("hub")
+	elif area != "hub" and GameManager.has_career() and cur.screen_name == area:
+		switch_area("hub")
 	elif cur.screen_name == "hub":
 		confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
 			GameManager.close_career_async(func() -> void: goto("menu")))
@@ -363,6 +471,50 @@ func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, res
 	content.minimum_size_changed.connect(fit)
 	sc.ready.connect(fit)
 	return sc
+
+
+## Popover: informação curta presa ao elemento tocado (o que é um atributo, a forma de um
+## jogador, a origem de um número). Não escurece a tela; tocar fora fecha. Um popover novo
+## fecha o anterior (nunca um sobre o outro).
+func popover(content: Control, anchor: Control, width: float = 460.0) -> Control:
+	if not _modals.is_empty() and bool(_modals.back().get_meta(&"popover", false)):
+		close_modal()
+	var layer: Control = main.modal_host
+	var catcher := Control.new()
+	catcher.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	catcher.set_meta(&"popover", true)
+	layer.add_child(catcher)
+	_modals.append(catcher)
+	catcher.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and ev.pressed:
+			if _modals.has(catcher):
+				_modals.erase(catcher)
+				catcher.queue_free())
+	var panel := PanelContainer.new()
+	panel.theme_type_variation = "Popover"
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if content is Label:
+		(content as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	panel.add_child(content)
+	panel.custom_minimum_size.x = width
+	catcher.add_child(panel)
+	var place := func() -> void:
+		if not is_instance_valid(panel) or not is_instance_valid(anchor):
+			return
+		var vr := layer.get_viewport_rect().size
+		var a := anchor.get_global_rect()
+		var sz := panel.get_combined_minimum_size()
+		panel.size = sz
+		var x := clampf(a.position.x, 16.0, vr.x - sz.x - 16.0)
+		var y := a.end.y + 8.0
+		if y + sz.y > vr.y - main.safe_margins().size.y - 16.0:
+			y = a.position.y - sz.y - 8.0
+		panel.position = Vector2(x, maxf(main.safe_margins().position.y + 8.0, y))
+	place.call_deferred()
+	panel.minimum_size_changed.connect(place)
+	return catcher
 
 
 func close_modal() -> void:

@@ -8,7 +8,6 @@ var _year := 0
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Elencos anteriores"
 
 

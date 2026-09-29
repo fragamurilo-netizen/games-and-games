@@ -11,7 +11,6 @@ var _comp := "u20"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Categorias de base"
 
 

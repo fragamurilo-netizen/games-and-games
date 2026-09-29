@@ -17,7 +17,6 @@ var _tab := "id"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Seu treinador"
 
 

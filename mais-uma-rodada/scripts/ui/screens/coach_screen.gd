@@ -10,7 +10,6 @@ var _tab := "profile"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Técnico"
 
 

@@ -54,6 +54,10 @@ func _ready() -> void:
 	_update_layout()
 	top_bar.back_pressed.connect(func(): UIManager.handle_back())
 	top_bar.menu_pressed.connect(NavMenu.open)
+	top_bar.bell_pressed.connect(func():
+		var cur := UIManager.current()
+		if cur == null or cur.screen_name != "inbox":
+			UIManager.push("inbox"))
 	bottom_nav.tab_selected.connect(_on_tab)
 	GameManager.world_changed.connect(func(): UIManager.refresh_chrome())
 	Sfx.start_music()
@@ -172,11 +176,7 @@ func _ease_alpha(r: TextureRect, want: float) -> void:
 
 
 func _on_tab(tab: String) -> void:
-	var cur := UIManager.current()
-	if is_instance_valid(cur) and cur.screen_name == tab:
-		cur.scroll_to_top()
-		return
-	UIManager.goto(tab)
+	UIManager.switch_area(tab)
 
 
 ## Resize pode ser emitido de novo quando a escala muda. Nunca reconstruir a árvore
@@ -268,8 +268,11 @@ func apply_chrome(screen: BaseScreen, can_go_back: bool) -> void:
 	bottom_nav.visible = screen.show_nav and GameManager.has_career()
 	if screen.show_top:
 		var club: Club = GameManager.user_club() if GameManager.has_career() else null
-		top_bar.set_state(screen.screen_title, screen.screen_subtitle, can_go_back, club, NavMenu.available(screen))
-	bottom_nav.select(screen.nav_tab)
+		var unread := 0
+		if club != null and GameManager.world != null:
+			unread = InboxManager.unread_count(GameManager.world) + GameManager.world.unread_news_count()
+		top_bar.set_state(screen.screen_title, screen.screen_subtitle, can_go_back, club, NavMenu.available(screen), unread)
+	bottom_nav.select(UIManager.area)
 
 
 func _notification(what: int) -> void:

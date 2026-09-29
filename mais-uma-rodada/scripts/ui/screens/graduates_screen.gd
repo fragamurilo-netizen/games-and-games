@@ -7,7 +7,6 @@ var _filter := "active"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Revelados pela base"
 
 

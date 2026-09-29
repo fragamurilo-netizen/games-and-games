@@ -19,7 +19,9 @@ func _init() -> void:
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
-	_edit = p.get("edit", false)
+	_edit = p.get("edit", false) or screen_name == "tactics"
+	# Na área Tática a escalação é a raiz e a barra de navegação fica à vista.
+	show_nav = _edit
 
 
 func on_show() -> void:
@@ -40,7 +42,7 @@ func refresh() -> void:
 	var sheet := _sheet()
 	var f := FixtureManager.next_fixture_for(w, club.id)
 	screen_subtitle = "Rodada %d" % (f.round + 1) if f != null else ""
-	screen_title = "Escalação e tática" if _edit else "Pré-jogo"
+	screen_title = "Tática" if screen_name == "tactics" else ("Escalação e tática" if _edit else "Pré-jogo")
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -695,6 +697,9 @@ func _pick_for_bench(bench_index: int) -> void:
 func _build_footer(w: GameWorld) -> void:
 	var f := footer()
 	UIKit.clear(f)
+	if screen_name == "tactics":
+		hide_footer() # a escalação vale na hora; o jogo salva sozinho ao avançar
+		return
 	if _edit:
 		f.add_child(UIKit.button("SALVAR ESCALAÇÃO", "PrimaryButton", func():
 			GameManager.save_now()
