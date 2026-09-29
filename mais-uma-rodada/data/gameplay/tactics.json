@@ -2,8 +2,8 @@
   "_doc": "Modificadores táticos do motor de partidas. Valores moderados: talento decide, tática desempata. poss = deslocamento na posse (fração). rate = multiplicador da taxa de chances. quality = multiplicador do xG. fit = atributos que tornam o estilo mais eficiente para o elenco.",
   "home_advantage": 0.05,
   "mentalities": [
-    {"name": "Retranca", "desc": "Todos atrás da linha da bola. Sofre pouco, cria quase nada.", "att": 0.8, "def": 1.16, "poss": -0.06},
-    {"name": "Defensiva", "desc": "Prioriza a segurança e sai com cuidado.", "att": 0.9, "def": 1.07, "poss": -0.03},
+    {"name": "Retranca", "desc": "Todos atrás da linha da bola. Sofre pouco, cria quase nada.", "att": 0.8, "def": 1.22, "poss": -0.06},
+    {"name": "Defensiva", "desc": "Prioriza a segurança e sai com cuidado.", "att": 0.9, "def": 1.1, "poss": -0.03},
     {"name": "Equilibrada", "desc": "Nem tanto ao mar, nem tanto à terra.", "att": 1.0, "def": 1.0, "poss": 0.0},
     {"name": "Ofensiva", "desc": "Mais gente no ataque, mais espaço atrás.", "att": 1.1, "def": 0.93, "poss": 0.03},
     {"name": "Tudo ou nada", "desc": "Abafa o adversário. Perfeito para buscar o resultado no fim.", "att": 1.22, "def": 0.83, "poss": 0.05}
@@ -29,7 +29,7 @@
       "poss": -0.08, "rate": 0.86, "quality": 1.05, "fatigue": 0.95,
       "types": {"through": 1.2, "cross": 0.8, "long": 0.8, "dribble": 1.0, "counter": 2.6, "scramble": 0.8},
       "fit": ["VEL", "DEC", "PAS"],
-      "vs_open_bonus": 0.15
+      "vs_open_bonus": 0.2
     },
     {
       "name": "Pressão alta", "short": "Pressão",

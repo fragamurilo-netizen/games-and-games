@@ -43,7 +43,12 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 				shots += int(e[0])
 				on += int(e[1])
 		else:
-			shots = maxi(g, int(round(rng.randfn(9.5 + 2.3 * g + (ps - 0.5) * 12.0, 2.8))))
+			# O modo rápido conta os lances de perigo de verdade (res["sh"]); resultados antigos não.
+			var sh_real: Array = res.get("sh", [])
+			if sh_real.size() == 2:
+				shots = maxi(g, int(sh_real[side]))
+			else:
+				shots = maxi(g, int(round(rng.randfn(9.5 + 2.3 * g + (ps - 0.5) * 12.0, 2.8))))
 			shots = mini(shots, 32)
 			on = g
 			for _i in shots - g:
@@ -63,12 +68,24 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 		_spread(rng, lines, rows, TK, maxi(4, int(round(rng.randfn(16.0 + (0.5 - ps) * 10.0, 3.0)))), QuickMatch.L_DEF, false)
 		_spread(rng, lines, rows, IT, maxi(2, int(round(rng.randfn(9.0 + (0.5 - ps) * 6.0, 2.5)))), QuickMatch.L_DEF, false)
 		_spread(rng, lines, rows, DR, maxi(1, int(round(rng.randfn(8.0 + (ps - 0.5) * 6.0, 2.5)))), QuickMatch.L_ATT, false, true)
+		# xG de cada um: parte do xG real do time (res.tac.xg) pelo que finalizou, acertou e marcou.
+		var raw := {}
+		var raw_sum := 0.0
 		for ln in lines:
 			var p: Player = ln[QuickMatch.L_P]
 			var row: Array = rows[p.id]
 			row[PP] = _pass_pct(rng, p, int(ln[QuickMatch.L_POS]), ps)
-			row[XG] = int(round((int(ln[QuickMatch.L_G]) * 0.3 + int(row[SH]) * 0.075 + int(row[SO]) * 0.06) * 100.0 * rng.randf_range(0.85, 1.15)))
+			var rv := (int(ln[QuickMatch.L_G]) * 0.3 + int(row[SH]) * 0.075 + int(row[SO]) * 0.06) * rng.randf_range(0.85, 1.15)
+			raw[p.id] = rv
+			raw_sum += rv
 			out[p.id] = row
+		var team_xg := raw_sum
+		var tx: Array = res.get("tac", {}).get("xg", [])
+		if tx.size() == 2:
+			team_xg = float(tx[side])
+		for ln in lines:
+			var pid: int = (ln[QuickMatch.L_P] as Player).id
+			out[pid][XG] = int(round(float(raw[pid]) / maxf(0.001, raw_sum) * team_xg * 100.0)) if raw_sum > 0.0 else 0
 	# Defesas: o que o goleiro segurou do que foi no alvo
 	for side in 2:
 		var saved := maxi(0, on_target[1 - side] - score[1 - side])

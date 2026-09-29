@@ -57,7 +57,7 @@ const CH_PENALTY := 8
 const CH_ERROR := 9
 const CH_KEYS: Array[String] = ["through", "cross", "long", "dribble", "counter", "scramble"]
 const BASE_TYPE_W: Array[float] = [0.26, 0.22, 0.18, 0.14, 0.10, 0.10]
-const BASE_XG: Array[float] = [0.155, 0.088, 0.032, 0.11, 0.19, 0.13, 0.07, 0.065, 0.76, 0.3]
+const BASE_XG: Array[float] = [0.132, 0.075, 0.027, 0.094, 0.162, 0.11, 0.07, 0.065, 0.76, 0.27]
 
 # --- Modos de escolha de jogador ---
 const PK_SHOOT := 0
@@ -71,12 +71,12 @@ const PK_MID := 7
 const PK_DEFEND := 8
 
 # --- Calibração (ver tests/season_simulator.gd) ---
-const BASE_CHANCE := 0.165 # prob. de chance por minuto de posse, times iguais
-const BETA := 0.06 # sensibilidade da taxa de chances à diferença ATA×DEF (por ponto)
+const BASE_CHANCE := 0.196 # prob. de chance por minuto de posse, times iguais
+const BETA := 0.05 # sensibilidade da taxa de chances à diferença ATA×DEF (por ponto)
 const GAMMA := 0.021 # sensibilidade da posse à diferença de meio-campo (por ponto)
-const DELTA := 0.007 # sensibilidade da qualidade da chance
+const DELTA := 0.005 # sensibilidade da qualidade da chance
 const EPS := 0.006 # finalizador × goleiro
-const HOME_CHANCE := 0.1 # empurrão da torcida na taxa de chances do mandante
+const HOME_CHANCE := 0.11 # empurrão da torcida na taxa de chances do mandante
 const AWAY_CHANCE := 0.05 # pressão sobre o visitante
 const FOUL_RATE := 0.235
 const INJURY_RATE := 0.0014
@@ -90,13 +90,30 @@ const MOD_DAMP := 0.35
 const LIVE_XG := 0.72
 
 
+## Peso de finalização pela qualidade do finalizador, com retorno decrescente: o bom atacante chuta
+## mais que o comum, mas não fica com todas as bolas (quem converte mais já é premiado no gol).
+## Evita artilheiros de 40+ gols por temporada como regra.
+static func shot_share(c_fin: float) -> float:
+	return pow(maxf(1.0, c_fin) / 60.0, 0.6) * 60.0
+
+
 static func damp(x: float) -> float:
 	return 1.0 + (x - 1.0) * MOD_DAMP
 ## Contra o time do usuário a IA se motiva mais conforme a dificuldade (fácil, normal, difícil).
 const USER_OPP_BOOST: Array[float] = [1.0, 1.035, 1.07]
 ## Força do efeito do placar (no começo do jogo e somado até o fim).
+## Quem finaliza: o centroavante recebe mais bolas, o zagueiro sobe nas bolas aéreas. Calibrado para
+## a divisão real dos gols (atacantes ~55–60%, meias ~28%, defensores ~12%).
+const ST_SHOOT := 1.3
+const OWN_GOAL_P := 0.1
+const CB_HEAD := 0.5
+## Quem dá o último passe: os criadores (passe + visão) concentram as assistências.
+const CREATOR_EXP := 1.6
 const STATE_BASE := 0.04
 const STATE_LATE := 0.07
+const STATE_BEATEN := 0.3 # quem perde de 2+ ainda empurra, mas sem a mesma força
+const STATE_LEAD2 := 0.75
+const STATE_LEAD3 := 0.55
 ## Janelas de substituição automática: minutos 60, 68, 76 e 84 (ver _ai_decisions).
 
 var rng := RandomNumberGenerator.new()
@@ -676,7 +693,7 @@ func _pick_lane(att: MatchTeam, dfn: MatchTeam, ctype: int) -> Array:
 	var tw := 0.0
 	for l in 3:
 		var rel := float(ratio[l]) / maxf(0.01, mean)
-		var wl := float(base[l]) * clampf(rel, 0.5, 2.0)
+		var wl := float(base[l]) * clampf(pow(rel, 1.3), 0.5, 2.0) # o lado aberto atrai as jogadas
 		var fl := clampf(pow(rel, 0.3), 0.82, 1.22)
 		w.append(wl)
 		fac.append(fl)
@@ -773,33 +790,34 @@ func crowd_mood() -> Dictionary:
 ## fora, com a área cheia), quem está na frente recua e acha espaço no contra-ataque.
 ## Cresce com o tempo de jogo e com a diferença (até 2 gols).
 func _game_state() -> void:
-	var t_f := clampf(float(minute) / 90.0, 0.0, 1.3)
 	for t: MatchTeam in teams:
-		var diff: int = score[t.side] - score[1 - t.side]
-		if diff == 0:
-			# Empate nos minutos finais: ninguém quer se expor (o empate real é mais comum que o sorteio puro).
-			t.g_rate = 0.9 if minute >= 80 and half == 2 else 1.0
-			t.g_quality = 1.0
-			t.g_poss = 0.0
-			continue
-		var k := (STATE_BASE + STATE_LATE * t_f) * (1.0 if absi(diff) == 1 else 1.35)
-		if diff < 0:
-			# Atrás: ocupa o campo e finaliza mais (de fora, com a área cheia). Perdendo de muito,
-			# o time desanima e a pressão perde força.
-			t.g_rate = 1.0 + k * (1.5 if diff == -1 else 0.7)
-			t.g_quality = 1.0 - k * 0.5
-			t.g_poss = k * 0.15
-		else:
-			# Na frente: recua e explora o contra-ataque. Com dois ou três gols de vantagem, tira o pé.
-			t.g_rate = 1.0 - k * 0.7
-			t.g_quality = 1.0 + k * 0.35
-			t.g_poss = -k * 0.15
-			if diff == 2:
-				t.g_rate *= 0.88
-			elif diff >= 3:
-				t.g_rate *= 0.72
+		var sm := state_mods(score[t.side] - score[1 - t.side], minute, half)
+		t.g_rate = sm[0]
+		t.g_quality = sm[1]
+		t.g_poss = sm[2]
 	for t: MatchTeam in teams:
 		t.apply_state(score[t.side] - score[1 - t.side]) # cera de quem vence (instrução de equipe)
+
+
+## Efeito do placar sobre [taxa de chances, qualidade da chance, posse] de um time com saldo `diff`
+## no minuto dado. O mesmo para o minuto a minuto e para o modo rápido.
+## Atrás: ocupa o campo e finaliza mais (de fora, com a área cheia); perdendo de muito, desanima.
+## Na frente: recua e explora o contra-ataque; com dois ou três gols de vantagem, os dois tiram o pé
+## (jogo resolvido: goleadas de 6 ou 7 existem, mas são raras).
+## Empate nos minutos finais: ninguém quer se expor (o empate real é mais comum que o sorteio puro).
+static func state_mods(diff: int, minute: int, half: int) -> Array:
+	if diff == 0:
+		return [0.9 if minute >= 80 and half == 2 else 1.0, 1.0, 0.0]
+	var t_f := clampf(float(minute) / 90.0, 0.0, 1.3)
+	var k := (STATE_BASE + STATE_LATE * t_f) * (1.0 if absi(diff) == 1 else 1.35)
+	if diff < 0:
+		return [1.0 + k * (1.5 if diff == -1 else STATE_BEATEN), 1.0 - k * 0.5, k * 0.15]
+	var rate := 1.0 - k * 0.7
+	if diff == 2:
+		rate *= STATE_LEAD2
+	elif diff >= 3:
+		rate *= STATE_LEAD3
+	return [rate, 1.0 + k * 0.35, -k * 0.15]
 
 
 ## Recalcula as probabilidades por minuto (chamado quando setores ou táticas mudam).
@@ -920,27 +938,31 @@ func _pick_weighted(t: MatchTeam, mode: int, gen: RandomNumberGenerator = null) 
 	return null
 
 
-func _pick_assister(att: MatchTeam, ctype: int, shooter: MatchPlayer) -> MatchPlayer:
-	var mode := PK_PASS
-	var chance_assist := 0.75
+## Quem pode dar a assistência em cada tipo de jogada: [modo de escolha, chance de haver passe].
+## Compartilhado com o modo rápido.
+static func assist_profile(ctype: int) -> Array:
 	match ctype:
 		CH_CROSS, CH_CORNER:
-			mode = PK_CROSS
-			chance_assist = 0.9
+			return [PK_CROSS, 0.9]
 		CH_DRIBBLE:
-			chance_assist = 0.3
+			return [PK_PASS, 0.3]
 		CH_LONG:
-			chance_assist = 0.45
+			return [PK_PASS, 0.45]
 		CH_SCRAMBLE:
-			chance_assist = 0.35
+			return [PK_PASS, 0.35]
 		CH_COUNTER:
-			chance_assist = 0.7
+			return [PK_PASS, 0.7]
 		CH_ERROR, CH_FREEKICK, CH_PENALTY:
-			chance_assist = 0.0
-	if rng.randf() >= chance_assist:
+			return [PK_PASS, 0.0]
+	return [PK_PASS, 0.75]
+
+
+func _pick_assister(att: MatchTeam, ctype: int, shooter: MatchPlayer) -> MatchPlayer:
+	var ap := assist_profile(ctype)
+	if rng.randf() >= float(ap[1]):
 		return null
 	for _i in 4:
-		var a := _pick_weighted(att, mode)
+		var a := _pick_weighted(att, int(ap[0]))
 		if a != null and a != shooter:
 			return a
 	return null
@@ -1219,7 +1241,8 @@ func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: Match
 	var s := att.side
 	var before_diff := score[s] - score[1 - s]
 	var own_goal := false
-	if ctype == CH_CROSS and rng.randf() < 0.05:
+	# Gol contra: cruzamento ou escanteio desviado pela zaga (~3% dos gols, como na vida real).
+	if (ctype == CH_CROSS or ctype == CH_CORNER) and rng.randf() < OWN_GOAL_P:
 		var og := _pick_weighted(dfn, PK_DEFEND)
 		if og != null:
 			own_goal = true
@@ -1348,11 +1371,11 @@ func _resolve_foul(att: MatchTeam, dfn: MatchTeam) -> void:
 		_emit(EV_FOUL, dfn.side, fouler.p.id, victim.p.id if victim != null else -1, {"danger": dangerous})
 	var dis := fouler.a_dis
 	var p_yellow := 0.155 * fouler.card_mult * card_f * (1.4 - dis / 100.0) * (1.15 if dfn.intensity == 2 else 1.0) * dfn.x_cards
-	var p_red := 0.0045 * fouler.card_mult * card_f * (1.3 - dis / 100.0)
+	var p_red := 0.0026 * fouler.card_mult * card_f * (1.3 - dis / 100.0)
 	if dangerous:
 		p_yellow *= 1.3
 	if fouler.yellow >= 1:
-		p_yellow *= 0.55 # pendurado alivia na dividida
+		p_yellow *= 0.45 # pendurado alivia na dividida (e o juiz pensa duas vezes antes do segundo)
 	if rng.randf() < p_red:
 		_send_off(dfn, fouler, false)
 	elif rng.randf() < p_yellow:
@@ -1407,7 +1430,7 @@ func _pick_fouler(t: MatchTeam) -> MatchPlayer:
 			Pos.ST:
 				base = 0.8
 		if mp.yellow >= 1:
-			base *= 0.45
+			base *= 0.4
 		cands.append(mp)
 		w.append(base * mp.card_mult * (1.5 - mp.a_dis / 100.0))
 	if cands.is_empty():
@@ -2006,6 +2029,12 @@ func _ai_read(t: MatchTeam) -> void:
 	# 7. Vencendo e sofrendo muito: baixa a linha e fecha o meio
 	if diff > 0 and o.xg - t.xg >= 0.7 and t.line > 0:
 		set_line(t.side, t.line - 1)
+		return
+	# 8. Saiu para o jogo e está levando sufoco sem estar atrás: um degrau mais cauteloso
+	# (vale para o resto da partida: o plano base muda, não só o momento).
+	if diff >= 0 and o.xg - t.xg >= 1.0 and t.base_mentality >= TeamSheet.MENT_OFENSIVA:
+		t.base_mentality -= 1
+		set_mentality(t.side, t.base_mentality)
 
 
 ## Lateral (ou ala/meia aberto) que cobre o corredor `lane` (do ponto de vista de quem defende).
@@ -2086,17 +2115,44 @@ func _ai_decisions() -> void:
 		if minute == 58 or minute == 70:
 			_ai_read(t)
 		_ai_formation(t)
-		if minute % 10 == 0 and minute >= 60:
-			var diff: int = score[t.side] - score[1 - t.side]
-			var target := t.base_mentality
-			if diff < 0:
-				target = maxi(t.base_mentality, 3 if minute < 80 else 4)
-			elif diff == 1 and minute >= 75:
-				target = mini(t.base_mentality, 1)
-			elif diff >= 2:
-				target = mini(t.base_mentality, 2)
+		if minute % 5 == 0 and minute >= 55:
+			var target := ai_target_mentality(t.base_mentality, score[t.side] - score[1 - t.side], minute, _rel_strength(t))
 			if target != t.mentality:
 				set_mentality(t.side, target)
+
+
+## Diferença de nível em campo agora (setores de quem está jogando, com cansaço e expulsões):
+## positivo = `t` é melhor que o rival. Na escala dos setores (~ pontos de atributo).
+func _rel_strength(t: MatchTeam) -> float:
+	var o: MatchTeam = teams[1 - t.side]
+	return (t.u_att + t.u_mid + t.u_def) / 3.0 - (o.u_att + o.u_mid + o.u_def) / 3.0 + (o.on_pitch_count - t.on_pitch_count) * -4.0
+
+
+## Mentalidade que o técnico da IA quer com este placar, minuto e diferença de nível (rel > 0: o time
+## é melhor). O favorito que empata ou perde se lança mais cedo; o azarão que vence se fecha antes e
+## aceita o empate; ninguém se fecha com dois gols de vantagem antes da hora.
+static func ai_target_mentality(base: int, diff: int, minute: int, rel: float) -> int:
+	var fav := rel >= 3.0
+	var dog := rel <= -3.0
+	if minute < 60 and not (fav and diff < 0):
+		return base
+	if diff < 0:
+		if diff <= -3 and minute >= 70:
+			return mini(base, 2) # jogo perdido: evita o vexame
+		if minute >= 80:
+			return 4
+		return maxi(base, 3)
+	if diff == 0:
+		if fav and minute >= 70:
+			return maxi(base, 3)
+		if dog and minute >= 75:
+			return mini(base, 1) # o ponto fora de casa contra o grande vale muito
+		return base
+	if diff == 1:
+		if minute >= (65 if dog else 75):
+			return mini(base, 1)
+		return base
+	return mini(base, 2)
 
 
 ## Plano de jogo do usuário: muda a mentalidade quando o placar muda de situação
@@ -2233,7 +2289,7 @@ func to_result() -> Dictionary:
 		for mp: MatchPlayer in t.all:
 			if mp.used:
 				pstats[mp.p.id] = [mp.shots, mp.shots_on, mp.saves]
-	return {"hg": score[0], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats,
+	return {"hg": score[0], "sh": [teams[0].shots, teams[1].shots], "ag": score[1], "att": attendance, "goals": goals, "motm": motm.p.id if motm != null else -1, "pstats": pstats,
 		"et": half >= 3, "pens": [pen_score[0], pen_score[1]] if pen_taken[0] + pen_taken[1] > 0 else [],
 		"derby": derby, "importance": importance, "yc": [teams[0].yellows, teams[1].yellows], "rc": [teams[0].reds, teams[1].reds],
 		"lines": lines, "poss": possession_pct(0), "ref": ref, "tac": tactical_result()}

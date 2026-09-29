@@ -115,6 +115,17 @@ static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_ho
 	if sheet.mentality <= 1:
 		line = 0
 		pressing = mini(pressing, 1)
+	if diff >= 5.0 and sheet.mentality >= 3 and roll < adapt + 0.25:
+		# Favorito: sufoca a saída de bola de quem tem menos qualidade (pressão e linha adiantada).
+		pressing = 2
+		line = maxi(line, 1)
+	elif diff <= -6.0:
+		# Azarão: nada de pressão alta nem linha adiantada contra atacantes melhores.
+		pressing = mini(pressing, 1)
+		line = 0 if roll < adapt + 0.3 else mini(line, 1)
+	elif not is_home and absf(diff) < 4.0 and sheet.mentality >= TeamSheet.MENT_TUDO:
+		# Fora de casa em jogo parelho ninguém começa no tudo ou nada.
+		sheet.mentality = TeamSheet.MENT_OFENSIVA
 	# Elenco cansado não aguenta pressão alta o jogo inteiro.
 	if pressing == 2 and _avg_condition(world, sheet) < 82.0:
 		pressing = 1
