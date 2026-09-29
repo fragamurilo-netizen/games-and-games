@@ -335,6 +335,65 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 			TrainingSheet.open(yp)
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
+		"buy_cond", "buy_terms", "buy_loan":
+			for c: Club in w.clubs_in_league(u.league_id):
+				if c.id != u.id and not u.is_rival(c.id):
+					var sq := w.squad(c)
+					sq.sort_custom(func(a, b): return a.overall > b.overall)
+					Negotiation.open(w, sq[2], "buy", func(): pass)
+					break
+			await _frames(2)
+			var neg: Negotiation = Negotiation.last
+			if neg != null:
+				match kind:
+					"buy_cond":
+						neg.buy_tab = "cond"
+						neg.deal["inst"] = 2
+						neg.deal["addon"] = 0.2
+					"buy_terms":
+						neg.agreed_fee = neg.fee
+						neg.wage = TransferManager.wage_ask(w, neg.p, u)
+						neg.terms_tab = "extra"
+						neg.deal["abl"] = 1
+						neg.deal["role"] = Player.STATUS_ROTATION
+					"buy_loan":
+						neg.loan_mode = true
+						neg.loan_terms = {"kind": "obl", "ws": 0.75}
+				neg._render()
+		"offer":
+			var sq2 := w.squad(u)
+			sq2.sort_custom(func(a, b): return a.age(w.year) < b.age(w.year))
+			var r := TransferManager.shop_player(w, sq2[0])
+			if TransferManager.pending_offers(w).is_empty():
+				var o := TransferOffer.new()
+				o.id = w.next_offer_id
+				w.next_offer_id += 1
+				o.player_id = sq2[0].id
+				o.buyer_id = w.clubs_in_league("POR1")[0].id
+				o.seller_id = u.id
+				o.fee = Valuation.round_value(sq2[0].value * 1.1)
+				o.max_fee = int(o.fee * 1.25)
+				o.created_day = w.current_turn()
+				o.expires_day = w.current_turn() + 2
+				w.offers.append(o)
+			for o: TransferOffer in w.offers:
+				if o.is_pending():
+					o.inst = 3
+					o.addon = Valuation.round_value(o.fee * 0.15)
+					break
+			UIManager.goto("market", {"tab": "offers"})
+			await _frames(6)
+			print("[tela] propostas: ", r["msg"])
+		"kid":
+			UIManager.push("academy")
+			await _frames(6)
+			var kids := YouthManager.academy(w)
+			kids.sort_custom(func(a, b): return a.stats[Player.S_APPS] > b.stats[Player.S_APPS])
+			_screen().call("_actions", kids[0])
+		"coach":
+			UIManager.push("academy", {"tab": "staff"})
+			await _frames(6)
+			_screen().call("_coach_picker", YouthManager.CAT_U20)
 	await _shot(prefix + "dlg_" + kind)
 	UIManager.close_all_modals()
 

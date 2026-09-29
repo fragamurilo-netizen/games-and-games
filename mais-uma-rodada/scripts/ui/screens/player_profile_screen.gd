@@ -992,6 +992,19 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 	if own and not p.loan.is_empty():
 		var owner := w.club(int(p.loan.get("from", -1)))
 		f.add_child(UIKit.label("Emprestado pelo %s." % (owner.short_name if owner != null else "clube"), "Small", true))
+		if p.loan.has("opt"):
+			var opt_price := int(p.loan["opt"])
+			var obl := bool(p.loan.get("obl", false))
+			f.add_child(UIKit.label(("Obrigação de compra por %s se fizer %d jogos (tem %d)." % [Fmt.money(opt_price), DealTerms.OBLIGATION_APPS, DealTerms.season_apps(p)]) if obl else ("Opção de compra: %s." % Fmt.money(opt_price)), "Small", true))
+			if not obl:
+				f.add_child(UIKit.button("EXERCER OPÇÃO (%s)" % Fmt.money(opt_price), "PrimaryButton", func():
+					UIManager.confirm("Comprar %s?" % p.display_name(), "Você paga %s ao %s e ele fica em definitivo, com o salário atual." % [Fmt.money(opt_price), owner.short_name if owner != null else "clube"], "Comprar", func():
+						var r := DealTerms.exercise_option(w, p)
+						UIManager.toast(String(r["msg"]), UIColors.GREEN if r["ok"] else UIColors.RED)
+						if r["ok"]:
+							AudioManager.play("sign")
+							GameManager.save_now()
+						refresh()), "check"))
 		var tb := UIKit.button("Treino individual", "", func(): TrainingSheet.open(p, refresh_cb), "tactics")
 		f.add_child(tb)
 		return
@@ -1011,13 +1024,7 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 				refresh()))
 		else:
 			row.add_child(_act("Vender", "money", func(): Negotiation.open(w, p, "sell", refresh_cb)))
-		row.add_child(_act("Emprestar", "swap", func():
-			UIManager.confirm("Emprestar %s?" % p.display_name(), "Ele vai para um clube onde deve jogar mais, até o fim da temporada. O salário fica por conta do outro clube.", "Emprestar", func():
-				var r := TransferManager.loan_out(w, p)
-				UIManager.toast(r["msg"], UIColors.GREEN if r["ok"] else UIColors.RED)
-				if r["ok"]:
-					GameManager.save_now()
-					UIManager.back())))
+		row.add_child(_act("Emprestar", "swap", func(): _loan_sheet(w, p)))
 		if Store.career_edit_on():
 			row.add_child(_act("Editar", "gear", func(): UIManager.push("editor", {"player": p.id})))
 		row.add_child(_act("Rescindir", "close", func():
@@ -1030,6 +1037,12 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 	elif p.club_id < 0:
 		f.add_child(UIKit.button("CONTRATAR (LIVRE)", "PrimaryButton", func(): Negotiation.open(w, p, "free", refresh_cb), "check"))
 	else:
+		var bb := DealTerms.buyback_of(w, p)
+		if not bb.is_empty():
+			var bbb := UIKit.button("RECOMPRAR POR %s" % Fmt.money(int(bb["price"])), "PrimaryButton", func(): Negotiation.open(w, p, "buyback", refresh_cb), "money")
+			bbb.disabled = not w.transfer_window_open()
+			f.add_child(bbb)
+			f.add_child(UIKit.label("Cláusula de recompra válida até %d: o clube dele não pode recusar." % int(bb["until"]), "Small", true))
 		var b := UIKit.button("FAZER PROPOSTA", "PrimaryButton", func(): Negotiation.open(w, p, "buy", refresh_cb), "swap")
 		if not w.transfer_window_open():
 			b.disabled = true
@@ -1042,6 +1055,34 @@ func _actions(w: GameWorld, p: Player, own: bool) -> void:
 			f.add_child(UIKit.label("Assinou pré-contrato com o %s." % (pc.short_name if pc != null else "?"), "Small", true))
 		elif TransferManager.precontract_block(w, p, w.user_club()) == "":
 			f.add_child(UIKit.button("PROPOR PRÉ-CONTRATO", "GhostButton", func(): Negotiation.open(w, p, "pre", refresh_cb), "clock"))
+
+
+## Empréstimo de um jogador do elenco: simples, com opção ou com obrigação de compra.
+func _loan_sheet(w: GameWorld, p: Player) -> void:
+	var v := UIKit.vbox(12)
+	var head := UIKit.hbox(8)
+	var t := UIKit.label("Emprestar %s" % p.display_name(), "Title", true)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
+	v.add_child(head)
+	v.add_child(UIKit.label("Ele vai para um clube onde deve jogar mais, até o fim da temporada. O salário fica por conta do outro clube.", "Small", true))
+	var price := DealTerms.loan_option_price(w, p)
+	for opt in [["", "Empréstimo simples", "Volta no fim da temporada."],
+			["opt", "Com opção de compra", "O clube pode comprá-lo por %s no fim, se gostar." % Fmt.money(price)],
+			["obl", "Com obrigação de compra", "Se fizer %d jogos, a venda por %s é automática." % [DealTerms.OBLIGATION_APPS, Fmt.money(price)]]]:
+		var kind: String = opt[0]
+		var col := UIKit.vbox(2)
+		col.add_child(UIKit.label(String(opt[1]), "H3"))
+		col.add_child(UIKit.label(String(opt[2]), "Small", true))
+		v.add_child(UIKit.tap_row(col, func():
+			UIManager.close_modal()
+			var r := TransferManager.loan_out(w, p, kind)
+			UIManager.toast(r["msg"], UIColors.GREEN if r["ok"] else UIColors.RED)
+			if r["ok"]:
+				GameManager.save_now()
+				UIManager.back()))
+	UIManager.show_modal(v, true)
 
 
 ## Botão compacto do rodapé: ícone em cima e o nome curto embaixo.

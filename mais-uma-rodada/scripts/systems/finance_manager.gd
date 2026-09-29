@@ -51,7 +51,8 @@ static func wage_bill(world: GameWorld, club: Club) -> int:
 	for pid in club.player_ids:
 		var p: Player = world.players.get(pid, null)
 		if p != null:
-			total += p.wage
+			# Emprestado com salário dividido: o clube que o usa paga só a parte combinada.
+			total += p.wage if p.loan.is_empty() else int(p.wage * float(p.loan.get("ws", 1.0)))
 	return total
 
 

@@ -415,6 +415,19 @@ func _offer_card(w: GameWorld, o: TransferOffer) -> Control:
 	fee.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	fee.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	card.add_child(fee)
+	var terms: Array = []
+	if o.inst > 1:
+		terms.append("em %d parcelas (%s agora)" % [o.inst, Fmt.money(int(ceil(float(o.fee) / o.inst)))])
+	if o.addon > 0:
+		terms.append("+ %s após %d jogos" % [Fmt.money(o.addon), DealTerms.ADDON_APPS])
+	if o.so > 0.0:
+		terms.append("%d%% de revenda para você" % int(round(o.so * 100.0)))
+	if o.bb > 0:
+		terms.append("recompra por %s até %d" % [Fmt.money(o.bb), w.year + DealTerms.BUYBACK_YEARS])
+	if not terms.is_empty():
+		var tl := UIKit.label(" · ".join(PackedStringArray(terms)), "Small", true)
+		tl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		card.add_child(tl)
 	var pid := p.id
 	card.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
 	if p.trait_sum("ambition") >= 25.0 and buyer.reputation > w.user_club().reputation:
@@ -429,6 +442,17 @@ func _offer_card(w: GameWorld, o: TransferOffer) -> Control:
 			more.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			crow.add_child(more)
 		card.add_child(crow)
+		var clr := UIKit.hbox(8)
+		if o.so <= 0.0:
+			var sob := UIKit.button("Pedir 15% de revenda", "ChipButton", func(): _respond(o, "so", 0), "plus")
+			sob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			clr.add_child(sob)
+		if o.bb <= 0 and p.age(w.year) <= 23:
+			var bbb := UIKit.button("Pedir recompra", "ChipButton", func(): _respond(o, "bb", 0), "back")
+			bbb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			clr.add_child(bbb)
+		if clr.get_child_count() > 0:
+			card.add_child(clr)
 	var row := UIKit.hbox(8)
 	var accept := UIKit.button("Aceitar", "PrimaryButton", func(): _respond(o, "accept", 0), "check")
 	accept.size_flags_horizontal = Control.SIZE_EXPAND_FILL

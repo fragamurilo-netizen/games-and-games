@@ -110,6 +110,7 @@ static func years_in(world: GameWorld, p: Player) -> int:
 ## Quanto o clube já conhece o garoto (0.3..0.92): coordenador da base, anos de casa e jogos.
 static func precision(world: GameWorld, p: Player) -> float:
 	var pr := 0.3 + People.staff_level(world, "base") * 0.3 + years_in(world, p) * 0.12
+	pr += (YouthAcademy.coach_level(world, category(p, world.year)) - 2) * 0.03
 	if p.stats[Player.S_APPS] >= 10:
 		pr += 0.08
 	return clampf(pr, 0.3, 0.92)
@@ -336,11 +337,11 @@ static func best_prospect(world: GameWorld, club: Club) -> Player:
 
 
 ## Sobe um garoto para o elenco profissional. Retorna a mensagem para a interface.
-static func promote(world: GameWorld, p: Player) -> String:
+static func promote(world: GameWorld, p: Player, loaned: bool = false) -> String:
 	var club := world.user_club()
 	if not world.academy.has(p.id):
 		return "Ele não está mais na base."
-	if club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
+	if not loaned and club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return "Elenco cheio: libere uma vaga antes de subir %s." % p.display_name()
 	world.academy.erase(p.id)
 	var years_home := years_in(world, p)
@@ -355,6 +356,8 @@ static func promote(world: GameWorld, p: Player) -> String:
 	world.stat_add("youth_promoted")
 	CoachIdentity.on_promote(world)
 	_add_grad(world, p, club.id, 0, years_home)
+	if loaned:
+		return "%s assinou o contrato profissional." % p.display_name()
 	NewsManager.post_raw(world, "%s sobe para o profissional" % p.display_name(),
 		"Aos %d anos, %s (%s) deixa a base do %s e passa a treinar com o elenco principal." % [p.age(world.year), p.display_name(), Pos.name_of(p.position).to_lower(), club.short_name],
 		club.id, p.id, NewsEvent.IMP_HIGH, "base")
@@ -503,9 +506,10 @@ static func weekly(world: GameWorld) -> void:
 			age_f *= 1.2
 		elif age <= 17 and p.dev_curve == Player.CURVE_TARDIO:
 			age_f *= 0.8
-		var budget := gap * 0.005 * age_f * (0.75 + club.youth_level / 250.0) * play_factor(world, p) * focus * p.trait_mult("dev_mult") + p.dev_acc
-		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget))
+		var budget := gap * 0.005 * age_f * YouthAcademy.facility_growth(club) * play_factor(world, p) * focus * p.trait_mult("dev_mult") * YouthAcademy.growth_mult(world, p) + p.dev_acc
+		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget), YouthAcademy.growth_bias(world, p))
 		p.morale = clampf(p.morale + (65.0 - p.morale) * 0.1, 0.0, 100.0)
+		YouthAcademy.weekly_side(world, p)
 
 
 ## Balanço do ano de cada garoto: estirão (ganha potencial) ou estagnação (perde).
@@ -526,6 +530,8 @@ static func yearly_review(world: GameWorld) -> Array:
 			up += 0.22
 		if apps >= 8 and avg >= 7.0:
 			up += 0.12
+		up += minf(0.12, int(world.youth.get("shine", {}).get(str(p.id), 0)) * 0.03) # brilhou nas copas
+		up += (YouthAcademy.coach_level(world, cat) - 3) * 0.02
 		if cat != CAT_U15 and games >= 8 and apps < games * 0.2:
 			down += 0.12
 		for t in ["profissional", "esforcado", "perfeccionista"]:
@@ -575,6 +581,7 @@ static func season_turnover(world: GameWorld) -> Dictionary:
 		var cp: Player = ch["p"]
 		out["changes"].append({"id": cp.id, "name": cp.display_name(), "up": ch["up"], "d": ch["d"], "why": ch["why"]})
 	world.year += 1
+	YouthAcademy.log_season(world, world.year - 1)
 	for p: Player in world.academy.values().duplicate():
 		p.reset_season_stats()
 		if p.age(world.year) > MAX_AGE:
@@ -587,6 +594,9 @@ static func season_turnover(world: GameWorld) -> Dictionary:
 	var cost := scouting_cost(world)
 	if cost > 0:
 		club.add_ledger("investimentos", -cost)
+	var staff_cost := YouthAcademy.coaches_cost(world)
+	club.add_ledger("salarios", -staff_cost)
+	out["staff_cost"] = staff_cost
 	out["cost"] = cost
 	state(world)["cost"] = cost
 	var used := WorldGenerator.used_names_of(world)
@@ -625,6 +635,7 @@ static func build_league(world: GameWorld) -> void:
 	var u17 := _build(world, "u17")
 	if not u17.is_empty():
 		world.youth["u17"] = u17
+	YouthCups.build(world)
 
 
 static func _build(world: GameWorld, key: String) -> Dictionary:
@@ -784,16 +795,17 @@ static func play_slot(world: GameWorld, slot: int) -> Array:
 				f.ag = int(g[3])
 				CompetitionManager.apply_to_table(yl["table"], f)
 				if world.is_user_club(h):
-					g.append(_credit_user(world, yl, team, int(g[2]), int(g[3])))
+					g.append(_credit_user(world, yl, team, int(g[2]), int(g[3]), key))
 					_credit_goals(world, yl, a, int(g[3]))
 				elif world.is_user_club(a):
 					_credit_goals(world, yl, h, int(g[2]))
-					g.append(_credit_user(world, yl, team, int(g[3]), int(g[2])))
+					g.append(_credit_user(world, yl, team, int(g[3]), int(g[2]), key))
 				else:
 					_credit_goals(world, yl, h, int(g[2]))
 					_credit_goals(world, yl, a, int(g[3]))
 				if world.is_user_club(h) or world.is_user_club(a):
 					played.append(g)
+	YouthCups.play_slot(world, slot, used)
 	return played
 
 
@@ -805,7 +817,7 @@ static func _strength(world: GameWorld, yl: Dictionary, cid: int) -> float:
 
 ## Minutos, gols, assistências e notas do time do usuário. Retorna o resumo do jogo:
 ## {"g": [nomes dos autores], "best": nome do melhor em campo}.
-static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, mine: int, theirs: int) -> Dictionary:
+static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, mine: int, theirs: int, comp_key: String = "") -> Dictionary:
 	var rng := world.rng
 	var xi: Array = team["xi"]
 	var summary := {"g": [], "best": ""}
@@ -864,6 +876,8 @@ static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, min
 		p.stats[Player.S_ASSISTS] += int(assists.get(p.id, 0))
 		p.stats[Player.S_RATING_SUM] += int(round(rt * 10.0))
 		p.push_rating(rt)
+		if comp_key != "":
+			YouthCups._add_cs(world, p.id, comp_key, 1, int(goals.get(p.id, 0)), int(assists.get(p.id, 0)))
 		if rt > best_r:
 			best_r = rt
 			best = p
@@ -873,6 +887,8 @@ static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, min
 		bp.stats[Player.S_MINUTES] += 20
 		bp.stats[Player.S_RATING_SUM] += int(round(rb * 10.0))
 		bp.push_rating(rb)
+		if comp_key != "":
+			YouthCups._add_cs(world, bp.id, comp_key, 1, 0, 0)
 	if best != null:
 		best.stats[Player.S_MOTM] += 1
 		summary["best"] = best.short_name()
@@ -930,6 +946,9 @@ static func finish_league(world: GameWorld) -> Dictionary:
 			out = {"u17": u17}
 		else:
 			out["u17"] = u17
+	var cups := YouthCups.finish(world)
+	if not cups.is_empty() and not out.is_empty():
+		out["cups"] = cups
 	return out
 
 
