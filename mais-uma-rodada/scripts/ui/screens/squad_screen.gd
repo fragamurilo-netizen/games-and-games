@@ -112,7 +112,7 @@ func _passes_quick(w: GameWorld, p: Player) -> bool:
 static func stat_cols(width: float) -> int:
 	if width >= 1250.0:
 		return 6
-	if width >= 980.0:
+	if width >= 900.0:
 		return 4
 	return 0
 
