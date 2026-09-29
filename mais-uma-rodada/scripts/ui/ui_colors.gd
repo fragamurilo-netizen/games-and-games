@@ -4,29 +4,29 @@ extends RefCounted
 ## (cinzas quentes, texto quase preto), com o destaque na cor do clube.
 ## Use estas cores em vez de cores soltas; elas mudam quando o modo muda.
 
-## Paleta escura (é a que está gravada no tema do projeto). Grafite azulado em camadas, como
-## as interfaces de transmissão: fundo quase preto, superfícies que sobem de tom a cada nível.
-const D_BG := Color("#090B0F")
-const D_SURFACE := Color("#12151B")
-const D_SURFACE_2 := Color("#1A1E26")
-const D_SURFACE_3 := Color("#242A34")
-const D_LINE := Color("#2B313C")
-const D_TEXT := Color("#F3F5F8")
-const D_MUTED := Color("#9AA2AF")
-const D_DIM := Color("#848C99")
-const D_GOLD := Color("#FFC940")
-const D_GOLD_DARK := Color("#C99A1E")
-const D_GREEN := Color("#34C77B")
-const D_RED := Color("#EF4B55")
-const D_BLUE := Color("#4DA8F0")
-const D_ORANGE := Color("#F5A45B")
-## Paleta clara: contraste de texto AA (4,5:1 ou mais) sobre o branco e sobre o fundo.
+## Paleta escura (a gravada no tema do projeto). "Lousa e giz" (ver DESIGN.md): ardósia neutra
+## em degraus de tom, texto de giz, estados em tons sóbrios. A cor do clube entra só como contexto.
+const D_BG := Color("#15181B")
+const D_SURFACE := Color("#1C2024")
+const D_SURFACE_2 := Color("#24292E")
+const D_SURFACE_3 := Color("#30363C")
+const D_LINE := Color("#343A40")
+const D_TEXT := Color("#F1F0EC")
+const D_MUTED := Color("#A5ABB2")
+const D_DIM := Color("#8A9199")
+const D_GOLD := Color("#D3A94A")
+const D_GOLD_DARK := Color("#A8843A")
+const D_GREEN := Color("#57976B")
+const D_RED := Color("#C75B5B")
+const D_BLUE := Color("#6F93B8")
+const D_ORANGE := Color("#D39B45")
+## Paleta clara: os mesmos papéis, contraste de texto AA sobre o fundo e as superfícies.
 const LIGHT := {
-	"BG": Color("#EDEFF3"), "SURFACE": Color("#FFFFFF"), "SURFACE_2": Color("#F4F6F9"),
-	"SURFACE_3": Color("#E2E6EC"), "LINE": Color("#D3D8E0"), "TEXT": Color("#0E1117"),
-	"MUTED": Color("#474E5A"), "DIM": Color("#5B6270"), "GOLD": Color("#8A5E00"),
-	"GOLD_DARK": Color("#6B4900"), "GREEN": Color("#137A43"), "RED": Color("#C4262B"),
-	"BLUE": Color("#1766A6"), "ORANGE": Color("#A5550A"),
+	"BG": Color("#E4E6E8"), "SURFACE": Color("#F4F5F6"), "SURFACE_2": Color("#EAECEE"),
+	"SURFACE_3": Color("#DADDE1"), "LINE": Color("#C5CAD0"), "TEXT": Color("#15181B"),
+	"MUTED": Color("#474D54"), "DIM": Color("#585F67"), "GOLD": Color("#7A5A12"),
+	"GOLD_DARK": Color("#5E450C"), "GREEN": Color("#2E6A43"), "RED": Color("#9E3434"),
+	"BLUE": Color("#35597F"), "ORANGE": Color("#855814"),
 }
 const DARK := {
 	"BG": D_BG, "SURFACE": D_SURFACE, "SURFACE_2": D_SURFACE_2, "SURFACE_3": D_SURFACE_3,
@@ -35,6 +35,9 @@ const DARK := {
 }
 ## Tons da paleta escura anterior ainda escritos em algumas telas: viram o tom novo equivalente.
 const LEGACY := {
+	"090B0F": "BG", "12151B": "SURFACE", "1A1E26": "SURFACE_2", "242A34": "SURFACE_3", "2B313C": "LINE",
+	"F3F5F8": "TEXT", "9AA2AF": "MUTED", "848C99": "DIM", "34C77B": "GREEN", "EF4B55": "RED",
+	"4DA8F0": "BLUE", "F5A45B": "ORANGE",
 	"0A0B0D": "BG", "141518": "SURFACE", "1C1D21": "SURFACE_2", "26282D": "SURFACE_3",
 	"2F3137": "LINE", "F2F3F5": "TEXT", "9EA2AA": "MUTED", "63676F": "DIM", "3DBE7A": "GREEN",
 	"E5484D": "RED", "4EA8DE": "BLUE", "F0A35E": "ORANGE", "646C79": "DIM",
@@ -42,8 +45,8 @@ const LEGACY := {
 ## Cores do tema escuro que não são da paleta acima e seus pares no modo claro.
 const LIGHT_EXTRA := [
 	[Color("#0E0F11"), Color("#E4E7EB")],
-	[Color("#0D1015"), Color("#FFFFFF")],
-	[Color("#1E232C"), Color("#DDE2E9")],
+	[Color("#111417"), Color("#F4F5F6")],
+	[Color("#262B30"), Color("#D3D7DC")],
 	[Color("#1F2126"), Color("#E9EBEE")],
 	[Color("#20252F"), Color("#E9ECF1")],
 	[Color("#FFB3B5"), Color("#B3261E")],
@@ -86,8 +89,8 @@ const TINT_KEYS := ["BG", "SURFACE", "SURFACE_2", "SURFACE_3", "LINE"]
 const INK_KEYS := ["MUTED", "DIM", "GOLD", "GREEN", "RED", "BLUE", "ORANGE"]
 ## Valor atual (tingido/ajustado) de cada chave da paleta em TINT_KEYS e INK_KEYS.
 static var _cur := {}
-const PITCH_A := Color("#2E7D4B")
-const PITCH_B := Color("#2A7445")
+const PITCH_A := Color("#2F5A42")
+const PITCH_B := Color("#2B5440")
 const PITCH_LINE := Color(0.87, 0.95, 0.89, 0.75)
 
 
@@ -376,8 +379,9 @@ static func _repaint_theme_items(th: Theme) -> void:
 static func _fix_states(th: Theme) -> void:
 	var ph := th.get_stylebox(&"hover", &"PrimaryButton") as StyleBoxFlat
 	if ph != null:
-		ph.bg_color = hover_of(ACCENT)
-		ph.border_color = ACCENT_DARK
+		# Botão principal é de giz (DESIGN.md), não da cor do clube.
+		ph.bg_color = hover_of(TEXT)
+		ph.border_color = hover_of(TEXT)
 	if not touch_only():
 		return
 	for type in th.get_type_list():

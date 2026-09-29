@@ -4,43 +4,56 @@ extends RefCounted
 ## tema (tools/build_theme.gd) usam estes valores em vez de números soltos, para que tudo
 ## tenha o mesmo ritmo. As cores ficam em UIColors.
 
-## Espaçamento (grade de 4 px).
-const S1 := 4
-const S2 := 8
-const S3 := 12
-const S4 := 16
-const S5 := 20
-const S6 := 24
-const S8 := 32
-## Margem lateral das telas.
-const GUTTER := 20
+## Valores em px do canvas (600 de largura em retrato; 1 dp ≈ 1,5 px). Fonte da verdade:
+## DESIGN.md. Não crie valores fora destas escalas.
 
-## Cantos: quase retos, como em software esportivo e grafismo de transmissão (nada de 12-24 px
-## em tudo).
-const R_XS := 3
-const R_SM := 4
+## Espaçamento: 6, 12, 18, 24, 36, 48.
+const S1 := 6
+const S2 := 12
+const S3 := 18
+const S4 := 24
+const S5 := 24
+const S6 := 36
+const S8 := 48
+## Margem lateral das telas (contexto denso: GUTTER_DENSE).
+const GUTTER := 24
+const GUTTER_DENSE := 18
+
+## Raios: 0 (tabela, linha, campo), 6 (objeto, botão, campo de texto), 12 (topo de folha e
+## diálogo). R_XS e R_MD ficam como apelidos de 6 para o código antigo.
+const R_NONE := 0
+const R_XS := 6
+const R_SM := 6
 const R_MD := 6
-const R_LG := 8
+const R_LG := 12
 
-## Tipografia (px no viewport de 720 de largura).
-const F_DISPLAY := 56
-const F_TITLE := 40
-const F_H2 := 30
-const F_H3 := 24
+## Tipografia (DESIGN.md › Typography).
+const F_SCORE := 60
+const F_ENTITY := 44
+const F_SCREEN := 36
+const F_SECTION := 28
 const F_BODY := 24
-const F_SMALL := 19
-const F_CAPS := 16
-const F_EYEBROW := 17
+const F_BODY_SMALL := 21
+const F_META := 20
+const F_CAPTION := 18
+## Apelidos antigos, apontando para a escala nova.
+const F_DISPLAY := F_SCORE
+const F_TITLE := F_ENTITY
+const F_H2 := F_SECTION
+const F_H3 := F_BODY
+const F_SMALL := F_BODY_SMALL
+const F_CAPS := F_CAPTION
+const F_EYEBROW := F_CAPTION
 
-## Alturas de toque.
+## Alturas de toque (≥ 72 = 48 dp; compactos ≥ 66 = 44 dp).
 const H_BUTTON := 72
-const H_BUTTON_SM := 56
-const H_CHIP := 48
-const H_TAB := 64
+const H_BUTTON_SM := 66
+const H_CHIP := 66
+const H_TAB := 72
 const H_ROW := 84
 const H_NAV := 96
 
-## Linha fina que separa cartões do fundo (mapeada no modo claro em UIColors.LIGHT_EXTRA).
-const HAIRLINE := Color("#1E232C")
-## Fundo das barras (superior, inferior, rodapés).
-const BAR := Color("#0D1015")
+## Divisor fino dentro de superfícies (mapeado no modo claro em UIColors.LIGHT_EXTRA).
+const HAIRLINE := Color("#262B30")
+## Fundo das barras (superior, navegação, rodapés).
+const BAR := Color("#111417")

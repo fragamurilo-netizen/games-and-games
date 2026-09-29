@@ -48,17 +48,19 @@ func refresh() -> void:
 		c.add_child(_jobs_card(w, jobs))
 		return
 	var preseason := PreseasonManager.is_active(w)
-	# Duas colunas quando cabe: à esquerda o que pede ação (jogo e pendências), à direita o que
-	# se lê (notícias, tabela, calendário). No celular, uma coluna nessa mesma ordem.
+	# Início com ritmo editorial (DESIGN.md › Editorial): a data como manchete, o jogo como o
+	# acontecimento principal, o que pede decisão e, depois, o mundo do futebol. Em tela larga,
+	# a coluna da direita traz a temporada (tabela e próximos jogos).
 	max_content_width = 1500.0
+	screen_subtitle = ""
 	var left: VBoxContainer = c
 	var right: VBoxContainer = c
 	if content_width() >= 1050.0:
-		var split := UIKit.hbox(40)
-		left = UIKit.vbox(c.get_theme_constant(&"separation"))
-		right = UIKit.vbox(c.get_theme_constant(&"separation"))
+		var split := UIKit.hbox(UITokens.S8)
+		left = UIKit.vbox(UITokens.S4)
+		right = UIKit.vbox(UITokens.S4)
 		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		left.size_flags_stretch_ratio = 1.15
+		left.size_flags_stretch_ratio = 1.3
 		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		split.add_child(left)
 		split.add_child(right)
@@ -77,32 +79,36 @@ func refresh() -> void:
 	var attention := _attention(w, club)
 	if attention != null:
 		left.add_child(attention)
-	var backstage: Control = RelationsScreen.pending_card(w, func(): refresh(), true)
+	var backstage: Control = RelationsScreen.pending_card(w, func(): refresh(), false)
 	if backstage != null:
 		left.add_child(backstage)
-	right.add_child(_news_card(w))
+	var news := _news_card(w)
+	if right == c:
+		left.add_child(news)
 	if not preseason:
 		right.add_child(_mini_table_card(w, club))
 	for extra in [_upcoming_card(w, club), _cups_card(w, club)]:
 		if extra != null:
 			right.add_child(extra)
+	if right != c:
+		left.add_child(news)
 
 
-## Data do dia em destaque e onde o clube está: a primeira coisa que o técnico lê.
+## Data do dia como manchete e, embaixo, onde o clube está e o que a diretoria espera.
 func _date_line(w: GameWorld, club: Club) -> Control:
 	var v := UIKit.vbox(0)
 	var slot := clampi(w.season.day, 0, maxi(0, w.season.total_days() - 1))
-	var d := UIKit.label(w.season.date_label(slot).capitalize() if w.season.date_label(slot) != "" else str(w.year), "Title")
-	v.add_child(d)
-	var parts: Array = ["Temporada %d" % w.year, w.league_name(club.league_id)]
+	var date := w.season.long_date_label(slot)
+	v.add_child(UIKit.label(date if date != "" else "Temporada %d" % w.year, "Title"))
 	var league := w.league_of(club.id)
+	var where := w.league_name(club.league_id)
 	if league != null and int(league.table[club.id]["pl"]) > 0:
-		parts.append("%dº · %d pts" % [CompetitionManager.position_of(league, club.id), int(league.table[club.id]["pts"])])
+		where = "%dº no %s, %d pontos" % [CompetitionManager.position_of(league, club.id), w.league_name(club.league_id), int(league.table[club.id]["pts"])]
+	var sub := UIKit.label(where, "Muted", true)
+	v.add_child(sub)
 	var goal: Array = SeasonManager.goal_of(w, club.id)
 	if not goal.is_empty():
-		parts.append("meta: %s" % String(goal[0]).to_lower())
-	var sub := UIKit.label(" · ".join(parts), "Muted", true)
-	v.add_child(sub)
+		v.add_child(UIKit.label("Meta da diretoria: %s" % String(goal[0]).to_lower(), "Muted", true))
 	return v
 
 
@@ -123,8 +129,9 @@ func _attention(w: GameWorld, club: Club) -> Control:
 		rows.append([UIColors.MUTED, Fmt.plural(unread, "mensagem não lida", "mensagens não lidas"), "", func(): UIManager.push("inbox")])
 	if rows.is_empty():
 		return null
-	var v := UIKit.card("CardHighlight", 0)
-	v.add_child(UIKit.section_header("Precisa da sua atenção · %d" % rows.size()))
+	var out := UIKit.vbox(UITokens.S2)
+	out.add_child(UIKit.section_header("Precisa da sua atenção"))
+	var v := UIKit.card("Card", 0)
 	for r in rows:
 		var h := UIKit.hbox(14)
 		var mark := ColorRect.new()
@@ -143,7 +150,8 @@ func _attention(w: GameWorld, club: Club) -> Control:
 		var row := UIKit.tap_row(h, r[3])
 		row.custom_minimum_size.y = UITokens.H_ROW
 		v.add_child(row)
-	return UIKit.card_panel(v)
+	out.add_child(UIKit.card_panel(v))
+	return out
 
 
 ## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.
@@ -675,31 +683,36 @@ func _inbox_card(w: GameWorld) -> Control:
 	return UIKit.card_panel(card)
 
 
+## Mundo do futebol: uma manchete com foto e, embaixo, as outras notícias como lista editorial.
 func _news_card(w: GameWorld) -> Control:
-	var card := UIKit.card("Card", 10)
-	var unread := w.unread_news_count()
-	card.add_child(UIKit.section_header("Notícias" + (" · %d novas" % unread if unread > 1 else (" · 1 nova" if unread == 1 else "")), "Todas", func(): UIManager.push("news")))
+	var out := UIKit.vbox(UITokens.S2)
+	out.add_child(UIKit.section_header("Mundo do futebol", "Todas as notícias", func(): UIManager.push("news")))
 	# O que importa primeiro: notícias do seu país e as grandes; o mundo completa se faltar.
 	var picked: Array = []
 	var rest: Array = []
 	for i in range(w.news.size() - 1, maxi(-1, w.news.size() - 60), -1):
 		var n: NewsEvent = w.news[i]
-		if picked.size() >= 4:
+		if picked.size() >= 5:
 			break
 		if n.importance >= NewsEvent.IMP_HIGH or (n.importance >= NewsEvent.IMP_NORMAL and not NewsRow.is_foreign(w, n)):
 			picked.append(n)
-		elif rest.size() < 4:
+		elif rest.size() < 5:
 			rest.append(n)
-	while picked.size() < 4 and not rest.is_empty():
+	while picked.size() < 5 and not rest.is_empty():
 		picked.append(rest.pop_front())
-	picked.sort_custom(func(a: NewsEvent, b: NewsEvent): return w.news.find(a) > w.news.find(b))
-	var shown := 0
+	if picked.is_empty():
+		out.add_child(UIKit.state_block("empty", "Nenhuma notícia ainda.", "O noticiário começa com a primeira rodada."))
+		return out
+	# Manchete: a mais importante das escolhidas; o resto na ordem do mais recente.
+	var lead: NewsEvent = picked[0]
 	for n: NewsEvent in picked:
-		card.add_child(NewsRow.make(w, n, true))
-		shown += 1
-	if shown == 0:
-		card.add_child(UIKit.label("Nada por aqui ainda.", "Muted"))
-	return UIKit.card_panel(card)
+		if n.importance > lead.importance:
+			lead = n
+	picked.erase(lead)
+	out.add_child(NewsRow.feature(w, lead, 300, true))
+	for n: NewsEvent in picked:
+		out.add_child(NewsRow.make(w, n, true))
+	return out
 
 
 ## O post mais recente sobre o seu clube nas redes.
@@ -783,10 +796,16 @@ func _mini_table_card(w: GameWorld, club: Club) -> Control:
 	var from := clampi(me - 2, 0, maxi(0, ids.size() - 5))
 	var card := UIKit.card("Card", 4)
 	var head := UIKit.hbox(8)
-	var sec := UIKit.section(league.name)
+	var sec := UIKit.label(league.name, "Section")
 	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sec.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	head.add_child(sec)
-	head.add_child(UIKit.label("J    SG    PTS", "Small"))
+	for t in ["J", "SG", "Pts"]:
+		var hl := UIKit.label(t, "Caps")
+		hl.custom_minimum_size.x = 52
+		hl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		hl.size_flags_vertical = Control.SIZE_SHRINK_END
+		head.add_child(hl)
 	card.add_child(head)
 	for i in range(from, mini(from + 5, ids.size())):
 		var cl := w.club(int(ids[i]))
@@ -806,8 +825,12 @@ func _mini_table_card(w: GameWorld, club: Club) -> Control:
 		if cl.id == club.id:
 			n.add_theme_color_override(&"font_color", UIColors.ACCENT)
 		row.add_child(n)
-		var nums := UIKit.label("%2d   %s   %3d" % [int(r["pl"]), Fmt.signed(int(r["gf"]) - int(r["ga"])), int(r["pts"])], "Mono")
-		row.add_child(nums)
+		for val in [str(int(r["pl"])), Fmt.signed(int(r["gf"]) - int(r["ga"])), str(int(r["pts"]))]:
+			var nl2 := UIKit.label(val)
+			nl2.custom_minimum_size.x = 52
+			nl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			nl2.add_theme_font_override(&"font", DataTable.tabular_font())
+			row.add_child(nl2)
 		card.add_child(UIKit.tap_row(row, func(): UIManager.goto("table"), "CardFlat" if cl.id == club.id else "RowPanel"))
 	return UIKit.card_panel(card)
 

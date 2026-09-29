@@ -46,96 +46,203 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	# Tela larga (tablet deitado): campo e banco à esquerda, adversário e tática à direita
-	var left := c
-	var right := c
-	if content_width() >= 1250.0:
-		var split := UIKit.hbox(UITokens.S4)
-		var gap := c.get_theme_constant(&"separation")
-		left = UIKit.vbox(gap)
-		right = UIKit.vbox(gap)
-		for col: VBoxContainer in [left, right]:
-			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			split.add_child(col)
+	# Modo Futebol (DESIGN.md): o campo domina. Em retrato: formação, campo, banco e o plano
+	# embaixo. Deitado/tablet: o campo ocupa a altura toda à esquerda; banco e plano ao lado.
+	var wide := content_width() >= 1000.0
+	var left: VBoxContainer = c
+	var right: VBoxContainer = c
+	if wide:
+		var split := UIKit.hbox(UITokens.S6)
+		left = UIKit.vbox(UITokens.S2)
+		right = UIKit.vbox(UITokens.S3)
+		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		left.size_flags_stretch_ratio = 1.4
+		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		split.add_child(left)
+		split.add_child(right)
 		c.add_child(split)
-	if f != null and not _edit:
-		right.add_child(_opponent_card(w, f))
-		right.add_child(_assistant_card(w, f))
+	left.add_child(_formation_header(w, club, sheet))
 	for n in _notes:
-		left.add_child(UIKit.colored(n, UIColors.ORANGE, "Small"))
+		left.add_child(UIKit.colored(n, UIColors.ORANGE, "Small", true))
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "lineup"
-	_pitch.custom_minimum_size = Vector2(0, 700)
+	var vh := get_viewport_rect().size.y
+	var landscape := UILayout.is_landscape()
+	_pitch.horizontal = landscape and not UILayout.is_tablet()
+	# Altura livre: tela menos barra superior, navegação (embaixo só no celular), cabeçalho da
+	# formação e margens; no celular também o banco, para campo e banco caberem juntos.
+	var avail := vh - 88.0 - 110.0 - 48.0 - (0.0 if wide else 96.0 + 190.0)
+	var pw := content_width() * (0.58 if wide else 1.0)
+	var ph := (pw / 1.55) if _pitch.horizontal else (pw / 0.74)
+	_pitch.custom_minimum_size = Vector2(0, clampf(minf(ph, avail), 380.0, 1100.0))
 	_pitch.mouse_filter = Control.MOUSE_FILTER_STOP
 	_pitch.chip_color = club.primary_color()
 	_update_chips()
 	_pitch.slot_tapped.connect(_on_slot)
 	left.add_child(_pitch)
-	var strength := ClubAI.lineup_strength(w, sheet.formation, sheet.starters) / 11.0
-	var hint := UIKit.hbox(8)
-	hint.add_child(UIKit.spacer())
-	hint.add_child(UIKit.label("Força do time: %d" % int(round(strength)), "H3"))
-	left.add_child(hint)
 	var rule := SquadRules.describe(club)
 	if rule != "":
 		var used := SquadRules.count(w, club, sheet.starters + sheet.bench)
 		var lim := int(SquadRules.limit(club)["max"])
-		left.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
-	var tools := UIKit.hbox(8)
-	var auto := UIKit.button("Escalação automática", "GhostButton", func():
-		club.sheet = ClubAI.auto_sheet(w, club, sheet.formation)
-		UIManager.toast("Melhores disponíveis escalados.")
-		refresh(), "bolt")
-	auto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools.add_child(auto)
-	var rest := UIKit.button("Poupar cansados", "GhostButton", func():
-		var msgs := SquadManager.rest_tired(w, club, sheet)
-		if msgs.is_empty():
-			UIManager.toast("Ninguém cansado com substituto à altura.")
-		else:
-			_notes = msgs
-			UIManager.toast("%d titular(es) poupado(s)." % msgs.size())
-		refresh(), "heart")
-	rest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools.add_child(rest)
-	left.add_child(tools)
-	var pe := CheckButton.new()
-	pe.text = "Editar posições no campo"
-	pe.button_pressed = _pos_edit
-	pe.toggled.connect(func(v):
-		_pos_edit = v
+		if used > lim:
+			left.add_child(UIKit.colored("%s: %d de %d." % [rule, used, lim], UIColors.ORANGE, "Small", true))
+	# Banco: faixa de camisas logo abaixo do campo (ao lado, em tela larga).
+	(right if wide else left).add_child(_bench_strip(w, club, sheet, wide))
+	if f != null and not _edit:
+		right.add_child(_opponent_card(w, f))
+		right.add_child(_assistant_card(w, f))
+	# Plano de jogo: cada escolha é uma linha com o valor atual; tocar abre as opções numa folha.
+	var tac := DatabaseManager.tactics()
+	var base := DatabaseManager.formation_base(sheet.formation)
+	var custom := sheet.formation.begins_with("C:")
+	right.add_child(UIKit.label("Plano de jogo", "Section"))
+	var plan := UIKit.card("Card", 0)
+	plan.add_child(_picker_row("Formação", base + (" (variação)" if custom else ""), TacticsManager.formation_fam(club, sheet.formation), _formation_sheet))
+	plan.add_child(_picker_row("Mentalidade", String(tac["mentalities"][sheet.mentality]["name"]), -1.0, _mentality_sheet))
+	plan.add_child(_picker_row("Estilo", String(tac["styles"][sheet.style]["short"]), TacticsManager.style_fam(club, sheet.style), _style_sheet))
+	var adj := "Intensidade %s, linha %s" % [String(tac["intensity"][sheet.intensity]["name"]).to_lower(), String(tac["line"][sheet.line]["name"]).to_lower()]
+	plan.add_child(_picker_row("Ajustes", adj, -1.0, _extras_sheet))
+	var deep := TacticsManager.deep_summary(sheet)
+	plan.add_child(_picker_row("Instruções", deep if deep != "" else "Padrão", -1.0, _section_sheet.bind("Instruções de equipe", func(v: VBoxContainer):
+		_deep_open = true
+		_deep_section(v, w, sheet))))
+	plan.add_child(_picker_row("Por placar", "A partir dos %d'" % sheet.plan_minute, -1.0, _section_sheet.bind("Plano por placar", func(v: VBoxContainer): _plan_section(v, sheet))))
+	plan.add_child(_picker_row("Individuais", "Por jogador", -1.0, _section_sheet.bind("Instruções individuais", func(v: VBoxContainer): _instructions_section(v, w, sheet))))
+	var cap := w.player(sheet.captain)
+	plan.add_child(_picker_row("Bola parada", ("Capitão " + cap.short_name()) if cap != null else "Capitão e cobradores", -1.0, _section_sheet.bind("Capitão e bola parada", func(v: VBoxContainer):
+		for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
+			v.add_child(_taker_row(w, sheet, item[0], item[1]))
+		v.add_child(_shootout_row(w, sheet)))))
+	right.add_child(UIKit.card_panel(plan))
+	right.add_child(_style_fit_label(w, sheet, tac["styles"][sheet.style]))
+	_build_footer(w)
+
+
+## Cabeçalho do campo: a formação em destaque, a força do time e as ferramentas rápidas.
+func _formation_header(w: GameWorld, club: Club, sheet: TeamSheet) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	var base := DatabaseManager.formation_base(sheet.formation)
+	var tv := UIKit.vbox(-4)
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var fl := UIKit.label(base + ("*" if sheet.formation.begins_with("C:") else ""), "Title")
+	tv.add_child(fl)
+	var strength := ClubAI.lineup_strength(w, sheet.formation, sheet.starters) / 11.0
+	tv.add_child(UIKit.label("Força do time titular: %d" % int(round(strength)), "Muted"))
+	h.add_child(tv)
+	var pe := UIKit.button("Mover posições", "ChipButton", func():
+		_pos_edit = not _pos_edit
 		refresh())
-	left.add_child(pe)
-	# Banco logo abaixo do campo: quem entra é parte da escalação.
-	left.add_child(UIKit.section_header("Banco · %d" % sheet.bench.size()))
+	pe.toggle_mode = true
+	pe.button_pressed = _pos_edit
+	pe.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pe.custom_minimum_size.y = UITokens.H_CHIP
+	h.add_child(pe)
+	var tools := UIKit.icon_button("menu", func(): _tools_sheet(w, club), "Mais")
+	tools.theme_type_variation = "GhostButton"
+	tools.custom_minimum_size = Vector2(UITokens.H_CHIP, UITokens.H_CHIP)
+	tools.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(tools)
+	return h
+
+
+## Escalação automática e poupar cansados, num menu (ações de vez em quando, não o tempo todo).
+func _tools_sheet(w: GameWorld, club: Club) -> void:
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Escalação", "Section"))
+	v.add_child(UIKit.gap(UITokens.S2))
+	var items := [
+		["Escalação automática", "Os melhores disponíveis na formação atual.", func():
+			club.sheet = ClubAI.auto_sheet(w, club, _sheet().formation)
+			UIManager.toast("Melhores disponíveis escalados.")],
+		["Poupar cansados", "Troca titulares abaixo do ideal por reservas à altura.", func():
+			var msgs := SquadManager.rest_tired(w, club, _sheet())
+			if msgs.is_empty():
+				UIManager.toast("Ninguém cansado com substituto à altura.")
+			else:
+				_notes = msgs
+				UIManager.toast("%d titular(es) poupado(s)." % msgs.size())],
+	]
+	for it in items:
+		var box := UIKit.vbox(0)
+		box.add_child(UIKit.label(String(it[0]), "H3"))
+		box.add_child(UIKit.label(String(it[1]), "Muted", true))
+		var cb: Callable = it[2]
+		var row := UIKit.tap_row(box, func():
+			UIManager.close_modal()
+			cb.call()
+			refresh())
+		row.custom_minimum_size.y = UITokens.H_ROW
+		v.add_child(row)
+	UIManager.show_modal(v, true)
+
+
+## Folha com uma seção do plano (instruções, plano por placar, individuais, bola parada).
+func _section_sheet(title: String, build: Callable) -> void:
+	var v := UIKit.vbox(UITokens.S2)
+	var head := UIKit.hbox(8)
+	var t := UIKit.label(title, "Section")
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	head.add_child(UIKit.button("Pronto", "TextButton", func():
+		UIManager.close_modal()
+		refresh()))
+	v.add_child(head)
+	build.call(v)
+	UIManager.show_modal(v, true)
+
+
+## Banco como faixa de camisas: número, sobrenome, geral e físico. Tocar escolhe quem troca.
+func _bench_strip(w: GameWorld, club: Club, sheet: TeamSheet, wide: bool) -> Control:
+	var out := UIKit.vbox(UITokens.S1)
+	out.add_child(UIKit.label("Banco (%d)" % sheet.bench.size(), "Section"))
+	var row: Container
+	if wide:
+		var g := GridContainer.new()
+		g.columns = 4
+		g.add_theme_constant_override(&"h_separation", UITokens.S1)
+		g.add_theme_constant_override(&"v_separation", UITokens.S1)
+		row = g
+		out.add_child(g)
+	else:
+		var sc := ScrollContainer.new()
+		sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+		sc.custom_minimum_size.y = 150
+		var hb := UIKit.hbox(UITokens.S1)
+		sc.add_child(hb)
+		row = hb
+		out.add_child(sc)
 	for i in sheet.bench.size():
 		var p := w.player(sheet.bench[i])
 		if p == null:
 			continue
 		var bi := i
-		left.add_child(PlayerRowView.make(w, p, {"mode": "pick"}, func(): _pick_for_bench(bi)))
-	# Painel rápido: cada escolha é uma linha com o valor atual; tocar abre as opções numa folha.
-	var tac := DatabaseManager.tactics()
-	var base := DatabaseManager.formation_base(sheet.formation)
-	var custom := sheet.formation.begins_with("C:")
-	right.add_child(UIKit.section_header("Plano de jogo"))
-	right.add_child(_picker_row("Formação", base + (" (variação)" if custom else ""), TacticsManager.formation_fam(club, sheet.formation), _formation_sheet))
-	right.add_child(_picker_row("Mentalidade", String(tac["mentalities"][sheet.mentality]["name"]), -1.0, _mentality_sheet))
-	right.add_child(_picker_row("Estilo", String(tac["styles"][sheet.style]["short"]), TacticsManager.style_fam(club, sheet.style), _style_sheet))
-	var st: Dictionary = tac["styles"][sheet.style]
-	right.add_child(_style_fit_label(w, sheet, st))
-	var adj := "%s · linha %s · pressão %s" % [String(tac["intensity"][sheet.intensity]["name"]).to_lower(), String(tac["line"][sheet.line]["name"]).to_lower(), String(tac["pressing"][sheet.pressing]["name"]).to_lower()]
-	right.add_child(_picker_row("Ajustes", adj, -1.0, _extras_sheet))
-	_deep_section(right, w, sheet)
-	_plan_section(right, sheet)
-	_instructions_section(right, w, sheet)
-	# Bola parada
-	right.add_child(UIKit.section("Capitão e bola parada"))
-	for item in [["Capitão", "captain"], ["Pênaltis", "penalty_taker"], ["Faltas", "freekick_taker"], ["Escanteios", "corner_taker"]]:
-		right.add_child(_taker_row(w, sheet, item[0], item[1]))
-	right.add_child(_shootout_row(w, sheet))
-	_build_footer(w)
+		var v := UIKit.vbox(0)
+		v.custom_minimum_size.x = 118
+		var kit := UIKit.shirt_back(club, p.shirt, 62, false, p.position == Pos.GK)
+		kit.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(kit)
+		var nm := UIKit.label(p.short_name(), "Small")
+		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		nm.add_theme_color_override(&"font_color", UIColors.TEXT)
+		v.add_child(nm)
+		var meta := UIKit.hbox(6)
+		meta.alignment = BoxContainer.ALIGNMENT_CENTER
+		meta.add_child(UIKit.colored(Pos.code(p.position), Pos.group_color(p.position), "Caps"))
+		var ov := UIKit.label(str(p.overall), "Caps")
+		ov.add_theme_color_override(&"font_color", Fmt.rating_color(p.overall))
+		meta.add_child(ov)
+		if p.injury_weeks > 0 or p.suspension > 0:
+			meta.add_child(UIKit.colored("fora", UIColors.RED, "Caps"))
+		elif p.condition < 85.0:
+			meta.add_child(UIKit.colored("%d%%" % int(p.condition), UIColors.ORANGE, "Caps"))
+		v.add_child(meta)
+		var tap := UIKit.tap_row(v, func(): _pick_for_bench(bi), "PanelContainer")
+		tap.tooltip_text = p.display_name()
+		row.add_child(tap)
+	return out
 
 
 ## Linha do painel rápido: nome à esquerda, valor e entrosamento à direita.
@@ -538,13 +645,19 @@ func _update_chips() -> void:
 	var w := world()
 	var sheet := _sheet()
 	var slots: Array = DatabaseManager.formation(sheet.formation)["slots"]
+	var club := w.user_club()
+	var kh: Dictionary = club.kit_home
+	var kg: Dictionary = club.gk_kit()
 	var chips: Array = []
 	for i in slots.size():
 		var pid: int = sheet.starters[i] if i < sheet.starters.size() and sheet.starters[i] != null else -1
 		var p := w.player(pid)
 		var s: Dictionary = slots[i]
 		var ch := {"x": s["x"], "y": s["y"], "number": p.shirt if p != null else "?", "name": p.short_name() if p != null else "vazio",
-			"rating": int(round(p.rating_at(s["pos"]))) if p != null else 0}
+			"rating": int(round(p.rating_at(s["pos"]))) if p != null else 0,
+			"c1": Color(String((kg if int(s["pos"]) == Pos.GK else kh).get("c1", club.color1))),
+			"c2": Color(String((kg if int(s["pos"]) == Pos.GK else kh).get("c2", club.color2))),
+			"cond": p.condition if p != null else 100.0}
 		if p != null and Pos.familiarity(p.position, p.secondary, s["pos"]) < 0.9:
 			ch["warn"] = true
 		if p != null and p.id == sheet.captain:

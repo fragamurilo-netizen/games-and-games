@@ -2,6 +2,7 @@ extends BaseScreen
 ## Elenco: filtros por setor, ordenação e acesso rápido a escalação e perfil.
 
 const FILTERS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
+## Seções além da lista (abertas pelo pé da tela; a lista é sempre a primeira coisa).
 const VIEWS := ["Jogadores", "Números", "Profundidade", "Papéis"]
 const SORTS := [["pos", "Posição"], ["ovr", "Overall"], ["form", "Nota"], ["cond", "Condição"], ["age", "Idade"], ["contract", "Contrato"], ["value", "Valor"]]
 ## Recortes rápidos da lista (tocáveis também nos alertas do resumo).
@@ -15,6 +16,9 @@ var _view := 0
 
 var _table_state := {}
 var _loan_state := {}
+## Visão da tabela (PlayerTable.VIEWS) e jogador aberto no painel de detalhe (tela larga).
+var _cols := "geral"
+var _sel := -1
 
 
 func _init() -> void:
@@ -23,8 +27,8 @@ func _init() -> void:
 	max_content_width = 1700.0
 
 
-## Resumo em uma linha: o que muda decisão (tamanho, força do time titular, folha, regra de
-## estrangeiros). Lesionados e contratos acabando viram recortes da tabela.
+## Resumo em uma frase (sem painel de indicadores): tamanho, idade, time titular e folha.
+## A regra de estrangeiros só aparece quando estourada.
 func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 	var v := UIKit.vbox(2)
 	var ages := 0.0
@@ -35,23 +39,17 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 		xi = ClubAI.lineup_strength(w, club.sheet.formation, club.sheet.starters) / 11.0
 	var fin := FinanceManager.summary(w, club)
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
-	var line := RichTextLabel.new()
-	line.bbcode_enabled = true
-	line.fit_content = true
-	line.scroll_active = false
-	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.add_theme_color_override(&"default_color", UIColors.MUTED)
-	var bill := "[color=#%s]%s[/color]" % [(UIColors.RED if over else UIColors.TEXT).to_html(false), Fmt.money_month(fin["wage_bill"])]
-	line.text = "%d jogadores · %s anos em média · time titular [color=#%s]%d[/color] · folha %s de %s" % [
-		squad.size(), Fmt._decimal(ages / maxf(1.0, squad.size()), 1), UIColors.TEXT.to_html(false), int(round(xi)), bill, Fmt.money(fin["wage_budget"])]
-	v.add_child(line)
+	var txt := "%d jogadores, idade média de %s anos. Time titular com força %d. Folha de %s por mês, limite de %s." % [
+		squad.size(), Fmt._decimal(ages / maxf(1.0, squad.size()), 1), int(round(xi)), Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])]
+	v.add_child(UIKit.label(txt, "Muted", true))
+	if over:
+		v.add_child(UIKit.colored("A folha passou do limite da diretoria.", UIColors.RED, "Small", true))
 	var rule := SquadRules.describe(club)
 	if rule != "":
 		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
 		var lim := int(SquadRules.limit(club)["max"])
 		if used > lim:
-			v.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE, "Small", true))
+			v.add_child(UIKit.colored("%s: %d de %d." % [rule, used, lim], UIColors.ORANGE, "Small", true))
 	return v
 
 
@@ -99,24 +97,42 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var vitems: Array = []
-	for i in VIEWS.size():
-		vitems.append([str(i), VIEWS[i]])
-	c.add_child(UIKit.tabs(vitems, str(_view), func(key: String):
-		_view = int(key)
+	if _view != 0:
+		# Seção secundária: volta à lista com um toque.
+		var back := UIKit.button("Voltar à lista", "TextButton", func():
+			_view = 0
+			refresh(), "back")
+		back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		c.add_child(back)
+		c.add_child(UIKit.label(VIEWS[_view], "Title"))
+		match _view:
+			1:
+				c.add_child(TeamStatsScreen.squad_table(w, club))
+			2:
+				_build_depth(w, club, c)
+			3:
+				_build_roles(w, club, c)
+		return
+	# Mestre/detalhe em tela larga: a lista à esquerda, o jogador escolhido à direita.
+	var wide := content_width() >= 1000.0
+	var main: VBoxContainer = c
+	var side: VBoxContainer = null
+	if wide:
+		var split := UIKit.hbox(UITokens.S6)
+		main = UIKit.vbox(UITokens.S3)
+		main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		main.size_flags_stretch_ratio = 1.7
+		side = UIKit.vbox(UITokens.S3)
+		side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		split.add_child(main)
+		split.add_child(side)
+		c.add_child(split)
+	main.add_child(_summary(w, club, squad))
+	# Visão: troca as colunas (Geral, Forma, Temporada, Contrato). Setor e recorte embaixo.
+	main.add_child(UIKit.segment(PlayerTable.VIEWS, _cols, func(key: String):
+		_cols = key
 		refresh()))
-	if _view == 1:
-		c.add_child(TeamStatsScreen.squad_table(w, club))
-		return
-	if _view == 2:
-		_build_depth(w, club, c)
-		return
-	if _view == 3:
-		_build_roles(w, club, c)
-		return
-	c.add_child(_summary(w, club, squad))
-	# Filtros numa fileira só: setor e recorte (lesionados, contrato acabando...).
-	var bar := UIKit.hbox(10)
+	var bar := UIKit.hbox(UITokens.S2)
 	var fitems: Array = []
 	for i in FILTERS.size():
 		fitems.append([str(i), FILTERS[i]])
@@ -131,36 +147,64 @@ func refresh() -> void:
 	for q in QUICK:
 		if q[0] == _quick:
 			qname = String(q[1])
-	var qb := UIKit.button(qname if _quick != "all" else "Recorte", "ChipButton", _quick_sheet.bind(counts))
+	var alerts := int(counts.get("hurt", 0)) + int(counts.get("exp", 0))
+	var qb := UIKit.button(qname if _quick != "all" else ("Filtro (%d)" % alerts if alerts > 0 else "Filtro"), "ChipButton", _quick_sheet.bind(counts))
+	qb.custom_minimum_size.y = UITokens.H_CHIP
 	if _quick != "all":
-		qb.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
-	elif int(counts.get("hurt", 0)) + int(counts.get("exp", 0)) > 0:
-		qb.text = "Recorte · %d" % (int(counts.get("hurt", 0)) + int(counts.get("exp", 0)))
+		qb.button_pressed = true
+		qb.toggle_mode = true
 	bar.add_child(qb)
-	c.add_child(bar)
+	main.add_child(bar)
 	var list: Array = []
 	for p in squad:
 		if (_filter == 0 or Pos.group(p.position) == _filter - 1) and _passes_quick(w, p):
 			list.append(p)
 	if list.is_empty():
-		c.add_child(UIKit.state_block("empty", "Ninguém nesse recorte.", "", "Mostrar todos", func():
+		main.add_child(UIKit.state_block("empty", "Ninguém nesse recorte.", "", "Mostrar todos", func():
 			_filter = 0
 			_quick = "all"
 			refresh()))
 	else:
-		c.add_child(PlayerTable.make(w, list, "squad", _table_state, func(p: Player): UIManager.push("player", {"id": p.id})))
+		var tap := func(p: Player):
+			if wide:
+				_sel = p.id
+				refresh()
+			else:
+				UIManager.push("player", {"id": p.id})
+		var tbl := PlayerTable.make(w, list, "squad", _table_state, tap, [], _cols, wide)
+		if wide:
+			tbl.highlight = func(p: Player) -> bool: return p.id == _sel
+			tbl._build()
+		main.add_child(tbl)
 	var out := TransferManager.loaned_out(w)
 	if not out.is_empty():
-		c.add_child(UIKit.section_header("Emprestados · %d" % out.size()))
-		c.add_child(PlayerTable.make(w, out, "club", _loan_state, func(p: Player): UIManager.push("player", {"id": p.id})))
-	c.add_child(UIKit.gap(12))
-	c.add_child(UIKit.menu_group([
-		UIKit.menu_row("", "Estatísticas da equipe", "", func(): UIManager.push("team_stats")),
-		UIKit.menu_row("", "Numeração", "", func(): UIManager.push("numbers")),
+		main.add_child(UIKit.label("Emprestados", "Section"))
+		main.add_child(PlayerTable.make(w, out, "club", _loan_state, func(p: Player): UIManager.push("player", {"id": p.id}), [], "geral", wide))
+	main.add_child(UIKit.gap(UITokens.S2))
+	main.add_child(UIKit.menu_group([
+		UIKit.menu_row("", "Profundidade por posição", "", func():
+			_view = 2
+			refresh()),
+		UIKit.menu_row("", "Papéis e promessas", "", func():
+			_view = 3
+			refresh()),
+		UIKit.menu_row("", "Números da temporada", "", func():
+			_view = 1
+			refresh()),
 		UIKit.menu_row("", "Contratos", "", func(): UIManager.push("contracts")),
+		UIKit.menu_row("", "Numeração", "", func(): UIManager.push("numbers")),
 		UIKit.menu_row("", "Vestiário", "", func(): UIManager.push("dressing_room")),
-		UIKit.menu_row("", "Base", "", func(): UIManager.push("academy")),
 	]))
+	if side != null:
+		var sel := w.player(_sel)
+		if sel == null or sel.club_id != club.id:
+			sel = null
+			for p in list:
+				sel = p
+				break
+		if sel != null:
+			_sel = sel.id
+			side.add_child(PlayerBrief.make(w, sel, true))
 
 
 func _quick_counts(w: GameWorld, squad: Array) -> Dictionary:

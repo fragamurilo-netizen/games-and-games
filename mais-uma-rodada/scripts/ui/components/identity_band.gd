@@ -27,6 +27,12 @@ static func wrap(club: Club, block_w: float = 200.0, height: float = 200.0) -> A
 	if club != null:
 		bg.c1 = club.primary_color()
 		bg.c2 = club.secondary_color()
+		# Camisa clara (branca, creme): o bloco vai na segunda cor e o claro vira a faixa,
+		# para não virar um retângulo branco estourado sobre a ardósia.
+		if bg.c1.get_luminance() > 0.75 and bg.c2.get_luminance() < 0.6:
+			var t := bg.c1
+			bg.c1 = bg.c2
+			bg.c2 = t
 	p.add_child(bg)
 	var body := UIKit.vbox(10)
 	body.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -24,6 +24,8 @@ var items: Array = []
 ## Estado que a tela guarda entre reconstruções: {"sort": key, "desc": bool, "shown": int}.
 var state: Dictionary = {}
 var lead_width := 300.0
+## Largura mínima da coluna do nome: abaixo disso as colunas de números rolam para o lado.
+var lead_min := 220.0
 var row_height := ROW_H
 var zebra := false
 ## Item destacado (o clube do usuário na classificação, o jogador aberto no painel lateral).
@@ -119,7 +121,8 @@ func _build() -> void:
 	# Os números nunca empurram a tela para os lados: rolam dentro do próprio bloco.
 	var fit := func():
 		if is_instance_valid(lead) and size.x > 0.0:
-			lead.custom_minimum_size.x = maxf(lead_width, size.x - num_w)
+			# O nome cede espaço até lead_min antes de os números começarem a rolar para o lado.
+			lead.custom_minimum_size.x = maxf(minf(lead_width, lead_min), size.x - num_w)
 	resized.connect(fit)
 	fit.call_deferred()
 	lead.add_child(_head_cell(columns[0], true))

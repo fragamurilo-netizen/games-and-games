@@ -6,6 +6,7 @@ extends BaseScreen
 var _club_id := -1
 ## Aba aberta: cada parte do clube numa aba, em vez de uma tela comprida.
 static var _tab_own := "overview"
+const SECTION_NAMES := {"calendar": "Calendário", "manage": "Finanças e diretoria", "stats": "Estatísticas", "history": "História do clube", "career": "Carreira"}
 var _tab := "overview"
 
 
@@ -17,7 +18,7 @@ func _init() -> void:
 func setup(p: Dictionary) -> void:
 	super.setup(p)
 	_club_id = int(p.get("id", -1))
-	_tab = String(p.get("tab", _tab_own if _club_id < 0 else "overview"))
+	_tab = String(p.get("tab", "overview"))
 
 
 func _own() -> bool:
@@ -34,6 +35,16 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	max_content_width = 1800.0
+	# Clube do usuário: a página começa pela instituição (DESIGN.md › Clube). As seções abrem
+	# por cima (voltar retorna aqui), sem fileira de abas.
+	if _own():
+		screen_title = club.short_name if _tab == "overview" else String(SECTION_NAMES.get(_tab, club.short_name))
+		screen_subtitle = "" if _tab == "overview" else club.short_name
+		UIManager.refresh_chrome()
+		if _tab == "overview":
+			_club_home(w, club, c)
+			return
 	var items: Array = [["overview", "Clube"]]
 	if _own():
 		items.append_array([["calendar", "Calendário"], ["manage", "Finanças e diretoria"], ["stats", "Estatísticas"], ["history", "História"], ["career", "Carreira"]])
@@ -42,12 +53,11 @@ func refresh() -> void:
 	var keys: Array = items.map(func(it: Array) -> String: return String(it[0]))
 	if not _tab in keys:
 		_tab = "overview"
-	c.add_child(UIKit.scroll_tabs(items, _tab, func(key: String):
-		_tab = key
-		if _own():
-			_tab_own = key
-		refresh()
-		scroll_to_top()))
+	if not _own():
+		c.add_child(UIKit.scroll_tabs(items, _tab, func(key: String):
+			_tab = key
+			refresh()
+			scroll_to_top()))
 	var box := UIKit.vbox(UITokens.S4)
 	c.add_child(box)
 	var cards: Array = []
@@ -59,8 +69,6 @@ func refresh() -> void:
 			for ch in ident.get_children():
 				ident.remove_child(ch)
 				cards.append(ch)
-				if _own() and cards.size() == 1:
-					cards.append(_sections(w, club)) # logo abaixo do cabeçalho do clube
 			ident.free()
 			if not _own():
 				cards.append(_season_card(w, club))
@@ -96,29 +104,132 @@ func refresh() -> void:
 	UIKit.columns(box, cards, content_width(), 2, 1 if _tab == "overview" else 0)
 
 
-## Seções do próprio clube numa lista: competições, calendário, finanças, estrutura e o mundo.
-func _sections(w: GameWorld, club: Club) -> Control:
+## Página do próprio clube: identidade grande (escudo sobre as cores, nome, cidade, liga), a
+## temporada numa faixa de números, os uniformes e as áreas do clube agrupadas pelo assunto,
+## cada uma com a informação viva ao lado. Em tela larga: identidade à esquerda, áreas à direita.
+func _club_home(w: GameWorld, club: Club, c: VBoxContainer) -> void:
+	var left: VBoxContainer = c
+	var right: VBoxContainer = c
+	if content_width() >= 1000.0:
+		var split := UIKit.hbox(UITokens.S6)
+		left = UIKit.vbox(UITokens.S4)
+		right = UIKit.vbox(UITokens.S4)
+		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		split.add_child(left)
+		split.add_child(right)
+		c.add_child(split)
+	left.add_child(_club_hero(w, club))
+	left.add_child(_kits_row(club))
 	var league := w.league_of(club.id)
-	var pos_txt := ""
-	if league != null and int(league.table[club.id]["pl"]) > 0:
-		pos_txt = "%dº · %d pts" % [CompetitionManager.position_of(league, club.id), int(league.table[club.id]["pts"])]
+	var played := league != null and int(league.table[club.id]["pl"]) > 0
+	var pos_txt := ("%dº, %d pontos" % [CompetitionManager.position_of(league, club.id), int(league.table[club.id]["pts"])]) if played else "Antes da estreia"
 	var fin := FinanceManager.summary(w, club)
-	return UIKit.menu_group([
-		UIKit.menu_row("", "Competições", w.league_name(club.league_id) + ((" · " + pos_txt) if pos_txt != "" else ""), func(): UIManager.push("table")),
-		UIKit.menu_row("", "Calendário", "", func():
-			_tab = "calendar"
-			_tab_own = "calendar"
-			refresh()),
-		UIKit.menu_row("", "Finanças e diretoria", "Caixa %s · %s" % [Fmt.money(club.balance), FinanceManager.health_label(w, club).to_lower()], func():
-			_tab = "manage"
-			_tab_own = "manage"
-			refresh()),
-		UIKit.menu_row("", "Base", "%d garotos" % w.academy.size(), func(): UIManager.push("academy")),
-		UIKit.menu_row("", "Treino", String(TrainingManager.focus_of(club)["name"]), func(): UIManager.push("training")),
-		UIKit.menu_row("", "Seleções", "", func(): UIManager.push("national")),
-		UIKit.menu_row("", "Ranking de clubes", "", func(): UIManager.push("table", {"rank": ""})),
-		UIKit.menu_row("", "História do futebol", "", func(): UIManager.push("history")),
+	var nf := FixtureManager.next_fixture_for(w, club.id)
+	var next_txt := ""
+	if nf != null:
+		var opp := w.club(nf.opponent_of(club.id))
+		next_txt = "%s, %s %s" % [w.season.date_label(nf.slot, false), "contra o" if nf.home == club.id else "no", opp.short_name]
+	var yl_pos := YouthManager.sorted_table(w).find(w.user_club_id) + 1
+	_group(right, "Futebol", [
+		["Elenco", "%d jogadores" % club.player_ids.size(), func(): UIManager.switch_area("squad")],
+		["Base", "%d garotos%s" % [w.academy.size(), (", %dº na liga sub-20" % yl_pos) if yl_pos > 0 and YouthManager.has_league(w) and int(w.youth_league["table"][w.user_club_id]["pl"]) > 0 else ""], func(): UIManager.push("academy")],
+		["Treino", String(TrainingManager.focus_of(club)["name"]), func(): UIManager.push("training")],
+		["Comissão técnica", "", func(): UIManager.push("relations", {"tab": "staff"})],
 	])
+	_group(right, "Competição", [
+		["Calendário", ("Próximo: " + next_txt) if next_txt != "" else "Temporada encerrada", func(): UIManager.push("club", {"tab": "calendar"})],
+		["Classificação", "%s no %s" % [pos_txt, w.league_name(club.league_id)] if played else w.league_name(club.league_id), func(): UIManager.push("table")],
+		["Seleções", "", func(): UIManager.push("national")],
+		["Ranking de clubes", "", func(): UIManager.push("table", {"rank": ""})],
+	])
+	_group(right, "Gestão", [
+		["Finanças", "Caixa de %s, %s" % [Fmt.money(club.balance), FinanceManager.health_label(w, club).to_lower()], func(): UIManager.push("club", {"tab": "manage"})],
+		["Diretoria e torcida", "Confiança %s" % BoardManager.label(club.board_confidence).to_lower(), func(): UIManager.push("club", {"tab": "manage"})],
+		["Estatísticas", "", func(): UIManager.push("club", {"tab": "stats"})],
+		["Uniformes e patrocínio", "", func(): UIManager.push("kit")],
+	])
+	var cid := club.id
+	_group(right, "Instituição", [
+		["História do clube", "Títulos, ídolos e recordes", func(): UIManager.push("club", {"tab": "history"})],
+		["Elencos anteriores", "", func(): UIManager.push("past_squads", {"id": cid})],
+		["Revelados pela base", "", func(): UIManager.push("graduates", {"id": cid})],
+		["Sua carreira", "", func(): UIManager.push("club", {"tab": "career"})],
+		["História do futebol", "", func(): UIManager.push("history")],
+	])
+	left.add_child(ReputationScreen.club_card(w, club))
+	left.add_child(_dna_card(w, club))
+
+
+## Cabeçalho do clube: escudo grande sobre o bloco na cor do clube, nome e lugar, e a faixa
+## da temporada (posição, pontos, confiança, caixa).
+func _club_hero(w: GameWorld, club: Club) -> Control:
+	var hero := IdentityBand.wrap(club, 150.0, 214.0)
+	var body: VBoxContainer = hero[1]
+	var row := UIKit.hbox(UITokens.S6)
+	var cr := UIKit.crest(club, 170)
+	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(cr)
+	var col := UIKit.vbox(0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var nm := UIKit.label(club.name, "Title", true)
+	nm.max_lines_visible = 3
+	col.add_child(nm)
+	if club.nickname != "":
+		col.add_child(UIKit.label(club.nickname, "Muted"))
+	var place := UIKit.hbox(UITokens.S1)
+	place.add_child(UIKit.flag(club.nation, 28))
+	place.add_child(UIKit.label("%s, %s" % [club.city, DatabaseManager.nation_name(club.nation)], "Small", true))
+	col.add_child(place)
+	col.add_child(UIKit.label(w.league_name(club.league_id), "Small", true))
+	row.add_child(col)
+	body.add_child(row)
+	body.add_child(UIKit.gap(UITokens.S1))
+	var league := w.league_of(club.id)
+	var played := league != null and int(league.table[club.id]["pl"]) > 0
+	var conf := club.board_confidence
+	body.add_child(StatStrip.make([
+		["Posição", ("%dº" % CompetitionManager.position_of(league, club.id)) if played else "–", UIColors.TEXT],
+		["Pontos", str(int(league.table[club.id]["pts"])) if played else "–", UIColors.TEXT],
+		["Diretoria", BoardManager.label(conf), BoardManager.color(conf)],
+		["Caixa", Fmt.money(club.balance), UIColors.TEXT if club.balance >= 0 else UIColors.RED],
+	]))
+	var goal: Array = SeasonManager.goal_of(w, club.id)
+	if not goal.is_empty():
+		body.add_child(UIKit.label("Meta da temporada: %s." % String(goal[0]).to_lower(), "", true))
+	body.add_child(UIKit.label("%s, %s lugares. Fundado em %d." % [club.stadium, Fmt.thousands(club.capacity), club.founded], "Muted", true))
+	return hero[0]
+
+
+## Os uniformes da temporada: presença do clube (e atalho para o editor de uniformes).
+func _kits_row(club: Club) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	for k in [[club.kit_home, "Titular"], [club.kit_away, "Reserva"], [club.third_kit(), "Terceiro"], [club.gk_kit(), "Goleiro"]]:
+		var v := UIKit.vbox(2)
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var kv := UIKit.kit(k[0], 92, 0, club.crest)
+		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(kv)
+		var l := UIKit.label(String(k[1]), "Caps")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(l)
+		h.add_child(v)
+	var card := UIKit.card("Card", 0)
+	card.add_child(h)
+	var panel := UIKit.tap_row(UIKit.card_panel(card), func(): UIManager.push("kit"), "PanelContainer")
+	return panel
+
+
+## Grupo de áreas do clube: título de seção e as linhas (nome, informação viva, toque abre).
+func _group(parent: VBoxContainer, title: String, rows: Array) -> void:
+	var v := UIKit.vbox(UITokens.S1)
+	v.add_child(UIKit.label(title, "Section"))
+	var list: Array = []
+	for r in rows:
+		list.append(UIKit.menu_row("", String(r[0]), String(r[1]), r[2]))
+	v.add_child(UIKit.menu_group(list))
+	parent.add_child(v)
 
 
 ## Calendário do clube na temporada: data, competição, adversário, mando e resultado.

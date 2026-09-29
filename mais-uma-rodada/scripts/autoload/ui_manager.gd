@@ -409,6 +409,9 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	panel.theme_type_variation = "Sheet" if as_sheet else "Dialog"
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	box.add_child(panel)
+	# Conteúdo com largura mínima fixa (pensada para telas maiores) nunca vaza para os lados.
+	var psb := panel.get_theme_stylebox(&"panel")
+	_clamp_width(content, vw - side * 2.0 - (psb.get_minimum_size().x if psb != null else 0.0), 2)
 	# Conteúdo maior que a tela rola dentro do modal em vez de vazar para fora dela.
 	var reserved := safe.position.y + 60.0 + (safe.size.y if as_sheet else safe.size.y + 60.0)
 	var body := _fit_to_screen(content, layer, panel, reserved)
@@ -450,6 +453,16 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 ## Limita a altura do conteúdo do modal ao espaço da tela. Se o conteúdo já é uma rolagem
 ## (listas longas), só limita sua altura; senão, embrulha num ScrollContainer que cresce
 ## junto com o conteúdo até o limite e então passa a rolar.
+func _clamp_width(n: Control, max_w: float, depth: int) -> void:
+	if n.custom_minimum_size.x > max_w:
+		n.custom_minimum_size.x = maxf(0.0, max_w)
+	if depth <= 0:
+		return
+	for ch in n.get_children():
+		if ch is Control:
+			_clamp_width(ch, max_w, depth - 1)
+
+
 func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, reserved: float) -> Control:
 	var max_h := func() -> float:
 		var style := panel.get_theme_stylebox(&"panel")

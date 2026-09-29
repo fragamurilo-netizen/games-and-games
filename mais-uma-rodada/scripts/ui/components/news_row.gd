@@ -269,7 +269,7 @@ static func make(w: GameWorld, n: NewsEvent, compact: bool) -> Control:
 	sec.add_theme_color_override(&"font_color", tone if tone != UIColors.MUTED else UIColors.DIM)
 	head.add_child(sec)
 	if not n.read:
-		head.add_child(UIKit.pill("NOVA", UIColors.ACCENT, 13))
+		head.add_child(UIKit.colored("nova", UIColors.TEXT, "Caps"))
 	v.add_child(head)
 	v.add_child(UIKit.label(n.title, "H3", true))
 	if n.body != "" and (not compact or n.importance >= NewsEvent.IMP_HIGH):

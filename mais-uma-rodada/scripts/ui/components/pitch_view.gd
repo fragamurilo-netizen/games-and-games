@@ -1003,6 +1003,8 @@ func _build_crowd(r: Rect2, rings: Dictionary) -> void:
 # Escalação
 # ---------------------------------------------------------------------------
 
+## Escalação na lousa: cada titular é uma mini camisa no uniforme do clube (o goleiro no dele),
+## com o número, o sobrenome embaixo e o geral na posição. Físico só aparece quando preocupa.
 func _draw_chips(r: Rect2) -> void:
 	var font := get_theme_font(&"font", &"Stat")
 	var small := get_theme_font(&"font", &"H3")
@@ -1010,30 +1012,51 @@ func _draw_chips(r: Rect2) -> void:
 	for i in chips.size():
 		var ch: Dictionary = chips[i]
 		var p := P(float(ch["y"]), float(ch["x"]), r)
-		var col: Color = ch.get("color", chip_color)
+		var c1: Color = ch.get("c1", ch.get("color", chip_color))
+		var c2: Color = ch.get("c2", c1.darkened(0.3))
+		var sz := rad * 2.3
 		if i == selected:
-			draw_circle(p, rad * 1.35, Color(1, 0.79, 0.25, 0.45))
-		draw_circle(p + Vector2(0, 2), rad, Color(0, 0, 0, 0.35))
-		draw_circle(p, rad, col)
-		draw_arc(p, rad, 0.0, TAU, 32, Color(1, 1, 1, 0.85) if i != selected else UIColors.ACCENT, maxf(2.0, rad * 0.12), true)
+			draw_circle(p, sz * 0.78, Color(UIColors.D_TEXT, 0.22))
+		_draw_mini_shirt(p, sz, c1, c2, i == selected)
 		var num := str(ch.get("number", ""))
-		var fs := int(rad * 0.95)
+		var fs := int(sz * 0.36)
 		var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(font, p + Vector2(-nw * 0.5, fs * 0.36), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(col))
+		draw_string(font, p + Vector2(-nw * 0.5, fs * 0.5), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
 		var rating: int = int(ch.get("rating", 0))
-		if rating > 0:
-			var rb := Rect2(p + Vector2(rad * 0.45, -rad * 1.25), Vector2(rad * 1.25, rad * 0.8))
-			draw_rect(rb, Color(0.04, 0.045, 0.05, 0.9))
-			var rs := str(rating)
-			var rfs := int(rad * 0.6)
-			var rw := font.get_string_size(rs, HORIZONTAL_ALIGNMENT_LEFT, -1, rfs).x
-			draw_string(font, rb.position + Vector2((rb.size.x - rw) * 0.5, rb.size.y * 0.78), rs, HORIZONTAL_ALIGNMENT_LEFT, -1, rfs, Fmt.rating_color(rating))
 		var nm: String = ch.get("name", "")
-		var nfs := int(maxf(13.0, rad * 0.62))
-		var tw := small.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
-		var bg := Rect2(p + Vector2(-tw * 0.5 - 6, rad + 3), Vector2(tw + 12, nfs * 1.25))
-		draw_rect(bg, Color(0.04, 0.045, 0.05, 0.78))
-		draw_string(small, p + Vector2(-tw * 0.5, rad + 3 + nfs * 0.98), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE if not ch.get("warn", false) else UIColors.ORANGE)
+		var nfs := int(maxf(15.0, rad * 0.62))
+		var label := nm + ("  %d" % rating if rating > 0 else "")
+		var tw := small.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
+		var top := p.y + sz * 0.5 + 4.0
+		draw_rect(Rect2(p.x - tw * 0.5 - 6, top, tw + 12, nfs * 1.3), Color(0.08, 0.09, 0.1, 0.72))
+		var nmw := small.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
+		draw_string(small, Vector2(p.x - tw * 0.5, top + nfs * 1.0), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, UIColors.D_TEXT if not ch.get("warn", false) else UIColors.D_ORANGE)
+		if rating > 0:
+			draw_string(small, Vector2(p.x - tw * 0.5 + nmw, top + nfs * 1.0), "  %d" % rating, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Fmt.rating_color(rating))
+		var cond := float(ch.get("cond", 100.0))
+		if cond < 85.0:
+			var bw := sz * 0.9
+			var by := top + nfs * 1.3 + 3.0
+			draw_rect(Rect2(p.x - bw * 0.5, by, bw, 4), Color(0, 0, 0, 0.5))
+			draw_rect(Rect2(p.x - bw * 0.5, by, bw * cond / 100.0, 4), UIColors.D_ORANGE if cond >= 70.0 else UIColors.D_RED)
+
+
+## Camisa de futebol vista de frente: corpo na cor principal, mangas e gola na segunda cor,
+## contorno escuro fino para ler sobre a grama; selecionada ganha contorno de giz.
+func _draw_mini_shirt(c: Vector2, s: float, c1: Color, c2: Color, sel: bool) -> void:
+	var u := func(x: float, y: float) -> Vector2: return c + Vector2(x * s, y * s)
+	var body := PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47),
+		u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13), u.call(0.29, 0.47),
+		u.call(-0.29, 0.47), u.call(-0.29, -0.13), u.call(-0.40, -0.06), u.call(-0.52, -0.26)])
+	draw_colored_polygon(body, c1)
+	var same := absf(c1.r - c2.r) + absf(c1.g - c2.g) + absf(c1.b - c2.b) < 0.15
+	var trim := c2 if not same else c1.darkened(0.35)
+	draw_colored_polygon(PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.52, -0.26), u.call(-0.40, -0.06), u.call(-0.29, -0.13)]), trim)
+	draw_colored_polygon(PackedVector2Array([u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13)]), trim)
+	draw_polyline(PackedVector2Array([u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47)]), trim, maxf(2.0, s * 0.05), true)
+	var outline := body.duplicate()
+	outline.append(body[0])
+	draw_polyline(outline, UIColors.D_TEXT if sel else Color(0, 0, 0, 0.55), maxf(1.5, s * (0.05 if sel else 0.025)), true)
 
 
 # ---------------------------------------------------------------------------

@@ -10,7 +10,7 @@ const BP_EXPANDED := 1500.0
 const COLUMN_MAX := 820.0
 const RAIL_W := 132.0
 const COL3_MIN := 2000.0
-static var viewport := Vector2(720, 1280)
+static var viewport := Vector2(600, 1066)
 static var force_tablet := false
 
 
@@ -56,7 +56,8 @@ static func is_tablet() -> bool:
 ## No tablet a base é maior que a do celular: mais conteúdo por tela, com texto ainda maior
 ## (em milímetros) que no celular.
 static func base_size_for(window_size: Vector2i, tablet: bool = false) -> Vector2i:
-	var portrait := Vector2i(1100, 1500) if tablet else Vector2i(720, 1280)
+	# Celular: 600 de largura (1 dp ≈ 1,5 px nos aparelhos de 390–411 dp; DESIGN.md › Unidades).
+	var portrait := Vector2i(1100, 1500) if tablet else Vector2i(600, 1066)
 	if window_size.x > window_size.y:
 		return Vector2i(portrait.y, portrait.x)
 	return portrait

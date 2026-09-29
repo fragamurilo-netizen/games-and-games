@@ -1,10 +1,10 @@
 class_name AchievementBanner
 extends CanvasLayer
-## Aviso de conquista desbloqueada: desce do alto da tela com a medalha na cor do nível, o nome
-## e a descrição, fica alguns segundos e sobe. Mostra as pendentes uma por vez; tocar abre a
+## Aviso de conquista desbloqueada: faixa compacta abaixo da barra superior com a medalha, o
+## nome e o nível; aparece por 3,5 s. Mostra as pendentes uma por vez; tocar abre a
 ## tela de conquistas.
 
-const SHOW := 3.2
+const SHOW := 3.5
 
 var world: GameWorld = null
 var _panel: PanelContainer
@@ -40,35 +40,36 @@ static func notify(w: GameWorld) -> void:
 
 func _ready() -> void:
 	layer = 95
+	# Aviso compacto (DESIGN.md › Toast): ~108 px, abaixo da barra superior, sem sombra nem
+	# brilho. A cor do nível da conquista aparece só no filete da esquerda e na medalha.
 	_panel = PanelContainer.new()
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.07, 0.08, 0.1, 0.97)
-	sb.set_corner_radius_all(18)
-	sb.set_border_width_all(2)
-	sb.border_color = Color("#FFC940")
-	sb.shadow_color = Color(0, 0, 0, 0.45)
-	sb.shadow_size = 18
-	sb.content_margin_left = 16
+	sb.bg_color = UIColors.SURFACE_2
+	sb.set_corner_radius_all(UITokens.R_SM)
+	sb.border_width_left = 4
+	sb.border_color = UIColors.GOLD
+	sb.content_margin_left = 14
 	sb.content_margin_right = 18
-	sb.content_margin_top = 12
-	sb.content_margin_bottom = 12
-	sb.anti_aliasing = true
+	sb.content_margin_top = 10
+	sb.content_margin_bottom = 10
 	_panel.add_theme_stylebox_override(&"panel", sb)
+	_panel.custom_minimum_size.y = 96
 	var row := UIKit.hbox(14)
 	_medal = AchievementMedal.new()
-	_medal.custom_minimum_size = Vector2(76, 76)
+	_medal.custom_minimum_size = Vector2(60, 60)
 	_medal.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(_medal)
 	var v := UIKit.vbox(0)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	_title = UIKit.label("CONQUISTA DESBLOQUEADA", "Caps")
-	_name = UIKit.label("", "H2")
-	_name.add_theme_color_override(&"font_color", UIColors.D_TEXT)
-	_desc = UIKit.label("", "Small", true)
-	_desc.add_theme_color_override(&"font_color", UIColors.D_TEXT.darkened(0.3))
-	v.add_child(_title)
+	_name = UIKit.label("", "H3")
+	_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_title = UIKit.label("", "Small")
+	_title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_desc = UIKit.label("", "Small")
+	_desc.visible = false
 	v.add_child(_name)
+	v.add_child(_title)
 	v.add_child(_desc)
 	row.add_child(v)
 	_panel.add_child(row)
@@ -96,9 +97,9 @@ func _next() -> bool:
 		return _next()
 	var col := Achievements.tier_color(id)
 	_medal.setup(id, true)
-	_title.text = (I18n.t("Conquista desbloqueada") + " · " + I18n.t(String(Achievements.TIERS[a["tier"]]["name"]))).to_upper()
-	_title.add_theme_color_override(&"font_color", col)
+	_title.text = I18n.t("Conquista desbloqueada") + ", " + I18n.t(String(Achievements.TIERS[a["tier"]]["name"])).to_lower()
 	(_panel.get_theme_stylebox(&"panel") as StyleBoxFlat).border_color = col
+	_panel.tooltip_text = String(a["desc"])
 	_name.text = String(a["name"])
 	_desc.text = String(a["desc"])
 	_t = 0.0
@@ -118,16 +119,20 @@ func _process(delta: float) -> void:
 			return
 	_t += delta
 	var vp := get_viewport().get_visible_rect().size
-	var w := minf(vp.x - 32.0, 640.0)
+	var w := minf(vp.x - UITokens.GUTTER * 2.0, 620.0)
 	_panel.size = Vector2(w, 0)
 	_panel.reset_size()
 	_panel.size.x = w
-	var enter := clampf(_t / 0.35, 0.0, 1.0)
-	var leave := clampf((_t - SHOW) / 0.35, 0.0, 1.0)
-	var k := (1.0 - pow(1.0 - enter, 3.0)) * (1.0 - leave * leave)
-	_panel.position = Vector2(vp.x * 0.5 - w * 0.5, lerpf(-_panel.size.y - 30.0, 48.0, k))
-	_medal.shine = fmod(_t, 2.0)
-	_medal.queue_redraw()
+	# Logo abaixo da barra superior (e da área segura), sem cobrir título e abas por muito tempo.
+	var top := 24.0
+	if UIManager.main != null:
+		var bar: Control = UIManager.main.top_bar
+		top = (bar.get_global_rect().end.y if bar.visible else UIManager.main.safe_margins().position.y) + 12.0
+	var enter := clampf(_t / 0.2, 0.0, 1.0)
+	var leave := clampf((_t - SHOW) / 0.25, 0.0, 1.0)
+	_panel.modulate.a = enter * (1.0 - leave)
+	var slide := 0.0 if AppSettings.reduce_motion else (1.0 - enter) * -12.0
+	_panel.position = Vector2(vp.x * 0.5 - w * 0.5, top + slide)
 	if _t >= SHOW + 0.35:
 		_busy = false
 		_panel.visible = false

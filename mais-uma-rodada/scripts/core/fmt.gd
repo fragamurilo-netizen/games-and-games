@@ -115,18 +115,17 @@ static func rating_color(ovr: int) -> Color:
 	return UIColors.ink(_rating_color(ovr))
 
 
+## Escala de notas moderada (DESIGN.md › Colors): sálvia, oliva, ocre, ferrugem, tijolo.
 static func _rating_color(ovr: int) -> Color:
 	if ovr >= 80:
-		return Color("#00C08B")
+		return Color("#7FB28C")
 	if ovr >= 70:
-		return Color("#3DBE5A")
+		return Color("#9DB46C")
 	if ovr >= 60:
-		return Color("#9ACD4E")
+		return Color("#C4AE5C")
 	if ovr >= 50:
-		return Color("#E8C547")
-	if ovr >= 40:
-		return Color("#F08A3E")
-	return Color("#E5484D")
+		return Color("#C98A4B")
+	return Color("#C75B5B")
 
 
 ## Cor para notas de partida (3–10), na mesma escala.
@@ -136,13 +135,11 @@ static func match_rating_color(r: float) -> Color:
 
 static func _match_rating_color(r: float) -> Color:
 	if r >= 8.0:
-		return Color("#00C08B")
+		return Color("#7FB28C")
 	if r >= 7.0:
-		return Color("#3DBE5A")
+		return Color("#9DB46C")
 	if r >= 6.5:
-		return Color("#9ACD4E")
+		return Color("#C4AE5C")
 	if r >= 6.0:
-		return Color("#E8C547")
-	if r >= 5.0:
-		return Color("#F08A3E")
-	return Color("#E5484D")
+		return Color("#C98A4B")
+	return Color("#C75B5B")

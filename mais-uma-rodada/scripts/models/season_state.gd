@@ -138,6 +138,26 @@ func date_label(slot: int, with_weekday: bool = true) -> String:
 	return s
 
 
+## Data por extenso para manchete: "Quarta-feira, 4 de fevereiro".
+func long_date_label(slot: int) -> String:
+	if slot < 0 or slot >= calendar.size():
+		return ""
+	var doy: int = calendar[slot]["d"]
+	var unix := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1}) + doy * 86400
+	var dt := Time.get_datetime_dict_from_unix_time(unix)
+	var wd := int(dt["weekday"])
+	var m := int(dt["month"]) - 1
+	match I18n.lang:
+		"en":
+			return "%s, %s %d" % [["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][wd],
+				["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][m], int(dt["day"])]
+		"es":
+			return "%s, %d de %s" % [["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][wd], int(dt["day"]),
+				["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][m]]
+	return "%s, %d de %s" % [["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"][wd], int(dt["day"]),
+		["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"][m]]
+
+
 func to_dict() -> Dictionary:
 	var ls: Dictionary = {}
 	for id in leagues:
