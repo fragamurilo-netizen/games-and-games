@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Apply integrity-checked source changes
+      - name: Verify refinement source and integrate concurrent audio and tablet fixes
         shell: bash
         run: |
           set -euo pipefail
@@ -28,7 +28,15 @@ jobs:
           mkdir -p validation mais-uma-rodada/build
           git rev-parse HEAD > validation/input-commit.txt
           python3 .ci/apply_refinement_edits.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git diff 4f90c3eec4c4cc891f6e4d9710bf7a681742a838 c947406abd2a91353a653ca4b37918874764b2ea -- mais-uma-rodada/scripts mais-uma-rodada/tests > validation/upstream-source.patch
+          # Merge INTO the isolated branch only. Any conflict fails; never auto-resolve.
+          git merge --no-commit --no-ff c947406abd2a91353a653ca4b37918874764b2ea 2>&1 | tee validation/merge.log
+          echo c947406abd2a91353a653ca4b37918874764b2ea > validation/integrated-base.txt
           git diff --check
+          git diff --cached --check
+          git diff --cached -- mais-uma-rodada/scripts mais-uma-rodada/tests > validation/integration.patch
       - name: Validate accounting, full world season, mobile layout and actual OpenGL captures
         shell: bash
         run: |
@@ -63,7 +71,7 @@ jobs:
               if grep -E "SCRIPT ERROR|Parse Error|^ERROR:" /workspace/validation/visual-tests.log; then exit 1; fi
               test "$(find /workspace/validation/screenshots -name "*.png" | wc -l)" -eq 16
             '
-      - name: Commit validated readable source to isolated development branch only
+      - name: Commit validated source and integration to isolated branch only
         shell: bash
         run: |
           set -euo pipefail
@@ -72,8 +80,8 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           mapfile -t SOURCE_PATHS < validation/source-paths.txt
           git add -- "${SOURCE_PATHS[@]}"
-          if ! git diff --cached --quiet; then
-            git commit -m 'Refine 0.5.1 scoring attribution, board budgets, installment accounting, academy plans and responsive UI'
+          if ! git diff --cached --quiet || test -f .git/MERGE_HEAD; then
+            git commit -m 'Integrate latest audio, lifecycle and tablet corrections into validated realism refinement 0.5.1'
             git push origin HEAD:codex/realism-refinement-0.5.1-20260928
           fi
           git rev-parse HEAD > validation/source-commit.txt
@@ -110,7 +118,7 @@ jobs:
           with zipfile.ZipFile(apk) as z:
               assert z.testzip() is None
               assert 'AndroidManifest.xml' in z.namelist()
-          Path('validation/build.json').write_text(json.dumps({'version': '0.5.1', 'code': 14, 'package': 'com.maisumarodada.futebol.refinetest', 'name': 'Mais Uma Rodada 0.5.1 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'base_commit': '6e3f472d6532090e73d799c1f0f6c221e97c0ec7', 'physical_android_tested': False}, indent=2))
+          Path('validation/build.json').write_text(json.dumps({'version': '0.5.1', 'code': 14, 'package': 'com.maisumarodada.futebol.refinetest', 'name': 'Mais Uma Rodada 0.5.1 Teste', 'source_commit': Path('validation/source-commit.txt').read_text().strip(), 'base_commit': '6e3f472d6532090e73d799c1f0f6c221e97c0ec7', 'integrated_source': 'c947406abd2a91353a653ca4b37918874764b2ea', 'physical_android_tested': False}, indent=2))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
