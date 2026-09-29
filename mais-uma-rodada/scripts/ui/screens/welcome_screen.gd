@@ -164,7 +164,7 @@ func _squad(w: GameWorld, club: Club) -> Control:
 			vet = p
 	if young != null:
 		card.add_child(UIKit.label("A promessa", "Caps"))
-		card.add_child(_player_line(w, club, young, "%d anos · %s" % [young.age(w.year), Player.potential_label(young.potential_estimate(0.8))]))
+		card.add_child(_player_line(w, club, young, "%d anos · %s" % [young.age(w.year), PlayerAssessment.summary(w,young,true)]))
 	if vet != null:
 		card.add_child(UIKit.label("A voz da experiência", "Caps"))
 		card.add_child(_player_line(w, club, vet, "%d anos · %d jogos na carreira" % [vet.age(w.year), vet.career_apps]))
@@ -198,7 +198,7 @@ func _player_line(w: GameWorld, club: Club, p: Player, note: String) -> Control:
 	col.add_child(nl)
 	col.add_child(UIKit.label(note, "Small", true))
 	row.add_child(col)
-	row.add_child(UIKit.badge(p.overall, 52, 38, 22))
+	row.add_child(UIKit.player_stars(w,p,15))
 	var pid := p.id
 	return UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}))
 

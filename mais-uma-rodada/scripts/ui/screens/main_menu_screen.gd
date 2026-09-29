@@ -160,7 +160,7 @@ static func show_credits() -> void:
 		v.add_child(UIKit.section("Apoio"))
 		v.add_child(UIKit.colored("Obrigado pelo café! Você ajuda o jogo a continuar.", UIColors.GREEN, "H3", true))
 	v.add_child(UIKit.section("Tecnologia"))
-	v.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby (SIL Open Font License 1.1).", "Small", true))
+	v.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fonte Saira, de Héctor Gatti e Omnibus-Type (SIL Open Font License 1.1).", "Small", true))
 	v.add_child(UIKit.section("Aviso"))
 	v.add_child(UIKit.label("Clubes, estádios e competições usam os nomes reais só como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
 	v.add_child(UIKit.label("versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "Small"))

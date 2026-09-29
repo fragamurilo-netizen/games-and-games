@@ -12,10 +12,10 @@ var f_bold: Font
 
 
 func build() -> void:
-	f_reg = load("res://assets/fonts/Barlow-Regular.woff2")
-	f_semi = load("res://assets/fonts/Barlow-SemiBold.woff2")
-	f_cond = load("res://assets/fonts/BarlowCondensed-SemiBold.woff2")
-	f_bold = load("res://assets/fonts/BarlowCondensed-ExtraBold.woff2")
+	f_reg = _saira(400,100)
+	f_semi = _saira(600,100)
+	f_cond = _saira(600,87.5)
+	f_bold = _saira(750,87.5)
 	var th := Theme.new()
 	th.default_font = f_reg
 	th.default_font_size = 24
@@ -27,6 +27,16 @@ func build() -> void:
 	_misc(th)
 	var err := ResourceSaver.save(th, OUT)
 	print("tema salvo: ", OUT, " (", error_string(err), ")")
+
+
+func _saira(weight: float, width: float) -> FontVariation:
+	var font := FontVariation.new()
+	font.base_font = load("res://assets/fonts/Saira-Variable.ttf")
+	font.variation_opentype = {"weight":weight,"width":width}
+	# Saira includes generous vertical metrics; keep compact UI leading.
+	font.spacing_top = -2
+	font.spacing_bottom = -3
+	return font
 
 
 static func sb(bg: Color, radius: int = 14, border: Color = Color(0, 0, 0, 0), bw: int = 0, mx: int = 18, my: int = 12) -> StyleBoxFlat:
@@ -61,7 +71,7 @@ func _spaced(base: Font, px: int) -> FontVariation:
 	return fv
 
 
-## Escala de DESIGN.md › Typography. Condensada = futebol; Barlow = dado e texto.
+## Escala de DESIGN.md › Typography. Saira semicomprimida nos títulos; largura normal para leitura.
 func _labels(th: Theme) -> void:
 	th.set_color(&"font_color", "Label", UIColors.TEXT)
 	th.set_font_size(&"font_size", "Label", UITokens.F_BODY)
@@ -246,9 +256,7 @@ func _buttons(th: Theme) -> void:
 	th.add_type("RowOverlay")
 	th.set_type_variation("RowOverlay", "Button")
 	# Selecionado/pressionado: filete na cor do clube só à esquerda (como uma lista de verdade).
-	var ov_p := sb(Color(UIColors.ACCENT, 0.10), 0, clear, 0, 0, 0)
-	ov_p.border_color = UIColors.ACCENT
-	ov_p.border_width_left = 3
+	var ov_p := sb(UIColors.SURFACE_3, 0, clear, 0, 0, 0)
 	_button_states(th, "RowOverlay", empty, sb(Color(UIColors.LINE, 0.45), 0, clear, 0, 0, 0), ov_p, empty)
 	_button_colors(th, "RowOverlay", UIColors.TEXT, UIColors.TEXT)
 	# Ícone (barra superior)

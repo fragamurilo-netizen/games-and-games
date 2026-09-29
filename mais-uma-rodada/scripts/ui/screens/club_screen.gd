@@ -662,7 +662,7 @@ func _show_suggestions() -> void:
 		v.add_child(UIKit.label(p.display_name(), "H3"))
 		v.add_child(UIKit.label("%s · %d anos · %s · %s" % [Pos.code(p.position), p.age(w.year), cl.short_name if cl != null else "livre", Fmt.money(p.value)], "Small"))
 		h.add_child(v)
-		h.add_child(UIKit.badge(p.overall, 52, 36, 22))
+		h.add_child(UIKit.player_stars(w,p,15))
 		var id := p.id
 		root.add_child(UIKit.tap_row(h, func():
 			UIManager.close_modal()
@@ -691,9 +691,9 @@ func _youth_card(w: GameWorld, club: Club) -> Control:
 		var v := UIKit.vbox(0)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(UIKit.label(p.display_name(), "H3"))
-		v.add_child(UIKit.label("%d anos · %s" % [p.age(w.year), Player.potential_label(p.potential_estimate(prec))], "Small"))
+		v.add_child(UIKit.label("%d anos · %s" % [p.age(w.year), PlayerAssessment.summary(w,p,true)], "Small"))
 		h.add_child(v)
-		h.add_child(UIKit.badge(p.overall, 52, 36, 22))
+		h.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
 		card.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
 	var cid := club.id

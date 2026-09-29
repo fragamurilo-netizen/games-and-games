@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://66670exyeplt"
-path="res://.godot/imported/BarlowCondensed-ExtraBold.woff2-85bf0c27a314a7eeb49f4c87d8998bd6.fontdata"
+uid="uid://drybxkdo5atoe"
+path="res://.godot/imported/Saira-Variable.ttf-a9d34bd659c388a2a9511579587eb6df.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/BarlowCondensed-ExtraBold.woff2"
-dest_files=["res://.godot/imported/BarlowCondensed-ExtraBold.woff2-85bf0c27a314a7eeb49f4c87d8998bd6.fontdata"]
+source_file="res://assets/fonts/Saira-Variable.ttf"
+dest_files=["res://.godot/imported/Saira-Variable.ttf-a9d34bd659c388a2a9511579587eb6df.fontdata"]
 
 [params]
 

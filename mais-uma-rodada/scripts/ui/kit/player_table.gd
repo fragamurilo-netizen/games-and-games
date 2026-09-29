@@ -4,7 +4,7 @@ extends RefCounted
 ## mesmas colunas de números em todo lugar. A coluna do nome traz número, posição, nome e a
 ## situação na segunda linha (lesionado, suspenso, emprestado...), sem ícones soltos.
 ##
-## mode: "squad" (dados exatos do próprio elenco), "market" (overall estimado e preço),
+## mode: "squad" (dados exatos do próprio elenco), "market" (avaliação da comissão e preço),
 ## "club" (outro clube, estimado, sem preço), "youth" (base), "national" (convocação: sem número,
 ## o clube no lugar da situação).
 
@@ -78,20 +78,15 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
 	var c := {}
 	c["pos"] = {"key": "pos", "title": "Jogador", "first": "asc",
-		"sort": func(p: Player) -> int: return Pos.DISPLAY_ORDER.find(p.position) * 1000 - int(p.ovr_f * 10),
+		"sort": func(p: Player) -> int: return Pos.DISPLAY_ORDER.find(p.position) * 1000 - int(PlayerAssessment.score(w,p) * 10),
 		"cell": func(p: Player) -> Control: return lead_cell(w, p, mode)}
-	c["ovr"] = {"key": "ovr", "title": "Geral", "w": 66, "tip": "Overall",
-		"sort": func(p: Player) -> float: return p.ovr_f if exact else float(PlayerRowView.estimate(w, p, p.overall)),
+	c["ovr"] = {"key": "ovr", "title": "Avaliação", "w": 98, "tip": "Estimativa para a posição no seu elenco; estrelas claras indicam incerteza",
+		"sort": func(p: Player) -> float: return PlayerAssessment.stars(w,p),
 		"cell": func(p: Player) -> Control: return ovr_cell(w, p, exact)}
-	c["pot"] = {"key": "pot", "title": "Potencial", "w": 100, "tip": "Estimativa da comissão",
+	c["pot"] = {"key": "pot", "title": "Projeção", "w": 100, "tip": "Estimativa da comissão",
 		"sort": func(p: Player) -> float: return YouthManager.potential_stars(w, p),
 		"cell": func(p: Player) -> Control:
-			var st := StarsView.new()
-			st.star_size = 17.0
-			st.stars = YouthManager.potential_stars(w, p)
-			st.color = UIColors.GOLD
-			st.tooltip_text = YouthManager.potential_label_of(w, p)
-			return st}
+			return UIKit.player_stars(w,p,17,true)}
 	c["age"] = {"key": "age", "title": "Idade", "w": 60, "first": "asc",
 		"text": func(p: Player) -> String: return str(p.age(y)),
 		"sort": func(p: Player) -> int: return p.age(y)}
@@ -243,19 +238,11 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 		if Scouting.is_scouted(w, p):
 			# Até 25 anos, o que o olheiro viu (potencial) diz mais que "observado".
 			if p.age(w.year) <= 25:
-				return [Player.potential_label(p.potential_estimate(0.75)), UIColors.MUTED]
+				return [PlayerAssessment.summary(w,p,true), UIColors.MUTED]
 			return ["Observado", UIColors.MUTED]
 		return [PlayStyle.of(p), UIColors.MUTED]
 	return [Player.STATUS_NAMES[p.squad_status], UIColors.MUTED]
 
 
-static func ovr_cell(w: GameWorld, p: Player, exact: bool) -> Control:
-	var l := Label.new()
-	var v := p.overall if exact else PlayerRowView.estimate(w, p, p.overall)
-	l.text = str(v) if exact else "~%d" % v
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	l.add_theme_font_override(&"font", ThemeDB.get_project_theme().get_font(&"font", &"Section"))
-	l.add_theme_font_size_override(&"font_size", UITokens.F_SECTION)
-	l.add_theme_color_override(&"font_color", UIColors.readable_on(Fmt.rating_color(v), [UIColors.BG], 4.5))
-	return l
+static func ovr_cell(w: GameWorld, p: Player, _exact: bool) -> Control:
+	return UIKit.player_stars(w,p,16)

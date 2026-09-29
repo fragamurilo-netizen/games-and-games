@@ -36,7 +36,7 @@ static func open(ev: Dictionary, on_done: Callable = Callable()) -> void:
 		col.add_child(UIKit.label(p.full_name(), "H3", true))
 		col.add_child(UIKit.label("%d anos · %s · moral %s" % [p.age(w.year), Pos.name_of(p.position), UIColors.morale_label(p.morale).to_lower()], "Small", true))
 		row.add_child(col)
-		row.add_child(UIKit.badge(p.overall))
+		row.add_child(UIKit.player_stars(w,p,15))
 		var pc := UIKit.card("CardInset", 0)
 		pc.add_child(row)
 		v.add_child(UIKit.card_panel(pc))

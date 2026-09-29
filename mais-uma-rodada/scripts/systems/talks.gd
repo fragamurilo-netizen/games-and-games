@@ -798,7 +798,7 @@ static func _staff_report(world: GameWorld, role: String) -> Array:
 			var gks: Array = squad.filter(func(p): return p.position == Pos.GK)
 			gks.sort_custom(func(a, b): return a.overall > b.overall)
 			for p: Player in gks.slice(0, 3):
-				out.append("%s: %d de geral, forma %.1f." % [p.display_name(), p.overall, p.form()])
+				out.append("%s: %s; forma %.1f." % [p.display_name(), PlayerAssessment.summary(world,p), p.form()])
 		"olheiro":
 			var need: Array = []
 			for nd in TransferManager.squad_needs(world, club):
@@ -808,7 +808,7 @@ static func _staff_report(world: GameWorld, role: String) -> Array:
 				if p.age(world.year) <= 31 and (need.is_empty() or need.has(p.position)) and (best == null or p.overall > best.overall):
 					best = p
 			if best != null:
-				out.append("Sem clube e disponível: %s (%s, %d anos), nível %d." % [best.display_name(), Pos.name_of(best.position), best.age(world.year), best.overall])
+				out.append("Sem clube e disponível: %s (%s, %d anos)." % [best.display_name(), Pos.name_of(best.position), best.age(world.year)])
 			if not need.is_empty():
 				out.append("Nossa carência: %s." % ", ".join(need.slice(0, 3).map(func(x): return Pos.name_of(int(x)))))
 			out.append("Estou afinando as avaliações de jogadores de outros clubes.")

@@ -354,7 +354,7 @@ func _render_swap_picker() -> void:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(sp.display_name(), "H3"))
 		var willing := TransferManager.interest(w, sp, seller) >= 0.2
-		col.add_child(UIKit.label("%d anos · ovr %d%s" % [sp.age(w.year), sp.overall, "" if willing else " · não quer ir"], "Small"))
+		col.add_child(UIKit.label("%d anos · %s%s" % [sp.age(w.year), PlayerAssessment.summary(w,sp), "" if willing else " · não quer ir"], "Small"))
 		row.add_child(col)
 		row.add_child(UIKit.colored(Fmt.money(TransferManager.swap_worth(w, sp, seller)), UIColors.ACCENT if willing else UIColors.MUTED, "H3"))
 		var sid := sp.id

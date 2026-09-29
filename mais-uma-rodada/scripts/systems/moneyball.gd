@@ -144,22 +144,21 @@ static func metric(world: GameWorld, p: Player, profile: String) -> Array:
 				var v := p.stats[Player.S_SAVES] * per + 3.0 * p.stats[Player.S_CLEAN] / apps
 				return [v, "%.1f defesas/90 · %d sem sofrer gol" % [p.stats[Player.S_SAVES] * per, p.stats[Player.S_CLEAN]]]
 		"jovem":
-			var prec := 0.8 if Scouting.is_scouted(world, p) else 0.3
-			var pot := p.potential_estimate(prec)
-			return [float(pot) + (21 - p.age(world.year)) * 0.5, "potencial estimado %d" % pot]
+			var pot := PlayerAssessment.stars(world,p,-1,true)
+			return [float(pot) + (21 - p.age(world.year)) * 0.5, "projeção " + PlayerAssessment.summary(world,p,true)]
 	# geral (e fallback dos perfis que só existem com minutos): nota média
 	if enough:
 		return [p.avg_rating(), "nota %.2f em %d jogos" % [p.avg_rating(), p.stats[Player.S_APPS]]]
 	if not last.is_empty():
 		return [float(last.get("r", 6.5)), "nota %.2f em %d jogos (%d)" % [float(last.get("r", 0.0)), int(last.get("a", 0)), int(last.get("y", 0))]]
-	return [5.5 + (p.overall - 60) * 0.04, "sem jogos recentes (overall %d)" % p.overall]
+	return [5.5 + (PlayerAssessment.score(world,p) - 60) * 0.04, "sem jogos recentes"]
 
 
 ## Pré-seleção barata: números da temporada (se houver) e overall, contra o preço.
-static func _pre_score(p: Player, profile: String, price: int) -> float:
+static func _pre_score(world: GameWorld, p: Player, profile: String, price: int) -> float:
 	var mins := float(p.stats[Player.S_MINUTES])
 	var per := 90.0 / maxf(1.0, mins)
-	var s := float(p.overall)
+	var s := PlayerAssessment.score(world,p)
 	if mins >= MIN_MINUTES:
 		match profile:
 			"gols":
@@ -177,7 +176,7 @@ static func _pre_score(p: Player, profile: String, price: int) -> float:
 			_:
 				s += 6.0 * (p.avg_rating() - 6.5)
 	elif profile == "jovem":
-		s = float(p.potential)
+		s += maxf(0.0,26-p.age(world.year))*0.5
 	return s - 2.5 * log(maxf(1.0, price) / 100000.0 + 1.0)
 
 
@@ -195,7 +194,7 @@ static func search(world: GameWorld, club: Club, profile: String, positions: Arr
 		var age := p.age(world.year)
 		if age > max_age or (profile == "jovem" and age > 21):
 			continue
-		if p.overall < min_ovr:
+		if PlayerAssessment.score(world,p) < min_ovr:
 			continue
 		var price := maxi(p.value, p.asking_price) if p.club_id >= 0 else 0
 		if max_fee > 0 and price > max_fee:
@@ -203,7 +202,7 @@ static func search(world: GameWorld, club: Club, profile: String, positions: Arr
 		# Custo real: taxa + dois anos de salário (livre não sai de graça)
 		var wage := p.wage if p.club_id >= 0 and p.wage > 0 else Valuation.wage_demand(p, club, world.year)
 		var cost := price + wage * 24
-		pool.append({"p": p, "price": price, "wage": wage, "cost": cost, "pre": _pre_score(p, profile, cost)})
+		pool.append({"p": p, "price": price, "wage": wage, "cost": cost, "pre": _pre_score(world,p, profile, cost)})
 	if pool.is_empty():
 		return []
 	# Só os mais promissores passam pela conta completa (a carreira compactada de cada jogador só

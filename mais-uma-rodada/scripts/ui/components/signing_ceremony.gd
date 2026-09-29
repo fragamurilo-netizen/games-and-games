@@ -281,8 +281,8 @@ func _draw_fx() -> void:
 			parts.append(Fmt.money(fee))
 		parts.append("contrato até %d" % player.contract_end)
 		_center_text(cv, font_caps, " · ".join(parts), y + 80.0, 20, Color(muted, ft))
-		var ovr := "OVR %d" % player.overall
-		_center_text(cv, font, ovr, y + 126.0, 34, Color(UIColors.D_GOLD, ft))
+		var ovr := PlayerAssessment.standout(world,player)
+		_center_text(cv, font, ovr, y + 126.0, 24, Color(UIColors.D_GOLD, ft))
 	# Confete.
 	for c in _confetti:
 		var pos: Vector2 = c[0]

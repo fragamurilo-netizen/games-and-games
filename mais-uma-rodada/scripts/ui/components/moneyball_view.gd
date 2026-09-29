@@ -103,7 +103,7 @@ static func build(w: GameWorld, club: Club, width: float, redo: Callable) -> Con
 		col.add_child(UIKit.label("%s · %s" % [cl.short_name if cl != null else "Livre", String(e["text"])], "Small"))
 		col.add_child(UIKit.label("%s · salário %s" % [Fmt.money(price) if price > 0 else "sem taxa", Fmt.money_month(int(e["wage"]))], "Small"))
 		h.add_child(col)
-		h.add_child(UIKit.badge(p.overall, 44, 32, 20))
+		h.add_child(UIKit.player_stars(w,p,15))
 		var cb := float(e["cb"])
 		h.add_child(UIKit.pill(str(int(round(cb))), UIColors.GREEN if cb >= 70.0 else (UIColors.ACCENT if cb >= 50.0 else UIColors.MUTED), 15))
 		var pid := p.id

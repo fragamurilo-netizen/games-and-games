@@ -27,12 +27,7 @@ static func make(w: GameWorld, p: Player, exact: bool, on_change: Callable = Cal
 		nat.add_child(UIKit.label(NameGenerator.nationality_name(p.nationality), "Small"))
 		col.add_child(nat)
 	top.add_child(col)
-	var ovr := p.overall if exact else PlayerRowView.estimate(w, p, p.overall)
-	var ob := UIKit.badge(ovr, 72, 56, 48)
-	if not exact:
-		ob.text_override = "~%d" % ovr
-	ob.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	top.add_child(ob)
+	col.add_child(UIKit.player_stars(w,p,18))
 	body.add_child(top)
 	body.add_child(UIKit.gap(6))
 	# Faixa de números: o que muda a escalação hoje.

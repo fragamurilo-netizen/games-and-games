@@ -126,11 +126,11 @@ static func estimate(world: GameWorld, p: Player) -> int:
 
 ## Estrelas (0,5 a 5, de meia em meia) do potencial estimado.
 static func potential_stars(world: GameWorld, p: Player) -> float:
-	return clampf(snappedf((estimate(world, p) - 46.0) / 9.0, 0.5), 0.5, 5.0)
+	return PlayerAssessment.stars(world,p,-1,true)
 
 
 static func potential_label_of(world: GameWorld, p: Player) -> String:
-	return Player.potential_label(estimate(world, p))
+	return PlayerAssessment.summary(world,p,true)
 
 
 ## Quão confiável é a avaliação.

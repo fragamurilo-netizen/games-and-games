@@ -1,6 +1,6 @@
 extends SceneTree
 ## Monta as capturas da ficha da Google Play (store/screenshots) a partir das telas do tour:
-## fundo azul-noite, uma frase curta em Barlow Condensed no topo e a tela do jogo embaixo, em
+## fundo azul-noite, uma frase curta em Saira no topo e a tela do jogo embaixo, em
 ## 1080 × 1920 (as 8 telas do plano de lançamento, store/plano-de-lancamento.html).
 ##   1. xvfb-run godot --path . --resolution 1080x1920 --script res://tools/screenshot_tour.gd -- --out=/tmp/tour
 ##   2. xvfb-run godot --path . --resolution 1080x1920 --script res://tools/store_frames.gd -- --in=/tmp/tour --out=../store/screenshots
@@ -38,7 +38,7 @@ func _run() -> void:
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	root.size = Vector2i(W, H)
 	DirAccess.make_dir_recursive_absolute(opt_out)
-	var font: FontFile = load("res://assets/fonts/BarlowCondensed-ExtraBold.woff2")
+	var font: Font = ThemeDB.get_project_theme().get_font(&"font",&"Title")
 	var ok := 0
 	for fr in FRAMES:
 		var src := "%s/%s.png" % [opt_in, fr[1]]
@@ -60,7 +60,7 @@ func _run() -> void:
 	quit(0 if ok == FRAMES.size() else 1)
 
 
-func _frame(shot: Image, caption: String, font: FontFile) -> Control:
+func _frame(shot: Image, caption: String, font: Font) -> Control:
 	var c := Control.new()
 	c.size = Vector2(W, H)
 	var bg := TextureRect.new()
