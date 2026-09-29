@@ -261,7 +261,6 @@ func _transfers_card(w: GameWorld) -> Control:
 	for i in mini(6, sorted.size()):
 		var t: Transfer = sorted[i]
 		var row := UIKit.hbox(10)
-		row.add_child(UIKit.badge(t.overall, 48, 34, 20))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label("%s, %d anos" % [t.player_name, t.age], "H3"))

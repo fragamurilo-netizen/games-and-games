@@ -109,7 +109,7 @@ func _pick_row(w: GameWorld, p: Player) -> Control:
 	var cl := w.club(p.club_id) if p.club_id >= 0 else null
 	col.add_child(UIKit.label("%d anos · %s" % [p.age(w.year), cl.short_name if cl != null else "sem clube"], "Small"))
 	row.add_child(col)
-	row.add_child(UIKit.badge(_seen_ovr(w, p)))
+	row.add_child(UIKit.player_stars(w,p,15))
 	var pid := p.id
 	return UIKit.tap_row(row, func():
 		_b = pid
@@ -123,13 +123,13 @@ func _suggestions(w: GameWorld, pa: Player) -> Array:
 		for p: Player in w.squad(w.user_club()):
 			if p.id != pa.id and Pos.group(p.position) == grp:
 				out.append(p)
-	out.sort_custom(func(x: Player, y: Player): return x.overall > y.overall)
+	out.sort_custom(func(x: Player, y: Player): return PlayerAssessment.score(w,x) > PlayerAssessment.score(w,y))
 	out = out.slice(0, 6)
 	var best: Array = []
 	for p: Player in w.players.values():
 		if p.id != pa.id and p.position == pa.position and p.club_id >= 0 and p.overall >= 80:
 			best.append(p)
-	best.sort_custom(func(x: Player, y: Player): return x.overall > y.overall)
+	best.sort_custom(func(x: Player, y: Player): return PlayerAssessment.score(w,x) > PlayerAssessment.score(w,y))
 	for p in best.slice(0, 4):
 		if not out.has(p):
 			out.append(p)
@@ -144,7 +144,7 @@ func _search(w: GameWorld, pa: Player, q: String) -> Array:
 			continue
 		if p.display_name().to_lower().contains(ql) or p.full_name().to_lower().contains(ql):
 			out.append(p)
-	out.sort_custom(func(x: Player, y: Player): return x.overall > y.overall)
+	out.sort_custom(func(x: Player, y: Player): return PlayerAssessment.score(w,x) > PlayerAssessment.score(w,y))
 	return out.slice(0, 20)
 
 
@@ -158,10 +158,7 @@ func _own(w: GameWorld, p: Player) -> bool:
 
 ## Atributo como o treinador enxerga (exato no próprio elenco; aproximado nos outros).
 func _seen(w: GameWorld, p: Player, a: int) -> int:
-	var v: int = p.attrs[a]
-	if not _own(w, p):
-		v = clampi(v + int(round(RngUtil.noise(p.id, a, 7) * 5.0)), 1, 99)
-	return v
+	return PlayerAssessment.attribute(w,p,a)
 
 
 func _seen_ovr(w: GameWorld, p: Player) -> int:
@@ -189,13 +186,14 @@ func _heads(w: GameWorld, pa: Player, pb: Player) -> Control:
 	row.add_child(_head(w, pb, HORIZONTAL_ALIGNMENT_RIGHT))
 	card.add_child(row)
 	for r in [
-		["Overall", _seen_ovr(w, pa), _seen_ovr(w, pb), true, ""],
 		["Idade", pa.age(w.year), pb.age(w.year), false, ""],
 		["Valor", pa.value, pb.value, true, "money"],
 		["Salário", pa.wage, pb.wage, false, "wage"],
 		["Contrato até", pa.contract_end if pa.club_id >= 0 else 0, pb.contract_end if pb.club_id >= 0 else 0, true, "year"],
 	]:
 		card.add_child(_line(String(r[0]), r[1], r[2], bool(r[3]), String(r[4])))
+	card.add_child(_text_line("Avaliação",PlayerAssessment.summary(w,pa),PlayerAssessment.summary(w,pb)))
+	card.add_child(_text_line("Pontos fortes",PlayerAssessment.standout(w,pa),PlayerAssessment.standout(w,pb)))
 	card.add_child(_text_line("Clube", ca.short_name if ca != null else "—", cb.short_name if cb != null else "—"))
 	card.add_child(_text_line("Posição", Pos.name_of(pa.position), Pos.name_of(pb.position)))
 	card.add_child(_text_line("Estilo", PlayStyle.of(pa), PlayStyle.of(pb)))
@@ -209,7 +207,7 @@ func _head(w: GameWorld, p: Player, align: int) -> Control:
 	var top := UIKit.hbox(8)
 	top.alignment = BoxContainer.ALIGNMENT_BEGIN if align == HORIZONTAL_ALIGNMENT_LEFT else BoxContainer.ALIGNMENT_END
 	var pv := UIKit.portrait(p, cl, w.year, 128)
-	var badge := UIKit.badge(_seen_ovr(w, p), 60, 44, 28)
+	var badge := UIKit.player_stars(w,p,15)
 	badge.size_flags_vertical = Control.SIZE_SHRINK_END
 	if align == HORIZONTAL_ALIGNMENT_LEFT:
 		top.add_child(pv)

@@ -259,6 +259,15 @@ static func flag(code: String, w: int) -> FlagView:
 	return v
 
 
+static func shirt_number(p: Player, club: Club, px: int = 48) -> KitView:
+	var shirt := kit(club.kit_for(p) if club != null else {"c1":"#747C85","pattern":"plain"},px,p.shirt)
+	shirt.back = true
+	shirt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	shirt.tooltip_text = "Camisa %d" % p.shirt
+	shirt.accessibility_name = shirt.tooltip_text
+	return shirt
+
+
 static func kit(k: Dictionary, px: int, number: int = 0, crest_spec: Dictionary = {}) -> KitView:
 	var v := KitView.new()
 	v.crest = crest_spec
@@ -267,6 +276,20 @@ static func kit(k: Dictionary, px: int, number: int = 0, crest_spec: Dictionary 
 	v.kit = k
 	v.number = number
 	return v
+
+
+static func player_stars(w: GameWorld, p: Player, px: float = 16.0, future: bool = false, pos: int = -1) -> StarsView:
+	var r := PlayerAssessment.report(w,p,pos)
+	var view := StarsView.new()
+	view.star_size = px
+	view.stars = float(r["future_low"] if future else r["low"])
+	view.upper_stars = float(r["future_high"] if future else r["high"])
+	view.color = UIColors.GOLD
+	view.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	view.mouse_filter = Control.MOUSE_FILTER_PASS
+	view.tooltip_text = ("Projeção: " if future else "Avaliação: ") + PlayerAssessment.range_text(view.stars,view.upper_stars) + "\nPara " + Pos.name_of(int(r["position"])) + " no seu elenco. " + PlayerAssessment.confidence_name(w,p) + ".\nAs estrelas claras indicam a margem de incerteza."
+	view.accessibility_description = view.tooltip_text
+	return view
 
 
 static func badge(value: int, w: int = 56, h: int = 40, fs: int = 26) -> RatingBadge:
@@ -458,42 +481,39 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.toggle_mode = toggle
 	b.name = "Tap"
-	_fit_overlay(p, b)
-	press_fx(b, p, 0.98)
+	b.set_meta("row_overlay", true)
 	if cb.is_valid():
 		b.pressed.connect(func():
 			Sfx.click()
 			cb.call())
-	p.add_child(b)
+	attach_row_overlay(p,b)
 	return p
 
 
-## A camada clicável fica dentro das margens do painel; os estados dela (passar por cima,
-## selecionado) crescem até a borda do painel, com o mesmo arredondamento, para o destaque
-## cobrir a linha inteira em vez de um contorno solto por dentro.
-static func _fit_overlay(p: PanelContainer, b: Button) -> void:
-	var th := ThemeDB.get_project_theme()
-	if th == null or not th.has_stylebox(&"panel", p.theme_type_variation):
-		return
-	var ps := th.get_stylebox(&"panel", p.theme_type_variation)
-	var rad := 0
-	if ps is StyleBoxFlat:
-		rad = (ps as StyleBoxFlat).corner_radius_top_left
-	for st in [&"hover", &"pressed", &"hover_pressed"]:
-		var src := th.get_stylebox(st, &"RowOverlay") as StyleBoxFlat
-		if src == null:
-			continue
-		var box := src.duplicate() as StyleBoxFlat
-		box.expand_margin_left = ps.content_margin_left
-		box.expand_margin_right = ps.content_margin_right
-		box.expand_margin_top = ps.content_margin_top
-		box.expand_margin_bottom = ps.content_margin_bottom
-		box.set_corner_radius_all(rad)
-		b.add_theme_stylebox_override(st, box)
+## Neutral selection behind content, aligned to the complete row including padding.
+static func attach_row_overlay(p: PanelContainer, b: Button) -> void:
+	var overlay := Control.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(overlay)
+	overlay.add_child(b)
+	b.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	var panel_ref: WeakRef = weakref(p)
+	var overlay_ref: WeakRef = weakref(overlay)
+	var button_ref: WeakRef = weakref(b)
+	var fit := func():
+		var panel: Control = panel_ref.get_ref()
+		var layer: Control = overlay_ref.get_ref()
+		var button: Control = button_ref.get_ref()
+		if panel == null or layer == null or button == null: return
+		button.position = -layer.position
+		button.size = panel.size
+	p.resized.connect(fit)
+	overlay.resized.connect(fit)
+	p.move_child(overlay,0)
 
 
 static func set_row_selected(row: PanelContainer, selected: bool) -> void:
-	var b := row.get_node_or_null("Tap") as Button
+	var b := row.find_child("Tap", true, false) as Button
 	if b != null:
 		b.set_pressed_no_signal(selected)
 

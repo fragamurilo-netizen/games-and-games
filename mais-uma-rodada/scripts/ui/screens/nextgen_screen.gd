@@ -83,6 +83,6 @@ func _row(w: GameWorld, p: Player, rank: int) -> Control:
 	v.add_child(UIKit.label("%s · %d anos · %s" % [Pos.code(p.position), p.age(w.year), cl.short_name if cl != null else "sem clube"], "Small"))
 	h.add_child(v)
 	h.add_child(UIKit.flag(p.nationality, 30))
-	h.add_child(UIKit.badge(p.overall, 52, 36, 22))
+	h.add_child(UIKit.player_stars(w,p,15))
 	var pid := p.id
 	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat")

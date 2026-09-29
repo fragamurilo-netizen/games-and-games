@@ -229,7 +229,7 @@ func _only_pass() -> void:
 	AppSettings.theme_mode = AppSettings.THEME_LIGHT if light else AppSettings.THEME_DARK
 	GameManager.start_career(w, club_id, "Murilo", GameWorld.DIFF_NORMAL, 5)
 	if nt != "":
-		NationalCoach.accept(w, nt)
+		NationalCoach.accept(w, nt, true)
 	UIManager.apply_look()
 	for i in rounds:
 		GameManager.play_instant()

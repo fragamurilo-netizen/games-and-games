@@ -658,11 +658,18 @@ func sim_step_start() -> bool:
 
 
 func _sim_step_work() -> Dictionary:
+	var t0 := Time.get_ticks_usec()
 	_begin_match_core(false)
+	SeasonManager._time("batch_preparar",t0)
+	t0 = Time.get_ticks_usec()
 	var sim := user_sim()
 	if sim != null:
 		sim.run_to_end()
-	return _finish_core()
+	SeasonManager._time("batch_partida",t0)
+	t0 = Time.get_ticks_usec()
+	var report := _finish_core()
+	SeasonManager._time("batch_finalizar",t0)
+	return report
 
 
 ## null enquanto a data ainda roda (ou se nenhuma foi pedida); depois, uma vez, o relatório

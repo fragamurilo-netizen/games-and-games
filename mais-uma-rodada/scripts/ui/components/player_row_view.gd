@@ -118,14 +118,7 @@ static func make(w: GameWorld, p: Player, opts: Dictionary, cb: Callable) -> Pan
 		pcol2.add_child(cap)
 		row.add_child(pcol2)
 	var pos: int = opts.get("pos", -1)
-	var shown := int(round(p.rating_at(pos))) if pos >= 0 else p.overall
-	if own or opts.get("known", false):
-		row.add_child(UIKit.badge(shown))
-	else:
-		var est := estimate(w, p, shown)
-		var b := UIKit.badge(est)
-		b.text_override = "~%d" % est
-		row.add_child(b)
+	row.add_child(UIKit.player_stars(w,p,15,false,pos))
 	return UIKit.tap_row(row, cb)
 
 
@@ -174,12 +167,12 @@ static func stat_header(mode: String, n: int) -> Control:
 	h.add_child(sp)
 	var cols: Array = (WIDE_MARKET if mode == "market" else WIDE_SQUAD).slice(0, n)
 	cols.append(["Preço", W_PRICE] if mode == "market" else ["Físico", W_COND_WIDE])
-	cols.append(["OVR", 56])
+	cols.append(["Avaliação", 88])
 	for col in cols:
 		var l := UIKit.label(String(col[0]), "Caps")
 		l.uppercase = true
 		l.custom_minimum_size.x = int(col[1])
-		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if col[0] != "Físico" and col[0] != "OVR" else HORIZONTAL_ALIGNMENT_CENTER
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if col[0] != "Físico" and col[0] != "Avaliação" else HORIZONTAL_ALIGNMENT_CENTER
 		l.clip_text = true
 		h.add_child(l)
 	m.add_child(h)

@@ -259,6 +259,10 @@ static func has_offer(world: GameWorld, code: String) -> bool:
 
 ## Assume a seleção (convite aceito ou escolha no início da carreira).
 static func accept(world: GameWorld, code: String, quiet: bool = false) -> void:
+	if not quiet and not has_offer(world, code):
+		return
+	if not DatabaseManager.nations().has(code):
+		return
 	var st := state(world)
 	if String(st.get("nation", "")) != "":
 		_close(world, "Saiu para a %s" % DatabaseManager.nation_name(code))

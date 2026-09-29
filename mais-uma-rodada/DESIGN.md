@@ -33,52 +33,52 @@ colors:
   club-accent-muted: DYNAMIC
 typography:
   display-score:
-    fontFamily: Barlow Condensed
+    fontFamily: Saira Semi Condensed
     fontSize: 60px
-    fontWeight: 800
+    fontWeight: 750
     lineHeight: 1.0
   entity-title:
-    fontFamily: Barlow Condensed
+    fontFamily: Saira Semi Condensed
     fontSize: 44px
-    fontWeight: 800
+    fontWeight: 750
     lineHeight: 1.05
   screen-title:
-    fontFamily: Barlow Condensed
+    fontFamily: Saira Semi Condensed
     fontSize: 36px
     fontWeight: 600
     lineHeight: 1.1
   section:
-    fontFamily: Barlow Condensed
+    fontFamily: Saira Semi Condensed
     fontSize: 28px
     fontWeight: 600
     lineHeight: 1.15
   body-strong:
-    fontFamily: Barlow
+    fontFamily: Saira
     fontSize: 24px
     fontWeight: 600
     lineHeight: 1.3
   body:
-    fontFamily: Barlow
+    fontFamily: Saira
     fontSize: 24px
     fontWeight: 400
     lineHeight: 1.3
   body-small:
-    fontFamily: Barlow
+    fontFamily: Saira
     fontSize: 21px
     fontWeight: 400
     lineHeight: 1.3
   metadata:
-    fontFamily: Barlow
+    fontFamily: Saira
     fontSize: 20px
     fontWeight: 400
     lineHeight: 1.25
   caption:
-    fontFamily: Barlow
+    fontFamily: Saira
     fontSize: 18px
     fontWeight: 600
     lineHeight: 1.2
   data:
-    fontFamily: Barlow
+    fontFamily: Saira
     fontSize: 24px
     fontWeight: 400
     fontFeature: "tnum, lnum"
@@ -215,9 +215,9 @@ e texto de giz (`text-primary`) em três níveis (`text-secondary`, `text-muted`
 
 Duas larguras da mesma família, com papéis claros:
 
-- **Barlow Condensed** (600/800) é o *futebol*: nome de clube, placar, competição, título de
+- **Saira Semi Condensed** (600/750) é o *futebol*: nome de clube, placar, competição, título de
   tela, número grande, partida.
-- **Barlow** (400/600) é *dado e texto*: tabela, rótulo, filtro, contrato, número pequeno.
+- **Saira** (400/600) é *dado e texto*: tabela, rótulo, filtro, contrato, número pequeno.
 
 Escala (variação do tema entre parênteses): `display-score` 60 (`Score`), `entity-title` 44
 (`Title`), `screen-title` 36 (barra superior), `section` 28 (`Section`), `body` /
@@ -314,3 +314,11 @@ Depois de cada tela: rodar o jogo e capturar 390×844, 844×390, 800×1280 e 128
 específica? O objeto principal é óbvio? Hierarquia em 2 s? Excesso de divisor ou de
 superfície? Colisão? Ação comum escondida? Parece molde de IA? Esta composição poderia
 existir numa fintech? Se uma das duas últimas for "sim", refazer.
+
+## Estados de seleção (0.5.3)
+
+Linhas selecionadas usam `surface-selected` em toda a largura, atrás do conteúdo, sem filete lateral. Pressionar uma linha não altera sua escala nem seus recuos. Foco por teclado mantém o contorno de giz. A avaliação de atletas usa estrelas douradas (`UIColors.GOLD`), com a parte incerta em texto secundário; CA/PA só aparecem mediante revelação explícita no editor.
+
+## Tipografia 0.5.3
+
+Saira substitui a família anterior em toda a interface. Fonte variável original da Omnibus-Type, sob SIL OFL 1.1: largura 100/pesos 400 e 600 para leitura; largura 87,5/pesos 600 e 750 para títulos e placares. A inspiração é a clareza e o desenho angular das interfaces de futebol; não é a fonte proprietária do EA FC. Entrelinha compacta no tema (`spacing_top = -2`, `spacing_bottom = -3`), sem comprimir os glifos. Preservar acentos portugueses, algarismos tabulares e áreas de toque ao ajustar quebras de linha. Origem e licença em `assets/fonts/SOURCE-Saira.txt` e `OFL-Saira.txt`.

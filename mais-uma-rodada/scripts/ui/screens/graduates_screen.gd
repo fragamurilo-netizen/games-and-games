@@ -96,7 +96,7 @@ func _active(w: GameWorld, club: Club, list: Array) -> Control:
 		row.add_child(col)
 		if cur != null:
 			row.add_child(UIKit.crest(cur, 34))
-		row.add_child(UIKit.badge(p.overall if w.is_user_club(p.club_id) else PlayerRowView.estimate(w, p, p.overall), 50, 36, 20))
+		row.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
 		card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid})))
 	if list.size() > 60:
@@ -117,7 +117,6 @@ func _retired(w: GameWorld, retired: Array) -> Control:
 		col.add_child(UIKit.label(String(r.get("ka", r.get("name", "—"))), "H3", true))
 		col.add_child(UIKit.label("%d jogos · %d gols · %d títulos" % [int(r.get("apps", 0)), int(r.get("goals", 0)), int(r.get("titles", 0))], "Small"))
 		row.add_child(col)
-		row.add_child(UIKit.badge(int(r.get("ovr", 0)), 50, 36, 20))
 		card.add_child(row)
 	return UIKit.card_panel(card)
 

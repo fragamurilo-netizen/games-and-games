@@ -432,9 +432,13 @@ static func _period(st: Dictionary, m0: int, m1: int, half: int) -> void:
 	var lines: Array = st["lines"]
 	var score: Array = st["score"]
 	var tl: Array = st["tl"]
+	# Counts change only on a substitution, injury or sending-off.
+	var active: Array[int] = [_on_count(lines[0]),_on_count(lines[1])]
 	for m in range(m0, m1 + 1):
 		while int(st["ti"]) < tl.size() and int(tl[int(st["ti"])][0]) <= m:
+			var changed_side := int(tl[int(st["ti"])][2])
 			_timeline_event(st, tl[int(st["ti"])])
+			active[changed_side] = _on_count(lines[changed_side])
 			st["ti"] = int(st["ti"]) + 1
 		var t_f := clampf(float(m) / 90.0, 0.0, 1.3)
 		var time_f := 1.05 if half >= 3 else 0.86 + 0.28 * minf(t_f, 1.0)
@@ -446,8 +450,8 @@ static func _period(st: Dictionary, m0: int, m1: int, half: int) -> void:
 			# Reação: quem acabou de sofrer o gol se lança nos minutos seguintes
 			if m < int(st["react"][s]):
 				rate_m *= 1.18
-			var n_att := _on_count(lines[s])
-			var n_def := _on_count(lines[1 - s])
+			var n_att := active[s]
+			var n_def := active[1-s]
 			var p: float = float(st["rate"][s]) * time_f * rate_m * (1.0 + (11 - n_def) * 0.08) * (1.0 - (11 - n_att) * 0.06)
 			if rng.randf() < p:
 				_chance(st, s, m, half, qual_m)
@@ -455,11 +459,13 @@ static func _period(st: Dictionary, m0: int, m1: int, half: int) -> void:
 			var cr: float = float(st["card"][s]) * (1.25 if diff < 0 and m >= 70 else 1.0)
 			if rng.randf() < cr:
 				_card(st, s, m)
+				active[s] = _on_count(lines[s])
 			elif rng.randf() < cr * 0.015:
 				var v: Variant = _pick(rng, lines[s], 7)
 				if v != null:
 					_send_off(v, m)
 					st["rc"][s] += 1
+					active[s] = _on_count(lines[s])
 
 
 static func _chance(st: Dictionary, s: int, m: int, half: int, qual_m: float) -> void:

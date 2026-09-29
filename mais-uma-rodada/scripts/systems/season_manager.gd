@@ -337,9 +337,12 @@ static func run_entry(world: GameWorld, entry: Dictionary) -> void:
 	var f: Fixture = entry["f"]
 	var home := world.club(f.home)
 	var away := world.club(f.away)
+	var mark := Time.get_ticks_usec()
 	var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
 	var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+	mark = _time("ai_escalacao",mark)
 	entry["res"] = QuickMatch.play(world, home, away, hs, as_, entry["ctx"], entry["seed"])
+	_time("ai_partida",mark)
 
 
 static func entry_done(entry: Dictionary) -> bool:

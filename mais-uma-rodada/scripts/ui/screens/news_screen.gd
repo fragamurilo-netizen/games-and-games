@@ -272,7 +272,7 @@ func _transfer_row(w: GameWorld, t: Transfer) -> Control:
 		h.add_child(UIKit.crest(to, 30))
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UIKit.label("%s (%d anos, %d)" % [t.player_name, t.age, t.overall], "H3")
+	var nm := UIKit.label("%s · %d anos" % [t.player_name, t.age], "H3")
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(nm)
 	col.add_child(UIKit.label("%s → %s · rodada %d" % [from.short_name if from != null else "livre", to.short_name if to != null else "sem clube", t.day + 1], "Small"))

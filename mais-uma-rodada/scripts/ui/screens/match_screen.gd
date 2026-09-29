@@ -2379,7 +2379,7 @@ func _mp_row(mp: MatchPlayer, pos: int, cb: Callable) -> Control:
 	var cond_col := UIColors.GREEN if mp.cond >= 75.0 else (UIColors.ORANGE if mp.cond >= 60.0 else UIColors.RED)
 	col.add_child(UIKit.bar(mp.cond, 100.0, cond_col, 8))
 	row.add_child(col)
-	row.add_child(UIKit.badge(int(round(mp.p.rating_at(pos))), 52, 36, 22))
+	row.add_child(UIKit.player_stars(world(),mp.p,15,false,pos))
 	if mp.used:
 		var live := clampf(6.0 + mp.rating_pts, 3.0, 10.0)
 		var r := UIKit.label(Fmt.rating(live), "H3")

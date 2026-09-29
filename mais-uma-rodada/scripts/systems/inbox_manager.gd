@@ -212,7 +212,7 @@ static func _squad_intro(world: GameWorld) -> void:
 		if p.age(world.year) >= 32:
 			old += 1
 	var lines: Array = ["Dei uma primeira olhada no grupo que você recebeu."]
-	lines.append("O melhor jogador é %s (%s, %d)." % [best.display_name(), Pos.name_of(best.position).to_lower(), best.overall])
+	lines.append("Destaque do elenco: %s (%s)." % [best.display_name(), Pos.name_of(best.position).to_lower()])
 	if young != null:
 		lines.append("Fique de olho em %s, %d anos: tem margem para crescer." % [young.display_name(), young.age(world.year)])
 	if old >= 5:
@@ -411,7 +411,7 @@ static func scout_report(world: GameWorld) -> void:
 	var lines: Array = []
 	for p: Player in picks.slice(0, 3):
 		var where := world.club(p.club_id).short_name if p.club_id >= 0 else "sem clube"
-		lines.append("• %s, %d anos, %s (%s) · %d · valor %s" % [p.display_name(), p.age(world.year), Pos.name_of(p.position).to_lower(), where, p.overall, Fmt.money(p.value)])
+		lines.append("• %s, %d anos, %s (%s) · valor %s" % [p.display_name(), p.age(world.year), Pos.name_of(p.position).to_lower(), where, Fmt.money(p.value)])
 	var top: Player = picks[0]
 	send(world, "olheiro", "Jogadores que cabem no orçamento",
 		"Com %s para gastar, estes nomes melhorariam o nosso time:\n\n%s\n\nToque para ver o primeiro da lista." % [Fmt.money(budget), "\n".join(lines)],
@@ -463,7 +463,7 @@ static func on_offer_received(world: GameWorld, o: TransferOffer) -> void:
 	if p == null or b == null:
 		return
 	send(world, "clube", "Proposta por %s" % p.display_name(),
-		"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo(s)." % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year), p.overall,
+		"O %s oferece %s por %s (%d anos).\n\nA proposta vale por %d jogo(s)." % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year),
 			maxi(1, o.expires_day - world.current_turn() + 1)],
 		{"k": "offers"}, p.id, b.id, b.short_name)
 

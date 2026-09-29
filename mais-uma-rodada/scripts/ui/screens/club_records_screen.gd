@@ -160,7 +160,7 @@ func _rank_row(w: GameWorld, n: int, d: Dictionary, all_time: bool) -> Control:
 		var span := str(int(d["from"])) if int(d["from"]) == int(d["to"]) else "%d–%d" % [int(d["from"]), int(d["to"])]
 		sub = "%s · %d j · %d g · %d a" % [span, int(d["a"]), int(d["g"]), int(d["as"])]
 	else:
-		sub = "%d j · %d g · %d a · nível %d" % [int(d["a"]), int(d["g"]), int(d["as"]), int(d["o"])]
+		sub = "%d j · %d g · %d a" % [int(d["a"]), int(d["g"]), int(d["as"])]
 	var sl := UIKit.label(sub, "Small")
 	sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(sl)
@@ -276,7 +276,7 @@ func _move_row(w: GameWorld, t: Transfer, ours: int) -> Control:
 		var mine := w.club(ours)
 		where += " · " + (mine.short_name if mine != null else "")
 	var when := "rodada %d · %d" % [t.day + 1, t.year] if t.day < 38 else str(t.year)
-	var sub := UIKit.label("%s · %d anos · nível %d · %s" % [where, t.age, t.overall, when], "Small")
+	var sub := UIKit.label("%s · %d anos · %s" % [where, t.age, when], "Small")
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(sub)
 	row.add_child(col)

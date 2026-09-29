@@ -152,16 +152,12 @@ func _kid_row(w: GameWorld, club: Club, p: Player) -> Control:
 	col.add_child(UIKit.colored(info, UIColors.ORANGE if age >= YouthManager.MAX_AGE else UIColors.MUTED, "Small"))
 	row.add_child(col)
 	row.add_child(_stars(w, p, 14))
-	row.add_child(UIKit.badge(p.overall, 52, 38, 22))
+	row.add_child(UIKit.player_stars(w,p,15))
 	return row
 
 
 func _stars(w: GameWorld, p: Player, px: float) -> StarsView:
-	var st := StarsView.new()
-	st.star_size = px
-	st.stars = YouthManager.potential_stars(w, p)
-	st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	return st
+	return UIKit.player_stars(w,p,px,true)
 
 
 func _actions(p: Player) -> void:
@@ -183,7 +179,7 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 	col.add_child(UIKit.label("Estimativa da base: %s" % YouthManager.potential_text(w, p), "Small", true))
 	col.add_child(_stars(w, p, 20))
 	head.add_child(col)
-	var bd := UIKit.badge(p.overall)
+	var bd := UIKit.player_stars(w,p,15)
 	bd.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	head.add_child(bd)
 	var xb := UIKit.icon_button("close", func(): UIManager.close_modal())
@@ -214,7 +210,7 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 		for i in range(hist.size() - 1, -1, -1):
 			var r: Dictionary = hist[i]
 			var avg := float(r["r"]) / 10.0 / maxf(1.0, float(r["a"]))
-			v.add_child(UIKit.kv("%d · %s" % [int(r["y"]), YouthManager.category_name(String(r["cat"]))], "%d J · %d G · %d A · %.1f · ovr %d" % [int(r["a"]), int(r["g"]), int(r["as"]), avg, int(r.get("o", 0))]))
+			v.add_child(UIKit.kv("%d · %s" % [int(r["y"]), YouthManager.category_name(String(r["cat"]))], "%d J · %d G · %d A · %.1f" % [int(r["a"]), int(r["g"]), int(r["as"]), avg]))
 	# Plano individual
 	var plan := YouthAcademy.plan_of(w, p)
 	v.add_child(UIKit.section("Plano individual"))
@@ -252,7 +248,7 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 	for q: Player in w.squad(w.user_club()):
 		weakest = mini(weakest, q.overall)
 	v.add_child(UIKit.section("Decisão"))
-	v.add_child(UIKit.label("Mais fraco do elenco profissional: %d" % weakest, "Small", true))
+	v.add_child(UIKit.label(PlayerAssessment.fit_text(w,p), "Small", true))
 	v.add_child(UIKit.button("SUBIR AO PROFISSIONAL", "PrimaryButton", func():
 		UIManager.close_modal()
 		UIManager.toast(YouthManager.promote(w, p))
@@ -452,7 +448,7 @@ func _trial(w: GameWorld) -> Control:
 		col.add_child(nr)
 		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), YouthManager.potential_label_of(w, p), p.hometown if p.hometown != "" else DatabaseManager.nation_name(p.nationality)], "Small"))
 		row.add_child(col)
-		row.add_child(UIKit.badge(p.overall, 48, 36, 20))
+		row.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
 		var ok := UIKit.icon_button("check", func():
 			UIManager.toast(YouthManager.accept_candidate(w, pid))
@@ -502,7 +498,7 @@ func _grads(w: GameWorld) -> Control:
 			now = "%d anos · %s" % [p.age(w.year), cl.short_name if cl != null else "sem clube"]
 		col.add_child(UIKit.label("%s · %s" % [how, now], "Small", true))
 		row.add_child(col)
-		row.add_child(UIKit.badge(p.overall if p != null else int(e.get("o", 0)), 48, 36, 20))
+		row.add_child(UIKit.player_stars(w,p,15) if p != null else UIKit.label("—","Small"))
 		if p != null:
 			var pid := p.id
 			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid})))
@@ -938,6 +934,6 @@ func _intl_prospects(w: GameWorld, d: Dictionary) -> Control:
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		row.add_child(nl)
 		row.add_child(UIKit.label("%d anos" % p.age(w.year), "Small"))
-		row.add_child(UIKit.badge(p.overall, 48, 36, 20))
+		row.add_child(UIKit.player_stars(w,p,15))
 		card.add_child(row)
 	return UIKit.card_panel(card)

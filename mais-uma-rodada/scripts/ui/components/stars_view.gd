@@ -13,6 +13,8 @@ extends Control
 		custom_minimum_size = Vector2(star_size * 5 + 4 * 3, star_size)
 		queue_redraw()
 @export var color: Color = UIColors.ACCENT
+## Upper edge of an uncertain assessment. Negative keeps ordinary stars.
+var upper_stars: float = -1.0
 
 
 func _init() -> void:
@@ -26,6 +28,11 @@ func _draw() -> void:
 		var c := Vector2(i * (star_size + 3.0) + star_size * 0.5, y)
 		var poly := CrestView._star(c, star_size * 0.5, star_size * 0.22, 5)
 		draw_colored_polygon(poly, UIColors.SURFACE_3)
+		if upper_stars > stars and float(i) < upper_stars:
+			var upper_fill := clampf(upper_stars-i,0.0,1.0)
+			var bounds := PackedVector2Array([Vector2(c.x-star_size,c.y-star_size),Vector2(c.x-star_size*0.5+star_size*upper_fill,c.y-star_size),Vector2(c.x-star_size*0.5+star_size*upper_fill,c.y+star_size),Vector2(c.x-star_size,c.y+star_size)])
+			for piece in Geometry2D.intersect_polygons(poly,bounds):
+				draw_colored_polygon(piece, Color(UIColors.MUTED,0.65))
 		var fill := clampf(stars - i, 0.0, 1.0)
 		if fill >= 0.99:
 			draw_colored_polygon(poly, color)

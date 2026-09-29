@@ -229,7 +229,7 @@ static func change_pills(changes: Array, max_n: int) -> HFlowContainer:
 static func _trend_badge(v: float) -> Control:
 	if absf(v) < 0.05:
 		return UIKit.label("", "Small")
-	var pl := UIKit.pill(("%+.1f" % v).replace(".", ","), UIColors.GREEN if v > 0.0 else UIColors.RED, 16)
+	var pl := UIKit.pill("Evoluindo" if v > 0.0 else "Em queda", UIColors.GREEN if v > 0.0 else UIColors.RED, 16)
 	pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return pl
 

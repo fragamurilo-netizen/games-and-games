@@ -131,7 +131,7 @@ func _players(w: GameWorld, c: VBoxContainer) -> void:
 		var nm := UIKit.label(p.display_name(), "H3")
 		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		col.add_child(nm)
-		col.add_child(UIKit.label("%s · %d · %d títulos · %s" % [cl.short_name if cl != null else "", p.overall, p.titles, Reputation.player_label(rep)], "Small"))
+		col.add_child(UIKit.label("%s · %d títulos · %s" % [cl.short_name if cl != null else "", p.titles, Reputation.player_label(rep)], "Small"))
 		h.add_child(col)
 		h.add_child(UIKit.pill(str(int(round(rep))), Reputation.color(rep), 16))
 		var pid := p.id
