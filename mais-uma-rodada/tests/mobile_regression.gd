@@ -23,8 +23,8 @@ func _run() -> void:
 	_portraits = load("res://scripts/ui/components/portrait_view.gd")
 	check(_layout.base_size_for(Vector2i(1080, 2400)) == Vector2i(720, 1280), "phone portrait base")
 	check(_layout.base_size_for(Vector2i(2400, 1080)) == Vector2i(1280, 720), "phone landscape base")
-	check(_layout.base_size_for(Vector2i(1600, 2560), true) == Vector2i(900, 1200), "tablet portrait base")
-	check(_layout.base_size_for(Vector2i(2560, 1600), true) == Vector2i(1200, 900), "tablet landscape base")
+	check(_layout.base_size_for(Vector2i(1600, 2560), true) == Vector2i(1100, 1500), "tablet portrait base")
+	check(_layout.base_size_for(Vector2i(2560, 1600), true) == Vector2i(1500, 1100), "tablet landscape base")
 	check(is_equal_approx(_layout.device_scale(), 1.0), "no hidden text shrink")
 	var packed := load("res://scenes/main.tscn") as PackedScene
 	if packed == null:

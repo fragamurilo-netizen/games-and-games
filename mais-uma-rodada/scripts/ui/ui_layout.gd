@@ -53,8 +53,10 @@ static func is_tablet() -> bool:
 
 ## Função pura para testar rotação sem depender do sensor ou do monitor da máquina.
 ## A base também gira; manter 720x1280 deitado encolhia a interface para caber na altura.
+## No tablet a base é maior que a do celular: mais conteúdo por tela, com texto ainda maior
+## (em milímetros) que no celular.
 static func base_size_for(window_size: Vector2i, tablet: bool = false) -> Vector2i:
-	var portrait := Vector2i(900, 1200) if tablet else Vector2i(720, 1280)
+	var portrait := Vector2i(1100, 1500) if tablet else Vector2i(720, 1280)
 	if window_size.x > window_size.y:
 		return Vector2i(portrait.y, portrait.x)
 	return portrait
