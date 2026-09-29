@@ -5,6 +5,8 @@ extends BaseScreen
 var _summary: Dictionary = {}
 var _overlay: GoalOverlay
 var _celebrated := false
+## Cerimônia de prêmios: fica na raiz (acima de tudo) e sai junto com a tela (voltar do Android).
+var _ceremony_node: Control
 
 
 var _tab := "mine"
@@ -66,6 +68,12 @@ func _ceremony() -> void:
 	var cer := AwardCeremony.new()
 	get_tree().root.add_child(cer)
 	cer.start(world(), items)
+	_ceremony_node = cer
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_ceremony_node) and not _ceremony_node.is_queued_for_deletion():
+		_ceremony_node.queue_free()
 
 
 func refresh() -> void:
