@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo-google-fonts/commissioner": "^0.4.1",
     "@expo-google-fonts/newsreader": "^0.4.1",
+    "@paralelo/characters": "*",
     "@paralelo/content": "*",
     "@paralelo/persistence": "*",
     "@paralelo/shared": "*",

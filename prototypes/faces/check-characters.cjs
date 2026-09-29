@@ -1,7 +1,7 @@
 // node prototypes/faces/check-characters.cjs — no installed dependencies.
 const assert = require('node:assert/strict')
 const { performance } = require('node:perf_hooks')
-require('./faces-core.js'); require('./character-catalog.js'); require('./vector-body.js'); require('./vector-wardrobe.js'); require('./vector-character.js'); require('./character-save.js')
+require('../../packages/characters/src/renderer/faces-core.js'); require('../../packages/characters/src/renderer/character-catalog.js'); require('../../packages/characters/src/renderer/vector-body.js'); require('../../packages/characters/src/renderer/vector-wardrobe.js'); require('../../packages/characters/src/renderer/vector-character.js'); require('../../packages/characters/src/renderer/character-save.js')
 const C=globalThis.FaceCore,R=globalThis.VectorCharacter,S=globalThis.CharacterSave
 assert.equal(C.HAIR_STYLES.length,133);assert.equal(C.BEARD_STYLES.length,106)
 const g=C.makeGenome('style-check',{sex:'M'})

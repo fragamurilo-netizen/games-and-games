@@ -12,7 +12,7 @@ export default function PeopleScreen() {
     <Text style={s.body}>Sua vida na cidade também depende das pessoas que lembram de você.</Text>
     {people.map(person => <Section key={person.id} title={person.name}>
       <View style={{ flexDirection: "row", gap: 16, alignItems: "flex-start" }}>
-        <Portrait seed={person.appearance.seed} sex={person.appearance.sex} age={person.age} size={88} rotatable
+        <Portrait seed={person.appearance.seed} sex={person.appearance.sex} age={person.age} size={88}
           accessibilityLabel={`Retrato de ${person.name}, ${person.age} anos`} />
         <View style={{ flex: 1, minWidth: 0 }}><Text style={s.secondary}>{person.description} · {person.age} anos</Text><Text style={s.body}>{person.state}</Text></View>
       </View>

@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc -p packages/shared && tsc -p packages/ui && tsc -p packages/simulation && tsc -p packages/content && tsc -p packages/persistence && tsc -p apps/dev-sim && tsc -p apps/mobile --noEmit",
+    "typecheck": "tsc -p packages/shared && tsc -p packages/ui && tsc -p packages/characters && tsc -p packages/simulation && tsc -p packages/content && tsc -p packages/persistence && tsc -p apps/dev-sim && tsc -p apps/mobile --noEmit",
     "sim": "tsx apps/dev-sim/src/main.ts",
     "mobile": "npm --workspace apps/mobile run start",
     "android": "npm --workspace apps/mobile run android"

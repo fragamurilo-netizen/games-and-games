@@ -34,7 +34,7 @@ export default function LifeScreen() {
             <Text style={styles.date}>{life.date}</Text>
             <Text style={styles.time}>{life.time}</Text>
           </View>
-          <Portrait seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} size={112} rotatable
+          <Portrait seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} size={112}
             accessibilityLabel={`Retrato de ${life.name}, ${life.age} anos`} />
         </View>
         <Text style={styles.body}>{life.energy}</Text>

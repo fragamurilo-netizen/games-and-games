@@ -1,6 +1,6 @@
 // Run: node prototypes/faces/check-anatomy.cjs (no installed packages required).
 const assert = require('node:assert/strict')
-require('./faces-core.js')
+require('../../packages/characters/src/renderer/faces-core.js')
 const C = globalThis.FaceCore
 let cases = 0
 for (const sex of ['F', 'M']) {

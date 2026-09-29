@@ -33,6 +33,10 @@ Folha de revisão de corpos, pesos, idades e roupas:
 
 ## Arquivos
 
+O renderizador agora vive em `packages/characters/src/renderer/` e é usado pelo app
+(`@paralelo/characters`, função `drawCharacter`). O laboratório e os checks carregam
+os arquivos de lá; não há cópia nesta pasta.
+
 | Arquivo | Responsabilidade |
 | --- | --- |
 | `faces-core.js` | RNG, genoma, alelos, herança, crescimento e proporções corporais. Puro, sem DOM. |
