@@ -42,5 +42,8 @@ clube de nome comprido, lesão, suspensão, folha estourada).
 
 - Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
   de toque e de teclado; precisa de um controle no `main.gd`.
-- Mercado, Partida, Base, Treino, Finanças, Diretoria, Notícias, Conversas, Seleções,
-  Competições e Histórico ainda usam o sistema, mas não foram recompostos (fase seguinte).
+- Base, Treino, Finanças, Diretoria, Notícias, Conversas, Seleções, Competições e Histórico
+  ainda usam o sistema, mas não foram recompostos (fase seguinte).
+- `tools/match_shots.gd` termina com erros de script ao fechar ("lock" em nulo, "main" liberado):
+  a ferramenta sai enquanto a rodada ainda fecha na thread. Já acontecia antes da UI 2.0; a
+  captura "fim" sai preta pelo mesmo motivo.
