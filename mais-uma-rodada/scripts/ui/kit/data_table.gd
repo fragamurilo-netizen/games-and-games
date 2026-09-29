@@ -19,6 +19,7 @@ const PAGE := 80
 ## Respiro entre colunas de números.
 const GAP := 12
 
+var _layout_fit: Callable
 var columns: Array = []
 var items: Array = []
 ## Estado que a tela guarda entre reconstruções: {"sort": key, "desc": bool, "shown": int}.
@@ -41,6 +42,12 @@ static func tabular_font() -> Font:
 	if _tnum == null:
 		_tnum = FontVariation.new()
 		_tnum.base_font = ThemeDB.get_project_theme().get_font(&"font", &"Label") if ThemeDB.get_project_theme() != null else ThemeDB.fallback_font
+		# Nested variations otherwise fall back to the variable font's default (Thin).
+		if _tnum.base_font is FontVariation:
+			var source := _tnum.base_font as FontVariation
+			_tnum.variation_opentype = source.variation_opentype.duplicate()
+			_tnum.spacing_top = source.spacing_top
+			_tnum.spacing_bottom = source.spacing_bottom
 		_tnum.opentype_features = {"tnum": 1, "lnum": 1}
 	return _tnum
 
@@ -90,7 +97,10 @@ func _col(key: String) -> Dictionary:
 
 
 func _build() -> void:
+	if _layout_fit.is_valid() and resized.is_connected(_layout_fit):
+		resized.disconnect(_layout_fit)
 	for ch in get_children():
+		remove_child(ch)
 		ch.queue_free()
 	if columns.is_empty():
 		return
@@ -119,10 +129,13 @@ func _build() -> void:
 	grid.custom_minimum_size.x = num_w
 	# O nome tem largura mínima fixa; se sobrar espaço além dos números, o nome fica com ele.
 	# Os números nunca empurram a tela para os lados: rolam dentro do próprio bloco.
+	var lead_ref: WeakRef = weakref(lead)
 	var fit := func():
-		if is_instance_valid(lead) and size.x > 0.0:
+		var cell: Control = lead_ref.get_ref()
+		if cell != null and size.x > 0.0:
 			# O nome cede espaço até lead_min antes de os números começarem a rolar para o lado.
-			lead.custom_minimum_size.x = maxf(minf(lead_width, lead_min), size.x - num_w)
+			cell.custom_minimum_size.x = maxf(minf(lead_width, lead_min), size.x - num_w)
+	_layout_fit = fit
 	resized.connect(fit)
 	fit.call_deferred()
 	lead.add_child(_head_cell(columns[0], true))
@@ -214,14 +227,14 @@ func _add_row(lead: VBoxContainer, grid: VBoxContainer, item: Variant, i: int) -
 		tap.pressed.connect(func():
 			Sfx.click()
 			row_pressed.emit(item))
-		p.add_child(tap)
+		UIKit.attach_row_overlay(p,tap)
 
 
 func _row_panel(hl: bool, alt: bool, mk: Color) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.custom_minimum_size.y = row_height
 	var box := StyleBoxFlat.new()
-	box.bg_color = Color(UIColors.ACCENT, 0.12) if hl else (Color(UIColors.SURFACE, 0.6) if alt else Color(0, 0, 0, 0))
+	box.bg_color = UIColors.SURFACE_3 if hl else (Color(UIColors.SURFACE, 0.6) if alt else Color(0, 0, 0, 0))
 	box.border_color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
 	box.border_width_bottom = 1
 	if mk.a > 0.0:

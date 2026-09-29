@@ -63,6 +63,8 @@ var nickname: String = ""
 var known_as: String = ""
 var birth_year: int = 2000
 var nationality: String = ""
+## País natal, cidadanias, residência e seleção são fatos separados; nunca derivados do rosto.
+var origin: Dictionary = {}
 var eth: int = 1 # etnia (índice em nations.json → ethnicities), usada pelo rosto
 var height: int = 178
 var weight: int = 75
@@ -392,6 +394,22 @@ func season_delta() -> int:
 
 ## Prêmios de um ano (chaves).
 ## Registra um título (conta e guarda qual foi).
+func club_tenure(year: int) -> String:
+	if club_id < 0:
+		return "Sem clube"
+	var since := joined_year
+	# The latest open spell distinguishes a return and a loan from ownership.
+	for i in range(spells.size() - 1, -1, -1):
+		var spell: Dictionary = spells[i]
+		if int(spell.get("c", -1)) == club_id and int(spell.get("to", 0)) == 0:
+			since = int(spell.get("from", since))
+			break
+	if since <= 0 or since > year:
+		return "Chegada ao clube não registrada"
+	var seasons := year - since + 1
+	return "Desde %d — %s" % [since, "1ª temporada no clube" if seasons == 1 else "%d temporadas no clube" % seasons]
+
+
 func win_title(year: int, key: String, club_id: int) -> void:
 	titles += 1
 	trophies.append({"y": year, "k": key, "c": club_id})
@@ -517,7 +535,7 @@ func to_dict() -> Dictionary:
 	var d := {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
-		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
+		"sec": secondary, "sh": shirt, "ht": hometown, "origin": origin, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
 		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "sg": signature,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
@@ -600,6 +618,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.known_as = d.get("ka", "")
 	p.birth_year = int(d.get("by", 2000))
 	p.nationality = d.get("nat", "")
+	p.origin = d.get("origin", {}).duplicate(true)
 	p.eth = int(d.get("eth", 1))
 	p.height = int(d.get("h", 178))
 	p.foot = int(d.get("ft", FOOT_RIGHT))

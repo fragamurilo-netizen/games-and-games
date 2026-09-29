@@ -400,9 +400,8 @@ func _evolution_card(w: GameWorld) -> Control:
 			var nl := UIKit.label("%s (%d anos)" % [r["name"], int(r["age"])], "")
 			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(nl)
-			row.add_child(UIKit.label("%d → %d" % [int(r["from"]), int(r["to"])], "Mono"))
 			var d := int(r["d"])
-			row.add_child(UIKit.colored(("+%d" % d) if d > 0 else str(d), pair[2], "H3"))
+			row.add_child(UIKit.colored("Evoluiu" if d > 0 else "Regrediu", pair[2], "H3"))
 			var pid := int(r["id"])
 			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid})))
 	if not persona.is_empty():

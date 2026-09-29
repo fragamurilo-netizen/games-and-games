@@ -7,7 +7,7 @@ const TABS := [["search", "Buscar"], ["shortlist", "Lista"], ["scout", "Olheiros
 const POOLS := [["all", "Contratar"], ["free", "Livres"], ["pre", "Fim de contrato"], ["moneyball", "Moneyball"]]
 const GROUPS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 const AGES := [["Todas", 99], ["≤ 21", 21], ["≤ 25", 25], ["≤ 29", 29]]
-const SORTS := [["rel", "Relevância"], ["ovr", "Nível"], ["value", "Valor"], ["price", "Preço"], ["age", "Idade"]]
+const SORTS := [["rel", "Relevância"], ["ovr", "Avaliação"], ["value", "Valor"], ["price", "Preço"], ["age", "Idade"]]
 const MOVE_SCOPES := [["mine", "Seu clube"], ["league", "Sua liga"], ["all", "Mundo"]]
 const MOVE_SORTS := [["recent", "Recentes"], ["fee", "Maiores"]]
 ## Linhas levadas para a tabela (ela mostra 80 e "mostrar mais").
@@ -217,7 +217,7 @@ func _weakest_starter_by_group(w: GameWorld, club: Club) -> Array:
 		if p == null or i >= slots.size():
 			continue
 		var g := Pos.group(int(slots[i]["pos"]))
-		out[g] = minf(out[g], p.rating_at(int(slots[i]["pos"])))
+		out[g] = minf(out[g], PlayerAssessment.score(w,p,int(slots[i]["pos"])))
 	return out
 
 
@@ -416,12 +416,12 @@ func _market_cols(w: GameWorld, club: Club, weakest: Array) -> Array:
 	var room := int(fin["wage_budget"]) - int(fin["wage_bill"])
 	var gain := func(p: Player) -> int:
 		var ref := float(weakest[Pos.group(p.position)])
-		return PlayerRowView.estimate(w, p, p.overall) - int(round(ref)) if ref < 98.0 else 0
+		return int(round(PlayerAssessment.score(w,p))) - int(round(ref)) if ref < 98.0 else 0
 	return [
-		{"key": "gain", "title": "± tit.", "w": 72, "tip": "Diferença para o seu titular mais fraco no setor",
+		{"key": "gain", "title": "Encaixe", "w": 135, "tip": "Estimativa dos atributos em relação ao seu elenco",
 			"text": func(p: Player) -> String:
 				var d: int = gain.call(p)
-				return ("+%d" % d) if d > 0 else str(d),
+				return "Reforço" if d > 3 else "Disputa vaga" if d >= -3 else "Reserva",
 			"sort": func(p: Player) -> int: return gain.call(p),
 			"color": func(p: Player) -> Color:
 				var d: int = gain.call(p)
@@ -448,7 +448,7 @@ func _search_base(w: GameWorld, club: Club, weakest: Array, budget: float, scout
 	for p: Player in w.players.values():
 		if p.club_id < 0 or p.club_id == club.id or p.retiring:
 			continue
-		var est := PlayerRowView.estimate(w, p, p.overall)
+		var est := int(round(PlayerAssessment.score(w,p)))
 		_base.append([p, est, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget)])
 	return _base
 
@@ -501,7 +501,7 @@ func _free_tab(c: VBoxContainer, w: GameWorld) -> void:
 		if _group > 0 and Pos.group(p.position) != _group - 1:
 			continue
 		list.append(p)
-	list.sort_custom(func(a: Player, b: Player): return a.overall > b.overall)
+	list.sort_custom(func(a: Player, b: Player): return PlayerAssessment.score(w,a) > PlayerAssessment.score(w,b))
 	if list.is_empty():
 		c.add_child(UIKit.state_block("empty", "Nenhum jogador livre nessa posição agora."))
 		return
@@ -749,10 +749,10 @@ func _option_sheet(title: String, items: Array, current: int, pick: Callable) ->
 func _pot_col(w: GameWorld) -> Dictionary:
 	var txt := func(p: Player) -> String:
 		var age := p.age(w.year)
-		return Player.potential_label(p.potential_estimate(0.75)) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
+		return PlayerAssessment.summary(w,p,true) if age <= 25 else ("No auge" if age <= 30 else "Veterano")
 	return {"key": "spot", "title": "Potencial", "w": 150, "align": "l",
 		"text": txt,
-		"sort": func(p: Player) -> float: return p.potential_estimate(0.75) if p.age(w.year) <= 25 else 0.0,
+		"sort": func(p: Player) -> float: return PlayerAssessment.stars(w,p,-1,true) if p.age(w.year) <= 25 else 0.0,
 		"color": func(p: Player) -> Color: return UIColors.TEXT if p.age(w.year) <= 25 else UIColors.MUTED}
 
 
@@ -798,7 +798,7 @@ func _shortlist_tab(c: VBoxContainer, w: GameWorld) -> void:
 	# Quem tem novidade primeiro, depois pelo nível estimado.
 	var rows: Array = []
 	for p: Player in list:
-		rows.append([p, Shortlist.changes(w, p), PlayerRowView.estimate(w, p, p.overall)])
+		rows.append([p, Shortlist.changes(w, p), int(round(PlayerAssessment.score(w,p)))])
 	rows.sort_custom(func(a, b): return (not a[1].is_empty() and b[1].is_empty()) or (a[1].is_empty() == b[1].is_empty() and a[2] > b[2]))
 	var cards: Array = []
 	for r in rows:
@@ -931,7 +931,7 @@ func _move_row(w: GameWorld, t: Transfer, club: Club) -> Control:
 	col.add_child(nm)
 	var route := "%s → %s" % [from.short_name if from != null else "Livre", to.short_name if to != null else "?"]
 	var when := "rodada %d" % (t.day + 1) if t.year == w.year else str(t.year)
-	var sub := UIKit.label("%d anos · nível %d · %s · %s" % [t.age, t.overall, route, when], "Small")
+	var sub := UIKit.label("%d anos · %s · %s" % [t.age, route, when], "Small")
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(sub)
 	if from != null:
@@ -961,7 +961,7 @@ func _relevance(w: GameWorld, p: Player, gain: float, budget: float) -> float:
 	var v := clampf(gain, -12.0, 12.0) * 2.0
 	var age := p.age(w.year)
 	if age <= 22:
-		v += clampf(float(p.potential_estimate(0.5) - p.overall), 0.0, 15.0) * 0.4
+		v += clampf((PlayerAssessment.stars(w,p,-1,true)-PlayerAssessment.stars(w,p))*10.0, 0.0, 15.0) * 0.4
 	elif age >= 32:
 		v -= float(age - 31) * 1.5
 	var ratio := float(p.value) / budget
@@ -979,11 +979,11 @@ func _market_row(w: GameWorld, club: Club, p: Player, weakest: Array) -> Control
 	var box := UIKit.vbox(2)
 	box.add_child(PlayerRowView.make(w, p, {"mode": "market", "cols": _row_cols}, func(): UIManager.push("player", {"id": pid})))
 	var info := UIKit.hbox(10)
-	var est := PlayerRowView.estimate(w, p, p.overall)
+	var est := int(round(PlayerAssessment.score(w,p)))
 	var ref := float(weakest[Pos.group(p.position)])
 	if ref < 98.0:
 		var d := est - int(round(ref))
-		var txt := ("+%d sobre seu pior titular no setor" % d) if d > 0 else ("mesmo nível do seu titular" if d == 0 else "%d abaixo do seu titular" % d)
+		var txt := PlayerAssessment.fit_text(w,p)
 		info.add_child(UIKit.colored(txt, UIColors.GREEN if d > 0 else (UIColors.MUTED if d == 0 else UIColors.ORANGE), "Small"))
 	info.add_child(UIKit.spacer())
 	var wage := TransferManager.wage_ask(w, p, club)
@@ -1025,7 +1025,7 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 		if not TransferManager.precontract_of(w, p).is_empty():
 			signed += 1
 			continue
-		var est := PlayerRowView.estimate(w, p, p.overall)
+		var est := int(round(PlayerAssessment.score(w,p)))
 		list.append([p, _relevance(w, p, float(est) - float(weakest[Pos.group(p.position)]), budget * 4.0)])
 	var total := list.size()
 	list = _top(list, func(e: Array) -> float: return float(e[1]), true)

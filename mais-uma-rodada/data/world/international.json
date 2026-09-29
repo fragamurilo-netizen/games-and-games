@@ -27,19 +27,19 @@
 			"entry": {
 				"UEFA": 16,
 				"CAF": 9,
-				"AFC": 7,
+				"AFC": 8,
 				"CONMEBOL": 6,
 				"CONCACAF": 6,
 				"OFC": 1
 			},
-			"playoff": 3,
+			"playoff": 2,
 			"qualifying": {
 				"seasons": 2,
 				"UEFA": {
 					"groups": 12
 				},
 				"CAF": {
-					"groups": 5
+					"groups": 9
 				},
 				"CONMEBOL": {
 					"groups": 1
@@ -54,7 +54,22 @@
 			"colors": [
 				"#8A6D1D",
 				"#F7E7A6"
-			]
+			],
+			"host_editions": {
+				"2030": [
+					"ESP",
+					"POR",
+					"MAR",
+					"ARG",
+					"PAR",
+					"URU"
+				],
+				"2034": [
+					"KSA"
+				]
+			},
+			"third_place": true,
+			"format": "48 seleções em 12 grupos. Os dois primeiros e os melhores terceiros avançam ao mata-mata."
 		},
 		"EURO": {
 			"name": "Eurocopa",
@@ -79,13 +94,14 @@
 			"qualifying": {
 				"seasons": 2,
 				"UEFA": {
-					"groups": 7
+					"groups": 12
 				}
 			},
 			"colors": [
 				"#143CDB",
 				"#DCE4FF"
-			]
+			],
+			"format": "24 seleções em 6 grupos. Os dois primeiros e os melhores terceiros avançam ao mata-mata."
 		},
 		"CA": {
 			"name": "Copa América",
@@ -113,15 +129,17 @@
 			"colors": [
 				"#0B2A5B",
 				"#E3C15A"
-			]
+			],
+			"third_place": true,
+			"format": "16 seleções em 4 grupos. Os dois primeiros avançam ao mata-mata."
 		},
 		"AFCON": {
 			"name": "Copa Africana de Nações",
 			"short": "Copa Africana",
 			"every": 2,
 			"first": 2027,
-			"teams": 16,
-			"groups": 4,
+			"teams": 24,
+			"groups": 6,
 			"hosts": [
 				"MAR",
 				"NGA",
@@ -135,26 +153,35 @@
 				"TUN"
 			],
 			"entry": {
-				"CAF": 16
+				"CAF": 24
 			},
 			"qualifying": {
 				"seasons": 1,
 				"CAF": {
-					"groups": 5
+					"groups": 12
 				}
 			},
 			"colors": [
 				"#0B6E4F",
 				"#F2C14E"
-			]
+			],
+			"host_editions": {
+				"2027": [
+					"KEN",
+					"UGA",
+					"TAN"
+				]
+			},
+			"third_place": true,
+			"format": "24 seleções em 6 grupos. Os dois primeiros e os melhores terceiros avançam ao mata-mata."
 		},
 		"ASIAN": {
 			"name": "Copa da Ásia",
 			"short": "Copa da Ásia",
 			"every": 4,
 			"first": 2027,
-			"teams": 8,
-			"groups": 2,
+			"teams": 24,
+			"groups": 6,
 			"hosts": [
 				"KSA",
 				"JPN",
@@ -166,20 +193,27 @@
 				"IRN"
 			],
 			"entry": {
-				"AFC": 8
+				"AFC": 24
 			},
 			"colors": [
 				"#6A1B9A",
 				"#E0C3FC"
-			]
+			],
+			"qualifying": {
+				"seasons": 2,
+				"AFC": {
+					"groups": 6
+				}
+			},
+			"format": "24 seleções em 6 grupos. Os dois primeiros e os melhores terceiros avançam ao mata-mata."
 		},
 		"GOLD": {
 			"name": "Copa Ouro",
 			"short": "Copa Ouro",
 			"every": 2,
 			"first": 2027,
-			"teams": 8,
-			"groups": 2,
+			"teams": 16,
+			"groups": 4,
 			"hosts": [
 				"USA",
 				"MEX",
@@ -191,15 +225,190 @@
 				"USA"
 			],
 			"entry": {
-				"CONCACAF": 7
+				"CONCACAF": 15
 			},
-			"guests": {
-				"AFC": 1
-			},
+			"guests": {},
 			"colors": [
 				"#1F3A93",
 				"#F2C14E"
-			]
+			],
+			"invited_editions": {
+				"2027": [
+					"KSA"
+				]
+			},
+			"format": "16 seleções em 4 grupos. Os dois primeiros avançam ao mata-mata."
+		},
+		"OFC": {
+			"name": "Copa das Nações da Oceania",
+			"short": "Copa da Oceania",
+			"first": 2028,
+			"every": 4,
+			"teams": 8,
+			"groups": 2,
+			"hosts": [
+				"NZL",
+				"VAN",
+				"FIJ"
+			],
+			"entry": {
+				"OFC": 8
+			},
+			"third_place": true,
+			"colors": [
+				"#163E77",
+				"#FFFFFF"
+			],
+			"format": "8 seleções em 2 grupos. Os dois primeiros avançam ao mata-mata."
+		},
+		"UNL": {
+			"name": "Liga das Nações da UEFA",
+			"short": "Nações UEFA",
+			"first": 2027,
+			"every": 2,
+			"teams": 54,
+			"groups": 0,
+			"hosts": [],
+			"entry": {
+				"UEFA": 54
+			},
+			"format_type": "nations_league",
+			"colors": [
+				"#15366B",
+				"#E1E5ED"
+			],
+			"initial_divisions": [
+				[
+					"POR",
+					"DEN",
+					"NOR",
+					"WAL",
+					"GER",
+					"NED",
+					"SRB",
+					"GRE",
+					"ESP",
+					"CRO",
+					"ENG",
+					"CZE",
+					"FRA",
+					"ITA",
+					"BEL",
+					"TUR"
+				],
+				[
+					"SCO",
+					"SUI",
+					"SVN",
+					"MKD",
+					"HUN",
+					"UKR",
+					"GEO",
+					"NIR",
+					"ISR",
+					"AUT",
+					"IRL",
+					"KOS",
+					"POL",
+					"BIH",
+					"ROU",
+					"SWE"
+				],
+				[
+					"ALB",
+					"FIN",
+					"BLR",
+					"SMR",
+					"MNE",
+					"ARM",
+					"CYP",
+					"LVA",
+					"KAZ",
+					"SVK",
+					"FRO",
+					"MDA",
+					"ISL",
+					"BUL",
+					"EST",
+					"LUX"
+				],
+				[
+					"GIB",
+					"MLT",
+					"AND",
+					"LTU",
+					"AZE",
+					"LIE"
+				]
+			],
+			"format": "Divisões com acesso e rebaixamento. Fase de grupos, quartas em ida e volta na Liga A e finais em sede única. Regulamento-base: 2026/27."
+		},
+		"CNL": {
+			"name": "Liga das Nações da CONCACAF",
+			"short": "Nações CONCACAF",
+			"first": 2027,
+			"every": 2,
+			"teams": 41,
+			"groups": 0,
+			"hosts": [],
+			"entry": {
+				"CONCACAF": 41
+			},
+			"format_type": "nations_league",
+			"colors": [
+				"#15366B",
+				"#E1E5ED"
+			],
+			"initial_divisions": [
+				[
+					"MEX",
+					"USA",
+					"CAN",
+					"PAN",
+					"CRC",
+					"HAI",
+					"TRI",
+					"CUW",
+					"NCA",
+					"DOM",
+					"HON",
+					"JAM",
+					"GUA",
+					"SUR",
+					"MTQ",
+					"SLV"
+				],
+				[
+					"GUY",
+					"PUR",
+					"DMA",
+					"CAY",
+					"GLP",
+					"BER",
+					"LCA",
+					"BRB",
+					"CUB",
+					"GRN",
+					"SKN",
+					"BOE",
+					"GUF",
+					"VIN",
+					"BLZ",
+					"SMA"
+				],
+				[
+					"MSR",
+					"TCA",
+					"VGB",
+					"ATG",
+					"ARU",
+					"AIA",
+					"SMN",
+					"BAH",
+					"VIR"
+				]
+			],
+			"format": "Divisões com acesso e rebaixamento. Fase de grupos, quartas em ida e volta na Liga A e finais em sede única. Regulamento-base: 2026/27."
 		}
 	}
 }

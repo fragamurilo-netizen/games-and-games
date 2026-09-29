@@ -34,8 +34,13 @@ static func open() -> void:
 	var right := UIKit.vbox(6)
 	for c: VBoxContainer in [left, right]:
 		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		cols.add_child(c)
 	var wide: bool = UIManager.main != null and UIManager.main.get_viewport_rect().size.x >= 1000.0
+	if wide:
+		cols.add_child(left)
+		cols.add_child(right)
+	else:
+		cols.free()
+		right.free()
 	_group(left, "Caixa de entrada", [
 		["Mensagens", "inbox", {}, InboxManager.unread_count(w)],
 		["Notícias", "news", {}, w.unread_news_count()],
@@ -55,6 +60,7 @@ static func open() -> void:
 	_group(r, "Clube", [
 		["Competições", "table", {}, 0],
 		["Estatísticas", "team_stats", {}, 0],
+		["Confrontos", "rivalry", {"a": cid}, 0],
 		["Uniformes", "kit", {}, 0],
 		["Camisas antigas", "kit_history", {"id": cid}, 0],
 		["Elencos antigos", "past_squads", {"id": cid}, 0],
@@ -84,13 +90,7 @@ static func open() -> void:
 		UIManager.confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
 			GameManager.close_career_async(func() -> void: UIManager.goto("menu"))), false, 0))
 	r.add_child(game)
-	if wide:
-		v.add_child(cols)
-	else:
-		# Celular: uma coluna só. `left` nasceu dentro de `cols`; sai de lá antes de entrar na folha.
-		cols.remove_child(left)
-		cols.free()
-		v.add_child(left)
+	v.add_child(cols if wide else left)
 	UIManager.show_modal(v, true)
 
 
@@ -116,7 +116,7 @@ static func _row(title: String, cb: Callable, here: bool, badge: int) -> PanelCo
 	if badge > 0:
 		h.add_child(UIKit.colored(str(badge) if badge < 100 else "99+", UIColors.RED, "Caps"))
 	var row := UIKit.tap_row(h, cb)
-	row.custom_minimum_size.y = 64
+	row.custom_minimum_size.y = UITokens.H_ROW
 	return row
 
 

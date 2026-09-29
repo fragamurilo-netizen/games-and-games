@@ -444,7 +444,7 @@ func _squad_card(w: GameWorld, sq: Array) -> Control:
 	var hl := UIKit.label("Jogador", "Caps")
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hdr.add_child(hl)
-	hdr.add_child(UIKit.label("J  G  A  NOTA  OVR", "Caps"))
+	hdr.add_child(UIKit.label("J  G  A  NOTA", "Caps"))
 	card.add_child(hdr)
 	for r: Array in sq:
 		var row := UIKit.hbox(8)
@@ -454,13 +454,6 @@ func _squad_card(w: GameWorld, sq: Array) -> Control:
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		row.add_child(nl)
 		row.add_child(UIKit.label("%d  %d  %d  %s" % [int(r[3]), int(r[4]), int(r[5]), Fmt.rating(float(r[6]))], "Mono"))
-		var d := int(r[8]) if r.size() > 8 else 0
-		var ol := UIKit.label("%d%s" % [int(r[7]), (" +%d" % d) if d > 0 else ((" %d" % d) if d < 0 else "")], "Mono")
-		ol.custom_minimum_size.x = 92
-		ol.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		if d != 0:
-			ol.add_theme_color_override(&"font_color", UIColors.GREEN if d > 0 else UIColors.RED)
-		row.add_child(ol)
 		card.add_child(_player_tap(row, int(r[0])))
 	return UIKit.card_panel(card)
 

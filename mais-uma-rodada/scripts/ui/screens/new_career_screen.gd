@@ -374,8 +374,7 @@ func _club_row(cl: Club) -> Control:
 	st.star_size = 18
 	st.stars = StarsView.from_reputation(cl.reputation)
 	right.add_child(st)
-	var strength := int(round(ClubAI._compute_strength(_world, cl)))
-	var b := UIKit.badge(strength, 60, 44, 26)
+	var b := UIKit.label("%d atletas" % _world.squad(cl).size(), "Small")
 	b.size_flags_horizontal = Control.SIZE_SHRINK_END
 	right.add_child(b)
 	row.add_child(right)

@@ -23,7 +23,7 @@ var _search := ""
 var _pclub := -1 # clube aberto na lista de jogadores (-2 = sem clube)
 var _match := "" # nome original do jogador em edição (Editor geral)
 var _uid := "" # jogador criado no Editor geral
-var _ovr_badge: RatingBadge = null
+var _ovr_badge: StarsView = null
 var _ovr_label: Label = null
 var _kit_sel := "h" # uniforme aberto no editor de clube: h, a, t, g
 
@@ -719,7 +719,7 @@ func _player_list_card(w: GameWorld, title: String, list: Array, club: Club) -> 
 		row.add_child(col)
 		if not has_career() and PlayerMods.key_of(w, p) != "":
 			row.add_child(UIKit.pill("EDITADO", UIColors.BLUE, 14))
-		row.add_child(UIKit.badge(p.overall, 52, 38, 22))
+		row.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
 		card.add_child(UIKit.tap_row(row, func(): _open_player(pid)))
 	if list.is_empty():
@@ -785,7 +785,7 @@ func _player_editor(c: VBoxContainer) -> void:
 	col.add_child(UIKit.label(p.full_name(), "Title", true))
 	col.add_child(UIKit.label("%s · %d anos · %s" % [Pos.name_of(p.position), p.age(w.year), club.short_name if club != null else "Sem clube"], "Small", true))
 	var ob := UIKit.hbox(10)
-	_ovr_badge = UIKit.badge(p.overall)
+	_ovr_badge = UIKit.player_stars(w,p,18)
 	ob.add_child(_ovr_badge)
 	_ovr_label = UIKit.label("", "Small")
 	ob.add_child(_ovr_label)
@@ -828,7 +828,11 @@ func _player_editor(c: VBoxContainer) -> void:
 		if String(codes[i]) == p.nationality:
 			nob.select(i)
 	nob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	nob.item_selected.connect(func(i: int): p.nationality = String(codes[i]))
+	nob.item_selected.connect(func(i: int):
+		NationalityManager.ensure(w, p)
+		p.nationality = String(codes[i])
+		# Editing citizenship does not rewrite birthplace or the international record.
+		p.origin["passports"][p.nationality] = {"since": p.birth_year, "basis":"parent", "eligible":true})
 	nat_row.add_child(nob)
 	names.add_child(nat_row)
 	names.add_child(_stepper("Ano de nascimento", p.birth_year, w.year - 45, w.year - 15, func(v: int): p.birth_year = v,
@@ -887,15 +891,18 @@ func _player_editor(c: VBoxContainer) -> void:
 	c.add_child(UIKit.card_panel(fc))
 	# Nível
 	var lc := UIKit.card("Card", 8)
-	lc.add_child(UIKit.section("Nível"))
-	lc.add_child(_stepper("Overall (ajusta todos os atributos juntos)", p.overall, 30, 99, func(v: int):
+	lc.add_child(UIKit.section("Dados internos"))
+	lc.add_child(_stepper("CA — ajusta os atributos", p.overall, 30, 99, func(v: int):
 		PlayerMods.scale_to(p, v)
 		p.potential = maxi(p.potential, p.overall)
 		refresh.call_deferred()))
-	lc.add_child(_stepper("Potencial (oculto no jogo)", p.potential, 30, 99, func(v: int):
+	lc.add_child(_stepper("PA — limite de desenvolvimento", p.potential, 30, 99, func(v: int):
 		p.potential = maxi(v, p.overall)
 		_update_ovr_label(p)))
-	c.add_child(UIKit.card_panel(lc))
+	var hidden := UIKit.card_panel(lc)
+	hidden.visible = false
+	c.add_child(UIKit.button("Mostrar CA e PA (editor)", "GhostButton", func(): hidden.visible = not hidden.visible))
+	c.add_child(hidden)
 	c.add_child(_attrs_card(p))
 	c.add_child(_traits_card(p))
 	c.add_child(_look_card(p))
@@ -951,10 +958,13 @@ func _remove_player_dialog(w: GameWorld, p: Player, club: Club) -> void:
 
 
 func _update_ovr_label(p: Player) -> void:
+	PlayerAssessment.invalidate()
 	if _ovr_badge != null and is_instance_valid(_ovr_badge):
-		_ovr_badge.value = p.overall
+		var report := PlayerAssessment.report(world() if has_career() else GameManager.preview_world,p)
+		_ovr_badge.stars = report["low"]
+		_ovr_badge.upper_stars = report["high"]
 	if _ovr_label != null and is_instance_valid(_ovr_label):
-		_ovr_label.text = "overall · potencial %d" % p.potential
+		_ovr_label.text = "Avaliação da comissão"
 
 
 ## Linha com − valor +. `on_change(v)` aplica a mudança; `fmt(v)` devolve o texto mostrado.

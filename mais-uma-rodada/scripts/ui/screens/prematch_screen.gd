@@ -138,7 +138,7 @@ func _formation_header(w: GameWorld, club: Club, sheet: TeamSheet) -> Control:
 	var fl := UIKit.label(base + ("*" if sheet.formation.begins_with("C:") else ""), "Title")
 	tv.add_child(fl)
 	var strength := ClubAI.lineup_strength(w, sheet.formation, sheet.starters) / 11.0
-	tv.add_child(UIKit.label("Força do time titular: %d" % int(round(strength)), "Muted"))
+	tv.add_child(UIKit.label("%d titulares" % sheet.starters.filter(func(pid): return pid >= 0).size(), "Muted"))
 	h.add_child(tv)
 	var pe := UIKit.button("Mover posições", "ChipButton", func():
 		_pos_edit = not _pos_edit
@@ -241,8 +241,7 @@ func _bench_strip(w: GameWorld, club: Club, sheet: TeamSheet, wide: bool) -> Con
 		var meta := UIKit.hbox(6)
 		meta.alignment = BoxContainer.ALIGNMENT_CENTER
 		meta.add_child(UIKit.colored(Pos.code(p.position), Pos.group_color(p.position), "Caps"))
-		var ov := UIKit.label(str(p.overall), "Caps")
-		ov.add_theme_color_override(&"font_color", Fmt.rating_color(p.overall))
+		var ov := UIKit.player_stars(w,p,13)
 		meta.add_child(ov)
 		if p.injury_weeks > 0 or p.suspension > 0:
 			meta.add_child(UIKit.colored("fora", UIColors.RED, "Caps"))
@@ -375,7 +374,7 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 	var where := ""
 	if league != null and league.table.has(opp.id):
 		where = "%dº na %s · " % [CompetitionManager.position_of(league, opp.id), league.short_name]
-	col.add_child(UIKit.label("%sforça %d · %s" % [where, int(round(ClubAI._compute_strength(w, opp))), opp.arch().get("tag", "")], "Small", true))
+	col.add_child(UIKit.label("%s%s" % [where, opp.arch().get("tag", "")], "Small", true))
 	row.add_child(col)
 	if league != null and league.table.has(opp.id):
 		var fd := FormDots.new()
@@ -394,6 +393,7 @@ func _opponent_card(w: GameWorld, f: Fixture) -> Control:
 		card.add_child(UIKit.label("Costuma jogar no %s, %s." % [opp_sheet.formation, String(tac["styles"][opp_sheet.style]["name"]).to_lower()], "Small"))
 	card.add_child(UIKit.label("Filosofia: " + ClubPhilosophy.summary(opp), "Small", true))
 	var h2h := FootballMemory.head_to_head(w, club.id, opp.id)
+	card.add_child(UIKit.button("Ver confrontos anteriores", "GhostButton", func(): UIManager.push("rivalry", {"a": club.id, "b": opp.id}), "ball"))
 	if int(h2h["games"]) > 0:
 		var last: Array = h2h["recent"]
 		var tail := ""
@@ -664,7 +664,7 @@ func _update_chips() -> void:
 		var p := w.player(pid)
 		var s: Dictionary = slots[i]
 		var ch := {"x": s["x"], "y": s["y"], "number": p.shirt if p != null else "?", "name": p.short_name() if p != null else "vazio",
-			"rating": int(round(p.rating_at(s["pos"]))) if p != null else 0,
+			"rating": 0,
 			"c1": Color(String((kg if int(s["pos"]) == Pos.GK else kh).get("c1", club.color1))),
 			"c2": Color(String((kg if int(s["pos"]) == Pos.GK else kh).get("c2", club.color2))),
 			"cond": p.condition if p != null else 100.0}

@@ -151,6 +151,8 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 			UIManager.goto("club")
 		else:
 			UIManager.push("club", {"id": cid}), "RowPanel")
+	row.custom_minimum_size.y = UITokens.H_ROW
+	row.tooltip_text = cl.name
 	# Linha de tabela clássica: filete embaixo; o clube do usuário ganha só um fundo tingido.
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(UIColors.ACCENT, 0.12) if is_user else Color(0, 0, 0, 0)
@@ -283,7 +285,7 @@ static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, capti
 ## Detalhes de um jogo (gols, craque, público) ou a prévia (campanhas) se ainda não aconteceu.
 static func fixture_details(w: GameWorld, f: Fixture) -> void:
 	var v := UIKit.vbox(12)
-	v.custom_minimum_size.x = 600
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var home := w.club(f.home)
 	var away := w.club(f.away)
 	var t := UIKit.label("%s %s %s" % [home.short_name, ("%d – %d" % [f.hg, f.ag]) if f.played else "×", away.short_name], "Title", true)

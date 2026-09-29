@@ -280,7 +280,7 @@ func _plan(p: Player) -> String:
 
 ## Celular: só o plano ao lado do overall (o nome precisa do espaço). Com espaço, a tendência.
 func _trend_col() -> Dictionary:
-	return {"key": "trend", "title": "Tend.", "w": 64, "tip": "Tendência nas últimas semanas",
+	return {"key": "trend", "title": "Evolução", "w": 126, "tip": "Tendência nas últimas semanas",
 		"sort": func(p: Player) -> float: return TrainingManager.trend(p),
 		"cell": func(p: Player) -> Control: return TrainingSheet.trend_label(TrainingManager.trend(p))}
 

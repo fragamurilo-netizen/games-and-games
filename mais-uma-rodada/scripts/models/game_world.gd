@@ -408,4 +408,5 @@ static func from_dict(d: Dictionary, pre_clubs: Array = [], pre_players: Array =
 			if String(stadiums.get(c.key, "")) != "":
 				c.stadium = stadiums[c.key] # estádios sem nome de patrocinador
 	w.stats["short_names"] = true
+	NationalityManager.ensure_world(w)
 	return w

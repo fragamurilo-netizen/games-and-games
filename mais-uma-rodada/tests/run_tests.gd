@@ -187,7 +187,7 @@ func _test_generation() -> void:
 	var small: Club = w.clubs_in_league("BRA4")[19]
 	check(ClubAI._compute_strength(w, big) > ClubAI._compute_strength(w, small) + 25.0, "escala de níveis entre ligas")
 	# Copas da primeira temporada montadas
-	check(w.season.cups.has("UCL") and w.season.cups["UCL"].club_ids.size() == 32, "Liga dos Campeões com 32 clubes")
+	check(w.season.cups.has("UCL") and w.season.cups["UCL"].club_ids.size() == 36, "Liga dos Campeões com 36 clubes")
 	check(w.season.cups.has("LIB") and w.season.cups["LIB"].club_ids.size() == 32, "Libertadores com 32 clubes")
 	_season_world = null
 
@@ -534,7 +534,12 @@ func _test_season_cycle() -> void:
 				if seen.has(n):
 					same_nation += 1
 				seen[n] = true
-		check(same_nation <= 2, "%s: %d grupos com clubes do mesmo país" % [cid, same_nation])
+		if cup.league_phase:
+			for f: Fixture in cup.fixtures:
+				if f.stage == Fixture.STAGE_GROUP:
+					check(w.club(f.home).nation != w.club(f.away).nation, "Liga: adversários do mesmo país")
+		else:
+			check(same_nation <= 2, "%s: %d grupos com clubes do mesmo país" % [cid, same_nation])
 		for f in cup.fixtures:
 			check(f.played, "%s: jogo não disputado" % cid)
 		var last := cup.ties_of_round(cup.round_names.size() - 1)
@@ -773,7 +778,7 @@ func _test_end_season() -> void:
 		if d["id"] == "BRA1":
 			bra = d
 	check(w.season.cups["LIB"].has_club(int(bra["champion"])), "campeão brasileiro fora da Libertadores")
-	check(w.season.cups["UCL"].club_ids.size() == 32 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
+	check(w.season.cups["UCL"].club_ids.size() == 36 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
 	# Campeão da Copa do Brasil garante a Libertadores; supercopa com o campeão da liga e o da copa.
 	check(w.season.cups["LIB"].has_club(int(_cup_champs.get("CDB", -1))), "campeão da Copa do Brasil fora da Libertadores")
 	check(w.season.cups.has("SCB") and w.season.cups["SCB"].has_club(int(bra["champion"])), "Supercopa do Brasil sem o campeão brasileiro")
@@ -1335,7 +1340,7 @@ func _test_hearts_manager() -> void:
 		if p.heart >= 0:
 			fans += 1
 			var hc := w.club(p.heart)
-			check(hc != null and hc.nation == p.nationality, "time de coração de outro país")
+			check(hc != null and hc.nation == NationalityManager.birth_country(p), "time de coração fora do país onde cresceu")
 			if hc != null and hc.city == p.hometown:
 				local += 1
 		if p.heart_known:
@@ -1982,7 +1987,14 @@ func _test_market_ai() -> void:
 			deal = MarketAI.negotiate(w, big, prospect, 1.0, false, false, push)
 			if deal.has("fee"):
 				break
-		check(deal.has("fee") and int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		# A reserva do vendedor e cada contraproposta são aleatórias: nem toda
+		# negociação fecha, mesmo com ágio. Verifique a disposição de pagar e,
+		# quando houver acordo, o preço; uma recusa legítima deve informar a distância.
+		check(MarketAI.max_bid(w, big, prospect, 1.0, false, false, 3) >= prospect.value, "teto inglês abaixo do valor da promessa")
+		if deal.has("fee"):
+			check(int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		else:
+			check(float(deal.get("gap", -1.0)) >= 0.0, "negociação da promessa recusada sem informar a distância")
 		var bids := MarketAI.bids_for_user_player(w, big, prospect)
 		check(int(bids[0]) <= int(bids[1]) and int(bids[0]) > 0, "proposta acima do teto do comprador")
 	check(MarketAI.power(big) > MarketAI.power(seller) * 2.0, "liga inglesa deveria ter muito mais poder de compra")
@@ -2333,7 +2345,8 @@ func _test_preseason() -> void:
 func _test_second_cups() -> void:
 	var w := WorldGenerator.generate(4242, "padrao")
 	for cid in ["UEL", "UECL", "SUD"]:
-		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == 32, "%s sem 32 clubes" % cid)
+		var expected := 32 if cid == "SUD" else 36
+		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == expected, "%s sem %d clubes" % [cid, expected])
 	var seen := {}
 	for cid in w.season.cups:
 		if not CupManager.is_international(cid):
@@ -2351,6 +2364,12 @@ func _test_second_cups() -> void:
 	uel.champion = uel.club_ids[0]
 	var q := CupManager.compute_qualified(w)
 	check(q["UCL"].has(uel.champion) and not q["UEL"].has(uel.champion), "campeão da Europa League fora da Liga dos Campeões")
+	var uecl: Cup = w.season.cups["UECL"]
+	uecl.champion = uecl.club_ids[-1]
+	q = CupManager.compute_qualified(w)
+	check(q["UEL"].has(uecl.champion) or q["UCL"].has(uecl.champion), "campeão da Conference sem vaga superior")
+	for id in ["UCL", "UEL", "UECL"]:
+		check(q[id].size() == 36, "vagas de campeão alteraram tamanho de " + id)
 	var all := {}
 	for cid in q:
 		for club in q[cid]:
@@ -2380,7 +2399,7 @@ func _test_national_teams() -> void:
 	if tours.has("WC2030"):
 		var wc: Dictionary = tours["WC2030"]
 		check((wc["teams"] as Array).size() == 48 and wc["teams"].has("ESP"), "Copa do Mundo sem 48 seleções ou sem a sede")
-		check((wc["ko"] as Array).size() == 5 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "", "mata-mata da Copa incompleto")
+		check((wc["ko"] as Array).size() == 6 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "" and String(wc.get("third", "")) != "", "mata-mata da Copa incompleto (inclui terceiro lugar)")
 		var uefa := 0
 		for t in wc["teams"]:
 			if DatabaseManager.nation(t).get("confed", "") == "UEFA":

@@ -181,8 +181,8 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 		var cup: Cup = w.season.cups.get(f.comp, null)
 		var g: Dictionary = cup.group_of(cl.id) if cup != null else {}
 		if f.stage == Fixture.STAGE_GROUP and not g.is_empty():
-			var order := CompetitionManager.sort_table(g["clubs"], g["table"])
-			text = "%dº no grupo %s" % [order.find(cl.id) + 1, g["n"]]
+			var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
+			text = "%dº na fase de liga" % [order.find(cl.id) + 1] if cup.league_phase else "%dº no grupo %s" % [order.find(cl.id) + 1, g["n"]]
 		else:
 			text = "%s · %s" % [DatabaseManager.nation_name(cl.nation), w.league_short(cl.league_id)]
 	var sub := UIKit.label(text, "Small")
@@ -511,13 +511,13 @@ func _cups_card(w: GameWorld, club: Club) -> Control:
 			for t in cup.ties:
 				if int(t["a"]) == club.id or int(t["b"]) == club.id:
 					r = maxi(r, int(t["r"]))
-			status = cup.round_names[r] if r >= 0 else "Fase de grupos"
+			status = cup.round_names[r] if r >= 0 else ("Fase de liga" if cup.league_phase else "Fase de grupos")
 			color = UIColors.GREEN
 		else:
 			var g := cup.group_of(club.id)
 			if not g.is_empty():
-				var order := CompetitionManager.sort_table(g["clubs"], g["table"])
-				status = "%dº no grupo %s · %d pts" % [order.find(club.id) + 1, g["n"], int(g["table"][club.id]["pts"])]
+				var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
+				status = "%dº · %d pts" % [order.find(club.id) + 1, int(g["table"][club.id]["pts"])] if cup.league_phase else "%dº no grupo %s · %d pts" % [order.find(club.id) + 1, g["n"], int(g["table"][club.id]["pts"])]
 			else:
 				status = "Classificado"
 		if status != "CAMPEÃO" and status != "Eliminado" and cup.byes.has(club.id) and cup.round_names.size() > 1:

@@ -50,6 +50,8 @@ func _run() -> void:
 			check(root.content_scale_size == _layout.base_size_for(dimensions, tablet), "rotated base " + str(dimensions))
 			check(not bool(main.get("_layout_pending")), "resize notifications settle")
 			check(is_instance_valid(main.get("bottom_nav")), "navigation survives rotation")
+			var bar: Control = main.get("top_bar")
+			check(bar.get_global_rect().position.y >= 0, "header remains inside safe area")
 	_layout.force_tablet = false
 	await _test_match_rotation()
 	_portraits._cmd_cache.clear()
@@ -94,6 +96,8 @@ func _test_match_rotation() -> void:
 	var stats_box := MarginContainer.new()
 	stats_box.add_child(stats)
 	body.add_child(stats_box)
+	var field_nodes: Array[Control] = [pitch_box, body.get_child(2), body.get_child(3), stats_box]
+	screen.set("_field_nodes", field_nodes)
 	var tabs := HBoxContainer.new()
 	var tabs_box := MarginContainer.new()
 	tabs_box.add_child(tabs)
@@ -117,11 +121,13 @@ func _test_match_rotation() -> void:
 		_layout.viewport = Vector2(1280, 720)
 		screen.call("_responsive_layout")
 		check(is_instance_valid(screen.get("_wide_body")), "wide match body " + str(turn))
+		check(pitch.horizontal, "landscape field orientation")
 		check(score.get_parent() == body and controls.get_parent() == body, "score/controls stay outside columns")
 		_layout.viewport = Vector2(720, 1280)
 		screen.call("_responsive_layout")
 		check(body.get_children() == original, "exact child order restored " + str(turn))
-		check(is_equal_approx(pitch.custom_minimum_size.y, 330.0), "portrait field height restored")
+		check(not pitch.horizontal, "portrait field orientation restored")
+		check(is_equal_approx(pitch.custom_minimum_size.y, screen.call("_pitch_height")), "portrait field height restored")
 		await process_frame
 	screen.queue_free()
 	await process_frame

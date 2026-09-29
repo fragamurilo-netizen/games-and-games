@@ -14,10 +14,12 @@ static func limit(club: Club) -> Dictionary:
 
 
 static func is_foreign(p: Player, club: Club, scope: String) -> bool:
-	if p.nationality == club.nation:
+	var nationalities := NationalityManager.passports(p)
+	if nationalities.has(club.nation):
 		return false
 	if scope == "non_eu":
-		return not EU.has(p.nationality)
+		for nation in nationalities:
+			if EU.has(nation): return false
 	return true
 
 

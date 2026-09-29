@@ -63,7 +63,7 @@ func refresh() -> void:
 		1:
 			list.sort_custom(func(a: Player, b: Player): return a.wage > b.wage)
 		2:
-			list.sort_custom(func(a: Player, b: Player): return a.overall > b.overall)
+			list.sort_custom(func(a: Player, b: Player): return PlayerAssessment.score(w,a) > PlayerAssessment.score(w,b))
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("%d jogadores" % list.size()))
 	if list.is_empty():
@@ -184,7 +184,7 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 	el.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(el)
 	h.add_child(right)
-	h.add_child(UIKit.badge(p.overall, 52, 36, 22))
+	h.add_child(UIKit.player_stars(w,p,15))
 	var pid := p.id
 	var outer := UIKit.vbox(4)
 	outer.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat"))

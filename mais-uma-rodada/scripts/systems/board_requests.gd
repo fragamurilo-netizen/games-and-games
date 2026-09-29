@@ -118,7 +118,7 @@ static func suggestions(world: GameWorld) -> Dictionary:
 	var squad: Array = world.squad(club)
 	var groups := [[], [], [], []]
 	for p: Player in squad:
-		groups[Pos.group(p.position)].append(p.overall)
+		groups[Pos.group(p.position)].append(PlayerAssessment.score(world,p))
 	var worst := 1
 	var worst_v := 999.0
 	var need := [2, 4, 4, 3]
@@ -143,11 +143,11 @@ static func suggestions(world: GameWorld) -> Dictionary:
 	for p: Player in world.players.values():
 		if p.club_id == club.id or Pos.group(p.position) != worst or p.age(world.year) > 31:
 			continue
-		if p.overall < worst_v + 2.0 or float(p.value) > budget:
+		if PlayerAssessment.score(world,p) < worst_v + 2.0 or float(p.value) > budget:
 			continue
 		if rng.randf() > reach:
 			continue
-		cands.append([p, float(p.overall) + float(p.potential - p.overall) * 0.3 - float(p.value) / maxf(1.0, budget) * 4.0])
+		cands.append([p, PlayerAssessment.score(world,p) + maxf(0.0,26-p.age(world.year))*0.5 - float(p.value) / maxf(1.0, budget) * 4.0])
 	cands.sort_custom(func(a, b): return float(a[1]) > float(b[1]))
 	var ids: Array = []
 	for c in cands.slice(0, 5):

@@ -56,8 +56,8 @@ const CATALOG := {
 	# Mercado
 	"reforco": {"name": "Primeiro reforço", "desc": "Fazer a primeira contratação", "icon": "swap", "tier": "bronze", "cat": "mercado"},
 	"bomba": {"name": "Contratação bombástica", "desc": "Fechar uma contratação de peso (apresentação especial)", "icon": "star", "tier": "prata", "cat": "mercado"},
-	"craque": {"name": "Chegou um craque", "desc": "Contratar um jogador de overall 85 ou mais", "icon": "star", "tier": "ouro", "cat": "mercado"},
-	"joia": {"name": "Garimpeiro", "desc": "Contratar um jogador de até 19 anos com potencial 80+", "icon": "search", "tier": "prata", "cat": "mercado"},
+	"craque": {"name": "Chegou um craque", "desc": "Contratar um jogador de elite", "icon": "star", "tier": "ouro", "cat": "mercado"},
+	"joia": {"name": "Garimpeiro", "desc": "Contratar uma grande promessa de até 19 anos", "icon": "search", "tier": "prata", "cat": "mercado"},
 	"venda": {"name": "Negócio da China", "desc": "Vender um jogador por 30 milhões ou mais", "icon": "money", "tier": "prata", "cat": "mercado"},
 	"venda_recorde": {"name": "Venda do século", "desc": "Vender um jogador por 80 milhões ou mais", "icon": "money", "tier": "ouro", "cat": "mercado"},
 	# Elenco

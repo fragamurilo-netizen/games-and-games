@@ -9,7 +9,7 @@ extends RefCounted
 ## do país (fase preliminar para quem sobra na conta, os grandes entram direto) e as supercopas antes
 ## da primeira rodada (campeão da liga × campeão da copa, campeões continentais).
 
-const ROUND_NAMES := {"r16": "Oitavas de final", "qf": "Quartas de final", "sf": "Semifinal", "f": "Final"}
+const ROUND_NAMES := {"po": "Playoffs", "r16": "Oitavas de final", "qf": "Quartas de final", "sf": "Semifinal", "f": "Final"}
 const KO_SLOTS := {"r16": ["C7", "C8"], "qf": ["C9", "C10"], "sf": ["C11", "C12"], "f": ["C13"]}
 const CWC_SLOTS := {"qf": ["X1"], "sf": ["X2"], "f": ["X3"]}
 const STAGE_IMPORTANCE := {"r16": 0.62, "qf": 0.72, "sf": 0.85, "f": 1.0}
@@ -384,11 +384,16 @@ static func compute_qualified(world: GameWorld) -> Dictionary:
 		if cup == null or cup.champion < 0:
 			continue
 		var dest: String = id if cup_level(id) == 1 else _top_cup_of_confed(String(cfg(id).get("confed", "")))
+		if id == "UECL":
+			dest = "UEL"
+			# A Champions place already earned through the league takes precedence.
+			if Array(out.get("UCL", [])).has(cup.champion):
+				continue
 		holders.append([cup.champion, dest])
 	for h in holders:
 		_place_holder(world, out, int(h[0]), String(h[1]), protected)
 		protected.append(int(h[0]))
-	return out
+	return _complete_qualified(world, out, protected)
 
 
 ## Primeira temporada: não há tabela anterior — classificam os de maior reputação de cada país.
@@ -402,6 +407,39 @@ static func initial_qualified(world: GameWorld) -> Dictionary:
 		ids.sort_custom(func(a, b): return world.club(a).reputation > world.club(b).reputation or (world.club(a).reputation == world.club(b).reputation and a < b))
 		ranked[nation] = ids
 	return _fill_by_level(world, ranked)
+
+
+## Title-holder cascades can leave vacancies or a 37th club. Keep protected
+## winners, fill vacancies from eligible domestic leagues and avoid duplicates.
+static func _complete_qualified(world: GameWorld, out: Dictionary, protected: Array) -> Dictionary:
+	var used := {}
+	var ids := continental_ids()
+	ids.sort_custom(func(a, b): return cup_level(a) < cup_level(b))
+	for id in ids:
+		var target := int(cfg(id).get("teams", out[id].size()))
+		var list: Array = out[id].filter(func(cid): return not used.has(cid))
+		while list.size() > target:
+			var remove_at := list.size() - 1
+			while remove_at >= 0 and protected.has(list[remove_at]):
+				remove_at -= 1
+			if remove_at < 0:
+				break
+			list.remove_at(remove_at)
+		var pool: Array = []
+		for nation in cfg(id).get("alloc", {}):
+			var league := world.league(DatabaseManager.league_at(nation, 1))
+			if league != null:
+				pool.append_array(CompetitionManager.sorted_ids(league))
+		pool.sort_custom(func(a, b): return _coef(world, a) > _coef(world, b) or (_coef(world, a) == _coef(world, b) and a < b))
+		for cid in pool:
+			if list.size() >= target:
+				break
+			if not list.has(cid) and not used.has(cid) and not protected.has(cid):
+				list.append(cid)
+		out[id] = list
+		for cid in list:
+			used[cid] = true
+	return out
 
 
 ## Nações com vaga em alguma copa continental.
@@ -489,6 +527,10 @@ static func setup_season(world: GameWorld, s: SeasonState) -> void:
 	var qualified: Dictionary = world.stats.get("qualified", {})
 	if qualified.is_empty():
 		qualified = initial_qualified(world)
+	elif Array(qualified.get("UCL", [])).size() != 36 or Array(qualified.get("UEL", [])).size() != 36 or Array(qualified.get("UECL", [])).size() != 36:
+		# An old save may contain next-season qualification calculated under the
+		# 32-team rules. Recompute all levels together so no club enters two cups.
+		qualified = compute_qualified(world) if world.season != null else initial_qualified(world)
 	for id in continental_ids():
 		var list: Array = []
 		for cid in qualified.get(id, []):
@@ -502,6 +544,10 @@ static func setup_season(world: GameWorld, s: SeasonState) -> void:
 		cup.name = cup_name(id)
 		cup.short_name = cup_short(id)
 		cup.club_ids = list
+		if String(cfg(id).get("format_type", "")) == "league_phase" and list.size() == 36:
+			if LeaguePhase.setup(world, s, cup):
+				s.cups[id] = cup
+				continue
 		for k in ko_plan(id):
 			cup.round_names.append(ROUND_NAMES[k])
 		var groups := int(cfg(id).get("groups", 0))
@@ -890,7 +936,7 @@ static func prize_of(id: String, key: String) -> int:
 # ---------------------------------------------------------------------------
 
 ## Registra um jogo de copa: tabela do grupo e premiação por resultado.
-static func apply_result(world: GameWorld, f: Fixture) -> void:
+static func apply_result(world: GameWorld, f: Fixture, result: Dictionary = {}) -> void:
 	var cup: Cup = world.season.cups.get(f.comp, null)
 	if cup == null:
 		return
@@ -899,6 +945,20 @@ static func apply_result(world: GameWorld, f: Fixture) -> void:
 		var g := cup.group_of(f.home)
 		if not g.is_empty():
 			CompetitionManager.apply_to_table(g["table"], f)
+			if cup.league_phase:
+				var yc: Array = result.get("yc", [0, 0])
+				var rc: Array = result.get("rc", [0, 0])
+				for side in 2:
+					var row: Dictionary = g["table"][f.home if side == 0 else f.away]
+					var points := int(yc[side]) + 3 * int(rc[side])
+					var lines: Array = result.get("lines", [[], []])
+					if not lines[side].is_empty():
+						points = 0
+						for line in lines[side]:
+							var yellow := int(line[QuickMatch.L_Y])
+							var red := bool(line[QuickMatch.L_RED])
+							points += 3 if red and yellow >= 2 else yellow + (3 if red else 0)
+					row["discipline"] = int(row.get("discipline", 0)) + points
 		if f.round == 0:
 			for cid in [f.home, f.away]:
 				world.club(cid).add_ledger("premiacao", int(prize.get("group", 0)))
@@ -919,7 +979,13 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 		if cup.finished:
 			continue
 		# Fim da fase de grupos → mata-mata
-		if not cup.groups.is_empty() and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1) and is_state(id):
+		if cup.league_phase and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1):
+			var pairs := LeaguePhase.playoff_pairs(world, cup)
+			for i in cup.league_rank.size():
+				events.append({"t": "advance" if i < 24 else "out", "cup": id,
+					"club": cup.league_rank[i], "stage": "Fase de liga", "direct": i < 8})
+			_create_ko_round(world, s, cup, 0, pairs)
+		elif not cup.groups.is_empty() and cup.ties.is_empty() and _all_played(cup, Fixture.STAGE_GROUP, -1) and is_state(id):
 			var seeds := state_qualified(cup)
 			for cid in cup.club_ids:
 				if not seeds.has(cid):
@@ -977,7 +1043,9 @@ static func after_slot(world: GameWorld, slot: int) -> Array:
 					var winners: Array = []
 					for t in round_ties:
 						winners.append(int(t["w"]))
-					if not cup.plan.is_empty():
+					if cup.league_phase:
+						_create_ko_round(world, s, cup, last_r + 1, LeaguePhase.next_pairs(world, cup, last_r + 1, winners))
+					elif not cup.plan.is_empty():
 						if last_r == 0:
 							winners.append_array(cup.byes) # quem entrou direto estreia na 2ª fase
 						_create_ko_round(world, s, cup, last_r + 1, _domestic_pairs(world, cup, winners, last_r + 1))

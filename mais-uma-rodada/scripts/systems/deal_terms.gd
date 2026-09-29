@@ -307,10 +307,12 @@ static func _buy_from_loan(world: GameWorld, p: Player, owner: Club, borrower: C
 	p.loan = {}
 	if owner == null:
 		p.club_id = -1
+		NationalityManager.sync_residence(world, p, true)
 		TransferManager.complete_transfer(world, p, borrower, 0, maxi(p.wage, Valuation.wage_demand(p, borrower, world.year)), TransferManager.preferred_years(world, p))
 		return
 	owner.player_ids.append(p.id)
 	p.club_id = owner.id
+	NationalityManager.sync_residence(world, p, true)
 	var wage := maxi(p.wage, Valuation.wage_demand(p, borrower, world.year)) if not world.is_user_club(borrower.id) else p.wage
 	TransferManager.complete_transfer(world, p, borrower, price, wage, TransferManager.preferred_years(world, p))
 

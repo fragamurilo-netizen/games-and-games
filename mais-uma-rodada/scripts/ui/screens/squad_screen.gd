@@ -4,7 +4,7 @@ extends BaseScreen
 const FILTERS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 ## Seções além da lista (abertas pelo pé da tela; a lista é sempre a primeira coisa).
 const VIEWS := ["Jogadores", "Números", "Profundidade", "Papéis"]
-const SORTS := [["pos", "Posição"], ["ovr", "Overall"], ["form", "Nota"], ["cond", "Condição"], ["age", "Idade"], ["contract", "Contrato"], ["value", "Valor"]]
+const SORTS := [["pos", "Posição"], ["ovr", "Avaliação"], ["form", "Nota"], ["cond", "Condição"], ["age", "Idade"], ["contract", "Contrato"], ["value", "Valor"]]
 ## Recortes rápidos da lista (tocáveis também nos alertas do resumo).
 const QUICK := [["all", "Todos"], ["ok", "Disponíveis"], ["hurt", "Lesionados"], ["exp", "Contrato acabando"], ["u21", "Sub-21"], ["tired", "Cansados"]]
 
@@ -39,8 +39,8 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 		xi = ClubAI.lineup_strength(w, club.sheet.formation, club.sheet.starters) / 11.0
 	var fin := FinanceManager.summary(w, club)
 	var over: bool = fin["wage_bill"] > fin["wage_budget"]
-	var txt := "%d jogadores, idade média de %s anos. Time titular com força %d. Folha de %s por mês, limite de %s." % [
-		squad.size(), Fmt._decimal(ages / maxf(1.0, squad.size()), 1), int(round(xi)), Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])]
+	var txt := "%d jogadores, idade média de %s anos. Folha de %s por mês, limite de %s." % [
+		squad.size(), Fmt._decimal(ages / maxf(1.0, squad.size()), 1), Fmt.money(fin["wage_bill"]), Fmt.money(fin["wage_budget"])]
 	v.add_child(UIKit.label(txt, "Muted", true))
 	if over:
 		v.add_child(UIKit.colored("A folha passou do limite da diretoria.", UIColors.RED, "Small", true))
@@ -175,6 +175,7 @@ func refresh() -> void:
 		var dense := wide or content_width() >= 760.0
 		var tbl := PlayerTable.make(w, list, "squad", _table_state, tap, [], _cols, dense and not wide or content_width() >= 1500.0)
 		if wide:
+			if _sel < 0 and not list.is_empty(): _sel = list[0].id
 			tbl.highlight = func(p: Player) -> bool: return p.id == _sel
 			tbl._build()
 		main.add_child(tbl)
@@ -273,7 +274,7 @@ func _build_depth(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 			line.add_child(nm)
 			if not p.is_available():
 				line.add_child(UIKit.icon_rect("cross", 18, UIColors.RED))
-			line.add_child(UIKit.badge(int(round(item[1])), 48, 32, 20))
+			line.add_child(UIKit.player_stars(w,p,15,false,int(row["pos"][0])))
 			card.add_child(UIKit.tap_row(line, func(): UIManager.push("player", {"id": pid})))
 		c.add_child(UIKit.card_panel(card))
 

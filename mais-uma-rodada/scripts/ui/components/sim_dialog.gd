@@ -76,7 +76,7 @@ static func start(m: int, n: int, done: Callable) -> void:
 
 
 func _ready() -> void:
-	custom_minimum_size.x = 580
+	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_theme_constant_override(&"separation", 12)
 	var w := GameManager.world
 	add_child(UIKit.label("Simulando...", "Title"))
@@ -85,7 +85,7 @@ func _ready() -> void:
 	_bar = UIKit.bar(0.0, 1.0, UIColors.ACCENT, 14)
 	add_child(_bar)
 	var sc := ScrollContainer.new()
-	sc.custom_minimum_size.y = 420
+	sc.custom_minimum_size.y = clampf(get_viewport_rect().size.y * 0.35, 144.0, 420.0)
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_list = UIKit.vbox(6)
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL

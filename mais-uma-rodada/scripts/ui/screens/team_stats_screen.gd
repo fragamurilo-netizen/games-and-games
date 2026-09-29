@@ -292,7 +292,6 @@ static func _ranks_card(w: GameWorld, club: Club, league: League) -> Control:
 	var metrics := [
 		["Ataque", func(c: Club) -> float: return float(league.row(c.id).get("gf", 0)), true, func(v: float) -> String: return "%d gols" % int(v)],
 		["Defesa", func(c: Club) -> float: return float(league.row(c.id).get("ga", 0)), false, func(v: float) -> String: return "%d sofridos" % int(v)],
-		["Força do time titular", func(c: Club) -> float: return _xi_avg(w, c), true, func(v: float) -> String: return "%.1f" % v],
 		["Valor do elenco", func(c: Club) -> float: return _squad_value(w, c), true, func(v: float) -> String: return Fmt.money(v)],
 		["Folha salarial", func(c: Club) -> float: return float(FinanceManager.wage_bill(w, c)), true, func(v: float) -> String: return Fmt.money(v) + "/mês"],
 		["Reputação", func(c: Club) -> float: return c.reputation, true, func(v: float) -> String: return "%d" % int(round(v))],
@@ -336,8 +335,8 @@ static func _squad_card(w: GameWorld, club: Club) -> Control:
 		if p.nationality != club.nation:
 			foreign += 1
 	card.add_child(UIKit.stat_grid([
-		UIKit.stat_tile("%.1f" % _xi_avg(w, club), "time titular", UIColors.ACCENT),
-		UIKit.stat_tile("%.1f" % (ovr / maxf(1.0, sq.size())), "elenco"),
+		UIKit.stat_tile(str(sq.filter(func(p: Player): return p.is_available()).size()), "disponíveis"),
+		UIKit.stat_tile(str(sq.size()), "no elenco"),
 		UIKit.stat_tile("%.1f" % _avg_age(w, club), "idade média"),
 	], 600))
 	card.add_child(UIKit.kv("Jogadores", "%d · %d estrangeiros" % [sq.size(), foreign]))
@@ -352,9 +351,9 @@ static func _squad_card(w: GameWorld, club: Club) -> Control:
 			s += p.overall
 			if best == null or p.overall > best.overall:
 				best = p
-		var txt := "%d · média %.1f" % [list.size(), s / maxf(1.0, list.size())]
+		var txt := "%d jogadores" % list.size()
 		if best != null:
-			txt += " · melhor %s (%d)" % [best.short_name(), best.overall]
+			txt += " · destaque: %s" % best.short_name()
 		card.add_child(UIKit.kv(Pos.GROUP_NAMES[g], txt))
 	return UIKit.card_panel(card)
 

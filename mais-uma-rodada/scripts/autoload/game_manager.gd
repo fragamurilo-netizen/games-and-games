@@ -28,6 +28,7 @@ var _save_phase := 0 # 0 parado, 1 montando os blocos, 2 gravando na thread
 ## responde) e o save fica para o fim do lote, em vez de um save completo a cada jogo.
 var _batch := false
 var _batch_save := false
+var _end_batch_pending := false
 var _sim_has := false # relatório de uma data do "Simular" esperando o SimDialog buscar
 var _sim_report: Dictionary = {}
 ## Trabalho pesado numa thread (fechar a rodada, fim de temporada, carregar, simular): a tela
@@ -145,6 +146,8 @@ func _complete_work() -> void:
 	if cb.is_valid():
 		cb.call(r)
 	if _work_task < 0: # (o done pode ter emendado outro trabalho)
+		if _end_batch_pending:
+			end_batch()
 		if _resave_after_work:
 			_resave_after_work = false
 			save_now()
@@ -461,6 +464,13 @@ func _save_on_pause() -> void:
 ## Monta a data do próximo jogo do usuário; a partida dele volta viva e as demais rodam em
 ## segundo plano (pump_ai) enquanto ele assiste.
 func begin_match() -> Dictionary:
+	if is_busy():
+		return {}
+	return _begin_match_core()
+
+
+## Called only by the owner of the world (UI thread or the active worker).
+func _begin_match_core(with_detail: bool = true) -> Dictionary:
 	if world == null or world.season == null or world.season.finished or Store.locked(world):
 		return {}
 	if not matchday.is_empty():
@@ -468,7 +478,7 @@ func begin_match() -> Dictionary:
 	SeasonManager.advance_to_user(world)
 	if world.season.finished or not SeasonManager.user_plays_now(world):
 		return {}
-	matchday = SeasonManager.begin_matchday(world)
+	matchday = SeasonManager.begin_matchday(world, with_detail)
 	_ai_queue.clear()
 	for e in matchday["entries"]:
 		if e != matchday["user"]:
@@ -536,8 +546,15 @@ func finish_match() -> Dictionary:
 
 ## finish_match numa thread de trabalho, com o aviso "processando"; `done(relatório)` na principal.
 func finish_match_async(done: Callable) -> void:
-	if matchday.is_empty() or not run_work(_finish_core, _after_report.bind(done), "Fechando a rodada..."):
-		done.call(finish_match())
+	# Never fall back to mutating the same world on the UI thread while a worker
+	# owns it. A duplicate finish request must not settle a match twice.
+	if is_busy():
+		return
+	if matchday.is_empty():
+		if done.is_valid():
+			done.call({})
+		return
+	run_work(_finish_core, _after_report.bind(done), "Fechando a rodada...")
 
 
 ## Joga a rodada inteira sem assistir (modo instantâneo), numa thread de trabalho.
@@ -600,7 +617,12 @@ func begin_batch() -> void:
 
 
 func end_batch() -> void:
-	_wait_work()
+	# A folha pode sair da árvore durante a simulação. Esperar aqui bloqueava a
+	# interface até acabar a data inteira; no Android isso pode provocar um ANR.
+	if is_busy():
+		_end_batch_pending = true
+		return
+	_end_batch_pending = false
 	if not _batch:
 		return
 	_batch = false
@@ -636,11 +658,18 @@ func sim_step_start() -> bool:
 
 
 func _sim_step_work() -> Dictionary:
-	begin_match()
+	var t0 := Time.get_ticks_usec()
+	_begin_match_core(false)
+	SeasonManager._time("batch_preparar",t0)
+	t0 = Time.get_ticks_usec()
 	var sim := user_sim()
 	if sim != null:
 		sim.run_to_end()
-	return _finish_core()
+	SeasonManager._time("batch_partida",t0)
+	t0 = Time.get_ticks_usec()
+	var report := _finish_core()
+	SeasonManager._time("batch_finalizar",t0)
+	return report
 
 
 ## null enquanto a data ainda roda (ou se nenhuma foi pedida); depois, uma vez, o relatório
@@ -669,6 +698,8 @@ func advance_to_end() -> void:
 
 ## Avança até o fim numa thread de trabalho (o resto do calendário pode ter muitas datas).
 func advance_to_end_async(done: Callable) -> void:
+	if is_busy():
+		return
 	var ok := world != null and world.season != null and matchday.is_empty() and not Store.locked(world)
 	if ok and run_work(_advance_core, _after_advance.bind(done), "Avançando o calendário..."):
 		return
@@ -697,6 +728,8 @@ func end_season() -> Dictionary:
 
 ## Fim de temporada numa thread de trabalho (é a operação mais pesada do jogo).
 func end_season_async(done: Callable) -> void:
+	if is_busy():
+		return
 	if not season_over() or not run_work(_end_season_core, func(r: Variant) -> void:
 			done.call(_after_season(r)), "Encerrando a temporada..."):
 		done.call(end_season() if season_over() else last_summary)

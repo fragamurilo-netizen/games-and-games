@@ -145,21 +145,22 @@ static func suggest(world: GameWorld, club: Club, opp: Club, is_home: bool) -> D
 static func _style_scores(world: GameWorld, club: Club) -> Array:
 	var tac := DatabaseManager.tactics()
 	var out: Array = []
+	var players: Array[Player] = []
 	var sheet := club.sheet
+	if sheet != null:
+		for i in range(1,sheet.starters.size()):
+			var p := world.player(sheet.starters[i])
+			if p != null: players.append(p)
+	# Resolve players and attribute codes once, retaining the original sum order.
 	for st in tac["styles"]:
+		var indices: Array[int] = []
+		for code in st["fit"]: indices.append(DatabaseManager.attr_index(code))
 		var fit_sum := 0.0
-		var n := 0
-		if sheet != null:
-			for i in sheet.starters.size():
-				var p := world.player(sheet.starters[i])
-				if p == null or i == 0:
-					continue
-				var s := 0.0
-				for code in st["fit"]:
-					s += p.attrs[DatabaseManager.attr_index(code)]
-				fit_sum += s / st["fit"].size() - p.ovr_f
-				n += 1
-		out.append(fit_sum / maxf(1.0, n) * 0.5)
+		for p: Player in players:
+			var value := 0.0
+			for index in indices: value += p.attrs[index]
+			fit_sum += value / indices.size() - p.ovr_f
+		out.append(fit_sum / maxf(1.0,players.size()) * 0.5)
 	return out
 
 

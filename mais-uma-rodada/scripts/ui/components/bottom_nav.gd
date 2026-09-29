@@ -32,7 +32,7 @@ func _ready() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size = Vector2(0, UITokens.H_NAV - 8)
 		b.toggle_mode = true
-		b.focus_mode = Control.FOCUS_NONE
+		b.focus_mode = Control.FOCUS_ALL
 		UIKit.press_fx(b, null, 0.92)
 		var tab: String = t[0]
 		b.pressed.connect(func():
@@ -69,11 +69,14 @@ func set_vertical(on: bool) -> void:
 	if on:
 		sb.border_width_top = 0
 		sb.border_width_right = 1
-		sb.content_margin_top = 16
+		sb.content_margin_top = UITokens.S1 if UILayout.viewport.y < 720.0 else 16
 	add_theme_stylebox_override(&"panel", sb)
 	for b: Button in _buttons.values():
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size = Vector2(0, 104 if on else UITokens.H_NAV - 8)
+		# Five 104px items plus the header exceeded a landscape phone's 600px
+		# canvas, pushing the entire shell above the safe area and clipping titles.
+		var rail_height := UITokens.H_BUTTON if UILayout.viewport.y < 560.0 else (UITokens.H_ROW if UILayout.viewport.y < 720.0 else 104)
+		b.custom_minimum_size = Vector2(0, rail_height if on else UITokens.H_NAV - 8)
 	queue_redraw()
 
 

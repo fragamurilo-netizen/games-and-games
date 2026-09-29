@@ -60,9 +60,9 @@ static func send_mission(world: GameWorld, origin: String, group: int, max_age: 
 		if p.club_id >= 0 and TransferManager.asking_price(world, p) > reach:
 			continue
 		# Nível estimado + margem de crescimento para os jovens.
-		var score := float(PlayerRowView.estimate(world, p, p.overall))
+		var score := PlayerAssessment.score(world,p)
 		if p.age(world.year) <= 23:
-			score += maxf(0.0, p.potential_estimate(0.3) - p.overall) * 0.4
+			score += maxf(0.0, 26.0-p.age(world.year)) * 0.5
 		elif p.age(world.year) > 30:
 			score -= (p.age(world.year) - 30) * 1.5
 		cands.append([p, score])

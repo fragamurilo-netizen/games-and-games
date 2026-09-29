@@ -40,7 +40,7 @@ static func make(h1: Color, h2: Color, a1: Color, a2: Color, rit: String, is_nig
 ## Ritual pela competição e pela torcida da casa.
 static func ritual_for(w: GameWorld, comp: String, home: Club) -> String:
 	if comp in ["UCL", "UEL", "UECL"]:
-		return "ucl"
+		return comp.to_lower()
 	if comp in ["LIB", "SUD"]:
 		return "libertad"
 	if home.key == "GER_DOR":
@@ -89,6 +89,13 @@ func _draw() -> void:
 	_ellipse(Vector2(w * 0.5, mid_y), w * 0.16, h * 0.05, Color(1, 1, 1, 0.5))
 	if ritual == "ucl":
 		_starball(Vector2(w * 0.5, mid_y), w * 0.15, h * 0.045)
+	elif ritual in ["uel", "uecl"]:
+		var accent: Color = ScoreboardTheme.for_competition(null, ritual.to_upper())["accent"]
+		var center := Vector2(w * 0.5, mid_y)
+		_ellipse(center, w * 0.15, h * 0.045, UIColors.SURFACE)
+		for side in [-1, 1]:
+			var x: float = center.x + side * w * 0.05
+			draw_colored_polygon(PackedVector2Array([Vector2(x, mid_y - h * 0.025), Vector2(x + side * w * 0.06, mid_y), Vector2(x, mid_y + h * 0.025), Vector2(x - side * w * 0.02, mid_y)]), accent)
 	# Túnel
 	var tun := Vector2(w * 0.5, h - 6.0)
 	draw_rect(Rect2(tun.x - 46, tun.y - 34, 92, 40), Color(0.05, 0.05, 0.06))
@@ -120,9 +127,8 @@ func _draw() -> void:
 	if caption != "":
 		var f := get_theme_default_font()
 		var fs := 20
-		var tw2 := f.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_rect(Rect2(w * 0.5 - tw2 * 0.5 - 12, h - 70, tw2 + 24, 34), Color(0, 0, 0, 0.6))
-		draw_string(f, Vector2(w * 0.5 - tw2 * 0.5, h - 46), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
+		draw_rect(Rect2(UITokens.S3, h - 84, w - UITokens.S3 * 2, 66), Color(0, 0, 0, 0.6))
+		draw_multiline_string(f, Vector2(UITokens.S4, h - 60), caption, HORIZONTAL_ALIGNMENT_CENTER, w - UITokens.S4 * 2, fs, 2, Color.WHITE)
 
 
 func _stands(r: Rect2) -> void:

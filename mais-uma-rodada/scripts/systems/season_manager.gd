@@ -99,7 +99,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
-	return out
+	return LeaguePhase.extend_calendar(out)
 
 
 ## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
@@ -290,7 +290,7 @@ static func goal_of(world: GameWorld, club_id: int) -> Array:
 ## Prepara a data atual: contexto e sementes de todos os jogos. A partida do usuário volta viva
 ## (MatchSimulation detalhada); as demais ficam na fila do modo rápido (run_entry).
 ## Retorna {"day", "entries": [{f, seed, ctx, sim}], "user": entrada do usuário ou {}, "notes"}.
-static func begin_matchday(world: GameWorld) -> Dictionary:
+static func begin_matchday(world: GameWorld, with_detail: bool = true) -> Dictionary:
 	var md := {"day": world.season.day, "entries": [], "user": {}, "notes": []}
 	for f: Fixture in world.season.fixtures_at(world.season.day):
 		if not f.played and (world.is_user_club(f.home) or world.is_user_club(f.away)):
@@ -308,7 +308,9 @@ static func begin_matchday(world: GameWorld) -> Dictionary:
 			var hs := _sheet_for(world, home, away, true, md)
 			var as_ := _sheet_for(world, away, home, false, md)
 			var sim := MatchSimulation.new()
-			sim.setup(world, home, away, hs, as_, entry["ctx"], entry["seed"], true)
+			# Instant/batch simulation keeps the same match model and tactical analysis,
+			# but does not allocate commentary and pitch-animation events nobody sees.
+			sim.setup(world, home, away, hs, as_, entry["ctx"], entry["seed"], with_detail)
 			entry["sim"] = sim
 			md["user"] = entry
 		md["entries"].append(entry)
@@ -335,9 +337,12 @@ static func run_entry(world: GameWorld, entry: Dictionary) -> void:
 	var f: Fixture = entry["f"]
 	var home := world.club(f.home)
 	var away := world.club(f.away)
+	var mark := Time.get_ticks_usec()
 	var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
 	var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+	mark = _time("ai_escalacao",mark)
 	entry["res"] = QuickMatch.play(world, home, away, hs, as_, entry["ctx"], entry["seed"])
+	_time("ai_partida",mark)
 
 
 static func entry_done(entry: Dictionary) -> bool:
@@ -549,7 +554,7 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			league.table[f.away]["yc"] += int(yc[1])
 			league.table[f.away]["rc"] += int(rc[1])
 	elif world.league(f.comp) == null:
-		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
+		CupManager.apply_result(world, f, res) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
 	FootballMemory.on_match(world, f)
 	Referees.record(world, res)
 	var derby := bool(res.get("derby", false))
@@ -1140,7 +1145,7 @@ static func _stage_reached(cup: Cup, club_id: int) -> String:
 		if int(t["a"]) == club_id or int(t["b"]) == club_id:
 			best = maxi(best, int(t["r"]))
 	if best < 0:
-		return "Fase de grupos" if not cup.groups.is_empty() else "Primeira fase"
+		return "Fase de liga" if cup.league_phase else ("Fase de grupos" if not cup.groups.is_empty() else "Primeira fase")
 	return cup.round_names[best]
 
 

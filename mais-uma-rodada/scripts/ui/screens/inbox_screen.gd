@@ -267,7 +267,7 @@ static func message_view(w: GameWorld, m: Dictionary, on_change: Callable, in_sh
 		var pc := w.club(p.club_id)
 		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), Pos.name_of(p.position), pc.short_name if pc != null else "sem clube"], "Small", true))
 		pr.add_child(col)
-		pr.add_child(UIKit.badge(p.overall))
+		pr.add_child(UIKit.player_stars(w,p,15))
 		var pcard := UIKit.card("CardInset", 0)
 		pcard.add_child(pr)
 		v.add_child(UIKit.card_panel(pcard))

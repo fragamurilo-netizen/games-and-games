@@ -126,11 +126,11 @@ static func estimate(world: GameWorld, p: Player) -> int:
 
 ## Estrelas (0,5 a 5, de meia em meia) do potencial estimado.
 static func potential_stars(world: GameWorld, p: Player) -> float:
-	return clampf(snappedf((estimate(world, p) - 46.0) / 9.0, 0.5), 0.5, 5.0)
+	return PlayerAssessment.stars(world,p,-1,true)
 
 
 static func potential_label_of(world: GameWorld, p: Player) -> String:
-	return Player.potential_label(estimate(world, p))
+	return PlayerAssessment.summary(world,p,true)
 
 
 ## Quão confiável é a avaliação.
@@ -242,7 +242,8 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 	p.wage = 0
 	p.contract_end = world.year
 	p.joined_year = world.year
-	if p.nationality == club.nation and rng.randf() < float(reg["home"]) and not ClubPolicy.of(club).has("only"):
+	NationalityManager.sync_residence(world, p)
+	if NationalityManager.birth_country(p) == club.nation and rng.randf() < float(reg["home"]) and not ClubPolicy.of(club).has("only"):
 		p.hometown = club.city
 	HeartClubs.assign_academy_kid(world, p, club)
 	Valuation.update_value(p, world.year)
@@ -281,7 +282,8 @@ static func run_trial(world: GameWorld) -> Array:
 	for _i in n:
 		var kid := _new_kid(world, club, world.rng.randi_range(MIN_AGE, 17), used, -4.5, 5.5, 1.0)
 		world.academy.erase(kid.id) # só entra se for aprovado
-		kid.hometown = club.city if world.rng.randf() < 0.7 else kid.hometown
+		if NationalityManager.birth_country(kid) == club.nation and world.rng.randf() < 0.7:
+			kid.hometown = club.city
 		HeartClubs.assign_academy_kid(world, kid, club)
 		cands.append(kid.to_dict())
 	s["cands"] = cands

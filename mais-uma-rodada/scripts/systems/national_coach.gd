@@ -259,6 +259,10 @@ static func has_offer(world: GameWorld, code: String) -> bool:
 
 ## Assume a seleção (convite aceito ou escolha no início da carreira).
 static func accept(world: GameWorld, code: String, quiet: bool = false) -> void:
+	if not quiet and not has_offer(world, code):
+		return
+	if not DatabaseManager.nations().has(code):
+		return
 	var st := state(world)
 	if String(st.get("nation", "")) != "":
 		_close(world, "Saiu para a %s" % DatabaseManager.nation_name(code))
@@ -328,7 +332,7 @@ static func _fire(world: GameWorld, why: String) -> void:
 static func eligible(world: GameWorld, code: String) -> Array:
 	var out: Array = []
 	for p: Player in world.players.values():
-		if p.nationality == code and p.club_id >= 0 and not p.retiring:
+		if NationalityManager.team(p) == code and p.club_id >= 0 and not p.retiring:
 			out.append(p)
 	out.sort_custom(func(a, b): return a.ovr_f > b.ovr_f or (a.ovr_f == b.ovr_f and a.id < b.id))
 	return out
@@ -340,7 +344,7 @@ static func current_list(world: GameWorld) -> Array:
 	var out: Array = []
 	for pid in state(world).get("list", []):
 		var p := world.player(int(pid))
-		if p != null and p.nationality == code and p.club_id >= 0:
+		if p != null and NationalityManager.team(p) == code and p.club_id >= 0:
 			out.append(p)
 	return out
 

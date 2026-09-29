@@ -187,7 +187,7 @@ func refresh() -> void:
 	card4.add_child(UIKit.section("Sobre"))
 	card4.add_child(UIKit.label("Mais Uma Rodada · versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "H3"))
 	card4.add_child(UIKit.label("Clubes, estádios e ligas usam os nomes reais apenas como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
-	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
+	card4.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fonte Saira, de Héctor Gatti e Omnibus-Type, sob a SIL Open Font License 1.1. Escudos, uniformes, rostos e sons são gerados pelo próprio jogo.", "Small", true))
 	card4.add_child(UIKit.label("Tudo roda offline e o jogo não coleta dados. As compras são processadas pela Google Play.", "Small", true))
 	tabs["about"].append(UIKit.card_panel(card4))
 	cards = tabs.get(_tab, tabs["game"])
