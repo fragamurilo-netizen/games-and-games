@@ -1,0 +1,32 @@
+name: Realism development workspace
+on:
+  push:
+    branches: [codex/realism-data-0.5.1-20260929]
+    paths: [.github/workflows/realism-workspace.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Archive inspected sources and validation engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p workspace-artifact
+          git archive --format=tar.gz 6e3f472d6532090e73d799c1f0f6c221e97c0ec7 mais-uma-rodada docs/DEPTH-0.5.0.md > workspace-artifact/depth-source.tar.gz
+          git archive --format=tar.gz c947406abd2a91353a653ca4b37918874764b2ea mais-uma-rodada > workspace-artifact/upstream-source.tar.gz
+          git diff --binary 4f90c3eec4c4cc891f6e4d9710bf7a681742a838 c947406abd2a91353a653ca4b37918874764b2ea -- mais-uma-rodada > workspace-artifact/upstream-changes.patch
+          git log --format='%h %s' 4f90c3eec4c4cc891f6e4d9710bf7a681742a838..c947406abd2a91353a653ca4b37918874764b2ea > workspace-artifact/upstream-commits.txt
+          docker run --rm -v "$PWD/workspace-artifact:/output" barichello/godot-ci:4.7 bash -lc 'cp "$(command -v godot)" /output/godot; chmod +x /output/godot; godot --version > /output/engine.txt'
+          sha256sum workspace-artifact/* > workspace-artifact/checksums.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: realism-dev-workspace
+          path: workspace-artifact/
+          retention-days: 2
