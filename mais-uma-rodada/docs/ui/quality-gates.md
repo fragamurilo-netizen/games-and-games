@@ -59,11 +59,12 @@ clube de nome comprido, lesão, suspensão, folha estourada).
   jogador ao lado na tela larga e em folha no celular (com "Descartar relatório").
 - **Folha de treino individual**: resumo com carga, foco, estilo e posição em linhas; cada uma
   abre a lista de opções dentro da própria folha, com volta. Sem grades de chips.
+- **Foco de teclado**: botões, chips, abas e linhas tocáveis aceitam foco; o contorno é azul
+  (info), 3 px, afastado 4 px (giz sumiria no botão principal). Toque e clique soltam o foco
+  (`main.gd`), então o contorno só aparece navegando por teclado ou controle.
 
 ## Pendente
 
-- Foco visível por teclado nos botões (hoje só nos campos de texto): o Godot não separa foco
-  de toque e de teclado; precisa de um controle no `main.gd`.
 - `tools/match_shots.gd` termina com erros de script ao fechar ("lock" em nulo, "main" liberado):
   a ferramenta sai enquanto a rodada ainda fecha na thread. Já acontecia antes da UI 2.0; a
   captura "fim" sai preta pelo mesmo motivo.

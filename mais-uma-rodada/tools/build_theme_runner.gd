@@ -92,7 +92,20 @@ func _button_states(th: Theme, name: String, normal: StyleBox, hover: StyleBox, 
 	th.set_stylebox(&"pressed", name, pressed)
 	th.set_stylebox(&"hover_pressed", name, pressed)
 	th.set_stylebox(&"disabled", name, disabled)
-	th.set_stylebox(&"focus", name, StyleBoxEmpty.new())
+	th.set_stylebox(&"focus", name, _focus_ring())
+
+
+## Contorno de foco (teclado/controle): filete azul (info) de 3 px, afastado do botão; giz
+## sumiria no botão principal, que é de giz. O toque não deixa foco
+## em botão (main.gd solta o foco depois do clique), então isto só aparece navegando por teclas.
+func _focus_ring() -> StyleBoxFlat:
+	var f := StyleBoxFlat.new()
+	f.draw_center = false
+	f.border_color = UIColors.BLUE
+	f.set_border_width_all(3)
+	f.set_corner_radius_all(UITokens.R_SM)
+	f.set_expand_margin_all(4)
+	return f
 
 
 func _button_colors(th: Theme, name: String, fg: Color, pressed_fg: Color) -> void:
@@ -309,7 +322,7 @@ func _inputs(th: Theme) -> void:
 	th.set_color(&"font_focus_color", "CheckButton", UIColors.TEXT)
 	for st in [&"normal", &"hover", &"pressed", &"hover_pressed"]:
 		th.set_stylebox(st, "CheckButton", sb(Color(0, 0, 0, 0), 12, Color(0, 0, 0, 0), 0, 6, 10))
-	th.set_stylebox(&"focus", "CheckButton", StyleBoxEmpty.new())
+	th.set_stylebox(&"focus", "CheckButton", _focus_ring())
 	# Slider
 	var track := sb(UIColors.SURFACE_3, 6, Color(0, 0, 0, 0), 0, 0, 5)
 	th.set_stylebox(&"slider", "HSlider", track)
@@ -317,7 +330,7 @@ func _inputs(th: Theme) -> void:
 	th.set_stylebox(&"grabber_area", "HSlider", fill)
 	th.set_stylebox(&"grabber_area_highlight", "HSlider", fill)
 	th.set_stylebox(&"focus", "HSlider", StyleBoxEmpty.new())
-	th.set_stylebox(&"focus", "OptionButton", StyleBoxEmpty.new())
+	th.set_stylebox(&"focus", "OptionButton", _focus_ring())
 	# Barra de progresso
 	th.set_stylebox(&"background", "ProgressBar", sb(UIColors.SURFACE_3, 6, Color(0, 0, 0, 0), 0, 0, 0))
 	th.set_stylebox(&"fill", "ProgressBar", sb(UIColors.GREEN, 6, Color(0, 0, 0, 0), 0, 0, 0))

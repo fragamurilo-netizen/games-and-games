@@ -329,6 +329,19 @@ func _redraw_all(n: Node) -> void:
 		_redraw_all(child)
 
 
+## Toque e clique não deixam foco em botão (o contorno de foco é só para teclado e controle).
+func _input(event: InputEvent) -> void:
+	var tap: bool = (event is InputEventMouseButton and not event.pressed) or (event is InputEventScreenTouch and not event.pressed)
+	if tap:
+		_drop_button_focus.call_deferred()
+
+
+func _drop_button_focus() -> void:
+	var f := get_viewport().gui_get_focus_owner()
+	if f is BaseButton:
+		f.release_focus()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel"):
 		UIManager.handle_back()

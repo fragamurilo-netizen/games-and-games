@@ -347,6 +347,13 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					TrainingManager.set_style_target(yp, String(e["k"]))
 					break
 			TrainingSheet.open(yp, Callable(), "st" if kind == "training_st" else "")
+		"focus":
+			# Contorno de foco de teclado: o primeiro botão visível da tela recebe foco.
+			for b in _screen().find_children("*", "Button", true, false):
+				if (b as Button).is_visible_in_tree() and (b as Button).focus_mode != Control.FOCUS_NONE:
+					(b as Button).grab_focus()
+					print("[tela] foco em: ", (b as Button).text, " ", (b as Button).theme_type_variation, " dono=", _screen().get_viewport().gui_get_focus_owner())
+					break
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
 		"buy_cond", "buy_terms", "buy_loan":
