@@ -4,6 +4,8 @@ extends MarginContainer
 ## `refresh()` é chamado sempre que a aba fica visível.
 
 var body: VBoxContainer
+## Nome da aba, já exibido na placa do cabeçalho.
+var tab_label:=""
 var feedback:=""
 var _working:=false
 
@@ -32,18 +34,26 @@ func refresh() -> void:
 	for c in body.get_children():
 		body.remove_child(c)
 		c.queue_free()
-	add_heading(title())
+	if title().to_upper()!=tab_label.to_upper():add_heading(title())
 	if not feedback.is_empty():add_text(feedback,Tokens.MUTED)
 	build()
 
 
+## Cabeçalho de seção em faixa inclinada com entalhe vermelho (Undisputed 3).
 func add_heading(text: String) -> Label:
+	var bar := PanelContainer.new()
+	var box := Tokens.slanted_box(Tokens.SURFACE, 60)
+	box.border_width_left = 10
+	box.border_color = Tokens.FIGHT_RED
+	box.content_margin_left += Tokens.SPACE_S
+	bar.add_theme_stylebox_override("panel", box)
 	var l := Label.new()
-	l.text = text
+	l.text = text.to_upper()
 	l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", Tokens.FONT_TITLE)
-	l.add_theme_font_override("font",Tokens.DISPLAY_FONT)
-	body.add_child(l)
+	l.add_theme_font_size_override("font_size", 34)
+	l.add_theme_font_override("font",Tokens.italic_font())
+	bar.add_child(l)
+	body.add_child(bar)
 	return l
 
 
@@ -62,7 +72,9 @@ func add_todo(text: String) -> void:
 
 func add_button(text: String, callback: Callable) -> Button:
 	var button:=Button.new()
-	button.text=text;button.custom_minimum_size.y=Tokens.TOUCH_MIN
+	# Itens de menu em caixa alta, alinhados à esquerda como em Undisputed 3.
+	button.text=text.to_upper();button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size.y=Tokens.TOUCH_MIN
 	button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	button.pressed.connect(callback);body.add_child(button)
 	return button

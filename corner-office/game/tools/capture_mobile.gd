@@ -19,9 +19,10 @@ func _capture() -> void:
 			await RenderingServer.frame_post_draw
 			var path: String=output+"/%s-%dx%d.png"%[screen,view.x,view.y]
 			root.get_texture().get_image().save_png(path)
-	root.size=Vector2i(720,1280);root.content_scale_size=Vector2i(720,1280)
 	var menu: Control=load("res://ui/game_menu.gd").new();menu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);root.add_child(menu)
-	for i in 3:await process_frame
-	await RenderingServer.frame_post_draw
-	root.get_texture().get_image().save_png(output+"/main-menu-720x1280.png")
+	for view in [Vector2i(720,1280),Vector2i(1280,720)]:
+		root.size=view;root.content_scale_size=view
+		for i in 3:await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(output+"/main-menu-%dx%d.png"%[view.x,view.y])
 	print("NATIVE CAPTURES "+output);quit()
