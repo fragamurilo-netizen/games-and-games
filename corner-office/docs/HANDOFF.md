@@ -136,6 +136,15 @@ Pedidos: "estilos de luta reais + um número massivo de animações" e "muitos c
 - **Aparência:** `identity.js` ganhou 26 cabelos e 14 barbas (`novo:2`) e 20 tipos de corpo (`BODY_TYPES`, com `arms`, `neck`, `traps`, `belly` além dos parâmetros antigos); `studio.js` e `renderer.js` desenham os novos parâmetros.
 - **Catálogo para o gerador:** `game/content/appearance_catalog.json`, gerado por `node tools/build_appearance_catalog.cjs` a partir de `identity.js` (82 cabelos, 33 barbas, 20 corpos, 15 populações). Cada tipo de corpo traz `generator_body_type` (lean/athletic/compact/muscular/heavy do gerador) e afinidade por categoria de peso. O CI regenera e confere o diff.
 
+## Dano realista nas lutas (Claude, 30/09/2026)
+
+Pedido: "deixar o dano nos personagens muito mais realista nas lutas". Só apresentação; resultados não mudam.
+
+- `replay.js → woundMarks` cria um ferimento por golpe registrado: a gravidade é o delta de `damage`/`cuts` que o motor gravou naquele evento; posição e lado vêm de hashes fixos (lado do membro que bateu). Chutes bloqueados marcam o antebraço. `sample()` devolve `wounds` até o instante atual.
+- `renderer.js`: o rosto ganha inchaço e olho roxo por lado (o olho fecha com castigo pesado), vermelhidão, galo na testa, lábio partido, sangramento nasal, cortes com sangue escorrendo aos poucos, e suor. Corpo e perna ganham manchas que nascem vermelhas e escurecem em hematoma, agrupadas por região (fígado/costelas, coxa, panturrilha). Também: sangue pingando no peito, luvas sujas de sangue de quem bate num corte, respingos de suor/sangue no golpe limpo, balanço quando abalado, respiração pesada com pouco gás.
+- A escala visual segue a faixa real do motor (dano de cabeça ~0–0,3 numa luta inteira); os limites antigos (>0,35) quase nunca apareciam.
+- Testes: `presentation.cjs` confere que ferimentos só vêm de dano/corte registrados, somam no máximo o dano final, acumulam e são determinísticos. O teste Godot de sangue agora escolhe um replay simulado que tenha corte.
+
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.
