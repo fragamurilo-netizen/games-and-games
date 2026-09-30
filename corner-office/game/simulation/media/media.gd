@@ -179,7 +179,9 @@ func event_report(world: WorldState, ev: FightEvent) -> NewsItem:
 		recap.headline = str(template.event_completed).format({"event": ev.name})
 		recap.body = str(template.event_body).format({"bouts": ev.fight_ids.size(), "revenue": _number(int(ev.actual.revenue)), "margin": _number(int(ev.actual.margin))})
 		recap.reach = int(outlet(recap.outlet_id).get("reach", 40))
-	cover_event(world, ev)
+		# Cobertura uma vez por noite: os cartéis mudam depois e uma segunda
+		# leitura geraria marcos (invicto, sequência) que não eram fato na data.
+		cover_event(world, ev)
 	return recap
 
 

@@ -28,7 +28,7 @@ static func _migrate_v2_to_v3(data: Dictionary) -> Dictionary:
 			f["history"] = {"results": [], "streak": 0}
 		if not f.has("last_fight_on"):
 			f["last_fight_on"] = {}
-	return data
+	return _backfill_progression(data)
 
 
 ## v2: todo atleta passa a ter agência (Game Bible §9). Mesma regra pública de
@@ -52,7 +52,7 @@ static func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
 		if not clients.has(id):
 			clients.append(id)
 		agents[agent_id].client_ids = clients
-	return data
+	return _backfill_progression(data)
 
 
 static func slot_path(slot: String) -> String:
@@ -111,10 +111,11 @@ static func migrate(data: Dictionary) -> Variant:
 	return data
 
 
-## v2: passagem do tempo e progressão (idade, propostas rivais, reputação
+## Passagem do tempo e progressão (idade, propostas rivais, reputação
 ## fracionária, metas de temporada). Campos novos entram com o valor padrão;
+## idempotente: roda na v1→v2 e na v2→v3 (saves v2 de ramos paralelos).
 ## a reputação exata parte da inteira e as metas nascem no próximo dia.
-static func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
+static func _backfill_progression(data: Dictionary) -> Dictionary:
 	for f: Dictionary in data.get("fighters", {}).values():
 		for key: String in ["retired_on", "rival_interest"]:
 			if not f.has(key): f[key] = {}
