@@ -524,8 +524,10 @@ func live_score(entry: Dictionary, minute: int, half: int) -> Array:
 	return [hs, as_]
 
 
+## O que sobrou da fila roda de uma vez, com os jogos da IA em paralelo.
 func _wait_ai() -> void:
-	pump_ai(1e9)
+	SeasonManager.run_entries(world, _ai_queue)
+	_ai_queue.clear()
 
 
 func ai_ready() -> bool:

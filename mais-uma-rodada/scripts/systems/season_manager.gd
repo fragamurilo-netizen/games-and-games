@@ -325,6 +325,67 @@ static func _sheet_for(world: GameWorld, club: Club, opp: Club, home: bool, md: 
 
 
 ## Roda uma entrada ainda não simulada: modo rápido para IA × IA; minuto a minuto para o usuário.
+## Jogos da IA em paralelo (vários núcleos). false = um por um, como antes (comparação em testes).
+static var parallel := false  # LIGAR só depois do teste de igualdade (ver docs/HANDOFF.md)
+## Abaixo disso não compensa abrir threads.
+const PARALLEL_MIN := 12
+
+
+## Joga todas as partidas ainda sem resultado da data. As escalações da IA são montadas uma a
+## uma, na mesma ordem de sempre (mexem nos clubes e em caches do mundo); só as partidas rápidas,
+## que leem o mundo e sorteiam com a semente do próprio jogo, rodam em paralelo. O resultado é
+## idêntico ao de rodar em sequência (conferido em tests: "simulação paralela").
+static func run_entries(world: GameWorld, entries: Array) -> void:
+	var quick: Array = []
+	for e in entries:
+		if not e["res"].is_empty():
+			continue
+		if e["sim"] != null:
+			run_entry(world, e)
+			continue
+		quick.append(e)
+	var cores := mini(4, OS.get_processor_count() - 1)
+	if not parallel or quick.size() < PARALLEL_MIN or cores < 2:
+		for e in quick:
+			run_entry(world, e)
+		return
+	var mark := Time.get_ticks_usec()
+	for e in quick:
+		var f: Fixture = e["f"]
+		var home := world.club(f.home)
+		var away := world.club(f.away)
+		var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
+		var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+		e["_hs"] = hs
+		e["_as"] = as_
+		# Caches preguiçosos preenchidos aqui, na thread atual: nas threads só há leitura.
+		QuickMatch._tactics(hs)
+		QuickMatch._tactics(as_)
+		Referees.factors(world, Array(e["ctx"].get("ref", [])))
+		LeagueCulture.for_match(world, String(e["ctx"].get("competition", "")), home)
+	mark = _time("ai_escalacao", mark)
+	var threads: Array[Thread] = []
+	for t in cores:
+		var th := Thread.new()
+		th.start(_play_slice.bind(world, quick, t, cores))
+		threads.append(th)
+	for th in threads:
+		th.wait_to_finish()
+	for e in quick:
+		e.erase("_hs")
+		e.erase("_as")
+	_time("ai_partida", mark)
+
+
+static func _play_slice(world: GameWorld, quick: Array, first: int, step: int) -> void:
+	var i := first
+	while i < quick.size():
+		var e: Dictionary = quick[i]
+		var f: Fixture = e["f"]
+		e["res"] = QuickMatch.play(world, world.club(f.home), world.club(f.away), e["_hs"], e["_as"], e["ctx"], e["seed"])
+		i += step
+
+
 static func run_entry(world: GameWorld, entry: Dictionary) -> void:
 	if not entry["res"].is_empty():
 		return
@@ -352,8 +413,7 @@ static func entry_done(entry: Dictionary) -> bool:
 ## Aplica tudo o que aconteceu na data e avança o calendário. Retorna um relatório para a UI.
 static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var tt := Time.get_ticks_usec()
-	for e in md["entries"]:
-		run_entry(world, e)
+	run_entries(world, md["entries"])
 	# Raio-X tático do jogo do usuário (o minuto a minuto registrou corredores e contexto)
 	var ue: Dictionary = md.get("user", {})
 	if not ue.is_empty() and ue.get("sim", null) != null:
@@ -394,11 +454,15 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			var home := world.club(f.home)
 			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
-	WeeklyAwards.after_matchday(world, md, slot)
-	ClubEvents.after_matchday(world, slot)
-	NextGen.after_matchday(world, slot)
-	FootballMemory.after_matchday(world, md["entries"])
 	tt = _time("aplicar", tt)
+	WeeklyAwards.after_matchday(world, md, slot)
+	tt = _time("aplicar_premios", tt)
+	ClubEvents.after_matchday(world, slot)
+	tt = _time("aplicar_eventos", tt)
+	NextGen.after_matchday(world, slot)
+	tt = _time("aplicar_nextgen", tt)
+	FootballMemory.after_matchday(world, md["entries"])
+	tt = _time("aplicar_memoria", tt)
 	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube
 	var sus := world.suspended()
 	for pid in sus.keys():
@@ -681,9 +745,7 @@ static func play_matchday_instant(world: GameWorld) -> Dictionary:
 	var tt := Time.get_ticks_usec()
 	var md := begin_matchday(world)
 	_time("preparar", tt)
-	for e in md["entries"]:
-		run_entry(world, e)
-	return finish_matchday(world, md)
+	return finish_matchday(world, md) # finish_matchday joga as partidas (em paralelo)
 
 
 ## O usuário joga na data atual?

@@ -31,7 +31,10 @@ func _ready() -> void:
 			sim.run_to_end()
 		var t3 := Time.get_ticks_usec()
 		var ta := Time.get_ticks_usec()
-		for e in GameManager._ai_queue:
+		if OS.get_environment("SIM_SEQ") == "":
+			# Mesmo caminho do jogo: escalações em sequência, partidas em paralelo.
+			SeasonManager.run_entries(w, GameManager._ai_queue)
+		for e in GameManager._ai_queue if OS.get_environment("SIM_SEQ") != "" else []:
 			var f: Fixture = e["f"]
 			var hc := w.club(f.home)
 			var ac := w.club(f.away)
