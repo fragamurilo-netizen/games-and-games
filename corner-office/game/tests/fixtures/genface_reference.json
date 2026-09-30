@@ -1,0 +1,358 @@
+[
+ {
+  "seed": 1,
+  "pop": "misto",
+  "sex": "m",
+  "face": {
+   "v": 1,
+   "seed": 994822,
+   "pop": "caucaso",
+   "sex": "m",
+   "age": 25,
+   "build": 0.48878831742331386,
+   "skin": "t02",
+   "head": {
+    "shape": "quadrado",
+    "width": -0.1,
+    "jaw": -0.3,
+    "chin": -0.4
+   },
+   "eyes": {
+    "shape": "amendoado",
+    "iris": "escuro"
+   },
+   "brows": {
+    "shape": "reta"
+   },
+   "nose": {
+    "shape": "reto",
+    "broken": 0.2
+   },
+   "mouth": {
+    "shape": "fina"
+   },
+   "ears": {
+    "shape": "normal",
+    "cauli": 0
+   },
+   "hair": {
+    "style": "volumoso",
+    "color": "castanho_escuro"
+   },
+   "beard": {
+    "style": "nenhuma",
+    "color": null
+   },
+   "marks": [],
+   "recede": 0.6,
+   "body": {
+    "muscle": 0.58,
+    "fat": 0.11,
+    "hair": 0,
+    "height": 0.55
+   },
+   "kit": {
+    "shorts": "branco",
+    "gloves": "preto"
+   }
+  }
+ },
+ {
+  "seed": 42,
+  "pop": "latino",
+  "sex": "m",
+  "face": {
+   "v": 1,
+   "seed": 249923,
+   "pop": "latino",
+   "sex": "m",
+   "age": 31,
+   "build": 0.7457375649828464,
+   "skin": "t08",
+   "head": {
+    "shape": "oval",
+    "width": -0.4,
+    "jaw": 0,
+    "chin": 0.2
+   },
+   "eyes": {
+    "shape": "redondo",
+    "iris": "escuro"
+   },
+   "brows": {
+    "shape": "arqueada"
+   },
+   "nose": {
+    "shape": "romano",
+    "broken": 0.5
+   },
+   "mouth": {
+    "shape": "neutra"
+   },
+   "ears": {
+    "shape": "normal",
+    "cauli": 1
+   },
+   "hair": {
+    "style": "quiff",
+    "color": "castanho_escuro"
+   },
+   "beard": {
+    "style": "por_fazer",
+    "color": null
+   },
+   "marks": [
+    "lip"
+   ],
+   "recede": 0.5,
+   "body": {
+    "muscle": 0.69,
+    "fat": 0.06,
+    "hair": 0.84,
+    "height": 0.49
+   },
+   "kit": {
+    "shorts": "verde",
+    "gloves": "preto"
+   }
+  }
+ },
+ {
+  "seed": 777,
+  "pop": "caucaso",
+  "sex": "m",
+  "face": {
+   "v": 1,
+   "seed": 703472,
+   "pop": "caucaso",
+   "sex": "m",
+   "age": 30,
+   "build": 0.13781153480522335,
+   "skin": "t04",
+   "head": {
+    "shape": "oval",
+    "width": 0.1,
+    "jaw": 0.5,
+    "chin": 0
+   },
+   "eyes": {
+    "shape": "profundo",
+    "iris": "cinza"
+   },
+   "brows": {
+    "shape": "espessa"
+   },
+   "nose": {
+    "shape": "achatado",
+    "broken": 0.3
+   },
+   "mouth": {
+    "shape": "fina"
+   },
+   "ears": {
+    "shape": "pequena",
+    "cauli": 0
+   },
+   "hair": {
+    "style": "maquina",
+    "color": "preto"
+   },
+   "beard": {
+    "style": "cheia_longa",
+    "color": null
+   },
+   "marks": [
+    "nose"
+   ],
+   "recede": 0.4,
+   "body": {
+    "muscle": 0.78,
+    "fat": 0.06,
+    "hair": 0,
+    "height": 0.03
+   },
+   "kit": {
+    "shorts": "preto",
+    "gloves": "preto"
+   }
+  }
+ },
+ {
+  "seed": 2027,
+  "pop": "afro_diaspora",
+  "sex": "f",
+  "face": {
+   "v": 1,
+   "seed": 645076,
+   "pop": "afro_diaspora",
+   "sex": "f",
+   "age": 31,
+   "build": 0.6630088747479022,
+   "skin": "t15",
+   "head": {
+    "shape": "diamante",
+    "width": -0.1,
+    "jaw": -0.4,
+    "chin": 0.2
+   },
+   "eyes": {
+    "shape": "profundo",
+    "iris": "castanho"
+   },
+   "brows": {
+    "shape": "espessa"
+   },
+   "nose": {
+    "shape": "reto",
+    "broken": 0
+   },
+   "mouth": {
+    "shape": "carnuda"
+   },
+   "ears": {
+    "shape": "normal",
+    "cauli": 0
+   },
+   "hair": {
+    "style": "black_power",
+    "color": "preto"
+   },
+   "beard": {
+    "style": "nenhuma",
+    "color": null
+   },
+   "marks": [],
+   "recede": 0,
+   "body": {
+    "muscle": 0.69,
+    "fat": 0.24,
+    "hair": 0,
+    "height": 0.13
+   },
+   "kit": {
+    "shorts": "preto",
+    "gloves": "preto"
+   }
+  }
+ },
+ {
+  "seed": 123456,
+  "pop": "leste_asiatico",
+  "sex": "f",
+  "face": {
+   "v": 1,
+   "seed": 313410,
+   "pop": "leste_asiatico",
+   "sex": "f",
+   "age": 28,
+   "build": 0.30938898655585945,
+   "skin": "t03",
+   "head": {
+    "shape": "oval",
+    "width": -0.2,
+    "jaw": 0.4,
+    "chin": 0.4
+   },
+   "eyes": {
+    "shape": "pequeno",
+    "iris": "castanho"
+   },
+   "brows": {
+    "shape": "baixa"
+   },
+   "nose": {
+    "shape": "botao",
+    "broken": 0.8
+   },
+   "mouth": {
+    "shape": "neutra"
+   },
+   "ears": {
+    "shape": "abano",
+    "cauli": 0
+   },
+   "hair": {
+    "style": "cogumelo",
+    "color": "castanho_escuro"
+   },
+   "beard": {
+    "style": "nenhuma",
+    "color": null
+   },
+   "marks": [
+    "brow_r"
+   ],
+   "recede": 0,
+   "body": {
+    "muscle": 0.9,
+    "fat": 0.13,
+    "hair": 0,
+    "height": 0.89
+   },
+   "kit": {
+    "shorts": "vermelho",
+    "gloves": "preto"
+   }
+  }
+ },
+ {
+  "seed": 99,
+  "pop": "europa_norte",
+  "sex": "m",
+  "face": {
+   "v": 1,
+   "seed": 64387,
+   "pop": "europa_norte",
+   "sex": "m",
+   "age": 23,
+   "build": 0.7264174856245518,
+   "skin": "t01",
+   "head": {
+    "shape": "oval",
+    "width": -0.4,
+    "jaw": -0.1,
+    "chin": 0.3
+   },
+   "eyes": {
+    "shape": "amendoado",
+    "iris": "azul"
+   },
+   "brows": {
+    "shape": "arqueada"
+   },
+   "nose": {
+    "shape": "fino",
+    "broken": 0
+   },
+   "mouth": {
+    "shape": "pequena"
+   },
+   "ears": {
+    "shape": "grande",
+    "cauli": 0
+   },
+   "hair": {
+    "style": "mullet",
+    "color": "castanho"
+   },
+   "beard": {
+    "style": "nenhuma",
+    "color": null
+   },
+   "marks": [
+    "pinta_bochecha"
+   ],
+   "recede": 0.2,
+   "body": {
+    "muscle": 0.88,
+    "fat": 0.11,
+    "hair": 0,
+    "height": 0.69
+   },
+   "kit": {
+    "shorts": "vermelho",
+    "gloves": "preto"
+   }
+  }
+ }
+]
