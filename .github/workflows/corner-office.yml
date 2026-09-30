@@ -5,6 +5,7 @@ on:
     paths: ["corner-office/**", ".github/workflows/corner-office.yml"]
   pull_request:
     paths: ["corner-office/**", ".github/workflows/corner-office.yml"]
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -105,7 +106,7 @@ jobs:
           retention-days: 14
       - name: Commit test APK to the branch
         # Test builds for device QA land in corner-office/releases/ on claude/* branches.
-        if: github.event_name == 'push' && startsWith(github.ref_name, 'claude/')
+        if: github.event_name != 'pull_request' && startsWith(github.ref_name, 'claude/')
         run: |
           VERSION=$(sed -n 's/^version\/name="\(.*\)"/\1/p' corner-office/game/export_presets.cfg)
           DEST="corner-office/releases/corner-office-${VERSION}-debug.apk"
