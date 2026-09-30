@@ -162,10 +162,15 @@ func _shortlist_button(w: GameWorld, p: Player) -> Button:
 
 func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var compact := UILayout.is_landscape()
-	var hero := IdentityBand.wrap(club, 72.0, 128.0)
+	var ps := 84 if compact else 104
+	# A faixa diagonal passa ~78 px além do bloco: bloco = retrato − 48 deixa o nome livre
+	# (margem 18 + retrato + 12). Altura do bloco = só a do retrato, que fica no topo.
+	var hero := IdentityBand.wrap(club, float(ps) - 48.0, float(ps) + 36.0)
 	var card: VBoxContainer = hero[1]
 	var row := UIKit.hbox(UITokens.S2)
-	row.add_child(UIKit.portrait(p, club, w.year, 84 if compact else 104))
+	var pv := UIKit.portrait(p, club, w.year, ps)
+	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(pv)
 	var names := UIKit.vbox(UITokens.S1)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var title := UIKit.label(p.display_name(), "Section" if compact else "Title", true)

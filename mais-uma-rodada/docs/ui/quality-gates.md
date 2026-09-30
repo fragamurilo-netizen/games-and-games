@@ -62,6 +62,13 @@ clube de nome comprido, lesão, suspensão, folha estourada).
 - **Foco de teclado**: botões, chips, abas e linhas tocáveis aceitam foco; o contorno é azul
   (info), 3 px, afastado 4 px (giz sumiria no botão principal). Toque e clique soltam o foco
   (`main.gd`), então o contorno só aparece navegando por teclado ou controle.
+- **0.5.4 (sobre o trabalho do Codex 0.5.1–0.5.3)**: toque mais confiável (limiar de
+  arrasto 18/28 px, apertar sem varrer a árvore, sem "hover" preso no toque, folhas não
+  rolam sob o dedo); abas proporcionais ao texto; cortes da Saira no Elenco e no Mercado;
+  moral máxima "Ótima"; faixa do clube longe do nome (perfil, resumo, clube); data do
+  Início quebra em duas linhas no celular deitado. Medição: `design_shots -- --only=!taps`
+  (TAP_JITTER=px) em 390×844 — 89/92 toques com tremor de 14 px (os 3 restantes são abas
+  cortadas na borda de faixas roláveis), arrasto rola sem disparar botão.
 
 ## Pendente
 

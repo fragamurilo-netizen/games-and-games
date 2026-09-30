@@ -99,7 +99,8 @@ func _date_line(w: GameWorld, club: Club) -> Control:
 	var v := UIKit.vbox(0)
 	var slot := clampi(w.season.day, 0, maxi(0, w.season.total_days() - 1))
 	var date := w.season.long_date_label(slot)
-	v.add_child(UIKit.label(date if date != "" else "Temporada %d" % w.year, "Title"))
+	# Em coluna estreita (celular deitado) a data quebra em duas linhas em vez de cortar.
+	v.add_child(UIKit.label(date if date != "" else "Temporada %d" % w.year, "Title", true))
 	var league := w.league_of(club.id)
 	var where := w.league_name(club.league_id)
 	if league != null and int(league.table[club.id]["pl"]) > 0:
