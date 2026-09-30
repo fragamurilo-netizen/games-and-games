@@ -3,6 +3,7 @@ import { StyleSheet, Text, useWindowDimensions, View } from "react-native"
 import { queryDecision, queryLife, queryRoutine } from "@paralelo/simulation"
 import { ActionRow, Kicker, Page, Prose, splitLabel, TimeRow, ui } from "../components/editorial"
 import { DayBar } from "../components/game-feel"
+import { Messages } from "../components/messages"
 import { LifeScene, sceneText } from "../components/scene"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
@@ -50,6 +51,8 @@ export default function LifeScreen() {
     <Text style={styles.who}>{life.name}<Text style={styles.whoMuted}>  ·  {life.age} anos</Text></Text>
     <Text style={styles.state}>{life.body}</Text>
     {notice && <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>}
+
+    <Messages inbox={life.inbox} />
 
     {decision && <View style={styles.decision}>
       <Kicker meta={decision.date}>Uma escolha</Kicker>

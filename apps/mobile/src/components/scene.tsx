@@ -56,10 +56,12 @@ type Props = {
   age: number
   expression: CharacterExpression
   children?: React.ReactNode
+  /** altura da cena; por padrão quase quadrada */
+  height?: number
 }
 
-export function LifeScene({ width, minute, city, seed, sex, age, expression, children }: Props) {
-  const height = Math.round(width * 1.02)
+export function LifeScene({ width, minute, city, seed, sex, age, expression, children, height: fixed }: Props) {
+  const height = fixed ?? Math.round(width * 1.02)
   const ground = height - 34
   const sky = skyAt(minute)
   const body = useMemo(() => drawCharacter({ seed, sex, age, view: "body", background: false, expression }), [seed, sex, age, expression])

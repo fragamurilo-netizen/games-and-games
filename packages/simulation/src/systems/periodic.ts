@@ -9,10 +9,13 @@ import { remember } from "./memory"
 import { updateRelationship } from "./relationships"
 import { processLifeEvent } from "./events"
 import { processWorkEvent } from "./career"
+import { processDailyCity, processWeeklyEconomy } from "./city"
 
 export function processScheduled(world: WorldState, event: ScheduledEvent): WorldState {
   if (event.kind === "work-reminder" || event.kind === "work-attendance") return processWorkEvent(world, event)
   if (event.kind === "daily-events" || event.kind === "event-followup") return processLifeEvent(world, event)
+  if (event.kind === "daily-city") return processDailyCity(world, event)
+  if (event.kind === "weekly-economy") return processWeeklyEconomy(world, event)
   if (event.kind === "mother-message") return appendEntry(world, { at: world.clock, kind: "message", text: starterContent.reminder, personIds: [event.personId], cause: event.id })
   if (event.kind === "monthly-finance") {
     let next = world
@@ -31,7 +34,8 @@ export function processScheduled(world: WorldState, event: ScheduledEvent): Worl
   // IA inicial: pessoas próximas procuram contato segundo sociabilidade.
   // Ausência prolongada reduz proximidade; memória fica disponível no inspector.
   let next: WorldState = { ...world, memories: world.memories.map(memory => ({ ...memory, salience: memory.salience * .995 })) }
-  const relations = Object.values(world.relationships).filter(rel => rel.a === world.playerId || rel.b === world.playerId)
+  // Ligações diretas vêm de família e amizades; vizinhos e colegas falam por mensagem (systems/city).
+  const relations = Object.values(world.relationships).filter(rel => (rel.a === world.playerId || rel.b === world.playerId) && (rel.tags.includes("family") || rel.tags.includes("friend")))
   const roll = draw(world.seed, next.rng, "ai")
   next = { ...next, rng: roll.state }
   const selected = relations[Math.floor(roll.value * relations.length)]

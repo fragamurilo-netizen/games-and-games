@@ -33,10 +33,10 @@ describe("fundação determinística", () => {
     const start = { ...generated, events: { ...generated.events, seen: lifeEvents.map(event => event.id) } }
     const paused = apply(start, { type: "wait", minutes: 10080 })
     expect(paused.clock).toEqual({ day: 0, minute: 1080 })
-    expect(paused.timeline.filter(e => e.kind === "message")).toHaveLength(1)
+    expect(paused.timeline.filter(e => e.cause === "schedule:mother-first-day")).toHaveLength(1)
     const resumed = apply(paused, { type: "wait", minutes: 10080 })
     expect(resumed.clock).toEqual({ day: 7, minute: 1080 })
-    expect(resumed.timeline.filter(e => e.kind === "message")).toHaveLength(1)
+    expect(resumed.timeline.filter(e => e.cause === "schedule:mother-first-day")).toHaveLength(1)
   })
   it("não pula eventos durante descanso e mantém a duração da ação", () => {
     const start = apply(createWorld("s"), { type: "wait", minutes: 570 })

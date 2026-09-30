@@ -10,6 +10,7 @@ import { postLedger } from "../systems/finance"
 import { remember } from "../systems/memory"
 import { updateRelationship } from "../systems/relationships"
 import { finishGroceries, finishMeal, groceriesReason, mealReason } from "../systems/routine"
+import { replyReason, resolveReply } from "../systems/city"
 
 export type CommandError = Readonly<{ code: "invalid-duration" | "unknown-person" | "no-relationship" | "cooldown" | "exhausted" | "invalid-command" | "unavailable" | "insufficient-money" | "pending-decision"; message: string }>
 export function contactAvailability(world: WorldState, personId: PersonId): CommandError | null {
@@ -115,6 +116,18 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
         : `${person.name} não atendeu. Você deixou uma mensagem dizendo que já chegou bem.`
       next = appendEntry(next, { at: next.clock, kind: "relationship", text, personIds: [world.playerId, person.id], cause: `command.contact:${rel.id}` })
       next = remember(next, person.id, world.playerId, text, `command.contact:${rel.id}`)
+      break
+    }
+    case "reply": {
+      const reason = replyReason(world, command.messageId, command.reply)
+      if (reason) return err({ code: "unavailable", message: reason })
+      const from = world.inbox.find(m => m.id === command.messageId)!.fromId
+      if (command.reply === "call") {
+        const unavailable = contactAvailability(world, from)
+        if (unavailable) return err(unavailable)
+      }
+      const replied = resolveReply(world, command.messageId, command.reply)
+      next = advance(replied.world, addMinutes(world.clock, replied.minutes))
       break
     }
     default: return err({ code: "invalid-command", message: "Comando desconhecido." })

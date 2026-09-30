@@ -24,6 +24,7 @@ export default function CareerScreen() {
       <Kicker>Situação</Kicker>
       <Prose>{job.performance}</Prose>
       <Prose tone={job.warning ? "warning" : "secondary"}>{job.presence}</Prose>
+      {career.companyMood && <Prose tone={career.companyMood.includes("corte") ? "warning" : "secondary"}>Na empresa: {career.companyMood.charAt(0).toLocaleLowerCase("pt-BR") + career.companyMood.slice(1)}</Prose>}
       <View style={styles.actions}>
         <ActionRow label="Ir trabalhar" meta="8 h" disabled={!career.canWork} reason={career.unavailableReason} command={{ type: "work" }} />
         {career.nextWork.waitMinutes > 0 && <ActionRow label="Esperar o próximo turno" meta={`${career.nextWork.date.split(" de ").slice(0, 2).join(" de ")}, ${career.nextWork.time}`}
@@ -42,6 +43,7 @@ export default function CareerScreen() {
         <Text style={styles.itemValue}>{v.salary}</Text>
       </View>
       <Text style={styles.itemSub}>{v.company} · pede {v.preparation.toLowerCase()}</Text>
+      {v.referral && <Text style={styles.referral}>{v.referral}</Text>}
       <ActionRow label="Enviar currículo" meta="30 min" disabled={!v.canApply} reason={v.reason} command={{ type: "apply-job", vacancyId: v.id }} />
     </View>)}
 
@@ -75,4 +77,5 @@ const styles = StyleSheet.create({
   itemTitle: { flex: 1, color: colors.text, fontFamily: fonts.title, fontSize: 19, lineHeight: 24 },
   itemValue: { color: colors.text, fontFamily: fonts.medium, fontSize: 14, fontVariant: ["tabular-nums"] },
   itemSub: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13, lineHeight: 19, marginTop: 2 },
+  referral: { color: colors.accent, fontFamily: fonts.medium, fontSize: 12, lineHeight: 18, marginTop: 2 },
 })

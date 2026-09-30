@@ -1,14 +1,20 @@
 import { starterContent } from "@paralelo/content"
 import type { HouseholdId, PersonId, RelationshipId, ResidenceId, ScheduleId, TimelineId } from "@paralelo/shared"
-import type { PersonV3, Relationship, WorldState, WorldStateV1 } from "./domain/world"
+import type { PersonV3, Relationship, WorldState, WorldStateV1, WorldStateV5 } from "./domain/world"
 import { upgradeWorldV1 } from "./systems/slice"
 import { upgradeWorldV2 } from "./systems/events"
 import { upgradeWorldV3 } from "./systems/routine"
 import { upgradeWorldV4 } from "./systems/appearance"
+import { upgradeWorldV5 } from "./systems/city"
 import { createRng, draw } from "./rng"
 import { dayFromCalendar } from "./time"
 
 export function createWorld(seed: string): WorldState {
+  return upgradeWorldV5(createWorldV5(seed))
+}
+
+/** Mundo como era gerado no save v5; serve às migrações e aos testes delas. */
+export function createWorldV5(seed: string): WorldStateV5 {
   if (!seed.trim() || seed.length > 200) throw new Error("A seed deve ter entre 1 e 200 caracteres.")
   let rng = createRng()
   const roll = () => { const result = draw(seed, rng, "world"); rng = result.state; return result.value }

@@ -1,4 +1,4 @@
-import type { WorldState, WorldStateV1, WorldStateV2, WorldStateV3, WorldStateV4 } from "./domain/world"
+import type { WorldState, WorldStateV1, WorldStateV2, WorldStateV3, WorldStateV4, WorldStateV5 } from "./domain/world"
 import { hashText } from "./rng"
 
 function canonical(value: unknown): string {
@@ -10,4 +10,4 @@ function canonical(value: unknown): string {
   return JSON.stringify(value) ?? "null"
 }
 // Hash de diagnóstico, não criptográfico. Inclui relógio, RNG e comandos.
-export const worldHash = (world: WorldState | WorldStateV1 | WorldStateV2 | WorldStateV3 | WorldStateV4): string => hashText(canonical(world)).toString(16).padStart(8, "0")
+export const worldHash = (world: WorldState | WorldStateV1 | WorldStateV2 | WorldStateV3 | WorldStateV4 | WorldStateV5): string => hashText(canonical(world)).toString(16).padStart(8, "0")

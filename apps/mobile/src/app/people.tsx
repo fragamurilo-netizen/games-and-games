@@ -6,6 +6,9 @@ import { Portrait } from "../components/portrait"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 
+// Círculos na ordem em que pesam na vida de quem acabou de se mudar (bíblia §11.4).
+const GROUPS = [["family", "Família"], ["friend", "Amizades"], ["coworker", "Trabalho"], ["neighbor", "Vizinhança"]] as const
+
 // PESSOAS: nomes, contexto, tempo e memória; nada de medidores de afeto (bíblia §8.1, §60, §75).
 export default function PeopleScreen() {
   const { world } = useGame()
@@ -15,28 +18,35 @@ export default function PeopleScreen() {
   return <Page time={life.time}>
     <Text accessibilityRole="header" style={styles.title}>Pessoas</Text>
     <Text style={styles.lede}>{life.people.length} pessoas acompanham sua vida em {life.city}.</Text>
-    <Kicker first>Mais próximas</Kicker>
-    {life.people.map(person => {
-      const expanded = open === person.id
-      const first = person.name.split(" ")[0]
-      return <View key={person.id} style={styles.person}>
-        <Pressable accessibilityRole="button" accessibilityState={{ expanded }} accessibilityLabel={`${person.name}, ${person.description}`}
-          onPress={() => setOpen(expanded ? null : person.id)} style={({ pressed }) => [styles.row, pressed && ui.actionPressed]}>
-          <Portrait seed={person.appearance.seed} sex={person.appearance.sex} age={person.age} size={expanded ? 112 : 56}
-            accessibilityLabel={`Retrato de ${person.name}`} />
-          <View style={styles.rowText}>
-            <Text style={styles.name}>{person.name}</Text>
-            <Text style={styles.relation}>{person.description} · {person.age} anos</Text>
-            <Text style={styles.state}>{person.state}</Text>
+    {GROUPS.map(([group, title]) => {
+      const members = life.people.filter(p => p.group === group).sort((a, b) => b.closeness - a.closeness)
+      if (!members.length) return null
+      return <View key={group}>
+        <Kicker meta={`${members.length}`}>{title}</Kicker>
+        {members.map(person => {
+          const expanded = open === person.id
+          const first = person.name.split(" ")[0]
+          return <View key={person.id} style={styles.person}>
+            <Pressable accessibilityRole="button" accessibilityState={{ expanded }} accessibilityLabel={`${person.name}, ${person.description}`}
+              onPress={() => setOpen(expanded ? null : person.id)} style={({ pressed }) => [styles.row, pressed && ui.actionPressed]}>
+              <Portrait seed={person.appearance.seed} sex={person.appearance.sex} age={person.age} size={expanded ? 112 : 56}
+                accessibilityLabel={`Retrato de ${person.name}`} />
+              <View style={styles.rowText}>
+                <Text style={styles.name}>{person.name}</Text>
+                <Text style={styles.relation}>{person.description} · {person.age} anos</Text>
+                {person.work && <Text style={styles.relation}>{person.work}</Text>}
+                <Text style={styles.state}>{person.state}</Text>
+              </View>
+            </Pressable>
+            {expanded && <View style={styles.detail}>
+              {!!person.memories.length && <>
+                <Text style={styles.label}>MOMENTOS QUE FICARAM</Text>
+                {person.memories.map(memory => <TimeRow key={memory.id} time={memory.date.split(" de ").slice(0, 2).map((p, i) => i ? p.slice(0, 3) : p).join(" ")}>{memory.text}</TimeRow>)}
+              </>}
+              <ActionRow label={`Ligar para ${first}`} meta="até 30 min" disabled={!person.canContact} reason={person.unavailableReason} command={{ type: "contact", personId: person.id }} />
+            </View>}
           </View>
-        </Pressable>
-        {expanded && <View style={styles.detail}>
-          {!!person.memories.length && <>
-            <Text style={styles.label}>MOMENTOS QUE FICARAM</Text>
-            {person.memories.map(memory => <TimeRow key={memory.id} time={memory.date.split(" de ").slice(0, 2).map((p, i) => i ? p.slice(0, 3) : p).join(" ")}>{memory.text}</TimeRow>)}
-          </>}
-          <ActionRow label={`Ligar para ${first}`} meta="até 30 min" disabled={!person.canContact} reason={person.unavailableReason} command={{ type: "contact", personId: person.id }} />
-        </View>}
+        })}
       </View>
     })}
   </Page>

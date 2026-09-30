@@ -1,5 +1,7 @@
 import { contactAvailability } from "../commands"
-import type { WorldState } from "../domain/world"
+import type { CompanyId, PersonId } from "@paralelo/shared"
+import type { MessageReply, MessageTopic, WorldState } from "../domain/world"
+import { replyReason } from "../systems/city"
 import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
 import { courses, jobRoles, routineRules } from "@paralelo/content"
@@ -32,6 +34,40 @@ const MARK_LABELS: Partial<Record<WorldState["scheduled"][number]["kind"], strin
   "work-reminder": "Turno", "work-attendance": "Limite do turno", "monthly-finance": "Aluguel e salário", "mother-message": "Mensagem",
 }
 
+/** O que a pessoa faz da vida, do jeito que o jogador saberia (bíblia §11.4). */
+function workLine(world: WorldState, id: PersonId): string | null {
+  const resident = world.residents[id]
+  if (!resident) return null
+  if (resident.job) {
+    const role = jobRoles.find(item => item.id === resident.job!.roleId)
+    return `${role?.title ?? "Trabalha"} na ${world.companies[resident.job.companyId]!.name}`
+  }
+  const age = ageAt(world.people[id]!.birthDate, world.clock)
+  if (age >= 65) return "Já se aposentou"
+  if (age < 18) return "Ainda estuda"
+  return resident.goal?.kind === "find-job" ? "Procurando trabalho" : "Sem emprego fixo"
+}
+
+const REPLY_META: Record<MessageReply, string> = { answer: "15 min", call: "30 min", later: "adia 24 h" }
+const REPLY_LABEL: Record<MessageTopic, string> = { checkin: "Responder", hired: "Dar parabéns", dismissed: "Mandar apoio", "job-tip": "Pedir a indicação", worry: "Perguntar como está" }
+
+/** Mensagens que ainda esperam resposta, com o prazo dito em horas (bíblia §12.2: silêncio também é ação). */
+export function queryInbox(world: WorldState) {
+  const now = absoluteMinute(world.clock)
+  return world.inbox.filter(m => m.status === "unread" && absoluteMinute(m.expiresAt) > now).slice().reverse().map(m => {
+    const from = world.people[m.fromId]!
+    const hoursLeft = Math.max(1, Math.ceil((absoluteMinute(m.expiresAt) - now) / 60))
+    const callBlocked = contactAvailability(world, m.fromId)
+    return { id: m.id, from: { id: from.id, name: from.name, age: ageAt(from.birthDate, world.clock), appearance: { seed: from.appearanceSeed, sex: from.sex } },
+      text: m.text, time: formatTime(m.at), day: relativeDay(m.at, world.clock),
+      deadline: hoursLeft <= 3 ? "A mensagem está esfriando." : `Sem resposta, ela esfria em ${hoursLeft} h.`, urgent: hoursLeft <= 3,
+      replies: (["answer", "call", "later"] as const).map(reply => {
+        const reason = replyReason(world, m.id, reply) ?? (reply === "call" ? callBlocked?.message ?? null : null)
+        return { reply, label: reply === "answer" ? REPLY_LABEL[m.topic] : reply === "call" ? "Ligar" : "Depois", meta: REPLY_META[reply], canReply: !reason, reason }
+      }) }
+  })
+}
+
 // Read model novo a cada consulta; nada retornado compartilha objetos mutáveis do mundo.
 export function queryLife(world: WorldState) {
   const player = world.people[world.playerId]!
@@ -46,11 +82,15 @@ export function queryLife(world: WorldState) {
     hunger: player.needs.hunger >= 75 ? "A fome está tirando sua disposição. Reserve tempo para comer." : player.needs.hunger >= 45 ? "Já está na hora de pensar na próxima refeição." : "Você está sem fome por enquanto.",
     sleep: player.needs.sleepPressure >= 80 ? "O sono acumulado está atrapalhando. Uma pausa não substitui dormir." : player.needs.sleepPressure >= 55 ? "Você começa a sentir sono." : "Você está conseguindo se manter desperto.",
     timeline: world.timeline.slice(-80).reverse().map(entry => ({ id: entry.id, date: formatDate(entry.at), day: relativeDay(entry.at, world.clock), time: formatTime(entry.at), text: entry.text, kind: entry.kind })),
+    inbox: queryInbox(world),
     people: Object.values(world.relationships).filter(r => r.a === player.id || r.b === player.id).map(r => {
       const person = world.people[r.a === player.id ? r.b : r.a]!
       const unavailable = contactAvailability(world, person.id)
+      const tag = r.tags[0] ?? "friend"
       return { id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock), appearance: { seed: person.appearanceSeed, sex: person.sex },
-        description: r.tags.includes("family") ? "Sua mãe" : "Amizade de antes da mudança",
+        group: tag, closeness: r.affection + r.trust + r.familiarity,
+        description: tag === "family" ? "Sua mãe" : tag === "friend" ? "Amizade de antes da mudança" : tag === "neighbor" ? `Mora perto, na ${world.residences[person.residenceId]!.district}` : "Colega de trabalho",
+        work: workLine(world, person.id),
         state: r.lastInteractionAt && absoluteMinute(world.clock) - absoluteMinute(r.lastInteractionAt) < 10080 ? "Vocês tiveram contato recentemente." : r.lastInteractionAt ? "Faz um tempo que vocês não se falam." : r.trust > 65 ? "Existe confiança entre vocês." : "Vocês ainda têm muito para conversar.",
         canContact: !unavailable, unavailableReason: unavailable?.message ?? null,
         memories: world.memories.filter(memory => memory.personId === person.id && memory.salience > .1).slice(-3).reverse().map(memory => ({ id: memory.id, text: memory.text, date: formatDate(memory.at) })) }
@@ -76,13 +116,16 @@ export function queryCareer(world: WorldState) {
         : `A presença é cobrada a partir de ${formatDate({ day: world.employment.requiredFromDay, minute: 0 })}.`,
       warning: world.employment.consecutiveAbsences > 0 } : null,
     history: [...world.employmentHistory].reverse().map(record => ({ id: record.id, company: world.companies[record.companyId]!.name, title: jobRoles.find(role => role.id === record.roleId)!.title,
-      ended: formatDate(record.endedAt), settlement: formatMoney(record.settledCents), reason: "Contrato encerrado após três faltas seguidas." })),
+      ended: formatDate(record.endedAt), settlement: formatMoney(record.settledCents), reason: record.reason === "restructure" ? "Posto cortado quando a empresa enfrentou semanas fracas." : "Contrato encerrado após três faltas seguidas." })),
+    companyMood: world.employment ? companyMood(world, world.employment.companyId) : null,
     canWork: !unavailable, unavailableReason: unavailable,
     nextWork: { date: formatDate(next), time: formatTime(next), waitMinutes: Math.max(0, Math.min(10080, waitMinutes)) },
     vacancies: Object.values(world.vacancies).filter(v => v.open).map(v => {
       const definition = jobRoles.find(item => item.id === v.roleId)!
       const reason = applicationReason(world, v.id)
+      const tip = world.inbox.find(m => m.topic === "job-tip" && m.vacancyId === v.id && m.status === "answered")
       return { id: v.id, title: definition.title, company: world.companies[v.companyId]!.name, salary: formatMoney(definition.salaryCents), canApply: !reason, reason,
+        referral: tip ? `Com indicação de ${world.people[tip.fromId]!.name.split(" ")[0]}` : null,
         preparation: definition.skill === "organization" ? "Organização" : "Comunicação" }
     }),
     courses: courses.map(course => {
@@ -123,10 +166,30 @@ export function queryMoney(world: WorldState) {
   }
 }
 
+/** Saúde da empresa dita como quem trabalha lá perceberia; sem números (bíblia §15, §32). */
+function companyMood(world: WorldState, id: CompanyId): string {
+  const e = world.economy[id]
+  if (!e) return "Sem notícias da empresa."
+  if (e.weakWeeks >= 2 || e.health < 0.3) return "Semanas fracas seguidas. Fala-se em corte."
+  if (e.health < 0.45) return "O movimento anda fraco."
+  if (e.health > 0.7 && e.trend > 0) return "Movimento forte. A empresa está contratando."
+  return "Movimento estável."
+}
+
 export function queryWorld(world: WorldState) {
   const residence = world.residences[world.people[world.playerId]!.residenceId]!
+  const circle = new Set(Object.values(world.relationships).filter(r => r.a === world.playerId || r.b === world.playerId).map(r => (r.a === world.playerId ? r.b : r.a)))
+  const mine = world.employment?.companyId ?? null
   return { city: world.city, district: residence.district, population: Object.keys(world.people).length,
-    companies: Object.values(world.companies).map(company => ({ id: company.id, name: company.name, district: company.district, vacancies: Object.values(world.vacancies).filter(v => v.open && v.companyId === company.id).length })),
+    news: world.news.slice(-24).reverse().map(item => {
+      const known = item.personIds.find(id => circle.has(id))
+      const relevance = item.companyId && item.companyId === mine ? "Onde você trabalha" : known ? `Você conhece ${world.people[known]!.name.split(" ")[0]}` : null
+      return { id: item.id, date: formatDate(item.at), day: relativeDay(item.at, world.clock), section: item.section === "negocios" ? "Negócios" : item.section === "trabalho" ? "Trabalho" : "Cidade",
+        headline: item.headline, body: item.body, relevance }
+    }),
+    companies: Object.values(world.companies).map(company => ({ id: company.id, name: company.name, district: company.district, mood: companyMood(world, company.id), yours: company.id === mine,
+      staff: Object.values(world.residents).filter(r => r.job?.companyId === company.id).length,
+      vacancies: Object.values(world.vacancies).filter(v => v.open && v.companyId === company.id).length })),
     residents: Object.values(world.people).filter(person => world.tiers[person.id] === "background").map(person => ({ id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock), district: world.residences[person.residenceId]!.district })),
     facts: world.timeline.filter(entry => ["career", "finance", "education"].includes(entry.kind)).slice(-12).reverse().map(entry => ({ id: entry.id, date: formatDate(entry.at), text: entry.text })),
   }

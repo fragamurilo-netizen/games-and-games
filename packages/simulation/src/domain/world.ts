@@ -1,4 +1,4 @@
-import type { CompanyId, CourseId, DecisionId, EmploymentId, HouseholdId, LedgerId, MemoryId, PersonId, RelationshipId, ResidenceId, ScheduleId, TimelineId, VacancyId } from "@paralelo/shared"
+import type { CompanyId, CourseId, DecisionId, EmploymentId, HouseholdId, LedgerId, MemoryId, MessageId, NewsId, PersonId, RelationshipId, ResidenceId, ScheduleId, TimelineId, VacancyId } from "@paralelo/shared"
 import type { RngState } from "../rng"
 
 // Dia 0 = 05/01/2026. Minutos inteiros; nenhum tempo de sistema no domínio.
@@ -18,6 +18,7 @@ export type PersonV4 = Omit<PersonV3, "needs"> & Readonly<{
   needs: PersonV3["needs"] & Readonly<{ hunger: number; sleepPressure: number }>
 }>
 export type Person = PersonV4 & Readonly<{ sex: "F" | "M" }>
+export type RelationshipTag = "family" | "friend" | "neighbor" | "coworker"
 export type Relationship = Readonly<{
   id: RelationshipId
   a: PersonId
@@ -28,7 +29,7 @@ export type Relationship = Readonly<{
   respect: number
   attraction: number
   resentment: number
-  tags: readonly ("family" | "friend")[]
+  tags: readonly RelationshipTag[]
   lastInteractionAt?: GameDate
 }>
 export type TimelineEntry = Readonly<{
@@ -42,7 +43,7 @@ export type TimelineEntry = Readonly<{
 export type ScheduledEvent = Readonly<{
   id: ScheduleId
   at: GameDate
-  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance"
+  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance" | "daily-city" | "weekly-economy"
   employmentId?: EmploymentId
   eventId?: string
   actorId?: PersonId | null
@@ -60,6 +61,7 @@ export type Command =
   | Readonly<{ type: "work" }>
   | Readonly<{ type: "study"; courseId: CourseId }>
   | Readonly<{ type: "decide"; decisionId: DecisionId; choiceId: string }>
+  | Readonly<{ type: "reply"; messageId: MessageId; reply: MessageReply }>
 export type CommandRecord = Readonly<{ revision: number; at: GameDate; command: Command }>
 export type WorldStateV1 = Readonly<{
   schemaVersion: 1
@@ -84,7 +86,7 @@ export type Company = Readonly<{ id: CompanyId; name: string; district: string }
 export type Vacancy = Readonly<{ id: VacancyId; companyId: CompanyId; roleId: string; open: boolean }>
 export type EmploymentV3 = Readonly<{ id: EmploymentId; personId: PersonId; companyId: CompanyId; roleId: string; startedAt: GameDate; lastWorkedDay: number | null; accruedCents: number; shiftsWorked: number; performance: number }>
 export type Employment = EmploymentV3 & Readonly<{ requiredFromDay: number; consecutiveAbsences: number; lastAssessedDay: number | null }>
-export type EmploymentRecord = Readonly<{ id: EmploymentId; companyId: CompanyId; roleId: string; startedAt: GameDate; endedAt: GameDate; reason: "absence"; settledCents: number }>
+export type EmploymentRecord = Readonly<{ id: EmploymentId; companyId: CompanyId; roleId: string; startedAt: GameDate; endedAt: GameDate; reason: "absence" | "restructure"; settledCents: number }>
 export type LedgerEntry = Readonly<{ id: LedgerId; at: GameDate; amountCents: number; category: "salary" | "rent" | "food" | "education" | "event"; text: string; cause: string }>
 export type Memory = Readonly<{ id: MemoryId; at: GameDate; personId: PersonId; otherId: PersonId; text: string; salience: number; cause: string }>
 export type WorldStateV2 = Omit<WorldStateV1, "schemaVersion"> & Readonly<{
@@ -111,7 +113,28 @@ export type WorldStateV4 = Omit<WorldStateV3, "schemaVersion" | "people" | "empl
   employmentHistory: readonly EmploymentRecord[]
   routine: Readonly<{ pantryMeals: number; lastCommunityMealDay: number | null }>
 }>
-export type WorldState = Omit<WorldStateV4, "schemaVersion" | "people"> & Readonly<{
+export type WorldStateV5 = Omit<WorldStateV4, "schemaVersion" | "people"> & Readonly<{
   schemaVersion: 5
   people: Readonly<Record<string, Person>>
+}>
+
+// ---- Mundo vivo (v6): a cidade continua sem o jogador (bíblia §2.1, §13, §15, §19, §20) ----
+export type GoalKind = "find-job" | "change-job" | "keep-in-touch"
+export type Goal = Readonly<{ kind: GoalKind; since: GameDate }>
+/** Última decisão da IA, com as notas de cada opção (bíblia §13.3). */
+export type AiDecision = Readonly<{ at: GameDate; goal: GoalKind | null; options: readonly Readonly<{ action: string; score: number }>[]; chosen: string }>
+export type ResidentJob = Readonly<{ companyId: CompanyId; roleId: string; since: GameDate; satisfaction: number }>
+export type Resident = Readonly<{ job: ResidentJob | null; goal: Goal | null; lastDecision: AiDecision | null; lastAppliedDay: number | null; lastMessagedDay: number | null }>
+export type CompanyEconomy = Readonly<{ health: number; trend: number; weakWeeks: number }>
+export type NewsSection = "negocios" | "trabalho" | "cidade"
+export type NewsItem = Readonly<{ id: NewsId; at: GameDate; section: NewsSection; headline: string; body: string; companyId: CompanyId | null; personIds: readonly PersonId[]; cause: string }>
+export type MessageTopic = "checkin" | "hired" | "dismissed" | "job-tip" | "worry"
+export type MessageReply = "answer" | "call" | "later"
+export type Message = Readonly<{ id: MessageId; at: GameDate; fromId: PersonId; topic: MessageTopic; text: string; expiresAt: GameDate; status: "unread" | "answered" | "ignored"; postponed: boolean; vacancyId: VacancyId | null }>
+export type WorldState = Omit<WorldStateV5, "schemaVersion"> & Readonly<{
+  schemaVersion: 6
+  residents: Readonly<Record<string, Resident>>
+  economy: Readonly<Record<string, CompanyEconomy>>
+  news: readonly NewsItem[]
+  inbox: readonly Message[]
 }>

@@ -1,13 +1,14 @@
 // Presença (bíblia §33): o tempo anda na régua, cada ação deixa uma consequência visível,
 // a virada de dia é um capítulo e uma decisão toma a tela com a pessoa envolvida.
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native"
+import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native"
 import * as Haptics from "expo-haptics"
 import { queryDecision, queryLife } from "@paralelo/simulation"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 import { ActionRow } from "./editorial"
 import { Portrait } from "./portrait"
+import { LifeScene } from "./scene"
 
 const buzz = (kind: "light" | "success" | "warning"): void => {
   const p = kind === "light" ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
@@ -134,9 +135,17 @@ export function DecisionScene() {
   const [later, setLater] = useState<string | null>(null)
   useEffect(() => { if (decision && decision.id !== later) buzz("warning") }, [decision?.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const open = !!decision && decision.id !== later
+  // sem outra pessoa envolvida, a escolha acontece no lugar e na hora em que você está
+  const life = useMemo(() => world && decision && !decision.actor ? queryLife(world) : null, [world, decision])
+  const { width: screen } = useWindowDimensions()
+  const width = Math.min(screen, 600)
   return <Modal visible={open} animationType="slide" transparent={false} onRequestClose={() => decision && setLater(decision.id)}>
     {decision && <View style={scene.root}>
       <ScrollView contentContainerStyle={scene.content}>
+        {life && <View style={scene.bleed}>
+          <LifeScene width={width} height={Math.round(width * 0.62)} minute={life.minute} city={life.city} seed={life.appearance.seed}
+            sex={life.appearance.sex} age={life.age} expression="tense" />
+        </View>}
         {decision.actor && <View style={scene.actor}>
           <Portrait seed={decision.actor.appearance.seed} sex={decision.actor.appearance.sex} age={decision.actor.age} size={160} expression="curious"
             accessibilityLabel={`${decision.actor.name}`} />
@@ -158,6 +167,7 @@ const scene = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   content: { paddingHorizontal: space[6], paddingTop: space[12], paddingBottom: space[12], maxWidth: 600, width: "100%", alignSelf: "center" },
   actor: { alignItems: "flex-start", marginBottom: space[6] },
+  bleed: { marginHorizontal: -space[6], marginTop: -space[12], marginBottom: space[6] },
   actorName: { color: colors.textSecondary, fontFamily: fonts.medium, fontSize: 13, marginTop: space[2] },
   kicker: { color: colors.warning, fontFamily: fonts.label, fontSize: 11, letterSpacing: 1.6 },
   title: { color: colors.text, fontFamily: fonts.title, fontSize: 30, lineHeight: 36, marginTop: space[2] },

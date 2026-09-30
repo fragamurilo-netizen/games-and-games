@@ -1,4 +1,4 @@
-import { jobRoles, routineRules } from "@paralelo/content"
+import { cityRules, jobRoles, routineRules } from "@paralelo/content"
 import type { EmploymentId, ScheduleId, VacancyId } from "@paralelo/shared"
 import type { ScheduledEvent, WorldState } from "../domain/world"
 import { draw } from "../rng"
@@ -6,6 +6,7 @@ import { absoluteMinute, formatDate } from "../time"
 import { appendEntry } from "../timeline"
 import { formatMoney, postLedger } from "./finance"
 import { changeNeeds } from "./needs"
+import { hasReferral, meetCoworkers } from "./city"
 
 export function nextWeekday(day: number): number {
   while (day % 7 >= 5) day++
@@ -31,13 +32,13 @@ export function applicationReason(world: WorldState, vacancyId: VacancyId): stri
 export function applyForJob(world: WorldState, vacancyId: VacancyId): WorldState {
   const vacancy = world.vacancies[vacancyId]!, role = jobRoles.find(item => item.id === vacancy.roleId)!
   const roll = draw(world.seed, world.rng, "career")
-  const accepted = roll.value < .55 + world.skills[world.playerId]![role.skill] * .35
+  const accepted = roll.value < .55 + world.skills[world.playerId]![role.skill] * .35 + (hasReferral(world, vacancyId) ? cityRules.referralBonus : 0)
   let next: WorldState = { ...world, rng: roll.state, applications: [...world.applications, { vacancyId, at: world.clock, accepted }] }
   const company = world.companies[vacancy.companyId]!
   if (accepted) {
     const id = `employment:${world.nextId}` as EmploymentId
     next = { ...next, nextId: next.nextId + 1, employment: { id, personId: world.playerId, companyId: company.id, roleId: role.id, startedAt: world.clock, lastWorkedDay: null, accruedCents: 0, shiftsWorked: 0, performance: 60, requiredFromDay: nextWeekday(world.clock.day + 1), consecutiveAbsences: 0, lastAssessedDay: null }, vacancies: { ...next.vacancies, [vacancyId]: { ...vacancy, open: false } } }
-    next = scheduleWorkDay(next, next.employment!.requiredFromDay)
+    next = meetCoworkers(scheduleWorkDay(next, next.employment!.requiredFromDay), company.id)
   }
   return appendEntry(next, { at: world.clock, kind: "career", text: accepted
     ? `${company.name} aceitou seu currículo para ${role.title.toLowerCase()}. A presença passa a ser cobrada em ${formatDate({ day: next.employment!.requiredFromDay, minute: 0 })}. São oito horas por dia útil, com entrada entre 6h e 14h. Três faltas seguidas encerram o contrato.`

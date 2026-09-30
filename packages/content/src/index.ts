@@ -79,3 +79,4 @@ export function validateStarterContent(): readonly string[] {
   for (const course of courses) if (!Number.isSafeInteger(course.priceCents) || course.priceCents <= 0 || !Number.isSafeInteger(course.sessions) || course.sessions <= 0) errors.push(`Curso inválido: ${course.id}.`)
   return errors
 }
+export * from "./city"

@@ -1,12 +1,26 @@
 import { afterEach, describe, expect, it } from "vitest"
 import { readFileSync } from "node:fs"
 import { decodeSnapshot, encodeSnapshot, SqliteSaveRepository } from "@paralelo/persistence"
-import { createWorld, validateWorld, worldHash } from "@paralelo/simulation"
+import { createWorld, createWorldV5, validateWorld, worldHash, type WorldState } from "@paralelo/simulation"
 import { GameSession } from "../apps/mobile/src/application/game-session"
 import { memorySqlite } from "./fixtures/sqlite"
 
 const databases: ReturnType<typeof memorySqlite>[] = []
 const payload = readFileSync(new URL("./fixtures/legacy-save-v1.json", import.meta.url), "utf8")
+type LegacyPerson = { id: string; relationshipIds: string[] }
+// v6 liga vizinhos e amigos entre si: quem existia continua igual, só ganha vínculos novos
+const expectPeoplePreserved = (world: WorldState, people: Record<string, LegacyPerson>): void => {
+  for (const { relationshipIds, ...rest } of Object.values(people)) {
+    const person = world.people[rest.id]!
+    expect(person).toMatchObject(rest)
+    expect(person.relationshipIds.slice(0, relationshipIds.length)).toEqual(relationshipIds)
+  }
+}
+const expectRelationshipsPreserved = (world: WorldState, relationships: Record<string, unknown>): void => {
+  expect(world.relationships).toMatchObject(relationships)
+  for (const [id, relationship] of Object.entries(world.relationships))
+    if (!(id in relationships)) expect(relationship.tags.every(tag => tag === "neighbor" || tag === "friend")).toBe(true)
+}
 afterEach(() => { for (const database of databases.splice(0)) database.native.close() })
 describe("migrações de campanhas anteriores", () => {
   it("migra v2 preservando cidade, emprego, ledger, memórias e RNG", () => {
@@ -14,10 +28,10 @@ describe("migrações de campanhas anteriores", () => {
     const original = JSON.parse(previous), loaded = decodeSnapshot(previous)
     expect(loaded.ok).toBe(true)
     if (!loaded.ok) throw new Error(loaded.error.message)
-    expect(loaded.value.people).toMatchObject(original.world.people)
+    expectPeoplePreserved(loaded.value, original.world.people)
     for (const field of ["companies", "vacancies", "finance", "employment", "training", "memories", "rng", "clock", "timeline"] as const)
       expect(loaded.value[field]).toEqual(original.world[field])
-    expect(loaded.value.schemaVersion).toBe(5)
+    expect(loaded.value.schemaVersion).toBe(6)
     expect(loaded.value.events.pending).toBeNull()
     expect(loaded.value.scheduled.filter(event => event.kind === "daily-events")).toHaveLength(1)
     expect(validateWorld(loaded.value).ok).toBe(true)
@@ -27,9 +41,10 @@ describe("migrações de campanhas anteriores", () => {
     expect(result.ok).toBe(true)
     if (!result.ok) throw new Error(result.error.message)
     const world = result.value
-    expect(world.schemaVersion).toBe(5)
-    for (const field of ["seed", "clock", "rng", "relationships", "timeline", "revision"] as const) expect(world[field]).toEqual(legacy.world[field])
-    for (const person of Object.values(legacy.world.people)) expect(world.people[(person as { id: string }).id]).toMatchObject(person as object)
+    expect(world.schemaVersion).toBe(6)
+    for (const field of ["seed", "clock", "rng", "timeline", "revision"] as const) expect(world[field]).toEqual(legacy.world[field])
+    expectRelationshipsPreserved(world, legacy.world.relationships)
+    expectPeoplePreserved(world, legacy.world.people)
     expect(Object.keys(world.people)).toHaveLength(100)
     expect(validateWorld(world).ok).toBe(true)
     expect(decodeSnapshot(encodeSnapshot(world))).toEqual(result)
@@ -41,10 +56,10 @@ describe("migrações de campanhas anteriores", () => {
     database.native.prepare("INSERT INTO saves (slot, payload) VALUES (?, ?)").run("current", payload)
     const session = new GameSession(repo, "não-usar")
     await session.initialize()
-    expect(session.getSnapshot().world?.schemaVersion).toBe(5)
+    expect(session.getSnapshot().world?.schemaVersion).toBe(6)
     const current = database.native.prepare("SELECT payload FROM saves WHERE slot = 'current'").get()
     const previous = database.native.prepare("SELECT payload FROM saves WHERE slot = 'previous'").get()
-    expect(JSON.parse(String(current?.payload)).schemaVersion).toBe(5)
+    expect(JSON.parse(String(current?.payload)).schemaVersion).toBe(6)
     expect(previous?.payload).toBe(payload)
   })
   it("migra emprego v3 sem perder salário nem aplicar faltas retroativas", () => {
@@ -57,23 +72,44 @@ describe("migrações de campanhas anteriores", () => {
     expect(world.employment?.requiredFromDay).toBeGreaterThan(world.clock.day)
     expect(world.employment?.consecutiveAbsences).toBe(0)
     expect(world.employmentHistory).toEqual([])
-    expect(world.people).toMatchObject(original.people)
+    expectPeoplePreserved(world, original.people)
     for (const field of ["rng", "clock", "timeline", "finance", "events", "recentCommands", "vacancies"] as const) expect(world[field]).toEqual(original[field])
     expect(world.routine.pantryMeals).toBe(4)
     expect(world.scheduled.filter(item => item.kind.startsWith("work-"))).toHaveLength(2)
     expect(decodeSnapshot(encodeSnapshot(world))).toEqual(loaded)
   })
   it("migra v4 acrescentando o sexo pelo nome sem mexer no resto", () => {
-    const current = createWorld("migra-v4")
-    const people = Object.fromEntries(Object.entries(current.people).map(([id, person]) => {
+    const current = createWorld("migra-v4"), v5 = createWorldV5("migra-v4")
+    const people = Object.fromEntries(Object.entries(v5.people).map(([id, person]) => {
       const { sex: _sex, ...rest } = person
       return [id, rest]
     }))
-    const legacy = { ...current, schemaVersion: 4, people }
+    const legacy = { ...v5, schemaVersion: 4, people }
     const loaded = decodeSnapshot(JSON.stringify({ schemaVersion: 4, hash: worldHash(legacy as never), world: legacy }))
     if (!loaded.ok) throw new Error(loaded.error.message)
     expect(loaded.value).toEqual(current)
     expect(loaded.value.people["person:mother"]?.sex).toBe("F")
     expect(Object.values(loaded.value.people).every(person => person.sex === "F" || person.sex === "M")).toBe(true)
+  })
+})
+
+describe("migração v5 → v6 (mundo vivo)", () => {
+  it("dá emprego, economia, vizinhos e caixa de entrada sem tocar no que já existia", () => {
+    const v5 = createWorldV5("migra-v5")
+    const loaded = decodeSnapshot(JSON.stringify({ schemaVersion: 5, hash: worldHash(v5), world: v5 }))
+    if (!loaded.ok) throw new Error(loaded.error.message)
+    const world = loaded.value
+    expect(world).toEqual(createWorld("migra-v5"))
+    expect(world.schemaVersion).toBe(6)
+    for (const field of ["rng", "clock", "timeline", "finance", "companies", "vacancies", "memories", "employment"] as const) expect(world[field]).toEqual(v5[field])
+    expectRelationshipsPreserved(world, v5.relationships)
+    expectPeoplePreserved(world, v5.people)
+    expect(Object.keys(world.residents)).toHaveLength(Object.keys(world.people).length - 1)
+    expect(Object.keys(world.economy).sort()).toEqual(Object.keys(world.companies).sort())
+    expect(Object.values(world.relationships).filter(r => r.tags.includes("neighbor"))).toHaveLength(7)
+    expect(world.inbox).toEqual([])
+    expect(world.scheduled.filter(item => item.kind === "daily-city" || item.kind === "weekly-economy")).toHaveLength(2)
+    expect(validateWorld(world).ok).toBe(true)
+    expect(decodeSnapshot(encodeSnapshot(world))).toEqual(loaded)
   })
 })
