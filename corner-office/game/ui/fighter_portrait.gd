@@ -42,13 +42,21 @@ func _on_ready(key: String) -> void:
 	queue_redraw()
 
 
+## Moldura de card: fundo escuro, faixa diagonal na cor do corner, busto
+## ilustrado por cima e filete na base (DESIGN.md: cores só via Tokens).
 func _draw() -> void:
+	var w := size.x; var h := size.y
 	draw_rect(Rect2(Vector2.ZERO, size), Tokens.SURFACE)
+	var slab := accent; slab.a = 0.9
+	draw_colored_polygon(PackedVector2Array([Vector2(0, h * 0.62), Vector2(w, h * 0.34), Vector2(w, h), Vector2(0, h)]), slab)
+	var shade := Tokens.CANVAS; shade.a = 0.55
+	draw_colored_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w * 0.42, 0), Vector2(0, h * 0.3)]), shade)
 	if _texture:
 		draw_texture_rect(_texture, Rect2(Vector2.ZERO, size), false)
 	else:
 		var text := PortraitService.initials(fighter)
-		var fs := int(size.x * 0.36)
-		var w := Tokens.DISPLAY_FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(Tokens.DISPLAY_FONT, Vector2((size.x - w) / 2, size.y / 2 + fs * 0.35), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Tokens.MUTED)
-	draw_rect(Rect2(0, size.y - 3, size.x, 3), accent)
+		var fs := int(w * 0.36)
+		var tw := Tokens.DISPLAY_FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		draw_string(Tokens.DISPLAY_FONT, Vector2((w - tw) / 2, h / 2 + fs * 0.35), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Tokens.INK)
+	draw_rect(Rect2(0, h - 4, w, 4), accent)
+	draw_rect(Rect2(Vector2.ZERO, size), Tokens.CANVAS, false, 2.0)

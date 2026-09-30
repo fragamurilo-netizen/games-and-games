@@ -1,16 +1,18 @@
 class_name PortraitService
 extends Node
 ## Fotos dos lutadores (Game Design Bible §5). Não há segundo gerador de rostos:
-## o retrato é o mesmo `FightRenderer.head` do Fight Studio, rodando num WebView
-## invisível com os scripts originais extraídos de studio.cobundle. Cada PNG
+## o retrato usa o mesmo `drawFace` e catálogo do Fight Studio (estilo ilustrado
+## `STYLE` da biblioteca), rodando num WebView invisível com os scripts originais
+## extraídos de studio.cobundle. Cada PNG
 ## volta pela ponte do WebView e fica em cache (memória + user://portraits/).
 ## Android: plugin CornerOfficeStudio (render_portraits). Desktop: godot_wry.
 ## Sem WebView (headless, testes) a UI mostra as iniciais.
 
 signal portrait_ready(key: String)
 
-const W := 128
-const H := 160
+const W := 192
+const H := 240
+const STYLE := "flat"      # estilo de identity.js (STYLES); mudar invalida o cache
 const CACHE_DIR := "user://portraits"
 const BATCH := 24
 const SHEET := "res://presentation/portraits/portrait_sheet.js"
@@ -47,6 +49,7 @@ static func payload(f: Fighter) -> Dictionary:
 static func key_for(f: Fighter) -> String:
 	var p := payload(f)
 	p.erase("name")
+	p.style = STYLE; p.size = [W, H]; p.frame = 2
 	return "%08x" % (hash(JSON.stringify(p, "", true)) & 0xffffffff)
 
 
@@ -103,7 +106,7 @@ func sheet_html(jobs: Array) -> String:
 			var code := m.get_string(1)
 			if code.begins_with("/* Fight Night broadcast shell"): continue
 			_scripts += "<script>" + code + "</script>"
-	var sheet := FileAccess.get_file_as_string(SHEET).replace("__CO_PORTRAIT_W__", str(W)).replace("__CO_PORTRAIT_H__", str(H))
+	var sheet := FileAccess.get_file_as_string(SHEET).replace("__CO_PORTRAIT_W__", str(W)).replace("__CO_PORTRAIT_H__", str(H)).replace("__CO_PORTRAIT_STYLE__", STYLE)
 	var data := JSON.stringify(jobs).replace("<", "\\u003c")
 	return "<!doctype html><html><head><meta charset=\"utf-8\"></head><body>" + _scripts \
 		+ "<script id=\"co-portraits\" type=\"application/json\">" + data + "</script><script>" \

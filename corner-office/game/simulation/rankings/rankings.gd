@@ -221,5 +221,4 @@ func _append(world: WorldState,snapshot: Ranking) -> Ranking:
 	var k:=key(snapshot.organization_id,snapshot.division)
 	if not world.rankings.has(k):world.rankings[k]=[]
 	world.rankings[k].append(snapshot)
-	EventBus.ranking_updated.emit(snapshot.organization_id,snapshot.division)
 	return snapshot
