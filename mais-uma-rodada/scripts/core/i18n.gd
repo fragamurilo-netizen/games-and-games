@@ -30,6 +30,9 @@ static func system_language() -> String:
 
 ## Aplica o idioma salvo nas opções (chamado ao abrir o app e ao trocar nas Opções).
 static func apply(code: String) -> void:
+	# I18N_LANG=en|es força o idioma (ferramentas de revisão rodando sem as opções salvas).
+	if OS.get_environment("I18N_LANG") != "":
+		code = OS.get_environment("I18N_LANG")
 	if code not in LANGS:
 		code = DEFAULT
 	lang = code

@@ -12,6 +12,9 @@ var _exact_upper: Dictionary = {}
 var _patterns: Array = [] # {re: RegEx, anchor: String, names: Array, target: String, upper: bool}
 var _patterns_upper: Array = []
 var _cache: Dictionary = {}
+## I18N_AUDIT=arquivo: anota cada texto sem tradução (ferramenta de revisão, não usada no jogo).
+var _audit: FileAccess = null
+var _audit_seen: Dictionary = {}
 var _token_re := RegEx.create_from_string(_TOKEN)
 var _target_re := RegEx.create_from_string("%(?:\\.\\d+)?[sdf]|\\{[A-Za-z0-9_]+\\}")
 var _letter_re := RegEx.create_from_string("\\p{L}")
@@ -65,6 +68,13 @@ func lookup(src: String, depth: int = 0) -> String:
 			out = out.to_upper()
 		break
 	if depth == 0:
+		if _audit_path() != "" and not _audit_seen.has(src):
+			_audit_seen[src] = true
+			if _audit == null:
+				_audit = FileAccess.open(_audit_path(), FileAccess.WRITE)
+			if _audit != null:
+				_audit.store_line(JSON.stringify([src, out]))
+				_audit.flush()
 		if _cache.size() >= _CACHE_MAX:
 			_cache.clear()
 		_cache[src] = out
@@ -177,3 +187,7 @@ func _ordinals(text: String) -> String:
 		var n := int(m.get_string(1))
 		out = out.replace(m.get_string(), Fmt.ordinal(n))
 	return out
+
+
+func _audit_path() -> String:
+	return OS.get_environment("I18N_AUDIT")
