@@ -43,6 +43,7 @@ func _ready() -> void:
 		screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		screen.visible = false
 		screen.tab_label = tab.label
+		screen.navigate.connect(_navigate)
 		_content.add_child(screen)
 		_screens[tab.id] = screen
 
@@ -78,6 +79,14 @@ func show_tab(id: String) -> void:
 	_refresh_header()
 	for tab_id in _buttons:
 		_buttons[tab_id].button_pressed = tab_id == id
+
+
+func _navigate(id: String, payload: Dictionary) -> void:
+	_screens[id].receive(payload)
+	if _current == id:
+		_screens[id].refresh()
+	else:
+		show_tab(id)
 
 
 func _is_landscape() -> bool:

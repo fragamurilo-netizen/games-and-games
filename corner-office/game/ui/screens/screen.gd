@@ -3,7 +3,12 @@ extends MarginContainer
 ## Base das telas de aba. Subclasses sobrescrevem `title()` e `build()`.
 ## `refresh()` é chamado sempre que a aba fica visível.
 
+## Pede à casca para abrir outra aba (ex.: tocar num atleta na Início).
+signal navigate(tab: String, payload: Dictionary)
+
 var body: VBoxContainer
+## Seções recolhidas pelo jogador; sobrevivem ao refresh.
+var collapsed: Dictionary = {}
 ## Nome da aba, já exibido na placa do cabeçalho.
 var tab_label:=""
 var feedback:=""
@@ -27,6 +32,11 @@ func title() -> String:
 
 
 func build() -> void:
+	pass
+
+
+## Recebe o pedido de outra aba antes de ser mostrada (ver `navigate`).
+func receive(_payload: Dictionary) -> void:
 	pass
 
 
@@ -55,6 +65,46 @@ func add_heading(text: String) -> Label:
 	bar.add_child(l)
 	body.add_child(bar)
 	return l
+
+
+## Cabeçalho que recolhe/expande a seção. Retorna false se a seção está fechada.
+func add_section(text: String, open_by_default: bool=true) -> bool:
+	var key:=text
+	var is_open: bool=not collapsed.get(key,not open_by_default)
+	var button:=Button.new();button.text=("▾  " if is_open else "▸  ")+text.to_upper()
+	button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.custom_minimum_size.y=64
+	button.add_theme_font_size_override("font_size",30)
+	var box:=Tokens.slanted_box(Tokens.SURFACE,64);box.border_width_left=10;box.border_color=Tokens.FIGHT_RED
+	for state in ["normal","hover","pressed","hover_pressed","focus"]:button.add_theme_stylebox_override(state,box)
+	button.add_theme_color_override("font_hover_color",Tokens.INK)
+	button.pressed.connect(func():collapsed[key]=is_open;refresh())
+	body.add_child(button)
+	return is_open
+
+
+func add_node(node: Control) -> Control:
+	body.add_child(node);return node
+
+
+func add_tiles(tiles: Array) -> void:
+	body.add_child(StatWidgets.tile_row(tiles,get_viewport_rect().size.x))
+
+
+func add_bar(label: String, value: float, maximum: float=100.0, text: String="", color: Color=Tokens.INK) -> void:
+	body.add_child(StatWidgets.bar(label,value,maximum,text,color))
+
+
+## Faixa de sub-abas em paralelogramo (ex.: Elenco / Ranking / WCI).
+func add_segments(options: Array, selected: String, on_pick: Callable) -> void:
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",Tokens.SPACE_XS)
+	for option: Dictionary in options:
+		var b:=Button.new();b.text=str(option.label).to_upper();b.toggle_mode=true
+		b.button_pressed=str(option.id)==selected;b.size_flags_horizontal=SIZE_EXPAND_FILL
+		b.custom_minimum_size.y=Tokens.TOUCH_MIN-16;b.clip_text=true
+		b.add_theme_font_size_override("font_size",Tokens.FONT_SMALL-2)
+		b.pressed.connect(func():on_pick.call(option.id))
+		row.add_child(b)
+	body.add_child(row)
 
 
 func add_text(text: String, color: Color = Tokens.INK) -> Label:

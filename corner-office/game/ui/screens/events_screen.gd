@@ -7,6 +7,9 @@ var premium:=1.0
 var quote: Dictionary={}
 var creating:=false
 func title() -> String:return "Eventos"
+func receive(payload: Dictionary) -> void:
+	if payload.has("event_id"):selected_event=str(payload.event_id);creating=false
+	if payload.get("create",false):creating=true
 func build() -> void:
 	var w:=Game.world
 	var options: Array=[]
@@ -27,11 +30,12 @@ func build() -> void:
 	var ev: FightEvent=w.events[selected_event]
 	add_heading(ev.name)
 	add_text("%s · %s · %d lutas"%[GameDate.format(ev.date),CareerText.event_status(ev.status),ev.fight_ids.size()],Tokens.FIGHT_RED)
+	if ev.status=="planned":add_bar("Card montado",ev.fight_ids.size(),10,"%d/10"%ev.fight_ids.size(),Tokens.FIGHT_RED if ev.fight_ids.size()<6 else Tokens.INK)
 	for i in ev.fight_ids.size():
 		var f: Fight=w.fights[ev.fight_ids[i]]
 		var a: Fighter=w.fighters[f.fighter_a_id];var b: Fighter=w.fighters[f.fighter_b_id]
 		add_text("%02d  %s × %s"%[i+1,a.display_name(),b.display_name()])
-		add_text(CareerText.division(f.division),Tokens.MUTED)
+		add_text("%s · %s × %s"%[CareerText.division(f.division),a.record_string(),b.record_string()],Tokens.MUTED)
 		if f.status=="completed":
 			add_text("%s · %s · R%d %d:%02d"%[w.fighters[f.winner_id].display_name() if not f.winner_id.is_empty() else "Empate",f.method,f.end_round,f.end_time_s/60,f.end_time_s%60])
 			add_button("Assistir à luta",func():_watch(f))
@@ -64,15 +68,34 @@ func _matchmaker(ev: FightEvent) -> void:
 	if blue_id.is_empty() or blue_id in used:blue_id=blue_options[0].id
 	var blue:=add_select("Corner azul",blue_options,blue_id)
 	blue.item_selected.connect(func(i):blue_id=blue.get_item_metadata(i);quote={};refresh())
+	_tape(w.fighters[red_id],w.fighters[blue_id])
 	var offer:=add_select("Oferta de bolsa",[{"id":"1","label":"Contrato atual · 1×"},{"id":"1.5","label":"Aumentar 50% · 1,5×"},{"id":"2","label":"Dobrar · 2×"}],str(premium))
 	offer.item_selected.connect(func(i):premium=float(offer.get_item_metadata(i));quote={};refresh())
 	var params:={"event_id":ev.id,"red":red_id,"blue":blue_id,"premium":premium}
 	add_button("Avaliar confronto",func():
 		var result:=await run_action("evaluate",params);quote=result.get("quote",{});refresh())
 	if not quote.is_empty():
-		add_text("Esportivo %d/100 · Comercial %d/100\nAceitação: %d%% / %d%%\nBolsas até %s"%[quote.sporting_fit,quote.commercial_fit,float(quote.acceptance.get(red_id,0))*100,float(quote.acceptance.get(blue_id,0))*100,CareerText.money(int(quote.projected_cost))])
+		# Três scores separados (MMA Bible §30), cada um na sua barra.
+		add_bar("Encaixe esportivo",quote.sporting_fit,100,"",Tokens.INK)
+		add_bar("Apelo comercial",quote.commercial_fit,100,"",Tokens.INK)
+		add_bar("Aceita (vermelho)",float(quote.acceptance.get(red_id,0))*100,100,"%d%%"%roundi(float(quote.acceptance.get(red_id,0))*100),Tokens.FIGHT_RED)
+		add_bar("Aceita (azul)",float(quote.acceptance.get(blue_id,0))*100,100,"%d%%"%roundi(float(quote.acceptance.get(blue_id,0))*100),Tokens.CORNER_BLUE)
+		add_text("Bolsas até %s"%CareerText.money(int(quote.projected_cost)),Tokens.MUTED)
 		if not quote.eligible:add_text(CareerText.result(quote),Tokens.FIGHT_RED)
 	add_button("Enviar proposta",func():await run_action("propose",params);quote={};red_id="";blue_id="";refresh())
+## Tale of the tape: médias por área, cartel e medidas lado a lado.
+func _tape(red: Fighter, blue: Fighter) -> void:
+	var tape:=StatWidgets.Tape.new();tape.red_name=red.last_name;tape.blue_name=blue.last_name
+	var w:=Game.world
+	tape.rows=[
+		{"label":"Trocação","red":CareerStats.group_average(red.striking),"blue":CareerStats.group_average(blue.striking)},
+		{"label":"Wrestling","red":CareerStats.group_average(red.grappling),"blue":CareerStats.group_average(blue.grappling)},
+		{"label":"Jiu-jítsu","red":CareerStats.group_average(red.jiu_jitsu),"blue":CareerStats.group_average(blue.jiu_jitsu)},
+		{"label":"Físico","red":CareerStats.group_average(red.physical),"blue":CareerStats.group_average(blue.physical)},
+		{"label":"Mental","red":CareerStats.group_average(red.mental),"blue":CareerStats.group_average(blue.mental)},
+	]
+	add_node(tape)
+	add_text("%s  %s  ·  alcance %d × %d cm  ·  %s  %s"%[red.record_string(),CareerStats.streak_label(CareerStats.streak(w,red)),red.reach_cm,blue.reach_cm,blue.record_string(),CareerStats.streak_label(CareerStats.streak(w,blue))],Tokens.MUTED)
 func _watch(fight: Fight) -> void:
 	var viewer:=FightReplayView.new()
 	viewer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

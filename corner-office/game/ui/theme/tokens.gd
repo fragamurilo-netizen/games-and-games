@@ -20,6 +20,8 @@ const MUTED := Color("#8A939C")
 const FIGHT_RED := Color("#C83B3B")
 const STEEL := Color("#46535E")
 const CHAMP_GOLD := Color("#B88B46")
+## Corner azul do fight card; só aparece ao lado do vermelho (tale of the tape).
+const CORNER_BLUE := Color("#3E6FA8")
 
 const SPACE_XS := 4
 const SPACE_S := 8
