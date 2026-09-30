@@ -42,6 +42,9 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	screen.add_button("← Voltar sem salvar", on_done)
 	screen.add_heading("Editar lutador")
 	screen.add_text("%s · %s · %s" % [f.display_name(), f.record_string(), CareerText.division(f.division)], Tokens.MUTED)
+	var face := FaceView.of(f, 176)
+	face.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	screen.body.add_child(face)
 	var first := screen.add_input("Nome", f.first_name)
 	var last := screen.add_input("Sobrenome", f.last_name)
 	var nick := screen.add_input("Apelido (vazio = sem apelido)", f.nickname)
@@ -58,6 +61,21 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	var height := screen.add_number("Altura (cm)", f.height_cm, 140, 215)
 	var reach := screen.add_number("Envergadura (cm)", f.reach_cm, 130, 235)
 	var charisma := screen.add_number("Carisma", f.charisma, 1, 99)
+	# Prévia ao vivo: traços, idade e categoria (sexo) mudam o rosto antes de salvar.
+	var initial_pop := _value(population)
+	var preview := func(_v: Variant = null) -> void:
+		var a := f.appearance.duplicate(true)
+		if a.has("pop"):  # canônicos mantêm o retrato autoral (FighterEditor)
+			if _value(population) != initial_pop:
+				a.pop = _value(population)
+			a.age = int(age.value)
+		var probe := Fighter.new()
+		probe.id = f.id
+		probe.sex = Fighter.Sex.FEMALE if _value(division).begins_with("w_") else Fighter.Sex.MALE
+		face.set_face(FaceView.face_of(probe, a))
+	population.item_selected.connect(preview)
+	division.item_selected.connect(preview)
+	age.value_changed.connect(preview)
 
 	screen.add_heading("Atributos")
 	screen.add_text("A média de cada grupo desloca todos os atributos dele. Abra o detalhe para ajustar um a um.", Tokens.MUTED)

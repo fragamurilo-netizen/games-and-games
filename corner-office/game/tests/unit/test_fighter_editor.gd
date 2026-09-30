@@ -93,6 +93,8 @@ func test_editor_screens_build() -> void:
 	screen.editing = id
 	screen.refresh()
 	check(screen.body.get_child_count() > 60, "editor montado (%d controles)" % screen.body.get_child_count())
+	var faces := screen.body.get_children().filter(func(n): return n is FaceView)
+	check(faces.size() == 1 and not faces[0].face.is_empty(), "editor mostra o rosto do atleta")
 	screen.editing = ""
 	screen.selected_fighter = id
 	screen.refresh()
