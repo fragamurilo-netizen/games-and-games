@@ -243,3 +243,30 @@ limites da arena, repetibilidade e preservação do registro original.
 O pescoço foi encurtado no rig e no tronco; os pontos de contato de golpes altos
 acompanham a nova altura. Cada perna do short segue o segmento quadril–joelho,
 com barra e costura próprias. O cós acompanha a pelve e o top gira com o tronco.
+
+## Fight Night — experiência de transmissão (`broadcast.html`)
+
+Linguagem de menus e grafismo inspirada em UFC Undisputed 3 (painéis diagonais,
+cantos vermelho/azul, Chakra Petch inclinada), sem marcas, pessoas ou frases reais.
+O locutor é o fictício **Dario Valente** — não usar nome, voz ou bordões de
+locutores reais. Fluxo, sempre sobre o mesmo renderer do laboratório:
+
+1. **Abertura** — nome da noite, cidade, posição no card e disputa de cinturão
+   (`replay.presentation`, gerado por `FightReplayBuilder.presentation`).
+2. **Walkouts** — câmera fecha em cada atleta (azul, depois vermelho), árbitro
+   oculto; ficha com apelido, cartel, idade, ranking e bandeira.
+3. **Tale of the tape** e apresentação do locutor com legenda esticada no sobrenome
+   (TTS pt-BR opcional; legenda sempre visível), bordão "QUE A NOITE DECIDA!".
+4. **Luta** — câmera diretor (zoom por distância, clinch, chão, tremor em impactos),
+   HUD de energia/dano, callouts (QUEDA!, KNOCKDOWN!, FINALIZAÇÃO ENCAIXADA...),
+   intervalo com estatísticas do round e frase do córner.
+5. **Final** — replay em câmera lenta (0,35×) dos últimos ~2,6 s em KO/finalização,
+   leitura dos juízes ou do método, "E AINDA/E NOVO" em lutas de título e tela de
+   resultado com estatísticas oficiais (`replay.stats`).
+
+Toque no palco avança a cerimônia; PULAR e "SÓ A LUTA" vão direto ao combate.
+Áudio é sintetizado em WebAudio (gongo, torcida, impactos, batida do walkout).
+A apresentação só lê o replay: contagens como tentativas de finalização vêm dos
+eventos do motor, nunca de estimativa. O árbitro tem rosto do gerador e uniforme
+próprio; `renderer.view` (zoom/foco/tremor) e `renderer.hud` são opcionais e não
+alteram o laboratório quando ausentes.

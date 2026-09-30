@@ -1,14 +1,54 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Corner Office · Transmissão</title>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Corner Office · Fight Night</title>
 <link rel="stylesheet" href="broadcast.css">
 <script src="../face-lab/studio.js"></script><script src="../face-lab/identity.js"></script><script src="replay.js"></script><script src="appearance.js"></script><script src="renderer.js"></script>
-</head><body>
-<header><button id="back" type="button">← CARREIRA</button><strong>CO<span>SPORTS</span></strong><small>FIGHT NIGHT · REPLAY</small></header>
-<main><div class="stage"><canvas id="fight" aria-label="Transmissão da luta simulada"></canvas><div class="scorebug"><strong id="red"></strong><div><span id="round"></span><b id="clock"></b></div><strong id="blue"></strong></div></div>
-<div class="commentary"><strong id="action">Carregando transmissão…</strong><span id="outcome"></span></div>
-<div id="result" hidden></div><div id="error" role="alert" hidden></div>
-<label class="timeline"><span id="time">0:00</span><input id="seek" type="range" min="0" max="1" value="0" aria-label="Momento da luta"></label>
-<div class="controls"><button id="play" type="button">REPRODUZIR</button><select id="speed" aria-label="Velocidade"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option></select><button id="instant" type="button">RESULTADO</button><select id="camera" aria-label="Câmera"><option value="broadcast">TV</option><option value="detail">Próxima</option><option value="tactical">Arena</option></select></div>
+</head><body data-phase="loading">
+<header class="topbar">
+  <button id="back" type="button" aria-label="Voltar à carreira">←</button>
+  <strong class="brand">CO<span>SPORTS</span></strong>
+  <span id="eventline" class="eventline"></span>
+  <button id="mute" type="button" aria-pressed="false" aria-label="Som">SOM</button>
+  <button id="skip" type="button">PULAR</button>
+</header>
+<main>
+  <div class="stage" id="stage">
+    <canvas id="fight" aria-label="Transmissão da luta simulada"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <div class="hud" id="hud" hidden>
+      <div class="hud-side red"><span class="corner-tag">VERMELHO</span><strong id="hud-red"></strong>
+        <div class="bars"><i class="stamina"><b id="st-red"></b></i><i class="damage"><b id="dm-red"></b></i></div></div>
+      <div class="hud-clock"><span id="hud-round"></span><b id="hud-clock"></b></div>
+      <div class="hud-side blue"><span class="corner-tag">AZUL</span><strong id="hud-blue"></strong>
+        <div class="bars"><i class="stamina"><b id="st-blue"></b></i><i class="damage"><b id="dm-blue"></b></i></div></div>
+    </div>
+
+    <div class="callout" id="callout" aria-live="assertive"></div>
+    <div class="replay-tag" id="replaytag" hidden>REPLAY</div>
+    <div class="ticker" id="ticker" aria-live="polite"><span id="tick-action"></span><em id="tick-outcome"></em></div>
+
+    <section class="show" id="show" aria-live="polite"></section>
+    <div class="announcer" id="announcer" hidden><span class="who" id="speaker"></span><p id="line"></p></div>
+
+    <div class="gate" id="gate">
+      <div class="gate-card">
+        <span class="kicker">CO SPORTS APRESENTA</span>
+        <h1 id="gate-title">FIGHT NIGHT</h1>
+        <p id="gate-sub"></p>
+        <button id="start" type="button">INICIAR TRANSMISSÃO</button>
+        <button id="start-fast" type="button" class="ghost">SÓ A LUTA</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls" id="controls" hidden>
+    <button id="play" type="button">PAUSAR</button>
+    <select id="speed" aria-label="Velocidade"><option value="1">1×</option><option value="2">2×</option><option value="5">5×</option></select>
+    <select id="camera" aria-label="Câmera"><option value="director">DIRETOR</option><option value="broadcast">TV</option><option value="detail">PRÓXIMA</option><option value="tactical">ARENA</option></select>
+    <button id="instant" type="button">RESULTADO</button>
+  </div>
+  <label class="timeline" id="timeline" hidden><span id="time">0:00</span><div class="track"><input id="seek" type="range" min="0" max="1" value="0" aria-label="Momento da luta"><div class="marks" id="marks" aria-hidden="true"></div></div></label>
+  <div id="error" role="alert" hidden></div>
 </main>
 <!-- Build tool replaces the scripts below with a single offline payload. -->
 <script src="broadcast.js"></script></body></html>

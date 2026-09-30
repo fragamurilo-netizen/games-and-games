@@ -66,6 +66,10 @@ Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações r
 
 **Calibragem do combate (feita):** o soak `tools/soak_fights.gd` (3000 lutas geradas) mostrava ~50% de finalizações. As constantes de finalização, golpe limpo, peso da técnica (`skill_spread`) e dano por sexo agora vivem em `fight_tuning.json`. Resultado: masc. 20% finalização / 33% KO-TKO / 45% decisão; fem. 19% / 20% / 60%; favorito técnico vence ~57% das lutas equilibradas. `test_combat_calibration` trava regressões grosseiras.
 
+## Fight Night (Claude, 30/09/2026)
+
+`broadcast.html` virou uma noite completa no estilo UD3: abertura, walkouts, tale of the tape, locutor fictício Dario Valente (nunca usar locutores reais), HUD, câmera diretor, intervalos, replay em câmera lenta do final, cerimônia e tela de resultado. Dados extras em `replay.presentation`. Detalhes em `FIGHT_VISUALS.md`. Próximo passo natural: levar a mesma linguagem visual às telas Godot da carreira.
+
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.

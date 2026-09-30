@@ -78,3 +78,18 @@ func test_replay_blood_requires_recorded_cuts_and_is_seek_stable() -> void:
 	for id: String in dry.fighter_ids:dry.initial_state.cuts[id]=0.0
 	check(player.load_replay(dry),"Dry replay validates")
 	check_eq(player.seek_ms(player.duration_ms).stains.size(),0,"No blood invented without recorded cuts")
+
+
+func test_replay_carries_broadcast_presentation() -> void:
+	var world := WorldGenerator.generate(4, "regional_promoter")
+	var ev: FightEvent = world.events.values().filter(func(e): return e.organization_id != world.player_org_id and e.status == "announced")[0]
+	var fight: Fight = world.fights[ev.fight_ids[-1]]
+	world.date = ev.date.duplicate()
+	WorldSim.new(world).run_event(ev.id)
+	var replay := FightReplayBuilder.build(world, fight)
+	check_eq(replay.presentation.event_name, ev.name, "Nome do evento na transmissão")
+	check_eq(replay.presentation.card_slot, "main_event", "Última luta é a principal")
+	for id: String in replay.fighter_ids:
+		var info: Dictionary = replay.presentation.fighters[id]
+		check(int(info.get("age", 0)) >= 18 and int(info.get("age", 0)) <= 50, "Idade plausível: %s" % info)
+	check(FightReplayPlayer.new().load_replay(replay), "Presentation não quebra o contrato do replay")

@@ -10,6 +10,10 @@
       this.heads = new Map();
       this.camera = "broadcast";
       this.showRig = false;
+      // Optional director camera (broadcast shell): zoom/focus/shake around the
+      // cage floor. Presentation only; the replay pose data is untouched.
+      this.view = null;
+      this.hud = true;
     }
     head(f) {
       const key = JSON.stringify(f);
@@ -86,6 +90,14 @@
         c.lineTo(W * 0.5 - side * W * 0.08, H * 0.75);
         c.fill();
       }
+      const view = this.view;
+      if (view) {
+        c.save();
+        const zoom = view.zoom || 1;
+        c.translate(W * 0.5 + (view.shakeX || 0), this.floor + (view.shakeY || 0));
+        c.scale(zoom, zoom);
+        c.translate(-W * 0.5 - (view.focusX || 0) * this.S, -this.floor + (view.lift || 0) * this.S);
+      }
       this.arena(arena, false);
       this.blood(frame.stains || []);
       const ids = Object.keys(frame.poses),
@@ -125,6 +137,8 @@
       this.arena(arena, true);
       if (frame.clip.category === "official")
         this.referee(frame.progress, frame.event.technique_id, offset);
+      if (view) c.restore();
+      if (!this.hud) return;
       c.fillStyle = "rgba(12,16,19,.70)";
       c.fillRect(18, 18, 170, 29);
       c.fillStyle = "#E6E3DB";
@@ -760,29 +774,63 @@
       }
     }
     referee(t, id, offset) {
+      if (this.hideReferee) return;
       const c = this.ctx,
         p = this.project(offset - 1.7, 0.02, 0.7),
-        s = this.S;
+        s = this.S,
+        stop = id === "referee_stop";
+      // Same identity library as the athletes; one stable official per renderer.
+      if (!this.refFace && typeof genFace === "function") this.refFace = genFace(90210, "misto", "m");
+      const skin = "#b88a68", shirt = "#15191d", trousers = "#2b3036", glove = "#3f73b3";
       c.save();
       c.translate(...p);
-      c.fillStyle = "#10171D";
-      c.fillRect(-0.13 * s, -1.2 * s, 0.26 * s, 0.64 * s);
-      this.line([-0.08 * s, -0.6 * s], [-0.19 * s, 0], "#161D23", 0.12 * s);
-      this.line([0.08 * s, -0.6 * s], [0.2 * s, 0], "#161D23", 0.12 * s);
-      c.fillStyle = "#AA886C";
+      // trousers and shoes
+      for (const side of [-1, 1]) {
+        this.line([side * 0.08 * s, -0.94 * s], [side * 0.13 * s, -0.05 * s], trousers, 0.15 * s);
+        c.fillStyle = "#0b0d0f";
+        c.beginPath();
+        c.ellipse(side * 0.15 * s, -0.03 * s, 0.1 * s, 0.045 * s, 0, 0, Math.PI * 2);
+        c.fill();
+      }
+      // shirt with soft left key light, collar and belt
+      const g = c.createLinearGradient(-0.22 * s, 0, 0.22 * s, 0);
+      g.addColorStop(0, "#2a3138");
+      g.addColorStop(0.5, shirt);
+      g.addColorStop(1, "#07090b");
+      c.fillStyle = g;
       c.beginPath();
-      c.ellipse(0, -1.36 * s, 0.105 * s, 0.14 * s, 0, 0, Math.PI * 2);
+      c.moveTo(-0.23 * s, -1.46 * s);
+      c.quadraticCurveTo(0, -1.53 * s, 0.23 * s, -1.46 * s);
+      c.quadraticCurveTo(0.21 * s, -1.2 * s, 0.17 * s, -0.92 * s);
+      c.lineTo(-0.17 * s, -0.92 * s);
+      c.quadraticCurveTo(-0.21 * s, -1.2 * s, -0.23 * s, -1.46 * s);
       c.fill();
-      for (const side of [-1, 1])
-        this.line(
-          [side * 0.13 * s, -1.13 * s],
-          [
-            side * (0.24 + t * 0.16) * s,
-            -s * (id === "referee_stop" ? 1.05 : 0.74),
-          ],
-          "#172128",
-          0.09 * s,
-        );
+      this.line([-0.17 * s, -0.93 * s], [0.17 * s, -0.93 * s], "#0b0d0f", 0.04 * s);
+      this.line([-0.06 * s, -1.5 * s], [0, -1.42 * s], "#3a434c", 0.02 * s);
+      this.line([0.06 * s, -1.5 * s], [0, -1.42 * s], "#3a434c", 0.02 * s);
+      // arms: short black sleeves, skin forearms, blue exam gloves
+      for (const side of [-1, 1]) {
+        const shoulder = [side * 0.22 * s, -1.42 * s];
+        const elbow = stop && side === 1
+          ? [side * 0.46 * s, -1.34 * s]
+          : [side * 0.27 * s, -1.12 * s];
+        const hand = stop && side === 1
+          ? [side * (0.7 + t * 0.14) * s, -1.3 * s]
+          : [side * (0.3 + t * 0.08) * s, -0.86 * s];
+        this.line(shoulder, elbow, skin, 0.085 * s);
+        this.line(shoulder, [(shoulder[0] + elbow[0]) / 2, (shoulder[1] + elbow[1]) / 2], shirt, 0.11 * s);
+        this.line(elbow, hand, skin, 0.075 * s);
+        c.fillStyle = glove;
+        c.beginPath();
+        c.ellipse(hand[0], hand[1], 0.055 * s, 0.06 * s, 0, 0, Math.PI * 2);
+        c.fill();
+      }
+      // neck and face
+      this.line([0, -1.46 * s], [0, -1.55 * s], skin, 0.1 * s);
+      if (this.refFace) {
+        const sprite = this.head(this.refFace), headW = s * 0.32, headH = s * 0.4;
+        c.drawImage(sprite, -headW / 2, -1.66 * s - headH * 0.54, headW, headH);
+      }
       c.restore();
     }
   }
