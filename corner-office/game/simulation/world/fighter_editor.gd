@@ -9,7 +9,7 @@ const GROUPS := ["striking", "grappling", "jiu_jitsu", "physical", "mental"]
 const STANCES := ["orthodox", "southpaw", "switch"]
 
 
-## p: division, country, martial_base, fight_style, age, level, population,
+## p: division, country, discipline (ou martial_base), fight_style, age, level, population,
 ## prospect (bool), to_roster (bool). Campos vazios = sorteio do gerador.
 static func create(world: WorldState, p: Dictionary) -> Dictionary:
 	var opts := _generation_opts(world, p)
@@ -41,7 +41,7 @@ static func reroll(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 	var fresh := FighterGenerator.create(world, opts)
 	var old_division := f.division
 	for key: String in ["first_name", "last_name", "nickname", "country", "city", "languages", "sex", "birth_date", "gym_id",
-			"height_cm", "reach_cm", "stance", "body_type", "division", "natural_weight_kg", "martial_base", "fight_style", "style",
+			"height_cm", "reach_cm", "stance", "body_type", "division", "natural_weight_kg", "martial_base", "discipline", "fight_style", "style",
 			"striking", "grappling", "jiu_jitsu", "physical", "mental", "hidden", "potential", "record", "career_goals",
 			"popularity_by_region", "charisma", "appearance", "bio"]:
 		f.set(key, fresh.get(key))
@@ -70,8 +70,13 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 			reasons.append(Reason.make("INVALID_DIVISION"))
 		elif _is_booked(world, f):
 			reasons.append(Reason.make("FIGHTER_BOOKED"))
-	var base := str(p.get("martial_base", f.martial_base))
-	if not cfg.archetypes.has(base):
+	var arts := FighterGenerator.martial_arts()
+	var discipline := str(p.get("discipline", f.discipline))
+	if p.has("martial_base") and not p.has("discipline") and cfg.archetypes.has(str(p.martial_base)) and str(p.martial_base) != f.martial_base:
+		discipline = FighterGenerator.pick_discipline(world.rng, arts, cfg.countries.get(country, {}).get("disciplines", {}), "", str(p.martial_base))
+	if not discipline.is_empty() and not arts.has(discipline):
+		reasons.append(Reason.make("INVALID_STYLE"))
+	elif discipline.is_empty() and not cfg.archetypes.has(f.martial_base):
 		reasons.append(Reason.make("INVALID_STYLE"))
 	var fight_style := str(p.get("fight_style", f.fight_style))
 	if not fight_style.is_empty() and not cfg.fight_styles.has(fight_style):
@@ -104,10 +109,21 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 	if division != f.division:
 		f.division = division
 		f.sex = Fighter.Sex.FEMALE if division.begins_with("w_") else Fighter.Sex.MALE
-	f.martial_base = base
-	if fight_style != f.fight_style:
+	if discipline != f.discipline:
+		# Trocar de arte marcial troca também o "sotaque" dos atributos.
+		var before: Dictionary = arts.get(f.discipline, {}).get("attributes", {})
+		var after: Dictionary = arts[discipline].attributes
+		for group: String in GROUPS:
+			var values: Dictionary = f.get(group)
+			for attribute: String in values:
+				var delta := int(after.get(attribute, 0)) - int(before.get(attribute, 0))
+				if delta != 0:
+					values[attribute] = clampi(int(values[attribute]) + delta, 1, 99)
+		f.discipline = discipline
+		f.martial_base = str(arts[discipline].family)
+	if fight_style != f.fight_style or p.has("discipline") or p.has("martial_base"):
 		f.fight_style = fight_style
-		f.style = cfg.fight_styles[fight_style]["style"].duplicate() if not fight_style.is_empty() else {}
+		f.style = FighterGenerator.style_weights(cfg, fight_style, arts.get(f.discipline, {}))
 	f.stance = stance
 	f.body_type = body_type
 	if p.has("age"):
@@ -150,13 +166,16 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 ## Listas para o formulário (ids + nomes vindos do conteúdo).
 static func options() -> Dictionary:
 	var cfg: Dictionary = ContentDB.load_json(FighterGenerator.CONTENT)
-	var out := {"countries": [], "martial_bases": [], "fight_styles": [], "populations": [], "body_types": [], "stances": [], "divisions": []}
+	var out := {"countries": [], "disciplines": [], "fight_styles": [], "populations": [], "body_types": [], "stances": [], "divisions": []}
 	var codes: Array = cfg.countries.keys()
 	codes.sort_custom(func(a, b): return str(cfg.country_names.get(a, a)) < str(cfg.country_names.get(b, b)))
 	for code: String in codes:
 		out.countries.append({"id": code, "label": str(cfg.country_names.get(code, code))})
-	for base: String in cfg.archetypes:
-		out.martial_bases.append({"id": base, "label": FighterGenerator.base_name(base, cfg)})
+	var arts := FighterGenerator.martial_arts()
+	var ids: Array = arts.keys()
+	ids.sort_custom(func(a, b): return str(arts[a].name) < str(arts[b].name))
+	for id: String in ids:
+		out.disciplines.append({"id": id, "label": str(arts[id].name)})
 	for style: String in cfg.fight_styles:
 		out.fight_styles.append({"id": style, "label": str(cfg.fight_styles[style].name)})
 	for pop: String in cfg.population_names:
@@ -188,7 +207,7 @@ static func _generation_opts(world: WorldState, p: Dictionary) -> Dictionary:
 		if not _division_exists(division):
 			return {"error": "INVALID_DIVISION"}
 		opts.division = division
-	for key: String in ["country", "martial_base", "fight_style", "population"]:
+	for key: String in ["country", "discipline", "martial_base", "fight_style", "population"]:
 		var value := str(p.get(key, ""))
 		if not value.is_empty():
 			opts[key] = value

@@ -42,14 +42,15 @@ static func create(world: WorldState, opts: Dictionary = {}) -> Fighter:
 		if not used.has(f.first_name + " " + f.last_name):
 			break
 	used[f.first_name + " " + f.last_name] = true
-	f.martial_base = str(rng.weighted(origin.martial_bases))
-	if cfg.archetypes.has(str(opts.get("martial_base", ""))):
-		f.martial_base = str(opts.martial_base)
+	var arts: Dictionary = martial_arts()
+	f.discipline = pick_discipline(rng, arts, origin.disciplines, str(opts.get("discipline", "")), str(opts.get("martial_base", "")))
+	var art: Dictionary = arts[f.discipline]
+	f.martial_base = str(art.family)
 	var arch: Dictionary = cfg.archetypes.get(f.martial_base, cfg.archetypes.mma)
 	f.fight_style = str(opts.get("fight_style", ""))
 	if not cfg.fight_styles.has(f.fight_style):
-		f.fight_style = pick_fight_style(rng, cfg, f.martial_base)
-	f.style = cfg.fight_styles[f.fight_style]["style"].duplicate()
+		f.fight_style = pick_fight_style(rng, cfg, art)
+	f.style = style_weights(cfg, f.fight_style, art)
 	f.stance = str(rng.weighted(arch.stance))
 	f.gym_id = _pick_gym(rng, country, f.martial_base)
 
@@ -86,7 +87,7 @@ static func create(world: WorldState, opts: Dictionary = {}) -> Fighter:
 	var prime: Dictionary = cfg.prime
 	if age < int(prime.start):
 		level -= (int(prime.start) - age) * float(prime.young_penalty_per_year)
-	_roll_attributes(world, f, cfg, arch, level, cfg.fight_styles[f.fight_style]["keys"])
+	_roll_attributes(world, f, cfg, arch, level, cfg.fight_styles[f.fight_style]["keys"], art.attributes)
 	_apply_age(f, cfg, age)
 	f.hidden = _roll_hidden(rng, cfg, f.martial_base)
 	var growth := 0.0
@@ -154,11 +155,11 @@ static func monthly_intake(world: WorldState) -> Array:
 			item.headline = str(story.get("prospect_headline", "{fighter} chega ao mercado")).format({"fighter": f.display_name()})
 			item.body = str(story.get("prospect_body", "")).format({
 				"age": f.age_on(world.date), "record": f.record_string(), "city": f.city,
-				"division": f.division, "base": base_name(f.martial_base, cfg)})
+				"division": f.division, "base": discipline_name(f)})
 	return created
 
 
-static func _roll_attributes(world: WorldState, f: Fighter, cfg: Dictionary, arch: Dictionary, level: float, style_keys: Array = []) -> void:
+static func _roll_attributes(world: WorldState, f: Fighter, cfg: Dictionary, arch: Dictionary, level: float, style_keys: Array = [], art_offsets: Dictionary = {}) -> void:
 	var attrs: Dictionary = ContentDB.load_json("attributes.json")
 	var noise := float(cfg.attribute_noise)
 	var bonus := float(cfg.key_attribute_bonus)
@@ -172,6 +173,7 @@ static func _roll_attributes(world: WorldState, f: Fighter, cfg: Dictionary, arc
 				v += bonus
 			if attribute in style_keys:
 				v += float(cfg.fight_style_key_bonus)
+			v += float(art_offsets.get(attribute, 0))
 			values[attribute] = clampi(int(round(v)), lo, hi)
 		f.set(group, values)
 
@@ -244,22 +246,57 @@ static func _bio(rng: SimRandom, cfg: Dictionary, f: Fighter, age: int) -> Strin
 		if g.id == f.gym_id:
 			gym = g.name
 	return str(rng.pick(cfg.bios[phase])).format({
-		"age": age, "city": f.city, "base": base_name(f.martial_base, cfg), "gym": gym,
+		"age": age, "city": f.city, "base": discipline_name(f), "gym": gym,
 		"record": f.record_string(), "fights": f.record.wins + f.record.losses + f.record.draws})
 
 
-static func pick_fight_style(rng: SimRandom, cfg: Dictionary, base: String) -> String:
+static func martial_arts() -> Dictionary:
+	return ContentDB.load_json("martial_arts.json").disciplines
+
+
+## Arte marcial: a escolhida; senão uma do país dentro da família pedida;
+## senão sorteio pelos pesos do país.
+static func pick_discipline(rng: SimRandom, arts: Dictionary, country_weights: Dictionary, wanted: String, family: String) -> String:
+	if arts.has(wanted):
+		return wanted
+	if not family.is_empty():
+		var weights := {}
+		for id: String in arts:
+			if arts[id].family == family:
+				weights[id] = float(country_weights.get(id, 0.05))
+		if not weights.is_empty():
+			return str(rng.weighted(weights))
+	return str(rng.weighted(country_weights))
+
+
+static func pick_fight_style(rng: SimRandom, cfg: Dictionary, art: Dictionary) -> String:
 	var weights := {}
 	for id: String in cfg.fight_styles:
-		weights[id] = float(cfg.fight_styles[id].bases.get(base, 0.15))
+		weights[id] = float(art.fight_styles.get(id, 0.15))
 	return str(rng.weighted(weights))
 
 
-## Nome legível da base marcial (conteúdo, não código).
+## Pesos por categoria de técnica: estilo de luta × tendência da arte marcial.
+static func style_weights(cfg: Dictionary, fight_style: String, art: Dictionary) -> Dictionary:
+	var out: Dictionary = cfg.fight_styles[fight_style]["style"].duplicate() if cfg.fight_styles.has(fight_style) else {}
+	for category: String in art.get("intent", {}):
+		out[category] = snappedf(float(out.get(category, 1.0)) * float(art.intent[category]), 0.01)
+	return out
+
+
+## Nome legível da arte marcial do atleta (canônicos sem arte usam a família).
+static func discipline_name(f: Fighter) -> String:
+	var arts := martial_arts()
+	if arts.has(f.discipline):
+		return str(arts[f.discipline].name)
+	return base_name(f.martial_base)
+
+
+## Nome legível da família marcial (conteúdo, não código).
 static func base_name(base: String, cfg: Dictionary = {}) -> String:
 	if cfg.is_empty():
 		cfg = ContentDB.load_json(CONTENT)
-	return str(cfg.martial_base_names.get(base, base))
+	return str(cfg.family_names.get(base, base))
 
 
 static func _pick_gym(rng: SimRandom, country: String, base: String) -> String:

@@ -24,15 +24,6 @@
     "mediterraneo": 1.5,
     "europa_norte": 0.3
    },
-   "martial_bases": {
-    "bjj": 4,
-    "muay_thai": 3,
-    "boxing": 1.5,
-    "mma": 2,
-    "wrestling": 0.6,
-    "judo": 0.6,
-    "karate": 0.5
-   },
    "male": [
     "Caio",
     "Bruno",
@@ -92,7 +83,18 @@
     "Queiroz",
     "Machado",
     "Brandão"
-   ]
+   ],
+   "disciplines": {
+    "bjj": 4,
+    "muay_thai": 3,
+    "boxing": 1.5,
+    "mma": 2,
+    "luta_livre": 0.8,
+    "judo": 0.6,
+    "capoeira": 0.4,
+    "freestyle_wrestling": 0.5,
+    "karate_shotokan": 0.4
+   }
   },
   "US": {
    "weight": 18,
@@ -121,13 +123,6 @@
     "sul_asiatico": 0.3,
     "polinesia": 0.2,
     "oriente_medio": 0.3
-   },
-   "martial_bases": {
-    "wrestling": 4,
-    "boxing": 2.5,
-    "mma": 3,
-    "bjj": 1.5,
-    "kickboxing": 1
    },
    "male": [
     "Evan",
@@ -188,7 +183,17 @@
     "Stroud",
     "Tillman",
     "Vance"
-   ]
+   ],
+   "disciplines": {
+    "folkstyle_wrestling": 3,
+    "freestyle_wrestling": 1,
+    "boxing": 2.5,
+    "mma": 3,
+    "bjj": 1.5,
+    "kickboxing": 1,
+    "catch_wrestling": 0.2,
+    "karate_kyokushin": 0.2
+   }
   },
   "MX": {
    "weight": 8,
@@ -210,13 +215,6 @@
     "latino": 6,
     "andino": 2,
     "mediterraneo": 1
-   },
-   "martial_bases": {
-    "boxing": 5,
-    "mma": 2,
-    "kickboxing": 1,
-    "wrestling": 1,
-    "bjj": 1
    },
    "male": [
     "Emilio",
@@ -269,7 +267,14 @@
     "Treviño",
     "Olvera",
     "Zamora"
-   ]
+   ],
+   "disciplines": {
+    "boxing": 5,
+    "mma": 2,
+    "kickboxing": 1,
+    "freestyle_wrestling": 1,
+    "bjj": 1
+   }
   },
   "GB": {
    "weight": 6,
@@ -293,13 +298,6 @@
     "sul_asiatico": 1,
     "mediterraneo": 0.5,
     "africa_ocidental": 0.5
-   },
-   "martial_bases": {
-    "kickboxing": 3,
-    "boxing": 2.5,
-    "mma": 2,
-    "bjj": 1,
-    "wrestling": 0.5
    },
    "male": [
     "Callum",
@@ -346,7 +344,15 @@
     "Fenwick",
     "Barrow",
     "Critchley"
-   ]
+   ],
+   "disciplines": {
+    "kickboxing": 2,
+    "boxing": 2.5,
+    "mma": 2,
+    "bjj": 1,
+    "catch_wrestling": 0.4,
+    "muay_thai": 0.6
+   }
   },
   "IE": {
    "weight": 2,
@@ -362,12 +368,6 @@
    ],
    "populations": {
     "europa_norte": 1
-   },
-   "martial_bases": {
-    "boxing": 2,
-    "mma": 2,
-    "kickboxing": 1,
-    "bjj": 1
    },
    "male": [
     "Cian",
@@ -398,7 +398,13 @@
     "Mulligan",
     "Fitzgerald",
     "Hanlon"
-   ]
+   ],
+   "disciplines": {
+    "boxing": 2,
+    "mma": 2,
+    "kickboxing": 1,
+    "bjj": 1
+   }
   },
   "FR": {
    "weight": 3,
@@ -419,13 +425,6 @@
     "europa_norte": 2,
     "oriente_medio": 1.5,
     "africa_ocidental": 1.5
-   },
-   "martial_bases": {
-    "kickboxing": 2,
-    "judo": 2,
-    "mma": 2,
-    "boxing": 1,
-    "bjj": 1
    },
    "male": [
     "Théo",
@@ -459,7 +458,15 @@
     "Mercier",
     "Garnier",
     "Diallo"
-   ]
+   ],
+   "disciplines": {
+    "savate": 1.5,
+    "judo": 2,
+    "kickboxing": 1.5,
+    "mma": 2,
+    "boxing": 1,
+    "bjj": 1
+   }
   },
   "PL": {
    "weight": 4,
@@ -476,13 +483,6 @@
    ],
    "populations": {
     "leste_europeu": 1
-   },
-   "martial_bases": {
-    "wrestling": 2,
-    "kickboxing": 2,
-    "mma": 2,
-    "judo": 1,
-    "boxing": 1
    },
    "male": [
     "Kacper",
@@ -514,7 +514,15 @@
     "Kaczmarek",
     "Sikora",
     "Mazur"
-   ]
+   ],
+   "disciplines": {
+    "freestyle_wrestling": 1.5,
+    "greco_roman": 1,
+    "kickboxing": 2,
+    "mma": 2,
+    "judo": 1,
+    "boxing": 1
+   }
   },
   "JP": {
    "weight": 5,
@@ -532,14 +540,6 @@
    ],
    "populations": {
     "leste_asiatico": 1
-   },
-   "martial_bases": {
-    "judo": 3,
-    "karate": 3,
-    "kickboxing": 2,
-    "mma": 2,
-    "wrestling": 1,
-    "bjj": 1
    },
    "male": [
     "Ren",
@@ -582,7 +582,19 @@
     "Tamura",
     "Yoshida",
     "Sakai"
-   ]
+   ],
+   "disciplines": {
+    "judo": 3,
+    "karate_shotokan": 1.5,
+    "karate_kyokushin": 1.5,
+    "kickboxing": 2,
+    "mma": 2,
+    "catch_wrestling": 0.5,
+    "freestyle_wrestling": 1,
+    "bjj": 0.5,
+    "kudo": 0.4,
+    "sumo": 0.2
+   }
   },
   "KR": {
    "weight": 4,
@@ -599,14 +611,6 @@
    ],
    "populations": {
     "leste_asiatico": 1
-   },
-   "martial_bases": {
-    "taekwondo": 3,
-    "kickboxing": 2,
-    "mma": 2,
-    "judo": 1,
-    "wrestling": 1,
-    "boxing": 1
    },
    "male": [
     "Min-jun",
@@ -639,7 +643,15 @@
     "Shin",
     "Oh",
     "Seo"
-   ]
+   ],
+   "disciplines": {
+    "taekwondo": 3,
+    "kickboxing": 1.5,
+    "mma": 2,
+    "judo": 1,
+    "freestyle_wrestling": 0.6,
+    "boxing": 1
+   }
   },
   "KZ": {
    "weight": 5,
@@ -658,13 +670,6 @@
    "populations": {
     "asia_central": 4,
     "leste_europeu": 1
-   },
-   "martial_bases": {
-    "wrestling": 4,
-    "sambo": 3,
-    "boxing": 2,
-    "judo": 1,
-    "mma": 1
    },
    "male": [
     "Arman",
@@ -705,7 +710,17 @@
     "Temirov",
     "Serikbayev",
     "Utebayev"
-   ]
+   ],
+   "disciplines": {
+    "freestyle_wrestling": 2,
+    "greco_roman": 1,
+    "kazakh_kuresi": 1.5,
+    "combat_sambo": 2,
+    "sambo": 1,
+    "boxing": 2,
+    "judo": 1,
+    "mma": 1
+   }
   },
   "GE": {
    "weight": 3,
@@ -721,12 +736,6 @@
    ],
    "populations": {
     "caucaso": 1
-   },
-   "martial_bases": {
-    "wrestling": 4,
-    "judo": 3,
-    "sambo": 2,
-    "mma": 1
    },
    "male": [
     "Giorgi",
@@ -757,7 +766,14 @@
     "Gogua",
     "Dolidze",
     "Meskhi"
-   ]
+   ],
+   "disciplines": {
+    "freestyle_wrestling": 2,
+    "greco_roman": 2,
+    "judo": 3,
+    "sambo": 2,
+    "mma": 1
+   }
   },
   "AU": {
    "weight": 5,
@@ -779,14 +795,6 @@
     "polinesia": 1,
     "leste_asiatico": 0.6,
     "afro_diaspora": 0.3
-   },
-   "martial_bases": {
-    "kickboxing": 2.5,
-    "boxing": 2,
-    "mma": 2,
-    "bjj": 1.5,
-    "wrestling": 1,
-    "muay_thai": 1
    },
    "male": [
     "Jack",
@@ -820,7 +828,15 @@
     "Nolan",
     "Radford",
     "Tipene"
-   ]
+   ],
+   "disciplines": {
+    "kickboxing": 2.5,
+    "boxing": 2,
+    "mma": 2,
+    "bjj": 1.5,
+    "freestyle_wrestling": 0.6,
+    "muay_thai": 1
+   }
   },
   "NZ": {
    "weight": 3,
@@ -838,13 +854,6 @@
    "populations": {
     "europa_norte": 3,
     "polinesia": 3
-   },
-   "martial_bases": {
-    "kickboxing": 3,
-    "mma": 2,
-    "boxing": 1,
-    "bjj": 1,
-    "wrestling": 0.5
    },
    "male": [
     "Nikau",
@@ -875,7 +884,13 @@
     "Henare",
     "Kingi",
     "Fletcher"
-   ]
+   ],
+   "disciplines": {
+    "kickboxing": 3,
+    "mma": 2,
+    "boxing": 1,
+    "bjj": 1
+   }
   },
   "NG": {
    "weight": 3,
@@ -892,12 +907,6 @@
    ],
    "populations": {
     "africa_ocidental": 1
-   },
-   "martial_bases": {
-    "wrestling": 3,
-    "boxing": 2,
-    "kickboxing": 2,
-    "mma": 2
    },
    "male": [
     "Chinedu",
@@ -933,7 +942,13 @@
     "Ogunleye",
     "Nnamdi",
     "Ajayi"
-   ]
+   ],
+   "disciplines": {
+    "freestyle_wrestling": 3,
+    "boxing": 2,
+    "kickboxing": 2,
+    "mma": 2
+   }
   },
   "CM": {
    "weight": 2,
@@ -951,12 +966,6 @@
    "populations": {
     "africa_ocidental": 3,
     "africa_oriental": 1
-   },
-   "martial_bases": {
-    "judo": 2,
-    "wrestling": 2,
-    "boxing": 2,
-    "mma": 1
    },
    "male": [
     "Serge",
@@ -984,7 +993,13 @@
     "Abena",
     "Manga",
     "Essomba"
-   ]
+   ],
+   "disciplines": {
+    "judo": 2,
+    "freestyle_wrestling": 1.5,
+    "boxing": 2,
+    "mma": 1
+   }
   },
   "SN": {
    "weight": 1.5,
@@ -1001,12 +1016,6 @@
    ],
    "populations": {
     "africa_ocidental": 1
-   },
-   "martial_bases": {
-    "wrestling": 5,
-    "judo": 1,
-    "boxing": 1,
-    "mma": 1
    },
    "male": [
     "Moussa",
@@ -1034,7 +1043,13 @@
     "Sow",
     "Mbaye",
     "Cissé"
-   ]
+   ],
+   "disciplines": {
+    "laamb": 5,
+    "judo": 1,
+    "boxing": 1,
+    "mma": 1
+   }
   },
   "TH": {
    "weight": 2,
@@ -1051,11 +1066,6 @@
    ],
    "populations": {
     "sudeste_asiatico": 1
-   },
-   "martial_bases": {
-    "muay_thai": 8,
-    "boxing": 1,
-    "mma": 1
    },
    "male": [
     "Somchai",
@@ -1083,7 +1093,13 @@
     "Boonmee",
     "Chaiyaporn",
     "Rattanakorn"
-   ]
+   ],
+   "disciplines": {
+    "muay_thai": 8,
+    "boxing": 1,
+    "mma": 1,
+    "lethwei": 0.4
+   }
   },
   "PH": {
    "weight": 2,
@@ -1101,12 +1117,6 @@
    ],
    "populations": {
     "sudeste_asiatico": 1
-   },
-   "martial_bases": {
-    "boxing": 3,
-    "kickboxing": 3,
-    "mma": 2,
-    "bjj": 1
    },
    "male": [
     "Jomar",
@@ -1134,7 +1144,14 @@
     "Tolentino",
     "Manalo",
     "Macaraeg"
-   ]
+   ],
+   "disciplines": {
+    "boxing": 3,
+    "kickboxing": 1.5,
+    "sanda": 1.5,
+    "mma": 2,
+    "bjj": 1
+   }
   },
   "CN": {
    "weight": 3,
@@ -1152,13 +1169,6 @@
    ],
    "populations": {
     "leste_asiatico": 1
-   },
-   "martial_bases": {
-    "kickboxing": 4,
-    "wrestling": 2,
-    "judo": 2,
-    "boxing": 1,
-    "mma": 2
    },
    "male": [
     "Wei",
@@ -1192,7 +1202,14 @@
     "Xu",
     "Sun",
     "Ma"
-   ]
+   ],
+   "disciplines": {
+    "sanda": 5,
+    "freestyle_wrestling": 1.5,
+    "judo": 2,
+    "boxing": 1,
+    "mma": 2
+   }
   },
   "CU": {
    "weight": 2,
@@ -1210,12 +1227,6 @@
     "latino": 3,
     "afro_diaspora": 3,
     "mediterraneo": 0.5
-   },
-   "martial_bases": {
-    "boxing": 4,
-    "wrestling": 3,
-    "judo": 2,
-    "mma": 1
    },
    "male": [
     "Yoel",
@@ -1244,7 +1255,14 @@
     "Pupo",
     "Cedeño",
     "Leyva"
-   ]
+   ],
+   "disciplines": {
+    "boxing": 4,
+    "freestyle_wrestling": 2,
+    "greco_roman": 1.5,
+    "judo": 2,
+    "mma": 1
+   }
   },
   "NL": {
    "weight": 2.5,
@@ -1263,12 +1281,6 @@
     "europa_norte": 4,
     "afro_diaspora": 2,
     "oriente_medio": 2
-   },
-   "martial_bases": {
-    "kickboxing": 6,
-    "mma": 2,
-    "bjj": 1,
-    "judo": 1
    },
    "male": [
     "Daan",
@@ -1300,7 +1312,14 @@
     "Brouwer",
     "Jansen",
     "van Dijk"
-   ]
+   ],
+   "disciplines": {
+    "kickboxing": 6,
+    "mma": 2,
+    "bjj": 1,
+    "judo": 1,
+    "muay_thai": 1
+   }
   },
   "SE": {
    "weight": 1.5,
@@ -1318,13 +1337,6 @@
     "europa_norte": 5,
     "oriente_medio": 1,
     "africa_oriental": 0.5
-   },
-   "martial_bases": {
-    "kickboxing": 3,
-    "wrestling": 2,
-    "mma": 2,
-    "bjj": 1,
-    "boxing": 1
    },
    "male": [
     "Oskar",
@@ -1351,7 +1363,15 @@
     "Sandberg",
     "Lund",
     "Forsberg"
-   ]
+   ],
+   "disciplines": {
+    "kickboxing": 2,
+    "freestyle_wrestling": 1.5,
+    "greco_roman": 1.5,
+    "mma": 2,
+    "bjj": 1,
+    "boxing": 1
+   }
   },
   "RU": {
    "weight": 4,
@@ -1371,13 +1391,6 @@
     "caucaso": 4,
     "leste_europeu": 3,
     "asia_central": 1
-   },
-   "martial_bases": {
-    "sambo": 4,
-    "wrestling": 5,
-    "boxing": 1,
-    "kickboxing": 1,
-    "judo": 1
    },
    "male": [
     "Magomed",
@@ -1410,7 +1423,17 @@
     "Khasbulatov",
     "Morozov",
     "Umarov"
-   ]
+   ],
+   "disciplines": {
+    "combat_sambo": 3,
+    "sambo": 2,
+    "freestyle_wrestling": 4,
+    "greco_roman": 1,
+    "boxing": 1,
+    "kickboxing": 1,
+    "judo": 1,
+    "mma": 1
+   }
   },
   "IN": {
    "weight": 1.5,
@@ -1428,12 +1451,6 @@
    ],
    "populations": {
     "sul_asiatico": 1
-   },
-   "martial_bases": {
-    "wrestling": 5,
-    "boxing": 2,
-    "mma": 1,
-    "kickboxing": 1
    },
    "male": [
     "Arjun",
@@ -1460,7 +1477,14 @@
     "Chaudhary",
     "Dahiya",
     "Gill"
-   ]
+   ],
+   "disciplines": {
+    "pehlwani": 3,
+    "freestyle_wrestling": 2,
+    "boxing": 2,
+    "mma": 1,
+    "kickboxing": 1
+   }
   },
   "CA": {
    "weight": 3,
@@ -1482,13 +1506,6 @@
     "afro_diaspora": 1,
     "leste_asiatico": 0.6,
     "sul_asiatico": 0.6
-   },
-   "martial_bases": {
-    "wrestling": 2,
-    "bjj": 2,
-    "kickboxing": 2,
-    "mma": 2,
-    "boxing": 1
    },
    "male": [
     "Liam",
@@ -1517,7 +1534,15 @@
     "Lavoie",
     "Campbell",
     "Fraser"
-   ]
+   ],
+   "disciplines": {
+    "freestyle_wrestling": 2,
+    "bjj": 2,
+    "kickboxing": 2,
+    "mma": 2,
+    "boxing": 1,
+    "karate_kyokushin": 0.5
+   }
   }
  },
  "nicknames": {
@@ -2111,18 +2136,6 @@
   "journeyman_age": 30,
   "journeyman_loss_margin": 3
  },
- "martial_base_names": {
-  "boxing": "boxe",
-  "muay_thai": "muay thai",
-  "kickboxing": "kickboxing",
-  "karate": "karatê",
-  "taekwondo": "taekwondo",
-  "wrestling": "wrestling",
-  "bjj": "jiu-jítsu",
-  "judo": "judô",
-  "sambo": "sambo",
-  "mma": "MMA"
- },
  "body_type_names": {
   "lean": "longilíneo",
   "athletic": "atlético",
@@ -2134,14 +2147,6 @@
  "fight_styles": {
   "pressure": {
    "name": "Pressionador",
-   "bases": {
-    "boxing": 3,
-    "muay_thai": 2,
-    "wrestling": 2,
-    "mma": 2,
-    "kickboxing": 1,
-    "sambo": 1
-   },
    "keys": [
     "aggression",
     "cardio",
@@ -2155,13 +2160,6 @@
   },
   "counter": {
    "name": "Contra-atacante",
-   "bases": {
-    "boxing": 2,
-    "karate": 3,
-    "kickboxing": 2,
-    "taekwondo": 2,
-    "mma": 1
-   },
    "keys": [
     "countering",
     "defense",
@@ -2175,12 +2173,6 @@
   },
   "volume": {
    "name": "Trocador de volume",
-   "bases": {
-    "kickboxing": 3,
-    "boxing": 2,
-    "muay_thai": 1,
-    "mma": 2
-   },
    "keys": [
     "combinations",
     "cardio",
@@ -2193,13 +2185,6 @@
   },
   "knockout": {
    "name": "Nocauteador",
-   "bases": {
-    "boxing": 2,
-    "muay_thai": 2,
-    "kickboxing": 2,
-    "wrestling": 0.7,
-    "mma": 1
-   },
    "keys": [
     "power",
     "explosiveness",
@@ -2213,12 +2198,6 @@
   },
   "kicker": {
    "name": "Chutador",
-   "bases": {
-    "taekwondo": 5,
-    "karate": 3,
-    "kickboxing": 2,
-    "muay_thai": 2
-   },
    "keys": [
     "kicks",
     "mobility",
@@ -2231,12 +2210,6 @@
   },
   "clinch": {
    "name": "Especialista em clinch",
-   "bases": {
-    "muay_thai": 3,
-    "judo": 2,
-    "wrestling": 1,
-    "sambo": 1
-   },
    "keys": [
     "clinch",
     "knees",
@@ -2249,12 +2222,6 @@
   },
   "wrestle_boxer": {
    "name": "Wrestle-boxer",
-   "bases": {
-    "wrestling": 3,
-    "mma": 2,
-    "sambo": 1,
-    "boxing": 0.5
-   },
    "keys": [
     "takedown_offense",
     "boxing",
@@ -2267,12 +2234,6 @@
   },
   "control": {
    "name": "Controlador",
-   "bases": {
-    "wrestling": 3,
-    "judo": 2,
-    "sambo": 2,
-    "bjj": 1
-   },
    "keys": [
     "top_control",
     "cage_control",
@@ -2288,12 +2249,6 @@
   },
   "submission": {
    "name": "Finalizador",
-   "bases": {
-    "bjj": 4,
-    "sambo": 2,
-    "judo": 1,
-    "mma": 0.7
-   },
    "keys": [
     "submission_offense",
     "back_control",
@@ -2307,12 +2262,6 @@
   },
   "scrambler": {
    "name": "Scrambler",
-   "bases": {
-    "wrestling": 1,
-    "bjj": 1,
-    "mma": 2,
-    "sambo": 1
-   },
    "keys": [
     "scramble",
     "explosiveness",
@@ -2324,14 +2273,6 @@
   },
   "complete": {
    "name": "Completo",
-   "bases": {
-    "mma": 3,
-    "wrestling": 0.7,
-    "bjj": 0.7,
-    "boxing": 0.5,
-    "kickboxing": 0.7,
-    "sambo": 0.7
-   },
    "keys": [
     "fight_iq",
     "adaptation"
@@ -2383,5 +2324,17 @@
   "RU": "Rússia",
   "IN": "Índia",
   "CA": "Canadá"
+ },
+ "family_names": {
+  "boxing": "boxe",
+  "muay_thai": "muay thai",
+  "kickboxing": "kickboxing",
+  "karate": "karatê",
+  "taekwondo": "taekwondo",
+  "wrestling": "wrestling",
+  "bjj": "jiu-jítsu",
+  "judo": "judô",
+  "sambo": "sambo",
+  "mma": "MMA"
  }
 }
