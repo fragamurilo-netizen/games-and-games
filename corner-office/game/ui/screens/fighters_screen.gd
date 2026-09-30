@@ -18,7 +18,7 @@ func build() -> void:
 		for id: String in world.player_org().roster:
 			var f: Fighter=world.fighters[id]
 			if not division_filter.is_empty() and f.division!=division_filter:continue
-			add_button("%s  ·  %s\n%s"%[f.display_name(),f.record_string(),CareerText.division(f.division)],func():selected_fighter=f.id;refresh())
+			_fighter_row(f,"%s  ·  %s\n%s"%[f.display_name(),f.record_string(),CareerText.division(f.division)])
 	elif mode=="p4p":
 		_ranking_list(world,Rankings.WCI_ORG_ID,Rankings.P4P_DIVISION,"Pound-for-pound",true)
 	else:
@@ -35,14 +35,24 @@ func _ranking_list(world: WorldState,org_id: String,division: String,heading: St
 	add_text("Atualizado em "+GameDate.format(ranking.snapshot_date),Tokens.MUTED)
 	if not ranking.champion_id.is_empty():
 		var champ: Fighter=world.fighters[ranking.champion_id]
-		add_button("C   %s  ·  %s"%[champ.display_name(),champ.record_string()],func():selected_fighter=champ.id;refresh())
+		_fighter_row(champ,"C   %s  ·  %s"%[champ.display_name(),champ.record_string()])
 	for i in mini(15,ranking.entries.size()):
 		var f: Fighter=world.fighters[ranking.entries[i]]
 		var line:="%02d  %s  %s  ·  %s"%[i+1,_movement(ranking.changes.get(f.id,{})),f.display_name(),f.record_string()]
 		if show_division:line+="\n"+CareerText.division(f.division)
 		var why:=_change_text(world,ranking.changes.get(f.id,{}))
 		if not why.is_empty():line+="\n"+why
-		add_button(line,func():selected_fighter=f.id;refresh())
+		_fighter_row(f,line)
+
+## Linha com foto + botão que abre o perfil.
+func _fighter_row(f: Fighter,text: String) -> void:
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",Tokens.SPACE_S)
+	row.add_child(FighterPortrait.make(f,72))
+	var button:=Button.new();button.text=text;button.custom_minimum_size.y=Tokens.TOUCH_MIN
+	button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	button.pressed.connect(func():selected_fighter=f.id;refresh())
+	row.add_child(button);body.add_child(row)
 
 ## Seta de movimento em relação ao snapshot anterior.
 static func _movement(change: Dictionary) -> String:
@@ -75,6 +85,7 @@ static func _change_text(world: WorldState,change: Dictionary) -> String:
 
 func _profile(f: Fighter) -> void:
 	add_button("← Voltar à lista",func():selected_fighter="";refresh())
+	var photo:=FighterPortrait.make(f,176);photo.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;body.add_child(photo)
 	add_heading(f.display_name());add_text(CareerText.division(f.division)+" · "+f.country)
 	add_text("%s · %d cm · alcance %d cm"%[f.record_string(),f.height_cm,f.reach_cm])
 	add_text("Base: "+f.martial_base,Tokens.MUTED)
