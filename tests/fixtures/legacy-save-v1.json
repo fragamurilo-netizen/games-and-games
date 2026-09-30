@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "hash": "68a8b13d",
+  "world": {
+    "schemaVersion": 1,
+    "seed": "legacy-fixture",
+    "clock": {
+      "day": 0,
+      "minute": 480
+    },
+    "revision": 0,
+    "nextId": 2,
+    "playerId": "person:player",
+    "city": "Santa Aurora",
+    "people": {
+      "person:player": {
+        "id": "person:player",
+        "name": "Marina Santos",
+        "birthDate": {
+          "day": -8247,
+          "minute": 0
+        },
+        "householdId": "household:person:player",
+        "residenceId": "residence:person:player",
+        "appearanceSeed": "legacy-fixture/person:player",
+        "personality": {
+          "sociability": 0.9761289951857179,
+          "discipline": 0.9516639078501612,
+          "sensitivity": 0.7751319771632552
+        },
+        "needs": {
+          "energy": 83,
+          "stress": 21
+        },
+        "relationshipIds": [
+          "relationship:player:person:mother",
+          "relationship:player:person:friend-a",
+          "relationship:player:person:friend-b"
+        ]
+      },
+      "person:mother": {
+        "id": "person:mother",
+        "name": "Helena Ferreira",
+        "birthDate": {
+          "day": -18949,
+          "minute": 0
+        },
+        "householdId": "household:person:mother",
+        "residenceId": "residence:person:mother",
+        "appearanceSeed": "legacy-fixture/person:mother",
+        "personality": {
+          "sociability": 0.5115713039413095,
+          "discipline": 0.7993165797088295,
+          "sensitivity": 0.9167970884591341
+        },
+        "needs": {
+          "energy": 70,
+          "stress": 20
+        },
+        "relationshipIds": [
+          "relationship:player:person:mother"
+        ]
+      },
+      "person:friend-a": {
+        "id": "person:friend-a",
+        "name": "Caio Duarte",
+        "birthDate": {
+          "day": -8271,
+          "minute": 0
+        },
+        "householdId": "household:person:friend-a",
+        "residenceId": "residence:person:friend-a",
+        "appearanceSeed": "legacy-fixture/person:friend-a",
+        "personality": {
+          "sociability": 0.8590342600364238,
+          "discipline": 0.08189883851446211,
+          "sensitivity": 0.3763937943149358
+        },
+        "needs": {
+          "energy": 67,
+          "stress": 28
+        },
+        "relationshipIds": [
+          "relationship:player:person:friend-a"
+        ]
+      },
+      "person:friend-b": {
+        "id": "person:friend-b",
+        "name": "Lia Nunes",
+        "birthDate": {
+          "day": -8119,
+          "minute": 0
+        },
+        "householdId": "household:person:friend-b",
+        "residenceId": "residence:person:friend-b",
+        "appearanceSeed": "legacy-fixture/person:friend-b",
+        "personality": {
+          "sociability": 0.8231836261693388,
+          "discipline": 0.35902149113826454,
+          "sensitivity": 0.7566408894490451
+        },
+        "needs": {
+          "energy": 76,
+          "stress": 34
+        },
+        "relationshipIds": [
+          "relationship:player:person:friend-b"
+        ]
+      }
+    },
+    "households": {
+      "household:person:player": {
+        "id": "household:person:player",
+        "memberIds": [
+          "person:player"
+        ]
+      },
+      "household:person:mother": {
+        "id": "household:person:mother",
+        "memberIds": [
+          "person:mother"
+        ]
+      },
+      "household:person:friend-a": {
+        "id": "household:person:friend-a",
+        "memberIds": [
+          "person:friend-a"
+        ]
+      },
+      "household:person:friend-b": {
+        "id": "household:person:friend-b",
+        "memberIds": [
+          "person:friend-b"
+        ]
+      }
+    },
+    "residences": {
+      "residence:person:player": {
+        "id": "residence:person:player",
+        "district": "Vila das Flores"
+      },
+      "residence:person:mother": {
+        "id": "residence:person:mother",
+        "district": "Vila das Flores"
+      },
+      "residence:person:friend-a": {
+        "id": "residence:person:friend-a",
+        "district": "Vila das Flores"
+      },
+      "residence:person:friend-b": {
+        "id": "residence:person:friend-b",
+        "district": "Vila das Flores"
+      }
+    },
+    "relationships": {
+      "relationship:player:person:mother": {
+        "id": "relationship:player:person:mother",
+        "a": "person:player",
+        "b": "person:mother",
+        "familiarity": 95,
+        "affection": 70,
+        "trust": 71,
+        "respect": 60,
+        "attraction": 0,
+        "resentment": 0,
+        "tags": [
+          "family"
+        ]
+      },
+      "relationship:player:person:friend-a": {
+        "id": "relationship:player:person:friend-a",
+        "a": "person:player",
+        "b": "person:friend-a",
+        "familiarity": 55,
+        "affection": 58,
+        "trust": 52,
+        "respect": 60,
+        "attraction": 0,
+        "resentment": 0,
+        "tags": [
+          "friend"
+        ]
+      },
+      "relationship:player:person:friend-b": {
+        "id": "relationship:player:person:friend-b",
+        "a": "person:player",
+        "b": "person:friend-b",
+        "familiarity": 55,
+        "affection": 59,
+        "trust": 67,
+        "respect": 60,
+        "attraction": 0,
+        "resentment": 0,
+        "tags": [
+          "friend"
+        ]
+      }
+    },
+    "rng": {
+      "world": 36,
+      "ai": 0,
+      "event": 0,
+      "career": 0,
+      "health": 0,
+      "relationship": 0
+    },
+    "scheduled": [
+      {
+        "id": "schedule:mother-first-day",
+        "at": {
+          "day": 0,
+          "minute": 1080
+        },
+        "kind": "mother-message",
+        "personId": "person:mother",
+        "interrupts": true
+      }
+    ],
+    "timeline": [
+      {
+        "id": "timeline:1",
+        "at": {
+          "day": 0,
+          "minute": 480
+        },
+        "kind": "chapter",
+        "text": "As caixas da mudança ainda estão no corredor. É sua primeira semana morando por conta própria.",
+        "personIds": [
+          "person:player"
+        ],
+        "cause": "world.created"
+      }
+    ],
+    "recentCommands": []
+  }
+}

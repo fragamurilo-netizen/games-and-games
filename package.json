@@ -1,0 +1,21 @@
+{
+  "name": "paralelo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p packages/shared && tsc -p packages/ui && tsc -p packages/characters && tsc -p packages/simulation && tsc -p packages/content && tsc -p packages/persistence && tsc -p apps/dev-sim && tsc -p apps/mobile --noEmit",
+    "sim": "tsx apps/dev-sim/src/main.ts",
+    "mobile": "npm --workspace apps/mobile run start",
+    "android": "npm --workspace apps/mobile run android"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "tsx": "^4.20.0",
+    "vitest": "^3.2.4"
+  }
+}
