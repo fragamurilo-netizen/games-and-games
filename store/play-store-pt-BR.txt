@@ -2,39 +2,43 @@ TÍTULO
 Mais Uma Rodada: Técnico
 
 DESCRIÇÃO CURTA
-Seja o técnico: escale, negocie e simule temporadas. Offline e sem timers.
+Seja o técnico: escale, negocie e jogue temporadas inteiras. Offline, sem timer.
 
 DESCRIÇÃO COMPLETA
 Você é o técnico. Escolha um clube, monte o time e descubra até onde consegue levá-lo. Depois do apito final, a pergunta é sempre a mesma: só mais uma rodada?
 
-Mais Uma Rodada é um simulador de gestão de futebol feito para o celular. Joga offline, em retrato e com uma mão. Não tem energia, não tem timer e não tem caixa de prêmio. O que prende você é o campeonato.
+Mais Uma Rodada é um simulador de gestão de futebol feito para o celular. Joga offline, com uma mão e sem pressa. Não tem energia, não tem timer e não tem caixa de prêmio. O que prende você é o campeonato.
 
 ★ UM MUNDO INTEIRO PARA COMANDAR
-• Mais de 670 clubes em 53 ligas de 43 países, com acesso e rebaixamento
-• Cerca de 16 mil jogadores com 21 atributos, potencial, personalidade e carreira
-• Copas nacionais, estaduais, supercopas e torneios continentais com o formato da vida real
-• Seleções, eliminatórias e o torneio mundial de seleções
+• 980 clubes em 54 ligas de 43 países, com acesso e rebaixamento
+• Cerca de 27 mil jogadores com atributos, personalidade, origem e carreira
+• Copas nacionais, estaduais, supercopas e torneios continentais no formato atual, com fase de liga e mata-mata
+• Seleções com eliminatórias, ligas de nações, torneios continentais e o mundial de seleções, cada uma com seus títulos históricos
 
 ★ PARTIDAS QUE CONTAM UMA HISTÓRIA
 • Motor minuto a minuto: táticas, cansaço, cartões, lesões, pênaltis e acréscimos
-• Jogo ao vivo em campo 2D com narração, placar dos outros jogos e velocidade normal, rápida, turbo ou resultado direto
-• Pause para mudar a tática ou fazer substituições
+• Jogo ao vivo em campo 2D, com narração e placar dos outros jogos, ou simulação rápida quando você quiser só o resultado
+• Pause para mudar a tática, dar instruções ou fazer substituições em dois toques
 • Zebras acontecem, mas o time mais forte costuma ganhar, como no futebol de verdade
 
 ★ O TÉCNICO É VOCÊ
+• Escalação no campo, com as camisas do seu clube, e plano de jogo em poucos toques
 • 8 formações, mentalidade, estilo, pressão, linha defensiva e bola parada
-• Plano de jogo automático para quando o time estiver ganhando ou perdendo
-• Treino semanal, entrosamento e rodízio de elenco
+• Treino da semana, treino individual, entrosamento e rodízio de elenco
+
+★ CADA JOGADOR TEM UMA HISTÓRIA
+• Avaliação por estrelas pelo olho da sua comissão: quanto melhor o olheiro, menor a dúvida
+• Perfil com origem, carreira, clubes por onde passou e evolução temporada a temporada
+• Categorias de base, peneiras, olheiros e promessas que viram craques
 
 ★ MERCADO E BASTIDORES
-• Propostas, contrapropostas, trocas, empréstimos e renovações
-• Cada clube tem sua filosofia: tem quem só contrate jogador da região e quem aposte em jovens
-• Categorias de base, peneiras e promessas que viram craques
+• Propostas, contrapropostas, trocas, empréstimos e renovações, com o valor digitado do seu jeito
+• Cada clube tem sua filosofia: tem quem só contrate da região e quem aposte em jovens
 • Diretoria com metas, torcida, imprensa, finanças e estádio
 
 ★ SUA HISTÓRIA FICA GUARDADA
-• Sala de troféus, prêmios da temporada, eleição do melhor do mundo e Hall da Fama
-• Histórico de cada temporada, de cada jogador e da sua carreira
+• História de cada clube, com títulos e os técnicos de cada época
+• Sala de troféus, prêmios da temporada e Hall da Fama
 • 5 espaços de save e salvamento automático a cada rodada
 
 ★ DO SEU JEITO
@@ -43,13 +47,13 @@ Mais Uma Rodada é um simulador de gestão de futebol feito para o celular. Joga
 
 Comece de graça e jogue uma temporada completa. Gostou? Desbloqueie a Carreira Completa uma única vez e jogue quantas temporadas quiser, sem anúncios e sem assinatura.
 
-Os clubes, jogadores e competições do jogo são fictícios ou inspirados no futebol real, sem vínculo com nenhuma entidade oficial.
+Os jogadores do jogo são fictícios. Clubes e competições são inspirados no futebol real, sem vínculo com nenhuma entidade oficial.
 
 NOVIDADES (1.0.0)
 • Primeira versão na loja: a primeira temporada é grátis, com qualquer clube
 • Interface nova, pensada para jogar com uma mão
 • Copas continentais no formato atual e ligas de seleções
-• Jogadores avaliados por estrelas, com a parte incerta à mostra
+• Jogadores avaliados por estrelas, com a dúvida à mostra
 • Seleções com todos os títulos históricos
 • História dos clubes com os técnicos de cada época
 • Simulação mais rápida em celulares com vários núcleos

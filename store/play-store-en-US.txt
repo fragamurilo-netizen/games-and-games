@@ -7,34 +7,38 @@ Be the manager: pick the XI, do deals, play whole seasons. Offline, no timers.
 FULL DESCRIPTION
 You are the manager. Pick a club, build the team and find out how far you can take it. When the final whistle blows, the question never changes: just one more matchday?
 
-Mais Uma Rodada ("One More Matchday") is a football management sim built for your phone. It plays offline, in portrait, one-handed. No energy, no timers, no loot boxes. The league table is what keeps you playing.
+Mais Uma Rodada ("One More Matchday") is a football management sim built for your phone. It plays offline, one-handed, at your own pace. No energy, no timers, no loot boxes. The league table is what keeps you playing.
 
 ★ A WHOLE FOOTBALL WORLD
-• 670+ clubs in 53 leagues across 43 countries, with promotion and relegation
-• About 16,000 players with 21 attributes, potential, personality and a career history
-• Domestic cups, super cups and continental tournaments in their real-life formats
-• National teams, qualifiers and a world tournament
+• 980 clubs in 54 leagues across 43 countries, with promotion and relegation
+• About 27,000 players with attributes, personality, origin and a career history
+• Domestic cups, state championships, super cups and continental tournaments in their current formats, with league phase and knockouts
+• National teams with qualifiers, nations leagues, continental tournaments and a world tournament, each with its historical honours
 
 ★ MATCHES THAT TELL A STORY
 • Minute-by-minute engine: tactics, fatigue, cards, injuries, penalties and stoppage time
-• Live 2D match with commentary, scores from around the league and normal, fast, turbo or instant speed
-• Pause any time to change tactics or make substitutions
+• Live 2D match with commentary and scores from around the league, or a quick sim when you only want the result
+• Pause to change tactics, give instructions or make a substitution in two taps
 • Upsets happen, but the stronger side usually wins, just like real football
 
 ★ YOU MAKE THE CALLS
+• Pick your XI on the pitch, in your club's shirts, and set the game plan in a few taps
 • 8 formations, mentality, style, pressing, defensive line and set pieces
-• An automatic game plan for when you are winning or losing
-• Weekly training, team chemistry and squad rotation
+• Weekly training, individual training, team chemistry and squad rotation
+
+★ EVERY PLAYER HAS A STORY
+• Star ratings through your staff's eyes: the better your scout, the smaller the doubt
+• Profiles with origin, career, past clubs and season-by-season growth
+• Youth academy, trials, scouts and prospects who grow into stars
 
 ★ TRANSFERS AND THE BOARDROOM
-• Bids, counter-offers, swaps, loans and renewals
+• Bids, counter-offers, swaps, loans and renewals, typing the exact amount you want
 • Every club has its own philosophy: some sign only local players, others bet on youth
-• Youth academy, trials and prospects who grow into stars
 • Board objectives, fans, press, finances and stadium
 
 ★ YOUR LEGACY IS KEPT
-• Trophy room, season awards, best-player-in-the-world vote and Hall of Fame
-• Full history for every season, every player and your own career
+• Every club's history, with its titles and the managers of each era
+• Trophy room, season awards and Hall of Fame
 • 5 save slots and autosave every matchday
 
 ★ MAKE IT YOURS
@@ -43,13 +47,13 @@ Mais Uma Rodada ("One More Matchday") is a football management sim built for you
 
 Start for free and play a full season. Enjoying it? Unlock the Full Career once and play as many seasons as you like, with no ads and no subscription.
 
-Clubs, players and competitions are fictional or inspired by real football, with no affiliation to any official body.
+All players are fictional. Clubs and competitions are inspired by real football, with no affiliation to any official body.
 
 WHAT'S NEW (1.0.0)
 • First release: the first season is free, with any club
 • Brand-new interface built for one-handed play
-• Continental cups in their current format, plus national-team leagues
-• Players rated in stars, with the uncertain part shown
+• Continental cups in their current format, plus nations leagues
+• Players rated in stars, with the doubt shown
 • National teams with their full historical honours
 • Club history with the managers of every era
 • Faster simulation on multi-core phones

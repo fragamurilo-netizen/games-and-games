@@ -1,20 +1,21 @@
 extends SceneTree
-## Monta as capturas da ficha da Google Play (store/screenshots) a partir das telas do tour:
-## fundo azul-noite, uma frase curta em Saira no topo e a tela do jogo embaixo, em
-## 1080 × 1920 (as 8 telas do plano de lançamento, store/plano-de-lancamento.html).
-##   1. xvfb-run godot --path . --resolution 1080x1920 --script res://tools/screenshot_tour.gd -- --out=/tmp/tour
-##   2. xvfb-run godot --path . --resolution 1080x1920 --script res://tools/store_frames.gd -- --in=/tmp/tour --out=../store/screenshots
+## Monta as capturas da ficha da Google Play (store/screenshots): fundo ardósia (DESIGN.md), uma
+## frase curta em giz no topo e a tela do jogo embaixo, em 1080 × 1920.
+##   1. Telas: xvfb-run godot --path . --resolution 1080x1920 --script res://tools/design_shots.gd --
+##      --out=/tmp/loja --only=hub,tactics,squad,player,~buy,table,club:history --rounds=6
+##   2. Partida: tools/match_shots.gd na mesma resolução; copie um quadro como /tmp/loja/partida.png
+##   3. xvfb-run godot --path . --resolution 1080x1920 --script res://tools/store_frames.gd -- --in=/tmp/loja --out=../store/screenshots
 ## Em inglês: rode o tour com --lang=en e este com --lang=en (as frases mudam).
 
 const FRAMES := [
-	["01", "08_partida", "Cada minuto conta", "Every minute counts"],
-	["02", "09_gol", "Gol aos 90+4. Comemora!", "90+4 winner. Celebrate!"],
-	["03", "14_tabela", "Suba, caia, brigue pelo título", "Go up, go down, fight for the title"],
-	["04", "11b_formacao", "Sua tática, suas regras", "Your tactics, your rules"],
-	["05", "42_negociacao", "Negocie cada centavo", "Haggle over every cent"],
-	["06", "06_perfil", "16 mil jogadores com história", "16,000 players with a story"],
-	["07", "32_base", "Revele o próximo craque", "Discover the next star"],
-	["08", "44_historia_premios", "Encha a sala de troféus", "Fill the trophy room"],
+	["01", "partida", "Cada minuto conta", "Every minute counts"],
+	["02", "hub", "Dia de jogo: você decide", "Matchday: your call"],
+	["03", "tactics", "Sua tática, suas regras", "Your tactics, your rules"],
+	["04", "squad", "Conheça cada jogador", "Know every player"],
+	["05", "player", "Jogadores com história", "Players with a story"],
+	["06", "dlg_buy", "Negocie cada centavo", "Haggle over every cent"],
+	["07", "table", "Suba, caia, brigue pelo título", "Go up, go down, fight for the title"],
+	["08", "club_history", "Escreva a história do clube", "Write your club's history"],
 ]
 const W := 1080
 const H := 1920
@@ -52,7 +53,7 @@ func _run() -> void:
 		await RenderingServer.frame_post_draw
 		var img := root.get_texture().get_image()
 		img.convert(Image.FORMAT_RGB8) # a Play não quer transparência
-		img.save_png("%s/%s_%s.png" % [opt_out, fr[0], String(fr[1]).get_slice("_", 1)])
+		img.save_png("%s/%s_%s.png" % [opt_out, fr[0], String(fr[1]).replace("dlg_", "")])
 		canvas.queue_free()
 		ok += 1
 		print("[loja] ", fr[0], " ", fr[1])
@@ -65,8 +66,8 @@ func _frame(shot: Image, caption: String, font: Font) -> Control:
 	c.size = Vector2(W, H)
 	var bg := TextureRect.new()
 	var g := Gradient.new()
-	g.set_color(0, Color("#162231"))
-	g.set_color(1, Color("#0E1621"))
+	g.set_color(0, Color("#1C2024"))
+	g.set_color(1, Color("#15181B"))
 	var gt := GradientTexture2D.new()
 	gt.gradient = g
 	gt.fill_to = Vector2(0, 1)
@@ -77,7 +78,7 @@ func _frame(shot: Image, caption: String, font: Font) -> Control:
 	bg.stretch_mode = TextureRect.STRETCH_SCALE
 	bg.size = Vector2(W, H)
 	c.add_child(bg)
-	# Frase: branco-giz, com o traço dourado embaixo (um destaque por tela).
+	# Frase em giz, com um traço discreto embaixo (paleta do DESIGN.md).
 	var l := Label.new()
 	l.text = caption.to_upper()
 	l.add_theme_font_override(&"font", font)
@@ -86,7 +87,7 @@ func _frame(shot: Image, caption: String, font: Font) -> Control:
 	while fs > 64 and font.get_string_size(caption.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > W - 120:
 		fs -= 2
 	l.add_theme_font_size_override(&"font_size", fs)
-	l.add_theme_color_override(&"font_color", Color("#EAF0F6"))
+	l.add_theme_color_override(&"font_color", Color("#F1F0EC"))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -94,7 +95,7 @@ func _frame(shot: Image, caption: String, font: Font) -> Control:
 	l.size = Vector2(W - 120, TOP - 120)
 	c.add_child(l)
 	var bar := ColorRect.new()
-	bar.color = Color("#FFC940")
+	bar.color = Color("#A5ABB2")
 	bar.size = Vector2(120, 8)
 	bar.position = Vector2((W - 120) / 2.0, TOP - 58)
 	c.add_child(bar)
