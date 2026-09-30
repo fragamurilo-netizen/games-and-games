@@ -6,6 +6,8 @@ var opt_league := "BRA1"
 
 
 func _ready() -> void:
+	# SIM_SEQ=1: tudo um por um (caminho antigo), para comparar com as threads.
+	SeasonManager.parallel = OS.get_environment("SIM_SEQ") == ""
 	var t := Time.get_ticks_msec()
 	var w := WorldGenerator.generate(WorldGenerator.DEFAULT_SEED, "padrao")
 	print("mundo: %d ms" % (Time.get_ticks_msec() - t))

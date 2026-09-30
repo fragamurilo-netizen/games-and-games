@@ -326,7 +326,7 @@ static func _sheet_for(world: GameWorld, club: Club, opp: Club, home: bool, md: 
 
 ## Roda uma entrada ainda não simulada: modo rápido para IA × IA; minuto a minuto para o usuário.
 ## Jogos da IA em paralelo (vários núcleos). false = um por um, como antes (comparação em testes).
-static var parallel := false  # LIGAR só depois do teste de igualdade (ver docs/HANDOFF.md)
+static var parallel := true  # igual ao sequencial: tests "simulação paralela = sequencial"
 ## Abaixo disso não compensa abrir threads.
 const PARALLEL_MIN := 12
 
@@ -363,6 +363,12 @@ static func run_entries(world: GameWorld, entries: Array) -> void:
 		QuickMatch._tactics(as_)
 		Referees.factors(world, Array(e["ctx"].get("ref", [])))
 		LeagueCulture.for_match(world, String(e["ctx"].get("competition", "")), home)
+		# Perfil tático do rival (cache estático _pcache e o "_v" dentro do perfil) e o estudo
+		# do técnico (People.ensure): gravam na primeira chamada, então saem daqui já prontos.
+		TacticalScout.vulnerability(world, home)
+		TacticalScout.vulnerability(world, away)
+		TacticalScout.study(world, home)
+		TacticalScout.study(world, away)
 	mark = _time("ai_escalacao", mark)
 	var threads: Array[Thread] = []
 	for t in cores:

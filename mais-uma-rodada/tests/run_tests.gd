@@ -66,6 +66,7 @@ func _initialize() -> void:
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
 	_run("DNA dos clubes: identidade, mercado e mudanças", _test_club_dna)
+	_run("simulação paralela = sequencial", _test_parallel_equals_sequential)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -313,6 +314,47 @@ func _test_quick_calibration() -> void:
 
 
 ## A partida assistida usa exatamente a mesma simulação da instantânea.
+
+
+## Mesmo mundo, mesmas datas: jogos da IA em várias threads dão exatamente o mesmo resultado
+## que um por um (placares, gols, cartões, lesões e o estado de todos os jogadores).
+func _test_parallel_equals_sequential() -> void:
+	var sigs: Array = []
+	var biggest := 0
+	var was := SeasonManager.parallel
+	for mode in 2:
+		SeasonManager.parallel = mode == 1
+		var w := _career_world()
+		var played: Array = []
+		for d in 10:
+			if w.season.finished:
+				break
+			var todo: Array = w.season.fixtures_at(w.season.day).filter(func(f: Fixture): return not f.played)
+			biggest = maxi(biggest, todo.size())
+			SeasonManager.play_matchday_instant(w)
+			played.append_array(todo)
+		sigs.append(_world_signature(w, played))
+	SeasonManager.parallel = was
+	check(biggest >= SeasonManager.PARALLEL_MIN, "nenhuma data com jogos suficientes para as threads (%d)" % biggest)
+	check(sigs[0][0] == sigs[1][0], "placares diferentes entre sequencial e paralelo")
+	check(sigs[0][1] == sigs[1][1], "estado dos jogadores diferente entre sequencial e paralelo")
+	check(sigs[0][2] > 0, "nenhum jogo jogado")
+
+
+## [hash dos jogos, hash dos jogadores, jogos] de um mundo.
+func _world_signature(w: GameWorld, fixtures: Array) -> Array:
+	var games: Array = []
+	for f: Fixture in fixtures:
+		if f.played:
+			games.append([f.comp, f.home, f.away, f.hg, f.ag, f.pen_h, f.pen_a, f.motm, f.attendance, f.goals])
+	var ids: Array = w.players.keys()
+	ids.sort()
+	var ps: Array = []
+	for pid in ids:
+		var p: Player = w.players[pid]
+		ps.append([pid, p.club_id, snappedf(p.condition, 0.001), snappedf(p.morale, 0.001), p.injury_weeks, p.suspension,
+			p.yellow_acc, p.stats, p.recent_ratings, p.minutes_season])
+	return [hash(var_to_bytes(games)), hash(var_to_bytes(ps)), games.size()]
 
 
 func _test_live_equals_instant() -> void:

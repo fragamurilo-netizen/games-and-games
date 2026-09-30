@@ -96,6 +96,9 @@ func refresh() -> void:
 				UIKit.menu_row("swap", "Histórico de transferências", "", func(): UIManager.push("club_records", {"id": hid, "tab": "transfers"})),
 			]))
 			cards.append(_history_card(w, club))
+			var coaches := _coaches_card(w, club)
+			if coaches != null:
+				cards.append(coaches)
 			var idols := _idols_card(w, club)
 			if idols != null:
 				cards.append(idols)
@@ -843,6 +846,69 @@ static func _title_color(k: String) -> Color:
 		"L:":
 			return UIColors.ACCENT
 	return UIColors.GREEN
+
+
+## Técnicos do clube, do atual para os mais antigos: anos no cargo, campanha, títulos e como
+## saiu. A linha inteira abre o perfil de quem ainda está no futebol.
+func _coaches_card(w: GameWorld, club: Club) -> Control:
+	var list := CoachCareer.club_history(w, club)
+	if list.is_empty():
+		return null
+	var card := UIKit.card("Card", 0)
+	card.add_child(UIKit.section("Técnicos"))
+	for i in mini(12, list.size()):
+		var e: Dictionary = list[i]
+		var row := UIKit.hbox(UITokens.S3)
+		row.custom_minimum_size.y = UITokens.H_ROW
+		var y0 := int(e["from"])
+		var y1 := int(e["to"])
+		var span := ("%d–hoje" % y0) if bool(e["cur"]) else (str(y0) if y1 <= y0 else "%d–%d" % [y0, y1])
+		var yrs := UIKit.label(span, "Small")
+		yrs.add_theme_font_override(&"font", DataTable.tabular_font())
+		yrs.custom_minimum_size.x = 132
+		yrs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(yrs)
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var name := UIKit.label(String(e["n"]) + (" (interino)" if bool(e.get("int", false)) else ""), "H3")
+		name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		col.add_child(name)
+		var g := int(e["w"]) + int(e["d"]) + int(e["l"])
+		var camp := "%dV %dE %dD" % [int(e["w"]), int(e["d"]), int(e["l"])]
+		if g > 0:
+			camp += " (%d%%)" % int(round(100.0 * (3 * int(e["w"]) + int(e["d"])) / (3.0 * g)))
+		var cl := UIKit.label(camp, "Small")
+		cl.add_theme_font_override(&"font", DataTable.tabular_font())
+		col.add_child(cl)
+		var end := ("Você" if bool(e.get("user", false)) else "No cargo") if bool(e["cur"]) else String(e["end"])
+		if end != "":
+			col.add_child(UIKit.label(end, "Muted"))
+		row.add_child(col)
+		var t := int(e["t"])
+		if t > 0:
+			var tb := UIKit.hbox(UITokens.S1)
+			tb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			tb.add_child(UIKit.icon_rect("trophy", 24, UIColors.MUTED))
+			var tl := UIKit.label(str(t), "H3")
+			tl.add_theme_font_override(&"font", DataTable.tabular_font())
+			tb.add_child(tl)
+			row.add_child(tb)
+		var id := int(e["id"])
+		var cid := club.id
+		# Linha de dados (sem fundo, divisor embaixo); a mesma forma com ou sem perfil para abrir.
+		if bool(e.get("user", false)):
+			card.add_child(UIKit.tap_row(row, func(): UIManager.push("manager")))
+		elif bool(e["cur"]):
+			card.add_child(UIKit.tap_row(row, func(): UIManager.push("coach", {"club": cid})))
+		elif id >= 0:
+			card.add_child(UIKit.tap_row(row, func(): UIManager.push("coach", {"coach": id})))
+		else:
+			var still := PanelContainer.new()
+			still.theme_type_variation = "RowPanel"
+			still.add_child(row)
+			card.add_child(still)
+	return UIKit.card_panel(card)
 
 
 ## Ídolos: aposentados que marcaram o clube (Hall da Fama do save).
