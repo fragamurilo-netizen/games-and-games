@@ -97,6 +97,10 @@ func simulate(world: WorldState, fight: Fight) -> Fight:
 static func gain_for_report(before: Dictionary, after: Dictionary, ids: Array) -> float:
 	return (after.stamina[ids[0]] - before.stamina[ids[0]] + after.stamina[ids[1]] - before.stamina[ids[1]]) * 0.5
 
+## Quanto a diferença de habilidade pesa em cada disputa (>1 = mais zebras).
+func _spread() -> float:
+	return float(_tuning.get("skill_spread", 1.0))
+
 static func _skill(f: Fighter, group: String, key: String) -> float:
 	var values: Dictionary = f.get(group)
 	return clampf(float(values.get(key, 50)), 1.0, 100.0)
@@ -113,7 +117,7 @@ func _choose_actor(c: Dictionary) -> String:
 		if c.state.position in GROUND:
 			weight *= 2.3 if c.state.top_id == id else 0.8
 		if not c.state.submission.is_empty():
-			weight *= 4.0 if c.state.submission.attacker_id == id else 0.4
+			weight *= float(_tuning.submission.attacker_actor_weight) if c.state.submission.attacker_id == id else 0.4
 		if c.last.get("target_id") == id and c.last.get("outcome") in ["evaded","blocked","missed"]:
 			weight *= 1.35
 		weights[id] = weight
@@ -160,7 +164,7 @@ func _choose_clip(c: Dictionary, actor: String, _target: String) -> Dictionary:
 		if clip.id == "exit_pocket":
 			weight *= 0.55
 		if not c.state.submission.is_empty() and clip.id == c.state.submission.technique_id and actor == c.state.submission.attacker_id:
-			weight *= 8.0
+			weight *= float(_tuning.submission.repeat_clip_weight)
 		weights[clip.id] = weight
 	if weights.is_empty():
 		return {}
@@ -186,7 +190,7 @@ func _resolve(c: Dictionary, actor: String, target: String, clip: Dictionary, se
 		_bump(c,actor,"takedown_attempts",1)
 		var offense := _skill(a,"grappling","takedown_offense")*.6+_skill(a,"physical","strength")*.2+_skill(a,"physical","explosiveness")*.2
 		var defense := _skill(b,"grappling","takedown_defense")*.7+_skill(b,"physical","mobility")*.3
-		var probability := clampf(.44+(offense-defense)/150.0+(c.state.stamina[actor]-c.state.stamina[target])*.22+c.state.damage[target].leg*.15,.06,.88)
+		var probability := clampf(.44+(offense-defense)/(150.0*_spread())+(c.state.stamina[actor]-c.state.stamina[target])*.22+c.state.damage[target].leg*.15,.06,.88)
 		outcome = "completed" if rng.chance(probability) else "defended"
 		reasons.append(Reason.make("TAKEDOWN_CONTEST",probability,{"offense":offense,"defense":defense}))
 		if outcome == "completed":
@@ -201,7 +205,7 @@ func _resolve(c: Dictionary, actor: String, target: String, clip: Dictionary, se
 		outcome = _submission(c,actor,target,clip,reasons)
 	elif clip.family == "transition":
 		var contested: bool = c.state.position in GROUND or clip.id in ["enter_clinch","drive_to_cage"]
-		var probability: float = .58+(_skill(a,"jiu_jitsu","transitions")-_skill(b,"grappling","top_control"))/220.0+(c.state.stamina[actor]-c.state.stamina[target])*.15
+		var probability: float = .58+(_skill(a,"jiu_jitsu","transitions")-_skill(b,"grappling","top_control"))/(220.0*_spread())+(c.state.stamina[actor]-c.state.stamina[target])*.15
 		outcome = "completed" if not contested or rng.chance(clampf(probability,.12,.88)) else "defended"
 		if outcome == "completed":
 			c.state.position = clip.to_position
@@ -216,7 +220,7 @@ func _resolve(c: Dictionary, actor: String, target: String, clip: Dictionary, se
 			c.state.submission = {}
 		reasons.append(Reason.make("POSITION_CONTEST",probability,{"destination":clip.to_position}))
 	elif clip.family == "control":
-		var probability := clampf(.66+(_skill(a,"grappling","clinch")-_skill(b,"grappling","scramble"))/220.0,.20,.90)
+		var probability := clampf(.66+(_skill(a,"grappling","clinch")-_skill(b,"grappling","scramble"))/(220.0*_spread()),.20,.90)
 		outcome = "held" if rng.chance(probability) else "escaped"
 		if outcome == "escaped":
 			c.state.position = "pocket" if c.state.position in ["clinch","cage_wrestling"] else "scramble"
@@ -253,7 +257,7 @@ func _strike(c: Dictionary, actor: String, target: String, clip: Dictionary, rea
 	var defense: float = _skill(b,"striking","defense") * (.65+c.state.stamina[target]*.35) * (1.0-c.state.stun[target]*.3)
 	var counter: bool = c.last.get("actor_id") == target and c.last.get("outcome") in ["missed","evaded","blocked"]
 	var reach := clampf(float(a.reach_cm-b.reach_cm)/700.0,-.07,.07)
-	var probability := clampf(.36+(accuracy-defense)/170.0+reach+c.state.stun[target]*.12+(0.06 if counter else 0.0),.10,.84)
+	var probability := clampf(.36+(accuracy-defense)/(170.0*_spread())+reach+c.state.stun[target]*.12+(0.06 if counter else 0.0),.10,.84)
 	_bump(c,actor,"attempted",1)
 	reasons.append(Reason.make("STRIKE_ACCURACY",probability,{"accuracy":accuracy,"defense":defense,"counter":counter}))
 	if not rng.chance(probability):
@@ -262,7 +266,7 @@ func _strike(c: Dictionary, actor: String, target: String, clip: Dictionary, rea
 	var zone: String = clip.target if clip.target in ["head","body","leg"] else "head"
 	var power := .45+_skill(a,"striking","power")/100.0+_skill(a,"physical","explosiveness")/250.0
 	var resistance := .75+_skill(b,"physical","durability")/150.0
-	var damage: float = float(_tuning.strike_damage)*power/resistance*rng.range_f(.72,1.32)*(.5+c.state.stamina[actor]*.5)
+	var damage: float = float(_tuning.strike_damage)*float(_tuning.get("strike_damage_by_sex",{}).get("f" if a.sex==Fighter.Sex.FEMALE else "m",1.0))*power/resistance*rng.range_f(.72,1.32)*(.5+c.state.stamina[actor]*.5)
 	if "jab" in clip.id:
 		damage *= .64
 	if clip.family == "kick":
@@ -282,8 +286,9 @@ func _strike(c: Dictionary, actor: String, target: String, clip: Dictionary, rea
 		c.state.stamina[target] = maxf(float(_tuning.stamina_floor),c.state.stamina[target]-damage*.85)
 	if zone == "head":
 		var chin := _skill(b,"physical","chin")
-		var clean := rng.chance(clampf(.10+(accuracy-defense)/700.0,.03,.16))
-		c.state.stun[target] = minf(1.0,c.state.stun[target]+damage*(6.5-chin/35.0)+(0.40 if clean else 0.0))
+		var cs: Dictionary = _tuning.clean_shot
+		var clean := rng.chance(clampf(float(cs.base)+(accuracy-defense)/float(cs.skill_divisor),float(cs.min),float(cs.max)))
+		c.state.stun[target] = minf(1.0,c.state.stun[target]+damage*(6.5-chin/35.0)+(float(cs.stun) if clean else 0.0))
 		if rng.chance(damage*2.0):
 			c.state.cuts[target] = minf(1.0,c.state.cuts[target]+rng.range_f(.08,.20))
 		var collapse: bool = c.state.stun[target] > .60 and rng.chance(.14+(100.0-chin)/170.0)
@@ -315,14 +320,14 @@ func _submission(c: Dictionary, actor: String, target: String, clip: Dictionary,
 		_bump(c,actor,"submission_attempts",1)
 	var offense := _skill(a,"jiu_jitsu","leg_locks") if clip.target == "leg" else _skill(a,"jiu_jitsu","submission_offense")
 	var defense := _skill(b,"jiu_jitsu","submission_defense")
-	var escape := clampf(.44+(defense-offense)/200.0+c.state.stamina[target]*.12-progress*.18,.08,.77)
+	var escape := clampf(float(_tuning.submission.escape_base)+(defense-offense)/(200.0*_spread())+c.state.stamina[target]*.12-progress*.18,.08,.77)
 	reasons.append(Reason.make("SUBMISSION_CONTEST",1.0-escape,{"type":clip.id,"offense":offense,"defense":defense,"progress_before":progress}))
 	if rng.chance(escape):
 		c.state.submission = {}
 		_bump(c,target,"escapes",1)
 		reasons.append(Reason.make("SUBMISSION_ESCAPE",escape))
 		return "escaped"
-	progress = clampf(progress+.12+(offense-defense)/260.0+(1.0-c.state.stamina[target])*.16+rng.range_f(-.04,.07),0.0,1.0)
+	progress = clampf(progress+float(_tuning.submission.progress_gain)+(offense-defense)/(260.0*_spread())+(1.0-c.state.stamina[target])*.16+rng.range_f(-.04,.07),0.0,1.0)
 	c.state.submission = {"attacker_id":actor,"defender_id":target,"technique_id":clip.id,"progress":progress}
 	c.state.stamina[target] = maxf(float(_tuning.stamina_floor),c.state.stamina[target]-.022)
 	_bump(c,actor,"grappling_impact",.015+progress*.035)

@@ -32,7 +32,7 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 - [x] `Economy`: P&L projetado e real
 - [x] `Media`: notícias com triggers factuais
 - [x] Avançar semana e repetir
-- [ ] Testes de simulação: milhares de lutas (distribuição KO/sub/decisão, upsets > 0)
+- [x] Testes de simulação: milhares de lutas (distribuição KO/sub/decisão, upsets > 0) — `tools/soak_fights.gd` + `test_combat_calibration`
 - [x] Screenshots portrait/landscape
 
 ## M2 — Mercado vivo

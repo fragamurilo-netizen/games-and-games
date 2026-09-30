@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "Prototype design parameters; not fitted to a real fight dataset. Game Bible \u00c2\u00a76; MMA Bible \u00c2\u00a720.",
+  "notes": "Prototype design parameters; not fitted to a real fight dataset. Game Bible Â§6; MMA Bible Â§20.",
   "round_seconds": 300,
   "exchange_seconds": [
     2.0,
@@ -10,8 +10,26 @@
   "stun_decay_per_second": 0.022,
   "stamina_floor": 0.08,
   "strike_damage": 0.027,
+  "strike_damage_by_sex": {
+    "m": 1.0,
+    "f": 0.76
+  },
   "knockdown_threshold": 0.4,
   "tko_unanswered": 5,
+  "submission": {
+    "attacker_actor_weight": 2.2,
+    "repeat_clip_weight": 4.0,
+    "escape_base": 0.5,
+    "progress_gain": 0.095
+  },
+  "clean_shot": {
+    "base": 0.12,
+    "skill_divisor": 1400,
+    "min": 0.07,
+    "max": 0.17,
+    "stun": 0.47
+  },
+  "skill_spread": 1.6,
   "styles": {
     "boxing": {
       "boxing": 2.5,
@@ -133,5 +151,6 @@
       "defense": 1.1,
       "scramble": 1.2
     }
-  }
+  },
+  "calibration": "Soak de 3000 lutas geradas (tools/soak_fights.gd): masc. ~19% finalização / 32% KO-TKO / 48% decisão; fem. menos KO; favorito técnico vence ~55% das lutas equilibradas. Referência ampla de MMA moderno, não ajuste fino a um dataset."
 }

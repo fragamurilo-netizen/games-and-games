@@ -64,14 +64,14 @@ Só usa dados públicos (cartel, ranking, popularidade) — teste `test_rival_ai
 
 Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações rivais, elencos entre 12 e 30.
 
-**Achado de calibragem (não corrigido):** nas lutas entre atletas gerados, ~50% terminam por finalização (real: ~20%). O teste com o roster canônico dá ~37%. Ver prioridade 4 abaixo.
+**Calibragem do combate (feita):** o soak `tools/soak_fights.gd` (3000 lutas geradas) mostrava ~50% de finalizações. As constantes de finalização, golpe limpo, peso da técnica (`skill_spread`) e dano por sexo agora vivem em `fight_tuning.json`. Resultado: masc. 20% finalização / 33% KO-TKO / 45% decisão; fem. 19% / 20% / 60%; favorito técnico vence ~57% das lutas equilibradas. `test_combat_calibration` trava regressões grosseiras.
 
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.
 2. Sessão de jogo completa em aparelho: contratar, montar card misto, anunciar, assistir e organizar a segunda noite. Medir legibilidade e fluidez antes de expandir sistemas.
 3. Melhorar perfis nativos com os retratos do gerador existente. Hoje as listas Godot são textuais; o protótipo web já usa os retratos.
-4. Calibrar o `FightEngine` com milhares de lutas entre atletas gerados (finalizações ~50% hoje; alvo de referência KO/TKO ~30%, finalização ~20%, decisão ~50%), sem mudar resultados para acomodar animação. Depois: ofertas concorrentes/BATNA e memória de agentes sobre a IA rival já existente.
+4. Ofertas concorrentes/BATNA e memória de agentes sobre a IA rival já existente.
 5. Separar modelos completos de ranking oficial e WCI: hoje listas/elegibilidade são distintas, mas compartilham uma fórmula inicial de resultados/oposição. Falta o composto completo e tratamento de inatividade da bíblia.
 6. Popularidade dinâmica, campeões/títulos, peso/camp, lesões detalhadas e substituições. Suspensão atual é regra inicial de pós-luta, não um sistema médico completo.
 7. Economia de longo prazo, contratos de mídia/sponsors, custos fixos e falência. Receitas atuais são parametrização regional inicial; não representam simulação econômica validada de décadas.
