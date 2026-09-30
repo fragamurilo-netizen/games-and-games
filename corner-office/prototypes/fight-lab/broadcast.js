@@ -95,7 +95,7 @@
   const callout = (text, kind = '') => { const n = el('div', 'bang ' + kind, text); $('callout').replaceChildren(n); };
 
   // ---------------------------------------------------------------- content
-  $('back').onclick = () => { audio.beat(false); try { speechSynthesis.cancel(); } catch (e) {} if (window.CornerOffice) window.CornerOffice.close(); else if (location.protocol === 'file:') window.close(); else location.href = '../promoter/'; };
+  $('back').onclick = () => { audio.beat(false); try { speechSynthesis.cancel(); } catch (e) {} if (window.CornerOffice) window.CornerOffice.close(); else if (window.ipc) window.ipc.postMessage('close'); else if (location.protocol === 'file:') window.close(); else location.href = '../promoter/'; };
   $('mute').onclick = () => { const m = !audio.muted; audio.mute(m); $('mute').setAttribute('aria-pressed', String(m)); };
   try {
     const bundled = !!$('co-catalog');

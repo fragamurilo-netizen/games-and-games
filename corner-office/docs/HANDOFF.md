@@ -31,7 +31,7 @@ python tools/fight_lab_server.py --godot /caminho/absoluto/godot --port 8768
 
 Carreira web: `http://127.0.0.1:8768/prototypes/promoter/`. Laboratório: `/prototypes/fight-lab/`. Transmissão sem ferramentas de autoria: `/prototypes/fight-lab/broadcast.html` (demonstração feminina quando nenhum replay da carreira foi solicitado).
 
-O servidor guarda `.local/career.json` (ignorado). `--data-dir` permite outro slot. Não apagar saves durante QA. O save desktop Godot fica em `user://`; é separado do save web. O botão Assistir no desktop abre `user://fight-studio.html`, autocontido. No Android abre dentro do app pelo módulo `CornerOfficeStudio`.
+O servidor guarda `.local/career.json` (ignorado). `--data-dir` permite outro slot. Não apagar saves durante QA. O save desktop Godot fica em `user://`; é separado do save web. O botão Assistir abre a transmissão dentro da tela do jogo: Android pelo módulo `CornerOfficeStudio`, desktop pela extensão `godot_wry`; sem WebView cai em `user://fight-studio.html` no navegador.
 
 ## Verificação
 
@@ -44,7 +44,7 @@ python tools/build_motion_catalog.py
 python tools/build_replay_examples.py
 python tools/build_simulated_replays.py
 python tools/build_studio_bundle.py
-git diff --exit-code -- game/content game/presentation/fight/studio.html.gz
+git diff --exit-code -- game/content game/presentation/fight/studio.cobundle
 ```
 
 Última rodada de serviços: 20 testes sem falhas; amostra regional de 16 noites / 96 lutas, com lucros e prejuízos; amostra de combate de 160 lutas. A API foi testada em diretório temporário: seis lutas, seis replays imutáveis, reload, validação de origem e preservação do save em pedidos rejeitados. Isso ainda não é o soak de milhares de lutas da bíblia.
@@ -70,6 +70,26 @@ Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações r
 
 `broadcast.html` virou uma noite completa no estilo UD3: abertura, walkouts, tale of the tape, locutor fictício Dario Valente (nunca usar locutores reais), HUD, câmera diretor, intervalos, replay em câmera lenta do final, cerimônia e tela de resultado. Dados extras em `replay.presentation`. Detalhes em `FIGHT_VISUALS.md`. Próximo passo natural: levar a mesma linguagem visual às telas Godot da carreira.
 
+## Transmissão embutida no jogo — EM ANDAMENTO (Claude, 30/09/2026)
+
+Pedido do usuário: a luta deve abrir **dentro da tela do jogo** (WebView nativo do jogo), não em diálogo por cima nem no navegador. Continua usando o mesmo Fight Studio (nada de renderer novo).
+
+Feito:
+- `game/ui/fight_replay_view.gd`: tela Fight Night com cabeçalho do jogo (bloco vermelho "‹ CARD", confronto e evento) e um palco onde a WebView é posicionada. Trata safe area, voltar do Android e fechamento pelo HTML.
+- Android: `CornerOfficeStudio.java` não usa mais `Dialog`; a WebView entra como view filha do layout da activity no retângulo do palco (`show(html,x,y,w,h)`, `set_rect`, `set_visible`, `close`, sinal `closed`). AAR recompilado.
+- Desktop: extensão `addons/godot_wry` (MIT, WebView2 no Windows, WebKitGTK no Linux) compilada aqui a partir do fonte; ver `addons/godot_wry/SOURCE.txt`. Sem ela a tela cai no navegador.
+- `broadcast.html` em modo embutido (`body[data-embedded]`) esconde o próprio botão voltar; o voltar do resultado chama `CornerOffice.close()` (Android) ou `window.ipc.postMessage('close')` (desktop).
+- **Bug corrigido:** o `aapt` do build Gradle descompactava `studio.html.gz` e tirava a extensão, então a transmissão nunca abria no Android. O pacote agora é `presentation/fight/studio.cobundle` (mesmo gzip).
+- CI Android voltou a ficar verde (`setup-android` com `packages: ''`).
+- APK de teste: `releases/corner-office-0.2.0-debug.apk` (com a WebView embutida).
+
+Falta (próximo colega):
+1. **Testar em aparelho Android**: posição/tamanho da WebView sob o cabeçalho, rotação (o `resized` chama `set_rect`), voltar, pausa/retorno, áudio após o toque em INICIAR.
+2. **Testar no Windows**: `godot_wry.dll` foi cruzado com mingw (`x86_64-pc-windows-gnu`) e nunca rodou num Windows real; precisa do WebView2 Runtime. Se não carregar, compilar com `just build` numa máquina Windows (alvo msvc) e ajustar `WRY.gdextension`.
+3. Linux: a `.so` exige `libwebkit2gtk-4.1`; o job `tests` do CI roda sem ela (a extensão só é usada fora do modo headless).
+4. Tirar screenshot da tela embutida (a WebView é janela nativa: o `get_texture()` do Godot não a captura; usar captura do sistema).
+5. Opcional: esconder também a marca/topbar do HTML em modo embutido se ficar redundante com o cabeçalho do jogo.
+
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.
@@ -81,4 +101,4 @@ Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações r
 7. Economia de longo prazo, contratos de mídia/sponsors, custos fixos e falência. Receitas atuais são parametrização regional inicial; não representam simulação econômica validada de décadas.
 8. Milhares de lutas, anos de carreira, regens/aposentadorias, modos executivo/from-nothing completos, scouting e Hall da Fama.
 
-Não marcar M1 completo enquanto arte/UX em aparelho e escala de simulação estiverem pendentes. Não mudar os resultados de combate para acomodar a animação. Sempre regenerar `studio.html.gz` após editar os arquivos compartilhados do Fight Studio.
+Não marcar M1 completo enquanto arte/UX em aparelho e escala de simulação estiverem pendentes. Não mudar os resultados de combate para acomodar a animação. Sempre regenerar `studio.cobundle` após editar os arquivos compartilhados do Fight Studio.
