@@ -103,9 +103,18 @@ def main():
                 return self.reply(400, {'error': str(error)})
             if not LOCK.acquire(blocking=False):
                 return self.reply(409, {'error': 'Uma simulação está sendo calculada. Tente novamente em instantes.'})
+            # Reply only after releasing the lock, so a client that sends its next
+            # request as soon as it reads this response never sees a false 409.
+            try:
+                status, payload = self.run_engine(career, config)
+            finally:
+                LOCK.release()
+            return self.reply(status, payload)
+
+        def run_engine(self, career, config):
             try:
                 if career and config['action'] == 'new' and save_path.exists() and config.get('replace') is not True:
-                    return self.reply(409, {'error': 'Já existe uma carreira. Use Nova carreira para substituir.'})
+                    return (409, {'error': 'Já existe uma carreira. Use Nova carreira para substituir.'})
                 with tempfile.TemporaryDirectory(prefix='corner-office-') as directory:
                     input_file = Path(directory) / 'input.json'
                     output_file = Path(directory) / 'response.json'
@@ -120,7 +129,7 @@ def main():
                     run = subprocess.run([godot, '--headless', '--path', str(ROOT / 'game'), '-s', script, '--', *paths], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
                     if run.returncode or not output_file.exists() or 'SCRIPT ERROR' in run.stderr or 'Parse Error' in run.stderr:
                         print(run.stdout, run.stderr, flush=True)
-                        return self.reply(500, {'error': 'O motor não conseguiu validar a operação. Seu save anterior foi preservado.'})
+                        return (500, {'error': 'O motor não conseguiu validar a operação. Seu save anterior foi preservado.'})
                     result = json.loads(output_file.read_text(encoding='utf-8-sig'))
                     if career and result.get('ok') and config['action'] not in ('state', 'evaluate', 'replay') and working_save.exists():
                         # Same-volume replacement; engine failure never touches the original.
@@ -129,11 +138,9 @@ def main():
                         if config['action'] == 'new' and save_path.exists():
                             shutil.copyfile(save_path, save_path.with_suffix('.backup.json'))
                         os.replace(pending, save_path)
-                    return self.reply(200, result)
+                    return (200, result)
             except subprocess.TimeoutExpired:
-                return self.reply(504, {'error': 'O motor excedeu o tempo de cálculo. Save anterior preservado.'})
-            finally:
-                LOCK.release()
+                return (504, {'error': 'O motor excedeu o tempo de cálculo. Save anterior preservado.'})
 
     print(f'Carreira: http://127.0.0.1:{args.port}/prototypes/promoter/', flush=True)
     print(f'Fight Studio: http://127.0.0.1:{args.port}/prototypes/fight-lab/', flush=True)

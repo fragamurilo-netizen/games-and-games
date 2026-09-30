@@ -41,7 +41,7 @@ jobs:
           python3 corner-office/tools/build_replay_examples.py
           python3 corner-office/tools/build_simulated_replays.py
           python3 corner-office/tools/build_studio_bundle.py
-          git diff --exit-code -- corner-office/game/presentation/fight/studio.html.gz
+          git diff --exit-code -- corner-office/game/presentation/fight/studio.cobundle
           git diff --exit-code -- corner-office/game/content
 
   android:

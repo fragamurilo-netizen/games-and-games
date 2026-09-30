@@ -151,3 +151,6 @@ body:not([data-phase="fight"]) .ticker{display:none}
 }
 @media(orientation:portrait){.show{align-items:flex-end;padding-bottom:9%}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Embedded in the game screen: the game header already offers the way back. */
+body[data-embedded] #back{display:none}

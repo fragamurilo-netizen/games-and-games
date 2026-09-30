@@ -30,7 +30,7 @@ def build():
         code = (STUDIO / match[1]).resolve().read_text(encoding='utf-8')
         return '<script>' + code.replace('</script', '<\\/script') + '</script>'
     html = re.sub(r'<script src="([^"]+)"></script>', script, html)
-    target = ROOT / 'game/presentation/fight/studio.html.gz'
+    target = ROOT / 'game/presentation/fight/studio.cobundle'
     packed = bytearray(gzip.compress(html.encode('utf-8'), mtime=0))
     packed[9] = 255  # Stable gzip OS byte across Python 3.11–3.13 / Windows / Linux.
     target.write_bytes(packed)
