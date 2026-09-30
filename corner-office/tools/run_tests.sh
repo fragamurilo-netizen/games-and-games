@@ -9,6 +9,13 @@ GODOT="${GODOT:-godot}"
 out="$("$GODOT" --headless --path . -s res://tests/run_tests.gd ${1:+-- "$@"} 2>&1)"
 status=$?
 echo "$out"
+# Navegação do hub precisa de uma árvore de cena real; roda à parte.
+nav="$("$GODOT" --headless --path . -s res://tools/check_navigation.gd 2>&1)"
+nav_status=$?
+echo "$nav" | grep -E "^(FAIL|NAVIGATION)"
+out="$out
+$nav"
+[ $nav_status -ne 0 ] && status=1
 if grep -qE "SCRIPT ERROR|Parse Error" <<<"$out"; then
 	echo "Falha: erros de script no log." >&2
 	exit 1

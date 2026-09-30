@@ -2,6 +2,11 @@ extends Screen
 ## Free agency / basic renewal on mobile. Bible §9; o agente responde via Agencies.
 var selected:=""
 func title() -> String:return "Mercado"
+func receive(payload: Dictionary) -> void:
+	if payload.get("reset",false):selected=""
+	if payload.has("fighter_id"):selected=str(payload.fighter_id)
+func snapshot() -> Dictionary:
+	var s:=super.snapshot();s.fighter_id=selected;return s
 func build() -> void:
 	var w:=Game.world
 	if selected.is_empty():
@@ -23,6 +28,7 @@ func build() -> void:
 	add_button("← Agentes livres",func():selected="";refresh())
 	add_portrait(f)
 	add_heading(f.display_name());add_text(CareerText.division(f.division)+" / "+f.record_string());add_text(CareerText.agent_line(w,f),Tokens.MUTED)
+	add_button("Ver ficha completa",func():navigate.emit("fighters",{"fighter_id":f.id}))
 	var bid:=Contracts.best_rival_bid(w,f,w.player_org_id)
 	if bid>0:add_text("Proposta rival na mesa: %s por luta."%CareerText.money(bid),Tokens.FIGHT_RED)
 	var show:=add_number("Bolsa por apresentação · US$",maxi(Contracts.market_price(w,f),bid),1,10000000)
