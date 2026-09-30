@@ -372,6 +372,6 @@ static func _label(text: String, variation: String = "", wrap: bool = false) -> 
 	l.text = text
 	l.theme_type_variation = variation
 	if wrap:
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return l

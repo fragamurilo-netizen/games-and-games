@@ -33,6 +33,10 @@ func _frames(n: int) -> void:
 
 
 func _shot(shot_name: String) -> void:
+	# Aviso de conquista não entra na foto (aparece por cima do que se quer mostrar).
+	for n in get_tree().root.find_children("*", "", true, false):
+		if n is AchievementBanner:
+			n.queue_free()
 	await _frames(4)
 	var t := Time.get_ticks_msec() + 350
 	while Time.get_ticks_msec() < t:
