@@ -18,7 +18,7 @@ static func build_create(screen: Screen, on_done: Callable, on_cancel: Callable)
 	var division := screen.add_select("Categoria", [any] + o.divisions)
 	var country := screen.add_select("País", [any] + o.countries)
 	var population := screen.add_select("Traços do rosto", [{"id": "", "label": "Pelo país"}] + o.populations)
-	var base := screen.add_select("Base marcial", [any] + o.martial_bases)
+	var base := screen.add_select("Arte marcial de origem", [any] + o.disciplines)
 	var style := screen.add_select("Estilo de luta", [any] + o.fight_styles)
 	var age := screen.add_number("Idade (0 = sorteio)", 0, 0, 45)
 	var level := screen.add_number("Nível técnico (0 = sorteio; 40 regional, 60 bom, 75 elite)", 0, 0, 90)
@@ -27,7 +27,7 @@ static func build_create(screen: Screen, on_done: Callable, on_cancel: Callable)
 	screen.add_button("GERAR LUTADOR", func():
 		var result: Dictionary = await screen.run_action("create_fighter", {
 			"division": _value(division), "country": _value(country), "population": _value(population),
-			"martial_base": _value(base), "fight_style": _value(style), "age": int(age.value), "level": level.value,
+			"discipline": _value(base), "fight_style": _value(style), "age": int(age.value), "level": level.value,
 			"prospect": _value(phase) == "prospect", "to_roster": _value(destination) == "roster"})
 		if result.get("ok"):
 			on_done.call(str(result.fighter_id))
@@ -50,7 +50,7 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	var population := screen.add_select("Traços do rosto", o.populations, str(f.appearance.get("pop", "")))
 	var new_face := _check(screen, "Sortear um rosto novo ao salvar")
 	var division := screen.add_select("Categoria", o.divisions, f.division)
-	var base := screen.add_select("Base marcial", o.martial_bases, f.martial_base)
+	var base := screen.add_select("Arte marcial de origem", ([] if not f.discipline.is_empty() else [{"id": "", "label": "Família: " + FighterGenerator.base_name(f.martial_base)}]) + o.disciplines, f.discipline)
 	var style := screen.add_select("Estilo de luta", [{"id": "", "label": "Sem estilo definido"}] + o.fight_styles, f.fight_style)
 	var stance := screen.add_select("Guarda", o.stances, f.stance)
 	var body := screen.add_select("Biotipo", o.body_types, f.body_type)
@@ -91,9 +91,11 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	screen.add_button("SALVAR ALTERAÇÕES", func():
 		var p := {"first_name": first.text, "last_name": last.text, "nickname": nick.text, "country": _value(country),
 			"city": city.text, "population": _value(population), "reroll_face": new_face.button_pressed,
-			"division": _value(division), "martial_base": _value(base), "fight_style": _value(style),
+			"division": _value(division), "fight_style": _value(style),
 			"stance": _value(stance), "body_type": _value(body), "age": int(age.value), "height_cm": int(height.value),
 			"reach_cm": int(reach.value), "charisma": int(charisma.value), "bio": bio.text}
+		if not _value(base).is_empty():
+			p.discipline = _value(base)
 		if _value(country) != f.country and city.text == f.city:
 			p.erase("city")  # país novo sem cidade digitada: o jogo escolhe uma cidade de lá
 		var group_levels := {}

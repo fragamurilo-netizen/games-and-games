@@ -29,6 +29,9 @@ var natural_weight_kg := 0.0
 
 # Base marcial = origem técnica, não classe (MMA Bible §1, §7).
 var martial_base := ""
+# Arte marcial real (content/martial_arts.json); martial_base é a família dela
+# usada pelo Fight Engine e pelo Fight Studio.
+var discipline := ""
 
 # Atributos técnicos 1–100 (chaves em content/attributes.json).
 var striking := {}

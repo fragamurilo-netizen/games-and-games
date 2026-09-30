@@ -5,12 +5,14 @@ extends TestCase
 func test_create_respects_chosen_origin_and_style() -> void:
 	var w := WorldGenerator.generate(31, "regional_promoter")
 	var roster_before: int = w.player_org().roster.size()
-	var r := CareerActions.perform(w, "create_fighter", {"division": "m_welterweight", "country": "GE", "martial_base": "wrestling",
+	var r := CareerActions.perform(w, "create_fighter", {"division": "m_welterweight", "country": "GE", "discipline": "greco_roman",
 		"fight_style": "control", "age": 25, "level": 70, "population": "caucaso", "to_roster": true})
 	check(r.ok, "criado")
 	var f: Fighter = w.fighters[r.fighter_id]
 	check_eq(f.country, "GE", "país escolhido")
-	check_eq(f.martial_base, "wrestling", "base escolhida")
+	check_eq(f.discipline, "greco_roman", "arte marcial escolhida")
+	check_eq(f.martial_base, "wrestling", "família da arte marcial")
+	check(float(f.style.get("clinch", 1.0)) > 1.2, "greco-romana puxa o clinch")
 	check_eq(f.fight_style, "control", "estilo escolhido")
 	check(float(f.style.get("takedown", 1.0)) > 1.0, "estilo pesa nas intenções do Fight Engine")
 	check_eq(f.age_on(w.date), 25, "idade escolhida")
@@ -29,13 +31,14 @@ func test_edit_changes_identity_attributes_and_face() -> void:
 	var f: Fighter = w.fighters[id]
 	var seed_before: int = f.appearance.seed
 	var r := CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "first_name": "  Tiago ", "last_name": "Brandão", "nickname": "Bigorna",
-		"country": "BR", "division": "m_welterweight", "martial_base": "bjj", "fight_style": "submission", "age": 30,
+		"country": "BR", "division": "m_welterweight", "discipline": "luta_livre", "fight_style": "submission", "age": 30,
 		"height_cm": 183, "reach_cm": 190, "group_levels": {"jiu_jitsu": 80}, "attributes": {"striking": {"boxing": 91}},
 		"record": {"wins": 9, "losses": 1, "draws": 0}, "population": "afro_diaspora"})
 	check(r.ok, "edição aceita")
 	check_eq(f.display_name(), "Tiago “Bigorna” Brandão", "nome limpo")
 	check_eq(f.division, "m_welterweight", "categoria nova")
 	check_eq(f.fight_style, "submission", "estilo novo")
+	check_eq(f.martial_base, "bjj", "luta livre é da família do jiu-jítsu")
 	check(abs(FighterEditor.group_level(f, "jiu_jitsu") - 80) <= 1, "média do grupo ajustada")
 	check_eq(f.striking.boxing, 91, "atributo individual")
 	check_eq(f.record.wins, 9, "cartel antes da carreira")

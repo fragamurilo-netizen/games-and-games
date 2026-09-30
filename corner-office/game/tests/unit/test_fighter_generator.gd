@@ -31,6 +31,8 @@ func test_generated_fighters_are_coherent() -> void:
 		check(cfg.countries.has(f.country), "país conhecido")
 		check(f.city in cfg.countries[f.country].cities, "cidade do país")
 		check(cfg.archetypes.has(f.martial_base), "base marcial conhecida")
+		check(FighterGenerator.martial_arts().has(f.discipline), "arte marcial real conhecida")
+		check_eq(FighterGenerator.martial_arts()[f.discipline].family, f.martial_base, "família coerente")
 		check(f.reach_cm - f.height_cm >= -4 and f.reach_cm - f.height_cm <= 13, "envergadura plausível")
 		check(f.natural_weight_kg > 45.0, "peso natural definido")
 		check(f.record.wins + f.record.losses + f.record.draws >= 1, "ao menos uma luta")
@@ -55,6 +57,10 @@ func test_martial_base_shapes_the_skill_profile() -> void:
 		sums[key][1] += _avg(f.grappling)
 		sums[key][2] += 1
 	check(sums.striker[2] > 5 and sums.wrestler[2] > 5, "amostra suficiente")
+	var kinds := {}
+	for f: Fighter in _generated(w):
+		kinds[f.discipline] = true
+	check(kinds.size() >= 18, "variedade de artes marciais (%d)" % kinds.size())
 	check(sums.striker[0] / sums.striker[2] > sums.striker[1] / sums.striker[2] + 6, "trocador troca mais do que derruba")
 	check(sums.wrestler[1] / sums.wrestler[2] > sums.wrestler[0] / sums.wrestler[2] + 6, "wrestler derruba mais do que troca")
 

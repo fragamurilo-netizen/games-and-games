@@ -48,7 +48,7 @@ func _profile(f: Fighter) -> void:
 	for injury: Dictionary in f.injuries:add_text("Lesionado (%s) até %s"%[CareerText.injury(str(injury.type)),GameDate.format(injury.until)],Tokens.FIGHT_RED)
 	add_text("%s · %d cm · alcance %d cm"%[f.record_string(),f.height_cm,f.reach_cm])
 	var o:=FighterEditor.options()
-	add_text("%d anos · %s · base: %s%s"%[f.age_on(Game.world.date),_label(o.countries,f.country),FighterGenerator.base_name(f.martial_base),"" if f.fight_style.is_empty() else " · "+_label(o.fight_styles,f.fight_style)],Tokens.MUTED)
+	add_text("%d anos · %s · %s%s"%[f.age_on(Game.world.date),_label(o.countries,f.country),FighterGenerator.discipline_name(f),"" if f.fight_style.is_empty() else " · "+_label(o.fight_styles,f.fight_style)],Tokens.MUTED)
 	add_text("Guarda %s · %s%s"%[_label(o.stances,f.stance).to_lower(),_label(o.body_types,f.body_type),"" if f.natural_weight_kg<=0 else " · %.1f kg fora do camp"%f.natural_weight_kg],Tokens.MUTED)
 	if not f.bio.is_empty():add_text(f.bio,Tokens.MUTED)
 	var groups: Dictionary={"Trocação":f.striking,"Wrestling":f.grappling,"Jiu-jítsu":f.jiu_jitsu}
