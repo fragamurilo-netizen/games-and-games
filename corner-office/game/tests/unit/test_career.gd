@@ -36,7 +36,7 @@ func test_generated_world_and_six_bout_career_loop() -> void:
 	check(CareerActions.perform(world,"advance_event",{"event_id":id}).ok,"Advance to fight night")
 	check_eq(ev.status,"completed","Night finishes")
 	check_eq(world.player_org().cash,cash+int(ev.actual.margin),"Exactly one settlement")
-	check_eq(world.news.values().filter(func(n: NewsItem): return ev.id in n.entity_ids).size(),1,"One factual event report")
+	check_eq(world.news.values().filter(func(n: NewsItem): return n.topic=="event_completed" and ev.id in n.entity_ids).size(),1,"One factual event report")
 	for fight_id: String in ev.fight_ids:
 		var f: Fight=world.fights[fight_id]
 		check_eq(f.status,"completed","Real combat engine used")

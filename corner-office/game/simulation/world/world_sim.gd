@@ -35,6 +35,7 @@ func advance_day() -> void:
 		EventBus.month_advanced.emit(world.date)
 	standing.ensure_objectives(world)
 	org_ai.tick(world)
+	media.scan_triggers(world)
 	# TODO(M2): camps e negociações com memória de agentes.
 	EventBus.day_advanced.emit(world.date)
 

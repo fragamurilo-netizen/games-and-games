@@ -33,7 +33,7 @@ content/*.json ─► simulation (models + systems) ─► EventBus / Game.world
 | Contracts | `simulation/contracts/contracts.gd` | Ofertas, BATNA, agentes, free agency | `sign()` pronto; resto TODO |
 | Economy | `simulation/economy/economy.gd` | P&L projetado/real, mídia, sponsors | TODO(M1) |
 | Popularity | `simulation/popularity/popularity.gd` | Mercados regionais, draw | resultado move popularidade regional; draw TODO |
-| Media | `simulation/media/media.gd` | Notícias com triggers factuais | `publish()` pronto; triggers TODO |
+| Media | `simulation/media/media.gd` | Notícias com triggers factuais | Cards, resultados, zebras, sequências, contratos, agentes livres e rankings; textos em `content/news_templates.json`; UI em `ui/news_center.gd` |
 | Identity | `identity/face_generator.gd` | Rostos, corpos, envelhecimento | TODO(M1) — depende do gerador do Mais Uma Rodada |
 | SaveSystem | `save/save_system.gd` | Versionamento, migração, integridade | pronto |
 
