@@ -59,6 +59,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.2.1'
+      - uses: android-actions/setup-android@v3
       - name: Install Android build tools
         run: sdkmanager 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0'
       - name: Build original Fight Studio bridge
