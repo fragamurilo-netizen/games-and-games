@@ -93,7 +93,11 @@ func _art(city_id: String, height: int) -> void:
 
 func _person_link(id: String, label: String = "") -> void:
 	var text := label if not label.is_empty() else _person_label(id)
-	_link(text, func(): open("person", id))
+	add_fighter_row(_fighter(id), text, func(): open("person", id))
+
+
+func _fighter(id: String) -> Fighter:
+	return Universe.as_fighter(id, Game.world if Game.has_world() else null)
 
 
 func _person_label(id: String) -> String:
@@ -230,6 +234,8 @@ func _lineage(org_id: String, division: String) -> void:
 		if last.get("end") != null:
 			_small("Ganhou o cinturão vago na reestruturação de dezembro de 2026.")
 		var cid: String = champ.id
+		var photo := add_portrait(_fighter(cid), 176)
+		photo.accent = Tokens.CHAMP_GOLD
 		_link("Ver ficha", func(): open("person", cid) if not Universe.person(cid).is_empty() else null)
 	else:
 		add_text("CINTURÃO VAGO", Tokens.MUTED)
@@ -239,7 +245,7 @@ func _lineage(org_id: String, division: String) -> void:
 	for r: Dictionary in reversed:
 		var id: String = r.fighter_id
 		var span := "%s – %s" % [Universe.format_date(r.start), Universe.format_date(r.end) if r.end != null else "hoje"]
-		_link("%s  ·  %s" % [r.name, Universe.country_name(r.country)], func(): open("person", id))
+		add_fighter_row(_fighter(id), "%s  ·  %s" % [r.name, Universe.country_name(r.country)], func(): open("person", id))
 		_small("%s · %s · %d defesa%s · %s%s" % [span, r.event, int(r.defenses), "" if int(r.defenses) == 1 else "s", r.how_won,
 			("  ·  " + str(r.how_ended)) if not str(r.how_ended).is_empty() else ""])
 
@@ -312,13 +318,15 @@ func _classics() -> void:
 	list.reverse()
 	for f: Dictionary in list:
 		var id: String = f.id
-		_link("%s  ·  %s × %s" % [str(f.date).left(4), Universe.person_name(f.red), Universe.person_name(f.blue)], func(): open("fight", id))
+		add_face_off(_fighter(f.red), _fighter(f.blue), "%s\n%s × %s" % [str(f.date).left(4), Universe.person_name(f.red), Universe.person_name(f.blue)],
+			func(): open("fight", id))
 		_small("%s · %s · %s · %s" % [f.event, _division_name(f.division), f.method, "★".repeat(int(round(float(f.stars))))])
 
 
 func _fight(id: String) -> void:
 	var f := Universe.fight(id)
 	add_heading("%s × %s" % [Universe.person_name(f.red), Universe.person_name(f.blue)])
+	add_face_off(_fighter(f.red), _fighter(f.blue), "×")
 	add_text("%s · %s · %s" % [f.event, Universe.format_date(f.date), _division_name(f.division)], Tokens.MUTED)
 	var winner: String = f.red if f.winner == "red" else f.blue if f.winner == "blue" else ""
 	add_text(("Vitória de %s" % Universe.person_name(winner)) if not winner.is_empty() else "Empate", Tokens.CHAMP_GOLD)
@@ -338,11 +346,15 @@ func _person(id: String) -> void:
 		add_text("Sem registro.", Tokens.MUTED)
 		return
 	var nick: String = str(p.get("nickname", ""))
+	var photo := add_portrait(alive if alive else Universe.as_fighter(id), 220)
+	if not p.get("titles", []).is_empty():
+		photo.accent = Tokens.CHAMP_GOLD
 	add_heading(alive.display_name() if alive else "%s%s %s" % [p.first_name, (" “%s”" % nick) if not nick.is_empty() else "", p.last_name])
 	var country_id: String = alive.country if alive else str(p.country)
 	add_text("%s%s" % [Universe.country_name(country_id), ("  ·  nascido em %d" % int(p.birth_year)) if p.has("birth_year") else ""], Tokens.MUTED)
 	if alive:
-		add_text("Em atividade em 2027 · cartel %d-%d" % [int(alive.record.wins), int(alive.record.losses)])
+		var fights_done := int(alive.record.wins) + int(alive.record.losses)
+		add_text("Em atividade em 2027" + (" · cartel %d-%d" % [int(alive.record.wins), int(alive.record.losses)] if fights_done > 0 else ""))
 	elif p.get("retired") != null:
 		add_text("Aposentado em %d" % int(p.retired))
 	if not str(p.get("role_text", "")).is_empty() and not alive:
@@ -375,7 +387,7 @@ func _hof() -> void:
 	add_heading("Hall da Fama")
 	for h: Dictionary in Universe.hall_of_fame():
 		var id: String = h.fighter_id
-		_link("%d · %s" % [int(h.inducted), h.name], func(): open("person", id))
+		add_fighter_row(_fighter(id), "%d · %s" % [int(h.inducted), h.name], func(): open("person", id))
 		_small(h.citation)
 
 

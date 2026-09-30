@@ -76,3 +76,13 @@ func test_city_art_renders() -> void:
 	var img := CityArt.render(Universe.city("city_rio_de_janeiro"), Vector2i(160, 90))
 	check_eq(img.get_size(), Vector2i(160, 90), "tamanho pedido")
 	check(img.get_pixel(80, 5) != img.get_pixel(80, 85), "céu e chão diferentes")
+
+
+func test_history_people_have_portrait_data() -> void:
+	var a := Universe.as_fighter("hist_braga")
+	var b := Universe.as_fighter("hist_harper")
+	check(a.appearance.has("seed") and a.appearance.has("pop"), "lenda tem aparência para o retrato")
+	check_eq(b.sex, Fighter.Sex.FEMALE, "sexo vem da história")
+	check(PortraitService.key_for(a) != PortraitService.key_for(b), "cada pessoa tem retrato próprio")
+	var w := WorldGenerator.generate(3, "regional_promoter", false)
+	check(Universe.as_fighter("ftr_carter", w) == w.fighters.ftr_carter, "lutador vivo usa a ficha do mundo")

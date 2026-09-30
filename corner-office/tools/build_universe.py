@@ -146,9 +146,31 @@ people: dict[str, dict] = {}
 used_names: set[str] = {f"{f['first_name']} {f['last_name']}" for f in CANONICAL.values()}
 
 
+# País -> populações do gerador de rostos do Fight Studio (prototypes/face-lab/identity.js).
+FACE_POPS = {
+    "BR": {"latino": 5, "afro_diaspora": 3, "mediterraneo": 2}, "US": {"europa_norte": 4, "afro_diaspora": 4, "latino": 2, "mediterraneo": 1},
+    "CA": {"europa_norte": 5, "mediterraneo": 2, "afro_diaspora": 1}, "MX": {"latino": 8, "andino": 2}, "AR": {"mediterraneo": 5, "latino": 5},
+    "PE": {"andino": 6, "latino": 4}, "GB": {"europa_norte": 7, "afro_diaspora": 2, "sul_asiatico": 1}, "IE": {"europa_norte": 1},
+    "NL": {"europa_norte": 7, "afro_diaspora": 2, "oriente_medio": 1}, "FR": {"mediterraneo": 5, "oriente_medio": 2, "africa_ocidental": 2, "europa_norte": 1},
+    "PL": {"leste_europeu": 1}, "RS": {"leste_europeu": 1}, "HR": {"leste_europeu": 1}, "SE": {"europa_norte": 1},
+    "RU": {"leste_europeu": 5, "caucaso": 4, "asia_central": 1}, "KZ": {"asia_central": 7, "leste_europeu": 3}, "GE": {"caucaso": 1},
+    "UZ": {"asia_central": 1}, "AZ": {"caucaso": 1}, "JP": {"leste_asiatico": 1}, "KR": {"leste_asiatico": 1}, "CN": {"leste_asiatico": 1},
+    "MN": {"asia_central": 4, "leste_asiatico": 6}, "PH": {"sudeste_asiatico": 1}, "TH": {"sudeste_asiatico": 1},
+    "AU": {"europa_norte": 6, "polinesia": 2, "mediterraneo": 2}, "NZ": {"polinesia": 6, "europa_norte": 4}, "NG": {"africa_ocidental": 1},
+    "CM": {"africa_ocidental": 1}, "ZA": {"africa_oriental": 5, "europa_norte": 5}, "TR": {"mediterraneo": 5, "oriente_medio": 5},
+}
+
+
+def appearance(pid: str, country: str, sex: str) -> dict:
+    r = random.Random("face:" + pid)
+    pops = FACE_POPS.get(country, {"misto": 1})
+    return {"seed": r.randrange(1, 2_000_000_000), "sex": sex.lower(), "pop": r.choices(list(pops), list(pops.values()))[0]}
+
+
 def add_person(pid, first, last, nick, country, sex, birth, division, **extra):
     people[pid] = {"id": pid, "first_name": first, "last_name": last, "nickname": nick, "country": country, "sex": sex,
-                   "birth_year": birth, "division": division, "titles": [], "title_fights": {"wins": 0, "losses": 0, "draws": 0}, **extra}
+                   "birth_year": birth, "division": division, "titles": [], "title_fights": {"wins": 0, "losses": 0, "draws": 0},
+                   "appearance": appearance(pid, country, sex), **extra}
     used_names.add(f"{first} {last}")
     return people[pid]
 

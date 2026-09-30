@@ -194,6 +194,23 @@ static func person_name(id: String) -> String:
 	return "%s %s" % [p.first_name, p.last_name]
 
 
+## Lutador para os componentes de retrato (FighterPortrait): o do mundo vivo
+## quando existe, senão um Fighter de leitura montado com a aparência histórica.
+static func as_fighter(id: String, world: WorldState = null) -> Fighter:
+	if world and world.fighters.has(id):
+		return world.fighters[id]
+	var p := person(id)
+	var f := Fighter.new()
+	f.id = id
+	f.first_name = str(p.get("first_name", ""))
+	f.last_name = str(p.get("last_name", ""))
+	f.nickname = str(p.get("nickname", ""))
+	f.country = str(p.get("country", ""))
+	f.sex = Fighter.Sex.FEMALE if p.get("sex") == "F" else Fighter.Sex.MALE
+	f.appearance = p.get("appearance", {})
+	return f
+
+
 static func fight(id: String) -> Dictionary:
 	return _indexed("fights", "fights", "fights").get(id, {})
 
