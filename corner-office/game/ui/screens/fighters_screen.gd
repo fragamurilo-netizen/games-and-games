@@ -98,36 +98,44 @@ static func _change_text(world: WorldState,change: Dictionary) -> String:
 
 func _profile(f: Fighter) -> void:
 	var w:=Game.world
-	add_button("← Voltar à lista",func():selected_fighter="";refresh())
-	add_button("EDITAR LUTADOR",func():editing=f.id;feedback="";refresh())
-	add_portrait(f)
-	add_heading(f.display_name());add_text(CareerText.division(f.division)+" · "+f.country+" · %d anos"%f.age_on(Game.world.date),Tokens.MUTED)
+	add_button("Editar lutador",func():editing=f.id;feedback="";refresh(),"Muda nome, país, estilo, físico e atributos deste atleta.")
+	var run:=CareerStats.streak(w,f)
+	var methods:=CareerStats.win_methods(w,f)
+	# Foto à esquerda, ficha à direita (quadro de retrato dos menus de 2012).
+	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",Tokens.SPACE_M)
+	top.add_child(StatWidgets.portrait_frame(f,200))
+	var sheet:=VBoxContainer.new();sheet.size_flags_horizontal=SIZE_EXPAND_FILL
+	sheet.add_theme_constant_override("separation",Tokens.SPACE_S)
+	sheet.add_child(Ud3Chrome.header_bar("Ficha do atleta"))
+	var who:=Label.new();who.text="%s\n%s · %d anos"%[f.display_name(),CareerText.division(f.division),f.age_on(w.date)]
+	who.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;who.add_theme_font_size_override("font_size",20);sheet.add_child(who)
+	sheet.add_child(StatWidgets.tile_row([
+		StatWidgets.tile("Cartel",f.record_string(),"V-D-E",true),
+		StatWidgets.tile("Sequência","%+d"%run if run!=0 else "—",CareerStats.streak_label(run)),
+	],0))
+	top.add_child(sheet);add_node(top)
 	if f.retired:add_text("Aposentado em "+GameDate.format(f.retired_on),Tokens.MUTED)
 	for injury: Dictionary in f.injuries:add_text("Lesionado (%s) até %s"%[CareerText.injury(str(injury.type)),GameDate.format(injury.until)],Tokens.FIGHT_RED)
 	var o:=FighterEditor.options()
-	add_text("%d anos · %s · %s%s"%[f.age_on(Game.world.date),_label(o.countries,f.country),FighterGenerator.discipline_name(f),"" if f.fight_style.is_empty() else " · "+_label(o.fight_styles,f.fight_style)],Tokens.MUTED)
+	add_text("%s · %s%s"%[_label(o.countries,f.country),FighterGenerator.discipline_name(f),"" if f.fight_style.is_empty() else " · "+_label(o.fight_styles,f.fight_style)],Tokens.MUTED)
 	add_text("Guarda %s · %s%s"%[_label(o.stances,f.stance).to_lower(),_label(o.body_types,f.body_type),"" if f.natural_weight_kg<=0 else " · %.1f kg fora do camp"%f.natural_weight_kg],Tokens.MUTED)
 	if not f.bio.is_empty():add_text(f.bio,Tokens.MUTED)
 	_ranking_summary(f)
-	var run:=CareerStats.streak(w,f)
-	var methods:=CareerStats.win_methods(w,f)
 	add_tiles([
-		StatWidgets.tile("Cartel",f.record_string(),"V-D-E",true),
-		StatWidgets.tile("Sequência","%+d"%run if run!=0 else "—",CareerStats.streak_label(run)),
 		StatWidgets.tile("Altura / alcance","%d/%d"%[f.height_cm,f.reach_cm],"cm"),
 		StatWidgets.tile("Vitórias registradas","%d/%d/%d"%[methods.ko_tko,methods.submission,methods.decision],"KO · finalização · decisão"),
 	])
 	_links(f)
-	add_text("FORMA RECENTE",Tokens.MUTED)
+	add_label("Forma recente")
 	var strip:=StatWidgets.Form.new();strip.results=CareerStats.form(w,f);add_node(strip)
 	var groups: Array=[["Trocação",f.striking],["Wrestling",f.grappling],["Jiu-jítsu",f.jiu_jitsu],["Físico",f.physical],["Mental",f.mental]]
 	for group: Array in groups:
 		var values: Dictionary=group[1]
 		if values.is_empty():continue
-		if not add_section("%s  %d"%[group[0],roundi(CareerStats.group_average(values))],group[0]=="Trocação"):continue
-		for key: String in values:
-			var v:=float(values[key])
-			add_bar(CareerText.attribute(key),v,100,"",StatWidgets.attribute_color(v))
+		if not add_section("%s  ·  %d"%[group[0],roundi(CareerStats.group_average(values))],group[0]=="Trocação"):continue
+		var rows: Array=[]
+		for key: String in values:rows.append([CareerText.attribute(key),str(roundi(float(values[key])))])
+		add_node(StatWidgets.table(["Atributo","Nota"],rows,[.75,.25]))
 	var avg:=CareerStats.fight_averages(w,f)
 	if avg.fights>0 and add_section("Números por luta"):
 		add_bar("Golpes conectados",avg.landed,maxf(60.0,avg.landed),"%.1f"%avg.landed)
