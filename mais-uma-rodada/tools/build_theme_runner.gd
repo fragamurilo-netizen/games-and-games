@@ -228,7 +228,16 @@ func _buttons(th: Theme) -> void:
 	# Navegação inferior (o indicador da aba ativa é desenhado pela BottomNav)
 	th.add_type("NavButton")
 	th.set_type_variation("NavButton", "Button")
-	_button_states(th, "NavButton", empty, sb(Color(1, 1, 1, 0.03), UITokens.R_MD, clear, 0, 4, 6), sb(clear, UITokens.R_MD, clear, 0, 4, 6), empty)
+	# Ícone e rótulo centrados no botão: o ícone fica preso no topo (vertical_icon_alignment), então
+	# a margem de cima é maior. Os quatro estados com a mesma margem (o vazio não tinha nenhuma e
+	# o ícone encostava na borda da barra).
+	var nav_states: Array = []
+	for bg in [clear, Color(1, 1, 1, 0.03), clear, clear]:
+		var nb := sb(bg, UITokens.R_MD, clear, 0, 4, 6)
+		nb.content_margin_top = UITokens.S3
+		nb.content_margin_bottom = UITokens.S1
+		nav_states.append(nb)
+	_button_states(th, "NavButton", nav_states[0], nav_states[1], nav_states[2], nav_states[3])
 	_button_colors(th, "NavButton", UIColors.DIM, UIColors.TEXT)
 	th.set_font(&"font", "NavButton", f_semi)
 	th.set_font_size(&"font_size", "NavButton", 19)

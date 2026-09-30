@@ -249,6 +249,9 @@ func _only_pass() -> void:
 		if spec == "!taps":
 			await _tap_check(w)
 			continue
+		if spec == "!nametap":
+			await _name_tap_check(w)
+			continue
 		if spec.begins_with("~article"):
 			await _article_shot(w, spec.substr(9))
 			continue
@@ -524,6 +527,7 @@ func _tap_check(w: GameWorld) -> void:
 				fails.append(label)
 			UIManager.close_all_modals()
 		print("[toque] %s: %d alvos, falharam %d %s" % [route, n_route, fails.size(), str(fails)])
+	await _name_tap_check(w)
 	# Arrasto: começar em cima de uma linha e subir 160 px tem de rolar e não disparar nada.
 	for route in ["squad", "hub", "inbox"]:
 		await _open_route(w, route)
@@ -544,6 +548,39 @@ func _tap_check(w: GameWorld) -> void:
 		await _frames(3)
 		print("[toque] arrasto em %s: rolou %d px, disparou botão: %s" % [route, sc.scroll_vertical - before, hit[0]])
 	print("[toque] TOTAL %d/%d dispararam; apertar custa em média %d µs, pior %d µs" % [ok, total, sum_us / maxi(1, total), worst_us])
+
+
+## Elenco: tocar em qualquer ponto da coluna do nome (retrato, nome, selos) abre o jogador.
+func _name_tap_check(w: GameWorld) -> void:
+	# Elenco: tocar em qualquer ponto da coluna do nome (retrato, nome, selos) abre o jogador.
+	await _open_route(w, "squad")
+	var name_ok := 0
+	var name_total := 0
+	var name_fail: Array = []
+	for row_i in 6:
+		for fx in [0.12, 0.45, 0.8]:
+			await _open_route(w, "squad")
+			var taps: Array = _screen().find_children("*", "Button", true, false).filter(func(b):
+				return b.theme_type_variation == &"RowOverlay" and b.is_visible_in_tree() and b.get_global_rect().size.x < 400.0)
+			if row_i >= taps.size():
+				break
+			var tb: Button = taps[row_i]
+			var r: Rect2 = tb.get_global_rect()
+			var pos := r.position + Vector2(r.size.x * fx, r.size.y * 0.5)
+			var before_screen := UIManager.current()
+			_mouse(pos, true)
+			await get_tree().process_frame
+			var j := float(OS.get_environment("TAP_JITTER")) if OS.get_environment("TAP_JITTER") != "" else 6.0
+			_move(pos + Vector2(j * 0.6, j * 0.5))
+			await get_tree().process_frame
+			_mouse(pos + Vector2(j, j * 0.8), false)
+			await _frames(3)
+			name_total += 1
+			if UIManager.current() != before_screen and UIManager.current().screen_name == "player":
+				name_ok += 1
+			else:
+				name_fail.append("linha %d em %d%%" % [row_i, int(fx * 100)])
+	print("[toque] elenco, coluna do nome: %d/%d abriram o jogador %s" % [name_ok, name_total, str(name_fail)])
 
 
 func _open_route(w: GameWorld, route: String) -> void:

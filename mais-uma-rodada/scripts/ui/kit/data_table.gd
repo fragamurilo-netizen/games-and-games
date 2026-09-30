@@ -259,7 +259,10 @@ func _cell(c: Dictionary, item: Variant, lead: bool) -> Control:
 	var w := float(c.get("w", 72))
 	if c.has("cell"):
 		var ctl: Control = (c["cell"] as Callable).call(item)
+		# Tudo dentro da célula (retrato, selos, nome) deixa o toque passar para a linha: o botão
+		# da linha fica atrás do conteúdo, e um retrato que segura o toque fazia o nome "não clicar".
 		ctl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		UIKit._ignore_mouse(ctl)
 		if not lead:
 			ctl.custom_minimum_size.x = maxf(ctl.custom_minimum_size.x, w)
 		else:
