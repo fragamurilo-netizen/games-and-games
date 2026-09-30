@@ -1,0 +1,18 @@
+{
+  "_doc": "Pesos do Ranking Engine (Game Design Bible §7 Rankings; MMA Bible §12, §23).",
+  "recent_fights": 6,
+  "recency_half_life_days": 365,
+  "resume": {"win": 1.0, "loss": -0.5, "win_rate": 20.0},
+  "win": {"base": 10.0, "opposition": 15.0, "finish": 3.0, "title": 6.0},
+  "loss": {"base": -9.0, "opposition_relief": 5.0, "finished": -2.0},
+  "draw": 1.0,
+  "streak_step": 2.0,
+  "streak_cap": 5,
+  "unranked_opposition_scale": 0.6,
+  "inactivity": {"grace_days": 365, "per_month": 1.5, "cap": 20.0},
+  "panel_bias": 1.5,
+  "max_climb": 5,
+  "p4p_per_division": 5,
+  "p4p_rank_bonus": 6.0,
+  "p4p_size": 15
+}

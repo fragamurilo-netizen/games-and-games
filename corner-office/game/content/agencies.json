@@ -1,0 +1,6 @@
+[
+  {"id": "agt_blackstone", "name": "Blackstone Sports", "profile": "Estrelas globais", "behavior": "Agressiva; maximiza garantias.", "demand": 1.12, "guarantee_weight": 1.35, "rival_leverage": 0.5, "trust_sensitivity": 1.0, "home_countries": [], "home_discount": 0.0},
+  {"id": "agt_northstar", "name": "Northstar Management", "profile": "Prospects", "behavior": "Busca atividade e desenvolvimento.", "demand": 0.97, "guarantee_weight": 1.0, "rival_leverage": 0.25, "trust_sensitivity": 0.8, "home_countries": [], "home_discount": 0.0},
+  {"id": "agt_morales", "name": "Morales Sports", "profile": "América Latina", "behavior": "Relacionamentos regionais fortes.", "demand": 1.03, "guarantee_weight": 1.0, "rival_leverage": 0.4, "trust_sensitivity": 1.2, "home_countries": ["BR", "MX", "AR", "CO", "PE", "CL"], "home_discount": 0.05},
+  {"id": "agt_crownking", "name": "Crown & King", "profile": "Pequena e combativa", "behavior": "Usa competição entre promotoras.", "demand": 1.05, "guarantee_weight": 1.0, "rival_leverage": 1.0, "trust_sensitivity": 1.3, "home_countries": [], "home_discount": 0.0}
+]

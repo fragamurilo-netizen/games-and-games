@@ -1,0 +1,14 @@
+[
+  {"id": "m_flyweight", "name": "Mosca", "sex": "M", "limit_lb": 125, "limit_kg": 56.7},
+  {"id": "m_bantamweight", "name": "Galo", "sex": "M", "limit_lb": 135, "limit_kg": 61.2},
+  {"id": "m_featherweight", "name": "Pena", "sex": "M", "limit_lb": 145, "limit_kg": 65.8},
+  {"id": "m_lightweight", "name": "Leve", "sex": "M", "limit_lb": 155, "limit_kg": 70.3},
+  {"id": "m_welterweight", "name": "Meio-médio", "sex": "M", "limit_lb": 170, "limit_kg": 77.1},
+  {"id": "m_middleweight", "name": "Médio", "sex": "M", "limit_lb": 185, "limit_kg": 83.9},
+  {"id": "m_light_heavyweight", "name": "Meio-pesado", "sex": "M", "limit_lb": 205, "limit_kg": 93.0},
+  {"id": "m_heavyweight", "name": "Pesado", "sex": "M", "limit_lb": 265, "limit_kg": 120.2},
+  {"id": "w_strawweight", "name": "Palha", "sex": "F", "limit_lb": 115, "limit_kg": 52.2},
+  {"id": "w_flyweight", "name": "Mosca", "sex": "F", "limit_lb": 125, "limit_kg": 56.7},
+  {"id": "w_bantamweight", "name": "Galo", "sex": "F", "limit_lb": 135, "limit_kg": 61.2},
+  {"id": "w_featherweight", "name": "Pena", "sex": "F", "limit_lb": 145, "limit_kg": 65.8}
+]

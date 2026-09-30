@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corner Office · Rostos</title>
+<script src="studio.js?v=5"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: laboratório — editor (retrato + controles) no topo, catálogo em abas logo abaixo, depois populações e roster.
+   Tokens = DESIGN.md do Corner Office (tema escuro único, por escolha do produto). */
+:root {
+  color-scheme: dark;
+  --canvas: #111417;
+  --surface: #1B2025;
+  --surface-2: #232A31;
+  --paper: #F1EEE6;
+  --ink: #F4F1E8;
+  --soft: #cfd3d6;
+  --muted: #8A939C;
+  --red: #C83B3B;
+  --steel: #46535E;
+  --gold: #B88B46;
+  --f-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--canvas); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; margin: 0; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: 20px; padding-block: 0 64px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 800; line-height: 0.95; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(44px, 8vw, 92px); }
+h2 { font-size: clamp(28px, 4.4vw, 42px); }
+p { margin: 0; max-width: 66ch; }
+.muted { color: var(--muted); }
+.label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+header.hero { padding-block: 36px 24px; display: grid; gap: 14px; border-bottom: 1px solid var(--steel); }
+header.hero .kicker { display: flex; gap: 12px; align-items: center; }
+header.hero .kicker i { width: 28px; height: 3px; background: var(--red); display: block; }
+header.hero p { font-size: 17px; color: var(--soft); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.stats span { font-family: var(--f-mono); font-size: 12px; color: var(--soft); font-variant-numeric: tabular-nums; }
+.stats b { font-family: var(--f-display); font-size: 24px; color: var(--ink); margin-right: 6px; }
+
+section { padding-block: 36px 8px; display: grid; gap: 18px; }
+.sec-head { display: grid; gap: 8px; }
+
+/* editor */
+.editor { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.stage { display: grid; gap: 12px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.stage canvas.main { width: 100%; aspect-ratio: 1 / 1.45; display: block; background: var(--surface); }
+.stage canvas.main:not([data-view="figure"]) { aspect-ratio: 1 / 1.15; }
+.view-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.view-controls select { flex: 1; }
+.stage-note { font-size: 12px; color: var(--muted); }
+.body-controls { display: grid; gap: 12px; border-block: 1px solid var(--steel); padding-block: 16px; }
+.body-controls summary { cursor: pointer; font-weight: 600; }
+.body-controls[open] summary { margin-bottom: 12px; }
+.body-controls .sliders { margin-block: 12px; }
+.btn[aria-pressed="true"] { box-shadow: inset 0 -3px var(--red); color: var(--ink); }
+button, .seg button, .btn, select { min-height: 44px; }
+.stage .who { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.stage .who b { font-family: var(--f-display); font-size: 28px; line-height: 1; }
+.controls { display: grid; gap: 16px; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--steel); }
+.seg button { font: 600 14px var(--f-body); color: var(--muted); background: none; border: 0; padding: 7px 11px; cursor: pointer; min-height: 38px; }
+.seg button + button { border-left: 1px solid var(--steel); }
+.seg button[aria-pressed="true"] { color: var(--ink); background: var(--surface-2); box-shadow: inset 0 -3px 0 var(--red); }
+.toggle { display: inline-flex; gap: 8px; align-items: center; font-weight: 600; font-size: 14px; cursor: pointer; min-height: 38px; }
+.toggle input { accent-color: var(--red); width: 18px; height: 18px; }
+.btn { font: 600 14px var(--f-body); color: var(--ink); background: var(--red); border: 0; padding: 8px 14px; cursor: pointer; min-height: 38px; }
+.btn.ghost { background: var(--surface-2); }
+select { font: 600 14px var(--f-body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--steel); padding: 7px 10px; min-height: 38px; max-width: 100%; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sliders { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 18px; }
+.sliders label { display: grid; gap: 2px; font-size: 13px; color: var(--soft); }
+.sliders label span { display: flex; justify-content: space-between; }
+.sliders label output { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sliders input[type=range] { accent-color: var(--red); width: 100%; }
+
+.tabs { display: flex; gap: 0; overflow-x: auto; border-bottom: 1px solid var(--steel); scrollbar-width: thin; }
+.tabs button { font: 600 14px var(--f-body); color: var(--muted); background: none; border: 0; padding: 10px 12px; cursor: pointer; white-space: nowrap; min-height: 42px; }
+.tabs button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -3px 0 var(--red); }
+.tabs button small { font-family: var(--f-mono); font-size: 10px; color: var(--muted); margin-left: 4px; }
+.cat-note { font-size: 14px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.opt { display: grid; gap: 4px; background: none; border: 0; padding: 0; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.opt canvas { width: 100%; aspect-ratio: 1 / 1.1; display: block; background: var(--surface); outline: 2px solid transparent; outline-offset: -2px; }
+.opt[aria-pressed="true"] canvas { outline-color: var(--red); }
+.opt span { font-size: 13px; line-height: 1.2; color: var(--soft); }
+.opt[aria-pressed="true"] span { color: var(--ink); font-weight: 600; }
+
+details.json { background: var(--surface); padding: 10px 14px; }
+details.json summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+details.json textarea { width: 100%; height: 190px; margin-top: 10px; background: var(--canvas); color: var(--soft); border: 1px solid var(--steel); font: 12px/1.4 var(--f-mono); padding: 8px; resize: vertical; }
+details.json .ctl-row { margin-top: 8px; }
+
+.poses { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.poses figure.p canvas { aspect-ratio: 1 / 2; }
+.strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+figure.p { margin: 0; display: grid; gap: 4px; }
+figure.p canvas { width: 100%; aspect-ratio: 1 / 1.15; display: block; background: var(--surface); }
+figure.p .nm { font-family: var(--f-display); font-weight: 800; font-size: 19px; line-height: 1; text-transform: uppercase; }
+figure.p .sub { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+button.p { display: block; width: 100%; min-width: 0; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+figure.p figcaption { display: grid; gap: 1px; min-width: 0; }
+figure.p .nm, figure.p .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.rank { background: var(--surface); padding: 6px 16px; max-width: 520px; }
+.rank .r { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--surface-2); }
+.rank .r:first-child { border-top: 0; }
+.rank .n { font-family: var(--f-display); font-weight: 800; font-size: 22px; text-align: right; color: var(--muted); }
+.rank .n.c { color: var(--gold); }
+.rank canvas { width: 44px; height: 44px; display: block; }
+.rank b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank .who { min-width: 0; }
+.rank .who span { font-size: 13px; color: var(--muted); }
+.rank .rec { font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+@media (min-width: 821px) and (max-height: 820px) {
+  .stage { position: static; }
+}
+@media (max-width: 820px) {
+  .editor { grid-template-columns: minmax(0, 1fr); }
+  .stage { position: static; max-width: 360px; }
+  .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .poses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
+}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker"><i></i><span class="label">Corner Office · Identidade de personagem · Bíblia §5</span></div>
+    <h1>Laboratório de atletas</h1>
+    <p>Rostos com identidade. Corpos com presença. Explore proporções, biotipos e detalhes no novo modo Estúdio: luz suave, textura de pele e volume anatômico. Compare com os estilos A–D e veja o mesmo atleta em oito poses.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <section id="editor">
+    <div class="editor">
+      <div class="stage">
+        <div class="seg" role="group" aria-label="Enquadramento">
+          <button data-view="figure" aria-pressed="true">Corpo inteiro</button>
+          <button data-view="portrait" aria-pressed="false">Retrato</button>
+          <button data-view="hands" aria-pressed="false">Mãos</button>
+          <button data-view="feet" aria-pressed="false">Pés</button>
+        </div>
+        <canvas class="main" id="main" data-view="figure" aria-label="Prévia do atleta"></canvas>
+        <div class="who"><b id="who-name">Rosto atual</b><span class="label" id="who-meta"></span></div>
+        <div class="ctl-row">
+          <div class="seg" role="group" aria-label="Estilo">
+            <button id="st-studio" data-style="studio" aria-pressed="true">Estúdio</button>
+            <button id="st-flat" data-style="flat" aria-pressed="false" title="Broadcast original">A</button>
+            <button id="st-editorial" data-style="editorial" aria-pressed="false">B</button>
+            <button id="st-geo" data-style="geo" aria-pressed="false">C</button>
+            <button id="st-sketch" data-style="sketch" aria-pressed="false">D</button>
+          </div>
+          <label class="toggle"><input type="checkbox" id="post"> Pós-luta</label>
+        </div>
+        <div class="view-controls"><select id="preview-pose" aria-label="Pose da prévia"></select><button class="btn ghost" id="export-png">Exportar PNG</button></div>
+        <p class="stage-note" id="preview-note">Estúdio · ilustração procedural com volume e textura.</p>
+      </div>
+      <div class="controls">
+        <div class="ctl-row">
+          <div class="seg" role="group" aria-label="Sexo">
+            <button id="sx-m" data-sex="m" aria-pressed="true">Masculino</button>
+            <button id="sx-f" data-sex="f" aria-pressed="false">Feminino</button>
+          </div>
+          <select id="pop-sel" aria-label="População para sorteio"></select>
+          <button class="btn" id="rand">Sortear rosto</button>
+        </div>
+        <div class="sliders">
+          <label for="sl-age"><span>Idade <output id="o-age"></output></span><input type="range" id="sl-age" min="18" max="45" step="1"></label>
+          <label for="sl-build"><span>Porte físico <output id="o-build"></output></span><input type="range" id="sl-build" min="0" max="1" step="0.05"></label>
+          <label for="sl-width"><span>Largura do rosto <output id="o-width"></output></span><input type="range" id="sl-width" min="-1" max="1" step="0.1"></label>
+          <label for="sl-jaw"><span>Mandíbula <output id="o-jaw"></output></span><input type="range" id="sl-jaw" min="-1" max="1" step="0.1"></label>
+          <label for="sl-chin"><span>Queixo <output id="o-chin"></output></span><input type="range" id="sl-chin" min="-1" max="1" step="0.1"></label>
+          <label for="sl-broken"><span>Nariz quebrado <output id="o-broken"></output></span><input type="range" id="sl-broken" min="0" max="1" step="0.1"></label>
+          <label for="sl-cauli"><span>Couve-flor <output id="o-cauli"></output></span><input type="range" id="sl-cauli" min="0" max="3" step="1"></label>
+          <label for="sl-recede"><span>Tendência a calvície <output id="o-recede"></output></span><input type="range" id="sl-recede" min="0" max="1" step="0.1"></label>
+        </div>
+        <details class="body-controls" id="anatomy" open><summary>Anatomia e equipamento</summary></details>
+        <div class="tabs" role="tablist" id="tabs" aria-label="Categorias"></div>
+        <p class="cat-note" id="cat-note"></p>
+        <div class="grid" id="catalog"></div>
+        <details class="json">
+          <summary>Parâmetros do rosto (JSON para a Godot)</summary>
+          <textarea id="json" readonly aria-label="Parâmetros em JSON"></textarea>
+          <div class="ctl-row"><button class="btn ghost" id="copy">Copiar JSON</button><span class="label" id="copy-msg"></span></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="poses">
+    <div class="sec-head">
+      <span class="label">Corpo inteiro</span>
+      <h2>Poses com e sem cinturão</h2>
+      <p class="muted">O rosto atual em corpo inteiro, no formato das fotos oficiais de ranking: pose de media day, guarda de luta, braços cruzados e vitória, e quatro jeitos de segurar o cinturão. O cinturão é fictício do Corner Office (placa dourada com o monograma CO) e só deve aparecer para campeões.</p>
+    </div>
+    <div class="ctl-row" role="group" aria-label="Categoria de peso">
+      <span class="label">Preset</span>
+      <button class="btn ghost" data-preset="mosca">Peso mosca</button>
+      <button class="btn ghost" data-preset="leve">Peso leve</button>
+      <button class="btn ghost" data-preset="medio">Peso médio</button>
+      <button class="btn ghost" data-preset="pesado">Peso pesado</button>
+    </div>
+    <div class="sliders">
+      <label for="sl-muscle"><span>Musculatura <output id="o-muscle"></output></span><input type="range" id="sl-muscle" min="0" max="1" step="0.05"></label>
+      <label for="sl-fat"><span>Gordura corporal <output id="o-fat"></output></span><input type="range" id="sl-fat" min="0" max="1" step="0.05"></label>
+      <label for="sl-bhair"><span>Pelos no corpo <output id="o-bhair"></output></span><input type="range" id="sl-bhair" min="0" max="1" step="0.05"></label>
+      <label for="sl-height"><span>Altura <output id="o-height"></output></span><input type="range" id="sl-height" min="0" max="1" step="0.05"></label>
+    </div>
+    <div class="ctl-row">
+      <label class="toggle" for="kit-shorts">Calção <select id="kit-shorts"></select></label>
+      <label class="toggle" for="kit-gloves">Luvas <select id="kit-gloves"></select></label>
+    </div>
+    <span class="label">Sem cinturão</span>
+    <div class="poses" id="poses-plain"></div>
+    <span class="label">Com cinturão</span>
+    <div class="poses" id="poses-belt"></div>
+  </section>
+
+  <section id="carreira">
+    <div class="sec-head">
+      <span class="label">Linha do tempo</span>
+      <h2>O rosto atual ao longo da carreira</h2>
+      <p class="muted">Mesma semente em cinco idades: entradas, grisalho, rugas, bolsas sob os olhos. Orelha, nariz e cicatrizes seguem o que está no editor.</p>
+    </div>
+    <div class="strip" id="timeline"></div>
+  </section>
+
+  <section id="populacoes">
+    <div class="sec-head">
+      <span class="label">Populações</span>
+      <h2>Sorteios por população</h2>
+      <p class="muted">Cada população é uma distribuição de pele, textura e cor de cabelo, formatos de olho, nariz e boca e densidade de barba. As faixas se sobrepõem de propósito: nacionalidade não é destino (bíblia §13). Clique num rosto para abrir no editor.</p>
+    </div>
+    <div class="ctl-row"><select id="pop-grid-sel" aria-label="População da grade"></select><button class="btn ghost" id="pop-regen">Sortear outros 12</button></div>
+    <div class="grid" id="pop-grid"></div>
+  </section>
+
+  <section id="roster">
+    <div class="sec-head">
+      <span class="label">Roster canônico 2027</span>
+      <h2>Estrelas refeitas com a biblioteca nova</h2>
+    </div>
+    <div class="grid" id="canon"></div>
+  </section>
+
+  <section id="uso">
+    <div class="sec-head">
+      <span class="label">Teste de tamanho</span>
+      <h2>Ranking com avatar de 44 px</h2>
+    </div>
+    <div class="rank" id="rank"></div>
+  </section>
+</div>
+
+<script src="identity.js"></script>
+<script>
+/* ================= estado e UI ================= */
+let face=clone(CANON[0]), style='studio', post=false, cat='hair', previewView='figure', previewPose='oficial';
+const $=id=>document.getElementById(id);
+const count=CATS.reduce((a,c)=>a+c.items.length,0);
+$('stats').innerHTML=[[Object.keys(HAIR_STYLES).length,'cabelos'],[Object.keys(BEARDS).length,'barbas'],[Object.keys(NOSES).length,'narizes'],[Object.keys(EYES).length,'olhos'],[Object.keys(MOUTHS).length,'bocas'],[Object.keys(SKIN).length,'tons de pele'],[Object.keys(POPS).length-1,'populações'],[count,'opções no total']].map(([n,l])=>`<span><b>${n}</b>${l}</span>`).join('');
+
+for(const sel of[$('pop-sel'),$('pop-grid-sel')]){for(const[k,v]of Object.entries(POPS)){const o=document.createElement('option');o.value=k;o.textContent=v.n;sel.append(o)}}
+$('pop-sel').value='misto';$('pop-grid-sel').value='afro_diaspora';
+
+const tabsEl=$('tabs');
+for(const c of CATS){const b=document.createElement('button');b.role='tab';b.id='tab-'+c.id;b.dataset.cat=c.id;b.innerHTML=`${c.n}<small>${c.items.length}</small>`;b.setAttribute('aria-selected',String(c.id===cat));b.addEventListener('click',()=>{cat=c.id;renderCatalog()});tabsEl.append(b)}
+
+const sliders=[['age','age',v=>v,v=>`${v} anos`],['build','build',v=>+v,v=>Math.round(v*100)+'%'],['width','head.width',v=>+v,v=>(+v).toFixed(1)],['jaw','head.jaw',v=>+v,v=>(+v).toFixed(1)],['chin','head.chin',v=>+v,v=>(+v).toFixed(1)],['broken','nose.broken',v=>+v,v=>Math.round(v*100)+'%'],['cauli','ears.cauli',v=>+v,v=>['nenhuma','leve','média','forte'][v]],['recede','recede',v=>+v,v=>Math.round(v*100)+'%']];
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a[k],o);
+const setP=(o,p,v)=>{const ks=p.split('.'),last=ks.pop();ks.reduce((a,k)=>a[k],o)[last]=v};
+for(const[id,path,parse]of sliders){$('sl-'+id).addEventListener('input',e=>{setP(face,path,parse(+e.target.value));update()})}
+
+function syncControls(){
+  for(const[id,path,,fmt]of sliders){const v=getP(face,path);$('sl-'+id).value=v;$('o-'+id).textContent=fmt(v)}
+  document.querySelectorAll('[data-sex]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sex===face.sex)));
+  $('who-name').textContent=face.name||'Rosto sorteado';
+  $('who-meta').textContent=[POPS[face.pop]?.n,face.age+' anos'].filter(Boolean).join(' · ');
+  const out={...face};delete out.name;delete out.cc;delete out.rec;
+  $('json').value=JSON.stringify(out,null,2);
+}
+function renderCatalog(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.cat===cat)));
+  const c=CATS.find(x=>x.id===cat);$('cat-note').textContent=c.note||'Cada miniatura aplica a opção ao rosto atual. Clique para escolher.';
+  const el=$('catalog');el.innerHTML='';
+  const cur=c.get(face);
+  for(const[k,label]of c.items){
+    const b=document.createElement('button');b.className='opt';b.type='button';
+    const sel=c.multi?cur.includes(k):cur===k;b.setAttribute('aria-pressed',String(sel));
+    const cv=document.createElement('canvas');const sp=document.createElement('span');sp.textContent=label;b.append(cv,sp);el.append(b);
+    const f2=clone(face);c.set(f2,k);if(c.id==='beard'&&f2.sex==='f')f2.sex='m';
+    renderPortrait(cv,f2,style,{...c.view,post});
+    b.addEventListener('click',()=>{c.set(face,k);update()});
+  }
+}
+function renderTimeline(){
+  const el=$('timeline');el.innerHTML='';
+  for(const a of[19,25,31,37,43]){
+    const f2={...clone(face),age:a};
+    const fg=document.createElement('figure');fg.className='p';const cv=document.createElement('canvas');const cap=document.createElement('figcaption');
+    cap.innerHTML=`<span class="nm">${a} anos</span>`;fg.append(cv,cap);el.append(fg);renderPortrait(cv,f2,style,{post});
+  }
+}
+let popSeed=7;
+function renderPopGrid(){
+  const el=$('pop-grid');el.innerHTML='';const pid=$('pop-grid-sel').value;
+  for(let i=0;i<12;i++){const f2=genFace(popSeed*7919+i*104729,pid);
+    const b=document.createElement('button');b.className='p';b.type='button';const fg=document.createElement('figure');fg.className='p';
+    const cv=document.createElement('canvas');const cap=document.createElement('figcaption');cap.innerHTML=`<span class="sub"></span>`;
+    cap.querySelector('.sub').textContent=`${f2.sex==='f'?'Feminino':'Masculino'} · ${f2.age} anos`;
+    fg.append(cv,cap);b.append(fg);el.append(b);renderPortrait(cv,f2,style,{post});
+    b.setAttribute('aria-label','Abrir no editor');b.addEventListener('click',()=>{face=f2;update();$('editor').scrollIntoView({behavior:'smooth'})});
+  }
+}
+function renderCanon(){
+  const el=$('canon');el.innerHTML='';
+  for(const f of CANON){const b=document.createElement('button');b.className='p';b.type='button';const fg=document.createElement('figure');fg.className='p';
+    const cv=document.createElement('canvas');const cap=document.createElement('figcaption');cap.innerHTML=`<span class="nm"></span><span class="sub"></span>`;
+    cap.querySelector('.nm').textContent=f.name.split(' ').slice(-1)[0];cap.querySelector('.sub').textContent=`${f.cc} · ${f.rec}`;
+    fg.append(cv,cap);b.append(fg);el.append(b);renderPortrait(cv,f,style,{post});
+    b.addEventListener('click',()=>{face=clone(f);update();$('editor').scrollIntoView({behavior:'smooth'})})}
+}
+function renderRank(){
+  const el=$('rank');el.innerHTML='';
+  const rows=[[CANON[0],'C'],[CANON[1],'1'],[genFace(401,'latino','m'),'2'],[genFace(402,'caucaso','m'),'3'],[genFace(403,'europa_norte','m'),'4'],[face,'—']];
+  const names=['','','Ramon Estrada','Timur Aliyev','Devon Hart','Rosto atual'];
+  rows.forEach(([f,n],i)=>{const r=document.createElement('div');r.className='r';
+    r.innerHTML=`<span class="n ${n==='C'?'c':''}">${n}</span><canvas></canvas><div class="who"><b></b><span></span></div><span class="rec"></span>`;
+    r.querySelector('b').textContent=f.name||names[i];r.querySelector('.who span').textContent=f.cc||POPS[f.pop]?.n||'';r.querySelector('.rec').textContent=f.rec||'';
+    el.append(r);renderPortrait(r.querySelector('canvas'),f,style,{avatar:true,zoom:1.5,post})});
+}
+const BODY_SL=[['muscle','muscle'],['fat','fat'],['bhair','hair'],['height','height'],['shoulders','shoulders'],['reach','reach'],['legs','legs'],['waist','waist'],['hips','hips'],['legmass','legMass'],['chest','chest']];
+const PRESETS={mosca:{build:.15,muscle:.6,fat:.07,height:.15},leve:{build:.35,muscle:.72,fat:.09,height:.4},medio:{build:.6,muscle:.82,fat:.11,height:.6},pesado:{build:1,muscle:.66,fat:.42,height:.85}};
+// Place anatomy beside the live preview; new fields are additive to appearance v1.
+const anatomy=$('anatomy');
+for(const node of document.querySelectorAll('#poses > .ctl-row, #poses > .sliders'))anatomy.append(node);
+for(const[id,label]of[['shoulders','Largura dos ombros'],['reach','Comprimento dos braços'],['legs','Proporção das pernas'],['waist','Cintura'],['hips','Quadril'],['legmass','Volume das pernas'],['chest','Volume do tórax']]){
+  const l=document.createElement('label');l.htmlFor='sl-'+id;l.innerHTML=`<span>${label} <output id="o-${id}"></output></span><input type="range" id="sl-${id}" min="0" max="1" step="0.01">`;anatomy.querySelector('.sliders').append(l)}
+anatomy.querySelectorAll('input').forEach(input=>input.step='0.01');
+const silhouettes={
+  natural:{waist:.5,hips:.5,legMass:.5,chest:.5,shoulders:.5,muscle:.55,fat:.23},
+  atletica:{waist:.4,hips:.65,legMass:.67,chest:.55,shoulders:.5,muscle:.75,fat:.13},
+  curvas:{waist:.3,hips:.9,legMass:.8,chest:.7,shoulders:.38,muscle:.58,fat:.2},
+  potente:{waist:.5,hips:.65,legMass:.85,chest:.8,shoulders:.8,muscle:.95,fat:.16}
+};
+const silhouetteRow=document.createElement('div');silhouetteRow.className='ctl-row';silhouetteRow.setAttribute('role','group');silhouetteRow.setAttribute('aria-label','Silhueta');silhouetteRow.innerHTML='<span class="label">Silhueta</span>';
+for(const[k,label]of[['natural','Natural'],['atletica','Atlética'],['curvas','Curvilínea'],['potente','Potente']]){const b=document.createElement('button');b.className='btn ghost';b.dataset.silhouette=k;b.textContent=label;b.addEventListener('click',()=>{face.body={...face.body,...silhouettes[k]};update()});silhouetteRow.append(b)}
+anatomy.querySelector('.sliders').before(silhouetteRow);
+const handsLabel=document.createElement('label');handsLabel.className='toggle';handsLabel.htmlFor='kit-hands';handsLabel.innerHTML='Mãos <select id="kit-hands"><option value="bare">Mãos livres</option><option value="mma">Luvas de MMA</option></select>';anatomy.querySelector('.ctl-row:last-child').append(handsLabel);
+for(const[k,v]of Object.entries(POSES)){const o=document.createElement('option');o.value=k;o.textContent=v.n;$('preview-pose').append(o)}
+function normalizeAppearance(){
+  face.kit={shorts:'preto',gloves:'preto',hands:'bare',...face.kit};
+  face.body={muscle:.65,fat:.15,hair:0,height:.5,shoulders:.5,reach:.5,legs:.5,waist:face.sex==='f'?.4:.5,hips:face.sex==='f'?.65:.5,legMass:face.sex==='f'?.62:.5,chest:.5,...face.body};
+}
+function renderMain(){
+  $('main').dataset.view=previewView;
+  $('main').setAttribute('aria-label',({figure:'Corpo inteiro do atleta',portrait:'Retrato do atleta',hands:'Detalhe da mão do atleta',feet:'Detalhe dos pés do atleta'})[previewView]);
+  $('preview-pose').disabled=previewView==='portrait';
+  renderPortrait($('main'),face,style,{post,figure:previewView!=='portrait',focus:previewView,pose:previewPose});
+  $('preview-note').textContent=style==='studio'?'Estúdio · ilustração procedural com volume e textura.':({flat:'A · Broadcast original',editorial:'B · Recorte editorial',geo:'C · Facetado',sketch:'D · Scout'})[style];
+}
+function renderPoses(){
+  if(!face.kit)face.kit={shorts:'preto',gloves:'preto'};
+  if(!face.body)face.body={muscle:.65,fat:.15,hair:0,height:.5};
+  for(const[id,k]of BODY_SL){$('sl-'+id).value=face.body[k]??.5;$('o-'+id).textContent=Math.round((face.body[k]??.5)*100)+'%'}
+  document.querySelectorAll('[data-preset]').forEach(b=>{const p=PRESETS[b.dataset.preset];b.setAttribute('aria-pressed',String(face.build===p.build&&face.body.muscle===p.muscle&&face.body.fat===p.fat&&face.body.height===p.height))});
+  document.querySelectorAll('[data-silhouette]').forEach(b=>{const p=silhouettes[b.dataset.silhouette];b.setAttribute('aria-pressed',String(Object.entries(p).every(([k,v])=>face.body[k]===v)))});
+  $('kit-shorts').value=face.kit.shorts;$('kit-gloves').value=face.kit.gloves;$('kit-hands').value=face.kit.hands||'bare';
+  for(const[el,belt]of[[$('poses-plain'),0],[$('poses-belt'),1]]){el.innerHTML='';
+    for(const[k,v]of Object.entries(POSES).filter(([,v])=>v.belt===belt)){
+      const fg=document.createElement('figure');fg.className='p';const cv=document.createElement('canvas');const cap=document.createElement('figcaption');
+      cap.innerHTML='<span class="sub"></span>';cap.querySelector('.sub').textContent=v.n;fg.append(cv,cap);el.append(fg);
+      renderPortrait(cv,face,style,{figure:true,pose:k,post})}}
+}
+function update(){normalizeAppearance();syncControls();renderMain();renderCatalog();renderPoses();renderTimeline();renderRank()}
+function renderAll(){update();renderPopGrid();renderCanon()}
+
+document.querySelectorAll('[data-style]').forEach(b=>b.addEventListener('click',()=>{style=b.dataset.style;if(style!=='studio'&&['hands','feet'].includes(previewView))previewView='figure';document.querySelectorAll('button[data-view]').forEach(x=>{x.disabled=['hands','feet'].includes(x.dataset.view)&&style!=='studio';x.setAttribute('aria-pressed',String(x.dataset.view===previewView))});document.querySelectorAll('[data-style]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderAll()}));
+document.querySelectorAll('[data-sex]').forEach(b=>b.addEventListener('click',()=>{face.sex=b.dataset.sex;
+  if(face.sex==='f'){face.beard.style='nenhuma';face.recede=0;if(!['coque','rabo','longo_liso','longo_ondulado','cacheado_longo','box_braids','nago','afro_curto','black_power','twists','franja','duas_trancas','tranca_unica','coque_baixo','pixie','undercut_lateral','meio_coque','maquina','raspado','dreads_longos','rabo_alto','ombro','coque_baguncado','curto_lateral','afro_puff','trancas_laterais','cogumelo','franja_longa','ondulado_medio'].includes(face.hair.style))face.hair.style='rabo_alto'}
+  update()}));
+$('post').addEventListener('change',e=>{post=e.target.checked;renderAll()});
+document.querySelectorAll('button[data-view]').forEach(b=>b.addEventListener('click',()=>{previewView=b.dataset.view;document.querySelectorAll('button[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderMain()}));
+$('preview-pose').addEventListener('change',e=>{previewPose=e.target.value;renderMain()});
+$('kit-hands').addEventListener('change',e=>{face.kit.hands=e.target.value;syncControls();renderMain();renderPoses()});
+$('export-png').addEventListener('click',()=>{const cv=document.createElement('canvas');
+  renderPortrait(cv,face,style,{post,figure:previewView!=='portrait',focus:previewView,pose:previewPose,width:1440,height:previewView==='figure'?2088:1656,pixelRatio:1});
+  cv.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`corner-office-${face.seed}-${style}-${previewView}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)},'image/png');
+});
+$('rand').addEventListener('click',()=>{face=genFace(Math.floor(Math.random()*1e9),$('pop-sel').value,face.sex);update()});
+$('pop-grid-sel').addEventListener('change',renderPopGrid);
+for(const[id,k]of BODY_SL)$('sl-'+id).addEventListener('input',e=>{face.body={...(face.body||{}),[k]:+e.target.value};syncControls();renderMain();renderPoses()});
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{const pr=PRESETS[b.dataset.preset];face.build=pr.build;face.body={...(face.body||{}),muscle:pr.muscle,fat:pr.fat,height:pr.height};update()}));
+for(const[id,obj,key]of[['kit-shorts',SHORTS,'shorts'],['kit-gloves',GLOVES,'gloves']]){const sel=$(id);
+  for(const[k,v]of Object.entries(obj)){const o=document.createElement('option');o.value=k;o.textContent=v[1];sel.append(o)}
+  sel.addEventListener('change',e=>{face.kit={...(face.kit||{}),[key]:e.target.value};syncControls();renderMain();renderPoses()})}
+$('pop-regen').addEventListener('click',()=>{popSeed=Math.floor(Math.random()*1e6);renderPopGrid()});
+$('copy').addEventListener('click',()=>{const t=$('json').value;
+  const ok=()=>{$('copy-msg').textContent='Copiado'};const fail=()=>{$('json').focus();$('json').select();$('copy-msg').textContent='Selecionado: use Ctrl+C'};
+  try{navigator.clipboard.writeText(t).then(ok,fail)}catch(e){fail()}});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(renderAll,150)});
+(document.fonts?.ready||Promise.resolve()).then(renderAll);
+renderAll();
+</script>
+</body></html>

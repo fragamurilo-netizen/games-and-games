@@ -1,0 +1,7 @@
+{
+  "flagship": {"name": "A Grande Liga", "cash": 60000000, "reputation": 92, "tier": "global", "identity": "flagship_organization", "rival_reputation_scale": 0.55, "difficulty": "foco do produto"},
+  "from_nothing": {"name": "From Nothing", "cash": 250000, "reputation": 5, "roster_size": [0, 0], "titles": 0, "difficulty": "alta"},
+  "regional_promoter": {"name": "Regional Promoter", "cash": 1500000, "reputation": 25, "roster_size": [20, 40], "titles": 1, "difficulty": "média"},
+  "executive": {"name": "Executive", "cash": 0, "reputation": 0, "roster_size": [0, 0], "take_over_global_org": true, "difficulty": "alta por complexidade"},
+  "sandbox": {"name": "Sandbox", "cash": 5000000, "reputation": 50, "roster_size": [30, 30], "customizable": true, "difficulty": "customizável"}
+}

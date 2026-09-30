@@ -1,0 +1,32 @@
+[
+  {
+    "id": "integrated",
+    "title": "MMA · do boxe à finalização",
+    "file": "integrated.json"
+  },
+  {
+    "id": "striking",
+    "title": "Distância · boxe e chutes",
+    "file": "striking.json"
+  },
+  {
+    "id": "wrestling",
+    "title": "Wrestling · entradas e grade",
+    "file": "wrestling.json"
+  },
+  {
+    "id": "ground",
+    "title": "Jiu-jítsu · guarda, raspagem e ataque",
+    "file": "ground.json"
+  },
+  {
+    "id": "women",
+    "title": "Atletas · clinch e chão",
+    "file": "women.json"
+  },
+  {
+    "id": "shinsei",
+    "title": "Shinsei · ringue e grappling",
+    "file": "shinsei.json"
+  }
+]

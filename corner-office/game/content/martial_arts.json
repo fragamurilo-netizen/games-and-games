@@ -1,0 +1,891 @@
+{
+ "_note": "Artes marciais reais usadas por lutadores (Game Design Bible §4; MMA Bible §§1,7). 'family' é o perfil do Fight Engine e do Fight Studio (content/fight_tuning.json → styles). 'attributes' soma aos atributos do arquétipo da família. 'fight_styles' pesa o sorteio do estilo de luta. 'intent' multiplica as intenções por categoria de técnica. 'animation_tags' e 'signature_techniques' são o contrato com as animações.",
+ "disciplines": {
+  "boxing": {
+   "name": "Boxe",
+   "family": "boxing",
+   "kind": "striking",
+   "origin": [
+    "GB",
+    "US"
+   ],
+   "description": "Mãos refinadas, movimentação de cabeça e trabalho de pés; pouco chute.",
+   "attributes": {
+    "boxing": 8,
+    "jab": 6,
+    "combinations": 6,
+    "defense": 4,
+    "countering": 3,
+    "kicks": -10,
+    "low_kicks": -6,
+    "knees": -4
+   },
+   "fight_styles": {
+    "pressure": 2,
+    "counter": 2,
+    "volume": 1.5,
+    "knockout": 2
+   },
+   "intent": {
+    "boxing": 1.2,
+    "kicks": 0.7
+   },
+   "signature_techniques": [
+    "jab",
+    "direto",
+    "cruzado",
+    "uppercut",
+    "esquiva",
+    "pêndulo",
+    "gancho no corpo"
+   ],
+   "animation_tags": [
+    "guarda_alta",
+    "movimento_de_cabeça",
+    "pés_de_boxe"
+   ]
+  },
+  "muay_thai": {
+   "name": "Muay thai",
+   "family": "muay_thai",
+   "kind": "striking",
+   "origin": [
+    "TH"
+   ],
+   "description": "A arte das oito armas: canelas, joelhos, cotovelos e clinch de nuca.",
+   "attributes": {
+    "kicks": 6,
+    "low_kicks": 6,
+    "knees": 8,
+    "elbows": 8,
+    "clinch": 6,
+    "durability": 3
+   },
+   "fight_styles": {
+    "pressure": 1.5,
+    "clinch": 3,
+    "knockout": 1.5,
+    "volume": 1
+   },
+   "intent": {
+    "clinch": 1.2,
+    "kicks": 1.15
+   },
+   "signature_techniques": [
+    "chute circular com a canela",
+    "teep",
+    "joelhada no clinch",
+    "cotovelada",
+    "plam (clinch tailandês)"
+   ],
+   "animation_tags": [
+    "guarda_tailandesa",
+    "ritmo_de_balanço",
+    "clinch_de_nuca"
+   ]
+  },
+  "lethwei": {
+   "name": "Lethwei",
+   "family": "muay_thai",
+   "kind": "striking",
+   "origin": [
+    "MM"
+   ],
+   "description": "Boxe birmanês de mãos nuas; queixo de ferro e pressão sem pausa.",
+   "attributes": {
+    "elbows": 6,
+    "knees": 6,
+    "power": 6,
+    "chin": 6,
+    "durability": 6,
+    "aggression": 6,
+    "defense": -3
+   },
+   "fight_styles": {
+    "pressure": 3,
+    "knockout": 2.5,
+    "clinch": 1
+   },
+   "intent": {
+    "clinch": 1.15,
+    "boxing": 1.1
+   },
+   "signature_techniques": [
+    "cabeçada (proibida no MMA, vira pressão)",
+    "cotovelada",
+    "joelhada",
+    "chute baixo"
+   ],
+   "animation_tags": [
+    "guarda_aberta",
+    "avanço_constante"
+   ]
+  },
+  "kickboxing": {
+   "name": "Kickboxing holandês",
+   "family": "kickboxing",
+   "kind": "striking",
+   "origin": [
+    "NL",
+    "JP"
+   ],
+   "description": "Mãos de boxe emendadas com chutes baixos pesados.",
+   "attributes": {
+    "combinations": 6,
+    "low_kicks": 7,
+    "kicks": 4,
+    "power": 3,
+    "clinch": -3
+   },
+   "fight_styles": {
+    "volume": 2.5,
+    "pressure": 2,
+    "knockout": 1.5,
+    "kicker": 1
+   },
+   "intent": {
+    "boxing": 1.1,
+    "kicks": 1.15
+   },
+   "signature_techniques": [
+    "combinação terminada em chute baixo",
+    "gancho de esquerda",
+    "joelhada frontal"
+   ],
+   "animation_tags": [
+    "guarda_alta",
+    "combinações_mão_perna"
+   ]
+  },
+  "sanda": {
+   "name": "Sanda (sanshou)",
+   "family": "kickboxing",
+   "kind": "striking",
+   "origin": [
+    "CN"
+   ],
+   "description": "Boxe chinês com chutes e projeções: pega o chute e derruba.",
+   "attributes": {
+    "kicks": 5,
+    "takedown_offense": 8,
+    "clinch": 4,
+    "scramble": 3,
+    "speed": 3
+   },
+   "fight_styles": {
+    "kicker": 1.5,
+    "counter": 1.5,
+    "wrestle_boxer": 1,
+    "volume": 1
+   },
+   "intent": {
+    "kicks": 1.15,
+    "takedown": 1.25
+   },
+   "signature_techniques": [
+    "chute lateral",
+    "projeção pegando o chute",
+    "varrida"
+   ],
+   "animation_tags": [
+    "guarda_lateral",
+    "pega_chute_e_projeta"
+   ]
+  },
+  "savate": {
+   "name": "Savate (boxe francês)",
+   "family": "kickboxing",
+   "kind": "striking",
+   "origin": [
+    "FR"
+   ],
+   "description": "Chutes precisos com o pé calçado e distância de esgrima.",
+   "attributes": {
+    "kicks": 6,
+    "accuracy": 5,
+    "speed": 3,
+    "mobility": 4,
+    "low_kicks": 2,
+    "clinch": -3
+   },
+   "fight_styles": {
+    "kicker": 2,
+    "counter": 1.5,
+    "volume": 1.5
+   },
+   "intent": {
+    "kicks": 1.2,
+    "movement": 1.15
+   },
+   "signature_techniques": [
+    "chassé",
+    "fouetté",
+    "revers",
+    "coup de pied bas"
+   ],
+   "animation_tags": [
+    "guarda_esgrima",
+    "chutes_com_a_ponta_do_pé"
+   ]
+  },
+  "karate_shotokan": {
+   "name": "Karatê shotokan",
+   "family": "karate",
+   "kind": "striking",
+   "origin": [
+    "JP"
+   ],
+   "description": "Distância longa, entradas explosivas e contra-ataque.",
+   "attributes": {
+    "countering": 7,
+    "mobility": 6,
+    "speed": 5,
+    "accuracy": 4,
+    "patience": 4,
+    "clinch": -4
+   },
+   "fight_styles": {
+    "counter": 3,
+    "kicker": 1.5
+   },
+   "intent": {
+    "movement": 1.2,
+    "defense": 1.15
+   },
+   "signature_techniques": [
+    "entrada explosiva de blitz",
+    "chute frontal (mae geri)",
+    "contra-ataque de direto"
+   ],
+   "animation_tags": [
+    "base_lateral",
+    "entrada_e_saída"
+   ]
+  },
+  "karate_kyokushin": {
+   "name": "Karatê kyokushin",
+   "family": "karate",
+   "kind": "striking",
+   "origin": [
+    "JP",
+    "CA"
+   ],
+   "description": "Karatê de contato total: canelas duras e troca franca.",
+   "attributes": {
+    "kicks": 6,
+    "low_kicks": 6,
+    "durability": 5,
+    "chin": 3,
+    "power": 4,
+    "cardio": 3
+   },
+   "fight_styles": {
+    "pressure": 2,
+    "knockout": 1.5,
+    "kicker": 1.5
+   },
+   "intent": {
+    "kicks": 1.2,
+    "boxing": 1.05
+   },
+   "signature_techniques": [
+    "chute alto giratório",
+    "chute baixo",
+    "socos no corpo"
+   ],
+   "animation_tags": [
+    "guarda_baixa",
+    "troca_franca"
+   ]
+  },
+  "taekwondo": {
+   "name": "Taekwondo",
+   "family": "taekwondo",
+   "kind": "striking",
+   "origin": [
+    "KR"
+   ],
+   "description": "Chutes rápidos e giratórios a partir de uma base lateral.",
+   "attributes": {
+    "kicks": 8,
+    "speed": 5,
+    "mobility": 5,
+    "explosiveness": 4,
+    "boxing": -4,
+    "clinch": -4
+   },
+   "fight_styles": {
+    "kicker": 4,
+    "counter": 1.5
+   },
+   "intent": {
+    "kicks": 1.35,
+    "movement": 1.1
+   },
+   "signature_techniques": [
+    "chute giratório para trás",
+    "chute com a perna da frente",
+    "chute de gancho"
+   ],
+   "animation_tags": [
+    "guarda_lateral",
+    "saltita",
+    "chutes_giratórios"
+   ]
+  },
+  "capoeira": {
+   "name": "Capoeira",
+   "family": "taekwondo",
+   "kind": "striking",
+   "origin": [
+    "BR"
+   ],
+   "description": "Ginga constante, chutes circulares imprevisíveis e rasteiras.",
+   "attributes": {
+    "kicks": 7,
+    "mobility": 7,
+    "speed": 3,
+    "explosiveness": 3,
+    "scramble": 3,
+    "boxing": -5,
+    "defense": -2
+   },
+   "fight_styles": {
+    "kicker": 3,
+    "scrambler": 1.5,
+    "counter": 1
+   },
+   "intent": {
+    "kicks": 1.3,
+    "movement": 1.2,
+    "scramble": 1.1
+   },
+   "signature_techniques": [
+    "meia-lua de compasso",
+    "armada",
+    "martelo",
+    "rasteira"
+   ],
+   "animation_tags": [
+    "ginga",
+    "chutes_giratórios",
+    "esquiva_baixa"
+   ]
+  },
+  "freestyle_wrestling": {
+   "name": "Luta olímpica (estilo livre)",
+   "family": "wrestling",
+   "kind": "grappling",
+   "origin": [
+    "US",
+    "RU",
+    "GE",
+    "IN"
+   ],
+   "description": "Ataques às pernas, scrambles e controle por cima.",
+   "attributes": {
+    "takedown_offense": 6,
+    "scramble": 5,
+    "takedown_defense": 4,
+    "cardio": 3
+   },
+   "fight_styles": {
+    "control": 2,
+    "wrestle_boxer": 2,
+    "scrambler": 2
+   },
+   "intent": {
+    "takedown": 1.2,
+    "scramble": 1.1
+   },
+   "signature_techniques": [
+    "baiana (double leg)",
+    "single leg",
+    "ankle pick",
+    "virada"
+   ],
+   "animation_tags": [
+    "base_baixa",
+    "ataque_às_pernas"
+   ]
+  },
+  "greco_roman": {
+   "name": "Luta greco-romana",
+   "family": "wrestling",
+   "kind": "grappling",
+   "origin": [
+    "GE",
+    "RU",
+    "SE",
+    "CU"
+   ],
+   "description": "Só acima da cintura: clinch de tronco, projeções e força.",
+   "attributes": {
+    "clinch": 8,
+    "cage_control": 6,
+    "strength": 5,
+    "takedown_offense": 2,
+    "scramble": -2
+   },
+   "fight_styles": {
+    "clinch": 2.5,
+    "control": 2.5
+   },
+   "intent": {
+    "clinch": 1.3,
+    "takedown": 1.1
+   },
+   "signature_techniques": [
+    "suplex",
+    "body lock",
+    "arm drag",
+    "projeção de quadril"
+   ],
+   "animation_tags": [
+    "clinch_de_tronco",
+    "pressão_na_grade"
+   ]
+  },
+  "folkstyle_wrestling": {
+   "name": "Wrestling universitário (folkstyle)",
+   "family": "wrestling",
+   "kind": "grappling",
+   "origin": [
+    "US"
+   ],
+   "description": "Formação americana: derruba, prende por cima e castiga no cardio.",
+   "attributes": {
+    "top_control": 8,
+    "takedown_offense": 4,
+    "cardio": 5,
+    "ground_and_pound": 3,
+    "discipline": 3
+   },
+   "fight_styles": {
+    "control": 3,
+    "wrestle_boxer": 2
+   },
+   "intent": {
+    "takedown": 1.2,
+    "ground": 1.15
+   },
+   "signature_techniques": [
+    "single leg na grade",
+    "controle por cima (ride)",
+    "levantar e sair (stand-up)"
+   ],
+   "animation_tags": [
+    "base_baixa",
+    "controle_por_cima"
+   ]
+  },
+  "laamb": {
+   "name": "Luta senegalesa (laamb)",
+   "family": "wrestling",
+   "kind": "grappling",
+   "origin": [
+    "SN"
+   ],
+   "description": "Luta tradicional senegalesa, com golpes: força explosiva no clinch.",
+   "attributes": {
+    "strength": 7,
+    "clinch": 6,
+    "power": 4,
+    "takedown_offense": 3,
+    "explosiveness": 3
+   },
+   "fight_styles": {
+    "clinch": 2,
+    "knockout": 1.5,
+    "control": 1.5
+   },
+   "intent": {
+    "clinch": 1.2,
+    "takedown": 1.1,
+    "boxing": 1.05
+   },
+   "signature_techniques": [
+    "projeção no clinch",
+    "derrubada de força",
+    "socos na entrada"
+   ],
+   "animation_tags": [
+    "clinch_de_força",
+    "base_larga"
+   ]
+  },
+  "pehlwani": {
+   "name": "Pehlwani (kushti)",
+   "family": "wrestling",
+   "kind": "grappling",
+   "origin": [
+    "IN",
+    "PK"
+   ],
+   "description": "Luta tradicional indiana de akhara: resistência e controle.",
+   "attributes": {
+    "strength": 5,
+    "cardio": 4,
+    "takedown_offense": 4,
+    "top_control": 4,
+    "durability": 3
+   },
+   "fight_styles": {
+    "control": 3,
+    "clinch": 1
+   },
+   "intent": {
+    "takedown": 1.15,
+    "ground": 1.1
+   },
+   "signature_techniques": [
+    "dhobi pachad (projeção de ombro)",
+    "baiana",
+    "controle no chão"
+   ],
+   "animation_tags": [
+    "base_baixa",
+    "força_de_akhara"
+   ]
+  },
+  "kazakh_kuresi": {
+   "name": "Kazakh küresi",
+   "family": "wrestling",
+   "kind": "grappling",
+   "origin": [
+    "KZ"
+   ],
+   "description": "Luta de cinturão cazaque: pegada firme e projeções.",
+   "attributes": {
+    "clinch": 6,
+    "strength": 5,
+    "takedown_offense": 4,
+    "takedown_defense": 3
+   },
+   "fight_styles": {
+    "clinch": 2,
+    "control": 2
+   },
+   "intent": {
+    "clinch": 1.2,
+    "takedown": 1.1
+   },
+   "signature_techniques": [
+    "projeção de cinturão",
+    "varrida no clinch"
+   ],
+   "animation_tags": [
+    "pegada_no_cinturão",
+    "clinch_de_tronco"
+   ]
+  },
+  "judo": {
+   "name": "Judô",
+   "family": "judo",
+   "kind": "grappling",
+   "origin": [
+    "JP",
+    "FR",
+    "GE",
+    "BR"
+   ],
+   "description": "Pegada e desequilíbrio: projeções de quadril e imobilização.",
+   "attributes": {
+    "clinch": 6,
+    "takedown_offense": 5,
+    "transitions": 3,
+    "strength": 3,
+    "top_control": 2
+   },
+   "fight_styles": {
+    "clinch": 2,
+    "control": 2,
+    "submission": 1
+   },
+   "intent": {
+    "clinch": 1.25,
+    "takedown": 1.15
+   },
+   "signature_techniques": [
+    "uchi mata",
+    "o soto gari",
+    "harai goshi",
+    "osaekomi (imobilização)"
+   ],
+   "animation_tags": [
+    "pegada_de_kimono",
+    "projeções_de_quadril"
+   ]
+  },
+  "bjj": {
+   "name": "Jiu-jítsu brasileiro",
+   "family": "bjj",
+   "kind": "grappling",
+   "origin": [
+    "BR",
+    "US"
+   ],
+   "description": "Guarda, raspagens e finalizações; o chão é a casa.",
+   "attributes": {
+    "submission_offense": 7,
+    "guard": 7,
+    "back_control": 5,
+    "transitions": 4,
+    "submission_defense": 3
+   },
+   "fight_styles": {
+    "submission": 4,
+    "control": 1
+   },
+   "intent": {
+    "submission": 1.3,
+    "ground": 1.15
+   },
+   "signature_techniques": [
+    "triângulo",
+    "mata-leão",
+    "armlock da guarda",
+    "raspagem"
+   ],
+   "animation_tags": [
+    "guarda_fechada",
+    "pega_as_costas"
+   ]
+  },
+  "luta_livre": {
+   "name": "Luta livre esportiva",
+   "family": "bjj",
+   "kind": "grappling",
+   "origin": [
+    "BR"
+   ],
+   "description": "Grappling brasileiro sem kimono: scrambles e chaves de perna.",
+   "attributes": {
+    "leg_locks": 7,
+    "submission_offense": 5,
+    "scramble": 5,
+    "takedown_offense": 2
+   },
+   "fight_styles": {
+    "submission": 3,
+    "scrambler": 2
+   },
+   "intent": {
+    "submission": 1.2,
+    "scramble": 1.2
+   },
+   "signature_techniques": [
+    "chave de calcanhar",
+    "kimura",
+    "guilhotina",
+    "scramble para as costas"
+   ],
+   "animation_tags": [
+    "sem_kimono",
+    "ritmo_de_scramble"
+   ]
+  },
+  "catch_wrestling": {
+   "name": "Catch wrestling",
+   "family": "sambo",
+   "kind": "grappling",
+   "origin": [
+    "GB",
+    "US",
+    "JP"
+   ],
+   "description": "'Pegue onde puder': controle por cima com finalizações dolorosas.",
+   "attributes": {
+    "submission_offense": 5,
+    "leg_locks": 5,
+    "top_control": 5,
+    "strength": 3,
+    "ground_and_pound": 2
+   },
+   "fight_styles": {
+    "control": 2,
+    "submission": 2
+   },
+   "intent": {
+    "ground": 1.2,
+    "submission": 1.15
+   },
+   "signature_techniques": [
+    "double wristlock",
+    "chave de pescoço (neck crank)",
+    "chave de perna"
+   ],
+   "animation_tags": [
+    "pressão_por_cima",
+    "pegadas_dolorosas"
+   ]
+  },
+  "sambo": {
+   "name": "Sambo esportivo",
+   "family": "sambo",
+   "kind": "grappling",
+   "origin": [
+    "RU",
+    "KZ"
+   ],
+   "description": "Projeções de judô e chaves de perna; pouco jogo de guarda.",
+   "attributes": {
+    "leg_locks": 7,
+    "takedown_offense": 5,
+    "clinch": 3
+   },
+   "fight_styles": {
+    "submission": 2,
+    "control": 2
+   },
+   "intent": {
+    "takedown": 1.2,
+    "submission": 1.15
+   },
+   "signature_techniques": [
+    "projeção com chave de perna",
+    "chave de joelho",
+    "kneebar"
+   ],
+   "animation_tags": [
+    "jaqueta_de_sambo",
+    "ataque_às_pernas"
+   ]
+  },
+  "combat_sambo": {
+   "name": "Sambo de combate",
+   "family": "sambo",
+   "kind": "hybrid",
+   "origin": [
+    "RU",
+    "KZ"
+   ],
+   "description": "Sambo com golpes: o pai do grappling de pressão do Daguestão.",
+   "attributes": {
+    "takedown_offense": 5,
+    "ground_and_pound": 6,
+    "boxing": 3,
+    "clinch": 3,
+    "cage_control": 3
+   },
+   "fight_styles": {
+    "control": 2.5,
+    "wrestle_boxer": 2.5,
+    "pressure": 1.5
+   },
+   "intent": {
+    "takedown": 1.2,
+    "gnp": 1.2
+   },
+   "signature_techniques": [
+    "projeção após socos",
+    "ground and pound",
+    "chave de braço"
+   ],
+   "animation_tags": [
+    "pressão_e_projeção",
+    "socos_na_entrada"
+   ]
+  },
+  "sumo": {
+   "name": "Sumô",
+   "family": "judo",
+   "kind": "grappling",
+   "origin": [
+    "JP"
+   ],
+   "description": "Arrancada explosiva e empurrão; raro e pesado no MMA.",
+   "attributes": {
+    "strength": 8,
+    "explosiveness": 5,
+    "clinch": 6,
+    "cage_control": 4,
+    "cardio": -6,
+    "mobility": -6
+   },
+   "fight_styles": {
+    "clinch": 2.5,
+    "pressure": 2
+   },
+   "intent": {
+    "clinch": 1.3
+   },
+   "signature_techniques": [
+    "tachiai (arrancada)",
+    "oshi (empurrão)",
+    "yorikiri (condução para fora)"
+   ],
+   "animation_tags": [
+    "arrancada",
+    "empurra_até_a_grade"
+   ]
+  },
+  "mma": {
+   "name": "Formado no MMA",
+   "family": "mma",
+   "kind": "hybrid",
+   "origin": [
+    "US",
+    "BR",
+    "RU"
+   ],
+   "description": "Sem arte de origem dominante: aprendeu tudo junto desde cedo.",
+   "attributes": {
+    "fight_iq": 4,
+    "adaptation": 5,
+    "cardio": 2,
+    "takedown_defense": 2
+   },
+   "fight_styles": {
+    "complete": 3,
+    "wrestle_boxer": 1.5,
+    "scrambler": 1.5,
+    "pressure": 1
+   },
+   "intent": {},
+   "signature_techniques": [
+    "jab e baiana",
+    "ground and pound",
+    "luta de grade"
+   ],
+   "animation_tags": [
+    "guarda_mista",
+    "transições_em_pé_chão"
+   ]
+  },
+  "kudo": {
+   "name": "Kudo (daido juku)",
+   "family": "karate",
+   "kind": "hybrid",
+   "origin": [
+    "JP"
+   ],
+   "description": "Karatê misto japonês: golpes, clinch e projeções.",
+   "attributes": {
+    "knees": 5,
+    "clinch": 4,
+    "kicks": 3,
+    "takedown_offense": 3,
+    "durability": 3
+   },
+   "fight_styles": {
+    "pressure": 1.5,
+    "clinch": 1.5,
+    "complete": 1
+   },
+   "intent": {
+    "clinch": 1.15,
+    "kicks": 1.1
+   },
+   "signature_techniques": [
+    "joelhada no clinch",
+    "projeção",
+    "chute alto"
+   ],
+   "animation_tags": [
+    "capacete_e_luvas",
+    "clinch_ofensivo"
+   ]
+  }
+ }
+}

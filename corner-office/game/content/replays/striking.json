@@ -1,0 +1,733 @@
+{
+  "version": 1,
+  "id": "striking",
+  "title": "Distância · boxe e chutes",
+  "source": "authored_preview",
+  "organization_id": "org_frontline",
+  "ruleset_id": "unified",
+  "fighter_ids": [
+    "red",
+    "blue"
+  ],
+  "fighters": {
+    "red": {
+      "appearance_index": 3,
+      "stance": "orthodox"
+    },
+    "blue": {
+      "appearance_index": 5,
+      "stance": "southpaw"
+    }
+  },
+  "initial_state": {
+    "position": "long_range",
+    "top_id": null,
+    "location": "center",
+    "stamina": {
+      "red": 1,
+      "blue": 1
+    },
+    "damage": {
+      "red": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      },
+      "blue": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "striking_000",
+      "at_ms": 0,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 300,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "circle_left",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 1
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_001",
+      "at_ms": 1600,
+      "duration_ms": 1900,
+      "round": 1,
+      "clock_s": 299,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "outside_low",
+      "outcome": "landed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_002",
+      "at_ms": 3500,
+      "duration_ms": 1900,
+      "round": 1,
+      "clock_s": 297,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "teep",
+      "outcome": "blocked",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_003",
+      "at_ms": 5400,
+      "duration_ms": 1900,
+      "round": 1,
+      "clock_s": 295,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "head_roundhouse",
+      "outcome": "evaded",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_004",
+      "at_ms": 7300,
+      "duration_ms": 1900,
+      "round": 1,
+      "clock_s": 293,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "switch_kick",
+      "outcome": "landed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.946,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_005",
+      "at_ms": 9200,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 291,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "enter_pocket",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "long_range",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.946,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_006",
+      "at_ms": 10800,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 290,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "jab",
+      "outcome": "blocked",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_007",
+      "at_ms": 12400,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 288,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "cross",
+      "outcome": "evaded",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.91,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_008",
+      "at_ms": 14000,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 286,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "liver_hook",
+      "outcome": "landed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.91,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.075,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_009",
+      "at_ms": 15600,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 285,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "lead_uppercut",
+      "outcome": "blocked",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_010",
+      "at_ms": 17200,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 283,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "overhand",
+      "outcome": "knockdown",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "scramble",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.874,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      }
+    },
+    {
+      "id": "striking_011",
+      "at_ms": 18800,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 282,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "sit_out",
+      "outcome": "defended",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "scramble",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.874,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      },
+      "after": {
+        "position": "scramble",
+        "top_id": "red",
+        "location": "center",
+        "stamina": {
+          "red": 0.856,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0.15,
+            "leg": 0.075
+          }
+        }
+      }
+    }
+  ],
+  "result": {
+    "method": "decision",
+    "winner_id": "red"
+  }
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Placeholder do monograma CO (bíblia §24): dois blocos que se encaram, separados por uma linha de fight card. -->
+  <rect width="128" height="128" rx="20" fill="#111417"/>
+  <path d="M58 30H34a8 8 0 0 0-8 8v52a8 8 0 0 0 8 8h24V82H42V46h16z" fill="#F4F1E8"/>
+  <path d="M70 30h24a8 8 0 0 1 8 8v52a8 8 0 0 1-8 8H70zM86 46v36" fill="#F4F1E8"/>
+  <rect x="80" y="46" width="8" height="36" fill="#111417"/>
+  <rect x="62" y="22" width="4" height="84" fill="#C83B3B"/>
+</svg>

@@ -1,0 +1,8 @@
+{
+  "striking": ["boxing", "jab", "combinations", "defense", "accuracy", "power", "kicks", "low_kicks", "knees", "elbows", "countering"],
+  "grappling": ["takedown_offense", "takedown_defense", "clinch", "cage_control", "top_control", "scramble", "ground_and_pound"],
+  "jiu_jitsu": ["guard", "transitions", "submission_offense", "submission_defense", "back_control", "leg_locks"],
+  "physical": ["strength", "explosiveness", "speed", "cardio", "durability", "chin", "recovery", "mobility"],
+  "mental": ["fight_iq", "discipline", "adaptation", "composure", "aggression", "patience", "clutch"],
+  "hidden": ["pressure_tolerance", "war_propensity", "fights_hurt", "camp_discipline", "weight_cut_ease", "ambition", "ego", "loyalty", "professionalism", "volatility", "injury_risk", "damage_sensitivity", "natural_charisma", "interview_skill", "popularity_potential", "preference"]
+}

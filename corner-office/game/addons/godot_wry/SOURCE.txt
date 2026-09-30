@@ -1,0 +1,3 @@
+godot_wry b1783bb (MIT) — https://github.com/doceazedo/godot_wry. Built with: cargo build --release --locked --target <triple> in rust/.
+Windows: target x86_64-pc-windows-gnu (mingw-w64), stripped; WebView2Loader.dll (x64) comes from the webview2-com-sys 0.36.0 crate and must sit next to godot_wry.dll. Needs the Microsoft Edge WebView2 Runtime (standard on Windows 10/11).
+Linux: needs libwebkit2gtk-4.1 at runtime.

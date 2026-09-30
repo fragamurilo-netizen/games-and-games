@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Corner Office · Fight Studio</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="../face-lab/studio.js"></script>
+    <script src="../face-lab/identity.js"></script>
+    <script src="replay.js"></script>
+    <script src="appearance.js"></script>
+    <script src="renderer.js"></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <a class="eyebrow" href="../face-lab/"
+            >CORNER OFFICE / LABORATÓRIOS</a
+          >
+          <h1>O combate ganha movimento.</h1>
+          <p>
+            Distância, clinch, quedas e chão. Uma biblioteca de movimentos para
+            acompanhar cada troca da simulação, do primeiro estudo à decisão.
+          </p>
+        </div>
+        <div class="edition">
+          <span>FIGHT STUDIO</span><b>OPEN ERA · 2027</b
+          ><small id="inventory">Carregando biblioteca…</small>
+        </div>
+      </header>
+      <div id="error" role="alert" hidden></div>
+      <section class="workspace" aria-label="Laboratório de luta">
+        <div class="broadcast">
+          <div class="scoreboard">
+            <div class="fighter red">
+              <small>CORNER VERMELHO</small><strong id="name-red">—</strong
+              ><meter
+                id="stamina-red"
+                min="0"
+                max="1"
+                value="1"
+                aria-label="Energia corner vermelho"
+              ></meter
+              ><span id="damage-red">—</span>
+            </div>
+            <div class="clock">
+              <span id="round">ROUND 1</span><b id="clock">5:00</b
+              ><small id="org-label">CROWN</small>
+            </div>
+            <div class="fighter blue">
+              <small>CORNER AZUL</small><strong id="name-blue">—</strong
+              ><meter
+                id="stamina-blue"
+                min="0"
+                max="1"
+                value="1"
+                aria-label="Energia corner azul"
+              ></meter
+              ><span id="damage-blue">—</span>
+            </div>
+          </div>
+          <div class="viewport">
+            <div class="channel-bug">
+              <b>CO<span>SPORTS</span></b
+              ><small>FIGHT NIGHT · REPLAY</small>
+            </div>
+            <canvas
+              id="fight"
+              role="img"
+              aria-label="Dois atletas reproduzem os movimentos registrados na arena"
+            ></canvas>
+            <div class="tv-scorebug" aria-label="Placar da transmissão">
+              <div class="tv-name red-name">
+                <small id="tv-red-style"></small
+                ><strong id="tv-red-name"></strong>
+              </div>
+              <div class="tv-time">
+                <span id="tv-round"></span><b id="tv-clock"></b>
+              </div>
+              <div class="tv-name blue-name">
+                <small id="tv-blue-style"></small
+                ><strong id="tv-blue-name"></strong>
+              </div>
+            </div>
+            <div class="caption">
+              <span id="phase">POCKET</span
+              ><strong id="action">Carregando…</strong
+              ><span id="outcome"></span>
+            </div>
+          </div>
+          <div class="tv-ticker">
+            <b>CO / FIGHT DESK</b
+            ><span id="tv-stats">Estatísticas oficiais do replay</span>
+          </div>
+          <div class="transport">
+            <button id="broadcast-mode" aria-pressed="false">
+              Modo transmissão
+            </button>
+            <button id="play" class="primary" aria-label="Pausar reprodução">
+              Pausar</button
+            ><button id="restart">Reiniciar</button
+            ><label
+              >Velocidade<select id="speed">
+                <option value="1">1×</option>
+                <option value="2">2×</option>
+                <option value="5">5×</option>
+                <option value="0.25">0,25× · detalhe</option>
+              </select></label
+            ><button id="instant">Resultado instantâneo</button
+            ><label class="loop"
+              ><input id="loop" type="checkbox" checked /> Repetir</label
+            >
+          </div>
+          <label class="timeline"
+            >Linha do tempo <output id="time">0:00 / 0:00</output
+            ><input
+              id="seek"
+              type="range"
+              min="0"
+              max="1000"
+              value="0"
+              step="1"
+              aria-label="Posição da reprodução"
+          /></label>
+          <div id="fight-story" class="fight-story" aria-live="polite"></div>
+          <div class="broadcast-footer">
+            <span id="source">DEMONSTRAÇÃO · sequência autoral</span
+            ><span id="position">—</span><span id="result" role="status"></span>
+          </div>
+        </div>
+        <aside aria-label="Seleção de prévia">
+          <form id="match-form" class="match-form">
+            <span class="eyebrow">SIMULAÇÃO AUTÔNOMA</span>
+            <h2>Preparar confronto</h2>
+            <label>Evento<select id="match-org"></select></label>
+            <label>Corner vermelho<select id="match-red"></select></label>
+            <label
+              >Plano vermelho<select id="match-red-style">
+                <option value="">Base original</option>
+              </select></label
+            >
+            <label>Corner azul<select id="match-blue"></select></label>
+            <label
+              >Plano azul<select id="match-blue-style">
+                <option value="">Base original</option>
+              </select></label
+            >
+            <div class="pair">
+              <label
+                >Rounds<select id="match-rounds">
+                  <option value="3">3 rounds</option>
+                  <option value="5">5 rounds</option>
+                </select></label
+              >
+              <label
+                >Seed<input
+                  id="match-seed"
+                  type="number"
+                  min="0"
+                  max="2147483647"
+                  step="1"
+                  value="2027"
+                  required
+              /></label>
+            </div>
+            <button id="simulate" class="primary" type="submit">
+              Simular confronto
+            </button>
+            <p id="engine-status" class="note" role="status">
+              Conectando ao motor…
+            </p>
+            <p class="note">
+              Exibição de laboratório. O plano muda as preferências de ataque;
+              as habilidades continuam sendo as do atleta. Durante a luta, você
+              acompanha.
+            </p>
+          </form>
+          <h2>Sala de exibição</h2>
+          <label>Organização<select id="arena"></select></label
+          ><label>Sequência<select id="sequence"></select></label>
+          <div class="pair">
+            <label>Atleta · vermelho<select id="fighter-red"></select></label
+            ><label>Atleta · azul<select id="fighter-blue"></select></label>
+          </div>
+          <label
+            >Câmera<select id="camera">
+              <option value="broadcast">Transmissão</option>
+              <option value="detail">Detalhe dos atletas</option>
+              <option value="tactical">Arena inteira</option>
+            </select></label
+          ><label class="check"
+            ><input id="rig" type="checkbox" /> Mostrar articulações</label
+          >
+          <div class="io">
+            <label class="file-button"
+              >Importar replay JSON<input
+                id="import"
+                type="file"
+                accept=".json,application/json" /></label
+            ><button id="export">Exportar replay</button>
+          </div>
+          <p class="note">
+            Replays simulados e demonstrações estão identificados na
+            transmissão. A seed permite repetir o mesmo confronto.
+          </p>
+          <a href="../../docs/FIGHT_VISUALS.md"
+            >Guia de integração para a equipe ↗</a
+          >
+        </aside>
+      </section>
+      <section
+        id="verdict"
+        class="verdict"
+        hidden
+        aria-label="Resultado oficial"
+      >
+        <span class="eyebrow">RESULTADO OFICIAL</span>
+        <h2 id="verdict-title"></h2>
+        <p id="verdict-detail"></p>
+        <div id="scorecards" class="scorecards"></div>
+      </section>
+      <section class="library">
+        <div class="section-title">
+          <div>
+            <span class="eyebrow">BIBLIOTECA DE MOVIMENTOS</span>
+            <h2>Cada fase. Duas respostas.</h2>
+          </div>
+          <span id="count"></span>
+        </div>
+        <div class="filters">
+          <label
+            >Buscar técnica<input
+              id="search"
+              type="search"
+              placeholder="Jab, raspagem, clinch…" /></label
+          ><label
+            >Fase<select id="category">
+              <option value="">Todas as fases</option>
+            </select></label
+          ><label
+            >Base marcial<select id="style">
+              <option value="">Todas as bases</option>
+            </select></label
+          >
+        </div>
+        <div id="categories" class="categories" aria-label="Técnicas"></div>
+        <div id="clip-detail" class="clip-detail">
+          <div>
+            <small>INSPEÇÃO DE MOVIMENTO</small
+            ><strong id="clip-name">Selecione uma técnica</strong
+            ><span id="clip-path"></span>
+          </div>
+          <label>Resposta registrada<select id="response"></select></label
+          ><button id="inspect" class="primary">Reproduzir técnica</button>
+        </div>
+      </section>
+      <section class="events">
+        <div class="section-title">
+          <div>
+            <span class="eyebrow">REGISTRO DA LUTA</span>
+            <h2>O que aconteceu na troca.</h2>
+          </div>
+          <span>Selecione uma troca para rever.</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Round / relógio</th>
+                <th>Atleta</th>
+                <th>Técnica</th>
+                <th>Resposta</th>
+                <th>Posição seguinte</th>
+              </tr>
+            </thead>
+            <tbody id="events"></tbody>
+          </table>
+        </div>
+      </section>
+      <footer>
+        Corner Office · Universo fictício · Game Design Bible §§3, 5–6, 15–17 ·
+        MMA Bible §§7, 20
+      </footer>
+    </main>
+  </body>
+</html>

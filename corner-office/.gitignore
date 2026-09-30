@@ -1,0 +1,29 @@
+# Godot
+game/.godot/
+game/build/
+game/android/
+*.import.tmp
+
+# Builds e assinaturas
+*.apk
+*.aab
+*.idsig
+*.keystore
+*.jks
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Python tooling caches
+__pycache__/
+*.pyc
+
+.local/
+
+# Android bridge outputs (built by CI)
+android-studio-plugin/.gradle/
+android-studio-plugin/**/build/
+game/addons/corner_office_studio/bin/
+game/tools/_*.gd
+game/tools/_*.gd.uid

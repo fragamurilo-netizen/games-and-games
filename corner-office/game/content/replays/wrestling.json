@@ -1,0 +1,733 @@
+{
+  "version": 1,
+  "id": "wrestling",
+  "title": "Wrestling · entradas e grade",
+  "source": "authored_preview",
+  "organization_id": "org_iron",
+  "ruleset_id": "unified",
+  "fighter_ids": [
+    "red",
+    "blue"
+  ],
+  "fighters": {
+    "red": {
+      "appearance_index": 2,
+      "stance": "orthodox"
+    },
+    "blue": {
+      "appearance_index": 9,
+      "stance": "southpaw"
+    }
+  },
+  "initial_state": {
+    "position": "pocket",
+    "top_id": null,
+    "location": "center",
+    "stamina": {
+      "red": 1,
+      "blue": 1
+    },
+    "damage": {
+      "red": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      },
+      "blue": {
+        "head": 0,
+        "body": 0,
+        "leg": 0
+      }
+    }
+  },
+  "events": [
+    {
+      "id": "wrestling_000",
+      "at_ms": 0,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 300,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "jab",
+      "outcome": "missed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 1
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_001",
+      "at_ms": 1600,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 299,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "level_change",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "pocket",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 1,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "open_wrestling",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_002",
+      "at_ms": 3200,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 297,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "double_leg",
+      "outcome": "defended",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "open_wrestling",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.982,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "open_wrestling",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_003",
+      "at_ms": 5600,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 295,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "chain_reshoot",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "open_wrestling",
+        "top_id": null,
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.982
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "blue",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_004",
+      "at_ms": 8000,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 292,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "guard_posture",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "blue",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.964
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "guard",
+        "top_id": "blue",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_005",
+      "at_ms": 10300,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 290,
+      "actor_id": "blue",
+      "target_id": "red",
+      "technique_id": "guard_open",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "guard",
+        "top_id": "blue",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.946
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "half_guard",
+        "top_id": "blue",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_006",
+      "at_ms": 12600,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 288,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "wall_walk",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "half_guard",
+        "top_id": "blue",
+        "location": "center",
+        "stamina": {
+          "red": 0.964,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "cage_wrestling",
+        "top_id": null,
+        "location": "cage",
+        "stamina": {
+          "red": 0.946,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_007",
+      "at_ms": 15000,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 285,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "cage_turn",
+      "outcome": "held",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "cage_wrestling",
+        "top_id": null,
+        "location": "cage",
+        "stamina": {
+          "red": 0.946,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "cage_wrestling",
+        "top_id": null,
+        "location": "cage",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_008",
+      "at_ms": 16600,
+      "duration_ms": 2400,
+      "round": 1,
+      "clock_s": 284,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "cage_single",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "cage_wrestling",
+        "top_id": null,
+        "location": "cage",
+        "stamina": {
+          "red": 0.928,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "half_guard",
+        "top_id": "red",
+        "location": "cage",
+        "stamina": {
+          "red": 0.91,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_009",
+      "at_ms": 19000,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 281,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "knee_slice",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "half_guard",
+        "top_id": "red",
+        "location": "cage",
+        "stamina": {
+          "red": 0.91,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "cage",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_010",
+      "at_ms": 21300,
+      "duration_ms": 2300,
+      "round": 1,
+      "clock_s": 279,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "mount_advance",
+      "outcome": "completed",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "side_control",
+        "top_id": "red",
+        "location": "cage",
+        "stamina": {
+          "red": 0.892,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "mount_back",
+        "top_id": "red",
+        "location": "cage",
+        "stamina": {
+          "red": 0.874,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "wrestling_011",
+      "at_ms": 23600,
+      "duration_ms": 1600,
+      "round": 1,
+      "clock_s": 277,
+      "actor_id": "red",
+      "target_id": "blue",
+      "technique_id": "mount_hammer",
+      "outcome": "stoppage",
+      "rules_approved": true,
+      "reason_codes": [
+        "AUTHORED_PREVIEW"
+      ],
+      "before": {
+        "position": "mount_back",
+        "top_id": "red",
+        "location": "cage",
+        "stamina": {
+          "red": 0.874,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      },
+      "after": {
+        "position": "reset",
+        "top_id": null,
+        "location": "cage",
+        "stamina": {
+          "red": 0.856,
+          "blue": 0.928
+        },
+        "damage": {
+          "red": {
+            "head": 0,
+            "body": 0,
+            "leg": 0
+          },
+          "blue": {
+            "head": 0.075,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    }
+  ],
+  "result": {
+    "method": "ko_tko",
+    "winner_id": "red"
+  }
+}

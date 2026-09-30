@@ -1,0 +1,516 @@
+{
+ "profiles": {
+  "boxing": {
+   "boxing": 14,
+   "jab": 10,
+   "combinations": 12,
+   "defense": 8,
+   "accuracy": 8,
+   "power": 6,
+   "countering": 8,
+   "kicks": -10,
+   "low_kicks": -6,
+   "knees": -4,
+   "elbows": -6,
+   "takedown_offense": -10,
+   "takedown_defense": -2,
+   "clinch": -4,
+   "cage_control": -6,
+   "top_control": -8,
+   "scramble": -6,
+   "ground_and_pound": -4,
+   "guard": -10,
+   "transitions": -10,
+   "submission_offense": -12,
+   "submission_defense": -6,
+   "back_control": -10,
+   "leg_locks": -12,
+   "speed": 2,
+   "mobility": 3
+  },
+  "muay_thai": {
+   "kicks": 10,
+   "low_kicks": 12,
+   "knees": 14,
+   "elbows": 14,
+   "clinch": 10,
+   "power": 4,
+   "boxing": 2,
+   "defense": 2,
+   "jab": -2,
+   "takedown_offense": -10,
+   "top_control": -8,
+   "guard": -6,
+   "transitions": -8,
+   "submission_offense": -8,
+   "submission_defense": -4,
+   "back_control": -8,
+   "leg_locks": -10,
+   "scramble": -6,
+   "durability": 3,
+   "chin": 2
+  },
+  "kickboxing": {
+   "kicks": 12,
+   "low_kicks": 10,
+   "combinations": 10,
+   "boxing": 6,
+   "jab": 6,
+   "accuracy": 6,
+   "defense": 6,
+   "knees": 4,
+   "countering": 4,
+   "mobility": 4,
+   "takedown_offense": -12,
+   "takedown_defense": -4,
+   "top_control": -10,
+   "ground_and_pound": -6,
+   "guard": -10,
+   "transitions": -10,
+   "submission_offense": -12,
+   "submission_defense": -6,
+   "back_control": -10,
+   "leg_locks": -10,
+   "scramble": -6,
+   "cage_control": -6
+  },
+  "karate": {
+   "kicks": 10,
+   "mobility": 10,
+   "countering": 10,
+   "defense": 10,
+   "accuracy": 6,
+   "speed": 4,
+   "jab": 4,
+   "patience": 4,
+   "clinch": -8,
+   "takedown_offense": -10,
+   "top_control": -10,
+   "cage_control": -8,
+   "guard": -8,
+   "transitions": -8,
+   "submission_offense": -10,
+   "back_control": -8,
+   "leg_locks": -10,
+   "ground_and_pound": -6,
+   "power": -2
+  },
+  "taekwondo": {
+   "kicks": 16,
+   "mobility": 8,
+   "speed": 4,
+   "low_kicks": -2,
+   "boxing": -6,
+   "clinch": -10,
+   "takedown_offense": -12,
+   "takedown_defense": -8,
+   "top_control": -10,
+   "cage_control": -10,
+   "guard": -8,
+   "transitions": -8,
+   "submission_offense": -10,
+   "back_control": -8,
+   "leg_locks": -8,
+   "ground_and_pound": -6,
+   "knees": 2,
+   "countering": 4
+  },
+  "wrestling": {
+   "takedown_offense": 16,
+   "takedown_defense": 14,
+   "cage_control": 12,
+   "top_control": 12,
+   "scramble": 10,
+   "ground_and_pound": 8,
+   "clinch": 6,
+   "strength": 4,
+   "cardio": 4,
+   "back_control": 2,
+   "transitions": 2,
+   "guard": -8,
+   "submission_offense": -6,
+   "leg_locks": -10,
+   "kicks": -8,
+   "low_kicks": -6,
+   "knees": -2,
+   "elbows": -2,
+   "boxing": -6,
+   "jab": -6,
+   "combinations": -8,
+   "accuracy": -4,
+   "defense": -4,
+   "countering": -6
+  },
+  "bjj": {
+   "submission_offense": 16,
+   "guard": 14,
+   "transitions": 12,
+   "back_control": 14,
+   "leg_locks": 8,
+   "submission_defense": 10,
+   "scramble": 4,
+   "top_control": 4,
+   "takedown_offense": -2,
+   "takedown_defense": -6,
+   "boxing": -8,
+   "jab": -6,
+   "combinations": -8,
+   "defense": -6,
+   "accuracy": -4,
+   "kicks": -8,
+   "low_kicks": -6,
+   "knees": -4,
+   "elbows": -4,
+   "countering": -6,
+   "power": -4,
+   "ground_and_pound": -2
+  },
+  "judo": {
+   "clinch": 16,
+   "takedown_offense": 10,
+   "takedown_defense": 8,
+   "top_control": 6,
+   "cage_control": 4,
+   "submission_offense": 4,
+   "transitions": 4,
+   "back_control": 2,
+   "strength": 4,
+   "kicks": -8,
+   "low_kicks": -6,
+   "boxing": -6,
+   "jab": -6,
+   "combinations": -8,
+   "defense": -4,
+   "accuracy": -4,
+   "countering": -6,
+   "leg_locks": -8,
+   "guard": -4
+  },
+  "sambo": {
+   "takedown_offense": 10,
+   "takedown_defense": 8,
+   "clinch": 10,
+   "top_control": 8,
+   "leg_locks": 14,
+   "submission_offense": 6,
+   "scramble": 6,
+   "cage_control": 4,
+   "ground_and_pound": 4,
+   "strength": 4,
+   "kicks": -8,
+   "low_kicks": -4,
+   "jab": -6,
+   "combinations": -6,
+   "defense": -4,
+   "countering": -6,
+   "guard": -2,
+   "boxing": -2,
+   "accuracy": -4,
+   "elbows": -4
+  },
+  "mma": {
+   "adaptation": 4,
+   "fight_iq": 2
+  }
+ },
+ "backgrounds": {
+  "wrestling": [
+   {
+    "text": "Wrestler universitário (NCAA Divisão I)",
+    "w": 3,
+    "countries": [
+     "US",
+     "CA"
+    ]
+   },
+   {
+    "text": "All-American de wrestling universitário",
+    "w": 1,
+    "countries": [
+     "US",
+     "CA"
+    ],
+    "min_peak": 74
+   },
+   {
+    "text": "Wrestler de ensino médio convertido ao MMA",
+    "w": 2,
+    "countries": [
+     "US",
+     "CA"
+    ]
+   },
+   {
+    "text": "Campeão nacional de wrestling estilo livre",
+    "w": 2,
+    "min_peak": 66
+   },
+   {
+    "text": "Wrestler olímpico",
+    "w": 0.4,
+    "min_peak": 78
+   },
+   {
+    "text": "Medalhista mundial de wrestling",
+    "w": 0.3,
+    "min_peak": 80
+   },
+   {
+    "text": "Wrestler de clube desde a infância",
+    "w": 3
+   },
+   {
+    "text": "Wrestler greco-romano da seleção",
+    "w": 1,
+    "countries": [
+     "RU",
+     "KZ",
+     "KG",
+     "UZ",
+     "UA",
+     "GE",
+     "AM",
+     "AZ",
+     "IR",
+     "TR",
+     "PL",
+     "RS"
+    ],
+    "min_peak": 68
+   }
+  ],
+  "bjj": [
+   {
+    "text": "Faixa-preta de jiu-jitsu, medalhista mundial",
+    "w": 0.6,
+    "min_peak": 76
+   },
+   {
+    "text": "Faixa-preta de jiu-jitsu, campeão continental",
+    "w": 1.2,
+    "min_peak": 68
+   },
+   {
+    "text": "Faixa-preta de jiu-jitsu",
+    "w": 3
+   },
+   {
+    "text": "Faixa-marrom de jiu-jitsu",
+    "w": 3
+   },
+   {
+    "text": "Competidor de submission grappling (no-gi)",
+    "w": 1.5
+   },
+   {
+    "text": "Campeão de ADCC regional",
+    "w": 0.6,
+    "min_peak": 70
+   }
+  ],
+  "judo": [
+   {
+    "text": "Judoca da seleção nacional",
+    "w": 1.5,
+    "min_peak": 66
+   },
+   {
+    "text": "Medalhista continental de judô",
+    "w": 0.7,
+    "min_peak": 72
+   },
+   {
+    "text": "Judoca olímpico",
+    "w": 0.3,
+    "min_peak": 78
+   },
+   {
+    "text": "Faixa-preta de judô",
+    "w": 3
+   }
+  ],
+  "sambo": [
+   {
+    "text": "Campeão mundial de sambo de combate",
+    "w": 0.5,
+    "min_peak": 76
+   },
+   {
+    "text": "Mestre do esporte em sambo",
+    "w": 2,
+    "countries": [
+     "RU",
+     "KZ",
+     "KG",
+     "UZ",
+     "UA",
+     "GE",
+     "AM",
+     "AZ"
+    ]
+   },
+   {
+    "text": "Sambista da seleção nacional",
+    "w": 1,
+    "min_peak": 66
+   },
+   {
+    "text": "Praticante de sambo desde a infância",
+    "w": 3
+   }
+  ],
+  "boxing": [
+   {
+    "text": "Boxeador amador da seleção nacional",
+    "w": 1.2,
+    "min_peak": 66
+   },
+   {
+    "text": "Ex-boxeador profissional",
+    "w": 1.5
+   },
+   {
+    "text": "Campeão regional de boxe amador",
+    "w": 2.5
+   },
+   {
+    "text": "Boxeador olímpico",
+    "w": 0.3,
+    "min_peak": 78
+   },
+   {
+    "text": "Boxeador de academia de bairro",
+    "w": 2.5
+   }
+  ],
+  "muay_thai": [
+   {
+    "text": "Lutador de muay thai com dezenas de lutas",
+    "w": 3
+   },
+   {
+    "text": "Campeão nacional de muay thai",
+    "w": 1.2,
+    "min_peak": 66
+   },
+   {
+    "text": "Ex-lutador profissional de muay thai na Tailândia",
+    "w": 0.8
+   },
+   {
+    "text": "Campeão de estádio em Bangcoc",
+    "w": 0.6,
+    "countries": [
+     "TH"
+    ],
+    "min_peak": 68
+   }
+  ],
+  "kickboxing": [
+   {
+    "text": "Ex-kickboxer profissional",
+    "w": 2
+   },
+   {
+    "text": "Campeão nacional de kickboxing",
+    "w": 1.2,
+    "min_peak": 66
+   },
+   {
+    "text": "Campeão de sanda",
+    "w": 1.5,
+    "countries": [
+     "CN"
+    ]
+   },
+   {
+    "text": "Kickboxer de circuito europeu",
+    "w": 1.5,
+    "countries": [
+     "NL",
+     "GB",
+     "FR",
+     "DE",
+     "PL",
+     "RS",
+     "IT",
+     "SE",
+     "TR",
+     "MA"
+    ]
+   },
+   {
+    "text": "Campeão mundial amador de kickboxing",
+    "w": 0.4,
+    "min_peak": 76
+   },
+   {
+    "text": "Praticante de kickboxing desde a adolescência",
+    "w": 3
+   }
+  ],
+  "karate": [
+   {
+    "text": "Karateca de competição (kumite)",
+    "w": 3
+   },
+   {
+    "text": "Campeão nacional de karatê",
+    "w": 1.2,
+    "min_peak": 66
+   },
+   {
+    "text": "Faixa-preta de karatê kyokushin",
+    "w": 1.5,
+    "countries": [
+     "JP",
+     "BR",
+     "NL",
+     "RU",
+     "PL"
+    ]
+   },
+   {
+    "text": "Karateca da seleção nacional",
+    "w": 0.6,
+    "min_peak": 72
+   }
+  ],
+  "taekwondo": [
+   {
+    "text": "Faixa-preta de taekwondo",
+    "w": 3
+   },
+   {
+    "text": "Atleta de taekwondo da seleção",
+    "w": 0.8,
+    "min_peak": 68
+   },
+   {
+    "text": "Taekwondista olímpico",
+    "w": 0.2,
+    "min_peak": 78
+   }
+  ],
+  "mma": [
+   {
+    "text": "Formado direto no MMA desde a adolescência",
+    "w": 3
+   },
+   {
+    "text": "Revelação do MMA amador",
+    "w": 1.5,
+    "min_peak": 62
+   },
+   {
+    "text": "Campeão amador de MMA",
+    "w": 0.8,
+    "min_peak": 68
+   },
+   {
+    "text": "Veio das lutas regionais sem base de competição",
+    "w": 2
+   }
+  ]
+ }
+}

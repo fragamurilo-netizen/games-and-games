@@ -1,0 +1,9 @@
+[
+  {"id": "gym_forge", "name": "Forge MMA", "city": "Las Vegas", "country": "US", "region": "usa", "specialties": ["complete"], "identity": "Completa; alto custo e grande infraestrutura."},
+  {"id": "gym_spcl", "name": "São Paulo Combat Lab", "city": "São Paulo", "country": "BR", "region": "brazil", "specialties": ["bjj", "striking"], "identity": "BJJ + striking; forte pipeline brasileiro."},
+  {"id": "gym_mountain", "name": "Mountain House", "city": "Almaty", "country": "KZ", "region": "central_asia", "specialties": ["wrestling", "control"], "identity": "Wrestling e controle."},
+  {"id": "gym_kingsway", "name": "Kingsway MMA", "city": "Manchester", "country": "GB", "region": "europe", "specialties": ["striking", "conditioning"], "identity": "Striking + preparação física."},
+  {"id": "gym_shinjuku", "name": "Shinjuku Fight Institute", "city": "Tóquio", "country": "JP", "region": "japan_korea", "specialties": ["karate", "judo", "kickboxing"], "identity": "Karate, judô e kickboxing."},
+  {"id": "gym_blackwater", "name": "Blackwater MMA", "city": "Flórida", "country": "US", "region": "usa", "specialties": ["complete", "media"], "identity": "Equipe de estrelas e grande mídia."},
+  {"id": "gym_mexico", "name": "Mexico Fight House", "city": "Cidade do México", "country": "MX", "region": "mexico", "specialties": ["boxing", "pressure", "cardio"], "identity": "Boxe, pressão e cardio."}
+]

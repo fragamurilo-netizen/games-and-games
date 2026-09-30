@@ -1,0 +1,7 @@
+[
+  {"id": "champion_ducking", "headline": "Campeão está fugindo do #1?", "triggers": ["champion_refused_2_offers", "contender_called_out_publicly"]},
+  {"id": "robbery_debate", "headline": "Decisão polêmica divide opiniões", "triggers": ["split_or_close_cards", "media_scoring_diverges"]},
+  {"id": "division_out_of_control", "headline": "Organização perde controle da divisão", "triggers": ["champion_inactive", "interim_title_exists", "failed_booking"]},
+  {"id": "new_star", "headline": "Nasce uma estrela", "triggers": ["finish_streak", "audience_growth", "social_traction"]},
+  {"id": "weight_cut_problem", "headline": "Problema crônico com a balança", "triggers": ["multiple_weight_misses", "difficult_cuts", "commission_warning"]}
+]

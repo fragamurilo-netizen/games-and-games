@@ -1,0 +1,40 @@
+extends Screen
+## Free agency / basic renewal on mobile. Bible §9; o agente responde via Agencies.
+var selected:=""
+func title() -> String:return "Mercado"
+func receive(payload: Dictionary) -> void:
+	if payload.get("reset",false):selected=""
+	if payload.has("fighter_id"):selected=str(payload.fighter_id)
+func snapshot() -> Dictionary:
+	var s:=super.snapshot();s.fighter_id=selected;return s
+func build() -> void:
+	var w:=Game.world
+	if selected.is_empty():
+		var expiring: Array=[]
+		for id: String in w.player_org().roster:
+			var own: Fighter=w.fighters[id];var c: Contract=w.contracts.get(own.contract_id)
+			if c and (c.bouts_remaining<=1 or Contracts.best_rival_bid(w,own,w.player_org_id)>0):expiring.append(own)
+		if not expiring.is_empty():
+			add_text("RENOVAÇÕES",Tokens.FIGHT_RED)
+			for own: Fighter in expiring:
+				var bid:=Contracts.best_rival_bid(w,own,w.player_org_id)
+				add_button("%s  /  %s\n%s"%[own.display_name(),own.record_string(),"Proposta rival: %s"%CareerText.money(bid) if bid>0 else "Última luta do contrato"],func():selected=own.id;refresh())
+		add_text("AGENTES LIVRES",Tokens.FIGHT_RED)
+		add_text("Proponha quatro lutas e construa o próximo nome da sua promoção.",Tokens.MUTED)
+		for f: Fighter in w.fighters.values():
+			if f.organization_id.is_empty() and not f.retired:add_fighter_row(f,"%s  /  %s\n%s · %d anos · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),f.age_on(w.date),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
+		return
+	var f: Fighter=w.fighters[selected]
+	add_button("← Agentes livres",func():selected="";refresh())
+	add_portrait(f)
+	add_heading(f.display_name());add_text(CareerText.division(f.division)+" / "+f.record_string());add_text(CareerText.agent_line(w,f),Tokens.MUTED)
+	add_button("Ver ficha completa",func():navigate.emit("fighters",{"fighter_id":f.id}))
+	var bid:=Contracts.best_rival_bid(w,f,w.player_org_id)
+	if bid>0:add_text("Proposta rival na mesa: %s por luta."%CareerText.money(bid),Tokens.FIGHT_RED)
+	var show:=add_number("Bolsa por apresentação · US$",maxi(Contracts.market_price(w,f),bid),1,10000000)
+	var signing:=add_number("Luvas na assinatura · US$",0,0,10000000)
+	add_text("4 lutas · 18 meses · bônus de vitória de 50%",Tokens.MUTED)
+	add_button("ENVIAR CONTRATO",func():
+		var result:=await run_action("negotiate",{"fighter_id":f.id,"show_money":int(show.value),"signing_bonus":int(signing.value)})
+		if result.get("ok") and not result.has("counter_show"):selected=""
+		refresh())

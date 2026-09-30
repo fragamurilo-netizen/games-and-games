@@ -1,0 +1,118 @@
+name: Corner Office
+
+on:
+  push:
+    paths: ["corner-office/**", ".github/workflows/corner-office.yml"]
+  pull_request:
+    paths: ["corner-office/**", ".github/workflows/corner-office.yml"]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: 4.4.1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+
+      - name: Run tests
+        run: corner-office/tools/run_tests.sh
+
+      - name: Verify career HTTP and atomic saves
+        run: python3 corner-office/tools/test_career_api.py --godot /usr/local/bin/godot
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify motion catalog and replay contract
+        run: |
+          node corner-office/prototypes/fight-lab/tests/replay.cjs
+          node corner-office/prototypes/fight-lab/tests/presentation.cjs
+
+      - name: Verify reproducible visual content
+        run: |
+          python3 corner-office/tools/build_motion_catalog.py
+          python3 corner-office/tools/build_replay_examples.py
+          python3 corner-office/tools/build_simulated_replays.py
+          python3 corner-office/tools/build_studio_bundle.py
+          git diff --exit-code -- corner-office/game/presentation/fight/studio.cobundle
+          git diff --exit-code -- corner-office/game/content
+
+  android:
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      GODOT_VERSION: 4.4.1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2.1'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+      - name: Install Android build tools
+        run: sdkmanager 'platform-tools' 'platforms;android-34' 'build-tools;34.0.0'
+      - name: Build original Fight Studio bridge
+        run: |
+          gradle -p corner-office/android-studio-plugin :plugin:assembleDebug :plugin:assembleRelease
+          mkdir -p corner-office/game/addons/corner_office_studio/bin
+          cp corner-office/android-studio-plugin/plugin/build/outputs/aar/plugin-*.aar corner-office/game/addons/corner_office_studio/bin/
+      - name: Install Godot and Android templates
+        run: |
+          curl -fSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
+          curl -fSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -j -q templates.tpz 'templates/android*' 'templates/version.txt' -d "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p corner-office/game/android/build
+          unzip -q "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip" -d corner-office/game/android/build
+          echo -n "${GODOT_VERSION}.stable" > corner-office/game/android/.build_version
+          chmod +x corner-office/game/android/build/gradlew
+      - name: Configure and export debug APK
+        run: |
+          mkdir -p "$HOME/.config/godot" corner-office/game/build/android
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          config = '[gd_resource type="EditorSettings" format=3]\n[resource]\n'
+          config += 'export/android/android_sdk_path = "' + os.environ['ANDROID_HOME'] + '"\n'
+          config += 'export/android/java_sdk_path = "' + os.environ['JAVA_HOME'] + '"\n'
+          (Path.home()/'.config/godot/editor_settings-4.4.tres').write_text(config)
+          PY
+          godot --headless --path corner-office/game --import
+          godot --headless --path corner-office/game --export-debug Android build/android/corner-office-debug.apk
+          test -s corner-office/game/build/android/corner-office-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corner-office-android-debug
+          path: corner-office/game/build/android/corner-office-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Commit test APK to the branch
+        # Test builds for device QA land in corner-office/releases/ on claude/* branches.
+        if: github.event_name != 'pull_request' && startsWith(github.ref_name, 'claude/')
+        run: |
+          VERSION=$(sed -n 's/^version\/name="\(.*\)"/\1/p' corner-office/game/export_presets.cfg)
+          DEST="corner-office/releases/corner-office-${VERSION}-debug.apk"
+          cp corner-office/game/build/android/corner-office-debug.apk "$DEST"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f "$DEST"
+          git commit -m "Test APK ${VERSION} (${GITHUB_SHA::7}) [skip ci]" || exit 0
+          git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"

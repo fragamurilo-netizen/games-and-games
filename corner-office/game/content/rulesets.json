@@ -1,0 +1,5 @@
+[
+  {"id": "unified", "name": "Unified Rules", "venue": "cage", "round_minutes": 5, "max_rounds": 5, "scoring": "round_based_10_point_must", "judges": 3, "weigh_in": "traditional"},
+  {"id": "shinsei_ring", "name": "Shinsei Rules", "venue": "ring", "round_minutes": 5, "max_rounds": 3, "scoring": "whole_fight", "judges": 3, "weigh_in": "traditional", "notes": "Identidade própria da Shinsei (MMA Bible §2, §6); detalhar no design."},
+  {"id": "hydration", "name": "Hydration Protocol", "venue": "cage", "round_minutes": 5, "max_rounds": 5, "scoring": "round_based_10_point_must", "judges": 3, "weigh_in": "hydration", "urine_specific_gravity_max": 1.025}
+]
