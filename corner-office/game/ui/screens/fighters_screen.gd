@@ -6,7 +6,12 @@ var selected_fighter:=""
 var mode:="roster"
 func title() -> String:return "Lutadores"
 func receive(payload: Dictionary) -> void:
+	if payload.get("reset",false):selected_fighter=""
 	if payload.has("fighter_id"):selected_fighter=str(payload.fighter_id)
+	if payload.has("mode"):mode=str(payload.mode);selected_fighter=str(payload.get("fighter_id",""))
+	if payload.has("division"):division_filter=str(payload.division)
+func snapshot() -> Dictionary:
+	var s:=super.snapshot();s.merge({"fighter_id":selected_fighter,"mode":mode,"division":division_filter});return s
 func build() -> void:
 	var world:=Game.world
 	if not selected_fighter.is_empty():_profile(world.fighters[selected_fighter]);return
@@ -43,6 +48,7 @@ func _profile(f: Fighter) -> void:
 		StatWidgets.tile("Altura / alcance","%d/%d"%[f.height_cm,f.reach_cm],"cm"),
 		StatWidgets.tile("Vitórias registradas","%d/%d/%d"%[methods.ko_tko,methods.submission,methods.decision],"KO · finalização · decisão"),
 	])
+	_links(f)
 	add_text("FORMA RECENTE",Tokens.MUTED)
 	var strip:=StatWidgets.Form.new();strip.results=CareerStats.form(w,f);add_node(strip)
 	var groups: Array=[["Trocação",f.striking],["Wrestling",f.grappling],["Jiu-jítsu",f.jiu_jitsu],["Físico",f.physical],["Mental",f.mental]]
@@ -71,6 +77,23 @@ func _profile(f: Fighter) -> void:
 	if f.organization_id==w.player_org_id:
 		var c: Contract=w.contracts.get(f.contract_id)
 		if c:add_text("%s por apresentação · %d lutas restantes"%[CareerText.money(c.show_money),c.bouts_remaining])
+## Atalhos da ficha para o resto da central.
+func _links(f: Fighter) -> void:
+	var w:=Game.world
+	var booked: FightEvent=null
+	for ev: FightEvent in w.events.values():
+		if ev.status in ["planned","announced"]:
+			for id: String in ev.fight_ids:
+				var fight: Fight=w.fights[id]
+				if f.id in [fight.fighter_a_id,fight.fighter_b_id]:booked=ev
+	if booked and booked.organization_id==w.player_org_id:
+		add_button("Próxima luta: %s · %s"%[booked.name,GameDate.format(booked.date)],func():navigate.emit("events",{"event_id":booked.id}))
+	elif booked:add_text("Escalado em %s · %s"%[booked.name,GameDate.format(booked.date)],Tokens.MUTED)
+	elif f.organization_id==w.player_org_id:
+		var next:=CareerStats.next_event(w)
+		if next and next.status=="planned":add_button("Escalar em %s"%next.name,func():navigate.emit("events",{"event_id":next.id,"red":f.id}))
+	if f.organization_id.is_empty():add_button("Negociar contrato",func():navigate.emit("market",{"fighter_id":f.id}))
+	add_button("Ver ranking da categoria",func():navigate.emit("fighters",{"mode":"official","division":f.division}))
 func _watch(fight: Fight) -> void:
 	var viewer:=FightReplayView.new()
 	viewer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

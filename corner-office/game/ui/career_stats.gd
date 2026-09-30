@@ -121,8 +121,17 @@ static func hot_fighters(w: WorldState, count: int=3) -> Array:
 	return list.slice(0,count)
 
 
-## Season milestones: presentation goals read from history, they change no rule.
+## Season goals for the dashboard. The official goals (with the year-end bonus)
+## are OrgStanding.objective_view from PR #67; once that class exists this reads
+## it, and the local fallback below should be deleted. Looked up by name so this
+## file compiles with or without it.
 static func milestones(w: WorldState) -> Array:
+	for c: Dictionary in ProjectSettings.get_global_class_list():
+		if c["class"]=="OrgStanding":
+			var out: Array=[]
+			for o: Dictionary in load(c.path).objective_view(w):
+				out.append({"label":str(o.label),"value":int(o.progress),"goal":int(o.target),"money":o.id=="profit","official":true})
+			return out
 	var s:=org_summary(w)
 	var best_run:=0
 	for id: String in w.player_org().roster:best_run=maxi(best_run,streak(w,w.fighters[id]))

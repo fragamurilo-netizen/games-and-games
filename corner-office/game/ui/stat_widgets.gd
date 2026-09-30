@@ -87,6 +87,31 @@ class Form extends Control:
 			draw_string(Tokens.italic_font(),Vector2(x,29),results[i],HORIZONTAL_ALIGNMENT_CENTER,44,20,Tokens.INK)
 
 
+## Hub card: a live door into another area (Undisputed 3 career hub).
+## Title, one big figure, a line of context and a chevron; lights red on press.
+class HubCard extends Button:
+	var heading:="";var figure:="";var detail:="";var soon:=false
+	func _init() -> void:
+		custom_minimum_size=Vector2(0,150);size_flags_horizontal=SIZE_EXPAND_FILL
+		clip_contents=true
+	func _ready() -> void:
+		disabled=soon
+		if soon:mouse_default_cursor_shape=CURSOR_ARROW
+	func _draw() -> void:
+		var lean:=size.y*Tokens.SLANT*.5;var x:=lean+16;var w:=size.x-lean*2-80
+		var ink:=Tokens.MUTED if soon else Tokens.INK
+		draw_string(Tokens.italic_font(),Vector2(x,38),heading.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,w,24,Tokens.FIGHT_RED if not soon and not (is_hovered() or button_pressed) else ink)
+		var fs:=44
+		while fs>22 and Tokens.italic_font().get_string_size(figure,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x>w:fs-=2
+		draw_string(Tokens.italic_font(),Vector2(x-6,48+fs),figure,HORIZONTAL_ALIGNMENT_LEFT,w,fs,ink)
+		draw_string(Tokens.BODY_FONT,Vector2(x-12,size.y-18),detail,HORIZONTAL_ALIGNMENT_LEFT,w+40,17,Tokens.INK if is_hovered() else Tokens.MUTED)
+		if not soon:draw_string(Tokens.italic_font(),Vector2(size.x-lean-44,size.y*.5+18),"›",HORIZONTAL_ALIGNMENT_LEFT,-1,56,ink)
+
+
+static func hub_card(heading: String, figure: String, detail: String, soon: bool=false) -> HubCard:
+	var c:=HubCard.new();c.heading=heading;c.figure=figure;c.detail=detail;c.soon=soon;return c
+
+
 static func tile(label: String, value: String, note: String="", accent: bool=false) -> Tile:
 	var t:=Tile.new();t.label=label;t.value=value;t.note=note;t.accent=accent;return t
 

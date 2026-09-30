@@ -9,6 +9,12 @@ signal navigate(tab: String, payload: Dictionary)
 var body: VBoxContainer
 ## Seções recolhidas pelo jogador; sobrevivem ao refresh.
 var collapsed: Dictionary = {}
+## Seção para onde rolar no próximo refresh (pedido vindo de outra aba ou do hub).
+var focus_section:=""
+var _scroll: ScrollContainer
+var _focus_node: Control
+## Rolagem a restaurar no próximo refresh (histórico do Voltar).
+var pending_scroll:=-1
 ## Nome da aba, já exibido na placa do cabeçalho.
 var tab_label:=""
 var feedback:=""
@@ -19,6 +25,7 @@ func _init() -> void:
 	for side in ["left", "right", "top", "bottom"]:
 		add_theme_constant_override("margin_" + side, Tokens.SPACE_M)
 	var scroll := ScrollContainer.new()
+	_scroll = scroll
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
 	body = VBoxContainer.new()
@@ -47,6 +54,20 @@ func refresh() -> void:
 	if title().to_upper()!=tab_label.to_upper():add_heading(title())
 	if not feedback.is_empty():add_text(feedback,Tokens.MUTED)
 	build()
+	if _focus_node or pending_scroll>=0:_restore_scroll.call_deferred(_focus_node,pending_scroll)
+	focus_section="";_focus_node=null;pending_scroll=-1
+
+
+func _restore_scroll(node: Control, value: int) -> void:
+	await get_tree().process_frame
+	if is_instance_valid(node):_scroll.scroll_vertical=int(node.position.y)
+	elif value>=0:_scroll.scroll_vertical=value
+
+
+## Estado para o botão Voltar: o que `receive` precisa para reabrir esta tela
+## como estava. Subclasses somam seus campos (atleta aberto, evento, modo).
+func snapshot() -> Dictionary:
+	return {"scroll":_scroll.scroll_vertical}
 
 
 ## Cabeçalho de seção em faixa inclinada com entalhe vermelho (Undisputed 3).
@@ -79,6 +100,7 @@ func add_section(text: String, open_by_default: bool=true) -> bool:
 	button.add_theme_color_override("font_hover_color",Tokens.INK)
 	button.pressed.connect(func():collapsed[key]=is_open;refresh())
 	body.add_child(button)
+	if text==focus_section:_focus_node=button
 	return is_open
 
 
@@ -104,6 +126,19 @@ func add_segments(options: Array, selected: String, on_pick: Callable) -> void:
 		b.add_theme_font_size_override("font_size",Tokens.FONT_SMALL-2)
 		b.pressed.connect(func():on_pick.call(option.id))
 		row.add_child(b)
+	body.add_child(row)
+
+
+## Dois botões lado a lado: um confronto com cada atleta tocável.
+func add_pair(left: String, on_left: Callable, right: String, on_right: Callable) -> void:
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",Tokens.SPACE_XS)
+	for side in [[left,on_left,Tokens.FIGHT_RED],[right,on_right,Tokens.CORNER_BLUE]]:
+		var b:=Button.new();b.text=str(side[0]).to_upper();b.size_flags_horizontal=SIZE_EXPAND_FILL
+		b.custom_minimum_size.y=Tokens.TOUCH_MIN;b.clip_text=true;b.alignment=HORIZONTAL_ALIGNMENT_LEFT
+		b.add_theme_font_size_override("font_size",Tokens.FONT_SMALL)
+		var box:=Tokens.slanted_box(Color(Tokens.SURFACE,.94));box.border_width_left=6;box.border_color=side[2]
+		b.add_theme_stylebox_override("normal",box)
+		b.pressed.connect(side[1]);row.add_child(b)
 	body.add_child(row)
 
 

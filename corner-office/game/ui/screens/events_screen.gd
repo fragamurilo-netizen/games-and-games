@@ -8,8 +8,12 @@ var quote: Dictionary={}
 var creating:=false
 func title() -> String:return "Eventos"
 func receive(payload: Dictionary) -> void:
+	if payload.get("reset",false):creating=false;quote={}
 	if payload.has("event_id"):selected_event=str(payload.event_id);creating=false
 	if payload.get("create",false):creating=true
+	if payload.has("red"):red_id=str(payload.red);blue_id=str(payload.get("blue",""));quote={}
+func snapshot() -> Dictionary:
+	var s:=super.snapshot();s.merge({"event_id":selected_event,"red":red_id,"blue":blue_id});return s
 func build() -> void:
 	var w:=Game.world
 	var options: Array=[]
@@ -34,10 +38,10 @@ func build() -> void:
 	for i in ev.fight_ids.size():
 		var f: Fight=w.fights[ev.fight_ids[i]]
 		var a: Fighter=w.fighters[f.fighter_a_id];var b: Fighter=w.fighters[f.fighter_b_id]
-		add_text("%02d  %s × %s"%[i+1,a.display_name(),b.display_name()])
-		add_text("%s · %s × %s"%[CareerText.division(f.division),a.record_string(),b.record_string()],Tokens.MUTED)
+		add_text("%02d  ·  %s · %s × %s"%[i+1,CareerText.division(f.division),a.record_string(),b.record_string()],Tokens.MUTED)
+		add_pair(a.display_name(),func():navigate.emit("fighters",{"fighter_id":a.id}),b.display_name(),func():navigate.emit("fighters",{"fighter_id":b.id}))
 		if f.status=="completed":
-			add_text("%s · %s · R%d %d:%02d"%[w.fighters[f.winner_id].display_name() if not f.winner_id.is_empty() else "Empate",f.method,f.end_round,f.end_time_s/60,f.end_time_s%60])
+			add_text("%s · %s · R%d %d:%02d"%[w.fighters[f.winner_id].display_name() if not f.winner_id.is_empty() else "Empate",CareerStats.METHOD_LABELS.get(f.method,f.method),f.end_round,f.end_time_s/60,f.end_time_s%60])
 			add_button("Assistir à luta",func():_watch(f))
 		elif ev.status=="planned":add_button("Retirar confronto",func():await run_action("remove_bout",{"fight_id":f.id});quote={};refresh())
 	if ev.status=="postponed" or (ev.status=="planned" and GameDate.days_between(w.date,ev.date)<1):

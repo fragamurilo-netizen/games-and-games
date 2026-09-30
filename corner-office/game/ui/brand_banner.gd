@@ -6,6 +6,8 @@ extends Control
 var headline:="CORNER OFFICE"
 var subtitle:="MMA PROMOTER SIMULATOR"
 var show_art:=false
+## Largura livre à direita (botão Voltar sobreposto).
+var right_reserve:=0
 var art: Texture2D=preload("res://assets/brand/corner-office-menu.png")
 func _init() -> void:
 	mouse_filter=MOUSE_FILTER_IGNORE
@@ -37,7 +39,8 @@ func _draw() -> void:
 	var sub_x:=plate_w+lean+30
 	var sub_w:=Tokens.BODY_FONT.get_string_size(subtitle.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,15).x
 	if size.x-sub_x-12>=sub_w or not show_art:
-		draw_string(Tokens.BODY_FONT,Vector2(sub_x,y+h*.5+16),subtitle.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,size.x-sub_x-12,15,Tokens.MUTED)
+		var room:=size.x-sub_x-12-right_reserve
+		if room>60:draw_string(Tokens.BODY_FONT,Vector2(sub_x,y+h*.5+16),subtitle.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,room,15,Tokens.MUTED)
 	else:
 		draw_string(Tokens.BODY_FONT,Vector2(8,y-12),subtitle.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,size.x-16,15,Tokens.INK)
 	draw_line(Vector2(0,y+h+1),Vector2(size.x,y+h+1),Tokens.STEEL,2,true)

@@ -21,7 +21,7 @@ func build() -> void:
 		var top:=1.0
 		for ev: FightEvent in events:top=maxf(top,float(ev.actual.revenue))
 		for ev: FightEvent in events.slice(0,8):
-			add_text("%s · %s"%[ev.name,GameDate.format(ev.date)])
+			add_button("%s · %s"%[ev.name,GameDate.format(ev.date)],func():navigate.emit("events",{"event_id":ev.id}))
 			add_bar("Receita",float(ev.actual.revenue),top,_short(int(ev.actual.revenue)),Tokens.INK)
 			add_bar("Custos",float(ev.actual.costs),top,_short(int(ev.actual.costs)),Tokens.STEEL)
 			add_bar("Resultado",absf(float(ev.actual.margin)),top,_short(int(ev.actual.margin)),Tokens.FIGHT_RED if int(ev.actual.margin)<0 else Tokens.INK)

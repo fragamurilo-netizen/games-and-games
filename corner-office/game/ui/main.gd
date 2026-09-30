@@ -24,6 +24,9 @@ var _current := ""
 var _stage: VBoxContainer
 var _header: BrandBanner
 var _safe: MarginContainer
+var _history: Array = []
+var _back: Button
+var _swipe_from := Vector2.INF
 
 
 func _ready() -> void:
@@ -53,6 +56,14 @@ func _ready() -> void:
 	_safe=MarginContainer.new();_safe.set_anchors_and_offsets_preset(PRESET_FULL_RECT);add_child(_safe);_safe.add_child(_stage)
 	_header=BrandBanner.new();_header.custom_minimum_size.y=78
 	_stage.add_child(_header)
+	# Voltar sempre à mão no cabeçalho, como o "B VOLTAR" dos menus de console.
+	_back=Button.new();_back.text="‹ VOLTAR";_back.visible=false
+	_back.custom_minimum_size=Vector2(150,Tokens.TOUCH_MIN-20)
+	_back.add_theme_font_size_override("font_size",Tokens.FONT_SMALL)
+	_back.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+	_back.offset_left=-162;_back.offset_right=-8;_back.offset_top=-26;_back.offset_bottom=26
+	_back.pressed.connect(go_back)
+	_header.add_child(_back)
 	if not Game.has_world():
 		if Game.load_game("autosave")!=OK:
 			Game.new_game(Time.get_ticks_usec())
@@ -81,12 +92,58 @@ func show_tab(id: String) -> void:
 		_buttons[tab_id].button_pressed = tab_id == id
 
 
+## Toda troca de tela passa por aqui e fica no histórico do Voltar, para que
+## hub, abas e atalhos entre telas funcionem como uma central só.
 func _navigate(id: String, payload: Dictionary) -> void:
-	_screens[id].receive(payload)
+	if _current != "":
+		_history.append({"tab": _current, "state": _screens[_current].snapshot()})
+		if _history.size() > 40:
+			_history.pop_front()
+	_open(id, payload)
+
+
+func _open(id: String, payload: Dictionary) -> void:
+	var screen: Screen = _screens[id]
+	screen.receive(payload)
+	screen.pending_scroll = int(payload.get("scroll", -1))
 	if _current == id:
-		_screens[id].refresh()
+		screen.refresh()
+		for tab_id in _buttons:
+			_buttons[tab_id].button_pressed = tab_id == id
 	else:
 		show_tab(id)
+	_refresh_header()
+
+
+## Tocar na aba já aberta volta à raiz dela (ex.: do perfil para a lista).
+func _tab_pressed(id: String) -> void:
+	_navigate(id, {"reset": true} if id == _current else {})
+
+
+## Volta um passo. Retorna false quando não há para onde voltar.
+func go_back() -> bool:
+	if _history.is_empty():
+		return false
+	var step: Dictionary = _history.pop_back()
+	_open(step.tab, step.state)
+	return true
+
+
+## Deslizar na horizontal troca de aba, na ordem da faixa.
+func _input(event: InputEvent) -> void:
+	if not visible or get_children().any(func(node): return node is GameMenu):
+		return
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_swipe_from = event.position
+		elif _swipe_from != Vector2.INF:
+			var delta: Vector2 = event.position - _swipe_from
+			_swipe_from = Vector2.INF
+			if absf(delta.x) > 180 and absf(delta.x) > absf(delta.y) * 2.5:
+				var ids: Array = TABS.map(func(t): return t.id)
+				var i: int = ids.find(_current) + (1 if delta.x < 0 else -1)
+				if i >= 0 and i < ids.size():
+					_navigate(ids[i], {})
 
 
 func _is_landscape() -> bool:
@@ -125,7 +182,7 @@ func _rebuild_layout() -> void:
 			box.content_margin_left = Tokens.SPACE_S + Tokens.SPACE_XS
 			box.content_margin_right = Tokens.SPACE_S + Tokens.SPACE_XS
 			b.add_theme_stylebox_override(state, box)
-		b.pressed.connect(show_tab.bind(tab.id))
+		b.pressed.connect(_tab_pressed.bind(tab.id))
 		b.button_pressed = tab.id == _current
 		_nav.add_child(b)
 		_buttons[tab.id] = b
@@ -155,10 +212,14 @@ func _notification(what: int) -> void:
 	if what==NOTIFICATION_WM_GO_BACK_REQUEST:
 		if get_tree().root.get_children().any(func(node):return node is FightReplayView):return
 		get_viewport().set_input_as_handled()
-		if not get_children().any(func(node):return node is GameMenu):_open_menu()
+		if get_children().any(func(node):return node is GameMenu):return
+		if not go_back():_open_menu()
 
 
 func _refresh_header() -> void:
+	if _back:
+		_back.visible=not _history.is_empty()
+		_header.right_reserve=170 if _back.visible else 0
 	if _header and Game.has_world():
 		if _current != "":_header.headline=_screens[_current].tab_label
 		_header.subtitle=Game.world.player_org().short_name+" / "+GameDate.format(Game.world.date)+" / CARREIRA REGIONAL"
