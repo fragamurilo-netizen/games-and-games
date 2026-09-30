@@ -1,3 +1,22 @@
+# Continuidade — foco em grande liga e atletas realistas (Claude, 30/09/2026)
+
+**Decisão do dono do projeto** (Game Design Bible §0): o jogo é um simulador do universo de uma grande liga no molde do UFC (fictícia). A liga é a nossa; as outras são pano de fundo. O núcleo é descobrir atletas, acompanhar carreiras e assistir às lutas.
+
+Entregue na branch `claude/determined-clarke-dua3k2` (com `dreamy-carson` mesclada):
+
+- Modo padrão `flagship` ("A Grande Liga"): Summit Fighting Championship (SFC), com cerca de 600 atletas nas 12 divisões e campeões; as 7 organizações viram ligas nacionais; circuito regional com 900 atletas (prospects e journeymen).
+- Geração realista (`simulation/careers/`): país → grupo étnico → nome e rosto coerentes; altura, envergadura e peso por divisão; base marcial por país; modelo latente (pico, prime por divisão/estilo, desenvolvimento e declínio); cartel vindo de carreira pregressa simulada, com KO/SUB/DEC, rating público, sequência e últimas 10 lutas.
+- Agentes, BATNA e memória de negociação (`simulation/contracts/agencies.gd`).
+- Relatório de realismo: `godot --headless --path game -s res://tools/athlete_report.gd -- 2027`.
+- CI: pushes em `claude/*` compilam o APK e o commitam em `releases/corner-office-<versão>-debug.apk` (0.3.0 nesta rodada).
+
+Problemas conhecidos nesta build de teste:
+
+- Save do modo liga está grande (~13 MB); autosave/carregamento podem ficar lentos no aparelho. Próximo passo: enxugar (histórico de ranking guarda placar de todos os atletas; `attr_noise` e resultados recentes por atleta).
+- Telas nativas listam o elenco inteiro (600+ botões) — precisam de filtro por divisão, busca e paginação.
+- Card da liga exige 10–14 lutas; alguns textos da UI ainda falam em "seis lutas".
+- Ainda não existe evolução/declínio mensal, aposentadoria, surgimento de novos atletas, lutas do circuito durante o save, ranking top 15 por rating/inatividade nem matchmaker automático da liga (tarefas seguintes).
+
 # Continuidade — carreira regional, Android e transmissão original
 
 Branch compartilhada: `claude/dreamy-carson-628oai` em `fragamurilo-netizen/games-and-games`.
