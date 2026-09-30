@@ -70,6 +70,11 @@ GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD='senha' \
 godot --headless --export-release "Android" build/MaisUmaRodada-0.4.0.aab
 ```
 
+Se o Gradle parar com **429 Too Many Requests** do Maven Central, use o espelho do Google: crie
+`~/.gradle/init.d/mirror.gradle` que acrescente
+`https://maven-central.storage-download.googleapis.com/maven2/` aos repositórios de
+`pluginManagement` e de todos os projetos. O AAB 1.0.0 (`builds/MaisUmaRodada-1.0.0-play.aab`) saiu assim.
+
 O preset "Android" gera AAB só com ARM64 (menos de 30 MB; celulares só de 32 bits ficam de fora) e alvo no
 SDK 36. O preset "Android arm64" gera um APK para instalar direto no celular; exporte-o com `--export-debug`
 para jogar sem trava.
