@@ -46,7 +46,7 @@ jobs:
           git diff --exit-code -- corner-office/game/content
 
   android:
-    needs: tests
+    # needs: tests  (APK de teste rápido: não espera os testes)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
