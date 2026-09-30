@@ -10,6 +10,7 @@ func _ready() -> void:
 	_buttons=VBoxContainer.new();_buttons.add_theme_constant_override("separation",12);add_child(_buttons)
 	_add("CONTINUAR CARREIRA",func():continued.emit();queue_free())
 	_add("NOVA CARREIRA",func():_confirm.popup_centered(Vector2i(600,330)))
+	_add("UNIVERSO",func():UniverseView.open_over(get_tree()))
 	_add("ASSISTIR DEMONSTRAÇÃO",func():
 		var viewer:=FightReplayView.new();viewer.set_anchors_and_offsets_preset(PRESET_FULL_RECT);get_tree().root.add_child(viewer)
 		viewer.open(ContentDB.load_json("replays/sim_women.json")))
@@ -25,8 +26,8 @@ func _add(text: String,action: Callable) -> void:
 func _layout() -> void:
 	if _buttons==null:return
 	var portrait:=size.y>size.x
-	_buttons.position=Vector2(32,size.y-345 if portrait else size.y*.47)
-	_buttons.size=Vector2(size.x-64 if portrait else minf(520,size.x*.45),290)
+	_buttons.position=Vector2(32,size.y-450 if portrait else size.y*.38)
+	_buttons.size=Vector2(size.x-64 if portrait else minf(520,size.x*.45),400)
 	queue_redraw()
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO,size),Tokens.CANVAS)
