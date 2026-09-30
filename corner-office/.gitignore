@@ -25,3 +25,5 @@ __pycache__/
 android-studio-plugin/.gradle/
 android-studio-plugin/**/build/
 game/addons/corner_office_studio/bin/
+game/tools/_*.gd
+game/tools/_*.gd.uid

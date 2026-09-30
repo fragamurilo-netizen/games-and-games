@@ -19,3 +19,9 @@ signal month_advanced(date: Dictionary)
 signal fighter_retired(fighter_id: String)
 signal organization_tier_changed(org_id: String, tier: String)
 signal season_closed(season: int)
+
+# Sede (simulation/office): a UI reage; nenhum sistema chama a UI direto.
+signal dilemma_created(dilemma_id: String)
+signal office_changed
+## Microfeedback: tone good | bad | neutral | money.
+signal toast(text: String, tone: String)

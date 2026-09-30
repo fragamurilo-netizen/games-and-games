@@ -23,6 +23,29 @@ const CHAMP_GOLD := Color("#B88B46")
 ## Corner azul do fight card; só aparece ao lado do vermelho (tale of the tape).
 const CORNER_BLUE := Color("#3E6FA8")
 
+## Semânticas de estado (barras, badges, toasts). Vermelho segue sendo ação/perigo.
+const GOOD := Color("#4E9A6B")
+const WARN := Color("#D08A2E")
+const INFO := Color("#3E6FA8")
+
+## Sede 2D (ui/office). Paleta própria, fosca, sem neon: piso, paredes, móveis.
+const OFFICE_WALL := Color("#232A31")
+const OFFICE_WALL_TOP := Color("#39434D")
+const OFFICE_CARPET := Color("#2B3138")
+const OFFICE_CARPET_LINE := Color("#323941")
+const OFFICE_WOOD := Color("#4A3A2C")
+const OFFICE_WOOD_LINE := Color("#54423233")
+const OFFICE_TILE := Color("#3A4148")
+const OFFICE_TILE_LINE := Color("#434B53")
+const OFFICE_DESK := Color("#5E4B3A")
+const OFFICE_DESK_TOP := Color("#7A624B")
+const OFFICE_METAL := Color("#8C969F")
+const OFFICE_SCREEN := Color("#9EC3D9")
+const OFFICE_PLANT := Color("#3F7A4E")
+const OFFICE_SHADOW := Color(0, 0, 0, 0.28)
+const OFFICE_LOCKED := Color("#15191D")
+const OFFICE_GLASS := Color("#9EC3D922")
+
 const SPACE_XS := 4
 const SPACE_S := 8
 const SPACE_M := 16

@@ -25,3 +25,22 @@ static func days_between(a: Dictionary, b: Dictionary) -> int:
 
 static func format(d: Dictionary) -> String:
 	return "%02d/%02d/%04d" % [d.day, d.month, d.year]
+
+
+## 0 = domingo … 6 = sábado.
+static func weekday(d: Dictionary) -> int:
+	return int(Time.get_datetime_dict_from_unix_time(to_unix(d)).weekday)
+
+
+static func is_weekend(d: Dictionary) -> bool:
+	var w := weekday(d)
+	return w == 0 or w == 6
+
+
+const WEEKDAYS := ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"]
+const MONTHS := ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
+
+## "qua, 14 abr 2027" — barra superior e calendário.
+static func long_format(d: Dictionary) -> String:
+	return "%s, %d %s %d" % [WEEKDAYS[weekday(d)], int(d.day), MONTHS[int(d.month) - 1], int(d.year)]

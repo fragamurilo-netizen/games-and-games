@@ -1,0 +1,1581 @@
+{
+  "_doc": "Decisões da sede (Game Design Bible §19 Sistema de eventos). Cada evento só nasce quando a pré-condição (`requires`, avaliada em Dilemmas) é fato no mundo. Operações de efeito: stat, salary, cash, reputation, relation, vacation, leave, deal, followup, roll, promote, candidates, release_fighter, promise_fighter, text. `who`: staff (principal), other (segunda pessoa), team (toda a equipe). Valores entre chaves vêm do contexto resolvido na criação.",
+  "max_open": 4,
+  "events": [
+    {
+      "id": "raise_request",
+      "category": "rh",
+      "priority": "high",
+      "requires": "underpaid_ambitious",
+      "chance": 0.08,
+      "cooldown_days": 45,
+      "expires_days": 10,
+      "title": "{staff} pede aumento",
+      "body": "{staff} ({role}) diz que o mercado paga {market}/mês por alguém do seu nível. Hoje recebe {salary}. Ambição alta, e já ouviu sondagens de fora.",
+      "options": [
+        {
+          "id": "give",
+          "label": "Dar o aumento",
+          "hint": "Salário ao nível de mercado.",
+          "effects": [
+            {
+              "op": "salary",
+              "who": "staff",
+              "to_ctx": "market_value"
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 14
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "loyalty",
+              "delta": 6
+            },
+            {
+              "op": "text",
+              "value": "{staff} saiu satisfeito."
+            }
+          ]
+        },
+        {
+          "id": "negotiate",
+          "label": "Negociar meio-termo",
+          "hint": "Depende de lealdade e confiança.",
+          "effects": [
+            {
+              "op": "roll",
+              "base": 0.45,
+              "stats": {
+                "loyalty": 0.005,
+                "trust": 0.004,
+                "ambition": -0.004
+              },
+              "success": [
+                {
+                  "op": "salary",
+                  "who": "staff",
+                  "pct": 0.06
+                },
+                {
+                  "op": "stat",
+                  "who": "staff",
+                  "field": "morale",
+                  "delta": 6
+                },
+                {
+                  "op": "text",
+                  "value": "{staff} aceitou o meio-termo."
+                }
+              ],
+              "fail": [
+                {
+                  "op": "stat",
+                  "who": "staff",
+                  "field": "morale",
+                  "delta": -10
+                },
+                {
+                  "op": "stat",
+                  "who": "staff",
+                  "field": "trust",
+                  "delta": -8
+                },
+                {
+                  "op": "followup",
+                  "event": "poach_offer",
+                  "days": [
+                    8,
+                    20
+                  ],
+                  "chance": 0.7
+                },
+                {
+                  "op": "text",
+                  "value": "{staff} não gostou da contraproposta e ficou de ouvir o mercado."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "bonus",
+          "label": "Bônus único",
+          "hint": "Um salário agora; o assunto volta depois.",
+          "effects": [
+            {
+              "op": "cash",
+              "amount_ctx": "salary_value",
+              "sign": -1,
+              "label": "Bônus: {staff}"
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 8
+            },
+            {
+              "op": "followup",
+              "event": "raise_again",
+              "days": [
+                50,
+                80
+              ],
+              "chance_stat": {
+                "field": "ambition",
+                "scale": 0.009
+              }
+            },
+            {
+              "op": "text",
+              "value": "{staff} aceitou o bônus, por enquanto."
+            }
+          ]
+        },
+        {
+          "id": "promote",
+          "label": "Oferecer promoção",
+          "hint": "Só funciona se tiver nível para o cargo acima.",
+          "effects": [
+            {
+              "op": "promote",
+              "who": "staff"
+            }
+          ]
+        },
+        {
+          "id": "refuse",
+          "label": "Recusar",
+          "hint": "Economiza agora; ambição alta pode virar saída.",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": -16
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "trust",
+              "delta": -10
+            },
+            {
+              "op": "followup",
+              "event": "poach_offer",
+              "days": [
+                10,
+                30
+              ],
+              "chance_stat": {
+                "field": "ambition",
+                "scale": 0.011
+              }
+            },
+            {
+              "op": "text",
+              "value": "{staff} ouviu o não em silêncio."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "raise_again",
+      "category": "rh",
+      "priority": "high",
+      "requires": "followup_only",
+      "expires_days": 8,
+      "title": "{staff} volta a cobrar o aumento",
+      "body": "O bônus acabou e o salário continua o mesmo. {staff} quer uma resposta definitiva.",
+      "options": [
+        {
+          "id": "give",
+          "label": "Dar o aumento",
+          "effects": [
+            {
+              "op": "salary",
+              "who": "staff",
+              "pct": 0.12
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 12
+            },
+            {
+              "op": "text",
+              "value": "{staff} ficou."
+            }
+          ]
+        },
+        {
+          "id": "refuse",
+          "label": "Recusar de novo",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": -18
+            },
+            {
+              "op": "followup",
+              "event": "poach_offer",
+              "days": [
+                5,
+                14
+              ],
+              "chance": 0.85
+            },
+            {
+              "op": "text",
+              "value": "{staff} começou a atender ligações de fora."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poach_offer",
+      "category": "concorrencia",
+      "priority": "critical",
+      "requires": "poach_target",
+      "chance": 0.03,
+      "cooldown_days": 40,
+      "expires_days": 5,
+      "title": "{rival} quer levar {staff}",
+      "body": "{rival} ofereceu {offer}/mês para {staff} ({role}). Hoje ganha {salary}. A resposta sai esta semana.",
+      "options": [
+        {
+          "id": "match",
+          "label": "Cobrir a oferta",
+          "hint": "Paga o que a rival paga.",
+          "effects": [
+            {
+              "op": "salary",
+              "who": "staff",
+              "to_ctx": "offer_value"
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "loyalty",
+              "delta": 10
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 10
+            },
+            {
+              "op": "text",
+              "value": "{staff} ficou — e agora sabe quanto vale."
+            }
+          ]
+        },
+        {
+          "id": "appeal",
+          "label": "Apelar para o projeto",
+          "hint": "Lealdade, confiança e moral pesam.",
+          "effects": [
+            {
+              "op": "roll",
+              "base": 0.25,
+              "stats": {
+                "loyalty": 0.006,
+                "trust": 0.006,
+                "morale": 0.004,
+                "ambition": -0.004
+              },
+              "success": [
+                {
+                  "op": "stat",
+                  "who": "staff",
+                  "field": "loyalty",
+                  "delta": 12
+                },
+                {
+                  "op": "text",
+                  "value": "{staff} recusou {rival}. Ficou pelo projeto."
+                }
+              ],
+              "fail": [
+                {
+                  "op": "leave",
+                  "who": "staff",
+                  "destination_ctx": "rival_id"
+                },
+                {
+                  "op": "text",
+                  "value": "{staff} aceitou a proposta de {rival}."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "release",
+          "label": "Deixar ir",
+          "default": true,
+          "effects": [
+            {
+              "op": "leave",
+              "who": "staff",
+              "destination_ctx": "rival_id"
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": -3
+            },
+            {
+              "op": "text",
+              "value": "{staff} agora trabalha para {rival}."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "burnout",
+      "category": "funcionarios",
+      "priority": "high",
+      "requires": "burning_out",
+      "chance": 0.25,
+      "cooldown_days": 20,
+      "expires_days": 6,
+      "title": "{staff} está no limite",
+      "body": "Estresse no vermelho, noites em claro. {staff} ainda não pediu nada, mas o setor inteiro percebeu.",
+      "options": [
+        {
+          "id": "rest",
+          "label": "Dar 5 dias de folga",
+          "hint": "O setor fica desfalcado nesses dias.",
+          "effects": [
+            {
+              "op": "vacation",
+              "who": "staff",
+              "days": 5
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "trust",
+              "delta": 8
+            },
+            {
+              "op": "text",
+              "value": "{staff} vai descansar."
+            }
+          ]
+        },
+        {
+          "id": "split",
+          "label": "Dividir tarefas com {other}",
+          "hint": "Alivia agora, pesa em {other}.",
+          "requires_other": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "stress",
+              "delta": -22
+            },
+            {
+              "op": "stat",
+              "who": "other",
+              "field": "stress",
+              "delta": 16
+            },
+            {
+              "op": "relation",
+              "delta": 8
+            },
+            {
+              "op": "text",
+              "value": "{other} assumiu parte do trabalho de {staff}."
+            }
+          ]
+        },
+        {
+          "id": "ignore",
+          "label": "Seguir em frente",
+          "default": true,
+          "effects": [
+            {
+              "op": "followup",
+              "event": "collapse",
+              "days": [
+                3,
+                10
+              ],
+              "chance": 0.6
+            },
+            {
+              "op": "text",
+              "value": "Ninguém tocou no assunto."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "collapse",
+      "category": "crise",
+      "priority": "critical",
+      "requires": "followup_only",
+      "expires_days": 3,
+      "title": "{staff} foi afastado por esgotamento",
+      "body": "Atestado de 10 dias. O setor de {role} fica descoberto no pior momento.",
+      "options": [
+        {
+          "id": "support",
+          "label": "Dar todo o apoio",
+          "effects": [
+            {
+              "op": "vacation",
+              "who": "staff",
+              "days": 10
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "trust",
+              "delta": 10
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": 3
+            },
+            {
+              "op": "text",
+              "value": "A equipe viu a presidência apoiar {staff}."
+            }
+          ]
+        },
+        {
+          "id": "cold",
+          "label": "Cobrar a volta rápida",
+          "default": true,
+          "effects": [
+            {
+              "op": "vacation",
+              "who": "staff",
+              "days": 10
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "trust",
+              "delta": -15
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": -5
+            },
+            {
+              "op": "text",
+              "value": "O clima na sede pesou."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office_conflict",
+      "category": "relacionamentos",
+      "priority": "medium",
+      "requires": "rival_pair",
+      "chance": 0.12,
+      "cooldown_days": 30,
+      "expires_days": 10,
+      "title": "{staff} e {other} em pé de guerra",
+      "body": "Discussão alta na frente de todo mundo. Os dois não trocam mais informação — e o trabalho sente.",
+      "options": [
+        {
+          "id": "mediate",
+          "label": "Mediar pessoalmente",
+          "hint": "Sua confiança com os dois pesa.",
+          "effects": [
+            {
+              "op": "roll",
+              "base": 0.4,
+              "stats": {
+                "trust": 0.006
+              },
+              "success": [
+                {
+                  "op": "relation",
+                  "delta": 35
+                },
+                {
+                  "op": "text",
+                  "value": "Conversa difícil, mas os dois voltaram a trabalhar juntos."
+                }
+              ],
+              "fail": [
+                {
+                  "op": "relation",
+                  "delta": -10
+                },
+                {
+                  "op": "stat",
+                  "who": "staff",
+                  "field": "trust",
+                  "delta": -5
+                },
+                {
+                  "op": "text",
+                  "value": "A mediação não colou."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "warn",
+          "label": "Advertir os dois",
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": -6
+            },
+            {
+              "op": "stat",
+              "who": "other",
+              "field": "morale",
+              "delta": -6
+            },
+            {
+              "op": "relation",
+              "delta": 12
+            },
+            {
+              "op": "text",
+              "value": "Advertência formal. Clima frio, mas civilizado."
+            }
+          ]
+        },
+        {
+          "id": "ignore",
+          "label": "Deixar se resolverem",
+          "default": true,
+          "effects": [
+            {
+              "op": "followup",
+              "event": "conflict_blowup",
+              "days": [
+                7,
+                18
+              ],
+              "chance": 0.55
+            },
+            {
+              "op": "text",
+              "value": "A briga ficou para eles."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conflict_blowup",
+      "category": "crise",
+      "priority": "critical",
+      "requires": "followup_only",
+      "expires_days": 4,
+      "title": "{other} ameaça sair por causa de {staff}",
+      "body": "Depois de mais uma briga, {other} disse que é ele ou {staff}.",
+      "options": [
+        {
+          "id": "keep_staff",
+          "label": "Ficar com {staff}",
+          "effects": [
+            {
+              "op": "leave",
+              "who": "other"
+            },
+            {
+              "op": "text",
+              "value": "{other} pediu as contas."
+            }
+          ]
+        },
+        {
+          "id": "keep_other",
+          "label": "Ficar com {other}",
+          "effects": [
+            {
+              "op": "leave",
+              "who": "staff"
+            },
+            {
+              "op": "text",
+              "value": "{staff} deixou a empresa."
+            }
+          ]
+        },
+        {
+          "id": "both",
+          "label": "Segurar os dois",
+          "hint": "Aumento para ambos acalma, por um tempo.",
+          "default": true,
+          "effects": [
+            {
+              "op": "salary",
+              "who": "staff",
+              "pct": 0.05
+            },
+            {
+              "op": "salary",
+              "who": "other",
+              "pct": 0.05
+            },
+            {
+              "op": "relation",
+              "delta": 20
+            },
+            {
+              "op": "text",
+              "value": "Trégua comprada a preço de aumento."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mentorship",
+      "category": "relacionamentos",
+      "priority": "low",
+      "requires": "mentor_pair",
+      "chance": 0.05,
+      "cooldown_days": 60,
+      "expires_days": 14,
+      "title": "{staff} quer apadrinhar {other}",
+      "body": "{staff} vê potencial em {other} e pede tempo na agenda para ensinar o ofício.",
+      "options": [
+        {
+          "id": "approve",
+          "label": "Aprovar a mentoria",
+          "effects": [
+            {
+              "op": "relation",
+              "delta": 30
+            },
+            {
+              "op": "stat",
+              "who": "other",
+              "field": "potential",
+              "delta": 4
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "stress",
+              "delta": 6
+            },
+            {
+              "op": "text",
+              "value": "{other} ganhou um padrinho na casa."
+            }
+          ]
+        },
+        {
+          "id": "decline",
+          "label": "Agora não",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": -3
+            },
+            {
+              "op": "text",
+              "value": "Fica para outra hora."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sponsor_offer",
+      "category": "clientes",
+      "priority": "medium",
+      "requires": "announced_event_soon",
+      "chance": 0.12,
+      "cooldown_days": 25,
+      "expires_days": 7,
+      "title": "{brand} quer patrocinar {event}",
+      "body": "A {brand} oferece {amount} para estampar a marca no octógono de {event}. Querem resposta em uma semana.",
+      "options": [
+        {
+          "id": "accept",
+          "label": "Fechar por {amount}",
+          "effects": [
+            {
+              "op": "cash",
+              "amount_ctx": "amount_value",
+              "sign": 1,
+              "label": "Patrocínio: {brand}"
+            },
+            {
+              "op": "news",
+              "topic": "sponsor_signed"
+            },
+            {
+              "op": "text",
+              "value": "{brand} estampa {event}."
+            }
+          ]
+        },
+        {
+          "id": "negotiate",
+          "label": "Pedir mais (marketing negocia)",
+          "hint": "Marketing e mídia fortes aumentam a chance.",
+          "effects": [
+            {
+              "op": "roll",
+              "base": 0.35,
+              "role_bonus": {
+                "marketing": 2.0,
+                "media": 1.5
+              },
+              "success": [
+                {
+                  "op": "cash",
+                  "amount_ctx": "amount_value",
+                  "sign": 1,
+                  "mult": 1.4,
+                  "label": "Patrocínio: {brand}"
+                },
+                {
+                  "op": "news",
+                  "topic": "sponsor_signed"
+                },
+                {
+                  "op": "text",
+                  "value": "{brand} subiu a oferta em 40%."
+                }
+              ],
+              "fail": [
+                {
+                  "op": "text",
+                  "value": "{brand} foi para outra promoção."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "decline",
+          "label": "Recusar",
+          "default": true,
+          "effects": [
+            {
+              "op": "text",
+              "value": "Sem patrocínio máster nesta noite."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "broadcaster_offer",
+      "category": "clientes",
+      "priority": "high",
+      "requires": "broadcaster_ready",
+      "chance": 0.04,
+      "cooldown_days": 120,
+      "expires_days": 10,
+      "title": "{brand} propõe acordo de transmissão",
+      "body": "A {brand} quer exclusividade dos seus cards pelos próximos 4 meses: +{pct}% na receita de mídia de cada noite.",
+      "options": [
+        {
+          "id": "accept",
+          "label": "Assinar",
+          "effects": [
+            {
+              "op": "deal",
+              "kind": "media",
+              "value_ctx": "pct_value",
+              "days": 120,
+              "name_ctx": "brand"
+            },
+            {
+              "op": "reputation",
+              "delta": 1
+            },
+            {
+              "op": "news",
+              "topic": "broadcaster_deal"
+            },
+            {
+              "op": "text",
+              "value": "Seus cards passam na {brand} até {until}."
+            }
+          ]
+        },
+        {
+          "id": "negotiate",
+          "label": "Negociar percentual",
+          "hint": "Mídia e marketing contam.",
+          "effects": [
+            {
+              "op": "roll",
+              "base": 0.3,
+              "role_bonus": {
+                "media": 2.0,
+                "marketing": 1.2
+              },
+              "success": [
+                {
+                  "op": "deal",
+                  "kind": "media",
+                  "value_ctx": "pct_value",
+                  "mult": 1.5,
+                  "days": 120,
+                  "name_ctx": "brand"
+                },
+                {
+                  "op": "news",
+                  "topic": "broadcaster_deal"
+                },
+                {
+                  "op": "text",
+                  "value": "{brand} aceitou pagar 50% a mais."
+                }
+              ],
+              "fail": [
+                {
+                  "op": "text",
+                  "value": "{brand} desistiu da conversa."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "decline",
+          "label": "Seguir independente",
+          "default": true,
+          "effects": [
+            {
+              "op": "text",
+              "value": "Sem acordo de transmissão."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fighter_inactive",
+      "category": "atletas",
+      "priority": "medium",
+      "requires": "inactive_fighter",
+      "chance": 0.06,
+      "cooldown_days": 30,
+      "expires_days": 10,
+      "title": "{fighter} cobra uma luta",
+      "body": "{fighter} está há {days} dias sem lutar. O empresário diz que ou vem luta, ou vem liberação.",
+      "options": [
+        {
+          "id": "promise",
+          "label": "Prometer luta em 60 dias",
+          "hint": "Promessa não cumprida volta pior.",
+          "effects": [
+            {
+              "op": "promise_fighter",
+              "days": 60
+            },
+            {
+              "op": "text",
+              "value": "Promessa feita: {fighter} luta até {until}."
+            }
+          ]
+        },
+        {
+          "id": "release",
+          "label": "Liberar o contrato",
+          "effects": [
+            {
+              "op": "release_fighter"
+            },
+            {
+              "op": "text",
+              "value": "{fighter} está livre no mercado."
+            }
+          ]
+        },
+        {
+          "id": "ignore",
+          "label": "Ignorar",
+          "default": true,
+          "effects": [
+            {
+              "op": "fighter_heat",
+              "delta": -3
+            },
+            {
+              "op": "text",
+              "value": "{fighter} reclamou nas redes."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "promise_broken",
+      "category": "atletas",
+      "priority": "high",
+      "requires": "followup_only",
+      "expires_days": 7,
+      "title": "{fighter} diz que a promessa foi quebrada",
+      "body": "Sessenta dias depois, nenhuma luta. {fighter} e o empresário exigem a liberação.",
+      "options": [
+        {
+          "id": "release",
+          "label": "Liberar",
+          "effects": [
+            {
+              "op": "release_fighter"
+            },
+            {
+              "op": "text",
+              "value": "{fighter} saiu magoado."
+            }
+          ]
+        },
+        {
+          "id": "hold",
+          "label": "Segurar pelo contrato",
+          "default": true,
+          "effects": [
+            {
+              "op": "fighter_heat",
+              "delta": -6
+            },
+            {
+              "op": "reputation",
+              "delta": -1
+            },
+            {
+              "op": "text",
+              "value": "A imprensa ouviu o lado de {fighter}."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "market_downturn",
+      "category": "mercado",
+      "priority": "medium",
+      "requires": "no_downturn",
+      "chance": 0.004,
+      "cooldown_days": 180,
+      "expires_days": 10,
+      "title": "Mercado de eventos em retração",
+      "body": "Venda de ingressos caiu em todo o circuito. Analistas falam em 2 meses de público menor.",
+      "options": [
+        {
+          "id": "cut",
+          "label": "Baixar preço de ingresso",
+          "hint": "Enche a arena, receita por ingresso menor.",
+          "effects": [
+            {
+              "op": "deal",
+              "kind": "ticket_price",
+              "value": -0.15,
+              "days": 60,
+              "name": "Ingresso popular"
+            },
+            {
+              "op": "text",
+              "value": "Ingressos 15% mais baratos por 60 dias."
+            }
+          ]
+        },
+        {
+          "id": "push",
+          "label": "Campanha de marketing (US$ 30 mil)",
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 30000,
+              "sign": -1,
+              "label": "Campanha anti-crise"
+            },
+            {
+              "op": "deal",
+              "kind": "attendance",
+              "value": -0.03,
+              "days": 60,
+              "name": "Retração amortecida"
+            },
+            {
+              "op": "text",
+              "value": "A campanha segurou quase todo o público."
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "label": "Esperar passar",
+          "default": true,
+          "effects": [
+            {
+              "op": "deal",
+              "kind": "attendance",
+              "value": -0.14,
+              "days": 60,
+              "name": "Retração do mercado"
+            },
+            {
+              "op": "text",
+              "value": "Público 14% menor nos próximos 60 dias."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "team_celebration",
+      "category": "funcionarios",
+      "priority": "low",
+      "requires": "profitable_night",
+      "chance": 0.7,
+      "cooldown_days": 20,
+      "expires_days": 5,
+      "title": "Equipe quer comemorar {event}",
+      "body": "{event} deu {margin} de lucro. A sede está elétrica.",
+      "options": [
+        {
+          "id": "party",
+          "label": "Festa na sede (US$ 8 mil)",
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 8000,
+              "sign": -1,
+              "label": "Festa pós-evento"
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": 8
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "stress",
+              "delta": -8
+            },
+            {
+              "op": "team_bond",
+              "delta": 6
+            },
+            {
+              "op": "text",
+              "value": "Noite longa. Segunda-feira todo mundo chegou sorrindo."
+            }
+          ]
+        },
+        {
+          "id": "bonus",
+          "label": "Bônus de 10% do salário",
+          "effects": [
+            {
+              "op": "cash",
+              "amount_ctx": "team_bonus",
+              "sign": -1,
+              "label": "Bônus pós-evento"
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "loyalty",
+              "delta": 5
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": 5
+            },
+            {
+              "op": "text",
+              "value": "Bônus pago. A equipe sentiu o reconhecimento."
+            }
+          ]
+        },
+        {
+          "id": "thanks",
+          "label": "Agradecer e seguir",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": 2
+            },
+            {
+              "op": "text",
+              "value": "Um obrigado sincero na reunião de segunda."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "standout_candidate",
+      "category": "oportunidade",
+      "priority": "low",
+      "requires": "standout_candidate",
+      "chance": 0.15,
+      "cooldown_days": 30,
+      "expires_days": 7,
+      "title": "{staff} está no mercado",
+      "body": "Currículo forte para {role}. Pede {asking}/mês e tem outra entrevista marcada.",
+      "options": [
+        {
+          "id": "hire",
+          "label": "Contratar agora por {asking}",
+          "effects": [
+            {
+              "op": "hire",
+              "who": "staff"
+            }
+          ]
+        },
+        {
+          "id": "interview",
+          "label": "Entrevistar antes",
+          "effects": [
+            {
+              "op": "interview",
+              "who": "staff"
+            },
+            {
+              "op": "text",
+              "value": "Entrevista marcada: veja {staff} em Equipe."
+            }
+          ]
+        },
+        {
+          "id": "pass",
+          "label": "Deixar passar",
+          "default": true,
+          "effects": [
+            {
+              "op": "text",
+              "value": "{staff} seguiu para outra entrevista."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cash_crunch",
+      "category": "financeiro",
+      "priority": "critical",
+      "requires": "cash_crunch",
+      "chance": 0.2,
+      "cooldown_days": 60,
+      "expires_days": 7,
+      "title": "Caixa não cobre duas folhas",
+      "body": "Com {cash} no caixa e folha de {payroll}/mês, a sede corre risco. O financeiro pede uma decisão.",
+      "options": [
+        {
+          "id": "loan",
+          "label": "Empréstimo de US$ 150 mil",
+          "hint": "Devolve US$ 175 mil em 90 dias.",
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 150000,
+              "sign": 1,
+              "label": "Empréstimo bancário"
+            },
+            {
+              "op": "followup",
+              "event": "loan_due",
+              "days": [
+                90,
+                90
+              ],
+              "chance": 1.0
+            },
+            {
+              "op": "text",
+              "value": "Dinheiro na conta. Vencimento em 90 dias."
+            }
+          ]
+        },
+        {
+          "id": "freeze",
+          "label": "Congelar salários",
+          "effects": [
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "morale",
+              "delta": -10
+            },
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "trust",
+              "delta": -6
+            },
+            {
+              "op": "text",
+              "value": "Salários congelados. A equipe não gostou."
+            }
+          ]
+        },
+        {
+          "id": "wait",
+          "label": "Confiar na próxima noite",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "team",
+              "field": "stress",
+              "delta": 6
+            },
+            {
+              "op": "text",
+              "value": "Todos os olhos na próxima bilheteria."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "loan_due",
+      "category": "financeiro",
+      "priority": "high",
+      "requires": "followup_only",
+      "expires_days": 1,
+      "title": "Vence o empréstimo",
+      "body": "O banco debitou US$ 175 mil, como combinado.",
+      "options": [
+        {
+          "id": "ok",
+          "label": "Entendido",
+          "default": true,
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 175000,
+              "sign": -1,
+              "label": "Quitação do empréstimo"
+            },
+            {
+              "op": "text",
+              "value": "Empréstimo quitado."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "understaffed",
+      "category": "rh",
+      "priority": "medium",
+      "requires": "missing_role",
+      "chance": 0.3,
+      "cooldown_days": 30,
+      "expires_days": 10,
+      "title": "Ninguém cuida de {role}",
+      "body": "A sede não tem {role}. {impact}",
+      "options": [
+        {
+          "id": "search",
+          "label": "Abrir vaga de {role}",
+          "effects": [
+            {
+              "op": "candidates",
+              "role_ctx": "role_id",
+              "count": 2
+            },
+            {
+              "op": "text",
+              "value": "Dois candidatos de {role} chegaram. Veja em Equipe."
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "label": "Depois",
+          "default": true,
+          "effects": [
+            {
+              "op": "text",
+              "value": "A vaga fica em aberto."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "campaign_idea",
+      "category": "projetos",
+      "priority": "medium",
+      "requires": "campaign_window",
+      "chance": 0.1,
+      "cooldown_days": 30,
+      "expires_days": 6,
+      "title": "{staff} propõe campanha para {event}",
+      "body": "{staff} ({role}) tem um plano de divulgação para {event}: outdoor, influenciadores e pesagem aberta ao público.",
+      "options": [
+        {
+          "id": "big",
+          "label": "Campanha completa (US$ 20 mil)",
+          "hint": "+8% de público até a noite.",
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 20000,
+              "sign": -1,
+              "label": "Campanha: {event}"
+            },
+            {
+              "op": "deal",
+              "kind": "attendance",
+              "value": 0.08,
+              "until_ctx": "event_date",
+              "name": "Campanha de {event}"
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 6
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "stress",
+              "delta": 8
+            },
+            {
+              "op": "text",
+              "value": "Campanha no ar. {staff} está animado."
+            }
+          ]
+        },
+        {
+          "id": "small",
+          "label": "Versão enxuta (US$ 8 mil)",
+          "hint": "+3% de público.",
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 8000,
+              "sign": -1,
+              "label": "Campanha: {event}"
+            },
+            {
+              "op": "deal",
+              "kind": "attendance",
+              "value": 0.03,
+              "until_ctx": "event_date",
+              "name": "Campanha de {event}"
+            },
+            {
+              "op": "text",
+              "value": "Campanha enxuta aprovada."
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "label": "Sem verba agora",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": -4
+            },
+            {
+              "op": "text",
+              "value": "{staff} guardou a ideia na gaveta."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scout_report",
+      "category": "oportunidade",
+      "priority": "low",
+      "requires": "scout_prospects",
+      "chance": 0.07,
+      "cooldown_days": 28,
+      "expires_days": 10,
+      "title": "Relatório de scouting de {staff}",
+      "body": "{staff} viu três nomes que valem atenção no circuito: {prospects}.",
+      "options": [
+        {
+          "id": "shortlist",
+          "label": "Pôr na lista de observação",
+          "hint": "Aparecem destacados no Mercado.",
+          "effects": [
+            {
+              "op": "shortlist"
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 4
+            },
+            {
+              "op": "text",
+              "value": "Três prospects na sua lista de observação."
+            }
+          ]
+        },
+        {
+          "id": "archive",
+          "label": "Arquivar",
+          "default": true,
+          "effects": [
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": -2
+            },
+            {
+              "op": "text",
+              "value": "Relatório arquivado."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "press_request",
+      "category": "noticias",
+      "priority": "low",
+      "requires": "press_target",
+      "chance": 0.05,
+      "cooldown_days": 25,
+      "expires_days": 5,
+      "title": "Imprensa quer entrevistar {fighter}",
+      "body": "Um programa de grande audiência pediu {fighter} ao vivo. {staff} (mídia) diz que dá para encaixar na agenda.",
+      "options": [
+        {
+          "id": "yes",
+          "label": "Liberar a entrevista",
+          "effects": [
+            {
+              "op": "popularity",
+              "delta": 3
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "stress",
+              "delta": 5
+            },
+            {
+              "op": "text",
+              "value": "{fighter} foi bem no ar e ganhou fãs."
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "label": "Preservar o atleta",
+          "default": true,
+          "effects": [
+            {
+              "op": "text",
+              "value": "{fighter} segue focado no treino."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "supplier_deal",
+      "category": "financeiro",
+      "priority": "low",
+      "requires": "finance_idea",
+      "chance": 0.04,
+      "cooldown_days": 90,
+      "expires_days": 8,
+      "title": "{staff} quer renegociar fornecedores",
+      "body": "Produção, arena e marketing estão caros. {staff} (financeiro) propõe contratar uma consultoria por US$ 6 mil para renegociar tudo.",
+      "options": [
+        {
+          "id": "go",
+          "label": "Aprovar (US$ 6 mil)",
+          "hint": "-6% nos custos das noites por 90 dias.",
+          "effects": [
+            {
+              "op": "cash",
+              "amount": 6000,
+              "sign": -1,
+              "label": "Consultoria de fornecedores"
+            },
+            {
+              "op": "deal",
+              "kind": "costs",
+              "value": -0.06,
+              "days": 90,
+              "name": "Fornecedores renegociados"
+            },
+            {
+              "op": "stat",
+              "who": "staff",
+              "field": "morale",
+              "delta": 5
+            },
+            {
+              "op": "text",
+              "value": "Contratos renegociados: noites mais baratas por 90 dias."
+            }
+          ]
+        },
+        {
+          "id": "no",
+          "label": "Não agora",
+          "default": true,
+          "effects": [
+            {
+              "op": "text",
+              "value": "Custos seguem como estão."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

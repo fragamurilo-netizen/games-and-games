@@ -33,9 +33,10 @@ func test_generated_world_and_six_bout_career_loop() -> void:
 	check_eq(ev.fight_ids.size(),6,"Six accepted bouts")
 	check(CareerActions.perform(world,"announce",{"event_id":id}).ok,"Announce complete card")
 	var cash:=world.player_org().cash
+	var office_before:=world.player_org().ledger.size()
 	check(CareerActions.perform(world,"advance_event",{"event_id":id}).ok,"Advance to fight night")
 	check_eq(ev.status,"completed","Night finishes")
-	check_eq(world.player_org().cash,cash+int(ev.actual.margin),"Exactly one settlement")
+	check_eq(world.player_org().cash,cash+int(ev.actual.margin)+_office_moves(world,office_before),"Exactly one settlement (além da folha da sede)")
 	check_eq(world.news.values().filter(func(n: NewsItem): return n.topic=="event_completed" and ev.id in n.entity_ids).size(),1,"One factual event report")
 	for fight_id: String in ev.fight_ids:
 		var f: Fight=world.fights[fight_id]
@@ -99,11 +100,19 @@ func test_late_medical_change_postpones_without_paying_and_can_reschedule() -> v
 	var f: Fight=world.fights[ev.fight_ids[0]]
 	world.fighters[f.fighter_a_id].medical_suspension_until=GameDate.add_days(ev.date,50)
 	var cash:=world.player_org().cash
+	var office_before:=world.player_org().ledger.size()
 	CareerActions.perform(world,"advance_event",{"event_id":id})
 	check_eq(ev.status,"postponed","A later medical change stops the event")
-	check_eq(world.player_org().cash,cash,"No settlement for an unavailable card")
+	check_eq(world.player_org().cash,cash+_office_moves(world,office_before),"No settlement for an unavailable card")
 	check_eq(f.status,"booked","No partial fight night")
 	check(CareerActions.perform(world,"reschedule",{"event_id":id,"days":60}).ok,"Reschedule after recovery")
 	check(CareerActions.perform(world,"announce",{"event_id":id}).ok,"Revalidate before new announcement")
 	CareerActions.perform(world,"advance_event",{"event_id":id})
 	check_eq(ev.status,"completed","Recovered card can run")
+
+
+## Folha e decisões da sede entram no caixa pelo livro-caixa da organização.
+func _office_moves(world: WorldState, from: int) -> int:
+	var total:=0
+	for entry: Dictionary in world.player_org().ledger.slice(from):total+=int(entry.amount)
+	return total

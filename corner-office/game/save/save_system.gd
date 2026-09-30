@@ -13,7 +13,20 @@ const SAVE_DIR := "user://saves"
 const MIGRATIONS := {
 	1: "_migrate_v1_to_v2",
 	2: "_migrate_v2_to_v3",
+	3: "_migrate_v3_to_v4",
 }
+
+
+## v4: sede da promotora (staff, decisões, livro-caixa, nível do escritório).
+## Coleções novas começam vazias; Office.ensure monta a equipe inicial ao abrir
+## o save (WorldSim._init), com o fluxo próprio office_rng.
+static func _migrate_v3_to_v4(data: Dictionary) -> Dictionary:
+	for key: String in ["staff", "dilemmas"]:
+		if not data.has(key):
+			data[key] = {}
+	if not data.has("office_rng_state"):
+		data["office_rng_state"] = str(SimRandom.new(int(data.get("seed_value", 0)) * 7919 + 17).get_state())
+	return data
 
 
 ## v3: rating público, última luta e resumo de carreira (CareerHistory).

@@ -9,6 +9,7 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 	var w := WorldState.new()
 	w.seed_value = seed_value
 	w.rng = SimRandom.new(seed_value)
+	w.office_rng = SimRandom.new(seed_value * 7919 + 17)
 
 	for o in ContentDB.load_json("organizations.json"):
 		var org := Organization.new().load_dict(o) as Organization
@@ -52,6 +53,7 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 			Rankings.new().update(w,"wci",division.id)
 		# O mundo já começa em movimento: rivais anunciam as primeiras noites.
 		OrgAI.new().tick(w)
+	Office.ensure(w)
 	return w
 
 

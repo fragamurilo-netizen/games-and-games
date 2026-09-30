@@ -386,6 +386,78 @@
         "Depois de vencer em {event}, {fighter} ({record}) foi às redes cobrar {target} ({target_record}), um dos nomes mais altos do {division}. Nos bastidores, a luta já vende.",
         "{fighter} não esperou nem a coletiva: saiu de {event} e marcou {target} ({target_record}) nas redes. A torcida já escolheu lado."
       ]
+    },
+    "staff_hired": {
+      "outlet": "out_fightwire",
+      "category": "bastidores",
+      "importance": 1,
+      "headlines": [
+        "{org} contrata {staff} para {role}",
+        "Reforço nos bastidores: {staff} chega à {org}"
+      ],
+      "bodies": [
+        "{staff} assume a área de {role} na sede da {org}."
+      ]
+    },
+    "staff_left": {
+      "outlet": "out_fightwire",
+      "category": "bastidores",
+      "importance": 1,
+      "headlines": [
+        "{staff} deixa a {org}",
+        "Baixa nos bastidores da {org}: sai {staff}"
+      ],
+      "bodies": [
+        "{staff} ({role}) não faz mais parte da equipe da {org}."
+      ]
+    },
+    "staff_poached": {
+      "outlet": "out_journal",
+      "category": "bastidores",
+      "importance": 2,
+      "headlines": [
+        "{rival} tira {staff} da {org}",
+        "Guerra nos bastidores: {staff} troca a {org} pela {rival}"
+      ],
+      "bodies": [
+        "{staff}, que cuidava de {role} na {org}, aceitou proposta da {rival}."
+      ]
+    },
+    "office_expanded": {
+      "outlet": "out_journal",
+      "category": "bastidores",
+      "importance": 2,
+      "headlines": [
+        "{org} muda de sede: {office}",
+        "Crescimento: {org} inaugura {office}"
+      ],
+      "bodies": [
+        "A promotora amplia a estrutura para comportar mais gente e novas áreas."
+      ]
+    },
+    "sponsor_signed": {
+      "outlet": "out_fightwire",
+      "category": "eventos",
+      "importance": 1,
+      "headlines": [
+        "{brand} patrocina {event}",
+        "{event} ganha patrocínio máster da {brand}"
+      ],
+      "bodies": [
+        "Acordo de {amount} para estampar a marca no octógono."
+      ]
+    },
+    "broadcaster_deal": {
+      "outlet": "out_journal",
+      "category": "mercado",
+      "importance": 3,
+      "headlines": [
+        "{org} fecha com a {brand}",
+        "{brand} leva os cards da {org} com exclusividade"
+      ],
+      "bodies": [
+        "Acordo de transmissão por quatro meses aumenta a receita de mídia de cada noite."
+      ]
     }
   },
   "social": {

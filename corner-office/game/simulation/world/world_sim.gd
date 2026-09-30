@@ -18,6 +18,7 @@ var standing := OrgStanding.new()
 
 func _init(w: WorldState) -> void:
 	world = w
+	Office.ensure(world)
 
 
 func advance_day() -> void:
@@ -36,6 +37,13 @@ func advance_day() -> void:
 	standing.ensure_objectives(world)
 	org_ai.tick(world)
 	media.scan_triggers(world)
+	# Sede: equipe trabalha, folha no dia 1º, decisões nascem de fatos.
+	Office.daily(world)
+	if int(world.date.day) == 1:
+		Office.monthly(world)
+	for d: Dilemma in Dilemmas.tick(world):
+		EventBus.dilemma_created.emit(d.id)
+	EventBus.office_changed.emit()
 	# TODO(M2): camps e negociações com memória de agentes.
 	EventBus.day_advanced.emit(world.date)
 

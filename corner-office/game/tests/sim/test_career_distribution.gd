@@ -13,10 +13,11 @@ func test_regional_career_repeats_with_mixed_cards_and_valid_accounts() -> void:
 			check_eq(ev.fight_ids.size(),6,"Six accepted bouts, seed %d"%seed_value)
 			check(CareerActions.perform(world,"announce",{"event_id":id}).ok,"Announce mixed card")
 			var before:=world.player_org().cash
+			var office_before:=world.player_org().ledger.size()
 			CareerActions.perform(world,"advance_event",{"event_id":id})
 			check_eq(ev.status,"completed","Repeated event resolves")
 			if ev.actual.is_empty():continue
-			check_eq(world.player_org().cash,before+int(ev.actual.margin),"Ledger reconciles")
+			check_eq(world.player_org().cash,before+int(ev.actual.margin)+world.player_org().ledger.slice(office_before).reduce(func(t,e):return t+int(e.amount),0),"Ledger reconciles (noite + folha da sede)")
 			check(int(ev.actual.costs)<=int(ev.projected.costs),"Agreed purse budget covers actual obligations")
 			check(int(ev.actual.attendance)<=2800 and int(ev.actual.attendance)>0,"Attendance within venue capacity")
 			check(world.player_org().cash>0,"Regional starting capital supports two initial nights")
