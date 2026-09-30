@@ -30,6 +30,11 @@
     "stun": 0.47
   },
   "skill_spread": 1.6,
+  "signature": {
+    "own": 3.0,
+    "mma": 0.6,
+    "other": 0.12
+  },
   "styles": {
     "boxing": {
       "boxing": 2.5,

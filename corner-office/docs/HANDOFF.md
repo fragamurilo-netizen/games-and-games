@@ -127,6 +127,15 @@ Pedido: integrar o motor 2D (Fight Studio em WebView) ao jogo real. A ponte já 
 - Verificado: 92 lutas reais de uma carreira gerada (seed 2027, 20 semanas) carregaram no `studio.cobundle` em Chromium 390×700 do portão ao resultado, sem erro de JS.
 - Ainda falta testar em aparelho Android e no Windows (itens da seção anterior continuam valendo). AAR antigo sem `next()` cai no comportamento de fechar.
 
+## Estilos reais, golpes assinatura, cabelos, barbas e corpos (Claude, 30/09/2026)
+
+Pedidos: "estilos de luta reais + um número massivo de animações" e "muitos cabelos e barbas novos, corpos com muito mais variações".
+
+- **Golpes:** `tools/build_motion_catalog.py` ganhou cerca de 170 golpes assinatura por arte marcial (boxe, muay thai, kickboxing, caratê, taekwondo, wrestling, judô, BJJ, sambo, MMA), com movimentos próprios (`shape_motion`: gancho, uppercut, superman, chute rodado, tornado, uchi-mata, seoi-nage, suplex, sumi-gaeshi, raspagens, chaves de perna…) e combinações. Catálogo: 328 técnicas, 1138 trilhas; os 158 clipes antigos não mudaram.
+- **Motor:** `fight_tuning.json → signature` pesa o repertório pelo estilo do lutador (próprio 3.0, MMA 0.6, outros 0.12), renormalizado por categoria, então o equilíbrio de categorias não muda. `_by_position` indexa clipes por posição (a suíte sim ficou mais rápida). Cotoveladas cortam mais. Finalizações ~13% (antes ~20%; teste de calibração passa), decisões ~48%, KO/TKO ~37%.
+- **Aparência:** `identity.js` ganhou 26 cabelos e 14 barbas (`novo:2`) e 20 tipos de corpo (`BODY_TYPES`, com `arms`, `neck`, `traps`, `belly` além dos parâmetros antigos); `studio.js` e `renderer.js` desenham os novos parâmetros.
+- **Catálogo para o gerador:** `game/content/appearance_catalog.json`, gerado por `node tools/build_appearance_catalog.cjs` a partir de `identity.js` (82 cabelos, 33 barbas, 20 corpos, 15 populações). Cada tipo de corpo traz `generator_body_type` (lean/athletic/compact/muscular/heavy do gerador) e afinidade por categoria de peso. O CI regenera e confere o diff.
+
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.

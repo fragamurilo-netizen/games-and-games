@@ -24,7 +24,7 @@ const start=Date.now();let count=0;
 const original=clone(A.CANON[0]),serialized=JSON.stringify(original);
 assert.equal(hash(render(original)),hash(render(original)),'render must be deterministic');
 assert.equal(JSON.stringify(original),serialized,'render must not mutate appearance');
-for(const property of ['muscle','fat','height','shoulders','reach','legs','hair','waist','hips','legMass','chest']){
+for(const property of ['muscle','fat','height','shoulders','reach','legs','hair','waist','hips','legMass','chest','arms','neck','traps','belly']){
  const low=clone(original),high=clone(original);low.body[property]=0;high.body[property]=1;
  assert.notEqual(hash(render(low)),hash(render(high)),property+' must change output');count+=2;
 }

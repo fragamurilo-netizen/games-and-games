@@ -123,12 +123,13 @@ function studioBackdrop(ctx, W, H, figure) {
 // Continuous athlete silhouette (Game Design Bible §5). Adult landmarks and
 // connected limb envelopes are shared across poses; no separate joint discs.
 function drawStudioFigure(ctx, W, H, f, st, opts = {}) {
-  const B = {muscle:.65,fat:.15,height:.5,shoulders:.5,reach:.5,legs:.5,hair:0,waist:f.sex==='f'?.4:.5,hips:f.sex==='f'?.65:.5,legMass:f.sex==='f'?.62:.5,chest:.5,...f.body};
+  const B = {muscle:.65,fat:.15,height:.5,shoulders:.5,reach:.5,legs:.5,hair:0,waist:f.sex==='f'?.4:.5,hips:f.sex==='f'?.65:.5,legMass:f.sex==='f'?.62:.5,chest:.5,arms:.5,neck:.5,traps:.5,belly:0,...f.body};
   const m=clamp(B.muscle,0,1),fat=clamp(B.fat,0,1),build=clamp(f.build??.5,0,1),female=f.sex==='f';
   const pose=opts.pose||'oficial',high=['vitoria','cinturao_erguido'].includes(pose);
   const skin=SKIN[f.skin]?.[0]||SKIN.t06[0],dark=darken(skin,.65),light=lighten(skin,.4);
   const sh=(female?1.0:1.2)+build*(female?.12:.16)+m*.08+(B.shoulders-.5)*.22;
   const waist=(female?.60:.77)+build*(female?.09:.13)+fat*.36+(B.waist-.5)*.2,hip=waist+(female?.37:.12)+(B.hips-.5)*.4;
+  const gut=clamp(B.belly,0,1),armMass=(B.arms-.5),trap=(B.traps-.5);
   const legLength=1+(B.legs-.5)*.13+(B.height-.5)*.09;
   const kneeY=4.55+2.08*legLength,ankY=4.55+4.22*legLength,sole=ankY+.49;
   let scale=Math.min(H/(high?12.6:10.9),W/(high?7.1:6.0));
@@ -191,7 +192,7 @@ function drawStudioFigure(ctx, W, H, f, st, opts = {}) {
   for(const [s,A,E0,H0] of [[-1,shoulderL,positions[0],positions[1]],[1,shoulderR,positions[2],positions[3]]]){
     const E=add(A,mul(sub(E0,A),reach)),hand=add(E,mul(sub(H0,E0),reach));
     const midUpper=add(A,mul(sub(E,A),.42)),midFore=add(E,mul(sub(hand,E),.3));
-    const limb=envelope([[...A,(.28+m*.07)*armScale],[...midUpper,(.25+m*.065+fat*.06)*armScale],[...E,.165*armScale],[...midFore,(.205+m*.03+fat*.03)*armScale],[...hand,.105*armScale]]);
+    const limb=envelope([[...A,(.28+m*.07+armMass*.09)*armScale],[...midUpper,(.25+m*.065+fat*.06+armMass*.1)*armScale],[...E,(.165+armMass*.02)*armScale],[...midFore,(.205+m*.03+fat*.03+armMass*.055)*armScale],[...hand,.105*armScale]]);
     arms.push({...limb,A,E,hand,s});
   }
   if(opts.focus==='hands'){scale=Math.min(W/1.32,H/1.75);ox=W/2-arms[0].hand[0]*scale;oy=H*.42-arms[0].hand[1]*scale;}
@@ -201,8 +202,8 @@ function drawStudioFigure(ctx, W, H, f, st, opts = {}) {
     const limb=envelope([[hipX,4.28,(.35+m*.085+fat*.14+(B.legMass-.5)*.18)*(female?1.14:1)],[hipX+s*.06,5.18,(.36+m*.07+fat*.1+(B.legMass-.5)*.18)*(female?1.12:1)],[kx,kneeY,.215+fat*.035],[kx+s*.025,kneeY+.68,.25+m*.035+fat*.04+(B.legMass-.5)*.075],[ax,ankY,.125+fat*.017]]);
     legs.push({...limb,s,kx,ax});
   }
-  const neck=(female?.25:.275)+build*.045;
-  const torso=smooth([[-neck,.58],[-neck,1.0],[-.54,1.13],[-sh-.02,1.28],[-sh-.30,1.45],[-sh-.25,1.92],[-sh+.1,2.19],[-sh+.25,2.54],[-waist,3.3],[-waist,3.85],[-hip,4.26],[-hip*.7,4.7],[0,4.82],[hip*.7,4.7],[hip,4.26],[waist,3.85],[waist,3.3],[sh-.25,2.54],[sh-.1,2.19],[sh+.25,1.92],[sh+.30,1.45],[sh+.02,1.28],[.54,1.13],[neck,1.0],[neck,.58]]);
+  const neck=(female?.25:.275)+build*.045+(B.neck-.5)*.14;
+  const torso=smooth([[-neck,.58],[-neck,1.0],[-.54-trap*.12,1.13-trap*.16],[-sh-.02,1.28],[-sh-.30,1.45],[-sh-.25,1.92],[-sh+.1,2.19],[-sh+.25,2.54],[-waist-gut*.16,3.3],[-waist-gut*.34,3.85],[-hip,4.26],[-hip*.7,4.7],[0,4.82],[hip*.7,4.7],[hip,4.26],[waist+gut*.34,3.85],[waist+gut*.16,3.3],[sh-.25,2.54],[sh-.1,2.19],[sh+.25,1.92],[sh+.30,1.45],[sh+.02,1.28],[.54+trap*.12,1.13-trap*.16],[neck,1.0],[neck,.58]]);
   const skinMesh=new Path2D();skinMesh.addPath(torso);for(const part of [...legs,...arms])skinMesh.addPath(part.path);
   ctx.save();ctx.translate(ox,oy);ctx.scale(scale,scale);
   const skinMaterial=studioGradient(ctx,skin,0,3,sh+.55);ctx.fillStyle=skinMaterial;ctx.fill(skinMesh);
@@ -220,6 +221,7 @@ function drawStudioFigure(ctx, W, H, f, st, opts = {}) {
     if(!female){soft(s*sh*.46,2.17,.067,.044,mix(skin,'#623b34',.5),.57);soft(s*sh*.46,2.18,.025,.018,dark,.55)}
   }
   soft(0,.84,.33,.17,dark,.48);
+  if(gut>.05){soft(-.2,3.5,waist*.75,.5,light,gut*.3);soft(waist*.55,3.95,waist*.5,.25,dark,gut*.35)}
   soft(0,3.65,.052,.065,dark,.6);soft(-.012,3.64,.018,.025,light,.45);
   for(const leg of legs){soft(leg.kx,kneeY,.16,.24,light,.23);soft(leg.kx+.12,kneeY+.05,.105,.24,dark,.26);
     curve([[leg.kx-.04,kneeY+.22],[leg.kx-.05,kneeY+1],[leg.ax-.035,ankY-.16]],light,.018,.26);}

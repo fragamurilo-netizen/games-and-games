@@ -354,6 +354,11 @@
         body = f.body || {},
         muscle = body.muscle ?? 0.65,
         fat = body.fat ?? 0.14,
+        // Body-type fields from the appearance catalog; neutral when absent.
+        armK = 1 + ((body.arms ?? 0.5) - 0.5) * 0.45,
+        legK = 1 + ((body.legMass ?? (f.sex === "f" ? 0.62 : 0.5)) - 0.5) * 0.4,
+        neckK = 1 + ((body.neck ?? 0.5) - 0.5) * 0.9,
+        belly = body.belly ?? 0,
         fem = f.sex === "f",
         skin = SKIN[f.skin]?.[0] || "#B7805D",
         P = (v) => this.project(v[0] + offset, v[1]),
@@ -501,10 +506,10 @@
         }
         c.restore();
       };
-      limb(s.hips[0], s.legs[0], [size * 1.26, size * 0.74, size * 0.43]);
+      limb(s.hips[0], s.legs[0], [size * 1.26 * legK, size * 0.74 * legK, size * 0.43]);
       foot(s.legs[0], 0);
-      limb(s.shoulders[0], s.arms[0], [size * 0.72, size * 0.47, size * 0.33]);
-      limb(s.hips[1], s.legs[1], [size * 1.28, size * 0.76, size * 0.43]);
+      limb(s.shoulders[0], s.arms[0], [size * 0.72 * armK, size * 0.47 * armK, size * 0.33]);
+      limb(s.hips[1], s.legs[1], [size * 1.28 * legK, size * 0.76 * legK, size * 0.43]);
       foot(s.legs[1], 1);
       if ((damage?.leg || 0) > 0.12) {
         const a = P(s.hips[1]),
@@ -571,14 +576,18 @@
       const shoulder =
           (fem ? 0.151 : 0.195) * scale +
           (body.shoulders ?? 0.5) * scale * 0.025,
-        waist = (fem ? 0.106 : 0.145) * scale + fat * scale * 0.05,
+        waist =
+          (fem ? 0.106 : 0.145) * scale +
+          fat * scale * 0.05 +
+          ((body.waist ?? (fem ? 0.4 : 0.5)) - 0.5) * scale * 0.03,
+        gut = waist + belly * scale * 0.06,
         hips =
           (fem ? 0.191 : 0.155) * scale + (body.hips ?? 0.5) * scale * 0.035;
       c.fillStyle = studioGradient(c, skin, 0, -0.3 * scale, shoulder);
       c.beginPath();
       c.moveTo(-hips, 0.04 * scale);
       c.bezierCurveTo(
-        -waist,
+        -gut,
         -0.16 * scale,
         -waist,
         -0.3 * scale,
@@ -591,8 +600,8 @@
         -0.07 * scale,
         -0.5 * scale,
       );
-      c.lineTo(-0.06 * scale, -0.57 * scale);
-      c.lineTo(0.06 * scale, -0.57 * scale);
+      c.lineTo(-0.06 * neckK * scale, -0.57 * scale);
+      c.lineTo(0.06 * neckK * scale, -0.57 * scale);
       c.lineTo(0.07 * scale, -0.5 * scale);
       c.quadraticCurveTo(
         shoulder * 0.84,
@@ -603,7 +612,7 @@
       c.bezierCurveTo(
         waist,
         -0.3 * scale,
-        waist,
+        gut,
         -0.16 * scale,
         hips,
         0.04 * scale,
@@ -700,7 +709,7 @@
       );
       this.line([0, 0], [0, scale * 0.055], darken(kit, 0.4), scale * 0.008);
       c.restore();
-      limb(s.shoulders[1], s.arms[1], [size * 0.74, size * 0.49, size * 0.33]);
+      limb(s.shoulders[1], s.arms[1], [size * 0.74 * armK, size * 0.49 * armK, size * 0.33]);
       for (const arm of s.arms) {
         const hand = P(arm.end);
         c.save();

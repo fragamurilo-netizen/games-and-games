@@ -3,7 +3,10 @@ const R=require('../replay'), A=require('../appearance');
 const dir=path.resolve(__dirname,'../../../game/content');
 const read=p=>JSON.parse(fs.readFileSync(path.join(dir,p),'utf8'));
 const catalog=read('fight_visuals.json'),arenas=read('arena_profiles.json');
-const log=read('replays/sim_exchange.json'),original=JSON.stringify(log);
+// Fixtures come from the real engine; use one whose fight actually opened a cut.
+const cut=e=>Object.values(e.after.cuts||{}).some(v=>v>0);
+const log=read('replays/simulated_index.json').map(x=>read('replays/'+x.file)).find(l=>l.events.some(cut)),original=JSON.stringify(log);
+assert.ok(log,'At least one engine fixture has a cut');
 const player=new R.Player(log,catalog,arenas),all=player.sample(player.duration).stains;
 assert.ok(all.length>0,'Cuts leave blood on the mat');
 assert.equal(player.sample(0).stains.length,0,'No future blood at start');

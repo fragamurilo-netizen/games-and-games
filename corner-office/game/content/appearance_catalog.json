@@ -1,0 +1,3322 @@
+{
+ "version": 1,
+ "source": "prototypes/face-lab/identity.js (gerado por tools/build_appearance_catalog.cjs; não editar à mão)",
+ "note": "Ids são o que Fighter.appearance guarda. hair.style/beard.style/body.type usam estes ids; body.* são 0–1.",
+ "skin_tones": [
+  {
+   "id": "t01",
+   "label": "Muito clara rosada",
+   "hex": "#f7ded0"
+  },
+  {
+   "id": "t02",
+   "label": "Clara",
+   "hex": "#f1d2b8"
+  },
+  {
+   "id": "t03",
+   "label": "Clara quente",
+   "hex": "#e9c4a1"
+  },
+  {
+   "id": "t04",
+   "label": "Clara oliva",
+   "hex": "#dcbb92"
+  },
+  {
+   "id": "t05",
+   "label": "Média clara",
+   "hex": "#d6a57f"
+  },
+  {
+   "id": "t06",
+   "label": "Média",
+   "hex": "#c99570"
+  },
+  {
+   "id": "t07",
+   "label": "Média oliva",
+   "hex": "#bd8c5e"
+  },
+  {
+   "id": "t08",
+   "label": "Bronzeada",
+   "hex": "#b27a52"
+  },
+  {
+   "id": "t09",
+   "label": "Morena",
+   "hex": "#a06a45"
+  },
+  {
+   "id": "t10",
+   "label": "Morena escura",
+   "hex": "#8f5d3b"
+  },
+  {
+   "id": "t11",
+   "label": "Marrom",
+   "hex": "#7d4f33"
+  },
+  {
+   "id": "t12",
+   "label": "Marrom escura",
+   "hex": "#6c422a"
+  },
+  {
+   "id": "t13",
+   "label": "Escura",
+   "hex": "#5b3622"
+  },
+  {
+   "id": "t14",
+   "label": "Muito escura",
+   "hex": "#4a2b1b"
+  },
+  {
+   "id": "t15",
+   "label": "Retinta",
+   "hex": "#3b2216"
+  }
+ ],
+ "hair_colors": [
+  {
+   "id": "preto",
+   "label": "Preto",
+   "hex": "#17110e"
+  },
+  {
+   "id": "castanho_escuro",
+   "label": "Castanho escuro",
+   "hex": "#35231a"
+  },
+  {
+   "id": "castanho",
+   "label": "Castanho",
+   "hex": "#5a3a22"
+  },
+  {
+   "id": "castanho_claro",
+   "label": "Castanho claro",
+   "hex": "#7d5a3a"
+  },
+  {
+   "id": "ruivo_escuro",
+   "label": "Ruivo escuro",
+   "hex": "#7a3a20"
+  },
+  {
+   "id": "ruivo",
+   "label": "Ruivo",
+   "hex": "#a24a22"
+  },
+  {
+   "id": "loiro_escuro",
+   "label": "Loiro escuro",
+   "hex": "#94733f"
+  },
+  {
+   "id": "loiro",
+   "label": "Loiro",
+   "hex": "#c7a15f"
+  },
+  {
+   "id": "platinado",
+   "label": "Platinado",
+   "hex": "#e3d7bb"
+  },
+  {
+   "id": "grisalho",
+   "label": "Grisalho",
+   "hex": "#8e8a84"
+  },
+  {
+   "id": "branco",
+   "label": "Branco",
+   "hex": "#d8d5cf"
+  },
+  {
+   "id": "tingido_vermelho",
+   "label": "Tingido vermelho",
+   "hex": "#8e1f2b"
+  },
+  {
+   "id": "tingido_azul",
+   "label": "Tingido azul",
+   "hex": "#23466e"
+  },
+  {
+   "id": "tingido_rosa",
+   "label": "Tingido rosa",
+   "hex": "#c2507e"
+  },
+  {
+   "id": "tingido_verde",
+   "label": "Tingido verde",
+   "hex": "#2f7a4f"
+  },
+  {
+   "id": "multicolor",
+   "label": "Mechas coloridas",
+   "hex": "#a2508a"
+  },
+  {
+   "id": "bicolor",
+   "label": "Duas cores",
+   "hex": "#9a3a7a"
+  },
+  {
+   "id": "pontas_claras",
+   "label": "Pontas descoloridas",
+   "hex": "#3a2a1c"
+  },
+  {
+   "id": "acaju",
+   "label": "Acaju",
+   "hex": "#6e2a1c"
+  },
+  {
+   "id": "prata",
+   "label": "Prata",
+   "hex": "#b9bcc0"
+  }
+ ],
+ "hair_styles": [
+  {
+   "id": "raspado",
+   "label": "Raspado",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "maquina",
+   "label": "Máquina",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "degrade_baixo",
+   "label": "Degradê baixo",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "degrade_alto",
+   "label": "Degradê navalhado",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "militar",
+   "label": "Militar",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "curto",
+   "label": "Curto texturizado",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "cacheado_curto",
+   "label": "Cacheado curto",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "risca",
+   "label": "Risca lateral",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "topete",
+   "label": "Topete",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "para_tras",
+   "label": "Penteado para trás",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "moicano",
+   "label": "Moicano",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "fauxhawk",
+   "label": "Faux-hawk",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "franja",
+   "label": "Franja",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "black_power",
+   "label": "Black power",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "afro_curto",
+   "label": "Afro curto",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "twists",
+   "label": "Twists",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "nago",
+   "label": "Trança nagô",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "box_braids",
+   "label": "Box braids",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "dreads_curtos",
+   "label": "Dreads curtos",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "dreads_longos",
+   "label": "Dreads longos",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "coque_masc",
+   "label": "Coque alto",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "coque",
+   "label": "Coque",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "rabo",
+   "label": "Rabo de cavalo",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "longo_liso",
+   "label": "Longo liso",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "longo_ondulado",
+   "label": "Longo ondulado",
+   "sex": "any",
+   "round": 1
+  },
+  {
+   "id": "cacheado_longo",
+   "label": "Cacheado longo",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "mullet",
+   "label": "Mullet",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "coroa",
+   "label": "Calvície de coroa",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "undercut",
+   "label": "Undercut para trás",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "mullet_moderno",
+   "label": "Mullet moderno",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "crop_frances",
+   "label": "Crop francês",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "espetado",
+   "label": "Espetado",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "degrade_risca",
+   "label": "Degradê com risca",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "high_top",
+   "label": "High top",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "moicano_cacheado",
+   "label": "Moicano cacheado",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "dreads_presos",
+   "label": "Dreads presos no alto",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "meio_coque",
+   "label": "Meio coque",
+   "sex": "m",
+   "round": 1
+  },
+  {
+   "id": "duas_trancas",
+   "label": "Duas tranças",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "tranca_unica",
+   "label": "Trança única",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "coque_baixo",
+   "label": "Coque baixo",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "pixie",
+   "label": "Pixie",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "undercut_lateral",
+   "label": "Lateral raspada",
+   "sex": "f",
+   "round": 1
+  },
+  {
+   "id": "quiff",
+   "label": "Topete curto",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "franja_longa",
+   "label": "Franja longa",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "cogumelo",
+   "label": "Cogumelo",
+   "sex": "any",
+   "round": 2
+  },
+  {
+   "id": "ombro",
+   "label": "Na altura do ombro",
+   "sex": "any",
+   "round": 2
+  },
+  {
+   "id": "ondulado_medio",
+   "label": "Ondulado médio",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "cachos_volumosos",
+   "label": "Cachos volumosos",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "dreads_soltos",
+   "label": "Dreads soltos",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "twists_altos",
+   "label": "Twists altos",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "afro_puff",
+   "label": "Afro puff",
+   "sex": "f",
+   "round": 2
+  },
+  {
+   "id": "rabo_alto",
+   "label": "Rabo alto",
+   "sex": "f",
+   "round": 2
+  },
+  {
+   "id": "coque_baguncado",
+   "label": "Coque bagunçado",
+   "sex": "f",
+   "round": 2
+  },
+  {
+   "id": "curto_lateral",
+   "label": "Curto de lado",
+   "sex": "f",
+   "round": 2
+  },
+  {
+   "id": "volumoso",
+   "label": "Volumoso espetado",
+   "sex": "m",
+   "round": 2
+  },
+  {
+   "id": "trancas_laterais",
+   "label": "Tranças nas laterais",
+   "sex": "f",
+   "round": 2
+  },
+  {
+   "id": "waves_360",
+   "label": "Ondas 360",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "caesar",
+   "label": "Caesar",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "flat_top",
+   "label": "Flat top",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "maquina_desenho",
+   "label": "Máquina com desenho",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "afro_degrade",
+   "label": "Afro com degradê",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "cachos_degrade",
+   "label": "Cachos com degradê",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "slick_longo",
+   "label": "Longo para trás",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "samurai",
+   "label": "Coque samurai",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "undercut_coque",
+   "label": "Undercut com coque",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "nago_zigue",
+   "label": "Nagô em zigue-zague",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "freeform",
+   "label": "Locs livres",
+   "sex": "any",
+   "round": 3
+  },
+  {
+   "id": "franja_cortina",
+   "label": "Franja cortina",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "wolf_cut",
+   "label": "Wolf cut",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "calvo_lateral",
+   "label": "Calvo no topo",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "viking_trancado",
+   "label": "Lateral raspada com trança",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "espinhos",
+   "label": "Espinhos curtos",
+   "sex": "m",
+   "round": 3
+  },
+  {
+   "id": "trancas_boxeadora",
+   "label": "Tranças de boxeadora",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "bob",
+   "label": "Chanel",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "long_bob",
+   "label": "Chanel alongado",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "shag",
+   "label": "Shag repicado",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "coque_trancado",
+   "label": "Coque trançado",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "rabo_trancado",
+   "label": "Rabo trançado",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "bantu_knots",
+   "label": "Bantu knots",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "nago_longas",
+   "label": "Nagô longas",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "franja_reta_longo",
+   "label": "Longo com franja reta",
+   "sex": "f",
+   "round": 3
+  },
+  {
+   "id": "coques_duplos",
+   "label": "Dois coques",
+   "sex": "f",
+   "round": 3
+  }
+ ],
+ "beards": [
+  {
+   "id": "nenhuma",
+   "label": "Sem barba",
+   "round": 1
+  },
+  {
+   "id": "sombra",
+   "label": "Sombra",
+   "round": 1
+  },
+  {
+   "id": "por_fazer",
+   "label": "Por fazer",
+   "round": 1
+  },
+  {
+   "id": "cheia_curta",
+   "label": "Cheia curta",
+   "round": 1
+  },
+  {
+   "id": "cheia_longa",
+   "label": "Cheia longa",
+   "round": 1
+  },
+  {
+   "id": "sem_bigode",
+   "label": "Sem bigode",
+   "round": 1
+  },
+  {
+   "id": "cavanhaque",
+   "label": "Cavanhaque",
+   "round": 1
+  },
+  {
+   "id": "cavanhaque_bigode",
+   "label": "Cavanhaque e bigode",
+   "round": 1
+  },
+  {
+   "id": "ancora",
+   "label": "Âncora",
+   "round": 1
+  },
+  {
+   "id": "bigode",
+   "label": "Bigode",
+   "round": 1
+  },
+  {
+   "id": "bigode_fino",
+   "label": "Bigode fino",
+   "round": 1
+  },
+  {
+   "id": "ferradura",
+   "label": "Ferradura",
+   "round": 1
+  },
+  {
+   "id": "costeletas",
+   "label": "Costeletas largas",
+   "round": 1
+  },
+  {
+   "id": "contorno",
+   "label": "Contorno",
+   "round": 1
+  },
+  {
+   "id": "mosca",
+   "label": "Mosca",
+   "round": 1
+  },
+  {
+   "id": "desenhada",
+   "label": "Barba desenhada",
+   "round": 2
+  },
+  {
+   "id": "longa_sem_bigode",
+   "label": "Longa sem bigode",
+   "round": 2
+  },
+  {
+   "id": "bigode_grosso",
+   "label": "Bigode grosso",
+   "round": 2
+  },
+  {
+   "id": "cavanhaque_longo",
+   "label": "Cavanhaque longo",
+   "round": 2
+  },
+  {
+   "id": "cheia_media",
+   "label": "Cheia média",
+   "round": 3
+  },
+  {
+   "id": "lenhador",
+   "label": "Lenhador",
+   "round": 3
+  },
+  {
+   "id": "viking_trancada",
+   "label": "Viking trançada",
+   "round": 3
+  },
+  {
+   "id": "van_dyke",
+   "label": "Van Dyke",
+   "round": 3
+  },
+  {
+   "id": "balbo",
+   "label": "Balbo",
+   "round": 3
+  },
+  {
+   "id": "garibaldi",
+   "label": "Garibaldi",
+   "round": 3
+  },
+  {
+   "id": "bigode_guidao",
+   "label": "Bigode guidão",
+   "round": 3
+  },
+  {
+   "id": "chevron",
+   "label": "Bigode chevron",
+   "round": 3
+  },
+  {
+   "id": "fu_manchu",
+   "label": "Fu manchu",
+   "round": 3
+  },
+  {
+   "id": "barba_degrade",
+   "label": "Barba com degradê",
+   "round": 3
+  },
+  {
+   "id": "falhada",
+   "label": "Barba falhada",
+   "round": 3
+  },
+  {
+   "id": "ducktail",
+   "label": "Barba em ponta",
+   "round": 3
+  },
+  {
+   "id": "costeletas_bigode",
+   "label": "Costeletas com bigode",
+   "round": 3
+  },
+  {
+   "id": "contorno_bigode",
+   "label": "Contorno com bigode",
+   "round": 3
+  }
+ ],
+ "iris": [
+  {
+   "id": "escuro",
+   "label": "Castanho escuro",
+   "hex": "#24170f"
+  },
+  {
+   "id": "castanho",
+   "label": "Castanho",
+   "hex": "#4a2e1a"
+  },
+  {
+   "id": "mel",
+   "label": "Mel",
+   "hex": "#7a5420"
+  },
+  {
+   "id": "verde",
+   "label": "Verde",
+   "hex": "#5a6b3e"
+  },
+  {
+   "id": "azul",
+   "label": "Azul",
+   "hex": "#4d6d8c"
+  },
+  {
+   "id": "cinza",
+   "label": "Cinza",
+   "hex": "#6d7b83"
+  }
+ ],
+ "heads": [
+  {
+   "id": "oval",
+   "label": "Oval"
+  },
+  {
+   "id": "quadrado",
+   "label": "Quadrado"
+  },
+  {
+   "id": "redondo",
+   "label": "Redondo"
+  },
+  {
+   "id": "alongado",
+   "label": "Alongado"
+  },
+  {
+   "id": "diamante",
+   "label": "Diamante"
+  },
+  {
+   "id": "coracao",
+   "label": "Coração"
+  },
+  {
+   "id": "retangular",
+   "label": "Retangular"
+  }
+ ],
+ "eyes": [
+  {
+   "id": "amendoado",
+   "label": "Amendoado"
+  },
+  {
+   "id": "redondo",
+   "label": "Redondo"
+  },
+  {
+   "id": "encapuzado",
+   "label": "Encapuzado"
+  },
+  {
+   "id": "monolid",
+   "label": "Pálpebra única"
+  },
+  {
+   "id": "profundo",
+   "label": "Profundo"
+  },
+  {
+   "id": "caido",
+   "label": "Caído"
+  },
+  {
+   "id": "puxado",
+   "label": "Puxado para cima"
+  },
+  {
+   "id": "pequeno",
+   "label": "Pequeno"
+  },
+  {
+   "id": "grande",
+   "label": "Grande"
+  }
+ ],
+ "brows": [
+  {
+   "id": "reta",
+   "label": "Reta"
+  },
+  {
+   "id": "arqueada",
+   "label": "Arqueada"
+  },
+  {
+   "id": "alta",
+   "label": "Arco alto"
+  },
+  {
+   "id": "grossa",
+   "label": "Grossa"
+  },
+  {
+   "id": "fina",
+   "label": "Fina"
+  },
+  {
+   "id": "angular",
+   "label": "Angular"
+  },
+  {
+   "id": "espessa",
+   "label": "Espessa"
+  },
+  {
+   "id": "baixa",
+   "label": "Baixa e reta"
+  }
+ ],
+ "noses": [
+  {
+   "id": "reto",
+   "label": "Reto"
+  },
+  {
+   "id": "botao",
+   "label": "Botão"
+  },
+  {
+   "id": "largo",
+   "label": "Largo"
+  },
+  {
+   "id": "aquilino",
+   "label": "Aquilino"
+  },
+  {
+   "id": "romano",
+   "label": "Romano"
+  },
+  {
+   "id": "arrebitado",
+   "label": "Arrebitado"
+  },
+  {
+   "id": "fino",
+   "label": "Fino e longo"
+  },
+  {
+   "id": "achatado",
+   "label": "Achatado (boxeador)"
+  },
+  {
+   "id": "carnudo",
+   "label": "Ponta carnuda"
+  }
+ ],
+ "mouths": [
+  {
+   "id": "neutra",
+   "label": "Neutra"
+  },
+  {
+   "id": "fina",
+   "label": "Lábios finos"
+  },
+  {
+   "id": "carnuda",
+   "label": "Carnuda"
+  },
+  {
+   "id": "larga",
+   "label": "Larga"
+  },
+  {
+   "id": "pequena",
+   "label": "Pequena"
+  },
+  {
+   "id": "canto",
+   "label": "Sorriso de canto"
+  },
+  {
+   "id": "seria",
+   "label": "Séria"
+  },
+  {
+   "id": "inferior",
+   "label": "Inferior cheio"
+  },
+  {
+   "id": "arco",
+   "label": "Arco do cupido marcado"
+  }
+ ],
+ "ears": [
+  {
+   "id": "normal",
+   "label": "Normal"
+  },
+  {
+   "id": "pequena",
+   "label": "Pequena"
+  },
+  {
+   "id": "abano",
+   "label": "De abano"
+  },
+  {
+   "id": "grande",
+   "label": "Grande"
+  }
+ ],
+ "marks": [
+  {
+   "id": "sardas_leves",
+   "label": "Sardas leves"
+  },
+  {
+   "id": "sardas",
+   "label": "Sardas fortes"
+  },
+  {
+   "id": "pinta_bochecha",
+   "label": "Pinta na bochecha"
+  },
+  {
+   "id": "pinta_queixo",
+   "label": "Pinta no queixo"
+  },
+  {
+   "id": "pinta_labio",
+   "label": "Pinta no lábio"
+  },
+  {
+   "id": "brow_l",
+   "label": "Cicatriz supercílio E"
+  },
+  {
+   "id": "brow_r",
+   "label": "Cicatriz supercílio D"
+  },
+  {
+   "id": "cheek_l",
+   "label": "Cicatriz bochecha E"
+  },
+  {
+   "id": "cheek_r",
+   "label": "Cicatriz bochecha D"
+  },
+  {
+   "id": "lip",
+   "label": "Cicatriz no lábio"
+  },
+  {
+   "id": "nose",
+   "label": "Cicatriz no nariz"
+  },
+  {
+   "id": "chin",
+   "label": "Cicatriz no queixo"
+  },
+  {
+   "id": "neck",
+   "label": "Tatuagem no pescoço"
+  },
+  {
+   "id": "chest",
+   "label": "Tatuagem no peito"
+  },
+  {
+   "id": "shoulders",
+   "label": "Tatuagem nos ombros"
+  },
+  {
+   "id": "temple",
+   "label": "Tatuagem na têmpora"
+  },
+  {
+   "id": "argola",
+   "label": "Argola na orelha"
+  },
+  {
+   "id": "brinco",
+   "label": "Brinco"
+  }
+ ],
+ "body_keys": [
+  "muscle",
+  "fat",
+  "height",
+  "shoulders",
+  "reach",
+  "legs",
+  "waist",
+  "hips",
+  "legMass",
+  "chest",
+  "arms",
+  "neck",
+  "traps",
+  "belly"
+ ],
+ "body_types": [
+  {
+   "id": "esguio",
+   "label": "Esguio",
+   "sex": "m",
+   "generator_body_type": "lean",
+   "build": 0.2,
+   "weight_class_affinity": {
+    "leve": 3,
+    "medio": 1.5,
+    "pesado": 0.2
+   },
+   "body": {
+    "muscle": 0.42,
+    "fat": 0.05,
+    "height": 0.62,
+    "shoulders": 0.32,
+    "reach": 0.62,
+    "legs": 0.6,
+    "waist": 0.35,
+    "hips": 0.45,
+    "legMass": 0.35,
+    "chest": 0.4,
+    "arms": 0.3,
+    "neck": 0.32,
+    "traps": 0.3,
+    "belly": 0
+   }
+  },
+  {
+   "id": "longilineo",
+   "label": "Longilíneo",
+   "sex": "m",
+   "generator_body_type": "lean",
+   "build": 0.35,
+   "weight_class_affinity": {
+    "leve": 1.5,
+    "medio": 2,
+    "pesado": 1
+   },
+   "body": {
+    "muscle": 0.55,
+    "fat": 0.07,
+    "height": 0.9,
+    "shoulders": 0.45,
+    "reach": 0.95,
+    "legs": 0.85,
+    "waist": 0.42,
+    "hips": 0.45,
+    "legMass": 0.42,
+    "chest": 0.45,
+    "arms": 0.42,
+    "neck": 0.4,
+    "traps": 0.4,
+    "belly": 0
+   }
+  },
+  {
+   "id": "cardio_seco",
+   "label": "Seco de cardio",
+   "sex": "m",
+   "generator_body_type": "lean",
+   "build": 0.3,
+   "weight_class_affinity": {
+    "leve": 2.5,
+    "medio": 1.5,
+    "pesado": 0.2
+   },
+   "body": {
+    "muscle": 0.58,
+    "fat": 0.03,
+    "height": 0.4,
+    "shoulders": 0.42,
+    "reach": 0.5,
+    "legs": 0.55,
+    "waist": 0.35,
+    "hips": 0.45,
+    "legMass": 0.45,
+    "chest": 0.45,
+    "arms": 0.42,
+    "neck": 0.42,
+    "traps": 0.4,
+    "belly": 0
+   }
+  },
+  {
+   "id": "atletico",
+   "label": "Atlético",
+   "sex": "m",
+   "generator_body_type": "athletic",
+   "build": 0.5,
+   "weight_class_affinity": {
+    "leve": 2,
+    "medio": 3,
+    "pesado": 1.5
+   },
+   "body": {
+    "muscle": 0.66,
+    "fat": 0.1,
+    "height": 0.5,
+    "shoulders": 0.55,
+    "reach": 0.5,
+    "legs": 0.5,
+    "waist": 0.48,
+    "hips": 0.5,
+    "legMass": 0.52,
+    "chest": 0.55,
+    "arms": 0.55,
+    "neck": 0.52,
+    "traps": 0.52,
+    "belly": 0
+   }
+  },
+  {
+   "id": "definido",
+   "label": "Definido",
+   "sex": "m",
+   "generator_body_type": "athletic",
+   "build": 0.55,
+   "weight_class_affinity": {
+    "leve": 1.5,
+    "medio": 2.5,
+    "pesado": 1
+   },
+   "body": {
+    "muscle": 0.82,
+    "fat": 0.04,
+    "height": 0.5,
+    "shoulders": 0.62,
+    "reach": 0.5,
+    "legs": 0.5,
+    "waist": 0.42,
+    "hips": 0.48,
+    "legMass": 0.55,
+    "chest": 0.62,
+    "arms": 0.62,
+    "neck": 0.55,
+    "traps": 0.58,
+    "belly": 0
+   }
+  },
+  {
+   "id": "compacto",
+   "label": "Compacto",
+   "sex": "m",
+   "generator_body_type": "compact",
+   "build": 0.65,
+   "weight_class_affinity": {
+    "leve": 2,
+    "medio": 2,
+    "pesado": 0.8
+   },
+   "body": {
+    "muscle": 0.74,
+    "fat": 0.12,
+    "height": 0.12,
+    "shoulders": 0.62,
+    "reach": 0.3,
+    "legs": 0.3,
+    "waist": 0.55,
+    "hips": 0.55,
+    "legMass": 0.7,
+    "chest": 0.6,
+    "arms": 0.64,
+    "neck": 0.66,
+    "traps": 0.62,
+    "belly": 0
+   }
+  },
+  {
+   "id": "musculoso",
+   "label": "Musculoso",
+   "sex": "m",
+   "generator_body_type": "muscular",
+   "build": 0.72,
+   "weight_class_affinity": {
+    "leve": 0.5,
+    "medio": 2,
+    "pesado": 2.5
+   },
+   "body": {
+    "muscle": 0.9,
+    "fat": 0.1,
+    "height": 0.55,
+    "shoulders": 0.78,
+    "reach": 0.5,
+    "legs": 0.5,
+    "waist": 0.5,
+    "hips": 0.52,
+    "legMass": 0.65,
+    "chest": 0.75,
+    "arms": 0.78,
+    "neck": 0.7,
+    "traps": 0.75,
+    "belly": 0
+   }
+  },
+  {
+   "id": "massivo",
+   "label": "Massivo",
+   "sex": "m",
+   "generator_body_type": "muscular",
+   "build": 0.9,
+   "weight_class_affinity": {
+    "leve": 0.1,
+    "medio": 0.8,
+    "pesado": 3
+   },
+   "body": {
+    "muscle": 0.96,
+    "fat": 0.16,
+    "height": 0.65,
+    "shoulders": 0.92,
+    "reach": 0.6,
+    "legs": 0.5,
+    "waist": 0.6,
+    "hips": 0.58,
+    "legMass": 0.8,
+    "chest": 0.88,
+    "arms": 0.92,
+    "neck": 0.85,
+    "traps": 0.9,
+    "belly": 0.05
+   }
+  },
+  {
+   "id": "grappler_robusto",
+   "label": "Grappler robusto",
+   "sex": "m",
+   "generator_body_type": "compact",
+   "build": 0.75,
+   "weight_class_affinity": {
+    "leve": 1,
+    "medio": 2.5,
+    "pesado": 2.5
+   },
+   "body": {
+    "muscle": 0.78,
+    "fat": 0.18,
+    "height": 0.35,
+    "shoulders": 0.66,
+    "reach": 0.4,
+    "legs": 0.42,
+    "waist": 0.62,
+    "hips": 0.6,
+    "legMass": 0.75,
+    "chest": 0.64,
+    "arms": 0.7,
+    "neck": 0.95,
+    "traps": 0.92,
+    "belly": 0.08
+   }
+  },
+  {
+   "id": "pesado_forte",
+   "label": "Pesado forte",
+   "sex": "m",
+   "generator_body_type": "heavy",
+   "build": 0.95,
+   "weight_class_affinity": {
+    "leve": 0,
+    "medio": 0.4,
+    "pesado": 3
+   },
+   "body": {
+    "muscle": 0.72,
+    "fat": 0.35,
+    "height": 0.75,
+    "shoulders": 0.85,
+    "reach": 0.7,
+    "legs": 0.5,
+    "waist": 0.72,
+    "hips": 0.66,
+    "legMass": 0.82,
+    "chest": 0.8,
+    "arms": 0.82,
+    "neck": 0.85,
+    "traps": 0.82,
+    "belly": 0.25
+   }
+  },
+  {
+   "id": "pesado_barriga",
+   "label": "Pesadão de barriga",
+   "sex": "m",
+   "generator_body_type": "heavy",
+   "build": 1,
+   "weight_class_affinity": {
+    "leve": 0,
+    "medio": 0.2,
+    "pesado": 1.8
+   },
+   "body": {
+    "muscle": 0.58,
+    "fat": 0.62,
+    "height": 0.7,
+    "shoulders": 0.78,
+    "reach": 0.66,
+    "legs": 0.45,
+    "waist": 0.9,
+    "hips": 0.75,
+    "legMass": 0.85,
+    "chest": 0.75,
+    "arms": 0.75,
+    "neck": 0.9,
+    "traps": 0.7,
+    "belly": 0.75
+   }
+  },
+  {
+   "id": "veterano",
+   "label": "Veterano",
+   "sex": "m",
+   "generator_body_type": "athletic",
+   "build": 0.6,
+   "weight_class_affinity": {
+    "leve": 0.8,
+    "medio": 1.5,
+    "pesado": 1.5
+   },
+   "body": {
+    "muscle": 0.58,
+    "fat": 0.28,
+    "height": 0.5,
+    "shoulders": 0.55,
+    "reach": 0.55,
+    "legs": 0.5,
+    "waist": 0.6,
+    "hips": 0.55,
+    "legMass": 0.55,
+    "chest": 0.55,
+    "arms": 0.55,
+    "neck": 0.6,
+    "traps": 0.55,
+    "belly": 0.3
+   }
+  },
+  {
+   "id": "esguia",
+   "label": "Esguia",
+   "sex": "f",
+   "generator_body_type": "lean",
+   "build": 0.15,
+   "weight_class_affinity": {
+    "leve": 3,
+    "medio": 1,
+    "pesado": 0.2
+   },
+   "body": {
+    "muscle": 0.45,
+    "fat": 0.08,
+    "height": 0.55,
+    "shoulders": 0.3,
+    "reach": 0.6,
+    "legs": 0.6,
+    "waist": 0.3,
+    "hips": 0.55,
+    "legMass": 0.5,
+    "chest": 0.35,
+    "arms": 0.3,
+    "neck": 0.3,
+    "traps": 0.25,
+    "belly": 0
+   }
+  },
+  {
+   "id": "longilinea",
+   "label": "Longilínea",
+   "sex": "f",
+   "generator_body_type": "lean",
+   "build": 0.3,
+   "weight_class_affinity": {
+    "leve": 1.5,
+    "medio": 2,
+    "pesado": 1
+   },
+   "body": {
+    "muscle": 0.55,
+    "fat": 0.1,
+    "height": 0.9,
+    "shoulders": 0.4,
+    "reach": 0.9,
+    "legs": 0.88,
+    "waist": 0.36,
+    "hips": 0.6,
+    "legMass": 0.55,
+    "chest": 0.45,
+    "arms": 0.4,
+    "neck": 0.35,
+    "traps": 0.3,
+    "belly": 0
+   }
+  },
+  {
+   "id": "atletica",
+   "label": "Atlética",
+   "sex": "f",
+   "generator_body_type": "athletic",
+   "build": 0.45,
+   "weight_class_affinity": {
+    "leve": 2.5,
+    "medio": 3,
+    "pesado": 1.5
+   },
+   "body": {
+    "muscle": 0.62,
+    "fat": 0.12,
+    "height": 0.45,
+    "shoulders": 0.42,
+    "reach": 0.5,
+    "legs": 0.5,
+    "waist": 0.4,
+    "hips": 0.64,
+    "legMass": 0.62,
+    "chest": 0.5,
+    "arms": 0.48,
+    "neck": 0.4,
+    "traps": 0.4,
+    "belly": 0
+   }
+  },
+  {
+   "id": "definida",
+   "label": "Definida",
+   "sex": "f",
+   "generator_body_type": "athletic",
+   "build": 0.5,
+   "weight_class_affinity": {
+    "leve": 2,
+    "medio": 2.5,
+    "pesado": 1
+   },
+   "body": {
+    "muscle": 0.8,
+    "fat": 0.06,
+    "height": 0.45,
+    "shoulders": 0.5,
+    "reach": 0.5,
+    "legs": 0.5,
+    "waist": 0.35,
+    "hips": 0.6,
+    "legMass": 0.62,
+    "chest": 0.42,
+    "arms": 0.6,
+    "neck": 0.45,
+    "traps": 0.48,
+    "belly": 0
+   }
+  },
+  {
+   "id": "compacta",
+   "label": "Compacta",
+   "sex": "f",
+   "generator_body_type": "compact",
+   "build": 0.6,
+   "weight_class_affinity": {
+    "leve": 2.5,
+    "medio": 1.5,
+    "pesado": 0.5
+   },
+   "body": {
+    "muscle": 0.72,
+    "fat": 0.12,
+    "height": 0.1,
+    "shoulders": 0.52,
+    "reach": 0.3,
+    "legs": 0.3,
+    "waist": 0.45,
+    "hips": 0.62,
+    "legMass": 0.75,
+    "chest": 0.5,
+    "arms": 0.6,
+    "neck": 0.55,
+    "traps": 0.52,
+    "belly": 0
+   }
+  },
+  {
+   "id": "forte",
+   "label": "Forte",
+   "sex": "f",
+   "generator_body_type": "muscular",
+   "build": 0.72,
+   "weight_class_affinity": {
+    "leve": 0.8,
+    "medio": 2,
+    "pesado": 2.5
+   },
+   "body": {
+    "muscle": 0.85,
+    "fat": 0.14,
+    "height": 0.55,
+    "shoulders": 0.66,
+    "reach": 0.55,
+    "legs": 0.5,
+    "waist": 0.5,
+    "hips": 0.62,
+    "legMass": 0.75,
+    "chest": 0.55,
+    "arms": 0.72,
+    "neck": 0.62,
+    "traps": 0.66,
+    "belly": 0
+   }
+  },
+  {
+   "id": "curvilinea",
+   "label": "Curvilínea",
+   "sex": "f",
+   "generator_body_type": "athletic",
+   "build": 0.5,
+   "weight_class_affinity": {
+    "leve": 1.5,
+    "medio": 2,
+    "pesado": 1.5
+   },
+   "body": {
+    "muscle": 0.55,
+    "fat": 0.24,
+    "height": 0.45,
+    "shoulders": 0.4,
+    "reach": 0.5,
+    "legs": 0.5,
+    "waist": 0.34,
+    "hips": 0.88,
+    "legMass": 0.8,
+    "chest": 0.72,
+    "arms": 0.45,
+    "neck": 0.38,
+    "traps": 0.35,
+    "belly": 0.05
+   }
+  },
+  {
+   "id": "potente",
+   "label": "Potente",
+   "sex": "f",
+   "generator_body_type": "heavy",
+   "build": 0.85,
+   "weight_class_affinity": {
+    "leve": 0.3,
+    "medio": 1,
+    "pesado": 2.5
+   },
+   "body": {
+    "muscle": 0.78,
+    "fat": 0.3,
+    "height": 0.6,
+    "shoulders": 0.72,
+    "reach": 0.6,
+    "legs": 0.5,
+    "waist": 0.62,
+    "hips": 0.72,
+    "legMass": 0.85,
+    "chest": 0.65,
+    "arms": 0.75,
+    "neck": 0.68,
+    "traps": 0.66,
+    "belly": 0.18
+   }
+  }
+ ],
+ "populations": [
+  {
+   "id": "africa_ocidental",
+   "label": "África Ocidental",
+   "beard_chance": 0.6,
+   "skin": {
+    "t12": 2,
+    "t13": 3,
+    "t14": 3,
+    "t15": 2
+   },
+   "hair_colors": {
+    "preto": 1,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "raspado": 3,
+    "maquina": 3,
+    "degrade_alto": 3,
+    "degrade_baixo": 2,
+    "twists": 2,
+    "nago": 1,
+    "dreads_curtos": 1,
+    "afro_curto": 2,
+    "black_power": 1,
+    "degrade_risca": 2,
+    "high_top": 0.7,
+    "dreads_presos": 0.8,
+    "moicano_cacheado": 0.5,
+    "twists_altos": 1.2,
+    "dreads_soltos": 0.8,
+    "cachos_volumosos": 0.4,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.8,
+    "maquina_desenho": 0.5,
+    "waves_360": 2,
+    "afro_degrade": 1.6,
+    "cachos_degrade": 0.8,
+    "nago_zigue": 1,
+    "freeform": 0.6
+   },
+   "hair_styles_f": {
+    "box_braids": 3,
+    "nago": 2,
+    "afro_curto": 2,
+    "coque": 1,
+    "twists": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "afro_puff": 1.5,
+    "trancas_laterais": 1.2,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 2,
+    "bantu_knots": 1.2,
+    "freeform": 0.5
+   },
+   "beards": {
+    "nenhuma": 3,
+    "sombra": 2,
+    "por_fazer": 2,
+    "cavanhaque_bigode": 2,
+    "cheia_curta": 1,
+    "contorno": 1,
+    "cavanhaque": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "africa_oriental",
+   "label": "África Oriental",
+   "beard_chance": 0.5,
+   "skin": {
+    "t10": 1,
+    "t11": 2,
+    "t12": 3,
+    "t13": 3,
+    "t14": 2
+   },
+   "hair_colors": {
+    "preto": 1,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "raspado": 3,
+    "maquina": 3,
+    "degrade_alto": 2,
+    "afro_curto": 2,
+    "twists": 1,
+    "dreads_curtos": 1,
+    "degrade_risca": 2,
+    "high_top": 0.7,
+    "dreads_presos": 0.8,
+    "moicano_cacheado": 0.5,
+    "twists_altos": 1.2,
+    "dreads_soltos": 0.8,
+    "cachos_volumosos": 0.4,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.8,
+    "maquina_desenho": 0.5,
+    "waves_360": 2,
+    "afro_degrade": 1.6,
+    "cachos_degrade": 0.8,
+    "nago_zigue": 1,
+    "freeform": 0.6
+   },
+   "hair_styles_f": {
+    "box_braids": 2,
+    "nago": 2,
+    "afro_curto": 2,
+    "coque": 2,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "afro_puff": 1.5,
+    "trancas_laterais": 1.2,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 2,
+    "bantu_knots": 1.2,
+    "freeform": 0.5
+   },
+   "beards": {
+    "nenhuma": 3,
+    "sombra": 2,
+    "por_fazer": 2,
+    "cavanhaque_bigode": 1,
+    "cheia_curta": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "afro_diaspora",
+   "label": "Afro-brasileiro / afro-americano",
+   "beard_chance": 0.7,
+   "skin": {
+    "t08": 1,
+    "t09": 2,
+    "t10": 2,
+    "t11": 3,
+    "t12": 3,
+    "t13": 2,
+    "t14": 1,
+    "t15": 1
+   },
+   "hair_colors": {
+    "preto": 6,
+    "castanho_escuro": 2,
+    "tingido_vermelho": 0.3,
+    "platinado": 0.3,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "degrade_alto": 3,
+    "degrade_baixo": 3,
+    "maquina": 2,
+    "raspado": 2,
+    "twists": 2,
+    "nago": 2,
+    "dreads_curtos": 1,
+    "dreads_longos": 1,
+    "black_power": 1,
+    "afro_curto": 2,
+    "cacheado_curto": 1,
+    "moicano": 0.5,
+    "degrade_risca": 2,
+    "high_top": 0.7,
+    "dreads_presos": 0.8,
+    "moicano_cacheado": 0.5,
+    "twists_altos": 1.2,
+    "dreads_soltos": 0.8,
+    "cachos_volumosos": 0.4,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.8,
+    "maquina_desenho": 0.5,
+    "waves_360": 2,
+    "afro_degrade": 1.6,
+    "cachos_degrade": 0.8,
+    "nago_zigue": 1,
+    "freeform": 0.6
+   },
+   "hair_styles_f": {
+    "box_braids": 3,
+    "nago": 2,
+    "black_power": 1,
+    "afro_curto": 1,
+    "coque": 1,
+    "twists": 1,
+    "cacheado_longo": 1,
+    "rabo": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "afro_puff": 1.5,
+    "trancas_laterais": 1.2,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 2,
+    "bantu_knots": 1.2,
+    "freeform": 0.5
+   },
+   "beards": {
+    "nenhuma": 2,
+    "sombra": 2,
+    "por_fazer": 2,
+    "cavanhaque_bigode": 3,
+    "cheia_curta": 2,
+    "contorno": 1,
+    "bigode": 1,
+    "ancora": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "latino",
+   "label": "Latino-americano",
+   "beard_chance": 0.75,
+   "skin": {
+    "t04": 1,
+    "t05": 2,
+    "t06": 3,
+    "t07": 3,
+    "t08": 3,
+    "t09": 2,
+    "t10": 1
+   },
+   "hair_colors": {
+    "preto": 4,
+    "castanho_escuro": 4,
+    "castanho": 1,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 3,
+    "degrade_baixo": 3,
+    "militar": 2,
+    "cacheado_curto": 2,
+    "risca": 1,
+    "franja": 1,
+    "mullet": 1,
+    "maquina": 1,
+    "topete": 1,
+    "para_tras": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "meio_coque": 0.7,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 1.2,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "rabo": 3,
+    "longo_liso": 2,
+    "longo_ondulado": 2,
+    "coque": 2,
+    "nago": 1,
+    "cacheado_longo": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 2,
+    "por_fazer": 2,
+    "bigode": 2,
+    "cavanhaque_bigode": 2,
+    "cheia_curta": 2,
+    "sombra": 1,
+    "ferradura": 0.5,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "andino",
+   "label": "Andino / indígena das Américas",
+   "beard_chance": 0.35,
+   "skin": {
+    "t06": 2,
+    "t07": 3,
+    "t08": 3,
+    "t09": 2,
+    "t10": 1
+   },
+   "hair_colors": {
+    "preto": 1,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 3,
+    "militar": 2,
+    "franja": 2,
+    "maquina": 2,
+    "degrade_baixo": 2,
+    "rabo": 0.5,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_liso": 3,
+    "rabo": 3,
+    "coque": 1,
+    "nago": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 5,
+    "sombra": 2,
+    "bigode": 1,
+    "bigode_fino": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "europa_norte",
+   "label": "Europa do Norte",
+   "beard_chance": 0.7,
+   "skin": {
+    "t01": 3,
+    "t02": 3,
+    "t03": 1
+   },
+   "hair_colors": {
+    "loiro": 3,
+    "loiro_escuro": 3,
+    "castanho_claro": 3,
+    "castanho": 2,
+    "ruivo": 1,
+    "ruivo_escuro": 1,
+    "platinado": 0.3,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 3,
+    "degrade_baixo": 2,
+    "militar": 2,
+    "risca": 2,
+    "para_tras": 1,
+    "maquina": 2,
+    "raspado": 1,
+    "mullet": 1,
+    "topete": 1,
+    "coque_masc": 1,
+    "coroa": 0.5,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "meio_coque": 0.7,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "rabo": 3,
+    "coque": 3,
+    "longo_liso": 2,
+    "longo_ondulado": 1,
+    "nago": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 2,
+    "por_fazer": 2,
+    "cheia_curta": 3,
+    "cheia_longa": 1,
+    "sombra": 1,
+    "cavanhaque_bigode": 1,
+    "ancora": 0.5,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.8,
+    "lenhador": 1,
+    "viking_trancada": 0.3
+   }
+  },
+  {
+   "id": "mediterraneo",
+   "label": "Europa do Sul / Mediterrâneo",
+   "beard_chance": 0.8,
+   "skin": {
+    "t03": 2,
+    "t04": 3,
+    "t05": 3,
+    "t06": 2,
+    "t07": 1
+   },
+   "hair_colors": {
+    "preto": 3,
+    "castanho_escuro": 4,
+    "castanho": 2,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 3,
+    "degrade_baixo": 3,
+    "cacheado_curto": 2,
+    "para_tras": 2,
+    "risca": 1,
+    "maquina": 1,
+    "topete": 1,
+    "coroa": 0.5,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "meio_coque": 0.7,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 1.2,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_ondulado": 3,
+    "rabo": 2,
+    "coque": 2,
+    "cacheado_longo": 1,
+    "longo_liso": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "por_fazer": 3,
+    "cheia_curta": 3,
+    "sombra": 2,
+    "nenhuma": 1,
+    "cavanhaque_bigode": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "leste_europeu",
+   "label": "Leste Europeu",
+   "beard_chance": 0.65,
+   "skin": {
+    "t01": 2,
+    "t02": 3,
+    "t03": 2,
+    "t04": 1
+   },
+   "hair_colors": {
+    "castanho": 3,
+    "castanho_claro": 3,
+    "loiro_escuro": 2,
+    "castanho_escuro": 2,
+    "loiro": 1,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "maquina": 3,
+    "raspado": 2,
+    "militar": 3,
+    "curto": 2,
+    "degrade_baixo": 2,
+    "coroa": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "meio_coque": 0.7,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "rabo": 3,
+    "coque": 2,
+    "longo_liso": 2,
+    "nago": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 2,
+    "por_fazer": 3,
+    "sombra": 2,
+    "cheia_curta": 2,
+    "sem_bigode": 0.5,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.8,
+    "lenhador": 1,
+    "viking_trancada": 0.3
+   }
+  },
+  {
+   "id": "oriente_medio",
+   "label": "Oriente Médio / Norte da África",
+   "beard_chance": 0.9,
+   "skin": {
+    "t03": 1,
+    "t04": 3,
+    "t05": 3,
+    "t06": 3,
+    "t07": 2,
+    "t08": 1,
+    "t09": 1
+   },
+   "hair_colors": {
+    "preto": 5,
+    "castanho_escuro": 3,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 2,
+    "degrade_baixo": 3,
+    "cacheado_curto": 2,
+    "maquina": 2,
+    "para_tras": 1,
+    "militar": 1,
+    "risca": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_ondulado": 2,
+    "coque": 2,
+    "rabo": 2,
+    "cacheado_longo": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "cheia_curta": 4,
+    "por_fazer": 3,
+    "cheia_longa": 1,
+    "sombra": 1,
+    "cavanhaque_bigode": 1,
+    "nenhuma": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "longa_sem_bigode": 1,
+    "cheia_media": 2.5,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.8,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "caucaso",
+   "label": "Cáucaso",
+   "beard_chance": 0.9,
+   "skin": {
+    "t02": 2,
+    "t03": 3,
+    "t04": 3,
+    "t05": 2
+   },
+   "hair_colors": {
+    "preto": 4,
+    "castanho_escuro": 3,
+    "castanho": 1,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "raspado": 3,
+    "maquina": 3,
+    "militar": 2,
+    "curto": 1,
+    "degrade_baixo": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "rabo": 2,
+    "coque": 2,
+    "longo_liso": 2,
+    "longo_ondulado": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "cheia_curta": 3,
+    "sem_bigode": 2,
+    "por_fazer": 2,
+    "cheia_longa": 1,
+    "nenhuma": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "longa_sem_bigode": 1,
+    "cheia_media": 2.5,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.8,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "asia_central",
+   "label": "Ásia Central",
+   "beard_chance": 0.5,
+   "skin": {
+    "t02": 1,
+    "t03": 2,
+    "t04": 3,
+    "t05": 3,
+    "t06": 2,
+    "t07": 1
+   },
+   "hair_colors": {
+    "preto": 5,
+    "castanho_escuro": 2,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "maquina": 3,
+    "raspado": 2,
+    "militar": 3,
+    "curto": 2,
+    "degrade_baixo": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_liso": 3,
+    "rabo": 2,
+    "coque": 2,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 3,
+    "sombra": 2,
+    "por_fazer": 2,
+    "bigode": 1,
+    "cheia_curta": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "longa_sem_bigode": 1,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "leste_asiatico",
+   "label": "Leste Asiático",
+   "beard_chance": 0.25,
+   "skin": {
+    "t02": 3,
+    "t03": 3,
+    "t04": 2,
+    "t05": 2,
+    "t06": 1
+   },
+   "hair_colors": {
+    "preto": 6,
+    "castanho_escuro": 2,
+    "platinado": 0.4,
+    "tingido_azul": 0.2,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "franja": 3,
+    "curto": 3,
+    "risca": 2,
+    "para_tras": 2,
+    "degrade_baixo": 2,
+    "militar": 1,
+    "moicano": 0.3,
+    "fauxhawk": 0.5,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 2.5,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.8,
+    "ombro": 0.25,
+    "cogumelo": 1.2,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_liso": 3,
+    "rabo": 3,
+    "coque": 2,
+    "franja": 2,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "cogumelo": 1,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 6,
+    "sombra": 2,
+    "bigode_fino": 1,
+    "cavanhaque": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "sudeste_asiatico",
+   "label": "Sudeste Asiático",
+   "beard_chance": 0.3,
+   "skin": {
+    "t05": 2,
+    "t06": 3,
+    "t07": 3,
+    "t08": 2,
+    "t09": 2,
+    "t10": 1
+   },
+   "hair_colors": {
+    "preto": 6,
+    "castanho_escuro": 2,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 3,
+    "degrade_baixo": 3,
+    "franja": 2,
+    "militar": 2,
+    "cacheado_curto": 1,
+    "fauxhawk": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_liso": 3,
+    "rabo": 3,
+    "coque": 2,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 5,
+    "sombra": 2,
+    "bigode_fino": 1,
+    "cavanhaque": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "sul_asiatico",
+   "label": "Sul da Ásia",
+   "beard_chance": 0.75,
+   "skin": {
+    "t06": 2,
+    "t07": 2,
+    "t08": 3,
+    "t09": 3,
+    "t10": 2,
+    "t11": 2,
+    "t12": 1
+   },
+   "hair_colors": {
+    "preto": 5,
+    "castanho_escuro": 3,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "curto": 3,
+    "para_tras": 2,
+    "degrade_baixo": 2,
+    "cacheado_curto": 2,
+    "risca": 1,
+    "topete": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 1.2,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_liso": 3,
+    "rabo": 2,
+    "coque": 2,
+    "longo_ondulado": 1,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "cheia_curta": 3,
+    "por_fazer": 3,
+    "sombra": 1,
+    "nenhuma": 2,
+    "cavanhaque_bigode": 1,
+    "bigode": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 2.5,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.8,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  },
+  {
+   "id": "polinesia",
+   "label": "Polinésia / Pacífico",
+   "beard_chance": 0.6,
+   "skin": {
+    "t07": 2,
+    "t08": 3,
+    "t09": 3,
+    "t10": 2,
+    "t11": 1
+   },
+   "hair_colors": {
+    "preto": 5,
+    "castanho_escuro": 2,
+    "multicolor": 0.08,
+    "tingido_rosa": 0.05,
+    "tingido_verde": 0.04,
+    "pontas_claras": 0.06,
+    "bicolor": 0.03,
+    "prata": 0.03,
+    "acaju": 0.05
+   },
+   "hair_styles_m": {
+    "cacheado_curto": 3,
+    "coque_masc": 3,
+    "degrade_baixo": 2,
+    "maquina": 2,
+    "dreads_curtos": 1,
+    "longo_ondulado": 1,
+    "mullet": 1,
+    "undercut": 1.2,
+    "crop_frances": 1,
+    "mullet_moderno": 0.6,
+    "espetado": 0.4,
+    "meio_coque": 0.7,
+    "quiff": 2.5,
+    "franja_longa": 1,
+    "ondulado_medio": 0.6,
+    "cachos_volumosos": 0.6,
+    "volumoso": 0.3,
+    "ombro": 0.25,
+    "caesar": 1,
+    "espinhos": 0.6,
+    "slick_longo": 0.3,
+    "samurai": 0.3,
+    "undercut_coque": 0.6,
+    "calvo_lateral": 0.4,
+    "wolf_cut": 0.3,
+    "franja_cortina": 0.5,
+    "viking_trancado": 0.15,
+    "flat_top": 0.2,
+    "maquina_desenho": 0.5,
+    "cachos_degrade": 0.6
+   },
+   "hair_styles_f": {
+    "longo_ondulado": 3,
+    "cacheado_longo": 2,
+    "coque": 2,
+    "rabo": 2,
+    "duas_trancas": 3,
+    "tranca_unica": 2,
+    "coque_baixo": 2,
+    "pixie": 0.4,
+    "undercut_lateral": 0.4,
+    "rabo_alto": 3.5,
+    "ombro": 1.5,
+    "coque_baguncado": 1,
+    "curto_lateral": 0.5,
+    "trancas_boxeadora": 3,
+    "rabo_trancado": 2,
+    "coque_trancado": 1.5,
+    "bob": 0.4,
+    "long_bob": 0.4,
+    "shag": 0.3,
+    "franja_reta_longo": 0.4,
+    "coques_duplos": 0.6,
+    "nago_longas": 0.8
+   },
+   "beards": {
+    "nenhuma": 2,
+    "por_fazer": 2,
+    "cheia_curta": 2,
+    "cavanhaque_bigode": 2,
+    "sombra": 1,
+    "desenhada": 1.2,
+    "bigode_grosso": 0.4,
+    "cavanhaque_longo": 0.3,
+    "cheia_media": 1.2,
+    "barba_degrade": 1.5,
+    "falhada": 0.6,
+    "van_dyke": 0.4,
+    "balbo": 0.4,
+    "contorno_bigode": 0.6,
+    "chevron": 0.3,
+    "bigode_guidao": 0.1,
+    "fu_manchu": 0.08,
+    "ducktail": 0.3,
+    "costeletas_bigode": 0.2,
+    "garibaldi": 0.3,
+    "lenhador": 0.4,
+    "viking_trancada": 0.05
+   }
+  }
+ ]
+}
