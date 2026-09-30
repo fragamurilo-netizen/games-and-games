@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native"
 import * as Haptics from "expo-haptics"
-import { queryDecision, queryLife, queryPeriod } from "@paralelo/simulation"
+import { queryDecision, queryLife, queryPeriod, queryWorkScene } from "@paralelo/simulation"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 import { ActionRow } from "./editorial"
@@ -181,4 +181,68 @@ const scene = StyleSheet.create({
   choices: { marginTop: space[6], borderTopColor: colors.rule, borderTopWidth: StyleSheet.hairlineWidth },
   later: { marginTop: space[6], paddingVertical: space[3] },
   laterText: { color: colors.textSecondary, fontFamily: fonts.medium, fontSize: 14 },
+})
+
+// ---------------- trabalho em cena (bíblia §7, §46) ----------------
+export function WorkScene() {
+  const { world, dispatch, busy } = useGame()
+  const scene = useMemo(() => world && !world.events.pending ? queryWorkScene(world) : null, [world])
+  const life = useMemo(() => world && scene && !scene.actor ? queryLife(world) : null, [world, scene])
+  const { width: screen } = useWindowDimensions()
+  const width = Math.min(screen, 600)
+  useEffect(() => { if (scene) buzz("warning") }, [scene?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  const kicker = scene ? (scene.kind === "shift" ? "NO TURNO" : scene.kind === "review" ? "CONVERSA DO MÊS" : "ENTREVISTA") : ""
+  return <Modal visible={!!scene} animationType="slide" transparent={false} onRequestClose={() => undefined}>
+    {scene && <View style={work.root}>
+      <ScrollView contentContainerStyle={work.content}>
+        {scene.actor ? <View style={work.actor}>
+          <Portrait seed={scene.actor.appearance.seed} sex={scene.actor.appearance.sex} age={scene.actor.age} size={150} expression={scene.kind === "review" ? "neutral" : "curious"} accessibilityLabel={scene.actor.name} />
+          <View style={work.actorText}>
+            <Text style={work.actorName}>{scene.actor.name}</Text>
+            {scene.actor.role && <Text style={work.actorRole}>{scene.actor.role}</Text>}
+          </View>
+        </View> : life && <View style={scene_.bleed}>
+          <LifeScene width={width} height={Math.round(width * 0.55)} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} expression="tense" />
+        </View>}
+        <Text style={work.kicker}>{kicker} · {scene.time}</Text>
+        <Text accessibilityRole="header" style={work.title}>{scene.title}</Text>
+        {scene.text.map((line, i) => <Text key={i} style={[work.text, i > 0 && work.textMore]}>{line}</Text>)}
+        <View style={work.choices}>
+          {scene.choices.map(choice => <Pressable key={choice.id} accessibilityRole="button" disabled={busy || !choice.canChoose}
+            accessibilityLabel={[choice.label, choice.meta, choice.hint].filter(Boolean).join(", ")} accessibilityState={{ disabled: busy || !choice.canChoose }}
+            onPress={() => { void dispatch({ type: "work-choice", sceneId: scene.id, choiceId: choice.id }) }}
+            style={({ pressed }) => [work.choice, pressed && work.pressed]}>
+            <View style={work.choiceHead}>
+              <Text style={[work.choiceLabel, !choice.canChoose && work.off]}>{choice.label}</Text>
+              {choice.meta && <Text style={work.meta}>{choice.meta}</Text>}
+            </View>
+            {choice.hint && <Text style={[work.hint, choice.hint === "arriscado" && work.risky]}>{choice.hint.charAt(0).toUpperCase() + choice.hint.slice(1)}.</Text>}
+            {!choice.canChoose && choice.reason && <Text style={work.hint}>{choice.reason}</Text>}
+          </Pressable>)}
+        </View>
+      </ScrollView>
+    </View>}
+  </Modal>
+}
+const scene_ = StyleSheet.create({ bleed: { marginHorizontal: -space[6], marginTop: -space[12], marginBottom: space[6] } })
+const work = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  content: { paddingHorizontal: space[6], paddingTop: space[12], paddingBottom: space[12], maxWidth: 600, width: "100%", alignSelf: "center" },
+  actor: { flexDirection: "row", alignItems: "flex-end", gap: space[4], marginBottom: space[6] },
+  actorText: { flex: 1, paddingBottom: space[2] },
+  actorName: { color: colors.text, fontFamily: fonts.title, fontSize: 20, lineHeight: 25 },
+  actorRole: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13, marginTop: 2 },
+  kicker: { color: colors.accent, fontFamily: fonts.label, fontSize: 11, letterSpacing: 1.6 },
+  title: { color: colors.text, fontFamily: fonts.title, fontSize: 28, lineHeight: 34, marginTop: space[2] },
+  text: { color: colors.text, fontFamily: fonts.narrative, fontSize: 19, lineHeight: 29, marginTop: space[4] },
+  textMore: { marginTop: space[2], color: colors.textSecondary, fontSize: 17, lineHeight: 26 },
+  choices: { marginTop: space[6], borderTopColor: colors.rule, borderTopWidth: StyleSheet.hairlineWidth },
+  choice: { paddingVertical: space[4], borderBottomColor: colors.rule, borderBottomWidth: StyleSheet.hairlineWidth, minHeight: 56 },
+  pressed: { backgroundColor: colors.surface },
+  choiceHead: { flexDirection: "row", alignItems: "baseline", gap: space[4] },
+  choiceLabel: { flex: 1, color: colors.text, fontFamily: fonts.medium, fontSize: 17, lineHeight: 24 },
+  meta: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 14, fontVariant: ["tabular-nums"] },
+  hint: { color: colors.textMuted, fontFamily: fonts.body, fontSize: 13, lineHeight: 19, marginTop: space[1] },
+  risky: { color: colors.warning },
+  off: { color: colors.textMuted },
 })

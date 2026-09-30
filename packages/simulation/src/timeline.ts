@@ -20,8 +20,10 @@ export function entryWeight(entry: Pick<TimelineEntry, "kind" | "cause" | "text"
     case "finance": return entry.text.includes("negativa") ? "importante" : "relevante"
     case "education": return entry.text.startsWith("Você concluiu") ? "importante" : "cotidiano"
     case "career":
-      if (cause.startsWith("career.dismissed") || cause.startsWith("career.restructure")) return "importante"
-      if (cause.startsWith("career.application")) return entry.text.includes("aceitou") ? "importante" : "relevante"
+      if (cause.startsWith("work.promotion:")) return "marco"
+      if (cause.startsWith("career.dismissed") || cause.startsWith("career.restructure") || cause.startsWith("career.performance") || cause.startsWith("work.review")) return "importante"
+      if (cause.startsWith("work.moment") || cause.startsWith("work.interview") || cause.startsWith("work.assignment") || cause.startsWith("work.leader") || cause.startsWith("work.promotion-denied")) return "relevante"
+      if (cause.startsWith("career.application")) return entry.text.includes("aceitou") || entry.text.includes(" é sua") ? "importante" : "relevante"
       if (cause.startsWith("career.absence")) return "relevante"
       return "cotidiano"
     case "relationship":

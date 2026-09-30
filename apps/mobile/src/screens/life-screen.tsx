@@ -58,6 +58,7 @@ export default function LifeScreen() {
     </View>}
 
     <Kicker meta="o relógio avança">Agora</Kicker>
+    {life.work?.canWork && <ActionRow label={life.work.late ? "Ir trabalhar, com atraso" : "Ir trabalhar"} meta="8 h" command={{ type: "work" }} />}
     <ActionRow label="Descansar" meta="2 h" command={{ type: "rest" }} />
     <ActionRow label="Dormir" meta="8 h" command={{ type: "sleep" }} />
     <ActionRow label="Seguir o dia" meta="4 h" command={{ type: "wait", minutes: 240 }} />

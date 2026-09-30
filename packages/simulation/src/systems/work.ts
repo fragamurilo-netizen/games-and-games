@@ -34,7 +34,7 @@ export function whenText(world: Pick<WorldState, "clock">, at: { day: number; mi
 }
 const dueText = (world: Pick<WorldState, "clock">, day: number): string => {
   const diff = day - world.clock.day
-  return diff <= 0 ? "hoje" : diff === 1 ? "amanhã" : onWeekday(day)
+  return diff <= 0 ? "hoje" : diff === 1 ? "amanhã" : weekdayOf({ day, minute: 0 })
 }
 
 // ---------------- migração e liderança ----------------

@@ -6,7 +6,7 @@ import { competitionFor, familyOf, internalApplicationReason, interviewChoices, 
 import { entryWeight, summarizeRoutine, weightRank } from "../timeline"
 import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
-import { courses, fillText, inPlace, interviewTexts, jobRoles, roleCareer, routineRules, workSituations } from "@paralelo/content"
+import { courses, fillText, inPlace, interviewTexts, jobRoles, roleCareer, routineRules, workRules, workSituations } from "@paralelo/content"
 import { applicationReason, nextWorkTime, workReason } from "../systems/career"
 import { formatMoney } from "../systems/finance"
 import { groceriesReason, mealReason, type MealSource } from "../systems/routine"
@@ -33,7 +33,7 @@ function expressionFor(needs: WorldState["people"][string]["needs"]): "tired" | 
   return "neutral"
 }
 const MARK_LABELS: Partial<Record<WorldState["scheduled"][number]["kind"], string>> = {
-  "work-reminder": "Turno", "work-attendance": "Limite do turno", "monthly-finance": "Aluguel e salário", "mother-message": "Mensagem",
+  "work-reminder": "Turno", "work-attendance": "Limite do turno", "monthly-finance": "Aluguel e salário", "mother-message": "Mensagem", interview: "Entrevista",
 }
 
 /** O que aconteceu entre você e a pessoa, dos fatos que pesam (bíblia §6.4). */
@@ -141,10 +141,15 @@ export function queryLife(world: WorldState) {
         canContact: !unavailable, unavailableReason: unavailable?.message ?? null,
         memories: world.memories.filter(memory => memory.personId === person.id && memory.salience > .1).slice(-3).reverse().map(memory => ({ id: memory.id, text: memory.text, date: formatDate(memory.at) })) }
     }),
-    agenda: world.scheduled.filter(item => item.kind === "work-attendance" || item.kind === "monthly-finance")
-      .sort((a, b) => absoluteMinute(a.at) - absoluteMinute(b.at)).slice(0, 3).map(item => ({ id: item.id, date: formatDate(item.at),
-        time: item.kind === "work-attendance" ? "Entrada até 14h" : formatTime(item.at),
-        label: item.kind === "work-attendance" && world.employment ? `Expediente · ${world.companies[world.employment.companyId]!.name}` : "Pagamento e aluguel" })),
+    agenda: world.scheduled.filter(item => item.kind === "work-attendance" || item.kind === "monthly-finance" || item.kind === "interview")
+      .sort((a, b) => absoluteMinute(a.at) - absoluteMinute(b.at)).slice(0, 4).map(item => {
+        const interview = item.kind === "interview" ? world.work.interviews.find(i => i.id === item.interviewId) : undefined
+        return { id: item.id, date: formatDate(item.at),
+          time: item.kind === "work-attendance" ? "Chegar até 8h30" : formatTime(item.at),
+          label: interview ? `${interview.internal ? "Processo interno" : "Entrevista"} · ${world.companies[interview.companyId]!.name}`
+            : item.kind === "work-attendance" && world.employment ? `Expediente · ${world.companies[world.employment.companyId]!.name}` : "Pagamento e aluguel" }
+      }),
+    work: world.employment ? { canWork: !workReason(world), reason: workReason(world), late: world.clock.minute > workRules.onTimeMinute } : null,
   }
 }
 
@@ -197,7 +202,7 @@ export function queryCareer(world: WorldState) {
   return {
     employment: e && role && w && manager ? { company: world.companies[e.companyId]!.name, title: role.title,
       salary: formatMoney(w.salaryCents), accrued: formatMoney(e.accruedCents), shifts: e.shiftsWorked, tenure: tenureText(world.clock.day - e.startedAt.day),
-      schedule: "Segunda a sexta · chegada até 8h30, 8 horas",
+      schedule: "Seg a sex, até 8h30",
       started: formatDate(e.startedAt), performance: situation[0] ?? "", presence: e.consecutiveAbsences === 2 ? "Você recebeu uma advertência. Outra falta seguida encerra o contrato."
         : e.consecutiveAbsences === 1 ? "Há uma falta registrada. Comparecer ao próximo turno interrompe a sequência."
         : `A presença é cobrada a partir de ${formatDate({ day: e.requiredFromDay, minute: 0 })}.`,
@@ -243,7 +248,7 @@ export function queryWorkScene(world: WorldState) {
   if (scene.kind === "shift") {
     const situation = workSituations.find(s => s.id === scene.situationId)!
     const skill = jobRoles.find(r => r.id === e!.roleId)!.skill
-    return { ...base, title: `No turno · ${values.company}`, text: [fillText(situation.text, values)],
+    return { ...base, title: values.company, text: [fillText(situation.text, values)],
       choices: situation.choices.map(c => {
         const cost = [c.minutes ? `+${c.minutes} min` : null, c.success.effect.moneyCents ? formatMoney(-c.success.effect.moneyCents) : null].filter(Boolean).join(", ")
         const money = -(c.success.effect.moneyCents ?? 0)
@@ -252,12 +257,12 @@ export function queryWorkScene(world: WorldState) {
       }) }
   }
   if (scene.kind === "review") {
-    return { ...base, title: "Conversa do mês", text: reviewEvaluation(world).facts,
+    return { ...base, title: `Com ${values.manager}`, text: reviewEvaluation(world).facts,
       choices: reviewChoices(world).map(c => ({ id: c.id, label: c.label, meta: null, hint: null, canChoose: c.available, reason: c.reason })) }
   }
   const interview = world.work.interviews.find(i => i.id === scene.interviewId)!
   const intro = interview.internal ? interviewTexts.internal : interviewTexts.intro[familyOf(interview.roleId)]
-  return { ...base, title: interview.internal ? "Processo interno" : `Entrevista · ${values.company}`,
+  return { ...base, title: interview.internal ? `Processo interno · ${values.role}` : values.company,
     text: [fillText(intro, values), interview.prepared ? "Você chegou com as respostas ensaiadas." : "Você não teve tempo de se preparar."],
     choices: interviewChoices(world, interview).map(c => ({ id: c.id, label: c.label, meta: null, hint: riskOf(world, c, c.skill).hint, canChoose: true, reason: null })) }
 }
