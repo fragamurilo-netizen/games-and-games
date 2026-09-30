@@ -20,3 +20,11 @@ static func result(data: Dictionary) -> String:
 	return " ".join(lines)
 static func event_status(value: String) -> String:
 	return {"planned":"EM MONTAGEM","announced":"ANUNCIADO","completed":"CONCLUÍDO","postponed":"ADIADO"}.get(value,value)
+static func tier(value: String) -> String:
+	return {"regional":"regional","national":"nacional","global":"global"}.get(value,value)
+static func objective(goal: Dictionary) -> String:
+	var mark:="✓ " if goal.done else "○ "
+	if goal.id=="profit":return mark+"Fechar o ano com lucro de pelo menos %s · agora %s"%[money(int(goal.target)),money(int(goal.progress))]
+	return mark+"%s · agora %d"%[goal.label,int(goal.progress)]
+static func injury(kind: String) -> String:
+	return {"cut":"corte","hand":"mão","rib":"costela","shoulder":"ombro","knee":"joelho","concussion":"concussão"}.get(kind,kind)

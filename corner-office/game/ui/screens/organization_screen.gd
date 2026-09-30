@@ -6,6 +6,14 @@ func build() -> void:
 	add_heading(org.name);add_text(org.base_city+" / "+org.base_country,Tokens.MUTED)
 	add_text("CAIXA  "+CareerText.money(org.cash))
 	add_text("Compromissos anunciados: "+CareerText.money(CareerActions.reserved_cash(w)),Tokens.MUTED)
+	add_text("Reputação %d · promoção %s"%[org.reputation,CareerText.tier(org.tier)])
+	add_heading("Promotoras")
+	var position:=0
+	for row: Dictionary in OrgStanding.league_table(w):
+		position+=1
+		add_text("%d. %s · %s · reputação %d (%+d em 12 meses) · %d atletas"%[position,row.short_name,CareerText.tier(row.tier),row.reputation,row.trend,row.roster],Tokens.FIGHT_RED if row.is_player else Tokens.INK)
+	for review: Dictionary in org.season_reviews:
+		add_text("Temporada %d: %d de %d metas · reputação %+d · bônus %s"%[int(review.season),int(review.done),int(review.total),int(review.reputation_delta),CareerText.money(int(review.cash))],Tokens.MUTED)
 	var events:=w.events.values();events.reverse()
 	for ev: FightEvent in events:
 		if ev.organization_id!=org.id or ev.actual.is_empty():continue

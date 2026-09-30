@@ -11,7 +11,7 @@ const SAVE_DIR := "user://saves"
 
 ## versão de origem -> nome do método que migra para a versão seguinte.
 const MIGRATIONS := {
-	# 1: "_migrate_v1_to_v2",
+	1: "_migrate_v1_to_v2",
 }
 
 
@@ -68,4 +68,18 @@ static func migrate(data: Dictionary) -> Variant:
 		data = Callable(SaveSystem, MIGRATIONS[version]).call(data)
 		version += 1
 		data.schema_version = version
+	return data
+
+
+## v2: passagem do tempo e progressão (idade, propostas rivais, reputação
+## fracionária, metas de temporada). Campos novos entram com o valor padrão;
+## a reputação exata parte da inteira e as metas nascem no próximo dia.
+static func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
+	for f: Dictionary in data.get("fighters", {}).values():
+		for key: String in ["retired_on", "debut_on", "rival_interest"]:
+			if not f.has(key): f[key] = {}
+	for o: Dictionary in data.get("organizations", {}).values():
+		if not o.has("reputation_exact"): o.reputation_exact = float(o.get("reputation", 0))
+		for key: String in ["standing_history", "objectives", "season_reviews"]:
+			if not o.has(key): o[key] = []
 	return data

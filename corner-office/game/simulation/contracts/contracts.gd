@@ -23,8 +23,19 @@ func evaluate_offer(world: WorldState, offer: Contract) -> Dictionary:
 		reasons.append(Reason.make("INVALID_CONTRACT"))
 	if org.cash<offer.signing_bonus: reasons.append(Reason.make("INSUFFICIENT_CASH"))
 	var fair:=market_price(world,fighter)
+	var rival_bid:=best_rival_bid(world,fighter,org.id)
+	if rival_bid>fair: fair=rival_bid
 	var probability:=clampf(.65+(float(offer.show_money)/fair-1.0)*.65+(org.reputation-30)*.002,.08,.98)
-	return {"eligible":reasons.is_empty(),"accept_probability":probability if reasons.is_empty() else 0.0,"fair_show":fair,"counter_show":int(fair*1.1),"reasons":reasons if not reasons.is_empty() else [Reason.make("CONTRACT_MARKET_VALUE",probability,{"fair_show":fair})]}
+	return {"eligible":reasons.is_empty(),"accept_probability":probability if reasons.is_empty() else 0.0,"fair_show":fair,"counter_show":int(fair*1.1),"rival_bid":rival_bid,"reasons":reasons if not reasons.is_empty() else [Reason.make("CONTRACT_MARKET_VALUE",probability,{"fair_show":fair,"rival_bid":rival_bid})]}
+
+## Maior proposta rival ainda válida, sem contar a da própria organização.
+static func best_rival_bid(world: WorldState, fighter: Fighter, excluding_org: String="") -> int:
+	var best:=0
+	for org_id: String in fighter.rival_interest:
+		var bid: Dictionary=fighter.rival_interest[org_id]
+		if org_id==excluding_org or GameDate.days_between(world.date,bid.until)<0: continue
+		best=maxi(best,int(bid.show))
+	return best
 
 func sign(world: WorldState, offer: Contract) -> void:
 	if world.contracts.has(offer.id): return
@@ -40,6 +51,7 @@ func sign(world: WorldState, offer: Contract) -> void:
 	world.add("contracts",offer)
 	fighter.contract_id=offer.id
 	fighter.organization_id=offer.organization_id
+	fighter.rival_interest={}
 	var org: Organization=world.organizations[offer.organization_id]
 	org.cash-=offer.signing_bonus
 	if not org.roster.has(fighter.id): org.roster.append(fighter.id)

@@ -1,0 +1,127 @@
+{
+  "_doc": "Passagem de tempo, evolução de carreira e disputa com rivais (simulation/world/life_cycle.gd, simulation/organizations/org_standing.gd, org_ai.gd). Curvas são [idade, variação por mês]. Valores de protótipo, calibrados por tests/sim/test_world_evolution.gd.",
+  "development": {
+    "technical_curve": [[18, 0.45], [22, 0.34], [25, 0.2], [28, 0.07], [31, 0.0], [33, -0.07], [35, -0.16], [38, -0.3], [42, -0.45]],
+    "physical_curve": [[18, 0.32], [22, 0.22], [25, 0.08], [27, 0.0], [30, -0.1], [33, -0.24], [36, -0.4], [40, -0.6]],
+    "mental_curve": [[18, 0.3], [25, 0.2], [30, 0.1], [34, 0.0], [38, -0.12]],
+    "active_days": 150,
+    "inactive_growth_factor": 0.55,
+    "noise": 0.18,
+    "ceiling_base": 58,
+    "ceiling_per_potential": 0.42,
+    "chin_wear_per_head_damage": 0.03,
+    "wear_attributes": ["chin", "durability", "recovery"],
+    "min_value": 15,
+    "max_value": 99
+  },
+  "injuries": {
+    "post_fight_base": 0.03,
+    "per_damage": 0.18,
+    "types": {
+      "cut": [14, 35],
+      "hand": [30, 75],
+      "rib": [30, 60],
+      "shoulder": [45, 120],
+      "knee": [60, 180],
+      "concussion": [45, 90]
+    },
+    "weights_by_zone": {
+      "head": {"cut": 3, "concussion": 2, "hand": 1},
+      "body": {"rib": 3, "shoulder": 1, "hand": 1},
+      "leg": {"knee": 3, "hand": 1}
+    }
+  },
+  "retirement": {
+    "age_curve": [[28, 0.0], [32, 0.004], [35, 0.014], [38, 0.04], [41, 0.09], [45, 0.25]],
+    "losing_streak_bonus": 0.02,
+    "head_damage_per_unit": 0.003,
+    "unsigned_veteran_age": 30,
+    "unsigned_bonus": 0.012,
+    "champion_factor": 0.35
+  },
+  "regen": {
+    "extra_prospect_chance": 0.55,
+    "minimum_free_agents": 30,
+    "maximum_free_agents": 70,
+    "age": [18, 23],
+    "level": [36, 58],
+    "potential_mean": [45, 90],
+    "potential_spread": [6, 16],
+    "wins": [0, 5],
+    "losses": [0, 2],
+    "popularity": [0, 10]
+  },
+  "popularity": {
+    "win": 2.0,
+    "finish": 2.0,
+    "main_event": 1.5,
+    "loss": -1.0,
+    "finished_loss": -1.0,
+    "home_spill": 0.35,
+    "inactive_days": 180,
+    "inactive_decay": 0.6,
+    "max": 100.0
+  },
+  "standing": {
+    "tiers": {"regional": 0, "national": 40, "global": 62},
+    "hysteresis": 4,
+    "event_rate": 0.06,
+    "event_max_delta": 2.0,
+    "rival_event_rate": 0.04,
+    "idle_days": 90,
+    "idle_penalty": 0.4,
+    "negative_cash_penalty": 0.8,
+    "market_gain": 1.5,
+    "market_decay": 0.3,
+    "market_attendance_weight": 0.002
+  },
+  "tier_economy": {
+    "regional": {"capacity": 1.0, "venue_cost": 1.0, "media": 1.0, "sponsors": 1.0, "production": 1.0},
+    "national": {"capacity": 1.6, "venue_cost": 1.4, "media": 1.6, "sponsors": 1.4, "production": 1.25},
+    "global": {"capacity": 2.4, "venue_cost": 1.9, "media": 2.4, "sponsors": 1.9, "production": 1.5}
+  },
+  "season": {
+    "goals": {
+      "regional": {"events": 5, "profit": 0, "reputation_gain": 8, "signings": 3},
+      "national": {"events": 7, "profit": 250000, "reputation_gain": 5, "signings": 4},
+      "global": {"events": 9, "profit": 1000000, "reputation_gain": 2, "signings": 5}
+    },
+    "reward_reputation": 1.0,
+    "reward_cash": {"regional": 40000, "national": 90000, "global": 200000},
+    "failure_penalty": 2.0
+  },
+  "rival_bids": {
+    "interval_days": 14,
+    "window_days": 75,
+    "premium": [1.15, 1.45],
+    "valid_days": 120,
+    "minimum_score": 6.0,
+    "roster_slack": 6,
+    "traits": ["aggressive_buyer", "star_first", "expansionist", "prospect_first"]
+  },
+  "stories": {
+    "retired": "{fighter} anuncia aposentadoria",
+    "retired_body": "Aos {age} anos, encerra a carreira com cartel de {record}.",
+    "injury": "{fighter} sai lesionado ({injury})",
+    "injury_body": "Previsão de retorno em {date}.",
+    "bid": "{organization} faz proposta por {fighter}",
+    "bid_body": "O vínculo com {current} termina em breve. Para segurar o atleta, a oferta de renovação precisa cobrir {show} por luta.",
+    "departed": "{fighter} troca {previous} por {organization}",
+    "departed_body": "Contrato encerrado e oferta rival aceita: {show} por luta.",
+    "tier_up": "{organization} sobe de patamar: agora é {tier}",
+    "tier_down": "{organization} perde força e volta a ser {tier}",
+    "tier_body": "Reputação atual: {reputation}. Arenas, mídia e patrocínio acompanham o novo patamar.",
+    "season": "Temporada {season}: {organization} cumpre {done} de {total} metas",
+    "season_body": "Reputação {reputation_delta}. Bônus de patrocinadores: {cash}. Promotoras mais fortes: {top}."
+  },
+  "labels": {
+    "tiers": {"regional": "regional", "national": "nacional", "global": "global"},
+    "goals": {
+      "events": "Realizar {target} noites de luta",
+      "profit": "Fechar o ano com lucro de pelo menos {target}",
+      "reputation": "Chegar a reputação {target}",
+      "signings": "Assinar {target} contratos"
+    },
+    "injuries": {"cut": "corte", "hand": "mão", "rib": "costela", "shoulder": "ombro", "knee": "joelho", "concussion": "concussão"}
+  }
+}

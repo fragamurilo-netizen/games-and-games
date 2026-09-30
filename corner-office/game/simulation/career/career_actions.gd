@@ -64,8 +64,20 @@ static func perform(world: WorldState, action: String, p: Dictionary={}) -> Dict
 			ev.date=GameDate.add_days(world.date,clampi(int(p.get("days",42)),14,120));ev.status="planned"
 			return {"ok":true,"message":"Evento reagendado. Revise o card antes de anunciar novamente."}
 		"advance_week":
+			var before:=world.news.size()
 			WorldSim.new(world).advance_week()
-			return {"ok":true,"message":"Semana avançada. Agenda, contratos e eventos atualizados."}
+			return _with_digest(world,before,"Semana avançada. Agenda, contratos e eventos atualizados.")
+		"advance_month":
+			# Avança até o dia 1º do próximo mês, parando antes de uma noite própria anunciada.
+			var before:=world.news.size()
+			var sim:=WorldSim.new(world)
+			var stop:=_next_own_event_date(world)
+			for i in 31:
+				if not stop.is_empty() and GameDate.days_between(world.date,stop)<=1:break
+				sim.advance_day()
+				if int(world.date.day)==1:break
+			var note:="Mês avançado." if int(world.date.day)==1 else "Avanço pausado na véspera da sua próxima noite."
+			return _with_digest(world,before,note)
 		"advance_event":
 			var ev: FightEvent=world.events.get(str(p.get("event_id","")))
 			if ev==null or ev.organization_id!=world.player_org_id:return _error("INVALID_EVENT")
@@ -99,13 +111,27 @@ static func reserved_cash(world: WorldState) -> int:
 		if ev.organization_id==world.player_org_id and ev.status=="announced":total+=int(ev.projected.get("costs",0))
 	return total
 
+static func _next_own_event_date(world: WorldState) -> Dictionary:
+	var best: Dictionary={}
+	for ev: FightEvent in world.events.values():
+		if ev.organization_id==world.player_org_id and ev.status=="announced" and (best.is_empty() or GameDate.days_between(ev.date,best)>0):best=ev.date
+	return best
+
+## Resumo da passagem do tempo: as manchetes que nasceram no período.
+static func _with_digest(world: WorldState, news_before: int, message: String) -> Dictionary:
+	var items: Array=world.news.values().slice(news_before)
+	var digest: Array=items.map(func(n: NewsItem): return n.headline)
+	var text:=message
+	if not digest.is_empty():text+=" "+" · ".join(digest.slice(maxi(0,digest.size()-3)))
+	return {"ok":true,"message":text,"digest":digest}
+
 static func _error(code: String) -> Dictionary:return {"ok":false,"reasons":[Reason.make(code)]}
 
 static func snapshot(world: WorldState) -> Dictionary:
 	var fighters: Array=[];var events: Array=[];var news: Array=[];var tables: Array=[]
 	for f: Fighter in world.fighters.values():
 		var c: Contract=world.contracts.get(f.contract_id)
-		fighters.append({"id":f.id,"name":f.first_name+" "+f.last_name,"sex":f.sex,"country":f.country,"division":f.division,"style":f.martial_base,"record":f.record.duplicate(),"organization_id":f.organization_id,"height_cm":f.height_cm,"reach_cm":f.reach_cm,"appearance":f.appearance.duplicate(true),"show_money":c.show_money if c and c.active else Contracts.market_price(world,f),"bouts_remaining":c.bouts_remaining if c and c.active else 0,"suspension":f.medical_suspension_until.duplicate()})
+		fighters.append({"id":f.id,"name":f.first_name+" "+f.last_name,"sex":f.sex,"country":f.country,"division":f.division,"style":f.martial_base,"record":f.record.duplicate(),"organization_id":f.organization_id,"height_cm":f.height_cm,"reach_cm":f.reach_cm,"appearance":f.appearance.duplicate(true),"show_money":c.show_money if c and c.active else Contracts.market_price(world,f),"bouts_remaining":c.bouts_remaining if c and c.active else 0,"suspension":f.medical_suspension_until.duplicate(),"age":f.age_on(world.date),"retired":f.retired,"injuries":f.injuries.duplicate(true),"rival_bid":Contracts.best_rival_bid(world,f,world.player_org_id) if f.organization_id==world.player_org_id else 0})
 	for ev: FightEvent in world.events.values():
 		if ev.organization_id!=world.player_org_id:continue
 		var item:=ev.to_dict().duplicate(true);item.fights=[]
@@ -116,4 +142,4 @@ static func snapshot(world: WorldState) -> Dictionary:
 	for item: NewsItem in world.news.values():news.append(item.to_dict())
 	for history: Array in world.rankings.values():
 		if not history.is_empty() and history[-1].organization_id in [world.player_org_id,"wci"]:tables.append(history[-1].to_dict())
-	return {"date":world.date.duplicate(),"seed":world.seed_value,"organization":world.player_org().to_dict().duplicate(true),"reserved_cash":reserved_cash(world),"fighters":fighters,"events":events,"news":news,"rankings":tables,"divisions":ContentDB.load_json("weight_classes.json"),"styles":ContentDB.load_json("fight_visuals.json").styles}
+	return {"date":world.date.duplicate(),"seed":world.seed_value,"organization":world.player_org().to_dict().duplicate(true),"reserved_cash":reserved_cash(world),"fighters":fighters,"events":events,"news":news,"rankings":tables,"divisions":ContentDB.load_json("weight_classes.json"),"objectives":OrgStanding.objective_view(world),"organizations":OrgStanding.league_table(world),"styles":ContentDB.load_json("fight_visuals.json").styles}

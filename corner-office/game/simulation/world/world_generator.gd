@@ -35,6 +35,7 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 			org.roster.append(fighter.id)
 
 	_create_player_org(w, start_mode)
+	OrgStanding.new().ensure_objectives(w)
 	if include_population:
 		PopulationGenerator.populate(w,start_mode)
 		for division: Dictionary in ContentDB.load_json("weight_classes.json"):

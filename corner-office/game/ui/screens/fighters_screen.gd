@@ -17,7 +17,8 @@ func build() -> void:
 		for id: String in world.player_org().roster:
 			var f: Fighter=world.fighters[id]
 			if not division_filter.is_empty() and f.division!=division_filter:continue
-			add_button("%s  ·  %s\n%s"%[f.display_name(),f.record_string(),CareerText.division(f.division)],func():selected_fighter=f.id;refresh())
+			var alert:="  ·  PROPOSTA RIVAL" if Contracts.best_rival_bid(world,f,world.player_org_id)>0 else "  ·  LESIONADO" if not f.injuries.is_empty() else ""
+			add_button("%s  ·  %s\n%s · %d anos%s"%[f.display_name(),f.record_string(),CareerText.division(f.division),f.age_on(world.date),alert],func():selected_fighter=f.id;refresh())
 	else:
 		add_text("Modelo inicial: resultados e oposição. Listas oficial e mundial separadas.",Tokens.MUTED)
 		for d: Dictionary in ContentDB.load_json("weight_classes.json"):
@@ -30,7 +31,9 @@ func build() -> void:
 				add_button("%02d  %s  ·  %s"%[i+1,f.display_name(),f.record_string()],func():selected_fighter=f.id;refresh())
 func _profile(f: Fighter) -> void:
 	add_button("← Voltar à lista",func():selected_fighter="";refresh())
-	add_heading(f.display_name());add_text(CareerText.division(f.division)+" · "+f.country)
+	add_heading(f.display_name());add_text(CareerText.division(f.division)+" · "+f.country+" · %d anos"%f.age_on(Game.world.date))
+	if f.retired:add_text("Aposentado em "+GameDate.format(f.retired_on),Tokens.MUTED)
+	for injury: Dictionary in f.injuries:add_text("Lesionado (%s) até %s"%[CareerText.injury(str(injury.type)),GameDate.format(injury.until)],Tokens.FIGHT_RED)
 	add_text("%s · %d cm · alcance %d cm"%[f.record_string(),f.height_cm,f.reach_cm])
 	add_text("Base: "+f.martial_base,Tokens.MUTED)
 	var groups: Dictionary={"Trocação":f.striking,"Wrestling":f.grappling,"Jiu-jítsu":f.jiu_jitsu}
@@ -42,4 +45,6 @@ func _profile(f: Fighter) -> void:
 	if not f.medical_suspension_until.is_empty():add_text("Repouso até "+GameDate.format(f.medical_suspension_until))
 	if f.organization_id==Game.world.player_org_id:
 		var c: Contract=Game.world.contracts.get(f.contract_id)
-		if c:add_text("%s por apresentação · %d lutas restantes"%[CareerText.money(c.show_money),c.bouts_remaining])
+		if c:add_text("%s por apresentação · %d lutas restantes · vence em %s"%[CareerText.money(c.show_money),c.bouts_remaining,GameDate.format(c.expires_on)])
+		for org_id: String in f.rival_interest:
+			add_text("%s oferece %s por luta. Renove no Mercado cobrindo a proposta antes do fim do contrato."%[Game.world.organizations[org_id].short_name,CareerText.money(int(f.rival_interest[org_id].show))],Tokens.FIGHT_RED)

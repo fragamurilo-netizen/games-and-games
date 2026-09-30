@@ -65,12 +65,27 @@ var appearance := {}
 
 var bio := ""               # gancho narrativo (texto livre)
 var retired := false
+var retired_on := {}        # GameDate da aposentadoria
+var debut_on := {}          # GameDate em que entrou no mundo (novos talentos)
+
+# Propostas públicas de rivais pelo próximo contrato (org_id -> {show, until}).
+# Contracts.evaluate_offer usa a melhor como preço de mercado.
+var rival_interest := {}
 
 
 func display_name() -> String:
 	if nickname.is_empty():
 		return "%s %s" % [first_name, last_name]
 	return "%s “%s” %s" % [first_name, nickname, last_name]
+
+
+func age_on(date: Dictionary) -> int:
+	if birth_date.is_empty():
+		return 27
+	var years: int = int(date.year) - int(birth_date.year)
+	if int(date.month) < int(birth_date.month) or (int(date.month) == int(birth_date.month) and int(date.day) < int(birth_date.day)):
+		years -= 1
+	return years
 
 
 func record_string() -> String:
