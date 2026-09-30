@@ -54,7 +54,11 @@ func _manage_roster(world: WorldState) -> void:
 			break
 		if f.retired or not f.organization_id.is_empty() or f.division not in ["m_lightweight", "m_welterweight", "w_flyweight", "w_bantamweight"]:
 			continue
-		CareerActions.perform(world, "negotiate", {"fighter_id": f.id, "show_money": int(Contracts.market_price(world, f) * 1.1)})
+		var r := CareerActions.perform(world, "negotiate", {"fighter_id": f.id, "show_money": int(Contracts.market_price(world, f) * 1.1)})
+		# Com agências o pedido pode passar do preço de mercado: o promotor ativo
+		# cobre a contraproposta, como já faz nas renovações.
+		if r.has("counter_show") and int(r.counter_show) <= int(Contracts.market_price(world, f) * 1.6):
+			CareerActions.perform(world, "negotiate", {"fighter_id": f.id, "show_money": int(r.counter_show)})
 
 
 func test_active_promoter_grows_over_three_years() -> void:
