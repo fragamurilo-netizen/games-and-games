@@ -30,6 +30,7 @@
     out.sex = explicit || out.sex;
     out.name = f.name || out.name;
     out.body = { ...out.body, ...(f.appearance?.body || {}) };
+    if (Number.isFinite(f.appearance?.age)) out.age = f.appearance.age;
     if (out.sex === "f")
       out.body = { shoulders: 0.35, hips: 0.65, waist: 0.35, ...out.body };
     out.marks = (out.marks || []).filter(

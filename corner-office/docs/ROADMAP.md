@@ -14,6 +14,7 @@ Baseado em Game Design Bible §20. Regra: implementar o vertical slice antes de 
 ## M1 — Loop jogável
 
 - [x] `WorldGenerator`: 211 atletas, elenco regional, elencos rivais e free agents
+- [x] `FighterGenerator`: origem → base marcial, rosto e nomes; curva de idade, potencial, cartel coerente com o nível; prospectos mensais e aposentadorias (`content/fighter_generation.json`)
 - [x] Organizações rivais ativas (`OrgAI`: agenda, cards, caixa, adiamentos, renovações, contratações)
 - [x] Protótipo da biblioteca de rostos (`prototypes/face-lab/`)
 - [x] Fight Studio: catálogo 2D pareado, arenas das sete organizações, replays autorais e sampler Godot ([guia](FIGHT_VISUALS.md))

@@ -7,6 +7,7 @@ func build() -> void:
 	var banner:=BrandBanner.new();banner.show_art=true;banner.headline="CONSTRUA SEU LEGADO";banner.subtitle="Dentro do cage, cada resultado conta.";banner.custom_minimum_size.y=360;body.add_child(banner)
 	add_heading(CareerText.money(org.cash))
 	add_text("%d atletas · %s comprometidos com eventos"%[org.roster.size(),CareerText.money(CareerActions.reserved_cash(w))],Tokens.MUTED)
+	add_text("Reputação %d · promoção %s"%[org.reputation,CareerText.tier(org.tier)])
 	var next: FightEvent=null
 	for ev: FightEvent in w.events.values():
 		if ev.organization_id==w.player_org_id and ev.status in ["planned","announced"]:
@@ -16,7 +17,12 @@ func build() -> void:
 		add_text("%s · %d lutas · %s"%[GameDate.format(next.date),next.fight_ids.size(),CareerText.event_status(next.status)])
 	else:add_text("Sua próxima grande noite começa em Eventos. Monte um card de 6 a 10 lutas.")
 	add_button("Avançar 7 dias",func():await run_action("advance_week");refresh())
+	add_button("Avançar até o próximo mês",func():await run_action("advance_month");refresh())
 	add_text("Progresso salvo automaticamente neste aparelho.",Tokens.MUTED)
+	var goals:=OrgStanding.objective_view(w)
+	if not goals.is_empty():
+		add_heading("Metas da temporada %d"%int(goals[0].season))
+		for goal: Dictionary in goals:add_text(CareerText.objective(goal),Tokens.INK if goal.done else Tokens.MUTED)
 	add_heading("Agenda do mercado")
 	var rivals: Array=[]
 	for ev: FightEvent in w.events.values():

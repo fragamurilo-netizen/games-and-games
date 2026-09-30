@@ -27,16 +27,28 @@ func evaluate_offer(world: WorldState, offer: Contract) -> Dictionary:
 	if org.cash<offer.signing_bonus: reasons.append(Reason.make("INSUFFICIENT_CASH"))
 	# O pedido vem do agente: mercado, perfil da agência, confiança e BATNA (Agencies).
 	var q:=Agencies.quote(world,fighter,org.id)
+	# Proposta rival válida na mesa sobe o pedido do agente.
+	var rival_bid:=best_rival_bid(world,fighter,org.id)
+	if rival_bid>int(q.ask_show):q.ask_show=rival_bid
 	var value:=Agencies.offer_value(offer,fighter.agent_id)
 	var probability:=clampf(.65+(value/float(q.ask_show)-1.0)*.65,.08,.98)
 	var explained: Array=q.reasons.duplicate()
 	explained.push_front(Reason.make("CONTRACT_MARKET_VALUE",probability,{"fair_show":q.fair_show,"ask_show":q.ask_show}))
-	return {"eligible":reasons.is_empty(),"accept_probability":probability if reasons.is_empty() else 0.0,"fair_show":q.fair_show,"ask_show":q.ask_show,"counter_show":q.ask_show,"meets_ask":value>=float(q.ask_show),"batna_show":q.batna_show,"rival_ids":q.rival_ids,"agent_id":q.agent_id,"trust":q.trust,"reasons":reasons if not reasons.is_empty() else explained}
+	return {"eligible":reasons.is_empty(),"accept_probability":probability if reasons.is_empty() else 0.0,"fair_show":q.fair_show,"ask_show":q.ask_show,"counter_show":q.ask_show,"meets_ask":value>=float(q.ask_show),"batna_show":q.batna_show,"rival_bid":rival_bid,"rival_ids":q.rival_ids,"agent_id":q.agent_id,"trust":q.trust,"reasons":reasons if not reasons.is_empty() else explained}
 
 ## Oferta não fechada: fica na memória do agente (Game Bible §9).
 func reject(world: WorldState, offer: Contract, response: Dictionary, outcome: String="countered") -> Dictionary:
 	if not response.get("eligible",false): return {}
 	return Agencies.record(world,offer,int(response.ask_show),outcome)
+
+## Maior proposta rival ainda válida, sem contar a da própria organização.
+static func best_rival_bid(world: WorldState, fighter: Fighter, excluding_org: String="") -> int:
+	var best:=0
+	for org_id: String in fighter.rival_interest:
+		var bid: Dictionary=fighter.rival_interest[org_id]
+		if org_id==excluding_org or GameDate.days_between(world.date,bid.until)<0: continue
+		best=maxi(best,int(bid.show))
+	return best
 
 func sign(world: WorldState, offer: Contract) -> void:
 	if world.contracts.has(offer.id): return
@@ -54,6 +66,7 @@ func sign(world: WorldState, offer: Contract) -> void:
 	world.add("contracts",offer)
 	fighter.contract_id=offer.id
 	fighter.organization_id=offer.organization_id
+	fighter.rival_interest={}
 	var org: Organization=world.organizations[offer.organization_id]
 	org.cash-=offer.signing_bonus
 	if not org.roster.has(fighter.id): org.roster.append(fighter.id)

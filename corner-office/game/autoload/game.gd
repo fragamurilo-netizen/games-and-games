@@ -35,7 +35,7 @@ func has_world() -> bool:
 func perform_action(action: String, params: Dictionary={}) -> Dictionary:
 	if world==null:return {"ok":false,"message":"Nenhuma carreira aberta."}
 	var result:=CareerActions.perform(world,action,params)
-	if result.get("ok") and action not in ["state","evaluate"]:
+	if result.get("ok") and action not in ["state","evaluate","fighter_options"]:
 		var error:=save_game("autosave")
 		if error!=OK:result.message="Decisão aplicada, mas o save falhou. Não feche o jogo."
 	return result

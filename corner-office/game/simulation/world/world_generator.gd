@@ -35,6 +35,7 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 			org.roster.append(fighter.id)
 
 	_create_player_org(w, start_mode)
+	OrgStanding.new().ensure_objectives(w)
 	var mode: Dictionary = ContentDB.load_json("start_modes.json").get(start_mode, {})
 	if include_population and mode.get("tier", "") == "global":
 		LeagueBuilder.populate(w, mode)

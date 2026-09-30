@@ -18,9 +18,23 @@ static func event_config(world: WorldState, org_id: String) -> Dictionary:
 	var org: Organization=world.organizations.get(org_id)
 	return cfg.flagship_event if org and org.tier=="global" and org.is_player else cfg.event
 
+## Patamar da promoção (regional/nacional/global) escala arena, mídia e
+## patrocínio (content/world_tuning.json → tier_economy).
+static func tier_factors(org: Organization) -> Dictionary:
+	return ContentDB.load_json("world_tuning.json").tier_economy.get(org.tier,{})
+
+## Liga principal usa a própria escala; as demais crescem pelo patamar.
+static func capacity(org: Organization) -> int:
+	var cfg: Dictionary=ContentDB.load_json("career_tuning.json")
+	if org.tier=="global" and org.is_player:return int(cfg.flagship_event.capacity)
+	return int(cfg.event.capacity*float(tier_factors(org).get("capacity",1.0)))
+
 func project_event(world: WorldState, ev: FightEvent) -> Dictionary:
 	var cfg: Dictionary=event_config(world,ev.organization_id)
 	var org: Organization=world.organizations[ev.organization_id]
+	var tier:=tier_factors(org)
+	var cap:=capacity(org)
+	var market:=float(org.market_popularity.get(ev.region,0.0))*float(ContentDB.load_json("world_tuning.json").standing.market_attendance_weight)
 	var fame:=0.0
 	var purses:=0
 	var athletes:=0
@@ -31,9 +45,9 @@ func project_event(world: WorldState, ev: FightEvent) -> Dictionary:
 			fame+=float(f.popularity_by_region.get(ev.region,0))+f.charisma*.12
 			athletes+=1
 		for offer: Dictionary in _purses(world,fight).values(): purses+=int(offer.show+offer.win)
-	var attendance:=clampi(int(cfg.capacity*(.24+org.reputation*.006+fame*.0009)),0,int(cfg.capacity))
-	var revenues: Dictionary={"gate":attendance*int(cfg.ticket_price),"media":int(cfg.media_guarantee),"sponsors":int(cfg.sponsor_base+fame*42)}
-	var costs: Dictionary={"purses":purses,"production":int(cfg.production),"venue":int(cfg.venue_cost),"travel":athletes*int(cfg.travel_per_fighter),"officials":int(cfg.officials),"marketing":int(cfg.marketing)}
+	var attendance:=clampi(int(cap*(.24+org.reputation*.006+fame*.0009+market)),0,cap)
+	var revenues: Dictionary={"gate":attendance*int(cfg.ticket_price),"media":int(cfg.media_guarantee*float(tier.get("media",1.0))),"sponsors":int((cfg.sponsor_base+fame*42)*float(tier.get("sponsors",1.0)))}
+	var costs: Dictionary={"purses":purses,"production":int(cfg.production*float(tier.get("production",1.0))),"venue":int(cfg.venue_cost*float(tier.get("venue_cost",1.0))),"travel":athletes*int(cfg.travel_per_fighter),"officials":int(cfg.officials),"marketing":int(cfg.marketing)}
 	var revenue:=0;var total_cost:=0
 	for value in revenues.values():revenue+=int(value)
 	for value in costs.values():total_cost+=int(value)
@@ -58,7 +72,7 @@ func settle_event(world: WorldState, ev: FightEvent) -> Dictionary:
 			var rest_days:=int(rest.ko_loser_days if fight.method=="ko_tko" and fight.winner_id!=fighter_id else rest.standard_days)
 			f.medical_suspension_until=GameDate.add_days(ev.date,rest_days)
 	var cfg: Dictionary=event_config(world,ev.organization_id)
-	var attendance:=clampi(int(actual.attendance*world.rng.range_f(.82,1.12)),0,int(cfg.capacity))
+	var attendance:=clampi(int(actual.attendance*world.rng.range_f(.82,1.12)),0,capacity(world.organizations[ev.organization_id]))
 	actual.lines.revenue.gate=attendance*int(cfg.ticket_price)
 	actual.lines.costs.purses=paid
 	actual.audience+=18*(attendance-int(actual.attendance))

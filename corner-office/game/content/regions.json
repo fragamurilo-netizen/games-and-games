@@ -7,7 +7,10 @@
   {"id": "japan_korea", "name": "Japão/Coreia", "countries": ["JP", "KR"], "style_tendencies": ["judo", "karate", "kickboxing"], "gameplay": "Apresentação e formatos diferenciados."},
   {"id": "oceania", "name": "Austrália/NZ", "countries": ["AU", "NZ"], "style_tendencies": ["striking", "conditioning"], "gameplay": "Hub do Pacífico."},
   {"id": "middle_east", "name": "Oriente Médio", "countries": ["AE", "BH", "IR", "MA", "QA", "SA"], "style_tendencies": [], "gameplay": "Mercado de eventos premium."},
-  {"id": "asia_pacific", "name": "China/Sudeste Asiático", "countries": ["CN", "IN", "PH", "TH"], "style_tendencies": ["kickboxing", "wrestling", "muay_thai"], "gameplay": "Mercado enorme e talento em ascensão."},
   {"id": "south_america", "name": "América do Sul", "countries": ["AR", "CO", "PE"], "style_tendencies": ["bjj", "boxing"], "gameplay": "Prospects duros e baratos."},
-  {"id": "africa", "name": "África", "countries": ["CM", "NG", "ZA"], "style_tendencies": ["kickboxing", "wrestling", "boxing"], "gameplay": "Atletismo bruto e poucas estruturas."}
+  {"id": "africa", "name": "África", "countries": ["CI", "CM", "GH", "NG", "SN", "ZA"], "style_tendencies": ["wrestling", "boxing", "judo"], "gameplay": "Talentos atléticos e mercado emergente."},
+  {"id": "southeast_asia", "name": "Sudeste Asiático", "countries": ["TH", "PH", "ID", "VN", "MY", "SG"], "style_tendencies": ["muay_thai", "boxing", "kickboxing"], "gameplay": "Berço do muay thai; público fiel à trocação."},
+  {"id": "china", "name": "China", "countries": ["CN"], "style_tendencies": ["kickboxing", "wrestling", "judo"], "gameplay": "Mercado enorme e ainda pouco explorado."},
+  {"id": "caribbean", "name": "Caribe", "countries": ["CU", "DO", "PR", "JM"], "style_tendencies": ["boxing", "wrestling", "judo"], "gameplay": "Escola olímpica forte; muitos atletas competem fora."},
+  {"id": "south_asia", "name": "Sul da Ásia", "countries": ["IN", "PK", "BD"], "style_tendencies": ["wrestling", "boxing"], "gameplay": "Tradição de luta livre e público jovem."}
 ]
