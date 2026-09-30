@@ -3,12 +3,27 @@ const R=require('../replay'), A=require('../appearance');
 const dir=path.resolve(__dirname,'../../../game/content');
 const read=p=>JSON.parse(fs.readFileSync(path.join(dir,p),'utf8'));
 const catalog=read('fight_visuals.json'),arenas=read('arena_profiles.json');
-const log=read('replays/sim_exchange.json'),original=JSON.stringify(log);
+// Fixtures come from the real engine; use one whose fight actually opened a cut.
+const cut=e=>Object.values(e.after.cuts||{}).some(v=>v>0);
+const log=read('replays/simulated_index.json').map(x=>read('replays/'+x.file)).find(l=>l.events.some(cut)),original=JSON.stringify(log);
+assert.ok(log,'At least one engine fixture has a cut');
 const player=new R.Player(log,catalog,arenas),all=player.sample(player.duration).stains;
 assert.ok(all.length>0,'Cuts leave blood on the mat');
 assert.equal(player.sample(0).stains.length,0,'No future blood at start');
 for(const mark of all){const e=log.events.find(e=>e.id===mark.source_event);assert.ok(e.after.cuts[e.target_id]>0);assert.ok(['landed','knockdown','stoppage'].includes(e.outcome));assert.ok(Math.abs(mark.x)<arenas.arenas.find(a=>a.id===log.organization_id).radius_m);}
 assert.deepEqual(player.sample(player.duration).stains,all,'Seek is deterministic');
+// Visible injuries come only from damage and cuts the engine recorded, accumulate, and never look ahead.
+const wounds=player.sample(player.duration).wounds;
+assert.ok(wounds.some(w=>w.zone==='head')&&wounds.some(w=>w.cut>0),'Head hits and the cut become wounds');
+assert.equal(player.sample(0).wounds.length,0,'No future wounds at start');
+for(const w of wounds){const e=log.events.find(e=>e.id===w.source_event);assert.equal(e.target_id,w.id);
+ if(w.zone==='arm'){assert.equal(e.outcome,'blocked');continue}
+ assert.ok(['landed','knockdown','stoppage'].includes(e.outcome));
+ assert.ok(Math.abs(w.power-Math.max(0,e.after.damage[w.id][w.zone]-e.before.damage[w.id][w.zone]))<1e-9,'Wound severity is the engine delta');
+ if(w.cut>0)assert.ok(e.after.cuts[w.id]>e.before.cuts[w.id]);}
+for(const id of log.fighter_ids)for(const zone of ['head','body','leg']){const sum=wounds.filter(w=>w.id===id&&w.zone===zone).reduce((a,w)=>a+w.power,0),last=log.events.at(-1).after.damage[id][zone];assert.ok(sum<=last+1e-9,'Wounds never exceed recorded damage')}
+const mid=player.sample(player.duration/2).wounds;assert.ok(mid.length<wounds.length&&mid.every(w=>w.at_ms<=player.duration/2),'Wounds accumulate over the fight');
+assert.deepEqual(player.sample(player.duration).wounds,wounds,'Wounds are deterministic');
 assert.equal(JSON.stringify(log),original,'Cosmetics do not modify simulation');
 const dry=structuredClone(log);for(const e of dry.events)for(const s of [e.before,e.after])s.cuts={};dry.initial_state=structuredClone(dry.events[0].before);
 assert.equal(new R.Player(dry,catalog,arenas).sample(player.duration).stains.length,0,'No cuts, no invented blood');
@@ -18,4 +33,4 @@ for(const id of ['ftr_costa','ftr_markovic']) {
  assert.equal(A.resolve({...fighter,appearance_index:0},context.canon).sex,'f','Stale male index cannot override female identity');
  assert.equal(A.resolve({...fighter,appearance_index:null},context.canon).sex,'f','Female fallback stays female');
 }
-console.log(JSON.stringify({passed:true,blood_marks:all.length,female_identity:true}));
+console.log(JSON.stringify({passed:true,blood_marks:all.length,wounds:wounds.length,female_identity:true}));

@@ -64,7 +64,14 @@ func test_every_clip_has_paired_tracks_and_stable_ids() -> void:
 				check(frame.has("a") and frame.has("b"), "Dois atletas sincronizados")
 
 func test_replay_blood_requires_recorded_cuts_and_is_seek_stable() -> void:
-	var replay: Dictionary=ContentDB.load_json("replays/sim_exchange.json")
+	# Fixtures come from the real engine; use one whose fight actually opened a cut.
+	var replay: Dictionary={}
+	for entry: Dictionary in ContentDB.load_json("replays/simulated_index.json"):
+		var log: Dictionary=ContentDB.load_json("replays/"+String(entry.file))
+		if log.events.any(func(e): return e.after.cuts.values().any(func(v): return float(v)>0.0)):
+			replay=log
+			break
+	check(not replay.is_empty(),"At least one engine fixture has a cut")
 	var player:=FightReplayPlayer.new()
 	check(player.load_replay(replay),"Blood replay validates")
 	var marks: Array=player.seek_ms(player.duration_ms).stains

@@ -35,8 +35,12 @@ def main():
         for name, title, values in SCENARIOS:
             config.write_text(json.dumps(values), encoding='utf-8')
             result = ROOT / 'game/content/replays' / (name + '.json')
+            result.unlink(missing_ok=True)
             run = subprocess.run([args.godot,'--headless','--path',str(ROOT/'game'),'-s','res://tools/preview_fight.gd','--',str(config),str(result)], capture_output=True, text=True, encoding='utf-8', errors='replace')
-            if run.returncode or 'SCRIPT ERROR' in run.stderr:
+            # A -s script has no autoloads, so scripts naming EventBus fail to compile in
+            # this process only; the fight path does not use them. Any other error is fatal.
+            errors = [l for l in run.stderr.splitlines() if 'SCRIPT ERROR' in l and 'Identifier not found: EventBus' not in l and 'Failed to compile depended scripts' not in l]
+            if run.returncode or errors or not result.exists():
                 raise RuntimeError(run.stdout + run.stderr)
             # Canonical JSON makes comparison independent of Godot dictionary formatting.
             log = canonical(json.loads(result.read_text(encoding='utf-8')))
