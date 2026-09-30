@@ -17,10 +17,11 @@ func build() -> void:
 		add_text("AGENTES LIVRES",Tokens.FIGHT_RED)
 		add_text("Proponha quatro lutas e construa o próximo nome da sua promoção.",Tokens.MUTED)
 		for f: Fighter in w.fighters.values():
-			if f.organization_id.is_empty() and not f.retired:add_button("%s  /  %s\n%s · %d anos · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),f.age_on(w.date),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
+			if f.organization_id.is_empty() and not f.retired:add_fighter_row(f,"%s  /  %s\n%s · %d anos · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),f.age_on(w.date),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
 		return
 	var f: Fighter=w.fighters[selected]
 	add_button("← Agentes livres",func():selected="";refresh())
+	add_portrait(f)
 	add_heading(f.display_name());add_text(CareerText.division(f.division)+" / "+f.record_string());add_text(CareerText.agent_line(w,f),Tokens.MUTED)
 	var bid:=Contracts.best_rival_bid(w,f,w.player_org_id)
 	if bid>0:add_text("Proposta rival na mesa: %s por luta."%CareerText.money(bid),Tokens.FIGHT_RED)

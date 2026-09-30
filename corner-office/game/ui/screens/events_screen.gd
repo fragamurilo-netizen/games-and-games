@@ -30,8 +30,7 @@ func build() -> void:
 	for i in ev.fight_ids.size():
 		var f: Fight=w.fights[ev.fight_ids[i]]
 		var a: Fighter=w.fighters[f.fighter_a_id];var b: Fighter=w.fighters[f.fighter_b_id]
-		add_text("%02d  %s × %s"%[i+1,a.display_name(),b.display_name()])
-		add_text(CareerText.division(f.division),Tokens.MUTED)
+		add_face_off(a,b,"%02d\n%s\n×\n%s\n%s"%[i+1,a.display_name(),b.display_name(),CareerText.division(f.division)])
 		if f.status=="completed":
 			add_text("%s · %s · R%d %d:%02d"%[w.fighters[f.winner_id].display_name() if not f.winner_id.is_empty() else "Empate",f.method,f.end_round,f.end_time_s/60,f.end_time_s%60])
 			add_button("Assistir à luta",func():_watch(f))
@@ -64,6 +63,7 @@ func _matchmaker(ev: FightEvent) -> void:
 	if blue_id.is_empty() or blue_id in used:blue_id=blue_options[0].id
 	var blue:=add_select("Corner azul",blue_options,blue_id)
 	blue.item_selected.connect(func(i):blue_id=blue.get_item_metadata(i);quote={};refresh())
+	add_face_off(w.fighters[red_id],w.fighters[blue_id],"%s\n×\n%s"%[w.fighters[red_id].display_name(),w.fighters[blue_id].display_name()])
 	var offer:=add_select("Oferta de bolsa",[{"id":"1","label":"Contrato atual · 1×"},{"id":"1.5","label":"Aumentar 50% · 1,5×"},{"id":"2","label":"Dobrar · 2×"}],str(premium))
 	offer.item_selected.connect(func(i):premium=float(offer.get_item_metadata(i));quote={};refresh())
 	var params:={"event_id":ev.id,"red":red_id,"blue":blue_id,"premium":premium}

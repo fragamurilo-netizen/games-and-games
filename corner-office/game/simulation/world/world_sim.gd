@@ -78,6 +78,7 @@ func run_event(event_id: String) -> void:
 	for division: Dictionary in ContentDB.load_json("weight_classes.json"):
 		rankings.update(world,ev.organization_id,division.id)
 		rankings.update(world,"wci",division.id)
+	rankings.update_p4p(world)
 	media.event_report(world,ev)
 	EventBus.event_completed.emit(event_id)
 
