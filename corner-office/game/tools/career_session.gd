@@ -9,9 +9,6 @@ func _initialize() -> void:
 	var config: Variant=JSON.parse_string(FileAccess.get_file_as_string(args[0]))
 	if not config is Dictionary:quit(1);return
 	var actions: GDScript=load("res://simulation/career/career_actions.gd")
-	# Idem: o builder chega em Rankings, que emite pelo EventBus (autoload).
-	var builder: GDScript=load("res://presentation/fight/fight_replay_builder.gd")
-	var replay_player: GDScript=load("res://presentation/fight/fight_replay_player.gd")
 	var action:=str(config.get("action","state"))
 	var world: WorldState
 	if action=="new":
@@ -24,8 +21,8 @@ func _initialize() -> void:
 	if action=="replay":
 		var fight: Fight=world.fights.get(str(config.get("fight_id","")))
 		if fight==null or fight.status!="completed":_reply(args[1],{"ok":false,"error":"Luta ainda não concluída."});return
-		var replay: Dictionary=builder.build(world,fight)
-		var player: Variant=replay_player.new()
+		var replay:=FightReplayBuilder.build(world,fight)
+		var player:=FightReplayPlayer.new()
 		if not player.load_replay(replay):push_error(str(player.errors));quit(1);return
 		_reply(args[1],{"ok":true,"replay":replay});return
 	var result: Dictionary={"ok":true,"message":"Carreira regional iniciada."} if action=="new" else actions.perform(world,action,config)

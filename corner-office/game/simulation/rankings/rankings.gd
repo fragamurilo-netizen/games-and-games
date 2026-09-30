@@ -221,4 +221,9 @@ func _append(world: WorldState,snapshot: Ranking) -> Ranking:
 	var k:=key(snapshot.organization_id,snapshot.division)
 	if not world.rankings.has(k):world.rankings[k]=[]
 	world.rankings[k].append(snapshot)
+	# Busca o autoload em tempo de execução: ferramentas de linha de comando
+	# (career_session, preview_fight) compilam este script antes dos autoloads.
+	var tree:=Engine.get_main_loop() as SceneTree
+	var bus:=tree.root.get_node_or_null("EventBus") if tree else null
+	if bus:bus.ranking_updated.emit(snapshot.organization_id,snapshot.division)
 	return snapshot
