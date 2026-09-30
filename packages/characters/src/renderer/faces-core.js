@@ -394,6 +394,11 @@
     }
     const additional = HAIR_STYLES.filter(s => s.catalogTexture != null && (F ? s.len > .4 : s.len < .9) && (tex > 2 ? s.special || s.catalogTexture >= 2 : !s.special)).map(s => s.id)
     pool = [...pool, ...additional]
+    // cabelo longo em homem existe, mas é minoria: sem isso metade sairia de cabelo nos ombros
+    if (!F) {
+      const short = pool.filter((id) => HAIR_BY_ID[id] && HAIR_BY_ID[id].len < 0.45)
+      if (short.length && !r.chance(0.12)) pool = short
+    }
     const beards = BEARD_STYLES.map((b) => b.id)
     return {
       hair: r.pick(pool),

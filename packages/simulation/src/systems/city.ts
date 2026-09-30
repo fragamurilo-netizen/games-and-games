@@ -302,7 +302,8 @@ function residentTurn(world: WorldState, id: PersonId, close: boolean): WorldSta
         return message(withResident(world, { goal }), id, "checkin", text)
       } })
     const tip = r.job && !world.employment && rel.trust >= 45
-      ? Object.values(world.vacancies).find(v => v.open && v.companyId === r.job!.companyId) : undefined
+      // só indica o que você consegue ocupar: quem conhece você sabe do seu preparo
+      ? Object.values(world.vacancies).find(v => v.open && v.companyId === r.job!.companyId && playerFits(world, v.roleId)) : undefined
     if (tip) options.push({ action: `indicar-vaga:${tip.id}`, score: (0.75 + noise("tip")) * inertia,
       run: () => message(withResident(world, { goal }), id, "job-tip", fillText(pick(messageTexts.jobTip, `tip/${id}/${day}`, world), { company: world.companies[tip.companyId]!.name, role: roleTitle(tip.roleId) }), tip.id) })
   }
@@ -331,6 +332,11 @@ function applyResident(world: WorldState, id: PersonId, vacancyId: VacancyId): W
   if (previous) next = openReplacement(next, id, previous)
   if (relationshipBetween(next, next.playerId, id)) next = message(next, id, "hired", fillText(pick(messageTexts.hired, `hired/${id}/${vacancyId}`, next), { company: company.name, role: role.title.toLowerCase() }))
   return next
+}
+
+const playerFits = (world: WorldState, roleId: string): boolean => {
+  const role = jobRoles.find(r => r.id === roleId), skills = world.skills[world.playerId]
+  return !!role && !!skills && skills[role.skill] >= role.required
 }
 
 /** Quem sai abre vaga de substituição quando o quadro precisa (bíblia §15.2). */

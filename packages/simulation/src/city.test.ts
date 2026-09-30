@@ -164,4 +164,18 @@ describe("mundo vivo", () => {
     const person = queryLife(world).people.find(p => p.id === ignored.fromId)!
     expect(person.history.moments.some(m => m.text.includes("sem resposta"))).toBe(true)
   })
+
+  it("amigos só indicam vagas que você consegue ocupar", () => {
+    let tips = 0
+    for (const seed of ["dica-a", "dica-b", "dica-c"]) {
+      const world = run(createWorld(seed), 120)
+      for (const m of world.inbox.filter(x => x.topic === "job-tip")) {
+        const v = world.vacancies[m.vacancyId!]!
+        expect(queryCareer({ ...world, employment: null, vacancies: { ...world.vacancies, [v.id]: { ...v, open: true } }, applications: [], employmentHistory: [] })
+          .vacancies.find(x => x.id === v.id)?.reason ?? "").not.toContain("preparo")
+        tips++
+      }
+    }
+    expect(tips).toBeGreaterThan(0)
+  })
 })
