@@ -39,13 +39,16 @@
     const grey = smooth(g.hair.greyOnset, g.hair.greyOnset + 30, age)
     const hair = mix(C.hairRGB(p.hairEu, p.hairPheo), [183, 182, 169], grey * .85)
     const clothes = [[103, 126, 109], [166, 115, 87], [110, 128, 148], [153, 112, 126], [191, 161, 92], [88, 106, 106]]
-    let cloth = clothes[Math.floor(g.pref.shirtHue * clothes.length) % clothes.length]
+    // cor da roupa do dia (a simulação escolhe); sem ela, a preferência do genoma
+    let cloth = clothes[Math.floor((opts.shirtHue ?? g.pref.shirtHue) * clothes.length) % clothes.length]
+    const pantsSet = [['#4b5a61', '#39454d'], ['#3b3f47', '#2c2f35'], ['#6b6252', '#554d40'], ['#5a6b7d', '#465463']]
+    const [pantsColor, pantsShade] = pantsSet[Math.floor((opts.pantsTone ?? 0) * pantsSet.length) % pantsSet.length]
     const fabrics={linen:[202,195,172],formal:[188,196,191],shirt:[157,176,183],blazer:[76,94,108],cardigan:[156,120,98],blouse:[149,160,125],blouse34:[178,137,145],dress:[145,100,113],dresslong:[112,148,138],tank:[193,175,146],knit:[164,151,113]}
     if(fabrics[opts.outfit])cloth=mix(cloth,fabrics[opts.outfit],.82)
     return { p, skin: rgb(skin), shadow: rgb(mix(skin, [91, 64, 47], .18)), blush: rgb(mix(skin, [182, 99, 91], .28)),
       hair: rgb(hair), hairHi: rgb(mix(hair, [210, 193, 155], .16)), eye: rgb(C.eyeRGB(p.eyeDark, p.eyeGreen)),
       lip: rgb(mix(skin, [135, 67, 63], .48)), shirt: rgb(cloth), clothShadow: rgb(mix(cloth, [31, 45, 43], .22)),
-      pants: '#4b5a61', pantShadow: '#39454d', shoe: '#343b39', shoeHi: '#636d64' }
+      pants: pantsColor, pantShadow: pantsShade.slice(0, 7), shoe: '#343b39', shoeHi: '#636d64' }
   }
   function geometry(g, age, fat) {
     const z = g.z, baby = 1 - smooth(0, 13, age), old = smooth(55, 105, age)

@@ -1,6 +1,7 @@
-import { lifeEvents, validateLifeEvents, type EventChoice, type EventDefinition } from "@paralelo/content"
+import { bodyRules, lifeEvents, validateLifeEvents, type EventChoice, type EventDefinition } from "@paralelo/content"
 import type { DecisionId, PersonId, ScheduleId } from "@paralelo/shared"
 import type { ScheduledEvent, WorldState, WorldStateV2, WorldStateV3 } from "../domain/world"
+import { eat } from "./body"
 import { draw } from "../rng"
 import { advance } from "../scheduling"
 import { addMinutes, ageAt, formatDate } from "../time"
@@ -61,6 +62,7 @@ export function resolveDecision(world: WorldState, option: EventChoice): WorldSt
   let next = advance({ ...world, events: { ...world.events, pending: null } }, addMinutes(world.clock, option.effect.minutes))
   if (option.effect.moneyCents) next = postLedger(next, { amountCents: option.effect.moneyCents, category: "event", text: definition.title, cause: `event.choice:${pending.id}:${option.id}` })
   next = changeNeeds(next, { energy: option.effect.energy ?? 0, stress: option.effect.stress ?? 0, hunger: option.effect.hunger ?? 0 })
+  if ((option.effect.hunger ?? 0) < 0) next = eat(next, -option.effect.hunger! * bodyRules.kcalPerHunger)
   const skills = next.skills[next.playerId]!, clamp = (n: number) => Math.max(0, Math.min(1, n))
   next = { ...next, skills: { ...next.skills, [next.playerId]: { organization: clamp(skills.organization + (option.effect.organization ?? 0)), communication: clamp(skills.communication + (option.effect.communication ?? 0)) } } }
   if (pending.actorId) {

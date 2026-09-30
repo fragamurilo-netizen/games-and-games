@@ -3,11 +3,11 @@
 // a conversa do mês pode trazer aumento, advertência ou promoção; candidatura vira entrevista.
 // Sorteios pela stream "career"; nada aqui avança o relógio (a camada de comandos avança).
 import {
-  assignmentTemplates, inPlace, courses, fillText, interviewTexts, jobRoles, reviewTexts, roleCareer, workRules, workSituations,
+  assignmentTemplates, bodyRules, inPlace, courses, fillText, interviewTexts, jobRoles, reviewTexts, roleCareer, workRules, workSituations,
   type RoleFamily, type WorkChoice, type WorkEffect, type WorkSituation,
 } from "@paralelo/content"
 import type { CompanyId, EmploymentId, InterviewId, PersonId, RelationshipId, SceneId, ScheduleId, VacancyId } from "@paralelo/shared"
-import type { EmploymentV7, Interview, ScheduledEvent, WorkScene, Workplace, WorldState, WorldStateV6 } from "../domain/world"
+import type { EmploymentV7, Interview, ScheduledEvent, WorkScene, Workplace, WorldState, WorldStateV6, WorldStateV7 } from "../domain/world"
 import { draw, hashText } from "../rng"
 import { absoluteMinute, ageAt, formatDate, formatTime, weekdayOf } from "../time"
 import { appendEntry } from "../timeline"
@@ -17,6 +17,7 @@ import { formatMoney, postLedger } from "./finance"
 import { remember } from "./memory"
 import { changeNeeds } from "./needs"
 import { updateRelationship } from "./relationships"
+import { burn, dressGap, eat, presenceOf } from "./body"
 
 const clamp = (v: number, lo = 0, hi = 100): number => Math.max(lo, Math.min(hi, v))
 /** Confiança e desempenho sobem cada vez mais devagar perto do topo; caem sem desconto. */
@@ -40,8 +41,9 @@ const dueText = (world: Pick<WorldState, "clock">, day: number): string => {
 // ---------------- migração e liderança ----------------
 
 /** v6 -> v7: líderes por empresa, local de trabalho do contrato atual e agenda de entrevistas vazia. */
-export function upgradeWorldV6(base: WorldStateV6): WorldState {
-  let world = { ...base, schemaVersion: 7, employment: null, leaders: {}, work: { scene: null, interviews: [] } } as WorldState
+export function upgradeWorldV6(base: WorldStateV6): WorldStateV7 {
+  // os ajudantes trabalham sobre o formato atual; campos de versões futuras ficam vazios e saem no fim
+  let world = { ...base, schemaVersion: 8, employment: null, leaders: {}, work: { scene: null, interviews: [] }, bodies: {}, wardrobes: {}, gym: null } as unknown as WorldState
   world = ensureLeaders(world, false)
   if (base.employment) {
     const e = base.employment
@@ -50,7 +52,8 @@ export function upgradeWorldV6(base: WorldStateV6): WorldState {
       totalShifts: e.shiftsWorked, nextReviewDay: nextWeekday(Math.max(e.requiredFromDay, day) + 14) }) } }
     world = linkManager(world)
   }
-  return world
+  const { bodies: _bodies, wardrobes: _wardrobes, gym: _gym, ...v7 } = world
+  return { ...v7, schemaVersion: 7 }
 }
 
 /** Garante uma pessoa responsável por equipe em cada empresa; troca quando ela sai (bíblia §15.1, §15.7). */
@@ -203,6 +206,7 @@ function applyEffect(world: WorldState, effect: WorkEffect, actorId: PersonId | 
     }
   }
   next = changeNeeds(next, { energy: effect.energy ?? 0, stress: effect.stress ?? 0, hunger: effect.hunger ?? 0 })
+  if ((effect.hunger ?? 0) < 0) next = eat(next, -effect.hunger! * bodyRules.kcalPerHunger)
   if (effect.moneyCents) next = postLedger(next, { amountCents: effect.moneyCents, category: "food", text: "Almoço com a equipe", cause })
   if (actorId && (effect.coworker || effect.trust)) {
     const rel = relationshipBetween(next, next.playerId, actorId)
@@ -247,6 +251,7 @@ export function finishShift(world: WorldState, shiftDay: number): WorldState {
   let next: WorldState = { ...world, skills: { ...world.skills, [world.playerId]: { ...skills, [role.skill]: Math.min(1, skills[role.skill] + .003) } },
     employment: { ...e, lastWorkedDay: shiftDay, consecutiveAbsences: 0, accruedCents: e.accruedCents + Math.round(w.salaryCents / 20), shiftsWorked: e.shiftsWorked + 1, performance,
       workplace: { ...w, totalShifts: w.totalShifts + 1, assignment, lateToday: false } } }
+  next = burn(next, bodyRules.shiftKcal[familyOf(e.roleId)] ?? 150)
   next = appendEntry(next, { at: next.clock, kind: "career", text: `Turno encerrado ${inPlace(world.companies[e.companyId]!.name)}.${condition}`, personIds: [world.playerId], cause: `career.shift:${e.id}` })
   next = settleAssignment(next, true)
   next = giveAssignment(next)
@@ -479,7 +484,7 @@ export function resolveInterviewChoice(world: WorldState, choiceId: InterviewCho
   const skill = world.skills[world.playerId]![role.skill]
   const trust = interview.internal && world.employment ? world.employment.workplace.trust : 50
   const score = clamp(.28 + skill * .5 + (interview.prepared ? .15 : 0) + (referral ? .2 : 0) + (hasExperience(world, interview.roleId) ? .08 : 0) +
-    (went ? (choiceId === "team" ? .06 : .14) : -.06) - Math.min(.15, competitionFor(world, interview.roleId) * .025) + (interview.internal ? (trust - 55) / 150 : 0), .03, .95)
+    (went ? (choiceId === "team" ? .06 : .14) : -.06) - Math.min(.15, competitionFor(world, interview.roleId) * .025) + (presenceOf(world, world.playerId) - .5) * .25 + (interview.internal ? (trust - 55) / 150 : 0), .03, .95)
   const texts = interviewTexts.choices[choiceId]
   const v = sceneValues(world, scene)
   const intro = fillText(interview.internal ? interviewTexts.internal : interviewTexts.intro[familyOf(interview.roleId)], v)
@@ -590,7 +595,11 @@ export function workDailyCheck(world: WorldState, absent: boolean): WorldState {
 export function checkIn(world: WorldState): WorldState {
   const e = world.employment!
   const late = world.clock.minute > workRules.onTimeMinute
-  return { ...world, employment: { ...e, lastWorkedDay: world.clock.day, workplace: { ...e.workplace, lateToday: late, lateThisMonth: e.workplace.lateThisMonth + (late ? 1 : 0), trust: clamp(e.workplace.trust - (late ? 2 : 0)) } } }
+  // roupa abaixo do que a função pede também é notada (uma vez por dia, na chegada)
+  const gap = dressGap(world)
+  let next: WorldState = { ...world, employment: { ...e, lastWorkedDay: world.clock.day, workplace: { ...e.workplace, lateToday: late, lateThisMonth: e.workplace.lateThisMonth + (late ? 1 : 0), trust: clamp(e.workplace.trust - (late ? 2 : 0) - gap) } } }
+  if (gap) next = appendEntry(next, { at: next.clock, kind: "career", text: `${first(world.people[e.workplace.managerId]!.name)} olhou para a sua roupa e comentou que aqui se espera algo mais arrumado.`, personIds: [world.playerId, e.workplace.managerId], cause: `work.dress:${e.id}:${world.clock.day}` })
+  return next
 }
 
 

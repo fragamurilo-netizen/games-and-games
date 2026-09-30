@@ -1,6 +1,7 @@
 import { err, ok, type Result } from "@paralelo/shared"
-import type { WorldState, WorldStateV1, WorldStateV2, WorldStateV3, WorldStateV4, WorldStateV5, WorldStateV6 } from "./domain/world"
-import { assignmentTemplates, jobRoles, courses, lifeEvents, roleCareer, routineRules, workRules, workSituations } from "@paralelo/content"
+import type { WorldState, WorldStateV1, WorldStateV2, WorldStateV3, WorldStateV4, WorldStateV5, WorldStateV6, WorldStateV7 } from "./domain/world"
+import { assignmentTemplates, jobRoles, courses, lifeEvents, outfitCatalog, roleCareer, routineRules, workRules, workSituations } from "@paralelo/content"
+import { validBody } from "./systems/body"
 import { RNG_STREAMS } from "./rng"
 import { absoluteMinute } from "./time"
 
@@ -14,10 +15,12 @@ const stringArray = (value: unknown): value is string[] => Array.isArray(value) 
 const command = (value: unknown): boolean => object(value) &&
   (["rest", "sleep", "work", "buy-groceries"].includes(String(value.type)) || (value.type === "meal" && (value.source === undefined || ["home", "restaurant", "community"].includes(String(value.source)))) || (value.type === "wait" && integer(value.minutes, 1, 10080)) || (value.type === "contact" && id(value.personId)) || (value.type === "apply-job" && id(value.vacancyId)) || (value.type === "study" && id(value.courseId)) || (value.type === "decide" && id(value.decisionId) && text(value.choiceId)) || (value.type === "reply" && id(value.messageId) && ["answer", "call", "later"].includes(String(value.reply))) ||
     (value.type === "work-choice" && id(value.sceneId) && text(value.choiceId)) || value.type === "apply-internal" ||
-    (value.type === "prepare" && (value.target === "review" || (value.target === "interview" && id(value.interviewId)))))
+    (value.type === "prepare" && (value.target === "review" || (value.target === "interview" && id(value.interviewId)))) ||
+    (value.type === "exercise" && ["walk", "run", "home", "gym"].includes(String(value.kind))) || (value.type === "groom" && ["shave", "haircut"].includes(String(value.kind))) ||
+    ((value.type === "dress" || value.type === "buy-clothes") && outfitCatalog.some(o => o.id === value.outfit)) || (value.type === "gym" && ["join", "cancel"].includes(String(value.action))) || value.type === "snack")
 
 // Valida forma e referências antes de converter dados externos em domínio.
-function validateBase(input: unknown, version: 1 | 2 | 3 | 4 | 5 | 6 | 7): Result<unknown, readonly string[]> {
+function validateBase(input: unknown, version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8): Result<unknown, readonly string[]> {
   const errors: string[] = []
   if (!object(input)) return err(["Save não é um objeto."])
   if (input.schemaVersion !== version) return err(["Versão de save não suportada; é necessário um migrador explícito."])
@@ -81,7 +84,7 @@ function validateBase(input: unknown, version: 1 | 2 | 3 | 4 | 5 | 6 | 7): Resul
   const schedules = new Set<string>()
   if (!Array.isArray(input.scheduled)) errors.push("Agenda inválida.")
   else for (const item of input.scheduled) {
-    if (!object(item) || !id(item.id) || schedules.has(item.id) || !date(item.at) || !["mother-message", "daily-social", "monthly-finance", "daily-events", "event-followup", "work-reminder", "work-attendance", "daily-city", "weekly-economy", "interview", "interview-result"].includes(String(item.kind)) || !id(item.personId) || !Object.hasOwn(people, item.personId) ||
+    if (!object(item) || !id(item.id) || schedules.has(item.id) || !date(item.at) || !["mother-message", "daily-social", "monthly-finance", "daily-events", "event-followup", "work-reminder", "work-attendance", "daily-city", "weekly-economy", "interview", "interview-result", "daily-body"].includes(String(item.kind)) || !id(item.personId) || !Object.hasOwn(people, item.personId) ||
       typeof item.interrupts !== "boolean" || (date(input.clock) && absoluteMinute(item.at) < absoluteMinute(input.clock))) errors.push("Evento agendado inválido.")
     else schedules.add(item.id)
   }
@@ -100,7 +103,7 @@ export function validateWorldV1(input: unknown): Result<WorldStateV1, readonly s
   return result.ok ? ok(result.value as WorldStateV1) : result
 }
 
-function validateSlice(input: unknown, version: 2 | 3 | 4 | 5 | 6 | 7): Result<unknown, readonly string[]> {
+function validateSlice(input: unknown, version: 2 | 3 | 4 | 5 | 6 | 7 | 8): Result<unknown, readonly string[]> {
   const base = validateBase(input, version)
   if (!base.ok) return base
   if (!object(input)) return err(["Mundo inválido."])
@@ -162,7 +165,7 @@ export function validateWorldV2(input: unknown): Result<WorldStateV2, readonly s
   const result = validateSlice(input, 2)
   return result.ok ? ok(result.value as WorldStateV2) : result
 }
-function validateEvents(input: unknown, version: 3 | 4 | 5 | 6 | 7): Result<unknown, readonly string[]> {
+function validateEvents(input: unknown, version: 3 | 4 | 5 | 6 | 7 | 8): Result<unknown, readonly string[]> {
   const result = validateSlice(input, version)
   if (!result.ok) return result
   if (!object(input) || !object(input.events)) return err(["Estado de eventos ausente."])
@@ -183,7 +186,7 @@ export function validateWorldV3(input: unknown): Result<WorldStateV3, readonly s
   const result = validateEvents(input, 3)
   return result.ok ? ok(result.value as WorldStateV3) : result
 }
-function validateRoutine(input: unknown, version: 4 | 5 | 6 | 7): Result<unknown, readonly string[]> {
+function validateRoutine(input: unknown, version: 4 | 5 | 6 | 7 | 8): Result<unknown, readonly string[]> {
   const result = validateEvents(input, version)
   if (!result.ok) return result
   if (!object(input) || !date(input.clock)) return err(["Mundo inválido."])
@@ -233,7 +236,7 @@ export function validateWorldV4(input: unknown): Result<WorldStateV4, readonly s
   const result = validateRoutine(input, 4)
   return result.ok ? ok(result.value as WorldStateV4) : result
 }
-function validateSexed(input: unknown, version: 5 | 6 | 7): Result<unknown, readonly string[]> {
+function validateSexed(input: unknown, version: 5 | 6 | 7 | 8): Result<unknown, readonly string[]> {
   const result = validateRoutine(input, version)
   if (!result.ok) return result
   const people = object(input) && object(input.people) ? input.people : {}
@@ -249,7 +252,7 @@ export function validateWorldV6(input: unknown): Result<WorldStateV6, readonly s
   const result = validateCity(input, 6)
   return result.ok ? ok(result.value as WorldStateV6) : result
 }
-function validateCity(input: unknown, version: 6 | 7): Result<unknown, readonly string[]> {
+function validateCity(input: unknown, version: 6 | 7 | 8): Result<unknown, readonly string[]> {
   const result = validateSexed(input, version)
   if (!result.ok) return result
   if (!object(input) || !date(input.clock)) return err(["Mundo inválido."])
@@ -292,8 +295,35 @@ function validateCity(input: unknown, version: 6 | 7): Result<unknown, readonly 
 }
 
 // v7: trabalho vivido — líderes, local de trabalho, cena pendente e entrevistas.
+export function validateWorldV7(input: unknown): Result<WorldStateV7, readonly string[]> {
+  const result = validateWork(input, 7)
+  return result.ok ? ok(result.value as WorldStateV7) : result
+}
+// v8: corpo, guarda-roupa e academia para cada pessoa.
 export function validateWorld(input: unknown): Result<WorldState, readonly string[]> {
-  const result = validateCity(input, 7)
+  const result = validateWork(input, 8)
+  if (!result.ok) return result
+  if (!object(input)) return err(["Mundo inválido."])
+  const errors: string[] = []
+  const people = object(input.people) ? input.people : {}
+  const bodies = object(input.bodies) ? input.bodies : null, wardrobes = object(input.wardrobes) ? input.wardrobes : null
+  if (!bodies || !wardrobes) errors.push("Corpos ou guarda-roupas ausentes.")
+  else {
+    for (const key of Object.keys(people)) {
+      if (!validBody(bodies[key])) errors.push(`Corpo inválido: ${key}.`)
+      const w = wardrobes[key]
+      if (!object(w) || !Array.isArray(w.owned) || !w.owned.length || w.owned.length > 20 || w.owned.some(o => !outfitCatalog.some(c => c.id === o)) ||
+        (w.today !== null && (!object(w.today) || !integer(w.today.day) || !w.owned.includes(String(w.today.outfit))))) errors.push(`Guarda-roupa inválido: ${key}.`)
+    }
+    for (const key of [...Object.keys(bodies), ...Object.keys(wardrobes)]) if (!Object.hasOwn(people, key)) errors.push(`Corpo sem pessoa: ${key}.`)
+  }
+  if (input.gym !== null && (!object(input.gym) || !date(input.gym.since))) errors.push("Matrícula inválida.")
+  const scheduled = Array.isArray(input.scheduled) ? input.scheduled.filter(object) : []
+  if (scheduled.filter(e => e.kind === "daily-body").length !== 1) errors.push("Rotina do corpo ausente/duplicada.")
+  return errors.length ? err(errors) : ok(input as unknown as WorldState)
+}
+function validateWork(input: unknown, version: 7 | 8): Result<unknown, readonly string[]> {
+  const result = validateCity(input, version)
   if (!result.ok) return result
   if (!object(input) || !date(input.clock)) return err(["Mundo inválido."])
   const clock = input.clock, errors: string[] = []
@@ -337,6 +367,6 @@ export function validateWorld(input: unknown): Result<WorldState, readonly strin
       (scene.kind === "review" && (!object(employment) || scene.situationId !== "review")) ||
       (scene.kind === "interview" && (!seen.has(String(scene.interviewId)) || !String(scene.situationId).startsWith("interview:"))))) errors.push("Cena de trabalho inválida.")
   }
-  return errors.length ? err(errors) : ok(input as unknown as WorldState)
+  return errors.length ? err(errors) : ok(input)
 }
 const assignmentIds = new Set(Object.values(assignmentTemplates).flat().map(t => t.id))

@@ -6,10 +6,10 @@ A fonte de verdade do projeto é a **bíblia de design**:
 [`docs/PARALELO_MASTER_DESIGN_BIBLE.md`](docs/PARALELO_MASTER_DESIGN_BIBLE.md)
 (original em `.docx` na mesma pasta). Leia antes de mexer em arquitetura.
 
-> Status: **primeira campanha jogável**, com motor puro, relógio, RNG, 100 pessoas,
-> relações/memórias, carreira com presença e demissão, cursos, alimentação, sono,
-> despensa, extrato, 30 eventos/10 cadeias e save SQLite v4. As cinco áreas do app
-> executam ou consultam o estado real da campanha.
+> Status: **save v8**. Cidade viva (moradores com emprego e objetivos, economia, jornal,
+> mensagens), trabalho vivido (turno com escolhas, gestor, tarefa, conversa do mês,
+> entrevistas, promoção), corpo e aparência na simulação (peso, força, cuidado, roupa
+> do dia), começo da campanha e timeline editorial. 98 testes.
 > Continuidade para colegas: [`docs/CONTINUIDADE.md`](docs/CONTINUIDADE.md).
 
 ## Estrutura (bíblia §80)

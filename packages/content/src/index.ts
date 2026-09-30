@@ -3,6 +3,7 @@
 export * from "./events"
 export * from "./routine"
 export * from "./work"
+export * from "./body"
 export const starterContent = {
   city: "Santa Aurora",
   district: "Vila das Flores",

@@ -4,6 +4,7 @@ import { nextWeekday, scheduleWorkDay } from "./career"
 import { changeNeeds } from "./needs"
 import { postLedger } from "./finance"
 import { appendEntry } from "../timeline"
+import { eat } from "./body"
 
 // A campanha antiga recebe recursos iniciais, sem inventar necessidades ou faltas passadas.
 export function upgradeWorldV3(base: WorldStateV3): WorldStateV4 {
@@ -31,7 +32,7 @@ export function groceriesReason(world: WorldState): string | null {
 }
 export function finishMeal(world: WorldState, source: MealSource, startedDay: number): WorldState {
   const meal = routineRules.meals[source]
-  let next = changeNeeds(world, meal)
+  let next = eat(changeNeeds(world, meal), meal.kcal)
   next = { ...next, routine: { pantryMeals: next.routine.pantryMeals - (source === "home" ? 1 : 0), lastCommunityMealDay: source === "community" ? startedDay : next.routine.lastCommunityMealDay } }
   if (meal.priceCents) next = postLedger(next, { amountCents: -meal.priceCents, category: "food", text: "Refeição no restaurante do bairro", cause: "command.meal:restaurant" })
   const text = source === "home" ? "Você preparou uma refeição com o que tinha em casa e comeu com calma."

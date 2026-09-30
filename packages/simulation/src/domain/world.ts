@@ -45,7 +45,7 @@ export type TimelineEntry = Readonly<{
 export type ScheduledEvent = Readonly<{
   id: ScheduleId
   at: GameDate
-  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance" | "daily-city" | "weekly-economy" | "interview" | "interview-result"
+  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance" | "daily-city" | "weekly-economy" | "interview" | "interview-result" | "daily-body"
   employmentId?: EmploymentId
   interviewId?: InterviewId
   eventId?: string
@@ -68,6 +68,12 @@ export type Command =
   | Readonly<{ type: "work-choice"; sceneId: SceneId; choiceId: string }>
   | Readonly<{ type: "prepare"; target: "review" } | { type: "prepare"; target: "interview"; interviewId: InterviewId }>
   | Readonly<{ type: "apply-internal" }>
+  | Readonly<{ type: "exercise"; kind: "walk" | "run" | "home" | "gym" }>
+  | Readonly<{ type: "groom"; kind: "shave" | "haircut" }>
+  | Readonly<{ type: "dress"; outfit: string }>
+  | Readonly<{ type: "buy-clothes"; outfit: string }>
+  | Readonly<{ type: "gym"; action: "join" | "cancel" }>
+  | Readonly<{ type: "snack" }>
 export type CommandRecord = Readonly<{ revision: number; at: GameDate; command: Command }>
 export type WorldStateV1 = Readonly<{
   schemaVersion: 1
@@ -179,10 +185,41 @@ export type WorkScene = Readonly<{
   remainingMinutes: number
   shiftDay: number | null
 }>
-export type WorldState = Omit<WorldStateV6, "schemaVersion" | "employment"> & Readonly<{
+export type WorldStateV7 = Omit<WorldStateV6, "schemaVersion" | "employment"> & Readonly<{
   schemaVersion: 7
   employment: EmploymentV7 | null
   /** quem responde pela equipe em cada empresa (bíblia §15.1) */
   leaders: Readonly<Record<string, PersonId>>
   work: Readonly<{ scene: WorkScene | null; interviews: readonly Interview[] }>
+}>
+
+// ---- Corpo e aparência (v8): peso, força, cuidado e roupa do dia (bíblia §21) ----
+export type PersonBody = Readonly<{
+  heightCm: number
+  fatKg: number
+  leanKg: number
+  /** massa magra natural da pessoa; treino sobe acima dela, falta de treino volta */
+  baseLeanKg: number
+  /** força treinada, 0–1 */
+  strength: number
+  /** condicionamento, 0–1 */
+  fitness: number
+  lastTrainingDay: number | null
+  lastShaveDay: number
+  lastHaircutDay: number
+  /** calorias ingeridas e gastas em exercício hoje */
+  kcalIn: number
+  kcalOut: number
+  /** hábitos de quem não é o jogador: movimento e apetite, 0–1 */
+  activity: number
+  appetite: number
+  /** peso semanal, para dizer "três quilos em um mês" com base em fatos */
+  weightLog: readonly Readonly<{ day: number; kg: number }>[]
+}>
+export type Wardrobe = Readonly<{ owned: readonly string[]; today: Readonly<{ day: number; outfit: string }> | null }>
+export type WorldState = Omit<WorldStateV7, "schemaVersion"> & Readonly<{
+  schemaVersion: 8
+  bodies: Readonly<Record<string, PersonBody>>
+  wardrobes: Readonly<Record<string, Wardrobe>>
+  gym: Readonly<{ since: GameDate }> | null
 }>

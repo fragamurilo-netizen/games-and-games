@@ -1,180 +1,116 @@
 # Continuidade do desenvolvimento
 
-Fonte de verdade: `PARALELO_MASTER_DESIGN_BIBLE.md`, especialmente §§36–43,
-49, 67, 80–82. Leia a bíblia antes de alterar arquitetura.
+Fonte de verdade: `PARALELO_MASTER_DESIGN_BIBLE.md`. Decisões explícitas do dono vêm
+logo depois; quando conflitam com a bíblia, estão registradas abaixo em
+"Decisões e contradições". Leia a bíblia e `CLAUDE.md` antes de mexer em arquitetura.
 
-Branch compartilhada: `claude/inspiring-cray-82ewil` no remoto `origin`.
-Atualize este documento e faça commit/push de cada entrega validada. Nunca
-confunda sistemas planejados com funcionalidades já implementadas.
+Branch compartilhada: `claude/inspiring-cray-82ewil` (PR #59). Faça `git pull` antes
+de começar; outros agentes (Codex, Claude) também empurram nela. Nunca force-push.
+Atualize este documento a cada entrega validada e nunca descreva como pronto o que
+só está planejado.
 
-## Entrega atual: rotina, alimentação e presença no trabalho
+## Estado atual: save v8
 
-- Núcleo TS puro em `packages/simulation`: relógio Gregorian sem Date do sistema,
-  RNG de seis streams independentes, IDs estáveis, pessoas, relações, agenda,
-  comandos, timeline, queries, validação e hash de diagnóstico.
-- Cenário: adulto jovem, moradia, mãe e dois amigos em Santa Aurora. A cidade
-  contém 100 pessoas persistentes, 10 empresas, 12 funções/vagas e 3 cursos.
-  Conteúdo em `packages/content`. As 96 pessoas de fundo ainda não têm IA ativa.
-- Descansar recupera energia; ligar consome tempo e pode não obter resposta;
-  contatos têm intervalo de oito horas. Skip para em mensagens importantes.
-- `GameSession` é a dona da campanha na aplicação. UI assina o read model e
-  envia comandos; persistência precede a publicação da transição.
-- Expo Router e cinco áreas VIDA/PESSOAS/CARREIRA/DINHEIRO/MUNDO em `apps/mobile/src/app`; SQLite Android/web na borda,
-  via `apps/mobile/src/persistence`. Web exige WASM e COOP/COEP, configurados no Metro.
-- Save v4: snapshot integral em SQLite, atualização e backup anterior em uma
-  transação. IDs/referências/intervalos/hash são verificados na carga. Save
-  futuro é recusado; corrupção tenta backup sem substituir a cópia válida por
-  dados danificados. Se ambas as cópias falharem, nenhuma é sobrescrita.
-- CLI `apps/dev-sim`: seed, fast-forward, inspeção, benchmark e snapshot JSON.
-- Cursos cobram aulas, desenvolvem habilidade e têm conclusão e limite diário.
-  Habilidades condicionam candidaturas; seleção é determinística e tem cooldown.
-  Contratação fecha a vaga. Trabalho tem turno de oito horas, dias úteis e limite
-  de um turno por dia. Cada turno acumula 1/20 do salário de referência.
-- Sono acumulado e fome em `Person.needs`, junto de energia e stress. Descansar
-  e dormir são atividades distintas. Integração de intervalos mantém os efeitos
-  consistentes quando há eventos no meio de uma ação. Só o jogador tem essas
-  necessidades processadas; NPCs continuam seguindo seus tiers anteriores.
-- Despensa começa com quatro porções. Comprar seis custa R$ 48 e leva uma hora;
-  preparar comida usa uma porção e 35 minutos. Restaurante: R$ 18/45 minutos.
-  Almoço comunitário: gratuito, uma vez por dia, entrada entre 11h e 14h. Há
-  caminho de recuperação mesmo sem saldo. Estoque máximo: 30 refeições.
-- Agenda de trabalho real: lembrete às 8h e conferência de presença às 14h01,
-  apenas em dias úteis. Entrada é permitida das 6h às 14h. A cobrança começa
-  no próximo dia útil, inclusive para empregos migrados. Presença é registrada
-  antes de processar as oito horas para não marcar falta durante um turno.
-- Primeira falta gera aviso; segunda, advertência; terceira seguida encerra
-  o contrato. Trabalhar interrompe a sequência. A saída liquida o salário
-  acumulado uma vez, reabre a vaga, remove a agenda antiga e entra no histórico
-  profissional. Nova candidatura à mesma empresa tem intervalo de sete dias.
-  Sono, alimentação, stress e energia afetam o desempenho; nenhum sorteio é
-  usado para essas faltas. As regras são parâmetros de gameplay em `content/routine.ts`.
-- VIDA mostra os próximos turnos e pagamento/aluguel, sem revelar eventos
-  internos dos NPCs. CARREIRA explica a situação da presença e exibe contratos
-  encerrados. Lembretes sem novidade não interrompem a passagem de tempo.
-- Dia 1 às 8h: pagamento dos turnos efetivamente cumpridos, seguido do aluguel.
-  Todos os valores são inteiros em centavos; saldo precisa conferir com o ledger.
-  Saldo negativo é explícito. Refeições e aulas são bloqueadas sem saldo suficiente.
-- Pessoas próximas podem iniciar contato diário por iniciativa própria segundo
-  sociabilidade. Contatos deixam memória; ausências prolongadas afetam proximidade.
-  Esta é IA social inicial, não a Utility AI completa de §13.
-- Motor declarativo com 30 acontecimentos em 10 cadeias de três etapas.
-  Condições consideram trabalho, energia, dinheiro e stress. Escolhas consomem
-  tempo e podem alterar saldo, habilidades, necessidades, relações e memórias.
-  Custos pagos sem saldo são recusados e sempre existe uma alternativa gratuita.
-  Uma decisão pendente pausa o skip e impede ações até o jogador responder.
-  Follow-ups mantêm a pessoa original e são agendados dois dias depois.
-  Orçamento: no máximo uma decisão por dia; novos inícios a cada três dias;
-  cada definição aparece uma vez. Conteúdo é validado contra IDs/ciclos/efeitos.
-- Fontes por orientação explícita do usuário: Newsreader nos títulos e narrativa,
-  Commissioner no corpo/controles. Sem Barlow. Cinco TTF estáticos importados
-  individualmente e empacotados offline; tokens em `packages/ui/src/tokens.ts`.
-- Falha ao abrir SQLite oferece nova tentativa sem apagar dados. Campanha
-  carregando mantém a recuperação acessível também ao abrir uma rota diretamente.
-  MUNDO mostra moradores em lotes de 20 para reduzir a montagem inicial no celular.
-- Laboratório vetorial em `prototypes/faces`: 133 cabelos, 106 barbas, 19 roupas,
-  corpos contínuos, idades, ancestrais e herança. Commit `7df361c`.
+`npm test`: 98 testes, todos verdes. `npm run typecheck`: limpo em todos os workspaces.
+20 anos simulados em ~3,7 s no teste longo (limite do vitest: 5 s).
 
-## Como verificar e continuar
+### Simulação (`packages/simulation`)
 
-Use Node 24 e execute `npm ci`, `npm test`, `npm run typecheck`,
-`npm --workspace apps/mobile run lint`. Depois `npm run mobile` para Android ou
-`npm --workspace apps/mobile run web`. O laboratório abre separadamente com
-`python -m http.server 8765 --bind 127.0.0.1` dentro de `prototypes/faces`.
+| Versão | Sistema | Arquivos principais |
+|---|---|---|
+| v1–v4 | relógio, RNG por streams, pessoas, relações, carreira básica, cursos, ledger, eventos (30 em 10 cadeias), rotina (fome, sono, despensa), presença | `systems/slice.ts`, `events.ts`, `routine.ts`, `career.ts` |
+| v5 | sexo pelo nome (aparência) | `systems/appearance.ts` |
+| v6 | **mundo vivo**: moradores com emprego/objetivo e IA por utilidade com inércia (§13); economia semanal das empresas com quadro e rotatividade; jornal; mensagens com prazo (responder, ligar, adiar; silêncio esfria a relação) | `systems/city.ts`, `content/city.ts` |
+| v7 | **trabalho vivido** (§7, §15, §61): líder por empresa; turno com situação no meio (32 situações por família de função); pontualidade até 8h30; tarefa semanal; conversa do mês (aumento, advertência, demissão por desempenho, promoção por processo interno); candidatura vira entrevista marcada e preparável, com concorrência | `systems/work.ts`, `content/work.ts` |
+| v8 | **corpo e aparência** (§21): peso por balanço calórico (Mifflin-St Jeor, 7.700 kcal/kg), força e fôlego por treino com retorno decrescente e perda sem prática, academia com mensalidade, barba e cabelo, guarda-roupa, roupa do dia para todos por clima, compromisso e sorteio, código de vestimenta no trabalho, "presença" pesando em entrevistas, espelho em frases | `systems/body.ts`, `content/body.ts` |
 
-Há 49 testes cobrindo determinismo, relógio, eventos, comandos recusados,
-read models isolados, SQLite real, rollback, backup, saves futuros/corrompidos,
-duplo toque, falha de gravação e integridade durante 1, 5 e 20 anos.
-As corridas longas verificam integridade financeira e social; não demonstram
-balanceamento de uma vida completa. Ainda não há macroeconomia ou envelhecimento
-com morte/legado. Também há curso, contratação, turno, presença, demissão,
-despensa, sono e conservação do ledger. Um cenário de 90 dias trabalha,
-compra comida, dorme, responde decisões e recebe três pagamentos mensais.
+Outros módulos:
+- Timeline com peso editorial, resumo de rotina e compactação (§6.2–6.4): `timeline.ts`.
+- Começo da campanha (§47): nome, corpo, idade e ponto de partida em `systems/onboarding.ts`.
+- Ferramentas (§42): `queries/debug.ts` (inspector de pessoa e de evento, estatísticas);
+  CLI `npm run sim -- --seed x --days 365 --auto-choice safe --stats --events --inspect person:player --quiet`.
+- `test-support.ts`: ajudantes que jogam como uma pessoa (resolvem cenas, vão a entrevistas).
+
+### App (`apps/mobile`)
+
+- Começo da campanha (`screens/start-screen.tsx`), Vida com cena, régua do dia, mensagens,
+  timeline por dia; Pessoas por círculo com histórico; Carreira no formato do §61;
+  Mundo com jornal; cenas em tela cheia para decisão e trabalho (`components/game-feel.tsx`).
+- Personagens 2D do renderizador vetorial (`packages/characters`), via `drawCharacter`.
+
+## O que falta na frente atual (corpo e aparência, v8)
+
+A simulação do v8 está pronta e testada (`body.test.ts`), mas **ainda não aparece no app**:
+
+1. Passar `lookOf(world, id)` para o desenho. `drawCharacter` já aceita `look`
+   (`fat`, `muscle`, `outfit`, `shirtHue`, `pantsTone`, `beard`). Falta:
+   - no renderizador, transformar `stubbleDays` em barba (`por-fazer` a partir de 2 dias,
+     `curta` a partir de 6, `cheia` a partir de 15) quando `g.pref.beard === "nenhuma"`;
+   - `Portrait` e `LifeScene` receberem `look`;
+   - as queries (`queryLife`, pessoas, inbox, cenas, gestor) devolverem `look` junto de `appearance`.
+2. Seção "Corpo" na Vida: `mirrorText` (frases e tendência de peso) e ações contextuais
+   (caminhar, correr, treinar em casa, academia, fazer a barba, cortar o cabelo, lanche
+   rápido), sem virar lista gigante (§3, §7.3).
+3. Guarda-roupa: escolher a roupa de hoje (`dress`) e comprar (`buy-clothes`).
+4. Academia em Dinheiro: matrícula e cancelamento (`gym`); a mensalidade já é cobrada no dia 1º.
+5. Teste de migração v7→v8 em `tests/migration.test.ts`.
+6. **Saúde (§21) ainda não existe.** Hoje há um piso fisiológico provisório para quem não
+   come (em `processDailyBody`). Fome prolongada, doença e consequências precisam do
+   sistema de saúde, com cuidado de representação (§21.3, §21.4).
+
+## Próximas frentes, na ordem combinada com o dono
+
+1. Terminar corpo e aparência no app (acima).
+2. **Escola e formação + profissões ampliadas.** Instituições com horário, custo,
+   pré-requisito e credencial (§16): escola para crianças NPC, supletivo, curso técnico,
+   faculdade. Dezenas de profissões por setor, exigindo formação, cada uma com família,
+   situações de turno, salário e degrau seguinte (`roleCareer`). Ver decisão 1.
+3. **Relações realistas** (§11): conhecer gente em lugares (trabalho, academia, escola),
+   amizade por tempo junto, atração e romance, brigas e afastamento, casais e términos
+   entre NPCs. O campo `attraction` já existe na relação; `presenceOf` já existe para
+   primeiras impressões.
+4. **Envelhecimento e gerações** (§22): corpo e saúde mudando com a idade, nascimentos,
+   mortes, família mudando, crianças indo à escola.
+
+Pedido do dono que orienta tudo: "tem que ser vontade de jogar, não SaaS" e "os menus e
+jogos não parecem divertidos ainda". Priorize mudanças visíveis (o personagem muda,
+as pessoas reagem) e escolhas com custo real.
+
+## Decisões e contradições registradas
+
+1. **"Adicionar todos os trabalhos possíveis"** × bíblia §65 (quantidade de profissões é o
+   primeiro corte) e §3 (sem listas gigantes de opções equivalentes). Decisão: ampliar
+   muito, por setores, com formação exigida e impacto real, sem lista infinita.
+2. **"Adicionar escola"** × §48 (o jogador começa adulto jovem). Decisão: a escola existe
+   no mundo (crianças NPC) e o jogador acessa supletivo, técnico e faculdade. Começar
+   a vida criança fica para depois.
+3. **"Ficar mais bonito/feio"** × §3 e §8.1 (sem barras e números para atributos humanos).
+   Decisão: aparência muda no desenho e em frases; o número interno (`presenceOf`)
+   nunca aparece na tela.
+4. Personagens: o dono preferiu o renderizador 2D do Codex ao 2,5D; o 2,5D foi removido.
 
 ## Save e migrações
 
-SQLite `PRAGMA user_version = 1`: tabela `saves(slot, payload)`; slots `current`
-e `previous`. Envelope JSON `schemaVersion = 4`, hash e WorldState v4. O save
-do laboratório (`paralelo-character`) é independente do save da campanha.
-Migração v1 -> v2 em `systems/slice.ts`: preserva pessoas originais, relações,
-timeline, seed, relógio e cursores RNG. Acrescenta cidade/finanças/carreira via
-namespace determinística independente. Fixture produzida com o gerador do
-commit de fundação `1670156` em `tests/fixtures/legacy-save-v1.json`; testes
-verificam migração, persistência e preservação da versão antiga como backup.
-Migração v2 -> v3 em `systems/events.ts`: preserva os sistemas existentes e
-acrescenta estado/agenda de decisões sem consumir RNG. Fixture v2 gerada no
-checkpoint `82e83c6`; decisões pendentes e follow-ups são salvos integralmente.
-Migração v3 -> v4 em `systems/routine.ts`: acrescenta fome/sono, despensa e
-controle de presença sem consumir RNG nem aplicar faltas passadas. Fixture v3
-produzida no checkpoint `99a5700`, com emprego ativo e R$ 90 a receber, está em
-`tests/fixtures/legacy-save-v3.json`. Pessoas antigas mantêm todos os campos
-anteriores; só recebem as novas necessidades. A versão anterior fica no backup.
-Ao adicionar campos obrigatórios, criar migração explícita e teste de fixture
-da versão anterior; não aceitar silenciosamente dados incompletos.
+Envelope JSON `{ schemaVersion: 8, hash, world }` em SQLite (slots `current` e `previous`).
+Cadeia explícita em `packages/persistence/src/snapshot.ts`:
+v1→v2 `slice.ts`, v2→v3 `events.ts`, v3→v4 `routine.ts`, v4→v5 `appearance.ts`,
+v5→v6 `city.ts`, v6→v7 `work.ts`, v7→v8 `body.ts`. Cada versão tem validador próprio
+em `validation.ts`. Migrações não consomem RNG salvo (usam hash de seed e entidade).
+Ao adicionar campo obrigatório: novo tipo `WorldStateVN`, `upgradeWorldVN`,
+`validateWorldVN`, entrada na cadeia do snapshot e teste de migração.
+
+## Como verificar
+
+Node 22.13+ (24 recomendado). `npm ci`, `npm test`, `npm run typecheck`.
+App: `npm run mobile` (Expo Go no Android) ou `cd apps/mobile && npx expo start --web`.
+APK: `cd apps/mobile && npx eas-cli build -p android --profile preview` (conta Expo).
+Personagens: `node prototypes/faces/check-characters.cjs`.
 
 ## Limitações conhecidas
 
-**Android é a plataforma principal.** Export de produção Android/Hermes passou,
-inclusive com as cinco fontes TTF. Isso valida resolução/compilação e assets;
-não é um APK nem substitui teste em aparelho. Não há SDK Android/adb disponível
-nesta máquina. Perfis EAS development/preview APK/production AAB já existem.
-Não foi disparado build EAS remoto nesta entrega. Web é ambiente auxiliar de
-inspeção. O retrato vetorial ainda não é integrado à campanha.
-Person e Relationship são modelos iniciais; crenças, macroeconomia, mensagens
-respondíveis gerais, Utility AI completa, promoções e troca voluntária de emprego faltam.
-Demissão implementada apenas por faltas consecutivas; crise da empresa, licença,
-justificativa de ausência e desligamento por desempenho ainda não existem.
-Empregos e contas só são simulados para o jogador. Moradia é fixa. O registro
-MUNDO deriva de fatos da campanha, não é um sistema de jornalismo da cidade.
-As taxas de necessidades são parâmetros abstratos de jogo e precisam de
-balanceamento com uso real. Não há doença, desmaio ou morte por negligenciar
-alimentação/sono nesta versão. Não foram acrescentadas dependências nativas.
-O hash de diagnóstico não é criptográfico. Histórico de comandos guarda os
-últimos 256; timeline persistida é integral e query mostra os últimos 80.
-
-## Próximas entregas, na ordem
-
-1. Validar APK/emulador Android: abertura offline, fonte ampliada, voltar,
-   background, retomada, duplo toque e SQLite real no aparelho.
-2. Ampliar agenda com compromissos pessoais, licenças e justificativas de falta.
-3. Utility AI, empregos/finanças dos NPCs, mensagens respondíveis e crenças.
-4. Promoções, desligamentos por outros motivos, despesas detalhadas, dívidas e mudanças.
-5. Completar o slice de §48: promover 20 NPCs relevantes, educação aprofundada,
-   notícias da cidade e campanhas de três meses com trabalho e decisões.
-6. Portar renderer/genoma vetorial para TS e react-native-svg sem duplicar a
-   fonte de verdade; só depois acrescentar retratos às listas de pessoas.
-
-## Validação e performance desta entrega
-
-`npm test`: 49 testes, incluindo as 60 escolhas dos 30 eventos, cadeia completa,
-replay recusado, opção sem saldo, retomada pendente e migrações v1/v2/v3.
-Rotina: refeições e compras, sono vs pausa, intervalos de necessidade, contrato
-às 14h, fim de semana, advertência, recuperação de presença, acerto único,
-vaga reaberta, agenda corrompida e campanha ativa de três meses.
-`npm run typecheck`: todos os workspaces.
-`npm --workspace apps/mobile run lint` e `npx expo install --check`: executados.
-Web: navegação, ações, extrato, autosave e retomada/migração inspecionados no browser.
-Em campanha separada de QA v3, a atualização preservou saldo de R$ 850, acrescentou
-quatro porções, consumiu uma e comprou seis por R$ 48 (saldo R$ 802). Contratação
-na Padaria Aurora e turno de oito horas geraram R$ 95 a receber, sem falta falsa
-às 14h01. Faltar no dia seguinte mostrou aviso na área CARREIRA.
-Reabrir a rota CARREIRA preservou o emprego, a falta e os R$ 95 acumulados.
-A campanha principal foi migrada mantendo 16/01/2026 às 19h55, com histórico
-anterior intacto, quatro porções iniciais e nenhum erro de console.
-CLI seed `rotina-v4`, 90 dias, `--auto-choice first`: mundo válido e cadeias
-contextuais. Sem essa opção, a CLI pausa na decisão do jogador; `safe` usa a
-última alternativa disponível para testar fast-forward sem impor gastos.
-Benchmark CPU local: 1.000 mundos de 100 pessoas em aproximadamente 420 ms.
-Não representa FPS nem desempenho Android. Export Android/Hermes passou:
-bundle cerca de 3 MB, mais assets/fontes. Saídas em `output/`, ignoradas pelo Git.
-
-## Checkpoints compartilhados
-
-- `7df361c`: laboratório vetorial revisado.
-- `1670156`: fundação e save v1.
-- `82e83c6`: carreira, cursos, ledger, autonomia social e save v2.
-- `99a5700`: motor de decisões/save v3 e fontes autorais Android.
-- Entrega atual: localizar em `git log` pelo título
-  "Implementa rotina alimentar sono e presenca profissional com save v4".
-  Nunca force-push desta branch compartilhada.
-
-Registre aqui resultados medidos e novos limites ao concluir cada entrega.
+- Sem saúde, doença ou morte; piso fisiológico provisório no corpo.
+- Crenças (§79), moradia variável, dívidas e retrospectiva anual ainda não existem.
+- O teste de 20 anos está a ~1,3 s do limite de 5 s do vitest; ao somar sistemas
+  diários, use nível de detalhe (jogador diário, NPCs em lote semanal) como em
+  `processDailyBody` e `processDailyCity`.
+- Web é ambiente auxiliar; Android é o alvo. Não há SDK Android nesta máquina.

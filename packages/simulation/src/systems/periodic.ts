@@ -11,12 +11,14 @@ import { processLifeEvent } from "./events"
 import { processWorkEvent } from "./career"
 import { processDailyCity, processWeeklyEconomy } from "./city"
 import { processInterviewEvent } from "./work"
+import { chargeGym, processDailyBody } from "./body"
 
 export function processScheduled(world: WorldState, event: ScheduledEvent): WorldState {
   if (event.kind === "work-reminder" || event.kind === "work-attendance") return processWorkEvent(world, event)
   if (event.kind === "daily-events" || event.kind === "event-followup") return processLifeEvent(world, event)
   if (event.kind === "daily-city") return processDailyCity(world, event)
   if (event.kind === "interview" || event.kind === "interview-result") return processInterviewEvent(world, event)
+  if (event.kind === "daily-body") return processDailyBody(world, event)
   if (event.kind === "weekly-economy") return processWeeklyEconomy(world, event)
   if (event.kind === "mother-message") return appendEntry(world, { at: world.clock, kind: "message", text: starterContent.reminder, personIds: [event.personId], cause: event.id })
   if (event.kind === "monthly-finance") {
@@ -28,6 +30,7 @@ export function processScheduled(world: WorldState, event: ScheduledEvent): Worl
       next = appendEntry(next, { at: world.clock, kind: "finance", text: `Caiu o pagamento dos turnos do mês: ${formatMoney(accrued)}.`, personIds: [world.playerId], cause: world.employment.id })
     }
     next = postLedger(next, { amountCents: -world.finance.monthlyRentCents, category: "rent", text: "Aluguel · Vila das Flores", cause: event.id })
+    next = chargeGym(next)
     next = appendEntry(next, { at: world.clock, kind: "finance", text: `O aluguel de ${formatMoney(world.finance.monthlyRentCents)} foi debitado.${next.finance.balanceCents < 0 ? " A conta ficou negativa. Você precisa reorganizar as despesas." : ""}`, personIds: [world.playerId], cause: event.id })
     const now = calendarDate(world.clock.day)
     const day = now.month === 12 ? dayFromCalendar(now.year + 1, 1, 1) : dayFromCalendar(now.year, now.month + 1, 1)

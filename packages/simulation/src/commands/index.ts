@@ -3,7 +3,7 @@ import type { Command, WorldState } from "../domain/world"
 import { draw } from "../rng"
 import { absoluteMinute, addMinutes } from "../time"
 import { advance, appendEntry } from "../scheduling"
-import { courses, lifeEvents, routineRules, workRules, workSituations } from "@paralelo/content"
+import { courses, exercises, groomingRules, lifeEvents, routineRules, snack, workRules, workSituations } from "@paralelo/content"
 import { choiceReason, resolveDecision } from "../systems/events"
 import { applicationReason, applyForJob, workReason } from "../systems/career"
 import { appointmentConflict, applyInternal, checkIn, finishShift, interviewChoices, internalApplicationReason, openShiftScene, prepare, prepareReason, resolveInterviewChoice, resolveReview, resolveShiftChoice, reviewChoices } from "../systems/work"
@@ -12,6 +12,7 @@ import { remember } from "../systems/memory"
 import { updateRelationship } from "../systems/relationships"
 import { finishGroceries, finishMeal, groceriesReason, mealReason } from "../systems/routine"
 import { replyReason, resolveReply } from "../systems/city"
+import { buyClothes, buyClothesReason, dress, dressReason, eatSnack, exercise, exerciseReason, groom, groomReason, gym, gymReason, snackReason } from "../systems/body"
 
 export type CommandError = Readonly<{ code: "invalid-duration" | "unknown-person" | "no-relationship" | "cooldown" | "exhausted" | "invalid-command" | "unavailable" | "insufficient-money" | "pending-decision"; message: string }>
 export function contactAvailability(world: WorldState, personId: PersonId): CommandError | null {
@@ -183,6 +184,49 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       }
       const replied = resolveReply(world, command.messageId, command.reply)
       next = advance(replied.world, addMinutes(world.clock, replied.minutes))
+      break
+    }
+    case "exercise": {
+      const e = exercises[command.kind]
+      if (!e) return err({ code: "invalid-command", message: "Exercício desconhecido." })
+      const reason = exerciseReason(world, command.kind)
+      if (reason) return err({ code: "unavailable", message: reason })
+      { const b = busyFor(e.minutes); if (b) return b }
+      next = exercise(advance(world, addMinutes(world.clock, e.minutes)), command.kind)
+      break
+    }
+    case "groom": {
+      const reason = groomReason(world, command.kind)
+      if (reason) return err({ code: "unavailable", message: reason })
+      const minutes = groomingRules[command.kind].minutes
+      { const b = busyFor(minutes); if (b) return b }
+      next = groom(advance(world, addMinutes(world.clock, minutes)), command.kind)
+      break
+    }
+    case "dress": {
+      const reason = dressReason(world, command.outfit)
+      if (reason) return err({ code: "unavailable", message: reason })
+      next = dress(world, command.outfit)
+      break
+    }
+    case "buy-clothes": {
+      const reason = buyClothesReason(world, command.outfit)
+      if (reason) return err({ code: "unavailable", message: reason })
+      { const b = busyFor(60); if (b) return b }
+      next = buyClothes(advance(world, addMinutes(world.clock, 60)), command.outfit)
+      break
+    }
+    case "gym": {
+      const reason = gymReason(world, command.action)
+      if (reason) return err({ code: "unavailable", message: reason })
+      next = gym(world, command.action)
+      break
+    }
+    case "snack": {
+      const reason = snackReason(world)
+      if (reason) return err({ code: "unavailable", message: reason })
+      { const b = busyFor(snack.minutes); if (b) return b }
+      next = eatSnack(advance(world, addMinutes(world.clock, snack.minutes)))
       break
     }
     default: return err({ code: "invalid-command", message: "Comando desconhecido." })

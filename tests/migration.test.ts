@@ -31,7 +31,7 @@ describe("migrações de campanhas anteriores", () => {
     expectPeoplePreserved(loaded.value, original.world.people)
     for (const field of ["companies", "vacancies", "finance", "employment", "training", "memories", "rng", "clock", "timeline"] as const)
       expect(loaded.value[field]).toEqual(original.world[field])
-    expect(loaded.value.schemaVersion).toBe(7)
+    expect(loaded.value.schemaVersion).toBe(8)
     expect(loaded.value.events.pending).toBeNull()
     expect(loaded.value.scheduled.filter(event => event.kind === "daily-events")).toHaveLength(1)
     expect(validateWorld(loaded.value).ok).toBe(true)
@@ -41,7 +41,7 @@ describe("migrações de campanhas anteriores", () => {
     expect(result.ok).toBe(true)
     if (!result.ok) throw new Error(result.error.message)
     const world = result.value
-    expect(world.schemaVersion).toBe(7)
+    expect(world.schemaVersion).toBe(8)
     for (const field of ["seed", "clock", "rng", "timeline", "revision"] as const) expect(world[field]).toEqual(legacy.world[field])
     expectRelationshipsPreserved(world, legacy.world.relationships)
     expectPeoplePreserved(world, legacy.world.people)
@@ -56,10 +56,10 @@ describe("migrações de campanhas anteriores", () => {
     database.native.prepare("INSERT INTO saves (slot, payload) VALUES (?, ?)").run("current", payload)
     const session = new GameSession(repo, "não-usar")
     await session.initialize()
-    expect(session.getSnapshot().world?.schemaVersion).toBe(7)
+    expect(session.getSnapshot().world?.schemaVersion).toBe(8)
     const current = database.native.prepare("SELECT payload FROM saves WHERE slot = 'current'").get()
     const previous = database.native.prepare("SELECT payload FROM saves WHERE slot = 'previous'").get()
-    expect(JSON.parse(String(current?.payload)).schemaVersion).toBe(7)
+    expect(JSON.parse(String(current?.payload)).schemaVersion).toBe(8)
     expect(previous?.payload).toBe(payload)
   })
   it("migra emprego v3 sem perder salário nem aplicar faltas retroativas", () => {
@@ -104,7 +104,7 @@ describe("migração v5 → v6 (mundo vivo)", () => {
     if (!loaded.ok) throw new Error(loaded.error.message)
     const world = loaded.value
     expect(world).toEqual(createWorld("migra-v5"))
-    expect(world.schemaVersion).toBe(7)
+    expect(world.schemaVersion).toBe(8)
     for (const field of ["rng", "clock", "timeline", "finance", "companies", "vacancies", "memories", "employment"] as const) expect(world[field]).toEqual(v5[field])
     expectRelationshipsPreserved(world, v5.relationships)
     expectPeoplePreserved(world, v5.people)
@@ -125,7 +125,7 @@ describe("migração v6 → v7 (trabalho vivido)", () => {
     if (!loaded.ok) throw new Error(loaded.error.message)
     const world = loaded.value
     expect(world).toEqual(createWorld("migra-v6"))
-    expect(world.schemaVersion).toBe(7)
+    expect(world.schemaVersion).toBe(8)
     for (const field of ["rng", "clock", "timeline", "finance", "companies", "vacancies", "news", "inbox", "economy"] as const) expect(world[field]).toEqual(v6[field])
     expect(Object.keys(world.leaders).sort()).toEqual(Object.keys(world.companies).sort())
     expect(world.work).toEqual({ scene: null, interviews: [] })

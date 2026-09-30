@@ -1,19 +1,19 @@
 import { err, ok, type Result } from "@paralelo/shared"
 import {
-  validateWorld, validateWorldV1, validateWorldV2, validateWorldV3, validateWorldV4, validateWorldV5, validateWorldV6,
-  upgradeWorldV1, upgradeWorldV2, upgradeWorldV3, upgradeWorldV4, upgradeWorldV5, upgradeWorldV6, worldHash, type WorldState,
-  type WorldStateV1, type WorldStateV2, type WorldStateV3, type WorldStateV4, type WorldStateV5, type WorldStateV6,
+  validateWorld, validateWorldV1, validateWorldV2, validateWorldV3, validateWorldV4, validateWorldV5, validateWorldV6, validateWorldV7,
+  upgradeWorldV1, upgradeWorldV2, upgradeWorldV3, upgradeWorldV4, upgradeWorldV5, upgradeWorldV6, upgradeWorldV7, worldHash, type WorldState,
+  type WorldStateV1, type WorldStateV2, type WorldStateV3, type WorldStateV4, type WorldStateV5, type WorldStateV6, type WorldStateV7,
 } from "@paralelo/simulation"
 
 export type SaveError = Readonly<{ code: "invalid-save" | "unsupported-version" | "storage"; message: string }>
-export const SAVE_VERSION = 7
+export const SAVE_VERSION = 8
 export function encodeSnapshot(world: WorldState): string {
   return JSON.stringify({ schemaVersion: SAVE_VERSION, hash: worldHash(world), world })
 }
 
-type AnyWorld = WorldStateV1 | WorldStateV2 | WorldStateV3 | WorldStateV4 | WorldStateV5 | WorldStateV6 | WorldState
+type AnyWorld = WorldStateV1 | WorldStateV2 | WorldStateV3 | WorldStateV4 | WorldStateV5 | WorldStateV6 | WorldStateV7 | WorldState
 const validators: Readonly<Record<number, (input: unknown) => Result<AnyWorld, readonly string[]>>> = {
-  1: validateWorldV1, 2: validateWorldV2, 3: validateWorldV3, 4: validateWorldV4, 5: validateWorldV5, 6: validateWorldV6, 7: validateWorld,
+  1: validateWorldV1, 2: validateWorldV2, 3: validateWorldV3, 4: validateWorldV4, 5: validateWorldV5, 6: validateWorldV6, 7: validateWorldV7, 8: validateWorld,
 }
 // Cadeia de migrações registradas: cada versão sobe um degrau até a atual.
 function upgrade(world: AnyWorld): WorldState {
@@ -23,8 +23,9 @@ function upgrade(world: AnyWorld): WorldState {
     case 3: return upgrade(upgradeWorldV3(world))
     case 4: return upgrade(upgradeWorldV4(world))
     case 5: return upgrade(upgradeWorldV5(world))
-    case 6: return upgradeWorldV6(world)
-    case 7: return world
+    case 6: return upgrade(upgradeWorldV6(world))
+    case 7: return upgradeWorldV7(world)
+    case 8: return world
   }
 }
 
