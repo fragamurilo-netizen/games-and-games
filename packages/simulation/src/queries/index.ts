@@ -2,6 +2,7 @@ import { contactAvailability } from "../commands"
 import type { CompanyId, PersonId } from "@paralelo/shared"
 import type { MessageReply, MessageTopic, WorldState } from "../domain/world"
 import { replyReason } from "../systems/city"
+import { entryWeight, summarizeRoutine, weightRank } from "../timeline"
 import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
 import { courses, inPlace, jobRoles, routineRules } from "@paralelo/content"
@@ -68,6 +69,38 @@ export function queryInbox(world: WorldState) {
   })
 }
 
+/**
+ * Timeline por dia (bíblia §6.2–6.3): hoje aparece inteiro; nos dias anteriores a rotina vira
+ * uma frase feita dos fatos do dia e só o que pesa aparece em linha própria.
+ */
+function timelineDays(world: WorldState, limit = 10) {
+  const groups: { key: number; entries: WorldState["timeline"][number][] }[] = []
+  for (let i = world.timeline.length - 1; i >= 0 && groups.length <= limit; i--) {
+    const entry = world.timeline[i]!
+    const last = groups.at(-1)
+    if (last && last.key === entry.at.day) last.entries.push(entry)
+    else groups.push({ key: entry.at.day, entries: [entry] })
+  }
+  return groups.slice(0, limit).map(group => {
+    const today = group.key === world.clock.day
+    const shown = today ? group.entries : group.entries.filter(e => weightRank(entryWeight(e)) >= weightRank("relevante"))
+    const rest = today ? [] : group.entries.filter(e => weightRank(entryWeight(e)) < weightRank("relevante"))
+    return { day: relativeDay(group.entries[0]!.at, world.clock), summary: rest.length ? summarizeRoutine(world, [...rest].reverse()) : null,
+      entries: shown.map(entry => ({ id: entry.id, time: formatTime(entry.at), text: entry.text, kind: entry.kind, weight: entryWeight(entry) })) }
+  })
+}
+
+/** O que aconteceu desde um instante: o fato de maior peso e o resumo da rotina (bíblia §6.3, §33). */
+export function queryPeriod(world: WorldState, fromMinute: number) {
+  const entries = world.timeline.filter(e => absoluteMinute(e.at) >= fromMinute)
+  const top = [...entries].sort((a, b) => weightRank(entryWeight(b)) - weightRank(entryWeight(a)) || absoluteMinute(b.at) - absoluteMinute(a.at))[0] ?? null
+  const minutes = absoluteMinute(world.clock) - fromMinute
+  const days = Math.floor((minutes + 60) / 1440)
+  const span = days >= 2 ? `${["", "", "Dois", "Três", "Quatro", "Cinco", "Seis", "Sete"][days] ?? days} dias depois.` : days === 1 ? "Um dia depois." : minutes >= 120 ? `${Math.round(minutes / 60)} horas depois.` : minutes >= 60 ? "Uma hora depois." : null
+  return { span, count: entries.length, top: top && weightRank(entryWeight(top)) >= weightRank("relevante") ? { time: formatTime(top.at), text: top.text } : null,
+    routine: summarizeRoutine(world, entries), minutes }
+}
+
 // Read model novo a cada consulta; nada retornado compartilha objetos mutáveis do mundo.
 export function queryLife(world: WorldState) {
   const player = world.people[world.playerId]!
@@ -81,7 +114,8 @@ export function queryLife(world: WorldState) {
     stress: player.needs.stress > 65 ? "Está difícil desligar a cabeça." : player.needs.stress < 20 ? "Hoje a cabeça está mais tranquila." : "Você está conseguindo lidar com as preocupações do dia.",
     hunger: player.needs.hunger >= 75 ? "A fome está tirando sua disposição. Reserve tempo para comer." : player.needs.hunger >= 45 ? "Já está na hora de pensar na próxima refeição." : "Você está sem fome por enquanto.",
     sleep: player.needs.sleepPressure >= 80 ? "O sono acumulado está atrapalhando. Uma pausa não substitui dormir." : player.needs.sleepPressure >= 55 ? "Você começa a sentir sono." : "Você está conseguindo se manter desperto.",
-    timeline: world.timeline.slice(-80).reverse().map(entry => ({ id: entry.id, date: formatDate(entry.at), day: relativeDay(entry.at, world.clock), time: formatTime(entry.at), text: entry.text, kind: entry.kind })),
+    timeline: world.timeline.slice(-80).reverse().map(entry => ({ id: entry.id, date: formatDate(entry.at), day: relativeDay(entry.at, world.clock), time: formatTime(entry.at), text: entry.text, kind: entry.kind, weight: entryWeight(entry) })),
+    days: timelineDays(world),
     inbox: queryInbox(world),
     people: Object.values(world.relationships).filter(r => r.a === player.id || r.b === player.id).map(r => {
       const person = world.people[r.a === player.id ? r.b : r.a]!

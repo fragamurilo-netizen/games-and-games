@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native"
 import * as Haptics from "expo-haptics"
-import { queryDecision, queryLife } from "@paralelo/simulation"
+import { queryDecision, queryLife, queryPeriod } from "@paralelo/simulation"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 import { ActionRow } from "./editorial"
@@ -61,7 +61,13 @@ export function Consequence() {
     const before = lastClock.current
     lastClock.current = clock
     if (seen.current === null) { seen.current = head.id; return }
-    if (head.id === seen.current) {
+    if (before !== null && clock - before >= 720 && world) {
+      // salto grande: um resumo feito dos fatos do período, não uma enxurrada (bíblia §6.3)
+      seen.current = head.id
+      const period = queryPeriod(world, before + 1)
+      const text = [period.span, period.top?.text, period.routine].filter(Boolean).join(" ")
+      setShown({ time: head.time, text: text || "O tempo passou sem novidade." })
+    } else if (head.id === seen.current) {
       // o tempo passou sem acontecimento: ainda assim o jogo responde
       if (before === null || clock - before < 60) return
       const hours = Math.round((clock - before) / 60)

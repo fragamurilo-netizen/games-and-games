@@ -28,13 +28,6 @@ export default function LifeScreen() {
     {!busy && <ActionRow label="Tentar novamente" onPress={() => { void retry() }} />}
   </Page>
 
-  const days: { day: string; entries: typeof life.timeline }[] = []
-  for (const entry of life.timeline) {
-    const last = days[days.length - 1]
-    if (last && last.day === entry.day) last.entries.push(entry)
-    else days.push({ day: entry.day, entries: [entry] })
-  }
-
   return <Page bare>
     <View style={styles.bleed}>
       <LifeScene width={width} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} expression={life.expression}>
@@ -90,9 +83,10 @@ export default function LifeScreen() {
       </TimeRow>)}
     </>}
 
-    {days.map(group => <View key={group.day}>
+    {life.days.map(group => <View key={group.day}>
       <Kicker>{group.day}</Kicker>
-      {group.entries.map(entry => <TimeRow key={entry.id} time={entry.time} emphasis={entry.kind === "chapter"}>{entry.text}</TimeRow>)}
+      {group.summary && <Text style={styles.summary}>{group.summary}</Text>}
+      {group.entries.map(entry => <TimeRow key={entry.id} time={entry.time} emphasis={entry.weight === "marco" || entry.weight === "importante"}>{entry.text}</TimeRow>)}
     </View>)}
   </Page>
 }
@@ -110,5 +104,6 @@ const styles = StyleSheet.create({
   decision: { marginTop: space[2] },
   decisionTitle: { color: colors.text, fontFamily: fonts.title, fontSize: 24, lineHeight: 30, marginTop: space[2] },
   choices: { marginTop: space[3], borderTopColor: colors.rule, borderTopWidth: StyleSheet.hairlineWidth },
+  summary: { color: colors.textSecondary, fontFamily: fonts.narrative, fontSize: 17, lineHeight: 25, marginTop: space[1], marginBottom: space[2] },
   agendaTime: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13, lineHeight: 19 },
 })

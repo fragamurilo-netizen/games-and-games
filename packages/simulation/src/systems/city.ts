@@ -11,7 +11,7 @@ import type {
 } from "../domain/world"
 import { hashText } from "../rng"
 import { absoluteMinute, addMinutes, ageAt, formatDate } from "../time"
-import { appendEntry } from "../timeline"
+import { appendEntry, entryWeight } from "../timeline"
 import { formatMoney, postLedger } from "./finance"
 import { remember } from "./memory"
 import { changeNeeds } from "./needs"
@@ -231,7 +231,7 @@ function goalFor(world: WorldState, id: PersonId, r: Resident): Goal | null {
 
 export function processDailyCity(world: WorldState, event: ScheduledEvent): WorldState {
   // memórias que o tempo apagou saem do registro (bíblia §10.2, §43: memória não cresce sem limite)
-  let next = expireMessages({ ...world, memories: world.memories.filter(m => m.salience >= 0.05), vacancies: pruneVacancies(world) })
+  let next = expireMessages({ ...world, memories: world.memories.filter(m => m.salience >= 0.05), vacancies: pruneVacancies(world), timeline: pruneTimeline(world) })
   const day = world.clock.day
   const ids = Object.keys(next.residents).sort() as PersonId[]
   for (const id of ids) {
@@ -240,6 +240,21 @@ export function processDailyCity(world: WorldState, event: ScheduledEvent): Worl
     next = residentTurn(next, id, close)
   }
   return { ...next, scheduled: [...next.scheduled, { ...event, at: { day: day + 1, minute: cityRules.dailyCityMinute } }] }
+}
+
+// o histórico guarda o que importa por anos; ruído sai em um mês e rotina em um ano (bíblia §6.4, §43)
+function pruneTimeline(world: WorldState): WorldState["timeline"] {
+  if (world.clock.day % 7 !== 0) return world.timeline
+  // a timeline é cronológica: só o trecho com mais de 30 dias precisa ser olhado
+  const now = absoluteMinute(world.clock)
+  let end = 0
+  while (end < world.timeline.length && now - absoluteMinute(world.timeline[end]!.at) > 30 * 1440) end++
+  if (!end) return world.timeline
+  const old = world.timeline.slice(0, end).filter(e => {
+    const weight = entryWeight(e)
+    return weight === "ruido" ? false : weight === "cotidiano" ? now - absoluteMinute(e.at) <= 365 * 1440 : true
+  })
+  return old.length === end ? world.timeline : [...old, ...world.timeline.slice(end)]
 }
 
 // vaga fechada some do mercado; só fica registrada se o jogador se candidatou ou se uma mensagem cita
