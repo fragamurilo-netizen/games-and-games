@@ -1,8 +1,9 @@
 import { useMemo } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native"
 import { queryDecision, queryLife, queryRoutine } from "@paralelo/simulation"
 import { ActionRow, Kicker, Page, Prose, splitLabel, TimeRow, ui } from "../components/editorial"
-import { Portrait } from "../components/portrait"
+import { DayBar } from "../components/game-feel"
+import { LifeScene, sceneText } from "../components/scene"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 
@@ -17,6 +18,8 @@ export default function LifeScreen() {
   const life = useMemo(() => world ? queryLife(world) : null, [world])
   const decision = useMemo(() => world ? queryDecision(world) : null, [world])
   const routine = useMemo(() => world ? queryRoutine(world) : null, [world])
+  const { width: screen } = useWindowDimensions()
+  const width = Math.min(screen, 640)
 
   if (!life) return <Page>
     <Text style={styles.day}>{busy ? "Abrindo sua vida…" : "Não foi possível abrir a campanha."}</Text>
@@ -31,17 +34,20 @@ export default function LifeScreen() {
     else days.push({ day: entry.day, entries: [entry] })
   }
 
-  return <Page time={life.time}>
-    <View style={styles.head}>
-      <View style={styles.headText}>
-        <Text style={styles.year}>{life.year}</Text>
-        <Text accessibilityRole="header" style={styles.day}>{life.dayTitle}</Text>
-        <Text style={styles.who}>{life.name}<Text style={styles.whoMuted}>  ·  {life.age} anos  ·  {life.city}</Text></Text>
-      </View>
-      <Portrait seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} size={84} background={false}
-        accessibilityLabel={`Retrato de ${life.name}, ${life.age} anos`} />
+  return <Page bare>
+    <View style={styles.bleed}>
+      <LifeScene width={width} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} expression={life.expression}>
+        <View style={styles.sceneTop}>
+          <View style={styles.headText}>
+            <Text style={sceneText.kicker}>DIA {life.dayNumber} · {life.city.toLocaleUpperCase("pt-BR")}</Text>
+            <Text accessibilityRole="header" style={sceneText.day}>{life.dayTitle}</Text>
+          </View>
+          <Text style={sceneText.time}>{life.time}</Text>
+        </View>
+      </LifeScene>
     </View>
-
+    <View style={styles.dayBar}><DayBar minute={life.minute} marks={life.marks} width={width - 48} /></View>
+    <Text style={styles.who}>{life.name}<Text style={styles.whoMuted}>  ·  {life.age} anos</Text></Text>
     <Text style={styles.state}>{life.body}</Text>
     {notice && <Text accessibilityLiveRegion="polite" style={styles.notice}>{notice}</Text>}
 
@@ -89,11 +95,12 @@ export default function LifeScreen() {
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: "row", alignItems: "flex-end", gap: space[4], marginTop: space[6] },
-  headText: { flex: 1, minWidth: 0, paddingBottom: space[2] },
-  year: { color: colors.textMuted, fontFamily: fonts.label, fontSize: 11, letterSpacing: 1.6, fontVariant: ["tabular-nums"] },
+  bleed: { marginHorizontal: -space[6], marginTop: -space[4] },
+  sceneTop: { flexDirection: "row", alignItems: "flex-start", gap: space[4], marginTop: space[6] },
+  headText: { flex: 1, minWidth: 0 },
+  dayBar: { marginTop: space[3] },
   day: { color: colors.text, fontFamily: fonts.title, fontSize: 34, lineHeight: 40, marginTop: space[1] },
-  who: { color: colors.text, fontFamily: fonts.medium, fontSize: 14, lineHeight: 21, marginTop: space[3] },
+  who: { color: colors.text, fontFamily: fonts.medium, fontSize: 14, lineHeight: 21, marginTop: space[2] },
   whoMuted: { color: colors.textSecondary, fontFamily: fonts.body },
   state: { color: colors.text, fontFamily: fonts.narrative, fontSize: 19, lineHeight: 29, marginTop: space[6] },
   notice: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 14, lineHeight: 21, marginTop: space[3] },

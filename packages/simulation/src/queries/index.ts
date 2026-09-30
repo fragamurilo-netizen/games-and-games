@@ -21,12 +21,25 @@ function bodySummary(needs: WorldState["people"][string]["needs"], minute: numbe
   return minute < 720 ? "Energia em dia e nenhuma fome. O dia está pela frente." : minute < 1080 ? "Tudo em ordem por enquanto." : "O dia foi tranquilo até aqui."
 }
 
+/** Expressão do personagem a partir do estado do corpo (sem expor números). */
+function expressionFor(needs: WorldState["people"][string]["needs"]): "tired" | "tense" | "warm" | "neutral" {
+  if (needs.energy < 30 || needs.sleepPressure >= 70) return "tired"
+  if (needs.stress > 60 || needs.hunger >= 75) return "tense"
+  if (needs.energy >= 55 && needs.stress < 35 && needs.hunger < 45) return "warm"
+  return "neutral"
+}
+const MARK_LABELS: Partial<Record<WorldState["scheduled"][number]["kind"], string>> = {
+  "work-reminder": "Turno", "work-attendance": "Limite do turno", "monthly-finance": "Aluguel e salário", "mother-message": "Mensagem",
+}
+
 // Read model novo a cada consulta; nada retornado compartilha objetos mutáveis do mundo.
 export function queryLife(world: WorldState) {
   const player = world.people[world.playerId]!
   return {
     name: player.name, age: ageAt(player.birthDate, world.clock), city: world.city,
     appearance: { seed: player.appearanceSeed, sex: player.sex }, body: bodySummary(player.needs, world.clock.minute),
+    minute: world.clock.minute, dayNumber: world.clock.day + 1, expression: expressionFor(player.needs),
+    marks: world.scheduled.filter(item => item.at.day === world.clock.day && MARK_LABELS[item.kind]).map(item => ({ id: item.id, minute: item.at.minute, label: MARK_LABELS[item.kind]! })),
     date: formatDate(world.clock), time: formatTime(world.clock), dayTitle: formatDayHeading(world.clock), year: formatDate(world.clock).slice(-4),
     energy: player.needs.energy < 20 ? "Você precisa descansar." : player.needs.energy < 50 ? "O cansaço começa a pesar." : "Você ainda tem disposição.",
     stress: player.needs.stress > 65 ? "Está difícil desligar a cabeça." : player.needs.stress < 20 ? "Hoje a cabeça está mais tranquila." : "Você está conseguindo lidar com as preocupações do dia.",

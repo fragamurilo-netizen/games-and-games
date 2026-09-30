@@ -3,7 +3,7 @@ import type { DecisionId, PersonId, ScheduleId } from "@paralelo/shared"
 import type { ScheduledEvent, WorldState, WorldStateV2, WorldStateV3 } from "../domain/world"
 import { draw } from "../rng"
 import { advance } from "../scheduling"
-import { addMinutes, formatDate } from "../time"
+import { addMinutes, ageAt, formatDate } from "../time"
 import { appendEntry } from "../timeline"
 import { postLedger } from "./finance"
 import { remember } from "./memory"
@@ -78,6 +78,8 @@ export function queryDecision(world: WorldState) {
   const pending = world.events.pending
   if (!pending) return null
   const definition = lifeEvents.find(event => event.id === pending.definitionId)!
+  const actor = pending.actorId ? world.people[pending.actorId] : undefined
   return { id: pending.id, title: definition.title, text: eventText(world, definition.text, pending.actorId), date: formatDate(pending.at),
+    actor: actor ? { name: actor.name, age: ageAt(actor.birthDate, world.clock), appearance: { seed: actor.appearanceSeed, sex: actor.sex } } : null,
     choices: definition.choices.map(option => ({ id: option.id, label: option.label, reason: choiceReason(world, option), canChoose: !choiceReason(world, option) })) }
 }

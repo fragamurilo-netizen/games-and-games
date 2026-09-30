@@ -10,14 +10,14 @@ import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 
 /** Página: faixa superior discreta com a marca e a hora da campanha; sem título-slogan. */
-export function Page({ children, time }: { children: ReactNode; time?: string }) {
+export function Page({ children, time, bare = false }: { children: ReactNode; time?: string; bare?: boolean }) {
   const { error, busy, world } = useGame()
   return <SafeAreaView edges={["top", "left", "right"]} style={ui.root}>
     <ScrollView contentContainerStyle={ui.content}>
-      <View style={ui.masthead}>
+      {!bare && <View style={ui.masthead}>
         <Text style={ui.wordmark}>PARALELO</Text>
         {time && <Text style={ui.clock}>{time}</Text>}
-      </View>
+      </View>}
       {error && <Text accessibilityRole="alert" style={ui.alert}>{error}</Text>}
       {world?.events.pending && <Link href="/" style={ui.pending}>Uma decisão espera sua resposta em Vida.</Link>}
       {children}
@@ -80,7 +80,7 @@ export function TimeRow({ time, children, emphasis = false }: { time: string; ch
 
 export const ui = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingHorizontal: space[6], paddingTop: space[4], paddingBottom: space[12], maxWidth: 640, width: "100%", alignSelf: "center" },
+  content: { paddingHorizontal: space[6], paddingTop: space[4], paddingBottom: space[12] + 40, maxWidth: 640, width: "100%", alignSelf: "center" },
   masthead: { flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", paddingBottom: space[3], borderBottomColor: colors.rule, borderBottomWidth: 1 },
   wordmark: { color: colors.textSecondary, fontFamily: fonts.label, fontSize: 11, letterSpacing: 3 },
   clock: { color: colors.text, fontFamily: fonts.medium, fontSize: 13, fontVariant: ["tabular-nums"] },

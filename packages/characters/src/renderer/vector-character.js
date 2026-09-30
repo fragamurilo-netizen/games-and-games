@@ -212,15 +212,21 @@
       s.oval(x-1.8,y-3.4,1.6,1.6,'#fff9e9')
       s.oval(x+2.5,y+2, .65,.65,'#fff9e9',null,1,.7)
       s.path(`M${n(x-w)} ${n(y+dir*tilt)} Q${n(x)} ${n(y-open-3)} ${n(x+w)} ${n(y-dir*tilt)}`, 'none',c.hair,g.sex==='F'?2.4:1.7)
-      const browY=y-23-z.browY*2+(expression==='curious'&&dir===1?-5:0), bw=w*(1+z.browLen*.04), thick=clamp(4+z.browThick*.9,2,7)
+      if(expression==='tired') {
+        s.path(`M${n(x-w-1)} ${n(y+dir*tilt)} Q${n(x)} ${n(y-open-5)} ${n(x+w+1)} ${n(y-dir*tilt)} Q${n(x)} ${n(y-open*.15)} ${n(x-w-1)} ${n(y+dir*tilt)} Z`,c.skin,null)
+        s.path(`M${n(x-w)} ${n(y+dir*tilt)} Q${n(x)} ${n(y-open*.15)} ${n(x+w)} ${n(y-dir*tilt)}`, 'none',c.hair,g.sex==='F'?2.4:1.9)
+        s.path(`M${n(x-w+1)} ${n(y+open+2)} Q${n(x)} ${n(y+open+6)} ${n(x+w-1)} ${n(y+open+2)}`, 'none',c.shadow,1.6,.7)
+      }
+      const browY=y-23-z.browY*2+(expression==='curious'&&dir===1?-5:0)+(expression==='tense'?4:expression==='tired'?2:0), bw=w*(1+z.browLen*.04), thick=clamp(4+z.browThick*.9,2,7)
       s.path(`M${n(x-bw)} ${n(browY+2)} Q${n(x-3)} ${n(browY-6-z.browArch*1.5)} ${n(x+bw)} ${n(browY)} L${n(x+bw-1)} ${n(browY+thick)} Q${n(x-3)} ${n(browY+thick-4-z.browArch*1.5)} ${n(x-bw)} ${n(browY+thick+2)} Z`,c.hair,null)
       s.oval(200+dir*(q.eyeOff+13),q.noseY+8,15,6,c.blush,null,1,.4)
       if(q.old>.25) { s.path(`M${n(x-w-3)} ${n(y+7)} q${-dir*8} 4 ${-dir*12} 1`, 'none', c.shadow,1.4); s.path(`M${n(x-10)} ${n(y+14)} q10 3 21 -1`, 'none',c.shadow,1.2) }
     }
+    if(expression==='tense') s.path(`M197 ${n(q.eyeY-17)} l2 8 M203 ${n(q.eyeY-17)} l-2 8`, 'none',c.shadow,1.3)
     const nw=clamp(9+z.noseW*1.3,5,15)*lerp(1,.74,q.baby), ny=q.noseY
     s.path(`M204 ${n(q.eyeY+11)} q-3 ${n(ny-q.eyeY-22)} -8 ${n(ny-q.eyeY-11)} q8 7 ${n(nw)} 2`, 'none',c.shadow,2.1)
     s.path(`M${n(200-nw)} ${n(ny+5)} q4 -3 7 0 M${n(204+nw*.3)} ${n(ny+5)} q4 -3 6 0`, 'none',c.shadow,1.7)
-    const mw=q.mouthW, my=q.mouthY, lip=clamp(3.8+z.lipL*.9,1.8,7), upper=clamp(2+z.lipU*.65,1,5), smile=expression==='warm'?3:expression==='curious'?1:0
+    const mw=q.mouthW, my=q.mouthY, lip=clamp(3.8+z.lipL*.9,1.8,7), upper=clamp(2+z.lipU*.65,1,5), smile=expression==='warm'?3:expression==='curious'?1:expression==='tense'?-1.6:expression==='tired'?-.6:0
     s.path(`M${n(200-mw)} ${n(my)} Q189 ${n(my-upper-2)} 200 ${n(my-1)} Q211 ${n(my-upper-2)} ${n(200+mw)} ${n(my)} Q200 ${n(my+lip*2)} ${n(200-mw)} ${n(my)} Z`,c.lip,null)
     s.path(`M${n(200-mw)} ${n(my-smile*.35)} Q200 ${n(my+1.5+smile)} ${n(200+mw)} ${n(my-smile*.35)}`, 'none',rgb(mix(C.skinRGB(c.p.mel,g.skin.under),[78,40,35],.65)),1.4)
     if(smile>1)for(const dir of [-1,1])s.path(`M${n(200+dir*(mw+1))} ${n(my-2)} q${dir*2} 2 ${dir*1} 4`, 'none',c.shadow,1.2)
