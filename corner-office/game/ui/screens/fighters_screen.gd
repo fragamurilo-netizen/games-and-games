@@ -47,6 +47,15 @@ func _profile(f: Fighter) -> void:
 	var o:=FighterEditor.options()
 	add_text("%d anos · %s · %s%s"%[f.age_on(Game.world.date),_label(o.countries,f.country),FighterGenerator.discipline_name(f),"" if f.fight_style.is_empty() else " · "+_label(o.fight_styles,f.fight_style)],Tokens.MUTED)
 	add_text("Guarda %s · %s%s"%[_label(o.stances,f.stance).to_lower(),_label(o.body_types,f.body_type),"" if f.natural_weight_kg<=0 else " · %.1f kg fora do camp"%f.natural_weight_kg],Tokens.MUTED)
+	var origin:=FighterGenerator.group_by_id(f.country,f.origin_group)
+	if not origin.is_empty():add_text("Origem: %s · %s"%[origin.name,f.city],Tokens.MUTED)
+	if not f.personality.is_empty():
+		var persona:Dictionary=ContentDB.load_json(FighterGenerator.PERSONALITIES)
+		var arch:Dictionary=persona.archetypes.get(str(f.personality.archetype),{})
+		var traits:Array=[]
+		for t:String in persona.traits:traits.append("%s %d"%[persona.traits[t].name.to_lower(),int(f.personality.get(t,50))])
+		add_text("Personalidade: %s. %s"%[arch.get("name","?"),arch.get("description","")])
+		add_text(" · ".join(traits),Tokens.MUTED)
 	if not f.bio.is_empty():add_text(f.bio,Tokens.MUTED)
 	var groups: Dictionary={"Trocação":f.striking,"Wrestling":f.grappling,"Jiu-jítsu":f.jiu_jitsu}
 	for group: String in groups:

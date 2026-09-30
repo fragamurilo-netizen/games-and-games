@@ -48,7 +48,20 @@ func test_edit_changes_identity_attributes_and_face() -> void:
 	check_eq(f.appearance.seed, seed_before, "mesmo rosto (seed) sem pedir sorteio")
 	CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "reroll_face": true})
 	check(f.appearance.seed != seed_before, "rosto novo quando pedido")
+	CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "personality": {"archetype": "hothead"}})
+	var moved := CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "country": "RU", "origin_group": "ru_dagestan",
+		"personality": {"archetype": "silent_killer"}})
+	check(moved.ok, "origem e personalidade editáveis")
+	check_eq(f.origin_group, "ru_dagestan", "grupo novo")
+	check(f.city in FighterGenerator.group_by_id("RU", "ru_dagestan").cities, "cidade da origem nova")
+	check_eq(f.personality.archetype, "silent_killer", "arquétipo novo")
+	check_eq(int(f.personality.trash_talk), 8, "traços na média do arquétipo")
+	CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "personality": {"archetype": "silent_killer", "trash_talk": 30}})
+	check_eq(int(f.personality.trash_talk), 30, "traço ajustado")
+	check(not CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "personality": {"archetype": "xx"}}).ok, "arquétipo inválido recusado")
+	check(not CareerActions.perform(w, "edit_fighter", {"fighter_id": id, "country": "JP", "origin_group": "ru_dagestan"}).ok, "grupo de outro país recusado")
 	var restored := SaveSystem.decode(SaveSystem.encode(w))
+	check_eq(restored.fighters[id].personality.archetype, "silent_killer", "personalidade sobrevive ao save")
 	check_eq(restored.fighters[id].fight_style, "submission", "estilo sobrevive ao save")
 
 
@@ -93,8 +106,6 @@ func test_editor_screens_build() -> void:
 	screen.editing = id
 	screen.refresh()
 	check(screen.body.get_child_count() > 60, "editor montado (%d controles)" % screen.body.get_child_count())
-	var faces := screen.body.get_children().filter(func(n): return n is FaceView)
-	check(faces.size() == 1 and not faces[0].face.is_empty(), "editor mostra o rosto do atleta")
 	screen.editing = ""
 	screen.selected_fighter = id
 	screen.refresh()

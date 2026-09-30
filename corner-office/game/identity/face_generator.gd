@@ -17,7 +17,7 @@ extends RefCounted
 
 ## Parâmetros que o renderer do Fight Studio (prototypes/face-lab/identity.js,
 ## `genFace(seed, pop, sex)` + `FightAppearance.resolve`) entende. `pop` sai do país
-## (content/fighter_generation.json), então um atleta de Tbilisi tem traços do
+## (content/origins.json: o grupo cultural do atleta), então um atleta de Tbilisi tem traços do
 ## Cáucaso e um de Osaka, do Leste Asiático. `body` e `age` sobrescrevem o sorteio
 ## do renderer para que corpo e idade batam com o atleta. extra.height (0–1) é a
 ## altura relativa à divisão.
@@ -32,7 +32,9 @@ const BODY := {
 
 static func create_appearance(rng: SimRandom, country: String, body_type: String, age: int, sex: String = "m", extra: Dictionary = {}) -> Dictionary:
 	var cfg: Dictionary = ContentDB.load_json("fighter_generation.json")
-	var pops: Dictionary = cfg.countries.get(country, {}).get("populations", {})
+	var pops: Dictionary = extra.get("populations", {})
+	if pops.is_empty():
+		pops = FighterGenerator.country_populations(country)
 	var pop: String = str(rng.weighted(pops)) if not pops.is_empty() else "misto"
 	if cfg.population_names.has(str(extra.get("pop", ""))):
 		pop = str(extra.pop)

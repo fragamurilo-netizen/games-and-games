@@ -9,7 +9,7 @@ const GROUPS := ["striking", "grappling", "jiu_jitsu", "physical", "mental"]
 const STANCES := ["orthodox", "southpaw", "switch"]
 
 
-## p: division, country, discipline (ou martial_base), fight_style, age, level, population,
+## p: division, country, origin_group, discipline (ou martial_base), fight_style, age, level, population, personality (arquétipo),
 ## prospect (bool), to_roster (bool). Campos vazios = sorteio do gerador.
 static func create(world: WorldState, p: Dictionary) -> Dictionary:
 	var opts := _generation_opts(world, p)
@@ -43,7 +43,7 @@ static func reroll(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 	for key: String in ["first_name", "last_name", "nickname", "country", "city", "languages", "sex", "birth_date", "gym_id",
 			"height_cm", "reach_cm", "stance", "body_type", "division", "natural_weight_kg", "martial_base", "discipline", "fight_style", "style",
 			"striking", "grappling", "jiu_jitsu", "physical", "mental", "hidden", "potential", "record", "career_goals",
-			"popularity_by_region", "charisma", "appearance", "bio"]:
+			"popularity_by_region", "charisma", "appearance", "bio", "origin_group", "personality"]:
 		f.set(key, fresh.get(key))
 	_refresh_rankings(world, f, old_division)
 	return {"ok": true, "fighter_id": f.id, "message": "Novo sorteio: %s." % f.display_name()}
@@ -92,6 +92,13 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 		reasons.append(Reason.make("INVALID_BODY"))
 	if p.has("record") and not f.fight_ids.is_empty():
 		reasons.append(Reason.make("FIGHTER_HAS_HISTORY"))
+	var origin_group := str(p.get("origin_group", f.origin_group if country == f.country else ""))
+	if not origin_group.is_empty() and FighterGenerator.group_by_id(country, origin_group).is_empty():
+		reasons.append(Reason.make("UNKNOWN_COUNTRY"))
+	var personality: Dictionary = p.get("personality", {})
+	var persona_cfg: Dictionary = ContentDB.load_json(FighterGenerator.PERSONALITIES)
+	if personality.has("archetype") and not persona_cfg.archetypes.has(str(personality.archetype)):
+		reasons.append(Reason.make("INVALID_PERSONALITY"))
 	if not reasons.is_empty():
 		return {"ok": false, "reasons": reasons}
 
@@ -100,10 +107,15 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 	f.last_name = last
 	if p.has("nickname"):
 		f.nickname = _clean(p.nickname, 24)
-	if country != f.country:
+	if country != f.country or origin_group != f.origin_group:
+		# País ou grupo novo: cidade, idiomas e traços do rosto seguem a origem.
+		var group := FighterGenerator.pick_group(world.rng, country, origin_group)
 		f.country = country
+		f.origin_group = str(group.id)
 		f.languages = cfg.countries[country].languages.duplicate()
-		f.city = str(cfg.countries[country].cities[0])
+		f.city = str(world.rng.pick(group.cities))
+		if not p.has("population") and f.appearance.has("pop") and not group.populations.has(population):
+			population = str(world.rng.weighted(group.populations))
 	if p.has("city") and not _clean(p.city, 32).is_empty():
 		f.city = _clean(p.city, 32)
 	if division != f.division:
@@ -141,6 +153,13 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 		f.charisma = clampi(int(p.charisma), 1, 99)
 	if p.has("bio"):
 		f.bio = _clean(p.bio, 280)
+	if not personality.is_empty():
+		var archetype := str(personality.get("archetype", f.personality.get("archetype", "")))
+		if archetype != str(f.personality.get("archetype", "")):
+			f.personality = FighterGenerator.personality_of(archetype)
+		for key: String in persona_cfg.traits:
+			if personality.has(key):
+				f.personality[key] = clampi(int(personality[key]), 0, 100)
 	for group: String in p.get("group_levels", {}):
 		if group in GROUPS and not f.get(group).is_empty():
 			var values: Dictionary = f.get(group)
@@ -166,11 +185,20 @@ static func edit(world: WorldState, id: String, p: Dictionary) -> Dictionary:
 ## Listas para o formulário (ids + nomes vindos do conteúdo).
 static func options() -> Dictionary:
 	var cfg: Dictionary = ContentDB.load_json(FighterGenerator.CONTENT)
-	var out := {"countries": [], "disciplines": [], "fight_styles": [], "populations": [], "body_types": [], "stances": [], "divisions": []}
+	var out := {"countries": [], "disciplines": [], "fight_styles": [], "populations": [], "body_types": [], "stances": [], "divisions": [],
+		"origin_groups": {}, "personalities": [], "personality_traits": []}
 	var codes: Array = cfg.countries.keys()
 	codes.sort_custom(func(a, b): return str(cfg.country_names.get(a, a)) < str(cfg.country_names.get(b, b)))
 	for code: String in codes:
 		out.countries.append({"id": code, "label": str(cfg.country_names.get(code, code))})
+		out.origin_groups[code] = []
+		for g: Dictionary in FighterGenerator.origins().countries.get(code, []):
+			out.origin_groups[code].append({"id": g.id, "label": str(g.name)})
+	var persona: Dictionary = ContentDB.load_json(FighterGenerator.PERSONALITIES)
+	for id: String in persona.archetypes:
+		out.personalities.append({"id": id, "label": str(persona.archetypes[id].name), "description": str(persona.archetypes[id].description)})
+	for key: String in persona.traits:
+		out.personality_traits.append({"id": key, "label": str(persona.traits[key].name)})
 	var arts := FighterGenerator.martial_arts()
 	var ids: Array = arts.keys()
 	ids.sort_custom(func(a, b): return str(arts[a].name) < str(arts[b].name))
@@ -207,11 +235,13 @@ static func _generation_opts(world: WorldState, p: Dictionary) -> Dictionary:
 		if not _division_exists(division):
 			return {"error": "INVALID_DIVISION"}
 		opts.division = division
-	for key: String in ["country", "discipline", "martial_base", "fight_style", "population"]:
+	for key: String in ["country", "origin_group", "discipline", "martial_base", "fight_style", "population", "personality"]:
 		var value := str(p.get(key, ""))
 		if not value.is_empty():
 			opts[key] = value
 	if opts.has("country") and not cfg.countries.has(opts.country):
+		return {"error": "UNKNOWN_COUNTRY"}
+	if opts.has("origin_group") and (not opts.has("country") or FighterGenerator.group_by_id(opts.country, opts.origin_group).is_empty()):
 		return {"error": "UNKNOWN_COUNTRY"}
 	if p.has("age") and int(p.age) > 0:
 		opts.age = clampi(int(p.age), 18, 45)
