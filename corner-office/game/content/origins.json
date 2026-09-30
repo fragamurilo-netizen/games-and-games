@@ -1,0 +1,1042 @@
+{
+ "_note": "Origens dos atletas (Game Design Bible §§4,5): cada país tem grupos culturais com peso, cidades, população facial (content/fighter_generation.json → population_names) e pools de nome. 'first'/'last' apontam para name_pools; 'disciplines' substitui as artes do país e 'disciplines_bonus' multiplica. 'personality' pondera arquétipos (content/personalities.json). Nomes são comuns e as combinações são fictícias.",
+ "surname_rules": {
+  "slavic": [
+   ["skiy", "skaya"],
+   ["sky", "skaya"],
+   ["ov", "ova"],
+   ["ev", "eva"],
+   ["yev", "yeva"],
+   ["in", "ina"]
+  ],
+  "polish": [
+   ["ski", "ska"],
+   ["cki", "cka"],
+   ["dzki", "dzka"]
+  ],
+  "kazakh": [
+   ["uly", "kyzy"],
+   ["ov", "ova"],
+   ["ev", "eva"],
+   ["in", "ina"]
+  ]
+ },
+ "countries": {
+  "BR": [
+   {
+    "id": "br_sul_sudeste",
+    "name": "Sul e Sudeste",
+    "weight": 5,
+    "populations": {
+     "latino": 3,
+     "mediterraneo": 2,
+     "europa_norte": 0.8,
+     "afro_diaspora": 1.2
+    },
+    "cities": ["Curitiba", "São Paulo", "Porto Alegre", "Belo Horizonte", "Florianópolis", "Campinas", "Santos", "Londrina", "Joinville", "Ribeirão Preto", "Juiz de Fora", "Caxias do Sul"],
+    "first": "pt_br",
+    "last": "pt_br"
+   },
+   {
+    "id": "br_norte_nordeste",
+    "name": "Norte e Nordeste",
+    "weight": 4,
+    "populations": {
+     "afro_diaspora": 3,
+     "latino": 3,
+     "andino": 0.6
+    },
+    "cities": ["Salvador", "Natal", "Manaus", "Recife", "Fortaleza", "Belém", "João Pessoa", "Teresina", "Maceió", "São Luís", "Aracaju", "Macapá"],
+    "first": "pt_br",
+    "last": "pt_br"
+   },
+   {
+    "id": "br_rio",
+    "name": "Rio de Janeiro",
+    "weight": 2,
+    "populations": {
+     "afro_diaspora": 2.5,
+     "latino": 2.5,
+     "mediterraneo": 1
+    },
+    "cities": ["Rio de Janeiro", "Niterói", "Duque de Caxias", "Nova Iguaçu", "São Gonçalo", "Petrópolis"],
+    "first": "pt_br",
+    "last": "pt_br"
+   }
+  ],
+  "US": [
+   {
+    "id": "us_white",
+    "name": "Americano branco",
+    "weight": 4,
+    "populations": {
+     "europa_norte": 5,
+     "mediterraneo": 1.5,
+     "leste_europeu": 0.6
+    },
+    "cities": ["Denver", "Columbus", "Omaha", "Milwaukee", "Boise", "Sacramento", "Tampa", "Iowa City", "Pittsburgh", "Nashville", "Albany", "Salt Lake City", "Spokane", "Kansas City"],
+    "first": "en_us",
+    "last": "en_us"
+   },
+   {
+    "id": "us_black",
+    "name": "Afro-americano",
+    "weight": 3.5,
+    "populations": {
+     "afro_diaspora": 1
+    },
+    "cities": ["Atlanta", "Philadelphia", "Detroit", "Chicago", "Houston", "Memphis", "Baltimore", "Oakland", "Newark", "New Orleans", "Cleveland", "Charlotte"],
+    "first": "african_american",
+    "last": "african_american",
+    "disciplines_bonus": {
+     "boxing": 2.0,
+     "folkstyle_wrestling": 1.3
+    }
+   },
+   {
+    "id": "us_hispanic",
+    "name": "Latino dos EUA",
+    "weight": 2,
+    "populations": {
+     "latino": 3,
+     "andino": 1
+    },
+    "cities": ["San Antonio", "Los Angeles", "El Paso", "Phoenix", "Miami", "Fresno", "Albuquerque", "Houston", "Denver", "San Diego"],
+    "first": "es_us",
+    "last": "es_mx",
+    "disciplines_bonus": {
+     "boxing": 1.8
+    }
+   },
+   {
+    "id": "us_asian",
+    "name": "Ásio-americano",
+    "weight": 0.5,
+    "populations": {
+     "leste_asiatico": 3,
+     "sudeste_asiatico": 1.5,
+     "sul_asiatico": 0.8
+    },
+    "cities": ["San Jose", "Seattle", "Honolulu", "Nova York", "Los Angeles", "Houston"],
+    "first": "en_us",
+    "last": "asian_us_last"
+   },
+   {
+    "id": "us_pacific",
+    "name": "Havaiano e das ilhas",
+    "weight": 0.25,
+    "populations": {
+     "polinesia": 1
+    },
+    "cities": ["Honolulu", "Hilo", "Salt Lake City", "Oakland", "Kahului"],
+    "first": "pacific",
+    "last": "pacific"
+   },
+   {
+    "id": "us_arab",
+    "name": "Árabe-americano",
+    "weight": 0.3,
+    "populations": {
+     "oriente_medio": 1
+    },
+    "cities": ["Dearborn", "Chicago", "Nova York", "Paterson", "Anaheim"],
+    "first": "arab",
+    "last": "arab"
+   }
+  ],
+  "MX": [
+   {
+    "id": "mx_mestizo",
+    "name": "Mestiço",
+    "weight": 6,
+    "populations": {
+     "latino": 6,
+     "mediterraneo": 1
+    },
+    "cities": ["Monterrey", "Tijuana", "Guadalajara", "Hermosillo", "León", "Chihuahua", "Ciudade do México", "Culiacán", "Mexicali", "Toluca", "Querétaro", "Aguascalientes"],
+    "first": "es_mx",
+    "last": "es_mx"
+   },
+   {
+    "id": "mx_sul",
+    "name": "Sul indígena",
+    "weight": 2,
+    "populations": {
+     "andino": 3,
+     "latino": 1
+    },
+    "cities": ["Oaxaca", "Puebla", "Mérida", "Tuxtla Gutiérrez", "Villahermosa", "Cancún", "Campeche"],
+    "first": "es_mx",
+    "last": "es_mx"
+   }
+  ],
+  "GB": [
+   {
+    "id": "gb_white",
+    "name": "Britânico",
+    "weight": 6,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Manchester", "Liverpool", "Birmingham", "Leeds", "Glasgow", "Cardiff", "Bristol", "Newcastle", "Sheffield", "Nottingham", "Swansea", "Edimburgo", "Aberdeen", "Belfast"],
+    "first": "en_uk",
+    "last": "en_uk"
+   },
+   {
+    "id": "gb_black",
+    "name": "Britânico negro",
+    "weight": 1.7,
+    "populations": {
+     "afro_diaspora": 1.5,
+     "africa_ocidental": 0.9
+    },
+    "cities": ["Londres", "Birmingham", "Manchester", "Croydon", "Leeds", "Nottingham"],
+    "first": "black_british",
+    "last": "black_british"
+   },
+   {
+    "id": "gb_south_asian",
+    "name": "Britânico sul-asiático",
+    "weight": 1,
+    "populations": {
+     "sul_asiatico": 1
+    },
+    "cities": ["Bradford", "Leicester", "Birmingham", "Londres", "Luton", "Blackburn"],
+    "first": "pakistani",
+    "last": "pakistani"
+   },
+   {
+    "id": "gb_arab",
+    "name": "Britânico árabe",
+    "weight": 0.4,
+    "populations": {
+     "oriente_medio": 1
+    },
+    "cities": ["Londres", "Manchester", "Sheffield", "Liverpool"],
+    "first": "arab",
+    "last": "arab"
+   }
+  ],
+  "IE": [
+   {
+    "id": "ie",
+    "name": "Irlandês",
+    "weight": 1,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Dublin", "Cork", "Galway", "Limerick", "Waterford", "Drogheda", "Sligo", "Kilkenny"],
+    "first": "irish",
+    "last": "irish"
+   }
+  ],
+  "FR": [
+   {
+    "id": "fr_french",
+    "name": "Francês",
+    "weight": 4,
+    "populations": {
+     "mediterraneo": 2,
+     "europa_norte": 2
+    },
+    "cities": ["Lyon", "Toulouse", "Nice", "Lille", "Bordeaux", "Nantes", "Rennes", "Montpellier", "Grenoble", "Strasbourg", "Dijon", "Brest"],
+    "first": "fr_fr",
+    "last": "fr_fr",
+    "disciplines_bonus": {
+     "savate": 1.6,
+     "judo": 1.3
+    }
+   },
+   {
+    "id": "fr_maghreb",
+    "name": "Franco-magrebino",
+    "weight": 1.5,
+    "populations": {
+     "oriente_medio": 1
+    },
+    "cities": ["Marselha", "Paris", "Lyon", "Saint-Denis", "Roubaix", "Nice"],
+    "first": "maghrebi",
+    "last": "maghrebi",
+    "disciplines_bonus": {
+     "kickboxing": 1.5,
+     "boxing": 1.4
+    }
+   },
+   {
+    "id": "fr_african",
+    "name": "Franco-africano",
+    "weight": 1.5,
+    "populations": {
+     "africa_ocidental": 1
+    },
+    "cities": ["Paris", "Saint-Denis", "Évry", "Marselha", "Lyon", "Créteil"],
+    "first": "west_african_fr",
+    "last": "west_african_fr"
+   }
+  ],
+  "PL": [
+   {
+    "id": "pl",
+    "name": "Polonês",
+    "weight": 1,
+    "populations": {
+     "leste_europeu": 1
+    },
+    "cities": ["Cracóvia", "Wrocław", "Gdańsk", "Poznań", "Łódź", "Varsóvia", "Lublin", "Katowice", "Szczecin", "Olsztyn", "Opole"],
+    "first": "polish",
+    "last": "polish"
+   }
+  ],
+  "JP": [
+   {
+    "id": "jp",
+    "name": "Japonês",
+    "weight": 1,
+    "populations": {
+     "leste_asiatico": 1
+    },
+    "cities": ["Osaka", "Tóquio", "Nagoya", "Fukuoka", "Sapporo", "Kobe", "Yokohama", "Hiroshima", "Sendai", "Chiba", "Kyoto", "Okinawa"],
+    "first": "japanese",
+    "last": "japanese",
+    "personality": {
+     "technician": 2,
+     "humble_worker": 2,
+     "warrior_code": 1.5,
+     "silent_killer": 1.5
+    }
+   }
+  ],
+  "KR": [
+   {
+    "id": "kr",
+    "name": "Coreano",
+    "weight": 1,
+    "populations": {
+     "leste_asiatico": 1
+    },
+    "cities": ["Seul", "Busan", "Incheon", "Daegu", "Gwangju", "Daejeon", "Ulsan", "Suwon", "Jeju"],
+    "first": "korean",
+    "last": "korean"
+   }
+  ],
+  "CN": [
+   {
+    "id": "cn_han",
+    "name": "Chinês han",
+    "weight": 1,
+    "populations": {
+     "leste_asiatico": 1
+    },
+    "cities": ["Chengdu", "Pequim", "Xangai", "Kunming", "Harbin", "Wuhan", "Shenzhen", "Xi'an", "Guangzhou", "Zhengzhou", "Changsha", "Qingdao"],
+    "first": "chinese",
+    "last": "chinese"
+   }
+  ],
+  "KZ": [
+   {
+    "id": "kz_kazakh",
+    "name": "Cazaque",
+    "weight": 4,
+    "populations": {
+     "asia_central": 1
+    },
+    "cities": ["Almaty", "Astana", "Shymkent", "Taraz", "Kyzylorda", "Aktobe", "Atyrau", "Turkistan"],
+    "first": "kazakh",
+    "last": "kazakh"
+   },
+   {
+    "id": "kz_russian",
+    "name": "Russo do Cazaquistão",
+    "weight": 1,
+    "populations": {
+     "leste_europeu": 1
+    },
+    "cities": ["Karaganda", "Pavlodar", "Oskemen", "Petropavl", "Kostanay"],
+    "first": "russian",
+    "last": "russian"
+   }
+  ],
+  "GE": [
+   {
+    "id": "ge",
+    "name": "Georgiano",
+    "weight": 1,
+    "populations": {
+     "caucaso": 1
+    },
+    "cities": ["Tbilisi", "Batumi", "Kutaisi", "Rustavi", "Zugdidi", "Gori", "Telavi", "Poti"],
+    "first": "georgian",
+    "last": "georgian",
+    "personality": {
+     "warrior_code": 2,
+     "local_hero": 1.5
+    }
+   }
+  ],
+  "AU": [
+   {
+    "id": "au_anglo",
+    "name": "Australiano",
+    "weight": 5,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Sydney", "Brisbane", "Perth", "Adelaide", "Gold Coast", "Melbourne", "Newcastle", "Townsville", "Hobart", "Geelong"],
+    "first": "anglo_au_first",
+    "last": "en_uk"
+   },
+   {
+    "id": "au_med",
+    "name": "Australiano mediterrâneo",
+    "weight": 1,
+    "populations": {
+     "mediterraneo": 3,
+     "oriente_medio": 1
+    },
+    "cities": ["Melbourne", "Sydney", "Adelaide", "Wollongong"],
+    "first": "med_au",
+    "last": "med_au"
+   },
+   {
+    "id": "au_pacific",
+    "name": "Australiano das ilhas",
+    "weight": 1,
+    "populations": {
+     "polinesia": 1
+    },
+    "cities": ["Sydney", "Brisbane", "Logan", "Ipswich"],
+    "first": "pacific",
+    "last": "pacific"
+   },
+   {
+    "id": "au_asian",
+    "name": "Ásio-australiano",
+    "weight": 0.6,
+    "populations": {
+     "leste_asiatico": 2,
+     "sudeste_asiatico": 1
+    },
+    "cities": ["Sydney", "Melbourne", "Perth"],
+    "first": "anglo_au_first",
+    "last": "asian_us_last"
+   }
+  ],
+  "NZ": [
+   {
+    "id": "nz_pakeha",
+    "name": "Neozelandês",
+    "weight": 3,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Auckland", "Wellington", "Christchurch", "Hamilton", "Dunedin", "Tauranga"],
+    "first": "en_uk",
+    "last": "en_uk"
+   },
+   {
+    "id": "nz_maori",
+    "name": "Maori e pasifika",
+    "weight": 3,
+    "populations": {
+     "polinesia": 1
+    },
+    "cities": ["Auckland", "Rotorua", "Gisborne", "Whangārei", "Porirua", "Hamilton"],
+    "first": "maori",
+    "last": "maori"
+   }
+  ],
+  "NG": [
+   {
+    "id": "ng_yoruba",
+    "name": "Iorubá",
+    "weight": 1.2,
+    "populations": {
+     "africa_ocidental": 1
+    },
+    "cities": ["Lagos", "Ibadan", "Abeokuta", "Oshogbo", "Akure", "Ilorin"],
+    "first": "yoruba",
+    "last": "yoruba"
+   },
+   {
+    "id": "ng_igbo",
+    "name": "Igbo",
+    "weight": 1,
+    "populations": {
+     "africa_ocidental": 1
+    },
+    "cities": ["Enugu", "Onitsha", "Owerri", "Aba", "Awka", "Port Harcourt"],
+    "first": "igbo",
+    "last": "igbo"
+   },
+   {
+    "id": "ng_hausa",
+    "name": "Hauçá",
+    "weight": 1,
+    "populations": {
+     "africa_ocidental": 1
+    },
+    "cities": ["Kano", "Kaduna", "Abuja", "Sokoto", "Zaria", "Katsina"],
+    "first": "hausa",
+    "last": "hausa",
+    "disciplines_bonus": {
+     "boxing": 1.6
+    }
+   }
+  ],
+  "CM": [
+   {
+    "id": "cm",
+    "name": "Camaronês",
+    "weight": 1,
+    "populations": {
+     "africa_ocidental": 3,
+     "africa_oriental": 1
+    },
+    "cities": ["Douala", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Maroua", "Limbe"],
+    "first": "cameroon",
+    "last": "cameroon"
+   }
+  ],
+  "SN": [
+   {
+    "id": "sn",
+    "name": "Senegalês",
+    "weight": 1,
+    "populations": {
+     "africa_ocidental": 1
+    },
+    "cities": ["Dakar", "Thiès", "Saint-Louis", "Ziguinchor", "Kaolack", "Mbour", "Touba", "Rufisque"],
+    "first": "west_african_fr",
+    "last": "west_african_fr"
+   }
+  ],
+  "TH": [
+   {
+    "id": "th",
+    "name": "Tailandês",
+    "weight": 1,
+    "populations": {
+     "sudeste_asiatico": 1
+    },
+    "cities": ["Bangkok", "Chiang Mai", "Buriram", "Khon Kaen", "Nakhon Ratchasima", "Phuket", "Udon Thani", "Pattaya", "Surin", "Ubon Ratchathani"],
+    "first": "thai",
+    "last": "thai"
+   }
+  ],
+  "PH": [
+   {
+    "id": "ph",
+    "name": "Filipino",
+    "weight": 1,
+    "populations": {
+     "sudeste_asiatico": 1
+    },
+    "cities": ["Manila", "Cebu", "Baguio", "Davao", "Iloilo", "General Santos", "Bacolod", "Cagayan de Oro"],
+    "first": "filipino",
+    "last": "filipino"
+   }
+  ],
+  "CU": [
+   {
+    "id": "cu",
+    "name": "Cubano",
+    "weight": 1,
+    "populations": {
+     "latino": 3,
+     "afro_diaspora": 3,
+     "mediterraneo": 0.5
+    },
+    "cities": ["Havana", "Santiago de Cuba", "Camagüey", "Holguín", "Pinar del Río", "Cienfuegos", "Guantánamo", "Matanzas"],
+    "first": "es_cu",
+    "last": "es_cu"
+   }
+  ],
+  "NL": [
+   {
+    "id": "nl_dutch",
+    "name": "Holandês",
+    "weight": 4,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Amsterdã", "Roterdã", "Utrecht", "Eindhoven", "Haia", "Groningen", "Breda", "Tilburg", "Nijmegen"],
+    "first": "dutch",
+    "last": "dutch"
+   },
+   {
+    "id": "nl_moroccan",
+    "name": "Marroquino-holandês",
+    "weight": 2,
+    "populations": {
+     "oriente_medio": 1
+    },
+    "cities": ["Amsterdã", "Roterdã", "Utrecht", "Haia", "Gouda"],
+    "first": "maghrebi",
+    "last": "maghrebi",
+    "disciplines_bonus": {
+     "kickboxing": 2.0
+    }
+   },
+   {
+    "id": "nl_surinamese",
+    "name": "Surinamês-holandês",
+    "weight": 2,
+    "populations": {
+     "afro_diaspora": 1
+    },
+    "cities": ["Amsterdã", "Roterdã", "Haia", "Almere", "Paramaribo"],
+    "first": "surinamese",
+    "last": "surinamese",
+    "disciplines_bonus": {
+     "kickboxing": 2.0
+    }
+   }
+  ],
+  "SE": [
+   {
+    "id": "se_swedish",
+    "name": "Sueco",
+    "weight": 5,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Estocolmo", "Gotemburgo", "Malmö", "Uppsala", "Örebro", "Umeå", "Västerås", "Linköping"],
+    "first": "swedish",
+    "last": "swedish"
+   },
+   {
+    "id": "se_arab",
+    "name": "Sueco do Oriente Médio",
+    "weight": 1,
+    "populations": {
+     "oriente_medio": 1
+    },
+    "cities": ["Malmö", "Estocolmo", "Gotemburgo", "Södertälje"],
+    "first": "arab",
+    "last": "arab"
+   },
+   {
+    "id": "se_somali",
+    "name": "Sueco-somali",
+    "weight": 0.5,
+    "populations": {
+     "africa_oriental": 1
+    },
+    "cities": ["Estocolmo", "Gotemburgo", "Örebro"],
+    "first": "somali",
+    "last": "somali"
+   }
+  ],
+  "RU": [
+   {
+    "id": "ru_dagestan",
+    "name": "Daguestanês",
+    "weight": 3,
+    "populations": {
+     "caucaso": 1
+    },
+    "cities": ["Makhachkala", "Khasavyurt", "Kaspiysk", "Derbent", "Buynaksk", "Kizlyar", "Izberbash", "Gunib"],
+    "first": "dagestani",
+    "last": "dagestani",
+    "disciplines": {
+     "freestyle_wrestling": 6,
+     "combat_sambo": 3,
+     "sambo": 2,
+     "mma": 2.5,
+     "sanda": 1.2,
+     "judo": 0.8,
+     "boxing": 0.6,
+     "greco_roman": 0.8
+    },
+    "personality": {
+     "warrior_code": 3.5,
+     "silent_killer": 2,
+     "humble_worker": 2,
+     "family_man": 1.5,
+     "showman": 0.3
+    }
+   },
+   {
+    "id": "ru_chechnya",
+    "name": "Checheno",
+    "weight": 1.5,
+    "populations": {
+     "caucaso": 1
+    },
+    "cities": ["Grozny", "Gudermes", "Argun", "Shali", "Urus-Martan", "Nazran"],
+    "first": "chechen",
+    "last": "chechen",
+    "disciplines": {
+     "freestyle_wrestling": 5,
+     "boxing": 2,
+     "kickboxing": 1.5,
+     "mma": 2.5,
+     "combat_sambo": 1.5,
+     "greco_roman": 0.8
+    },
+    "personality": {
+     "warrior_code": 3,
+     "silent_killer": 2,
+     "hothead": 1.2,
+     "showman": 0.4
+    }
+   },
+   {
+    "id": "ru_russian",
+    "name": "Russo",
+    "weight": 3,
+    "populations": {
+     "leste_europeu": 1
+    },
+    "cities": ["Moscou", "São Petersburgo", "Yekaterinburg", "Krasnodar", "Novosibirsk", "Rostov-on-Don", "Omsk", "Stary Oskol", "Chelyabinsk", "Samara", "Voronezh", "Perm"],
+    "first": "russian",
+    "last": "russian",
+    "disciplines": {
+     "sambo": 3,
+     "boxing": 3,
+     "kickboxing": 2,
+     "combat_sambo": 2.5,
+     "mma": 1.5,
+     "judo": 1,
+     "karate_kyokushin": 0.8,
+     "greco_roman": 0.8
+    }
+   },
+   {
+    "id": "ru_tatar",
+    "name": "Tártaro e bashkir",
+    "weight": 1,
+    "populations": {
+     "leste_europeu": 1,
+     "asia_central": 1
+    },
+    "cities": ["Kazan", "Ufa", "Naberezhnye Chelny", "Almetyevsk", "Sterlitamak"],
+    "first": "tatar",
+    "last": "tatar",
+    "disciplines": {
+     "kazakh_kuresi": 2,
+     "sambo": 2,
+     "freestyle_wrestling": 2,
+     "judo": 1.5,
+     "boxing": 1,
+     "mma": 1
+    }
+   },
+   {
+    "id": "ru_siberia",
+    "name": "Iacute e buriato",
+    "weight": 0.6,
+    "populations": {
+     "asia_central": 1
+    },
+    "cities": ["Yakutsk", "Ulan-Ude", "Kyzyl", "Chita", "Mirny"],
+    "first": "siberian",
+    "last": "siberian",
+    "disciplines": {
+     "freestyle_wrestling": 5,
+     "boxing": 1.5,
+     "sambo": 1.5,
+     "mma": 1
+    }
+   }
+  ],
+  "IN": [
+   {
+    "id": "in_north",
+    "name": "Punjabi e haryanvi",
+    "weight": 2,
+    "populations": {
+     "sul_asiatico": 1
+    },
+    "cities": ["Chandigarh", "Rohtak", "Bhiwani", "Sonipat", "Amritsar", "Ludhiana", "Jalandhar", "Patiala"],
+    "first": "south_asian",
+    "last": "south_asian",
+    "disciplines": {
+     "freestyle_wrestling": 4,
+     "pehlwani": 3,
+     "boxing": 2.5,
+     "judo": 0.5,
+     "mma": 1
+    }
+   },
+   {
+    "id": "in_urban",
+    "name": "Indiano urbano",
+    "weight": 2,
+    "populations": {
+     "sul_asiatico": 1
+    },
+    "cities": ["Délhi", "Mumbai", "Pune", "Bangalore", "Hyderabad", "Chennai", "Kochi", "Kolkata", "Imphal"],
+    "first": "south_asian",
+    "last": "south_asian"
+   }
+  ],
+  "CA": [
+   {
+    "id": "ca_anglo",
+    "name": "Canadense anglófono",
+    "weight": 4,
+    "populations": {
+     "europa_norte": 1
+    },
+    "cities": ["Toronto", "Calgary", "Winnipeg", "Vancouver", "Edmonton", "Halifax", "Ottawa", "Regina", "Saskatoon"],
+    "first": "en_us",
+    "last": "en_uk"
+   },
+   {
+    "id": "ca_quebec",
+    "name": "Quebequense",
+    "weight": 2,
+    "populations": {
+     "europa_norte": 3,
+     "mediterraneo": 1
+    },
+    "cities": ["Montreal", "Quebec", "Laval", "Gatineau", "Sherbrooke", "Trois-Rivières"],
+    "first": "fr_ca",
+    "last": "fr_ca"
+   },
+   {
+    "id": "ca_black",
+    "name": "Canadense negro",
+    "weight": 0.8,
+    "populations": {
+     "afro_diaspora": 1
+    },
+    "cities": ["Toronto", "Montreal", "Brampton", "Ottawa"],
+    "first": "black_british",
+    "last": "black_british"
+   },
+   {
+    "id": "ca_asian",
+    "name": "Canadense asiático",
+    "weight": 1,
+    "populations": {
+     "leste_asiatico": 2,
+     "sul_asiatico": 2
+    },
+    "cities": ["Vancouver", "Toronto", "Richmond", "Brampton", "Surrey"],
+    "first": "en_us",
+    "last": "asian_us_last"
+   }
+  ]
+ },
+ "name_pools": {
+  "african_american": {
+   "male": ["Malik", "Jamal", "DeAndre", "Tyrone", "Darius", "Marcus", "Terrell", "Andre", "Jalen", "Deshawn", "Darnell", "Cedric", "Lamar", "Rashad", "Tremaine", "Kendrick", "Jermaine", "Quincy", "Isaiah", "Xavier", "Elijah", "Kareem", "Dominique", "Terrence", "Demetrius", "Reggie", "Curtis", "Derrick", "Anthony", "Corey", "Devon", "Trey", "Khalil", "Jaylen", "Keon", "Marquise", "Roderick", "Alonzo", "Cornell", "Montel", "Tavon", "Desmond", "Maurice", "Dwayne", "Byron", "Julius"],
+   "female": ["Aaliyah", "Imani", "Jasmine", "Keisha", "Tamika", "Ebony", "Shanice", "Aisha", "Destiny", "Monique", "Tiana", "Brianna", "Kiara", "Jada", "Nia", "Latoya", "Kimberly", "Danielle", "Angela", "Tasha", "Raven", "Candace", "Janelle", "Simone", "Deja", "Amara"],
+   "last": ["Washington", "Jackson", "Johnson", "Williams", "Brown", "Jones", "Davis", "Robinson", "Harris", "Jefferson", "Coleman", "Freeman", "Banks", "Booker", "Mosley", "Gaines", "Sims", "Wooten", "Hairston", "Pettaway", "Merriweather", "Battle", "Ivory", "Bethea", "Dorsey", "Toliver", "Fields", "Hawkins", "Holloway", "Grant", "Carter", "Simmons", "Henderson", "Patterson", "Bryant", "Alexander", "Jenkins", "Wallace", "Hayes", "Bennett", "Dixon", "Reed", "Mack", "Glover", "Pugh", "Tate", "Bivens", "Dawkins", "Lockhart", "McCall"]
+  },
+  "anglo_au_first": {
+   "male": ["Jack", "Liam", "Josh", "Ben", "Mitch", "Brodie", "Lachlan", "Riley", "Jayden", "Kane", "Bailey", "Nathan", "Daniel", "Dylan", "Tyson", "Hayden", "Callum", "Jarrod", "Brock", "Kurt", "Shaun", "Damien", "Craig", "Luke", "Jake", "Aaron", "Corey", "Blake", "Zac", "Harrison", "Cooper", "Angus", "Declan", "Flynn", "Toby"],
+   "female": ["Chloe", "Jess", "Emily", "Brooke", "Jade", "Tahlia", "Kayla", "Sarah", "Hannah", "Georgia", "Mia", "Ruby", "Tegan", "Maddison", "Shannon", "Casey", "Bec", "Kirra", "Brianna", "Stacey"],
+   "last": []
+  },
+  "arab": {
+   "male": ["Ahmad", "Mohammad", "Ali", "Hassan", "Hussein", "Khaled", "Omar", "Yousef", "Ibrahim", "Mahmoud", "Mustafa", "Karim", "Rami", "Samir", "Tarek", "Nabil", "Fadi", "Bassel", "Ziad", "Hadi", "Jamal", "Walid", "Mazen", "Anas", "Majd", "Firas", "Amir", "Adnan", "Bilal", "Rashid", "Saleh", "Nasser", "Hamza", "Tamer", "Laith"],
+   "female": ["Fatima", "Layla", "Noor", "Rana", "Hiba", "Dima", "Lina", "Maya", "Rania", "Salma", "Yasmin", "Zeina", "Aya", "Hala", "Nour", "Sara", "Mariam", "Amal", "Reem", "Dana"],
+   "last": ["Haddad", "Khoury", "Nasser", "Saleh", "Hamdan", "Mansour", "Barakat", "Jaber", "Khalil", "Aziz", "Hassan", "Darwish", "Farah", "Habib", "Issa", "Kassem", "Masri", "Najjar", "Qasim", "Rahman", "Sabbagh", "Shaheen", "Tamimi", "Yassin", "Zayed", "Abboud", "Awad", "Bakri", "Daher", "Fakhoury", "Ghanem", "Hijazi", "Karam", "Maalouf", "Obeid", "Sayegh", "Sleiman", "Taha"]
+  },
+  "asian_us_last": {
+   "male": [],
+   "female": [],
+   "last": ["Nguyen", "Tran", "Le", "Pham", "Kim", "Lee", "Park", "Wong", "Chen", "Chang", "Wu", "Liu", "Huang", "Tanaka", "Yamamoto", "Nakamura", "Santos", "Reyes", "Cruz", "Patel", "Shah", "Chung", "Choi", "Lam", "Ho", "Ng", "Chan", "Yee", "Ito", "Sato", "Vu", "Dang", "Truong", "Do", "Hoang"]
+  },
+  "black_british": {
+   "male": ["Leon", "Tyrese", "Kwame", "Jermaine", "Darren", "Marcus", "Kofi", "Andre", "Jordan", "Reuben", "Tunde", "Chidi", "Kieron", "Ashley", "Nathaniel", "Ethan", "Isaac", "Joel", "Delroy", "Winston", "Clinton", "Emmanuel", "Samuel", "Kyle", "Tayo", "Femi", "Kemi", "Lamar", "Ricardo", "Daniel"],
+   "female": ["Chantelle", "Shanice", "Abena", "Adwoa", "Kemi", "Funmi", "Tanisha", "Jade", "Keisha", "Nadia", "Aaliyah", "Zara", "Imani", "Precious", "Grace", "Esther", "Latisha", "Ruth", "Naomi", "Blessing"],
+   "last": ["Johnson", "Williams", "Brown", "Campbell", "Thomas", "Richards", "Bailey", "Clarke", "Francis", "Gordon", "Grant", "Morgan", "Stephenson", "Anderson", "Mensah", "Boateng", "Owusu", "Asante", "Adebayo", "Okafor", "Oduya", "Adeyemi", "Nwosu", "Okonkwo", "Bello", "Afolabi", "Henry", "Lewis", "Reid", "Samuels", "Blake", "Wright", "Edwards", "Hinds", "Morrison", "Joseph"]
+  },
+  "cameroon": {
+   "male": ["Francis", "Jean-Pierre", "Patrick", "Blaise", "Hervé", "Roger", "Stéphane", "Arnaud", "Emmanuel", "Samuel", "Christian", "Didier", "Serge", "Eric", "Joël", "Yannick", "Landry", "Aristide", "Gaël", "Junior", "Cédric", "Rodrigue", "Thierry", "Alain", "Achille", "Olivier", "Paul", "Joseph", "Vincent", "Martial", "Aboubakar", "Moussa", "Hamidou", "Ousmane"],
+   "female": ["Christelle", "Josiane", "Brigitte", "Solange", "Nadège", "Carine", "Rosine", "Gisèle", "Sandrine", "Estelle", "Florence", "Mireille", "Clarisse", "Laure", "Ornella", "Prisca", "Rachel", "Aïcha", "Hadja", "Madeleine"],
+   "last": ["Essomba", "Fotso", "Kamga", "Tchoupo", "Njoya", "Nganga", "Abega", "Nguemo", "Ndjeng", "Owona", "Ebanda", "Bella", "Manga", "Mballa", "Tsafack", "Fokou", "Kengne", "Djeumo", "Tagne", "Wandji", "Nana", "Simo", "Ngassa", "Kamdem", "Feudjio", "Tchatchoua"]
+  },
+  "chechen": {
+   "male": ["Akhmed", "Magomed", "Ibragim", "Adam", "Ruslan", "Rasul", "Islam", "Abdul-Kerim", "Alikhan", "Aslambek", "Bekkhan", "Dzhabrail", "Imam", "Isa", "Khasan", "Khusein", "Lom-Ali", "Mansur", "Movsar", "Musa", "Rizvan", "Shamil", "Turpal", "Umar", "Yusup", "Zelimkhan", "Albert", "Apti", "Ayub", "Baysangur", "Dukvakha", "Salman", "Said-Emi", "Zaurbek", "Ilyas", "Aslan", "Anzor", "Arbi", "Alvi"],
+   "female": ["Aminat", "Madina", "Zarema", "Kheda", "Malika", "Petimat", "Milana", "Luiza", "Zalina", "Khava", "Satsita", "Aishat", "Raisa", "Seda", "Liana", "Taisa", "Zura", "Iman", "Maryam", "Amina"],
+   "last": ["Magomadov", "Umarov", "Dzhabrailov", "Bisultanov", "Makhmudov", "Edilov", "Gaitamirov", "Albakov", "Arsaev", "Bakaev", "Dadaev", "Ekhiev", "Gakaev", "Idrisov", "Israilov", "Khadzhiev", "Kurbanov", "Labazanov", "Mamakaev", "Musaev", "Nazirov", "Salgiriev", "Saidulaev", "Temirkhanov", "Tovsultanov", "Tutaev", "Umkhaev", "Vakhaev", "Zakriev", "Akhmadov", "Dudurkaev", "Saidov", "Yusupov", "Elmurzaev", "Abdurakhmanov", "Tagaev"],
+   "surname_rule": "slavic"
+  },
+  "chinese": {
+   "male": ["Wei", "Jun", "Hao", "Lei", "Tao", "Qiang", "Peng", "Bo", "Chao", "Long", "Yang", "Jian", "Zhen", "Ming", "Kai", "Jie", "Yu", "Feng", "Liang", "Gang", "Bin", "Hui", "Xiang", "Zhi", "Rui", "Hang", "Yong", "Shuai", "Haoran", "Zihao", "Yuxuan", "Jiahao", "Mingyu", "Tianyi", "Zhihao", "Zhipeng", "Hongxiang"],
+   "female": ["Li", "Na", "Jing", "Ying", "Hua", "Mei", "Xue", "Yan", "Lin", "Fang", "Ting", "Qian", "Xin", "Yue", "Hong", "Juan", "Jiayi", "Yuqi", "Xiaoxue", "Shuang", "Lina", "Ni"],
+   "last": ["Wang", "Li", "Zhang", "Liu", "Chen", "Yang", "Huang", "Zhao", "Wu", "Zhou", "Xu", "Sun", "Ma", "Zhu", "Hu", "Guo", "He", "Gao", "Lin", "Luo", "Zheng", "Liang", "Xie", "Tang", "Han", "Feng", "Deng", "Cao", "Peng", "Zeng", "Xiao", "Tian", "Dong", "Pan", "Yuan", "Cai", "Jiang", "Yu", "Du", "Ye", "Cheng", "Wei", "Su", "Lü", "Ding", "Ren", "Lu", "Yao", "Shen", "Zhong", "Cui", "Tan", "Fan", "Jin", "Shi", "Qiu", "Qin", "Hou", "Bai", "Meng", "Yan", "Kong", "Xue"]
+  },
+  "dagestani": {
+   "male": ["Magomed", "Abdulrashid", "Islam", "Shamil", "Gadzhi", "Umar", "Rasul", "Ali", "Akhmed", "Abubakar", "Murad", "Saygid", "Arsen", "Magomedrasul", "Tagir", "Ramazan", "Ibragim", "Rustam", "Kurban", "Omar", "Ruslan", "Said", "Gasan", "Nurmagomed", "Zaur", "Muslim", "Abdulkadyr", "Kamil", "Dzhamal", "Gamid", "Khasbulat", "Uvais", "Mairbek", "Rashid", "Artur", "Eldar", "Nariman", "Zubair", "Abusupiyan", "Magomedkhan", "Yusup", "Suleiman", "Shakhban", "Gadzhimurad"],
+   "female": ["Aminat", "Patimat", "Madina", "Zaira", "Khadizhat", "Aishat", "Zarema", "Saida", "Diana", "Maryam", "Asiyat", "Fatima", "Zalina", "Milana", "Gulnara", "Kamila", "Ayna", "Salimat", "Umukusum", "Barinat"],
+   "last": ["Magomedov", "Abdulaev", "Gadzhiev", "Aliev", "Omarov", "Ramazanov", "Akhmedov", "Gasanov", "Ibragimov", "Kurbanov", "Isaev", "Mustafaev", "Dzhamaldinov", "Abakarov", "Saidov", "Rasulov", "Gadzhimuradov", "Magomedaliev", "Tagirov", "Musaev", "Kasimov", "Salikhov", "Guseinov", "Mamedov", "Zubairaev", "Umarov", "Abdurakhmanov", "Suleimanov", "Yusupov", "Sharapudinov", "Magomedkhanov", "Kerimov", "Batirov", "Saadulaev", "Chalaev", "Omargadzhiev", "Aliyarov", "Dakhaev", "Gamzatov", "Murtuzaliev", "Shikhsaidov", "Alibekov", "Khizriev", "Kamilov", "Akhmedkhanov", "Bagomedov", "Gaziev", "Ismailov", "Magomedrasulov", "Shakhbanov"],
+   "surname_rule": "slavic"
+  },
+  "dutch": {
+   "male": ["Daan", "Sem", "Lucas", "Levi", "Milan", "Thijs", "Jesse", "Bram", "Ruben", "Tim", "Stijn", "Niels", "Rick", "Koen", "Joost", "Sander", "Bas", "Jeroen", "Wouter", "Martijn", "Dennis", "Jordy", "Kevin", "Mike", "Robin", "Jasper", "Teun", "Gijs", "Pieter", "Hendrik", "Jan", "Willem", "Arjan", "Marco", "Peter"],
+   "female": ["Emma", "Sophie", "Julia", "Anna", "Lisa", "Eva", "Sanne", "Lotte", "Femke", "Fleur", "Iris", "Anouk", "Maud", "Lieke", "Marloes", "Denise", "Kim", "Esmee", "Romy", "Nikki", "Germaine", "Marieke"],
+   "last": ["de Jong", "Jansen", "de Vries", "van den Berg", "van Dijk", "Bakker", "Janssen", "Visser", "Smit", "Meijer", "de Boer", "Mulder", "de Groot", "Bos", "Vos", "Peters", "Hendriks", "van Leeuwen", "Dekker", "Brouwer", "de Wit", "Dijkstra", "Smits", "de Graaf", "van der Meer", "van der Linden", "Kok", "Jacobs", "de Haan", "Vermeulen", "van den Heuvel", "van der Veen", "van den Broek", "de Bruijn", "de Bruin", "van der Heijden", "Schouten", "van Beek", "Willems", "van Vliet", "Ruiter", "Kuipers", "Verhoeven", "Koster", "Prins", "van Wijk"]
+  },
+  "en_uk": {
+   "male": ["James", "Jack", "Harry", "Charlie", "Thomas", "George", "Oliver", "Callum", "Connor", "Liam", "Jordan", "Ryan", "Lewis", "Jamie", "Scott", "Craig", "Dean", "Lee", "Wayne", "Gary", "Darren", "Mark", "Paul", "Stuart", "Kieran", "Reece", "Brad", "Aaron", "Luke", "Sam", "Tom", "Dan", "Josh", "Mitchell", "Declan", "Owen", "Rhys", "Gareth", "Aled", "Ewan", "Fraser", "Alfie", "Archie", "Tommy", "Joe", "Billy", "Nathan", "Leon", "Ross", "Danny"],
+   "female": ["Emma", "Chloe", "Sophie", "Lauren", "Megan", "Jade", "Hannah", "Charlotte", "Amy", "Holly", "Rebecca", "Stacey", "Gemma", "Kirsty", "Leanne", "Rhiannon", "Bethan", "Eilidh", "Kayleigh", "Molly", "Ellie", "Georgia", "Abbie", "Zoe", "Lucy", "Katie", "Nicola", "Hayley"],
+   "last": ["Smith", "Jones", "Taylor", "Brown", "Williams", "Wilson", "Johnson", "Davies", "Robinson", "Wright", "Thompson", "Evans", "Walker", "White", "Roberts", "Green", "Hall", "Wood", "Jackson", "Clarke", "Hughes", "Edwards", "Turner", "Harris", "Martin", "Cooper", "Hill", "Ward", "Morris", "Moore", "King", "Watson", "Harrison", "Morgan", "Baker", "Young", "Allen", "Mitchell", "James", "Anderson", "Phillips", "Lee", "Bell", "Parker", "Davis", "Price", "Bennett", "Griffiths", "Pritchard", "Llewellyn", "MacDonald", "Campbell", "Stewart", "Fraser", "McKenzie", "Robertson", "Reid", "Murray", "Ferguson", "Hamilton", "Sutherland", "Ashworth", "Pennington", "Hargreaves", "Whitfield", "Barlow", "Crossley", "Holt", "Hodgson", "Doherty"]
+  },
+  "en_us": {
+   "male": ["Jake", "Tyler", "Cody", "Ryan", "Kyle", "Brandon", "Justin", "Austin", "Dustin", "Travis", "Chase", "Hunter", "Colby", "Garrett", "Bryce", "Logan", "Mason", "Wyatt", "Cole", "Blake", "Zach", "Shane", "Brett", "Derek", "Trevor", "Casey", "Jordan", "Kevin", "Michael", "Matt", "Chris", "Josh", "Nick", "Sean", "Danny", "Tom", "Jimmy", "Bobby", "Clay", "Jared", "Nate", "Luke", "Caleb", "Evan", "Colton", "Brady", "Tanner", "Grant", "Dalton", "Jesse"],
+   "female": ["Ashley", "Brittany", "Kayla", "Megan", "Taylor", "Jessica", "Amanda", "Sarah", "Rachel", "Lauren", "Kelsey", "Morgan", "Paige", "Alexis", "Haley", "Brooke", "Shelby", "Courtney", "Danielle", "Heather", "Jenna", "Kaitlyn", "Madison", "Emily", "Katie", "Mackenzie", "Tessa", "Holly", "Cassidy", "Jillian"],
+   "last": ["Smith", "Johnson", "Miller", "Davis", "Wilson", "Anderson", "Taylor", "Thomas", "Moore", "Martin", "Thompson", "White", "Clark", "Lewis", "Walker", "Hall", "Allen", "Young", "King", "Wright", "Scott", "Green", "Baker", "Adams", "Nelson", "Hill", "Campbell", "Mitchell", "Carter", "Roberts", "Phillips", "Evans", "Turner", "Parker", "Collins", "Edwards", "Stewart", "Morris", "Murphy", "Cook", "Rogers", "Morgan", "Cooper", "Peterson", "Reed", "Bailey", "Bell", "Kelly", "Howard", "Cox", "Ward", "Brooks", "Gray", "Hughes", "Price", "Sanders", "Myers", "Long", "Ross", "Foster", "Powell", "Jenkins", "Perry", "Russell", "Sullivan", "Fisher", "Hayes", "Graham", "Wallace", "Cole", "West", "Jordan", "Owens", "Reynolds", "Hansen", "Larson", "Schmidt", "Mueller", "Olson", "Novak", "Kowalski", "Brennan", "McCarthy", "Doyle"]
+  },
+  "es_cu": {
+   "male": ["Yordenis", "Yunier", "Yasmany", "Yoandy", "Lázaro", "Osmany", "Yuniel", "Andy", "Yander", "Reinier", "Dairon", "Liván", "Yosvany", "Adonis", "Alexei", "Frank", "Ernesto", "Raúl", "Orlando", "Pedro", "Jorge Luis", "Leinier", "Yusniel", "Dayron", "Maikel", "Rolando", "Arlen", "Yamil", "Guillermo", "Odlanier", "Yunieski", "Héctor", "Ariel", "Luis Ángel"],
+   "female": ["Yaimara", "Yudelkis", "Yaneisy", "Yurisleidy", "Dayana", "Idalys", "Yarelis", "Legna", "Yamilé", "Mailín", "Odalys", "Yoana", "Liset", "Yanet", "Arianna", "Mayelín", "Yulieski", "Daylín", "Leidis", "Yuleisy"],
+   "last": ["Pérez", "González", "Rodríguez", "Hernández", "García", "Martínez", "Fernández", "López", "Díaz", "Sánchez", "Romero", "Álvarez", "Ruiz", "Torres", "Castillo", "Cruz", "Morales", "Suárez", "Rivero", "Correa", "Iglesias", "Solís", "Ramírez", "Echevarría", "Portuondo", "Toledo", "Cabrera", "Pedroso", "Ortiz", "Batista", "Quesada", "Ceballos", "Oquendo", "Machado"]
+  },
+  "es_mx": {
+   "male": ["José", "Juan", "Luis", "Carlos", "Jorge", "Miguel", "Alejandro", "Eduardo", "Fernando", "Ricardo", "Roberto", "Francisco", "Javier", "Sergio", "Raúl", "Daniel", "Arturo", "Héctor", "Oscar", "Manuel", "Rafael", "Andrés", "Gerardo", "Adrián", "Iván", "Saúl", "Erick", "Brandon", "Kevin", "Ulises", "Rodrigo", "Martín", "Emiliano", "Diego", "Joaquín", "Ramón", "Alfonso", "Armando", "Gustavo", "Octavio", "Pablo", "Rubén", "Santiago", "Yair", "Édgar", "Leonardo", "Juan Carlos", "José Luis", "Luis Ángel", "Juan Pablo"],
+   "female": ["María", "Guadalupe", "Alejandra", "Fernanda", "Daniela", "Gabriela", "Mariana", "Andrea", "Karla", "Paola", "Ximena", "Valeria", "Sofía", "Brenda", "Diana", "Jazmín", "Leticia", "Rocío", "Yesenia", "Lorena", "Vanessa", "Irene", "Montserrat", "Itzel", "Araceli", "Nayeli", "María José"],
+   "last": ["Hernández", "García", "Martínez", "López", "González", "Pérez", "Rodríguez", "Sánchez", "Ramírez", "Cruz", "Flores", "Gómez", "Morales", "Vázquez", "Reyes", "Jiménez", "Torres", "Díaz", "Gutiérrez", "Ruiz", "Mendoza", "Aguilar", "Ortiz", "Moreno", "Castillo", "Romero", "Álvarez", "Méndez", "Chávez", "Rivera", "Juárez", "Ramos", "Domínguez", "Herrera", "Medina", "Castro", "Vargas", "Guzmán", "Velázquez", "Rojas", "Contreras", "Salazar", "Luna", "Ortega", "Cervantes", "Estrada", "Delgado", "Figueroa", "Espinoza", "Villarreal", "Rosales", "Zamora", "Guerrero", "Navarro", "Ibarra", "Valenzuela", "Cortés", "Robles", "Acosta", "Cisneros", "Trejo", "Pacheco", "Quintero", "Barrera", "Montoya"]
+  },
+  "es_us": {
+   "male": ["Anthony", "Adrian", "Brandon", "Christian", "Daniel", "David", "Eric", "Gabriel", "Isaac", "Jonathan", "Joseph", "Julian", "Kevin", "Marco", "Mario", "Nathan", "Oscar", "Richard", "Steven", "Victor", "Alex", "Angel", "Andrew", "Aaron", "Jesús", "José", "Luis", "Carlos", "Miguel", "Diego", "Ricky", "Manny", "Rudy", "Frankie", "Tony", "Danny", "Joey", "Sal", "Hector", "Rey"],
+   "female": ["Alyssa", "Andrea", "Ariana", "Briana", "Cristina", "Daisy", "Diana", "Erica", "Gabriela", "Isabel", "Jasmine", "Jennifer", "Karina", "Leslie", "Marisol", "Melissa", "Monica", "Nicole", "Priscilla", "Selena", "Stephanie", "Vanessa", "Veronica", "Yvette"],
+   "last": []
+  },
+  "filipino": {
+   "male": ["Jose", "Juan", "Mark", "John", "Michael", "Rey", "Jerome", "Kevin", "Christian", "Joshua", "Ramon", "Eduard", "Honorio", "Lito", "Danny", "Rolando", "Joey", "Jomar", "Rene", "Arnel", "Bong", "Jeff", "Jericho", "Kenneth", "Paolo", "Marlon", "Richard", "Ryan", "Jayson", "Carlo", "Miguel", "Angelo", "Emmanuel", "Nonito", "Donnie"],
+   "female": ["Maria", "Angelica", "Kristine", "Jasmine", "Mary Joy", "Rose", "Ana", "Grace", "Lovely", "Princess", "Jessa", "Mylene", "Denice", "Jenelyn", "April", "Hergie", "Rhea", "Joanna"],
+   "last": ["Santos", "Reyes", "Cruz", "Bautista", "Garcia", "Mendoza", "Ramos", "Aquino", "Castillo", "Villanueva", "Del Rosario", "Dela Cruz", "Gonzales", "Fernandez", "Lopez", "Vitasa", "Alvarez", "Macaraeg", "Tolentino", "Manalo", "Soriano", "Magbanua", "Dimaculangan", "Lagman", "Pangilinan", "Salazar", "Navarro", "Buenaventura", "Evangelista", "Galang", "Ocampo"]
+  },
+  "fr_ca": {
+   "male": ["Jean-François", "Marc-André", "Jean-Philippe", "Pierre-Luc", "Olivier", "Maxime", "Simon", "Mathieu", "Alexandre", "Vincent", "Gabriel", "Samuel", "Félix", "Étienne", "Charles", "Louis-Philippe", "Guillaume", "Francis", "Patrick", "Stéphane", "Sébastien", "Martin", "David", "Éric", "Jonathan", "Dominic", "Frédéric", "Kevin", "William", "Jérémie", "Hugo", "Antoine", "Georges", "Mathis", "Émile"],
+   "female": ["Marie-Ève", "Marie-Pier", "Catherine", "Geneviève", "Isabelle", "Julie", "Mélanie", "Stéphanie", "Valérie", "Audrey", "Émilie", "Karine", "Joanie", "Andréanne", "Laurence", "Rosalie", "Camille", "Alexandra", "Noémie", "Sarah"],
+   "last": ["Tremblay", "Gagnon", "Roy", "Côté", "Bouchard", "Gauthier", "Morin", "Lavoie", "Fortin", "Gagné", "Ouellet", "Pelletier", "Bélanger", "Lévesque", "Bergeron", "Leblanc", "Paquette", "Girard", "Simard", "Boucher", "Caron", "Beaulieu", "Cloutier", "Dubé", "Poirier", "Fournier", "Lapointe", "Leclerc", "Lefebvre", "Poulin", "Thibault", "St-Pierre", "Laflamme", "Nadeau", "Beaudoin", "Deschênes", "Desrosiers", "Lachance", "Mercier", "Vaillancourt", "Rivard", "Arsenault", "Charbonneau", "Brassard", "Villeneuve", "Émond", "Proulx", "Parent", "Dufour"]
+  },
+  "fr_fr": {
+   "male": ["Thomas", "Nicolas", "Julien", "Maxime", "Alexandre", "Kevin", "Romain", "Antoine", "Quentin", "Florian", "Mathieu", "Guillaume", "Benjamin", "Adrien", "Hugo", "Lucas", "Théo", "Baptiste", "Clément", "Pierre", "Louis", "Jérémy", "Anthony", "Sébastien", "Cédric", "Loïc", "Yoann", "Damien", "Arnaud", "Fabien", "Gaël", "Mickaël", "Nathan", "Enzo", "Léo", "Tristan", "Valentin", "Corentin", "Cyril", "Jonathan"],
+   "female": ["Marie", "Camille", "Léa", "Manon", "Chloé", "Laura", "Julie", "Sarah", "Pauline", "Émilie", "Mathilde", "Océane", "Justine", "Charlotte", "Marion", "Anaïs", "Clara", "Lucie", "Élodie", "Audrey", "Morgane", "Mélanie", "Aurélie", "Inès", "Margaux"],
+   "last": ["Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Michel", "Garcia", "David", "Bertrand", "Roux", "Vincent", "Fournier", "Morel", "Girard", "André", "Lefèvre", "Mercier", "Dupont", "Lambert", "Bonnet", "François", "Martinez", "Legrand", "Garnier", "Faure", "Rousseau", "Blanc", "Guérin", "Muller", "Henry", "Roussel", "Nicolas", "Perrin", "Morin", "Mathieu", "Clément", "Gauthier", "Dumont", "Lopez", "Fontaine", "Chevalier", "Robin", "Masson", "Sanchez", "Gérard", "Nguyen", "Boyer", "Denis", "Lemaire", "Duval", "Joly", "Gautier", "Roger", "Roche", "Roy", "Noël", "Meyer", "Lucas", "Meunier", "Jean", "Perez", "Marchand"]
+  },
+  "georgian": {
+   "male": ["Giorgi", "Levan", "Davit", "Nika", "Luka", "Irakli", "Zurab", "Lasha", "Beka", "Tornike", "Sandro", "Shota", "Vakhtang", "Merab", "Guram", "Gela", "Tamaz", "Revaz", "Nodar", "Mamuka", "Otar", "Paata", "Archil", "Temur", "Ilia", "Saba", "Vazha", "Avtandil", "Kakha", "Mikheil", "Lado", "Dato", "Goga", "Teimuraz", "Varlam", "Koba", "Badri", "Zviad", "Gocha", "Ramaz"],
+   "female": ["Nino", "Tamar", "Mariam", "Ana", "Salome", "Eka", "Natia", "Sophio", "Keti", "Lika", "Maka", "Tiko", "Nana", "Manana", "Khatia", "Eliso", "Tsiala", "Mzia", "Lela", "Ketevan"],
+   "last": ["Beridze", "Kapanadze", "Gelashvili", "Maisuradze", "Giorgadze", "Lomidze", "Tsiklauri", "Bolkvadze", "Nozadze", "Mchedlidze", "Khutsishvili", "Abashidze", "Chkheidze", "Kavtaradze", "Jorjadze", "Gogoladze", "Tsertsvadze", "Kiknadze", "Kalandadze", "Makharadze", "Mikautadze", "Janelidze", "Gabunia", "Khvichia", "Kobakhidze", "Datunashvili", "Natsvlishvili", "Tabatadze", "Jikia", "Chikovani", "Kvirkvelia", "Lagvilava", "Revishvili", "Svanidze", "Gigauri", "Gogua", "Kurtanidze", "Zaalishvili", "Kharaishvili"]
+  },
+  "hausa": {
+   "male": ["Abubakar", "Aliyu", "Musa", "Ibrahim", "Sani", "Yusuf", "Bello", "Haruna", "Suleiman", "Abdullahi", "Nasiru", "Shehu", "Umar", "Garba", "Hamza", "Kabiru", "Lawal", "Mustapha", "Bashir", "Idris", "Adamu", "Isa", "Jibril", "Mansur", "Yakubu", "Zakari", "Danjuma", "Tanko", "Auwal"],
+   "female": ["Aisha", "Hadiza", "Fatima", "Zainab", "Maryam", "Hauwa", "Amina", "Rabi", "Halima", "Khadija", "Safiya", "Bilkisu", "Jamila", "Sadiya", "Hafsat", "Asma'u"],
+   "last": ["Abubakar", "Bello", "Danladi", "Garba", "Ibrahim", "Lawal", "Musa", "Sani", "Shehu", "Umar", "Yakubu", "Yusuf", "Aliyu", "Dikko", "Gambo", "Kano", "Maikudi", "Mohammed", "Sokoto", "Tukur", "Waziri", "Zubairu", "Jibrin", "Kurfi", "Bako", "Dauda", "Idris", "Ladan", "Magaji"]
+  },
+  "igbo": {
+   "male": ["Chinedu", "Chukwuemeka", "Obinna", "Ikenna", "Emeka", "Nnamdi", "Uchenna", "Chidi", "Kelechi", "Ifeanyi", "Chiamaka", "Somtochukwu", "Tochukwu", "Okechukwu", "Chibuike", "Ebuka", "Kenechukwu", "Onyekachi", "Chisom", "Uzoma", "Ugochukwu", "Nonso", "Arinze", "Izuchukwu", "Jideofor", "Chinonso", "Kingsley", "Godwin", "Sunday"],
+   "female": ["Adaeze", "Chiamaka", "Ngozi", "Nneka", "Chioma", "Ifeoma", "Uchechi", "Amarachi", "Obiageli", "Nkechi", "Chinwe", "Ogechi", "Ebere", "Ijeoma", "Somto", "Oluchi", "Onyinye", "Kosisochukwu"],
+   "last": ["Okafor", "Okonkwo", "Nwosu", "Eze", "Obi", "Nwachukwu", "Okeke", "Onyeka", "Chukwu", "Ibe", "Anyanwu", "Okoro", "Ugwu", "Ezeh", "Nnaji", "Obiora", "Onuoha", "Uchenna", "Agu", "Ekwueme", "Nwafor", "Odoh", "Ofor", "Ogbonna", "Okoye", "Onwuachi", "Umeh", "Asogwa", "Okpara", "Nwokolo", "Ezeani"]
+  },
+  "irish": {
+   "male": ["Conor", "Sean", "Liam", "Cian", "Darragh", "Eoin", "Ciarán", "Padraig", "Declan", "Colm", "Oisín", "Niall", "Ronan", "Fionn", "Shane", "Kieran", "Aidan", "Brendan", "Cathal", "Diarmuid", "Tadhg", "Fergal", "Rory", "Donal", "Killian", "Seamus", "Paddy", "Dylan", "Jack", "Michael"],
+   "female": ["Aoife", "Niamh", "Siobhán", "Ciara", "Orla", "Sinéad", "Caoimhe", "Roisín", "Saoirse", "Clodagh", "Aisling", "Eimear", "Gráinne", "Deirdre", "Emer", "Méabh", "Nuala", "Fiona", "Katie", "Sarah"],
+   "last": ["Murphy", "Kelly", "O'Sullivan", "Walsh", "Smith", "O'Brien", "Byrne", "Ryan", "O'Connor", "O'Neill", "O'Reilly", "Doyle", "McCarthy", "Gallagher", "O'Doherty", "Kennedy", "Lynch", "Murray", "Quinn", "Moore", "McLoughlin", "O'Carroll", "Connolly", "Daly", "O'Connell", "Wilson", "Dunne", "Brennan", "Burke", "Collins", "Campbell", "Clarke", "Johnston", "Hughes", "Farrell", "Fitzgerald", "Brown", "Martin", "Maguire", "Nolan", "Flynn", "Thompson", "Callaghan", "O'Donnell", "Duffy", "Mahony", "Boyle", "Healy", "Shanahan", "Keane"]
+  },
+  "japanese": {
+   "male": ["Takashi", "Hiroshi", "Kenji", "Daisuke", "Yuki", "Ryota", "Shota", "Takumi", "Kazuki", "Yuta", "Haruto", "Sota", "Kaito", "Ren", "Riku", "Hayato", "Kenta", "Naoki", "Tatsuya", "Yusuke", "Kohei", "Masato", "Shinya", "Tomoya", "Takeshi", "Makoto", "Satoshi", "Akira", "Kazuya", "Ryo", "Tsuyoshi", "Yoshihiro", "Kazushi", "Genki", "Kyoji", "Rin", "Asahi", "Ryuichi", "Hideo", "Koji", "Shuhei", "Jun", "Tetsuya", "Yoshiaki", "Katsunori", "Mitsuhiro", "Daiki", "Hiroki", "Ryusei", "Taiga"],
+   "female": ["Yuki", "Aoi", "Sakura", "Haruka", "Misaki", "Ayaka", "Nanami", "Rina", "Mai", "Miyu", "Saki", "Kana", "Emi", "Asuka", "Megumi", "Yuka", "Ayumi", "Natsuki", "Shizuka", "Rena", "Hina", "Mizuki", "Kaori", "Mika", "Tomomi", "Satomi", "Seika", "Itsuki", "Miku", "Nao"],
+   "last": ["Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki", "Yamaguchi", "Matsumoto", "Inoue", "Kimura", "Hayashi", "Shimizu", "Yamazaki", "Mori", "Abe", "Ikeda", "Hashimoto", "Yamashita", "Ishikawa", "Nakajima", "Maeda", "Fujita", "Ogawa", "Goto", "Okada", "Hasegawa", "Murakami", "Kondo", "Ishii", "Saito", "Sakamoto", "Endo", "Fujii", "Nishimura", "Fukuda", "Ota", "Miura", "Okamoto", "Matsuda", "Nakagawa", "Ishida", "Hirota", "Kitaoka", "Aoyama"]
+  },
+  "kazakh": {
+   "male": ["Nurlan", "Yerlan", "Aibek", "Daniyar", "Askar", "Arman", "Yerzhan", "Bauyrzhan", "Dauren", "Zhandos", "Aslan", "Madi", "Sanzhar", "Alibek", "Timur", "Rustem", "Marat", "Serik", "Kairat", "Beibit", "Azamat", "Nurzhan", "Yermek", "Olzhas", "Shyngys", "Temirlan", "Zhanibek", "Miras", "Dias", "Ilyas", "Kanat", "Bekzat", "Birzhan", "Yerbol", "Adil", "Almas", "Samat", "Ruslan"],
+   "female": ["Aigerim", "Dana", "Madina", "Aruzhan", "Zhanar", "Dinara", "Gulnara", "Aizhan", "Assel", "Saule", "Zarina", "Kamila", "Aliya", "Akmaral", "Togzhan", "Meruert", "Balnur", "Zhansaya", "Anel", "Tomiris", "Laura", "Aisulu"],
+   "last": ["Nurmagambetov", "Abenov", "Bekov", "Dzhaksybekov", "Iskakov", "Kassymov", "Mukhametov", "Nurlanov", "Ospanov", "Rakhimov", "Sadykov", "Seitkali", "Suleimenov", "Baimukhanov", "Zhakupov", "Akhmetov", "Kenzhebayev", "Bekmukhambetov", "Temirov", "Serikov", "Beibitov", "Aubakirov", "Karimov", "Ismailov", "Omarov", "Utebayev", "Zholdasbekov", "Kaliev", "Dosmagambetov", "Tuleubayev", "Zhanabayev", "Mamyrbayev", "Sultanbekov", "Yessenov", "Kuanyshbekuly", "Nurzhanuly", "Daniyaruly", "Marat uly"],
+   "surname_rule": "kazakh"
+  },
+  "korean": {
+   "male": ["Min-jun", "Seo-jun", "Do-yun", "Ji-ho", "Joon-ho", "Hyun-woo", "Sung-min", "Dong-hyun", "Tae-hyun", "Jae-won", "Chan-sung", "Doo-ho", "Kyung-ho", "Seung-woo", "Jun-young", "Ki-won", "Sang-hoon", "Young-jin", "Woo-jin", "Jin-soo", "Hyun-gyu", "Dong-sik", "Myung-hwan", "Da-un", "Jung-yong", "Chang-min", "Sung-hoon", "Yong-jae", "Hee-seung", "Kwang-hee"],
+   "female": ["Ji-yeon", "Seo-yeon", "Min-seo", "Ha-eun", "Ji-woo", "Soo-bin", "Yu-jin", "Da-hye", "Eun-ji", "Hye-jin", "Na-rae", "Ji-hyun", "Seul-gi", "Bo-ra", "Mi-rae", "Ye-jin", "Hyo-joo", "Chae-won", "Ga-eun", "So-hee"],
+   "last": ["Kim", "Lee", "Park", "Choi", "Jung", "Kang", "Cho", "Yoon", "Jang", "Lim", "Han", "Oh", "Seo", "Shin", "Kwon", "Hwang", "Ahn", "Jeon", "Hong", "Yoo", "Ko", "Moon", "Yang", "Son", "Bae", "Baek", "Heo", "Nam", "Noh", "Ha", "Kwak", "Sung", "Cha", "Joo", "Woo", "Min", "Ryu", "Na", "Jin"]
+  },
+  "maghrebi": {
+   "male": ["Karim", "Nassim", "Mehdi", "Yassine", "Sofiane", "Rachid", "Samir", "Bilal", "Hakim", "Farid", "Mourad", "Nabil", "Walid", "Amine", "Ilyes", "Ryad", "Anis", "Mohamed", "Ahmed", "Youssef", "Hamza", "Adel", "Nordine", "Riad", "Salim", "Tarik", "Zakaria", "Oussama", "Ayoub", "Badr", "Soufiane", "Khalid", "Redouane", "Ismaël", "Abdel", "Moussa", "Sami", "Jamel", "Lotfi", "Azzedine"],
+   "female": ["Nadia", "Samira", "Leïla", "Yasmine", "Sarah", "Imane", "Inès", "Amel", "Karima", "Meriem", "Sabrina", "Djamila", "Fatima", "Nora", "Rania", "Salma", "Hafsa", "Soraya", "Lina", "Zineb", "Khadija", "Houda", "Siham"],
+   "last": ["Benali", "Bouzid", "Haddad", "Mansouri", "Belkacem", "Saidi", "Amrani", "Brahimi", "Cherif", "Djebbar", "Ferhat", "Guendouzi", "Hamidi", "Khelifi", "Larbi", "Meziane", "Nacer", "Ouali", "Rahmani", "Slimani", "Taleb", "Yahiaoui", "Zidane", "Bouazza", "El Idrissi", "El Amrani", "Benjelloun", "Tahiri", "Alaoui", "Bennani", "Ouahbi", "Boukhari", "Chaoui", "Harrak", "Moussaoui", "Azzouzi", "Belhaj", "Bensaid", "Ziani", "Aït Ali", "Boussaid", "Kaddour", "Messaoudi", "Ghezzal", "Belarbi", "Hadjadj"]
+  },
+  "maori": {
+   "male": ["Wiremu", "Tamati", "Hemi", "Rawiri", "Ihaia", "Te Ariki", "Nikau", "Manaia", "Kauri", "Tane", "Rangi", "Hohepa", "Pita", "Aperahama", "Matiu", "Tipene", "Hone", "Kahu", "Tama", "Ropata", "Israel", "Kai", "Mason", "Jahvis", "Ariki"],
+   "female": ["Aroha", "Mere", "Hine", "Kiri", "Moana", "Ngaire", "Anahera", "Ataahua", "Huia", "Manaia", "Marama", "Tui", "Waimarie", "Kahurangi", "Maia", "Ria"],
+   "last": ["Walker", "Ngata", "Parata", "Tamihana", "Tawhiri", "Rangihuna", "Paewai", "Horomona", "Te Rangi", "Tipene", "Wihongi", "Kereama", "Paki", "Rewiti", "Tahana", "Takerei", "Waaka", "Whaanga", "Hapi", "Karaka", "Kingi", "Mahuika", "Ngarimu", "Pomare", "Poutama", "Ruatapu", "Tahere", "Tupaea", "Herewini", "Ruru", "Hohaia", "Te Kani", "Ormsby", "Hetaraka"]
+  },
+  "med_au": {
+   "male": ["Nick", "George", "Con", "Peter", "Chris", "Steve", "Tony", "Frank", "Joe", "Sam", "Michael", "Dimitri", "Kostas", "Angelo", "Luca", "Marco", "Paul", "Jason", "Alex", "Bilal", "Ahmed", "Jamal", "Rob", "Theo", "Andrew"],
+   "female": ["Maria", "Elena", "Sophia", "Christina", "Anna", "Katerina", "Georgia", "Angela", "Rita", "Lina", "Nadia", "Stella", "Tina", "Vanessa", "Zoe"],
+   "last": ["Papadopoulos", "Nikolaidis", "Georgiou", "Konstantinou", "Ioannou", "Dimitriou", "Rossi", "Russo", "Esposito", "Romano", "Ricci", "Marino", "Greco", "Bruno", "Gallo", "Conti", "Costa", "Mancini", "Lombardo", "Moretti", "Barbieri", "Fontana", "Kouris", "Karagiannis", "Alexiou", "Makris", "Pappas", "Stavros", "Haddad", "Khoury", "Nasser", "Salameh", "Fakhoury"]
+  },
+  "pacific": {
+   "male": ["Tevita", "Sione", "Viliami", "Siaosi", "Tui", "Manu", "Pita", "Semisi", "Tama", "Iosefa", "Lealaiauloto", "Junior", "Toa", "Mose", "Faafetai", "Kalani", "Keoni", "Makoa", "Nainoa", "Kai", "Ikaika", "Afa", "Kaleo", "Lani", "Tanoai", "Losa", "Soliai", "Talalelei", "Fuimaono", "Tavita"],
+   "female": ["Leilani", "Moana", "Mele", "Malia", "Lesieli", "Seini", "Ana", "Lupe", "Losana", "Fetu", "Kalea", "Nalani", "Mahina", "Keala", "Pua", "Sina", "Tiare", "Lani"],
+   "last": ["Fonoti", "Tuiasosopo", "Mauga", "Leavasa", "Tupou", "Taufa", "Latu", "Havili", "Vainikolo", "Fifita", "Kaufusi", "Fuimaono", "Aumua", "Peni", "Sopoaga", "Tago", "Faleolo", "Talataina", "Ioane", "Kahananui", "Kealoha", "Kamakana", "Makoa", "Akana", "Kahale", "Nakoa", "Pomaikai", "Tuilagi", "Sapolu", "Tuiali'i", "Masoe", "Paepae", "Afoa", "Leiataua"]
+  },
+  "pakistani": {
+   "male": ["Imran", "Faisal", "Zain", "Hamza", "Bilal", "Adnan", "Tariq", "Asif", "Kamran", "Shahid", "Waqar", "Naveed", "Irfan", "Omar", "Yasir", "Junaid", "Saqib", "Arslan", "Haris", "Danyal", "Rizwan", "Shoaib", "Zubair", "Aamir", "Nadeem", "Sajid", "Wasim", "Umair", "Fahad"],
+   "female": ["Aisha", "Ayesha", "Sana", "Fatima", "Zara", "Hira", "Mehwish", "Nadia", "Saima", "Amna", "Iqra", "Maryam", "Rabia", "Sadia", "Noor", "Hina"],
+   "last": ["Khan", "Ahmed", "Hussain", "Qureshi", "Sheikh", "Chaudhry", "Bhatti", "Butt", "Mirza", "Rehman", "Malik", "Iqbal", "Akhtar", "Siddiqui", "Raza", "Shah", "Javed", "Aslam", "Anwar", "Rashid", "Hanif", "Nawaz", "Saleem", "Yousaf", "Mahmood", "Abbasi", "Awan", "Rana", "Janjua", "Dar"]
+  },
+  "polish": {
+   "male": ["Mateusz", "Michał", "Kamil", "Łukasz", "Tomasz", "Paweł", "Krzysztof", "Marcin", "Piotr", "Jakub", "Bartosz", "Adrian", "Dawid", "Damian", "Grzegorz", "Mariusz", "Artur", "Rafał", "Sebastian", "Szymon", "Wojciech", "Przemysław", "Arkadiusz", "Daniel", "Karol", "Maciej", "Patryk", "Robert", "Marek", "Sławomir", "Janusz", "Norbert", "Hubert", "Oskar", "Filip", "Konrad", "Radosław", "Jan", "Zbigniew", "Igor"],
+   "female": ["Anna", "Katarzyna", "Magdalena", "Agnieszka", "Joanna", "Karolina", "Monika", "Natalia", "Aleksandra", "Paulina", "Justyna", "Marta", "Ewelina", "Weronika", "Dominika", "Izabela", "Kinga", "Sylwia", "Klaudia", "Patrycja", "Zuzanna", "Martyna", "Iwona", "Beata"],
+   "last": ["Nowak", "Kowalski", "Wiśniewski", "Wójcik", "Kowalczyk", "Kamiński", "Lewandowski", "Zieliński", "Szymański", "Woźniak", "Dąbrowski", "Kozłowski", "Jankowski", "Mazur", "Wojciechowski", "Kwiatkowski", "Krawczyk", "Kaczmarek", "Piotrowski", "Grabowski", "Zając", "Pawłowski", "Michalski", "Król", "Wieczorek", "Jabłoński", "Wróbel", "Nowakowski", "Majewski", "Olszewski", "Stępień", "Malinowski", "Jaworski", "Adamczyk", "Dudek", "Nowicki", "Pawlak", "Górski", "Witkowski", "Walczak", "Sikora", "Baran", "Rutkowski", "Michalak", "Szewczyk", "Ostrowski", "Tomaszewski", "Pietrzak", "Zalewski", "Wróblewski", "Chmielewski", "Sobczak"],
+   "surname_rule": "polish"
+  },
+  "pt_br": {
+   "male": ["João", "Pedro", "Lucas", "Gabriel", "Matheus", "Rafael", "Thiago", "Felipe", "Gustavo", "Bruno", "Rodrigo", "Diego", "Leandro", "Marcelo", "Fábio", "André", "Vinícius", "Caio", "Renan", "Wellington", "Anderson", "Cleiton", "Jailton", "Edson", "Adriano", "Rogério", "Márcio", "Paulo", "Carlos", "Antônio", "Francisco", "José", "Luiz", "Ronaldo", "Robson", "Alex", "Jefferson", "Washington", "Éverton", "Wanderlei", "Kaique", "Davi", "Arthur", "Enzo", "Heitor", "Murilo", "Igor", "Iago", "Otávio", "Renato", "Sandro", "Valdir", "Gilberto", "Edvaldo", "Josué", "Natan", "Ítalo", "Cauã", "Ryan", "Alisson", "Daniel", "Samuel", "Elias", "Jean", "Wesley", "João Pedro", "João Victor", "Luiz Felipe", "Carlos Eduardo", "Paulo Henrique", "Pedro Henrique", "Marcos Vinícius"],
+   "female": ["Ana", "Amanda", "Bruna", "Camila", "Carla", "Cláudia", "Daniela", "Débora", "Fernanda", "Gabriela", "Isabela", "Jéssica", "Juliana", "Larissa", "Letícia", "Luana", "Mariana", "Natália", "Patrícia", "Priscila", "Raquel", "Renata", "Tatiane", "Thaís", "Vanessa", "Viviane", "Aline", "Beatriz", "Bianca", "Karine", "Kelly", "Joice", "Taila", "Ketlen", "Mayra", "Poliana", "Ana Clara", "Maria Eduarda", "Ana Paula", "Maria Clara"],
+   "last": ["Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes", "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida", "Lopes", "Soares", "Fernandes", "Vieira", "Barbosa", "Rocha", "Dias", "Nascimento", "Andrade", "Moreira", "Nunes", "Marques", "Machado", "Mendes", "Freitas", "Cardoso", "Ramos", "Gonçalves", "Santana", "Teixeira", "Araújo", "Pinto", "Correia", "Moura", "Cavalcanti", "Batista", "Campos", "Monteiro", "Cunha", "Reis", "Brito", "Farias", "Nogueira", "Bezerra", "Maciel", "Siqueira", "Pacheco", "Tavares", "Sampaio", "Borges", "Queiroz", "Xavier", "Aguiar", "Bastos", "Leão", "Figueiredo", "Guimarães", "Magalhães", "Prates", "Albuquerque", "Coutinho", "Medeiros", "Sales", "Paiva", "Duarte"]
+  },
+  "russian": {
+   "male": ["Aleksandr", "Aleksei", "Andrei", "Anton", "Artem", "Denis", "Dmitri", "Egor", "Evgeni", "Fedor", "Igor", "Ilya", "Ivan", "Kirill", "Konstantin", "Maksim", "Mikhail", "Nikita", "Nikolai", "Oleg", "Pavel", "Roman", "Ruslan", "Sergei", "Stanislav", "Vadim", "Valentin", "Vasili", "Viktor", "Vitali", "Vladimir", "Vladislav", "Vyacheslav", "Yuri", "Zakhar", "Gleb", "Timofei", "Matvei", "Arseni", "Bogdan", "Georgi", "Leonid", "Mark", "Petr", "Semyon", "Yaroslav", "Daniil", "Grigori", "Anatoli", "Boris"],
+   "female": ["Anastasia", "Maria", "Daria", "Anna", "Elena", "Olga", "Irina", "Ekaterina", "Tatiana", "Natalia", "Svetlana", "Yulia", "Ksenia", "Viktoria", "Polina", "Alina", "Valentina", "Evgenia", "Kristina", "Marina", "Sofia", "Vera", "Yana", "Alena", "Lyudmila", "Veronika", "Diana", "Galina"],
+   "last": ["Ivanov", "Smirnov", "Kuznetsov", "Popov", "Vasiliev", "Petrov", "Sokolov", "Mikhailov", "Novikov", "Fedorov", "Morozov", "Volkov", "Alekseev", "Lebedev", "Semenov", "Egorov", "Pavlov", "Kozlov", "Stepanov", "Nikolaev", "Orlov", "Andreev", "Makarov", "Nikitin", "Zakharov", "Zaitsev", "Soloviev", "Borisov", "Yakovlev", "Grigoriev", "Romanov", "Vorobiev", "Sergeev", "Kuzmin", "Frolov", "Aleksandrov", "Dmitriev", "Korolev", "Gusev", "Kiselev", "Ilyin", "Maksimov", "Polyakov", "Sorokin", "Vinogradov", "Kovalev", "Belov", "Medvedev", "Antonov", "Tarasov", "Zhukov", "Baranov", "Filippov", "Komarov", "Davydov", "Belyaev", "Gerasimov", "Bogdanov", "Osipov", "Sidorov", "Matveev", "Titov", "Markov", "Mironov", "Krylov", "Kulikov", "Karpov", "Vlasov", "Melnikov", "Denisov", "Gavrilov", "Tikhonov", "Kazakov", "Afanasiev", "Danilov", "Savelyev", "Timofeev", "Fomin", "Chernov", "Abramov", "Levin"],
+   "surname_rule": "slavic"
+  },
+  "siberian": {
+   "male": ["Aian", "Erel", "Nyurgun", "Semyon", "Vasili", "Ivan", "Nikolai", "Afanasi", "Innokenti", "Petr", "Aital", "Erkin", "Bair", "Batu", "Chingis", "Zhargal", "Aldar", "Tumen", "Munko", "Solbon", "Dashi", "Bato", "Arsalan", "Timur", "Sayan", "Aisen", "Nyurbu", "Egor", "Mikhail", "Aleksei"],
+   "female": ["Sardana", "Aitalina", "Tuyara", "Nyurguyana", "Kyunney", "Saina", "Sayana", "Oyuna", "Dulma", "Tsyrena", "Erzhena", "Aryuna", "Darima", "Sesegma", "Anastasia", "Maria"],
+   "last": ["Sivtsev", "Nikolaev", "Vasiliev", "Petrov", "Ivanov", "Egorov", "Andreev", "Stepanov", "Gotovtsev", "Argunov", "Popov", "Pavlov", "Dambaev", "Tsydenov", "Batuev", "Dorzhiev", "Badmaev", "Balzhinimaev", "Zhambalov", "Namsaraev", "Tsybikov", "Buyantuev", "Sanzhiev", "Budaev", "Ochirov", "Zhigzhitov", "Garmaev", "Dashiev", "Tsyrenov", "Radnaev", "Aldarov", "Mongush", "Oorzhak", "Kuular", "Saryglar", "Ondar"],
+   "surname_rule": "slavic"
+  },
+  "somali": {
+   "male": ["Abdi", "Ahmed", "Mohamed", "Abdullahi", "Hassan", "Ali", "Omar", "Yusuf", "Ismail", "Farah", "Mahad", "Hamza", "Liban", "Guled", "Khalid", "Bashir", "Abdirahman", "Mustafa", "Idris", "Nuur"],
+   "female": ["Hodan", "Amina", "Fadumo", "Ifrah", "Sahra", "Hibo", "Ayan", "Nimco", "Faiza", "Ilhan", "Leyla", "Hamdi"],
+   "last": ["Abdi", "Ahmed", "Mohamed", "Hassan", "Ali", "Omar", "Yusuf", "Farah", "Warsame", "Jama", "Hersi", "Aden", "Egal", "Samatar", "Mohamud", "Nur", "Osman", "Dahir", "Elmi", "Duale"]
+  },
+  "south_asian": {
+   "male": ["Arjun", "Rohit", "Vikram", "Rahul", "Amit", "Sanjay", "Deepak", "Ravi", "Suresh", "Manoj", "Karan", "Aman", "Harpreet", "Gurpreet", "Jaspreet", "Manpreet", "Sandeep", "Rajesh", "Anil", "Sunil", "Vijay", "Ajay", "Nikhil", "Varun", "Pradeep", "Ashok", "Sachin", "Yogesh", "Naveen", "Satish", "Ravinder", "Hardeep", "Kuldeep", "Inderjit", "Mohit", "Neeraj"],
+   "female": ["Priya", "Anjali", "Pooja", "Neha", "Sakshi", "Geeta", "Ritu", "Sonam", "Nisha", "Kavita", "Sunita", "Pinki", "Manpreet", "Harleen", "Simran", "Jasleen", "Divya", "Anshu", "Antim", "Mansi", "Kiran"],
+   "last": ["Singh", "Kumar", "Sharma", "Yadav", "Malik", "Sangwan", "Chahal", "Gill", "Sandhu", "Dhillon", "Sidhu", "Grewal", "Brar", "Rana", "Chauhan", "Tomar", "Rathore", "Verma", "Gupta", "Patel", "Mehta", "Joshi", "Pandey", "Mishra", "Tiwari", "Reddy", "Nair", "Menon", "Iyer", "Pillai", "Rao", "Khatri", "Dagar", "Hooda", "Deswal", "Rathee"]
+  },
+  "surinamese": {
+   "male": ["Remy", "Tyrone", "Gilbert", "Errol", "Rayen", "Jairzinho", "Donovan", "Clyde", "Romano", "Melvin", "Ricardo", "Ivan", "Ernesto", "Andy", "Regilio", "Humphrey", "Ruggero", "Kenneth", "Glenn", "Stanley", "Patrick", "Jurgen", "Dwight", "Delano", "Quincy"],
+   "female": ["Germaine", "Chantal", "Shirley", "Natasja", "Jennifer", "Denise", "Priscilla", "Rachelle", "Sharon", "Tamara", "Kimberley", "Naomi", "Melissa", "Jolanda"],
+   "last": ["Yvel", "Balrak", "Ristie", "Tuitel", "Doest", "Bosnie", "Fer", "Hooi", "Tjon", "Dors", "Lachman", "Karg", "Amatdjais", "Nunes", "Pinas", "Macnack", "Rustenberg", "Sabajo", "Wolff"]
+  },
+  "swedish": {
+   "male": ["Alexander", "Erik", "Karl", "Johan", "Anders", "Lars", "Oskar", "Viktor", "Emil", "Filip", "Gustav", "Linus", "Axel", "Albin", "Anton", "Jesper", "Mattias", "Marcus", "Niklas", "Rasmus", "Sebastian", "Simon", "Tobias", "Andreas", "Henrik", "Joakim", "Kristoffer", "Magnus", "Fredrik", "Ludvig", "Elias", "Hugo", "Isak", "Melker"],
+   "female": ["Anna", "Emma", "Sara", "Johanna", "Elin", "Linnea", "Frida", "Moa", "Hanna", "Matilda", "Ida", "Klara", "Maja", "Wilma", "Ebba", "Alva", "Tove", "Sanna", "Josefin", "Lina"],
+   "last": ["Andersson", "Johansson", "Karlsson", "Nilsson", "Eriksson", "Larsson", "Olsson", "Persson", "Svensson", "Gustafsson", "Pettersson", "Jonsson", "Jansson", "Hansson", "Bengtsson", "Jönsson", "Lindberg", "Jakobsson", "Magnusson", "Lindström", "Olofsson", "Lindqvist", "Lindgren", "Berg", "Axelsson", "Bergström", "Lundberg", "Lundqvist", "Lind", "Mattsson", "Berglund", "Fredriksson", "Sandberg", "Henriksson", "Forsberg", "Sjöberg", "Wallin", "Engström", "Eklund", "Danielsson", "Håkansson", "Lundin", "Björk", "Bergman", "Gunnarsson", "Holm", "Wikström", "Samuelsson", "Isaksson", "Fransson"]
+  },
+  "tatar": {
+   "male": ["Rinat", "Ramil", "Marat", "Ilnur", "Airat", "Ilgiz", "Rustem", "Radik", "Renat", "Ruslan", "Azat", "Aydar", "Almaz", "Ilshat", "Fanis", "Rafael", "Damir", "Ildar", "Timur", "Emil", "Artur", "Rafik", "Nail", "Zufar", "Shamil", "Linar", "Ilyas", "Bulat", "Albert", "Salavat"],
+   "female": ["Alsu", "Gulnaz", "Dilyara", "Leysan", "Aigul", "Guzel", "Elvira", "Liliya", "Rezeda", "Alina", "Zulfiya", "Ilsiya", "Kamila", "Adelina", "Regina", "Aliya", "Chulpan", "Dinara"],
+   "last": ["Galiullin", "Khairullin", "Nurullin", "Sharipov", "Zaripov", "Mukhametshin", "Khabibullin", "Gilmutdinov", "Safin", "Valiev", "Garipov", "Minnikhanov", "Fatkullin", "Sabirov", "Yunusov", "Akhmetzyanov", "Gataullin", "Ziganshin", "Kamaletdinov", "Nizamov", "Latypov", "Zakirov", "Tukhvatullin", "Gainullin", "Iskhakov", "Salikhov", "Shaimardanov", "Bikbulatov", "Yusupov", "Mingazov", "Ibragimov", "Galimov", "Nabiullin", "Saifullin"],
+   "surname_rule": "slavic"
+  },
+  "thai": {
+   "male": ["Somchai", "Sittichai", "Kaew", "Pongsiri", "Anucha", "Chaiya", "Kiattisak", "Nattapong", "Phanuwat", "Sakda", "Thanawat", "Wichai", "Kongsak", "Rungrat", "Chatchai", "Worawut", "Suriya", "Apichat", "Teerapong", "Jakkrit", "Pakorn", "Songkran"],
+   "female": ["Somjai", "Anong", "Kanya", "Malee", "Nok", "Ploy", "Siriporn", "Supaporn", "Wassana", "Rattana", "Kanokwan", "Pimchanok", "Dang", "Fon", "Mint", "Chompoo", "Jintara", "Pornthip", "Duangjai"],
+   "last": ["Sor Jor", "Tor Laksong", "Chuwattana", "Wor Wanchai", "Sitmonchai", "Kaewsamrit", "Sakchaichote", "Sitthichai", "Jaroensuk", "Thongchai", "Srisuk", "Wongsawat", "Rattanakorn", "Boonmee", "Saetang", "Phrommas", "Kongprasert", "Chaiyaphum", "Sombat", "Suwannarat", "Thaweesak", "Singhapat", "Naksuriya"]
+  },
+  "west_african_fr": {
+   "male": ["Moussa", "Mamadou", "Ibrahima", "Ousmane", "Cheikh", "Abdoulaye", "Modou", "Aliou", "Pape", "Babacar", "Lamine", "Serigne", "Omar", "Amadou", "Souleymane", "Boubacar", "Samba", "Malick", "Assane", "Idrissa", "Djibril", "Youssou", "Mbaye", "Balla", "Mame", "Saliou", "Birame", "Alioune", "Demba", "El Hadji", "Francis", "Didier", "Christian", "Jean-Pierre", "Patrick", "Blaise", "Hervé", "Roger", "Stéphane", "Arnaud"],
+   "female": ["Aminata", "Fatou", "Awa", "Mariama", "Aïssatou", "Khady", "Ndèye", "Coumba", "Adama", "Astou", "Bineta", "Rokhaya", "Dieynaba", "Sokhna", "Yacine", "Marème", "Nafi", "Oumou", "Seynabou", "Kiné", "Christelle", "Josiane", "Brigitte", "Solange"],
+   "last": ["Diop", "Ndiaye", "Fall", "Sow", "Diallo", "Gueye", "Faye", "Seck", "Sarr", "Mbaye", "Cissé", "Ba", "Camara", "Diouf", "Thiam", "Niang", "Kane", "Sy", "Touré", "Sall", "Dieng", "Wade", "Mbengue", "Sène", "Ndour", "Diagne", "Konaté", "Traoré", "Sané", "Dramé", "Coulibaly", "Keïta", "Kouyaté", "Balde", "Badji", "Diatta", "Manga", "Tendeng"]
+  },
+  "yoruba": {
+   "male": ["Babatunde", "Oluwaseun", "Adewale", "Olumide", "Ayodele", "Femi", "Tunde", "Segun", "Kunle", "Wale", "Dayo", "Bayo", "Gbenga", "Yemi", "Tobi", "Damilola", "Sodiq", "Ayomide", "Ibrahim", "Ademola", "Rotimi", "Kehinde", "Taiwo", "Idowu", "Abiodun", "Olamide", "Akin", "Jide", "Lanre"],
+   "female": ["Adenike", "Folake", "Funmilayo", "Titilayo", "Yetunde", "Bukola", "Omolara", "Adeola", "Bisola", "Kemi", "Temitope", "Ronke", "Toyin", "Damilola", "Abimbola", "Motunrayo", "Olayinka", "Iyabo"],
+   "last": ["Adebayo", "Adeyemi", "Afolabi", "Ogunleye", "Olawale", "Oladipo", "Oyelaran", "Akinola", "Bamidele", "Ogundipe", "Okunola", "Adeleke", "Ajayi", "Alabi", "Balogun", "Fashola", "Ige", "Lawal", "Martins", "Obafemi", "Odukoya", "Ogunbanjo", "Oyewole", "Salami", "Sanni", "Shittu", "Adewumi", "Olaniyan", "Akande", "Ayinde", "Babalola", "Ojo", "Oni", "Oyebanji"]
+  }
+ }
+}
