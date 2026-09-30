@@ -4,7 +4,8 @@ extends TestCase
 
 
 func _fighter(world: WorldState, age: int, potential: float = 50.0) -> Fighter:
-	var f := LifeCycle.new().make_prospect(world, "m_lightweight")
+	var f := FighterGenerator.create(world, {"prospect": true, "division": "m_lightweight"})
+	world.add("fighters", f)
 	f.birth_date = {"year": int(world.date.year) - age, "month": 1, "day": 1}
 	f.potential = {"mean": potential, "spread": 8.0}
 	return f
@@ -49,19 +50,16 @@ func test_injuries_heal_and_block_booking_meanwhile() -> void:
 	check(f.injuries.is_empty(), "Lesão cicatriza na data prevista")
 
 
-func test_old_fighters_retire_and_are_replaced() -> void:
+func test_old_contracted_fighters_retire() -> void:
 	var world := WorldGenerator.generate(5, "regional_promoter")
 	var player := world.player_org()
 	var vet: Fighter = world.fighters[player.roster[1]]
 	vet.birth_date = {"year": int(world.date.year) - 46, "month": 1, "day": 1}
 	var contract: Contract = world.contracts[vet.contract_id]
-	var before := world.fighters.size()
 	var lc := LifeCycle.new()
-	var prospects := 0
 	for month in 24:
 		world.date.month = month % 12 + 1
-		var changes := lc.monthly(world)
-		prospects += changes.prospects.size()
+		lc.monthly(world)
 		if vet.retired:
 			break
 	check(vet.retired, "Atleta de 46 anos se aposenta")
@@ -69,11 +67,6 @@ func test_old_fighters_retire_and_are_replaced() -> void:
 	check(not contract.active, "Contrato encerrado, histórico preservado")
 	check(world.contracts.has(contract.id), "Contrato continua no histórico")
 	check(not vet.retired_on.is_empty(), "Data da aposentadoria registrada")
-	check(prospects >= 1 and world.fighters.size() > before, "Nova safra entra no mundo")
-	var names := {}
-	for f: Fighter in world.fighters.values():
-		check(not names.has(f.first_name + " " + f.last_name), "Nomes continuam únicos")
-		names[f.first_name + " " + f.last_name] = true
 	var retired_news := world.news.values().filter(func(n: NewsItem): return n.topic == "fighter_retired" and vet.id in n.entity_ids)
 	check_eq(retired_news.size(), 1, "Aposentadoria de atleta do jogador vira notícia")
 
@@ -103,7 +96,7 @@ func test_save_migrates_from_v1() -> void:
 	var data := world.to_dict()
 	data.schema_version = 1
 	for f: Dictionary in data.fighters.values():
-		for key: String in ["retired_on", "debut_on", "rival_interest"]:
+		for key: String in ["retired_on", "rival_interest"]:
 			f.erase(key)
 	for o: Dictionary in data.organizations.values():
 		for key: String in ["reputation_exact", "standing_history", "objectives", "season_reviews"]:
@@ -183,10 +176,13 @@ func test_rivals_bid_for_expiring_player_athletes() -> void:
 	check(bid > Contracts.market_price(world, star), "Proposta rival acima do preço de mercado")
 	var low := CareerActions.perform(world, "negotiate", {"fighter_id": star.id, "show_money": Contracts.market_price(world, star)})
 	check(low.has("counter_show") and int(low.counter_show) >= bid, "Renovar exige cobrir a proposta rival")
-	var bidder: String = star.rival_interest.keys()[0]
+	var bidder := ""
+	for org_id: String in star.rival_interest:
+		if bidder.is_empty() or int(star.rival_interest[org_id].show) > int(star.rival_interest[bidder].show):
+			bidder = org_id
 	c.bouts_remaining = 0
 	WorldSim.new(world).advance_day()
-	check_eq(star.organization_id, bidder, "Sem renovação, atleta assina com a rival")
+	check_eq(star.organization_id, bidder, "Sem renovação, atleta assina com a maior proposta")
 	check(not org.roster.has(star.id), "Sai do elenco do jogador")
 	check(world.news.values().any(func(n: NewsItem): return n.topic == "fighter_departed"), "Saída vira notícia")
 

@@ -3,8 +3,9 @@ extends RefCounted
 ## Passagem do tempo para os atletas (Game Design Bible §4, §13; MMA Bible §15, §18).
 ## Todo dia: lesões cicatrizam. Todo dia 1º: atributos evoluem pela curva de
 ## idade (potencial dinâmico, atividade e dano acumulado), popularidade esfria
-## na inatividade, veteranos se aposentam e uma nova safra entra no mundo.
-## Parâmetros em content/world_tuning.json.
+## na inatividade e atletas sob contrato decidem se aposentam (idade, dano,
+## má fase). Chegada de prospectos e aposentadoria de agentes livres ficam com
+## FighterGenerator.monthly_intake. Parâmetros em content/world_tuning.json.
 
 var _cfg: Dictionary = {}
 static var _regions: Array = []
@@ -34,8 +35,7 @@ func monthly(world: WorldState) -> Dictionary:
 		_cool_down(world, f)
 		_expire_bids(world, f)
 	var retired := _retirements(world)
-	var prospects := _regen(world, retired)
-	return {"retired": retired.map(func(f: Fighter): return f.id), "prospects": prospects}
+	return {"retired": retired.map(func(f: Fighter): return f.id)}
 
 
 static func curve(points: Array, x: float) -> float:
@@ -63,7 +63,7 @@ static func last_fight_date(world: WorldState, f: Fighter) -> Dictionary:
 		var fight: Fight = world.fights.get(f.fight_ids[i])
 		if fight and world.events.has(fight.event_id):
 			return world.events[fight.event_id].date
-	return f.debut_on
+	return {}
 
 
 ## Arredondamento estocástico: variações mensais pequenas acumulam sem viés.
@@ -105,8 +105,6 @@ func _cool_down(world: WorldState, f: Fighter) -> void:
 	var p: Dictionary = _cfg.popularity
 	var last := last_fight_date(world, f)
 	if not last.is_empty() and GameDate.days_between(last, world.date) <= int(p.inactive_days):
-		return
-	if last.is_empty() and f.fight_ids.is_empty() and not f.debut_on.is_empty() and GameDate.days_between(f.debut_on, world.date) <= int(p.inactive_days):
 		return
 	for region: String in f.popularity_by_region:
 		f.popularity_by_region[region] = maxf(0.0, float(f.popularity_by_region[region]) - float(p.inactive_decay))
@@ -160,15 +158,14 @@ func _retirements(world: WorldState) -> Array:
 			booked[fight.fighter_b_id] = true
 	var out: Array = []
 	for f: Fighter in world.fighters.values():
-		if f.retired or booked.has(f.id):
+		# Agentes livres: FighterGenerator.monthly_intake decide.
+		if f.retired or f.organization_id.is_empty() or booked.has(f.id):
 			continue
 		var age := f.age_on(world.date)
 		var p := curve(r.age_curve, age)
 		p += float(f.damage_history.get("head", 0.0)) * float(r.head_damage_per_unit)
 		if _losing_streak(world, f, 3):
 			p += float(r.losing_streak_bonus)
-		if f.organization_id.is_empty() and age >= int(r.unsigned_veteran_age):
-			p += float(r.unsigned_bonus)
 		if _is_top_ranked(world, f):
 			p *= float(r.champion_factor)
 		if p > 0.0 and world.rng.chance(p):
@@ -218,71 +215,6 @@ static func _fame(f: Fighter) -> float:
 	for v in f.popularity_by_region.values():
 		best = maxf(best, float(v))
 	return best
-
-
-# ---------------------------------------------------------------- nova safra
-
-func _regen(world: WorldState, retired: Array) -> Array:
-	var g: Dictionary = _cfg.regen
-	var free := 0
-	for f: Fighter in world.fighters.values():
-		if not f.retired and f.organization_id.is_empty():
-			free += 1
-	var divisions: Array = retired.map(func(f: Fighter): return f.division)
-	if free < int(g.maximum_free_agents) and world.rng.chance(float(g.extra_prospect_chance)):
-		divisions.append("")
-	for i in maxi(0, int(g.minimum_free_agents) - free - divisions.size()):
-		divisions.append("")
-	var out: Array = []
-	for division: String in divisions:
-		out.append(make_prospect(world, division).id)
-	return out
-
-
-## Jovem atleta gerado durante a carreira (Game Design Bible §13). Mesmo
-## vocabulário do PopulationGenerator, mas com idade baixa e potencial largo.
-func make_prospect(world: WorldState, division: String = "") -> Fighter:
-	var g: Dictionary = _cfg.regen
-	var cfg: Dictionary = ContentDB.load_json("career_tuning.json")
-	var attrs: Dictionary = ContentDB.load_json("attributes.json")
-	var profiles: Array = ContentDB.load_json("combat_profiles.json").fighters.values()
-	var styles: Array = ContentDB.load_json("fight_tuning.json").styles.keys()
-	var used := {}
-	for other: Fighter in world.fighters.values():
-		used[other.first_name + " " + other.last_name] = true
-	var f := Fighter.new()
-	f.id = world.new_id("ftr")
-	var region: Dictionary = world.rng.pick(cfg.names)
-	f.division = division if not division.is_empty() else str(world.rng.pick(cfg.player_divisions))
-	f.sex = Fighter.Sex.FEMALE if f.division.begins_with("w_") else Fighter.Sex.MALE
-	for attempt in 200:
-		f.first_name = world.rng.pick(region.female if f.sex == Fighter.Sex.FEMALE else region.male)
-		f.last_name = world.rng.pick(region.last)
-		if not used.has(f.first_name + " " + f.last_name):
-			break
-	f.country = region.country
-	f.city = region.city
-	var age := world.rng.range_i(int(g.age[0]), int(g.age[1]))
-	f.birth_date = {"year": int(world.date.year) - age, "month": world.rng.range_i(1, 12), "day": world.rng.range_i(1, 28)}
-	f.height_cm = int(cfg.division_height.get(f.division, 175)) + world.rng.range_i(-8, 8)
-	f.reach_cm = f.height_cm + world.rng.range_i(-3, 11)
-	f.martial_base = world.rng.pick(styles)
-	f.stance = world.rng.weighted({"orthodox": .68, "southpaw": .25, "switch": .07})
-	var level := world.rng.range_i(int(g.level[0]), int(g.level[1]))
-	var template: Dictionary = world.rng.pick(profiles)
-	for group: String in ["striking", "grappling", "jiu_jitsu", "physical", "mental"]:
-		var values := {}
-		for attribute: String in attrs[group]:
-			values[attribute] = clampi(level + world.rng.range_i(-13, 13) + int(template[group].get(attribute, 65)) - 75, 20, 90)
-		f.set(group, values)
-	f.potential = {"mean": world.rng.range_f(float(g.potential_mean[0]), float(g.potential_mean[1])), "spread": world.rng.range_f(float(g.potential_spread[0]), float(g.potential_spread[1]))}
-	f.record = {"wins": world.rng.range_i(int(g.wins[0]), int(g.wins[1])), "losses": world.rng.range_i(int(g.losses[0]), int(g.losses[1])), "draws": 0, "nc": 0}
-	f.popularity_by_region = {region.region: world.rng.range_i(int(g.popularity[0]), int(g.popularity[1]))}
-	f.charisma = world.rng.range_i(20, 80)
-	f.appearance = {"seed": world.rng.range_i(1, 2000000000), "sex": "f" if f.sex == Fighter.Sex.FEMALE else "m", "pop": "misto"}
-	f.debut_on = world.date.duplicate()
-	world.add("fighters", f)
-	return f
 
 
 ## Notícia factual gerada pela passagem do tempo (MMA Bible §27).

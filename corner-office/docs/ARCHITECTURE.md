@@ -23,7 +23,7 @@ content/*.json ─► simulation (models + systems) ─► EventBus / Game.world
 | Módulo | Arquivo | Responsabilidade | Status |
 |---|---|---|---|
 | WorldSim | `simulation/world/world_sim.gd` | Relógio: dia a dia, dia 1º (mês) e 1º de janeiro (temporada) | pronto |
-| LifeCycle | `simulation/world/life_cycle.gd` | Idade e evolução de atributos, lesões pós-luta, aposentadoria, nova safra | pronto; retorno de aposentados TODO |
+| LifeCycle | `simulation/world/life_cycle.gd` | Idade e evolução de atributos, lesões pós-luta, aposentadoria de contratados (agentes livres e prospectos: `FighterGenerator.monthly_intake`) | pronto; retorno de aposentados TODO |
 | OrgStanding | `simulation/organizations/org_standing.gd` | Reputação, patamar regional/nacional/global, mercados regionais, metas e balanço da temporada | pronto |
 | FightEngine | `simulation/fight/fight_engine.gd` | Simulação por trocas, dano, resultados e histórico | protótipo funcional + testes de distribuição |
 | Judge | `simulation/fight/judge.gd` | 10-point must / avaliação global, perfis de juiz | funcional + testes de prioridade de critérios |

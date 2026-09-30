@@ -24,8 +24,11 @@ func advance_day() -> void:
 	world.date = GameDate.add_days(world.date, 1)
 	_expire_contracts()
 	_run_scheduled_events()
-	# Passagem do tempo: lesões diárias; evolução, aposentadorias, nova safra,
-	# reputação e temporada no dia 1º (Game Design Bible §13).
+	# Passagem do tempo (Game Design Bible §13): lesões diárias; no dia 1º,
+	# chegada de prospectos e aposentadoria de agentes livres (FighterGenerator),
+	# evolução e aposentadoria de contratados (LifeCycle), reputação e temporada.
+	if int(world.date.day) == 1:
+		FighterGenerator.monthly_intake(world)
 	life_cycle.daily(world)
 	if int(world.date.day) == 1:
 		standing.monthly(world)

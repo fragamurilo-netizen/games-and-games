@@ -76,7 +76,7 @@ static func migrate(data: Dictionary) -> Variant:
 ## a reputação exata parte da inteira e as metas nascem no próximo dia.
 static func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
 	for f: Dictionary in data.get("fighters", {}).values():
-		for key: String in ["retired_on", "debut_on", "rival_interest"]:
+		for key: String in ["retired_on", "rival_interest"]:
 			if not f.has(key): f[key] = {}
 	for o: Dictionary in data.get("organizations", {}).values():
 		if not o.has("reputation_exact"): o.reputation_exact = float(o.get("reputation", 0))

@@ -42,7 +42,9 @@ var hidden := {}
 # Potencial dinâmico: distribuição, não teto (Game Design Bible §4).
 var potential := {"mean": 50.0, "spread": 10.0}
 
-# Preferências de estilo (distribuição de intenções no Fight Engine).
+# Estilo de luta (content/fighter_generation.json → fight_styles) e seus
+# pesos por categoria de técnica (distribuição de intenções no Fight Engine).
+var fight_style := ""
 var style := {}
 
 # Carreira
@@ -66,7 +68,6 @@ var appearance := {}
 var bio := ""               # gancho narrativo (texto livre)
 var retired := false
 var retired_on := {}        # GameDate da aposentadoria
-var debut_on := {}          # GameDate em que entrou no mundo (novos talentos)
 
 # Propostas públicas de rivais pelo próximo contrato (org_id -> {show, until}).
 # Contracts.evaluate_offer usa a melhor como preço de mercado.
@@ -81,11 +82,11 @@ func display_name() -> String:
 
 func age_on(date: Dictionary) -> int:
 	if birth_date.is_empty():
-		return 27
-	var years: int = int(date.year) - int(birth_date.year)
+		return 0
+	var age: int = int(date.year) - int(birth_date.year)
 	if int(date.month) < int(birth_date.month) or (int(date.month) == int(birth_date.month) and int(date.day) < int(birth_date.day)):
-		years -= 1
-	return years
+		age -= 1
+	return age
 
 
 func record_string() -> String:
