@@ -10,7 +10,8 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import org.godotengine.godot.Godot;
 import org.godotengine.godot.plugin.GodotPlugin;
@@ -27,7 +28,7 @@ public final class CornerOfficeStudio extends GodotPlugin {
     private int x, y, w, h;
     public CornerOfficeStudio(Godot godot) { super(godot); }
     @Override public String getPluginName() { return "CornerOfficeStudio"; }
-    @Override public Set<SignalInfo> getPluginSignals() { return Collections.singleton(new SignalInfo("closed")); }
+    @Override public Set<SignalInfo> getPluginSignals() { return new HashSet<>(Arrays.asList(new SignalInfo("closed"), new SignalInfo("next"))); }
 
     /** Rectangle in window pixels, as computed by Godot from the reserved Control. */
     @UsedByGodot @SuppressLint("SetJavaScriptEnabled")
@@ -51,6 +52,8 @@ public final class CornerOfficeStudio extends GodotPlugin {
             });
             web.addJavascriptInterface(new Object() {
                 @JavascriptInterface public void close() { CornerOfficeStudio.this.close(); }
+                /** Whole-night playback: Godot owns the card queue and loads the next bout. */
+                @JavascriptInterface public void next() { runOnRenderThread(() -> emitSignal("next")); }
             }, "CornerOffice");
             ViewGroup root = activity.findViewById(android.R.id.content);
             root.addView(web, params(left, top, width, height));

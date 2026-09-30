@@ -39,12 +39,16 @@ func build() -> void:
 	if ev.status=="postponed" or (ev.status=="planned" and GameDate.days_between(w.date,ev.date)<1):
 		add_button("Reagendar para daqui a 60 dias",func():await run_action("reschedule",{"event_id":ev.id,"days":60});refresh())
 	if ev.status=="planned":_matchmaker(ev)
+	if ev.status=="completed" and not ev.fight_ids.is_empty():add_button("ASSISTIR À NOITE",func():_watch_night(ev))
 	var finance: Dictionary=ev.actual if ev.status=="completed" else ev.projected
 	if not finance.is_empty():
 		add_heading("Balanço" if ev.status=="completed" else "Previsão")
 		add_text("Receita  %s\nCustos  %s\nResultado  %s"%[CareerText.money(int(finance.revenue)),CareerText.money(int(finance.costs)),CareerText.money(int(finance.margin))])
 	if ev.status=="planned":add_button("ANUNCIAR CARD",func():await run_action("announce",{"event_id":ev.id});refresh())
-	elif ev.status=="announced":add_button("REALIZAR EVENTO",func():await run_action("advance_event",{"event_id":ev.id});refresh())
+	elif ev.status=="announced":add_button("REALIZAR EVENTO",func():
+		var result:=await run_action("advance_event",{"event_id":ev.id});refresh()
+		# The night is decided by the simulation; then it is shown, bout by bout.
+		if result.get("ok") and ev.status=="completed":_watch_night(ev))
 func _matchmaker(ev: FightEvent) -> void:
 	add_heading("Negociar confronto")
 	var w:=Game.world;var used: Array=[]
@@ -74,7 +78,20 @@ func _matchmaker(ev: FightEvent) -> void:
 		if not quote.eligible:add_text(CareerText.result(quote),Tokens.FIGHT_RED)
 	add_button("Enviar proposta",func():await run_action("propose",params);quote={};red_id="";blue_id="";refresh())
 func _watch(fight: Fight) -> void:
+	var ev: FightEvent=Game.world.events.get(fight.event_id)
+	if ev:_watch_night(ev,fight.id);return
+	_viewer().open(FightReplayBuilder.build(Game.world,fight))
+## Whole card in running order (prelims → main event), starting at `from_id`.
+func _watch_night(ev: FightEvent,from_id:="") -> void:
+	var replays: Array=[];var start:=0
+	for id: String in ev.fight_ids:
+		var f: Fight=Game.world.fights[id]
+		if f.status!="completed":continue
+		if id==from_id:start=replays.size()
+		replays.append(FightReplayBuilder.build(Game.world,f))
+	_viewer().open_night(replays,start)
+func _viewer() -> FightReplayView:
 	var viewer:=FightReplayView.new()
 	viewer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	get_tree().root.add_child(viewer)
-	viewer.open(FightReplayBuilder.build(Game.world,fight))
+	return viewer

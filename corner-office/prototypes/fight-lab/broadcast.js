@@ -128,7 +128,9 @@
   const refName = REFEREES[Math.abs(replay.seed || 0) % REFEREES.length];
   $('eventline').textContent = [eventName, P.city || arena?.city, P.card_slot ? SLOT[P.card_slot]?.replace(/^(a|uma) /, '') : null].filter(Boolean).join(' · ');
   $('gate-title').textContent = `${name(RED).split(' ').pop()} × ${name(BLUE).split(' ').pop()}`.toUpperCase();
-  $('gate-sub').textContent = [eventName, division, `${rounds} rounds`, title ? 'disputa de cinturão' : null].filter(Boolean).join(' · ');
+  // Whole-night playback from the game: the host passes the bout's place on the card.
+  const cardPos = P.card_position && P.card_position.total > 1 ? `luta ${P.card_position.index} de ${P.card_position.total}` : null;
+  $('gate-sub').textContent = [eventName, division, `${rounds} rounds`, title ? 'disputa de cinturão' : null, cardPos].filter(Boolean).join(' · ');
   document.body.dataset.phase = phase = 'gate';
 
   // timeline marks: rounds and knockdowns
@@ -414,8 +416,15 @@
     for (const [i, card] of (r.scorecards || []).entries()) panel.append(el('p', 'sub', `${JUDGES[(i + (replay.seed || 0)) % JUDGES.length]}: ${(card.total || []).join(' – ')}`));
     const actions = el('div', 'actions');
     const again = el('button', 'primary', 'ASSISTIR DE NOVO'); again.onclick = () => { time = 0; for (const k of ['hud', 'controls', 'timeline']) $(k).hidden = false; startFight(); };
-    const back = el('button', null, 'VOLTAR À CARREIRA'); back.onclick = () => $('back').click();
-    actions.append(again, back); panel.append(actions);
+    const back = el('button', null, P.next_bout ? 'VOLTAR AO CARD' : 'VOLTAR À CARREIRA'); back.onclick = () => $('back').click();
+    if (P.next_bout) {
+      // The host game owns the queue; this only asks it for the next bout of the night.
+      const next = el('button', 'primary', 'PRÓXIMA LUTA ›'); next.title = P.next_bout;
+      next.onclick = () => { audio.beat(false); try { speechSynthesis.cancel(); } catch (e) {} if (window.CornerOffice?.next) window.CornerOffice.next(); else if (window.ipc) window.ipc.postMessage('next'); else $('back').click(); };
+      again.className = '';
+      actions.append(next, again, back); panel.append(el('p', 'sub', 'A seguir: ' + P.next_bout));
+    } else actions.append(again, back);
+    panel.append(actions);
     show(panel); audio.swell(.06, 2);
   }
 
