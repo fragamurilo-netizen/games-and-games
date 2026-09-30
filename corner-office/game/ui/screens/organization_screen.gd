@@ -24,4 +24,5 @@ func build() -> void:
 				var label: String={"gate":"Bilheteria","media":"Transmissão","sponsors":"Patrocínios","purses":"Bolsas","production":"Produção","venue":"Arena","travel":"Viagens","officials":"Arbitragem","marketing":"Marketing"}.get(key,key)
 				add_text(label+"  "+CareerText.money(int(ev.actual.lines[group][key])))
 		add_text("RESULTADO  "+CareerText.money(int(ev.actual.margin)))
+	add_button("Universo: história, cinturões e cidades",func():UniverseView.open_over(get_tree()))
 	add_button("Salvar carreira agora",func():feedback="Carreira salva." if Game.save_game("autosave")==OK else "Falha ao salvar.";refresh())

@@ -41,6 +41,9 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 		LeagueBuilder.populate(w, mode)
 	elif include_population:
 		PopulationGenerator.populate(w,start_mode)
+	if include_population:
+		# Campeões de 2027 saem da história do universo (content/universe/titles.json).
+		Universe.apply_titles(w)
 	# Representação por regra pública, depois dos contratos iniciais (sem RNG).
 	Agencies.assign_all(w)
 	if include_population:
