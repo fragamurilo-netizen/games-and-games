@@ -16,3 +16,5 @@ export type LedgerId = Brand<string, "LedgerId">
 export type DecisionId = Brand<string, "DecisionId">
 export type NewsId = Brand<string, "NewsId">
 export type MessageId = Brand<string, "MessageId">
+export type SceneId = Brand<string, "SceneId">
+export type InterviewId = Brand<string, "InterviewId">

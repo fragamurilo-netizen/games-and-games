@@ -1,12 +1,11 @@
 // Começo da campanha (bíblia §47, §48): identidade básica e ponto de partida escolhidos pelo
 // jogador; o resto vem da seed. Aplicado sobre o mundo recém-criado, antes do primeiro save.
 import { jobRoles, starterContent } from "@paralelo/content"
-import { err, ok, type EmploymentId, type Result, type VacancyId } from "@paralelo/shared"
+import { err, ok, type CompanyId, type Result } from "@paralelo/shared"
 import type { WorldState } from "../domain/world"
 import { calendarDate, dayFromCalendar, formatDate } from "../time"
 import { appendEntry } from "../timeline"
-import { nextWeekday, scheduleWorkDay } from "./career"
-import { meetCoworkers } from "./city"
+import { hirePlayer } from "./work"
 
 export type StartingPoint = "job-search" | "simple-job"
 export type StartProfile = Readonly<{ firstName: string; sex: "F" | "M"; age: number; start: StartingPoint }>
@@ -44,15 +43,11 @@ export function beginLife(world: WorldState, input: StartProfile): Result<WorldS
 function hireAtStart(world: WorldState): WorldState {
   const entry = jobRoles.filter(role => role.required <= 0.15)
   const vacancy = Object.values(world.vacancies).filter(v => v.open && entry.some(role => role.id === v.roleId)).sort((a, b) => (a.id < b.id ? -1 : 1))[0]
-  const companyId = vacancy?.companyId ?? (Object.keys(world.companies).sort()[0]! as keyof WorldState["companies"])
+  const companyId = vacancy?.companyId ?? (Object.keys(world.companies).sort()[0]! as CompanyId)
   const company = world.companies[companyId]!
   const role = jobRoles.find(r => r.id === vacancy?.roleId) ?? entry[0]!
-  const id = `employment:${world.nextId}` as EmploymentId
-  let next: WorldState = { ...world, nextId: world.nextId + 1,
-    employment: { id, personId: world.playerId, companyId: company.id, roleId: role.id, startedAt: world.clock, lastWorkedDay: null, accruedCents: 0, shiftsWorked: 0, performance: 60,
-      requiredFromDay: nextWeekday(world.clock.day + 1), consecutiveAbsences: 0, lastAssessedDay: null },
-    vacancies: vacancy ? { ...world.vacancies, [vacancy.id as VacancyId]: { ...vacancy, open: false } } : world.vacancies }
-  next = meetCoworkers(scheduleWorkDay(next, next.employment!.requiredFromDay), company.id)
-  return appendEntry(next, { at: world.clock, kind: "career", text: `O contrato com ${company.name} foi fechado antes da mudança: ${role.title.toLowerCase()}, oito horas por dia útil. O primeiro turno é em ${formatDate({ day: next.employment!.requiredFromDay, minute: 0 })}.`,
-    personIds: [world.playerId], cause: `career.start:${id}` })
+  const next = hirePlayer(world, company.id, role.id, vacancy?.id ?? null, false)
+  const e = next.employment!
+  return appendEntry(next, { at: world.clock, kind: "career", text: `O contrato com ${company.name} foi fechado antes da mudança: ${role.title.toLowerCase()}, oito horas por dia útil, chegando até as 8h30. O primeiro turno é em ${formatDate({ day: e.requiredFromDay, minute: 0 })}. Quem responde pela equipe é ${world.people[e.workplace.managerId]!.name}.`,
+    personIds: [world.playerId, e.workplace.managerId], cause: `career.start:${e.id}` })
 }

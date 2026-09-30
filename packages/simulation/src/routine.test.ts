@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest"
 import { lifeEvents } from "@paralelo/content"
 import { decodeSnapshot, encodeSnapshot } from "@paralelo/persistence"
 import type { VacancyId } from "@paralelo/shared"
-import { absoluteMinute, createWorld, executeCommand, nextWeekday, queryCareer, queryDecision, queryLife, queryRoutine, validateWorld, worldHash, type Command, type WorldState } from "."
+import { absoluteMinute, createWorld, executeCommand, nextWeekday, hirePlayer, queryCareer, queryDecision, queryLife, queryRoutine, validateWorld, worldHash, type Command, type WorldState } from "."
 import { applyElapsed } from "./systems/needs"
+import { hireViaInterviews, settle, workShift } from "./test-support"
 
 function apply(world: WorldState, command: Command): WorldState {
   const result = executeCommand(world, command)
@@ -19,13 +20,11 @@ function until(world: WorldState, day: number, minute: number): WorldState {
   while (absoluteMinute(world.clock) < target) world = apply(world, { type: "wait", minutes: Math.min(10080, target - absoluteMinute(world.clock)) })
   return world
 }
+// Presença e faltas: contrato fechado no dia 0 (como no começo "com emprego simples").
 function hired(): WorldState {
-  let world = quiet("attendance")
-  for (const vacancy of queryCareer(world).vacancies.filter(item => item.canApply)) {
-    world = apply(world, { type: "apply-job", vacancyId: vacancy.id })
-    if (world.employment) return world
-  }
-  throw new Error("Seed de teste sem contratação")
+  const world = quiet("attendance")
+  const vacancy = Object.values(world.vacancies).find(v => v.open && v.roleId === "stock") ?? Object.values(world.vacancies).find(v => v.open)!
+  return hirePlayer(world, vacancy.companyId, vacancy.roleId, vacancy.id, false)
 }
 const needs = (world: WorldState) => world.people[world.playerId]!.needs
 
@@ -96,7 +95,7 @@ describe("agenda e consequências profissionais", () => {
     let world = hired(), day = world.employment!.requiredFromDay
     world = until(world, day, 360)
     world = apply(world, { type: "sleep" }) // 06h -> 14h, energia suficiente.
-    const worked = apply(world, { type: "work" })
+    const worked = workShift(world)
     expect(worked.clock).toEqual({ day, minute: 1320 })
     expect(worked.employment?.lastAssessedDay).toBe(day)
     expect(worked.employment?.consecutiveAbsences).toBe(0)
@@ -115,7 +114,7 @@ describe("agenda e consequências profissionais", () => {
     day = nextWeekday(day + 1)
     world = until(world, day, 0)
     world = apply(world, { type: "sleep" })
-    world = apply(world, { type: "work" })
+    world = workShift(world)
     expect(world.employment?.consecutiveAbsences).toBe(0)
     expect(nextWeekday(5)).toBe(7)
     expect(world.scheduled.filter(item => item.kind.startsWith("work-")).every(item => item.at.day % 7 < 5)).toBe(true)
@@ -130,14 +129,14 @@ describe("agenda e consequências profissionais", () => {
     const first = world.employment!.requiredFromDay
     world = until(world, first - 1, 1320)
     world = apply(world, { type: "sleep" })
-    world = apply(world, { type: "work" }) // 06h -> 14h.
+    world = workShift(world) // 06h -> 14h.
     const followed = apply(world, { type: "wait", minutes: 30 })
     expect(followed.clock).toEqual({ day: first, minute: 870 })
     expect(followed.employment?.consecutiveAbsences).toBe(0)
     expect(followed.timeline).toEqual(world.timeline)
   })
   it("demite após três faltas, paga saldo devido uma vez, reabre vaga e permite buscar outra", () => {
-    const worked = apply(hired(), { type: "work" }), employment = worked.employment!
+    const worked = workShift(hired()), employment = worked.employment!
     let dismissed = worked
     for (let i = 0; i < 3; i++) dismissed = until(dismissed, nextWeekday(employment.requiredFromDay + i), 841)
     expect(dismissed.employment).toBeNull()
@@ -165,19 +164,17 @@ describe("agenda e consequências profissionais", () => {
     expect(validateWorld({ ...dismissed, employmentHistory: [{ ...dismissed.employmentHistory[0], settledCents: 1 }] }).ok).toBe(false)
   })
   it("sustenta três meses de trabalho, alimentação, sono, decisões e save", () => {
-    let world = createWorld("working-life")
-    for (const vacancy of queryCareer(world).vacancies.filter(item => item.canApply)) {
-      world = apply(world, { type: "apply-job", vacancyId: vacancy.id })
-      if (world.employment) break
-    }
+    let world = hireViaInterviews(createWorld("working-life"))
     expect(world.employment).not.toBeNull()
     for (let steps = 0; world.clock.day < 90 && steps < 2000; steps++) {
-      const decision = queryDecision(world)
-      if (decision) world = apply(world, { type: "decide", decisionId: decision.id, choiceId: decision.choices.filter(choice => choice.canChoose).at(-1)!.id })
+      // uma pessoa pontual: dorme cedo, chega no horário combinado, come entre uma coisa e outra
+      const canWork = queryCareer(world).canWork
+      if (queryDecision(world) || world.work.scene) world = settle(world)
+      else if (canWork && world.clock.minute <= 480 && needs(world).hunger < 75) world = workShift(world)
       else if (needs(world).hunger >= 45) world = apply(world, world.routine.pantryMeals ? { type: "meal", source: "home" } : { type: "buy-groceries" })
-      else if (needs(world).energy < 40 || needs(world).sleepPressure >= 65) world = apply(world, { type: "sleep" })
-      else if (queryCareer(world).canWork) world = apply(world, { type: "work" })
-      else world = apply(world, { type: "wait", minutes: 120 })
+      else if (world.clock.minute >= 1320 || world.clock.minute < 300 || needs(world).energy < 25) world = apply(world, { type: "sleep" })
+      else if (canWork) world = workShift(world)
+      else world = apply(world, { type: "wait", minutes: 60 })
       expect(validateWorld(world)).toMatchObject({ ok: true })
       if (steps % 100 === 0) {
         const loaded = decodeSnapshot(encodeSnapshot(world))

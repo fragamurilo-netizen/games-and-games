@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { companies, fillText, inPlace, placeGender, validateCityContent } from "@paralelo/content"
-import type { EmploymentId, MessageId } from "@paralelo/shared"
-import { absoluteMinute, createWorld, dismissPlayer, inspectEvents, queryLife, inspectPerson, worldStats, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
+import type { MessageId } from "@paralelo/shared"
+import { absoluteMinute, createWorld, dismissPlayer, hirePlayer, inspectEvents, queryLife, inspectPerson, worldStats, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
 
 const apply = (world: WorldState, command: Command): WorldState => {
   const result = executeCommand(world, command)
@@ -87,8 +87,8 @@ describe("mundo vivo", () => {
   it("corte do jogador paga os turnos e fica no histórico como reestruturação", () => {
     const start = createWorld("corte")
     const company = Object.values(start.companies)[0]!
-    const employed: WorldState = { ...start, employment: { id: "employment:99" as EmploymentId, personId: start.playerId, companyId: company.id, roleId: "counter",
-      startedAt: start.clock, lastWorkedDay: null, accruedCents: 12000, shiftsWorked: 2, performance: 60, requiredFromDay: start.clock.day + 1, consecutiveAbsences: 0, lastAssessedDay: null } }
+    const hired = hirePlayer(start, company.id, "counter", null, false)
+    const employed: WorldState = { ...hired, employment: { ...hired.employment!, accruedCents: 12000, shiftsWorked: 2 } }
     const world = dismissPlayer(employed)
     expect(world.employment).toBeNull()
     expect(world.employmentHistory.at(-1)?.reason).toBe("restructure")

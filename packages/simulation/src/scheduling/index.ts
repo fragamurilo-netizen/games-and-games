@@ -19,7 +19,7 @@ export function advance(world: WorldState, target: GameDate, options: { activity
     const previousEntries = next.timeline.length
     next = processScheduled(next, event)
     const workNotice = event.kind === "work-reminder" || event.kind === "work-attendance"
-    if (options.interruptible && ((event.interrupts && (!workNotice || next.timeline.length > previousEntries)) || next.events.pending)) return next
+    if (options.interruptible && ((event.interrupts && (!workNotice || next.timeline.length > previousEntries)) || next.events.pending || next.work.scene)) return next
   }
   return { ...applyElapsed(next, end - absoluteMinute(next.clock), options.activity), clock: fromMinute(end) }
 }

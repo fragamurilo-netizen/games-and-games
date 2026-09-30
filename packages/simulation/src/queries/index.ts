@@ -2,10 +2,11 @@ import { contactAvailability } from "../commands"
 import type { CompanyId, PersonId } from "@paralelo/shared"
 import type { MessageReply, MessageTopic, WorldState } from "../domain/world"
 import { replyReason } from "../systems/city"
+import { competitionFor, familyOf, internalApplicationReason, interviewChoices, prepareReason, promotionGaps, reviewChoices, reviewEvaluation, riskOf, sceneValues } from "../systems/work"
 import { entryWeight, summarizeRoutine, weightRank } from "../timeline"
 import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
-import { courses, inPlace, jobRoles, routineRules } from "@paralelo/content"
+import { courses, fillText, inPlace, interviewTexts, jobRoles, roleCareer, routineRules, workSituations } from "@paralelo/content"
 import { applicationReason, nextWorkTime, workReason } from "../systems/career"
 import { formatMoney } from "../systems/finance"
 import { groceriesReason, mealReason, type MealSource } from "../systems/routine"
@@ -147,30 +148,78 @@ export function queryLife(world: WorldState) {
   }
 }
 
+const tenureText = (days: number): string => {
+  if (days < 7) return days <= 1 ? "Começou agora" : `${days} dias de casa`
+  if (days < 60) return `${Math.floor(days / 7)} ${Math.floor(days / 7) === 1 ? "semana" : "semanas"} de casa`
+  const months = Math.floor(days / 30)
+  return months < 12 ? `${months} meses de casa` : `${Math.floor(months / 12)} ${Math.floor(months / 12) === 1 ? "ano" : "anos"} e ${months % 12} ${months % 12 === 1 ? "mês" : "meses"} de casa`
+}
+const trustText = (trust: number): string => trust >= 80 ? "Confia no seu trabalho e já pede sua opinião." : trust >= 60 ? "A relação profissional é boa." : trust >= 40 ? "A relação é correta, mas ainda sem muita confiança." : "Tem cobrado de perto."
+
+// CARREIRA (bíblia §61): empresa, função, gestor, situação, próximos dias e oportunidades.
 export function queryCareer(world: WorldState) {
-  const role = jobRoles.find(item => item.id === world.employment?.roleId)
+  const e = world.employment
+  const role = jobRoles.find(item => item.id === e?.roleId)
   const next = nextWorkTime(world)
   const waitMinutes = absoluteMinute(next) - absoluteMinute(world.clock)
   const unavailable = workReason(world)
+  const w = e?.workplace
+  const manager = w ? world.people[w.managerId]! : null
+  const situation: string[] = []
+  if (e && w) {
+    if (w.warnings) situation.push("Você está com uma advertência formal. Mais um mês ruim encerra o contrato.")
+    if (e.performance < 40) situation.push("O trabalho caiu nas últimas semanas. Presença, preparo e descanso fazem diferença.")
+    else if (e.performance >= 70) situation.push("Você está dando conta bem do que a função pede.")
+    else situation.push("Você está dando conta das tarefas.")
+    if (w.lateThisMonth >= 2) situation.push(`Neste mês você chegou depois do horário ${w.lateThisMonth} vezes.`)
+    if (e.consecutiveAbsences === 2) situation.push("Duas faltas seguidas. Outra encerra o contrato.")
+    else if (e.consecutiveAbsences === 1) situation.push("Há uma falta registrada. Comparecer ao próximo turno interrompe a sequência.")
+    const mood = companyMood(world, e.companyId)
+    if (mood.includes("corte") || mood.includes("fraco")) situation.push(`Na empresa: ${mood.charAt(0).toLowerCase()}${mood.slice(1)}`)
+  }
+  const agenda: { id: string; date: string; time: string; label: string; kind: "interview" | "review" | "assignment"; prepare: { interviewId: string | null; canPrepare: boolean; reason: string | null; prepared: boolean } | null }[] = []
+  for (const i of world.work.interviews.filter(i => i.status === "scheduled")) {
+    const reason = prepareReason(world, "interview", i.id)
+    agenda.push({ id: i.id, date: formatDate(i.at), time: formatTime(i.at), kind: "interview", label: i.internal ? `Processo interno · ${jobRoles.find(r => r.id === i.roleId)!.title}` : `Entrevista · ${world.companies[i.companyId]!.name}`,
+      prepare: { interviewId: i.id, canPrepare: !reason, reason: i.prepared ? null : reason, prepared: i.prepared } })
+  }
+  if (e && w) {
+    const reason = prepareReason(world, "review")
+    agenda.push({ id: "review", date: formatDate({ day: w.nextReviewDay, minute: 0 }), time: "fim do turno", kind: "review", label: `Conversa do mês com ${manager!.name.split(" ")[0]}`,
+      prepare: { interviewId: null, canPrepare: !reason, reason: w.prepared ? null : reason, prepared: w.prepared } })
+    if (w.assignment) agenda.push({ id: "assignment", date: formatDate({ day: w.assignment.dueDay, minute: 0 }), time: "prazo", kind: "assignment",
+      label: `Entrega: ${w.assignment.title} · ${w.assignment.progress} de ${w.assignment.needed} partes`, prepare: null })
+  }
+  agenda.sort((a, b) => (a.kind === "interview" ? 0 : 1) - (b.kind === "interview" ? 0 : 1))
+  const p = w?.promotion
+  const promotionReason = internalApplicationReason(world)
+  const nextRoleId = e ? roleCareer[e.roleId]?.next ?? null : null
   return {
-    employment: world.employment && role ? { company: world.companies[world.employment.companyId]!.name, title: role.title,
-      salary: formatMoney(role.salaryCents), accrued: formatMoney(world.employment.accruedCents), shifts: world.employment.shiftsWorked,
-      started: formatDate(world.employment.startedAt), performance: world.employment.performance < 40 ? "Seu desempenho caiu. Presença, preparo e condições para trabalhar fazem diferença." : "Você está dando conta das tarefas.",
-      presence: world.employment.consecutiveAbsences === 2 ? "Você recebeu uma advertência. Outra falta seguida encerra o contrato."
-        : world.employment.consecutiveAbsences === 1 ? "Há uma falta registrada. Comparecer ao próximo turno interrompe a sequência."
-        : `A presença é cobrada a partir de ${formatDate({ day: world.employment.requiredFromDay, minute: 0 })}.`,
-      warning: world.employment.consecutiveAbsences > 0 } : null,
+    employment: e && role && w && manager ? { company: world.companies[e.companyId]!.name, title: role.title,
+      salary: formatMoney(w.salaryCents), accrued: formatMoney(e.accruedCents), shifts: e.shiftsWorked, tenure: tenureText(world.clock.day - e.startedAt.day),
+      schedule: "Segunda a sexta · chegada até 8h30, 8 horas",
+      started: formatDate(e.startedAt), performance: situation[0] ?? "", presence: e.consecutiveAbsences === 2 ? "Você recebeu uma advertência. Outra falta seguida encerra o contrato."
+        : e.consecutiveAbsences === 1 ? "Há uma falta registrada. Comparecer ao próximo turno interrompe a sequência."
+        : `A presença é cobrada a partir de ${formatDate({ day: e.requiredFromDay, minute: 0 })}.`,
+      warning: w.warnings > 0 || e.consecutiveAbsences > 0, situation,
+      manager: { id: manager.id, name: manager.name, age: ageAt(manager.birthDate, world.clock), appearance: { seed: manager.appearanceSeed, sex: manager.sex }, relation: trustText(w.trust) },
+      next: nextRoleId ? { title: jobRoles.find(r => r.id === nextRoleId)!.title, gaps: promotionGaps(world) } : null } : null,
+    agenda,
+    promotion: p && e ? { title: jobRoles.find(r => r.id === p.roleId)!.title, company: world.companies[e.companyId]!.name, until: formatDate({ day: p.untilDay, minute: 0 }), canApply: !promotionReason, reason: promotionReason } : null,
     history: [...world.employmentHistory].reverse().map(record => ({ id: record.id, company: world.companies[record.companyId]!.name, title: jobRoles.find(role => role.id === record.roleId)!.title,
-      ended: formatDate(record.endedAt), settlement: formatMoney(record.settledCents), reason: record.reason === "restructure" ? "Posto cortado quando a empresa enfrentou semanas fracas." : "Contrato encerrado após três faltas seguidas." })),
-    companyMood: world.employment ? companyMood(world, world.employment.companyId) : null,
+      ended: formatDate(record.endedAt), settlement: formatMoney(record.settledCents),
+      reason: record.reason === "restructure" ? "Posto cortado quando a empresa enfrentou semanas fracas." : record.reason === "performance" ? "Contrato encerrado depois de duas conversas difíceis seguidas." : "Contrato encerrado após três faltas seguidas." })),
+    companyMood: e ? companyMood(world, e.companyId) : null,
     canWork: !unavailable, unavailableReason: unavailable,
     nextWork: { date: formatDate(next), time: formatTime(next), waitMinutes: Math.max(0, Math.min(10080, waitMinutes)) },
     vacancies: Object.values(world.vacancies).filter(v => v.open).map(v => {
       const definition = jobRoles.find(item => item.id === v.roleId)!
       const reason = applicationReason(world, v.id)
       const tip = world.inbox.find(m => m.topic === "job-tip" && m.vacancyId === v.id && m.status === "answered")
+      const rivals = competitionFor(world, v.roleId)
       return { id: v.id, title: definition.title, company: world.companies[v.companyId]!.name, salary: formatMoney(definition.salaryCents), canApply: !reason, reason,
         referral: tip ? `Com indicação de ${world.people[tip.fromId]!.name.split(" ")[0]}` : null,
+        competition: rivals >= 6 ? "Muita gente procurando esse tipo de vaga." : rivals >= 3 ? "Há concorrência." : "Pouca concorrência.",
         preparation: definition.skill === "organization" ? "Organização" : "Comunicação" }
     }),
     courses: courses.map(course => {
@@ -180,6 +229,37 @@ export function queryCareer(world: WorldState) {
       return { id, title: course.title, institution: course.institution, price: formatMoney(course.priceCents), progress: `${progress.sessions} de ${course.sessions} aulas`, canStudy: !reason, reason }
     }),
   }
+}
+
+/** A cena de trabalho em curso, pronta para a tela (bíblia §7: situação, pessoas, custos, risco em palavras). */
+export function queryWorkScene(world: WorldState) {
+  const scene = world.work.scene
+  if (!scene) return null
+  const values = sceneValues(world, scene)
+  const actor = scene.actorId ? world.people[scene.actorId]! : null
+  const e = world.employment
+  const actorRole = !actor ? null : scene.kind !== "shift" || actor.id === e?.workplace.managerId ? "Responde pela equipe" : "Colega de equipe"
+  const base = { id: scene.id, kind: scene.kind, time: formatTime(scene.at), actor: actor ? { id: actor.id, name: actor.name, age: ageAt(actor.birthDate, world.clock), appearance: { seed: actor.appearanceSeed, sex: actor.sex }, role: actorRole } : null }
+  if (scene.kind === "shift") {
+    const situation = workSituations.find(s => s.id === scene.situationId)!
+    const skill = jobRoles.find(r => r.id === e!.roleId)!.skill
+    return { ...base, title: `No turno · ${values.company}`, text: [fillText(situation.text, values)],
+      choices: situation.choices.map(c => {
+        const cost = [c.minutes ? `+${c.minutes} min` : null, c.success.effect.moneyCents ? formatMoney(-c.success.effect.moneyCents) : null].filter(Boolean).join(", ")
+        const money = -(c.success.effect.moneyCents ?? 0)
+        const reason = money > 0 && world.finance.balanceCents < money ? "Não há saldo para isso agora." : null
+        return { id: c.id, label: fillText(c.label, values), meta: cost || null, hint: riskOf(world, c, skill).hint, canChoose: !reason, reason }
+      }) }
+  }
+  if (scene.kind === "review") {
+    return { ...base, title: "Conversa do mês", text: reviewEvaluation(world).facts,
+      choices: reviewChoices(world).map(c => ({ id: c.id, label: c.label, meta: null, hint: null, canChoose: c.available, reason: c.reason })) }
+  }
+  const interview = world.work.interviews.find(i => i.id === scene.interviewId)!
+  const intro = interview.internal ? interviewTexts.internal : interviewTexts.intro[familyOf(interview.roleId)]
+  return { ...base, title: interview.internal ? "Processo interno" : `Entrevista · ${values.company}`,
+    text: [fillText(intro, values), interview.prepared ? "Você chegou com as respostas ensaiadas." : "Você não teve tempo de se preparar."],
+    choices: interviewChoices(world, interview).map(c => ({ id: c.id, label: c.label, meta: null, hint: riskOf(world, c, c.skill).hint, canChoose: true, reason: null })) }
 }
 
 export function queryRoutine(world: WorldState) {

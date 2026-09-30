@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 import { courses, jobRoles, validateStarterContent } from "@paralelo/content"
 import type { CourseId } from "@paralelo/shared"
-import { absoluteMinute, createWorld, executeCommand, queryCareer, queryDecision, validateWorld, worldHash, type Command, type WorldState } from "."
+import { absoluteMinute, createWorld, executeCommand, queryDecision, validateWorld, worldHash, type Command, type WorldState } from "."
+import { hireViaInterviews, settle, workShift } from "./test-support"
 
 function apply(world: WorldState, command: Command): WorldState {
   const result = executeCommand(world, command)
@@ -10,21 +11,12 @@ function apply(world: WorldState, command: Command): WorldState {
 }
 function waitUntil(world: WorldState, minute: number): WorldState {
   while (absoluteMinute(world.clock) < minute) {
-    const pending = queryDecision(world)
-    const choice = pending?.choices.at(-1)
-    world = pending && choice ? apply(world, { type: "decide", decisionId: pending.id, choiceId: choice.id })
+    world = queryDecision(world) || world.work.scene ? settle(world)
       : apply(world, { type: "wait", minutes: Math.min(10080, minute - absoluteMinute(world.clock)) })
   }
   return world
 }
-function hired(seed = "work"): WorldState {
-  let world = createWorld(seed)
-  for (const vacancy of queryCareer(world).vacancies.filter(v => v.canApply)) {
-    world = apply(world, { type: "apply-job", vacancyId: vacancy.id })
-    if (world.employment) return world
-  }
-  throw new Error("Seed de teste não conseguiu emprego.")
-}
+const hired = (seed = "work"): WorldState => hireViaInterviews(createWorld(seed))
 describe("carreira, educação, dinheiro e autonomia", () => {
   it("valida conteúdo e cria entidades estáveis de uma cidade com 100 pessoas", () => {
     const world = createWorld("city")
@@ -47,7 +39,9 @@ describe("carreira, educação, dinheiro e autonomia", () => {
   })
   it("registra turno uma só vez e conserva salário devido mesmo após faltas", () => {
     const start = hired()
-    const worked = apply(start, { type: "work" })
+    // descansa na véspera e chega às 6h do primeiro dia de trabalho
+    const ready = apply(waitUntil(start, start.employment!.requiredFromDay * 1440 - 120), { type: "sleep" })
+    const worked = workShift(ready)
     expect(worked.employment?.shiftsWorked).toBe(1)
     expect(executeCommand(worked, { type: "work" }).ok).toBe(false)
     const salary = Math.round(jobRoles.find(r => r.id === worked.employment!.roleId)!.salaryCents / 20)

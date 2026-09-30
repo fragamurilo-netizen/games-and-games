@@ -1,4 +1,4 @@
-import type { CompanyId, CourseId, DecisionId, EmploymentId, HouseholdId, LedgerId, MemoryId, MessageId, NewsId, PersonId, RelationshipId, ResidenceId, ScheduleId, TimelineId, VacancyId } from "@paralelo/shared"
+import type { CompanyId, CourseId, DecisionId, EmploymentId, HouseholdId, InterviewId, LedgerId, MemoryId, MessageId, NewsId, PersonId, RelationshipId, ResidenceId, SceneId, ScheduleId, TimelineId, VacancyId } from "@paralelo/shared"
 import type { RngState } from "../rng"
 
 // Dia 0 = 05/01/2026. Minutos inteiros; nenhum tempo de sistema no domínio.
@@ -45,8 +45,9 @@ export type TimelineEntry = Readonly<{
 export type ScheduledEvent = Readonly<{
   id: ScheduleId
   at: GameDate
-  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance" | "daily-city" | "weekly-economy"
+  kind: "mother-message" | "daily-social" | "monthly-finance" | "daily-events" | "event-followup" | "work-reminder" | "work-attendance" | "daily-city" | "weekly-economy" | "interview" | "interview-result"
   employmentId?: EmploymentId
+  interviewId?: InterviewId
   eventId?: string
   actorId?: PersonId | null
   personId: PersonId
@@ -64,6 +65,9 @@ export type Command =
   | Readonly<{ type: "study"; courseId: CourseId }>
   | Readonly<{ type: "decide"; decisionId: DecisionId; choiceId: string }>
   | Readonly<{ type: "reply"; messageId: MessageId; reply: MessageReply }>
+  | Readonly<{ type: "work-choice"; sceneId: SceneId; choiceId: string }>
+  | Readonly<{ type: "prepare"; target: "review" } | { type: "prepare"; target: "interview"; interviewId: InterviewId }>
+  | Readonly<{ type: "apply-internal" }>
 export type CommandRecord = Readonly<{ revision: number; at: GameDate; command: Command }>
 export type WorldStateV1 = Readonly<{
   schemaVersion: 1
@@ -88,7 +92,7 @@ export type Company = Readonly<{ id: CompanyId; name: string; district: string }
 export type Vacancy = Readonly<{ id: VacancyId; companyId: CompanyId; roleId: string; open: boolean }>
 export type EmploymentV3 = Readonly<{ id: EmploymentId; personId: PersonId; companyId: CompanyId; roleId: string; startedAt: GameDate; lastWorkedDay: number | null; accruedCents: number; shiftsWorked: number; performance: number }>
 export type Employment = EmploymentV3 & Readonly<{ requiredFromDay: number; consecutiveAbsences: number; lastAssessedDay: number | null }>
-export type EmploymentRecord = Readonly<{ id: EmploymentId; companyId: CompanyId; roleId: string; startedAt: GameDate; endedAt: GameDate; reason: "absence" | "restructure"; settledCents: number }>
+export type EmploymentRecord = Readonly<{ id: EmploymentId; companyId: CompanyId; roleId: string; startedAt: GameDate; endedAt: GameDate; reason: "absence" | "restructure" | "performance"; settledCents: number }>
 export type LedgerEntry = Readonly<{ id: LedgerId; at: GameDate; amountCents: number; category: "salary" | "rent" | "food" | "education" | "event"; text: string; cause: string }>
 export type Memory = Readonly<{ id: MemoryId; at: GameDate; personId: PersonId; otherId: PersonId; text: string; salience: number; cause: string }>
 export type WorldStateV2 = Omit<WorldStateV1, "schemaVersion"> & Readonly<{
@@ -133,10 +137,52 @@ export type NewsItem = Readonly<{ id: NewsId; at: GameDate; section: NewsSection
 export type MessageTopic = "checkin" | "hired" | "dismissed" | "job-tip" | "worry"
 export type MessageReply = "answer" | "call" | "later"
 export type Message = Readonly<{ id: MessageId; at: GameDate; fromId: PersonId; topic: MessageTopic; text: string; expiresAt: GameDate; status: "unread" | "answered" | "ignored"; postponed: boolean; vacancyId: VacancyId | null }>
-export type WorldState = Omit<WorldStateV5, "schemaVersion"> & Readonly<{
+export type WorldStateV6 = Omit<WorldStateV5, "schemaVersion"> & Readonly<{
   schemaVersion: 6
   residents: Readonly<Record<string, Resident>>
   economy: Readonly<Record<string, CompanyEconomy>>
   news: readonly NewsItem[]
   inbox: readonly Message[]
+}>
+
+// ---- Trabalho vivido (v7): gestor, confiança, turno com situações, avaliação, entrevistas (bíblia §15, §61) ----
+export type Assignment = Readonly<{ templateId: string; title: string; givenDay: number; dueDay: number; needed: number; progress: number }>
+export type Workplace = Readonly<{
+  managerId: PersonId
+  /** confiança profissional de quem responde pela equipe, 0–100 */
+  trust: number
+  salaryCents: number
+  totalShifts: number
+  lateThisMonth: number
+  absencesThisMonth: number
+  warnings: number
+  lateToday: boolean
+  assignment: Assignment | null
+  delivered: number
+  missed: number
+  nextReviewDay: number
+  prepared: boolean
+  recentSituations: readonly string[]
+  promotion: Readonly<{ roleId: string; untilDay: number; applied: boolean }> | null
+}>
+export type EmploymentV7 = Employment & Readonly<{ workplace: Workplace }>
+export type InterviewStatus = "scheduled" | "awaiting" | "passed" | "failed" | "missed" | "canceled"
+export type Interview = Readonly<{ id: InterviewId; vacancyId: VacancyId | null; companyId: CompanyId; roleId: string; internal: boolean; at: GameDate; prepared: boolean; status: InterviewStatus; score: number | null }>
+export type WorkScene = Readonly<{
+  id: SceneId
+  kind: "shift" | "review" | "interview"
+  situationId: string
+  at: GameDate
+  actorId: PersonId | null
+  interviewId: InterviewId | null
+  /** minutos de turno que faltam depois da cena */
+  remainingMinutes: number
+  shiftDay: number | null
+}>
+export type WorldState = Omit<WorldStateV6, "schemaVersion" | "employment"> & Readonly<{
+  schemaVersion: 7
+  employment: EmploymentV7 | null
+  /** quem responde pela equipe em cada empresa (bíblia §15.1) */
+  leaders: Readonly<Record<string, PersonId>>
+  work: Readonly<{ scene: WorkScene | null; interviews: readonly Interview[] }>
 }>

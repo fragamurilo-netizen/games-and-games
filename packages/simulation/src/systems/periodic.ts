@@ -10,11 +10,13 @@ import { updateRelationship } from "./relationships"
 import { processLifeEvent } from "./events"
 import { processWorkEvent } from "./career"
 import { processDailyCity, processWeeklyEconomy } from "./city"
+import { processInterviewEvent } from "./work"
 
 export function processScheduled(world: WorldState, event: ScheduledEvent): WorldState {
   if (event.kind === "work-reminder" || event.kind === "work-attendance") return processWorkEvent(world, event)
   if (event.kind === "daily-events" || event.kind === "event-followup") return processLifeEvent(world, event)
   if (event.kind === "daily-city") return processDailyCity(world, event)
+  if (event.kind === "interview" || event.kind === "interview-result") return processInterviewEvent(world, event)
   if (event.kind === "weekly-economy") return processWeeklyEconomy(world, event)
   if (event.kind === "mother-message") return appendEntry(world, { at: world.clock, kind: "message", text: starterContent.reminder, personIds: [event.personId], cause: event.id })
   if (event.kind === "monthly-finance") {

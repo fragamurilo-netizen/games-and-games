@@ -3,9 +3,10 @@ import type { Command, WorldState } from "../domain/world"
 import { draw } from "../rng"
 import { absoluteMinute, addMinutes } from "../time"
 import { advance, appendEntry } from "../scheduling"
-import { courses, lifeEvents, routineRules } from "@paralelo/content"
+import { courses, lifeEvents, routineRules, workRules, workSituations } from "@paralelo/content"
 import { choiceReason, resolveDecision } from "../systems/events"
-import { applicationReason, applyForJob, completeShift, workReason } from "../systems/career"
+import { applicationReason, applyForJob, workReason } from "../systems/career"
+import { appointmentConflict, applyInternal, checkIn, finishShift, interviewChoices, internalApplicationReason, openShiftScene, prepare, prepareReason, resolveInterviewChoice, resolveReview, resolveShiftChoice, reviewChoices } from "../systems/work"
 import { postLedger } from "../systems/finance"
 import { remember } from "../systems/memory"
 import { updateRelationship } from "../systems/relationships"
@@ -25,6 +26,12 @@ export function contactAvailability(world: WorldState, personId: PersonId): Comm
 }
 export function executeCommand(world: WorldState, command: Command): Result<WorldState, CommandError> {
   if (world.events.pending && command.type !== "decide") return err({ code: "pending-decision", message: "Uma decisão espera sua resposta na área VIDA." })
+  if (!world.events.pending && world.work.scene && command.type !== "work-choice") return err({ code: "pending-decision", message: "Uma situação no trabalho espera sua resposta." })
+  // compromissos marcados não são atravessados por ações longas (a espera para neles)
+  const busyFor = (minutes: number): Result<never, CommandError> | null => {
+    const conflict = appointmentConflict(world, minutes)
+    return conflict ? err({ code: "unavailable", message: conflict }) : null
+  }
   let next: WorldState
   switch (command.type) {
     case "decide": {
@@ -44,11 +51,13 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       break
     }
     case "rest": {
+      { const b = busyFor(120); if (b) return b }
       next = advance(world, addMinutes(world.clock, 120), { activity: "rest" })
       next = appendEntry(next, { at: next.clock, kind: "action", text: "Você deixou as tarefas de lado e descansou por duas horas.", personIds: [world.playerId], cause: "command.rest" })
       break
     }
     case "sleep": {
+      { const b = busyFor(480); if (b) return b }
       next = advance(world, addMinutes(world.clock, 480), { activity: "sleep" })
       next = appendEntry(next, { at: next.clock, kind: "action", text: "Você dormiu oito horas e retomou o dia depois de acordar.", personIds: [world.playerId], cause: "command.sleep" })
       break
@@ -57,29 +66,72 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       const source = command.source ?? "restaurant"
       const reason = mealReason(world, source)
       if (reason) return err({ code: source === "restaurant" && world.finance.balanceCents < 1800 ? "insufficient-money" : "unavailable", message: reason })
+      { const b = busyFor(routineRules.meals[source].minutes); if (b) return b }
       next = finishMeal(advance(world, addMinutes(world.clock, routineRules.meals[source].minutes)), source, world.clock.day)
       break
     }
     case "buy-groceries": {
       const reason = groceriesReason(world)
       if (reason) return err({ code: world.finance.balanceCents < routineRules.groceries.priceCents ? "insufficient-money" : "unavailable", message: reason })
+      { const b = busyFor(routineRules.groceries.minutes); if (b) return b }
       next = finishGroceries(advance(world, addMinutes(world.clock, routineRules.groceries.minutes)))
       break
     }
     case "apply-job": {
       const reason = applicationReason(world, command.vacancyId)
       if (reason) return err({ code: "unavailable", message: reason })
+      { const b = busyFor(30); if (b) return b }
       next = applyForJob(advance(world, addMinutes(world.clock, 30)), command.vacancyId)
       break
     }
     case "work": {
       const reason = workReason(world)
       if (reason) return err({ code: "unavailable", message: reason })
-      // Turno iniciado em uma data; o scheduler conserva todos os fatos no intervalo.
-      // Presença registrada no início: a cobrança das 14h01 pode ocorrer durante
-      // o turno. O comando inteiro só é publicado depois do save bem-sucedido.
-      const checkedIn = { ...world, employment: { ...world.employment!, lastWorkedDay: world.clock.day } }
-      next = completeShift(advance(checkedIn, addMinutes(world.clock, routineRules.work.shiftMinutes)), world.clock.day)
+      { const b = busyFor(routineRules.work.shiftMinutes); if (b) return b }
+      // Presença registrada na chegada: a cobrança das 14h01 pode ocorrer durante o turno.
+      // No meio do turno acontece um momento em que você decide como agir (bíblia §7, §46).
+      const shiftDay = world.clock.day
+      next = advance(checkIn(world), addMinutes(world.clock, workRules.momentAfterMinutes))
+      if (next.employment?.lastWorkedDay === shiftDay && !next.work.scene)
+        next = openShiftScene(next, routineRules.work.shiftMinutes - workRules.momentAfterMinutes, shiftDay)
+      break
+    }
+    case "work-choice": {
+      const scene = world.work.scene
+      if (!scene || scene.id !== command.sceneId) return err({ code: "unavailable", message: "Essa situação já passou." })
+      if (scene.kind === "shift") {
+        const choice = workSituations.find(s => s.id === scene.situationId)?.choices.find(c => c.id === command.choiceId)
+        if (!choice) return err({ code: "unavailable", message: "Esta escolha não existe." })
+        const cost = -(choice.success.effect.moneyCents ?? 0)
+        if (cost > 0 && world.finance.balanceCents < cost) return err({ code: "insufficient-money", message: "Não há saldo para isso agora." })
+        const resolved = resolveShiftChoice(world, choice)
+        next = advance(resolved.world, addMinutes(world.clock, resolved.minutes))
+        if (next.employment && scene.shiftDay !== null && next.employment.lastWorkedDay === scene.shiftDay) next = finishShift(next, scene.shiftDay)
+      } else if (scene.kind === "review") {
+        const choice = reviewChoices(world).find(c => c.id === command.choiceId)
+        if (!choice) return err({ code: "unavailable", message: "Esta escolha não existe." })
+        if (!choice.available) return err({ code: "unavailable", message: choice.reason ?? "Isso não cabe nesta conversa." })
+        next = advance(resolveReview(world, choice.id), addMinutes(world.clock, 20))
+      } else {
+        const interview = world.work.interviews.find(i => i.id === scene.interviewId)
+        const choice = interview ? interviewChoices(world, interview).find(c => c.id === command.choiceId) : undefined
+        if (!choice) return err({ code: "unavailable", message: "Esta escolha não existe." })
+        next = advance(resolveInterviewChoice(world, choice.id), addMinutes(world.clock, scene.remainingMinutes))
+      }
+      break
+    }
+    case "prepare": {
+      const interviewId = command.target === "interview" ? command.interviewId : undefined
+      const reason = prepareReason(world, command.target, interviewId)
+      if (reason) return err({ code: "unavailable", message: reason })
+      { const b = busyFor(workRules.prepareMinutes); if (b) return b }
+      next = prepare(advance(world, addMinutes(world.clock, workRules.prepareMinutes)), command.target, interviewId)
+      break
+    }
+    case "apply-internal": {
+      const reason = internalApplicationReason(world)
+      if (reason) return err({ code: "unavailable", message: reason })
+      next = applyInternal(advance(world, addMinutes(world.clock, 15)))
       break
     }
     case "study": {
@@ -89,6 +141,7 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
       if (training.lastStudiedDay === world.clock.day) return err({ code: "cooldown", message: "Você já fez a aula de hoje. Pratique de novo amanhã." })
       if (world.finance.balanceCents < course.priceCents) return err({ code: "insufficient-money", message: "Não há saldo suficiente para esta aula." })
       if (world.people[world.playerId]!.needs.energy < 15) return err({ code: "exhausted", message: "Descanse antes de estudar." })
+      { const b = busyFor(120); if (b) return b }
       next = advance(world, addMinutes(world.clock, 120))
       next = postLedger(next, { amountCents: -course.priceCents, category: "education", text: `Aula · ${course.title}`, cause: `education:${command.courseId}` })
       const skills = next.skills[next.playerId]!, sessions = training.sessions + 1
@@ -99,6 +152,7 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
     case "contact": {
       const unavailable = contactAvailability(world, command.personId)
       if (unavailable) return err(unavailable)
+      { const b = busyFor(30); if (b) return b }
       const rel = Object.values(world.relationships).find(r => (r.a === world.playerId && r.b === command.personId) || (r.b === world.playerId && r.a === command.personId))!
       const roll = draw(world.seed, world.rng, "relationship")
       const answered = roll.value < .55 + rel.trust / 250
@@ -121,6 +175,7 @@ export function executeCommand(world: WorldState, command: Command): Result<Worl
     case "reply": {
       const reason = replyReason(world, command.messageId, command.reply)
       if (reason) return err({ code: "unavailable", message: reason })
+      { const b = busyFor(command.reply === "call" ? 30 : 15); if (b) return b }
       const from = world.inbox.find(m => m.id === command.messageId)!.fromId
       if (command.reply === "call") {
         const unavailable = contactAvailability(world, from)

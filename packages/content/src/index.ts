@@ -2,6 +2,7 @@
 // Conteúdo inicial da fundação, sem lógica de simulação.
 export * from "./events"
 export * from "./routine"
+export * from "./work"
 export const starterContent = {
   city: "Santa Aurora",
   district: "Vila das Flores",

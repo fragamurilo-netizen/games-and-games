@@ -39,13 +39,13 @@ export function processLifeEvent(world: WorldState, item: ScheduledEvent): World
   if (item.kind === "event-followup") {
     const definition = lifeEvents.find(event => event.id === item.eventId)
     if (!definition || world.events.seen.includes(definition.id)) return world
-    if (world.events.pending || world.events.lastOfferedDay === world.clock.day)
+    if (world.events.pending || world.work.scene || world.events.lastOfferedDay === world.clock.day)
       return { ...world, scheduled: [...world.scheduled, { ...item, at: { day: world.clock.day + 1, minute: 1140 } }] }
     if (!eligibleEvent(world, definition)) return appendEntry(world, { at: world.clock, kind: "decision", text: `A oportunidade de ${definition.title.toLowerCase()} passou; seu dia tomou outro rumo.`, personIds: [world.playerId], cause: `event.expired:${definition.id}` })
     return offer(world, definition, item.actorId ?? actorFor(world, definition))
   }
   let next: WorldState = { ...world, scheduled: [...world.scheduled, { ...item, at: { day: world.clock.day + 1, minute: 1140 } }] }
-  if (world.events.pending || (world.events.lastOfferedDay !== null && world.clock.day - world.events.lastOfferedDay < 3)) return next
+  if (world.events.pending || world.work.scene || (world.events.lastOfferedDay !== null && world.clock.day - world.events.lastOfferedDay < 3)) return next
   const eligible = lifeEvents.filter(event => event.root && !world.events.seen.includes(event.id) && eligibleEvent(world, event))
   if (!eligible.length) return next
   const roll = draw(world.seed, world.rng, "event")

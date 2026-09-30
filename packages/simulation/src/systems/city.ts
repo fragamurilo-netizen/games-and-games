@@ -7,7 +7,7 @@ import { cityRules, fillText, jobRoles, messageTexts, newsTexts, replyTexts } fr
 import type { CompanyId, MessageId, NewsId, PersonId, RelationshipId, ScheduleId, VacancyId } from "@paralelo/shared"
 import type {
   AiDecision, CompanyEconomy, Goal, Message, MessageReply, MessageTopic, NewsItem, NewsSection, Relationship,
-  RelationshipTag, Resident, ScheduledEvent, WorldState, WorldStateV5,
+  RelationshipTag, Resident, ScheduledEvent, WorldState, WorldStateV5, WorldStateV6,
 } from "../domain/world"
 import { hashText } from "../rng"
 import { absoluteMinute, addMinutes, ageAt, formatDate } from "../time"
@@ -16,6 +16,7 @@ import { formatMoney, postLedger } from "./finance"
 import { remember } from "./memory"
 import { changeNeeds } from "./needs"
 import { updateRelationship } from "./relationships"
+import { ensureLeaders } from "./work"
 
 const chance = (world: { seed: string }, key: string): number => hashText(`${world.seed}/city/${key}`) / 4294967296
 const clamp = (v: number, lo = 0, hi = 1): number => Math.max(lo, Math.min(hi, v))
@@ -34,7 +35,7 @@ function nextMonday(day: number): number {
 
 // v5 -> v6: acrescenta emprego e objetivos dos moradores, economia das empresas, vizinhos e
 // amizades entre pessoas próximas. Usa uma namespace própria; não consome RNG salvo.
-export function upgradeWorldV5(base: WorldStateV5): WorldState {
+export function upgradeWorldV5(base: WorldStateV5): WorldStateV6 {
   const value = (key: string): number => hashText(`${base.seed}/city-v6/${key}`) / 4294967296
   const companyIds = Object.keys(base.companies).sort() as CompanyId[]
   const residents: Record<string, Resident> = {}
@@ -153,7 +154,7 @@ export function processWeeklyEconomy(world: WorldState, event: ScheduledEvent): 
     const trend = clamp(before.trend * 0.7 + (chance(next, `trend/${companyId}/${day}`) - 0.5) * 0.14, -0.12, 0.12)
     const health = +clamp(before.health + trend * 0.5 + (0.55 - before.health) * 0.04, 0.05, 0.95).toFixed(3)
     const weakWeeks = health < 0.3 ? before.weakWeeks + 1 : 0
-    next = { ...next, economy: { ...next.economy, [companyId]: { health, trend: +trend.toFixed(3), weakWeeks } } }
+    next = { ...next, economy: { ...next.economy, [companyId]: { health, trend: +trend.toFixed(3) || 0, weakWeeks } } }
     const values = { company: company.name, district: company.district }
     if (before.health >= 0.35 && health < 0.35) {
       next = publish(next, "negocios", newsTexts.weak, values, companyId, [], `economy.weak:${companyId}:${day}`)
@@ -181,6 +182,8 @@ export function processWeeklyEconomy(world: WorldState, event: ScheduledEvent): 
       next = publish(next, "trabalho", newsTexts.opening, { ...values, role: role.title.toLowerCase() }, companyId, [], `economy.opening:${id}`)
     }
   }
+  // quem saiu pode ter sido a pessoa que respondia pela equipe
+  next = ensureLeaders(next)
   return { ...next, scheduled: [...next.scheduled, { ...event, at: { day: nextMonday(day), minute: cityRules.weeklyEconomyMinute } }] }
 }
 
@@ -259,9 +262,12 @@ function pruneTimeline(world: WorldState): WorldState["timeline"] {
 
 // vaga fechada some do mercado; só fica registrada se o jogador se candidatou ou se uma mensagem cita
 function pruneVacancies(world: WorldState): WorldState["vacancies"] {
-  const kept = new Set<string>([...world.applications.map(a => a.vacancyId), ...world.inbox.flatMap(m => (m.vacancyId ? [m.vacancyId] : []))])
+  const kept = new Set<string>([...world.applications.map(a => a.vacancyId), ...world.inbox.flatMap(m => (m.vacancyId ? [m.vacancyId] : [])),
+    ...world.work.interviews.flatMap(i => (i.vacancyId ? [i.vacancyId] : []))])
+  const e = world.employment
   const vacancies: Record<string, WorldState["vacancies"][string]> = {}
-  for (const [id, v] of Object.entries(world.vacancies)) if (v.open || kept.has(id)) vacancies[id] = v
+  // o posto do contrato atual continua registrado como ocupado
+  for (const [id, v] of Object.entries(world.vacancies)) if (v.open || kept.has(id) || (e && v.companyId === e.companyId && v.roleId === e.roleId)) vacancies[id] = v
   return vacancies
 }
 
@@ -279,7 +285,9 @@ function residentTurn(world: WorldState, id: PersonId, close: boolean): WorldSta
   const skills = world.skills[id]
   if (goal && (goal.kind === "find-job" || goal.kind === "change-job") && skills) {
     const urgency = goal.kind === "find-job" ? 0.8 : 0.45
-    for (const v of Object.values(world.vacancies).filter(v => v.open && v.companyId !== r.job?.companyId).sort((a, b) => (a.id < b.id ? -1 : 1))) {
+    // vaga com entrevista do jogador marcada fica em processo até a resposta
+    const reserved = new Set(world.work.interviews.filter(i => i.status === "scheduled" || i.status === "awaiting").map(i => i.vacancyId))
+    for (const v of Object.values(world.vacancies).filter(v => v.open && v.companyId !== r.job?.companyId && !reserved.has(v.id)).sort((a, b) => (a.id < b.id ? -1 : 1))) {
       const role = jobRoles.find(x => x.id === v.roleId)!
       const skill = skills[role.skill]
       if (skill < role.required * 0.8) continue
@@ -312,7 +320,7 @@ function residentTurn(world: WorldState, id: PersonId, close: boolean): WorldSta
   const chosen = options[0]!
   let next = chosen.run()
   if (close) {
-    const decision: AiDecision = { at: world.clock, goal: goal?.kind ?? null, options: options.slice(0, 5).map(o => ({ action: o.action, score: +o.score.toFixed(3) })), chosen: chosen.action }
+    const decision: AiDecision = { at: world.clock, goal: goal?.kind ?? null, options: options.slice(0, 5).map(o => ({ action: o.action, score: +o.score.toFixed(3) || 0 })), chosen: chosen.action }
     next = withResident(next, { lastDecision: decision })
   }
   return next

@@ -140,7 +140,7 @@ export function validateCityContent(): string[] {
   return errors
 }
 
-export function fillText(template: string, values: Readonly<Partial<Record<"name" | "first" | "company" | "role" | "district", string>>>): string {
+export function fillText(template: string, values: Readonly<Record<string, string | undefined>>): string {
   const agreed = template.replace(CONTRACTION, (all, before: string, word: string, key: "company" | "district") => {
     const name = values[key]
     if (!name || placeGender[name] !== "o") return all

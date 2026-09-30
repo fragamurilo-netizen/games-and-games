@@ -6,11 +6,12 @@ import { upgradeWorldV2 } from "./systems/events"
 import { upgradeWorldV3 } from "./systems/routine"
 import { upgradeWorldV4 } from "./systems/appearance"
 import { upgradeWorldV5 } from "./systems/city"
+import { upgradeWorldV6 } from "./systems/work"
 import { createRng, draw } from "./rng"
 import { dayFromCalendar } from "./time"
 
 export function createWorld(seed: string): WorldState {
-  return upgradeWorldV5(createWorldV5(seed))
+  return upgradeWorldV6(upgradeWorldV5(createWorldV5(seed)))
 }
 
 /** Mundo como era gerado no save v5; serve às migrações e aos testes delas. */
