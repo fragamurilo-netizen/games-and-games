@@ -44,7 +44,11 @@ export function upgradeWorldV5(base: WorldStateV5): WorldState {
     const adult = age >= 18 && age <= 64
     const employed = adult && value(`${person.id}/employed`) < cityRules.employedShare
     const companyId = companyIds[Math.floor(value(`${person.id}/company`) * companyIds.length)]!
-    const role = jobRoles[Math.floor(value(`${person.id}/role`) * jobRoles.length)]!
+    // cada um trabalha em algo que o próprio preparo sustenta
+    const skills = base.skills[person.id]
+    const fit = skills ? jobRoles.filter(r => skills[r.skill] >= r.required * 0.8) : []
+    const pool = fit.length ? fit : jobRoles.filter(r => r.required <= 0.15)
+    const role = pool[Math.floor(value(`${person.id}/role`) * pool.length)]!
     residents[person.id] = {
       job: employed ? { companyId, roleId: role.id, since: { day: base.clock.day - Math.floor(value(`${person.id}/since`) * 1500), minute: 480 }, satisfaction: Math.round(40 + value(`${person.id}/sat`) * 40) } : null,
       goal: null, lastDecision: null, lastAppliedDay: null, lastMessagedDay: null,
@@ -109,17 +113,40 @@ const roleTitle = (roleId: string): string => jobRoles.find(r => r.id === roleId
 
 // ---------------- economia semanal ----------------
 
+/** Pessoas empregadas na empresa, contando o jogador. */
+function staffOf(world: WorldState, companyId: CompanyId): number {
+  let n = world.employment?.companyId === companyId ? 1 : 0
+  for (const r of Object.values(world.residents)) if (r.job?.companyId === companyId) n++
+  return n
+}
+/** Quadro que o movimento sustenta: a cidade tende a ~10% de desemprego em tempos normais. */
+function capacityOf(world: WorldState, companyId: CompanyId): number {
+  const companies = Object.keys(world.companies).length
+  let adults = 1
+  for (const id of Object.keys(world.residents)) { const age = ageAt(world.people[id]!.birthDate, world.clock); if (age >= 18 && age <= 64) adults++ }
+  const health = world.economy[companyId]?.health ?? 0.5
+  return Math.round((adults / companies) * cityRules.employedTarget * (0.75 + 0.5 * health))
+}
+
 export function processWeeklyEconomy(world: WorldState, event: ScheduledEvent): WorldState {
   let next = world
   const day = world.clock.day
-  // satisfação no trabalho flutua; empresas fracas pesam
+  // satisfação no trabalho flutua; empresas fracas pesam; aos 65 a pessoa se aposenta
   const residents = { ...next.residents }
   for (const [id, r] of Object.entries(residents)) {
     if (!r.job) continue
+    if (ageAt(next.people[id]!.birthDate, next.clock) >= 65) { residents[id] = { ...r, job: null, goal: null }; continue }
     const health = next.economy[r.job.companyId]?.health ?? 0.5
     residents[id] = { ...r, job: { ...r.job, satisfaction: Math.round(clamp(r.job.satisfaction + (chance(next, `sat/${id}/${day}`) - 0.5) * 10 - (health < 0.4 ? 3 : 0), 0, 100)) } }
   }
   next = { ...next, residents }
+  // rotatividade: todo mês alguém sai por conta própria, mais ainda quem está insatisfeito (bíblia §15.2)
+  for (const [id, r] of Object.entries(next.residents).sort(([a], [b]) => (a < b ? -1 : 1))) {
+    if (!r.job || chance(next, `quit/${id}/${day}`) >= cityRules.weeklyTurnover + (r.job.satisfaction < 40 ? 0.04 : 0)) continue
+    const job = r.job
+    next = { ...next, residents: { ...next.residents, [id]: { ...r, job: null, goal: { kind: "find-job", since: next.clock } } } }
+    next = openReplacement(next, id as PersonId, job)
+  }
   for (const companyId of Object.keys(next.economy).sort() as CompanyId[]) {
     const before = next.economy[companyId]!
     const company = next.companies[companyId]!
@@ -140,9 +167,15 @@ export function processWeeklyEconomy(world: WorldState, event: ScheduledEvent): 
     }
     if (before.health < 0.5 && health >= 0.7) next = publish(next, "negocios", newsTexts.recovery, values, companyId, [], `economy.recovery:${companyId}:${day}`)
     if (weakWeeks >= 2) next = layoff(next, companyId, day)
+    // quadro acima do que o movimento sustenta: corte pontual mesmo sem crise declarada
+    else if (health < 0.45 && staffOf(next, companyId) > capacityOf(next, companyId) + 1 && chance(next, `trim/${companyId}/${day}`) < 0.25) next = layoff(next, companyId, day)
     const openHere = Object.values(next.vacancies).filter(v => v.open && v.companyId === companyId).length
-    if (health > 0.68 && openHere === 0 && chance(next, `open/${companyId}/${day}`) < 0.35) {
-      const role = pick(jobRoles, `open-role/${companyId}/${day}`, next)
+    // só contrata quem tem espaço no quadro; empresa saudável sustenta mais gente
+    if (health >= 0.4 && staffOf(next, companyId) + openHere < capacityOf(next, companyId) && chance(next, `open/${companyId}/${day}`) < 0.45) {
+      // a vaga nasce para o que a cidade tem de gente: prefere funções que alguém sem emprego consegue ocupar
+      const seekers = Object.entries(next.residents).filter(([, r]) => !r.job && r.goal?.kind === "find-job").map(([id]) => next.skills[id]).filter(s => !!s)
+      const reachable = jobRoles.filter(role => seekers.some(s => s[role.skill] >= role.required * 0.8))
+      const role = pick(reachable.length && chance(next, `reach/${companyId}/${day}`) < 0.8 ? reachable : jobRoles, `open-role/${companyId}/${day}`, next)
       const id = `vacancy:${next.nextId}` as VacancyId
       next = { ...next, nextId: next.nextId + 1, vacancies: { ...next.vacancies, [id]: { id, companyId, roleId: role.id, open: true } } }
       next = publish(next, "trabalho", newsTexts.opening, { ...values, role: role.title.toLowerCase() }, companyId, [], `economy.opening:${id}`)
@@ -273,22 +306,25 @@ function applyResident(world: WorldState, id: PersonId, vacancyId: VacancyId): W
   const v = world.vacancies[vacancyId]!
   const role = jobRoles.find(x => x.id === v.roleId)!
   const skill = world.skills[id]![role.skill]
-  if (chance(world, `hire/${id}/${vacancyId}/${world.clock.day}`) >= 0.3 + skill * 0.6) return world
+  if (chance(world, `hire/${id}/${vacancyId}/${world.clock.day}`) >= 0.45 + skill * 0.5) return world
   const person = world.people[id]!
   const company = world.companies[v.companyId]!
   const previous = world.residents[id]!.job
   let next: WorldState = { ...world, vacancies: { ...world.vacancies, [vacancyId]: { ...v, open: false } },
     residents: { ...world.residents, [id]: { ...world.residents[id]!, goal: null, job: { companyId: v.companyId, roleId: v.roleId, since: world.clock, satisfaction: 65 } } } }
   next = publish(next, "trabalho", newsTexts.hire, { company: company.name, name: person.name, role: role.title.toLowerCase(), district: company.district }, company.id, [id], `city.hire:${id}:${vacancyId}`)
-  if (previous) {
-    // quem sai abre vaga de substituição (bíblia §15.2)
-    const old = world.companies[previous.companyId]!
-    const replacement = `vacancy:${next.nextId}` as VacancyId
-    next = { ...next, nextId: next.nextId + 1, vacancies: { ...next.vacancies, [replacement]: { id: replacement, companyId: old.id, roleId: previous.roleId, open: true } } }
-    next = publish(next, "trabalho", newsTexts.replacement, { company: old.name, name: person.name, role: roleTitle(previous.roleId), district: old.district }, old.id, [id], `city.replacement:${replacement}`)
-  }
+  if (previous) next = openReplacement(next, id, previous)
   if (relationshipBetween(next, next.playerId, id)) next = message(next, id, "hired", fillText(pick(messageTexts.hired, `hired/${id}/${vacancyId}`, next), { company: company.name, role: role.title.toLowerCase() }))
   return next
+}
+
+/** Quem sai abre vaga de substituição quando o quadro precisa (bíblia §15.2). */
+function openReplacement(world: WorldState, id: PersonId, previous: NonNullable<Resident["job"]>): WorldState {
+  if (staffOf(world, previous.companyId) >= capacityOf(world, previous.companyId)) return world
+  const old = world.companies[previous.companyId]!
+  const replacement = `vacancy:${world.nextId}` as VacancyId
+  const next: WorldState = { ...world, nextId: world.nextId + 1, vacancies: { ...world.vacancies, [replacement]: { id: replacement, companyId: old.id, roleId: previous.roleId, open: true } } }
+  return publish(next, "trabalho", newsTexts.replacement, { company: old.name, name: world.people[id]!.name, role: roleTitle(previous.roleId), district: old.district }, old.id, [id], `city.replacement:${replacement}`)
 }
 
 // ---------------- mensagens do jogador ----------------

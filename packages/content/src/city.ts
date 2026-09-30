@@ -5,6 +5,10 @@
 export const cityRules = {
   /** fração inicial de adultos (18–64) com emprego */
   employedShare: 0.72,
+  /** fração de adultos que o mercado sustenta com empresas em saúde média */
+  employedTarget: 0.93,
+  /** chance semanal de alguém deixar o emprego por conta própria */
+  weeklyTurnover: 0.01,
   /** quantas pessoas da vizinhança passam a fazer parte do círculo do jogador */
   neighbors: 7,
   messageHours: 24,

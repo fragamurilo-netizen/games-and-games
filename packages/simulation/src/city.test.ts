@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { companies, fillText, inPlace, placeGender, validateCityContent } from "@paralelo/content"
 import type { EmploymentId, MessageId } from "@paralelo/shared"
-import { absoluteMinute, createWorld, dismissPlayer, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
+import { absoluteMinute, createWorld, dismissPlayer, inspectEvents, inspectPerson, worldStats, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
 
 const apply = (world: WorldState, command: Command): WorldState => {
   const result = executeCommand(world, command)
@@ -129,5 +129,28 @@ describe("mundo vivo", () => {
     const later = apply(start, { type: "reply", messageId: id, reply: "later" })
     expect(later.inbox.find(x => x.id === id)!.postponed).toBe(true)
     expect(executeCommand(later, { type: "reply", messageId: id, reply: "later" })).toMatchObject({ ok: false })
+  })
+
+  it("mantém mercado de trabalho plausível ao longo de um ano", () => {
+    for (const seed of ["mercado-a", "mercado-b"]) {
+      const stats = worldStats(run(createWorld(seed), 365))
+      expect(stats.unemployment).toBeGreaterThan(0)
+      expect(stats.unemployment).toBeLessThan(0.3)
+      expect(stats.news.hires).toBeGreaterThan(5)
+    }
+  })
+
+  it("inspector explica pessoa, eventos e estado da cidade (bíblia §42)", () => {
+    const world = run(createWorld("inspector"), 30)
+    const friend = inspectPerson(world, "person:friend-a")!
+    expect(friend.relationships.some(r => r.id === world.playerId)).toBe(true)
+    expect(friend.lastDecision?.options[0]?.score).toBeGreaterThanOrEqual(friend.lastDecision?.options.at(-1)?.score ?? 0)
+    expect(inspectPerson(world, "person:ninguem")).toBeNull()
+    const events = inspectEvents(world)
+    expect(events.length).toBeGreaterThan(0)
+    for (const e of events) expect(e.eligible === (e.blocked === null)).toBe(true)
+    const stats = worldStats(world)
+    expect(stats.population).toBe(Object.keys(world.people).length)
+    expect(stats.companies).toHaveLength(Object.keys(world.companies).length)
   })
 })

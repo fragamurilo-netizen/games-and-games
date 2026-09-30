@@ -37,6 +37,7 @@ export default function CareerScreen() {
     </>}
 
     <Kicker meta={`${career.vacancies.length} abertas`}>Vagas</Kicker>
+    {!career.vacancies.length && <Prose tone="secondary">Nenhuma vaga aberta agora. Novas vagas saem no jornal da cidade, em geral no começo da semana.</Prose>}
     {career.vacancies.map(v => <View key={v.id} style={styles.item}>
       <View style={styles.itemHead}>
         <Text style={styles.itemTitle}>{v.title}</Text>

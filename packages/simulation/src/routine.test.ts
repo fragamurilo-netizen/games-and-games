@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { lifeEvents } from "@paralelo/content"
 import { decodeSnapshot, encodeSnapshot } from "@paralelo/persistence"
+import type { VacancyId } from "@paralelo/shared"
 import { absoluteMinute, createWorld, executeCommand, nextWeekday, queryCareer, queryDecision, queryLife, queryRoutine, validateWorld, worldHash, type Command, type WorldState } from "."
 import { applyElapsed } from "./systems/needs"
 
@@ -146,7 +147,10 @@ describe("agenda e consequências profissionais", () => {
     expect(reopened.open).toBe(true)
     expect(dismissed.scheduled.some(item => item.employmentId === employment.id)).toBe(false)
     expect(executeCommand(dismissed, { type: "apply-job", vacancyId: reopened.id }).ok).toBe(false)
-    expect(queryCareer(dismissed).vacancies.some(item => item.canApply && item.company !== dismissed.companies[employment.companyId]!.name)).toBe(true)
+    // outra empresa continua aberta a você (o mercado pode estar sem vaga agora; criamos uma)
+    const other = Object.values(dismissed.companies).find(c => c.id !== employment.companyId)!
+    const opening = { id: "vacancy:teste" as VacancyId, companyId: other.id, roleId: "stock", open: true }
+    expect(queryCareer({ ...dismissed, vacancies: { ...dismissed.vacancies, [opening.id]: opening } }).vacancies.find(v => v.id === opening.id)?.canApply).toBe(true)
     const paid = until(dismissed, 30, 480)
     expect(paid.finance.ledger.filter(item => item.category === "salary")).toHaveLength(1)
     expect(validateWorld(paid).ok).toBe(true)
