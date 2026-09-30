@@ -17,6 +17,7 @@ func load_game(slot: String) -> Error:
 	if loaded == null:
 		return ERR_FILE_CORRUPT
 	world = loaded
+	Universe.apply_titles(world, true)  # saves anteriores ao universo ganham seus campeões
 	sim = WorldSim.new(world)
 	EventBus.world_loaded.emit()
 	return OK
