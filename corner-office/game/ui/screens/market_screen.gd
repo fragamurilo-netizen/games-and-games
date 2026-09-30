@@ -8,10 +8,11 @@ func build() -> void:
 		add_text("AGENTES LIVRES",Tokens.FIGHT_RED)
 		add_text("Proponha quatro lutas e construa o próximo nome da sua promoção.",Tokens.MUTED)
 		for f: Fighter in w.fighters.values():
-			if f.organization_id.is_empty():add_button("%s  /  %s\n%s · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
+			if f.organization_id.is_empty():add_fighter_row(f,"%s  /  %s\n%s · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
 		return
 	var f: Fighter=w.fighters[selected]
 	add_button("← Agentes livres",func():selected="";refresh())
+	add_portrait(f)
 	add_heading(f.display_name());add_text(CareerText.division(f.division)+" / "+f.record_string())
 	var show:=add_number("Bolsa por apresentação · US$",Contracts.market_price(w,f),1,10000000)
 	var signing:=add_number("Luvas na assinatura · US$",0,0,10000000)

@@ -25,7 +25,7 @@ func build() -> void:
 	for ev: FightEvent in rivals.slice(0,3):
 		var main: Fight=w.fights[ev.fight_ids[-1]]
 		add_text("%s · %s"%[ev.name,GameDate.format(ev.date)])
-		add_text("%s × %s · %s"%[w.fighters[main.fighter_a_id].display_name(),w.fighters[main.fighter_b_id].display_name(),ev.city],Tokens.MUTED)
+		add_face_off(w.fighters[main.fighter_a_id],w.fighters[main.fighter_b_id],"%s\n×\n%s\n%s"%[w.fighters[main.fighter_a_id].display_name(),w.fighters[main.fighter_b_id].display_name(),ev.city])
 	if rivals.is_empty():add_text("Nenhuma noite rival anunciada.",Tokens.MUTED)
 	add_heading("Noticiário")
 	var items:=w.news.values();items.reverse()
