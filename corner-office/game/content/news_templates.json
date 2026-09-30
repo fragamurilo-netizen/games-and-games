@@ -1,0 +1,112 @@
+{
+  "_doc": "Central de notícias (simulation/media/media.gd; Game Design Bible §10, MMA Bible §27). Cada tópico só é publicado quando o fato acontece. Placeholders entre chaves são preenchidos pela simulação; a variante de texto vem do hash do fato, não do RNG do mundo.",
+  "lookback_days": 7,
+  "notable_popularity": 40,
+  "notable_rank": 5,
+  "upset_record_gap": 6,
+  "streak_milestones": [5, 8, 12],
+  "undefeated_milestones": [5, 10, 15],
+  "losing_streak": 3,
+  "categories": [
+    {"id": "resultados", "label": "Resultados"},
+    {"id": "eventos", "label": "Eventos"},
+    {"id": "mercado", "label": "Mercado"},
+    {"id": "rankings", "label": "Rankings"},
+    {"id": "bastidores", "label": "Bastidores"}
+  ],
+  "importance_labels": ["", "Nota", "Destaque", "Manchete"],
+  "topics": {
+    "event_completed": {"outlet": "out_journal", "category": "eventos", "importance": 2},
+    "event_postponed": {"outlet": "out_fightwire", "category": "eventos", "importance": 3},
+    "event_announced": {
+      "outlet": "out_fightwire", "category": "eventos", "importance": 2,
+      "headlines": ["{org} anuncia {event}: {a} × {b}", "Card fechado: {a} e {b} lideram {event}", "{event} tem luta principal definida"],
+      "bodies": ["{a} ({a_record}) enfrenta {b} ({b_record}) no {division} em {city}, dia {date}. O card tem {bouts} lutas.", "A {org} leva {bouts} lutas a {city} em {date}. Na principal, {a} ({a_record}) × {b} ({b_record}), categoria {division}."]
+    },
+    "event_cancelled": {
+      "outlet": "out_fightwire", "category": "eventos", "importance": 2,
+      "headlines": ["{org} cancela {event}", "Fim da linha para {event}"],
+      "bodies": ["A organização não conseguiu remontar o card previsto para {city} em {date}. As lutas voltam para a mesa de matchmaking."]
+    },
+    "main_event_result": {
+      "outlet": "out_fightwire", "category": "resultados", "importance": 3,
+      "headlines": ["{winner} vence {loser} por {method} na luta principal", "{winner} fecha {event} com vitória sobre {loser}", "Noite de {winner}: {method} contra {loser} em {event}"],
+      "bodies": ["{winner} ({winner_record}) derrotou {loser} ({loser_record}) por {method_full} {when} na luta principal de {event}.", "Na luta principal de {event}, {winner} superou {loser} por {method_full}, {when}. Cartel agora em {winner_record}."]
+    },
+    "main_event_draw": {
+      "outlet": "out_fightwire", "category": "resultados", "importance": 3,
+      "headlines": ["Empate na luta principal de {event}", "{a} e {b} empatam em {event}"],
+      "bodies": ["Os juízes não separaram {a} e {b} {when}. A revanche já é assunto nos bastidores."]
+    },
+    "upset": {
+      "outlet": "out_inside", "category": "resultados", "importance": 3,
+      "headlines": ["Zebra! {winner} derruba {loser}", "Ninguém esperava: {winner} vence {loser}", "{loser} cai diante de {winner} e o mercado reage"],
+      "bodies": ["Com cartel de {winner_before} antes da luta, {winner} venceu {loser} ({loser_before}) por {method_full} em {event}. A mesa redonda discute o que muda na divisão {division}.", "{winner} chegou como azarão ({winner_before} contra {loser_before}) e saiu de {event} com vitória por {method_full}."]
+    },
+    "split_decision": {
+      "outlet": "out_clinch", "category": "resultados", "importance": 2,
+      "headlines": ["Decisão dividida em {event} divide opiniões", "Roubo ou justiça? {winner} vence {loser} na dividida", "{loser} contesta a decisão em {event}"],
+      "bodies": ["{winner} levou a decisão dividida sobre {loser}. Um dos três juízes viu outra luta, e a torcida de {loser} já pede revanche.", "Placar dividido entre os juízes: {winner} vence, {loser} reclama. O debate toma conta dos bastidores de {event}."]
+    },
+    "finish_of_night": {
+      "outlet": "out_fightmetric", "category": "resultados", "importance": 1,
+      "headlines": ["Fim mais rápido da noite: {winner} em {time}", "{winner} precisa de {time} para resolver"],
+      "bodies": ["{winner} encerrou a luta contra {loser} por {method_full} no {round}º round, aos {time}. Foi o fim mais rápido de {event}."]
+    },
+    "new_star": {
+      "outlet": "out_inside", "category": "resultados", "importance": 3,
+      "headlines": ["Nasce uma estrela: {fighter} emenda {streak} finalizações", "{fighter} vira o nome do momento no {division}"],
+      "bodies": ["{fighter} ({record}) venceu as últimas {streak} lutas antes do gongo final. A divisão {division} ganha um nome que vende ingresso.", "Três lutas, três finalizações. {fighter} ({record}) chega ao topo das conversas depois de {event}."]
+    },
+    "win_streak": {
+      "outlet": "out_fightmetric", "category": "resultados", "importance": 2,
+      "headlines": ["{fighter} chega a {streak} vitórias seguidas", "Sequência de {streak}: {fighter} segue embalado"],
+      "bodies": ["Com a vitória em {event}, {fighter} ({record}) soma {streak} triunfos consecutivos no {division}."]
+    },
+    "undefeated": {
+      "outlet": "out_fightmetric", "category": "resultados", "importance": 2,
+      "headlines": ["{fighter} segue {invicto}: {record}", "Invencibilidade mantida: {fighter} chega a {record}"],
+      "bodies": ["{fighter} ainda não sabe o que é perder como profissional. Depois de {event}, o cartel é {record} no {division}."]
+    },
+    "losing_streak": {
+      "outlet": "out_clinch", "category": "bastidores", "importance": 1,
+      "headlines": ["{fighter} vive fase difícil: {streak} derrotas seguidas", "Crise para {fighter} depois de {event}"],
+      "bodies": ["A derrota em {event} é a {streak}ª seguida de {fighter} ({record}). O futuro no {division} vira pauta."]
+    },
+    "medical_suspension": {
+      "outlet": "out_fightwire", "category": "bastidores", "importance": 1,
+      "headlines": ["{fighter} cumpre {days} dias de repouso médico", "Suspensão médica: {fighter} fora até {until}"],
+      "bodies": ["Depois do nocaute sofrido em {event}, {fighter} só pode voltar a lutar a partir de {until}."]
+    },
+    "event_loss": {
+      "outlet": "out_journal", "category": "bastidores", "importance": 2,
+      "headlines": ["{event} fecha no vermelho", "Conta não fecha: prejuízo em {event}"],
+      "bodies": ["A noite rendeu {revenue} em receitas, mas o resultado operacional foi {margin}. Custos de produção e bolsas pesaram mais do que a bilheteria."]
+    },
+    "signing_player": {
+      "outlet": "out_fightwire", "category": "mercado", "importance": 2,
+      "headlines": ["{fighter} assina com {org}", "Reforço: {org} contrata {fighter}"],
+      "bodies": ["{fighter} ({record}, {division}) fechou contrato de {bouts} lutas com a {org}."]
+    },
+    "signing_rival": {
+      "outlet": "out_fightwire", "category": "mercado", "importance": 2,
+      "headlines": ["{org} contrata {fighter}", "{fighter} é o novo nome da {org}"],
+      "bodies": ["A {org} fechou com {fighter} ({record}, {division}). O acordo prevê {bouts} lutas."]
+    },
+    "renewal": {
+      "outlet": "out_journal", "category": "mercado", "importance": 1,
+      "headlines": ["{fighter} renova com {org}", "{org} segura {fighter}"],
+      "bodies": ["{fighter} ({record}) assinou novo contrato de {bouts} lutas e segue na {org}."]
+    },
+    "free_agent": {
+      "outlet": "out_clinch", "category": "mercado", "importance": 2,
+      "headlines": ["{fighter} está livre no mercado", "Agente livre: {fighter} deixa a {org}"],
+      "bodies": ["O vínculo de {fighter} ({record}, {division}) com a {org} terminou. Promotoras já sondam {atleta}."]
+    },
+    "new_number_one": {
+      "outlet": "out_fightmetric", "category": "rankings", "importance": 2,
+      "headlines": ["{fighter} assume o topo do ranking {ranking} no {division}", "Novo número 1 no {division}: {fighter}"],
+      "bodies": ["O ranking {ranking} do {division} mudou de dono: {fighter} ({record}) tira {previous} da liderança."]
+    }
+  }
+}

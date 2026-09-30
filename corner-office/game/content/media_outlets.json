@@ -1,7 +1,7 @@
 [
-  {"id": "out_fightwire", "name": "FightWire", "role": "breaking_news", "tone": "Rápido, factual, movimentações de mercado."},
-  {"id": "out_journal", "name": "The Combat Journal", "role": "deep_journalism", "tone": "Negócio, contexto e análise."},
-  {"id": "out_inside", "name": "Inside Fighting", "role": "tv_roundtable", "tone": "Entrevistas e debate."},
-  {"id": "out_clinch", "name": "The Clinch", "role": "tabloid", "tone": "Rivalidades, provocações, bastidores."},
-  {"id": "out_fightmetric", "name": "FightMetric", "role": "data", "tone": "Rankings, estatísticas e histórico."}
+  {"id": "out_fightwire", "name": "FightWire", "role": "breaking_news", "tone": "Rápido, factual, movimentações de mercado.", "reach": 60},
+  {"id": "out_journal", "name": "The Combat Journal", "role": "deep_journalism", "tone": "Negócio, contexto e análise.", "reach": 45},
+  {"id": "out_inside", "name": "Inside Fighting", "role": "tv_roundtable", "tone": "Entrevistas e debate.", "reach": 70},
+  {"id": "out_clinch", "name": "The Clinch", "role": "tabloid", "tone": "Rivalidades, provocações, bastidores.", "reach": 80},
+  {"id": "out_fightmetric", "name": "FightMetric", "role": "data", "tone": "Rankings, estatísticas e histórico.", "reach": 35}
 ]

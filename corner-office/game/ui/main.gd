@@ -124,7 +124,7 @@ func _open_menu() -> void:
 
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_WM_GO_BACK_REQUEST:
-		if get_tree().root.get_children().any(func(node):return node is FightReplayView):return
+		if get_tree().root.get_children().any(func(node):return node is FightReplayView or node is NewsCenter):return
 		get_viewport().set_input_as_handled()
 		if not get_children().any(func(node):return node is GameMenu):_open_menu()
 

@@ -23,6 +23,7 @@ func advance_day() -> void:
 	_expire_contracts()
 	_run_scheduled_events()
 	org_ai.tick(world)
+	media.scan_triggers(world)
 	# TODO(M2): lesões, camps e negociações com memória de agentes.
 	EventBus.day_advanced.emit(world.date)
 
