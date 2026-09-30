@@ -67,6 +67,7 @@ func _initialize() -> void:
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
 	_run("DNA dos clubes: identidade, mercado e mudanças", _test_club_dna)
 	_run("simulação paralela = sequencial", _test_parallel_equals_sequential)
+	_run("títulos históricos reais das seleções", _test_national_past_titles)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -314,6 +315,21 @@ func _test_quick_calibration() -> void:
 
 
 ## A partida assistida usa exatamente a mesma simulação da instantânea.
+
+
+func _test_national_past_titles() -> void:
+	var count := func(code: String, tid: String) -> int:
+		return NationalTeamManager.past_titles(code).filter(func(t): return String(t[0]) == tid).size()
+	check(count.call("BRA", "WC") == 5, "Brasil sem as 5 Copas do Mundo")
+	check(count.call("GER", "WC") == 4, "Alemanha sem as 4 Copas (Alemanha Ocidental conta)")
+	check(count.call("ARG", "CA") == 16 and count.call("URU", "CA") == 15, "Copa América: Argentina 16, Uruguai 15")
+	check(count.call("ESP", "EURO") == 4, "Espanha sem as 4 Eurocopas")
+	# Nada do passado em ano que o próprio jogo disputa (a 1ª Copa do jogo é em 2030).
+	var first := int(NationalTeamManager.tcfg("WC").get("first", 0))
+	for code in ["BRA", "ESP", "ARG", "FRA"]:
+		for t in NationalTeamManager.past_titles(code):
+			check(int(t[1]) < int(NationalTeamManager.tcfg(String(t[0])).get("first", 9999)), "título do passado em ano do jogo: %s" % [t])
+	check(first > 0, "Copa do Mundo sem primeira edição no jogo")
 
 
 ## Mesmo mundo, mesmas datas: jogos da IA em várias threads dão exatamente o mesmo resultado

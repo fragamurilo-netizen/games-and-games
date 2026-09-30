@@ -11,6 +11,7 @@ const PATHS := {
 	"continental": "res://data/world/continental.json",
 	"domestic": "res://data/world/domestic.json",
 	"international": "res://data/world/international.json",
+	"national_titles": "res://data/world/national_titles.json",
 	"national_kits": "res://data/world/national_kits.json",
 	"history": "res://data/world/history.json",
 	"foreign_clubs": "res://data/world/foreign_clubs.json",

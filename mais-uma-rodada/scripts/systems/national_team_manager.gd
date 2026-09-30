@@ -1468,9 +1468,40 @@ static func player_titles(world: GameWorld, pid: int) -> Array:
 
 
 ## Títulos de uma seleção no save: [[torneio, ano]].
+## Títulos da seleção: o passado real (data/world/national_titles.json, só os anos antes da
+## primeira edição disputada no jogo) e os conquistados no save. [[torneio, ano]], por ano.
 static func titles_of(world: GameWorld, code: String) -> Array:
-	var out: Array = []
+	var out: Array = past_titles(code)
 	for r in data(world)["tours"]:
 		if String(r["champion"]) == code:
 			out.append([String(r["t"]), int(r["y"])])
+	out.sort_custom(func(a, b): return int(a[1]) < int(b[1]))
+	return out
+
+
+static func past_titles(code: String) -> Array:
+	var out: Array = []
+	var src: Variant = DatabaseManager.get_data("national_titles")
+	if not src is Dictionary:
+		return out
+	var all: Dictionary = src.get("titles", {})
+	for tid in all:
+		var first := int(tcfg(String(tid)).get("first", 9999))
+		for e in all[tid]:
+			if e is Array and e.size() >= 2 and String(e[1]) == code and int(e[0]) < first:
+				out.append([String(tid), int(e[0])])
+	return out
+
+
+## Títulos agrupados por torneio, na ordem do international.json: [[torneio, quantos, [anos]]].
+static func titles_summary(world: GameWorld, code: String) -> Array:
+	var by := {}
+	for t in titles_of(world, code):
+		if not by.has(t[0]):
+			by[t[0]] = []
+		(by[t[0]] as Array).append(int(t[1]))
+	var out: Array = []
+	for tid in DatabaseManager.international_cfg().get("tournaments", {}):
+		if by.has(tid):
+			out.append([String(tid), (by[tid] as Array).size(), by[tid]])
 	return out

@@ -464,7 +464,7 @@ func _nation_table_row(w: GameWorld, code: String, r: Dictionary, pos: int, high
 
 func _champions_list(w: GameWorld, id: String) -> Control:
 	var card := UIKit.card("Card", 4)
-	card.add_child(UIKit.section("Campeões no save"))
+	card.add_child(UIKit.section("Campeões"))
 	var any := false
 	var tours: Array = NationalTeamManager.data(w)["tours"]
 	for i in range(tours.size() - 1, -1, -1):
@@ -481,6 +481,24 @@ func _champions_list(w: GameWorld, id: String) -> Control:
 		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(n)
 		h.add_child(UIKit.label("vice: %s" % DatabaseManager.nation_name(r["runner_up"]), "Small"))
+		card.add_child(h)
+	# Antes do save: os campeões reais (data/world/national_titles.json), do mais recente ao mais antigo.
+	var src: Variant = DatabaseManager.get_data("national_titles")
+	var past: Array = (src.get("titles", {}) as Dictionary).get(id, []) if src is Dictionary else []
+	var first := int(NationalTeamManager.tcfg(id).get("first", 9999))
+	for i in range(past.size() - 1, -1, -1):
+		var e: Array = past[i]
+		if int(e[0]) >= first:
+			continue
+		any = true
+		var h := UIKit.hbox(10)
+		var y := UIKit.label(str(int(e[0])), "H3")
+		y.custom_minimum_size.x = 64
+		h.add_child(y)
+		h.add_child(UIKit.flag(String(e[1]), 32))
+		var n := UIKit.label(DatabaseManager.nation_name(String(e[1])), "H3")
+		n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		h.add_child(n)
 		card.add_child(h)
 	if not any:
 		card.add_child(UIKit.label("Nenhuma edição disputada ainda.", "Muted"))
@@ -589,20 +607,48 @@ func _squad(w: GameWorld, c: VBoxContainer) -> void:
 		squad = NationalTeamManager.call_up(pool)
 	# O cabeçalho da tela já mostra bandeira e nome: aqui só o que é da lista.
 	var bits: Array = [tr("Lista provável, se a convocação fosse hoje.") if fresh else tr("Última convocação.")]
-	var titles := NationalTeamManager.titles_of(w, _nation)
-	if not titles.is_empty():
-		var tt: Array = []
-		for t in titles:
-			tt.append("%s %d" % [String(NationalTeamManager.tcfg(t[0]).get("short", t[0])), int(t[1])])
-		bits.append(tr("Títulos: %s.") % ", ".join(tt))
 	c.add_child(UIKit.label(" ".join(bits), "Muted", true))
 	if squad.is_empty():
 		c.add_child(UIKit.state_block("empty", "Nenhum jogador desta nacionalidade.", "Só entram jogadores com clube."))
+		_add_titles(w, c)
 		return
 	var v := UIKit.vbox(UITokens.S1)
 	v.add_child(UIKit.label("%d convocados" % squad.size(), "Section"))
 	v.add_child(PlayerTable.make(w, squad, "national", _squad_state, func(p: Player): UIManager.push("player", {"id": p.id}),
 		_caps_cols(w), "selecao", content_width() >= 760.0))
+	c.add_child(v)
+	_add_titles(w, c)
+
+
+## Títulos da seleção (o passado real e os do save), um torneio por linha: quantos e em que anos.
+func _add_titles(w: GameWorld, c: VBoxContainer) -> void:
+	var sum := NationalTeamManager.titles_summary(w, _nation)
+	if sum.is_empty():
+		return
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Títulos", "Section"))
+	for e in sum:
+		var row := UIKit.hbox(UITokens.S3)
+		row.custom_minimum_size.y = UITokens.H_ROW
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		col.add_child(UIKit.label(String(NationalTeamManager.tcfg(String(e[0])).get("name", e[0])), "H3"))
+		var years: Array = []
+		for y in e[2]:
+			years.append(str(int(y)))
+		var yl := UIKit.label(", ".join(years), "Muted", true)
+		yl.add_theme_font_override(&"font", DataTable.tabular_font())
+		col.add_child(yl)
+		row.add_child(col)
+		var n := UIKit.label("%d×" % int(e[1]), "Section")
+		n.add_theme_font_override(&"font", DataTable.tabular_font())
+		n.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(n)
+		var line := PanelContainer.new()
+		line.theme_type_variation = "RowPanel"
+		line.add_child(row)
+		v.add_child(line)
 	c.add_child(v)
 
 
