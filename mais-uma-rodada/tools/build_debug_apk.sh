@@ -24,6 +24,8 @@ fi
 mkdir -p "$WORK/proj"
 (cd "$ROOT" && tar --exclude=./build -cf - .) | tar -xf - -C "$WORK/proj"
 sed -i 's#^enabled=PackedStringArray("res://addons/GodotGooglePlayBilling/plugin.cfg")#enabled=PackedStringArray()#' "$WORK/proj/project.godot"
+# Marca "sem_trava": a build de teste não cobra (Store.enforced), nem em modo release.
+sed -i 's/^custom_features=""/custom_features="sem_trava"/' "$WORK/proj/export_presets.cfg"
 sed -i 's/^gradle_build\/use_gradle_build=true/gradle_build\/use_gradle_build=false/; s/^package\/signed=true/package\/signed=false/; s/^gradle_build\/export_format=1/gradle_build\/export_format=0/' "$WORK/proj/export_presets.cfg"
 godot --headless --path "$WORK/proj" --import >/dev/null 2>&1 || true
 godot --headless --path "$WORK/proj" "--export-${MODE:-debug}" "Android" "$WORK/unsigned.apk"

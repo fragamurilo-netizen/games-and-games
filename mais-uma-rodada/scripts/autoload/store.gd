@@ -55,6 +55,9 @@ func _ready() -> void:
 func enforced() -> bool:
 	if enforce_override >= 0:
 		return enforce_override == 1
+	# APK de teste (tools/build_debug_apk.sh): sem o plugin de compras, tudo liberado.
+	if OS.has_feature("sem_trava"):
+		return false
 	return OS.has_feature("android") and not OS.is_debug_build()
 
 

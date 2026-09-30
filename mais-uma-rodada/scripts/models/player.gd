@@ -130,6 +130,9 @@ var unhappy_weeks: int = 0
 var ovr_f: float = 50.0
 var overall: int = 50
 var dev_acc: float = 0.0
+## Fase da carreira (-1 a 1): o que vem acontecendo nas últimas temporadas (ver
+## PlayerDevelopment._career_arc). Tem memória: fase boa tende a continuar, ruim também.
+var arc: float = 0.0
 var minutes_season: int = 0
 ## Overall no início da temporada (para medir evolução/piora no ano).
 var ovr_start: int = -1
@@ -542,7 +545,7 @@ func to_dict() -> Dictionary:
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
 		"sus": suspension, "nd": intl_duty, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
-		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
+		"acc": dev_acc, "arc": snappedf(arc, 0.001), "min": minutes_season, "o0": ovr_start, "pl": persona_log,
 		"stats": stats, "cs": cup_stats, "hist": _packed(_raw_out(_history_raw), _history), "spells": _packed(_raw_out(_spells_raw), _spells),
 		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_raw_out(_trophies_raw), _trophies),
 	}
@@ -606,7 +609,7 @@ static func _packed(raw: Variant, rows: Array) -> Variant:
 
 
 ## Campos numéricos cujo padrão no from_dict é zero.
-const ZERO_DEFAULT: Array[String] = ["sh", "ask", "rc", "iw", "sus", "ya", "uw", "min", "acc", "sn", "val", "ca", "cg", "cas", "tt", "wage", "ce", "jy"]
+const ZERO_DEFAULT: Array[String] = ["sh", "ask", "rc", "iw", "sus", "ya", "uw", "min", "acc", "arc", "sn", "val", "ca", "cg", "cas", "tt", "wage", "ce", "jy"]
 
 
 static func from_dict(d: Dictionary) -> Player:
@@ -667,6 +670,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.retiring = bool(d.get("ret", false))
 	p.unhappy_weeks = int(d.get("uw", 0))
 	p.dev_acc = float(d.get("acc", 0.0))
+	p.arc = float(d.get("arc", 0.0))
 	p.minutes_season = int(d.get("min", 0))
 	var st: Variant = d.get("stats", null)
 	if st is PackedInt32Array and st.size() == S_COUNT:

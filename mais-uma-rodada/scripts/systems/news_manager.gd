@@ -393,13 +393,27 @@ static func on_retirement_announced(world: GameWorld, p: Player) -> void:
 	if not world.has_user():
 		return
 	var c := world.club(p.club_id)
-	var notable := p.career_apps >= 250 or (c != null and world.is_user_club(c.id)) or (c != null and c.league_id == world.user_league_id() and p.overall >= PlayerGenerator.league_level(c))
-	if not notable:
+	if not retirement_newsworthy(world, p, c):
 		return
 	var n := post(world, "aposentadoria_anuncio", {"player": _pname(p), "age": p.age(world.year), "apps": p.career_apps, "goals": p.career_goals},
 		p.club_id, p.id, NewsEvent.IMP_HIGH if c != null and world.is_user_club(c.id) else NewsEvent.IMP_NORMAL)
 	n.media = {"type": "player", "player": p.id, "club": p.club_id, "cr": [p.career_apps, p.career_goals, p.titles]}
 	WorldPulse.on_retirement(world, p)
+
+
+## Aposentadoria que vira notícia: a do seu elenco sempre; na sua liga, quem foi destaque dela
+## ou teve uma carreira longa de verdade; no resto do mundo, só quem ficou famoso (títulos,
+## seleção, prêmios ou uma carreira inteira em clube grande). Os outros param em silêncio.
+static func retirement_newsworthy(world: GameWorld, p: Player, c: Club) -> bool:
+	if c != null and world.is_user_club(c.id):
+		return true
+	var caps := int(NationalTeamManager.caps_of(world, p.id)[0])
+	var famous := p.titles >= 6 or caps >= 40 or p.awards.size() >= 2 or (p.career_apps >= 550 and c != null and c.reputation >= 78.0)
+	if famous:
+		return true
+	if c != null and c.league_id == world.user_league_id():
+		return p.overall >= PlayerGenerator.league_level(c) + 4.0 or p.career_apps >= 450
+	return false
 
 
 static func on_explosion(world: GameWorld, p: Player) -> void:
