@@ -29,12 +29,12 @@ func build() -> void:
 	if rivals.is_empty():add_text("Nenhuma noite rival anunciada.",Tokens.MUTED)
 	add_heading("Noticiário")
 	var items:=w.news.values();items.reverse()
-	var featured:=items.filter(func(n: NewsItem):return n.importance>=3 or Media.involves_player(w,n))
+	var featured:=items.filter(func(n: NewsItem):return n.channel=="site" and (n.importance>=3 or Media.involves_player(w,n)))
 	for item: NewsItem in featured.slice(0,4):
 		add_text("%s · %s"%[Media.outlet(item.outlet_id).name.to_upper(),GameDate.format(item.created_at)],Tokens.MUTED)
 		add_text(item.headline)
 	if items.is_empty():add_text("As manchetes chegam com as próximas noites, suas e das rivais.",Tokens.MUTED)
 	var unread:=Media.unread_count(w)
-	add_button("Abrir noticiário"+(" · %d novas"%unread if unread>0 else ""),func():
+	add_button("Notícias, sites e redes"+(" · %d novas"%unread if unread>0 else ""),func():
 		var center:=NewsCenter.new();center.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 		center.closed.connect(refresh);get_tree().root.add_child(center))

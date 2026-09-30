@@ -99,3 +99,23 @@ func test_player_signing_is_player_news() -> void:
 	var found := world.news.values().filter(func(n: NewsItem): return n.topic == "signing_player" and free.id in n.entity_ids)
 	check_eq(found.size(), 1, "Contratação do jogador vira notícia")
 	check(not found.is_empty() and Media.involves_player(world, found[0]), "Filtro 'minha organização' pega a contratação")
+
+
+func test_social_posts_follow_facts() -> void:
+	var world := _run(7, 150)
+	var posts: Array = world.news.values().filter(func(n: NewsItem): return n.channel == "social")
+	var topics := {}
+	for p: NewsItem in posts:
+		topics[p.topic] = true
+		check(not p.author_id.is_empty(), "Post tem autor")
+		check(Media.handle(world, p.author_id).begins_with("@"), "Autor tem @: " + Media.handle(world, p.author_id))
+		check(not "{" in p.headline, "Post preenchido: " + p.headline)
+		check(p.reach > 0, "Post tem engajamento")
+		if p.topic == "social_win":
+			var fight: Fight = world.fights[p.key.substr(9)]
+			check_eq(p.author_id, fight.winner_id, "Quem comemora é quem venceu")
+		if p.topic == "social_callout":
+			check(p.entity_ids[1] != p.author_id, "Ninguém desafia a si mesmo")
+	for topic in ["social_org_announce", "social_win", "social_loss"]:
+		check(topics.has(topic), "Post publicado: " + topic)
+	check_eq(Media.compact(12400), "12,4 mil", "Engajamento compacto")

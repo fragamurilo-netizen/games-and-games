@@ -54,6 +54,8 @@ func story(world: WorldState, topic: String, key: String, vars: Dictionary, enti
 	if not t.has("headlines"):
 		return null
 	var item := _make(world, topic, key, facts, entity_ids)
+	item.channel = str(t.get("channel", "site"))
+	item.author_id = str(vars.get("_author", ""))
 	item.headline = _variant(t.headlines, key).format(vars)
 	item.body = _variant(t.get("bodies", [""]), key + ":body").format(vars)
 	var fame := 0.0
@@ -62,6 +64,8 @@ func story(world: WorldState, topic: String, key: String, vars: Dictionary, enti
 		if f:
 			fame = maxf(fame, _fame(f))
 	item.reach = int(float(outlet(item.outlet_id).get("reach", 40)) * (0.5 + 0.25 * item.importance) + fame)
+	if item.channel == "social":
+		item.reach = _engagement(world, item.author_id, key)
 	_commit(world, item)
 	return item
 
@@ -132,6 +136,7 @@ func scan_triggers(world: WorldState) -> Array:
 			continue
 		var org: Organization = world.organizations.get(c.organization_id)
 		_add(out, story(world, "free_agent", "free:" + c.id, _fighter_vars(f).merged({"org": org.name if org else ""}), [f.id, c.organization_id]))
+		_add(out, story(world, "social_free_agent", "post_free:" + c.id, _fighter_vars(f).merged({"_author": f.id}), [f.id, c.organization_id]))
 	for key: String in world.rankings:
 		var parts := key.split(":")
 		if parts[0] != world.player_org_id and parts[0] != Rankings.WCI_ORG_ID:
@@ -150,7 +155,10 @@ func scan_triggers(world: WorldState) -> Array:
 		if leader == null or previous == null:
 			continue
 		var label: String = "World Combat Index" if parts[0] == Rankings.WCI_ORG_ID else world.organizations[parts[0]].short_name
-		_add(out, story(world, "new_number_one", "top:" + now.id, _fighter_vars(leader).merged({"ranking": label, "previous": previous.display_name()}), [leader.id, parts[0]]))
+		var top_vars := _fighter_vars(leader).merged({"ranking": label, "previous": previous.display_name(), "previous_handle": handle(world, previous.id), "_author": leader.id})
+		_add(out, story(world, "new_number_one", "top:" + now.id, top_vars, [leader.id, parts[0]]))
+		if parts[0] == Rankings.WCI_ORG_ID:
+			_add(out, story(world, "social_number_one", "post_top:" + now.id, top_vars, [leader.id, previous.id]))
 	return out
 
 
@@ -212,6 +220,9 @@ func cover_event(world: WorldState, ev: FightEvent) -> Array:
 		var loser: Fighter = world.fighters[fight.fighter_b_id if fight.winner_id == fight.fighter_a_id else fight.fighter_a_id]
 		if fight.method == "decision" and fight.method_detail == "split" and (featured or player):
 			_add(out, story(world, "split_decision", "split:" + fight.id, v, ids))
+			_add(out, story(world, "social_fans_split", "fans_split:" + fight.id, v.merged({"_author": _fan_account(fight.id), "loser_handle": handle(world, loser.id)}), ids))
+		if main or fight == upset or (player and featured):
+			_social_fight(world, out, ev, fight, winner, loser, v, ids)
 		if fight.method in ["ko_tko", "submission"] and not main:
 			if fastest == null or _elapsed(fight) < _elapsed(fastest):
 				fastest = fight
@@ -246,7 +257,10 @@ func _announce(world: WorldState, ev: FightEvent) -> NewsItem:
 		return null
 	var a: Fighter = world.fighters[main.fighter_a_id]
 	var b: Fighter = world.fighters[main.fighter_b_id]
-	return story(world, "event_announced", "announce:" + ev.id, {"org": org.name, "event": ev.name, "city": ev.city, "date": GameDate.format(ev.date), "bouts": ev.fight_ids.size(), "a": a.display_name(), "b": b.display_name(), "a_record": a.record_string(), "b_record": b.record_string(), "division": division_name(main.division)}, [ev.id, ev.organization_id, a.id, b.id])
+	var vars := {"org": org.name, "event": ev.name, "city": ev.city, "date": GameDate.format(ev.date), "bouts": ev.fight_ids.size(), "a": a.display_name(), "b": b.display_name(), "a_record": a.record_string(), "b_record": b.record_string(), "division": division_name(main.division)}
+	var item := story(world, "event_announced", "announce:" + ev.id, vars, [ev.id, ev.organization_id, a.id, b.id])
+	story(world, "social_org_announce", "post_announce:" + ev.id, vars.merged({"_author": org.id, "a_handle": handle(world, a.id), "b_handle": handle(world, b.id)}), [ev.id, org.id, a.id, b.id])
+	return item
 
 
 func _signing(world: WorldState, c: Contract) -> NewsItem:
@@ -265,7 +279,10 @@ func _signing(world: WorldState, c: Contract) -> NewsItem:
 	var topic := "renewal" if renewal else "signing_player" if player else "signing_rival"
 	if (renewal or not player) and not _notable(world, f):
 		return null
-	return story(world, topic, "sign:" + c.id, _fighter_vars(f).merged({"org": org.name, "bouts": c.bouts_total}), [f.id, org.id])
+	var vars := _fighter_vars(f).merged({"org": org.name, "bouts": c.bouts_total, "org_handle": handle(world, org.id), "_author": f.id})
+	var item := story(world, topic, "sign:" + c.id, vars, [f.id, org.id])
+	story(world, "social_renewal" if renewal else "social_signing", "post_sign:" + c.id, vars, [f.id, org.id])
+	return item
 
 
 func _make(world: WorldState, topic: String, key: String, facts: Array, entity_ids: Array) -> NewsItem:
@@ -398,3 +415,91 @@ func _fight_vars(world: WorldState, ev: FightEvent, fight: Fight) -> Dictionary:
 
 static func _record_before(f: Fighter, won: bool) -> String:
 	return "%d-%d-%d" % [int(f.record.wins) - (1 if won else 0), int(f.record.losses) - (0 if won else 1), int(f.record.draws)]
+
+
+# --- Redes sociais (Game Design Bible §10: trash talk, rivalidades) ---------
+# Posts são NewsItem com channel "social": o autor é um atleta, uma
+# organização ou uma conta de torcida (content/news_templates.json → social).
+
+func _social_fight(world: WorldState, out: Array, ev: FightEvent, fight: Fight, winner: Fighter, loser: Fighter, v: Dictionary, ids: Array) -> void:
+	_add(out, story(world, "social_win", "post_win:" + fight.id, v.merged({"_author": winner.id, "loser_handle": handle(world, loser.id)}), ids))
+	_add(out, story(world, "social_loss", "post_loss:" + fight.id, v.merged({"_author": loser.id}), ids))
+	if fight.id != ev.fight_ids[-1]:
+		return
+	# Callout: o vencedor cobra o nome mais alto do World Combat Index.
+	var history: Array = world.rankings.get(Rankings.key(Rankings.WCI_ORG_ID, winner.division), [])
+	if history.is_empty():
+		return
+	for id: String in history[-1].entries.slice(0, 3):
+		if id != winner.id and id != loser.id and world.fighters.has(id):
+			var target: Fighter = world.fighters[id]
+			var cv := _fighter_vars(winner).merged({"_author": winner.id, "target": target.display_name(), "target_handle": handle(world, id), "target_record": target.record_string(), "event": ev.name})
+			_add(out, story(world, "social_callout", "callout:" + fight.id, cv, [winner.id, id, ev.organization_id]))
+			# O tabloide repercute a provocação no site.
+			_add(out, story(world, "callout_story", "callout_story:" + fight.id, cv, [winner.id, id, ev.organization_id]))
+			return
+
+
+static func handle(world: WorldState, id: String) -> String:
+	var f: Fighter = world.fighters.get(id)
+	if f:
+		return "@" + _slug(f.first_name + f.last_name)
+	var org: Organization = world.organizations.get(id)
+	if org:
+		return "@" + _slug(org.short_name)
+	return str(_account(id).get("handle", "@" + id))
+
+
+static func author_name(world: WorldState, id: String) -> String:
+	var f: Fighter = world.fighters.get(id)
+	if f:
+		return f.display_name()
+	var org: Organization = world.organizations.get(id)
+	if org:
+		return org.name
+	return str(_account(id).get("name", id))
+
+
+static func _account(id: String) -> Dictionary:
+	for a: Dictionary in config().social.accounts:
+		if a.id == id:
+			return a
+	return {}
+
+
+static func _fan_account(key: String) -> String:
+	var accounts: Array = config().social.accounts
+	return str(accounts[absi(key.hash()) % accounts.size()].id)
+
+
+static func _slug(text: String) -> String:
+	var out := ""
+	for ch in text.to_lower():
+		var i := "áàâãäéèêëíìîïóòôõöúùûüçñ".find(ch)
+		if i >= 0:
+			ch = "aaaaaeeeeiiiiooooouuuucn"[i]
+		if (ch >= "a" and ch <= "z") or (ch >= "0" and ch <= "9"):
+			out += ch
+	return out
+
+
+## Curtidas estimadas: fama e carisma do autor (públicos), variação estável
+## pela chave do fato. Nunca olha atributos ocultos.
+func _engagement(world: WorldState, author_id: String, key: String) -> int:
+	var base := float(config().social.fan_account_base)
+	var f: Fighter = world.fighters.get(author_id)
+	if f:
+		base = (_fame(f) + 10.0) * (0.5 + f.charisma / 100.0) * 40.0
+	var org: Organization = world.organizations.get(author_id)
+	if org:
+		base = org.reputation * 60.0
+	return int(base * (0.8 + float(absi(key.hash()) % 400) / 1000.0))
+
+
+## 12400 → "12,4 mil" (rótulo de engajamento para a UI).
+static func compact(value: int) -> String:
+	if value >= 1000000:
+		return ("%.1f mi" % (value / 1000000.0)).replace(".", ",")
+	if value >= 1000:
+		return ("%.1f mil" % (value / 1000.0)).replace(".", ",")
+	return str(value)

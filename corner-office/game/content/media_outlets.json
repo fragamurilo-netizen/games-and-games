@@ -1,7 +1,7 @@
 [
-  {"id": "out_fightwire", "name": "FightWire", "role": "breaking_news", "tone": "Rápido, factual, movimentações de mercado.", "reach": 60},
-  {"id": "out_journal", "name": "The Combat Journal", "role": "deep_journalism", "tone": "Negócio, contexto e análise.", "reach": 45},
-  {"id": "out_inside", "name": "Inside Fighting", "role": "tv_roundtable", "tone": "Entrevistas e debate.", "reach": 70},
-  {"id": "out_clinch", "name": "The Clinch", "role": "tabloid", "tone": "Rivalidades, provocações, bastidores.", "reach": 80},
-  {"id": "out_fightmetric", "name": "FightMetric", "role": "data", "tone": "Rankings, estatísticas e histórico.", "reach": 35}
+  {"id": "out_fightwire", "name": "FightWire", "role": "breaking_news", "tone": "Rápido, factual, movimentações de mercado.", "reach": 60, "domain": "fightwire.news", "tagline": "Primeiro a saber."},
+  {"id": "out_journal", "name": "The Combat Journal", "role": "deep_journalism", "tone": "Negócio, contexto e análise.", "reach": 45, "domain": "combatjournal.com", "tagline": "O negócio por trás das lutas."},
+  {"id": "out_inside", "name": "Inside Fighting", "role": "tv_roundtable", "tone": "Entrevistas e debate.", "reach": 70, "domain": "insidefighting.tv", "tagline": "A mesa redonda do MMA."},
+  {"id": "out_clinch", "name": "The Clinch", "role": "tabloid", "tone": "Rivalidades, provocações, bastidores.", "reach": 80, "domain": "theclinch.net", "tagline": "Tudo o que acontece fora do cage."},
+  {"id": "out_fightmetric", "name": "FightMetric", "role": "data", "tone": "Rankings, estatísticas e histórico.", "reach": 35, "domain": "fightmetric.data", "tagline": "Números não mentem."}
 ]
