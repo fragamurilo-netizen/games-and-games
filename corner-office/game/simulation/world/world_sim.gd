@@ -22,6 +22,9 @@ func advance_day() -> void:
 	world.date = GameDate.add_days(world.date, 1)
 	_expire_contracts()
 	_run_scheduled_events()
+	# Todo mês chegam prospectos e veteranos sem contrato se aposentam (Bible §13).
+	if int(world.date.day) == 1:
+		FighterGenerator.monthly_intake(world)
 	org_ai.tick(world)
 	# TODO(M2): lesões, camps e negociações com memória de agentes.
 	EventBus.day_advanced.emit(world.date)

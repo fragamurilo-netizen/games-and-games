@@ -8,7 +8,7 @@ func build() -> void:
 		add_text("AGENTES LIVRES",Tokens.FIGHT_RED)
 		add_text("Proponha quatro lutas e construa o próximo nome da sua promoção.",Tokens.MUTED)
 		for f: Fighter in w.fighters.values():
-			if f.organization_id.is_empty():add_button("%s  /  %s\n%s · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
+			if f.organization_id.is_empty() and not f.retired:add_button("%s  /  %s\n%s · %d anos · %s"%[f.display_name(),f.record_string(),CareerText.division(f.division),f.age_on(w.date),CareerText.money(Contracts.market_price(w,f))],func():selected=f.id;refresh())
 		return
 	var f: Fighter=w.fighters[selected]
 	add_button("← Agentes livres",func():selected="";refresh())

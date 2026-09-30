@@ -32,7 +32,8 @@ func _profile(f: Fighter) -> void:
 	add_button("← Voltar à lista",func():selected_fighter="";refresh())
 	add_heading(f.display_name());add_text(CareerText.division(f.division)+" · "+f.country)
 	add_text("%s · %d cm · alcance %d cm"%[f.record_string(),f.height_cm,f.reach_cm])
-	add_text("Base: "+f.martial_base,Tokens.MUTED)
+	add_text("%d anos · base: %s · %s · %.1f kg fora do camp"%[f.age_on(Game.world.date),FighterGenerator.base_name(f.martial_base),f.body_type,f.natural_weight_kg],Tokens.MUTED)
+	if not f.bio.is_empty():add_text(f.bio,Tokens.MUTED)
 	var groups: Dictionary={"Trocação":f.striking,"Wrestling":f.grappling,"Jiu-jítsu":f.jiu_jitsu}
 	for group: String in groups:
 		add_heading(group)

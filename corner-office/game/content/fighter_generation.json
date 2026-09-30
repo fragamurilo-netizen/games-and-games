@@ -1,0 +1,1451 @@
+{
+ "_note": "Gerador de lutadores (Game Design Bible §§4,5,13; MMA Bible §§1,7,14). Universo fictício: nomes, apelidos e cidades genéricos.",
+ "countries": {
+  "BR": {
+   "weight": 18,
+   "region": "brazil",
+   "languages": [
+    "pt"
+   ],
+   "cities": [
+    "Curitiba",
+    "São Paulo",
+    "Rio de Janeiro",
+    "Belo Horizonte",
+    "Manaus",
+    "Salvador",
+    "Natal",
+    "Porto Alegre",
+    "Belém"
+   ],
+   "populations": {
+    "latino": 4,
+    "afro_diaspora": 3,
+    "mediterraneo": 1.5,
+    "europa_norte": 0.3
+   },
+   "martial_bases": {
+    "bjj": 4,
+    "muay_thai": 3,
+    "boxing": 1.5,
+    "mma": 2,
+    "wrestling": 0.6,
+    "judo": 0.6,
+    "karate": 0.5
+   },
+   "male": [
+    "Caio",
+    "Bruno",
+    "Lucas",
+    "Renan",
+    "Diego",
+    "André",
+    "Vitor",
+    "Igor",
+    "Thiago",
+    "Gustavo",
+    "Matheus",
+    "Felipe",
+    "Rodrigo",
+    "Wesley",
+    "Jefferson",
+    "Leandro",
+    "Otávio",
+    "Davi"
+   ],
+   "female": [
+    "Lara",
+    "Marina",
+    "Bianca",
+    "Luiza",
+    "Camila",
+    "Renata",
+    "Aline",
+    "Yasmin",
+    "Jéssica",
+    "Tainá",
+    "Priscila",
+    "Karine",
+    "Letícia",
+    "Beatriz",
+    "Débora",
+    "Natália"
+   ],
+   "last": [
+    "Duarte",
+    "Nunes",
+    "Almeida",
+    "Teixeira",
+    "Pereira",
+    "Moura",
+    "Batista",
+    "Vieira",
+    "Carvalho",
+    "Rocha",
+    "Barbosa",
+    "Cardoso",
+    "Farias",
+    "Lima",
+    "Mendes",
+    "Sampaio",
+    "Tavares",
+    "Queiroz",
+    "Machado",
+    "Brandão"
+   ]
+  },
+  "US": {
+   "weight": 18,
+   "region": "usa",
+   "languages": [
+    "en"
+   ],
+   "cities": [
+    "Phoenix",
+    "Denver",
+    "Albuquerque",
+    "Sacramento",
+    "Columbus",
+    "Tampa",
+    "Omaha",
+    "Milwaukee",
+    "Austin",
+    "Boise"
+   ],
+   "populations": {
+    "europa_norte": 4,
+    "afro_diaspora": 3.5,
+    "latino": 2,
+    "mediterraneo": 1,
+    "leste_asiatico": 0.5,
+    "sul_asiatico": 0.3,
+    "polinesia": 0.2,
+    "oriente_medio": 0.3
+   },
+   "martial_bases": {
+    "wrestling": 4,
+    "boxing": 2.5,
+    "mma": 3,
+    "bjj": 1.5,
+    "kickboxing": 1
+   },
+   "male": [
+    "Evan",
+    "Miles",
+    "Dylan",
+    "Logan",
+    "Adrian",
+    "Noah",
+    "Owen",
+    "Tyler",
+    "Caleb",
+    "Garrett",
+    "Dante",
+    "Wyatt",
+    "Marcus",
+    "Cody",
+    "Trevor",
+    "Isaiah",
+    "Brandon",
+    "Colton"
+   ],
+   "female": [
+    "Nora",
+    "Chloe",
+    "Maya",
+    "Lauren",
+    "Avery",
+    "Brooke",
+    "Stella",
+    "Harper",
+    "Kendall",
+    "Tessa",
+    "Jordan",
+    "Paige",
+    "Sierra",
+    "Danielle",
+    "Kayla",
+    "Reagan"
+   ],
+   "last": [
+    "Mercer",
+    "Hayes",
+    "Bennett",
+    "Foster",
+    "Quinn",
+    "Ellis",
+    "Sullivan",
+    "Brooks",
+    "Whitaker",
+    "Dalton",
+    "Pruitt",
+    "Barnes",
+    "Holcomb",
+    "Garner",
+    "McBride",
+    "Lawson",
+    "Reddick",
+    "Stroud",
+    "Tillman",
+    "Vance"
+   ]
+  },
+  "MX": {
+   "weight": 8,
+   "region": "mexico",
+   "languages": [
+    "es"
+   ],
+   "cities": [
+    "Monterrey",
+    "Tijuana",
+    "Guadalajara",
+    "Puebla",
+    "Hermosillo",
+    "León",
+    "Mérida",
+    "Chihuahua"
+   ],
+   "populations": {
+    "latino": 6,
+    "andino": 2,
+    "mediterraneo": 1
+   },
+   "martial_bases": {
+    "boxing": 5,
+    "mma": 2,
+    "kickboxing": 1,
+    "wrestling": 1,
+    "bjj": 1
+   },
+   "male": [
+    "Emilio",
+    "Javier",
+    "Diego",
+    "Sergio",
+    "Luis",
+    "Marco",
+    "Hugo",
+    "Iván",
+    "Rodrigo",
+    "Alonso",
+    "Gerardo",
+    "Joaquín",
+    "Ulises",
+    "Rafael",
+    "Tomás",
+    "Adán"
+   ],
+   "female": [
+    "Valeria",
+    "Lucía",
+    "Elena",
+    "Isabel",
+    "Daniela",
+    "Camila",
+    "Renata",
+    "Abril",
+    "Ximena",
+    "Paola",
+    "Regina",
+    "Fernanda",
+    "Mariana",
+    "Itzel"
+   ],
+   "last": [
+    "Vargas",
+    "Mendoza",
+    "Navarro",
+    "Aguilar",
+    "Cruz",
+    "Salinas",
+    "Ortega",
+    "Serrano",
+    "Villarreal",
+    "Guzmán",
+    "Robles",
+    "Esparza",
+    "Cárdenas",
+    "Treviño",
+    "Olvera",
+    "Zamora"
+   ]
+  },
+  "GB": {
+   "weight": 6,
+   "region": "europe",
+   "languages": [
+    "en"
+   ],
+   "cities": [
+    "Manchester",
+    "Liverpool",
+    "Birmingham",
+    "Leeds",
+    "Glasgow",
+    "Cardiff",
+    "Bristol",
+    "Newcastle"
+   ],
+   "populations": {
+    "europa_norte": 6,
+    "afro_diaspora": 1.5,
+    "sul_asiatico": 1,
+    "mediterraneo": 0.5,
+    "africa_ocidental": 0.5
+   },
+   "martial_bases": {
+    "kickboxing": 3,
+    "boxing": 2.5,
+    "mma": 2,
+    "bjj": 1,
+    "wrestling": 0.5
+   },
+   "male": [
+    "Callum",
+    "Oliver",
+    "Finn",
+    "Arthur",
+    "Lewis",
+    "Jamie",
+    "Oscar",
+    "Toby",
+    "Declan",
+    "Rhys",
+    "Kieran",
+    "Ashley",
+    "Connor",
+    "Reece"
+   ],
+   "female": [
+    "Freya",
+    "Alice",
+    "Ruby",
+    "Grace",
+    "Imogen",
+    "Holly",
+    "Beth",
+    "Iris",
+    "Poppy",
+    "Megan",
+    "Shannon",
+    "Eloise"
+   ],
+   "last": [
+    "Ward",
+    "Palmer",
+    "Holt",
+    "Clarke",
+    "Walsh",
+    "Bishop",
+    "Reeves",
+    "Shaw",
+    "Pickering",
+    "Hollis",
+    "Ashworth",
+    "Fenwick",
+    "Barrow",
+    "Critchley"
+   ]
+  },
+  "IE": {
+   "weight": 2,
+   "region": "europe",
+   "languages": [
+    "en"
+   ],
+   "cities": [
+    "Dublin",
+    "Cork",
+    "Galway",
+    "Limerick"
+   ],
+   "populations": {
+    "europa_norte": 1
+   },
+   "martial_bases": {
+    "boxing": 2,
+    "mma": 2,
+    "kickboxing": 1,
+    "bjj": 1
+   },
+   "male": [
+    "Cian",
+    "Eoin",
+    "Oisín",
+    "Darragh",
+    "Ronan",
+    "Fionn",
+    "Tadhg",
+    "Colm"
+   ],
+   "female": [
+    "Aoife",
+    "Niamh",
+    "Saoirse",
+    "Clodagh",
+    "Orla",
+    "Ciara"
+   ],
+   "last": [
+    "Byrne",
+    "Kavanagh",
+    "Doyle",
+    "Nolan",
+    "Brennan",
+    "Lynch",
+    "Keane",
+    "Mulligan",
+    "Fitzgerald",
+    "Hanlon"
+   ]
+  },
+  "FR": {
+   "weight": 3,
+   "region": "europe",
+   "languages": [
+    "fr"
+   ],
+   "cities": [
+    "Marseille",
+    "Lyon",
+    "Toulouse",
+    "Nice",
+    "Lille",
+    "Bordeaux"
+   ],
+   "populations": {
+    "mediterraneo": 3,
+    "europa_norte": 2,
+    "oriente_medio": 1.5,
+    "africa_ocidental": 1.5
+   },
+   "martial_bases": {
+    "kickboxing": 2,
+    "judo": 2,
+    "mma": 2,
+    "boxing": 1,
+    "bjj": 1
+   },
+   "male": [
+    "Théo",
+    "Hugo",
+    "Maxime",
+    "Julien",
+    "Karim",
+    "Bastien",
+    "Quentin",
+    "Yanis",
+    "Samir",
+    "Loïc"
+   ],
+   "female": [
+    "Manon",
+    "Chloé",
+    "Inès",
+    "Camille",
+    "Léa",
+    "Sarah",
+    "Océane"
+   ],
+   "last": [
+    "Morel",
+    "Girard",
+    "Lefèvre",
+    "Rousseau",
+    "Fontaine",
+    "Chevalier",
+    "Benali",
+    "Mercier",
+    "Garnier",
+    "Diallo"
+   ]
+  },
+  "PL": {
+   "weight": 4,
+   "region": "europe",
+   "languages": [
+    "pl"
+   ],
+   "cities": [
+    "Kraków",
+    "Wrocław",
+    "Gdańsk",
+    "Poznań",
+    "Łódź"
+   ],
+   "populations": {
+    "leste_europeu": 1
+   },
+   "martial_bases": {
+    "wrestling": 2,
+    "kickboxing": 2,
+    "mma": 2,
+    "judo": 1,
+    "boxing": 1
+   },
+   "male": [
+    "Kacper",
+    "Mateusz",
+    "Jakub",
+    "Bartosz",
+    "Szymon",
+    "Paweł",
+    "Tomasz",
+    "Michał",
+    "Dawid"
+   ],
+   "female": [
+    "Zuzanna",
+    "Karolina",
+    "Natalia",
+    "Weronika",
+    "Agnieszka",
+    "Joanna"
+   ],
+   "last": [
+    "Nowicki",
+    "Kowalczyk",
+    "Zieliński",
+    "Wróbel",
+    "Sadowski",
+    "Pawlak",
+    "Dudek",
+    "Kaczmarek",
+    "Sikora",
+    "Mazur"
+   ]
+  },
+  "JP": {
+   "weight": 5,
+   "region": "japan_korea",
+   "languages": [
+    "ja"
+   ],
+   "cities": [
+    "Osaka",
+    "Tóquio",
+    "Nagoya",
+    "Fukuoka",
+    "Sapporo",
+    "Kobe"
+   ],
+   "populations": {
+    "leste_asiatico": 1
+   },
+   "martial_bases": {
+    "judo": 3,
+    "karate": 3,
+    "kickboxing": 2,
+    "mma": 2,
+    "wrestling": 1,
+    "bjj": 1
+   },
+   "male": [
+    "Ren",
+    "Haruto",
+    "Kaito",
+    "Daichi",
+    "Yuto",
+    "Sota",
+    "Riku",
+    "Toma",
+    "Kenta",
+    "Shun",
+    "Takumi",
+    "Ryota"
+   ],
+   "female": [
+    "Hana",
+    "Mei",
+    "Yui",
+    "Rina",
+    "Sakura",
+    "Aoi",
+    "Mio",
+    "Emi",
+    "Nanami",
+    "Ayaka"
+   ],
+   "last": [
+    "Mori",
+    "Takeda",
+    "Ishida",
+    "Okada",
+    "Ueda",
+    "Fujita",
+    "Kondo",
+    "Arai",
+    "Hasegawa",
+    "Kubota",
+    "Nishimura",
+    "Tamura",
+    "Yoshida",
+    "Sakai"
+   ]
+  },
+  "KR": {
+   "weight": 4,
+   "region": "japan_korea",
+   "languages": [
+    "ko"
+   ],
+   "cities": [
+    "Seul",
+    "Busan",
+    "Incheon",
+    "Daegu",
+    "Gwangju"
+   ],
+   "populations": {
+    "leste_asiatico": 1
+   },
+   "martial_bases": {
+    "taekwondo": 3,
+    "kickboxing": 2,
+    "mma": 2,
+    "judo": 1,
+    "wrestling": 1,
+    "boxing": 1
+   },
+   "male": [
+    "Min-jun",
+    "Seo-jun",
+    "Ji-ho",
+    "Hyun-woo",
+    "Do-yun",
+    "Jae-won",
+    "Tae-hyun",
+    "Sung-min"
+   ],
+   "female": [
+    "Ji-woo",
+    "Seo-yeon",
+    "Min-seo",
+    "Ha-eun",
+    "Su-bin",
+    "Ye-jin"
+   ],
+   "last": [
+    "Kim",
+    "Park",
+    "Choi",
+    "Jung",
+    "Kang",
+    "Yoon",
+    "Jang",
+    "Lim",
+    "Han",
+    "Shin",
+    "Oh",
+    "Seo"
+   ]
+  },
+  "KZ": {
+   "weight": 5,
+   "region": "central_asia",
+   "languages": [
+    "kk",
+    "ru"
+   ],
+   "cities": [
+    "Almaty",
+    "Astana",
+    "Shymkent",
+    "Karaganda",
+    "Aktobe"
+   ],
+   "populations": {
+    "asia_central": 4,
+    "leste_europeu": 1
+   },
+   "martial_bases": {
+    "wrestling": 4,
+    "sambo": 3,
+    "boxing": 2,
+    "judo": 1,
+    "mma": 1
+   },
+   "male": [
+    "Arman",
+    "Daniyar",
+    "Nurlan",
+    "Samat",
+    "Timur",
+    "Aslan",
+    "Ruslan",
+    "Marat",
+    "Yerlan",
+    "Azamat",
+    "Bauyrzhan",
+    "Dias"
+   ],
+   "female": [
+    "Aida",
+    "Alina",
+    "Dana",
+    "Amina",
+    "Kamila",
+    "Zarina",
+    "Mira",
+    "Saule",
+    "Aigerim",
+    "Dinara"
+   ],
+   "last": [
+    "Akhmetov",
+    "Karimov",
+    "Sadykov",
+    "Omarov",
+    "Bekov",
+    "Isayev",
+    "Nuriev",
+    "Aripov",
+    "Zhakupov",
+    "Temirov",
+    "Serikbayev",
+    "Utebayev"
+   ]
+  },
+  "GE": {
+   "weight": 3,
+   "region": "central_asia",
+   "languages": [
+    "ka"
+   ],
+   "cities": [
+    "Tbilisi",
+    "Batumi",
+    "Kutaisi",
+    "Rustavi"
+   ],
+   "populations": {
+    "caucaso": 1
+   },
+   "martial_bases": {
+    "wrestling": 4,
+    "judo": 3,
+    "sambo": 2,
+    "mma": 1
+   },
+   "male": [
+    "Giorgi",
+    "Levan",
+    "Davit",
+    "Nika",
+    "Irakli",
+    "Zurab",
+    "Lasha",
+    "Tornike"
+   ],
+   "female": [
+    "Nino",
+    "Mariam",
+    "Tamar",
+    "Ana",
+    "Salome",
+    "Eka"
+   ],
+   "last": [
+    "Beridze",
+    "Kapanadze",
+    "Gelashvili",
+    "Tsiklauri",
+    "Lomidze",
+    "Chkheidze",
+    "Abashidze",
+    "Gogua",
+    "Dolidze",
+    "Meskhi"
+   ]
+  },
+  "AU": {
+   "weight": 5,
+   "region": "oceania",
+   "languages": [
+    "en"
+   ],
+   "cities": [
+    "Sydney",
+    "Brisbane",
+    "Perth",
+    "Adelaide",
+    "Gold Coast",
+    "Melbourne"
+   ],
+   "populations": {
+    "europa_norte": 5,
+    "mediterraneo": 1,
+    "polinesia": 1,
+    "leste_asiatico": 0.6,
+    "afro_diaspora": 0.3
+   },
+   "martial_bases": {
+    "kickboxing": 2.5,
+    "boxing": 2,
+    "mma": 2,
+    "bjj": 1.5,
+    "wrestling": 1,
+    "muay_thai": 1
+   },
+   "male": [
+    "Jack",
+    "Riley",
+    "Mitchell",
+    "Brodie",
+    "Lachlan",
+    "Cooper",
+    "Hamish",
+    "Jarrah",
+    "Declan",
+    "Kane"
+   ],
+   "female": [
+    "Tahlia",
+    "Jade",
+    "Ella",
+    "Sienna",
+    "Madison",
+    "Kirra",
+    "Brianna"
+   ],
+   "last": [
+    "Kerr",
+    "Donnelly",
+    "Maguire",
+    "Pearce",
+    "Baxter",
+    "Hutchins",
+    "Wallace",
+    "Nolan",
+    "Radford",
+    "Tipene"
+   ]
+  },
+  "NZ": {
+   "weight": 3,
+   "region": "oceania",
+   "languages": [
+    "en",
+    "mi"
+   ],
+   "cities": [
+    "Auckland",
+    "Wellington",
+    "Christchurch",
+    "Hamilton"
+   ],
+   "populations": {
+    "europa_norte": 3,
+    "polinesia": 3
+   },
+   "martial_bases": {
+    "kickboxing": 3,
+    "mma": 2,
+    "boxing": 1,
+    "bjj": 1,
+    "wrestling": 0.5
+   },
+   "male": [
+    "Nikau",
+    "Tane",
+    "Liam",
+    "Wiremu",
+    "Hunter",
+    "Mason",
+    "Rawiri",
+    "Blake"
+   ],
+   "female": [
+    "Aroha",
+    "Kaia",
+    "Mia",
+    "Tui",
+    "Ruby",
+    "Anahera"
+   ],
+   "last": [
+    "Tuhoe",
+    "Walker",
+    "Ngata",
+    "Harrison",
+    "Parata",
+    "Wilson",
+    "Ruru",
+    "Henare",
+    "Kingi",
+    "Fletcher"
+   ]
+  }
+ },
+ "nicknames": {
+  "pt": [
+   "Furacão",
+   "Muralha",
+   "Trovão",
+   "Tanque",
+   "Faísca",
+   "Caçador",
+   "Serpente",
+   "Relâmpago",
+   "Bigorna",
+   "Martelo",
+   "Tempestade",
+   "Carcará",
+   "Onça",
+   "Cometa",
+   "Pedreira",
+   "Vulcão",
+   "Marreta",
+   "Dinamite",
+   "Cangaceiro",
+   "Capoeira",
+   "Guerreiro",
+   "Sucuri"
+  ],
+  "en": [
+   "The Hammer",
+   "Ice",
+   "The Surgeon",
+   "Anvil",
+   "Wildfire",
+   "The Architect",
+   "Hurricane",
+   "Viper",
+   "Ironside",
+   "Nightshift",
+   "The Mechanic",
+   "Blizzard",
+   "Outlaw",
+   "Sledge",
+   "Tundra",
+   "Diesel",
+   "Lockjaw",
+   "Crossfire",
+   "The Professor",
+   "Brickhouse",
+   "Rattler",
+   "Longshot"
+  ],
+  "es": [
+   "El Toro",
+   "La Pantera",
+   "El Martillo",
+   "Relámpago",
+   "El Halcón",
+   "Dinamita",
+   "La Roca",
+   "Tormenta",
+   "El Alacrán",
+   "Centella",
+   "El Muro",
+   "El Lobo",
+   "La Fiera",
+   "El Volcán"
+  ],
+  "fr": [
+   "Le Rempart",
+   "La Foudre",
+   "Le Faucon",
+   "Tonnerre",
+   "Le Bélier",
+   "La Lame"
+  ],
+  "pl": [
+   "Wilk",
+   "Młot",
+   "Grom",
+   "Tur",
+   "Sokół",
+   "Niedźwiedź"
+  ],
+  "ja": [
+   "Kaminari",
+   "Tora",
+   "Oni",
+   "Kaze",
+   "Tetsu",
+   "Ryu",
+   "Hayate",
+   "Arashi"
+  ],
+  "ko": [
+   "Horangi",
+   "Taepung",
+   "Iron Crane",
+   "Stone Fist",
+   "Byeorak"
+  ],
+  "kk": [
+   "Barys",
+   "Qasqyr",
+   "Burkit",
+   "Aibat",
+   "Tulpar"
+  ],
+  "ru": [
+   "Molot",
+   "Medved",
+   "Kuvalda"
+  ],
+  "ka": [
+   "Datvi",
+   "Lomi",
+   "Mgeli",
+   "Kldé"
+  ],
+  "mi": [
+   "Taniwha",
+   "Kahu",
+   "Tama Toa"
+  ]
+ },
+ "nickname_chance": {
+  "base": 0.2,
+  "per_win": 0.03,
+  "max": 0.8
+ },
+ "archetypes": {
+  "boxing": {
+   "groups": {
+    "striking": 7,
+    "grappling": -5,
+    "jiu_jitsu": -7,
+    "physical": 1,
+    "mental": 0
+   },
+   "keys": [
+    "boxing",
+    "jab",
+    "combinations",
+    "power",
+    "countering",
+    "defense",
+    "accuracy",
+    "speed"
+   ],
+   "body_types": {
+    "athletic": 4,
+    "lean": 2,
+    "compact": 2,
+    "muscular": 1
+   },
+   "stance": {
+    "orthodox": 0.7,
+    "southpaw": 0.25,
+    "switch": 0.05
+   }
+  },
+  "muay_thai": {
+   "groups": {
+    "striking": 6,
+    "grappling": -2,
+    "jiu_jitsu": -7,
+    "physical": 1,
+    "mental": 0
+   },
+   "keys": [
+    "kicks",
+    "low_kicks",
+    "knees",
+    "elbows",
+    "clinch",
+    "durability",
+    "chin"
+   ],
+   "body_types": {
+    "lean": 4,
+    "athletic": 3,
+    "compact": 1
+   },
+   "stance": {
+    "orthodox": 0.7,
+    "southpaw": 0.2,
+    "switch": 0.1
+   }
+  },
+  "kickboxing": {
+   "groups": {
+    "striking": 6,
+    "grappling": -5,
+    "jiu_jitsu": -6,
+    "physical": 1,
+    "mental": 0
+   },
+   "keys": [
+    "kicks",
+    "combinations",
+    "low_kicks",
+    "speed",
+    "mobility",
+    "accuracy"
+   ],
+   "body_types": {
+    "lean": 4,
+    "athletic": 3,
+    "compact": 1
+   },
+   "stance": {
+    "orthodox": 0.62,
+    "southpaw": 0.25,
+    "switch": 0.13
+   }
+  },
+  "karate": {
+   "groups": {
+    "striking": 5,
+    "grappling": -5,
+    "jiu_jitsu": -6,
+    "physical": 1,
+    "mental": 2
+   },
+   "keys": [
+    "kicks",
+    "countering",
+    "defense",
+    "mobility",
+    "speed",
+    "patience",
+    "accuracy"
+   ],
+   "body_types": {
+    "lean": 5,
+    "athletic": 3
+   },
+   "stance": {
+    "orthodox": 0.5,
+    "southpaw": 0.25,
+    "switch": 0.25
+   }
+  },
+  "taekwondo": {
+   "groups": {
+    "striking": 4,
+    "grappling": -6,
+    "jiu_jitsu": -6,
+    "physical": 2,
+    "mental": 0
+   },
+   "keys": [
+    "kicks",
+    "speed",
+    "mobility",
+    "explosiveness",
+    "countering"
+   ],
+   "body_types": {
+    "lean": 6,
+    "athletic": 2
+   },
+   "stance": {
+    "orthodox": 0.5,
+    "southpaw": 0.2,
+    "switch": 0.3
+   }
+  },
+  "wrestling": {
+   "groups": {
+    "striking": -5,
+    "grappling": 8,
+    "jiu_jitsu": 0,
+    "physical": 2,
+    "mental": 0
+   },
+   "keys": [
+    "takedown_offense",
+    "takedown_defense",
+    "top_control",
+    "cage_control",
+    "ground_and_pound",
+    "cardio",
+    "strength",
+    "scramble"
+   ],
+   "body_types": {
+    "compact": 4,
+    "muscular": 3,
+    "athletic": 2
+   },
+   "stance": {
+    "orthodox": 0.72,
+    "southpaw": 0.23,
+    "switch": 0.05
+   }
+  },
+  "bjj": {
+   "groups": {
+    "striking": -6,
+    "grappling": 1,
+    "jiu_jitsu": 9,
+    "physical": -1,
+    "mental": 1
+   },
+   "keys": [
+    "submission_offense",
+    "guard",
+    "back_control",
+    "transitions",
+    "submission_defense",
+    "leg_locks"
+   ],
+   "body_types": {
+    "athletic": 3,
+    "compact": 2,
+    "lean": 2,
+    "heavy": 1
+   },
+   "stance": {
+    "orthodox": 0.72,
+    "southpaw": 0.23,
+    "switch": 0.05
+   }
+  },
+  "judo": {
+   "groups": {
+    "striking": -5,
+    "grappling": 6,
+    "jiu_jitsu": 2,
+    "physical": 2,
+    "mental": 0
+   },
+   "keys": [
+    "clinch",
+    "takedown_offense",
+    "top_control",
+    "strength",
+    "transitions",
+    "cage_control"
+   ],
+   "body_types": {
+    "compact": 3,
+    "muscular": 3,
+    "athletic": 2,
+    "heavy": 1
+   },
+   "stance": {
+    "orthodox": 0.6,
+    "southpaw": 0.35,
+    "switch": 0.05
+   }
+  },
+  "sambo": {
+   "groups": {
+    "striking": -4,
+    "grappling": 5,
+    "jiu_jitsu": 4,
+    "physical": 2,
+    "mental": 0
+   },
+   "keys": [
+    "leg_locks",
+    "takedown_offense",
+    "submission_offense",
+    "scramble",
+    "clinch",
+    "durability"
+   ],
+   "body_types": {
+    "compact": 4,
+    "muscular": 3,
+    "athletic": 2
+   },
+   "stance": {
+    "orthodox": 0.7,
+    "southpaw": 0.25,
+    "switch": 0.05
+   }
+  },
+  "mma": {
+   "groups": {
+    "striking": 0,
+    "grappling": 0,
+    "jiu_jitsu": 0,
+    "physical": 1,
+    "mental": 1
+   },
+   "keys": [
+    "fight_iq",
+    "adaptation",
+    "cardio",
+    "scramble",
+    "takedown_defense"
+   ],
+   "body_types": {
+    "athletic": 5,
+    "lean": 2,
+    "compact": 2,
+    "muscular": 1
+   },
+   "stance": {
+    "orthodox": 0.66,
+    "southpaw": 0.26,
+    "switch": 0.08
+   }
+  }
+ },
+ "key_attribute_bonus": 9,
+ "attribute_noise": 6,
+ "attribute_range": [
+  20,
+  95
+ ],
+ "level": {
+  "mean": 56,
+  "deviation": 7,
+  "range": [
+   40,
+   78
+  ]
+ },
+ "age": {
+  "population": [
+   21,
+   36
+  ],
+  "peak": 28,
+  "prospect": [
+   19,
+   24
+  ]
+ },
+ "prime": {
+  "start": 26,
+  "end": 32,
+  "young_penalty_per_year": 1.2,
+  "decline_per_year": 1.8,
+  "decline_attributes": [
+   "speed",
+   "explosiveness",
+   "recovery",
+   "chin",
+   "durability",
+   "mobility"
+  ],
+  "veteran_mental_per_year": 0.8
+ },
+ "potential": {
+  "growth_per_year_below_peak": [
+   0.8,
+   2.4
+  ],
+  "base_spread": 3,
+  "spread_per_year_below_peak": 1.2
+ },
+ "record": {
+  "fights_per_year": [
+   0.9,
+   2.3
+  ],
+  "max_fights": 34,
+  "win_base": 0.6,
+  "win_per_level": 0.02,
+  "win_noise": 0.08,
+  "win_range": [
+   0.3,
+   0.93
+  ],
+  "draw_chance": 0.02,
+  "prospect_fights": [
+   0,
+   6
+  ],
+  "prospect_win_bonus": 0.12
+ },
+ "height_deviation": 4.5,
+ "reach_offset": {
+  "mean": 2.5,
+  "deviation": 3.5,
+  "range": [
+   -4,
+   13
+  ]
+ },
+ "natural_weight_over_limit": [
+  1.05,
+  1.16
+ ],
+ "body_weight_factor": {
+  "lean": -0.02,
+  "athletic": 0.0,
+  "compact": 0.01,
+  "muscular": 0.03,
+  "heavy": 0.05
+ },
+ "charisma": {
+  "mean": 50,
+  "deviation": 15
+ },
+ "popularity": {
+  "base": 3,
+  "per_win": 1.2,
+  "per_charisma": 0.15,
+  "noise": 4,
+  "range": [
+   1,
+   45
+  ]
+ },
+ "hidden": {
+  "mean": 55,
+  "deviation": 15,
+  "range": [
+   5,
+   95
+  ]
+ },
+ "career_goals": [
+  "money",
+  "legacy",
+  "activity",
+  "belt"
+ ],
+ "bios": {
+  "prospect": [
+   "Prospecto de {age} anos vindo do circuito regional de {city}. Base: {base}.",
+   "Estreou cedo em {city}; ainda cru, mas treina como veterano. Base: {base}.",
+   "Chegou ao profissional em {city} e os olheiros locais falam bem. Base: {base}."
+  ],
+  "prime": [
+   "{age} anos, auge físico. Construiu o cartel {record} em eventos de {city}. Base: {base}.",
+   "Atleta de {city} com base de {base}; busca a luta que muda a carreira.",
+   "Cartel {record}. Treina em {gym}; base de {base}."
+  ],
+  "veteran": [
+   "Veterano de {age} anos com {fights} lutas profissionais; conhece todos os atalhos do cage. Base: {base}.",
+   "Nome conhecido em {city}; experiência compensa o que o tempo levou. Base: {base}.",
+   "{fights} lutas no corpo. Base de {base}; sabe vender uma luta."
+  ]
+ },
+ "intake": {
+  "per_month": [
+   1,
+   3
+  ],
+  "news_min_wins": 4,
+  "retire_age": 34,
+  "retire_chance": 0.3,
+  "forced_retire_age": 41,
+  "journeyman_age": 30,
+  "journeyman_loss_margin": 3
+ },
+ "martial_base_names": {
+  "boxing": "boxe",
+  "muay_thai": "muay thai",
+  "kickboxing": "kickboxing",
+  "karate": "karatê",
+  "taekwondo": "taekwondo",
+  "wrestling": "wrestling",
+  "bjj": "jiu-jítsu",
+  "judo": "judô",
+  "sambo": "sambo",
+  "mma": "MMA"
+ },
+ "body_type_names": {
+  "lean": "longilíneo",
+  "athletic": "atlético",
+  "compact": "compacto",
+  "muscular": "musculoso",
+  "heavy": "pesado"
+ },
+ "gym_fallback": "uma equipe local"
+}

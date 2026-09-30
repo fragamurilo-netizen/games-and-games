@@ -105,7 +105,7 @@ static func snapshot(world: WorldState) -> Dictionary:
 	var fighters: Array=[];var events: Array=[];var news: Array=[];var tables: Array=[]
 	for f: Fighter in world.fighters.values():
 		var c: Contract=world.contracts.get(f.contract_id)
-		fighters.append({"id":f.id,"name":f.first_name+" "+f.last_name,"sex":f.sex,"country":f.country,"division":f.division,"style":f.martial_base,"record":f.record.duplicate(),"organization_id":f.organization_id,"height_cm":f.height_cm,"reach_cm":f.reach_cm,"appearance":f.appearance.duplicate(true),"show_money":c.show_money if c and c.active else Contracts.market_price(world,f),"bouts_remaining":c.bouts_remaining if c and c.active else 0,"suspension":f.medical_suspension_until.duplicate()})
+		fighters.append({"id":f.id,"name":f.first_name+" "+f.last_name,"sex":f.sex,"country":f.country,"division":f.division,"style":f.martial_base,"record":f.record.duplicate(),"organization_id":f.organization_id,"height_cm":f.height_cm,"reach_cm":f.reach_cm,"appearance":f.appearance.duplicate(true),"show_money":c.show_money if c and c.active else Contracts.market_price(world,f),"bouts_remaining":c.bouts_remaining if c and c.active else 0,"suspension":f.medical_suspension_until.duplicate(),"retired":f.retired,"nickname":f.nickname,"age":f.age_on(world.date),"bio":f.bio})
 	for ev: FightEvent in world.events.values():
 		if ev.organization_id!=world.player_org_id:continue
 		var item:=ev.to_dict().duplicate(true);item.fights=[]

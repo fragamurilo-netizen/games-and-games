@@ -73,5 +73,14 @@ func display_name() -> String:
 	return "%s “%s” %s" % [first_name, nickname, last_name]
 
 
+func age_on(date: Dictionary) -> int:
+	if birth_date.is_empty():
+		return 0
+	var age: int = int(date.year) - int(birth_date.year)
+	if int(date.month) < int(birth_date.month) or (int(date.month) == int(birth_date.month) and int(date.day) < int(birth_date.day)):
+		age -= 1
+	return age
+
+
 func record_string() -> String:
 	return "%d-%d-%d" % [record.wins, record.losses, record.draws]
