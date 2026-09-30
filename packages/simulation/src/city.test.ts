@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { validateCityContent } from "@paralelo/content"
+import { companies, fillText, inPlace, placeGender, validateCityContent } from "@paralelo/content"
 import type { EmploymentId, MessageId } from "@paralelo/shared"
 import { absoluteMinute, createWorld, dismissPlayer, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
 
@@ -34,6 +34,15 @@ const until = (start: WorldState, done: (world: WorldState) => boolean, maxDays 
 describe("mundo vivo", () => {
   it("tem textos da cidade válidos", () => {
     expect(validateCityContent()).toEqual([])
+  })
+
+  it("concorda artigo com o nome do lugar", () => {
+    for (const name of [...companies, "Centro", "Vila das Flores"]) expect(placeGender[name]).toMatch(/^[ao]$/)
+    expect(fillText("Começo na {company} amanhã.", { company: "Hotel Primavera" })).toBe("Começo no Hotel Primavera amanhã.")
+    expect(fillText("A {company} perdeu um cliente.", { company: "Café da Praça" })).toBe("O Café da Praça perdeu um cliente.")
+    expect(fillText("Passo perto da {district}.", { district: "Centro" })).toBe("Passo perto do Centro.")
+    expect(fillText("Clima estranho na {company}.", { company: "Padaria Aurora" })).toBe("Clima estranho na Padaria Aurora.")
+    expect(inPlace("Centro")).toBe("no Centro")
   })
 
   it("é determinístico: mesma seed e mesmos comandos dão o mesmo mundo", () => {

@@ -15,10 +15,10 @@ export function Messages({ inbox }: { inbox: Inbox }) {
   const locked = busy || !!world?.events.pending
   return <>
     <Kicker meta={inbox.length === 1 ? "1 sem resposta" : `${inbox.length} sem resposta`}>Mensagens</Kicker>
-    {inbox.map(m => {
+    {inbox.map((m, i) => {
       const first = m.from.name.split(" ")[0]
       const blocked = m.replies.find(r => !r.canReply && r.reply !== "later")
-      return <View key={m.id} style={styles.message}>
+      return <View key={m.id} style={[styles.message, i > 0 && styles.between]}>
         <View style={styles.head}>
           <Portrait seed={m.from.appearance.seed} sex={m.from.appearance.sex} age={m.from.age} size={44} accessibilityLabel={`Retrato de ${m.from.name}`} />
           <View style={styles.headText}>
@@ -46,7 +46,8 @@ export function Messages({ inbox }: { inbox: Inbox }) {
 }
 
 const styles = StyleSheet.create({
-  message: { paddingVertical: space[3], borderBottomColor: colors.rule, borderBottomWidth: StyleSheet.hairlineWidth },
+  message: { paddingVertical: space[3] },
+  between: { borderTopColor: colors.rule, borderTopWidth: StyleSheet.hairlineWidth },
   head: { flexDirection: "row", alignItems: "center", gap: space[3] },
   headText: { flex: 1, minWidth: 0 },
   name: { color: colors.text, fontFamily: fonts.medium, fontSize: 15, lineHeight: 21 },

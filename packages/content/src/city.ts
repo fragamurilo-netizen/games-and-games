@@ -105,7 +105,19 @@ export const newsTexts = {
   ],
 } as const
 
+/** Gênero gramatical de lugares e empresas: decide "na Padaria" ou "no Hotel" (bíblia §32). */
+export const placeGender: Readonly<Record<string, "a" | "o">> = {
+  "Mercado do Bairro": "o", "Padaria Aurora": "a", "Clínica São Bento": "a", "Oficina Central": "a", "Livraria Travessa": "a",
+  "Logística Horizonte": "a", "Café da Praça": "o", "Escritório Mendonça": "o", "Hotel Primavera": "o", "Tecidos Flores": "a",
+  "Centro": "o", "Vila das Flores": "a",
+}
+const MASCULINE: Readonly<Record<string, string>> = { na: "no", a: "o", da: "do", pela: "pelo" }
+/** "na Vila das Flores", "no Centro". */
+export const inPlace = (name: string): string => `${placeGender[name] === "o" ? "no" : "na"} ${name}`
+
 const PLACEHOLDER = /\{([a-z]+)\}/g
+// Concordância: os textos são escritos no feminino ("na {company}") e viram "no" quando o nome pede
+const CONTRACTION = /(^|[^\p{L}])(na|Na|a|A|da|Da|pela|Pela) \{(company|district)\}/gu
 const KNOWN = new Set(["name", "first", "company", "role", "district"])
 export function validateCityContent(): string[] {
   const errors: string[] = []
@@ -125,5 +137,11 @@ export function validateCityContent(): string[] {
 }
 
 export function fillText(template: string, values: Readonly<Partial<Record<"name" | "first" | "company" | "role" | "district", string>>>): string {
-  return template.replace(PLACEHOLDER, (_, key: string) => values[key as keyof typeof values] ?? `{${key}}`)
+  const agreed = template.replace(CONTRACTION, (all, before: string, word: string, key: "company" | "district") => {
+    const name = values[key]
+    if (!name || placeGender[name] !== "o") return all
+    const lower = MASCULINE[word.toLowerCase()]!
+    return `${before}${word[0] === word[0]!.toUpperCase() ? lower[0]!.toUpperCase() + lower.slice(1) : lower} {${key}}`
+  })
+  return agreed.replace(PLACEHOLDER, (_, key: string) => values[key as keyof typeof values] ?? `{${key}}`)
 }

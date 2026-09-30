@@ -4,7 +4,7 @@ import type { MessageReply, MessageTopic, WorldState } from "../domain/world"
 import { replyReason } from "../systems/city"
 import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
-import { courses, jobRoles, routineRules } from "@paralelo/content"
+import { courses, inPlace, jobRoles, routineRules } from "@paralelo/content"
 import { applicationReason, nextWorkTime, workReason } from "../systems/career"
 import { formatMoney } from "../systems/finance"
 import { groceriesReason, mealReason, type MealSource } from "../systems/routine"
@@ -40,7 +40,7 @@ function workLine(world: WorldState, id: PersonId): string | null {
   if (!resident) return null
   if (resident.job) {
     const role = jobRoles.find(item => item.id === resident.job!.roleId)
-    return `${role?.title ?? "Trabalha"} na ${world.companies[resident.job.companyId]!.name}`
+    return `${role?.title ?? "Trabalha"} ${inPlace(world.companies[resident.job.companyId]!.name)}`
   }
   const age = ageAt(world.people[id]!.birthDate, world.clock)
   if (age >= 65) return "Já se aposentou"
@@ -89,7 +89,7 @@ export function queryLife(world: WorldState) {
       const tag = r.tags[0] ?? "friend"
       return { id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock), appearance: { seed: person.appearanceSeed, sex: person.sex },
         group: tag, closeness: r.affection + r.trust + r.familiarity,
-        description: tag === "family" ? "Sua mãe" : tag === "friend" ? "Amizade de antes da mudança" : tag === "neighbor" ? `Mora perto, na ${world.residences[person.residenceId]!.district}` : "Colega de trabalho",
+        description: tag === "family" ? "Sua mãe" : tag === "friend" ? "Amizade de antes da mudança" : tag === "neighbor" ? `Mora perto, ${inPlace(world.residences[person.residenceId]!.district)}` : "Colega de trabalho",
         work: workLine(world, person.id),
         state: r.lastInteractionAt && absoluteMinute(world.clock) - absoluteMinute(r.lastInteractionAt) < 10080 ? "Vocês tiveram contato recentemente." : r.lastInteractionAt ? "Faz um tempo que vocês não se falam." : r.trust > 65 ? "Existe confiança entre vocês." : "Vocês ainda têm muito para conversar.",
         canContact: !unavailable, unavailableReason: unavailable?.message ?? null,
