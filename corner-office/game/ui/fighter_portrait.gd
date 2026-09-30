@@ -17,6 +17,7 @@ static func make(f: Fighter, width: float, accent_color: Color = Tokens.STEEL) -
 	p.accent = accent_color
 	p.custom_minimum_size = Vector2(width, width * PortraitService.H / PortraitService.W)
 	p.mouse_filter = MOUSE_FILTER_IGNORE
+	p.clip_contents = true   # a bandeira é cortada nas bordas do card
 	return p
 
 
@@ -42,15 +43,22 @@ func _on_ready(key: String) -> void:
 	queue_redraw()
 
 
-## Moldura de card: fundo escuro, faixa diagonal na cor do corner, busto
-## ilustrado por cima e filete na base (DESIGN.md: cores só via Tokens).
+## Moldura de card: bandeira do país ao fundo (cortada para preencher),
+## véu escuro para o busto ilustrado se destacar e filete na cor do corner.
+## Sem bandeira conhecida: fundo liso com a faixa diagonal do corner.
 func _draw() -> void:
 	var w := size.x; var h := size.y
 	draw_rect(Rect2(Vector2.ZERO, size), Tokens.SURFACE)
-	var slab := accent; slab.a = 0.9
-	draw_colored_polygon(PackedVector2Array([Vector2(0, h * 0.62), Vector2(w, h * 0.34), Vector2(w, h), Vector2(0, h)]), slab)
-	var shade := Tokens.CANVAS; shade.a = 0.55
-	draw_colored_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w * 0.42, 0), Vector2(0, h * 0.3)]), shade)
+	if FlagView.has_flag(fighter.country):
+		var fw := maxf(w, h * 1.5)
+		FlagView.paint(self, Rect2((w - fw) * 0.5, (h - fw / 1.5) * 0.5, fw, fw / 1.5), fighter.country)
+		var veil := Tokens.CANVAS; veil.a = 0.28
+		draw_rect(Rect2(Vector2.ZERO, size), veil)
+		var foot := Tokens.CANVAS; foot.a = 0.45
+		draw_colored_polygon(PackedVector2Array([Vector2(0, h * 0.72), Vector2(w, h * 0.58), Vector2(w, h), Vector2(0, h)]), foot)
+	else:
+		var slab := accent; slab.a = 0.9
+		draw_colored_polygon(PackedVector2Array([Vector2(0, h * 0.62), Vector2(w, h * 0.34), Vector2(w, h), Vector2(0, h)]), slab)
 	if _texture:
 		draw_texture_rect(_texture, Rect2(Vector2.ZERO, size), false)
 	else:

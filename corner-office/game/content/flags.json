@@ -1,0 +1,966 @@
+{
+ "_doc": "Bandeiras por código ISO 3166-1 alfa-2 (o mesmo de Fighter.country e do universo). Especificação procedural lida por ui/flag_view.gd: p = padrão (h, v, nordic, cross, saltire, stripes, tri, diamond, quarters, pall, serrated, vband, diag, solid), c = cores, w = pesos das faixas, k = cantão, e = emblema. Base: data/world/nations.json do Mais Uma Rodada.",
+ "flags": {
+  "AE": {
+   "name": "Emirados Árabes Unidos",
+   "flag": {
+    "p": "vband",
+    "c": [
+     "#FF0000",
+     "#00732F",
+     "#FFFFFF",
+     "#000000"
+    ]
+   }
+  },
+  "AM": {
+   "name": "Armênia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#D90012",
+     "#0033A0",
+     "#F2A800"
+    ]
+   }
+  },
+  "AR": {
+   "name": "Argentina",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#74ACDF",
+     "#FFFFFF",
+     "#74ACDF"
+    ],
+    "e": {
+     "t": "sun",
+     "c": "#F6B40E",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.3
+    }
+   }
+  },
+  "AU": {
+   "name": "Austrália",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#012169"
+    ],
+    "k": {
+     "c": "#012169",
+     "w": 0.5,
+     "h": 0.5,
+     "e": {
+      "t": "union",
+      "c": "#FFFFFF",
+      "x": 0.5,
+      "y": 0.5,
+      "s": 1.0,
+      "c2": "#C8102E"
+     }
+    },
+    "e": {
+     "t": "stars_aus",
+     "c": "#FFFFFF",
+     "x": 0.72,
+     "y": 0.5,
+     "s": 0.45
+    }
+   }
+  },
+  "AZ": {
+   "name": "Azerbaijão",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#00B5E2",
+     "#EF3340",
+     "#509E2F"
+    ],
+    "e": {
+     "t": "star",
+     "c": "#FFFFFF",
+     "x": 0.55,
+     "y": 0.5,
+     "s": 0.18
+    }
+   }
+  },
+  "BA": {
+   "name": "Bósnia e Herzegovina",
+   "flag": {
+    "p": "tri",
+    "c": [
+     "#002395"
+    ],
+    "t": "#FECB00",
+    "e": {
+     "t": "stars_diag",
+     "c": "#FFFFFF",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.3
+    }
+   }
+  },
+  "BE": {
+   "name": "Bélgica",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#000000",
+     "#FAE042",
+     "#ED2939"
+    ]
+   }
+  },
+  "BG": {
+   "name": "Bulgária",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FFFFFF",
+     "#00966E",
+     "#D62612"
+    ]
+   }
+  },
+  "BH": {
+   "name": "Barein",
+   "flag": {
+    "p": "serrated",
+    "c": [
+     "#FFFFFF",
+     "#CE1126"
+    ]
+   }
+  },
+  "BR": {
+   "name": "Brasil",
+   "flag": {
+    "p": "diamond",
+    "c": [
+     "#009B3A",
+     "#FEDF00",
+     "#002776"
+    ]
+   }
+  },
+  "CA": {
+   "name": "Canadá",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#FF0000",
+     "#FFFFFF",
+     "#FF0000"
+    ],
+    "w": [
+     1,
+     2,
+     1
+    ],
+    "e": {
+     "t": "leaf",
+     "c": "#FF0000",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.4
+    }
+   }
+  },
+  "CL": {
+   "name": "Chile",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FFFFFF",
+     "#D52B1E"
+    ],
+    "k": {
+     "c": "#0039A6",
+     "w": 0.34,
+     "h": 0.5,
+     "e": {
+      "t": "star",
+      "c": "#FFFFFF",
+      "x": 0.5,
+      "y": 0.5,
+      "s": 0.5
+     }
+    }
+   }
+  },
+  "CM": {
+   "name": "Camarões",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#007A5E",
+     "#CE1126",
+     "#FCD116"
+    ],
+    "e": {
+     "t": "star",
+     "c": "#FCD116",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.28
+    }
+   }
+  },
+  "CN": {
+   "name": "China",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#EE1C25"
+    ],
+    "e": {
+     "t": "stars_chn",
+     "c": "#FFFF00",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.5
+    }
+   }
+  },
+  "CO": {
+   "name": "Colômbia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FCD116",
+     "#003893",
+     "#CE1126"
+    ],
+    "w": [
+     2,
+     1,
+     1
+    ]
+   }
+  },
+  "CU": {
+   "name": "Cuba",
+   "flag": {
+    "p": "tri",
+    "c": [
+     "#002A8F",
+     "#FFFFFF",
+     "#002A8F",
+     "#FFFFFF",
+     "#002A8F"
+    ],
+    "t": "#CF142B",
+    "e": {
+     "t": "star",
+     "c": "#FFFFFF",
+     "x": 0.17,
+     "y": 0.5,
+     "s": 0.3
+    }
+   }
+  },
+  "CZ": {
+   "name": "Tchéquia",
+   "flag": {
+    "p": "tri",
+    "c": [
+     "#FFFFFF",
+     "#D7141A"
+    ],
+    "t": "#11457E"
+   }
+  },
+  "DE": {
+   "name": "Alemanha",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#000000",
+     "#DD0000",
+     "#FFCE00"
+    ]
+   }
+  },
+  "DK": {
+   "name": "Dinamarca",
+   "flag": {
+    "p": "nordic",
+    "c": [
+     "#C8102E",
+     "#FFFFFF"
+    ]
+   }
+  },
+  "EG": {
+   "name": "Egito",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#CE1126",
+     "#FFFFFF",
+     "#000000"
+    ],
+    "e": {
+     "t": "eagle",
+     "c": "#C09300",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.26
+    }
+   }
+  },
+  "ES": {
+   "name": "Espanha",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#AA151B",
+     "#F1BF00",
+     "#AA151B"
+    ],
+    "w": [
+     1,
+     2,
+     1
+    ],
+    "e": {
+     "t": "shield",
+     "c": "#AA151B",
+     "x": 0.3,
+     "y": 0.5,
+     "s": 0.28
+    }
+   }
+  },
+  "FR": {
+   "name": "França",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#002395",
+     "#FFFFFF",
+     "#ED2939"
+    ]
+   }
+  },
+  "GB": {
+   "name": "Reino Unido",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#012169"
+    ],
+    "e": {
+     "t": "union",
+     "c": "#FFFFFF",
+     "c2": "#C8102E"
+    }
+   }
+  },
+  "GE": {
+   "name": "Geórgia",
+   "flag": {
+    "p": "cross",
+    "c": [
+     "#FFFFFF",
+     "#FF0000"
+    ]
+   }
+  },
+  "GR": {
+   "name": "Grécia",
+   "flag": {
+    "p": "stripes",
+    "c": [
+     "#0D5EAF",
+     "#FFFFFF"
+    ],
+    "n": 9,
+    "k": {
+     "c": "#0D5EAF",
+     "w": 0.37,
+     "h": 0.56,
+     "e": {
+      "t": "cross_sq",
+      "c": "#FFFFFF",
+      "x": 0.5,
+      "y": 0.5,
+      "s": 0.8
+     }
+    }
+   }
+  },
+  "HR": {
+   "name": "Croácia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FF0000",
+     "#FFFFFF",
+     "#171796"
+    ],
+    "e": {
+     "t": "checker",
+     "c": "#FF0000",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.36,
+     "c2": "#FFFFFF"
+    }
+   }
+  },
+  "ID": {
+   "name": "Indonésia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#CE1126",
+     "#FFFFFF"
+    ]
+   }
+  },
+  "IE": {
+   "name": "Irlanda",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#169B62",
+     "#FFFFFF",
+     "#FF883E"
+    ]
+   }
+  },
+  "IN": {
+   "name": "Índia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FF9933",
+     "#FFFFFF",
+     "#138808"
+    ],
+    "e": {
+     "t": "disc",
+     "c": "#000080",
+     "c2": "#FFFFFF",
+     "s": 0.26
+    }
+   }
+  },
+  "IR": {
+   "name": "Irã",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#239F40",
+     "#FFFFFF",
+     "#DA0000"
+    ],
+    "e": {
+     "t": "disc",
+     "c": "#DA0000",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.22,
+     "c2": "#FFFFFF"
+    }
+   }
+  },
+  "IT": {
+   "name": "Itália",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#009246",
+     "#FFFFFF",
+     "#CE2B37"
+    ]
+   }
+  },
+  "JP": {
+   "name": "Japão",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#FFFFFF"
+    ],
+    "e": {
+     "t": "disc",
+     "c": "#BC002D",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.6
+    }
+   }
+  },
+  "KG": {
+   "name": "Quirguistão",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#E8112D"
+    ],
+    "e": {
+     "t": "sun",
+     "c": "#FFEF00",
+     "s": 0.42
+    }
+   }
+  },
+  "KR": {
+   "name": "Coreia do Sul",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#FFFFFF"
+    ],
+    "e": {
+     "t": "taeguk",
+     "c": "#CD2E3A",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.5,
+     "c2": "#0047A0"
+    }
+   }
+  },
+  "KZ": {
+   "name": "Cazaquistão",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#00AFCA"
+    ],
+    "e": {
+     "t": "sun",
+     "c": "#FEC50C",
+     "s": 0.38
+    }
+   }
+  },
+  "MA": {
+   "name": "Marrocos",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#C1272D"
+    ],
+    "e": {
+     "t": "star_o",
+     "c": "#006233",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.4
+    }
+   }
+  },
+  "MC": {
+   "name": "Mônaco",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#CE1126",
+     "#FFFFFF"
+    ]
+   }
+  },
+  "MN": {
+   "name": "Mongólia",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#C4272F",
+     "#015197",
+     "#C4272F"
+    ],
+    "e": {
+     "t": "disc",
+     "c": "#F9CF02",
+     "x": 0.17,
+     "y": 0.42,
+     "s": 0.2
+    }
+   }
+  },
+  "MX": {
+   "name": "México",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#006847",
+     "#FFFFFF",
+     "#CE1126"
+    ],
+    "e": {
+     "t": "eagle",
+     "c": "#8C5A2B",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.3
+    }
+   }
+  },
+  "NG": {
+   "name": "Nigéria",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#008751",
+     "#FFFFFF",
+     "#008751"
+    ]
+   }
+  },
+  "NL": {
+   "name": "Países Baixos",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#AE1C28",
+     "#FFFFFF",
+     "#21468B"
+    ]
+   }
+  },
+  "NO": {
+   "name": "Noruega",
+   "flag": {
+    "p": "nordic",
+    "c": [
+     "#BA0C2F",
+     "#FFFFFF",
+     "#00205B"
+    ]
+   }
+  },
+  "NZ": {
+   "name": "Nova Zelândia",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#012169"
+    ],
+    "k": {
+     "c": "#012169",
+     "w": 0.5,
+     "h": 0.5,
+     "e": {
+      "t": "union",
+      "c": "#FFFFFF",
+      "x": 0.5,
+      "y": 0.5,
+      "s": 1.0,
+      "c2": "#C8102E"
+     }
+    },
+    "e": {
+     "t": "stars_nzl",
+     "c": "#C8102E",
+     "x": 0.75,
+     "y": 0.5,
+     "s": 0.45
+    }
+   }
+  },
+  "PE": {
+   "name": "Peru",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#D91023",
+     "#FFFFFF",
+     "#D91023"
+    ]
+   }
+  },
+  "PH": {
+   "name": "Filipinas",
+   "flag": {
+    "p": "tri",
+    "c": [
+     "#0038A8",
+     "#CE1126"
+    ],
+    "t": "#FFFFFF",
+    "e": {
+     "t": "sun",
+     "c": "#FCD116",
+     "x": 0.16,
+     "y": 0.5,
+     "s": 0.2
+    }
+   }
+  },
+  "PL": {
+   "name": "Polônia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FFFFFF",
+     "#DC143C"
+    ]
+   }
+  },
+  "PT": {
+   "name": "Portugal",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#006600",
+     "#FF0000"
+    ],
+    "w": [
+     2,
+     3
+    ],
+    "e": {
+     "t": "disc",
+     "c": "#FFE000",
+     "x": 0.4,
+     "y": 0.5,
+     "s": 0.34,
+     "c2": "#FF0000"
+    }
+   }
+  },
+  "QA": {
+   "name": "Catar",
+   "flag": {
+    "p": "serrated",
+    "c": [
+     "#FFFFFF",
+     "#8A1538"
+    ]
+   }
+  },
+  "RO": {
+   "name": "Romênia",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#002B7F",
+     "#FCD116",
+     "#CE1126"
+    ]
+   }
+  },
+  "RS": {
+   "name": "Sérvia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#C6363C",
+     "#0C4076",
+     "#FFFFFF"
+    ],
+    "e": {
+     "t": "shield",
+     "c": "#C6363C",
+     "x": 0.35,
+     "y": 0.45,
+     "s": 0.4
+    }
+   }
+  },
+  "RU": {
+   "name": "Rússia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#FFFFFF",
+     "#0039A6",
+     "#D52B1E"
+    ]
+   }
+  },
+  "SA": {
+   "name": "Arábia Saudita",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#006C35"
+    ],
+    "e": {
+     "t": "script",
+     "c": "#FFFFFF",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.5
+    }
+   }
+  },
+  "SE": {
+   "name": "Suécia",
+   "flag": {
+    "p": "nordic",
+    "c": [
+     "#006AA7",
+     "#FECC02"
+    ]
+   }
+  },
+  "SG": {
+   "name": "Singapura",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#EF3340",
+     "#FFFFFF"
+    ],
+    "e": {
+     "t": "crescent",
+     "c": "#FFFFFF",
+     "x": 0.18,
+     "y": 0.25,
+     "s": 0.26
+    }
+   }
+  },
+  "SN": {
+   "name": "Senegal",
+   "flag": {
+    "p": "v",
+    "c": [
+     "#00853F",
+     "#FDEF42",
+     "#E31B23"
+    ],
+    "e": {
+     "t": "star",
+     "c": "#00853F",
+     "x": 0.5,
+     "y": 0.5,
+     "s": 0.3
+    }
+   }
+  },
+  "TH": {
+   "name": "Tailândia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#A51931",
+     "#F4F5F8",
+     "#2D2A4A",
+     "#F4F5F8",
+     "#A51931"
+    ],
+    "w": [
+     1,
+     1,
+     2,
+     1,
+     1
+    ]
+   }
+  },
+  "TJ": {
+   "name": "Tadjiquistão",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#CC0000",
+     "#FFFFFF",
+     "#006600"
+    ],
+    "w": [
+     2,
+     3,
+     2
+    ],
+    "e": {
+     "t": "disc",
+     "c": "#F8C300",
+     "s": 0.2
+    }
+   }
+  },
+  "TR": {
+   "name": "Turquia",
+   "flag": {
+    "p": "solid",
+    "c": [
+     "#E30A17"
+    ],
+    "e": {
+     "t": "crescent",
+     "c": "#FFFFFF",
+     "x": 0.42,
+     "y": 0.5,
+     "s": 0.5
+    }
+   }
+  },
+  "UA": {
+   "name": "Ucrânia",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#0057B7",
+     "#FFD700"
+    ]
+   }
+  },
+  "US": {
+   "name": "Estados Unidos",
+   "flag": {
+    "p": "stripes",
+    "c": [
+     "#B22234",
+     "#FFFFFF"
+    ],
+    "n": 13,
+    "k": {
+     "c": "#3C3B6E",
+     "w": 0.4,
+     "h": 0.54,
+     "e": {
+      "t": "stars_grid",
+      "c": "#FFFFFF",
+      "x": 0.5,
+      "y": 0.5,
+      "s": 0.8
+     }
+    }
+   }
+  },
+  "UZ": {
+   "name": "Uzbequistão",
+   "flag": {
+    "p": "h",
+    "c": [
+     "#0099B5",
+     "#FFFFFF",
+     "#1EB53A"
+    ],
+    "e": {
+     "t": "crescent",
+     "c": "#FFFFFF",
+     "x": 0.14,
+     "y": 0.17,
+     "s": 0.22
+    }
+   }
+  },
+  "ZA": {
+   "name": "África do Sul",
+   "flag": {
+    "p": "pall",
+    "c": [
+     "#E03C31",
+     "#001489",
+     "#007749",
+     "#FFFFFF",
+     "#FFB81C",
+     "#000000"
+    ]
+   }
+  }
+ }
+}
