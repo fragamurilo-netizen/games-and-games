@@ -119,3 +119,16 @@ func test_social_posts_follow_facts() -> void:
 	for topic in ["social_org_announce", "social_win", "social_loss"]:
 		check(topics.has(topic), "Post publicado: " + topic)
 	check_eq(Media.compact(12400), "12,4 mil", "Engajamento compacto")
+
+
+func test_related_news_share_people_or_nights() -> void:
+	var world := _run(7, 150)
+	var main: Array = world.news.values().filter(func(n: NewsItem): return n.topic == "main_event_result")
+	check(not main.is_empty(), "Há resultado de luta principal")
+	if main.is_empty():
+		return
+	var related := Media.related(world, main[0], 6)
+	check(not related.is_empty(), "Resultado tem notícias relacionadas")
+	for r: NewsItem in related:
+		check(r.id != main[0].id, "Não relaciona consigo mesma")
+		check(r.entity_ids.any(func(id): return id in main[0].entity_ids and (world.fighters.has(id) or world.events.has(id))), "Relacionada compartilha atleta ou noite")

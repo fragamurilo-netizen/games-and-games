@@ -505,3 +505,24 @@ static func compact(value: int) -> String:
 	if value >= 1000:
 		return ("%.1f mil" % (value / 1000.0)).replace(".", ",")
 	return str(value)
+
+
+## O que mais saiu sobre os mesmos atletas ou noites (mais recentes primeiro).
+static func related(world: WorldState, item: NewsItem, limit: int) -> Array:
+	var ids := {}
+	for id: String in item.entity_ids:
+		if world.fighters.has(id) or world.events.has(id):
+			ids[id] = true
+	var out: Array = []
+	var all: Array = world.news.values()
+	for i in range(all.size() - 1, -1, -1):
+		var n: NewsItem = all[i]
+		if n.id == item.id:
+			continue
+		for id: String in n.entity_ids:
+			if ids.has(id):
+				out.append(n)
+				break
+		if out.size() >= limit:
+			break
+	return out
