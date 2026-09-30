@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native"
 import { queryDecision, queryLife, queryRoutine } from "@paralelo/simulation"
 import { ActionRow, Kicker, Page, Prose, splitLabel, TimeRow, ui } from "../components/editorial"
+import { BodySection } from "../components/body-section"
 import { DayBar } from "../components/game-feel"
 import { Messages } from "../components/messages"
 import { LifeScene, sceneText } from "../components/scene"
@@ -30,7 +31,7 @@ export default function LifeScreen() {
 
   return <Page bare>
     <View style={styles.bleed}>
-      <LifeScene width={width} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} expression={life.expression}>
+      <LifeScene width={width} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} look={life.appearance.look} age={life.age} expression={life.expression}>
         <View style={styles.sceneTop}>
           <View style={styles.headText}>
             <Text style={sceneText.kicker}>DIA {life.dayNumber} · {life.city.toLocaleUpperCase("pt-BR")}</Text>
@@ -76,6 +77,8 @@ export default function LifeScreen() {
       })()}
       {routine.showCommunityWait && <ActionRow label="Esperar o almoço comunitário" meta={`${routine.communityDate}, 11h`} command={{ type: "wait", minutes: routine.communityWait }} />}
     </>}
+
+    <BodySection />
 
     {!!life.agenda.length && <>
       <Kicker>Na agenda</Kicker>

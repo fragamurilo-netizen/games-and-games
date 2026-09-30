@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest"
 import { readFileSync } from "node:fs"
 import { decodeSnapshot, encodeSnapshot, SqliteSaveRepository } from "@paralelo/persistence"
-import { createWorld, createWorldV5, upgradeWorldV5, validateWorld, worldHash, type WorldState } from "@paralelo/simulation"
+import { createWorld, createWorldV5, upgradeWorldV5, upgradeWorldV6, validateWorld, worldHash, type WorldState } from "@paralelo/simulation"
 import { GameSession } from "../apps/mobile/src/application/game-session"
 import { memorySqlite } from "./fixtures/sqlite"
 
@@ -130,5 +130,24 @@ describe("migração v6 → v7 (trabalho vivido)", () => {
     expect(Object.keys(world.leaders).sort()).toEqual(Object.keys(world.companies).sort())
     expect(world.work).toEqual({ scene: null, interviews: [] })
     expect(validateWorld(world).ok).toBe(true)
+  })
+})
+
+describe("migração v7 → v8 (corpo e aparência)", () => {
+  it("dá corpo e guarda-roupa a todo mundo e agenda o balanço diário sem mexer no resto", () => {
+    const v7 = upgradeWorldV6(upgradeWorldV5(createWorldV5("migra-v7")))
+    const loaded = decodeSnapshot(JSON.stringify({ schemaVersion: 7, hash: worldHash(v7), world: v7 }))
+    if (!loaded.ok) throw new Error(loaded.error.message)
+    const world = loaded.value
+    expect(world).toEqual(createWorld("migra-v7"))
+    expect(world.schemaVersion).toBe(8)
+    for (const field of ["rng", "clock", "timeline", "finance", "people", "relationships", "residents", "work", "leaders", "inbox"] as const) expect(world[field]).toEqual(v7[field])
+    expect(Object.keys(world.bodies).sort()).toEqual(Object.keys(world.people).sort())
+    expect(Object.keys(world.wardrobes).sort()).toEqual(Object.keys(world.people).sort())
+    expect(world.gym).toBeNull()
+    expect(world.scheduled.filter(item => item.kind === "daily-body")).toHaveLength(1)
+    expect(world.scheduled.slice(0, v7.scheduled.length)).toEqual(v7.scheduled)
+    expect(validateWorld(world).ok).toBe(true)
+    expect(decodeSnapshot(encodeSnapshot(world))).toEqual(loaded)
   })
 })

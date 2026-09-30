@@ -150,10 +150,10 @@ export function DecisionScene() {
       <ScrollView contentContainerStyle={scene.content}>
         {life && <View style={scene.bleed}>
           <LifeScene width={width} height={Math.round(width * 0.62)} minute={life.minute} city={life.city} seed={life.appearance.seed}
-            sex={life.appearance.sex} age={life.age} expression="tense" />
+            sex={life.appearance.sex} look={life.appearance.look} age={life.age} expression="tense" />
         </View>}
         {decision.actor && <View style={scene.actor}>
-          <Portrait seed={decision.actor.appearance.seed} sex={decision.actor.appearance.sex} age={decision.actor.age} size={160} expression="curious"
+          <Portrait seed={decision.actor.appearance.seed} sex={decision.actor.appearance.sex} look={decision.actor.appearance.look} age={decision.actor.age} size={160} expression="curious"
             accessibilityLabel={`${decision.actor.name}`} />
           <Text style={scene.actorName}>{decision.actor.name}</Text>
         </View>}
@@ -196,13 +196,13 @@ export function WorkScene() {
     {scene && <View style={work.root}>
       <ScrollView contentContainerStyle={work.content}>
         {scene.actor ? <View style={work.actor}>
-          <Portrait seed={scene.actor.appearance.seed} sex={scene.actor.appearance.sex} age={scene.actor.age} size={150} expression={scene.kind === "review" ? "neutral" : "curious"} accessibilityLabel={scene.actor.name} />
+          <Portrait seed={scene.actor.appearance.seed} sex={scene.actor.appearance.sex} look={scene.actor.appearance.look} age={scene.actor.age} size={150} expression={scene.kind === "review" ? "neutral" : "curious"} accessibilityLabel={scene.actor.name} />
           <View style={work.actorText}>
             <Text style={work.actorName}>{scene.actor.name}</Text>
             {scene.actor.role && <Text style={work.actorRole}>{scene.actor.role}</Text>}
           </View>
         </View> : life && <View style={scene_.bleed}>
-          <LifeScene width={width} height={Math.round(width * 0.55)} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} age={life.age} expression="tense" />
+          <LifeScene width={width} height={Math.round(width * 0.55)} minute={life.minute} city={life.city} seed={life.appearance.seed} sex={life.appearance.sex} look={life.appearance.look} age={life.age} expression="tense" />
         </View>}
         <Text style={work.kicker}>{kicker} · {scene.time}</Text>
         <Text accessibilityRole="header" style={work.title}>{scene.title}</Text>

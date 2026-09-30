@@ -5,6 +5,7 @@ import { err, ok, type CompanyId, type Result } from "@paralelo/shared"
 import type { WorldState } from "../domain/world"
 import { calendarDate, dayFromCalendar, formatDate } from "../time"
 import { appendEntry } from "../timeline"
+import { resetBody } from "./body"
 import { hirePlayer } from "./work"
 
 export type StartingPoint = "job-search" | "simple-job"
@@ -36,6 +37,8 @@ export function beginLife(world: WorldState, input: StartProfile): Result<WorldS
   const year = today.year - profile.age - (born.month > today.month || (born.month === today.month && born.day > today.day) ? 1 : 0)
   let next: WorldState = { ...world, people: { ...world.people, [player.id]: { ...player, name: `${profile.firstName} ${surname}`, sex: profile.sex,
     birthDate: { day: dayFromCalendar(year, born.month, Math.min(born.day, 28)), minute: 0 } } } }
+  // o corpo e as roupas nascem do sexo e da idade escolhidos, não do rascunho gerado pela seed
+  next = resetBody(next, player.id)
   if (profile.start === "simple-job") next = hireAtStart(next)
   return ok(next)
 }

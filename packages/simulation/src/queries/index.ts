@@ -6,10 +6,11 @@ import { competitionFor, familyOf, internalApplicationReason, interviewChoices, 
 import { entryWeight, summarizeRoutine, weightRank } from "../timeline"
 import { ageAt, calendarDate, formatDate, formatDayHeading, formatTime, relativeDay } from "../time"
 import { absoluteMinute } from "../time"
-import { courses, fillText, inPlace, interviewTexts, jobRoles, roleCareer, routineRules, workRules, workSituations } from "@paralelo/content"
+import { bodyRules, courses, dressCode, exercises, fillText, groomingRules, outfitCatalog, snack, type ExerciseKind, inPlace, interviewTexts, jobRoles, roleCareer, routineRules, workRules, workSituations } from "@paralelo/content"
 import { applicationReason, nextWorkTime, workReason } from "../systems/career"
 import { formatMoney } from "../systems/finance"
 import { groceriesReason, mealReason, type MealSource } from "../systems/routine"
+import { appearanceOf, buyClothesReason, exerciseReason, groomReason, gymReason, mirrorText, outfitOf, seasonOf, snackReason } from "../systems/body"
 
 // Resumo do corpo em linguagem: só o que pede atenção entra (bíblia §2.3, §32).
 function bodySummary(needs: WorldState["people"][string]["needs"], minute: number): string {
@@ -69,7 +70,7 @@ export function queryInbox(world: WorldState) {
     const from = world.people[m.fromId]!
     const hoursLeft = Math.max(1, Math.ceil((absoluteMinute(m.expiresAt) - now) / 60))
     const callBlocked = contactAvailability(world, m.fromId)
-    return { id: m.id, from: { id: from.id, name: from.name, age: ageAt(from.birthDate, world.clock), appearance: { seed: from.appearanceSeed, sex: from.sex } },
+    return { id: m.id, from: { id: from.id, name: from.name, age: ageAt(from.birthDate, world.clock), appearance: appearanceOf(world, from.id) },
       text: m.text, time: formatTime(m.at), day: relativeDay(m.at, world.clock),
       deadline: hoursLeft <= 3 ? "A mensagem está esfriando." : `Sem resposta, ela esfria em ${hoursLeft} h.`, urgent: hoursLeft <= 3,
       replies: (["answer", "call", "later"] as const).map(reply => {
@@ -116,7 +117,7 @@ export function queryLife(world: WorldState) {
   const player = world.people[world.playerId]!
   return {
     name: player.name, age: ageAt(player.birthDate, world.clock), city: world.city,
-    appearance: { seed: player.appearanceSeed, sex: player.sex }, body: bodySummary(player.needs, world.clock.minute),
+    appearance: appearanceOf(world, player.id), body: bodySummary(player.needs, world.clock.minute),
     minute: world.clock.minute, dayNumber: world.clock.day + 1, expression: expressionFor(player.needs),
     marks: world.scheduled.filter(item => item.at.day === world.clock.day && MARK_LABELS[item.kind]).map(item => ({ id: item.id, minute: item.at.minute, label: MARK_LABELS[item.kind]! })),
     date: formatDate(world.clock), time: formatTime(world.clock), dayTitle: formatDayHeading(world.clock), year: formatDate(world.clock).slice(-4),
@@ -131,7 +132,7 @@ export function queryLife(world: WorldState) {
       const person = world.people[r.a === player.id ? r.b : r.a]!
       const unavailable = contactAvailability(world, person.id)
       const tag = r.tags[0] ?? "friend"
-      return { id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock), appearance: { seed: person.appearanceSeed, sex: person.sex },
+      return { id: person.id, name: person.name, age: ageAt(person.birthDate, world.clock), appearance: appearanceOf(world, person.id),
         group: tag, closeness: r.affection + r.trust + r.familiarity,
         description: tag === "family" ? "Sua mãe" : tag === "friend" ? "Amizade de antes da mudança" : tag === "neighbor" ? `Mora perto, ${inPlace(world.residences[person.residenceId]!.district)}` : "Colega de trabalho",
         work: workLine(world, person.id),
@@ -207,7 +208,7 @@ export function queryCareer(world: WorldState) {
         : e.consecutiveAbsences === 1 ? "Há uma falta registrada. Comparecer ao próximo turno interrompe a sequência."
         : `A presença é cobrada a partir de ${formatDate({ day: e.requiredFromDay, minute: 0 })}.`,
       warning: w.warnings > 0 || e.consecutiveAbsences > 0, situation,
-      manager: { id: manager.id, name: manager.name, age: ageAt(manager.birthDate, world.clock), appearance: { seed: manager.appearanceSeed, sex: manager.sex }, relation: trustText(w.trust) },
+      manager: { id: manager.id, name: manager.name, age: ageAt(manager.birthDate, world.clock), appearance: appearanceOf(world, manager.id), relation: trustText(w.trust) },
       next: nextRoleId ? { title: jobRoles.find(r => r.id === nextRoleId)!.title, gaps: promotionGaps(world) } : null } : null,
     agenda,
     promotion: p && e ? { title: jobRoles.find(r => r.id === p.roleId)!.title, company: world.companies[e.companyId]!.name, until: formatDate({ day: p.untilDay, minute: 0 }), canApply: !promotionReason, reason: promotionReason } : null,
@@ -244,7 +245,7 @@ export function queryWorkScene(world: WorldState) {
   const actor = scene.actorId ? world.people[scene.actorId]! : null
   const e = world.employment
   const actorRole = !actor ? null : scene.kind !== "shift" || actor.id === e?.workplace.managerId ? "Responde pela equipe" : "Colega de equipe"
-  const base = { id: scene.id, kind: scene.kind, time: formatTime(scene.at), actor: actor ? { id: actor.id, name: actor.name, age: ageAt(actor.birthDate, world.clock), appearance: { seed: actor.appearanceSeed, sex: actor.sex }, role: actorRole } : null }
+  const base = { id: scene.id, kind: scene.kind, time: formatTime(scene.at), actor: actor ? { id: actor.id, name: actor.name, age: ageAt(actor.birthDate, world.clock), appearance: appearanceOf(world, actor.id), role: actorRole } : null }
   if (scene.kind === "shift") {
     const situation = workSituations.find(s => s.id === scene.situationId)!
     const skill = jobRoles.find(r => r.id === e!.roleId)!.skill
@@ -279,6 +280,54 @@ export function queryRoutine(world: WorldState) {
     groceries: { label: `Comprar para seis refeições · ${formatMoney(routineRules.groceries.priceCents)}, 1 hora`, canBuy: !groceries, reason: groceries },
     communityWait, communityDate: formatDate({ day: communityDay, minute: 660 }),
     showCommunityWait: communityWait > 0 && world.finance.balanceCents < routineRules.meals.restaurant.priceCents && world.routine.pantryMeals === 0,
+  }
+}
+
+const FORMALITY = ["casual", "arrumada", "social"] as const
+const outfitLabel = (id: string): string => outfitCatalog.find(o => o.id === id)?.label ?? "Roupa do dia a dia"
+
+/**
+ * CORPO (bíblia §21): o espelho em frases, o que dá para fazer pelo corpo agora e a roupa do dia.
+ * Números de beleza ou de força nunca aparecem; o peso, sim, como na balança de casa.
+ */
+export function queryBody(world: WorldState) {
+  const player = world.people[world.playerId]!
+  const mirror = mirrorText(world)
+  const wearing = outfitOf(world, world.playerId)
+  const e = world.employment
+  const expected = e ? dressCode[roleCareer[e.roleId]?.family ?? "operacao"] ?? 0 : null
+  const season = seasonOf(world.clock.day)
+  const owned = world.wardrobes[world.playerId]?.owned ?? []
+  const actions = (Object.keys(exercises) as ExerciseKind[])
+    // sem matrícula, a academia só aparece em Dinheiro
+    .filter(kind => kind !== "gym" || world.gym)
+    .map(kind => {
+      const reason = exerciseReason(world, kind)
+      return { key: kind, label: exercises[kind].label, meta: `${exercises[kind].minutes} min`, canDo: !reason, reason, command: { type: "exercise" as const, kind } }
+    })
+  const shave = player.sex === "M" ? groomReason(world, "shave") : null
+  const haircut = groomReason(world, "haircut")
+  const snackBlocked = snackReason(world)
+  const care = [
+    ...(player.sex === "M" ? [{ key: "shave", label: groomingRules.shave.label, meta: `${groomingRules.shave.minutes} min`, canDo: !shave, reason: shave, command: { type: "groom" as const, kind: "shave" as const } }] : []),
+    { key: "haircut", label: groomingRules.haircut.label, meta: `${formatMoney(groomingRules.haircut.priceCents[player.sex])}, 1 h`, canDo: !haircut, reason: haircut, command: { type: "groom" as const, kind: "haircut" as const } },
+    { key: "snack", label: snack.label, meta: `${formatMoney(snack.priceCents)}, ${snack.minutes} min`, canDo: !snackBlocked, reason: snackBlocked, command: { type: "snack" as const } },
+  ]
+  return {
+    lines: mirror.lines, weight: `${mirror.weightKg.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kg`, trend: mirror.trend,
+    actions, care,
+    wardrobe: {
+      wearing: outfitLabel(wearing),
+      hint: [season === 1 ? "Dia frio." : season === -1 ? "Dia quente." : null,
+        expected !== null && world.clock.day % 7 < 5 ? `O trabalho pede roupa ${FORMALITY[expected]}.` : null].filter(Boolean).join(" ") || null,
+      owned: owned.map(id => ({ id, label: outfitLabel(id), wearing: id === wearing })),
+      shop: outfitCatalog.filter(o => o.sexes.includes(player.sex) && !owned.includes(o.id)).map(o => {
+        const reason = buyClothesReason(world, o.id)
+        return { id: o.id, label: o.label, price: formatMoney(o.priceCents), canBuy: !reason, reason }
+      }),
+    },
+    gym: { label: bodyRules.gym.label, price: formatMoney(bodyRules.gym.priceCents), member: !!world.gym, since: world.gym ? formatDate(world.gym.since) : null,
+      reason: gymReason(world, world.gym ? "cancel" : "join") },
   }
 }
 

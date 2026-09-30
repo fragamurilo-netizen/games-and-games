@@ -20,7 +20,7 @@ export function Messages({ inbox }: { inbox: Inbox }) {
       const blocked = m.replies.find(r => !r.canReply && r.reply !== "later")
       return <View key={m.id} style={[styles.message, i > 0 && styles.between]}>
         <View style={styles.head}>
-          <Portrait seed={m.from.appearance.seed} sex={m.from.appearance.sex} age={m.from.age} size={44} accessibilityLabel={`Retrato de ${m.from.name}`} />
+          <Portrait seed={m.from.appearance.seed} sex={m.from.appearance.sex} look={m.from.appearance.look} age={m.from.age} size={44} accessibilityLabel={`Retrato de ${m.from.name}`} />
           <View style={styles.headText}>
             <Text style={styles.name}>{m.from.name}</Text>
             <Text style={styles.when}>{m.day === "Hoje" ? m.time : `${m.day}, ${m.time}`}</Text>

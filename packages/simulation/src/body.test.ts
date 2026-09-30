@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { lifeEvents, validateBodyContent } from "@paralelo/content"
-import { absoluteMinute, createWorld, lookOf, mirrorText, outfitOf, validateWorld, weightOf, worldHash, type WorldState } from "."
+import { absoluteMinute, createWorld, lookOf, mirrorText, outfitOf, queryBody, queryLife, validateWorld, weightOf, worldHash, type WorldState } from "."
 import { apply } from "./test-support"
 
 const quiet = (seed: string): WorldState => { const w = createWorld(seed); return { ...w, events: { ...w.events, seen: lifeEvents.map(e => e.id) } } }
@@ -77,3 +77,29 @@ describe("corpo e aparência (bíblia §21)", () => {
 function executeTwice(world: WorldState): boolean {
   try { apply(apply(fed(world), { type: "exercise", kind: "home" }), { type: "exercise", kind: "home" }); return true } catch { return false }
 }
+
+describe("corpo nas telas", () => {
+  it("mostra frases, ações possíveis e a roupa do dia", () => {
+    const world = toDay(quiet("tela-corpo"), 2)
+    const body = queryBody(world)
+    expect(body.lines.length).toBeGreaterThan(0)
+    expect(body.weight).toMatch(/^\d+,\d kg$/)
+    // sem matrícula, treino na academia não aparece como ação
+    expect(body.actions.map(a => a.key)).toEqual(["walk", "run", "home"])
+    expect(body.wardrobe.owned.filter(o => o.wearing)).toHaveLength(1)
+    expect(body.wardrobe.shop.every(o => !world.wardrobes[world.playerId]!.owned.includes(o.id))).toBe(true)
+    expect(body.gym.member).toBe(false)
+    // nenhum número de beleza, força ou fôlego chega à tela (bíblia §8.1)
+    expect(JSON.stringify({ lines: body.lines, actions: body.actions, care: body.care })).not.toMatch(/\d+(,\d+)?\s*%|força \d|fôlego \d/)
+    const joined = apply({ ...world, clock: { ...world.clock, minute: 600 } }, { type: "gym", action: "join" })
+    expect(queryBody(joined).actions.map(a => a.key)).toContain("gym")
+    expect(queryBody(joined).gym.member).toBe(true)
+  })
+
+  it("quem aparece nas telas leva junto o corpo e a roupa de hoje", () => {
+    const life = queryLife(toDay(quiet("olhar"), 3))
+    expect(life.appearance.look.outfit).toBeTruthy()
+    expect(life.appearance.look.stubbleDays).toBeGreaterThanOrEqual(0)
+    for (const person of life.people) expect(person.appearance.look.outfit).toBeTruthy()
+  })
+})

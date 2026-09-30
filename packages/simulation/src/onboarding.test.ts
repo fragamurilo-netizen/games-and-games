@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { outfitCatalog } from "@paralelo/content"
 import { ageAt, beginLife, createWorld, queryCareer, validateProfile, validateWorld, worldHash } from "."
 
 describe("começo da campanha (bíblia §47, §48)", () => {
@@ -13,6 +14,18 @@ describe("começo da campanha (bíblia §47, §48)", () => {
     expect(result.value.employment).toBeNull()
     expect(result.value.companies).toEqual(base.companies)
     expect(validateWorld(result.value).ok).toBe(true)
+  })
+
+  it("dá corpo e roupas do sexo escolhido", () => {
+    // o rascunho da seed pode ter nascido com o outro sexo; "santa-aurora/abc" começa como F
+    for (const seed of ["roupas", "santa-aurora/abc"]) for (const sex of ["F", "M"] as const) {
+      const result = beginLife(createWorld(seed), { firstName: "Alex", sex, age: 24, start: "job-search" })
+      if (!result.ok) throw new Error(result.error)
+      const w = result.value
+      expect(w.wardrobes[w.playerId]!.owned.every(id => outfitCatalog.find(o => o.id === id)!.sexes.includes(sex))).toBe(true)
+      expect(w.bodies[w.playerId]!.heightCm).toBeGreaterThan(sex === "M" ? 150 : 140)
+      expect(validateWorld(w).ok).toBe(true)
+    }
   })
 
   it("com emprego simples, começa contratado com agenda e colegas", () => {

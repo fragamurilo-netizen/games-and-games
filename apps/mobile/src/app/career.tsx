@@ -30,7 +30,7 @@ export default function CareerScreen() {
       {job.situation.map((line, i) => <Prose key={i} tone={/advertência|falta|caiu|corte|fraco/.test(line) ? "warning" : i === 0 ? "primary" : "secondary"}>{line}</Prose>)}
 
       <View style={styles.manager}>
-        <Portrait seed={job.manager.appearance.seed} sex={job.manager.appearance.sex} age={job.manager.age} size={72} accessibilityLabel={`Retrato de ${job.manager.name}`} />
+        <Portrait seed={job.manager.appearance.seed} sex={job.manager.appearance.sex} look={job.manager.appearance.look} age={job.manager.age} size={72} accessibilityLabel={`Retrato de ${job.manager.name}`} />
         <View style={styles.managerText}>
           <Text style={styles.managerName}>{job.manager.name}</Text>
           <Text style={styles.managerRole}>Responde pela equipe</Text>

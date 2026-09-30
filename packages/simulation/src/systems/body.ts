@@ -74,6 +74,11 @@ export function upgradeWorldV7(base: WorldStateV7): WorldState {
   return { ...base, schemaVersion: 8, bodies, wardrobes, gym: null, scheduled: [...base.scheduled, event] }
 }
 
+/** Corpo e guarda-roupa refeitos para quem mudou de sexo ou idade antes do primeiro dia (começo da campanha). */
+export function resetBody(world: WorldState, id: PersonId): WorldState {
+  return { ...world, bodies: { ...world.bodies, [id]: newBody(world, id) }, wardrobes: { ...world.wardrobes, [id]: newWardrobe(world, id) } }
+}
+
 // ---------------- balanço diário ----------------
 
 const withBody = (world: WorldState, id: string, patch: Partial<PersonBody>): WorldState =>
@@ -285,8 +290,11 @@ export function dressGap(world: WorldState): number {
 
 // ---------------- aparência ----------------
 
+/** Como a pessoa aparece hoje para o renderizador; números ficam só no desenho (bíblia §8.1). */
+export type PersonLook = Readonly<{ fat?: number; muscle?: number; outfit?: string; stubbleDays?: number; shirtHue?: number; pantsTone?: number }>
+
 /** O que o renderizador precisa para desenhar a pessoa hoje. */
-export function lookOf(world: WorldState, id: string) {
+export function lookOf(world: WorldState, id: string): PersonLook {
   const b = world.bodies[id], person = world.people[id]!
   const day = world.clock.day
   if (!b) return {}
@@ -296,6 +304,12 @@ export function lookOf(world: WorldState, id: string) {
   const stubbleDays = male ? (id === world.playerId ? day - b.lastShaveDay : hashText(`${world.seed}/${id}/shave/${day}`) % 3) : 0
   return { fat: +fat.toFixed(3), muscle: +muscle.toFixed(3), outfit: outfitOf(world, id), stubbleDays,
     shirtHue: unit(world, `${id}/${day}/hue`), pantsTone: unit(world, `${id}/${day}/pants`) }
+}
+
+/** Identidade visual (seed e sexo) e como a pessoa está hoje, para qualquer tela que a desenhe. */
+export function appearanceOf(world: WorldState, id: string): Readonly<{ seed: string; sex: "F" | "M"; look: PersonLook }> {
+  const person = world.people[id]!
+  return { seed: person.appearanceSeed, sex: person.sex, look: lookOf(world, id) }
 }
 
 /** Presença: cuidado, fôlego, roupa adequada, sono. Pesa em entrevistas e primeiras impressões. */

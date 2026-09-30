@@ -11,7 +11,7 @@ só está planejado.
 
 ## Estado atual: save v8
 
-`npm test`: 98 testes, todos verdes. `npm run typecheck`: limpo em todos os workspaces.
+`npm test`: 104 testes, todos verdes. `npm run typecheck`: limpo em todos os workspaces.
 20 anos simulados em ~3,7 s no teste longo (limite do vitest: 5 s).
 
 ### Simulação (`packages/simulation`)
@@ -37,30 +37,33 @@ Outros módulos:
   timeline por dia; Pessoas por círculo com histórico; Carreira no formato do §61;
   Mundo com jornal; cenas em tela cheia para decisão e trabalho (`components/game-feel.tsx`).
 - Personagens 2D do renderizador vetorial (`packages/characters`), via `drawCharacter`.
+- Corpo no app: toda query que devolve `appearance` traz `appearance.look` (`appearanceOf` em
+  `systems/body.ts`); `Portrait` e `LifeScene` desenham gordura, músculo, roupa do dia e barba.
+  `drawCharacter` transforma `look.stubbleDays` em barba (`beardAfter`: por fazer a partir de
+  2 dias, curta a partir de 6, cheia a partir de 15) só para quem anda barbeado por estilo.
+- Seção "Corpo" e "Roupa de hoje" na Vida (`components/body-section.tsx`, `queryBody`): espelho
+  em frases e peso da balança, caminhar/correr/treinar em casa (academia só com matrícula),
+  barba, cabelo, lanche; guarda-roupa e loja recolhidos. Academia (matrícula e cancelamento)
+  em Dinheiro.
 
 ## O que falta na frente atual (corpo e aparência, v8)
 
-A simulação do v8 está pronta e testada (`body.test.ts`), mas **ainda não aparece no app**:
+Corpo e aparência estão na simulação e no app (acima), com teste de migração v7→v8.
+Correção junto: `beginLife` refaz corpo e guarda-roupa do jogador pelo sexo e idade escolhidos
+(antes, quem escolhia outro sexo que o rascunho da seed ficava com roupas do rascunho).
+Saves já começados com esse defeito não são corrigidos: a peça fica no guarda-roupa, sem efeito
+além do nome na lista.
 
-1. Passar `lookOf(world, id)` para o desenho. `drawCharacter` já aceita `look`
-   (`fat`, `muscle`, `outfit`, `shirtHue`, `pantsTone`, `beard`). Falta:
-   - no renderizador, transformar `stubbleDays` em barba (`por-fazer` a partir de 2 dias,
-     `curta` a partir de 6, `cheia` a partir de 15) quando `g.pref.beard === "nenhuma"`;
-   - `Portrait` e `LifeScene` receberem `look`;
-   - as queries (`queryLife`, pessoas, inbox, cenas, gestor) devolverem `look` junto de `appearance`.
-2. Seção "Corpo" na Vida: `mirrorText` (frases e tendência de peso) e ações contextuais
-   (caminhar, correr, treinar em casa, academia, fazer a barba, cortar o cabelo, lanche
-   rápido), sem virar lista gigante (§3, §7.3).
-3. Guarda-roupa: escolher a roupa de hoje (`dress`) e comprar (`buy-clothes`).
-4. Academia em Dinheiro: matrícula e cancelamento (`gym`); a mensalidade já é cobrada no dia 1º.
-5. Teste de migração v7→v8 em `tests/migration.test.ts`.
-6. **Saúde (§21) ainda não existe.** Hoje há um piso fisiológico provisório para quem não
+Falta:
+1. Verificar no Android real (Expo Go): peso da tela Vida com a seção nova e o custo do
+   redesenho do SVG quando a roupa muda. Na web (export + Chromium) a seção aparece e funciona.
+2. **Saúde (§21) ainda não existe.** Hoje há um piso fisiológico provisório para quem não
    come (em `processDailyBody`). Fome prolongada, doença e consequências precisam do
    sistema de saúde, com cuidado de representação (§21.3, §21.4).
 
 ## Próximas frentes, na ordem combinada com o dono
 
-1. Terminar corpo e aparência no app (acima).
+1. ~~Terminar corpo e aparência no app~~ (feito; falta só verificar no Android).
 2. **Escola e formação + profissões ampliadas.** Instituições com horário, custo,
    pré-requisito e credencial (§16): escola para crianças NPC, supletivo, curso técnico,
    faculdade. Dezenas de profissões por setor, exigindo formação, cada uma com família,

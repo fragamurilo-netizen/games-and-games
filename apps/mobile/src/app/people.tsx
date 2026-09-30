@@ -31,7 +31,7 @@ export default function PeopleScreen() {
           return <View key={person.id} style={styles.person}>
             <Pressable accessibilityRole="button" accessibilityState={{ expanded }} accessibilityLabel={`${person.name}, ${person.description}`}
               onPress={() => setOpen(expanded ? null : person.id)} style={({ pressed }) => [styles.row, pressed && ui.actionPressed]}>
-              <Portrait seed={person.appearance.seed} sex={person.appearance.sex} age={person.age} size={expanded ? 112 : 56}
+              <Portrait seed={person.appearance.seed} sex={person.appearance.sex} look={person.appearance.look} age={person.age} size={expanded ? 112 : 56}
                 accessibilityLabel={`Retrato de ${person.name}`} />
               <View style={styles.rowText}>
                 <Text style={styles.name}>{person.name}</Text>

@@ -4,7 +4,7 @@ import { memo, useEffect, useMemo, useRef } from "react"
 import { Animated, Easing, StyleSheet, Text, View } from "react-native"
 import Svg, { Circle, Defs, Ellipse, LinearGradient, Rect, Stop } from "react-native-svg"
 import { SvgXml } from "react-native-svg"
-import { drawCharacter, type CharacterExpression, type CharacterSex } from "@paralelo/characters"
+import { drawCharacter, type CharacterExpression, type CharacterLook, type CharacterSex } from "@paralelo/characters"
 import { colors, fonts, space } from "../theme"
 
 type Key = readonly [minute: number, top: string, bottom: string]
@@ -55,16 +55,18 @@ type Props = {
   sex: CharacterSex
   age: number
   expression: CharacterExpression
+  look?: CharacterLook
   children?: React.ReactNode
   /** altura da cena; por padrão quase quadrada */
   height?: number
 }
 
-export function LifeScene({ width, minute, city, seed, sex, age, expression, children, height: fixed }: Props) {
+export function LifeScene({ width, minute, city, seed, sex, age, expression, look, children, height: fixed }: Props) {
   const height = fixed ?? Math.round(width * 1.02)
   const ground = height - 34
   const sky = skyAt(minute)
-  const body = useMemo(() => drawCharacter({ seed, sex, age, view: "body", background: false, expression }), [seed, sex, age, expression])
+  const lookKey = JSON.stringify(look ?? {})
+  const body = useMemo(() => drawCharacter({ seed, sex, age, view: "body", background: false, expression, look }), [seed, sex, age, expression, lookKey]) // eslint-disable-line react-hooks/exhaustive-deps
   const figureH = height * 0.76
   const figureW = figureH * (body.width / body.height)
   // sol de 6h a 18h, lua no resto
@@ -74,7 +76,7 @@ export function LifeScene({ width, minute, city, seed, sex, age, expression, chi
   const cx = width * (0.62 + 0.3 * t), cy = height * 0.6 - Math.sin(Math.PI * t) * height * 0.2
   // entrada suave quando a cena monta ou a expressão muda
   const fade = useRef(new Animated.Value(0)).current
-  useEffect(() => { fade.setValue(0.4); Animated.timing(fade, { toValue: 1, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true }).start() }, [expression, fade])
+  useEffect(() => { fade.setValue(0.4); Animated.timing(fade, { toValue: 1, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true }).start() }, [expression, look?.outfit, fade])
 
   return <View style={{ width, height, overflow: "hidden" }}>
     <Svg width={width} height={height} style={StyleSheet.absoluteFill}>

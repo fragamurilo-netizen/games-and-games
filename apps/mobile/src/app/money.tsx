@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { StyleSheet, Text, View } from "react-native"
-import { queryLife, queryMoney } from "@paralelo/simulation"
-import { FactRow, Kicker, Page, Prose } from "../components/editorial"
+import { queryBody, queryLife, queryMoney } from "@paralelo/simulation"
+import { ActionRow, FactRow, Kicker, Page, Prose } from "../components/editorial"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 
@@ -12,7 +12,8 @@ export default function MoneyScreen() {
   const { world } = useGame()
   const money = useMemo(() => world ? queryMoney(world) : null, [world])
   const life = useMemo(() => world ? queryLife(world) : null, [world])
-  if (!money || !life) return null
+  const body = useMemo(() => world ? queryBody(world) : null, [world])
+  if (!money || !life || !body) return null
   return <Page time={life.time}>
     <Text style={styles.label}>SALDO</Text>
     <Text accessibilityRole="header" style={[styles.balance, money.negative && styles.negative]}>{money.balance}</Text>
@@ -26,7 +27,14 @@ export default function MoneyScreen() {
     <Kicker meta="dia 1, 8h">Próximo acerto</Kicker>
     <FactRow label="Aluguel" value={`− ${money.rent}`} />
     <FactRow label="Turnos já trabalhados" value={money.accrued} />
+    {body.gym.member && <FactRow label={body.gym.label} value={`− ${body.gym.price}`} />}
     <Text style={styles.note}>O salário paga só os turnos cumpridos.</Text>
+
+    <Kicker meta={body.gym.member ? `desde ${body.gym.since}` : `${body.gym.price} por mês`}>Academia</Kicker>
+    {body.gym.member
+      ? <ActionRow label="Cancelar a matrícula" meta="sem multa" command={{ type: "gym", action: "cancel" }} />
+      : <ActionRow label="Fazer matrícula" meta={`${body.gym.price} agora`} disabled={!!body.gym.reason} reason={body.gym.reason} command={{ type: "gym", action: "join" }} />}
+    <Text style={styles.note}>{body.gym.member ? "A mensalidade é cobrada todo dia 1º, junto com o aluguel." : "A primeira mensalidade sai na hora; depois, todo dia 1º, junto com o aluguel."}</Text>
 
     <Kicker meta={money.ledger.length ? `${money.ledger.length} lançamentos` : undefined}>Extrato</Kicker>
     {!money.ledger.length && <Text style={styles.note}>Nenhum lançamento ainda. Você chegou à cidade com {"R$\u00A0800,00"}.</Text>}
