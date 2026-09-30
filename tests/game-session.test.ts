@@ -52,3 +52,21 @@ describe("fluxo aplicação -> comando -> save -> query", () => {
     expect(native.prepare("SELECT payload FROM saves WHERE slot = 'current'").get()?.payload).toBe("quebrado")
   })
 })
+describe("começo da campanha (bíblia §47)", () => {
+  it("sem save, espera a escolha e só então cria e grava a vida", async () => {
+    const repo = new SqliteSaveRepository(fixture().db)
+    const session = new GameSession(repo, "s", { onboarding: true, newSeed: () => "nova" })
+    await session.initialize()
+    expect(session.getSnapshot()).toMatchObject({ world: null, needsStart: true, busy: false })
+    await session.start({ firstName: "x", sex: "F", age: 22, start: "job-search" })
+    expect(session.getSnapshot().world).toBeNull()
+    expect(session.getSnapshot().error).toBeTruthy()
+    await session.start({ firstName: "Débora", sex: "F", age: 24, start: "simple-job" })
+    const world = session.getSnapshot().world!
+    expect(world.people[world.playerId]!.name).toBe("Débora Ferreira")
+    expect(world.employment).not.toBeNull()
+    const resumed = new GameSession(repo, "s", { onboarding: true })
+    await resumed.initialize()
+    expect(resumed.getSnapshot()).toMatchObject({ world, needsStart: false })
+  })
+})

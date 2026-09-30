@@ -14,6 +14,7 @@ import { Commissioner_500Medium } from "@expo-google-fonts/commissioner/500Mediu
 import { Commissioner_600SemiBold } from "@expo-google-fonts/commissioner/600SemiBold"
 import { GameProvider, useGame } from "../hooks/game-context"
 import LifeScreen from "../screens/life-screen"
+import StartScreen from "../screens/start-screen"
 import { Consequence, DayTurn, DecisionScene } from "../components/game-feel"
 void SplashScreen.preventAutoHideAsync()
 
@@ -35,7 +36,8 @@ export default function RootLayout() {
   </SafeAreaProvider>
 }
 function Campaign() {
-  const { world } = useGame()
+  const { world, needsStart } = useGame()
+  if (needsStart && !world) return <StartScreen />
   return <View style={styles.page}>{world ? <><View style={styles.page}><Slot /><Consequence /></View><Navigation /><DecisionScene /><DayTurn /></> : <LifeScreen />}</View>
 }
 function Navigation() {

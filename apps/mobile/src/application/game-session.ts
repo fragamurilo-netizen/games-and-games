@@ -1,4 +1,4 @@
-import { createWorld, executeCommand, type Command, type WorldState } from "@paralelo/simulation"
+import { beginLife, createWorld, executeCommand, type Command, type StartProfile, type WorldState } from "@paralelo/simulation"
 import type { LoadedSave, SaveError } from "@paralelo/persistence"
 import type { Result } from "@paralelo/shared"
 
@@ -6,15 +6,21 @@ export interface SavePort {
   load(): Promise<Result<LoadedSave | null, SaveError>>
   save(world: WorldState): Promise<Result<void, SaveError>>
 }
-export type SessionSnapshot = Readonly<{ world: WorldState | null; busy: boolean; error: string | null; notice: string | null }>
+export type SessionSnapshot = Readonly<{ world: WorldState | null; busy: boolean; error: string | null; notice: string | null; needsStart: boolean }>
+export type SessionOptions = Readonly<{
+  /** sem save, espera o jogador escolher identidade e ponto de partida (bíblia §47) */
+  onboarding?: boolean
+  /** seed de uma nova campanha; a aplicação usa o relógio do aparelho, fora da simulação */
+  newSeed?: () => string
+}>
 
 // Única dona do estado da campanha na aplicação. React apenas assina e envia comandos.
 export class GameSession {
-  private snapshot: SessionSnapshot = { world: null, busy: true, error: null, notice: null }
+  private snapshot: SessionSnapshot = { world: null, busy: true, error: null, notice: null, needsStart: false }
   private readonly listeners = new Set<() => void>()
   private initialization: Promise<void> | null = null
   private operating = false
-  constructor(private readonly saves: SavePort, private readonly initialSeed: string) {}
+  constructor(private readonly saves: SavePort, private readonly initialSeed: string, private readonly options: SessionOptions = {}) {}
   getSnapshot = (): SessionSnapshot => this.snapshot
   subscribe = (listener: () => void): (() => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener) } }
   private publish(patch: Partial<SessionSnapshot>): void {
@@ -28,6 +34,7 @@ export class GameSession {
       try {
         const loaded = await this.saves.load()
         if (!loaded.ok) { this.publish({ busy: false, error: loaded.error.message }); return }
+        if (!loaded.value && this.options.onboarding) { this.publish({ busy: false, needsStart: true }); return }
         const world = loaded.value?.world ?? createWorld(this.initialSeed)
         // Também materializa migração ou recuperação; save igual preserva backup.
         {
@@ -39,6 +46,21 @@ export class GameSession {
     }
     this.initialization = operation().finally(() => { if (!this.snapshot.world) this.initialization = null })
     return this.initialization
+  }
+  /** Cria a campanha com o perfil escolhido e grava antes de mostrar. */
+  start = async (profile: StartProfile, chosenSeed?: string): Promise<void> => {
+    if (this.snapshot.world || this.operating) return
+    const seed = chosenSeed ?? this.options.newSeed?.() ?? this.initialSeed
+    const begun = beginLife(createWorld(seed), profile)
+    if (!begun.ok) { this.publish({ error: begun.error }); return }
+    this.operating = true
+    this.publish({ busy: true, error: null })
+    try {
+      const saved = await this.saves.save(begun.value)
+      if (!saved.ok) { this.publish({ error: saved.error.message }); return }
+      this.publish({ world: begun.value, needsStart: false })
+    } catch { this.publish({ error: "Não foi possível começar a campanha agora." }) }
+    finally { this.operating = false; this.publish({ busy: false }) }
   }
   dispatch = async (command: Command): Promise<void> => {
     const world = this.snapshot.world
