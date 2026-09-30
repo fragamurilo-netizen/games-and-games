@@ -36,6 +36,7 @@ func _ready() -> void:
 	UILayout.viewport = get_viewport_rect().size
 	$Background.color = UIColors.BG
 	add_child(TouchScroll.new())
+	get_viewport().gui_focus_changed.connect(_on_focus_changed)
 	_shadow = _edge(Color(0, 0, 0, 0.45), Color(0, 0, 0, 0))
 	_fade = _edge(Color(UIColors.BG, 0.0), Color(UIColors.BG, 0.92))
 	_wake_timer = Timer.new()
@@ -332,11 +333,43 @@ func _redraw_all(n: Node) -> void:
 		_redraw_all(child)
 
 
+## Última entrada foi teclado/controle: só então a rolagem acompanha o foco.
+var _keys_nav := false
+
+
 ## Toque e clique não deixam foco em botão (o contorno de foco é só para teclado e controle).
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey or event is InputEventJoypadButton:
+		_keys_nav = true
+	elif event is InputEventMouseButton or event is InputEventScreenTouch:
+		_keys_nav = false
 	var tap: bool = (event is InputEventMouseButton and not event.pressed) or (event is InputEventScreenTouch and not event.pressed)
 	if tap:
 		_drop_button_focus.call_deferred()
+	if event is InputEventScreenTouch and not event.pressed:
+		# Tela de toque não tem "passar por cima": sem isto a linha tocada ficava acesa até o
+		# próximo toque, porque o mouse emulado continua parado onde o dedo saiu.
+		_clear_hover.call_deferred()
+
+
+func _clear_hover() -> void:
+	var e := InputEventMouseMotion.new()
+	e.position = Vector2(-10000, -10000)
+	e.global_position = e.position
+	get_viewport().push_input(e, true)
+
+
+## Navegando por teclado, a lista rola até o item focado (as rolagens não seguem o foco sozinhas:
+## no toque isso movia a lista sob o dedo e o toque se perdia).
+func _on_focus_changed(c: Control) -> void:
+	if not _keys_nav or c == null:
+		return
+	var n: Node = c.get_parent()
+	while n != null:
+		if n is ScrollContainer:
+			(n as ScrollContainer).ensure_control_visible(c)
+			return
+		n = n.get_parent()
 
 
 func _drop_button_focus() -> void:

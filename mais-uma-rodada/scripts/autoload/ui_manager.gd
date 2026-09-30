@@ -475,7 +475,8 @@ func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, res
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	sc.scroll_deadzone = 14
-	sc.follow_focus = true
+	# Não segue o foco: no toque, a folha rolava sob o dedo (main.gd rola no teclado).
+	sc.follow_focus = false
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(content)
 	var fit := func() -> void:

@@ -246,6 +246,9 @@ func _only_pass() -> void:
 		if n != null:
 			n.queue_free()
 	for spec in only.split(","):
+		if spec == "!taps":
+			await _tap_check(w)
+			continue
 		if spec.begins_with("~article"):
 			await _article_shot(w, spec.substr(9))
 			continue
@@ -476,3 +479,141 @@ func _uglify(w: GameWorld) -> void:
 		var o := w.club(nf.opponent_of(w.user_club_id))
 		o.short_name = "Sportverein Mönchenwaldbach"
 		o.name = "Sportverein Mönchenwaldbach 1900 e.V."
+
+
+## !taps: toque simulado (aperta, treme alguns px como um dedo, solta) em cada botão visível das
+## telas principais. Conta quantos dispararam e mede quanto o "apertar" custa (tudo o que roda em
+## _input antes da GUI: rolagem por arrasto, foco...). Toque que não dispara = clique ruim.
+func _tap_check(w: GameWorld) -> void:
+	var routes := ["hub", "squad", "tactics", "market", "club", "player", "training", "table", "inbox"]
+	var total := 0
+	var ok := 0
+	var worst_us := 0
+	var sum_us := 0
+	for route in routes:
+		var fails: Array = []
+		var n_route := 0
+		for i in 14:
+			await _open_route(w, route)
+			var targets := _tap_targets()
+			if i >= targets.size():
+				break
+			var b: BaseButton = targets[i]
+			var label := _btn_label(b)
+			var fired := [false]
+			b.pressed.connect(func(): fired[0] = true, CONNECT_ONE_SHOT)
+			var pos := b.get_global_rect().get_center()
+			var t0 := Time.get_ticks_usec()
+			_mouse(pos, true)
+			var dt := Time.get_ticks_usec() - t0
+			worst_us = maxi(worst_us, dt)
+			sum_us += dt
+			await get_tree().process_frame
+			var j := float(OS.get_environment("TAP_JITTER")) if OS.get_environment("TAP_JITTER") != "" else 6.0
+			_move(pos + Vector2(j * 0.6, j * 0.5))
+			await get_tree().process_frame
+			_move(pos + Vector2(j, j * 0.8))
+			await get_tree().process_frame
+			_mouse(pos + Vector2(j, j * 0.8), false)
+			await _frames(2)
+			total += 1
+			n_route += 1
+			if fired[0]:
+				ok += 1
+			else:
+				fails.append(label)
+			UIManager.close_all_modals()
+		print("[toque] %s: %d alvos, falharam %d %s" % [route, n_route, fails.size(), str(fails)])
+	# Arrasto: começar em cima de uma linha e subir 160 px tem de rolar e não disparar nada.
+	for route in ["squad", "hub", "inbox"]:
+		await _open_route(w, route)
+		var tg := _tap_targets()
+		var sc := _screen().scroll()
+		if tg.is_empty() or sc == null:
+			continue
+		var b2: BaseButton = tg[tg.size() / 2]
+		var hit := [false]
+		b2.pressed.connect(func(): hit[0] = true, CONNECT_ONE_SHOT)
+		var p0 := b2.get_global_rect().get_center()
+		var before := sc.scroll_vertical
+		_mouse(p0, true)
+		for k in 8:
+			await get_tree().process_frame
+			_move(p0 - Vector2(0, 20 * (k + 1)))
+		_mouse(p0 - Vector2(0, 160), false)
+		await _frames(3)
+		print("[toque] arrasto em %s: rolou %d px, disparou botão: %s" % [route, sc.scroll_vertical - before, hit[0]])
+	print("[toque] TOTAL %d/%d dispararam; apertar custa em média %d µs, pior %d µs" % [ok, total, sum_us / maxi(1, total), worst_us])
+
+
+func _open_route(w: GameWorld, route: String) -> void:
+	UIManager.close_all_modals()
+	var args := {}
+	if route == "player":
+		var sq := w.squad(w.user_club())
+		args = {"id": sq[0].id}
+	if route in UIManager.TABS:
+		UIManager.goto(route, args)
+	else:
+		UIManager.goto("hub")
+		await _frames(2)
+		UIManager.push(route, args)
+	await _frames(6)
+	var sc := _screen().scroll()
+	if sc != null:
+		sc.scroll_vertical = 0
+	await _frames(2)
+
+
+## Botões habilitados e visíveis dentro da área útil da tela atual, de cima para baixo.
+func _tap_targets() -> Array:
+	var out: Array = []
+	var vr := get_viewport().get_visible_rect()
+	var sc := _screen().scroll()
+	var clip: Rect2 = sc.get_global_rect() if sc != null else vr
+	for n in _screen().find_children("*", "BaseButton", true, false):
+		var b := n as BaseButton
+		if b.disabled or not b.is_visible_in_tree() or b.mouse_filter == Control.MOUSE_FILTER_IGNORE:
+			continue
+		var r := b.get_global_rect()
+		if r.size.x < 8 or r.size.y < 8:
+			continue
+		var c := r.get_center()
+		if not clip.has_point(c) or not vr.has_point(c):
+			continue
+		out.append(b)
+	out.sort_custom(func(a: BaseButton, b2: BaseButton): return a.get_global_rect().position.y < b2.get_global_rect().position.y)
+	return out
+
+
+func _btn_label(b: BaseButton) -> String:
+	if b is Button and (b as Button).text != "":
+		return (b as Button).text.left(24)
+	var lbl := b.get_parent().find_child("*", true, false) if b.get_parent() != null else null
+	for l in b.get_parent().get_parent().find_children("*", "Label", true, false) if b.get_parent() != null and b.get_parent().get_parent() != null else []:
+		return "linha: " + (l as Label).text.left(20)
+	return b.name
+
+
+func _mouse(pos: Vector2, down: bool) -> void:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = down
+	e.button_mask = MOUSE_BUTTON_MASK_LEFT if down else 0
+	e.position = pos
+	e.global_position = pos
+	_last_pos = pos
+	get_viewport().push_input(e, true)
+
+
+var _last_pos := Vector2.ZERO
+
+
+func _move(pos: Vector2) -> void:
+	var e := InputEventMouseMotion.new()
+	e.button_mask = MOUSE_BUTTON_MASK_LEFT
+	e.position = pos
+	e.global_position = pos
+	e.relative = pos - _last_pos
+	_last_pos = pos
+	get_viewport().push_input(e, true)

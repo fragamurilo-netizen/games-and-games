@@ -8,9 +8,11 @@ extends Node
 ## vira rolagem, o botão sob o dedo é cancelado (não dispara) e, ao soltar, a lista segue
 ## deslizando e desacelera. Também funciona com o mouse no PC (clicar e arrastar).
 
-## Distância (px do viewport) para um toque virar arrasto. Menor que o scroll_deadzone das
-## telas, para o arrasto nativo nunca começar em paralelo.
-const DRAG_THRESHOLD := 12.0
+## Distância (px do canvas, ~1,5 px por dp) para um toque virar arrasto. Dedo treme de 5 a
+## 10 dp num toque parado; abaixo disso o toque era cancelado e o botão não respondia.
+## Na horizontal (abas, faixas) o limiar é maior: arrastar de lado é raro e tremer de lado não.
+const DRAG_THRESHOLD := 18.0
+const DRAG_THRESHOLD_H := 28.0
 ## Desaceleração da inércia (maior = para mais rápido).
 const FRICTION := 3.2
 const MAX_SPEED := 7000.0
@@ -49,16 +51,14 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Apertar não procura nada (era uma varredura da árvore inteira a cada toque, um quadro
+## perdido por toque): só guarda o ponto. A busca pelas rolagens sob o dedo acontece uma vez,
+## quando o movimento passa do limiar.
 func _on_press(pos: Vector2) -> void:
 	_stop_fling()
-	_pressing = false
 	_dragging = false
 	_target = null
-	if _over_blocking_control(pos):
-		return
-	_candidates = _scrolls_at(pos)
-	if _candidates.is_empty():
-		return
+	_candidates.clear()
 	_pressing = true
 	_start = pos
 	_velocity = 0.0
@@ -68,9 +68,14 @@ func _on_press(pos: Vector2) -> void:
 func _on_motion(event: InputEventMouseMotion) -> void:
 	if not _dragging:
 		var moved: Vector2 = event.position - _start
-		if moved.length() < DRAG_THRESHOLD:
+		var vert := absf(moved.y) >= absf(moved.x)
+		if (vert and absf(moved.y) < DRAG_THRESHOLD) or (not vert and absf(moved.x) < DRAG_THRESHOLD_H):
 			return
-		_vertical = absf(moved.y) >= absf(moved.x)
+		if _over_blocking_control(_start):
+			_pressing = false
+			return
+		_candidates = _scrolls_at(_start)
+		_vertical = vert
 		_target = _pick(_vertical)
 		if _target == null:
 			_pressing = false
