@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { companies, fillText, inPlace, placeGender, validateCityContent } from "@paralelo/content"
 import type { EmploymentId, MessageId } from "@paralelo/shared"
-import { absoluteMinute, createWorld, dismissPlayer, inspectEvents, inspectPerson, worldStats, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
+import { absoluteMinute, createWorld, dismissPlayer, inspectEvents, queryLife, inspectPerson, worldStats, executeCommand, queryCareer, queryDecision, queryInbox, queryWorld, relationshipBetween, validateWorld, worldHash, type Command, type WorldState } from "."
 
 const apply = (world: WorldState, command: Command): WorldState => {
   const result = executeCommand(world, command)
@@ -152,5 +152,16 @@ describe("mundo vivo", () => {
     const stats = worldStats(world)
     expect(stats.population).toBe(Object.keys(world.people).length)
     expect(stats.companies).toHaveLength(Object.keys(world.companies).length)
+  })
+
+  it("responde quando vocês se conheceram e o que houve entre vocês (bíblia §6.4)", () => {
+    const start = createWorld("historia")
+    const neighbor = queryLife(start).people.find(p => p.group === "neighbor")!
+    expect(neighbor.since).toContain("5 de janeiro de 2026")
+    expect(queryLife(start).people.find(p => p.group === "family")!.since).toBe("A vida inteira")
+    const world = until(start, w => w.inbox.some(m => m.status === "ignored"))
+    const ignored = world.inbox.find(m => m.status === "ignored")!
+    const person = queryLife(world).people.find(p => p.id === ignored.fromId)!
+    expect(person.history.moments.some(m => m.text.includes("sem resposta"))).toBe(true)
   })
 })

@@ -35,6 +35,15 @@ const MARK_LABELS: Partial<Record<WorldState["scheduled"][number]["kind"], strin
   "work-reminder": "Turno", "work-attendance": "Limite do turno", "monthly-finance": "Aluguel e salário", "mother-message": "Mensagem",
 }
 
+/** O que aconteceu entre você e a pessoa, dos fatos que pesam (bíblia §6.4). */
+function personHistory(world: WorldState, id: PersonId) {
+  const shared = world.timeline.filter(e => e.personIds.includes(id))
+  const talks = shared.filter(e => e.kind === "relationship" && entryWeight(e) === "cotidiano").length
+  const moments = shared.filter(e => weightRank(entryWeight(e)) >= weightRank("relevante")).slice(-5).reverse()
+    .map(e => ({ id: e.id, date: formatDate(e.at), text: e.text }))
+  return { talks: talks === 0 ? "Nenhuma conversa no último ano." : talks === 1 ? "Uma conversa no último ano." : `${talks} conversas no último ano.`, moments }
+}
+
 /** O que a pessoa faz da vida, do jeito que o jogador saberia (bíblia §11.4). */
 function workLine(world: WorldState, id: PersonId): string | null {
   const resident = world.residents[id]
@@ -125,6 +134,8 @@ export function queryLife(world: WorldState) {
         group: tag, closeness: r.affection + r.trust + r.familiarity,
         description: tag === "family" ? "Sua mãe" : tag === "friend" ? "Amizade de antes da mudança" : tag === "neighbor" ? `Mora perto, ${inPlace(world.residences[person.residenceId]!.district)}` : "Colega de trabalho",
         work: workLine(world, person.id),
+        since: tag === "family" ? "A vida inteira" : r.since ? `${tag === "neighbor" ? "Vizinhança desde" : "Vocês se conheceram em"} ${formatDate(r.since)}` : "Desde antes da mudança",
+        history: personHistory(world, person.id),
         state: r.lastInteractionAt && absoluteMinute(world.clock) - absoluteMinute(r.lastInteractionAt) < 10080 ? "Vocês tiveram contato recentemente." : r.lastInteractionAt ? "Faz um tempo que vocês não se falam." : r.trust > 65 ? "Existe confiança entre vocês." : "Vocês ainda têm muito para conversar.",
         canContact: !unavailable, unavailableReason: unavailable?.message ?? null,
         memories: world.memories.filter(memory => memory.personId === person.id && memory.salience > .1).slice(-3).reverse().map(memory => ({ id: memory.id, text: memory.text, date: formatDate(memory.at) })) }

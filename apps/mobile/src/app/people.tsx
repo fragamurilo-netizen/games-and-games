@@ -6,6 +6,8 @@ import { Portrait } from "../components/portrait"
 import { useGame } from "../hooks/game-context"
 import { colors, fonts, space } from "../theme"
 
+const shortDate = (date: string): string => date.split(" de ").slice(0, 2).map((p, i) => i ? p.slice(0, 3) : p).join(" ")
+
 // Círculos na ordem em que pesam na vida de quem acabou de se mudar (bíblia §11.4).
 const GROUPS = [["family", "Família"], ["friend", "Amizades"], ["coworker", "Trabalho"], ["neighbor", "Vizinhança"]] as const
 
@@ -39,9 +41,14 @@ export default function PeopleScreen() {
               </View>
             </Pressable>
             {expanded && <View style={styles.detail}>
+              <Text style={styles.since}>{person.since} · {person.history.talks}</Text>
+              {!!person.history.moments.length && <>
+                <Text style={styles.label}>ENTRE VOCÊS</Text>
+                {person.history.moments.map(m => <TimeRow key={m.id} time={shortDate(m.date)}>{m.text}</TimeRow>)}
+              </>}
               {!!person.memories.length && <>
                 <Text style={styles.label}>MOMENTOS QUE FICARAM</Text>
-                {person.memories.map(memory => <TimeRow key={memory.id} time={memory.date.split(" de ").slice(0, 2).map((p, i) => i ? p.slice(0, 3) : p).join(" ")}>{memory.text}</TimeRow>)}
+                {person.memories.map(memory => <TimeRow key={memory.id} time={shortDate(memory.date)}>{memory.text}</TimeRow>)}
               </>}
               <ActionRow label={`Ligar para ${first}`} meta="até 30 min" disabled={!person.canContact} reason={person.unavailableReason} command={{ type: "contact", personId: person.id }} />
             </View>}
@@ -62,5 +69,6 @@ const styles = StyleSheet.create({
   relation: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13, lineHeight: 19, marginTop: 2 },
   state: { color: colors.text, fontFamily: fonts.narrative, fontSize: 16, lineHeight: 23, marginTop: space[2] },
   detail: { paddingBottom: space[3] },
+  since: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13, lineHeight: 19, marginBottom: space[1] },
   label: { color: colors.textMuted, fontFamily: fonts.label, fontSize: 10, letterSpacing: 1.6, marginTop: space[2], marginBottom: space[1] },
 })

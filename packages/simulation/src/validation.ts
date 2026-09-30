@@ -57,7 +57,8 @@ function validateBase(input: unknown, version: 1 | 2 | 3 | 4 | 5 | 6): Result<un
     if (!id(key) || !object(rel) || rel.id !== key || !id(rel.a) || !id(rel.b) || rel.a === rel.b || !Object.hasOwn(people, rel.a) || !Object.hasOwn(people, rel.b) ||
       ![rel.familiarity, rel.affection, rel.trust, rel.respect, rel.attraction, rel.resentment].every(v => number(v)) ||
       !Array.isArray(rel.tags) || !rel.tags.every(tag => ["family", "friend", "neighbor", "coworker"].includes(String(tag))) ||
-      (rel.lastInteractionAt !== undefined && (!date(rel.lastInteractionAt) || (date(input.clock) && absoluteMinute(rel.lastInteractionAt) > absoluteMinute(input.clock))))) {
+      (rel.lastInteractionAt !== undefined && (!date(rel.lastInteractionAt) || (date(input.clock) && absoluteMinute(rel.lastInteractionAt) > absoluteMinute(input.clock)))) ||
+      (rel.since !== undefined && (!date(rel.since) || (date(input.clock) && absoluteMinute(rel.since) > absoluteMinute(input.clock))))) {
       errors.push(`Relação inválida: ${key}.`); continue
     }
     for (const personId of [rel.a, rel.b]) {

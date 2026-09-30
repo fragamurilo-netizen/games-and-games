@@ -66,7 +66,7 @@ export function upgradeWorldV5(base: WorldStateV5): WorldState {
   const link = (a: PersonId, b: PersonId, tag: RelationshipTag, familiarity: number, affection: number, trust: number): void => {
     const id = `relationship:${tag}:${a}:${b}` as RelationshipId
     if (relationships[id] || relationshipBetween({ relationships }, a, b)) return
-    relationships[id] = { id, a, b, familiarity, affection, trust, respect: 45, attraction: 0, resentment: 0, tags: [tag] }
+    relationships[id] = { id, a, b, familiarity, affection, trust, respect: 45, attraction: 0, resentment: 0, tags: [tag], ...(tag === "neighbor" ? { since: base.clock } : {}) }
     for (const personId of [a, b]) people[personId] = { ...people[personId]!, relationshipIds: [...people[personId]!.relationshipIds, id] }
   }
   const neighbors = Object.values(base.people)
@@ -401,7 +401,7 @@ export function meetCoworkers(world: WorldState, companyId: CompanyId): WorldSta
     const relId = `relationship:coworker:${world.playerId}:${id}` as RelationshipId
     if (next.relationships[relId]) continue
     next = { ...next,
-      relationships: { ...next.relationships, [relId]: { id: relId, a: next.playerId, b: id as PersonId, familiarity: 10, affection: 25, trust: 25, respect: 45, attraction: 0, resentment: 0, tags: ["coworker"], lastInteractionAt: next.clock } },
+      relationships: { ...next.relationships, [relId]: { id: relId, a: next.playerId, b: id as PersonId, familiarity: 10, affection: 25, trust: 25, respect: 45, attraction: 0, resentment: 0, tags: ["coworker"], lastInteractionAt: next.clock, since: next.clock } },
       people: { ...next.people, [next.playerId]: { ...next.people[next.playerId]!, relationshipIds: [...next.people[next.playerId]!.relationshipIds, relId] }, [id]: { ...next.people[id]!, relationshipIds: [...next.people[id]!.relationshipIds, relId] } },
       tiers: { ...next.tiers, [id]: "close" } }
   }

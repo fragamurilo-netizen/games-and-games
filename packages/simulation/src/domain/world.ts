@@ -31,6 +31,8 @@ export type Relationship = Readonly<{
   resentment: number
   tags: readonly RelationshipTag[]
   lastInteractionAt?: GameDate
+  /** quando se conheceram, se foi dentro da campanha (bíblia §6.4) */
+  since?: GameDate
 }>
 export type TimelineEntry = Readonly<{
   id: TimelineId
