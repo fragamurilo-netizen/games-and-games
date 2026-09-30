@@ -4,16 +4,29 @@ extends Control
 ## Cores só via Tokens (DESIGN.md).
 
 var fighter: Fighter
+var accent: Color = Tokens.STEEL
 var _texture: Texture2D
 var _key := ""
 
 
-static func make(f: Fighter, width: float) -> FighterPortrait:
+## Componente único de retrato: use em qualquer tela com lutador.
+## `accent` é a faixa de base (vermelho/azul no confronto).
+static func make(f: Fighter, width: float, accent_color: Color = Tokens.STEEL) -> FighterPortrait:
 	var p := FighterPortrait.new()
 	p.fighter = f
+	p.accent = accent_color
 	p.custom_minimum_size = Vector2(width, width * PortraitService.H / PortraitService.W)
 	p.mouse_filter = MOUSE_FILTER_IGNORE
 	return p
+
+
+## Troca o lutador exibido (editor/criador reaproveitam o mesmo nó).
+func set_fighter(f: Fighter) -> void:
+	fighter = f
+	if is_inside_tree():
+		_key = PortraitService.key_for(f)
+		_texture = PortraitService.service().texture_for(f)
+		queue_redraw()
 
 
 func _ready() -> void:
@@ -38,4 +51,4 @@ func _draw() -> void:
 		var fs := int(size.x * 0.36)
 		var w := Tokens.DISPLAY_FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(Tokens.DISPLAY_FONT, Vector2((size.x - w) / 2, size.y / 2 + fs * 0.35), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Tokens.MUTED)
-	draw_line(Vector2(0, size.y - 1), Vector2(size.x, size.y - 1), Tokens.STEEL, 2)
+	draw_rect(Rect2(0, size.y - 3, size.x, 3), accent)

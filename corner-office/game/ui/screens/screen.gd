@@ -67,6 +67,35 @@ func add_button(text: String, callback: Callable) -> Button:
 	button.pressed.connect(callback);body.add_child(button)
 	return button
 
+## Foto grande do lutador (perfil, contrato).
+func add_portrait(f: Fighter, width: float = 176) -> FighterPortrait:
+	var photo:=FighterPortrait.make(f,width);photo.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	body.add_child(photo);return photo
+
+## Linha de lutador: foto + texto. Com callback vira botão.
+func add_fighter_row(f: Fighter, text: String, callback: Callable = Callable()) -> HBoxContainer:
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",Tokens.SPACE_S)
+	row.add_child(FighterPortrait.make(f,72))
+	row.add_child(_row_label(text,callback,HORIZONTAL_ALIGNMENT_LEFT))
+	body.add_child(row);return row
+
+## Confronto: foto do corner vermelho, texto, foto do corner azul.
+func add_face_off(red: Fighter, blue: Fighter, text: String, callback: Callable = Callable()) -> HBoxContainer:
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",Tokens.SPACE_S)
+	row.add_child(FighterPortrait.make(red,72,Tokens.FIGHT_RED))
+	row.add_child(_row_label(text,callback,HORIZONTAL_ALIGNMENT_CENTER))
+	row.add_child(FighterPortrait.make(blue,72,Tokens.STEEL))
+	body.add_child(row);return row
+
+func _row_label(text: String, callback: Callable, align: HorizontalAlignment) -> Control:
+	if callback.is_valid():
+		var button:=Button.new();button.text=text;button.custom_minimum_size.y=Tokens.TOUCH_MIN
+		button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		button.alignment=align;button.pressed.connect(callback);return button
+	var l:=Label.new();l.text=text;l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	l.size_flags_horizontal=Control.SIZE_EXPAND_FILL;l.horizontal_alignment=align;l.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	return l
+
 func add_input(label: String, value: String="") -> LineEdit:
 	add_text(label,Tokens.MUTED)
 	var input:=LineEdit.new();input.text=value
