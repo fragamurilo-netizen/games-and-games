@@ -31,7 +31,7 @@ public final class CornerOfficeStudio extends GodotPlugin {
     public CornerOfficeStudio(Godot godot) { super(godot); }
     @Override public String getPluginName() { return "CornerOfficeStudio"; }
     @Override public Set<SignalInfo> getPluginSignals() {
-        return new HashSet<>(Arrays.asList(new SignalInfo("closed"),
+        return new HashSet<>(Arrays.asList(new SignalInfo("closed"), new SignalInfo("next"),
                 new SignalInfo("portrait", String.class, String.class), new SignalInfo("portraits_done")));
     }
 
@@ -57,6 +57,8 @@ public final class CornerOfficeStudio extends GodotPlugin {
             });
             web.addJavascriptInterface(new Object() {
                 @JavascriptInterface public void close() { CornerOfficeStudio.this.close(); }
+                /** Whole-night playback: Godot owns the card queue and loads the next bout. */
+                @JavascriptInterface public void next() { runOnRenderThread(() -> emitSignal("next")); }
             }, "CornerOffice");
             ViewGroup root = activity.findViewById(android.R.id.content);
             root.addView(web, params(left, top, width, height));

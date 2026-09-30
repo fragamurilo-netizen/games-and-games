@@ -109,6 +109,16 @@ Falta (próximo colega):
 4. Tirar screenshot da tela embutida (a WebView é janela nativa: o `get_texture()` do Godot não a captura; usar captura do sistema).
 5. Opcional: esconder também a marca/topbar do HTML em modo embutido se ficar redundante com o cabeçalho do jogo.
 
+## Noite completa no motor 2D (Claude, 30/09/2026)
+
+Pedido: integrar o motor 2D (Fight Studio em WebView) ao jogo real. A ponte já existia; agora a noite inteira passa por ela.
+
+- **REALIZAR EVENTO** simula a noite e abre a transmissão na primeira luta do card; eventos concluídos têm **ASSISTIR À NOITE**, e "Assistir à luta" abre a noite a partir daquela luta.
+- `FightReplayView.open_night(replays, start)` guarda a fila (preliminares → principal). O cabeçalho mostra `LUTA i/N`; a tela de resultado do HTML ganha **PRÓXIMA LUTA ›** (Android: `CornerOffice.next()` → sinal `next`; desktop: `ipc 'next'`). `open(data)` continua valendo para uma luta só (demonstração).
+- `presentation.card_position` e `presentation.next_bout` são só apresentação; os replays não mudam (teste `test_night_queue_marks_card_position_without_touching_replays`).
+- Verificado: 92 lutas reais de uma carreira gerada (seed 2027, 20 semanas) carregaram no `studio.cobundle` em Chromium 390×700 do portão ao resultado, sem erro de JS.
+- Ainda falta testar em aparelho Android e no Windows (itens da seção anterior continuam valendo). AAR antigo sem `next()` cai no comportamento de fechar.
+
 ## Próximas tarefas, por prioridade
 
 1. Confirmar build do workflow Android, instalar APK e testar rotação, botão voltar, suspensão/retorno, save e desempenho da WebView. Sem SDK local nesta máquina; não afirmar teste em aparelho sem fazê-lo.
