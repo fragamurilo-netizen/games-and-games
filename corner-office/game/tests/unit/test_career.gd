@@ -77,15 +77,15 @@ func test_contracts_and_market_change_roster() -> void:
 	for f: Fighter in world.fighters.values():
 		if f.organization_id.is_empty():free=f;break
 	check(free!=null,"Free agency exists")
-	var price:=Contracts.market_price(world,free)
 	var low:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":1})
 	check(low.has("counter_show"),"Under-market offer generates counter")
 	check(free.organization_id.is_empty(),"Counter does not sign silently")
-	var response:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":price})
-	check(response.ok,"Accept fair initial deal")
+	var response:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":int(low.counter_show)})
+	check(response.ok and not response.has("counter_show"),"Agent's counter closes the deal")
 	check(world.player_org().roster.has(free.id),"New athlete in roster")
 	var old_id:=free.contract_id
-	CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":price+500})
+	var renewal:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":world.contracts[old_id].show_money})
+	if renewal.has("counter_show"):CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":int(renewal.counter_show)})
 	check(not world.contracts[old_id].active,"Renewal retains inactive historical contract")
 	check_eq(world.player_org().roster.count(free.id),1,"No duplicate roster entry")
 

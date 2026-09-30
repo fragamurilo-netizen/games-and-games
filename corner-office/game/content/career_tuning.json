@@ -316,5 +316,23 @@
     "venue": "Arena",
     "renewal_window_days": 45,
     "release_loss_margin": 3
+  },
+  "agencies": {
+    "_doc": "Agentes, leverage e memória (simulation/contracts/agencies.gd). Valores de protótipo; calibrar por simulação.",
+    "star_popularity": 30,
+    "star_wins": 12,
+    "prospect_max_bouts": 6,
+    "reputation_baseline": 30,
+    "reputation_weight": 0.002,
+    "trust_weight": 0.002,
+    "trust_min": -100,
+    "trust_max": 100,
+    "rival_bid_premium": 1.05,
+    "trust_signed": 2,
+    "hard_ratio": 0.9,
+    "trust_hard": -2,
+    "hostile_ratio": 0.75,
+    "trust_hostile": -8,
+    "counter_rounding": 10
   }
 }

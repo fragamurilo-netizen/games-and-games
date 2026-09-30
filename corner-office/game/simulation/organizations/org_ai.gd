@@ -257,6 +257,8 @@ func _renew_contracts(world: WorldState, org: Organization) -> void:
 		var response := contracts.evaluate_offer(world, offer)
 		if response.eligible and world.rng.chance(float(response.accept_probability)):
 			contracts.sign(world, offer)
+		else:
+			contracts.reject(world, offer, response, "refused")
 
 
 func _maybe_sign(world: WorldState, org: Organization) -> void:
@@ -301,6 +303,8 @@ func _maybe_sign(world: WorldState, org: Organization) -> void:
 		contracts.sign(world, offer)
 		org.ai_state.signings = int(org.ai_state.get("signings", 0)) + 1
 		Rankings.new().update(world, org.id, best.division)
+	else:
+		contracts.reject(world, offer, response, "refused")
 
 
 static func _region_of(country: String) -> String:

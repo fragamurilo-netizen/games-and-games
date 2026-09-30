@@ -11,8 +11,32 @@ const SAVE_DIR := "user://saves"
 
 ## versão de origem -> nome do método que migra para a versão seguinte.
 const MIGRATIONS := {
-	# 1: "_migrate_v1_to_v2",
+	1: "_migrate_v1_to_v2",
 }
+
+
+## v2: todo atleta passa a ter agência (Game Bible §9). Mesma regra pública de
+## Agencies.assign_all; confiança começa neutra e a memória vazia.
+static func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
+	# Carga em tempo de execução: scripts de CLI parseiam SaveSystem antes dos
+	# autoloads, e Agencies depende de Contracts → EventBus.
+	var agencies: GDScript = load("res://simulation/contracts/agencies.gd")
+	var agents: Dictionary = data.get("agents", {})
+	var ids: Array = data.get("fighters", {}).keys()
+	ids.sort()
+	for id: String in ids:
+		var f: Dictionary = data.fighters[id]
+		if not str(f.get("agent_id", "")).is_empty():
+			continue
+		var agent_id: String = agencies.agency_for(str(f.get("country", "")), f.get("popularity_by_region", {}), f.get("record", {}))
+		if not agents.has(agent_id):
+			continue
+		f.agent_id = agent_id
+		var clients: Array = agents[agent_id].get("client_ids", [])
+		if not clients.has(id):
+			clients.append(id)
+		agents[agent_id].client_ids = clients
+	return data
 
 
 static func slot_path(slot: String) -> String:

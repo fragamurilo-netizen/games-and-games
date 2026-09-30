@@ -37,6 +37,9 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 	_create_player_org(w, start_mode)
 	if include_population:
 		PopulationGenerator.populate(w,start_mode)
+	# Representação por regra pública, depois dos contratos iniciais (sem RNG).
+	Agencies.assign_all(w)
+	if include_population:
 		for division: Dictionary in ContentDB.load_json("weight_classes.json"):
 			Rankings.new().update(w,w.player_org_id,division.id)
 			Rankings.new().update(w,"wci",division.id)

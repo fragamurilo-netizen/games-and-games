@@ -22,13 +22,24 @@ func evaluate_offer(world: WorldState, offer: Contract) -> Dictionary:
 	if offer.show_money<=0 or offer.win_bonus<0 or offer.signing_bonus<0 or offer.bouts_total<1 or offer.bouts_total>8 or offer.bouts_remaining!=offer.bouts_total or offer.expires_on.is_empty() or GameDate.days_between(world.date,offer.expires_on)<=0:
 		reasons.append(Reason.make("INVALID_CONTRACT"))
 	if org.cash<offer.signing_bonus: reasons.append(Reason.make("INSUFFICIENT_CASH"))
-	var fair:=market_price(world,fighter)
-	var probability:=clampf(.65+(float(offer.show_money)/fair-1.0)*.65+(org.reputation-30)*.002,.08,.98)
-	return {"eligible":reasons.is_empty(),"accept_probability":probability if reasons.is_empty() else 0.0,"fair_show":fair,"counter_show":int(fair*1.1),"reasons":reasons if not reasons.is_empty() else [Reason.make("CONTRACT_MARKET_VALUE",probability,{"fair_show":fair})]}
+	# O pedido vem do agente: mercado, perfil da agência, confiança e BATNA (Agencies).
+	var q:=Agencies.quote(world,fighter,org.id)
+	var value:=Agencies.offer_value(offer,fighter.agent_id)
+	var probability:=clampf(.65+(value/float(q.ask_show)-1.0)*.65,.08,.98)
+	var explained: Array=q.reasons.duplicate()
+	explained.push_front(Reason.make("CONTRACT_MARKET_VALUE",probability,{"fair_show":q.fair_show,"ask_show":q.ask_show}))
+	return {"eligible":reasons.is_empty(),"accept_probability":probability if reasons.is_empty() else 0.0,"fair_show":q.fair_show,"ask_show":q.ask_show,"counter_show":q.ask_show,"meets_ask":value>=float(q.ask_show),"batna_show":q.batna_show,"rival_ids":q.rival_ids,"agent_id":q.agent_id,"trust":q.trust,"reasons":reasons if not reasons.is_empty() else explained}
+
+## Oferta não fechada: fica na memória do agente (Game Bible §9).
+func reject(world: WorldState, offer: Contract, response: Dictionary, outcome: String="countered") -> Dictionary:
+	if not response.get("eligible",false): return {}
+	return Agencies.record(world,offer,int(response.ask_show),outcome)
 
 func sign(world: WorldState, offer: Contract) -> void:
 	if world.contracts.has(offer.id): return
-	if not evaluate_offer(world,offer).eligible: return
+	var response:=evaluate_offer(world,offer)
+	if not response.eligible: return
+	Agencies.record(world,offer,int(response.ask_show),"signed")
 	var fighter: Fighter=world.fighters[offer.fighter_id]
 	var previous: Contract=world.contracts.get(fighter.contract_id)
 	if previous: previous.active=false

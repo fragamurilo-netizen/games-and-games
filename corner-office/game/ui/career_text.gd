@@ -13,10 +13,31 @@ static func division(id: String) -> String:
 		if d.id==id:return "%s · %s"%[d.name,"feminino" if d.sex=="F" else "masculino"]
 	return id
 static func result(data: Dictionary) -> String:
-	if data.has("counter_show"):return "Contraproposta: %s por apresentação."%money(int(data.counter_show))
+	if data.has("counter_show"):return " ".join(["Contraproposta: %s por apresentação."%money(int(data.counter_show))]+negotiation(data))
 	if data.has("message"):return str(data.message)
 	var lines: Array=[]
 	for reason: Dictionary in data.get("proposal",data).get("reasons",[]):lines.append(REASONS.get(reason.code,str(reason.code).replace("_"," ")))
 	return " ".join(lines)
+## Explica o pedido do agente a partir dos reason codes do serviço (Bible §9).
+static func negotiation(data: Dictionary) -> Array:
+	var lines: Array=[]
+	match str(data.get("stance","")):
+		"hostile":lines.append("A agência considerou a oferta ofensiva; a confiança caiu para todos os seus clientes.")
+		"hard":lines.append("A agência anotou a oferta baixa.")
+	for r: Dictionary in data.get("reasons",[]):
+		var d: Dictionary=r.get("data",{})
+		match str(r.code):
+			"RIVAL_INTEREST":lines.append("Outras promoções têm vaga e caixa: %s."%", ".join(d.get("organizations",[])))
+			"AGENT_TRUST":lines.append(("%s desconfia de negociações anteriores com você." if int(d.get("trust",0))<0 else "%s valoriza o histórico com você.")%d.get("agent",""))
+			"AGENT_HOME_MARKET":lines.append("%s facilita acordos no mercado local."%d.get("agent",""))
+			"PROMOTION_REPUTATION":
+				if float(r.weight)>0:lines.append("A reputação da promoção ainda pesa no preço.")
+			"NO_PAY_CUT":lines.append("O atleta não aceita redução da bolsa atual.")
+	return lines
+static func agent_line(w: WorldState, f: Fighter) -> String:
+	var a: Agent=w.agents.get(f.agent_id)
+	if a==null:return "Sem agente"
+	var trust:=int(a.relationship.get(w.player_org_id,0))
+	return "Agente: %s · %s"%[a.name,"confiança %+d"%trust if trust!=0 else "relação neutra"]
 static func event_status(value: String) -> String:
 	return {"planned":"EM MONTAGEM","announced":"ANUNCIADO","completed":"CONCLUÍDO","postponed":"ADIADO"}.get(value,value)

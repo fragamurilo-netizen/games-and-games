@@ -1,5 +1,5 @@
 extends Screen
-## Free agency / basic renewal on mobile. Bible §9; full agent BATNA remains M2.
+## Free agency / basic renewal on mobile. Bible §9; o agente responde via Agencies.
 var selected:=""
 func title() -> String:return "Mercado"
 func build() -> void:
@@ -12,7 +12,7 @@ func build() -> void:
 		return
 	var f: Fighter=w.fighters[selected]
 	add_button("← Agentes livres",func():selected="";refresh())
-	add_heading(f.display_name());add_text(CareerText.division(f.division)+" / "+f.record_string())
+	add_heading(f.display_name());add_text(CareerText.division(f.division)+" / "+f.record_string());add_text(CareerText.agent_line(w,f),Tokens.MUTED)
 	var show:=add_number("Bolsa por apresentação · US$",Contracts.market_price(w,f),1,10000000)
 	var signing:=add_number("Luvas na assinatura · US$",0,0,10000000)
 	add_text("4 lutas · 18 meses · bônus de vitória de 50%",Tokens.MUTED)
