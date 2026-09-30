@@ -42,7 +42,9 @@ var hidden := {}
 # Potencial dinâmico: distribuição, não teto (Game Design Bible §4).
 var potential := {"mean": 50.0, "spread": 10.0}
 
-# Preferências de estilo (distribuição de intenções no Fight Engine).
+# Estilo de luta (content/fighter_generation.json → fight_styles) e seus
+# pesos por categoria de técnica (distribuição de intenções no Fight Engine).
+var fight_style := ""
 var style := {}
 
 # Carreira

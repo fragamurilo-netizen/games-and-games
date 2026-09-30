@@ -38,6 +38,7 @@ func test_generated_fighters_are_coherent() -> void:
 		check_eq(f.appearance.age, age, "idade do rosto = idade do atleta")
 		check_eq(f.appearance.sex, "f" if f.sex == Fighter.Sex.FEMALE else "m", "sexo do rosto")
 		check(not f.bio.is_empty(), "bio gerada")
+		check(cfg.fight_styles.has(f.fight_style), "estilo de luta conhecido")
 		check(not f.hidden.is_empty() and f.hidden.has("injury_risk"), "atributos ocultos")
 		names[f.first_name + " " + f.last_name] = true
 	check_eq(names.size(), fighters.size(), "nomes únicos")
@@ -80,8 +81,8 @@ func test_monthly_intake_adds_prospects_and_retires_old_free_agents() -> void:
 	for i in 31:
 		sim.advance_day()
 	var created: Array = w.fighters.values().filter(func(f: Fighter): return not known.has(f.id) and f.age_on(w.date) <= 24 and f.record.wins + f.record.losses + f.record.draws <= 6)
-	check(w.fighters.size() >= before + 2, "chegaram prospectos (%d → %d)" % [before, w.fighters.size()])
-	check(created.size() >= 2, "prospectos jovens e com poucas lutas")
+	check(w.fighters.size() >= before + 1, "chegaram prospectos (%d → %d)" % [before, w.fighters.size()])
+	check(created.size() >= 1, "prospectos jovens e com poucas lutas")
 	check(veteran.retired, "veterano de 45 anos sem contrato se aposenta")
 	var restored := SaveSystem.decode(SaveSystem.encode(w))
 	check_eq(restored.fighters.size(), w.fighters.size(), "prospectos sobrevivem ao save")

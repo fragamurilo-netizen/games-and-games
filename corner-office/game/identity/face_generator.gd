@@ -34,6 +34,8 @@ static func create_appearance(rng: SimRandom, country: String, body_type: String
 	var cfg: Dictionary = ContentDB.load_json("fighter_generation.json")
 	var pops: Dictionary = cfg.countries.get(country, {}).get("populations", {})
 	var pop: String = str(rng.weighted(pops)) if not pops.is_empty() else "misto"
+	if cfg.population_names.has(str(extra.get("pop", ""))):
+		pop = str(extra.pop)
 	var shape: Dictionary = BODY.get(body_type, BODY.athletic)
 	var body := {
 		"muscle": snappedf(clampf(shape.muscle + rng.range_f(-0.06, 0.06), 0.3, 0.95), 0.01),

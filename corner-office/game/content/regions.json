@@ -1,10 +1,15 @@
 [
   {"id": "brazil", "name": "Brasil", "countries": ["BR"], "style_tendencies": ["bjj", "muay_thai", "boxing"], "gameplay": "Prospects numerosos; forte apelo doméstico."},
-  {"id": "usa", "name": "EUA", "countries": ["US"], "style_tendencies": ["wrestling", "boxing", "complete"], "gameplay": "Maior mercado comercial inicial."},
+  {"id": "usa", "name": "EUA", "countries": ["US", "CA"], "style_tendencies": ["wrestling", "boxing", "complete"], "gameplay": "Maior mercado comercial inicial."},
   {"id": "mexico", "name": "México", "countries": ["MX"], "style_tendencies": ["boxing", "cardio", "pressure"], "gameplay": "Mercado de estrelas e grandes arenas."},
   {"id": "europe", "name": "Europa", "countries": ["GB", "IE", "FR", "DE", "PL", "RS", "NL", "SE", "ES", "IT"], "style_tendencies": ["kickboxing", "grappling"], "gameplay": "Crescimento rápido e circuitos nacionais."},
   {"id": "central_asia", "name": "Cáucaso/Ásia Central", "countries": ["KZ", "KG", "UZ", "TJ", "GE", "AM", "AZ", "RU"], "style_tendencies": ["wrestling", "sambo", "control"], "gameplay": "Talentos tecnicamente difíceis e menos comercializados."},
   {"id": "japan_korea", "name": "Japão/Coreia", "countries": ["JP", "KR"], "style_tendencies": ["judo", "karate", "kickboxing"], "gameplay": "Apresentação e formatos diferenciados."},
   {"id": "oceania", "name": "Austrália/NZ", "countries": ["AU", "NZ"], "style_tendencies": ["striking", "conditioning"], "gameplay": "Hub do Pacífico."},
-  {"id": "middle_east", "name": "Oriente Médio", "countries": ["AE", "SA", "QA", "BH"], "style_tendencies": [], "gameplay": "Mercado de eventos premium."}
+  {"id": "middle_east", "name": "Oriente Médio", "countries": ["AE", "SA", "QA", "BH"], "style_tendencies": [], "gameplay": "Mercado de eventos premium."},
+  {"id": "africa", "name": "África", "countries": ["NG", "CM", "SN", "ZA", "CI", "GH"], "style_tendencies": ["wrestling", "boxing", "judo"], "gameplay": "Talentos atléticos e mercado emergente."},
+  {"id": "southeast_asia", "name": "Sudeste Asiático", "countries": ["TH", "PH", "ID", "VN", "MY", "SG"], "style_tendencies": ["muay_thai", "boxing", "kickboxing"], "gameplay": "Berço do muay thai; público fiel à trocação."},
+  {"id": "china", "name": "China", "countries": ["CN"], "style_tendencies": ["kickboxing", "wrestling", "judo"], "gameplay": "Mercado enorme e ainda pouco explorado."},
+  {"id": "caribbean", "name": "Caribe", "countries": ["CU", "DO", "PR", "JM"], "style_tendencies": ["boxing", "wrestling", "judo"], "gameplay": "Escola olímpica forte; muitos atletas competem fora."},
+  {"id": "south_asia", "name": "Sul da Ásia", "countries": ["IN", "PK", "BD"], "style_tendencies": ["wrestling", "boxing"], "gameplay": "Tradição de luta livre e público jovem."}
 ]
