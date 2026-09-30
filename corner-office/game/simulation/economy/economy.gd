@@ -12,8 +12,14 @@ func _purses(world: WorldState, fight: Fight) -> Dictionary:
 		result[id]={"show":c.show_money if c else Contracts.market_price(world,f),"win":c.win_bonus if c else 0}
 	return result
 
+## A liga principal opera em outra escala de receita e custo (Bible §0, §12).
+static func event_config(world: WorldState, org_id: String) -> Dictionary:
+	var cfg: Dictionary=ContentDB.load_json("career_tuning.json")
+	var org: Organization=world.organizations.get(org_id)
+	return cfg.flagship_event if org and org.tier=="global" and org.is_player else cfg.event
+
 func project_event(world: WorldState, ev: FightEvent) -> Dictionary:
-	var cfg: Dictionary=ContentDB.load_json("career_tuning.json").event
+	var cfg: Dictionary=event_config(world,ev.organization_id)
 	var org: Organization=world.organizations[ev.organization_id]
 	var fame:=0.0
 	var purses:=0
@@ -51,8 +57,9 @@ func settle_event(world: WorldState, ev: FightEvent) -> Dictionary:
 			var rest: Dictionary=ContentDB.load_json("career_tuning.json").medical_rest
 			var rest_days:=int(rest.ko_loser_days if fight.method=="ko_tko" and fight.winner_id!=fighter_id else rest.standard_days)
 			f.medical_suspension_until=GameDate.add_days(ev.date,rest_days)
-	var attendance:=clampi(int(actual.attendance*world.rng.range_f(.82,1.12)),0,int(ContentDB.load_json("career_tuning.json").event.capacity))
-	actual.lines.revenue.gate=attendance*int(ContentDB.load_json("career_tuning.json").event.ticket_price)
+	var cfg: Dictionary=event_config(world,ev.organization_id)
+	var attendance:=clampi(int(actual.attendance*world.rng.range_f(.82,1.12)),0,int(cfg.capacity))
+	actual.lines.revenue.gate=attendance*int(cfg.ticket_price)
 	actual.lines.costs.purses=paid
 	actual.audience+=18*(attendance-int(actual.attendance))
 	actual.attendance=attendance

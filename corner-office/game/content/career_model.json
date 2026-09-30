@@ -1,0 +1,399 @@
+{
+ "_doc": "Modelo de atletas e carreiras (simulation/careers). Fontes: médias públicas de ligas de elite (altura por divisão, taxas de finalização, idade de pico). Valores de protótipo; calibrados por tests/sim/test_athlete_realism.gd.",
+ "divisions": {
+  "m_flyweight": {
+   "height": [
+    165,
+    4
+   ],
+   "prime": 28.0,
+   "finish": 0.42,
+   "ko_share": 0.45,
+   "weight_ratio": 1.1,
+   "share": 0.07,
+   "physical": {
+    "speed": 7,
+    "cardio": 5,
+    "strength": -4,
+    "mobility": 5,
+    "explosiveness": 3
+   }
+  },
+  "m_bantamweight": {
+   "height": [
+    170,
+    4
+   ],
+   "prime": 28.5,
+   "finish": 0.46,
+   "ko_share": 0.52,
+   "weight_ratio": 1.1,
+   "share": 0.13,
+   "physical": {
+    "speed": 5,
+    "cardio": 4,
+    "strength": -3,
+    "mobility": 4,
+    "explosiveness": 2
+   }
+  },
+  "m_featherweight": {
+   "height": [
+    174,
+    4
+   ],
+   "prime": 29.0,
+   "finish": 0.5,
+   "ko_share": 0.56,
+   "weight_ratio": 1.11,
+   "share": 0.15,
+   "physical": {
+    "speed": 3,
+    "cardio": 3,
+    "strength": -2,
+    "mobility": 2,
+    "explosiveness": 1
+   }
+  },
+  "m_lightweight": {
+   "height": [
+    178,
+    4.5
+   ],
+   "prime": 29.5,
+   "finish": 0.52,
+   "ko_share": 0.58,
+   "weight_ratio": 1.11,
+   "share": 0.19,
+   "physical": {
+    "speed": 1,
+    "cardio": 1
+   }
+  },
+  "m_welterweight": {
+   "height": [
+    181.5,
+    4.5
+   ],
+   "prime": 30.0,
+   "finish": 0.55,
+   "ko_share": 0.62,
+   "weight_ratio": 1.11,
+   "share": 0.17,
+   "physical": {
+    "strength": 1
+   }
+  },
+  "m_middleweight": {
+   "height": [
+    185,
+    4.5
+   ],
+   "prime": 30.5,
+   "finish": 0.6,
+   "ko_share": 0.66,
+   "weight_ratio": 1.1,
+   "share": 0.13,
+   "physical": {
+    "speed": -1,
+    "cardio": -1,
+    "strength": 2,
+    "mobility": -1
+   }
+  },
+  "m_light_heavyweight": {
+   "height": [
+    189,
+    4.5
+   ],
+   "prime": 31.0,
+   "finish": 0.64,
+   "ko_share": 0.72,
+   "weight_ratio": 1.09,
+   "share": 0.08,
+   "physical": {
+    "speed": -3,
+    "cardio": -3,
+    "strength": 3,
+    "mobility": -3,
+    "explosiveness": 1
+   }
+  },
+  "m_heavyweight": {
+   "height": [
+    191.5,
+    5.5
+   ],
+   "prime": 32.0,
+   "finish": 0.7,
+   "ko_share": 0.78,
+   "weight_ratio": 0.93,
+   "share": 0.08,
+   "physical": {
+    "speed": -7,
+    "cardio": -7,
+    "strength": 5,
+    "mobility": -6,
+    "explosiveness": 1
+   }
+  },
+  "w_strawweight": {
+   "height": [
+    161,
+    4
+   ],
+   "prime": 28.5,
+   "finish": 0.35,
+   "ko_share": 0.36,
+   "weight_ratio": 1.09,
+   "share": 0.3,
+   "physical": {
+    "speed": 4,
+    "cardio": 4,
+    "strength": -3,
+    "mobility": 3
+   }
+  },
+  "w_flyweight": {
+   "height": [
+    166,
+    4
+   ],
+   "prime": 29.0,
+   "finish": 0.38,
+   "ko_share": 0.42,
+   "weight_ratio": 1.09,
+   "share": 0.33,
+   "physical": {
+    "speed": 2,
+    "cardio": 2,
+    "strength": -1,
+    "mobility": 2
+   }
+  },
+  "w_bantamweight": {
+   "height": [
+    169.5,
+    4
+   ],
+   "prime": 29.5,
+   "finish": 0.44,
+   "ko_share": 0.5,
+   "weight_ratio": 1.08,
+   "share": 0.25,
+   "physical": {
+    "strength": 1
+   }
+  },
+  "w_featherweight": {
+   "height": [
+    172,
+    4.5
+   ],
+   "prime": 30.0,
+   "finish": 0.5,
+   "ko_share": 0.55,
+   "weight_ratio": 1.07,
+   "share": 0.12,
+   "physical": {
+    "speed": -2,
+    "cardio": -2,
+    "strength": 3,
+    "mobility": -2
+   }
+  }
+ },
+ "style_ko_factor": {
+  "boxing": 1.45,
+  "kickboxing": 1.4,
+  "muay_thai": 1.35,
+  "karate": 1.2,
+  "taekwondo": 1.2,
+  "wrestling": 0.9,
+  "bjj": 0.45,
+  "judo": 0.65,
+  "sambo": 0.7,
+  "mma": 1.0
+ },
+ "style_finish_factor": {
+  "boxing": 1.05,
+  "kickboxing": 1.0,
+  "muay_thai": 1.08,
+  "karate": 0.9,
+  "taekwondo": 0.95,
+  "wrestling": 0.9,
+  "bjj": 1.15,
+  "judo": 1.0,
+  "sambo": 1.05,
+  "mma": 1.0
+ },
+ "style_prime_shift": {
+  "wrestling": 0.6,
+  "bjj": 0.8,
+  "judo": 0.4,
+  "sambo": 0.4,
+  "boxing": -0.3,
+  "kickboxing": -0.3,
+  "karate": -0.5,
+  "taekwondo": -0.6,
+  "muay_thai": -0.2,
+  "mma": 0.0
+ },
+ "tiers": {
+  "flagship": {
+   "ability": [
+    68,
+    5.5
+   ],
+   "age": [
+    30.2,
+    3.9
+   ],
+   "range": [
+    21,
+    41
+   ]
+  },
+  "national": {
+   "ability": [
+    57,
+    6
+   ],
+   "age": [
+    28.5,
+    4.2
+   ],
+   "range": [
+    19,
+    40
+   ]
+  },
+  "circuit": {
+   "ability": [
+    47,
+    7.5
+   ],
+   "age": [
+    26.0,
+    4.4
+   ],
+   "range": [
+    18,
+    40
+   ]
+  }
+ },
+ "growth_gap": [
+  21,
+  4.5
+ ],
+ "decline_rate": [
+  0.2,
+  0.06
+ ],
+ "prime_sd": 1.5,
+ "debut_age": [
+  22.6,
+  2.4
+ ],
+ "debut_shift": {
+  "wrestling": 1.0,
+  "judo": 1.0,
+  "sambo": 0.6,
+  "bjj": 0.8
+ },
+ "months_between_fights": {
+  "early": [
+   3.8,
+   1.4
+  ],
+  "mid": [
+   4.8,
+   1.8
+  ],
+  "flagship": [
+   5.6,
+   2.2
+  ]
+ },
+ "layoff": {
+  "chance": 0.08,
+  "months": [
+   7,
+   20
+  ]
+ },
+ "win_scale": 6.0,
+ "draw_chance": 0.012,
+ "nc_chance": 0.006,
+ "finish_round": [
+  0.49,
+  0.3,
+  0.17,
+  0.025,
+  0.015
+ ],
+ "flagship_threshold": 62,
+ "national_threshold": 53,
+ "elo": {
+  "start": 1000,
+  "k_early": 36,
+  "k": 24,
+  "level_scale": 12
+ },
+ "reach_ape_index": [
+  2.0,
+  4.2
+ ],
+ "stance": {
+  "orthodox": 0.72,
+  "southpaw": 0.21,
+  "switch": 0.07
+ },
+ "blue_chip": {
+  "chance": 0.05,
+  "max_age": 24,
+  "growth_gap": [
+   33,
+   4
+  ]
+ },
+ "attribute_noise": 5.5,
+ "integration_bouts": 25,
+ "integration": 0.35,
+ "roster": {
+  "flagship_total": 600,
+  "national_per_org": 34,
+  "circuit_total": 900
+ },
+ "ko_details": {
+  "ko": 0.38,
+  "referee_tko": 0.5,
+  "body_tko": 0.04,
+  "leg_tko": 0.03,
+  "doctor_stoppage": 0.04,
+  "corner_stoppage": 0.01
+ },
+ "submission_details": {
+  "rear_naked_choke": 0.33,
+  "guillotine": 0.15,
+  "arm_triangle": 0.1,
+  "triangle": 0.1,
+  "armbar_guard": 0.06,
+  "armbar_mount": 0.04,
+  "kimura": 0.03,
+  "americana": 0.015,
+  "omoplata": 0.005,
+  "darce": 0.06,
+  "anaconda": 0.03,
+  "straight_ankle": 0.01,
+  "kneebar": 0.01,
+  "heel_hook": 0.03,
+  "calf_slicer": 0.005
+ },
+ "decision_details": {
+  "unanimous": 0.7,
+  "split": 0.22,
+  "majority": 0.08
+ }
+}

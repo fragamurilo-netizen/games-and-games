@@ -12,7 +12,23 @@ const SAVE_DIR := "user://saves"
 ## versão de origem -> nome do método que migra para a versão seguinte.
 const MIGRATIONS := {
 	1: "_migrate_v1_to_v2",
+	2: "_migrate_v2_to_v3",
 }
+
+
+## v3: rating público, última luta e resumo de carreira (CareerHistory).
+## Saves antigos recebem um rating estimado pelo cartel, sem inventar lutas.
+static func _migrate_v2_to_v3(data: Dictionary) -> Dictionary:
+	for id: String in data.get("fighters", {}):
+		var f: Dictionary = data.fighters[id]
+		var rec: Dictionary = f.get("record", {})
+		if not f.has("rating"):
+			f["rating"] = 1000.0 + clampf((int(rec.get("wins", 0)) - int(rec.get("losses", 0))) * 8.0, -200.0, 300.0)
+		if not f.has("history"):
+			f["history"] = {"results": [], "streak": 0}
+		if not f.has("last_fight_on"):
+			f["last_fight_on"] = {}
+	return data
 
 
 ## v2: todo atleta passa a ter agência (Game Bible §9). Mesma regra pública de

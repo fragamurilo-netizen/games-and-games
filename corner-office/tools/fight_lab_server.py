@@ -28,6 +28,8 @@ def validate_career(config):
     for key, maximum in [('seed', 2147483647), ('days', 120), ('show_money', 10000000), ('signing_bonus', 10000000)]:
         if key in config and (type(config[key]) is not int or not 0 <= config[key] <= maximum):
             raise ValueError('Valor numérico inválido.')
+    if 'mode' in config and config['mode'] not in ('flagship', 'regional_promoter'):
+        raise ValueError('Modo de carreira inválido.')
     if 'premium' in config and (type(config['premium']) not in (int, float) or not math.isfinite(config['premium']) or not 1 <= config['premium'] <= 2):
         raise ValueError('Multiplicador de bolsa inválido.')
 

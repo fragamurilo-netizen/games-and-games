@@ -43,7 +43,7 @@ def main():
                     if status == 200: assert data.get('ok'), (action, data.get('error'), data.get('reasons'))
                     return data
                 assert not call('state')['has_save']
-                world = call('new', seed=44)['world']
+                world = call('new', seed=44, mode='regional_promoter')['world']
                 assert len(world['fighters']) >= 100
                 def digest(): return hashlib.sha256(save.read_bytes()).hexdigest()
                 before = digest()

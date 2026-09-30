@@ -35,7 +35,10 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 			org.roster.append(fighter.id)
 
 	_create_player_org(w, start_mode)
-	if include_population:
+	var mode: Dictionary = ContentDB.load_json("start_modes.json").get(start_mode, {})
+	if include_population and mode.get("tier", "") == "global":
+		LeagueBuilder.populate(w, mode)
+	elif include_population:
 		PopulationGenerator.populate(w,start_mode)
 	# Representação por regra pública, depois dos contratos iniciais (sem RNG).
 	Agencies.assign_all(w)
@@ -53,13 +56,13 @@ static func _create_player_org(w: WorldState, start_mode: String) -> void:
 	var mode: Dictionary = modes.get(start_mode, modes["regional_promoter"])
 	var org := Organization.new()
 	org.id = "org_player"
-	var identity: Dictionary = ContentDB.load_json("career_tuning.json").player_organization
+	var identity: Dictionary = ContentDB.load_json("career_tuning.json")[mode.get("identity", "player_organization")]
 	org.name = identity.name
 	org.short_name = identity.short_name
 	org.base_country = identity.base_country
 	org.base_city = identity.base_city
 	org.is_player = true
-	org.tier = "regional"
+	org.tier = str(mode.get("tier", "regional"))
 	org.cash = int(mode.cash)
 	org.reputation = int(mode.reputation)
 	w.add("organizations", org)

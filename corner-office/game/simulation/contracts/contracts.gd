@@ -8,7 +8,10 @@ static func market_price(_world: WorldState, fighter: Fighter) -> int:
 	var fame := 0.0
 	for value in fighter.popularity_by_region.values(): fame=maxf(fame,float(value))
 	var technical := (float(fighter.striking.get("accuracy",50))+float(fighter.grappling.get("takedown_offense",50))+float(fighter.jiu_jitsu.get("submission_offense",50)))/3.0
-	return int(_config.minimum_show+technical*_config.skill_multiplier+fame*_config.popularity_multiplier)
+	# Resultados públicos (rating) e estrelato (fama acima do limiar) pesam no preço.
+	var standing := maxf(0.0,fighter.rating-1000.0)*float(_config.get("rating_multiplier",0))
+	var star := pow(maxf(0.0,fame-float(_config.get("star_threshold",100))),2)*float(_config.get("star_multiplier",0))
+	return int(_config.minimum_show+technical*_config.skill_multiplier+fame*_config.popularity_multiplier+standing+star)
 
 func evaluate_offer(world: WorldState, offer: Contract) -> Dictionary:
 	var fighter: Fighter=world.fighters.get(offer.fighter_id)

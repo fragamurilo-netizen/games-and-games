@@ -13,6 +13,25 @@ Versão 1.0 • Setembro de 2026
 
 NORTE
 
+# 0. Foco do produto (revisão de 30/09/2026 — prevalece sobre o restante)
+
+Decisão do dono do projeto: Corner Office é **um simulador do universo de uma grande liga de MMA, no molde do UFC**, e não um simulador de vários negócios ao mesmo tempo. A liga é **a nossa**. As demais organizações continuam existindo, mas são pano de fundo: circuito regional, celeiro de talentos e, de vez em quando, concorrência por um nome.
+
+O coração do jogo:
+
+1. **Descobrir atletas**: prospects surgem no circuito regional e em outras ligas, com cartel, idade, base marcial e origem coerentes. O jogador observa, contrata cedo ou espera.
+2. **Acompanhar carreiras**: evolução, auge, declínio, lesões, sequências, cinturões, aposentadoria e eventuais retornos, sempre emergindo da simulação.
+3. **Desenrolar das coisas**: rankings top 15 por divisão, campeões, title shots discutíveis, rivalidades e notícias com gatilho factual.
+4. **Assistir às lutas**: a transmissão do Fight Studio é o momento de recompensa.
+
+Estrutura da liga (fictícia, sem marcas, pessoas ou eventos reais — ver §22):
+
+- 8 divisões masculinas (mosca a pesado) e 4 femininas (palha a pena), elenco total na casa de 550–650 atletas, distribuído por divisão como numa grande liga real.
+- Um campeão e um ranking oficial top 15 por divisão; World Combat Index independente para o mundo inteiro.
+- Eventos numerados (cards principais) e fight nights, com main event de 5 rounds.
+
+Realismo é requisito, não enfeite: geração de atletas (demografia, etnia, nomes, biotipo, base marcial por país sem determinismo), curvas de idade por divisão, cartéis plausíveis, métodos de vitória por divisão e sexo, rankings com qualidade de oposição e inatividade. Economia, mídia, contratos e IA rival ficam em nível suficiente para sustentar esse núcleo, e não disputam prioridade com ele.
+
 # 1. Visão do produto
 
 Corner Office é um simulador de gestão de MMA em que o jogador assume a presidência de uma organização e controla matchmaking, contratos, eventos, negociações, finanças, mídia, rankings, scouting e expansão global. As lutas são simuladas; a habilidade do jogador está em construir o ecossistema, identificar talentos, criar confrontos, equilibrar risco e retorno e reagir a um mundo imprevisível.

@@ -6,7 +6,7 @@ var world: WorldState
 var sim: WorldSim
 
 
-func new_game(seed_value: int = 0, start_mode: String = "regional_promoter") -> void:
+func new_game(seed_value: int = 0, start_mode: String = "flagship") -> void:
 	world = WorldGenerator.generate(seed_value, start_mode)
 	sim = WorldSim.new(world)
 	EventBus.world_loaded.emit()

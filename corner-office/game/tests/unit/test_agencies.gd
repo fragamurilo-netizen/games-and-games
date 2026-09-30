@@ -140,6 +140,7 @@ func test_v1_save_migrates_to_represented_fighters() -> void:
 	var migrated := SaveSystem.decode(JSON.stringify(JSON.from_native(data)))
 	check(migrated != null, "Save v1 carrega")
 	check_eq(migrated.schema_version, WorldState.SCHEMA_VERSION, "Migrado para a versão atual")
+	check(migrated.fighters.values().all(func(f): return f.rating > 0.0), "v3: rating estimado")
 	for id: String in world.fighters:
 		check_eq(migrated.fighters[id].agent_id, world.fighters[id].agent_id, "Migração usa a mesma regra do gerador")
 	for id: String in world.agents:

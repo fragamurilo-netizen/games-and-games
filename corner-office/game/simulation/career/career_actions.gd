@@ -4,7 +4,8 @@ extends RefCounted
 ## Both native and web presentation call these methods; no business rules in UI.
 
 static func perform(world: WorldState, action: String, p: Dictionary={}) -> Dictionary:
-	var cfg: Dictionary=ContentDB.load_json("career_tuning.json")
+	var cfg: Dictionary=ContentDB.load_json("career_tuning.json").duplicate()
+	cfg.event=Economy.event_config(world,world.player_org_id)
 	match action:
 		"state":return {"ok":true}
 		"create_event":

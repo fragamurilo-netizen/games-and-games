@@ -3,7 +3,7 @@ extends RefCounted
 ## Estado completo do mundo. Tudo que precisa persistir fica aqui.
 ## Coleções são indexadas por id estável.
 
-const SCHEMA_VERSION := 2
+const SCHEMA_VERSION := 3
 
 var schema_version := SCHEMA_VERSION
 var seed_value := 0

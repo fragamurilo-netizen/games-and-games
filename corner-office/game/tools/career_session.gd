@@ -12,7 +12,7 @@ func _initialize() -> void:
 	var action:=str(config.get("action","state"))
 	var world: WorldState
 	if action=="new":
-		world=generator.generate(int(config.get("seed",2027)),"regional_promoter")
+		world=generator.generate(int(config.get("seed",2027)),str(config.get("mode","flagship")))
 	elif FileAccess.file_exists(args[2]):
 		world=SaveSystem.decode(FileAccess.get_file_as_string(args[2]))
 		if world==null:_reply(args[1],{"ok":false,"error":"Save inválido. O arquivo existente foi preservado."});return

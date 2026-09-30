@@ -39,7 +39,10 @@
     "popularity_multiplier": 55,
     "win_bonus_ratio": 0.5,
     "term_days": 540,
-    "bouts": 4
+    "bouts": 4,
+    "rating_multiplier": 45,
+    "star_threshold": 40,
+    "star_multiplier": 30
   },
   "division_height": {
     "m_lightweight": 178,
@@ -334,5 +337,31 @@
     "hostile_ratio": 0.75,
     "trust_hostile": -8,
     "counter_rounding": 10
+  },
+  "flagship_organization": {
+    "name": "Summit Fighting Championship",
+    "short_name": "SFC",
+    "base_country": "US",
+    "base_city": "Las Vegas",
+    "arena_template_id": "org_crown"
+  },
+  "flagship_event": {
+    "name": "SFC Fight Night",
+    "venue": "Summit Arena",
+    "city": "Las Vegas",
+    "country": "US",
+    "region": "usa",
+    "minimum_bouts": 10,
+    "maximum_bouts": 14,
+    "notice_days": 42,
+    "production": 420000,
+    "venue_cost": 380000,
+    "travel_per_fighter": 4500,
+    "officials": 60000,
+    "marketing": 250000,
+    "ticket_price": 190,
+    "capacity": 16000,
+    "media_guarantee": 3200000,
+    "sponsor_base": 450000
   }
 }
