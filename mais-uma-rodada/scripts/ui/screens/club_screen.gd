@@ -168,7 +168,7 @@ func _club_home(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 ## Cabeçalho do clube: escudo grande sobre o bloco na cor do clube, nome e lugar, e a faixa
 ## da temporada (posição, pontos, confiança, caixa).
 func _club_hero(w: GameWorld, club: Club) -> Control:
-	var hero := IdentityBand.wrap(club, 150.0, 214.0)
+	var hero := IdentityBand.wrap(club, 140.0, 214.0)  # faixa termina antes do nome (escudo 170 + 36)
 	var body: VBoxContainer = hero[1]
 	var row := UIKit.hbox(UITokens.S6)
 	var cr := UIKit.crest(club, 170)

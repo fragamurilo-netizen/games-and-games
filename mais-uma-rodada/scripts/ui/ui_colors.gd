@@ -506,7 +506,7 @@ static func morale_color(m: float) -> Color:
 
 static func morale_label(m: float) -> String:
 	if m >= 80.0:
-		return "Excelente"
+		return "Ótima"
 	if m >= 65.0:
 		return "Boa"
 	if m >= 45.0:

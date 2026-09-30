@@ -600,6 +600,8 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		b.custom_minimum_size.y = UITokens.H_TAB
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Largura proporcional ao texto (+ respiro): "Histórico" não corta para "Lista" caber.
+		b.size_flags_stretch_ratio = float(I18n.t(b.text).length() + 3)
 		b.clip_text = true
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var key: String = it[0]

@@ -24,7 +24,8 @@ static func make(items: Array) -> HBoxContainer:
 		v.add_theme_constant_override(&"separation", -4)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var val := UIKit.label(String(it[1]), "Section")
+		# Cinco ou mais valores numa linha de celular: fonte menor para "Excelente" caber.
+		var val := UIKit.label(String(it[1]), "Section" if items.size() <= 4 else "H3")
 		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		val.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		if it.size() > 2:

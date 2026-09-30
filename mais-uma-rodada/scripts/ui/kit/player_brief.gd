@@ -8,7 +8,7 @@ extends RefCounted
 ## `on_change`: chamado depois de uma ação que muda o mundo (proposta, lista de observação).
 static func make(w: GameWorld, p: Player, exact: bool, on_change: Callable = Callable()) -> Control:
 	var club := w.club(p.club_id) if p.club_id >= 0 else null
-	var hero := IdentityBand.wrap(club, 104.0, 150.0)
+	var hero := IdentityBand.wrap(club, 70.0, 150.0)  # faixa diagonal termina ~78 px além do bloco, antes do nome
 	var body: VBoxContainer = hero[1]
 	var top := UIKit.hbox(UITokens.S6)
 	var pv := UIKit.portrait(p, club, w.year, 118)

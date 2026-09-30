@@ -4,7 +4,7 @@ extends BaseScreen
 ## Mercado = busca + observação + vendas + transferências (DESIGN.md). Livres, fim de contrato e
 ## Moneyball são modos da busca, não abas próprias.
 const TABS := [["search", "Buscar"], ["shortlist", "Lista"], ["scout", "Olheiros"], ["sales", "Vendas"], ["moves", "Histórico"]]
-const POOLS := [["all", "Contratar"], ["free", "Livres"], ["pre", "Fim de contrato"], ["moneyball", "Moneyball"]]
+const POOLS := [["all", "Contratar"], ["free", "Livres"], ["pre", "A vencer"], ["moneyball", "Moneyball"]]
 const GROUPS := ["Todos", "GOL", "DEF", "MEI", "ATA"]
 const AGES := [["Todas", 99], ["≤ 21", 21], ["≤ 25", 25], ["≤ 29", 29]]
 const SORTS := [["rel", "Relevância"], ["ovr", "Avaliação"], ["value", "Valor"], ["price", "Preço"], ["age", "Idade"]]

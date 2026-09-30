@@ -80,7 +80,7 @@ static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
 	c["pos"] = {"key": "pos", "title": "Jogador", "first": "asc",
 		"sort": func(p: Player) -> int: return Pos.DISPLAY_ORDER.find(p.position) * 1000 - int(PlayerAssessment.score(w,p) * 10),
 		"cell": func(p: Player) -> Control: return lead_cell(w, p, mode)}
-	c["ovr"] = {"key": "ovr", "title": "Avaliação", "w": 98, "tip": "Estimativa para a posição no seu elenco; estrelas claras indicam incerteza",
+	c["ovr"] = {"key": "ovr", "title": "Avaliação", "w": 88, "tip": "Estimativa para a posição no seu elenco; estrelas claras indicam incerteza",
 		"sort": func(p: Player) -> float: return PlayerAssessment.stars(w,p),
 		"cell": func(p: Player) -> Control: return ovr_cell(w, p, exact)}
 	c["pot"] = {"key": "pot", "title": "Projeção", "w": 100, "tip": "Estimativa da comissão",
@@ -97,11 +97,11 @@ static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
 		"text": func(p: Player) -> String: return "Livre" if p.club_id < 0 else w.club(p.club_id).short_name,
 		"sort": func(p: Player) -> String: return "" if p.club_id < 0 else w.club(p.club_id).short_name,
 		"color": func(_p: Player) -> Color: return UIColors.MUTED}
-	c["cond"] = {"key": "cond", "title": "Físico", "w": 70, "first": "asc",
+	c["cond"] = {"key": "cond", "title": "Físico", "w": 58, "first": "asc",
 		"text": func(p: Player) -> String: return "%d%%" % int(round(p.condition)),
 		"sort": func(p: Player) -> float: return p.condition,
 		"color": func(p: Player) -> Color: return UIColors.TEXT if p.condition >= 85.0 else (UIColors.ORANGE if p.condition >= 70.0 else UIColors.RED)}
-	c["morale"] = {"key": "morale", "title": "Moral", "w": 104,
+	c["morale"] = {"key": "morale", "title": "Moral", "w": 96,
 		"text": func(p: Player) -> String: return UIColors.morale_label(p.morale),
 		"sort": func(p: Player) -> float: return p.morale,
 		"color": func(p: Player) -> Color: return UIColors.morale_color(p.morale)}
@@ -245,4 +245,4 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 
 
 static func ovr_cell(w: GameWorld, p: Player, _exact: bool) -> Control:
-	return UIKit.player_stars(w,p,16)
+	return UIKit.player_stars(w,p,14)
