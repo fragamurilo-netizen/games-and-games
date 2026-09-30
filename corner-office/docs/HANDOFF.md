@@ -89,6 +89,14 @@ Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações r
 
 `broadcast.html` virou uma noite completa no estilo UD3: abertura, walkouts, tale of the tape, locutor fictício Dario Valente (nunca usar locutores reais), HUD, câmera diretor, intervalos, replay em câmera lenta do final, cerimônia e tela de resultado. Dados extras em `replay.presentation`. Detalhes em `FIGHT_VISUALS.md`. Próximo passo natural: levar a mesma linguagem visual às telas Godot da carreira.
 
+## Integração 0.4.0 (Claude, 30/09/2026)
+
+`claude/dreamy-carson-628oai` agora junta as branches paralelas: determined-clarke (agências/BATNA, liga principal), project-thread-2uj2qo (gerador, tempo, progressão), klzt5i (artes marciais), 3etjpt (retratos, bandeiras, rankings/P4P), su2l5q (universo e enciclopédia), w8d3lp (central de notícias), 0sx6y9 (menus UD3 e hub) e 1vk3sj (noite inteira no Fight Studio). APK: `releases/corner-office-0.4.0-debug.apk`.
+
+Decisões da junção: pedido do agente sobe para a proposta rival quando ela é maior; liga principal usa a própria capacidade e as demais escalam pelo patamar; migrações v1→v2 dos dois ramos unidas (`_backfill_progression`, também na v2→v3); regiões finas do gerador (China, Sudeste/Sul da Ásia, Caribe) + América do Sul; bandeiras novas para BD, CI, DO, GH, JM, MY, PK, PR, VN; cobertura da imprensa roda uma vez por noite.
+
+Pendente: `test_player_progression` pede reputação +12 em 3 anos e a soma dá +9 (agências encarecem contratações). É balanceamento, não erro; ajustar metas/ganho de reputação ou o limiar do teste.
+
 ## Transmissão embutida no jogo — EM ANDAMENTO (Claude, 30/09/2026)
 
 Pedido do usuário: a luta deve abrir **dentro da tela do jogo** (WebView nativo do jogo), não em diálogo por cima nem no navegador. Continua usando o mesmo Fight Studio (nada de renderer novo).
