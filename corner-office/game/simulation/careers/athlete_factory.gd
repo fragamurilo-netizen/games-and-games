@@ -68,6 +68,10 @@ static func country_weights(sex: int, talent_bias: float) -> Dictionary:
 	return out
 
 
+## Sobrenomes que flexionam no feminino (Morozov → Morozova, Kowalski → Kowalska).
+const SURNAME_RULES := {"ru": "slavic", "dag": "slavic", "az": "slavic", "uk": "slavic", "kz": "kazakh", "pl": "polish"}
+
+
 static func _full_name(first: String, last: String) -> String:
 	return first + " " + last
 
@@ -118,11 +122,12 @@ static func create(world: WorldState, rng: SimRandom, spec: Dictionary) -> Fight
 	var talent_bias := 0.35 if tier == "flagship" else 0.15 if tier == "national" else 0.0
 	var c := country(spec.get("country", rng.weighted(country_weights(f.sex, talent_bias))))
 	f.country = c.code
-	f.city = rng.pick(c.cities)
 	f.languages = c.languages.duplicate()
 	f.division = division if not division.is_empty() else _pick_division(rng, f.sex, float(c.height_offset))
 	# --- etnia e nome coerentes (Bible §13: coerentes entre si e variados)
 	var group: Dictionary = rng.weighted(_group_weights(c))
+	# Cidade do grupo quando o país tem regiões marcadas (ex.: Daguestão × Moscou).
+	f.city = rng.pick(group.get("cities", c.cities))
 	var pools := names()
 	var used: Dictionary = spec.get("used_names", {})
 	var first_pool: Dictionary = pools[group.first]
@@ -130,6 +135,8 @@ static func create(world: WorldState, rng: SimRandom, spec: Dictionary) -> Fight
 	for attempt in 60:
 		f.first_name = rng.pick(firsts)
 		f.last_name = rng.pick(pools[group.last].last)
+		if f.sex == Fighter.Sex.FEMALE:
+			f.last_name = FighterGenerator.female_surname(f.last_name, str(SURNAME_RULES.get(group.last, "")))
 		var full := _full_name(f.first_name, f.last_name)
 		if not used.has(full) and not _blocked.has(full):
 			break

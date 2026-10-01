@@ -164,15 +164,16 @@ static func ensure(world: WorldState) -> void:
 static func generate(world: WorldState, role: String, level: String = "", org_id: String = "") -> StaffMember:
 	var rng := world.office_rng
 	var cfg := config()
-	var names: Dictionary = ContentDB.load_json("fighter_generation.json").countries
 	var s := StaffMember.new()
 	s.id = world.new_id("staff")
 	s.role = role
 	s.country = str(rng.pick(cfg.countries))
-	var origin: Dictionary = names.get(s.country, names.values()[0])
+	if not FighterGenerator.origins().countries.has(s.country):
+		s.country = "BR"
 	s.sex = "f" if rng.chance(0.42) else "m"
-	s.first_name = str(rng.pick(origin.female if s.sex == "f" else origin.male))
-	s.last_name = str(rng.pick(origin.last))
+	var name := FighterGenerator.roll_name(rng, FighterGenerator.pick_group(rng, s.country), s.sex == "f")
+	s.first_name = str(name[0])
+	s.last_name = str(name[1])
 	s.age = rng.range_i(23, 58)
 	s.experience = clampi(s.age - 22 - rng.range_i(0, 6), 0, 35)
 	s.skill = clampf(rng.normal(38.0 + s.experience * 1.4, 9.0), 18.0, 92.0)
