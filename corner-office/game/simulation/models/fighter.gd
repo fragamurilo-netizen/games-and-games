@@ -11,6 +11,7 @@ var last_name := ""
 var nickname := ""
 var country := ""          # ISO-3166 alpha-2
 var city := ""
+var origin_group := ""      # grupo cultural (content/origins.json), ex.: ru_dagestan
 var languages: Array = []
 var sex: int = Sex.MALE
 var birth_date := {}       # GameDate dict
@@ -76,6 +77,10 @@ var damage_history := {"head": 0.0, "body": 0.0, "legs": 0.0}
 var appearance := {}
 
 var bio := ""               # gancho narrativo (texto livre)
+# Personalidade (content/personalities.json): {archetype, temperament, confidence,
+# trash_talk, discipline, media, loyalty}, traços de 0 a 100. Lida pelas notícias
+# e redes sociais; editável no editor de lutadores.
+var personality := {}
 var retired := false
 var retired_on := {}        # GameDate da aposentadoria
 

@@ -29,14 +29,17 @@ func test_generated_fighters_are_coherent() -> void:
 		var age := f.age_on(w.date)
 		check(age >= 19 and age <= 40, "idade plausível (%d)" % age)
 		check(cfg.countries.has(f.country), "país conhecido")
-		check(f.city in cfg.countries[f.country].cities, "cidade do país")
+		var group := FighterGenerator.group_by_id(f.country, f.origin_group)
+		check(not group.is_empty(), "grupo cultural do país")
+		check(f.city in group.get("cities", []), "cidade do grupo")
 		check(cfg.archetypes.has(f.martial_base), "base marcial conhecida")
 		check(FighterGenerator.martial_arts().has(f.discipline), "arte marcial real conhecida")
 		check_eq(FighterGenerator.martial_arts()[f.discipline].family, f.martial_base, "família coerente")
 		check(f.reach_cm - f.height_cm >= -4 and f.reach_cm - f.height_cm <= 13, "envergadura plausível")
 		check(f.natural_weight_kg > 45.0, "peso natural definido")
 		check(f.record.wins + f.record.losses + f.record.draws >= 1, "ao menos uma luta")
-		check(f.appearance.pop in cfg.countries[f.country].populations, "rosto coerente com o país")
+		check(f.appearance.pop in group.get("populations", {}), "rosto coerente com a origem")
+		check(not f.personality.is_empty() and int(f.personality.temperament) >= 0 and int(f.personality.temperament) <= 100, "personalidade")
 		check_eq(f.appearance.age, age, "idade do rosto = idade do atleta")
 		check_eq(f.appearance.sex, "f" if f.sex == Fighter.Sex.FEMALE else "m", "sexo do rosto")
 		check(not f.bio.is_empty(), "bio gerada")
@@ -112,3 +115,49 @@ func _win_rate(list: Array) -> float:
 		wins += f.record.wins
 		fights += f.record.wins + f.record.losses
 	return wins / maxf(1.0, fights)
+
+
+func test_origins_look_and_sound_real() -> void:
+	var w := WorldGenerator.generate(12, "regional_promoter")
+	var east_asian_only := ["JP", "KR", "CN"]
+	for i in 60:
+		var jp := FighterGenerator.create(w, {"country": east_asian_only[i % 3], "division": "m_lightweight"})
+		check_eq(jp.appearance.pop, "leste_asiatico", "rosto leste-asiático para %s" % jp.country)
+	var dagestan := 0
+	for i in 40:
+		var f := FighterGenerator.create(w, {"country": "RU", "origin_group": "ru_dagestan", "division": "m_lightweight"})
+		check_eq(f.appearance.pop, "caucaso", "daguestanês tem traços do Cáucaso")
+		check(f.city in ["Makhachkala", "Khasavyurt", "Kaspiysk", "Derbent", "Buynaksk", "Kizlyar", "Izberbash", "Gunib"], "cidade do Daguestão")
+		check(f.first_name in FighterGenerator.origins().name_pools.dagestani.male, "nome daguestanês")
+		if f.discipline in ["freestyle_wrestling", "combat_sambo", "sambo"]:
+			dagestan += 1
+	check(dagestan >= 25, "Daguestão luta olímpica e sambo (%d/40)" % dagestan)
+	var woman := FighterGenerator.create(w, {"country": "RU", "origin_group": "ru_russian", "division": "w_strawweight"})
+	check(woman.last_name.ends_with("a"), "sobrenome russo no feminino (%s)" % woman.last_name)
+	check_eq(FighterGenerator.female_surname("Kowalski", "polish"), "Kowalska", "polonês no feminino")
+	check_eq(FighterGenerator.female_surname("Galiullin", "slavic"), "Galiullina", "tártaro no feminino")
+
+
+func test_names_are_massive_and_varied() -> void:
+	var o := FighterGenerator.origins()
+	var total := 0
+	for pool: Dictionary in o.name_pools.values():
+		total += pool.male.size() + pool.female.size() + pool.last.size()
+	check(total >= 3500, "milhares de nomes (%d)" % total)
+	var w := WorldGenerator.generate(13, "regional_promoter")
+	var names := {}
+	for i in 400:
+		var f := FighterGenerator.create(w, {"division": "m_welterweight"})
+		names[f.first_name + " " + f.last_name] = true
+	check(names.size() >= 390, "quase sem repetição em 400 sorteios (%d)" % names.size())
+
+
+func test_personality_follows_origin_and_feeds_charisma() -> void:
+	var w := WorldGenerator.generate(14, "regional_promoter")
+	var counts := {}
+	for i in 120:
+		var f := FighterGenerator.create(w, {"country": "RU", "origin_group": "ru_dagestan", "division": "m_lightweight"})
+		counts[f.personality.archetype] = int(counts.get(f.personality.archetype, 0)) + 1
+	check(int(counts.get("warrior_code", 0)) > int(counts.get("showman", 0)) * 3, "código de guerreiro é comum no Daguestão, showman é raro")
+	var showman := FighterGenerator.create(w, {"personality": "showman", "division": "m_lightweight"})
+	check(int(showman.personality.trash_talk) >= 55, "showman provoca")

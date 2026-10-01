@@ -2,7 +2,8 @@ class_name FighterGenerator
 extends RefCounted
 ## Gerador de lutadores fictícios (Game Design Bible §§4,5,13; MMA Bible §§1,7,14,18).
 ##
-## Um atleta nasce de uma origem (país → base marcial, população facial, nomes),
+## Um atleta nasce de uma origem (país → grupo cultural → cidade, nomes,
+## população facial e base marcial; content/origins.json),
 ## de uma idade (curva de auge, potencial e experiência) e de um nível técnico.
 ## O cartel é consequência do nível e da idade; a aparência é desacoplada da
 ## habilidade. Parâmetros em content/fighter_generation.json.
@@ -11,10 +12,12 @@ extends RefCounted
 ## quando novos prospectos chegam ao mercado e veteranos sem contrato se aposentam.
 
 const CONTENT := "fighter_generation.json"
+const ORIGINS := "origins.json"
+const PERSONALITIES := "personalities.json"
 
 
 ## Cria (sem registrar no mundo) um atleta. opts aceita:
-##  division, country, age, prospect (bool), used_names (Dictionary), cfg (conteúdo já carregado).
+##  division, country, origin_group, age, prospect (bool), used_names (Dictionary), cfg (conteúdo já carregado).
 static func create(world: WorldState, opts: Dictionary = {}) -> Fighter:
 	var cfg: Dictionary = opts.get("cfg", {})
 	if cfg.is_empty():
@@ -32,18 +35,21 @@ static func create(world: WorldState, opts: Dictionary = {}) -> Fighter:
 	if not cfg.countries.has(country):
 		country = _weighted_key(rng, cfg.countries, "weight")
 	var origin: Dictionary = cfg.countries[country]
+	var group := pick_group(rng, country, str(opts.get("origin_group", "")))
 	f.country = country
-	f.city = rng.pick(origin.cities)
+	f.origin_group = str(group.id)
+	f.city = rng.pick(group.cities)
 	f.languages = origin.languages.duplicate()
 	var used: Dictionary = opts.get("used_names", {})
 	for attempt in 200:
-		f.first_name = rng.pick(origin.female if f.sex == Fighter.Sex.FEMALE else origin.male)
-		f.last_name = rng.pick(origin.last)
+		var name := roll_name(rng, group, f.sex == Fighter.Sex.FEMALE)
+		f.first_name = name[0]
+		f.last_name = name[1]
 		if not used.has(f.first_name + " " + f.last_name):
 			break
 	used[f.first_name + " " + f.last_name] = true
 	var arts: Dictionary = martial_arts()
-	f.discipline = pick_discipline(rng, arts, origin.disciplines, str(opts.get("discipline", "")), str(opts.get("martial_base", "")))
+	f.discipline = pick_discipline(rng, arts, group_disciplines(origin, group), str(opts.get("discipline", "")), str(opts.get("martial_base", "")))
 	var art: Dictionary = arts[f.discipline]
 	f.martial_base = str(art.family)
 	var arch: Dictionary = cfg.archetypes.get(f.martial_base, cfg.archetypes.mma)
@@ -105,6 +111,10 @@ static func create(world: WorldState, opts: Dictionary = {}) -> Fighter:
 
 	# Mercado (popularidade regional e separada de skill; MMA Bible §18).
 	f.charisma = clampi(int(round(rng.normal(float(cfg.charisma.mean), float(cfg.charisma.deviation)))), 5, 95)
+	# Personalidade: arquétipo ponderado pelo grupo; quem é midiático tem mais carisma.
+	f.personality = roll_personality(rng, group, str(opts.get("personality", "")))
+	var traits: Dictionary = ContentDB.load_json(PERSONALITIES)
+	f.charisma = clampi(f.charisma + int(round((float(f.personality.media) - 50.0) * float(traits.charisma_from_media))), 5, 95)
 	var pop: Dictionary = cfg.popularity
 	var fame: float = float(pop.base) + f.record.wins * float(pop.per_win) + (f.charisma - 50) * float(pop.per_charisma) + rng.normal(0.0, float(pop.noise))
 	f.popularity_by_region = {str(origin.region): clampi(int(round(fame)), int(pop.range[0]), int(pop.range[1]))}
@@ -120,8 +130,98 @@ static func create(world: WorldState, opts: Dictionary = {}) -> Fighter:
 	f.nickname = _roll_nickname(rng, cfg, f)
 	f.bio = _bio(rng, cfg, f, age)
 	f.appearance = FaceGenerator.create_appearance(rng, country, f.body_type, age, "f" if f.sex == Fighter.Sex.FEMALE else "m",
-		{"height": clampf((f.height_cm - base_height) / 24.0 + 0.5, 0.0, 1.0), "pop": str(opts.get("population", ""))})
+		{"height": clampf((f.height_cm - base_height) / 24.0 + 0.5, 0.0, 1.0), "pop": str(opts.get("population", "")), "populations": group.populations})
 	return f
+
+
+# ---------- origem: grupos culturais, nomes e personalidade ----------
+
+static func origins() -> Dictionary:
+	return ContentDB.load_json(ORIGINS)
+
+
+## Grupo cultural do país (ex.: RU → Daguestão, Chechênia, Rússia europeia).
+static func pick_group(rng: SimRandom, country: String, wanted: String = "") -> Dictionary:
+	var groups: Array = origins().countries.get(country, [])
+	for g: Dictionary in groups:
+		if g.id == wanted:
+			return g
+	var weights := {}
+	for i in groups.size():
+		weights[i] = float(groups[i].weight)
+	return groups[int(rng.weighted(weights))]
+
+
+static func group_by_id(country: String, id: String) -> Dictionary:
+	for g: Dictionary in origins().countries.get(country, []):
+		if g.id == id:
+			return g
+	return {}
+
+
+## [nome, sobrenome] do grupo; sobrenomes eslavos e poloneses flexionam no feminino.
+static func roll_name(rng: SimRandom, group: Dictionary, female: bool) -> Array:
+	var o := origins()
+	var first_pool: Dictionary = o.name_pools[group.first]
+	var last_pool: Dictionary = o.name_pools[group.last]
+	var first: String = rng.pick(first_pool.female if female else first_pool.male)
+	var last: String = rng.pick(last_pool.last)
+	if female and last_pool.has("surname_rule"):
+		last = female_surname(last, str(last_pool.surname_rule))
+	return [first, last]
+
+
+static func female_surname(last: String, rule: String) -> String:
+	for pair: Array in origins().surname_rules.get(rule, []):
+		if last.ends_with(pair[0]):
+			return last.left(last.length() - str(pair[0]).length()) + str(pair[1])
+	return last
+
+
+## Pesos de arte marcial: o grupo pode substituir os do país ou multiplicá-los.
+static func group_disciplines(country_cfg: Dictionary, group: Dictionary) -> Dictionary:
+	var weights: Dictionary = group.get("disciplines", country_cfg.get("disciplines", {})).duplicate()
+	var bonus: Dictionary = group.get("disciplines_bonus", {})
+	for art: String in bonus:
+		weights[art] = float(weights.get(art, 0.3)) * float(bonus[art])
+	return weights
+
+
+## Mistura de populações faciais do país inteiro (soma dos grupos pelo peso).
+static func country_populations(country: String) -> Dictionary:
+	var out := {}
+	for g: Dictionary in origins().countries.get(country, []):
+		var total := 0.0
+		for pop: String in g.populations:
+			total += float(g.populations[pop])
+		for pop: String in g.populations:
+			out[pop] = float(out.get(pop, 0.0)) + float(g.weight) * float(g.populations[pop]) / total
+	return out
+
+
+## Personalidade: arquétipo (ponderado pelo grupo) + seis traços com ruído.
+static func roll_personality(rng: SimRandom, group: Dictionary = {}, archetype: String = "") -> Dictionary:
+	var cfg: Dictionary = ContentDB.load_json(PERSONALITIES)
+	if not cfg.archetypes.has(archetype):
+		var weights := {}
+		var bias: Dictionary = group.get("personality", {})
+		for id: String in cfg.archetypes:
+			weights[id] = float(cfg.archetypes[id].weight) * float(bias.get(id, 1.0))
+		archetype = str(rng.weighted(weights))
+	var out := {"archetype": archetype}
+	var means: Dictionary = cfg.archetypes[archetype].traits
+	for key: String in cfg.traits:
+		out[key] = clampi(int(round(rng.normal(float(means[key]), float(cfg.noise)))), 0, 100)
+	return out
+
+
+## Personalidade nos valores médios do arquétipo (editor: trocar de arquétipo).
+static func personality_of(archetype: String) -> Dictionary:
+	var cfg: Dictionary = ContentDB.load_json(PERSONALITIES)
+	var out := {"archetype": archetype}
+	for key: String in cfg.traits:
+		out[key] = int(cfg.archetypes[archetype].traits[key])
+	return out
 
 
 ## Chegada mensal de prospectos e aposentadoria de veteranos sem contrato.
@@ -149,7 +249,8 @@ static func monthly_intake(world: WorldState) -> Array:
 		created.append(f.id)
 		# Notícia só com fato público: invicto com vitórias suficientes (MMA Bible §27).
 		if f.record.losses == 0 and f.record.wins >= int(intake.news_min_wins):
-			var item := Media.new().publish(world, "prospect_turns_pro",
+			# Carregado só aqui: ferramentas headless (career_session) rodam sem o autoload EventBus.
+			var item: NewsItem = load("res://simulation/media/media.gd").new().publish(world, "prospect_turns_pro",
 				[Reason.make("UNBEATEN_PROSPECT", f.record.wins, {"fighter_id": f.id})], [f.id])
 			var story: Dictionary = tuning.story
 			item.headline = str(story.get("prospect_headline", "{fighter} chega ao mercado")).format({"fighter": f.display_name()})

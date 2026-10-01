@@ -17,16 +17,20 @@ static func build_create(screen: Screen, on_done: Callable, on_cancel: Callable)
 	var any := {"id": "", "label": "Sorteio"}
 	var division := screen.add_select("Categoria", [any] + o.divisions)
 	var country := screen.add_select("País", [any] + o.countries)
-	var population := screen.add_select("Traços do rosto", [{"id": "", "label": "Pelo país"}] + o.populations)
+	var origin := screen.add_select("Origem dentro do país", [{"id": "", "label": "Sorteio (escolha o país)"}])
+	country.item_selected.connect(func(_i: int) -> void: _fill_origins(origin, o, _value(country), ""))
+	var population := screen.add_select("Traços do rosto", [{"id": "", "label": "Pela origem"}] + o.populations)
 	var base := screen.add_select("Arte marcial de origem", [any] + o.disciplines)
 	var style := screen.add_select("Estilo de luta", [any] + o.fight_styles)
+	var persona := screen.add_select("Personalidade", [any] + o.personalities)
 	var age := screen.add_number("Idade (0 = sorteio)", 0, 0, 45)
 	var level := screen.add_number("Nível técnico (0 = sorteio; 40 regional, 60 bom, 75 elite)", 0, 0, 90)
 	var phase := screen.add_select("Momento da carreira", [{"id": "", "label": "Formado"}, {"id": "prospect", "label": "Prospecto (poucas lutas)"}])
 	var destination := screen.add_select("Destino", [{"id": "", "label": "Agente livre (mercado)"}, {"id": "roster", "label": "Meu elenco (contrato padrão)"}])
 	screen.add_button("GERAR LUTADOR", func():
 		var result: Dictionary = await screen.run_action("create_fighter", {
-			"division": _value(division), "country": _value(country), "population": _value(population),
+			"division": _value(division), "country": _value(country), "origin_group": _value(origin), "population": _value(population),
+			"personality": _value(persona),
 			"discipline": _value(base), "fight_style": _value(style), "age": int(age.value), "level": level.value,
 			"prospect": _value(phase) == "prospect", "to_roster": _value(destination) == "roster"})
 		if result.get("ok"):
@@ -42,10 +46,14 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	screen.add_button("← Voltar sem salvar", on_done)
 	screen.add_heading("Editar lutador")
 	screen.add_text("%s · %s · %s" % [f.display_name(), f.record_string(), CareerText.division(f.division)], Tokens.MUTED)
+	var face := _portrait(screen, f)
 	var first := screen.add_input("Nome", f.first_name)
 	var last := screen.add_input("Sobrenome", f.last_name)
 	var nick := screen.add_input("Apelido (vazio = sem apelido)", f.nickname)
 	var country := screen.add_select("País", o.countries, f.country)
+	var origin := screen.add_select("Origem dentro do país", [])
+	_fill_origins(origin, o, f.country, f.origin_group)
+	country.item_selected.connect(func(_i: int) -> void: _fill_origins(origin, o, _value(country), ""))
 	var city := screen.add_input("Cidade", f.city)
 	var population := screen.add_select("Traços do rosto", o.populations, str(f.appearance.get("pop", "")))
 	var new_face := _check(screen, "Sortear um rosto novo ao salvar")
@@ -58,6 +66,21 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	var height := screen.add_number("Altura (cm)", f.height_cm, 140, 215)
 	var reach := screen.add_number("Envergadura (cm)", f.reach_cm, 130, 235)
 	var charisma := screen.add_number("Carisma", f.charisma, 1, 99)
+	# Prévia ao vivo: traços, idade e categoria (sexo) mudam o rosto antes de salvar.
+	var initial_pop := _value(population)
+	var preview := func(_v: Variant = null) -> void:
+		if face == null:
+			return
+		var probe := _copy(f)
+		probe.sex = Fighter.Sex.FEMALE if _value(division).begins_with("w_") else Fighter.Sex.MALE
+		if probe.appearance.has("pop"):  # canônicos mantêm o retrato autoral (FighterEditor)
+			if _value(population) != initial_pop:
+				probe.appearance.pop = _value(population)
+			probe.appearance.age = int(age.value)
+		face.call("set_fighter", probe)
+	population.item_selected.connect(preview)
+	division.item_selected.connect(preview)
+	age.value_changed.connect(preview)
 
 	screen.add_heading("Atributos")
 	screen.add_text("A média de cada grupo desloca todos os atributos dele. Abra o detalhe para ajustar um a um.", Tokens.MUTED)
@@ -80,6 +103,14 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 	detail.toggled.connect(func(on: bool):
 		for node: Control in detail_nodes:
 			node.visible = on)
+
+	screen.add_heading("Personalidade")
+	screen.add_text("Molda entrevistas, provocações e redes sociais. Trocar o arquétipo recoloca os traços na média dele.", Tokens.MUTED)
+	var archetype := str(f.personality.get("archetype", ""))
+	var persona := screen.add_select("Arquétipo", ([] if not archetype.is_empty() else [{"id": "", "label": "Sem personalidade"}]) + o.personalities, archetype)
+	var traits := {}
+	for t: Dictionary in o.personality_traits:
+		traits[t.id] = screen.add_number(str(t.label), int(f.personality.get(t.id, 50)), 0, 100)
 
 	var record := {}
 	if f.fight_ids.is_empty():
@@ -123,6 +154,48 @@ static func build_edit(screen: Screen, f: Fighter, on_done: Callable) -> void:
 		screen.add_button("SORTEAR DE NOVO (mesma categoria e país)", func():
 			await screen.run_action("reroll_fighter", {"fighter_id": f.id, "division": f.division, "country": f.country})
 			screen.refresh())
+
+
+const PORTRAIT := "res://ui/fighter_portrait.gd"
+
+
+## Retrato oficial do jogo (FighterPortrait, componente único das telas).
+## Carregado por caminho para o editor funcionar com ou sem ele na base.
+static func _portrait(screen: Screen, f: Fighter) -> Control:
+	if not ResourceLoader.exists(PORTRAIT):
+		return null
+	var photo: Control = load(PORTRAIT).call("make", f, 176.0)
+	photo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	screen.body.add_child(photo)
+	return photo
+
+
+## Cópia rasa do atleta para a prévia (a edição só vale ao salvar).
+static func _copy(f: Fighter) -> Fighter:
+	var probe := Fighter.new()
+	probe.id = f.id
+	probe.first_name = f.first_name
+	probe.last_name = f.last_name
+	probe.sex = f.sex
+	probe.appearance = f.appearance.duplicate(true)
+	return probe
+
+
+## Grupos culturais do país escolhido (content/origins.json).
+static func _fill_origins(select: OptionButton, o: Dictionary, country: String, selected: String) -> void:
+	select.clear()
+	var items: Array = o.origin_groups.get(country, [])
+	if items.is_empty():
+		select.add_item("Sorteio (escolha o país)")
+		select.set_item_metadata(0, "")
+		return
+	select.add_item("Sorteio pela população do país")
+	select.set_item_metadata(0, "")
+	for item: Dictionary in items:
+		select.add_item(str(item.label))
+		select.set_item_metadata(select.item_count - 1, str(item.id))
+		if item.id == selected:
+			select.select(select.item_count - 1)
 
 
 static func _check(screen: Screen, text: String) -> CheckBox:
