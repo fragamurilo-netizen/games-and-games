@@ -150,15 +150,26 @@ func _choose_clip(c: Dictionary, actor: String, _target: String) -> Dictionary:
 		counts[clip.category] = int(counts.get(clip.category,0)) + 1
 	# Signature techniques of a real base dominate that fighter's repertoire; the category
 	# total is renormalized so the style profile (and combat calibration) keeps its shape.
+	# Selection weights are rescaled too, so each category keeps the pull the base catalog
+	# gave it however many signature clips it gained.
 	var sig: Dictionary = _tuning.get("signature",{})
 	var repertoire := {}
 	var repertoire_sum := {}
+	var core := {}
 	for clip: Dictionary in candidates:
 		var k := 1.0
 		if clip.get("signature",false):
 			k = float(sig.get("own",1.0)) if base in clip.styles else float(sig.get("mma",1.0)) if base == "mma" else float(sig.get("other",1.0))
+		var sel := float(clip.get("selection_weight",1.0))
 		repertoire[clip.id] = k
-		repertoire_sum[clip.category] = float(repertoire_sum.get(clip.category,0.0)) + k
+		repertoire_sum[clip.category] = float(repertoire_sum.get(clip.category,0.0)) + k*sel
+		if not clip.get("signature",false):
+			var acc: Array = core.get(clip.category,[0.0,0])
+			core[clip.category] = [float(acc[0])+sel,int(acc[1])+1]
+	for category: String in repertoire_sum.keys():
+		var acc: Array = core.get(category,[])
+		var mean := float(acc[0])/float(acc[1]) if not acc.is_empty() else 1.0
+		repertoire_sum[category] = float(repertoire_sum[category])/mean
 	var weights := {}
 	for clip: Dictionary in candidates:
 		var weight := float(profile.get(clip.category,1.0)) / float(counts[clip.category])
