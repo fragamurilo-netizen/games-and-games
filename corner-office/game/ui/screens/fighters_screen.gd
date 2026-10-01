@@ -21,7 +21,7 @@ func build() -> void:
 		FighterEditorForm.build_edit(self,world.fighters[editing],func():editing="";refresh());return
 	if not selected_fighter.is_empty():_profile(world.fighters[selected_fighter]);return
 	add_button("＋ CRIAR LUTADOR",func():editing="new";feedback="";refresh())
-	add_segments([{"id":"roster","label":"Meu elenco"},{"id":"all","label":"Todos"},{"id":"official","label":"Ranking"},{"id":"wci","label":"Mundial"},{"id":"p4p","label":"P4P"}],mode,func(id):mode=id;refresh())
+	add_segments([{"id":"roster","label":"Elenco"},{"id":"all","label":"Todos"},{"id":"official","label":"Ranking"},{"id":"wci","label":"Mundial"},{"id":"p4p","label":"P4P"}],mode,func(id):mode=id;refresh())
 	var options: Array=[{"id":"","label":"Todas as categorias"}]
 	for d: Dictionary in ContentDB.load_json("weight_classes.json"):options.append({"id":d.id,"label":CareerText.division(d.id)})
 	if mode!="p4p":
