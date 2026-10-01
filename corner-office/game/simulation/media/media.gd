@@ -312,7 +312,12 @@ func _commit(world: WorldState, item: NewsItem) -> void:
 	if not item.key.is_empty():
 		has_story(world, item.key)
 		_keys[item.key] = true
-	EventBus.news_published.emit(item.id)
+	# Sem referência estática ao autoload: ferramentas `-s` (career_session,
+	# servidor da carreira) compilam a Media antes de existir o EventBus.
+	var tree := Engine.get_main_loop() as SceneTree
+	var bus: Node = tree.root.get_node_or_null("EventBus") if tree else null
+	if bus:
+		bus.news_published.emit(item.id)
 
 
 static func _add(out: Array, item: NewsItem) -> void:
