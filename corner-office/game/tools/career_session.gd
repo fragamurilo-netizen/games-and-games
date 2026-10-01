@@ -14,22 +14,22 @@ func _initialize() -> void:
 	if action=="new":
 		world=generator.generate(int(config.get("seed",2027)),str(config.get("mode","flagship")))
 	elif FileAccess.file_exists(args[2]):
-		world=load("res://save/save_system.gd").decode(FileAccess.get_file_as_string(args[2]))
+		world=SaveSystem.decode(FileAccess.get_file_as_string(args[2]))
 		if world==null:_reply(args[1],{"ok":false,"error":"Save inválido. O arquivo existente foi preservado."});return
 	else:
 		_reply(args[1],{"ok":action=="state","has_save":false,"message":"Comece uma carreira regional."});return
 	if action=="replay":
 		var fight: Fight=world.fights.get(str(config.get("fight_id","")))
 		if fight==null or fight.status!="completed":_reply(args[1],{"ok":false,"error":"Luta ainda não concluída."});return
-		var replay: Dictionary=load("res://presentation/fight/fight_replay_builder.gd").build(world,fight)
-		var player=load("res://presentation/fight/fight_replay_player.gd").new()
+		var replay:=FightReplayBuilder.build(world,fight)
+		var player:=FightReplayPlayer.new()
 		if not player.load_replay(replay):push_error(str(player.errors));quit(1);return
 		_reply(args[1],{"ok":true,"replay":replay});return
 	var result: Dictionary={"ok":true,"message":"Carreira regional iniciada."} if action=="new" else actions.perform(world,action,config)
 	if result.ok and action not in ["state","evaluate"]:
 		var file:=FileAccess.open(args[2],FileAccess.WRITE)
 		if file==null:quit(1);return
-		file.store_string(load("res://save/save_system.gd").encode(world));file.close()
+		file.store_string(SaveSystem.encode(world));file.close()
 	result.has_save=true
 	result.world=actions.snapshot(world)
 	_reply(args[1],result)
