@@ -5,6 +5,8 @@ extends MarginContainer
 
 ## Pede à casca para abrir outra aba (ex.: tocar num atleta na Início).
 signal navigate(tab: String, payload: Dictionary)
+## Texto da linha de descrição (faixa inferior) para o item em foco.
+signal hint_changed(text: String)
 
 var body: VBoxContainer
 ## Seções recolhidas pelo jogador; sobrevivem ao refresh.
@@ -42,6 +44,19 @@ func build() -> void:
 	pass
 
 
+## Descrição padrão da tela na faixa inferior; vazio usa a da área.
+func hint() -> String:
+	return ""
+
+
+## Liga um controle à linha de descrição: tocar, passar o mouse ou focar mostra `text`.
+func describe(control: Control, text: String) -> void:
+	if text.is_empty():return
+	control.mouse_entered.connect(func():hint_changed.emit(text))
+	control.focus_entered.connect(func():hint_changed.emit(text))
+	if control is BaseButton:control.button_down.connect(func():hint_changed.emit(text))
+
+
 ## Recebe o pedido de outra aba antes de ser mostrada (ver `navigate`).
 func receive(_payload: Dictionary) -> void:
 	pass
@@ -70,20 +85,10 @@ func snapshot() -> Dictionary:
 	return {"scroll":_scroll.scroll_vertical}
 
 
-## Cabeçalho de seção em faixa inclinada com entalhe vermelho (Undisputed 3).
+## Cabeçalho de seção: faixa cinza-escura com texto claro centralizado.
 func add_heading(text: String) -> Label:
-	var bar := PanelContainer.new()
-	var box := Tokens.slanted_box(Tokens.SURFACE, 60)
-	box.border_width_left = 10
-	box.border_color = Tokens.FIGHT_RED
-	box.content_margin_left += Tokens.SPACE_S
-	bar.add_theme_stylebox_override("panel", box)
-	var l := Label.new()
-	l.text = text.to_upper()
-	l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", 34)
-	l.add_theme_font_override("font",Tokens.italic_font())
-	bar.add_child(l)
+	var bar:=Ud3Chrome.header_bar(text,52)
+	var l: Label=bar.get_child(0);l.add_theme_font_size_override("font_size",26)
 	body.add_child(bar)
 	return l
 
@@ -93,12 +98,15 @@ func add_section(text: String, open_by_default: bool=true) -> bool:
 	var key:=text
 	var is_open: bool=not collapsed.get(key,not open_by_default)
 	var button:=Button.new();button.text=("▾  " if is_open else "▸  ")+text.to_upper()
-	button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.custom_minimum_size.y=64
-	button.add_theme_font_size_override("font_size",30)
-	var box:=Tokens.slanted_box(Tokens.SURFACE,64);box.border_width_left=10;box.border_color=Tokens.FIGHT_RED
-	for state in ["normal","hover","pressed","hover_pressed","focus"]:button.add_theme_stylebox_override(state,box)
-	button.add_theme_color_override("font_hover_color",Tokens.INK)
+	button.alignment=HORIZONTAL_ALIGNMENT_CENTER;button.custom_minimum_size.y=56
+	button.add_theme_font_size_override("font_size",24)
+	var box:=Tokens.slanted_box(Tokens.HEADER_BAR,56);box.content_margin_top=4;box.content_margin_bottom=4
+	var lit:=Tokens.slanted_box(Tokens.FIGHT_RED,56);lit.content_margin_top=4;lit.content_margin_bottom=4
+	button.add_theme_stylebox_override("normal",box)
+	for state in ["hover","pressed","hover_pressed","focus"]:button.add_theme_stylebox_override(state,lit)
+	button.add_theme_color_override("font_color",Tokens.HEADER_TEXT)
 	button.pressed.connect(func():collapsed[key]=is_open;refresh())
+	describe(button,("Toque para recolher " if is_open else "Toque para abrir ")+text.to_lower()+".")
 	body.add_child(button)
 	if text==focus_section:_focus_node=button
 	return is_open
@@ -136,7 +144,7 @@ func add_pair(left: String, on_left: Callable, right: String, on_right: Callable
 		var b:=Button.new();b.text=str(side[0]).to_upper();b.size_flags_horizontal=SIZE_EXPAND_FILL
 		b.custom_minimum_size.y=Tokens.TOUCH_MIN;b.clip_text=true;b.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		b.add_theme_font_size_override("font_size",Tokens.FONT_SMALL)
-		var box:=Tokens.slanted_box(Color(Tokens.SURFACE,.94));box.border_width_left=6;box.border_color=side[2]
+		var box:=Tokens.flat_box(Color(Tokens.PANEL_ROW,.9),side[2],0);box.border_width_left=8;box.border_color=side[2]
 		b.add_theme_stylebox_override("normal",box)
 		b.pressed.connect(side[1]);row.add_child(b)
 	body.add_child(row)
@@ -146,6 +154,9 @@ func add_text(text: String, color: Color = Tokens.INK) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Texto vai sobre painel claro: as cores de tela escura viram tinta escura.
+	if color == Tokens.INK: color = Tokens.PANEL_INK
+	elif color == Tokens.MUTED: color = Tokens.PANEL_MUTED
 	l.add_theme_color_override("font_color", color)
 	body.add_child(l)
 	return l
@@ -155,13 +166,14 @@ func add_todo(text: String) -> void:
 	add_text("TODO — " + text, Tokens.MUTED)
 
 
-func add_button(text: String, callback: Callable) -> Button:
+func add_button(text: String, callback: Callable, hint_text: String="") -> Button:
 	var button:=Button.new()
 	# Itens de menu em caixa alta, alinhados à esquerda como em Undisputed 3.
 	button.text=text.to_upper();button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	button.custom_minimum_size.y=Tokens.TOUCH_MIN
 	button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	button.pressed.connect(callback);body.add_child(button)
+	describe(button,hint_text)
 	return button
 
 ## Foto grande do lutador (perfil, contrato).
@@ -193,20 +205,26 @@ func _row_label(text: String, callback: Callable, align: HorizontalAlignment) ->
 	l.size_flags_horizontal=Control.SIZE_EXPAND_FILL;l.horizontal_alignment=align;l.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	return l
 
+## Rótulo de campo em azul e caixa alta, como as colunas das tabelas de 2012.
+func add_label(text: String) -> Label:
+	var l:=add_text(text.to_upper(),Tokens.TABLE_BLUE)
+	l.add_theme_font_override("font",Tokens.DISPLAY_FONT);l.add_theme_font_size_override("font_size",18)
+	return l
+
 func add_input(label: String, value: String="") -> LineEdit:
-	add_text(label,Tokens.MUTED)
+	add_label(label)
 	var input:=LineEdit.new();input.text=value
 	input.custom_minimum_size.y=Tokens.TOUCH_MIN;body.add_child(input)
 	return input
 
 func add_number(label: String, value: float, minimum: float, maximum: float) -> SpinBox:
-	add_text(label,Tokens.MUTED)
+	add_label(label)
 	var input:=SpinBox.new();input.min_value=minimum;input.max_value=maximum;input.value=value
 	input.custom_minimum_size.y=Tokens.TOUCH_MIN;body.add_child(input)
 	return input
 
 func add_select(label: String, options: Array, selected: String="") -> OptionButton:
-	add_text(label,Tokens.MUTED)
+	add_label(label)
 	var input:=OptionButton.new();input.custom_minimum_size.y=Tokens.TOUCH_MIN
 	input.fit_to_longest_item=false;input.clip_text=true
 	for option: Dictionary in options:

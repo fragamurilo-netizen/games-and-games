@@ -24,9 +24,10 @@ func _capture() -> void:
 			root.get_texture().get_image().save_png(path)
 	# Perfil de um atleta que já lutou e o matchmaker com tale of the tape.
 	root.size=Vector2i(720,1280);root.content_scale_size=Vector2i(720,1280)
-	if played!="":
-		scene._navigate("fighters",{"fighter_id":played})
-		await _shot(output+"/fighter-profile-720x1280.png")
+	# Sem noite jogada (anúncio recusado), mostra o primeiro atleta do elenco.
+	if played=="":played=game.world.player_org().roster[0]
+	scene._navigate("fighters",{"fighter_id":played})
+	await _shot(output+"/fighter-profile-720x1280.png")
 	var next: Dictionary=career.create_event(game.world,"Segunda Noite")
 	scene._navigate("events",{"event_id":next.event_id})
 	var scroll: ScrollContainer=scene._screens["events"].get_child(0)
