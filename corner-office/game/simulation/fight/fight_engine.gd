@@ -10,9 +10,18 @@ var _tuning: Dictionary = ContentDB.load_json("fight_tuning.json")
 var _catalog: Dictionary = ContentDB.load_json("fight_techniques.json")
 var _clips := {}
 
+var _by_position := {}
+
 func _init() -> void:
 	for clip: Dictionary in _catalog.clips:
 		_clips[clip.id] = clip
+		# Candidate lists per position: the catalog is large, the choice runs every exchange.
+		if clip.category == "official":
+			continue
+		for position: String in clip.from_positions:
+			if not _by_position.has(position):
+				_by_position[position] = []
+			_by_position[position].append(clip)
 
 func simulate(world: WorldState, fight: Fight) -> Fight:
 	if fight.status != "booked":
@@ -129,9 +138,7 @@ func _choose_clip(c: Dictionary, actor: String, _target: String) -> Dictionary:
 	var profile: Dictionary = _tuning.styles[base]
 	var candidates: Array = []
 	var counts := {}
-	for clip: Dictionary in _catalog.clips:
-		if c.state.position not in clip.from_positions or clip.category == "official":
-			continue
+	for clip: Dictionary in _by_position.get(c.state.position,[]):
 		if c.state.position in GROUND:
 			if clip.actor_role == "top" and c.state.top_id != actor:
 				continue
@@ -141,9 +148,32 @@ func _choose_clip(c: Dictionary, actor: String, _target: String) -> Dictionary:
 			continue
 		candidates.append(clip)
 		counts[clip.category] = int(counts.get(clip.category,0)) + 1
+	# Signature techniques of a real base dominate that fighter's repertoire; the category
+	# total is renormalized so the style profile (and combat calibration) keeps its shape.
+	# Selection weights are rescaled too, so each category keeps the pull the base catalog
+	# gave it however many signature clips it gained.
+	var sig: Dictionary = _tuning.get("signature",{})
+	var repertoire := {}
+	var repertoire_sum := {}
+	var core := {}
+	for clip: Dictionary in candidates:
+		var k := 1.0
+		if clip.get("signature",false):
+			k = float(sig.get("own",1.0)) if base in clip.styles else float(sig.get("mma",1.0)) if base == "mma" else float(sig.get("other",1.0))
+		var sel := float(clip.get("selection_weight",1.0))
+		repertoire[clip.id] = k
+		repertoire_sum[clip.category] = float(repertoire_sum.get(clip.category,0.0)) + k*sel
+		if not clip.get("signature",false):
+			var acc: Array = core.get(clip.category,[0.0,0])
+			core[clip.category] = [float(acc[0])+sel,int(acc[1])+1]
+	for category: String in repertoire_sum.keys():
+		var acc: Array = core.get(category,[])
+		var mean := float(acc[0])/float(acc[1]) if not acc.is_empty() else 1.0
+		repertoire_sum[category] = float(repertoire_sum[category])/mean
 	var weights := {}
 	for clip: Dictionary in candidates:
 		var weight := float(profile.get(clip.category,1.0)) / float(counts[clip.category])
+		weight *= float(repertoire[clip.id]) * float(counts[clip.category]) / float(repertoire_sum[clip.category])
 		weight *= clampf(float(f.style.get(clip.category,1.0)),0.05,4.0)
 		if base in clip.styles:
 			weight *= 1.25
@@ -163,11 +193,18 @@ func _choose_clip(c: Dictionary, actor: String, _target: String) -> Dictionary:
 			weight *= 1.6 if base in ["wrestling","bjj","sambo","judo"] else 0.6
 		if clip.id == "exit_pocket":
 			weight *= 0.55
-		if not c.state.submission.is_empty() and clip.id == c.state.submission.technique_id and actor == c.state.submission.attacker_id:
-			weight *= float(_tuning.submission.repeat_clip_weight)
 		weights[clip.id] = weight
 	if weights.is_empty():
 		return {}
+	# Keep working an established submission. Its pull is measured against the whole set of
+	# alternative submissions, so a larger catalog does not dilute the attack (MMA Bible §20).
+	var ongoing: String = str(c.state.submission.get("technique_id","")) if not c.state.submission.is_empty() and actor == c.state.submission.attacker_id else ""
+	if weights.has(ongoing):
+		var others := 0.0
+		for clip: Dictionary in candidates:
+			if clip.family == "submission" and clip.id != ongoing:
+				others += float(weights[clip.id])
+		weights[ongoing] = maxf(float(weights[ongoing])*float(_tuning.submission.repeat_clip_weight),others*float(_tuning.submission.repeat_clip_weight)/3.0)
 	return _clips[c.world.rng.weighted(weights)]
 
 func _resolve(c: Dictionary, actor: String, target: String, clip: Dictionary, seconds: float) -> void:
@@ -289,7 +326,8 @@ func _strike(c: Dictionary, actor: String, target: String, clip: Dictionary, rea
 		var cs: Dictionary = _tuning.clean_shot
 		var clean := rng.chance(clampf(float(cs.base)+(accuracy-defense)/float(cs.skill_divisor),float(cs.min),float(cs.max)))
 		c.state.stun[target] = minf(1.0,c.state.stun[target]+damage*(6.5-chin/35.0)+(float(cs.stun) if clean else 0.0))
-		if rng.chance(damage*2.0):
+		# Elbows open cuts far more often than gloved punches (MMA Bible §7).
+		if rng.chance(damage*(6.0 if "elbow" in clip.id else 2.0)):
 			c.state.cuts[target] = minf(1.0,c.state.cuts[target]+rng.range_f(.08,.20))
 		var collapse: bool = c.state.stun[target] > .60 and rng.chance(.14+(100.0-chin)/170.0)
 		var unable: bool = c.state.unanswered[target] >= int(_tuning.tko_unanswered) and c.state.damage[target].head > .28 and (c.state.stamina[target] < .56 or c.state.stun[target] > .32 or c.state.position in GROUND)

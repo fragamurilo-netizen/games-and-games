@@ -3,6 +3,159 @@
  */
 (function (root) {
   "use strict";
+  const rgba = (hex, a) => {
+    const [r, g, b] = h2r(hex);
+    return `rgba(${r},${g},${b},${Math.max(0, Math.min(1, a))})`;
+  };
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  // Injuries drawn onto the face sprite (face-lab units: eyes at x ±.3, y .02;
+  // brows y -.13; nostrils y .43; mouth y .6). source-atop keeps paint on the head.
+  function faceWounds(c, f, fd) {
+    const S = 101,
+      X = (x) => 128 + x * S,
+      Y = (y) => 146 + y * S,
+      skin = SKIN[f.skin]?.[0] || "#B7805D";
+    const blot = (x, y, rx, ry, color, alpha, rot = 0) => {
+      if (alpha <= 0.005) return;
+      c.save();
+      c.translate(X(x), Y(y));
+      c.rotate(rot);
+      c.scale(1, ry / rx);
+      const g = c.createRadialGradient(0, 0, 0, 0, 0, rx * S);
+      g.addColorStop(0, rgba(color, alpha));
+      g.addColorStop(0.55, rgba(color, alpha * 0.6));
+      g.addColorStop(1, rgba(color, 0));
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(0, 0, rx * S, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    };
+    // A tapering run of blood that follows gravity down the face.
+    const stream = (x, y, len, width, wobble, seed, alpha = 0.92) => {
+      if (len <= 0.01) return;
+      const pts = [];
+      for (let k = 0; k <= 16; k++) {
+        const t = k / 16;
+        // Blood beads and thins as it runs; the path follows facial contours loosely.
+        pts.push([x + Math.sin(t * 5.3 + seed * 6) * wobble * 1.6 + Math.sin(t * 13 + seed * 3) * wobble * 0.5, y + t * len, width * (1 - t * 0.6) * (0.8 + 0.35 * Math.sin(t * 9 + seed * 5) ** 2)]);
+      }
+      // Thin smear where the run was wiped by gloves and sweat.
+      c.strokeStyle = rgba("#8E2027", alpha * 0.18);
+      c.lineWidth = width * S * 3.2;
+      c.lineCap = "round";
+      c.beginPath();
+      pts.forEach(([px, py], i) => (i ? c.lineTo(X(px), Y(py)) : c.moveTo(X(px), Y(py))));
+      c.stroke();
+      c.beginPath();
+      pts.forEach(([px, py, w], i) => (i ? c.lineTo(X(px - w), Y(py)) : c.moveTo(X(px - w), Y(py))));
+      for (let i = pts.length - 1; i >= 0; i--) c.lineTo(X(pts[i][0] + pts[i][2]), Y(pts[i][1]));
+      c.closePath();
+      c.fillStyle = rgba("#5E0A10", alpha * 0.9);
+      c.fill();
+      c.strokeStyle = rgba("#C9464B", alpha * 0.35);
+      c.lineWidth = 1;
+      c.beginPath();
+      pts.forEach(([px, py, w], i) => (i ? c.lineTo(X(px - w * 0.4), Y(py)) : c.moveTo(X(px - w * 0.4), Y(py))));
+      c.stroke();
+      const [ex, ey, ew] = pts[pts.length - 1];
+      c.fillStyle = rgba("#6E0C12", alpha);
+      c.beginPath();
+      c.ellipse(X(ex), Y(ey + ew * 0.6), ew * 1.25 * S, ew * 1.6 * S, 0, 0, Math.PI * 2);
+      c.fill();
+    };
+    c.save();
+    c.globalCompositeOperation = "source-atop";
+    const H = clamp01(fd.head / 0.22),
+      sweat = clamp01((fd.sweat - 0.3) / 0.6);
+    // Exertion and accumulated punishment redden the face.
+    for (const s of [-1, 1]) blot(s * 0.3, 0.27, 0.2, 0.14, "#B8403A", 0.1 * sweat + 0.3 * H);
+    blot(0, 0.3, 0.08, 0.13, "#B03A36", 0.35 * H);
+    for (const s of [-1, 1]) {
+      const sw = Math.min(1.4, fd.swell[s] / 0.1);
+      if (sw <= 0.02) continue;
+      // Orbital hematoma: purple centre, red rim, a shine where skin is stretched.
+      blot(s * 0.34, 0.12, 0.27, 0.18, "#9C3A3A", 0.3 * Math.min(1, sw));
+      blot(s * 0.32, 0.09, 0.19, 0.12, "#4A2142", 0.6 * Math.min(1, sw));
+      blot(s * 0.37, 0.19, 0.12, 0.06, "#FFFFFF", 0.13 * Math.min(1, sw), s * 0.3);
+      const close = clamp01((sw - 0.8) / 0.6);
+      if (close > 0.03) {
+        const puffy = mix(skin, "#6B3148", 0.35);
+        c.globalAlpha = Math.min(1, close * 1.6);
+        c.fillStyle = puffy;
+        c.beginPath();
+        c.ellipse(X(s * 0.3), Y(-0.02 + close * 0.03), 0.15 * S, (0.04 + close * 0.045) * S, 0, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = mix(skin, "#5A2A40", 0.45);
+        c.beginPath();
+        c.ellipse(X(s * 0.3), Y(0.085 - close * 0.02), 0.14 * S, (0.03 + close * 0.03) * S, 0, 0, Math.PI * 2);
+        c.fill();
+        c.strokeStyle = "#2A1218";
+        c.lineWidth = 1.4;
+        c.beginPath();
+        c.moveTo(X(s * 0.3 - 0.11), Y(0.045));
+        c.quadraticCurveTo(X(s * 0.3), Y(0.06), X(s * 0.3 + 0.11), Y(0.04));
+        c.stroke();
+        c.globalAlpha = 1;
+        blot(s * 0.3, -0.04, 0.1, 0.03, "#FFFFFF", 0.18 * close);
+      }
+    }
+    if (fd.head > 0.1) {
+      const s = fd.swell[1] >= fd.swell[-1] ? 1 : -1,
+        k = clamp01((fd.head - 0.1) / 0.15);
+      blot(s * 0.2, -0.33, 0.12, 0.08, "#A2403E", 0.4 * k);
+      blot(s * 0.19, -0.36, 0.09, 0.05, "#FFFFFF", 0.07 * k);
+    }
+    const lip = clamp01(fd.lip / 0.07);
+    if (lip > 0.05) {
+      blot(0.08, 0.6, 0.075, 0.035, "#8E2A31", 0.6 * lip);
+      c.strokeStyle = rgba("#4A0A10", 0.8 * lip);
+      c.lineWidth = 1.3;
+      c.beginPath();
+      c.moveTo(X(0.07), Y(0.585));
+      c.lineTo(X(0.1), Y(0.625));
+      c.stroke();
+    }
+    const nose = clamp01(fd.nose);
+    if (nose > 0.05) {
+      for (const s of [-1, 1]) stream(s * 0.045, 0.42, (0.08 + nose * 0.3) * (s < 0 ? 1 : 0.7), 0.012 + nose * 0.01, 0.006, s + 2, 0.85);
+      blot(0, 0.5, 0.1, 0.03, "#6E0C12", 0.55 * nose);
+    }
+    const SPOTS = [[0.28, -0.14], [0.42, -0.07], [0.36, 0.2], [0.13, -0.36], [0.03, 0.12], [0.24, -0.12]];
+    for (const cut of fd.cuts) {
+      const [sx, sy] = SPOTS[Math.floor(cut.u * SPOTS.length) % SPOTS.length],
+        x = cut.side * sx,
+        y = sy,
+        sev = clamp01(cut.sev / 0.2),
+        L = 0.06 + sev * 0.08,
+        a = (cut.v - 0.5) * 0.9;
+      blot(x, y, 0.11, 0.07, "#A8262B", 0.45);
+      // The run lengthens for a couple of seconds after the cut opens.
+      const flow = clamp01(cut.age / 2600),
+        len = (0.25 + sev * 0.75) * flow;
+      const n = 1 + (sev > 0.55 ? 1 : 0) + (sev > 0.85 ? 1 : 0);
+      for (let k = 0; k < n; k++)
+        stream(x + (k - (n - 1) / 2) * 0.035 + cut.side * 0.01, y + 0.01, len * (1 - k * 0.3) * (0.8 + cut.v * 0.4), 0.01 + sev * 0.011, 0.012, cut.u + k);
+      c.strokeStyle = "#3A070B";
+      c.lineCap = "round";
+      c.lineWidth = 2.6;
+      c.beginPath();
+      c.moveTo(X(x - Math.cos(a) * L * 0.5), Y(y - Math.sin(a) * L * 0.5));
+      c.lineTo(X(x + Math.cos(a) * L * 0.5), Y(y + Math.sin(a) * L * 0.5));
+      c.stroke();
+      c.strokeStyle = "#D2383E";
+      c.lineWidth = 1;
+      c.beginPath();
+      c.moveTo(X(x - Math.cos(a) * L * 0.45), Y(y - Math.sin(a) * L * 0.45 - 0.008));
+      c.lineTo(X(x + Math.cos(a) * L * 0.45), Y(y + Math.sin(a) * L * 0.45 - 0.008));
+      c.stroke();
+    }
+    // Sweat catches the arena light on forehead, nose and cheekbones.
+    if (sweat > 0.02)
+      for (const [x, y, r] of [[-0.18, -0.36, 0.05], [0.16, -0.3, 0.04], [0.02, 0.27, 0.025], [-0.36, 0.2, 0.03], [0.38, 0.12, 0.03]])
+        blot(x, y, r, r * 0.6, "#FFFFFF", 0.45 * sweat);
+    c.restore();
+  }
   class FightRenderer {
     constructor(canvas) {
       this.canvas = canvas;
@@ -30,6 +183,60 @@
       });
       this.heads.set(key, cv);
       return cv;
+    }
+    // Face sprite with the fight's injuries; quantized so a bout reuses a few dozen sprites.
+    damagedHead(f, fd) {
+      const base = this.head(f),
+        q = (v, k = 100) => Math.round(v * k);
+      if (!fd || (fd.head <= 0 && !fd.cuts.length && fd.nose <= 0.05 && fd.sweat < 0.32)) return base;
+      const key = [
+        JSON.stringify(f),
+        q(fd.head),
+        q(fd.swell[-1]),
+        q(fd.swell[1]),
+        q(fd.nose, 20),
+        q(fd.lip),
+        q(fd.sweat, 10),
+        ...fd.cuts.map((x) => [q(x.u), q(x.sev), Math.min(10, Math.floor(x.age / 260))].join(":")),
+      ].join("|");
+      this.hurt ||= new Map();
+      if (this.hurt.has(key)) return this.hurt.get(key);
+      if (this.hurt.size > 90) this.hurt.clear();
+      const cv = document.createElement("canvas");
+      cv.width = base.width;
+      cv.height = base.height;
+      const c = cv.getContext("2d");
+      c.drawImage(base, 0, 0);
+      faceWounds(c, f, fd);
+      this.hurt.set(key, cv);
+      return cv;
+    }
+    // Everything a fighter's body shows at this moment, rebuilt from recorded hits.
+    woundState(frame, id) {
+      const t = frame.time,
+        st = frame.state,
+        fd = { head: 0, swell: { "-1": 0, 1: 0 }, cuts: [], nose: 0, lip: 0, body: [], leg: [], arm: [], spray: null, time: t };
+      fd.sweat = 1 - (st.stamina?.[id] ?? 1);
+      fd.stun = st.stun?.[id] || 0;
+      fd.cut = st.cuts?.[id] || 0;
+      for (const w of frame.wounds || []) {
+        if (w.id !== id) continue;
+        const age = t - w.at_ms,
+          grow = Math.min(1, 0.35 + age / 4000);
+        if (w.zone === "head") {
+          fd.head += w.power;
+          fd.swell[w.side] += (w.power + (w.knockdown ? 0.05 : 0)) * grow;
+          if (w.cut > 0) fd.cuts.push({ u: w.u, v: w.v, side: w.side, sev: w.cut, age });
+          if (w.power > 0.022) fd.lip += w.power;
+          if (w.knockdown) fd.nose += 0.45;
+          if (age < 420 && (w.power > 0.012 || w.knockdown))
+            fd.spray = { age, power: w.power + (w.knockdown ? 0.04 : 0), seed: w.u, bloody: w.cut > 0 || fd.cut > 0.05 };
+        } else fd[w.zone]?.push({ ...w, age });
+      }
+      fd.nose += Math.max(0, fd.head - 0.12) * 3;
+      const other = frame.fighter_ids.find((x) => x !== id);
+      fd.glove = Math.min(0.7, (st.cuts?.[other] || 0) * 2.5);
+      return fd;
     }
     render(frame, arena, appearances) {
       const cv = this.canvas,
@@ -133,6 +340,7 @@
           offset,
           frame.state.damage[id],
           frame.state.cuts?.[id] || 0,
+          this.woundState(frame, id),
         );
       this.arena(arena, true);
       if (frame.clip.category === "official")
@@ -347,17 +555,48 @@
         }
       }
     }
-    fighter(p, f, corner, offset, damage, cuts = 0) {
+    fighter(p, f, corner, offset, damage, cuts = 0, fd = null) {
+      // A rocked fighter sways on unsteady legs; the recorded pose stays the anchor.
+      if (fd?.stun > 0.05)
+        p = { ...p, lean: p.lean + Math.sin(fd.time * 0.006) * Math.min(1, fd.stun) * 9 };
       const c = this.ctx,
         s = FightReplay.skeleton(p, f),
         scale = this.S,
         body = f.body || {},
         muscle = body.muscle ?? 0.65,
         fat = body.fat ?? 0.14,
+        // Body-type fields from the appearance catalog; neutral when absent.
+        armK = 1 + ((body.arms ?? 0.5) - 0.5) * 0.45,
+        legK = 1 + ((body.legMass ?? (f.sex === "f" ? 0.62 : 0.5)) - 0.5) * 0.4,
+        neckK = 1 + ((body.neck ?? 0.5) - 0.5) * 0.9,
+        belly = body.belly ?? 0,
         fem = f.sex === "f",
         skin = SKIN[f.skin]?.[0] || "#B7805D",
         P = (v) => this.project(v[0] + offset, v[1]),
         skinGrad = (x, r) => studioGradient(c, skin, x, 0, r);
+      // Hits on one area merge into a mottled patch: red while fresh, darker and
+      // more purple as punishment piles up; a bright flush marks the instant of impact.
+      const patch = (x, y, rx, ry, total, age, seed, rot = 0) => {
+        const k = Math.min(1, total / 0.1),
+          fresh = Math.max(0, 1 - age / 6000),
+          r = rngOf(Math.floor(seed * 1e5) + 7);
+        if (k > 0.02) {
+          studioSoft(c, x, y, rx * (1 + k * 0.6), ry * (1 + k * 0.6), "#A8544C", 0.12 + k * 0.18, rot);
+          for (let i = 0; i < 3; i++)
+            studioSoft(c, x + (r() - 0.5) * rx * 0.9, y + (r() - 0.5) * ry * 0.9, rx * (0.35 + r() * 0.35) * (0.6 + k * 0.5), ry * (0.3 + r() * 0.35) * (0.6 + k * 0.5), mix(mix("#6A3550", "#4E3A58", r()), "#B8433D", fresh * 0.6), (0.08 + k * 0.3) * (0.7 + r() * 0.3), rot + r());
+        }
+        if (age < 260) studioSoft(c, x, y, rx * 1.2, ry * 1.2, "#E86A5E", 0.5 * (1 - age / 260), rot);
+      };
+      const areas = (list, spots) => {
+        const out = spots.map(() => ({ total: 0, age: 1e9, seed: 0 }));
+        for (const w of list) {
+          const a = out[Math.min(spots.length - 1, Math.floor(w.u * spots.length))];
+          a.total += w.power;
+          a.age = Math.min(a.age, w.age);
+          a.seed = a.seed || w.v + 0.01;
+        }
+        return out;
+      };
       const hip = P(s.hip),
         neck = P(s.neck);
       const size =
@@ -501,23 +740,21 @@
         }
         c.restore();
       };
-      limb(s.hips[0], s.legs[0], [size * 1.26, size * 0.74, size * 0.43]);
+      limb(s.hips[0], s.legs[0], [size * 1.26 * legK, size * 0.74 * legK, size * 0.43]);
       foot(s.legs[0], 0);
-      limb(s.shoulders[0], s.arms[0], [size * 0.72, size * 0.47, size * 0.33]);
-      limb(s.hips[1], s.legs[1], [size * 1.28, size * 0.76, size * 0.43]);
+      limb(s.shoulders[0], s.arms[0], [size * 0.72 * armK, size * 0.47 * armK, size * 0.33]);
+      limb(s.hips[1], s.legs[1], [size * 1.28 * legK, size * 0.76 * legK, size * 0.43]);
       foot(s.legs[1], 1);
-      if ((damage?.leg || 0) > 0.12) {
+      // Kicks land on the lead leg: thigh welts, and calf kicks lower down.
+      if (fd?.leg.length) {
         const a = P(s.hips[1]),
-          b = P(s.legs[1].joint);
-        studioSoft(
-          c,
-          a[0] * 0.4 + b[0] * 0.6,
-          a[1] * 0.4 + b[1] * 0.6,
-          size * 0.7,
-          size * 1.0,
-          "#794E58",
-          Math.min(0.4, damage.leg * 0.5),
-        );
+          b = P(s.legs[1].joint),
+          e = P(s.legs[1].end);
+        areas(fd.leg, [[a, b, 0.6], [a, b, 0.78], [b, e, 0.35]]).forEach((ar, i) => {
+          const [from, to, t] = [[a, b, 0.6], [a, b, 0.8], [b, e, 0.35]][i];
+          if (ar.total > 0 || ar.age < 260)
+            patch(from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t, size * 0.6, size * 0.95, ar.total, ar.age, ar.seed, Math.atan2(to[1] - from[1], to[0] - from[0]) - Math.PI / 2);
+        });
       }
       // Each cloth leg follows the solved hip/knee segment, including kicks and ground poses.
       const shortsColor = SHORTS[f.kit?.shorts]?.[0] || corner;
@@ -567,18 +804,23 @@
       c.save();
       c.translate(...hip);
       c.rotate(angle);
-      c.scale(1, s.h);
+      // Heavy breathing when the tank empties.
+      c.scale(1 + Math.sin((fd?.time || 0) * 0.005) * 0.018 * Math.max(0, (fd?.sweat || 0) - 0.35), s.h);
       const shoulder =
           (fem ? 0.151 : 0.195) * scale +
           (body.shoulders ?? 0.5) * scale * 0.025,
-        waist = (fem ? 0.106 : 0.145) * scale + fat * scale * 0.05,
+        waist =
+          (fem ? 0.106 : 0.145) * scale +
+          fat * scale * 0.05 +
+          ((body.waist ?? (fem ? 0.4 : 0.5)) - 0.5) * scale * 0.03,
+        gut = waist + belly * scale * 0.06,
         hips =
           (fem ? 0.191 : 0.155) * scale + (body.hips ?? 0.5) * scale * 0.035;
       c.fillStyle = studioGradient(c, skin, 0, -0.3 * scale, shoulder);
       c.beginPath();
       c.moveTo(-hips, 0.04 * scale);
       c.bezierCurveTo(
-        -waist,
+        -gut,
         -0.16 * scale,
         -waist,
         -0.3 * scale,
@@ -591,8 +833,8 @@
         -0.07 * scale,
         -0.5 * scale,
       );
-      c.lineTo(-0.06 * scale, -0.57 * scale);
-      c.lineTo(0.06 * scale, -0.57 * scale);
+      c.lineTo(-0.06 * neckK * scale, -0.57 * scale);
+      c.lineTo(0.06 * neckK * scale, -0.57 * scale);
       c.lineTo(0.07 * scale, -0.5 * scale);
       c.quadraticCurveTo(
         shoulder * 0.84,
@@ -603,7 +845,7 @@
       c.bezierCurveTo(
         waist,
         -0.3 * scale,
-        waist,
+        gut,
         -0.16 * scale,
         hips,
         0.04 * scale,
@@ -625,28 +867,31 @@
         fem,
         f.seed || 17,
       );
-      // Local bruising follows the torso instead of floating in screen coordinates.
-      if ((damage?.body || 0) > 0.12) {
-        studioSoft(
-          c,
-          scale * 0.065,
-          -scale * 0.21,
-          scale * 0.078,
-          scale * 0.055,
-          "#813F48",
-          Math.min(0.4, damage.body * 0.5),
-          -0.3,
-        );
-        studioSoft(
-          c,
-          -scale * 0.09,
-          -scale * 0.35,
-          scale * 0.055,
-          scale * 0.038,
-          "#946D61",
-          Math.min(0.33, damage.body * 0.45),
-          0.3,
-        );
+      // Local bruising follows the torso: ribs, liver and solar plexus, one mark per hit.
+      if (fd?.body.length)
+        // Liver/ribs on the open side, solar plexus, and the far ribs.
+        areas(fd.body, [[0.45, 0.2], [0.05, 0.3], [-0.4, 0.24]]).forEach((ar, i) => {
+          const [x, y] = [[0.45, 0.2], [0.05, 0.3], [-0.4, 0.24]][i];
+          if (ar.total > 0 || ar.age < 260)
+            patch((p.facing || 1) * shoulder * x, -scale * y, scale * 0.065, scale * 0.05, ar.total, ar.age, ar.seed, x * 0.6);
+        });
+      const sweat = Math.max(0, (fd?.sweat || 0) - 0.3) / 0.7;
+      if (sweat > 0.02) {
+        studioSoft(c, 0, -scale * 0.42, shoulder * 0.8, scale * 0.1, "#C25A55", sweat * 0.14);
+        const r = rngOf((f.seed || 17) * 31 + 5);
+        for (let k = 0; k < 9; k++)
+          studioSoft(c, (r() - 0.5) * shoulder * 1.4, -scale * (0.1 + r() * 0.42), scale * 0.006, scale * (0.012 + r() * 0.014), "#FFFFFF", sweat * 0.28);
+      }
+      // Blood from facial cuts drips onto chest and shoulders.
+      if ((fd?.cut || 0) > 0.04) {
+        const r = rngOf((f.seed || 17) * 53 + 11),
+          n = Math.min(16, Math.floor(fd.cut * 60));
+        for (let k = 0; k < n; k++) {
+          const x = (r() - 0.5) * shoulder * 1.1,
+            y = -scale * (0.3 + r() * 0.22);
+          studioSoft(c, x, y, scale * (0.006 + r() * 0.008), scale * (0.008 + r() * 0.016), "#6E0C12", 0.75);
+        }
+        if (fd.cut > 0.12) studioSoft(c, shoulder * 0.15, -scale * 0.4, scale * 0.02, scale * 0.12, "#7A1117", 0.45);
       }
       c.restore();
       if (fem) {
@@ -700,7 +945,14 @@
       );
       this.line([0, 0], [0, scale * 0.055], darken(kit, 0.4), scale * 0.008);
       c.restore();
-      limb(s.shoulders[1], s.arms[1], [size * 0.74, size * 0.49, size * 0.33]);
+      limb(s.shoulders[1], s.arms[1], [size * 0.74 * armK, size * 0.49 * armK, size * 0.33]);
+      // Checked kicks leave the blocking forearm red.
+      if (fd?.arm.length) {
+        const j = P(s.arms[1].joint),
+          e = P(s.arms[1].end),
+          [ar] = areas(fd.arm, [0]);
+        patch(j[0] + (e[0] - j[0]) * 0.5, j[1] + (e[1] - j[1]) * 0.5, size * 0.35, size * 0.55, ar.total * 0.6, ar.age, ar.seed, Math.atan2(e[1] - j[1], e[0] - j[0]) - Math.PI / 2);
+      }
       for (const arm of s.arms) {
         const hand = P(arm.end);
         c.save();
@@ -728,40 +980,36 @@
           );
           c.fill();
         }
+        if ((fd?.glove || 0) > 0.05) studioSoft(c, size * 0.3, 0, size * 0.28, size * 0.42, "#6E0C12", fd.glove);
         c.restore();
       }
       const head = P(s.head);
       c.save();
       c.translate(...head);
       c.rotate(((p.lean + p.head) * Math.PI) / 180);
-      const sprite = this.head(f),
+      const sprite = this.damagedHead(f, fd),
         headW = scale * 0.32,
         headH = scale * 0.4;
       c.drawImage(sprite, -headW / 2, -headH * 0.54, headW, headH);
-      if ((damage?.head || 0) > 0.35) {
-        c.fillStyle = "rgba(117,42,45,.26)";
-        c.beginPath();
-        c.ellipse(
-          headW * 0.17,
-          headH * 0.02,
-          headW * 0.1,
-          headW * 0.08,
-          0,
-          0,
-          Math.PI * 2,
-        );
-        c.fill();
-      }
-      if (cuts > 0.04) {
-        this.line(
-          [-headW * 0.17, -headH * 0.08],
-          [-headW * 0.02, -headH * 0.11],
-          "#7E2C30",
-          Math.max(1, scale * 0.006),
-          Math.min(0.85, 0.3 + cuts),
-        );
-      }
       c.restore();
+      // Sweat (and blood, once cut) sprays off the head on a clean shot.
+      if (fd?.spray) {
+        const sp = fd.spray,
+          k = sp.age / 420,
+          r = rngOf(Math.floor(sp.seed * 1e6) + 3),
+          n = Math.min(26, 6 + Math.floor(sp.power * 500)),
+          dir = -(p.facing || 1);
+        for (let i = 0; i < n; i++) {
+          const spd = scale * (0.12 + r() * 0.3) * (0.6 + sp.power * 12),
+            ang = (r() - 0.6) * 1.3,
+            x = head[0] + dir * Math.cos(ang) * spd * k,
+            y = head[1] - Math.sin(ang) * spd * k + scale * 0.25 * k * k;
+          c.fillStyle = sp.bloody && r() < 0.55 ? rgba("#7A0D13", 0.9 * (1 - k)) : `rgba(226,236,242,${0.75 * (1 - k)})`;
+          c.beginPath();
+          c.arc(x, y, Math.max(0.8, scale * (0.003 + r() * 0.004)), 0, Math.PI * 2);
+          c.fill();
+        }
+      }
       if (this.showRig) {
         for (const [origin, limb] of [
           ...s.arms.map((x, i) => [s.shoulders[i], x]),

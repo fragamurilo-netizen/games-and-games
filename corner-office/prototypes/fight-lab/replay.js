@@ -302,6 +302,50 @@
     }
     return marks;
   }
+  // Visible injuries, one per recorded hit: severity is the engine's own damage/cut delta,
+  // placement comes from fixed hashes. Nothing here changes a result.
+  function woundMarks(log, clips) {
+    const wounds = [];
+    const hash = (s) => {
+      let h = 2166136261;
+      for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+      return h >>> 0;
+    };
+    for (const e of log.events) {
+      const clip = clips.get(e.technique_id),
+        id = e.target_id;
+      if (!clip || !id || !e.before.damage?.[id]) continue;
+      const at = e.at_ms + e.duration_ms * (clip.contact_t || 0.56),
+        v = hash(e.id + ":wound"),
+        u = (v % 1000) / 1000,
+        w = ((v >>> 10) % 1000) / 1000;
+      if (e.outcome === "blocked" && clip.family === "kick") {
+        wounds.push({ id, at_ms: at, zone: "arm", side: u < 0.5 ? -1 : 1, power: 0.02, cut: 0, knockdown: false, u, v: w, attacker: e.actor_id, source_event: e.id });
+        continue;
+      }
+      if (!["landed", "knockdown", "stoppage"].includes(e.outcome)) continue;
+      for (const zone of ["head", "body", "leg"]) {
+        const power = Math.max(0, (e.after.damage[id]?.[zone] || 0) - (e.before.damage[id]?.[zone] || 0)),
+          cut = zone === "head" ? Math.max(0, (e.after.cuts?.[id] || 0) - (e.before.cuts?.[id] || 0)) : 0;
+        if (power <= 0 && cut <= 0 && !(zone === clip.target && e.outcome !== "landed")) continue;
+        wounds.push({
+          id,
+          at_ms: at,
+          zone,
+          // Lead/rear limb picks the struck side; a quarter of hits land on the other one.
+          side: (clip.limb ? 1 : -1) * (w < 0.25 ? -1 : 1),
+          power,
+          cut,
+          knockdown: e.outcome === "knockdown",
+          u,
+          v: w,
+          attacker: e.actor_id,
+          source_event: e.id,
+        });
+      }
+    }
+    return wounds;
+  }
   class Player {
     constructor(replay, catalog, arenas) {
       const errors = validate(replay, catalog, arenas);
@@ -317,6 +361,7 @@
         this.clips,
         arenaFor(replay, arenas),
       );
+      this.wounds = woundMarks(this.log, this.clips);
       this.ends = this.log.events.map((e) => {
         const c = this.clips.get(e.technique_id),
           last = c.tracks[e.outcome].at(-1),
@@ -399,6 +444,7 @@
       const state = clone(progress >= 1 ? e.after : e.before);
       return {
         stains: clone(this.stains.filter((mark) => mark.at_ms <= t)),
+        wounds: clone(this.wounds.filter((mark) => mark.at_ms <= t)),
         fighter_ids: this.log.fighter_ids,
         time: t,
         event_index: lo,
@@ -480,6 +526,7 @@
   return {
     Player,
     bloodMarks,
+    woundMarks,
     arenaFor,
     validate,
     expectedPosition,

@@ -25,6 +25,10 @@ Referência: fotos oficiais dos 200 atletas ranqueados em ufc.com.br/rankings (2
 `drawFigure` reescrito: membros com perfil anatômico (deltoide, bíceps/tríceps, braquiorradial, quadríceps, vasto medial, panturrilha), tronco com trapézio, dorsal em V, peitoral, abdômen, oblíquos, serrátil, linhas do V e clavículas, luz vinda da esquerda, luvas de MMA com dedos e velcro, pés, calção com fenda e cordão. Novo `face.body = {muscle, fat, hair, height}` e presets por categoria (mosca, leve, médio, pesado).
 
 
+## Rodada 5 — mais cabelos, barbas e tipos de corpo
+
+26 cabelos novos (waves 360, caesar, flat top, degradê com desenho, afro e cachos com degradê, samurai, undercut com coque, nagô, freeform, wolf cut, viking trançado, bob, shag, bantu knots, coques duplos…) e 14 barbas (lenhador, viking trançada, van dyke, balbo, garibaldi, guidão, chevron, fu manchu, degradê, falhada…), marcados `novo:2`. `BODY_TYPES` define 20 físicos (12 masculinos, 8 femininos) sobre 14 parâmetros de corpo; `genFace` sorteia um tipo coerente com sexo e categoria. `node ../../tools/build_appearance_catalog.cjs` exporta tudo para `game/content/appearance_catalog.json`.
+
 ## Estúdio — anatomia contínua e materiais
 
 O novo modo **Estúdio** é o padrão do laboratório. A–D continuam disponíveis para
