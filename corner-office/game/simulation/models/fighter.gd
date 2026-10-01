@@ -52,7 +52,14 @@ var fight_style := ""
 var style := {}
 
 # Carreira
+# wins/losses/draws/nc + ko_wins, sub_wins, dec_wins, ko_losses, sub_losses, dec_losses
 var record := {"wins": 0, "losses": 0, "draws": 0, "nc": 0}
+# Rating público (tipo Elo) só de resultados e oposição: base do WCI (MMA Bible §23).
+var rating := 1000.0
+var last_fight_on := {}
+# Resumo da carreira: debut, sequência, últimas 10 lutas (inclui circuito),
+# estreia na liga, origem esportiva. Histórico transmitido fica em fight_ids.
+var history := {}
 var fight_ids: Array = []          # append-only
 var titles: Array = []             # append-only
 var career_goals := {}             # money / legacy / activity / belt ...
@@ -75,6 +82,11 @@ var bio := ""               # gancho narrativo (texto livre)
 # e redes sociais; editável no editor de lutadores.
 var personality := {}
 var retired := false
+var retired_on := {}        # GameDate da aposentadoria
+
+# Propostas públicas de rivais pelo próximo contrato (org_id -> {show, until}).
+# Contracts.evaluate_offer usa a melhor como preço de mercado.
+var rival_interest := {}
 
 
 func display_name() -> String:

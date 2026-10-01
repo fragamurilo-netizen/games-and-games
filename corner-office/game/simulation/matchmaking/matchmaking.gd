@@ -35,6 +35,8 @@ func evaluate(world: WorldState, fighter_a_id: String, fighter_b_id: String, eve
 		result.projected_cost+=show+bonus
 		var acceptance:=clampf(.76+minf(56,notice)*.002+(premium-1)*.45-float(f.mental.get("discipline",50))*.001,.15,.98)
 		if notice<21: acceptance-=.18
+		# Matchmaker da sede convence atletas (Office; só a liga do jogador).
+		acceptance=clampf(acceptance+Office.effect(world,ev.organization_id,"matchmaker"),.15,.98)
 		result.acceptance[f.id]=acceptance
 	var record_gap:=absf(float(a.record.wins-b.record.wins))
 	result.sporting_fit=clampf(88-record_gap*2.5+(8 if a.martial_base!=b.martial_base else 0),10,98)

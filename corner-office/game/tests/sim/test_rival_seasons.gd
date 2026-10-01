@@ -38,4 +38,14 @@ func test_two_years_of_rival_activity_stay_healthy() -> void:
 		check(world.news.size() >= per_org.values().reduce(func(a, b): return a + b, 0), "Cada noite rival gera notícia")
 		for org: Organization in world.organizations.values():
 			check(org.cash > -2_000_000, "Sem colapso financeiro descontrolado: %s %d" % [org.id, org.cash])
-		print("  Seed %d: %d noites rivais, %d lutas, métodos %s, agentes livres %d → %d, contratações rivais %d" % [seed_value, per_org.values().reduce(func(a, b): return a + b, 0), bouts, methods, start_free, free_now, signings])
+		# Memória de agentes (Game Bible §9): negociações rivais ficam registradas
+		# e a confiança fica dentro dos limites.
+		var memory := 0
+		var trust_range := [0, 0]
+		for a: Agent in world.agents.values():
+			memory += a.memory.size()
+			for value in a.relationship.values():
+				trust_range = [mini(trust_range[0], int(value)), maxi(trust_range[1], int(value))]
+		check(memory >= signings, "Toda contratação rival entra na memória: %d ≥ %d" % [memory, signings])
+		check(trust_range[0] >= -100 and trust_range[1] <= 100, "Confiança limitada: %s" % str(trust_range))
+		print("  Seed %d: %d noites rivais, %d lutas, métodos %s, agentes livres %d → %d, contratações rivais %d, memória de agentes %d, confiança %s" % [seed_value, per_org.values().reduce(func(a, b): return a + b, 0), bouts, methods, start_free, free_now, signings, memory, str(trust_range)])

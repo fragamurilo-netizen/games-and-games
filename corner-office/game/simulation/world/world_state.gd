@@ -3,11 +3,14 @@ extends RefCounted
 ## Estado completo do mundo. Tudo que precisa persistir fica aqui.
 ## Coleções são indexadas por id estável.
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 4
 
 var schema_version := SCHEMA_VERSION
 var seed_value := 0
 var rng := SimRandom.new()
+## Fluxo próprio da sede (Office): staff e dilemas não deslocam o sorteio das
+## lutas, mas continuam determinísticos e salvos com o mundo.
+var office_rng := SimRandom.new()
 var date := GameDate.START.duplicate()
 var player_org_id := ""
 var next_ids := {}             # prefixo -> contador (ids nunca reutilizados)
@@ -21,6 +24,8 @@ var gyms := {}
 var agents := {}
 var rankings := {}             # "org:division" -> Array[Ranking] (histórico)
 var news := {}
+var staff := {}
+var dilemmas := {}
 
 ## Coleção -> classe da entidade. (Função, não const: classes globais não
 ## são expressões constantes em GDScript.)
@@ -34,6 +39,8 @@ static func collections() -> Dictionary:
 		"gyms": Gym,
 		"agents": Agent,
 		"news": NewsItem,
+		"staff": StaffMember,
+		"dilemmas": Dilemma,
 	}
 
 
@@ -59,6 +66,7 @@ func to_dict() -> Dictionary:
 		"schema_version": schema_version,
 		"seed_value": seed_value,
 		"rng_state": str(rng.get_state()),
+		"office_rng_state": str(office_rng.get_state()),
 		"date": date,
 		"player_org_id": player_org_id,
 		"next_ids": next_ids,
@@ -80,6 +88,8 @@ static func from_dict(d: Dictionary) -> WorldState:
 	w.schema_version = int(d.schema_version)
 	w.seed_value = int(d.seed_value)
 	w.rng.set_state(int(d.rng_state))
+	if d.has("office_rng_state"):w.office_rng.set_state(int(d.office_rng_state))
+	else:w.office_rng=SimRandom.new(int(d.seed_value)*7919+17)
 	w.date = d.date
 	w.player_org_id = d.player_org_id
 	w.next_ids = d.next_ids

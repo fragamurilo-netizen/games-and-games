@@ -9,6 +9,7 @@ extends RefCounted
 ## Estado persistente fica em Organization.ai_state (serializável).
 
 var _cfg: Dictionary = {}
+var _bids: Dictionary = {}
 var matchmaking := Matchmaking.new()
 var economy := Economy.new()
 var contracts := Contracts.new()
@@ -16,6 +17,7 @@ var contracts := Contracts.new()
 
 func _init() -> void:
 	_cfg = ContentDB.load_json("career_tuning.json").rival_ai
+	_bids = ContentDB.load_json("world_tuning.json").rival_bids
 
 
 ## Chamado uma vez por dia pelo WorldSim, depois dos eventos do dia.
@@ -26,6 +28,7 @@ func tick(world: WorldState) -> void:
 		_handle_postponed(world, org)
 		_renew_contracts(world, org)
 		_maybe_sign(world, org)
+		_bid_for_player_athletes(world, org)
 		_maybe_schedule(world, org)
 
 
@@ -257,6 +260,8 @@ func _renew_contracts(world: WorldState, org: Organization) -> void:
 		var response := contracts.evaluate_offer(world, offer)
 		if response.eligible and world.rng.chance(float(response.accept_probability)):
 			contracts.sign(world, offer)
+		else:
+			contracts.reject(world, offer, response, "refused")
 
 
 func _maybe_sign(world: WorldState, org: Organization) -> void:
@@ -301,6 +306,52 @@ func _maybe_sign(world: WorldState, org: Organization) -> void:
 		contracts.sign(world, offer)
 		org.ai_state.signings = int(org.ai_state.get("signings", 0)) + 1
 		Rankings.new().update(world, org.id, best.division)
+	else:
+		contracts.reject(world, offer, response, "refused")
+
+
+# ---------------------------------------------------------------- disputa com o jogador
+
+## Rivais fazem propostas públicas por atletas do jogador em fim de contrato
+## (Game Design Bible §3 "negociam atletas", §9 free agency). Só usam dados
+## públicos: cartel, idade, popularidade e prazo do vínculo. A melhor proposta
+## vira o piso da renovação (Contracts.evaluate_offer); se o contrato acabar
+## sem renovação, o atleta assina com quem pagou mais (WorldSim).
+func _bid_for_player_athletes(world: WorldState, org: Organization) -> void:
+	var next_after: Dictionary = org.ai_state.get("next_bid_after", {})
+	if not next_after.is_empty() and GameDate.days_between(world.date, next_after) > 0:
+		return
+	org.ai_state.next_bid_after = GameDate.add_days(world.date, int(_bids.interval_days))
+	var interested := false
+	for t: String in org.executive_traits:
+		interested = interested or t in _bids.traits
+	var player := world.player_org()
+	if not interested or player == null:
+		return
+	if org.roster.size() >= int(_cfg.roster_target) + int(_bids.roster_slack):
+		return
+	if org.cash - reserved_cash(world, org) < int(_cfg.minimum_cash_reserve) * 3:
+		return
+	var best: Fighter = null
+	var best_score := float(_bids.minimum_score)
+	for id: String in player.roster:
+		var f: Fighter = world.fighters[id]
+		var c: Contract = world.contracts.get(f.contract_id)
+		if f.retired or f.rival_interest.has(org.id) or c == null or not c.active:
+			continue
+		if c.bouts_remaining > 1 and GameDate.days_between(world.date, c.expires_on) > int(_bids.window_days):
+			continue
+		var score: float = f.record.wins - f.record.losses * .5 + _fame(f) * .2
+		if "prospect_first" in org.executive_traits:
+			score += maxf(0.0, 27.0 - f.age_on(world.date)) * .5
+		if score > best_score or (best != null and score == best_score and f.id < best.id):
+			best = f
+			best_score = score
+	if best == null:
+		return
+	var show := int(Contracts.market_price(world, best) * world.rng.range_f(float(_bids.premium[0]), float(_bids.premium[1])))
+	best.rival_interest[org.id] = {"show": show, "since": world.date.duplicate(), "until": GameDate.add_days(world.date, int(_bids.valid_days))}
+	LifeCycle.story(world, "rival_bid", "bid", {"organization": org.name, "fighter": best.display_name(), "current": player.name, "show": "US$ %d" % show}, [best.id, org.id])
 
 
 static func _region_of(country: String) -> String:

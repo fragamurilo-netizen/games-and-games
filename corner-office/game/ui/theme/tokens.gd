@@ -7,6 +7,10 @@ extends RefCounted
 
 const DISPLAY_FONT = preload("res://ui/theme/fonts/ChakraPetch-Bold.ttf")
 const BODY_FONT = preload("res://ui/theme/fonts/ChakraPetch-Medium.ttf")
+## Inclinação dos menus inspirados em UFC Undisputed 3: títulos em itálico
+## e barras em paralelogramo. Um único valor para texto e formas.
+const SLANT := 0.22
+static var _italic: FontVariation
 
 const CANVAS := Color("#111417")
 const SURFACE := Color("#1B2025")
@@ -16,6 +20,31 @@ const MUTED := Color("#8A939C")
 const FIGHT_RED := Color("#C83B3B")
 const STEEL := Color("#46535E")
 const CHAMP_GOLD := Color("#B88B46")
+## Corner azul do fight card; só aparece ao lado do vermelho (tale of the tape).
+const CORNER_BLUE := Color("#3E6FA8")
+
+## Semânticas de estado (barras, badges, toasts). Vermelho segue sendo ação/perigo.
+const GOOD := Color("#4E9A6B")
+const WARN := Color("#D08A2E")
+const INFO := Color("#3E6FA8")
+
+## Sede 2D (ui/office). Paleta própria, fosca, sem neon: piso, paredes, móveis.
+const OFFICE_WALL := Color("#232A31")
+const OFFICE_WALL_TOP := Color("#39434D")
+const OFFICE_CARPET := Color("#2B3138")
+const OFFICE_CARPET_LINE := Color("#323941")
+const OFFICE_WOOD := Color("#4A3A2C")
+const OFFICE_WOOD_LINE := Color("#54423233")
+const OFFICE_TILE := Color("#3A4148")
+const OFFICE_TILE_LINE := Color("#434B53")
+const OFFICE_DESK := Color("#5E4B3A")
+const OFFICE_DESK_TOP := Color("#7A624B")
+const OFFICE_METAL := Color("#8C969F")
+const OFFICE_SCREEN := Color("#9EC3D9")
+const OFFICE_PLANT := Color("#3F7A4E")
+const OFFICE_SHADOW := Color(0, 0, 0, 0.28)
+const OFFICE_LOCKED := Color("#15191D")
+const OFFICE_GLASS := Color("#9EC3D922")
 
 const SPACE_XS := 4
 const SPACE_S := 8
@@ -32,37 +61,54 @@ const FONT_SCORE := 64
 const TOUCH_MIN := 88
 
 
+## Display em itálico sintético (Chakra Petch não tem itálico próprio).
+static func italic_font() -> FontVariation:
+	if _italic==null:
+		_italic=FontVariation.new();_italic.base_font=DISPLAY_FONT
+		_italic.variation_transform=Transform2D(Vector2(1,SLANT),Vector2(0,1),Vector2.ZERO)
+	return _italic
+
+
+## Barra em paralelogramo; o recuo lateral acompanha a inclinação.
+static func slanted_box(color: Color, height: float=TOUCH_MIN) -> StyleBoxFlat:
+	var box:=StyleBoxFlat.new();box.bg_color=color
+	box.skew=Vector2(SLANT,0);box.anti_aliasing=true
+	var inset:=SPACE_M+ceilf(height*SLANT*.5)
+	box.content_margin_left=inset;box.content_margin_right=inset
+	box.content_margin_top=SPACE_S;box.content_margin_bottom=SPACE_S
+	return box
+
+
 static func build_theme() -> Theme:
 	var t := Theme.new()
 	t.default_font_size = FONT_BODY
 	t.default_font = BODY_FONT
-	t.set_font("font", "Button", DISPLAY_FONT)
+	t.set_font("font", "Button", italic_font())
 	t.set_font("font", "OptionButton", DISPLAY_FONT)
 	t.set_color("font_color", "Label", INK)
 	t.set_color("font_color", "Button", INK)
-	t.set_color("font_pressed_color", "Button", FIGHT_RED)
-	t.set_color("font_hover_color", "Button", INK)
+	# Seleção estilo Undisputed 3: a barra inteira acende em vermelho.
+	for state in ["font_pressed_color","font_hover_color","font_focus_color","font_hover_pressed_color"]:
+		t.set_color(state, "Button", INK)
+	t.set_color("font_disabled_color", "Button", MUTED)
 
 	var panel := StyleBoxFlat.new()
 	panel.bg_color = SURFACE
 	t.set_stylebox("panel", "PanelContainer", panel)
 
-	var btn := StyleBoxFlat.new()
-	btn.bg_color = SURFACE
-	btn.border_width_bottom = 2
-	btn.border_color = STEEL
-	btn.content_margin_left = SPACE_M
-	btn.content_margin_right = SPACE_M
-	btn.content_margin_top = SPACE_S
-	btn.content_margin_bottom = SPACE_S
-	var btn_pressed := btn.duplicate() as StyleBoxFlat
-	btn_pressed.border_width_left = 6
-	btn_pressed.border_color = FIGHT_RED
-	for state in ["normal", "hover", "disabled"]:
-		t.set_stylebox(state, "Button", btn)
-	t.set_stylebox("pressed", "Button", btn_pressed)
-	t.set_stylebox("focus", "Button", btn_pressed)
+	var btn:=slanted_box(Color(SURFACE,.94))
+	btn.border_width_bottom=2;btn.border_color=STEEL
+	var lit:=slanted_box(FIGHT_RED)
+	var off:=slanted_box(Color(SURFACE,.5))
+	t.set_stylebox("normal","Button",btn)
+	t.set_stylebox("disabled","Button",off)
+	for state in ["hover","pressed","hover_pressed"]:
+		t.set_stylebox(state,"Button",lit)
+	var focus:=StyleBoxFlat.new();focus.draw_center=false
+	focus.skew=Vector2(SLANT,0);focus.border_color=INK
+	focus.set_border_width_all(2)
+	t.set_stylebox("focus","Button",focus)
 	for kind in ["LineEdit", "OptionButton", "PopupMenu"]:
-		t.set_stylebox("normal",kind,btn)
+		t.set_stylebox("normal",kind,slanted_box(SURFACE))
 		t.set_color("font_color",kind,INK)
 	return t

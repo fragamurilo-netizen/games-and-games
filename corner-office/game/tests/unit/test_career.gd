@@ -33,10 +33,11 @@ func test_generated_world_and_six_bout_career_loop() -> void:
 	check_eq(ev.fight_ids.size(),6,"Six accepted bouts")
 	check(CareerActions.perform(world,"announce",{"event_id":id}).ok,"Announce complete card")
 	var cash:=world.player_org().cash
+	var office_before:=world.player_org().ledger.size()
 	check(CareerActions.perform(world,"advance_event",{"event_id":id}).ok,"Advance to fight night")
 	check_eq(ev.status,"completed","Night finishes")
-	check_eq(world.player_org().cash,cash+int(ev.actual.margin),"Exactly one settlement")
-	check_eq(world.news.values().filter(func(n: NewsItem): return ev.id in n.entity_ids).size(),1,"One factual event report")
+	check_eq(world.player_org().cash,cash+int(ev.actual.margin)+_office_moves(world,office_before),"Exactly one settlement (além da folha da sede)")
+	check_eq(world.news.values().filter(func(n: NewsItem): return n.topic=="event_completed" and ev.id in n.entity_ids).size(),1,"One factual event report")
 	for fight_id: String in ev.fight_ids:
 		var f: Fight=world.fights[fight_id]
 		check_eq(f.status,"completed","Real combat engine used")
@@ -77,15 +78,15 @@ func test_contracts_and_market_change_roster() -> void:
 	for f: Fighter in world.fighters.values():
 		if f.organization_id.is_empty():free=f;break
 	check(free!=null,"Free agency exists")
-	var price:=Contracts.market_price(world,free)
 	var low:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":1})
 	check(low.has("counter_show"),"Under-market offer generates counter")
 	check(free.organization_id.is_empty(),"Counter does not sign silently")
-	var response:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":price})
-	check(response.ok,"Accept fair initial deal")
+	var response:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":int(low.counter_show)})
+	check(response.ok and not response.has("counter_show"),"Agent's counter closes the deal")
 	check(world.player_org().roster.has(free.id),"New athlete in roster")
 	var old_id:=free.contract_id
-	CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":price+500})
+	var renewal:=CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":world.contracts[old_id].show_money})
+	if renewal.has("counter_show"):CareerActions.perform(world,"negotiate",{"fighter_id":free.id,"show_money":int(renewal.counter_show)})
 	check(not world.contracts[old_id].active,"Renewal retains inactive historical contract")
 	check_eq(world.player_org().roster.count(free.id),1,"No duplicate roster entry")
 
@@ -99,11 +100,19 @@ func test_late_medical_change_postpones_without_paying_and_can_reschedule() -> v
 	var f: Fight=world.fights[ev.fight_ids[0]]
 	world.fighters[f.fighter_a_id].medical_suspension_until=GameDate.add_days(ev.date,50)
 	var cash:=world.player_org().cash
+	var office_before:=world.player_org().ledger.size()
 	CareerActions.perform(world,"advance_event",{"event_id":id})
 	check_eq(ev.status,"postponed","A later medical change stops the event")
-	check_eq(world.player_org().cash,cash,"No settlement for an unavailable card")
+	check_eq(world.player_org().cash,cash+_office_moves(world,office_before),"No settlement for an unavailable card")
 	check_eq(f.status,"booked","No partial fight night")
 	check(CareerActions.perform(world,"reschedule",{"event_id":id,"days":60}).ok,"Reschedule after recovery")
 	check(CareerActions.perform(world,"announce",{"event_id":id}).ok,"Revalidate before new announcement")
 	CareerActions.perform(world,"advance_event",{"event_id":id})
 	check_eq(ev.status,"completed","Recovered card can run")
+
+
+## Folha e decisões da sede entram no caixa pelo livro-caixa da organização.
+func _office_moves(world: WorldState, from: int) -> int:
+	var total:=0
+	for entry: Dictionary in world.player_org().ledger.slice(from):total+=int(entry.amount)
+	return total

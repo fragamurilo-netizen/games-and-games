@@ -1,3 +1,22 @@
+# Continuidade — foco em grande liga e atletas realistas (Claude, 30/09/2026)
+
+**Decisão do dono do projeto** (Game Design Bible §0): o jogo é um simulador do universo de uma grande liga no molde do UFC (fictícia). A liga é a nossa; as outras são pano de fundo. O núcleo é descobrir atletas, acompanhar carreiras e assistir às lutas.
+
+Entregue na branch `claude/determined-clarke-dua3k2` (com `dreamy-carson` mesclada):
+
+- Modo padrão `flagship` ("A Grande Liga"): Summit Fighting Championship (SFC), com cerca de 600 atletas nas 12 divisões e campeões; as 7 organizações viram ligas nacionais; circuito regional com 900 atletas (prospects e journeymen).
+- Geração realista (`simulation/careers/`): país → grupo étnico → nome e rosto coerentes; altura, envergadura e peso por divisão; base marcial por país; modelo latente (pico, prime por divisão/estilo, desenvolvimento e declínio); cartel vindo de carreira pregressa simulada, com KO/SUB/DEC, rating público, sequência e últimas 10 lutas.
+- Agentes, BATNA e memória de negociação (`simulation/contracts/agencies.gd`).
+- Relatório de realismo: `godot --headless --path game -s res://tools/athlete_report.gd -- 2027`.
+- CI: pushes em `claude/*` compilam o APK e o commitam em `releases/corner-office-<versão>-debug.apk` (0.3.0 nesta rodada).
+
+Problemas conhecidos nesta build de teste:
+
+- Save do modo liga está grande (~13 MB); autosave/carregamento podem ficar lentos no aparelho. Próximo passo: enxugar (histórico de ranking guarda placar de todos os atletas; `attr_noise` e resultados recentes por atleta).
+- Telas nativas listam o elenco inteiro (600+ botões) — precisam de filtro por divisão, busca e paginação.
+- Card da liga exige 10–14 lutas; alguns textos da UI ainda falam em "seis lutas".
+- Ainda não existe evolução/declínio mensal, aposentadoria, surgimento de novos atletas, lutas do circuito durante o save, ranking top 15 por rating/inatividade nem matchmaker automático da liga (tarefas seguintes).
+
 # Continuidade — carreira regional, Android e transmissão original
 
 Branch compartilhada: `claude/dreamy-carson-628oai` em `fragamurilo-netizen/games-and-games`.
@@ -70,6 +89,14 @@ Amostra de 2 anos (2 seeds): ~55 noites rivais, ~410 lutas, ~48 contratações r
 
 `broadcast.html` virou uma noite completa no estilo UD3: abertura, walkouts, tale of the tape, locutor fictício Dario Valente (nunca usar locutores reais), HUD, câmera diretor, intervalos, replay em câmera lenta do final, cerimônia e tela de resultado. Dados extras em `replay.presentation`. Detalhes em `FIGHT_VISUALS.md`. Próximo passo natural: levar a mesma linguagem visual às telas Godot da carreira.
 
+## Integração 0.4.0 (Claude, 30/09/2026)
+
+`claude/dreamy-carson-628oai` agora junta as branches paralelas: determined-clarke (agências/BATNA, liga principal), project-thread-2uj2qo (gerador, tempo, progressão), klzt5i (artes marciais), 3etjpt (retratos, bandeiras, rankings/P4P), su2l5q (universo e enciclopédia), w8d3lp (central de notícias), 0sx6y9 (menus UD3 e hub) e 1vk3sj (noite inteira no Fight Studio). APK: `releases/corner-office-0.4.0-debug.apk`.
+
+Decisões da junção: pedido do agente sobe para a proposta rival quando ela é maior; liga principal usa a própria capacidade e as demais escalam pelo patamar; migrações v1→v2 dos dois ramos unidas (`_backfill_progression`, também na v2→v3); regiões finas do gerador (China, Sudeste/Sul da Ásia, Caribe) + América do Sul; bandeiras novas para BD, CI, DO, GH, JM, MY, PK, PR, VN; cobertura da imprensa roda uma vez por noite.
+
+Pendente: `test_player_progression` pede reputação +12 em 3 anos e a soma dá +9 (agências encarecem contratações). É balanceamento, não erro; ajustar metas/ganho de reputação ou o limiar do teste.
+
 ## Transmissão embutida no jogo — EM ANDAMENTO (Claude, 30/09/2026)
 
 Pedido do usuário: a luta deve abrir **dentro da tela do jogo** (WebView nativo do jogo), não em diálogo por cima nem no navegador. Continua usando o mesmo Fight Studio (nada de renderer novo).
@@ -89,6 +116,16 @@ Falta (próximo colega):
 3. Linux: a `.so` exige `libwebkit2gtk-4.1`; o job `tests` do CI roda sem ela (a extensão só é usada fora do modo headless).
 4. Tirar screenshot da tela embutida (a WebView é janela nativa: o `get_texture()` do Godot não a captura; usar captura do sistema).
 5. Opcional: esconder também a marca/topbar do HTML em modo embutido se ficar redundante com o cabeçalho do jogo.
+
+## Noite completa no motor 2D (Claude, 30/09/2026)
+
+Pedido: integrar o motor 2D (Fight Studio em WebView) ao jogo real. A ponte já existia; agora a noite inteira passa por ela.
+
+- **REALIZAR EVENTO** simula a noite e abre a transmissão na primeira luta do card; eventos concluídos têm **ASSISTIR À NOITE**, e "Assistir à luta" abre a noite a partir daquela luta.
+- `FightReplayView.open_night(replays, start)` guarda a fila (preliminares → principal). O cabeçalho mostra `LUTA i/N`; a tela de resultado do HTML ganha **PRÓXIMA LUTA ›** (Android: `CornerOffice.next()` → sinal `next`; desktop: `ipc 'next'`). `open(data)` continua valendo para uma luta só (demonstração).
+- `presentation.card_position` e `presentation.next_bout` são só apresentação; os replays não mudam (teste `test_night_queue_marks_card_position_without_touching_replays`).
+- Verificado: 92 lutas reais de uma carreira gerada (seed 2027, 20 semanas) carregaram no `studio.cobundle` em Chromium 390×700 do portão ao resultado, sem erro de JS.
+- Ainda falta testar em aparelho Android e no Windows (itens da seção anterior continuam valendo). AAR antigo sem `next()` cai no comportamento de fechar.
 
 ## Próximas tarefas, por prioridade
 

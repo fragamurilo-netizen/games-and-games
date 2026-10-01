@@ -22,16 +22,18 @@ content/*.json ─► simulation (models + systems) ─► EventBus / Game.world
 
 | Módulo | Arquivo | Responsabilidade | Status |
 |---|---|---|---|
-| WorldSim | `simulation/world/world_sim.gd` | Tempo, eventos globais, geração e aposentadoria | relógio pronto; sistemas TODO |
+| WorldSim | `simulation/world/world_sim.gd` | Relógio: dia a dia, dia 1º (mês) e 1º de janeiro (temporada) | pronto |
+| LifeCycle | `simulation/world/life_cycle.gd` | Idade e evolução de atributos, lesões pós-luta, aposentadoria de contratados (agentes livres e prospectos: `FighterGenerator.monthly_intake`) | pronto; retorno de aposentados TODO |
+| OrgStanding | `simulation/organizations/org_standing.gd` | Reputação, patamar regional/nacional/global, mercados regionais, metas e balanço da temporada | pronto |
 | FightEngine | `simulation/fight/fight_engine.gd` | Simulação por trocas, dano, resultados e histórico | protótipo funcional + testes de distribuição |
 | Judge | `simulation/fight/judge.gd` | 10-point must / avaliação global, perfis de juiz | funcional + testes de prioridade de critérios |
 | Matchmaking | `simulation/matchmaking/matchmaking.gd` | Elegibilidade, 3 scores, propostas | pronto (M1) |
-| OrgAI | `simulation/organizations/org_ai.gd` | Rivais autônomas: agenda, cards, caixa, adiamentos, renovações e free agency | pronto (M1); BATNA/memória M2 |
+| OrgAI | `simulation/organizations/org_ai.gd` | Rivais autônomas: agenda, cards, caixa, adiamentos, renovações, free agency e propostas por atletas do jogador | pronto (M1); BATNA/memória M2 |
 | Rankings | `simulation/rankings/rankings.gd` | Rankings por org + World Combat Index | TODO(M1) |
 | Contracts | `simulation/contracts/contracts.gd` | Ofertas, BATNA, agentes, free agency | `sign()` pronto; resto TODO |
 | Economy | `simulation/economy/economy.gd` | P&L projetado/real, mídia, sponsors | TODO(M1) |
-| Popularity | `simulation/popularity/popularity.gd` | Mercados regionais, draw | TODO(M1) |
-| Media | `simulation/media/media.gd` | Notícias com triggers factuais | `publish()` pronto; triggers TODO |
+| Popularity | `simulation/popularity/popularity.gd` | Mercados regionais, draw | resultado move popularidade regional; draw TODO |
+| Media | `simulation/media/media.gd` | Notícias com triggers factuais | Cards, resultados, zebras, sequências, contratos, agentes livres e rankings; textos em `content/news_templates.json`; UI em `ui/news_center.gd` |
 | Identity | `identity/face_generator.gd` | Rostos, corpos, envelhecimento | TODO(M1) — depende do gerador do Mais Uma Rodada |
 | SaveSystem | `save/save_system.gd` | Versionamento, migração, integridade | pronto |
 
@@ -67,9 +69,9 @@ Faltam (criar quando o sistema precisar): `Ruleset`, `Jurisdiction`, `MediaDeal`
 
 1. Jogador cria `FightEvent` (Eventos) e propõe lutas → `Matchmaking.evaluate` / `propose`.
 2. Aceita → `Fight.status = "booked"`, `EventBus.fight_booked`.
-3. Semanas passam (`WorldSim.advance_week`) — camps, lesões, quedas de luta (M2).
+3. Semanas passam (`WorldSim.advance_week`, ou `advance_month` em `CareerActions`) — lesões cicatrizam; no dia 1º, `LifeCycle.monthly` e `OrgStanding.monthly`; camps (M2).
 4. Na data: `WorldSim.run_event` → `FightEngine.simulate` (+`Judge`) para cada luta.
-5. `Rankings.update`, `Popularity.apply_fight_result`, `Economy.settle_event`, `Media.scan_triggers`.
+5. `Popularity.apply_fight_result` e `LifeCycle.after_fight` (lesão) por luta; `Economy.settle_event`, `OrgStanding.after_event` (reputação), `Rankings.update`, `Media.event_report`.
 6. UI escuta `event_completed` e mostra resultados/P&L/notícias.
 
 ## Convenções

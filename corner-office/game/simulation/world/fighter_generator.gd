@@ -249,7 +249,8 @@ static func monthly_intake(world: WorldState) -> Array:
 		created.append(f.id)
 		# Notícia só com fato público: invicto com vitórias suficientes (MMA Bible §27).
 		if f.record.losses == 0 and f.record.wins >= int(intake.news_min_wins):
-			var item := Media.new().publish(world, "prospect_turns_pro",
+			# Carregado só aqui: ferramentas headless (career_session) rodam sem o autoload EventBus.
+			var item: NewsItem = load("res://simulation/media/media.gd").new().publish(world, "prospect_turns_pro",
 				[Reason.make("UNBEATEN_PROSPECT", f.record.wins, {"fighter_id": f.id})], [f.id])
 			var story: Dictionary = tuning.story
 			item.headline = str(story.get("prospect_headline", "{fighter} chega ao mercado")).format({"fighter": f.display_name()})

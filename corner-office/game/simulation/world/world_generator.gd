@@ -9,6 +9,7 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 	var w := WorldState.new()
 	w.seed_value = seed_value
 	w.rng = SimRandom.new(seed_value)
+	w.office_rng = SimRandom.new(seed_value * 7919 + 17)
 
 	for o in ContentDB.load_json("organizations.json"):
 		var org := Organization.new().load_dict(o) as Organization
@@ -35,13 +36,24 @@ static func generate(seed_value: int, start_mode: String, include_population: bo
 			org.roster.append(fighter.id)
 
 	_create_player_org(w, start_mode)
-	if include_population:
+	OrgStanding.new().ensure_objectives(w)
+	var mode: Dictionary = ContentDB.load_json("start_modes.json").get(start_mode, {})
+	if include_population and mode.get("tier", "") == "global":
+		LeagueBuilder.populate(w, mode)
+	elif include_population:
 		PopulationGenerator.populate(w,start_mode)
+	if include_population:
+		# Campeões de 2027 saem da história do universo (content/universe/titles.json).
+		Universe.apply_titles(w)
+	# Representação por regra pública, depois dos contratos iniciais (sem RNG).
+	Agencies.assign_all(w)
+	if include_population:
 		for division: Dictionary in ContentDB.load_json("weight_classes.json"):
 			Rankings.new().update(w,w.player_org_id,division.id)
 			Rankings.new().update(w,"wci",division.id)
 		# O mundo já começa em movimento: rivais anunciam as primeiras noites.
 		OrgAI.new().tick(w)
+	Office.ensure(w)
 	return w
 
 
@@ -50,13 +62,13 @@ static func _create_player_org(w: WorldState, start_mode: String) -> void:
 	var mode: Dictionary = modes.get(start_mode, modes["regional_promoter"])
 	var org := Organization.new()
 	org.id = "org_player"
-	var identity: Dictionary = ContentDB.load_json("career_tuning.json").player_organization
+	var identity: Dictionary = ContentDB.load_json("career_tuning.json")[mode.get("identity", "player_organization")]
 	org.name = identity.name
 	org.short_name = identity.short_name
 	org.base_country = identity.base_country
 	org.base_city = identity.base_city
 	org.is_player = true
-	org.tier = "regional"
+	org.tier = str(mode.get("tier", "regional"))
 	org.cash = int(mode.cash)
 	org.reputation = int(mode.reputation)
 	w.add("organizations", org)

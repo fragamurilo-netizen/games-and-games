@@ -5,6 +5,7 @@ on:
     paths: ["corner-office/**", ".github/workflows/corner-office.yml"]
   pull_request:
     paths: ["corner-office/**", ".github/workflows/corner-office.yml"]
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -48,6 +49,8 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
     env:
       GODOT_VERSION: 4.4.1
     steps:
@@ -101,3 +104,15 @@ jobs:
           path: corner-office/game/build/android/corner-office-debug.apk
           if-no-files-found: error
           retention-days: 14
+      - name: Commit test APK to the branch
+        # Test builds for device QA land in corner-office/releases/ on claude/* branches.
+        if: github.event_name != 'pull_request' && startsWith(github.ref_name, 'claude/')
+        run: |
+          VERSION=$(sed -n 's/^version\/name="\(.*\)"/\1/p' corner-office/game/export_presets.cfg)
+          DEST="corner-office/releases/corner-office-${VERSION}-debug.apk"
+          cp corner-office/game/build/android/corner-office-debug.apk "$DEST"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f "$DEST"
+          git commit -m "Test APK ${VERSION} (${GITHUB_SHA::7}) [skip ci]" || exit 0
+          git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"

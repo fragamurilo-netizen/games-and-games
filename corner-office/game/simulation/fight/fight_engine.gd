@@ -396,11 +396,15 @@ func _decision(c: Dictionary) -> void:
 	c.fight.reasons.append(Reason.make("JUDGES_DECISION",0.0,{"votes":votes,"scoring":c.rule.scoring}))
 
 func _update_records(world: WorldState, fight: Fight) -> void:
+	var ratings := {fight.fighter_a_id: world.fighters[fight.fighter_a_id].rating, fight.fighter_b_id: world.fighters[fight.fighter_b_id].rating}
+	var ev: FightEvent = world.events.get(fight.event_id)
 	for id: String in [fight.fighter_a_id,fight.fighter_b_id]:
 		var fighter: Fighter = world.fighters[id]
+		var opponent_id: String = fight.fighter_b_id if id == fight.fighter_a_id else fight.fighter_a_id
 		fighter.fight_ids.append(fight.id)
-		var key := "draws" if fight.method == "draw" else "nc" if fight.method == "nc" else "wins" if id == fight.winner_id else "losses"
-		fighter.record[key] = int(fighter.record.get(key,0))+1
+		var result := "D" if fight.method == "draw" else "NC" if fight.method == "nc" else "W" if id == fight.winner_id else "L"
+		# Cartel, métodos, rating público, sequência e resumo recente (CareerHistory).
+		CareerHistory.record_result(fighter, ev.date if ev else world.date, result, fight.method, fight.method_detail, fight.end_round, ratings[opponent_id], {"fight_id": fight.id, "opponent_id": opponent_id, "opponent": world.fighters[opponent_id].first_name + " " + world.fighters[opponent_id].last_name, "organization_id": ev.organization_id if ev else "", "title": fight.title_stakes == "title"})
 		fighter.damage_history.head += float(fight.damage[id].head)
 		fighter.damage_history.body += float(fight.damage[id].body)
 		fighter.damage_history.legs += float(fight.damage[id].leg)

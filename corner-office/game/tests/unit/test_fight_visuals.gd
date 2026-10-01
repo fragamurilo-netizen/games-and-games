@@ -93,3 +93,25 @@ func test_replay_carries_broadcast_presentation() -> void:
 		var info: Dictionary = replay.presentation.fighters[id]
 		check(int(info.get("age", 0)) >= 18 and int(info.get("age", 0)) <= 50, "Idade plausível: %s" % info)
 	check(FightReplayPlayer.new().load_replay(replay), "Presentation não quebra o contrato do replay")
+
+
+func test_night_queue_marks_card_position_without_touching_replays() -> void:
+	var world := WorldGenerator.generate(4, "regional_promoter")
+	var ev: FightEvent = world.events.values().filter(func(e): return e.organization_id != world.player_org_id and e.status == "announced")[0]
+	world.date = ev.date.duplicate()
+	WorldSim.new(world).run_event(ev.id)
+	var replays: Array = []
+	for id: String in ev.fight_ids:
+		replays.append(FightReplayBuilder.build(world, world.fights[id]))
+	var before := JSON.stringify(replays)
+	var view := FightReplayView.new()
+	view._queue = replays
+	var first := view.bout_data(0)
+	var last := view.bout_data(replays.size() - 1)
+	check_eq(first.presentation.card_position, {"index": 1, "total": replays.size()}, "Primeira luta da noite")
+	check_eq(first.presentation.next_bout, replays[1].title, "Anuncia a próxima luta")
+	check(not last.presentation.has("next_bout"), "Luta principal encerra a noite")
+	check_eq(last.presentation.card_slot, "main_event", "Ordem do card: principal por último")
+	check(FightReplayPlayer.new().load_replay(first), "Posição no card não quebra o contrato")
+	check_eq(JSON.stringify(replays), before, "Replays imutáveis")
+	view.free()
