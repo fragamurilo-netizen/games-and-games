@@ -298,7 +298,30 @@
         "Vitória por {method} em {event}. Cartel {winner_record}. Obrigado a toda a equipe!",
         "Falei que ia acontecer. {winner_record} e contando.",
         "Respeito, {loser_handle}. Mas hoje a noite era minha."
-      ]
+      ],
+      "voices": {
+        "provocador": [
+          "Eu avisei. {loser_handle} não estava no meu nível. Próximo!",
+          "{method} em {event}. Quem ainda duvida de mim?",
+          "Mais um na conta. {winner_record}. Tragam alguém de verdade."
+        ],
+        "humilde": [
+          "Graças a Deus, à família e à equipe. Respeito total ao {loser_handle}.",
+          "Vitória em {event}. Obrigado a todos que torceram. Voltamos pra academia amanhã."
+        ],
+        "seco": [
+          "Trabalho feito.",
+          "{winner_record}."
+        ],
+        "brincalhao": [
+          "Hoje o churrasco é por minha conta! Vitória em {event}.",
+          "Mãe, apareci na TV! {winner_record}."
+        ],
+        "negociador": [
+          "Vitória em {event}. Agora é hora de conversar sobre números.",
+          "{winner_record}. Meu empresário vai ter uma semana cheia."
+        ]
+      }
     },
     "social_loss": {
       "channel": "social",
@@ -309,7 +332,20 @@
         "Não foi a minha noite. Volto mais forte.",
         "Parabéns ao adversário. Hora de voltar para a academia.",
         "Dói, mas faz parte. Obrigado pelo carinho de todos."
-      ]
+      ],
+      "voices": {
+        "provocador": [
+          "Roubaram de mim. Quero revanche, {winner_handle}.",
+          "Não acabou. {winner_handle}, te vejo de novo."
+        ],
+        "humilde": [
+          "Não foi dessa vez. Obrigado pelo carinho, volto mais forte.",
+          "Parabéns ao {winner_handle}. Aprendi muito hoje."
+        ],
+        "brincalhao": [
+          "Pelo menos o cabelo ficou bonito. Volto logo!"
+        ]
+      }
     },
     "social_callout": {
       "channel": "social",
@@ -319,8 +355,21 @@
       "headlines": [
         "{target_handle}, chega de fugir. Você é o próximo.",
         "Resolvi o meu trabalho em {event}. {target_handle}, cadê você?",
-        "Todo mundo sabe quem é o verdadeiro dono do {division}. {target_handle}, vamos resolver?"
-      ]
+        "Todo mundo sabe quem manda no {division}. {target_handle}, vamos resolver?"
+      ],
+      "voices": {
+        "provocador": [
+          "{target_handle}, você é o próximo e sabe disso. Assina o contrato.",
+          "Chega de fugir, {target_handle}. Eu quero você.",
+          "{target_handle}, seu reinado acabou. Só falta marcar a data."
+        ],
+        "brincalhao": [
+          "{target_handle}, aceita um café? Depois a gente luta, claro."
+        ],
+        "negociador": [
+          "{target_handle}, essa luta vende. Vamos fazer dinheiro juntos?"
+        ]
+      }
     },
     "social_fans_split": {
       "channel": "social",
@@ -341,7 +390,18 @@
       "headlines": [
         "Novo capítulo. Orgulho de fazer parte da {org_handle}.",
         "Assinado! Agora sou {org_handle}. Vamos trabalhar."
-      ]
+      ],
+      "voices": {
+        "humilde": [
+          "Grato pela oportunidade. Orgulho de vestir as cores da {org_handle}."
+        ],
+        "negociador": [
+          "Negócio fechado com a {org_handle}. Bons termos para os dois lados."
+        ],
+        "provocador": [
+          "A {org_handle} acabou de contratar o melhor do {division}. De nada."
+        ]
+      }
     },
     "social_renewal": {
       "channel": "social",
@@ -371,7 +431,15 @@
       "headlines": [
         "Número 1 do mundo no {division}. Quem é o próximo?",
         "Topo do ranking. {previous_handle}, foi bom enquanto durou."
-      ]
+      ],
+      "voices": {
+        "humilde": [
+          "Número 1 do mundo. Nada disso sem minha equipe. Obrigado!"
+        ],
+        "provocador": [
+          "Número 1. Sempre fui. {previous_handle}, pode sentar."
+        ]
+      }
     },
     "callout_story": {
       "outlet": "out_clinch",

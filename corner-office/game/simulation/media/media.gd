@@ -56,7 +56,11 @@ func story(world: WorldState, topic: String, key: String, vars: Dictionary, enti
 	var item := _make(world, topic, key, facts, entity_ids)
 	item.channel = str(t.get("channel", "site"))
 	item.author_id = str(vars.get("_author", ""))
-	item.headline = _variant(t.headlines, key).format(vars)
+	var lines: Array = t.headlines
+	var voice := voice_of(world, item.author_id)
+	if t.has("voices") and t.voices.has(voice):
+		lines = t.voices[voice]
+	item.headline = _variant(lines, key).format(vars)
 	item.body = _variant(t.get("bodies", [""]), key + ":body").format(vars)
 	var fame := 0.0
 	for id: String in entity_ids:
@@ -308,7 +312,12 @@ func _commit(world: WorldState, item: NewsItem) -> void:
 	if not item.key.is_empty():
 		has_story(world, item.key)
 		_keys[item.key] = true
-	EventBus.news_published.emit(item.id)
+	# Sem referência estática ao autoload: ferramentas `-s` (career_session,
+	# servidor da carreira) compilam a Media antes de existir o EventBus.
+	var tree := Engine.get_main_loop() as SceneTree
+	var bus: Node = tree.root.get_node_or_null("EventBus") if tree else null
+	if bus:
+		bus.news_published.emit(item.id)
 
 
 static func _add(out: Array, item: NewsItem) -> void:
@@ -425,10 +434,15 @@ static func _record_before(f: Fighter, won: bool) -> String:
 
 func _social_fight(world: WorldState, out: Array, ev: FightEvent, fight: Fight, winner: Fighter, loser: Fighter, v: Dictionary, ids: Array) -> void:
 	_add(out, story(world, "social_win", "post_win:" + fight.id, v.merged({"_author": winner.id, "loser_handle": handle(world, loser.id)}), ids))
-	_add(out, story(world, "social_loss", "post_loss:" + fight.id, v.merged({"_author": loser.id}), ids))
+	if _personality(loser).get("posts", "") != "baixa":
+		_add(out, story(world, "social_loss", "post_loss:" + fight.id, v.merged({"_author": loser.id, "winner_handle": handle(world, winner.id)}), ids))
 	if fight.id != ev.fight_ids[-1]:
 		return
-	# Callout: o vencedor cobra o nome mais alto do World Combat Index.
+	# Callout: o vencedor cobra o nome mais alto do World Combat Index —
+	# só quem é de provocar (personalidade do atleta, quando existir).
+	var traits: Dictionary = _traits(winner)
+	if not traits.is_empty() and float(traits.get("trash_talk", 50)) < 40:
+		return
 	var history: Array = world.rankings.get(Rankings.key(Rankings.WCI_ORG_ID, winner.division), [])
 	if history.is_empty():
 		return
@@ -505,3 +519,63 @@ static func compact(value: int) -> String:
 	if value >= 1000:
 		return ("%.1f mil" % (value / 1000.0)).replace(".", ",")
 	return str(value)
+
+
+## O que mais saiu sobre os mesmos atletas ou noites (mais recentes primeiro).
+static func related(world: WorldState, item: NewsItem, limit: int) -> Array:
+	var ids := {}
+	for id: String in item.entity_ids:
+		if world.fighters.has(id) or world.events.has(id):
+			ids[id] = true
+	var out: Array = []
+	var all: Array = world.news.values()
+	for i in range(all.size() - 1, -1, -1):
+		var n: NewsItem = all[i]
+		if n.id == item.id:
+			continue
+		for id: String in n.entity_ids:
+			if ids.has(id):
+				out.append(n)
+				break
+		if out.size() >= limit:
+			break
+	return out
+
+
+
+# --- Voz nas redes: personalidade do atleta (Fighter.personality, gerador de
+# lutadores; content/personalities.json). Sem o campo, voz padrão.
+const VOICE_BY_TONE := {"provocador": "provocador", "agressivo": "provocador", "contestador": "provocador", "grato": "humilde", "caloroso": "humilde", "solene": "humilde", "seco": "seco", "bem-humorado": "brincalhao", "negociador": "negociador"}
+static var _archetypes: Dictionary = {}
+
+
+static func _traits(f: Fighter) -> Dictionary:
+	var p: Variant = f.get("personality") if f else null
+	return p if typeof(p) == TYPE_DICTIONARY else {}
+
+
+## Bloco `social` do arquétipo (tone, posts, topics), ou {}.
+static func _personality(f: Fighter) -> Dictionary:
+	var traits := _traits(f)
+	if traits.is_empty():
+		return {}
+	if _archetypes.is_empty() and FileAccess.file_exists(ContentDB.CONTENT_DIR + "/personalities.json"):
+		_archetypes = ContentDB.load_json("personalities.json").get("archetypes", {})
+	return _archetypes.get(str(traits.get("archetype", "")), {}).get("social", {})
+
+
+static func voice_of(world: WorldState, author_id: String) -> String:
+	var f: Fighter = world.fighters.get(author_id)
+	if f == null:
+		return ""
+	var tone := str(_personality(f).get("tone", ""))
+	if VOICE_BY_TONE.has(tone):
+		return VOICE_BY_TONE[tone]
+	var traits := _traits(f)
+	if traits.is_empty():
+		return ""
+	if float(traits.get("trash_talk", 50)) >= 65:
+		return "provocador"
+	if float(traits.get("trash_talk", 50)) <= 25:
+		return "humilde"
+	return ""
