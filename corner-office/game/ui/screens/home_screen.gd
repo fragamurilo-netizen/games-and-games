@@ -8,9 +8,10 @@ func build() -> void:
 	var landscape:=get_viewport_rect().size.x>get_viewport_rect().size.y
 	add_text(GameDate.format(w.date)+"  /  "+org.name+"  /  "+CareerText.money(org.cash),Tokens.MUTED)
 	var next:=CareerStats.next_event(w)
-	var advance:=add_button("Avançar 7 dias",func():await run_action("advance_week");refresh())
+	var advance:=add_button("Avançar 7 dias",func():await run_action("advance_week");refresh(),"Passa uma semana: treinos, notícias, rivais e o calendário andam.")
 	advance.add_theme_stylebox_override("normal",Tokens.slanted_box(Tokens.FIGHT_RED))
-	add_button("Avançar até o próximo mês",func():await run_action("advance_month");refresh())
+	advance.add_theme_color_override("font_color",Color.WHITE)
+	add_button("Avançar até o próximo mês",func():await run_action("advance_month");refresh(),"Avança até o dia 1º do próximo mês, parando antes da sua próxima noite.")
 	add_hub(_cards(w,next),3 if landscape else 2)
 	var summary:=CareerStats.org_summary(w)
 	var finish_rate:="—" if summary.fights==0 else "%d%%"%roundi(100.0*summary.finishes/summary.fights)
@@ -91,6 +92,7 @@ func add_hub(cards: Array, columns: int) -> void:
 		var card: StatWidgets.HubCard=entry[0]
 		if entry[1] is Callable:card.pressed.connect(entry[1])
 		elif entry[1]!="":card.pressed.connect(func():navigate.emit(entry[1],entry[2]))
+		describe(card,"%s: %s"%[card.heading,card.detail])
 		grid.add_child(card)
 	body.add_child(grid)
 
@@ -98,6 +100,10 @@ func add_hub(cards: Array, columns: int) -> void:
 func _open_news() -> void:
 	var center:=NewsCenter.new();center.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	center.closed.connect(refresh);get_tree().root.add_child(center)
+
+
+func hint() -> String:
+	return "Central da promoção: toque num cartão para ir direto à área."
 
 
 func receive(payload: Dictionary) -> void:

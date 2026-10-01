@@ -25,6 +25,12 @@ Mistura de broadcast esportivo, bastidores de promoção e sala de matchmaking. 
 | `INK` | `#F4F1E8` | Texto primário |
 | `MUTED` | `#8A939C` | Metadados |
 | `FIGHT_RED` | `#C83B3B` | Ação, perigo, evento, resultado e o item selecionado do menu (barra acesa, como em Undisputed 3); nunca fundo de tela |
+| `TITLE_RED` | `#B51D22` | Faixas de título e de comandos |
+| `PANEL` / `PANEL_ROW` / `PANEL_LINE` | `#E4E6E9` / `#D5D8DC` / `#BEC3C9` | Painéis claros, linhas listradas e divisórias |
+| `PANEL_INK` / `PANEL_MUTED` | `#1C2025` / `#59616B` | Texto sobre painel claro |
+| `HEADER_BAR` / `HEADER_TEXT` | `#4A4F56` / `#DADDE0` | Cabeçalhos de painel e de seção |
+| `TABLE_BLUE` | `#2B55C4` | Rótulos de coluna e de campo |
+| `HINT_TEXT` | `#E2D2A6` | Linha de descrição no rodapé |
 | `STEEL` | `#46535E` | Estrutura e divisores |
 | `CHAMP_GOLD` | `#B88B46` | **Só** cinturões, campeões, legado, Hall da Fama |
 
@@ -46,17 +52,25 @@ Mistura de broadcast esportivo, bastidores de promoção e sala de matchmaking. 
 
 ## Linguagem de menus (referência: UFC Undisputed 3, 2012)
 
-- Formas em paralelogramo com a mesma inclinação do itálico (`Tokens.slanted_box`).
-- Item selecionado = barra inteira acesa em `FIGHT_RED`; os demais em carvão com régua `STEEL` embaixo.
-- Cabeçalho de tela: placa vermelha cortada na diagonal com o nome da aba, filete off-white e o contexto (organização / data) ao lado.
-- Cabeçalho de seção: faixa carvão inclinada com entalhe vermelho à esquerda.
-- Menu inicial: barras empilhadas, a selecionada mais longa; placa de descrição abaixo; faixa de dicas no rodapé.
+Implementada em `game/ui/ud3_chrome.gd`, `game/ui/theme/tokens.gd` e `game/ui/stat_widgets.gd`.
+
+- Fundo: key art própria em tons de cinza, clareada (`Ud3Chrome.Backdrop`).
+- Topo: faixa vermelha `TITLE_RED` com a ponta esquerda cortada e o nome da área em branco; contexto (promoção · data · caixa) à direita.
+- Painéis claros `PANEL` com borda branca e sombra; cabeçalhos em faixa cinza-escura `HEADER_BAR` com texto claro centralizado.
+- Listas: linhas claras com texto escuro; o item selecionado acende inteiro em `FIGHT_RED` com texto branco e pontas cortadas.
+- Tabelas: colunas em azul `TABLE_BLUE`, linhas listradas, nota de elite em vermelho.
+- Rodapé: faixa vermelha com a marca e os comandos (VOLTAR, MENU) e, embaixo, a linha de descrição em `HINT_TEXT` do item em foco.
+- Landscape: menu de áreas num painel à esquerda e conteúdo à direita. Portrait: conteúdo em cima e faixa de áreas acima do rodapé.
 - Só a linguagem é referência: nada de logos, fontes, arte ou nomes do jogo original.
+
+## Regra dos 3 toques
+
+Toda área abre em 1 toque (faixa de áreas ou cartão da central) e toda ação em até 3. Exemplos: ficha de atleta = Lutadores → atleta (2); escalar atleta = ficha → "Escalar em…" → Enviar proposta (3 a partir da ficha); contratar agente livre = Mercado → atleta → Enviar contrato (3); balanço de uma noite = Organização → noite (2). Toda tela nova precisa caber nessa regra; atalhos entre telas usam `Screen.navigate` e o VOLTAR refaz o caminho.
 
 ## Regras de UX mobile
 
 - Ações frequentes em até dois toques.
-- Portrait: faixa de abas embaixo. Landscape/tablet: faixa de abas no alto, abaixo do cabeçalho.
+- Portrait: faixa de áreas acima do rodapé. Landscape/tablet: menu de áreas à esquerda.
 - Bottom sheets para detalhes contextuais; nunca modal sobre modal.
 - Listas densas para dados tabulares; superfícies só para entidades/eventos reais.
 - Toque mínimo `Tokens.TOUCH_MIN` (88 px no viewport de 720 px ≈ 48 dp). Respeitar safe areas.
