@@ -40,8 +40,8 @@ func _initialize() -> void:
 			world.fighters[item[1]].martial_base = config[item[0]]
 	world.add("fights",fight)
 	FightEngine.new().simulate(world,fight)
-	var replay := FightReplayBuilder.build(world,fight)
-	var player := FightReplayPlayer.new()
+	var replay: Dictionary = load("res://presentation/fight/fight_replay_builder.gd").build(world,fight)
+	var player = load("res://presentation/fight/fight_replay_player.gd").new()
 	if not player.load_replay(replay):
 		push_error(str(player.errors))
 		quit(1)
