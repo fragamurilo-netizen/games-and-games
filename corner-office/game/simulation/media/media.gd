@@ -308,7 +308,11 @@ func _commit(world: WorldState, item: NewsItem) -> void:
 	if not item.key.is_empty():
 		has_story(world, item.key)
 		_keys[item.key] = true
-	EventBus.news_published.emit(item.id)
+	# Busca o autoload em tempo de execução: ferramentas de linha de comando
+	# (career_session, preview_fight) compilam este script antes dos autoloads.
+	var tree:=Engine.get_main_loop() as SceneTree
+	var bus:=tree.root.get_node_or_null("EventBus") if tree else null
+	if bus:bus.news_published.emit(item.id)
 
 
 static func _add(out: Array, item: NewsItem) -> void:
