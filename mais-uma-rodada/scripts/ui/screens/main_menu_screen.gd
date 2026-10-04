@@ -111,13 +111,18 @@ func _menu() -> VBoxContainer:
 		cont.custom_minimum_size.y = 96
 		card.add_child(cont)
 		v.add_child(UIKit.card_panel(card))
-	var tiles: Array = [
-		UIKit.action_tile("plus", "Nova carreira", "", func(): UIManager.push("new_career"), latest <= 0),
-		UIKit.action_tile("save", "Carregar jogo", "", func(): UIManager.push("load")),
-		UIKit.action_tile("shield", "Editor e mods", "", func(): UIManager.push("editor")),
-		UIKit.action_tile("gear", "Opções", "", func(): UIManager.push("settings")),
-	]
-	v.add_child(UIKit.tile_grid(tiles, 2))
+	# Sem carreira salva, começar uma é a ação principal; as demais ficam numa lista curta.
+	if latest <= 0:
+		var nb := UIKit.button("NOVA CARREIRA", "PrimaryButton", func(): UIManager.push("new_career"), "plus")
+		nb.custom_minimum_size.y = 96
+		v.add_child(nb)
+	var rows: Array = []
+	if latest > 0:
+		rows.append(UIKit.menu_row("plus", "Nova carreira", "", func(): UIManager.push("new_career")))
+	rows.append(UIKit.menu_row("save", "Carregar jogo", "", func(): UIManager.push("load")))
+	rows.append(UIKit.menu_row("shield", "Editor e mods", "", func(): UIManager.push("editor")))
+	rows.append(UIKit.menu_row("gear", "Opções", "", func(): UIManager.push("settings")))
+	v.add_child(UIKit.menu_group(rows))
 	v.add_child(_language_row())
 	return v
 
