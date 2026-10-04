@@ -126,6 +126,8 @@ func _identity_card(w: GameWorld, club: Club) -> Control:
 	tags.add_child(UIKit.pill(String(arch.get("tag", "")).to_upper(), UIColors.ACCENT, 16))
 	tags.add_child(UIKit.pill("FINANÇAS: " + FinanceManager.health_label(w, club).to_upper(), _health_color(FinanceManager.health_label(w, club)), 16))
 	card.add_child(tags)
+	# Folga para os selos não encostarem no filete da base do fundo.
+	card.add_child(UIKit.gap(4))
 	out.add_child(HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1))
 	# Números rápidos: ranking mundial, estádio e ingresso.
 	var tiles := UIKit.hbox(10)

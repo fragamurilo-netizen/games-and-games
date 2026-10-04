@@ -178,7 +178,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 				icon = "news"
 		card.add_child(UIKit.menu_row(icon, text, "", func(): TalkDialog.open(kind, target, on_done), UIKit.pill("AGORA", UIColors.ORANGE, 14)))
 	if always:
-		var b := UIKit.button("Vestiário, diretoria, torcida e imprensa", "GhostButton", func(): UIManager.push("relations"), "heart")
+		var b := UIKit.button("Abrir bastidores", "GhostButton", func(): UIManager.push("relations"), "heart")
 		card.add_child(b)
 	return UIKit.card_panel(card)
 
