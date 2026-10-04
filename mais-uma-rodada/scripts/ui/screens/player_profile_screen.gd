@@ -355,12 +355,13 @@ func _tile(value: String, caption: String, color: Color = UIColors.TEXT, fill: f
 	var v := UIKit.card("CardFlat", 2)
 	var panel := UIKit.card_panel(v)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var l := UIKit.label(value, "H3")
-	l.add_theme_color_override(&"font_color", color)
+	# Mesmo desenho dos ladrilhos de número do resto do jogo: valor condensado, legenda em caixa alta.
+	var l := UIKit.label(value, "Stat")
+	l.add_theme_color_override(&"font_color", UIColors.ink(color))
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	l.custom_minimum_size.x = 40
 	v.add_child(l)
-	var c := UIKit.label(caption, "Small")
+	var c := UIKit.label(caption.to_upper(), "Caps")
 	# Legenda quebra em vez de cortar ("valor de mer...") quando o bloco fica estreito
 	c.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	c.custom_minimum_size.x = 40
