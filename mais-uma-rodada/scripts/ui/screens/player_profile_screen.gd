@@ -332,12 +332,12 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	var cond_txt := "%d%%" % int(p.condition)
 	if p.injury_weeks > 0:
 		cond_txt = "Lesão"
-	grid.add_child(_tile(cond_txt, "físico" if p.injury_weeks == 0 else "%d semana(s)" % p.injury_weeks, UIColors.RED if p.injury_weeks > 0 else (UIColors.GREEN if p.condition >= 90 else UIColors.TEXT), p.condition / 100.0 if p.injury_weeks == 0 else -1.0))
+	grid.add_child(_tile(cond_txt, "físico" if p.injury_weeks == 0 else ("%d semana" if p.injury_weeks == 1 else "%d semanas") % p.injury_weeks, UIColors.RED if p.injury_weeks > 0 else (UIColors.GREEN if p.condition >= 90 else UIColors.TEXT), p.condition / 100.0 if p.injury_weeks == 0 else -1.0))
 	card.add_child(grid)
 	if p.injury_weeks > 0:
-		card.add_child(UIKit.colored("%s — volta em %d semana(s)." % [p.injury_name, p.injury_weeks], UIColors.RED, "Small"))
+		card.add_child(UIKit.colored(("%s — volta em %d semana." if p.injury_weeks == 1 else "%s — volta em %d semanas.") % [p.injury_name, p.injury_weeks], UIColors.RED, "Small"))
 	if p.suspension > 0:
-		card.add_child(UIKit.colored("Suspenso por %d jogo(s)." % p.suspension, UIColors.RED, "Small"))
+		card.add_child(UIKit.colored(("Suspenso por %d jogo." if p.suspension == 1 else "Suspenso por %d jogos.") % p.suspension, UIColors.RED, "Small"))
 	if p.retiring:
 		card.add_child(UIKit.colored("Anunciou que vai se aposentar ao fim da temporada.", UIColors.ACCENT, "Small"))
 	if p.transfer_listed:

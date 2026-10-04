@@ -93,7 +93,7 @@ func refresh() -> void:
 			UIManager.toast("Ninguém cansado com substituto à altura.")
 		else:
 			_notes = msgs
-			UIManager.toast("%d titular(es) poupado(s)." % msgs.size())
+			UIManager.toast(("%d titular poupado." if msgs.size() == 1 else "%d titulares poupados.") % msgs.size())
 		refresh(), "heart")
 	rest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(rest)
@@ -721,7 +721,7 @@ func _start() -> void:
 		if w.player(pid) == null:
 			missing += 1
 	if missing > 0:
-		UIManager.info("Escalação incompleta", "Faltam %d jogador(es) no time titular." % missing)
+		UIManager.info("Escalação incompleta", ("Falta %d jogador no time titular." if missing == 1 else "Faltam %d jogadores no time titular.") % missing)
 		return
 	AudioManager.play("whistle", -4.0)
 	if AppSettings.match_speed == AppSettings.SPEED_INSTANT:

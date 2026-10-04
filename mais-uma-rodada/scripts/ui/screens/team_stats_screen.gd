@@ -246,10 +246,10 @@ static func _season_card(w: GameWorld, club: Club, league: League) -> Control:
 				big_d = gf - ga
 				var opp := w.club(f.away if is_home else f.home)
 				big = "%d x %d no %s" % [gf, ga, opp.short_name] if opp != null else "%d x %d" % [gf, ga]
-	card.add_child(UIKit.kv("Em casa", "%d pts em %d jogos (%s) · %d:%d" % [home[1], home[0], _pct(home[1], home[0] * 3.0), home[2], home[3]]))
-	card.add_child(UIKit.kv("Fora", "%d pts em %d jogos (%s) · %d:%d" % [away[1], away[0], _pct(away[1], away[0] * 3.0), away[2], away[3]]))
-	card.add_child(UIKit.kv("Sem sofrer gol", "%d jogos" % clean))
-	card.add_child(UIKit.kv("Sem marcar", "%d jogos" % blank))
+	card.add_child(UIKit.kv("Em casa", ("%d pts em %d jogo (%s) · %d:%d" if home[0] == 1 else "%d pts em %d jogos (%s) · %d:%d") % [home[1], home[0], _pct(home[1], home[0] * 3.0), home[2], home[3]]))
+	card.add_child(UIKit.kv("Fora", ("%d pts em %d jogo (%s) · %d:%d" if away[0] == 1 else "%d pts em %d jogos (%s) · %d:%d") % [away[1], away[0], _pct(away[1], away[0] * 3.0), away[2], away[3]]))
+	card.add_child(UIKit.kv("Sem sofrer gol", Fmt.n_of(clean, "%d jogo", "%d jogos")))
+	card.add_child(UIKit.kv("Sem marcar", Fmt.n_of(blank, "%d jogo", "%d jogos")))
 	if big != "":
 		card.add_child(UIKit.kv("Maior vitória", big))
 	var form := String(r.get("form", ""))
@@ -291,7 +291,7 @@ static func _ranks_card(w: GameWorld, club: Club, league: League) -> Control:
 	card.add_child(UIKit.section_header("Na liga"))
 	var n := league.club_ids.size()
 	var metrics := [
-		["Ataque", func(c: Club) -> float: return float(league.row(c.id).get("gf", 0)), true, func(v: float) -> String: return "%d gols" % int(v)],
+		["Ataque", func(c: Club) -> float: return float(league.row(c.id).get("gf", 0)), true, func(v: float) -> String: return Fmt.n_of(int(v), "%d gol", "%d gols")],
 		["Defesa", func(c: Club) -> float: return float(league.row(c.id).get("ga", 0)), false, func(v: float) -> String: return "%d sofridos" % int(v)],
 		["Força do time titular", func(c: Club) -> float: return _xi_avg(w, c), true, func(v: float) -> String: return "%.1f" % v],
 		["Valor do elenco", func(c: Club) -> float: return _squad_value(w, c), true, func(v: float) -> String: return Fmt.money(v)],
@@ -366,7 +366,7 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 	var sq := w.squad(club)
 	var any := false
 	var cats := [
-		["Artilheiro", func(p: Player) -> float: return p.stat(Player.S_GOALS), func(p: Player) -> String: return "%d gols" % p.stat(Player.S_GOALS)],
+		["Artilheiro", func(p: Player) -> float: return p.stat(Player.S_GOALS), func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_GOALS), "%d gol", "%d gols")],
 		["Assistências", func(p: Player) -> float: return p.stat(Player.S_ASSISTS), func(p: Player) -> String: return "%d assist." % p.stat(Player.S_ASSISTS)],
 		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%.2f em %d jogos" % [p.avg_rating(), p.stat(Player.S_APPS)]],
 		["Mais minutos", func(p: Player) -> float: return p.stat(Player.S_MINUTES), func(p: Player) -> String: return "%d min" % p.stat(Player.S_MINUTES)],

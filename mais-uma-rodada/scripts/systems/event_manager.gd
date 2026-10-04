@@ -929,7 +929,7 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 						if q.injury_weeks == 0:
 							q.injury_name = ""
 						n += 1
-				msg = "Tratamento intensivo para %d jogador(es)." % n
+				msg = ("Tratamento intensivo para %d jogador." if n == 1 else "Tratamento intensivo para %d jogadores.") % n
 			else:
 				msg = "Tratamento normal mantido."
 		"friendly":

@@ -119,6 +119,6 @@ static func _announce_nx(world: GameWorld, ids: Array) -> void:
 	var body := "%s, %d anos, do %s, lidera o NXGN %d, o ranking dos %d melhores jogadores sub-21 do mundo feito pelo portal Golaço." % [
 		top.display_name(), top.age(world.year), tc.short_name if tc != null else "?", world.year, ids.size()]
 	if ours > 0:
-		body += " O %s tem %d nome(s) na lista." % [world.user_club().short_name, ours]
+		body += (" O %s tem %d nome na lista." if ours == 1 else " O %s tem %d nomes na lista.") % [world.user_club().short_name, ours]
 	NewsManager.post_raw(world, "NXGN %d: %s é o melhor jovem do mundo" % [world.year, top.display_name()], body, top.club_id, top.id,
 		NewsEvent.IMP_HIGH if ours > 0 or world.is_user_club(top.club_id) else NewsEvent.IMP_NORMAL, "premio")

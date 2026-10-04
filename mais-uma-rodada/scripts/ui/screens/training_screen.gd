@@ -282,7 +282,7 @@ func _evolution_cards(w: GameWorld, club: Club) -> Array:
 		if TrainingManager.trend(p) <= -0.1 and down.size() < 5:
 			down.append(p)
 	var out: Array = []
-	out.append(_trend_card("Em alta", "Últimas %d semana(s)" % weeks, up, "Ninguém."))
+	out.append(_trend_card("Em alta", ("Última semana" if weeks == 1 else "Últimas %d semanas") % weeks, up, "Ninguém."))
 	out.append(_trend_card("Em queda", "", down, "Ninguém."))
 	# Últimas mudanças de atributo no elenco
 	var all_ch: Array = []

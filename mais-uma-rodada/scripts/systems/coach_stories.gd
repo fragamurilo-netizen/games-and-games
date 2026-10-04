@@ -122,7 +122,7 @@ static func labels(world: GameWorld, co: Dictionary) -> Array:
 			league_aw += 1
 	var age := world.year - int(co.get("by", world.year - 50))
 	if world_aw > 0:
-		out.append({"n": "Melhor do mundo", "d": "Eleito treinador do ano %d vez(es)." % world_aw})
+		out.append({"n": "Melhor do mundo", "d": ("Eleito treinador do ano %d vez." if world_aw == 1 else "Eleito treinador do ano %d vezes.") % world_aw})
 	if int(t["t"]) >= 8:
 		out.append({"n": "Multicampeão", "d": "%d títulos na carreira." % int(t["t"])})
 	if best_len >= 5 and best_titles >= 1:

@@ -164,7 +164,7 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 	head.add_child(xb)
 	v.add_child(head)
 	var yrs := YouthManager.years_in(w, p)
-	var line := "%s na base" % ["Chegou nesta temporada" if yrs == 0 else ("%d ano(s)" % yrs)]
+	var line := "%s na base" % ["Chegou nesta temporada" if yrs == 0 else (("%d ano" if yrs == 1 else "%d anos") % yrs)]
 	var pf := YouthManager.play_factor(w, p)
 	if pf < 0.95:
 		line += " · joga pouco"
@@ -816,7 +816,7 @@ func _facilities(w: GameWorld, club: Club) -> Control:
 	var wait := BoardRequests.wait_turns(w, "youth")
 	var lbl := "Pedir investimento (%s)" % Fmt.money(BoardRequests.cost_of(w, "youth"))
 	if wait > 0:
-		lbl = "Novo pedido em %d rodada(s)" % wait
+		lbl = ("Novo pedido em %d rodada" if wait == 1 else "Novo pedido em %d rodadas") % wait
 	var b := UIKit.button(lbl, "GhostButton", func():
 		UIManager.confirm("Levar o pedido ao presidente?", "O diretor de futebol leva o pedido de investimento na base. Custo: %s." % Fmt.money(BoardRequests.cost_of(w, "youth")), "Pedir", func():
 			var r := BoardRequests.request(w, "youth")

@@ -102,7 +102,7 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer) -> void:
 		var pprog := float(p.train.get("prog", 0.0))
 		var rate := TrainingManager.position_rate(w, club, p, learning)
 		var weeks := int(ceil((1.0 - pprog) / maxf(0.001, rate)))
-		body.add_child(UIKit.label("Aprendendo %s: %d%% · cerca de %d semana(s)" % [Pos.name_of(learning), int(pprog * 100.0), weeks], "", true))
+		body.add_child(UIKit.label(("Aprendendo %s: %d%% · cerca de %d semana" if weeks == 1 else "Aprendendo %s: %d%% · cerca de %d semanas") % [Pos.name_of(learning), int(pprog * 100.0), weeks], "", true))
 		body.add_child(UIKit.bar(pprog, 1.0, UIColors.GREEN, 10))
 	var pg := ButtonGroup.new()
 	var pflow := UIKit.flow(8)

@@ -513,7 +513,7 @@ static func _mark(world: GameWorld, rid: int, status: int) -> void:
 
 static func _confirmed(world: GameWorld, p: Player, to: Club, from: Club, rid: int, weeks: int, fee: int) -> void:
 	_mark(world, rid, RS_TRUE)
-	var body := "O interesse foi noticiado há %d semana(s) e se confirmou: %s é jogador do %s%s." % [maxi(1, weeks), p.display_name(), to.short_name,
+	var body := ("O interesse foi noticiado há %d semana e se confirmou: %s é jogador do %s%s." if maxi(1, weeks) == 1 else "O interesse foi noticiado há %d semanas e se confirmou: %s é jogador do %s%s.") % [maxi(1, weeks), p.display_name(), to.short_name,
 		(" por %s" % Fmt.money(fee)) if fee > 0 else ""]
 	var n := NewsManager.post_raw(world, "Deu certo: rumor sobre %s se confirma" % p.display_name(), body, to.id, p.id, _imp(world, to), "rumor_ok")
 	n.media = NewsManager.signing_media(p, to, fee, from.id if from != null else -1)
@@ -821,7 +821,7 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 				if gap <= 2:
 					tr[zkey] = rp
 					var n := NewsManager.post_raw(world, "Luta contra a queda esquenta na %s" % lg.name,
-						"%s, primeiro fora da zona, tem só %d ponto(s) a mais que o %s. Faltam %d rodadas." % [safe.short_name, gap, first_down.short_name, total - rp],
+						("%s, primeiro fora da zona, tem só %d ponto a mais que o %s. Faltam %d rodadas." if gap == 1 else "%s, primeiro fora da zona, tem só %d pontos a mais que o %s. Faltam %d rodadas.") % [safe.short_name, gap, first_down.short_name, total - rp],
 						first_down.id, -1, NewsEvent.IMP_HIGH if world.is_user_club(safe.id) or world.is_user_club(first_down.id) else imp, "briga_z")
 					n.media = {"type": "crest", "club": first_down.id, "tb": table_rows(lg, ids, cut - 3, cut + 3), "lg": lg.id, "zc": cut + 1,
 						"hl": [safe.id, first_down.id]}

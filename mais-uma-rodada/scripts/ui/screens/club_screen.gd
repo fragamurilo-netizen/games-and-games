@@ -344,7 +344,7 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	if ClubEvents.banned(w, club):
 		card.add_child(UIKit.colored("Transfer ban", UIColors.RED, "Small", true))
 	if int(club.affairs.get("closed", 0)) > 0:
-		card.add_child(UIKit.colored("Punido com %d jogo(s) de portões fechados." % int(club.affairs["closed"]), UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored(("Punido com %d jogo de portões fechados." if int(club.affairs["closed"]) == 1 else "Punido com %d jogos de portões fechados.") % int(club.affairs["closed"]), UIColors.ORANGE, "Small", true))
 	if club.balance < 0:
 		card.add_child(UIKit.colored("Caixa no vermelho: contratações bloqueadas.", UIColors.ORANGE, "Small", true))
 	elif FinanceManager.debt_ratio(club, float(fin["expected_revenue"])) > 1.0:
@@ -409,7 +409,7 @@ func _structure_card(w: GameWorld, club: Club) -> Control:
 		var chance := float(od[0])
 		var label := "Pedir ao presidente (%s)" % Fmt.money(cost)
 		if wait > 0:
-			label = "Novo pedido em %d rodada(s)" % wait
+			label = ("Novo pedido em %d rodada" if wait == 1 else "Novo pedido em %d rodadas") % wait
 		elif kind == "stadium" and w.stats.has("stadium_work"):
 			label = "Obras em andamento"
 		var b := UIKit.button(label, "GhostButton", func(): _ask(kind), "up")

@@ -35,7 +35,7 @@ func refresh() -> void:
 		return
 	max_content_width = 1800
 	var unread := InboxManager.unread_count(w)
-	screen_subtitle = "%d não lida(s)" % unread if unread > 0 else "Tudo lido"
+	screen_subtitle = ("%d não lida" if unread == 1 else "%d não lidas") % unread if unread > 0 else "Tudo lido"
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -71,7 +71,7 @@ func refresh() -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if not w.inbox.is_empty():
 		var tools := UIKit.hbox(8)
-		var count := UIKit.label(tr("%d mensagem(ns)") % shown.size(), "Caps")
+		var count := UIKit.label(tr(("%d mensagem" if shown.size() == 1 else "%d mensagens")) % shown.size(), "Caps")
 		count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tools.add_child(count)
 		var all_read := UIKit.button("Marcar lidas", "TextButton", func():
@@ -83,7 +83,7 @@ func refresh() -> void:
 		tools.add_child(UIKit.button("Limpar lidas", "TextButton", func():
 			var n := InboxManager.delete_read(w)
 			GameManager.save_now()
-			UIManager.toast("%d mensagem(ns) apagada(s)" % n if n > 0 else "Nada para apagar")
+			UIManager.toast(("%d mensagem apagada" if n == 1 else "%d mensagens apagadas") % n if n > 0 else "Nada para apagar")
 			refresh(), "close"))
 		list.add_child(tools)
 	# Mensagens agrupadas por dia, cada dia num cartão com filetes (como um cliente de e-mail).

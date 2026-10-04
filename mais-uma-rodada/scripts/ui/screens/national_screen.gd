@@ -480,7 +480,7 @@ func _quals(w: GameWorld, c: VBoxContainer) -> void:
 	var camp: Dictionary = camps[_camp]
 	var info := UIKit.card("CardHighlight", 6)
 	info.add_child(UIKit.label("%s %d" % [camp["name"], int(camp["y"])], "H2"))
-	info.add_child(UIKit.label("Rodada %d de %d · %d vaga(s)%s" % [int(camp["md"]), int(camp["mdt"]), int(camp["spots"]), " · encerrada" if bool(camp["done"]) else ""], "Small"))
+	info.add_child(UIKit.label(("Rodada %d de %d · %d vaga%s" if int(camp["spots"]) == 1 else "Rodada %d de %d · %d vagas%s") % [int(camp["md"]), int(camp["mdt"]), int(camp["spots"]), " · encerrada" if bool(camp["done"]) else ""], "Small"))
 	if bool(camp["done"]):
 		info.add_child(UIKit.label("Classificados: %s" % ", ".join((camp["q"] as Array).map(func(x): return DatabaseManager.nation_name(x))), "", true))
 	c.add_child(UIKit.card_panel(info))
@@ -521,7 +521,7 @@ func _ranking(w: GameWorld) -> Control:
 		h.add_child(n)
 		var titles := NationalTeamManager.titles_of(w, code).size()
 		if titles > 0:
-			h.add_child(UIKit.pill("%d título(s)" % titles, UIColors.ACCENT, 14))
+			h.add_child(UIKit.pill(("%d título" if titles == 1 else "%d títulos") % titles, UIColors.ACCENT, 14))
 		var pts := UIKit.label(str(int(round(float(r[i][1])))), "H3")
 		pts.custom_minimum_size.x = 70
 		pts.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

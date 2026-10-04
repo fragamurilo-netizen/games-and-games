@@ -916,7 +916,7 @@ func _highlights(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var att := CompetitionManager.best_attack(league)
 	var dfn := CompetitionManager.best_defense(league)
 	if att >= 0 and int(league.table[att]["pl"]) > 0:
-		info.add_child(UIKit.kv("Melhor ataque", "%s (%d gols)" % [w.club(att).short_name, int(league.table[att]["gf"])]))
+		info.add_child(UIKit.kv("Melhor ataque", ("%s (%d gol)" if int(league.table[att]["gf"]) == 1 else "%s (%d gols)") % [w.club(att).short_name, int(league.table[att]["gf"])]))
 	if dfn >= 0 and int(league.table[dfn]["pl"]) > 0:
 		info.add_child(UIKit.kv("Melhor defesa", "%s (%d sofridos)" % [w.club(dfn).short_name, int(league.table[dfn]["ga"])]))
 	var games := 0
