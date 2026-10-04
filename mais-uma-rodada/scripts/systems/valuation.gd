@@ -15,7 +15,7 @@ static var WAGE_GROWTH := 1.152
 
 ## Quanto a liga valoriza o jogador (Transfermarkt: o mesmo nível vale muito mais na Premier League
 ## do que no Brasileirão ou na Argentina). Divisões de baixo valem 20% menos a cada degrau.
-const LEAGUE_VALUE := {"ENG": 1.55, "ESP": 0.9, "GER": 1.0, "ITA": 1.0, "FRA": 0.92, "POR": 0.85, "NED": 0.9,
+const LEAGUE_VALUE := {"ENG": 1.55, "ESP": 1.0, "GER": 0.98, "ITA": 0.96, "FRA": 0.92, "POR": 0.85, "NED": 0.9,
 	"BEL": 0.78, "TUR": 0.78, "KSA": 0.85, "QAT": 0.6, "UAE": 0.6, "SCO": 0.6, "AUT": 0.7, "SUI": 0.7,
 	"DEN": 0.7, "GRE": 0.65, "BRA": 0.85, "ARG": 0.58, "MEX": 0.85, "USA": 1.05, "JPN": 0.55, "KOR": 0.5,
 	"URU": 0.5, "COL": 0.52, "CHI": 0.5, "ECU": 0.5, "PAR": 0.45}
@@ -44,7 +44,7 @@ static func perceived_rating(p: Player, year: int) -> float:
 	var eff := p.ovr_f
 	if age <= 23:
 		var pot := float(p.potential) + p.scout_noise * 0.5
-		var w := clampf((24 - age) * 0.09, 0.0, 0.55)
+		var w := clampf((24 - age) * 0.075, 0.0, 0.45)
 		eff = maxf(eff, eff + (pot - eff) * w)
 	return eff - shift
 
@@ -82,37 +82,29 @@ static func refresh_shift(world: GameWorld) -> void:
 	shift = ref - float(world.stats["mref0"])
 
 
+## Curva de idade do mercado (Transfermarkt): o pico é dos 21 aos 25; depois dos 27 cada ano tira
+## um pedaço, e aos 30 um jogador vale ~2/3 do que valia no auge com o mesmo nível.
+const AGE_VALUE := {17: 1.15, 18: 1.2, 19: 1.22, 20: 1.25, 21: 1.25, 22: 1.22, 23: 1.18, 24: 1.14, 25: 1.1,
+	26: 1.05, 27: 1.0, 28: 0.92, 29: 0.83, 30: 0.73, 31: 0.61, 32: 0.5, 33: 0.4, 34: 0.3, 35: 0.23}
+
+
 static func age_factor(age: int) -> float:
-	if age <= 19:
-		return 1.2
-	if age <= 21:
-		return 1.25
-	if age <= 24:
-		return 1.18
-	if age <= 27:
-		return 1.05
-	if age <= 29:
-		return 0.9
-	match age:
-		30:
-			return 0.75
-		31:
-			return 0.6
-		32:
-			return 0.48
-		33:
-			return 0.38
-		34:
-			return 0.28
-	return 0.2
+	if age < 17:
+		return 1.1
+	return float(AGE_VALUE.get(age, 0.18))
 
 
+## Contrato longo segura o preço; perto do fim o clube perde força na mesa (Bosman aos 0 anos).
 static func contract_factor(years_left: int) -> float:
 	if years_left <= 0:
 		return 0.55
 	if years_left == 1:
-		return 0.85
-	return 1.0
+		return 0.8
+	if years_left == 2:
+		return 0.93
+	if years_left == 3:
+		return 1.0
+	return 1.04
 
 
 static func position_factor(pos: int) -> float:
@@ -133,14 +125,23 @@ static func market_value(p: Player, year: int) -> int:
 	# Garoto que já é craque vale uma fortuna (o mercado paga os anos de auge pela frente)
 	var ag := p.age(year)
 	if ag <= 23:
-		v *= 1.0 + clampf((p.ovr_f - 74.0) / 10.0, 0.0, 1.0) * (0.7 if ag <= 20 else (0.5 if ag <= 21 else 0.25))
+		v *= 1.0 + clampf((p.ovr_f - 74.0) / 10.0, 0.0, 1.0) * (0.45 if ag <= 20 else (0.3 if ag <= 21 else 0.15))
 	v *= contract_factor(p.contract_years_left(year))
 	v *= position_factor(p.position)
 	v *= league_value(p.club_id)
 	# Forma recente pesa um pouco (quem está voando fica mais caro).
 	v *= clampf(1.0 + (p.form() - 6.5) * 0.08, 0.85, 1.2)
 	v *= season_factor(p)
-	return round_value(v)
+	return round_value(soft_top(v))
+
+
+## Teto de mercado: acima de ~€ 130 mi cada euro "a mais" pesa menos (ninguém paga € 400 mi por
+## um garoto, por mais que ele seja fora da curva); o recorde fica na casa dos € 200 mi.
+static func soft_top(v: float) -> float:
+	var knee := 130_000_000.0
+	if v <= knee:
+		return v
+	return knee + (v - knee) * 0.4
 
 
 ## Temporada que o mercado viu: boa campanha valoriza, temporada apagada desvaloriza.
@@ -171,6 +172,9 @@ static func base_wage(rating: float) -> float:
 static func wage_demand(p: Player, club: Club, year: int) -> int:
 	var age := p.age(year)
 	var r := (p.ovr_f - shift) * 0.6 + perceived_rating(p, year) * 0.4
+	# Acima de 84 o salário sobe mais devagar: a estrela ganha o dobro do titular, não o quádruplo.
+	if r > 84.0:
+		r = 84.0 + (r - 84.0) * 0.7
 	var w := base_wage(r)
 	if club != null:
 		w *= (0.8 + club.reputation / 250.0) * float(club.league_cfg().get("wage", 0.5))
@@ -201,4 +205,4 @@ static func round_value(v: float) -> int:
 static func round_wage(w: float) -> int:
 	if w >= 1000.0:
 		return int(round(w / 100.0)) * 100
-	return maxi(300, int(round(w / 50.0)) * 50)
+	return maxi(150, int(round(w / 50.0)) * 50) # semiprofissional das divisões de baixo
