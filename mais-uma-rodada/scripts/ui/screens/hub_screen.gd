@@ -109,7 +109,7 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 	var v := UIKit.vbox(6)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	var cr := UIKit.crest(cl, 112)
+	var cr := UIKit.crest(cl, 88 if UILayout.is_short() else 112)
 	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(cr)
 	var n := UIKit.label(cl.short_name, "H2")
@@ -184,6 +184,22 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	band.add_child(where_pill)
 	UIKit.card_panel(card).free()
 	card = hero[2]
+	# Deitado (tela baixa e larga): times à esquerda, contexto e ações à direita, para o JOGAR
+	# caber sem rolar. Em pé, tudo empilhado.
+	var split := UILayout.is_landscape() and content_width() >= 900.0
+	var left := card
+	var right := card
+	if split:
+		var cols := UIKit.hbox(UITokens.S4)
+		left = UIKit.vbox(10)
+		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		left.size_flags_stretch_ratio = 1.15
+		right = UIKit.vbox(10)
+		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		right.alignment = BoxContainer.ALIGNMENT_END
+		cols.add_child(left)
+		cols.add_child(right)
+		card.add_child(cols)
 	var row := UIKit.hbox(6)
 	row.add_child(_club_tap(w, _team_block(w, w.club(f.home), f), f.home))
 	var mid := UIKit.vbox(2)
@@ -194,26 +210,27 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	mid.add_child(vs)
 	row.add_child(mid)
 	row.add_child(_club_tap(w, _team_block(w, w.club(f.away), f), f.away))
-	card.add_child(row)
+	left.add_child(row)
 	var stadium := UIKit.label(("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city]), "Small")
 	stadium.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	card.add_child(stadium)
+	left.add_child(stadium)
 	if derby:
 		var d := UIKit.label("CLÁSSICO", "H2")
 		d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		d.add_theme_color_override(&"font_color", UIColors.RED)
-		card.add_child(d)
+		left.add_child(d)
 	for hk in StoryHooks.for_next_match(w):
 		if hk["kind"] == "derby":
 			continue
 		var line := UIKit.hbox(10)
 		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 26, _hook_color(String(hk["kind"]))))
 		var t := UIKit.label(hk["text"], "", true)
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		line.add_child(t)
-		card.add_child(line)
+		right.add_child(line)
 	var play := UIKit.button("JOGAR", "PrimaryButton", func(): UIManager.push("prematch"), "play")
-	play.custom_minimum_size.y = 112
-	card.add_child(play)
+	play.custom_minimum_size.y = 88 if split else 112
+	right.add_child(play)
 	var sub := UIKit.hbox(10)
 	var lineup := UIKit.button("Escalação e tática", "GhostButton", func(): UIManager.push("prematch", {"edit": true}), "tactics")
 	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -221,7 +238,7 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	var quick := UIKit.button("Simular", "GhostButton", func(): SimDialog.open(func(): refresh()), "fast")
 	quick.tooltip_text = "Joga um ou vários jogos sem assistir"
 	sub.add_child(quick)
-	card.add_child(sub)
+	right.add_child(sub)
 	return hero[0]
 
 
