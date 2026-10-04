@@ -55,9 +55,9 @@ Os testes completos (`tests/run_tests.gd`) passam de 30 minutos, por isso rode s
 
 A ordem combinada:
 
-1. Ratings, potenciais, atributos, valores e mais estilos de jogador. Em andamento. Depois de mexer, rodar `tools/realism_report.gd` e conferir que os gols continuam realistas.
-2. Categorias de base: mais competições (sub-17, sub-20, Copinha, liga jovem europeia), academia e negociações mais profundas (parcelas, bônus, percentual de revenda, cláusula, empréstimo com opção de compra). Em andamento.
-3. Interface.
+1. Ratings, potenciais, atributos, valores e mais estilos de jogador. Feito em 04/10: 8 estilos novos, 3 traços, 3 filosofias de clube, elite comprimida (2 jogadores 90+ estáveis em 4 temporadas, `tools/ratings_report.gd -- --years=4`), valores e salários com curva de idade e contrato. Os gols continuam em 2,63 por jogo. Ponto a observar: o valor do jogador mais caro cai de € 140M para € 75M em 4 temporadas só de evolução.
+2. Categorias de base: mais competições (sub-17, sub-20, Copinha, liga jovem europeia), academia e negociações mais profundas (parcelas, bônus, percentual de revenda, cláusula, empréstimo com opção de compra). Feito.
+3. Interface. Em andamento.
    - Legibilidade, estados de hover e cores de destaque, a tela de números, paisagem e tablet.
    - Tirar a cara de "jogo feito às pressas por IA": nada de textos-propaganda cheios de superlativos e emojis, telas amontoadas ou visual genérico. O visual deve ser coerente e caprichado.
    - O jogo pode ficar maior em tamanho, isso não é problema.
