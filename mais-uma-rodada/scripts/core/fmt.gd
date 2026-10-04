@@ -106,7 +106,7 @@ static func minute(m: int, half: int = 0) -> String:
 
 
 static func plural(n: int, singular: String, plural_form: String) -> String:
-	return str(n) + " " + I18n.t(singular if n == 1 else plural_form)
+	return thousands(n) + " " + I18n.t(singular if n == 1 else plural_form)
 
 
 ## Frase com número e concordância: n_of(1, "%d jogo restante", "%d jogos restantes") → "1 jogo restante".
