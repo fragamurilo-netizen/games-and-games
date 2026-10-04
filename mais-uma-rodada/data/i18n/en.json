@@ -10210,5 +10210,8 @@
 	"Não acredita: há gente melhor na posição.": "He doesn't believe it: there are better players in his position.",
 	"Comissão menor, salário maior. Pela metade, o empresário pode travar o acordo.": "Lower commission, higher wage. At half, the agent may block the deal.",
 	"Abrir bastidores": "Open behind the scenes",
-	"%s encontrado": "%s found"
+	"%s encontrado": "%s found",
+	"%s marcados · %s sofridos": "%s scored · %s conceded",
+	"%d · média %s": "%d · average %s",
+	"%s em %d jogos": "%s in %d games"
 }

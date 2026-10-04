@@ -56,6 +56,12 @@ static func _decimal(x: float, places: int) -> String:
 	return txt if I18n.lang == "en" else txt.replace(".", ",")
 
 
+## Número com casas fixas e a vírgula do idioma: dec(7.3, 2) → "7,30" (en: "7.30").
+static func dec(x: float, places: int) -> String:
+	var txt := ("%." + str(places) + "f") % x
+	return txt if I18n.lang == "en" else txt.replace(".", ",")
+
+
 ## Nota de partida sempre com uma casa: 7,0 / 6,4.
 static func rating(r: float) -> String:
 	return "%.1f" % r if I18n.lang == "en" else ("%.1f" % r).replace(".", ",")

@@ -10210,5 +10210,8 @@
 	"Não acredita: há gente melhor na posição.": "No se lo cree: hay mejores en su posición.",
 	"Comissão menor, salário maior. Pela metade, o empresário pode travar o acordo.": "Comisión menor, salario mayor. A la mitad, el agente puede bloquear el acuerdo.",
 	"Abrir bastidores": "Abrir entre bastidores",
-	"%s encontrado": "%s encontrado"
+	"%s encontrado": "%s encontrado",
+	"%s marcados · %s sofridos": "%s marcados · %s recibidos",
+	"%d · média %s": "%d · media %s",
+	"%s em %d jogos": "%s en %d partidos"
 }

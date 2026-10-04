@@ -183,7 +183,7 @@ static func _fill_table(w: GameWorld, club: Club, body: VBoxContainer) -> void:
 		for k in ["a", "g", "as"]:
 			h.add_child(_num(int(r.get(k, 0)), 44, k == key))
 		var rt := float(r.get("r", 0.0))
-		var rl := _cell("%.2f" % rt if rt > 0.0 else "—", "Mono", 64)
+		var rl := _cell(Fmt.dec(rt, 2) if rt > 0.0 else "—", "Mono", 64)
 		if rt >= 7.2:
 			rl.add_theme_color_override(&"font_color", UIColors.GREEN)
 		elif rt > 0.0 and rt < 6.3:
@@ -258,7 +258,7 @@ static func _season_card(w: GameWorld, club: Club, league: League) -> Control:
 	card.add_child(UIKit.kv("Jogos", "%d · %dV %dE %dD" % [pl, int(r["w"]), int(r["d"]), int(r["l"])]))
 	card.add_child(UIKit.kv("Gols", "%d pró · %d contra · saldo %+d" % [int(r["gf"]), int(r["ga"]), int(r["gf"]) - int(r["ga"])]))
 	if pl > 0:
-		card.add_child(UIKit.kv("Média por jogo", "%.1f marcados · %.1f sofridos" % [float(r["gf"]) / pl, float(r["ga"]) / pl]))
+		card.add_child(UIKit.kv("Média por jogo", "%s marcados · %s sofridos" % [Fmt.dec(float(r["gf"]) / pl, 1), Fmt.dec(float(r["ga"]) / pl, 1)]))
 	# Casa, fora, jogos sem sofrer gol e maior vitória a partir dos jogos da liga.
 	var home := [0, 0, 0, 0] # jogos, pontos, gf, ga
 	var away := [0, 0, 0, 0]
@@ -333,7 +333,7 @@ static func _ranks_card(w: GameWorld, club: Club, league: League) -> Control:
 	var metrics := [
 		["Ataque", func(c: Club) -> float: return float(league.row(c.id).get("gf", 0)), true, func(v: float) -> String: return Fmt.n_of(int(v), "%d gol", "%d gols")],
 		["Defesa", func(c: Club) -> float: return float(league.row(c.id).get("ga", 0)), false, func(v: float) -> String: return "%d sofridos" % int(v)],
-		["Força do time titular", func(c: Club) -> float: return _xi_avg(w, c), true, func(v: float) -> String: return "%.1f" % v],
+		["Força do time titular", func(c: Club) -> float: return _xi_avg(w, c), true, func(v: float) -> String: return Fmt.dec(v, 1)],
 		["Valor do elenco", func(c: Club) -> float: return _squad_value(w, c), true, func(v: float) -> String: return Fmt.money(v)],
 		["Folha salarial", func(c: Club) -> float: return float(FinanceManager.wage_bill(w, c)), true, func(v: float) -> String: return Fmt.money(v) + "/mês"],
 		["Reputação", func(c: Club) -> float: return c.reputation, true, func(v: float) -> String: return "%d" % int(round(v))],
@@ -377,9 +377,9 @@ static func _squad_card(w: GameWorld, club: Club) -> Control:
 		if p.nationality != club.nation:
 			foreign += 1
 	card.add_child(UIKit.stat_grid([
-		UIKit.stat_tile("%.1f" % _xi_avg(w, club), "time titular", UIColors.ACCENT),
-		UIKit.stat_tile("%.1f" % (ovr / maxf(1.0, sq.size())), "elenco"),
-		UIKit.stat_tile("%.1f" % _avg_age(w, club), "idade média"),
+		UIKit.stat_tile(Fmt.dec(_xi_avg(w, club), 1), "time titular", UIColors.ACCENT),
+		UIKit.stat_tile(Fmt.dec(ovr / maxf(1.0, sq.size()), 1), "elenco"),
+		UIKit.stat_tile(Fmt.dec(_avg_age(w, club), 1), "idade média"),
 	], 600))
 	card.add_child(UIKit.kv("Jogadores", "%d · %d estrangeiros" % [sq.size(), foreign]))
 	card.add_child(UIKit.kv("Valor do elenco", Fmt.money(_squad_value(w, club))))
@@ -393,7 +393,7 @@ static func _squad_card(w: GameWorld, club: Club) -> Control:
 			s += p.overall
 			if best == null or p.overall > best.overall:
 				best = p
-		var txt := "%d · média %.1f" % [list.size(), s / maxf(1.0, list.size())]
+		var txt := "%d · média %s" % [list.size(), Fmt.dec(s / maxf(1.0, list.size()), 1)]
 		if best != null:
 			txt += " · melhor %s (%d)" % [best.short_name(), best.overall]
 		card.add_child(UIKit.kv(Pos.GROUP_NAMES[g], txt))
@@ -408,7 +408,7 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 	var cats := [
 		["Artilheiro", func(p: Player) -> float: return p.stat(Player.S_GOALS), func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_GOALS), "%d gol", "%d gols")],
 		["Assistências", func(p: Player) -> float: return p.stat(Player.S_ASSISTS), func(p: Player) -> String: return "%d assist." % p.stat(Player.S_ASSISTS)],
-		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%.2f em %d jogos" % [p.avg_rating(), p.stat(Player.S_APPS)]],
+		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%s em %d jogos" % [Fmt.dec(p.avg_rating(), 2), p.stat(Player.S_APPS)]],
 		["Mais minutos", func(p: Player) -> float: return p.stat(Player.S_MINUTES), func(p: Player) -> String: return "%d min" % p.stat(Player.S_MINUTES)],
 		["Craque do jogo", func(p: Player) -> float: return p.stat(Player.S_MOTM), func(p: Player) -> String: return "%dx" % p.stat(Player.S_MOTM)],
 		["Desarmes", func(p: Player) -> float: return p.stat(Player.S_TACKLES), func(p: Player) -> String: return "%d" % p.stat(Player.S_TACKLES)],

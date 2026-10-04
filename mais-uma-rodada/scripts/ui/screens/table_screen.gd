@@ -589,7 +589,7 @@ func _leader_board(w: GameWorld, title: String, stat: int, list: Array) -> Contr
 		var p: Player = list[i]
 		var club := w.club(p.club_id)
 		var mine := w.is_user_club(p.club_id)
-		var val := ("%.1f" % p.xg()) if stat == Player.S_XG else str(p.stats[stat])
+		var val := Fmt.dec(p.xg(), 1) if stat == Player.S_XG else str(p.stats[stat])
 		var row := UIKit.hbox(8)
 		if i == 0:
 			row.add_child(UIKit.crest(club, 40))
