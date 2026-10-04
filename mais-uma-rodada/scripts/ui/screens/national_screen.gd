@@ -626,7 +626,7 @@ func _my_squad(w: GameWorld, c: VBoxContainer) -> void:
 	hh.add_child(col)
 	head.add_child(hh)
 	var nxt := NationalTeamManager.next_window(w)
-	var note := "Sugestão da comissão técnica: toque em + e − para montar a sua." if not chosen else "Faltando gente, a comissão completa com os melhores disponíveis."
+	var note := "Sugestão da comissão técnica." if not chosen else "Faltando gente, a comissão completa com os melhores disponíveis."
 	if not nxt.is_empty():
 		note = "Vale para a data FIFA de %s (a lista sai uma semana antes). " % NationalTeamManager.window_label(w, nxt) + note
 	head.add_child(UIKit.label(note, "Small", true))

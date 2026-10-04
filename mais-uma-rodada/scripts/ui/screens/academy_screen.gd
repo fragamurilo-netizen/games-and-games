@@ -692,7 +692,7 @@ func _group_games(w: GameWorld, d: Dictionary) -> Control:
 				v.add_child(_score_row(w, g, false))
 				card.add_child(v)
 	if not any:
-		card.add_child(UIKit.label("Seu clube não disputa esta edição: acompanhe os grandes do continente.", "Muted", true))
+		card.add_child(UIKit.label("Seu clube não disputa esta edição.", "Muted", true))
 	return UIKit.card_panel(card)
 
 
@@ -766,7 +766,7 @@ func _honours(w: GameWorld) -> Control:
 		row.add_child(UIKit.label(String(h["r"]), "Small"))
 		card.add_child(row)
 	if hon.is_empty():
-		card.add_child(UIKit.label("As campanhas de destaque nas copas de base ficam registradas aqui.", "Muted", true))
+		card.add_child(UIKit.label("Nenhuma campanha de destaque ainda.", "Muted", true))
 	return UIKit.card_panel(card)
 
 

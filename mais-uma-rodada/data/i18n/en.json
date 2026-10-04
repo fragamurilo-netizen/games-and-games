@@ -10191,5 +10191,22 @@
 	"%d pts em %d jogo (%s) · %d:%d": "%d pts in %d game (%s) · %d:%d",
 	"%d jogo desde %d · %dV %dE %dD": "%d game since %d · %dW %dD %dL",
 	"%s (%d gol)": "%s (%d goal)",
-	"%d anos · %d jogo na carreira": "%d years · %d career game"
+	"%d anos · %d jogo na carreira": "%d years · %d career game",
+	"Sugestão da comissão técnica.": "Coaching staff's suggestion.",
+	"Nenhuma campanha de destaque ainda.": "No standout campaigns yet.",
+	"Seu clube não disputa esta edição.": "Your club is not in this edition.",
+	"Cores tradicionais do país.": "Traditional national colours.",
+	"Craque: %s": "Star: %s",
+	"Mais ajustes": "More adjustments",
+	"%d sem dono": "%d unmatched",
+	"%s, treinador do %s. %s lugares no %s, %s.": "%s, manager of %s. %s seats at %s, %s.",
+	"O %s não pode recusar a multa.": "%s cannot refuse the release clause.",
+	"Parcelado vale menos para o vendedor.": "Instalments are worth less to the seller.",
+	"Mais %s se ele fizer %d jogos em até %d anos.": "Another %s if he plays %d games within %d years.",
+	"Compra opcional por %s até o fim do empréstimo.": "Option to buy for %s until the loan ends.",
+	"Compra obrigatória por %s se ele fizer %d jogos.": "Obligation to buy for %s after %d games.",
+	"Pagos no fim da temporada. Para ele, valem uns %s/mês.": "Paid at the end of the season. Worth about %s/month to him.",
+	"Aceita ganhar menos. Cobra no fim da temporada se não for %s.": "Accepts less pay. Complains at season's end if not a %s.",
+	"Não acredita: há gente melhor na posição.": "He doesn't believe it: there are better players in his position.",
+	"Comissão menor, salário maior. Pela metade, o empresário pode travar o acordo.": "Lower commission, higher wage. At half, the agent may block the deal."
 }

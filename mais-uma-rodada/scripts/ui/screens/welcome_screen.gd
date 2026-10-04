@@ -57,7 +57,7 @@ func _hero(w: GameWorld, club: Club) -> Control:
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
 	stars.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(stars)
-	var intro := UIKit.label("%s, treinador do %s. %s lugares no %s, %s e uma história para honrar." % [
+	var intro := UIKit.label("%s, treinador do %s. %s lugares no %s, %s." % [
 		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true)
 	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(intro)

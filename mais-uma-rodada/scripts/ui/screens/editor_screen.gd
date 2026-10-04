@@ -1327,9 +1327,9 @@ func _mods_view(c: VBoxContainer) -> void:
 			if bool(m["enabled"]):
 				var miss := _misses(DropIns.report(id, _report_world()))
 				if miss > 0:
-					col.add_child(UIKit.colored("⚠ %d sem dono" % miss, UIColors.RED, "Small"))
+					col.add_child(UIKit.colored("%d sem dono" % miss, UIColors.RED, "Small"))
 		for pr in Mods.problems(id):
-			col.add_child(UIKit.colored("⚠ %s: %s" % [pr["file"], pr["msg"]], UIColors.RED, "Small", true))
+			col.add_child(UIKit.colored("%s: %s" % [pr["file"], pr["msg"]], UIColors.RED, "Small", true))
 		row.add_child(col)
 		if not cnt.is_empty():
 			row.add_child(UIKit.icon_button("info", func(): _pack_files_dialog(id, String(m["name"])), "Arquivos"))

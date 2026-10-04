@@ -619,7 +619,7 @@ func _teams(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	card.add_child(XIPitch.make(w, sel.get("ids", []), sel.get("rt", []), int(sel.get("best", -1))))
 	var best := w.player(int(sel.get("best", -1)))
 	if best != null:
-		card.add_child(UIKit.label("★ Craque: %s" % best.display_name(), "Small", true))
+		card.add_child(UIKit.label("Craque: %s" % best.display_name(), "Small", true))
 	c.add_child(UIKit.card_panel(card))
 
 

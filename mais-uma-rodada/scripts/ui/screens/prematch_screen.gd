@@ -149,7 +149,7 @@ func refresh() -> void:
 	right.add_child(_style_fit_label(w, sheet, st))
 	right.add_child(_fam_row("Entrosamento com o estilo", TacticsManager.style_fam(club, sheet.style)))
 	# Ajustes finos
-	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes: intensidade, linha, pressão", "GhostButton", func():
+	var more := UIKit.button(("▼ " if _extras_open else "▶ ") + "Mais ajustes", "GhostButton", func():
 		_extras_open = not _extras_open
 		refresh())
 	more.text = ("Esconder" if _extras_open else "Mostrar") + " ajustes: intensidade, linha, pressão"

@@ -233,7 +233,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var tags := UIKit.flow(8)
 	tags.add_child(UIKit.pill(p.playstyle().to_upper(), UIColors.BLUE, 16))
 	if p.signature != "":
-		tags.add_child(UIKit.pill("★ " + String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD, 16))
+		tags.add_child(UIKit.pill(String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD, 16))
 	for sp in p.specialties():
 		tags.add_child(UIKit.pill(String(sp).to_upper(), UIColors.GREEN, 16))
 	for t in p.traits:

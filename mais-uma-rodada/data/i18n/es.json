@@ -10191,5 +10191,22 @@
 	"%d pts em %d jogo (%s) · %d:%d": "%d pts en %d partido (%s) · %d:%d",
 	"%d jogo desde %d · %dV %dE %dD": "%d partido desde %d · %dV %dE %dD",
 	"%s (%d gol)": "%s (%d gol)",
-	"%d anos · %d jogo na carreira": "%d años · %d partido en su carrera"
+	"%d anos · %d jogo na carreira": "%d años · %d partido en su carrera",
+	"Sugestão da comissão técnica.": "Sugerencia del cuerpo técnico.",
+	"Nenhuma campanha de destaque ainda.": "Ninguna campaña destacada todavía.",
+	"Seu clube não disputa esta edição.": "Tu club no disputa esta edición.",
+	"Cores tradicionais do país.": "Colores tradicionales del país.",
+	"Craque: %s": "Figura: %s",
+	"Mais ajustes": "Más ajustes",
+	"%d sem dono": "%d sin dueño",
+	"%s, treinador do %s. %s lugares no %s, %s.": "%s, entrenador del %s. %s asientos en el %s, %s.",
+	"O %s não pode recusar a multa.": "El %s no puede rechazar la cláusula.",
+	"Parcelado vale menos para o vendedor.": "En cuotas vale menos para el vendedor.",
+	"Mais %s se ele fizer %d jogos em até %d anos.": "%s más si juega %d partidos en hasta %d años.",
+	"Compra opcional por %s até o fim do empréstimo.": "Opción de compra por %s hasta el fin de la cesión.",
+	"Compra obrigatória por %s se ele fizer %d jogos.": "Compra obligatoria por %s si juega %d partidos.",
+	"Pagos no fim da temporada. Para ele, valem uns %s/mês.": "Se pagan al final de la temporada. Para él valen unos %s/mes.",
+	"Aceita ganhar menos. Cobra no fim da temporada se não for %s.": "Acepta cobrar menos. Reclamará al final de la temporada si no es %s.",
+	"Não acredita: há gente melhor na posição.": "No se lo cree: hay mejores en su posición.",
+	"Comissão menor, salário maior. Pela metade, o empresário pode travar o acordo.": "Comisión menor, salario mayor. A la mitad, el agente puede bloquear el acuerdo."
 }
