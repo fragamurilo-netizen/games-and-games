@@ -150,44 +150,84 @@ static func _fill_table(w: GameWorld, club: Club, body: VBoxContainer) -> void:
 		body.add_child(UIKit.label("Sem registros desta temporada para este clube.", "Muted", true))
 		return
 	var current := _tbl_year == 0
+	# Colunas de largura fixa, números em fonte condensada alinhados à direita; o cabeçalho usa as
+	# mesmas margens das linhas para cada título ficar em cima da sua coluna. Zeros apagados.
+	var cols: Array = [["a", "J", 44], ["g", "G", 44], ["as", "A", 44], ["r", "NOTA", 64]]
+	if current:
+		cols.append(["m", "MIN", 70])
 	var head := UIKit.hbox(6)
 	var hn := UIKit.label("JOGADOR", "Caps")
 	hn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hn)
-	var cols := ["J", "G", "A", "NOTA"] + (["MIN"] if current else [])
-	for t in cols:
-		head.add_child(_cell(t, "Caps", 58 if t == "MIN" else 46))
-	body.add_child(head)
-	var tot := [0, 0, 0]
+	for col: Array in cols:
+		var hl := _cell(String(col[1]), "Caps", int(col[2]))
+		if String(col[0]) == key:
+			hl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		head.add_child(hl)
+	var tot := [0, 0, 0, 0]
+	var list: Array = [_plain_row(head)]
 	for r: Dictionary in rows:
 		tot[0] += int(r.get("a", 0))
 		tot[1] += int(r.get("g", 0))
 		tot[2] += int(r.get("as", 0))
+		tot[3] += maxi(0, int(r.get("m", 0)))
 		var h := UIKit.hbox(6)
 		h.add_child(UIKit.pos_badge(int(r.get("pos", 0))))
 		var nm := UIKit.label(String(r.get("n", "")), "")
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.custom_minimum_size.x = 40
+		if int(r.get("a", 0)) == 0:
+			nm.add_theme_color_override(&"font_color", UIColors.MUTED)
 		h.add_child(nm)
-		h.add_child(_cell(str(int(r.get("a", 0))), "", 46))
-		h.add_child(_cell(str(int(r.get("g", 0))), "H3" if int(r.get("g", 0)) > 0 else "", 46))
-		h.add_child(_cell(str(int(r.get("as", 0))), "", 46))
+		for k in ["a", "g", "as"]:
+			h.add_child(_num(int(r.get(k, 0)), 44, k == key))
 		var rt := float(r.get("r", 0.0))
-		var rl := _cell("%.2f" % rt if rt > 0.0 else "—", "", 46)
+		var rl := _cell("%.2f" % rt if rt > 0.0 else "—", "Mono", 64)
 		if rt >= 7.2:
 			rl.add_theme_color_override(&"font_color", UIColors.GREEN)
 		elif rt > 0.0 and rt < 6.3:
 			rl.add_theme_color_override(&"font_color", UIColors.RED)
+		elif rt <= 0.0:
+			rl.add_theme_color_override(&"font_color", UIColors.DIM)
 		h.add_child(rl)
 		if current:
-			h.add_child(_cell(str(int(r.get("m", 0))), "Small", 58))
+			var ml := _cell(Fmt.thousands(int(r.get("m", 0))) if int(r.get("m", 0)) > 0 else "—", "Mono", 70)
+			ml.add_theme_color_override(&"font_color", UIColors.MUTED if int(r.get("m", 0)) > 0 else UIColors.DIM)
+			h.add_child(ml)
 		var pid := int(r.get("id", -1))
 		if w.player(pid) != null:
-			body.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
+			list.append(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
 		else:
-			body.add_child(h)
-	body.add_child(UIKit.label("Total: %d jogos · %d gols · %d assistências (liga e copas)" % tot, "Small", true))
+			list.append(_plain_row(h))
+	# Total na mesma grade das colunas (liga e copas).
+	var th := UIKit.hbox(6)
+	var tl := UIKit.label("TOTAL", "Caps")
+	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	th.add_child(tl)
+	for i in 3:
+		th.add_child(_cell(str(tot[i]), "Mono", 44))
+	th.add_child(_cell("", "Mono", 64))
+	if current:
+		th.add_child(_cell(Fmt.thousands(tot[3]), "Mono", 70))
+	list.append(_plain_row(th))
+	body.add_child(UIKit.menu_group(list))
+
+
+static func _plain_row(inner: Control) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.add_child(inner)
+	return p
+
+
+## Número de uma coluna: zero apagado; a coluna da ordenação em destaque.
+static func _num(v: int, wdt: int, sorted: bool) -> Label:
+	var l := _cell(str(v), "Mono", wdt)
+	if v == 0:
+		l.add_theme_color_override(&"font_color", UIColors.DIM)
+	elif sorted:
+		l.add_theme_font_override(&"font", l.get_theme_font(&"font", &"StatBig"))
+	return l
 
 
 static func _cell(t: String, variation: String, wdt: int) -> Label:

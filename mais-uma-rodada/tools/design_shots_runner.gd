@@ -232,6 +232,11 @@ func _only_pass() -> void:
 		GameManager.play_instant()
 		await _frames(2)
 	UIManager.goto("hub")
+	# Avisos de conquista das rodadas simuladas não entram nas capturas (cobririam as telas).
+	w.pending_achievements.clear()
+	var banner := get_tree().root.get_node_or_null("AchievementBanner")
+	if banner != null:
+		banner.queue_free()
 	await _frames(6)
 	UIManager.close_all_modals()
 	for spec in only.split(","):
