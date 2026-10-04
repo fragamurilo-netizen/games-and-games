@@ -184,22 +184,9 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	band.add_child(where_pill)
 	UIKit.card_panel(card).free()
 	card = hero[2]
-	# Deitado (tela baixa e larga): times à esquerda, contexto e ações à direita, para o JOGAR
-	# caber sem rolar. Em pé, tudo empilhado.
-	var split := UILayout.is_landscape() and content_width() >= 900.0
-	var left := card
-	var right := card
-	if split:
-		var cols := UIKit.hbox(UITokens.S4)
-		left = UIKit.vbox(10)
-		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		left.size_flags_stretch_ratio = 1.15
-		right = UIKit.vbox(10)
-		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		right.alignment = BoxContainer.ALIGNMENT_END
-		cols.add_child(left)
-		cols.add_child(right)
-		card.add_child(cols)
+	# Tela baixa (celular deitado): escudos menores e o JOGAR na mesma fileira das outras ações,
+	# para tudo caber sem rolar.
+	var short := UILayout.is_short()
 	var row := UIKit.hbox(6)
 	row.add_child(_club_tap(w, _team_block(w, w.club(f.home), f), f.home))
 	var mid := UIKit.vbox(2)
@@ -210,35 +197,44 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 	mid.add_child(vs)
 	row.add_child(mid)
 	row.add_child(_club_tap(w, _team_block(w, w.club(f.away), f), f.away))
-	left.add_child(row)
+	card.add_child(row)
 	var stadium := UIKit.label(("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city]), "Small")
 	stadium.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	left.add_child(stadium)
+	card.add_child(stadium)
 	if derby:
 		var d := UIKit.label("CLÁSSICO", "H2")
 		d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		d.add_theme_color_override(&"font_color", UIColors.RED)
-		left.add_child(d)
+		card.add_child(d)
+	var shown := 0
 	for hk in StoryHooks.for_next_match(w):
 		if hk["kind"] == "derby":
 			continue
+		if short and shown >= 2:
+			break
+		shown += 1
 		var line := UIKit.hbox(10)
 		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 26, _hook_color(String(hk["kind"]))))
 		var t := UIKit.label(hk["text"], "", true)
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		line.add_child(t)
-		right.add_child(line)
+		card.add_child(line)
 	var play := UIKit.button("JOGAR", "PrimaryButton", func(): UIManager.push("prematch"), "play")
-	play.custom_minimum_size.y = 88 if split else 112
-	right.add_child(play)
+	play.custom_minimum_size.y = 76 if short else 112
 	var sub := UIKit.hbox(10)
+	if short:
+		play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		play.size_flags_stretch_ratio = 1.6
+		sub.add_child(play)
+	else:
+		card.add_child(play)
 	var lineup := UIKit.button("Escalação e tática", "GhostButton", func(): UIManager.push("prematch", {"edit": true}), "tactics")
 	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sub.add_child(lineup)
 	var quick := UIKit.button("Simular", "GhostButton", func(): SimDialog.open(func(): refresh()), "fast")
 	quick.tooltip_text = "Joga um ou vários jogos sem assistir"
 	sub.add_child(quick)
-	right.add_child(sub)
+	card.add_child(sub)
 	return hero[0]
 
 
