@@ -65,8 +65,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 	var weeks := FinanceManager.WEEKS * 0.5
 	var notable: Array = []
 	var drift := talent_drift(world)
-	var growth_f := clampf(1.0 - drift * 0.06, 0.55, 1.3) / weeks
-	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5) / weeks
+	var growth_f := clampf(1.0 - drift * 0.1, 0.5, 1.3) / weeks
+	var decline_f := clampf(1.0 + drift * 0.08, 0.75, 1.6) / weeks
 	var year := world.year
 	var clubs := world.clubs
 	var mentors := _mentor_bonus(world)
@@ -402,7 +402,7 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 	var rng := world.rng
 	var out := {"explosions": [], "busts": [], "late": [], "derail": []}
 	var full := FinanceManager.WEEKS * 90.0
-	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
+	var boost_chance := clampf(1.0 - talent_drift(world) * 0.2, 0.2, 1.0)
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
 		if age > 24:
@@ -440,7 +440,7 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 			if AwardManager.award_weight(k) >= 2:
 				up += 0.15
 				break
-		up *= boost_chance
+		up *= boost_chance * (1.0 if age <= 21 else 0.6) # depois dos 21 o teto já está quase definido
 		var roll := rng.randf()
 		if roll < up:
 			p.potential = bump_potential(rng, p.potential, rng.randi_range(1, 3))
@@ -465,12 +465,12 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 	return out
 
 
-## Sobe o teto `gain` pontos, cada vez mais difícil perto da elite: de 84 para cima metade dos
-## pontos "pega", de 88 para cima um terço e acima de 91 quase nenhum (fenômeno é fenômeno de
+## Sobe o teto `gain` pontos, cada vez mais difícil perto da elite: de 80 para cima 70% dos
+## pontos "pegam", de 84 para cima 40%, de 88 para cima 20% e acima de 91 quase nenhum (fenômeno é fenômeno de
 ## nascença; uma boa temporada não transforma um bom jogador em candidato à Bola de Ouro).
 static func bump_potential(rng: RandomNumberGenerator, pot: int, gain: int) -> int:
 	for _i in gain:
-		var ch := 1.0 if pot < 84 else (0.5 if pot < 88 else (0.3 if pot < 91 else 0.1))
+		var ch := 1.0 if pot < 80 else (0.7 if pot < 84 else (0.4 if pot < 88 else (0.2 if pot < 91 else 0.08)))
 		if rng.randf() < ch:
 			pot += 1
 	return mini(94, pot)

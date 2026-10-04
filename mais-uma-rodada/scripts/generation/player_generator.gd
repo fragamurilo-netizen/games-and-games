@@ -394,7 +394,7 @@ static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> i
 	# Acima de 85 cada ponto de potencial é mais raro (só os fenômenos passam de 90).
 	var pot := float(ovr) + gap
 	if pot > 85.0:
-		pot = 85.0 + (pot - 85.0) * 0.6
+		pot = 85.0 + (pot - 85.0) * 0.5
 	return clampi(int(round(pot)), ovr, 94)
 
 
@@ -418,7 +418,7 @@ static func intake_potential(rng: RandomNumberGenerator, ovr: int, age: int, you
 		gap += rng.randf_range(8.0, 16.0)
 	var pot := float(ovr) + maxf(3.0, gap)
 	if pot > 85.0:
-		pot = 85.0 + (pot - 85.0) * 0.6
+		pot = 85.0 + (pot - 85.0) * 0.5
 	return clampi(int(round(pot)), ovr + 3, 94)
 
 
@@ -545,7 +545,7 @@ static func soft_cap(target: float, ceiling: float) -> float:
 	var knee := ceiling - 5.0
 	if target <= knee:
 		return target
-	return knee + (target - knee) * 0.45
+	return knee + (target - knee) * 0.6
 
 
 ## Média do time titular provável (melhor goleiro + 10 melhores de linha).
