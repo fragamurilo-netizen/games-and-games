@@ -463,7 +463,7 @@ static func on_offer_received(world: GameWorld, o: TransferOffer) -> void:
 	if p == null or b == null:
 		return
 	send(world, "clube", "Proposta por %s" % p.display_name(),
-		"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo(s)." % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year), p.overall,
+		("O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo." if maxi(1, o.expires_day - world.current_turn() + 1) == 1 else "O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogos.") % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year), p.overall,
 			maxi(1, o.expires_day - world.current_turn() + 1)],
 		{"k": "offers"}, p.id, b.id, b.short_name)
 

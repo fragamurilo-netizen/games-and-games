@@ -636,7 +636,7 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 					{"t": "Manter", "hint": "Nada muda"}]}
 		"agent":
 			return {"title": "Empresário oferece %s" % pn, "def": 1,
-				"body": "Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d ano(s)." % [pn, p.age(world.year) if p != null else 0, Pos.NAMES[p.position] if p != null else "", Fmt.money(int(d.get("wage", 0))), int(d.get("years", 1))],
+				"body": ("Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d ano." if int(d.get("years", 1)) == 1 else "Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d anos.") % [pn, p.age(world.year) if p != null else 0, Pos.NAMES[p.position] if p != null else "", Fmt.money(int(d.get("wage", 0))), int(d.get("years", 1))],
 				"options": [
 					{"t": "Contratar", "hint": "Chega sem custo de transferência"},
 					{"t": "Dispensar", "hint": "Nada muda"}]}

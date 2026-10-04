@@ -569,7 +569,7 @@ static func _farewells(world: GameWorld, wk: int) -> void:
 		var crowd := mini(c.capacity, int(c.fan_base * world.rng.randf_range(0.5, 0.9)))
 		var body := "%s torcedores foram ao %s para o último jogo de %s, com ex-companheiros e amigos em campo. Foram %d jogos e %d gols na carreira%s." % [
 			Fmt.thousands(maxi(crowd, 1000)), c.stadium, name, int(e.get("a", 0)), int(e.get("g", 0)),
-			(", com %d título(s)" % int(e.get("t", 0))) if int(e.get("t", 0)) > 0 else ""]
+			((", com %d título" if int(e.get("t", 0)) == 1 else ", com %d títulos") % int(e.get("t", 0))) if int(e.get("t", 0)) > 0 else ""]
 		var pid := int(e.get("p", -1))
 		var n := NewsManager.post_raw(world, "Festa de despedida de %s lota o %s" % [name, c.stadium], body, c.id, pid if world.player(pid) != null else -1,
 			_imp(world, c), "despedida")

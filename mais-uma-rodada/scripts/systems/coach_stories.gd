@@ -126,7 +126,7 @@ static func labels(world: GameWorld, co: Dictionary) -> Array:
 	if int(t["t"]) >= 8:
 		out.append({"n": "Multicampeão", "d": "%d títulos na carreira." % int(t["t"])})
 	if best_len >= 5 and best_titles >= 1:
-		out.append({"n": "Ídolo do %s" % best_club, "d": "%d anos e %d título(s) no mesmo clube." % [best_len, best_titles]})
+		out.append({"n": "Ídolo do %s" % best_club, "d": ("%d anos e %d título no mesmo clube." if best_titles == 1 else "%d anos e %d títulos no mesmo clube.") % [best_len, best_titles]})
 	elif int(co.get("idol", -1)) >= 0 and world.club(int(co["idol"])) != null:
 		out.append({"n": "Cria do %s" % world.club(int(co["idol"])).short_name, "d": "Fez história lá como jogador."})
 	if cups >= 3:
@@ -272,7 +272,7 @@ static func _milestones(world: GameWorld, club: Club, co: Dictionary) -> void:
 			moment(world, co, "Chegou a %d jogos como técnico." % n, "marco")
 			if n >= 250:
 				_news(world, club, co, "%s chega a %d jogos como técnico" % [String(co["n"]), n],
-					"Na casamata do %s, %s alcançou a marca com %d vitórias e %d título(s) na carreira." % [club.short_name, String(co["n"]), int(t["w"]), int(t["t"])])
+					("Na casamata do %s, %s alcançou a marca com %d vitórias e %d título na carreira." if int(t["t"]) == 1 else "Na casamata do %s, %s alcançou a marca com %d vitórias e %d títulos na carreira.") % [club.short_name, String(co["n"]), int(t["w"]), int(t["t"])])
 	for n in MS_TITLES:
 		var key2 := "t%d" % n
 		if int(t["t"]) >= n and not ms.has(key2):

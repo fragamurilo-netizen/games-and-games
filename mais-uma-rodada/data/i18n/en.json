@@ -10213,5 +10213,21 @@
 	"%s encontrado": "%s found",
 	"%s marcados · %s sofridos": "%s scored · %s conceded",
 	"%d · média %s": "%d · average %s",
-	"%s em %d jogos": "%s in %d games"
+	"%s em %d jogos": "%s in %d games",
+	"%d anos e %d título no mesmo clube.": "%d years and %d title at the same club.",
+	"%d anos e %d títulos no mesmo clube.": "%d years and %d titles at the same club.",
+	"Na casamata do %s, %s alcançou a marca com %d vitórias e %d título na carreira.": "In the dugout at %s, %s reached the mark with %d wins and %d title in his career.",
+	"Na casamata do %s, %s alcançou a marca com %d vitórias e %d títulos na carreira.": "In the dugout at %s, %s reached the mark with %d wins and %d titles in his career.",
+	"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo.": "%s is offering %s for %s (%d years old, %d).\n\nThe offer stands for %d game.",
+	"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogos.": "%s is offering %s for %s (%d years old, %d).\n\nThe offer stands for %d games.",
+	"Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d título.": "At %d, %s hangs up the clipboard after %d jobs and %d title.",
+	"Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d títulos.": "At %d, %s hangs up the clipboard after %d jobs and %d titles.",
+	"Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d ano.": "An agent offers %s (%d years old, %s, free agent). He would sign for %s/month for %d year.",
+	"Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d anos.": "An agent offers %s (%d years old, %s, free agent). He would sign for %s/month for %d years.",
+	", com %d título": ", with %d title",
+	", com %d títulos": ", with %d titles",
+	"%d desconhecido: %s": "%d unknown: %s",
+	"%d desconhecidos: %s": "%d unknown: %s",
+	"%d linha ignorada": "%d line skipped",
+	"%d linhas ignoradas": "%d lines skipped"
 }

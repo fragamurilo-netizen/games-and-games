@@ -10213,5 +10213,21 @@
 	"%s encontrado": "%s encontrado",
 	"%s marcados · %s sofridos": "%s marcados · %s recibidos",
 	"%d · média %s": "%d · media %s",
-	"%s em %d jogos": "%s en %d partidos"
+	"%s em %d jogos": "%s en %d partidos",
+	"%d anos e %d título no mesmo clube.": "%d años y %d título en el mismo club.",
+	"%d anos e %d títulos no mesmo clube.": "%d años y %d títulos en el mismo club.",
+	"Na casamata do %s, %s alcançou a marca com %d vitórias e %d título na carreira.": "En el banco del %s, %s alcanzó la marca con %d victorias y %d título en su carrera.",
+	"Na casamata do %s, %s alcançou a marca com %d vitórias e %d títulos na carreira.": "En el banco del %s, %s alcanzó la marca con %d victorias y %d títulos en su carrera.",
+	"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo.": "El %s ofrece %s por %s (%d años, %d).\n\nLa oferta es válida por %d partido.",
+	"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogos.": "El %s ofrece %s por %s (%d años, %d).\n\nLa oferta es válida por %d partidos.",
+	"Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d título.": "A los %d años, %s cuelga la pizarra después de %d clubes y %d título.",
+	"Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d títulos.": "A los %d años, %s cuelga la pizarra después de %d clubes y %d títulos.",
+	"Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d ano.": "Un representante ofrece a %s (%d años, %s, sin club). Firmaría por %s/mes durante %d año.",
+	"Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d anos.": "Un representante ofrece a %s (%d años, %s, sin club). Firmaría por %s/mes durante %d años.",
+	", com %d título": ", con %d título",
+	", com %d títulos": ", con %d títulos",
+	"%d desconhecido: %s": "%d desconocido: %s",
+	"%d desconhecidos: %s": "%d desconocidos: %s",
+	"%d linha ignorada": "%d línea ignorada",
+	"%d linhas ignoradas": "%d líneas ignoradas"
 }
