@@ -56,6 +56,12 @@ static func _decimal(x: float, places: int) -> String:
 	return txt if I18n.lang == "en" else txt.replace(".", ",")
 
 
+## Número com casas fixas e a vírgula do idioma: dec(7.3, 2) → "7,30" (en: "7.30").
+static func dec(x: float, places: int) -> String:
+	var txt := ("%." + str(places) + "f") % x
+	return txt if I18n.lang == "en" else txt.replace(".", ",")
+
+
 ## Nota de partida sempre com uma casa: 7,0 / 6,4.
 static func rating(r: float) -> String:
 	return "%.1f" % r if I18n.lang == "en" else ("%.1f" % r).replace(".", ",")
@@ -106,7 +112,14 @@ static func minute(m: int, half: int = 0) -> String:
 
 
 static func plural(n: int, singular: String, plural_form: String) -> String:
-	return str(n) + " " + I18n.t(singular if n == 1 else plural_form)
+	return thousands(n) + " " + I18n.t(singular if n == 1 else plural_form)
+
+
+## Frase com número e concordância: n_of(1, "%d jogo restante", "%d jogos restantes") → "1 jogo restante".
+## Os dois moldes passam pela tradução antes do número entrar.
+static func n_of(n: int, one: String, many: String) -> String:
+	var molde := I18n.t(one if n == 1 else many)
+	return molde % n if molde.contains("%d") else molde
 
 
 ## Cor de destaque para um overall: escala contínua do ruim ao ótimo (vermelho → laranja →

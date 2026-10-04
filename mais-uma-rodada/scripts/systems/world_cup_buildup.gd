@@ -82,7 +82,7 @@ static func _status_line(world: GameWorld, id: String, y: int, code: String) -> 
 		for g in camp["groups"]:
 			if g["teams"].has(code):
 				var order := NationalTeamManager.sort_group(g)
-				return "%s é a %dª do grupo %s nas eliminatórias (%d vaga(s) para a confederação)." % [name, order.find(code) + 1, g["n"], int(camp["spots"])]
+				return ("%s é a %dª do grupo %s nas eliminatórias (%d vaga para a confederação)." if int(camp["spots"]) == 1 else "%s é a %dª do grupo %s nas eliminatórias (%d vagas para a confederação).") % [name, order.find(code) + 1, g["n"], int(camp["spots"])]
 	return "%s disputa a vaga pelo ranking." % name
 
 

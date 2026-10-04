@@ -233,7 +233,7 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var tags := UIKit.flow(8)
 	tags.add_child(UIKit.pill(p.playstyle().to_upper(), UIColors.BLUE, 16))
 	if p.signature != "":
-		tags.add_child(UIKit.pill("★ " + String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD, 16))
+		tags.add_child(UIKit.pill(String(Player.SIGNATURE_NAMES.get(p.signature, p.signature)).to_upper(), UIColors.GOLD, 16))
 	for sp in p.specialties():
 		tags.add_child(UIKit.pill(String(sp).to_upper(), UIColors.GREEN, 16))
 	for t in p.traits:
@@ -332,12 +332,12 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 	var cond_txt := "%d%%" % int(p.condition)
 	if p.injury_weeks > 0:
 		cond_txt = "Lesão"
-	grid.add_child(_tile(cond_txt, "físico" if p.injury_weeks == 0 else "%d semana(s)" % p.injury_weeks, UIColors.RED if p.injury_weeks > 0 else (UIColors.GREEN if p.condition >= 90 else UIColors.TEXT), p.condition / 100.0 if p.injury_weeks == 0 else -1.0))
+	grid.add_child(_tile(cond_txt, "físico" if p.injury_weeks == 0 else ("%d semana" if p.injury_weeks == 1 else "%d semanas") % p.injury_weeks, UIColors.RED if p.injury_weeks > 0 else (UIColors.GREEN if p.condition >= 90 else UIColors.TEXT), p.condition / 100.0 if p.injury_weeks == 0 else -1.0))
 	card.add_child(grid)
 	if p.injury_weeks > 0:
-		card.add_child(UIKit.colored("%s — volta em %d semana(s)." % [p.injury_name, p.injury_weeks], UIColors.RED, "Small"))
+		card.add_child(UIKit.colored(("%s — volta em %d semana." if p.injury_weeks == 1 else "%s — volta em %d semanas.") % [p.injury_name, p.injury_weeks], UIColors.RED, "Small"))
 	if p.suspension > 0:
-		card.add_child(UIKit.colored("Suspenso por %d jogo(s)." % p.suspension, UIColors.RED, "Small"))
+		card.add_child(UIKit.colored(("Suspenso por %d jogo." if p.suspension == 1 else "Suspenso por %d jogos.") % p.suspension, UIColors.RED, "Small"))
 	if p.retiring:
 		card.add_child(UIKit.colored("Anunciou que vai se aposentar ao fim da temporada.", UIColors.ACCENT, "Small"))
 	if p.transfer_listed:
@@ -355,12 +355,13 @@ func _tile(value: String, caption: String, color: Color = UIColors.TEXT, fill: f
 	var v := UIKit.card("CardFlat", 2)
 	var panel := UIKit.card_panel(v)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var l := UIKit.label(value, "H3")
-	l.add_theme_color_override(&"font_color", color)
+	# Mesmo desenho dos ladrilhos de número do resto do jogo: valor condensado, legenda em caixa alta.
+	var l := UIKit.label(value, "Stat")
+	l.add_theme_color_override(&"font_color", UIColors.ink(color))
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	l.custom_minimum_size.x = 40
 	v.add_child(l)
-	var c := UIKit.label(caption, "Small")
+	var c := UIKit.label(caption.to_upper(), "Caps")
 	# Legenda quebra em vez de cortar ("valor de mer...") quando o bloco fica estreito
 	c.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	c.custom_minimum_size.x = 40

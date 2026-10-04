@@ -1,7 +1,7 @@
 class_name AchievementBanner
 extends CanvasLayer
-## Aviso de conquista desbloqueada: desce do alto da tela com a medalha na cor do nível, o nome
-## e a descrição, fica alguns segundos e sobe. Mostra as pendentes uma por vez; tocar abre a
+## Aviso de conquista desbloqueada: sobe do pé da tela com a medalha na cor do nível, o nome
+## e a descrição, fica alguns segundos e desce. Mostra as pendentes uma por vez; tocar abre a
 ## tela de conquistas.
 
 const SHOW := 3.2
@@ -125,7 +125,12 @@ func _process(delta: float) -> void:
 	var enter := clampf(_t / 0.35, 0.0, 1.0)
 	var leave := clampf((_t - SHOW) / 0.35, 0.0, 1.0)
 	var k := (1.0 - pow(1.0 - enter, 3.0)) * (1.0 - leave * leave)
-	_panel.position = Vector2(vp.x * 0.5 - w * 0.5, lerpf(-_panel.size.y - 30.0, 48.0, k))
+	# Entra por baixo, na altura dos avisos (toasts): no alto cobria a barra do clube e o
+	# "Pular" das cerimônias.
+	var bottom := 170.0
+	if UIManager.main != null and UIManager.main.has_method("safe_margins"):
+		bottom += (UIManager.main.call("safe_margins") as Rect2).size.y
+	_panel.position = Vector2(vp.x * 0.5 - w * 0.5, lerpf(vp.y + 30.0, vp.y - bottom - _panel.size.y, k))
 	_medal.shine = fmod(_t, 2.0)
 	_medal.queue_redraw()
 	if _t >= SHOW + 0.35:

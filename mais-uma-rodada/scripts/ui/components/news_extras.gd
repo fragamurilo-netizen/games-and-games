@@ -178,7 +178,7 @@ static func _injury(w: GameWorld, n: NewsEvent, m: Dictionary) -> Control:
 	var p := w.player(int(m.get("player", -1)))
 	if p != null and n.year == w.year:
 		if p.injury_weeks > 0:
-			v.add_child(UIKit.label("Hoje: ainda faltam %d semana(s) de recuperação." % p.injury_weeks, "Small", true))
+			v.add_child(UIKit.label(("Hoje: ainda faltam %d semana de recuperação." if p.injury_weeks == 1 else "Hoje: ainda faltam %d semanas de recuperação.") % p.injury_weeks, "Small", true))
 		else:
 			v.add_child(UIKit.colored("Hoje: já está recuperado.", UIColors.GREEN, "Small", true))
 	return UIKit.card_panel(v)
@@ -307,7 +307,7 @@ static func _scorers(w: GameWorld, m: Dictionary) -> Control:
 	var v := _box("Artilharia")
 	for i in rows.size():
 		var r: Array = rows[i]
-		v.add_child(UIKit.kv("%d. %s · %s" % [i + 1, String(r[0]), _club_name(w, int(r[1]))], "%d gols" % int(r[2])))
+		v.add_child(UIKit.kv("%d. %s · %s" % [i + 1, String(r[0]), _club_name(w, int(r[1]))], Fmt.n_of(int(r[2]), "%d gol", "%d gols")))
 	return UIKit.card_panel(v)
 
 

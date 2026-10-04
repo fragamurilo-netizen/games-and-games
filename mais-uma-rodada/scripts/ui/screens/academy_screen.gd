@@ -164,7 +164,7 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 	head.add_child(xb)
 	v.add_child(head)
 	var yrs := YouthManager.years_in(w, p)
-	var line := "%s na base" % ["Chegou nesta temporada" if yrs == 0 else ("%d ano(s)" % yrs)]
+	var line := "%s na base" % ["Chegou nesta temporada" if yrs == 0 else (("%d ano" if yrs == 1 else "%d anos") % yrs)]
 	var pf := YouthManager.play_factor(w, p)
 	if pf < 0.95:
 		line += " · joga pouco"
@@ -692,7 +692,7 @@ func _group_games(w: GameWorld, d: Dictionary) -> Control:
 				v.add_child(_score_row(w, g, false))
 				card.add_child(v)
 	if not any:
-		card.add_child(UIKit.label("Seu clube não disputa esta edição: acompanhe os grandes do continente.", "Muted", true))
+		card.add_child(UIKit.label("Seu clube não disputa esta edição.", "Muted", true))
 	return UIKit.card_panel(card)
 
 
@@ -766,7 +766,7 @@ func _honours(w: GameWorld) -> Control:
 		row.add_child(UIKit.label(String(h["r"]), "Small"))
 		card.add_child(row)
 	if hon.is_empty():
-		card.add_child(UIKit.label("As campanhas de destaque nas copas de base ficam registradas aqui.", "Muted", true))
+		card.add_child(UIKit.label("Nenhuma campanha de destaque ainda.", "Muted", true))
 	return UIKit.card_panel(card)
 
 
@@ -816,7 +816,7 @@ func _facilities(w: GameWorld, club: Club) -> Control:
 	var wait := BoardRequests.wait_turns(w, "youth")
 	var lbl := "Pedir investimento (%s)" % Fmt.money(BoardRequests.cost_of(w, "youth"))
 	if wait > 0:
-		lbl = "Novo pedido em %d rodada(s)" % wait
+		lbl = ("Novo pedido em %d rodada" if wait == 1 else "Novo pedido em %d rodadas") % wait
 	var b := UIKit.button(lbl, "GhostButton", func():
 		UIManager.confirm("Levar o pedido ao presidente?", "O diretor de futebol leva o pedido de investimento na base. Custo: %s." % Fmt.money(BoardRequests.cost_of(w, "youth")), "Pedir", func():
 			var r := BoardRequests.request(w, "youth")

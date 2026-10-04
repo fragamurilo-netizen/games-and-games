@@ -353,7 +353,7 @@ static func _contracts_notice(world: GameWorld, club: Club) -> void:
 	if names.is_empty():
 		return
 	world.stats["inbox_contracts"] = world.year
-	send(world, "futebol", "%d contrato(s) terminam em %d" % [names.size(), world.year],
+	send(world, "futebol", ("%d contrato termina em %d" if names.size() == 1 else "%d contratos terminam em %d") % [names.size(), world.year],
 		"Estes jogadores ficam livres no fim da temporada: %s.\n\nQuem você quiser manter precisa renovar antes disso; os outros podem sair de graça." % ", ".join(names.slice(0, 8)) + (" e mais %d" % (names.size() - 8) if names.size() > 8 else ""),
 		{"k": "screen", "s": "squad", "args": {"sort": "contract"}})
 
@@ -431,7 +431,7 @@ static func on_event(world: GameWorld, ev: Dictionary) -> void:
 	if from == "jogador" and p != null:
 		name = p.display_name()
 	var left := maxi(1, int(ev["exp"]) - world.current_turn())
-	send(world, from, String(d["title"]), "%s\n\nResponda em até %d jogo(s)." % [String(d["body"]), left],
+	send(world, from, String(d["title"]), ("%s\n\nResponda em até %d jogo." if left == 1 else "%s\n\nResponda em até %d jogos.") % [String(d["body"]), left],
 		{"k": "event", "id": int(ev["id"])}, p.id if p != null else -1, -1, name)
 
 
@@ -463,7 +463,7 @@ static func on_offer_received(world: GameWorld, o: TransferOffer) -> void:
 	if p == null or b == null:
 		return
 	send(world, "clube", "Proposta por %s" % p.display_name(),
-		"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo(s)." % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year), p.overall,
+		("O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo." if maxi(1, o.expires_day - world.current_turn() + 1) == 1 else "O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogos.") % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year), p.overall,
 			maxi(1, o.expires_day - world.current_turn() + 1)],
 		{"k": "offers"}, p.id, b.id, b.short_name)
 
@@ -473,7 +473,7 @@ static func on_injury(world: GameWorld, p: Player) -> void:
 		return
 	var sev := "Nada grave" if p.injury_weeks <= 1 else ("Vai desfalcar por algumas semanas" if p.injury_weeks <= 4 else "Lesão séria")
 	send(world, "medico", "%s: %s" % [p.display_name(), p.injury_name if p.injury_name != "" else "lesão"],
-		"%s. %s deve ficar fora por %d semana(s).\n\nJá começamos o tratamento." % [sev, p.display_name(), p.injury_weeks],
+		("%s. %s deve ficar fora por %d semana.\n\nJá começamos o tratamento." if p.injury_weeks == 1 else "%s. %s deve ficar fora por %d semanas.\n\nJá começamos o tratamento.") % [sev, p.display_name(), p.injury_weeks],
 		{"k": "player", "id": p.id}, p.id)
 
 

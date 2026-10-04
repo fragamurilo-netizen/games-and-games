@@ -178,7 +178,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 				icon = "news"
 		card.add_child(UIKit.menu_row(icon, text, "", func(): TalkDialog.open(kind, target, on_done), UIKit.pill("AGORA", UIColors.ORANGE, 14)))
 	if always:
-		var b := UIKit.button("Vestiário, diretoria, torcida e imprensa", "GhostButton", func(): UIManager.push("relations"), "heart")
+		var b := UIKit.button("Abrir bastidores", "GhostButton", func(): UIManager.push("relations"), "heart")
 		card.add_child(b)
 	return UIKit.card_panel(card)
 
@@ -392,7 +392,7 @@ func _board(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	card.add_child(UIKit.kv("Meta da temporada", String(SeasonManager.goal_of(w, club.id)[0])))
 	var grace := int(People.data(w).get("grace", -1))
 	if grace >= w.current_turn():
-		card.add_child(UIKit.colored("Prazo: %d jogo(s)" % (grace - w.current_turn()), UIColors.GREEN, "Small", true))
+		card.add_child(UIKit.colored(("Prazo: %d jogo" if (grace - w.current_turn()) == 1 else "Prazo: %d jogos") % (grace - w.current_turn()), UIColors.GREEN, "Small", true))
 	elif conf < BoardManager.ULTIMATUM:
 		var ult := UIKit.pill("ULTIMATO", UIColors.RED, 14)
 		ult.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN

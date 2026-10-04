@@ -480,7 +480,7 @@ func _quals(w: GameWorld, c: VBoxContainer) -> void:
 	var camp: Dictionary = camps[_camp]
 	var info := UIKit.card("CardHighlight", 6)
 	info.add_child(UIKit.label("%s %d" % [camp["name"], int(camp["y"])], "H2"))
-	info.add_child(UIKit.label("Rodada %d de %d · %d vaga(s)%s" % [int(camp["md"]), int(camp["mdt"]), int(camp["spots"]), " · encerrada" if bool(camp["done"]) else ""], "Small"))
+	info.add_child(UIKit.label(("Rodada %d de %d · %d vaga%s" if int(camp["spots"]) == 1 else "Rodada %d de %d · %d vagas%s") % [int(camp["md"]), int(camp["mdt"]), int(camp["spots"]), " · encerrada" if bool(camp["done"]) else ""], "Small"))
 	if bool(camp["done"]):
 		info.add_child(UIKit.label("Classificados: %s" % ", ".join((camp["q"] as Array).map(func(x): return DatabaseManager.nation_name(x))), "", true))
 	c.add_child(UIKit.card_panel(info))
@@ -521,7 +521,7 @@ func _ranking(w: GameWorld) -> Control:
 		h.add_child(n)
 		var titles := NationalTeamManager.titles_of(w, code).size()
 		if titles > 0:
-			h.add_child(UIKit.pill("%d título(s)" % titles, UIColors.ACCENT, 14))
+			h.add_child(UIKit.pill(("%d título" if titles == 1 else "%d títulos") % titles, UIColors.ACCENT, 14))
 		var pts := UIKit.label(str(int(round(float(r[i][1])))), "H3")
 		pts.custom_minimum_size.x = 70
 		pts.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -626,7 +626,7 @@ func _my_squad(w: GameWorld, c: VBoxContainer) -> void:
 	hh.add_child(col)
 	head.add_child(hh)
 	var nxt := NationalTeamManager.next_window(w)
-	var note := "Sugestão da comissão técnica: toque em + e − para montar a sua." if not chosen else "Faltando gente, a comissão completa com os melhores disponíveis."
+	var note := "Sugestão da comissão técnica." if not chosen else "Faltando gente, a comissão completa com os melhores disponíveis."
 	if not nxt.is_empty():
 		note = "Vale para a data FIFA de %s (a lista sai uma semana antes). " % NationalTeamManager.window_label(w, nxt) + note
 	head.add_child(UIKit.label(note, "Small", true))

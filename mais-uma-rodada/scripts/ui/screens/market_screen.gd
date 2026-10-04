@@ -300,7 +300,7 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 		_:
 			list = _top(list, func(e: Array) -> float: return float(e[3]), true)
 			list.sort_custom(func(a, b): return float(a[3]) > float(b[3]))
-	results.add_child(UIKit.label("%s encontrados" % Fmt.plural(total, "jogador", "jogadores"), "Small", true))
+	results.add_child(UIKit.label(("%s encontrado" if total == 1 else "%s encontrados") % Fmt.plural(total, "jogador", "jogadores"), "Small", true))
 	if _row_cols > 0 and not list.is_empty():
 		results.add_child(PlayerRowView.stat_header("market", _row_cols))
 	for i in mini(MAX_ROWS, list.size()):

@@ -346,7 +346,7 @@ static func _title_decided(world: GameWorld, m: Dictionary, league: League, cham
 	if world.has_user() and (league.id == world.user_league_id() or world.is_user_club(champ)):
 		var c := world.club(champ)
 		var hp := world.player(hero)
-		var body := "O %s garantiu o título da %s%s." % [c.short_name, league.name, (" com %d rodada(s) de antecedência" % left) if left > 0 else ""]
+		var body := "O %s garantiu o título da %s%s." % [c.short_name, league.name, ((" com %d rodada de antecedência" if left == 1 else " com %d rodadas de antecedência") % left) if left > 0 else ""]
 		if hp != null:
 			body += " O gol do título foi de %s, contra o %s." % [hp.display_name(), _club_name(world, opp)]
 		NewsManager.post_raw(world, "%s é campeão da %s" % [c.short_name, league.short_name], body, champ, hero,
@@ -637,7 +637,7 @@ static func opponents_of(world: GameWorld, club_id: int, limit: int = 10) -> Arr
 
 ## Texto curto: "12 jogos · 5V 3E 4D · 18 x 15".
 static func h2h_line(h: Dictionary) -> String:
-	return "%d jogo(s) · %dV %dE %dD · gols %d x %d" % [int(h["games"]), int(h["wins"]), int(h["draws"]), int(h["losses"]), int(h["gf"]), int(h["ga"])]
+	return ("%d jogo · %dV %dE %dD · gols %d x %d" if int(h["games"]) == 1 else "%d jogos · %dV %dE %dD · gols %d x %d") % [int(h["games"]), int(h["wins"]), int(h["draws"]), int(h["losses"]), int(h["gf"]), int(h["ga"])]
 
 
 ## Maiores artilheiros e jogadores com mais jogos pelo clube (em atividade e lendas aposentadas):

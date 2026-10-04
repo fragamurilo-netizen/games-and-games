@@ -87,7 +87,7 @@ static func needs(world: GameWorld, club: Club) -> Array:
 			reasons.append("titular %d, média da liga %d" % [int(level), int(round(avg))])
 			prio += gap
 		if mine.size() < n + 1:
-			reasons.append("só %d jogador(es) para a vaga" % mine.size())
+			reasons.append(("só %d jogador para a vaga" if mine.size() == 1 else "só %d jogadores para a vaga") % mine.size())
 			prio += 4.0 * (n + 1 - mine.size())
 		elif mine.size() > n and float(mine[n]) < level - 8.0:
 			reasons.append("reserva muito abaixo do titular (%d)" % int(mine[n]))

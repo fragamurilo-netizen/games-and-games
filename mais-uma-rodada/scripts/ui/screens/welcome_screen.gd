@@ -57,7 +57,7 @@ func _hero(w: GameWorld, club: Club) -> Control:
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
 	stars.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(stars)
-	var intro := UIKit.label("%s, treinador do %s. %s lugares no %s, %s e uma história para honrar." % [
+	var intro := UIKit.label("%s, treinador do %s. %s lugares no %s, %s." % [
 		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true)
 	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(intro)
@@ -167,7 +167,7 @@ func _squad(w: GameWorld, club: Club) -> Control:
 		card.add_child(_player_line(w, club, young, "%d anos · %s" % [young.age(w.year), Player.potential_label(young.potential_estimate(0.8))]))
 	if vet != null:
 		card.add_child(UIKit.label("A voz da experiência", "Caps"))
-		card.add_child(_player_line(w, club, vet, "%d anos · %d jogos na carreira" % [vet.age(w.year), vet.career_apps]))
+		card.add_child(_player_line(w, club, vet, ("%d anos · %d jogo na carreira" if vet.career_apps == 1 else "%d anos · %d jogos na carreira") % [vet.age(w.year), vet.career_apps]))
 	var needs := TransferManager.squad_needs(w, club)
 	if not needs.is_empty():
 		var weak: Array = []

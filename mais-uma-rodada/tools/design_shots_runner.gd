@@ -232,6 +232,11 @@ func _only_pass() -> void:
 		GameManager.play_instant()
 		await _frames(2)
 	UIManager.goto("hub")
+	# Avisos de conquista das rodadas simuladas não entram nas capturas (cobririam as telas).
+	w.pending_achievements.clear()
+	var banner := get_tree().root.get_node_or_null("AchievementBanner")
+	if banner != null:
+		banner.queue_free()
 	await _frames(6)
 	UIManager.close_all_modals()
 	for spec in only.split(","):
@@ -311,6 +316,18 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 			EventDialog.open(evs[0])
 		"sim":
 			SimDialog.open(func(): pass)
+		"simdone", "simdone3":
+			SimDialog.start(SimDialog.MODE_GAMES, 3 if kind == "simdone3" else 1, func(): pass)
+			var until := Time.get_ticks_msec() + 60000
+			while Time.get_ticks_msec() < until:
+				await _frames(4)
+				var done := false
+				for n in get_tree().root.find_children("*", "", true, false):
+					if n is SimDialog and not bool(n.get("_running")):
+						done = true
+				if done:
+					break
+			await _frames(6)
 		"tutorial":
 			Tutorial.show_all()
 		"buy":
