@@ -61,6 +61,8 @@ A ordem combinada:
    - Legibilidade, estados de hover e cores de destaque, a tela de números, paisagem e tablet.
    - Tirar a cara de "jogo feito às pressas por IA": nada de textos-propaganda cheios de superlativos e emojis, telas amontoadas ou visual genérico. O visual deve ser coerente e caprichado.
    - O jogo pode ficar maior em tamanho, isso não é problema.
+   - Feito numa primeira passada: aviso de conquista no pé da tela (não cobre mais a barra nem o "Pular"), fim do "Simular" sem vão, plurais certos (`Fmt.n_of`, sem "jogo(s)"), menos microcopy na negociação, seleção e base, anel de foco nos botões, menu ☰ sempre na cor do clube do técnico, quadro de líderes em grade na aba Números, tabela do elenco com colunas alinhadas, recorte e ordem do elenco numa fileira, menu inicial em lista e início deitado compacto. Capturas em `/mnt/project-files/interface-2026-09-29/antes` e `depois` (prefixos `f_`, `fl_` claro, `fland_` deitado, `ftab_` tablet).
+   - Falta: varrer os textos explicativos que sobraram (tutorial, editor, regras de copa na base), os "(s)" das notícias geradas e as outras telas de estatística (perfil > Números, seleções).
 4. Mais eventos no jogo, mais cabelos e barbas e mais estatísticas.
 
 ## Decisões pendentes com o dono
