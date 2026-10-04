@@ -1029,6 +1029,7 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 		card.add_child(UIKit.label("Ninguém marcou ainda nesta temporada.", "Muted"))
 	var rank := 0
 	var last_v := -1
+	var rows: Array = []
 	for i in list.size():
 		var p: Player = list[i]
 		var v: int = p.stats[stat]
@@ -1036,7 +1037,9 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 			rank = i + 1
 			last_v = v
 		var apps: int = p.stats[Player.S_APPS]
-		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(apps, "jogo", "jogos")]))
+		rows.append(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(apps, "jogo", "jogos")]))
+	if not rows.is_empty():
+		card.add_child(TableRows.ranking_list(rows))
 	c.add_child(UIKit.card_panel(card))
 
 
@@ -1325,6 +1328,7 @@ func _cup_scorers(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 		card.add_child(UIKit.label("Ninguém marcou ainda.", "Muted"))
 	var rank := 0
 	var last_v := -1
+	var rows: Array = []
 	for i in list.size():
 		var p: Player = list[i]
 		var st: PackedInt32Array = p.cup_stats[cup.id]
@@ -1332,7 +1336,9 @@ func _cup_scorers(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 		if v != last_v:
 			rank = i + 1
 			last_v = v
-		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(st[Player.C_APPS], "jogo", "jogos")]))
+		rows.append(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(st[Player.C_APPS], "jogo", "jogos")]))
+	if not rows.is_empty():
+		card.add_child(TableRows.ranking_list(rows))
 	c.add_child(UIKit.card_panel(card))
 
 

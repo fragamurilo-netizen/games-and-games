@@ -47,22 +47,20 @@ func _summary_card(w: GameWorld, club: Club, squad: Array) -> Control:
 		cond += p.condition
 		mor += p.morale
 	var n := maxf(1.0, squad.size())
+	# Tamanho e idade já estão no subtítulo da barra: aqui só o que muda de rodada a rodada.
 	var r1 := UIKit.hbox(4)
-	r1.add_child(UIKit.stat(str(squad.size()), "jogadores"))
-	r1.add_child(UIKit.stat(Fmt._decimal(ages / n, 1), "idade média"))
 	r1.add_child(UIKit.stat(str(int(round(xi))), "força titular", UIColors.ACCENT))
-	card.add_child(r1)
-	var r2 := UIKit.hbox(4)
-	r2.add_child(UIKit.stat(str(foreign), "estrangeiros"))
-	r2.add_child(UIKit.stat(str(home), "crias da casa", UIColors.GREEN))
-	r2.add_child(UIKit.stat("%d%%" % int(round(cond / n)), "condição", UIColors.GREEN if cond / n >= 85.0 else UIColors.ORANGE))
-	r2.add_child(UIKit.stat(UIColors.morale_label(mor / n), "moral"))
-	card.add_child(r2)
+	r1.add_child(UIKit.stat("%d%%" % int(round(cond / n)), "condição", UIColors.GREEN if cond / n >= 85.0 else UIColors.ORANGE))
+	r1.add_child(UIKit.stat(UIColors.morale_label(mor / n), "moral", UIColors.morale_color(mor / n)))
 	var rule := SquadRules.describe(club)
 	if rule != "":
+		# Com regra de estrangeiros na liga: quantos estão entre os relacionados, do limite.
 		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
 		var lim := int(SquadRules.limit(club)["max"])
-		card.add_child(UIKit.colored("%s: %d/%d" % [rule, used, lim], UIColors.ORANGE if used > lim else UIColors.MUTED, "Small", true))
+		r1.add_child(UIKit.stat("%d/%d" % [used, lim], "estrangeiros", UIColors.ORANGE if used > lim else UIColors.TEXT))
+	else:
+		r1.add_child(UIKit.stat(str(foreign), "estrangeiros"))
+	card.add_child(r1)
 	# Alertas viram atalhos para o recorte da lista.
 	var alerts := UIKit.hbox(8)
 	if hurt > 0:
@@ -178,15 +176,16 @@ func refresh() -> void:
 		_filter = int(key)
 		refresh())
 	c.add_child(frow)
-	c.add_child(UIKit.scroll_tabs(QUICK, _quick, func(k: String):
+	# Recorte e ordem numa fileira só, cada um abrindo a sua lista (antes eram duas barras de
+	# abas rolando para o lado, uma em cima da outra).
+	var picks := UIKit.hbox(8)
+	picks.add_child(_picker("Mostrar", "list", QUICK, _quick, func(k: String):
 		_quick = k
 		refresh()))
-	var sitems: Array = []
-	for so in SORTS:
-		sitems.append([so[0], "↓ " + String(so[1])])
-	c.add_child(UIKit.scroll_tabs(sitems, _sort, func(k: String):
+	picks.add_child(_picker("Ordenar", "down", SORTS, _sort, func(k: String):
 		_sort = k
 		refresh()))
+	c.add_child(picks)
 	var list: Array = []
 	for p in squad:
 		if (_filter == 0 or Pos.group(p.position) == _filter - 1) and _passes_quick(w, p):
@@ -237,6 +236,28 @@ func refresh() -> void:
 		for p: Player in out:
 			var pid := p.id
 			c.add_child(PlayerRowView.make(w, p, {"mode": "market"}, func(): UIManager.push("player", {"id": pid})))
+
+
+## Botão "Rótulo: escolha atual" que abre as opções numa folha.
+func _picker(caption: String, icon_name: String, items: Array, selected: String, cb: Callable) -> Button:
+	var cur := ""
+	for it: Array in items:
+		if String(it[0]) == selected:
+			cur = tr(String(it[1]))
+	var b := UIKit.button("%s: %s" % [tr(caption), cur], "GhostButton", func():
+		var v := UIKit.vbox(12)
+		v.add_child(UIKit.label(caption, "Title"))
+		v.add_child(UIKit.option_grid(items, selected, func(k: String):
+			UIManager.close_modal()
+			cb.call(k), 2))
+		UIManager.show_modal(v, true), icon_name)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.clip_text = true
+	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if selected != String(items[0][0]):
+		for st in [&"font_color", &"font_hover_color", &"icon_normal_color", &"icon_hover_color"]:
+			b.add_theme_color_override(st, UIColors.ACCENT)
+	return b
 
 
 ## Profundidade: os três melhores por posição e onde falta gente boa.
