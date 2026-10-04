@@ -88,7 +88,19 @@ func _button_states(th: Theme, name: String, normal: StyleBox, hover: StyleBox, 
 	th.set_stylebox(&"pressed", name, pressed)
 	th.set_stylebox(&"hover_pressed", name, pressed)
 	th.set_stylebox(&"disabled", name, disabled)
-	th.set_stylebox(&"focus", name, StyleBoxEmpty.new())
+	# Foco (teclado, controle, TV): anel na cor de destaque por fora do botão. O toque e o mouse
+	# não mostram o foco (gui/common/show_focus_state_on_pointer_event no padrão).
+	var ring := StyleBoxFlat.new()
+	ring.draw_center = false
+	ring.border_color = UIColors.ACCENT
+	ring.set_border_width_all(3)
+	var rad := 0
+	if normal is StyleBoxFlat:
+		rad = (normal as StyleBoxFlat).corner_radius_top_left
+	ring.set_corner_radius_all(rad + 3 if rad > 0 else 4)
+	ring.set_expand_margin_all(3.0)
+	ring.anti_aliasing = true
+	th.set_stylebox(&"focus", name, ring)
 
 
 func _button_colors(th: Theme, name: String, fg: Color, pressed_fg: Color) -> void:

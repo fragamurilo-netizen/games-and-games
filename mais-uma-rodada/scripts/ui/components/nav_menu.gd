@@ -23,7 +23,11 @@ static func open() -> void:
 	if w == null or not w.has_user():
 		return
 	var cid := w.user_club_id
+	# O menu é do técnico: sempre nas cores do clube dele, mesmo aberto sobre uma tabela (cor da
+	# liga) ou sobre a tela de outro clube. Ao fechar, a tela de baixo volta às cores dela.
+	UIColors.apply_colors_for(w.user_club())
 	var v := UIKit.vbox(10)
+	v.tree_exited.connect(_restore_colors)
 	var head := UIKit.hbox(8)
 	var t := UIKit.label("Menu", "Title")
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -84,6 +88,15 @@ static func open() -> void:
 	]
 	v.add_child(_grid(game_row, game_row.size()))
 	UIManager.show_modal(v, true)
+
+
+static func _restore_colors() -> void:
+	var cur := UIManager.current()
+	if cur == null or not GameManager.has_career():
+		return
+	UIColors.apply_context(GameManager.user_club(), cur.color_context())
+	if UIManager.main != null:
+		UIManager.main.restyle()
 
 
 static func _tab_name(tab: String) -> String:
