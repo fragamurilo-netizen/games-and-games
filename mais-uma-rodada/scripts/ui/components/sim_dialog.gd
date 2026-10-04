@@ -192,7 +192,7 @@ func _after_step(report: Dictionary) -> void:
 	if uf != null:
 		_results.append(uf)
 		_list.add_child(_result_row(w, uf))
-	_status.text = "%d jogo(s) · %s" % [_results.size(), w.season.date_label(w.season.day, false)]
+	_status.text = Fmt.n_of(_results.size(), "%d jogo", "%d jogos") + " · " + w.season.date_label(w.season.day, false)
 	_bar.value = _progress(w)
 	_new_events.append_array(report.get("events", []))
 	if _stop_reason != "":
@@ -254,26 +254,35 @@ func _finish() -> void:
 			_:
 				losses += 1
 	add_child(UIKit.label("Simulação concluída", "Title"))
-	add_child(UIKit.label(_stop_reason, "H3", true))
+	var sub := Fmt.n_of(_results.size(), "%d jogo", "%d jogos") + " · " + w.season.date_label(w.season.day, false)
+	if _stop_reason != "" and _stop_reason != "Pronto.":
+		sub = _stop_reason + "  ·  " + sub
+	var sub_l := UIKit.label(sub, "Muted", true)
+	add_child(sub_l)
 	var stats := UIKit.hbox(4)
-	stats.add_child(UIKit.stat(str(wins), "vitórias", UIColors.GREEN))
-	stats.add_child(UIKit.stat(str(draws), "empates"))
-	stats.add_child(UIKit.stat(str(losses), "derrotas", UIColors.RED))
+	stats.add_child(UIKit.stat(str(wins), "vitória" if wins == 1 else "vitórias", UIColors.GREEN))
+	stats.add_child(UIKit.stat(str(draws), "empate" if draws == 1 else "empates"))
+	stats.add_child(UIKit.stat(str(losses), "derrota" if losses == 1 else "derrotas", UIColors.RED))
 	var league := w.league_of(w.user_club_id)
 	if league != null and not w.season.finished and int(league.table[w.user_club_id]["pl"]) > 0:
 		var pos := CompetitionManager.position_of(league, w.user_club_id)
 		var arrow := "" if _pos_before == 0 or pos == _pos_before else (" ▲" if pos < _pos_before else " ▼")
 		stats.add_child(UIKit.stat("%dº%s" % [pos, arrow], "na liga"))
 	add_child(stats)
-	var sc := ScrollContainer.new()
-	sc.custom_minimum_size.y = 300
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	var list := UIKit.vbox(6)
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for f: Fixture in _results:
-		list.add_child(_result_row(w, f))
-	sc.add_child(list)
-	add_child(sc)
+	if not _results.is_empty():
+		var list := UIKit.vbox(6)
+		list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for f: Fixture in _results:
+			list.add_child(_result_row(w, f))
+		# A lista só ocupa o que precisa: com poucos jogos, a caixa fixa de 300 px deixava um vão.
+		if _results.size() > 6:
+			var sc := ScrollContainer.new()
+			sc.custom_minimum_size.y = 300
+			sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+			sc.add_child(list)
+			add_child(sc)
+		else:
+			add_child(list)
 	var pending := EventManager.pending(w)
 	if not pending.is_empty():
 		var ev: Dictionary = pending[0]

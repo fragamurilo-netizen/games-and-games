@@ -311,6 +311,18 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 			EventDialog.open(evs[0])
 		"sim":
 			SimDialog.open(func(): pass)
+		"simdone", "simdone3":
+			SimDialog.start(SimDialog.MODE_GAMES, 3 if kind == "simdone3" else 1, func(): pass)
+			var until := Time.get_ticks_msec() + 60000
+			while Time.get_ticks_msec() < until:
+				await _frames(4)
+				var done := false
+				for n in get_tree().root.find_children("*", "", true, false):
+					if n is SimDialog and not bool(n.get("_running")):
+						done = true
+				if done:
+					break
+			await _frames(6)
 		"tutorial":
 			Tutorial.show_all()
 		"buy":

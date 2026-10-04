@@ -109,6 +109,13 @@ static func plural(n: int, singular: String, plural_form: String) -> String:
 	return str(n) + " " + I18n.t(singular if n == 1 else plural_form)
 
 
+## Frase com número e concordância: n_of(1, "%d jogo restante", "%d jogos restantes") → "1 jogo restante".
+## Os dois moldes passam pela tradução antes do número entrar.
+static func n_of(n: int, one: String, many: String) -> String:
+	var molde := I18n.t(one if n == 1 else many)
+	return molde % n if molde.contains("%d") else molde
+
+
 ## Cor de destaque para um overall: escala contínua do ruim ao ótimo (vermelho → laranja →
 ## amarelo → verde-claro → verde → esmeralda). Verde é sempre melhor que amarelo.
 static func rating_color(ovr: int) -> Color:
