@@ -545,7 +545,7 @@ static func soft_cap(target: float, ceiling: float) -> float:
 	var knee := ceiling - 5.0
 	if target <= knee:
 		return target
-	return knee + (target - knee) * 0.6
+	return knee + (target - knee) * 0.75
 
 
 ## Média do time titular provável (melhor goleiro + 10 melhores de linha).
