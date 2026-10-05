@@ -60,6 +60,15 @@ Pedido do Gregory: perder um título no agregado (Inter x Grêmio) saía com pó
 - Feitos do jogo (`ManagerFeats`) não dão bônus a quem ganhou o jogo e caiu. Técnicos da IA também sentem a final perdida.
 - O motor de partida não mudou.
 
+## Repercussão de mata-mata (05/10)
+
+Pedido do Gregory: perder um título no agregado (Inter x Grêmio) saía com pós-jogo "positivo" porque tudo olhava só o placar do dia.
+
+- `scripts/systems/tie_stakes.gd` (`TieStakes.of`) diz se o jogo decidiu um confronto (jogo único ou volta, copa ou playoff de liga): vencedor pelo agregado e pênaltis, se era final, se valia taça ou acesso, e o peso (1 = final com título).
+- Com isso, no jogo decisivo vale o confronto: torcida e diretoria (`BoardManager.after_tie`), apoio e reputação do técnico, coluna de jornal (`People._tie_column`), coletiva (`PressRoom._tie_question`), manchete (`NewsManager._tie_news`) e eventos. Ganhar a volta e perder a taça agora é derrota, e mais pesada no clássico.
+- Feitos do jogo (`ManagerFeats`) não dão bônus a quem ganhou o jogo e caiu. Técnicos da IA também sentem a final perdida.
+- O motor de partida não mudou.
+
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:
