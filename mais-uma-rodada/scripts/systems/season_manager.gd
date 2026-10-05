@@ -71,7 +71,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 			if not first_w:
 				sat += 7
 			first_w = false
-			out.append({"t": t.trim_suffix("@"), "d": sat})
+			out.append({"t": t.trim_suffix("@"), "d": sat, "we": true})
 			continue
 		if t == "W":
 			if not first_w:
@@ -433,6 +433,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var s := world.season
 	var slot := s.day
 	var weekend := s.is_weekend(slot)
+	var state_weekend := not weekend and s.is_state_weekend(slot)
 	var report := {"day": slot, "user": {}, "transfers": [], "retiring": [], "window_opened": false, "window_closed": false, "cups": []}
 	var user_pos_before := 0
 	if world.has_user():
@@ -441,7 +442,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			user_pos_before = CompetitionManager.position_of(ul, world.user_club_id)
 	var was_open := world.transfer_window_open()
 	# Lesões antigas avançam uma semana (a cada fim de semana) antes de registrar as novas.
-	if weekend:
+	if weekend or state_weekend:
 		for p: Player in world.players.values():
 			if p.injury_weeks > 0:
 				p.injury_weeks -= 1
@@ -524,6 +525,11 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			for p: Player in world.players.values():
 				Valuation.update_value(p, world.year)
 		tt = _time("valores", tt)
+	elif state_weekend:
+		# Janeiro a março do calendário de ano civil: os fins de semana são dos estaduais, mas é
+		# justamente quando a janela principal da América do Sul está aberta.
+		report["transfers"] = TransferManager.process_matchday(world)
+		tt = _time("mercado", tt)
 	# Veteranos anunciam aposentadoria
 	if s.is_retire_slot(slot):
 		var ann := PlayerDevelopment.announce_retirements(world)

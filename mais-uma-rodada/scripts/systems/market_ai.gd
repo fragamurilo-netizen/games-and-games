@@ -119,7 +119,7 @@ static func matchday(world: GameWorld) -> Array:
 	var st := _state(world, window)
 	st["rumors"] = 0
 	var deadline := window and _is_deadline(world)
-	var summer := window and world.current_day() < 10
+	var wi := window_index(world)
 	if window:
 		done.append_array(_resume_talks(world, st, deadline))
 	var order := _ai_clubs(world)
@@ -131,6 +131,7 @@ static func matchday(world: GameWorld) -> Array:
 		var key := str(c.id)
 		var left := int(st["left"].get(key, 0))
 		var urgent := _has_urgent_need(world, c)
+		var summer := window and is_main_window(world, c, wi)
 		var act := 0.0
 		if not window:
 			act = 0.1 if urgent else 0.0
@@ -193,18 +194,41 @@ static func _state(world: GameWorld, window: bool) -> Dictionary:
 			st = {"w": -1, "left": {}}
 			world.stats["mkt"] = st
 		return st
-	var wid := world.year * 100 + (0 if world.current_day() < 10 else 1)
+	var wi := window_index(world)
+	var wid := world.year * 100 + wi
 	if int(st.get("w", -1)) != wid:
 		st = {"w": wid, "left": {}, "talks": []}
 		world.stats["mkt"] = st
-		_plan_window(world, st, world.current_day() < 10)
+		_plan_window(world, st, wi)
 	return st
 
 
-static func _plan_window(world: GameWorld, st: Dictionary, summer: bool) -> void:
+## Qual janela está aberta: 0 = a primeira da temporada, 1 = a do meio (-1 = fechada).
+static func window_index(world: GameWorld) -> int:
+	if world.season == null:
+		return -1
+	var ws := world.season.window_ranges()
+	for i in ws.size():
+		if world.current_day() >= int(ws[i][0]) and world.current_day() <= int(ws[i][1]):
+			return i
+	return -1
+
+
+## A janela aberta é a grande do clube? Cada clube monta o elenco na pré-temporada da própria liga:
+## na América do Sul (ano civil) é a de janeiro, na Europa a de julho e agosto, seja qual for o
+## calendário da carreira. Na outra janela o clube só faz remendos e repõe quem vendeu.
+static func is_main_window(world: GameWorld, c: Club, wi: int) -> bool:
+	if wi < 0:
+		return false
+	var own := String(c.league_cfg().get("calendar", ""))
+	return (wi == 0) == (own == SeasonManager.calendar_kind(world))
+
+
+static func _plan_window(world: GameWorld, st: Dictionary, wi: int) -> void:
 	for c: Club in world.clubs:
 		if world.is_user_club(c.id):
 			continue
+		var summer := is_main_window(world, c, wi)
 		var needs := TransferManager.squad_needs(world, c)
 		var pw := power(c)
 		var n := 0
