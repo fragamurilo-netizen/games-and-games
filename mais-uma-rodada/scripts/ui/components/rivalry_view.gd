@@ -32,7 +32,7 @@ static func record_text(w: GameWorld, cid: int, other: int) -> String:
 	var r := Rivalry.record_for(w, cid, other)
 	if int(r["g"]) == 0:
 		return "Ainda sem confrontos no save"
-	return "%d jogos desde %d · %dV %dE %dD" % [int(r["g"]), int(r["since"]), int(r["w"]), int(r["d"]), int(r["l"])]
+	return ("%d jogo desde %d · %dV %dE %dD" if int(r["g"]) == 1 else "%d jogos desde %d · %dV %dE %dD") % [int(r["g"]), int(r["since"]), int(r["w"]), int(r["d"]), int(r["l"])]
 
 
 ## Bloco da prévia: termômetro, retrospecto e o último capítulo. Vazio se não houver rixa.

@@ -160,7 +160,7 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 	var v := UIKit.vbox(6)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	var cr := UIKit.crest(cl, 112)
+	var cr := UIKit.crest(cl, 88 if UILayout.is_short() else 112)
 	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(cr)
 	var n := UIKit.label(cl.short_name, "H2")
@@ -353,7 +353,7 @@ func _decisions_card(w: GameWorld) -> Control:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(d["title"]), "H3", true))
 		var left := maxi(1, int(ev["exp"]) - w.current_turn())
-		col.add_child(UIKit.label("Responda em até %d jogo(s)" % left, "Small"))
+		col.add_child(UIKit.label(("Responda em até %d jogo" if left == 1 else "Responda em até %d jogos") % left, "Small"))
 		row.add_child(col)
 		row.add_child(UIKit.label("›", "H2"))
 		var e: Dictionary = ev
@@ -377,8 +377,8 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["book", "História", "Campeões e prêmios", func(): UIManager.push("history")],
 		["globe", "Seleções", _nt_line(w), func(): UIManager.push("national")],
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
-		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
-		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
+		["mail", "Mensagens", ("%d não lida" if InboxManager.unread_count(w) == 1 else "%d não lidas") % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
+		["news", "Notícias", ("%d nova" if w.unread_news_count() == 1 else "%d novas") % w.unread_news_count(), func(): UIManager.push("news")],
 		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club(), w)) + " seguidores", func(): UIManager.push("social")],
 		["trophy", "Conquistas", "%d de %d" % [Achievements.unlocked(w).size(), Achievements.CATALOG.size()], func(): UIManager.push("achievements")],
 	]
@@ -561,7 +561,7 @@ static func _nt_line(w: GameWorld) -> String:
 	if code != "":
 		return "Técnico: %s · %dº" % [DatabaseManager.nation_name(code), NationalTeamManager.rank_of(w, code)]
 	if not NationalCoach.offers(w).is_empty():
-		return "%d convite(s) de seleção" % NationalCoach.offers(w).size()
+		return ("%d convite de seleção" if NationalCoach.offers(w).size() == 1 else "%d convites de seleção") % NationalCoach.offers(w).size()
 	return "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())]
 
 
@@ -573,7 +573,7 @@ func _fifa_alert(w: GameWorld, club: Club) -> Array:
 		for p in w.squad(club):
 			if p.intl_duty:
 				away += 1
-		return ["globe", UIColors.ACCENT, "Data FIFA até %s: %d jogador(es) a serviço da seleção" % [NationalTeamManager.day_label(w, int(active["to"])), away],
+		return ["globe", UIColors.ACCENT, ("Data FIFA até %s: %d jogador a serviço da seleção" if away == 1 else "Data FIFA até %s: %d jogadores a serviço da seleção") % [NationalTeamManager.day_label(w, int(active["to"])), away],
 			func(): UIManager.push("national")]
 	var nxt := NationalTeamManager.next_window(w)
 	if nxt.is_empty() or w.season == null:
@@ -596,7 +596,7 @@ func _fifa_alert(w: GameWorld, club: Club) -> Array:
 	for p in w.squad(club):
 		if (src.get(p.nationality, []) as Array).has(p.id):
 			n += 1
-	return ["globe", UIColors.ACCENT, "Data FIFA de %s: %d %s do elenco" % [NationalTeamManager.window_label(w, nxt), n, "convocado(s)" if d.has("next") else "provável(is) convocado(s)"],
+	return ["globe", UIColors.ACCENT, "Data FIFA de %s: %d %s do elenco" % [NationalTeamManager.window_label(w, nxt), n, ("convocado" if n == 1 else "convocados") if d.has("next") else ("provável convocado" if n == 1 else "prováveis convocados")],
 		func(): UIManager.push("national")]
 
 
@@ -622,7 +622,7 @@ func _alerts_items(w: GameWorld, club: Club) -> Array:
 			items.append(["shirt", UIColors.ACCENT, "Apresente os uniformes de %d" % w.year, func(): UIManager.push("kit", {"launch": true})])
 	var offers := TransferManager.pending_offers(w)
 	if not offers.is_empty():
-		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
+		items.append(["swap", UIColors.ACCENT, ("%d proposta pelo seu elenco" if offers.size() == 1 else "%d propostas pelo seu elenco") % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
 	if w.transfer_window_open():
 		items.append(["swap", UIColors.GREEN, "Janela de transferências aberta até %s" % w.season.date_label(w.window_end_day(), false), func(): UIManager.goto("market")])
 	var fifa := _fifa_alert(w, club)
@@ -641,9 +641,9 @@ func _alerts_items(w: GameWorld, club: Club) -> Array:
 	if not injured.is_empty():
 		items.append(["cross", UIColors.RED, "Lesionados: " + ", ".join(injured.slice(0, 3)) + (" e mais %d" % (injured.size() - 3) if injured.size() > 3 else ""), func(): UIManager.goto("squad")])
 	if not suspended.is_empty():
-		items.append(["card", UIColors.ORANGE, "Suspenso(s) no próximo jogo: " + ", ".join(suspended), func(): UIManager.goto("squad")])
+		items.append(["card", UIColors.ORANGE, ("Suspenso no próximo jogo: " if suspended.size() == 1 else "Suspensos no próximo jogo: ") + ", ".join(suspended), func(): UIManager.goto("squad")])
 	if expiring > 0 and w.season.day >= 14:
-		items.append(["clock", UIColors.ORANGE, "%d contrato(s) terminam no fim da temporada — renove quem você quer manter" % expiring, func(): UIManager.goto("squad", {"sort": "contract"})])
+		items.append(["clock", UIColors.ORANGE, ("%d contrato termina no fim da temporada" if expiring == 1 else "%d contratos terminam no fim da temporada") % expiring, func(): UIManager.goto("squad", {"sort": "contract"})])
 	var rules := DatabaseManager.squad_rules()
 	if club.player_ids.size() < int(rules["min_players"]):
 		items.append(["shirt", UIColors.RED, "Elenco curto: só %d jogadores" % club.player_ids.size(), func(): UIManager.goto("market")])
@@ -665,7 +665,7 @@ func _inbox_card(w: GameWorld) -> Control:
 	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(sec)
 	if unread > 0:
-		head.add_child(UIKit.colored("%d não lida(s)" % unread, UIColors.ACCENT, "Small"))
+		head.add_child(UIKit.colored(("%d não lida" if unread == 1 else "%d não lidas") % unread, UIColors.ACCENT, "Small"))
 	card.add_child(head)
 	var items: Array = w.inbox.duplicate()
 	items.reverse()

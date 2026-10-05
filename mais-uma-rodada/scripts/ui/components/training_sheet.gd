@@ -74,7 +74,7 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer, mode: String = 
 		var rate := TrainingManager.position_rate(w, club, p, learning)
 		var weeks := int(ceil((1.0 - pprog) / maxf(0.001, rate)))
 		plan.add_child(UIKit.gap(UITokens.S1))
-		plan.add_child(_progress(pprog, "%d%%, cerca de %d semana(s)" % [int(pprog * 100.0), weeks]))
+		plan.add_child(_progress(pprog, ("%d%%, cerca de %d semana" if weeks == 1 else "%d%%, cerca de %d semanas") % [int(pprog * 100.0), weeks]))
 	body.add_child(plan)
 
 

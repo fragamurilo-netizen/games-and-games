@@ -740,6 +740,16 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 		h.add_child(b)
 		if b.button_pressed:
 			sel = b
+	# O filete de baixo segue até a borda mesmo quando as abas não ocupam a largura toda.
+	h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var tail := Button.new()
+	tail.theme_type_variation = "TabButton"
+	tail.disabled = true
+	tail.focus_mode = Control.FOCUS_NONE
+	tail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tail.custom_minimum_size = Vector2(0, UITokens.H_TAB)
+	h.add_child(tail)
 	sc.add_child(h)
 	if sel != null:
 		# A aba ativa fica visível mesmo quando está no fim da lista.

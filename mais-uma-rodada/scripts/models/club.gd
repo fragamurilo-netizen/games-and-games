@@ -105,6 +105,10 @@ var streak_wins: int = 0
 var streak_winless: int = 0
 var streak_losses: int = 0
 var results: String = "" # "VEDDV..." resultados recentes (mais recente no fim)
+## Recordes em jogos oficiais desde o início do save: ws/us/cr = maior sequência de vitórias, invicta
+## e sem sofrer gol [n, ano]; bw/bl = maior vitória e maior derrota [gols pró, contra, adversário, ano];
+## csr = sequência atual sem sofrer gol (entre temporadas).
+var marks: Dictionary = {}
 
 # Controle da IA: quando a formação foi escolhida (salvo para o jogo seguir idêntico após carregar)
 var ai_formation_key: int = -1
@@ -204,6 +208,27 @@ func push_result(r: String) -> void:
 			streak_losses += 1
 
 
+## Atualiza os recordes depois de um jogo oficial (push_result já foi chamado).
+func record_match(gf: int, ga: int, opp: String, year: int) -> void:
+	if streak_wins > int((marks.get("ws", [0, 0]) as Array)[0]):
+		marks["ws"] = [streak_wins, year]
+	if streak_unbeaten > int((marks.get("us", [0, 0]) as Array)[0]):
+		marks["us"] = [streak_unbeaten, year]
+	var run := int(marks.get("csr", 0)) + 1 if ga == 0 else 0
+	marks["csr"] = run
+	if run > int((marks.get("cr", [0, 0]) as Array)[0]):
+		marks["cr"] = [run, year]
+	var m := gf - ga
+	if m > 0:
+		var bw: Array = marks.get("bw", [])
+		if bw.is_empty() or m > int(bw[0]) - int(bw[1]) or (m == int(bw[0]) - int(bw[1]) and gf > int(bw[0])):
+			marks["bw"] = [gf, ga, opp, year]
+	elif m < 0:
+		var bl: Array = marks.get("bl", [])
+		if bl.is_empty() or -m > int(bl[1]) - int(bl[0]) or (-m == int(bl[1]) - int(bl[0]) and ga > int(bl[1])):
+			marks["bl"] = [gf, ga, opp, year]
+
+
 func reset_season_state() -> void:
 	ledger = {}
 	streak_unbeaten = 0
@@ -247,7 +272,7 @@ func to_dict() -> Dictionary:
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
 		"rk": rank_hist, "rkp": rank_prev, "sqa": squad_archive,
-		"xh": xi_hist, "trh": tr_hist,
+		"xh": xi_hist, "trh": tr_hist, "mk": marks,
 	}
 
 
@@ -321,4 +346,5 @@ static func from_dict(d: Dictionary) -> Club:
 	c.squad_archive = d.get("sqa", {})
 	c.xi_hist = d.get("xh", {})
 	c.tr_hist = Array(d.get("trh", []))
+	c.marks = Dictionary(d.get("mk", {}))
 	return c

@@ -65,8 +65,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 	var weeks := FinanceManager.WEEKS * 0.5
 	var notable: Array = []
 	var drift := talent_drift(world)
-	var growth_f := clampf(1.0 - drift * 0.06, 0.55, 1.3) / weeks
-	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5) / weeks
+	var growth_f := clampf(1.0 - drift * 0.1, 0.5, 1.3) / weeks
+	var decline_f := clampf(1.0 + drift * 0.08, 0.75, 1.6) / weeks
 	var year := world.year
 	var clubs := world.clubs
 	var mentors := _mentor_bonus(world)
@@ -125,7 +125,7 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				var mins: int = minutes.get(p.id, 0)
 				load_f = 1.08 if mins >= 80 else (0.95 if mins == 0 else 1.0)
 			# Real (Transfermarkt/FC): ~-1 por ano logo depois do auge, -2 aos 33-34, -3 perto dos 36
-			var expected := (8.0 + (age - dstart) * 5.5) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
+			var expected := (9.5 + (age - dstart) * 6.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
 			while expected > 0.0:
 				if rng.randf() < minf(1.0, expected):
 					apply_decline(rng, p)
@@ -402,7 +402,7 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 	var rng := world.rng
 	var out := {"explosions": [], "busts": [], "late": [], "derail": [], "rise": [], "fall": []}
 	var full := FinanceManager.WEEKS * 90.0
-	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
+	var boost_chance := clampf(1.0 - talent_drift(world) * 0.2, 0.2, 1.0)
 	# Nota média de cada elenco (quem jogou de verdade): a fase compara o jogador com o próprio time.
 	var team_avg := {}
 	for p: Player in world.players.values():
@@ -416,6 +416,7 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 		if age > 24:
 			_late_turns(world, p, age, p.minutes_season / full, out)
 			_career_arc(world, p, age, p.minutes_season / full, out, float(team_avg.get(p.club_id, 6.75)))
+			_settle_potential(p, age)
 			continue
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
@@ -447,10 +448,10 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 			if AwardManager.award_weight(k) >= 2:
 				up += 0.15
 				break
-		up *= boost_chance
+		up *= boost_chance * (1.0 if age <= 21 else 0.6) # depois dos 21 o teto já está quase definido
 		var roll := rng.randf()
 		if roll < up:
-			p.potential = mini(94, p.potential + rng.randi_range(1, 3))
+			p.potential = bump_potential(rng, p.potential, rng.randi_range(1, 3))
 		elif roll < up + down:
 			p.potential = maxi(p.overall, p.potential - rng.randi_range(1, 3))
 		if rng.randf() < 0.025:
@@ -471,6 +472,27 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 			_derail(world, p, age, share, out)
 		_career_arc(world, p, age, share, out, float(team_avg.get(p.club_id, 6.75)))
 	return out
+
+
+## Sobe o teto `gain` pontos, cada vez mais difícil perto da elite: de 80 para cima 70% dos
+## pontos "pegam", de 84 para cima 40%, de 88 para cima 20% e acima de 91 quase nenhum (fenômeno é fenômeno de
+## nascença; uma boa temporada não transforma um bom jogador em candidato à Bola de Ouro).
+static func bump_potential(rng: RandomNumberGenerator, pot: int, gain: int) -> int:
+	for _i in gain:
+		var ch := 1.0 if pot < 80 else (0.7 if pot < 84 else (0.4 if pot < 88 else (0.2 if pot < 91 else 0.08)))
+		if rng.randf() < ch:
+			pot += 1
+	return mini(94, pot)
+
+
+## Depois do auge o teto é o que ele já é: veterano não tem "potencial" acima do overall (senão
+## a tela mostra um trintão em queda com 8 pontos para crescer). Perto do auge, no máximo 2.
+static func _settle_potential(p: Player, age: int) -> void:
+	var dstart := int(CURVES[p.dev_curve][1]) + (3 if p.position == Pos.GK else 0)
+	if age >= dstart:
+		p.potential = p.overall
+	elif age >= 28:
+		p.potential = clampi(p.potential, p.overall, p.overall + 2)
 
 
 ## Florescimento tardio (o caso Vardy): depois dos 24, quem joga muito e bem pode ainda subir de

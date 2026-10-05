@@ -337,7 +337,7 @@ func _evolution(w: GameWorld, club: Club) -> Array:
 		if TrainingManager.trend(p) <= -0.1 and down.size() < 5:
 			down.append(p)
 	var out: Array = []
-	out.append(_trend_block(w, "Em alta", tr("Últimas %d semana(s)") % weeks, up, "Ninguém subiu de forma clara."))
+	out.append(_trend_block(w, "Em alta", ("Última semana" if weeks == 1 else "Últimas %d semanas") % weeks, up, "Ninguém subiu de forma clara."))
 	out.append(_trend_block(w, "Em queda", "", down, "Ninguém caiu."))
 	out.append(_changes_block(w, squad))
 	return out

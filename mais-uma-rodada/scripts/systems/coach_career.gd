@@ -608,7 +608,7 @@ static func retire_free(world: GameWorld, r: RandomNumberGenerator) -> void:
 		if age >= 72 or (age >= 64 and r.randf() < 0.2) or (idle >= 4 and float(co.get("rep", 40.0)) < 40.0 and r.randf() < 0.4):
 			if float(co.get("rep", 0.0)) >= 60.0 and world.has_user() and String(co.get("nat", "")) == world.user_club().nation:
 				NewsManager.post_raw(world, "%s encerra a carreira de técnico" % String(co["n"]),
-					"Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d título(s)." % [age, String(co["n"]), totals(co)["clubs"], totals(co)["t"]],
+					("Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d título." if int(totals(co)["t"]) == 1 else "Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d títulos.") % [age, String(co["n"]), totals(co)["clubs"], totals(co)["t"]],
 					-1, -1, NewsEvent.IMP_NORMAL, "tecnicos")
 			continue
 		keep.append(co)

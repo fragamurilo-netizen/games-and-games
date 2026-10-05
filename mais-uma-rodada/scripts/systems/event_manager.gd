@@ -46,6 +46,22 @@ const KINDS := {
 	"training_star": {"w": 0.7, "icon": "star", "color": "GREEN"},
 	"academy_path": {"w": 0.55, "icon": "star", "color": "GREEN"},
 	"media_leak": {"w": 0.45, "icon": "news", "color": "RED"},
+	# Segundo lote (EventPack)
+	"rush_back": {"w": 0.6, "icon": "cross", "color": "RED"},
+	"renewal_standoff": {"w": 0.6, "icon": "money", "color": "ORANGE"},
+	"tapping_up": {"w": 0.45, "icon": "swap", "color": "RED"},
+	"rival_jab": {"w": 0.9, "icon": "news", "color": "BLUE"},
+	"board_cut": {"w": 0.5, "icon": "money", "color": "RED"},
+	"board_meeting": {"w": 0.8, "icon": "shield", "color": "ORANGE"},
+	"fans_ct": {"w": 0.7, "icon": "heart", "color": "RED"},
+	"idol_farewell": {"w": 0.6, "icon": "star", "color": "GREEN"},
+	"loan_request": {"w": 0.55, "icon": "swap", "color": "BLUE"},
+	"agent_fee": {"w": 0.35, "icon": "search", "color": "ORANGE"},
+	"documentary": {"w": 0.25, "icon": "news", "color": "BLUE"},
+	"sack_rumor": {"w": 0.6, "icon": "news", "color": "RED"},
+	"fatigue": {"w": 0.55, "icon": "cross", "color": "ORANGE"},
+	"win_bonus": {"w": 0.45, "icon": "money", "color": "BLUE"},
+	"own_doctor": {"w": 0.4, "icon": "cross", "color": "ORANGE"},
 }
 ## Ligas que pagam acima do mercado (propostas "irrecusáveis").
 const RICH_NATIONS := ["KSA", "QAT", "UAE"]
@@ -74,6 +90,7 @@ static func after_user_turn(world: GameWorld, result: String) -> Array:
 	_check_promises(world, turn, result)
 	_expire(world, turn)
 	_random_happenings(world)
+	EventPack.after_turn(world, turn, result)
 	AmbientStorytelling.after_user_turn(world, result)
 	if world.events.size() >= MAX_PENDING:
 		return out
@@ -114,6 +131,8 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 		return {}
 	var turn := world.current_turn()
 	var ev := {"k": k, "p": -1, "p2": -1, "d": {}}
+	if EventPack.handles(k):
+		return EventPack.build(world, k, ev)
 	match k:
 		"raise":
 			var best: Player = null
@@ -463,6 +482,8 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 	var p2: Player = world.player(int(ev.get("p2", -1)))
 	var d: Dictionary = ev.get("d", {})
 	var pn := p.display_name() if p != null else "O jogador"
+	if EventPack.handles(String(ev["k"])):
+		return EventPack.describe(world, ev)
 	match String(ev["k"]):
 		"raise":
 			return {"title": "%s quer aumento" % pn, "def": 2,
@@ -636,7 +657,7 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 					{"t": "Manter", "hint": "Nada muda"}]}
 		"agent":
 			return {"title": "Empresário oferece %s" % pn, "def": 1,
-				"body": "Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d ano(s)." % [pn, p.age(world.year) if p != null else 0, Pos.NAMES[p.position] if p != null else "", Fmt.money(int(d.get("wage", 0))), int(d.get("years", 1))],
+				"body": ("Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d ano." if int(d.get("years", 1)) == 1 else "Um empresário oferece %s (%d anos, %s, sem clube). Ele assinaria por %s/mês por %d anos.") % [pn, p.age(world.year) if p != null else 0, Pos.NAMES[p.position] if p != null else "", Fmt.money(int(d.get("wage", 0))), int(d.get("years", 1))],
 				"options": [
 					{"t": "Contratar", "hint": "Chega sem custo de transferência"},
 					{"t": "Dispensar", "hint": "Nada muda"}]}
@@ -721,6 +742,8 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 	var d: Dictionary = ev.get("d", {})
 	var turn := world.current_turn()
 	var msg := ""
+	if EventPack.handles(String(ev["k"])):
+		return EventPack.resolve(world, ev, opt)
 	match String(ev["k"]):
 		"raise":
 			if p == null or p.club_id != club.id:
@@ -929,7 +952,7 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 						if q.injury_weeks == 0:
 							q.injury_name = ""
 						n += 1
-				msg = "Tratamento intensivo para %d jogador(es)." % n
+				msg = ("Tratamento intensivo para %d jogador." if n == 1 else "Tratamento intensivo para %d jogadores.") % n
 			else:
 				msg = "Tratamento normal mantido."
 		"friendly":

@@ -22,7 +22,7 @@ static func open(ev: Dictionary, on_done: Callable = Callable()) -> void:
 	var left := int(ev["exp"]) - w.current_turn()
 	var eb := UIKit.hbox(8)
 	eb.add_child(UIKit.eyebrow("Decisão", color_of(ev)))
-	eb.add_child(UIKit.pill(I18n.t("%d jogo(s) para responder") % maxi(1, left), UIColors.ORANGE if left <= 1 else UIColors.MUTED, 14))
+	eb.add_child(UIKit.pill(I18n.t(("%d jogo para responder" if maxi(1, left) == 1 else "%d jogos para responder")) % maxi(1, left), UIColors.ORANGE if left <= 1 else UIColors.MUTED, 14))
 	hc.add_child(eb)
 	hc.add_child(UIKit.label(String(desc["title"]), "Title", true))
 	head.add_child(hc)

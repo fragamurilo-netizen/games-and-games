@@ -1,20 +1,5 @@
 # Continuar daqui (atualizado em 05/10/2026)
 
-## Atenção: há duas linhas do jogo (05/10)
-
-- `claude/youthful-newton-hey7og` (e este ramo, `claude/posicoes-escalacao-hbrnjt`, que parte dele): a UI 2.0, versão 1.0.0. É a que o dono e o Gregory estão jogando no celular (os prints de 02/10 são dela).
-- `claude/project-thread-nzso8z`: versão 0.4.0 com o motor realista, base, negociações, eventos e estatísticas de 04 e 05/10. Ela não tem a UI 2.0, e a UI 2.0 não tem esse conteúdo. As duas se separaram em 29/09 (`2b8f81b`) e ainda precisam ser juntadas.
-
-### Posições da escalação (05/10, ramo `claude/posicoes-escalacao-hbrnjt`)
-
-- Mover posições não empilha mais ninguém. Antes, virar o centroavante em ponta-direita punha o jogador exatamente em cima do ponta que já existia. Agora `DatabaseManager._spread_custom` espaça as posições repetidas na mesma linha e afasta as vagas que se encostam.
-- Na partida, companheiros ficam a pelo menos 4,2 m e adversários a 2,6 m (`PitchMotion.SEP_MATE` e `SEP_RIVAL`). Em barreira, escanteio e comemoração continua 1,3 m. Numa simulação de 6000 quadros, os pares de companheiros a menos de 3 m caíram de 639 para 107.
-- No pré-jogo, o banco cabe acima de velocidade e Iniciar partida (`_fit_pitch`).
-- Na partida, a narração tem altura mínima e não some mais atrás da barra quando há gols no placar. A tarja do gol fica por cima do campo, e Pausar, o ritmo e Mais ganharam nome como os outros botões.
-- Para conferir: `design_shots -- --only=!lineup` (ou `!lineup=C:4-4-2|9=AM`).
-- APK: `builds/MaisUmaRodada-1.0.0-posicoes-2026-10-05.apk` (mesmo certificado, instala por cima).
-
-
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
 ## Onde está o jogo
@@ -66,23 +51,33 @@ Os testes completos (`tests/run_tests.gd`) passam de 30 minutos, por isso rode s
   - O técnico de seleção vem pelo mercado de técnicos (`scripts/systems/national_coach.gd`): vagas, candidaturas e escolha pela reputação. Não dá para escolher seleção no início da carreira.
   - O calendário europeu agora começa em 1º de agosto, sem pausa de inverno, e termina em 31 de maio. Isso ainda espera o OK do dono.
 
-## Feito na tarde de 29/09
+## Repercussão de mata-mata (05/10)
 
-- **Testes e ferramentas voltaram a rodar.** Com `--script`, o Godot compila o script principal antes de registrar os autoloads. Os sistemas passaram a depender de componentes de interface (`scouting` → `player_row_view` → `ui_kit` → `AudioManager`), e com isso `tests/run_tests.gd`, `tools/realism_report.gd` e as outras ferramentas paravam de compilar. Agora o som passa por `Sfx` (`scripts/core/sfx.gd`), que procura o autoload na hora. **Não escreva `AudioManager.` fora do próprio autoload.**
-- **Ratings.** Meia dúzia de jogadores passa de 90 (antes o máximo era 89). Os titulares mudam de nível conforme a função (`STARTER_SHIFT`), e o craque do elenco quase nunca é lateral. Antes os três melhores do mundo eram laterais-esquerdos.
-- **Estilos novos.** Volante líbero, armador itinerante, trequartista, intérprete de espaços, ponta de área e cabeceador. Cada um fica com 6 a 8% da função.
+Pedido do Gregory: perder um título no agregado (Inter x Grêmio) saía com pós-jogo "positivo" porque tudo olhava só o placar do dia.
+
+- `scripts/systems/tie_stakes.gd` (`TieStakes.of`) diz se o jogo decidiu um confronto (jogo único ou volta, copa ou playoff de liga): vencedor pelo agregado e pênaltis, se era final, se valia taça ou acesso, e o peso (1 = final com título).
+- Com isso, no jogo decisivo vale o confronto: torcida e diretoria (`BoardManager.after_tie`), apoio e reputação do técnico, coluna de jornal (`People._tie_column`), coletiva (`PressRoom._tie_question`), manchete (`NewsManager._tie_news`) e eventos. Ganhar a volta e perder a taça agora é derrota, e mais pesada no clássico.
+- Feitos do jogo (`ManagerFeats`) não dão bônus a quem ganhou o jogo e caiu. Técnicos da IA também sentem a final perdida.
+- O motor de partida não mudou.
 
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:
 
-1. Ratings, potenciais, atributos, valores e mais estilos de jogador. Primeira parte feita em 29/09 à tarde (veja acima). Os valores e o potencial dos jovens foram medidos e estão plausíveis. Depois de mexer, rodar `tools/realism_report.gd` e conferir que os gols continuam realistas.
-2. Categorias de base: mais competições (sub-17, sub-20, Copinha, liga jovem europeia), academia e negociações mais profundas (parcelas, bônus, percentual de revenda, cláusula, empréstimo com opção de compra). Em andamento.
-3. Interface.
+1. Ratings, potenciais, atributos, valores e mais estilos de jogador. Feito em 04/10: 8 estilos novos, 3 traços, 3 filosofias de clube, elite comprimida (2 jogadores 90+ estáveis em 4 temporadas, `tools/ratings_report.gd -- --years=4`), valores e salários com curva de idade e contrato. Os gols continuam em 2,63 por jogo. Ponto a observar: o valor do jogador mais caro cai de € 140M para € 75M em 4 temporadas só de evolução.
+2. Categorias de base: mais competições (sub-17, sub-20, Copinha, liga jovem europeia), academia e negociações mais profundas (parcelas, bônus, percentual de revenda, cláusula, empréstimo com opção de compra). Feito.
+3. Interface. Em andamento.
    - Legibilidade, estados de hover e cores de destaque, a tela de números, paisagem e tablet.
    - Tirar a cara de "jogo feito às pressas por IA": nada de textos-propaganda cheios de superlativos e emojis, telas amontoadas ou visual genérico. O visual deve ser coerente e caprichado.
    - O jogo pode ficar maior em tamanho, isso não é problema.
-4. Mais eventos no jogo, mais cabelos e barbas e mais estatísticas.
+   - Feito numa primeira passada: aviso de conquista no pé da tela (não cobre mais a barra nem o "Pular"), fim do "Simular" sem vão, plurais certos (`Fmt.n_of`, sem "jogo(s)"), menos microcopy na negociação, seleção e base, anel de foco nos botões, menu ☰ sempre na cor do clube do técnico, quadro de líderes em grade na aba Números, tabela do elenco com colunas alinhadas, recorte e ordem do elenco numa fileira, menu inicial em lista e início deitado compacto. Capturas em `/mnt/project-files/interface-2026-09-29/antes` e `depois` (prefixos `f_`, `fl_` claro, `fland_` deitado, `ftab_` tablet).
+   - Falta: varrer os textos explicativos que sobraram (tutorial, editor, regras de copa na base), os "(s)" das notícias geradas e as outras telas de estatística (perfil > Números, seleções).
+4. Mais eventos no jogo, mais cabelos e barbas e mais estatísticas. Feito em 05/10:
+   - **Eventos.** 15 dilemas novos em `scripts/systems/event_pack.gd` (tipos registrados em `EventManager.KINDS`): antecipar a volta de lesionado (com risco de recaída), renovação travada por luvas, rival assediando o craque, provocação antes do clássico, corte na folha, reunião com a diretoria (meta de pontos em 3 jogos), protesto no CT, despedida de ídolo, pedido de empréstimo, empresário cobrando comissão, série de bastidores, boato de demissão, alerta de desgaste, bicho por vitória e tratamento com médico particular. As consequências que chegam depois ficam em `world.stats["ev2"]` e são conferidas a cada jogo. `tools/events_smoke.gd` agora passa por todos os tipos.
+   - **Rostos.** 14 penteados (211-224) e 8 barbas (141-148) no fim das listas. Os novos entram num sorteio à parte (`FaceGen._newer_pick`, `HS_V1`/`BD_V1`), então o rosto de quem já existia não muda. Saem em cerca de 6% dos cabelos e 4% das barbas; os chamativos (coque samurai cacheado, nagô com risco) em menos de 0,1%. Catálogo em `/mnt/project-files/rostos-2d/novos-2026-10/`.
+   - **Estatísticas.** Duelos aéreos ganhos, faltas e gols sofridos pelo goleiro (`Player.S_AERIAL`, `S_FOULS`, `S_CONCEDED`; saves antigos completam com zero). Recordes do clube em `club.marks` (sequências de vitórias, invencibilidade e sem sofrer gol, maior vitória e maior derrota). Perfil > Números ganhou por 90 minutos, chutes no alvo, minutos por gol e o bloco do goleiro; Carreira ganhou gols por jogo, G+A por jogo, craque do jogo e jogos sem sofrer gol. Estatísticas da equipe ganhou novos destaques e o cartão de recordes; Tabela > Números ganhou duelos aéreos, jogos sem sofrer gol (goleiros) e craque do jogo. Os números novos são sorteados depois dos antigos, então placares e o realismo não mudam.
+   - Capturas em `/mnt/project-files/conteudo-2026-10/`. Para capturar um evento específico: `--only=~event=tipo`.
+   - Traduções en/es dos textos novos incluídas.
 
 ## Decisões pendentes com o dono
 

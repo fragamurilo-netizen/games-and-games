@@ -70,7 +70,8 @@
 			"desc": "A bola é do clube. Técnicos que chegam mantêm o toque.",
 			"ph": [
 				"posicional",
-				"toque"
+				"toque",
+				"aproximacao"
 			]
 		},
 		"transicao": {
@@ -86,7 +87,8 @@
 			"desc": "Solidez primeiro. Perder de pouco é quase vencer.",
 			"ph": [
 				"ferrolho",
-				"tres_zagueiros"
+				"tres_zagueiros",
+				"bloco_medio"
 			]
 		},
 		"intensidade": {
@@ -94,7 +96,8 @@
 			"desc": "Pressão, disputa e ritmo alto os 90 minutos.",
 			"ph": [
 				"pressao",
-				"direto"
+				"direto",
+				"bola_parada"
 			]
 		}
 	},

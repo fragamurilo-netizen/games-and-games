@@ -532,31 +532,90 @@ func _season_modal(w: GameWorld, league: League, y: int, lg: Dictionary) -> void
 ## Líderes da liga nas estatísticas detalhadas (top 5 de cada).
 func _numbers(c: VBoxContainer, w: GameWorld) -> void:
 	var cats := [[Player.S_SHOTS, "Finalizações"], [Player.S_KEY_PASSES, "Passes decisivos"], [Player.S_DRIBBLES, "Dribles certos"],
-		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_SAVES, "Defesas"], [Player.S_XG, "xG"]]
+		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_AERIAL, "Duelos aéreos"],
+		[Player.S_SAVES, "Defesas"], [Player.S_CLEAN, "Jogos sem sofrer gol"], [Player.S_MOTM, "Craque do jogo"], [Player.S_XG, "xG"]]
+	var boards: Array = []
 	for cat in cats:
 		var stat: int = cat[0]
 		var list := CompetitionManager.player_ranking(w, _league_id, stat, 5)
-		if list.is_empty():
-			continue
-		var card := UIKit.card("Card", 4)
-		card.add_child(UIKit.section(String(cat[1])))
-		for i in list.size():
-			var p: Player = list[i]
-			var row := UIKit.hbox(10)
-			var rk := UIKit.label(str(i + 1), "H3")
-			rk.custom_minimum_size.x = 30
+		if stat == Player.S_CLEAN:
+			list = CompetitionManager.player_ranking(w, _league_id, stat, 80).filter(func(q: Player) -> bool: return q.position == Pos.GK).slice(0, 5)
+		if not list.is_empty():
+			boards.append(_leader_board(w, String(cat[1]), stat, list))
+	if boards.is_empty():
+		c.add_child(UIKit.empty_state("chart", "Sem números ainda", ""))
+		return
+	# Quadro de líderes em grade: duas colunas já no celular (cada quadro é estreito), três no
+	# tablet e na paisagem.
+	var cols := 1
+	var cw := content_width()
+	if cw >= 1000.0:
+		cols = 3
+	elif cw >= 600.0:
+		cols = 2
+	var grid := GridContainer.new()
+	grid.columns = cols
+	grid.add_theme_constant_override(&"h_separation", UITokens.S3)
+	grid.add_theme_constant_override(&"v_separation", UITokens.S3)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for b: Control in boards:
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(b)
+	c.add_child(grid)
+
+
+## Um quadro de líderes: o primeiro em destaque (nome, clube e número grande) e os quatro
+## seguintes em linhas compactas, com os números alinhados à direita.
+func _leader_board(w: GameWorld, title: String, stat: int, list: Array) -> Control:
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section(title))
+	var rows: Array = []
+	for i in list.size():
+		var p: Player = list[i]
+		var club := w.club(p.club_id)
+		var mine := w.is_user_club(p.club_id)
+		var val := Fmt.dec(p.xg(), 1) if stat == Player.S_XG else str(p.stats[stat])
+		var row := UIKit.hbox(8)
+		if i == 0:
+			row.add_child(UIKit.crest(club, 40))
+			var col := UIKit.vbox(0)
+			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var nl := UIKit.label(p.short_name(), "H3")
+			nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			if mine:
+				nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+			col.add_child(nl)
+			var cl := UIKit.label(club.short_name if club != null else "", "Small")
+			cl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			col.add_child(cl)
+			row.add_child(col)
+			var vl := UIKit.label(val, "StatBig")
+			vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			row.add_child(vl)
+		else:
+			var rk := UIKit.label(str(i + 1), "Caps")
+			rk.custom_minimum_size.x = 18
+			rk.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			row.add_child(rk)
-			row.add_child(UIKit.crest(w.club(p.club_id), 28))
-			var nl := UIKit.label(p.display_name(), "")
+			row.add_child(UIKit.crest(club, 22))
+			var nl := UIKit.label(p.short_name(), "")
+			nl.add_theme_font_size_override(&"font_size", UITokens.F_SMALL + 1)
 			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			if w.is_user_club(p.club_id):
+			if mine:
 				nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
 			row.add_child(nl)
-			row.add_child(UIKit.label(("%.1f" % p.xg()) if stat == Player.S_XG else str(p.stats[stat]), "Stat"))
-			var pid := p.id
-			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
-		c.add_child(UIKit.card_panel(card))
+			var vl := UIKit.label(val, "Mono")
+			vl.custom_minimum_size.x = 44
+			vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			row.add_child(vl)
+		var pid := p.id
+		rows.append(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}), "CardFlat"))
+	var group := UIKit.menu_group(rows)
+	# O quadro já é o cartão: o grupo de linhas fica sem fundo nem borda próprios.
+	group.add_theme_stylebox_override(&"panel", StyleBoxEmpty.new())
+	card.add_child(group)
+	return UIKit.card_panel(card)
 
 
 ## Seleção da rodada e seleções do mês de qualquer liga (a do usuário e as primeiras divisões), no campinho.
@@ -601,7 +660,7 @@ func _teams(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	card.add_child(XIPitch.make(w, sel.get("ids", []), sel.get("rt", []), int(sel.get("best", -1))))
 	var best := w.player(int(sel.get("best", -1)))
 	if best != null:
-		card.add_child(UIKit.label("★ Craque: %s" % best.display_name(), "Small", true))
+		card.add_child(UIKit.label("Craque: %s" % best.display_name(), "Small", true))
 	c.add_child(UIKit.card_panel(card))
 
 
@@ -900,7 +959,7 @@ func _highlights(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var att := CompetitionManager.best_attack(league)
 	var dfn := CompetitionManager.best_defense(league)
 	if att >= 0 and int(league.table[att]["pl"]) > 0:
-		info.add_child(UIKit.kv("Melhor ataque", "%s (%d gols)" % [w.club(att).short_name, int(league.table[att]["gf"])]))
+		info.add_child(UIKit.kv("Melhor ataque", ("%s (%d gol)" if int(league.table[att]["gf"]) == 1 else "%s (%d gols)") % [w.club(att).short_name, int(league.table[att]["gf"])]))
 	if dfn >= 0 and int(league.table[dfn]["pl"]) > 0:
 		info.add_child(UIKit.kv("Melhor defesa", "%s (%d sofridos)" % [w.club(dfn).short_name, int(league.table[dfn]["ga"])]))
 	var games := 0
@@ -957,6 +1016,7 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 		card.add_child(UIKit.label("Ninguém marcou ainda nesta temporada.", "Muted"))
 	var rank := 0
 	var last_v := -1
+	var rows: Array = []
 	for i in list.size():
 		var p: Player = list[i]
 		var v: int = p.stats[stat]
@@ -964,7 +1024,9 @@ func _ranking(c: VBoxContainer, w: GameWorld, stat: int, title: String) -> void:
 			rank = i + 1
 			last_v = v
 		var apps: int = p.stats[Player.S_APPS]
-		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(apps, "jogo", "jogos")]))
+		rows.append(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(apps, "jogo", "jogos")]))
+	if not rows.is_empty():
+		card.add_child(TableRows.ranking_list(rows))
 	c.add_child(UIKit.card_panel(card))
 
 
@@ -1312,6 +1374,7 @@ func _cup_scorers(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 		card.add_child(UIKit.label("Ninguém marcou ainda.", "Muted"))
 	var rank := 0
 	var last_v := -1
+	var rows: Array = []
 	for i in list.size():
 		var p: Player = list[i]
 		var st: PackedInt32Array = p.cup_stats[cup.id]
@@ -1319,7 +1382,9 @@ func _cup_scorers(c: VBoxContainer, w: GameWorld, cup: Cup) -> void:
 		if v != last_v:
 			rank = i + 1
 			last_v = v
-		card.add_child(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(st[Player.C_APPS], "jogo", "jogos")]))
+		rows.append(TableRows.ranking_row(w, p, rank, str(v), "%s · %s" % [Pos.code(p.position), Fmt.plural(st[Player.C_APPS], "jogo", "jogos")]))
+	if not rows.is_empty():
+		card.add_child(TableRows.ranking_list(rows))
 	c.add_child(UIKit.card_panel(card))
 
 

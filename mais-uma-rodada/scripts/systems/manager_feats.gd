@@ -156,6 +156,8 @@ static func on_user_match(world: GameWorld, entry: Dictionary, result: String) -
 		var vs := CoachStories.vs_user(oc)
 		if int(vs[0]) == 0 and int(vs[2]) >= 3:
 			out.append(_feat("freguesia", "Primeira vitória sobre %s depois de %d derrotas." % [String(oc["n"]), int(vs[2])]))
+	if tie_w >= 0 and tie_w != club.id:
+		out.clear() # ganhou o jogo e perdeu a vaga ou a taça: não há o que comemorar
 	if result == "V":
 		st["wc"] = int(st.get("wc", 0)) + 1
 		if int(st["wc"]) == 1 and int(world.manager_stats.get("games", 0)) > 1:

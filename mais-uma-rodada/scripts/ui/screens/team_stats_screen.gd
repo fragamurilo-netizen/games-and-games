@@ -52,7 +52,59 @@ static func cards(w: GameWorld, club: Club) -> Array:
 	out.append(squad_table(w, club))
 	out.append(_squad_card(w, club))
 	out.append(_leaders_card(w, club))
+	var rec := _records_card(w, club)
+	if rec != null:
+		out.append(rec)
 	return out
+
+
+## Recordes do clube: sequências e placares desde o início do save, e as melhores campanhas do
+## histórico de ligas.
+static func _records_card(w: GameWorld, club: Club) -> Control:
+	var mk := club.marks
+	var rows: Array = []
+	var ws: Array = mk.get("ws", [])
+	if not ws.is_empty() and int(ws[0]) >= 2:
+		rows.append(["Vitórias seguidas", "%s · %d" % [Fmt.n_of(int(ws[0]), "%d jogo", "%d jogos"), int(ws[1])]])
+	var us: Array = mk.get("us", [])
+	if not us.is_empty() and int(us[0]) >= 2:
+		rows.append(["Invencibilidade", "%s · %d" % [Fmt.n_of(int(us[0]), "%d jogo", "%d jogos"), int(us[1])]])
+	var cr: Array = mk.get("cr", [])
+	if not cr.is_empty() and int(cr[0]) >= 2:
+		rows.append(["Sem sofrer gol", "%s · %d" % [Fmt.n_of(int(cr[0]), "%d jogo", "%d jogos"), int(cr[1])]])
+	var bw: Array = mk.get("bw", [])
+	if not bw.is_empty():
+		rows.append(["Maior vitória", "%d x %d %s · %d" % [int(bw[0]), int(bw[1]), String(bw[2]), int(bw[3])]])
+	var bl: Array = mk.get("bl", [])
+	if not bl.is_empty():
+		rows.append(["Maior derrota", "%d x %d %s · %d" % [int(bl[0]), int(bl[1]), String(bl[2]), int(bl[3])]])
+	var best_pts: Dictionary = {}
+	var best_gf: Dictionary = {}
+	var best_ga: Dictionary = {}
+	for h in club.history:
+		var hd: Dictionary = h
+		var lg := w.league(String(hd.get("l", "")))
+		if lg == null or lg.tier != club.tier:
+			continue
+		if best_pts.is_empty() or int(hd.get("pts", 0)) > int(best_pts.get("pts", 0)):
+			best_pts = hd
+		if best_gf.is_empty() or int(hd.get("gf", 0)) > int(best_gf.get("gf", 0)):
+			best_gf = hd
+		var games := int(hd.get("w", 0)) + int(hd.get("dr", 0)) + int(hd.get("lo", 0))
+		if games > 0 and (best_ga.is_empty() or int(hd.get("ga", 0)) < int(best_ga.get("ga", 0))):
+			best_ga = hd
+	if not best_pts.is_empty():
+		rows.append(["Mais pontos na liga", "%s · %d" % [Fmt.n_of(int(best_pts.get("pts", 0)), "%d ponto", "%d pontos"), int(best_pts.get("y", 0))]])
+		rows.append(["Mais gols na liga", "%s · %d" % [Fmt.n_of(int(best_gf.get("gf", 0)), "%d gol", "%d gols"), int(best_gf.get("y", 0))]])
+		if not best_ga.is_empty():
+			rows.append(["Defesa menos vazada", "%s · %d" % [Fmt.n_of(int(best_ga.get("ga", 0)), "%d gol", "%d gols"), int(best_ga.get("y", 0))]])
+	if rows.is_empty():
+		return null
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section_header("Recordes do clube"))
+	for r: Array in rows:
+		card.add_child(UIKit.kv(String(r[0]), String(r[1])))
+	return UIKit.card_panel(card)
 
 
 # ---------------------------------------------------------------------------
@@ -149,44 +201,84 @@ static func _fill_table(w: GameWorld, club: Club, body: VBoxContainer) -> void:
 		body.add_child(UIKit.label("Sem registros desta temporada para este clube.", "Muted", true))
 		return
 	var current := _tbl_year == 0
+	# Colunas de largura fixa, números em fonte condensada alinhados à direita; o cabeçalho usa as
+	# mesmas margens das linhas para cada título ficar em cima da sua coluna. Zeros apagados.
+	var cols: Array = [["a", "J", 44], ["g", "G", 44], ["as", "A", 44], ["r", "NOTA", 64]]
+	if current:
+		cols.append(["m", "MIN", 70])
 	var head := UIKit.hbox(6)
 	var hn := UIKit.label("JOGADOR", "Caps")
 	hn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(hn)
-	var cols := ["J", "G", "A", "NOTA"] + (["MIN"] if current else [])
-	for t in cols:
-		head.add_child(_cell(t, "Caps", 58 if t == "MIN" else 46))
-	body.add_child(head)
-	var tot := [0, 0, 0]
+	for col: Array in cols:
+		var hl := _cell(String(col[1]), "Caps", int(col[2]))
+		if String(col[0]) == key:
+			hl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		head.add_child(hl)
+	var tot := [0, 0, 0, 0]
+	var list: Array = [_plain_row(head)]
 	for r: Dictionary in rows:
 		tot[0] += int(r.get("a", 0))
 		tot[1] += int(r.get("g", 0))
 		tot[2] += int(r.get("as", 0))
+		tot[3] += maxi(0, int(r.get("m", 0)))
 		var h := UIKit.hbox(6)
 		h.add_child(UIKit.pos_badge(int(r.get("pos", 0))))
 		var nm := UIKit.label(String(r.get("n", "")), "")
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.custom_minimum_size.x = 40
+		if int(r.get("a", 0)) == 0:
+			nm.add_theme_color_override(&"font_color", UIColors.MUTED)
 		h.add_child(nm)
-		h.add_child(_cell(str(int(r.get("a", 0))), "", 46))
-		h.add_child(_cell(str(int(r.get("g", 0))), "H3" if int(r.get("g", 0)) > 0 else "", 46))
-		h.add_child(_cell(str(int(r.get("as", 0))), "", 46))
+		for k in ["a", "g", "as"]:
+			h.add_child(_num(int(r.get(k, 0)), 44, k == key))
 		var rt := float(r.get("r", 0.0))
-		var rl := _cell("%.2f" % rt if rt > 0.0 else "—", "", 46)
+		var rl := _cell(Fmt.dec(rt, 2) if rt > 0.0 else "—", "Mono", 64)
 		if rt >= 7.2:
 			rl.add_theme_color_override(&"font_color", UIColors.GREEN)
 		elif rt > 0.0 and rt < 6.3:
 			rl.add_theme_color_override(&"font_color", UIColors.RED)
+		elif rt <= 0.0:
+			rl.add_theme_color_override(&"font_color", UIColors.DIM)
 		h.add_child(rl)
 		if current:
-			h.add_child(_cell(str(int(r.get("m", 0))), "Small", 58))
+			var ml := _cell(Fmt.thousands(int(r.get("m", 0))) if int(r.get("m", 0)) > 0 else "—", "Mono", 70)
+			ml.add_theme_color_override(&"font_color", UIColors.MUTED if int(r.get("m", 0)) > 0 else UIColors.DIM)
+			h.add_child(ml)
 		var pid := int(r.get("id", -1))
 		if w.player(pid) != null:
-			body.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
+			list.append(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
 		else:
-			body.add_child(h)
-	body.add_child(UIKit.label("Total: %d jogos · %d gols · %d assistências (liga e copas)" % tot, "Small", true))
+			list.append(_plain_row(h))
+	# Total na mesma grade das colunas (liga e copas).
+	var th := UIKit.hbox(6)
+	var tl := UIKit.label("TOTAL", "Caps")
+	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	th.add_child(tl)
+	for i in 3:
+		th.add_child(_cell(str(tot[i]), "Mono", 44))
+	th.add_child(_cell("", "Mono", 64))
+	if current:
+		th.add_child(_cell(Fmt.thousands(tot[3]), "Mono", 70))
+	list.append(_plain_row(th))
+	body.add_child(UIKit.menu_group(list))
+
+
+static func _plain_row(inner: Control) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.add_child(inner)
+	return p
+
+
+## Número de uma coluna: zero apagado; a coluna da ordenação em destaque.
+static func _num(v: int, wdt: int, sorted: bool) -> Label:
+	var l := _cell(str(v), "Mono", wdt)
+	if v == 0:
+		l.add_theme_color_override(&"font_color", UIColors.DIM)
+	elif sorted:
+		l.add_theme_font_override(&"font", l.get_theme_font(&"font", &"StatBig"))
+	return l
 
 
 static func _cell(t: String, variation: String, wdt: int) -> Label:
@@ -217,7 +309,7 @@ static func _season_card(w: GameWorld, club: Club, league: League) -> Control:
 	card.add_child(UIKit.kv("Jogos", "%d · %dV %dE %dD" % [pl, int(r["w"]), int(r["d"]), int(r["l"])]))
 	card.add_child(UIKit.kv("Gols", "%d pró · %d contra · saldo %+d" % [int(r["gf"]), int(r["ga"]), int(r["gf"]) - int(r["ga"])]))
 	if pl > 0:
-		card.add_child(UIKit.kv("Média por jogo", "%.1f marcados · %.1f sofridos" % [float(r["gf"]) / pl, float(r["ga"]) / pl]))
+		card.add_child(UIKit.kv("Média por jogo", "%s marcados · %s sofridos" % [Fmt.dec(float(r["gf"]) / pl, 1), Fmt.dec(float(r["ga"]) / pl, 1)]))
 	# Casa, fora, jogos sem sofrer gol e maior vitória a partir dos jogos da liga.
 	var home := [0, 0, 0, 0] # jogos, pontos, gf, ga
 	var away := [0, 0, 0, 0]
@@ -245,10 +337,10 @@ static func _season_card(w: GameWorld, club: Club, league: League) -> Control:
 				big_d = gf - ga
 				var opp := w.club(f.away if is_home else f.home)
 				big = "%d x %d no %s" % [gf, ga, opp.short_name] if opp != null else "%d x %d" % [gf, ga]
-	card.add_child(UIKit.kv("Em casa", "%d pts em %d jogos (%s) · %d:%d" % [home[1], home[0], _pct(home[1], home[0] * 3.0), home[2], home[3]]))
-	card.add_child(UIKit.kv("Fora", "%d pts em %d jogos (%s) · %d:%d" % [away[1], away[0], _pct(away[1], away[0] * 3.0), away[2], away[3]]))
-	card.add_child(UIKit.kv("Sem sofrer gol", "%d jogos" % clean))
-	card.add_child(UIKit.kv("Sem marcar", "%d jogos" % blank))
+	card.add_child(UIKit.kv("Em casa", ("%d pts em %d jogo (%s) · %d:%d" if home[0] == 1 else "%d pts em %d jogos (%s) · %d:%d") % [home[1], home[0], _pct(home[1], home[0] * 3.0), home[2], home[3]]))
+	card.add_child(UIKit.kv("Fora", ("%d pts em %d jogo (%s) · %d:%d" if away[0] == 1 else "%d pts em %d jogos (%s) · %d:%d") % [away[1], away[0], _pct(away[1], away[0] * 3.0), away[2], away[3]]))
+	card.add_child(UIKit.kv("Sem sofrer gol", Fmt.n_of(clean, "%d jogo", "%d jogos")))
+	card.add_child(UIKit.kv("Sem marcar", Fmt.n_of(blank, "%d jogo", "%d jogos")))
 	if big != "":
 		card.add_child(UIKit.kv("Maior vitória", big))
 	var form := String(r.get("form", ""))
@@ -290,7 +382,7 @@ static func _ranks_card(w: GameWorld, club: Club, league: League) -> Control:
 	card.add_child(UIKit.section_header("Na liga"))
 	var n := league.club_ids.size()
 	var metrics := [
-		["Ataque", func(c: Club) -> float: return float(league.row(c.id).get("gf", 0)), true, func(v: float) -> String: return "%d gols" % int(v)],
+		["Ataque", func(c: Club) -> float: return float(league.row(c.id).get("gf", 0)), true, func(v: float) -> String: return Fmt.n_of(int(v), "%d gol", "%d gols")],
 		["Defesa", func(c: Club) -> float: return float(league.row(c.id).get("ga", 0)), false, func(v: float) -> String: return "%d sofridos" % int(v)],
 		["Valor do elenco", func(c: Club) -> float: return _squad_value(w, c), true, func(v: float) -> String: return Fmt.money(v)],
 		["Folha salarial", func(c: Club) -> float: return float(FinanceManager.wage_bill(w, c)), true, func(v: float) -> String: return Fmt.money(v) + "/mês"],
@@ -364,14 +456,19 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 	var sq := w.squad(club)
 	var any := false
 	var cats := [
-		["Artilheiro", func(p: Player) -> float: return p.stat(Player.S_GOALS), func(p: Player) -> String: return "%d gols" % p.stat(Player.S_GOALS)],
+		["Artilheiro", func(p: Player) -> float: return p.stat(Player.S_GOALS), func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_GOALS), "%d gol", "%d gols")],
 		["Assistências", func(p: Player) -> float: return p.stat(Player.S_ASSISTS), func(p: Player) -> String: return "%d assist." % p.stat(Player.S_ASSISTS)],
-		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%.2f em %d jogos" % [p.avg_rating(), p.stat(Player.S_APPS)]],
+		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%s em %d jogos" % [Fmt.dec(p.avg_rating(), 2), p.stat(Player.S_APPS)]],
 		["Mais minutos", func(p: Player) -> float: return p.stat(Player.S_MINUTES), func(p: Player) -> String: return "%d min" % p.stat(Player.S_MINUTES)],
 		["Craque do jogo", func(p: Player) -> float: return p.stat(Player.S_MOTM), func(p: Player) -> String: return "%dx" % p.stat(Player.S_MOTM)],
+		["Gols por 90", func(p: Player) -> float: return p.per90(Player.S_GOALS) if p.stat(Player.S_MINUTES) >= 900 else 0.0, func(p: Player) -> String: return Fmt.dec(p.per90(Player.S_GOALS), 2)],
+		["Passes decisivos", func(p: Player) -> float: return p.stat(Player.S_KEY_PASSES), func(p: Player) -> String: return "%d" % p.stat(Player.S_KEY_PASSES)],
 		["Desarmes", func(p: Player) -> float: return p.stat(Player.S_TACKLES), func(p: Player) -> String: return "%d" % p.stat(Player.S_TACKLES)],
+		["Interceptações", func(p: Player) -> float: return p.stat(Player.S_INTERCEPTIONS), func(p: Player) -> String: return "%d" % p.stat(Player.S_INTERCEPTIONS)],
+		["Duelos aéreos", func(p: Player) -> float: return p.stat(Player.S_AERIAL), func(p: Player) -> String: return "%d" % p.stat(Player.S_AERIAL)],
 		["Defesas (goleiro)", func(p: Player) -> float: return p.stat(Player.S_SAVES), func(p: Player) -> String: return "%d" % p.stat(Player.S_SAVES)],
-		["Cartões", func(p: Player) -> float: return p.stat(Player.S_YELLOWS) + 3 * p.stat(Player.S_REDS), func(p: Player) -> String: return "%d amarelos · %d vermelhos" % [p.stat(Player.S_YELLOWS), p.stat(Player.S_REDS)]],
+		["Sem sofrer gol", func(p: Player) -> float: return p.stat(Player.S_CLEAN) if p.position == Pos.GK else 0.0, func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_CLEAN), "%d jogo", "%d jogos")],
+		["Cartões", func(p: Player) -> float: return p.stat(Player.S_YELLOWS) + 3 * p.stat(Player.S_REDS), func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_YELLOWS), "%d amarelo", "%d amarelos") + " · " + Fmt.n_of(p.stat(Player.S_REDS), "%d vermelho", "%d vermelhos")],
 	]
 	for cat: Array in cats:
 		var f: Callable = cat[1]
@@ -388,7 +485,7 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 		var pid := best.id
 		var h := UIKit.hbox(10)
 		var k := UIKit.label(String(cat[0]), "Muted")
-		k.custom_minimum_size.x = 150
+		k.custom_minimum_size.x = 180
 		h.add_child(k)
 		var nm := UIKit.label(best.short_name(), "H3")
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL

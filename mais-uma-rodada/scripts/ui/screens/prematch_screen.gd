@@ -931,7 +931,7 @@ func _start() -> void:
 		if w.player(pid) == null:
 			missing += 1
 	if missing > 0:
-		UIManager.info("Escalação incompleta", "Faltam %d jogador(es) no time titular." % missing)
+		UIManager.info("Escalação incompleta", ("Falta %d jogador no time titular." if missing == 1 else "Faltam %d jogadores no time titular.") % missing)
 		return
 	Sfx.play("whistle", -4.0)
 	if AppSettings.match_speed == AppSettings.SPEED_INSTANT:

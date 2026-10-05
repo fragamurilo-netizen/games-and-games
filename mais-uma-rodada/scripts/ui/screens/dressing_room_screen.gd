@@ -49,7 +49,7 @@ func _meeting_card(w: GameWorld) -> Control:
 	card.add_child(UIKit.section("Reunião com o elenco"))
 	var wait := DressingRoom.wait_turns(w)
 	if wait > 0:
-		card.add_child(UIKit.label("Nova reunião em %d rodada(s)." % wait, "Small", true))
+		card.add_child(UIKit.label(("Nova reunião em %d rodada." if wait == 1 else "Nova reunião em %d rodadas.") % wait, "Small", true))
 		return UIKit.card_panel(card)
 	var grid := GridContainer.new()
 	grid.columns = 2
