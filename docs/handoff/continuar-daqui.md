@@ -11,6 +11,15 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
 - O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
 
+### Bolinhas seguindo a narração (05/10, ramo `claude/bolinhas-narracao-5wp2pg`)
+
+- Parte de `claude/elencos-realistas-k0e7o1` com o campo clássico 2D de `claude/palestras-narracao-1b2sru` juntado. É o ramo mais novo. APK: `builds/MaisUmaRodada-1.0.0-bolinhas-narracao-2026-10-05-debug.apk`.
+- **Cada lance narrado vira jogada no campo, com os jogadores citados.** `match_screen._beats` lê os eventos do minuto em ordem (antes só o último lance era encenado: defesa seguida de escanteio mostrava só o escanteio). Falta + cartão + jogador caído é uma jogada; falta perigosa + cobrança sai do mesmo lugar (`PitchMotion._fk_spot`); escanteio que vira finalização é cobrado por quem foi para a bandeira (escanteio curto quando o passe final é de outro).
+- **Minutos sem perigo** (`poss_*` da narração: ponta, virada, ligação direta, pressão, saída desde o goleiro, tiro de meta, lateral, recuo, tabela, condução, pivô, troca de passes, passe cortado, cruzamento afastado) têm roteiro próprio em `PitchMotion._script_poss`, com quem tem a bola (p), com quem joga (p2) e quem corta (d).
+- **Narração presa ao campo.** O PitchMotion põe marcos na fila (`mark`, `on_mark`): começo da jogada, momento decisivo (chute chegou, apito, bandeira, passe recebido) e apito do pênalti. A tela segura cada linha até o marco dela (`_gate_for`; limite de 7 s). No normal tudo é sincronizado e o minuto espera a jogada; no rápido só chances, gols e faltas que valem algo; no turbo e em "Só narração" a narração corre solta.
+- **Corredor da chance.** A simulação agora grava `ln` (0 esquerda, 1 meio, 2 direita) nas chances, o mesmo corredor que ela usou no confronto pelos lados; cruzamentos e jogadas saem desse lado. Só apresentação: placares não mudam (teste "partida ao vivo = partida instantânea" ok).
+- **Postura tática no desenho** (`PitchMotion.set_tactics`): linha alta/baixa, largura, pressão e mentalidade mudam o bloco sem bola e a altura do time com bola.
+
 ### Posições da escalação (05/10)
 
 - Mover posições não empilha mais ninguém. Antes, virar o centroavante em ponta-direita punha o jogador exatamente em cima do ponta que já existia. Agora `DatabaseManager._spread_custom` espaça as posições repetidas na mesma linha e afasta as vagas que se encostam.
