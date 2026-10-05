@@ -306,6 +306,21 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 	await _frames(6)
 	UIManager.close_all_modals()
 	var u := w.user_club()
+	# ~event=tipo: monta um evento desse tipo (EventManager.KINDS) para a captura.
+	if kind.begins_with("event="):
+		var ev := EventManager._build(w, kind.substr(6))
+		if ev.is_empty():
+			print("evento sem candidato: ", kind.substr(6))
+			return
+		ev["id"] = 9000 + w.events.size()
+		ev["turn"] = w.current_turn()
+		ev["exp"] = w.current_turn() + EventManager.LIFETIME
+		w.events.append(ev)
+		EventDialog.open(ev)
+		await _frames(8)
+		await _shot(prefix + "event_" + kind.substr(6))
+		UIManager.close_all_modals()
+		return
 	match kind:
 		"confirm":
 			UIManager.confirm("Apagar o espaço 2?", "Isso apaga o Coritiba para sempre, incluindo a cópia de segurança.", "Apagar", func(): pass)
