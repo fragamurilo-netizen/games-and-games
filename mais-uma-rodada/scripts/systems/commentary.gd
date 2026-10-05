@@ -12,6 +12,7 @@ var _bags: Dictionary = {} # categoria -> índices ainda não usados nesta parti
 var _last: Dictionary = {} # categoria -> último índice usado (não repete na virada do saco)
 var _data: Dictionary = {}
 var _big_miss: Dictionary = {} # player_id -> chances claras perdidas no jogo
+var _ok_idx: Dictionary = {} # categoria -> índices com tradução no idioma atual
 
 
 func _init(p_sim: MatchSimulation, p_stadium: String, seed_value: int) -> void:
@@ -27,9 +28,10 @@ func _pick(cat: String) -> String:
 		return ""
 	var bag: Array = _bags.get(cat, [])
 	if bag.is_empty():
-		for k in arr.size():
-			bag.append(k)
+		bag = _allowed(cat, arr).duplicate()
 		_bags[cat] = bag
+	if bag.is_empty():
+		return ""
 	var j := rng.randi_range(0, bag.size() - 1)
 	if bag.size() > 1 and int(bag[j]) == int(_last.get(cat, -1)):
 		j = (j + 1) % bag.size()
@@ -37,6 +39,19 @@ func _pick(cat: String) -> String:
 	bag.remove_at(j)
 	_last[cat] = i
 	return arr[i]
+
+
+## Índices sorteáveis da categoria. Em inglês e espanhol ficam só as frases já traduzidas: as
+## falas novas de rádio existem só em português e não podem aparecer no meio do texto traduzido.
+func _allowed(cat: String, arr: Array) -> Array:
+	if _ok_idx.has(cat):
+		return _ok_idx[cat]
+	var out: Array = []
+	for k in arr.size():
+		if I18n.is_pt() or I18n.t(String(arr[k])) != String(arr[k]):
+			out.append(k)
+	_ok_idx[cat] = out
+	return out
 
 
 func _name(side: int, pid: int) -> String:
@@ -510,11 +525,18 @@ func analysis_line(minute: int, half: int) -> Dictionary:
 	return l
 
 
-## Palestra no vestiário: o tom da conversa e quem saiu mais ligado (ou abatido).
+## Palestra no vestiário: o que o técnico disse (a fala escolhida na tela) e, na voz do
+## repórter de campo, quem saiu mais ligado (ou abatido).
 func _talk_lines(ev: Dictionary, x: Dictionary) -> Array:
 	var side := int(ev.get("s", 0))
 	var cfg: Dictionary = MatchSimulation.TALKS.get(String(x["talk"]), {})
-	var lines: Array = [_line(I18n.t("No vestiário do {team}: “%s”") % I18n.t(String(cfg.get("name", ""))), ev, "tactic", 0.0)]
+	var say := String(x.get("say", ""))
+	var lines: Array = []
+	if say != "" and I18n.is_pt():
+		lines.append(_line(_pick_or("radio_talk_open", "No vestiário do {team}, o técnico fala com o grupo:"), ev, "reporter", 0.0))
+		lines.append(_raw_line("“%s”" % say, ev, "tactic", 0.3))
+	else:
+		lines.append(_line(I18n.t("No vestiário do {team}: “%s”") % I18n.t(String(cfg.get("name", ""))), ev, "tactic", 0.0))
 	var up: Array = []
 	for pid in x.get("up", []):
 		up.append(_name(side, int(pid)))
@@ -522,12 +544,24 @@ func _talk_lines(ev: Dictionary, x: Dictionary) -> Array:
 	for pid in x.get("down", []):
 		down.append(_name(side, int(pid)))
 	if up.size() >= 3:
-		lines.append(_line(I18n.t("O grupo volta a campo ligado. %s parecem outros.") % ", ".join(up.slice(0, 2)), ev, "info", 0.4))
+		lines.append(_line(I18n.t("O grupo volta a campo ligado. %s parecem outros.") % ", ".join(up.slice(0, 2)), ev, "reporter", 0.8))
 	elif not up.is_empty():
-		lines.append(_line(I18n.t("%s sai do vestiário mais confiante.") % ", ".join(up), ev, "info", 0.4))
+		lines.append(_line(I18n.t("%s sai do vestiário mais confiante.") % ", ".join(up), ev, "reporter", 0.8))
 	if not down.is_empty():
-		lines.append(_line(I18n.t("%s não gostou do tom da conversa.") % ", ".join(down.slice(0, 2)), ev, "info", 0.4))
+		lines.append(_line(I18n.t("%s não gostou do tom da conversa.") % ", ".join(down.slice(0, 2)), ev, "reporter", 0.9))
 	return lines
+
+
+func _pick_or(cat: String, fallback: String) -> String:
+	var txt := _pick(cat)
+	return txt if txt != "" else fallback
+
+
+## Linha com texto pronto (sem tradução nem marcadores).
+func _raw_line(text: String, ev: Dictionary, style: String, delay: float) -> Dictionary:
+	var l := _line("", ev, style, delay)
+	l["text"] = text
+	return l
 
 
 ## Grito da beira do campo e a reação de quem respondeu (ou sentiu).

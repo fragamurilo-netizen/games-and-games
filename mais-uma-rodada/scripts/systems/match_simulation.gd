@@ -1685,6 +1685,7 @@ func _shout_reaction(mp: MatchPlayer, rx: String, diff: int) -> float:
 	var p := mp.p
 	var sensitive := p.has_trait("timido") or p.has_trait("inseguro") or p.hid("pre") <= 5
 	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional") or p.hid("det") >= 16
+	var pro := p.has_trait("profissional") or p.has_trait("disciplinado") or p.has_trait("perfeccionista") or p.hid("det") >= 15
 	var low := p.morale < 45.0
 	if rx == "inc":
 		var d := 0.015
@@ -1714,14 +1715,17 @@ func _shout_reaction(mp: MatchPlayer, rx: String, diff: int) -> float:
 # ---------------------------------------------------------------------------
 
 const TALKS := {
-	"motivar": {"name": "Vamos pra cima, o jogo é nosso!", "short": "Motivar", "desc": "Acende o time. Rende mais para quem está atrás ou é azarão."},
-	"tranquilizar": {"name": "Calma, joguem o nosso jogo.", "short": "Tranquilizar", "desc": "Tira o peso dos mais nervosos. Bom em jogo grande ou vencendo."},
-	"elogiar": {"name": "Estão de parabéns, continuem assim.", "short": "Elogiar", "desc": "Mantém o embalo de quem está bem. Perdendo, soa acomodado."},
-	"exigir": {"name": "Só a vitória interessa hoje.", "short": "Exigir vitória", "desc": "Líderes crescem; os inseguros sentem. Pesa mais quando se é favorito."},
-	"sem_pressao": {"name": "Sem pressão. Divirtam-se.", "short": "Sem pressão", "desc": "Solta o azarão. Para o favorito, pode relaxar demais."},
-	"cobrar": {"name": "Isso está inaceitável!", "short": "Cobrar", "desc": "Chacoalha quem está mal. Ganhando, é injusto e pesa contra."},
+	"motivar": {"name": "Vamos pra cima, o jogo é nosso!", "short": "Motivar"},
+	"tranquilizar": {"name": "Calma, joguem o nosso jogo.", "short": "Acalmar"},
+	"elogiar": {"name": "Estão de parabéns, continuem assim.", "short": "Elogiar"},
+	"exigir": {"name": "Só a vitória interessa hoje.", "short": "Exigir vitória"},
+	"sem_pressao": {"name": "Sem pressão. Divirtam-se.", "short": "Tirar a pressão"},
+	"cobrar": {"name": "Isso está inaceitável!", "short": "Cobrar"},
+	"confiar": {"name": "Eu confio em vocês.", "short": "Mostrar confiança"},
+	"foco": {"name": "Atenção ao plano de jogo.", "short": "Foco no plano"},
+	"decepcao": {"name": "Esperava mais de vocês.", "short": "Mostrar decepção"},
 }
-const TALK_ORDER: Array[String] = ["motivar", "tranquilizar", "elogiar", "exigir", "sem_pressao", "cobrar"]
+const TALK_ORDER: Array[String] = ["motivar", "tranquilizar", "confiar", "foco", "elogiar", "exigir", "decepcao", "cobrar", "sem_pressao"]
 
 
 ## Dá para falar com o time agora? Antes do pontapé inicial ou no intervalo, uma vez por pausa.
@@ -1735,12 +1739,14 @@ func can_talk(side: int) -> bool:
 
 
 ## Palestra: reação individual pela personalidade, moral, placar, favoritismo e peso do jogo.
-## Vale até a próxima palestra. Retorna {"ok", "msg", "up": [ids], "down": [ids]}.
-func team_talk(side: int, key: String) -> Dictionary:
+## Vale até a próxima palestra. Repetir no intervalo o tom de antes do jogo rende menos.
+## `say` é a fala escolhida na tela (vai para a narração). Retorna {"ok", "msg", "up", "down", "repeat"}.
+func team_talk(side: int, key: String, say: String = "") -> Dictionary:
 	if not TALKS.has(key) or not can_talk(side):
 		return {"ok": false, "msg": "Agora não dá para falar com o time."}
 	var t: MatchTeam = teams[side]
 	var o: MatchTeam = teams[1 - side]
+	var repeat := started and t.talk_key == key
 	t.talk_half = 0 if not started else half
 	t.talk_key = key
 	var diff := score[side] - score[1 - side]
@@ -1749,6 +1755,8 @@ func team_talk(side: int, key: String) -> Dictionary:
 	var down: Array = []
 	for mp: MatchPlayer in t.all:
 		var d := _talk_reaction(mp.p, key, diff, fav)
+		if repeat:
+			d *= 0.55
 		mp.talk_f = 1.0 + d
 		if not mp.on_pitch:
 			continue
@@ -1758,18 +1766,22 @@ func team_talk(side: int, key: String) -> Dictionary:
 			down.append(mp.p.id)
 	t.recompute_units()
 	_refresh_rates()
-	_emit(EV_TACTIC, side, -1, -1, {"talk": key, "up": up, "down": down})
-	var msg := "Palestra: \"%s\"" % String(TALKS[key]["name"])
+	var ex := {"talk": key, "up": up, "down": down}
+	if say != "":
+		ex["say"] = say
+	_emit(EV_TACTIC, side, -1, -1, ex)
+	var msg := "Palestra: \"%s\"" % (say if say != "" else String(TALKS[key]["name"]))
 	if up.size() > down.size() + 2:
 		msg += " O vestiário comprou a ideia."
 	elif down.size() > up.size():
 		msg += " Nem todo mundo gostou."
-	return {"ok": true, "msg": msg, "up": up, "down": down}
+	return {"ok": true, "msg": msg, "up": up, "down": down, "repeat": repeat}
 
 
 func _talk_reaction(p: Player, key: String, diff: int, fav: float) -> float:
 	var sensitive := p.has_trait("timido") or p.has_trait("inseguro") or p.hid("pre") <= 5
 	var hard := p.has_trait("lider") or p.has_trait("cascudo") or p.has_trait("competitivo") or p.has_trait("profissional") or p.hid("det") >= 16
+	var pro := p.has_trait("profissional") or p.has_trait("disciplinado") or p.has_trait("perfeccionista") or p.hid("det") >= 15
 	var loose := p.has_trait("acomodado") or p.has_trait("festeiro")
 	var low := p.morale < 45.0
 	var big := importance >= 0.6 or derby
@@ -1805,6 +1817,29 @@ func _talk_reaction(p: Player, key: String, diff: int, fav: float) -> float:
 				d = -0.035
 			if HiddenPersona.hot_head(p):
 				d -= 0.015
+		"confiar":
+			# Escolha segura: ajuda pouco, quase nunca atrapalha; rende mais com quem está inseguro.
+			d = 0.01 + (0.012 if sensitive or low else 0.0) + (0.004 if diff < 0 else 0.0)
+			if loose and fav > 3.0:
+				d -= 0.012
+		"foco":
+			# Conversa tática: rende com quem é profissional; os dispersos desligam.
+			d = 0.005 + (0.014 if pro else 0.0) + (0.005 if absi(diff) <= 1 else 0.0)
+			if loose:
+				d -= 0.01
+		"decepcao":
+			# Mais fria que a cobrança: mexe com o orgulho sem humilhar.
+			d = (0.016 if diff < 0 else (0.004 if diff == 0 else -0.018))
+			if hard or p.has_trait("resiliente"):
+				d += 0.008
+			if sensitive or low:
+				d -= 0.014
+	if key in ["exigir", "motivar"] and big and (p.has_trait("jogos_grandes") or p.has_trait("decisivo")):
+		d += 0.008
+	if key == "elogiar" and (p.has_trait("vaidoso") or p.has_trait("estrela")):
+		d += 0.006
+	if key == "cobrar" and p.has_trait("temperamental"):
+		d -= 0.01
 	return clampf(d, -0.05, 0.05)
 
 

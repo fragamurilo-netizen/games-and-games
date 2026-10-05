@@ -2132,28 +2132,78 @@ func _other_scores(minute: int, half: int) -> VBoxContainer:
 # ---------------------------------------------------------------------------
 
 ## Palestra no vestiário (antes do pontapé inicial ou no intervalo). O relógio fica parado
-## enquanto o modal está aberto; "Sem palestra" segue sem efeito.
+## enquanto o modal está aberto; "Sem palestra" segue sem efeito. Cada tom aparece com uma fala
+## sorteada para o momento (TeamTalk), e depois vem a reação do grupo.
 func _open_talk(halftime: bool) -> void:
 	if _sim == null or not _sim.can_talk(_user_side):
 		return
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	var v := UIKit.vbox(10)
 	v.add_child(UIKit.label("Palestra no intervalo" if halftime else "Palestra antes do jogo", "Title"))
-	var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
-	if halftime:
-		v.add_child(UIKit.label(("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate."), "Muted"))
-	for key in MatchSimulation.TALK_ORDER:
-		var k: String = key
-		var cfg: Dictionary = MatchSimulation.TALKS[k]
-		var b := UIKit.button(String(cfg["name"]), "", func():
-			var r := _sim.team_talk(_user_side, k)
+	v.add_child(UIKit.label(_talk_context(halftime), "Muted", true))
+	var ut: MatchTeam = _sim.teams[_user_side]
+	for opt in TeamTalk.options(_sim, _user_side, rng):
+		var k := String(opt["key"])
+		var say := String(opt["text"])
+		var inner := UIKit.vbox(4)
+		var head := String(opt["short"])
+		if halftime and ut.talk_key == k:
+			head += " · mesmo tom de antes do jogo"
+		inner.add_child(UIKit.eyebrow(head))
+		inner.add_child(UIKit.label("“%s”" % say, "", true))
+		v.add_child(UIKit.tap_row(inner, func():
+			var r := _sim.team_talk(_user_side, k, say)
 			UIManager.close_modal()
-			UIManager.toast(String(r["msg"]), UIColors.ACCENT if r["ok"] else UIColors.RED)
+			if not r["ok"]:
+				UIManager.toast(String(r["msg"]), UIColors.RED)
+				if halftime:
+					_show_halftime()
+				return
 			_drain(false)
-			if halftime:
-				_show_halftime(), "")
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		v.add_child(b)
+			_show_talk_reaction(k, r, halftime, rng)))
 	v.add_child(UIKit.button("Sem palestra", "GhostButton", func():
+		UIManager.close_modal()
+		if halftime:
+			_show_halftime()))
+	UIManager.show_modal(v, true, false)
+
+
+## Uma linha sobre o momento: placar no intervalo; antes do jogo, mando, favoritismo e peso.
+func _talk_context(halftime: bool) -> String:
+	var opp: MatchTeam = _sim.teams[1 - _user_side]
+	if halftime:
+		var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
+		var txt := ("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate.")
+		var xd := _sim.teams[_user_side].xg - opp.xg
+		if xd >= 0.6:
+			txt += " Mandando no jogo."
+		elif xd <= -0.6:
+			txt += " O adversário está melhor."
+		return txt
+	var parts: Array[String] = []
+	parts.append("Contra o %s%s" % [opp.club.short_name, "" if _sim.neutral else (", em casa" if _user_side == 0 else ", fora de casa")])
+	var sit := TeamTalk.situation(_sim, _user_side)
+	if sit.has("pre_derby"):
+		parts.append("clássico")
+	if sit.has("pre_big"):
+		parts.append("jogo decisivo")
+	if sit.has("pre_fav"):
+		parts.append("somos favoritos")
+	elif sit.has("pre_under"):
+		parts.append("eles são favoritos")
+	return ", ".join(parts) + "."
+
+
+## Reação do vestiário: resumo e quem respondeu (ou sentiu) a conversa.
+func _show_talk_reaction(key: String, r: Dictionary, halftime: bool, rng: RandomNumberGenerator) -> void:
+	var rx := TeamTalk.reaction(_sim, _user_side, key, r.get("up", []), r.get("down", []), bool(r.get("repeat", false)), rng)
+	var v := UIKit.vbox(10)
+	v.add_child(UIKit.label("Reação no vestiário", "Title"))
+	v.add_child(UIKit.label(String(rx["summary"]), "H3", true))
+	for line in rx["lines"]:
+		v.add_child(UIKit.label(String(line), "", true))
+	v.add_child(UIKit.button("Voltar ao intervalo" if halftime else "Ir para o jogo", "PrimaryButton", func():
 		UIManager.close_modal()
 		if halftime:
 			_show_halftime()))
