@@ -6,7 +6,7 @@ extends BaseScreen
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
-const PITCH_COMPACT := 0.2 # fração da altura do campo (deitado) quando os lances estão em destaque
+const PITCH_COMPACT := 0.23 # fração da altura do campo (deitado) quando os lances estão em destaque
 const FEED_FS := 24 # corpo da narração
 const FEED_FS_NEW := 27 # lance mais recente, em cima
 const FEED_MIN_H := 130.0 # altura mínima da narração/abas embaixo do campo
@@ -231,7 +231,7 @@ func _pitch_height() -> float:
 		return 120.0 if get_viewport_rect().size.y < 720.0 else 220.0
 	var h := get_viewport_rect().size.y
 	if AppSettings.match_view == 0:
-		return clampf(h * PITCH_COMPACT, 220.0, 340.0)
+		return clampf(h * PITCH_COMPACT, 250.0, 380.0)
 	return clampf(h * 0.5, 420.0, 760.0)
 
 
@@ -300,6 +300,7 @@ func _build() -> void:
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
 	StadiumStyle.apply_weather(_stadium, _sim.wx)
 	_pitch.stadium = _stadium
+	_pitch.classic = AppSettings.match_gfx == 0
 	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
 	Sfx.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
 	_add_field_node(UIKit.margin(_pitch, 0, 6, 0, 4))
@@ -866,6 +867,9 @@ func _flush_lines() -> void:
 
 
 func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
+	if is_instance_valid(_pitch) and _pitch.classic:
+		var sd := int(line.get("side", -1))
+		_pitch.show_caption(String(line.get("text", "")), _side_color(sd) if sd >= 0 else UIColors.MUTED)
 	if ev.is_empty():
 		return
 	var t: int = ev["t"]
@@ -1667,18 +1671,35 @@ func _build_tabs() -> void:
 	for b in t.get_children():
 		(b as Button).custom_minimum_size.y = 56
 	_tabs_row.add_child(t)
-	var vb := UIKit.icon_button("pitch" if AppSettings.match_view == 2 else "list", _cycle_match_view, "Campo e narração")
+	var vb := UIKit.icon_button("pitch", _open_view_sheet, "Campo e narração")
 	vb.custom_minimum_size = Vector2(56, 56)
 	_tabs_row.add_child(vb)
 
 
-## Alterna o espaço da tela: lances em destaque (campo menor), campo grande ou só a narração.
-func _cycle_match_view() -> void:
-	AppSettings.match_view = (AppSettings.match_view + 1) % 3
-	AppSettings.save_settings()
-	_apply_match_view()
-	_build_tabs()
-	UIManager.toast(AppSettings.MATCH_VIEW_NAMES[AppSettings.match_view], UIColors.ACCENT)
+## Folha de visualização: espaço do campo (menor, grande, só narração) e visual do campo
+## (clássico 2D ou transmissão). Vale na hora e fica salvo nas opções.
+func _open_view_sheet() -> void:
+	var v := UIKit.vbox(12)
+	v.add_child(UIKit.label("Campo e narração", "Title"))
+	v.add_child(UIKit.eyebrow("Espaço na tela"))
+	var views: Array = []
+	for i in AppSettings.MATCH_VIEW_NAMES.size():
+		views.append([str(i), AppSettings.MATCH_VIEW_NAMES[i]])
+	v.add_child(UIKit.segment(views, str(AppSettings.match_view), func(k: String):
+		AppSettings.match_view = int(k)
+		AppSettings.save_settings()
+		_apply_match_view()))
+	v.add_child(UIKit.eyebrow("Visual do campo"))
+	var gfx: Array = []
+	for i in AppSettings.MATCH_GFX_NAMES.size():
+		gfx.append([str(i), AppSettings.MATCH_GFX_NAMES[i]])
+	v.add_child(UIKit.segment(gfx, str(AppSettings.match_gfx), func(k: String):
+		AppSettings.match_gfx = int(k)
+		AppSettings.save_settings()
+		_pitch.classic = AppSettings.match_gfx == 0
+		_pitch.queue_redraw()))
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true, true)
 
 
 func _apply_match_view() -> void:
