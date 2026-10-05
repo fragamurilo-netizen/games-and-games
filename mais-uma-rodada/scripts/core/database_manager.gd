@@ -452,9 +452,77 @@ static func _custom_formation(fname: String) -> Dictionary:
 			for k in ["def", "mid", "att", "wide"]:
 				s[k] = float(role[k])
 		slots.append(s)
+	_spread_custom(slots, ov)
 	var f := {"name": fname, "desc": "Variação personalizada do %s." % base, "slots": slots}
 	_custom_cache[fname] = f
 	return f
+
+
+## Distância mínima entre duas vagas no campinho (em fração da largura e do comprimento):
+## abaixo disso a camisa e o nome de uma cobrem os da outra.
+const SLOT_MIN_DX := 0.2
+const SLOT_MIN_DY := 0.11
+const CENTRAL_CODES := ["CB", "DM", "CM", "AM", "ST"]
+
+
+## Arruma as vagas de uma formação personalizada para ninguém ficar em cima de ninguém:
+## 1) posições repetidas (dois PD, três MC...) ficam na mesma linha, espaçadas por igual
+##    (centrais) ou uma por dentro da outra (laterais e pontas);
+## 2) vagas que ainda se encostam são afastadas para os lados (e, se faltar campo, na altura).
+static func _spread_custom(slots: Array, ov: Dictionary) -> void:
+	var codes: Array = Pos.CODES_I18N["en"]
+	var groups := {}
+	for i in range(1, slots.size()):
+		var code: String = codes[int(slots[i]["pos"])]
+		if not groups.has(code):
+			groups[code] = []
+		groups[code].append(i)
+	for code in groups:
+		var idx: Array = groups[code]
+		if idx.size() < 2 or not idx.any(func(i): return ov.has(i)):
+			continue
+		var y := 0.0
+		for i in idx:
+			y += float(slots[i]["y"])
+		y /= idx.size()
+		var n := idx.size()
+		if code in CENTRAL_CODES:
+			idx.sort_custom(func(a, b): return float(slots[a]["x"]) < float(slots[b]["x"]) or (float(slots[a]["x"]) == float(slots[b]["x"]) and a < b))
+			var gap := minf(0.24, 0.72 / (n - 1))
+			for k in n:
+				slots[idx[k]]["x"] = 0.5 + (k - (n - 1) * 0.5) * gap
+				slots[idx[k]]["y"] = y
+		else:
+			# Lateral/ponta repetido: o primeiro fica no corredor, os outros entram em direção ao meio.
+			var edge: float = SIDE_X.get(code, 0.84)
+			var inward := -1.0 if edge > 0.5 else 1.0
+			idx.sort_custom(func(a, b): return absf(float(slots[a]["x"]) - edge) < absf(float(slots[b]["x"]) - edge) or (absf(float(slots[a]["x"]) - edge) == absf(float(slots[b]["x"]) - edge) and a < b))
+			for k in n:
+				slots[idx[k]]["x"] = edge + inward * k * SLOT_MIN_DX
+				slots[idx[k]]["y"] = y
+	for _it in 16:
+		var moved := false
+		for i in range(1, slots.size()):
+			for j in range(i + 1, slots.size()):
+				var a: Dictionary = slots[i]
+				var b: Dictionary = slots[j]
+				var dx := float(b["x"]) - float(a["x"])
+				var dy := float(b["y"]) - float(a["y"])
+				if absf(dx) >= SLOT_MIN_DX - 0.001 or absf(dy) >= SLOT_MIN_DY - 0.001:
+					continue
+				moved = true
+				var sgn := 1.0 if dx > 0.0 or (dx == 0.0 and float(a["x"]) <= 0.5) else -1.0
+				var push := (SLOT_MIN_DX - absf(dx)) * 0.5 + 0.002
+				var ax := clampf(float(a["x"]) - sgn * push, 0.08, 0.92)
+				var bx := clampf(float(b["x"]) + sgn * push, 0.08, 0.92)
+				if absf(bx - ax) < SLOT_MIN_DX - 0.01:
+					# Encostou na lateral: o espaço que falta vem da altura.
+					var sy := 1.0 if dy >= 0.0 else -1.0
+					b["y"] = clampf(float(a["y"]) + sy * SLOT_MIN_DY, 0.12, 0.74)
+				a["x"] = ax
+				b["x"] = bx
+		if not moved:
+			break
 
 
 static func formation_names() -> Array[String]:
