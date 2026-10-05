@@ -9,6 +9,10 @@ var _extras_open := false
 var _deep_open := false
 ## Tocar numa vaga do campinho muda a posição dela (formação personalizada) em vez do jogador.
 var _pos_edit := false
+var _bench_node: Control
+## Quanto o campo encolhe para o banco caber acima do rodapé (medido por tamanho de tela).
+var _pitch_cut := 0.0
+var _fit_key := Vector2.ZERO
 
 
 func _init() -> void:
@@ -85,7 +89,11 @@ func refresh() -> void:
 	var avail := vh - 88.0 - 110.0 - 48.0 - (0.0 if wide else 96.0 + 190.0)
 	var pw := content_width() * (0.58 if wide else 1.0)
 	var ph := (pw / 1.55) if _pitch.horizontal else (pw / 0.74)
-	_pitch.custom_minimum_size = Vector2(0, clampf(minf(ph, avail), 380.0, 1100.0))
+	var fit_key := get_viewport_rect().size
+	if fit_key != _fit_key:
+		_fit_key = fit_key
+		_pitch_cut = 0.0
+	_pitch.custom_minimum_size = Vector2(0, clampf(minf(ph, avail) - _pitch_cut, 380.0, 1100.0))
 	_pitch.mouse_filter = Control.MOUSE_FILTER_STOP
 	_pitch.chip_color = club.primary_color()
 	_update_chips()
@@ -98,7 +106,8 @@ func refresh() -> void:
 		if used > lim:
 			left.add_child(UIKit.colored("%s: %d de %d." % [rule, used, lim], UIColors.ORANGE, "Small", true))
 	# Banco: faixa de camisas logo abaixo do campo (ao lado, em tela larga).
-	(right if wide else left).add_child(_bench_strip(w, club, sheet, wide))
+	_bench_node = _bench_strip(w, club, sheet, wide)
+	(right if wide else left).add_child(_bench_node)
 	if f != null and not _edit:
 		right.add_child(_opponent_card(w, f))
 		right.add_child(_assistant_card(w, f))
@@ -127,6 +136,22 @@ func refresh() -> void:
 	right.add_child(UIKit.card_panel(plan))
 	right.add_child(_style_fit_label(w, sheet, tac["styles"][sheet.style]))
 	_build_footer(w)
+	if not wide:
+		_fit_pitch.call_deferred()
+
+
+## Em pé, campo e banco têm de caber juntos acima do rodapé (velocidade e Iniciar partida):
+## depois de montada a tela, mede quanto o banco passou do visível e encolhe o campo.
+func _fit_pitch() -> void:
+	await get_tree().process_frame
+	var sc := scroll()
+	if sc == null or sc.size.y <= 0.0 or not is_instance_valid(_pitch) or not is_instance_valid(_bench_node):
+		return
+	var bottom := _bench_node.get_global_rect().end.y - sc.get_global_rect().position.y + sc.scroll_vertical
+	var over := bottom + UITokens.S2 - sc.size.y
+	if over > 1.0:
+		_pitch_cut += over
+		_pitch.custom_minimum_size.y = maxf(380.0, _pitch.custom_minimum_size.y - over)
 
 
 ## Cabeçalho do campo: a formação em destaque, a força do time e as ferramentas rápidas.
@@ -906,7 +931,7 @@ func _start() -> void:
 		if w.player(pid) == null:
 			missing += 1
 	if missing > 0:
-		UIManager.info("Escalação incompleta", "Faltam %d jogador(es) no time titular." % missing)
+		UIManager.info("Escalação incompleta", ("Falta %d jogador no time titular." if missing == 1 else "Faltam %d jogadores no time titular.") % missing)
 		return
 	Sfx.play("whistle", -4.0)
 	if AppSettings.match_speed == AppSettings.SPEED_INSTANT:

@@ -20,6 +20,9 @@ const BOX_D := 16.5
 const JOG := 5.0
 const RUN := 7.2
 const SPRINT := 8.8
+## Distância mínima entre jogadores (m) para os círculos não se cobrirem na tela.
+const SEP_MATE := 4.2
+const SEP_RIVAL := 2.6
 
 class Ag:
 	var side := 0
@@ -849,19 +852,29 @@ func _update_agents(dt: float) -> void:
 				if mode == "goal":
 					spd = 3.0
 			_steer(a, tgt, spd, dt)
-	# Ninguém atravessa ninguém: afastamento leve entre jogadores próximos.
+	# Ninguém em cima de ninguém: o círculo do jogador na tela tem uns 4,6 m de diâmetro, então
+	# companheiros mantêm essa distância; adversários podem chegar mais perto (disputa de bola).
+	# Barreira, área no escanteio e comemoração juntam o time de propósito: aí vale o mínimo.
+	var tight := mode == "set" or mode == "goal"
 	for s in 2:
 		for a: Ag in agents[s]:
 			if not a.on or a.down > 0.0:
 				continue
 			for s2 in 2:
+				var min_d := 1.3 if tight else (SEP_MATE if s2 == s else SEP_RIVAL)
 				for b: Ag in agents[s2]:
 					if b == a or not b.on:
 						continue
 					var d := a.pos - b.pos
 					var dl := d.length()
-					if dl < 1.3 and dl > 0.001:
-						a.pos += d / dl * (1.3 - dl) * 0.25
+					if dl >= min_d:
+						continue
+					if dl < 0.001:
+						# Mesmo ponto: cada um sai para um lado (determinístico, pelo índice).
+						var ang := (a.idx * 2.4 + a.side * 1.3)
+						d = Vector2(cos(ang), sin(ang))
+						dl = 0.001
+					a.pos += d / dl * (min_d - dl) * 0.25
 
 
 func _steer(a: Ag, tgt: Vector2, spd: float, dt: float) -> void:

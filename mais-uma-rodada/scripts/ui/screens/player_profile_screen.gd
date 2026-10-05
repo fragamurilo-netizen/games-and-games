@@ -200,9 +200,9 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		info_parent.add_child(UIKit.tap_row(cr,func(): UIManager.push("club",{"id":cid}),"PanelContainer"))
 		info_parent.add_child(UIKit.label(p.club_tenure(w.year),"Small",true))
 	if p.injury_weeks > 0:
-		card.add_child(UIKit.colored("Fora por lesão · %s · %d semana(s)" % [p.injury_name,p.injury_weeks],UIColors.ORANGE,"",true))
+		card.add_child(UIKit.colored(("Fora por lesão · %s · %d semana" if p.injury_weeks == 1 else "Fora por lesão · %s · %d semanas") % [p.injury_name,p.injury_weeks],UIColors.ORANGE,"",true))
 	elif p.suspension > 0:
-		card.add_child(UIKit.colored("Suspenso · %d jogo(s)" % p.suspension,UIColors.ORANGE,"",true))
+		card.add_child(UIKit.colored(("Suspenso · %d jogo" if p.suspension == 1 else "Suspenso · %d jogos") % p.suspension,UIColors.ORANGE,"",true))
 	elif p.intl_duty:
 		card.add_child(UIKit.colored("A serviço da seleção",UIColors.ORANGE,"",true))
 	_acts = UIKit.vbox(UITokens.S2)
@@ -320,12 +320,13 @@ func _tile(value: String, caption: String, color: Color = UIColors.TEXT, fill: f
 	var v := UIKit.card("CardFlat", 2)
 	var panel := UIKit.card_panel(v)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var l := UIKit.label(value, "H3")
-	l.add_theme_color_override(&"font_color", color)
+	# Mesmo desenho dos ladrilhos de número do resto do jogo: valor condensado, legenda em caixa alta.
+	var l := UIKit.label(value, "Stat")
+	l.add_theme_color_override(&"font_color", UIColors.ink(color))
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	l.custom_minimum_size.x = 40
 	v.add_child(l)
-	var c := UIKit.label(caption, "Small")
+	var c := UIKit.label(caption.to_upper(), "Caps")
 	# Legenda quebra em vez de cortar ("valor de mer...") quando o bloco fica estreito
 	c.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	c.custom_minimum_size.x = 40
@@ -542,6 +543,8 @@ func _stats(w: GameWorld, p: Player) -> Control:
 		if gk:
 			row_c.add_child(UIKit.stat(str(p.stats[Player.S_SAVES]), "defesas"))
 			row_c.add_child(UIKit.stat("%.1f" % p.per90(Player.S_SAVES), "defesas /90"))
+			row_c.add_child(UIKit.stat(str(p.stats[Player.S_CONCEDED]), "gols sofridos"))
+			row_c.add_child(UIKit.stat("%d%%" % int(round(p.save_pct())) if p.stats[Player.S_SAVES] + p.stats[Player.S_CONCEDED] > 0 else "—", "chutes defendidos"))
 			row_c.add_child(UIKit.stat("%d%%" % int(round(p.pass_pct())), "passes certos"))
 		else:
 			row_c.add_child(UIKit.stat("%d (%d)" % [p.stats[Player.S_SHOTS], p.stats[Player.S_SHOTS_ON]], "chutes (alvo)"))
@@ -557,6 +560,22 @@ func _stats(w: GameWorld, p: Player) -> Control:
 			var conv := 100.0 * p.stats[Player.S_GOALS] / p.stats[Player.S_SHOTS] if p.stats[Player.S_SHOTS] > 0 else 0.0
 			row_d.add_child(UIKit.stat("%d%%" % int(round(conv)), "aproveitamento"))
 			card.add_child(row_d)
+			var row_e := UIKit.hbox(4)
+			var on_pct := 100.0 * p.stats[Player.S_SHOTS_ON] / p.stats[Player.S_SHOTS] if p.stats[Player.S_SHOTS] > 0 else 0.0
+			row_e.add_child(UIKit.stat("%d%%" % int(round(on_pct)) if p.stats[Player.S_SHOTS] > 0 else "—", "chutes no alvo"))
+			row_e.add_child(UIKit.stat(str(p.stats[Player.S_AERIAL]), "duelos aéreos"))
+			row_e.add_child(UIKit.stat(str(p.stats[Player.S_FOULS]), "faltas"))
+			row_e.add_child(UIKit.stat(str(p.stats[Player.S_MINUTES] / p.stats[Player.S_GOALS]) if p.stats[Player.S_GOALS] > 0 else "—", "min por gol"))
+			card.add_child(row_e)
+			if mins >= 270:
+				card.add_child(UIKit.label("Por 90 minutos", "Caps"))
+				var row_f := UIKit.hbox(4)
+				row_f.add_child(UIKit.stat(Fmt.dec(p.per90(Player.S_GOALS), 2), "gols"))
+				row_f.add_child(UIKit.stat(Fmt.dec(p.per90(Player.S_ASSISTS), 2), "assist."))
+				row_f.add_child(UIKit.stat(Fmt.dec(p.per90(Player.S_SHOTS), 1), "chutes"))
+				row_f.add_child(UIKit.stat(Fmt.dec(p.per90(Player.S_KEY_PASSES), 1), "passes decisivos"))
+				row_f.add_child(UIKit.stat(Fmt.dec(p.per90(Player.S_TACKLES) + p.per90(Player.S_INTERCEPTIONS), 1), "desarmes + intercept."))
+				card.add_child(row_f)
 			var diff := p.stats[Player.S_GOALS] - p.xg()
 			if p.stats[Player.S_SHOTS] >= 15 and absf(diff) >= 2.0:
 				card.add_child(UIKit.colored("Gols vs. esperado: %+.1f" % diff, UIColors.GREEN if diff > 0 else UIColors.ORANGE, "Small", true))
@@ -638,6 +657,15 @@ func _career(w: GameWorld, p: Player) -> Control:
 	row2.add_child(UIKit.stat(str(p.career_assists), "assist."))
 	row2.add_child(UIKit.stat(str(p.titles), "títulos"))
 	card.add_child(row2)
+	if p.career_apps > 0:
+		var cx := p.career_extra()
+		var row2b := UIKit.hbox(4)
+		row2b.add_child(UIKit.stat(Fmt.dec(float(p.career_goals) / p.career_apps, 2), "gols por jogo"))
+		row2b.add_child(UIKit.stat(Fmt.dec(float(p.career_goals + p.career_assists) / p.career_apps, 2), "G+A por jogo"))
+		row2b.add_child(UIKit.stat(str(int(cx["mo"])), "craque do jogo"))
+		if Pos.group(p.position) <= Pos.G_DEF:
+			row2b.add_child(UIKit.stat(str(int(cx["cs"])), "sem sofrer gol"))
+		card.add_child(row2b)
 	var caps := NationalTeamManager.caps_of(w, p.id)
 	var nt_titles := NationalTeamManager.player_titles(w, p.id)
 	if caps[0] > 0 or NationalTeamManager.is_called(w, p):

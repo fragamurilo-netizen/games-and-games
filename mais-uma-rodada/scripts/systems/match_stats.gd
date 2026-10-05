@@ -18,10 +18,12 @@ const DR := 5 # dribles certos
 const SV := 6 # defesas
 const PP := 7 # % de passes certos (0..100)
 const XG := 8 # xG × 100
-const N := 9
+const AD := 9 # duelos aéreos ganhos
+const FC := 10 # faltas cometidas
+const N := 11
 
 
-## {player_id: [SH, SO, KP, TK, IT, DR, SV, PP, XG]} dos dois times.
+## {player_id: [SH, SO, KP, TK, IT, DR, SV, PP, XG, AD, FC]} dos dois times.
 static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([world.world_seed, f.home, f.away, f.slot, f.hg, f.ag, "stats"])
@@ -95,7 +97,48 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 				var e: Array = real.get(p.id, [])
 				out[p.id][SV] = int(e[2]) if e.size() > 2 else saved
 				saved = 0
+	# Duelos aéreos ganhos (≈ 13 por time) e faltas cometidas (≈ 12, mais para quem tem menos a
+	# bola). Sorteados por último para não mudar os números acima.
+	for side in 2:
+		var lines2: Array = res["lines"][side]
+		var ps2 := poss if side == 0 else 1.0 - poss
+		var rows2 := {}
+		for ln in lines2:
+			rows2[(ln[QuickMatch.L_P] as Player).id] = out[(ln[QuickMatch.L_P] as Player).id]
+		var aw: Array = []
+		var fw: Array = []
+		for ln in lines2:
+			var p: Player = ln[QuickMatch.L_P]
+			var mf := float(ln[QuickMatch.L_MINS]) / 90.0
+			var h := clampf((p.height - 168.0) / 18.0, 0.25, 1.7)
+			aw.append(AERIAL_POS[int(ln[QuickMatch.L_POS])] * h * (0.4 + p.attrs[Attr.CAB] / 100.0 + p.attrs[Attr.FOR] / 250.0) * mf)
+			var fv := float(ln[QuickMatch.L_FOUL])
+			if fv <= 0.0:
+				fv = float(ln[QuickMatch.L_DEF]) * 0.8 + 0.1
+			if int(ln[QuickMatch.L_POS]) == Pos.GK:
+				fv = 0.03
+			fw.append(fv * (1.25 - p.attrs[Attr.DIS] / 160.0) * mf)
+			# Cada cartão veio de uma falta.
+			rows2[p.id][FC] += int(ln[QuickMatch.L_Y]) + (1 if bool(ln[QuickMatch.L_RED]) else 0)
+		var n_air := maxi(4, int(round(rng.randfn(13.0, 3.5))))
+		for _i in n_air:
+			var k := RngUtil.weighted_index(rng, aw)
+			if k < 0:
+				break
+			rows2[(lines2[k][QuickMatch.L_P] as Player).id][AD] += 1
+		var n_foul := maxi(3, int(round(rng.randfn(11.5 + (0.5 - ps2) * 6.0, 3.0))))
+		for ln in lines2:
+			n_foul -= int(rows2[(ln[QuickMatch.L_P] as Player).id][FC])
+		for _i in maxi(0, n_foul):
+			var k := RngUtil.weighted_index(rng, fw)
+			if k < 0:
+				break
+			rows2[(lines2[k][QuickMatch.L_P] as Player).id][FC] += 1
 	return out
+
+
+## Peso de cada posição nas bolas aéreas.
+const AERIAL_POS: Array[float] = [0.25, 0.75, 1.7, 0.75, 1.1, 0.8, 0.5, 0.45, 0.45, 0.45, 0.45, 1.45]
 
 
 static func _assists(lines: Array) -> int:

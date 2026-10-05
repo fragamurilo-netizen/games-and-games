@@ -86,10 +86,10 @@ static func for_next_match(world: GameWorld) -> Array:
 		if p.contract_end <= world.year:
 			expiring += 1
 	if expiring > 0 and world.season.day >= 38:
-		out.append({"text": "%d contrato(s) terminam no fim da temporada" % expiring, "kind": "contract", "priority": 30 + world.season.day / 2})
+		out.append({"text": ("%d contrato termina no fim da temporada" if expiring == 1 else "%d contratos terminam no fim da temporada") % expiring, "kind": "contract", "priority": 30 + world.season.day / 2})
 	var offers := TransferManager.pending_offers(world).size()
 	if offers > 0:
-		out.append({"text": "%d proposta(s) aguardando resposta" % offers, "kind": "market", "priority": 80})
+		out.append({"text": ("%d proposta aguardando resposta" if offers == 1 else "%d propostas aguardando resposta") % offers, "kind": "market", "priority": 80})
 	out.append_array(ManagerFeats.next_hooks(world, opp))
 	out.sort_custom(func(a, b): return a["priority"] > b["priority"])
 	return out.slice(0, 4)
@@ -116,9 +116,9 @@ static func _cup_hook(world: GameWorld, f: Fixture, user: Club, opp: Club) -> Di
 		var mine: int = agg[0] if f.home == user.id else agg[1]
 		var theirs: int = agg[1] if f.home == user.id else agg[0]
 		if mine > theirs:
-			return {"text": "%s · volta: vantagem de %d gol(s)" % [stage, mine - theirs], "kind": "season", "priority": 92}
+			return {"text": ("%s · volta: vantagem de %d gol" if (mine - theirs) == 1 else "%s · volta: vantagem de %d gols") % [stage, mine - theirs], "kind": "season", "priority": 92}
 		if mine < theirs:
-			return {"text": "%s · volta: precisa reverter %d gol(s)" % [stage, theirs - mine], "kind": "season", "priority": 96}
+			return {"text": ("%s · volta: precisa reverter %d gol" if (theirs - mine) == 1 else "%s · volta: precisa reverter %d gols") % [stage, theirs - mine], "kind": "season", "priority": 96}
 		return {"text": "%s · volta: tudo igual no agregado" % stage, "kind": "season", "priority": 94}
 	return {"text": "%s da %s · jogo de ida" % [stage, cup.short_name], "kind": "season", "priority": 86}
 

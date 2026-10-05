@@ -896,7 +896,7 @@ static func _announce_news(world: GameWorld, next: Dictionary, firsts: Array, dr
 		body.append("Ficaram fora da lista desta vez: %s. Vale uma conversa, a moral caiu." % ", ".join(out.map(func(p: Player): return p.display_name())))
 	if body.is_empty():
 		return
-	var subj := ("Data FIFA: %d convocado(s) do elenco" % going.size()) if not going.is_empty() else "Data FIFA: ninguém do elenco na lista"
+	var subj := (("Data FIFA: %d convocado do elenco" if going.size() == 1 else "Data FIFA: %d convocados do elenco") % going.size()) if not going.is_empty() else "Data FIFA: ninguém do elenco na lista"
 	InboxManager.send(world, "federacao", subj, "\n\n".join(body), {"k": "screen", "s": "national", "args": {"tab": "squad"}},
 		int(going[0].id) if not going.is_empty() else -1, club.id)
 
@@ -1043,7 +1043,7 @@ static func _after_date(world: GameWorld, env: Env, results: Array, weekend_inde
 			p.injury_name = InjuryTable.name_for(p.injury_weeks, p.id + world.year)
 			if world.has_user() and p.club_id == world.user_club_id:
 				NewsManager.post_raw(world, "%s volta machucado da seleção" % p.display_name(),
-					"O jogador se lesionou a serviço da seleção (%s) e desfalca o time por %d semana(s)." % [DatabaseManager.nation_name(NationalityManager.team(p)), p.injury_weeks],
+					("O jogador se lesionou a serviço da seleção (%s) e desfalca o time por %d semana." if p.injury_weeks == 1 else "O jogador se lesionou a serviço da seleção (%s) e desfalca o time por %d semanas.") % [DatabaseManager.nation_name(NationalityManager.team(p)), p.injury_weeks],
 					world.user_club_id, p.id, NewsEvent.IMP_HIGH, "selecao")
 	_send_on_duty(world, env, weekend_index)
 	if not world.has_user():
@@ -1432,7 +1432,7 @@ static func _tournament_effects(world: GameWorld, env: Env, rec: Dictionary) -> 
 				if p.club_id == world.user_club_id:
 					mine.append(p.display_name())
 		if not mine.is_empty():
-			NewsManager.post_raw(world, "%d jogador(es) do %s na %s" % [mine.size(), world.user_club().short_name, rec["name"]],
+			NewsManager.post_raw(world, ("%d jogador do %s na %s" if mine.size() == 1 else "%d jogadores do %s na %s") % [mine.size(), world.user_club().short_name, rec["name"]],
 				"Convocados: %s." % ", ".join(mine), world.user_club_id, -1, NewsEvent.IMP_NORMAL, "selecao")
 
 

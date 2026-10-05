@@ -862,6 +862,47 @@ static func press_mood(world: GameWorld) -> float:
 	return s / js.size()
 
 
+## Coluna depois de um mata-mata decidido: fala do confronto e da taça, não do placar do dia.
+static func _tie_column(world: GameWorld, r: RandomNumberGenerator, f: Fixture, st: Dictionary) -> void:
+	var js := journalists(world)
+	if js.is_empty():
+		return
+	var j: Dictionary = RngUtil.pick(r, js)
+	var club := world.user_club()
+	var opp := world.club(f.opponent_of(club.id))
+	var m := world.manager_name
+	var won := int(st["w"]) == club.id
+	var derby := bool(st["derby"])
+	var how := TieStakes.how(st)
+	var comp := TieStakes.of_comp(String(st["name"]))
+	var mine := f.result_for(club.id)
+	var title := ""
+	var body := ""
+	if bool(st["title"]):
+		if won:
+			title = RngUtil.pick(r, ["%s entra para a história do %s" % [m, club.short_name], "A taça tem a cara de %s" % m])
+			body = "Título %s%s. %s" % [comp, (" " + how) if how != "" else "",
+				"E em cima do maior rival: a cidade vai lembrar disso por anos." if derby else "O treinador ganhou crédito para muito tempo."]
+			if mine == "D":
+				body += " Perder o último jogo não apagou nada."
+		else:
+			title = RngUtil.pick(r, ["%s deixa a taça escapar" % m, "Vice que dói: a conta chega para %s" % m])
+			if derby:
+				title = RngUtil.pick(r, ["Taça na mão do rival: dia de luto no %s" % club.short_name, "O %s vê o %s levantar a taça" % [club.short_name, opp.short_name]])
+			body = "O %s perdeu o título %s%s%s. %s" % [club.short_name, comp, (" " + how) if how != "" else "", (" para o %s" % opp.short_name) if not derby else " para o maior rival",
+				"Vencer o último jogo não serviu de consolo: o título ficou com o outro lado." if mine == "V" else "A torcida quer saber o que deu errado na decisão."]
+	elif won:
+		title = "%s passa pelo %s%s" % [club.short_name, opp.short_name, " e garante a vaga" if bool(st["access"]) else ""]
+		body = "Classificação %s na %s %s.%s" % [how if how != "" else "no jogo único", String(st["stage"]).to_lower(), comp,
+			" Mesmo com a derrota no jogo, o que vale é a vaga." if mine == "D" else ""]
+	else:
+		title = "Eliminação pesa sobre %s" % m if not derby else "Eliminado pelo rival: %s na berlinda" % m
+		body = "O %s caiu %s diante do %s na %s %s.%s" % [club.short_name, how if how != "" else "no jogo único", opp.short_name, String(st["stage"]).to_lower(), comp,
+			" A vitória no jogo não apaga a eliminação." if mine == "V" else ""]
+	NewsManager.post_raw(world, title, "%s\n— %s, %s" % [body, String(j["n"]), String(j["o"])], club.id, -1,
+		NewsEvent.IMP_HIGH if bool(st["final"]) or derby else NewsEvent.IMP_NORMAL, "imprensa")
+
+
 ## Coluna depois de um jogo do usuário: o tom depende do jornalista, da relação e do momento.
 static func _column(world: GameWorld, r: RandomNumberGenerator, f: Fixture, result: String) -> void:
 	var js := journalists(world)
@@ -946,6 +987,7 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 		var f: Fixture = e["f"]
 		if not f.played:
 			continue
+		var stakes := TieStakes.of(world, f)
 		for cid in [f.home, f.away]:
 			if world.is_user_club(cid):
 				continue
@@ -959,7 +1001,11 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 			co[key] = int(co.get(key, 0)) + 1
 			var bp := ClubDNA.patience(c) # paciência com técnico é DNA do clube
 			var pres_pat := float(PRES_STYLES.get(String(pp["pres"].get(cid, {}).get("st", "paciente")), PRES_STYLES["paciente"])["patience"])
+			if not stakes.is_empty():
+				res = "V" if int(stakes["w"]) == cid else "D" # mata-mata: vale o confronto, não o placar do dia
 			var d := 2.0 if res == "V" else (0.2 if res == "E" else -2.6)
+			if not stakes.is_empty():
+				d *= 1.0 + 2.0 * float(stakes["weight"])
 			if derby:
 				d *= 1.6
 			if d < 0.0:
@@ -1149,6 +1195,10 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 		add_coach_rel(world, int(oc["id"]), d)
 	# Torcida
 	var sd := 1.6 if result == "V" else (-0.3 if result == "E" else -2.2)
+	var stakes := TieStakes.of(world, f)
+	if not stakes.is_empty():
+		# Taça ou vaga em jogo: o apoio sobe ou desaba pelo confronto inteiro.
+		sd = (5.0 if int(stakes["w"]) == club.id else -7.0) * float(stakes["weight"]) + sd
 	if derby:
 		sd *= 1.8
 	add_support(world, sd + (club.fan_mood - 55.0) * 0.015)
@@ -1163,9 +1213,14 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 	if derby:
 		add_pres_rel(world, 3.0 if result == "V" else (-3.0 if result == "D" else 0.0))
 	# Reputação do treinador
-	pp["mrep"] = clampf(manager_rep(world) + (0.25 if result == "V" else (-0.2 if result == "D" else 0.0)) * (club.reputation / 50.0), 5.0, 99.0)
-	# Imprensa
-	if r.randf() < 0.45:
+	var rep_d := 0.25 if result == "V" else (-0.2 if result == "D" else 0.0)
+	if not stakes.is_empty():
+		rep_d *= 1.0 + 3.0 * float(stakes["weight"]) # final ganha ou perdida marca o nome do treinador
+	pp["mrep"] = clampf(manager_rep(world) + rep_d * (club.reputation / 50.0), 5.0, 99.0)
+	# Imprensa: decisão de mata-mata sempre rende coluna
+	if not stakes.is_empty():
+		_tie_column(world, r, f, stakes)
+	elif r.randf() < 0.45:
 		_column(world, r, f, result)
 	# Ultimato e demissão no meio da temporada
 	_check_job(world, r)

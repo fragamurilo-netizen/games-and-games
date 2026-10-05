@@ -68,10 +68,10 @@ const MATCH_ARCH := {
 }
 const MATCH_PHIL := {
 	"pressao": ["pressao", "vertical"],
-	"posse": ["posicional", "toque"],
+	"posse": ["posicional", "toque", "aproximacao"],
 	"contragolpe": ["contragolpe", "vertical", "direto"],
-	"retranca": ["ferrolho", "pragmatico"],
-	"ofensivo": ["toque", "pontas"],
+	"retranca": ["ferrolho", "pragmatico", "bloco_medio"],
+	"ofensivo": ["toque", "pontas", "aproximacao"],
 }
 
 

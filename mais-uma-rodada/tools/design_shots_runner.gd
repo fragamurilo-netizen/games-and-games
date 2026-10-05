@@ -235,6 +235,11 @@ func _only_pass() -> void:
 		GameManager.play_instant()
 		await _frames(2)
 	UIManager.goto("hub")
+	# Avisos de conquista das rodadas simuladas não entram nas capturas (cobririam as telas).
+	w.pending_achievements.clear()
+	var banner := get_tree().root.get_node_or_null("AchievementBanner")
+	if banner != null:
+		banner.queue_free()
 	await _frames(6)
 	UIManager.close_all_modals()
 	if ugly:
@@ -251,6 +256,9 @@ func _only_pass() -> void:
 			continue
 		if spec == "!nametap":
 			await _name_tap_check(w)
+			continue
+		if spec.begins_with("!lineup"):
+			await _lineup_check(w, spec.get_slice("=", 1) if spec.contains("=") else "C:4-3-3|1=RM,9=RW")
 			continue
 		if spec.begins_with("~article"):
 			await _article_shot(w, spec.substr(9))
@@ -314,6 +322,34 @@ func _only_pass() -> void:
 			await _shot(shot_name + "_" + "bcdefghij"[pg - 1])
 
 
+## Formação personalizada (padrão: o caso dos prints, LD virou MD e o centroavante virou PD):
+## pré-jogo e partida em alguns momentos, para conferir que ninguém fica em cima de ninguém.
+func _lineup_check(w: GameWorld, fname: String) -> void:
+	var club := w.user_club()
+	club.sheet = ClubAI.auto_sheet(w, club, fname)
+	UIManager.goto("hub")
+	await _frames(2)
+	UIManager.push("prematch")
+	await _frames(8)
+	UIManager.close_all_modals()
+	await _shot(prefix + "lineup_pre")
+	_scroll(400)
+	await _shot(prefix + "lineup_pre_b")
+	GameManager.begin_match()
+	UIManager.replace("match")
+	await _frames(12)
+	var ms := _screen()
+	UIManager.close_all_modals()
+	ms.call("_drain", false)
+	await _shot(prefix + "lineup_kickoff")
+	ms.set("_pace", 2)
+	for k in 4:
+		var t := Time.get_ticks_msec() + 4000
+		while Time.get_ticks_msec() < t:
+			await get_tree().process_frame
+		await _shot(prefix + "lineup_match_%d" % k)
+
+
 ## Diálogos e folhas por cima do hub (~confirm, ~event, ~sim, ~tutorial, ~buy, ~talk, ~toast).
 func _dialog_shot(w: GameWorld, kind: String) -> void:
 	UIManager.close_all_modals()
@@ -321,6 +357,21 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 	await _frames(6)
 	UIManager.close_all_modals()
 	var u := w.user_club()
+	# ~event=tipo: monta um evento desse tipo (EventManager.KINDS) para a captura.
+	if kind.begins_with("event="):
+		var ev := EventManager._build(w, kind.substr(6))
+		if ev.is_empty():
+			print("evento sem candidato: ", kind.substr(6))
+			return
+		ev["id"] = 9000 + w.events.size()
+		ev["turn"] = w.current_turn()
+		ev["exp"] = w.current_turn() + EventManager.LIFETIME
+		w.events.append(ev)
+		EventDialog.open(ev)
+		await _frames(8)
+		await _shot(prefix + "event_" + kind.substr(6))
+		UIManager.close_all_modals()
+		return
 	match kind:
 		"confirm":
 			UIManager.confirm("Apagar o espaço 2?", "Isso apaga o Coritiba para sempre, incluindo a cópia de segurança.", "Apagar", func(): pass)
@@ -331,6 +382,18 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 			EventDialog.open(evs[0])
 		"sim":
 			SimDialog.open(func(): pass)
+		"simdone", "simdone3":
+			SimDialog.start(SimDialog.MODE_GAMES, 3 if kind == "simdone3" else 1, func(): pass)
+			var until := Time.get_ticks_msec() + 60000
+			while Time.get_ticks_msec() < until:
+				await _frames(4)
+				var done := false
+				for n in get_tree().root.find_children("*", "", true, false):
+					if n is SimDialog and not bool(n.get("_running")):
+						done = true
+				if done:
+					break
+			await _frames(6)
 		"tutorial":
 			Tutorial.show_all()
 		"buy":
