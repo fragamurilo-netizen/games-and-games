@@ -469,8 +469,8 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 		["Interceptações", func(p: Player) -> float: return p.stat(Player.S_INTERCEPTIONS), func(p: Player) -> String: return "%d" % p.stat(Player.S_INTERCEPTIONS)],
 		["Duelos aéreos", func(p: Player) -> float: return p.stat(Player.S_AERIAL), func(p: Player) -> String: return "%d" % p.stat(Player.S_AERIAL)],
 		["Defesas (goleiro)", func(p: Player) -> float: return p.stat(Player.S_SAVES), func(p: Player) -> String: return "%d" % p.stat(Player.S_SAVES)],
-		["Sem sofrer gol (goleiro)", func(p: Player) -> float: return p.stat(Player.S_CLEAN) if p.position == Pos.GK else 0.0, func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_CLEAN), "%d jogo", "%d jogos")],
-		["Cartões", func(p: Player) -> float: return p.stat(Player.S_YELLOWS) + 3 * p.stat(Player.S_REDS), func(p: Player) -> String: return "%d amarelos · %d vermelhos" % [p.stat(Player.S_YELLOWS), p.stat(Player.S_REDS)]],
+		["Sem sofrer gol", func(p: Player) -> float: return p.stat(Player.S_CLEAN) if p.position == Pos.GK else 0.0, func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_CLEAN), "%d jogo", "%d jogos")],
+		["Cartões", func(p: Player) -> float: return p.stat(Player.S_YELLOWS) + 3 * p.stat(Player.S_REDS), func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_YELLOWS), "%d amarelo", "%d amarelos") + " · " + Fmt.n_of(p.stat(Player.S_REDS), "%d vermelho", "%d vermelhos")],
 	]
 	for cat: Array in cats:
 		var f: Callable = cat[1]
@@ -487,7 +487,7 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 		var pid := best.id
 		var h := UIKit.hbox(10)
 		var k := UIKit.label(String(cat[0]), "Muted")
-		k.custom_minimum_size.x = 150
+		k.custom_minimum_size.x = 180
 		h.add_child(k)
 		var nm := UIKit.label(best.short_name(), "H3")
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL

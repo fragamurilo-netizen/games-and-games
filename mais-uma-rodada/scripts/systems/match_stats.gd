@@ -97,7 +97,7 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 				var e: Array = real.get(p.id, [])
 				out[p.id][SV] = int(e[2]) if e.size() > 2 else saved
 				saved = 0
-	# Duelos aéreos ganhos (≈ 15 por time) e faltas cometidas (≈ 12, mais para quem tem menos a
+	# Duelos aéreos ganhos (≈ 13 por time) e faltas cometidas (≈ 12, mais para quem tem menos a
 	# bola). Sorteados por último para não mudar os números acima.
 	for side in 2:
 		var lines2: Array = res["lines"][side]
@@ -120,7 +120,7 @@ static func build(world: GameWorld, f: Fixture, res: Dictionary) -> Dictionary:
 			fw.append(fv * (1.25 - p.attrs[Attr.DIS] / 160.0) * mf)
 			# Cada cartão veio de uma falta.
 			rows2[p.id][FC] += int(ln[QuickMatch.L_Y]) + (1 if bool(ln[QuickMatch.L_RED]) else 0)
-		var n_air := maxi(4, int(round(rng.randfn(15.0, 4.0))))
+		var n_air := maxi(4, int(round(rng.randfn(13.0, 3.5))))
 		for _i in n_air:
 			var k := RngUtil.weighted_index(rng, aw)
 			if k < 0:
