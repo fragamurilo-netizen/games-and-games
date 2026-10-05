@@ -55,7 +55,7 @@ static func plan(rng: RandomNumberGenerator, club: Club, slots: Array) -> Dictio
 	var w: Array = []
 	for i in starters:
 		var p: int = slots[i][0]
-		w.append(2.2 if p in [Pos.ST, Pos.AM, Pos.RW, Pos.LW] else (1.6 if p == Pos.CM else (0.6 if p in [Pos.RB, Pos.LB] else (0.8 if p == Pos.GK else 1.0))))
+		w.append(1.5 if p in [Pos.ST, Pos.AM, Pos.RW, Pos.LW] else (1.2 if p == Pos.CM else (0.75 if p in [Pos.RB, Pos.LB] else 1.0)))
 	for rank in starters.size():
 		var j := RngUtil.weighted_index(rng, w)
 		if j < 0:

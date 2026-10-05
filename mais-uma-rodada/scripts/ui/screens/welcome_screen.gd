@@ -160,14 +160,19 @@ func _squad(w: GameWorld, club: Club) -> Control:
 		var a := p.age(w.year)
 		if a <= 21 and (young == null or p.potential_estimate(0.8) > young.potential_estimate(0.8)):
 			young = p
-		if a >= 31 and (vet == null or p.career_apps > vet.career_apps):
+		# O ídolo da casa fala mais alto que o veterano que acabou de chegar
+		if a >= 31 and (vet == null or _vet_score(w, p) > _vet_score(w, vet)):
 			vet = p
 	if young != null:
 		card.add_child(UIKit.label("A promessa", "Caps"))
 		card.add_child(_player_line(w, club, young, "%d anos · %s" % [young.age(w.year), PlayerAssessment.summary(w,young,true)]))
 	if vet != null:
 		card.add_child(UIKit.label("A voz da experiência", "Caps"))
-		card.add_child(_player_line(w, club, vet, ("%d anos · %d jogo na carreira" if vet.career_apps == 1 else "%d anos · %d jogos na carreira") % [vet.age(w.year), vet.career_apps]))
+		var yrs := w.year - vet.joined_year
+		var vnote := ("%d anos · %d jogo na carreira" if vet.career_apps == 1 else "%d anos · %d jogos na carreira") % [vet.age(w.year), vet.career_apps]
+		if yrs >= 5:
+			vnote = "%d anos · %s no clube" % [vet.age(w.year), Fmt.n_of(yrs, "%d temporada", "%d temporadas")]
+		card.add_child(_player_line(w, club, vet, vnote))
 	var needs := TransferManager.squad_needs(w, club)
 	if not needs.is_empty():
 		var weak: Array = []
@@ -177,6 +182,10 @@ func _squad(w: GameWorld, club: Club) -> Control:
 	else:
 		card.add_child(UIKit.colored("Elenco equilibrado", UIColors.GREEN, "Small", true))
 	return UIKit.card_panel(card)
+
+
+func _vet_score(w: GameWorld, p: Player) -> float:
+	return float(p.career_apps) + (w.year - p.joined_year) * 40.0 + (400.0 if p.has_trait("idolo") else 0.0) + (200.0 if p.has_trait("lider") else 0.0)
 
 
 func _star_note(w: GameWorld, p: Player) -> String:

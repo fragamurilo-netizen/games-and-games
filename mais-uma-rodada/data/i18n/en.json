@@ -10480,5 +10480,8 @@
 	"%d amarelo": "%d yellow",
 	"%d amarelos": "%d yellows",
 	"%d vermelho": "%d red",
-	"%d vermelhos": "%d reds"
+	"%d vermelhos": "%d reds",
+	"%d anos · %s no clube": "%d yrs · %s at the club",
+	"%d temporada": "%d season",
+	"%d temporadas": "%d seasons"
 }
