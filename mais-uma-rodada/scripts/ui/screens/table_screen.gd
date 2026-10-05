@@ -550,11 +550,14 @@ func _season_modal(w: GameWorld, league: League, y: int, lg: Dictionary) -> void
 ## Líderes da liga nas estatísticas detalhadas (top 5 de cada).
 func _numbers(c: VBoxContainer, w: GameWorld) -> void:
 	var cats := [[Player.S_SHOTS, "Finalizações"], [Player.S_KEY_PASSES, "Passes decisivos"], [Player.S_DRIBBLES, "Dribles certos"],
-		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_SAVES, "Defesas"], [Player.S_XG, "xG"]]
+		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_AERIAL, "Duelos aéreos"],
+		[Player.S_SAVES, "Defesas"], [Player.S_CLEAN, "Jogos sem sofrer gol"], [Player.S_MOTM, "Craque do jogo"], [Player.S_XG, "xG"]]
 	var boards: Array = []
 	for cat in cats:
 		var stat: int = cat[0]
 		var list := CompetitionManager.player_ranking(w, _league_id, stat, 5)
+		if stat == Player.S_CLEAN:
+			list = CompetitionManager.player_ranking(w, _league_id, stat, 80).filter(func(q: Player) -> bool: return q.position == Pos.GK).slice(0, 5)
 		if not list.is_empty():
 			boards.append(_leader_board(w, String(cat[1]), stat, list))
 	if boards.is_empty():

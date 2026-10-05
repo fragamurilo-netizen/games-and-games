@@ -53,7 +53,59 @@ static func cards(w: GameWorld, club: Club) -> Array:
 	out.append(squad_table(w, club))
 	out.append(_squad_card(w, club))
 	out.append(_leaders_card(w, club))
+	var rec := _records_card(w, club)
+	if rec != null:
+		out.append(rec)
 	return out
+
+
+## Recordes do clube: sequências e placares desde o início do save, e as melhores campanhas do
+## histórico de ligas.
+static func _records_card(w: GameWorld, club: Club) -> Control:
+	var mk := club.marks
+	var rows: Array = []
+	var ws: Array = mk.get("ws", [])
+	if not ws.is_empty() and int(ws[0]) >= 2:
+		rows.append(["Vitórias seguidas", "%s · %d" % [Fmt.n_of(int(ws[0]), "%d jogo", "%d jogos"), int(ws[1])]])
+	var us: Array = mk.get("us", [])
+	if not us.is_empty() and int(us[0]) >= 2:
+		rows.append(["Invencibilidade", "%s · %d" % [Fmt.n_of(int(us[0]), "%d jogo", "%d jogos"), int(us[1])]])
+	var cr: Array = mk.get("cr", [])
+	if not cr.is_empty() and int(cr[0]) >= 2:
+		rows.append(["Sem sofrer gol", "%s · %d" % [Fmt.n_of(int(cr[0]), "%d jogo", "%d jogos"), int(cr[1])]])
+	var bw: Array = mk.get("bw", [])
+	if not bw.is_empty():
+		rows.append(["Maior vitória", "%d x %d %s · %d" % [int(bw[0]), int(bw[1]), String(bw[2]), int(bw[3])]])
+	var bl: Array = mk.get("bl", [])
+	if not bl.is_empty():
+		rows.append(["Maior derrota", "%d x %d %s · %d" % [int(bl[0]), int(bl[1]), String(bl[2]), int(bl[3])]])
+	var best_pts: Dictionary = {}
+	var best_gf: Dictionary = {}
+	var best_ga: Dictionary = {}
+	for h in club.history:
+		var hd: Dictionary = h
+		var lg := w.league(String(hd.get("l", "")))
+		if lg == null or lg.tier != club.tier:
+			continue
+		if best_pts.is_empty() or int(hd.get("pts", 0)) > int(best_pts.get("pts", 0)):
+			best_pts = hd
+		if best_gf.is_empty() or int(hd.get("gf", 0)) > int(best_gf.get("gf", 0)):
+			best_gf = hd
+		var games := int(hd.get("w", 0)) + int(hd.get("dr", 0)) + int(hd.get("lo", 0))
+		if games > 0 and (best_ga.is_empty() or int(hd.get("ga", 0)) < int(best_ga.get("ga", 0))):
+			best_ga = hd
+	if not best_pts.is_empty():
+		rows.append(["Mais pontos na liga", "%s · %d" % [Fmt.n_of(int(best_pts.get("pts", 0)), "%d ponto", "%d pontos"), int(best_pts.get("y", 0))]])
+		rows.append(["Mais gols na liga", "%s · %d" % [Fmt.n_of(int(best_gf.get("gf", 0)), "%d gol", "%d gols"), int(best_gf.get("y", 0))]])
+		if not best_ga.is_empty():
+			rows.append(["Defesa menos vazada", "%s · %d" % [Fmt.n_of(int(best_ga.get("ga", 0)), "%d gol", "%d gols"), int(best_ga.get("y", 0))]])
+	if rows.is_empty():
+		return null
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section_header("Recordes do clube"))
+	for r: Array in rows:
+		card.add_child(UIKit.kv(String(r[0]), String(r[1])))
+	return UIKit.card_panel(card)
 
 
 # ---------------------------------------------------------------------------
@@ -411,8 +463,13 @@ static func _leaders_card(w: GameWorld, club: Club) -> Control:
 		["Melhor nota", func(p: Player) -> float: return p.avg_rating() if p.stat(Player.S_APPS) >= 3 else 0.0, func(p: Player) -> String: return "%s em %d jogos" % [Fmt.dec(p.avg_rating(), 2), p.stat(Player.S_APPS)]],
 		["Mais minutos", func(p: Player) -> float: return p.stat(Player.S_MINUTES), func(p: Player) -> String: return "%d min" % p.stat(Player.S_MINUTES)],
 		["Craque do jogo", func(p: Player) -> float: return p.stat(Player.S_MOTM), func(p: Player) -> String: return "%dx" % p.stat(Player.S_MOTM)],
+		["Gols por 90", func(p: Player) -> float: return p.per90(Player.S_GOALS) if p.stat(Player.S_MINUTES) >= 900 else 0.0, func(p: Player) -> String: return Fmt.dec(p.per90(Player.S_GOALS), 2)],
+		["Passes decisivos", func(p: Player) -> float: return p.stat(Player.S_KEY_PASSES), func(p: Player) -> String: return "%d" % p.stat(Player.S_KEY_PASSES)],
 		["Desarmes", func(p: Player) -> float: return p.stat(Player.S_TACKLES), func(p: Player) -> String: return "%d" % p.stat(Player.S_TACKLES)],
+		["Interceptações", func(p: Player) -> float: return p.stat(Player.S_INTERCEPTIONS), func(p: Player) -> String: return "%d" % p.stat(Player.S_INTERCEPTIONS)],
+		["Duelos aéreos", func(p: Player) -> float: return p.stat(Player.S_AERIAL), func(p: Player) -> String: return "%d" % p.stat(Player.S_AERIAL)],
 		["Defesas (goleiro)", func(p: Player) -> float: return p.stat(Player.S_SAVES), func(p: Player) -> String: return "%d" % p.stat(Player.S_SAVES)],
+		["Sem sofrer gol (goleiro)", func(p: Player) -> float: return p.stat(Player.S_CLEAN) if p.position == Pos.GK else 0.0, func(p: Player) -> String: return Fmt.n_of(p.stat(Player.S_CLEAN), "%d jogo", "%d jogos")],
 		["Cartões", func(p: Player) -> float: return p.stat(Player.S_YELLOWS) + 3 * p.stat(Player.S_REDS), func(p: Player) -> String: return "%d amarelos · %d vermelhos" % [p.stat(Player.S_YELLOWS), p.stat(Player.S_REDS)]],
 	]
 	for cat: Array in cats:
