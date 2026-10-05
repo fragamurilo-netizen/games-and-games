@@ -1,4 +1,19 @@
-# Continuar daqui (atualizado em 29/09/2026, à tarde)
+# Continuar daqui (atualizado em 05/10/2026)
+
+## Atenção: há duas linhas do jogo (05/10)
+
+- `claude/youthful-newton-hey7og` (e este ramo, `claude/posicoes-escalacao-hbrnjt`, que parte dele): a UI 2.0, versão 1.0.0. É a que o dono e o Gregory estão jogando no celular (os prints de 02/10 são dela).
+- `claude/project-thread-nzso8z`: versão 0.4.0 com o motor realista, base, negociações, eventos e estatísticas de 04 e 05/10. Ela não tem a UI 2.0, e a UI 2.0 não tem esse conteúdo. As duas se separaram em 29/09 (`2b8f81b`) e ainda precisam ser juntadas.
+
+### Posições da escalação (05/10, ramo `claude/posicoes-escalacao-hbrnjt`)
+
+- Mover posições não empilha mais ninguém. Antes, virar o centroavante em ponta-direita punha o jogador exatamente em cima do ponta que já existia. Agora `DatabaseManager._spread_custom` espaça as posições repetidas na mesma linha e afasta as vagas que se encostam.
+- Na partida, companheiros ficam a pelo menos 4,2 m e adversários a 2,6 m (`PitchMotion.SEP_MATE` e `SEP_RIVAL`). Em barreira, escanteio e comemoração continua 1,3 m. Numa simulação de 6000 quadros, os pares de companheiros a menos de 3 m caíram de 639 para 107.
+- No pré-jogo, o banco cabe acima de velocidade e Iniciar partida (`_fit_pitch`).
+- Na partida, a narração tem altura mínima e não some mais atrás da barra quando há gols no placar. A tarja do gol fica por cima do campo, e Pausar, o ritmo e Mais ganharam nome como os outros botões.
+- Para conferir: `design_shots -- --only=!lineup` (ou `!lineup=C:4-4-2|9=AM`).
+- APK: `builds/MaisUmaRodada-1.0.0-posicoes-2026-10-05.apk` (mesmo certificado, instala por cima).
+
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
