@@ -6,7 +6,8 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 - **As duas linhas foram juntadas em 05/10** no ramo `claude/posicoes-escalacao-hbrnjt`. Ele tem a UI 2.0 e a versão 1.0.0 (antes em `claude/youthful-newton-hey7og`, a que o dono e o Gregory jogam), mais todo o conteúdo da 0.4.0 de `claude/project-thread-nzso8z` (motor realista, base e negociações, eventos, estatísticas e recordes, repercussão do mata-mata). Trabalho novo deve partir desse ramo. O `nzso8z` ficou para trás e não tem a UI 2.0.
 - Na junção, as telas seguiram a UI 2.0 (sem o overall na interface, só estrelas) e ganharam os plurais certos da 0.4.0. Os estilos de jogador das duas linhas foram somados. A evolução usa a fase de carreira da 1.0.0 (`_career_arc`), com o potencial assentado (`_settle_potential`) e a deriva da 0.4.0. O teto dos craques e o peso por posição vêm calibrados da 0.4.0. O aviso de conquista ficou no topo, compacto, como na UI 2.0. O menu ☰ continua na cor do clube do técnico.
-- Não foi refeita a calibragem de `tools/ratings_report.gd` depois da junção. Vale rodar para conferir os 90+ em 4 temporadas.
+- A evolução foi recalibrada depois da junção (`ARC_BIAS` e salto menor perto da elite em `_career_arc`, superestrelas mais raras em `STARTER_SHIFT`). Com `tools/ratings_report.gd -- --years=4`, o 90+ fica entre 3 e 4 e o 85+ perto de 100.
+- Também entraram a repercussão do mata-mata (`claude/repercussao-titulo-qumdw2`) e as palestras e a narração de rádio (`claude/palestras-narracao-1b2sru`). APK com tudo: `builds/MaisUmaRodada-1.0.0-unificada-2026-10-05.apk`.
 - O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
 - O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
 
@@ -16,6 +17,13 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - Na partida, companheiros ficam a pelo menos 4,2 m e adversários a 2,6 m (`PitchMotion.SEP_MATE` e `SEP_RIVAL`). Em barreira, escanteio e comemoração continua 1,3 m.
 - No pré-jogo, o banco cabe acima do rodapé (`_fit_pitch`). Na partida, a narração tem altura mínima (`FEED_MIN_H`) e a tarja do gol fica por cima do campo. O layout da partida agora é da thread "Palestras e narração".
 - Para conferir: `design_shots -- --only=!lineup` (ou `!lineup=C:4-4-2|9=AM`).
+
+### Palestras e narração de rádio (05/10, ramo `claude/palestras-narracao-1b2sru`)
+
+- Partiu da junção acima (`claude/posicoes-escalacao-hbrnjt`) e é o ramo mais novo.
+- **Palestra.** As falas ficam em `scripts/systems/team_talk.gd` (`TeamTalk.LINES`), separadas por tom e por momento: antes do jogo (favorito, azarão, clássico, decisão, casa, fora) e no intervalo (vencendo por 1 ou 2+, empate, perdendo por 1 ou 2+, mandando no jogo sem vencer, sofrendo sem perder). A cada vez que o modal abre sai uma fala diferente por tom, com nomes do jogo ({star}, {their}, {gk}, {opp}). São 9 tons: os 6 antigos mais Mostrar confiança, Foco no plano e Mostrar decepção (`_talk_reaction` em `match_simulation.gd`, mesmo teto de ±5%). Repetir no intervalo o tom de antes do jogo rende 55%. Depois da escolha vem a "Reação no vestiário" com quem respondeu. Só o time do usuário dá palestra, então o motor calibrado não muda.
+- **Narração de rádio.** Frases novas em `data/text/commentary.json`: categorias `radio_*` ("tempo e placar" nos minutos 8, 22, 38, 52, 68 e 83; tensão antes do chute; placar repetido depois do gol; abertura da fala do vestiário) e mais variações nas categorias de gol, chance, posse, falta etc. Elas só existem em português: em inglês e espanhol o `Commentary._allowed` usa só frases que têm tradução.
+- **Tela da partida.** Em pé, o padrão é "Campo menor": campo deitado com ~20% da altura e a narração com o resto. O botão ao lado das abas alterna Campo menor, Campo grande (o vertical de antes) e Só narração (`AppSettings.match_view`, salvo nas opções). O lance mais recente entra com letra maior.
 
 ## Como conferir e gerar o APK
 
