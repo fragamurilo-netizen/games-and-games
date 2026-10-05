@@ -189,6 +189,8 @@ func lines_for(ev: Dictionary) -> Array:
 				if fin == "solo":
 					bc = "build_solo"
 				out.append(_line(_pick(bc), ev, "chance", 0.0))
+				if rng.randf() < 0.55:
+					_radio(out, "radio_tension", ev, "chance", 0.15)
 				if fin != "" and _data.has("fin_" + fin):
 					out.append(_line(_pick("fin_" + fin), ev, "chance", 0.3))
 			var cat := "goal"
@@ -223,6 +225,8 @@ func lines_for(ev: Dictionary) -> Array:
 				out.append(_line(_pick("brace"), ev, "info", 0.7))
 			if int(ev.get("p2", -1)) >= 0 and t == MatchSimulation.EV_GOAL:
 				out.append(_line(_pick("assist"), ev, "info", 0.8))
+			if rng.randf() < 0.6:
+				_radio(out, "radio_goal_score", ev, "info", 1.3)
 			var ctx := _goal_context(ev, tags) if t == MatchSimulation.EV_GOAL else ""
 			if ctx != "" and rng.randf() < 0.75:
 				out.append(_line(_pick(ctx), ev, "info", 1.1))
@@ -245,6 +249,8 @@ func lines_for(ev: Dictionary) -> Array:
 				cat2 += "_" + fin2
 			elif big and (t == MatchSimulation.EV_SAVE or t == MatchSimulation.EV_MISS):
 				cat2 += "_big"
+			if t != MatchSimulation.EV_BLOCK and float(x.get("xg", 0.0)) >= 0.15 and rng.randf() < 0.5:
+				_radio(out, "radio_tension", ev, "chance", 0.25)
 			var hot := t == MatchSimulation.EV_POST or cat2 == "block_line" or big or fin2 in ["double", "fingertip", "one_on_one", "last_ditch"]
 			var ol := _line(_pick(cat2), ev, "chance" if hot else "normal", 0.5)
 			if hot:
@@ -342,6 +348,34 @@ func lines_for(ev: Dictionary) -> Array:
 			if (x.has("formation") or x.has("style")) and rng.randf() < 0.4:
 				out.append(_line(_pick("reporter_coach"), ev, "reporter", 1.0))
 	return out
+
+
+## Linha de rádio (só existe em português): entra só se a categoria tiver o que dizer.
+func _radio(out: Array, cat: String, ev: Dictionary, style: String, delay: float) -> void:
+	var txt := _pick(cat)
+	if txt != "":
+		out.append(_line(txt, ev, style, delay))
+
+
+## "Tempo e placar" do rádio, com {team} apontando para quem vence. Vazio fora do português.
+func clock_line(minute: int, half: int) -> Dictionary:
+	var hs := sim.score[0]
+	var as_ := sim.score[1]
+	var cat := "radio_clock"
+	var side := -1
+	if rng.randf() < 0.6:
+		if hs == as_:
+			cat = "radio_clock_level"
+		else:
+			cat = "radio_clock_lead"
+			side = 0 if hs > as_ else 1
+	var txt := _pick(cat)
+	if txt == "":
+		return {}
+	var ev := {"t": -1, "m": minute, "h": half, "s": maxi(side, 0), "x": {}, "hs": hs, "as": as_}
+	var l := _line(txt, ev, "info", 0.0)
+	l["side"] = side
+	return l
 
 
 ## Marca a linha como lance de destaque (a tela mostra um letreiro no campo: "NA TRAVE!").

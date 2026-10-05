@@ -6,6 +6,9 @@ extends BaseScreen
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
+const PITCH_COMPACT := 0.24 # fração da altura do campo (deitado) quando os lances estão em destaque
+const FEED_FS := 24 # corpo da narração
+const FEED_FS_NEW := 27 # lance mais recente, em cima
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
 
 var _sim: MatchSimulation
@@ -158,7 +161,8 @@ func _responsive_layout() -> void:
 	if is_instance_valid(_momentum):
 		_momentum.visible = not short_view
 	# O campo é o protagonista: em pé ele fica vertical e ocupa a maior parte da altura.
-	_pitch.horizontal = wide
+	# Com os lances em destaque (padrão), o campo fica deitado e baixo em pé também.
+	_pitch.horizontal = wide or AppSettings.match_view == 0
 	_pitch.custom_minimum_size.y = _pitch_height()
 	if wide == (_wide_body != null):
 		return
@@ -207,11 +211,15 @@ func _responsive_layout() -> void:
 		_wide_body = null
 
 
-## Altura do campo: deitado ele enche a coluna; em pé fica com ~55% da tela e a narração embaixo.
+## Altura do campo: deitado ele enche a coluna. Em pé, com os lances em destaque, é uma faixa
+## deitada de ~1/4 da tela; com o campo grande, fica vertical com metade da tela.
 func _pitch_height() -> float:
 	if UILayout.is_wide() and UILayout.is_landscape():
 		return 120.0 if get_viewport_rect().size.y < 720.0 else 220.0
-	return clampf(get_viewport_rect().size.y * 0.5, 420.0, 760.0)
+	var h := get_viewport_rect().size.y
+	if AppSettings.match_view == 0:
+		return clampf(h * PITCH_COMPACT, 230.0, 360.0)
+	return clampf(h * 0.5, 420.0, 760.0)
 
 
 # ---------------------------------------------------------------------------
@@ -258,7 +266,7 @@ func _build() -> void:
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
-	_pitch.horizontal = UILayout.is_wide()
+	_pitch.horizontal = UILayout.is_wide() or AppSettings.match_view == 0
 	_pitch.custom_minimum_size = Vector2(0, _pitch_height())
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
@@ -358,6 +366,7 @@ func _build() -> void:
 	_root.add_child(_controls_panel)
 	_build_controls()
 	_responsive_layout()
+	_apply_match_view()
 	# Comemoração por cima de tudo
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
@@ -930,7 +939,8 @@ func _after_goal(ev: Dictionary) -> void:
 
 
 func _play_replay(clip: Dictionary, after: Callable) -> void:
-	var dur := _pitch.motion.start_replay(clip)
+	# Só narração: sem campo na tela, não há replay para mostrar.
+	var dur := _pitch.motion.start_replay(clip) if AppSettings.match_view != 2 else 0.0
 	if dur <= 0.0:
 		if after.is_valid():
 			after.call()
@@ -1290,9 +1300,19 @@ func _update_sides() -> void:
 		_enqueue(_com.extra_line("sides_swap", "info", 0, 2), {}, 0.3)
 
 
-## Resumo dos números a cada 15 minutos (na narração).
+## Minutos do "tempo e placar" (entre os resumos de números de 15 em 15).
+const CLOCK_MINUTES: Array[int] = [8, 22, 38, 52, 68, 83]
+
+
+## Resumo dos números a cada 15 minutos (na narração) e, entre eles, o "tempo e placar".
 func _stat_summary() -> void:
 	var m := _sim.minute
+	if _sim.half <= 2 and m in CLOCK_MINUTES and not _stat_marks.has("c%d" % m):
+		_stat_marks["c%d" % m] = true
+		var cl := _com.clock_line(m, _sim.half)
+		if not cl.is_empty():
+			_enqueue(cl, {}, 0.1)
+		return
 	if _sim.half > 2 or m % 15 != 0 or m == 0 or m == 45 or m == 90:
 		return
 	var key := "%d:%d" % [_sim.half, m]
@@ -1336,7 +1356,15 @@ func _add_line(line: Dictionary) -> void:
 	var t := UIKit.label(String(line.get("text", "")), variation, true)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if variation == "":
-		t.add_theme_font_size_override(&"font_size", 24)
+		# O lance mais recente entra maior; o anterior volta ao corpo normal.
+		t.add_theme_font_size_override(&"font_size", FEED_FS_NEW)
+		row.set_meta("fresh", t)
+	if _feed.get_child_count() > 0:
+		var prev := _feed.get_child(0)
+		var inner: Node = prev.get_child(0) if prev is PanelContainer and prev.get_child_count() > 0 else prev
+		if inner.has_meta("fresh"):
+			(inner.get_meta("fresh") as Label).add_theme_font_size_override(&"font_size", FEED_FS)
+			inner.remove_meta("fresh")
 	var col := UIColors.TEXT
 	match style:
 		"info":
@@ -1617,6 +1645,28 @@ func _build_tabs() -> void:
 	for b in t.get_children():
 		(b as Button).custom_minimum_size.y = 56
 	_tabs_row.add_child(t)
+	var vb := UIKit.icon_button("pitch" if AppSettings.match_view == 2 else "list", _cycle_match_view, "Campo e narração")
+	vb.custom_minimum_size = Vector2(56, 56)
+	_tabs_row.add_child(vb)
+
+
+## Alterna o espaço da tela: lances em destaque (campo menor), campo grande ou só a narração.
+func _cycle_match_view() -> void:
+	AppSettings.match_view = (AppSettings.match_view + 1) % 3
+	AppSettings.save_settings()
+	_apply_match_view()
+	_build_tabs()
+	UIManager.toast(AppSettings.MATCH_VIEW_NAMES[AppSettings.match_view], UIColors.ACCENT)
+
+
+func _apply_match_view() -> void:
+	if not is_instance_valid(_pitch):
+		return
+	var box := _pitch.get_parent() as Control
+	box.visible = AppSettings.match_view != 2
+	var wide := UILayout.is_wide() and UILayout.is_landscape()
+	_pitch.horizontal = wide or AppSettings.match_view == 0
+	_pitch.custom_minimum_size.y = _pitch_height()
 
 
 func _set_tab(key: String) -> void:
