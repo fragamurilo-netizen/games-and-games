@@ -6,7 +6,8 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 - **As duas linhas foram juntadas em 05/10** no ramo `claude/posicoes-escalacao-hbrnjt`. Ele tem a UI 2.0 e a versão 1.0.0 (antes em `claude/youthful-newton-hey7og`, a que o dono e o Gregory jogam), mais todo o conteúdo da 0.4.0 de `claude/project-thread-nzso8z` (motor realista, base e negociações, eventos, estatísticas e recordes, repercussão do mata-mata). Trabalho novo deve partir desse ramo. O `nzso8z` ficou para trás e não tem a UI 2.0.
 - Na junção, as telas seguiram a UI 2.0 (sem o overall na interface, só estrelas) e ganharam os plurais certos da 0.4.0. Os estilos de jogador das duas linhas foram somados. A evolução usa a fase de carreira da 1.0.0 (`_career_arc`), com o potencial assentado (`_settle_potential`) e a deriva da 0.4.0. O teto dos craques e o peso por posição vêm calibrados da 0.4.0. O aviso de conquista ficou no topo, compacto, como na UI 2.0. O menu ☰ continua na cor do clube do técnico.
-- Não foi refeita a calibragem de `tools/ratings_report.gd` depois da junção. Vale rodar para conferir os 90+ em 4 temporadas.
+- A evolução foi recalibrada depois da junção (`ARC_BIAS` e salto menor perto da elite em `_career_arc`, superestrelas mais raras em `STARTER_SHIFT`). Com `tools/ratings_report.gd -- --years=4`, o 90+ fica entre 3 e 4 e o 85+ perto de 100.
+- Também entraram a repercussão do mata-mata (`claude/repercussao-titulo-qumdw2`) e as palestras e a narração de rádio (`claude/palestras-narracao-1b2sru`). APK com tudo: `builds/MaisUmaRodada-1.0.0-unificada-2026-10-05.apk`.
 - O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
 - O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
 

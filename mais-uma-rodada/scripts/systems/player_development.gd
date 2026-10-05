@@ -527,6 +527,7 @@ static func _late_turns(world: GameWorld, p: Player, age: int, share: float, out
 ## continua: quem engrenou tende a seguir subindo, quem perdeu espaço tende a afundar, e os dois
 ## podem virar. O overall anda na direção do momento; quanto mais jovem, maior o passo.
 ## Os saltos e quedas grandes entram em out["rise"] / out["fall"] (notícias e relatórios).
+const ARC_BIAS := 0.1
 const ARC_STEP := [[19, 4.0], [22, 3.5], [26, 3.0], [29, 2.4], [32, 2.0], [99, 1.6]]
 
 
@@ -564,6 +565,9 @@ static func _career_arc(world: GameWorld, p: Player, age: int, share: float, out
 		c -= 0.1
 	if p.club_id < 0:
 		c -= 0.15 # sem clube, sem ritmo
+	# Centro da fase: o titular comum (joga, nota na média do time) fica perto de zero; sem isso
+	# o mundo inteiro subia um pouco por ano (medido com tools/ratings_report.gd -- --years=4).
+	c -= ARC_BIAS
 	var arc := clampf(p.arc * 0.5 + c + rng.randfn(0.0, 0.32), -1.0, 1.0)
 	p.arc = arc
 	var step := 1.6
@@ -572,6 +576,10 @@ static func _career_arc(world: GameWorld, p: Player, age: int, share: float, out
 			step = float(s[1])
 			break
 	var delta := arc * step
+	# Fase boa depois dos 29 segura o nível, não sobe; e quanto mais alto o overall, menor o
+	# salto (quem já é 88 não vira 90 por um bom ano). Sem isso a elite inflava a cada temporada.
+	if delta > 0.0:
+		delta *= clampf(1.0 - (p.ovr_f - 74.0) * 0.07, 0.15, 1.0) * (1.0 if age <= 29 else 0.0)
 	var before := p.ovr_f
 	if delta >= 0.5:
 		p.potential = mini(94, maxi(p.potential, int(ceil(p.ovr_f + delta)) + 1))
