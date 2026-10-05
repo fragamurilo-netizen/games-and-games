@@ -85,6 +85,21 @@ Pedido do Gregory: perder um título no agregado (Inter x Grêmio) saía com pó
 - Feitos do jogo (`ManagerFeats`) não dão bônus a quem ganhou o jogo e caiu. Técnicos da IA também sentem a final perdida.
 - O motor de partida não mudou.
 
+## Elencos com roteiro e overall coerente (05/10)
+
+Ramo `claude/elencos-realistas-k0e7o1`, feito sobre a linha unificada (`claude/posicoes-escalacao-hbrnjt`). Só muda a criação do mundo: carreiras salvas não mudam, só carreira nova.
+
+- **Roteiro do elenco** em `scripts/generation/squad_story.gd` (`SquadStory`), chamado por `PlayerGenerator.create_squad`:
+  - Hierarquia dos titulares (`RANK_OFFSETS`): o melhor fica uns 4,5 acima da média do time e o elo fraco uns 4 abaixo; clube grande tem o topo mais aberto. `calibrate_xi` continua acertando a média do time pela força do clube.
+  - Capitão (27-33 anos, traço Líder, 4 a 10 anos de casa), ídolo veterano no banco (32-36, traço Ídolo, às vezes cria que nunca saiu), joia da base (17-18 anos, teto alto conforme o clube), repatriado (cria que rodou fora e voltou; o passado começa no clube em `CareerBackfill`) e astros estrangeiros veteranos na Arábia, Catar, Emirados, EUA e China.
+  - O estrangeiro chega mais novo nas vitrines (Portugal, Holanda, Bélgica) e mais velho no Golfo (`IMPORT_AGE`).
+  - `SquadStory.roles` só existe durante a geração (o passado lê dali); não vai para o save.
+- **Overall coerente.** O ponto forte do jogador passa no máximo uns 10 do overall (`PlayerGenerator.spike_cap`); garoto de 17-20 anos sempre tem margem de potencial; o status Titular é o melhor goleiro e os 10 melhores de linha (antes eram os 12 de maior overall, e o 2º goleiro podia virar titular). Nomes repetidos no mesmo elenco usam o nome completo.
+- **Boas-vindas.** "A voz da experiência" prefere o ídolo ou o líder com mais anos de casa e mostra as temporadas no clube.
+- **Escala.** A escala do overall não mudou: a média dos titulares por clube é a mesma. No começo há 3 jogadores 90+ (antes 4) e 85+ caiu de 104 para ~90. O topo de cada time ficou um pouco mais alto e o elo fraco um pouco mais baixo, o que pode mexer de leve em valores dos melhores de cada clube.
+- **Motor.** Motor lance a lance (25 datas): 2,70 gols por jogo, contra 2,65 na base. No modo rápido, temporada inteira: 2,73 contra 2,70.
+- **Ferramenta.** `tools/squad_report.gd` mostra elencos por extenso (papel, anos de casa, passagens) e a distribuição dos papéis: `godot --headless --path . --script res://tools/squad_report.gd -- --clubs=Flamengo,Real Madrid`.
+
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:
