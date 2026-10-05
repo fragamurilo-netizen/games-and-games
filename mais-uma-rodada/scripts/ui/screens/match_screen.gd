@@ -6,7 +6,7 @@ extends BaseScreen
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
-const PITCH_COMPACT := 0.24 # fração da altura do campo (deitado) quando os lances estão em destaque
+const PITCH_COMPACT := 0.2 # fração da altura do campo (deitado) quando os lances estão em destaque
 const FEED_FS := 24 # corpo da narração
 const FEED_FS_NEW := 27 # lance mais recente, em cima
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
@@ -154,8 +154,11 @@ func _responsive_layout() -> void:
 	var wide := UILayout.is_wide() and UILayout.is_landscape()
 	var short_view := wide and get_viewport_rect().size.y < 720.0
 	# Em paisagem no celular, preserve campo e comandos. Os detalhes seguem no painel.
+	# Em pé com os lances em destaque (ou só narração), a linha de estádio e clima sai do placar:
+	# a abertura da narração já diz isso.
+	var compact := not wide and AppSettings.match_view != 1
 	if is_instance_valid(_conditions):
-		_conditions.visible = not short_view
+		_conditions.visible = not short_view and not compact
 	if is_instance_valid(_stats_lbl):
 		_stats_lbl.visible = not short_view
 	if is_instance_valid(_momentum):
@@ -218,7 +221,7 @@ func _pitch_height() -> float:
 		return 120.0 if get_viewport_rect().size.y < 720.0 else 220.0
 	var h := get_viewport_rect().size.y
 	if AppSettings.match_view == 0:
-		return clampf(h * PITCH_COMPACT, 230.0, 360.0)
+		return clampf(h * PITCH_COMPACT, 220.0, 340.0)
 	return clampf(h * 0.5, 420.0, 760.0)
 
 
@@ -1664,9 +1667,7 @@ func _apply_match_view() -> void:
 		return
 	var box := _pitch.get_parent() as Control
 	box.visible = AppSettings.match_view != 2
-	var wide := UILayout.is_wide() and UILayout.is_landscape()
-	_pitch.horizontal = wide or AppSettings.match_view == 0
-	_pitch.custom_minimum_size.y = _pitch_height()
+	_responsive_layout()
 
 
 func _set_tab(key: String) -> void:

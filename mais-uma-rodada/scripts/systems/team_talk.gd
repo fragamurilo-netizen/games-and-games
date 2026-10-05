@@ -203,7 +203,13 @@ const LINES := {
 			"Tira o peso das costas. Joguem o futebol de vocês.",
 		],
 		"half_suffer": [
-			"Estar atrás no jogo não é problema. Respira e sai pro jogo sem medo.",
+			"Eles estão com mais a bola, e tudo bem. Respira e joga sem medo.",
+		],
+		"half_lead": [
+			"A vantagem é nossa. Joguem leves, sem medo de errar.",
+		],
+		"half_dom": [
+			"O gol vai sair. Não fiquem ansiosos, joguem soltos.",
 		],
 	},
 	"cobrar": {

@@ -566,6 +566,9 @@ func _talk_lines(ev: Dictionary, x: Dictionary) -> Array:
 	var cfg: Dictionary = MatchSimulation.TALKS.get(String(x["talk"]), {})
 	var say := String(x.get("say", ""))
 	var lines: Array = []
+	if int(ev.get("m", 0)) <= 0:
+		ev = ev.duplicate()
+		ev["t"] = MatchSimulation.EV_KICKOFF # antes do jogo: sem minuto na linha
 	if say != "" and I18n.is_pt():
 		lines.append(_line(_pick_or("radio_talk_open", "No vestiário do {team}, o técnico fala com o grupo:"), ev, "reporter", 0.0))
 		lines.append(_raw_line("“%s”" % say, ev, "tactic", 0.3))

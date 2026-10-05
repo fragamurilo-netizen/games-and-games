@@ -1760,9 +1760,9 @@ func team_talk(side: int, key: String, say: String = "") -> Dictionary:
 		mp.talk_f = 1.0 + d
 		if not mp.on_pitch:
 			continue
-		if d >= 0.025:
+		if d >= 0.018:
 			up.append(mp.p.id)
-		elif d <= -0.02:
+		elif d <= -0.015:
 			down.append(mp.p.id)
 	t.recompute_units()
 	_refresh_rates()
