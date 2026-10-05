@@ -22,6 +22,8 @@ const MAX_RUMORS_PER_TURN := 1
 const MAX_TALKS := 40 # negociações em andamento de uma semana para outra
 const MAX_PUSH := 2 # quantas vezes o comprador volta à mesa depois da primeira recusa
 const SOUTH_AMERICA := ["BRA", "ARG", "URU", "COL", "CHI", "ECU", "PER", "PAR", "BOL", "VEN"]
+const JEWEL_POT := 74.0 # potencial que faz um garoto de 16-17 anos ser vendido antes dos 18
+const JEWEL_PRESELL := 0.35 # chance por janela de uma dessas joias ser vendida (sobe com o potencial)
 const JEWEL_HUNT := 0.12 # chance de uma busca de clube europeu de porte ser por joia sul-americana
 
 static var _cfg: Dictionary = {}
@@ -227,6 +229,7 @@ static func is_main_window(world: GameWorld, c: Club, wi: int) -> bool:
 
 
 static func _plan_window(world: GameWorld, st: Dictionary, wi: int) -> void:
+	_presell_jewels(world)
 	for c: Club in world.clubs:
 		if world.is_user_club(c.id):
 			continue
@@ -717,6 +720,47 @@ static func _draw_jewel(world: GameWorld, index: Dictionary, prof: Dictionary) -
 		return null
 	var arr: Array = index.get("young", {}).get(src[world.rng.randi_range(0, src.size() - 1)], [])
 	return null if arr.is_empty() else arr[world.rng.randi_range(0, arr.size() - 1)]
+
+
+## Uma vez por janela: as maiores promessas sul-americanas de 16 e 17 anos atraem clubes europeus,
+## que fecham já e levam o garoto quando ele fizer 18 (TransferRules.hold_until_18).
+static func _presell_jewels(world: GameWorld) -> void:
+	var hunters: Array = []
+	for c: Club in world.clubs:
+		if not world.is_user_club(c.id) and hunts_jewels(c) and not ClubEvents.banned(world, c):
+			hunters.append(c)
+	if hunters.is_empty():
+		return
+	for p: Player in world.players.values():
+		if p.club_id < 0 or not p.loan.is_empty() or p.age(world.year) < 16 or p.age(world.year) > 17:
+			continue
+		var seller := world.club(p.club_id)
+		if world.is_user_club(seller.id) or not SOUTH_AMERICA.has(seller.nation):
+			continue
+		var pot := float(p.potential) + p.scout_noise * 0.5
+		if pot < JEWEL_POT or world.rng.randf() > JEWEL_PRESELL * (1.0 + (pot - JEWEL_POT) / 10.0):
+			continue
+		# Os mais ricos escolhem primeiro; o garoto prefere quem tem nome.
+		var best: Club = null
+		var best_v := -1e9
+		for _k in 8:
+			var c: Club = hunters[world.rng.randi_range(0, hunters.size() - 1)]
+			if not ClubPolicy.ai_wants(world, c, p):
+				continue
+			var v := c.reputation + power(c) * 10.0 + world.rng.randf_range(0.0, 8.0)
+			if v > best_v:
+				best_v = v
+				best = c
+		if best == null:
+			continue
+		world.stat_add("jewel_tries")
+		# O clube sul-americano vende pelo pedido: o dinheiro fecha o ano e o garoto não ficaria mesmo.
+		var fee := Valuation.round_value(TransferManager.asking_price(world, p) * world.rng.randf_range(1.0, 1.25))
+		if fee > best.transfer_budget or world.rng.randf() > maxf(0.5, player_interest(world, p, best)):
+			continue
+		TransferManager.complete_transfer(world, p, best, fee, Valuation.wage_demand(p, best, world.year), 5)
+		TransferRules.hold_until_18(world, p, best, seller)
+		TransferRules.news_hold(world, p, best, seller, fee)
 
 
 ## Clube europeu com dinheiro e olheiros na América do Sul.
