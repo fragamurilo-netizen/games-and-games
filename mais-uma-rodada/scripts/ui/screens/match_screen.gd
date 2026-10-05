@@ -7,6 +7,7 @@ const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
 const FEED_MIN_H := 130.0 # altura mínima da narração/abas embaixo do campo
+const PITCH_MIN_TALL := 320.0 # em pé o campo parte disso e cresce com o espaço que sobra
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
 
 var _sim: MatchSimulation
@@ -164,7 +165,7 @@ func _responsive_layout() -> void:
 	if not wide:
 		# Em pé o campo cresce com o espaço que sobra, mas a narração sempre fica com umas
 		# linhas à vista: com gols no placar ela sumia atrás da barra de botões.
-		_pitch.custom_minimum_size.y = minf(_pitch_height(), 320.0)
+		_pitch.custom_minimum_size.y = minf(_pitch_height(), PITCH_MIN_TALL)
 		var pb := _pitch.get_parent() as Control
 		pb.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		pb.size_flags_stretch_ratio = 6.0
