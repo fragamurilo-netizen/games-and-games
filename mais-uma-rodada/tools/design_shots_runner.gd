@@ -252,6 +252,9 @@ func _only_pass() -> void:
 		if spec == "!nametap":
 			await _name_tap_check(w)
 			continue
+		if spec.begins_with("!lineup"):
+			await _lineup_check(w, spec.get_slice("=", 1) if spec.contains("=") else "C:4-3-3|1=RM,9=RW")
+			continue
 		if spec.begins_with("~article"):
 			await _article_shot(w, spec.substr(9))
 			continue
@@ -312,6 +315,34 @@ func _only_pass() -> void:
 				break
 			sc.scroll_vertical = int(sc.size.y * 0.85 * pg)
 			await _shot(shot_name + "_" + "bcdefghij"[pg - 1])
+
+
+## Formação personalizada (padrão: o caso dos prints, LD virou MD e o centroavante virou PD):
+## pré-jogo e partida em alguns momentos, para conferir que ninguém fica em cima de ninguém.
+func _lineup_check(w: GameWorld, fname: String) -> void:
+	var club := w.user_club()
+	club.sheet = ClubAI.auto_sheet(w, club, fname)
+	UIManager.goto("hub")
+	await _frames(2)
+	UIManager.push("prematch")
+	await _frames(8)
+	UIManager.close_all_modals()
+	await _shot(prefix + "lineup_pre")
+	_scroll(400)
+	await _shot(prefix + "lineup_pre_b")
+	GameManager.begin_match()
+	UIManager.replace("match")
+	await _frames(12)
+	var ms := _screen()
+	UIManager.close_all_modals()
+	ms.call("_drain", false)
+	await _shot(prefix + "lineup_kickoff")
+	ms.set("_pace", 2)
+	for k in 4:
+		var t := Time.get_ticks_msec() + 4000
+		while Time.get_ticks_msec() < t:
+			await get_tree().process_frame
+		await _shot(prefix + "lineup_match_%d" % k)
 
 
 ## Diálogos e folhas por cima do hub (~confirm, ~event, ~sim, ~tutorial, ~buy, ~talk, ~toast).
