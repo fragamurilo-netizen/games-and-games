@@ -45,7 +45,10 @@ const S_DRIBBLES := 15
 const S_SAVES := 16
 const S_PASS_PCT := 17 # soma das % de passes certos por jogo (média = / jogos)
 const S_XG := 18 # xG × 100
-const S_COUNT := 19
+const S_AERIAL := 19 # duelos aéreos ganhos
+const S_FOULS := 20 # faltas cometidas
+const S_CONCEDED := 21 # gols sofridos com ele em campo (goleiro)
+const S_COUNT := 22
 
 # --- Estatísticas de copa (PackedInt32Array por copa; as de liga ficam em `stats`) ---
 const C_APPS := 0
@@ -371,6 +374,27 @@ func pass_pct() -> float:
 
 func xg() -> float:
 	return stats[S_XG] / 100.0
+
+
+## Gols por finalização, em % (0 sem finalizações).
+func conversion() -> float:
+	return 100.0 * stats[S_GOALS] / stats[S_SHOTS] if stats[S_SHOTS] > 0 else 0.0
+
+
+## % das finalizações no alvo que o goleiro defendeu (0 sem chutes contra).
+func save_pct() -> float:
+	var faced := stats[S_SAVES] + stats[S_CONCEDED]
+	return 100.0 * stats[S_SAVES] / faced if faced > 0 else 0.0
+
+
+## Totais da carreira somando as temporadas arquivadas e a atual (liga):
+## {mo: craque do jogo, cs: jogos sem sofrer gol}.
+func career_extra() -> Dictionary:
+	var t := {"mo": stats[S_MOTM], "cs": stats[S_CLEAN]}
+	for h in history:
+		for k in t:
+			t[k] = int(t[k]) + int((h as Dictionary).get(k, 0))
+	return t
 
 
 ## Por 90 minutos (0 sem minutos).

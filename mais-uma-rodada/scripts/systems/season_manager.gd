@@ -562,6 +562,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
 		club.push_result(result)
+		var opp_c := world.club(f.away if side == 0 else f.home)
+		club.record_match(int(score[side]), int(score[1 - side]), opp_c.short_name if opp_c != null else "", world.year)
 		if result == "V" and world.is_user_club(club.id):
 			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
@@ -611,6 +613,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 					p.stats[Player.S_MOTM] += 1
 				if conceded == 0 and mins >= 60 and ln[QuickMatch.L_DEFN]:
 					p.stats[Player.S_CLEAN] += 1
+				if int(ln[QuickMatch.L_POS]) == Pos.GK and int(ln[QuickMatch.L_START]) == 0:
+					p.stats[Player.S_CONCEDED] += conceded
 				var ds: Array = detail.get(p.id, [])
 				if ds.size() == MatchStats.N:
 					for k in MatchStats.N:
