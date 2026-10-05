@@ -743,6 +743,9 @@ func _process(delta: float) -> void:
 			_pitch.highlight_slot = -1
 	if _done or UIManager.has_modal():
 		return
+	# O relógio do minuto corre junto com a jogada e a narração (o minuto dura o maior dos dois).
+	if not (_halftime or _paused):
+		_clock -= delta
 	if _hold > 0.0:
 		_hold -= delta
 		return
@@ -766,12 +769,11 @@ func _process(delta: float) -> void:
 		return
 	if _halftime or _paused:
 		return
+	if _clock > 0.0:
+		return
 	# No ritmo normal o próximo minuto espera a jogada encenada terminar (a bola não "teleporta").
 	if _pace == 0 and _pitch.motion.scripted_busy() and _busy_wait < 3.0:
 		_busy_wait += delta
-		return
-	_clock -= delta
-	if _clock > 0.0:
 		return
 	_clock = PACE[_pace]
 	_busy_wait = 0.0
@@ -1253,7 +1255,8 @@ func _beats(evs: Array, base: int, ph: Dictionary) -> Array:
 					var mp: MatchPlayer = _sim.teams[s].by_id.get(int(e["p"]), null)
 					if mp != null:
 						inf3["p"] = mp.slot
-				out.append({"info": inf3, "key": true, "evs": group})
+				# No rápido só a falta que vale alguma coisa (cartão, bola parada perigosa) segura o minuto.
+				out.append({"info": inf3, "key": card > 0 or fk or bool(x.get("danger", false)), "evs": group})
 			MatchSimulation.EV_FREEKICK:
 				pre.append([idx, "start"])
 			MatchSimulation.EV_CORNER:
@@ -1262,9 +1265,9 @@ func _beats(evs: Array, base: int, ph: Dictionary) -> Array:
 					pre.append([idx, "start"])
 					ctk = _slot_of(s, int(e["p"]))
 					continue
-				out.append({"info": {"kind": "corner", "side": s, "p": _slot_of(s, int(e["p"]))}, "key": true, "evs": [[idx, "start"]]})
+				out.append({"info": {"kind": "corner", "side": s, "p": _slot_of(s, int(e["p"]))}, "key": false, "evs": [[idx, "start"]]})
 			MatchSimulation.EV_OFFSIDE:
-				out.append({"info": {"kind": "offside", "side": s, "p": _slot_of(s, int(e["p"])), "zone": 0.8}, "key": true, "evs": [[idx, "hit"]]})
+				out.append({"info": {"kind": "offside", "side": s, "p": _slot_of(s, int(e["p"])), "zone": 0.8}, "key": bool(x.get("goal", false)), "evs": [[idx, "hit"]]})
 			_:
 				if not CHANCE_RES.has(t):
 					continue
