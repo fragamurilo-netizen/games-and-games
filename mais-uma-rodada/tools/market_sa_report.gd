@@ -83,7 +83,7 @@ func _initialize() -> void:
 	print("maiores vendas sul-americanas:")
 	for t: Transfer in big_sa.slice(0, 15):
 		print("  %s %s (%d anos, %d): %s → %s" % [Fmt.money(t.fee), t.player_name, t.age, t.overall, w.club(t.from_id).short_name, w.club(t.to_id).short_name])
-	for k in ["solidarity", "rights_cut", "medical_fail", "loans", "auctions", "swaps", "talks"]:
+	for k in ["solidarity", "minor_deals", "loans", "auctions", "swaps", "talks"]:
 		if w.stats.has(k):
 			print("%s: %s" % [k, w.stats[k]])
 	quit()

@@ -823,6 +823,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var lower := DatabaseManager.league_at(league.nation, league.tier + 1)
 		var promoted: Array = LeagueFormat.promoted(league, ids, up, world) if up > 0 and upper != "" else []
 		var relegated: Array = ids.slice(teams - down) if down > 0 and lower != "" else []
+		if LeagueFormat.uses_promedios(league) and lower != "":
+			relegated = LeagueFormat.promedio_relegated(world, league, ids, down)
 		# Repescagem: o clube da elite que perdeu cai junto (o vencedor de baixo sobe em promoted)
 		var bar_down := LeagueFormat.barrage_relegated(league)
 		if bar_down >= 0 and lower != "" and not relegated.has(bar_down):

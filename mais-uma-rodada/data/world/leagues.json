@@ -1084,6 +1084,7 @@
 		{
 			"id": "ARG1",
 			"nation": "ARG",
+			"promedios": true,
 			"tier": 1,
 			"name": "Liga Profesional Argentina",
 			"short": "Liga Profesional",

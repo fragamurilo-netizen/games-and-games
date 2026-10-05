@@ -285,7 +285,10 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 		card.add_child(UIKit.kv("Pedem", Fmt.money(TransferManager.asking_price(w, p))))
 	if not p.loan.is_empty():
 		var owner := w.club(int(p.loan.get("from", -1)))
-		card.add_child(UIKit.kv("Emprestado pelo", "%s até %d" % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year))], UIColors.ORANGE))
+		if TransferRules.is_held(p):
+			card.add_child(UIKit.kv("Vendido ao", "%s, chega em %d" % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year)) + 1], UIColors.ORANGE))
+		else:
+			card.add_child(UIKit.kv("Emprestado pelo", "%s até %d" % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year))], UIColors.ORANGE))
 	if p.retiring:
 		card.add_child(UIKit.colored("Anunciou que vai se aposentar ao fim da temporada.", UIColors.ORANGE, "Small", true))
 	return UIKit.card_panel(card)

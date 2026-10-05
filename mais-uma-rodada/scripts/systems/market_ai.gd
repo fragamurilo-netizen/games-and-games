@@ -21,6 +21,8 @@ const OFFSEASON_ROUNDS := 2 # rodadas de mercado nas férias (antes do primeiro 
 const MAX_RUMORS_PER_TURN := 1
 const MAX_TALKS := 40 # negociações em andamento de uma semana para outra
 const MAX_PUSH := 2 # quantas vezes o comprador volta à mesa depois da primeira recusa
+const SOUTH_AMERICA := ["BRA", "ARG", "URU", "COL", "CHI", "ECU", "PER", "PAR", "BOL", "VEN"]
+const JEWEL_HUNT := 0.12 # chance de uma busca de clube europeu de porte ser por joia sul-americana
 
 static var _cfg: Dictionary = {}
 
@@ -316,7 +318,7 @@ static func _loan_destination(world: GameWorld, owner: Club, p: Player) -> Club:
 		var c: Club = world.clubs[world.rng.randi_range(0, world.clubs.size() - 1)]
 		if c.id == owner.id or world.is_user_club(c.id) or c.player_ids.size() >= max_players - 2 or c.is_rival(owner.id):
 			continue
-		if not ClubPolicy.eligible(world, c, p):
+		if not ClubPolicy.eligible(world, c, p) or TransferRules.minor_blocked(world, p, c):
 			continue
 		var lvl := PlayerGenerator.club_level(c)
 		if p.ovr_f < lvl - 3.0 or p.ovr_f > lvl + 6.0:
@@ -361,6 +363,11 @@ static func _pick_need(world: GameWorld, c: Club, free_only: bool) -> Dictionary
 		young_p = maxf(young_p, 0.5)
 	elif rec == "estrelas" or rec == "veteranos":
 		young_p *= 0.3
+	# Garimpo: clube europeu de porte vai atrás de joia sul-americana (fecha cedo, antes da
+	# concorrência, mesmo que o garoto só possa se mudar aos 18).
+	if hunts_jewels(c) and world.rng.randf() < JEWEL_HUNT:
+		var jf := world.rng.randi_range(1, TransferManager.FAMILIES.size() - 1)
+		return {"fam": jf, "pos": -1, "min_rating": level - 9.0, "urgency": 0.4, "young": true, "jewel": true}
 	if young_p > 0.0 and world.rng.randf() < young_p:
 		var fam := world.rng.randi_range(0, TransferManager.FAMILIES.size() - 1)
 		return {"fam": fam, "pos": -1, "min_rating": level - 4.0, "urgency": 0.5, "young": true}
@@ -403,9 +410,13 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 		ages = pages
 	if need.get("young", false):
 		ages = [17, 22]
+	if need.get("jewel", false):
+		ages = [16, 20]
 	var pot_w := float(arch.get("potential_weight", 0.4))
 	if ClubDNA.rec(c) == "formacao":
 		pot_w = maxf(pot_w, 0.75)
+	if need.get("jewel", false):
+		pot_w = maxf(pot_w, 0.9)
 	var sources: Array = prof.get("sources", [])
 	var my_power := power(c)
 	var level := PlayerGenerator.club_level(c)
@@ -413,14 +424,17 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 	var best: Player = null
 	var best_score := -1e9
 	for _k in CANDIDATES:
-		var p := _draw(world, index, c, fam, min_rating, prof)
-		if p == null or p.club_id == c.id or p.retiring or p.injury_weeks > 4:
+		var p := _draw_jewel(world, index, prof) if need.get("jewel", false) else _draw(world, index, c, fam, min_rating, prof)
+		if p == null or p.club_id == c.id or p.retiring or p.injury_weeks > 4 or not p.loan.is_empty():
 			continue
 		if not ClubPolicy.ai_wants(world, c, p):
 			continue # filosofia do clube (Athletic só bascos, Red Bull só jovens...)
 		if p.club_id >= 0:
 			if free_only or world.is_user_club(p.club_id) or p.joined_year == world.year:
 				continue # recém-contratado não é revendido na mesma temporada
+		# Menor de 18 de outro país: só quem está garimpando joias fecha agora para levar depois.
+		if TransferRules.minor_blocked(world, p, c) and (p.club_id < 0 or not need.get("young", false)):
+			continue
 		var age := p.age(world.year)
 		var rating := p.rating_at(target_pos) if target_pos >= 0 else p.ovr_f
 		var eff := rating + (float(p.potential) - rating) * pot_w * (0.6 if age <= 23 else 0.0)
@@ -505,11 +519,15 @@ static func _close_deal(world: GameWorld, st: Dictionary, c: Club, p: Player, ur
 	var wage := Valuation.round_wage(TransferManager.wage_ask(world, p, buyer) * float(profile(buyer.nation).get("wage_boost", 1.0)))
 	if deal.get("clause", false):
 		_news_clause(world, buyer, p, seller, fee)
+	var minor := TransferRules.minor_blocked(world, p, buyer)
 	# Troca: parte do pagamento vai em jogador que o vendedor precisa.
 	var piece: Player = null
-	if world.rng.randf() < 0.45:
+	if not minor and world.rng.randf() < 0.45:
 		piece = _swap_piece(world, buyer, seller, p, fee)
 	var t := TransferManager.complete_transfer(world, p, buyer, fee, wage, years)
+	if minor:
+		TransferRules.hold_until_18(world, p, buyer, seller)
+		TransferRules.news_hold(world, p, buyer, seller, fee)
 	var so := float(deal.get("sell_on", 0.0))
 	if so > 0.0:
 		p.clauses = {"so": seller.id, "pct": so}
@@ -522,7 +540,7 @@ static func _close_deal(world: GameWorld, st: Dictionary, c: Club, p: Player, ur
 		var bk := str(buyer.id)
 		st["left"][bk] = int(st["left"].get(bk, 0)) - 1
 	# Efeito dominó: quem perdeu um titular vai atrás de reposição.
-	if was_key and not world.is_user_club(seller.id):
+	if was_key and not minor and not world.is_user_club(seller.id):
 		var k := str(seller.id)
 		st["left"][k] = int(st["left"].get(k, 0)) + 1
 	_news_record(world, t)
@@ -687,6 +705,31 @@ static func exercise_loan_options(world: GameWorld) -> void:
 		p.loan = {}
 		TransferManager.complete_transfer(world, p, borrower, opt, Valuation.wage_demand(p, borrower, world.year), TransferManager.preferred_years(world, p))
 		world.stat_add("options_exercised")
+
+
+## Joia de um dos países de garimpo sul-americanos do clube.
+static func _draw_jewel(world: GameWorld, index: Dictionary, prof: Dictionary) -> Player:
+	var src: Array = []
+	for n in prof.get("sources", []):
+		if SOUTH_AMERICA.has(n):
+			src.append(n)
+	if src.is_empty():
+		return null
+	var arr: Array = index.get("young", {}).get(src[world.rng.randi_range(0, src.size() - 1)], [])
+	return null if arr.is_empty() else arr[world.rng.randi_range(0, arr.size() - 1)]
+
+
+## Clube europeu com dinheiro e olheiros na América do Sul.
+static func hunts_jewels(c: Club) -> bool:
+	if SOUTH_AMERICA.has(c.nation) or c.reputation < 64.0:
+		return false
+	var ages: Variant = profile(c.nation).get("age")
+	if ages is Array and int(ages[0]) >= 23:
+		return false # Golfo, Turquia, China: compram pronto, não apostam em garoto
+	for n in profile(c.nation).get("sources", []):
+		if SOUTH_AMERICA.has(n):
+			return true
+	return false
 
 
 ## Sorteia um candidato: próprio país, rotas de garimpo do país ou o mercado mundial por nível.
