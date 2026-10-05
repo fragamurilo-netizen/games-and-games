@@ -702,7 +702,7 @@ func _promedios_card(w: GameWorld, league: League) -> Control:
 	if not LeagueFormat.uses_promedios(league):
 		return null
 	var pr := LeagueFormat.promedios(w, league)
-	if pr.is_empty():
+	if pr.is_empty() or pr.all(func(e): return int(e["pj"]) == 0):
 		return null
 	var card := UIKit.card("Card", 6)
 	card.add_child(UIKit.section("Promedios"))
