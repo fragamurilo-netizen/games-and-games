@@ -72,6 +72,15 @@ Os testes completos (`tests/run_tests.gd`) passam de 30 minutos, por isso rode s
 - **Ratings.** Meia dúzia de jogadores passa de 90 (antes o máximo era 89). Os titulares mudam de nível conforme a função (`STARTER_SHIFT`), e o craque do elenco quase nunca é lateral. Antes os três melhores do mundo eram laterais-esquerdos.
 - **Estilos novos.** Volante líbero, armador itinerante, trequartista, intérprete de espaços, ponta de área e cabeceador. Cada um fica com 6 a 8% da função.
 
+## Repercussão de mata-mata (05/10)
+
+Pedido do Gregory: perder um título no agregado (Inter x Grêmio) saía com pós-jogo "positivo" porque tudo olhava só o placar do dia.
+
+- `scripts/systems/tie_stakes.gd` (`TieStakes.of`) diz se o jogo decidiu um confronto (jogo único ou volta, copa ou playoff de liga): vencedor pelo agregado e pênaltis, se era final, se valia taça ou acesso, e o peso (1 = final com título).
+- Com isso, no jogo decisivo vale o confronto: torcida e diretoria (`BoardManager.after_tie`), apoio e reputação do técnico, coluna de jornal (`People._tie_column`), coletiva (`PressRoom._tie_question`), manchete (`NewsManager._tie_news`) e eventos. Ganhar a volta e perder a taça agora é derrota, e mais pesada no clássico.
+- Feitos do jogo (`ManagerFeats`) não dão bônus a quem ganhou o jogo e caiu. Técnicos da IA também sentem a final perdida.
+- O motor de partida não mudou.
+
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:

@@ -87,3 +87,11 @@ static func how(st: Dictionary) -> String:
 	if bool(st.get("two", false)):
 		return "no agregado (%d x %d)" % [int(st["agg"][0]), int(st["agg"][1])]
 	return ""
+
+
+## "da Copa do Brasil", "do Campeonato Gaúcho": artigo certo antes do nome da competição.
+static func of_comp(name: String) -> String:
+	for w in ["Copa", "Liga", "Recopa", "Supercopa", "Taça", "Libertadores", "Sul-Americana", "Série", "Premier", "Bundesliga", "Eredivisie", "Champions", "Europa", "Conference", "Ligue", "Primeira", "Superliga", "Super Liga"]:
+		if name.begins_with(w):
+			return "da " + name
+	return "do " + name

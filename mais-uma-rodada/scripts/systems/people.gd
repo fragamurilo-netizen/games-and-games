@@ -874,14 +874,14 @@ static func _tie_column(world: GameWorld, r: RandomNumberGenerator, f: Fixture, 
 	var won := int(st["w"]) == club.id
 	var derby := bool(st["derby"])
 	var how := TieStakes.how(st)
-	var comp := String(st["name"])
+	var comp := TieStakes.of_comp(String(st["name"]))
 	var mine := f.result_for(club.id)
 	var title := ""
 	var body := ""
 	if bool(st["title"]):
 		if won:
 			title = RngUtil.pick(r, ["%s entra para a história do %s" % [m, club.short_name], "A taça tem a cara de %s" % m])
-			body = "Título da %s%s. %s" % [comp, (" " + how) if how != "" else "",
+			body = "Título %s%s. %s" % [comp, (" " + how) if how != "" else "",
 				"E em cima do maior rival: a cidade vai lembrar disso por anos." if derby else "O treinador ganhou crédito para muito tempo."]
 			if mine == "D":
 				body += " Perder o último jogo não apagou nada."
@@ -889,15 +889,15 @@ static func _tie_column(world: GameWorld, r: RandomNumberGenerator, f: Fixture, 
 			title = RngUtil.pick(r, ["%s deixa a taça escapar" % m, "Vice que dói: a conta chega para %s" % m])
 			if derby:
 				title = RngUtil.pick(r, ["Taça na mão do rival: dia de luto no %s" % club.short_name, "O %s vê o %s levantar a taça" % [club.short_name, opp.short_name]])
-			body = "O %s perdeu a %s%s%s. %s" % [club.short_name, comp, (" " + how) if how != "" else "", (" para o %s" % opp.short_name) if not derby else " para o maior rival",
+			body = "O %s perdeu o título %s%s%s. %s" % [club.short_name, comp, (" " + how) if how != "" else "", (" para o %s" % opp.short_name) if not derby else " para o maior rival",
 				"Vencer o último jogo não serviu de consolo: o título ficou com o outro lado." if mine == "V" else "A torcida quer saber o que deu errado na decisão."]
 	elif won:
-		title = "%s passa pelo %s%s" % [club.short_name, opp.short_name, (" e está na %s" % comp) if bool(st["access"]) else ""]
-		body = "Classificação %s na %s da %s.%s" % [how if how != "" else "no jogo único", String(st["stage"]).to_lower(), comp,
+		title = "%s passa pelo %s%s" % [club.short_name, opp.short_name, " e garante a vaga" if bool(st["access"]) else ""]
+		body = "Classificação %s na %s %s.%s" % [how if how != "" else "no jogo único", String(st["stage"]).to_lower(), comp,
 			" Mesmo com a derrota no jogo, o que vale é a vaga." if mine == "D" else ""]
 	else:
 		title = "Eliminação pesa sobre %s" % m if not derby else "Eliminado pelo rival: %s na berlinda" % m
-		body = "O %s caiu %s diante do %s na %s da %s.%s" % [club.short_name, how if how != "" else "no jogo único", opp.short_name, String(st["stage"]).to_lower(), comp,
+		body = "O %s caiu %s diante do %s na %s %s.%s" % [club.short_name, how if how != "" else "no jogo único", opp.short_name, String(st["stage"]).to_lower(), comp,
 			" A vitória no jogo não apaga a eliminação." if mine == "V" else ""]
 	NewsManager.post_raw(world, title, "%s\n— %s, %s" % [body, String(j["n"]), String(j["o"])], club.id, -1,
 		NewsEvent.IMP_HIGH if bool(st["final"]) or derby else NewsEvent.IMP_NORMAL, "imprensa")
