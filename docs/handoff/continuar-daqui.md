@@ -4,10 +4,18 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
-- O ramo de trabalho é `claude/project-thread-nzso8z` e reúne tudo. O `main` ainda só tem o commit inicial e nada foi juntado nele (o dono pede para perguntar antes).
-- A versão continua 0.4.0.
-- O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2).
-- O APK mais recente fica em `builds/` nesse ramo. Para instalar: abrir o link do GitHub no celular, logado, e tocar em Download.
+- **As duas linhas foram juntadas em 05/10** no ramo `claude/posicoes-escalacao-hbrnjt`. Ele tem a UI 2.0 e a versão 1.0.0 (antes em `claude/youthful-newton-hey7og`, a que o dono e o Gregory jogam), mais todo o conteúdo da 0.4.0 de `claude/project-thread-nzso8z` (motor realista, base e negociações, eventos, estatísticas e recordes, repercussão do mata-mata). Trabalho novo deve partir desse ramo. O `nzso8z` ficou para trás e não tem a UI 2.0.
+- Na junção, as telas seguiram a UI 2.0 (sem o overall na interface, só estrelas) e ganharam os plurais certos da 0.4.0. Os estilos de jogador das duas linhas foram somados. A evolução usa a fase de carreira da 1.0.0 (`_career_arc`), com o potencial assentado (`_settle_potential`) e a deriva da 0.4.0. O teto dos craques e o peso por posição vêm calibrados da 0.4.0. O aviso de conquista ficou no topo, compacto, como na UI 2.0. O menu ☰ continua na cor do clube do técnico.
+- Não foi refeita a calibragem de `tools/ratings_report.gd` depois da junção. Vale rodar para conferir os 90+ em 4 temporadas.
+- O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
+- O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
+
+### Posições da escalação (05/10)
+
+- Mover posições não empilha mais ninguém. Antes, virar o centroavante em ponta-direita punha o jogador exatamente em cima do ponta que já existia. Agora `DatabaseManager._spread_custom` espaça as posições repetidas na mesma linha e afasta as vagas que se encostam.
+- Na partida, companheiros ficam a pelo menos 4,2 m e adversários a 2,6 m (`PitchMotion.SEP_MATE` e `SEP_RIVAL`). Em barreira, escanteio e comemoração continua 1,3 m.
+- No pré-jogo, o banco cabe acima do rodapé (`_fit_pitch`). Na partida, a narração tem altura mínima (`FEED_MIN_H`) e a tarja do gol fica por cima do campo. O layout da partida agora é da thread "Palestras e narração".
+- Para conferir: `design_shots -- --only=!lineup` (ou `!lineup=C:4-4-2|9=AM`).
 
 ## Como conferir e gerar o APK
 
