@@ -65,6 +65,11 @@ var swapped: bool = false:
 		_crowd_tex = null
 		queue_redraw()
 ## Siglas mostradas no fundo de cada campo de defesa (quem defende aquele gol).
+## Visual clássico de jogo de técnico (2D chapado, estilo FM 2008): campo liso sem estádio,
+## bolinhas com número, sem câmera e a frase do lance na barra de baixo.
+var classic: bool = false
+var caption: Dictionary = {} # {text, color, t}
+const CAPTION_DUR := 4.5
 var home_label: String = ""
 var away_label: String = ""
 ## Câmera da transmissão: aproxima no ataque perigoso, na comemoração e no replay.
@@ -95,6 +100,10 @@ func _process(delta: float) -> void:
 	_t += delta
 	motion.update(delta)
 	_update_camera(delta)
+	if not caption.is_empty():
+		caption["t"] = float(caption["t"]) + delta
+		if float(caption["t"]) >= CAPTION_DUR:
+			caption = {}
 	if not callout.is_empty():
 		callout["t"] = float(callout["t"]) + delta
 		if float(callout["t"]) >= float(callout["dur"]):
@@ -138,6 +147,11 @@ func reset_kickoff() -> void:
 	motion.kickoff(motion.poss, false)
 
 
+## Frase da narração na barra de baixo do campo (visual clássico).
+func show_caption(text: String, col: Color) -> void:
+	caption = {"text": text, "color": col, "t": 0.0}
+
+
 ## Letreiro grande sobre o campo por `dur` segundos.
 func show_callout(text: String, col: Color, dur: float = 1.4) -> void:
 	callout = {"text": text, "color": col, "t": 0.0, "dur": dur}
@@ -158,7 +172,7 @@ func _update_camera(delta: float) -> void:
 	elif mm.chance_live and PitchMotion.depth(mm.poss, mm.ball) >= 0.62:
 		target = 1.3
 		focus = mm.ball.lerp(Vector2(PitchMotion.goal_x(mm.poss), PitchMotion.W * 0.5), 0.35)
-	if AppSettings.reduce_motion:
+	if AppSettings.reduce_motion or classic:
 		target = 1.0
 	var k := clampf(delta * (4.0 if mm.replaying else 2.2), 0.0, 1.0)
 	cam_zoom = lerpf(cam_zoom, target, k)
@@ -173,6 +187,8 @@ func _update_camera(delta: float) -> void:
 func _margins() -> Vector2:
 	if mode != "match" or stadium.is_empty():
 		return Vector2.ZERO
+	if classic:
+		return Vector2(0.02, 0.035)
 	match String(stadium.get("kind", "arena")):
 		"olimpico":
 			return Vector2(0.1, 0.2)
@@ -186,12 +202,24 @@ func _margins() -> Vector2:
 func pitch_rect() -> Rect2:
 	var aspect := 1.55 if horizontal else 0.74 # largura/altura na tela
 	var m := _margins()
-	var h := size.y / (1.0 + 2.0 * m.y)
+	var avail_h := size.y - _caption_h()
+	var h := avail_h / (1.0 + 2.0 * m.y)
 	var w := h * aspect
 	if w * (1.0 + 2.0 * m.x) > size.x:
 		w = size.x / (1.0 + 2.0 * m.x)
 		h = w / aspect
-	return Rect2((size.x - w) * 0.5, (size.y - h) * 0.5, w, h)
+	return Rect2((size.x - w) * 0.5, (avail_h - h) * 0.5, w, h)
+
+
+## Altura da barra de narração do visual clássico (fica embaixo do campo, sem cobrir jogador).
+func _caption_h() -> float:
+	if mode != "match" or not classic:
+		return 0.0
+	return float(_caption_fs()) * 1.7
+
+
+func _caption_fs() -> int:
+	return int(clampf(size.y * 0.06, 14.0, 22.0))
 
 
 ## Canônico (a, b) → tela.
@@ -227,7 +255,9 @@ func _draw() -> void:
 	if size.x < 1.0 or size.y < 1.0:
 		return
 	var r := pitch_rect()
-	var in_match := mode == "match" and not stadium.is_empty()
+	var in_match := mode == "match" and not stadium.is_empty() and not classic
+	if mode == "match" and classic:
+		draw_rect(Rect2(Vector2.ZERO, size), CLASSIC_BG)
 	var zoomed := mode == "match" and cam_zoom > 1.005
 	if zoomed:
 		# Câmera: aproxima em torno do foco sem mostrar nada além das bordas do controle.
@@ -258,6 +288,8 @@ func _draw() -> void:
 		draw_set_transform_matrix(_cam_xf)
 	if mode == "match":
 		_draw_broadcast()
+		if classic:
+			_draw_caption()
 
 
 # ---------------------------------------------------------------------------
@@ -316,9 +348,16 @@ func _rect_ab(a0: float, b0: float, a1: float, b1: float, r: Rect2) -> Rect2:
 	return Rect2(Vector2(minf(p0.x, p1.x), minf(p0.y, p1.y)), (p1 - p0).abs())
 
 
+const CLASSIC_BG := Color("#14231A")
+const CLASSIC_A := Color("#3C8A3E")
+const CLASSIC_B := Color("#358038")
+
+
 func _grass_colors() -> Array:
 	var a := UIColors.PITCH_A
 	var b := UIColors.PITCH_B
+	if mode == "match" and classic:
+		return [CLASSIC_A, CLASSIC_B]
 	if mode == "match" and not stadium.is_empty():
 		match String(stadium.get("kind", "")):
 			"arena", "nacional":
@@ -355,8 +394,8 @@ func _grass_colors() -> Array:
 
 func _draw_pitch(r: Rect2) -> void:
 	var gc := _grass_colors()
-	var kind := String(stadium.get("kind", "")) if mode == "match" else ""
-	var stripes := 12
+	var kind := String(stadium.get("kind", "")) if mode == "match" and not classic else ""
+	var stripes := 10 if classic else 12
 	if kind == "arena" or kind == "nacional":
 		stripes = 18
 	elif kind == "acanhado":
@@ -1083,6 +1122,9 @@ func _draw_mini_shirt(c: Vector2, s: float, c1: Color, c2: Color, sel: bool) -> 
 # ---------------------------------------------------------------------------
 
 func _draw_match(r: Rect2) -> void:
+	if classic:
+		_draw_match_classic(r)
+		return
 	var mm := motion
 	var ppm := r.size.y / PitchMotion.W # pixels por metro
 	var rad := clampf(ppm * 2.3, 7.0, 17.0)
@@ -1157,6 +1199,98 @@ func _draw_match(r: Rect2) -> void:
 			tc = home_color2 if mm.owner.side == 0 else away_color2
 		draw_rect(Rect2(bgr.position, Vector2(3, bgr.size.y)), tc)
 		draw_string(small, bgr.position + Vector2(6, nfs * 1.02), mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE)
+
+
+## Partida no visual clássico: bolinhas chapadas com número, bola branca com contorno e rastro,
+## nome de quem conduz embaixo dele. Sem pernas, sombras de luz nem câmera.
+func _draw_match_classic(r: Rect2) -> void:
+	var mm := motion
+	var ppm := r.size.y / PitchMotion.W
+	var rad := clampf(ppm * 2.1, 7.0, 16.0)
+	var font := get_theme_font(&"font", &"Stat")
+	var small := get_theme_font(&"font", &"H3")
+	var fs := int(rad * 1.05)
+	_draw_end_labels(r, font, int(rad * 1.1))
+	for side in 2:
+		for a: PitchMotion.Ag in mm.agents[side]:
+			if not a.on:
+				continue
+			var slots: Array = home_slots if a.side == 0 else away_slots
+			var sl: Dictionary = slots[a.idx] if a.idx < slots.size() else {}
+			var c1: Color = sl.get("c1", home_color if a.side == 0 else away_color)
+			var c2: Color = sl.get("c2", home_color2 if a.side == 0 else away_color2)
+			var p := M(a.pos, r)
+			var fill := c1
+			if a.down > 0.0:
+				fill = Color(c1, 0.45)
+			draw_circle(p + Vector2(1.0, 1.5), rad, Color(0, 0, 0, 0.3))
+			draw_circle(p, rad, fill)
+			# Contorno: a segunda cor quando contrasta, senão escuro (time de branco no gramado).
+			var ring := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.25 else c1.darkened(0.55)
+			draw_arc(p, rad, 0.0, TAU, 24, ring, maxf(1.5, rad * 0.16), true)
+			if a.side == highlight_side and a.idx == highlight_slot:
+				draw_arc(p, rad * 1.5, 0.0, TAU, 24, Color("#FFE14D"), 2.5, true)
+			var num := str(a.number)
+			var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			draw_string(font, p + Vector2(-nw * 0.5, fs * 0.36), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
+			if a.card > 0:
+				draw_rect(Rect2(p + Vector2(rad * 0.55, -rad * 1.7), Vector2(rad * 0.55, rad * 0.75)), Color("#F5D547") if a.card == 1 else Color("#E5484D"))
+	# Árbitro e bandeirinhas: pontos pretos com aro amarelo.
+	draw_circle(M(mm.ref_pos, r), rad * 0.6, Color("#111111"))
+	draw_arc(M(mm.ref_pos, r), rad * 0.6, 0.0, TAU, 16, Color("#F5D547"), 1.5, true)
+	for i in 2:
+		var ap: Vector2 = mm.ar_pos[i]
+		var sp := M(ap, r)
+		draw_circle(sp, rad * 0.45, Color("#111111"))
+		if float(mm.ar_flag[i]) > 0.0:
+			draw_rect(Rect2(sp + Vector2(-rad * 0.3, -rad * 1.5), Vector2(rad * 0.6, rad * 0.45)), Color("#E5484D"))
+	if mm.ref_card > 0:
+		var rp := M(mm.ref_pos, r)
+		draw_rect(Rect2(rp + Vector2(rad * 0.4, -rad * 1.9), Vector2(rad * 0.6, rad * 0.85)), Color("#F5D547") if mm.ref_card == 1 else Color("#E5484D"))
+	# Rastro da bola (passe, cruzamento, chute) e a bola.
+	var prev := Vector2.INF
+	for tr in mm.trail:
+		var tp := M(tr[0], r) - Vector2(0, float(tr[1]) * ppm * 0.6)
+		var k := 1.0 - float(tr[2]) / 0.35
+		if prev != Vector2.INF:
+			draw_line(prev, tp, Color(1, 1, 1, 0.45 * k), maxf(1.5, rad * 0.22))
+		prev = tp
+	var bp := M(mm.ball, r)
+	var lift := Vector2(0, -mm.ball_h * ppm * 0.6)
+	var br := rad * 0.5 * (1.0 + mm.ball_h * 0.06)
+	draw_circle(bp + Vector2(1.5, 2.0), rad * 0.42, Color(0, 0, 0, 0.35))
+	draw_circle(bp + lift, br, Color.WHITE)
+	draw_arc(bp + lift, br, 0.0, TAU, 16, Color(0.05, 0.05, 0.05), 1.5, true)
+	if mm.owner != null and mm.owner.on and mm.owner.name != "":
+		var op := M(mm.owner.pos, r)
+		var nfs := int(clampf(rad * 1.05, 11.0, 17.0))
+		var tw := small.get_string_size(mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
+		var at := op + Vector2(-tw * 0.5, rad + nfs * 1.05)
+		at.x = clampf(at.x, 2.0, size.x - tw - 2.0)
+		draw_string(small, at + Vector2(1, 1), mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color(0, 0, 0, 0.85))
+		draw_string(small, at, mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE)
+
+
+## Barra da narração embaixo do campo (visual clássico): a frase do lance que o campo encena.
+func _draw_caption() -> void:
+	var fs := _caption_fs()
+	var h := _caption_h()
+	var bar := Rect2(Vector2(0, size.y - h), Vector2(size.x, h))
+	draw_rect(bar, Color(0, 0, 0, 0.55))
+	if caption.is_empty():
+		return
+	var small := get_theme_font(&"font", &"H3")
+	var t := float(caption["t"])
+	var alpha := clampf((CAPTION_DUR - t) / 0.5, 0.0, 1.0) * clampf(t / 0.12, 0.0, 1.0)
+	var col: Color = caption["color"]
+	draw_rect(Rect2(bar.position, Vector2(5, h)), Color(col, alpha))
+	var base := String(caption["text"])
+	var txt := base
+	var max_w := size.x - 24.0
+	while base.length() > 8 and small.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		base = base.substr(0, base.length() - 2)
+		txt = base.strip_edges() + "…"
+	draw_string(small, bar.position + Vector2(14, h * 0.5 + fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1, 1, 1, alpha))
 
 
 func _draw_shadow(p: Vector2, rad: float, night: bool) -> void:
