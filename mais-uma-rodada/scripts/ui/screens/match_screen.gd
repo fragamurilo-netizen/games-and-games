@@ -673,29 +673,77 @@ static func _cdist(a: Color, b: Color) -> float:
 
 
 func _team_colors(home: Club, away: Club) -> Array[Color]:
+	# No campinho cada time é a cor que mais aparece no uniforme (Grêmio é azul, não o branco do
+	# c1 das listras), com a outra cor de contorno. O visitante usa o uniforme que mais se
+	# distingue do mandante pela cor das bolinhas; se ainda ficar parecido, vai de neutro.
 	var hk := home.kit_home
-	var h1 := Color(String(hk.get("c1", home.color1)))
-	var h2 := Color(String(hk.get("c2", home.color2)))
-	var a1: Color
-	var a2: Color
-	# Visitante entra com o uniforme que mais contrasta com o do mandante (camisa e calção inteiros).
-	match KitDesign.away_choice(home, away):
-		"home":
-			a1 = Color(String(away.kit_home.get("c1", away.color1)))
-			a2 = Color(String(away.kit_home.get("c2", away.color2)))
-		"away":
-			a1 = Color(String(away.kit_away.get("c1", "#FFFFFF")))
-			a2 = Color(String(away.kit_away.get("c2", "#111111")))
-		"third":
-			var third := away.third_kit()
-			a1 = Color(String(third.get("c1", "#FFFFFF")))
-			a2 = Color(String(third.get("c2", "#111111")))
-		_:
-			var dom := KitDesign.dominant(hk)
-			a1 = Color("#F4F4F4") if dom.get_luminance() < 0.5 else Color("#15181D")
-			a2 = Color("#15181D") if dom.get_luminance() < 0.5 else Color("#F4F4F4")
-	var out: Array[Color] = [h1, h2, a1, a2]
+	var hd := _dot_colors(hk)
+	var kits: Array = []
+	var pref := KitDesign.away_choice(home, away)
+	for which in [pref, "home", "away", "third"]:
+		var k: Dictionary = away.kit_home if which == "home" else (away.kit_away if which == "away" else (away.third_kit() if which == "third" else {}))
+		if not k.is_empty():
+			kits.append(k)
+	var best: Array = []
+	var best_d := -1.0
+	for k in kits:
+		var dc := _dot_colors(k)
+		var d := KitDesign.delta_e(dc[0], hd[0])
+		if d >= DOT_MIN_DE:
+			best = dc
+			break
+		if d > best_d:
+			best_d = d
+			best = dc
+	if best.is_empty() or KitDesign.delta_e(best[0], hd[0]) < DOT_MIN_DE:
+		var dark: bool = (hd[0] as Color).get_luminance() >= 0.5
+		best = [Color("#15181D"), Color("#F4F4F4")] if dark else [Color("#F4F4F4"), Color("#15181D")]
+		if KitDesign.delta_e(best[0], hd[0]) < DOT_MIN_DE:
+			best = [Color("#F5D547"), Color("#15181D")]
+	var out: Array[Color] = [hd[0], hd[1], best[0], best[1]]
 	return out
+
+
+const DOT_MIN_DE := 32.0
+const GK_OPTS: Array[String] = ["#F28C28", "#3DBE7A", "#F5D547", "#9B5DE5", "#E84A8A", "#4EA8DE", "#15181D"]
+
+
+## Goleiro com cor própria: se a camisa dele lembrar a de algum dos dois times (ou o outro goleiro),
+## troca pela opção mais distante de todas.
+func _gk_color(c: Color, side: int) -> Color:
+	var avoid: Array = [_colors[0], _colors[2]]
+	var other := _sim.teams[1 - side].club.gk_kit()
+	if side == 1:
+		avoid.append(_gk_color(Color(String(other.get("c1", "#111111"))), 0))
+	var near := func(x: Color) -> float:
+		var m := 999.0
+		for a in avoid:
+			m = minf(m, KitDesign.delta_e(x, a))
+		return m
+	if near.call(c) >= 25.0:
+		return c
+	var best := c
+	var best_d := -1.0
+	for h in GK_OPTS:
+		var d: float = near.call(Color(h))
+		if d > best_d:
+			best_d = d
+			best = Color(h)
+	return best # diferença mínima (CIE ΔE) entre as bolinhas dos dois times
+
+
+## [cor da bolinha, cor do contorno] de um uniforme: a cor dominante e a que mais contrasta com ela.
+static func _dot_colors(k: Dictionary) -> Array:
+	var dom := KitDesign.dominant(k)
+	var ring := Color("#15181D") if dom.get_luminance() >= 0.5 else Color("#F4F4F4")
+	var best := 0.0
+	for sw in KitDesign.swatches(k):
+		var c: Color = sw[0]
+		var d := KitDesign.delta_e(c, dom)
+		if d > best and d > 25.0:
+			best = d
+			ring = c
+	return [dom, ring]
 
 
 func _side_color(side: int) -> Color:
@@ -1365,7 +1413,7 @@ func _sync_slots() -> void:
 				"gk": String(s.get("role", "")) == "GK" or int(s.get("pos", -1)) == Pos.GK}
 			if mp != null and mp.p.position == Pos.GK and int(s.get("pos", -1)) == Pos.GK:
 				var gk := t.club.gk_kit()
-				e["c1"] = Color(String(gk.get("c1", "#111111")))
+				e["c1"] = _gk_color(Color(String(gk.get("c1", "#111111"))), side)
 				e["c2"] = Color(String(gk.get("c2", "#FFFFFF")))
 			arr.append(e)
 		if side == 0:
