@@ -1594,5 +1594,11 @@
 		"Do vestiário do {team}, o recado do técnico:",
 		"Informação do vestiário do {team}. O técnico reuniu o grupo e disse:",
 		"Porta do vestiário do {team} entreaberta, e dá pra ouvir o técnico:"
+	],
+	"radio_tension_air": [
+		"Olha o perigo...",
+		"Atenção, {gk}...",
+		"Pode ser agora...",
+		"Tem gente do {team} chegando na área..."
 	]
 }

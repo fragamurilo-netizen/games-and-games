@@ -190,7 +190,7 @@ func lines_for(ev: Dictionary) -> Array:
 					bc = "build_solo"
 				out.append(_line(_pick(bc), ev, "chance", 0.0))
 				if rng.randf() < 0.55:
-					_radio(out, "radio_tension", ev, "chance", 0.15)
+					_radio(out, _tension_cat(ct), ev, "chance", 0.15)
 				if fin != "" and _data.has("fin_" + fin):
 					out.append(_line(_pick("fin_" + fin), ev, "chance", 0.3))
 			var cat := "goal"
@@ -250,7 +250,7 @@ func lines_for(ev: Dictionary) -> Array:
 			elif big and (t == MatchSimulation.EV_SAVE or t == MatchSimulation.EV_MISS):
 				cat2 += "_big"
 			if t != MatchSimulation.EV_BLOCK and float(x.get("xg", 0.0)) >= 0.15 and rng.randf() < 0.5:
-				_radio(out, "radio_tension", ev, "chance", 0.25)
+				_radio(out, _tension_cat(ct2), ev, "chance", 0.25)
 			var hot := t == MatchSimulation.EV_POST or cat2 == "block_line" or big or fin2 in ["double", "fingertip", "one_on_one", "last_ditch"]
 			var ol := _line(_pick(cat2), ev, "chance" if hot else "normal", 0.5)
 			if hot:
@@ -355,6 +355,13 @@ func _radio(out: Array, cat: String, ev: Dictionary, style: String, delay: float
 	var txt := _pick(cat)
 	if txt != "":
 		out.append(_line(txt, ev, style, delay))
+
+
+## Bola aérea ou bate-rebate não tem "ajeitou pra bater": a tensão é outra.
+static func _tension_cat(ct: int) -> String:
+	if ct in [MatchSimulation.CH_CROSS, MatchSimulation.CH_CORNER, MatchSimulation.CH_SCRAMBLE]:
+		return "radio_tension_air"
+	return "radio_tension"
 
 
 ## "Tempo e placar" do rádio, com {team} apontando para quem vence. Vazio fora do português.
