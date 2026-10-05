@@ -152,7 +152,7 @@ func _free(w: GameWorld, c: VBoxContainer) -> void:
 		if not last.is_empty():
 			info.append("último: %s (%s)" % [String(last.get("cn", "")), CoachCareer.end_text(last).to_lower()] if CoachCareer.end_text(last) != "" else "último: %s" % String(last.get("cn", "")))
 		if int(t["t"]) > 0:
-			info.append("%d título(s)" % int(t["t"]))
+			info.append(("%d título" if int(t["t"]) == 1 else "%d títulos") % int(t["t"]))
 		col.add_child(UIKit.label(" · ".join(info), "Small", true))
 		row.add_child(col)
 		row.add_child(UIKit.label(CoachScreen._stars(float(co.get("sk", 50.0))), "Small"))

@@ -577,11 +577,13 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		var league := world.league_of(world.user_club_id)
 		report["user"] = {"fixture": f, "result": f.result_for(world.user_club_id), "pos_before": user_pos_before,
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
-		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
-		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
+		# No mata-mata decidido, o clima depois do jogo segue o confronto (agregado, pênaltis, taça).
+		var mood := TieStakes.effective_result(world, f, world.user_club_id)
+		report["events"] = EventManager.after_user_turn(world, mood)
+		report["talks"] = People.after_user_turn(world, md["user"], mood)
 		report["feats"] = ManagerFeats.on_user_match(world, md["user"], String(report["user"]["result"]))
-		CoachStories.after_user_match(world, md["user"], String(report["user"]["result"]))
-		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
+		CoachStories.after_user_match(world, md["user"], mood)
+		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], mood))
 		InboxManager.after_user_turn(world, report, md["user"])
 	return report
 
@@ -633,10 +635,13 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var score: Array = [f.hg, f.ag]
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
 	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
+	var stakes := TieStakes.of(world, f) # mata-mata decidido: vale o agregado e a taça
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
 		club.push_result(result)
+		var opp_c := world.club(f.away if side == 0 else f.home)
+		club.record_match(int(score[side]), int(score[1 - side]), opp_c.short_name if opp_c != null else "", world.year)
 		if result == "V" and world.is_user_club(club.id):
 			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
@@ -650,6 +655,11 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			dm *= 1.25
 		if big:
 			dm *= 1.8
+		if not stakes.is_empty():
+			# A torcida mede pelo confronto: cair (ainda mais numa final, ainda mais para o rival)
+			# pesa muito mais que o placar do dia.
+			var tw := float(stakes["weight"]) * (1.4 if derby else 1.0)
+			dm = (14.0 * tw) if int(stakes["w"]) == club.id else (-16.0 * tw * swing)
 		club.fan_mood = clampf(club.fan_mood + dm, 0.0, 100.0)
 		# Técnico do usuário
 		if world.is_user_club(club.id):
@@ -657,7 +667,9 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			var key := "w" if result == "V" else ("d" if result == "E" else "l")
 			world.manager_stats[key] = int(world.manager_stats.get(key, 0)) + 1
 			CoachIdentity.on_match(world, club)
-			BoardManager.after_match(world, club, result, derby)
+			BoardManager.after_match(world, club, result if stakes.is_empty() else ("V" if int(stakes["w"]) == club.id else "D"), derby)
+			if not stakes.is_empty():
+				BoardManager.after_tie(world, club, int(stakes["w"]) == club.id, float(stakes["weight"]), derby)
 		var conceded: int = score[1 - side]
 		for ln in res["lines"][side]:
 			var p: Player = ln[QuickMatch.L_P]
@@ -686,6 +698,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 					p.stats[Player.S_MOTM] += 1
 				if conceded == 0 and mins >= 60 and ln[QuickMatch.L_DEFN]:
 					p.stats[Player.S_CLEAN] += 1
+				if int(ln[QuickMatch.L_POS]) == Pos.GK and int(ln[QuickMatch.L_START]) == 0:
+					p.stats[Player.S_CONCEDED] += conceded
 				var ds: Array = detail.get(p.id, [])
 				if ds.size() == MatchStats.N:
 					for k in MatchStats.N:

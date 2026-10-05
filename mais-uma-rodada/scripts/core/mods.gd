@@ -234,7 +234,7 @@ static func problems(id: String) -> Array:
 		if DatabaseManager.cup_cfg(String(cid)).is_empty():
 			unknown.append(cid)
 	if not unknown.is_empty():
-		out.append({"file": "ids", "msg": "%d desconhecido(s): %s" % [unknown.size(), ", ".join(unknown.slice(0, 4).map(func(x): return String(x)))]})
+		out.append({"file": "ids", "msg": ("%d desconhecido: %s" if unknown.size() == 1 else "%d desconhecidos: %s") % [unknown.size(), ", ".join(unknown.slice(0, 4).map(func(x): return String(x)))]})
 	for rel in _files_under(root + "/data", "data"):
 		if not rel.ends_with(".json"):
 			continue
@@ -411,7 +411,7 @@ static func _read_names_csv(path: String, out: Dictionary) -> void:
 		cur.merge(e, true)
 		bucket[rid] = cur
 	if bad > 0:
-		out["problems"].append({"file": "names.csv", "msg": "%d linha(s) ignorada(s)" % bad})
+		out["problems"].append({"file": "names.csv", "msg": ("%d linha ignorada" if bad == 1 else "%d linhas ignoradas") % bad})
 
 
 ## Campos do pacote por cima de um clube/competição dos dados. c1/c2 trocam uma cor só.

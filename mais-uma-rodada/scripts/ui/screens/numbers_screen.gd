@@ -71,8 +71,9 @@ func _head(w: GameWorld, club: Club) -> Control:
 	var p := w.player(_sel) if _sel >= 0 else null
 	if p == null or p.club_id != club.id:
 		_sel = -1
-		card.add_child(UIKit.label("Escolha um jogador.", "H3", true))
-		return UIKit.card_panel(card)
+		# Sem jogador escolhido, nada de cartão com instrução: a lista abaixo já é o convite.
+		card.free()
+		return Control.new()
 	var row := UIKit.hbox(12)
 	row.add_child(UIKit.portrait(p, club, w.year, 72))
 	var col := UIKit.vbox(2)

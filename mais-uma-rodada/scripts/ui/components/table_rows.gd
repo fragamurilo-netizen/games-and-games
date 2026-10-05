@@ -262,9 +262,11 @@ static func _legend_item(c: Color, text: String) -> HBoxContainer:
 ## Linha de ranking individual (artilharia, assistências, notas).
 static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, caption: String) -> Control:
 	var h := UIKit.hbox(10)
-	var rl := UIKit.label(str(rank), "H3")
-	rl.custom_minimum_size.x = 36
+	var rl := UIKit.label(str(rank), "Mono")
+	rl.custom_minimum_size.x = 32
 	rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if rank > 3:
+		rl.add_theme_color_override(&"font_color", UIColors.MUTED)
 	h.add_child(rl)
 	var cl: Club = w.club(p.club_id) if p.club_id >= 0 else null
 	h.add_child(UIKit.crest(cl, 32))
@@ -277,9 +279,19 @@ static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, capti
 	col.add_child(n)
 	col.add_child(UIKit.label("%s · %s" % [cl.short_name if cl != null else "sem clube", caption], "Small"))
 	h.add_child(col)
-	h.add_child(UIKit.label(value, "Stat"))
+	var vl := UIKit.label(value, "Stat")
+	vl.custom_minimum_size.x = 48
+	vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(vl)
 	var pid := p.id
 	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel")
+
+
+## Linhas de ranking numa lista só, separadas por filetes (sem uma caixa por linha).
+static func ranking_list(rows: Array) -> Control:
+	var group := UIKit.menu_group(rows)
+	group.add_theme_stylebox_override(&"panel", StyleBoxEmpty.new())
+	return group
 
 
 ## Detalhes de um jogo (gols, craque, público) ou a prévia (campanhas) se ainda não aconteceu.

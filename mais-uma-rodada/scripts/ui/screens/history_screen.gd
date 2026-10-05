@@ -29,7 +29,7 @@ func refresh() -> void:
 	for h in w.history:
 		if not h.get("pre", false):
 			played += 1
-	screen_subtitle = "%d temporada(s) no save" % played
+	screen_subtitle = ("%d temporada no save" if played == 1 else "%d temporadas no save") % played
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
@@ -770,7 +770,7 @@ func _club_memory(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 	for i in range(past.size() - 1, -1, -1):
 		var e: Array = past[i]
 		var t := int(e[8]) if e.size() > 8 else FootballMemory.titles_between(w, club.id, int(e[1]), int(e[2]))
-		coaches.append(_mem_row(int(e[1]), "%s, até %d%s" % [String(e[0]), int(e[2]), (" · %d título(s)" % t) if t > 0 else ""],
+		coaches.append(_mem_row(int(e[1]), "%s, até %d%s" % [String(e[0]), int(e[2]), ((" · %d título" if t == 1 else " · %d títulos") % t) if t > 0 else ""],
 			"%dV %dE %dD" % [int(e[3]), int(e[4]), int(e[5])]))
 	c.add_child(_list_card("Técnicos históricos", coaches, "Nada ainda."))
 	# Confrontos: rivais primeiro, depois os adversários mais frequentes

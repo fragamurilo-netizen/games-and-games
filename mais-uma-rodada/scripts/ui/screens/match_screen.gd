@@ -9,6 +9,8 @@ const FEED_MAX := 70
 const PITCH_COMPACT := 0.2 # fração da altura do campo (deitado) quando os lances estão em destaque
 const FEED_FS := 24 # corpo da narração
 const FEED_FS_NEW := 27 # lance mais recente, em cima
+const FEED_MIN_H := 130.0 # altura mínima da narração/abas embaixo do campo
+const PITCH_MIN_TALL := 320.0 # em pé o campo parte disso e cresce com o espaço que sobra
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
 
 var _sim: MatchSimulation
@@ -167,6 +169,14 @@ func _responsive_layout() -> void:
 	# Com os lances em destaque (padrão), o campo fica deitado e baixo em pé também.
 	_pitch.horizontal = wide or AppSettings.match_view == 0
 	_pitch.custom_minimum_size.y = _pitch_height()
+	if not wide:
+		# Em pé o campo cresce com o espaço que sobra, mas a narração sempre fica com umas
+		# linhas à vista: com gols no placar ela sumia atrás da barra de botões.
+		_pitch.custom_minimum_size.y = minf(_pitch_height(), PITCH_MIN_TALL)
+		# Com os lances em destaque, o espaço que sobra vai para a narração, não para o campo.
+		var pb := _pitch.get_parent() as Control
+		pb.size_flags_vertical = Control.SIZE_EXPAND_FILL if AppSettings.match_view == 1 else Control.SIZE_FILL
+		pb.size_flags_stretch_ratio = 6.0
 	if wide == (_wide_body != null):
 		return
 	var pitch_box := _pitch.get_parent()
@@ -208,7 +218,7 @@ func _responsive_layout() -> void:
 			_root.add_child(n)
 			_root.move_child(n, at)
 			at += 1
-		(pitch_box as Control).size_flags_vertical = Control.SIZE_FILL
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL if AppSettings.match_view == 1 else Control.SIZE_FILL
 		_root.remove_child(_wide_body)
 		_wide_body.queue_free()
 		_wide_body = null
@@ -293,8 +303,15 @@ func _build() -> void:
 	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
 	Sfx.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
 	_add_field_node(UIKit.margin(_pitch, 0, 6, 0, 4))
+	# Tarja do gol por cima do pé do campo (fora do fluxo: não empurra a narração para baixo).
 	_l3 = _build_l3()
-	_add_field_node(UIKit.margin(_l3, 8, 0, 8, 4))
+	_l3.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_l3.offset_left = 8
+	_l3.offset_right = -8
+	_l3.offset_bottom = -6
+	_l3.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_l3.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pitch.add_child(_l3)
 	if not _div_entries.is_empty() or not _day_entries.is_empty():
 		_add_field_node(UIKit.margin(_build_strip(), 8, 0, 8, 4))
 		_ticker.visible = false
@@ -343,6 +360,7 @@ func _build() -> void:
 	_feed_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_feed_scroll.scroll_deadzone = 14
 	_feed_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_feed_scroll.custom_minimum_size.y = FEED_MIN_H
 	_feed = UIKit.vbox(12)
 	_feed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_feed_scroll.add_child(UIKit.margin(_feed, 18, 6, 18, 12))
@@ -352,6 +370,7 @@ func _build() -> void:
 	_tab_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_tab_scroll.scroll_deadzone = 14
 	_tab_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_tab_scroll.custom_minimum_size.y = FEED_MIN_H
 	_tab_scroll.visible = false
 	_tab_box = UIKit.vbox(8)
 	_tab_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -541,14 +560,14 @@ func _build_controls() -> void:
 	_update_play_button()
 
 
-## Controle secundário (tempo, menu): só o ícone, estreito; o nome fica na dica.
+## Controle secundário (tempo, menu): mais estreito e discreto, mas com o nome embaixo do ícone
+## como os outros (só o ícone deixava a barra desigual e o botão de tempo sem dizer o ritmo).
 func _compact(b: Button) -> void:
 	b.size_flags_horizontal = Control.SIZE_FILL
-	b.custom_minimum_size.x = UITokens.H_BUTTON
+	b.custom_minimum_size.x = UITokens.H_BUTTON + 12
 	b.theme_type_variation = "GhostButton"
 	b.tooltip_text = b.text
-	b.set_meta(&"compact", true)
-	b.text = ""
+	b.add_theme_font_size_override(&"font_size", 15)
 
 
 ## Menu do resto: painel com os números, som e ir para o fim.

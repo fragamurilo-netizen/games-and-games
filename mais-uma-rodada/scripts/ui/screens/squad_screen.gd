@@ -46,6 +46,7 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 		v.add_child(UIKit.colored("A folha passou do limite da diretoria.", UIColors.RED, "Small", true))
 	var rule := SquadRules.describe(club)
 	if rule != "":
+		# Com regra de estrangeiros na liga: quantos estão entre os relacionados, do limite.
 		var used := SquadRules.count(w, club, (club.sheet.starters + club.sheet.bench) if club.sheet != null else [])
 		var lim := int(SquadRules.limit(club)["max"])
 		if used > lim:
@@ -247,6 +248,28 @@ func _quick_sheet(counts: Dictionary) -> void:
 		row.custom_minimum_size.y = 72
 		v.add_child(row)
 	UIManager.show_modal(v, true)
+
+
+## Botão "Rótulo: escolha atual" que abre as opções numa folha.
+func _picker(caption: String, icon_name: String, items: Array, selected: String, cb: Callable) -> Button:
+	var cur := ""
+	for it: Array in items:
+		if String(it[0]) == selected:
+			cur = tr(String(it[1]))
+	var b := UIKit.button("%s: %s" % [tr(caption), cur], "GhostButton", func():
+		var v := UIKit.vbox(12)
+		v.add_child(UIKit.label(caption, "Title"))
+		v.add_child(UIKit.option_grid(items, selected, func(k: String):
+			UIManager.close_modal()
+			cb.call(k), 2))
+		UIManager.show_modal(v, true), icon_name)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.clip_text = true
+	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if selected != String(items[0][0]):
+		for st in [&"font_color", &"font_hover_color", &"icon_normal_color", &"icon_hover_color"]:
+			b.add_theme_color_override(st, UIColors.ACCENT)
+	return b
 
 
 ## Profundidade: os três melhores por posição e onde falta gente boa.

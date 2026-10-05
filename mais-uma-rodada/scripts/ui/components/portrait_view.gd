@@ -296,6 +296,20 @@ const STYLE_P: Array = [
 	{"tp": 0.36, "sd": 0.28, "sp": 3, "tx": "coil", "sb": 0.42}, # black power com costeletas longas
 	{"tp": 0.16, "sd": 0.06, "gl": 0.55, "fl": 0, "bk": "mullet", "sb": 0.1}, # para trás volumoso até a nuca
 	{"tp": 0.12, "sd": 0.05, "sb": 0.05, "tx": "wavy", "bk": "long", "fl": 1, "fr": "part", "gl": 0.15}, # longo ondulado atrás das orelhas
+	{"tp": 0.14, "sd": 0.0, "fd": 2, "tx": "wavy", "fl": 1}, # ondulado com degradê
+	{"tp": 0.26, "sd": 0.16, "sp": 3, "tx": "curl", "sb": 0.06, "hl": 0.12, "fr": "curl_fringe"}, # cacheado médio com franja
+	{"tp": 0.1, "sd": 0.0, "fd": 5, "fl": 1, "fr": "part", "lu": 1, "gl": 0.15}, # repartido navalhado
+	{"tp": 0.16, "sd": 0.03, "fd": 1, "tx": "coil", "fr": "twists"}, # twists curtos com degradê baixo
+	{"tp": 0.15, "sd": 0.08, "sb": 0.1, "fl": 1, "fr": "side_fringe", "gl": 0.2}, # médio penteado de lado
+	{"tp": 0.3, "sd": 0.04, "fd": 1, "sp": 3, "tx": "curl"}, # cacheado com laterais curtas
+	{"tp": 0.08, "sd": 0.02, "fd": 1, "fl": 1, "fr": "part", "gl": 0.5}, # social com gel
+	{"tp": 0.11, "sd": 0.06, "sb": 0.06, "fl": 3, "fr": "curtain"}, # curto repartido ao meio
+	{"tp": 0.22, "sd": 0.06, "fd": 1, "sp": 3, "tx": "coil", "lu": 1}, # crespo médio com degradê baixo
+	{"tp": 0.12, "sd": 0.04, "fd": 1, "fr": "quiff", "ph": 0.75}, # topete curto natural
+	{"tp": 0.03, "sd": 0.0, "fd": 3, "bk": "knot", "tx": "curl", "gl": 0.1}, # coque samurai cacheado
+	{"tp": 0.03, "sd": 0.0, "fd": 2, "tx": "braid", "op": 0.8, "fr": "shaved_part"}, # nagô com risco lateral
+	{"tp": 0.08, "sd": 0.04, "tx": "wavy", "bk": "bun_low", "fl": 0, "gl": 0.15}, # ondulado preso em coque baixo
+	{"tp": 0.16, "sd": 0.0, "fd": 2, "fl": 0, "gl": 0.25, "sp": 5}, # para trás desarrumado com degradê
 ]
 
 const LIGHT := Vector3(-0.4, -0.5, 0.77)

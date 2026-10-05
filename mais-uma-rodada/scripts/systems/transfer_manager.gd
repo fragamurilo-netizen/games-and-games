@@ -281,7 +281,7 @@ static func user_terms(world: GameWorld, p: Player, wage: int, years: int, deal:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou os termos!" % p.display_name()}
 	if wage >= demand * 0.9 and world.rng.randf() < 0.5:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou, mesmo pedindo um pouco mais." % p.display_name()}
-	return {"result": "counter", "wage": demand, "msg": "%s quer %s por %d ano(s)." % [p.display_name(), Fmt.money_month(demand), years]}
+	return {"result": "counter", "wage": demand, "msg": ("%s quer %s por %d ano." if years == 1 else "%s quer %s por %d anos.") % [p.display_name(), Fmt.money_month(demand), years]}
 
 
 static func _wage_fits(world: GameWorld, club: Club, p: Player, wage: int) -> bool:
@@ -1066,7 +1066,7 @@ static func shop_player(world: GameWorld, p: Player) -> Dictionary:
 			break
 	if n == 0:
 		return {"ok": true, "n": 0, "msg": "Nenhum clube se interessou por %s agora." % p.display_name()}
-	return {"ok": true, "n": n, "msg": "%d clube(s) fizeram proposta por %s." % [n, p.display_name()]}
+	return {"ok": true, "n": n, "msg": ("%d clube fez proposta por %s." if n == 1 else "%d clubes fizeram proposta por %s.") % [n, p.display_name()]}
 
 
 static func _find_buyer(world: GameWorld, p: Player) -> Club:

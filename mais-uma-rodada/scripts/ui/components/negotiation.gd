@@ -220,7 +220,6 @@ func _render_sell_buttons() -> void:
 		_render(), "swap")
 	shop.disabled = not w.transfer_window_open()
 	box.add_child(shop)
-	box.add_child(UIKit.label("Nas propostas que chegarem, dá para pedir % de revenda e cláusula de recompra (jogadores jovens)." , "Small", true))
 
 
 ## Proposta de compra: abas de valor, condições e troca, e o resumo sempre à vista.
@@ -231,7 +230,7 @@ func _render_buy() -> void:
 	if clause > 0:
 		var cc := UIKit.card("CardFlat", 4)
 		cc.add_child(UIKit.label("Multa rescisória: %s" % Fmt.money(clause), "H3"))
-		cc.add_child(UIKit.label("Depositando a multa, o %s não pode recusar: você negocia só com o jogador." % seller.short_name, "Small", true))
+		cc.add_child(UIKit.label("O %s não pode recusar a multa." % seller.short_name, "Small", true))
 		var pay := UIKit.button("PAGAR A MULTA", "", func():
 			if TransferManager.upfront_cost(clause, deal) > user.transfer_budget:
 				message = "A multa (mais a comissão) passa do orçamento de %s." % Fmt.money(user.transfer_budget)
@@ -260,11 +259,11 @@ func _render_buy() -> void:
 			_render_fee("Sua proposta ao %s" % seller.short_name, "Orçamento para contratações: %s" % Fmt.money(user.transfer_budget))
 		"cond":
 			box.add_child(_choice("Pagamento", [["À vista", 1], ["2 parcelas", 2], ["3 parcelas", 3]], int(deal["inst"]), func(v): deal["inst"] = int(v)))
-			box.add_child(UIKit.label("Parcelar alivia o caixa agora, mas o vendedor desconta: vale menos para ele.", "Small", true))
+			box.add_child(UIKit.label("Parcelado vale menos para o vendedor.", "Small", true))
 			box.add_child(_choice("Revenda para o %s" % seller.short_name, [["0%", 0.0], ["10%", 0.1], ["20%", 0.2]], float(deal["sell_on"]), func(v): deal["sell_on"] = float(v)))
 			box.add_child(_choice("Bônus por metas (após %d jogos)" % DealTerms.ADDON_APPS, [["Sem", 0.0], ["+10%", 0.1], ["+20%", 0.2], ["+30%", 0.3]], float(deal["addon"]), func(v): deal["addon"] = float(v)))
 			if float(deal["addon"]) > 0.0:
-				box.add_child(UIKit.label("Você paga mais %s só se ele completar %d jogos pelo clube em até %d anos. O vendedor conta isso como meio dinheiro." % [Fmt.money(DealTerms.addon_amount(fee, deal)), DealTerms.ADDON_APPS, DealTerms.ADDON_YEARS], "Small", true))
+				box.add_child(UIKit.label("Mais %s se ele fizer %d jogos em até %d anos." % [Fmt.money(DealTerms.addon_amount(fee, deal)), DealTerms.ADDON_APPS, DealTerms.ADDON_YEARS], "Small", true))
 			box.add_child(_choice("Comissão do empresário (%d%%)" % int(round(float(deal["agent_pct"]) * 100.0)), _agent_opts(), float(deal["agent"]), func(v): deal["agent"] = float(v)))
 		"swap":
 			_render_swap_summary()
@@ -312,7 +311,6 @@ func _choice(caption: String, opts: Array, current: Variant, cb: Callable) -> Co
 func _render_swap_summary() -> void:
 	var seller := w.club(p.club_id)
 	var swaps := TransferManager.swap_players(w, deal)
-	box.add_child(UIKit.label("Jogadores do seu elenco entram como parte do pagamento, pelo quanto o %s acha que eles valem." % seller.short_name, "Small", true))
 	for sp: Player in swaps:
 		var row := UIKit.hbox(10)
 		row.add_child(UIKit.pos_badge(sp.position))
@@ -374,9 +372,9 @@ func _render_loan() -> void:
 	var price := DealTerms.loan_option_price(w, p)
 	box.add_child(_loan_choice("Compra no fim", [["Sem compra", ""], ["Opção", "opt"], ["Obrigação", "obl"]], String(loan_terms["kind"]), "kind"))
 	if String(loan_terms["kind"]) == "opt":
-		box.add_child(UIKit.label("Você pode comprá-lo por %s até o fim do empréstimo (no perfil dele). O dono cobra menos pelo empréstimo." % Fmt.money(price), "Small", true))
+		box.add_child(UIKit.label("Compra opcional por %s até o fim do empréstimo." % Fmt.money(price), "Small", true))
 	elif String(loan_terms["kind"]) == "obl":
-		box.add_child(UIKit.label("A compra por %s vira obrigatória se ele fizer %d jogos. Com a venda garantida, o dono libera até titular e quase não cobra o empréstimo." % [Fmt.money(price), DealTerms.OBLIGATION_APPS], "Small", true))
+		box.add_child(UIKit.label("Compra obrigatória por %s se ele fizer %d jogos." % [Fmt.money(price), DealTerms.OBLIGATION_APPS], "Small", true))
 	box.add_child(_loan_choice("Salário pago por você", [["100%", 1.0], ["75%", 0.75], ["50%", 0.5]], float(loan_terms["ws"]), "ws"))
 	var r := TransferManager.loan_in_terms(w, p, loan_terms)
 	var sum := UIKit.card("CardInset", 2)
@@ -456,7 +454,7 @@ func _render_terms(caption: String) -> void:
 		var gbo := DealTerms.bonus_options("gb", wage)
 		box.add_child(_choice("Bônus por jogo", [["Sem", 0], [Fmt.money(abo[1]), 1], [Fmt.money(abo[2]), 2]], int(deal["abl"]), func(v): deal["abl"] = int(v)))
 		box.add_child(_choice("Bônus por gol", [["Sem", 0], [Fmt.money(gbo[1]), 1], [Fmt.money(gbo[2]), 2]], int(deal["gbl"]), func(v): deal["gbl"] = int(v)))
-		box.add_child(UIKit.label("Bônus saem no fim da temporada, pelo que ele jogar e marcar. Em troca, ele aceita um fixo menor (vale uns %s/mês para ele)." % Fmt.money(int(DealTerms.bonus_monthly_value(p, deal))), "Small", true))
+		box.add_child(UIKit.label("Pagos no fim da temporada. Para ele, valem uns %s/mês." % Fmt.money(int(DealTerms.bonus_monthly_value(p, deal))), "Small", true))
 		var roles: Array = []
 		for r in DealTerms.ROLE_OPTIONS:
 			roles.append([String(r[1]), int(r[0])])
@@ -464,13 +462,13 @@ func _render_terms(caption: String) -> void:
 		var role := int(deal["role"])
 		if role >= 0:
 			if DealTerms.promise_credible(w, p, club, role):
-				box.add_child(UIKit.label("Ele aceita ganhar menos pela promessa. Se não for %s de verdade (jogos como titular), vai cobrar no fim da temporada." % DealTerms.role_name(role).to_lower(), "Small", true))
+				box.add_child(UIKit.label("Aceita ganhar menos. Cobra no fim da temporada se não for %s." % DealTerms.role_name(role).to_lower(), "Small", true))
 			else:
-				box.add_child(UIKit.colored("Ele não acredita: há gente melhor na posição. A promessa não muda o pedido.", UIColors.ORANGE, "Small", true))
+				box.add_child(UIKit.colored("Não acredita: há gente melhor na posição.", UIColors.ORANGE, "Small", true))
 		var lump := DealTerms.agent_cost(w, p, agreed_fee if agreed_fee > 0 else 0, String(deal.get("mode", mode)), wage, {"agent": 1.0, "agent_pct": deal.get("agent_pct", 0.05)})
 		box.add_child(_choice("Comissão do empresário (cheia: %s)" % Fmt.money(lump), _agent_opts(), float(deal["agent"]), func(v): deal["agent"] = float(v)))
 		if float(deal["agent"]) < 1.0:
-			box.add_child(UIKit.label("Cortar a comissão faz o empresário pedir um salário maior; pela metade, ele pode travar o acordo.", "Small", true))
+			box.add_child(UIKit.label("Comissão menor, salário maior. Pela metade, o empresário pode travar o acordo.", "Small", true))
 	_money_summary = UIKit.card("CardInset", UITokens.S1)
 	box.add_child(UIKit.card_panel(_money_summary))
 	_update_money_summary(true)

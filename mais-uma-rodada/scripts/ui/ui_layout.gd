@@ -30,6 +30,11 @@ static func is_landscape() -> bool:
 	return viewport.x > viewport.y
 
 
+## Tela baixa (celular deitado): cartões altos precisam dividir o conteúdo em colunas.
+static func is_short() -> bool:
+	return viewport.y < 900.0
+
+
 static func columns_for(w: float, max_cols: int = 3) -> int:
 	if w >= COL3_MIN and max_cols >= 3:
 		return 3
