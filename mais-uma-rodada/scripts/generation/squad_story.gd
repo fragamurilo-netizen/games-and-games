@@ -11,7 +11,7 @@ extends RefCounted
 ## Tudo sai do RNG do mundo dentro de create_squad.
 
 ## Distância de cada titular, do melhor ao pior, até a média do time (11 titulares).
-const RANK_OFFSETS: Array = [5.5, 3.4, 2.3, 1.4, 0.7, 0.0, -0.7, -1.4, -2.2, -3.1, -4.5]
+const RANK_OFFSETS: Array = [4.6, 3.1, 2.2, 1.4, 0.7, 0.0, -0.7, -1.4, -2.1, -2.9, -4.0]
 
 ## Ligas com astros estrangeiros veteranos (Arábia, Golfo) ou "jogadores designados" (EUA, China).
 const MARQUEE := {"KSA": [30, 34], "QAT": [30, 35], "UAE": [29, 34], "USA": [28, 34], "CHN": [28, 33]}
@@ -50,12 +50,13 @@ static func plan(rng: RandomNumberGenerator, club: Club, slots: Array) -> Dictio
 				bench.append(i)
 			_:
 				kids.append(i)
-	# Ordem de qualidade dos titulares: o craque costuma ser do meio para a frente; lateral e
-	# goleiro raramente são o melhor do time (mas às vezes são).
+	# Ordem de qualidade dos titulares: o craque puxa um pouco para o meio e o ataque, mas o
+	# zagueiro ou o goleiro também podem ser o melhor do time (pender demais para o ataque
+	# desequilibra o motor e infla os gols).
 	var w: Array = []
 	for i in starters:
 		var p: int = slots[i][0]
-		w.append(1.5 if p in [Pos.ST, Pos.AM, Pos.RW, Pos.LW] else (1.2 if p == Pos.CM else (0.75 if p in [Pos.RB, Pos.LB] else 1.0)))
+		w.append(1.15 if p in [Pos.ST, Pos.AM, Pos.RW, Pos.LW] else (1.1 if p == Pos.CM else (0.8 if p in [Pos.RB, Pos.LB] else (0.9 if p == Pos.GK else 1.0))))
 	for rank in starters.size():
 		var j := RngUtil.weighted_index(rng, w)
 		if j < 0:
