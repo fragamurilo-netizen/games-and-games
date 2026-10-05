@@ -248,6 +248,11 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		var hc := _pick_club(rng, ctx, home, minf(float(ovr[first_y]), float(ctx["top"][home])), 0.5, [], p)
 		if not hc.is_empty():
 			plan[first_y] = [int(hc[1]), String(hc[2]), String(hc[3]), float(hc[0]), false, home]
+	# Repatriado: começou no clube atual, rodou fora e voltou (as primeiras temporadas são aqui)
+	if cur != null and String(SquadStory.roles.get(p.id, "")) == "repatriado":
+		var last_home := mini(first_y + rng.randi_range(2, 4), join - 4)
+		for yy in range(first_y, last_home):
+			plan[yy] = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur) - 3.0, false, cur.nation]
 	# Temporadas
 	var hist: Array = []
 	var ys: Array = plan.keys()

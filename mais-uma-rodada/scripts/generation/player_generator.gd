@@ -342,7 +342,7 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 	for _iter in 6:
 		var ovr := 0.0
 		for i in Attr.COUNT:
-			ovr += w[i] * soft_attr(vals[i])
+			ovr += w[i] * soft_attr(spike_cap(vals[i], target, i))
 		var d := target - ovr
 		if absf(d) < 0.3:
 			break
@@ -352,8 +352,17 @@ static func _generate_attributes(rng: RandomNumberGenerator, p: Player, target: 
 	for i in Attr.COUNT:
 		if (i == Attr.GOL or i == Attr.REF) and pos != Pos.GK:
 			vals[i] = clampf(vals[i], 1.0, 25.0)
-		p.attrs[i] = int(round(soft_attr(vals[i])))
+		p.attrs[i] = int(round(soft_attr(spike_cap(vals[i], target, i))))
 	p.recompute_overall()
+
+
+## O ponto forte de um jogador passa do overall dele, mas não muito: um zagueiro 83 desarma como
+## 90, não como 98 (como nos jogos de futebol de verdade, o pico fica uns 10 acima do overall).
+static func spike_cap(v: float, target: float, attr: int) -> float:
+	if attr == Attr.DIS:
+		return v
+	var cap := target + 10.0
+	return v if v <= cap else cap + (v - cap) * 0.4
 
 
 ## Acima de 90 cada ponto de atributo fica mais raro: o craque tem dois ou três números na casa dos
@@ -396,7 +405,8 @@ static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> i
 		gap = rng.randfn(float(g[0]), float(g[1]))
 	if age <= 20 and rng.randf() < 0.012:
 		gap += rng.randf_range(6.0, 12.0) # joia rara
-	gap = maxf(0.0, gap)
+	# Garoto de 17–20 anos sempre tem o que crescer (pouco, às vezes): ninguém chega pronto aos 18.
+	gap = maxf(maxf(0.0, (21.0 - age) * 1.2), gap)
 	# Acima de 85 cada ponto de potencial é mais raro (só os fenômenos passam de 90).
 	var pot := float(ovr) + gap
 	if pot > 85.0:
@@ -464,36 +474,20 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 		slots.append(pool[i])
 	if rng.randf() < 0.45:
 		slots.append([RngUtil.pick(rng, [Pos.CM, Pos.ST, Pos.CB, Pos.RW, Pos.AM]), -12.0, 2])
-	# Craques: clube grande tem 2–4 jogadores bem acima do resto; o médio, às vezes um ídolo
-	var n_stars := 0
-	if club.reputation >= 85.0:
-		n_stars = rng.randi_range(1, 3)
-	elif club.reputation >= 74.0:
-		n_stars = rng.randi_range(1, 2)
-	elif club.reputation >= 58.0:
-		n_stars = rng.randi_range(0, 1)
-	else:
-		n_stars = 1 if rng.randf() < 0.35 else 0
-	var starters: Array = []
-	for i in slots.size():
-		if slots[i][2] == 0:
-			starters.append(i)
-	var star_w: Array = []
-	for i in starters:
-		# Craque de verdade costuma ser do meio para a frente; lateral e goleiro de elite são raros.
-		var sp: int = slots[i][0]
-		star_w.append(2.2 if sp in [Pos.ST, Pos.AM, Pos.RW, Pos.LW, Pos.CM] else (0.6 if sp in [Pos.RB, Pos.LB, Pos.GK] else 1.0))
-	var boost := {}
-	for k in n_stars:
-		var j := RngUtil.weighted_index(rng, star_w)
-		if j < 0:
-			break
-		boost[starters[j]] = rng.randf_range(2.5, 5.5) + (1.0 if k == 0 else 0.0)
-		star_w[j] = 0.0
+	# Roteiro do elenco: hierarquia dos titulares, capitão, ídolo, joia, repatriado, astros
+	var story := SquadStory.plan(rng, club, slots)
+	var n_starters := 0
+	for s0: Array in slots:
+		if int(s0[2]) == 0:
+			n_starters += 1
 	for si in slots.size():
 		var s: Array = slots[si]
 		var pos: int = s[0]
 		var tier: int = s[2]
+		var st: Dictionary = story.get(si, {})
+		var rank := int(st.get("rank", -1))
+		var role := String(st.get("role", ""))
+		var star := rank == 0 or (rank == 1 and club.reputation >= 80.0)
 		var age := _pick_age(rng, tier, young_share, veteran_share)
 		if pos == Pos.GK and tier == 0:
 			age = clampi(int(round(rng.randfn(29.5, 3.3))), 22, 37) # goleiro titular costuma ser mais experiente
@@ -502,30 +496,58 @@ static func create_squad(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 			age = mini(age, int(pol_age["buy_age_max"]) + (6 if pos == Pos.GK else 3)) # elenco jovem (Red Bull, Brighton...)
 		if pol_age.has("buy_age_min") and tier == 0:
 			age = maxi(age, int(pol_age["buy_age_min"]) + 1) # estrelas experientes
-		var target: float = level + float(s[1]) + rng.randfn(0.0, 2.4) + float(boost.get(si, 0.0))
-		if tier == 0:
-			target += float(STARTER_SHIFT.get(pos, 0.0))
-		if boost.has(si):
+		if star and role == "":
 			if pos == Pos.GK:
 				age = clampi(int(round(rng.randfn(29.5, 2.6))), 25, 34) # goleiro craque é experiente
 			else:
 				age = clampi(int(round(rng.randfn(27.0, 2.6))), 22, 31) # craques no auge
-		target -= age_penalty(age, pos)
+		var r_age := SquadStory.role_age(rng, role, pos, club)
+		if r_age > 0:
+			age = r_age
 		# Garotos do elenco vêm quase todos da base local; os mais velhos seguem as rotas de importação
-		var nat := pick_youth_nationality(rng, club, age) if age <= 19 else pick_nationality(rng, club)
+		var nat := SquadStory.role_nation(rng, role, club)
+		if nat == "":
+			nat = pick_youth_nationality(rng, club, age) if age <= 19 else pick_nationality(rng, club)
+		if nat != club.nation and role == "" and age >= 21:
+			# Vitrine compra garoto para revender; o Golfo paga pela experiência.
+			age = clampi(age + int(SquadStory.IMPORT_AGE.get(club.nation, 0)), 19, 35)
+		var noise := 1.2 if tier == 0 else 2.4
+		var target: float = level + float(s[1]) + rng.randfn(0.0, noise) + SquadStory.role_target(role)
+		if tier == 0:
+			target += float(STARTER_SHIFT.get(pos, 0.0)) + SquadStory.rank_offset(rank, n_starters, club)
+		# O capitão e o astro veterano ainda estão no nível de titular (a idade pesa pouco neles)
+		target -= age_penalty(age, pos) * (0.35 if role in ["capitao", "astro"] else 1.0)
 		if nat != club.nation:
 			target += 1.5
-		target = clampf(soft_cap(target, star_ceiling(club)), 25.0, 93.0)
+		target = clampf(soft_cap(target, star_ceiling(club) + (2.0 if role == "astro" else 0.0)), 25.0, 93.0)
 		# Craque quase sempre tem "assinatura"
-		var p := create(world, rng, pos, target, age, nat, club.city, used_names, 0.6 if boost.has(si) else SIGNATURE_CHANCE)
-		ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
+		var p := create(world, rng, pos, target, age, nat, club.city, used_names, 0.6 if star or role == "astro" else SIGNATURE_CHANCE)
+		if role != "idolo" and role != "repatriado":
+			ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
 		sign_to_club(world, rng, p, club, true)
 		# Cria da casa: na carreira anterior ele só jogou aqui (formado na base)
 		if hg_share > 0.0 and age <= 31 and rng.randf() < hg_share:
 			p.joined_year = world.year - maxi(0, age - 18)
+		SquadStory.apply(world, rng, club, p, role, level)
 	calibrate_xi(world, club, level)
 	assign_statuses(world, club)
 	assign_shirt_numbers(world, club)
+	_dedupe_names(world, club)
+
+
+## Dois jogadores com o mesmo nome no elenco: o segundo passa a ser chamado pelo nome completo
+## (como o "Matos" que vira "Thiago Matos" na súmula).
+static func _dedupe_names(world: GameWorld, club: Club) -> void:
+	var seen := {}
+	for p: Player in world.squad(club):
+		var k := p.display_name()
+		if seen.has(k):
+			var full := "%s %s" % [p.first_name, p.last_name]
+			if full.strip_edges() != "" and not seen.has(full) and full != k:
+				p.known_as = full
+			elif p.nickname != "" and not seen.has(p.nickname):
+				p.known_as = p.nickname
+		seen[p.display_name()] = true
 
 
 ## Quanto a idade tira do nível de quem ainda não chegou (ou já passou) do auge.
@@ -632,24 +654,38 @@ static func sign_to_club(world: GameWorld, rng: RandomNumberGenerator, p: Player
 
 
 ## Define status no elenco pela ordem de qualidade (estrela, titular, rotação, reserva, promessa).
+## Titular é quem joga: o melhor goleiro e os 10 melhores de linha (o 2º goleiro nunca é titular,
+## mesmo sendo melhor que o 11º de linha).
 static func assign_statuses(world: GameWorld, club: Club) -> void:
 	var squad := world.squad(club)
 	squad.sort_custom(func(a, b): return a.ovr_f > b.ovr_f)
+	var xi := {}
+	var gk := false
+	var field := 0
 	var avg := 0.0
-	var n := mini(11, squad.size())
-	for i in n:
-		avg += squad[i].ovr_f
-	avg = avg / maxf(1.0, n)
+	for p: Player in squad:
+		if p.position == Pos.GK:
+			if gk:
+				continue
+			gk = true
+		elif field >= 10:
+			continue
+		else:
+			field += 1
+		xi[p.id] = true
+		avg += p.ovr_f
+	avg = avg / maxf(1.0, xi.size())
+	var rest := 0
 	for i in squad.size():
 		var p: Player = squad[i]
 		var age := p.age(world.year)
-		if i < 2 and p.ovr_f >= avg + 3.0:
-			p.squad_status = Player.STATUS_STAR
-		elif i < 12:
-			p.squad_status = Player.STATUS_STARTER
-		elif age <= 21 and p.potential >= p.overall + 6:
+		if xi.has(p.id):
+			p.squad_status = Player.STATUS_STAR if i < 2 and p.ovr_f >= avg + 3.0 else Player.STATUS_STARTER
+			continue
+		rest += 1
+		if age <= 21 and p.potential >= p.overall + 6:
 			p.squad_status = Player.STATUS_PROSPECT
-		elif i < 18:
+		elif rest <= 7:
 			p.squad_status = Player.STATUS_ROTATION
 		else:
 			p.squad_status = Player.STATUS_BACKUP

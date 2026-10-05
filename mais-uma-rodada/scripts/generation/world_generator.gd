@@ -27,6 +27,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	for c in w.clubs:
 		Overrides.apply_club(c)
 	var used_names := {}
+	SquadStory.roles.clear()
 	for c in w.clubs:
 		PlayerGenerator.create_squad(w, rng, c, PlayerGenerator.club_level(c), used_names)
 	var n_free := int(w.clubs.size() * float(DatabaseManager.rules().get("free_agents_per_club", 0.5)))
@@ -41,6 +42,8 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	w.stats["kits_real"] = 1 # uniformes reais já vêm dos dados (ClubGenerator.upgrade_kits)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
+	if not SquadStory.keep:
+		SquadStory.roles.clear()
 	HeartClubs.ensure_all(w)
 	SeasonManager.setup_first_season(w)
 	SponsorManager.ensure_all(w) # patrocinadores e fornecedoras da IA, por país
