@@ -291,7 +291,8 @@ static func after_user_match(world: GameWorld, entry: Dictionary, result: String
 	if co.is_empty():
 		return
 	var vs: Array = co.get("vs", [0, 0, 0])
-	var i := 2 if result == "V" else (1 if result == "E" else 0) # do ponto de vista do técnico: V do usuário = D dele
+	var day := f.result_for(user.id) # o retrospecto conta o placar do jogo; o tom da fala segue o confronto
+	var i := 2 if day == "V" else (1 if day == "E" else 0) # do ponto de vista do técnico: V do usuário = D dele
 	vs[i] = int(vs[i]) + 1
 	co["vs"] = vs
 	var nm := String(co["n"])
