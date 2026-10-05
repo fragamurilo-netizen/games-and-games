@@ -78,8 +78,9 @@ static func after_matchday(world: GameWorld, results: Array) -> void:
 		var imp := NewsEvent.IMP_HIGH if involves_user else NewsEvent.IMP_NORMAL
 		if involves_user:
 			var st := TieStakes.of(world, f)
-			if not st.is_empty():
-				# Mata-mata decidido: a manchete é o confronto (agregado e taça), não o placar do dia.
+			# Mata-mata decidido: quando o placar do dia engana (caiu, ou passou perdendo o jogo),
+			# a manchete é o confronto. Taça e vaga ganhas já saem nas notícias da copa.
+			if not st.is_empty() and (int(st["w"]) != user.id or f.result_for(user.id) == "D"):
 				_with_score(_tie_news(world, f, st, user), f, world)
 				posted += 1
 				continue
@@ -159,7 +160,7 @@ static func _tie_news(world: GameWorld, f: Fixture, st: Dictionary, user: Club) 
 	var won := int(st["w"]) == user.id
 	var how := TieStakes.how(st)
 	var how_s := (" " + how) if how != "" else ""
-	var comp := String(st["name"])
+	var comp := TieStakes.of_comp(String(st["name"]))
 	var day := f.result_for(user.id)
 	var derby := bool(st["derby"])
 	var score := "%d x %d" % [f.hg, f.ag]
@@ -167,22 +168,22 @@ static func _tie_news(world: GameWorld, f: Fixture, st: Dictionary, user: Club) 
 	var body := ""
 	if bool(st["title"]):
 		if won:
-			title = "%s é campeão da %s%s" % [user.short_name, comp, " em cima do rival" if derby else ""]
+			title = "%s é campeão %s%s" % [user.short_name, comp, " em cima do rival" if derby else ""]
 			body = "%s contra o %s no jogo decisivo e taça garantida%s.%s" % [score, opp.short_name, how_s,
 				" A cidade é do %s." % user.short_name if derby else ""]
 		else:
-			title = ("Clássico vale taça e ela vai para o %s" % opp.short_name) if derby else ("%s fica com o vice da %s" % [user.short_name, comp])
-			body = "%s no jogo decisivo, mas o título da %s ficou com o %s%s." % [score, comp, opp.short_name, how_s]
+			title = ("Clássico vale taça e ela vai para o %s" % opp.short_name) if derby else ("%s fica com o vice %s" % [user.short_name, comp])
+			body = "%s no jogo decisivo, mas o título %s ficou com o %s%s." % [score, comp, opp.short_name, how_s]
 			if day == "V":
 				body += " A vitória no dia não bastou: na soma dos jogos, deu %s." % opp.short_name
 			body += (" A cidade é do %s. No %s, sobra a cobrança." % [opp.short_name, user.short_name]) if derby else " Na arquibancada, a frustração era visível."
 		return post_raw(world, title, body, user.id, -1, NewsEvent.IMP_HEADLINE, _tie_cat(f, derby, "campeao" if won else "eliminado"))
 	if won:
 		title = "%s elimina o %s%s" % [user.short_name, opp.short_name, (" e conquista a vaga") if bool(st["access"]) else ""]
-		body = "%s no jogo decisivo da %s da %s. Classificação%s.%s" % [score, String(st["stage"]).to_lower(), comp, how_s,
+		body = "%s no jogo decisivo da %s %s. Classificação%s.%s" % [score, String(st["stage"]).to_lower(), comp, how_s,
 			" A derrota no dia não mudou o que importava." if day == "D" else ""]
 	else:
-		title = ("%s cai para o rival na %s" % [user.short_name, comp]) if derby else ("%s está fora da %s" % [user.short_name, comp])
+		title = ("%s cai para o rival e está fora %s" % [user.short_name, comp]) if derby else ("%s está fora %s" % [user.short_name, comp])
 		body = "%s contra o %s e eliminação%s na %s." % [score, opp.short_name, how_s, String(st["stage"]).to_lower()]
 		if day == "V":
 			body += " Ganhar o jogo não foi suficiente."

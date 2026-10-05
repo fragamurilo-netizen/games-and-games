@@ -371,7 +371,7 @@ static func after_user_game(world: GameWorld, entry: Dictionary, result: String)
 	if not st.is_empty():
 		# Mata-mata decidido: a coletiva é sobre o confronto (agregado, pênaltis, taça).
 		last["tie"] = {"won": int(st["w"]) == club.id, "title": bool(st["title"]), "final": bool(st["final"]), "how": TieStakes.how(st),
-			"comp": String(st["name"]), "stage": String(st["stage"]), "day": f.result_for(club.id)}
+			"comp": TieStakes.of_comp(String(st["name"])), "stage": String(st["stage"]), "day": f.result_for(club.id)}
 	pr["match"] = last
 	var r := People.rng(world, 44)
 	_player_speaks(world, r, hero, hero_r, result)
@@ -520,31 +520,31 @@ static func _tie_question(tie: Dictionary, on: String, derby: bool, pick_j: Call
 	if bool(tie["won"]):
 		if bool(tie["title"]):
 			if derby:
-				return {"j": pick_j.call("bairrista"), "q": "Campeão da %s%s em cima do %s. Tem recado para o rival?" % [String(tie["comp"]), how_s, on], "o": [
-					{"t": ""A cidade tem dono. E a taça também."", "fx": {"sup": 6.0, crel: -8.0, "head": true, "jrel": 3.0}},
-					{"t": ""Respeito o %s. A taça fala por nós."" % on, "fx": {"board": 3.0, "sup": 2.0, crel: 3.0}}]}
-			return {"j": pick_j.call("amigavel"), "q": "Campeão da %s%s. O que esse título significa?" % [String(tie["comp"]), how_s], "o": [
-				{"t": ""É do torcedor. Ele esperou por isso."", "fx": {"sup": 4.0, "team": 1.0, "head": true}},
-				{"t": ""É do grupo. Eles acreditaram até o fim."", "fx": {"team": 4.0, "mood": 3.0}},
-				{"t": ""É só o começo. Queremos mais."", "fx": {"sup": 3.0, "board": 2.0, "quote": "title", "jrel": 2.0}}]}
+				return {"j": pick_j.call("bairrista"), "q": "Campeão %s%s em cima do %s. Tem recado para o rival?" % [String(tie["comp"]), how_s, on], "o": [
+					{"t": "\"A cidade tem dono. E a taça também.\"", "fx": {"sup": 6.0, crel: -8.0, "head": true, "jrel": 3.0}},
+					{"t": "\"Respeito o %s. A taça fala por nós.\"" % on, "fx": {"board": 3.0, "sup": 2.0, crel: 3.0}}]}
+			return {"j": pick_j.call("amigavel"), "q": "Campeão %s%s. O que esse título significa?" % [String(tie["comp"]), how_s], "o": [
+				{"t": "\"É do torcedor. Ele esperou por isso.\"", "fx": {"sup": 4.0, "team": 1.0, "head": true}},
+				{"t": "\"É do grupo. Eles acreditaram até o fim.\"", "fx": {"team": 4.0, "mood": 3.0}},
+				{"t": "\"É só o começo. Queremos mais.\"", "fx": {"sup": 3.0, "board": 2.0, "quote": "title", "jrel": 2.0}}]}
 		var q := "Passaram pelo %s%s. " % [on, how_s]
 		q += "Perder o jogo e avançar vale igual?" if String(tie.get("day", "")) == "D" else "O que muda com essa classificação?"
 		return {"j": pick_j.call("analitico"), "q": q, "o": [
-			{"t": ""Mata-mata é isso: o que vale é a vaga."", "fx": {"team": 2.0, "board": 1.0}},
-			{"t": ""Ainda não fizemos nada. Agora é a próxima fase."", "fx": {"board": 2.0, "jrel": 1.0}}]}
+			{"t": "\"Mata-mata é isso: o que vale é a vaga.\"", "fx": {"team": 2.0, "board": 1.0}},
+			{"t": "\"Ainda não fizemos nada. Agora é a próxima fase.\"", "fx": {"board": 2.0, "jrel": 1.0}}]}
 	if bool(tie["title"]):
-		var q2 := "O título da %s ficou com o %s%s. " % [String(tie["comp"]), on, how_s]
+		var q2 := "O título %s ficou com o %s%s. " % [String(tie["comp"]), on, how_s]
 		if derby:
-			q2 = "A taça da %s foi para o rival%s. " % [String(tie["comp"]), how_s]
+			q2 = "A taça %s foi para o rival%s. " % [String(tie["comp"]), how_s]
 		q2 += "Vencer o jogo de hoje serve de consolo?" if String(tie.get("day", "")) == "V" else "O que você diz ao torcedor?"
 		return {"j": pick_j.call("bairrista" if derby else "critico"), "q": q2, "o": [
-			{"t": ""Não serve de nada. Peço desculpas ao torcedor."", "fx": {"sup": 2.0, "team": -1.0, "head": true}},
-			{"t": ""A responsabilidade é minha. Eu respondo pela final."", "fx": {"sup": 1.0, "team": 2.0, "board": -2.0}},
-			{"t": ""Chegamos à final. Não é pouca coisa."", "fx": {"sup": -5.0, "board": -2.0, "jrel": -2.0, "head": true}}]}
+			{"t": "\"Não serve de nada. Peço desculpas ao torcedor.\"", "fx": {"sup": 2.0, "team": -1.0, "head": true}},
+			{"t": "\"A responsabilidade é minha. Eu respondo pela final.\"", "fx": {"sup": 1.0, "team": 2.0, "board": -2.0}},
+			{"t": "\"Chegamos à final. Não é pouca coisa.\"", "fx": {"sup": -5.0, "board": -2.0, "jrel": -2.0, "head": true}}]}
 	return {"j": pick_j.call("critico"), "q": "Eliminados pelo %s%s na %s. Faltou o quê?" % [on, how_s, String(tie["stage"]).to_lower()], "o": [
-		{"t": ""Faltou competência. E começa por mim."", "fx": {"sup": 2.0, "team": 1.0, "board": -1.0}},
-		{"t": ""Faltou detalhe. O time competiu."", "fx": {"team": 2.0, "sup": -2.0, "jrel": -1.0}},
-		{"t": ""Tem jogador que precisa se olhar no espelho."", "fx": {"team": -4.0, "board": 1.0, "head": true, "quote": "blame"}}]}
+		{"t": "\"Faltou competência. E começa por mim.\"", "fx": {"sup": 2.0, "team": 1.0, "board": -1.0}},
+		{"t": "\"Faltou detalhe. O time competiu.\"", "fx": {"team": 2.0, "sup": -2.0, "jrel": -1.0}},
+		{"t": "\"Tem jogador que precisa se olhar no espelho.\"", "fx": {"team": -4.0, "board": 1.0, "head": true, "quote": "blame"}}]}
 
 
 ## Manchete da coletiva conforme o veículo de quem fez a pergunta principal.
