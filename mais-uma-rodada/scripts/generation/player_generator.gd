@@ -62,8 +62,8 @@ const SIGNATURE_CHANCE := 0.17
 ## Nível dos titulares por função em relação ao time (como no futebol real, os melhores de cada
 ## elenco quase sempre são meias e atacantes; laterais raramente estão entre os melhores do mundo).
 ## O time inteiro continua na média do clube (calibrate_xi).
-const STARTER_SHIFT := {Pos.GK: 0.0, Pos.RB: -2.0, Pos.LB: -2.0, Pos.CB: -0.5, Pos.DM: -0.5, Pos.CM: 0.5,
-	Pos.AM: 1.0, Pos.RM: 0.0, Pos.LM: 0.0, Pos.RW: 1.0, Pos.LW: 1.0, Pos.ST: 1.0}
+const STARTER_SHIFT := {Pos.GK: 0.0, Pos.RB: -1.5, Pos.LB: -1.5, Pos.CB: -0.25, Pos.DM: -0.25, Pos.CM: 0.25,
+	Pos.AM: 0.5, Pos.RM: 0.0, Pos.LM: 0.0, Pos.RW: 0.5, Pos.LW: 0.5, Pos.ST: 0.5}
 const CURVE_WEIGHTS: Array = [15.0, 52.0, 13.0, 10.0, 10.0]
 
 ## Modelo de elenco (25 vagas): [posição, deslocamento de qualidade em relação ao nível do clube, "nível" 0 titular/1 reserva/2 jovem]
@@ -551,7 +551,7 @@ static func star_ceiling(club: Club) -> float:
 ## Acima do teto o nível cresce devagar (poucos chegam a 90 no mundo).
 ## Acima do joelho o alvo cresce devagar: craques existem, mas 90+ é para meia dúzia no mundo.
 static func soft_cap(target: float, ceiling: float) -> float:
-	var knee := ceiling - 3.5
+	var knee := ceiling - 5.0
 	if target <= knee:
 		return target
 	return knee + (target - knee) * 0.75
