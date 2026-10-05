@@ -1,4 +1,4 @@
-# Continuar daqui (atualizado em 29/09/2026)
+# Continuar daqui (atualizado em 05/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
@@ -63,7 +63,12 @@ A ordem combinada:
    - O jogo pode ficar maior em tamanho, isso não é problema.
    - Feito numa primeira passada: aviso de conquista no pé da tela (não cobre mais a barra nem o "Pular"), fim do "Simular" sem vão, plurais certos (`Fmt.n_of`, sem "jogo(s)"), menos microcopy na negociação, seleção e base, anel de foco nos botões, menu ☰ sempre na cor do clube do técnico, quadro de líderes em grade na aba Números, tabela do elenco com colunas alinhadas, recorte e ordem do elenco numa fileira, menu inicial em lista e início deitado compacto. Capturas em `/mnt/project-files/interface-2026-09-29/antes` e `depois` (prefixos `f_`, `fl_` claro, `fland_` deitado, `ftab_` tablet).
    - Falta: varrer os textos explicativos que sobraram (tutorial, editor, regras de copa na base), os "(s)" das notícias geradas e as outras telas de estatística (perfil > Números, seleções).
-4. Mais eventos no jogo, mais cabelos e barbas e mais estatísticas.
+4. Mais eventos no jogo, mais cabelos e barbas e mais estatísticas. Feito em 05/10:
+   - **Eventos.** 15 dilemas novos em `scripts/systems/event_pack.gd` (tipos registrados em `EventManager.KINDS`): antecipar a volta de lesionado (com risco de recaída), renovação travada por luvas, rival assediando o craque, provocação antes do clássico, corte na folha, reunião com a diretoria (meta de pontos em 3 jogos), protesto no CT, despedida de ídolo, pedido de empréstimo, empresário cobrando comissão, série de bastidores, boato de demissão, alerta de desgaste, bicho por vitória e tratamento com médico particular. As consequências que chegam depois ficam em `world.stats["ev2"]` e são conferidas a cada jogo. `tools/events_smoke.gd` agora passa por todos os tipos.
+   - **Rostos.** 14 penteados (211-224) e 8 barbas (141-148) no fim das listas. Os novos entram num sorteio à parte (`FaceGen._newer_pick`, `HS_V1`/`BD_V1`), então o rosto de quem já existia não muda. Saem em cerca de 6% dos cabelos e 4% das barbas; os chamativos (coque samurai cacheado, nagô com risco) em menos de 0,1%. Catálogo em `/mnt/project-files/rostos-2d/novos-2026-10/`.
+   - **Estatísticas.** Duelos aéreos ganhos, faltas e gols sofridos pelo goleiro (`Player.S_AERIAL`, `S_FOULS`, `S_CONCEDED`; saves antigos completam com zero). Recordes do clube em `club.marks` (sequências de vitórias, invencibilidade e sem sofrer gol, maior vitória e maior derrota). Perfil > Números ganhou por 90 minutos, chutes no alvo, minutos por gol e o bloco do goleiro; Carreira ganhou gols por jogo, G+A por jogo, craque do jogo e jogos sem sofrer gol. Estatísticas da equipe ganhou novos destaques e o cartão de recordes; Tabela > Números ganhou duelos aéreos, jogos sem sofrer gol (goleiros) e craque do jogo. Os números novos são sorteados depois dos antigos, então placares e o realismo não mudam.
+   - Capturas em `/mnt/project-files/conteudo-2026-10/`. Para capturar um evento específico: `--only=~event=tipo`.
+   - Traduções en/es dos textos novos incluídas.
 
 ## Decisões pendentes com o dono
 
