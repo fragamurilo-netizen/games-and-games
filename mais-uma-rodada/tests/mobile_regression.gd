@@ -126,7 +126,7 @@ func _test_match_rotation() -> void:
 		_layout.viewport = Vector2(720, 1280)
 		screen.call("_responsive_layout")
 		check(body.get_children() == original, "exact child order restored " + str(turn))
-		check(not pitch.horizontal, "portrait field orientation restored")
+		check(pitch.horizontal == (AppSettings.match_view == 0), "portrait field orientation restored")
 		check(is_equal_approx(pitch.custom_minimum_size.y, minf(screen.call("_pitch_height"), screen.PITCH_MIN_TALL)), "portrait field height restored")
 		await process_frame
 	screen.queue_free()

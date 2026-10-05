@@ -49,6 +49,9 @@ static var music_volume: int = 60
 static var sfx_volume: int = 100
 static var music_track: int = 0
 static var music_in_match: bool = false
+## Partida ao vivo: 0 = lances em destaque (campo menor), 1 = campo grande, 2 = só narração.
+const MATCH_VIEW_NAMES: Array[String] = ["Campo menor", "Campo grande", "Só narração"]
+static var match_view: int = 0
 ## Animações de gol e transições mais curtas.
 static var reduce_motion: bool = false
 static var _loaded := false
@@ -80,6 +83,7 @@ static func load_settings() -> void:
 	sfx_volume = cfg.get_value("audio", "sfx_volume", 100)
 	music_track = cfg.get_value("audio", "music_track", 0)
 	music_in_match = cfg.get_value("audio", "music_in_match", false)
+	match_view = clampi(int(cfg.get_value("game", "match_view", 0)), 0, 2)
 
 
 static func save_settings() -> void:
@@ -102,6 +106,7 @@ static func save_settings() -> void:
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.set_value("audio", "music_track", music_track)
 	cfg.set_value("audio", "music_in_match", music_in_match)
+	cfg.set_value("game", "match_view", match_view)
 	cfg.save(PATH)
 
 

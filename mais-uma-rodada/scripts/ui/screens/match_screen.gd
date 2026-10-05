@@ -6,6 +6,9 @@ extends BaseScreen
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
+const PITCH_COMPACT := 0.2 # fração da altura do campo (deitado) quando os lances estão em destaque
+const FEED_FS := 24 # corpo da narração
+const FEED_FS_NEW := 27 # lance mais recente, em cima
 const FEED_MIN_H := 130.0 # altura mínima da narração/abas embaixo do campo
 const PITCH_MIN_TALL := 320.0 # em pé o campo parte disso e cresce com o espaço que sobra
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
@@ -153,21 +156,26 @@ func _responsive_layout() -> void:
 	var wide := UILayout.is_wide() and UILayout.is_landscape()
 	var short_view := wide and get_viewport_rect().size.y < 720.0
 	# Em paisagem no celular, preserve campo e comandos. Os detalhes seguem no painel.
+	# Em pé com os lances em destaque (ou só narração), a linha de estádio e clima sai do placar:
+	# a abertura da narração já diz isso.
+	var compact := not wide and AppSettings.match_view != 1
 	if is_instance_valid(_conditions):
-		_conditions.visible = not short_view
+		_conditions.visible = not short_view and not compact
 	if is_instance_valid(_stats_lbl):
 		_stats_lbl.visible = not short_view
 	if is_instance_valid(_momentum):
 		_momentum.visible = not short_view
 	# O campo é o protagonista: em pé ele fica vertical e ocupa a maior parte da altura.
-	_pitch.horizontal = wide
+	# Com os lances em destaque (padrão), o campo fica deitado e baixo em pé também.
+	_pitch.horizontal = wide or AppSettings.match_view == 0
 	_pitch.custom_minimum_size.y = _pitch_height()
 	if not wide:
 		# Em pé o campo cresce com o espaço que sobra, mas a narração sempre fica com umas
 		# linhas à vista: com gols no placar ela sumia atrás da barra de botões.
 		_pitch.custom_minimum_size.y = minf(_pitch_height(), PITCH_MIN_TALL)
+		# Com os lances em destaque, o espaço que sobra vai para a narração, não para o campo.
 		var pb := _pitch.get_parent() as Control
-		pb.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		pb.size_flags_vertical = Control.SIZE_EXPAND_FILL if AppSettings.match_view == 1 else Control.SIZE_FILL
 		pb.size_flags_stretch_ratio = 6.0
 	if wide == (_wide_body != null):
 		return
@@ -210,17 +218,21 @@ func _responsive_layout() -> void:
 			_root.add_child(n)
 			_root.move_child(n, at)
 			at += 1
-		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL if AppSettings.match_view == 1 else Control.SIZE_FILL
 		_root.remove_child(_wide_body)
 		_wide_body.queue_free()
 		_wide_body = null
 
 
-## Altura do campo: deitado ele enche a coluna; em pé fica com ~55% da tela e a narração embaixo.
+## Altura do campo: deitado ele enche a coluna. Em pé, com os lances em destaque, é uma faixa
+## deitada de ~1/4 da tela; com o campo grande, fica vertical com metade da tela.
 func _pitch_height() -> float:
 	if UILayout.is_wide() and UILayout.is_landscape():
 		return 120.0 if get_viewport_rect().size.y < 720.0 else 220.0
-	return clampf(get_viewport_rect().size.y * 0.5, 420.0, 760.0)
+	var h := get_viewport_rect().size.y
+	if AppSettings.match_view == 0:
+		return clampf(h * PITCH_COMPACT, 220.0, 340.0)
+	return clampf(h * 0.5, 420.0, 760.0)
 
 
 # ---------------------------------------------------------------------------
@@ -267,7 +279,7 @@ func _build() -> void:
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
-	_pitch.horizontal = UILayout.is_wide()
+	_pitch.horizontal = UILayout.is_wide() or AppSettings.match_view == 0
 	_pitch.custom_minimum_size = Vector2(0, _pitch_height())
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
@@ -376,6 +388,7 @@ func _build() -> void:
 	_root.add_child(_controls_panel)
 	_build_controls()
 	_responsive_layout()
+	_apply_match_view()
 	# Comemoração por cima de tudo
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
@@ -948,7 +961,8 @@ func _after_goal(ev: Dictionary) -> void:
 
 
 func _play_replay(clip: Dictionary, after: Callable) -> void:
-	var dur := _pitch.motion.start_replay(clip)
+	# Só narração: sem campo na tela, não há replay para mostrar.
+	var dur := _pitch.motion.start_replay(clip) if AppSettings.match_view != 2 else 0.0
 	if dur <= 0.0:
 		if after.is_valid():
 			after.call()
@@ -1308,9 +1322,19 @@ func _update_sides() -> void:
 		_enqueue(_com.extra_line("sides_swap", "info", 0, 2), {}, 0.3)
 
 
-## Resumo dos números a cada 15 minutos (na narração).
+## Minutos do "tempo e placar" (entre os resumos de números de 15 em 15).
+const CLOCK_MINUTES: Array[int] = [8, 22, 38, 52, 68, 83]
+
+
+## Resumo dos números a cada 15 minutos (na narração) e, entre eles, o "tempo e placar".
 func _stat_summary() -> void:
 	var m := _sim.minute
+	if _sim.half <= 2 and m in CLOCK_MINUTES and not _stat_marks.has("c%d" % m):
+		_stat_marks["c%d" % m] = true
+		var cl := _com.clock_line(m, _sim.half)
+		if not cl.is_empty():
+			_enqueue(cl, {}, 0.1)
+		return
 	if _sim.half > 2 or m % 15 != 0 or m == 0 or m == 45 or m == 90:
 		return
 	var key := "%d:%d" % [_sim.half, m]
@@ -1354,7 +1378,15 @@ func _add_line(line: Dictionary) -> void:
 	var t := UIKit.label(String(line.get("text", "")), variation, true)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if variation == "":
-		t.add_theme_font_size_override(&"font_size", 24)
+		# O lance mais recente entra maior; o anterior volta ao corpo normal.
+		t.add_theme_font_size_override(&"font_size", FEED_FS_NEW)
+		row.set_meta("fresh", t)
+	if _feed.get_child_count() > 0:
+		var prev := _feed.get_child(0)
+		var inner: Node = prev.get_child(0) if prev is PanelContainer and prev.get_child_count() > 0 else prev
+		if inner.has_meta("fresh"):
+			(inner.get_meta("fresh") as Label).add_theme_font_size_override(&"font_size", FEED_FS)
+			inner.remove_meta("fresh")
 	var col := UIColors.TEXT
 	match style:
 		"info":
@@ -1635,6 +1667,26 @@ func _build_tabs() -> void:
 	for b in t.get_children():
 		(b as Button).custom_minimum_size.y = 56
 	_tabs_row.add_child(t)
+	var vb := UIKit.icon_button("pitch" if AppSettings.match_view == 2 else "list", _cycle_match_view, "Campo e narração")
+	vb.custom_minimum_size = Vector2(56, 56)
+	_tabs_row.add_child(vb)
+
+
+## Alterna o espaço da tela: lances em destaque (campo menor), campo grande ou só a narração.
+func _cycle_match_view() -> void:
+	AppSettings.match_view = (AppSettings.match_view + 1) % 3
+	AppSettings.save_settings()
+	_apply_match_view()
+	_build_tabs()
+	UIManager.toast(AppSettings.MATCH_VIEW_NAMES[AppSettings.match_view], UIColors.ACCENT)
+
+
+func _apply_match_view() -> void:
+	if not is_instance_valid(_pitch):
+		return
+	var box := _pitch.get_parent() as Control
+	box.visible = AppSettings.match_view != 2
+	_responsive_layout()
 
 
 func _set_tab(key: String) -> void:
@@ -2150,28 +2202,78 @@ func _other_scores(minute: int, half: int) -> VBoxContainer:
 # ---------------------------------------------------------------------------
 
 ## Palestra no vestiário (antes do pontapé inicial ou no intervalo). O relógio fica parado
-## enquanto o modal está aberto; "Sem palestra" segue sem efeito.
+## enquanto o modal está aberto; "Sem palestra" segue sem efeito. Cada tom aparece com uma fala
+## sorteada para o momento (TeamTalk), e depois vem a reação do grupo.
 func _open_talk(halftime: bool) -> void:
 	if _sim == null or not _sim.can_talk(_user_side):
 		return
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	var v := UIKit.vbox(10)
 	v.add_child(UIKit.label("Palestra no intervalo" if halftime else "Palestra antes do jogo", "Title"))
-	var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
-	if halftime:
-		v.add_child(UIKit.label(("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate."), "Muted"))
-	for key in MatchSimulation.TALK_ORDER:
-		var k: String = key
-		var cfg: Dictionary = MatchSimulation.TALKS[k]
-		var b := UIKit.button(String(cfg["name"]), "", func():
-			var r := _sim.team_talk(_user_side, k)
+	v.add_child(UIKit.label(_talk_context(halftime), "Muted", true))
+	var ut: MatchTeam = _sim.teams[_user_side]
+	for opt in TeamTalk.options(_sim, _user_side, rng):
+		var k := String(opt["key"])
+		var say := String(opt["text"])
+		var inner := UIKit.vbox(4)
+		var head := String(opt["short"])
+		if halftime and ut.talk_key == k:
+			head += " · mesmo tom de antes do jogo"
+		inner.add_child(UIKit.eyebrow(head))
+		inner.add_child(UIKit.label("“%s”" % say, "", true))
+		v.add_child(UIKit.tap_row(inner, func():
+			var r := _sim.team_talk(_user_side, k, say)
 			UIManager.close_modal()
-			UIManager.toast(String(r["msg"]), UIColors.ACCENT if r["ok"] else UIColors.RED)
+			if not r["ok"]:
+				UIManager.toast(String(r["msg"]), UIColors.RED)
+				if halftime:
+					_show_halftime()
+				return
 			_drain(false)
-			if halftime:
-				_show_halftime(), "")
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		v.add_child(b)
+			_show_talk_reaction(k, r, halftime, rng)))
 	v.add_child(UIKit.button("Sem palestra", "GhostButton", func():
+		UIManager.close_modal()
+		if halftime:
+			_show_halftime()))
+	UIManager.show_modal(v, true, false)
+
+
+## Uma linha sobre o momento: placar no intervalo; antes do jogo, mando, favoritismo e peso.
+func _talk_context(halftime: bool) -> String:
+	var opp: MatchTeam = _sim.teams[1 - _user_side]
+	if halftime:
+		var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
+		var txt := ("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate.")
+		var xd := _sim.teams[_user_side].xg - opp.xg
+		if xd >= 0.6:
+			txt += " Mandando no jogo."
+		elif xd <= -0.6:
+			txt += " O adversário está melhor."
+		return txt
+	var parts: Array[String] = []
+	parts.append("Contra o %s%s" % [opp.club.short_name, "" if _sim.neutral else (", em casa" if _user_side == 0 else ", fora de casa")])
+	var sit := TeamTalk.situation(_sim, _user_side)
+	if sit.has("pre_derby"):
+		parts.append("clássico")
+	if sit.has("pre_big"):
+		parts.append("jogo decisivo")
+	if sit.has("pre_fav"):
+		parts.append("somos favoritos")
+	elif sit.has("pre_under"):
+		parts.append("eles são favoritos")
+	return ", ".join(parts) + "."
+
+
+## Reação do vestiário: resumo e quem respondeu (ou sentiu) a conversa.
+func _show_talk_reaction(key: String, r: Dictionary, halftime: bool, rng: RandomNumberGenerator) -> void:
+	var rx := TeamTalk.reaction(_sim, _user_side, key, r.get("up", []), r.get("down", []), bool(r.get("repeat", false)), rng)
+	var v := UIKit.vbox(10)
+	v.add_child(UIKit.label("Reação no vestiário", "Title"))
+	v.add_child(UIKit.label(String(rx["summary"]), "H3", true))
+	for line in rx["lines"]:
+		v.add_child(UIKit.label(String(line), "", true))
+	v.add_child(UIKit.button("Voltar ao intervalo" if halftime else "Ir para o jogo", "PrimaryButton", func():
 		UIManager.close_modal()
 		if halftime:
 			_show_halftime()))

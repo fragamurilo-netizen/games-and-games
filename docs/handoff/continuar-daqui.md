@@ -17,6 +17,13 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - No pré-jogo, o banco cabe acima do rodapé (`_fit_pitch`). Na partida, a narração tem altura mínima (`FEED_MIN_H`) e a tarja do gol fica por cima do campo. O layout da partida agora é da thread "Palestras e narração".
 - Para conferir: `design_shots -- --only=!lineup` (ou `!lineup=C:4-4-2|9=AM`).
 
+### Palestras e narração de rádio (05/10, ramo `claude/palestras-narracao-1b2sru`)
+
+- Partiu da junção acima (`claude/posicoes-escalacao-hbrnjt`) e é o ramo mais novo.
+- **Palestra.** As falas ficam em `scripts/systems/team_talk.gd` (`TeamTalk.LINES`), separadas por tom e por momento: antes do jogo (favorito, azarão, clássico, decisão, casa, fora) e no intervalo (vencendo por 1 ou 2+, empate, perdendo por 1 ou 2+, mandando no jogo sem vencer, sofrendo sem perder). A cada vez que o modal abre sai uma fala diferente por tom, com nomes do jogo ({star}, {their}, {gk}, {opp}). São 9 tons: os 6 antigos mais Mostrar confiança, Foco no plano e Mostrar decepção (`_talk_reaction` em `match_simulation.gd`, mesmo teto de ±5%). Repetir no intervalo o tom de antes do jogo rende 55%. Depois da escolha vem a "Reação no vestiário" com quem respondeu. Só o time do usuário dá palestra, então o motor calibrado não muda.
+- **Narração de rádio.** Frases novas em `data/text/commentary.json`: categorias `radio_*` ("tempo e placar" nos minutos 8, 22, 38, 52, 68 e 83; tensão antes do chute; placar repetido depois do gol; abertura da fala do vestiário) e mais variações nas categorias de gol, chance, posse, falta etc. Elas só existem em português: em inglês e espanhol o `Commentary._allowed` usa só frases que têm tradução.
+- **Tela da partida.** Em pé, o padrão é "Campo menor": campo deitado com ~20% da altura e a narração com o resto. O botão ao lado das abas alterna Campo menor, Campo grande (o vertical de antes) e Só narração (`AppSettings.match_view`, salvo nas opções). O lance mais recente entra com letra maior.
+
 ## Como conferir e gerar o APK
 
 Rode dentro de `mais-uma-rodada/`:
