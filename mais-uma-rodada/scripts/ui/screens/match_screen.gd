@@ -38,7 +38,13 @@ var _shown_score: Array[int] = [0, 0] # placar mostrado: o gol só entra quando 
 var _colors: Array[Color] = []
 var _vis_rng := RandomNumberGenerator.new()
 var _last_phase: Dictionary = {}
-var _play_delay := 0.0 # quanto a jogada encenada no campo ainda leva (s): a narração acompanha
+## Narração presa ao campo: cada lance encenado tem marcos (começo, momento decisivo, apito do
+## pênalti) e as linhas dele só saem quando a bola chega lá.
+var _gates: Dictionary = {} # id do marco -> _elapsed quando o campo passou por ele
+var _ev_gate: Dictionary = {} # índice do evento em _sim.events -> {role, s, h, f}
+var _gate_clock := 0.0 # só anda com o campo rodando (pausa e janelas não estouram o limite)
+var _beat_n := 0
+var _busy_wait := 0.0
 var _stadium: Dictionary = {}
 var _highlight_timer := 0.0
 var _ticker_t := 1.5
@@ -297,6 +303,7 @@ func _build() -> void:
 	_pitch.ref_color2 = refc[1]
 	_pitch.motion = PitchMotion.new(seed_base * 7 + 3)
 	_pitch.motion.tempo = TEMPO[_pace]
+	_pitch.motion.on_mark = _on_mark
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
 	StadiumStyle.apply_weather(_stadium, _sim.wx)
 	_pitch.stadium = _stadium
@@ -720,6 +727,8 @@ func _process(delta: float) -> void:
 			_hide_aux()
 	# O replay roda mesmo com o jogo pausado (botão "Rever"), mas não por baixo de um modal.
 	_pitch.motion.frozen = UIManager.has_modal() or ((_paused or _halftime or _done) and not _replay_on)
+	if not _pitch.motion.frozen:
+		_gate_clock += delta
 	if _replay_on and not _pitch.motion.replaying:
 		_replay_on = false
 		_hold = minf(_hold, 0.25)
@@ -757,20 +766,23 @@ func _process(delta: float) -> void:
 		return
 	if _halftime or _paused:
 		return
+	# No ritmo normal o próximo minuto espera a jogada encenada terminar (a bola não "teleporta").
+	if _pace == 0 and _pitch.motion.scripted_busy() and _busy_wait < 3.0:
+		_busy_wait += delta
+		return
 	_clock -= delta
 	if _clock > 0.0:
 		return
 	_clock = PACE[_pace]
+	_busy_wait = 0.0
 	_advance()
 
 
 func _advance() -> void:
 	_sim.step()
-	# Primeiro o campo encena o lance; a narração do desfecho sai quando a jogada termina.
-	_play_delay = 0.0
+	# Primeiro o campo monta o lance; a narração de cada parte sai quando a bola chega nela.
 	_script_play()
 	_drain(false)
-	_play_delay = 0.0
 	_after_step()
 
 
@@ -802,18 +814,50 @@ func _drain(silent: bool) -> void:
 	while _ev_index < _sim.events.size():
 		var ev: Dictionary = _sim.events[_ev_index]
 		_ev_index += 1
-		_handle_event(ev, silent)
+		_handle_event(ev, silent, _ev_gate.get(_ev_index - 1, {}))
+		_ev_gate.erase(_ev_index - 1)
 
 
 func _delay_scale() -> float:
 	return clampf(PACE[_pace] / 0.32, 0.3, 1.6)
 
 
-func _enqueue(line: Dictionary, ev: Dictionary, delay: float) -> void:
-	_queue.append({"at": _elapsed + delay, "line": line, "ev": ev})
+func _enqueue(line: Dictionary, ev: Dictionary, delay: float, gate: String = "") -> void:
+	var item := {"at": _elapsed + delay, "line": line, "ev": ev}
+	if gate != "":
+		item["gate"] = gate
+		item["rel"] = delay
+		item["lim"] = _gate_clock + 7.0 # nunca fica presa: se o campo não chegar lá, sai assim mesmo
+	_queue.append(item)
 
 
-func _handle_event(ev: Dictionary, silent: bool) -> void:
+func _on_mark(id: String) -> void:
+	_gates[id] = _elapsed
+
+
+const OUTCOME_STYLES: Array[String] = ["goal", "card_y", "card_r", "big", "var"]
+
+
+## Em que marco do campo cada linha do lance sai, e quanto depois dele.
+func _gate_for(g: Dictionary, line: Dictionary, d: float) -> Array:
+	var style := String(line.get("style", ""))
+	var outcome := d >= 0.5 or style in OUTCOME_STYLES
+	match String(g.get("role", "")):
+		"start":
+			return [g["s"], d * 0.6]
+		"hit":
+			return [g["h"], maxf(0.0, d - 0.2) + (0.5 if style in ["card_y", "card_r"] else 0.0)]
+		"pen":
+			return [g["f"], d * 0.6]
+		"pen_chance":
+			return [g["h"], maxf(0.0, d - 0.5)] if outcome else [g["f"], 0.9 + d]
+	# chance: a preparação sai enquanto a jogada se arma, o desfecho quando a bola chega.
+	if outcome:
+		return [g["h"], maxf(0.0, d - 0.5)]
+	return [g["s"], 0.25 + d * 1.5]
+
+
+func _handle_event(ev: Dictionary, silent: bool, g: Dictionary = {}) -> void:
 	var t: int = ev["t"]
 	var side: int = ev["s"]
 	if (t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL) and silent:
@@ -825,7 +869,7 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 		_pitch.motion.kickoff(0 if _sim.half % 2 == 1 else 1, true)
 		if not silent:
 			Sfx.play("whistle", -4.0)
-	var scripted := _play_delay > 0.0 and t in SCRIPTED_EVENTS
+	var gated := not g.is_empty() and not silent
 	for line in _com.lines_for(ev):
 		var style: String = line["style"]
 		if silent and style in ["normal", "chance", "info", "crowd", "var", "pundit", "reporter"] and t != MatchSimulation.EV_FULLTIME and t != MatchSimulation.EV_HALFTIME:
@@ -833,18 +877,19 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 		if silent:
 			_add_line(line)
 			continue
-		var d := float(line["delay"]) * _delay_scale()
-		if scripted:
-			# Preparação no meio da jogada; desfecho quando a bola chega.
-			d = d + _play_delay if d > 0.0 or style in ["goal", "card_y", "card_r", "big"] else _play_delay * 0.5
-		_enqueue(line, ev, d)
+		if gated:
+			var gt := _gate_for(g, line, float(line["delay"]))
+			_enqueue(line, ev, float(gt[1]) * _delay_scale(), String(gt[0]))
+			continue
+		_enqueue(line, ev, float(line["delay"]) * _delay_scale())
 	if silent:
 		return
 	if t == MatchSimulation.EV_HALFTIME:
 		var an := _com.analysis_line(int(ev["m"]), int(ev["h"]))
 		if not an.is_empty():
 			_enqueue(an, {}, 1.2)
-	_on_event_visual(ev)
+	if not (gated and t == MatchSimulation.EV_KNOCK): # caído depois da falta: o campo já encena
+		_on_event_visual(ev)
 	# Destaque do protagonista no campo
 	var pid: int = ev.get("p", -1)
 	if pid >= 0 and side >= 0:
@@ -856,7 +901,18 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 
 
 func _flush_lines() -> void:
-	while not _queue.is_empty() and float(_queue[0]["at"]) <= _elapsed:
+	while not _queue.is_empty():
+		var head: Dictionary = _queue[0]
+		if head.has("gate"):
+			var gid := String(head["gate"])
+			if not _gates.has(gid):
+				if _gate_clock < float(head["lim"]):
+					break
+				_gates[gid] = _elapsed
+			if float(_gates[gid]) + float(head["rel"]) > _elapsed:
+				break
+		elif float(head["at"]) > _elapsed:
+			break
 		var item: Dictionary = _queue.pop_front()
 		var line: Dictionary = item["line"]
 		var ev: Dictionary = item["ev"]
@@ -1074,10 +1130,6 @@ func _record_scorer(ev: Dictionary) -> void:
 	list.append([scorer, [m]])
 
 
-const SCRIPTED_EVENTS: Array[int] = [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS,
-	MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK, MatchSimulation.EV_PEN_SAVE, MatchSimulation.EV_PEN_MISS, MatchSimulation.EV_PENALTY_AWARDED,
-	MatchSimulation.EV_FOUL, MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED, MatchSimulation.EV_OFFSIDE, MatchSimulation.EV_CORNER,
-	MatchSimulation.EV_FREEKICK, MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER, MatchSimulation.EV_VAR]
 const CHANCE_RES := {
 	MatchSimulation.EV_GOAL: "goal", MatchSimulation.EV_OWN_GOAL: "goal", MatchSimulation.EV_SAVE: "save",
 	MatchSimulation.EV_MISS: "miss", MatchSimulation.EV_POST: "post", MatchSimulation.EV_BLOCK: "block",
@@ -1092,14 +1144,6 @@ func _slot_of(side: int, pid: int) -> int:
 	return mp.slot if mp != null and mp.on_pitch else -1
 
 
-func _find_ev(types: Array) -> Dictionary:
-	for i in range(_sim.last_events.size() - 1, -1, -1):
-		var e: Dictionary = _sim.last_events[i]
-		if types.has(int(e["t"])):
-			return e
-	return {}
-
-
 func _script_play() -> void:
 	var ph: Dictionary = _sim.last_phase
 	if ph.is_empty() or is_same(ph, _last_phase):
@@ -1108,82 +1152,164 @@ func _script_play() -> void:
 	var ev := int(ph.get("ev", -1))
 	if ev in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF, MatchSimulation.EV_EXTRA_TIME]:
 		return
-	var side := int(ph.get("side", 0))
-	var info := {"side": side, "zone": float(ph.get("to", 0.5))}
+	if _queue.is_empty():
+		_gates.clear()
+	var evs: Array = _sim.last_events
+	var base := _sim.events.size() - evs.size()
+	var beats := _beats(evs, base, ph)
 	var mo := _pitch.motion
-	if CHANCE_RES.has(ev):
-		var e := _find_ev(CHANCE_RES.keys())
-		if e.is_empty():
-			mo.ambient(side, float(ph.get("to", 0.5)))
-			return
+	if beats.is_empty():
+		mo.ambient(int(ph.get("side", 0)), float(ph.get("to", 0.5)))
+		return
+	# Narração presa ao campo no normal e no rápido (no rápido, os toques de bola sem perigo
+	# não seguram o minuto); no turbo e sem campo na tela, a narração corre solta.
+	var sync := _pace < 2 and AppSettings.match_view != 2
+	for i in beats.size():
+		var b: Dictionary = beats[i]
+		var info: Dictionary = b["info"]
+		info["append"] = i > 0
+		if sync and (_pace == 0 or bool(b["key"])):
+			_beat_n += 1
+			var id := "b%d" % _beat_n
+			info["start"] = id + "s"
+			info["hit"] = id + "h"
+			if b.has("pen"):
+				info["fhit"] = id + "f"
+			for item in b["evs"]:
+				_ev_gate[int(item[0])] = {"role": String(item[1]), "s": id + "s", "h": id + "h", "f": id + "f"}
+		mo.play(info)
+
+
+const FLAVOR_HIT: Array[String] = ["intercept", "cross_cut", "long", "press"]
+
+
+## Lances do minuto na ordem em que aconteceram, cada um com a jogada do campo e os eventos da
+## narração que ele mostra ([índice do evento, papel]: start, hit, chance, pen, pen_chance).
+func _beats(evs: Array, base: int, ph: Dictionary) -> Array:
+	var out: Array = []
+	var pre: Array = [] # eventos que entram na próxima chance (escanteio, falta, pênalti marcado)
+	var ctk := -1 # quem foi para a bandeira
+	var i := 0
+	var n := evs.size()
+	while i < n:
+		var e: Dictionary = evs[i]
 		var t := int(e["t"])
+		var s := int(e["s"])
 		var x: Dictionary = e.get("x", {})
-		info["kind"] = "chance"
-		info["ct"] = int(ph.get("ct", x.get("ct", 0)))
-		info["res"] = CHANCE_RES[t]
-		if t == MatchSimulation.EV_OWN_GOAL:
-			info["own"] = true
-			info["sh"] = _slot_of(1 - side, int(e["p"]))
-		else:
-			info["sh"] = _slot_of(side, int(e["p"]))
-			info["as"] = _slot_of(side, int(e.get("p2", -1)))
-		if x.has("line"):
-			info["line"] = _slot_of(1 - side, int(x["line"]))
-		if x.has("culprit"):
-			info["culprit"] = _slot_of(1 - side, int(x["culprit"]))
-		if x.has("fin"):
-			info["fin"] = String(x["fin"])
-		# Chance clara (gol, trave, xG alto): o chute sai em câmera lenta no ritmo normal.
-		if _pace == 0 and (t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_POST] or float(x.get("xg", 0.0)) >= 0.3):
-			info["big"] = true
-		if int(info["ct"]) == MatchSimulation.CH_PENALTY:
-			var pa := _find_ev([MatchSimulation.EV_PENALTY_AWARDED])
-			if not pa.is_empty():
-				info["pen"] = {"victim": _slot_of(side, int(pa["p"])), "fouler": _slot_of(1 - side, int(pa.get("p2", -1))),
-					"how": String(pa.get("x", {}).get("how", ""))}
-	elif ev == MatchSimulation.EV_FOUL:
-		var f := _find_ev([MatchSimulation.EV_FOUL])
-		if f.is_empty():
-			return
-		info["kind"] = "foul"
-		info["p"] = _slot_of(1 - side, int(f["p"]))
-		info["p2"] = _slot_of(side, int(f.get("p2", -1)))
-		info["danger"] = bool(f.get("x", {}).get("danger", false))
-		info["zone"] = float(ph.get("to", 0.5))
-		var c := _find_ev([MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED])
-		if not c.is_empty() and int(c["p"]) == int(f["p"]):
-			info["card"] = 2 if int(c["t"]) == MatchSimulation.EV_RED else 1
-			# Expulso: o slot já saiu do campo na simulação; o cartão aparece antes de ele sair.
-			if info["p"] == -1:
-				var mp: MatchPlayer = _sim.teams[1 - side].by_id.get(int(f["p"]), null)
-				if mp != null:
-					info["p"] = mp.slot
-	elif ev == MatchSimulation.EV_OFFSIDE:
-		var o := _find_ev([MatchSimulation.EV_OFFSIDE])
-		info["kind"] = "offside"
-		info["p"] = _slot_of(side, int(o.get("p", -1))) if not o.is_empty() else -1
-	elif ev == MatchSimulation.EV_CORNER:
-		var cn := _find_ev([MatchSimulation.EV_CORNER])
-		info["kind"] = "corner"
-		info["p"] = _slot_of(side, int(cn.get("p", -1))) if not cn.is_empty() else -1
-	else:
-		var fl := _find_ev([MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER])
-		if fl.is_empty():
-			mo.ambient(side, float(ph.get("to", 0.5)))
-			return
-		var ft := int(fl["t"])
-		var fs := int(fl["s"])
-		info["side"] = fs
-		info["kind"] = {MatchSimulation.EV_SKILL: "skill", MatchSimulation.EV_TACKLE: "tackle", MatchSimulation.EV_KEEPER: "keeper"}[ft]
-		info["p"] = _slot_of(fs, int(fl["p"]))
-		info["p2"] = _slot_of(1 - fs, int(fl.get("p2", -1)))
-	mo.play(info)
-	# No ritmo normal a partida espera a jogada; no rápido, só os gols; no turbo, nada.
-	var bt := mo.busy_time()
-	if _pace == 0:
-		_play_delay = minf(bt, 3.4)
-	elif _pace == 1 and String(info.get("res", "")) == "goal":
-		_play_delay = minf(bt, 3.2) # o gol inteiro no campo (e no replay)
+		var idx := base + i
+		i += 1
+		match t:
+			MatchSimulation.EV_POSSESSION:
+				var k := String(x.get("kind", ""))
+				if k.begins_with("read_"):
+					continue
+				var inf := {"kind": "poss", "pk": k, "side": s, "p": _slot_of(s, int(e["p"])), "p2": _slot_of(s, int(e.get("p2", -1))),
+					"d": _slot_of(1 - s, int(x.get("d", -1))), "zone": float(ph.get("to", 0.5))}
+				out.append({"info": inf, "key": false, "evs": [[idx, "hit" if k in FLAVOR_HIT else "start"]]})
+			MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER:
+				var kd: String = {MatchSimulation.EV_SKILL: "skill", MatchSimulation.EV_TACKLE: "tackle", MatchSimulation.EV_KEEPER: "keeper"}[t]
+				var inf2 := {"kind": kd, "side": s, "p": _slot_of(s, int(e["p"])), "p2": _slot_of(1 - s, int(e.get("p2", -1))), "zone": float(ph.get("to", 0.5))}
+				out.append({"info": inf2, "key": false, "evs": [[idx, "hit"]]})
+			MatchSimulation.EV_FOUL:
+				# Junta o que vem colado na falta: cartão, jogador caído, pênalti ou cobrança perigosa.
+				var group: Array = [[idx, "hit"]]
+				var card := 0
+				var knock := false
+				var pen := false
+				var fk := false
+				var j := i
+				while j < n:
+					var e2: Dictionary = evs[j]
+					var t2 := int(e2["t"])
+					if t2 in [MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED] and int(e2["p"]) == int(e["p"]):
+						card = 2 if t2 == MatchSimulation.EV_RED else 1
+					elif t2 == MatchSimulation.EV_KNOCK:
+						knock = true
+					elif t2 == MatchSimulation.EV_PENALTY_AWARDED:
+						pen = true
+					elif t2 == MatchSimulation.EV_VAR and String(e2.get("x", {}).get("kind", "")) == "pen_ok":
+						pass
+					elif t2 == MatchSimulation.EV_FREEKICK:
+						fk = true
+						break
+					elif t2 == MatchSimulation.EV_INJURY:
+						pass
+					else:
+						break
+					group.append([base + j, "hit"])
+					j += 1
+				i = j
+				if pen:
+					# O pênalti encena a falta antes da cobrança: tudo isso sai no apito.
+					for gi in group:
+						pre.append([gi[0], "pen"])
+					continue
+				var side := 1 - s # quem sofre
+				var inf3 := {"kind": "foul", "side": side, "p": _slot_of(s, int(e["p"])), "p2": _slot_of(side, int(e.get("p2", -1))),
+					"danger": bool(x.get("danger", false)), "zone": float(ph.get("to", 0.5)) if not fk else maxf(0.72, float(ph.get("to", 0.75))),
+					"card": card, "knock": knock, "fk": fk}
+				if card > 0 and int(inf3["p"]) == -1:
+					# Expulso: a vaga já está vazia na simulação, mas o cartão aparece antes de ele sair.
+					var mp: MatchPlayer = _sim.teams[s].by_id.get(int(e["p"]), null)
+					if mp != null:
+						inf3["p"] = mp.slot
+				out.append({"info": inf3, "key": true, "evs": group})
+			MatchSimulation.EV_FREEKICK:
+				pre.append([idx, "start"])
+			MatchSimulation.EV_CORNER:
+				# Escanteio que vira finalização: a cobrança faz parte da chance.
+				if i < n and int(evs[i]["t"]) in CHANCE_RES and int(evs[i].get("x", {}).get("ct", -1)) == MatchSimulation.CH_CORNER:
+					pre.append([idx, "start"])
+					ctk = _slot_of(s, int(e["p"]))
+					continue
+				out.append({"info": {"kind": "corner", "side": s, "p": _slot_of(s, int(e["p"]))}, "key": true, "evs": [[idx, "start"]]})
+			MatchSimulation.EV_OFFSIDE:
+				out.append({"info": {"kind": "offside", "side": s, "p": _slot_of(s, int(e["p"])), "zone": 0.8}, "key": true, "evs": [[idx, "hit"]]})
+			_:
+				if not CHANCE_RES.has(t):
+					continue
+				var ct := int(x.get("ct", 0))
+				var inf4 := {"kind": "chance", "side": s, "ct": ct, "res": CHANCE_RES[t], "zone": float(ph.get("to", 0.9))}
+				if t == MatchSimulation.EV_OWN_GOAL:
+					inf4["own"] = true
+					inf4["sh"] = _slot_of(1 - s, int(e["p"]))
+				else:
+					inf4["sh"] = _slot_of(s, int(e["p"]))
+					inf4["as"] = _slot_of(s, int(e.get("p2", -1)))
+				if x.has("line"):
+					inf4["line"] = _slot_of(1 - s, int(x["line"]))
+				if x.has("culprit"):
+					inf4["culprit"] = _slot_of(1 - s, int(x["culprit"]))
+				if x.has("fin"):
+					inf4["fin"] = String(x["fin"])
+				if x.has("ln"):
+					inf4["ln"] = int(x["ln"])
+				if ctk >= 0 and ct == MatchSimulation.CH_CORNER:
+					inf4["ctk"] = ctk
+				ctk = -1
+				if _pace == 0 and (t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_POST] or float(x.get("xg", 0.0)) >= 0.3):
+					inf4["big"] = true # chance clara: o chute sai em câmera lenta
+				var group2: Array = pre.duplicate()
+				pre.clear()
+				var b := {"info": inf4, "key": true, "evs": group2}
+				if ct == MatchSimulation.CH_PENALTY:
+					b["pen"] = true
+					var pa := {}
+					for pe in evs:
+						if int(pe["t"]) == MatchSimulation.EV_PENALTY_AWARDED:
+							pa = pe
+					if not pa.is_empty():
+						inf4["pen"] = {"victim": _slot_of(s, int(pa["p"])), "fouler": _slot_of(1 - s, int(pa.get("p2", -1))),
+							"how": String(pa.get("x", {}).get("how", ""))}
+					group2.append([idx, "pen_chance"])
+				else:
+					group2.append([idx, "chance"])
+				# O que a narração diz logo depois do gol (VAR confirmando, técnico reclamando).
+				while i < n and int(evs[i]["t"]) in [MatchSimulation.EV_VAR, MatchSimulation.EV_CROWD] and t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL]:
+					group2.append([base + i, "hit"])
+					i += 1
+				out.append(b)
+	return out
 
 
 ## Efeitos no campo que não dependem da jogada: lesão, jogador caído, VAR.
@@ -1244,6 +1370,7 @@ func _sync_slots() -> void:
 		else:
 			_pitch.away_slots = arr
 		_pitch.motion.set_team(side, arr)
+		_pitch.motion.set_tactics(side, {"line": t.line, "width": t.width_i, "press": t.pressing, "ment": t.mentality})
 
 
 func _update_board() -> void:

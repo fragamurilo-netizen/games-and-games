@@ -150,6 +150,7 @@ var competition: String = "L"
 ## Última fase de jogo (para a animação 2D): lado com a bola, zona inicial/final (0..1) e evento.
 var last_phase: Dictionary = {}
 var last_events: Array = []
+var _ch_lane := -1 # corredor da chance em andamento (só para a narração/campo: "ln" no evento)
 ## Pressão por minuto (só com detail): [tempo, minuto, valor] — valor > 0 mandante, < 0 visitante.
 var pressure: Array = []
 var year: int = 2026
@@ -1003,6 +1004,7 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		lane = int(lp[0])
 		lane_f = float(lp[1])
 		xr_box[s] += 1
+	_ch_lane = lane
 	# Qualidade da chance
 	var xg: float = _xg[ctype] * lane_f
 	if ctype != CH_PENALTY and ctype != CH_FREEKICK:
@@ -1101,6 +1103,8 @@ func _resolve_chance(att: MatchTeam, dfn: MatchTeam, forced_type: int, forced_sh
 		rec["r"] = {EV_SAVE: "defesa", EV_POST: "trave", EV_BLOCK: "bloqueio", EV_PEN_SAVE: "defesa"}.get(ev, "fora")
 	if detail:
 		var ex := {"ct": ctype, "xg": snappedf(xg, 0.01), "gk": gk.p.id if gk != null else -1}
+		if lane >= 0:
+			ex["ln"] = lane
 		if not pk.is_empty():
 			ex["res"] = String(pk["res"])
 			ex["dir"] = int(pk["dir"])
@@ -1310,6 +1314,8 @@ func _goal(att: MatchTeam, dfn: MatchTeam, shooter: MatchPlayer, assister: Match
 		tags.append("counter")
 	half_events += 1
 	var gx := {"ct": ctype, "imp": imp, "tags": tags, "culprit": culprit.p.id if culprit != null else -1}
+	if detail and _ch_lane >= 0:
+		gx["ln"] = _ch_lane
 	if detail and not own_goal:
 		var fin := _finish_kind(ctype, EV_GOAL, shooter, 0.0)
 		if fin != "":
