@@ -39,7 +39,25 @@ func _initialize() -> void:
 			guard += 1
 		seasons += 1
 		if seasons < opt_seasons and w.season.finished:
+			var arg: League = w.season.leagues.get("ARG1")
+			var before := []
+			if arg != null:
+				var ids := CompetitionManager.sorted_ids(arg)
+				var pr := LeagueFormat.promedios(w, arg)
+				print("ARG1 últimos da tabela: %s · piores promedios: %s" % [", ".join(ids.slice(ids.size() - 2).map(func(i): return w.club(i).short_name)),
+					", ".join(pr.slice(pr.size() - 3).map(func(e): return "%s %.3f" % [w.club(e["id"]).short_name, e["avg"]]))])
+				before = arg.club_ids.duplicate()
+			var held := 0
+			for p: Player in w.players.values():
+				if TransferRules.is_held(p):
+					held += 1
+			print("garotos vendidos esperando os 18: %d" % held)
 			SeasonManager.end_season(w)
+			var down := []
+			for cid in before:
+				if w.club(cid).league_id != "ARG1":
+					down.append(w.club(cid).short_name)
+			print("ARG1 rebaixados: %s" % ", ".join(down))
 	print("datas: %d · %.1fs · transferências no log: %d" % [guard, (Time.get_ticks_msec() - t0) / 1000.0, w.transfer_log.size()])
 	var line := []
 	for k in per_slot:

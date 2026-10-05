@@ -224,7 +224,7 @@ static func status(w: GameWorld, p: Player, mode: String) -> Array:
 	if not p.loan.is_empty():
 		var from := w.club(int(p.loan.get("from", -1))) if p.loan.has("from") else null
 		if TransferRules.is_held(p):
-			return [("Vendido ao " + from.short_name) if from != null else "Vendido", UIColors.ORANGE]
+			return [("Vendido ao %s" % from.short_name) if from != null else "Vendido", UIColors.ORANGE]
 		return [("Emprestado pelo " + from.short_name) if from != null else "Emprestado", UIColors.ORANGE]
 	if own and p.contract_end <= w.year:
 		return ["Último ano", UIColors.ORANGE]

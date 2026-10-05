@@ -367,7 +367,7 @@ static func _pick_need(world: GameWorld, c: Club, free_only: bool) -> Dictionary
 	# concorrência, mesmo que o garoto só possa se mudar aos 18).
 	if hunts_jewels(c) and world.rng.randf() < JEWEL_HUNT:
 		var jf := world.rng.randi_range(1, TransferManager.FAMILIES.size() - 1)
-		return {"fam": jf, "pos": -1, "min_rating": level - 9.0, "urgency": 0.4, "young": true, "jewel": true}
+		return {"fam": jf, "pos": -1, "min_rating": level - 12.0, "urgency": 0.4, "young": true, "jewel": true}
 	if young_p > 0.0 and world.rng.randf() < young_p:
 		var fam := world.rng.randi_range(0, TransferManager.FAMILIES.size() - 1)
 		return {"fam": fam, "pos": -1, "min_rating": level - 4.0, "urgency": 0.5, "young": true}

@@ -10088,5 +10088,22 @@
 	"Gol de cabeça é a especialidade: o time procura a cabeça dele em todo cruzamento.": "Headed goals are his speciality: the team looks for his head with every cross.",
 	"Você": "You",
 	"No cargo": "In charge",
-	"%d–hoje": "%d–now"
+	"%d–hoje": "%d–now",
+	"Menor de 18 não pode se mudar de país (regra da FIFA).": "Under-18s can't move to another country (FIFA rule).",
+	"Pela regra da FIFA ele só pode se mudar de país aos 18: fica no %s até o fim de %d e se apresenta ao %s em %d.": "Under FIFA rules he can only move abroad at 18: he stays at %s until the end of %d and joins %s in %d.",
+	"%s é do %s! %s": "%s belongs to %s! %s",
+	"%s foi vendido ao %s por %s. %s": "%s was sold to %s for %s. %s",
+	"%s aceitou a proposta%s!%s": "%s accepted the offer%s!%s",
+	"O %s acertou a venda de %s, de %d anos, ao %s por %s. %s": "%s agreed the sale of %s, %d, to %s for %s. %s",
+	"Solidariedade pela venda de %s": "Solidarity payment for the sale of %s",
+	"O %s recebeu %s do mecanismo de solidariedade da FIFA pela transferência de %s do %s para o %s. É a parte do clube por ter formado o jogador.": "%s received %s from the FIFA solidarity mechanism for the transfer of %s from %s to %s. It is the club's share for developing the player.",
+	"Solidariedade da FIFA": "FIFA solidarity",
+	"Vendido ao": "Sold to",
+	"%s, chega em %d": "%s, arrives in %d",
+	"Vendido ao %s": "Sold to %s",
+	"Vendido": "Sold",
+	"comprado do %s, chega em %d": "bought from %s, arrives in %d",
+	"vendido ao %s, sai em %d": "sold to %s, leaves in %d",
+	"Promedios": "Points average (promedios)",
+	"Caem o pior promedio (pontos por jogo nas últimas %d temporadas na elite) e o último da tabela anual.": "The worst points average (points per game over the last %d top-flight seasons) and the bottom club of the annual table go down."
 }
