@@ -16,8 +16,7 @@ const LANG_GROUP := {"pt": "Os brasileiros e lusófonos", "es": "Os hispânicos"
 
 
 static func _lang(code: String) -> String:
-	var lg := String(DatabaseManager.nation(code).get("lang", ""))
-	return (lg if lg != "" else code).get_slice("_", 0)
+	return Languages.primary(code)
 
 
 ## Influência de cada jogador no vestiário (0..100).
@@ -77,7 +76,7 @@ static func _isolated(world: GameWorld, p: Player) -> bool:
 	for b: Dictionary in People.bonds_of(world, p.id):
 		if int(b.get("v", 0)) > 0:
 			friends += 1
-	return (mates == 0 and _lang(club.nation) != lg and friends == 0) or (People.trust_of(world, p) < 30.0 and friends == 0)
+	return (mates == 0 and Languages.comm(p, club) < 0.45 and friends == 0) or (People.trust_of(world, p) < 30.0 and friends == 0)
 
 
 ## Panelinhas: [{name, members: [Player], leader: Player, mood, trust}].

@@ -452,7 +452,7 @@ func _club_card(w: GameWorld) -> Control:
 	var retired: Array = _summary.get("retired", [])
 	var left: Array = _summary.get("left", [])
 	var youth: Array = _summary.get("youth", [])
-	if retired.is_empty() and left.is_empty() and youth.is_empty() and Array(_summary.get("youth_changes", [])).is_empty():
+	if retired.is_empty() and left.is_empty() and youth.is_empty() and Array(_summary.get("youth_changes", [])).is_empty() and Array(_summary.get("youth_quit", [])).is_empty():
 		return null
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Seu elenco"))
@@ -465,6 +465,8 @@ func _club_card(w: GameWorld) -> Control:
 	var yleft: Array = _summary.get("youth_left", [])
 	if not yleft.is_empty():
 		card.add_child(UIKit.label("Deixaram a base (idade limite): %s." % ", ".join(PackedStringArray(yleft)), "Small", true))
+	for q in _summary.get("youth_quit", []):
+		card.add_child(UIKit.colored("Desistiu da base · %s" % String(q), UIColors.ORANGE, "Small", true))
 	for ch in _summary.get("youth_changes", []):
 		var txt := "%s %s: %s" % ["▲" if ch["up"] else "▼", ch["name"], ch["why"]]
 		card.add_child(UIKit.colored(txt, UIColors.GREEN if ch["up"] else UIColors.ORANGE, "Small", true))

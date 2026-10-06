@@ -266,6 +266,8 @@ func _load_core(save_slot: int) -> GameWorld:
 	LeagueReputation.ensure(w) # força das ligas, que muda com o tempo
 	if int(w.stats.get("rel_v", 0)) < 1:
 		Relations.generate(w) # saves de antes das relações
+	if int(w.stats.get("lng_v", 0)) < 1:
+		Languages.init_world(w) # saves de antes dos idiomas
 	Valuation.refresh_shift(w)
 	var market_migrated := MarketReality.ensure_world(w)
 	if market_migrated:

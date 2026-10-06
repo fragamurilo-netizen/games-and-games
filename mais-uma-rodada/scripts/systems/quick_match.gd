@@ -254,6 +254,8 @@ static func play(world: GameWorld, home: Club, away: Club, hs: TeamSheet, as_: T
 	var crowd := 0.0 if neutral else 0.6 + 0.4 * clampf(float(att_n) / maxf(1.0, home.capacity), 0.0, 1.0)
 	var cul := LeagueCulture.for_match(world, String(ctx.get("competition", "")), home)
 	crowd *= float(cul["home"])
+	if not neutral:
+		crowd *= Geo.travel_factor(world, home, away) # viagem longa pesa no visitante
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	var derby := bool(ctx.get("derby", false))
 	var importance := float(ctx.get("importance", 0.3))

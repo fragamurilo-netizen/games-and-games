@@ -596,6 +596,11 @@ func _origin_card(w: GameWorld, p: Player) -> Control:
 	if heart != "": card.add_child(UIKit.label(heart,"Small",true))
 	card.add_child(UIKit.label("Nascimento", "Small"))
 	card.add_child(UIKit.label(NationalityManager.birthplace(p), "H3", true))
+	var away := Geo.home_text(p, w.club(p.club_id)) if p.club_id >= 0 else ""
+	if away != "":
+		card.add_child(UIKit.label(away, "Small", true))
+	card.add_child(UIKit.label("Idiomas", "Small"))
+	card.add_child(UIKit.label(Languages.text(p), "", true))
 	card.add_child(UIKit.separator())
 	card.add_child(UIKit.section("Nacionalidades"))
 	for code in NationalityManager.passports(p):

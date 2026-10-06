@@ -273,7 +273,7 @@ static func _affinity(world: GameWorld, c: Club, a: Player, b: Player, initial: 
 	var aa := a.age(world.year)
 	var ab := b.age(world.year)
 	var abroad := a.nationality == b.nationality and a.nationality != c.nation
-	var same_lang := String(DatabaseManager.nation(a.nationality).get("lang", "a")) == String(DatabaseManager.nation(b.nationality).get("lang", "b"))
+	var same_lang := Languages.primary(a.nationality) == Languages.primary(b.nationality)
 	# Revelados juntos: amizade de infância
 	if came_up_together(a, b) and ch < 0.55:
 		return [AMIGO, 45.0 + ch * 40.0, a, b]

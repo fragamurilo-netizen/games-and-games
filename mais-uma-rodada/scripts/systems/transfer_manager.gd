@@ -85,11 +85,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 	else:
 		# Língua e compatriotas: quem chega num país da mesma língua, ou num elenco com gente do seu
 		# país, se adapta mais rápido e topa mais fácil.
-		var my_lang := String(DatabaseManager.nation(p.nationality).get("lang", ""))
-		if my_lang != "" and my_lang == String(DatabaseManager.nation(buyer.nation).get("lang", "")):
-			v += 0.06
-		elif p.age(world.year) >= 29:
-			v -= 0.04 # veterano estranha língua e país novos
+		v += Languages.ease(p, buyer, p.age(world.year)) # quem fala (ou entende) a língua topa mais fácil
 		var mates := 0
 		for q in world.squad(buyer):
 			if q.nationality == p.nationality:

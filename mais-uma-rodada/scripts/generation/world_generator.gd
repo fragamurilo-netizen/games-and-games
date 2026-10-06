@@ -44,6 +44,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	PreHistory.build(w)
 	CareerBackfill.build(w)
 	Relations.generate(w) # amizades, rixas, irmãos, mentores e ídolos de um mundo que já existia
+	Languages.init_world(w) # línguas da terra e as aprendidas nas passagens pelo exterior
 	if not SquadStory.keep:
 		SquadStory.roles.clear()
 	HeartClubs.ensure_all(w)

@@ -5,7 +5,7 @@ extends BaseScreen
 
 
 func _init() -> void:
-	screen_title = "Mercado de técnicos"
+	screen_title = "Vagas"
 
 
 func refresh() -> void:
@@ -234,6 +234,9 @@ func _sheet_head(w: GameWorld, cl: Club) -> VBoxContainer:
 	v.add_child(UIKit.kv("Presidente", String(pst.get("name", ""))))
 	v.add_child(UIKit.kv("Jeito de jogar do clube", ClubDNA.name_of("tac", ClubDNA.tac(cl))))
 	v.add_child(UIKit.kv("Sua cotação", JobMarket.fit_label(f), JobMarket.fit_color(f)))
+	var ln := JobMarket.language_note(w, cl)
+	if ln != "":
+		v.add_child(UIKit.colored(ln, UIColors.ORANGE, "Small", true))
 	return v
 
 

@@ -11,7 +11,7 @@
 			"city": "Napoli",
 			"founded": 1926,
 			"league": "ITA1",
-			"rep": 88,
+			"rep": 86,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#12A0D7",
@@ -42,7 +42,7 @@
 			"city": "Milano",
 			"founded": 1908,
 			"league": "ITA1",
-			"rep": 91,
+			"rep": 90,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#0068A8",
@@ -79,7 +79,7 @@
 			"city": "Milano",
 			"founded": 1899,
 			"league": "ITA1",
-			"rep": 88,
+			"rep": 89,
 			"arch": "rico_promovido",
 			"colors": [
 				"#FB090B",
@@ -113,7 +113,7 @@
 			"city": "Torino",
 			"founded": 1897,
 			"league": "ITA1",
-			"rep": 90,
+			"rep": 89,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#FFFFFF",

@@ -78,6 +78,7 @@ var position: int = Pos.CM
 var secondary: Array = []
 var shirt: int = 0
 var hometown: String = ""
+var langs: Dictionary = {} # idiomas {código: fluência 0..100} (Languages)
 var face_seed: int = 0
 ## Aparência fixada pelo editor: {hs penteado, hc cor do cabelo, bd barba, sk pele, ey olhos, photo arquivo}.
 var look: Dictionary = {}
@@ -571,7 +572,7 @@ func to_dict() -> Dictionary:
 	var d := {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
 		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ah": adult_h, "ft": foot, "pos": position,
-		"sec": secondary, "sh": shirt, "ht": hometown, "origin": origin, "fs": face_seed, "lk": look, "trn": train,
+		"sec": secondary, "sh": shirt, "ht": hometown, "lng": langs, "origin": origin, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
 		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "rlb": bonds, "rlc": coach_rel, "idl": idol, "ilg": inj_log, "sg": signature,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
@@ -664,6 +665,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.secondary = Array(d.get("sec", []))
 	p.shirt = int(d.get("sh", 0))
 	p.hometown = d.get("ht", "")
+	p.langs = d.get("lng", {})
 	p.face_seed = int(d.get("fs", p.id))
 	p.look = d.get("lk", {})
 	p.train = d.get("trn", {})

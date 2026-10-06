@@ -88,11 +88,25 @@ static func fit(world: GameWorld, c: Club) -> float:
 	var v := 0.55 - (c.reputation * 0.9 - rep) / 30.0
 	v += CoachIdentity.job_score(CoachIdentity.job_context(world), c) / 40.0
 	var home := world.user_club().nation if world.has_user() else c.nation
-	v += 0.08 if c.nation == home else -0.05
+	v += 0.05 if c.nation == home else -0.02
+	v += (Languages.coach_comm(world, c) - 0.6) * 0.15 # falar a língua do vestiário conta
 	var f: Dictionary = world.stats.get("fired", {})
 	if not f.is_empty() and not bool(f.get("res", false)):
 		v -= 0.08 # recém-demitido assusta um pouco
 	return clampf(v, 0.03, 0.95)
+
+
+## Aviso de língua para a vaga ("" se o técnico se comunica bem lá).
+static func language_note(world: GameWorld, c: Club) -> String:
+	var cm := Languages.coach_comm(world, c)
+	if cm >= 0.7:
+		return ""
+	var lg := I18n.t(Languages.name_of(Languages.club_lang(c)))
+	if I18n.lang != "en":
+		lg = lg.to_lower() # em inglês, nome de língua leva maiúscula
+	if cm >= 0.4:
+		return "Seu %s ainda é básico: a diretoria pergunta como vai falar com o grupo." % lg
+	return "Você não fala %s: a diretoria vê isso com reserva." % lg
 
 
 static func fit_label(v: float) -> String:

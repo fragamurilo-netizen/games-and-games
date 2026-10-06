@@ -336,6 +336,7 @@ const PARALLEL_MIN := 12
 ## que leem o mundo e sorteiam com a semente do próprio jogo, rodam em paralelo. O resultado é
 ## idêntico ao de rodar em sequência (conferido em tests: "simulação paralela").
 static func run_entries(world: GameWorld, entries: Array) -> void:
+	Geo.prepare(world) # distâncias prontas antes das threads dos jogos
 	var quick: Array = []
 	for e in entries:
 		if not e["res"].is_empty():
@@ -517,7 +518,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			# O clima volta devagar para o patamar do momento (títulos, finais perdidas, jejum).
 			c.fan_mood = clampf(c.fan_mood + (Aftermath.mood_target(world, c) - c.fan_mood) * 0.03, 0.0, 100.0)
 			# Amigos no time titular se entendem; desafetos atrapalham.
-			c.cohesion = clampf(c.cohesion + Relations.cohesion_push(world, c), 20.0, 100.0)
+			c.cohesion = clampf(c.cohesion + Relations.cohesion_push(world, c) + Languages.cohesion_push(world, c), 20.0, 100.0)
 			TicketOffice.weekly_mood(c) # a torcida sente o preço do ingresso
 		Aftermath.weekly(world)
 		WorldEvents.weekly(world)
@@ -536,6 +537,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		if _weekend_index(s, slot) % 4 == 3:
 			for p: Player in world.players.values():
 				Valuation.update_value(p, world.year)
+			Languages.monthly(world) # cada um aprende um pouco da língua do clube
 		tt = _time("valores", tt)
 	elif state_weekend:
 		# Janeiro a março do calendário de ano civil: os fins de semana são dos estaduais, mas é
@@ -1180,6 +1182,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	if world.has_user():
 		var turnover := YouthManager.season_turnover(world)
 		summary["youth_left"] = turnover["left"]
+		summary["youth_quit"] = turnover.get("quit", [])
 		summary["youth_changes"] = turnover["changes"]
 		summary["youth_cost"] = turnover["cost"]
 		for ch in turnover["changes"]:

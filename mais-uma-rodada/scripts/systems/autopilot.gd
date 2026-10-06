@@ -20,7 +20,7 @@ const MODE_DESC := [
 ]
 
 ## Eventos que pesam na temporada: no modo "Só o importante" a simulação para neles.
-const BIG_EVENTS := ["takeover", "want_leave", "rival_bid", "tapping_up", "youth_bid", "prodigy", "renewal_standoff",
+const BIG_EVENTS := ["takeover", "want_leave", "rival_bid", "tapping_up", "youth_bid", "youth_agent", "prodigy", "renewal_standoff",
 	"chairman", "board_meeting", "board_cut", "sack_rumor", "stadium", "betting", "idol_farewell"]
 
 static var mode := MODE_OFF

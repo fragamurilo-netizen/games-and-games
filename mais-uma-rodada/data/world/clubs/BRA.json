@@ -12,7 +12,7 @@
 			"uf": "RJ",
 			"founded": 1895,
 			"league": "BRA1",
-			"rep": 93,
+			"rep": 89,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#C8102E",
@@ -51,7 +51,7 @@
 			"uf": "SP",
 			"founded": 1914,
 			"league": "BRA1",
-			"rep": 91,
+			"rep": 87,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#006437",
@@ -87,7 +87,7 @@
 			"uf": "SP",
 			"founded": 1910,
 			"league": "BRA1",
-			"rep": 88,
+			"rep": 84,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#FFFFFF",
@@ -123,7 +123,7 @@
 			"uf": "SP",
 			"founded": 1930,
 			"league": "BRA1",
-			"rep": 86,
+			"rep": 82,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#FFFFFF",
@@ -162,7 +162,7 @@
 			"uf": "SP",
 			"founded": 1912,
 			"league": "BRA1",
-			"rep": 80,
+			"rep": 76,
 			"arch": "tradicional_decadente",
 			"colors": [
 				"#FFFFFF",
@@ -197,7 +197,7 @@
 			"uf": "RJ",
 			"founded": 1902,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#7A0F2A",
@@ -233,7 +233,7 @@
 			"uf": "RJ",
 			"founded": 1904,
 			"league": "BRA1",
-			"rep": 85,
+			"rep": 81,
 			"arch": "rico_promovido",
 			"colors": [
 				"#111111",
@@ -265,7 +265,7 @@
 			"uf": "RJ",
 			"founded": 1898,
 			"league": "BRA1",
-			"rep": 82,
+			"rep": 78,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#111111",
@@ -296,7 +296,7 @@
 			"uf": "RS",
 			"founded": 1903,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#0D80BF",
@@ -333,7 +333,7 @@
 			"uf": "RS",
 			"founded": 1909,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#E30613",
@@ -368,7 +368,7 @@
 			"uf": "MG",
 			"founded": 1908,
 			"league": "BRA1",
-			"rep": 85,
+			"rep": 81,
 			"arch": "dinheiro_gestao_ruim",
 			"colors": [
 				"#111111",
@@ -400,7 +400,7 @@
 			"uf": "MG",
 			"founded": 1921,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#1D3F91",
@@ -432,7 +432,7 @@
 			"uf": "BA",
 			"founded": 1931,
 			"league": "BRA1",
-			"rep": 77,
+			"rep": 73,
 			"arch": "rico_promovido",
 			"colors": [
 				"#1B3A8C",
@@ -467,7 +467,7 @@
 			"uf": "BA",
 			"founded": 1899,
 			"league": "BRA1",
-			"rep": 69,
+			"rep": 65,
 			"arch": "tradicional_decadente",
 			"colors": [
 				"#E30613",
@@ -561,7 +561,7 @@
 			"uf": "PR",
 			"founded": 1924,
 			"league": "BRA1",
-			"rep": 75,
+			"rep": 71,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#C8102E",
@@ -592,7 +592,7 @@
 			"uf": "SP",
 			"founded": 1928,
 			"league": "BRA1",
-			"rep": 68,
+			"rep": 64,
 			"arch": "rico_promovido",
 			"colors": [
 				"#FFFFFF",
@@ -652,7 +652,7 @@
 			"uf": "SP",
 			"founded": 1925,
 			"league": "BRA1",
-			"rep": 60,
+			"rep": 56,
 			"arch": "azarao",
 			"colors": [
 				"#FFD100",
@@ -679,7 +679,7 @@
 			"uf": "PR",
 			"founded": 1909,
 			"league": "BRA1",
-			"rep": 66,
+			"rep": 62,
 			"arch": "tradicional_decadente",
 			"colors": [
 				"#FFFFFF",
@@ -804,7 +804,7 @@
 			"uf": "SC",
 			"founded": 1973,
 			"league": "BRA1",
-			"rep": 57,
+			"rep": 53,
 			"arch": "cidade_pequena",
 			"colors": [
 				"#006437",
@@ -1041,7 +1041,7 @@
 			"uf": "PA",
 			"founded": 1905,
 			"league": "BRA1",
-			"rep": 55,
+			"rep": 51,
 			"arch": "torcida_impaciente",
 			"colors": [
 				"#0E2A5C",

@@ -44,7 +44,7 @@
 			"city": "Manchester",
 			"founded": 1878,
 			"league": "ENG1",
-			"rep": 87,
+			"rep": 91,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#DA020E",
@@ -182,7 +182,7 @@
 			"city": "London",
 			"founded": 1882,
 			"league": "ENG1",
-			"rep": 86,
+			"rep": 85,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#FFFFFF",
@@ -215,7 +215,7 @@
 			"city": "London",
 			"founded": 1905,
 			"league": "ENG1",
-			"rep": 90,
+			"rep": 89,
 			"arch": "dinheiro_gestao_ruim",
 			"colors": [
 				"#034694",
@@ -254,7 +254,7 @@
 			"city": "Newcastle",
 			"founded": 1892,
 			"league": "ENG1",
-			"rep": 84,
+			"rep": 85,
 			"arch": "rico_promovido",
 			"colors": [
 				"#111111",

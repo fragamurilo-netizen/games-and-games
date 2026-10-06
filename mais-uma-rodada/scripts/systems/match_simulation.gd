@@ -222,6 +222,8 @@ func setup(world: GameWorld, home: Club, away: Club, home_sheet: TeamSheet, away
 		_type_w[CH_LONG] = BASE_TYPE_W[CH_LONG] * float(wx_fx["long"])
 		_type_w[CH_CROSS] = BASE_TYPE_W[CH_CROSS] * float(wx_fx["cross"])
 	crowd *= float(cul["home"])
+	if crowd > 0.0:
+		crowd *= Geo.travel_factor(world, teams[0].club, teams[1].club) # viagem longa pesa no visitante
 	var adv := float(DatabaseManager.tactics().get("home_advantage", 0.05))
 	teams[0].home_f = 1.0 + adv * crowd * 0.5
 	teams[1].home_f = 1.0

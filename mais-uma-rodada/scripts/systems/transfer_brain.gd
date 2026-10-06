@@ -166,7 +166,7 @@ static func profile(world: GameWorld, c: Club) -> Dictionary:
 	for p: Player in world.squad(c):
 		top_wage = maxi(top_wage, p.wage)
 	return {"rec": rec, "ages": ClubDNA.ages(c), "pot_w": pot_w, "top_wage": top_wage,
-		"lang": String(DatabaseManager.nation(c.nation).get("lang", "")), "mism": float(arch.get("mismanagement", 0.0)) >= 0.5}
+		"lang": Languages.club_lang(c), "mism": float(arch.get("mismanagement", 0.0)) >= 0.5}
 
 
 # ---------------------------------------------------------------------------
@@ -294,8 +294,8 @@ static func targets(world: GameWorld, c: Club, need: Dictionary, index: Dictiona
 		s -= (1.0 - ow) * 3.0
 		if p.nationality == c.nation:
 			s += 1.0
-		elif String(DatabaseManager.nation(p.nationality).get("lang", "?")) == String(prof["lang"]):
-			s += 0.8 # mesma língua: adapta rápido
+		elif Languages.level(p, String(prof["lang"])) >= 60.0:
+			s += 0.8 # fala a língua: adapta rápido
 		if kn < 50.0 and prof["rec"] != "moneyball":
 			s -= 0.8 # pouco visto: risco
 		if prof["rec"] == "moneyball":

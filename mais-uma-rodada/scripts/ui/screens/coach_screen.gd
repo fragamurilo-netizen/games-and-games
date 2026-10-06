@@ -84,6 +84,8 @@ func _hero(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	nrow.add_child(UIKit.flag(String(co["nat"]), 34))
 	nrow.add_child(UIKit.label("%s · %d anos" % [DatabaseManager.nation_name(String(co["nat"])), w.year - int(co.get("by", w.year - 50))], "Small", true))
 	col.add_child(nrow)
+	if club != null and w.is_user_club(club.id) and not bool(co.get("int", false)):
+		col.add_child(UIKit.label(Languages.coach_text(w), "Small", true))
 	var pills := UIKit.flow(6)
 	pills.add_child(UIKit.pill(People.style_name(String(co["st"])).to_upper(), UIColors.ACCENT, 16))
 	pills.add_child(UIKit.pill(CoachStories.temper_name(w, co).to_upper(), UIColors.BLUE, 16))
