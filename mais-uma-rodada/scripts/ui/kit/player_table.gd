@@ -31,14 +31,16 @@ static func make(w: GameWorld, players: Array, mode: String, state: Dictionary, 
 		return Color(0, 0, 0, 0)
 	t.row_pressed.connect(func(p: Variant): on_tap.call(p))
 	var cols := columns(w, mode, view, wide)
-	cols.append_array(extra)
+	# Colunas próprias da tela (comparação, salário pedido, treino) logo depois das da visão:
+	# são o motivo de a tela existir, não podem ficar no fim da rolagem.
+	var at := mini(cols.size(), 1 + _view_keys(mode, view, wide).size())
+	for i in extra.size():
+		cols.insert(at + i, extra[i])
 	return t.setup(cols, players, state)
 
 
-static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = false) -> Array:
-	var y := w.year
-	var exact := mode == "squad" or mode == "youth"
-	var c := _all(w, mode, exact, y)
+## Colunas da visão, as primeiras depois do nome.
+static func _view_keys(mode: String, view: String, wide: bool) -> Array:
 	var keys: Array = []
 	match view:
 		"geral":
@@ -61,18 +63,34 @@ static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = 
 				keys = ["ovr", "age", "price", "club", "form", "value"] if wide else ["ovr", "age", "price"]
 			else:
 				keys = ["ovr", "age", "cond", "morale", "form", "apps", "goals", "assists", "contract", "wage", "value"]
-	# Com espaço sobrando (tablet em pé, desktop), a visão ganha colunas em vez de vazio.
-	if wide and view != "":
-		var more: Dictionary = {"geral": ["age", "form", "apps", "contract"], "forma": ["age", "cond", "morale"],
-			"temporada": ["age", "ovr"], "contrato": ["age", "ovr", "morale"]}
-		for k in more.get(view, []):
-			if not k in keys:
-				keys.append(k)
+	return keys
+
+
+static func columns(w: GameWorld, mode: String, view: String = "", wide: bool = false) -> Array:
+	var y := w.year
+	var exact := mode == "squad" or mode == "youth"
+	var c := _all(w, mode, exact, y)
+	var keys: Array = _view_keys(mode, view, wide)
+	# A visão escolhe as primeiras colunas; as outras vêm depois e aparecem passando o dedo
+	# para o lado (o nome fica preso). Assim o celular mostra tudo sem apertar a linha.
+	for k in REST.get(mode, REST["squad"]):
+		if not k in keys:
+			keys.append(k)
 	var out: Array = [c["pos"]]
 	for k in keys:
 		if c.has(k):
 			out.append(c[k])
 	return out
+
+
+## Colunas que seguem as da visão, na ordem em que o dedo as revela.
+const REST := {
+	"squad": ["age", "form", "apps", "goals", "assists", "mins", "rs", "shots", "kp", "tk", "pp", "cards", "cond", "morale", "contract", "wage", "value"],
+	"youth": ["age", "pot", "apps", "goals", "assists", "form", "cond", "morale", "contract", "value"],
+	"club": ["age", "form", "apps", "goals", "assists", "mins", "contract", "value"],
+	"national": ["age", "form", "apps", "goals", "assists", "rs", "value"],
+	"market": ["age", "price", "club", "form", "apps", "goals", "assists", "rs", "contract", "value"],
+}
 
 
 static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
@@ -133,6 +151,34 @@ static func _all(w: GameWorld, mode: String, exact: bool, y: int) -> Dictionary:
 		"text": func(p: Player) -> String: return str(int(p.season_totals()[2])),
 		"sort": func(p: Player) -> int: return int(p.season_totals()[2]),
 		"color": func(p: Player) -> Color: return UIColors.TEXT if int(p.season_totals()[2]) > 0 else UIColors.DIM}
+	c["mins"] = {"key": "mins", "title": "Min", "w": 64, "tip": "Minutos na liga",
+		"text": func(p: Player) -> String: return str(p.stats[Player.S_MINUTES]),
+		"sort": func(p: Player) -> int: return p.stats[Player.S_MINUTES],
+		"color": func(_p: Player) -> Color: return UIColors.MUTED}
+	c["rs"] = {"key": "rs", "title": "RS", "w": 56, "tip": "Nota RodadaScore na liga",
+		"text": func(p: Player) -> String: return Fmt.rating(LeagueStats.player_rating(p)) if p.stats[Player.S_APPS] > 0 else "–",
+		"sort": func(p: Player) -> float: return LeagueStats.player_rating(p),
+		"color": func(p: Player) -> Color: return Fmt.match_rating_color(LeagueStats.player_rating(p)) if p.stats[Player.S_APPS] > 0 else UIColors.DIM}
+	c["shots"] = {"key": "shots", "title": "Fin", "w": 48, "tip": "Finalizações na liga",
+		"text": func(p: Player) -> String: return str(p.stats[Player.S_SHOTS]),
+		"sort": func(p: Player) -> int: return p.stats[Player.S_SHOTS],
+		"color": func(_p: Player) -> Color: return UIColors.MUTED}
+	c["kp"] = {"key": "kp", "title": "PD", "w": 48, "tip": "Passes decisivos na liga",
+		"text": func(p: Player) -> String: return str(p.stats[Player.S_KEY_PASSES]),
+		"sort": func(p: Player) -> int: return p.stats[Player.S_KEY_PASSES],
+		"color": func(_p: Player) -> Color: return UIColors.MUTED}
+	c["tk"] = {"key": "tk", "title": "Des", "w": 52, "tip": "Desarmes na liga",
+		"text": func(p: Player) -> String: return str(p.stats[Player.S_TACKLES]),
+		"sort": func(p: Player) -> int: return p.stats[Player.S_TACKLES],
+		"color": func(_p: Player) -> Color: return UIColors.MUTED}
+	c["pp"] = {"key": "pp", "title": "Passe", "w": 64, "tip": "% de passes certos na liga",
+		"text": func(p: Player) -> String: return ("%d%%" % int(round(p.pass_pct()))) if p.stats[Player.S_APPS] > 0 else "–",
+		"sort": func(p: Player) -> float: return p.pass_pct(),
+		"color": func(_p: Player) -> Color: return UIColors.MUTED}
+	c["cards"] = {"key": "cards", "title": "Cartões", "w": 76, "tip": "Amarelos e vermelhos na liga",
+		"text": func(p: Player) -> String: return "%d/%d" % [p.stats[Player.S_YELLOWS], p.stats[Player.S_REDS]],
+		"sort": func(p: Player) -> int: return p.stats[Player.S_YELLOWS] + p.stats[Player.S_REDS] * 3,
+		"color": func(p: Player) -> Color: return UIColors.RED if p.stats[Player.S_REDS] > 0 else UIColors.MUTED}
 	c["contract"] = {"key": "contract", "title": "Até", "w": 64, "first": "asc", "tip": "Fim do contrato",
 		"text": func(p: Player) -> String: return str(p.contract_end) if p.club_id >= 0 else "–",
 		"sort": func(p: Player) -> int: return p.contract_end,

@@ -634,6 +634,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	if is_league:
+		LeagueStats.record(world.league(f.comp), f, res, detail)
 	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
 	var stakes := TieStakes.of(world, f) # mata-mata decidido: vale o agregado e a taça
 	for side in 2:

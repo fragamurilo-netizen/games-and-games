@@ -534,6 +534,10 @@ func _numbers(c: VBoxContainer, w: GameWorld) -> void:
 	var cats := [[Player.S_SHOTS, "Finalizações"], [Player.S_KEY_PASSES, "Passes decisivos"], [Player.S_DRIBBLES, "Dribles certos"],
 		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_AERIAL, "Duelos aéreos"],
 		[Player.S_SAVES, "Defesas"], [Player.S_CLEAN, "Jogos sem sofrer gol"], [Player.S_MOTM, "Craque do jogo"], [Player.S_XG, "xG"]]
+	# A página completa de números da liga (times, jogadores, seleção): RodadaScore.
+	var lid := _league_id
+	var go := UIKit.menu_row("chart", "Estatísticas completas", "Times, jogadores e seleção da temporada · RodadaScore", func(): UIManager.push("league_stats", {"league": lid}))
+	c.add_child(UIKit.menu_group([go]))
 	var boards: Array = []
 	for cat in cats:
 		var stat: int = cat[0]

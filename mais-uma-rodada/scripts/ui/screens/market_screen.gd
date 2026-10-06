@@ -403,7 +403,7 @@ func _fill_search(results: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var players: Array = []
 	for i in shown:
 		players.append(list[i][0])
-	var tbl := PlayerTable.make(w, players, "market", _table_state, _open, _market_cols(w, club, weakest) if _wide_table() else [], "", _wide_table())
+	var tbl := PlayerTable.make(w, players, "market", _table_state, _open, _market_cols(w, club, weakest), "", _wide_table())
 	tbl.sort_changed.connect(func(_k: String, _d: bool): _fill_search.call_deferred(results, w, club))
 	results.add_child(tbl)
 	_default_brief(players)
@@ -1037,7 +1037,7 @@ func _pre_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	var players: Array = []
 	for e in list.slice(0, MAX_ROWS):
 		players.append(e[0])
-	c.add_child(PlayerTable.make(w, players, "market", _pre_state, _open, _market_cols(w, club, weakest) if _wide_table() else [], "", _wide_table()))
+	c.add_child(PlayerTable.make(w, players, "market", _pre_state, _open, _market_cols(w, club, weakest), "", _wide_table()))
 	_default_brief(players)
 
 
@@ -1060,6 +1060,6 @@ func _suggest_card(w: GameWorld, club: Club) -> Control:
 			players.append(p)
 	if players.is_empty():
 		return null
-	v.add_child(PlayerTable.make(w, players, "market", {}, _open, _market_cols(w, club, weakest) if _wide_table() else [], "", _wide_table()))
+	v.add_child(PlayerTable.make(w, players, "market", {}, _open, _market_cols(w, club, weakest), "", _wide_table()))
 	v.add_child(UIKit.gap(12))
 	return v
