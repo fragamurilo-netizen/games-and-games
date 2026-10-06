@@ -117,6 +117,7 @@ Ramo `claude/historico-inicio-carreira`, feito sobre `claude/bolinhas-narracao-5
 - O passado é montado do presente para trás. O empréstimo podia cair no primeiro ano, e 5,6% dos jogadores começavam a carreira emprestados. Também podia vir depois de um clube que não era o dono do passe.
 - Agora cada empréstimo guarda o clube dono (`plan[ano][6]`). O ano antes do empréstimo é sempre no dono, seja na base ou numa contratação. Se o primeiro ano era empréstimo, ele vira a estreia no dono. Empréstimo só a partir dos 18 anos.
 - `tools/squad_report.gd` mostra a parte dos jogadores que começam emprestados (agora 0%) e a dos empréstimos entre duas passagens pelo mesmo clube (99,5%).
+- **Falta.** Desta parte, nada. Para seguir, junte este ramo em `claude/bolinhas-narracao-5wp2pg` quando a conversa das negociações entre clubes terminar lá; os dois mexem em arquivos diferentes. O APK mais recente com este trabalho é `builds/MaisUmaRodada-1.0.0-historico-inicio-2026-10-06-debug.apk`.
 
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
