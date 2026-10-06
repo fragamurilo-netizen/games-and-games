@@ -1,4 +1,4 @@
-# Continuar daqui (atualizado em 05/10/2026)
+# Continuar daqui (atualizado em 06/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
@@ -19,6 +19,30 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - **Narração presa ao campo.** O PitchMotion põe marcos na fila (`mark`, `on_mark`): começo da jogada, momento decisivo (chute chegou, apito, bandeira, passe recebido) e apito do pênalti. A tela segura cada linha até o marco dela (`_gate_for`; limite de 7 s). No normal tudo é sincronizado e o minuto espera a jogada; no rápido só chances, gols e faltas que valem algo; no turbo e em "Só narração" a narração corre solta.
 - **Corredor da chance.** A simulação agora grava `ln` (0 esquerda, 1 meio, 2 direita) nas chances, o mesmo corredor que ela usou no confronto pelos lados; cruzamentos e jogadas saem desse lado. Só apresentação: placares não mudam (teste "partida ao vivo = partida instantânea" ok).
 - **Postura tática no desenho** (`PitchMotion.set_tactics`): linha alta/baixa, largura, pressão e mentalidade mudam o bloco sem bola e a altura do time com bola.
+
+### Escudos e logos de competição (06/10, ramo `claude/escudos-caprichados-i5l8y5`)
+
+Pedido do dono em 06/10: "Capriche bem mais nos escudos e logos de ligas". Parte de `claude/bolinhas-narracao-5wp2pg` e só mexe no desenho de escudos e logos (`scripts/ui/components/crest_view.gd`, `crest_art.gd`, `data/world/identity.json`, `data/world/clubs/*.json`, `tools/crest_sheet.gd`, `tools/crest_gen/`).
+
+Feito:
+- **Logos das 152 competições** (54 ligas, 19 continentais/estaduais, 71 copas nacionais, da liga e supercopas, 9 torneios de seleções; antes 82 tinham logo e o resto era um escudo dourado genérico). Cada logo é uma marca chapada (`"logo": true`): quadrado arredondado (`tile`), disco (`round`) ou escudo moderno (`badge`), com taça, bola em espiral, jogador chutando, leão, águia etc. Chaves novas do CrestView: `flag` (faixa com as cores da bandeira no alto), `num` (selo com o numeral da divisão), `wordmark` (nome embaixo, só com 72 px ou mais), `ring_c` (aro fino), `sym_top` (símbolo pequeno em cima, ex.: coroa do leão da Premier), `accent`.
+- **Desenhos novos no CrestArt:** `trophy`, `trophy_ears`, `trophy_tall`, `trophy_globe`, `trophy_plate`, `trophy_lid` (com sombra `_d` e reflexo `_h`), `ball_swirl` (recortes `_c` na cor do fundo), `player_kick`, `globe`; `starball` é desenhado no código.
+- **Escudos:** voltou o que se perdeu na junção de 27/09 (`2742294`): placa atrás do monograma em campo listrado (`plate`), filete interno, contorno escuro por fora, `canton`, `field: pale_cross`, `tc`, `hoops:2` com uma faixa só. Saíram o brilho e o degradê (DESIGN.md: sem brilho).
+- Os louros agora ficam por baixo da faixa com o nome (antes as folhas comiam as letras).
+
+Falta (nesta ordem):
+1. Devolver os escudos de 27/09 que a junção trocou (98 clubes; lista: diferença entre `d3b4bed` e o ramo, menos os 13 refeitos depois: Grêmio, Flamengo, São Paulo, Internacional, Athletico, Barcelona, Liverpool, Chelsea, Tottenham, Man United, Ajax, Dortmund e Gladbach).
+2. Mais capricho nos escudos de monograma genérico (muitos clubes menores só têm letras).
+3. Folha antes/depois em `/mnt/project-files/escudos-caprichados/` e APK de teste em `builds/`.
+4. PR para o dono olhar (perguntar antes de juntar).
+
+Como conferir:
+```
+xvfb-run -a godot --path . --resolution 1420x1470 --script res://tools/crest_sheet.gd -- --logos --size=120 --cols=8 --h=1460 --out=/tmp/logos.png
+xvfb-run -a godot --path . --resolution 1460x1480 --script res://tools/crest_sheet.gd -- --size=78 --cols=16 --h=1470 --offset=0 --out=/tmp/clubes.png
+python3 tools/crest_gen/logos.py .          # refaz os logos em identity.json
+python3 tools/crest_gen/logo_art.py scripts/ui/components/crest_art.gd   # refaz as taças/bola/jogador
+```
 
 ### Posições da escalação (05/10)
 
