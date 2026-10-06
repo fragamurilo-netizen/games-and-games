@@ -16,6 +16,7 @@ const RANK_SHOW := 50
 var _xi_pick := "w"
 ## Visão da classificação: geral, casa, fora ou momento (TableRows.VIEW_*).
 var _view := TableRows.VIEW_ALL
+const PROMEDIO_ROWS := 6
 ## Cores da competição aberta: pintam o fundo da tela e a faixa do cabeçalho.
 var _tint: Array = []
 
@@ -744,11 +745,59 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		card.add_child(TableRows.table_row(w, t[cid], cid, i + 1, compact, CompetitionManager.zone_color(zone), _view, move,
 			func(): _club_sheet(w, lg, cid), wide))
 	c.add_child(UIKit.card_panel(card))
+	var pm := _promedios_card(w, league)
+	if pm != null:
+		c.add_child(pm)
 	c.add_child(TableRows.legend(league))
 	var fdesc := LeagueFormat.describe(league)
 	if fdesc != "":
 		c.add_child(_format_card(league.id, fdesc))
 	_highlights(c, w, league)
+
+
+## Promedios (Argentina): a parte de baixo da tabela de pontos por jogo das últimas temporadas.
+## O último cai junto com o lanterna da tabela anual.
+func _promedios_card(w: GameWorld, league: League) -> Control:
+	if not LeagueFormat.uses_promedios(league):
+		return null
+	var pr := LeagueFormat.promedios(w, league)
+	if pr.is_empty() or pr.all(func(e): return int(e["pj"]) == 0):
+		return null
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Promedios"))
+	var from := maxi(0, pr.size() - PROMEDIO_ROWS)
+	var uid := w.user_club_id
+	var upos := -1
+	for i in pr.size():
+		if int(pr[i]["id"]) == uid:
+			upos = i
+	for i in range(from, pr.size()):
+		card.add_child(_promedio_row(w, pr[i], i + 1, i == pr.size() - 1))
+	if upos >= 0 and upos < from:
+		card.add_child(_zone_line())
+		card.add_child(_promedio_row(w, pr[upos], upos + 1, false))
+	return UIKit.card_panel(card)
+
+
+func _promedio_row(w: GameWorld, e: Dictionary, pos: int, down: bool) -> Control:
+	var cl := w.club(int(e["id"]))
+	var row := UIKit.hbox(8)
+	var pl := UIKit.label("%d" % pos, "Stat")
+	pl.custom_minimum_size.x = 28
+	row.add_child(pl)
+	row.add_child(UIKit.crest(cl, 24))
+	var nl := UIKit.label(cl.short_name, "H3" if w.is_user_club(cl.id) else "")
+	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if w.is_user_club(cl.id):
+		nl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	row.add_child(nl)
+	row.add_child(UIKit.colored("%d/%d" % [int(e["pts"]), int(e["pj"])], UIColors.MUTED, "Small"))
+	var al := UIKit.label(Fmt._decimal(float(e["avg"]), 3), "Stat")
+	if down:
+		al.add_theme_color_override(&"font_color", UIColors.RED)
+	row.add_child(al)
+	return row
 
 
 func _zone_line() -> Control:

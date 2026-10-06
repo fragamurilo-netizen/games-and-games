@@ -24,8 +24,9 @@ const CAT_NAMES := {
 	"investimentos": "Investimentos", "bonus_patrocinio": "Bônus de patrocínio", "aporte": "Aporte do novo dono",
 	"renegociacao": "Dívida renegociada", "saida_dono": "Dívida deixada pelo dono", "impostos": "Impostos",
 	"emprestimo": "Empréstimo bancário", "amortizacao": "Amortização da dívida",
+	"solidariedade": "Solidariedade da FIFA",
 }
-const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "loja", "premiacao", "vendas", "aporte", "renegociacao", "emprestimo"]
+const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "loja", "premiacao", "vendas", "solidariedade", "aporte", "renegociacao", "emprestimo"]
 const EXPENSE_CATS: Array[String] = ["salarios", "compras", "manutencao", "juros", "amortizacao", "rescisoes", "luvas", "investimentos", "saida_dono", "impostos"]
 ## Movimentos de dívida e de dono não são lucro nem prejuízo: ficam fora do imposto.
 const NOT_TAXED: Array[String] = ["emprestimo", "amortizacao", "aporte", "renegociacao", "saida_dono"]

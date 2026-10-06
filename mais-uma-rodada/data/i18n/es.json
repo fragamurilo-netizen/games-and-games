@@ -10483,5 +10483,22 @@
 	"%d vermelhos": "%d rojas",
 	"%d anos · %s no clube": "%d años · %s en el club",
 	"%d temporada": "%d temporada",
-	"%d temporadas": "%d temporadas"
+	"%d temporadas": "%d temporadas",
+	"Menor de 18 não pode se mudar de país (regra da FIFA).": "Un menor de 18 no puede cambiar de país (norma de la FIFA).",
+	"Pela regra da FIFA ele só pode se mudar de país aos 18: fica no %s até o fim de %d e se apresenta ao %s em %d.": "Por norma de la FIFA solo puede cambiar de país a los 18: sigue en el %s hasta el final de %d y se incorpora al %s en %d.",
+	"%s é do %s! %s": "¡%s es del %s! %s",
+	"%s foi vendido ao %s por %s. %s": "%s fue vendido al %s por %s. %s",
+	"%s aceitou a proposta%s!%s": "¡%s aceptó la oferta%s!%s",
+	"O %s acertou a venda de %s, de %d anos, ao %s por %s. %s": "El %s cerró la venta de %s, de %d años, al %s por %s. %s",
+	"Solidariedade pela venda de %s": "Solidaridad por la venta de %s",
+	"O %s recebeu %s do mecanismo de solidariedade da FIFA pela transferência de %s do %s para o %s. É a parte do clube por ter formado o jogador.": "El %s recibió %s del mecanismo de solidaridad de la FIFA por el traspaso de %s del %s al %s. Es la parte del club por haber formado al jugador.",
+	"Solidariedade da FIFA": "Solidaridad FIFA",
+	"Vendido ao": "Vendido al",
+	"%s, chega em %d": "%s, llega en %d",
+	"Vendido ao %s": "Vendido al %s",
+	"Vendido": "Vendido",
+	"comprado do %s, chega em %d": "comprado al %s, llega en %d",
+	"vendido ao %s, sai em %d": "vendido al %s, se va en %d",
+	"Promedios": "Promedios",
+	"Caem o pior promedio (pontos por jogo nas últimas %d temporadas na elite) e o último da tabela anual.": "Descienden el peor promedio (puntos por partido en las últimas %d temporadas en primera) y el último de la tabla anual."
 }

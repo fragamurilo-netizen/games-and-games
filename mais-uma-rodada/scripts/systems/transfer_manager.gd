@@ -197,7 +197,8 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	var with_swap := "" if swaps.is_empty() else " (com a troca)"
 	if value >= ask:
 		n["lb"] = 0
-		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!" % [seller.short_name, with_swap]}
+		var later := (" " + TransferRules.hold_note(world, p, user, seller)) if TransferRules.minor_blocked(world, p, user) else ""
+		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!%s" % [seller.short_name, with_swap, later]}
 	if value < ask * 0.6:
 		n["lb"] = int(n.get("lb", 0)) + 1
 		if int(n["lb"]) >= 2:
@@ -411,6 +412,8 @@ static func loan_in_terms(world: GameWorld, p: Player, terms: Dictionary = {}) -
 		return {"ok": false, "msg": ob}
 	if seller.is_rival(user.id):
 		return {"ok": false, "msg": "%s não empresta jogadores para o rival." % seller.short_name}
+	if TransferRules.minor_blocked(world, p, user):
+		return {"ok": false, "msg": "Menor de 18 não pode se mudar de país (regra da FIFA)."}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio."}
 	if interest(world, p, user) < 0.25:
@@ -473,7 +476,7 @@ static func loan_out(world: GameWorld, p: Player, kind: String = "") -> Dictiona
 		if c.id == user.id or c.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 			continue
 		var level := PlayerGenerator.club_level(c)
-		if p.ovr_f < level - 3.0 or p.ovr_f > level + 10.0:
+		if p.ovr_f < level - 3.0 or p.ovr_f > level + 10.0 or TransferRules.minor_blocked(world, p, c):
 			continue
 		var v := -absf(p.ovr_f - level - 2.0) + (4.0 if c.nation == user.nation else 0.0) + world.rng.randf_range(0.0, 3.0)
 		if v > best_v:
@@ -557,8 +560,10 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	Rivalry.on_transfer(world, p, seller, buyer)
 	if seller != null:
 		seller.player_ids.erase(p.id)
-		seller.add_ledger("vendas", fee)
-		FinanceManager.on_sale(world, seller, fee)
+		# Venda internacional: 5% ficam com os clubes que formaram o jogador (TransferRules).
+		var net := fee - TransferRules.pay_solidarity(world, p, seller, buyer, fee)
+		seller.add_ledger("vendas", net)
+		FinanceManager.on_sale(world, seller, net)
 		_close_spell(world, p)
 		# Percentual de revenda para um ex-clube
 		var so_club := world.club(int(p.clauses.get("so", -1)))
@@ -664,6 +669,8 @@ static func user_sign_free(world: GameWorld, p: Player, wage: int, years: int, d
 	var rule := policy_block(world, user, p)
 	if rule != "":
 		return {"ok": false, "msg": rule}
+	if TransferRules.minor_blocked(world, p, user):
+		return {"ok": false, "msg": "Menor de 18 não pode se mudar de país (regra da FIFA)."}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio (máximo %d)." % int(DatabaseManager.squad_rules()["max_players"])}
 	var r := user_terms(world, p, wage, years, deal)
@@ -690,8 +697,12 @@ static func user_sign(world: GameWorld, p: Player, fee: int, wage: int, years: i
 		return {"ok": false, "msg": r["msg"], "wage": r.get("wage", 0), "result": r["result"]}
 	var seller_id := p.club_id
 	var seller := world.club(seller_id)
+	var minor := TransferRules.minor_blocked(world, p, user)
 	complete_transfer(world, p, user, fee, wage, years)
 	apply_deal(world, p, user, seller_id, fee, deal)
+	if minor:
+		TransferRules.hold_until_18(world, p, user, seller)
+		return {"ok": true, "msg": "%s é do %s! %s" % [p.display_name(), user.short_name, TransferRules.hold_note(world, p, user, seller)]}
 	var names: Array = []
 	for sp: Player in swaps:
 		var sw := maxi(sp.wage, Valuation.wage_demand(sp, seller, world.year))
@@ -790,8 +801,13 @@ static func respond_offer(world: GameWorld, o: TransferOffer, action: String, co
 				return "A janela está fechada."
 			o.status = TransferOffer.ACCEPTED
 			var wage := Valuation.wage_demand(p, buyer, world.year)
+			var seller := world.club(p.club_id)
+			var minor := TransferRules.minor_blocked(world, p, buyer)
 			complete_transfer(world, p, buyer, o.fee, wage, preferred_years(world, p))
 			DealTerms.on_offer_accepted(world, o, p, buyer)
+			if minor:
+				TransferRules.hold_until_18(world, p, buyer, seller)
+				return "%s foi vendido ao %s por %s. %s" % [p.display_name(), buyer.short_name, Fmt.money(o.fee), TransferRules.hold_note(world, p, buyer, seller)]
 			return "%s foi vendido ao %s por %s." % [p.display_name(), buyer.short_name, Fmt.money(o.fee)]
 		"so", "bb":
 			return DealTerms.request_clause(world, o, action)
@@ -844,6 +860,7 @@ static func _build_index(world: GameWorld) -> Dictionary:
 	for _f in FAMILIES:
 		band.append({})
 	var nat := {}
+	var young := {}
 	for p: Player in world.players.values():
 		if p.retiring or not p.loan.is_empty():
 			continue
@@ -859,7 +876,12 @@ static func _build_index(world: GameWorld) -> Dictionary:
 				arr.append([])
 			nat[n] = arr
 		nat[n][f].append(p)
-	return {"band": band, "nat": nat}
+		# Joias (até 20 anos, potencial alto): o garimpo dos clubes europeus na América do Sul.
+		if p.club_id >= 0 and p.potential >= 72 and p.age(world.year) <= 20:
+			if not young.has(n):
+				young[n] = []
+			young[n].append(p)
+	return {"band": band, "nat": nat, "young": young}
 
 
 ## Família de cada posição (índice em FAMILIES), na ordem de Pos: GK, RB, CB, LB, DM, CM, AM, RM,
@@ -1116,6 +1138,8 @@ static func precontract_block(world: GameWorld, p: Player, c: Club) -> String:
 		return "Ele já assinou pré-contrato."
 	if not p.loan.is_empty() or p.retiring:
 		return "Ele não pode assinar agora."
+	if TransferRules.minor_blocked(world, p, c):
+		return "Menor de 18 não pode se mudar de país (regra da FIFA)."
 	return ""
 
 
@@ -1165,7 +1189,7 @@ static func ai_precontracts(world: GameWorld) -> void:
 			continue
 		var cur := world.club(p.club_id)
 		var suitor := MarketAI.realistic_suitor(world, p, maxf(20.0, cur.reputation - 10.0) if cur != null else 20.0, rng)
-		if suitor == null or ClubEvents.banned(world, suitor):
+		if suitor == null or ClubEvents.banned(world, suitor) or TransferRules.minor_blocked(world, p, suitor):
 			continue
 		_register_pre(world, p, suitor, wage_ask(world, p, suitor), preferred_years(world, p), {})
 

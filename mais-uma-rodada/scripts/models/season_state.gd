@@ -46,6 +46,19 @@ func is_weekend(slot: int) -> bool:
 	return slot_type(slot) == "W"
 
 
+## Fim de semana de estadual (calendário de ano civil, "E3@" no modelo): não é rodada de liga, mas
+## o mercado e o departamento médico andam como em qualquer semana. Saves antigos não têm a marca
+## "we": vale o dia da semana da data.
+func is_state_weekend(slot: int) -> bool:
+	if not slot_type(slot).begins_with("E"):
+		return false
+	var e: Dictionary = calendar[slot]
+	if e.has("we"):
+		return bool(e["we"])
+	var jan1 := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1})
+	return int(Time.get_datetime_dict_from_unix_time(jan1 + int(e.get("d", 0)) * 86400)["weekday"]) == 6
+
+
 ## Janelas e aposentadorias de saves com o calendário antigo (sem as marcas "win"/"ret").
 const LEGACY_WINDOWS: Array = [[0, 5], [32, 36]]
 const LEGACY_RETIRE := 48
