@@ -20,6 +20,13 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - **Corredor da chance.** A simulação agora grava `ln` (0 esquerda, 1 meio, 2 direita) nas chances, o mesmo corredor que ela usou no confronto pelos lados; cruzamentos e jogadas saem desse lado. Só apresentação: placares não mudam (teste "partida ao vivo = partida instantânea" ok).
 - **Postura tática no desenho** (`PitchMotion.set_tactics`): linha alta/baixa, largura, pressão e mentalidade mudam o bloco sem bola e a altura do time com bola.
 
+### Cores no campinho, negociações e cabelos (06/10, mesmo ramo)
+
+- APK: `builds/MaisUmaRodada-1.0.0-cabelos-negociacoes-2026-10-06-debug.apk`.
+- **Cores**: `match_screen._team_colors` usa a cor que mais aparece no uniforme (`_dot_colors`) com anel de contraste; visitante escolhe o uniforme mais diferente (ΔE mínimo `DOT_MIN_DE`), goleiros por `_gk_color`.
+- **Negociações** (`transfer_manager.gd`): preço pedido depende do tamanho de quem compra; multa rescisória paga à vista leva o jogador (perfil mostra a multa); jogador que quer sair barateia; clube honra a própria contraproposta na mesma janela e não sobe o valor; termos pessoais sem sorteio repetido.
+- **Cabelos**: depois dos 28, quem tem entradas/coroa costuma passar máquina ou assumir a careca (sorteio à parte, `"calvo"`); careca rara abaixo dos 22. Conferir com `tools/hair_stats.gd` e `tools/squad_faces.gd`.
+
 ### Posições da escalação (05/10)
 
 - Mover posições não empilha mais ninguém. Antes, virar o centroavante em ponta-direita punha o jogador exatamente em cima do ponta que já existia. Agora `DatabaseManager._spread_custom` espaça as posições repetidas na mesma linha e afasta as vagas que se encostam.
