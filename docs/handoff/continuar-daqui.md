@@ -27,6 +27,13 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - **Negociações** (`transfer_manager.gd`): preço pedido depende do tamanho de quem compra; multa rescisória paga à vista leva o jogador (perfil mostra a multa); jogador que quer sair barateia; clube honra a própria contraproposta na mesma janela e não sobe o valor; termos pessoais sem sorteio repetido.
 - **Cabelos**: depois dos 28, quem tem entradas/coroa costuma passar máquina ou assumir a careca (sorteio à parte, `"calvo"`); careca rara abaixo dos 22. Conferir com `tools/hair_stats.gd` e `tools/squad_faces.gd`.
 
+### Mesa de negociação (06/10, mesmo ramo; mercado sul-americano juntado)
+
+- APK: `builds/MaisUmaRodada-1.0.0-mesa-negociacao-2026-10-06-debug.apk`. Ramo `claude/mercado-sulamericano-1ipxqh` juntado aqui.
+- Compra vira reunião com o diretor do vendedor (`Negotiation._render_talk`): cada proposta tem resposta na hora, em voz direta (`TransferManager._director_line`), e ele cede um pouco a cada rodada até um piso (90% do pedido; 86% se precisa vender).
+- Paciência por reunião (`meeting_patience`, 3 a 5) no lugar de 3 propostas por dia; proposta ofensiva gasta em dobro. Contraproposta vale até o fim da janela, mesmo com a reunião encerrada.
+- "Levantar da mesa" (`walk_away`): clube que precisa vender (ou com jogador forçando saída) chama de volta uma vez por janela, com valor menor.
+
 ### Posições da escalação (05/10)
 
 - Mover posições não empilha mais ninguém. Antes, virar o centroavante em ponta-direita punha o jogador exatamente em cima do ponta que já existia. Agora `DatabaseManager._spread_custom` espaça as posições repetidas na mesma linha e afasta as vagas que se encostam.
