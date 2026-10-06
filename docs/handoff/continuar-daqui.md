@@ -1,4 +1,4 @@
-# Continuar daqui (atualizado em 05/10/2026)
+# Continuar daqui (atualizado em 06/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
@@ -10,6 +10,25 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - Também entraram a repercussão do mata-mata (`claude/repercussao-titulo-qumdw2`) e as palestras e a narração de rádio (`claude/palestras-narracao-1b2sru`). APK com tudo: `builds/MaisUmaRodada-1.0.0-unificada-2026-10-05.apk`.
 - O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
 - O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
+
+### Mundo com mais impacto (06/10, ramo `claude/mundo-impacto-mtmev0`)
+
+- Pedido do dono: "tornar o mundo mais real, mais impacto". Parte de `claude/bolinhas-narracao-5wp2pg` e já traz o mercado sul-americano (`claude/mercado-sulamericano-1ipxqh`) juntado: a IA voltou a negociar nos fins de semana de estadual, entram a regra dos menores de 18, a solidariedade da FIFA e os promedios. APK: `builds/MaisUmaRodada-1.0.0-mundo-impacto-2026-10-06-debug.apk`.
+- **Marcas que ficam** (`scripts/systems/aftermath.gd`, classe `Aftermath`). Título, fim de jejum, copa, acesso, vice (dói mais para o rival ou por 1 a 3 pontos), final perdida, eliminação para o rival, rebaixamento, rival campeão e goleada em clássico viram marcas do clube em `world.stats["af"]`. Cada marca tem peso e meia-vida em semanas de temporada. Saves antigos começam sem marcas.
+  - **Torcida.** O clima volta toda semana para `Aftermath.mood_target`, um patamar que as marcas e o jejum puxam (antes era sempre 60). Público e camisas já dependem do clima, então sentem junto.
+  - **Jejum.** `drought_years` / `drought_pressure` (clube grande da 1ª divisão, a partir de 6 anos). Quebrar a fila ou ganhar o 1º título vira manchete. Fila em número redondo (10, 15, 20 anos...) vira notícia na virada do ano.
+  - **Diretoria da IA.** `Aftermath.sting` entra no `People.on_season_end`: perder título ou final para o rival conta como posições abaixo da meta. O técnico demitido assim usa o motivo "ferida" ("não resistiu depois de perder a final para o X"). Estadual e supercopa quase não pesam.
+  - **Virada do ano** (`Aftermath.season_open`, depois dos orçamentos e antes do mercado das férias). Presidente vaidoso, exigente ou populista que levou a pancada abre o cofre (verba +25 a 45%). O presidente do usuário cobra "Ninguém aqui esqueceu".
+  - **Mercado.** Recém-rebaixado vende quem está acima do nível por ~78% (`sell_mult` em `MarketAI._seller_mult`) e esses jogadores querem sair (`exit_pull` em `player_interest`). O campeão atrai um pouco mais.
+  - **Vestiário.** No mata-mata decidido a moral segue o confronto, não o placar do dia (`_apply_match`). Por semanas, a marca fresca puxa a moral do elenco (`_dressing_room`).
+  - **Imprensa.** O assunto volta de 3 a 8 semanas depois (uma vez por clube a cada 6 semanas, e só se o clima ainda conta a história) e um ano depois, para o clube do usuário.
+- **Ferramenta.** `godot --headless --path . --script res://tools/aftermath_report.gd -- --seasons=2 [--league=BRA1] [--cal=ano|eu]` mostra as marcas, clima × patamar, jejuns, vendas dos rebaixados e as notícias geradas. Em 2 temporadas no Brasil: Corinthians quebrou jejum de 9 anos, Palmeiras e São Paulo demitiram depois de finais perdidas para o rival, o Palmeiras abriu o cofre (+45%) e o Vasco rebaixado vendeu 3 titulares. A média ficou em 2,74 gols por jogo (motor rápido, todas as ligas; o motor não foi mexido).
+
+**O que falta (próximos passos, nesta ordem):**
+1. Mostrar as marcas na tela do clube, aba História: "Último título da liga: 2019 (há 7 anos)" e uma lista curta de marcas recentes (ano e texto). Usar `UIKit.kv` e as linhas do `_history_card` em `club_screen.gd`, seguindo o DESIGN.md, sem card novo.
+2. Pré-jogo e ganchos: quando o próximo adversário é quem deixou a marca (final, vice), dar o gancho de reencontro em `StoryHooks` (`Rivalry.last_grudge` já cobre a revanche do clássico; conferir para não duplicar).
+3. Calibrar com `aftermath_report` num calendário europeu (`--cal=eu --league=ENG1`). Ver se os técnicos demitidos por "ferida" ficam em 1 a 3 por temporada na 1ª divisão e se o clima não fica preso nos extremos.
+4. Traduções EN/ES das notícias novas (o dono tinha deixado EN/ES em segundo plano).
 
 ### Bolinhas seguindo a narração (05/10, ramo `claude/bolinhas-narracao-5wp2pg`)
 
