@@ -24,6 +24,7 @@ extends RefCounted
 
 ## Número de "rodada" dos jogos da repescagem (fora da numeração do mata-mata).
 const BAR_R := 50
+const PROMEDIO_YEARS := 3
 const KO_NAMES := {"r16": "Oitavas", "ef": "Eliminatória", "qf": "Quartas", "sf": "Semifinal", "f": "Final"}
 
 
@@ -363,12 +364,83 @@ static func promoted(league: League, ids: Array, up: int, world: GameWorld = nul
 	return out
 
 
+# ---------------------------------------------------------------------------
+# Promedios (Argentina)
+# ---------------------------------------------------------------------------
+
+## A liga rebaixa pelos promedios (leagues.json → "promedios")?
+static func uses_promedios(league: League) -> bool:
+	return bool(league.cfg().get("promedios", false))
+
+
+## Promedio de cada clube: pontos por jogo nas últimas PROMEDIO_YEARS temporadas na elite, a atual
+## incluída (quem acabou de subir conta só as que jogou nela). Do melhor para o pior:
+## [{id, avg, pts, pj, n}].
+static func promedios(world: GameWorld, league: League) -> Array:
+	var out: Array = []
+	for cid in league.club_ids:
+		var c := world.club(int(cid))
+		if c == null:
+			continue
+		var row: Dictionary = league.table.get(cid, {})
+		var pts := int(row.get("pts", 0))
+		var pj := int(row.get("pl", 0))
+		var n := 1
+		for h: Dictionary in c.history:
+			var y := int(h.get("y", 0))
+			if String(h.get("l", "")) != league.id or y < world.year - PROMEDIO_YEARS + 1 or y >= world.year:
+				continue
+			pts += int(h.get("pts", 0))
+			pj += int(h.get("w", 0)) + int(h.get("dr", 0)) + int(h.get("lo", 0))
+			n += 1
+		# Temporadas de antes da carreira: campanha estimada pela reputação (os grandes chegam com
+		# promedio folgado, como na vida real).
+		var first := DatabaseManager.start_year()
+		var came_up := c.history.any(func(h): return int(h.get("y", 0)) >= first and String(h.get("l", "")) != league.id)
+		var est_from := maxi(world.year - PROMEDIO_YEARS + 1, first - PROMEDIO_YEARS + 1)
+		var est_to := est_from if came_up else mini(world.year, first)
+		for _y in range(est_from, est_to):
+			var games := maxi(1, league.club_ids.size() - 1)
+			pts += int(round(games * _ppg_estimate(league, c)))
+			pj += games
+			n += 1
+		out.append({"id": int(cid), "avg": float(pts) / maxf(1.0, float(pj)), "pts": pts, "pj": pj, "n": n})
+	out.sort_custom(func(a, b): return float(a["avg"]) > float(b["avg"]) if float(a["avg"]) != float(b["avg"]) else int(a["pts"]) > int(b["pts"]))
+	return out
+
+
+## Pontos por jogo que um clube costuma fazer na liga pela reputação (1,0 o mais fraco, 1,9 o maior).
+static func _ppg_estimate(league: League, c: Club) -> float:
+	var rep: Array = league.cfg().get("rep", [40, 90])
+	var t := clampf((c.reputation - float(rep[0])) / maxf(1.0, float(rep[1]) - float(rep[0])), 0.0, 1.0)
+	return 1.0 + t * 0.9
+
+
+## Rebaixados pelos promedios: o pior promedio e o último da tabela anual (se for o mesmo clube,
+## o penúltimo), até completar `down`. ids = classificação da tabela anual.
+static func promedio_relegated(world: GameWorld, league: League, ids: Array, down: int) -> Array:
+	var out: Array = []
+	if down <= 0 or ids.is_empty():
+		return out
+	var pr := promedios(world, league)
+	if not pr.is_empty():
+		out.append(int(pr.back()["id"]))
+	var i := ids.size() - 1
+	while out.size() < down and i >= 0:
+		if not out.has(int(ids[i])):
+			out.append(int(ids[i]))
+		i -= 1
+	return out
+
+
 ## Texto do regulamento para a interface.
 static func describe(league: League) -> String:
 	var parts: Array = []
 	var own := String(cfg(league).get("desc", ""))
 	if own != "":
 		parts.append(own)
+	if uses_promedios(league):
+		parts.append("Caem o pior promedio (pontos por jogo nas últimas %d temporadas na elite) e o último da tabela anual." % PROMEDIO_YEARS)
 	var bar := String(barrage_cfg(league).get("desc", ""))
 	if bar != "":
 		parts.append(bar)

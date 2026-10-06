@@ -243,8 +243,9 @@ static func legend(league: League) -> HFlowContainer:
 		var promo := LeagueFormat.kind(league) == "promo"
 		var span := ("%dº" % int(pr[0])) if int(pr[0]) == int(pr[1]) else ("%dº–%dº" % [int(pr[0]), int(pr[1])])
 		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PLAYOFF), ("Playoffs de acesso (%s)" if promo else "Repescagem (%s)") % span))
-	if league.relegated_count() > 0:
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % league.relegated_count()))
+	var rel := league.relegated_count() - (1 if LeagueFormat.uses_promedios(league) else 0)
+	if rel > 0:
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % rel))
 	return f
 
 

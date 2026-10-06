@@ -106,6 +106,8 @@ static func zone_of(league: League, position: int) -> int:
 	if up > 0 and position <= up:
 		return ZONE_PROMOTION
 	var down := int(cfg.get("down", 0))
+	if LeagueFormat.uses_promedios(league):
+		down -= 1 # a outra vaga é do pior promedio, que fica no quadro próprio
 	if down > 0 and position > teams - down:
 		return ZONE_RELEGATION
 	var pr := playoff_range(league)
