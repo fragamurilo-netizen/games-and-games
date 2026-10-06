@@ -5,6 +5,8 @@ extends SceneTree
 ## --size=N (lado de cada retrato), --only=a,b (só esses casos), --clean (rostos limpos)
 
 var _out := "user://closeup.png"
+var _cut := false
+var _bgc := Color("#141414")
 var _frames := 0
 
 ## Com --clean: rostos sem barba e com cabelo curto, para julgar só o rosto.
@@ -38,13 +40,17 @@ func _initialize() -> void:
 			px = int(a.substr(7))
 		elif a.begins_with("--preset="):
 			PortraitView.light_preset = int(a.substr(9))
+		elif a == "--cutout":
+			_cut = true
+		elif a.begins_with("--bg="):
+			_bgc = Color(a.substr(5))
 		elif a == "--clean":
 			cases = CLEAN
 		elif a.begins_with("--only="):
 			only = Array(a.substr(7).split(",")).map(func(x): return int(x))
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var bg := ColorRect.new()
-	bg.color = Color("#141414")
+	bg.color = _bgc
 	bg.size = Vector2(6000, 6000)
 	root.add_child(bg)
 	var crest := {"shape": "shield", "symbol": "star", "c1": "#222222", "c2": "#FFFFFF", "border": "thin", "initials": "FC"}
@@ -67,6 +73,7 @@ func _initialize() -> void:
 		pv.bg_color = Color(String(k["c1"])).darkened(0.6)
 		pv.kit = k
 		pv.crest = crest
+		pv.cutout = _cut
 		root.add_child(pv)
 
 
