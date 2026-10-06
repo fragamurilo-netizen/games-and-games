@@ -1,8 +1,11 @@
-# Continuar daqui (atualizado em 05/10/2026)
+# Continuar daqui (atualizado em 06/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
 ## Onde está o jogo
+
+- **Ramo mais novo (06/10): `claude/bolinhas-narracao-5wp2pg`.** Tem tudo de `claude/posicoes-escalacao-hbrnjt` + elencos realistas + campo clássico 2D + mercado sul-americano, e por cima: bolinhas seguindo a narração, cores dos times no campinho, negociações realistas com mesa cara a cara, calvície por idade. Último APK: `builds/MaisUmaRodada-1.0.0-mesa-negociacao-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima).
+- **Para seguir neste ramo:** (1) testar no celular a mesa de negociação e o "Levantar da mesa" (a chamada de volta só acontece com clube que precisa vender; não foi vista num teste real); (2) rodar `tests/run_tests.gd` depois da junção do mercado sul-americano (só a compilação foi conferida); (3) as respostas novas do diretor ainda não têm tradução em `data/i18n/en.json`/`es.json`; (4) propostas que a IA faz pelos jogadores do usuário (`respond_offer`) já respondem na hora, mas ainda não usam a mesa de conversa; (5) "primeiro clube aparece como empréstimo" no histórico está com a thread "Elencos e overall realistas", em outro ramo.
 
 - **As duas linhas foram juntadas em 05/10** no ramo `claude/posicoes-escalacao-hbrnjt`. Ele tem a UI 2.0 e a versão 1.0.0 (antes em `claude/youthful-newton-hey7og`, a que o dono e o Gregory jogam), mais todo o conteúdo da 0.4.0 de `claude/project-thread-nzso8z` (motor realista, base e negociações, eventos, estatísticas e recordes, repercussão do mata-mata). Trabalho novo deve partir desse ramo. O `nzso8z` ficou para trás e não tem a UI 2.0.
 - Na junção, as telas seguiram a UI 2.0 (sem o overall na interface, só estrelas) e ganharam os plurais certos da 0.4.0. Os estilos de jogador das duas linhas foram somados. A evolução usa a fase de carreira da 1.0.0 (`_career_arc`), com o potencial assentado (`_settle_potential`) e a deriva da 0.4.0. O teto dos craques e o peso por posição vêm calibrados da 0.4.0. O aviso de conquista ficou no topo, compacto, como na UI 2.0. O menu ☰ continua na cor do clube do técnico.
