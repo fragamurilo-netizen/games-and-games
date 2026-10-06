@@ -62,6 +62,10 @@ const KINDS := {
 	"fatigue": {"w": 0.55, "icon": "cross", "color": "ORANGE"},
 	"win_bonus": {"w": 0.45, "icon": "money", "color": "BLUE"},
 	"own_doctor": {"w": 0.4, "icon": "cross", "color": "ORANGE"},
+	# Vida na base (YouthLife)
+	"youth_agent": {"w": 0.9, "icon": "search", "color": "RED"},
+	"youth_homesick": {"w": 0.6, "icon": "home", "color": "ORANGE"},
+	"youth_parent": {"w": 0.5, "icon": "clock", "color": "ORANGE"},
 }
 ## Ligas que pagam acima do mercado (propostas "irrecusáveis").
 const RICH_NATIONS := ["KSA", "QAT", "UAE"]
@@ -133,6 +137,8 @@ static func _build(world: GameWorld, k: String) -> Dictionary:
 	var ev := {"k": k, "p": -1, "p2": -1, "d": {}}
 	if EventPack.handles(k):
 		return EventPack.build(world, k, ev)
+	if YouthLife.handles(k):
+		return YouthLife.build(world, k, ev)
 	match k:
 		"raise":
 			var best: Player = null
@@ -484,6 +490,8 @@ static func describe(world: GameWorld, ev: Dictionary) -> Dictionary:
 	var pn := p.display_name() if p != null else "O jogador"
 	if EventPack.handles(String(ev["k"])):
 		return EventPack.describe(world, ev)
+	if YouthLife.handles(String(ev["k"])):
+		return YouthLife.describe(world, ev)
 	match String(ev["k"]):
 		"raise":
 			return {"title": "%s quer aumento" % pn, "def": 2,
@@ -744,6 +752,8 @@ static func resolve(world: GameWorld, ev: Dictionary, opt: int) -> String:
 	var msg := ""
 	if EventPack.handles(String(ev["k"])):
 		return EventPack.resolve(world, ev, opt)
+	if YouthLife.handles(String(ev["k"])):
+		return YouthLife.resolve(world, ev, opt)
 	match String(ev["k"]):
 		"raise":
 			if p == null or p.club_id != club.id:

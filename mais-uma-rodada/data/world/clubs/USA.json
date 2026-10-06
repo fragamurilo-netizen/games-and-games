@@ -441,9 +441,7 @@
 				"initials": "H",
 				"sc": "#101820"
 			},
-			"rivals": [
-				"USA_ATX"
-			]
+			"rivals": ["USA_ATX", "USA_DAL"]
 		},
 		{
 			"key": "USA_KCB",

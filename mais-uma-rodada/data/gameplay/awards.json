@@ -1,0 +1,26 @@
+{
+	"_doc": "Nomes dos prêmios (AwardManager.award_name). world: prêmios mundiais e continentais com o nome real de 2026 (cerimônia da Bola de Ouro: Troféu Kopa, Yashin, Gerd Müller e Johan Cruyff; prêmios continentais). league: nome local de cada prêmio de liga pelo país (vazio = nome genérico).",
+	"world": {
+		"ballon": "Bola de Ouro", "world_young": "Troféu Kopa", "gk_world": "Troféu Yashin", "coach_world": "Troféu Johan Cruyff",
+		"boot": "Chuteira de Ouro", "muller": "Troféu Gerd Müller", "world_xi": "Seleção do ano (FIFPRO)",
+		"rei_america": "Rei da América", "caf_poty": "Jogador Africano do Ano", "afc_poty": "Jogador Asiático do Ano"
+	},
+	"league": {
+		"ESP": {"scorer": "Troféu Pichichi", "glove": "Troféu Zamora", "mvp": "Melhor jogador da LaLiga"},
+		"ITA": {"scorer": "Capocannoniere", "mvp": "Melhor jogador da Serie A"},
+		"GER": {"scorer": "Torjägerkanone", "mvp": "Jogador da temporada da Bundesliga"},
+		"ENG": {"scorer": "Golden Boot da Premier League", "glove": "Golden Glove da Premier League", "mvp": "Jogador do Ano da PFA", "young": "Jovem do Ano da PFA"},
+		"FRA": {"mvp": "Jogador do Ano da UNFP", "young": "Revelação do Ano da UNFP"},
+		"POR": {"mvp": "Jogador do Ano da Liga Portugal", "scorer": "Bola de Prata (artilheiro)"},
+		"NED": {"mvp": "Jogador do Ano da Eredivisie", "young": "Talento do Ano (Johan Cruijff Prijs)"},
+		"BRA": {"mvp": "Bola de Ouro do Brasileirão", "team": "Bola de Prata (seleção do campeonato)", "scorer": "Artilheiro do Brasileirão", "young": "Craque revelação do Brasileirão"},
+		"ARG": {"mvp": "Olimpia de Plata", "scorer": "Artilheiro da Liga Profesional"},
+		"MEX": {"mvp": "Balón de Oro da Liga MX", "scorer": "Campeão de gols da Liga MX"},
+		"USA": {"mvp": "MVP da MLS", "scorer": "Golden Boot da MLS", "young": "Jovem do Ano da MLS", "gk": "Goleiro do Ano da MLS"},
+		"KSA": {"mvp": "Melhor jogador da Saudi Pro League"},
+		"SCO": {"mvp": "Jogador do Ano da PFA Scotland"},
+		"URU": {"mvp": "Melhor jogador do Uruguaio"},
+		"COL": {"mvp": "Melhor jogador da Liga BetPlay"},
+		"JPN": {"mvp": "MVP da J1 League"}
+	}
+}

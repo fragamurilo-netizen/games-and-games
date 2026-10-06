@@ -62,7 +62,7 @@ func _moves(w: GameWorld, c: VBoxContainer) -> void:
 			list.append(e)
 	# Resumo da temporada
 	var this_year := list.filter(func(e): return int(e["y"]) == w.year and String(e["why"]) != "efe")
-	var fired := this_year.filter(func(e): return String(e["why"]) in ["resultados", "temporada"]).size()
+	var fired := this_year.filter(func(e): return String(e["why"]) in ["resultados", "temporada", "ferida"]).size()
 	var per_club := {}
 	for e: Dictionary in this_year:
 		per_club[int(e["c"])] = int(per_club.get(int(e["c"]), 0)) + 1

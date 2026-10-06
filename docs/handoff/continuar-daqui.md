@@ -4,7 +4,27 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
-- **Escudos e logos (06/10): `claude/escudos-caprichados-i5l8y5`** = ramo das bolinhas (até a mesa de negociação) + escudos e logos caprichados. APK: `builds/MaisUmaRodada-1.0.0-escudos-logos-2026-10-06-debug.apk`. Detalhes em "Escudos e logos de competição" abaixo.
+- **Ramo mais novo (06/10, fim da noite): `claude/escudos-caprichados-i5l8y5`** = `claude/hopeful-newton-8avbo4` + escudos e logos (213 escudos desenhados, coroas nas copas, escudo novo do Barcelona, logos novos da Premier League e da Championship). APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk`. Detalhes em "Escudos e logos de competição" abaixo.
+- **Ramo de 06/10 à noite: `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
+
+### Mundo vivo, carreira de técnico e base profunda (06/10, ramo `claude/hopeful-newton-8avbo4`)
+
+- **Carreira de técnico** (`job_market.gd`, tela `jobs`, menu ☰ › Mercado de técnicos): pedir demissão, ver vagas e "cargos por um fio", candidatar-se, entrevista (Talks "interview"); clubes ligam quando precisam. A língua conta: quem não fala a do vestiário perde cotação (`Languages.coach_comm`) e a vaga avisa.
+- **Formas de jogo**: 17 formações e 27 modelos de jogo (`game_models.gd`, `data/gameplay/game_models.json`) no pré-jogo.
+- **Mercado**: cada clube da IA (até a 2ª divisão) tem olheiros que assistem a jogos de verdade (`club_scout_net.gd`) e um cérebro de janela (`transfer_brain.gd`: diagnóstico do elenco, pressão da torcida, plano por necessidade, dominó quando vende). Sem sorteio. Calibrado com o Transfermarkt: brasileiros quase não trazem europeus (1%), repatriação ~16%. Acordos: CPLP (Brasil/Portugal), ACP na Espanha, permissão de trabalho inglesa (GBE).
+- **Economia 2026** (`economy.gd`, `data/world/economy.json`): moedas e câmbio, receitas e dívidas reais dos clubes de referência, custo operacional por liga, recuperação judicial; reputação das ligas muda (`league_reputation.gd`).
+- **Reputação escondida**: estrelas e rótulos no lugar do número (`UIKit.rep_stars`). Correções de reputação de clubes (Man United, Benfica/Porto/Sporting, Milan/Napoli etc.) e o Brasil um pouco abaixo no mundo (clubes e faixa da Série A −4: a força dentro do país não muda).
+- **Auxiliar no comando** (`autopilot.gd`): simular escolhendo "tudo pelo auxiliar" ou "só me chame no importante".
+- **Corpo**: garotos crescem e engordam até a idade adulta, alguns com tendência a peso (`body_growth.gd`), e o peso pesa nas lesões.
+- **Relações** (`relations.gd`): amizades, desafetos, irmãos, revelados juntos, mentores, técnico favorito/odiado, ídolos, lendas do clube (tela do clube). Níveis nunca aparecem na interface (pedido do dono).
+- **Lesões** (`injury_model.gd`): por parte do corpo, idade, cansaço, posição, recidiva, peso e departamento médico, e lesões de treino em todos os clubes. ~25 lesões de 1+ semana por clube da elite na temporada (Inglaterra, Espanha, Alemanha, Brasil), média ~4 semanas (`tools/injury_report.gd`).
+- **Ingressos** (`ticket_office.gd`), clássicos corrigidos no mundo todo, prêmios com nomes do mundo e por liga (`data/gameplay/awards.json`).
+- **Base profunda** (`youth_life.gd`, ficha do garoto › "Vida na base"): maturação biológica escondida (o precoce domina a base e engana a avaliação; o tardio parece pior), família (presente, humilde, pai que cuida da carreira, alojamento longe de casa pela distância real), primeiro contrato profissional aos 16, empresários que farejam talento de verdade, compensação de formação da FIFA, saudade, pai cobrando minutos, desistências no fim do ano e laços da geração. Dilemas novos: `youth_agent`, `youth_homesick`, `youth_parent`. Teste: `tools/youth_life_smoke.gd`.
+- **Geografia** (`geo.gd`, `data/world/geo.json`): coordenadas das ~1.370 cidades de clubes e cidades natais. Viagem bem mais longa que a média da liga pesa no visitante (`Geo.travel_factor`, preparado antes das threads dos jogos); "a X km de casa" no perfil.
+- **Idiomas** (`languages.gd`, `data/world/languages.json`, campo `Player.langs` salvo como "lng"): cada um fala a da terra (bilíngues com noção da outra) e o inglês do seu país, e aprende a do clube por mês. Pesa no isolamento do vestiário, nas panelinhas, no entrosamento, na vontade de ir para um país e no técnico. Perfil mostra "Português (nativo) · Espanhol (fluente)". Sem versão em alemão (pedido do dono).
+- **Falta:** traduções EN/ES dos textos novos; testar no celular a ficha "Vida na base" e o mercado de técnicos; `tests/run_tests.gd` completo não foi rodado nesta rodada (só check_scripts, smokes e mobile_regression).
+
+- **Junção de 06/10 à tarde: `claude/youthful-newton-hey7og`.** Partiu de `claude/bolinhas-narracao-5wp2pg` e juntou `claude/escudos-caprichados-i5l8y5`, `claude/scout-rodadascore-8c516x`, `claude/mundo-impacto-mtmev0` e `claude/historico-inicio-carreira` (seções de cada um abaixo). APK sem trava de compra: `builds/MaisUmaRodada-1.0.0-tudo-junto-sem-trava-2026-10-06.apk` (certificado de sempre). Conferido: `check_scripts` 0 erros, smoke, mobile_regression e toque no nome do elenco (18/18).
 - **Ramo mais novo (06/10): `claude/bolinhas-narracao-5wp2pg`.** Tem tudo de `claude/posicoes-escalacao-hbrnjt` + elencos realistas + campo clássico 2D + mercado sul-americano, e por cima: bolinhas seguindo a narração, cores dos times no campinho, negociações realistas com mesa cara a cara, calvície por idade. Último APK: `builds/MaisUmaRodada-1.0.0-mesa-negociacao-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima).
 - **Para seguir neste ramo:** (1) testar no celular a mesa de negociação e o "Levantar da mesa" (a chamada de volta só acontece com clube que precisa vender; não foi vista num teste real); (2) rodar `tests/run_tests.gd` depois da junção do mercado sul-americano (só a compilação foi conferida); (3) as respostas novas do diretor ainda não têm tradução em `data/i18n/en.json`/`es.json`; (4) propostas que a IA faz pelos jogadores do usuário (`respond_offer`) já respondem na hora, mas ainda não usam a mesa de conversa; (5) "primeiro clube aparece como empréstimo" no histórico está com a thread "Elencos e overall realistas", em outro ramo.
 
@@ -14,6 +34,39 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - Também entraram a repercussão do mata-mata (`claude/repercussao-titulo-qumdw2`) e as palestras e a narração de rádio (`claude/palestras-narracao-1b2sru`). APK com tudo: `builds/MaisUmaRodada-1.0.0-unificada-2026-10-05.apk`.
 - O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
 - O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
+
+### Olheiros, tabelas que rolam de lado e RodadaScore (06/10, ramo `claude/scout-rodadascore-8c516x`)
+
+- Parte de `claude/bolinhas-narracao-5wp2pg`. Outras threads trabalham em paralelo em ramos próprios a partir do mesmo ponto (partida/rostos/negociações, mundo mais real, elencos, escudos); este ramo mexe só em olheiros, tabelas e estatísticas. APK: `builds/MaisUmaRodada-1.0.0-scout-rodadascore-2026-10-06-debug.apk`.
+- **Olheiros refeitos** (`scripts/systems/scouting.gd`, `scripts/ui/components/scout_report_view.gd`, aba Mercado › Olheiros):
+  - Missões que duram rodadas: por perfil (foco Melhor disponível, Pronto para jogar, Jovem promessa ou Oportunidade; setor, origem, idade), uma liga inteira (4 rodadas) ou um jogador (botão "Observar de perto" no relatório; 1 rodada no país, 2 fora). A primeira leva de nomes chega na hora; `Scouting.tick` (chamado em `InboxManager.after_user_turn`) avança cada missão e, no fim, o olheiro manda mensagem na caixa de entrada.
+  - Missões ao mesmo tempo: 1 a 3 (`Scouting.slots`: nível do olheiro ≥ 0,55 e reputação do clube ≥ 70).
+  - Conhecimento 0–100% por jogador (`stats.scouting.know`). Ele encolhe o ruído do potencial (`scout_noise` a partir do original em `n0`) e sobe a confiança da avaliação (`PlayerAssessment.confidence` faz lerp entre a base e o teto do olheiro). Relatórios antigos valem 70%.
+  - Relatório: letra A–D e rótulo (Contratar, Boa opção, Para compor elenco, Não recomendado; `Scouting.verdict`), nível hoje e até onde pode chegar, encaixe no elenco, estilo, pé, pontos fortes e fracos (mais itens quanto mais visto), personalidade a partir de 60% e lesões/regularidade a partir de 80%, números da temporada. A tabela de relatórios tem Recom., Visto e Potencial e filtros Todos/Recomendados/Novos.
+  - `Scouting.send_mission` continua existindo (ferramentas de captura e tour usam).
+- **Tabelas que rolam de lado** (`scripts/ui/kit/data_table.gd`): o nome fica preso e as colunas de números passam com o dedo; um trilho fino acima do cabeçalho mostra que há mais colunas e onde você está; a posição da rolagem fica guardada ao ordenar. `PlayerTable` agora mostra todas as colunas em toda visão (a visão só escolhe as primeiras; `REST` define a ordem do resto) e ganhou Min, RS (nota RodadaScore), Fin, PD, Des, Passe e Cartões. Colunas próprias da tela (mercado: Encaixe e Pede; treino) entram logo depois das da visão, também no celular. A classificação no celular em pé virou `TableRows.standings_table` (J, SG e PTS e, de lado, V, E, D, GP, GC, Últimos 5, Aproveitamento); no tablet segue a linha antiga.
+- **RodadaScore** (`scripts/systems/league_stats.gd`, `scripts/ui/screens/league_stats_screen.gd`, rota `league_stats`): página de estatísticas da liga no estilo WhoScored, com "Powered by RodadaScore". Abas Resumo (melhores notas, times em destaque, a liga em números), Times (Geral/Ataque/Defesa/Disciplina; toque abre pontos fortes, fracos e estilo do time), Jogadores (Geral/Ataque/Defesa/Passe/Goleiros, setor, Regulares, Por 90 min) e Seleção da temporada (4-3-3 pela nota). Entradas: aba Números das Competições ("Estatísticas completas") e menu ☰ › Clube › Estatísticas da liga. Posse, finalizações sofridas e xG contra são somados a cada jogo de liga em `league.table[clube]["ts"]` (`LeagueStats.record`, chamado em `SeasonManager._apply_match`); save antigo cai nas somas dos jogadores e mostra "–" na posse até jogar.
+- **Falta / ideias para seguir:** conferir a folha do relatório e a mensagem de fim de missão num celular de verdade; botão "Pedir relatório" também no perfil do jogador de outro clube (hoje só no relatório e no painel do mercado); os goleiros dominam as melhores notas porque a nota de partida do motor favorece goleiros (assunto do motor, não desta tela); mostrar o RodadaScore também para copas; a classificação em grupos (split) perde os rótulos de grupo no celular.
+- Conferido com `tools/check_scripts.gd` (0 erros) e capturas 390x844 (`--only=league_stats:summary,league_stats:teams,league_stats:players,league_stats:xi,market:scout,table,squad --rounds=18 --lang=pt`). Testes completos não rodados.
+
+### Mundo com mais impacto (06/10, ramo `claude/mundo-impacto-mtmev0`)
+
+- Pedido do dono: "tornar o mundo mais real, mais impacto". Parte de `claude/bolinhas-narracao-5wp2pg` e já traz o mercado sul-americano (`claude/mercado-sulamericano-1ipxqh`) juntado: a IA voltou a negociar nos fins de semana de estadual, entram a regra dos menores de 18, a solidariedade da FIFA e os promedios. APK: `builds/MaisUmaRodada-1.0.0-mundo-impacto-2026-10-06-debug.apk`.
+- **Marcas que ficam** (`scripts/systems/aftermath.gd`, classe `Aftermath`). Título, fim de jejum, copa, acesso, vice (dói mais para o rival ou por 1 a 3 pontos), final perdida, eliminação para o rival, rebaixamento, rival campeão e goleada em clássico viram marcas do clube em `world.stats["af"]`. Cada marca tem peso e meia-vida em semanas de temporada. Saves antigos começam sem marcas.
+  - **Torcida.** O clima volta toda semana para `Aftermath.mood_target`, um patamar que as marcas e o jejum puxam (antes era sempre 60). Público e camisas já dependem do clima, então sentem junto.
+  - **Jejum.** `drought_years` / `drought_pressure` (clube grande da 1ª divisão, a partir de 6 anos). Quebrar a fila ou ganhar o 1º título vira manchete. Fila em número redondo (10, 15, 20 anos...) vira notícia na virada do ano.
+  - **Diretoria da IA.** `Aftermath.sting` entra no `People.on_season_end`: perder título ou final para o rival conta como posições abaixo da meta. O técnico demitido assim usa o motivo "ferida" ("não resistiu depois de perder a final para o X"). Estadual e supercopa quase não pesam.
+  - **Virada do ano** (`Aftermath.season_open`, depois dos orçamentos e antes do mercado das férias). Presidente vaidoso, exigente ou populista que levou a pancada abre o cofre (verba +25 a 45%). O presidente do usuário cobra "Ninguém aqui esqueceu".
+  - **Mercado.** Recém-rebaixado vende quem está acima do nível por ~78% (`sell_mult` em `MarketAI._seller_mult`) e esses jogadores querem sair (`exit_pull` em `player_interest`). O campeão atrai um pouco mais.
+  - **Vestiário.** No mata-mata decidido a moral segue o confronto, não o placar do dia (`_apply_match`). Por semanas, a marca fresca puxa a moral do elenco (`_dressing_room`).
+  - **Imprensa.** O assunto volta de 3 a 8 semanas depois (uma vez por clube a cada 6 semanas, e só se o clima ainda conta a história) e um ano depois, para o clube do usuário.
+- **Ferramenta.** `godot --headless --path . --script res://tools/aftermath_report.gd -- --seasons=2 [--league=BRA1] [--cal=ano|eu]` mostra as marcas, clima × patamar, jejuns, vendas dos rebaixados e as notícias geradas. Em 2 temporadas no Brasil: Corinthians quebrou jejum de 9 anos, Palmeiras e São Paulo demitiram depois de finais perdidas para o rival, o Palmeiras abriu o cofre (+45%) e o Vasco rebaixado vendeu 3 titulares. A média ficou em 2,74 gols por jogo (motor rápido, todas as ligas; o motor não foi mexido).
+
+**O que falta (próximos passos, nesta ordem):**
+1. Mostrar as marcas na tela do clube, aba História: "Último título da liga: 2019 (há 7 anos)" e uma lista curta de marcas recentes (ano e texto). Usar `UIKit.kv` e as linhas do `_history_card` em `club_screen.gd`, seguindo o DESIGN.md, sem card novo.
+2. Pré-jogo e ganchos: quando o próximo adversário é quem deixou a marca (final, vice), dar o gancho de reencontro em `StoryHooks` (`Rivalry.last_grudge` já cobre a revanche do clássico; conferir para não duplicar).
+3. Calibrar com `aftermath_report` num calendário europeu (`--cal=eu --league=ENG1`). Ver se os técnicos demitidos por "ferida" ficam em 1 a 3 por temporada na 1ª divisão e se o clima não fica preso nos extremos.
+4. Traduções EN/ES das notícias novas (o dono tinha deixado EN/ES em segundo plano).
 
 ### Bolinhas seguindo a narração (05/10, ramo `claude/bolinhas-narracao-5wp2pg`)
 
@@ -53,6 +106,7 @@ Feito:
 - Logos: copas do rei, do trono e do emir com coroa; estrela das supercopas dentro do escudo; Coppa Italia e Coupe de France com a faixa da bandeira.
 - Imagens antes/depois em `/mnt/project-files/escudos-caprichados/` (`escudos-antes-depois-destaques.png`, `escudos-novos-213-*.png`, `escudos-27-09-de-volta-*.png`, `logos-antes-depois-*.png`).
 - APK: `builds/MaisUmaRodada-1.0.0-escudos-logos-2026-10-06-debug.apk` (com tudo do ramo das bolinhas até a mesa de negociação).
+- Pedido de 06/10 à noite: **escudo novo do Barcelona** (chapado, fios escuros entre as partes, cruz centrada, borda fina escura `bc`, bola antiga sem brilho; desenho no campo/formato `barca` do `crest_view.gd`) e **logos novos da Premier League** (leão coroado de perfil, `lion_crowned`, roxo sobre branco) **e da Championship** (leão passante dourado, `lion_passant`, escudo azul-marinho). Os dois leões estão no editor de escudos. APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk` (feito depois de juntar `claude/hopeful-newton-8avbo4`).
 
 Falta:
 1. Escudos de monograma de clubes menores (Brasil, Portugal, Alemanha...) continuam só com letras; na maioria é assim no clube de verdade, mas dá para caprichar em alguns.
@@ -155,6 +209,15 @@ Ramo `claude/elencos-realistas-k0e7o1`, feito sobre a linha unificada (`claude/p
 - **Escala.** A escala do overall não mudou: a média dos titulares por clube é a mesma. No começo há 3 jogadores 90+ (antes 4) e 85+ caiu de 104 para ~90. O topo de cada time ficou um pouco mais alto e o elo fraco um pouco mais baixo, o que pode mexer de leve em valores dos melhores de cada clube.
 - **Motor.** Motor lance a lance (25 datas): 2,70 gols por jogo, contra 2,65 na base. No modo rápido, temporada inteira: 2,73 contra 2,70.
 - **Ferramenta.** `tools/squad_report.gd` mostra elencos por extenso (papel, anos de casa, passagens) e a distribuição dos papéis: `godot --headless --path . --script res://tools/squad_report.gd -- --clubs=Flamengo,Real Madrid`.
+
+## Passado sem começar emprestado (06/10)
+
+Ramo `claude/historico-inicio-carreira`, feito sobre `claude/bolinhas-narracao-5wp2pg`. Só muda o passado gerado na criação do mundo (`CareerBackfill`), então vale para carreira nova.
+
+- O passado é montado do presente para trás. O empréstimo podia cair no primeiro ano, e 5,6% dos jogadores começavam a carreira emprestados. Também podia vir depois de um clube que não era o dono do passe.
+- Agora cada empréstimo guarda o clube dono (`plan[ano][6]`). O ano antes do empréstimo é sempre no dono, seja na base ou numa contratação. Se o primeiro ano era empréstimo, ele vira a estreia no dono. Empréstimo só a partir dos 18 anos.
+- `tools/squad_report.gd` mostra a parte dos jogadores que começam emprestados (agora 0%) e a dos empréstimos entre duas passagens pelo mesmo clube (99,5%).
+- **Falta.** Desta parte, nada. Para seguir, junte este ramo em `claude/bolinhas-narracao-5wp2pg` quando a conversa das negociações entre clubes terminar lá; os dois mexem em arquivos diferentes. O APK mais recente com este trabalho é `builds/MaisUmaRodada-1.0.0-historico-inicio-2026-10-06-debug.apk`.
 
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 

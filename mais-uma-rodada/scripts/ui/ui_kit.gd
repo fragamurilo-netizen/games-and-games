@@ -694,6 +694,17 @@ static func menu_group(rows: Array) -> PanelContainer:
 
 
 ## Ladrilho de número: valor grande, legenda em caixa alta embaixo.
+## Reputação (1–100) como estrelas douradas: o número fica escondido, o efeito no jogo continua.
+static func rep_stars(rep: float, px: float = 16.0) -> StarsView:
+	var st := StarsView.new()
+	st.star_size = px
+	st.color = UIColors.GOLD
+	st.stars = StarsView.from_reputation(rep)
+	st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	st.tooltip_text = Reputation.label(rep)
+	return st
+
+
 static func stat_tile(value: String, caption: String, color: Color = Color(0, 0, 0, 0)) -> PanelContainer:
 	var p := PanelContainer.new()
 	var box := StyleBoxEmpty.new()

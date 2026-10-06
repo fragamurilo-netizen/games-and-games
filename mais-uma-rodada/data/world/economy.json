@@ -1,0 +1,34 @@
+{
+	"_doc": "Economia 2026 (Economy). fx: cotações de partida (unidades da moeda por 1 euro, 05/10/2026: euro a R$ 5,60 e US$ 1,12) e, por moeda, vol = oscilação típica por temporada e pull = quanto volta para o patamar de partida a cada ano (câmbio real, descontada a inflação). currency: moeda de cada país (ausente = EUR); a receita dos clubes daquele país, em euros, segue o câmbio (real mais fraco = clube brasileiro com menos poder de compra). clubs: âncoras reais pela chave do clube, [receita anual em € milhões, dívida em € milhões ou -1 sem referência]. Fontes: Deloitte Football Money League 2026 (temporada 2024/25); balanços 2025 dos clubes brasileiros (dívidas em reais convertidas a R$ 5,60; receita recorrente, sem a venda de jogadores, que no jogo entra à parte: estimada a partir do total publicado — Flamengo R$ 2,09 bi, Palmeiras R$ 1,70 bi, Botafogo R$ 1,39 bi...); os demais são estimativas de ordem de grandeza.",
+	"fx": {
+		"BRL": {"rate": 5.60, "vol": 0.09, "pull": 0.35, "name": "real"},
+		"USD": {"rate": 1.12, "vol": 0.05, "pull": 0.4, "name": "dólar"},
+		"GBP": {"rate": 0.87, "vol": 0.04, "pull": 0.4, "name": "libra"},
+		"ARS": {"rate": 1650.0, "vol": 0.22, "pull": 0.3, "name": "peso argentino"},
+		"MXN": {"rate": 20.8, "vol": 0.07, "pull": 0.4, "name": "peso mexicano"},
+		"COP": {"rate": 4600.0, "vol": 0.08, "pull": 0.4, "name": "peso colombiano"},
+		"CLP": {"rate": 1080.0, "vol": 0.07, "pull": 0.4, "name": "peso chileno"},
+		"TRY": {"rate": 48.0, "vol": 0.14, "pull": 0.3, "name": "lira turca"},
+		"JPY": {"rate": 172.0, "vol": 0.06, "pull": 0.4, "name": "iene"}
+	},
+	"currency": {
+		"BRA": "BRL", "ARG": "ARS", "MEX": "MXN", "COL": "COP", "CHI": "CLP", "TUR": "TRY", "JPN": "JPY",
+		"ENG": "GBP", "SCO": "GBP", "USA": "USD", "KSA": "USD", "QAT": "USD", "UAE": "USD", "ECU": "USD"
+	},
+	"clubs": {
+		"ESP_MBL": [1161, -1], "ESP_BLG": [975, -1], "GER_MUR": [861, -1], "FRA_PCF": [837, -1], "ENG_MSR": [836, -1],
+		"ENG_MSK": [829, -1], "ENG_NLR": [822, -1], "ENG_MRD": [793, -1], "ENG_NLW": [673, -1], "ENG_WLB": [584, -1],
+		"ITA_MNZ": [538, -1], "GER_DOR": [531, -1], "ESP_MRB": [455, -1], "ENG_AST": [450, -1], "ITA_MRN": [410, -1],
+		"ITA_TBN": [402, -1], "ENG_TYN": [398, -1], "GER_STU": [296, -1], "POR_ENC": [283, -1], "ENG_ELI": [276, -1],
+		"ITA_NAP": [260, -1], "ITA_RGR": [250, -1], "GER_LEV": [270, -1], "TUR_IAS": [260, -1], "TUR_IKN": [220, -1],
+		"FRA_MRS": [250, -1], "FRA_LYO": [200, -1], "POR_DRA": [220, -1], "POR_LEO": [230, -1], "NED_AMS": [190, -1],
+		"NED_EIN": [120, -1], "NED_ROT": [110, -1], "SCO_GLE": [150, -1],
+		"BRA_RNC": [300, 84], "BRA_VPA": [200, 205], "BRA_GLO": [140, 281], "BRA_MOR": [150, 153], "BRA_TRL": [130, 147],
+		"BRA_TIM": [155, 437], "BRA_IMT": [110, 139], "BRA_PRA": [100, 159], "BRA_RAP": [110, 206], "BRA_GAL": [105, 409],
+		"BRA_COL": [100, 166], "BRA_MBR": [55, 76], "BRA_CMA": [90, 150], "BRA_ESQ": [80, 30], "BRA_FUR": [60, 15],
+		"BRA_PIC": [45, 40], "BRA_VOZ": [40, 31], "BRA_LBA": [33, 63], "BRA_LDI": [30, 68], "BRA_LMI": [25, 0],
+		"ARG_MIL": [125, -1], "ARG_XEN": [110, -1], "ARG_ACA": [40, -1], "ARG_ROJ": [30, -1],
+		"KSA_AZR": [230, -1], "KSA_ALM": [220, -1], "KSA_AMD": [180, -1],
+		"USA_MIA": [180, -1], "USA_LAG": [130, -1], "MEX_AGU": [110, -1], "MEX_RAY": [90, -1], "MEX_AUR": [80, -1]
+	}
+}

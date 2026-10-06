@@ -64,6 +64,7 @@ static func open() -> void:
 	_group(r, "Clube", [
 		["Competições", "table", {}, 0],
 		["Estatísticas", "team_stats", {}, 0],
+		["Estatísticas da liga", "league_stats", {}, 0],
 		["Confrontos", "rivalry", {"a": cid}, 0],
 		["Uniformes", "kit", {}, 0],
 		["Camisas antigas", "kit_history", {"id": cid}, 0],
@@ -74,6 +75,7 @@ static func open() -> void:
 		["Reputação", "reputation", {}, 0],
 		["Conquistas", "achievements", {}, 0],
 		["Seleções", "national", {}, 0],
+		["Mercado de técnicos", "jobs", {}, 0],
 		["Dança das cadeiras", "coach_moves", {}, 0],
 		["História", "history", {}, 0],
 		["Joias", "nextgen", {}, 0],

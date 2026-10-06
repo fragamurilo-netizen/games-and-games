@@ -61,9 +61,9 @@ func _comps(w: GameWorld, c: VBoxContainer) -> void:
 		var nm := UIKit.label(Reputation.comp_name(w, key), "H3")
 		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		col.add_child(nm)
-		col.add_child(UIKit.label("%s · título vale %d pts" % [Reputation.label(float(r["r"])), int(round(Reputation.title_value(key)))], "Small"))
+		col.add_child(UIKit.label(Reputation.label(float(r["r"])), "Small"))
 		h.add_child(col)
-		h.add_child(UIKit.pill(str(int(round(float(r["r"])))), Reputation.color(float(r["r"])), 16))
+		h.add_child(UIKit.rep_stars(float(r["r"])))
 		list.add_child(h)
 	c.add_child(UIKit.card_panel(list))
 	if not _all and rows.size() > n:
@@ -80,7 +80,7 @@ func _clubs(w: GameWorld, c: VBoxContainer) -> void:
 	clubs.sort_custom(func(a: Club, b: Club): return a.reputation > b.reputation or (a.reputation == b.reputation and a.id < b.id))
 	if w.has_user():
 		var me := w.user_club()
-		c.add_child(UIKit.label("%s é o %dº em reputação no mundo (%d · %s)." % [me.short_name, Reputation.club_world_rank(w, me), int(round(me.reputation)), Reputation.label(me.reputation)], "Muted", true))
+		c.add_child(UIKit.label("%s é o %dº em reputação no mundo (%s)." % [me.short_name, Reputation.club_world_rank(w, me), Reputation.label(me.reputation).to_lower()], "Muted", true))
 	var list := UIKit.card("Card", 4)
 	var n := mini(100 if _all else 40, clubs.size())
 	for i in n:
@@ -93,9 +93,9 @@ func _clubs(w: GameWorld, c: VBoxContainer) -> void:
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(cl.short_name, "H3"))
-		col.add_child(UIKit.label("%s · %s · prestígio %d" % [w.league_short(cl.league_id), Reputation.label(cl.reputation), int(round(Reputation.club_prestige(cl)))], "Small"))
+		col.add_child(UIKit.label("%s · %s" % [w.league_short(cl.league_id), Reputation.label(cl.reputation)], "Small"))
 		h.add_child(col)
-		h.add_child(UIKit.pill(str(int(round(cl.reputation))), Reputation.color(cl.reputation), 16))
+		h.add_child(UIKit.rep_stars(cl.reputation))
 		var cid := cl.id
 		list.add_child(UIKit.tap_row(h, func():
 			if w.is_user_club(cid):
@@ -133,7 +133,7 @@ func _players(w: GameWorld, c: VBoxContainer) -> void:
 		col.add_child(nm)
 		col.add_child(UIKit.label("%s · %d títulos · %s" % [cl.short_name if cl != null else "", p.titles, Reputation.player_label(rep)], "Small"))
 		h.add_child(col)
-		h.add_child(UIKit.pill(str(int(round(rep))), Reputation.color(rep), 16))
+		h.add_child(UIKit.rep_stars(rep))
 		var pid := p.id
 		list.add_child(UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel"))
 	c.add_child(UIKit.card_panel(list))
@@ -147,15 +147,16 @@ func _players(w: GameWorld, c: VBoxContainer) -> void:
 static func club_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section_header("Reputação", "Ranking", func(): UIManager.push("reputation")))
-	var tiles: Array = [
-		UIKit.stat_tile(str(int(round(club.reputation))), Reputation.label(club.reputation), Reputation.color(club.reputation)),
-		UIKit.stat_tile("%dº" % Reputation.club_world_rank(w, club), "no mundo"),
-		UIKit.stat_tile(str(int(round(Reputation.club_prestige(club)))), "prestígio"),
-	]
-	card.add_child(UIKit.stat_grid(tiles, 600))
+	var head := UIKit.hbox(UITokens.S2)
+	head.add_child(UIKit.rep_stars(club.reputation, 22.0))
+	var rl := UIKit.label(Reputation.label(club.reputation), "H3")
+	rl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(rl)
+	head.add_child(UIKit.label("%dº no mundo" % Reputation.club_world_rank(w, club), "Muted"))
+	card.add_child(head)
 	if club.league_id != "":
 		var lr := Reputation.league_rep(club.league_id)
-		card.add_child(UIKit.kv("Liga", "%s · %d (%s)" % [w.league_short(club.league_id), int(round(lr)), Reputation.label(lr)]))
+		card.add_child(UIKit.kv("Liga", "%s · %s" % [w.league_short(club.league_id), Reputation.label(lr).to_lower()]))
 	var best := Reputation.club_titles_by_value(club)
 	if best.is_empty():
 		card.add_child(UIKit.label("Sem títulos ainda.", "Small", true))
@@ -163,5 +164,5 @@ static func club_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.label("Títulos que mais pesam", "Caps"))
 		for i in mini(3, best.size()):
 			var t: Dictionary = best[i]
-			card.add_child(UIKit.kv("%dx %s" % [int(t["n"]), Reputation.comp_name(w, String(t["k"]))], "%d pts cada" % int(round(float(t["v"])))))
+			card.add_child(UIKit.kv("%dx %s" % [int(t["n"]), Reputation.comp_name(w, String(t["k"]))], Reputation.label(Reputation.title_rep(String(t["k"])))))
 	return UIKit.card_panel(card)

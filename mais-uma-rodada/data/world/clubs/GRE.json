@@ -32,10 +32,7 @@
 				"text2": "PIRAEUS",
 				"border": "thin"
 			},
-			"rivals": [
-				"GRE_ATH",
-				"GRE_AEN"
-			]
+			"rivals": ["GRE_ATH", "GRE_AEN", "GRE_DIK"]
 		},
 		{
 			"key": "GRE_ATH",

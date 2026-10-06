@@ -148,7 +148,7 @@ func _job_card(w: GameWorld) -> Control:
 	else:
 		card.add_child(UIKit.section("Seu cargo"))
 		card.add_child(UIKit.label("Você comanda apenas o %s." % w.user_club().short_name, "", true))
-		card.add_child(UIKit.kv("Sua reputação", str(int(round(People.manager_rep(w))))))
+		card.add_child(UIKit.kv("Sua reputação", Reputation.label(People.manager_rep(w))))
 	var offers: Array = NationalCoach.offers(w)
 	if not offers.is_empty():
 		card.add_child(UIKit.section("Convites"))

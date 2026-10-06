@@ -359,6 +359,16 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 	var u := w.user_club()
 	# ~event=tipo: monta um evento desse tipo (EventManager.KINDS) para a captura.
 	if kind.begins_with("event="):
+		if kind.begins_with("event=youth_"):
+			# Dilemas da base: prepara um garoto de 16+ com o assédio, a saudade e o pai do caso.
+			YouthManager.ensure_academy(w)
+			for kp: Player in w.academy.values():
+				if kp.age(w.year) >= 16:
+					var e := YouthLife.of(w, kp)
+					e["ag"] = 75.0
+					e["hs"] = 60.0
+					e["fm"] = "pai"
+					break
 		var ev := EventManager._build(w, kind.substr(6))
 		if ev.is_empty():
 			print("evento sem candidato: ", kind.substr(6))
@@ -373,6 +383,49 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 		UIManager.close_all_modals()
 		return
 	match kind:
+		"kid":
+			# Ficha de um garoto da base (Vida na base: contrato, família, corpo).
+			YouthManager.ensure_academy(w)
+			var kid: Player = null
+			for kp: Player in w.academy.values():
+				if kp.age(w.year) >= 16 and (kid == null or kp.potential > kid.potential):
+					kid = kp
+			UIManager.goto("academy")
+			await _frames(8)
+			_screen().call("_actions", kid)
+			await _frames(8)
+			await _shot(prefix + "kid")
+			UIManager.close_all_modals()
+			return
+		"interview":
+			# Entrevista de emprego (JobMarket): marca a entrevista num clube da liga e abre a conversa.
+			var target: Club = null
+			for oc: Club in w.clubs_in_league(u.league_id):
+				if oc.id != u.id and (target == null or oc.reputation > target.reputation):
+					target = oc
+			JobMarket.data(w)["apps"][target.id] = {"y": w.year, "st": "ent"}
+			TalkDialog.open("interview", target.id)
+			await _frames(8)
+			await _shot(prefix + "interview")
+			UIManager.close_all_modals()
+			return
+		"models":
+			UIManager.goto("tactics")
+			await _frames(8)
+			_screen().call("_models_sheet")
+			await _frames(8)
+			await _shot(prefix + "models")
+			UIManager.close_all_modals()
+			return
+		"unemployed":
+			JobMarket.resign(w)
+			UIManager.goto("hub")
+			await _frames(8)
+			await _shot(prefix + "unemployed_hub")
+			UIManager.push("jobs")
+			await _frames(8)
+			await _shot(prefix + "unemployed_jobs")
+			return
 		"confirm":
 			UIManager.confirm("Apagar o espaço 2?", "Isso apaga o Coritiba para sempre, incluindo a cópia de segurança.", "Apagar", func(): pass)
 		"event":

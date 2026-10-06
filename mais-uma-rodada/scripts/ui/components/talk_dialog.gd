@@ -24,6 +24,8 @@ static func _render(root: VBoxContainer, conv: Dictionary, on_done: Callable) ->
 	var p: Player = w.player(int(conv.get("p", -1)))
 	if p != null:
 		head.add_child(UIKit.portrait(p, w.club(p.club_id), w.year, 72))
+	elif String(conv["k"]) == "interview" and w.club(int(conv["t"])) != null:
+		head.add_child(UIKit.crest(w.club(int(conv["t"])), 72))
 	else:
 		head.add_child(UIKit.icon_rect(_icon(String(conv["k"])), 44, UIColors.ACCENT))
 	var col := UIKit.vbox(0)
@@ -52,10 +54,27 @@ static func _render(root: VBoxContainer, conv: Dictionary, on_done: Callable) ->
 			for t in fx:
 				box.add_child(UIKit.label("• " + String(t), "Small", true))
 			root.add_child(UIKit.card_panel(box))
+		if String(conv["k"]) == "interview" and conv["d"].get("offer", false):
+			var oc := w.club(int(conv["t"]))
+			root.add_child(UIKit.button("Assinar com o %s" % oc.short_name, "PrimaryButton", func():
+				UIManager.close_modal()
+				JobMarket.accept(w, oc.id)
+				GameManager.save_now()
+				Sfx.play("sign")
+				UIManager.toast("Bem-vindo ao %s!" % oc.short_name, UIColors.GREEN)
+				UIManager.goto("hub")))
+			root.add_child(UIKit.button("Pensar com calma", "GhostButton", func():
+				UIManager.close_modal()
+				GameManager.save_now()
+				if on_done.is_valid():
+					on_done.call()))
+			return
 		root.add_child(UIKit.button("Fechar", "PrimaryButton", func():
 			UIManager.close_modal()
 			GameManager.save_now()
-			if on_done.is_valid():
+			if w.stats.has("fired"):
+				UIManager.goto("hub") # pediu demissão (ou foi demitido) na conversa
+			elif on_done.is_valid():
 				on_done.call()))
 		return
 	root.add_child(UIKit.section_header("Sua resposta"))
@@ -137,4 +156,6 @@ static func _icon(kind: String) -> String:
 			return "whistle"
 		"press":
 			return "news"
+		"interview":
+			return "whistle"
 	return "info"

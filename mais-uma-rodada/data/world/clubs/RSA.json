@@ -26,7 +26,7 @@
 				"symbol": "sunrise",
 				"sc": "#006437"
 			},
-			"rivals": []
+			"rivals": ["RSA_BUC"]
 		},
 		{
 			"key": "RSA_AMA",
@@ -81,9 +81,7 @@
 				"symbol": "skull",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"RSA_AMA"
-			]
+			"rivals": ["RSA_AMA", "RSA_BRZ"]
 		},
 		{
 			"key": "RSA_STE",

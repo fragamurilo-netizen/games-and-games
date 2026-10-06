@@ -41,7 +41,7 @@ static func _pick(world: GameWorld, arr: Array) -> String:
 
 
 ## Abre uma conversa. kind: "player" (t = id do jogador), "board", "staff" (t = índice do cargo),
-## "fans", "coach" (t = id do clube), "press".
+## "fans", "coach" (t = id do clube), "press", "interview" (t = id do clube; JobMarket).
 static func start(world: GameWorld, kind: String, target: int = -1) -> Dictionary:
 	People.ensure(world)
 	match kind:
@@ -57,6 +57,8 @@ static func start(world: GameWorld, kind: String, target: int = -1) -> Dictionar
 			return AmbientStorytelling.enrich_conversation(world, _coach_start(world, target), kind, target)
 		"press":
 			return AmbientStorytelling.enrich_conversation(world, _press_start(world), kind, target)
+		"interview":
+			return JobMarket.interview_start(world, target)
 	var c := _new(kind, target, "", "")
 	_finish(c)
 	return c
@@ -83,6 +85,8 @@ static func choose(world: GameWorld, conv: Dictionary, opt_id: String) -> void:
 			_coach_choose(world, conv, opt_id)
 		"press":
 			_press_choose(world, conv, opt_id)
+		"interview":
+			JobMarket.interview_choose(world, conv, opt_id)
 
 
 static func _cooldown_left(world: GameWorld, key: String, cd: int) -> int:
@@ -556,6 +560,7 @@ static func _board_start(world: GameWorld) -> Dictionary:
 	]
 	if club.board_confidence < 50.0:
 		opts.append({"id": "tempo", "t": "Pedir tempo e paciência", "hint": "Pode segurar o cargo por alguns jogos"})
+	opts.append({"id": "sair", "t": "Pedir demissão", "hint": "Você deixa o clube e procura outro emprego"})
 	opts.append({"id": "bye", "t": "Encerrar a reunião", "hint": ""})
 	conv["opts"] = opts
 	return conv
@@ -618,7 +623,26 @@ static func _board_choose(world: GameWorld, conv: Dictionary, id: String) -> voi
 						_fx(conv, "Confiança da diretoria +5 · relação com o presidente melhorou")
 			_finish(conv)
 			return
+		"sair":
+			if id == "sim":
+				_say(conv, "npc", _pick(world, ["Se é a sua decisão, respeito. Obrigado pelo trabalho, %s." % world.manager_name,
+					"Lamento. As portas daqui ficam abertas para você.", "Uma pena. Boa sorte no próximo desafio."]))
+				JobMarket.resign(world)
+				conv["d"]["resigned"] = true
+				_fx(conv, "Você não é mais o técnico do %s" % club.short_name)
+			else:
+				_say(conv, "npc", "Ótimo. Então vamos trabalhar.")
+				People.add_pres_rel(world, -1.0)
+			_finish(conv)
+			return
 		"topics":
+			if id == "sair":
+				conv["stage"] = "sair"
+				_say(conv, "npc", _pick(world, ["Pedir demissão? Pense bem, %s. Tem certeza?" % world.manager_name, "Você quer sair? Agora? Tem certeza?"]))
+				conv["opts"] = [
+					{"id": "sim", "t": "\"Tenho. Entrego o cargo.\"", "hint": "Você fica sem clube e escolhe o próximo emprego"},
+					{"id": "nao", "t": "\"Esqueça. Foi um momento ruim.\""}]
+				return
 			if id == "bye":
 				_say(conv, "npc", "Bom trabalho. Até a próxima.")
 				_finish(conv)

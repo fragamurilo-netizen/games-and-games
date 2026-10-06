@@ -11,7 +11,7 @@
 			"city": "Napoli",
 			"founded": 1926,
 			"league": "ITA1",
-			"rep": 88,
+			"rep": 86,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#12A0D7",
@@ -42,7 +42,7 @@
 			"city": "Milano",
 			"founded": 1908,
 			"league": "ITA1",
-			"rep": 91,
+			"rep": 90,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#0068A8",
@@ -79,7 +79,7 @@
 			"city": "Milano",
 			"founded": 1899,
 			"league": "ITA1",
-			"rep": 88,
+			"rep": 89,
 			"arch": "rico_promovido",
 			"colors": [
 				"#FB090B",
@@ -113,7 +113,7 @@
 			"city": "Torino",
 			"founded": 1897,
 			"league": "ITA1",
-			"rep": 90,
+			"rep": 89,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#FFFFFF",
@@ -135,10 +135,7 @@
 				"stars": 3,
 				"border": "thin"
 			},
-			"rivals": [
-				"ITA_TGR",
-				"ITA_MNZ"
-			]
+			"rivals": ["ITA_TGR", "ITA_MNZ", "ITA_FIR"]
 		},
 		{
 			"key": "ITA_BER",
@@ -172,7 +169,7 @@
 				"text2": "BERGAMO",
 				"tc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["ITA_RGR"]
 		},
 		{
 			"key": "ITA_RGR",
@@ -200,9 +197,7 @@
 				"sc": "#F0BC42",
 				"border": "gold"
 			},
-			"rivals": [
-				"ITA_RBC"
-			]
+			"rivals": ["ITA_RBC", "ITA_NAP", "ITA_BER"]
 		},
 		{
 			"key": "ITA_RBC",
@@ -262,7 +257,7 @@
 				"sc": "#E30613",
 				"border": "thick"
 			},
-			"rivals": []
+			"rivals": ["ITA_TBN", "ITA_BGN"]
 		},
 		{
 			"key": "ITA_BGN",
@@ -294,7 +289,7 @@
 				"c3": "#A21C26",
 				"border": "thin"
 			},
-			"rivals": []
+			"rivals": ["ITA_FIR"]
 		},
 		{
 			"key": "ITA_COM",

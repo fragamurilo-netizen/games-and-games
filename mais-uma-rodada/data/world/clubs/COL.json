@@ -27,9 +27,7 @@
 				"initials": "AN",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"COL_POD"
-			]
+			"rivals": ["COL_POD", "COL_EMB"]
 		},
 		{
 			"key": "COL_EMB",
@@ -58,9 +56,7 @@
 				"c2": "#FFFFFF",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"COL_CAR"
-			]
+			"rivals": ["COL_CAR", "COL_VRD"]
 		},
 		{
 			"key": "COL_ESC",

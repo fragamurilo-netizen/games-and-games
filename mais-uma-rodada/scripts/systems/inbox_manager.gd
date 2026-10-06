@@ -253,6 +253,7 @@ static func after_user_turn(world: GameWorld, report: Dictionary, entry: Diction
 	_match_report(world, entry)
 	var turn := world.current_turn()
 	var club := world.user_club()
+	Scouting.tick(world)
 	if turn > 0 and turn % SCOUT_EVERY == 0:
 		scout_report(world)
 	if turn > 0 and turn % TREND_EVERY == 0:

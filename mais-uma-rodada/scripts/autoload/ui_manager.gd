@@ -41,10 +41,12 @@ const SCREENS := {
 	"compare": "res://scenes/screens/compare.tscn",
 	"coach": "res://scenes/screens/coach.tscn",
 	"coach_moves": "res://scenes/screens/coach_moves.tscn",
+	"jobs": "res://scenes/screens/jobs.tscn",
 	"xray": "res://scenes/screens/xray.tscn",
 	"rivalry": "res://scenes/screens/rivalry.tscn",
 	"reputation": "res://scenes/screens/reputation.tscn",
 	"team_stats": "res://scenes/screens/team_stats.tscn",
+	"league_stats": "res://scenes/screens/league_stats.tscn",
 	"club_records": "res://scenes/screens/club_records.tscn",
 	"tactics": "res://scenes/screens/prematch.tscn",
 }

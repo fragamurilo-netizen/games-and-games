@@ -84,6 +84,8 @@ func _hero(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	nrow.add_child(UIKit.flag(String(co["nat"]), 34))
 	nrow.add_child(UIKit.label("%s · %d anos" % [DatabaseManager.nation_name(String(co["nat"])), w.year - int(co.get("by", w.year - 50))], "Small", true))
 	col.add_child(nrow)
+	if club != null and w.is_user_club(club.id) and not bool(co.get("int", false)):
+		col.add_child(UIKit.label(Languages.coach_text(w), "Small", true))
 	var pills := UIKit.flow(6)
 	pills.add_child(UIKit.pill(People.style_name(String(co["st"])).to_upper(), UIColors.ACCENT, 16))
 	pills.add_child(UIKit.pill(CoachStories.temper_name(w, co).to_upper(), UIColors.BLUE, 16))
@@ -114,7 +116,7 @@ func _work(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	row.add_child(UIKit.stat("%d-%d-%d" % [int(co.get("w", 0)), int(co.get("d", 0)), int(co.get("l", 0))], "V-E-D"))
 	row.add_child(UIKit.stat("%d%%" % int(round(100.0 * (int(co.get("w", 0)) * 3 + int(co.get("d", 0))) / maxf(1.0, games * 3.0))) if games > 0 else "—", "aproveitamento"))
 	row.add_child(UIKit.stat(_stars(float(co.get("sk", 50.0))), "nível"))
-	row.add_child(UIKit.stat(str(int(round(float(co.get("rep", 50.0))))), "reputação"))
+	row.add_child(UIKit.stat(Reputation.label(float(co.get("rep", 50.0))), "reputação"))
 	card.add_child(row)
 	var job := float(co.get("job", 60.0))
 	var jl := "Prestigiado" if job >= 75.0 else ("Estável" if job >= 50.0 else ("Pressionado" if job >= 30.0 else "Cargo balançando"))

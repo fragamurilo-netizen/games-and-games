@@ -325,10 +325,10 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 			if code != "apo":
 				pp["free"].append(old)
 	# Interino: no meio do ano, o auxiliar segura o time por alguns jogos enquanto o clube procura.
-	if forced.is_empty() and reason in ["resultados", "res"] and r.randf() < 0.45:
+	if forced.is_empty() and reason in ["resultados", "res"] and r.randf() < 0.6:
 		var it := _new_coach(world, r, club.nation, club.reputation - 14.0, club.archetype)
 		it["int"] = true
-		it["left"] = r.randi_range(1, 3)
+		it["left"] = r.randi_range(2, 4)
 		it["c"] = club.id
 		it["since"] = world.year
 		it["job"] = 55.0
@@ -423,7 +423,8 @@ static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_
 		return
 	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio",
 		"usuario": "após a saída de %s" % world.manager_name, "res": "que pediu demissão", "efetivo": "que era interino",
-		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube"}.get(reason, "")
+		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube",
+		"ferida": "que não resistiu depois de %s" % note}.get(reason, "")
 	var nm := String(new_coach["n"])
 	var title := ""
 	var body := ""
@@ -1054,10 +1055,13 @@ static func _maybe_offer_user(world: GameWorld, r: RandomNumberGenerator, c: Clu
 	if pp.has("offer"):
 		return
 	var u := world.user_club()
-	if c.is_pool() or c.reputation <= u.reputation + 2.0 or c.reputation > manager_rep(world) + 22.0 or c.nation != u.nation and r.randf() < 0.6:
-		return
-	if r.randf() > 0.35:
-		return
+	# Quem deixou o nome à disposição recebe a ligação primeiro (se o perfil servir).
+	var watched := JobMarket.watching(world, c.id) and JobMarket.fit(world, c) >= 0.3
+	if not watched:
+		if c.is_pool() or c.reputation <= u.reputation + 2.0 or c.reputation > manager_rep(world) + 22.0 or c.nation != u.nation and r.randf() < 0.6:
+			return
+		if r.randf() > 0.35:
+			return
 	pp["offer"] = {"c": c.id, "until": world.current_turn() + 3}
 	InboxManager.on_job_offer(world, c)
 	NewsManager.post_raw(world, "%s sonda %s" % [c.short_name, world.manager_name],
@@ -1091,10 +1095,7 @@ static func accept_offer(world: GameWorld) -> void:
 	if o.is_empty():
 		return
 	data(world).erase("offer")
-	var old := world.user_club()
-	BoardManager.take_job(world, int(o["c"]))
-	NewsManager.post_raw(world, "%s deixa o %s" % [world.manager_name, old.short_name],
-		"A torcida do %s não perdoou a saída no meio da temporada." % old.short_name, old.id, -1, NewsEvent.IMP_HIGH, "tecnicos")
+	JobMarket.accept(world, int(o["c"]))
 
 
 ## Depois de cada jogo do usuário. Retorna os pedidos de conversa novos.
@@ -1224,6 +1225,8 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 		_column(world, r, f, result)
 	# Ultimato e demissão no meio da temporada
 	_check_job(world, r)
+	# Clube com vaga que pode ligar para o usuário
+	JobMarket.tick(world, r)
 	# Pedidos de conversa
 	return _requests(world, r)
 
@@ -1446,6 +1449,9 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			continue
 		var goal := SeasonManager.goal_of(world, c.id)
 		var diff := int(goal[1]) - int(h["p"])
+		# Perder o título para o rival ou a final pesa como terminar abaixo da meta.
+		var sting := Aftermath.sting(world, c)
+		var sdiff := diff - int(round(float(sting["v"])))
 		co["rep"] = clampf(float(co["rep"]) + clampf(diff * 0.8, -5.0, 6.0) + (6.0 if int(h["p"]) == 1 else 0.0), 5.0, 99.0)
 		co["sk"] = clampf(float(co["sk"]) + r.randf_range(-1.0, 1.5), 15.0, 97.0)
 		CoachCareer.bank(co)
@@ -1458,10 +1464,10 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			replace_coach(world, c, "efetivo") # a temporada acabou: o clube escolhe um técnico
 		elif age >= 70 and r.randf() < 0.5:
 			replace_coach(world, c, "")
-		elif diff <= -3 and r.randf() < 0.55 / pres_pat:
-			replace_coach(world, c, "temporada")
+		elif sdiff <= -3 and r.randf() < 0.55 / pres_pat:
+			replace_coach(world, c, "ferida" if diff > -3 else "temporada", String(sting["why"]))
 		else:
-			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + diff * 2.0, 20.0, 90.0)
+			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + sdiff * 2.0, 20.0, 90.0)
 	CoachCareer.retire_free(world, r)
 	# Presidentes: fim de mandato e eleições
 	for cid in pp["pres"]:

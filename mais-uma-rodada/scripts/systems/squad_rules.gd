@@ -9,6 +9,13 @@ const EU := ["ESP", "POR", "FRA", "GER", "ITA", "NED", "BEL", "AUT", "CRO", "CZE
 	"ROU", "SVK", "SVN", "FIN", "BUL", "LUX", "EST", "LVA", "LTU", "CYP", "MLT", "NOR", "ISL", "SUI", "LIE"]
 
 
+## Acordo de Cotonou (UE com os países da África, do Caribe e do Pacífico): na Espanha, os
+## jogadores desses países não contam como extracomunitários (foreign_limit.exempt = ["ACP"]).
+const ACP := ["SEN", "NGA", "GHA", "CIV", "CMR", "MLI", "BFA", "GUI", "GAB", "COD", "CGO", "ANG", "MOZ", "CPV", "GNB",
+	"EQG", "TOG", "BEN", "NIG", "GAM", "SLE", "LBR", "ZAM", "ZIM", "RSA", "KEN", "TAN", "UGA", "ETH", "MAD", "BDI",
+	"RWA", "SUD", "JAM", "TRI", "HAI", "DOM", "CUB", "BAR", "GUY", "SUR", "FIJ", "PNG", "NZL"]
+
+
 static func limit(club: Club) -> Dictionary:
 	return club.league_cfg().get("foreign_limit", {})
 
@@ -18,8 +25,10 @@ static func is_foreign(p: Player, club: Club, scope: String) -> bool:
 	if nationalities.has(club.nation):
 		return false
 	if scope == "non_eu":
+		var exempt: Array = limit(club).get("exempt", [])
 		for nation in nationalities:
 			if EU.has(nation): return false
+			if exempt.has("ACP") and ACP.has(nation): return false
 	return true
 
 

@@ -18,6 +18,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	Valuation.load_scale()
 	Valuation.shift = 0.0
 	var w := GameWorld.new()
+	Economy.ensure(w) # câmbio de partida antes de qualquer conta de receita
 	w.world_seed = seed_value
 	w.world_type = world_type
 	w.rng.seed = seed_value
@@ -42,6 +43,8 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	w.stats["kits_real"] = 1 # uniformes reais já vêm dos dados (ClubGenerator.upgrade_kits)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
+	Relations.generate(w) # amizades, rixas, irmãos, mentores e ídolos de um mundo que já existia
+	Languages.init_world(w) # línguas da terra e as aprendidas nas passagens pelo exterior
 	if not SquadStory.keep:
 		SquadStory.roles.clear()
 	HeartClubs.ensure_all(w)
@@ -51,6 +54,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	DropIns.apply_world(w) # escudos e camisas soltos nas pastas dos pacotes
 	if world_type == "padrao":
 		WorldEvents.seed_real_situation(w) # donos, SAFs e crises que já existem no começo do jogo
+	LeagueReputation.ensure(w) # coeficientes de partida das ligas
 	compact_all(w)
 	return w
 

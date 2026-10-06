@@ -25,6 +25,8 @@ var _status: Label
 var _bar: ProgressBar
 var _list: VBoxContainer
 var _new_events: Array = []
+var _log_start := 0
+var _routine_start: Array = [0, 0]
 
 
 ## Folha com as opções de simulação.
@@ -49,11 +51,38 @@ static func open(done: Callable) -> void:
 			UIManager.close_modal()
 			start(m, n, done)))
 	v.add_child(UIKit.menu_group(rows))
+	v.add_child(UIKit.section_header("Quem decide"))
+	var mode_box := UIKit.vbox(0)
+	_mode_rows(mode_box)
+	v.add_child(mode_box)
 	v.add_child(UIKit.section_header("Opções"))
-	v.add_child(_toggle("Parar em decisões, propostas e lesões", stop_on_events, func(on: bool): stop_on_events = on))
+	if Autopilot.mode == Autopilot.MODE_OFF:
+		v.add_child(_toggle("Parar em decisões, propostas e lesões", stop_on_events, func(on: bool): stop_on_events = on))
 	v.add_child(_toggle("Assistente escala o time a cada jogo", auto_lineup, func(on: bool): auto_lineup = on))
 	v.add_child(UIKit.button("Cancelar", "GhostButton", func(): UIManager.close_modal()))
 	UIManager.show_modal(v, true)
+
+
+## Os três jeitos de delegar ao auxiliar (Autopilot), como linhas de escolha única.
+static func _mode_rows(box: VBoxContainer) -> void:
+	UIKit.clear(box)
+	for i in Autopilot.MODE_NAMES.size():
+		var h := UIKit.hbox(12)
+		var on := i == Autopilot.mode
+		h.add_child(UIKit.icon_rect("check" if on else "minus", 24, UIColors.ACCENT if on else UIColors.DIM))
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(String(Autopilot.MODE_NAMES[i]), "H3"))
+		col.add_child(UIKit.label(String(Autopilot.MODE_DESC[i]), "Muted", true))
+		h.add_child(col)
+		var idx := i
+		var row := UIKit.tap_row(h, func():
+			Autopilot.mode = idx
+			if idx != Autopilot.MODE_OFF:
+				auto_lineup = true
+			_mode_rows(box))
+		row.custom_minimum_size.y = UITokens.H_ROW
+		box.add_child(row)
 
 
 static func _toggle(text: String, on: bool, cb: Callable) -> Control:
@@ -93,6 +122,8 @@ func _ready() -> void:
 	add_child(sc)
 	add_child(UIKit.button("Parar", "GhostButton", func(): _stop_reason = "Simulação interrompida."))
 	_start_month = w.season.month_of(w.season.day)
+	_log_start = Autopilot.log_mark(w)
+	_routine_start = Autopilot.routine(w)
 	var league := w.league_of(w.user_club_id)
 	if league != null and int(league.table[w.user_club_id]["pl"]) > 0:
 		_pos_before = CompetitionManager.position_of(league, w.user_club_id)
@@ -170,6 +201,7 @@ func _step() -> void:
 				return
 	if auto_lineup and club.sheet != null:
 		club.sheet = ClubAI.auto_sheet(w, club, club.sheet.formation)
+		Autopilot.prepare_match(w, club) # o auxiliar estuda o rival e ajusta o plano
 	else:
 		ClubAI.validate_user_sheet(w, club)
 	_offers_before = TransferManager.pending_offers(w).size()
@@ -197,6 +229,9 @@ func _after_step(report: Dictionary) -> void:
 	_new_events.append_array(report.get("events", []))
 	if _stop_reason != "":
 		return # "Parar" tocado durante a data
+	if Autopilot.mode != Autopilot.MODE_OFF:
+		_stop_reason = Autopilot.handle(w)
+		return
 	if stop_on_events:
 		if not report.get("events", []).is_empty():
 			_stop_reason = "Uma decisão espera por você."
@@ -283,6 +318,28 @@ func _finish() -> void:
 			add_child(sc)
 		else:
 			add_child(list)
+	var done_by_aux := Autopilot.log_since(w, _log_start)
+	var rt := Autopilot.routine(w)
+	var press := int(rt[0]) - int(_routine_start[0])
+	var talks := int(rt[1]) - int(_routine_start[1])
+	if not done_by_aux.is_empty() or press + talks > 0:
+		add_child(UIKit.label("O que %s decidiu" % Assistant.name_of(w), "Section"))
+		if press + talks > 0:
+			add_child(UIKit.label("Atendeu %s e %s no seu lugar." % [Fmt.n_of(press, "%d coletiva", "%d coletivas"), Fmt.n_of(talks, "%d conversa com jogador", "%d conversas com jogadores")], "Muted", true))
+		var box := UIKit.vbox(4)
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for e: Dictionary in done_by_aux:
+			box.add_child(UIKit.label("%s · %s" % [String(e["d"]), String(e["w"])], "H3", true))
+			if String(e["r"]) != "":
+				box.add_child(UIKit.label(String(e["r"]), "Small", true))
+		if done_by_aux.size() > 4:
+			var sc2 := ScrollContainer.new()
+			sc2.custom_minimum_size.y = 260
+			sc2.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+			sc2.add_child(box)
+			add_child(sc2)
+		else:
+			add_child(box)
 	var pending := EventManager.pending(w)
 	if not pending.is_empty():
 		var ev: Dictionary = pending[0]

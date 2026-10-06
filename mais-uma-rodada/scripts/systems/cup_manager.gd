@@ -820,7 +820,7 @@ static func _setup_state_cups(world: GameWorld, s: SeasonState) -> void:
 
 static func _coef(world: GameWorld, cid: int) -> float:
 	var c := world.club(cid)
-	return c.reputation + float(DatabaseManager.nation(c.nation).get("coef", 40)) * 0.1
+	return c.reputation + LeagueReputation.coef(c.nation) * 0.1
 
 
 static func _draw_groups(world: GameWorld, s: SeasonState, cup: Cup, n_groups: int) -> void:

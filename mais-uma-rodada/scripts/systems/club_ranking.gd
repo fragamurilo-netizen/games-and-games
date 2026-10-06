@@ -18,7 +18,7 @@ const CONFED_WEIGHT := {"UEFA": 1.0, "CONMEBOL": 0.8, "AFC": 0.55, "CONCACAF": 0
 ## Força de uma liga para o ranking (1.0 = primeira divisão do país mais forte).
 static func league_strength(league_id: String) -> float:
 	var cfg := DatabaseManager.league_cfg(league_id)
-	var coef := float(DatabaseManager.nation(String(cfg.get("nation", ""))).get("coef", 40)) / 100.0
+	var coef := LeagueReputation.coef(String(cfg.get("nation", ""))) / 100.0 # muda com o tempo
 	var tier := clampi(int(cfg.get("tier", 1)), 1, TIER_WEIGHT.size())
 	return coef * float(TIER_WEIGHT[tier - 1])
 

@@ -120,7 +120,7 @@ static func precision(world: GameWorld, p: Player) -> float:
 ## carrega um erro (olheiros erram): uma parte do ruído nunca some.
 static func estimate(world: GameWorld, p: Player) -> int:
 	var pr := precision(world, p)
-	var err := float(p.scout_noise) * (1.0 - pr * 0.65)
+	var err := float(p.scout_noise) * (1.0 - pr * 0.65) + YouthLife.estimate_bias(world, p, pr) # corpo adiantado engana
 	return clampi(int(round(p.potential + err)), p.overall, 94)
 
 
@@ -345,14 +345,17 @@ static func promote(world: GameWorld, p: Player, loaned: bool = false) -> String
 		return "Ele não está mais na base."
 	if not loaned and club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return "Elenco cheio: libere uma vaga antes de subir %s." % p.display_name()
+	var pro_end := int(YouthLife.of(world, p)["pc"]) if YouthLife.has_pro(world, p) else 0
+	var pro_wage := p.wage if pro_end > 0 else 0
+	YouthLife.forget(world, p.id)
 	world.academy.erase(p.id)
 	var years_home := years_in(world, p)
 	p.reset_season_stats()
 	p.club_id = -1
 	PlayerGenerator.sign_to_club(world, world.rng, p, club, false)
 	p.squad_status = Player.STATUS_PROSPECT
-	p.contract_end = world.year + 3
-	p.wage = Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5)))
+	p.contract_end = maxi(world.year + 3, pro_end)
+	p.wage = maxi(pro_wage, Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5))))
 	p.morale = minf(100.0, p.morale + 12.0)
 	Valuation.update_value(p, world.year)
 	world.stat_add("youth_promoted")
@@ -372,6 +375,7 @@ static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: fl
 	if not world.academy.has(p.id) or buyer == null:
 		return "Negócio desfeito."
 	var years_home := years_in(world, p)
+	YouthLife.forget(world, p.id)
 	world.academy.erase(p.id)
 	p.reset_season_stats()
 	p.club_id = -1
@@ -394,6 +398,7 @@ static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: fl
 
 
 static func release(world: GameWorld, p: Player) -> void:
+	YouthLife.forget(world, p.id)
 	world.academy.erase(p.id)
 
 
@@ -508,10 +513,11 @@ static func weekly(world: GameWorld) -> void:
 			age_f *= 1.2
 		elif age <= 17 and p.dev_curve == Player.CURVE_TARDIO:
 			age_f *= 0.8
-		var budget := gap * 0.005 * age_f * YouthAcademy.facility_growth(club) * play_factor(world, p) * focus * p.trait_mult("dev_mult") * YouthAcademy.growth_mult(world, p) + p.dev_acc
+		var budget := gap * 0.005 * age_f * YouthAcademy.facility_growth(club) * play_factor(world, p) * focus * p.trait_mult("dev_mult") * YouthAcademy.growth_mult(world, p) * YouthLife.growth_mult(world, p) + p.dev_acc
 		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget), YouthAcademy.growth_bias(world, p))
 		p.morale = clampf(p.morale + (65.0 - p.morale) * 0.1, 0.0, 100.0)
 		YouthAcademy.weekly_side(world, p)
+	YouthLife.weekly(world) # empresários, saudade, contrato profissional
 
 
 ## Balanço do ano de cada garoto: estirão (ganha potencial) ou estagnação (perde).
@@ -573,7 +579,7 @@ static func yearly_review(world: GameWorld) -> Array:
 ## Fim de temporada: balanço, todos envelhecem um ano; quem passou da idade sai; chegam novos garotos.
 ## Retorna {"left": [nomes], "new": [Player], "changes": [{id, name, up, d, why}], "cost": custo da captação}.
 static func season_turnover(world: GameWorld) -> Dictionary:
-	var out := {"left": [], "new": [], "changes": [], "cost": 0}
+	var out := {"left": [], "quit": [], "new": [], "changes": [], "cost": 0}
 	if not world.has_user():
 		return out
 	var club := world.user_club()
@@ -584,6 +590,11 @@ static func season_turnover(world: GameWorld) -> Dictionary:
 		out["changes"].append({"id": cp.id, "name": cp.display_name(), "up": ch["up"], "d": ch["d"], "why": ch["why"]})
 	world.year += 1
 	YouthAcademy.log_season(world, world.year - 1)
+	world.year -= 1
+	YouthLife.generation_bonds(world) # quem dividiu a categoria no ano
+	for dq in YouthLife.dropouts(world):
+		out["quit"].append("%s: %s" % [dq[0], String(dq[1])])
+	world.year += 1
 	for p: Player in world.academy.values().duplicate():
 		p.reset_season_stats()
 		if p.age(world.year) > MAX_AGE:
@@ -593,6 +604,7 @@ static func season_turnover(world: GameWorld) -> Dictionary:
 			world.add_player(p) # vira agente livre: outro clube pode apostar nele
 			out["left"].append(p.display_name())
 	dismiss_candidates(world)
+	YouthLife.prune(world)
 	var cost := scouting_cost(world)
 	if cost > 0:
 		club.add_ledger("investimentos", -cost)
@@ -723,7 +735,7 @@ static func pick_team(world: GameWorld, key: String, exclude: Dictionary = {}, r
 			for p: Player in src:
 				if taken.has(p.id):
 					continue
-				var s: float = p.rating_at(slot) + rng.randfn(0.0, 1.6) - p.stats[Player.S_STARTS] * 0.04
+				var s: float = p.rating_at(slot) + YouthLife.pick_bonus(world, p) + rng.randfn(0.0, 1.6) - p.stats[Player.S_STARTS] * 0.04
 				if si == 1:
 					s -= 2.5 # sobe de categoria quem se destaca
 				if s > best_s:
@@ -734,7 +746,7 @@ static func pick_team(world: GameWorld, key: String, exclude: Dictionary = {}, r
 			continue
 		taken[best.id] = true
 		xi.append([best, slot])
-		total += best.rating_at(slot)
+		total += best.rating_at(slot) + YouthLife.maturity_edge(world, best) # na base, o corpo joga
 	var bench: Array = []
 	for p: Player in pool + extra:
 		if not taken.has(p.id) and bench.size() < 3 and p.best_position() != Pos.GK:

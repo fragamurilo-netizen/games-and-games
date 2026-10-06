@@ -11,9 +11,12 @@ static func confidence(w: GameWorld, p: Player) -> float:
 	var own := w.is_user_club(p.club_id) or w.academy.has(p.id)
 	var skill := People.staff_level(w, "olheiro")
 	if own: return clampf(0.76 + skill * 0.2, 0.78, 0.95)
-	if Scouting.is_scouted(w, p): return clampf(0.58 + skill * 0.25, 0.62, 0.88)
 	var c := w.club(p.club_id)
-	return 0.5 if c != null and c.league_id == w.user_league_id() else 0.28
+	var base := 0.5 if c != null and c.league_id == w.user_league_id() else 0.28
+	# Relatório de olheiro: quanto mais rodadas de observação, mais perto do teto do olheiro.
+	var know := Scouting.knowledge(w, p)
+	if know > 0: return lerpf(base, clampf(0.72 + skill * 0.2, 0.74, 0.92), know / 100.0)
+	return base
 
 static func confidence_name(w: GameWorld, p: Player) -> String:
 	var c := confidence(w,p)

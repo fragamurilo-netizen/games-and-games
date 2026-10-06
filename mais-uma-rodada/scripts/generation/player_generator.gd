@@ -203,6 +203,7 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.height = int(round(RngUtil.gauss(rng, HEIGHT_MEAN[pos] + _height_shift(p.eth) + (float(sig[3]) if not sig.is_empty() else 0.0), 5.0, 163.0, 205.0)))
 	p.weight = Physique.weight_for(rng, p.height, pos, age)
 	_pick_traits(rng, p)
+	BodyGrowth.setup_young(p, world.year) # garoto ainda cresce e ganha massa
 	_generate_attributes(rng, p, target, age, sig[2] if not sig.is_empty() else {})
 	p.signature = String(sig[0]) if not sig.is_empty() else ""
 	p.secondary = _pick_secondary(rng, pos)
@@ -417,12 +418,13 @@ static func _pick_potential(rng: RandomNumberGenerator, ovr: int, age: int) -> i
 ## Potencial de um jovem da base, influenciado pela qualidade da base do clube e pela escola do país.
 static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: int, drift: float = 0.0, nation_bonus: float = 0.0) -> int:
 	var gap := rng.randfn(5.0 + youth_level * 0.05 - drift * 0.8 + nation_bonus, 6.5)
-	var gem_chance := 0.004 + youth_level * 0.0002 + nation_bonus * 0.001
+	var gem_chance := 0.005 + youth_level * 0.0002 + nation_bonus * 0.001
 	if rng.randf() < gem_chance:
 		gap += rng.randf_range(12.0, 20.0)
 	var pot := float(ovr) + maxf(2.0, gap)
-	if pot > 85.0:
-		pot = 85.0 + (pot - 85.0) * 0.6
+	# Acima de 86 cada ponto é raro, mas toda safra mundial tem as suas joias de 90+ (FC/Transfermarkt).
+	if pot > 86.0:
+		pot = 86.0 + (pot - 86.0) * 0.65
 	return clampi(int(round(pot)), ovr + 2, 94)
 
 
@@ -430,11 +432,11 @@ static func youth_potential(rng: RandomNumberGenerator, ovr: int, youth_level: i
 ## a base boa acrescenta um pouco. Acima de 85 cada ponto é mais raro; joia rara em qualquer clube.
 static func intake_potential(rng: RandomNumberGenerator, ovr: int, age: int, youth_level: int, drift: float = 0.0, nation_bonus: float = 0.0) -> int:
 	var gap := rng.randfn(12.0 - (age - 16) * 1.5 + youth_level * 0.04 - drift * 0.8 + nation_bonus, 6.0)
-	if rng.randf() < 0.004 + youth_level * 0.0001 + nation_bonus * 0.001:
+	if rng.randf() < 0.006 + youth_level * 0.0001 + nation_bonus * 0.001:
 		gap += rng.randf_range(8.0, 16.0)
 	var pot := float(ovr) + maxf(3.0, gap)
-	if pot > 85.0:
-		pot = 85.0 + (pot - 85.0) * 0.5
+	if pot > 86.0:
+		pot = 86.0 + (pot - 86.0) * 0.6
 	return clampi(int(round(pot)), ovr + 3, 94)
 
 

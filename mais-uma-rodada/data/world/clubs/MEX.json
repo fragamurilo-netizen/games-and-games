@@ -28,11 +28,7 @@
 				"sc": "#1D3F91",
 				"border": "double"
 			},
-			"rivals": [
-				"MEX_GDL",
-				"MEX_CEM",
-				"MEX_FEL"
-			]
+			"rivals": ["MEX_GDL", "MEX_CEM", "MEX_FEL", "MEX_TOL"]
 		},
 		{
 			"key": "MEX_GDL",
@@ -205,7 +201,7 @@
 				"symbol": "devil",
 				"sc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["MEX_AGU"]
 		},
 		{
 			"key": "MEX_GRR",

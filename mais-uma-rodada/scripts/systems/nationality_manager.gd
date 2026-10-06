@@ -11,6 +11,9 @@ const SPANISH_TWO := ["BRA", "ARG", "URU", "PAR", "CHI", "BOL", "PER", "ECU", "C
 ## discretionary and UK sporting eligibility has a special home-association agreement.
 const YEARS := {"BRA":4, "ESP":10, "ITA":10, "SUI":10, "AUT":10, "DEN":9, "NOR":8, "ARG":2, "URU":5, "PAR":3, "PER":2}
 const DISCRETIONARY := ["KSA", "QAT", "UAE", "BHR", "KUW", "OMA"]
+## Acordos entre países (2026). CPLP: países de língua portuguesa (Brasil naturaliza em 1 ano;
+## Portugal, pela lei de 2025, em 7 anos para a CPLP e a UE e 10 para os demais).
+const CPLP := ["POR", "BRA", "ANG", "MOZ", "CPV", "GNB", "STP", "TLS", "EQG"]
 ## Explicit fictional family routes: these describe generated biography, not population statistics.
 const FAMILY := {
 	"CMR":["FRA","BEL"], "SEN":["FRA"], "CIV":["FRA"], "MLI":["FRA"], "ALG":["FRA"],
@@ -116,6 +119,8 @@ static func years_required(p: Player, nation: String) -> int:
 	if DISCRETIONARY.has(nation) or UK.has(nation): return -1
 	if nation == "ESP" and SPANISH_TWO.has(p.nationality): return 2
 	if nation == "ITA" and SquadRules.EU.has(p.nationality): return 4
+	if nation == "BRA" and CPLP.has(p.nationality): return 1
+	if nation == "POR": return 7 if CPLP.has(p.nationality) or SquadRules.EU.has(p.nationality) else 10
 	return int(YEARS.get(nation, 5))
 
 static func progress(w: GameWorld, p: Player) -> Dictionary:

@@ -194,6 +194,11 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 	elif pf > 1.08:
 		line += " · titular da categoria"
 	v.add_child(UIKit.colored(line, UIColors.ORANGE if pf < 0.95 else UIColors.MUTED, "Small", true))
+	# Vida fora de campo: contrato, família, corpo e assédio (o que a comissão percebe)
+	v.add_child(UIKit.section("Vida na base"))
+	for note in YouthLife.notes(w, p):
+		if String(note) != "":
+			v.add_child(UIKit.label(String(note), "Small", true))
 	# Números da temporada, por competição
 	v.add_child(UIKit.section("Temporada"))
 	if p.stats[Player.S_APPS] > 0:
@@ -254,6 +259,15 @@ func _fill_kid(v: VBoxContainer, p: Player) -> void:
 		UIManager.toast(YouthManager.promote(w, p))
 		GameManager.save_now()
 		refresh(), "up"))
+	if YouthLife.pro_block(w, p) == "":
+		v.add_child(UIKit.button("Assinar contrato profissional", "", func():
+			UIManager.close_modal()
+			UIManager.confirm("Contrato profissional para %s?" % p.display_name(),
+				"Ele segue na base, com salário de %s/mês por %d anos. Protege o clube contra empresários." % [Fmt.money(YouthLife.pro_wage(w, p)), YouthLife.PRO_YEARS],
+				"Assinar", func():
+					UIManager.toast(YouthLife.sign_pro(w, p), UIColors.GREEN)
+					GameManager.save_now()
+					refresh()), "check"))
 	var loan_why := YouthAcademy.loan_block(w, p)
 	var do_loan := func():
 		var r := YouthAcademy.loan_kid(w, p)
