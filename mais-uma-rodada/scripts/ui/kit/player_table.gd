@@ -22,6 +22,8 @@ static func make(w: GameWorld, players: Array, mode: String, state: Dictionary, 
 	var t := DataTable.new()
 	t.row_height = ROW_H
 	t.lead_width = 290.0
+	# O nome continua legível: quando as colunas não cabem, elas rolam em vez de apertar o nome.
+	t.lead_min = 262.0
 	if not state.has("sort") and mode != "market":
 		state["sort"] = "pos"
 		state["desc"] = false

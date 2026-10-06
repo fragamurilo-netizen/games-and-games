@@ -116,9 +116,11 @@ func _wordmark(size: int) -> Control:
 	var h := UIKit.hbox(0)
 	h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var a := UIKit.label("Rodada", "H3")
+	a.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	a.add_theme_font_size_override(&"font_size", size)
 	h.add_child(a)
 	var b := UIKit.colored("Score", UIColors.readable_on(_tint(), [UIColors.BG], 3.0), "H3")
+	b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	b.add_theme_font_size_override(&"font_size", size)
 	h.add_child(b)
 	return h
@@ -128,6 +130,7 @@ func _powered() -> Control:
 	var h := UIKit.hbox(UITokens.S1)
 	h.alignment = BoxContainer.ALIGNMENT_CENTER
 	var l := UIKit.label("Powered by", "Small")
+	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(l)
 	h.add_child(_wordmark(UITokens.F_SMALL + 2))
@@ -565,8 +568,8 @@ func _players(c: VBoxContainer, w: GameWorld, league: League) -> void:
 		_player_state = {"sort": first, "desc": not first in ["fc", "yc", "conc"]}
 	var t := DataTable.new()
 	t.row_height = 80
-	t.lead_width = 260.0
-	t.lead_min = 200.0
+	t.lead_width = 270.0
+	t.lead_min = 236.0
 	t.highlight = func(p: Player) -> bool: return w.is_user_club(p.club_id)
 	t.row_pressed.connect(func(p: Variant): UIManager.push("player", {"id": (p as Player).id}))
 	t.setup(picked, list, _player_state)

@@ -30,6 +30,11 @@ var _origin := "all"
 ## Ordenação da tabela de relatórios dos olheiros.
 var _scout_state := {}
 var _scouted_only := false
+## Olheiros: tipo da próxima missão, foco, liga e o recorte dos relatórios.
+var _job_kind := "perfil"
+var _focus := "geral"
+var _job_league := ""
+var _scout_filter := "all"
 var _listed_only := false
 var _expiring_only := false
 var _query := ""
@@ -136,8 +141,8 @@ func _show_brief(p: Player) -> void:
 		return
 	UIKit.clear(_side)
 	_side.add_child(PlayerBrief.make(world(), p, false, func(): refresh()))
-	if _tab == "scout":
-		_side.add_child(_discard_button(p))
+	if _tab == "scout" or Scouting.is_scouted(world(), p):
+		_side.add_child(ScoutReportView.make(world(), p, func(): refresh()))
 
 
 ## Primeiro jogador de uma lista vai para o painel se nada estiver escolhido.
@@ -642,68 +647,196 @@ func _listed_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 const GROUP_NAMES := ["Todos os setores", "Goleiros", "Defesa", "Meio-campo", "Ataque"]
 
 
-## Olheiros: a próxima missão em linhas que abrem folhas (setor, origem, idade), como o plano da
-## Tática e do Treino; os relatórios na tabela do mercado, com o potencial que o olheiro viu.
+## Olheiros: as missões em campo, a próxima missão em linhas que abrem folhas (como o plano da
+## Tática e do Treino) e os relatórios numa tabela com a recomendação e o quanto já foi visto.
 func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
-	var lvl := People.staff_level(w, "olheiro")
+	var lvl := Scouting.level(w)
 	var q := "excelente" if lvl >= 0.85 else ("bom" if lvl >= 0.6 else ("regular" if lvl >= 0.4 else "fraco"))
-	var ready := Scouting.can_send(w)
-	c.add_child(UIKit.label("Olheiro-chefe %s: observa %s por missão. %s" % [q, Fmt.plural(Scouting.capacity(w), "jogador", "jogadores"),
-		"Pronto para a próxima." if ready else "Está em campo; o relatório chega na próxima rodada."], "Muted", true))
+	var chief := String(People.staff(w).get("olheiro", {}).get("n", ""))
+	var jobs := Scouting.jobs(w)
+	c.add_child(UIKit.label("%s, olheiro-chefe %s. %d de %d missões em campo." % [chief if chief != "" else "Seu olheiro", q, jobs.size(), Scouting.slots(w)], "Muted", true))
+	# Em campo
+	if not jobs.is_empty():
+		var rows: Array = []
+		for job: Dictionary in jobs:
+			rows.append(_job_row(w, job))
+		c.add_child(UIKit.label("Em campo", "Section"))
+		c.add_child(UIKit.menu_group(rows))
+	# Próxima missão
+	if Scouting.can_send(w):
+		c.add_child(_mission_card(w, club))
+	var all := Scouting.reports(w)
+	var list: Array = all
+	match _scout_filter:
+		"rec":
+			list = all.filter(func(p: Player) -> bool: return String(Scouting.verdict(w, p)["grade"]) in ["A", "B"])
+		"new":
+			list = all.filter(func(p: Player) -> bool: return Scouting.is_new(w, p))
+	var head := UIKit.hbox(UITokens.S2)
+	var ttl := UIKit.label("Relatórios (%d)" % all.size(), "Section")
+	ttl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(ttl)
+	c.add_child(head)
+	if all.is_empty():
+		c.add_child(UIKit.state_block("empty", "Nenhum relatório ainda.", "Os jogadores que os olheiros virem aparecem aqui, com a recomendação e o quanto já foram observados."))
+		return
+	var g := ButtonGroup.new()
+	var fl := UIKit.flow(UITokens.S1)
+	for f: Array in [["all", "Todos"], ["rec", "Recomendados"], ["new", "Novos"]]:
+		var key := String(f[0])
+		fl.add_child(UIKit.chip(String(f[1]), _scout_filter == key, g, func():
+			_scout_filter = key
+			refresh()))
+	c.add_child(fl)
+	if list.is_empty():
+		c.add_child(UIKit.label("Ninguém nesse recorte.", "Muted"))
+		return
+	_default_brief(list)
+	if _scout_state.is_empty():
+		_scout_state = {"sort": "rec", "desc": true}
+	var t := PlayerTable.make(w, list, "market", _scout_state, func(p: Player): _open_report(p), _scout_cols(w), "", _wide_table())
+	t.highlight = func(p: Player) -> bool: return _side != null and p.id == _sel
+	c.add_child(t)
+
+
+## Linha de missão em campo: o que procura, em que rodada está e quantos nomes já trouxe.
+func _job_row(w: GameWorld, job: Dictionary) -> Control:
+	var kind := String(job.get("k", "perfil"))
+	var kname: String = {"perfil": "Perfil", "liga": "Liga", "jogador": "Jogador"}.get(kind, "")
+	var found := (job.get("found", []) as Array).size()
+	var sub := "%s · rodada %d de %d" % [kname, mini(int(job["done"]), int(job["len"])), int(job["len"])]
+	if kind != "jogador":
+		sub += " · " + Fmt.plural(found, "nome", "nomes")
+	var jid := int(job["id"])
+	var title := Scouting.job_title(w, job)
+	return UIKit.menu_row("search", title, sub, func():
+		var v := UIKit.vbox(UITokens.S2)
+		v.add_child(UIKit.label(title, "H2", true))
+		v.add_child(UIKit.label(sub, "Muted", true))
+		v.add_child(UIKit.button("Encerrar missão", "SecondaryButton", func():
+			UIManager.close_modal()
+			Scouting.cancel(w, jid)
+			GameManager.save_now()
+			refresh()))
+		v.add_child(UIKit.button("Fechar", "TextButton", func(): UIManager.close_modal()))
+		UIManager.show_modal(v, true))
+
+
+func _mission_card(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 0)
-	card.add_child(UIKit.label("Próxima missão", "Section"))
+	card.add_child(UIKit.label("Nova missão", "Section"))
 	card.add_child(UIKit.gap(UITokens.S1))
-	var origin_name := ""
-	for o in Scouting.ORIGINS:
-		if String(o[0]) == _origin:
-			origin_name = String(o[1])
-	if _origin == "nat":
-		origin_name = "Só %s" % DatabaseManager.nation_name(club.nation)
+	card.add_child(UIKit.segment([["perfil", "Por perfil"], ["liga", "Uma liga"]], _job_kind, func(k: String):
+		_job_kind = k
+		refresh()))
+	card.add_child(UIKit.gap(UITokens.S1))
+	if _job_kind == "liga":
+		if _job_league == "":
+			_job_league = w.user_league_id()
+		var lg := w.league(_job_league)
+		card.add_child(_mission_row("Liga", lg.name if lg != null else "–", func(): _league_sheet(w)))
+	else:
+		var focus_name := ""
+		for f: Array in Scouting.FOCUS:
+			if String(f[0]) == _focus:
+				focus_name = String(f[1])
+		card.add_child(_mission_row("Foco", focus_name, func():
+			var items: Array = []
+			var cur := 0
+			for i in Scouting.FOCUS.size():
+				if String(Scouting.FOCUS[i][0]) == _focus:
+					cur = i
+				items.append([String(Scouting.FOCUS[i][1]), String(Scouting.FOCUS[i][2])])
+			_option_sheet("Foco", items, cur, func(i: int): _focus = String(Scouting.FOCUS[i][0]))))
 	card.add_child(_mission_row("Setor", GROUP_NAMES[_group], func():
 		var items: Array = []
 		for n in GROUP_NAMES:
 			items.append([n, ""])
 		_option_sheet("Setor", items, _group, func(i: int): _group = i)))
-	card.add_child(_mission_row("Origem", origin_name, func():
-		var items: Array = []
-		var cur := 0
-		for i in Scouting.ORIGINS.size():
-			var k := String(Scouting.ORIGINS[i][0])
-			if k == _origin:
-				cur = i
-			var sub: String = {"all": "Onde a rede do clube alcança.", "nat": "Só jogadores de %s." % DatabaseManager.nation_name(club.nation), "for": "Só jogadores de fora do país."}.get(k, "")
-			items.append([String(Scouting.ORIGINS[i][1]), sub])
-		_option_sheet("Origem", items, cur, func(i: int): _origin = String(Scouting.ORIGINS[i][0]))))
-	card.add_child(_mission_row("Idade", "Qualquer" if _age == 0 else "Até %d anos" % int(AGES[_age][1]), func():
-		var items: Array = []
-		for a in AGES:
-			items.append(["Qualquer idade" if int(a[1]) >= 99 else "Até %d anos" % int(a[1]), ""])
-		_option_sheet("Idade", items, _age, func(i: int): _age = i)))
+	if _job_kind == "perfil":
+		var origin_name := ""
+		for o in Scouting.ORIGINS:
+			if String(o[0]) == _origin:
+				origin_name = String(o[1])
+		if _origin == "nat":
+			origin_name = "Só %s" % DatabaseManager.nation_name(club.nation)
+		card.add_child(_mission_row("Origem", origin_name, func():
+			var items: Array = []
+			var cur := 0
+			for i in Scouting.ORIGINS.size():
+				var k := String(Scouting.ORIGINS[i][0])
+				if k == _origin:
+					cur = i
+				var sub: String = {"all": "Onde a rede do clube alcança.", "nat": "Só jogadores de %s." % DatabaseManager.nation_name(club.nation), "for": "Só jogadores de fora do país."}.get(k, "")
+				items.append([String(Scouting.ORIGINS[i][1]), sub])
+			_option_sheet("Origem", items, cur, func(i: int): _origin = String(Scouting.ORIGINS[i][0]))))
+		card.add_child(_mission_row("Idade", "Qualquer" if _age == 0 else "Até %d anos" % int(AGES[_age][1]), func():
+			var items: Array = []
+			for a in AGES:
+				items.append(["Qualquer idade" if int(a[1]) >= 99 else "Até %d anos" % int(a[1]), ""])
+			_option_sheet("Idade", items, _age, func(i: int): _age = i)))
 	card.add_child(UIKit.gap(UITokens.S2))
-	var go := UIKit.button("Enviar olheiro" if ready else "Olheiro em campo", "PrimaryButton" if ready else "GhostButton", func():
-		if not Scouting.can_send(w):
-			return
-		var found := Scouting.send_mission(w, _origin, _group - 1, int(AGES[_age][1]))
+	var job := {"k": _job_kind, "g": _group - 1}
+	if _job_kind == "liga":
+		job["l"] = _job_league
+	else:
+		job["o"] = _origin
+		job["a"] = int(AGES[_age][1])
+		job["f"] = _focus
+	var rounds := Scouting.job_length(w, job)
+	card.add_child(UIKit.label("Leva %s; os primeiros nomes chegam já." % Fmt.plural(rounds, "rodada", "rodadas"), "Small", true))
+	card.add_child(UIKit.gap(UITokens.S1))
+	var go := UIKit.button("Enviar olheiro", "PrimaryButton", func():
+		var found := Scouting.open_job(w, job.duplicate())
 		if found.is_empty():
-			UIManager.toast("O olheiro não achou ninguém nesse perfil ao alcance do clube.", UIColors.ORANGE)
+			UIManager.toast("Ninguém nesse perfil ao alcance do clube por enquanto.", UIColors.ORANGE)
 		else:
-			UIManager.toast("Relatório pronto: %s." % Fmt.plural(found.size(), "jogador observado", "jogadores observados"), UIColors.GREEN)
+			UIManager.toast("Primeiros nomes: %s." % Fmt.plural(found.size(), "jogador visto", "jogadores vistos"), UIColors.GREEN)
 		GameManager.save_now()
 		refresh())
-	go.disabled = not ready
 	card.add_child(go)
-	c.add_child(UIKit.card_panel(card))
-	var list := Scouting.reports(w)
-	c.add_child(UIKit.label("Relatórios (%d)" % list.size(), "Section"))
-	if list.is_empty():
-		c.add_child(UIKit.state_block("empty", "Nenhum relatório ainda.", "Escolha o perfil acima e envie o olheiro: os jogadores observados aparecem aqui, com o potencial que ele viu."))
-		return
-	_default_brief(list)
-	if _scout_state.is_empty():
-		_scout_state = {"sort": "ovr", "desc": true}
-	var t := PlayerTable.make(w, list, "market", _scout_state, func(p: Player): _open_report(p), [_pot_col(w)] if content_width() >= 760.0 else [], "", _wide_table())
-	t.highlight = func(p: Player) -> bool: return _side != null and p.id == _sel
-	c.add_child(t)
+	return UIKit.card_panel(card)
+
+
+## Liga para a missão: a sua, as do país e as primeiras divisões dos outros.
+func _league_sheet(w: GameWorld) -> void:
+	var ids: Array = []
+	var user_nat := w.user_club().nation
+	for lid in DatabaseManager.leagues_of_nation(user_nat):
+		ids.append(String(lid))
+	for n in DatabaseManager.league_nations():
+		var first: Array = DatabaseManager.leagues_of_nation(String(n))
+		if not first.is_empty() and not String(first[0]) in ids:
+			ids.append(String(first[0]))
+	var items: Array = []
+	var cur := 0
+	var valid: Array = []
+	for lid in ids:
+		var lg := w.league(lid)
+		if lg == null:
+			continue
+		if lid == _job_league:
+			cur = valid.size()
+		valid.append(lid)
+		items.append([lg.name, DatabaseManager.nation_name(lg.nation)])
+	_option_sheet("Liga", items, cur, func(i: int): _job_league = String(valid[i]))
+
+
+## Colunas dos relatórios: recomendação, quanto já foi visto e o potencial.
+func _scout_cols(w: GameWorld) -> Array:
+	return [
+		{"key": "rec", "title": "Recom.", "w": 150, "align": "l", "tip": "Recomendação do olheiro",
+			"text": func(p: Player) -> String:
+				var v := Scouting.verdict(w, p)
+				return "%s  %s" % [v["grade"], v["label"]],
+			"sort": func(p: Player) -> float: return Scouting.verdict_score(w, p),
+			"color": func(p: Player) -> Color: return UIColors.ink(Scouting.verdict(w, p)["color"])},
+		{"key": "know", "title": "Visto", "w": 64, "tip": "Quanto o olheiro já viu do jogador",
+			"text": func(p: Player) -> String: return "%d%%" % Scouting.knowledge(w, p),
+			"sort": func(p: Player) -> int: return Scouting.knowledge(w, p),
+			"color": func(p: Player) -> Color: return UIColors.TEXT if Scouting.knowledge(w, p) >= 80 else UIColors.MUTED},
+		_pot_col(w),
+	]
 
 
 func _mission_row(title: String, value: String, cb: Callable) -> Control:
@@ -756,30 +889,19 @@ func _pot_col(w: GameWorld) -> Dictionary:
 		"color": func(p: Player) -> Color: return UIColors.TEXT if p.age(w.year) <= 25 else UIColors.MUTED}
 
 
-## Relatório aberto: ao lado (tela larga) ou numa folha com o resumo do jogador e o descarte.
+## Relatório aberto: ao lado (tela larga) ou numa folha com o resumo do jogador e o relatório.
 func _open_report(p: Player) -> void:
 	if _side != null:
 		_open(p)
 		refresh()
 		return
 	var v := UIKit.vbox(UITokens.S2)
-	v.add_child(PlayerBrief.make(world(), p, false, func():
+	var close := func():
 		UIManager.close_modal()
-		refresh()))
-	v.add_child(_discard_button(p, true))
+		refresh()
+	v.add_child(PlayerBrief.make(world(), p, false, close))
+	v.add_child(ScoutReportView.make(world(), p, close))
 	UIManager.show_modal(v, true)
-
-
-func _discard_button(p: Player, in_sheet: bool = false) -> Control:
-	var w := world()
-	var b := UIKit.button("Descartar relatório", "TextButton", func():
-		if in_sheet:
-			UIManager.close_modal()
-		Scouting.forget(w, p)
-		GameManager.save_now()
-		refresh())
-	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	return b
 
 
 # ---------------------------------------------------------------------------

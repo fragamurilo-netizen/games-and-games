@@ -169,6 +169,92 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 	return row
 
 
+## Classificação como tabela de dados (celular em pé): posição, escudo e nome presos à esquerda;
+## J, SG e PTS logo de cara e, passando o dedo, V, E, D, gols, os últimos jogos e o aproveitamento.
+## `lines`: [{id, pos, zone (Color), move, row (Dictionary)}] já na ordem da tabela.
+static func standings_table(w: GameWorld, lines: Array, view: String, on_tap: Callable, state: Dictionary) -> DataTable:
+	var t := DataTable.new()
+	t.row_height = UITokens.H_ROW - 8
+	t.lead_width = 250.0
+	t.lead_min = 232.0
+	t.marker = func(it: Dictionary) -> Color: return it["zone"]
+	t.highlight = func(it: Dictionary) -> bool: return w.is_user_club(int(it["id"]))
+	t.row_pressed.connect(func(it: Variant): on_tap.call(int((it as Dictionary)["id"])))
+	var num := func(key: String, title: String, tip: String, strong: bool = false) -> Dictionary:
+		return {"key": key, "title": title, "w": 56 if strong else 44, "tip": tip, "strong": strong,
+			"text": func(it: Dictionary) -> String:
+				var r: Dictionary = it["row"]
+				return Fmt.signed(int(r["gf"]) - int(r["ga"])) if key == "sg" else str(int(r[key])),
+			"sort": func(it: Dictionary) -> int:
+				var r: Dictionary = it["row"]
+				return int(r["gf"]) - int(r["ga"]) if key == "sg" else int(r[key]),
+			"color": func(it: Dictionary) -> Color:
+				if strong:
+					return UIColors.RED if int((it["row"] as Dictionary).get("ded", 0)) > 0 else UIColors.TEXT
+				return UIColors.MUTED}
+	var c := {}
+	c["club"] = {"key": "club", "title": "Clube", "first": "asc",
+		"sort": func(it: Dictionary) -> int: return int(it["pos"]),
+		"cell": func(it: Dictionary) -> Control: return _standing_lead(w, it)}
+	c["pl"] = num.call("pl", "J", "Jogos")
+	c["sg"] = num.call("sg", "SG", "Saldo de gols")
+	c["sg"]["w"] = 52
+	c["pts"] = num.call("pts", "PTS", "Pontos", true)
+	c["w"] = num.call("w", "V", "Vitórias")
+	c["d"] = num.call("d", "E", "Empates")
+	c["l"] = num.call("l", "D", "Derrotas")
+	c["gf"] = num.call("gf", "GP", "Gols pró")
+	c["ga"] = num.call("ga", "GC", "Gols contra")
+	c["form"] = {"key": "form", "title": "Últimos 5", "w": W_FORM, "align": "c",
+		"cell": func(it: Dictionary) -> Control: return form_dots(String((it["row"] as Dictionary).get("form", "")), 18)}
+	c["apr"] = {"key": "apr", "title": "Aprov.", "w": 68, "tip": "Aproveitamento dos pontos",
+		"text": func(it: Dictionary) -> String:
+			var r: Dictionary = it["row"]
+			return ("%d%%" % roundi(100.0 * int(r["pts"]) / (3.0 * int(r["pl"])))) if int(r["pl"]) > 0 else "–",
+		"sort": func(it: Dictionary) -> float:
+			var r: Dictionary = it["row"]
+			return float(r["pts"]) / maxf(1.0, int(r["pl"])),
+		"color": func(_it: Dictionary) -> Color: return UIColors.MUTED}
+	var keys: Array = ["form", "apr", "pts", "pl", "w", "d", "l", "gf", "ga", "sg"] if view == VIEW_FORM \
+		else ["pl", "sg", "pts", "w", "d", "l", "gf", "ga", "form", "apr"]
+	var cols: Array = [c["club"]]
+	for k in keys:
+		cols.append(c[k])
+	return t.setup(cols, lines, state)
+
+
+static func _standing_lead(w: GameWorld, it: Dictionary) -> Control:
+	var cid := int(it["id"])
+	var cl := w.club(cid)
+	var is_user := w.is_user_club(cid)
+	var h := UIKit.hbox(6)
+	var pl := UIKit.label(str(int(it["pos"])), "H3")
+	pl.custom_minimum_size.x = 30
+	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pl.add_theme_font_override(&"font", DataTable.tabular_font())
+	h.add_child(pl)
+	var cr := UIKit.crest(cl, W_CREST)
+	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(cr)
+	var n := UIKit.label(cl.short_name, "H3" if is_user else "")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if is_user:
+		n.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+	h.add_child(n)
+	var move := int(it.get("move", 0))
+	if move != 0:
+		var up := move > 0
+		var mv := UIKit.colored(("▲" if up else "▼") + str(absi(move)), UIColors.GREEN if up else UIColors.RED, "Small")
+		mv.add_theme_font_size_override(&"font_size", 16)
+		mv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(mv)
+	h.tooltip_text = cl.name
+	return h
+
+
 ## Quadradinhos dos últimos jogos (V verde, E cinza, D vermelho), do mais antigo ao mais recente.
 static func form_dots(form: String, px: int = 18, slots: int = 5) -> HBoxContainer:
 	var h := UIKit.hbox(4)
