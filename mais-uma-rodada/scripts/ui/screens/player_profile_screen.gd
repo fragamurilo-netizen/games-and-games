@@ -196,6 +196,12 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	names.add_child(nr)
 	if p.nickname != "" and p.nickname != p.display_name():
 		names.add_child(UIKit.label("Apelido: %s" % p.nickname, "Small", true))
+	var gwave := Generations.wave_of(w, p.nationality, p.birth_year)
+	if not gwave.is_empty() and int(gwave["d"]) > 0:
+		var gnat := p.nationality
+		var gb := UIKit.button(Generations.name_of(gwave), "ChipButton", func(): UIManager.push("generations", {"nation": gnat}), "star")
+		gb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		names.add_child(gb)
 	var pos_txt := Pos.name_of(p.position)
 	var sec: Array[String] = []
 	for sp in p.secondary:

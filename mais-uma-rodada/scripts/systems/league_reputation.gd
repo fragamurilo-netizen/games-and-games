@@ -123,7 +123,8 @@ static func season_close(world: GameWorld) -> Array:
 		var top := _top_rep(world, lid) - float(d["top0"].get(nat, 0.0))
 		var rev0 := maxf(1.0, float(d["rev0"].get(nat, 1.0)))
 		var money := log(maxf(0.05, _mean_revenue(world, lid) / rev0))
-		var target := clampf(c0 + perf * 1.6 + top * 0.6 + money * 8.0, c0 - MAX_SHIFT, c0 + MAX_SHIFT)
+		# 4) A formação do país (gerações e investimento na base) também dá vitrine à liga.
+		var target := clampf(c0 + perf * 1.6 + top * 0.6 + money * 8.0 + Generations.league_push(world, nat), c0 - MAX_SHIFT, c0 + MAX_SHIFT)
 		var old := float(d["c"].get(nat, c0))
 		var nw := snappedf(clampf(old + (target - old) * SPEED, 5.0, 100.0), 0.1)
 		d["c"][nat] = nw

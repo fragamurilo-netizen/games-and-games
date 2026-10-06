@@ -218,7 +218,7 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 	var pos: int = RngUtil.weighted_index(rng, _pos_weights(world))
 	var level := PlayerGenerator.league_level(club)
 	var drift := clampf(float(world.stats.get("talent_drift", 0.0)), -8.0, 8.0)
-	var nation_bonus := float(DatabaseManager.nation(club.nation).get("youth", 0.0))
+	var nation_bonus := Generations.nation_youth(world, club.nation)
 	var target := level - 22.0 + club.youth_level * 0.07 + rng.randfn(0.0, spread) + (age - 15) * 2.2 - drift + nation_bonus * 0.4 + float(reg["target"]) + quality
 	target = clampf(target, 18.0, 68.0)
 	var imp := float(reg["import"])
@@ -237,6 +237,7 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 		p.potential = clampi(p.potential + rng.randi_range(6, 12), p.overall + 2, 94)
 	elif gm < 1.0 and rng.randf() < (1.0 - gm) * 0.5:
 		p.potential = maxi(p.overall + 2, p.potential - rng.randi_range(1, 3))
+	Generations.on_new_kid(world, p)
 	p.club_id = club.id
 	p.squad_status = Player.STATUS_PROSPECT
 	p.wage = 0

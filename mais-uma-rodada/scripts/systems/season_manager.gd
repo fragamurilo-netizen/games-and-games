@@ -1173,6 +1173,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.year += 1
 	world.season_number += 1
 	BodyGrowth.yearly(world) # garotos crescem; quem tem tendência volta das férias acima do peso
+	# Gerações dos países: a base de cada um anda, gerações excepcionais nascem e são descobertas
+	Generations.season_close(world)
 	# Base
 	var youth := PlayerDevelopment.youth_intake(world)
 	var yc := 0

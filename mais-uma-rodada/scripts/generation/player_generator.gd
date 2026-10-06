@@ -728,7 +728,7 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	var age := rng.randi_range(16, 18)
 	var level := league_level(club)
 	var drift := clampf(float(world.stats.get("talent_drift", 0.0)), -8.0, 8.0)
-	var nation_bonus := float(DatabaseManager.nation(club.nation).get("youth", 0.0))
+	var nation_bonus := Generations.nation_youth(world, club.nation)
 	# O garoto que sobe no gigante tem ~60 aos 16 (não 70: quase ninguém chega pronto); o do clube
 	# pequeno, ~35–40. A diferença entre as bases é menor que a entre os times principais.
 	var target := 6.0 + level * 0.6 + club.youth_level * 0.05 + rng.randfn(0.0, 4.5) + (age - 16) * 2.0 - drift + nation_bonus * 0.4
@@ -737,6 +737,7 @@ static func create_youth(world: GameWorld, rng: RandomNumberGenerator, club: Clu
 	var p := create(world, rng, pos, target, age, nat, club.city, used_names)
 	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used_names)
 	p.potential = intake_potential(rng, p.overall, age, club.youth_level, drift, nation_bonus)
+	Generations.on_new_kid(world, p) # categoria do país e, se for o caso, a geração excepcional
 	p.squad_status = Player.STATUS_PROSPECT
 	sign_to_club(world, rng, p, club, false)
 	p.contract_end = world.year + 3

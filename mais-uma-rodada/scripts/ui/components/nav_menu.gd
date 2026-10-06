@@ -79,6 +79,7 @@ static func open() -> void:
 		["Dança das cadeiras", "coach_moves", {}, 0],
 		["História", "history", {}, 0],
 		["Joias", "nextgen", {}, 0],
+		["Gerações", "generations", {}, 0],
 	])
 	var game := UIKit.vbox(0)
 	game.add_child(UIKit.section_header("Jogo"))
