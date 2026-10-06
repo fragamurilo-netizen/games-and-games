@@ -15,6 +15,13 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 - **Ramo de 06/10 à noite: `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
 
+### Retratos estilo FM, nomes por família e cabelos por etnia (06/10, ramo `claude/project-thread-fxyjyl`)
+
+- Seção escrita na junção (o ramo não deixou nota). APK do ramo: `builds/MaisUmaRodada-1.0.0-retratos-fm-texturas-2026-10-06-debug.apk` (feito antes do último commit, o dos nomes).
+- **Retratos** (`portrait_view.gd`, `face_gen.gd`): recorte no estilo FM com luz de contorno só na silhueta (a luz some antes do contorno da cabeça, sem "capacete" claro no black power); texturas de fios, pelos, pele e íris (`tools/portrait_textures/gen.py`); 8 olhos, 8 narizes e 8 bocas novos; editor escolhe o formato de olhos, nariz e boca (`editor_screen.gd`).
+- **Protótipo, ainda fora do jogo:** `tools/cutout_photo_fx_r3.py` gera seis looks de foto (estúdio, coletiva, túnel, filme 35 mm, chuva, sol) sobre o recorte. Falta o dono escolher um e levar para o `portrait_view`.
+- **Nomes coerentes com a família** (`name_generator.gd`, `data/names/names.json` → `mixing`, 10 culturas de diáspora novas): sobrenome da família e, muitas vezes, primeiro nome do país ("Tyler Vu", nipo-brasileiro com nome brasileiro). A família também dá o segundo passaporte. Na filosofia basca, só o nome do país vira basco. Cabelo crespo fica raro fora de quem tem ascendência africana; Espanha, Itália, Portugal, Argentina e Uruguai ganham mais rostos mediterrâneos. Conferir com `tools/origin_report.gd -- --nations=ESP,BRA --n=6`.
+
 ### Mundo vivo, carreira de técnico e base profunda (06/10, ramo `claude/hopeful-newton-8avbo4`)
 
 - **Carreira de técnico** (`job_market.gd`, tela `jobs`, menu ☰ › Mercado de técnicos): pedir demissão, ver vagas e "cargos por um fio", candidatar-se, entrevista (Talks "interview"); clubes ligam quando precisam. A língua conta: quem não fala a do vestiário perde cotação (`Languages.coach_comm`) e a vaga avisa.
