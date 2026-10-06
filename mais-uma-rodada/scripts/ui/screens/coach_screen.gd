@@ -31,6 +31,18 @@ static func portrait(world: GameWorld, co: Dictionary, club: Club, px: int) -> P
 	return v
 
 
+## Foto de coletiva do técnico (PhotoPortrait), mesmo rosto do retrato.
+static func photo(world: GameWorld, co: Dictionary, club: Club, px: Vector2) -> PhotoPortrait:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([world.world_seed, "coach", int(co.get("id", 0))])
+	var origin := NameGenerator.pick_origin(rng, String(co.get("nat", "BRA")))
+	var ph := PhotoPortrait.new()
+	ph.custom_minimum_size = px
+	ph.mood = PhotoPortrait.for_moment("tecnico")
+	ph.set_person(rng.randi() & 0x7FFFFFFF, int(origin["eth"]), world.year - int(co.get("by", world.year - 50)), club)
+	return ph
+
+
 func refresh() -> void:
 	var w := world()
 	if w == null:
@@ -76,7 +88,7 @@ func refresh() -> void:
 func _hero(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	var card := UIKit.card("Card", 8)
 	var row := UIKit.hbox(16)
-	row.add_child(portrait(w, co, club, 150))
+	row.add_child(photo(w, co, club, Vector2(150, 150)))
 	var col := UIKit.vbox(4)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(String(co["n"]), "Title", true))

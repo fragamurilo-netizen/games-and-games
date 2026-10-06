@@ -337,6 +337,12 @@ static func portrait(p: Player, club: Club, year: int, px: int) -> PortraitView:
 	return v
 
 
+## Retrato com cara de foto (PhotoPortrait): o cenário vem do momento do jogo ("perfil",
+## "premio", "pre_jogo", "lenda", "treino", "craque_do_jogo"...). `px` define o formato.
+static func photo(p: Player, club: Club, year: int, px: Vector2, moment: String, wx: Dictionary = {}) -> PhotoPortrait:
+	return PhotoPortrait.of_player(p, club, year, px, moment, wx)
+
+
 static func bar(value: float, max_value: float, color: Color, h: int = 10) -> ProgressBar:
 	var pb := ProgressBar.new()
 	pb.max_value = max_value

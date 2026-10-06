@@ -30,7 +30,7 @@ static func open(ev: Dictionary, on_done: Callable = Callable()) -> void:
 	var p: Player = w.player(int(ev.get("p", -1)))
 	if p != null:
 		var row := UIKit.hbox(12)
-		row.add_child(UIKit.portrait(p, w.club(p.club_id), w.year, 76))
+		row.add_child(UIKit.photo(p, w.club(p.club_id), w.year, Vector2(88, 88), _moment(String(ev.get("k", "")))))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(p.full_name(), "H3", true))
@@ -94,3 +94,15 @@ static func has_terms(h: String) -> bool:
 		if ch >= "0" and ch <= "9":
 			return true
 	return false
+
+
+## Cenário da foto conforme o assunto: imprensa vira coletiva, treino vira sol, base e despedida
+## viram filme; o resto, a ficha de estúdio.
+static func _moment(k: String) -> String:
+	if k in ["press", "media_leak", "rival_jab", "social", "documentary", "sack_rumor", "tapping_up", "mercenary", "want_leave"]:
+		return "coletiva"
+	if k in ["training_star", "fatigue", "rush_back", "extra", "youth_parent", "youth_homesick", "youth_agent", "prodigy", "academy_path"]:
+		return "treino"
+	if k in ["idol_farewell", "homesick", "baby"]:
+		return "lenda"
+	return "perfil"

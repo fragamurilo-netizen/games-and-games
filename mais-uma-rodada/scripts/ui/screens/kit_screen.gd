@@ -207,6 +207,12 @@ func refresh() -> void:
 		var info := UIKit.card("Card", 8)
 		info.add_child(UIKit.label("Só o técnico da seleção muda os uniformes." if _nation != "" else "Uniformes de %d já em campo." % w.year, "", true))
 		c.add_child(UIKit.card_panel(info))
+	if _nation == "" and not pre:
+		# Lançamento: cada camisa vestida por um jogador do elenco
+		var pres := UIKit.card("Card", 8)
+		pres.add_child(UIKit.section("Apresentação"))
+		pres.add_child(KitPresentation.row(w, club, clampf((minf(content_width(), 900.0) - 96.0) / 4.0, 80.0, 190.0)))
+		c.add_child(UIKit.card_panel(pres))
 	if _nation == "":
 		c.add_child(_history_card(club))
 		c.add_child(_sponsors_card(w, club, pre))

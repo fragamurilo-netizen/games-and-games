@@ -26,7 +26,7 @@ static func _build(w: GameWorld, p: Player, body: VBoxContainer, mode: String = 
 	var rebuild := func(m: String): _build(w, p, body, m)
 	var club := w.club(p.club_id)
 	var head := UIKit.hbox(12)
-	head.add_child(UIKit.portrait(p, club, w.year, 64))
+	head.add_child(UIKit.photo(p, club, w.year, Vector2(72, 72), "treino")) # no CT, ao sol
 	var col := UIKit.vbox(0)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UIKit.label(p.display_name(), "Screen")

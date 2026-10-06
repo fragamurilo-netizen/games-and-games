@@ -349,6 +349,8 @@ static func show_launch(w: GameWorld) -> void:
 	scroll.custom_minimum_size.y = 560
 	var inner := UIKit.vbox(12)
 	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# A sessão de fotos do lançamento: cada camisa no corpo de um jogador do elenco
+	inner.add_child(KitPresentation.row(w, club, 128.0))
 	inner.add_child(make(w, p))
 	var notes := UIKit.card("CardFlat", 6)
 	var s := int(rec["score"])

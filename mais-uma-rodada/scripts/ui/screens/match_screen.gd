@@ -2798,7 +2798,8 @@ func _build_summary() -> void:
 	if motm != null:
 		var row := UIKit.hbox(12)
 		var club := motm.p.club_id
-		row.add_child(UIKit.portrait(motm.p, world().club(club), world().year, 72))
+		# Foto do craque com o tempo do jogo: chuva, noite de refletores ou sol
+		row.add_child(UIKit.photo(motm.p, world().club(club), world().year, Vector2(96, 96), "craque_do_jogo", _sim.wx))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label("CRAQUE DO JOGO", "Caps"))

@@ -168,7 +168,8 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 	var hero := IdentityBand.wrap(club, float(ps) - 48.0, float(ps) + 36.0)
 	var card: VBoxContainer = hero[1]
 	var row := UIKit.hbox(UITokens.S2)
-	var pv := UIKit.portrait(p, club, w.year, ps)
+	# Foto de ficha (estúdio) no lugar do retrato simples
+	var pv := UIKit.photo(p, club, w.year, Vector2(ps, ps), "perfil")
 	pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(pv)
 	var names := UIKit.vbox(UITokens.S1)

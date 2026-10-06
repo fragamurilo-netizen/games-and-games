@@ -89,7 +89,8 @@ func _show(i: int) -> void:
 	var p := world.player(int(it.get("id", -1)))
 	if p != null:
 		var club: Club = world.club(p.club_id) if p.club_id >= 0 else null
-		_portrait = UIKit.portrait(p, club, world.year, 220)
+		_portrait = UIKit.photo(p, club, world.year, Vector2(220, 220), "premio") # foto de gala, com flash
+		_portrait.size = Vector2(220, 220)
 		add_child(_portrait)
 		if club != null:
 			_crest = UIKit.crest(club, 70)

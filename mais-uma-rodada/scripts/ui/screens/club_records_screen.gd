@@ -115,7 +115,7 @@ func _chip(w: GameWorld, club: Club, slot: Array, all_time: bool, cw: float) -> 
 	var p := w.player(int(d["id"]))
 	var top := CenterContainer.new()
 	if p != null:
-		top.add_child(UIKit.portrait(p, club, w.year, 72))
+		top.add_child(UIKit.photo(p, club, w.year, Vector2(72, 72), "recorde")) # foto antiga, de filme
 	else:
 		top.add_child(UIKit.pos_badge(int(d["pos"])))
 	v.add_child(top)

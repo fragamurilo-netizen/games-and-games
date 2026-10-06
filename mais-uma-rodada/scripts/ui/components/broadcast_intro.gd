@@ -130,7 +130,7 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 		var star := _star(t)
 		if star != null:
 			var row := UIKit.hbox(12)
-			row.add_child(UIKit.portrait(star, t.club, w.year, 96))
+			row.add_child(UIKit.photo(star, t.club, w.year, Vector2(96, 120), "pre_jogo")) # no túnel, antes de entrar
 			var col := UIKit.vbox(0)
 			col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			col.add_child(UIKit.label(t.club.short_name, "Caps"))
