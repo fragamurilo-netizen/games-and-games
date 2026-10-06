@@ -64,6 +64,29 @@ static func premium(c: Club) -> float:
 	return clampf(0.8 + float(c.league_cfg().get("wage", 0.5)) * 0.3, 0.82, 1.2)
 
 
+## Chance (0..1) de o clube aceitar um jogador por causa da nacionalidade dele, como no mercado
+## real: na América do Sul quase todo estrangeiro é sul-americano (Transfermarkt: europeus são 1 a 2%
+## dos elencos do Brasileirão e do Argentino). Do próprio país ou da mesma confederação = 1; de quem
+## está na lista de importações do país (nations.json › imports), a força dela × outside_imports;
+## do resto, outside. País sem outside em market.json não filtra.
+static func origin_weight(buyer: Club, p: Player) -> float:
+	var prof := profile(buyer.nation)
+	var outside: Variant = prof.get("outside")
+	if outside == null or p.nationality == buyer.nation:
+		return 1.0
+	var my_conf := String(DatabaseManager.nation(buyer.nation).get("confed", ""))
+	if my_conf != "" and String(DatabaseManager.nation(p.nationality).get("confed", "")) == my_conf:
+		return 1.0
+	var w := float(outside)
+	var imp: Dictionary = DatabaseManager.nation(buyer.nation).get("imports", {})
+	if imp.has(p.nationality):
+		var top := 1.0
+		for k in imp:
+			top = maxf(top, float(imp[k]))
+		w = maxf(w, float(imp[p.nationality]) / top * float(prof.get("outside_imports", 0.5)))
+	return w
+
+
 # ---------------------------------------------------------------------------
 # Coerência: quem pode querer quem, e quanto vale uma aposta
 # ---------------------------------------------------------------------------
@@ -86,6 +109,8 @@ static func realistic_suitor(world: GameWorld, p: Player, min_rep: float, rng: R
 			continue
 		if not fits_level(world, c, p, below) or not ClubPolicy.ai_wants(world, c, p):
 			continue
+		if origin_weight(c, p) < 0.15:
+			continue # rumor tem de fazer sentido: clube argentino não sonda zagueiro sueco
 		if filter.is_valid() and not filter.call(c):
 			continue
 		cands.append(c)
@@ -432,6 +457,9 @@ static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dicti
 			continue
 		if not ClubPolicy.ai_wants(world, c, p):
 			continue # filosofia do clube (Athletic só bascos, Red Bull só jovens...)
+		var ow := origin_weight(c, p)
+		if ow < 1.0 and world.rng.randf() >= ow:
+			continue # sul-americano raramente traz europeu (nem africano, nem asiático)
 		if p.club_id >= 0:
 			if free_only or world.is_user_club(p.club_id) or p.joined_year == world.year:
 				continue # recém-contratado não é revendido na mesma temporada
@@ -787,6 +815,13 @@ static func _draw(world: GameWorld, index: Dictionary, c: Club, fam: int, min_ra
 	elif r < dom:
 		nat = c.nation
 	else:
+		# A volta para casa: na América do Sul boa parte dos reforços "de fora" é do próprio país,
+		# jogando no exterior (veteranos e quem não se firmou na Europa, na Ásia ou nos EUA).
+		var repat := float(prof.get("repat", 0.0))
+		if repat > 0.0 and world.rng.randf() < repat:
+			var ab: Array = index.get("abroad", {}).get(c.nation, [])
+			if not ab.is_empty() and not ab[fam].is_empty():
+				return ab[fam][world.rng.randi_range(0, ab[fam].size() - 1)]
 		nat = ClubDNA.away_nation(world.rng, c, prof.get("sources", []))
 	if nat != "":
 		var arr: Array = index["nat"].get(nat, [])
@@ -985,6 +1020,9 @@ static func find_buyer_for(world: GameWorld, p: Player) -> Club:
 		if world.is_user_club(c.id) or c.transfer_budget < p.value * 0.75:
 			continue
 		if not ClubPolicy.ai_wants(world, c, p):
+			continue
+		var ow := origin_weight(c, p)
+		if ow < 1.0 and world.rng.randf() >= ow:
 			continue
 		var level := PlayerGenerator.club_level(c)
 		if r < level - 3.0 or r > level + 12.0:

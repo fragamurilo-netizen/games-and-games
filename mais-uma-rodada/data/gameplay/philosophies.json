@@ -3,7 +3,7 @@
   "philosophies": {
     "posicional": {
       "name": "Jogo de posição", "desc": "Posse paciente, triângulos e linhas altas. Quer a bola o tempo todo.",
-      "formations": ["4-3-3", "4-2-3-1", "3-4-3"], "style": 0, "style2": 3, "mentality": 3,
+      "formations": ["4-3-3", "4-2-3-1", "3-4-3", "3-4-2-1"], "style": 0, "style2": 3, "mentality": 3,
       "pressing": 2, "line": 2, "intensity": 1, "adapt": 0.2, "tempo": 0, "passing": 0, "transition": 2, "squad": ["PAS", "TEC", "VIS"]
     },
     "pressao": {
@@ -13,27 +13,27 @@
     },
     "ferrolho": {
       "name": "Ferrolho", "desc": "Bloco baixo, cinco atrás se preciso, e uma bola para decidir.",
-      "formations": ["5-3-2", "4-1-4-1", "3-5-2", "4-4-2"], "style": 2, "style2": 5, "mentality": 1,
+      "formations": ["5-3-2", "4-1-4-1", "3-5-2", "4-4-2", "5-4-1"], "style": 2, "style2": 5, "mentality": 1,
       "pressing": 0, "line": 0, "intensity": 1, "adapt": 0.4, "tempo": 0, "passing": 2, "marking": 1, "transition": 0, "corners": 2, "squad": ["MAR", "POS", "FOR"]
     },
     "contragolpe": {
       "name": "Contra-ataque letal", "desc": "Cede a bola de propósito e mata na velocidade.",
-      "formations": ["4-4-2", "4-2-3-1", "4-1-4-1", "5-3-2"], "style": 2, "style2": 1, "mentality": 2,
+      "formations": ["4-4-2", "4-2-3-1", "4-1-4-1", "5-3-2", "4-4-1-1"], "style": 2, "style2": 1, "mentality": 2,
       "pressing": 1, "line": 0, "intensity": 1, "adapt": 0.45, "tempo": 2, "passing": 2, "transition": 0, "squad": ["VEL", "FIN", "DEC"]
     },
     "direto": {
       "name": "Jogo direto", "desc": "Bola na área, segunda bola e muita disputa física.",
-      "formations": ["4-4-2", "4-3-3", "4-1-4-1"], "style": 5, "style2": 1, "mentality": 2,
+      "formations": ["4-4-2", "4-3-3", "4-1-4-1", "4-1-3-2"], "style": 5, "style2": 1, "mentality": 2,
       "pressing": 1, "line": 1, "intensity": 2, "adapt": 0.35, "tempo": 2, "passing": 2, "corners": 2, "squad": ["CAB", "FOR", "CRU"]
     },
     "pontas": {
       "name": "Jogo pelas pontas", "desc": "Amplitude total, laterais que apoiam e cruzamento na área.",
-      "formations": ["4-4-2", "4-3-3", "3-4-3", "3-5-2"], "style": 4, "style2": 1, "mentality": 3,
+      "formations": ["4-4-2", "4-3-3", "3-4-3", "3-5-2", "5-2-3"], "style": 4, "style2": 1, "mentality": 3,
       "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.3, "corners": 2, "squad": ["CRU", "VEL", "CAB"]
     },
     "toque": {
       "name": "Futebol arte", "desc": "Toque de bola, drible e liberdade para os craques criarem.",
-      "formations": ["4-3-1-2", "4-2-3-1", "4-3-3", "4-4-2"], "style": 0, "style2": 4, "mentality": 3,
+      "formations": ["4-3-1-2", "4-2-3-1", "4-3-3", "4-4-2", "4-2-2-2"], "style": 0, "style2": 4, "mentality": 3,
       "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.3, "tempo": 0, "passing": 0, "squad": ["TEC", "VIS", "PAS"]
     },
     "vertical": {
@@ -48,17 +48,17 @@
     },
     "tres_zagueiros": {
       "name": "Linha de três", "desc": "Três zagueiros, alas que voam e meio povoado.",
-      "formations": ["3-4-3", "3-5-2", "5-3-2"], "style": 4, "style2": 0, "mentality": 2,
+      "formations": ["3-4-3", "3-5-2", "5-3-2", "3-4-2-1", "3-4-1-2", "5-2-3"], "style": 4, "style2": 0, "mentality": 2,
       "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.35, "corners": 2, "squad": ["RES", "CRU", "MAR"]
     },
     "aproximacao": {
       "name": "Jogo de aproximação", "desc": "Todo mundo perto da bola: tabelas curtas, liberdade para trocar de posição e triangulações pelo lado do campo.",
-      "formations": ["4-2-3-1", "4-3-1-2", "4-4-2"], "style": 0, "style2": 3, "mentality": 3,
+      "formations": ["4-2-3-1", "4-3-1-2", "4-4-2", "4-2-2-2", "4-3-2-1"], "style": 0, "style2": 3, "mentality": 3,
       "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.2, "tempo": 1, "passing": 0, "transition": 2, "squad": ["TEC", "PAS", "DRI"]
     },
     "bloco_medio": {
       "name": "Bloco médio", "desc": "Time compacto no meio-campo: fecha os espaços por dentro, rouba e sai rápido, sem se afundar na área.",
-      "formations": ["4-4-2", "4-1-4-1", "4-2-3-1"], "style": 2, "style2": 0, "mentality": 2,
+      "formations": ["4-4-2", "4-1-4-1", "4-2-3-1", "4-4-1-1"], "style": 2, "style2": 0, "mentality": 2,
       "pressing": 1, "line": 1, "intensity": 1, "adapt": 0.5, "tempo": 1, "passing": 1, "marking": 0, "transition": 1, "squad": ["POS", "INT", "RES"]
     },
     "bola_parada": {

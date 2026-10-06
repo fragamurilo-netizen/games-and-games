@@ -75,6 +75,7 @@ static func open() -> void:
 		["Reputação", "reputation", {}, 0],
 		["Conquistas", "achievements", {}, 0],
 		["Seleções", "national", {}, 0],
+		["Mercado de técnicos", "jobs", {}, 0],
 		["Dança das cadeiras", "coach_moves", {}, 0],
 		["História", "history", {}, 0],
 		["Joias", "nextgen", {}, 0],

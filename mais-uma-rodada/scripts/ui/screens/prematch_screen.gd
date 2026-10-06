@@ -117,6 +117,8 @@ func refresh() -> void:
 	var custom := sheet.formation.begins_with("C:")
 	right.add_child(UIKit.label("Plano de jogo", "Section"))
 	var plan := UIKit.card("Card", 0)
+	var model := GameModels.current(w, sheet)
+	plan.add_child(_picker_row("Modelo", String(model.get("name", "Personalizado")), -1.0, _models_sheet))
 	plan.add_child(_picker_row("Formação", base + (" (variação)" if custom else ""), TacticsManager.formation_fam(club, sheet.formation), _formation_sheet))
 	plan.add_child(_picker_row("Mentalidade", String(tac["mentalities"][sheet.mentality]["name"]), -1.0, _mentality_sheet))
 	plan.add_child(_picker_row("Estilo", String(tac["styles"][sheet.style]["short"]), TacticsManager.style_fam(club, sheet.style), _style_sheet))
@@ -340,6 +342,86 @@ func _formation_sheet() -> void:
 			changes.append("%s → %s" % [Pos.code(int(base_slots[int(k)]["pos"])), Pos.code(DatabaseManager.POS_BY_CODE[ov[k]])])
 		extra = UIKit.label("Variação do %s: %s. Escolher uma formação desfaz a variação." % [base, ", ".join(PackedStringArray(changes))], "Muted", true)
 	_option_sheet("Formação", items, names.find(base), func(i: int): _set_formation(String(names[i])), extra)
+
+
+## Modelos de jogo prontos (por grupo) e as táticas salvas pelo usuário. Escolher aplica tudo:
+## formação, plano, instruções de equipe e individuais.
+func _models_sheet() -> void:
+	var w := world()
+	var club := w.user_club()
+	var sheet := _sheet()
+	var cur := String(GameModels.current(w, sheet).get("id", ""))
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Modelo de jogo", "H2"))
+	v.add_child(UIKit.label("Uma tática completa de uma vez. Formação nova começa pouco entrosada e melhora com os jogos.", "Muted", true))
+	v.add_child(UIKit.gap(UITokens.S2))
+	# Minhas táticas
+	v.add_child(UIKit.section("Minhas táticas"))
+	var mine := GameModels.saved(w)
+	for m: Dictionary in mine:
+		v.add_child(_model_row(w, club, sheet, m, cur, true))
+	var save_row := UIKit.hbox(UITokens.S2)
+	var name_edit := LineEdit.new()
+	name_edit.placeholder_text = "Nome da tática atual"
+	name_edit.max_length = 28
+	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_edit.custom_minimum_size.y = UITokens.H_CHIP
+	save_row.add_child(name_edit)
+	save_row.add_child(UIKit.button("Salvar", "SecondaryButton", func():
+		var m := GameModels.save_current(w, sheet, name_edit.text)
+		GameManager.save_now()
+		UIManager.close_modal()
+		UIManager.toast("Tática salva: %s." % String(m["name"]), UIColors.GREEN)
+		refresh()))
+	v.add_child(save_row)
+	if mine.size() >= GameModels.MAX_SAVED:
+		v.add_child(UIKit.label("Até %d táticas: salvar outra apaga a mais antiga." % GameModels.MAX_SAVED, "Small", true))
+	# Modelos prontos, por grupo
+	for g in GameModels.groups():
+		v.add_child(UIKit.gap(UITokens.S3))
+		v.add_child(UIKit.section(String(g)))
+		for m: Dictionary in GameModels.all():
+			if String(m.get("group", "")) == String(g):
+				v.add_child(_model_row(w, club, sheet, m, cur, false))
+	UIManager.show_modal(v, true)
+
+
+func _model_row(w: GameWorld, club: Club, sheet: TeamSheet, m: Dictionary, cur: String, mine: bool) -> Control:
+	var h := UIKit.hbox(UITokens.S2)
+	var box := UIKit.vbox(0)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var top := UIKit.hbox(UITokens.S2)
+	var name := UIKit.label(String(m["name"]), "H3")
+	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if String(m["id"]) == cur:
+		name.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+	top.add_child(name)
+	var fname := DatabaseManager.formation_base(String(m.get("f", "")))
+	var fam := TacticsManager.formation_fam(club, fname)
+	top.add_child(UIKit.label(fname, "Small"))
+	top.add_child(UIKit.colored(TacticsManager.fam_label(fam), TacticsManager.fam_color(fam), "Small"))
+	box.add_child(top)
+	box.add_child(UIKit.label(String(m.get("desc", "")), "Muted", true))
+	h.add_child(box)
+	var id := String(m["id"])
+	if mine:
+		var del := UIKit.icon_button("close", func():
+			GameModels.delete_saved(w, id)
+			GameManager.save_now()
+			UIManager.close_modal()
+			UIManager.toast("Tática apagada.")
+			refresh(), "Apagar")
+		del.theme_type_variation = "GhostButton"
+		del.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(del)
+	var row := UIKit.tap_row(h, func():
+		UIManager.close_modal()
+		GameModels.apply(w, club, sheet, m)
+		UIManager.toast("Modelo aplicado: %s." % String(m["name"]))
+		refresh())
+	row.custom_minimum_size.y = UITokens.H_ROW
+	return row
 
 
 func _mentality_sheet() -> void:

@@ -411,8 +411,12 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 	card.add_child(UIKit.section("Sem clube"))
 	var fired: Dictionary = w.stats.get("fired", {})
 	var old := w.club(int(fired.get("from", -1)))
-	card.add_child(UIKit.label("A diretoria do %s decidiu trocar o comando técnico." % (old.short_name if old != null else "clube"), "Title", true))
-	card.add_child(UIKit.label("Alguns clubes querem conversar.", "Muted", true))
+	var oname := old.short_name if old != null else "clube"
+	if bool(fired.get("res", false)):
+		card.add_child(UIKit.label("Você entregou o cargo no %s." % oname, "Title", true))
+	else:
+		card.add_child(UIKit.label("A diretoria do %s decidiu trocar o comando técnico." % oname, "Title", true))
+	card.add_child(UIKit.label("Alguns clubes querem conversar. Também dá para mandar currículo para quem está com vaga aberta.", "Muted", true))
 	for cid in jobs:
 		var cl := w.club(int(cid))
 		if cl == null:
@@ -428,10 +432,11 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 		var ccid: int = int(cid)
 		card.add_child(UIKit.tap_row(row, func():
 			UIManager.confirm("Assumir o %s?" % cl.short_name, "Você será o novo treinador do clube a partir de agora.", "Assumir", func():
-				BoardManager.take_job(w, ccid)
+				JobMarket.accept(w, ccid)
 				GameManager.save_now()
 				Sfx.play("sign")
 				UIManager.goto("hub")), "Card"))
+	card.add_child(UIKit.button("Vagas abertas e entrevistas", "GhostButton", func(): UIManager.push("jobs"), "search"))
 	return UIKit.card_panel(card)
 
 

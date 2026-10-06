@@ -979,6 +979,7 @@ static func _build_index(world: GameWorld) -> Dictionary:
 		band.append({})
 	var nat := {}
 	var young := {}
+	var abroad := {} # nacionalidade → jogadores dela em clubes de outro país (a repatriação)
 	for p: Player in world.players.values():
 		if p.retiring or not p.loan.is_empty():
 			continue
@@ -994,12 +995,19 @@ static func _build_index(world: GameWorld) -> Dictionary:
 				arr.append([])
 			nat[n] = arr
 		nat[n][f].append(p)
+		if p.club_id >= 0 and n != p.nationality:
+			if not abroad.has(p.nationality):
+				var arr2: Array = []
+				for _k in FAMILIES:
+					arr2.append([])
+				abroad[p.nationality] = arr2
+			abroad[p.nationality][f].append(p)
 		# Joias (até 20 anos, potencial alto): o garimpo dos clubes europeus na América do Sul.
 		if p.club_id >= 0 and p.potential >= 72 and p.age(world.year) <= 20:
 			if not young.has(n):
 				young[n] = []
 			young[n].append(p)
-	return {"band": band, "nat": nat, "young": young}
+	return {"band": band, "nat": nat, "young": young, "abroad": abroad}
 
 
 ## Família de cada posição (índice em FAMILIES), na ordem de Pos: GK, RB, CB, LB, DM, CM, AM, RM,
@@ -1426,6 +1434,8 @@ static func balance_squads(world: GameWorld) -> void:
 					continue
 				if p.ovr_f > level + 6.0 or not ClubPolicy.eligible(world, c, p):
 					continue
+				if MarketAI.origin_weight(c, p) < 0.5:
+					continue # sul-americano completa o elenco com quem é do continente
 				pick = p
 				break
 			if pick == null:
