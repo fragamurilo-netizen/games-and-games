@@ -174,6 +174,8 @@ static func _comp_weight(world: GameWorld, f: Fixture, cid: int) -> float:
 	var rep := base
 	if world.season.cups.has(f.comp):
 		rep = Reputation.cup_rep(f.comp)
+		if CupManager.is_state(f.comp):
+			rep *= 0.6 # estadual: perder a final dói, mas não derruba ninguém sozinho
 	elif world.league(f.comp) != null:
 		rep = Reputation.league_rep(f.comp)
 	return clampf(rep / maxf(30.0, base), 0.45, 1.3)
@@ -228,15 +230,22 @@ static func _follow_ups(world: GameWorld, c: Club, live: Array) -> void:
 	var mine := world.is_user_club(c.id)
 	if not mine and not _relevant(world, c):
 		return
+	var fu: Dictionary = world.stats.get("af_fu", {})
+	world.stats["af_fu"] = fu
 	for m: Array in live:
 		var k := String(m[I_K])
 		var age := week(world) - int(m[I_WK])
+		var hurts := bool(KINDS[k]["pain"])
 		var f := int(m[I_F])
 		var o := world.club(int(m[I_O]))
 		var y := int(m[I_Y])
 		if f == 0 and age >= 3 and age <= 8 and float(m[I_W]) >= 0.5 and k in ["final", "vice", "queda", "jejum", "titulo", "eliminado"]:
 			m[I_F] = 1
-			if mine or float(m[I_W]) >= 0.8:
+			# Uma volta ao assunto por clube a cada seis semanas, e só se o clima ainda conta a história.
+			var quiet := week(world) - int(fu.get(str(c.id), -99)) >= 6
+			var fits := c.fan_mood < 62.0 if hurts else c.fan_mood >= 58.0
+			if quiet and fits and (mine or float(m[I_W]) >= 0.8):
+				fu[str(c.id)] = week(world)
 				_follow_story(world, c, k, o, y, mine)
 		elif f <= 1 and world.year == y + 1 and world.current_day() >= int(m[I_D]) and float(m[I_W]) >= 0.8 and k in ["final", "vice", "queda", "jejum", "titulo"]:
 			m[I_F] = 2
@@ -411,6 +420,8 @@ static func sting(world: GameWorld, c: Club) -> Dictionary:
 			continue
 		var k := String(m[I_K])
 		var s: float = float(m[I_W]) * {"vice": 2.6, "final": 2.0, "eliminado": 1.2, "rival_campeao": 0.8, "goleada": 0.6, "queda": 0.0}.get(k, 0.0)
+		if float(m[I_W]) < 0.6 and k != "rival_campeao":
+			s *= 0.3 # decisão pequena (estadual, supercopa) quase não entra na conta da diretoria
 		v += s
 		if s > best:
 			best = s
