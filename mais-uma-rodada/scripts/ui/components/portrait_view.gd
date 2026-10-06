@@ -357,6 +357,9 @@ var _BW := 0.0
 var _MW := 0.0
 var _ND := 0.0
 var _skin := Color.WHITE
+## Ombro da luz na pele: acima de _lum_knee a luminância se aproxima de _lum_top sem passar.
+var _lum_knee := 9.0
+var _lum_top := 10.0
 var _beard_p: Dictionary = {}
 var _shadow_p: Dictionary = {}
 var _blotches: Array = []
@@ -614,6 +617,10 @@ func _setup(c: Vector2, s: float) -> void:
 	_BW = float(f["bridge_w"])
 	_MW = float(f["mouth_w"]) * 1.15
 	_skin = f["skin"]
+	# Luminância em que o canal mais claro da pele chega a 0,97 (com as curvas de _shade)
+	var lum_max := minf(pow(0.97 / maxf(_skin.r, 0.01), 1.0 / 0.82), minf(0.97 / maxf(_skin.g, 0.01), pow(0.97 / maxf(_skin.b, 0.01), 1.0 / 1.12)))
+	_lum_top = maxf(lum_max, 1.05)
+	_lum_knee = maxf(0.92, _lum_top - 0.2)
 	# Índice fora da tabela (save antigo, catálogo novo) cai no último item em vez de travar o
 	# _setup no meio: com o _setup interrompido a pele do rosto saía toda preta.
 	_beard_p = FaceGen.BEARD_PARTS[clampi(int(f["beard"]), 0, FaceGen.BEARD_PARTS.size() - 1)]
@@ -1226,6 +1233,10 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		a = (u - float(bl[0])) / float(bl[2])
 		b = (v - float(bl[1])) / float(bl[2])
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
+	# Pele muito clara não estoura no branco: a luz forte entra num "ombro" suave, como numa foto
+	if lum > _lum_knee:
+		var room := _lum_top - _lum_knee
+		lum = _lum_knee + room * (1.0 - exp(-(lum - _lum_knee) / room))
 	var col := _shade(_skin, lum)
 	# Pele translúcida: na passagem da luz para a sombra o tom esquenta um pouco (sangue sob a pele)
 	var term := 4.0 * diff * (1.0 - diff)
@@ -1243,12 +1254,14 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	col = col.lerp(Color(0.85, 0.32, 0.3), clampf(blush * k[11] * 0.18, 0.0, 0.3))
 	# Sombra da barba feita (zona da barba, bem suave)
 	if k[12] > 0.02 and v > N - 0.05:
-		var line := lerpf(N + 0.02, 0.2, smoothstep(MW * 0.8, MW * 1.5, au)) - 0.16 * smoothstep(0.55, 1.0, au)
-		var dens := smoothstep(line - 0.08, line + 0.08, v)
+		# A linha desce na frente da bochecha e sobe para a costeleta; a passagem é larga (a faixa
+		# estreita marcava um degrau na altura do nariz, com a testa parecendo mais branca)
+		var line := lerpf(N + 0.02, (N + M) * 0.5 + 0.04, smoothstep(MW * 0.8, MW * 1.5, au)) - 0.3 * smoothstep(0.6, 1.0, au)
+		var dens := smoothstep(line - 0.12, line + 0.14, v)
 		a = u / MW
 		b = (v - M) / (k[8] * 2.2 + 0.03)
 		dens *= smoothstep(0.8, 1.1, sqrt(a * a + b * b))
-		col = col.lerp(_shadow_col, dens * k[12] * 0.32)
+		col = col.lerp(_shadow_col, dens * k[12] * 0.24)
 	# Brilho especular (mais visível em pele escura)
 	var hx := _half.x
 	var hy := _half.y
@@ -3379,7 +3392,10 @@ func _cap_alpha(p: Vector2, w: float) -> float:
 		a *= 1.0 - minf(1.0, crown * 1.3) * _g(q.x, 0.7) * smoothstep(0.35, 0.8, h) * smoothstep(0.05, 0.4, w)
 	var sharp: bool = bool(f["lineup"]) or int(_hs("lu", 0)) == 1 or _hs("tx", "") in ["braid", "braid_zig", "waves"]
 	# Linha do cabelo: o cabelo nasce ralo e vai enchendo (sem a "tarja" de borda dura na testa).
-	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else 0.3, w))
+	# A faixa rala tem largura parecida em qualquer volume: num black power (calota grossa) 30% da
+	# calota virava um véu translúcido enorme sobre a testa.
+	var ramp := 0.3 * clampf(0.14 / (maxf(float(_hs("tp", 0.1)), float(_hs("sd", 0.0))) + 0.05), 0.3, 1.0)
+	a *= lerpf(0.9 if sharp else 0.0, 1.0, smoothstep(0.0, 0.08 if sharp else ramp, w))
 	# Costeletas afinam até sumir. Em line-up/tranças/waves a ponta fica um pouco mais marcada.
 	var sb: float = float(_hs("sb", 0.0))
 	if absf(q.x) > 0.5:
@@ -3701,10 +3717,19 @@ func _hair_shadow() -> void:
 		# Mais forte no meio da testa; nas laterais, onde a linha desce, some aos poucos
 		var k := strength * (1.0 - smoothstep(0.25, 0.9, q.y + 0.6)) * _cap_alpha(p, 0.15)
 		a.append(k)
-		lower.append(p + Vector2(0.0, _fh * (0.05 + 0.03 * float(_hs("hl", 0.0)) / 0.3)))
-	_strip(_cap_in, lower, 2, func(p: Vector2, t: float, w: float) -> Color:
+		# De perto a sombra desce mais pela testa (o cabelo tapa a luz de cima)
+		lower.append(p + Vector2(0.0, _fh * ((0.05 if _s < 140.0 else 0.09) + 0.03 * float(_hs("hl", 0.0)) / 0.3)))
+	_strip(_cap_in, lower, 3, func(p: Vector2, t: float, w: float) -> Color:
 		var i := clampi(int(round(t * (n - 1))), 0, n - 1)
-		return Color(_shadow_col.darkened(0.3), a[i] * (1.0 - w) * (1.0 - w)))
+		return Color(_shadow_col.darkened(0.3), a[i] * pow(1.0 - w, 1.7)))
+	# A pele embaixo dos fios ralos da linha do cabelo fica na sombra do próprio cabelo (sem isso a
+	# testa clara aparecia através dos fios como um brilho)
+	var up := PackedVector2Array()
+	for i in n:
+		up.append(_cap_in[i].lerp(_cap_out[i], 0.32))
+	_strip(up, _cap_in, 2, func(_p: Vector2, t: float, w: float) -> Color:
+		var i := clampi(int(round(t * (n - 1))), 0, n - 1)
+		return Color(_shadow_col.darkened(0.3), a[i] * lerpf(2.2, 1.0, w)))
 
 
 ## Textura do cabelo sobre a calota. Com a textura de fios (retrato grande), os cachos, as
