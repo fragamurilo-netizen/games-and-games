@@ -1,7 +1,9 @@
 class_name NameGenerator
 extends RefCounted
 ## Nomes coerentes por cultura (names.json) a partir da origem de cada nacionalidade (nations.json):
-## o jogador sorteia uma origem — cultura de nome + etnia (usada pelo rosto). Gera apelidos
+## o jogador sorteia uma origem — cultura de nome + etnia (usada pelo rosto). Quem tem família de
+## outra origem (um negro nascido no País Basco, um nipo-brasileiro) ganha nome misto: sobrenome da
+## família e, muitas vezes, primeiro nome do país — "Iñaki Williams", não "Iker Etxeberria". Gera apelidos
 ## (diminutivos, regionais e descritivos), o nome de camisa (known_as) e nunca repete nomes
 ## completos já usados no mundo nem nomes de craques reais.
 
@@ -16,6 +18,7 @@ const KNOWN_MAX := 3
 
 static var _famous: Dictionary = {}
 static var _eth_index: Dictionary = {}
+static var _mixing: Dictionary = {}
 
 
 static func _prepare() -> void:
@@ -26,6 +29,7 @@ static func _prepare() -> void:
 	var eth: Array = DatabaseManager.ethnicities()
 	for i in eth.size():
 		_eth_index[eth[i]] = i
+	_mixing = DatabaseManager.names().get("mixing", {})
 
 
 static func nationality_name(code: String) -> String:
@@ -37,23 +41,115 @@ static func ethnicity_index(key: String) -> int:
 	return int(_eth_index.get(key, 1))
 
 
-## Origem de quem nasceu em `nation_code`: {"c": cultura de nome, "eth": índice da etnia}.
+## Origem de quem nasceu em `nation_code`: {"c": cultura de nome, "eth": índice da etnia,
+## "h": cultura da família quando ela é de outra origem, senão ""}. Com família de outra origem,
+## "c" vem como "país+família" (ou "país+família+m" para filho de casal misto), que generate() entende.
 static func pick_origin(rng: RandomNumberGenerator, nation_code: String) -> Dictionary:
 	_prepare()
 	var origins: Array = DatabaseManager.nation(nation_code).get("origins", [])
 	if origins.is_empty():
-		return {"c": "en", "eth": 1}
+		return {"c": "en", "eth": 1, "h": ""}
 	var weights: Array = []
 	for o in origins:
 		weights.append(float(o["w"]))
 	var o: Dictionary = origins[maxi(0, RngUtil.weighted_index(rng, weights))]
 	var eth_key: Variant = RngUtil.weighted_key(rng, o["eth"])
-	return {"c": o["c"], "eth": int(_eth_index.get(eth_key, 1))}
+	var c := String(o["c"])
+	# Sorteio à parte, a partir do estado atual: não consome o gerador principal, então o resto do
+	# mundo (atributos, clubes, rostos) sai igual.
+	var hr := RandomNumberGenerator.new()
+	hr.seed = hash([rng.state, nation_code, eth_key])
+	var fam := ""
+	if o.has("h"):
+		fam = String(RngUtil.weighted_key(hr, o["h"]))
+	elif hr.randf() >= _keep_chance(c, String(eth_key)):
+		fam = _heritage(hr, String(eth_key), nation_code)
+	if fam != "" and fam != c:
+		c += "+" + fam + ("+m" if String(eth_key) == "mix" else "")
+	elif _immigrant(c, nation_code):
+		fam = c # família toda de fora: nome inteiro da cultura dela ("Moussa Diarra" na França)
+	else:
+		fam = ""
+	return {"c": c, "eth": int(_eth_index.get(eth_key, 1)), "h": fam}
+
+
+## Culturas que, num país que não é o delas, indicam família imigrante (o nome todo é da família).
+## As línguas do próprio país (francês na Bélgica e no Canadá, italiano na Suíça) não contam.
+const IMMIGRANT := ["waf_en", "waf_fr", "ng", "gh", "sn", "ml", "ci", "cm", "cd", "bf", "ga", "zw", "gw", "ao", "cv", "mz",
+	"lusoaf", "jm", "maghreb", "ma", "dz", "tn", "arab", "eg", "tr", "persian", "sas", "horn", "jp", "kr", "cn", "vn", "ph",
+	"pac", "latam", "mx", "br", "south_slav", "west_slav", "east_slav", "alb", "sur", "molucca", "ssd"]
+
+
+static func _immigrant(culture_id: String, nation_code: String) -> bool:
+	return IMMIGRANT.has(culture_id) and not heritage_nations(culture_id).has(nation_code)
+
+
+## Países da família de uma cultura (mixing.homes), para o segundo passaporte.
+static func heritage_nations(culture_id: String) -> Array:
+	_prepare()
+	return (_mixing.get("homes", {}) as Dictionary).get(culture_id, [])
+
+
+## Chance de alguém dessa etnia ter o nome todo da cultura do país (mixing.coherent).
+static func _keep_chance(culture_id: String, eth_key: String) -> float:
+	var coh: Dictionary = _mixing.get("coherent", {})
+	if not coh.has(culture_id):
+		return 1.0
+	return float((coh[culture_id] as Dictionary).get(eth_key, 0.0))
+
+
+## Cultura da família de quem tem essa etnia e nasceu nesse país (mixing.heritage).
+static func _heritage(rng: RandomNumberGenerator, eth_key: String, nation_code: String) -> String:
+	var t: Dictionary = (_mixing.get("heritage", {}) as Dictionary).get(eth_key, {})
+	var w: Dictionary = t.get(nation_code, t.get("*", {}))
+	if w.is_empty():
+		return ""
+	return String(RngUtil.weighted_key(rng, w))
+
+
+## Troca a cultura do país numa origem (filosofia de clube: os da região levam nome basco).
+## "es" → "eus"; "es+gh" → "eus+gh"; família toda de fora ("waf_fr") → "eus+waf_fr".
+static func with_local(origin_c: String, local: String) -> String:
+	var parts := origin_c.split("+")
+	if parts.size() > 1:
+		parts[0] = local
+		return "+".join(parts)
+	if IMMIGRANT.has(origin_c):
+		return local + "+" + origin_c
+	return local
 
 
 static func _culture(culture_id: String) -> Dictionary:
 	var cultures: Dictionary = DatabaseManager.names()["cultures"]
 	return cultures.get(culture_id, cultures["en"])
+
+
+## Cultura de nome de quem tem família de outra origem ("país+família[+m]"): sobrenome da família;
+## o primeiro nome vem do país com a chance da família (diaspora_first) somada à do país
+## (first_pull). Filho de casal misto (+m) às vezes leva o primeiro nome da família e o sobrenome
+## do país ("Yussuf Poulsen").
+static func _blend(rng: RandomNumberGenerator, culture_id: String) -> Dictionary:
+	var parts := culture_id.split("+")
+	var local := _culture(parts[0])
+	if parts.size() < 2:
+		return local
+	var fam := _culture(parts[1])
+	var c := local.duplicate()
+	var swap := 0.3 if parts.size() > 2 and parts[2] == "m" else 0.04
+	var lf := clampf(float(fam.get("diaspora_first", 0.4)) + float(local.get("first_pull", 0.0)), 0.0, 0.95)
+	var r := rng.randf()
+	if r < swap:
+		c["first"] = fam["first"]
+		c.erase("compound")
+		c.erase("diminutives")
+		return c
+	c["last"] = fam["last"]
+	c.erase("suffixes") # "Júnior", "Neto" e "Filho" só com o sobrenome do país
+	if r >= swap + (1.0 - swap) * lf:
+		c["first"] = fam["first"]
+		c.erase("compound")
+		c.erase("diminutives")
+	return c
 
 
 static func _is_famous(first: String, main: String, last: String) -> bool:
@@ -71,7 +167,7 @@ static func generate(rng_in: RandomNumberGenerator, culture_id: String, ctx: Dic
 	# contra repetidos não desloca o resto da geração do mundo (atributos, clubes, rostos).
 	var rng := RandomNumberGenerator.new()
 	rng.seed = rng_in.randi()
-	var c := _culture(culture_id)
+	var c := _blend(rng, culture_id)
 	var first := ""
 	var last := ""
 	var main := ""

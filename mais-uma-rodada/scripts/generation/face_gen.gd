@@ -930,6 +930,15 @@ const ETH_TEXTURE: Array = [
 	[5, 3, 0.8, 0], [5, 4, 1.4, 0], [3, 4, 2.4, 0.1], [2.5, 4, 3, 0.3], [3, 3.5, 2.5, 0.8], [7, 1.5, 0.3, 0],
 	[0.8, 2, 3.5, 3], [0, 0, 0.4, 8], [9, 1, 0.2, 0], [4, 4, 2, 0.2], [0, 0.4, 3, 6], [1, 3, 4, 1.5], [7, 2, 0.8, 0],
 ]
+## Cabelo crespo fora de quem tem ascendência africana é raro: parte de quem sorteou crespo nessas
+## etnias fica com cacheado (sorteio à parte). Chance de continuar crespo, por etnia.
+const COILY_KEEP: Array[float] = [1.0, 1.0, 0.15, 0.6, 0.5, 1.0, 1.0, 1.0, 1.0, 0.15, 1.0, 1.0, 1.0]
+## Penteados de cabelo crespo (black power, nagô, twists, dreads, esponja...): chance de alguém de
+## cada etnia manter um deles quando sorteia; fora da ascendência africana, quase sempre vira um
+## corte comum.
+const AFRO_STYLE_KEEP: Array[float] = [0.05, 0.06, 0.1, 0.3, 0.45, 0.1, 1.0, 1.0, 0.04, 0.08, 1.0, 0.7, 0.05]
+const AFRO_STYLE_WORDS: Array[String] = ["crespo", "afro", "black power", "esponja", "twist", "locs", "dread", "nagô",
+	"trança", "box braids", "waves", "high top", "frohawk", "puff", "freeform", "tufinhos"]
 ## Médias por etnia: largura do nariz, altura do dorso do nariz, lábios, abertura dos olhos,
 ## largura do rosto, maçãs do rosto, arco superciliar.
 const ETH_NOSE_W: Array[float] = [0.15, 0.155, 0.16, 0.165, 0.17, 0.18, 0.19, 0.225, 0.17, 0.175, 0.18, 0.21, 0.19]
@@ -1188,6 +1197,11 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 		hc_i = clampi(int(look["hc"]), 0, HAIR_COLORS.size() - 1)
 	f["hair_i"] = hc_i
 	var tex := RngUtil.weighted_index(rng, ETH_TEXTURE[e])
+	if tex == T_COILY and COILY_KEEP[e] < 1.0:
+		var trng := RandomNumberGenerator.new()
+		trng.seed = hash([seed_value, "crespo"])
+		if trng.randf() >= COILY_KEEP[e]:
+			tex = T_CURLY
 	f["texture"] = tex
 	# Genética de calvície e de cabelos brancos
 	var bald_gene := clampf(float(ETH_BALD_GENE[e]) + rng.randf_range(-0.35, 0.45), 0.0, 1.0)
@@ -1210,6 +1224,17 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if phase_rng.randf() < 0.45:
 		style = RngUtil.weighted_index(phase_rng, sw_old)
 	style = _newer_pick(hash([seed_value, "hs2", int(floor((age + phase_off) / 4.0))]), sw, HS_V1, style)
+	if is_afro_style(style) and AFRO_STYLE_KEEP[e] < 1.0:
+		var arng := RandomNumberGenerator.new()
+		arng.seed = hash([seed_value, "afro", int(floor((age + phase_off) / 4.0))])
+		if arng.randf() >= AFRO_STYLE_KEEP[e]:
+			var sw_plain := sw.duplicate()
+			for i in sw_plain.size():
+				if is_afro_style(i):
+					sw_plain[i] = 0.0
+			var alt := RngUtil.weighted_index(arng, sw_plain)
+			if alt >= 0:
+				style = alt
 	# Calvície avançada: raspa, passa a máquina ou assume a careca
 	if (crown > 0.35 or rec > 0.7) and style in NEEDS_HAIR:
 		var r := phase_rng.randf()
@@ -2065,6 +2090,23 @@ const LONG_STYLE_NAMES := ["Longo", "Coque", "Rabo de cavalo", "Surfista", "Cach
 	"Coque baixo com degradê", "Longo solto repartido", "Longo liso molhado para trás",
 	"Dreads longos volumosos", "Longo com faixa", "Preso para trás com mechas soltas", "Longo ondulado atrás das orelhas",
 	"Ondulado preso em coque baixo"]
+static var _afro_flags := PackedByteArray()
+
+
+## Penteado típico de cabelo crespo (ver AFRO_STYLE_WORDS).
+static func is_afro_style(i: int) -> bool:
+	if _afro_flags.size() != HAIR_STYLES.size():
+		_afro_flags.resize(HAIR_STYLES.size())
+		for k in HAIR_STYLES.size():
+			var n := HAIR_STYLES[k].to_lower()
+			_afro_flags[k] = 0
+			for w in AFRO_STYLE_WORDS:
+				if n.find(w) >= 0:
+					_afro_flags[k] = 1
+					break
+	return i >= 0 and i < _afro_flags.size() and _afro_flags[i] == 1
+
+
 static var _style_mult := PackedFloat32Array()
 ## Quantos penteados e barbas existiam antes do sorteio à parte (não mudar).
 const HS_V1 := 211

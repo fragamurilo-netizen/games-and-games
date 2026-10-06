@@ -1,5 +1,5 @@
 {
-	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas, sas = sul-asiático, hae = chifre da África, pac = polinésio, sea = sudeste asiático), w = peso. youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
+	"_doc": "Nações do mundo. confed: UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC. coef: força do futebol local (vagas e sorteios continentais). origins: de onde vêm os jogadores nascidos no país — c = cultura de nome (names.json), eth = pesos de etnia para o rosto (nor, eur, med, arb, lat, and, mix, afr, eas, sas = sul-asiático, hae = chifre da África, pac = polinésio, sea = sudeste asiático), w = peso, h = família de outra origem (cultura → peso: sobrenome dela e primeiro nome às vezes do país; ver names.json → mixing). youth: bônus de talento da base. imports: pesos das nacionalidades estrangeiras nas ligas do país. foreign: fatia de estrangeiros por divisão. cities: [nome, tamanho 1-5, região]. lang: vocabulário dos clubes procedurais. flag: desenho da bandeira (ver FlagView).",
 	"ethnicities": [
 		"nor",
 		"eur",
@@ -37,8 +37,8 @@
 						"eur": 22,
 						"mix": 13,
 						"afr": 15,
-						"sas": 4,
-						"hae": 2
+						"sas": 0.7,
+						"hae": 0.6
 					}
 				},
 				{
@@ -399,8 +399,8 @@
 					"c": "es",
 					"w": 88,
 					"eth": {
-						"eur": 80,
-						"med": 12,
+						"eur": 58,
+						"med": 34,
 						"nor": 4,
 						"mix": 2,
 						"afr": 2
@@ -1104,8 +1104,8 @@
 					"c": "it",
 					"w": 92,
 					"eth": {
-						"eur": 80,
-						"med": 18,
+						"eur": 56,
+						"med": 42,
 						"nor": 2
 					}
 				},
@@ -1684,8 +1684,8 @@
 					"c": "pt",
 					"w": 85,
 					"eth": {
-						"eur": 80,
-						"med": 10,
+						"eur": 55,
+						"med": 35,
 						"mix": 6,
 						"afr": 4
 					}
@@ -5119,7 +5119,8 @@
 					"c": "br",
 					"w": 100,
 					"eth": {
-						"eur": 38,
+						"eur": 30,
+						"med": 8,
 						"mix": 37,
 						"afr": 20,
 						"eas": 2,
@@ -5700,7 +5701,8 @@
 					"c": "rio",
 					"w": 96,
 					"eth": {
-						"eur": 70,
+						"eur": 52,
+						"med": 18,
 						"lat": 25,
 						"mix": 2,
 						"and": 3
@@ -5714,7 +5716,10 @@
 					}
 				},
 				{
-					"c": "arab",
+					"c": "rio",
+					"h": {
+						"arab": 1
+					},
 					"w": 1,
 					"eth": {
 						"arb": 1
@@ -5950,7 +5955,8 @@
 					"c": "rio",
 					"w": 97,
 					"eth": {
-						"eur": 80,
+						"eur": 62,
+						"med": 18,
 						"mix": 8,
 						"afr": 6,
 						"lat": 6
@@ -6259,7 +6265,10 @@
 					}
 				},
 				{
-					"c": "arab",
+					"c": "cl",
+					"h": {
+						"arab": 1
+					},
 					"w": 1,
 					"eth": {
 						"arb": 1
@@ -6540,7 +6549,10 @@
 					}
 				},
 				{
-					"c": "jp",
+					"c": "pe",
+					"h": {
+						"jp": 1
+					},
 					"w": 1,
 					"eth": {
 						"eas": 1
@@ -7227,14 +7239,20 @@
 					}
 				},
 				{
-					"c": "kr",
+					"c": "us",
+					"h": {
+						"kr": 1
+					},
 					"w": 1,
 					"eth": {
 						"eas": 1
 					}
 				},
 				{
-					"c": "jp",
+					"c": "us",
+					"h": {
+						"jp": 1
+					},
 					"w": 1,
 					"eth": {
 						"eas": 1
@@ -7537,7 +7555,10 @@
 					}
 				},
 				{
-					"c": "kr",
+					"c": "en",
+					"h": {
+						"kr": 1
+					},
 					"w": 1,
 					"eth": {
 						"eas": 1
@@ -7884,16 +7905,22 @@
 				},
 				{
 					"c": "fr",
+					"h": {
+						"ma": 1
+					},
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"arb": 1
 					}
 				},
 				{
 					"c": "es",
+					"h": {
+						"ma": 1
+					},
 					"w": 1,
 					"eth": {
-						"eur": 1
+						"arb": 1
 					}
 				}
 			],
@@ -8128,25 +8155,37 @@
 			"origins": [
 				{
 					"c": "rsa",
-					"w": 90,
+					"w": 80,
 					"eth": {
-						"afr": 80,
-						"mix": 10,
-						"nor": 8,
-						"eur": 2
+						"afr": 1
+					}
+				},
+				{
+					"c": "af",
+					"w": 12,
+					"eth": {
+						"mix": 1
+					}
+				},
+				{
+					"c": "af",
+					"w": 3,
+					"eth": {
+						"nor": 80,
+						"eur": 20
 					}
 				},
 				{
 					"c": "en",
-					"w": 6,
+					"w": 2,
 					"eth": {
-						"nor": 90,
-						"eur": 10
+						"nor": 85,
+						"eur": 15
 					}
 				},
 				{
 					"c": "lusoaf",
-					"w": 2,
+					"w": 1,
 					"eth": {
 						"afr": 1
 					}
@@ -9945,14 +9984,20 @@
 					}
 				},
 				{
-					"c": "kr",
+					"c": "en",
+					"h": {
+						"kr": 1
+					},
 					"w": 1,
 					"eth": {
 						"eas": 1
 					}
 				},
 				{
-					"c": "jp",
+					"c": "en",
+					"h": {
+						"jp": 1
+					},
 					"w": 1,
 					"eth": {
 						"eas": 1

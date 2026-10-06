@@ -2,7 +2,8 @@ class_name NationalityManager
 extends RefCounted
 ## Fictional careers: citizenship, birthplace, residence and sporting allegiance.
 ## FIFA senior eligibility is separate from the simplified citizenship process.
-## No inference from a player's name, face, skin or ethnicity.
+## The family is generated first (NameGenerator.pick_origin): the name, the face and a heritage
+## passport all follow from it. Nothing is inferred afterwards from a name, face or skin.
 
 const VERSION := 1
 const UK := ["ENG", "SCO", "WAL", "NIR"]
@@ -51,21 +52,69 @@ static func passports(p: Player) -> Array:
 	if p.nationality != "" and not out.has(p.nationality): out.push_front(p.nationality)
 	return out
 
-static func generate(p: Player) -> void:
+## `heritage`: cultura da família quando ela é de outra origem (NameGenerator.pick_origin → "h").
+static func generate(p: Player, heritage: String = "") -> void:
 	# Separate RNG: changing biographical variety does not re-roll ability or appearance.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = RngUtil.hash_i(p.face_seed, p.id, 62926)
 	p.origin = {"v":VERSION, "birth":p.nationality, "team":p.nationality,
 		"passports":{p.nationality:{"since":p.birth_year,"basis":"birth","eligible":true}},
 		"parents":[p.nationality], "residence":{}, "records":{}, "events":[], "switched":false}
+	if add_heritage(p, heritage, 0.2):
+		return
 	var routes: Array = FAMILY.get(p.nationality, [])
 	if not routes.is_empty() and rng.randf() < 0.10:
 		var other := String(routes[rng.randi_range(0, routes.size()-1)])
+		# Family routes only where that family could plausibly be the player's own.
+		if not _fits(p, other):
+			return
 		p.origin["parents"].append(other)
 		p.origin["passports"][other] = {"since":p.birth_year,"basis":"parent","eligible":true}
 		if rng.randf() < 0.55 and not cities_of(other).is_empty():
 			p.origin["birth"] = other
 			p.hometown = PlayerGenerator.pick_hometown(rng, other, "")
+
+
+## Família de outra origem: um dos pais é de lá; a maioria tem também o passaporte (e pode defender
+## essa seleção: Iñaki Williams joga por Gana) e alguns nasceram lá (`born_abroad`).
+static func add_heritage(p: Player, heritage: String, born_abroad: float) -> bool:
+	if heritage == "" or p.origin.is_empty():
+		return false
+	var homes := NameGenerator.heritage_nations(heritage).filter(func(n): return n != p.nationality)
+	if homes.is_empty():
+		return false
+	var rng := RandomNumberGenerator.new()
+	rng.seed = RngUtil.hash_i(p.face_seed, p.id, 62928)
+	var other := String(homes[rng.randi_range(0, homes.size() - 1)])
+	if not p.origin["parents"].has(other):
+		p.origin["parents"].append(other)
+	if rng.randf() < 0.55:
+		p.origin["passports"][other] = {"since":p.birth_year,"basis":"parent","eligible":true}
+	if rng.randf() < born_abroad and not cities_of(other).is_empty():
+		p.origin["birth"] = other
+		p.hometown = PlayerGenerator.pick_hometown(rng, other, "")
+	return true
+
+
+## Share of the player's generated ethnicity among people born in `nation` (nations.json origins).
+static func _fits(p: Player, nation: String) -> bool:
+	var origins: Array = DatabaseManager.nation(nation).get("origins", [])
+	var eth: Array = DatabaseManager.ethnicities()
+	if origins.is_empty() or p.eth < 0 or p.eth >= eth.size():
+		return true
+	var key := String(eth[p.eth])
+	var total := 0.0
+	var hit := 0.0
+	for o in origins:
+		var ew: Dictionary = o["eth"]
+		var s := 0.0
+		for k in ew:
+			s += float(ew[k])
+		if s <= 0.0:
+			continue
+		total += float(o["w"])
+		hit += float(o["w"]) * float(ew.get(key, 0.0)) / s
+	return total <= 0.0 or hit / total >= 0.03
 
 static func ensure(w: GameWorld, p: Player) -> void:
 	if not p.origin.is_empty(): return
