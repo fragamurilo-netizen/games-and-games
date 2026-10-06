@@ -4,6 +4,10 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
+- **Escudos e logos (06/10): `claude/escudos-caprichados-i5l8y5`** = ramo das bolinhas (até a mesa de negociação) + escudos e logos caprichados. APK: `builds/MaisUmaRodada-1.0.0-escudos-logos-2026-10-06-debug.apk`. Detalhes em "Escudos e logos de competição" abaixo.
+- **Ramo mais novo (06/10): `claude/bolinhas-narracao-5wp2pg`.** Tem tudo de `claude/posicoes-escalacao-hbrnjt` + elencos realistas + campo clássico 2D + mercado sul-americano, e por cima: bolinhas seguindo a narração, cores dos times no campinho, negociações realistas com mesa cara a cara, calvície por idade. Último APK: `builds/MaisUmaRodada-1.0.0-mesa-negociacao-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima).
+- **Para seguir neste ramo:** (1) testar no celular a mesa de negociação e o "Levantar da mesa" (a chamada de volta só acontece com clube que precisa vender; não foi vista num teste real); (2) rodar `tests/run_tests.gd` depois da junção do mercado sul-americano (só a compilação foi conferida); (3) as respostas novas do diretor ainda não têm tradução em `data/i18n/en.json`/`es.json`; (4) propostas que a IA faz pelos jogadores do usuário (`respond_offer`) já respondem na hora, mas ainda não usam a mesa de conversa; (5) "primeiro clube aparece como empréstimo" no histórico está com a thread "Elencos e overall realistas", em outro ramo.
+
 - **As duas linhas foram juntadas em 05/10** no ramo `claude/posicoes-escalacao-hbrnjt`. Ele tem a UI 2.0 e a versão 1.0.0 (antes em `claude/youthful-newton-hey7og`, a que o dono e o Gregory jogam), mais todo o conteúdo da 0.4.0 de `claude/project-thread-nzso8z` (motor realista, base e negociações, eventos, estatísticas e recordes, repercussão do mata-mata). Trabalho novo deve partir desse ramo. O `nzso8z` ficou para trás e não tem a UI 2.0.
 - Na junção, as telas seguiram a UI 2.0 (sem o overall na interface, só estrelas) e ganharam os plurais certos da 0.4.0. Os estilos de jogador das duas linhas foram somados. A evolução usa a fase de carreira da 1.0.0 (`_career_arc`), com o potencial assentado (`_settle_potential`) e a deriva da 0.4.0. O teto dos craques e o peso por posição vêm calibrados da 0.4.0. O aviso de conquista ficou no topo, compacto, como na UI 2.0. O menu ☰ continua na cor do clube do técnico.
 - A evolução foi recalibrada depois da junção (`ARC_BIAS` e salto menor perto da elite em `_career_arc`, superestrelas mais raras em `STARTER_SHIFT`). Com `tools/ratings_report.gd -- --years=4`, o 90+ fica entre 3 e 4 e o 85+ perto de 100.
@@ -20,6 +24,20 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - **Corredor da chance.** A simulação agora grava `ln` (0 esquerda, 1 meio, 2 direita) nas chances, o mesmo corredor que ela usou no confronto pelos lados; cruzamentos e jogadas saem desse lado. Só apresentação: placares não mudam (teste "partida ao vivo = partida instantânea" ok).
 - **Postura tática no desenho** (`PitchMotion.set_tactics`): linha alta/baixa, largura, pressão e mentalidade mudam o bloco sem bola e a altura do time com bola.
 
+### Cores no campinho, negociações e cabelos (06/10, mesmo ramo)
+
+- APK: `builds/MaisUmaRodada-1.0.0-cabelos-negociacoes-2026-10-06-debug.apk`.
+- **Cores**: `match_screen._team_colors` usa a cor que mais aparece no uniforme (`_dot_colors`) com anel de contraste; visitante escolhe o uniforme mais diferente (ΔE mínimo `DOT_MIN_DE`), goleiros por `_gk_color`.
+- **Negociações** (`transfer_manager.gd`): preço pedido depende do tamanho de quem compra; multa rescisória paga à vista leva o jogador (perfil mostra a multa); jogador que quer sair barateia; clube honra a própria contraproposta na mesma janela e não sobe o valor; termos pessoais sem sorteio repetido.
+- **Cabelos**: depois dos 28, quem tem entradas/coroa costuma passar máquina ou assumir a careca (sorteio à parte, `"calvo"`); careca rara abaixo dos 22. Conferir com `tools/hair_stats.gd` e `tools/squad_faces.gd`.
+
+### Mesa de negociação (06/10, mesmo ramo; mercado sul-americano juntado)
+
+- APK: `builds/MaisUmaRodada-1.0.0-mesa-negociacao-2026-10-06-debug.apk`. Ramo `claude/mercado-sulamericano-1ipxqh` juntado aqui.
+- Compra vira reunião com o diretor do vendedor (`Negotiation._render_talk`): cada proposta tem resposta na hora, em voz direta (`TransferManager._director_line`), e ele cede um pouco a cada rodada até um piso (90% do pedido; 86% se precisa vender).
+- Paciência por reunião (`meeting_patience`, 3 a 5) no lugar de 3 propostas por dia; proposta ofensiva gasta em dobro. Contraproposta vale até o fim da janela, mesmo com a reunião encerrada.
+- "Levantar da mesa" (`walk_away`): clube que precisa vender (ou com jogador forçando saída) chama de volta uma vez por janela, com valor menor.
+
 ### Escudos e logos de competição (06/10, ramo `claude/escudos-caprichados-i5l8y5`)
 
 Pedido do dono em 06/10: "Capriche bem mais nos escudos e logos de ligas". Parte de `claude/bolinhas-narracao-5wp2pg` e só mexe no desenho de escudos e logos (`scripts/ui/components/crest_view.gd`, `crest_art.gd`, `data/world/identity.json`, `data/world/clubs/*.json`, `tools/crest_sheet.gd`, `tools/crest_gen/`).
@@ -30,11 +48,15 @@ Feito:
 - **Escudos:** voltou o que se perdeu na junção de 27/09 (`2742294`): placa atrás do monograma em campo listrado (`plate`), filete interno, contorno escuro por fora, `canton`, `field: pale_cross`, `tc`, `hoops:2` com uma faixa só. Saíram o brilho e o degradê (DESIGN.md: sem brilho).
 - Os louros agora ficam por baixo da faixa com o nome (antes as folhas comiam as letras).
 
-Falta (nesta ordem):
-1. Devolver os escudos de 27/09 que a junção trocou (98 clubes; lista: diferença entre `d3b4bed` e o ramo, menos os 13 refeitos depois: Grêmio, Flamengo, São Paulo, Internacional, Athletico, Barcelona, Liverpool, Chelsea, Tottenham, Man United, Ajax, Dortmund e Gladbach).
-2. Mais capricho nos escudos de monograma genérico (muitos clubes menores só têm letras).
-3. Folha antes/depois em `/mnt/project-files/escudos-caprichados/` e APK de teste em `builds/`.
-4. PR para o dono olhar (perguntar antes de juntar).
+- **213 clubes que saíam com escudo sorteado a cada carreira** (Austrália, Áustria, Bélgica, Bolívia, Chile, China, Colômbia, Croácia, Tchéquia, Dinamarca, Equador, Egito, Grécia, Japão, Coreia, Marrocos, Nigéria, Paraguai, Peru, Catar, África do Sul, Escócia, Senegal, Sérvia, Suíça, Tunísia, Emirados, Ucrânia, Uruguai e Venezuela) ganharam escudo fixo inspirado no de verdade (leão do Brisbane, touro do Macarthur, galhada do Ross County, âncora do Chornomorets, farol de La Serena...).
+- **Os 98 escudos de 27/09 voltaram** (os 13 refeitos depois ficaram como estavam). `ClubGenerator.upgrade_crests` agora atualiza, ao carregar, o escudo de clube real que não foi editado: carreiras em andamento recebem os escudos novos; escudo editado no editor (`"edited"`), com imagem de mod ou com override fica como está.
+- Logos: copas do rei, do trono e do emir com coroa; estrela das supercopas dentro do escudo; Coppa Italia e Coupe de France com a faixa da bandeira.
+- Imagens antes/depois em `/mnt/project-files/escudos-caprichados/` (`escudos-antes-depois-destaques.png`, `escudos-novos-213-*.png`, `escudos-27-09-de-volta-*.png`, `logos-antes-depois-*.png`).
+- APK: `builds/MaisUmaRodada-1.0.0-escudos-logos-2026-10-06-debug.apk` (com tudo do ramo das bolinhas até a mesa de negociação).
+
+Falta:
+1. Escudos de monograma de clubes menores (Brasil, Portugal, Alemanha...) continuam só com letras; na maioria é assim no clube de verdade, mas dá para caprichar em alguns.
+2. PR para o dono olhar (perguntar antes de juntar).
 
 Como conferir:
 ```

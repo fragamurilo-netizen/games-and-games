@@ -1139,6 +1139,15 @@ static func features(seed_value: int, eth: int, age: int, look: Dictionary = {})
 	if (crown > 0.35 or rec > 0.7) and style in NEEDS_HAIR:
 		var r := phase_rng.randf()
 		style = H_BALD if r < 0.3 else (H_BUZZ if r < 0.65 else H_SHORT)
+	# Entradas e coroa já visíveis depois dos 28: boa parte prefere máquina ou careca a esconder.
+	# Sorteio à parte, para não mexer no resto do rosto.
+	var thin := maxf(crown * 1.6, rec - 0.35)
+	if age >= 28 and thin > 0.2 and style not in [H_BALD, H_BUZZ] and not look.has("hs"):
+		var crng := RandomNumberGenerator.new()
+		crng.seed = hash([seed_value, "calvo"])
+		var r2 := crng.randf()
+		if r2 < clampf(thin * 0.9, 0.0, 0.7):
+			style = H_BALD if r2 < thin * 0.3 else H_BUZZ
 	if look.has("hs"):
 		style = clampi(int(look["hs"]), 0, HAIR_STYLES.size() - 1)
 		crown = minf(crown, 0.3)
@@ -1938,7 +1947,7 @@ static func _style_weights(e: int, tex: int, age: int) -> Array:
 				H_CURLY_FRINGE, H_BLEACHED, H_TEXT_FRINGE, H_FROSTED, H_SPONGE, H_TEXT_QUIFF, H_BLOWOUT, H_TWIST_OUT,
 				H_SKIN_FADE, H_CURTAIN, H_BLEACH_DESIGN, H_AFRO_PART, H_FREEFORM_FADE, H_WAVES_FADE, H_QUIFF_BURST]:
 			sw[i] = float(sw[i]) * 1.4
-		sw[H_BALD] = float(sw[H_BALD]) * 0.3
+		sw[H_BALD] = float(sw[H_BALD]) * (0.1 if age < 22 else 0.3)
 	return sw
 
 

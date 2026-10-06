@@ -277,15 +277,19 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 		card.add_child(UIKit.kv("Papel no elenco", Player.STATUS_NAMES[p.squad_status]))
 	else:
 		card.add_child(UIKit.kv("Situação", "Livre, sem taxa"))
-	if p.release_clause > 0 and p.club_id >= 0:
-		card.add_child(UIKit.kv("Multa rescisória", Fmt.money(p.release_clause)))
+	var rc := MarketAI._clause_of(w.club(p.club_id), p) if p.club_id >= 0 else 0
+	if rc > 0:
+		card.add_child(UIKit.kv("Multa rescisória", Fmt.money(rc)))
 	if p.transfer_listed:
 		card.add_child(UIKit.kv("À venda por", Fmt.money(TransferManager.asking_price(w, p)), UIColors.GREEN))
 	elif not own and p.club_id >= 0 and p.loan.is_empty():
 		card.add_child(UIKit.kv("Pedem", Fmt.money(TransferManager.asking_price(w, p))))
 	if not p.loan.is_empty():
 		var owner := w.club(int(p.loan.get("from", -1)))
-		card.add_child(UIKit.kv("Emprestado pelo", "%s até %d" % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year))], UIColors.ORANGE))
+		if TransferRules.is_held(p):
+			card.add_child(UIKit.kv("Vendido ao", "%s, chega em %d" % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year)) + 1], UIColors.ORANGE))
+		else:
+			card.add_child(UIKit.kv("Emprestado pelo", "%s até %d" % [owner.short_name if owner != null else "?", int(p.loan.get("until", w.year))], UIColors.ORANGE))
 	if p.retiring:
 		card.add_child(UIKit.colored("Anunciou que vai se aposentar ao fim da temporada.", UIColors.ORANGE, "Small", true))
 	return UIKit.card_panel(card)

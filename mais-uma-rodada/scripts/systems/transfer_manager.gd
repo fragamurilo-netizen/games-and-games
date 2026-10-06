@@ -4,7 +4,6 @@ extends RefCounted
 ## propostas da IA pelos jogadores do usuário, agentes livres, renovações e rescisões.
 
 const STATUS_ASK: Array[float] = [1.55, 1.25, 1.05, 0.9, 1.3] # estrela, titular, rotação, reserva, promessa
-const MAX_BIDS_PER_DAY := 3
 const OFFER_DAYS := 2 # prazo das propostas, em jogos do usuário
 const BAND := 4.0 # largura das faixas de nível do índice do mercado
 
@@ -51,6 +50,18 @@ static func asking_price(world: GameWorld, p: Player, memo: Dictionary = {}) -> 
 		mult *= 0.85
 	if not world.is_user_club(club.id) and world.has_user():
 		mult *= [0.92, 1.0, 1.1][world.difficulty]
+		# Quem compra muda o preço (a mesma régua do mercado entre os clubes da IA): clube pequeno
+		# não segura quem recebe proposta de gigante; clube grande não precisa vender titular, e
+		# craque só sai por loucura. Contrato longo encarece.
+		var gap := MarketAI.power(world.user_club()) / maxf(0.05, MarketAI.power(club))
+		if gap >= 1.6:
+			mult *= 0.92
+		elif gap <= 0.7 and p.squad_status <= Player.STATUS_STARTER:
+			mult *= 1.35
+		if p.squad_status == Player.STATUS_STAR and gap < 1.2:
+			mult *= 1.4
+		if years >= 4:
+			mult *= 1.08
 	return Valuation.round_value(p.value * mult)
 
 
@@ -164,17 +175,38 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	# Paciência: propostas ridículas seguidas fazem o clube encerrar a conversa por algumas rodadas.
 	if int(n.get("off", -1)) > world.current_turn():
 		return {"result": "rejected", "fee": 0, "msg": "O %s se sentiu desrespeitado e só volta a falar de %s daqui a %s." % [seller.short_name, p.display_name(), Fmt.plural(int(n["off"]) - world.current_turn(), "rodada", "rodadas")]}
-	if int(n["d"]) == world.current_turn() and int(n["n"]) >= MAX_BIDS_PER_DAY:
-		return {"result": "rejected", "fee": 0, "msg": "O clube encerrou as conversas por hoje. Tente depois do próximo jogo."}
+	var pat := meeting_patience(world, seller, p)
+	var wk0 := world.year * 10 + (1 if world.transfer_window_open() else 0)
+	var honored := int(n.get("cy", -1)) == wk0 and float(n.get("ctr", 0.0)) > 0.0 \
+			and deal_value(fee, deal) >= float(n["ctr"]) * 0.995 and swap_players(world, deal).is_empty()
+	if int(n["d"]) == world.current_turn() and int(n["n"]) >= pat and not honored:
+		return {"result": "rejected", "fee": 0, "closed": true, "msg": "A reunião acabou. O %s volta a sentar depois do próximo jogo." % seller.short_name}
 	if int(n["d"]) != world.current_turn():
-		n = {"d": world.current_turn(), "n": 0, "lb": int(n.get("lb", 0))}
+		var keep := {"d": world.current_turn(), "n": 0, "lb": int(n.get("lb", 0))}
+		for k in ["ctr", "cy", "wa"]:
+			if n.has(k):
+				keep[k] = n[k]
+		n = keep
 	n["n"] = int(n["n"]) + 1
 	neg[key] = n
 	world.stats["neg"] = neg
+	# Multa rescisória (a do contrato ou a implícita dos titulares na Espanha e em Portugal): pagou à
+	# vista, o clube não tem como segurar. Só falta convencer o jogador.
+	var clause := MarketAI._clause_of(seller, p)
+	if clause > 0 and int(deal.get("inst", 1)) <= 1 and fee >= clause and swap_players(world, deal).is_empty():
+		n["lb"] = 0
+		return {"result": "accepted", "fee": fee, "clause": true,
+			"msg": "Multa rescisória paga: o %s não pode recusar. Agora é convencer %s." % [seller.short_name, p.display_name()]}
 	var block := sale_block(world, seller, user, p)
 	if block != "":
-		return {"result": "rejected", "fee": 0, "msg": block}
+		var hint := " A multa rescisória é %s." % Fmt.money(clause) if clause > 0 else ""
+		return {"result": "rejected", "fee": 0, "msg": block + hint}
 	var ask := asking_price(world, p)
+	var gap := MarketAI.power(user) / maxf(0.05, MarketAI.power(seller))
+	# Jogador que quer muito a mudança para um clube maior força a saída: o clube cede um pouco.
+	var forcing := gap >= 1.3 and interest(world, p, user) >= 0.8
+	if forcing:
+		ask = int(ask * 0.93)
 	# Clube não vende titular absoluto para rival direto, exceto por muito dinheiro.
 	if seller.is_rival(user.id) and p.squad_status <= Player.STATUS_STARTER:
 		ask = int(ask * 1.4)
@@ -195,10 +227,16 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	var swap_total := swap_value(world, swaps, seller)
 	var value := deal_value(fee, deal) + swap_total
 	var with_swap := "" if swaps.is_empty() else " (com a troca)"
-	if value >= ask:
+	# Palavra dada: o que o clube pediu na contraproposta (nesta janela) ele aceita se você cobrir.
+	var ctr := float(n.get("ctr", 0.0)) if int(n.get("cy", -1)) == world.year * 10 + (1 if world.transfer_window_open() else 0) else 0.0
+	if value >= ask or (ctr > 0.0 and value >= ctr * 0.995):
 		n["lb"] = 0
-		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!" % [seller.short_name, with_swap]}
+		n.erase("ctr")
+		var why := " %s forçou a saída." % p.display_name() if forcing and value < ask / 0.93 else ""
+		var later := (" " + TransferRules.hold_note(world, p, user, seller)) if TransferRules.minor_blocked(world, p, user) else ""
+		return {"result": "accepted", "fee": fee, "msg": "Aperto de mão: o %s aceita%s.%s%s" % [seller.short_name, with_swap, why, later]}
 	if value < ask * 0.6:
+		n["n"] = int(n["n"]) + 1 # proposta ofensiva gasta a paciência em dobro
 		n["lb"] = int(n.get("lb", 0)) + 1
 		if int(n["lb"]) >= 2:
 			n["off"] = world.current_turn() + 3
@@ -206,10 +244,21 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 			return {"result": "rejected", "fee": 0, "msg": "Segunda proposta muito abaixo do valor: o %s se sentiu desrespeitado e encerrou as conversas por 3 rodadas." % seller.short_name}
 	if value >= ask * 0.8:
 		# Quanto de dinheiro a mais cobre a diferença (a parte da troca já está contada).
-		var target := (value + ask) * 0.5 if value >= ask * 0.92 else float(ask)
+		# Na mesa o diretor também cede um pouco a cada rodada de conversa, até um piso.
+		var conc: float = [0.0, 0.2, 0.35, 0.45][clampi(int(n["n"]) - 1, 0, 3)]
+		var floor_k := 0.86 if DealTerms.deadline_mult(world, seller, p) < 1.0 or p.transfer_listed else 0.9
+		var target := maxf(ask * floor_k, ask - (ask - value) * conc)
+		if value >= ask * 0.92:
+			target = minf(target, (value + ask) * 0.5)
 		var cash_f := maxf(0.5, deal_value(1_000_000, deal) / 1_000_000.0)
 		var counter := Valuation.round_value(fee + (target - value) / cash_f)
 		counter = maxi(counter, fee + 1000)
+		# Não volta atrás: a nova contraproposta nunca passa da anterior.
+		if ctr > 0.0:
+			counter = mini(counter, Valuation.round_value(fee + maxf(0.0, ctr - value) / cash_f))
+			target = minf(target, ctr)
+		n["ctr"] = target
+		n["cy"] = world.year * 10 + (1 if world.transfer_window_open() else 0)
 		var alt := ""
 		if int(deal.get("inst", 1)) > 1:
 			var cash_deal := deal.duplicate()
@@ -217,10 +266,79 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 			var cash_counter := Valuation.round_value(maxf(float(fee), fee + (target - (deal_value(fee, cash_deal) + swap_total)) / maxf(0.5, deal_value(1_000_000, cash_deal) / 1_000_000.0)))
 			if cash_counter < counter:
 				alt = " À vista, aceitariam %s." % Fmt.money(cash_counter)
-		elif float(deal.get("addon", 0.0)) <= 0.0 and value >= ask * 0.88:
-			alt = " Ou o valor atual com 20%% em bônus por metas."
-		return {"result": "counter", "fee": counter, "msg": "%s pede %s%s.%s" % [seller.short_name, Fmt.money(counter), with_swap, alt]}
-	return {"result": "rejected", "fee": 0, "msg": "Proposta recusada: muito abaixo do esperado (%s pediria algo perto de %s%s)." % [seller.short_name, Fmt.money(Valuation.round_value(maxf(0.0, ask * 1.05 - swap_total))), with_swap]}
+		elif float(deal.get("addon", 0.0)) <= 0.0 and value >= ask * 0.88 and int(n["n"]) <= 1:
+			alt = " Ou o valor atual com 20% em bônus por metas."
+		var said := _director_line(p, int(n["n"]), counter, with_swap, ctr > 0.0 and target >= ctr * 0.99)
+		return {"result": "counter", "fee": counter, "msg": said + alt}
+	return {"result": "rejected", "fee": 0, "msg": "Isso não chega perto. Para conversar, algo como %s%s." % [Fmt.money(Valuation.round_value(maxf(0.0, ask * 1.05 - swap_total))), with_swap]}
+
+
+## Quantas propostas o diretor do clube vendedor escuta na mesma reunião (uma por rodada).
+## Clube que precisa vender aguenta mais conversa; rival e dono de titular absoluto, menos.
+static func meeting_patience(world: GameWorld, seller: Club, p: Player) -> int:
+	var user := world.user_club()
+	var pat := 4
+	if p.transfer_listed or FinanceManager.in_trouble(seller) or DealTerms.deadline_mult(world, seller, p) < 1.0:
+		pat += 1
+	if seller.is_rival(user.id):
+		pat -= 1
+	if p.squad_status <= Player.STATUS_STARTER and MarketAI.power(seller) >= MarketAI.power(user):
+		pat -= 1
+	return clampi(pat, 3, 5)
+
+
+## Propostas que ainda cabem na reunião de hoje.
+static func meeting_left(world: GameWorld, p: Player) -> int:
+	if p.club_id < 0:
+		return 0
+	var n: Dictionary = world.stats.get("neg", {}).get(str(p.id), {})
+	var used := int(n.get("n", 0)) if int(n.get("d", -1)) == world.current_turn() else 0
+	return maxi(0, meeting_patience(world, world.club(p.club_id), p) - used)
+
+
+## Resposta do diretor na mesa, em voz direta. Varia com a rodada da conversa, sem sorteio.
+static func _director_line(p: Player, round_n: int, fee: int, with_swap: String, firm: bool) -> String:
+	var v := Fmt.money(fee) + with_swap
+	if firm:
+		return "%s. Daqui não passo." % v
+	var lines := [
+		"Por menos de %s ele não sai.",
+		"Chegue a %s e a gente aperta a mão.",
+		"%s e fechamos hoje.",
+		"Ele vale %s. Isso é o que posso fazer.",
+	]
+	return String(lines[absi(hash([p.id, round_n])) % lines.size()]) % v
+
+
+## O usuário levanta da mesa. Clube que precisa vender (ou com o jogador forçando a saída) às
+## vezes chama de volta antes de você sair, com um valor menor. Uma vez por janela e por jogador.
+static func walk_away(world: GameWorld, p: Player, fee: int) -> Dictionary:
+	var neg: Dictionary = world.stats.get("neg", {})
+	var n: Dictionary = neg.get(str(p.id), {})
+	var seller := world.club(p.club_id)
+	var user := world.user_club()
+	var wk := world.year * 10 + (1 if world.transfer_window_open() else 0)
+	var ctr := float(n.get("ctr", 0.0)) if int(n.get("cy", -1)) == wk else 0.0
+	var close := func() -> void:
+		n["d"] = world.current_turn()
+		n["n"] = 99
+		neg[str(p.id)] = n
+		world.stats["neg"] = neg
+	if seller == null or ctr <= 0.0 or int(n.get("wa", -1)) == wk:
+		close.call()
+		return {"result": "left", "msg": "Tudo bem. A porta fica aberta."}
+	n["wa"] = wk
+	var need := p.transfer_listed or FinanceManager.in_trouble(seller) or DealTerms.deadline_mult(world, seller, p) < 1.0 \
+			or p.squad_status >= Player.STATUS_BACKUP \
+			or (MarketAI.power(user) / maxf(0.05, MarketAI.power(seller)) >= 1.3 and interest(world, p, user) >= 0.8)
+	if not need or float(fee) < ctr * 0.85:
+		close.call()
+		return {"result": "left", "msg": "Tudo bem. A porta fica aberta."}
+	var nf := Valuation.round_value(fee + (ctr - fee) * 0.4)
+	n["ctr"] = float(nf)
+	neg[str(p.id)] = n
+	world.stats["neg"] = neg
+	return {"result": "counter", "fee": nf, "msg": "Espera. Fechamos em %s, mas é agora." % Fmt.money(nf)}
 
 
 ## Jogadores do usuário oferecidos como parte do pagamento (deal["swap"] = [ids]).
@@ -279,7 +397,8 @@ static func user_terms(world: GameWorld, p: Player, wage: int, years: int, deal:
 		return {"result": "rejected", "wage": demand, "msg": "Folha salarial estourada: a diretoria limita a %s/mês." % Fmt.money(user.wage_budget)}
 	if wage >= demand:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou os termos!" % p.display_name()}
-	if wage >= demand * 0.9 and world.rng.randf() < 0.5:
+	# Perto do pedido, o empresário decide de uma vez (insistir com o mesmo valor não muda a resposta).
+	if wage >= demand * 0.9 and absi(hash([p.id, user.id, world.year, "termos"])) % 100 < 50:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou, mesmo pedindo um pouco mais." % p.display_name()}
 	return {"result": "counter", "wage": demand, "msg": ("%s quer %s por %d ano." if years == 1 else "%s quer %s por %d anos.") % [p.display_name(), Fmt.money_month(demand), years]}
 
@@ -411,6 +530,8 @@ static func loan_in_terms(world: GameWorld, p: Player, terms: Dictionary = {}) -
 		return {"ok": false, "msg": ob}
 	if seller.is_rival(user.id):
 		return {"ok": false, "msg": "%s não empresta jogadores para o rival." % seller.short_name}
+	if TransferRules.minor_blocked(world, p, user):
+		return {"ok": false, "msg": "Menor de 18 não pode se mudar de país (regra da FIFA)."}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio."}
 	if interest(world, p, user) < 0.25:
@@ -473,7 +594,7 @@ static func loan_out(world: GameWorld, p: Player, kind: String = "") -> Dictiona
 		if c.id == user.id or c.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 			continue
 		var level := PlayerGenerator.club_level(c)
-		if p.ovr_f < level - 3.0 or p.ovr_f > level + 10.0:
+		if p.ovr_f < level - 3.0 or p.ovr_f > level + 10.0 or TransferRules.minor_blocked(world, p, c):
 			continue
 		var v := -absf(p.ovr_f - level - 2.0) + (4.0 if c.nation == user.nation else 0.0) + world.rng.randf_range(0.0, 3.0)
 		if v > best_v:
@@ -557,8 +678,10 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	Rivalry.on_transfer(world, p, seller, buyer)
 	if seller != null:
 		seller.player_ids.erase(p.id)
-		seller.add_ledger("vendas", fee)
-		FinanceManager.on_sale(world, seller, fee)
+		# Venda internacional: 5% ficam com os clubes que formaram o jogador (TransferRules).
+		var net := fee - TransferRules.pay_solidarity(world, p, seller, buyer, fee)
+		seller.add_ledger("vendas", net)
+		FinanceManager.on_sale(world, seller, net)
 		_close_spell(world, p)
 		# Percentual de revenda para um ex-clube
 		var so_club := world.club(int(p.clauses.get("so", -1)))
@@ -664,6 +787,8 @@ static func user_sign_free(world: GameWorld, p: Player, wage: int, years: int, d
 	var rule := policy_block(world, user, p)
 	if rule != "":
 		return {"ok": false, "msg": rule}
+	if TransferRules.minor_blocked(world, p, user):
+		return {"ok": false, "msg": "Menor de 18 não pode se mudar de país (regra da FIFA)."}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return {"ok": false, "msg": "Elenco cheio (máximo %d)." % int(DatabaseManager.squad_rules()["max_players"])}
 	var r := user_terms(world, p, wage, years, deal)
@@ -690,8 +815,12 @@ static func user_sign(world: GameWorld, p: Player, fee: int, wage: int, years: i
 		return {"ok": false, "msg": r["msg"], "wage": r.get("wage", 0), "result": r["result"]}
 	var seller_id := p.club_id
 	var seller := world.club(seller_id)
+	var minor := TransferRules.minor_blocked(world, p, user)
 	complete_transfer(world, p, user, fee, wage, years)
 	apply_deal(world, p, user, seller_id, fee, deal)
+	if minor:
+		TransferRules.hold_until_18(world, p, user, seller)
+		return {"ok": true, "msg": "%s é do %s! %s" % [p.display_name(), user.short_name, TransferRules.hold_note(world, p, user, seller)]}
 	var names: Array = []
 	for sp: Player in swaps:
 		var sw := maxi(sp.wage, Valuation.wage_demand(sp, seller, world.year))
@@ -790,8 +919,13 @@ static func respond_offer(world: GameWorld, o: TransferOffer, action: String, co
 				return "A janela está fechada."
 			o.status = TransferOffer.ACCEPTED
 			var wage := Valuation.wage_demand(p, buyer, world.year)
+			var seller := world.club(p.club_id)
+			var minor := TransferRules.minor_blocked(world, p, buyer)
 			complete_transfer(world, p, buyer, o.fee, wage, preferred_years(world, p))
 			DealTerms.on_offer_accepted(world, o, p, buyer)
+			if minor:
+				TransferRules.hold_until_18(world, p, buyer, seller)
+				return "%s foi vendido ao %s por %s. %s" % [p.display_name(), buyer.short_name, Fmt.money(o.fee), TransferRules.hold_note(world, p, buyer, seller)]
 			return "%s foi vendido ao %s por %s." % [p.display_name(), buyer.short_name, Fmt.money(o.fee)]
 		"so", "bb":
 			return DealTerms.request_clause(world, o, action)
@@ -844,6 +978,7 @@ static func _build_index(world: GameWorld) -> Dictionary:
 	for _f in FAMILIES:
 		band.append({})
 	var nat := {}
+	var young := {}
 	for p: Player in world.players.values():
 		if p.retiring or not p.loan.is_empty():
 			continue
@@ -859,7 +994,12 @@ static func _build_index(world: GameWorld) -> Dictionary:
 				arr.append([])
 			nat[n] = arr
 		nat[n][f].append(p)
-	return {"band": band, "nat": nat}
+		# Joias (até 20 anos, potencial alto): o garimpo dos clubes europeus na América do Sul.
+		if p.club_id >= 0 and p.potential >= 72 and p.age(world.year) <= 20:
+			if not young.has(n):
+				young[n] = []
+			young[n].append(p)
+	return {"band": band, "nat": nat, "young": young}
 
 
 ## Família de cada posição (índice em FAMILIES), na ordem de Pos: GK, RB, CB, LB, DM, CM, AM, RM,
@@ -1116,6 +1256,8 @@ static func precontract_block(world: GameWorld, p: Player, c: Club) -> String:
 		return "Ele já assinou pré-contrato."
 	if not p.loan.is_empty() or p.retiring:
 		return "Ele não pode assinar agora."
+	if TransferRules.minor_blocked(world, p, c):
+		return "Menor de 18 não pode se mudar de país (regra da FIFA)."
 	return ""
 
 
@@ -1165,7 +1307,7 @@ static func ai_precontracts(world: GameWorld) -> void:
 			continue
 		var cur := world.club(p.club_id)
 		var suitor := MarketAI.realistic_suitor(world, p, maxf(20.0, cur.reputation - 10.0) if cur != null else 20.0, rng)
-		if suitor == null or ClubEvents.banned(world, suitor):
+		if suitor == null or ClubEvents.banned(world, suitor) or TransferRules.minor_blocked(world, p, suitor):
 			continue
 		_register_pre(world, p, suitor, wage_ask(world, p, suitor), preferred_years(world, p), {})
 

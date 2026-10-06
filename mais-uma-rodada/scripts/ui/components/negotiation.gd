@@ -31,6 +31,8 @@ var terms_tab := "base"
 var picking_swap := false
 ## A multa rescisória foi paga (o vendedor não pode recusar).
 var clause_paid := false
+## Conversa na mesa com o diretor do vendedor: [{you: bool, t: texto}].
+var talk: Array = []
 var _money: MoneyInput
 var _money_summary: VBoxContainer
 const MAX_SWAP := 2
@@ -251,6 +253,8 @@ func _render_buy() -> void:
 		pay.disabled = not w.transfer_window_open()
 		cc.add_child(pay)
 		box.add_child(UIKit.card_panel(cc))
+	if not talk.is_empty():
+		_render_talk(seller)
 	box.add_child(UIKit.segment([["fee", "Valor"], ["cond", "Condições"], ["swap", "Troca"]], buy_tab, func(k: String):
 		buy_tab = k
 		_render()))
@@ -280,6 +284,55 @@ func _render_buy() -> void:
 			if _money != null: _money.set_amount(fee)
 			_send_bid()))
 	box.add_child(UIKit.button("ENVIAR PROPOSTA", "PrimaryButton", _send_bid, "swap"))
+	if counter_fee > 0:
+		box.add_child(UIKit.button("Levantar da mesa", "TextButton", _walk_away))
+
+
+## A reunião: o que você ofereceu e o que o diretor respondeu, na ordem, e quantas propostas
+## ele ainda escuta hoje.
+func _render_talk(seller: Club) -> void:
+	var cc := UIKit.card("CardFlat", UITokens.S1)
+	var top := UIKit.hbox(12)
+	var ttl := UIKit.label("Mesa com o %s" % seller.short_name, "H3")
+	ttl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(ttl)
+	var left := TransferManager.meeting_left(w, p)
+	var lt := "Reunião encerrada" if left <= 0 else Fmt.n_of(left, "%d proposta restante", "%d propostas restantes")
+	top.add_child(UIKit.colored(lt, UIColors.ORANGE if left <= 1 else UIColors.MUTED, "Small"))
+	cc.add_child(top)
+	for line in talk.slice(maxi(0, talk.size() - 6)):
+		var row := UIKit.vbox(0)
+		var you: bool = line["you"]
+		row.add_child(UIKit.colored("Você" if you else seller.short_name, UIColors.MUTED, "Small"))
+		row.add_child(UIKit.label(String(line["t"]), "Muted" if you else "", true))
+		cc.add_child(row)
+	box.add_child(UIKit.card_panel(cc))
+
+
+func _offer_line() -> String:
+	var t := "Ofereço %s" % Fmt.money(fee)
+	if int(deal.get("inst", 1)) > 1:
+		t += " em %d parcelas" % int(deal["inst"])
+	if float(deal.get("addon", 0.0)) > 0.0:
+		t += ", mais %d%% em metas" % int(round(float(deal["addon"]) * 100.0))
+	if float(deal.get("sell_on", 0.0)) > 0.0:
+		t += ", com %d%% da revenda" % int(round(float(deal["sell_on"]) * 100.0))
+	var sw := TransferManager.swap_players(w, deal)
+	if not sw.is_empty():
+		t += " e %s na troca" % ", ".join(sw.map(func(x): return x.display_name()))
+	return t + "."
+
+
+func _walk_away() -> void:
+	talk.append({"you": true, "t": "Assim não dá. Obrigado pelo tempo."})
+	var r := TransferManager.walk_away(w, p, fee)
+	talk.append({"you": false, "t": r["msg"]})
+	message = ""
+	if r["result"] == "counter":
+		counter_fee = int(r["fee"])
+	else:
+		counter_fee = -1
+	_render()
 
 
 func _agent_opts() -> Array:
@@ -405,18 +458,28 @@ func _send_bid() -> void:
 	if not _valid_amount():
 		return
 	var r := TransferManager.user_bid(w, p, fee, deal)
-	message = r["msg"]
+	message = ""
+	var said := String(r["msg"])
 	match r["result"]:
 		"accepted":
 			agreed_fee = fee
+			message = said
 			message_color = UIColors.GREEN
 			wage = TransferManager.wage_ask(w, p, w.user_club())
 			Sfx.play("sign", -6.0)
 		"counter":
+			talk.append({"you": true, "t": _offer_line()})
+			talk.append({"you": false, "t": said})
 			counter_fee = int(r["fee"])
-			message_color = UIColors.ACCENT
 		_:
-			message_color = UIColors.RED
+			# Recusa da mesa (valor, paciência) entra na conversa; bloqueio de regra fica embaixo.
+			if r.has("closed") or said.begins_with("Isso não chega") or said.begins_with("Segunda proposta"):
+				if not r.has("closed"):
+					talk.append({"you": true, "t": _offer_line()})
+				talk.append({"you": false, "t": said})
+			else:
+				message = said
+				message_color = UIColors.RED
 	_render()
 
 

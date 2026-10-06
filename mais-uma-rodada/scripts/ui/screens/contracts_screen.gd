@@ -167,7 +167,10 @@ func _row(w: GameWorld, club: Club, p: Player) -> Control:
 		bits.append(("obrigação" if bool(p.loan.get("obl", false)) else "opção") + " de compra " + Fmt.money(int(p.loan["opt"])))
 	if not p.loan.is_empty():
 		var other := w.club(int(p.loan.get("from", -1)) if int(p.loan.get("from", -1)) != club.id else p.club_id)
-		bits.append(("emprestado ao %s" if int(p.loan.get("from", -1)) == club.id else "emprestado pelo %s") % (other.short_name if other != null else "?"))
+		if TransferRules.is_held(p):
+			bits.append(("comprado do %s, chega em %d" if int(p.loan.get("from", -1)) == club.id else "vendido ao %s, sai em %d") % [other.short_name if other != null else "?", int(p.loan.get("until", w.year)) + 1])
+		else:
+			bits.append(("emprestado ao %s" if int(p.loan.get("from", -1)) == club.id else "emprestado pelo %s") % (other.short_name if other != null else "?"))
 	var pre := TransferManager.precontract_of(w, p)
 	if not pre.is_empty():
 		var pc := w.club(int(pre.get("club", -1)))
