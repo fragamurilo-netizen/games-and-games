@@ -459,7 +459,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		clubs_played[f.away] = true
 		if not f.neutral:
 			var home := world.club(f.home)
-			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
+			var price := FinanceManager.ticket_price(home) * FinanceManager.matchday_yield(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
 	tt = _time("aplicar", tt)
 	WeeklyAwards.after_matchday(world, md, slot)
@@ -638,6 +638,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 	FootballMemory.on_match(world, f)
 	Referees.record(world, res)
 	var derby := bool(res.get("derby", false))
+	# Peso do jogo para o crescimento dos jovens (final, mata-mata decisivo, clássico).
+	var big_f := maxf(float(res.get("importance", 0.3)), 0.65 if derby else 0.0)
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
@@ -692,6 +694,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			var red: bool = ln[QuickMatch.L_RED]
 			var inj: int = ln[QuickMatch.L_INJ]
 			played[p.id] = int(played.get(p.id, 0)) + mins
+			if mins >= 30 and big_f >= PlayerDevelopment.BIG_GAME:
+				PlayerDevelopment.big_games[p.id] = maxf(big_f, float(PlayerDevelopment.big_games.get(p.id, 0.0)))
 			p.minutes_season += mins
 			if is_league:
 				p.stats[Player.S_APPS] += 1
@@ -829,6 +833,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.stats["qualified"] = CupManager.compute_qualified(world)
 	# Ranking mundial de clubes: arquiva a temporada antes que tabelas e copas sejam desfeitas
 	ClubRanking.close_season(world)
+	LeagueReputation.season_close(world) # coeficiente das ligas pelo que os clubes fizeram nas copas
 	tt = _time("es_ranking", tt)
 	progress = 5
 	ClubRanking.season_news(world)
@@ -1187,6 +1192,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.offers.clear()
 	world.stats.erase("neg")
 	var taxes := FinanceManager.season_taxes(world)
+	Economy.season_fx(world) # o câmbio anda antes dos orçamentos do ano
 	WorldEvents.season_start(world)
 	WorldPulse.season_start(world)
 	for c: Club in world.clubs:
@@ -1202,6 +1208,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		if not world.is_user_club(c.id):
 			PlayerGenerator.assign_statuses(world, c)
 		_assign_missing_shirts(world, c)
+	FinanceAI.season_open(world) # amortiza dívida, gasta o caixa parado ou entra em austeridade
 	Aftermath.season_open(world) # cofre aberto depois do vice, cobrança e jejum
 	Valuation.refresh_shift(world)
 	Referees.season_close(world)

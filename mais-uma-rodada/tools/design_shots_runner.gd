@@ -373,6 +373,35 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 		UIManager.close_all_modals()
 		return
 	match kind:
+		"interview":
+			# Entrevista de emprego (JobMarket): marca a entrevista num clube da liga e abre a conversa.
+			var target: Club = null
+			for oc: Club in w.clubs_in_league(u.league_id):
+				if oc.id != u.id and (target == null or oc.reputation > target.reputation):
+					target = oc
+			JobMarket.data(w)["apps"][target.id] = {"y": w.year, "st": "ent"}
+			TalkDialog.open("interview", target.id)
+			await _frames(8)
+			await _shot(prefix + "interview")
+			UIManager.close_all_modals()
+			return
+		"models":
+			UIManager.goto("tactics")
+			await _frames(8)
+			_screen().call("_models_sheet")
+			await _frames(8)
+			await _shot(prefix + "models")
+			UIManager.close_all_modals()
+			return
+		"unemployed":
+			JobMarket.resign(w)
+			UIManager.goto("hub")
+			await _frames(8)
+			await _shot(prefix + "unemployed_hub")
+			UIManager.push("jobs")
+			await _frames(8)
+			await _shot(prefix + "unemployed_jobs")
+			return
 		"confirm":
 			UIManager.confirm("Apagar o espaço 2?", "Isso apaga o Coritiba para sempre, incluindo a cópia de segurança.", "Apagar", func(): pass)
 		"event":

@@ -117,7 +117,7 @@
 		"wage_base": 1600,
 		"wage_growth": 1.152,
 		"revenue_per_wage": 330,
-		"tv_share": 0.35,
+		"tv_share": 0.5,
 		"prize_first": 0.16,
 		"prize_last": 0.02,
 		"promotion_bonus": 0.25,

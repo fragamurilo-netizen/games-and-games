@@ -57,6 +57,13 @@ static func talent_drift(world: GameWorld) -> float:
 
 ## Evolução semanal de todos os jogadores. minutes: {player_id: minutos no jogo desta rodada}.
 ## Retorna jogadores que tiveram salto notável (para notícias).
+## Jogos grandes da semana (final, clássico, mata-mata decisivo): {id do jogador: importância}.
+## Preenchido por SeasonManager._apply_match e consumido em weekly_tick.
+static var big_games: Dictionary = {}
+const BIG_GAME := 0.6 # importância a partir da qual o jogo conta como "grande"
+const BIG_GAME_BOOST := 0.45 # jovem que joga jogo grande amadurece mais (no máximo +45% na semana)
+
+
 static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dictionary = {}) -> Array:
 	var rng := world.rng
 	# Metade dos jogadores por semana, com o dobro do efeito: mesmo total, metade do custo.
@@ -103,6 +110,9 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				var train_f := TrainingManager.growth_mult(world, p) * (ManagerProfile.youth_mult(world) if age <= 21 else 1.0) if cid == world.user_club_id else 1.0
 				# Quem joga bem cresce mais; quem vive de notas baixas trava.
 				var perf_f := performance_factor(p) if mins > 0 else 1.0
+				# Importância do jogo: garoto que segura uma final ou um clássico amadurece mais rápido.
+				if age <= 23 and big_games.has(p.id):
+					perf_f *= 1.0 + BIG_GAME_BOOST * clampf((float(big_games[p.id]) - BIG_GAME) / (1.0 - BIG_GAME) * 0.6 + 0.4, 0.0, 1.0)
 				# Jovens ao lado de um mentor aprendem mais rápido.
 				var mentor_f := 1.0 + float(mentors.get(cid, 0.0)) if age <= 22 and cid >= 0 and not p.has_trait("mentor") else 1.0
 				# A cabeça conta: moral, confiança no treinador e o nível de quem treina ao lado.
@@ -133,6 +143,7 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 			# A cabeça ainda aprende: veteranos ganham leitura de jogo enquanto o físico cai.
 			if rng.randf() < 0.035 * p.trait_mult("dev_mult"):
 				_wisdom(rng, p)
+	big_games.clear()
 	return notable
 
 

@@ -207,8 +207,11 @@ static func season_start(world: GameWorld) -> void:
 		var ratio := FinanceManager.debt_ratio(c, revenue)
 		# Dívida grande sozinha não quebra ninguém (bancos rolam); quebra quem passou do limite do
 		# crédito ou fechou o ano com um rombo que os bancos não cobrem.
-		var broke := ratio > float(FinanceManager.money()["debt_limit"]) or c.balance < -revenue * 0.3
-		if broke and world.rng.randf() < 0.45:
+		# Economia 2026: dívidas reais (Corinthians ~2,8 anos de receita, Atlético-MG ~3,9) são roladas
+		# com bancos e parcelamentos de impostos; a recuperação judicial vem quando a dívida passa de
+		# ~3 anos de receita ou o caixa estoura.
+		var broke := ratio > float(FinanceManager.money()["debt_limit"]) * 1.6 or c.balance < -revenue * 0.3
+		if broke and world.rng.randf() < 0.3:
 			_judicial_recovery(world, c, revenue)
 		elif not world.is_user_club(c.id) and c.balance > revenue * 1.5 and c.fan_base > c.capacity and world.rng.randf() < 0.3:
 			_expand_stadium_ai(world, c)

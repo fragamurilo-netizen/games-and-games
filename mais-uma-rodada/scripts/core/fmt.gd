@@ -4,17 +4,18 @@ extends RefCounted
 
 
 ## A economia do jogo é euro-base. A preferência muda só a exibição.
-## Câmbio de referência do BCE em 25/09/2026: €1 = R$ 5,9091 = US$ 1,1403.
-const EUR_TO_BRL := 5.9091
-const EUR_TO_USD := 1.1403
-const FX_DATE := "25/09/2026"
+## Câmbio de partida (05/10/2026): €1 = R$ 5,60 = US$ 1,12. Na carreira vale o câmbio do mundo,
+## que anda a cada temporada (Economy, data/world/economy.json).
+const EUR_TO_BRL := 5.60
+const EUR_TO_USD := 1.12
+const FX_DATE := "05/10/2026"
 
 static func currency_rate() -> float:
 	match AppSettings.currency:
 		AppSettings.CURRENCY_BRL:
-			return EUR_TO_BRL
+			return Economy.rate("BRL")
 		AppSettings.CURRENCY_USD:
-			return EUR_TO_USD
+			return Economy.rate("USD")
 	return 1.0
 
 static func currency_symbol() -> String:

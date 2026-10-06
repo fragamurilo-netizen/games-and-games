@@ -17,6 +17,11 @@ const PLAYER_LABELS := [[86.0, "Estrela mundial"], [74.0, "Internacional"], [60.
 static var _comp_cache := {}
 
 
+## A força das ligas mudou (LeagueReputation): as reputações de competição são recalculadas.
+static func clear_cache() -> void:
+	_comp_cache.clear()
+
+
 static func label(v: float) -> String:
 	for it: Array in LABELS:
 		if v >= float(it[0]):

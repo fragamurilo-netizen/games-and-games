@@ -67,6 +67,8 @@ var sponsors: Dictionary = {}
 ## Momento comercial (0,72..1,35): sobe com campanhas acima do esperado e títulos, cai com fracassos
 ## e rebaixamento. Multiplica a receita de patrocínio e o valor das propostas de patrocinadores.
 var commercial: float = 1.0
+## Força comercial além do que a reputação explica (Economia 2026: âncora na receita real).
+var rev_k: float = 1.0
 ## Vida institucional (ClubEvents): dono, SAF, punições, portões fechados, falência, presidente.
 var affairs: Dictionary = {}
 
@@ -259,7 +261,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "key": key, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
 		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
-		"cmk": snappedf(commercial, 0.001), "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
+		"cmk": snappedf(commercial, 0.001), "rvk": snappedf(rev_k, 0.0001), "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
 		"rivals": rivals, "stadium": stadium, "cap": capacity, "ven": venue, "off": official,
 		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
@@ -322,6 +324,7 @@ static func from_dict(d: Dictionary) -> Club:
 	c.crest = d.get("crest", {})
 	c.sponsors = d.get("spn", {})
 	c.commercial = float(d.get("cmk", 1.0))
+	c.rev_k = float(d.get("rvk", 1.0))
 	c.affairs = d.get("af", {})
 	c.ai_formation_key = int(d.get("afk", -1))
 	c.player_ids = Array(d.get("players", []))

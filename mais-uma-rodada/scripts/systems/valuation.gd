@@ -135,13 +135,14 @@ static func market_value(p: Player, year: int) -> int:
 	return round_value(soft_top(v))
 
 
-## Teto de mercado: acima de ~€ 130 mi cada euro "a mais" pesa menos (ninguém paga € 400 mi por
-## um garoto, por mais que ele seja fora da curva); o recorde fica na casa dos € 200 mi.
+## Teto de mercado: acima de ~€ 150 mi cada euro "a mais" pesa menos (ninguém paga € 400 mi por
+## um garoto, por mais que ele seja fora da curva); o topo fica entre € 180 e 200 mi, como no
+## Transfermarkt de 2026.
 static func soft_top(v: float) -> float:
-	var knee := 130_000_000.0
+	var knee := 150_000_000.0
 	if v <= knee:
 		return v
-	return knee + (v - knee) * 0.4
+	return knee + (v - knee) * 0.5
 
 
 ## Temporada que o mercado viu: boa campanha valoriza, temporada apagada desvaloriza.

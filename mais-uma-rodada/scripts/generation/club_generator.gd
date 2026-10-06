@@ -273,7 +273,8 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	c.fan_mood = clampf(60.0 + rng.randf_range(-10.0, 10.0), 0.0, 100.0)
 	c.board_confidence = 60.0
 	c.cohesion = clampf(55.0 + float(arch.get("cohesion_bonus", 0)) + rng.randf_range(0.0, 10.0), 0.0, 100.0)
-	var revenue := float(FinanceManager.expected_revenue(c))
+	Economy.anchor_revenue(c) # receita real dos clubes de referência
+	var revenue := FinanceManager.net_revenue(c) # caixa e dívida na escala do que sobra para o futebol
 	c.balance = int(revenue * float(arch.get("balance_mult", 0.3)) * rng.randf_range(0.8, 1.2))
 	c.balance = int(round(c.balance / 10000.0)) * 10000
 	# Dívida de longo prazo em anos de receita (arquétipo). Sorteio à parte, sem mexer no gerador do mundo.
@@ -281,6 +282,9 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	dr.seed = hash([c.key, c.name, rng.state])
 	var dm: Array = arch.get("debt", [0.05, 0.3])
 	c.debt = int(round(revenue * dr.randf_range(float(dm[0]), float(dm[1])) / 10000.0)) * 10000
+	var real_debt := Economy.real_debt(c)
+	if real_debt >= 0:
+		c.debt = real_debt # dívida real (balanços de 2025)
 
 
 ## Rivais: autorais pela chave; procedurais pelos clubes da mesma cidade ou de reputação parecida na nação.
