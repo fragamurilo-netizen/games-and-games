@@ -559,8 +559,12 @@ func _light_pass() -> void:
 		return warm
 	var head := _head_contour(_contour_k())
 	if cutout or _fm:
-		# Sem fundo: a luz vai só sobre o rosto (no círculo inteiro ela tingia o fundo transparente)
-		_radial(_hc, head, 4 if _s < 90.0 else 6, light)
+		# Sem fundo: a luz vai só sobre o rosto (no círculo inteiro ela tingia o fundo transparente),
+		# sumindo antes do contorno da cabeça: com a borda dura, o black power e o cabelo comprido
+		# ficavam com um "capacete" mais claro no formato do crânio
+		_radial(_hc, head, 4 if _s < 90.0 else 6, func(p: Vector2, t: float, i: int) -> Color:
+			var c: Color = light.call(p, t, i)
+			return Color(c, c.a * (1.0 - smoothstep(0.5, 0.95, t))))
 	else:
 		var circle := _ellipse(_c, _R, _R, 24 if _s < 90.0 else 36)
 		_radial(_c, circle, 4 if _s < 90.0 else 6, light)
