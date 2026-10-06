@@ -258,10 +258,10 @@ func _render(s: float) -> void:
 	_charge(sp, charge_box, inner, s, box)
 	if String(sp["sym_top"]) != "" and CrestArt.has(String(sp["sym_top"])):
 		# Símbolo pequeno acima do principal (coroa sobre o leão, estrela sobre a bola)
-		var tc0 := Vector2(charge_box.get_center().x, charge_box.position.y - box.size.y * 0.1)
+		var tc0 := Vector2(charge_box.get_center().x, charge_box.position.y - box.size.y * 0.09)
 		var tcol: Color = sp["accent"] if sp["accent"] != null else (sp["sc"] if sp["sc"] != null else contrast(c1, c2, c3))
 		for pp: PackedVector2Array in CrestArt.polys(String(sp["sym_top"])):
-			_poly(_xf_c(pp, tc0, box.size.x * 0.13), tcol)
+			_poly(_xf_c(pp, tc0, box.size.x * 0.115), tcol)
 	if wordmark != "":
 		var wy := 0.79 if shape != "badge" else 0.74
 		var ink: Color = sp["sc"] if sp["sc"] != null else contrast(c1, c2, c3)
@@ -371,8 +371,8 @@ static func _logo_box(box: Rect2, shape: String, has_flag: bool, has_top: bool, 
 		cy += 0.05
 		sz *= 0.9
 	if has_top:
-		cy += 0.07
-		sz *= 0.84
+		cy += 0.1
+		sz *= 0.82
 	if has_word:
 		cy -= 0.1
 		sz *= 0.8
