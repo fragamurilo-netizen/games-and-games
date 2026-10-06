@@ -70,6 +70,40 @@ func _world(w: GameWorld) -> void:
 	print("\n== 1ª divisão: craque − média do XI: p10 %.1f · med %.1f · p90 %.1f" % [gaps[gaps.size() / 10], gaps[gaps.size() / 2], gaps[gaps.size() * 9 / 10]])
 	print("   melhor − 11º: p10 %.1f · med %.1f · p90 %.1f" % [spreads[spreads.size() / 10], spreads[spreads.size() / 2], spreads[spreads.size() * 9 / 10]])
 	print("   papéis: %s" % str(roles))
+	var loans := 0
+	var back_owner := 0
+	var first_loan := 0
+	var with_loan := 0
+	var total := 0
+	for p: Player in w.players.values():
+		var sp: Array = p.spells
+		if sp.is_empty():
+			continue
+		total += 1
+		if bool(sp[0].get("lo", false)):
+			first_loan += 1
+		var had := false
+		for i in sp.size():
+			if bool(sp[i].get("lo", false)):
+				had = true
+				loans += 1
+				# volta para o dono ou foi vendido pelo dono depois?
+				var before := -1
+				for j in range(i - 1, -1, -1):
+					if not bool(sp[j].get("lo", false)):
+						before = int(sp[j]["c"])
+						break
+				var after := -1
+				for j in range(i + 1, sp.size()):
+					if not bool(sp[j].get("lo", false)):
+						after = int(sp[j]["c"])
+						break
+				if before == after:
+					back_owner += 1
+		if had:
+			with_loan += 1
+	print("   1ª passagem emprestado: %d de %d (%.1f%%) · com algum empréstimo: %.1f%%" % [first_loan, total, 100.0 * first_loan / maxf(1, total), 100.0 * with_loan / maxf(1, total)])
+	print("   empréstimos entre duas passagens pelo mesmo clube: %.1f%%" % (100.0 * back_owner / maxf(1, loans)))
 	var hist := {}
 	for p: Player in w.players.values():
 		var b := int(p.overall / 5) * 5

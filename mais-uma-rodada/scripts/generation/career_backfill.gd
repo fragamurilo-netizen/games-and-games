@@ -207,9 +207,11 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 	var cur := world.club(p.club_id) if p.club_id >= 0 else null
 	var join := p.joined_year if cur != null else year
 	join = clampi(join, first_y, year)
-	var plan := {} # ano -> [club_id, nome, liga, nível, empréstimo, nação]
+	var plan := {} # ano -> [club_id, nome, liga, nível, empréstimo, nação, (dono, se empréstimo)]
 	for y in range(join, year):
 		plan[y] = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur), false, cur.nation]
+	# Dono do passe nos anos de empréstimo: o próximo clube (no tempo) em que ele jogou de verdade
+	var owner: Array = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur), false, cur.nation] if cur != null else []
 	var home := p.nationality
 	var y2 := join - 1
 	var avoid: Array = [cur.id] if cur != null else []
@@ -229,7 +231,7 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		if float(club[0]) >= float(ctx["top"].get(nation, 99.0)) - 3.0:
 			span += rng.randi_range(1, 2)
 		# Empréstimo: o jovem do clube grande roda por um ano num menor
-		var loan := yr_age <= 22 and float(club[0]) < later_level - 3.0 and rng.randf() < 0.45
+		var loan := yr_age >= 18 and yr_age <= 22 and not owner.is_empty() and float(club[0]) < later_level - 3.0 and rng.randf() < 0.45
 		if loan:
 			span = 1
 		for k in span:
@@ -237,8 +239,11 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 			if yy < first_y:
 				break
 			plan[yy] = [int(club[1]), String(club[2]), String(club[3]), float(club[0]), loan and k == 0, nation]
+			if loan and k == 0:
+				plan[yy].append(owner)
 		if not loan:
 			later_level = float(club[0])
+			owner = [int(club[1]), String(club[2]), String(club[3]), float(club[0]), false, nation]
 		avoid = [int(club[1])]
 		y2 -= span
 	# Estreia quase sempre em casa: o primeiro ano vai para um clube do país natal (o mais
@@ -253,6 +258,27 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		var last_home := mini(first_y + rng.randi_range(2, 4), join - 4)
 		for yy in range(first_y, last_home):
 			plan[yy] = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur) - 3.0, false, cur.nation]
+	# Empréstimo só sai de quem é dono do passe: antes de cada empréstimo ele passou pelo dono
+	# (subiu na base de lá ou foi contratado). Ninguém começa a carreira emprestado: se o primeiro
+	# ano é empréstimo, ele vira o ano de estreia no dono; se antes do empréstimo havia outro
+	# clube, o último ano ali passa a ser o do dono (contratado e emprestado em seguida).
+	var yrs: Array = plan.keys()
+	yrs.sort()
+	for i in yrs.size():
+		var e: Array = plan[yrs[i]]
+		if not bool(e[4]):
+			continue
+		var own: Array = e[6] if e.size() > 6 else []
+		if own.is_empty():
+			plan[yrs[i]] = [e[0], e[1], e[2], e[3], false, e[5]]
+			continue
+		var j := i - 1
+		while j >= 0 and bool(plan[yrs[j]][4]) and plan[yrs[j]].size() > 6 and int(plan[yrs[j]][6][0]) == int(own[0]):
+			j -= 1
+		if j < 0:
+			plan[yrs[i]] = own.duplicate()
+		elif int(plan[yrs[j]][0]) != int(own[0]):
+			plan[yrs[j]] = own.duplicate()
 	# Temporadas
 	var hist: Array = []
 	var ys: Array = plan.keys()
