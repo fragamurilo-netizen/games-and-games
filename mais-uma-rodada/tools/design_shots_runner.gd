@@ -427,7 +427,7 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					break
 		"toast":
 			UIManager.toast("Proposta enviada. A resposta chega na próxima rodada.", UIColors.GREEN)
-		"buy_cond", "buy_terms", "buy_loan":
+		"buy_cond", "buy_terms", "buy_loan", "buy_talk":
 			for c: Club in w.clubs_in_league(u.league_id):
 				if c.id != u.id and not u.is_rival(c.id):
 					var sq := w.squad(c)
@@ -451,6 +451,12 @@ func _dialog_shot(w: GameWorld, kind: String) -> void:
 					"buy_loan":
 						neg.loan_mode = true
 						neg.loan_terms = {"kind": "obl", "ws": 0.75}
+					"buy_talk":
+						u.transfer_budget = maxi(u.transfer_budget, 200_000_000)
+						neg.fee = Valuation.round_value(TransferManager.asking_price(w, neg.p) * 0.86)
+						neg._send_bid()
+						neg.fee = Valuation.round_value(neg.fee * 1.04)
+						neg._send_bid()
 				neg._render()
 		"offer":
 			var sq2 := w.squad(u)

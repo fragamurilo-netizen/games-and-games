@@ -4,7 +4,6 @@ extends RefCounted
 ## propostas da IA pelos jogadores do usuário, agentes livres, renovações e rescisões.
 
 const STATUS_ASK: Array[float] = [1.55, 1.25, 1.05, 0.9, 1.3] # estrela, titular, rotação, reserva, promessa
-const MAX_BIDS_PER_DAY := 3
 const OFFER_DAYS := 2 # prazo das propostas, em jogos do usuário
 const BAND := 4.0 # largura das faixas de nível do índice do mercado
 
@@ -176,10 +175,18 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	# Paciência: propostas ridículas seguidas fazem o clube encerrar a conversa por algumas rodadas.
 	if int(n.get("off", -1)) > world.current_turn():
 		return {"result": "rejected", "fee": 0, "msg": "O %s se sentiu desrespeitado e só volta a falar de %s daqui a %s." % [seller.short_name, p.display_name(), Fmt.plural(int(n["off"]) - world.current_turn(), "rodada", "rodadas")]}
-	if int(n["d"]) == world.current_turn() and int(n["n"]) >= MAX_BIDS_PER_DAY:
-		return {"result": "rejected", "fee": 0, "msg": "O clube encerrou as conversas por hoje. Tente depois do próximo jogo."}
+	var pat := meeting_patience(world, seller, p)
+	var wk0 := world.year * 10 + (1 if world.transfer_window_open() else 0)
+	var honored := int(n.get("cy", -1)) == wk0 and float(n.get("ctr", 0.0)) > 0.0 \
+			and deal_value(fee, deal) >= float(n["ctr"]) * 0.995 and swap_players(world, deal).is_empty()
+	if int(n["d"]) == world.current_turn() and int(n["n"]) >= pat and not honored:
+		return {"result": "rejected", "fee": 0, "closed": true, "msg": "A reunião acabou. O %s volta a sentar depois do próximo jogo." % seller.short_name}
 	if int(n["d"]) != world.current_turn():
-		n = {"d": world.current_turn(), "n": 0, "lb": int(n.get("lb", 0))}
+		var keep := {"d": world.current_turn(), "n": 0, "lb": int(n.get("lb", 0))}
+		for k in ["ctr", "cy", "wa"]:
+			if n.has(k):
+				keep[k] = n[k]
+		n = keep
 	n["n"] = int(n["n"]) + 1
 	neg[key] = n
 	world.stats["neg"] = neg
@@ -226,8 +233,9 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 		n["lb"] = 0
 		n.erase("ctr")
 		var why := " %s forçou a saída." % p.display_name() if forcing and value < ask / 0.93 else ""
-		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!%s" % [seller.short_name, with_swap, why]}
+		return {"result": "accepted", "fee": fee, "msg": "Aperto de mão: o %s aceita%s.%s" % [seller.short_name, with_swap, why]}
 	if value < ask * 0.6:
+		n["n"] = int(n["n"]) + 1 # proposta ofensiva gasta a paciência em dobro
 		n["lb"] = int(n.get("lb", 0)) + 1
 		if int(n["lb"]) >= 2:
 			n["off"] = world.current_turn() + 3
@@ -235,7 +243,12 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 			return {"result": "rejected", "fee": 0, "msg": "Segunda proposta muito abaixo do valor: o %s se sentiu desrespeitado e encerrou as conversas por 3 rodadas." % seller.short_name}
 	if value >= ask * 0.8:
 		# Quanto de dinheiro a mais cobre a diferença (a parte da troca já está contada).
-		var target := (value + ask) * 0.5 if value >= ask * 0.92 else float(ask)
+		# Na mesa o diretor também cede um pouco a cada rodada de conversa, até um piso.
+		var conc: float = [0.0, 0.2, 0.35, 0.45][clampi(int(n["n"]) - 1, 0, 3)]
+		var floor_k := 0.86 if DealTerms.deadline_mult(world, seller, p) < 1.0 or p.transfer_listed else 0.9
+		var target := maxf(ask * floor_k, ask - (ask - value) * conc)
+		if value >= ask * 0.92:
+			target = minf(target, (value + ask) * 0.5)
 		var cash_f := maxf(0.5, deal_value(1_000_000, deal) / 1_000_000.0)
 		var counter := Valuation.round_value(fee + (target - value) / cash_f)
 		counter = maxi(counter, fee + 1000)
@@ -252,10 +265,79 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 			var cash_counter := Valuation.round_value(maxf(float(fee), fee + (target - (deal_value(fee, cash_deal) + swap_total)) / maxf(0.5, deal_value(1_000_000, cash_deal) / 1_000_000.0)))
 			if cash_counter < counter:
 				alt = " À vista, aceitariam %s." % Fmt.money(cash_counter)
-		elif float(deal.get("addon", 0.0)) <= 0.0 and value >= ask * 0.88:
-			alt = " Ou o valor atual com 20%% em bônus por metas."
-		return {"result": "counter", "fee": counter, "msg": "%s pede %s%s.%s" % [seller.short_name, Fmt.money(counter), with_swap, alt]}
-	return {"result": "rejected", "fee": 0, "msg": "Proposta recusada: muito abaixo do esperado (%s pediria algo perto de %s%s)." % [seller.short_name, Fmt.money(Valuation.round_value(maxf(0.0, ask * 1.05 - swap_total))), with_swap]}
+		elif float(deal.get("addon", 0.0)) <= 0.0 and value >= ask * 0.88 and int(n["n"]) <= 1:
+			alt = " Ou o valor atual com 20% em bônus por metas."
+		var said := _director_line(p, int(n["n"]), counter, with_swap, ctr > 0.0 and target >= ctr * 0.99)
+		return {"result": "counter", "fee": counter, "msg": said + alt}
+	return {"result": "rejected", "fee": 0, "msg": "Isso não chega perto. Para conversar, algo como %s%s." % [Fmt.money(Valuation.round_value(maxf(0.0, ask * 1.05 - swap_total))), with_swap]}
+
+
+## Quantas propostas o diretor do clube vendedor escuta na mesma reunião (uma por rodada).
+## Clube que precisa vender aguenta mais conversa; rival e dono de titular absoluto, menos.
+static func meeting_patience(world: GameWorld, seller: Club, p: Player) -> int:
+	var user := world.user_club()
+	var pat := 4
+	if p.transfer_listed or FinanceManager.in_trouble(seller) or DealTerms.deadline_mult(world, seller, p) < 1.0:
+		pat += 1
+	if seller.is_rival(user.id):
+		pat -= 1
+	if p.squad_status <= Player.STATUS_STARTER and MarketAI.power(seller) >= MarketAI.power(user):
+		pat -= 1
+	return clampi(pat, 3, 5)
+
+
+## Propostas que ainda cabem na reunião de hoje.
+static func meeting_left(world: GameWorld, p: Player) -> int:
+	if p.club_id < 0:
+		return 0
+	var n: Dictionary = world.stats.get("neg", {}).get(str(p.id), {})
+	var used := int(n.get("n", 0)) if int(n.get("d", -1)) == world.current_turn() else 0
+	return maxi(0, meeting_patience(world, world.club(p.club_id), p) - used)
+
+
+## Resposta do diretor na mesa, em voz direta. Varia com a rodada da conversa, sem sorteio.
+static func _director_line(p: Player, round_n: int, fee: int, with_swap: String, firm: bool) -> String:
+	var v := Fmt.money(fee) + with_swap
+	if firm:
+		return "%s. Daqui não passo." % v
+	var lines := [
+		"Por menos de %s ele não sai.",
+		"Chegue a %s e a gente aperta a mão.",
+		"%s e fechamos hoje.",
+		"Ele vale %s. Isso é o que posso fazer.",
+	]
+	return String(lines[absi(hash([p.id, round_n])) % lines.size()]) % v
+
+
+## O usuário levanta da mesa. Clube que precisa vender (ou com o jogador forçando a saída) às
+## vezes chama de volta antes de você sair, com um valor menor. Uma vez por janela e por jogador.
+static func walk_away(world: GameWorld, p: Player, fee: int) -> Dictionary:
+	var neg: Dictionary = world.stats.get("neg", {})
+	var n: Dictionary = neg.get(str(p.id), {})
+	var seller := world.club(p.club_id)
+	var user := world.user_club()
+	var wk := world.year * 10 + (1 if world.transfer_window_open() else 0)
+	var ctr := float(n.get("ctr", 0.0)) if int(n.get("cy", -1)) == wk else 0.0
+	var close := func() -> void:
+		n["d"] = world.current_turn()
+		n["n"] = 99
+		neg[str(p.id)] = n
+		world.stats["neg"] = neg
+	if seller == null or ctr <= 0.0 or int(n.get("wa", -1)) == wk:
+		close.call()
+		return {"result": "left", "msg": "Tudo bem. A porta fica aberta."}
+	n["wa"] = wk
+	var need := p.transfer_listed or FinanceManager.in_trouble(seller) or DealTerms.deadline_mult(world, seller, p) < 1.0 \
+			or p.squad_status >= Player.STATUS_BACKUP \
+			or (MarketAI.power(user) / maxf(0.05, MarketAI.power(seller)) >= 1.3 and interest(world, p, user) >= 0.8)
+	if not need or float(fee) < ctr * 0.85:
+		close.call()
+		return {"result": "left", "msg": "Tudo bem. A porta fica aberta."}
+	var nf := Valuation.round_value(fee + (ctr - fee) * 0.4)
+	n["ctr"] = float(nf)
+	neg[str(p.id)] = n
+	world.stats["neg"] = neg
+	return {"result": "counter", "fee": nf, "msg": "Espera. Fechamos em %s, mas é agora." % Fmt.money(nf)}
 
 
 ## Jogadores do usuário oferecidos como parte do pagamento (deal["swap"] = [ids]).
