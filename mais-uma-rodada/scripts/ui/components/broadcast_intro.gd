@@ -119,10 +119,23 @@ static func show(w: GameWorld, sim: MatchSimulation, fx: Fixture, stadium: Dicti
 	walk.add_child(UIKit.label("Os times entram em campo", "Title", true))
 	walk.add_child(WalkoutView.make(colors[0], colors[1], colors[2], colors[3], rit, bool(stadium.get("night", false)), String(RITUAL_TEXT.get(rit, "")), hash([fx.home, fx.away])))
 	pages.append(walk)
-	# 3 e 4. Escalações no campinho
+	# 3 e 4. Escalações no campinho e, no grafismo de TV, os titulares por setor com os recortes
+	var pk := TvPackage.for_comp(w, fx.comp)
 	for t: MatchTeam in sim.teams:
 		var lb := LineupBoard.make(t, th["accent"], th["bg"], colors[0 if t.side == 0 else 2], colors[1 if t.side == 0 else 3], People.coach_name(w, t.club.id))
 		pages.append(lb)
+		if AppSettings.tv_graphics >= 1:
+			var sp := UIKit.vbox(8)
+			var hr2 := UIKit.hbox(10)
+			hr2.add_child(UIKit.crest(t.club, 44))
+			var tl := UIKit.label("Titulares", "Title", true)
+			tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			hr2.add_child(tl)
+			hr2.add_child(UIKit.label(t.formation_name, "H3"))
+			sp.add_child(hr2)
+			for sec in TvGraphics.sectors(t):
+				sp.add_child(TvGraphics.sector_card(pk, w, t.club, String(sec[0]), sec[1]))
+			pages.append(sp)
 	# 5. Fique de olho
 	var last := UIKit.vbox(12)
 	last.add_child(UIKit.label("Fique de olho", "Title", true))

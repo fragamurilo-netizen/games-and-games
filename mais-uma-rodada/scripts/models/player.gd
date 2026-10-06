@@ -224,6 +224,15 @@ func full_name() -> String:
 	return first_name + " " + last_name
 
 
+## Nome de camisa a partir do nome e do sobrenome principal ("Bruno Guimarães"), sem apelido.
+static func shirt_name_of(first: String, last: String) -> String:
+	var f := first.get_slice(" ", 0)
+	var l := last.get_slice(" ", last.get_slice_count(" ") - 1) if last != "" else ""
+	if l == "" or f == "":
+		return ""
+	return "%s %s" % [f, l]
+
+
 func display_name() -> String:
 	return known_as if known_as != "" else last_name
 

@@ -69,6 +69,7 @@ func refresh() -> void:
 		AppSettings.reduce_motion = v
 		AppSettings.save_settings()))
 	tabs["look"].append(UIKit.card_panel(cl))
+	tabs["look"].append(UIKit.card_panel(_crests_card()))
 	var card0 := UIKit.card("Card", 12)
 	card0.add_child(UIKit.section("Idioma"))
 	var lrow := _chips(I18n.LANG_NAMES, I18n.LANGS.find(AppSettings.language), func(i: int):
@@ -157,6 +158,11 @@ func refresh() -> void:
 		AppSettings.match_speed = int(k)
 		AppSettings.save_settings())
 	card2.add_child(row)
+	card2.add_child(UIKit.label("Grafismo de TV (pacote de cada liga)", "Muted"))
+	card2.add_child(_chips(AppSettings.TV_GRAPHICS_NAMES, AppSettings.tv_graphics, func(i: int):
+		AppSettings.tv_graphics = i
+		AppSettings.save_settings()))
+	card2.add_child(UIKit.label("Faixa do gol na cor do clube, tarja do goleador, números, tabela ao vivo, substituições e cartões, cada liga com a cara da sua transmissão.", "Small", true))
 	tabs["game"].push_front(UIKit.card_panel(card2)) # partidas primeiro: a opção mais usada
 	var cs := UIKit.card("Card", 12)
 	cs.add_child(UIKit.section("Compras"))
@@ -249,3 +255,118 @@ func _toggle(text: String, value: bool, cb: Callable) -> CheckButton:
 		Sfx.play("toggle_on" if v else "toggle_off", -6.0)
 		cb.call(v))
 	return t
+
+
+# ---------------------------------------------------------------------------
+# Escudos e logos reais (pacotes de imagens e a pasta de logos do FM)
+# ---------------------------------------------------------------------------
+
+func _crests_card() -> VBoxContainer:
+	var ce := UIKit.card("Card", 12)
+	ce.add_child(UIKit.section("Escudos e logos"))
+	ce.add_child(_chips(["Do jogo", "Reais (pacotes instalados)"], 1 if AppSettings.pack_images else 0, func(i: int):
+		AppSettings.pack_images = i == 1
+		AppSettings.save_settings()
+		FmLogoImport.refresh_world(world())
+		UIManager.toast("Escudos reais ligados." if AppSettings.pack_images else "Escudos do jogo.")
+		refresh()))
+	var n_cr := 0
+	var n_lg := 0
+	for id in Mods.active_ids():
+		var cnt := DropIns.counts(String(id))
+		n_cr += int(cnt.get("crests", 0))
+		n_lg += int(cnt.get("logos", 0))
+	var status := "Nenhum pacote de escudos instalado: o jogo usa os próprios desenhos."
+	if n_cr + n_lg > 0:
+		status = "Pacotes ligados: %s e %s." % [Fmt.plural(n_cr, "escudo", "escudos"), Fmt.plural(n_lg, "logo de competição", "logos de competições")]
+	ce.add_child(UIKit.label(status, "Small", true))
+	ce.add_child(UIKit.button("Importar logos do Football Manager", "", _import_fm, "download"))
+	if not FmLogoImport.source().is_empty() and world() != null:
+		ce.add_child(UIKit.button("Associar escudos pelo número do FM", "GhostButton", func(): _fm_assign_sheet(""), "edit"))
+	ce.add_child(UIKit.label("Escolha a pasta graphics/logos do FM (no PC ela fica em Documentos › Sports Interactive › Football Manager). Logos com o nome do clube entram direto; os com número entram com uma lista número;nome na pasta ou associando aqui, clube a clube. No celular, copie a pasta para Download/logos. Nenhum escudo real vem com o jogo.", "Muted", true))
+	return ce
+
+
+func _import_fm() -> void:
+	var dirs := FmLogoImport.default_dirs()
+	var start := String(dirs[0]) if not dirs.is_empty() else ""
+	if DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+		DisplayServer.file_dialog_show("Pasta de logos do FM", start, "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_DIR, PackedStringArray(),
+			func(status: bool, paths: PackedStringArray, _idx: int):
+				if status and not paths.is_empty():
+					_run_fm_import.call_deferred(paths[0]))
+		return
+	if start != "":
+		_run_fm_import(start)
+		return
+	UIManager.info("Pasta de logos não encontrada", "Copie a pasta graphics/logos do Football Manager para Download/logos neste aparelho e toque em Importar de novo.")
+
+
+func _run_fm_import(dir: String) -> void:
+	UIManager.toast("Lendo a pasta de logos…")
+	await get_tree().process_frame
+	var r := FmLogoImport.run(world(), dir)
+	var msg := "%s e %s ligados ao jogo." % [Fmt.plural(int(r["clubs"]), "escudo de clube", "escudos de clubes"), Fmt.plural(int(r["comps"]), "logo de competição", "logos de competições")]
+	if int(r["numbers"]) > 0:
+		msg += "\n\n%s do FM ainda sem clube. Associe pelo número em Opções › Visual (no FM: Preferências › Mostrar IDs únicos) ou ponha uma lista número;nome na pasta." % Fmt.plural(int(r["numbers"]), "logo com número", "logos com número")
+	if int(r["total"]) == 0:
+		msg = "Nenhuma imagem encontrada em:\n%s" % dir
+	UIManager.info("Logos do Football Manager", msg)
+	refresh()
+
+
+## Uma liga por vez: escudo atual, nome e o número do FM; o escudo muda assim que o número entra.
+func _fm_assign_sheet(league_id: String) -> void:
+	var w := world()
+	if w == null:
+		return
+	if league_id == "":
+		var ul := w.league_of(w.user_club_id)
+		league_id = ul.id if ul != null else String(DatabaseManager.league_ids()[0])
+	var v := UIKit.vbox(10)
+	v.add_child(UIKit.label("Associar escudos do FM", "Title"))
+	v.add_child(UIKit.label("No FM, ligue Preferências › Mostrar IDs únicos: o número do clube aparece no título da página dele.", "Small", true))
+	var ob := OptionButton.new()
+	var ids: Array = Array(DatabaseManager.league_ids())
+	for i in ids.size():
+		var lg := w.league(String(ids[i]))
+		ob.add_item(lg.name if lg != null else String(ids[i]), i)
+		if String(ids[i]) == league_id:
+			ob.select(i)
+	ob.item_selected.connect(func(i: int):
+		UIManager.close_modal()
+		_fm_assign_sheet.call_deferred(String(ids[i])))
+	v.add_child(ob)
+	var um: Dictionary = FmLogoImport.user_map().get("clubs", {})
+	var by_key := {}
+	for uid in um:
+		by_key[String(um[uid])] = String(uid)
+	for c: Club in w.clubs_in_league(league_id):
+		var row := UIKit.hbox(10)
+		var cr := UIKit.crest(c, 48)
+		row.add_child(cr)
+		var nl := UIKit.label(c.name, "H3")
+		nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(nl)
+		var le := LineEdit.new()
+		le.custom_minimum_size = Vector2(150, 64)
+		le.placeholder_text = "nº do FM"
+		le.text = String(by_key.get(c.key, ""))
+		le.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
+		var club := c
+		le.text_submitted.connect(func(t: String):
+			var uid := t.strip_edges()
+			if uid == "":
+				return
+			if FmLogoImport.assign(w, uid, club.key):
+				cr.set_club(club)
+				cr.queue_redraw()
+				UIManager.toast("Escudo do %s atualizado." % club.short_name)
+			else:
+				UIManager.toast("Número %s não está na pasta importada." % uid))
+		row.add_child(le)
+		v.add_child(row)
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true)

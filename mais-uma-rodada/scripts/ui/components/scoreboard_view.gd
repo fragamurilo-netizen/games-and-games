@@ -10,6 +10,7 @@ extends PanelContainer
 ##   compacto — selo no canto: logo, siglas em fichas coloridas, placar e relógio numa linha só
 ##   painel   — um time por linha (placar empilhado), relógio numa coluna ao lado
 ##   neon     — vidro escuro, filetes acesos na cor da competição e números grandes
+##   pacote   — o placar do pacote de TV da liga (TvPackage): logo, siglas, placar e aba do tempo
 ## Em todos: logo da competição, relógio com acréscimo ("+4"), aviso de gol na ficha do time,
 ## estado do jogo (intervalo, fim, pênaltis) e o agregado dos mata-matas de ida e volta.
 ##
@@ -21,6 +22,7 @@ const LIMITS := [45, 90, 105, 120]
 const AMBER := Color("#FFB000")
 
 var th: Dictionary = {}
+var pk: Dictionary = {} # pacote de TV (layout "pacote")
 var layout := "faixa"
 var comp := ""
 var abbrs: Array = ["", ""]
@@ -63,6 +65,13 @@ static func make(w: GameWorld, comp_id: String, title: String, home: Club, away:
 	v.comp = comp_id
 	v.th = ScoreboardTheme.for_competition(w, comp_id)
 	v.layout = force_layout if ScoreboardTheme.LAYOUTS.has(force_layout) else String(v.th.get("layout", "faixa"))
+	if v.layout == "pacote":
+		v.pk = TvPackage.for_comp(w, comp_id)
+		v.th["bg"] = v.pk["bg"]
+		v.th["bg2"] = v.pk["bg2"]
+		v.th["accent"] = v.pk["accent"]
+		v.th["text"] = v.pk["ink"]
+		v.th["caps"] = Color(v.pk["accent"]).lerp(Color.WHITE, 0.35)
 	v.abbrs = [home.abbr, away.abbr]
 	v.cols = colors
 	v._build(w, title, home, away, extra, live)
@@ -136,7 +145,7 @@ func show_state(h: int, a: int, clock: String, extra: String, state: String, agg
 	_cur_state = state
 	_cur_extra = extra
 	_extra.text = extra
-	_state.text = state if layout != "compacto" else _short_state(state)
+	_state.text = state if layout not in ["compacto", "pacote"] else _short_state(state)
 	_tab_visibility()
 	_pens.visible = pens != ""
 	_pens.text = pens
@@ -163,6 +172,8 @@ func _flash(side: int) -> void:
 	_goal_serial += 1
 	var serial := _goal_serial
 	_goal.text = ("GOL  %s" % abbrs[side]) if layout != "compacto" else "GOL"
+	if layout == "pacote":
+		_goal.text = String(pk.get("goal", "GOL"))
 	_goal_box.visible = true
 	_tab_visibility()
 	var chip: Control = _chips[side]
@@ -373,6 +384,11 @@ func _build(w: GameWorld, title: String, home: Club, away: Club, extra: Control,
 			sb.border_width_top = 1
 			sb.shadow_color = Color(acc.r, acc.g, acc.b, 0.45)
 			sb.shadow_size = 10
+		"pacote":
+			# Fundo neutro e escuro: a peça da liga (clara ou escura) é que aparece, como sobre o vídeo
+			sb.bg_color = Color(th["bg"]).darkened(0.62)
+			sb.content_margin_left = 12
+			sb.content_margin_top = 10
 	add_theme_stylebox_override(&"panel", sb)
 	var v := UIKit.vbox(4)
 	add_child(v)
@@ -389,6 +405,8 @@ func _build(w: GameWorld, title: String, home: Club, away: Club, extra: Control,
 	match layout:
 		"compacto":
 			_build_compact(v, title, home, away)
+		"pacote":
+			_build_package(v, title, home, away)
 		"painel":
 			v.add_child(_strip(title))
 			_build_stacked(v, home, away)
@@ -654,3 +672,105 @@ func _build_stacked(v: VBoxContainer, home: Club, away: Club) -> void:
 	away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	row.add_child(rows)
 	v.add_child(row)
+
+
+## Pacote da liga: uma peça só com logo, siglas (na cor do time, no papel com filete ou com
+## escudo, conforme o pacote), placar e aba do tempo; embaixo, a competição em letra pequena.
+func _build_package(v: VBoxContainer, title: String, home: Club, away: Club) -> void:
+	var rad := int(pk["radius"])
+	var sk := float(pk["skew"])
+	var light := bool(pk.get("light", false))
+	var piece := UIKit.hbox(0)
+	piece.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var parts: Array[PanelContainer] = []
+	var logo := _box(pk["logo_bg"], 0, Color(0, 0, 0, 0), 0, 8, 4, sk)
+	logo.add_child(_logo(38))
+	parts.append(logo)
+	for side in 2:
+		if side == 1:
+			var box := _box(pk["score_bg"], 0, Color(0, 0, 0, 0), 0, 12, 0, sk)
+			var digits := UIKit.hbox(6)
+			digits.alignment = BoxContainer.ALIGNMENT_CENTER
+			digits.add_child(_digit(0, pk["score_ink"], 34))
+			digits.add_child(_lbl("–", "Score", Color(pk["score_ink"], 0.7), 28))
+			digits.add_child(_digit(1, pk["score_ink"], 34))
+			box.add_child(digits)
+			_score_box = box
+			parts.append(box)
+		parts.append(_pk_team(side, home if side == 0 else away, light, sk))
+	var tab := _time_tab(pk["time_bg"], pk["time_ink"], 0, "H3", 22)
+	for b: PanelContainer in [_clock_box, _extra_box, _state_box, _goal_box]:
+		b.custom_minimum_size.y = 52
+		_style(b).skew = Vector2(sk, 0)
+	_style(_goal_box).bg_color = pk["accent"]
+	_goal.add_theme_color_override(&"font_color", UIColors.on_color(pk["accent"]))
+	for p in parts:
+		p.custom_minimum_size.y = 52
+		piece.add_child(p)
+	piece.add_child(tab)
+	# Cantos só nas pontas da peça
+	if rad > 0:
+		var first := _style(parts[0])
+		first.corner_radius_top_left = rad
+		first.corner_radius_bottom_left = rad
+		for b: PanelContainer in [_clock_box, _extra_box, _state_box, _goal_box]:
+			_style(b).corner_radius_top_right = rad
+			_style(b).corner_radius_bottom_right = rad
+	# A peça fica sozinha na linha (cabe em 390 dp); o selo da emissora desce para a linha do nome.
+	v.add_child(piece)
+	var sub := UIKit.hbox(8)
+	var t := _lbl(title, "Caps", Color(_text(), 0.78), 18)
+	t.clip_text = true
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sub.add_child(t)
+	sub.add_child(_pens_label(pk["accent"]))
+	sub.add_child(bug)
+	# Nomes completos não aparecem (a TV usa a sigla), mas a tela da partida escreve neles.
+	home_name.visible = false
+	away_name.visible = false
+	sub.add_child(home_name)
+	sub.add_child(away_name)
+	v.add_child(sub)
+
+
+func _pk_team(side: int, club: Club, light: bool, sk: float) -> PanelContainer:
+	var c1: Color = cols[side * 2]
+	var c2: Color = cols[side * 2 + 1]
+	var mode := String(pk.get("team", "crest"))
+	var p: PanelContainer
+	var ink: Color
+	match mode:
+		"fill":
+			var bg := ClubGradient.deep(c1)
+			p = _box(bg, 0, c2, 0, 12, 0, sk)
+			_style(p).border_width_bottom = 5
+			ink = UIColors.on_color(bg)
+		_:
+			var bg2: Color = pk["paper"] if light else pk["bg2"]
+			p = _box(bg2, 0, c1 if UIColors.contrast(c1, bg2) > 1.4 else c2, 0, 10, 0, sk)
+			if mode == "bar":
+				if side == 0:
+					_style(p).border_width_left = 7
+				else:
+					_style(p).border_width_right = 7
+			ink = pk["paper_ink"] if light else pk["ink"]
+	p.custom_minimum_size.x = 72
+	var row := UIKit.hbox(6)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var ab := _lbl(String(abbrs[side]), "H3", ink, 24)
+	ab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if mode == "crest":
+		var cr := UIKit.crest(club, 30)
+		cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if side == 0:
+			row.add_child(cr)
+			row.add_child(ab)
+		else:
+			row.add_child(ab)
+			row.add_child(cr)
+	else:
+		row.add_child(ab)
+	p.add_child(row)
+	_chips[side] = p
+	return p

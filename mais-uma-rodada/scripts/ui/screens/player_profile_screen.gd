@@ -194,6 +194,8 @@ func _header(w: GameWorld, p: Player, club: Club) -> Control:
 		sn.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		nr.add_child(sn)
 	names.add_child(nr)
+	if p.nickname != "" and p.nickname != p.display_name():
+		names.add_child(UIKit.label("Apelido: %s" % p.nickname, "Small", true))
 	var pos_txt := Pos.name_of(p.position)
 	var sec: Array[String] = []
 	for sp in p.secondary:

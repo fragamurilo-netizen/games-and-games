@@ -110,6 +110,9 @@ var _shout_btn: Button = null
 var _sound_btn: Button = null
 var _skip_btn: Button
 var _overlay: GoalOverlay
+var _tv: TvLayer # grafismo de TV da competição (faixa do gol, tarjas, números, tabela)
+var _pk: Dictionary = {}
+var _tv_seen: Dictionary = {}
 var _tac_box: VBoxContainer
 var _momentum: MomentumView
 var _conditions: Control
@@ -404,6 +407,12 @@ func _build() -> void:
 	# Comemoração por cima de tudo
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
+	# Grafismo de TV (pacote da liga), por baixo da comemoração antiga
+	_pk = TvPackage.for_comp(w, _fx.comp)
+	_tv = TvLayer.new()
+	_tv.area = _tv_area
+	add_child(_tv)
+	move_child(_tv, _overlay.get_index())
 	_sync_slots()
 	_update_board()
 	var info := "%s · %s torcedores" % [home.stadium, Fmt.thousands(_sim.attendance)]
@@ -448,6 +457,9 @@ func _lower_third(ev: Dictionary) -> void:
 	var side: int = ev["s"]
 	var mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
 	if mp == null or _l3 == null:
+		return
+	if AppSettings.tv_graphics >= 1:
+		_tv_scorer(ev, mp)
 		return
 	var in_game := 0
 	for e in _sim.events:
@@ -781,6 +793,7 @@ func _process(delta: float) -> void:
 	_pitch.motion.frozen = UIManager.has_modal() or ((_paused or _halftime or _done) and not _replay_on)
 	if not _pitch.motion.frozen:
 		_gate_clock += delta
+	_tv.paused = UIManager.has_modal() or _halftime or _paused
 	if _replay_on and not _pitch.motion.replaying:
 		_replay_on = false
 		_hold = minf(_hold, 0.25)
@@ -855,6 +868,7 @@ func _after_step() -> void:
 	_script_play()
 	_update_sides()
 	_stat_summary()
+	_tv_tick()
 	if GameManager.ai_ready() and not _sim.finished:
 		_announce_other_goals(_sim.minute, _sim.half)
 	_sync_slots()
@@ -990,6 +1004,7 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 		"goal":
 			_celebrate(ev)
 		"card_y", "card_r":
+			_tv_booking(ev, style == "card_r" or t == MatchSimulation.EV_RED)
 			Sfx.crowd_event("card", int(ev["s"]))
 			Sfx.play("card", -6.0)
 			Sfx.vibrate(25)
@@ -1013,6 +1028,10 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 		_hold = maxf(_hold, 0.9 * _delay_scale())
 	if t == MatchSimulation.EV_FOUL:
 		Sfx.crowd_event("foul", int(ev["s"]))
+	if t == MatchSimulation.EV_SUB:
+		_tv_sub(ev)
+	elif t == MatchSimulation.EV_KICKOFF and int(ev["h"]) == 1:
+		_tv_info()
 	if t == MatchSimulation.EV_HALFTIME:
 		Sfx.play("whistle_half", -4.0)
 		Sfx.crowd_event("half", 0)
@@ -1136,7 +1155,13 @@ func _celebrate(ev: Dictionary) -> void:
 		title = "GOL DO %s" % _sim.teams[side].club.short_name.to_upper()
 	var c1: Color = _colors[0] if side == 0 else _colors[2]
 	var c2: Color = _colors[1] if side == 0 else _colors[3]
-	var dur := _overlay.play(level, title, scorer, GoalOverlay.tag_text(tags), info, c1, c2, 1.0 if _pace < 2 else 0.5)
+	var dur := 0.0
+	if AppSettings.tv_graphics >= 1:
+		# Faixa do gol do pacote da liga (sigla, escudo, a palavra do gol na língua da TV e o minuto)
+		var secs: float = float({3: 2.7, 2: 2.3, 1: 1.9, -1: 1.6, -2: 2.1}.get(level, 1.9)) * (1.0 if _pace < 2 else 0.6)
+		dur = _tv.play_banner(TvGraphics.goal_banner(_pk, _sim.teams[side].club, minute_txt), secs, level == 3)
+	else:
+		dur = _overlay.play(level, title, scorer, GoalOverlay.tag_text(tags), info, c1, c2, 1.0 if _pace < 2 else 0.5)
 	_hold = maxf(_hold, dur + 0.2)
 	_pitch.goal_effect(side, c1)
 	var sc_mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
@@ -1819,6 +1844,8 @@ func _announce_other_goals(minute: int, half: int) -> void:
 				who += " (contra)"
 			var txt := "%s marca, %s %d x %d %s" % [who, w.club(f.home).short_name, hs, as_, w.club(f.away).short_name]
 			_enqueue(_com.extra_line("other_goal", "other", gm, gh, {"txt": txt}), {}, 0.1)
+			if _tv_full():
+				_tv.show_piece(TvGraphics.other_goal(_pk, w.club(f.home), w.club(f.away), hs, as_, int(g[1]), "%s %s" % [who, Fmt.minute(gm, gh)]), TvLayer.TOP, 3.6)
 		_other_seen[i] = maxi(seen, n)
 
 
@@ -1882,6 +1909,15 @@ func _open_view_sheet() -> void:
 		AppSettings.save_settings()
 		_pitch.classic = AppSettings.match_gfx == 0
 		_pitch.queue_redraw()))
+	v.add_child(UIKit.eyebrow("Grafismo de TV"))
+	var tvg: Array = []
+	for i in AppSettings.TV_GRAPHICS_NAMES.size():
+		tvg.append([str(i), AppSettings.TV_GRAPHICS_NAMES[i]])
+	v.add_child(UIKit.segment(tvg, str(AppSettings.tv_graphics), func(k: String):
+		AppSettings.tv_graphics = int(k)
+		AppSettings.save_settings()
+		if AppSettings.tv_graphics == 0:
+			_tv.clear()))
 	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
 	UIManager.show_modal(v, true, true)
 
@@ -2036,8 +2072,9 @@ func _entry_scorers(e: Dictionary, minute: int, half: int) -> String:
 	return "  ·  ".join(PackedStringArray(parts))
 
 
-## Classificação como estaria se os jogos acabassem agora (setas: posição antes da rodada).
-func _render_table_tab() -> void:
+## Classificação como estaria se os jogos acabassem agora: {order, before, live, title, league,
+## cup, modern, pending} ou {} (jogo sem tabela).
+func _live_table() -> Dictionary:
 	var w := world()
 	var minute := _sim.minute if _sim.half <= 2 else 90
 	var half := mini(_sim.half, 2)
@@ -2049,7 +2086,7 @@ func _render_table_tab() -> void:
 	if _fx.is_league():
 		league = w.league(_fx.comp)
 		if league == null:
-			return
+			return {}
 		ids = league.club_ids
 		base = league.table
 		title = "Tabela ao vivo · %s" % league.short_name
@@ -2057,7 +2094,7 @@ func _render_table_tab() -> void:
 		cup = w.season.cups.get(_fx.comp, null)
 		var g: Dictionary = cup.group_of(_fx.home) if cup != null else {}
 		if g.is_empty():
-			return
+			return {}
 		ids = g["clubs"]
 		base = g["table"]
 		title = "Fase de liga ao vivo · %s" % cup.short_name if cup.league_phase else "Grupo %s ao vivo · %s" % [g["n"], cup.short_name]
@@ -2089,6 +2126,20 @@ func _render_table_tab() -> void:
 		tmp.ag = int(sc[1])
 		CompetitionManager.apply_to_table(live, tmp)
 	var order := LeaguePhase.sorted_ids(cup, live, live_scores) if modern else CompetitionManager.sort_table(ids, live)
+	return {"order": order, "before": before, "live": live, "title": title, "league": league, "cup": cup, "modern": modern, "pending": pending}
+
+
+func _render_table_tab() -> void:
+	var d := _live_table()
+	if d.is_empty():
+		return
+	var order: Array = d["order"]
+	var before: Array = d["before"]
+	var live: Dictionary = d["live"]
+	var title := String(d["title"])
+	var league: League = d["league"]
+	var modern := bool(d["modern"])
+	var pending := bool(d["pending"])
 	var card := UIKit.card("Card", 2)
 	card.add_child(UIKit.section(title))
 	if pending:
@@ -2196,6 +2247,7 @@ func _confirm_skip() -> void:
 
 func _skip_to_end() -> void:
 	_overlay.skip()
+	_tv.clear()
 	_pitch.motion.stop_replay()
 	_replay_on = false
 	_replay_after = Callable()
@@ -2238,10 +2290,17 @@ func _show_halftime() -> void:
 	var sc := UIKit.label("%s  %d – %d  %s" % [_sim.teams[0].club.short_name, _sim.score[0], _sim.score[1], _sim.teams[1].club.short_name], "H2", true)
 	sc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sc)
-	v.add_child(_stats_table(false))
+	if AppSettings.tv_graphics >= 1:
+		v.add_child(_tv_stats("Fim do tempo normal" if et else "Primeiro tempo", false))
+	else:
+		v.add_child(_stats_table(false))
 	var km := _key_moments(3 if et else 1)
 	if km != null:
 		v.add_child(km)
+	if AppSettings.tv_graphics >= 1:
+		var tb := _tv_table_piece()
+		if tb != null:
+			v.add_child(tb)
 	var aux := _halftime_assistant()
 	if aux.get_child_count() > 0:
 		v.add_child(aux)
@@ -2725,6 +2784,7 @@ func _on_final() -> void:
 	if _done:
 		return
 	_done = true
+	_tv.clear()
 	_set_bug("FIM DE JOGO", UIColors.MUTED)
 	_hide_aux() # sugestão tática não faz sentido depois do apito final
 	UIManager.close_all_modals()
@@ -2795,7 +2855,26 @@ func _build_summary() -> void:
 	_feed.add_child(UIKit.card_panel(goals))
 	# Craque
 	var motm := _sim.man_of_the_match()
-	if motm != null:
+	if motm != null and AppSettings.tv_graphics >= 1:
+		# Melhor em campo no grafismo da TV: recorte, nota e o que fez
+		var mbits: Array[String] = []
+		if motm.goals > 0:
+			mbits.append(Fmt.plural(motm.goals, "gol", "gols"))
+		if motm.assists > 0:
+			mbits.append(Fmt.plural(motm.assists, "assistência", "assistências"))
+		if motm.saves > 0:
+			mbits.append(Fmt.plural(motm.saves, "defesa", "defesas"))
+		var mclub := world().club(motm.p.club_id)
+		var mcard := TvGraphics.potm_card(_pk, world(), motm.p, mclub, motm.final_rating, ", ".join(PackedStringArray(mbits)))
+		var mpid := motm.p.id
+		var tap := Button.new()
+		tap.flat = true
+		tap.focus_mode = Control.FOCUS_NONE
+		tap.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		tap.pressed.connect(func(): UIManager.push("player", {"id": mpid}))
+		mcard.add_child(tap)
+		_feed.add_child(mcard)
+	elif motm != null:
 		var row := UIKit.hbox(12)
 		var club := motm.p.club_id
 		# Foto do craque com o tempo do jogo: chuva, noite de refletores ou sol
@@ -2820,16 +2899,19 @@ func _build_summary() -> void:
 		_feed.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": mid}), "CardHighlight"))
 	# Estatísticas
 	var st := UIKit.card("Card", 6)
-	var hdr := UIKit.hbox(8)
-	var hl := UIKit.label(_sim.teams[0].club.short_name, "H3")
-	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hdr.add_child(hl)
-	var al := UIKit.label(_sim.teams[1].club.short_name, "H3")
-	al.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	al.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hdr.add_child(al)
-	st.add_child(hdr)
-	st.add_child(_stats_table(true))
+	if AppSettings.tv_graphics >= 1:
+		_feed.add_child(_tv_stats("Fim de jogo", true))
+	else:
+		var hdr := UIKit.hbox(8)
+		var hl := UIKit.label(_sim.teams[0].club.short_name, "H3")
+		hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hdr.add_child(hl)
+		var al := UIKit.label(_sim.teams[1].club.short_name, "H3")
+		al.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		al.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		hdr.add_child(al)
+		st.add_child(hdr)
+		st.add_child(_stats_table(true))
 	st.add_child(UIKit.section("Pressão ao longo do jogo"))
 	var mom := MomentumView.new()
 	mom.custom_minimum_size = Vector2(0, 90)
@@ -3005,3 +3087,149 @@ func _halftime_assistant() -> Control:
 			row.add_child(b)
 		card.add_child(row)
 	return card
+
+
+# ---------------------------------------------------------------------------
+# Grafismo de TV (pacote da competição)
+# ---------------------------------------------------------------------------
+
+## Área do campo na camada da TV (sem campo na tela: o espaço logo abaixo do placar).
+func _tv_area() -> Rect2:
+	var off := _tv.global_position
+	if is_instance_valid(_pitch) and _pitch.is_visible_in_tree() and _pitch.size.y > 80.0:
+		return Rect2(_pitch.global_position - off, _pitch.size)
+	if is_instance_valid(_board):
+		var top := _board.global_position.y + _board.size.y - off.y
+		return Rect2(0.0, top, _tv.size.x, maxf(200.0, _tv.size.y * 0.6 - top))
+	return Rect2(Vector2.ZERO, _tv.size)
+
+
+## Peças além do gol: só no grafismo completo, fora do turbo e uma vez por lance (`key`).
+func _tv_full(key: String = "") -> bool:
+	if _tv == null or AppSettings.tv_graphics < 2 or _pace >= 2 or _done:
+		return false
+	if key != "":
+		if _tv_seen.has(key):
+			return false
+		_tv_seen[key] = true
+	return true
+
+
+## Tarja do goleador depois da faixa do gol: recorte, número, nome, minuto e o que o gol significa.
+func _tv_scorer(ev: Dictionary, mp: MatchPlayer) -> void:
+	var side: int = ev["s"]
+	var in_game := 0
+	for e in _sim.events:
+		if int(e["t"]) == MatchSimulation.EV_GOAL and int(e.get("p", -1)) == mp.p.id and int(e["s"]) == side and (int(e["h"]) < int(ev["h"]) or (int(e["h"]) == int(ev["h"]) and int(e["m"]) <= int(ev["m"]))):
+			in_game += 1
+	var season_g: int = mp.p.stats[Player.S_GOALS] if mp.p.stats.size() > Player.S_GOALS else 0
+	var cap := "Gol  %s" % Fmt.minute(int(ev["m"]), int(ev["h"]))
+	var tag := GoalOverlay.tag_text(ev.get("x", {}).get("tags", []))
+	if tag != "":
+		cap += "  ·  " + tag
+	var facts := "%s na temporada" % Fmt.plural(season_g + maxi(1, in_game), "gol", "gols")
+	if in_game >= 2:
+		facts = "%dº gol no jogo  ·  %s" % [in_game, facts]
+	_tv.show_piece(TvGraphics.scorer_card(_pk, world(), mp.p, _sim.teams[side].club, cap, facts), TvLayer.LOWER, 4.8 if _pace < 2 else 2.6)
+
+
+func _tv_booking(ev: Dictionary, red: bool) -> void:
+	if not _tv_full("card:%s:%s" % [_goal_key(ev), str(red)]):
+		return
+	var side: int = ev["s"]
+	var mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev.get("p", -1)), null)
+	if mp == null:
+		return
+	var second := bool(ev.get("x", {}).get("second", false))
+	_tv.show_piece(TvGraphics.booking_card(_pk, _sim.teams[side].club, mp.p, red, Fmt.minute(int(ev["m"]), int(ev["h"])), second), TvLayer.LOWER, 3.6)
+
+
+func _tv_sub(ev: Dictionary) -> void:
+	if not _tv_full("sub:%s:%d" % [_goal_key(ev), int(ev.get("p2", -1))]):
+		return
+	var side: int = ev["s"]
+	var t: MatchTeam = _sim.teams[side]
+	var p_in: MatchPlayer = t.by_id.get(int(ev.get("p", -1)), null)
+	var p_out: MatchPlayer = t.by_id.get(int(ev.get("p2", -1)), null)
+	if p_in == null:
+		return
+	_tv.show_piece(TvGraphics.sub_card(_pk, t.club, p_in.p, p_out.p if p_out != null else null, Fmt.minute(int(ev["m"]), int(ev["h"]))), TvLayer.LOWER, 3.6)
+
+
+## Logo depois do apito inicial: estádio, público, árbitro e clima.
+func _tv_info() -> void:
+	if not _tv_full("info"):
+		return
+	var home: Club = _sim.teams[0].club
+	var rows: Array = [["Estádio", home.stadium if not _sim.neutral else "Campo neutro"], ["Público", Fmt.thousands(_sim.attendance)]]
+	var rs := Referees.summary(world(), _sim.ref)
+	if rs != "":
+		rows.append(["Árbitro", rs.get_slice(" · ", 0)])
+	var wx := _sim.wx
+	if not wx.is_empty():
+		rows.append(["Clima", "%s, %d°C" % [Weather.NAMES.get(String(wx.get("kind", "")), ""), int(wx.get("temp", 20))]])
+	_tv.show_piece(TvGraphics.info_card(_pk, _fx.comp, rows), TvLayer.LOWER, 4.5)
+
+
+## Números a cada quarto de hora e a tabela ao vivo duas vezes por tempo.
+func _tv_tick() -> void:
+	if _sim.half > 2 or _sim.finished:
+		return
+	var m := _sim.minute
+	if m in [15, 60] and _tv_full("st%d" % m):
+		_tv.show_piece(_tv_stats("Até aqui  ·  %d'" % m, false, true), TvLayer.CENTER, 5.0)
+	elif m in [34, 79] and _tv_full("tb%d" % m):
+		var tb := _tv_table_piece()
+		if tb != null:
+			_tv.show_piece(tb, TvLayer.CENTER, 6.0)
+
+
+## Quadro de números lado a lado (curto: posse, finalizações, no gol, xG).
+func _tv_stats(title: String, full: bool, short: bool = false) -> Control:
+	var h: MatchTeam = _sim.teams[0]
+	var a: MatchTeam = _sim.teams[1]
+	var ph := _sim.possession_pct(0)
+	var rows: Array = [
+		["Posse de bola", Fmt.percent(ph), Fmt.percent(1.0 - ph), ph],
+		["Finalizações", str(h.shots), str(a.shots), TvGraphics.share(h.shots, a.shots)],
+		["No gol", str(h.on_target), str(a.on_target), TvGraphics.share(h.on_target, a.on_target)],
+		["Gols esperados (xG)", TacticalXRay.dec(h.xg, 1), TacticalXRay.dec(a.xg, 1), TvGraphics.share(h.xg, a.xg)],
+	]
+	if not short:
+		rows.append(["Escanteios", str(h.corners), str(a.corners), TvGraphics.share(h.corners, a.corners)])
+		rows.append(["Faltas", str(h.fouls), str(a.fouls), TvGraphics.share(h.fouls, a.fouls)])
+	if full:
+		rows.append(["Impedimentos", str(h.offsides), str(a.offsides), TvGraphics.share(h.offsides, a.offsides)])
+		rows.append(["Cartões amarelos", str(h.yellows), str(a.yellows), TvGraphics.share(h.yellows, a.yellows)])
+		rows.append(["Defesas do goleiro", str(h.saves), str(a.saves), TvGraphics.share(h.saves, a.saves)])
+	return TvGraphics.stat_card(_pk, h.club, a.club, title, rows, [_side_color(0), _side_color(1)])
+
+
+## Tabela ao vivo da TV: liga curta inteira; senão, o líder e a vizinhança do seu time.
+func _tv_table_piece() -> Control:
+	var d := _live_table()
+	if d.is_empty():
+		return null
+	var order: Array = d["order"]
+	var before: Array = d["before"]
+	var live: Dictionary = d["live"]
+	var n := order.size()
+	var idxs: Array[int] = []
+	if n <= 8:
+		for i in n:
+			idxs.append(i)
+	else:
+		var u := maxi(0, order.find(world().user_club_id))
+		var start := clampi(u - 3, 0, n - 7)
+		if start > 0:
+			idxs.append(0)
+		for i in range(start, start + 7):
+			idxs.append(i)
+	var rows: Array = []
+	for k in idxs.size():
+		var i := idxs[k]
+		var cid: int = order[i]
+		var r: Dictionary = live[cid]
+		rows.append({"pos": i + 1, "before": before.find(cid) + 1, "cid": cid, "pl": int(r["pl"]), "gd": int(r["gf"]) - int(r["ga"]),
+			"pts": int(r["pts"]), "live": cid == _fx.home or cid == _fx.away, "gap": k > 0 and i - idxs[k - 1] > 1})
+	return TvGraphics.table_card(_pk, world(), _fx.comp, "Se terminasse agora", rows)

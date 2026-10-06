@@ -25,6 +25,7 @@ const PATHS := {
 	"club_policies": "res://data/gameplay/club_policies.json",
 	"commentary": "res://data/text/commentary.json",
 	"news": "res://data/text/news.json",
+	"fm_ids": "res://data/world/fm_ids.json",
 }
 const CLUBS_DIR := "res://data/world/clubs/"
 ## Uniformes reais dos clubes autorais, por nação (titular, reserva, terceiro, goleiro e alternativos).

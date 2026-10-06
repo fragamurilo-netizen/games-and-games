@@ -12,6 +12,8 @@ extends RefCounted
 ##   compacto — selo pequeno no canto, siglas em fichas coloridas (ScoreboardView)
 ##   painel   — um time por linha, relógio numa coluna
 ##   neon     — vidro escuro e filetes acesos
+##   pacote   — o placar do pacote de TV da competição (TvPackage): logo, siglas, placar e aba do
+##              tempo numa peça só, como na transmissão de cada liga
 ## O desenho de cada um fica em ScoreboardView.
 ##
 ## Dados (todos opcionais, do mais forte para o mais fraco):
@@ -29,9 +31,9 @@ const CUPS := {
 	"CWC": ["#2A1F00", "#4A3700", "#F2C94C"],
 }
 const DEFAULT := ["#0F1012", "#18191C", "#FFC940"]
-const LAYOUTS: Array[String] = ["faixa", "tv", "angular", "capsula", "classico", "compacto", "painel", "neon"]
+const LAYOUTS: Array[String] = ["faixa", "tv", "angular", "capsula", "classico", "compacto", "painel", "neon", "pacote"]
 const LAYOUT_NAMES := {"faixa": "Faixa", "tv": "TV", "angular": "Angular", "capsula": "Cápsula", "classico": "Clássico",
-	"compacto": "Compacto", "painel": "Painel", "neon": "Neon"}
+	"compacto": "Compacto", "painel": "Painel", "neon": "Neon", "pacote": "Pacote da liga"}
 const LAYOUT_HINTS := {
 	"faixa": "Faixa arredondada com o nome da competição e o placar numa caixa com borda.",
 	"tv": "Barra reta de transmissão, blocos na cor de cada time e placar cheio na cor da liga.",
@@ -41,6 +43,7 @@ const LAYOUT_HINTS := {
 	"compacto": "Selo no canto: logo, siglas em fichas coloridas, placar e relógio numa linha só.",
 	"painel": "Um time por linha, com o placar empilhado e o relógio numa coluna ao lado.",
 	"neon": "Vidro escuro, filetes acesos na cor da competição e números grandes.",
+	"pacote": "O placar da transmissão da própria liga: logo, siglas, placar e aba do tempo numa peça só.",
 }
 const LAYOUT_OF := {
 	"UCL": "faixa", "LIB": "classico", "CWC": "faixa", "CCC": "angular", "CAF": "tv", "AFC": "angular",
@@ -100,6 +103,9 @@ static func layout_for(comp: String, with_editor: bool = true) -> String:
 	var own := String(style.get("layout", ""))
 	if LAYOUTS.has(own):
 		return own
+	# Competições com pacote de TV (Premier, LaLiga, Bundesliga, Brasileirão, Champions...)
+	if TvPackage.has(comp):
+		return "pacote"
 	var custom: Dictionary = DatabaseManager.get_data("identity").get("scoreboard_layout", {})
 	if custom.has(comp):
 		return String(custom[comp])

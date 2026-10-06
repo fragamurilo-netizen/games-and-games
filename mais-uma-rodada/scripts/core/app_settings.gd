@@ -55,6 +55,14 @@ static var match_view: int = 0
 ## Visual do campo na partida: 0 = clássico 2D (bolinhas, estilo dos jogos de técnico antigos), 1 = transmissão.
 const MATCH_GFX_NAMES: Array[String] = ["Clássico 2D", "Transmissão"]
 static var match_gfx: int = 0
+## Grafismo de TV na partida (pacote da liga): 0 = desligado (comemoração antiga), 1 = só os gols
+## (faixa do gol e tarja do goleador), 2 = completo (números, tabela ao vivo, substituições,
+## cartões, outros jogos, melhor em campo).
+const TV_GRAPHICS_NAMES: Array[String] = ["Desligado", "Só os gols", "Completo"]
+static var tv_graphics: int = 2
+## Escudos, logos, fotos e uniformes em imagem dos pacotes instalados (drop-ins): ligados (true) ou
+## só os desenhos do jogo (false).
+static var pack_images: bool = true
 ## Animações de gol e transições mais curtas.
 static var reduce_motion: bool = false
 static var _loaded := false
@@ -88,6 +96,8 @@ static func load_settings() -> void:
 	music_in_match = cfg.get_value("audio", "music_in_match", false)
 	match_view = clampi(int(cfg.get_value("game", "match_view", 0)), 0, 2)
 	match_gfx = clampi(int(cfg.get_value("game", "match_gfx", 0)), 0, 1)
+	tv_graphics = clampi(int(cfg.get_value("game", "tv_graphics", 2)), 0, 2)
+	pack_images = bool(cfg.get_value("look", "pack_images", true))
 
 
 static func save_settings() -> void:
@@ -112,6 +122,8 @@ static func save_settings() -> void:
 	cfg.set_value("audio", "music_in_match", music_in_match)
 	cfg.set_value("game", "match_view", match_view)
 	cfg.set_value("game", "match_gfx", match_gfx)
+	cfg.set_value("game", "tv_graphics", tv_graphics)
+	cfg.set_value("look", "pack_images", pack_images)
 	cfg.save(PATH)
 
 

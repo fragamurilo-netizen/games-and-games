@@ -1,0 +1,5 @@
+{
+	"_doc": "Números únicos (UID) do banco do Football Manager -> clubes (chave) e competições (id) do jogo, para importar a pasta graphics/logos do FM (FmLogoImport). Vem vazio: um mod pode preencher (data/world/fm_ids.patch.json) e o jogador associa clube a clube em Opções > Visual. Nada de imagem real vem com o jogo.",
+	"clubs": {},
+	"comps": {}
+}

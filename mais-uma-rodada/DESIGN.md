@@ -276,6 +276,19 @@ estado alternável.
 - **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão; o corpo em
   degradê duplo (mandante nasce na borda esquerda, visitante na direita, escuro no meio onde fica
   o texto), escudos, ação principal de giz.
+- **Grafismo de TV** (`TvPackage` → `TvGraphics`, mostrado pela `TvLayer` na partida): cada
+  competição tem o pacote da sua transmissão (Premier, EFL, FA Cup, LaLiga, Serie A, Bundesliga,
+  Ligue 1, Liga Portugal, Eredivisie, Süper Lig, Brasileirão, Liga Profesional, MLS, J.League,
+  Champions, Liga Europa, Conference, Libertadores, Sul-Americana, Mundial; as outras herdam o do
+  país ou um genérico nas cores do placar). Paleta, cantos, inclinação e a palavra do gol na língua
+  da TV ("GOAL", "GOL", "TOR", "BUT", "GOLO") vêm dos dados do pacote, não da paleta da interface: é
+  a única exceção às cores e à caixa alta, e só dentro das peças de TV (placar `pacote`, faixa do
+  gol, tarja do goleador com recorte, números com barra dividida, tabela ao vivo, substituição,
+  cartão, informação do jogo, outro jogo, melhor em campo, titulares por setor). Pacote "papel"
+  (Bundesliga, LaLiga, Brasileirão, Eredivisie, FA Cup): peças brancas com texto escuro. A cor do
+  clube entra pelo `ClubGradient`. Sem brilho nem sombra. Uma peça por lugar (embaixo, meio, alto),
+  some sozinha e some ao toque; o jogo não para por elas (só a faixa do gol segura a partida).
+  Opções › Partidas: desligado, só os gols ou completo.
 - **Campo** (`PitchView`): mini camisas, sobrenome, condição discreta. Toque = painel
   rápido, arrastar = trocar, segurar = perfil.
 - **Botão principal**: giz. **Secundário**: `surface-raised`. **Texto**: sem fundo.

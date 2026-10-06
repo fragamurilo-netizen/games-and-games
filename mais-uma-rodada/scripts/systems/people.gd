@@ -181,7 +181,7 @@ static func _person_name(r: RandomNumberGenerator, nation: String) -> String:
 	var g := NameGenerator.generate(r, String(origin["c"]), {}, {})
 	var first := String(g["first"]).get_slice(" ", 0)
 	var known := String(g["known_as"])
-	if known == String(g["nickname"]) and known != "" and r.randf() < 0.35:
+	if known == String(g["nickname"]) and NameGenerator.is_shirt_nickname(known) and r.randf() < 0.35:
 		return known
 	var last := String(g["last"])
 	var main := last.get_slice(" ", last.get_slice_count(" ") - 1)

@@ -84,6 +84,9 @@ var color1 := Color.BLACK
 var color2 := Color.BLACK
 var away1 := Color.BLACK
 var away2 := Color.BLACK
+## Fundo de onde a cor nasce (transparente = a superfície da interface). Os grafismos de TV usam o
+## fundo do pacote da competição.
+var base_color := Color(0, 0, 0, 0)
 var _rect: ColorRect
 
 
@@ -127,6 +130,25 @@ static func attach(panel: PanelContainer, club: Club, mode_: int = LEFT, away: C
 	return panel
 
 
+## Como attach, mas devolve o degradê (para ajustar alcance, força e o fundo). Em Control comum
+## (não PanelContainer) o degradê ocupa o controle inteiro.
+static func fill(parent: Control, club: Club, mode_: int = LEFT, base: Color = Color(0, 0, 0, 0), reach_: float = 0.75, strength_: float = 0.9) -> ClubGradient:
+	var g := ClubGradient.new()
+	g.mode = mode_
+	g.reach = reach_
+	g.strength = strength_
+	g.base_color = base
+	var cc := club_colors(club)
+	g.color1 = cc[0]
+	g.color2 = cc[1]
+	if not parent is Container:
+		g.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	parent.add_child(g)
+	parent.move_child(g, 0)
+	parent.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	return g
+
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rect = ColorRect.new()
@@ -157,7 +179,7 @@ func _apply() -> void:
 		return
 	_rect.size = size + _margins
 	var mat := _rect.material as ShaderMaterial
-	mat.set_shader_parameter(&"base", UIColors.SURFACE)
+	mat.set_shader_parameter(&"base", base_color if base_color.a > 0.0 else UIColors.SURFACE)
 	mat.set_shader_parameter(&"c1", color1)
 	mat.set_shader_parameter(&"c2", color2)
 	mat.set_shader_parameter(&"d1", away1)

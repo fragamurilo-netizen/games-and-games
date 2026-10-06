@@ -547,7 +547,7 @@ static func _dedupe_names(world: GameWorld, club: Club) -> void:
 			var full := "%s %s" % [p.first_name, p.last_name]
 			if full.strip_edges() != "" and not seen.has(full) and full != k:
 				p.known_as = full
-			elif p.nickname != "" and not seen.has(p.nickname):
+			elif NameGenerator.is_shirt_nickname(p.nickname) and not seen.has(p.nickname):
 				p.known_as = p.nickname
 		seen[p.display_name()] = true
 

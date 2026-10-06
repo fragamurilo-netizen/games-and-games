@@ -15,6 +15,8 @@ const FIRST_MAX := 4
 ## Nome de camisa comum ("Silva", "Juan González"): a partir do terceiro, entra o primeiro nome ou
 ## o sobrenome completo, como os clubes fazem na vida real.
 const KNOWN_MAX := 3
+## Diminutivo que vira nome de camisa (o resto fica só como apelido no perfil).
+const DIM_SHIRT := 0.55
 
 static var _famous: Dictionary = {}
 static var _eth_index: Dictionary = {}
@@ -193,9 +195,15 @@ static func generate(rng_in: RandomNumberGenerator, culture_id: String, ctx: Dic
 	var known_by: Dictionary = c.get("known_by", {"last": 1.0})
 	var mode: String = RngUtil.weighted_key(rng, known_by)
 	if mode == "nickname":
-		nickname = _make_nickname(rng, c, first, last, ctx)
+		# Apelido descritivo ou regional ("Trator", "Canhoto", "Baiano") fica só no perfil; nome de
+		# camisa só o diminutivo do próprio nome ("Dudu", "Juninho"), e nem sempre.
+		var nk := _make_nickname(rng, c, first, last, ctx)
+		nickname = String(nk[0])
+		var shirt := String(nk[1]) == "dim" and rng.randf() < DIM_SHIRT
 		if nickname == "" or int(used.get("~k:" + nickname, 0)) >= NICK_MAX:
 			nickname = ""
+			shirt = false
+		if not shirt:
 			mode = "full" if known_by.has("full") else "last"
 	elif mode == "first" and int(used.get("~k:" + first, 0)) >= FIRST_MAX:
 		mode = "full" if known_by.has("full") else "last"
@@ -255,25 +263,26 @@ static func _pick_list(rng: RandomNumberGenerator, arr: Array, zipf: float) -> S
 	return String(arr[mini(arr.size() - 1, int(floor(arr.size() * pow(rng.randf(), zipf))))])
 
 
-static func _make_nickname(rng: RandomNumberGenerator, c: Dictionary, first: String, last: String, ctx: Dictionary) -> String:
+## [apelido, tipo]: "dim" (diminutivo do nome, pode ir na camisa), "regional" ou "desc" (só no perfil).
+static func _make_nickname(rng: RandomNumberGenerator, c: Dictionary, first: String, last: String, ctx: Dictionary) -> Array:
 	var options: Array = []
 	var first_base := first.get_slice(" ", 0)
 	# Diminutivo do primeiro nome
 	var dims: Dictionary = c.get("diminutives", {})
 	if dims.has(first_base) and rng.randf() < 0.5:
-		return RngUtil.pick(rng, dims[first_base])
+		return [String(RngUtil.pick(rng, dims[first_base])), "dim"]
 	# Júnior -> Juninho
 	if last.ends_with("Júnior") and rng.randf() < 0.6:
-		return "Juninho"
+		return ["Juninho", "dim"]
 	# Regional (conforme a região da cidade natal)
 	var regional: Dictionary = c.get("regional", {})
 	var region: String = ctx.get("region", "")
 	if region != "" and regional.has(region) and rng.randf() < 0.3:
-		return RngUtil.pick(rng, regional[region])
+		return [String(RngUtil.pick(rng, regional[region])), "regional"]
 	# Descritivo: depende de físico e atributos
 	var desc: Dictionary = c.get("descriptive", {})
 	if desc.is_empty():
-		return ""
+		return ["", ""]
 	var pos: int = ctx.get("pos", Pos.CM)
 	var h: int = ctx.get("height", 178)
 	var a: PackedByteArray = ctx.get("attrs", PackedByteArray())
@@ -300,7 +309,30 @@ static func _make_nickname(rng: RandomNumberGenerator, c: Dictionary, first: Str
 			options.append("skill")
 	if not options.is_empty() and rng.randf() < 0.75:
 		var key: String = RngUtil.pick(rng, options)
-		return RngUtil.pick(rng, desc[key])
+		return [String(RngUtil.pick(rng, desc[key])), "desc"]
 	if desc.has("generic"):
-		return RngUtil.pick(rng, desc["generic"])
-	return ""
+		return [String(RngUtil.pick(rng, desc["generic"])), "desc"]
+	return ["", ""]
+
+
+
+static var _shirt_nicks: Dictionary = {}
+
+
+## Apelido que pode ser nome de camisa (diminutivo do nome: "Dudu", "Juninho")? Os descritivos e
+## regionais ("Trator", "Baiano") não: ficam só no perfil.
+static func is_shirt_nickname(nick: String) -> bool:
+	if nick == "":
+		return false
+	if _shirt_nicks.is_empty():
+		var m := {"Juninho": true}
+		var cultures: Variant = DatabaseManager.names().get("cultures", {})
+		if cultures is Dictionary:
+			for cid in cultures:
+				var dims: Variant = (cultures[cid] as Dictionary).get("diminutives", {}) if cultures[cid] is Dictionary else {}
+				if dims is Dictionary:
+					for k in dims:
+						for n in dims[k]:
+							m[String(n)] = true
+		_shirt_nicks = m
+	return _shirt_nicks.has(nick)

@@ -408,5 +408,12 @@ static func from_dict(d: Dictionary, pre_clubs: Array = [], pre_players: Array =
 			if String(stadiums.get(c.key, "")) != "":
 				c.stadium = stadiums[c.key] # estádios sem nome de patrocinador
 	w.stats["short_names"] = true
+	# Apelido descritivo ou regional ("Trator", "Canhoto") deixa de ser o nome de camisa: vira só o
+	# apelido do perfil, e o jogador passa a ser chamado pelo nome e sobrenome (uma vez por save).
+	if not w.stats.has("nick_v2"):
+		w.stats["nick_v2"] = true
+		for p: Player in w.players.values():
+			if p.known_as != "" and p.known_as == p.nickname and not NameGenerator.is_shirt_nickname(p.nickname):
+				p.known_as = Player.shirt_name_of(p.first_name, p.last_name)
 	NationalityManager.ensure_world(w)
 	return w

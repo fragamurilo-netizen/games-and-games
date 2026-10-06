@@ -99,6 +99,11 @@ static func ensure() -> void:
 				continue
 			var k := String(e["key"]) + ("|" + String(e["slot"]) if e["kind"] == "kits" else "")
 			idx[e["kind"]][k] = "%s/%s/%s" % [Mods.DIR, id, e["file"]]
+	# Opções › Visual › Escudos e logos "Do jogo": os pacotes ficam instalados, mas sem efeito.
+	if not AppSettings.pack_images:
+		for k in KINDS:
+			idx[k] = {}
+		kj = {}
 	_idx = idx
 	_files = files
 	_kit_json = kj
