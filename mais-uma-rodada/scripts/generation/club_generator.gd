@@ -754,7 +754,9 @@ static func upgrade_kits(world: GameWorld) -> void:
 
 
 ## Saves antigos: escudos no formato antigo (sem "field") viram os novos — os reais pelo banco
-## de dados, os gerados pelo estilo do país. Imagem importada e escudo do editor ficam.
+## de dados, os gerados pelo estilo do país. Escudo de clube real que o jogador não mexeu
+## acompanha o desenho do banco de dados (escudos redesenhados chegam às carreiras em andamento).
+## Imagem importada e escudo do editor ficam.
 static func upgrade_crests(world: GameWorld) -> void:
 	var datas := {}
 	for c in world.clubs:
@@ -764,12 +766,14 @@ static func upgrade_crests(world: GameWorld) -> void:
 				by_key[String(d.get("key", ""))] = d
 			datas[c.nation] = by_key
 	for c in world.clubs:
-		if c.crest.has("field") or c.crest.has("img") or not Overrides.club(c.key).get("crest", {}).is_empty():
+		if c.crest.has("img") or bool(c.crest.get("edited", false)) or not Overrides.club(c.key).get("crest", {}).is_empty():
+			continue
+		var data: Dictionary = datas[c.nation].get(c.key, {})
+		var hint: Dictionary = data.get("crest", {})
+		if c.crest.has("field") and not hint.has("field"):
 			continue
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(c.key)
-		var data: Dictionary = datas[c.nation].get(c.key, {})
-		var hint: Dictionary = data.get("crest", {})
 		var old: Dictionary = c.crest
 		_make_crest(rng, c, hint)
 		if not hint.has("initials") and old.has("initials"):
