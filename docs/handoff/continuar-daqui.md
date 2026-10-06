@@ -213,6 +213,16 @@ Ramo `claude/historico-inicio-carreira`, feito sobre `claude/bolinhas-narracao-5
 - `tools/squad_report.gd` mostra a parte dos jogadores que começam emprestados (agora 0%) e a dos empréstimos entre duas passagens pelo mesmo clube (99,5%).
 - **Falta.** Desta parte, nada. Para seguir, junte este ramo em `claude/bolinhas-narracao-5wp2pg` quando a conversa das negociações entre clubes terminar lá; os dois mexem em arquivos diferentes. O APK mais recente com este trabalho é `builds/MaisUmaRodada-1.0.0-historico-inicio-2026-10-06-debug.apk`.
 
+## Uniformes com formato anatômico (06/10)
+
+Pedido do dono: não refazer os uniformes, só deixar camisa, calção, meias e chuteiras mais anatômicos.
+Branch `claude/project-thread-1j6fph` (a partir de `claude/hopeful-newton-8avbo4`). Só `scripts/ui/components/kit_view.gd` mudou:
+- Camisa: tronco em trapézio (ombro caindo do pescoço, peito largo, cintura afinando), mangas caídas junto ao corpo com deltoide arredondado, luz no peitoral e no ombro.
+- Calção com quadril arredondado, barra mais baixa por fora e gancho; faixas laterais e barras seguem a nova lateral (`_side_strip`, `_hem_strip`).
+- Coxa e joelho com sombra da barra; meião com panturrilha e tornozelo; chuteira com bico virado para fora, solado e travas.
+- Estampas, golas, estilos de manga/calção/meião, cores e chaves de save não mudaram.
+- Antes/depois: /mnt/project-files/uniformes-anatomicos/. APK: builds/MaisUmaRodada-1.0.0-uniformes-anatomicos-2026-10-06-debug.apk.
+
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:
