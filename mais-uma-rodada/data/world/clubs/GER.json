@@ -176,12 +176,16 @@
 			"capacity": 60000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "oval",
 				"field": "hoops:2",
-				"symbol": "antlers",
+				"symbol": "letter",
+				"initials": "VfB",
 				"c1": "#FFFFFF",
 				"c2": "#E32219",
-				"sc": "#111111"
+				"fc": "#E32219",
+				"sc": "#FFFFFF",
+				"border": "thick",
+				"stars": 0
 			},
 			"rivals": [
 				"GER_KAR"
@@ -405,9 +409,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"field": "plain",
+				"field": "halves_h",
 				"symbol": "letter",
 				"initials": "FCU",
+				"c1": "#D4011D",
+				"c2": "#FFFFFF",
+				"fc": "#FFD700",
+				"plate": "disc",
+				"pc": "#D4011D",
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
@@ -557,7 +566,13 @@
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "BSC",
-				"sc": "#005CA9"
+				"c1": "#005CA9",
+				"c2": "#FFFFFF",
+				"plate": "none",
+				"sc": "#FFFFFF",
+				"border": "thin",
+				"chief_text": "HERTHA",
+				"cc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_UNI"
@@ -698,8 +713,11 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCK",
-				"sc": "#FFFFFF",
-				"border": "double"
+				"c1": "#E2001A",
+				"c2": "#FFFFFF",
+				"border": "double",
+				"ribbon": "1900",
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_SAA"
@@ -753,7 +771,7 @@
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCN",
@@ -810,7 +828,7 @@
 			"capacity": 34300,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "KSC",
@@ -869,7 +887,7 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCM",

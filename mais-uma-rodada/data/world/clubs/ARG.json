@@ -29,7 +29,8 @@
 				"c1": "#0A3D8F",
 				"c2": "#FFD100",
 				"sc": "#0A3D8F",
-				"c3": "#FFD100"
+				"c3": "#FFD100",
+				"border": "gold"
 			},
 			"rivals": [
 				"ARG_MIL"
@@ -60,7 +61,9 @@
 				"initials": "CARP",
 				"c1": "#FFFFFF",
 				"c2": "#E30613",
-				"sc": "#111111"
+				"sc": "#111111",
+				"plate": "none",
+				"border": "thick"
 			},
 			"rivals": [
 				"ARG_XEN"
@@ -85,7 +88,7 @@
 			"capacity": 51000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "RC",
@@ -347,11 +350,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"field": "plain",
-				"symbol": "letter",
-				"initials": "CAB",
+				"field": "chief",
+				"chief_text": "CAB",
+				"cc": "#FFFFFF",
+				"symbol": "stars:1",
+				"c1": "#6CACE4",
+				"c2": "#FFFFFF",
 				"sc": "#FFFFFF",
-				"border": "thick"
+				"border": "thin"
 			},
 			"rivals": [
 				"ARG_MAT"
@@ -380,6 +386,8 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CAH",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
 				"sc": "#E30613",
 				"border": "thick"
 			},
@@ -410,7 +418,9 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CAL",
-				"border": "thick"
+				"c1": "#7B1E3A",
+				"c2": "#FFFFFF",
+				"border": "double"
 			},
 			"rivals": [
 				"ARG_TAD"
@@ -657,12 +667,15 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
-				"field": "plain",
+				"shape": "ring",
+				"field": "hoops:2",
 				"symbol": "letter",
 				"initials": "QAC",
-				"sc": "#1D3F91",
-				"border": "thick"
+				"c1": "#FFFFFF",
+				"c2": "#0B2A6B",
+				"sc": "#FFFFFF",
+				"text": "QUILMES A.C.",
+				"year": "1887"
 			},
 			"rivals": []
 		},
@@ -819,7 +832,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AB",
