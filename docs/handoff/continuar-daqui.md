@@ -108,9 +108,14 @@ Feito:
 - APK: `builds/MaisUmaRodada-1.0.0-escudos-logos-2026-10-06-debug.apk` (com tudo do ramo das bolinhas até a mesa de negociação).
 - Pedido de 06/10 à noite: **escudo novo do Barcelona** (chapado, fios escuros entre as partes, cruz centrada, borda fina escura `bc`, bola antiga sem brilho; desenho no campo/formato `barca` do `crest_view.gd`) e **logos novos da Premier League** (leão coroado de perfil, `lion_crowned`, roxo sobre branco) **e da Championship** (leão passante dourado, `lion_passant`, escudo azul-marinho). Os dois leões estão no editor de escudos. APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk` (feito depois de juntar `claude/hopeful-newton-8avbo4`).
 
-Falta:
-1. Escudos de monograma de clubes menores (Brasil, Portugal, Alemanha...) continuam só com letras; na maioria é assim no clube de verdade, mas dá para caprichar em alguns.
-2. PR para o dono olhar (perguntar antes de juntar).
+Estado (06/10, 20:15): tudo commitado e enviado em `claude/escudos-caprichados-i5l8y5`, que agora é `claude/hopeful-newton-8avbo4` + escudos e logos. PR #73 (rascunho) aponta para `claude/hopeful-newton-8avbo4`; não juntar sem o ok do dono. Último APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk`.
+
+Falta (nesta ordem):
+1. Escudos de monograma de clubes menores (Brasil, Portugal, Alemanha...) continuam só com letras; na maioria é assim no clube de verdade, mas dá para caprichar em alguns (estrelas, faixa com o ano, listras, símbolo da cidade). A lista sai com o script de `--keys` do `crest_sheet` sobre os clubes com `"field": "plain"` e `"symbol": "letter"` (246 clubes).
+2. Barcelona SC (Equador) ainda é só "BSC" em escudo amarelo; o dono pediu "o Barcelona" e foi feito o espanhol.
+3. O dono olhar o PR #73 e decidir a junção.
+
+Para seguir: partir deste ramo, desenhar com `tools/crest_sheet.gd` (folhas) e conferir com `tools/design_shots.gd -- --only=hub@1,table@1 --club=<nome>`. Para gerar APK num contêiner novo (sem modelos de exportação), ver a nota de memória "escudos-logos-2026-10-06": baixar só `android_debug.apk`/`android_release.apk` do .tpz do Godot 4.7.2 por requisição Range e o uber-apk-signer 1.3.0 em `/opt/apk/signer.jar` (mesmo certificado de depuração).
 
 Como conferir:
 ```
