@@ -31,6 +31,11 @@ var _crowd_level: Array[float] = [0.0, 0.0]
 var _crowd_boost: Array[float] = [0.0, 0.0] # empurrão temporário (+/-)
 var _crowd_boost_t: Array[float] = [0.0, 0.0]
 var _crowd_on := false
+var _crowd_gen := 0 # muda a cada liga/desliga: timers antigos não mexem na torcida nova
+var _crowd_hush := false # partida pausada: a arquibancada vira murmúrio
+var _sfx_names: Array[String] = ["", "", "", ""] # o que cada player de efeitos está tocando
+## Efeitos que só fazem sentido dentro da partida: cortados ao sair dela.
+const MATCH_SFX: Array[String] = ["whistle", "whistle_half", "whistle_end", "goal", "goal_big", "goal_roar", "groan", "boo", "applause", "chance", "card"]
 
 
 func _ready() -> void:
@@ -105,6 +110,9 @@ func screen_changed(screen_name: String) -> void:
 	_in_match = match_now
 	if not match_now:
 		_match_muted = false
+		# Rede de segurança: saindo da partida por qualquer caminho, a torcida e os apitos param.
+		crowd_stop()
+		_stop_match_sfx()
 	start_music()
 
 
@@ -187,10 +195,28 @@ func play(name: String, volume_db: float = 0.0) -> void:
 	if stream == null:
 		return
 	var p := _players[_next]
+	_sfx_names[_next] = name
 	_next = (_next + 1) % _players.size()
 	p.stream = stream
 	p.volume_db = volume_db
 	p.play()
+
+
+func _stop_match_sfx() -> void:
+	for i in _players.size():
+		if _players[i].playing and MATCH_SFX.has(_sfx_names[i]):
+			_players[i].stop()
+	if _clip_p != null and _clip_p.playing:
+		_clip_p.stop()
+
+
+## Desligaram os efeitos nas Opções: corta tudo o que estiver soando (menos a música).
+func stop_all() -> void:
+	for p in _players:
+		p.stop()
+	crowd_stop(true)
+	if _clip_p != null:
+		_clip_p.stop()
 
 
 func vibrate(ms: int) -> void:
@@ -229,13 +255,20 @@ func _notification(what: int) -> void:
 	# No Android o jogo em segundo plano não deve continuar tocando.
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		if OS.has_feature("mobile"):
-			_music.stream_paused = true
-			for cp in _crowd_p:
-				cp.stream_paused = true
+			for p in _all_players():
+				p.stream_paused = true
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		_music.stream_paused = false
-		for cp in _crowd_p:
-			cp.stream_paused = false
+		for p in _all_players():
+			p.stream_paused = false
+
+
+func _all_players() -> Array[AudioStreamPlayer]:
+	var all: Array[AudioStreamPlayer] = [_music]
+	all.append_array(_players)
+	all.append_array(_crowd_p)
+	if _clip_p != null:
+		all.append(_clip_p)
+	return all
 
 
 # ---------------------------------------------------------------------------
@@ -267,6 +300,8 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 	if not AppSettings.sound:
 		return
 	_crowd_on = true
+	_crowd_hush = false
+	_crowd_gen += 1
 	set_process(true)
 	var profs := [home, away]
 	_crowd_prof = [home, away]
@@ -299,11 +334,33 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 ## Desliga a torcida (com fade, a não ser que `now`).
 func crowd_stop(now := false) -> void:
 	_crowd_on = false
+	_crowd_gen += 1
 	for i in 2:
 		if now:
 			_crowd_p[i].stop()
 			_crowd_p[i].volume_db = -80.0
 		_crowd_level[i] = _crowd_level[i] if not now else 0.0
+	# O canto/gol gravado não fica soando sozinho depois que a torcida sai.
+	if _clip_p != null and _clip_p.playing:
+		if now:
+			_clip_p.stop()
+		else:
+			var tw := create_tween()
+			tw.tween_property(_clip_p, "volume_db", -40.0, 0.6)
+			tw.tween_callback(_clip_p.stop)
+	set_process(true)
+
+
+## Volta para a partida (depois de abrir um perfil no meio do jogo): a mesma torcida retoma.
+func crowd_resume() -> void:
+	if _crowd_on or not AppSettings.sound or _crowd_prof[0].is_empty():
+		return
+	_crowd_on = true
+	_crowd_gen += 1
+	for i in 2:
+		if _crowd_p[i].stream != null and not _crowd_p[i].playing:
+			_crowd_play(i, _crowd_p[i].stream)
+	set_process(true)
 
 
 ## Reações: "danger" (ataque perigoso), "goal", "foul", "card", "save", "half", "second", "end".
@@ -331,13 +388,20 @@ func crowd_event(kind: String, side: int) -> void:
 		"half":
 			_push(0, -0.6, 9999.0)
 			_push(1, -0.6, 9999.0)
+		"pause":
+			_crowd_hush = true
+		"resume":
+			_crowd_hush = false
 		"second":
 			_crowd_boost = [0.1, 0.1]
 			_crowd_boost_t = [4.0, 4.0]
 		"end":
 			_push(s, 0.5, 8.0)
 			_push(o, -0.7, 9999.0)
-			get_tree().create_timer(7.0).timeout.connect(func(): crowd_stop())
+			var gen := _crowd_gen
+			get_tree().create_timer(7.0).timeout.connect(func():
+				if gen == _crowd_gen:
+					crowd_stop())
 
 
 func _push(i: int, amount: float, secs: float) -> void:
@@ -396,8 +460,10 @@ func _crowd_tick(delta: float) -> void:
 			if _crowd_boost_t[i] <= 0.0:
 				_crowd_boost[i] = 0.0
 		var target := 0.0
-		if _crowd_on and not _match_muted:
+		if _crowd_on and not _match_muted and AppSettings.sound:
 			target = clampf(_crowd_base[i] * (1.0 + _crowd_boost[i]), 0.0, 1.0)
+			if _crowd_hush:
+				target *= 0.3
 		_crowd_level[i] = move_toward(_crowd_level[i], target, delta * (0.9 if target > _crowd_level[i] else 0.35))
 		_crowd_p[i].volume_db = linear_to_db(maxf(0.0005, _crowd_level[i]))
 		if not _crowd_on and _crowd_level[i] <= 0.001:

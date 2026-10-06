@@ -133,6 +133,8 @@ func refresh() -> void:
 		AppSettings.save_settings()
 		if v:
 			Sfx.play("whistle", -6.0)
+		else:
+			Sfx.stop_all()
 		refresh()))
 	if AppSettings.sound:
 		card.add_child(_slider("Volume dos efeitos", AppSettings.sfx_volume, func(v: int):
