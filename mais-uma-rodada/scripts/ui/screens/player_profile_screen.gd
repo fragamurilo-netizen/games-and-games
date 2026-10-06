@@ -917,8 +917,8 @@ func _career_years(w: GameWorld, p: Player) -> Array:
 	for y in order:
 		out.append(by[y])
 	# Temporada em andamento
-	if p.club_id >= 0 and p.stats[Player.S_APPS] > 0:
-		var tot: Array = p.season_totals()
+	var tot: Array = p.season_totals()
+	if p.club_id >= 0 and int(tot[0]) > 0:
 		out.append({"y": w.year, "a": int(tot[0]), "g": int(tot[1]), "as": int(tot[2]), "mi": p.stats[Player.S_MINUTES],
 			"mo": 0, "cs": 0, "yc": 0, "rc": 0, "rs": p.avg_rating() * p.stats[Player.S_APPS], "ra": p.stats[Player.S_APPS],
 			"o": p.overall, "o0": p.ovr_start if p.ovr_start >= 0 else p.overall, "clubs": [p.club_id], "inj": [], "now": true})
@@ -947,7 +947,8 @@ func _career_chart(w: GameWorld, p: Player, card: VBoxContainer) -> void:
 		var chip := UIKit.chip(String(m[1]), key == _career_metric, g, func():
 			_career_metric = key
 			refresh())
-		UIKit.shrink_button(chip)
+		chip.clip_text = false
+		chip.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
 		chips.add_child(chip)
 	card.add_child(chips)
 	var labels: Array = []
@@ -1007,11 +1008,11 @@ func _year_detail(w: GameWorld, p: Player, e: Dictionary) -> Control:
 	var r: Variant = _metric(e, "r")
 	var cells: Array = [[str(int(e["a"])), "jogos"], [str(int(e["g"])), "gols"], [str(int(e["as"])), "assist."],
 		[Fmt.rating(float(r)) if r != null else "—", "nota"], [Fmt.thousands(int(e["mi"])), "minutos"],
-		[str(int(e["mo"])), "craque do jogo"], [str(int(e["yc"])) + " / " + str(int(e["rc"])), "amarelos / vermelhos"]]
+		[str(int(e["mo"])), "craque"], [str(int(e["yc"])) + "/" + str(int(e["rc"])), "cartões"]]
 	if Pos.group(p.position) <= Pos.G_DEF:
 		cells.append([str(int(e["cs"])), "sem sofrer gol"])
 	elif int(e["a"]) > 0:
-		cells.append([Fmt.dec(float(int(e["g"]) + int(e["as"])) / int(e["a"]), 2), "G+A por jogo"])
+		cells.append([Fmt.dec(float(int(e["g"]) + int(e["as"])) / int(e["a"]), 2), "G+A/jogo"])
 	for cell in cells:
 		var st := UIKit.stat(String(cell[0]), String(cell[1]))
 		st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1023,7 +1024,7 @@ func _year_detail(w: GameWorld, p: Player, e: Dictionary) -> Control:
 		box.add_child(UIKit.colored("%s (%+d)" % [txt, d], UIColors.GREEN if d > 0 else (UIColors.ORANGE if d < 0 else UIColors.MUTED), "Small", true))
 	for inj in e["inj"]:
 		box.add_child(UIKit.colored("%s · %d semanas fora" % [String(inj[0]), int(inj[1])], UIColors.RED, "Small", true))
-	return box
+	return UIKit.card_panel(box)
 
 
 ## Auge da carreira: melhor nota, ano de mais gols, mais jogos e o maior nível (com a idade).
