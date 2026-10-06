@@ -115,7 +115,7 @@ Falta (nesta ordem):
 2. Barcelona SC (Equador) ainda é só "BSC" em escudo amarelo; o dono pediu "o Barcelona" e foi feito o espanhol.
 3. O dono olhar o PR #73 e decidir a junção.
 
-Para seguir: partir deste ramo, desenhar com `tools/crest_sheet.gd` (folhas) e conferir com `tools/design_shots.gd -- --only=hub@1,table@1 --club=<nome>`. Para gerar APK num contêiner novo (sem modelos de exportação), ver a nota de memória "escudos-logos-2026-10-06": baixar só `android_debug.apk`/`android_release.apk` do .tpz do Godot 4.7.2 por requisição Range e o uber-apk-signer 1.3.0 em `/opt/apk/signer.jar` (mesmo certificado de depuração).
+Para seguir: partir deste ramo, desenhar com `tools/crest_sheet.gd` (folhas) e conferir com `tools/design_shots.gd -- --only=hub@1,table@1 --club=<nome>`. Para gerar APK num contêiner novo (sem modelos de exportação): o .tpz do Godot 4.7.2 tem 1,28 GB; basta tirar dele `templates/android_debug.apk`, `android_release.apk` e `version.txt` (por requisição Range no diretório central do zip, ou baixando tudo) para `~/.local/share/godot/export_templates/4.7.2.stable/`, e pôr o uber-apk-signer 1.3.0 em `/opt/apk/signer.jar` (a chave de depuração embutida dá o mesmo certificado, SHA-256 1e08a903…). `builds/*.apk` está no .gitignore: `git add -f`.
 
 Como conferir:
 ```
