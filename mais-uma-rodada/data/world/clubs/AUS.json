@@ -25,9 +25,7 @@
 				"field": "vee",
 				"symbol": "none"
 			},
-			"rivals": [
-				"AUS_MSC"
-			]
+			"rivals": ["AUS_MCY"]
 		},
 		{
 			"key": "AUS_SSK",
@@ -105,7 +103,7 @@
 			"stadium": "AAMI Park",
 			"capacity": 30000,
 			"kit": "plain",
-			"rivals": [],
+			"rivals": ["AUS_MVB"],
 			"crest": {
 				"shape": "ring",
 				"field": "plain",

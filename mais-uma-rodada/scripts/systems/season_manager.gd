@@ -448,6 +448,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 				p.injury_weeks -= 1
 				if p.injury_weeks == 0:
 					p.injury_name = ""
+					if not p.inj_log.is_empty():
+						InjuryModel.on_return(p, int(p.inj_log[p.inj_log.size() - 1][3])) # volta sem ritmo
 	var played := {}
 	var newly_suspended := {}
 	var clubs_played := {}
@@ -502,6 +504,10 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	if weekend:
 		# Evolução, finanças e mercado andam por semana.
 		var notable := PlayerDevelopment.weekly_tick(world, played, clubs_played)
+		BodyGrowth.weekly(world)
+		tt = _time("evolucao", tt)
+		ClubScoutNet.weekly(world, md["entries"]) # olheiros dos clubes da IA assistem aos jogos
+		tt = _time("olheiros", tt)
 		for p in notable:
 			if p.age(world.year) <= 21:
 				NewsManager.on_explosion(world, p)
@@ -510,10 +516,14 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			FinanceManager.process_week(world, c)
 			# O clima volta devagar para o patamar do momento (títulos, finais perdidas, jejum).
 			c.fan_mood = clampf(c.fan_mood + (Aftermath.mood_target(world, c) - c.fan_mood) * 0.03, 0.0, 100.0)
+			# Amigos no time titular se entendem; desafetos atrapalham.
+			c.cohesion = clampf(c.cohesion + Relations.cohesion_push(world, c), 20.0, 100.0)
+			TicketOffice.weekly_mood(c) # a torcida sente o preço do ingresso
 		Aftermath.weekly(world)
 		WorldEvents.weekly(world)
 		tt = _time("financas", tt)
 		TrainingManager.weekly(world)
+		InjuryModel.training_week(world) # lesões de treino em todos os clubes
 		YouthManager.weekly(world)
 		HeartClubs.weekly(world)
 		report["youth"] = YouthManager.play_slot(world, slot)
@@ -557,6 +567,8 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	WorldPulse.after_matchday(world, md["entries"])
 	Achievements.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
+	Relations.after_matchday(world, md["entries"]) # goleada esquenta o vestiário; vitória grande une
+	tt = _time("relacoes", tt)
 	CoachStories.after_matchday(world, md["entries"])
 	AwardVoting.maybe_announce(world)
 	PressRoom.after_matchday(world)
@@ -745,8 +757,11 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 					world.mark_suspended(p)
 			# Lesão
 			if inj > 0:
+				# O lance vira lesão de verdade pelo jogador: idade, cansaço, posição, recidiva, peso.
+				var im := InjuryModel.make(world, p, inj, p.condition)
+				inj = int(im["weeks"])
 				p.injury_weeks = maxi(p.injury_weeks, inj)
-				p.injury_name = InjuryTable.name_for(inj, p.id + world.season.day)
+				p.injury_name = String(im["name"])
 				PlayerCareer.on_injury(world, p, inj, p.injury_name)
 				PlayerDevelopment.injury_setback(world.rng, p, inj, p.age(world.year))
 				NewsManager.on_injury(world, p)
@@ -980,8 +995,13 @@ static func end_season(world: GameWorld) -> Dictionary:
 	extra["world_young"] = wy_rank[0] if not wy_rank.is_empty() else {}
 	extra["gk_world"] = gk_rank[0] if not gk_rank.is_empty() else {}
 	extra["boot"] = AwardManager.golden_boot(world)
+	extra["muller"] = AwardManager.muller(world)
+	extra["rei_america"] = AwardManager.continental(world, "CONMEBOL", true)
+	extra["caf_poty"] = AwardManager.continental(world, "CAF", false)
+	extra["afc_poty"] = AwardManager.continental(world, "AFC", false)
 	extra["world_xi"] = AwardVoting.world_xi(world, summary["intl"])
-	AwardManager.credit(world, {}, ballon, {"world_young": extra["world_young"], "boot": extra["boot"], "gk_world": extra["gk_world"], "world_xi": extra["world_xi"]})
+	AwardManager.credit(world, {}, ballon, {"world_young": extra["world_young"], "boot": extra["boot"], "gk_world": extra["gk_world"], "world_xi": extra["world_xi"],
+		"muller": extra["muller"], "rei_america": extra["rei_america"], "caf_poty": extra["caf_poty"], "afc_poty": extra["afc_poty"]})
 	var wcoach := AwardVoting.world_coach_vote(world, coaches)
 	if bool(wcoach.get("user", false)):
 		var ma: Array = world.manager_stats.get("awards", [])
@@ -1058,6 +1078,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	tt = _time("es_pessoas", tt)
 	progress = 55
 	ClubRecords.snapshot_season(world) # melhor 11 do ano e de sempre, em todos os clubes
+	Relations.season_close(world, Relations.champions(world)) # laços do ano, técnicos favoritos e ídolos
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
 	if uc != null:
@@ -1085,7 +1106,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 		"club": world.user_club_id, "yl": yl_sum, "wy": extra["world_young"], "boot": extra["boot"], "cp": extra["club"],
 		"arch": SeasonArchive.snapshot_leagues(world), "sq": SeasonArchive.snapshot_squad(world),
 		"bo": bo_rank, "months": weekly["months"], "tw": summary["totw_most"], "gkw": extra["gk_world"], "wxi": extra["world_xi"],
-		"wco": wcoach, "aw": ledger})
+		"wco": wcoach, "aw": ledger, "mul": extra["muller"], "ra": extra["rei_america"], "caf": extra["caf_poty"], "afc": extra["afc_poty"]})
 	tt = _time("es_arquivo", tt)
 	progress = 62
 	# Evolução do elenco do usuário no ano (quem subiu e quem caiu)
@@ -1149,6 +1170,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	# Novo ano
 	world.year += 1
 	world.season_number += 1
+	BodyGrowth.yearly(world) # garotos crescem; quem tem tendência volta das férias acima do peso
 	# Base
 	var youth := PlayerDevelopment.youth_intake(world)
 	var yc := 0
@@ -1209,6 +1231,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 			PlayerGenerator.assign_statuses(world, c)
 		_assign_missing_shirts(world, c)
 	FinanceAI.season_open(world) # amortiza dívida, gasta o caixa parado ou entra em austeridade
+	TicketOffice.season_review_ai(world) # IA reajusta o ingresso pelo que o estádio mostrou
 	Aftermath.season_open(world) # cofre aberto depois do vice, cobrança e jejum
 	Valuation.refresh_shift(world)
 	Referees.season_close(world)

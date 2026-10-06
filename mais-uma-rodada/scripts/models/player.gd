@@ -71,6 +71,8 @@ var origin: Dictionary = {}
 var eth: int = 1 # etnia (índice em nations.json → ethnicities), usada pelo rosto
 var height: int = 178
 var weight: int = 75
+## Altura final (cm): o garoto ainda cresce até ela (BodyGrowth). 0 = não definida (saves antigos).
+var adult_h: int = 0
 var foot: int = FOOT_RIGHT
 var position: int = Pos.CM
 var secondary: Array = []
@@ -99,6 +101,13 @@ var signature: String = ""
 ## Time de coração (HeartClubs): -2 não sorteado, -1 nenhum, >= 0 clube. Escondido até ser revelado.
 var heart: int = -2
 var heart_known: bool = false
+## Relações (Relations): laços com outros jogadores {pid: [tipo, valor -100..100, desde]},
+## relação com técnicos {id do técnico (-2 = o usuário): valor} e o ídolo (pid, -1 = nenhum).
+var bonds: Dictionary = {}
+var coach_rel: Dictionary = {}
+var idol: int = -1
+## Lesões recentes [[ano, turno, parte do corpo, semanas]] (InjuryModel: recidiva e histórico).
+var inj_log: Array = []
 
 # Contrato e status
 var club_id: int = -1
@@ -561,10 +570,10 @@ func to_dict() -> Dictionary:
 	compact()
 	var d := {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
-		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
+		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ah": adult_h, "ft": foot, "pos": position,
 		"sec": secondary, "sh": shirt, "ht": hometown, "origin": origin, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
-		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "sg": signature,
+		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "rlb": bonds, "rlc": coach_rel, "idl": idol, "ilg": inj_log, "sg": signature,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
@@ -651,6 +660,7 @@ static func from_dict(d: Dictionary) -> Player:
 	p.foot = int(d.get("ft", FOOT_RIGHT))
 	p.position = int(d.get("pos", Pos.CM))
 	p.weight = int(d.get("wt", Physique.default_weight(p.height, p.position)))
+	p.adult_h = int(d.get("ah", 0))
 	p.secondary = Array(d.get("sec", []))
 	p.shirt = int(d.get("sh", 0))
 	p.hometown = d.get("ht", "")
@@ -670,6 +680,10 @@ static func from_dict(d: Dictionary) -> Player:
 	p.hidden = d.get("hid", {})
 	p.scout_noise = int(d.get("sn", 0))
 	p.heart = int(d.get("hc", -2))
+	p.bonds = d.get("rlb", {})
+	p.coach_rel = d.get("rlc", {})
+	p.idol = int(d.get("idl", -1))
+	p.inj_log = d.get("ilg", [])
 	p.signature = String(d.get("sg", ""))
 	p.heart_known = bool(d.get("hk", false))
 	p.club_id = int(d.get("club", -1))

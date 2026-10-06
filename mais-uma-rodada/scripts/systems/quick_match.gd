@@ -707,7 +707,7 @@ static func _pick_injured(rng: RandomNumberGenerator, lines: Array) -> Variant:
 	for v in lines:
 		if v[10] == 1:
 			var p: Player = v[0]
-			total += (1.0 + p.injury_prone / 10.0) * p.trait_mult("injury_mult") * (0.3 if int(v[1]) == Pos.GK else 1.0)
+			total += (1.0 + p.injury_prone / 10.0) * p.trait_mult("injury_mult") * BodyGrowth.injury_factor(p) * (0.3 if int(v[1]) == Pos.GK else 1.0)
 	if total <= 0.0:
 		return null
 	var r := rng.randf() * total
@@ -715,7 +715,7 @@ static func _pick_injured(rng: RandomNumberGenerator, lines: Array) -> Variant:
 		if v[10] != 1:
 			continue
 		var p: Player = v[0]
-		r -= (1.0 + p.injury_prone / 10.0) * p.trait_mult("injury_mult") * (0.3 if int(v[1]) == Pos.GK else 1.0)
+		r -= (1.0 + p.injury_prone / 10.0) * p.trait_mult("injury_mult") * BodyGrowth.injury_factor(p) * (0.3 if int(v[1]) == Pos.GK else 1.0)
 		if r <= 0.0:
 			return v
 	return null

@@ -392,7 +392,7 @@ func _arch_card(w: GameWorld, h: Dictionary, a: Dictionary) -> Control:
 					continue
 				var ad: Dictionary = aw[k]
 				var row := UIKit.hbox(10)
-				var kl := UIKit.label(AwardManager.award_name(k), "Small")
+				var kl := UIKit.label(AwardManager.award_name(k, _arch_league), "Small")
 				kl.custom_minimum_size.x = 170
 				kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 				row.add_child(kl)
@@ -576,7 +576,7 @@ func _awards(w: GameWorld) -> Control:
 			row.add_child(col)
 			row.add_child(UIKit.flag(String(ballon.get("nat", "")), 36))
 			card.add_child(_player_tap(row, int(ballon["id"])))
-		for wk in [["wy", "world_young"], ["boot", "boot"]]:
+		for wk in [["wy", "world_young"], ["boot", "boot"], ["mul", "muller"], ["ra", "rei_america"], ["caf", "caf_poty"], ["afc", "afc_poty"]]:
 			var wd: Dictionary = h.get(wk[0], {})
 			if wd.is_empty():
 				continue
@@ -603,7 +603,7 @@ func _awards(w: GameWorld) -> Control:
 					continue
 				var a: Dictionary = aw[k]
 				var row := UIKit.hbox(10)
-				var kl := UIKit.label(AwardManager.award_name(k), "Small")
+				var kl := UIKit.label(AwardManager.award_name(k, lid), "Small")
 				kl.custom_minimum_size.x = 170
 				kl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART # nome longo quebra em vez de empurrar a coluna
 				row.add_child(kl)

@@ -99,6 +99,9 @@ func refresh() -> void:
 			var coaches := _coaches_card(w, club)
 			if coaches != null:
 				cards.append(coaches)
+			var legends := _legends_card(w, club)
+			if legends != null:
+				cards.append(legends)
 			var idols := _idols_card(w, club)
 			if idols != null:
 				cards.append(idols)
@@ -505,6 +508,19 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.kv("Dívida de longo prazo", "%s · %s da receita" % [Fmt.money(club.debt), "%d%%" % int(round(dr * 100.0))],
 			UIColors.RED if dr > 1.0 else (UIColors.ORANGE if dr > 0.5 else UIColors.TEXT)))
 		card.add_child(UIKit.kv("Parcela da dívida (ano)", Fmt.money(FinanceManager.debt_service(club))))
+	var tk := TicketOffice.preview(w, club, club.ticket_mult)
+	var tk_txt := "%s · %s · %d%% de ocupação" % [TicketOffice.level_name(club), Fmt.money(int(tk["price"])), int(round(float(tk["occ"]) * 100.0))]
+	if w.is_user_club(club.id):
+		var trow := UIKit.hbox(UITokens.S2)
+		var tcol := UIKit.vbox(0)
+		tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tcol.add_child(UIKit.label("Ingresso", "Muted"))
+		tcol.add_child(UIKit.label(tk_txt, "", true))
+		trow.add_child(tcol)
+		trow.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
+		card.add_child(UIKit.tap_row(trow, func(): _ticket_sheet(w, club)))
+	else:
+		card.add_child(UIKit.kv("Ingresso", tk_txt))
 	var deal := FinanceManager.tv_deal(w, club.league_id)
 	card.add_child(UIKit.kv("Cota de TV (ano)", "%s%s" % [Fmt.money(club.income_tv), "" if absf(deal - 1.0) < 0.01 else " · contrato %s%d%%" % ["+" if deal > 1.0 else "−", int(round(absf(deal - 1.0) * 100.0))]]))
 	var own := WorldEvents.owner_of(w, club.id)
@@ -525,6 +541,34 @@ func _finance_card(w: GameWorld, club: Club) -> Control:
 	elif FinanceManager.debt_ratio(club, float(fin["expected_revenue"])) > 1.0:
 		card.add_child(UIKit.colored("Dívida acima de um ano de receita.", UIColors.ORANGE, "Small", true))
 	return UIKit.card_panel(card)
+
+
+## Política de preço do ingresso: cada patamar com o público e a renda que deve dar.
+func _ticket_sheet(w: GameWorld, club: Club) -> void:
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Preço do ingresso", "H2"))
+	v.add_child(UIKit.label("Ingresso caro enche o caixa, mas esvazia a arquibancada e irrita a torcida aos poucos. Barato enche o estádio e agrada.", "Muted", true))
+	v.add_child(UIKit.gap(UITokens.S2))
+	var cur := TicketOffice.level_of(club)
+	for i in TicketOffice.LEVELS.size():
+		var mult := float(TicketOffice.LEVELS[i][0])
+		var pv := TicketOffice.preview(w, club, mult)
+		var box := UIKit.vbox(0)
+		var nm := UIKit.label("%s · %s" % [String(TicketOffice.LEVELS[i][1]), Fmt.money(int(pv["price"]))], "H3")
+		if i == cur:
+			nm.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		box.add_child(nm)
+		box.add_child(UIKit.label("Público de %s (%d%%) · bilheteria de %s na temporada" % [Fmt.thousands(int(pv["att"])), int(round(float(pv["occ"]) * 100.0)), Fmt.money(int(pv["gate"]))], "Muted", true))
+		var idx := i
+		var row := UIKit.tap_row(box, func():
+			UIManager.close_modal()
+			TicketOffice.set_level(club, idx)
+			GameManager.save_now()
+			UIManager.toast("Ingresso: %s." % String(TicketOffice.LEVELS[idx][1]).to_lower())
+			refresh())
+		row.custom_minimum_size.y = UITokens.H_ROW
+		v.add_child(row)
+	UIManager.show_modal(v, true)
 
 
 ## Entradas e saídas da temporada, categoria a categoria.
@@ -938,6 +982,29 @@ func _idols_card(w: GameWorld, club: Club) -> Control:
 		col.add_child(UIKit.label("%d jogos, %d gols pelo clube · aposentou-se em %d" % [idols[i][2], idols[i][3], int(r.get("year", 0))], "Small", true))
 		row.add_child(col)
 		card.add_child(row)
+	return UIKit.card_panel(card)
+
+
+## Lendas do clube (Relations.legends): maior artilheiro, recordista de jogos e ídolos, ativos e
+## aposentados. Tocar num jogador em atividade abre o perfil.
+func _legends_card(w: GameWorld, club: Club) -> Control:
+	var rows := Relations.legends(w, club)
+	if rows.is_empty():
+		return null
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("Lendas do clube"))
+	for e: Dictionary in rows:
+		var r: Dictionary = e["r"]
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_child(UIKit.label(String(e["why"]), "Caps"))
+		col.add_child(UIKit.label(String(r["n"]), "H3", true))
+		col.add_child(UIKit.label(String(e["txt"]) + ("" if bool(r["active"]) else " · aposentado"), "Small", true))
+		var pid := int(r["pid"])
+		if bool(r["active"]) and w.player(pid) != null:
+			card.add_child(UIKit.tap_row(col, func(): UIManager.push("player", {"id": pid})))
+		else:
+			card.add_child(col)
 	return UIKit.card_panel(card)
 
 

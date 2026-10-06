@@ -79,7 +79,7 @@ const EPS := 0.006 # finalizador × goleiro
 const HOME_CHANCE := 0.11 # empurrão da torcida na taxa de chances do mandante
 const AWAY_CHANCE := 0.05 # pressão sobre o visitante
 const FOUL_RATE := 0.235
-const INJURY_RATE := 0.0014
+const INJURY_RATE := 0.003
 const FATIGUE_RATE := 0.17
 ## Desvio do "dia do time" (1,0 ± ~3,5%): times iguais podem ter jogos bem diferentes.
 const DAY_SIGMA := 0.035
@@ -343,7 +343,7 @@ func _make_mp(pl: Player, big: bool, inj_m: float = 1.0) -> MatchPlayer:
 	mp.ctx = 1.0 + (pl.trait_sum("big_game") if big else 0.0)
 	mp.card_mult = pl.trait_mult("card_mult")
 	mp.clutch = pl.trait_sum("clutch")
-	mp.injury_f = (1.0 + pl.injury_prone / 10.0) * pl.trait_mult("injury_mult") * inj_m
+	mp.injury_f = (1.0 + pl.injury_prone / 10.0) * pl.trait_mult("injury_mult") * inj_m * BodyGrowth.injury_factor(pl)
 	mp.prepare()
 	return mp
 

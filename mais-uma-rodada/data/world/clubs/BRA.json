@@ -1519,10 +1519,7 @@
 				"symbol": "letter",
 				"initials": "SER"
 			},
-			"rivals": [
-				"BRA_PAP",
-				"BRA_JUV"
-			]
+			"rivals": ["BRA_JUV"]
 		},
 		{
 			"key": "BRA_DSE",

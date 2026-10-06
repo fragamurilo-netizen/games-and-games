@@ -22,15 +22,17 @@ func _initialize() -> void:
 		var buys := {}
 		var sells := {}
 		var spent := {}
+		var got := {}
 		for t: Transfer in w.transfer_log:
 			if t.year != w.year:
 				continue
 			buys[t.to_id] = int(buys.get(t.to_id, 0)) + 1
 			spent[t.to_id] = int(spent.get(t.to_id, 0)) + t.fee
 			sells[t.from_id] = int(sells.get(t.from_id, 0)) + 1
-		print("-- mercado da temporada %d: clube compras(€M gastos)/vendas" % w.year)
+			got[t.from_id] = int(got.get(t.from_id, 0)) + t.fee
+		print("-- mercado de %d: compras (€ mi) / vendas (€ mi)" % w.year)
 		for c: Club in _clubs(w):
-			print("   %-14s %2d (%4.0f) / %2d" % [c.short_name, int(buys.get(c.id, 0)), float(spent.get(c.id, 0)) / 1e6, int(sells.get(c.id, 0))])
+			print("   %-14s %2d (%4.0f) / %2d (%4.0f)" % [c.short_name, int(buys.get(c.id, 0)), float(spent.get(c.id, 0)) / 1e6, int(sells.get(c.id, 0)), float(got.get(c.id, 0)) / 1e6])
 		SeasonManager.end_season(w)
 		_report(w)
 	quit()
@@ -40,14 +42,14 @@ func _clubs(w: GameWorld) -> Array:
 	var out: Array = []
 	for nm in CLUBS:
 		for c: Club in w.clubs:
-			if c.short_name == nm and c.tier <= 2 and c.nation != "URU":
+			if c.short_name == nm and c.nation != "URU":
 				out.append(c)
 				break
 	return out
 
 
 func _report(w: GameWorld) -> void:
-	print("== %d: clube | XI | elenco € mi | idade XI | caixa | verba | folha/ano" % w.year)
+	print("== %d: clube | XI | elenco € mi | idade XI | caixa | verba | folha/ano | jogadores" % w.year)
 	for c: Club in _clubs(w):
 		var sq: Array = w.squad(c)
 		sq.sort_custom(func(a: Player, b: Player): return a.ovr_f > b.ovr_f)
@@ -59,5 +61,5 @@ func _report(w: GameWorld) -> void:
 			age += sq[i].age(w.year)
 		for p: Player in sq:
 			val += p.value
-		var n := float(mini(11, sq.size()))
-		print("   %-14s %5.1f | %5.0f | %4.1f | %5.0f | %4.0f | %4.0f" % [c.short_name, xi / n, val / 1e6, age / n, c.balance / 1e6, c.transfer_budget / 1e6, FinanceManager.wage_bill(w, c) * 12.0 / 1e6])
+		var n := float(maxi(1, mini(11, sq.size())))
+		print("   %-14s %5.1f | %5.0f | %4.1f | %5.0f | %4.0f | %4.0f | %d" % [c.short_name, xi / n, val / 1e6, age / n, c.balance / 1e6, c.transfer_budget / 1e6, FinanceManager.wage_bill(w, c) * 12.0 / 1e6, sq.size()])

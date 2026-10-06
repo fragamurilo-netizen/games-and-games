@@ -63,7 +63,6 @@ const LOAD: Array = [
 const HIST_WEEKS := 12
 const LOG_MAX := 10
 ## Lesão no treino por jogador e semana, sobre a parte da carga acima do normal.
-const TRAIN_INJURY := 0.004
 
 
 static func focus_of(club: Club) -> Dictionary:
@@ -200,11 +199,9 @@ static func weekly(world: GameWorld) -> void:
 	var wk := int(club.training.get("wk", 0)) + 1
 	club.training["wk"] = wk
 	var lm := learn_mult(world, club)
-	var inj_base := float(f["injury"]) * float(inten["injury"]) * People.injury_mult(world)
 	for p: Player in world.squad(club):
 		if mdelta != 0.0:
 			p.morale = clampf(p.morale + mdelta, 0.0, 100.0)
-		_training_injury(world, club, p, inj_base)
 		_style_week(world, club, p, lm)
 		_record(p, wk)
 		var target := int(p.train.get("pos", -1))
@@ -248,23 +245,6 @@ static func learnable_positions(p: Player) -> Array:
 
 ## Lesão no próprio treino: só a parte da carga acima do normal (intensidade, foco físico, carga
 ## extra), mais provável em quem já está cansado ou tem histórico de lesões.
-static func _training_injury(world: GameWorld, club: Club, p: Player, inj_base: float) -> void:
-	if p.is_injured():
-		return
-	var m := inj_base * float(load_of(p)["injury"])
-	var excess := m - 0.95
-	if excess <= 0.0:
-		return
-	var cond_f := 1.0 + clampf((75.0 - p.condition) / 25.0, 0.0, 1.0)
-	var prone_f := (1.0 + p.injury_prone / 10.0) * 0.5
-	if world.rng.randf() >= TRAIN_INJURY * excess * cond_f * prone_f * (1.15 - 0.3 * quality(world, club)):
-		return
-	p.injury_weeks = world.rng.randi_range(1, 3)
-	p.injury_name = RngUtil.pick(world.rng, ["Estiramento muscular (treino)", "Torção no tornozelo (treino)", "Dor na coxa (treino)", "Sobrecarga na panturrilha (treino)"])
-	NewsManager.on_injury(world, p)
-	InboxManager.on_injury(world, p)
-
-
 ## Estilo em desenvolvimento: jovens crescem na direção dele (bias_for); a cada semana também há
 ## uma pequena chance de "reorientar" um ponto (mais no atributo do estilo novo, menos num do
 ## estilo atual), o que vale para qualquer idade. Quando o estilo vira o principal, avisa.

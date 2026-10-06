@@ -1,5 +1,5 @@
 {
-	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). gross: receita real da liga ÷ receita do modelo antigo (Economia 2026: a média de receita por clube bate com a realidade de 2024/25; o excedente vira custo operacional — staff, viagens, estrutura, bônus — e não infla salários nem verbas). opex: fração desse excedente que vira custo (padrão 0,85; no Brasil menos, porque os salários reais lá são bem mais altos que o modelo antigo pagava). rev: força comercial além da folha (multiplica as receitas; padrão 1). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE). barrage: repescagem entre divisões na liga de cima ({pos, vs, legs, desc}): o clube em pos enfrenta o vs da divisão de baixo (ou o vencedor dos playoffs de acesso dela); com ela, o up da divisão de baixo conta só as vagas diretas.",
+	"_doc": "Ligas nacionais. tier: 1 = primeira divisão. rr: turnos (2 = turno e returno). up/down: vagas de acesso/rebaixamento. level: força média dos titulares [mais fraco, mais forte]. rep: faixa de reputação usada para mapear clubes em nível. wage: escala salarial da liga (1 = referência). gross: receita real da liga ÷ receita do modelo antigo (Economia 2026: a média de receita por clube bate com a realidade de 2024/25; o excedente vira custo operacional — staff, viagens, estrutura, bônus — e não infla salários nem verbas). opex: fração desse excedente que vira custo (padrão 0,85; no Brasil menos, porque os salários reais lá são bem mais altos que o modelo antigo pagava). rev: força comercial além da folha (multiplica as receitas; padrão 1). att: cultura de público. ticket: ingresso médio. colors: [principal, destaque] da identidade visual da liga (selo, cabeçalhos e editor). Receitas (TV, patrocínio, premiação) são derivadas da folha típica da liga (rules.json → money). culture: cultura da liga pelas médias reais (goals = média de gols / 2,65, home = peso do mando, cards = cartões). format: formato real além dos pontos corridos (LeagueFormat): split (grupos depois da fase regular; o grupo de cima termina à frente; halve corta os pontos pela metade) ou playoff (os teams primeiros decidem o título em mata-mata ko, com legs jogos por fase; byes melhores entram na segunda fase). desc: regulamento mostrado no jogo. foreign_limit: regra de inscrição da liga ({max, scope}): estrangeiros permitidos entre os relacionados de cada jogo (scope \"non_eu\" conta só os de fora da UE/EEE; exempt [\"ACP\"]: o Acordo de Cotonou isenta África, Caribe e Pacífico, como na Espanha). barrage: repescagem entre divisões na liga de cima ({pos, vs, legs, desc}): o clube em pos enfrenta o vs da divisão de baixo (ou o vencedor dos playoffs de acesso dela); com ela, o up da divisão de baixo conta só as vagas diretas.",
 	"leagues": [
 		{
 			"id": "ENG1",
@@ -110,7 +110,8 @@
 			},
 			"foreign_limit": {
 				"max": 3,
-				"scope": "non_eu"
+				"scope": "non_eu",
+				"exempt": ["ACP"]
 			}
 		},
 		{
@@ -145,7 +146,8 @@
 			},
 			"foreign_limit": {
 				"max": 3,
-				"scope": "non_eu"
+				"scope": "non_eu",
+				"exempt": ["ACP"]
 			},
 			"format": {
 				"type": "promo",

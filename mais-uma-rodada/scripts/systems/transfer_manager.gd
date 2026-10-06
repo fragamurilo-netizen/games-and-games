@@ -82,6 +82,23 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 			v -= 0.15 # ninguém gosta de trocar pelo rival
 	if buyer.nation == p.nationality:
 		v += 0.05 # voltar para casa
+	else:
+		# Língua e compatriotas: quem chega num país da mesma língua, ou num elenco com gente do seu
+		# país, se adapta mais rápido e topa mais fácil.
+		var my_lang := String(DatabaseManager.nation(p.nationality).get("lang", ""))
+		if my_lang != "" and my_lang == String(DatabaseManager.nation(buyer.nation).get("lang", "")):
+			v += 0.06
+		elif p.age(world.year) >= 29:
+			v -= 0.04 # veterano estranha língua e país novos
+		var mates := 0
+		for q in world.squad(buyer):
+			if q.nationality == p.nationality:
+				mates += 1
+		if mates >= 2:
+			v += 0.04
+	if cur != null and buyer.nation != cur.nation:
+		# Liga em alta (coeficiente) atrai; trocar por uma liga bem mais fraca afasta.
+		v += clampf((LeagueReputation.coef(buyer.nation) - LeagueReputation.coef(cur.nation)) / 250.0, -0.12, 0.12)
 	if p.age(world.year) >= 31:
 		v += 0.1
 	# Minutos: teria espaço no novo time?
@@ -94,6 +111,7 @@ static func interest(world: GameWorld, p: Player, buyer: Club) -> float:
 		v += 0.15 # insatisfeito quer sair
 	v += HeartClubs.interest_delta(world, p, buyer)
 	v += CoachIdentity.interest_delta(world, p, buyer)
+	v += Relations.pull(world, p, buyer) # amigos, irmão, técnico favorito, ídolo; desafeto e inimigo afastam
 	return clampf(v, 0.05, 0.95)
 
 
@@ -162,6 +180,9 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	var rule := policy_block(world, user, p)
 	if rule != "":
 		return {"result": "rejected", "fee": 0, "msg": rule}
+	var permit := TransferRules.permit_block(world, p, user)
+	if permit != "":
+		return {"result": "rejected", "fee": 0, "msg": permit}
 	if not world.transfer_window_open():
 		return {"result": "rejected", "fee": 0, "msg": "A janela de transferências está fechada."}
 	if p.loan.size() > 0:
@@ -717,6 +738,7 @@ static func complete_transfer(world: GameWorld, p: Player, buyer: Club, fee: int
 	world.transfer_log.append(t)
 	ClubRecords.on_transfer(world, t)
 	CoachIdentity.on_transfer(world, p, buyer, seller, fee)
+	Relations.on_transfer(world, p, seller, buyer)
 	FootballMemory.on_transfer(world, t)
 	world.stat_add("transfers")
 	world.stat_add("transfer_fees", fee)
@@ -787,6 +809,9 @@ static func user_sign_free(world: GameWorld, p: Player, wage: int, years: int, d
 	var rule := policy_block(world, user, p)
 	if rule != "":
 		return {"ok": false, "msg": rule}
+	var permit := TransferRules.permit_block(world, p, user)
+	if permit != "":
+		return {"ok": false, "msg": permit}
 	if TransferRules.minor_blocked(world, p, user):
 		return {"ok": false, "msg": "Menor de 18 não pode se mudar de país (regra da FIFA)."}
 	if user.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
@@ -980,6 +1005,7 @@ static func _build_index(world: GameWorld) -> Dictionary:
 	var nat := {}
 	var young := {}
 	var abroad := {} # nacionalidade → jogadores dela em clubes de outro país (a repatriação)
+	var avail := {} # país do clube → família → quem os empresários oferecem (livre, listado, insatisfeito, fim de contrato)
 	for p: Player in world.players.values():
 		if p.retiring or not p.loan.is_empty():
 			continue
@@ -995,6 +1021,13 @@ static func _build_index(world: GameWorld) -> Dictionary:
 				arr.append([])
 			nat[n] = arr
 		nat[n][f].append(p)
+		if p.club_id < 0 or p.transfer_listed or p.morale < 35.0 or p.contract_years_left(world.year) <= 0:
+			if not avail.has(n):
+				var arr3: Array = []
+				for _k in FAMILIES:
+					arr3.append([])
+				avail[n] = arr3
+			avail[n][f].append(p)
 		if p.club_id >= 0 and n != p.nationality:
 			if not abroad.has(p.nationality):
 				var arr2: Array = []
@@ -1007,7 +1040,7 @@ static func _build_index(world: GameWorld) -> Dictionary:
 			if not young.has(n):
 				young[n] = []
 			young[n].append(p)
-	return {"band": band, "nat": nat, "young": young, "abroad": abroad}
+	return {"band": band, "nat": nat, "young": young, "abroad": abroad, "avail": avail}
 
 
 ## Família de cada posição (índice em FAMILIES), na ordem de Pos: GK, RB, CB, LB, DM, CM, AM, RM,

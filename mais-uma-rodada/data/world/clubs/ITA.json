@@ -135,10 +135,7 @@
 				"stars": 3,
 				"border": "thin"
 			},
-			"rivals": [
-				"ITA_TGR",
-				"ITA_MNZ"
-			]
+			"rivals": ["ITA_TGR", "ITA_MNZ", "ITA_FIR"]
 		},
 		{
 			"key": "ITA_BER",
@@ -172,7 +169,7 @@
 				"text2": "BERGAMO",
 				"tc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["ITA_RGR"]
 		},
 		{
 			"key": "ITA_RGR",
@@ -200,9 +197,7 @@
 				"sc": "#F0BC42",
 				"border": "gold"
 			},
-			"rivals": [
-				"ITA_RBC"
-			]
+			"rivals": ["ITA_RBC", "ITA_NAP", "ITA_BER"]
 		},
 		{
 			"key": "ITA_RBC",
@@ -262,7 +257,7 @@
 				"sc": "#E30613",
 				"border": "thick"
 			},
-			"rivals": []
+			"rivals": ["ITA_TBN", "ITA_BGN"]
 		},
 		{
 			"key": "ITA_BGN",
@@ -294,7 +289,7 @@
 				"c3": "#A21C26",
 				"border": "thin"
 			},
-			"rivals": []
+			"rivals": ["ITA_FIR"]
 		},
 		{
 			"key": "ITA_COM",

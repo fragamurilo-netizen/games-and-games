@@ -591,7 +591,7 @@ func _origin_card(w: GameWorld, p: Player) -> Control:
 	var card := UIKit.card("Card", UITokens.S2)
 	card.add_child(UIKit.section("Origem e seleção"))
 	card.add_child(UIKit.label(p.full_name(),"H3",true))
-	card.add_child(UIKit.label("%s · %d kg · %s" % [Fmt.height(p.height),p.weight,["Destro","Canhoto","Ambidestro"][p.foot]],"",true))
+	card.add_child(UIKit.label("%s · %s · %s" % [Fmt.height(p.height), BodyGrowth.weight_text(p, world().year), ["Destro","Canhoto","Ambidestro"][p.foot]],"",true))
 	var heart := HeartClubs.known_text(w,p)
 	if heart != "": card.add_child(UIKit.label(heart,"Small",true))
 	card.add_child(UIKit.label("Nascimento", "Small"))
@@ -690,7 +690,7 @@ func _career(w: GameWorld, p: Player) -> Control:
 			var wh := AwardManager.award_where(w, a)
 			var where := "" if wh == "" else " · " + wh
 			var big := AwardManager.award_weight(String(a["k"])) >= 5
-			af.add_child(UIKit.pill("%s %d%s" % [AwardManager.award_name(String(a["k"])), int(a["y"]), where], UIColors.ACCENT if big else UIColors.BLUE, 16))
+			af.add_child(UIKit.pill("%s %d%s" % [AwardManager.award_name(String(a["k"]), String(a.get("l", ""))), int(a["y"]), where], UIColors.ACCENT if big else UIColors.BLUE, 16))
 		card.add_child(af)
 	if not p.trophies.is_empty():
 		card.add_child(UIKit.section("Títulos"))

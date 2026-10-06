@@ -15,7 +15,6 @@ extends RefCounted
 ## - último fim de semana da janela: correria, ágio de pânico e vendedores mais duros.
 
 const CFG_PATH := "res://data/gameplay/market.json"
-const CANDIDATES := 40
 const STATUS_ASK: Array[float] = [1.6, 1.25, 1.0, 0.85, 1.3] # estrela, titular, rotação, reserva, promessa
 const OFFSEASON_ROUNDS := 2 # rodadas de mercado nas férias (antes do primeiro jogo)
 const MAX_RUMORS_PER_TURN := 1
@@ -24,7 +23,6 @@ const MAX_PUSH := 2 # quantas vezes o comprador volta à mesa depois da primeira
 const SOUTH_AMERICA := ["BRA", "ARG", "URU", "COL", "CHI", "ECU", "PER", "PAR", "BOL", "VEN"]
 const JEWEL_POT := 74.0 # potencial que faz um garoto de 16-17 anos ser vendido antes dos 18
 const JEWEL_PRESELL := 0.35 # chance por janela de uma dessas joias ser vendida (sobe com o potencial)
-const JEWEL_HUNT := 0.12 # chance de uma busca de clube europeu de porte ser por joia sul-americana
 
 static var _cfg: Dictionary = {}
 
@@ -161,16 +159,18 @@ static func matchday(world: GameWorld) -> Array:
 		var left := int(st["left"].get(key, 0))
 		var urgent := _has_urgent_need(world, c)
 		var summer := window and is_main_window(world, c, wi)
-		var act := 0.0
-		if not window:
-			act = 0.1 if urgent else 0.0
-		elif left > 0 or urgent:
-			act = (0.5 if summer else 0.3) + minf(0.25, power(c) * 0.1)
-			if deadline:
-				act = minf(0.95, act + 0.3)
-		if act <= 0.0 or world.rng.randf() >= act:
+		# O clube trabalha enquanto tem prioridade aberta no plano; fora da janela, só livres para
+		# tapar carência. Clube grande tem mais gente no departamento e resolve mais coisas por semana.
+		if window:
+			if TransferBrain.next_need(st, c).is_empty():
+				continue
+		elif not urgent:
 			continue
-		var tries := 2 if summer and left >= 2 else 1
+		var tries := 1
+		if summer and left >= 2:
+			tries = 2 + (1 if power(c) >= 1.0 else 0)
+		if deadline:
+			tries += 1
 		for _k in tries:
 			var t := _try_signing(world, c, index, st, deadline, not window)
 			if t == null:
@@ -259,19 +259,8 @@ static func _plan_window(world: GameWorld, st: Dictionary, wi: int) -> void:
 		if world.is_user_club(c.id):
 			continue
 		var summer := is_main_window(world, c, wi)
-		var needs := TransferManager.squad_needs(world, c)
-		var pw := power(c)
-		var n := 0
-		if summer:
-			# Grandes e ricos trazem 3 a 6 reforços; pequenos, 1 a 3. Carências somam.
-			n = 1 + int(round(minf(3.0, pw * 1.6))) + mini(2, needs.size())
-			if c.transfer_budget <= 0 and needs.is_empty():
-				n = 1
-			n += world.rng.randi_range(-1, 1) + ClubDNA.window_delta(c)
-		else:
-			# Janela de inverno é de remendos: só quem tem carência ou dinheiro sobrando.
-			n = mini(2, needs.size()) if not needs.is_empty() else (1 if world.rng.randf() < 0.3 else 0)
-		st["left"][str(c.id)] = clampi(n, 0, 7)
+		# Diagnóstico do elenco, pressão e perfil viram a lista de prioridades da janela.
+		TransferBrain.plan_window(world, st, c, summer)
 		_plan_sales(world, c, summer)
 		if summer or world.rng.randf() < 0.35:
 			_plan_loans(world, c)
@@ -371,152 +360,37 @@ static func _has_urgent_need(world: GameWorld, c: Club) -> bool:
 	return not needs.is_empty() and int(needs[0]["count"]) < int(TransferManager.FAMILIES[int(needs[0]["fam"])][1])
 
 
-## O que o clube vai buscar: {fam, pos, min_rating, urgency}.
-static func _pick_need(world: GameWorld, c: Club, free_only: bool) -> Dictionary:
-	var level := PlayerGenerator.club_level(c)
-	var needs := TransferManager.squad_needs(world, c)
-	if not needs.is_empty() and int(needs[0]["count"]) < int(TransferManager.FAMILIES[int(needs[0]["fam"])][1]):
-		return {"fam": int(needs[0]["fam"]), "pos": -1, "min_rating": level - 8.0, "urgency": float(needs[0]["urgency"])}
-	if free_only:
-		return {}
-	var rules := DatabaseManager.squad_rules()
-	if c.player_ids.size() >= int(rules["max_players"]) - 2:
-		return {}
-	var arch := c.arch()
-	# DNA: clubes de formação (e os que usam muito a base) apostam em promessas; os de estrelas
-	# miram alto; os outros reforçam o titular mais fraco.
-	var rec := ClubDNA.rec(c)
-	var young_p := 0.4 if float(arch.get("potential_weight", 0.4)) >= 0.6 else 0.0
-	if rec == "formacao":
-		young_p = maxf(young_p, 0.5)
-	elif rec == "estrelas" or rec == "veteranos":
-		young_p *= 0.3
-	# Garimpo: clube europeu de porte vai atrás de joia sul-americana (fecha cedo, antes da
-	# concorrência, mesmo que o garoto só possa se mudar aos 18).
-	if hunts_jewels(c) and world.rng.randf() < JEWEL_HUNT:
-		var jf := world.rng.randi_range(1, TransferManager.FAMILIES.size() - 1)
-		return {"fam": jf, "pos": -1, "min_rating": level - 12.0, "urgency": 0.4, "young": true, "jewel": true}
-	if young_p > 0.0 and world.rng.randf() < young_p:
-		var fam := world.rng.randi_range(0, TransferManager.FAMILIES.size() - 1)
-		return {"fam": fam, "pos": -1, "min_rating": level - 4.0, "urgency": 0.5, "young": true}
-	var weak := TransferManager._weakest_starter(world, c)
-	if not weak.is_empty() and float(weak["rating"]) < level + 5.0 and world.rng.randf() < 0.75:
-		var wfam := TransferManager._family_of(int(weak["pos"]))
-		# Garoto da base pronto para a vaga: o clube que usa a base não compra por cima dele.
-		if ClubDNA.kid_blocks(world, c, wfam, level):
-			return {}
-		var bar := float(weak["rating"]) + (4.0 if rec == "estrelas" else 2.0)
-		return {"fam": wfam, "pos": int(weak["pos"]), "min_rating": bar, "urgency": 1.0}
-	if not needs.is_empty():
-		return {"fam": int(needs[0]["fam"]), "pos": -1, "min_rating": float(needs[0]["best"]) + 1.0, "urgency": float(needs[0]["urgency"])}
-	return {}
-
-
 static func _try_signing(world: GameWorld, c: Club, index: Dictionary, st: Dictionary, deadline: bool, free_only: bool) -> Transfer:
 	if ClubEvents.banned(world, c):
 		return null # transfer ban: não pode inscrever reforços
-	var need := _pick_need(world, c, free_only)
-	var mismanaged := world.rng.randf() < float(c.arch().get("mismanagement", 0.0)) * 0.2
+	var need := TransferBrain.next_need(st, c)
+	if need.is_empty() and free_only:
+		# Fora da janela: só sem clube, e só para tapar uma carência de verdade.
+		for n: Dictionary in TransferBrain.diagnose(world, c, false):
+			if String(n["why"]) == "carencia":
+				need = n
+				break
 	if need.is_empty():
 		return null
-	var fam: int = need["fam"]
-	var min_rating: float = need["min_rating"]
-	var target_pos: int = need["pos"]
-	var urgency: float = need["urgency"]
-	var budget := c.transfer_budget
-	var wage_room := c.wage_budget - FinanceManager.wage_bill(world, c)
-	if wage_room <= 0 and urgency < 3.0 and not mismanaged:
+	var mismanaged := float(c.arch().get("mismanagement", 0.0)) >= 0.5
+	var urgency := clampf(float(need.get("prio", 1.0)), 0.5, 4.0)
+	var cands := TransferBrain.targets(world, c, need, index, free_only, st)
+	if cands.is_empty():
+		need["fails"] = int(need.get("fails", 0)) + 1
 		return null
+	var best: Player = cands[0]
 	var prof := profile(c.nation)
-	var arch := c.arch()
-	var ages: Array = arch.get("target_age", [20, 30])
-	var pages: Variant = prof.get("age")
-	var ra := world.rng.randf()
-	if ra < 0.6:
-		ages = ClubDNA.ages(c) # a filosofia de elenco manda
-	elif pages is Array and ra < 0.85:
-		ages = pages
-	if need.get("young", false):
-		ages = [17, 22]
-	if need.get("jewel", false):
-		ages = [16, 20]
-	var pot_w := float(arch.get("potential_weight", 0.4))
-	if ClubDNA.rec(c) == "formacao":
-		pot_w = maxf(pot_w, 0.75)
-	if need.get("jewel", false):
-		pot_w = maxf(pot_w, 0.9)
-	var sources: Array = prof.get("sources", [])
-	var my_power := power(c)
-	var level := PlayerGenerator.club_level(c)
-	var fam_surplus := TransferManager._family_count(world, c, int(TransferManager.FAMILIES[fam][0][0])) - int(TransferManager.FAMILIES[fam][1]) - 1
-	var best: Player = null
-	var best_score := -1e9
-	for _k in CANDIDATES:
-		var p := _draw_jewel(world, index, prof) if need.get("jewel", false) else _draw(world, index, c, fam, min_rating, prof)
-		if p == null or p.club_id == c.id or p.retiring or p.injury_weeks > 4 or not p.loan.is_empty():
-			continue
-		if not ClubPolicy.ai_wants(world, c, p):
-			continue # filosofia do clube (Athletic só bascos, Red Bull só jovens...)
-		var ow := origin_weight(c, p)
-		if ow < 1.0 and world.rng.randf() >= ow:
-			continue # sul-americano raramente traz europeu (nem africano, nem asiático)
-		if p.club_id >= 0:
-			if free_only or world.is_user_club(p.club_id) or p.joined_year == world.year:
-				continue # recém-contratado não é revendido na mesma temporada
-		# Menor de 18 de outro país: só quem está garimpando joias fecha agora para levar depois.
-		if TransferRules.minor_blocked(world, p, c) and (p.club_id < 0 or not need.get("young", false)):
-			continue
-		var age := p.age(world.year)
-		var rating := p.rating_at(target_pos) if target_pos >= 0 else p.ovr_f
-		var eff := rating + (float(p.potential) - rating) * pot_w * (0.6 if age <= 23 else 0.0)
-		eff += ClubPolicy.preference_bonus(world, c, p)
-		# Diretoria bagunçada erra a mão, mas não a ponto de buscar quem nem serviria para o elenco.
-		if eff < min_rating - (6.0 if mismanaged else 0.0):
-			continue
-		var price := 0.0
-		var seller: Club = null
-		if p.club_id >= 0:
-			seller = world.club(p.club_id)
-			price = float(p.value) * _seller_mult(world, seller, p, c, false, index["memo"])
-			if price > budget * (1.3 if mismanaged else 1.0) and not _loanable(world, p, c):
-				continue
-			# Titular de clube muito mais rico não sai para um clube pequeno.
-			if power(seller) > my_power * 1.5 and p.squad_status <= Player.STATUS_STARTER and age < 30:
-				continue
-		var wage := float(Valuation.wage_demand(p, c, world.year)) * float(prof.get("wage_boost", 1.0))
-		if wage > maxf(float(wage_room), 0.0) * (1.5 if mismanaged else 1.1) and not (urgency >= 3.0 and wage <= c.wage_budget * 0.08):
-			continue
-		var score := eff - min_rating
-		if age < int(ages[0]) - 1 or age > int(ages[1]) + 1:
-			score -= 3.0 + absf(age - clampi(age, int(ages[0]), int(ages[1]))) * 1.5
-		score -= price / maxf(50000.0, float(budget) + 1.0) * 2.5
-		if p.transfer_listed:
-			score += 1.5
-		if p.club_id < 0:
-			score += 1.0 # de graça
-		elif p.contract_years_left(world.year) <= 1:
-			score += 1.0 # fim de contrato: sai barato
-		if seller != null and sources.has(seller.nation):
-			score += 1.5 # rota conhecida de garimpo
-		if p.nationality == c.nation and age >= 29:
-			score += 1.5 # repatriação
-		if seller != null and (seller.is_rival(c.id) or c.is_rival(seller.id)):
-			score -= 4.0
-		score += ClubDNA.candidate_bonus(world, c, p, rating, level, price, float(budget), maxi(0, fam_surplus))
-		if mismanaged:
-			score = world.rng.randf_range(-5.0, 5.0) + (rating - min_rating) * 0.3
-		if score > best_score:
-			best_score = score
-			best = p
-	if best == null:
-		return null
-	var wage2 := Valuation.round_wage(TransferManager.wage_ask(world, best, c) * float(prof.get("wage_boost", 1.0)))
-	var years := TransferManager.preferred_years(world, best)
 	if best.club_id < 0:
-		if world.rng.randf() > player_interest(world, best, c):
+		if player_interest(world, best, c) < decision_bar(best):
+			TransferBrain.record(st, c, need, best, false)
 			return null
-		return TransferManager.complete_transfer(world, best, c, 0, wage2, years)
-	return _close_deal(world, st, c, best, urgency, deadline, mismanaged, 0)
+		var wage2 := Valuation.round_wage(TransferManager.wage_ask(world, best, c) * float(prof.get("wage_boost", 1.0)))
+		var tf := TransferManager.complete_transfer(world, best, c, 0, wage2, TransferManager.preferred_years(world, best))
+		TransferBrain.record(st, c, need, best, true)
+		return tf
+	var t := _close_deal(world, st, c, best, urgency, deadline, mismanaged, 0)
+	TransferBrain.record(st, c, need, best, best.club_id == c.id)
+	return t
 
 
 ## Fecha (ou não) a contratação: disputa com outros interessados, negociação, troca, % de revenda,
@@ -542,8 +416,8 @@ static func _close_deal(world: GameWorld, st: Dictionary, c: Club, p: Player, ur
 			deal["fee"] = auc["fee"]
 			if buyer != c:
 				_news_hijack(world, buyer, c, p, int(deal["fee"]))
-	if world.rng.randf() > player_interest(world, p, buyer):
-		return null # clubes se acertaram, mas o jogador não quis
+	if player_interest(world, p, buyer) < decision_bar(p):
+		return null # clubes se acertaram, mas o jogador não quis (exigência dele, não sorteio)
 	var was_key := p.squad_status <= Player.STATUS_STARTER
 	var fee: int = deal["fee"]
 	var years := TransferManager.preferred_years(world, p)
@@ -570,10 +444,9 @@ static func _close_deal(world: GameWorld, st: Dictionary, c: Club, p: Player, ur
 	if buyer != c:
 		var bk := str(buyer.id)
 		st["left"][bk] = int(st["left"].get(bk, 0)) - 1
-	# Efeito dominó: quem perdeu um titular vai atrás de reposição.
+	# Efeito dominó: quem perdeu um titular põe a reposição no topo da lista.
 	if was_key and not minor and not world.is_user_club(seller.id):
-		var k := str(seller.id)
-		st["left"][k] = int(st["left"].get(k, 0)) + 1
+		TransferBrain.on_sold(world, seller, p)
 	_news_record(world, t)
 	return t
 
@@ -738,20 +611,6 @@ static func exercise_loan_options(world: GameWorld) -> void:
 		world.stat_add("options_exercised")
 
 
-## Joia de um dos países de garimpo sul-americanos do clube.
-static func _draw_jewel(world: GameWorld, index: Dictionary, prof: Dictionary) -> Player:
-	var src: Array = []
-	for n in prof.get("sources", []):
-		if SOUTH_AMERICA.has(n):
-			src.append(n)
-	if src.is_empty():
-		return null
-	var arr: Array = index.get("young", {}).get(src[world.rng.randi_range(0, src.size() - 1)], [])
-	return null if arr.is_empty() else arr[world.rng.randi_range(0, arr.size() - 1)]
-
-
-## Uma vez por janela: as maiores promessas sul-americanas de 16 e 17 anos atraem clubes europeus,
-## que fecham já e levam o garoto quando ele fizer 18 (TransferRules.hold_until_18).
 static func _presell_jewels(world: GameWorld) -> void:
 	var hunters: Array = []
 	for c: Club in world.clubs:
@@ -804,37 +663,8 @@ static func hunts_jewels(c: Club) -> bool:
 	return false
 
 
-## Sorteia um candidato: próprio país, rotas de garimpo do país ou o mercado mundial por nível.
-static func _draw(world: GameWorld, index: Dictionary, c: Club, fam: int, min_rating: float, prof: Dictionary) -> Player:
-	var r := world.rng.randf()
-	var dom := ClubDNA.home_share(c, float(prof.get("domestic", 0.6))) # alcance do mercado (DNA)
-	var nat := ""
-	var only := String(ClubPolicy.of(c).get("only", ""))
-	if only != "":
-		nat = ClubPolicy.rule_nation(only) # só procura onde a regra deixa
-	elif r < dom:
-		nat = c.nation
-	else:
-		# A volta para casa: na América do Sul boa parte dos reforços "de fora" é do próprio país,
-		# jogando no exterior (veteranos e quem não se firmou na Europa, na Ásia ou nos EUA).
-		var repat := float(prof.get("repat", 0.0))
-		if repat > 0.0 and world.rng.randf() < repat:
-			var ab: Array = index.get("abroad", {}).get(c.nation, [])
-			if not ab.is_empty() and not ab[fam].is_empty():
-				return ab[fam][world.rng.randi_range(0, ab[fam].size() - 1)]
-		nat = ClubDNA.away_nation(world.rng, c, prof.get("sources", []))
-	if nat != "":
-		var arr: Array = index["nat"].get(nat, [])
-		if not arr.is_empty() and not arr[fam].is_empty():
-			return arr[fam][world.rng.randi_range(0, arr[fam].size() - 1)]
-	var bands: Dictionary = index["band"][fam]
-	var b0 := int(min_rating / TransferManager.BAND)
-	for _t in 3:
-		var b := b0 + world.rng.randi_range(0, 2)
-		if bands.has(b) and not bands[b].is_empty():
-			var arr2: Array = bands[b]
-			return arr2[world.rng.randi_range(0, arr2.size() - 1)]
-	return null
+static func decision_bar(p: Player) -> float:
+	return 0.32 + float(hash([p.id, p.face_seed, "exige"]) % 100) / 100.0 * 0.3
 
 
 ## Vontade do jogador de ir (0..1): a base do jogo + dinheiro do Golfo/EUA para veteranos + voltar para casa.

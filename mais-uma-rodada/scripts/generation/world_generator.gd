@@ -43,6 +43,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	w.stats["kits_real"] = 1 # uniformes reais já vêm dos dados (ClubGenerator.upgrade_kits)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
+	Relations.generate(w) # amizades, rixas, irmãos, mentores e ídolos de um mundo que já existia
 	if not SquadStory.keep:
 		SquadStory.roles.clear()
 	HeartClubs.ensure_all(w)

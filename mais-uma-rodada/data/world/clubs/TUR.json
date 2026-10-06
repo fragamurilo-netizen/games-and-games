@@ -62,10 +62,7 @@
 				"stars": 5,
 				"c3": "#FFED00"
 			},
-			"rivals": [
-				"TUR_IAS",
-				"TUR_IKR"
-			]
+			"rivals": ["TUR_IAS", "TUR_IKR", "TUR_FIR"]
 		},
 		{
 			"key": "TUR_IKR",
@@ -128,7 +125,7 @@
 				"year": "1967",
 				"tc": "#6E1F37"
 			},
-			"rivals": []
+			"rivals": ["TUR_IKN"]
 		},
 		{
 			"key": "TUR_BSK",

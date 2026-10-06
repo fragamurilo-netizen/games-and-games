@@ -27,9 +27,7 @@
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
-			"rivals": [
-				"KSA_ALM"
-			]
+			"rivals": ["KSA_ALM", "KSA_SHB"]
 		},
 		{
 			"key": "KSA_ALM",

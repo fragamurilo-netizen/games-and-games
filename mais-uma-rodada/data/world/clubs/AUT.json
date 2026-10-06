@@ -29,7 +29,7 @@
 				"c2": "#E30613",
 				"sc": "#E30613"
 			},
-			"rivals": []
+			"rivals": ["AUT_HUT"]
 		},
 		{
 			"key": "AUT_HUT",
@@ -58,9 +58,7 @@
 				"year": "1899",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"AUT_VEI"
-			]
+			"rivals": ["AUT_VEI", "AUT_MOZ", "AUT_GRZ"]
 		},
 		{
 			"key": "AUT_VEI",
@@ -114,7 +112,7 @@
 				"field": "halves",
 				"symbol": "cat"
 			},
-			"rivals": []
+			"rivals": ["AUT_GAK", "AUT_HUT"]
 		},
 		{
 			"key": "AUT_LAS",
@@ -292,7 +290,7 @@
 			"capacity": 16000,
 			"kit": "plain",
 			"crest": {},
-			"rivals": []
+			"rivals": ["AUT_GRZ"]
 		}
 	]
 }

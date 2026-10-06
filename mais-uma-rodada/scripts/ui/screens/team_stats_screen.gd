@@ -386,7 +386,7 @@ static func _ranks_card(w: GameWorld, club: Club, league: League) -> Control:
 		["Defesa", func(c: Club) -> float: return float(league.row(c.id).get("ga", 0)), false, func(v: float) -> String: return "%d sofridos" % int(v)],
 		["Valor do elenco", func(c: Club) -> float: return _squad_value(w, c), true, func(v: float) -> String: return Fmt.money(v)],
 		["Folha salarial", func(c: Club) -> float: return float(FinanceManager.wage_bill(w, c)), true, func(v: float) -> String: return Fmt.money(v) + "/mês"],
-		["Reputação", func(c: Club) -> float: return c.reputation, true, func(v: float) -> String: return "%d" % int(round(v))],
+		["Reputação", func(c: Club) -> float: return c.reputation, true, func(v: float) -> String: return Reputation.label(v)],
 	]
 	var started := int(league.row(club.id).get("pl", 0)) > 0
 	for m: Array in metrics:

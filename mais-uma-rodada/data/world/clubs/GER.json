@@ -29,10 +29,7 @@
 				"c2": "#DC052D",
 				"fc": "#0066B2"
 			},
-			"rivals": [
-				"GER_DOR",
-				"GER_SEC"
-			]
+			"rivals": ["GER_DOR"]
 		},
 		{
 			"key": "GER_DOR",
@@ -155,7 +152,7 @@
 				"sc": "#111111",
 				"border": "thick"
 			},
-			"rivals": []
+			"rivals": ["GER_MAI", "GER_DAR"]
 		},
 		{
 			"key": "GER_STU",
@@ -187,9 +184,7 @@
 				"border": "thick",
 				"stars": 0
 			},
-			"rivals": [
-				"GER_KAR"
-			]
+			"rivals": ["GER_KAR", "GER_FRB"]
 		},
 		{
 			"key": "GER_MGL",
@@ -249,7 +244,7 @@
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
-			"rivals": []
+			"rivals": ["GER_HAN", "GER_BSW"]
 		},
 		{
 			"key": "GER_FRB",
@@ -276,7 +271,7 @@
 				"initials": "SCF",
 				"sc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["GER_STU"]
 		},
 		{
 			"key": "GER_HOF",
@@ -331,7 +326,7 @@
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
-			"rivals": []
+			"rivals": ["GER_FFM"]
 		},
 		{
 			"key": "GER_BRE",
@@ -688,7 +683,7 @@
 				"symbol": "fleur",
 				"sc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["GER_FFM"]
 		},
 		{
 			"key": "GER_LAU",
@@ -748,9 +743,7 @@
 				"initials": "96",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"GER_BSW"
-			]
+			"rivals": ["GER_BSW", "GER_WOB"]
 		},
 		{
 			"key": "GER_NUR",
@@ -948,9 +941,7 @@
 				"symbol": "lion",
 				"sc": "#1D5AA8"
 			},
-			"rivals": [
-				"GER_HAN"
-			]
+			"rivals": ["GER_HAN", "GER_WOB"]
 		},
 		{
 			"key": "GER_FUE",

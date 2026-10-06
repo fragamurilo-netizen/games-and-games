@@ -203,6 +203,7 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.height = int(round(RngUtil.gauss(rng, HEIGHT_MEAN[pos] + _height_shift(p.eth) + (float(sig[3]) if not sig.is_empty() else 0.0), 5.0, 163.0, 205.0)))
 	p.weight = Physique.weight_for(rng, p.height, pos, age)
 	_pick_traits(rng, p)
+	BodyGrowth.setup_young(p, world.year) # garoto ainda cresce e ganha massa
 	_generate_attributes(rng, p, target, age, sig[2] if not sig.is_empty() else {})
 	p.signature = String(sig[0]) if not sig.is_empty() else ""
 	p.secondary = _pick_secondary(rng, pos)

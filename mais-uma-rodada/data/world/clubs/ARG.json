@@ -239,7 +239,7 @@
 				"field": "vee",
 				"symbol": "none"
 			},
-			"rivals": []
+			"rivals": ["ARG_VER"]
 		},
 		{
 			"key": "ARG_RCA",
@@ -703,7 +703,7 @@
 				"symbol": "letter",
 				"initials": "FCO"
 			},
-			"rivals": []
+			"rivals": ["ARG_FOR"]
 		},
 		{
 			"key": "ARG_BOH",
@@ -1045,9 +1045,7 @@
 				"initials": "IACC",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"ARG_BEL"
-			]
+			"rivals": ["ARG_PTA"]
 		},
 		{
 			"key": "ARG_PLA",

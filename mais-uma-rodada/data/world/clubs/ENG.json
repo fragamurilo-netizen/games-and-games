@@ -270,9 +270,7 @@
 				"c3": "#0070C0",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"ENG_WEA"
-			]
+			"rivals": ["ENG_WEA", "ENG_TEE"]
 		},
 		{
 			"key": "ENG_AST",

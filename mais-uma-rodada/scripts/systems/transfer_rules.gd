@@ -23,6 +23,47 @@ const EU := ["ESP", "GER", "ITA", "FRA", "POR", "NED", "BEL", "AUT", "SUI", "CRO
 # ---------------------------------------------------------------------------
 
 ## A ida para `buyer` agora esbarra na regra dos menores?
+## Permissão de trabalho no Reino Unido (pós-Brexit, sistema de pontos GBE): quem não tem passaporte
+## britânico ou irlandês precisa somar pontos — seleção forte com jogos, liga e minutos do clube atual,
+## nível, e a exceção para promessas sub-21. Vale para europeus também. "" = pode jogar lá.
+const UK_CLUBS := ["ENG", "SCO"]
+const UK_FREE := ["ENG", "SCO", "WAL", "NIR", "IRL"]
+const GBE_PASS := 15
+
+
+static func permit_block(world: GameWorld, p: Player, buyer: Club) -> String:
+	if not UK_CLUBS.has(buyer.nation):
+		return ""
+	for n in NationalityManager.passports(p):
+		if UK_FREE.has(n):
+			return ""
+	if gbe_points(world, p) >= GBE_PASS:
+		return ""
+	return "Sem permissão de trabalho no Reino Unido: faltam pontos (seleção, nível da liga e minutos)."
+
+
+static func gbe_points(world: GameWorld, p: Player) -> int:
+	var pts := 0
+	var team := NationalityManager.team(p)
+	var rec: Dictionary = p.origin.get("records", {}).get(team, {})
+	var apps := int(rec.get("apps", 0))
+	var tc := LeagueReputation.coef(team)
+	if apps >= 10:
+		pts += 15 if tc >= 70.0 else (10 if tc >= 50.0 else 5)
+	elif apps >= 3:
+		pts += 6 if tc >= 60.0 else 3
+	var cur := world.club(p.club_id)
+	if cur != null:
+		var lc := LeagueReputation.coef(cur.nation) * (1.0 if cur.tier == 1 else 0.5)
+		pts += 8 if lc >= 85.0 else (6 if lc >= 70.0 else (4 if lc >= 55.0 else (2 if lc >= 40.0 else 0)))
+		pts += 6 if p.squad_status <= Player.STATUS_STARTER else (3 if p.squad_status == Player.STATUS_ROTATION else 0)
+	if p.overall >= 76:
+		pts += 6
+	if p.age(world.year) <= 21 and p.potential >= 80:
+		pts += 6 # exceção para promessas de elite
+	return pts
+
+
 static func minor_blocked(world: GameWorld, p: Player, buyer: Club) -> bool:
 	if p == null or buyer == null:
 		return false

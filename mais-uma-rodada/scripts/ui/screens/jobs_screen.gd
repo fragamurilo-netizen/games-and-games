@@ -38,7 +38,7 @@ func _status(w: GameWorld, out: bool) -> Control:
 	var v := UIKit.vbox(UITokens.S2)
 	var rep := People.manager_rep(w)
 	var apps: Dictionary = JobMarket.data(w)["apps"]
-	var items: Array = [["Reputação", str(int(round(rep))), Fmt.rating_color(int(rep))]]
+	var items: Array = [["Reputação", Reputation.label(rep), Reputation.color(rep)]]
 	if out:
 		items.append(["Situação", "Sem clube", UIColors.ORANGE])
 	else:
