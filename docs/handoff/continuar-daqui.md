@@ -4,7 +4,7 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
-- **Ramo mais novo (06/10, noite): `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
+- **Ramo mais novo (06/10, noite): `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
 
 ### Mundo vivo, carreira de técnico e base profunda (06/10, ramo `claude/hopeful-newton-8avbo4`)
 
