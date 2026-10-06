@@ -25,7 +25,7 @@ func _ready() -> void:
 	bell_btn.icon = UIKit.icon("bell")
 	bell_btn.draw.connect(_draw_badge)
 	back_btn.pressed.connect(func():
-		Sfx.click()
+		Sfx.play("back", -6.0)
 		back_pressed.emit())
 	bell_btn.pressed.connect(func():
 		Sfx.click()

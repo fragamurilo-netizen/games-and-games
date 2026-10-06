@@ -36,7 +36,7 @@ func _ready() -> void:
 		UIKit.press_fx(b, null, 0.92)
 		var tab: String = t[0]
 		b.pressed.connect(func():
-			Sfx.click()
+			Sfx.play("tab", -6.0)
 			tab_selected.emit(tab))
 		row.add_child(b)
 		_buttons[tab] = b

@@ -89,3 +89,15 @@ static func crowd_event(kind: String, side: int) -> void:
 static func crowd_clip(side: int, kind: String) -> bool:
 	var a := _a()
 	return a != null and bool(a.crowd_clip(side, kind))
+
+
+static func stop_all() -> void:
+	var a := _a()
+	if a != null:
+		a.stop_all()
+
+
+static func crowd_resume() -> void:
+	var a := _a()
+	if a != null:
+		a.crowd_resume()

@@ -126,6 +126,8 @@ func _init() -> void:
 func on_show() -> void:
 	if not _built:
 		_build()
+	elif not _done:
+		Sfx.crowd_resume() # voltou de um perfil aberto no meio do jogo
 	set_process(true)
 	_set_live(true)
 
@@ -137,6 +139,8 @@ func on_hide() -> void:
 
 
 func _exit_tree() -> void:
+	# "Continuar" troca a tela sem on_hide: sem isto a torcida seguia tocando nos resultados.
+	Sfx.crowd_stop()
 	_set_live(false)
 
 
@@ -998,6 +1002,8 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 			Sfx.crowd_event("danger", int(ev["s"]))
 			if t == MatchSimulation.EV_SAVE and int(ev["s"]) == 1:
 				Sfx.crowd_event("save", 0) # defesa do goleiro da casa: aplausos
+			if t == MatchSimulation.EV_POST:
+				Sfx.play("post", -6.0)
 			if t == MatchSimulation.EV_POST or (ev.has("x") and float(ev["x"].get("xg", 0.0)) >= 0.3):
 				Sfx.play("chance", -8.0)
 		"var":
@@ -1008,7 +1014,7 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 	if t == MatchSimulation.EV_FOUL:
 		Sfx.crowd_event("foul", int(ev["s"]))
 	if t == MatchSimulation.EV_HALFTIME:
-		Sfx.play("whistle", -4.0)
+		Sfx.play("whistle_half", -4.0)
 		Sfx.crowd_event("half", 0)
 	elif t == MatchSimulation.EV_FULLTIME:
 		Sfx.play("whistle_end", -3.0)
@@ -2155,11 +2161,13 @@ func _toggle_play() -> void:
 		_start_second_half()
 		return
 	_paused = not _paused
+	Sfx.crowd_event("pause" if _paused else "resume", 0)
 	_update_play_button()
 
 
 func _start_second_half() -> void:
 	_set_bug("● AO VIVO", Color("#FF4B4B"))
+	Sfx.crowd_event("resume", 0)
 	Sfx.crowd_event("second", 0)
 	_halftime = false
 	_paused = false

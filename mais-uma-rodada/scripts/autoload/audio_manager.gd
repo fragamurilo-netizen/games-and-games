@@ -1,10 +1,11 @@
 extends Node
-## Sons sintetizados em tempo de execução (nenhum arquivo de áudio no APK) + vibração.
-## Cada som é gerado uma única vez, sob demanda, e reaproveitado.
-## A música de fundo (MusicSynth) é gerada numa thread e guardada em cache no aparelho.
+## Trilha sonora + vibração. Músicas e efeitos vêm de assets/audio/ (compostos e gerados pelo próprio
+## projeto em tools/audio/gerar_trilha.py, sem nada de terceiros). Se um arquivo faltar, o som é
+## sintetizado aqui mesmo (versão antiga) e a música cai no MusicSynth, gerado numa thread.
 
 const RATE := 22050
 const MUSIC_CACHE := "user://music_v2_%d.pcm"
+const SFX_DIR := "res://assets/audio/efeitos/"
 
 var _players: Array[AudioStreamPlayer] = []
 var _cache: Dictionary = {}
@@ -14,6 +15,7 @@ var _music_streams: Dictionary = {} # faixa -> AudioStreamWAV
 var _music_task := -1
 var _music_task_track := -1
 var _music_samples := PackedFloat32Array()
+var _rot_track := 0 # faixa atual da opção "Todas, em sequência"
 var _in_match := false
 var _match_muted := false # mute temporário da tela de partida; não altera as Opções globais
 var _fade: Tween
@@ -22,6 +24,7 @@ var _crowd_p: Array[AudioStreamPlayer] = []
 var _crowd_real: Array = [{}, {}] # perfil das torcidas que têm gravação de verdade
 var _crowd_prof: Array = [{}, {}]
 var _clip_p: AudioStreamPlayer = null
+var _bed_p: AudioStreamPlayer # ambiente do estádio (murmúrio, gritos soltos) por baixo dos cantos
 var _crowd_task: Array[int] = [-1, -1]
 var _crowd_out: Array = [[], []] # resultado da thread: [PackedByteArray]
 var _crowd_cache: Dictionary = {} # chave do perfil -> AudioStreamWAV
@@ -31,12 +34,17 @@ var _crowd_level: Array[float] = [0.0, 0.0]
 var _crowd_boost: Array[float] = [0.0, 0.0] # empurrão temporário (+/-)
 var _crowd_boost_t: Array[float] = [0.0, 0.0]
 var _crowd_on := false
+var _crowd_gen := 0 # muda a cada liga/desliga: timers antigos não mexem na torcida nova
+var _crowd_hush := false # partida pausada: a arquibancada vira murmúrio
+var _sfx_names: Array[String] = ["", "", "", "", "", "", "", ""] # o que cada player de efeitos está tocando
+## Efeitos que só fazem sentido dentro da partida: cortados ao sair dela.
+const MATCH_SFX: Array[String] = ["whistle", "whistle_half", "whistle_end", "goal", "goal_big", "goal_roar", "groan", "boo", "applause", "chance", "card", "post"]
 
 
 func _ready() -> void:
 	_ensure_bus(&"Music")
 	_ensure_bus(&"SFX")
-	for i in 4:
+	for i in _sfx_names.size():
 		var p := AudioStreamPlayer.new()
 		p.bus = &"SFX"
 		add_child(p)
@@ -44,12 +52,19 @@ func _ready() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.bus = &"Music"
 	add_child(_music)
+	_music.finished.connect(_on_music_finished)
+	_rot_track = randi() % Soundtrack.FILES.size()
+	_drop_old_music_cache()
 	for i in 2:
 		var cp := AudioStreamPlayer.new()
 		cp.bus = &"SFX"
 		cp.volume_db = -80.0
 		add_child(cp)
 		_crowd_p.append(cp)
+	_bed_p = AudioStreamPlayer.new()
+	_bed_p.bus = &"SFX"
+	_bed_p.volume_db = -80.0
+	add_child(_bed_p)
 	apply_volumes()
 
 
@@ -82,7 +97,19 @@ func start_music() -> void:
 	if not want:
 		_fade_to(-40.0, func(): _music.stop())
 		return
-	var track := clampi(AppSettings.music_track, 0, MusicSynth.TRACKS.size() - 1)
+	var choice := clampi(AppSettings.music_track, 0, Soundtrack.TRACKS.size() - 1)
+	var rotation := choice == Soundtrack.ROTATION
+	var file := Soundtrack.load_track(_rot_track if rotation else choice)
+	if file != null:
+		if "loop" in file:
+			file.set("loop", not rotation)
+		if _music.stream != file or not _music.playing:
+			_music.stream = file
+			_music.volume_db = -30.0
+			_music.play()
+		_fade_to(0.0)
+		return
+	var track := clampi(choice, 0, MusicSynth.TRACKS.size() - 1)
 	var stream: AudioStreamWAV = _music_streams.get(track)
 	if stream == null:
 		stream = _load_cached(track)
@@ -105,7 +132,27 @@ func screen_changed(screen_name: String) -> void:
 	_in_match = match_now
 	if not match_now:
 		_match_muted = false
+		# Rede de segurança: saindo da partida por qualquer caminho, a torcida e os apitos param.
+		crowd_stop()
+		_stop_match_sfx()
 	start_music()
+
+
+## "Todas, em sequência": acabou uma faixa, entra a próxima.
+func _on_music_finished() -> void:
+	if AppSettings.music_track == Soundtrack.ROTATION:
+		_rot_track = (_rot_track + 1) % Soundtrack.FILES.size()
+		start_music()
+
+
+## As faixas antigas geradas no aparelho ocupavam uns 4 MB e não são mais usadas.
+func _drop_old_music_cache() -> void:
+	if Soundtrack.load_track(0) == null:
+		return
+	for v in ["user://music_v1_%d.pcm", MUSIC_CACHE]:
+		for i in 3:
+			if FileAccess.file_exists(v % i):
+				DirAccess.remove_absolute(v % i)
 
 
 func _fade_to(db: float, done: Callable = Callable()) -> void:
@@ -132,7 +179,7 @@ func _render_async(track: int) -> void:
 
 func _process(delta: float) -> void:
 	_crowd_tick(delta)
-	var crowd_busy := _crowd_on or _crowd_task[0] >= 0 or _crowd_task[1] >= 0 or _crowd_p[0].playing or _crowd_p[1].playing
+	var crowd_busy := _crowd_on or _crowd_task[0] >= 0 or _crowd_task[1] >= 0 or _crowd_p[0].playing or _crowd_p[1].playing or _bed_p.playing
 	if _music_task < 0:
 		if not crowd_busy:
 			set_process(false)
@@ -173,6 +220,8 @@ func _load_cached(track: int) -> AudioStreamWAV:
 
 ## A faixa já foi gerada (ou está no cache do aparelho)?
 func music_ready(track: int) -> bool:
+	if track == Soundtrack.ROTATION or Soundtrack.load_track(track) != null:
+		return true
 	return _music_streams.has(track) or FileAccess.file_exists(MUSIC_CACHE % track)
 
 
@@ -186,11 +235,36 @@ func play(name: String, volume_db: float = 0.0) -> void:
 	var stream := _stream(name)
 	if stream == null:
 		return
-	var p := _players[_next]
-	_next = (_next + 1) % _players.size()
+	# Um player livre; se todos estiverem ocupados, o mais antigo (um clique não corta o apito final).
+	var idx := _next
+	for k in _players.size():
+		var j := (_next + k) % _players.size()
+		if not _players[j].playing:
+			idx = j
+			break
+	var p := _players[idx]
+	_sfx_names[idx] = name
+	_next = (idx + 1) % _players.size()
 	p.stream = stream
 	p.volume_db = volume_db
 	p.play()
+
+
+func _stop_match_sfx() -> void:
+	for i in _players.size():
+		if _players[i].playing and MATCH_SFX.has(_sfx_names[i]):
+			_players[i].stop()
+	if _clip_p != null and _clip_p.playing:
+		_clip_p.stop()
+
+
+## Desligaram os efeitos nas Opções: corta tudo o que estiver soando (menos a música).
+func stop_all() -> void:
+	for p in _players:
+		p.stop()
+	crowd_stop(true)
+	if _clip_p != null:
+		_clip_p.stop()
 
 
 func vibrate(ms: int) -> void:
@@ -229,13 +303,21 @@ func _notification(what: int) -> void:
 	# No Android o jogo em segundo plano não deve continuar tocando.
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		if OS.has_feature("mobile"):
-			_music.stream_paused = true
-			for cp in _crowd_p:
-				cp.stream_paused = true
+			for p in _all_players():
+				p.stream_paused = true
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
-		_music.stream_paused = false
-		for cp in _crowd_p:
-			cp.stream_paused = false
+		for p in _all_players():
+			p.stream_paused = false
+
+
+func _all_players() -> Array[AudioStreamPlayer]:
+	var all: Array[AudioStreamPlayer] = [_music]
+	all.append_array(_players)
+	all.append_array(_crowd_p)
+	all.append(_bed_p)
+	if _clip_p != null:
+		all.append(_clip_p)
+	return all
 
 
 # ---------------------------------------------------------------------------
@@ -267,7 +349,10 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 	if not AppSettings.sound:
 		return
 	_crowd_on = true
+	_crowd_hush = false
+	_crowd_gen += 1
 	set_process(true)
+	_bed_start()
 	var profs := [home, away]
 	_crowd_prof = [home, away]
 	var f := clampf(fill, 0.15, 1.0)
@@ -299,11 +384,36 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 ## Desliga a torcida (com fade, a não ser que `now`).
 func crowd_stop(now := false) -> void:
 	_crowd_on = false
+	_crowd_gen += 1
 	for i in 2:
 		if now:
 			_crowd_p[i].stop()
 			_crowd_p[i].volume_db = -80.0
 		_crowd_level[i] = _crowd_level[i] if not now else 0.0
+	if now:
+		_bed_p.stop()
+	# O canto/gol gravado não fica soando sozinho depois que a torcida sai.
+	if _clip_p != null and _clip_p.playing:
+		if now:
+			_clip_p.stop()
+		else:
+			var tw := create_tween()
+			tw.tween_property(_clip_p, "volume_db", -40.0, 0.6)
+			tw.tween_callback(_clip_p.stop)
+	set_process(true)
+
+
+## Volta para a partida (depois de abrir um perfil no meio do jogo): a mesma torcida retoma.
+func crowd_resume() -> void:
+	if _crowd_on or not AppSettings.sound or _crowd_prof[0].is_empty():
+		return
+	_crowd_on = true
+	_crowd_gen += 1
+	for i in 2:
+		if _crowd_p[i].stream != null and not _crowd_p[i].playing:
+			_crowd_play(i, _crowd_p[i].stream)
+	_bed_start()
+	set_process(true)
 
 
 ## Reações: "danger" (ataque perigoso), "goal", "foul", "card", "save", "half", "second", "end".
@@ -319,25 +429,36 @@ func crowd_event(kind: String, side: int) -> void:
 		"goal":
 			_push(s, 0.6, 22.0)
 			_push(o, -0.55, 25.0)
-			crowd_clip(s, "gol")
+			if not crowd_clip(s, "gol"):
+				# A explosão da torcida de quem marcou (a visitante, pequena, soa de longe)
+				play("goal_roar", linear_to_db(clampf(_crowd_base[s] * 1.3, 0.12, 1.0)) - 1.0)
+			if _crowd_base[o] > 0.3:
+				play("groan", linear_to_db(clampf(_crowd_base[o], 0.1, 1.0)) - 7.0)
 		"foul", "card":
 			# Falta/cartão do visitante: a casa vaia; da casa: a casa reclama do juiz
 			if s == 1 or kind == "card":
 				play("boo", -9.0 if s == 1 else -13.0)
 			_push(0, 0.15, 3.0)
 		"save":
-			play("applause", -14.0)
+			play("applause", -11.0)
 			_push(s, 0.2, 2.5)
 		"half":
 			_push(0, -0.6, 9999.0)
 			_push(1, -0.6, 9999.0)
+		"pause":
+			_crowd_hush = true
+		"resume":
+			_crowd_hush = false
 		"second":
 			_crowd_boost = [0.1, 0.1]
 			_crowd_boost_t = [4.0, 4.0]
 		"end":
 			_push(s, 0.5, 8.0)
 			_push(o, -0.7, 9999.0)
-			get_tree().create_timer(7.0).timeout.connect(func(): crowd_stop())
+			var gen := _crowd_gen
+			get_tree().create_timer(7.0).timeout.connect(func():
+				if gen == _crowd_gen:
+					crowd_stop())
 
 
 func _push(i: int, amount: float, secs: float) -> void:
@@ -369,7 +490,26 @@ func crowd_clip(side: int, kind: String) -> bool:
 	return true
 
 
+func _bed_start() -> void:
+	if _bed_p.playing:
+		return
+	var st := _stream("estadio")
+	if st == null:
+		return
+	if "loop" in st:
+		st.set("loop", true)
+	_bed_p.stream = st
+	_bed_p.volume_db = -60.0
+	_bed_p.play(randf() * st.get_length() * 0.9)
+
+
 func _crowd_tick(delta: float) -> void:
+	if _bed_p.playing:
+		# O ambiente acompanha o tamanho das duas torcidas (some junto quando elas saem)
+		var lvl := (_crowd_level[0] + _crowd_level[1] * 0.6) * 0.75
+		_bed_p.volume_db = linear_to_db(maxf(0.0005, lvl))
+		if not _crowd_on and lvl <= 0.001:
+			_bed_p.stop()
 	for i in 2:
 		if _crowd_task[i] >= 0 and WorkerThreadPool.is_task_completed(_crowd_task[i]):
 			WorkerThreadPool.wait_for_task_completion(_crowd_task[i])
@@ -396,17 +536,26 @@ func _crowd_tick(delta: float) -> void:
 			if _crowd_boost_t[i] <= 0.0:
 				_crowd_boost[i] = 0.0
 		var target := 0.0
-		if _crowd_on and not _match_muted:
+		if _crowd_on and not _match_muted and AppSettings.sound:
 			target = clampf(_crowd_base[i] * (1.0 + _crowd_boost[i]), 0.0, 1.0)
+			if _crowd_hush:
+				target *= 0.3
 		_crowd_level[i] = move_toward(_crowd_level[i], target, delta * (0.9 if target > _crowd_level[i] else 0.35))
 		_crowd_p[i].volume_db = linear_to_db(maxf(0.0005, _crowd_level[i]))
 		if not _crowd_on and _crowd_level[i] <= 0.001:
 			_crowd_p[i].stop()
 
 
-func _stream(name: String) -> AudioStreamWAV:
+func _stream(name: String) -> AudioStream:
 	if _cache.has(name):
 		return _cache[name]
+	for ext in ["wav", "ogg"]:
+		var path: String = SFX_DIR + name + "." + ext
+		if ResourceLoader.exists(path):
+			var st: AudioStream = load(path)
+			if st != null:
+				_cache[name] = st
+				return st
 	var samples := PackedFloat32Array()
 	match name:
 		"click":
