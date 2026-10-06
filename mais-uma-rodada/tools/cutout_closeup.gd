@@ -1,8 +1,8 @@
 extends SceneTree
 ## Cutouts grandes para conferir realismo: cabelos, barbas e camisa com a luz de estúdio.
-## --preset=N mostra uma das iluminações/texturas em teste (PortraitView.light_preset).
 ## xvfb-run godot --path . --resolution 1280x660 --script res://tools/cutout_closeup.gd -- --out=/tmp/closeup.png
-## --size=N (lado de cada retrato), --only=a,b (só esses casos), --clean (rostos limpos)
+## --size=N (lado de cada retrato), --only=a,b (só esses casos), --clean (rostos limpos),
+## --classic (busto no círculo em vez do recorte FM), --cutout e --bg=#rrggbb (fundo da tela)
 
 var _out := "user://closeup.png"
 var _cut := false
@@ -38,8 +38,8 @@ func _initialize() -> void:
 			_out = a.substr(6)
 		elif a.begins_with("--size="):
 			px = int(a.substr(7))
-		elif a.begins_with("--preset="):
-			PortraitView.light_preset = int(a.substr(9))
+		elif a == "--classic":
+			PortraitView.default_framing = PortraitView.FRAME_CLASSIC
 		elif a == "--cutout":
 			_cut = true
 		elif a.begins_with("--bg="):

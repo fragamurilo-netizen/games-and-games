@@ -77,6 +77,22 @@ var cutout: bool = false:
 		cutout = v
 		queue_redraw()
 
+## Enquadramento: clássico (busto dentro do círculo com a cor do clube) ou recorte como os cutouts
+## do Football Manager (cabeça grande no quadro, fundo transparente, ombros cortados embaixo).
+const FRAME_CLASSIC := 0
+const FRAME_FM := 1
+## Padrão dos retratos (Opções › Retratos). As fotos de apresentação (cutout) usam sempre o busto.
+static var default_framing := FRAME_FM
+## -1 = segue o padrão.
+var framing: int = -1:
+	set(v):
+		framing = v
+		queue_redraw()
+## No recorte FM a cabeça é desenhada como num busto deste tamanho relativo, com os olhos a 47%
+## da altura do quadro (medidas tiradas de cutouts de 250 px).
+const FM_ZOOM := 1.42
+const FM_EYE_Y := 0.47
+
 ## Parâmetros de cada penteado: tp/sd = volume no alto/nas laterais, hl = franja (desce a linha do
 ## cabelo), sb = até onde descem as laterais, fd = degradê (1 leve, 2 alto, 3 lateral raspada),
 ## tx = textura forçada, sp = silhueta (1 reto no alto, 2 espetado, 3 cacheado, 4 crista),
@@ -327,6 +343,8 @@ var _hc := Vector2.ZERO
 var _fw := 0.0
 var _fh := 0.0
 var _R := 0.0
+var _fm := false
+var _rect := Rect2()
 var _det := 1.0
 var _light := Vector3.ZERO
 # Traços em coordenadas normalizadas do rosto (u = x/fw, v = y/fh a partir do centro da cabeça)
@@ -351,10 +369,6 @@ var _beard_data: Array = []
 var _rec: Array = []
 var _recording := false
 static var _cmd_cache: Dictionary = {}
-## Prévia de iluminações/texturas alternativas (0 = visual atual do jogo). Só usado pela ferramenta
-## tools/cutout_light_presets.gd enquanto o dono escolhe; o jogo nunca muda esse valor.
-static var light_preset := 0
-static var _preset_tex: Dictionary = {}
 static var _cmd_cache_order: Array = []
 const CMD_CACHE_MAX := 720
 # Contexto da malha que está sendo gerada
@@ -402,8 +416,22 @@ func set_person(seed_value: int, eth_: int, age_: int, club: Club) -> void:
 		bg_color = club.primary_color().darkened(0.6)
 
 
+func _init() -> void:
+	# O recorte FM passa das bordas do quadro (ombros, cabelo alto): o próprio Control corta.
+	clip_contents = true
+	# Texturas de fios e pele com mipmaps: nítidas de perto e sem chuvisco nos retratos pequenos.
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+
+
 func _invalidate() -> void:
 	queue_redraw()
+
+
+## Recorte no estilo FM? As fotos de apresentação (cutout) precisam do busto inteiro.
+func is_fm() -> bool:
+	if cutout:
+		return false
+	return (default_framing if framing < 0 else framing) == FRAME_FM
 
 
 # ---------------------------------------------------------------------------
@@ -416,6 +444,8 @@ func _draw() -> void:
 		return
 	var o := Vector2((size.x - s) * 0.5, (size.y - s) * 0.5)
 	var c := o + Vector2(s * 0.5, s * 0.5)
+	_fm = is_fm()
+	_rect = Rect2(o, Vector2(s, s))
 	if photo != null:
 		_draw_photo(c, s)
 		return
@@ -425,7 +455,7 @@ func _draw() -> void:
 	_prepare_decals(s)
 	# Três camadas com cache próprio: fundo + cabelo de trás, corpo + roupa, rosto + cabelo.
 	# Trocar o uniforme ou a estampa ficar pronta só redesenha a camada do corpo.
-	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, light_preset])
+	var face_key := hash([face_seed, eth, age, look, size, bg_color, cutout, _fm])
 	var k_back := hash(["back", face_key])
 	var k_body := hash(["body", face_key, shirt_color, trim_color, suit, kit_collar, kit_pattern, kit, crest,
 		_crest_tex != null, _sponsor_tex != null])
@@ -437,7 +467,13 @@ func _draw() -> void:
 			_replay(_cmd_cache[key])
 			continue
 		if not ready:
-			_setup(c, s)
+			if _fm:
+				# Busto maior que o quadro, com os olhos na altura dos cutouts do FM; o que passa
+				# das bordas é cortado (ombros embaixo, cabelo muito alto em cima).
+				var sv := s * FM_ZOOM
+				_setup(Vector2(c.x, o.y + s * FM_EYE_Y + sv * 0.105), sv)
+			else:
+				_setup(c, s)
 			ready = true
 		_rec = []
 		_recording = true
@@ -459,7 +495,7 @@ func _draw() -> void:
 func _layer_back() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(_f["texture_seed"])
-	if not cutout:
+	if not cutout and not _fm:
 		_background()
 		_backdrop_depth()
 	_back_hair(rng)
@@ -492,11 +528,8 @@ func _layer_front() -> void:
 	else:
 		_scalp_shine()
 	_accessories()
-	if light_preset == 0 or light_preset >= 4:
-		_light_pass()
-	if light_preset != 0:
-		_preset_pass()
-	if cutout:
+	_light_pass()
+	if cutout or _fm:
 		return
 	# Borda
 	_r_arc(_c, _R - 1.0, 0.0, TAU, 64, Color(bg_color.lightened(0.25), 0.6), maxf(1.0, _s * 0.012), true)
@@ -508,30 +541,53 @@ func _layer_front() -> void:
 func _light_pass() -> void:
 	if _s < 50.0:
 		return
-	var circle := _ellipse(_c, _R, _R, 24 if _s < 90.0 else 36)
 	var key := _hc + Vector2(-_fw * 0.9, -_fh * 0.9)
-	_radial(_c, circle, 4 if _s < 90.0 else 6, func(p: Vector2, _t: float, _i: int) -> Color:
+	var light := func(p: Vector2, _t: float, _i: int) -> Color:
 		var d := (p - key) / (_s * 0.9)
 		var fall := clampf(d.length(), 0.0, 1.3)
 		var warm := Color(1.0, 0.92, 0.8, 0.1 * (1.0 - smoothstep(0.0, 0.65, fall)))
 		var shade := 0.12 * smoothstep(0.55, 1.35, fall)
 		if shade > warm.a:
 			return Color(0.04, 0.06, 0.12, shade)
-		return warm)
-	# Luz de contorno (recorte) à direita
-	var lw := maxf(0.8, _s * 0.007)
+		return warm
 	var head := _head_contour(_contour_k())
+	if cutout or _fm:
+		# Sem fundo: a luz vai só sobre o rosto (no círculo inteiro ela tingia o fundo transparente)
+		_radial(_hc, head, 4 if _s < 90.0 else 6, light)
+	else:
+		var circle := _ellipse(_c, _R, _R, 24 if _s < 90.0 else 36)
+		_radial(_c, circle, 4 if _s < 90.0 else 6, light)
+	# Luz de contorno (recorte) à direita, só na pele à mostra: não risca cabelo, mechas nem barba
+	var lw := maxf(0.8, _s * 0.007)
+	var locks := String(_hs("fr", "")) in ["locks", "braid_locks"] or String(_hs("bk", "")) in ["long", "curly_long", "afro_curl", "dreads", "braids"]
 	var rim := PackedVector2Array()
 	var rc := PackedColorArray()
+	_body_setup()
 	for p in head:
 		var q := _uv(p)
-		if q.x > 0.2 and q.y > -0.35 and q.y < 0.95:
+		var bare := q.x > 0.2 and q.y > -0.35 and q.y < 0.95 and not locks
+		# Só na silhueta contra o fundo: a orelha e o pescoço ficam atrás da borda do rosto
+		if bare and (absf(q.y - 0.04) < 0.24 or (q.y > 0.2 and p.x - _hc.x < _nwt + _s * 0.006)):
+			bare = false
+		if bare and int(_f["style"]) != FaceGen.H_BALD and q.y < _hairline_v(q.x) + 0.12:
+			bare = false
+		if bare and int(_f["beard"]) != FaceGen.B_NONE and _beard_dens(q.x * 0.97, q.y, _beard_p, false) > 0.15:
+			bare = false
+		if bare and q.y < float(_hs("sb", 0.0)) + 0.05 and _cap_in.size() > 2 and q.y < 0.1:
+			bare = false
+		if bare:
 			rim.append(_cl(p + Vector2(-lw * 0.6, 0)))
 			rc.append(Color(0.8, 0.88, 1.0, 0.28 * smoothstep(0.2, 0.7, q.x) * (1.0 - smoothstep(0.6, 0.95, q.y))))
+		elif rim.size() > 2:
+			_r_polyline_colors(rim, rc, lw, true)
+			rim = PackedVector2Array()
+			rc = PackedColorArray()
+		else:
+			rim = PackedVector2Array()
+			rc = PackedColorArray()
 	if rim.size() > 2:
 		_r_polyline_colors(rim, rc, lw, true)
 	if not suit:
-		_body_setup()
 		var side := _torso_side(0.06, false)
 		var sc := PackedColorArray()
 		var sp := PackedVector2Array()
@@ -573,10 +629,6 @@ func _setup(c: Vector2, s: float) -> void:
 	_hc = c + Vector2(0, -s * 0.1)
 	_det = clampf(s / 140.0, 0.3, 2.0)
 	_light = LIGHT.normalized()
-	match light_preset:
-		1: _light = Vector3(0.0, -0.85, 0.5).normalized()
-		2: _light = Vector3(-0.8, -0.3, 0.55).normalized()
-		3: _light = Vector3(0.0, -0.12, 1.0).normalized()
 	_E = float(f["eye_y"])
 	_X = float(f["eye_dx"])
 	_N = float(f["nose_len"])
@@ -633,6 +685,17 @@ static func _has_alpha(t: Texture2D) -> bool:
 
 func _draw_photo(c: Vector2, s: float) -> void:
 	var ts := photo.get_size()
+	if _fm:
+		# Recorte FM: a foto no quadro, sem círculo (PNG transparente inteiro; foto comum cortada
+		# em quadrado a partir do alto)
+		if _has_alpha(photo):
+			var kf := minf(size.x / ts.x, size.y / ts.y)
+			var szf := ts * kf
+			draw_texture_rect(photo, Rect2(Vector2((size.x - szf.x) * 0.5, size.y - szf.y), szf), false)
+		else:
+			var sd := minf(ts.x, ts.y)
+			draw_texture_rect_region(photo, Rect2(_rect.position, _rect.size), Rect2(Vector2((ts.x - sd) * 0.5, 0.0), Vector2(sd, sd)))
+		return
 	if cutout and _has_alpha(photo):
 		# Recorte (apresentação, notícias): a imagem inteira, apoiada embaixo, sem o círculo.
 		var k := minf(size.x / ts.x, size.y / ts.y)
@@ -720,11 +783,31 @@ func _emit(m: Array) -> void:
 
 ## Mantém os pontos dentro do círculo do retrato (recorte barato das malhas).
 func _cl(p: Vector2) -> Vector2:
+	if _fm:
+		return p # o Control corta (clip_contents); prender na borda criava faixas no rodapé
 	var d := p - _c
 	var r := _R - 0.5
 	if d.length_squared() > r * r:
 		return _c + d.normalized() * r
 	return p
+
+
+## Ponto dentro do retrato (círculo ou quadro do recorte FM), com folga `margin`.
+func _inside(p: Vector2, margin: float = 1.0) -> bool:
+	if _fm:
+		return _rect.grow(-margin).has_point(p)
+	return (p - _c).length() < _R - margin
+
+
+## Contorno do retrato como polígono, para recortar malhas.
+func _clip_poly() -> PackedVector2Array:
+	if _fm:
+		var r := _rect
+		return PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)])
+	var disc := PackedVector2Array()
+	for i in 64:
+		disc.append(_c + Vector2.from_angle(TAU * i / 64.0) * _R * 0.995)
+	return disc
 
 
 func _aa_outline(poly: PackedVector2Array, col: Color, alpha: float) -> void:
@@ -885,10 +968,6 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	var diff := clampf((nx * _light.x + ny * _light.y + nz * _light.z + 0.3) / 1.3, 0.0, 1.0)
 	# Luz principal suave e um rebatedor na frente: a sombra fica macia, sem "meia cara escura"
 	var lum := 0.56 + 0.5 * diff
-	match light_preset:
-		1: lum = 0.42 + 0.68 * diff
-		2: lum = 0.44 + 0.66 * diff
-		3: lum = 0.7 + 0.36 * diff
 	# Oclusão onde a cabeça vira para longe da câmera e luz de rebote no lado da sombra, que separa
 	# o rosto do fundo como numa foto
 	lum -= 0.06 * smoothstep(0.78, 1.0, t)
@@ -1023,11 +1102,6 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 		a = (u - float(bl[0])) / float(bl[2])
 		b = (v - float(bl[1])) / float(bl[2])
 		lum += float(bl[3]) * exp(-a * a - b * b) * (1.0 - k[21] * 0.7)
-	if light_preset == 6:
-		# Ilustração: a luz vira três tons com passagem curta, como pintura de cel
-		var q := clampf((lum - 0.6) / 0.45, 0.0, 1.0) * 2.0
-		var qi := floorf(q)
-		lum = 0.62 + 0.46 * (qi + smoothstep(0.45, 0.55, q - qi)) / 2.0
 	var col := _shade(_skin, lum)
 	# Pele translúcida: na passagem da luz para a sombra o tom esquenta um pouco (sangue sob a pele)
 	var term := 4.0 * diff * (1.0 - diff)
@@ -1059,10 +1133,6 @@ func _skin_px(p: Vector2, t: float, i: int) -> Color:
 	a = (u + 0.5) / 0.2
 	b = (v - 0.08) / 0.1
 	spec *= k[13] * (0.6 + 0.8 * (fore * 0.9 + ridge_hl + exp(-a * a - b * b)))
-	if light_preset == 3:
-		spec *= 1.8
-	elif light_preset == 6:
-		spec = 0.12 * smoothstep(0.25, 0.4, spec)
 	return Color(minf(col.r + spec, 1.0), minf(col.g + spec * 0.97, 1.0), minf(col.b + spec * 0.93, 1.0))
 
 
@@ -1230,8 +1300,6 @@ func _marks(rng: RandomNumberGenerator) -> void:
 # ---------------------------------------------------------------------------
 
 func _background() -> void:
-	if light_preset != 0 and _preset_background():
-		return
 	var circle := _ellipse(_c, _R, _R, 24 if _s < 90.0 else 40)
 	_radial(_c, circle, 3 if _s < 90.0 else 5, func(p: Vector2, t: float, _i: int) -> Color:
 		var d := (p - _c) / _R
@@ -1243,13 +1311,6 @@ func _background() -> void:
 ## projetam no fundo, para o busto "descolar" do fundo como num recorte de foto.
 func _backdrop_depth() -> void:
 	if _s < 60.0:
-		return
-	if light_preset == 3:
-		# Flash colado na câmera: sombra dura e curta no fundo, deslocada para baixo e à direita
-		var off := Vector2(_s * 0.035, _s * 0.025)
-		var hs := _ellipse(_hc + off + Vector2(0, -_fh * 0.08), _fw * 1.05, _fh * 1.1, 40)
-		_r_colored_polygon(hs, Color(0, 0, 0, 0.16))
-		_feather(hs, PackedColorArray([Color(0, 0, 0, 0.16)]))
 		return
 	var glow := _hc + Vector2(-_fw * 0.35, -_fh * 0.25)
 	var halo := _ellipse(glow, _fw * 2.1, _fh * 1.9, 32)
@@ -1627,9 +1688,7 @@ func _body() -> void:
 			sleeve_panels.append(poly)
 	# Recorte pelo círculo do retrato como polígono (prender ponto a ponto na borda cruzava o
 	# contorno das faixas largas, e a faixa não era desenhada).
-	var disc := PackedVector2Array()
-	for i in 64:
-		disc.append(_c + Vector2.from_angle(TAU * i / 64.0) * _R * 0.995)
+	var disc := _clip_poly()
 	for layer in [[panels, pat_col], [panels3, pat_col3], [sleeve_panels, c2]]:
 		var col: Color = layer[1]
 		for band: PackedVector2Array in layer[0]:
@@ -1694,7 +1753,7 @@ func _chest_marks(body_col: Color, c2: Color, trim: Color, neck_low: float) -> v
 	else:
 		var ec := _wrap(cflat)
 		var r := s * 0.028
-		if (ec - _c).length() < _R - r * 1.5:
+		if _inside(ec, r * 1.5):
 			var edge := c2 if absf(c2.get_luminance() - body_col.get_luminance()) > 0.2 else trim
 			var lum := _cloth_lum(ec, neck_low)
 			var shield := PackedVector2Array([ec + Vector2(-r, -r), ec + Vector2(r, -r), ec + Vector2(r, r * 0.25), ec + Vector2(0, r * 1.25), ec + Vector2(-r, r * 0.25)])
@@ -1708,7 +1767,7 @@ func _chest_marks(body_col: Color, c2: Color, trim: Color, neck_low: float) -> v
 	var sup: Dictionary = kit.get("sup", {}) if kit.get("sup") is Dictionary else {}
 	if not sup.is_empty():
 		var sc := _wrap(Vector2(_hc.x - _sw * 0.36, y - s * 0.004))
-		if (sc - _c).length() < _R - s * 0.04:
+		if _inside(sc, s * 0.04):
 			var ink := _shade(Color(String(kit["supc"])) if String(kit.get("supc", "")) != "" else _ink_on(sup, body_col), _cloth_lum(sc, neck_low))
 			_supplier_logo(sc, s * 0.022, String(sup.get("logo", "")), String(sup.get("n", "")), ink)
 	# Patrocinador master no peito (o que couber no retrato)
@@ -1735,7 +1794,7 @@ func _chest_marks(body_col: Color, c2: Color, trim: Color, neck_low: float) -> v
 		fs = int(fs * maxw / tw)
 		tw = font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	var pos := Vector2(_hc.x - tw * 0.5, _ynotch + s * 0.2)
-	if fs >= 6 and pos.y < _c.y + _R * 0.95:
+	if fs >= 6 and _inside(Vector2(_hc.x, pos.y), 0.0) and pos.y < _c.y + _R * 0.95:
 		var lum := _cloth_lum(Vector2(_hc.x, sy), neck_low)
 		_r_string(font, pos, name, fs, Color(_shade(ink_sp, lum), 0.92))
 
@@ -1752,7 +1811,7 @@ func _decal(tex: Texture2D, center: Vector2, sz: Vector2, tint: Color, neck_low:
 		for i in nx + 1:
 			var uv := Vector2(float(i) / nx, float(j) / ny)
 			var p := _wrap(center + (uv - Vector2(0.5, 0.5)) * sz)
-			if (p - _c).length() > _R - 1.0:
+			if not _inside(p):
 				p = _cl(p)
 			pts.append(p)
 			uvs.append(uv)
@@ -1934,7 +1993,7 @@ func _placket(bot: Vector2, trim: Color, body_col: Color, buttons: int) -> void:
 	_r_polygon(plk, pc)
 	for k in buttons:
 		var bp := bot + Vector2(0, s * (0.015 + 0.025 * k))
-		if (bp - _c).length() < _R - 2.0:
+		if _inside(bp, 2.0):
 			_r_circle(bp, maxf(0.6, s * 0.005), body_col.lightened(0.25))
 
 
@@ -1953,7 +2012,7 @@ func _polo_collar(line: PackedVector2Array, trim: Color, body_col: Color) -> voi
 	_r_line(_cl(bot + Vector2(pw, 0)), _cl(bot + Vector2(pw, s * 0.1)), Color(0, 0, 0, 0.18), maxf(0.6, s * 0.004), true)
 	for k in 2:
 		var bp := bot + Vector2(0, s * (0.03 + 0.045 * k))
-		if (bp - _c).length() < _R - 2.0:
+		if _inside(bp, 2.0):
 			_r_circle(bp, maxf(0.7, s * 0.006), trim.lightened(0.3))
 	# Abas da gola dobradas sobre os ombros
 	for sx: float in [-1.0, 1.0]:
@@ -2882,7 +2941,7 @@ func _beard_strands(rng: RandomNumberGenerator, P: Dictionary) -> void:
 		if rng.randf() > dens:
 			continue
 		var p := pts[i] + Vector2(rng.randf_range(-jit, jit), rng.randf_range(-jit, jit))
-		if (p - _c).length() > _R - 1.0:
+		if not _inside(p):
 			continue
 		# Cada fio confere a densidade no ponto exato onde nasce (e as falhas, se houver)
 		var qp := _uv(p)
@@ -4267,191 +4326,3 @@ static func _ellipse(c: Vector2, rx: float, ry: float, n: int) -> PackedVector2A
 		var a := TAU * i / n
 		pts.append(c + Vector2(cos(a) * rx, sin(a) * ry))
 	return pts
-
-# ---------------------------------------------------------------------------
-# Prévias de iluminação/textura (light_preset != 0)
-# ---------------------------------------------------------------------------
-
-func _preset_background() -> bool:
-	var circle := _ellipse(_c, _R, _R, 48)
-	match light_preset:
-		1:
-			# Noite de jogo: fundo escuro, refletores desfocados no alto
-			_radial(_c, circle, 5, func(p: Vector2, t: float, _i: int) -> Color:
-				var d := (p - _c) / _R
-				var base := Color(0.05, 0.07, 0.11).lerp(bg_color.darkened(0.5), 0.35)
-				return base.lightened(0.12 * (1.0 - smoothstep(-0.9, 0.2, d.y))))
-			var rng := RandomNumberGenerator.new()
-			rng.seed = 911
-			for i in 7:
-				var q := _c + Vector2(rng.randf_range(-0.85, 0.85) * _R, rng.randf_range(-0.95, -0.45) * _R)
-				var r := _s * rng.randf_range(0.03, 0.07)
-				var blob := _ellipse(q, r, r, 20)
-				_radial(q, blob, 3, func(_p: Vector2, t: float, _i: int) -> Color:
-					return Color(0.85, 0.93, 1.0, 0.22 * (1.0 - smoothstep(0.2, 1.0, t))))
-			return true
-		2:
-			# Fim de tarde: céu quente do lado do sol, mais frio do outro
-			_radial(_c, circle, 5, func(p: Vector2, _t: float, _i: int) -> Color:
-				var d := (p - _c) / _R
-				var warm := Color(0.93, 0.62, 0.33)
-				var cool := Color(0.24, 0.27, 0.4)
-				var c := cool.lerp(warm, clampf(0.5 - d.x * 0.55 - d.y * 0.25, 0.0, 1.0))
-				return c.lerp(bg_color, 0.25))
-			return true
-		3:
-			# Dia de mídia: fundo cinza claro liso, como o painel das fotos oficiais
-			_radial(_c, circle, 4, func(_p: Vector2, t: float, _i: int) -> Color:
-				return Color(0.86, 0.87, 0.89).darkened(0.08 * t * t))
-			return true
-	return false
-
-
-func _preset_pass() -> void:
-	if _s < 50.0:
-		return
-	var circle := _ellipse(_c, _R, _R, 48)
-	var lw := maxf(0.9, _s * 0.009)
-	var head := _head_contour(_contour_k())
-	match light_preset:
-		1:
-			# Refletores no alto: cabeça e ombros claros em cima, peito caindo para a sombra,
-			# e contorno frio dos dois lados
-			_radial(_c, circle, 6, func(p: Vector2, _t: float, _i: int) -> Color:
-				var y := (p.y - _c.y) / _R
-				return Color(0.02, 0.03, 0.08, 0.32 * smoothstep(-0.1, 0.9, y)))
-			var top := _ellipse(_hc + Vector2(0, -_fh * 0.95), _fw * 1.1, _fh * 0.5, 32)
-			_radial(_hc + Vector2(0, -_fh * 0.95), top, 4, func(_p: Vector2, t: float, _i: int) -> Color:
-				return Color(0.85, 0.92, 1.0, 0.16 * (1.0 - smoothstep(0.0, 1.0, t))))
-			_preset_rim(head, Color(0.75, 0.9, 1.0), 0.55, lw, 0.0)
-		2:
-			# Sol baixo à esquerda: banho dourado no lado da luz, sombra azulada do outro
-			_radial(_c, circle, 6, func(p: Vector2, _t: float, _i: int) -> Color:
-				var x := (p.x - _hc.x) / (_fw * 1.6)
-				if x < 0.0:
-					return Color(1.0, 0.7, 0.35, 0.16 * smoothstep(0.0, 1.0, -x + 0.3))
-				return Color(0.12, 0.1, 0.3, 0.2 * smoothstep(0.0, 1.0, x)))
-			_preset_rim(head, Color(1.0, 0.82, 0.5), 0.7, lw * 1.2, -1.0)
-		3:
-			# Flash: quase sem gradiente, só um leve vinhetado
-			_radial(_c, circle, 5, func(_p: Vector2, t: float, _i: int) -> Color:
-				return Color(0, 0, 0, 0.1 * smoothstep(0.6, 1.0, t)))
-		4:
-			# Figurinha impressa: retícula, papel e cor um pouco lavada
-			_r_colored_polygon(circle, Color(1.0, 0.96, 0.86, 0.1))
-			_preset_texture(circle, "halftone")
-		5:
-			_preset_texture(circle, "brush")
-		6:
-			# Contorno de tinta na cabeça
-			var ink := Color(0.08, 0.05, 0.04, 0.55)
-			var y1 := 0.32 if int(_f["beard"]) != FaceGen.B_NONE else 1.2
-			var line := PackedVector2Array()
-			for p in head:
-				var q := _uv(p)
-				if q.y > -0.15 and q.y < y1:
-					line.append(p)
-			# o contorno começa no meio do queixo; reordena para a linha não cruzar o rosto
-			line = _order_by_angle(line)
-			var parts: Array = [line]
-			if y1 < 1.0:
-				parts = [PackedVector2Array(), PackedVector2Array()]
-				for p in line:
-					(parts[0 if p.x < _hc.x else 1] as PackedVector2Array).append(p)
-			for part: PackedVector2Array in parts:
-				if part.size() > 2:
-					_r_polyline(part, ink, maxf(1.0, _s * 0.007), true)
-
-
-## Luz de recorte na lateral do rosto (entre a têmpora e a mandíbula, sem riscar cabelo e barba)
-## e nos ombros. side < 0: só do lado esquerdo; 0: dos dois lados.
-func _preset_rim(head: PackedVector2Array, col: Color, strength: float, lw: float, side: float) -> void:
-	var y1 := 0.32 if int(_f["beard"]) != FaceGen.B_NONE else 0.8
-	var segs: Array = [PackedVector2Array(), PackedVector2Array()]
-	var cols: Array = [PackedColorArray(), PackedColorArray()]
-	for p in head:
-		var q := _uv(p)
-		var k := 0 if q.x < 0.0 else 1
-		if (side < 0.0 and k == 1) or q.y < -0.12 or q.y > y1 or absf(q.x) < 0.3:
-			continue
-		var a := strength * smoothstep(-0.12, 0.05, q.y) * (1.0 - smoothstep(y1 - 0.2, y1, q.y))
-		(segs[k] as PackedVector2Array).append(_cl(p + Vector2(-signf(q.x) * lw * 0.6, 0)))
-		(cols[k] as PackedColorArray).append(Color(col, a))
-	for k in 2:
-		if (segs[k] as PackedVector2Array).size() > 2:
-			_r_polyline_colors(segs[k], cols[k], lw, true)
-	if suit:
-		return
-	_body_setup()
-	var torso := _torso_side(0.06, false)
-	for sgn: float in [-1.0, 1.0]:
-		if side < 0.0 and sgn > 0.0:
-			continue
-		var sp := PackedVector2Array()
-		var sc := PackedColorArray()
-		for p in torso:
-			if p.y < _ysp - _s * 0.03 or absf(p.x - _hc.x) < _nwt:
-				continue
-			var m := Vector2(_hc.x + (p.x - _hc.x) * sgn, p.y)
-			sp.append(_cl(m + Vector2(-sgn * lw * 0.7, lw * 0.3)))
-			sc.append(Color(col, strength * 0.8 * (1.0 - smoothstep(_ysp, _ysp + _s * 0.2, p.y))))
-		if sp.size() > 2:
-			_r_polyline_colors(sp, sc, lw * 1.3, true)
-
-
-func _order_by_angle(pts: PackedVector2Array) -> PackedVector2Array:
-	var arr: Array = Array(pts)
-	arr.sort_custom(func(a: Vector2, b: Vector2) -> bool:
-		return fposmod((a - _hc).angle() + PI * 0.5, TAU) < fposmod((b - _hc).angle() + PI * 0.5, TAU))
-	return PackedVector2Array(arr)
-
-
-func _preset_texture(circle: PackedVector2Array, kind: String) -> void:
-	var n := clampi(int(_s), 64, 512)
-	var key := kind + str(n)
-	if not _preset_tex.has(key):
-		var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
-		var rng := RandomNumberGenerator.new()
-		rng.seed = 4242
-		if kind == "halftone":
-			var cell := maxf(3.0, n / 90.0)
-			for y in n:
-				for x in n:
-					# grade a 45 graus
-					var u := (x + y) / (cell * 1.414)
-					var v := (x - y) / (cell * 1.414)
-					var du := u - roundf(u)
-					var dv := v - roundf(v)
-					var d := sqrt(du * du + dv * dv)
-					var dot := 1.0 - smoothstep(0.22, 0.34, d)
-					var grain := rng.randf() * 0.06
-					img.set_pixel(x, y, Color(0.12, 0.08, 0.05, 0.15 * dot + grain))
-		else:
-			# Pintura: manchas largas de tinta (claras e escuras) e pinceladas curtas e largas
-			for y in n:
-				for x in n:
-					var m := _vnoise(x * 12.0 / n, y * 12.0 / n) - 0.5
-					var m2 := _vnoise(x * 40.0 / n + 9.0, y * 40.0 / n) - 0.5
-					var t := m * 0.7 + m2 * 0.3
-					img.set_pixel(x, y, Color(1, 0.96, 0.88, t * 0.22) if t > 0.0 else Color(0.12, 0.07, 0.04, -t * 0.22))
-			var bw := maxi(2, n / 110)
-			for i in int(n * n / 260.0):
-				var p := Vector2(rng.randf() * n, rng.randf() * n)
-				var ang := -0.8 + rng.randf_range(-0.5, 0.5)
-				var dir := Vector2(cos(ang), sin(ang))
-				var ln := rng.randf_range(n * 0.015, n * 0.035)
-				var light := rng.randf() < 0.5
-				var a := rng.randf_range(0.025, 0.05)
-				var col := Color(1, 0.97, 0.9, a) if light else Color(0.1, 0.06, 0.04, a)
-				for t in int(ln):
-					var fade := sin(PI * t / ln)
-					var q := p + dir * t
-					for w in bw:
-						var qx := posmod(int(q.x - dir.y * w), n)
-						var qy := posmod(int(q.y + dir.x * w), n)
-						img.set_pixel(qx, qy, img.get_pixel(qx, qy).blend(Color(col, col.a * fade)))
-		_preset_tex[key] = ImageTexture.create_from_image(img)
-	var uvs := PackedVector2Array()
-	for p in circle:
-		uvs.append((p - (_c - Vector2(_R, _R))) / (2.0 * _R))
-	_r_colored_polygon(circle, Color.WHITE, uvs, _preset_tex[key])
