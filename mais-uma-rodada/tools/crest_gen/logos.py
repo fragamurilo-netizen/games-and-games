@@ -67,8 +67,8 @@ FLAGS = {
 logos = {}
 
 # ---------------------------------------------------------------------------------------- Ligas
-logos["ENG1"] = L("round", "#3D195B", "lion_head", "#FFFFFF", sym_top="crown", accent="#FFFFFF", ring_c="#00FF85", wordmark="PREMIER LEAGUE")
-logos["ENG2"] = L("round", "#0B1C3F", "lion", "#D4AF37", ring_c="#D4AF37", wordmark="CHAMPIONSHIP")
+logos["ENG1"] = L("round", "#FFFFFF", "lion_crowned", "#37003C", c2="#37003C", ring_c="#37003C", wordmark="PREMIER LEAGUE")
+logos["ENG2"] = L("badge", "#0B1C3F", "lion_passant", "#D4AF37", ring_c="#D4AF37", sym_scale=1.15, wordmark="CHAMPIONSHIP")
 logos["ESP1"] = L("tile", "#FF4B44", "ball_swirl", "#FFFFFF", wordmark="LALIGA")
 logos["ESP2"] = L("tile", "#1B1B1B", "ball_swirl", "#00D0FF", num="2", accent="#00D0FF", wordmark="LALIGA")
 logos["GER1"] = L("tile", "#D20515", "player_kick", "#FFFFFF", wordmark="BUNDESLIGA")

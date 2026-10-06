@@ -65,7 +65,9 @@
 				"c1": "#004D98",
 				"c2": "#A50044",
 				"c3": "#E4B43A",
-				"border": "gold"
+				"border": "thin",
+				"bc": "#1E1E24",
+				"finish": false
 			},
 			"rivals": [
 				"ESP_MBL",

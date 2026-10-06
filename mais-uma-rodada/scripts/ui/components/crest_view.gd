@@ -21,7 +21,7 @@ extends Control
 ##   laurel  louros em volta                    border  none|thin|thick|double|gold
 ##   plate  auto|band|disc|none — placa atrás do monograma (auto: só em campo listrado/dividido)
 ##   pc     cor da placa                         finish  false tira o filete interno
-##   tc     cor do texto do anel
+##   tc     cor do texto do anel                bc  cor da borda (thin/thick/double)
 ##   canton cor do cantão (quadrado no alto à esquerda)   canton_sym  símbolo dentro dele
 ##   field pale_cross:L|R  metade com cruz (lado L/R) e metade listrada (Milan, Bologna)
 ## Logos de competição (mesmo formato, chaves a mais):
@@ -137,6 +137,7 @@ static func spec(cr: Dictionary) -> Dictionary:
 	sp["pc"] = _col_or_null(cr, "pc")
 	sp["finish"] = bool(cr.get("finish", true))
 	sp["tc"] = _col_or_null(cr, "tc")
+	sp["bc"] = _col_or_null(cr, "bc")
 	sp["canton"] = _col_or_null(cr, "canton")
 	sp["canton_sym"] = String(cr.get("canton_sym", ""))
 	sp["logo"] = bool(cr.get("logo", false))
@@ -502,22 +503,22 @@ func _field(poly: PackedVector2Array, box: Rect2, sp: Dictionary, s: float) -> v
 				var o := -0.5 + i * bw * 2.0 + bw
 				parts.append([PackedVector2Array([Vector2(o, 1.1), Vector2(o + bw, 1.1), Vector2(o + bw + 1.2, -0.1), Vector2(o + 1.2, -0.1)]), c2])
 		"barca":
-			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa FCB no meio
-			var gold := Color("#E4B43A")
+			# Blaugrana embaixo; em cima a cruz de São Jorge e as barras catalãs; faixa FCB no meio.
+			# Fios escuros separam as partes, como no escudo de verdade (sem frisos dourados).
+			var ink := Color("#1E1E24")
 			for i in 7:
 				if i % 2 == 1:
 					parts.append([_rect(i / 7.0, 0.47, 1.0 / 7.0 + 0.001, 0.6), c2])
 			parts.append([_rect(-0.1, -0.1, 0.6, 0.43), Color("#F7F4EC")])
-			parts.append([_rect(0.215, -0.1, 0.07, 0.43), Color("#D21F26")])
-			parts.append([_rect(-0.1, 0.11, 0.6, 0.07), Color("#D21F26")])
+			parts.append([_rect(0.262, -0.1, 0.076, 0.43), Color("#D21F26")])
+			parts.append([_rect(-0.1, 0.168, 0.6, 0.072), Color("#D21F26")])
 			parts.append([_rect(0.5, -0.1, 0.6, 0.43), Color("#FCD116")])
 			for i in 4:
-				parts.append([_rect(0.5 + (1 + i * 2) * 0.5 / 9.0, -0.1, 0.5 / 9.0, 0.43), Color("#D21F26")])
+				parts.append([_rect(0.5 + (1 + i * 2) * 0.42 / 9.0, -0.1, 0.42 / 9.0, 0.43), Color("#D21F26")])
 			parts.append([_rect(-0.1, 0.33, 1.2, 0.14), Color("#F4EEDC")])
-			# Frisos dourados entre as partes, como o esmalte do escudo
-			parts.append([_rect(-0.1, 0.322, 1.2, 0.016), gold])
-			parts.append([_rect(-0.1, 0.462, 1.2, 0.016), gold])
-			parts.append([_rect(0.492, -0.1, 0.016, 0.43), gold])
+			parts.append([_rect(-0.1, 0.323, 1.2, 0.014), ink])
+			parts.append([_rect(-0.1, 0.463, 1.2, 0.014), ink])
+			parts.append([_rect(0.493, -0.1, 0.014, 0.43), ink])
 		"bordure":
 			pass
 	for part: Array in parts:
@@ -618,19 +619,20 @@ func _charge(sp: Dictionary, cb: Rect2, field_poly: PackedVector2Array, s: float
 			var y := -0.35 + k * 0.6
 			_polyline(PackedVector2Array([cen + Vector2(-r, (y - 0.4) * r), cen + Vector2(0, (y + 0.2) * r), cen + Vector2(r, (y - 0.4) * r)]), col, maxf(2.0, r * 0.26))
 		return
-	# Bola antiga de couro, com os gomos costurados (Barça)
+	# Bola antiga de couro, chapada, com os gomos costurados (Barça)
 	if sym == "ball_old":
 		var bc := cen
 		var br := r * 0.62
-		_circle(bc + Vector2(br * 0.06, br * 0.08), br, Color(0, 0, 0, 0.3))
-		_circle(bc, br, Color("#7A4A12"))
-		_circle(bc, br * 0.92, Color("#E9A93B"))
-		_circle(bc + Vector2(-br * 0.28, -br * 0.3), br * 0.35, Color(1, 0.9, 0.6, 0.35))
-		var seam := Color("#6B3F0E")
-		var lw := maxf(1.0, br * 0.07)
-		_polyline(PackedVector2Array([bc + Vector2(-br * 0.88, -br * 0.2), bc + Vector2(-br * 0.3, -br * 0.05), bc + Vector2(br * 0.3, -br * 0.05), bc + Vector2(br * 0.88, -br * 0.2)]), seam, lw)
-		_polyline(PackedVector2Array([bc + Vector2(-br * 0.7, br * 0.55), bc + Vector2(-br * 0.2, br * 0.35), bc + Vector2(br * 0.2, br * 0.35), bc + Vector2(br * 0.7, br * 0.55)]), seam, lw)
-		_polyline(PackedVector2Array([bc + Vector2(0, -br * 0.9), bc + Vector2(-br * 0.08, -br * 0.05), bc + Vector2(0, br * 0.35), bc + Vector2(br * 0.05, br * 0.9)]), seam, lw)
+		_circle(bc, br, Color("#1E1E24"))
+		_circle(bc, br * 0.9, Color("#F2B233"))
+		var seam := Color("#1E1E24")
+		var lw := maxf(1.0, br * 0.075)
+		# Gomos da bola antiga: faixa do meio em lente e gomos dos lados atravessados
+		for sx in [-1.0, 1.0]:
+			_polyline(PackedVector2Array([bc + Vector2(sx * br * 0.26, -br * 0.86), bc + Vector2(sx * br * 0.4, -br * 0.3), bc + Vector2(sx * br * 0.4, br * 0.3), bc + Vector2(sx * br * 0.26, br * 0.86)]), seam, lw)
+			_polyline(PackedVector2Array([bc + Vector2(sx * br * 0.4, -br * 0.04), bc + Vector2(sx * br * 0.7, -br * 0.1), bc + Vector2(sx * br * 0.92, -br * 0.04)]), seam, lw)
+		_polyline(PackedVector2Array([bc + Vector2(-br * 0.38, -br * 0.3), bc + Vector2(br * 0.38, -br * 0.3)]), seam, lw * 0.8)
+		_polyline(PackedVector2Array([bc + Vector2(-br * 0.38, br * 0.3), bc + Vector2(br * 0.38, br * 0.3)]), seam, lw * 0.8)
 		return
 	# Galo em cima da bola (Tottenham)
 	if sym == "rooster_ball":
@@ -797,6 +799,8 @@ func _border(poly: PackedVector2Array, inner: PackedVector2Array, ring: bool, sp
 	var c3: Color = sp["c3"]
 	var c1: Color = sp["c1"]
 	var edge := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.15 else c1.lightened(0.3)
+	if sp["bc"] != null:
+		edge = sp["bc"]
 	var logo := bool(sp["logo"])
 	# Contorno escuro por fora: recorta o escudo de qualquer fundo (tema claro ou escuro)
 	if b != "none" and s >= 20.0 and not logo:
@@ -986,17 +990,17 @@ static func unit_shape(shape: String) -> PackedVector2Array:
 				pts.append(Vector2(0.5 + cos(a) * 0.4, 0.56 + sin(a) * 0.42))
 			pts.append(Vector2(0.1, 0.56))
 		"barca":
-			# Ânfora: pontas do alto abertas para fora, topo côncavo, cintura na faixa FCB e fundo bojudo em ponta
+			# Ânfora: pontas do alto um pouco abertas, topo côncavo, cintura na faixa FCB e fundo bojudo em ponta
 			for i in 13:
-				pts.append(_bezier(Vector2(0.02, 0.0), Vector2(0.5, 0.16), Vector2(0.98, 0.0), i / 12.0))
+				pts.append(_bezier(Vector2(0.05, 0.02), Vector2(0.5, 0.15), Vector2(0.95, 0.02), i / 12.0))
 			for i in range(1, 9):
-				pts.append(_bezier(Vector2(0.98, 0.0), Vector2(0.86, 0.2), Vector2(0.87, 0.42), i / 8.0))
+				pts.append(_bezier(Vector2(0.95, 0.02), Vector2(0.87, 0.2), Vector2(0.875, 0.42), i / 8.0))
 			for i in range(1, 14):
-				pts.append(_bezier(Vector2(0.87, 0.42), Vector2(0.97, 0.78), Vector2(0.5, 0.99), i / 13.0))
+				pts.append(_bezier(Vector2(0.875, 0.42), Vector2(0.95, 0.8), Vector2(0.5, 0.985), i / 13.0))
 			for i in range(1, 14):
-				pts.append(_bezier(Vector2(0.5, 0.99), Vector2(0.03, 0.78), Vector2(0.13, 0.42), i / 13.0))
+				pts.append(_bezier(Vector2(0.5, 0.985), Vector2(0.05, 0.8), Vector2(0.125, 0.42), i / 13.0))
 			for i in range(1, 8):
-				pts.append(_bezier(Vector2(0.13, 0.42), Vector2(0.14, 0.2), Vector2(0.02, 0.0), i / 8.0))
+				pts.append(_bezier(Vector2(0.125, 0.42), Vector2(0.13, 0.2), Vector2(0.05, 0.02), i / 8.0))
 		"badge":
 			# Escudo moderno de competição: cantos de cima arredondados, laterais retas e ponta suave
 			var rr := 0.12
