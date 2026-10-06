@@ -264,9 +264,11 @@ func _render(s: float) -> void:
 		for pp: PackedVector2Array in CrestArt.polys(String(sp["sym_top"])):
 			_poly(_xf_c(pp, tc0, box.size.x * 0.115), tcol)
 	if wordmark != "":
-		var wy := 0.79 if shape != "badge" else 0.74
+		var wy := 0.79 if shape != "badge" else 0.71
 		var ink: Color = sp["sc"] if sp["sc"] != null else contrast(c1, c2, c3)
-		_text_center(wordmark, box.position + box.size * Vector2(0.5, wy), box.size.x * (0.64 if shape in ROUNDISH or shape == "badge" else 0.8), box.size.y * 0.13, ink)
+		# No escudo a ponta afina embaixo: nome mais estreito para não encostar na borda
+		var ww := 0.64 if shape in ROUNDISH else (0.58 if shape == "badge" else 0.8)
+		_text_center(wordmark, box.position + box.size * Vector2(0.5, wy), box.size.x * ww, box.size.y * 0.13, ink)
 	# Borda
 	_border(poly, inner, ring, sp, s)
 	# Texto do anel
