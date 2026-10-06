@@ -51,6 +51,18 @@ static func asking_price(world: GameWorld, p: Player, memo: Dictionary = {}) -> 
 		mult *= 0.85
 	if not world.is_user_club(club.id) and world.has_user():
 		mult *= [0.92, 1.0, 1.1][world.difficulty]
+		# Quem compra muda o preço (a mesma régua do mercado entre os clubes da IA): clube pequeno
+		# não segura quem recebe proposta de gigante; clube grande não precisa vender titular, e
+		# craque só sai por loucura. Contrato longo encarece.
+		var gap := MarketAI.power(world.user_club()) / maxf(0.05, MarketAI.power(club))
+		if gap >= 1.6:
+			mult *= 0.92
+		elif gap <= 0.7 and p.squad_status <= Player.STATUS_STARTER:
+			mult *= 1.35
+		if p.squad_status == Player.STATUS_STAR and gap < 1.2:
+			mult *= 1.4
+		if years >= 4:
+			mult *= 1.08
 	return Valuation.round_value(p.value * mult)
 
 
@@ -171,10 +183,23 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	n["n"] = int(n["n"]) + 1
 	neg[key] = n
 	world.stats["neg"] = neg
+	# Multa rescisória (a do contrato ou a implícita dos titulares na Espanha e em Portugal): pagou à
+	# vista, o clube não tem como segurar. Só falta convencer o jogador.
+	var clause := MarketAI._clause_of(seller, p)
+	if clause > 0 and int(deal.get("inst", 1)) <= 1 and fee >= clause and swap_players(world, deal).is_empty():
+		n["lb"] = 0
+		return {"result": "accepted", "fee": fee, "clause": true,
+			"msg": "Multa rescisória paga: o %s não pode recusar. Agora é convencer %s." % [seller.short_name, p.display_name()]}
 	var block := sale_block(world, seller, user, p)
 	if block != "":
-		return {"result": "rejected", "fee": 0, "msg": block}
+		var hint := " A multa rescisória é %s." % Fmt.money(clause) if clause > 0 else ""
+		return {"result": "rejected", "fee": 0, "msg": block + hint}
 	var ask := asking_price(world, p)
+	var gap := MarketAI.power(user) / maxf(0.05, MarketAI.power(seller))
+	# Jogador que quer muito a mudança para um clube maior força a saída: o clube cede um pouco.
+	var forcing := gap >= 1.3 and interest(world, p, user) >= 0.8
+	if forcing:
+		ask = int(ask * 0.93)
 	# Clube não vende titular absoluto para rival direto, exceto por muito dinheiro.
 	if seller.is_rival(user.id) and p.squad_status <= Player.STATUS_STARTER:
 		ask = int(ask * 1.4)
@@ -195,9 +220,13 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 	var swap_total := swap_value(world, swaps, seller)
 	var value := deal_value(fee, deal) + swap_total
 	var with_swap := "" if swaps.is_empty() else " (com a troca)"
-	if value >= ask:
+	# Palavra dada: o que o clube pediu na contraproposta (nesta janela) ele aceita se você cobrir.
+	var ctr := float(n.get("ctr", 0.0)) if int(n.get("cy", -1)) == world.year * 10 + (1 if world.transfer_window_open() else 0) else 0.0
+	if value >= ask or (ctr > 0.0 and value >= ctr * 0.995):
 		n["lb"] = 0
-		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!" % [seller.short_name, with_swap]}
+		n.erase("ctr")
+		var why := " %s forçou a saída." % p.display_name() if forcing and value < ask / 0.93 else ""
+		return {"result": "accepted", "fee": fee, "msg": "%s aceitou a proposta%s!%s" % [seller.short_name, with_swap, why]}
 	if value < ask * 0.6:
 		n["lb"] = int(n.get("lb", 0)) + 1
 		if int(n["lb"]) >= 2:
@@ -210,6 +239,12 @@ static func user_bid(world: GameWorld, p: Player, fee: int, deal: Dictionary = {
 		var cash_f := maxf(0.5, deal_value(1_000_000, deal) / 1_000_000.0)
 		var counter := Valuation.round_value(fee + (target - value) / cash_f)
 		counter = maxi(counter, fee + 1000)
+		# Não volta atrás: a nova contraproposta nunca passa da anterior.
+		if ctr > 0.0:
+			counter = mini(counter, Valuation.round_value(fee + maxf(0.0, ctr - value) / cash_f))
+			target = minf(target, ctr)
+		n["ctr"] = target
+		n["cy"] = world.year * 10 + (1 if world.transfer_window_open() else 0)
 		var alt := ""
 		if int(deal.get("inst", 1)) > 1:
 			var cash_deal := deal.duplicate()
@@ -279,7 +314,8 @@ static func user_terms(world: GameWorld, p: Player, wage: int, years: int, deal:
 		return {"result": "rejected", "wage": demand, "msg": "Folha salarial estourada: a diretoria limita a %s/mês." % Fmt.money(user.wage_budget)}
 	if wage >= demand:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou os termos!" % p.display_name()}
-	if wage >= demand * 0.9 and world.rng.randf() < 0.5:
+	# Perto do pedido, o empresário decide de uma vez (insistir com o mesmo valor não muda a resposta).
+	if wage >= demand * 0.9 and absi(hash([p.id, user.id, world.year, "termos"])) % 100 < 50:
 		return {"result": "accepted", "wage": wage, "msg": "%s aceitou, mesmo pedindo um pouco mais." % p.display_name()}
 	return {"result": "counter", "wage": demand, "msg": ("%s quer %s por %d ano." if years == 1 else "%s quer %s por %d anos.") % [p.display_name(), Fmt.money_month(demand), years]}
 

@@ -277,8 +277,9 @@ func _summary(w: GameWorld, p: Player, own: bool) -> Control:
 		card.add_child(UIKit.kv("Papel no elenco", Player.STATUS_NAMES[p.squad_status]))
 	else:
 		card.add_child(UIKit.kv("Situação", "Livre, sem taxa"))
-	if p.release_clause > 0 and p.club_id >= 0:
-		card.add_child(UIKit.kv("Multa rescisória", Fmt.money(p.release_clause)))
+	var rc := MarketAI._clause_of(w.club(p.club_id), p) if p.club_id >= 0 else 0
+	if rc > 0:
+		card.add_child(UIKit.kv("Multa rescisória", Fmt.money(rc)))
 	if p.transfer_listed:
 		card.add_child(UIKit.kv("À venda por", Fmt.money(TransferManager.asking_price(w, p)), UIColors.GREEN))
 	elif not own and p.club_id >= 0 and p.loan.is_empty():
