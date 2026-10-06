@@ -6,6 +6,11 @@ extends BaseScreen
 const PACE: Array[float] = [1.25, 0.32, 0.08] # segundos por minuto de jogo
 const PACE_NAMES: Array[String] = ["Normal", "Rápido", "Turbo"]
 const FEED_MAX := 70
+const PITCH_COMPACT := 0.23 # fração da altura do campo (deitado) quando os lances estão em destaque
+const FEED_FS := 24 # corpo da narração
+const FEED_FS_NEW := 27 # lance mais recente, em cima
+const FEED_MIN_H := 130.0 # altura mínima da narração/abas embaixo do campo
+const PITCH_MIN_TALL := 320.0 # em pé o campo parte disso e cresce com o espaço que sobra
 const TEMPO: Array[float] = [1.45, 2.3, 4.2] # velocidade do motor visual em cada ritmo
 
 var _sim: MatchSimulation
@@ -33,7 +38,13 @@ var _shown_score: Array[int] = [0, 0] # placar mostrado: o gol só entra quando 
 var _colors: Array[Color] = []
 var _vis_rng := RandomNumberGenerator.new()
 var _last_phase: Dictionary = {}
-var _play_delay := 0.0 # quanto a jogada encenada no campo ainda leva (s): a narração acompanha
+## Narração presa ao campo: cada lance encenado tem marcos (começo, momento decisivo, apito do
+## pênalti) e as linhas dele só saem quando a bola chega lá.
+var _gates: Dictionary = {} # id do marco -> _elapsed quando o campo passou por ele
+var _ev_gate: Dictionary = {} # índice do evento em _sim.events -> {role, s, h, f}
+var _gate_clock := 0.0 # só anda com o campo rodando (pausa e janelas não estouram o limite)
+var _beat_n := 0
+var _busy_wait := 0.0
 var _stadium: Dictionary = {}
 var _highlight_timer := 0.0
 var _ticker_t := 1.5
@@ -46,11 +57,6 @@ var _strip_chips: Array = [] # {e, panel, score, info, box, flash, total}
 var _strip_t := 0.0
 var _strip_hold := 0.0
 var _strip_x := 0.0
-## Motor posicional ligado: o campo reproduz os quadros do LiveEngine (trecho do minuto com os
-## lances importantes em velocidade quase real; minutos calmos em ritmo acelerado).
-var _live := false
-var _live_start := 0.0
-var _live_speed := 1.0
 var _sub_out := -1
 var _built := false
 var _tab := "feed" # feed | stats | round | table
@@ -59,6 +65,22 @@ var _other_seen: Dictionary = {} # índice da entrada -> gols já anunciados
 var _day_entries: Array = [] # outros jogos do mesmo país na data (fora a competição do usuário)
 var _stat_marks: Dictionary = {}
 var _swapped := false
+var _bug: Control # selo da emissora + "AO VIVO"
+var _l3: PanelContainer # tarja do gol
+## Auxiliar durante o jogo: o que já disse e a sugestão que está na tela.
+var _aux_state: Dictionary = {}
+var _aux_bar: PanelContainer
+var _aux_text: Label
+var _aux_btn: Button
+var _aux_act: Dictionary = {}
+var _aux_timer := 0.0
+## Replay dos gols: recortes gravados pelo PitchMotion (chave do gol -> recorte), a linha do gol
+## na narração (para o botão "Rever") e o que fazer quando o replay acaba.
+var _clips: Dictionary = {}
+var _goal_rows: Dictionary = {}
+var _replay_on := false
+var _replay_after: Callable = Callable()
+var _pressure_side := -1
 
 # Nós
 var _root: VBoxContainer
@@ -69,6 +91,7 @@ var _clock_lbl: Label
 var _home_scorers: Label
 var _away_scorers: Label
 var _ticker: Label
+var _board: ScoreboardView # placar da transmissão (desenha o estado; os rótulos acima são dele)
 var _pitch: PitchView
 var _poss_home: ColorRect
 var _poss_away: ColorRect
@@ -84,10 +107,12 @@ var _play_btn: Button
 var _speed_btn: Button
 var _tac_btn: Button
 var _shout_btn: Button = null
+var _sound_btn: Button = null
 var _skip_btn: Button
 var _overlay: GoalOverlay
 var _tac_box: VBoxContainer
 var _momentum: MomentumView
+var _conditions: Control
 var _tabs_row: HBoxContainer
 var _tab_scroll: ScrollContainer
 var _tab_box: VBoxContainer
@@ -102,14 +127,118 @@ func on_show() -> void:
 	if not _built:
 		_build()
 	set_process(true)
+	_set_live(true)
 
 
 func on_hide() -> void:
 	set_process(false)
+	Sfx.crowd_stop()
+	_set_live(false)
 
 
+func _exit_tree() -> void:
+	_set_live(false)
+
+
+func _set_live(on: bool) -> void:
+	if is_instance_valid(UIManager.main) and not UIManager.main.is_queued_for_deletion() and UIManager.main.has_method("set_live"):
+		UIManager.main.set_live(on)
+
+
+
+## Chamado quando a tela troca de ponto de quebra (girar o aparelho): só rearruma.
 func refresh() -> void:
-	pass
+	if _built:
+		_responsive_layout()
+
+
+var _wide_body: HBoxContainer = null
+var _field_nodes: Array[Control] = []
+
+
+## Paisagem e tablet: campo e números à esquerda, abas e narração numa coluna à direita.
+## No celular em retrato fica tudo empilhado (o placar em cima e os controles embaixo sempre).
+func _responsive_layout() -> void:
+	var wide := UILayout.is_wide() and UILayout.is_landscape()
+	var short_view := wide and get_viewport_rect().size.y < 720.0
+	# Em paisagem no celular, preserve campo e comandos. Os detalhes seguem no painel.
+	# Em pé com os lances em destaque (ou só narração), a linha de estádio e clima sai do placar:
+	# a abertura da narração já diz isso.
+	var compact := not wide and AppSettings.match_view != 1
+	if is_instance_valid(_conditions):
+		_conditions.visible = not short_view and not compact
+	if is_instance_valid(_stats_lbl):
+		_stats_lbl.visible = not short_view
+	if is_instance_valid(_momentum):
+		_momentum.visible = not short_view
+	# O campo é o protagonista: em pé ele fica vertical e ocupa a maior parte da altura.
+	# Com os lances em destaque (padrão), o campo fica deitado e baixo em pé também.
+	_pitch.horizontal = wide or AppSettings.match_view == 0
+	_pitch.custom_minimum_size.y = _pitch_height()
+	if not wide:
+		# Em pé o campo cresce com o espaço que sobra, mas a narração sempre fica com umas
+		# linhas à vista: com gols no placar ela sumia atrás da barra de botões.
+		_pitch.custom_minimum_size.y = minf(_pitch_height(), PITCH_MIN_TALL)
+		# Com os lances em destaque, o espaço que sobra vai para a narração, não para o campo.
+		var pb := _pitch.get_parent() as Control
+		pb.size_flags_vertical = Control.SIZE_EXPAND_FILL if AppSettings.match_view == 1 else Control.SIZE_FILL
+		pb.size_flags_stretch_ratio = 6.0
+	if wide == (_wide_body != null):
+		return
+	var pitch_box := _pitch.get_parent()
+	var tabs_box := _tabs_row.get_parent()
+	# Keep stable references: after rotation these nodes no longer belong to _root.
+	# Looking them up by sibling index could select the wide container itself and
+	# delete the goal banner when rotating back to portrait.
+	var right_nodes: Array = [tabs_box, _feed_scroll, _tab_scroll]
+	if wide:
+		var at := pitch_box.get_index()
+		_wide_body = UIKit.hbox(0)
+		_wide_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		var lv := UIKit.vbox(0)
+		lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lv.size_flags_stretch_ratio = 1.4
+		var rv := UIKit.vbox(0)
+		rv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for n: Node in _field_nodes:
+			n.get_parent().remove_child(n)
+			lv.add_child(n)
+		for n: Node in right_nodes:
+			_root.remove_child(n)
+			rv.add_child(n)
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL
+		_wide_body.add_child(lv)
+		var sep := ColorRect.new()
+		sep.color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+		sep.custom_minimum_size.x = 1
+		sep.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_wide_body.add_child(sep)
+		_wide_body.add_child(rv)
+		_root.add_child(_wide_body)
+		_root.move_child(_wide_body, at)
+	else:
+		var at := _wide_body.get_index()
+		var order: Array = _field_nodes + right_nodes
+		for n: Node in order:
+			n.get_parent().remove_child(n)
+			_root.add_child(n)
+			_root.move_child(n, at)
+			at += 1
+		(pitch_box as Control).size_flags_vertical = Control.SIZE_EXPAND_FILL if AppSettings.match_view == 1 else Control.SIZE_FILL
+		_root.remove_child(_wide_body)
+		_wide_body.queue_free()
+		_wide_body = null
+
+
+## Altura do campo: deitado ele enche a coluna. Em pé, com os lances em destaque, é uma faixa
+## deitada de ~1/4 da tela; com o campo grande, fica vertical com metade da tela.
+func _pitch_height() -> float:
+	if UILayout.is_wide() and UILayout.is_landscape():
+		return 120.0 if get_viewport_rect().size.y < 720.0 else 220.0
+	var h := get_viewport_rect().size.y
+	if AppSettings.match_view == 0:
+		return clampf(h * PITCH_COMPACT, 250.0, 380.0)
+	return clampf(h * 0.5, 420.0, 760.0)
 
 
 # ---------------------------------------------------------------------------
@@ -138,15 +267,15 @@ func _build() -> void:
 		elif f.is_league() and user_nation != "" and w.league(f.comp) != null and w.league(f.comp).nation == user_nation:
 			_day_entries.append(e)
 	_user_side = 0 if _fx.home == w.user_club_id else 1
-	_pace = 0 if AppSettings.match_speed == AppSettings.SPEED_NORMAL else 1
+	_pace = {AppSettings.SPEED_NORMAL: 0, AppSettings.SPEED_TURBO: 2}.get(AppSettings.match_speed, 1)
 	var home: Club = _sim.teams[0].club
 	var away: Club = _sim.teams[1].club
 	_colors = _team_colors(home, away)
 	var seed_base := (_fx.home * 131 + _fx.away) * 7919 + _fx.round * 97 + w.year
 	_com = Commentary.new(_sim, home.stadium, seed_base)
-	if _sim.live == null and not _sim.started:
-		_sim.enable_live(seed_base * 13 + 7)
-	_live = _sim.live != null
+	# Motor da partida: o minuto a minuto estatístico (o mesmo dos outros jogos do mundo), encenado
+	# pelo PitchMotion.
+	_aux_state = {"seed": seed_base, "ev": 0, "given": {}}
 	_vis_rng.seed = seed_base * 31 + 17
 
 	_root = UIKit.vbox(0)
@@ -156,11 +285,12 @@ func _build() -> void:
 	# Campo
 	_pitch = PitchView.new()
 	_pitch.mode = "match"
-	_pitch.horizontal = true
-	_pitch.custom_minimum_size = Vector2(0, 440)
+	_pitch.horizontal = UILayout.is_wide() or AppSettings.match_view == 0
+	_pitch.custom_minimum_size = Vector2(0, _pitch_height())
 	_pitch.home_label = home.abbr
 	_pitch.away_label = away.abbr
-	_pitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pitch.mouse_filter = Control.MOUSE_FILTER_PASS # toque no campo pula o replay
+	_pitch.replay_skipped.connect(_on_replay_skipped)
 	_pitch.home_color = _colors[0]
 	_pitch.home_color2 = _colors[1]
 	_pitch.away_color = _colors[2]
@@ -173,11 +303,25 @@ func _build() -> void:
 	_pitch.ref_color2 = refc[1]
 	_pitch.motion = PitchMotion.new(seed_base * 7 + 3)
 	_pitch.motion.tempo = TEMPO[_pace]
+	_pitch.motion.on_mark = _on_mark
 	_stadium = StadiumStyle.for_match(w, _fx, home, away, _sim.neutral, _sim.attendance, seed_base)
+	StadiumStyle.apply_weather(_stadium, _sim.wx)
 	_pitch.stadium = _stadium
-	_root.add_child(UIKit.margin(_pitch, 0, 6, 0, 4))
+	_pitch.classic = AppSettings.match_gfx == 0
+	# Torcida: cada clube com o seu som, a visitante na fatia dela do estádio
+	Sfx.crowd_start(CrowdProfile.for_club(home), CrowdProfile.for_club(away), float(_stadium.get("fill", 0.7)), float(_stadium.get("away_share", 0.1)))
+	_add_field_node(UIKit.margin(_pitch, 0, 6, 0, 4))
+	# Tarja do gol por cima do pé do campo (fora do fluxo: não empurra a narração para baixo).
+	_l3 = _build_l3()
+	_l3.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_l3.offset_left = 8
+	_l3.offset_right = -8
+	_l3.offset_bottom = -6
+	_l3.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_l3.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pitch.add_child(_l3)
 	if not _div_entries.is_empty() or not _day_entries.is_empty():
-		_root.add_child(UIKit.margin(_build_strip(), 8, 0, 8, 4))
+		_add_field_node(UIKit.margin(_build_strip(), 8, 0, 8, 4))
 		_ticker.visible = false
 	# Posse e números
 	_stats_box = UIKit.vbox(4)
@@ -209,12 +353,12 @@ func _build() -> void:
 	_stats_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_stats_box.add_child(_stats_lbl)
 	_momentum = MomentumView.new()
-	_momentum.custom_minimum_size = Vector2(0, 50)
+	_momentum.custom_minimum_size = Vector2(0, 30)
 	_momentum.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_momentum.home_color = _side_color(0)
 	_momentum.away_color = _side_color(1)
 	_stats_box.add_child(_momentum)
-	_root.add_child(UIKit.margin(_stats_box, 20, 2, 20, 6))
+	_add_field_node(UIKit.margin(_stats_box, 20, 0, 20, 2))
 	# Abas: lances, números, outros jogos e tabela ao vivo (o jogo segue rolando em todas)
 	_tabs_row = UIKit.hbox(6)
 	_root.add_child(UIKit.margin(_tabs_row, 14, 0, 14, 4))
@@ -224,7 +368,8 @@ func _build() -> void:
 	_feed_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_feed_scroll.scroll_deadzone = 14
 	_feed_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_feed = UIKit.vbox(8)
+	_feed_scroll.custom_minimum_size.y = FEED_MIN_H
+	_feed = UIKit.vbox(12)
 	_feed.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_feed_scroll.add_child(UIKit.margin(_feed, 18, 6, 18, 12))
 	(_feed.get_parent() as Control).size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -233,6 +378,7 @@ func _build() -> void:
 	_tab_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_tab_scroll.scroll_deadzone = 14
 	_tab_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_tab_scroll.custom_minimum_size.y = FEED_MIN_H
 	_tab_scroll.visible = false
 	_tab_box = UIKit.vbox(8)
 	_tab_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -240,13 +386,17 @@ func _build() -> void:
 	tm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_tab_scroll.add_child(tm)
 	_root.add_child(_tab_scroll)
+	# Sugestão do auxiliar (aparece quando ele tem algo a propor)
+	_root.add_child(_build_aux_bar())
 	# Controles
 	_controls_panel = PanelContainer.new()
 	_controls_panel.theme_type_variation = "BottomBar"
-	_controls = UIKit.hbox(8)
+	_controls = UIKit.hbox(UITokens.S1)
 	_controls_panel.add_child(_controls)
 	_root.add_child(_controls_panel)
 	_build_controls()
+	_responsive_layout()
+	_apply_match_view()
 	# Comemoração por cima de tudo
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
@@ -264,180 +414,128 @@ func _build() -> void:
 	var scat := "stadium_" + String(_stadium.get("kind", ""))
 	if DatabaseManager.commentary().has(scat):
 		_add_line(_com.extra_line(scat, "info", 0, 1))
-	if not _sim.started and _sim.can_talk(_user_side):
-		_open_talk.call_deferred(false)
+	if not _sim.started:
+		# Abertura da transmissão e, depois dela, a palestra
+		_open_intro.call_deferred()
+
+
+func _add_field_node(node: Control) -> void:
+	_field_nodes.append(node)
+	_root.add_child(node)
+
+
+func _open_intro() -> void:
+	BroadcastIntro.show(world(), _sim, _fx, _stadium, func():
+		if not _sim.started and _sim.can_talk(_user_side):
+			_open_talk(false), [_colors[0], _colors[1], _colors[2], _colors[3]])
+
+
+## Texto do selo da emissora: "AO VIVO", "INTERVALO" ou "FIM DE JOGO".
+func _set_bug(text: String, col: Color) -> void:
+	if _bug == null or _bug.get_child_count() < 2:
+		return
+	var l := _bug.get_child(1) as Label
+	l.text = text
+	l.add_theme_color_override(&"font_color", col)
+
+
+## Tarja de TV depois do gol: artilheiro, número do gol no jogo e na temporada.
+func _lower_third(ev: Dictionary) -> void:
+	var side: int = ev["s"]
+	var mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
+	if mp == null or _l3 == null:
+		return
+	var in_game := 0
+	for e in _sim.events:
+		if int(e["t"]) == MatchSimulation.EV_GOAL and int(e.get("p", -1)) == mp.p.id and int(e["s"]) == side and int(e["m"]) <= int(ev["m"]):
+			in_game += 1
+	var season_g: int = mp.p.stats[Player.S_GOALS] if mp.p.stats.size() > Player.S_GOALS else 0
+	var b := Broadcaster.for_competition(world(), _fx.comp)
+	(_l3.get_theme_stylebox(&"panel") as StyleBoxFlat).bg_color = b["c1"]
+	var name_l := _l3.get_node("R/V/N") as Label
+	var info_l := _l3.get_node("R/V/I") as Label
+	name_l.text = "%s  %s" % [mp.p.display_name().to_upper(), Fmt.minute(int(ev["m"]), int(ev["h"]))]
+	name_l.add_theme_color_override(&"font_color", b["c2"])
+	var parts: Array = [_sim.teams[side].club.short_name, "%dº gol no jogo" % maxi(1, in_game), "%d na temporada" % (season_g + maxi(1, in_game))]
+	info_l.text = " · ".join(parts)
+	_l3.visible = true
+	_l3.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(_l3, "modulate:a", 1.0, 0.25)
+	tw.tween_interval(4.5)
+	tw.tween_property(_l3, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(func(): _l3.visible = false)
+
+
+func _build_l3() -> PanelContainer:
+	var p := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color("#101010")
+	st.border_color = Color(1, 1, 1, 0.25)
+	st.border_width_left = 6
+	st.content_margin_left = 12
+	st.content_margin_right = 12
+	st.content_margin_top = 6
+	st.content_margin_bottom = 6
+	p.add_theme_stylebox_override(&"panel", st)
+	var r := UIKit.hbox(10)
+	r.name = "R"
+	var v := UIKit.vbox(0)
+	v.name = "V"
+	var n := UIKit.label("", "H3")
+	n.name = "N"
+	v.add_child(n)
+	var i := UIKit.label("", "Small")
+	i.name = "I"
+	v.add_child(i)
+	r.add_child(v)
+	p.add_child(r)
+	p.visible = false
+	return p
 
 
 func _build_scoreboard(home: Club, away: Club) -> Control:
-	# Placar com a cara da competição: cores da liga/copa e um desenho próprio (faixa, TV,
-	# angular, cápsula ou clássico), como os grafismos de cada transmissão.
-	var th := ScoreboardTheme.for_competition(world(), _fx.comp)
-	var layout := String(th.get("layout", "faixa"))
-	var accent: Color = th["accent"]
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = "TopBar"
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = th["bg"]
-	sb.border_color = accent
-	sb.border_width_bottom = 4
-	sb.content_margin_left = 16
-	sb.content_margin_right = 16
-	sb.content_margin_top = 10
-	sb.content_margin_bottom = 8
-	match layout:
-		"tv":
-			sb.border_width_bottom = 0
-			sb.border_width_top = 3
-		"capsula":
-			sb.corner_radius_bottom_left = 26
-			sb.corner_radius_bottom_right = 26
-			sb.shadow_color = Color(accent.r, accent.g, accent.b, 0.35)
-			sb.shadow_size = 6
-		"classico":
-			sb.bg_color = Color("#0B0B0B")
-			sb.border_color = Color("#3A3A3A")
-			sb.border_width_bottom = 5
-	panel.add_theme_stylebox_override(&"panel", sb)
-	var v := UIKit.vbox(2)
-	panel.add_child(v)
-	var strip := PanelContainer.new()
-	var ss := StyleBoxFlat.new()
-	ss.bg_color = th["bg2"]
-	ss.set_corner_radius_all(8)
-	ss.content_margin_left = 10
-	ss.content_margin_right = 10
-	ss.content_margin_top = 3
-	ss.content_margin_bottom = 3
-	var caps_col: Color = th["caps"]
-	match layout:
-		"tv":
-			ss.bg_color = accent
-			ss.set_corner_radius_all(0)
-			caps_col = UIColors.on_color(accent)
-		"angular":
-			ss.bg_color = accent
-			ss.skew = Vector2(0.35, 0)
-			ss.set_corner_radius_all(0)
-			caps_col = UIColors.on_color(accent)
-		"capsula":
-			ss.set_corner_radius_all(20)
-			ss.border_color = accent
-			ss.set_border_width_all(2)
-		"classico":
-			ss.bg_color = Color("#000000")
-			ss.set_corner_radius_all(2)
-			ss.border_color = Color("#3A3A3A")
-			ss.set_border_width_all(1)
-			caps_col = Color("#FFB000")
-	strip.add_theme_stylebox_override(&"panel", ss)
-	var comp_lbl := UIKit.label(CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO", "Caps")
-	comp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	comp_lbl.clip_text = true
-	comp_lbl.add_theme_color_override(&"font_color", caps_col)
-	strip.add_child(comp_lbl)
-	v.add_child(strip)
-	var row := UIKit.hbox(8)
-	row.add_child(UIKit.crest(home, 58))
-	if layout == "tv" or layout == "angular":
-		row.add_child(_team_block(_colors[0], _colors[1], layout))
-	_home_name = UIKit.label(home.short_name, "H2")
-	_home_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_home_name.clip_text = true
-	row.add_child(_home_name)
-	var mid := UIKit.vbox(0)
-	var score_box := PanelContainer.new()
-	var sbx := StyleBoxFlat.new()
-	sbx.bg_color = th["bg2"]
-	sbx.border_color = accent
-	sbx.set_border_width_all(2)
-	sbx.set_corner_radius_all(10)
-	sbx.content_margin_left = 14
-	sbx.content_margin_right = 14
-	var score_col: Color = th["text"]
-	var clock_col := accent
-	match layout:
-		"tv":
-			sbx.bg_color = accent
-			sbx.set_corner_radius_all(0)
-			sbx.set_border_width_all(0)
-			score_col = UIColors.on_color(accent)
-		"angular":
-			sbx.skew = Vector2(0.22, 0)
-			sbx.set_corner_radius_all(0)
-			sbx.border_width_top = 0
-			sbx.border_width_bottom = 0
-			sbx.border_width_left = 5
-			sbx.border_width_right = 5
-		"capsula":
-			sbx.set_corner_radius_all(24)
-			sbx.set_border_width_all(3)
-			sbx.shadow_color = Color(accent.r, accent.g, accent.b, 0.45)
-			sbx.shadow_size = 8
-		"classico":
-			sbx.bg_color = Color("#050505")
-			sbx.border_color = Color("#FFB000").darkened(0.5)
-			sbx.set_corner_radius_all(3)
-			sbx.set_border_width_all(3)
-			score_col = Color("#FFB000")
-			clock_col = Color("#FFB000")
-	score_box.add_theme_stylebox_override(&"panel", sbx)
-	_score_lbl = UIKit.label("0 – 0", "Score")
-	_score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_score_lbl.add_theme_color_override(&"font_color", score_col)
-	score_box.add_child(_score_lbl)
-	mid.add_child(score_box)
-	_clock_lbl = UIKit.label("0'", "Accent" if layout != "classico" else "Mono")
-	_clock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_clock_lbl.add_theme_color_override(&"font_color", clock_col)
-	if layout == "tv":
-		# Relógio numa aba própria, como na barra de TV.
-		var tab := PanelContainer.new()
-		var tb := StyleBoxFlat.new()
-		tb.bg_color = th["bg2"]
-		tb.content_margin_left = 8
-		tb.content_margin_right = 8
-		tab.add_theme_stylebox_override(&"panel", tb)
-		tab.add_child(_clock_lbl)
-		mid.add_child(tab)
+	# Placar da transmissão com a cara da competição (desenho e cores dos dados, mods ou Editor).
+	var title := CompText.fixture_title(world(), _fx).to_upper() if _fx.comp != "F" else "AMISTOSO"
+	_conditions = _conditions_row()
+	_board = ScoreboardView.make(world(), _fx.comp, title, home, away, _colors, _conditions, true, _fx.leg == 1)
+	_score_lbl = _board.score_proxy
+	_clock_lbl = _board.clock_proxy
+	_home_name = _board.home_name
+	_away_name = _board.away_name
+	_home_scorers = _board.home_scorers
+	_away_scorers = _board.away_scorers
+	_ticker = _board.ticker
+	_bug = _board.bug
+	return _board
+
+
+## Condições do jogo: clima (ícone), temperatura, dia/noite, altitude e público.
+func _conditions_row() -> Control:
+	var body := UIKit.vbox(UITokens.S1)
+	var venue := UIKit.label("Campo neutro" if _sim.neutral else _sim.teams[0].club.stadium, "Small", true)
+	venue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(venue)
+	var row := UIKit.hbox(UITokens.S1)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var wx: Dictionary = _sim.wx
+	var bits: Array = []
+	if not wx.is_empty():
+		row.add_child(WeatherIcon.new(String(wx.get("kind", "cloud")), bool(wx.get("night", false)), 26))
+		bits.append("%s · %d°C" % [Weather.NAMES.get(String(wx.get("kind", "")), ""), int(wx.get("temp", 20))])
+		bits.append("%dh" % int(wx.get("hour", 16)))
+		if wx.has("alt"):
+			bits.append("%s m de altitude" % Fmt.thousands(int(wx["alt"])))
+	if _sim.attendance > 0:
+		bits.append("%s torcedores" % Fmt.thousands(_sim.attendance))
 	else:
-		mid.add_child(_clock_lbl)
-	row.add_child(mid)
-	_away_name = UIKit.label(away.short_name, "H2")
-	_away_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_away_name.clip_text = true
-	row.add_child(_away_name)
-	if layout == "tv" or layout == "angular":
-		row.add_child(_team_block(_colors[2], _colors[3], layout))
-	row.add_child(UIKit.crest(away, 58))
-	v.add_child(row)
-	var sc := UIKit.hbox(8)
-	_home_scorers = UIKit.label("", "Small", true)
-	sc.add_child(_home_scorers)
-	_away_scorers = UIKit.label("", "Small", true)
-	_away_scorers.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	sc.add_child(_away_scorers)
-	v.add_child(sc)
-	_ticker = UIKit.label("", "Small")
-	_ticker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_ticker.clip_text = true
-	v.add_child(_ticker)
-	return panel
-
-
-## Bloco com as duas cores do time ao lado do nome (placares de TV e angular).
-func _team_block(c1: Color, c2: Color, layout: String) -> Control:
-	var p := PanelContainer.new()
-	var st := StyleBoxFlat.new()
-	st.bg_color = c1
-	st.border_color = c2
-	st.border_width_bottom = 5
-	if layout == "angular":
-		st.skew = Vector2(0.3, 0)
-	p.add_theme_stylebox_override(&"panel", st)
-	p.custom_minimum_size = Vector2(12, 44)
-	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	return p
+		bits.append("portões fechados")
+	var l := UIKit.label(" · ".join(bits), "Small", true)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(l)
+	body.add_child(row)
+	return body
 
 
 func _build_controls() -> void:
@@ -453,35 +551,121 @@ func _build_controls() -> void:
 		cont.custom_minimum_size.y = 92
 		_controls.add_child(cont)
 		return
-	_play_btn = UIKit.button("", "", _toggle_play, "pause")
-	_speed_btn = UIKit.button(PACE_NAMES[_pace], "", _cycle_speed, "fast")
-	_tac_btn = UIKit.button("Tática", "", _open_tactics, "tactics")
-	_shout_btn = UIKit.button("Gritar", "", _open_shouts, "whistle")
-	_skip_btn = UIKit.button("Fim", "", _confirm_skip, "skip")
-	_skip_btn.text = ""
-	_skip_btn.tooltip_text = "Ir para o fim"
-	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, _skip_btn]:
-		var icon_only: bool = b == _play_btn or b == _skip_btn
-		b.size_flags_horizontal = Control.SIZE_FILL if icon_only else Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size = Vector2(88 if icon_only else 0, 80)
-		b.add_theme_font_size_override(&"font_size", 21)
+	# As três decisões do jogo em destaque; tempo e o resto, compactos (DESIGN.md › Partida).
+	_play_btn = _ctl_btn("Pausar", "pause", _toggle_play)
+	_speed_btn = _ctl_btn(PACE_NAMES[_pace], "fast", _cycle_speed)
+	for b in [_play_btn, _speed_btn]:
+		_compact(b)
+	_tac_btn = _ctl_btn("Tática", "tactics", _open_tactics)
+	_shout_btn = _ctl_btn("Instruções", "whistle", _open_shouts)
+	var sub := _ctl_btn("Substituir", "swap", _open_subs)
+	var more := _ctl_btn("Mais", "menu", _match_menu)
+	_compact(more)
+	_sound_btn = null
+	_skip_btn = null
+	for b in [_play_btn, _speed_btn, _tac_btn, _shout_btn, sub, more]:
 		_controls.add_child(b)
 	_update_play_button()
+
+
+## Controle secundário (tempo, menu): mais estreito e discreto, mas com o nome embaixo do ícone
+## como os outros (só o ícone deixava a barra desigual e o botão de tempo sem dizer o ritmo).
+func _compact(b: Button) -> void:
+	b.size_flags_horizontal = Control.SIZE_FILL
+	b.custom_minimum_size.x = UITokens.H_BUTTON + 12
+	b.theme_type_variation = "GhostButton"
+	b.tooltip_text = b.text
+	b.add_theme_font_size_override(&"font_size", 15)
+
+
+## Menu do resto: painel com os números, som e ir para o fim.
+func _match_menu() -> void:
+	var v := UIKit.vbox(0)
+	v.add_child(UIKit.label("Partida", "Section"))
+	v.add_child(UIKit.gap(UITokens.S1))
+	var muted := Sfx.match_muted()
+	var items := [
+		["Painel da partida", "Posse, finalizações, xG e notas dos jogadores", _open_panel],
+		["Ligar o som" if muted else "Desligar o som", "", _toggle_match_sound],
+		["Ir para o fim", "Simula o resto do jogo", _confirm_skip],
+	]
+	for it in items:
+		var box := UIKit.vbox(0)
+		box.add_child(UIKit.label(String(it[0]), "H3"))
+		if String(it[1]) != "":
+			box.add_child(UIKit.label(String(it[1]), "Muted"))
+		var cb: Callable = it[2]
+		var row := UIKit.tap_row(box, func():
+			UIManager.close_modal()
+			cb.call())
+		row.custom_minimum_size.y = UITokens.H_ROW
+		v.add_child(row)
+	UIManager.show_modal(v, true)
+
+
+## Painel da partida numa folha: os números sem tirar o campo da tela.
+func _open_panel() -> void:
+	var keep := _tab_box
+	var v := UIKit.vbox(UITokens.S2)
+	v.add_child(UIKit.label("Painel da partida", "Section"))
+	_tab_box = v
+	_render_stats_tab()
+	_tab_box = keep
+	UIManager.show_modal(v, true)
+
+
+## Botão da barra: ícone em cima e o nome embaixo (cabe em qualquer largura de celular).
+func _ctl_btn(text: String, icon_name: String, cb: Callable) -> Button:
+	var b := UIKit.button(text, "", cb, icon_name)
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size = Vector2(0, 88)
+	b.clip_text = false
+	b.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.add_theme_font_size_override(&"font_size", 17)
+	# Margem interna menor que a do botão comum: o nome inteiro cabe no celular.
+	for st in [&"normal", &"hover", &"pressed", &"hover_pressed", &"disabled"]:
+		var sb := b.get_theme_stylebox(st)
+		if sb != null:
+			var d := sb.duplicate()
+			d.content_margin_left = 6
+			d.content_margin_right = 6
+			b.add_theme_stylebox_override(st, d)
+	return b
+
+
+func _toggle_match_sound() -> void:
+	Sfx.set_match_muted(not Sfx.match_muted())
+	_update_sound_button()
+
+
+func _update_sound_button() -> void:
+	if _sound_btn == null or not is_instance_valid(_sound_btn):
+		return
+	if _sound_btn == null:
+		return
+	var muted := Sfx.match_muted()
+	_sound_btn.text = "Mudo" if muted else "Som"
+	_sound_btn.tooltip_text = "Ligar som da partida" if muted else "Desligar som da partida"
+	_sound_btn.modulate.a = 0.58 if muted else 1.0
 
 
 func _update_play_button() -> void:
 	if _play_btn == null or _done:
 		return
-	_play_btn.text = ""
 	if _halftime:
-		_play_btn.tooltip_text = "2º tempo"
+		_play_btn.text = "2º tempo"
 		_play_btn.icon = UIKit.icon("play")
 	elif _paused:
-		_play_btn.tooltip_text = "Seguir"
+		_play_btn.text = "Seguir"
 		_play_btn.icon = UIKit.icon("play")
 	else:
-		_play_btn.tooltip_text = "Pausar"
+		_play_btn.text = "Pausar"
 		_play_btn.icon = UIKit.icon("pause")
+	_play_btn.tooltip_text = _play_btn.text
+	if _play_btn.has_meta(&"compact"):
+		_play_btn.text = ""
 
 
 static func _cdist(a: Color, b: Color) -> float:
@@ -489,29 +673,77 @@ static func _cdist(a: Color, b: Color) -> float:
 
 
 func _team_colors(home: Club, away: Club) -> Array[Color]:
+	# No campinho cada time é a cor que mais aparece no uniforme (Grêmio é azul, não o branco do
+	# c1 das listras), com a outra cor de contorno. O visitante usa o uniforme que mais se
+	# distingue do mandante pela cor das bolinhas; se ainda ficar parecido, vai de neutro.
 	var hk := home.kit_home
-	var h1 := Color(String(hk.get("c1", home.color1)))
-	var h2 := Color(String(hk.get("c2", home.color2)))
-	var a1: Color
-	var a2: Color
-	# Visitante entra com o uniforme que mais contrasta com o do mandante (camisa e calção inteiros).
-	match KitDesign.away_choice(home, away):
-		"home":
-			a1 = Color(String(away.kit_home.get("c1", away.color1)))
-			a2 = Color(String(away.kit_home.get("c2", away.color2)))
-		"away":
-			a1 = Color(String(away.kit_away.get("c1", "#FFFFFF")))
-			a2 = Color(String(away.kit_away.get("c2", "#111111")))
-		"third":
-			var third := away.third_kit()
-			a1 = Color(String(third.get("c1", "#FFFFFF")))
-			a2 = Color(String(third.get("c2", "#111111")))
-		_:
-			var dom := KitDesign.dominant(hk)
-			a1 = Color("#F4F4F4") if dom.get_luminance() < 0.5 else Color("#15181D")
-			a2 = Color("#15181D") if dom.get_luminance() < 0.5 else Color("#F4F4F4")
-	var out: Array[Color] = [h1, h2, a1, a2]
+	var hd := _dot_colors(hk)
+	var kits: Array = []
+	var pref := KitDesign.away_choice(home, away)
+	for which in [pref, "home", "away", "third"]:
+		var k: Dictionary = away.kit_home if which == "home" else (away.kit_away if which == "away" else (away.third_kit() if which == "third" else {}))
+		if not k.is_empty():
+			kits.append(k)
+	var best: Array = []
+	var best_d := -1.0
+	for k in kits:
+		var dc := _dot_colors(k)
+		var d := KitDesign.delta_e(dc[0], hd[0])
+		if d >= DOT_MIN_DE:
+			best = dc
+			break
+		if d > best_d:
+			best_d = d
+			best = dc
+	if best.is_empty() or KitDesign.delta_e(best[0], hd[0]) < DOT_MIN_DE:
+		var dark: bool = (hd[0] as Color).get_luminance() >= 0.5
+		best = [Color("#15181D"), Color("#F4F4F4")] if dark else [Color("#F4F4F4"), Color("#15181D")]
+		if KitDesign.delta_e(best[0], hd[0]) < DOT_MIN_DE:
+			best = [Color("#F5D547"), Color("#15181D")]
+	var out: Array[Color] = [hd[0], hd[1], best[0], best[1]]
 	return out
+
+
+const DOT_MIN_DE := 32.0
+const GK_OPTS: Array[String] = ["#F28C28", "#3DBE7A", "#F5D547", "#9B5DE5", "#E84A8A", "#4EA8DE", "#15181D"]
+
+
+## Goleiro com cor própria: se a camisa dele lembrar a de algum dos dois times (ou o outro goleiro),
+## troca pela opção mais distante de todas.
+func _gk_color(c: Color, side: int) -> Color:
+	var avoid: Array = [_colors[0], _colors[2]]
+	var other := _sim.teams[1 - side].club.gk_kit()
+	if side == 1:
+		avoid.append(_gk_color(Color(String(other.get("c1", "#111111"))), 0))
+	var near := func(x: Color) -> float:
+		var m := 999.0
+		for a in avoid:
+			m = minf(m, KitDesign.delta_e(x, a))
+		return m
+	if near.call(c) >= 25.0:
+		return c
+	var best := c
+	var best_d := -1.0
+	for h in GK_OPTS:
+		var d: float = near.call(Color(h))
+		if d > best_d:
+			best_d = d
+			best = Color(h)
+	return best # diferença mínima (CIE ΔE) entre as bolinhas dos dois times
+
+
+## [cor da bolinha, cor do contorno] de um uniforme: a cor dominante e a que mais contrasta com ela.
+static func _dot_colors(k: Dictionary) -> Array:
+	var dom := KitDesign.dominant(k)
+	var ring := Color("#15181D") if dom.get_luminance() >= 0.5 else Color("#F4F4F4")
+	var best := 0.0
+	for sw in KitDesign.swatches(k):
+		var c: Color = sw[0]
+		var d := KitDesign.delta_e(c, dom)
+		if d > best and d > 25.0:
+			best = d
+			ring = c
+	return [dom, ring]
 
 
 func _side_color(side: int) -> Color:
@@ -537,7 +769,21 @@ func _process(delta: float) -> void:
 	_update_ticker(delta)
 	_update_strip(delta)
 	_refresh_tab_if_needed()
-	_pitch.motion.frozen = _paused or _halftime or _done or UIManager.has_modal()
+	if _aux_timer > 0.0 and not _paused and not _halftime:
+		_aux_timer -= delta
+		if _aux_timer <= 0.0:
+			_hide_aux()
+	# O replay roda mesmo com o jogo pausado (botão "Rever"), mas não por baixo de um modal.
+	_pitch.motion.frozen = UIManager.has_modal() or ((_paused or _halftime or _done) and not _replay_on)
+	if not _pitch.motion.frozen:
+		_gate_clock += delta
+	if _replay_on and not _pitch.motion.replaying:
+		_replay_on = false
+		_hold = minf(_hold, 0.25)
+		var after := _replay_after
+		_replay_after = Callable()
+		if after.is_valid():
+			after.call()
 	if _highlight_timer > 0.0:
 		_highlight_timer -= delta
 		if _highlight_timer <= 0.0:
@@ -545,6 +791,9 @@ func _process(delta: float) -> void:
 			_pitch.highlight_slot = -1
 	if _done or UIManager.has_modal():
 		return
+	# O relógio do minuto corre junto com a jogada e a narração (o minuto dura o maior dos dois).
+	if not (_halftime or _paused):
+		_clock -= delta
 	if _hold > 0.0:
 		_hold -= delta
 		return
@@ -559,6 +808,7 @@ func _process(delta: float) -> void:
 		_halftime = true
 		_update_play_button()
 		_update_board()
+		_set_bug("INTERVALO", Color("#FFC940"))
 		_show_halftime()
 		return
 	if _pending_shootout:
@@ -567,23 +817,22 @@ func _process(delta: float) -> void:
 		return
 	if _halftime or _paused:
 		return
-	_clock -= delta
 	if _clock > 0.0:
 		return
+	# No ritmo normal o próximo minuto espera a jogada encenada terminar (a bola não "teleporta").
+	if _pace == 0 and _pitch.motion.scripted_busy() and _busy_wait < 3.0:
+		_busy_wait += delta
+		return
 	_clock = PACE[_pace]
+	_busy_wait = 0.0
 	_advance()
 
 
 func _advance() -> void:
 	_sim.step()
-	# Primeiro o campo encena o lance; a narração do desfecho sai quando a jogada termina.
-	_play_delay = 0.0
-	if _live:
-		_play_live()
-	else:
-		_script_play()
+	# Primeiro o campo monta o lance; a narração de cada parte sai quando a bola chega nela.
+	_script_play()
 	_drain(false)
-	_play_delay = 0.0
 	_after_step()
 
 
@@ -606,6 +855,8 @@ func _after_step() -> void:
 		_announce_other_goals(_sim.minute, _sim.half)
 	_sync_slots()
 	_update_board()
+	if not _sim.finished:
+		_assistant_tick()
 
 
 ## Processa os eventos novos da simulação (inclusive os gerados por ajustes do usuário).
@@ -613,18 +864,50 @@ func _drain(silent: bool) -> void:
 	while _ev_index < _sim.events.size():
 		var ev: Dictionary = _sim.events[_ev_index]
 		_ev_index += 1
-		_handle_event(ev, silent)
+		_handle_event(ev, silent, _ev_gate.get(_ev_index - 1, {}))
+		_ev_gate.erase(_ev_index - 1)
 
 
 func _delay_scale() -> float:
 	return clampf(PACE[_pace] / 0.32, 0.3, 1.6)
 
 
-func _enqueue(line: Dictionary, ev: Dictionary, delay: float) -> void:
-	_queue.append({"at": _elapsed + delay, "line": line, "ev": ev})
+func _enqueue(line: Dictionary, ev: Dictionary, delay: float, gate: String = "") -> void:
+	var item := {"at": _elapsed + delay, "line": line, "ev": ev}
+	if gate != "":
+		item["gate"] = gate
+		item["rel"] = delay
+		item["lim"] = _gate_clock + 7.0 # nunca fica presa: se o campo não chegar lá, sai assim mesmo
+	_queue.append(item)
 
 
-func _handle_event(ev: Dictionary, silent: bool) -> void:
+func _on_mark(id: String) -> void:
+	_gates[id] = _elapsed
+
+
+const OUTCOME_STYLES: Array[String] = ["goal", "card_y", "card_r", "big", "var"]
+
+
+## Em que marco do campo cada linha do lance sai, e quanto depois dele.
+func _gate_for(g: Dictionary, line: Dictionary, d: float) -> Array:
+	var style := String(line.get("style", ""))
+	var outcome := d >= 0.5 or style in OUTCOME_STYLES
+	match String(g.get("role", "")):
+		"start":
+			return [g["s"], d * 0.6]
+		"hit":
+			return [g["h"], maxf(0.0, d - 0.2) + (0.5 if style in ["card_y", "card_r"] else 0.0)]
+		"pen":
+			return [g["f"], d * 0.6]
+		"pen_chance":
+			return [g["h"], maxf(0.0, d - 0.5)] if outcome else [g["f"], 0.9 + d]
+	# chance: a preparação sai enquanto a jogada se arma, o desfecho quando a bola chega.
+	if outcome:
+		return [g["h"], maxf(0.0, d - 0.5)]
+	return [g["s"], 0.25 + d * 1.5]
+
+
+func _handle_event(ev: Dictionary, silent: bool, g: Dictionary = {}) -> void:
 	var t: int = ev["t"]
 	var side: int = ev["s"]
 	if (t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL) and silent:
@@ -635,8 +918,8 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 	if t in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF, MatchSimulation.EV_EXTRA_TIME, MatchSimulation.EV_ET_SECOND]:
 		_pitch.motion.kickoff(0 if _sim.half % 2 == 1 else 1, true)
 		if not silent:
-			AudioManager.play("whistle", -4.0)
-	var scripted := _play_delay > 0.0 and t in SCRIPTED_EVENTS
+			Sfx.play("whistle", -4.0)
+	var gated := not g.is_empty() and not silent
 	for line in _com.lines_for(ev):
 		var style: String = line["style"]
 		if silent and style in ["normal", "chance", "info", "crowd", "var", "pundit", "reporter"] and t != MatchSimulation.EV_FULLTIME and t != MatchSimulation.EV_HALFTIME:
@@ -644,21 +927,19 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 		if silent:
 			_add_line(line)
 			continue
-		var d := float(line["delay"]) * _delay_scale()
-		if _live and ev.has("sec"):
-			# Narração no instante do lance dentro do trecho reproduzido
-			d = float(line["delay"]) * 0.3 + maxf(0.0, (float(ev["sec"]) - _live_start) / _live_speed)
-		elif scripted:
-			# Preparação no meio da jogada; desfecho quando a bola chega.
-			d = d + _play_delay if d > 0.0 or style in ["goal", "card_y", "card_r", "big"] else _play_delay * 0.5
-		_enqueue(line, ev, d)
+		if gated:
+			var gt := _gate_for(g, line, float(line["delay"]))
+			_enqueue(line, ev, float(gt[1]) * _delay_scale(), String(gt[0]))
+			continue
+		_enqueue(line, ev, float(line["delay"]) * _delay_scale())
 	if silent:
 		return
 	if t == MatchSimulation.EV_HALFTIME:
 		var an := _com.analysis_line(int(ev["m"]), int(ev["h"]))
 		if not an.is_empty():
 			_enqueue(an, {}, 1.2)
-	_on_event_visual(ev)
+	if not (gated and t == MatchSimulation.EV_KNOCK): # caído depois da falta: o campo já encena
+		_on_event_visual(ev)
 	# Destaque do protagonista no campo
 	var pid: int = ev.get("p", -1)
 	if pid >= 0 and side >= 0:
@@ -670,47 +951,169 @@ func _handle_event(ev: Dictionary, silent: bool) -> void:
 
 
 func _flush_lines() -> void:
-	while not _queue.is_empty() and float(_queue[0]["at"]) <= _elapsed:
+	while not _queue.is_empty():
+		var head: Dictionary = _queue[0]
+		if head.has("gate"):
+			var gid := String(head["gate"])
+			if not _gates.has(gid):
+				if _gate_clock < float(head["lim"]):
+					break
+				_gates[gid] = _elapsed
+			if float(_gates[gid]) + float(head["rel"]) > _elapsed:
+				break
+		elif float(head["at"]) > _elapsed:
+			break
 		var item: Dictionary = _queue.pop_front()
 		var line: Dictionary = item["line"]
 		var ev: Dictionary = item["ev"]
 		_add_line(line)
+		if String(line.get("style", "")) == "goal" and not ev.is_empty() and _feed.get_child_count() > 0:
+			_goal_rows[_goal_key(ev)] = _feed.get_child(0)
 		_on_line_shown(line, ev)
 
 
 func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
+	if is_instance_valid(_pitch) and _pitch.classic:
+		var sd := int(line.get("side", -1))
+		_pitch.show_caption(String(line.get("text", "")), _side_color(sd) if sd >= 0 else UIColors.MUTED)
 	if ev.is_empty():
 		return
 	var t: int = ev["t"]
 	var style: String = line["style"]
+	if line.has("hl") and _pace < 2:
+		_callout(String(line["hl"]), int(ev.get("s", -1)))
 	match style:
 		"goal":
 			_celebrate(ev)
 		"card_y", "card_r":
-			AudioManager.play("card", -6.0)
-			AudioManager.vibrate(25)
+			Sfx.crowd_event("card", int(ev["s"]))
+			Sfx.play("card", -6.0)
+			Sfx.vibrate(25)
 			_hold = maxf(_hold, 0.5 * _delay_scale())
 		"big":
 			if t == MatchSimulation.EV_PEN_SAVE or t == MatchSimulation.EV_PEN_MISS or t == MatchSimulation.EV_PENALTY_AWARDED:
-				AudioManager.play("chance", -4.0)
+				Sfx.play("chance", -4.0)
 				_hold = maxf(_hold, 0.9 * _delay_scale())
 		"chance":
+			Sfx.crowd_event("danger", int(ev["s"]))
+			if t == MatchSimulation.EV_SAVE and int(ev["s"]) == 1:
+				Sfx.crowd_event("save", 0) # defesa do goleiro da casa: aplausos
 			if t == MatchSimulation.EV_POST or (ev.has("x") and float(ev["x"].get("xg", 0.0)) >= 0.3):
-				AudioManager.play("chance", -8.0)
+				Sfx.play("chance", -8.0)
 		"var":
 			_hold = maxf(_hold, 0.8 * _delay_scale())
 	if t == MatchSimulation.EV_OFFSIDE and style == "big":
-		AudioManager.play("whistle", -8.0)
+		Sfx.play("whistle", -8.0)
 		_hold = maxf(_hold, 0.9 * _delay_scale())
+	if t == MatchSimulation.EV_FOUL:
+		Sfx.crowd_event("foul", int(ev["s"]))
 	if t == MatchSimulation.EV_HALFTIME:
-		AudioManager.play("whistle", -4.0)
+		Sfx.play("whistle", -4.0)
+		Sfx.crowd_event("half", 0)
 	elif t == MatchSimulation.EV_FULLTIME:
-		AudioManager.play("whistle_end", -3.0)
+		Sfx.play("whistle_end", -3.0)
+		var hs := int(_sim.score[0])
+		var as_ := int(_sim.score[1])
+		Sfx.crowd_event("end", 0 if hs >= as_ else 1)
+
+
+const CALLOUTS := {
+	"post": ["NA TRAVE!", "#FFE08A"], "post_bar": ["NO TRAVESSÃO!", "#FFE08A"], "post_inside_out": ["NÃO ENTROU!", "#FFE08A"],
+	"save_big": ["QUE DEFESA!", "#9AD0FF"], "save_double": ["DEFESA DUPLA!", "#9AD0FF"], "save_fingertip": ["PONTA DOS DEDOS!", "#9AD0FF"],
+	"save_one_on_one": ["FECHOU O GOL!", "#9AD0FF"], "miss_big": ["UUUUH!", "#FFFFFF"], "miss_sky": ["ISOLOU!", "#FFFFFF"],
+	"block_line": ["EM CIMA DA LINHA!", "#9AD0FF"], "block_last_ditch": ["SALVOU!", "#9AD0FF"], "var_goal": ["GOL?", "#FFFFFF"],
+	"var_off": ["ANULADO!", "#E5484D"], "offside_goal": ["IMPEDIDO!", "#E5484D"], "pen": ["PÊNALTI!", "#FFC940"],
+	"pen_save": ["DEFENDEU!", "#9AD0FF"], "pen_miss": ["PERDEU!", "#FFFFFF"], "red": ["EXPULSO!", "#E5484D"],
+}
+
+
+## Letreiro sobre o campo nos lances de destaque, com a reação da torcida.
+func _callout(kind: String, side: int) -> void:
+	var key := kind
+	if not CALLOUTS.has(key):
+		if kind.begins_with("save"):
+			key = "save_big"
+		elif kind.begins_with("miss"):
+			key = "miss_big"
+		elif kind.begins_with("post"):
+			key = "post"
+		elif kind.begins_with("block"):
+			key = "block_line"
+		else:
+			return
+	var c: Array = CALLOUTS[key]
+	_pitch.show_callout(String(c[0]), Color(String(c[1])), 1.5 if _pace == 0 else 1.1)
+	if key in ["post", "post_bar", "post_inside_out", "miss_big", "miss_sky", "var_off"] and side >= 0:
+		_pitch.crowd_jump = maxf(_pitch.crowd_jump, 0.45)
+		_pitch.crowd_side = side
+	Sfx.vibrate(15)
+
+
+func _goal_key(ev: Dictionary) -> String:
+	return "%d:%d:%d:%d" % [int(ev.get("h", 1)), int(ev.get("m", 0)), int(ev.get("s", 0)), int(ev.get("p", -1))]
+
+
+## Depois da comemoração: replay do lance (ritmos normal e rápido), a tarja do artilheiro
+## durante o replay e a saída de bola quando ele acaba.
+func _after_goal(ev: Dictionary) -> void:
+	var side := int(ev["s"])
+	var clip: Dictionary = _pitch.motion.goal_clip() if _pace < 2 else {}
+	if int(ev["t"]) == MatchSimulation.EV_GOAL:
+		_lower_third(ev)
+	var resume := func(): _pitch.motion.kickoff(1 - side, false)
+	if clip.is_empty():
+		resume.call()
+		return
+	var key := _goal_key(ev)
+	_clips[key] = clip
+	_add_replay_button(key)
+	_play_replay(clip, resume)
+
+
+func _play_replay(clip: Dictionary, after: Callable) -> void:
+	# Só narração: sem campo na tela, não há replay para mostrar.
+	var dur := _pitch.motion.start_replay(clip) if AppSettings.match_view != 2 else 0.0
+	if dur <= 0.0:
+		if after.is_valid():
+			after.call()
+		return
+	_replay_on = true
+	_replay_after = after
+	_hold = maxf(_hold, dur + 0.3)
+
+
+func _on_replay_skipped() -> void:
+	# O PitchView já encerrou o replay; o _process devolve o jogo no próximo quadro.
+	_hold = minf(_hold, 0.25)
+
+
+## "Rever gol" na linha do gol da narração.
+func _add_replay_button(key: String) -> void:
+	var node: Control = _goal_rows.get(key, null)
+	if node == null or not is_instance_valid(node):
+		return
+	var row: HBoxContainer = node.get_child(0) as HBoxContainer if node is PanelContainer else node as HBoxContainer
+	if row == null or row.has_node("Rever"):
+		return
+	var b := UIKit.button("Rever", "ChipButton", _rewatch.bind(key), "play")
+	b.name = "Rever"
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(b)
+
+
+func _rewatch(key: String) -> void:
+	if _replay_on or _overlay.is_playing() or _done:
+		return
+	var clip: Dictionary = _clips.get(key, {})
+	if clip.is_empty():
+		return
+	_play_replay(clip, Callable())
 
 
 func _celebrate(ev: Dictionary) -> void:
 	_record_scorer(ev)
 	_shown_score = [int(ev["hs"]), int(ev["as"])]
+	_update_board() # placar muda na hora do gol, não só no próximo minuto
 	var side: int = ev["s"]
 	var x: Dictionary = ev.get("x", {})
 	var tags: Array = x.get("tags", [])
@@ -732,12 +1135,13 @@ func _celebrate(ev: Dictionary) -> void:
 	_pitch.goal_effect(side, c1)
 	var sc_mp: MatchPlayer = _sim.teams[side].by_id.get(int(ev["p"]), null)
 	_pitch.motion.celebrate(side, sc_mp.slot if sc_mp != null and sc_mp.on_pitch and int(ev["t"]) == MatchSimulation.EV_GOAL else -1)
-	AudioManager.goal(imp if level != 3 else maxf(imp, 0.8), ours)
+	Sfx.goal(imp if level != 3 else maxf(imp, 0.8), ours)
+	Sfx.crowd_event("goal", side)
 	if _pace == 0:
 		_hold += 1.8 # tempo de ver os times voltando para a saída
 	var tw := create_tween()
 	tw.tween_interval(dur)
-	tw.tween_callback(func(): _pitch.motion.kickoff(1 - side, false))
+	tw.tween_callback(_after_goal.bind(ev))
 
 
 func _player_name(side: int, pid: int) -> String:
@@ -776,10 +1180,6 @@ func _record_scorer(ev: Dictionary) -> void:
 	list.append([scorer, [m]])
 
 
-const SCRIPTED_EVENTS: Array[int] = [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_SAVE, MatchSimulation.EV_MISS,
-	MatchSimulation.EV_POST, MatchSimulation.EV_BLOCK, MatchSimulation.EV_PEN_SAVE, MatchSimulation.EV_PEN_MISS, MatchSimulation.EV_PENALTY_AWARDED,
-	MatchSimulation.EV_FOUL, MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED, MatchSimulation.EV_OFFSIDE, MatchSimulation.EV_CORNER,
-	MatchSimulation.EV_FREEKICK, MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER, MatchSimulation.EV_VAR]
 const CHANCE_RES := {
 	MatchSimulation.EV_GOAL: "goal", MatchSimulation.EV_OWN_GOAL: "goal", MatchSimulation.EV_SAVE: "save",
 	MatchSimulation.EV_MISS: "miss", MatchSimulation.EV_POST: "post", MatchSimulation.EV_BLOCK: "block",
@@ -794,49 +1194,7 @@ func _slot_of(side: int, pid: int) -> int:
 	return mp.slot if mp != null and mp.on_pitch else -1
 
 
-func _find_ev(types: Array) -> Dictionary:
-	for i in range(_sim.last_events.size() - 1, -1, -1):
-		var e: Dictionary = _sim.last_events[i]
-		if types.has(int(e["t"])):
-			return e
-	return {}
-
-
-## Traduz a fase do minuto (e os eventos dele) numa jogada encenada pelo PitchMotion.
-## Escolhe o trecho do minuto a mostrar: dos 8 s antes do primeiro lance importante até logo
-## depois do último, quase em tempo real; minuto sem lance passa acelerado (só o fim dele).
-func _play_live() -> void:
-	if _sim.live == null:
-		return
-	var fr: Array = _sim.live.frames
-	if fr.is_empty():
-		return
-	var last_t := float(fr.back()[0])
-	var k0 := INF
-	var k1 := -1.0
-	for k in _sim.live.keys:
-		if float(k[1]) >= 0.45:
-			k0 = minf(k0, float(k[0]))
-			k1 = maxf(k1, float(k[0]))
-	var a := 0.0
-	var b := last_t
-	var sp := 1.0
-	if k1 >= 0.0 and _pace < 2:
-		a = maxf(0.0, k0 - 8.0)
-		b = minf(last_t, k1 + 3.5)
-		sp = [1.35, 2.3][_pace]
-	else:
-		sp = [5.0, 9.0, 16.0][_pace]
-		a = maxf(0.0, last_t - PACE[_pace] * sp)
-	_live_start = a
-	_live_speed = sp
-	_pitch.motion.play_frames(fr, a, b, sp)
-	_clock = maxf(PACE[_pace], (b - a) / sp)
-
-
 func _script_play() -> void:
-	if _live:
-		return
 	var ph: Dictionary = _sim.last_phase
 	if ph.is_empty() or is_same(ph, _last_phase):
 		return
@@ -844,76 +1202,165 @@ func _script_play() -> void:
 	var ev := int(ph.get("ev", -1))
 	if ev in [MatchSimulation.EV_KICKOFF, MatchSimulation.EV_SECOND_HALF, MatchSimulation.EV_EXTRA_TIME]:
 		return
-	var side := int(ph.get("side", 0))
-	var info := {"side": side, "zone": float(ph.get("to", 0.5))}
+	if _queue.is_empty():
+		_gates.clear()
+	var evs: Array = _sim.last_events
+	var base := _sim.events.size() - evs.size()
+	var beats := _beats(evs, base, ph)
 	var mo := _pitch.motion
-	if CHANCE_RES.has(ev):
-		var e := _find_ev(CHANCE_RES.keys())
-		if e.is_empty():
-			mo.ambient(side, float(ph.get("to", 0.5)))
-			return
+	if beats.is_empty():
+		mo.ambient(int(ph.get("side", 0)), float(ph.get("to", 0.5)))
+		return
+	# Narração presa ao campo no normal e no rápido (no rápido, os toques de bola sem perigo
+	# não seguram o minuto); no turbo e sem campo na tela, a narração corre solta.
+	var sync := _pace < 2 and AppSettings.match_view != 2
+	for i in beats.size():
+		var b: Dictionary = beats[i]
+		var info: Dictionary = b["info"]
+		info["append"] = i > 0
+		if sync and (_pace == 0 or bool(b["key"])):
+			_beat_n += 1
+			var id := "b%d" % _beat_n
+			info["start"] = id + "s"
+			info["hit"] = id + "h"
+			if b.has("pen"):
+				info["fhit"] = id + "f"
+			for item in b["evs"]:
+				_ev_gate[int(item[0])] = {"role": String(item[1]), "s": id + "s", "h": id + "h", "f": id + "f"}
+		mo.play(info)
+
+
+const FLAVOR_HIT: Array[String] = ["intercept", "cross_cut", "long", "press"]
+
+
+## Lances do minuto na ordem em que aconteceram, cada um com a jogada do campo e os eventos da
+## narração que ele mostra ([índice do evento, papel]: start, hit, chance, pen, pen_chance).
+func _beats(evs: Array, base: int, ph: Dictionary) -> Array:
+	var out: Array = []
+	var pre: Array = [] # eventos que entram na próxima chance (escanteio, falta, pênalti marcado)
+	var ctk := -1 # quem foi para a bandeira
+	var i := 0
+	var n := evs.size()
+	while i < n:
+		var e: Dictionary = evs[i]
 		var t := int(e["t"])
+		var s := int(e["s"])
 		var x: Dictionary = e.get("x", {})
-		info["kind"] = "chance"
-		info["ct"] = int(ph.get("ct", x.get("ct", 0)))
-		info["res"] = CHANCE_RES[t]
-		if t == MatchSimulation.EV_OWN_GOAL:
-			info["own"] = true
-			info["sh"] = _slot_of(1 - side, int(e["p"]))
-		else:
-			info["sh"] = _slot_of(side, int(e["p"]))
-			info["as"] = _slot_of(side, int(e.get("p2", -1)))
-		if x.has("line"):
-			info["line"] = _slot_of(1 - side, int(x["line"]))
-		if x.has("culprit"):
-			info["culprit"] = _slot_of(1 - side, int(x["culprit"]))
-		if int(info["ct"]) == MatchSimulation.CH_PENALTY:
-			var pa := _find_ev([MatchSimulation.EV_PENALTY_AWARDED])
-			if not pa.is_empty():
-				info["pen"] = {"victim": _slot_of(side, int(pa["p"])), "fouler": _slot_of(1 - side, int(pa.get("p2", -1)))}
-	elif ev == MatchSimulation.EV_FOUL:
-		var f := _find_ev([MatchSimulation.EV_FOUL])
-		if f.is_empty():
-			return
-		info["kind"] = "foul"
-		info["p"] = _slot_of(1 - side, int(f["p"]))
-		info["p2"] = _slot_of(side, int(f.get("p2", -1)))
-		info["danger"] = bool(f.get("x", {}).get("danger", false))
-		info["zone"] = float(ph.get("to", 0.5))
-		var c := _find_ev([MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED])
-		if not c.is_empty() and int(c["p"]) == int(f["p"]):
-			info["card"] = 2 if int(c["t"]) == MatchSimulation.EV_RED else 1
-			# Expulso: o slot já saiu do campo na simulação; o cartão aparece antes de ele sair.
-			if info["p"] == -1:
-				var mp: MatchPlayer = _sim.teams[1 - side].by_id.get(int(f["p"]), null)
-				if mp != null:
-					info["p"] = mp.slot
-	elif ev == MatchSimulation.EV_OFFSIDE:
-		var o := _find_ev([MatchSimulation.EV_OFFSIDE])
-		info["kind"] = "offside"
-		info["p"] = _slot_of(side, int(o.get("p", -1))) if not o.is_empty() else -1
-	elif ev == MatchSimulation.EV_CORNER:
-		var cn := _find_ev([MatchSimulation.EV_CORNER])
-		info["kind"] = "corner"
-		info["p"] = _slot_of(side, int(cn.get("p", -1))) if not cn.is_empty() else -1
-	else:
-		var fl := _find_ev([MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER])
-		if fl.is_empty():
-			mo.ambient(side, float(ph.get("to", 0.5)))
-			return
-		var ft := int(fl["t"])
-		var fs := int(fl["s"])
-		info["side"] = fs
-		info["kind"] = {MatchSimulation.EV_SKILL: "skill", MatchSimulation.EV_TACKLE: "tackle", MatchSimulation.EV_KEEPER: "keeper"}[ft]
-		info["p"] = _slot_of(fs, int(fl["p"]))
-		info["p2"] = _slot_of(1 - fs, int(fl.get("p2", -1)))
-	mo.play(info)
-	# No ritmo normal a partida espera a jogada; no rápido, só os gols; no turbo, nada.
-	var bt := mo.busy_time()
-	if _pace == 0:
-		_play_delay = minf(bt, 3.4)
-	elif _pace == 1 and String(info.get("res", "")) == "goal":
-		_play_delay = minf(bt, 1.6)
+		var idx := base + i
+		i += 1
+		match t:
+			MatchSimulation.EV_POSSESSION:
+				var k := String(x.get("kind", ""))
+				if k.begins_with("read_"):
+					continue
+				var inf := {"kind": "poss", "pk": k, "side": s, "p": _slot_of(s, int(e["p"])), "p2": _slot_of(s, int(e.get("p2", -1))),
+					"d": _slot_of(1 - s, int(x.get("d", -1))), "zone": float(ph.get("to", 0.5))}
+				out.append({"info": inf, "key": false, "evs": [[idx, "hit" if k in FLAVOR_HIT else "start"]]})
+			MatchSimulation.EV_SKILL, MatchSimulation.EV_TACKLE, MatchSimulation.EV_KEEPER:
+				var kd: String = {MatchSimulation.EV_SKILL: "skill", MatchSimulation.EV_TACKLE: "tackle", MatchSimulation.EV_KEEPER: "keeper"}[t]
+				var inf2 := {"kind": kd, "side": s, "p": _slot_of(s, int(e["p"])), "p2": _slot_of(1 - s, int(e.get("p2", -1))), "zone": float(ph.get("to", 0.5))}
+				out.append({"info": inf2, "key": false, "evs": [[idx, "hit"]]})
+			MatchSimulation.EV_FOUL:
+				# Junta o que vem colado na falta: cartão, jogador caído, pênalti ou cobrança perigosa.
+				var group: Array = [[idx, "hit"]]
+				var card := 0
+				var knock := false
+				var pen := false
+				var fk := false
+				var j := i
+				while j < n:
+					var e2: Dictionary = evs[j]
+					var t2 := int(e2["t"])
+					if t2 in [MatchSimulation.EV_YELLOW, MatchSimulation.EV_RED] and int(e2["p"]) == int(e["p"]):
+						card = 2 if t2 == MatchSimulation.EV_RED else 1
+					elif t2 == MatchSimulation.EV_KNOCK:
+						knock = true
+					elif t2 == MatchSimulation.EV_PENALTY_AWARDED:
+						pen = true
+					elif t2 == MatchSimulation.EV_VAR and String(e2.get("x", {}).get("kind", "")) == "pen_ok":
+						pass
+					elif t2 == MatchSimulation.EV_FREEKICK:
+						fk = true
+						break
+					elif t2 == MatchSimulation.EV_INJURY:
+						pass
+					else:
+						break
+					group.append([base + j, "hit"])
+					j += 1
+				i = j
+				if pen:
+					# O pênalti encena a falta antes da cobrança: tudo isso sai no apito.
+					for gi in group:
+						pre.append([gi[0], "pen"])
+					continue
+				var side := 1 - s # quem sofre
+				var inf3 := {"kind": "foul", "side": side, "p": _slot_of(s, int(e["p"])), "p2": _slot_of(side, int(e.get("p2", -1))),
+					"danger": bool(x.get("danger", false)), "zone": float(ph.get("to", 0.5)) if not fk else maxf(0.72, float(ph.get("to", 0.75))),
+					"card": card, "knock": knock, "fk": fk}
+				if card > 0 and int(inf3["p"]) == -1:
+					# Expulso: a vaga já está vazia na simulação, mas o cartão aparece antes de ele sair.
+					var mp: MatchPlayer = _sim.teams[s].by_id.get(int(e["p"]), null)
+					if mp != null:
+						inf3["p"] = mp.slot
+				# No rápido só a falta que vale alguma coisa (cartão, bola parada perigosa) segura o minuto.
+				out.append({"info": inf3, "key": card > 0 or fk or bool(x.get("danger", false)), "evs": group})
+			MatchSimulation.EV_FREEKICK:
+				pre.append([idx, "start"])
+			MatchSimulation.EV_CORNER:
+				# Escanteio que vira finalização: a cobrança faz parte da chance.
+				if i < n and int(evs[i]["t"]) in CHANCE_RES and int(evs[i].get("x", {}).get("ct", -1)) == MatchSimulation.CH_CORNER:
+					pre.append([idx, "start"])
+					ctk = _slot_of(s, int(e["p"]))
+					continue
+				out.append({"info": {"kind": "corner", "side": s, "p": _slot_of(s, int(e["p"]))}, "key": false, "evs": [[idx, "start"]]})
+			MatchSimulation.EV_OFFSIDE:
+				out.append({"info": {"kind": "offside", "side": s, "p": _slot_of(s, int(e["p"])), "zone": 0.8}, "key": bool(x.get("goal", false)), "evs": [[idx, "hit"]]})
+			_:
+				if not CHANCE_RES.has(t):
+					continue
+				var ct := int(x.get("ct", 0))
+				var inf4 := {"kind": "chance", "side": s, "ct": ct, "res": CHANCE_RES[t], "zone": float(ph.get("to", 0.9))}
+				if t == MatchSimulation.EV_OWN_GOAL:
+					inf4["own"] = true
+					inf4["sh"] = _slot_of(1 - s, int(e["p"]))
+				else:
+					inf4["sh"] = _slot_of(s, int(e["p"]))
+					inf4["as"] = _slot_of(s, int(e.get("p2", -1)))
+				if x.has("line"):
+					inf4["line"] = _slot_of(1 - s, int(x["line"]))
+				if x.has("culprit"):
+					inf4["culprit"] = _slot_of(1 - s, int(x["culprit"]))
+				if x.has("fin"):
+					inf4["fin"] = String(x["fin"])
+				if x.has("ln"):
+					inf4["ln"] = int(x["ln"])
+				if ctk >= 0 and ct == MatchSimulation.CH_CORNER:
+					inf4["ctk"] = ctk
+				ctk = -1
+				if _pace == 0 and (t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL, MatchSimulation.EV_POST] or float(x.get("xg", 0.0)) >= 0.3):
+					inf4["big"] = true # chance clara: o chute sai em câmera lenta
+				var group2: Array = pre.duplicate()
+				pre.clear()
+				var b := {"info": inf4, "key": true, "evs": group2}
+				if ct == MatchSimulation.CH_PENALTY:
+					b["pen"] = true
+					var pa := {}
+					for pe in evs:
+						if int(pe["t"]) == MatchSimulation.EV_PENALTY_AWARDED:
+							pa = pe
+					if not pa.is_empty():
+						inf4["pen"] = {"victim": _slot_of(s, int(pa["p"])), "fouler": _slot_of(1 - s, int(pa.get("p2", -1))),
+							"how": String(pa.get("x", {}).get("how", ""))}
+					group2.append([idx, "pen_chance"])
+				else:
+					group2.append([idx, "chance"])
+				# O que a narração diz logo depois do gol (VAR confirmando, técnico reclamando).
+				while i < n and int(evs[i]["t"]) in [MatchSimulation.EV_VAR, MatchSimulation.EV_CROWD] and t in [MatchSimulation.EV_GOAL, MatchSimulation.EV_OWN_GOAL]:
+					group2.append([base + i, "hit"])
+					i += 1
+				out.append(b)
+	return out
 
 
 ## Efeitos no campo que não dependem da jogada: lesão, jogador caído, VAR.
@@ -930,6 +1377,8 @@ func _on_event_visual(ev: Dictionary) -> void:
 					a.hurt = 3.5
 		MatchSimulation.EV_KNOCK:
 			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p2", -1))), 2.2)
+		MatchSimulation.EV_CRAMP:
+			_pitch.motion.player_down(side, _slot_of(side, int(ev.get("p", -1))), 3.0)
 		MatchSimulation.EV_VAR:
 			_pitch.motion.var_check(2.0)
 
@@ -964,7 +1413,7 @@ func _sync_slots() -> void:
 				"gk": String(s.get("role", "")) == "GK" or int(s.get("pos", -1)) == Pos.GK}
 			if mp != null and mp.p.position == Pos.GK and int(s.get("pos", -1)) == Pos.GK:
 				var gk := t.club.gk_kit()
-				e["c1"] = Color(String(gk.get("c1", "#111111")))
+				e["c1"] = _gk_color(Color(String(gk.get("c1", "#111111"))), side)
 				e["c2"] = Color(String(gk.get("c2", "#FFFFFF")))
 			arr.append(e)
 		if side == 0:
@@ -972,6 +1421,7 @@ func _sync_slots() -> void:
 		else:
 			_pitch.away_slots = arr
 		_pitch.motion.set_team(side, arr)
+		_pitch.motion.set_tactics(side, {"line": t.line, "width": t.width_i, "press": t.pressing, "ment": t.mentality})
 
 
 func _update_board() -> void:
@@ -992,6 +1442,10 @@ func _update_board() -> void:
 		_pitch.board = {"h": _sim.teams[0].club.abbr, "a": _sim.teams[1].club.abbr, "hs": _shown_score[0], "as": _shown_score[1], "clock": _clock_lbl.text}
 	_home_scorers.text = _scorer_text(0)
 	_away_scorers.text = _scorer_text(1)
+	# Linha dos goleadores só aparece quando alguém marcou (placar compacto)
+	(_home_scorers.get_parent() as Control).visible = _home_scorers.text != "" or _away_scorers.text != ""
+	if _board != null:
+		_board.sync(_sim, _shown_score, _halftime, _done)
 	var ph := _sim.possession_pct(0)
 	_poss_home.size_flags_stretch_ratio = maxf(0.05, ph)
 	_poss_away.size_flags_stretch_ratio = maxf(0.05, 1.0 - ph)
@@ -999,9 +1453,34 @@ func _update_board() -> void:
 	_poss_lbl_a.text = Fmt.percent(1.0 - ph)
 	var h: MatchTeam = _sim.teams[0]
 	var a: MatchTeam = _sim.teams[1]
-	_stats_lbl.text = "Finalizações %d – %d  ·  No gol %d – %d  ·  Escanteios %d – %d" % [h.shots, a.shots, h.on_target, a.on_target, h.corners, a.corners]
+	_stats_lbl.text = "Finalizações %d – %d  ·  No gol %d – %d  ·  xG %s – %s" % [h.shots, a.shots, h.on_target, a.on_target, TacticalXRay.dec(h.xg, 1), TacticalXRay.dec(a.xg, 1)]
+	_update_pressure()
 	if _momentum != null:
 		_momentum.refresh(_sim.pressure, _goal_marks())
+
+
+## Selo "PRESSÃO" no campo quando um time empurra o outro nos últimos minutos (mesma
+## leitura do gráfico de momento). Some quando o jogo equilibra.
+func _update_pressure() -> void:
+	if _pitch == null:
+		return
+	var pr: Array = _sim.pressure
+	var n := mini(6, pr.size())
+	var sum := 0.0
+	for i in n:
+		sum += float(pr[pr.size() - 1 - i][2])
+	var avg := sum / maxf(1.0, float(n))
+	var side := -1
+	if n >= 4 and absf(avg) >= 0.26:
+		side = 0 if avg > 0.0 else 1
+	elif _pressure_side >= 0 and absf(avg) >= 0.18 and (avg > 0.0) == (_pressure_side == 0):
+		side = _pressure_side # histerese: não fica piscando
+	_pressure_side = side
+	if side < 0 or _done or _sim.finished:
+		_pitch.pressure_text = ""
+		return
+	_pitch.pressure_text = "PRESSÃO DO %s" % _sim.teams[side].club.abbr
+	_pitch.pressure_color = _side_color(side)
 
 
 func _goal_marks() -> Array:
@@ -1025,9 +1504,19 @@ func _update_sides() -> void:
 		_enqueue(_com.extra_line("sides_swap", "info", 0, 2), {}, 0.3)
 
 
-## Resumo dos números a cada 15 minutos (na narração).
+## Minutos do "tempo e placar" (entre os resumos de números de 15 em 15).
+const CLOCK_MINUTES: Array[int] = [8, 22, 38, 52, 68, 83]
+
+
+## Resumo dos números a cada 15 minutos (na narração) e, entre eles, o "tempo e placar".
 func _stat_summary() -> void:
 	var m := _sim.minute
+	if _sim.half <= 2 and m in CLOCK_MINUTES and not _stat_marks.has("c%d" % m):
+		_stat_marks["c%d" % m] = true
+		var cl := _com.clock_line(m, _sim.half)
+		if not cl.is_empty():
+			_enqueue(cl, {}, 0.1)
+		return
 	if _sim.half > 2 or m % 15 != 0 or m == 0 or m == 45 or m == 90:
 		return
 	var key := "%d:%d" % [_sim.half, m]
@@ -1063,11 +1552,23 @@ func _add_line(line: Dictionary) -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(bar)
 	var m := UIKit.label(String(line.get("minute", "")), "Mono")
-	m.custom_minimum_size.x = 76
+	m.custom_minimum_size.x = 70
+	m.add_theme_font_size_override(&"font_size", 22)
 	m.add_theme_color_override(&"font_color", UIColors.DIM)
 	row.add_child(m)
 	var variation := "H3" if style in ["goal", "big"] else ""
 	var t := UIKit.label(String(line.get("text", "")), variation, true)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if variation == "":
+		# O lance mais recente entra maior; o anterior volta ao corpo normal.
+		t.add_theme_font_size_override(&"font_size", FEED_FS_NEW)
+		row.set_meta("fresh", t)
+	if _feed.get_child_count() > 0:
+		var prev := _feed.get_child(0)
+		var inner: Node = prev.get_child(0) if prev is PanelContainer and prev.get_child_count() > 0 else prev
+		if inner.has_meta("fresh"):
+			(inner.get_meta("fresh") as Label).add_theme_font_size_override(&"font_size", FEED_FS)
+			inner.remove_meta("fresh")
 	var col := UIColors.TEXT
 	match style:
 		"info":
@@ -1096,6 +1597,8 @@ func _add_line(line: Dictionary) -> void:
 			col = Color("#F2C58A")
 		"other":
 			col = Color("#C9E7A8")
+		"assistant":
+			col = Color("#6FD3C1")
 	t.add_theme_color_override(&"font_color", UIColors.ink(col))
 	row.add_child(t)
 	var node: Control = row
@@ -1191,11 +1694,13 @@ func _build_strip() -> Control:
 		line.add_child(UIKit.crest(w.club(f.home), 22))
 		var sc := UIKit.label("%s 0–0 %s" % [w.club(f.home).abbr, w.club(f.away).abbr], "H3")
 		sc.add_theme_font_size_override(&"font_size", 19)
+		sc.add_theme_color_override(&"font_color", Color("#F2F4F7")) # fundo sempre escuro: texto claro em qualquer tema
 		line.add_child(sc)
 		line.add_child(UIKit.crest(w.club(f.away), 22))
 		col.add_child(line)
 		var info := UIKit.label("", "Small")
 		info.add_theme_font_size_override(&"font_size", 14)
+		info.add_theme_color_override(&"font_color", Color("#7CFFB2"))
 		info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		info.visible = false
 		col.add_child(info)
@@ -1249,8 +1754,9 @@ func _update_strip(delta: float) -> void:
 				(c["info"] as Label).text = "GOL  %s %d'" % [who, int(g[0])]
 				(c["info"] as Label).visible = true
 			var box: StyleBoxFlat = c["box"]
-			box.bg_color = UIColors.ACCENT.darkened(0.55)
-			box.border_color = UIColors.ACCENT
+			# Gol: verde escuro com borda verde viva (antes a cor do clube escurecida, que sumia com o texto)
+			box.bg_color = Color("#0F3D26")
+			box.border_color = Color("#2ECC71")
 			c["flash"] = 6.0
 			_strip_hold = 3.5
 			var panel: Control = c["panel"]
@@ -1328,7 +1834,7 @@ func _entry_text(e: Dictionary, sc: Array) -> String:
 # ---------------------------------------------------------------------------
 
 func _tab_list() -> Array:
-	var out: Array = [["feed", "Lances"], ["stats", "Números"]]
+	var out: Array = [["feed", "Lances"]]
 	if not _div_entries.is_empty() or not _day_entries.is_empty():
 		out.append(["round", "Rodada"])
 	if _fx.is_league() or _fx.stage == Fixture.STAGE_GROUP:
@@ -1338,13 +1844,48 @@ func _tab_list() -> Array:
 
 func _build_tabs() -> void:
 	UIKit.clear(_tabs_row)
-	var g := ButtonGroup.new()
-	for t in _tab_list():
-		var key: String = t[0]
-		var chip := UIKit.chip(t[1], key == _tab, g, func(): _set_tab(key))
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		_tabs_row.add_child(chip)
+	var t := UIKit.tabs(_tab_list(), _tab, func(key: String): _set_tab(key))
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for b in t.get_children():
+		(b as Button).custom_minimum_size.y = 56
+	_tabs_row.add_child(t)
+	var vb := UIKit.icon_button("pitch", _open_view_sheet, "Campo e narração")
+	vb.custom_minimum_size = Vector2(56, 56)
+	_tabs_row.add_child(vb)
+
+
+## Folha de visualização: espaço do campo (menor, grande, só narração) e visual do campo
+## (clássico 2D ou transmissão). Vale na hora e fica salvo nas opções.
+func _open_view_sheet() -> void:
+	var v := UIKit.vbox(12)
+	v.add_child(UIKit.label("Campo e narração", "Title"))
+	v.add_child(UIKit.eyebrow("Espaço na tela"))
+	var views: Array = []
+	for i in AppSettings.MATCH_VIEW_NAMES.size():
+		views.append([str(i), AppSettings.MATCH_VIEW_NAMES[i]])
+	v.add_child(UIKit.segment(views, str(AppSettings.match_view), func(k: String):
+		AppSettings.match_view = int(k)
+		AppSettings.save_settings()
+		_apply_match_view()))
+	v.add_child(UIKit.eyebrow("Visual do campo"))
+	var gfx: Array = []
+	for i in AppSettings.MATCH_GFX_NAMES.size():
+		gfx.append([str(i), AppSettings.MATCH_GFX_NAMES[i]])
+	v.add_child(UIKit.segment(gfx, str(AppSettings.match_gfx), func(k: String):
+		AppSettings.match_gfx = int(k)
+		AppSettings.save_settings()
+		_pitch.classic = AppSettings.match_gfx == 0
+		_pitch.queue_redraw()))
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true, true)
+
+
+func _apply_match_view() -> void:
+	if not is_instance_valid(_pitch):
+		return
+	var box := _pitch.get_parent() as Control
+	box.visible = AppSettings.match_view != 2
+	_responsive_layout()
 
 
 func _set_tab(key: String) -> void:
@@ -1426,7 +1967,7 @@ func _render_stats_tab() -> void:
 
 func _render_round_tab() -> void:
 	if not GameManager.ai_ready():
-		_tab_box.add_child(UIKit.label("Outros jogos em andamento… os placares aparecem em instantes.", "Muted", true))
+		_tab_box.add_child(UIKit.label("Outros jogos em andamento…", "Muted", true))
 		return
 	var minute := _sim.minute if _sim.half <= 2 else 90
 	var half := mini(_sim.half, 2)
@@ -1498,6 +2039,7 @@ func _render_table_tab() -> void:
 	var base: Dictionary = {}
 	var title := ""
 	var league: League = null
+	var cup: Cup = null
 	if _fx.is_league():
 		league = w.league(_fx.comp)
 		if league == null:
@@ -1506,15 +2048,17 @@ func _render_table_tab() -> void:
 		base = league.table
 		title = "Tabela ao vivo · %s" % league.short_name
 	else:
-		var cup: Cup = w.season.cups.get(_fx.comp, null)
+		cup = w.season.cups.get(_fx.comp, null)
 		var g: Dictionary = cup.group_of(_fx.home) if cup != null else {}
 		if g.is_empty():
 			return
 		ids = g["clubs"]
 		base = g["table"]
-		title = "Grupo %s ao vivo · %s" % [g["n"], cup.short_name]
-	var before := CompetitionManager.sort_table(ids, base)
+		title = "Fase de liga ao vivo · %s" % cup.short_name if cup.league_phase else "Grupo %s ao vivo · %s" % [g["n"], cup.short_name]
+	var modern := cup != null and cup.league_phase
+	var before := LeaguePhase.sorted_ids(cup) if modern else CompetitionManager.sort_table(ids, base)
 	var live: Dictionary = {}
+	var live_scores := {}
 	for cid in ids:
 		live[cid] = base[cid].duplicate()
 	var entries: Array = _div_entries.duplicate()
@@ -1531,13 +2075,14 @@ func _render_table_tab() -> void:
 			if not GameManager.ai_ready():
 				pending = true
 			sc = _score_of(e, minute, half)
+		live_scores[f] = sc
 		var tmp := Fixture.new()
 		tmp.home = f.home
 		tmp.away = f.away
 		tmp.hg = int(sc[0])
 		tmp.ag = int(sc[1])
 		CompetitionManager.apply_to_table(live, tmp)
-	var order := CompetitionManager.sort_table(ids, live)
+	var order := LeaguePhase.sorted_ids(cup, live, live_scores) if modern else CompetitionManager.sort_table(ids, live)
 	var card := UIKit.card("Card", 2)
 	card.add_child(UIKit.section(title))
 	if pending:
@@ -1548,8 +2093,10 @@ func _render_table_tab() -> void:
 		var zone := Color(0, 0, 0, 0)
 		if league != null:
 			zone = CompetitionManager.zone_color(CompetitionManager.zone_of(league, pos))
-		elif pos <= 2:
+		elif pos <= (8 if modern else 2):
 			zone = CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION)
+		elif modern and pos <= 24:
+			zone = UIColors.ORANGE
 		card.add_child(_live_row(cid, pos, before.find(cid) + 1, live[cid], zone))
 	if league != null:
 		card.add_child(UIKit.gap(6))
@@ -1612,6 +2159,8 @@ func _toggle_play() -> void:
 
 
 func _start_second_half() -> void:
+	_set_bug("● AO VIVO", Color("#FF4B4B"))
+	Sfx.crowd_event("second", 0)
 	_halftime = false
 	_paused = false
 	_clock = 0.5
@@ -1621,13 +2170,14 @@ func _start_second_half() -> void:
 
 func _cycle_speed() -> void:
 	_pace = (_pace + 1) % PACE.size()
-	_speed_btn.text = PACE_NAMES[_pace]
+	_speed_btn.tooltip_text = PACE_NAMES[_pace]
+	if not _speed_btn.has_meta(&"compact"):
+		_speed_btn.text = PACE_NAMES[_pace]
 	_clock = minf(_clock, PACE[_pace])
 	_pitch.motion.tempo = TEMPO[_pace]
-	# A preferência padrão acompanha a escolha (Normal/Rápido); o turbo é só desta partida.
-	if _pace < 2:
-		AppSettings.match_speed = AppSettings.SPEED_NORMAL if _pace == 0 else AppSettings.SPEED_FAST
-		AppSettings.save_settings()
+	# A preferência padrão acompanha a escolha: o próximo jogo começa no mesmo ritmo.
+	AppSettings.match_speed = [AppSettings.SPEED_NORMAL, AppSettings.SPEED_FAST, AppSettings.SPEED_TURBO][_pace]
+	AppSettings.save_settings()
 
 
 func _confirm_skip() -> void:
@@ -1638,12 +2188,13 @@ func _confirm_skip() -> void:
 
 func _skip_to_end() -> void:
 	_overlay.skip()
+	_pitch.motion.stop_replay()
+	_replay_on = false
+	_replay_after = Callable()
 	_queue.clear()
 	_hold = 0.0
 	_halftime = false
 	_pending_halftime = false
-	_sim.live = null # o resto do jogo sai do sorteio rápido
-	_live = false
 	_sim.run_to_end()
 	_drain(true)
 	_rebuild_scorers()
@@ -1659,7 +2210,7 @@ func _show_shootout_order() -> void:
 		players.append(mp.p)
 	var auto := ShootoutOrderView.ordered(players, [])
 	var v := ShootoutOrderView.build("Disputa de pênaltis",
-		"Escolha quem bate. Os cinco primeiros cobram as regulares; depois vêm as alternadas.",
+		"",
 		players, auto, func(ids: Array):
 			_sim.set_shootout_order(_user_side, ids)
 			UIManager.close_modal())
@@ -1680,7 +2231,16 @@ func _show_halftime() -> void:
 	sc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sc)
 	v.add_child(_stats_table(false))
-	v.add_child(_halftime_hint())
+	var km := _key_moments(3 if et else 1)
+	if km != null:
+		v.add_child(km)
+	var aux := _halftime_assistant()
+	if aux.get_child_count() > 0:
+		v.add_child(aux)
+	else:
+		var hint := _halftime_hint()
+		if hint != null:
+			v.add_child(hint)
 	var others := _other_scores(90 if et else 45, 2 if et else 1)
 	if others != null:
 		v.add_child(others)
@@ -1700,29 +2260,80 @@ func _show_halftime() -> void:
 	UIManager.show_modal(v, false, false)
 
 
-## Leitura rápida do primeiro tempo para ajudar a decidir (sem números mágicos escondidos).
+## Lances que marcaram o jogo até o intervalo: gols, bolas na trave, defesaças, gols anulados,
+## pênaltis perdidos e expulsões (os mais recentes por último, no máximo seis).
+func _key_moments(max_half: int) -> VBoxContainer:
+	var rows: Array = []
+	for ev in _sim.events:
+		if int(ev["h"]) > max_half:
+			continue
+		var t := int(ev["t"])
+		var x: Dictionary = ev.get("x", {})
+		var side := int(ev["s"])
+		if side < 0:
+			continue
+		var who := _player_name(side, int(ev.get("p", -1)))
+		var what := ""
+		match t:
+			MatchSimulation.EV_GOAL:
+				what = "Gol de %s" % who
+			MatchSimulation.EV_OWN_GOAL:
+				what = "Gol contra de %s" % who
+			MatchSimulation.EV_POST:
+				what = "Bola na trave de %s" % who
+			MatchSimulation.EV_SAVE:
+				if float(x.get("xg", 0.0)) >= 0.3 or String(x.get("fin", "")) in ["double", "fingertip", "one_on_one"]:
+					what = "Defesaça em chute de %s" % who
+			MatchSimulation.EV_MISS:
+				if String(x.get("fin", "")) == "var_off":
+					what = "Gol de %s anulado pelo VAR" % who
+				elif float(x.get("xg", 0.0)) >= 0.35:
+					what = "%s perde chance clara" % who
+			MatchSimulation.EV_BLOCK:
+				if x.has("line"):
+					what = "Bola salva em cima da linha"
+			MatchSimulation.EV_PEN_SAVE, MatchSimulation.EV_PEN_MISS:
+				what = "%s perde pênalti" % who
+			MatchSimulation.EV_RED:
+				what = "%s expulso" % who
+			MatchSimulation.EV_OFFSIDE:
+				if x.get("goal", false):
+					what = "Gol de %s anulado (impedimento)" % who
+		if what != "":
+			rows.append([Fmt.minute(int(ev["m"]), int(ev["h"])), side, what, t == MatchSimulation.EV_GOAL or t == MatchSimulation.EV_OWN_GOAL])
+	if rows.is_empty():
+		return null
+	var v := UIKit.vbox(4)
+	v.add_child(UIKit.section("Lances do jogo"))
+	for r in rows.slice(maxi(0, rows.size() - 6)):
+		var row := UIKit.hbox(10)
+		var bar := ColorRect.new()
+		bar.custom_minimum_size = Vector2(4, 0)
+		bar.color = _side_color(int(r[1]))
+		row.add_child(bar)
+		var m := UIKit.label(String(r[0]), "Mono")
+		m.custom_minimum_size.x = 64
+		m.add_theme_color_override(&"font_color", UIColors.DIM)
+		row.add_child(m)
+		var l := UIKit.label(String(r[2]), "H3" if bool(r[3]) else "", true)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if bool(r[3]):
+			l.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+		row.add_child(l)
+		v.add_child(row)
+	return v
+
+
+## Cansaço no intervalo (só quando pesa).
 func _halftime_hint() -> Label:
 	var me: MatchTeam = _sim.teams[_user_side]
-	var op: MatchTeam = _sim.teams[1 - _user_side]
-	var diff: int = _sim.score[_user_side] - _sim.score[1 - _user_side]
-	var txt := ""
-	if me.shots + 3 <= op.shots:
-		txt = "O adversário finaliza muito mais. Reforçar a defesa ou mudar o estilo pode segurar a pressão."
-	elif me.shots >= op.shots + 3 and diff <= 0:
-		txt = "Vocês dominam, mas o gol não saiu. Mais presença na área pode transformar volume em gols."
-	elif diff > 0:
-		txt = "Vantagem no placar. Controlar o jogo pode ser mais valioso que buscar o segundo gol."
-	elif diff < 0:
-		txt = "Atrás no placar. Uma mentalidade mais ofensiva abre espaços dos dois lados."
-	else:
-		txt = "Jogo equilibrado. Observe o cansaço dos seus jogadores antes do segundo tempo."
 	var tired := 0
 	for mp: MatchPlayer in me.slots:
 		if mp != null and mp.cond < 72.0:
 			tired += 1
-	if tired >= 2:
-		txt += " %d jogadores já mostram cansaço." % tired
-	return UIKit.label(txt, "Small", true)
+	if tired < 2:
+		return null
+	return UIKit.colored("%d cansados" % tired, UIColors.ORANGE, "Small")
 
 
 func _stats_table(full: bool) -> VBoxContainer:
@@ -1790,29 +2401,78 @@ func _other_scores(minute: int, half: int) -> VBoxContainer:
 # ---------------------------------------------------------------------------
 
 ## Palestra no vestiário (antes do pontapé inicial ou no intervalo). O relógio fica parado
-## enquanto o modal está aberto; "Sem palestra" segue sem efeito.
+## enquanto o modal está aberto; "Sem palestra" segue sem efeito. Cada tom aparece com uma fala
+## sorteada para o momento (TeamTalk), e depois vem a reação do grupo.
 func _open_talk(halftime: bool) -> void:
 	if _sim == null or not _sim.can_talk(_user_side):
 		return
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	var v := UIKit.vbox(10)
 	v.add_child(UIKit.label("Palestra no intervalo" if halftime else "Palestra antes do jogo", "Title"))
-	var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
-	if halftime:
-		v.add_child(UIKit.label(("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate."), "Muted"))
-	for key in MatchSimulation.TALK_ORDER:
-		var k: String = key
-		var cfg: Dictionary = MatchSimulation.TALKS[k]
-		var b := UIKit.button(String(cfg["name"]), "", func():
-			var r := _sim.team_talk(_user_side, k)
+	v.add_child(UIKit.label(_talk_context(halftime), "Muted", true))
+	var ut: MatchTeam = _sim.teams[_user_side]
+	for opt in TeamTalk.options(_sim, _user_side, rng):
+		var k := String(opt["key"])
+		var say := String(opt["text"])
+		var inner := UIKit.vbox(4)
+		var head := String(opt["short"])
+		if halftime and ut.talk_key == k:
+			head += " · mesmo tom de antes do jogo"
+		inner.add_child(UIKit.eyebrow(head))
+		inner.add_child(UIKit.label("“%s”" % say, "", true))
+		v.add_child(UIKit.tap_row(inner, func():
+			var r := _sim.team_talk(_user_side, k, say)
 			UIManager.close_modal()
-			UIManager.toast(String(r["msg"]), UIColors.ACCENT if r["ok"] else UIColors.RED)
+			if not r["ok"]:
+				UIManager.toast(String(r["msg"]), UIColors.RED)
+				if halftime:
+					_show_halftime()
+				return
 			_drain(false)
-			if halftime:
-				_show_halftime(), "")
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		v.add_child(b)
-		v.add_child(UIKit.label(String(cfg["desc"]), "Small", true))
+			_show_talk_reaction(k, r, halftime, rng)))
 	v.add_child(UIKit.button("Sem palestra", "GhostButton", func():
+		UIManager.close_modal()
+		if halftime:
+			_show_halftime()))
+	UIManager.show_modal(v, true, false)
+
+
+## Uma linha sobre o momento: placar no intervalo; antes do jogo, mando, favoritismo e peso.
+func _talk_context(halftime: bool) -> String:
+	var opp: MatchTeam = _sim.teams[1 - _user_side]
+	if halftime:
+		var diff := _sim.score[_user_side] - _sim.score[1 - _user_side]
+		var txt := ("Vencendo por %d." % diff) if diff > 0 else (("Perdendo por %d." % -diff) if diff < 0 else "Empate.")
+		var xd := _sim.teams[_user_side].xg - opp.xg
+		if xd >= 0.6:
+			txt += " Mandando no jogo."
+		elif xd <= -0.6:
+			txt += " O adversário está melhor."
+		return txt
+	var parts: Array[String] = []
+	parts.append("Contra o %s%s" % [opp.club.short_name, "" if _sim.neutral else (", em casa" if _user_side == 0 else ", fora de casa")])
+	var sit := TeamTalk.situation(_sim, _user_side)
+	if sit.has("pre_derby"):
+		parts.append("clássico")
+	if sit.has("pre_big"):
+		parts.append("jogo decisivo")
+	if sit.has("pre_fav"):
+		parts.append("somos favoritos")
+	elif sit.has("pre_under"):
+		parts.append("eles são favoritos")
+	return ", ".join(parts) + "."
+
+
+## Reação do vestiário: resumo e quem respondeu (ou sentiu) a conversa.
+func _show_talk_reaction(key: String, r: Dictionary, halftime: bool, rng: RandomNumberGenerator) -> void:
+	var rx := TeamTalk.reaction(_sim, _user_side, key, r.get("up", []), r.get("down", []), bool(r.get("repeat", false)), rng)
+	var v := UIKit.vbox(10)
+	v.add_child(UIKit.label("Reação no vestiário", "Title"))
+	v.add_child(UIKit.label(String(rx["summary"]), "H3", true))
+	for line in rx["lines"]:
+		v.add_child(UIKit.label(String(line), "", true))
+	v.add_child(UIKit.button("Voltar ao intervalo" if halftime else "Ir para o jogo", "PrimaryButton", func():
 		UIManager.close_modal()
 		if halftime:
 			_show_halftime()))
@@ -1835,7 +2495,7 @@ func _open_shouts() -> void:
 		v.add_child(UIKit.colored("Em vigor: %s (até %d')" % [String(MatchSimulation.SHOUTS[t.sh_key]["short"]), t.sh_until], UIColors.ACCENT, "Small"))
 	var wait := _sim.shout_wait(_user_side)
 	if wait > 0:
-		v.add_child(UIKit.label("O time ainda está digerindo o último grito: mais %d min." % wait, "Muted", true))
+		v.add_child(UIKit.label("Próximo grito em %d min." % wait, "Muted", true))
 	for key in MatchSimulation.SHOUT_ORDER:
 		var k: String = key
 		var cfg: Dictionary = MatchSimulation.SHOUTS[k]
@@ -1850,16 +2510,35 @@ func _open_shouts() -> void:
 		b.disabled = wait > 0
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		v.add_child(b)
-		var d := String(cfg["desc"])
 		if uses >= 1:
-			d += " Já usado %s." % Fmt.plural(uses, "vez", "vezes")
-		v.add_child(UIKit.label(d, "Small", true))
+			v.add_child(UIKit.label("Já usado %s." % Fmt.plural(uses, "vez", "vezes"), "Small", true))
 	UIManager.show_modal(v, true)
+
+
+var _subs_only := false
+
+
+## Substituir: lista de quem está em campo; toque em quem sai e depois em quem entra.
+func _open_subs() -> void:
+	if _done:
+		return
+	_subs_only = true
+	_sub_out = -1
+	_tac_box = UIKit.vbox(12)
+	_tac_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_render_tactics()
+	var s := ScrollContainer.new()
+	s.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	s.custom_minimum_size = Vector2(0, 880)
+	s.scroll_deadzone = 14
+	s.add_child(_tac_box)
+	UIManager.show_modal(s, true)
 
 
 func _open_tactics() -> void:
 	if _done:
 		return
+	_subs_only = false
 	_sub_out = -1
 	_tac_box = UIKit.vbox(12)
 	_tac_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1878,13 +2557,16 @@ func _render_tactics() -> void:
 	UIKit.clear(_tac_box)
 	var t: MatchTeam = _sim.teams[_user_side]
 	var head := UIKit.hbox(10)
-	var title := UIKit.label("Ajustes da partida" if _sub_out < 0 else "Quem entra?", "Title")
+	var title := UIKit.label(("Substituir" if _subs_only else "Tática") if _sub_out < 0 else "Quem entra?", "Section")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 	head.add_child(UIKit.icon_button("close", func(): UIManager.close_modal()))
 	_tac_box.add_child(head)
 	if _sub_out >= 0:
 		_render_bench_choice(t)
+		return
+	if _subs_only:
+		_render_subs(t)
 		return
 	var tac := DatabaseManager.tactics()
 	_tac_box.add_child(UIKit.section("Formação"))
@@ -1923,7 +2605,32 @@ func _render_tactics() -> void:
 			_drain(false)
 			_render_tactics()))
 	_tac_box.add_child(sl)
-	_tac_box.add_child(UIKit.label(String(tac["styles"][t.style]["desc"]), "Small", true))
+	# Ajustes finos também no meio do jogo
+	var fine := [["Pressão", tac["pressing"], t.pressing, func(i): _sim.set_pressing(_user_side, i)],
+		["Linha defensiva", tac["line"], t.line, func(i): _sim.set_line(_user_side, i)],
+		["Largura", [{"name": TeamSheet.WIDTH_NAMES[0]}, {"name": TeamSheet.WIDTH_NAMES[1]}, {"name": TeamSheet.WIDTH_NAMES[2]}], t.width_i, func(i): _sim.set_width(_user_side, i)],
+		["Intensidade", tac["intensity"], t.intensity, func(i): _sim.set_intensity(_user_side, i)]]
+	# Instruções de equipe (ritmo, passe, marcação, perda da bola, foco, cera, escanteios)
+	for k in TacticsManager.DEEP.size():
+		var dkey: String = TacticsManager.DEEP[k]
+		fine.append([String(TacticsManager.DEEP_TITLES[dkey]), TacticsManager.deep_options(dkey), int(t.deep[k]), func(i): _sim.set_deep(_user_side, dkey, i)])
+	for item in fine:
+		_tac_box.add_child(UIKit.section(String(item[0])))
+		var g := ButtonGroup.new()
+		var fl2 := UIKit.flow(8)
+		var opts: Array = item[1]
+		for i in opts.size():
+			var idx := i
+			var setter: Callable = item[3]
+			fl2.add_child(UIKit.chip(String(opts[i]["name"]), i == int(item[2]), g, func():
+				setter.call(idx)
+				_drain(false)
+				_render_tactics()))
+		_tac_box.add_child(fl2)
+
+
+## Quem está em campo, com fôlego, nota e cartão: tocar escolhe quem sai.
+func _render_subs(t: MatchTeam) -> void:
 	var auto := CheckButton.new()
 	auto.text = "Assistente troca jogadores cansados"
 	auto.button_pressed = t.auto_subs
@@ -1931,7 +2638,7 @@ func _render_tactics() -> void:
 	auto.toggled.connect(func(v: bool): t.auto_subs = v)
 	_tac_box.add_child(auto)
 	var left := t.max_subs - t.subs_used
-	_tac_box.add_child(UIKit.section("Em campo · substituições %d/%d" % [t.subs_used, t.max_subs]))
+	_tac_box.add_child(UIKit.label("Quem sai? %d de %d trocas feitas." % [t.subs_used, t.max_subs], "Muted"))
 	if left <= 0:
 		_tac_box.add_child(UIKit.label("Sem substituições restantes.", "Muted"))
 	for mp: MatchPlayer in t.slots:
@@ -1991,7 +2698,7 @@ func _mp_row(mp: MatchPlayer, pos: int, cb: Callable) -> Control:
 	var cond_col := UIColors.GREEN if mp.cond >= 75.0 else (UIColors.ORANGE if mp.cond >= 60.0 else UIColors.RED)
 	col.add_child(UIKit.bar(mp.cond, 100.0, cond_col, 8))
 	row.add_child(col)
-	row.add_child(UIKit.badge(int(round(mp.p.rating_at(pos))), 52, 36, 22))
+	row.add_child(UIKit.player_stars(world(),mp.p,15,false,pos))
 	if mp.used:
 		var live := clampf(6.0 + mp.rating_pts, 3.0, 10.0)
 		var r := UIKit.label(Fmt.rating(live), "H3")
@@ -2010,14 +2717,23 @@ func _on_final() -> void:
 	if _done:
 		return
 	_done = true
+	_set_bug("FIM DE JOGO", UIColors.MUTED)
+	_hide_aux() # sugestão tática não faz sentido depois do apito final
 	UIManager.close_all_modals()
-	_report = GameManager.finish_match()
+	# A data inteira fecha numa thread de trabalho (a tela não trava; o aviso mostra o andamento).
+	GameManager.finish_match_async(_after_final)
+
+
+func _after_final(report: Dictionary) -> void:
+	_report = report
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
 	var mine: int = _sim.score[_user_side]
 	var theirs: int = _sim.score[1 - _user_side]
 	if mine > theirs:
-		AudioManager.play("win", -4.0)
+		Sfx.play("win", -4.0)
 	elif mine < theirs:
-		AudioManager.play("lose", -6.0)
+		Sfx.play("lose", -6.0)
 	_update_board()
 	_pitch.visible = false
 	(_pitch.get_parent() as Control).visible = false
@@ -2043,6 +2759,10 @@ func _build_summary() -> void:
 	if _sim.derby:
 		top.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 18))
 	_feed.add_child(top)
+	# Mesa-redonda dos comentaristas nos jogos grandes
+	if Pundits.is_big(_sim):
+		var lg := world().league(_fx.comp)
+		_feed.add_child(Pundits.card("Mesa-redonda", Pundits.review(world(), _sim, lg.nation if lg != null else _sim.teams[0].club.nation)))
 	# Gols
 	var goals := UIKit.card("Card", 6)
 	goals.add_child(UIKit.section("Gols"))
@@ -2158,3 +2878,121 @@ func _build_summary() -> void:
 		oc.add_child(others)
 		_feed.add_child(UIKit.card_panel(oc))
 	_feed_scroll.scroll_vertical = 0
+
+
+# ---------------------------------------------------------------------------
+# Auxiliar ao vivo
+# ---------------------------------------------------------------------------
+
+func _build_aux_bar() -> Control:
+	_aux_bar = PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.07, 0.19, 0.23, 0.96)
+	box.border_color = Color("#6FD3C1")
+	box.border_width_left = 5
+	box.set_corner_radius_all(10)
+	box.content_margin_left = 14
+	box.content_margin_right = 10
+	box.content_margin_top = 10
+	box.content_margin_bottom = 10
+	_aux_bar.add_theme_stylebox_override(&"panel", box)
+	var row := UIKit.hbox(10)
+	row.add_child(UIKit.icon_rect("tactics", 30, Color("#6FD3C1")))
+	_aux_text = UIKit.label("", "Small", true)
+	_aux_text.add_theme_color_override(&"font_color", Color("#E6FFF9"))
+	_aux_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_aux_text)
+	var col := UIKit.vbox(6)
+	_aux_btn = UIKit.button("Aplicar", "PrimaryButton", _apply_aux)
+	_aux_btn.custom_minimum_size = Vector2(190, 58)
+	_aux_btn.add_theme_font_size_override(&"font_size", 20)
+	col.add_child(_aux_btn)
+	var no := UIKit.button("Dispensar", "GhostButton", _hide_aux)
+	no.custom_minimum_size = Vector2(190, 50)
+	no.add_theme_font_size_override(&"font_size", 19)
+	col.add_child(no)
+	row.add_child(col)
+	_aux_bar.add_child(row)
+	_aux_bar.visible = false
+	return UIKit.margin(_aux_bar, 12, 2, 12, 4)
+
+
+## Depois de cada minuto: o auxiliar tem algo a dizer?
+func _assistant_tick() -> void:
+	if _aux_state.is_empty() or _done:
+		return
+	var w := world()
+	var reads := Assistant.live(w, _sim, _user_side, _aux_state)
+	for r: Dictionary in reads:
+		var txt := "%s: %s" % [Assistant.name_of(w), String(r["text"])]
+		_enqueue({"text": txt, "style": "assistant", "side": _user_side, "minute": _sim.display_minute()}, {}, 0.4)
+		var act: Dictionary = r.get("act", {})
+		_show_aux(String(r["text"]), act)
+
+
+func _show_aux(text: String, act: Dictionary) -> void:
+	if _aux_bar == null or _done:
+		return
+	_aux_act = act
+	_aux_text.text = text
+	_aux_btn.visible = not act.is_empty()
+	if not act.is_empty():
+		_aux_btn.text = "Abrir" if String(act.get("kind", "")) == "tactics" else Assistant.act_label(act)
+	_aux_bar.get_parent().visible = true
+	_aux_bar.visible = true
+	_aux_timer = 12.0
+
+
+func _hide_aux() -> void:
+	if _aux_bar == null:
+		return
+	_aux_bar.visible = false
+	_aux_act = {}
+	_aux_timer = 0.0
+
+
+func _apply_aux() -> void:
+	var act := _aux_act
+	_hide_aux()
+	if act.is_empty() or _done:
+		return
+	if String(act.get("kind", "")) == "tactics":
+		_open_tactics()
+		return
+	var msg := Assistant.apply_live(_sim, _user_side, act)
+	_drain(false)
+	_sync_slots()
+	_update_board()
+	if msg != "":
+		UIManager.toast(msg)
+
+
+## No intervalo: as leituras mais importantes do auxiliar, cada uma com o ajuste pronto.
+func _halftime_assistant() -> Control:
+	var w := world()
+	var reads := Assistant.halftime(_sim, _user_side)
+	var card := UIKit.vbox(8)
+	if reads.is_empty():
+		return card
+	card.add_child(UIKit.colored("%s, no vestiário:" % Assistant.name_of(w), Color("#6FD3C1"), "Caps"))
+	for r: Dictionary in reads:
+		var row := UIKit.hbox(8)
+		var l := UIKit.label("• " + String(r["text"]), "Small", true)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		var act: Dictionary = r.get("act", {})
+		if not act.is_empty() and String(act.get("kind", "")) != "tactics":
+			var b := UIKit.button(Assistant.act_label(act), "GhostButton")
+			b.custom_minimum_size = Vector2(170, 56)
+			b.pressed.connect(func():
+				var msg := Assistant.apply_live(_sim, _user_side, act)
+				_drain(false)
+				_sync_slots()
+				_update_board()
+				b.disabled = true
+				b.text = "Feito"
+				if msg != "":
+					UIManager.toast(msg))
+			row.add_child(b)
+		card.add_child(row)
+	return card

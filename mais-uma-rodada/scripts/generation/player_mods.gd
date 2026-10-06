@@ -144,6 +144,8 @@ static func fill(world: GameWorld, p: Player, e: Dictionary) -> void:
 	if e.has("nick"):
 		p.nickname = String(e["nick"])
 	if e.has("nat") and DatabaseManager.has_nation(String(e["nat"])):
+		if p.nationality != String(e["nat"]):
+			p.origin.clear() # old generated biography must not survive an explicit mod nationality
 		p.nationality = String(e["nat"])
 	if e.has("pos"):
 		p.position = pos_from(e["pos"])

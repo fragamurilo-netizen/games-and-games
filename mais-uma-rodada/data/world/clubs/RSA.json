@@ -26,7 +26,7 @@
 				"symbol": "sunrise",
 				"sc": "#006437"
 			},
-			"rivals": []
+			"rivals": ["RSA_BUC"]
 		},
 		{
 			"key": "RSA_AMA",
@@ -47,7 +47,7 @@
 			"capacity": 94000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "KC",
@@ -81,9 +81,7 @@
 				"symbol": "skull",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"RSA_AMA"
-			]
+			"rivals": ["RSA_AMA", "RSA_BRZ"]
 		},
 		{
 			"key": "RSA_STE",
@@ -132,7 +130,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AZ"
@@ -181,7 +179,13 @@
 			"stadium": "Lucas Moripe Stadium",
 			"capacity": 28900,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SFC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -202,7 +206,13 @@
 			"stadium": "DHL Stadium",
 			"capacity": 55000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -223,7 +233,13 @@
 			"stadium": "Peter Mokaba Stadium",
 			"capacity": 41700,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:3",
+				"symbol": "letter",
+				"initials": "SU",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -244,7 +260,15 @@
 			"stadium": "Old Peter Mokaba Stadium",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -265,7 +289,14 @@
 			"stadium": "King Zwelithini Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GA",
+				"sc": "#FFD100",
+				"border": "gold"
+			},
 			"rivals": []
 		},
 		{
@@ -286,7 +317,13 @@
 			"stadium": "Buffalo City Stadium",
 			"capacity": 16000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "CU",
+				"text": "CHIPPA UNITED"
+			},
 			"rivals": []
 		},
 		{
@@ -307,7 +344,13 @@
 			"stadium": "King Zwelithini Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -328,7 +371,14 @@
 			"stadium": "Old Peter Mokaba Stadium",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MFC",
+				"sc": "#111111",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -349,7 +399,13 @@
 			"stadium": "Dr Petrus Molemela Stadium",
 			"capacity": 22000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -370,7 +426,13 @@
 			"stadium": "Olympia Park",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "globe",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

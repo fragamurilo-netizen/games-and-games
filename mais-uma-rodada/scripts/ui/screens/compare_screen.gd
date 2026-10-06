@@ -8,8 +8,10 @@ var _b := -1
 var _query := ""
 
 
+var _tab := "attrs"
+
+
 func _init() -> void:
-	show_nav = false
 	screen_title = "Comparar"
 
 
@@ -39,9 +41,17 @@ func refresh() -> void:
 	screen_subtitle = "%s × %s" % [pa.display_name(), pb.display_name()]
 	UIManager.refresh_chrome()
 	c.add_child(_heads(w, pa, pb))
-	c.add_child(_attrs(w, pa, pb))
-	c.add_child(_season(w, pa, pb))
-	c.add_child(_career_card(w, pa, pb))
+	c.add_child(UIKit.tabs([["attrs", "Atributos"], ["season", "Temporada"], ["career", "Carreira"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	match _tab:
+		"attrs":
+			c.add_child(_attrs(w, pa, pb))
+		"season":
+			c.add_child(_season(w, pa, pb))
+		_:
+			c.add_child(_career_card(w, pa, pb))
+	max_content_width = 1600
 	var f := footer()
 	UIKit.clear(f)
 	var row := UIKit.hbox(10)
@@ -82,7 +92,7 @@ func _picker(w: GameWorld, pa: Player, c: VBoxContainer) -> void:
 		if list.is_empty():
 			results.add_child(UIKit.label("Ninguém encontrado.", "Muted"))
 		if q.strip_edges().length() < 3:
-			results.add_child(UIKit.label("Mesma posição no seu elenco e os melhores do mundo na função", "Caps"))
+			results.add_child(UIKit.label("Mesma posição", "Caps"))
 		for p: Player in list:
 			results.add_child(_pick_row(w, p))
 	le.text_changed.connect(func(t: String): fill.call(t))
@@ -99,7 +109,7 @@ func _pick_row(w: GameWorld, p: Player) -> Control:
 	var cl := w.club(p.club_id) if p.club_id >= 0 else null
 	col.add_child(UIKit.label("%d anos · %s" % [p.age(w.year), cl.short_name if cl != null else "sem clube"], "Small"))
 	row.add_child(col)
-	row.add_child(UIKit.badge(_seen_ovr(w, p)))
+	row.add_child(UIKit.player_stars(w,p,15))
 	var pid := p.id
 	return UIKit.tap_row(row, func():
 		_b = pid
@@ -113,13 +123,13 @@ func _suggestions(w: GameWorld, pa: Player) -> Array:
 		for p: Player in w.squad(w.user_club()):
 			if p.id != pa.id and Pos.group(p.position) == grp:
 				out.append(p)
-	out.sort_custom(func(x: Player, y: Player): return x.overall > y.overall)
+	out.sort_custom(func(x: Player, y: Player): return PlayerAssessment.score(w,x) > PlayerAssessment.score(w,y))
 	out = out.slice(0, 6)
 	var best: Array = []
 	for p: Player in w.players.values():
 		if p.id != pa.id and p.position == pa.position and p.club_id >= 0 and p.overall >= 80:
 			best.append(p)
-	best.sort_custom(func(x: Player, y: Player): return x.overall > y.overall)
+	best.sort_custom(func(x: Player, y: Player): return PlayerAssessment.score(w,x) > PlayerAssessment.score(w,y))
 	for p in best.slice(0, 4):
 		if not out.has(p):
 			out.append(p)
@@ -134,7 +144,7 @@ func _search(w: GameWorld, pa: Player, q: String) -> Array:
 			continue
 		if p.display_name().to_lower().contains(ql) or p.full_name().to_lower().contains(ql):
 			out.append(p)
-	out.sort_custom(func(x: Player, y: Player): return x.overall > y.overall)
+	out.sort_custom(func(x: Player, y: Player): return PlayerAssessment.score(w,x) > PlayerAssessment.score(w,y))
 	return out.slice(0, 20)
 
 
@@ -148,10 +158,7 @@ func _own(w: GameWorld, p: Player) -> bool:
 
 ## Atributo como o treinador enxerga (exato no próprio elenco; aproximado nos outros).
 func _seen(w: GameWorld, p: Player, a: int) -> int:
-	var v: int = p.attrs[a]
-	if not _own(w, p):
-		v = clampi(v + int(round(RngUtil.noise(p.id, a, 7) * 5.0)), 1, 99)
-	return v
+	return PlayerAssessment.attribute(w,p,a)
 
 
 func _seen_ovr(w: GameWorld, p: Player) -> int:
@@ -159,46 +166,66 @@ func _seen_ovr(w: GameWorld, p: Player) -> int:
 
 
 func _heads(w: GameWorld, pa: Player, pb: Player) -> Control:
-	var card := UIKit.card("Card", 10)
+	var ca := w.club(pa.club_id) if pa.club_id >= 0 else null
+	var cb := w.club(pb.club_id) if pb.club_id >= 0 else null
+	# Frente a frente, como a tela de confronto de um jogo de futebol: cada lado na cor do clube.
+	var comp := ca.league_id if ca != null else (cb.league_id if cb != null else w.user_club().league_id)
+	var hero := MatchHero.wrap(w, comp, ca, cb)
+	var band: HBoxContainer = hero[1]
+	var bl := UIKit.label(tr("Frente a frente"), "Caps")
+	bl.add_theme_color_override(&"font_color", Color.WHITE)
+	bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(bl)
+	var card: VBoxContainer = hero[2]
 	var row := UIKit.hbox(8)
 	row.add_child(_head(w, pa, HORIZONTAL_ALIGNMENT_LEFT))
-	var vs := UIKit.label("×", "Title")
+	var vs := UIKit.label("VS", "Title")
 	vs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	vs.add_theme_color_override(&"font_color", UIColors.DIM)
 	row.add_child(vs)
 	row.add_child(_head(w, pb, HORIZONTAL_ALIGNMENT_RIGHT))
 	card.add_child(row)
-	var ca := w.club(pa.club_id) if pa.club_id >= 0 else null
-	var cb := w.club(pb.club_id) if pb.club_id >= 0 else null
 	for r in [
-		["Overall", _seen_ovr(w, pa), _seen_ovr(w, pb), true, ""],
 		["Idade", pa.age(w.year), pb.age(w.year), false, ""],
 		["Valor", pa.value, pb.value, true, "money"],
 		["Salário", pa.wage, pb.wage, false, "wage"],
 		["Contrato até", pa.contract_end if pa.club_id >= 0 else 0, pb.contract_end if pb.club_id >= 0 else 0, true, "year"],
 	]:
 		card.add_child(_line(String(r[0]), r[1], r[2], bool(r[3]), String(r[4])))
+	card.add_child(_text_line("Avaliação",PlayerAssessment.summary(w,pa),PlayerAssessment.summary(w,pb)))
+	card.add_child(_text_line("Pontos fortes",PlayerAssessment.standout(w,pa),PlayerAssessment.standout(w,pb)))
 	card.add_child(_text_line("Clube", ca.short_name if ca != null else "—", cb.short_name if cb != null else "—"))
 	card.add_child(_text_line("Posição", Pos.name_of(pa.position), Pos.name_of(pb.position)))
 	card.add_child(_text_line("Estilo", PlayStyle.of(pa), PlayStyle.of(pb)))
-	return UIKit.card_panel(card)
+	return hero[0]
 
 
 func _head(w: GameWorld, p: Player, align: int) -> Control:
 	var col := UIKit.vbox(4)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var cl := w.club(p.club_id) if p.club_id >= 0 else null
-	var top := UIKit.hbox(6)
+	var top := UIKit.hbox(8)
 	top.alignment = BoxContainer.ALIGNMENT_BEGIN if align == HORIZONTAL_ALIGNMENT_LEFT else BoxContainer.ALIGNMENT_END
-	top.add_child(UIKit.portrait(p, cl, w.year, 110))
+	var pv := UIKit.portrait(p, cl, w.year, 128)
+	var badge := UIKit.player_stars(w,p,15)
+	badge.size_flags_vertical = Control.SIZE_SHRINK_END
+	if align == HORIZONTAL_ALIGNMENT_LEFT:
+		top.add_child(pv)
+		top.add_child(badge)
+	else:
+		top.add_child(badge)
+		top.add_child(pv)
 	col.add_child(top)
-	var n := UIKit.label(p.display_name(), "H3")
+	var n := UIKit.label(p.display_name().to_upper(), "H3")
 	n.horizontal_alignment = align
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	col.add_child(n)
+	var sub := UIKit.label("%s · %s" % [Pos.code(p.position), cl.short_name if cl != null else tr("Sem clube")], "Caps")
+	sub.horizontal_alignment = align
+	col.add_child(sub)
 	var pid := p.id
-	var b := UIKit.button("Perfil", "GhostButton", func(): UIManager.push("player", {"id": pid}))
-	col.add_child(b)
-	return col
+	# O rosto abre o perfil (o botão "Perfil" separado sai: menos ruído no confronto).
+	return UIKit.tap_row(col, func(): UIManager.push("player", {"id": pid}), "RowPanel")
 
 
 ## Linha numérica: o melhor lado fica destacado (higher_better decide a direção).
@@ -338,4 +365,6 @@ func _career_card(w: GameWorld, pa: Player, pb: Player) -> Control:
 	var caps_a := NationalTeamManager.caps_of(w, pa.id)
 	var caps_b := NationalTeamManager.caps_of(w, pb.id)
 	card.add_child(_line("Jogos pela seleção", int(caps_a[0]), int(caps_b[0]), true, ""))
+	card.add_child(_line("Gols pela seleção", int(caps_a[1]), int(caps_b[1]), true, ""))
+	card.add_child(_line("Assist. pela seleção", int(caps_a[2]), int(caps_b[2]), true, ""))
 	return UIKit.card_panel(card)

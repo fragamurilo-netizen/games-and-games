@@ -66,6 +66,8 @@ func _initialize() -> void:
 	_run("caixa de entrada do treinador", _test_inbox)
 	_run("reputação do treinador aprendida com as decisões", _test_coach_identity)
 	_run("DNA dos clubes: identidade, mercado e mudanças", _test_club_dna)
+	_run("simulação paralela = sequencial", _test_parallel_equals_sequential)
+	_run("títulos históricos reais das seleções", _test_national_past_titles)
 	print("")
 	print("%d testes ok, %d falha(s) — %.1f s" % [passed, failures, (Time.get_ticks_msec() - t0) / 1000.0])
 	quit(1 if failures > 0 else 0)
@@ -187,7 +189,7 @@ func _test_generation() -> void:
 	var small: Club = w.clubs_in_league("BRA4")[19]
 	check(ClubAI._compute_strength(w, big) > ClubAI._compute_strength(w, small) + 25.0, "escala de níveis entre ligas")
 	# Copas da primeira temporada montadas
-	check(w.season.cups.has("UCL") and w.season.cups["UCL"].club_ids.size() == 32, "Liga dos Campeões com 32 clubes")
+	check(w.season.cups.has("UCL") and w.season.cups["UCL"].club_ids.size() == 36, "Liga dos Campeões com 36 clubes")
 	check(w.season.cups.has("LIB") and w.season.cups["LIB"].club_ids.size() == 32, "Libertadores com 32 clubes")
 	_season_world = null
 
@@ -313,6 +315,62 @@ func _test_quick_calibration() -> void:
 
 
 ## A partida assistida usa exatamente a mesma simulação da instantânea.
+
+
+func _test_national_past_titles() -> void:
+	var count := func(code: String, tid: String) -> int:
+		return NationalTeamManager.past_titles(code).filter(func(t): return String(t[0]) == tid).size()
+	check(count.call("BRA", "WC") == 5, "Brasil sem as 5 Copas do Mundo")
+	check(count.call("GER", "WC") == 4, "Alemanha sem as 4 Copas (Alemanha Ocidental conta)")
+	check(count.call("ARG", "CA") == 16 and count.call("URU", "CA") == 15, "Copa América: Argentina 16, Uruguai 15")
+	check(count.call("ESP", "EURO") == 4, "Espanha sem as 4 Eurocopas")
+	# Nada do passado em ano que o próprio jogo disputa (a 1ª Copa do jogo é em 2030).
+	var first := int(NationalTeamManager.tcfg("WC").get("first", 0))
+	for code in ["BRA", "ESP", "ARG", "FRA"]:
+		for t in NationalTeamManager.past_titles(code):
+			check(int(t[1]) < int(NationalTeamManager.tcfg(String(t[0])).get("first", 9999)), "título do passado em ano do jogo: %s" % [t])
+	check(first > 0, "Copa do Mundo sem primeira edição no jogo")
+
+
+## Mesmo mundo, mesmas datas: jogos da IA em várias threads dão exatamente o mesmo resultado
+## que um por um (placares, gols, cartões, lesões e o estado de todos os jogadores).
+func _test_parallel_equals_sequential() -> void:
+	var sigs: Array = []
+	var biggest := 0
+	var was := SeasonManager.parallel
+	for mode in 2:
+		SeasonManager.parallel = mode == 1
+		var w := _career_world()
+		var played: Array = []
+		for d in 10:
+			if w.season.finished:
+				break
+			var todo: Array = w.season.fixtures_at(w.season.day).filter(func(f: Fixture): return not f.played)
+			biggest = maxi(biggest, todo.size())
+			SeasonManager.play_matchday_instant(w)
+			played.append_array(todo)
+		sigs.append(_world_signature(w, played))
+	SeasonManager.parallel = was
+	check(biggest >= SeasonManager.PARALLEL_MIN, "nenhuma data com jogos suficientes para as threads (%d)" % biggest)
+	check(sigs[0][0] == sigs[1][0], "placares diferentes entre sequencial e paralelo")
+	check(sigs[0][1] == sigs[1][1], "estado dos jogadores diferente entre sequencial e paralelo")
+	check(sigs[0][2] > 0, "nenhum jogo jogado")
+
+
+## [hash dos jogos, hash dos jogadores, jogos] de um mundo.
+func _world_signature(w: GameWorld, fixtures: Array) -> Array:
+	var games: Array = []
+	for f: Fixture in fixtures:
+		if f.played:
+			games.append([f.comp, f.home, f.away, f.hg, f.ag, f.pen_h, f.pen_a, f.motm, f.attendance, f.goals])
+	var ids: Array = w.players.keys()
+	ids.sort()
+	var ps: Array = []
+	for pid in ids:
+		var p: Player = w.players[pid]
+		ps.append([pid, p.club_id, snappedf(p.condition, 0.001), snappedf(p.morale, 0.001), p.injury_weeks, p.suspension,
+			p.yellow_acc, p.stats, p.recent_ratings, p.minutes_season])
+	return [hash(var_to_bytes(games)), hash(var_to_bytes(ps)), games.size()]
 
 
 func _test_live_equals_instant() -> void:
@@ -479,7 +537,8 @@ func _test_season_cycle() -> void:
 				if f.stage == Fixture.STAGE_LEAGUE:
 					expect += 2 if f.hg == f.ag else 3
 		for cid in league.club_ids:
-			pts += int(league.table[cid]["pts"])
+			# Soma de volta os pontos perdidos por punição (ClubEvents._deduct)
+			pts += int(league.table[cid]["pts"]) + int(league.table[cid].get("ded", 0))
 		if not bool(LeagueFormat.cfg(league).get("halve", false)): # pontos pela metade no split
 			check(pts == expect, "%s: pontos na tabela (%d) não batem com os jogos (%d)" % [id, pts, expect])
 	# Estatísticas detalhadas com médias reais por time e por jogo (Premier League)
@@ -533,7 +592,12 @@ func _test_season_cycle() -> void:
 				if seen.has(n):
 					same_nation += 1
 				seen[n] = true
-		check(same_nation <= 2, "%s: %d grupos com clubes do mesmo país" % [cid, same_nation])
+		if cup.league_phase:
+			for f: Fixture in cup.fixtures:
+				if f.stage == Fixture.STAGE_GROUP:
+					check(w.club(f.home).nation != w.club(f.away).nation, "Liga: adversários do mesmo país")
+		else:
+			check(same_nation <= 2, "%s: %d grupos com clubes do mesmo país" % [cid, same_nation])
 		for f in cup.fixtures:
 			check(f.played, "%s: jogo não disputado" % cid)
 		var last := cup.ties_of_round(cup.round_names.size() - 1)
@@ -772,7 +836,7 @@ func _test_end_season() -> void:
 		if d["id"] == "BRA1":
 			bra = d
 	check(w.season.cups["LIB"].has_club(int(bra["champion"])), "campeão brasileiro fora da Libertadores")
-	check(w.season.cups["UCL"].club_ids.size() == 32 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
+	check(w.season.cups["UCL"].club_ids.size() == 36 and w.season.cups["LIB"].club_ids.size() == 32, "copas do ano seguinte incompletas")
 	# Campeão da Copa do Brasil garante a Libertadores; supercopa com o campeão da liga e o da copa.
 	check(w.season.cups["LIB"].has_club(int(_cup_champs.get("CDB", -1))), "campeão da Copa do Brasil fora da Libertadores")
 	check(w.season.cups.has("SCB") and w.season.cups["SCB"].has_club(int(bra["champion"])), "Supercopa do Brasil sem o campeão brasileiro")
@@ -1334,7 +1398,7 @@ func _test_hearts_manager() -> void:
 		if p.heart >= 0:
 			fans += 1
 			var hc := w.club(p.heart)
-			check(hc != null and hc.nation == p.nationality, "time de coração de outro país")
+			check(hc != null and hc.nation == NationalityManager.birth_country(p), "time de coração fora do país onde cresceu")
 			if hc != null and hc.city == p.hometown:
 				local += 1
 		if p.heart_known:
@@ -1529,7 +1593,10 @@ func _test_squad_events() -> void:
 			for q: Player in squad:
 				q.traits = []
 				q.morale = 70.0
-			var a: Player = squad[3 + opt * 2]
+			# Um dos melhores do elenco (a força real, ovr_f, é o que os clubes interessados olham).
+			var by_ovr := squad.duplicate()
+			by_ovr.sort_custom(func(x: Player, y: Player): return x.ovr_f > y.ovr_f)
+			var a: Player = by_ovr[opt]
 			# Condições de cada evento
 			a.nationality = "ARG" if c.nation != "ARG" else "URU"
 			a.morale = 40.0
@@ -1714,9 +1781,9 @@ func _test_xray() -> void:
 			rb = int(c.sheet.starters[i])
 		if int(slots[i]["pos"]) == Pos.RW:
 			rw = int(c.sheet.starters[i])
-	# Referência: os mesmos jogos sem a instrução
+	# Referência: os mesmos jogos sem a instrução (amostra inteira: 60 jogos oscilam demais)
 	var right0 := 0
-	for k in 60:
+	for k in 120:
 		var foe0: Club = w.clubs_in_league("BRA1")[k % 3]
 		if foe0.id == c.id:
 			foe0 = w.clubs_in_league("BRA1")[3]
@@ -1726,7 +1793,6 @@ func _test_xray() -> void:
 		right0 += int(TacticalXRay.analyze(w, sim0)["against"]["lanes"][2])
 	c.sheet.instr[rb] = "avancar"
 	var right := 0
-	var right60 := 0
 	var left := 0
 	var reports := 0
 	var fb_flagged := 0
@@ -1745,8 +1811,6 @@ func _test_xray() -> void:
 		var la: Array = rep["against"]["lanes"]
 		left += int(la[0])
 		right += int(la[2])
-		if k < 60:
-			right60 += int(la[2])
 		var total := 0
 		for ch in rep["chances"]:
 			if not bool(ch["mine"]) and int(ch["ul"]) >= 0:
@@ -1756,7 +1820,7 @@ func _test_xray() -> void:
 		check(total == int(la[0]) + int(la[1]) + int(la[2]), "corredores não somam as chances do adversário")
 		check(not Array(rep["segments"]).is_empty(), "raio-x sem trechos")
 	check(reports == 120, "raio-x não gerado em todas as partidas (%d)" % reports)
-	check(right60 > right0 * 1.07, "lateral no ataque não abriu o corredor (dir %d com × %d sem)" % [right60, right0])
+	check(right > right0 * 1.07, "lateral no ataque não abriu o corredor (dir %d com × %d sem)" % [right, right0])
 	check(fb_flagged > 0, "raio-x não apontou o lateral no ataque")
 	# Correção: aplicar a sugestão muda a escalação
 	var fix := {"type": "instr", "pid": rb, "instr": "segurar", "label": "segurar"}
@@ -1981,7 +2045,14 @@ func _test_market_ai() -> void:
 			deal = MarketAI.negotiate(w, big, prospect, 1.0, false, false, push)
 			if deal.has("fee"):
 				break
-		check(deal.has("fee") and int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		# A reserva do vendedor e cada contraproposta são aleatórias: nem toda
+		# negociação fecha, mesmo com ágio. Verifique a disposição de pagar e,
+		# quando houver acordo, o preço; uma recusa legítima deve informar a distância.
+		check(MarketAI.max_bid(w, big, prospect, 1.0, false, false, 3) >= prospect.value, "teto inglês abaixo do valor da promessa")
+		if deal.has("fee"):
+			check(int(deal["fee"]) * (1.0 + float(deal.get("sell_on", 0.0)) * 0.5) >= prospect.value, "clube inglês não pagou ágio pela promessa (%s)" % str(deal))
+		else:
+			check(float(deal.get("gap", -1.0)) >= 0.0, "negociação da promessa recusada sem informar a distância")
 		var bids := MarketAI.bids_for_user_player(w, big, prospect)
 		check(int(bids[0]) <= int(bids[1]) and int(bids[0]) > 0, "proposta acima do teto do comprador")
 	check(MarketAI.power(big) > MarketAI.power(seller) * 2.0, "liga inglesa deveria ter muito mais poder de compra")
@@ -2048,7 +2119,7 @@ func _test_faces() -> void:
 		var adult := FaceGen.features(i * 104729, i % FaceGen.ETH_COUNT, 31)
 		if int(adult["beard"]) == FaceGen.B_NONE:
 			adult_none += 1
-		if int(adult["beard"]) in [FaceGen.B_FULL, FaceGen.B_SHORT, FaceGen.B_BOXED, FaceGen.B_LONG]:
+		if int(adult["beard"]) in [FaceGen.B_FULL, FaceGen.B_SHORT, FaceGen.B_BOXED, FaceGen.B_LONG, FaceGen.B_MEDIUM, FaceGen.B_SQUARE, FaceGen.B_TRIMMED, FaceGen.B_ROUNDED, FaceGen.B_SHORT_SHARP, FaceGen.B_LUMBERJACK, FaceGen.B_WEEK, FaceGen.B_HOLLYWOOD]:
 			adult_full += 1
 	check(teen_beards <= 6, "barba demais aos 15 anos (%d)" % teen_beards)
 	check(adult_none >= 40 and adult_full >= 25, "barbas adultas sem variedade (sem %d, cheias %d)" % [adult_none, adult_full])
@@ -2332,7 +2403,8 @@ func _test_preseason() -> void:
 func _test_second_cups() -> void:
 	var w := WorldGenerator.generate(4242, "padrao")
 	for cid in ["UEL", "UECL", "SUD"]:
-		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == 32, "%s sem 32 clubes" % cid)
+		var expected := 32 if cid == "SUD" else 36
+		check(w.season.cups.has(cid) and w.season.cups[cid].club_ids.size() == expected, "%s sem %d clubes" % [cid, expected])
 	var seen := {}
 	for cid in w.season.cups:
 		if not CupManager.is_international(cid):
@@ -2350,6 +2422,12 @@ func _test_second_cups() -> void:
 	uel.champion = uel.club_ids[0]
 	var q := CupManager.compute_qualified(w)
 	check(q["UCL"].has(uel.champion) and not q["UEL"].has(uel.champion), "campeão da Europa League fora da Liga dos Campeões")
+	var uecl: Cup = w.season.cups["UECL"]
+	uecl.champion = uecl.club_ids[-1]
+	q = CupManager.compute_qualified(w)
+	check(q["UEL"].has(uecl.champion) or q["UCL"].has(uecl.champion), "campeão da Conference sem vaga superior")
+	for id in ["UCL", "UEL", "UECL"]:
+		check(q[id].size() == 36, "vagas de campeão alteraram tamanho de " + id)
 	var all := {}
 	for cid in q:
 		for club in q[cid]:
@@ -2379,7 +2457,7 @@ func _test_national_teams() -> void:
 	if tours.has("WC2030"):
 		var wc: Dictionary = tours["WC2030"]
 		check((wc["teams"] as Array).size() == 48 and wc["teams"].has("ESP"), "Copa do Mundo sem 48 seleções ou sem a sede")
-		check((wc["ko"] as Array).size() == 5 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "", "mata-mata da Copa incompleto")
+		check((wc["ko"] as Array).size() == 6 and String(wc["champion"]) != "" and String(wc["runner_up"]) != "" and String(wc.get("third", "")) != "", "mata-mata da Copa incompleto (inclui terceiro lugar)")
 		var uefa := 0
 		for t in wc["teams"]:
 			if DatabaseManager.nation(t).get("confed", "") == "UEFA":

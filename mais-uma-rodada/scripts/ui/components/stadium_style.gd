@@ -16,9 +16,29 @@ const RAINY: Array[String] = ["ENG", "SCO", "IRL", "NED", "BEL", "GER", "DEN", "
 const TRACK_WORDS: Array[String] = ["Olímpic", "Olimpic", "Olympia", "Olympiastadion", "Olimpiyat", "Olympisch", "Olympic Sports", "Estadio Nacional", "Olímpico"]
 
 
+## Clima do motor (Weather) no formato do campo: o que se vê é o que o jogo usou.
+static func apply_weather(st: Dictionary, wx: Dictionary) -> void:
+	if wx.is_empty():
+		return
+	var k := String(wx.get("kind", "cloud"))
+	var night := bool(wx.get("night", false))
+	st["night"] = night
+	st["rain"] = k == "rain" or k == "storm"
+	st["wx"] = k
+	st["temp"] = int(wx.get("temp", 20))
+	var w := k
+	if night:
+		w = "night_rain" if st["rain"] else ("cold" if int(wx.get("temp", 20)) <= 6 else "night")
+	st["weather"] = w
+
+
 static func kind_for(w: GameWorld, home: Club, neutral: bool) -> String:
 	if neutral:
 		return "nacional"
+	# Tipo escolhido nos dados ("stadium": {"kind": ...}) ou no Editor.
+	var own := LicensedData.venue_kind(home)
+	if own != "":
+		return own
 	var name := home.stadium
 	for word in TRACK_WORDS:
 		if name.contains(word) and not name.begins_with("Parc"):

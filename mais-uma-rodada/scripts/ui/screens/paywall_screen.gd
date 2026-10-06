@@ -22,10 +22,12 @@ func _exit_tree() -> void:
 
 func refresh() -> void:
 	UIManager.refresh_chrome()
+	StadiumBackdrop.attach(self)
+	max_content_width = 900
 	var c := content()
 	UIKit.clear(c)
 	var w := world()
-	var hero := UIKit.card("CardHighlight", 12)
+	var hero := UIKit.vbox(12)
 	var icon := TextureRect.new()
 	icon.texture = load("res://icon.svg")
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -41,13 +43,13 @@ func refresh() -> void:
 	if mods:
 		lead = "Instalar e ligar mods faz parte da Carreira Completa."
 	elif w != null and w.user_club() != null:
-		lead = "Sua primeira temporada no %s acabou. A carreira está salva e continua exatamente de onde parou." % w.user_club().short_name
+		lead = "Sua primeira temporada no %s acabou." % w.user_club().short_name
 	else:
-		lead = "A temporada de demonstração acabou. A carreira está salva e continua de onde parou."
+		lead = "A temporada de demonstração acabou."
 	var l := UIKit.label(lead, "Muted", true)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hero.add_child(l)
-	c.add_child(UIKit.card_panel(hero))
+	c.add_child(hero)
 
 	var card := UIKit.card("Card", 12)
 	card.add_child(UIKit.section("A Carreira Completa libera"))
@@ -57,7 +59,11 @@ func refresh() -> void:
 		["star", "Pagamento único", "Paga uma vez e é sua. Sem anúncios, sem assinatura e sem moedas."],
 	]:
 		var h := UIKit.hbox(14)
-		h.add_child(UIKit.icon_rect(row[0], 40, UIColors.ACCENT))
+		var tile := PanelContainer.new()
+		tile.theme_type_variation = "IconTile"
+		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tile.add_child(UIKit.icon_rect(row[0], 30, UIColors.ACCENT))
+		h.add_child(tile)
 		var v := UIKit.vbox(2)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(UIKit.label(row[1], "H3"))
@@ -88,8 +94,7 @@ func _footer() -> void:
 
 func _leave() -> void:
 	if world() != null and String(params.get("reason", "")) != "mods":
-		GameManager.close_career()
-		UIManager.goto("menu")
+		GameManager.close_career_async(func() -> void: UIManager.goto("menu"))
 	elif not UIManager.back():
 		UIManager.goto("menu")
 
@@ -102,7 +107,7 @@ func _on_store_changed() -> void:
 	if not is_inside_tree():
 		return
 	if Store.unlocked():
-		AudioManager.play("title")
+		Sfx.play("title")
 		if String(params.get("reason", "")) == "mods":
 			if not UIManager.back():
 				UIManager.goto("menu")

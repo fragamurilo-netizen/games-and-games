@@ -52,7 +52,7 @@ static func build(title: String, hint: String, players: Array, auto_players: Arr
 			row.add_child(down)
 			list.add_child(row)
 			if i == 4 and order.size() > 5:
-				list.add_child(UIKit.label("Alternadas, se precisar:", "Small", true))
+				list.add_child(UIKit.separator())
 	redraw.call(redraw)
 	var btns := UIKit.hbox(10)
 	btns.add_child(UIKit.button("Automática", "GhostButton", func():

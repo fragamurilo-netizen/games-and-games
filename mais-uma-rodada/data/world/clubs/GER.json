@@ -29,10 +29,7 @@
 				"c2": "#DC052D",
 				"fc": "#0066B2"
 			},
-			"rivals": [
-				"GER_DOR",
-				"GER_SEC"
-			]
+			"rivals": ["GER_DOR"]
 		},
 		{
 			"key": "GER_DOR",
@@ -57,7 +54,11 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "BVB",
+				"sub": "09",
+				"c1": "#FDE100",
+				"c2": "#111111",
 				"sc": "#111111",
+				"sym_scale": 1.1,
 				"border": "thick"
 			},
 			"rivals": [
@@ -74,7 +75,7 @@
 			"city": "Leverkusen",
 			"founded": 1904,
 			"league": "GER1",
-			"rep": 86,
+			"rep": 84,
 			"arch": "rico_promovido",
 			"colors": [
 				"#E32221",
@@ -151,7 +152,7 @@
 				"sc": "#111111",
 				"border": "thick"
 			},
-			"rivals": []
+			"rivals": ["GER_MAI", "GER_DAR"]
 		},
 		{
 			"key": "GER_STU",
@@ -172,16 +173,18 @@
 			"capacity": 60000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "oval",
 				"field": "hoops:2",
-				"symbol": "antlers",
+				"symbol": "letter",
+				"initials": "VfB",
 				"c1": "#FFFFFF",
 				"c2": "#E32219",
-				"sc": "#111111"
+				"fc": "#E32219",
+				"sc": "#FFFFFF",
+				"border": "thick",
+				"stars": 0
 			},
-			"rivals": [
-				"GER_KAR"
-			]
+			"rivals": ["GER_KAR", "GER_FRB"]
 		},
 		{
 			"key": "GER_MGL",
@@ -209,6 +212,7 @@
 				"c1": "#FFFFFF",
 				"c2": "#111111",
 				"sc": "#00843D",
+				"sym_scale": 1.9,
 				"border": "thick"
 			},
 			"rivals": [
@@ -240,7 +244,7 @@
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
-			"rivals": []
+			"rivals": ["GER_HAN", "GER_BSW"]
 		},
 		{
 			"key": "GER_FRB",
@@ -267,7 +271,7 @@
 				"initials": "SCF",
 				"sc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["GER_STU"]
 		},
 		{
 			"key": "GER_HOF",
@@ -322,7 +326,7 @@
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
-			"rivals": []
+			"rivals": ["GER_FFM"]
 		},
 		{
 			"key": "GER_BRE",
@@ -400,9 +404,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "round",
-				"field": "plain",
+				"field": "halves_h",
 				"symbol": "letter",
 				"initials": "FCU",
+				"c1": "#D4011D",
+				"c2": "#FFFFFF",
+				"fc": "#FFD700",
+				"plate": "disc",
+				"pc": "#D4011D",
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
@@ -552,7 +561,13 @@
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "BSC",
-				"sc": "#005CA9"
+				"c1": "#005CA9",
+				"c2": "#FFFFFF",
+				"plate": "none",
+				"sc": "#FFFFFF",
+				"border": "thin",
+				"chief_text": "HERTHA",
+				"cc": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_UNI"
@@ -668,7 +683,7 @@
 				"symbol": "fleur",
 				"sc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["GER_FFM"]
 		},
 		{
 			"key": "GER_LAU",
@@ -693,8 +708,11 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCK",
-				"sc": "#FFFFFF",
-				"border": "double"
+				"c1": "#E2001A",
+				"c2": "#FFFFFF",
+				"border": "double",
+				"ribbon": "1900",
+				"c3": "#FFFFFF"
 			},
 			"rivals": [
 				"GER_SAA"
@@ -725,9 +743,7 @@
 				"initials": "96",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"GER_BSW"
-			]
+			"rivals": ["GER_BSW", "GER_WOB"]
 		},
 		{
 			"key": "GER_NUR",
@@ -748,7 +764,7 @@
 			"capacity": 50000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCN",
@@ -805,7 +821,7 @@
 			"capacity": 34300,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "KSC",
@@ -864,7 +880,7 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCM",
@@ -925,9 +941,7 @@
 				"symbol": "lion",
 				"sc": "#1D5AA8"
 			},
-			"rivals": [
-				"GER_HAN"
-			]
+			"rivals": ["GER_HAN", "GER_WOB"]
 		},
 		{
 			"key": "GER_FUE",

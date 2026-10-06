@@ -7,6 +7,8 @@ extends Control
 ## `compact` desliga a animação (miniatura no feed das redes).
 
 var compact := false
+## Só o painel e a luz (foto de apresentação de reforço): sem treinador, mesa, microfones e plateia.
+var backdrop_only := false
 var club_name := ""
 var coach_name := ""
 var c1 := Color("#1B3A8C")
@@ -167,6 +169,7 @@ func _layout() -> void:
 	var cs := tb.size.y * 0.62
 	_skirt_crest.position = Vector2(tb.position.x + tb.size.x * 0.5 - cs * 0.5, tb.position.y + tb.size.y * 0.3)
 	_skirt_crest.size = Vector2(cs, cs)
+	_skirt_crest.visible = not backdrop_only
 	queue_redraw()
 	_front.queue_redraw()
 
@@ -236,6 +239,8 @@ func _draw_front() -> void:
 	for i in 6:
 		cv.draw_circle(Vector2(w * 0.5, h * 0.1), h * (0.55 - i * 0.07), Color(1, 1, 1, 0.035), true, -1.0, true)
 	cv.draw_rect(Rect2(0, 0, w, h * 0.72), Color(0, 0, 0, 0.05))
+	if backdrop_only:
+		return
 	# Treinador (silhueta de terno) atrás da mesa.
 	var cx := w * 0.5
 	var head_r := h * 0.078

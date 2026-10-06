@@ -1,0 +1,6 @@
+Saira by Hector Gatti and Omnibus-Type
+Source: https://raw.githubusercontent.com/google/fonts/8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5/ofl/saira/Saira%5Bwdth%2Cwght%5D.ttf
+Revision: 8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5
+SHA256: 9d050fc5a01c85f74c4257c207d50b55d1e40c37308c642f974a2c5003231dde
+Unmodified variable font; SIL Open Font License 1.1, see OFL-Saira.txt.
+Runtime styles use the original weight and width axes.

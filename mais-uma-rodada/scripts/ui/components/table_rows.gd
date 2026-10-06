@@ -5,6 +5,9 @@ extends RefCounted
 const COLS_COMPACT := ["J", "SG", "PTS"]
 const COLS_FULL := ["J", "V", "E", "D", "SG", "PTS"]
 const COLS_FORM := ["ÚLTIMOS 5", "APR", "PTS"]
+## Tela larga (tablet): gols pró e contra e os últimos jogos na própria classificação.
+const COLS_WIDE := ["J", "V", "E", "D", "GP", "GC", "SG", "ÚLTIMOS 5", "PTS"]
+const COLS_WIDE_SIDE := ["J", "V", "E", "D", "GP", "GC", "SG", "PTS"]
 ## Visões da classificação: geral, só jogos em casa, só fora, e o momento (últimos 5 jogos).
 const VIEW_ALL := "all"
 const VIEW_HOME := "home"
@@ -30,7 +33,18 @@ static func _col_width(col: String, compact: bool) -> int:
 	return 40
 
 
-static func header(compact: bool, view: String = VIEW_ALL) -> HBoxContainer:
+## Colunas de números de uma visão da classificação.
+static func _cols(compact: bool, view: String, wide: bool) -> Array:
+	if compact:
+		return COLS_COMPACT
+	if view == VIEW_FORM:
+		return COLS_FORM
+	if wide:
+		return COLS_WIDE if view == VIEW_ALL else COLS_WIDE_SIDE
+	return COLS_FULL
+
+
+static func header(compact: bool, view: String = VIEW_ALL, wide: bool = false) -> HBoxContainer:
 	var h := UIKit.hbox(6)
 	var gap := Control.new()
 	# Mesma soma da linha: margem, faixa da zona, posição e escudo (com os espaçamentos).
@@ -39,7 +53,7 @@ static func header(compact: bool, view: String = VIEW_ALL) -> HBoxContainer:
 	var n := UIKit.label("CLUBE", "Caps")
 	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(n)
-	var cols: Array = COLS_COMPACT if compact else (COLS_FORM if view == VIEW_FORM else COLS_FULL)
+	var cols: Array = _cols(compact, view, wide)
 	for col in cols:
 		var l := UIKit.label(col, "Caps")
 		l.custom_minimum_size.x = _col_width(col, compact)
@@ -59,12 +73,12 @@ static func row(w: GameWorld, league: League, club_id: int, pos: int, compact: b
 ## `move`: posições ganhas (+) ou perdidas (-) desde a rodada anterior. `on_tap` troca o destino
 ## do toque (por padrão abre o clube).
 static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compact: bool, zone: Color,
-		view: String = VIEW_ALL, move: int = 0, on_tap: Callable = Callable()) -> Control:
+		view: String = VIEW_ALL, move: int = 0, on_tap: Callable = Callable(), wide: bool = false) -> Control:
 	var cl := w.club(club_id)
 	var is_user := w.is_user_club(club_id)
 	var h := UIKit.hbox(6)
 	var bar := ColorRect.new()
-	bar.custom_minimum_size = Vector2(5, 0)
+	bar.custom_minimum_size = Vector2(3, 0)
 	bar.color = zone
 	h.add_child(bar)
 	var pl := UIKit.label(str(pos), "H3")
@@ -77,7 +91,7 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	n.clip_text = true
 	if is_user:
-		n.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		n.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
 	h.add_child(n)
 	if move != 0:
 		var up := move > 0
@@ -100,10 +114,18 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 		h.add_child(pt)
 	else:
 		var sg: int = int(r["gf"]) - int(r["ga"])
-		var values: Array = [r["pl"], sg, r["pts"]] if compact else [r["pl"], r["w"], r["d"], r["l"], sg, r["pts"]]
-		var cols: Array = COLS_COMPACT if compact else COLS_FULL
+		var cols: Array = _cols(compact, view, wide)
+		var by_col := {"J": r["pl"], "V": r["w"], "E": r["d"], "D": r["l"], "GP": r["gf"], "GC": r["ga"], "SG": sg, "PTS": r["pts"]}
+		var values: Array = []
+		for col in cols:
+			values.append(by_col.get(col, 0))
 		for i in values.size():
 			var last := i == values.size() - 1
+			if cols[i] == "ÚLTIMOS 5":
+				var fdw := form_dots(String(r.get("form", "")), 18)
+				fdw.custom_minimum_size.x = W_FORM
+				h.add_child(fdw)
+				continue
 			var txt := str(values[i])
 			var is_sg: bool = cols[i] == "SG"
 			if is_sg:
@@ -113,6 +135,12 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			if not last:
 				l.add_theme_color_override(&"font_color", UIColors.MUTED)
+			elif int(r.get("ded", 0)) > 0:
+				# Pontos perdidos fora de campo (punição): número em vermelho e o desconto ao lado
+				l.add_theme_color_override(&"font_color", UIColors.RED)
+				l.tooltip_text = "-%d pontos de punição" % int(r["ded"])
+				var dl := UIKit.colored("-%d" % int(r["ded"]), UIColors.RED, "Small")
+				h.add_child(dl)
 			h.add_child(l)
 	var cid := club_id
 	var tap := on_tap
@@ -122,19 +150,109 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 		elif w.is_user_club(cid):
 			UIManager.goto("club")
 		else:
-			UIManager.push("club", {"id": cid}), "CardFlat")
-	if is_user:
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = UIColors.SURFACE_2
-		sb.border_color = UIColors.ACCENT
-		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(14)
-		sb.content_margin_left = ROW_PAD
-		sb.content_margin_right = ROW_PAD
-		sb.content_margin_top = 10
-		sb.content_margin_bottom = 10
-		row.add_theme_stylebox_override(&"panel", sb)
+			UIManager.push("club", {"id": cid}), "RowPanel")
+	row.custom_minimum_size.y = UITokens.H_ROW
+	row.tooltip_text = cl.name
+	# Linha de tabela clássica: filete embaixo; o clube do usuário ganha só um fundo tingido.
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(UIColors.ACCENT, 0.12) if is_user else Color(0, 0, 0, 0)
+	sb.border_color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+	sb.border_width_bottom = 1
+	sb.content_margin_left = ROW_PAD
+	sb.content_margin_right = ROW_PAD
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	row.add_theme_stylebox_override(&"panel", sb)
+	for l in h.get_children():
+		if l is Label and (l as Label).text.is_valid_int() or (l is Label and (l as Label).text.begins_with("+")):
+			(l as Label).add_theme_font_override(&"font", DataTable.tabular_font())
 	return row
+
+
+## Classificação como tabela de dados (celular em pé): posição, escudo e nome presos à esquerda;
+## J, SG e PTS logo de cara e, passando o dedo, V, E, D, gols, os últimos jogos e o aproveitamento.
+## `lines`: [{id, pos, zone (Color), move, row (Dictionary)}] já na ordem da tabela.
+static func standings_table(w: GameWorld, lines: Array, view: String, on_tap: Callable, state: Dictionary) -> DataTable:
+	var t := DataTable.new()
+	t.row_height = UITokens.H_ROW - 8
+	t.lead_width = 300.0
+	t.lead_min = 290.0
+	t.marker = func(it: Dictionary) -> Color: return it["zone"]
+	t.highlight = func(it: Dictionary) -> bool: return w.is_user_club(int(it["id"]))
+	t.row_pressed.connect(func(it: Variant): on_tap.call(int((it as Dictionary)["id"])))
+	var num := func(key: String, title: String, tip: String, strong: bool = false) -> Dictionary:
+		return {"key": key, "title": title, "w": 56 if strong else 44, "tip": tip, "strong": strong,
+			"text": func(it: Dictionary) -> String:
+				var r: Dictionary = it["row"]
+				return Fmt.signed(int(r["gf"]) - int(r["ga"])) if key == "sg" else str(int(r[key])),
+			"sort": func(it: Dictionary) -> int:
+				var r: Dictionary = it["row"]
+				return int(r["gf"]) - int(r["ga"]) if key == "sg" else int(r[key]),
+			"color": func(it: Dictionary) -> Color:
+				if strong:
+					return UIColors.RED if int((it["row"] as Dictionary).get("ded", 0)) > 0 else UIColors.TEXT
+				return UIColors.MUTED}
+	var c := {}
+	c["club"] = {"key": "club", "title": "Clube", "first": "asc",
+		"sort": func(it: Dictionary) -> int: return int(it["pos"]),
+		"cell": func(it: Dictionary) -> Control: return _standing_lead(w, it)}
+	c["pl"] = num.call("pl", "J", "Jogos")
+	c["sg"] = num.call("sg", "SG", "Saldo de gols")
+	c["sg"]["w"] = 52
+	c["pts"] = num.call("pts", "PTS", "Pontos", true)
+	c["w"] = num.call("w", "V", "Vitórias")
+	c["d"] = num.call("d", "E", "Empates")
+	c["l"] = num.call("l", "D", "Derrotas")
+	c["gf"] = num.call("gf", "GP", "Gols pró")
+	c["ga"] = num.call("ga", "GC", "Gols contra")
+	c["form"] = {"key": "form", "title": "Últimos 5", "w": W_FORM, "align": "c",
+		"cell": func(it: Dictionary) -> Control: return form_dots(String((it["row"] as Dictionary).get("form", "")), 18)}
+	c["apr"] = {"key": "apr", "title": "Aprov.", "w": 68, "tip": "Aproveitamento dos pontos",
+		"text": func(it: Dictionary) -> String:
+			var r: Dictionary = it["row"]
+			return ("%d%%" % roundi(100.0 * int(r["pts"]) / (3.0 * int(r["pl"])))) if int(r["pl"]) > 0 else "–",
+		"sort": func(it: Dictionary) -> float:
+			var r: Dictionary = it["row"]
+			return float(r["pts"]) / maxf(1.0, int(r["pl"])),
+		"color": func(_it: Dictionary) -> Color: return UIColors.MUTED}
+	var keys: Array = ["form", "apr", "pts", "pl", "w", "d", "l", "gf", "ga", "sg"] if view == VIEW_FORM \
+		else ["pl", "sg", "pts", "w", "d", "l", "gf", "ga", "form", "apr"]
+	var cols: Array = [c["club"]]
+	for k in keys:
+		cols.append(c[k])
+	return t.setup(cols, lines, state)
+
+
+static func _standing_lead(w: GameWorld, it: Dictionary) -> Control:
+	var cid := int(it["id"])
+	var cl := w.club(cid)
+	var is_user := w.is_user_club(cid)
+	var h := UIKit.hbox(6)
+	var pl := UIKit.label(str(int(it["pos"])), "H3")
+	pl.custom_minimum_size.x = 30
+	pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	pl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pl.add_theme_font_override(&"font", DataTable.tabular_font())
+	h.add_child(pl)
+	var cr := UIKit.crest(cl, W_CREST)
+	cr.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(cr)
+	var n := UIKit.label(cl.short_name, "H3" if is_user else "")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if is_user:
+		n.add_theme_color_override(&"font_color", UIColors.ink(UIColors.ACCENT))
+	h.add_child(n)
+	var move := int(it.get("move", 0))
+	if move != 0:
+		var up := move > 0
+		var mv := UIKit.colored(("▲" if up else "▼") + str(absi(move)), UIColors.GREEN if up else UIColors.RED, "Small")
+		mv.add_theme_font_size_override(&"font_size", 16)
+		mv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(mv)
+	h.tooltip_text = cl.name
+	return h
 
 
 ## Quadradinhos dos últimos jogos (V verde, E cinza, D vermelho), do mais antigo ao mais recente.
@@ -211,8 +329,9 @@ static func legend(league: League) -> HFlowContainer:
 		var promo := LeagueFormat.kind(league) == "promo"
 		var span := ("%dº" % int(pr[0])) if int(pr[0]) == int(pr[1]) else ("%dº–%dº" % [int(pr[0]), int(pr[1])])
 		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_PLAYOFF), ("Playoffs de acesso (%s)" if promo else "Repescagem (%s)") % span))
-	if league.relegated_count() > 0:
-		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % league.relegated_count()))
+	var rel := league.relegated_count() - (1 if LeagueFormat.uses_promedios(league) else 0)
+	if rel > 0:
+		f.add_child(_legend_item(CompetitionManager.zone_color(CompetitionManager.ZONE_RELEGATION), "Rebaixamento (%d)" % rel))
 	return f
 
 
@@ -230,9 +349,11 @@ static func _legend_item(c: Color, text: String) -> HBoxContainer:
 ## Linha de ranking individual (artilharia, assistências, notas).
 static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, caption: String) -> Control:
 	var h := UIKit.hbox(10)
-	var rl := UIKit.label(str(rank), "H3")
-	rl.custom_minimum_size.x = 36
+	var rl := UIKit.label(str(rank), "Mono")
+	rl.custom_minimum_size.x = 32
 	rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if rank > 3:
+		rl.add_theme_color_override(&"font_color", UIColors.MUTED)
 	h.add_child(rl)
 	var cl: Club = w.club(p.club_id) if p.club_id >= 0 else null
 	h.add_child(UIKit.crest(cl, 32))
@@ -245,15 +366,25 @@ static func ranking_row(w: GameWorld, p: Player, rank: int, value: String, capti
 	col.add_child(n)
 	col.add_child(UIKit.label("%s · %s" % [cl.short_name if cl != null else "sem clube", caption], "Small"))
 	h.add_child(col)
-	h.add_child(UIKit.label(value, "Stat"))
+	var vl := UIKit.label(value, "Stat")
+	vl.custom_minimum_size.x = 48
+	vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(vl)
 	var pid := p.id
-	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "CardFlat")
+	return UIKit.tap_row(h, func(): UIManager.push("player", {"id": pid}), "RowPanel")
+
+
+## Linhas de ranking numa lista só, separadas por filetes (sem uma caixa por linha).
+static func ranking_list(rows: Array) -> Control:
+	var group := UIKit.menu_group(rows)
+	group.add_theme_stylebox_override(&"panel", StyleBoxEmpty.new())
+	return group
 
 
 ## Detalhes de um jogo (gols, craque, público) ou a prévia (campanhas) se ainda não aconteceu.
 static func fixture_details(w: GameWorld, f: Fixture) -> void:
 	var v := UIKit.vbox(12)
-	v.custom_minimum_size.x = 600
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var home := w.club(f.home)
 	var away := w.club(f.away)
 	var t := UIKit.label("%s %s %s" % [home.short_name, ("%d – %d" % [f.hg, f.ag]) if f.played else "×", away.short_name], "Title", true)

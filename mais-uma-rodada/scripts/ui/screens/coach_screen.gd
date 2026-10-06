@@ -6,10 +6,10 @@ extends BaseScreen
 
 var _club := -1
 var _coach := -1
+var _tab := "profile"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Técnico"
 
 
@@ -56,10 +56,18 @@ func refresh() -> void:
 	screen_subtitle = club.short_name if club != null else "Sem clube"
 	UIManager.refresh_chrome()
 	c.add_child(_hero(w, co, club))
-	if club != null:
-		c.add_child(_work(w, co, club))
-	c.add_child(_career(w, co))
-	c.add_child(_style_card(co))
+	c.add_child(UIKit.tabs([["profile", "Perfil"], ["career", "Carreira"]], _tab, func(key: String):
+		_tab = key
+		refresh()))
+	if _tab == "profile":
+		if club != null:
+			c.add_child(_work(w, co, club))
+		c.add_child(_style_card(w, co))
+	else:
+		c.add_child(_career(w, co))
+		c.add_child(_stories(w, co))
+	max_content_width = 1600
+	columnize(c, 2, 2, 0)
 	if club != null:
 		var cid := club.id
 		f.add_child(UIKit.button("Conversar", "PrimaryButton", func(): TalkDialog.open("coach", cid, func(): refresh()), "mail"))
@@ -76,7 +84,15 @@ func _hero(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	nrow.add_child(UIKit.flag(String(co["nat"]), 34))
 	nrow.add_child(UIKit.label("%s · %d anos" % [DatabaseManager.nation_name(String(co["nat"])), w.year - int(co.get("by", w.year - 50))], "Small", true))
 	col.add_child(nrow)
-	col.add_child(UIKit.pill(People.style_name(String(co["st"])).to_upper(), UIColors.ACCENT, 16))
+	if club != null and w.is_user_club(club.id) and not bool(co.get("int", false)):
+		col.add_child(UIKit.label(Languages.coach_text(w), "Small", true))
+	var pills := UIKit.flow(6)
+	pills.add_child(UIKit.pill(People.style_name(String(co["st"])).to_upper(), UIColors.ACCENT, 16))
+	pills.add_child(UIKit.pill(CoachStories.temper_name(w, co).to_upper(), UIColors.BLUE, 16))
+	col.add_child(pills)
+	var nick := CoachStories.nickname(w, co)
+	if nick != "":
+		col.add_child(UIKit.colored("\"%s\"" % nick, UIColors.ACCENT, "H3", true))
 	var crow := UIKit.hbox(8)
 	if club != null:
 		crow.add_child(UIKit.crest(club, 30))
@@ -100,7 +116,7 @@ func _work(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	row.add_child(UIKit.stat("%d-%d-%d" % [int(co.get("w", 0)), int(co.get("d", 0)), int(co.get("l", 0))], "V-E-D"))
 	row.add_child(UIKit.stat("%d%%" % int(round(100.0 * (int(co.get("w", 0)) * 3 + int(co.get("d", 0))) / maxf(1.0, games * 3.0))) if games > 0 else "—", "aproveitamento"))
 	row.add_child(UIKit.stat(_stars(float(co.get("sk", 50.0))), "nível"))
-	row.add_child(UIKit.stat(str(int(round(float(co.get("rep", 50.0))))), "reputação"))
+	row.add_child(UIKit.stat(Reputation.label(float(co.get("rep", 50.0))), "reputação"))
 	card.add_child(row)
 	var job := float(co.get("job", 60.0))
 	var jl := "Prestigiado" if job >= 75.0 else ("Estável" if job >= 50.0 else ("Pressionado" if job >= 30.0 else "Cargo balançando"))
@@ -111,6 +127,10 @@ func _work(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	var fired := int(co.get("fired", 0))
 	if fired > 0:
 		card.add_child(UIKit.kv("Demissões na carreira", str(fired)))
+	var vs := CoachStories.vs_user(co)
+	if int(vs[0]) + int(vs[1]) + int(vs[2]) > 0:
+		var tone := UIColors.GREEN if int(vs[0]) > int(vs[2]) else (UIColors.RED if int(vs[2]) > int(vs[0]) else UIColors.TEXT)
+		card.add_child(UIKit.kv("Você contra ele", "%dV %dE %dD" % [int(vs[0]), int(vs[1]), int(vs[2])], tone))
 	var rel := People.coach_rel(w, int(co["id"]))
 	card.add_child(UIKit.kv("Relação com você", People.coach_rel_label(rel), UIColors.GREEN if rel >= 12.0 else (UIColors.RED if rel <= -12.0 else UIColors.MUTED)))
 	if club.sheet != null:
@@ -122,13 +142,37 @@ func _work(w: GameWorld, co: Dictionary, club: Club) -> Control:
 	return UIKit.card_panel(card)
 
 
-func _style_card(co: Dictionary) -> Control:
+func _style_card(w: GameWorld, co: Dictionary) -> Control:
 	var card := UIKit.card("Card", 6)
 	var st: Dictionary = People.COACH_STYLES.get(String(co["st"]), {})
 	card.add_child(UIKit.section("Estilo de trabalho"))
 	card.add_child(UIKit.label(String(st.get("name", "")), "H3"))
-	if st.has("desc"):
-		card.add_child(UIKit.label(String(st["desc"]), "Small", true))
+	card.add_child(UIKit.label("Temperamento: " + CoachStories.temper_name(w, co), "H3"))
+	return UIKit.card_panel(card)
+
+
+## A história do técnico: o arco em andamento, o que a carreira justifica e os momentos marcantes.
+func _stories(w: GameWorld, co: Dictionary) -> Control:
+	var card := UIKit.card("Card", 6)
+	card.add_child(UIKit.section("História"))
+	var arc := CoachStories.arc_text(co)
+	if arc != "":
+		card.add_child(UIKit.colored(arc, UIColors.ORANGE, "H3", true))
+	var ls := CoachStories.labels(w, co)
+	if not ls.is_empty():
+		var fl := UIKit.flow(6)
+		for l in ls.slice(0, 4):
+			fl.add_child(UIKit.pill(String(l["n"]).to_upper(), UIColors.ACCENT, 13))
+		card.add_child(fl)
+	var aw: Array = co.get("aw", [])
+	for a in aw:
+		var what := "Treinador do ano" if String(a[1]) == "coach_world" else "Treinador da temporada (%s)" % w.league_short(String(a[2]))
+		card.add_child(UIKit.colored("%d · %s" % [int(a[0]), what], UIColors.ACCENT, "Small", true))
+	var tl := CoachStories.moments(co)
+	for i in range(tl.size() - 1, -1, -1):
+		card.add_child(UIKit.label("%d · %s" % [int(tl[i]["y"]), String(tl[i]["t"])], "Small", true))
+	if arc == "" and ls.is_empty() and aw.is_empty() and tl.is_empty():
+		card.add_child(UIKit.label("Ainda sem capítulos marcantes.", "Muted", true))
 	return UIKit.card_panel(card)
 
 
@@ -148,7 +192,7 @@ func _career(w: GameWorld, co: Dictionary) -> Control:
 		card.add_child(UIKit.kv("Demissões", str(int(t["dem"]))))
 	if int(co.get("pid", -1)) >= 0:
 		var pid := int(co["pid"])
-		card.add_child(UIKit.tap_row(UIKit.label("Ex-jogador: ver a carreira dele em campo", "Small", true), func(): UIManager.push("player", {"id": pid}), "CardFlat"))
+		card.add_child(UIKit.tap_row(UIKit.label("Ex-jogador · ver carreira", "Small", true), func(): UIManager.push("player", {"id": pid}), "CardFlat"))
 	else:
 		card.add_child(UIKit.label(CoachCareer.player_text(co), "Small", true))
 	var car: Array = co.get("car", [])
@@ -203,3 +247,7 @@ func _spell_row(w: GameWorld, sp: Dictionary) -> Control:
 static func _stars(sk: float) -> String:
 	var n := clampi(int(round((sk - 20.0) / 15.0)), 1, 5)
 	return "★".repeat(n) + "☆".repeat(5 - n)
+
+
+func color_context() -> Dictionary:
+	return club_context(_club)

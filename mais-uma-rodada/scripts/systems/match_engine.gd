@@ -52,6 +52,8 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 		att = FinanceManager.expected_attendance(home, away, derby, world.rng, Rivalry.attendance_factor(world, f.home, f.away, derby))
 		if not f.is_league():
 			att = mini(home.capacity, int(att * 1.12)) # noite de copa enche o estádio
+		if ClubEvents.take_closed(home):
+			att = 0 # punição: portões fechados
 	var ctx := {
 		"derby": derby,
 		"importance": importance_of(world, f),
@@ -60,6 +62,7 @@ static func context_for(world: GameWorld, f: Fixture) -> Dictionary:
 		"neutral": f.neutral,
 	}
 	ctx["ref"] = Referees.assign(world, f, float(ctx["importance"]))
+	ctx["wx"] = Weather.for_fixture(world, f)
 	if f.stage == Fixture.STAGE_KO and CupManager.is_deciding_leg(world, f):
 		ctx["ko"] = true
 		ctx["agg"] = CupManager.aggregate_before(world, f)

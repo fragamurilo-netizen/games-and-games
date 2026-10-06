@@ -23,11 +23,11 @@ const VERSION := 1
 const PAST_YEARS := 14
 const MOVES_MAX := 800
 ## Código de saída pelo motivo da troca (People.replace_coach).
-const END_BY_REASON := {"resultados": "dem", "temporada": "dem", "": "apo", "proposta": "sai", "res": "res", "efetivo": "int", "perdeu": "sai"}
+const END_BY_REASON := {"resultados": "dem", "temporada": "dem", "ferida": "dem", "": "apo", "proposta": "sai", "res": "res", "efetivo": "int", "perdeu": "sai", "ciclo": "fim"}
 const END_TEXT := {"dem": "Demitido", "sai": "Saiu para o %s", "res": "Pediu demissão", "fim": "Fim de ciclo", "apo": "Aposentou-se",
 	"usr": "Deu lugar a %s", "int": "Interino", "prom": "Promovido a técnico"}
-const WHY_TEXT := {"resultados": "demitido", "temporada": "demitido", "": "aposentado", "proposta": "saiu", "res": "pediu demissão",
-	"efetivo": "fim da interinidade", "perdeu": "tirado por outro clube", "usuario": "saída do técnico", "efe": "interino efetivado", "usr": "chegada de %s"}
+const WHY_TEXT := {"resultados": "demitido", "temporada": "demitido", "ferida": "demitido", "": "aposentado", "proposta": "saiu", "res": "pediu demissão",
+	"efetivo": "fim da interinidade", "perdeu": "tirado por outro clube", "usuario": "saída do técnico", "efe": "interino efetivado", "usr": "chegada de %s", "ciclo": "fim de ciclo"}
 const PLAYER_POS: Array[String] = ["goleiro", "zagueiro", "lateral", "volante", "meia", "ponta", "atacante"]
 
 
@@ -516,6 +516,47 @@ static func totals(co: Dictionary) -> Dictionary:
 	return {"g": w + d + l, "w": w, "d": d, "l": l, "t": t, "clubs": clubs.size(), "dem": dem}
 
 
+## Técnicos de um clube, do atual para os mais antigos: a galeria do passado e as trocas do save
+## (FootballMemory), com a campanha e, quando o técnico ainda está no futebol, como saiu.
+## [{n, from, to (0 = atual), w, d, l, t (títulos), id (-1 = já parou), end, cur}]
+static func club_history(world: GameWorld, club: Club) -> Array:
+	var out: Array = []
+	if world.is_user_club(club.id):
+		# O próprio usuário no cargo: campanha de toda a carreira quando este é o único emprego.
+		var jobs: Array = CoachIdentity.mem(world)["jobs"]
+		var job: Dictionary = jobs.back() if not jobs.is_empty() else {}
+		var ms := world.manager_stats
+		var only := jobs.size() <= 1
+		out.append({"n": world.manager_name, "from": int(job.get("from", world.year)), "to": 0,
+			"w": int(ms.get("w", 0)) if only else 0, "d": int(ms.get("d", 0)) if only else 0, "l": int(ms.get("l", 0)) if only else 0,
+			"t": FootballMemory.titles_between(world, club.id, int(job.get("from", world.year)), world.year),
+			"id": -1, "end": "", "cur": true, "user": true})
+	var cur := People.coach_of(world, club.id)
+	if not cur.is_empty():
+		var sp := current_spell(cur)
+		out.append({"n": String(cur.get("n", "")), "from": int(cur.get("since", world.year)), "to": 0,
+			"w": int(cur.get("w", 0)) + int(sp.get("w", 0)), "d": int(cur.get("d", 0)) + int(sp.get("d", 0)),
+			"l": int(cur.get("l", 0)) + int(sp.get("l", 0)), "t": (sp.get("t", []) as Array).size(),
+			"id": int(cur.get("id", -1)), "end": "", "cur": true, "int": bool(cur.get("int", false))})
+	var past: Array = FootballMemory.club_records(world, club.id)["coaches"]
+	for i in range(past.size() - 1, -1, -1):
+		var e: Array = past[i]
+		var id := int(e[6]) if e.size() > 6 else -1
+		var row := {"n": String(e[0]), "from": int(e[1]), "to": int(e[2]), "w": int(e[3]), "d": int(e[4]), "l": int(e[5]),
+			"t": int(e[8]) if e.size() > 8 else FootballMemory.titles_between(world, club.id, int(e[1]), int(e[2])),
+			"id": id, "end": "", "cur": false}
+		var co := find(world, id) if id >= 0 else {}
+		if co.is_empty():
+			row["id"] = -1
+		else:
+			for s: Dictionary in co.get("car", []):
+				if int(s.get("c", -1)) == club.id and int(s.get("from", -1)) == int(row["from"]):
+					row["end"] = end_text(s)
+					break
+		out.append(row)
+	return out
+
+
 static func end_text(sp: Dictionary) -> String:
 	var e := String(sp.get("e", ""))
 	if e == "":
@@ -567,7 +608,7 @@ static func retire_free(world: GameWorld, r: RandomNumberGenerator) -> void:
 		if age >= 72 or (age >= 64 and r.randf() < 0.2) or (idle >= 4 and float(co.get("rep", 40.0)) < 40.0 and r.randf() < 0.4):
 			if float(co.get("rep", 0.0)) >= 60.0 and world.has_user() and String(co.get("nat", "")) == world.user_club().nation:
 				NewsManager.post_raw(world, "%s encerra a carreira de técnico" % String(co["n"]),
-					"Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d título(s)." % [age, String(co["n"]), totals(co)["clubs"], totals(co)["t"]],
+					("Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d título." if int(totals(co)["t"]) == 1 else "Aos %d anos, %s pendura a prancheta depois de %d trabalhos e %d títulos.") % [age, String(co["n"]), totals(co)["clubs"], totals(co)["t"]],
 					-1, -1, NewsEvent.IMP_NORMAL, "tecnicos")
 			continue
 		keep.append(co)

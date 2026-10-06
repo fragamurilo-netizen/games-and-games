@@ -3,19 +3,45 @@ extends RefCounted
 ## Formatação de textos exibidos ao usuário (pt-BR; inglês e espanhol via I18n.lang).
 
 
-## Dinheiro compacto: $ 850, $ 12 mil, $ 1,2 mi, $ -3,4 mi.
+## A economia do jogo é euro-base. A preferência muda só a exibição.
+## Câmbio de partida (05/10/2026): €1 = R$ 5,60 = US$ 1,12. Na carreira vale o câmbio do mundo,
+## que anda a cada temporada (Economy, data/world/economy.json).
+const EUR_TO_BRL := 5.60
+const EUR_TO_USD := 1.12
+const FX_DATE := "05/10/2026"
+
+static func currency_rate() -> float:
+	match AppSettings.currency:
+		AppSettings.CURRENCY_BRL:
+			return Economy.rate("BRL")
+		AppSettings.CURRENCY_USD:
+			return Economy.rate("USD")
+	return 1.0
+
+static func currency_symbol() -> String:
+	match AppSettings.currency:
+		AppSettings.CURRENCY_BRL:
+			return "R$"
+		AppSettings.CURRENCY_USD:
+			return "US$"
+	return "€"
+
 static func money(v: float) -> String:
-	var neg := v < 0.0
-	var a := absf(v)
+	var shown := v * currency_rate()
+	var neg := shown < 0.0
+	var a := absf(shown)
 	var s := ""
-	if a >= 1_000_000.0:
+	if a >= 1_000_000_000.0:
+		var b := a / 1_000_000_000.0
+		s = _decimal(b, 2 if b < 10.0 else 1) + (" bi" if I18n.lang in ["pt", "es"] else "B")
+	elif a >= 1_000_000.0:
 		var m := a / 1_000_000.0
-		s = _decimal(m, 1 if m < 100.0 else 0) + (" mi" if I18n.lang == "pt" else "M")
+		s = _decimal(m, 1 if m < 100.0 else 0) + (" mi" if I18n.lang in ["pt", "es"] else "M")
 	elif a >= 1_000.0:
 		s = str(int(round(a / 1_000.0))) + ("K" if I18n.lang == "en" else " mil")
 	else:
 		s = str(int(round(a)))
-	return ("-$ " if neg else "$ ") + s
+	return ("-" if neg else "") + currency_symbol() + " " + s
 
 
 static func money_month(v: float) -> String:
@@ -28,6 +54,12 @@ static func _decimal(x: float, places: int) -> String:
 	var txt := ("%." + str(places) + "f") % x
 	if txt.ends_with(".0"):
 		txt = txt.substr(0, txt.length() - 2)
+	return txt if I18n.lang == "en" else txt.replace(".", ",")
+
+
+## Número com casas fixas e a vírgula do idioma: dec(7.3, 2) → "7,30" (en: "7.30").
+static func dec(x: float, places: int) -> String:
+	var txt := ("%." + str(places) + "f") % x
 	return txt if I18n.lang == "en" else txt.replace(".", ",")
 
 
@@ -81,7 +113,14 @@ static func minute(m: int, half: int = 0) -> String:
 
 
 static func plural(n: int, singular: String, plural_form: String) -> String:
-	return str(n) + " " + I18n.t(singular if n == 1 else plural_form)
+	return thousands(n) + " " + I18n.t(singular if n == 1 else plural_form)
+
+
+## Frase com número e concordância: n_of(1, "%d jogo restante", "%d jogos restantes") → "1 jogo restante".
+## Os dois moldes passam pela tradução antes do número entrar.
+static func n_of(n: int, one: String, many: String) -> String:
+	var molde := I18n.t(one if n == 1 else many)
+	return molde % n if molde.contains("%d") else molde
 
 
 ## Cor de destaque para um overall: escala contínua do ruim ao ótimo (vermelho → laranja →
@@ -90,18 +129,17 @@ static func rating_color(ovr: int) -> Color:
 	return UIColors.ink(_rating_color(ovr))
 
 
+## Escala de notas moderada (DESIGN.md › Colors): sálvia, oliva, ocre, ferrugem, tijolo.
 static func _rating_color(ovr: int) -> Color:
 	if ovr >= 80:
-		return Color("#00C08B")
+		return Color("#7FB28C")
 	if ovr >= 70:
-		return Color("#3DBE5A")
+		return Color("#9DB46C")
 	if ovr >= 60:
-		return Color("#9ACD4E")
+		return Color("#C4AE5C")
 	if ovr >= 50:
-		return Color("#E8C547")
-	if ovr >= 40:
-		return Color("#F08A3E")
-	return Color("#E5484D")
+		return Color("#C98A4B")
+	return Color("#C75B5B")
 
 
 ## Cor para notas de partida (3–10), na mesma escala.
@@ -111,13 +149,11 @@ static func match_rating_color(r: float) -> Color:
 
 static func _match_rating_color(r: float) -> Color:
 	if r >= 8.0:
-		return Color("#00C08B")
+		return Color("#7FB28C")
 	if r >= 7.0:
-		return Color("#3DBE5A")
+		return Color("#9DB46C")
 	if r >= 6.5:
-		return Color("#9ACD4E")
+		return Color("#C4AE5C")
 	if r >= 6.0:
-		return Color("#E8C547")
-	if r >= 5.0:
-		return Color("#F08A3E")
-	return Color("#E5484D")
+		return Color("#C98A4B")
+	return Color("#C75B5B")

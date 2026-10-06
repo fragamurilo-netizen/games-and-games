@@ -21,7 +21,7 @@
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "WAC",
@@ -105,7 +105,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "RSB",
@@ -132,7 +132,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FUS"
@@ -158,7 +158,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "MAS",
@@ -185,7 +185,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "HUSA"
@@ -234,7 +234,13 @@
 			"stadium": "Stade du Phosphate",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -255,7 +261,14 @@
 			"stadium": "Stade Ahmed Choukri",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RCZ",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -276,7 +289,13 @@
 			"stadium": "Stade Prince Héritier Moulay El Hassan",
 			"capacity": 18000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "UTS",
+				"text": "UNION TOUARGA"
+			},
 			"rivals": []
 		},
 		{
@@ -297,7 +316,13 @@
 			"stadium": "Stade d'Honneur de Meknès",
 			"capacity": 20000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "COD",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -318,7 +343,13 @@
 			"stadium": "Stade Saniat Rmel",
 			"capacity": 15000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "MAT",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -339,7 +370,13 @@
 			"stadium": "Stade El Bachir",
 			"capacity": 10000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "crescent",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -360,7 +397,13 @@
 			"stadium": "Stade Ibn Batouta",
 			"capacity": 65000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -381,7 +424,13 @@
 			"stadium": "Stade El Massira",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

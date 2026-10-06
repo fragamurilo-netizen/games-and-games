@@ -10,6 +10,8 @@ extends Control
 ## Na partida, `swapped` espelha o desenho: no segundo tempo o mandante ataca para a esquerda.
 
 signal slot_tapped(index: int)
+## Toque no campo durante o replay (a tela encerra o replay).
+signal replay_skipped
 
 @export_enum("lineup", "match") var mode: String = "lineup":
 	set(v):
@@ -63,8 +65,22 @@ var swapped: bool = false:
 		_crowd_tex = null
 		queue_redraw()
 ## Siglas mostradas no fundo de cada campo de defesa (quem defende aquele gol).
+## Visual clássico de jogo de técnico (2D chapado, estilo FM 2008): campo liso sem estádio,
+## bolinhas com número, sem câmera e a frase do lance na barra de baixo.
+var classic: bool = false
+var caption: Dictionary = {} # {text, color, t}
+const CAPTION_DUR := 4.5
 var home_label: String = ""
 var away_label: String = ""
+## Câmera da transmissão: aproxima no ataque perigoso, na comemoração e no replay.
+var cam_zoom := 1.0
+var cam_focus := Vector2(PitchMotion.L * 0.5, PitchMotion.W * 0.5) # metros
+var _cam_xf := Transform2D.IDENTITY # transformação da câmera no _draw (desenhos girados compõem com ela)
+## Letreiro que pisca sobre o campo ("NA TRAVE!", "QUE DEFESA!"): {text, color, t, dur}
+var callout: Dictionary = {}
+## Selo de pressão: "PRESSÃO DO FLA" quando um time empurra o outro (vazio = nada).
+var pressure_text := ""
+var pressure_color := Color.WHITE
 var _t := 0.0
 var _crowd_tex: ImageTexture = null
 var _crowd_size := Vector2.ZERO
@@ -83,6 +99,15 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	motion.update(delta)
+	_update_camera(delta)
+	if not caption.is_empty():
+		caption["t"] = float(caption["t"]) + delta
+		if float(caption["t"]) >= CAPTION_DUR:
+			caption = {}
+	if not callout.is_empty():
+		callout["t"] = float(callout["t"]) + delta
+		if float(callout["t"]) >= float(callout["dur"]):
+			callout = {}
 	flash = maxf(0.0, flash - delta * 1.2)
 	net_shake = maxf(0.0, net_shake - delta * 1.5)
 	if motion.net_t > 0.0 and motion.net_hit >= 0:
@@ -122,6 +147,39 @@ func reset_kickoff() -> void:
 	motion.kickoff(motion.poss, false)
 
 
+## Frase da narração na barra de baixo do campo (visual clássico).
+func show_caption(text: String, col: Color) -> void:
+	caption = {"text": text, "color": col, "t": 0.0}
+
+
+## Letreiro grande sobre o campo por `dur` segundos.
+func show_callout(text: String, col: Color, dur: float = 1.4) -> void:
+	callout = {"text": text, "color": col, "t": 0.0, "dur": dur}
+
+
+## Zoom e foco da câmera: replay bem perto da bola, ataque perigoso perto da área,
+## comemoração acompanhando quem fez o gol; o resto do jogo com o campo inteiro.
+func _update_camera(delta: float) -> void:
+	var mm := motion
+	var target := 1.0
+	var focus := Vector2(PitchMotion.L * 0.5, PitchMotion.W * 0.5)
+	if mm.replaying:
+		target = 1.75
+		focus = mm.ball
+	elif mm.mode == "goal" and mm.celebr_pos() != Vector2.INF:
+		target = 1.4
+		focus = mm.celebr_pos()
+	elif mm.chance_live and PitchMotion.depth(mm.poss, mm.ball) >= 0.62:
+		target = 1.3
+		focus = mm.ball.lerp(Vector2(PitchMotion.goal_x(mm.poss), PitchMotion.W * 0.5), 0.35)
+	if AppSettings.reduce_motion or classic:
+		target = 1.0
+	var k := clampf(delta * (4.0 if mm.replaying else 2.2), 0.0, 1.0)
+	cam_zoom = lerpf(cam_zoom, target, k)
+	if target <= 1.001 and cam_zoom < 1.01:
+		cam_zoom = 1.0
+	cam_focus = cam_focus.lerp(focus, clampf(delta * 3.0, 0.0, 1.0))
+
 # ---------------------------------------------------------------------------
 # Geometria
 # ---------------------------------------------------------------------------
@@ -129,6 +187,8 @@ func reset_kickoff() -> void:
 func _margins() -> Vector2:
 	if mode != "match" or stadium.is_empty():
 		return Vector2.ZERO
+	if classic:
+		return Vector2(0.02, 0.035)
 	match String(stadium.get("kind", "arena")):
 		"olimpico":
 			return Vector2(0.1, 0.2)
@@ -142,12 +202,24 @@ func _margins() -> Vector2:
 func pitch_rect() -> Rect2:
 	var aspect := 1.55 if horizontal else 0.74 # largura/altura na tela
 	var m := _margins()
-	var h := size.y / (1.0 + 2.0 * m.y)
+	var avail_h := size.y - _caption_h()
+	var h := avail_h / (1.0 + 2.0 * m.y)
 	var w := h * aspect
 	if w * (1.0 + 2.0 * m.x) > size.x:
 		w = size.x / (1.0 + 2.0 * m.x)
 		h = w / aspect
-	return Rect2((size.x - w) * 0.5, (size.y - h) * 0.5, w, h)
+	return Rect2((size.x - w) * 0.5, (avail_h - h) * 0.5, w, h)
+
+
+## Altura da barra de narração do visual clássico (fica embaixo do campo, sem cobrir jogador).
+func _caption_h() -> float:
+	if mode != "match" or not classic:
+		return 0.0
+	return float(_caption_fs()) * 1.7
+
+
+func _caption_fs() -> int:
+	return int(clampf(size.y * 0.06, 14.0, 22.0))
 
 
 ## Canônico (a, b) → tela.
@@ -179,8 +251,25 @@ func _wid_px(r: Rect2) -> float:
 # ---------------------------------------------------------------------------
 
 func _draw() -> void:
+	# Sem tamanho ainda (antes do layout): as contas com fposmod/size dariam NaN.
+	if size.x < 1.0 or size.y < 1.0:
+		return
 	var r := pitch_rect()
-	var in_match := mode == "match" and not stadium.is_empty()
+	var in_match := mode == "match" and not stadium.is_empty() and not classic
+	if mode == "match" and classic:
+		draw_rect(Rect2(Vector2.ZERO, size), CLASSIC_BG)
+	var zoomed := mode == "match" and cam_zoom > 1.005
+	if zoomed:
+		# Câmera: aproxima em torno do foco sem mostrar nada além das bordas do controle.
+		var z := cam_zoom
+		var c := size * 0.5
+		var fp := M(cam_focus, r)
+		fp.x = clampf(fp.x, size.x / (2.0 * z), size.x - size.x / (2.0 * z))
+		fp.y = clampf(fp.y, size.y / (2.0 * z), size.y - size.y / (2.0 * z))
+		_cam_xf = Transform2D(0.0, Vector2(z, z), 0.0, c - fp * z)
+	else:
+		_cam_xf = Transform2D.IDENTITY
+	draw_set_transform_matrix(_cam_xf)
 	if in_match:
 		_draw_stadium(r)
 	_draw_pitch(r)
@@ -194,6 +283,63 @@ func _draw() -> void:
 			_draw_weather()
 	if flash > 0.0:
 		draw_rect(r, Color(flash_color.r, flash_color.g, flash_color.b, flash * 0.25))
+	if zoomed:
+		_cam_xf = Transform2D.IDENTITY
+		draw_set_transform_matrix(_cam_xf)
+	if mode == "match":
+		_draw_broadcast()
+		if classic:
+			_draw_caption()
+
+
+# ---------------------------------------------------------------------------
+# Grafismo da transmissão (fora do zoom): replay, letreiros e pressão
+# ---------------------------------------------------------------------------
+
+func _draw_broadcast() -> void:
+	var font := get_theme_font(&"font", &"Stat")
+	var small := get_theme_font(&"font", &"H3")
+	if motion.replaying:
+		# Tarjas de cinema, selo REPLAY piscando e barra de progresso.
+		var bar_h := maxf(size.y * 0.09, 32.0)
+		draw_rect(Rect2(0, 0, size.x, bar_h), Color(0, 0, 0, 0.72))
+		draw_rect(Rect2(0, size.y - bar_h, size.x, bar_h), Color(0, 0, 0, 0.72))
+		var fs := int(clampf(bar_h * 0.58, 18.0, 30.0))
+		var txt := "REPLAY"
+		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var badge := Rect2(Vector2(12, (bar_h - fs * 1.3) * 0.5), Vector2(tw + fs * 1.6, fs * 1.3))
+		draw_rect(badge, comp_accent)
+		var dot := badge.position + Vector2(fs * 0.55, badge.size.y * 0.5)
+		if fmod(_t, 1.0) < 0.6:
+			draw_circle(dot, fs * 0.22, Color("#E5484D"))
+		draw_string(font, badge.position + Vector2(fs * 1.05, fs * 1.0), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(comp_accent))
+		var pw := size.x * 0.4
+		var pr := Rect2(Vector2(14, size.y - bar_h * 0.5 - 2), Vector2(pw, 4))
+		draw_rect(pr, Color(1, 1, 1, 0.2))
+		draw_rect(Rect2(pr.position, Vector2(pw * motion.replay_k, 4)), comp_accent)
+	elif pressure_text != "" and callout.is_empty():
+		var pfs := int(clampf(size.y * 0.04, 12.0, 20.0))
+		var pw2 := small.get_string_size(pressure_text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x
+		var a := 0.65 + 0.35 * absf(sin(_t * 3.0))
+		var pr2 := Rect2(Vector2((size.x - pw2) * 0.5 - 12, 6), Vector2(pw2 + 24, pfs * 1.5))
+		draw_rect(pr2, Color(0.03, 0.035, 0.04, 0.75 * a))
+		draw_rect(Rect2(pr2.position, Vector2(4, pr2.size.y)), pressure_color)
+		draw_string(small, pr2.position + Vector2(12, pfs * 1.1), pressure_text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs, Color(1, 1, 1, a))
+	if not callout.is_empty():
+		var t := float(callout["t"])
+		var dur := float(callout["dur"])
+		var pop := minf(1.0, t / 0.16)
+		var sc := 1.35 - 0.35 * pop
+		var alpha := clampf((dur - t) / 0.35, 0.0, 1.0) * pop
+		var cfs := int(clampf(size.y * 0.11, 26.0, 64.0) * sc)
+		var txt2 := String(callout["text"])
+		var cw := font.get_string_size(txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs).x
+		var col: Color = callout["color"]
+		var base := Vector2((size.x - cw) * 0.5, size.y * 0.5 + cfs * 0.35)
+		var band := Rect2(Vector2(0, size.y * 0.5 - cfs * 0.75), Vector2(size.x, cfs * 1.5))
+		draw_rect(band, Color(0, 0, 0, 0.45 * alpha))
+		draw_string(font, base + Vector2(3, 3), txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs, Color(0, 0, 0, 0.7 * alpha))
+		draw_string(font, base, txt2, HORIZONTAL_ALIGNMENT_LEFT, -1, cfs, Color(col.r, col.g, col.b, alpha))
 
 
 func _rect_ab(a0: float, b0: float, a1: float, b1: float, r: Rect2) -> Rect2:
@@ -202,9 +348,16 @@ func _rect_ab(a0: float, b0: float, a1: float, b1: float, r: Rect2) -> Rect2:
 	return Rect2(Vector2(minf(p0.x, p1.x), minf(p0.y, p1.y)), (p1 - p0).abs())
 
 
+const CLASSIC_BG := Color("#14231A")
+const CLASSIC_A := Color("#3C8A3E")
+const CLASSIC_B := Color("#358038")
+
+
 func _grass_colors() -> Array:
 	var a := UIColors.PITCH_A
 	var b := UIColors.PITCH_B
+	if mode == "match" and classic:
+		return [CLASSIC_A, CLASSIC_B]
 	if mode == "match" and not stadium.is_empty():
 		match String(stadium.get("kind", "")):
 			"arena", "nacional":
@@ -222,13 +375,27 @@ func _grass_colors() -> Array:
 		if stadium.get("rain", false):
 			a = a.darkened(0.12)
 			b = b.darkened(0.12)
+		match String(stadium.get("wx", "")):
+			"storm":
+				a = a.darkened(0.1).lerp(Color("#3E4A3A"), 0.15)
+				b = b.darkened(0.1).lerp(Color("#3E4A3A"), 0.15)
+			"snow":
+				a = a.lerp(Color("#DDE6EA"), 0.45)
+				b = b.lerp(Color("#CFD9DE"), 0.45)
+			"heat", "sun":
+				if not stadium.get("night", false):
+					a = a.lightened(0.05).lerp(Color("#7D9A3A"), 0.08 if stadium.get("wx", "") == "heat" else 0.0)
+					b = b.lightened(0.05).lerp(Color("#7D9A3A"), 0.08 if stadium.get("wx", "") == "heat" else 0.0)
+		if stadium.get("night", false):
+			a = a.darkened(0.06)
+			b = b.darkened(0.06)
 	return [a, b]
 
 
 func _draw_pitch(r: Rect2) -> void:
 	var gc := _grass_colors()
-	var kind := String(stadium.get("kind", "")) if mode == "match" else ""
-	var stripes := 12
+	var kind := String(stadium.get("kind", "")) if mode == "match" and not classic else ""
+	var stripes := 10 if classic else 12
 	if kind == "arena" or kind == "nacional":
 		stripes = 18
 	elif kind == "acanhado":
@@ -418,13 +585,13 @@ func _draw_fence_banners(bands: Array) -> void:
 			var bg := Color(String(b.get("c", "#EEEEEE")))
 			var tx := Color(String(b.get("t", "#111111")))
 			var sag := 0.03 * (1 if (i + k) % 2 == 0 else -1)
-			draw_set_transform(rr.get_center(), sag, Vector2.ONE)
+			draw_set_transform_matrix(_cam_xf * Transform2D(sag, rr.get_center()))
 			draw_rect(Rect2(-rr.size * 0.5, rr.size), bg.darkened(0.08))
 			draw_rect(Rect2(-rr.size * 0.5, rr.size), Color(0, 0, 0, 0.35), false, 1.0)
 			for cx in [-0.5, 0.5]:
 				draw_circle(Vector2(rr.size.x * cx * 0.94, -rr.size.y * 0.38), 1.0, Color(0.85, 0.85, 0.85, 0.9))
 			_board_logo(b, rr.size.x, rr.size.y, int(clampf(h * 0.55, 6.0, 16.0)), font, tx, bg)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_set_transform_matrix(_cam_xf)
 
 
 func _draw_fence(fence: Rect2, boards: Rect2) -> void:
@@ -535,9 +702,9 @@ func _draw_boards(boards: Rect2, inner: Rect2, bt: float, kind: String) -> void:
 			var rot := 0.0
 			if vertical:
 				rot = -PI / 2.0 if seg.position.x < size.x * 0.5 else PI / 2.0
-			draw_set_transform(seg.get_center(), rot, Vector2.ONE)
+			draw_set_transform_matrix(_cam_xf * Transform2D(rot, seg.get_center()))
 			_board_logo(b, along, thick, fs, font, tcol, bg)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_set_transform_matrix(_cam_xf)
 
 
 ## Nome da marca com o símbolo dela à esquerda, centrados numa placa de `along` x `thick`
@@ -580,9 +747,9 @@ func _draw_carpets(r: Rect2, grass: Rect2) -> void:
 			var bg := Color(String(b.get("c", "#1B1B1B")))
 			draw_rect(rr, Color(bg.r, bg.g, bg.b, 0.85))
 			var fs := int(clampf(gap * 0.55, 6.0, 16.0))
-			draw_set_transform(rr.get_center(), -PI / 2.0 if left else PI / 2.0, Vector2.ONE)
+			draw_set_transform_matrix(_cam_xf * Transform2D(-PI / 2.0 if left else PI / 2.0, rr.get_center()))
 			_board_logo(b, rr.size.y, rr.size.x, fs, font, Color(String(b.get("t", "#FFFFFF"))), bg)
-			draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_set_transform_matrix(_cam_xf)
 
 
 func _draw_dugouts(r: Rect2, grass: Rect2) -> void:
@@ -717,13 +884,72 @@ func _draw_shade(r: Rect2) -> void:
 
 
 func _draw_weather() -> void:
-	if not stadium.get("rain", false):
-		return
-	var n := 90
-	for i in n:
-		var x := fposmod(i * 97.31 + _t * 60.0, size.x)
-		var y := fposmod(i * 57.17 + _t * 520.0 + i * i * 0.37, size.y)
-		draw_line(Vector2(x, y), Vector2(x - 3.0, y + 11.0), Color(0.8, 0.88, 1.0, 0.22), 1.0)
+	var k := String(stadium.get("wx", "rain" if stadium.get("rain", false) else ""))
+	var night: bool = stadium.get("night", false)
+	match k:
+		"rain", "storm":
+			var n := 90 if k == "rain" else 170
+			var slant := 3.0 if k == "rain" else 7.0
+			for i in n:
+				var x := fposmod(i * 97.31 + _t * (60.0 if k == "rain" else 140.0), size.x)
+				var y := fposmod(i * 57.17 + _t * (520.0 if k == "rain" else 760.0) + i * i * 0.37, size.y)
+				draw_line(Vector2(x, y), Vector2(x - slant, y + (11.0 if k == "rain" else 15.0)), Color(0.8, 0.88, 1.0, 0.22 if k == "rain" else 0.3), 1.0)
+			# Respingos nas poças
+			for i in 14:
+				var ph := fposmod(_t * 1.3 + i * 0.37, 1.0)
+				var c := Vector2(fposmod(i * 131.7, size.x), fposmod(i * 71.3 + 40.0, size.y))
+				draw_arc(c, 2.0 + ph * 6.0, 0.0, TAU, 12, Color(0.85, 0.92, 1.0, 0.25 * (1.0 - ph)), 1.0)
+			if k == "storm":
+				draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.07, 0.12, 0.18))
+				# Relâmpago de vez em quando
+				var fl := fposmod(_t, 9.0)
+				if fl < 0.12 or (fl > 0.2 and fl < 0.26):
+					draw_rect(Rect2(Vector2.ZERO, size), Color(0.9, 0.95, 1.0, 0.35))
+		"snow":
+			for i in 120:
+				var sway := sin(_t * 1.4 + i * 1.7) * 8.0
+				var x := fposmod(i * 83.7 + sway + _t * 12.0, size.x)
+				var y := fposmod(i * 61.3 + _t * (38.0 + float(i % 5) * 9.0), size.y)
+				draw_circle(Vector2(x, y), 1.2 + float(i % 3) * 0.7, Color(1, 1, 1, 0.75))
+			draw_rect(Rect2(Vector2.ZERO, size), Color(0.85, 0.9, 1.0, 0.06))
+		"fog":
+			for band in 5:
+				var yy := size.y * (0.1 + band * 0.2) + sin(_t * 0.3 + band) * 12.0
+				draw_rect(Rect2(Vector2(0, yy - 40.0), Vector2(size.x, 80.0)), Color(0.9, 0.92, 0.94, 0.07))
+			draw_rect(Rect2(Vector2.ZERO, size), Color(0.88, 0.9, 0.92, 0.18))
+		"heat":
+			if not night:
+				draw_rect(Rect2(Vector2.ZERO, size), Color(1.0, 0.72, 0.3, 0.07))
+				# Ar tremendo sobre o gramado
+				for i in 10:
+					var y := fposmod(i * 47.0 - _t * 18.0, size.y)
+					var pts := PackedVector2Array()
+					for j in 16:
+						var x := size.x * j / 15.0
+						pts.append(Vector2(x, y + sin(_t * 4.0 + j * 0.9 + i) * 2.0))
+					draw_polyline(pts, Color(1, 0.95, 0.85, 0.06), 2.0)
+				_draw_sun()
+		"sun":
+			if not night:
+				_draw_sun()
+		"wind":
+			for i in 22:
+				var x := fposmod(i * 113.0 + _t * 260.0, size.x + 80.0) - 40.0
+				var y := fposmod(i * 53.0 + sin(_t + i) * 10.0, size.y)
+				draw_line(Vector2(x, y), Vector2(x + 28.0, y - 2.0), Color(1, 1, 1, 0.1), 1.0)
+	if night:
+		# Noite: fora do gramado mais escuro e o brilho dos refletores nos cantos
+		for c in [Vector2(0, 0), Vector2(size.x, 0), Vector2(0, size.y), Vector2(size.x, size.y)]:
+			for ring in 4:
+				draw_circle(c, 40.0 + ring * 34.0, Color(1.0, 0.98, 0.85, 0.03))
+
+
+## Sol forte: brilho no canto de onde vem a luz e um véu quente.
+func _draw_sun() -> void:
+	var c := Vector2(size.x * 0.92, size.y * 0.04)
+	for ring in 6:
+		draw_circle(c, 30.0 + ring * 40.0, Color(1.0, 0.95, 0.75, 0.05))
+	draw_circle(c, 18.0, Color(1.0, 0.98, 0.88, 0.35))
 
 
 ## Textura da torcida: fileiras, setores, lugares vazios conforme o público, torcida visitante
@@ -816,6 +1042,8 @@ func _build_crowd(r: Rect2, rings: Dictionary) -> void:
 # Escalação
 # ---------------------------------------------------------------------------
 
+## Escalação na lousa: cada titular é uma mini camisa no uniforme do clube (o goleiro no dele),
+## com o número, o sobrenome embaixo e o geral na posição. Físico só aparece quando preocupa.
 func _draw_chips(r: Rect2) -> void:
 	var font := get_theme_font(&"font", &"Stat")
 	var small := get_theme_font(&"font", &"H3")
@@ -823,30 +1051,70 @@ func _draw_chips(r: Rect2) -> void:
 	for i in chips.size():
 		var ch: Dictionary = chips[i]
 		var p := P(float(ch["y"]), float(ch["x"]), r)
-		var col: Color = ch.get("color", chip_color)
+		var c1: Color = ch.get("c1", ch.get("color", chip_color))
+		var c2: Color = ch.get("c2", c1.darkened(0.3))
+		var sz := rad * 2.3
 		if i == selected:
-			draw_circle(p, rad * 1.35, Color(1, 0.79, 0.25, 0.45))
-		draw_circle(p + Vector2(0, 2), rad, Color(0, 0, 0, 0.35))
-		draw_circle(p, rad, col)
-		draw_arc(p, rad, 0.0, TAU, 32, Color(1, 1, 1, 0.85) if i != selected else UIColors.ACCENT, maxf(2.0, rad * 0.12), true)
+			draw_circle(p, sz * 0.78, Color(UIColors.D_TEXT, 0.22))
+		_draw_mini_shirt(p, sz, c1, c2, i == selected)
 		var num := str(ch.get("number", ""))
-		var fs := int(rad * 0.95)
+		var fs := int(sz * 0.36)
 		var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(font, p + Vector2(-nw * 0.5, fs * 0.36), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(col))
+		draw_string(font, p + Vector2(-nw * 0.5, fs * 0.5), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
 		var rating: int = int(ch.get("rating", 0))
+		var nfs := int(maxf(15.0, rad * 0.62))
+		# Nome de camisa: sobrenome composto vira a última palavra; se ainda não couber no espaço
+		# entre dois jogadores, corta com reticências (o nome inteiro está no toque/perfil).
+		var nm := _shirt_name(String(ch.get("name", "")), small, nfs, _wid_px(r) * 0.2)
+		var label := nm + ("  %d" % rating if rating > 0 else "")
+		var tw := small.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
+		var top := p.y + sz * 0.5 + 4.0
+		draw_rect(Rect2(p.x - tw * 0.5 - 6, top, tw + 12, nfs * 1.3), Color(0.08, 0.09, 0.1, 0.72))
+		var nmw := small.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
+		draw_string(small, Vector2(p.x - tw * 0.5, top + nfs * 1.0), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, UIColors.D_TEXT if not ch.get("warn", false) else UIColors.D_ORANGE)
 		if rating > 0:
-			var rb := Rect2(p + Vector2(rad * 0.45, -rad * 1.25), Vector2(rad * 1.25, rad * 0.8))
-			draw_rect(rb, Color(0.04, 0.045, 0.05, 0.9))
-			var rs := str(rating)
-			var rfs := int(rad * 0.6)
-			var rw := font.get_string_size(rs, HORIZONTAL_ALIGNMENT_LEFT, -1, rfs).x
-			draw_string(font, rb.position + Vector2((rb.size.x - rw) * 0.5, rb.size.y * 0.78), rs, HORIZONTAL_ALIGNMENT_LEFT, -1, rfs, Fmt.rating_color(rating))
-		var nm: String = ch.get("name", "")
-		var nfs := int(maxf(13.0, rad * 0.62))
-		var tw := small.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
-		var bg := Rect2(p + Vector2(-tw * 0.5 - 6, rad + 3), Vector2(tw + 12, nfs * 1.25))
-		draw_rect(bg, Color(0.04, 0.045, 0.05, 0.78))
-		draw_string(small, p + Vector2(-tw * 0.5, rad + 3 + nfs * 0.98), nm, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE if not ch.get("warn", false) else UIColors.ORANGE)
+			draw_string(small, Vector2(p.x - tw * 0.5 + nmw, top + nfs * 1.0), "  %d" % rating, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Fmt.rating_color(rating))
+		var cond := float(ch.get("cond", 100.0))
+		if cond < 85.0:
+			var bw := sz * 0.9
+			var by := top + nfs * 1.3 + 3.0
+			draw_rect(Rect2(p.x - bw * 0.5, by, bw, 4), Color(0, 0, 0, 0.5))
+			draw_rect(Rect2(p.x - bw * 0.5, by, bw * cond / 100.0, 4), UIColors.D_ORANGE if cond >= 70.0 else UIColors.D_RED)
+
+
+func _shirt_name(full: String, font: Font, fs: int, max_w: float) -> String:
+	var cap := ""
+	if full.ends_with(" (C)"):
+		cap = " (C)"
+		full = full.trim_suffix(" (C)")
+	var nm := full
+	if font.get_string_size(nm + cap, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		var parts := nm.replace("-", " ").split(" ", false)
+		if parts.size() > 1:
+			nm = parts[parts.size() - 1]
+	while nm.length() > 3 and font.get_string_size(nm + "…" + cap, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		nm = nm.substr(0, nm.length() - 1)
+	if nm != full and not full.ends_with(nm):
+		nm += "…"
+	return nm + cap
+
+
+## Camisa de futebol vista de frente: corpo na cor principal, mangas e gola na segunda cor,
+## contorno escuro fino para ler sobre a grama; selecionada ganha contorno de giz.
+func _draw_mini_shirt(c: Vector2, s: float, c1: Color, c2: Color, sel: bool) -> void:
+	var u := func(x: float, y: float) -> Vector2: return c + Vector2(x * s, y * s)
+	var body := PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47),
+		u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13), u.call(0.29, 0.47),
+		u.call(-0.29, 0.47), u.call(-0.29, -0.13), u.call(-0.40, -0.06), u.call(-0.52, -0.26)])
+	draw_colored_polygon(body, c1)
+	var same := absf(c1.r - c2.r) + absf(c1.g - c2.g) + absf(c1.b - c2.b) < 0.15
+	var trim := c2 if not same else c1.darkened(0.35)
+	draw_colored_polygon(PackedVector2Array([u.call(-0.30, -0.44), u.call(-0.52, -0.26), u.call(-0.40, -0.06), u.call(-0.29, -0.13)]), trim)
+	draw_colored_polygon(PackedVector2Array([u.call(0.30, -0.44), u.call(0.52, -0.26), u.call(0.40, -0.06), u.call(0.29, -0.13)]), trim)
+	draw_polyline(PackedVector2Array([u.call(-0.13, -0.47), u.call(0.0, -0.37), u.call(0.13, -0.47)]), trim, maxf(2.0, s * 0.05), true)
+	var outline := body.duplicate()
+	outline.append(body[0])
+	draw_polyline(outline, UIColors.D_TEXT if sel else Color(0, 0, 0, 0.55), maxf(1.5, s * (0.05 if sel else 0.025)), true)
 
 
 # ---------------------------------------------------------------------------
@@ -854,6 +1122,9 @@ func _draw_chips(r: Rect2) -> void:
 # ---------------------------------------------------------------------------
 
 func _draw_match(r: Rect2) -> void:
+	if classic:
+		_draw_match_classic(r)
+		return
 	var mm := motion
 	var ppm := r.size.y / PitchMotion.W # pixels por metro
 	var rad := clampf(ppm * 2.3, 7.0, 17.0)
@@ -928,6 +1199,98 @@ func _draw_match(r: Rect2) -> void:
 			tc = home_color2 if mm.owner.side == 0 else away_color2
 		draw_rect(Rect2(bgr.position, Vector2(3, bgr.size.y)), tc)
 		draw_string(small, bgr.position + Vector2(6, nfs * 1.02), mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE)
+
+
+## Partida no visual clássico: bolinhas chapadas com número, bola branca com contorno e rastro,
+## nome de quem conduz embaixo dele. Sem pernas, sombras de luz nem câmera.
+func _draw_match_classic(r: Rect2) -> void:
+	var mm := motion
+	var ppm := r.size.y / PitchMotion.W
+	var rad := clampf(ppm * 2.1, 7.0, 16.0)
+	var font := get_theme_font(&"font", &"Stat")
+	var small := get_theme_font(&"font", &"H3")
+	var fs := int(rad * 1.05)
+	_draw_end_labels(r, font, int(rad * 1.1))
+	for side in 2:
+		for a: PitchMotion.Ag in mm.agents[side]:
+			if not a.on:
+				continue
+			var slots: Array = home_slots if a.side == 0 else away_slots
+			var sl: Dictionary = slots[a.idx] if a.idx < slots.size() else {}
+			var c1: Color = sl.get("c1", home_color if a.side == 0 else away_color)
+			var c2: Color = sl.get("c2", home_color2 if a.side == 0 else away_color2)
+			var p := M(a.pos, r)
+			var fill := c1
+			if a.down > 0.0:
+				fill = Color(c1, 0.45)
+			draw_circle(p + Vector2(1.0, 1.5), rad, Color(0, 0, 0, 0.3))
+			draw_circle(p, rad, fill)
+			# Contorno: a segunda cor quando contrasta, senão escuro (time de branco no gramado).
+			var ring := c2 if absf(c2.get_luminance() - c1.get_luminance()) > 0.25 else c1.darkened(0.55)
+			draw_arc(p, rad, 0.0, TAU, 24, ring, maxf(1.5, rad * 0.16), true)
+			if a.side == highlight_side and a.idx == highlight_slot:
+				draw_arc(p, rad * 1.5, 0.0, TAU, 24, Color("#FFE14D"), 2.5, true)
+			var num := str(a.number)
+			var nw := font.get_string_size(num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			draw_string(font, p + Vector2(-nw * 0.5, fs * 0.36), num, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UIColors.on_color(c1))
+			if a.card > 0:
+				draw_rect(Rect2(p + Vector2(rad * 0.55, -rad * 1.7), Vector2(rad * 0.55, rad * 0.75)), Color("#F5D547") if a.card == 1 else Color("#E5484D"))
+	# Árbitro e bandeirinhas: pontos pretos com aro amarelo.
+	draw_circle(M(mm.ref_pos, r), rad * 0.6, Color("#111111"))
+	draw_arc(M(mm.ref_pos, r), rad * 0.6, 0.0, TAU, 16, Color("#F5D547"), 1.5, true)
+	for i in 2:
+		var ap: Vector2 = mm.ar_pos[i]
+		var sp := M(ap, r)
+		draw_circle(sp, rad * 0.45, Color("#111111"))
+		if float(mm.ar_flag[i]) > 0.0:
+			draw_rect(Rect2(sp + Vector2(-rad * 0.3, -rad * 1.5), Vector2(rad * 0.6, rad * 0.45)), Color("#E5484D"))
+	if mm.ref_card > 0:
+		var rp := M(mm.ref_pos, r)
+		draw_rect(Rect2(rp + Vector2(rad * 0.4, -rad * 1.9), Vector2(rad * 0.6, rad * 0.85)), Color("#F5D547") if mm.ref_card == 1 else Color("#E5484D"))
+	# Rastro da bola (passe, cruzamento, chute) e a bola.
+	var prev := Vector2.INF
+	for tr in mm.trail:
+		var tp := M(tr[0], r) - Vector2(0, float(tr[1]) * ppm * 0.6)
+		var k := 1.0 - float(tr[2]) / 0.35
+		if prev != Vector2.INF:
+			draw_line(prev, tp, Color(1, 1, 1, 0.45 * k), maxf(1.5, rad * 0.22))
+		prev = tp
+	var bp := M(mm.ball, r)
+	var lift := Vector2(0, -mm.ball_h * ppm * 0.6)
+	var br := rad * 0.5 * (1.0 + mm.ball_h * 0.06)
+	draw_circle(bp + Vector2(1.5, 2.0), rad * 0.42, Color(0, 0, 0, 0.35))
+	draw_circle(bp + lift, br, Color.WHITE)
+	draw_arc(bp + lift, br, 0.0, TAU, 16, Color(0.05, 0.05, 0.05), 1.5, true)
+	if mm.owner != null and mm.owner.on and mm.owner.name != "":
+		var op := M(mm.owner.pos, r)
+		var nfs := int(clampf(rad * 1.05, 11.0, 17.0))
+		var tw := small.get_string_size(mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x
+		var at := op + Vector2(-tw * 0.5, rad + nfs * 1.05)
+		at.x = clampf(at.x, 2.0, size.x - tw - 2.0)
+		draw_string(small, at + Vector2(1, 1), mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color(0, 0, 0, 0.85))
+		draw_string(small, at, mm.owner.name, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs, Color.WHITE)
+
+
+## Barra da narração embaixo do campo (visual clássico): a frase do lance que o campo encena.
+func _draw_caption() -> void:
+	var fs := _caption_fs()
+	var h := _caption_h()
+	var bar := Rect2(Vector2(0, size.y - h), Vector2(size.x, h))
+	draw_rect(bar, Color(0, 0, 0, 0.55))
+	if caption.is_empty():
+		return
+	var small := get_theme_font(&"font", &"H3")
+	var t := float(caption["t"])
+	var alpha := clampf((CAPTION_DUR - t) / 0.5, 0.0, 1.0) * clampf(t / 0.12, 0.0, 1.0)
+	var col: Color = caption["color"]
+	draw_rect(Rect2(bar.position, Vector2(5, h)), Color(col, alpha))
+	var base := String(caption["text"])
+	var txt := base
+	var max_w := size.x - 24.0
+	while base.length() > 8 and small.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > max_w:
+		base = base.substr(0, base.length() - 2)
+		txt = base.strip_edges() + "…"
+	draw_string(small, bar.position + Vector2(14, h * 0.5 + fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1, 1, 1, alpha))
 
 
 func _draw_shadow(p: Vector2, rad: float, night: bool) -> void:
@@ -1012,6 +1375,13 @@ func _draw_end_labels(r: Rect2, font: Font, fs: int) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
+	if mode == "match":
+		# Durante o replay, um toque no campo volta ao vivo.
+		if motion.replaying and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			accept_event()
+			motion.stop_replay()
+			replay_skipped.emit()
+		return
 	if mode != "lineup":
 		return
 	# Toques chegam como clique emulado (emulate_mouse_from_touch): tratamos só o mouse.

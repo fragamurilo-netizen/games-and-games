@@ -302,7 +302,9 @@ static func manager_rep(world: GameWorld) -> float:
 static var _chain := 0
 
 
-static func replace_coach(world: GameWorld, club: Club, reason: String, note: String = "") -> Dictionary:
+## `forced`: técnico já escolhido (o mercado de fim de temporada de CoachStories); se estiver
+## empregado, sai do clube dele com multa e a troca continua lá.
+static func replace_coach(world: GameWorld, club: Club, reason: String, note: String = "", forced: Dictionary = {}) -> Dictionary:
 	var pp := data(world)
 	var r := rng(world, 3)
 	var old: Dictionary = pp["coaches"].get(club.id, {})
@@ -323,22 +325,25 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 			if code != "apo":
 				pp["free"].append(old)
 	# Interino: no meio do ano, o auxiliar segura o time por alguns jogos enquanto o clube procura.
-	if reason in ["resultados", "res"] and r.randf() < 0.45:
+	if forced.is_empty() and reason in ["resultados", "res"] and r.randf() < 0.6:
 		var it := _new_coach(world, r, club.nation, club.reputation - 14.0, club.archetype)
 		it["int"] = true
-		it["left"] = r.randi_range(1, 3)
+		it["left"] = r.randi_range(2, 4)
 		it["c"] = club.id
 		it["since"] = world.year
 		it["job"] = 55.0
 		CoachCareer.fresh_past(world, r, it, club, true)
 		CoachCareer.open_spell(world, it, club, "int")
 		pp["coaches"][club.id] = it
+		ClubDNA.on_coach_change(club) # o interino também é uma troca no banco
 		CoachCareer.log_move(world, club, old, it, reason)
 		_announce_change(world, club, old, it, reason, note)
 		return it
-	var best: Dictionary = {}
-	var best_score := -INF
+	var best: Dictionary = forced
+	var best_score := INF if not forced.is_empty() else -INF
 	for f: Dictionary in pp["free"]:
+		if not forced.is_empty():
+			break
 		if int(f.get("id", -1)) == int(old.get("id", -2)):
 			continue
 		if float(f["rep"]) > club.reputation + 18.0:
@@ -350,7 +355,11 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 			best = f
 	# Quem está bem num clube menor chama atenção: o clube maior paga a multa e leva.
 	var from_club: Club = null
-	if _chain < 2 and reason != "usuario" and r.randf() < 0.35:
+	if not forced.is_empty():
+		from_club = world.club(int(forced.get("c", -1)))
+		if from_club != null and not is_same(pp["coaches"].get(from_club.id, {}), forced):
+			from_club = null
+	elif _chain < 2 and reason != "usuario" and r.randf() < 0.35:
 		for cid in pp["coaches"]:
 			var co: Dictionary = pp["coaches"][cid]
 			var t := world.club(int(cid))
@@ -375,7 +384,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		club.balance -= fee
 		from_club.balance += fee
 		best["rep"] = minf(99.0, float(best["rep"]) + 2.0)
-	elif best.is_empty() or r.randf() < 0.25:
+	elif forced.is_empty() and (best.is_empty() or r.randf() < 0.25):
 		best = _new_coach(world, r, club.nation, club.reputation, club.archetype)
 		CoachCareer.fresh_past(world, r, best, club)
 	else:
@@ -396,6 +405,7 @@ static func replace_coach(world: GameWorld, club: Club, reason: String, note: St
 		pp["free"].pop_front()
 	CoachCareer.log_move(world, club, old, best, reason, from_club.id if from_club != null else -1, fee)
 	_announce_change(world, club, old, best, reason, note, from_club, fee)
+	CoachStories.on_hired(world, club, best, reason, from_club)
 	# Efeito dominó: o clube que perdeu o técnico vai atrás de outro.
 	if from_club != null:
 		_chain += 1
@@ -413,7 +423,8 @@ static func _announce_change(world: GameWorld, club: Club, old: Dictionary, new_
 		return
 	var why: String = {"resultados": "após a sequência ruim", "temporada": "depois de uma temporada abaixo da meta", "proposta": "que aceitou outro desafio",
 		"usuario": "após a saída de %s" % world.manager_name, "res": "que pediu demissão", "efetivo": "que era interino",
-		"perdeu": "que foi contratado pelo %s" % note}.get(reason, "")
+		"perdeu": "que foi contratado pelo %s" % note, "ciclo": "que encerrou o ciclo no clube",
+		"ferida": "que não resistiu depois de %s" % note}.get(reason, "")
 	var nm := String(new_coach["n"])
 	var title := ""
 	var body := ""
@@ -852,6 +863,47 @@ static func press_mood(world: GameWorld) -> float:
 	return s / js.size()
 
 
+## Coluna depois de um mata-mata decidido: fala do confronto e da taça, não do placar do dia.
+static func _tie_column(world: GameWorld, r: RandomNumberGenerator, f: Fixture, st: Dictionary) -> void:
+	var js := journalists(world)
+	if js.is_empty():
+		return
+	var j: Dictionary = RngUtil.pick(r, js)
+	var club := world.user_club()
+	var opp := world.club(f.opponent_of(club.id))
+	var m := world.manager_name
+	var won := int(st["w"]) == club.id
+	var derby := bool(st["derby"])
+	var how := TieStakes.how(st)
+	var comp := TieStakes.of_comp(String(st["name"]))
+	var mine := f.result_for(club.id)
+	var title := ""
+	var body := ""
+	if bool(st["title"]):
+		if won:
+			title = RngUtil.pick(r, ["%s entra para a história do %s" % [m, club.short_name], "A taça tem a cara de %s" % m])
+			body = "Título %s%s. %s" % [comp, (" " + how) if how != "" else "",
+				"E em cima do maior rival: a cidade vai lembrar disso por anos." if derby else "O treinador ganhou crédito para muito tempo."]
+			if mine == "D":
+				body += " Perder o último jogo não apagou nada."
+		else:
+			title = RngUtil.pick(r, ["%s deixa a taça escapar" % m, "Vice que dói: a conta chega para %s" % m])
+			if derby:
+				title = RngUtil.pick(r, ["Taça na mão do rival: dia de luto no %s" % club.short_name, "O %s vê o %s levantar a taça" % [club.short_name, opp.short_name]])
+			body = "O %s perdeu o título %s%s%s. %s" % [club.short_name, comp, (" " + how) if how != "" else "", (" para o %s" % opp.short_name) if not derby else " para o maior rival",
+				"Vencer o último jogo não serviu de consolo: o título ficou com o outro lado." if mine == "V" else "A torcida quer saber o que deu errado na decisão."]
+	elif won:
+		title = "%s passa pelo %s%s" % [club.short_name, opp.short_name, " e garante a vaga" if bool(st["access"]) else ""]
+		body = "Classificação %s na %s %s.%s" % [how if how != "" else "no jogo único", String(st["stage"]).to_lower(), comp,
+			" Mesmo com a derrota no jogo, o que vale é a vaga." if mine == "D" else ""]
+	else:
+		title = "Eliminação pesa sobre %s" % m if not derby else "Eliminado pelo rival: %s na berlinda" % m
+		body = "O %s caiu %s diante do %s na %s %s.%s" % [club.short_name, how if how != "" else "no jogo único", opp.short_name, String(st["stage"]).to_lower(), comp,
+			" A vitória no jogo não apaga a eliminação." if mine == "V" else ""]
+	NewsManager.post_raw(world, title, "%s\n— %s, %s" % [body, String(j["n"]), String(j["o"])], club.id, -1,
+		NewsEvent.IMP_HIGH if bool(st["final"]) or derby else NewsEvent.IMP_NORMAL, "imprensa")
+
+
 ## Coluna depois de um jogo do usuário: o tom depende do jornalista, da relação e do momento.
 static func _column(world: GameWorld, r: RandomNumberGenerator, f: Fixture, result: String) -> void:
 	var js := journalists(world)
@@ -936,6 +988,7 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 		var f: Fixture = e["f"]
 		if not f.played:
 			continue
+		var stakes := TieStakes.of(world, f)
 		for cid in [f.home, f.away]:
 			if world.is_user_club(cid):
 				continue
@@ -949,7 +1002,11 @@ static func after_matchday(world: GameWorld, entries: Array) -> void:
 			co[key] = int(co.get(key, 0)) + 1
 			var bp := ClubDNA.patience(c) # paciência com técnico é DNA do clube
 			var pres_pat := float(PRES_STYLES.get(String(pp["pres"].get(cid, {}).get("st", "paciente")), PRES_STYLES["paciente"])["patience"])
+			if not stakes.is_empty():
+				res = "V" if int(stakes["w"]) == cid else "D" # mata-mata: vale o confronto, não o placar do dia
 			var d := 2.0 if res == "V" else (0.2 if res == "E" else -2.6)
+			if not stakes.is_empty():
+				d *= 1.0 + 2.0 * float(stakes["weight"])
 			if derby:
 				d *= 1.6
 			if d < 0.0:
@@ -998,10 +1055,13 @@ static func _maybe_offer_user(world: GameWorld, r: RandomNumberGenerator, c: Clu
 	if pp.has("offer"):
 		return
 	var u := world.user_club()
-	if c.is_pool() or c.reputation <= u.reputation + 2.0 or c.reputation > manager_rep(world) + 22.0 or c.nation != u.nation and r.randf() < 0.6:
-		return
-	if r.randf() > 0.35:
-		return
+	# Quem deixou o nome à disposição recebe a ligação primeiro (se o perfil servir).
+	var watched := JobMarket.watching(world, c.id) and JobMarket.fit(world, c) >= 0.3
+	if not watched:
+		if c.is_pool() or c.reputation <= u.reputation + 2.0 or c.reputation > manager_rep(world) + 22.0 or c.nation != u.nation and r.randf() < 0.6:
+			return
+		if r.randf() > 0.35:
+			return
 	pp["offer"] = {"c": c.id, "until": world.current_turn() + 3}
 	InboxManager.on_job_offer(world, c)
 	NewsManager.post_raw(world, "%s sonda %s" % [c.short_name, world.manager_name],
@@ -1035,10 +1095,7 @@ static func accept_offer(world: GameWorld) -> void:
 	if o.is_empty():
 		return
 	data(world).erase("offer")
-	var old := world.user_club()
-	BoardManager.take_job(world, int(o["c"]))
-	NewsManager.post_raw(world, "%s deixa o %s" % [world.manager_name, old.short_name],
-		"A torcida do %s não perdoou a saída no meio da temporada." % old.short_name, old.id, -1, NewsEvent.IMP_HIGH, "tecnicos")
+	JobMarket.accept(world, int(o["c"]))
 
 
 ## Depois de cada jogo do usuário. Retorna os pedidos de conversa novos.
@@ -1139,6 +1196,10 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 		add_coach_rel(world, int(oc["id"]), d)
 	# Torcida
 	var sd := 1.6 if result == "V" else (-0.3 if result == "E" else -2.2)
+	var stakes := TieStakes.of(world, f)
+	if not stakes.is_empty():
+		# Taça ou vaga em jogo: o apoio sobe ou desaba pelo confronto inteiro.
+		sd = (5.0 if int(stakes["w"]) == club.id else -7.0) * float(stakes["weight"]) + sd
 	if derby:
 		sd *= 1.8
 	add_support(world, sd + (club.fan_mood - 55.0) * 0.015)
@@ -1153,12 +1214,19 @@ static func after_user_turn(world: GameWorld, entry: Dictionary, result: String)
 	if derby:
 		add_pres_rel(world, 3.0 if result == "V" else (-3.0 if result == "D" else 0.0))
 	# Reputação do treinador
-	pp["mrep"] = clampf(manager_rep(world) + (0.25 if result == "V" else (-0.2 if result == "D" else 0.0)) * (club.reputation / 50.0), 5.0, 99.0)
-	# Imprensa
-	if r.randf() < 0.45:
+	var rep_d := 0.25 if result == "V" else (-0.2 if result == "D" else 0.0)
+	if not stakes.is_empty():
+		rep_d *= 1.0 + 3.0 * float(stakes["weight"]) # final ganha ou perdida marca o nome do treinador
+	pp["mrep"] = clampf(manager_rep(world) + rep_d * (club.reputation / 50.0), 5.0, 99.0)
+	# Imprensa: decisão de mata-mata sempre rende coluna
+	if not stakes.is_empty():
+		_tie_column(world, r, f, stakes)
+	elif r.randf() < 0.45:
 		_column(world, r, f, result)
 	# Ultimato e demissão no meio da temporada
 	_check_job(world, r)
+	# Clube com vaga que pode ligar para o usuário
+	JobMarket.tick(world, r)
 	# Pedidos de conversa
 	return _requests(world, r)
 
@@ -1381,6 +1449,9 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			continue
 		var goal := SeasonManager.goal_of(world, c.id)
 		var diff := int(goal[1]) - int(h["p"])
+		# Perder o título para o rival ou a final pesa como terminar abaixo da meta.
+		var sting := Aftermath.sting(world, c)
+		var sdiff := diff - int(round(float(sting["v"])))
 		co["rep"] = clampf(float(co["rep"]) + clampf(diff * 0.8, -5.0, 6.0) + (6.0 if int(h["p"]) == 1 else 0.0), 5.0, 99.0)
 		co["sk"] = clampf(float(co["sk"]) + r.randf_range(-1.0, 1.5), 15.0, 97.0)
 		CoachCareer.bank(co)
@@ -1393,10 +1464,10 @@ static func on_season_end(world: GameWorld, summary: Dictionary) -> void:
 			replace_coach(world, c, "efetivo") # a temporada acabou: o clube escolhe um técnico
 		elif age >= 70 and r.randf() < 0.5:
 			replace_coach(world, c, "")
-		elif diff <= -3 and r.randf() < 0.55 / pres_pat:
-			replace_coach(world, c, "temporada")
+		elif sdiff <= -3 and r.randf() < 0.55 / pres_pat:
+			replace_coach(world, c, "ferida" if diff > -3 else "temporada", String(sting["why"]))
 		else:
-			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + diff * 2.0, 20.0, 90.0)
+			co["job"] = clampf(float(co["job"]) * 0.5 + 35.0 + sdiff * 2.0, 20.0, 90.0)
 	CoachCareer.retire_free(world, r)
 	# Presidentes: fim de mandato e eleições
 	for cid in pp["pres"]:

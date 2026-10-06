@@ -31,6 +31,8 @@ func refresh() -> void:
 		c.add_child(notes)
 	c.add_child(_camp_card(w, pre))
 	c.add_child(_friendlies_card(w, pre))
+	max_content_width = 1700
+	columnize(c, 0, 2, 1)
 	_footer(w)
 
 
@@ -46,25 +48,37 @@ func _intro_card(w: GameWorld, pre: Dictionary) -> Control:
 	card.add_child(row)
 	var steps := PreseasonManager.steps(w)
 	var names := ["Planejar o elenco", "Escolher a intertemporada", "Jogar os amistosos"]
-	var flow := UIKit.flow(8)
+	# As três etapas da pré-temporada como um passo a passo numerado.
+	var stepper := UIKit.hbox(8)
 	for i in 3:
-		flow.add_child(UIKit.pill(("✓ " if steps[i] else "") + names[i], UIColors.GREEN if steps[i] else UIColors.MUTED, 16))
-	card.add_child(flow)
-	card.add_child(UIKit.separator())
+		var st := UIKit.hbox(8)
+		st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var num := UIKit.pill("✓" if steps[i] else str(i + 1), UIColors.GREEN if steps[i] else UIColors.DIM, 16)
+		num.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		st.add_child(num)
+		var sl := UIKit.label(names[i], "Small", true)
+		sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if steps[i]:
+			sl.add_theme_color_override(&"font_color", UIColors.GREEN)
+		st.add_child(sl)
+		stepper.add_child(st)
+	card.add_child(stepper)
 	var goal := SeasonManager.goal_of(w, club.id)
 	card.add_child(UIKit.kv("Meta da diretoria", String(goal[0]), UIColors.ACCENT))
-	card.add_child(UIKit.kv("Verba para contratações", Fmt.money(club.transfer_budget)))
 	var bill := FinanceManager.wage_bill(w, club)
-	card.add_child(UIKit.kv("Folha salarial / limite", "%s / %s" % [Fmt.money_month(bill), Fmt.money_month(club.wage_budget)], UIColors.RED if bill > club.wage_budget else UIColors.TEXT))
-	card.add_child(UIKit.kv("Entrosamento", "%d" % int(club.cohesion), UIColors.morale_color(club.cohesion)))
-	return UIKit.card_panel(card)
+	card.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(Fmt.money(club.transfer_budget), "Verba"),
+		UIKit.stat_tile(Fmt.money_month(bill), "Folha / mês", UIColors.RED if bill > club.wage_budget else Color(0, 0, 0, 0)),
+		UIKit.stat_tile(Fmt.money_month(club.wage_budget), "Teto / mês"),
+		UIKit.stat_tile("%d" % int(club.cohesion), "Entrosamento", UIColors.morale_color(club.cohesion)),
+	], content_width()))
+	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1)
 
 
 ## Raio-x por setor: titulares contra a média da liga, quantidade e idade.
 func _plan_card(w: GameWorld) -> Control:
 	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Raio-x do elenco"))
-	card.add_child(UIKit.label("Titulares de cada setor contra a média da liga.", "Small", true))
 	for g in PreseasonManager.squad_plan(w):
 		var tone := int(g["tone"])
 		var color := UIColors.GREEN if tone > 0 else (UIColors.RED if tone < 0 else UIColors.BLUE)
@@ -100,10 +114,10 @@ func _plan_card(w: GameWorld) -> Control:
 func _notes_card(w: GameWorld) -> Control:
 	var n := PreseasonManager.squad_notes(w)
 	var blocks: Array = [
-		["expiring", "Contrato termina nesta temporada", "Renove quem é importante antes que o interesse de fora cresça.", UIColors.ORANGE, "clock"],
-		["veterans", "Veteranos em queda", "Acima de 32 anos e abaixo dos titulares do setor: bom momento para vender ou dar minutos a outros.", UIColors.MUTED, "down"],
-		["surplus", "Sobrando no elenco", "Reservas num setor lotado. Vender ou emprestar libera folha salarial.", UIColors.BLUE, "swap"],
-		["prospects", "Promessas para dar minutos", "Jovens com potencial bem acima do nível atual.", UIColors.GREEN, "up"],
+		["expiring", "Contrato termina nesta temporada", "", UIColors.ORANGE, "clock"],
+		["veterans", "Veteranos em queda", "", UIColors.MUTED, "down"],
+		["surplus", "Sobrando no elenco", "", UIColors.BLUE, "swap"],
+		["prospects", "Promessas para dar minutos", "", UIColors.GREEN, "up"],
 	]
 	var any := false
 	for b in blocks:
@@ -120,7 +134,6 @@ func _notes_card(w: GameWorld) -> Control:
 		head.add_child(UIKit.icon_rect(String(b[4]), 26, b[3]))
 		head.add_child(UIKit.colored(String(b[1]).to_upper() + " (%d)" % list.size(), b[3], "Caps"))
 		card.add_child(head)
-		card.add_child(UIKit.label(String(b[2]), "Small", true))
 		for p: Player in list.slice(0, 4):
 			var pid := p.id
 			card.add_child(PlayerRowView.make(w, p, {"mode": "squad"}, func(): UIManager.push("player", {"id": pid})))
@@ -145,24 +158,27 @@ func _camp_card(w: GameWorld, pre: Dictionary) -> Control:
 		row.add_child(col)
 		card.add_child(row)
 		return UIKit.card_panel(card)
-	card.add_child(UIKit.label("Uma por temporada.", "Small", true))
 	for key in PreseasonManager.CAMP_ORDER:
 		var cfg: Dictionary = PreseasonManager.CAMPS[key]
-		var row := UIKit.hbox(12)
-		row.add_child(UIKit.icon_rect(String(cfg["icon"]), 36, UIColors.ACCENT))
+		var row := UIKit.hbox(14)
+		var tile := PanelContainer.new()
+		tile.theme_type_variation = "IconTile"
+		tile.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		tile.add_child(UIKit.icon_rect(String(cfg["icon"]), 28, UIColors.ACCENT))
+		row.add_child(tile)
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(cfg["name"]), "H3", true))
-		col.add_child(UIKit.label(String(cfg["desc"]), "Small", true))
 		col.add_child(UIKit.colored("+ " + String(cfg["pros"]), UIColors.GREEN, "Small", true))
 		col.add_child(UIKit.colored("− " + String(cfg["cons"]), UIColors.ORANGE, "Small", true))
 		row.add_child(col)
+		row.add_child(UIKit.icon_rect("forward", 22, UIColors.DIM))
 		var k: String = key
 		card.add_child(UIKit.tap_row(row, func():
 			UIManager.confirm(String(cfg["name"]) + "?", String(cfg["pros"]) + "\n" + String(cfg["cons"]), "Escolher", func():
 				var notes := PreseasonManager.choose_camp(world(), k)
 				if not notes.is_empty():
-					AudioManager.play("whistle")
+					Sfx.play("whistle")
 					UIManager.toast(String(notes[0]), UIColors.GREEN)
 				GameManager.save_now()
 				refresh()), "CardFlat"))
@@ -210,7 +226,7 @@ func _friendlies_card(w: GameWorld, pre: Dictionary) -> Control:
 		var wins := 0
 		for r in res:
 			wins += 1 if r["r"] == "V" else 0
-		AudioManager.play("win" if wins >= 2 else "whistle")
+		Sfx.play("win" if wins >= 2 else "whistle")
 		GameManager.save_now()
 		refresh(), "play")
 	card.add_child(b)

@@ -12,7 +12,7 @@
 			"uf": "RJ",
 			"founded": 1895,
 			"league": "BRA1",
-			"rep": 93,
+			"rep": 89,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#C8102E",
@@ -26,7 +26,14 @@
 				"field": "hoops:4",
 				"symbol": "letter",
 				"initials": "CRF",
-				"sc": "#FFFFFF"
+				"mono": true,
+				"sym_pos": "tl",
+				"sc": "#FFFFFF",
+				"c1": "#C8102E",
+				"c2": "#111111",
+				"c3": "#F2C230",
+				"stars": 1,
+				"border": "thin"
 			},
 			"rivals": [
 				"BRA_TRL",
@@ -44,7 +51,7 @@
 			"uf": "SP",
 			"founded": 1914,
 			"league": "BRA1",
-			"rep": 91,
+			"rep": 87,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#006437",
@@ -80,7 +87,7 @@
 			"uf": "SP",
 			"founded": 1910,
 			"league": "BRA1",
-			"rep": 88,
+			"rep": 84,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#FFFFFF",
@@ -116,7 +123,7 @@
 			"uf": "SP",
 			"founded": 1930,
 			"league": "BRA1",
-			"rep": 86,
+			"rep": 82,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#FFFFFF",
@@ -134,7 +141,10 @@
 				"c1": "#E30613",
 				"c2": "#FFFFFF",
 				"fc": "#FFFFFF",
-				"c3": "#111111"
+				"c3": "#111111",
+				"stars": 3,
+				"border": "double",
+				"star_c": "#E2B84A"
 			},
 			"rivals": [
 				"BRA_TIM",
@@ -152,7 +162,7 @@
 			"uf": "SP",
 			"founded": 1912,
 			"league": "BRA1",
-			"rep": 80,
+			"rep": 76,
 			"arch": "tradicional_decadente",
 			"colors": [
 				"#FFFFFF",
@@ -187,7 +197,7 @@
 			"uf": "RJ",
 			"founded": 1902,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#7A0F2A",
@@ -223,7 +233,7 @@
 			"uf": "RJ",
 			"founded": 1904,
 			"league": "BRA1",
-			"rep": 85,
+			"rep": 81,
 			"arch": "rico_promovido",
 			"colors": [
 				"#111111",
@@ -255,7 +265,7 @@
 			"uf": "RJ",
 			"founded": 1898,
 			"league": "BRA1",
-			"rep": 82,
+			"rep": 78,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#111111",
@@ -286,7 +296,7 @@
 			"uf": "RS",
 			"founded": 1903,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#0D80BF",
@@ -296,15 +306,18 @@
 			"capacity": 55000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "iberian",
-				"field": "stripes_tri:6",
+				"shape": "ring",
+				"field": "stripes_tri:9",
 				"symbol": "none",
-				"chief_text": "GREMIO",
-				"cc": "#FFFFFF",
-				"c1": "#0D80BF",
+				"text": "GRÊMIO FOOT-BALL",
+				"text2": "PORTO ALEGRENSE",
+				"c1": "#FFFFFF",
 				"fc": "#111111",
-				"c3": "#FFFFFF",
-				"stars": 1
+				"c3": "#0D80BF",
+				"c2": "#0D80BF",
+				"stars": 1,
+				"star_c": "#E4B43A",
+				"border": "double"
 			},
 			"rivals": [
 				"BRA_COL"
@@ -320,7 +333,7 @@
 			"uf": "RS",
 			"founded": 1909,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#E30613",
@@ -334,6 +347,10 @@
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SCI",
+				"mono": true,
+				"sym_scale": 1.1,
+				"c1": "#E30613",
+				"c2": "#FFFFFF",
 				"sc": "#FFFFFF",
 				"border": "double"
 			},
@@ -351,7 +368,7 @@
 			"uf": "MG",
 			"founded": 1908,
 			"league": "BRA1",
-			"rep": 85,
+			"rep": 81,
 			"arch": "dinheiro_gestao_ruim",
 			"colors": [
 				"#111111",
@@ -383,7 +400,7 @@
 			"uf": "MG",
 			"founded": 1921,
 			"league": "BRA1",
-			"rep": 84,
+			"rep": 80,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#1D3F91",
@@ -415,7 +432,7 @@
 			"uf": "BA",
 			"founded": 1931,
 			"league": "BRA1",
-			"rep": 77,
+			"rep": 73,
 			"arch": "rico_promovido",
 			"colors": [
 				"#1B3A8C",
@@ -450,7 +467,7 @@
 			"uf": "BA",
 			"founded": 1899,
 			"league": "BRA1",
-			"rep": 69,
+			"rep": 65,
 			"arch": "tradicional_decadente",
 			"colors": [
 				"#E30613",
@@ -544,7 +561,7 @@
 			"uf": "PR",
 			"founded": 1924,
 			"league": "BRA1",
-			"rep": 75,
+			"rep": 71,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#C8102E",
@@ -554,9 +571,12 @@
 			"capacity": 42000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "modern",
-				"field": "hoops:4",
-				"symbol": "none"
+				"shape": "hexagon",
+				"field": "bends:4",
+				"symbol": "none",
+				"c1": "#111111",
+				"c2": "#C8102E",
+				"border": "thick"
 			},
 			"rivals": [
 				"BRA_COX"
@@ -572,7 +592,7 @@
 			"uf": "SP",
 			"founded": 1928,
 			"league": "BRA1",
-			"rep": 68,
+			"rep": 64,
 			"arch": "rico_promovido",
 			"colors": [
 				"#FFFFFF",
@@ -632,7 +652,7 @@
 			"uf": "SP",
 			"founded": 1925,
 			"league": "BRA1",
-			"rep": 60,
+			"rep": 56,
 			"arch": "azarao",
 			"colors": [
 				"#FFD100",
@@ -659,7 +679,7 @@
 			"uf": "PR",
 			"founded": 1909,
 			"league": "BRA1",
-			"rep": 66,
+			"rep": 62,
 			"arch": "tradicional_decadente",
 			"colors": [
 				"#FFFFFF",
@@ -669,7 +689,7 @@
 			"capacity": 40000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "CFC",
@@ -784,7 +804,7 @@
 			"uf": "SC",
 			"founded": 1973,
 			"league": "BRA1",
-			"rep": 57,
+			"rep": 53,
 			"arch": "cidade_pequena",
 			"colors": [
 				"#006437",
@@ -912,7 +932,7 @@
 			"capacity": 29000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "GFC",
@@ -1021,7 +1041,7 @@
 			"uf": "PA",
 			"founded": 1905,
 			"league": "BRA1",
-			"rep": 55,
+			"rep": 51,
 			"arch": "torcida_impaciente",
 			"colors": [
 				"#0E2A5C",
@@ -1062,7 +1082,7 @@
 			"capacity": 11000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "VNFC"
@@ -1499,10 +1519,7 @@
 				"symbol": "letter",
 				"initials": "SER"
 			},
-			"rivals": [
-				"BRA_PAP",
-				"BRA_JUV"
-			]
+			"rivals": ["BRA_JUV"]
 		},
 		{
 			"key": "BRA_DSE",
@@ -1704,7 +1721,7 @@
 			"capacity": 3000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "TFC"
@@ -2048,7 +2065,7 @@
 			"capacity": 20000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SEG"
@@ -2077,7 +2094,7 @@
 			"capacity": 16000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "MC",
@@ -2317,7 +2334,7 @@
 			"capacity": 5000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "MEC",
@@ -2348,7 +2365,7 @@
 			"capacity": 7000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NIFC"
@@ -2490,7 +2507,7 @@
 			"capacity": 18000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "PEL",
@@ -2576,7 +2593,7 @@
 			"capacity": 6000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AVE",
@@ -2660,7 +2677,7 @@
 			"capacity": 18000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "PAR",
@@ -2744,7 +2761,7 @@
 			"capacity": 30000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CAS",
@@ -2828,7 +2845,7 @@
 			"capacity": 6000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "MDI",
@@ -2912,7 +2929,7 @@
 			"capacity": 4000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "BRR",
@@ -2996,7 +3013,7 @@
 			"capacity": 5000,
 			"kit": "faixa",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "PRJ",
@@ -3080,7 +3097,7 @@
 			"capacity": 53000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "UBE",
@@ -3164,7 +3181,7 @@
 			"capacity": 15000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CAL",
@@ -3248,7 +3265,7 @@
 			"capacity": 10000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "GSO",
@@ -3332,7 +3349,7 @@
 			"capacity": 7000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "HOR",
@@ -3416,7 +3433,7 @@
 			"capacity": 8000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "GNS",
@@ -3500,7 +3517,7 @@
 			"capacity": 8000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "JZE",
@@ -3584,7 +3601,7 @@
 			"capacity": 16000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "FLF",
@@ -3672,7 +3689,7 @@
 			"capacity": 45000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "RET",
@@ -3756,7 +3773,7 @@
 			"capacity": 19000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CPN",
@@ -3842,7 +3859,7 @@
 			"capacity": 40000,
 			"kit": "stripes_h",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "hoops:3",
 				"symbol": "letter",
 				"initials": "MAC",
@@ -3926,7 +3943,7 @@
 			"capacity": 44000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "FPI",
@@ -4010,7 +4027,7 @@
 			"capacity": 6000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AGM",
@@ -4094,7 +4111,7 @@
 			"capacity": 6000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NAM",
@@ -4178,7 +4195,7 @@
 			"capacity": 10000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "LUV",
@@ -4262,7 +4279,7 @@
 			"capacity": 5000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "CEI",
@@ -4346,7 +4363,7 @@
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "SCT",
@@ -4430,7 +4447,7 @@
 			"capacity": 15000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NOR",

@@ -130,7 +130,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "A"
@@ -179,7 +179,16 @@
 			"stadium": "Suheim bin Hamad Stadium",
 			"capacity": 12000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "QSC",
+				"c1": "#8A1538",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -200,7 +209,13 @@
 			"stadium": "Al Shamal Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -221,7 +236,13 @@
 			"stadium": "Thani bin Jassim Stadium",
 			"capacity": 21000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -242,7 +263,13 @@
 			"stadium": "Al Bayt Stadium",
 			"capacity": 60000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#111111",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -263,7 +290,13 @@
 			"stadium": "Hamad bin Khalifa Stadium",
 			"capacity": 12000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -284,7 +317,13 @@
 			"stadium": "Grand Hamad Stadium",
 			"capacity": 13000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

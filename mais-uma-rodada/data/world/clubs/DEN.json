@@ -138,7 +138,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCN",
@@ -189,7 +189,14 @@
 			"stadium": "Cepheus Park",
 			"capacity": 10300,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RFC",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -210,7 +217,13 @@
 			"stadium": "Energi Viborg Arena",
 			"capacity": 9600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "VFF",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -231,7 +244,13 @@
 			"stadium": "Vejle Stadion",
 			"capacity": 10400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "VB",
+				"text": "VEJLE BOLDKLUB"
+			},
 			"rivals": []
 		},
 		{
@@ -252,7 +271,14 @@
 			"stadium": "Aalborg Portland Park",
 			"capacity": 13800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AaB",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -273,7 +299,14 @@
 			"stadium": "Lyngby Stadion",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LBK",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -294,7 +327,13 @@
 			"stadium": "Sydbank Park",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

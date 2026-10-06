@@ -27,6 +27,7 @@ const FROM := {
 	"empresario": {"role": "Empresário", "icon": "search", "group": "mercado"},
 	"clube": {"role": "Outro clube", "icon": "swap", "group": "mercado"},
 	"imprensa": {"role": "Imprensa", "icon": "news", "group": "outros"},
+	"federacao": {"role": "Federação", "icon": "globe", "group": "outros"},
 	"torcida": {"role": "Torcida organizada", "icon": "heart", "group": "outros"},
 }
 
@@ -45,6 +46,10 @@ const BOARD_EVERY := 8 # jogos entre duas cartas da diretoria
 # ---------------------------------------------------------------------------
 # Acesso
 # ---------------------------------------------------------------------------
+
+## A cada quantas rodadas o auxiliar manda as tendências do time.
+const TREND_EVERY := 5
+
 
 static func send(world: GameWorld, from: String, subject: String, body: String, action: Dictionary = {}, player_id: int = -1, club_id: int = -1, sender_name: String = "") -> Dictionary:
 	var id := int(world.stats.get("inbox_next", 1))
@@ -207,7 +212,7 @@ static func _squad_intro(world: GameWorld) -> void:
 		if p.age(world.year) >= 32:
 			old += 1
 	var lines: Array = ["Dei uma primeira olhada no grupo que você recebeu."]
-	lines.append("O melhor jogador é %s (%s, %d)." % [best.display_name(), Pos.name_of(best.position).to_lower(), best.overall])
+	lines.append("Destaque do elenco: %s (%s)." % [best.display_name(), Pos.name_of(best.position).to_lower()])
 	if young != null:
 		lines.append("Fique de olho em %s, %d anos: tem margem para crescer." % [young.display_name(), young.age(world.year)])
 	if old >= 5:
@@ -248,8 +253,11 @@ static func after_user_turn(world: GameWorld, report: Dictionary, entry: Diction
 	_match_report(world, entry)
 	var turn := world.current_turn()
 	var club := world.user_club()
+	Scouting.tick(world)
 	if turn > 0 and turn % SCOUT_EVERY == 0:
 		scout_report(world)
+	if turn > 0 and turn % TREND_EVERY == 0:
+		Assistant.trend_message(world)
 	if turn > 0 and turn % BOARD_EVERY == 0:
 		_board_letter(world, club)
 	_contracts_notice(world, club)
@@ -291,6 +299,10 @@ static func _match_report(world: GameWorld, entry: Dictionary) -> void:
 		lines[0] += " Destaque: %s (nota %s)." % [best.display_name(), _nota(best_r)]
 	if worst != null and worst != best and worst_r < 6.0:
 		lines.append("%s ficou abaixo (nota %s). Pode ser hora de uma conversa ou de um descanso." % [worst.display_name(), _nota(worst_r)])
+	# Leitura tática do jogo
+	var tl := Assistant.match_lines(world, club, entry)
+	if not tl.is_empty():
+		lines.append(" ".join(tl))
 	var nf := FixtureManager.next_fixture_for(world, club.id)
 	if nf != null:
 		var nopp := world.club(nf.opponent_of(club.id))
@@ -306,6 +318,10 @@ static func _match_report(world: GameWorld, entry: Dictionary) -> void:
 			if MatchEngine.is_derby(world, nf.home, nf.away):
 				txt += " É clássico: a torcida vai cobrar."
 			lines.append(txt)
+			# Primeira leitura do estudo do próximo rival
+			var notes := TacticalScout.weaknesses(TacticalScout.profile(world, nopp), TacticalScout.study(world, club))
+			if not notes.is_empty():
+				lines.append("Já comecei a estudar o %s. %s O dossiê completo está no pré-jogo." % [nopp.short_name, String(notes[0]["text"])])
 	send(world, "auxiliar", "Relatório: %s %d x %d %s" % [club.short_name, mine, theirs, opp.short_name if opp != null else ""],
 		"\n\n".join(lines), {"k": "screen", "s": "prematch", "args": {"edit": true}} if nf != null else {}, best.id if best != null else -1)
 
@@ -338,7 +354,7 @@ static func _contracts_notice(world: GameWorld, club: Club) -> void:
 	if names.is_empty():
 		return
 	world.stats["inbox_contracts"] = world.year
-	send(world, "futebol", "%d contrato(s) terminam em %d" % [names.size(), world.year],
+	send(world, "futebol", ("%d contrato termina em %d" if names.size() == 1 else "%d contratos terminam em %d") % [names.size(), world.year],
 		"Estes jogadores ficam livres no fim da temporada: %s.\n\nQuem você quiser manter precisa renovar antes disso; os outros podem sair de graça." % ", ".join(names.slice(0, 8)) + (" e mais %d" % (names.size() - 8) if names.size() > 8 else ""),
 		{"k": "screen", "s": "squad", "args": {"sort": "contract"}})
 
@@ -396,7 +412,7 @@ static func scout_report(world: GameWorld) -> void:
 	var lines: Array = []
 	for p: Player in picks.slice(0, 3):
 		var where := world.club(p.club_id).short_name if p.club_id >= 0 else "sem clube"
-		lines.append("• %s, %d anos, %s (%s) · %d · valor %s" % [p.display_name(), p.age(world.year), Pos.name_of(p.position).to_lower(), where, p.overall, Fmt.money(p.value)])
+		lines.append("• %s, %d anos, %s (%s) · valor %s" % [p.display_name(), p.age(world.year), Pos.name_of(p.position).to_lower(), where, Fmt.money(p.value)])
 	var top: Player = picks[0]
 	send(world, "olheiro", "Jogadores que cabem no orçamento",
 		"Com %s para gastar, estes nomes melhorariam o nosso time:\n\n%s\n\nToque para ver o primeiro da lista." % [Fmt.money(budget), "\n".join(lines)],
@@ -416,7 +432,7 @@ static func on_event(world: GameWorld, ev: Dictionary) -> void:
 	if from == "jogador" and p != null:
 		name = p.display_name()
 	var left := maxi(1, int(ev["exp"]) - world.current_turn())
-	send(world, from, String(d["title"]), "%s\n\nResponda em até %d jogo(s)." % [String(d["body"]), left],
+	send(world, from, String(d["title"]), ("%s\n\nResponda em até %d jogo." if left == 1 else "%s\n\nResponda em até %d jogos.") % [String(d["body"]), left],
 		{"k": "event", "id": int(ev["id"])}, p.id if p != null else -1, -1, name)
 
 
@@ -448,7 +464,7 @@ static func on_offer_received(world: GameWorld, o: TransferOffer) -> void:
 	if p == null or b == null:
 		return
 	send(world, "clube", "Proposta por %s" % p.display_name(),
-		"O %s oferece %s por %s (%d anos, %d).\n\nA proposta vale por %d jogo(s)." % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year), p.overall,
+		("O %s oferece %s por %s (%d anos).\n\nA proposta vale por %d jogo." if maxi(1, o.expires_day - world.current_turn() + 1) == 1 else "O %s oferece %s por %s (%d anos).\n\nA proposta vale por %d jogos.") % [b.name, Fmt.money(o.fee), p.display_name(), p.age(world.year),
 			maxi(1, o.expires_day - world.current_turn() + 1)],
 		{"k": "offers"}, p.id, b.id, b.short_name)
 
@@ -458,7 +474,7 @@ static func on_injury(world: GameWorld, p: Player) -> void:
 		return
 	var sev := "Nada grave" if p.injury_weeks <= 1 else ("Vai desfalcar por algumas semanas" if p.injury_weeks <= 4 else "Lesão séria")
 	send(world, "medico", "%s: %s" % [p.display_name(), p.injury_name if p.injury_name != "" else "lesão"],
-		"%s. %s deve ficar fora por %d semana(s).\n\nJá começamos o tratamento." % [sev, p.display_name(), p.injury_weeks],
+		("%s. %s deve ficar fora por %d semana.\n\nJá começamos o tratamento." if p.injury_weeks == 1 else "%s. %s deve ficar fora por %d semanas.\n\nJá começamos o tratamento.") % [sev, p.display_name(), p.injury_weeks],
 		{"k": "player", "id": p.id}, p.id)
 
 

@@ -21,7 +21,7 @@
 			"capacity": 42000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "B",
@@ -79,7 +79,7 @@
 			"capacity": 25000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "AR"
@@ -105,7 +105,7 @@
 			"capacity": 32000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "W"
@@ -158,7 +158,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "B"
@@ -234,7 +234,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "G"
@@ -283,7 +283,13 @@
 			"stadium": "Estadio Félix Capriles",
 			"capacity": 32000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "iberian",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -304,7 +310,13 @@
 			"stadium": "Estadio Félix Capriles",
 			"capacity": 32000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "UV",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -325,7 +337,14 @@
 			"stadium": "Estadio Jesús Bermúdez",
 			"capacity": 33000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "RO",
+				"sc": "#FFFFFF",
+				"crown": 1
+			},
 			"rivals": []
 		},
 		{
@@ -346,7 +365,13 @@
 			"stadium": "Estadio Jesús Bermúdez",
 			"capacity": 33000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SJ",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -367,7 +392,13 @@
 			"stadium": "Estadio Olímpico Patria",
 			"capacity": 32000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "IP",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -388,7 +419,13 @@
 			"stadium": "Estadio Víctor Agustín Ugarte",
 			"capacity": 32000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"crown": 1
+			},
 			"rivals": []
 		}
 	]

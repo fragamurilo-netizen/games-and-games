@@ -23,14 +23,49 @@ const ROUTES := {
 
 
 static func build(world: GameWorld) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash(world.world_seed * 53 + 11)
 	var ctx := _context(world)
 	var ids: Array = world.players.keys()
 	ids.sort()
+	var players: Array = []
 	for pid in ids:
-		var p: Player = world.players[pid]
-		_backfill(world, rng, ctx, p)
+		players.append(world.players[pid])
+	# Caches preguiçosos aquecidos antes das threads (elas só leem)
+	for lid in DatabaseManager.league_ids():
+		_rounds(lid)
+	DatabaseManager.personalities()
+	DatabaseManager.nations()
+	# Cada jogador tem um RNG próprio (semeado pelo mundo e pelo id): o passado sai igual com
+	# qualquer número de núcleos, e os jogadores são processados em paralelo.
+	var base_seed := hash(world.world_seed * 53 + 11)
+	var parts := Parallel.map_chunks(players.size(), func(a: int, b: int) -> Array:
+		var local := ctx.duplicate()
+		local["rows"] = {}
+		local["wcache"] = {}
+		local["caps"] = {}
+		var rng := RandomNumberGenerator.new()
+		for i in range(a, b):
+			var p: Player = players[i]
+			rng.seed = hash("%d:%d" % [base_seed, p.id])
+			_backfill(world, rng, local, p)
+		return [[local["rows"], local["caps"]]], 400)
+	# Junta na ordem dos jogadores (e das chaves): mesmo resultado em qualquer aparelho.
+	var rows := {}
+	var nt_pl: Dictionary = NationalTeamManager.data(world)["pl"]
+	for part: Array in parts:
+		var pr: Dictionary = part[0]
+		for key in pr:
+			if not rows.has(key):
+				rows[key] = []
+			(rows[key] as Array).append_array(pr[key])
+		var caps: Dictionary = part[1]
+		for pid in caps:
+			nt_pl[pid] = caps[pid]
+	var keys: Array = rows.keys()
+	keys.sort()
+	var sorted_rows := {}
+	for k in keys:
+		sorted_rows[k] = rows[k]
+	ctx["rows"] = sorted_rows
 	_season_awards(world, ctx)
 
 
@@ -76,7 +111,7 @@ static func _context(world: GameWorld) -> Dictionary:
 		for e: Array in by_nation[nat]:
 			best = maxf(best, float(e[0]))
 		top[nat] = best
-	# Seleções: o nível do 23º melhor jogador de cada nacionalidade é a linha de corte da convocação.
+	# Seleções: o nível do 26º melhor jogador de cada nacionalidade é a linha de corte da convocação.
 	var by_nat := {}
 	for p: Player in world.players.values():
 		if not by_nat.has(p.nationality):
@@ -87,7 +122,7 @@ static func _context(world: GameWorld) -> Dictionary:
 		var arr: Array = by_nat[nat]
 		arr.sort()
 		arr.reverse()
-		cut[nat] = float(arr[mini(22, arr.size() - 1)])
+		cut[nat] = float(arr[mini(25, arr.size() - 1)])
 	return {"nations": by_nation, "top": top, "champs": champs, "rows": {}, "wcache": {}, "nt_cut": cut, "world": world}
 
 
@@ -172,9 +207,11 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 	var cur := world.club(p.club_id) if p.club_id >= 0 else null
 	var join := p.joined_year if cur != null else year
 	join = clampi(join, first_y, year)
-	var plan := {} # ano -> [club_id, nome, liga, nível, empréstimo, nação]
+	var plan := {} # ano -> [club_id, nome, liga, nível, empréstimo, nação, (dono, se empréstimo)]
 	for y in range(join, year):
 		plan[y] = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur), false, cur.nation]
+	# Dono do passe nos anos de empréstimo: o próximo clube (no tempo) em que ele jogou de verdade
+	var owner: Array = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur), false, cur.nation] if cur != null else []
 	var home := p.nationality
 	var y2 := join - 1
 	var avoid: Array = [cur.id] if cur != null else []
@@ -194,7 +231,7 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		if float(club[0]) >= float(ctx["top"].get(nation, 99.0)) - 3.0:
 			span += rng.randi_range(1, 2)
 		# Empréstimo: o jovem do clube grande roda por um ano num menor
-		var loan := yr_age <= 22 and float(club[0]) < later_level - 3.0 and rng.randf() < 0.45
+		var loan := yr_age >= 18 and yr_age <= 22 and not owner.is_empty() and float(club[0]) < later_level - 3.0 and rng.randf() < 0.45
 		if loan:
 			span = 1
 		for k in span:
@@ -202,8 +239,11 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 			if yy < first_y:
 				break
 			plan[yy] = [int(club[1]), String(club[2]), String(club[3]), float(club[0]), loan and k == 0, nation]
+			if loan and k == 0:
+				plan[yy].append(owner)
 		if not loan:
 			later_level = float(club[0])
+			owner = [int(club[1]), String(club[2]), String(club[3]), float(club[0]), false, nation]
 		avoid = [int(club[1])]
 		y2 -= span
 	# Estreia quase sempre em casa: o primeiro ano vai para um clube do país natal (o mais
@@ -213,6 +253,32 @@ static func _backfill(world: GameWorld, rng: RandomNumberGenerator, ctx: Diction
 		var hc := _pick_club(rng, ctx, home, minf(float(ovr[first_y]), float(ctx["top"][home])), 0.5, [], p)
 		if not hc.is_empty():
 			plan[first_y] = [int(hc[1]), String(hc[2]), String(hc[3]), float(hc[0]), false, home]
+	# Repatriado: começou no clube atual, rodou fora e voltou (as primeiras temporadas são aqui)
+	if cur != null and String(SquadStory.roles.get(p.id, "")) == "repatriado":
+		var last_home := mini(first_y + rng.randi_range(2, 4), join - 4)
+		for yy in range(first_y, last_home):
+			plan[yy] = [cur.id, cur.short_name, cur.league_id, PlayerGenerator.club_level(cur) - 3.0, false, cur.nation]
+	# Empréstimo só sai de quem é dono do passe: antes de cada empréstimo ele passou pelo dono
+	# (subiu na base de lá ou foi contratado). Ninguém começa a carreira emprestado: se o primeiro
+	# ano é empréstimo, ele vira o ano de estreia no dono; se antes do empréstimo havia outro
+	# clube, o último ano ali passa a ser o do dono (contratado e emprestado em seguida).
+	var yrs: Array = plan.keys()
+	yrs.sort()
+	for i in yrs.size():
+		var e: Array = plan[yrs[i]]
+		if not bool(e[4]):
+			continue
+		var own: Array = e[6] if e.size() > 6 else []
+		if own.is_empty():
+			plan[yrs[i]] = [e[0], e[1], e[2], e[3], false, e[5]]
+			continue
+		var j := i - 1
+		while j >= 0 and bool(plan[yrs[j]][4]) and plan[yrs[j]].size() > 6 and int(plan[yrs[j]][6][0]) == int(own[0]):
+			j -= 1
+		if j < 0:
+			plan[yrs[i]] = own.duplicate()
+		elif int(plan[yrs[j]][0]) != int(own[0]):
+			plan[yrs[j]] = own.duplicate()
 	# Temporadas
 	var hist: Array = []
 	var ys: Array = plan.keys()
@@ -317,47 +383,78 @@ static func _cup_games(rng: RandomNumberGenerator, ctx: Dictionary, row: Diction
 	row["cas"] = _poisson(rng, ca * per_a)
 
 
-## Jogos e gols pela seleção antes do jogo começar: todo ano em que ele estava entre os melhores do
-## país (acima da linha de corte da convocação), entra na lista — titular joga quase todas as datas.
+## Jogos, gols e assistências pela seleção antes do jogo começar: todo ano em que ele estava entre
+## os melhores do país (acima da linha de corte da lista de 26), entra na lista. Titular joga quase
+## todas as datas FIFA (7-11 por ano) e, em ano de Copa do Mundo ou de torneio continental, mais
+## 3-6 jogos; quem fica no limite da lista entra de vez em quando. Estreia raramente antes dos 19.
 static func _national_caps(world: GameWorld, rng: RandomNumberGenerator, ctx: Dictionary, p: Player, ovr: Dictionary, age: int) -> void:
 	var cut := float(ctx["nt_cut"].get(p.nationality, 99.0))
+	var confed := String(DatabaseManager.nation(p.nationality).get("confed", ""))
 	var caps := 0
 	var goals := 0
+	var assists := 0
 	var per_goal := 0.0
+	var per_assist := 0.0
 	match Pos.group(p.position):
 		Pos.G_GK:
 			per_goal = 0.0
+			per_assist = 0.003
 		Pos.G_DEF:
 			per_goal = 0.04
+			per_assist = 0.05
 		Pos.G_MID:
 			per_goal = 0.07 + maxf(0.0, float(p.attrs[Attr.FIN]) - 60.0) * 0.004
+			per_assist = 0.1 + maxf(0.0, float(p.attrs[Attr.PAS]) - 60.0) * 0.005
 		_:
 			per_goal = 0.18 + maxf(0.0, float(p.attrs[Attr.FIN]) - 60.0) * 0.009
+			per_assist = 0.1 + maxf(0.0, float(p.attrs[Attr.VIS]) - 60.0) * 0.003
 	if p.position in [Pos.AM, Pos.RW, Pos.LW]:
 		per_goal *= 0.8
+		per_assist *= 1.5
 	var ys: Array = ovr.keys()
 	ys.sort()
 	for y in ys:
 		var a := age - (world.year - int(y))
-		if a < 19:
+		if a < 18 or (a < 19 and rng.randf() < 0.85):
 			continue
 		# A linha de corte de anos atrás é a de hoje (o país não muda tanto de nível).
 		var rel := float(ovr[y]) - cut
 		var n := 0
+		var tier := 0 # 3 titular, 2 rodízio, 1 limite da lista
 		if rel >= 4.0:
 			n = rng.randi_range(7, 11)
+			tier = 3
 		elif rel >= 1.5:
 			n = rng.randi_range(4, 9)
+			tier = 2
 		elif rel >= 0.0:
 			n = rng.randi_range(1, 5)
+			tier = 1
 		elif rel >= -2.0 and rng.randf() < 0.3:
 			n = rng.randi_range(1, 2)
+		if tier > 0 and _tournament_year(confed, int(y)):
+			n += [0, rng.randi_range(0, 2), rng.randi_range(2, 4), rng.randi_range(3, 6)][tier]
 		if p.position == Pos.GK and rel < 3.0:
 			n = int(n * 0.4) # o reserva do goleiro quase não entra
 		caps += n
 		goals += _poisson(rng, n * per_goal)
+		assists += _poisson(rng, n * per_assist)
 	if caps > 0:
-		NationalTeamManager.data(world)["pl"][p.id] = [caps, goals]
+		ctx["caps"][p.id] = [caps, goals, assists]
+
+
+## Ano com Copa do Mundo ou com o torneio continental da confederação.
+static func _tournament_year(confed: String, y: int) -> bool:
+	if y % 4 == 2:
+		return true # Copa do Mundo (2014, 2018, 2022...)
+	match confed:
+		"UEFA", "CONMEBOL":
+			return y % 4 == 0 or (confed == "CONMEBOL" and y in [2015, 2019, 2021])
+		"CAF", "CONCACAF":
+			return y % 2 == 1
+		"AFC":
+			return y % 4 == 3
+	return false
 
 
 ## Traços que se ganham com a estrada: ídolo de quem tem anos de clube, cascudo de quem já
@@ -449,8 +546,12 @@ static func _season_row(rng: RandomNumberGenerator, p: Player, y: int, e: Array,
 		share = rng.randf_range(0.1, 0.35)
 	else:
 		share = rng.randf_range(0.0, 0.14)
-	if bool(e[4]):
-		share = maxf(share, rng.randf_range(0.5, 0.85)) # emprestado para jogar
+	if bool(e[4]) and q >= -6.0:
+		share = maxf(share, rng.randf_range(0.45, 0.8)) # emprestado para jogar
+	if age <= 18 and q < 3.0:
+		share = minf(share, rng.randf_range(0.05, 0.4)) # adolescente só entra aos poucos
+	elif age <= 20 and q < 0.0:
+		share = minf(share, rng.randf_range(0.15, 0.55))
 	if p.position == Pos.GK and q < 0.0:
 		share *= 0.45 # goleiro reserva quase não joga
 	share *= 1.0 - clampf((p.injury_prone - 10) * 0.025, -0.05, 0.25) * rng.randf()

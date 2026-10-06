@@ -10,8 +10,8 @@ const CREST_SHAPES: Array[String] = ["shield", "heater", "iberian", "french", "s
 const CREST_SHAPE_NAMES: Array[String] = ["Clássico", "Heráldico", "Ibérico", "Francês", "Suíço", "Alongado", "Recortado", "Ondulado", "Moderno", "Redondo", "Anel com nome", "Oval", "Oval com nome", "Octógono", "Losango", "Hexágono", "Quadrado", "Flâmula"]
 const CREST_FIELDS: Array[String] = ["plain", "stripes:3", "stripes:5", "hoops:3", "hoops:2", "halves", "halves_h", "quarters", "sash", "sash_r", "diag", "vee", "chevron", "cross", "saltire", "chief", "pale", "tricolor_v", "tricolor_h", "lozenges", "checky", "bordure"]
 const CREST_FIELD_NAMES: Array[String] = ["Liso", "Listras", "Listras finas", "Faixas", "Faixa central", "Meio a meio", "Meio a meio (horizontal)", "Quartos", "Faixa diagonal", "Diagonal invertida", "Diagonal", "V", "Divisa", "Cruz", "Aspa", "Chefe", "Pala", "Tricolor vertical", "Tricolor horizontal", "Losangos", "Xadrez", "Bordadura"]
-const CREST_SYMBOLS: Array[String] = ["letter", "star", "stars:3", "ball", "crown", "eagle", "lion", "lion_head", "rooster", "wolf", "bull", "bull_charging", "fox", "bird", "seagull", "owl", "bat", "bear", "horse", "ram", "cat", "tiger", "dragon", "devil", "dolphin", "bee", "antlers", "castle", "tower", "ship", "caravel", "anchor", "anchor_oars", "cannon", "hammers", "swords", "trident", "key", "lighthouse", "torch", "tree", "rose", "fleur", "clover", "shamrock", "heart", "cross_pattee", "cross_plain", "crescent", "southern_cross", "sunrise", "mountain", "waves", "bolt", "gear", "skull", "laurel", "none"]
-const CREST_SYMBOL_NAMES: Array[String] = ["Iniciais", "Estrela", "Três estrelas", "Bola", "Coroa", "Águia", "Leão", "Cabeça de leão", "Galo", "Lobo", "Touro", "Touro investindo", "Raposa", "Pássaro", "Gaivota", "Coruja", "Morcego", "Urso", "Cavalo", "Carneiro", "Felino", "Tigre", "Dragão", "Diabo", "Golfinho", "Abelha", "Chifres", "Castelo", "Torre", "Navio", "Caravela", "Âncora", "Âncora e remos", "Canhão", "Martelos", "Espadas", "Tridente", "Chave", "Farol", "Tocha", "Árvore", "Rosa", "Flor-de-lis", "Trevo", "Trevo de três folhas", "Coração", "Cruz pátea", "Cruz", "Lua crescente", "Cruzeiro do Sul", "Sol nascente", "Montanha", "Ondas", "Raio", "Engrenagem", "Caveira", "Louros", "Nenhum"]
+const CREST_SYMBOLS: Array[String] = ["letter", "star", "stars:3", "ball", "crown", "eagle", "lion", "lion_head", "lion_crowned", "lion_passant", "rooster", "wolf", "bull", "bull_charging", "fox", "bird", "seagull", "owl", "bat", "bear", "horse", "ram", "cat", "tiger", "dragon", "devil", "dolphin", "bee", "antlers", "castle", "tower", "ship", "caravel", "anchor", "anchor_oars", "cannon", "hammers", "swords", "trident", "key", "lighthouse", "torch", "tree", "rose", "fleur", "clover", "shamrock", "heart", "cross_pattee", "cross_plain", "crescent", "southern_cross", "sunrise", "mountain", "waves", "bolt", "gear", "skull", "laurel", "none"]
+const CREST_SYMBOL_NAMES: Array[String] = ["Iniciais", "Estrela", "Três estrelas", "Bola", "Coroa", "Águia", "Leão", "Cabeça de leão", "Leão coroado", "Leão andando", "Galo", "Lobo", "Touro", "Touro investindo", "Raposa", "Pássaro", "Gaivota", "Coruja", "Morcego", "Urso", "Cavalo", "Carneiro", "Felino", "Tigre", "Dragão", "Diabo", "Golfinho", "Abelha", "Chifres", "Castelo", "Torre", "Navio", "Caravela", "Âncora", "Âncora e remos", "Canhão", "Martelos", "Espadas", "Tridente", "Chave", "Farol", "Tocha", "Árvore", "Rosa", "Flor-de-lis", "Trevo", "Trevo de três folhas", "Coração", "Cruz pátea", "Cruz", "Lua crescente", "Cruzeiro do Sul", "Sol nascente", "Montanha", "Ondas", "Raio", "Engrenagem", "Caveira", "Louros", "Nenhum"]
 const CREST_BORDERS: Array[String] = ["none", "thin", "thick", "double", "gold"]
 const CREST_BORDER_NAMES: Array[String] = ["Sem borda", "Fina", "Grossa", "Dupla", "Dourada"]
 ## Símbolos de clubes gerados, por grupo.
@@ -104,6 +104,7 @@ static func from_data(_world: GameWorld, rng: RandomNumberGenerator, data: Dicti
 	# não do nome oficial ("Club de Regatas do Flamengo" daria CRF).
 	if not (data.get("crest", {}) as Dictionary).has("initials"):
 		c.crest["initials"] = String(data.get("initials", _short_initials(c)))
+	LicensedData.apply_club(c, data) # nome oficial, estádio detalhado, escudo em imagem
 	return c
 
 
@@ -272,7 +273,8 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	c.fan_mood = clampf(60.0 + rng.randf_range(-10.0, 10.0), 0.0, 100.0)
 	c.board_confidence = 60.0
 	c.cohesion = clampf(55.0 + float(arch.get("cohesion_bonus", 0)) + rng.randf_range(0.0, 10.0), 0.0, 100.0)
-	var revenue := float(FinanceManager.expected_revenue(c))
+	Economy.anchor_revenue(c) # receita real dos clubes de referência
+	var revenue := FinanceManager.net_revenue(c) # caixa e dívida na escala do que sobra para o futebol
 	c.balance = int(revenue * float(arch.get("balance_mult", 0.3)) * rng.randf_range(0.8, 1.2))
 	c.balance = int(round(c.balance / 10000.0)) * 10000
 	# Dívida de longo prazo em anos de receita (arquétipo). Sorteio à parte, sem mexer no gerador do mundo.
@@ -280,6 +282,9 @@ static func _derive(_world: GameWorld, rng: RandomNumberGenerator, c: Club) -> v
 	dr.seed = hash([c.key, c.name, rng.state])
 	var dm: Array = arch.get("debt", [0.05, 0.3])
 	c.debt = int(round(revenue * dr.randf_range(float(dm[0]), float(dm[1])) / 10000.0)) * 10000
+	var real_debt := Economy.real_debt(c)
+	if real_debt >= 0:
+		c.debt = real_debt # dívida real (balanços de 2025)
 
 
 ## Rivais: autorais pela chave; procedurais pelos clubes da mesma cidade ou de reputação parecida na nação.
@@ -322,9 +327,149 @@ static func _make_kits(rng: RandomNumberGenerator, c: Club, hint: String) -> voi
 	# Sorteio próprio do clube: uma só tirada do gerador do mundo.
 	var kr := RandomNumberGenerator.new()
 	kr.seed = hash([c.key, c.color1, c.color2, rng.randi()])
+	# Clubes autorais: os uniformes que o clube usa de verdade (data/world/kits).
+	var real := real_kits(c)
+	if not real.is_empty():
+		c.kit_home = real["h"]
+		c.kit_away = real["a"]
+		c.kit_third = real["t"]
+		c.kit_gk = real["g"]
+		KitDesign.recolor_distinct(c, c.kit_away, [c.kit_home])
+		KitDesign.recolor_distinct(c, c.kit_third, [c.kit_home, c.kit_away])
+		return
 	c.kit_home = home_kit(kr, c, hint)
 	c.kit_away = away_kit(kr, c, c.kit_home)
 	c.kit_third = {}
+
+
+# ---------------------------------------------------------------------------
+# Uniformes reais
+# ---------------------------------------------------------------------------
+
+## Os uniformes reais do clube, completos: {h, a, t, g, alt: [...]} (ou {} se o clube não tem
+## dados). Os campos que o arquivo não diz (vivos, frisos do calção e dos meiões, gola...) saem
+## de um acabamento discreto, sempre o mesmo para o clube.
+static func real_kits(c: Club) -> Dictionary:
+	if c == null or c.key == "":
+		return {}
+	var d := DatabaseManager.club_kits(c.key)
+	# Uniformes da temporada inicial ("seasons": {"2026": {...}}) valem desde o começo.
+	var first := season_spec(c, DatabaseManager.start_year())
+	if not first.is_empty():
+		d = d.duplicate(true)
+		d.merge(first, true)
+	if d.is_empty() or not d.has("h") or not d.has("a"):
+		return {}
+	var out := {}
+	for w in ["h", "a", "t", "g"]:
+		if d.has(w):
+			out[w] = real_kit(c, d[w], w)
+	if not out.has("t"):
+		var kr := RandomNumberGenerator.new()
+		kr.seed = hash(c.key + ":3")
+		out["t"] = third_for(kr, c, out["h"], out["a"])
+	if not out.has("g"):
+		out["g"] = _gk_generated(c, out["h"], out["a"])
+	var alts: Array = []
+	var i := 0
+	for spec in d.get("alt", []):
+		if spec is Dictionary:
+			alts.append(real_kit(c, spec, "alt%d" % i))
+		i += 1
+	out["alt"] = alts
+	return out
+
+
+## Uniformes escritos para uma temporada ("seasons": {"2027": {h, a, t, g}} no arquivo de uniformes
+## ou no clube), já completos: {h?, a?, t?, g?} com só os que a temporada define.
+static func season_kits(c: Club, year: int) -> Dictionary:
+	var spec := season_spec(c, year)
+	var out := {}
+	for w in ["h", "a", "t", "g"]:
+		if spec.get(w, null) is Dictionary:
+			out[w] = real_kit(c, spec[w], w)
+	return out
+
+
+static func season_spec(c: Club, year: int) -> Dictionary:
+	var seasons: Variant = DatabaseManager.club_kits(c.key).get("seasons", {})
+	if not (seasons is Dictionary):
+		return {}
+	var s: Variant = seasons.get(str(year), {})
+	return s if s is Dictionary else {}
+
+
+## Um uniforme do arquivo de uniformes reais, com os campos que faltam preenchidos.
+static func real_kit(c: Club, spec: Dictionary, which: String) -> Dictionary:
+	var kr := RandomNumberGenerator.new()
+	kr.seed = hash([c.key, "real", which])
+	var k: Dictionary = spec.duplicate(true)
+	var c1 := String(k.get("c1", c.color1))
+	var c2 := String(k.get("c2", c.color2))
+	k["c1"] = c1
+	k["c2"] = c2
+	if not k.has("c3"):
+		k["c3"] = _accent(c1, [c2, "#FFFFFF", "#111111"])
+	var sh := String(k.get("shorts", c2))
+	k["shorts"] = sh
+	if not k.has("shorts2"):
+		k["shorts2"] = _accent(sh, [c1, c2, String(k["c3"])])
+	var so := String(k.get("socks", c1))
+	k["socks"] = so
+	if not k.has("socks2"):
+		k["socks2"] = _accent(so, [c2, c1, sh])
+	if not k.has("collar"):
+		k["collar"] = String(RngUtil.pick(kr, ["round", "round", "v", "v", "crossover", "polo", "ringer"]))
+	if not k.has("sleeve"):
+		k["sleeve"] = String(RngUtil.pick(kr, ["same", "same", "cuff", "cuff"]))
+	if not k.has("trim"):
+		k["trim"] = "none"
+	if not k.has("shorts_style"):
+		k["shorts_style"] = String(RngUtil.pick(kr, ["plain", "plain", "side_stripe", "piping", "hem"]))
+	if not k.has("socks_style"):
+		k["socks_style"] = String(RngUtil.pick(kr, ["plain", "top_band", "top_band", "top_stripes"]))
+	if which == "g":
+		k["gk"] = true
+		if not k.has("sleeve_len"):
+			k["sleeve_len"] = "long"
+	return k
+
+
+## Mesmo desenho, peças novas: a coleção do ano muda gola, punhos, vivos, frisos e às vezes ganha
+## textura tom sobre tom, mas mantém estampa e cores (a identidade do uniforme real).
+## `keep_cut`: chance de cada detalhe ficar como está.
+static func refresh_kit(kr: RandomNumberGenerator, base: Dictionary, keep_cut: float = 0.5) -> Dictionary:
+	var k := base.duplicate(true)
+	var gk := bool(k.get("gk", false))
+	if kr.randf() > keep_cut:
+		k["collar"] = _w(kr, COLLAR_W)
+	# Mangas de outra cor e as três listras são parte do desenho; o resto é acabamento.
+	if not String(k.get("sleeve", "same")) in ["contrast", "raglan", "stripes", "pattern"] and kr.randf() > keep_cut:
+		k["sleeve"] = String(RngUtil.pick(kr, ["same", "cuff", "cuff_double", "tipped", "shoulder_stripe"]))
+	if kr.randf() > keep_cut:
+		k["trim"] = String(RngUtil.pick(kr, ["none", "none", "sides", "shoulders", "hem"]))
+	if kr.randf() > keep_cut:
+		k["shorts_style"] = _w(kr, SHORTS_W)
+	if kr.randf() > keep_cut:
+		k["socks_style"] = _w(kr, SOCKS_W)
+	var pat := String(k.get("pattern", "plain"))
+	if bool(k.get("tonal", false)):
+		# Textura discreta: a do ano pode ser outra, ou a camisa volta a ser lisa.
+		var r := kr.randf()
+		if r < 0.3:
+			k["pattern"] = "plain"
+			k.erase("tonal")
+		elif r < 0.7:
+			k["pattern"] = RngUtil.pick(kr, TONAL)
+	elif pat == "plain" and not gk and kr.randf() < 0.25:
+		k["pattern"] = RngUtil.pick(kr, TONAL)
+		k["tonal"] = true
+	elif gk and kr.randf() < 0.4:
+		k["pattern"] = RngUtil.pick(kr, ["plain", "gradient", "shatter", "brush", "hoop_fade", "triangles", "side_panels", "chevron"])
+		k["tonal"] = k["pattern"] != "plain"
+		if not bool(k["tonal"]):
+			k.erase("tonal")
+	return k
 
 
 ## Estampas de clubes procedurais (peso: lisa e listras dominam, como no futebol de verdade).
@@ -497,6 +642,12 @@ static func _away_candidate(kr: RandomNumberGenerator, c: Club, home: Dictionary
 static func make_third_kit(c: Club) -> Dictionary:
 	var kr := RandomNumberGenerator.new()
 	kr.seed = hash(c.key + ":3")
+	var real := real_kits(c)
+	if not real.is_empty():
+		# O terceiro real (ou um dos alternativos) que não repete titular nem reserva.
+		for k: Dictionary in [real["t"]] + Array(real["alt"]):
+			if not KitDesign.clash(c.kit_home, k) and (c.kit_away.is_empty() or not KitDesign.clash(c.kit_away, k)):
+				return k.duplicate(true)
 	return third_for(kr, c, c.kit_home, c.kit_away)
 
 
@@ -542,12 +693,19 @@ const GK_COLORS: Array = [["#111111", "#39FF14"], ["#39FF14", "#111111"], ["#FFD
 ## Camisa de goleiro do clube: uma cor de goleiro bem diferente das duas camisas de linha, sempre a
 ## mesma para o clube (sorteio pela chave).
 static func make_gk_kit(c: Club) -> Dictionary:
+	var real := real_kits(c)
+	if not real.is_empty():
+		return real["g"]
+	return _gk_generated(c, c.kit_home, c.kit_away)
+
+
+static func _gk_generated(c: Club, home: Dictionary, away: Dictionary) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(c.key + ":gk")
 	var order: Array = range(GK_COLORS.size())
 	RngUtil.shuffle(rng, order)
 	var used: Array = []
-	for k in [c.kit_home, c.kit_away]:
+	for k in [home, away]:
 		for f in ["c1", "c2"]:
 			if k.has(f):
 				used.append(Color(String(k[f])))
@@ -578,8 +736,31 @@ static func _color_dist(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
 
 
+## Saves de antes dos uniformes reais: os clubes da IA passam a vestir os uniformes de verdade
+## (mantendo patrocinadores e fornecedora). O clube do usuário fica como está, porque pode ter
+## sido desenhado no editor. Roda uma vez por save.
+static func upgrade_kits(world: GameWorld) -> void:
+	if int(world.stats.get("kits_real", 0)) >= 1:
+		return
+	world.stats["kits_real"] = 1
+	for c in world.clubs:
+		if world.is_user_club(c.id):
+			continue
+		var real := real_kits(c)
+		if real.is_empty():
+			continue
+		for f in [["kit_home", "h"], ["kit_away", "a"], ["kit_third", "t"], ["kit_gk", "g"]]:
+			var k: Dictionary = (real[f[1]] as Dictionary).duplicate(true)
+			k.merge(KitDesign._sponsor_keys(c.get(f[0])), true)
+			c.set(f[0], k)
+		KitDesign.recolor_distinct(c, c.kit_away, [c.kit_home])
+		KitDesign.recolor_distinct(c, c.kit_third, [c.kit_home, c.kit_away])
+
+
 ## Saves antigos: escudos no formato antigo (sem "field") viram os novos — os reais pelo banco
-## de dados, os gerados pelo estilo do país. Imagem importada e escudo do editor ficam.
+## de dados, os gerados pelo estilo do país. Escudo de clube real que o jogador não mexeu
+## acompanha o desenho do banco de dados (escudos redesenhados chegam às carreiras em andamento).
+## Imagem importada e escudo do editor ficam.
 static func upgrade_crests(world: GameWorld) -> void:
 	var datas := {}
 	for c in world.clubs:
@@ -589,12 +770,14 @@ static func upgrade_crests(world: GameWorld) -> void:
 				by_key[String(d.get("key", ""))] = d
 			datas[c.nation] = by_key
 	for c in world.clubs:
-		if c.crest.has("field") or c.crest.has("img") or not Overrides.club(c.key).get("crest", {}).is_empty():
+		if c.crest.has("img") or bool(c.crest.get("edited", false)) or not Overrides.club(c.key).get("crest", {}).is_empty():
+			continue
+		var data: Dictionary = datas[c.nation].get(c.key, {})
+		var hint: Dictionary = data.get("crest", {})
+		if c.crest.has("field") and not hint.has("field"):
 			continue
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(c.key)
-		var data: Dictionary = datas[c.nation].get(c.key, {})
-		var hint: Dictionary = data.get("crest", {})
 		var old: Dictionary = c.crest
 		_make_crest(rng, c, hint)
 		if not hint.has("initials") and old.has("initials"):

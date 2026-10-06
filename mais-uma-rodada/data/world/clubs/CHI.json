@@ -114,7 +114,7 @@
 			"capacity": 12000,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "CL",
@@ -366,7 +366,13 @@
 			"stadium": "Estadio La Portada",
 			"capacity": 18200,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lighthouse",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -387,7 +393,13 @@
 			"stadium": "Estadio Nicolás Chahuán",
 			"capacity": 9200,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "ULC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -408,7 +420,13 @@
 			"stadium": "Estadio Nelson Oyarzún",
 			"capacity": 12000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "devil",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -429,7 +447,13 @@
 			"stadium": "Estadio Municipal de Limache",
 			"capacity": 4500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "DL",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		}
 	]

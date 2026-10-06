@@ -45,6 +45,11 @@ const BIAS := {
 	"perfeccionista": {"pro": 4, "det": 2},
 	"cascudo": {"pre": 4, "tem": 2, "ada": 2},
 	"idolo": {"lea": 5},
+	"vaidoso": {"pol": 4, "pro": -2, "amb": 3},
+	"brincalhao": {"tem": 3, "ada": 3},
+	"caseiro": {"lea": 5, "ada": -4, "pol": -2},
+	"polemico": {"pol": 7, "tem": -3},
+	"frio": {"pre": 7, "tem": 3},
 }
 
 

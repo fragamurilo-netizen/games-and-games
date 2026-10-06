@@ -231,6 +231,42 @@ static func golden_boot(world: GameWorld) -> Dictionary:
 		"goals": best.stats[Player.S_GOALS], "pts": snappedf(best_v, 0.1)}
 
 
+## Troféu Gerd Müller: quem mais marcou na temporada somando liga e copas (sem peso de liga).
+static func muller(world: GameWorld) -> Dictionary:
+	var best: Player = null
+	var bg := 0
+	for p: Player in world.players.values():
+		if p.club_id < 0:
+			continue
+		var g := int(p.season_totals()[1])
+		if g > bg or (g == bg and best != null and p.id < best.id):
+			bg = g
+			best = p
+	if best == null or bg < 10:
+		return {}
+	return {"id": best.id, "name": best.display_name(), "club": world.club(best.club_id).short_name, "nat": best.nationality, "goals": bg}
+
+
+## Prêmio continental: o melhor da temporada pelo mérito da Bola de Ouro, entre quem joga num
+## clube da confederação (club) ou é dela (nat). Rei da América: joga na América do Sul.
+static func continental(world: GameWorld, confed: String, by_club: bool, extra: Dictionary = {}) -> Dictionary:
+	var best: Player = null
+	var bv := -1.0
+	for p: Player in world.players.values():
+		if p.club_id < 0:
+			continue
+		var code := world.club(p.club_id).nation if by_club else p.nationality
+		if String(DatabaseManager.nation(code).get("confed", "")) != confed:
+			continue
+		var v := AwardVoting.ballon_merit(world, p, extra)
+		if v > bv:
+			bv = v
+			best = p
+	if best == null:
+		return {}
+	return {"id": best.id, "name": best.display_name(), "club": world.club(best.club_id).short_name, "nat": best.nationality, "goals": int(best.season_totals()[1])}
+
+
 ## Craque do clube na temporada (usado para o clube do usuário).
 static func club_player(world: GameWorld, club_id: int) -> Dictionary:
 	var c := world.club(club_id)
@@ -251,7 +287,27 @@ static func club_player(world: GameWorld, club_id: int) -> Dictionary:
 	return {"id": best.id, "name": best.display_name(), "club": c.short_name, "v": "%.2f" % best.avg_rating()}
 
 
-static func award_name(k: String) -> String:
+static var _names: Dictionary = {}
+
+
+static func _names_db() -> Dictionary:
+	if _names.is_empty():
+		var d: Variant = DatabaseManager.read_json("res://data/gameplay/awards.json")
+		_names = d if d is Dictionary else {"world": {}, "league": {}}
+	return _names
+
+
+## Nome do prêmio; com a liga (`league_id`), o nome local dela (Pichichi, Capocannoniere, Bola de
+## Ouro do Brasileirão...). Prêmios mundiais com o nome real (Troféu Kopa, Yashin, Gerd Müller).
+static func award_name(k: String, league_id: String = "") -> String:
+	var db := _names_db()
+	if league_id != "" and DatabaseManager.league_ids().has(league_id):
+		var nat := String(DatabaseManager.league_cfg(league_id).get("nation", ""))
+		var loc: Dictionary = db["league"].get(nat, {})
+		if loc.has(k):
+			return String(loc[k])
+	if db["world"].has(k):
+		return String(db["world"][k])
 	match k:
 		"mvp":
 			return "Craque"
@@ -293,6 +349,12 @@ static func award_name(k: String) -> String:
 			return "Treinador da temporada"
 		"coach_world":
 			return "Treinador do ano"
+		"nextgen":
+			return "Next Generation"
+		"nxgn":
+			return "Lista NXGN"
+		"nxgn_win":
+			return "Melhor jovem do mundo (NXGN)"
 	return k
 
 
@@ -312,12 +374,16 @@ static func award_where(world: GameWorld, a: Dictionary) -> String:
 ## Peso de um prêmio no currículo (usado para destacar os mais importantes e na moral).
 static func award_weight(k: String) -> int:
 	match k:
-		"potm":
+		"potm", "nextgen", "nxgn":
 			return 2
+		"nxgn_win":
+			return 5
 		"ballon":
 			return 10
-		"boot", "world_young", "gk_world":
+		"boot", "world_young", "gk_world", "muller":
 			return 6
+		"rei_america", "caf_poty", "afc_poty":
+			return 5
 		"world_xi":
 			return 4
 		"glove":
@@ -344,7 +410,7 @@ static func credit(world: GameWorld, awards: Dictionary, ballon: Dictionary, ext
 		_give(world, int(cups[cid]["id"]), "cup_mvp", cid)
 	if not ballon.is_empty():
 		_give(world, int(ballon["id"]), "ballon", "")
-	for k in ["world_young", "boot", "gk_world"]:
+	for k in ["world_young", "boot", "gk_world", "muller", "rei_america", "caf_poty", "afc_poty"]:
 		var d: Dictionary = extra.get(k, {})
 		if not d.is_empty():
 			_give(world, int(d["id"]), k, "")

@@ -9,6 +9,8 @@ var opt_secs := "40"
 var opt_night := ""
 var opt_skip := ""
 var opt_rain := ""
+## --sheets=1: captura também as folhas da partida (Substituir, quem entra, Painel, Mais).
+var opt_sheets := ""
 var shots := false
 var n := 0
 
@@ -76,6 +78,8 @@ func _run() -> void:
 	var sim0: MatchSimulation = ms.get("_sim")
 	var seen := 0
 	var goal_seq := 0
+	var replays := 0
+	var callouts := 0
 	var next_shot := Time.get_ticks_msec() + int(secs * 1000.0 / 6.0)
 	while Time.get_ticks_msec() - t0 < int(secs * 1000.0) and not bool(ms.get("_done")):
 		await get_tree().process_frame
@@ -88,6 +92,20 @@ func _run() -> void:
 				for j in 5:
 					await _wait(0.45)
 					await _shot("gol%d_%d" % [goal_seq, j])
+		# Replay do gol: fotografa o selo, o zoom e a câmera lenta.
+		if pitch.motion.replaying and replays < 2:
+			replays += 1
+			for j in 4:
+				await _wait(0.8)
+				await _shot("replay%d_%d" % [replays, j])
+			while pitch.motion.replaying:
+				await get_tree().process_frame
+			await _wait(0.6)
+			await _shot("replay%d_depois" % replays)
+		# Letreiros dos lances de destaque ("NA TRAVE!", "QUE DEFESA!").
+		if not pitch.callout.is_empty() and callouts < 4 and float(pitch.callout["t"]) > 0.2:
+			callouts += 1
+			await _shot("letreiro%d" % callouts)
 		if Time.get_ticks_msec() < next_shot:
 			continue
 		next_shot = Time.get_ticks_msec() + int(secs * 1000.0 / 6.0)
@@ -102,6 +120,29 @@ func _run() -> void:
 		var ov: GoalOverlay = ms.get("_overlay")
 		if not got_goal and ov != null and ov.is_playing():
 			got_goal = true
+	if opt_sheets == "1":
+		ms.call("_toggle_play")
+		ms.call("_open_subs")
+		await _frames(6)
+		await _shot("folha_substituir")
+		var t = ms.get("_sim").teams[int(ms.get("_user_side"))]
+		for mp in t.slots:
+			if mp != null:
+				ms.set("_sub_out", mp.p.id)
+				break
+		ms.call("_render_tactics")
+		await _frames(6)
+		await _shot("folha_quem_entra")
+		UIManager.close_all_modals()
+		ms.call("_open_panel")
+		await _frames(6)
+		await _shot("folha_painel")
+		UIManager.close_all_modals()
+		ms.call("_match_menu")
+		await _frames(6)
+		await _shot("folha_mais")
+		UIManager.close_all_modals()
+		ms.call("_toggle_play")
 	if opt_skip == "1":
 		ms.call("_skip_to_end")
 	# Resto do jogo em turbo (confere que roda até o fim sem erro).

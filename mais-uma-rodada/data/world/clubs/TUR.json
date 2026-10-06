@@ -62,10 +62,7 @@
 				"stars": 5,
 				"c3": "#FFED00"
 			},
-			"rivals": [
-				"TUR_IAS",
-				"TUR_IKR"
-			]
+			"rivals": ["TUR_IAS", "TUR_IKR", "TUR_FIR"]
 		},
 		{
 			"key": "TUR_IKR",
@@ -117,13 +114,18 @@
 			"capacity": 40000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "TS",
-				"sc": "#FFFFFF"
+				"c1": "#6E1F37",
+				"c2": "#80C3E8",
+				"fc": "#80C3E8",
+				"text": "TRABZONSPOR",
+				"year": "1967",
+				"tc": "#6E1F37"
 			},
-			"rivals": []
+			"rivals": ["TUR_IKN"]
 		},
 		{
 			"key": "TUR_BSK",
@@ -198,7 +200,7 @@
 			"kit": "halves",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "G",
@@ -225,7 +227,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "E",
@@ -278,7 +280,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "K",
@@ -305,7 +307,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "A",
@@ -383,7 +385,7 @@
 			"kit": "halves",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "GFK",
@@ -436,7 +438,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "R",
@@ -463,7 +465,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "GB",
@@ -490,7 +492,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "FK",

@@ -55,6 +55,10 @@ static func on_injury(world: GameWorld, p: Player, weeks: int, name: String) -> 
 static func season_rows(world: GameWorld, p: Player) -> Array:
 	var cuts: Array = _mem(world, "split").get(p.id, [])
 	var injs: Array = _mem(world, "injs").get(p.id, [])
+	# Atalho (o fim de temporada passa pelos ~27 mil jogadores): sem recortes, sem lesão grave e
+	# sem jogo no ano, não há linha nenhuma.
+	if cuts.is_empty() and injs.is_empty() and (p.club_id < 0 or int(p.season_totals()[0]) <= 0):
+		return []
 	var rows: Array = []
 	var prev := {}
 	var parts: Array = cuts.duplicate()
@@ -85,14 +89,19 @@ static func season_rows(world: GameWorld, p: Player) -> Array:
 	return rows
 
 
+static func _d(s: Dictionary, prev: Dictionary, k: String) -> int:
+	return int(s.get(k, 0)) - int(prev.get(k, 0))
+
+
 static func _diff(world: GameWorld, s: Dictionary, prev: Dictionary) -> Dictionary:
-	var d := func(k: String) -> int: return int(s.get(k, 0)) - int(prev.get(k, 0))
-	var a: int = d.call("a")
-	var rs: int = d.call("rs")
+	var a := _d(s, prev, "a")
+	var rs := _d(s, prev, "rs")
+	var g := _d(s, prev, "g")
+	var as_ := _d(s, prev, "as")
 	var row := {"y": world.year, "c": int(s["c"]), "cn": String(s["cn"]), "l": String(s["l"]),
-		"a": a, "g": d.call("g"), "as": d.call("as"), "r": snappedf(rs / 10.0 / a if a > 0 else 0.0, 0.01),
-		"ca": d.call("ta") - a, "cg": d.call("tg") - int(d.call("g")), "cas": d.call("tas") - int(d.call("as")),
-		"mi": d.call("mi"), "st": d.call("st"), "mo": d.call("mo"), "cs": d.call("cs"), "yc": d.call("yc"), "rc": d.call("rc")}
+		"a": a, "g": g, "as": as_, "r": snappedf(rs / 10.0 / a if a > 0 else 0.0, 0.01),
+		"ca": _d(s, prev, "ta") - a, "cg": _d(s, prev, "tg") - g, "cas": _d(s, prev, "tas") - as_,
+		"mi": _d(s, prev, "mi"), "st": _d(s, prev, "st"), "mo": _d(s, prev, "mo"), "cs": _d(s, prev, "cs"), "yc": _d(s, prev, "yc"), "rc": _d(s, prev, "rc")}
 	if bool(s.get("lo", false)):
 		row["lo"] = true
 	return row

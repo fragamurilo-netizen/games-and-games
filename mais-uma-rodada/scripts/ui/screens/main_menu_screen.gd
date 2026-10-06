@@ -12,20 +12,60 @@ func _init() -> void:
 
 
 func refresh() -> void:
+	StadiumBackdrop.attach(self)
 	var c := content()
 	UIKit.clear(c)
-	c.add_child(UIKit.gap(60))
+	var wide := UILayout.is_wide()
+	max_content_width = 1500.0 if wide else 720.0
+	var logo := _logo(wide)
+	var menu := _menu()
+	if wide:
+		# Paisagem/tablet: a marca à esquerda, o menu à direita.
+		var row := UIKit.hbox(UITokens.S8)
+		row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		logo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		logo.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		menu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		menu.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(logo)
+		row.add_child(menu)
+		var top := UIKit.gap(40)
+		c.add_child(top)
+		c.add_child(row)
+		# Tablet e paisagem: o bloco fica no meio da altura, não colado no topo
+		_center_vertically(top)
+	else:
+		c.add_child(UIKit.gap(36))
+		c.add_child(logo)
+		c.add_child(UIKit.gap(28))
+		c.add_child(menu)
+	c.add_child(UIKit.gap(24))
+	var credit := UIKit.label("Desenvolvido por %s · versão %s" % [DEVELOPER, ProjectSettings.get_setting("application/config/version", "0.1.0")], "Small")
+	credit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	c.add_child(UIKit.tap_row(credit, show_credits, "PanelContainer"))
+
+
+func _center_vertically(top: Control) -> void:
+	await get_tree().process_frame
+	var c := content()
+	if c == null or not is_instance_valid(top):
+		return
+	var rest := c.get_combined_minimum_size().y - top.custom_minimum_size.y
+	top.custom_minimum_size.y = maxf(40.0, (size.y - rest) * 0.3)
+
+
+func _logo(wide: bool) -> VBoxContainer:
 	var logo := UIKit.vbox(0)
 	logo.alignment = BoxContainer.ALIGNMENT_CENTER
 	var icon := TextureRect.new()
 	icon.texture = load("res://icon.svg")
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.custom_minimum_size = Vector2(176, 176)
+	icon.custom_minimum_size = Vector2(150, 150) if not wide else Vector2(200, 200)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo.add_child(icon)
-	logo.add_child(UIKit.gap(10))
+	logo.add_child(UIKit.gap(8))
 	var l1 := UIKit.label("MAIS UMA", "Logo")
 	l1.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l1.add_theme_color_override(&"font_color", UIColors.TEXT)
@@ -33,36 +73,75 @@ func refresh() -> void:
 	var l2 := UIKit.label("RODADA", "Logo")
 	l2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	logo.add_child(l2)
-	var tag := UIKit.label("Gestão de futebol. Só mais uma rodada.", "Muted")
+	var tag := UIKit.eyebrow("Gestão de futebol. Só mais uma rodada.", UIColors.MUTED)
 	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	logo.add_child(tag)
-	c.add_child(logo)
-	c.add_child(UIKit.gap(70))
+	return logo
+
+
+## Continuar (a última carreira em destaque) e as outras ações em ladrilhos.
+func _menu() -> VBoxContainer:
+	var v := UIKit.vbox(UITokens.S3)
 	var latest := SaveManager.latest_slot()
 	if latest > 0:
 		var meta := SaveManager.read_meta(latest)
+		var card := UIKit.card("CardHighlight", 12)
+		var row := UIKit.hbox(16)
+		var crest := CrestView.new()
+		crest.custom_minimum_size = Vector2(92, 92)
+		crest.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var cd: Variant = meta.get("crest", {})
+		if cd is Dictionary and not cd.is_empty():
+			crest.crest = cd
+		row.add_child(crest)
+		var col := UIKit.vbox(2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		col.add_child(UIKit.eyebrow("Continuar carreira"))
+		var nm := UIKit.label(String(meta.get("club", meta.get("short", ""))), "Title")
+		nm.uppercase = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		col.add_child(nm)
+		col.add_child(UIKit.label("%s · temporada %d · rodada %d" % [meta.get("division", meta.get("short", "")), int(meta.get("year", 0)), int(meta.get("round", 0))], "Small", true))
+		if String(meta.get("manager", "")) != "":
+			col.add_child(UIKit.label("Técnico: %s" % meta.get("manager", ""), "Small"))
+		row.add_child(col)
+		card.add_child(row)
 		var cont := UIKit.button("CONTINUAR", "PrimaryButton", func(): _load(latest), "play")
-		cont.custom_minimum_size.y = 104
-		c.add_child(cont)
-		var info := UIKit.label("%s · temporada %d · rodada %d" % [meta.get("short", meta.get("club", "")), int(meta.get("year", 0)), int(meta.get("round", 0))], "Muted")
-		info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		c.add_child(info)
-		c.add_child(UIKit.gap(10))
-	var new_btn := UIKit.button("NOVA CARREIRA", "PrimaryButton" if latest <= 0 else "", func(): UIManager.push("new_career"), "plus")
-	new_btn.custom_minimum_size.y = 96 if latest <= 0 else 84
-	c.add_child(new_btn)
-	c.add_child(UIKit.button("Carregar jogo", "", func(): UIManager.push("load"), "save"))
-	c.add_child(UIKit.button("Editor e mods", "", func(): UIManager.push("editor"), "shield"))
-	c.add_child(UIKit.button("Opções", "GhostButton", func(): UIManager.push("settings"), "gear"))
-	c.add_child(UIKit.gap(40))
-	var credit := UIKit.label("Desenvolvido por %s" % DEVELOPER, "Small")
-	credit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var credit_row := UIKit.tap_row(credit, show_credits, "CardFlat")
-	c.add_child(credit_row)
-	var ver := UIKit.label("versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "Small")
-	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ver.add_theme_color_override(&"font_color", UIColors.DIM)
-	c.add_child(ver)
+		cont.custom_minimum_size.y = 96
+		card.add_child(cont)
+		v.add_child(UIKit.card_panel(card))
+	# Sem carreira salva, começar uma é a ação principal; as demais ficam numa lista curta.
+	if latest <= 0:
+		var nb := UIKit.button("NOVA CARREIRA", "PrimaryButton", func(): UIManager.push("new_career"), "plus")
+		nb.custom_minimum_size.y = 96
+		v.add_child(nb)
+	var rows: Array = []
+	if latest > 0:
+		rows.append(UIKit.menu_row("plus", "Nova carreira", "", func(): UIManager.push("new_career")))
+	rows.append(UIKit.menu_row("save", "Carregar jogo", "", func(): UIManager.push("load")))
+	rows.append(UIKit.menu_row("shield", "Editor e mods", "", func(): UIManager.push("editor")))
+	rows.append(UIKit.menu_row("gear", "Opções", "", func(): UIManager.push("settings")))
+	v.add_child(UIKit.menu_group(rows))
+	v.add_child(_language_row())
+	return v
+
+
+## Idioma direto na tela inicial (cada nome sempre na própria língua).
+func _language_row() -> Control:
+	var items: Array = []
+	for i in I18n.LANGS.size():
+		items.append([I18n.LANGS[i], I18n.LANG_NAMES[i]])
+	var row := UIKit.segment(items, AppSettings.language, func(code: String):
+		if code == AppSettings.language:
+			return
+		AppSettings.language = code
+		AppSettings.save_settings()
+		I18n.apply(code)
+		refresh.call_deferred())
+	for b in row.find_children("*", "Button", true, false):
+		(b as Button).auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	return row
 
 
 ## Créditos do jogo (também abertos pelas Opções).
@@ -82,8 +161,11 @@ static func show_credits() -> void:
 	v.add_child(UIKit.section("Criação e desenvolvimento"))
 	v.add_child(UIKit.label(DEVELOPER, "H2"))
 	v.add_child(UIKit.label("Design de jogo, programação, simulação, interface e dados.", "Muted", true))
+	if Store.tips > 0:
+		v.add_child(UIKit.section("Apoio"))
+		v.add_child(UIKit.colored("Obrigado pelo café! Você ajuda o jogo a continuar.", UIColors.GREEN, "H3", true))
 	v.add_child(UIKit.section("Tecnologia"))
-	v.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fontes Barlow e Barlow Condensed, de Jeremy Tribby (SIL Open Font License 1.1).", "Small", true))
+	v.add_child(UIKit.label("Feito com Godot Engine (licença MIT). Fonte Saira, de Héctor Gatti e Omnibus-Type (SIL Open Font License 1.1).", "Small", true))
 	v.add_child(UIKit.section("Aviso"))
 	v.add_child(UIKit.label("Clubes, estádios e competições usam os nomes reais só como referência, sem vínculo oficial. Todos os jogadores são fictícios.", "Small", true))
 	v.add_child(UIKit.label("versão %s" % ProjectSettings.get_setting("application/config/version", "0.1.0"), "Small"))
@@ -92,8 +174,9 @@ static func show_credits() -> void:
 
 
 func _load(slot: int) -> void:
-	if GameManager.load_career(slot):
-		AudioManager.play("whistle", -6.0)
-		UIManager.goto("hub")
-	else:
-		UIManager.info("Não foi possível carregar", "O arquivo do slot %d parece corrompido." % slot)
+	GameManager.load_career_async(slot, func(ok: bool) -> void:
+		if ok:
+			Sfx.play("whistle", -6.0)
+			UIManager.goto("hub")
+		else:
+			UIManager.info("Não foi possível carregar", "O arquivo do slot %d parece corrompido." % slot))

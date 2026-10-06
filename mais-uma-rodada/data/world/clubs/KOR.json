@@ -182,7 +182,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "DHC",
@@ -233,7 +233,13 @@
 			"stadium": "Jeju World Cup Stadium",
 			"capacity": 29800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -254,7 +260,13 @@
 			"stadium": "Gwangju Football Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "torch",
+				"sc": "#E30613",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -275,7 +287,12 @@
 			"stadium": "Anyang Stadium",
 			"capacity": 17100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "wings",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -296,7 +313,15 @@
 			"stadium": "Daegu Forest Arena",
 			"capacity": 12400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#0D2A5C",
+				"c2": "#75AADB",
+				"sc": "#75AADB",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

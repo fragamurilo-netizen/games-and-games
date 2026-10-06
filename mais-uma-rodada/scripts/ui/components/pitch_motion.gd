@@ -5,6 +5,9 @@ extends RefCounted
 ## que zona, quem finaliza, quem dá o passe e como termina): troca de passes, condução, virada de
 ## jogo, lançamento, cruzamento, cabeceio, chute, defesa, rebote, escanteio, falta com barreira,
 ## pênalti, tiro de meta, impedimento com bandeira e comemoração.
+## Variações do desfecho (cavadinha, voleio, bicicleta, rebote, arrancada, defesa dupla,
+## travessão, gol anulado pelo VAR) vêm em info["fin"], escolhidas pela MatchSimulation.
+## Grava os últimos segundos de movimento para o replay do gol (goal_clip/start_replay).
 ## Só apresentação, com RNG próprio: assistir nunca muda o placar.
 ##
 ## Coordenadas em metros no referencial canônico da PitchView: x = comprimento (0 = gol do
@@ -17,6 +20,9 @@ const BOX_D := 16.5
 const JOG := 5.0
 const RUN := 7.2
 const SPRINT := 8.8
+## Distância mínima entre jogadores (m) para os círculos não se cobrirem na tela.
+const SEP_MATE := 4.2
+const SEP_RIVAL := 2.6
 
 class Ag:
 	var side := 0
@@ -75,6 +81,28 @@ var _line: Array = [0.2, 0.2] # profundidade da penúltima linha de cada time (v
 var _press: Array = [null, null]
 var _cover: Array = [null, null]
 var _celebr: Dictionary = {}
+
+# --- Replay: quadros gravados do próprio motor, reproduzidos mais devagar ---
+const REC_SPAN := 20.0 # segundos (do motor) guardados
+const REPLAY_BASE := 1.45 # velocidade do motor no replay (a do ritmo normal)
+var replaying := false
+var replay_k := 0.0 # progresso do replay (0..1)
+var last_play_t := -99.0 # início da última jogada roteirizada de chance
+var last_net_t := -99.0 # quando a bola balançou a rede pela última vez
+var _rec: Array = [] # quadros (ver _capture)
+## Jogada de chance em andamento (a câmera aproxima quando a bola chega perto da área).
+var chance_live := false
+var _slow_t := 0.0 # câmera lenta ao vivo no chute de uma chance clara (s reais)
+var _rp: Dictionary = {} # replay em andamento
+## Marcos da jogada ("começou", "chutou", "apitou"): a tela solta a narração de cada lance
+## quando o campo chega nele. Recebe o id passado em play()/mark().
+var on_mark: Callable = Callable()
+var _scr_n := 0 # jogadas roteirizadas ainda na fila (o fim de cada uma é um marco "_end")
+var _hit_id := "" # marco do momento decisivo da jogada sendo montada
+var _foul_id := "" # marco do apito (pênalti: a falta vem antes da cobrança)
+var _fk_spot := Vector2.INF # onde a falta perigosa aconteceu (a cobrança sai dali)
+## Postura de cada time (linha, largura, pressão, mentalidade), vinda da tática da simulação.
+var tac: Array = [{"line": 1, "width": 1, "press": 1, "ment": 2}, {"line": 1, "width": 1, "press": 1, "ment": 2}]
 
 
 func _init(seed_value: int = 1) -> void:
@@ -140,6 +168,11 @@ func busy_time() -> float:
 # Elencos (vêm do _sync_slots da tela)
 # ---------------------------------------------------------------------------
 
+## Postura do time: line/width/press 0..2, ment 0..4 (como na MatchTeam).
+func set_tactics(side: int, t: Dictionary) -> void:
+	tac[side] = t
+
+
 ## slots: [{x, y, number, on, name, role, gk}] na ordem das vagas.
 func set_team(side: int, slots: Array) -> void:
 	var arr: Array = agents[side]
@@ -180,6 +213,9 @@ func set_team(side: int, slots: Array) -> void:
 
 ## Saída de bola: `side` dá a saída. instant: todos já posicionados (início de tempo).
 func kickoff(side: int, instant: bool) -> void:
+	if replaying:
+		stop_replay()
+	chance_live = false
 	_clear()
 	mode = "kickoff"
 	poss = side
@@ -222,12 +258,26 @@ func ambient(side: int, to_depth: float) -> void:
 
 
 ## Jogada roteirizada a partir do lance da simulação. info:
-## {kind, side, ct, res, sh, as, p, p2, gk, card, danger, line, zone, own}
+## {kind, side, ct, res, sh, as, p, p2, d, gk, card, danger, line, zone, own, ln, fk, append, start, hit, fhit}
+## append: entra depois do que já está na fila (lances encadeados no mesmo minuto).
+## start/hit/fhit: marcos (ver on_mark) do começo, do momento decisivo e do apito do pênalti.
 func play(info: Dictionary) -> void:
+	if replaying:
+		stop_replay()
 	if mode == "goal" and String(info.get("kind", "")) != "kickoff":
+		for k in ["start", "fhit", "hit"]:
+			if info.has(k):
+				_fire_mark(String(info[k]))
 		return
-	_finish_now()
+	if not bool(info.get("append", false)):
+		_finish_now()
+	_hit_id = String(info.get("hit", ""))
+	_foul_id = String(info.get("fhit", ""))
+	mark(String(info.get("start", "")))
 	var kind := String(info.get("kind", ""))
+	chance_live = kind == "chance"
+	if kind == "chance":
+		last_play_t = _t
 	var side := int(info.get("side", 0))
 	zone = clampf(float(info.get("zone", zone)), 0.1, 0.9)
 	match kind:
@@ -245,6 +295,8 @@ func play(info: Dictionary) -> void:
 			_script_tackle(side, ag(side, int(info.get("p", -1))), ag(1 - side, int(info.get("p2", -1))))
 		"keeper":
 			_script_keeper(side)
+		"poss":
+			_script_poss(info)
 		"injury":
 			var v := ag(side, int(info.get("p", -1)))
 			if v != null:
@@ -255,6 +307,10 @@ func play(info: Dictionary) -> void:
 				_q({"k": "wait", "dur": 1.8, "est": 1.8})
 		_:
 			ambient(side, zone)
+	_put_foul()
+	_put_hit()
+	_scr_n += 1
+	_q({"k": "mark", "id": "_end", "est": 0.0})
 
 
 func show_card(side: int, idx: int, red: bool) -> void:
@@ -278,9 +334,18 @@ func player_down(side: int, idx: int, t: float) -> void:
 		a.down = t
 
 
+## Onde está a festa do gol (quem marcou), para a câmera acompanhar. INF = sem festa.
+func celebr_pos() -> Vector2:
+	if _celebr.is_empty():
+		return Vector2.INF
+	var sc: Ag = _celebr.get("sc", null)
+	return sc.pos if sc != null else _celebr["at"]
+
+
 ## Gol: a bola já está na rede. Quem fez corre para a bandeira de escanteio.
 func celebrate(side: int, scorer_idx: int) -> void:
 	mode = "goal"
+	_flush_marks()
 	_queue.clear()
 	_act = {}
 	owner = null
@@ -305,93 +370,16 @@ func celebrate(side: int, scorer_idx: int) -> void:
 # Laço
 # ---------------------------------------------------------------------------
 
-## Modo replay (motor posicional): em vez de encenar, reproduz os quadros gravados pelo
-## LiveEngine — cada jogador e a bola exatamente onde estavam, interpolados entre quadros.
-var _rp: Array = []
-var _rp_t := 0.0
-var _rp_end := 0.0
-var _rp_speed := 1.0
-
-
-## Toca os quadros [t, PackedFloat32Array] de `from_t` a `to_t` (segundos do minuto) a `speed`×.
-func play_frames(frames: Array, from_t: float, to_t: float, speed: float) -> void:
-	_clear()
-	mode = "play"
-	_rp = frames
-	_rp_t = from_t
-	_rp_end = to_t
-	_rp_speed = speed
-	_apply_frame(from_t, 0.0)
-
-
-func replay_on() -> bool:
-	return not _rp.is_empty()
-
-
-func _apply_frame(tt: float, delta: float) -> void:
-	var n := _rp.size()
-	if n == 0:
-		return
-	var fi := clampf(tt / 0.25, 0.0, n - 1.0)
-	var i0 := int(fi)
-	var i1 := mini(i0 + 1, n - 1)
-	var k := fi - i0
-	var f0: PackedFloat32Array = _rp[i0][1]
-	var f1: PackedFloat32Array = _rp[i1][1]
-	var j := 0
-	for side in 2:
-		var arr: Array = agents[side]
-		for i in 11:
-			if i < arr.size():
-				var a: Ag = arr[i]
-				if f0[j] > -50.0 and f1[j] > -50.0:
-					var np := Vector2(lerpf(f0[j], f1[j], k), lerpf(f0[j + 1], f1[j + 1], k))
-					var mv := np - a.pos
-					if delta > 0.0 and mv.length_squared() > 1e-4:
-						a.vel = mv / delta
-						a.face = mv.normalized()
-						a.run += mv.length() * 0.9
-					else:
-						a.vel = Vector2.ZERO
-					a.pos = np
-			j += 2
-	var nb := Vector2(lerpf(f0[44], f1[44], k), lerpf(f0[45], f1[45], k))
-	if delta > 0.0 and ball.distance_to(nb) > 2.5 and ball_h > 0.3 or lerpf(f0[46], f1[46], k) > 0.8:
-		trail.append([ball, ball_h, 0.0])
-	ball = nb
-	ball_h = lerpf(f0[46], f1[46], k)
-	var ow := int(f0[47])
-	if ow >= 0:
-		owner = ag(ow / 11, ow % 11)
-		if owner != null:
-			poss = owner.side
-	else:
-		owner = null
-	# A bola entrou: rede balança
-	if ball.x <= 0.3 and absf(ball.y - W * 0.5) < GOAL_HW:
-		net_hit = 0
-		net_t = 1.2
-	elif ball.x >= L - 0.3 and absf(ball.y - W * 0.5) < GOAL_HW:
-		net_hit = 1
-		net_t = 1.2
-
-
 func update(delta: float) -> void:
 	if frozen:
 		return
-	if not _rp.is_empty():
-		if _rp_t < _rp_end:
-			_rp_t = minf(_rp_end, _rp_t + delta * _rp_speed)
-			_apply_frame(_rp_t, delta)
-		_update_officials(delta * _rp_speed)
-		whistle = maxf(0.0, whistle - delta)
-		net_t = maxf(0.0, net_t - delta)
-		for tr in trail:
-			tr[2] += delta
-		while not trail.is_empty() and float(trail[0][2]) > 0.35:
-			trail.pop_front()
+	if replaying:
+		_replay_step(delta)
 		return
 	var dt := delta * tempo
+	if _slow_t > 0.0:
+		_slow_t -= delta
+		dt *= 0.5
 	_t += dt
 	_compute_lines()
 	_run_actions(dt)
@@ -414,6 +402,181 @@ func update(delta: float) -> void:
 		_amb_t -= dt
 		if _amb_t <= 0.0:
 			_ambient_action()
+	if chance_live and not busy():
+		chance_live = false
+	# ~30 quadros por segundo do motor bastam: o replay interpola entre eles.
+	if _rec.is_empty() or _t - float(_rec[-1]["t"]) >= 0.033:
+		_rec.append(_capture())
+	while not _rec.is_empty() and float(_rec[0]["t"]) < _t - REC_SPAN:
+		_rec.pop_front()
+
+
+# ---------------------------------------------------------------------------
+# Replay
+# ---------------------------------------------------------------------------
+
+## Quadro do estado visível (posições, bola, árbitro): o replay só redesenha isso.
+func _capture() -> Dictionary:
+	var pos := PackedVector2Array()
+	var vel := PackedVector2Array()
+	var face := PackedVector2Array()
+	var st := PackedFloat32Array()
+	for s in 2:
+		for a: Ag in agents[s]:
+			pos.append(a.pos)
+			vel.append(a.vel)
+			face.append(a.face)
+			st.append(a.run)
+			st.append(a.down)
+			st.append(a.dive)
+			st.append(a.arms)
+	return {"t": _t, "n0": agents[0].size(), "n1": agents[1].size(), "p": pos, "v": vel, "f": face, "s": st,
+		"b": ball, "bh": ball_h, "bs": ball_spin, "o": owner, "r": ref_pos, "rf": ref_face, "rr": ref_run,
+		"a0": ar_pos[0], "a1": ar_pos[1], "g0": ar_flag[0], "g1": ar_flag[1], "net": net_hit, "nt": net_t,
+		"sh": not _fl.is_empty() and String(_fl.get("kind", "")) == "shot", "wh": whistle, "rv": ref_var}
+
+
+## Aplica o quadro `a` interpolado até `b` (k = 0..1).
+func _apply(a: Dictionary, b: Dictionary, k: float) -> void:
+	var pa: PackedVector2Array = a["p"]
+	var pb: PackedVector2Array = b["p"]
+	var va: PackedVector2Array = a["v"]
+	var fa: PackedVector2Array = a["f"]
+	var fb: PackedVector2Array = b["f"]
+	var sa: PackedFloat32Array = a["s"]
+	var sb: PackedFloat32Array = b["s"]
+	var i := 0
+	for s in 2:
+		var n: int = a["n%d" % s]
+		for j in n:
+			if j < agents[s].size() and i < pa.size():
+				var ag_: Ag = agents[s][j]
+				ag_.pos = pa[i].lerp(pb[i], k) if i < pb.size() else pa[i]
+				ag_.vel = va[i]
+				var fc: Vector2 = fa[i].lerp(fb[i], k) if i < fb.size() else fa[i]
+				ag_.face = fc.normalized() if fc.length() > 0.01 else fa[i]
+				ag_.run = lerpf(sa[i * 4], sb[i * 4], k) if i * 4 < sb.size() else sa[i * 4]
+				ag_.down = sa[i * 4 + 1]
+				ag_.dive = sa[i * 4 + 2]
+				ag_.arms = sa[i * 4 + 3]
+			i += 1
+	ball = (a["b"] as Vector2).lerp(b["b"], k)
+	ball_h = lerpf(float(a["bh"]), float(b["bh"]), k)
+	ball_spin = float(a["bs"])
+	owner = a["o"]
+	ref_pos = (a["r"] as Vector2).lerp(b["r"], k)
+	ref_face = a["rf"]
+	ref_run = lerpf(float(a["rr"]), float(b["rr"]), k)
+	ar_pos[0] = (a["a0"] as Vector2).lerp(b["a0"], k)
+	ar_pos[1] = (a["a1"] as Vector2).lerp(b["a1"], k)
+	ar_flag[0] = float(a["g0"])
+	ar_flag[1] = float(a["g1"])
+	net_hit = int(a["net"])
+	net_t = float(a["nt"])
+	whistle = float(a["wh"])
+	ref_var = float(a["rv"])
+
+
+## Recorte do último gol: da jogada que levou ao gol até a bola balançar a rede e o começo da
+## festa. Vazio quando o lance não chegou a ser encenado (ritmo turbo, jogo pulado).
+func goal_clip() -> Dictionary:
+	# A rede tem de ter balançado depois do início da última jogada (senão é o gol anterior).
+	if last_net_t < 0.0 or last_net_t < last_play_t or _t - last_net_t > REC_SPAN - 5.0 or _rec.is_empty():
+		return {}
+	var t0 := maxf(last_net_t - 4.2, last_play_t - 0.2)
+	var t1 := minf(last_net_t + 1.3, _t)
+	var frames: Array = []
+	for f in _rec:
+		var ft := float(f["t"])
+		if ft >= t0 and ft <= t1:
+			frames.append(f)
+	if frames.size() < 8 or float(frames[-1]["t"]) - float(frames[0]["t"]) < 0.8:
+		return {}
+	return {"frames": frames, "t0": float(frames[0]["t"]), "t1": float(frames[-1]["t"]), "net": last_net_t}
+
+
+## Câmera lenta perto do chute, um pouco lenta na comemoração, normal na construção.
+static func _replay_rate(t: float, net: float) -> float:
+	if t >= net - 1.1 and t <= net + 0.3:
+		return 0.36
+	if t > net:
+		return 0.7
+	return 0.85
+
+
+## Duração do replay em segundos reais.
+static func replay_duration(clip: Dictionary) -> float:
+	if clip.is_empty():
+		return 0.0
+	var t := float(clip["t0"])
+	var t1 := float(clip["t1"])
+	var net := float(clip["net"])
+	var real := 0.0
+	var guard := 0
+	while t < t1 and guard < 5000:
+		guard += 1
+		var r := REPLAY_BASE * _replay_rate(t, net)
+		t += r * 0.02
+		real += 0.02
+	return real
+
+
+## Começa o replay de um recorte (goal_clip). O jogo ao vivo fica guardado e volta no fim.
+func start_replay(clip: Dictionary) -> float:
+	if clip.is_empty() or (clip["frames"] as Array).size() < 2:
+		return 0.0
+	if replaying:
+		stop_replay()
+	_rp = {"fr": clip["frames"], "t": float(clip["t0"]), "t0": float(clip["t0"]), "t1": float(clip["t1"]), "net": float(clip["net"]),
+		"i": 0, "live": _capture(), "trail": trail.duplicate()}
+	replaying = true
+	replay_k = 0.0
+	trail.clear()
+	var fr: Array = clip["frames"]
+	_apply(fr[0], fr[0], 0.0)
+	return replay_duration(clip)
+
+
+## Encerra o replay (fim ou toque para pular) e devolve o campo ao vivo.
+func stop_replay() -> void:
+	if not replaying:
+		return
+	replaying = false
+	var live: Dictionary = _rp.get("live", {})
+	if not live.is_empty():
+		_apply(live, live, 0.0)
+	trail = _rp.get("trail", [])
+	_rp = {}
+	replay_k = 1.0
+
+
+func _replay_step(delta: float) -> void:
+	var t := float(_rp["t"])
+	var net := float(_rp["net"])
+	t += delta * REPLAY_BASE * _replay_rate(t, net)
+	_rp["t"] = t
+	var t0 := float(_rp["t0"])
+	var t1 := float(_rp["t1"])
+	replay_k = clampf((t - t0) / maxf(0.01, t1 - t0), 0.0, 1.0)
+	for tr in trail:
+		tr[2] += delta
+	while not trail.is_empty() and float(trail[0][2]) > 0.6:
+		trail.pop_front()
+	if t >= t1:
+		stop_replay()
+		return
+	var fr: Array = _rp["fr"]
+	var i := int(_rp["i"])
+	while i + 1 < fr.size() - 1 and float(fr[i + 1]["t"]) <= t:
+		i += 1
+	_rp["i"] = i
+	var a: Dictionary = fr[i]
+	var b: Dictionary = fr[mini(i + 1, fr.size() - 1)]
+	var span := float(b["t"]) - float(a["t"])
+	var k := clampf((t - float(a["t"])) / span, 0.0, 1.0) if span > 0.0001 else 0.0
+	_apply(a, b, k)
+	if bool(a["sh"]):
+		trail.append([ball, ball_h, 0.0])
 
 
 func _run_actions(dt: float) -> void:
@@ -440,7 +603,61 @@ func _q(a: Dictionary) -> void:
 	_queue.append(a)
 
 
+## Marco na fila: dispara on_mark(id) quando o campo chega nesse ponto da jogada.
+func mark(id: String) -> void:
+	if id != "":
+		_q({"k": "mark", "id": id, "est": 0.0})
+
+
+## Jogada cortada (outra começou, saída de bola, replay): os marcos que faltavam saem na hora,
+## para a narração não ficar presa esperando um lance que não vai mais acontecer.
+func _flush_marks() -> void:
+	var pend: Array = []
+	if not _act.is_empty() and String(_act.get("k", "")) == "mark":
+		pend.append(_act["id"])
+	for a in _queue:
+		if String(a.get("k", "")) == "mark":
+			pend.append(a["id"])
+	if _hit_id != "":
+		pend.append(_hit_id)
+		_hit_id = ""
+	if _foul_id != "":
+		pend.append(_foul_id)
+		_foul_id = ""
+	_queue = _queue.filter(func(a): return String(a.get("k", "")) != "mark")
+	for id in pend:
+		_fire_mark(String(id))
+	_scr_n = 0
+
+
+## A jogada que a simulação mandou ainda está sendo encenada (fora o vaivém da bola rolando).
+func scripted_busy() -> bool:
+	return _scr_n > 0
+
+
+func _fire_mark(id: String) -> void:
+	if id == "_end":
+		_scr_n = maxi(0, _scr_n - 1)
+		return
+	if on_mark.is_valid():
+		on_mark.call(id)
+
+
+## Momento decisivo da jogada (chute chegou, apito, bandeira, passe recebido).
+func _put_hit() -> void:
+	if _hit_id != "":
+		mark(_hit_id)
+		_hit_id = ""
+
+
+func _put_foul() -> void:
+	if _foul_id != "":
+		mark(_foul_id)
+		_foul_id = ""
+
+
 func _clear() -> void:
+	_flush_marks()
 	_queue.clear()
 	_act = {}
 	_fl = {}
@@ -452,6 +669,7 @@ func _clear() -> void:
 
 ## Conclui na hora o que estava em andamento (nova jogada chegou): bola vai ao destino.
 func _finish_now() -> void:
+	_flush_marks()
 	if not _fl.is_empty():
 		ball = _fl["to"]
 		ball_h = 0.0
@@ -499,6 +717,9 @@ func _start_action(a: Dictionary) -> bool:
 		"carry":
 			if owner == null:
 				return false
+			if a.has("rel"):
+				a["to"] = owner.pos + (a["rel"] as Vector2)
+				a.erase("rel")
 			var to: Vector2 = _clamp_field(a["to"])
 			_ovr[owner] = {"to": to, "spd": float(a.get("spd", RUN)), "t": 9.0}
 			return true
@@ -523,15 +744,21 @@ func _start_action(a: Dictionary) -> bool:
 			var sh := owner
 			owner = null
 			var at2: Vector2 = a["at"]
+			if a.has("at_rel"):
+				at2 = sh.pos.lerp(at2, float(a["at_rel"]))
+			if a.has("gk_rel"):
+				a["gk_to"] = sh.pos.lerp(Vector2(goal_x(sh.side), W * 0.5), float(a["gk_rel"]))
 			sh.face = (at2 - sh.pos).normalized()
 			_fly(at2, float(a.get("loft", 0.5)), float(a.get("spd", 26.0)), "shot", null, float(a.get("curve", 0.0)))
 			var gk: Ag = a.get("gk", null)
 			if gk != null and a.has("gk_to"):
 				_ovr[gk] = {"to": a["gk_to"], "spd": float(a.get("gk_spd", 8.5)), "t": float(_fl["dur"]) + 0.5}
 				gk.dive = float(_fl["dur"]) + 0.5 if a.get("dive", false) else 0.0
+			if a.get("slow", false):
+				_slow_t = float(_fl["dur"]) * 2.0 / maxf(0.3, tempo) + 0.25
 			var bl: Ag = a.get("blocker", null)
 			if bl != null:
-				_ovr[bl] = {"to": a["at"], "spd": SPRINT, "t": float(_fl["dur"]) + 0.3}
+				_ovr[bl] = {"to": at2, "spd": SPRINT, "t": float(_fl["dur"]) + 0.3}
 			return true
 		"fly":
 			# Bola solta (rebote, desvio, afastada): sem dono até alguém chegar.
@@ -583,6 +810,8 @@ func _start_action(a: Dictionary) -> bool:
 			return true
 		"run":
 			var r: Ag = a.get("ag", null)
+			if r != null and r.on and a.has("meet") and owner != null:
+				a["to"] = owner.pos.lerp(a["to"], float(a["meet"]))
 			if r != null and r.on:
 				_ovr[r] = {"to": _clamp_field(a["to"]), "spd": float(a.get("spd", SPRINT)), "t": float(a.get("t", 2.0))}
 			return true
@@ -592,10 +821,17 @@ func _start_action(a: Dictionary) -> bool:
 		"net":
 			net_hit = int(a["i"])
 			net_t = 1.0
+			last_net_t = _t
+			return true
+		"var":
+			ref_var = float(a.get("t", 2.4))
 			return true
 		"call":
 			var cb: Callable = a["f"]
 			cb.call()
+			return true
+		"mark":
+			_fire_mark(String(a["id"]))
 			return true
 	return false
 
@@ -704,19 +940,29 @@ func _update_agents(dt: float) -> void:
 				if mode == "goal":
 					spd = 3.0
 			_steer(a, tgt, spd, dt)
-	# Ninguém atravessa ninguém: afastamento leve entre jogadores próximos.
+	# Ninguém em cima de ninguém: o círculo do jogador na tela tem uns 4,6 m de diâmetro, então
+	# companheiros mantêm essa distância; adversários podem chegar mais perto (disputa de bola).
+	# Barreira, área no escanteio e comemoração juntam o time de propósito: aí vale o mínimo.
+	var tight := mode == "set" or mode == "goal"
 	for s in 2:
 		for a: Ag in agents[s]:
 			if not a.on or a.down > 0.0:
 				continue
 			for s2 in 2:
+				var min_d := 1.3 if tight else (SEP_MATE if s2 == s else SEP_RIVAL)
 				for b: Ag in agents[s2]:
 					if b == a or not b.on:
 						continue
 					var d := a.pos - b.pos
 					var dl := d.length()
-					if dl < 1.3 and dl > 0.001:
-						a.pos += d / dl * (1.3 - dl) * 0.25
+					if dl >= min_d:
+						continue
+					if dl < 0.001:
+						# Mesmo ponto: cada um sai para um lado (determinístico, pelo índice).
+						var ang := (a.idx * 2.4 + a.side * 1.3)
+						d = Vector2(cos(ang), sin(ang))
+						dl = 0.001
+					a.pos += d / dl * (min_d - dl) * 0.25
 
 
 func _steer(a: Ag, tgt: Vector2, spd: float, dt: float) -> void:
@@ -835,11 +1081,18 @@ func _target(a: Ag) -> Vector2:
 			gd = 0.018
 		var gl := 0.5 + (bl - 0.5) * (0.3 if bd < 0.3 else 0.12)
 		return own(s, gd, gl)
+	var tc: Dictionary = tac[s]
+	var t_line := int(tc.get("line", 1))
+	var t_width := int(tc.get("width", 1))
+	var t_press := int(tc.get("press", 1))
+	var t_ment := int(tc.get("ment", 2))
 	if not has:
-		if a == _press[s]:
+		# Pressão baixa: ninguém sai para caçar a bola lá no campo de ataque deles.
+		var chase := not (t_press == 0 and bd > 0.62)
+		if a == _press[s] and chase:
 			return ball + (_goal_center(s) - ball).normalized() * 1.4
-		if a == _cover[s]:
-			return ball + (_goal_center(s) - ball).normalized() * 7.0
+		if a == _cover[s] and chase:
+			return ball + (_goal_center(s) - ball).normalized() * (4.5 if t_press == 2 else 7.0)
 	var fy := clampf(a.fy, 0.08, 0.8)
 	var fx := a.fx
 	var d: float
@@ -849,8 +1102,10 @@ func _target(a: Ag) -> Vector2:
 		var back := clampf(bd - 0.4, 0.13, 0.55)
 		var span := 0.48 + 0.1 * clampf(bd, 0.0, 1.0)
 		d = back + (fy - 0.15) / 0.55 * span
-		var width := 1.2 if bd > 0.35 else 1.05
+		var width: float = (1.2 if bd > 0.35 else 1.05) * [0.84, 1.0, 1.14][clampi(t_width, 0, 2)]
 		l = 0.5 + (fx - 0.5) * width + (bl - 0.5) * 0.16
+		# Mentalidade: o time ofensivo sobe mais gente; o defensivo deixa a última linha atrás.
+		d += (t_ment - 2) * (0.03 if fy > 0.3 else 0.015)
 		# Atacantes jogam na linha do penúltimo defensor (sem ficar impedidos) e pedem profundidade.
 		var cap := maxf(1.0 - float(_line[1 - s]) - 0.008, bd)
 		if a.role in ["ST", "W", "AM"] and bd > 0.5:
@@ -865,9 +1120,10 @@ func _target(a: Ag) -> Vector2:
 				d = lerpf(d, depth(s, want), 0.35)
 				l = lerpf(l, lat(s, want), 0.35)
 	else:
-		var line := clampf(bd - 0.3, 0.06, 0.42)
-		d = line + (fy - 0.15) / 0.55 * 0.36
-		l = 0.5 + (fx - 0.5) * 0.76 + (bl - 0.5) * 0.36
+		# Linha alta adianta o bloco; pressão alta sobe junto quando a bola está no campo deles.
+		var line := clampf(bd - 0.3 + (t_line - 1) * 0.05 + (0.05 if t_press == 2 and bd > 0.5 else (-0.03 if t_press == 0 else 0.0)), 0.05, 0.46)
+		d = line + (fy - 0.15) / 0.55 * (0.32 if t_ment < 2 else 0.36)
+		l = 0.5 + (fx - 0.5) * 0.76 * [0.9, 1.0, 1.08][clampi(t_width, 0, 2)] + (bl - 0.5) * 0.36
 		# Marcação no último terço: os zagueiros ficam entre o atacante e o gol.
 		if bd < 0.3:
 			d = minf(d, 0.2 + fy * 0.25)
@@ -1102,12 +1358,14 @@ func _script_chance(info: Dictionary) -> void:
 		asg = null
 	var gk := keeper(dfn)
 	var own_goal := bool(info.get("own", false))
+	# Corredor da jogada (o mesmo que a simulação usou para medir o confronto pelos lados).
+	var ln := int(info.get("ln", -1))
 	if own_goal:
 		# Gol contra: o cruzamento desvia no defensor e entra.
 		var og := ag(dfn, int(info.get("sh", -1)))
 		sh = _forward(side)
-		_ensure_ball(side, asg if asg != null else _pick_wide(side, rng.randf() < 0.5))
-		var left := rng.randf() < 0.5
+		var left := ln == 0 if ln != 1 and ln >= 0 else rng.randf() < 0.5
+		_ensure_ball(side, asg if asg != null else _pick_wide(side, left))
 		_q({"k": "carry", "to": own(side, 0.86, 0.06 if left else 0.94), "spd": RUN, "max": 1.4, "est": 1.0})
 		var spot := own(side, 0.955, 0.5 + rng.randf_range(-0.08, 0.08))
 		if og != null:
@@ -1117,6 +1375,8 @@ func _script_chance(info: Dictionary) -> void:
 		_q({"k": "net", "i": 1 if side == 0 else 0, "est": 0.0})
 		return
 	var lat0 := rng.randf_range(0.3, 0.7)
+	if ln >= 0:
+		lat0 = clampf([0.24, 0.5, 0.76][clampi(ln, 0, 2)] + rng.randf_range(-0.08, 0.08), 0.15, 0.85)
 	match ct:
 		MatchSimulation.CH_THROUGH:
 			var giver := asg if asg != null else _pick_mid(side, true)
@@ -1128,12 +1388,19 @@ func _script_chance(info: Dictionary) -> void:
 			_q({"k": "carry", "to": own(side, 0.88, 0.5 + (lat(side, land) - 0.5) * 0.6), "spd": SPRINT, "max": 0.9, "est": 0.5})
 		MatchSimulation.CH_CROSS, MatchSimulation.CH_CORNER:
 			if ct == MatchSimulation.CH_CORNER:
-				_script_corner(side, asg, sh)
+				# Quem foi para a bandeira (evento do escanteio) bate; se o passe final é de
+				# outro, é escanteio curto: toca para ele, que cruza.
+				var taker := ag(side, int(info.get("ctk", -1)))
+				if taker == null or taker == sh:
+					taker = asg
+				_script_corner(side, taker, sh, asg if asg != taker else null)
 				_queue_shot(side, sh, gk, res, ct, info)
 				return
 			var left := rng.randf() < 0.5
-			var crosser := asg if asg != null else _pick_wide(side, left)
-			if crosser != null:
+			var crosser := asg if asg != null else _pick_wide(side, left if ln < 0 or ln == 1 else ln == 0)
+			if ln == 0 or ln == 2:
+				left = ln == 0 # o cruzamento sai do corredor em que o time levou vantagem
+			elif crosser != null:
 				left = crosser.fx < 0.5
 			_ensure_ball(side, crosser)
 			var wing := 0.06 if left else 0.94
@@ -1147,8 +1414,12 @@ func _script_chance(info: Dictionary) -> void:
 			_q({"k": "run", "ag": sh, "to": spot, "t": 1.6, "est": 0.0})
 			_q({"k": "pass", "to": sh, "at": spot, "loft": 0.0, "spd": 18.0, "est": 0.7})
 			_q({"k": "carry", "to": spot + Vector2(dir(side) * 2.5, 0), "spd": RUN, "max": 0.6, "est": 0.4})
+		MatchSimulation.CH_DRIBBLE, MatchSimulation.CH_COUNTER when String(info.get("fin", "")) == "solo":
+			_script_solo(side, sh)
+		MatchSimulation.CH_COUNTER when String(info.get("fin", "")) == "square" and asg != null:
+			_script_square(side, asg, sh, lat0)
 		MatchSimulation.CH_DRIBBLE:
-			var start := own(side, 0.68, 0.2 if rng.randf() < 0.5 else 0.8)
+			var start := own(side, 0.68, (0.2 if ln == 0 else (0.8 if ln == 2 else 0.4 + rng.randf_range(0.0, 0.2))) if ln >= 0 else (0.2 if rng.randf() < 0.5 else 0.8))
 			_q({"k": "run", "ag": sh, "to": start, "t": 1.4, "est": 0.0})
 			_ensure_ball(side, asg if asg != null else _pick_mid(side, false))
 			_q({"k": "pass", "to": sh, "at": start, "loft": 0.0, "spd": 18.0, "est": 0.7})
@@ -1180,7 +1451,11 @@ func _script_chance(info: Dictionary) -> void:
 			_q({"k": "fly", "at": loose, "loft": 1.2, "spd": 10.0, "to": sh, "est": 0.5})
 		MatchSimulation.CH_FREEKICK:
 			var at := own(side, rng.randf_range(0.73, 0.79), rng.randf_range(0.3, 0.7))
+			if _fk_spot != Vector2.INF:
+				at = _fk_spot # a cobrança sai de onde a falta foi marcada
+			_fk_spot = Vector2.INF
 			var wall := _wall_for(dfn, at, 4 if depth(side, at) > 0.75 else 3)
+			info["_wall"] = wall
 			_q({"k": "set", "sk": "fk_box", "side": side, "at": at, "taker": sh, "wall": wall, "dur": 1.6, "est": 1.6})
 			_q({"k": "give", "ag": sh, "est": 0.0})
 			_q({"k": "wait", "dur": 0.5, "est": 0.5})
@@ -1188,6 +1463,27 @@ func _script_chance(info: Dictionary) -> void:
 			var pa: Dictionary = info.get("pen", {})
 			var victim := ag(side, int(pa.get("victim", -1)))
 			var fouler := ag(dfn, int(pa.get("fouler", -1)))
+			var how := String(pa.get("how", ""))
+			if victim != null and how == "hand" and fouler != null:
+				# Mão na bola: o cruzamento bate no braço do defensor.
+				_ensure_ball(side, victim)
+				var wl := 0.1 if lat(side, victim.pos) < 0.5 else 0.9
+				_q({"k": "carry", "to": own(side, 0.8, wl), "spd": SPRINT, "max": 1.2, "est": 0.9})
+				var blk_at := own(side, 0.88, 0.5 + (wl - 0.5) * 0.4)
+				_q({"k": "run", "ag": fouler, "to": blk_at, "t": 1.0, "est": 0.0})
+				_q({"k": "pass", "to": null, "at": blk_at, "loft": 1.5, "spd": 22.0, "est": 0.6})
+				_q({"k": "whistle", "est": 0.0})
+				_q({"k": "stop", "est": 0.0})
+				_q({"k": "wait", "dur": 0.9, "est": 0.9})
+				victim = null
+			elif victim != null and how == "dribble":
+				# Arrancada na área: corte seco antes de ser derrubado.
+				_ensure_ball(side, victim)
+				var y0 := lat(side, victim.pos)
+				_q({"k": "carry", "to": own(side, 0.8, clampf(y0, 0.25, 0.75)), "spd": SPRINT, "max": 1.0, "est": 0.7})
+				if fouler != null:
+					_q({"k": "run", "ag": fouler, "to": own(side, 0.83, clampf(y0, 0.3, 0.7)), "t": 0.8, "est": 0.0})
+				_q({"k": "carry", "to": own(side, 0.84, clampf(y0 + (0.12 if y0 < 0.5 else -0.12), 0.3, 0.7)), "spd": SPRINT, "max": 0.5, "est": 0.4})
 			if victim != null:
 				_ensure_ball(side, victim)
 				_q({"k": "carry", "to": own(side, 0.88, 0.42 + rng.randf_range(0.0, 0.16)), "spd": SPRINT, "max": 1.2, "est": 0.9})
@@ -1197,6 +1493,7 @@ func _script_chance(info: Dictionary) -> void:
 				_q({"k": "whistle", "est": 0.0})
 				_q({"k": "stop", "est": 0.0})
 				_q({"k": "wait", "dur": 0.9, "est": 0.9})
+			_put_foul()
 			var spot2 := own(side, 1.0 - 11.0 / L, 0.5)
 			_q({"k": "set", "sk": "pen", "side": side, "at": spot2, "taker": sh, "dur": 2.0, "est": 2.0})
 			_q({"k": "give", "ag": sh, "est": 0.0})
@@ -1248,9 +1545,49 @@ func _queue_shot(side: int, sh: Ag, gk: Ag, res: String, ct: int, info: Dictiona
 		loft = 0.5
 		spd = 26.0
 	var y := cy + rng.randf_range(-3.0, 3.0)
+	var fin := String(info.get("fin", ""))
+	match fin:
+		"volley":
+			loft = 1.1
+			spd = 30.0
+		"bicycle":
+			loft = 1.4
+			spd = 26.0
+		"flick":
+			spd = 15.0
+			y = cy + (2.8 if rng.randf() < 0.5 else -2.8)
+		"screamer":
+			loft = 2.6
+			spd = 36.0
+			y = cy + (3.1 if rng.randf() < 0.5 else -3.1)
+		"curler":
+			curve = 0.55 * (1.0 if rng.randf() < 0.5 else -1.0)
+			spd = 24.0
+			y = cy + (2.9 if rng.randf() < 0.5 else -2.9)
+		"top_corner":
+			curve = 0.7 * (1.0 if rng.randf() < 0.5 else -1.0)
+			loft = 3.4
+			y = cy + (3.2 if rng.randf() < 0.5 else -3.2)
+		"under_wall":
+			loft = 0.0
+			spd = 20.0
+		"power":
+			loft = 1.6
+			spd = 34.0
+			curve = 0.0
+		"near", "tap_in":
+			loft = 0.2
+			spd = 14.0 if fin == "tap_in" else 24.0
+			y = cy + (2.9 if rng.randf() < 0.5 else -2.9) if fin == "near" else y
+		"sky":
+			loft = 9.0
+		"header_over":
+			loft = 3.2
 	var shot := {"k": "shot", "loft": loft, "spd": spd, "curve": curve, "gk": gk, "est": 0.6}
 	var gk_line := Vector2(gx - dr * 0.9, cy)
 	var after: Array = []
+	var pre: Array = [] # ações antes do chute (drible no goleiro, primeiro chute do rebote)
+	var sh_pos := own(side, 0.86, 0.5) # onde a finalização costuma sair (a jogada ainda vai acontecer)
 	match res:
 		"goal":
 			shot["at"] = Vector2(gx + dr * 1.3, y)
@@ -1259,15 +1596,82 @@ func _queue_shot(side: int, sh: Ag, gk: Ag, res: String, ct: int, info: Dictiona
 			var gy := cy - (y - cy) * 0.6 if wrong else cy + (y - cy) * 0.45
 			shot["gk_to"] = Vector2(gx - dr * 0.8, gy)
 			shot["dive"] = absf(gy - cy) > 1.2
+			match fin:
+				"chip":
+					# Goleiro sai do gol e a bola passa por cima dele.
+					shot["loft"] = 3.6
+					shot["spd"] = 15.0
+					shot["gk_rel"] = 0.55
+					shot["gk_spd"] = SPRINT
+					shot["dive"] = false
+				"round_gk":
+					if gk != null and sh != null:
+						pre.append({"k": "run", "ag": gk, "to": Vector2(gx, cy), "meet": 0.5, "spd": SPRINT, "t": 1.2, "est": 0.0})
+						pre.append({"k": "carry", "to": Vector2.ZERO, "rel": Vector2(dr * 2.0, 0), "spd": RUN, "max": 0.6, "est": 0.4})
+						pre.append({"k": "down", "ag": gk, "t": 1.2, "est": 0.0})
+						var side_y := 5.0 if rng.randf() < 0.5 else -5.0
+						pre.append({"k": "carry", "to": Vector2.ZERO, "rel": Vector2(dr * 3.0, side_y), "spd": SPRINT, "max": 0.6, "est": 0.5})
+						shot["spd"] = 13.0
+						shot["loft"] = 0.0
+						shot.erase("gk_to")
+				"rebound":
+					if gk != null:
+						# Primeiro chute defendido, a bola sobra e o segundo entra.
+						var at0 := Vector2(gx - dr * 1.0, cy + rng.randf_range(-2.0, 2.0))
+						var reb := Vector2(gx - dr * rng.randf_range(6.0, 9.0), cy + rng.randf_range(-6.0, 6.0))
+						pre.append({"k": "shot", "at": at0, "loft": 0.6, "spd": 26.0, "gk": gk, "gk_to": at0, "gk_spd": 11.0, "dive": true, "est": 0.6})
+						pre.append({"k": "fly", "at": reb, "loft": 0.8, "spd": 12.0, "to": sh, "est": 0.5})
+						shot["gk_to"] = Vector2(gx - dr * 0.8, cy - (y - cy))
+						shot["spd"] = 22.0
+				"deflected":
+					var dfd := _nearest(1 - side, sh_pos.lerp(Vector2(gx, cy), 0.3))
+					if dfd != null:
+						shot["at"] = Vector2(gx, cy)
+						shot["at_rel"] = 0.3
+						shot["blocker"] = dfd
+						shot["gk_to"] = Vector2(gx - dr * 0.8, cy + (y - cy))
+						after.append({"k": "fly", "at": Vector2(gx + dr * 1.3, cy - (y - cy) * 0.8), "loft": 1.2, "spd": 20.0, "est": 0.5})
+			if fin == "diving" or fin == "bicycle":
+				after.append({"k": "down", "ag": sh, "t": 1.1, "est": 0.0})
 			after.append({"k": "net", "i": 1 if side == 0 else 0, "est": 0.0})
 		"save", "pen_save":
-			var hold := rng.randf() < 0.5 and res != "pen_save"
+			var hold := rng.randf() < 0.5 and res != "pen_save" and fin in ["", "reflex"]
 			var at := Vector2(gx - dr * 1.0, y)
 			shot["at"] = at
 			shot["gk_to"] = at
 			shot["gk_spd"] = 11.0
 			shot["dive"] = absf(y - cy) > 1.2
-			if hold:
+			if fin == "one_on_one":
+				# Goleiro sai do gol e fecha o ângulo nos pés do atacante.
+				if gk != null:
+					pre.append({"k": "run", "ag": gk, "to": Vector2(gx, cy), "meet": 0.6, "spd": SPRINT, "t": 1.0, "est": 0.0})
+					pre.append({"k": "wait", "dur": 0.35, "est": 0.35})
+				shot["at"] = Vector2(gx, cy)
+				shot["at_rel"] = 0.6
+				shot["gk_rel"] = 0.6
+				shot["dive"] = true
+				shot["spd"] = 18.0
+			elif fin == "fingertip":
+				y = cy + (3.1 if y >= cy else -3.1)
+				at = Vector2(gx - dr * 0.8, y)
+				shot["at"] = at
+				shot["gk_to"] = at
+				shot["dive"] = true
+				shot["loft"] = maxf(float(shot["loft"]), 2.4)
+				after.append({"k": "fly", "at": Vector2(gx + dr * 2.5, y + signf(y - cy) * 2.0), "loft": 1.4, "spd": 10.0, "free": true, "est": 0.4})
+				hold = false
+			elif fin == "punch":
+				shot["dive"] = false
+				after.append({"k": "fly", "at": Vector2(gx - dr * rng.randf_range(20.0, 28.0), cy + rng.randf_range(-14.0, 14.0)), "loft": 5.0, "spd": 18.0, "est": 0.7})
+			elif fin == "double" and gk != null:
+				var reb2 := Vector2(gx - dr * rng.randf_range(6.0, 9.0), cy + rng.randf_range(-6.0, 6.0))
+				var at2b := Vector2(gx - dr * 1.0, cy - (y - cy) * 0.7)
+				after.append({"k": "fly", "at": reb2, "loft": 0.8, "spd": 12.0, "to": sh, "est": 0.5})
+				after.append({"k": "shot", "at": at2b, "loft": 0.5, "spd": 24.0, "gk": gk, "gk_to": at2b, "gk_spd": 13.0, "dive": true, "est": 0.5})
+				after.append({"k": "fly", "at": Vector2(gx + dr * 1.5, cy + signf(at2b.y - cy + 0.01) * rng.randf_range(6.0, 12.0)), "loft": 2.0, "spd": 14.0, "free": true, "est": 0.5})
+			if fin in ["fingertip", "punch", "double"]:
+				pass
+			elif hold:
 				after.append({"k": "give", "ag": gk, "est": 0.0})
 				after.append({"k": "poss", "side": 1 - side, "est": 0.0})
 				after.append({"k": "wait", "dur": 0.8, "est": 0.8})
@@ -1280,12 +1684,20 @@ func _queue_shot(side: int, sh: Ag, gk: Ag, res: String, ct: int, info: Dictiona
 				after.append({"k": "fly", "at": out, "loft": 2.0, "spd": 14.0, "free": true, "est": 0.5})
 		"post":
 			var py := cy + (GOAL_HW if y > cy else -GOAL_HW)
+			if fin == "bar":
+				py = cy + rng.randf_range(-2.0, 2.0)
+				shot["loft"] = 2.6
 			shot["at"] = Vector2(gx, py)
 			shot["gk_to"] = Vector2(gx - dr * 0.8, cy + (py - cy) * 0.6)
 			shot["dive"] = true
-			var reb := Vector2(gx - dr * rng.randf_range(9.0, 16.0), cy + rng.randf_range(-10.0, 10.0))
-			var clr := _nearest(1 - side, reb)
-			after.append({"k": "fly", "at": reb, "loft": 1.5, "spd": 16.0, "to": clr, "est": 0.6})
+			if fin == "inside_out":
+				# Bate numa trave, corre em cima da linha e sai pela outra.
+				after.append({"k": "fly", "at": Vector2(gx, cy - (py - cy) * 0.9), "loft": 0.0, "spd": 9.0, "free": true, "est": 0.7})
+				after.append({"k": "fly", "at": Vector2(gx - dr * 6.0, cy - (py - cy) * 2.2), "loft": 0.5, "spd": 10.0, "to": _nearest(1 - side, Vector2(gx - dr * 6.0, cy)), "est": 0.6})
+			else:
+				var reb := Vector2(gx - dr * rng.randf_range(9.0, 16.0), cy + rng.randf_range(-10.0, 10.0))
+				var clr := _nearest(1 - side, reb)
+				after.append({"k": "fly", "at": reb, "loft": 1.5 if fin != "bar" else 3.5, "spd": 16.0, "to": clr, "est": 0.6})
 		"block":
 			var dl := int(info.get("line", -1))
 			var blk: Ag = ag(1 - side, dl) if dl >= 0 else null
@@ -1302,25 +1714,66 @@ func _queue_shot(side: int, sh: Ag, gk: Ag, res: String, ct: int, info: Dictiona
 				var at3 := from.lerp(Vector2(gx, y), 0.18)
 				shot["at"] = at3
 				shot["blocker"] = blk
+				if fin == "last_ditch" and blk != null:
+					after.append({"k": "down", "ag": blk, "t": 1.0, "est": 0.0})
 			var away := Vector2(gx - dr * rng.randf_range(12.0, 22.0), cy + rng.randf_range(-18.0, 18.0))
 			after.append({"k": "fly", "at": away, "loft": 3.0, "spd": 18.0, "to": _nearest(1 - side, away), "est": 0.6})
+		_ when fin == "var_off":
+			# A bola entra e a rede balança... e o VAR anula (no placar, foi para fora).
+			shot["at"] = Vector2(gx + dr * 1.3, y)
+			shot["gk_to"] = Vector2(gx - dr * 0.8, cy + (y - cy) * 0.45)
+			shot["dive"] = absf(y - cy) > 1.2
+			after.append({"k": "net", "i": 1 if side == 0 else 0, "var": true, "est": 0.0})
+			after.append({"k": "wait", "dur": 0.9, "est": 0.9})
+			after.append({"k": "whistle", "est": 0.0})
+			after.append({"k": "var", "t": 2.6, "est": 0.0})
+			after.append({"k": "wait", "dur": 2.0, "est": 2.0})
+			_goal_kick(1 - side, after)
+		_ when fin == "wall" and ct == MatchSimulation.CH_FREEKICK:
+			var wall: Array = info.get("_wall", [])
+			shot["at"] = Vector2(gx, y)
+			shot["at_rel"] = 0.12
+			shot["loft"] = 1.2
+			if not wall.is_empty():
+				shot["blocker"] = wall[0]
+			var away2 := Vector2(gx - dr * rng.randf_range(18.0, 26.0), cy + rng.randf_range(-16.0, 16.0))
+			after.append({"k": "fly", "at": away2, "loft": 4.0, "spd": 16.0, "to": _nearest(1 - side, away2), "est": 0.6})
+		_ when fin == "fresh_air":
+			# Furou: a bola escapa mansa para fora e o atacante vai ao chão.
+			var fy := cy + (1.0 if rng.randf() < 0.5 else -1.0) * rng.randf_range(6.0, 10.0)
+			shot["at"] = Vector2(gx + dr * 3.0, fy)
+			shot["free"] = true
+			shot["spd"] = 7.0
+			shot["loft"] = 0.0
+			after.append({"k": "down", "ag": sh, "t": 0.9, "est": 0.0})
+			after.append({"k": "wait", "dur": 0.5, "est": 0.5})
+			_goal_kick(1 - side, after)
 		_:
 			# Para fora (ou por cima) → tiro de meta.
-			var over := rng.randf() < 0.35 and not header
+			var over := (rng.randf() < 0.35 and not header) or fin in ["sky", "header_over"]
 			var my := y if over else cy + (1.0 if rng.randf() < 0.5 else -1.0) * rng.randf_range(4.6, 11.0)
 			shot["at"] = Vector2(gx + dr * 3.0, my)
 			shot["free"] = true
 			if over:
-				shot["loft"] = 5.5
+				shot["loft"] = maxf(float(shot["loft"]), 5.5)
 			shot["gk_to"] = Vector2(gx - dr * 0.8, cy + clampf(my - cy, -2.5, 2.5))
 			after.append({"k": "wait", "dur": 0.7, "est": 0.7})
 			_goal_kick(1 - side, after)
 	if ct == MatchSimulation.CH_PENALTY:
 		shot["est"] = 0.8
+	if info.get("big", false):
+		# Chance clara: o chute sai em câmera lenta ao vivo.
+		shot["slow"] = true
+		shot["est"] = float(shot["est"]) + 0.5
+	for a in pre:
+		_q(a)
 	_q(shot)
+	if res != "goal":
+		_put_hit() # a narração do desfecho sai quando a bola chega
 	_q({"k": "endset", "est": 0.0})
 	for a in after:
 		_q(a)
+	_put_hit() # gol: depois de a rede balançar
 
 
 func _goal_kick(side: int, out: Array) -> void:
@@ -1339,9 +1792,11 @@ func _goal_kick(side: int, out: Array) -> void:
 		out.append({"k": "pass", "to": tgt, "loft": 0.0 if short else rng.randf_range(10.0, 16.0), "spd": 14.0 if short else 27.0, "est": 1.2})
 
 
-func _script_corner(side: int, taker: Ag, target: Ag) -> void:
+func _script_corner(side: int, taker: Ag, target: Ag, short_to: Ag = null) -> void:
 	var dfn := 1 - side
 	var near_left := rng.randf() < 0.5
+	if taker != null:
+		near_left = taker.fx < 0.5 if rng.randf() < 0.7 else not (taker.fx < 0.5)
 	var at := own(side, 1.0, 0.0 if near_left else 1.0)
 	at = Vector2(clampf(at.x, 0.3, L - 0.3), clampf(at.y, 0.3, W - 0.3))
 	if taker == null:
@@ -1350,6 +1805,16 @@ func _script_corner(side: int, taker: Ag, target: Ag) -> void:
 	_q({"k": "give", "ag": taker, "est": 0.0})
 	_q({"k": "wait", "dur": 0.3, "est": 0.3})
 	var aim := own(side, 0.91 + rng.randf_range(-0.02, 0.03), 0.5 + rng.randf_range(-0.1, 0.1))
+	if short_to != null and target != null:
+		# Escanteio curto: toque para o companheiro na ponta da área e cruzamento dele.
+		var meet := own(side, 0.9, 0.2 if near_left else 0.8)
+		_q({"k": "run", "ag": short_to, "to": meet, "t": 1.2, "est": 0.0})
+		_q({"k": "pass", "to": short_to, "at": meet, "loft": 0.0, "spd": 14.0, "est": 0.6})
+		_q({"k": "endset", "est": 0.0})
+		_q({"k": "carry", "to": Vector2.ZERO, "rel": Vector2(dir(side) * 2.0, 0), "spd": RUN, "max": 0.4, "est": 0.3})
+		_q({"k": "run", "ag": target, "to": aim, "t": 1.5, "est": 0.0})
+		_q({"k": "pass", "to": target, "at": aim, "loft": 4.0, "spd": 21.0, "curve": 0.3 if near_left else -0.3, "est": 0.8})
+		return
 	if target != null:
 		_q({"k": "run", "ag": target, "to": aim, "t": 1.5, "est": 0.0})
 		_q({"k": "pass", "to": target, "at": aim, "loft": 5.0, "spd": 21.0, "curve": 0.4 if near_left else -0.4, "est": 0.9})
@@ -1358,6 +1823,7 @@ func _script_corner(side: int, taker: Ag, target: Ag) -> void:
 		# Sem finalização: a zaga afasta.
 		var hd := _nearest(dfn, aim)
 		_q({"k": "pass", "to": hd, "at": aim, "loft": 5.0, "spd": 21.0, "curve": 0.4 if near_left else -0.4, "est": 0.9})
+		_put_hit()
 		_q({"k": "endset", "est": 0.0})
 		var away := own(side, rng.randf_range(0.55, 0.68), rng.randf_range(0.2, 0.8))
 		_q({"k": "fly", "at": away, "loft": 6.0, "spd": 20.0, "to": _nearest(side, away), "est": 0.8})
@@ -1373,20 +1839,25 @@ func _script_foul(info: Dictionary) -> void:
 	if victim == null:
 		return
 	_ensure_ball(side, victim)
-	var d0 := clampf(zone, 0.2, 0.88)
-	var spot := own(side, d0, clampf(lat(side, victim.pos), 0.1, 0.9))
+	var fk := bool(info.get("fk", false))
+	var d0 := clampf(zone, 0.2, 0.8 if fk else 0.88)
+	var spot := own(side, d0, clampf(lat(side, victim.pos), 0.24 if fk else 0.1, 0.76 if fk else 0.9))
 	_q({"k": "carry", "to": spot, "spd": RUN, "max": 1.2, "est": 0.8})
 	if fouler != null:
 		_q({"k": "run", "ag": fouler, "to": spot, "spd": SPRINT, "t": 0.8, "est": 0.0})
 	_q({"k": "wait", "dur": 0.25, "est": 0.25})
-	_q({"k": "down", "ag": victim, "t": 1.3, "est": 0.0})
+	_q({"k": "down", "ag": victim, "t": 1.3 if not bool(info.get("knock", false)) else 2.4, "est": 0.0})
 	_q({"k": "whistle", "est": 0.0})
 	_q({"k": "stop", "est": 0.0})
+	_put_hit()
 	_q({"k": "wait", "dur": 0.8, "est": 0.8})
 	var card := int(info.get("card", 0))
 	if card > 0 and fouler != null:
 		_q({"k": "card", "ag": fouler, "red": card == 2, "est": 0.0})
 		_q({"k": "wait", "dur": 1.2, "est": 1.2})
+	if fk:
+		_fk_spot = spot # a cobrança perigosa vem na próxima jogada, do mesmo lugar
+		return
 	if bool(info.get("danger", false)) and d0 > 0.62:
 		var wall := _wall_for(dfn, spot, 3 if depth(side, spot) > 0.72 else 2)
 		_q({"k": "set", "sk": "fk_box", "side": side, "at": spot, "taker": _pick_mid(side, true), "wall": wall, "dur": 1.4, "est": 1.4})
@@ -1411,6 +1882,7 @@ func _script_offside(info: Dictionary) -> void:
 	_q({"k": "flag", "i": 0 if side == 0 else 1, "est": 0.0})
 	_q({"k": "whistle", "est": 0.0})
 	_q({"k": "stop", "est": 0.0})
+	_put_hit()
 	_q({"k": "wait", "dur": 0.7, "est": 0.7})
 	var tk := _nearest(dfn, beyond)
 	_q({"k": "set", "sk": "fk", "side": dfn, "at": beyond, "taker": tk, "dur": 1.0, "est": 1.0})
@@ -1430,6 +1902,7 @@ func _script_skill(side: int, dr: Ag, mk: Ag) -> void:
 	_q({"k": "wait", "dur": 0.2, "est": 0.2})
 	var jink := 5.0 * (1.0 if rng.randf() < 0.5 else -1.0)
 	_q({"k": "carry", "to": p0 + Vector2(dir(side) * 1.5, jink), "spd": SPRINT, "max": 0.4, "est": 0.3})
+	_put_hit()
 	_q({"k": "carry", "to": p0 + Vector2(dir(side) * 9.0, jink * 0.6), "spd": SPRINT, "max": 0.9, "est": 0.6})
 
 
@@ -1444,6 +1917,7 @@ func _script_tackle(side: int, df: Ag, vic: Ag) -> void:
 	_q({"k": "wait", "dur": 0.35, "est": 0.35})
 	_q({"k": "steal", "ag": df, "est": 0.3})
 	_q({"k": "poss", "side": side, "est": 0.0})
+	_put_hit()
 
 
 func _script_keeper(side: int) -> void:
@@ -1456,6 +1930,259 @@ func _script_keeper(side: int) -> void:
 	_q({"k": "run", "ag": gk, "to": box, "spd": RUN, "t": 1.5, "est": 0.0})
 	_q({"k": "pass", "to": gk, "at": box, "loft": 4.5, "spd": 20.0, "est": 0.9})
 	_q({"k": "poss", "side": side, "est": 0.0})
+	_put_hit()
 	_q({"k": "wait", "dur": 0.9, "est": 0.9})
 	var out := _pick_wide(side, rng.randf() < 0.5)
 	_q({"k": "pass", "to": out, "loft": 1.2, "spd": 18.0, "est": 0.8})
+
+
+## Arrancada individual: recebe no próprio campo e passa por dois marcadores até a área.
+func _script_solo(side: int, sh: Ag) -> void:
+	if sh == null:
+		return
+	var dfn := 1 - side
+	var y0 := rng.randf_range(0.3, 0.7)
+	var start := own(side, 0.38, y0)
+	_q({"k": "run", "ag": sh, "to": start, "t": 1.2, "est": 0.0})
+	_ensure_ball(side, sh)
+	_q({"k": "carry", "to": start, "spd": RUN, "max": 1.0, "est": 0.6})
+	var legs := [[0.56, 0.12], [0.72, -0.14]]
+	var y := y0
+	for leg in legs:
+		var d := float(leg[0])
+		var p := own(side, d, clampf(y, 0.2, 0.8))
+		var mk := _nearest(dfn, p)
+		if mk != null:
+			_q({"k": "run", "ag": mk, "to": p, "spd": SPRINT, "t": 0.9, "est": 0.0})
+		_q({"k": "carry", "to": p, "spd": SPRINT, "max": 1.2, "est": 0.8})
+		y = clampf(y + float(leg[1]) * (1.0 if y < 0.5 else -1.0), 0.25, 0.75)
+		if mk != null:
+			_q({"k": "down", "ag": mk, "t": 0.7, "est": 0.0})
+		_q({"k": "carry", "to": own(side, d + 0.05, y), "spd": SPRINT, "max": 0.5, "est": 0.4})
+	_q({"k": "carry", "to": own(side, 0.86, 0.5 + (y - 0.5) * 0.5), "spd": SPRINT, "max": 1.0, "est": 0.7})
+
+
+## Contra-ataque de dois contra o goleiro: quem conduz rola para o lado e o outro empurra.
+func _script_square(side: int, carrier: Ag, finisher: Ag, lat0: float) -> void:
+	var thief := _nearest(side, ball)
+	if thief != null and owner != thief and owner != null and owner.side != side:
+		_q({"k": "steal", "ag": thief, "est": 0.4})
+		_q({"k": "poss", "side": side, "est": 0.0})
+	_ensure_ball(side, carrier)
+	var lane := 0.35 if lat0 < 0.5 else 0.65
+	_q({"k": "run", "ag": finisher, "to": own(side, 0.8, 1.0 - lane), "t": 2.0, "est": 0.0})
+	_q({"k": "carry", "to": own(side, 0.86, lane), "spd": SPRINT, "max": 1.8, "est": 1.2})
+	var gk := keeper(1 - side)
+	if gk != null:
+		_q({"k": "run", "ag": gk, "to": own(side, 0.93, lane), "spd": SPRINT, "t": 1.0, "est": 0.0})
+	var tap := own(side, 0.93, 1.0 - lane * 0.9 - 0.05)
+	_q({"k": "run", "ag": finisher, "to": tap, "t": 1.2, "est": 0.0})
+	_q({"k": "pass", "to": finisher, "at": tap, "loft": 0.0, "spd": 18.0, "est": 0.6})
+
+
+## Minuto sem lance de perigo, encenado como a narração conta: quem tem a bola (p), com quem
+## joga (p2) e quem corta (d, do outro time). pk = o tipo de jogada da narração (poss_*).
+func _script_poss(info: Dictionary) -> void:
+	var side := int(info.get("side", 0))
+	var dfn := 1 - side
+	var pk := String(info.get("pk", ""))
+	var p := ag(side, int(info.get("p", -1)))
+	var p2 := ag(side, int(info.get("p2", -1)))
+	var d := ag(dfn, int(info.get("d", -1)))
+	if p2 == p:
+		p2 = null
+	if p == null:
+		p = _pick_mid(side, false)
+	if p == null:
+		return
+	var dr := dir(side)
+	match pk:
+		"wing":
+			# Abre na ponta: o companheiro recebe colado na lateral e encara o marcador.
+			var mate := p2 if p2 != null else _pick_wide(side, rng.randf() < 0.5)
+			_ensure_ball(side, p)
+			if mate == null:
+				return
+			var left := mate.fx < 0.5
+			var dd := clampf(depth(side, p.pos) + rng.randf_range(0.08, 0.18), 0.4, 0.78)
+			var at := own(side, dd, 0.05 if left else 0.95)
+			_q({"k": "run", "ag": mate, "to": at, "t": 1.4, "est": 0.0})
+			_q({"k": "pass", "to": mate, "at": at, "loft": 0.0 if p.pos.distance_to(at) < 26.0 else 3.0, "spd": 19.0, "est": 0.9})
+			_put_hit()
+			var mk := _nearest(dfn, at)
+			if mk != null:
+				_q({"k": "run", "ag": mk, "to": at + Vector2(dr * 4.0, 0), "spd": RUN, "t": 1.0, "est": 0.0})
+			_q({"k": "carry", "to": own(side, minf(dd + 0.08, 0.82), 0.06 if left else 0.94), "spd": RUN, "max": 1.0, "est": 0.7})
+		"switch":
+			# Inverte: de um corredor para o outro, bola longa pelo alto.
+			_ensure_ball(side, p)
+			var from_left := lat(side, p.pos) < 0.5
+			var mate2 := p2
+			if mate2 == null or (mate2.fx < 0.5) == from_left:
+				mate2 = _pick_wide(side, not from_left)
+			if mate2 == null:
+				return
+			var dd2 := clampf(depth(side, p.pos) + rng.randf_range(0.0, 0.12), 0.35, 0.75)
+			var at2 := own(side, dd2, 0.9 if from_left else 0.1)
+			_q({"k": "carry", "to": own(side, dd2 - 0.04, 0.3 if from_left else 0.7), "spd": RUN, "max": 0.7, "est": 0.5})
+			_q({"k": "run", "ag": mate2, "to": at2, "t": 1.8, "est": 0.0})
+			_q({"k": "pass", "to": mate2, "at": at2, "loft": rng.randf_range(6.0, 9.0), "spd": 24.0, "curve": 0.3 if from_left else -0.3, "est": 1.2})
+			_put_hit()
+		"long":
+			# Ligação direta: bola alta para o centroavante, disputa no alto e a zaga ganha.
+			_ensure_ball(side, p)
+			var fw := _forward(side)
+			var spot := own(side, clampf(1.0 - float(_line[dfn]) - 0.02, 0.62, 0.84), rng.randf_range(0.35, 0.65))
+			if fw != null and fw != p:
+				_q({"k": "run", "ag": fw, "to": spot, "t": 1.6, "est": 0.0})
+			var cb := d if d != null else _nearest(dfn, spot)
+			if cb != null:
+				_q({"k": "run", "ag": cb, "to": spot + Vector2(dr * 1.0, 0), "spd": SPRINT, "t": 1.6, "est": 0.0})
+			_q({"k": "pass", "to": null, "at": spot, "loft": rng.randf_range(8.0, 12.0), "spd": 25.0, "est": 1.2})
+			_put_hit()
+			var away := spot - Vector2(dr * rng.randf_range(14.0, 22.0), rng.randf_range(-12.0, 12.0))
+			_q({"k": "fly", "at": _clamp_field(away), "loft": 3.0, "spd": 15.0, "to": _nearest(dfn, away), "est": 0.7})
+			_q({"k": "poss", "side": dfn, "est": 0.0})
+		"press":
+			# Marcação em cima: dois chegam juntos, ele se livra com um toque curto.
+			_ensure_ball(side, p)
+			var pr1 := _nearest(dfn, p.pos)
+			var pr2 := _nearest(dfn, p.pos, true, pr1)
+			for pr in [pr1, pr2]:
+				if pr != null:
+					_q({"k": "run", "ag": pr, "to": p.pos + Vector2(dr * 1.6, rng.randf_range(-1.5, 1.5)), "spd": SPRINT, "t": 0.9, "est": 0.0})
+			_q({"k": "wait", "dur": 0.55, "est": 0.55})
+			_put_hit()
+			var out := p2 if p2 != null else _nearest(side, p.pos, true, p)
+			if out != null:
+				_q({"k": "pass", "to": out, "loft": 0.0, "spd": 16.0, "est": 0.7})
+		"build", "goalkick":
+			if pk == "goalkick":
+				var gq: Array = []
+				_goal_kick(side, gq)
+				for a in gq:
+					_q(a)
+				_put_hit()
+				return
+			# Saída desde o goleiro: curto para o zagueiro, que acha o meio.
+			var gk := keeper(side)
+			if gk != null:
+				_ensure_ball(side, gk)
+			var cbk := _nearest(side, own(side, 0.1, 0.3 if rng.randf() < 0.5 else 0.7), true)
+			var first := p if p.role in ["CB", "FB", "WB", "DM"] else cbk
+			if first != null:
+				_q({"k": "pass", "to": first, "loft": 0.0, "spd": 14.0, "est": 0.7})
+			_put_hit()
+			var nxt := p if first != p else (p2 if p2 != null else _pick_mid(side, true))
+			if nxt != null and nxt != first:
+				_q({"k": "pass", "to": nxt, "loft": 0.0, "spd": 16.0, "est": 0.8})
+		"throw":
+			# Lateral: a bola sai, quem cobra vai até a linha e repõe para o companheiro.
+			var ty := 0.4 if ball.y < W * 0.5 else W - 0.4
+			var at3 := Vector2(clampf(ball.x, 8.0, L - 8.0), ty)
+			var taker := p if p.role in ["FB", "WB", "WM", "W"] else _nearest(side, at3)
+			_q({"k": "set", "sk": "throw", "side": side, "at": at3, "taker": taker, "dur": 1.1, "est": 1.1})
+			_q({"k": "give", "ag": taker, "est": 0.0})
+			_q({"k": "endset", "est": 0.0})
+			_put_hit()
+			var rc := p2 if p2 != null and p2 != taker else _nearest(side, at3 + Vector2(dr * 8.0, (8.0 if ty < 1.0 else -8.0)), true, taker)
+			if rc != null:
+				_q({"k": "pass", "to": rc, "loft": 1.4, "spd": 12.0, "est": 0.7})
+		"back":
+			# Sem espaço, volta a bola para a zaga (ou o goleiro).
+			_ensure_ball(side, p)
+			var bk := p2 if p2 != null and depth(side, p2.pos) < depth(side, p.pos) - 0.05 else _nearest(side, own(side, 0.12, 0.5), false, p)
+			if bk != null:
+				_q({"k": "pass", "to": bk, "loft": 0.0, "spd": 16.0, "est": 0.8})
+			_put_hit()
+		"tabela":
+			# Um-dois: toca, corre, recebe de volta no espaço.
+			_ensure_ball(side, p)
+			var mate3 := p2 if p2 != null else _nearest(side, p.pos + Vector2(dr * 8.0, 0), true, p)
+			if mate3 == null:
+				return
+			var go := own(side, clampf(depth(side, p.pos) + 0.12, 0.3, 0.84), clampf(lat(side, p.pos) + rng.randf_range(-0.08, 0.08), 0.1, 0.9))
+			_q({"k": "pass", "to": mate3, "loft": 0.0, "spd": 17.0, "est": 0.6})
+			_q({"k": "run", "ag": p, "to": go, "t": 1.4, "est": 0.0})
+			_q({"k": "pass", "to": p, "at": go, "loft": 0.0, "spd": 18.0, "est": 0.6})
+			_put_hit()
+		"carry":
+			# Conduz: ganha metros com a bola dominada.
+			_ensure_ball(side, p)
+			var to := own(side, clampf(depth(side, p.pos) + rng.randf_range(0.12, 0.2), 0.3, 0.8), clampf(lat(side, p.pos) + rng.randf_range(-0.06, 0.06), 0.08, 0.92))
+			_q({"k": "carry", "to": to, "spd": SPRINT, "max": 1.8, "est": 1.2})
+			_put_hit()
+		"hold":
+			# Pivô: recebe de costas, segura o marcador e espera o time subir.
+			var fw2 := p if p.role in ["ST", "AM", "W"] else _forward(side)
+			if fw2 == null:
+				return
+			var hold_at := own(side, clampf(1.0 - float(_line[dfn]) - 0.05, 0.55, 0.8), clampf(lat(side, fw2.pos), 0.3, 0.7))
+			_q({"k": "run", "ag": fw2, "to": hold_at, "t": 1.2, "est": 0.0})
+			_ensure_ball(side, fw2)
+			var mk2 := d if d != null else _nearest(dfn, hold_at)
+			if mk2 != null:
+				_q({"k": "run", "ag": mk2, "to": hold_at + Vector2(dr * 1.2, 0), "spd": SPRINT, "t": 1.8, "est": 0.0})
+			_q({"k": "carry", "to": Vector2.ZERO, "rel": Vector2(-dr * 1.0, 0), "spd": 2.0, "max": 0.9, "est": 0.9})
+			_put_hit()
+			var sup := p2 if p2 != null and p2 != fw2 else _pick_mid(side, true)
+			if sup != null and sup != fw2:
+				_q({"k": "pass", "to": sup, "loft": 0.0, "spd": 14.0, "est": 0.6})
+		"patience":
+			# Troca de passes curta, de um lado para o outro, sem pressa.
+			_ensure_ball(side, p)
+			var last := p
+			for i in 3:
+				var nb: Ag = null
+				var best := 1e9
+				var want := own(side, clampf(depth(side, last.pos) + rng.randf_range(-0.06, 0.04), 0.15, 0.7), clampf(lat(side, last.pos) + (0.22 if i % 2 == 0 else -0.12) * (1.0 if lat(side, p.pos) < 0.5 else -1.0), 0.1, 0.9))
+				for a: Ag in _on_list(side):
+					if a == last or a.gk:
+						continue
+					var dist := a.pos.distance_to(want)
+					if dist < best:
+						best = dist
+						nb = a
+				if nb == null:
+					break
+				_q({"k": "pass", "to": nb, "loft": 0.0, "spd": 15.0, "est": 0.65})
+				last = nb
+			_put_hit()
+		"intercept":
+			# Passe cortado: a bola sai do pé dele e o defensor fica com ela.
+			_ensure_ball(side, p)
+			var tgt := p2 if p2 != null else _pick_mid(side, false)
+			var cut := d if d != null else (_nearest(dfn, tgt.pos.lerp(p.pos, 0.4)) if tgt != null else null)
+			if cut == null:
+				return
+			var mid := (p.pos.lerp(tgt.pos, 0.55)) if tgt != null else p.pos + Vector2(dr * 12.0, 0)
+			_q({"k": "run", "ag": cut, "to": mid, "spd": SPRINT, "t": 1.0, "est": 0.0})
+			if tgt != null:
+				_q({"k": "run", "ag": tgt, "to": tgt.pos, "t": 0.6, "est": 0.0})
+			_q({"k": "wait", "dur": 0.3, "est": 0.3})
+			_q({"k": "pass", "to": cut, "at": mid, "loft": 0.0, "spd": 17.0, "est": 0.6})
+			_q({"k": "poss", "side": dfn, "est": 0.0})
+			_put_hit()
+		"cross_cut":
+			# Cruzamento da ponta e o defensor afasta de cabeça.
+			var crs := p if p.role in ["FB", "WB", "WM", "W"] else _pick_wide(side, rng.randf() < 0.5)
+			if crs == null:
+				return
+			_ensure_ball(side, crs)
+			var left2 := lat(side, crs.pos) < 0.5
+			_q({"k": "carry", "to": own(side, 0.82, 0.07 if left2 else 0.93), "spd": SPRINT, "max": 1.5, "est": 1.0})
+			var box := own(side, 0.91, 0.5 + rng.randf_range(-0.1, 0.1))
+			var hd := d if d != null else _nearest(dfn, box)
+			if hd != null:
+				_q({"k": "run", "ag": hd, "to": box, "t": 1.4, "est": 0.0})
+			var fw3 := _forward(side)
+			if fw3 != null:
+				_q({"k": "run", "ag": fw3, "to": box + Vector2(-dr * 1.5, 1.5), "t": 1.4, "est": 0.0})
+			_q({"k": "pass", "to": hd, "at": box, "loft": rng.randf_range(3.5, 5.0), "spd": 21.0, "curve": 0.3 if left2 else -0.3, "est": 0.9})
+			_put_hit()
+			var clear := box - Vector2(dr * rng.randf_range(18.0, 28.0), rng.randf_range(-14.0, 14.0))
+			_q({"k": "fly", "at": _clamp_field(clear), "loft": 5.0, "spd": 18.0, "to": _nearest(dfn, clear), "est": 0.8})
+			_q({"k": "poss", "side": dfn, "est": 0.0})
+		_:
+			# Leitura do jogo, torcida: a bola segue rolando na zona da posse.
+			ambient(side, zone)

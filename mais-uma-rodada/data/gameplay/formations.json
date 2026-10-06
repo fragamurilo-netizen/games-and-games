@@ -13,135 +13,24 @@
     "ST": {"def": 0.02, "mid": 0.15, "att": 1.0, "wide": 0.0}
   },
   "norms": {"def": 4.8, "mid": 4.2, "att": 3.8},
-  "order": ["4-4-2", "4-3-3", "4-2-3-1", "3-5-2", "3-4-3", "5-3-2", "4-1-4-1", "4-3-1-2"],
+  "order": ["4-4-2", "4-3-3", "4-2-3-1", "3-5-2", "3-4-3", "5-3-2", "4-1-4-1", "4-3-1-2", "4-2-2-2", "4-3-2-1", "4-4-1-1", "4-1-3-2", "4-2-4", "3-4-1-2", "3-4-2-1", "5-4-1", "5-2-3"],
   "formations": {
-    "4-4-2": {
-      "desc": "Duas linhas de quatro e dupla de ataque. Equilibrado e fácil de entender.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22},
-        {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17},
-        {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17},
-        {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22},
-        {"pos": "RM", "role": "WM", "x": 0.86, "y": 0.45},
-        {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.4},
-        {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.4},
-        {"pos": "LM", "role": "WM", "x": 0.14, "y": 0.45},
-        {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.64},
-        {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.64}
-      ]
-    },
-    "4-3-3": {
-      "desc": "Três atacantes abertos e meio-campo com volante. Pressiona e ocupa o campo todo.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22},
-        {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17},
-        {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17},
-        {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22},
-        {"pos": "CM", "role": "CM", "x": 0.7, "y": 0.42},
-        {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.35},
-        {"pos": "CM", "role": "CM", "x": 0.3, "y": 0.42},
-        {"pos": "RW", "role": "W", "x": 0.84, "y": 0.62},
-        {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.68},
-        {"pos": "LW", "role": "W", "x": 0.16, "y": 0.62}
-      ]
-    },
-    "4-2-3-1": {
-      "desc": "Dois volantes protegem a zaga; um meia e dois pontas alimentam o centroavante.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22},
-        {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17},
-        {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17},
-        {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22},
-        {"pos": "DM", "role": "DM", "x": 0.62, "y": 0.34},
-        {"pos": "DM", "role": "DM", "x": 0.38, "y": 0.34},
-        {"pos": "RW", "role": "W", "x": 0.84, "y": 0.55},
-        {"pos": "AM", "role": "AM", "x": 0.5, "y": 0.53},
-        {"pos": "LW", "role": "W", "x": 0.16, "y": 0.55},
-        {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7}
-      ]
-    },
-    "3-5-2": {
-      "desc": "Três zagueiros, alas incansáveis e meio-campo congestionado. Domina o centro.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "CB", "role": "CB", "x": 0.72, "y": 0.19},
-        {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.16},
-        {"pos": "CB", "role": "CB", "x": 0.28, "y": 0.19},
-        {"pos": "RB", "role": "WB", "x": 0.9, "y": 0.42},
-        {"pos": "CM", "role": "CM", "x": 0.66, "y": 0.42},
-        {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.35},
-        {"pos": "CM", "role": "CM", "x": 0.34, "y": 0.42},
-        {"pos": "LB", "role": "WB", "x": 0.1, "y": 0.42},
-        {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.66},
-        {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.66}
-      ]
-    },
-    "3-4-3": {
-      "desc": "Ofensivo e largo: três atacantes, meias pelos lados e só três atrás.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "CB", "role": "CB", "x": 0.72, "y": 0.19},
-        {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.16},
-        {"pos": "CB", "role": "CB", "x": 0.28, "y": 0.19},
-        {"pos": "RM", "role": "WM", "x": 0.88, "y": 0.44},
-        {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.4},
-        {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.4},
-        {"pos": "LM", "role": "WM", "x": 0.12, "y": 0.44},
-        {"pos": "RW", "role": "W", "x": 0.8, "y": 0.64},
-        {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7},
-        {"pos": "LW", "role": "W", "x": 0.2, "y": 0.64}
-      ]
-    },
-    "5-3-2": {
-      "desc": "Cinco atrás, bloco baixo e dois atacantes para o contra-ataque. Difícil de furar.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "RB", "role": "FB", "x": 0.9, "y": 0.26},
-        {"pos": "CB", "role": "CB", "x": 0.7, "y": 0.18},
-        {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.15},
-        {"pos": "CB", "role": "CB", "x": 0.3, "y": 0.18},
-        {"pos": "LB", "role": "FB", "x": 0.1, "y": 0.26},
-        {"pos": "CM", "role": "CM", "x": 0.7, "y": 0.42},
-        {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.36},
-        {"pos": "CM", "role": "CM", "x": 0.3, "y": 0.42},
-        {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.64},
-        {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.64}
-      ]
-    },
-    "4-1-4-1": {
-      "desc": "Um volante fixo, quatro meias e um centroavante solitário. Compacto e seguro.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22},
-        {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17},
-        {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17},
-        {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22},
-        {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.32},
-        {"pos": "RM", "role": "WM", "x": 0.86, "y": 0.48},
-        {"pos": "CM", "role": "CM", "x": 0.62, "y": 0.46},
-        {"pos": "CM", "role": "CM", "x": 0.38, "y": 0.46},
-        {"pos": "LM", "role": "WM", "x": 0.14, "y": 0.48},
-        {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.68}
-      ]
-    },
-    "4-3-1-2": {
-      "desc": "O losango clássico: meia camisa 10 atrás de dois atacantes. Estreito e criativo.",
-      "slots": [
-        {"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04},
-        {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22},
-        {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17},
-        {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17},
-        {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22},
-        {"pos": "CM", "role": "CM", "x": 0.68, "y": 0.4},
-        {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.34},
-        {"pos": "CM", "role": "CM", "x": 0.32, "y": 0.4},
-        {"pos": "AM", "role": "AM", "x": 0.5, "y": 0.53},
-        {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.67},
-        {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.67}
-      ]
-    }
+    "4-4-2": {"desc": "Duas linhas de quatro e dupla de ataque. Equilibrado e fácil de entender.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "RM", "role": "WM", "x": 0.86, "y": 0.45}, {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.4}, {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.4}, {"pos": "LM", "role": "WM", "x": 0.14, "y": 0.45}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.64}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.64}]},
+    "4-3-3": {"desc": "Três atacantes abertos e meio-campo com volante. Pressiona e ocupa o campo todo.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "CM", "role": "CM", "x": 0.7, "y": 0.42}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.35}, {"pos": "CM", "role": "CM", "x": 0.3, "y": 0.42}, {"pos": "RW", "role": "W", "x": 0.84, "y": 0.62}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.68}, {"pos": "LW", "role": "W", "x": 0.16, "y": 0.62}]},
+    "4-2-3-1": {"desc": "Dois volantes protegem a zaga; um meia e dois pontas alimentam o centroavante.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "DM", "role": "DM", "x": 0.62, "y": 0.34}, {"pos": "DM", "role": "DM", "x": 0.38, "y": 0.34}, {"pos": "RW", "role": "W", "x": 0.84, "y": 0.55}, {"pos": "AM", "role": "AM", "x": 0.5, "y": 0.53}, {"pos": "LW", "role": "W", "x": 0.16, "y": 0.55}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7}]},
+    "3-5-2": {"desc": "Três zagueiros, alas incansáveis e meio-campo congestionado. Domina o centro.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "CB", "role": "CB", "x": 0.72, "y": 0.19}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.16}, {"pos": "CB", "role": "CB", "x": 0.28, "y": 0.19}, {"pos": "RB", "role": "WB", "x": 0.9, "y": 0.42}, {"pos": "CM", "role": "CM", "x": 0.66, "y": 0.42}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.35}, {"pos": "CM", "role": "CM", "x": 0.34, "y": 0.42}, {"pos": "LB", "role": "WB", "x": 0.1, "y": 0.42}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.66}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.66}]},
+    "3-4-3": {"desc": "Ofensivo e largo: três atacantes, meias pelos lados e só três atrás.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "CB", "role": "CB", "x": 0.72, "y": 0.19}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.16}, {"pos": "CB", "role": "CB", "x": 0.28, "y": 0.19}, {"pos": "RM", "role": "WM", "x": 0.88, "y": 0.44}, {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.4}, {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.4}, {"pos": "LM", "role": "WM", "x": 0.12, "y": 0.44}, {"pos": "RW", "role": "W", "x": 0.8, "y": 0.64}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7}, {"pos": "LW", "role": "W", "x": 0.2, "y": 0.64}]},
+    "5-3-2": {"desc": "Cinco atrás, bloco baixo e dois atacantes para o contra-ataque. Difícil de furar.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.9, "y": 0.26}, {"pos": "CB", "role": "CB", "x": 0.7, "y": 0.18}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.15}, {"pos": "CB", "role": "CB", "x": 0.3, "y": 0.18}, {"pos": "LB", "role": "FB", "x": 0.1, "y": 0.26}, {"pos": "CM", "role": "CM", "x": 0.7, "y": 0.42}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.36}, {"pos": "CM", "role": "CM", "x": 0.3, "y": 0.42}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.64}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.64}]},
+    "4-1-4-1": {"desc": "Um volante fixo, quatro meias e um centroavante solitário. Compacto e seguro.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.32}, {"pos": "RM", "role": "WM", "x": 0.86, "y": 0.48}, {"pos": "CM", "role": "CM", "x": 0.62, "y": 0.46}, {"pos": "CM", "role": "CM", "x": 0.38, "y": 0.46}, {"pos": "LM", "role": "WM", "x": 0.14, "y": 0.48}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.68}]},
+    "4-3-1-2": {"desc": "O losango clássico: meia camisa 10 atrás de dois atacantes. Estreito e criativo.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "CM", "role": "CM", "x": 0.68, "y": 0.4}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.34}, {"pos": "CM", "role": "CM", "x": 0.32, "y": 0.4}, {"pos": "AM", "role": "AM", "x": 0.5, "y": 0.53}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.67}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.67}]},
+    "4-2-2-2": {"desc": "O quadrado mágico: dois volantes, dois meias por dentro e dupla de ataque. Laterais dão a largura.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "DM", "role": "DM", "x": 0.62, "y": 0.35}, {"pos": "DM", "role": "DM", "x": 0.38, "y": 0.35}, {"pos": "AM", "role": "AM", "x": 0.7, "y": 0.52}, {"pos": "AM", "role": "AM", "x": 0.3, "y": 0.52}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.68}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.68}]},
+    "4-3-2-1": {"desc": "Árvore de Natal: três no meio, dois meias nas meias-luas e um centroavante. Estreito e cheio de passe.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "CM", "role": "CM", "x": 0.68, "y": 0.4}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.34}, {"pos": "CM", "role": "CM", "x": 0.32, "y": 0.4}, {"pos": "AM", "role": "AM", "x": 0.64, "y": 0.55}, {"pos": "AM", "role": "AM", "x": 0.36, "y": 0.55}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7}]},
+    "4-4-1-1": {"desc": "Duas linhas de quatro e um segundo atacante solto atrás do centroavante. Compacto e fácil de sair no contragolpe.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "RM", "role": "WM", "x": 0.86, "y": 0.45}, {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.4}, {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.4}, {"pos": "LM", "role": "WM", "x": 0.14, "y": 0.45}, {"pos": "AM", "role": "AM", "x": 0.5, "y": 0.56}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7}]},
+    "4-2-4": {"desc": "Quatro na frente, dois no meio. O ataque total dos anos 60: abafa o rival, mas o meio-campo fica exposto.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.38}, {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.38}, {"pos": "RW", "role": "W", "x": 0.85, "y": 0.6}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.68}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.68}, {"pos": "LW", "role": "W", "x": 0.15, "y": 0.6}]},
+    "4-1-3-2": {"desc": "Um volante de proteção, linha de três meias e dupla de ataque. Muita gente chegando na área.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.86, "y": 0.22}, {"pos": "CB", "role": "CB", "x": 0.62, "y": 0.17}, {"pos": "CB", "role": "CB", "x": 0.38, "y": 0.17}, {"pos": "LB", "role": "FB", "x": 0.14, "y": 0.22}, {"pos": "DM", "role": "DM", "x": 0.5, "y": 0.34}, {"pos": "RM", "role": "WM", "x": 0.84, "y": 0.48}, {"pos": "CM", "role": "CM", "x": 0.5, "y": 0.46}, {"pos": "LM", "role": "WM", "x": 0.16, "y": 0.48}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.67}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.67}]},
+    "3-4-1-2": {"desc": "Três zagueiros, alas, dois no meio e um camisa 10 atrás da dupla de ataque.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "CB", "role": "CB", "x": 0.72, "y": 0.19}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.16}, {"pos": "CB", "role": "CB", "x": 0.28, "y": 0.19}, {"pos": "RB", "role": "WB", "x": 0.9, "y": 0.44}, {"pos": "CM", "role": "CM", "x": 0.62, "y": 0.4}, {"pos": "CM", "role": "CM", "x": 0.38, "y": 0.4}, {"pos": "LB", "role": "WB", "x": 0.1, "y": 0.44}, {"pos": "AM", "role": "AM", "x": 0.5, "y": 0.55}, {"pos": "ST", "role": "ST", "x": 0.6, "y": 0.68}, {"pos": "ST", "role": "ST", "x": 0.4, "y": 0.68}]},
+    "3-4-2-1": {"desc": "Três atrás, alas abertos e dois meias por dentro servindo o centroavante. Ocupa os corredores entre as linhas.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "CB", "role": "CB", "x": 0.72, "y": 0.19}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.16}, {"pos": "CB", "role": "CB", "x": 0.28, "y": 0.19}, {"pos": "RB", "role": "WB", "x": 0.9, "y": 0.44}, {"pos": "CM", "role": "CM", "x": 0.62, "y": 0.4}, {"pos": "CM", "role": "CM", "x": 0.38, "y": 0.4}, {"pos": "LB", "role": "WB", "x": 0.1, "y": 0.44}, {"pos": "AM", "role": "AM", "x": 0.64, "y": 0.56}, {"pos": "AM", "role": "AM", "x": 0.36, "y": 0.56}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.7}]},
+    "5-4-1": {"desc": "Cinco atrás e quatro no meio: o ônibus estacionado. Quase não sofre, quase não cria.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.9, "y": 0.27}, {"pos": "CB", "role": "CB", "x": 0.7, "y": 0.18}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.15}, {"pos": "CB", "role": "CB", "x": 0.3, "y": 0.18}, {"pos": "LB", "role": "FB", "x": 0.1, "y": 0.27}, {"pos": "RM", "role": "WM", "x": 0.86, "y": 0.47}, {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.42}, {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.42}, {"pos": "LM", "role": "WM", "x": 0.14, "y": 0.47}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.66}]},
+    "5-2-3": {"desc": "Linha de cinco com dois meio-campistas e três atacantes. Defende com muita gente e sai rápido pelos lados.", "slots": [{"pos": "GK", "role": "GK", "x": 0.5, "y": 0.04}, {"pos": "RB", "role": "FB", "x": 0.9, "y": 0.28}, {"pos": "CB", "role": "CB", "x": 0.7, "y": 0.18}, {"pos": "CB", "role": "CB", "x": 0.5, "y": 0.15}, {"pos": "CB", "role": "CB", "x": 0.3, "y": 0.18}, {"pos": "LB", "role": "FB", "x": 0.1, "y": 0.28}, {"pos": "CM", "role": "CM", "x": 0.6, "y": 0.4}, {"pos": "CM", "role": "CM", "x": 0.4, "y": 0.4}, {"pos": "RW", "role": "W", "x": 0.84, "y": 0.6}, {"pos": "ST", "role": "ST", "x": 0.5, "y": 0.68}, {"pos": "LW", "role": "W", "x": 0.16, "y": 0.6}]}
   }
 }

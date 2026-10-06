@@ -9,17 +9,22 @@ extends RefCounted
 ## no valor em caso de rebaixamento. Também controla a janela da pré-temporada (uniforme).
 
 ## [chave, nome, fatia da receita de patrocínio típica do clube]
+## Calibrado com contratos reais de 2025/26: o peito é ~15% da receita comercial (Real Madrid:
+## Emirates € 70 mi de ~€ 530 mi), a fornecedora ~12% (adidas € 120 mi no Real); no Brasil as casas
+## de aposta pagam bem mais pelo peito (MASTER_NATION: Flamengo e Betano ≈ R$ 268 mi por ano).
 const SLOTS: Array = [
-	["master", "Master (peito)", 0.45],
-	["fornecedor", "Material esportivo", 0.1],
-	["manga", "Manga", 0.1],
-	["costas", "Costas", 0.08],
-	["calcao", "Calção", 0.07],
+	["master", "Master (peito)", 0.15],
+	["fornecedor", "Material esportivo", 0.12],
+	["manga", "Manga", 0.04],
+	["costas", "Costas", 0.03],
+	["calcao", "Calção", 0.02],
 ]
+## Peso do peito por país (apostas no Brasil; na Espanha a regra tira as casas de aposta).
+const MASTER_NATION := {"BRA": 1.8, "ARG": 1.3, "MEX": 1.3, "POR": 1.2, "ENG": 1.1, "ESP": 0.75}
 ## Chave do logo de cada espaço no dicionário do uniforme (KitView).
 const KIT_KEYS := {"master": "sp", "fornecedor": "sup", "manga": "sp_m", "costas": "sp_c", "calcao": "sp_s"}
-## Placas, licenciamento e patrocínios menores: entram sempre, sem contrato.
-const BASE_SHARE := 0.2
+## Placas, licenciamento, parceiros, naming rights e hospitalidade: entram sempre, sem contrato.
+const BASE_SHARE := 0.64
 ## Cláusulas padrão (fração do valor anual): título, vaga continental e corte por rebaixamento.
 const TITLE_BONUS := 0.12
 const CONT_BONUS := 0.06
@@ -184,7 +189,7 @@ static func _make_offers(world: GameWorld, club: Club) -> Dictionary:
 		var slot: String = s[0]
 		if club.sponsors.has(slot):
 			continue
-		var base := target * float(s[2])
+		var base := target * float(s[2]) * (float(MASTER_NATION.get(club.nation, 1.0)) if slot == "master" else 1.0)
 		var pool: Array = []
 		var weights: Array = []
 		if slot == "fornecedor":

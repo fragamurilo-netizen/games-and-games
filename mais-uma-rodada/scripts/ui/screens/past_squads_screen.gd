@@ -8,7 +8,6 @@ var _year := 0
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Elencos anteriores"
 
 
@@ -31,39 +30,53 @@ func refresh() -> void:
 	UIKit.clear(c)
 	var years := seasons_of(w, club)
 	if years.is_empty():
-		c.add_child(UIKit.label("Ainda não há temporadas encerradas para mostrar.", "Muted", true))
+		c.add_child(UIKit.label("Nenhuma temporada encerrada.", "Muted", true))
 		return
 	if _year == 0 or not years.has(_year):
 		_year = years[0]
 	var i := years.find(_year)
 	# Seletor de temporada
+	max_content_width = 1600
 	var nav := UIKit.hbox(10)
-	var prev := UIKit.button("‹ %d" % years[i + 1] if i + 1 < years.size() else "‹", "GhostButton", func():
+	var prev := UIKit.button("%d" % years[i + 1] if i + 1 < years.size() else "", "GhostButton", func():
 		if i + 1 < years.size():
 			_year = years[i + 1]
 			refresh())
 	prev.disabled = i + 1 >= years.size()
 	nav.add_child(prev)
-	var yl := UIKit.label("Temporada %d" % _year, "Title")
+	var yl := UIKit.label("Temporada %d" % _year, "H2")
 	yl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	yl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nav.add_child(yl)
-	var nxt := UIKit.button("%d ›" % years[i - 1] if i > 0 else "›", "GhostButton", func():
+	var nxt := UIKit.button("%d" % years[i - 1] if i > 0 else "", "GhostButton", func():
 		if i > 0:
 			_year = years[i - 1]
 			refresh())
 	nxt.disabled = i <= 0
-	nav.add_child(nxt)
-	c.add_child(nav)
-	# Campanha e títulos daquele ano
-	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.crest(club, 64))
+	prev.icon = UIKit.icon("back")
+	nxt.icon = UIKit.icon("forward")
+	nxt.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	prev.custom_minimum_size.x = 150
+	nxt.custom_minimum_size.x = 150
+	# Campanha e títulos daquele ano, no fundo do clube, com o seletor de temporada embaixo.
+	var card := UIKit.card("Card", 10)
+	var top := UIKit.hbox(16)
+	top.add_child(UIKit.crest(club, 88))
+	var camp := UIKit.vbox(2)
+	camp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	camp.add_child(UIKit.eyebrow("Elenco de %d" % _year))
+	camp.add_child(UIKit.label(club.name.to_upper(), "H2", true))
 	for line in _campaign(w, club, _year):
-		card.add_child(UIKit.label(line, "H3", true))
-	c.add_child(UIKit.card_panel(card))
+		camp.add_child(UIKit.label(line, "Small", true))
+	top.add_child(camp)
+	card.add_child(top)
+	card.add_child(nav)
+	c.add_child(HeroBackdrop.attach(UIKit.card_panel(card), club, 0.1))
+	var start := c.get_child_count()
 	# Elenco
 	var rows := squad_of(w, club, _year)
-	var list := UIKit.card("Card", 6)
+	var list := UIKit.card("Card", 4)
+	list.add_child(UIKit.section_header("Elenco"))
 	var hdr := UIKit.hbox(8)
 	var hl := UIKit.label("Nº  Jogador", "Caps")
 	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -99,10 +112,16 @@ func refresh() -> void:
 		if top_a.is_empty() or int(r.get("a", 0)) > int(top_a.get("a", 0)):
 			top_a = r
 	if not top_g.is_empty() and int(top_g.get("g", 0)) > 0:
-		var hi := UIKit.card("Card", 4)
-		hi.add_child(UIKit.kv("Artilheiro", "%s (%d)" % [top_g["n"], int(top_g["g"])], UIColors.ACCENT))
-		hi.add_child(UIKit.kv("Mais jogos", "%s (%d)" % [top_a["n"], int(top_a["a"])]))
+		var hi := UIKit.card("Card", 8)
+		hi.add_child(UIKit.section_header("Destaques"))
+		var grid := GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override(&"h_separation", UITokens.S2)
+		grid.add_child(UIKit.stat_tile("%s · %d" % [top_g["n"], int(top_g["g"])], "Artilheiro", UIColors.ACCENT))
+		grid.add_child(UIKit.stat_tile("%s · %d" % [top_a["n"], int(top_a["a"])], "Mais jogos"))
+		hi.add_child(grid)
 		c.add_child(UIKit.card_panel(hi))
+	columnize(c, start)
 
 
 ## Temporadas com registro (mais recente primeiro).
@@ -161,3 +180,7 @@ static func _campaign(w: GameWorld, club: Club, y: int) -> Array:
 	if out.is_empty():
 		out.append("Temporada %d" % y)
 	return out
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)

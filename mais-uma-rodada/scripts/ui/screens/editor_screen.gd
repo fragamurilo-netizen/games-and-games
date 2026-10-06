@@ -23,9 +23,31 @@ var _search := ""
 var _pclub := -1 # clube aberto na lista de jogadores (-2 = sem clube)
 var _match := "" # nome original do jogador em edição (Editor geral)
 var _uid := "" # jogador criado no Editor geral
-var _ovr_badge: RatingBadge = null
+var _ovr_badge: StarsView = null
 var _ovr_label: Label = null
+var _kit_sel := "h" # uniforme aberto no editor de clube: h, a, t, g
 
+
+func _ready() -> void:
+	Store.changed.connect(_on_store_changed)
+	Store.message.connect(_on_store_message)
+
+
+func _exit_tree() -> void:
+	if Store.changed.is_connected(_on_store_changed):
+		Store.changed.disconnect(_on_store_changed)
+	if Store.message.is_connected(_on_store_message):
+		Store.message.disconnect(_on_store_message)
+
+
+## Editor na carreira comprado: o início ganha Clubes e Jogadores (sem mexer numa edição aberta).
+func _on_store_changed() -> void:
+	if _view == "home":
+		refresh.call_deferred()
+
+
+func _on_store_message(text: String) -> void:
+	UIManager.toast(text)
 
 func _init() -> void:
 	show_nav = false
@@ -34,6 +56,8 @@ func _init() -> void:
 
 func setup(p: Dictionary) -> void:
 	super.setup(p)
+	if String(p.get("tab", "")) == "mods":
+		_view = "mods"
 	if p.has("player"):
 		_view = "player"
 		_pid = int(p["player"])
@@ -86,33 +110,35 @@ func _go(view: String) -> void:
 # ---------------------------------------------------------------------------
 
 func _home(c: VBoxContainer) -> void:
-	screen_subtitle = "Personalize o seu futebol" if has_career() else "Mundo padrão das novas carreiras"
+	screen_subtitle = "" if has_career() else "Mundo padrão das novas carreiras"
 	var items: Array = []
-	var edit_ok := not has_career() or AppSettings.career_edit
+	var edit_ok := not has_career() or Store.career_edit_on()
 	if has_career():
-		items.append(["shield", "Meu clube", "Nome, cores, escudo e imagem do escudo", func():
+		items.append(["shield", "Meu clube", "", func():
 			_club = world().user_club()
 			_club_dirty.clear()
 			_go("club")])
 	if edit_ok:
-		items.append(["search", "Clubes", "Qualquer clube do mundo" + ("" if has_career() else ": nomes, cores e escudos"), func(): _go("pick_club")])
-		items.append(["shirt", "Jogadores", "Editar qualquer jogador ou criar jogadores reais: nome, posições, físico, atributos, foto e aparência" if not has_career() else "Nome, posição, físico, atributos, foto e personalidade", func(): _go("pick_player")])
-	items.append(["trophy", "Competições", "Nomes, logos e cores de ligas e copas", func(): _go("pick_comp")])
+		items.append(["search", "Clubes", "Qualquer clube do mundo" + ("" if has_career() else ": nomes, escudos, estádios e uniformes"), func(): _go("pick_club")])
+		items.append(["shirt", "Jogadores", "", func(): _go("pick_player")])
+	items.append(["trophy", "Competições", "Nomes, logos, cores e placar da TV", func(): _go("pick_comp")])
 	if has_career():
-		items.append(["star", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
-	items.append(["list", "Mods", "Instalar, ligar e criar mods; exportar suas personalizações", func(): _go("mods")])
+		items.append(["user", "Treinador", "Nome, rosto, nacionalidade e estilo", func(): UIManager.push("manager")])
+	items.append(["list", "Mods", "", func(): _go("mods")])
+	# Início do editor: um ladrilho grande por área (como o hub de criação de um jogo de esporte).
+	max_content_width = 1500
+	c.add_child(UIKit.eyebrow("O que você quer editar?"))
+	var tiles: Array = []
 	for it in items:
-		var row := UIKit.hbox(14)
-		row.add_child(UIKit.icon_rect(String(it[0]), 40, UIColors.ACCENT))
-		var col := UIKit.vbox(0)
-		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(it[1]), "H2"))
-		col.add_child(UIKit.label(String(it[2]), "Small", true))
-		row.add_child(col)
-		c.add_child(UIKit.tap_row(row, it[3], "Card"))
+		tiles.append(UIKit.action_tile(String(it[0]), String(it[1]), String(it[2]), it[3], tiles.is_empty()))
+	c.add_child(UIKit.tile_grid(tiles, 3 if UILayout.is_wide() else 2))
 	var info := UIKit.card("Card", 6)
-	if has_career() and not AppSettings.career_edit:
-		info.add_child(UIKit.label("Para editar jogadores e outros clubes nesta carreira, ligue \"Editar jogadores e clubes durante a carreira\" em Opções. No Editor do menu inicial você sempre edita o mundo padrão das novas carreiras.", "Small", true))
+	if has_career() and not Store.editor_unlocked():
+		info.add_child(UIKit.label("Editar jogadores e clubes durante a carreira", "H3", true))
+		info.add_child(UIKit.button("Editor na carreira · %s" % Store.price(Store.EDITOR), "PrimaryButton", func(): Store.buy(Store.EDITOR), "palette"))
+		c.add_child(UIKit.card_panel(info))
+	elif has_career() and not AppSettings.career_edit:
+		info.add_child(UIKit.label("Edição na carreira desligada em Opções.", "Small", true))
 		c.add_child(UIKit.card_panel(info))
 
 
@@ -154,14 +180,12 @@ func _club_picker(c: VBoxContainer) -> void:
 	var leagues: Array = DatabaseManager.leagues_of_nation(_nation)
 	if _league == "" or not leagues.has(_league):
 		_league = String(leagues[0])
-	var g := ButtonGroup.new()
-	var flow := UIKit.flow(8)
+	var litems: Array = []
 	for id in leagues:
-		var lid: String = id
-		flow.add_child(UIKit.chip(String(DatabaseManager.league_cfg(lid).get("short", lid)), lid == _league, g, func():
-			_league = lid
-			refresh()))
-	c.add_child(flow)
+		litems.append([String(id), String(DatabaseManager.league_cfg(String(id)).get("short", id))])
+	c.add_child(UIKit.scroll_tabs(litems, _league, func(k: String):
+		_league = k
+		refresh()))
 	var card := UIKit.card("Card", 4)
 	for cl: Club in _clubs_of(_league):
 		var row := UIKit.hbox(12)
@@ -176,7 +200,7 @@ func _club_picker(c: VBoxContainer) -> void:
 			_club_dirty.clear()
 			_go("club")))
 	if card.get_child_count() == 0:
-		card.add_child(UIKit.label("Esta liga só tem clubes gerados na hora da carreira: edite-os com uma carreira aberta.", "Muted", true))
+		card.add_child(UIKit.label("Clubes gerados só na carreira.", "Muted", true))
 	c.add_child(UIKit.card_panel(card))
 	c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 
@@ -225,7 +249,7 @@ func _club_editor(c: VBoxContainer) -> void:
 	c.add_child(UIKit.card_panel(head))
 	var names := UIKit.card("Card", 8)
 	names.add_child(UIKit.section("Identidade"))
-	for f in [["name", "Nome completo", cl.name, 40], ["short", "Nome curto", cl.short_name, 20], ["abbr", "Sigla", cl.abbr, 4], ["nick", "Apelido", cl.nickname, 24], ["city", "Cidade", cl.city, 28], ["stadium", "Estádio", cl.stadium, 36]]:
+	for f in [["name", "Nome completo", cl.name, 40], ["short", "Nome curto", cl.short_name, 20], ["abbr", "Sigla", cl.abbr, 4], ["nick", "Apelido", cl.nickname, 24], ["city", "Cidade", cl.city, 28], ["official", "Nome oficial (opcional)", cl.official, 80]]:
 		var key: String = f[0]
 		names.add_child(_field(String(f[1]), String(f[2]), int(f[3]), func(t: String):
 			_set_club_field(cl, key, t)))
@@ -244,6 +268,8 @@ func _club_editor(c: VBoxContainer) -> void:
 		refresh()))
 	c.add_child(UIKit.card_panel(colors))
 	c.add_child(_crest_card(cl))
+	c.add_child(_stadium_card(cl))
+	c.add_child(_kits_card(cl))
 	var f := footer()
 	UIKit.clear(f)
 	var btns := UIKit.hbox(10)
@@ -287,7 +313,7 @@ func _crest_card(cl: Club) -> Control:
 			refresh()))
 	card.add_child(row)
 	if img != "":
-		card.add_child(UIKit.label("Usando a imagem importada. As opções abaixo valem para o escudo desenhado.", "Small", true))
+		card.add_child(UIKit.label("Imagem do pacote." if img.begins_with("@") else "Usando a imagem importada.", "Small", true))
 	for group in [["shape", "Formato", ClubGenerator.CREST_SHAPES, ClubGenerator.CREST_SHAPE_NAMES],
 			["field", "Campo", ClubGenerator.CREST_FIELDS, ClubGenerator.CREST_FIELD_NAMES],
 			["symbol", "Símbolo", ClubGenerator.CREST_SYMBOLS, ClubGenerator.CREST_SYMBOL_NAMES],
@@ -304,6 +330,7 @@ func _crest_card(cl: Club) -> Control:
 			flow.add_child(UIKit.chip(String(labels[i]), current == val, g, func():
 				cl.crest[key] = val
 				cl.crest.erase("stripes")
+				cl.crest["edited"] = true
 				_mark("crest")
 				refresh()))
 		card.add_child(flow)
@@ -315,11 +342,13 @@ func _crest_card(cl: Club) -> Control:
 	var stars := int(cl.crest.get("stars", 0))
 	st.add_child(UIKit.button("−", "GhostButton", func():
 		cl.crest["stars"] = maxi(0, stars - 1)
+		cl.crest["edited"] = true
 		_mark("crest")
 		refresh()))
 	st.add_child(UIKit.label(str(stars), ""))
 	st.add_child(UIKit.button("+", "GhostButton", func():
 		cl.crest["stars"] = mini(7, stars + 1)
+		cl.crest["edited"] = true
 		_mark("crest")
 		refresh()))
 	card.add_child(st)
@@ -331,10 +360,131 @@ func _crest_card(cl: Club) -> Control:
 	cb.button_pressed = int(cl.crest.get("crown", 0)) > 0
 	cb.toggled.connect(func(on: bool):
 		cl.crest["crown"] = 1 if on else 0
+		cl.crest["edited"] = true
 		_mark("crest")
 		refresh())
 	cw.add_child(cb)
 	card.add_child(cw)
+	return UIKit.card_panel(card)
+
+
+## Estádio: nome, capacidade, tipo (muda o desenho e o corte do gramado na partida), foto e extras.
+func _stadium_card(cl: Club) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Estádio"))
+	var photo := DropIns.venue_photo(cl)
+	if photo != null:
+		var tr := TextureRect.new()
+		tr.texture = photo
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tr.custom_minimum_size = Vector2(0, 200)
+		tr.clip_contents = true
+		card.add_child(tr)
+	card.add_child(_field("Nome do estádio", cl.stadium, 48, func(t: String): _set_club_field(cl, "stadium", t)))
+	var cap_fmt := func(v: int) -> String: return Fmt.thousands(v * 500)
+	var cap_set := func(v: int) -> void:
+		cl.capacity = v * 500
+		_mark("cap")
+	card.add_child(_stepper("Capacidade", clampi(int(round(cl.capacity / 500.0)), 1, 400), 1, 400, cap_set, cap_fmt))
+	for extra in [["nick", "Apelido do estádio", 32], ["built", "Inauguração (ano)", 4]]:
+		var key: String = extra[0]
+		card.add_child(_field(String(extra[1]), str(cl.venue.get(key, "")), int(extra[2]), func(t: String):
+			var v := t.strip_edges()
+			if v == "":
+				cl.venue.erase(key)
+			else:
+				cl.venue[key] = int(v) if key == "built" and v.is_valid_int() else v
+			_mark("venue")))
+	card.add_child(UIKit.label("Tipo de estádio", "Small"))
+	var g := ButtonGroup.new()
+	var flow := UIKit.flow(8)
+	var cur := String(cl.venue.get("kind", ""))
+	for k in LicensedData.VENUE_KIND_NAMES:
+		var kind: String = k
+		flow.add_child(UIKit.chip(String(LicensedData.VENUE_KIND_NAMES[kind]), cur == kind, g, func():
+			if kind == "":
+				cl.venue.erase("kind")
+			else:
+				cl.venue["kind"] = kind
+			_mark("venue")
+			refresh()))
+	card.add_child(flow)
+	var row := UIKit.hbox(10)
+	row.add_child(UIKit.button("Importar foto", "", func():
+		ImagePicker.pick("stadium", func(file: String):
+			CustomAssets.remove(String(cl.venue.get("photo", "")))
+			cl.venue["photo"] = file
+			_mark("venue")
+			refresh()), "plus"))
+	if String(cl.venue.get("photo", "")) != "":
+		row.add_child(UIKit.button("Remover foto", "GhostButton", func():
+			CustomAssets.remove(String(cl.venue.get("photo", "")))
+			cl.venue.erase("photo")
+			_mark("venue")
+			refresh()))
+	card.add_child(row)
+	return UIKit.card_panel(card)
+
+
+## Uniforme em edição (o dicionário do próprio clube, para mudar na hora).
+func _kit_ref(cl: Club, which: String) -> Dictionary:
+	match which:
+		"a":
+			return cl.kit_away
+		"t":
+			cl.third_kit()
+			return cl.kit_third
+		"g":
+			cl.gk_kit()
+			return cl.kit_gk
+	return cl.kit_home
+
+
+## Uniformes: os quatro lado a lado; o escolhido ganha estampa e cores (o desenho completo, peça
+## por peça, fica na tela de uniformes da carreira).
+func _kits_card(cl: Club) -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Uniformes"))
+	var kits := UIKit.hbox(8)
+	for it in [["h", "Titular", cl.kit_home], ["a", "Reserva", cl.kit_away], ["t", "Terceiro", cl.third_kit()], ["g", "Goleiro", cl.gk_kit()]]:
+		var which: String = it[0]
+		var v := UIKit.vbox(4)
+		var kv := UIKit.kit(it[2], 84, 0, cl.crest)
+		kv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(kv)
+		var l := UIKit.label(String(it[1]), "Caps")
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		if which == _kit_sel:
+			l.add_theme_color_override(&"font_color", UIColors.ACCENT)
+		v.add_child(l)
+		var tap := UIKit.tap_row(v, func():
+			_kit_sel = which
+			refresh(), "RowPanel", which == _kit_sel)
+		tap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		kits.add_child(tap)
+	card.add_child(kits)
+	var k := _kit_ref(cl, _kit_sel)
+	card.add_child(UIKit.label("Estampa", "Small"))
+	var ob := OptionButton.new()
+	for i in KitView.PATTERNS.size():
+		ob.add_item(String(KitView.PATTERNS[i][1]), i)
+		if String(KitView.PATTERNS[i][0]) == String(k.get("pattern", "plain")):
+			ob.select(i)
+	ob.item_selected.connect(func(i: int):
+		k["pattern"] = String(KitView.PATTERNS[i][0])
+		_mark("kits")
+		refresh())
+	card.add_child(ob)
+	for part in [["c1", "Camisa"], ["c2", "Detalhes"], ["shorts", "Calção"], ["socks", "Meiões"]]:
+		var field: String = part[0]
+		card.add_child(UIKit.label(String(part[1]), "Small"))
+		card.add_child(_swatches(String(k.get(field, k.get("c1", "#FFFFFF"))), func(hex: String):
+			k[field] = hex
+			if field == "c2" and not k.has("c3"):
+				k["c3"] = hex
+			_mark("kits")
+			refresh()))
 	return UIKit.card_panel(card)
 
 
@@ -350,12 +500,15 @@ func _set_club_field(cl: Club, key: String, t: String) -> void:
 		"abbr":
 			cl.abbr = v.to_upper()
 			cl.crest["initials"] = v.to_upper().substr(0, 3)
+			cl.crest["edited"] = true
 		"nick":
 			cl.nickname = v
 		"city":
 			cl.city = v
 		"stadium":
 			cl.stadium = v
+		"official":
+			cl.official = v
 	_mark(key)
 
 
@@ -381,6 +534,14 @@ func _store_partial(cl: Club) -> void:
 				cur["city"] = cl.city
 			"stadium":
 				cur["stadium"] = cl.stadium
+			"official":
+				cur["official"] = cl.official
+			"cap":
+				cur["cap"] = cl.capacity
+			"venue":
+				cur["venue"] = cl.venue.duplicate(true)
+			"kits":
+				cur["kits"] = Overrides.kits_of(cl)
 			"c1":
 				cur["c1"] = cl.color1
 				cur["c2"] = cl.color2
@@ -441,7 +602,7 @@ func _player_picker(c: VBoxContainer) -> void:
 	if w == null:
 		var wait := UIKit.card("Card", 8)
 		wait.add_child(UIKit.label("Carregando o mundo padrão…", "H2"))
-		wait.add_child(UIKit.label("Uns segundos: o editor monta os 692 clubes com os elencos que as novas carreiras vão receber, já com as suas personalizações.", "Small", true))
+		wait.add_child(UIKit.label("Montando os clubes…", "Small", true))
 		c.add_child(UIKit.card_panel(wait))
 		c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 		GameManager.ensure_preview_world(func():
@@ -533,7 +694,7 @@ func _player_picker(c: VBoxContainer) -> void:
 				list.append_array(YouthManager.academy(w))
 			c.add_child(_player_list_card(w, club.name, list, club))
 		else:
-			c.add_child(UIKit.label("Toque num clube para ver o elenco.", "Muted", true))
+			c.add_child(UIKit.label("Escolha um clube.", "Muted", true))
 	c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 
 
@@ -558,7 +719,7 @@ func _player_list_card(w: GameWorld, title: String, list: Array, club: Club) -> 
 		row.add_child(col)
 		if not has_career() and PlayerMods.key_of(w, p) != "":
 			row.add_child(UIKit.pill("EDITADO", UIColors.BLUE, 14))
-		row.add_child(UIKit.badge(p.overall, 52, 38, 22))
+		row.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
 		card.add_child(UIKit.tap_row(row, func(): _open_player(pid)))
 	if list.is_empty():
@@ -624,7 +785,7 @@ func _player_editor(c: VBoxContainer) -> void:
 	col.add_child(UIKit.label(p.full_name(), "Title", true))
 	col.add_child(UIKit.label("%s · %d anos · %s" % [Pos.name_of(p.position), p.age(w.year), club.short_name if club != null else "Sem clube"], "Small", true))
 	var ob := UIKit.hbox(10)
-	_ovr_badge = UIKit.badge(p.overall)
+	_ovr_badge = UIKit.player_stars(w,p,18)
 	ob.add_child(_ovr_badge)
 	_ovr_label = UIKit.label("", "Small")
 	ob.add_child(_ovr_label)
@@ -644,7 +805,7 @@ func _player_editor(c: VBoxContainer) -> void:
 			refresh()))
 	head.add_child(prow)
 	if not has_career():
-		head.add_child(UIKit.label("Editor geral: salvar grava este jogador no mundo padrão das próximas carreiras (e entra em \"Exportar como mod\").", "Small", true))
+		head.add_child(UIKit.label("Mundo padrão das novas carreiras.", "Small", true))
 	c.add_child(UIKit.card_panel(head))
 	_update_ovr_label(p)
 	# Identidade
@@ -667,7 +828,11 @@ func _player_editor(c: VBoxContainer) -> void:
 		if String(codes[i]) == p.nationality:
 			nob.select(i)
 	nob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	nob.item_selected.connect(func(i: int): p.nationality = String(codes[i]))
+	nob.item_selected.connect(func(i: int):
+		NationalityManager.ensure(w, p)
+		p.nationality = String(codes[i])
+		# Editing citizenship does not rewrite birthplace or the international record.
+		p.origin["passports"][p.nationality] = {"since": p.birth_year, "basis":"parent", "eligible":true})
 	nat_row.add_child(nob)
 	names.add_child(nat_row)
 	names.add_child(_stepper("Ano de nascimento", p.birth_year, w.year - 45, w.year - 15, func(v: int): p.birth_year = v,
@@ -726,15 +891,18 @@ func _player_editor(c: VBoxContainer) -> void:
 	c.add_child(UIKit.card_panel(fc))
 	# Nível
 	var lc := UIKit.card("Card", 8)
-	lc.add_child(UIKit.section("Nível"))
-	lc.add_child(_stepper("Overall (ajusta todos os atributos juntos)", p.overall, 30, 99, func(v: int):
+	lc.add_child(UIKit.section("Dados internos"))
+	lc.add_child(_stepper("CA — ajusta os atributos", p.overall, 30, 99, func(v: int):
 		PlayerMods.scale_to(p, v)
 		p.potential = maxi(p.potential, p.overall)
 		refresh.call_deferred()))
-	lc.add_child(_stepper("Potencial (oculto no jogo)", p.potential, 30, 99, func(v: int):
+	lc.add_child(_stepper("PA — limite de desenvolvimento", p.potential, 30, 99, func(v: int):
 		p.potential = maxi(v, p.overall)
 		_update_ovr_label(p)))
-	c.add_child(UIKit.card_panel(lc))
+	var hidden := UIKit.card_panel(lc)
+	hidden.visible = false
+	c.add_child(UIKit.button("Mostrar CA e PA (editor)", "GhostButton", func(): hidden.visible = not hidden.visible))
+	c.add_child(hidden)
 	c.add_child(_attrs_card(p))
 	c.add_child(_traits_card(p))
 	c.add_child(_look_card(p))
@@ -790,10 +958,13 @@ func _remove_player_dialog(w: GameWorld, p: Player, club: Club) -> void:
 
 
 func _update_ovr_label(p: Player) -> void:
+	PlayerAssessment.invalidate()
 	if _ovr_badge != null and is_instance_valid(_ovr_badge):
-		_ovr_badge.value = p.overall
+		var report := PlayerAssessment.report(world() if has_career() else GameManager.preview_world,p)
+		_ovr_badge.stars = report["low"]
+		_ovr_badge.upper_stars = report["high"]
 	if _ovr_label != null and is_instance_valid(_ovr_label):
-		_ovr_label.text = "overall · potencial %d" % p.potential
+		_ovr_label.text = "Avaliação da comissão"
 
 
 ## Linha com − valor +. `on_change(v)` aplica a mudança; `fmt(v)` devolve o texto mostrado.
@@ -904,7 +1075,7 @@ func _attrs_card(p: Player) -> Control:
 	if p.position == Pos.GK:
 		groups.push_front(["Goleiro", [Attr.GOL]])
 	for grp in groups:
-		card.add_child(UIKit.label(String(grp[0]).to_upper(), "Caps"))
+		card.add_child(UIKit.label(String(grp[0]), "Caps"))
 		for ai_v in grp[1]:
 			var ai: int = ai_v
 			var row := UIKit.hbox(10)
@@ -1054,7 +1225,6 @@ func _comp_editor(c: VBoxContainer) -> void:
 			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], "", colors_v)
 			refresh()))
 	card.add_child(row)
-	card.add_child(UIKit.label("Vale para todas as carreiras.", "Small", true))
 	c.add_child(UIKit.card_panel(card))
 	var colors := UIKit.card("Card", 8)
 	colors.add_child(UIKit.section("Cores"))
@@ -1066,8 +1236,8 @@ func _comp_editor(c: VBoxContainer) -> void:
 			colors_v[idx] = hex
 			Overrides.store_comp(_comp_kind, _comp_id, name_v[0], short_v[0], logo_v[0], colors_v)
 			refresh()))
-	colors.add_child(UIKit.label("As cores aparecem no selo da competição, nas tabelas e na próxima partida.", "Small", true))
 	c.add_child(UIKit.card_panel(colors))
+	c.add_child(_scoreboard_card())
 	var f := footer()
 	UIKit.clear(f)
 	f.add_child(UIKit.button("SALVAR", "PrimaryButton", func():
@@ -1079,6 +1249,48 @@ func _comp_editor(c: VBoxContainer) -> void:
 		_go("pick_comp"), "check"))
 
 
+## Placar da transmissão: desenho e cores (vale na partida, na chamada do jogo e no painel).
+func _scoreboard_card() -> Control:
+	var card := UIKit.card("Card", 8)
+	card.add_child(UIKit.section("Placar da TV"))
+	var own := ScoreboardTheme.comp_style(_comp_id).duplicate(true)
+	var th := ScoreboardTheme.for_competition(_w(), _comp_id)
+	card.add_child(ScoreboardView.preview(_w(), _comp_id))
+	card.add_child(UIKit.label("Desenho", "Small"))
+	var g := ButtonGroup.new()
+	var flow := UIKit.flow(8)
+	var cur := String(own.get("layout", ""))
+	var opts: Array = [""]
+	opts.append_array(ScoreboardTheme.LAYOUTS)
+	for l in opts:
+		var layout: String = l
+		var caption := "Automático (%s)" % ScoreboardTheme.layout_name(ScoreboardTheme.layout_for(_comp_id, false)) if layout == "" else ScoreboardTheme.layout_name(layout)
+		flow.add_child(UIKit.chip(caption, cur == layout, g, func():
+			if layout == "":
+				own.erase("layout")
+			else:
+				own["layout"] = layout
+			Overrides.store_scoreboard(_comp_kind, _comp_id, own)
+			refresh()))
+	card.add_child(flow)
+	var bg: Color = th["bg"]
+	var acc: Color = th["accent"]
+	for i in 2:
+		var idx: int = i
+		card.add_child(UIKit.label("Fundo" if idx == 0 else "Destaque", "Small"))
+		card.add_child(_swatches("#" + (bg if idx == 0 else acc).to_html(false), func(hex: String):
+			var b := Color(hex) if idx == 0 else bg
+			var a := Color(hex) if idx == 1 else acc
+			own["colors"] = ["#" + b.to_html(false), "#" + b.lightened(0.1).to_html(false), "#" + a.to_html(false)]
+			Overrides.store_scoreboard(_comp_kind, _comp_id, own)
+			refresh()))
+	if not own.is_empty():
+		card.add_child(UIKit.button("Voltar ao placar original", "GhostButton", func():
+			Overrides.store_scoreboard(_comp_kind, _comp_id, {})
+			refresh()))
+	return UIKit.card_panel(card)
+
+
 # ---------------------------------------------------------------------------
 # Mods
 # ---------------------------------------------------------------------------
@@ -1088,20 +1300,18 @@ func _mods_view(c: VBoxContainer) -> void:
 	if not Store.unlocked():
 		var lk := UIKit.card("CardHighlight", 10)
 		lk.add_child(UIKit.label("Mods fazem parte da Carreira Completa", "Title", true))
-		lk.add_child(UIKit.label("Instale mods, ligue e desligue e exporte suas personalizações depois de desbloquear a Carreira Completa (pagamento único de %s)." % Store.price(), "Muted", true))
+		lk.add_child(UIKit.label("Requer a Carreira Completa (%s)." % Store.price(), "Muted", true))
 		lk.add_child(UIKit.button("VER A CARREIRA COMPLETA", "PrimaryButton", func(): UIManager.push("paywall", {"reason": "mods"}), "star"))
 		c.add_child(UIKit.card_panel(lk))
 		return
-	var intro := UIKit.card("Card", 6)
-	intro.add_child(UIKit.label("Mods mudam os dados do jogo (clubes, ligas, copas, regras, textos) e colocam jogadores reais nos elencos. Os ligados valem na ordem da lista: o de baixo ganha.", "Small", true))
-	if has_career():
-		intro.add_child(UIKit.label("Com carreira aberta, vale para as próximas.", "Small", true))
-	c.add_child(UIKit.card_panel(intro))
 	var list := Mods.list()
+	c.add_child(_licensing_card(list))
 	var card := UIKit.card("Card", 8)
-	card.add_child(UIKit.section("Instalados"))
+	card.add_child(UIKit.section("Pacotes"))
 	if list.is_empty():
-		card.add_child(UIKit.label("Nenhum mod instalado ainda.", "Muted", true))
+		card.add_child(UIKit.label("Nenhum.", "Muted", true))
+	else:
+		card.add_child(UIKit.label("O de baixo ganha.", "Small", true))
 	for m in list:
 		var id := String(m["id"])
 		var row := UIKit.hbox(10)
@@ -1109,10 +1319,30 @@ func _mods_view(c: VBoxContainer) -> void:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(m["name"]), "H3", true))
 		var by := String(m["author"])
-		col.add_child(UIKit.label(("por %s" % by if by != "" else "") + (" · v%s" % m["version"] if String(m["version"]) != "" else ""), "Small"))
-		if String(m["description"]) != "":
-			col.add_child(UIKit.label(String(m["description"]), "Small", true))
+		var meta_parts: Array = []
+		if by != "":
+			meta_parts.append("por %s" % by)
+		if String(m["version"]) != "":
+			meta_parts.append("v%s" % m["version"])
+		var meta := " · ".join(meta_parts)
+		if meta != "":
+			col.add_child(UIKit.label(meta, "Small"))
+		var cnt := DropIns.counts(id)
+		if not cnt.is_empty():
+			var parts: Array = []
+			for kind in DropIns.KINDS:
+				if cnt.has(kind):
+					parts.append("%s %d" % [DropIns.KIND_NAMES[kind], cnt[kind]])
+			col.add_child(UIKit.label(" · ".join(parts), "Small", true))
+			if bool(m["enabled"]):
+				var miss := _misses(DropIns.report(id, _report_world()))
+				if miss > 0:
+					col.add_child(UIKit.colored("%d sem dono" % miss, UIColors.RED, "Small"))
+		for pr in Mods.problems(id):
+			col.add_child(UIKit.colored("%s: %s" % [pr["file"], pr["msg"]], UIColors.RED, "Small", true))
 		row.add_child(col)
+		if not cnt.is_empty():
+			row.add_child(UIKit.icon_button("info", func(): _pack_files_dialog(id, String(m["name"])), "Arquivos"))
 		if bool(m["enabled"]):
 			row.add_child(UIKit.icon_button("up", func():
 				Mods.move(id, -1)
@@ -1127,44 +1357,174 @@ func _mods_view(c: VBoxContainer) -> void:
 			_mods_changed())
 		row.add_child(tg)
 		row.add_child(UIKit.icon_button("close", func():
-			UIManager.confirm("Apagar o mod?", "\"%s\" sai do aparelho. Carreiras já começadas continuam como estão." % String(m["name"]), "Apagar", func():
+			UIManager.confirm("Apagar \"%s\"?" % String(m["name"]), "Carreiras começadas continuam como estão.", "Apagar", func():
 				Mods.remove(id)
 				_mods_changed()), "Apagar"))
 		card.add_child(row)
 	c.add_child(UIKit.card_panel(card))
 	var act := UIKit.card("Card", 8)
-	act.add_child(UIKit.section("Criar e compartilhar"))
-	act.add_child(UIKit.button("Instalar mod (.zip ou .json)", "", func(): _pick_mod_file(), "plus"))
-	act.add_child(UIKit.button("Exportar minhas personalizações como mod", "", func(): _export_mod_dialog(), "save"))
+	act.add_child(UIKit.section("Minhas edições"))
+	act.add_child(UIKit.button("Exportar como mod", "", func(): _export_mod_dialog(), "save"))
+	act.add_child(UIKit.button("Exportar como pasta", "", func(): _export_folder_dialog(), "list"))
 	act.add_child(UIKit.button("Como criar um mod", "GhostButton", func(): _mods_help(), "info"))
-	var path := ProjectSettings.globalize_path(Mods.DIR)
-	act.add_child(UIKit.label("Pasta dos mods: %s" % path, "Small", true))
-	if OS.has_feature("pc"):
-		act.add_child(UIKit.button("Abrir a pasta", "GhostButton", func():
-			DirAccess.make_dir_recursive_absolute(Mods.DIR)
-			OS.shell_open(path)))
 	c.add_child(UIKit.card_panel(act))
 	c.add_child(UIKit.button("Voltar", "GhostButton", func(): _go("home")))
 
 
-## Depois de ligar/desligar/apagar: sem carreira, relê os dados na hora.
+## Licenciamento: pasta, recarregar, importar/exportar pacote, modelo e o que casou.
+func _licensing_card(list: Array) -> Control:
+	var card := UIKit.card("Card", 10)
+	card.add_child(UIKit.section("Licenciamento"))
+	# Totais das imagens soltas nos pacotes ligados
+	var ok := {}
+	var miss := {}
+	for m in list:
+		if not bool(m["enabled"]):
+			continue
+		var rep := DropIns.report(String(m["id"]), _report_world())
+		for kind in rep:
+			ok[kind] = int(ok.get(kind, 0)) + rep[kind]["ok"].size()
+			miss[kind] = int(miss.get(kind, 0)) + rep[kind]["miss"].size()
+	var grid := GridContainer.new()
+	grid.columns = 5 if UILayout.is_wide() else 3
+	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.add_theme_constant_override(&"v_separation", 8)
+	for kind in DropIns.KINDS:
+		var n := int(ok.get(kind, 0))
+		var bad := int(miss.get(kind, 0))
+		var t := UIKit.stat_tile("%d" % n if bad == 0 else "%d/%d" % [n, n + bad], String(DropIns.KIND_NAMES[kind]),
+			UIColors.RED if bad > 0 else (UIColors.GREEN if n > 0 else Color(0, 0, 0, 0)))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(t)
+	card.add_child(grid)
+	var btns: Array = [
+		UIKit.button("Recarregar", "PrimaryButton", func(): _reload_mods(), "swap"),
+		UIKit.button("Importar", "", func(): _pick_mod_file(), "plus"),
+		UIKit.button("Exportar", "", func(): _export_pack_dialog(), "save"),
+		UIKit.button("Gerar modelo", "", func(): _make_template(), "table"),
+	]
+	var path := ProjectSettings.globalize_path(Mods.DIR)
+	if OS.has_feature("pc"):
+		btns.append(UIKit.button("Abrir pasta", "GhostButton", func():
+			DirAccess.make_dir_recursive_absolute(Mods.DIR)
+			OS.shell_open(path), "list"))
+	var bg := GridContainer.new()
+	bg.columns = 2
+	bg.add_theme_constant_override(&"h_separation", 8)
+	bg.add_theme_constant_override(&"v_separation", 8)
+	for b: Control in btns:
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bg.add_child(b)
+	card.add_child(bg)
+	var pl := UIKit.label(path.path_join("…") + "/" + " · ".join(DropIns.KINDS), "Small", true)
+	pl.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	card.add_child(pl)
+	return UIKit.card_panel(card)
+
+
+## Mundo para conferir as fotos de jogadores: o da carreira ou o do Editor geral, se já existir.
+func _report_world() -> GameWorld:
+	return world() if has_career() else GameManager.preview_world
+
+
+func _misses(rep: Dictionary) -> int:
+	var n := 0
+	for kind in rep:
+		n += rep[kind]["miss"].size()
+	return n
+
+
+## Arquivos de um pacote: com quem cada um casou e os que ficaram sem dono.
+func _pack_files_dialog(id: String, title: String) -> void:
+	var v := UIKit.vbox(8)
+	v.custom_minimum_size.x = 620
+	v.add_child(UIKit.label(title, "Title"))
+	var rep := DropIns.report(id, _report_world()) if Mods.active_ids().has(id) else {}
+	if rep.is_empty():
+		v.add_child(UIKit.label("Desligado.", "Muted"))
+	for kind in DropIns.KINDS:
+		if not rep.has(kind):
+			continue
+		v.add_child(UIKit.section(String(DropIns.KIND_NAMES[kind])))
+		for f in rep[kind]["miss"]:
+			v.add_child(UIKit.colored("✕ " + String(f).get_file(), UIColors.RED, "Small", true))
+		for pair in rep[kind]["ok"]:
+			var who := String(pair[1])
+			v.add_child(UIKit.label("✓ %s → %s" % [String(pair[0]).get_file(), who if who != "?" else "(abra uma carreira)"], "Small", true))
+	v.add_child(UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v, true)
+
+
+## Relê pastas e pacotes. Sem carreira, recarrega os dados; com carreira, só as imagens.
+func _reload_mods() -> void:
+	Mods.rescan()
+	_mods_changed()
+
+
+## Depois de ligar/desligar/apagar/recarregar: sem carreira, relê os dados na hora; com carreira,
+## escudos e camisas soltos entram no mundo aberto.
 func _mods_changed() -> void:
 	if not has_career():
 		DatabaseManager.reload()
 		GameManager.preview_world = null
-		UIManager.toast("Dados recarregados com os mods ligados.")
+	else:
+		DropIns.rescan()
+		DropIns.apply_world(world())
+	UIManager.toast("Mods recarregados.")
 	refresh()
 
 
+func _export_pack_dialog() -> void:
+	var v := UIKit.vbox(12)
+	v.add_child(UIKit.label("Exportar pacote", "Title"))
+	var name_v := ["Meu pacote"]
+	var author_v := [world().manager_name if has_career() else ""]
+	v.add_child(_field("Nome", name_v[0], 40, func(t: String): name_v[0] = t.strip_edges()))
+	v.add_child(_field("Autor", author_v[0], 40, func(t: String): author_v[0] = t.strip_edges()))
+	v.add_child(UIKit.button("EXPORTAR", "PrimaryButton", func():
+		var r := LicensePack.export_pack(name_v[0] if name_v[0] != "" else "Meu pacote", author_v[0])
+		UIManager.close_modal()
+		var ct: Dictionary = r["counts"]
+		var summary := "%d clubes · %d competições · %d jogadores · %d imagens" % [ct["clubs"], ct["comps"], ct["players"], ct["images"]]
+		if DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+			DisplayServer.file_dialog_show("Salvar pacote", "", String(r["zip"]).get_file(), false, DisplayServer.FILE_DIALOG_MODE_SAVE_FILE,
+				PackedStringArray(["*.zip ; Pacote"]), func(status: bool, paths: PackedStringArray, _idx: int):
+					if status and not paths.is_empty():
+						var okc := DirAccess.copy_absolute(String(r["zip_local"]), paths[0]) == OK
+						UIManager.toast(summary if okc else "Não foi possível salvar aí.", UIColors.GREEN if okc else UIColors.RED))
+			return
+		UIManager.info("Pacote exportado", summary + "\n\n" + String(r["zip"])), "save"))
+	v.add_child(UIKit.button("Cancelar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v)
+
+
+## Pacote vazio com a planilha de nomes (ids e nomes atuais) e as pastas de imagens.
+func _make_template() -> void:
+	var done := func(w: GameWorld):
+		var r := LicensePack.make_template(w)
+		if r.is_empty():
+			UIManager.toast("Não foi possível criar o modelo.", UIColors.RED)
+			return
+		Mods.rescan()
+		refresh()
+		UIManager.info("Modelo criado", "%d linhas\n\n%s" % [int(r["rows"]), r["csv"]])
+	var w := world() if has_career() else GameManager.preview_world
+	if w != null and w.world_seed == WorldGenerator.DEFAULT_SEED:
+		done.call(w)
+		return
+	UIManager.toast("Gerando o modelo…")
+	GameManager.ensure_preview_world(func(): done.call(GameManager.preview_world))
+
+
 func _pick_mod_file() -> void:
-	var filters := PackedStringArray(["*.zip, *.json ; Mods"])
+	var filters := PackedStringArray(["*.zip, *.json, *.csv ; Mods e pacotes"])
 	var finish := func(path: String):
 		var r := Mods.install(path)
 		UIManager.toast(String(r["msg"]), UIColors.GREEN if r["ok"] else UIColors.RED)
 		if r["ok"]:
 			_mods_changed()
 	if DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
-		DisplayServer.file_dialog_show("Escolha o mod", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE, filters,
+		DisplayServer.file_dialog_show("Escolha o pacote", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE, filters,
 			func(status: bool, paths: PackedStringArray, _idx: int):
 				if status and not paths.is_empty():
 					finish.call(paths[0]))
@@ -1173,7 +1533,7 @@ func _pick_mod_file() -> void:
 	fd.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 	fd.access = FileDialog.ACCESS_FILESYSTEM
 	fd.filters = filters
-	fd.title = "Escolha o mod"
+	fd.title = "Escolha o pacote"
 	fd.size = Vector2i(680, 900)
 	UIManager.main.add_child(fd)
 	fd.file_selected.connect(func(path: String):
@@ -1186,7 +1546,7 @@ func _pick_mod_file() -> void:
 func _export_mod_dialog() -> void:
 	var v := UIKit.vbox(12)
 	v.add_child(UIKit.label("Exportar como mod", "Title"))
-	v.add_child(UIKit.label("Junta num arquivo só os clubes, competições e jogadores que você editou no padrão, com as imagens. Quem instalar recebe tudo igual.", "Small", true))
+	v.add_child(UIKit.label("Clubes, competições e jogadores editados, com as imagens.", "Small", true))
 	var name_v := ["Meu mod"]
 	var author_v := [world().manager_name if has_career() else ""]
 	v.add_child(_field("Nome do mod", name_v[0], 40, func(t: String): name_v[0] = t.strip_edges()))
@@ -1196,6 +1556,24 @@ func _export_mod_dialog() -> void:
 		var fname: String = (name_v[0] if name_v[0] != "" else "mod").validate_filename().replace(" ", "_") + ".json"
 		UIManager.close_modal()
 		_save_export(fname, JSON.stringify(bundle, "\t")), "save"))
+	v.add_child(UIKit.button("Cancelar", "GhostButton", func(): UIManager.close_modal()))
+	UIManager.show_modal(v)
+
+
+## Exporta as personalizações numa pasta de mod (JSON legível, imagens em img/) e num .zip ao lado.
+func _export_folder_dialog() -> void:
+	var v := UIKit.vbox(12)
+	v.add_child(UIKit.label("Exportar como pasta", "Title"))
+	v.add_child(UIKit.label("Pasta com JSON e imagens para editar à mão; um .zip fica em exports/.", "Small", true))
+	var name_v := ["Meu mod"]
+	var author_v := [world().manager_name if has_career() else ""]
+	v.add_child(_field("Nome do mod", name_v[0], 40, func(t: String): name_v[0] = t.strip_edges()))
+	v.add_child(_field("Autor", author_v[0], 40, func(t: String): author_v[0] = t.strip_edges()))
+	v.add_child(UIKit.button("EXPORTAR", "PrimaryButton", func():
+		var r := Mods.export_folder(name_v[0] if name_v[0] != "" else "Meu mod", author_v[0])
+		UIManager.close_modal()
+		refresh()
+		UIManager.info("Pasta de mod criada", "Pasta:\n%s\n\nZip:\n%s" % [r["folder"], r["zip"]]), "save"))
 	v.add_child(UIKit.button("Cancelar", "GhostButton", func(): UIManager.close_modal()))
 	UIManager.show_modal(v)
 
@@ -1228,10 +1606,11 @@ func _mods_help() -> void:
 	v.custom_minimum_size.x = 620
 	v.add_child(UIKit.label("Como criar um mod", "Title"))
 	for t in [
-		["1. O jeito fácil", "Edite clubes, competições e jogadores aqui no Editor do menu inicial e use \"Exportar minhas personalizações como mod\". O arquivo .json pode ser mandado para qualquer pessoa, que instala com \"Instalar mod\"."],
+		["1. O jeito fácil", "Solte imagens em crests/, logos/, cutouts/, kits/ ou stadiums/ dentro de uma pasta de pacote, com o nome do clube, da competição ou do jogador, e toque em Recarregar. Para nomes: Gerar modelo, preencha o names.csv e Recarregar."],
 		["2. Jogadores reais", "No mod, o players.json lista jogadores: com \"match\" edita um jogador gerado (pelo nome original), sem \"match\" cria um novo e com \"remove\": true tira do mundo. Campos: club, first, last, known, nat, pos, sec, birth, height, weight, foot, shirt, ovr, pot, attrs, traits."],
 		["3. Mudar qualquer dado", "Todos os dados do jogo são JSON em data/. Um arquivo data/<caminho>.json no mod substitui o original; um data/<caminho>.patch.json muda só o que você escrever. Em listas, use {\"_by\": \"key\", \"items\": [...]} para mexer em itens pela chave."],
-		["4. Exemplos", "Renomear clube: data/world/clubs/BRA.patch.json. Regras das copas: data/world/domestic.patch.json (fases em ida e volta, vagas). Vagas continentais: data/world/continental.patch.json. Narração e notícias: data/text/."],
+		["4. Estádios, uniformes e placares", "No arquivo de clubes, \"stadium\" pode ser um objeto {name, capacity, kind, photo, nick, built} e \"kits\" traz os uniformes (também por temporada). Nas ligas e copas, \"scoreboard\": {layout, colors} escolhe o placar da TV. Imagens vão em img/ do mod."],
+		["5. Exemplos", "Renomear clube: data/world/clubs/BRA.patch.json. Regras das copas: data/world/domestic.patch.json (fases em ida e volta, vagas). Vagas continentais: data/world/continental.patch.json. Narração e notícias: data/text/."],
 		["Documentação completa", "docs/MODS.md no repositório do jogo, com o formato de cada arquivo."]]:
 		v.add_child(UIKit.label(String(t[0]), "H3"))
 		v.add_child(UIKit.label(String(t[1]), "Small", true))

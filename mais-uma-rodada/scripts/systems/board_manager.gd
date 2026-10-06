@@ -62,6 +62,24 @@ static func after_match(world: GameWorld, club: Club, res: String, derby: bool) 
 			InboxManager.on_ultimatum(world, club)
 
 
+## Mata-mata decidido: além do jogo, a diretoria pesa a vaga ou a taça que ficou pelo caminho.
+## `weight` vem de TieStakes (1 = final que vale título).
+static func after_tie(world: GameWorld, club: Club, won: bool, weight: float, derby: bool) -> void:
+	var raw := (3.5 * weight) if won else (-6.0 * weight)
+	if derby:
+		raw *= 1.3
+	var d := People.board_delta(world, club, raw, derby)
+	if world.is_user_club(club.id):
+		BoardObjectives.track(world, "Resultados", d)
+	var before := club.board_confidence
+	club.board_confidence = clampf(club.board_confidence + d, 0.0, 100.0)
+	if before >= ULTIMATUM and club.board_confidence < ULTIMATUM:
+		var goal := SeasonManager.goal_of(world, club.id)
+		NewsManager.post(world, "diretoria_ultimato", {"club": club.short_name, "goal": String(goal[0]).to_lower()}, club.id, -1, NewsEvent.IMP_HEADLINE)
+		if world.is_user_club(club.id):
+			InboxManager.on_ultimatum(world, club)
+
+
 ## Balanço da temporada. Atualiza a confiança e decide a demissão.
 ## Retorna {"delta": float, "fired": bool, "offers": [club_id]}.
 static func season_review(world: GameWorld, club: Club, user: Dictionary) -> Dictionary:

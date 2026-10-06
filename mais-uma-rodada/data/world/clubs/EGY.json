@@ -108,7 +108,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "MSC"
@@ -134,7 +134,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ISC",
@@ -214,7 +214,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ITT"
@@ -238,7 +238,13 @@
 			"stadium": "Petro Sport Stadium",
 			"capacity": 16000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "MS",
+				"sc": "#FFD100"
+			},
 			"rivals": []
 		},
 		{
@@ -259,7 +265,13 @@
 			"stadium": "Petro Sport Stadium",
 			"capacity": 16000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "torch",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -280,7 +292,13 @@
 			"stadium": "Alexandria Stadium",
 			"capacity": 13600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "lighthouse",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -301,7 +319,15 @@
 			"stadium": "El Gouna Stadium",
 			"capacity": 12000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"c1": "#0055A4",
+				"c2": "#F07F13",
+				"sc": "#F07F13",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -322,7 +348,13 @@
 			"stadium": "Ghazl El Mahalla Stadium",
 			"capacity": 29000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "gear",
+				"sc": "#E30613",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -343,7 +375,13 @@
 			"stadium": "Al Salam Stadium",
 			"capacity": 30000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "key",
+				"sc": "#FFD100",
+				"border": "gold"
+			},
 			"rivals": []
 		},
 		{
@@ -364,7 +402,13 @@
 			"stadium": "Borg El Arab Stadium",
 			"capacity": 86000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "PH",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -385,7 +429,13 @@
 			"stadium": "Suez Stadium",
 			"capacity": 27000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "PJ",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -406,7 +456,13 @@
 			"stadium": "Haras El Hodoud Stadium",
 			"capacity": 22000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "swords",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -427,7 +483,13 @@
 			"stadium": "Gehaz El Reyada Stadium",
 			"capacity": 20000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

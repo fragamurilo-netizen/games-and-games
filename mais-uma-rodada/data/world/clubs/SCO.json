@@ -86,11 +86,15 @@
 			"capacity": 20900,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "A",
-				"sc": "#FFFFFF"
+				"c1": "#D2001F",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"text": "ABERDEEN F.C.",
+				"year": "1903"
 			},
 			"rivals": []
 		},
@@ -194,7 +198,13 @@
 			"stadium": "Fir Park",
 			"capacity": 13600,
 			"kit": "faixa",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#8A1538",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -215,7 +225,13 @@
 			"stadium": "St Mirren Park",
 			"capacity": 8000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:5",
+				"symbol": "letter",
+				"initials": "SMFC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -236,7 +252,14 @@
 			"stadium": "Rugby Park",
 			"capacity": 15000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "KFC",
+				"sc": "#FFFFFF",
+				"ribbon": "CONFIDEMUS"
+			},
 			"rivals": []
 		},
 		{
@@ -257,7 +280,13 @@
 			"stadium": "Victoria Park",
 			"capacity": 6500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "antlers",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -278,7 +307,13 @@
 			"stadium": "McDiarmid Park",
 			"capacity": 10600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ram",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -299,7 +334,13 @@
 			"stadium": "Dens Park",
 			"capacity": 11500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "DFC",
+				"text": "DUNDEE"
+			},
 			"rivals": []
 		}
 	]

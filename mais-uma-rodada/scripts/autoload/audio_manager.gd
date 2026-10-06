@@ -4,7 +4,7 @@ extends Node
 ## A música de fundo (MusicSynth) é gerada numa thread e guardada em cache no aparelho.
 
 const RATE := 22050
-const MUSIC_CACHE := "user://music_v1_%d.pcm"
+const MUSIC_CACHE := "user://music_v2_%d.pcm"
 
 var _players: Array[AudioStreamPlayer] = []
 var _cache: Dictionary = {}
@@ -15,7 +15,22 @@ var _music_task := -1
 var _music_task_track := -1
 var _music_samples := PackedFloat32Array()
 var _in_match := false
+var _match_muted := false # mute temporário da tela de partida; não altera as Opções globais
 var _fade: Tween
+## Torcida da partida: loop dos donos da casa e da visitante, com volume que reage ao jogo.
+var _crowd_p: Array[AudioStreamPlayer] = []
+var _crowd_real: Array = [{}, {}] # perfil das torcidas que têm gravação de verdade
+var _crowd_prof: Array = [{}, {}]
+var _clip_p: AudioStreamPlayer = null
+var _crowd_task: Array[int] = [-1, -1]
+var _crowd_out: Array = [[], []] # resultado da thread: [PackedByteArray]
+var _crowd_cache: Dictionary = {} # chave do perfil -> AudioStreamWAV
+var _crowd_keys: Array[String] = ["", ""]
+var _crowd_base: Array[float] = [0.0, 0.0] # volume de repouso de cada torcida (0..1)
+var _crowd_level: Array[float] = [0.0, 0.0]
+var _crowd_boost: Array[float] = [0.0, 0.0] # empurrão temporário (+/-)
+var _crowd_boost_t: Array[float] = [0.0, 0.0]
+var _crowd_on := false
 
 
 func _ready() -> void:
@@ -29,6 +44,12 @@ func _ready() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.bus = &"Music"
 	add_child(_music)
+	for i in 2:
+		var cp := AudioStreamPlayer.new()
+		cp.bus = &"SFX"
+		cp.volume_db = -80.0
+		add_child(cp)
+		_crowd_p.append(cp)
 	apply_volumes()
 
 
@@ -57,7 +78,7 @@ static func _to_db(v: int) -> float:
 
 ## Liga (ou desliga) a música conforme as Opções e a tela atual.
 func start_music() -> void:
-	var want := AppSettings.music and AppSettings.music_volume > 0 and (not _in_match or AppSettings.music_in_match)
+	var want := AppSettings.music and AppSettings.music_volume > 0 and (not _in_match or AppSettings.music_in_match) and not (_in_match and _match_muted)
 	if not want:
 		_fade_to(-40.0, func(): _music.stop())
 		return
@@ -82,6 +103,8 @@ func screen_changed(screen_name: String) -> void:
 	if match_now == _in_match:
 		return
 	_in_match = match_now
+	if not match_now:
+		_match_muted = false
 	start_music()
 
 
@@ -107,9 +130,12 @@ func _render_async(track: int) -> void:
 	set_process(true)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_crowd_tick(delta)
+	var crowd_busy := _crowd_on or _crowd_task[0] >= 0 or _crowd_task[1] >= 0 or _crowd_p[0].playing or _crowd_p[1].playing
 	if _music_task < 0:
-		set_process(false)
+		if not crowd_busy:
+			set_process(false)
 		return
 	if not WorkerThreadPool.is_task_completed(_music_task):
 		return
@@ -155,7 +181,7 @@ func click() -> void:
 
 
 func play(name: String, volume_db: float = 0.0) -> void:
-	if not AppSettings.sound:
+	if not AppSettings.sound or (_in_match and _match_muted):
 		return
 	var stream := _stream(name)
 	if stream == null:
@@ -174,6 +200,11 @@ func vibrate(ms: int) -> void:
 
 ## Celebração de gol: rugido proporcional à importância + vibração.
 func goal(importance: float, ours: bool) -> void:
+	# Durante a partida o próprio loop da arquibancada reage ao gol. Evita empilhar um
+	# "ruído de torcida" artificial por cima da torcida humana sintetizada.
+	if _crowd_on:
+		vibrate(int(120 + importance * 380) if ours else 60)
+		return
 	if ours:
 		play("goal_big" if importance >= 0.6 else "goal", 0.0)
 		vibrate(int(120 + importance * 380))
@@ -182,13 +213,195 @@ func goal(importance: float, ours: bool) -> void:
 		vibrate(60)
 
 
+## Ao fechar, espera as faixas e torcidas ainda sendo geradas: a tarefa usa este nó e o jogo
+## abortava ao sair no meio da geração.
+func _exit_tree() -> void:
+	if _music_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_music_task)
+		_music_task = -1
+	for i in 2:
+		if _crowd_task[i] >= 0:
+			WorkerThreadPool.wait_for_task_completion(_crowd_task[i])
+			_crowd_task[i] = -1
+
+
 func _notification(what: int) -> void:
 	# No Android o jogo em segundo plano não deve continuar tocando.
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		if OS.has_feature("mobile"):
 			_music.stream_paused = true
+			for cp in _crowd_p:
+				cp.stream_paused = true
 	elif what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		_music.stream_paused = false
+		for cp in _crowd_p:
+			cp.stream_paused = false
+
+
+# ---------------------------------------------------------------------------
+# Mute rápido da partida
+# ---------------------------------------------------------------------------
+
+func match_muted() -> bool:
+	return _match_muted
+
+func set_match_muted(muted: bool) -> void:
+	_match_muted = muted
+	if muted:
+		# Corta imediatamente efeitos pontuais; a torcida faz fade no _crowd_tick.
+		for p in _players:
+			if p.playing:
+				p.stop()
+	start_music()
+	set_process(true)
+
+
+# ---------------------------------------------------------------------------
+# Torcida da partida
+# ---------------------------------------------------------------------------
+
+## Liga a torcida: `home` e `away` vêm do CrowdProfile; `fill` é a ocupação do estádio e
+## `away_share` a fatia da visitante. O loop é gerado numa thread (sem travar) e entra em fade.
+func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: float) -> void:
+	crowd_stop(true)
+	if not AppSettings.sound:
+		return
+	_crowd_on = true
+	set_process(true)
+	var profs := [home, away]
+	_crowd_prof = [home, away]
+	var f := clampf(fill, 0.15, 1.0)
+	_crowd_base[0] = clampf(0.55 * float(home.get("loud", 1.0)) * (0.45 + 0.55 * f) * (1.0 - away_share * 0.6), 0.1, 0.95)
+	_crowd_base[1] = clampf(0.9 * float(away.get("loud", 1.0)) * away_share * (0.5 + 0.5 * f), 0.03, 0.6)
+	for i in 2:
+		_crowd_level[i] = 0.0
+		_crowd_boost[i] = 0.0
+		# Gravação de verdade da torcida (clube, liga ou país), se existir
+		var real := CrowdAudio.loop_for(profs[i])
+		if real != null:
+			_crowd_real[i] = profs[i]
+			_crowd_keys[i] = ""
+			_crowd_play(i, real)
+			continue
+		_crowd_real[i] = {}
+		var key := CrowdProfile.key_of(profs[i])
+		_crowd_keys[i] = key
+		if _crowd_cache.has(key):
+			_crowd_play(i, _crowd_cache[key])
+			continue
+		var holder: Array = []
+		_crowd_out[i] = holder
+		var prof: Dictionary = profs[i]
+		_crowd_task[i] = WorkerThreadPool.add_task(func():
+			holder.append(CrowdSynth.to_pcm16(CrowdSynth.render(prof))), false, "torcida")
+
+
+## Desliga a torcida (com fade, a não ser que `now`).
+func crowd_stop(now := false) -> void:
+	_crowd_on = false
+	for i in 2:
+		if now:
+			_crowd_p[i].stop()
+			_crowd_p[i].volume_db = -80.0
+		_crowd_level[i] = _crowd_level[i] if not now else 0.0
+
+
+## Reações: "danger" (ataque perigoso), "goal", "foul", "card", "save", "half", "second", "end".
+## `side` 0 casa, 1 visitante: de quem é o lance.
+func crowd_event(kind: String, side: int) -> void:
+	if not _crowd_on or _match_muted:
+		return
+	var s := clampi(side, 0, 1)
+	var o := 1 - s
+	match kind:
+		"danger":
+			_push(s, 0.35, 3.5)
+		"goal":
+			_push(s, 0.6, 22.0)
+			_push(o, -0.55, 25.0)
+			crowd_clip(s, "gol")
+		"foul", "card":
+			# Falta/cartão do visitante: a casa vaia; da casa: a casa reclama do juiz
+			if s == 1 or kind == "card":
+				play("boo", -9.0 if s == 1 else -13.0)
+			_push(0, 0.15, 3.0)
+		"save":
+			play("applause", -14.0)
+			_push(s, 0.2, 2.5)
+		"half":
+			_push(0, -0.6, 9999.0)
+			_push(1, -0.6, 9999.0)
+		"second":
+			_crowd_boost = [0.1, 0.1]
+			_crowd_boost_t = [4.0, 4.0]
+		"end":
+			_push(s, 0.5, 8.0)
+			_push(o, -0.7, 9999.0)
+			get_tree().create_timer(7.0).timeout.connect(func(): crowd_stop())
+
+
+func _push(i: int, amount: float, secs: float) -> void:
+	_crowd_boost[i] = amount
+	_crowd_boost_t[i] = secs
+
+
+func _crowd_play(i: int, wav: AudioStream) -> void:
+	_crowd_p[i].stream = wav
+	_crowd_p[i].volume_db = -60.0
+	_crowd_p[i].play(randf() * wav.get_length() * 0.9)
+
+
+## Toca o trecho gravado do clube ("entrada" antes do jogo, "gol" na comemoração). true se tocou.
+func crowd_clip(side: int, kind: String) -> bool:
+	if not _crowd_on or _match_muted or not AppSettings.sound:
+		return false
+	var prof: Dictionary = _crowd_real[clampi(side, 0, 1)] if not _crowd_real[clampi(side, 0, 1)].is_empty() else _crowd_prof[clampi(side, 0, 1)]
+	var st := CrowdAudio.clip_for(prof, kind)
+	if st == null:
+		return false
+	if _clip_p == null:
+		_clip_p = AudioStreamPlayer.new()
+		_clip_p.bus = _crowd_p[0].bus
+		add_child(_clip_p)
+	_clip_p.stream = st
+	_clip_p.volume_db = -4.0
+	_clip_p.play()
+	return true
+
+
+func _crowd_tick(delta: float) -> void:
+	for i in 2:
+		if _crowd_task[i] >= 0 and WorkerThreadPool.is_task_completed(_crowd_task[i]):
+			WorkerThreadPool.wait_for_task_completion(_crowd_task[i])
+			_crowd_task[i] = -1
+			var holder: Array = _crowd_out[i]
+			if not holder.is_empty():
+				var wav := AudioStreamWAV.new()
+				wav.format = AudioStreamWAV.FORMAT_16_BITS
+				wav.mix_rate = CrowdSynth.RATE
+				wav.stereo = false
+				wav.data = holder[0]
+				wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+				wav.loop_begin = 0
+				wav.loop_end = (holder[0] as PackedByteArray).size() / 2
+				if _crowd_cache.size() > 8:
+					_crowd_cache.clear()
+				_crowd_cache[_crowd_keys[i]] = wav
+				if _crowd_on:
+					_crowd_play(i, wav)
+		if not _crowd_p[i].playing:
+			continue
+		if _crowd_boost_t[i] > 0.0:
+			_crowd_boost_t[i] -= delta
+			if _crowd_boost_t[i] <= 0.0:
+				_crowd_boost[i] = 0.0
+		var target := 0.0
+		if _crowd_on and not _match_muted:
+			target = clampf(_crowd_base[i] * (1.0 + _crowd_boost[i]), 0.0, 1.0)
+		_crowd_level[i] = move_toward(_crowd_level[i], target, delta * (0.9 if target > _crowd_level[i] else 0.35))
+		_crowd_p[i].volume_db = linear_to_db(maxf(0.0005, _crowd_level[i]))
+		if not _crowd_on and _crowd_level[i] <= 0.001:
+			_crowd_p[i].stop()
 
 
 func _stream(name: String) -> AudioStreamWAV:
@@ -203,13 +416,17 @@ func _stream(name: String) -> AudioStreamWAV:
 		"whistle_end":
 			samples = _concat([_whistle(0.3), _silence(0.12), _whistle(0.3), _silence(0.12), _whistle(0.7)])
 		"goal":
-			samples = _crowd(2.2, 0.55)
+			samples = _crowd_noise(2.2, 0.55)
 		"goal_big":
-			samples = _mix(_crowd(3.2, 0.8), _horn(1.4), 0.35)
+			samples = _mix(_crowd_noise(3.2, 0.8), _horn(1.4), 0.35)
 		"groan":
-			samples = _crowd(1.1, 0.25, true)
+			samples = _crowd_noise(1.1, 0.25, true)
+		"boo":
+			samples = _boo(1.6)
+		"applause":
+			samples = _applause(1.8)
 		"chance":
-			samples = _crowd(0.9, 0.3, true)
+			samples = _crowd_noise(0.9, 0.3, true)
 		"card":
 			samples = _tone(520.0, 0.12, 0.3, 0.005, 0.1)
 		"win":
@@ -258,7 +475,7 @@ func _whistle(dur: float) -> PackedFloat32Array:
 
 
 ## Torcida: ruído filtrado com envelope; `groan` gera um "uuuh" descendente.
-func _crowd(dur: float, vol: float, groan: bool = false) -> PackedFloat32Array:
+func _crowd_noise(dur: float, vol: float, groan: bool = false) -> PackedFloat32Array:
 	var n := int(dur * RATE)
 	var out := PackedFloat32Array()
 	out.resize(n)
@@ -279,6 +496,45 @@ func _crowd(dur: float, vol: float, groan: bool = false) -> PackedFloat32Array:
 			env = minf(1.0, t / 0.25) * minf(1.0, (dur - t) / (dur * 0.45))
 		var swell := 0.8 + 0.2 * sin(TAU * 1.7 * t)
 		out[i] = lp2 * 2.6 * vol * env * swell
+	return out
+
+
+## Vaia: "uuuu" grave de muita gente (ruído com formante baixo e vibração).
+func _boo(dur: float) -> PackedFloat32Array:
+	var n := int(dur * RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5150
+	var ph := 0.0
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / RATE
+		ph += TAU * (150.0 + 8.0 * sin(TAU * 4.0 * t)) / RATE
+		lp += (rng.randf_range(-1.0, 1.0) - lp) * 0.08
+		var env := minf(1.0, t / 0.3) * minf(1.0, (dur - t) / 0.5)
+		out[i] = (sin(ph) * 0.25 + sin(2.0 * ph) * 0.12 + lp * 1.6) * env * 0.5
+	return out
+
+
+## Aplausos: muitas palmas sobrepostas (estalos curtos de ruído).
+func _applause(dur: float) -> PackedFloat32Array:
+	var n := int(dur * RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 777
+	for c in int(dur * 90):
+		var at := rng.randi_range(0, n - 1)
+		var len := int(0.02 * RATE)
+		var amp := rng.randf_range(0.2, 0.5)
+		for i in len:
+			if at + i >= n:
+				break
+			out[at + i] += rng.randf_range(-1.0, 1.0) * amp * exp(-float(i) / (0.004 * RATE))
+	for i in n:
+		var t := float(i) / RATE
+		out[i] *= minf(1.0, t / 0.15) * minf(1.0, (dur - t) / 0.6) * 0.6
 	return out
 
 

@@ -327,7 +327,7 @@ static func cabinet(w: GameWorld, club: Club, px: int = 76) -> Control:
 		tile.add_child(nm)
 		flow.add_child(tile)
 	if flow.get_child_count() == 0:
-		return _label("A estante ainda está vazia. O primeiro troféu vai ficar aqui.", "Muted", true)
+		return _label("Estante vazia.", "Muted", true)
 	return flow
 
 

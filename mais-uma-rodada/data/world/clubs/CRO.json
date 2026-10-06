@@ -113,7 +113,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "NKO"
@@ -188,7 +188,16 @@
 			"stadium": "Radnik Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "checky",
+				"symbol": "letter",
+				"initials": "G",
+				"c1": "#E30613",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"text": "HNK GORICA"
+			},
 			"rivals": []
 		},
 		{
@@ -209,7 +218,15 @@
 			"stadium": "Aldo Drosina",
 			"capacity": 8900,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ram",
+				"c1": "#00843D",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -230,7 +247,15 @@
 			"stadium": "Gradski stadion",
 			"capacity": 3100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "SB",
+				"c1": "#0055A4",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -251,7 +276,13 @@
 			"stadium": "Šubićevac",
 			"capacity": 3400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

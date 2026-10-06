@@ -21,20 +21,18 @@
 			"capacity": 32100,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "O",
-				"c1": "#FFFFFF",
-				"c2": "#E30613",
-				"sc": "#E30613",
-				"c3": "#E30613",
-				"laurel": true
+				"initials": "OSFP",
+				"c1": "#E30613",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"text": "OLYMPIACOS",
+				"text2": "PIRAEUS",
+				"border": "thin"
 			},
-			"rivals": [
-				"GRE_ATH",
-				"GRE_AEN"
-			]
+			"rivals": ["GRE_ATH", "GRE_AEN", "GRE_DIK"]
 		},
 		{
 			"key": "GRE_ATH",
@@ -143,7 +141,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ARIS",
@@ -170,7 +168,7 @@
 			"kit": "stripes_v",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "OFI",
@@ -195,7 +193,12 @@
 			"stadium": "Panthessaliko",
 			"capacity": 22700,
 			"kit": "halves",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "ship",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -216,7 +219,17 @@
 			"stadium": "Theodoros Kolokotronis",
 			"capacity": 7400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"c1": "#FFD100",
+				"c2": "#111111",
+				"sc": "#111111",
+				"border": "thick",
+				"chief_text": "ASTERAS",
+				"cc": "#111111"
+			},
 			"rivals": []
 		},
 		{
@@ -237,7 +250,13 @@
 			"stadium": "Peristeri Stadium",
 			"capacity": 9000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "warrior",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -258,7 +277,15 @@
 			"stadium": "Panetolikos Stadium",
 			"capacity": 7300,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -279,7 +306,13 @@
 			"stadium": "Lamia Municipal",
 			"capacity": 5500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "torch",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -300,7 +333,12 @@
 			"stadium": "Serres Municipal",
 			"capacity": 9500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -321,7 +359,13 @@
 			"stadium": "Levadia Municipal",
 			"capacity": 6000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "L",
+				"text": "LEVADIAKOS"
+			},
 			"rivals": []
 		},
 		{
@@ -342,7 +386,15 @@
 			"stadium": "Zirinio",
 			"capacity": 3500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "owl",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

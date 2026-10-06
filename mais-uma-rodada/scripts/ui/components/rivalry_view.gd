@@ -32,7 +32,7 @@ static func record_text(w: GameWorld, cid: int, other: int) -> String:
 	var r := Rivalry.record_for(w, cid, other)
 	if int(r["g"]) == 0:
 		return "Ainda sem confrontos no save"
-	return "%d jogos desde %d · %dV %dE %dD" % [int(r["g"]), int(r["since"]), int(r["w"]), int(r["d"]), int(r["l"])]
+	return ("%d jogo desde %d · %dV %dE %dD" if int(r["g"]) == 1 else "%d jogos desde %d · %dV %dE %dD") % [int(r["g"]), int(r["since"]), int(r["w"]), int(r["d"]), int(r["l"])]
 
 
 ## Bloco da prévia: termômetro, retrospecto e o último capítulo. Vazio se não houver rixa.
@@ -48,7 +48,9 @@ static func summary(w: GameWorld, cid: int, other: int) -> Control:
 	if mem != "":
 		v.add_child(UIKit.label(mem + ".", "Small", true))
 	if h >= Rivalry.DERBY_AT:
-		v.add_child(UIKit.colored("Ingressos disputados: a diretoria trata este jogo como prioridade.", UIColors.ORANGE, "Small", true))
+		var dp := UIKit.pill("CLÁSSICO", UIColors.ORANGE, 13)
+		dp.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		v.add_child(dp)
 	return v
 
 

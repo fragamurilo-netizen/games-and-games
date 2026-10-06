@@ -23,6 +23,15 @@ static func label(text: String, variation: String = "", wrap: bool = false) -> L
 	return l
 
 
+## Texto em caixa alta vira caixa normal, já traduzido ("EM CASA" -> "Em casa"). Siglas curtas
+## (UEFA, MLS, VAR) ficam como estão. Quem usa desliga a tradução automática do nó.
+static func soften(text: String) -> String:
+	var t := I18n.t(text)
+	if t.length() <= 4 or t != t.to_upper() or t == t.to_lower():
+		return t
+	return t.substr(0, 1) + t.substr(1).to_lower()
+
+
 static func colored(text: String, color: Color, variation: String = "", wrap: bool = false) -> Label:
 	var l := label(text, variation, wrap)
 	l.add_theme_color_override(&"font_color", color)
@@ -32,17 +41,24 @@ static func colored(text: String, color: Color, variation: String = "", wrap: bo
 static func button(text: String, variation: String = "", cb: Callable = Callable(), icon_name: String = "") -> Button:
 	var b := Button.new()
 	b.text = text
+	if variation == "PrimaryButton":
+		b.text = soften(text)
+		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	if variation != "":
 		b.theme_type_variation = variation
-	if icon_name != "":
+	# O primário é só o texto; nos outros o ícone anda junto do texto, à esquerda (ícone colado na
+	# borda com o texto centralizado solto no meio é cara de modelo pronto).
+	if icon_name != "" and variation != "PrimaryButton":
 		b.icon = icon(icon_name)
 		b.expand_icon = false # largura limitada por icon_max_width do tema
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	b.custom_minimum_size.y = 72 if variation != "ChipButton" else 52
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b)
 	return b
 
@@ -54,11 +70,12 @@ static func icon_button(icon_name: String, cb: Callable, tip: String = "") -> Bu
 	b.expand_icon = false
 	b.custom_minimum_size = Vector2(64, 64)
 	b.tooltip_text = tip
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b, null, 0.9)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	return b
 
@@ -72,11 +89,12 @@ static func chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 	b.button_group = group
 	b.button_pressed = pressed
 	b.custom_minimum_size.y = 52
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	press_fx(b, null, 0.94)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
 	return b
 
@@ -241,6 +259,15 @@ static func flag(code: String, w: int) -> FlagView:
 	return v
 
 
+static func shirt_number(p: Player, club: Club, px: int = 48) -> KitView:
+	var shirt := kit(club.kit_for(p) if club != null else {"c1":"#747C85","pattern":"plain"},px,p.shirt)
+	shirt.back = true
+	shirt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	shirt.tooltip_text = "Camisa %d" % p.shirt
+	shirt.accessibility_name = shirt.tooltip_text
+	return shirt
+
+
 static func kit(k: Dictionary, px: int, number: int = 0, crest_spec: Dictionary = {}) -> KitView:
 	var v := KitView.new()
 	v.crest = crest_spec
@@ -249,6 +276,20 @@ static func kit(k: Dictionary, px: int, number: int = 0, crest_spec: Dictionary 
 	v.kit = k
 	v.number = number
 	return v
+
+
+static func player_stars(w: GameWorld, p: Player, px: float = 16.0, future: bool = false, pos: int = -1) -> StarsView:
+	var r := PlayerAssessment.report(w,p,pos)
+	var view := StarsView.new()
+	view.star_size = px
+	view.stars = float(r["future_low"] if future else r["low"])
+	view.upper_stars = float(r["future_high"] if future else r["high"])
+	view.color = UIColors.GOLD
+	view.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	view.mouse_filter = Control.MOUSE_FILTER_PASS
+	view.tooltip_text = ("Projeção: " if future else "Avaliação: ") + PlayerAssessment.range_text(view.stars,view.upper_stars) + "\nPara " + Pos.name_of(int(r["position"])) + " no seu elenco. " + PlayerAssessment.confidence_name(w,p) + ".\nAs estrelas claras indicam a margem de incerteza."
+	view.accessibility_description = view.tooltip_text
+	return view
 
 
 static func badge(value: int, w: int = 56, h: int = 40, fs: int = 26) -> RatingBadge:
@@ -314,8 +355,9 @@ static func bar(value: float, max_value: float, color: Color, h: int = 10) -> Pr
 	return pb
 
 
+## Título de seção dentro de cartões: texto normal em cor secundária.
 static func section(text: String) -> Label:
-	return label(text.to_upper(), "Caps")
+	return label(text, "Eyebrow")
 
 
 static func separator() -> HSeparator:
@@ -328,10 +370,11 @@ static func separator() -> HSeparator:
 static func stat(value: String, caption: String, color: Color = UIColors.TEXT) -> VBoxContainer:
 	var v := vbox(0)
 	var l := label(value, "Stat")
-	l.add_theme_color_override(&"font_color", color)
+	l.add_theme_color_override(&"font_color", UIColors.ink(color))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var c := label(caption, "Small")
+	var c := label(caption, "Caps")
 	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	c.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(l)
 	v.add_child(c)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -397,11 +440,12 @@ static func clear(node: Node) -> void:
 ## Linha "rótulo ........ valor".
 static func kv(key: String, value: String, value_color: Color = UIColors.TEXT) -> HBoxContainer:
 	var h := hbox(8)
+	h.custom_minimum_size.y = 44
 	var k := label(key, "Muted")
 	k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(k)
-	var v := label(value, "H3")
-	v.add_theme_color_override(&"font_color", value_color)
+	var v := label(value)
+	v.add_theme_color_override(&"font_color", UIColors.ink(value_color))
 	if value.length() > 22:
 		# Valor longo quebra em linhas à direita em vez de alargar a tela.
 		k.size_flags_horizontal = Control.SIZE_FILL
@@ -433,20 +477,43 @@ static func tap_row(inner: Control, cb: Callable, panel_variation: String = "Row
 	p.add_child(inner)
 	var b := Button.new()
 	b.theme_type_variation = "RowOverlay"
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.toggle_mode = toggle
 	b.name = "Tap"
-	press_fx(b, p, 0.98)
+	b.set_meta("row_overlay", true)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			AudioManager.click()
+			Sfx.click()
 			cb.call())
-	p.add_child(b)
+	attach_row_overlay(p,b)
 	return p
 
 
+## Neutral selection behind content, aligned to the complete row including padding.
+static func attach_row_overlay(p: PanelContainer, b: Button) -> void:
+	var overlay := Control.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(overlay)
+	overlay.add_child(b)
+	b.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	var panel_ref: WeakRef = weakref(p)
+	var overlay_ref: WeakRef = weakref(overlay)
+	var button_ref: WeakRef = weakref(b)
+	var fit := func():
+		var panel: Control = panel_ref.get_ref()
+		var layer: Control = overlay_ref.get_ref()
+		var button: Control = button_ref.get_ref()
+		if panel == null or layer == null or button == null: return
+		button.position = -layer.position
+		button.size = panel.size
+	p.resized.connect(fit)
+	overlay.resized.connect(fit)
+	p.move_child(overlay,0)
+
+
 static func set_row_selected(row: PanelContainer, selected: bool) -> void:
-	var b := row.get_node_or_null("Tap") as Button
+	var b := row.find_child("Tap", true, false) as Button
 	if b != null:
 		b.set_pressed_no_signal(selected)
 
@@ -458,23 +525,20 @@ static func _ignore_mouse(n: Node) -> void:
 		_ignore_mouse(c)
 
 
-## Etiqueta arredondada que se ajusta ao texto (tags de perfil, arquétipos, zonas).
+## Etiqueta de estado ("Em casa", "Lesionado", arquétipo): só o texto na cor do estado, sem
+## cápsula. Com tudo virando pílula a tela perde a hierarquia.
 static func pill(text: String, color: Color, font_size: int = 18) -> PanelContainer:
 	var p := PanelContainer.new()
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(color.r, color.g, color.b, 0.16)
-	box.border_color = Color(color.r, color.g, color.b, 0.7)
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(16)
-	box.content_margin_left = 12
-	box.content_margin_right = 12
-	box.content_margin_top = 3
-	box.content_margin_bottom = 3
+	var box := StyleBoxEmpty.new()
+	box.content_margin_top = 1
+	box.content_margin_bottom = 1
 	p.add_theme_stylebox_override(&"panel", box)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var l := label(text, "Caps")
+	color = UIColors.readable_on(color, [UIColors.SURFACE, UIColors.SURFACE_2, UIColors.BG], 4.5)
+	var l := label(soften(text), "Caps")
+	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.add_theme_color_override(&"font_color", color)
-	l.add_theme_font_size_override(&"font_size", font_size)
+	l.add_theme_font_size_override(&"font_size", font_size + 1)
 	p.add_child(l)
 	return p
 
@@ -486,3 +550,453 @@ static func flow(sep: int = 8) -> HFlowContainer:
 	f.add_theme_constant_override(&"v_separation", sep)
 	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return f
+
+
+# --- Sistema de design: componentes compostos -------------------------------------------
+
+## Rótulo pequeno acima de títulos ("Próxima partida"), em cor secundária.
+static func eyebrow(text: String, color: Color = Color(0, 0, 0, 0)) -> Label:
+	var l := label(text, "Eyebrow")
+	if color.a > 0.0:
+		l.add_theme_color_override(&"font_color", color)
+	return l
+
+
+## Cabeçalho de seção: filete na cor do clube, título em caixa alta e, opcional, um link à
+## direita ("VER TUDO").
+static func section_header(text: String, action: String = "", cb: Callable = Callable()) -> HBoxContainer:
+	var h := hbox(10)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var l := label(text, "Eyebrow")
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	h.add_child(l)
+	if action != "" and cb.is_valid():
+		var b := Button.new()
+		b.theme_type_variation = "TextButton"
+		b.text = action
+		b.focus_mode = Control.FOCUS_ALL
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.pressed.connect(func():
+			Sfx.click()
+			cb.call())
+		h.add_child(b)
+	return h
+
+
+## Abas de uma tela: `items` = [[chave, texto], ...]; `cb` recebe a chave escolhida.
+## Todas com a mesma largura, sublinhado na cor do clube na aba ativa.
+static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
+	var h := hbox(0)
+	var g := ButtonGroup.new()
+	for it: Array in items:
+		var b := Button.new()
+		b.theme_type_variation = "TabButton"
+		b.text = String(it[1])
+		b.toggle_mode = true
+		b.button_group = g
+		b.button_pressed = String(it[0]) == selected
+		b.focus_mode = Control.FOCUS_ALL
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.custom_minimum_size.y = UITokens.H_TAB
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Largura proporcional ao texto (+ respiro): "Histórico" não corta para "Lista" caber.
+		b.size_flags_stretch_ratio = float(I18n.t(b.text).length() + 3)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		var key: String = it[0]
+		b.pressed.connect(func():
+			Sfx.click()
+			cb.call(key))
+		h.add_child(b)
+	return h
+
+
+## Seletor compacto em cápsula (Geral/Casa/Fora, filtros de posição).
+static func segment(items: Array, selected: String, cb: Callable) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.theme_type_variation = "Segment"
+	var h := hbox(4)
+	var g := ButtonGroup.new()
+	for it: Array in items:
+		var b := Button.new()
+		b.theme_type_variation = "SegmentButton"
+		b.text = String(it[1])
+		b.toggle_mode = true
+		b.button_group = g
+		b.button_pressed = String(it[0]) == selected
+		b.focus_mode = Control.FOCUS_ALL
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.custom_minimum_size.y = 48
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Rótulo bem mais longo que os outros ganha um pouco mais de largura ("Instantâneo" cortava
+		# no tablet em duas colunas); os curtos continuam do mesmo tamanho entre si.
+		b.size_flags_stretch_ratio = maxf(7.0, I18n.t(b.text).length()) / 7.0
+		b.clip_text = true
+		var key: String = it[0]
+		b.pressed.connect(func():
+			Sfx.click()
+			cb.call(key))
+		h.add_child(b)
+	p.add_child(h)
+	return p
+
+
+## Linha de menu: ícone num ladrilho, título (e subtítulo) alinhados à esquerda e uma seta.
+static func menu_row(icon_name: String, title: String, subtitle: String, cb: Callable, trailing: Control = null) -> PanelContainer:
+	var h := hbox(16)
+	if icon_name != "":
+		var ic := icon_rect(icon_name, 26, UIColors.MUTED)
+		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(ic)
+	var tv := vbox(0)
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var t := label(title)
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	tv.add_child(t)
+	if subtitle != "":
+		var s := label(subtitle, "Muted")
+		s.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		tv.add_child(s)
+	h.add_child(tv)
+	if trailing != null:
+		trailing.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(trailing)
+	h.add_child(icon_rect("forward", 20, UIColors.DIM))
+	var row := tap_row(h, cb)
+	row.custom_minimum_size.y = UITokens.H_ROW
+	return row
+
+
+## Grupo de linhas de menu dentro de um único cartão, separadas por filetes.
+static func menu_group(rows: Array) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.theme_type_variation = "Card"
+	var v := vbox(0)
+	for i in rows.size():
+		var r: PanelContainer = rows[i]
+		var clear := StyleBoxEmpty.new()
+		clear.content_margin_left = 0
+		clear.content_margin_right = 4
+		clear.content_margin_top = 8
+		clear.content_margin_bottom = 8
+		r.add_theme_stylebox_override(&"panel", clear)
+		if i > 0:
+			var line := ColorRect.new()
+			line.color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+			line.custom_minimum_size.y = 1
+			line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			v.add_child(line)
+		v.add_child(r)
+	p.add_child(v)
+	return p
+
+
+## Ladrilho de número: valor grande, legenda em caixa alta embaixo.
+## Reputação (1–100) como estrelas douradas: o número fica escondido, o efeito no jogo continua.
+static func rep_stars(rep: float, px: float = 16.0) -> StarsView:
+	var st := StarsView.new()
+	st.star_size = px
+	st.color = UIColors.GOLD
+	st.stars = StarsView.from_reputation(rep)
+	st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	st.tooltip_text = Reputation.label(rep)
+	return st
+
+
+static func stat_tile(value: String, caption: String, color: Color = Color(0, 0, 0, 0)) -> PanelContainer:
+	var p := PanelContainer.new()
+	var box := StyleBoxEmpty.new()
+	box.set_content_margin_all(4)
+	p.add_theme_stylebox_override(&"panel", box)
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var v := vbox(2)
+	var l := label(value, "Stat")
+	l.add_theme_color_override(&"font_color", UIColors.ink(color) if color.a > 0.0 else UIColors.TEXT)
+	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(l)
+	var c := label(caption, "Caps")
+	c.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(c)
+	p.add_child(v)
+	return p
+
+
+## Abas que rolam para o lado quando não cabem (tabelas com muitas seções). Cada aba tem a
+## largura do texto; um filete corre por baixo de todas.
+static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollContainer:
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.custom_minimum_size.y = UITokens.H_TAB
+	var h := hbox(0)
+	var g := ButtonGroup.new()
+	var sel: Button = null
+	for it: Array in items:
+		var b := Button.new()
+		b.theme_type_variation = "TabButton"
+		b.text = String(it[1])
+		b.toggle_mode = true
+		b.button_group = g
+		b.button_pressed = String(it[0]) == selected
+		b.focus_mode = Control.FOCUS_ALL
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.custom_minimum_size = Vector2(0, UITokens.H_TAB)
+		var key: String = it[0]
+		b.pressed.connect(func():
+			Sfx.click()
+			cb.call(key))
+		h.add_child(b)
+		if b.button_pressed:
+			sel = b
+	# O filete de baixo segue até a borda mesmo quando as abas não ocupam a largura toda.
+	h.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var tail := Button.new()
+	tail.theme_type_variation = "TabButton"
+	tail.disabled = true
+	tail.focus_mode = Control.FOCUS_NONE
+	tail.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tail.custom_minimum_size = Vector2(0, UITokens.H_TAB)
+	h.add_child(tail)
+	sc.add_child(h)
+	if sel != null:
+		# A aba ativa fica visível mesmo quando está no fim da lista.
+		sel.ready.connect(func(): sc.ensure_control_visible.call_deferred(sel), CONNECT_ONE_SHOT)
+	return sc
+
+
+## Responsivo: coloca os cartões em `c` numa coluna (celular em retrato) ou distribui em
+## colunas lado a lado (paisagem, tablet), sempre equilibrando a altura das colunas.
+## `pinned` = quantos dos primeiros cartões ocupam a largura toda (o destaque da tela).
+static func columns(c: Container, cards: Array, width: float, max_cols: int = 3, pinned: int = 0) -> void:
+	# Nunca mais colunas que cartões (uma coluna vazia só estreitaria as outras)
+	var n := mini(UILayout.columns_for(width, max_cols), maxi(1, cards.size() - pinned))
+	var i := 0
+	while i < mini(pinned, cards.size()):
+		c.add_child(cards[i])
+		i += 1
+	if n <= 1:
+		for k in range(i, cards.size()):
+			c.add_child(cards[k])
+		return
+	var row := hbox(UITokens.S4)
+	var cols: Array = []
+	var load: Array = []
+	for _k in n:
+		var v := vbox(UITokens.S4)
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v.size_flags_stretch_ratio = 1.0
+		row.add_child(v)
+		cols.append(v)
+		load.append(0.0)
+	for k in range(i, cards.size()):
+		var card: Control = cards[k]
+		var best := 0
+		for j in n:
+			if load[j] < load[best] - 0.5:
+				best = j
+		(cols[best] as VBoxContainer).add_child(card)
+		load[best] += _weight(card)
+	c.add_child(row)
+
+
+## Altura estimada de um cartão antes do layout (textos quebrados ainda não têm largura).
+static func _weight(n: Node) -> float:
+	var h := 40.0
+	for ch in n.find_children("*", "", true, false):
+		if ch is Label:
+			h += 30.0 if (ch as Label).autowrap_mode == TextServer.AUTOWRAP_OFF else 48.0
+		elif ch is Button:
+			h += 60.0
+		elif ch is Control and not (ch is Container) and (ch as Control).custom_minimum_size.y > 0:
+			h += (ch as Control).custom_minimum_size.y * 0.6
+	return h
+
+
+static var _sized_icons: Dictionary = {}
+
+
+## Ícone redimensionado para `px` (campos de texto e outros lugares que desenham a textura no
+## tamanho original, sem escala).
+static func icon_sized(name: String, px: int) -> Texture2D:
+	var key := "%s@%d" % [name, px]
+	if not _sized_icons.has(key):
+		var tex := icon(name)
+		if tex == null:
+			return null
+		var img := tex.get_image()
+		if img.is_compressed():
+			img.decompress()
+		img.resize(px, px, Image.INTERPOLATE_LANCZOS)
+		_sized_icons[key] = ImageTexture.create_from_image(img)
+	return _sized_icons[key]
+
+
+## Grade de ladrilhos de número: 2 por linha no celular em retrato, todos lado a lado em
+## telas largas.
+static func stat_grid(tiles: Array, width: float) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = tiles.size() if UILayout.columns_for(width) > 1 or tiles.size() <= 3 else 2
+	g.add_theme_constant_override(&"h_separation", 10)
+	g.add_theme_constant_override(&"v_separation", 10)
+	for t: Control in tiles:
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		g.add_child(t)
+	return g
+
+
+## Ladrilho de ação (menus em grade): ícone no alto, título e uma linha de apoio.
+static func action_tile(icon_name: String, title: String, subtitle: String, cb: Callable, highlight: bool = false) -> PanelContainer:
+	var v := vbox(8)
+	var tile := PanelContainer.new()
+	tile.theme_type_variation = "IconTile"
+	tile.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	tile.add_child(icon_rect(icon_name, 28, UIColors.ACCENT if highlight else UIColors.MUTED))
+	v.add_child(tile)
+	var t := label(title, "H3")
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	v.add_child(t)
+	if subtitle != "":
+		var s := label(subtitle, "Small", true)
+		v.add_child(s)
+	var row := tap_row(v, cb, "CardHighlight" if highlight else "Card")
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.custom_minimum_size.y = 150
+	return row
+
+
+## Estado vazio: ícone num círculo, título, explicação e (opcional) um botão para resolver.
+static func empty_state(_icon_name: String, title: String, body: String, action: String = "", cb: Callable = Callable()) -> PanelContainer:
+	return state_block("empty", title, body, action, cb)
+
+
+## Estados de uma área da tela: "empty" (nada ainda), "error" (algo falhou) e "loading".
+## Texto alinhado à esquerda, direto, sem ilustração. A ação, quando há, é um botão comum.
+static func state_block(kind: String, title: String, body: String = "", action: String = "", cb: Callable = Callable()) -> PanelContainer:
+	var p := PanelContainer.new()
+	var sbx := StyleBoxEmpty.new()
+	sbx.content_margin_top = 24
+	sbx.content_margin_bottom = 24
+	p.add_theme_stylebox_override(&"panel", sbx)
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var v := vbox(8)
+	var t := label(title, "H3", true)
+	if kind == "error":
+		t.add_theme_color_override(&"font_color", UIColors.RED)
+	elif kind == "loading":
+		t.add_theme_color_override(&"font_color", UIColors.MUTED)
+	v.add_child(t)
+	if body != "":
+		v.add_child(label(body, "Muted", true))
+	if action != "" and cb.is_valid():
+		var btn := button(action, "GhostButton", cb)
+		btn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		v.add_child(btn)
+	p.add_child(v)
+	return p
+
+
+## Grade de ladrilhos com colunas fixas (2 no celular, mais em telas largas).
+static func tile_grid(tiles: Array, cols: int = 2) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = cols
+	g.add_theme_constant_override(&"h_separation", UITokens.S3)
+	g.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for t: Control in tiles:
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		g.add_child(t)
+	return g
+
+
+## Grade de opções escolhíveis (foco de treino, setor de captação...): cada opção é um ladrilho
+## com ícone, nome e uma linha de efeito; a escolhida fica destacada. Substitui fileiras de chips
+## quando a escolha merece explicação. `items` = [[chave, título, subtítulo, ícone], ...].
+static func option_grid(items: Array, selected: String, cb: Callable, cols: int = 2) -> GridContainer:
+	var grid := GridContainer.new()
+	grid.columns = cols
+	grid.add_theme_constant_override(&"h_separation", UITokens.S3)
+	grid.add_theme_constant_override(&"v_separation", UITokens.S3)
+	for it: Array in items:
+		var key := String(it[0])
+		var on := key == selected
+		var v := vbox(2)
+		var head := hbox(10)
+		if it.size() > 3 and String(it[3]) != "":
+			head.add_child(icon_rect(String(it[3]), 24, UIColors.ACCENT if on else UIColors.MUTED))
+		var t := label(String(it[1]), "H3")
+		t.clip_text = true
+		t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(t)
+		if on:
+			head.add_child(icon_rect("check", 22, UIColors.ACCENT))
+		v.add_child(head)
+		if it.size() > 2 and String(it[2]) != "":
+			var s := label(String(it[2]), "Small", true)
+			s.max_lines_visible = 2
+			v.add_child(s)
+		var tile := tap_row(v, func(): cb.call(key), "CardHighlight" if on else "CardFlat")
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(tile)
+	return grid
+
+
+## Efeitos em porcentagem como selos coloridos ("Evolução +10%" em verde, "Lesão +15%" em
+## vermelho). `items` = [[nome, delta_em_%, maior_é_melhor], ...]; zeros ficam de fora.
+static func effect_pills(items: Array) -> HFlowContainer:
+	var f := flow(8)
+	for it: Array in items:
+		var d := int(it[1])
+		if d == 0:
+			continue
+		var good := (d > 0) == bool(it[2])
+		f.add_child(pill("%s %+d%%" % [tr_static(String(it[0])), d], UIColors.GREEN if good else UIColors.RED, 16))
+	return f
+
+
+static func tr_static(s: String) -> String:
+	return I18n.t(s)
+
+
+## Linha de comparação entre dois lados (estatísticas de jogo): valores nas pontas, o nome no
+## meio e uma barra dividida na proporção, com o lado maior em destaque.
+static func versus_row(caption: String, a_text: String, b_text: String, a_val: float, b_val: float) -> VBoxContainer:
+	var v := vbox(4)
+	var r := hbox(8)
+	var total := a_val + b_val
+	var a_win := a_val > b_val
+	var b_win := b_val > a_val
+	var a := label(a_text, "H3")
+	a.custom_minimum_size.x = 90
+	if a_win:
+		a.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	r.add_child(a)
+	var n := label(caption, "Caps")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	r.add_child(n)
+	var b := label(b_text, "H3")
+	b.custom_minimum_size.x = 90
+	b.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if b_win:
+		b.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	r.add_child(b)
+	v.add_child(r)
+	var bars := hbox(4)
+	var left := ColorRect.new()
+	left.color = UIColors.ACCENT if a_win else UIColors.SURFACE_3
+	left.custom_minimum_size.y = 6
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = maxf(0.05, a_val / total) if total > 0.0 else 1.0
+	var right := ColorRect.new()
+	right.color = UIColors.ACCENT if b_win else UIColors.SURFACE_3
+	right.custom_minimum_size.y = 6
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.size_flags_stretch_ratio = maxf(0.05, b_val / total) if total > 0.0 else 1.0
+	bars.add_child(left)
+	bars.add_child(right)
+	v.add_child(bars)
+	return v

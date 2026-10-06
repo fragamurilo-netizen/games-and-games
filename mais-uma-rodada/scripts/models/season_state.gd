@@ -46,6 +46,19 @@ func is_weekend(slot: int) -> bool:
 	return slot_type(slot) == "W"
 
 
+## Fim de semana de estadual (calendário de ano civil, "E3@" no modelo): não é rodada de liga, mas
+## o mercado e o departamento médico andam como em qualquer semana. Saves antigos não têm a marca
+## "we": vale o dia da semana da data.
+func is_state_weekend(slot: int) -> bool:
+	if not slot_type(slot).begins_with("E"):
+		return false
+	var e: Dictionary = calendar[slot]
+	if e.has("we"):
+		return bool(e["we"])
+	var jan1 := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1})
+	return int(Time.get_datetime_dict_from_unix_time(jan1 + int(e.get("d", 0)) * 86400)["weekday"]) == 6
+
+
 ## Janelas e aposentadorias de saves com o calendário antigo (sem as marcas "win"/"ret").
 const LEGACY_WINDOWS: Array = [[0, 5], [32, 36]]
 const LEGACY_RETIRE := 48
@@ -136,6 +149,26 @@ func date_label(slot: int, with_weekday: bool = true) -> String:
 	if with_weekday:
 		s = WEEKDAYS_I18N.get(I18n.lang, WEEKDAYS_I18N["pt"])[int(dt["weekday"])] + " " + s
 	return s
+
+
+## Data por extenso para manchete: "Quarta-feira, 4 de fevereiro".
+func long_date_label(slot: int) -> String:
+	if slot < 0 or slot >= calendar.size():
+		return ""
+	var doy: int = calendar[slot]["d"]
+	var unix := Time.get_unix_time_from_datetime_dict({"year": year, "month": 1, "day": 1}) + doy * 86400
+	var dt := Time.get_datetime_dict_from_unix_time(unix)
+	var wd := int(dt["weekday"])
+	var m := int(dt["month"]) - 1
+	match I18n.lang:
+		"en":
+			return "%s, %s %d" % [["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][wd],
+				["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][m], int(dt["day"])]
+		"es":
+			return "%s, %d de %s" % [["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][wd], int(dt["day"]),
+				["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][m]]
+	return "%s, %d de %s" % [["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"][wd], int(dt["day"]),
+		["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"][m]]
 
 
 func to_dict() -> Dictionary:

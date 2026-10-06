@@ -11,13 +11,13 @@ Mais Uma Rodada ("One More Matchday") is a football management sim built for you
 
 ★ A WHOLE FOOTBALL WORLD
 • 670+ clubs in 53 leagues across 43 countries, with promotion and relegation
-• About 16,000 players with 15 attributes, potential, personality and a career history
+• About 16,000 players with 21 attributes, potential, personality and a career history
 • Domestic cups, super cups and continental tournaments in their real-life formats
 • National teams, qualifiers and a world tournament
 
 ★ MATCHES THAT TELL A STORY
 • Minute-by-minute engine: tactics, fatigue, cards, injuries, penalties and stoppage time
-• Live 2D match with commentary, scores from around the league and three speeds
+• Live 2D match with commentary, scores from around the league and normal, fast, turbo or instant speed
 • Pause any time to change tactics or make substitutions
 • Upsets happen, but the stronger side usually wins, just like real football
 
@@ -44,3 +44,12 @@ Mais Uma Rodada ("One More Matchday") is a football management sim built for you
 Start for free and play a full season. Enjoying it? Unlock the Full Career once and play as many seasons as you like, with no ads and no subscription.
 
 Clubs, players and competitions are fictional or inspired by real football, with no affiliation to any official body.
+
+WHAT'S NEW (1.0.0)
+• First release: the first season is free, with any club
+• Brand-new interface built for one-handed play
+• Continental cups in their current format, plus national-team leagues
+• Players rated in stars, with the uncertain part shown
+• National teams with their full historical honours
+• Club history with the managers of every era
+• Faster simulation on multi-core phones

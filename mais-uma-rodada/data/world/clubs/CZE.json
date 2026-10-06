@@ -51,7 +51,7 @@
 			"capacity": 18900,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ACS",
@@ -183,7 +183,13 @@
 			"stadium": "Lokotrans Aréna",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "wings",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -204,7 +210,13 @@
 			"stadium": "Stadion Střelnice",
 			"capacity": 6100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "FKJ",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -225,7 +237,13 @@
 			"stadium": "Malšovická aréna",
 			"capacity": 9300,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF",
+				"crown": 1
+			},
 			"rivals": []
 		},
 		{
@@ -246,7 +264,13 @@
 			"stadium": "Ďolíček",
 			"capacity": 6300,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B",
+				"text": "BOHEMIANS PRAHA"
+			},
 			"rivals": []
 		},
 		{
@@ -267,7 +291,16 @@
 			"stadium": "Na Stínadlech",
 			"capacity": 18000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FKT",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -288,7 +321,14 @@
 			"stadium": "Městský stadion",
 			"capacity": 8100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "rose",
+				"c1": "#0055A4",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -309,7 +349,13 @@
 			"stadium": "Městský stadion",
 			"capacity": 4800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -330,7 +376,13 @@
 			"stadium": "CFIG Arena",
 			"capacity": 4600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -351,7 +403,14 @@
 			"stadium": "Letná",
 			"capacity": 5800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "FCZ",
+				"sc": "#0055A4",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -372,7 +431,13 @@
 			"stadium": "Juliska",
 			"capacity": 8100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFD100",
+				"border": "gold"
+			},
 			"rivals": []
 		}
 	]

@@ -233,25 +233,65 @@ static func ensure_all(world: GameWorld) -> int:
 	return n
 
 
-## Virada de temporada: os clubes da IA lançam uniformes novos. O titular mantém a identidade
-## (a estampa tradicional volta na maioria dos anos); reserva e terceiro mudam mais.
+## Virada de temporada: os clubes da IA lançam uniformes novos. Tudo parte do modelo real do
+## clube (data/world/kits): o titular mantém estampa e cores e muda só o acabamento; reserva e
+## terceiro alternam entre os que o clube usou de verdade. Clubes gerados renovam o próprio
+## uniforme do mesmo jeito, sem se afastar dele.
 static func renew_ai(world: GameWorld, c: Club) -> void:
 	if world.is_user_club(c.id) or c.kit_home.is_empty():
 		return
 	var kr := RandomNumberGenerator.new()
 	kr.seed = hash([c.key, world.year, "kits"])
-	var old_pat := String(c.kit_home.get("pattern", "plain"))
-	if bool(c.kit_home.get("tonal", false)):
-		old_pat = "plain"
-	var hint := old_pat if kr.randf() < 0.75 else ""
 	var sp_h := _sponsor_keys(c.kit_home)
 	var sp_a := _sponsor_keys(c.kit_away)
-	c.kit_home = ClubGenerator.home_kit(kr, c, hint)
-	c.kit_home.merge(sp_h, true)
-	c.kit_away = ClubGenerator.away_kit(kr, c, c.kit_home)
-	c.kit_away.merge(sp_a, true)
-	c.kit_third = {}
-	c.kit_gk = {}
+	var sp_t := _sponsor_keys(c.kit_third)
+	var sp_g := _sponsor_keys(c.kit_gk)
+	var real := ClubGenerator.real_kits(c)
+	var h: Dictionary
+	var a: Dictionary
+	var t: Dictionary
+	var g: Dictionary
+	if not real.is_empty():
+		h = ClubGenerator.refresh_kit(kr, real["h"])
+		var pool: Array = [real["a"], real["t"]] + Array(real["alt"])
+		# Reserva: o real na maioria dos anos; às vezes um dos alternativos.
+		var ai := 0 if kr.randf() < 0.65 or pool.size() <= 2 else kr.randi_range(2, pool.size() - 1)
+		a = ClubGenerator.refresh_kit(kr, pool[ai])
+		# Terceiro: o real ou outro alternativo, nunca o mesmo desenho da reserva.
+		var rest: Array = []
+		for i in pool.size():
+			if i != ai and i != 0:
+				rest.append(i)
+		if ai != 0:
+			rest.append(0)
+		var ti: int = 1 if ai != 1 and kr.randf() < 0.6 else int(RngUtil.pick(kr, rest))
+		t = ClubGenerator.refresh_kit(kr, pool[ti])
+		g = ClubGenerator.refresh_kit(kr, real["g"])
+	else:
+		h = ClubGenerator.refresh_kit(kr, c.kit_home)
+		a = ClubGenerator.refresh_kit(kr, c.kit_away)
+		t = ClubGenerator.refresh_kit(kr, c.third_kit()) if kr.randf() < 0.6 else ClubGenerator.third_for(kr, c, h, a)
+		g = ClubGenerator.refresh_kit(kr, c.gk_kit())
+	for k in [h, a, t, g]:
+		for key in _sponsor_keys(k):
+			k.erase(key)
+	if clash(h, a):
+		a = ClubGenerator.away_kit(kr, c, h)
+	recolor_distinct(c, t, [h, a])
+	# Uniformes escritos para esta temporada nos dados (licenciamento) valem como estão.
+	var season := ClubGenerator.season_kits(c, world.year)
+	h = season.get("h", h)
+	a = season.get("a", a)
+	t = season.get("t", t)
+	g = season.get("g", g)
+	h.merge(sp_h, true)
+	a.merge(sp_a, true)
+	t.merge(sp_t, true)
+	g.merge(sp_g, true)
+	c.kit_home = h
+	c.kit_away = a
+	c.kit_third = t
+	c.kit_gk = g
 
 
 # ---------------------------------------------------------------------------
@@ -260,7 +300,7 @@ static func renew_ai(world: GameWorld, c: Club) -> void:
 
 ## As três linhas de coleção que a fornecedora apresenta todo ano: [nome, descrição].
 const COLLECTIONS: Array = [
-	["Raízes", "O desenho tradicional do clube, com acabamento clássico."],
+	["Raízes", "O uniforme de verdade do clube, com acabamento novo."],
 	["Contemporânea", "Linhas limpas, estampa discreta tom sobre tom e detalhes finos."],
 	["Ousada", "Estampa forte na titular e um terceiro uniforme feito para vender camisa."],
 ]
@@ -274,6 +314,21 @@ static func collection(c: Club, year: int, idx: int) -> Dictionary:
 	var kr := RandomNumberGenerator.new()
 	kr.seed = hash([c.key, year, "colecao", idx])
 	var style := idx % COLLECTIONS.size()
+	# Raízes: o modelo real do clube com acabamento novo.
+	var real := ClubGenerator.real_kits(c)
+	if style == 0 and not real.is_empty():
+		var rh := ClubGenerator.refresh_kit(kr, real["h"], 0.3 if idx < COLLECTIONS.size() else 0.0)
+		var pool: Array = [real["a"], real["t"]] + Array(real["alt"])
+		var ra := ClubGenerator.refresh_kit(kr, pool[0 if idx < COLLECTIONS.size() else kr.randi_range(0, pool.size() - 1)], 0.3)
+		var rt := ClubGenerator.refresh_kit(kr, pool[1 if idx < COLLECTIONS.size() else kr.randi_range(0, pool.size() - 1)], 0.3)
+		for k: Dictionary in [ra, rt]:
+			for key in ["collar", "sleeve_len", "trim"]:
+				if rh.has(key):
+					k[key] = rh[key]
+		if clash(rh, ra):
+			ra = ClubGenerator.away_kit(kr, c, rh)
+		recolor_distinct(c, rt, [rh, ra])
+		return {"name": String(COLLECTIONS[0][0]), "desc": String(COLLECTIONS[0][1]), "h": rh, "a": ra, "t": rt}
 	var cur := String(c.kit_home.get("pattern", "plain"))
 	if bool(c.kit_home.get("tonal", false)):
 		cur = "plain"

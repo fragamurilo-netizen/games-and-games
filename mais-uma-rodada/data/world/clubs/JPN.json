@@ -26,7 +26,7 @@
 				"symbol": "antlers",
 				"sc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["JPN_SAI"]
 		},
 		{
 			"key": "JPN_SAI",
@@ -52,7 +52,7 @@
 				"symbol": "letter",
 				"initials": "URD"
 			},
-			"rivals": []
+			"rivals": ["JPN_OSK", "JPN_KSH"]
 		},
 		{
 			"key": "JPN_YKM",
@@ -103,7 +103,7 @@
 			"capacity": 26800,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "KF",
@@ -160,15 +160,13 @@
 			"capacity": 39700,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "stripes:3",
 				"symbol": "letter",
 				"initials": "G",
 				"sc": "#FFFFFF"
 			},
-			"rivals": [
-				"JPN_KOB"
-			]
+			"rivals": ["JPN_KOB", "JPN_SAI", "JPN_CER"]
 		},
 		{
 			"key": "JPN_HIR",
@@ -190,7 +188,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "S",
@@ -241,7 +239,7 @@
 			"stadium": "Yodoko Sakura Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"rivals": [],
+			"rivals": ["JPN_OSK"],
 			"crest": {
 				"shape": "round",
 				"field": "plain",
@@ -294,7 +292,13 @@
 			"stadium": "Hitachidai Stadium",
 			"capacity": 15100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#111111",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -315,7 +319,13 @@
 			"stadium": "Toyota City Stadium",
 			"capacity": 44000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#F5A12D",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -336,7 +346,13 @@
 			"stadium": "Best Denki Stadium",
 			"capacity": 21500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bee",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -357,7 +373,13 @@
 			"stadium": "Niigata Stadium",
 			"capacity": 42300,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -378,7 +400,12 @@
 			"stadium": "Lemon Gas Stadium",
 			"capacity": 15200,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "waves",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -399,7 +426,14 @@
 			"stadium": "Tokyo Stadium",
 			"capacity": 49000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "V",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -420,7 +454,13 @@
 			"stadium": "Sanga Stadium by Kyocera",
 			"capacity": 21600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -441,7 +481,15 @@
 			"stadium": "NHK Spring Mitsuzawa",
 			"capacity": 15400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ship",
+				"c1": "#0055A4",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -462,7 +510,13 @@
 			"stadium": "City Light Stadium",
 			"capacity": 15500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "rooster",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -483,7 +537,13 @@
 			"stadium": "IAI Stadium Nihondaira",
 			"capacity": 19600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

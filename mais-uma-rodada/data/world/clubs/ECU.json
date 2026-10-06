@@ -273,7 +273,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "OSC",
@@ -351,7 +351,13 @@
 			"stadium": "Estadio Bellavista",
 			"capacity": 16500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "TU",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -372,7 +378,15 @@
 			"stadium": "Estadio Reina del Cisne",
 			"capacity": 14900,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "torch",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -393,7 +407,14 @@
 			"stadium": "Estadio Olímpico Atahualpa",
 			"capacity": 35000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "VT",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -414,7 +435,13 @@
 			"stadium": "Estadio Jocay",
 			"capacity": 20000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

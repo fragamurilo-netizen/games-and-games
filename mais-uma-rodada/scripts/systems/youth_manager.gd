@@ -110,6 +110,7 @@ static func years_in(world: GameWorld, p: Player) -> int:
 ## Quanto o clube já conhece o garoto (0.3..0.92): coordenador da base, anos de casa e jogos.
 static func precision(world: GameWorld, p: Player) -> float:
 	var pr := 0.3 + People.staff_level(world, "base") * 0.3 + years_in(world, p) * 0.12
+	pr += (YouthAcademy.coach_level(world, category(p, world.year)) - 2) * 0.03
 	if p.stats[Player.S_APPS] >= 10:
 		pr += 0.08
 	return clampf(pr, 0.3, 0.92)
@@ -119,17 +120,17 @@ static func precision(world: GameWorld, p: Player) -> float:
 ## carrega um erro (olheiros erram): uma parte do ruído nunca some.
 static func estimate(world: GameWorld, p: Player) -> int:
 	var pr := precision(world, p)
-	var err := float(p.scout_noise) * (1.0 - pr * 0.65)
+	var err := float(p.scout_noise) * (1.0 - pr * 0.65) + YouthLife.estimate_bias(world, p, pr) # corpo adiantado engana
 	return clampi(int(round(p.potential + err)), p.overall, 94)
 
 
 ## Estrelas (0,5 a 5, de meia em meia) do potencial estimado.
 static func potential_stars(world: GameWorld, p: Player) -> float:
-	return clampf(snappedf((estimate(world, p) - 46.0) / 9.0, 0.5), 0.5, 5.0)
+	return PlayerAssessment.stars(world,p,-1,true)
 
 
 static func potential_label_of(world: GameWorld, p: Player) -> String:
-	return Player.potential_label(estimate(world, p))
+	return PlayerAssessment.summary(world,p,true)
 
 
 ## Quão confiável é a avaliação.
@@ -223,8 +224,10 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 	var imp := float(reg["import"])
 	var nat := club.nation
 	if age >= 16 and rng.randf() < imp:
-		nat = PlayerGenerator.pick_import(rng, club.nation)
-		if age < min_foreign_age(nat, club.nation):
+		var pool: Dictionary = PlayerGenerator.YOUTH_IMPORTS.get(club.nation, {})
+		# Captação internacional: metade pelas rotas de sempre, metade pelos vizinhos e pela diáspora
+		nat = String(RngUtil.weighted_key(rng, pool)) if not pool.is_empty() and rng.randf() < 0.5 else PlayerGenerator.pick_import(rng, club.nation)
+		if DatabaseManager.nation(nat).is_empty() or age < min_foreign_age(nat, club.nation):
 			nat = club.nation
 	var p := PlayerGenerator.create(world, rng, pos, target, age, nat, club.city, used)
 	ClubPolicy.apply_rule(world, rng, club, p, ClubPolicy.generation_rule(rng, club), used)
@@ -239,7 +242,8 @@ static func _new_kid(world: GameWorld, club: Club, age: int, used: Dictionary, q
 	p.wage = 0
 	p.contract_end = world.year
 	p.joined_year = world.year
-	if p.nationality == club.nation and rng.randf() < float(reg["home"]) and not ClubPolicy.of(club).has("only"):
+	NationalityManager.sync_residence(world, p)
+	if NationalityManager.birth_country(p) == club.nation and rng.randf() < float(reg["home"]) and not ClubPolicy.of(club).has("only"):
 		p.hometown = club.city
 	HeartClubs.assign_academy_kid(world, p, club)
 	Valuation.update_value(p, world.year)
@@ -278,7 +282,8 @@ static func run_trial(world: GameWorld) -> Array:
 	for _i in n:
 		var kid := _new_kid(world, club, world.rng.randi_range(MIN_AGE, 17), used, -4.5, 5.5, 1.0)
 		world.academy.erase(kid.id) # só entra se for aprovado
-		kid.hometown = club.city if world.rng.randf() < 0.7 else kid.hometown
+		if NationalityManager.birth_country(kid) == club.nation and world.rng.randf() < 0.7:
+			kid.hometown = club.city
 		HeartClubs.assign_academy_kid(world, kid, club)
 		cands.append(kid.to_dict())
 	s["cands"] = cands
@@ -334,25 +339,30 @@ static func best_prospect(world: GameWorld, club: Club) -> Player:
 
 
 ## Sobe um garoto para o elenco profissional. Retorna a mensagem para a interface.
-static func promote(world: GameWorld, p: Player) -> String:
+static func promote(world: GameWorld, p: Player, loaned: bool = false) -> String:
 	var club := world.user_club()
 	if not world.academy.has(p.id):
 		return "Ele não está mais na base."
-	if club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
+	if not loaned and club.player_ids.size() >= int(DatabaseManager.squad_rules()["max_players"]):
 		return "Elenco cheio: libere uma vaga antes de subir %s." % p.display_name()
+	var pro_end := int(YouthLife.of(world, p)["pc"]) if YouthLife.has_pro(world, p) else 0
+	var pro_wage := p.wage if pro_end > 0 else 0
+	YouthLife.forget(world, p.id)
 	world.academy.erase(p.id)
 	var years_home := years_in(world, p)
 	p.reset_season_stats()
 	p.club_id = -1
 	PlayerGenerator.sign_to_club(world, world.rng, p, club, false)
 	p.squad_status = Player.STATUS_PROSPECT
-	p.contract_end = world.year + 3
-	p.wage = Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5)))
+	p.contract_end = maxi(world.year + 3, pro_end)
+	p.wage = maxi(pro_wage, Valuation.round_wage(Valuation.base_wage(p.ovr_f) * 0.6 * float(club.league_cfg().get("wage", 0.5))))
 	p.morale = minf(100.0, p.morale + 12.0)
 	Valuation.update_value(p, world.year)
 	world.stat_add("youth_promoted")
 	CoachIdentity.on_promote(world)
 	_add_grad(world, p, club.id, 0, years_home)
+	if loaned:
+		return "%s assinou o contrato profissional." % p.display_name()
 	NewsManager.post_raw(world, "%s sobe para o profissional" % p.display_name(),
 		"Aos %d anos, %s (%s) deixa a base do %s e passa a treinar com o elenco principal." % [p.age(world.year), p.display_name(), Pos.name_of(p.position).to_lower(), club.short_name],
 		club.id, p.id, NewsEvent.IMP_HIGH, "base")
@@ -365,6 +375,7 @@ static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: fl
 	if not world.academy.has(p.id) or buyer == null:
 		return "Negócio desfeito."
 	var years_home := years_in(world, p)
+	YouthLife.forget(world, p.id)
 	world.academy.erase(p.id)
 	p.reset_season_stats()
 	p.club_id = -1
@@ -387,6 +398,7 @@ static func sell(world: GameWorld, p: Player, buyer: Club, fee: int, sell_on: fl
 
 
 static func release(world: GameWorld, p: Player) -> void:
+	YouthLife.forget(world, p.id)
 	world.academy.erase(p.id)
 
 
@@ -432,16 +444,21 @@ static func bid_target(world: GameWorld) -> Player:
 	return best
 
 
-## Clube interessado num garoto: bem maior que o do usuário. De fora do país só se a idade
-## permitir a transferência internacional. Retorna null se ninguém se encaixar.
+## Clube interessado num garoto: bem maior que o do usuário e que o veja como futuro titular
+## (potencial à altura do elenco dele: gigante não compra garoto que nunca vai jogar lá).
+## De fora do país só se a idade permitir a transferência internacional. null se ninguém se encaixar.
 static func bid_buyer(world: GameWorld, p: Player) -> Club:
 	var club := world.user_club()
 	var age := p.age(world.year)
+	var pot := float(p.potential) + p.scout_noise * 0.5
 	var cands: Array = []
 	for c: Club in world.clubs:
 		if c.id == club.id or c.tier != 1 or c.reputation < club.reputation + 10.0:
 			continue
 		if age < min_foreign_age(club.nation, c.nation):
+			continue
+		var lvl := PlayerGenerator.club_level(c)
+		if pot < lvl - 2.0 or pot > lvl + 14.0 or not ClubPolicy.ai_wants(world, c, p):
 			continue
 		cands.append(c)
 	if cands.is_empty():
@@ -450,11 +467,10 @@ static func bid_buyer(world: GameWorld, p: Player) -> Club:
 	return cands[world.rng.randi_range(0, mini(cands.size(), 25) - 1)]
 
 
-## Valor de uma proposta por um garoto da base (potencial pesa mais que o nível atual).
+## Valor de uma proposta por um garoto da base: aposta no potencial, com o desconto de quem nunca
+## jogou no profissional (ver MarketAI.academy_fee).
 static func bid_fee(world: GameWorld, p: Player, buyer: Club) -> int:
-	var base := maxf(float(p.value), Valuation.base_wage(float(p.potential)) * 30.0)
-	var pot_f := 1.0 + maxf(0.0, p.potential - 70.0) * 0.08
-	return Valuation.round_value(base * pot_f * world.rng.randf_range(1.1, 1.8) * (0.8 + buyer.reputation / 250.0))
+	return MarketAI.academy_fee(world, p, buyer, world.rng)
 
 
 # ---------------------------------------------------------------------------
@@ -497,9 +513,11 @@ static func weekly(world: GameWorld) -> void:
 			age_f *= 1.2
 		elif age <= 17 and p.dev_curve == Player.CURVE_TARDIO:
 			age_f *= 0.8
-		var budget := gap * 0.005 * age_f * (0.75 + club.youth_level / 250.0) * play_factor(world, p) * focus * p.trait_mult("dev_mult") + p.dev_acc
-		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget))
+		var budget := gap * 0.005 * age_f * YouthAcademy.facility_growth(club) * play_factor(world, p) * focus * p.trait_mult("dev_mult") * YouthAcademy.growth_mult(world, p) * YouthLife.growth_mult(world, p) + p.dev_acc
+		PlayerDevelopment.apply_growth(world, p, maxf(0.0, budget), YouthAcademy.growth_bias(world, p))
 		p.morale = clampf(p.morale + (65.0 - p.morale) * 0.1, 0.0, 100.0)
+		YouthAcademy.weekly_side(world, p)
+	YouthLife.weekly(world) # empresários, saudade, contrato profissional
 
 
 ## Balanço do ano de cada garoto: estirão (ganha potencial) ou estagnação (perde).
@@ -520,6 +538,8 @@ static func yearly_review(world: GameWorld) -> Array:
 			up += 0.22
 		if apps >= 8 and avg >= 7.0:
 			up += 0.12
+		up += minf(0.12, int(world.youth.get("shine", {}).get(str(p.id), 0)) * 0.03) # brilhou nas copas
+		up += (YouthAcademy.coach_level(world, cat) - 3) * 0.02
 		if cat != CAT_U15 and games >= 8 and apps < games * 0.2:
 			down += 0.12
 		for t in ["profissional", "esforcado", "perfeccionista"]:
@@ -559,7 +579,7 @@ static func yearly_review(world: GameWorld) -> Array:
 ## Fim de temporada: balanço, todos envelhecem um ano; quem passou da idade sai; chegam novos garotos.
 ## Retorna {"left": [nomes], "new": [Player], "changes": [{id, name, up, d, why}], "cost": custo da captação}.
 static func season_turnover(world: GameWorld) -> Dictionary:
-	var out := {"left": [], "new": [], "changes": [], "cost": 0}
+	var out := {"left": [], "quit": [], "new": [], "changes": [], "cost": 0}
 	if not world.has_user():
 		return out
 	var club := world.user_club()
@@ -568,6 +588,12 @@ static func season_turnover(world: GameWorld) -> Dictionary:
 	for ch in yearly_review(world):
 		var cp: Player = ch["p"]
 		out["changes"].append({"id": cp.id, "name": cp.display_name(), "up": ch["up"], "d": ch["d"], "why": ch["why"]})
+	world.year += 1
+	YouthAcademy.log_season(world, world.year - 1)
+	world.year -= 1
+	YouthLife.generation_bonds(world) # quem dividiu a categoria no ano
+	for dq in YouthLife.dropouts(world):
+		out["quit"].append("%s: %s" % [dq[0], String(dq[1])])
 	world.year += 1
 	for p: Player in world.academy.values().duplicate():
 		p.reset_season_stats()
@@ -578,9 +604,13 @@ static func season_turnover(world: GameWorld) -> Dictionary:
 			world.add_player(p) # vira agente livre: outro clube pode apostar nele
 			out["left"].append(p.display_name())
 	dismiss_candidates(world)
+	YouthLife.prune(world)
 	var cost := scouting_cost(world)
 	if cost > 0:
 		club.add_ledger("investimentos", -cost)
+	var staff_cost := YouthAcademy.coaches_cost(world)
+	club.add_ledger("salarios", -staff_cost)
+	out["staff_cost"] = staff_cost
 	out["cost"] = cost
 	state(world)["cost"] = cost
 	var used := WorldGenerator.used_names_of(world)
@@ -619,6 +649,7 @@ static func build_league(world: GameWorld) -> void:
 	var u17 := _build(world, "u17")
 	if not u17.is_empty():
 		world.youth["u17"] = u17
+	YouthCups.build(world)
 
 
 static func _build(world: GameWorld, key: String) -> Dictionary:
@@ -704,7 +735,7 @@ static func pick_team(world: GameWorld, key: String, exclude: Dictionary = {}, r
 			for p: Player in src:
 				if taken.has(p.id):
 					continue
-				var s: float = p.rating_at(slot) + rng.randfn(0.0, 1.6) - p.stats[Player.S_STARTS] * 0.04
+				var s: float = p.rating_at(slot) + YouthLife.pick_bonus(world, p) + rng.randfn(0.0, 1.6) - p.stats[Player.S_STARTS] * 0.04
 				if si == 1:
 					s -= 2.5 # sobe de categoria quem se destaca
 				if s > best_s:
@@ -715,7 +746,7 @@ static func pick_team(world: GameWorld, key: String, exclude: Dictionary = {}, r
 			continue
 		taken[best.id] = true
 		xi.append([best, slot])
-		total += best.rating_at(slot)
+		total += best.rating_at(slot) + YouthLife.maturity_edge(world, best) # na base, o corpo joga
 	var bench: Array = []
 	for p: Player in pool + extra:
 		if not taken.has(p.id) and bench.size() < 3 and p.best_position() != Pos.GK:
@@ -778,16 +809,17 @@ static func play_slot(world: GameWorld, slot: int) -> Array:
 				f.ag = int(g[3])
 				CompetitionManager.apply_to_table(yl["table"], f)
 				if world.is_user_club(h):
-					g.append(_credit_user(world, yl, team, int(g[2]), int(g[3])))
+					g.append(_credit_user(world, yl, team, int(g[2]), int(g[3]), key))
 					_credit_goals(world, yl, a, int(g[3]))
 				elif world.is_user_club(a):
 					_credit_goals(world, yl, h, int(g[2]))
-					g.append(_credit_user(world, yl, team, int(g[3]), int(g[2])))
+					g.append(_credit_user(world, yl, team, int(g[3]), int(g[2]), key))
 				else:
 					_credit_goals(world, yl, h, int(g[2]))
 					_credit_goals(world, yl, a, int(g[3]))
 				if world.is_user_club(h) or world.is_user_club(a):
 					played.append(g)
+	YouthCups.play_slot(world, slot, used)
 	return played
 
 
@@ -799,7 +831,7 @@ static func _strength(world: GameWorld, yl: Dictionary, cid: int) -> float:
 
 ## Minutos, gols, assistências e notas do time do usuário. Retorna o resumo do jogo:
 ## {"g": [nomes dos autores], "best": nome do melhor em campo}.
-static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, mine: int, theirs: int) -> Dictionary:
+static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, mine: int, theirs: int, comp_key: String = "") -> Dictionary:
 	var rng := world.rng
 	var xi: Array = team["xi"]
 	var summary := {"g": [], "best": ""}
@@ -858,6 +890,8 @@ static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, min
 		p.stats[Player.S_ASSISTS] += int(assists.get(p.id, 0))
 		p.stats[Player.S_RATING_SUM] += int(round(rt * 10.0))
 		p.push_rating(rt)
+		if comp_key != "":
+			YouthCups._add_cs(world, p.id, comp_key, 1, int(goals.get(p.id, 0)), int(assists.get(p.id, 0)))
 		if rt > best_r:
 			best_r = rt
 			best = p
@@ -867,6 +901,8 @@ static func _credit_user(world: GameWorld, yl: Dictionary, team: Dictionary, min
 		bp.stats[Player.S_MINUTES] += 20
 		bp.stats[Player.S_RATING_SUM] += int(round(rb * 10.0))
 		bp.push_rating(rb)
+		if comp_key != "":
+			YouthCups._add_cs(world, bp.id, comp_key, 1, 0, 0)
 	if best != null:
 		best.stats[Player.S_MOTM] += 1
 		summary["best"] = best.short_name()
@@ -924,6 +960,9 @@ static func finish_league(world: GameWorld) -> Dictionary:
 			out = {"u17": u17}
 		else:
 			out["u17"] = u17
+	var cups := YouthCups.finish(world)
+	if not cups.is_empty() and not out.is_empty():
+		out["cups"] = cups
 	return out
 
 

@@ -11,13 +11,13 @@ Mais Uma Rodada é um simulador de gestão de futebol feito para o celular. Joga
 
 ★ UM MUNDO INTEIRO PARA COMANDAR
 • Mais de 670 clubes em 53 ligas de 43 países, com acesso e rebaixamento
-• Cerca de 16 mil jogadores com 15 atributos, potencial, personalidade e carreira
+• Cerca de 16 mil jogadores com 21 atributos, potencial, personalidade e carreira
 • Copas nacionais, estaduais, supercopas e torneios continentais com o formato da vida real
 • Seleções, eliminatórias e o torneio mundial de seleções
 
 ★ PARTIDAS QUE CONTAM UMA HISTÓRIA
 • Motor minuto a minuto: táticas, cansaço, cartões, lesões, pênaltis e acréscimos
-• Jogo ao vivo em campo 2D com narração, placar dos outros jogos e três velocidades
+• Jogo ao vivo em campo 2D com narração, placar dos outros jogos e velocidade normal, rápida, turbo ou resultado direto
 • Pause para mudar a tática ou fazer substituições
 • Zebras acontecem, mas o time mais forte costuma ganhar, como no futebol de verdade
 
@@ -45,9 +45,11 @@ Comece de graça e jogue uma temporada completa. Gostou? Desbloqueie a Carreira 
 
 Os clubes, jogadores e competições do jogo são fictícios ou inspirados no futebol real, sem vínculo com nenhuma entidade oficial.
 
-NOVIDADES (0.2.1)
-• Força dos clubes e dos jogadores calibrada com a vida real
-• Uniforme de goleiro para cada clube
-• Jogos e gols pela seleção no perfil do jogador
-• Filosofias de contratação dos clubes
-• Todas as copas nacionais e supercopas
+NOVIDADES (1.0.0)
+• Primeira versão na loja: a primeira temporada é grátis, com qualquer clube
+• Interface nova, pensada para jogar com uma mão
+• Copas continentais no formato atual e ligas de seleções
+• Jogadores avaliados por estrelas, com a parte incerta à mostra
+• Seleções com todos os títulos históricos
+• História dos clubes com os técnicos de cada época
+• Simulação mais rápida em celulares com vários núcleos

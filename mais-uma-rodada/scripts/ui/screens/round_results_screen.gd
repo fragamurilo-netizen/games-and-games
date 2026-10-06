@@ -27,6 +27,9 @@ func refresh() -> void:
 	UIKit.clear(c)
 	if f != null:
 		c.add_child(_user_card(w, f, user))
+		var pc := PrestigeCard.round_card(w, _report.get("feats", {}))
+		if pc != null:
+			c.add_child(pc)
 		if not Dictionary(w.stats.get("xray", {})).is_empty():
 			c.add_child(_xray_teaser(w))
 	for ev in _report.get("cups", []):
@@ -34,9 +37,9 @@ func refresh() -> void:
 		if txt != "" and (w.is_user_club(int(ev.get("club", -1))) or ev.get("t", "") == "cwc"):
 			c.add_child(_notice("trophy", UIColors.ACCENT, txt))
 	if _report.get("window_opened", false):
-		c.add_child(_notice("swap", UIColors.GREEN, "A janela de transferências abriu. Até %s você pode comprar e vender." % w.season.date_label(w.window_end_day(), false)))
+		c.add_child(_notice("swap", UIColors.GREEN, "Janela de transferências aberta até %s." % w.season.date_label(w.window_end_day(), false)))
 	elif _report.get("window_closed", false):
-		c.add_child(_notice("swap", UIColors.ORANGE, "A janela de transferências fechou. Agora só jogadores livres podem ser contratados."))
+		c.add_child(_notice("swap", UIColors.ORANGE, "Janela de transferências fechada."))
 	if f != null:
 		c.add_child(_round_card(w, f))
 		if f.is_league():
@@ -52,6 +55,8 @@ func refresh() -> void:
 	var ret := _retiring_card(w)
 	if ret != null:
 		c.add_child(ret)
+	max_content_width = 1700
+	columnize(c, 0, 2, 1 if f != null else 0)
 	_build_footer()
 
 
@@ -69,9 +74,15 @@ func _xray_teaser(w: GameWorld) -> Control:
 
 
 func _notice(icon_name: String, color: Color, text: String) -> Control:
-	var row := UIKit.hbox(12)
-	row.add_child(UIKit.icon_rect(icon_name, 30, color))
-	row.add_child(UIKit.label(text, "", true))
+	var row := UIKit.hbox(14)
+	var tile := PanelContainer.new()
+	tile.theme_type_variation = "IconTile"
+	tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	tile.add_child(UIKit.icon_rect(icon_name, 26, color))
+	row.add_child(tile)
+	var l := UIKit.label(text, "", true)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(l)
 	var card := UIKit.card("CardFlat", 0)
 	card.add_child(row)
 	return UIKit.card_panel(card)
@@ -80,14 +91,21 @@ func _notice(icon_name: String, color: Color, text: String) -> Control:
 func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 	var club := w.user_club()
 	var res: String = user.get("result", f.result_for(club.id))
-	var card := UIKit.card("CardHighlight", 12)
-	var head := UIKit.hbox(8)
-	var names := {"V": "VITÓRIA", "E": "EMPATE", "D": "DERROTA"}
-	head.add_child(UIKit.pill(names.get(res, res), UIColors.result_color(res), 22))
-	head.add_child(UIKit.spacer())
+	# Placar final no cartão de dia de jogo: faixa da competição e os lados nas cores dos clubes.
+	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
+	var band: HBoxContainer = hero[1]
+	var ft := UIKit.label(tr("Fim de jogo"), "Caps")
+	ft.add_theme_color_override(&"font_color", Color.WHITE)
+	ft.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ft.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(ft)
 	if MatchEngine.is_derby(w, f.home, f.away):
-		head.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 18))
-	card.add_child(head)
+		band.add_child(UIKit.pill("CLÁSSICO", UIColors.RED, 16))
+	var names := {"V": "VITÓRIA", "E": "EMPATE", "D": "DERROTA"}
+	var rp := UIKit.pill(names.get(res, res), UIColors.result_color(res), 18)
+	rp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(rp)
+	var card: VBoxContainer = hero[2]
 	var row := UIKit.hbox(8)
 	for side in 2:
 		var cl := w.club(f.home if side == 0 else f.away)
@@ -112,6 +130,10 @@ func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 		card.add_child(UIKit.kv("Craque do jogo", "%s (%s)" % [motm.display_name(), w.club(motm.club_id).short_name if motm.club_id >= 0 else "—"], UIColors.ACCENT))
 	var before := int(user.get("pos_before", 0))
 	var after := int(user.get("pos_after", 0))
+	# Antes da estreia na liga (estaduais, copas) a "posição" é só a ordem inicial da tabela
+	var ul := w.league_of(w.user_club_id)
+	if ul == null or not ul.table.has(w.user_club_id) or int(ul.table[w.user_club_id]["pl"]) == 0:
+		after = 0
 	if after > 0:
 		var prow := UIKit.hbox(10)
 		prow.add_child(UIKit.label("Posição na tabela", "Muted"))
@@ -123,7 +145,7 @@ func _user_card(w: GameWorld, f: Fixture, user: Dictionary) -> Control:
 		else:
 			prow.add_child(UIKit.label("%dº" % after, "H3"))
 		card.add_child(prow)
-	return UIKit.card_panel(card)
+	return hero[0]
 
 
 func _goals_box(w: GameWorld, f: Fixture) -> Control:
@@ -194,17 +216,22 @@ func _table_card(w: GameWorld, club: Club, f: Fixture) -> Control:
 		var cup: Cup = w.season.cups.get(f.comp, null)
 		var g: Dictionary = cup.group_of(club.id) if cup != null else {}
 		if g.is_empty():
+			UIKit.card_panel(card).free() # nada a mostrar: o cartão não fica solto na memória
 			return null
-		card.add_child(UIKit.section("%s · Grupo %s" % [cup.short_name, g["n"]]))
+		card.add_child(UIKit.section("%s · Fase de liga" % cup.short_name if cup.league_phase else "%s · Grupo %s" % [cup.short_name, g["n"]]))
 		card.add_child(TableRows.header(true))
-		var order := CompetitionManager.sort_table(g["clubs"], g["table"])
+		var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
 		for i in order.size():
-			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if i < 2 else Color(0, 0, 0, 0)
+			# Around the user's position is enough here; the full 36-team table has its own screen.
+			if cup.league_phase and absi(i - order.find(club.id)) > 2:
+				continue
+			var zone := CompetitionManager.zone_color(CompetitionManager.ZONE_PROMOTION) if i < (8 if cup.league_phase else 2) else (UIColors.ORANGE if cup.league_phase and i < 24 else Color.TRANSPARENT)
 			card.add_child(TableRows.table_row(w, g["table"][order[i]], int(order[i]), i + 1, true, zone))
 		var cid := cup.id
 		card.add_child(UIKit.button("Ver a copa", "GhostButton", func(): UIManager.goto("table", {"cup": cid}), "trophy"))
 		return UIKit.card_panel(card)
 	if f != null and f.stage == Fixture.STAGE_KO:
+		UIKit.card_panel(card).free()
 		return null
 	var league := w.league_of(club.id)
 	card.add_child(UIKit.section("Classificação · %s" % league.short_name))
@@ -234,7 +261,6 @@ func _transfers_card(w: GameWorld) -> Control:
 	for i in mini(6, sorted.size()):
 		var t: Transfer = sorted[i]
 		var row := UIKit.hbox(10)
-		row.add_child(UIKit.badge(t.overall, 48, 34, 20))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label("%s, %d anos" % [t.player_name, t.age], "H3"))

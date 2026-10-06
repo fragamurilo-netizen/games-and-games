@@ -9,13 +9,17 @@ const FILTERS := [["all", "Todas"], ["unread", "Não lidas"], ["reply", "A respo
 const SCREEN_LABELS := {
 	"relations": "Falar com a diretoria", "kit": "Abrir uniforme e patrocínios", "squad": "Ver elenco",
 	"prematch": "Escalação e tática", "training": "Abrir treino", "market": "Abrir mercado",
+	"national": "Abrir seleções",
 }
 
+const GROUP_NAMES := {"diretoria": "Diretoria", "comissao": "Comissão técnica", "elenco": "Elenco", "mercado": "Mercado"}
+
 var _filter := "all"
+## Mensagem aberta no painel de leitura (telas largas: lista à esquerda, mensagem à direita).
+var _open_id := -1
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Caixa de entrada"
 
 
@@ -28,53 +32,113 @@ func refresh() -> void:
 	var w := world()
 	if w == null:
 		return
+	max_content_width = 1800
 	var unread := InboxManager.unread_count(w)
-	screen_subtitle = "%d não lida(s)" % unread if unread > 0 else "Tudo lido"
+	screen_subtitle = ("%d não lida" if unread == 1 else "%d não lidas") % unread if unread > 0 else "Tudo lido"
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	var g := ButtonGroup.new()
-	var chips := UIKit.flow(8)
+	var pending := 0
+	for m: Dictionary in w.inbox:
+		if InboxManager.action_open(w, m):
+			pending += 1
+	# Resumo em frase: o que pede atenção agora (as contagens também ficam nas abas).
+	var bits: Array = []
+	bits.append(tr("Nenhuma mensagem nova.") if unread == 0 else (tr("1 mensagem nova.") if unread == 1 else tr("%d mensagens novas.") % unread))
+	if pending > 0:
+		bits.append(tr("1 pede resposta sua.") if pending == 1 else tr("%d pedem resposta sua.") % pending)
+	c.add_child(UIKit.label(" ".join(bits), "Muted", true))
+	var tabs: Array = []
 	for f in FILTERS:
-		var key: String = f[0]
-		var chip := UIKit.chip(f[1], key == _filter, g, func():
-			_filter = key
-			refresh())
-		chip.add_theme_font_size_override(&"font_size", 18)
-		chips.add_child(chip)
-	c.add_child(chips)
+		var label: String = tr(f[1])
+		if f[0] == "unread" and unread > 0:
+			label += " · %d" % unread
+		elif f[0] == "reply" and pending > 0:
+			label += " · %d" % pending
+		tabs.append([f[0], label])
+	c.add_child(UIKit.scroll_tabs(tabs, _filter, func(k: String):
+		_filter = k
+		refresh()))
+	var items: Array = w.inbox.duplicate()
+	items.reverse()
+	var shown: Array = []
+	for m: Dictionary in items:
+		if _passes(w, m):
+			shown.append(m)
+	var wide := UILayout.is_wide()
+	var list := UIKit.vbox(UITokens.S3)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if not w.inbox.is_empty():
-		var tools := UIKit.hbox(10)
-		var all_read := UIKit.button("Marcar todas como lidas", "GhostButton", func():
+		var tools := UIKit.hbox(8)
+		var count := UIKit.label(tr(("%d mensagem" if shown.size() == 1 else "%d mensagens")) % shown.size(), "Caps")
+		count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tools.add_child(count)
+		var all_read := UIKit.button("Marcar lidas", "TextButton", func():
 			InboxManager.mark_all_read(w)
 			GameManager.save_now()
 			refresh(), "check")
-		all_read.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		all_read.disabled = unread == 0
 		tools.add_child(all_read)
-		var clean := UIKit.button("Limpar lidas", "GhostButton", func():
+		tools.add_child(UIKit.button("Limpar lidas", "TextButton", func():
 			var n := InboxManager.delete_read(w)
 			GameManager.save_now()
-			UIManager.toast("%d mensagem(ns) apagada(s)" % n if n > 0 else "Nada para apagar")
-			refresh(), "close")
-		clean.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tools.add_child(clean)
-		c.add_child(tools)
-	var items: Array = w.inbox.duplicate()
-	items.reverse()
-	var shown := 0
+			UIManager.toast(("%d mensagem apagada" if n == 1 else "%d mensagens apagadas") % n if n > 0 else "Nada para apagar")
+			refresh(), "close"))
+		list.add_child(tools)
+	# Mensagens agrupadas por dia, cada dia num cartão com filetes (como um cliente de e-mail).
 	var last_key := ""
-	for m: Dictionary in items:
-		if not _passes(w, m):
-			continue
+	var group: Array = []
+	var on_change := func(): refresh()
+	for m: Dictionary in shown:
 		var key := "%d-%d" % [int(m["y"]), int(m["d"])]
 		if key != last_key:
+			if not group.is_empty():
+				list.add_child(UIKit.menu_group(group))
+			group = []
 			last_key = key
-			c.add_child(UIKit.section(date_of(w, m)))
-		c.add_child(row(w, m, func(): refresh()))
-		shown += 1
-	if shown == 0:
-		c.add_child(UIKit.label("Nenhuma mensagem aqui." if _filter != "all" else "A caixa de entrada está vazia. Relatórios, pedidos e propostas chegam aqui ao longo da temporada.", "Muted", true))
+			list.add_child(UIKit.eyebrow(date_of(w, m), UIColors.DIM))
+		# No celular o toque abre a folha da mensagem (row() cai em open_message quando cb é vazio);
+		# passar on_change aqui fazia o toque só recarregar a lista, sem abrir nada.
+		var cb := Callable()
+		if wide:
+			var mid := int(m["id"])
+			cb = func():
+				InboxManager.mark_read(m)
+				_open_id = mid
+				refresh()
+		group.append(row(w, m, on_change, cb, wide and int(m["id"]) == _open_id))
+	if not group.is_empty():
+		list.add_child(UIKit.menu_group(group))
+	if shown.is_empty():
+		var empty := UIKit.card("CardFlat", 10)
+		empty.add_child(UIKit.icon_rect("mail", 48, UIColors.DIM))
+		empty.add_child(UIKit.label("Nenhuma mensagem aqui." if _filter != "all" else "Caixa de entrada vazia.", "Muted", true))
+		list.add_child(UIKit.card_panel(empty))
+	if not wide:
+		c.add_child(list)
+		return
+	# Tela larga: lista e painel de leitura lado a lado.
+	var split := UIKit.hbox(UITokens.S5)
+	c.add_child(split)
+	list.size_flags_stretch_ratio = 0.9
+	split.add_child(list)
+	var open: Dictionary = {}
+	for m: Dictionary in shown:
+		if int(m["id"]) == _open_id:
+			open = m
+	if open.is_empty() and not shown.is_empty():
+		open = shown[0]
+		_open_id = int(open["id"])
+		InboxManager.mark_read(open)
+	var pane := UIKit.card("Card", 14)
+	if open.is_empty():
+		pane.add_child(UIKit.label("Escolha uma mensagem para ler.", "Muted"))
+	else:
+		pane.add_child(message_view(w, open, on_change, false))
+	var pp := UIKit.card_panel(pane)
+	pp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pp.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	split.add_child(pp)
 
 
 func _passes(w: GameWorld, m: Dictionary) -> bool:
@@ -96,35 +160,49 @@ static func date_of(w: GameWorld, m: Dictionary) -> String:
 	return str(int(m["y"]))
 
 
-## Linha de mensagem (também usada no cartão da tela inicial).
-static func row(w: GameWorld, m: Dictionary, on_change: Callable) -> Control:
+## Linha de mensagem (também usada no cartão da tela inicial). `tap` troca o que o toque faz
+## (no painel de leitura, só seleciona); `selected` destaca a linha aberta.
+static func row(w: GameWorld, m: Dictionary, on_change: Callable, tap: Callable = Callable(), selected: bool = false) -> Control:
 	var unread := not bool(m.get("r", false))
 	var open := InboxManager.action_open(w, m)
 	var r := UIKit.hbox(12)
+	# Ponto de não lida: a mesma coluna sempre, para a lista não "pular".
+	var dot := Control.new()
+	dot.custom_minimum_size = Vector2(10, 10)
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if unread:
+		dot.draw.connect(func(): dot.draw_circle(Vector2(5, 5), 5, UIColors.ACCENT))
+	r.add_child(dot)
 	var p := w.player(int(m.get("p", -1))) if String(m.get("f", "")) == "jogador" else null
 	var cl := w.club(int(m.get("c", -1))) if String(m.get("f", "")) == "clube" else null
 	if p != null:
-		var pv := UIKit.portrait(p, w.club(p.club_id), w.year, 48)
-		pv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		var pv := UIKit.portrait(p, w.club(p.club_id), w.year, 52)
+		pv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		r.add_child(pv)
 	elif cl != null:
-		var cv := UIKit.crest(cl, 44)
-		cv.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		var cv := UIKit.crest(cl, 48)
+		cv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		r.add_child(cv)
 	else:
-		var ic := UIKit.icon_rect(InboxManager.icon_of(m), 30, UIColors.ACCENT if unread else UIColors.MUTED)
-		ic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		r.add_child(ic)
-	var v := UIKit.vbox(2)
+		var tile := PanelContainer.new()
+		tile.theme_type_variation = "IconTile"
+		tile.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tile.add_child(UIKit.icon_rect(InboxManager.icon_of(m), 26, UIColors.ACCENT if unread else UIColors.MUTED))
+		r.add_child(tile)
+	var v := UIKit.vbox(1)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var who := String(m.get("n", ""))
 	var role := InboxManager.role_of(m)
-	var from := UIKit.label(who + ((" · " + role) if role != "" and role != who else ""), "Caps")
+	var from := UIKit.label((who + ((" · " + role) if role != "" and role != who else "")), "Caps")
 	from.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if unread:
 		from.add_theme_color_override(&"font_color", UIColors.ACCENT)
 	v.add_child(from)
-	v.add_child(UIKit.label(String(m.get("s", "")), "H3" if unread else "", true))
+	var subj := UIKit.label(String(m.get("s", "")), "H3" if unread else "")
+	subj.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if not unread:
+		subj.add_theme_color_override(&"font_color", UIColors.MUTED)
+	v.add_child(subj)
 	var preview := UIKit.label(String(m.get("b", "")).split("\n")[0], "Small")
 	preview.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(preview)
@@ -133,7 +211,10 @@ static func row(w: GameWorld, m: Dictionary, on_change: Callable) -> Control:
 		var pill := UIKit.pill("RESPONDER", UIColors.ORANGE, 15)
 		pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		r.add_child(pill)
-	return UIKit.tap_row(r, func(): open_message(m, on_change))
+	var cb := tap if tap.is_valid() else func(): open_message(m, on_change)
+	var tr_row := UIKit.tap_row(r, cb, "RowPanel", true)
+	UIKit.set_row_selected(tr_row, selected)
+	return tr_row
 
 
 ## Folha com a mensagem inteira e o atalho para resolver o assunto.
@@ -142,26 +223,54 @@ static func open_message(m: Dictionary, on_change: Callable = Callable()) -> voi
 	if w == null:
 		return
 	InboxManager.mark_read(m)
+	UIManager.show_modal(message_view(w, m, on_change, true), true)
+	if on_change.is_valid():
+		on_change.call()
+
+
+## Conteúdo da mensagem: cabeçalho com remetente, o texto e as ações. Vai na folha (celular)
+## ou no painel de leitura (tela larga).
+static func message_view(w: GameWorld, m: Dictionary, on_change: Callable, in_sheet: bool) -> VBoxContainer:
 	var v := UIKit.vbox(14)
-	var head := UIKit.hbox(12)
-	head.add_child(UIKit.icon_rect(InboxManager.icon_of(m), 40, UIColors.ACCENT))
-	head.add_child(UIKit.label(String(m.get("s", "")), "Title", true))
-	v.add_child(head)
 	var who := String(m.get("n", ""))
 	var role := InboxManager.role_of(m)
-	v.add_child(UIKit.label("De: %s%s · %s" % [who, (" (" + role + ")") if role != "" and role != who else "", date_of(w, m)], "Small", true))
+	var group := InboxManager.group_of(m)
+	var head := UIKit.hbox(14)
+	var tile := PanelContainer.new()
+	tile.theme_type_variation = "IconTile"
+	tile.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	tile.add_child(UIKit.icon_rect(InboxManager.icon_of(m), 34, UIColors.ACCENT))
+	head.add_child(tile)
+	var hv := UIKit.vbox(2)
+	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hv.add_child(UIKit.eyebrow(String(GROUP_NAMES.get(group, "Mensagem"))))
+	hv.add_child(UIKit.label(String(m.get("s", "")), "Title", true))
+	head.add_child(hv)
+	v.add_child(head)
+	var meta := UIKit.hbox(10)
+	var from := UIKit.label("%s%s" % [who, (" · " + role) if role != "" and role != who else ""], "Small", true)
+	from.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	meta.add_child(from)
+	meta.add_child(UIKit.label(date_of(w, m), "Caps"))
+	v.add_child(meta)
+	var line := ColorRect.new()
+	line.color = UITokens.HAIRLINE if not UIColors.light else UIColors.LINE
+	line.custom_minimum_size.y = 1
+	v.add_child(line)
 	var p := w.player(int(m.get("p", -1)))
 	if p != null:
 		var pr := UIKit.hbox(12)
-		pr.add_child(UIKit.portrait(p, w.club(p.club_id), w.year, 64))
+		pr.add_child(UIKit.portrait(p, w.club(p.club_id), w.year, 72))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(p.display_name(), "H3", true))
 		var pc := w.club(p.club_id)
 		col.add_child(UIKit.label("%d anos · %s · %s" % [p.age(w.year), Pos.name_of(p.position), pc.short_name if pc != null else "sem clube"], "Small", true))
 		pr.add_child(col)
-		pr.add_child(UIKit.badge(p.overall))
-		v.add_child(pr)
+		pr.add_child(UIKit.player_stars(w,p,15))
+		var pcard := UIKit.card("CardInset", 0)
+		pcard.add_child(pr)
+		v.add_child(UIKit.card_panel(pcard))
 	v.add_child(UIKit.label(String(m.get("b", "")), "", true))
 	var btn := _action_button(w, m, on_change)
 	if btn != null:
@@ -169,19 +278,19 @@ static func open_message(m: Dictionary, on_change: Callable = Callable()) -> voi
 	var bottom := UIKit.hbox(10)
 	var del := UIKit.button("Apagar", "GhostButton", func():
 		InboxManager.delete(w, int(m["id"]))
-		UIManager.close_modal()
+		if in_sheet:
+			UIManager.close_modal()
 		GameManager.save_now()
 		if on_change.is_valid():
 			on_change.call(), "close")
 	del.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(del)
-	var close := UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal())
-	close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom.add_child(close)
+	if in_sheet:
+		var close := UIKit.button("Fechar", "GhostButton", func(): UIManager.close_modal())
+		close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bottom.add_child(close)
 	v.add_child(bottom)
-	UIManager.show_modal(v, true)
-	if on_change.is_valid():
-		on_change.call()
+	return v
 
 
 static func _action_button(w: GameWorld, m: Dictionary, on_change: Callable) -> Button:

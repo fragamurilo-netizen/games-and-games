@@ -76,7 +76,7 @@ static func formations(club: Club) -> Array:
 ## Tática da IA para um jogo, a partir da filosofia. Clubes pragmáticos leem o adversário;
 ## os idealistas mudam pouco (no máximo baixam um pouco a mentalidade contra gigantes).
 ## Não usa o RNG do mundo: a variação vem do dia e do clube, então tudo segue determinístico.
-static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_home: bool, sheet: TeamSheet) -> void:
+static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_home: bool, sheet: TeamSheet, with_study: bool = true) -> void:
 	var ph := of(club)
 	var adapt := float(ph.get("adapt", 0.3))
 	var day := world.season.day if world.season != null else 0
@@ -115,6 +115,17 @@ static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_ho
 	if sheet.mentality <= 1:
 		line = 0
 		pressing = mini(pressing, 1)
+	if diff >= 5.0 and sheet.mentality >= 3 and roll < adapt + 0.25:
+		# Favorito: sufoca a saída de bola de quem tem menos qualidade (pressão e linha adiantada).
+		pressing = 2
+		line = maxi(line, 1)
+	elif diff <= -6.0:
+		# Azarão: nada de pressão alta nem linha adiantada contra atacantes melhores.
+		pressing = mini(pressing, 1)
+		line = 0 if roll < adapt + 0.3 else mini(line, 1)
+	elif not is_home and absf(diff) < 4.0 and sheet.mentality >= TeamSheet.MENT_TUDO:
+		# Fora de casa em jogo parelho ninguém começa no tudo ou nada.
+		sheet.mentality = TeamSheet.MENT_OFENSIVA
 	# Elenco cansado não aguenta pressão alta o jogo inteiro.
 	if pressing == 2 and _avg_condition(world, sheet) < 82.0:
 		pressing = 1
@@ -122,6 +133,13 @@ static func apply_match_plan(world: GameWorld, club: Club, opponent: Club, is_ho
 	sheet.pressing = clampi(pressing, 0, 2)
 	sheet.line = clampi(line, 0, 2)
 	sheet.intensity = clampi(intensity, 0, 2)
+	sheet.width = 1
+	# Ritmo, passe, marcação, perda da bola, cera e escanteios (instruções de equipe).
+	TacticsManager.ai_deep(world, club, sheet, ph, diff, roll)
+	# Estudo do rival: o técnico lê o adversário e ajusta o plano para este jogo.
+	if with_study and opponent != null:
+		var roll2 := float(absi(club.id * 3571 + day * 7907 + opponent.id * 613) % 1000) / 1000.0
+		TacticalScout.ai_adjust(world, club, opponent, is_home, sheet, adapt, roll2)
 
 
 static func _avg_condition(world: GameWorld, sheet: TeamSheet) -> float:

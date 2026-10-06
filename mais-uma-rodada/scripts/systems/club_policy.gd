@@ -28,9 +28,9 @@ static func matches(world: GameWorld, club: Club, p: Player, rule: String) -> bo
 	var val := parts[1] if parts.size() > 1 else ""
 	match kind:
 		"nation":
-			return p.nationality == val
+			return NationalityManager.passports(p).has(val)
 		"region":
-			if p.nationality == String(REGION_NATION.get(val, p.nationality)) and ClubGenerator.region_of_city(p.nationality, p.hometown) == val:
+			if NationalityManager.birth_country(p) == String(REGION_NATION.get(val, p.nationality)) and ClubGenerator.region_of_city(NationalityManager.birth_country(p), p.hometown) == val:
 				return true
 			return formed_at(p, club)
 	return true
@@ -113,6 +113,7 @@ static func apply_rule(world: GameWorld, rng: RandomNumberGenerator, club: Club,
 		return
 	var parts := rule.split(":")
 	p.nationality = nation
+	p.origin.clear()
 	var origin := NameGenerator.pick_origin(rng, nation)
 	p.eth = int(origin["eth"])
 	var culture := String(origin["c"])
@@ -123,6 +124,7 @@ static func apply_rule(world: GameWorld, rng: RandomNumberGenerator, club: Club,
 		culture = String(of(club).get("culture", culture))
 	else:
 		p.hometown = PlayerGenerator.pick_hometown(rng, nation, club.city)
+	NationalityManager.ensure(world, p)
 	var names := NameGenerator.generate(rng, culture, {"pos": p.position, "height": p.height, "foot": p.foot, "attrs": p.attrs,
 		"region": ClubGenerator.region_of_city(nation, p.hometown)}, used)
 	p.first_name = names["first"]

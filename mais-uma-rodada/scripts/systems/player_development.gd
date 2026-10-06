@@ -57,6 +57,13 @@ static func talent_drift(world: GameWorld) -> float:
 
 ## Evolução semanal de todos os jogadores. minutes: {player_id: minutos no jogo desta rodada}.
 ## Retorna jogadores que tiveram salto notável (para notícias).
+## Jogos grandes da semana (final, clássico, mata-mata decisivo): {id do jogador: importância}.
+## Preenchido por SeasonManager._apply_match e consumido em weekly_tick.
+static var big_games: Dictionary = {}
+const BIG_GAME := 0.6 # importância a partir da qual o jogo conta como "grande"
+const BIG_GAME_BOOST := 0.45 # jovem que joga jogo grande amadurece mais (no máximo +45% na semana)
+
+
 static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dictionary = {}) -> Array:
 	var rng := world.rng
 	# Metade dos jogadores por semana, com o dobro do efeito: mesmo total, metade do custo.
@@ -65,8 +72,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 	var weeks := FinanceManager.WEEKS * 0.5
 	var notable: Array = []
 	var drift := talent_drift(world)
-	var growth_f := clampf(1.0 - drift * 0.06, 0.55, 1.3) / weeks
-	var decline_f := clampf(1.0 + drift * 0.05, 0.75, 1.5) / weeks
+	var growth_f := clampf(1.0 - drift * 0.1, 0.5, 1.3) / weeks
+	var decline_f := clampf(1.0 + drift * 0.08, 0.75, 1.6) / weeks
 	var year := world.year
 	var clubs := world.clubs
 	var mentors := _mentor_bonus(world)
@@ -103,6 +110,9 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 				var train_f := TrainingManager.growth_mult(world, p) * (ManagerProfile.youth_mult(world) if age <= 21 else 1.0) if cid == world.user_club_id else 1.0
 				# Quem joga bem cresce mais; quem vive de notas baixas trava.
 				var perf_f := performance_factor(p) if mins > 0 else 1.0
+				# Importância do jogo: garoto que segura uma final ou um clássico amadurece mais rápido.
+				if age <= 23 and big_games.has(p.id):
+					perf_f *= 1.0 + BIG_GAME_BOOST * clampf((float(big_games[p.id]) - BIG_GAME) / (1.0 - BIG_GAME) * 0.6 + 0.4, 0.0, 1.0)
 				# Jovens ao lado de um mentor aprendem mais rápido.
 				var mentor_f := 1.0 + float(mentors.get(cid, 0.0)) if age <= 22 and cid >= 0 and not p.has_trait("mentor") else 1.0
 				# A cabeça conta: moral, confiança no treinador e o nível de quem treina ao lado.
@@ -124,7 +134,8 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 			if age >= 30:
 				var mins: int = minutes.get(p.id, 0)
 				load_f = 1.08 if mins >= 80 else (0.95 if mins == 0 else 1.0)
-			var expected := (5.0 + (age - dstart) * 4.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
+			# Real (Transfermarkt/FC): ~-1 por ano logo depois do auge, -2 aos 33-34, -3 perto dos 36
+			var expected := (9.5 + (age - dstart) * 6.0) * float(cv[2]) * p.trait_mult("decline_mult") * decline_f * body_f * load_f
 			while expected > 0.0:
 				if rng.randf() < minf(1.0, expected):
 					apply_decline(rng, p)
@@ -132,6 +143,7 @@ static func weekly_tick(world: GameWorld, minutes: Dictionary, clubs_played: Dic
 			# A cabeça ainda aprende: veteranos ganham leitura de jogo enquanto o físico cai.
 			if rng.randf() < 0.035 * p.trait_mult("dev_mult"):
 				_wisdom(rng, p)
+	big_games.clear()
 	return notable
 
 
@@ -399,12 +411,23 @@ static func apply_decline(rng: RandomNumberGenerator, p: Player) -> void:
 ## Retorna {"explosions": [Player], "busts": [Player]}.
 static func yearly_review(world: GameWorld) -> Dictionary:
 	var rng := world.rng
-	var out := {"explosions": [], "busts": []}
+	var out := {"explosions": [], "busts": [], "late": [], "derail": [], "rise": [], "fall": []}
 	var full := FinanceManager.WEEKS * 90.0
-	var boost_chance := clampf(1.0 - talent_drift(world) * 0.15, 0.2, 1.0)
+	var boost_chance := clampf(1.0 - talent_drift(world) * 0.2, 0.2, 1.0)
+	# Nota média de cada elenco (quem jogou de verdade): a fase compara o jogador com o próprio time.
+	var team_avg := {}
+	for p: Player in world.players.values():
+		if p.club_id >= 0 and p.minutes_season / full >= 0.2:
+			var acc: Array = team_avg.get(p.club_id, [0.0, 0])
+			team_avg[p.club_id] = [float(acc[0]) + p.avg_rating(), int(acc[1]) + 1]
+	for cid in team_avg:
+		team_avg[cid] = float(team_avg[cid][0]) / maxf(1.0, float(team_avg[cid][1]))
 	for p: Player in world.players.values():
 		var age := p.age(world.year)
 		if age > 24:
+			_late_turns(world, p, age, p.minutes_season / full, out)
+			_career_arc(world, p, age, p.minutes_season / full, out, float(team_avg.get(p.club_id, 6.75)))
+			_settle_potential(p, age)
 			continue
 		var share := p.minutes_season / full
 		var avg := p.avg_rating()
@@ -436,21 +459,185 @@ static func yearly_review(world: GameWorld) -> Dictionary:
 			if AwardManager.award_weight(k) >= 2:
 				up += 0.15
 				break
-		up *= boost_chance
+		up *= boost_chance * (1.0 if age <= 21 else 0.6) # depois dos 21 o teto já está quase definido
 		var roll := rng.randf()
 		if roll < up:
-			p.potential = mini(94, p.potential + rng.randi_range(1, 3))
+			p.potential = bump_potential(rng, p.potential, rng.randi_range(1, 3))
 		elif roll < up + down:
 			p.potential = maxi(p.overall, p.potential - rng.randi_range(1, 3))
 		if rng.randf() < 0.025:
 			p.potential = maxi(p.overall, p.potential - rng.randi_range(3, 6))
 			out["busts"].append(p)
+		elif age <= 17 and p.potential >= 86 and share >= 0.25 and rng.randf() < 0.25 + share * 0.3:
+			# Prodígio que ganhou minutos cedo (o caso Yamal): salto grande de uma vez
+			var b0 := p.overall
+			apply_growth(world, p, rng.randf_range(4.0, 8.0))
+			if p.overall > b0:
+				out["explosions"].append(p)
 		elif age <= 21 and p.potential - p.overall >= 6 and rng.randf() < 0.02 + share * 0.02:
 			var before := p.overall
 			apply_growth(world, p, rng.randf_range(2.0, 5.0))
 			if p.overall > before:
 				out["explosions"].append(p)
+		if age >= 21:
+			_derail(world, p, age, share, out)
+		_career_arc(world, p, age, share, out, float(team_avg.get(p.club_id, 6.75)))
 	return out
+
+
+## Sobe o teto `gain` pontos, cada vez mais difícil perto da elite: de 80 para cima 70% dos
+## pontos "pegam", de 84 para cima 40%, de 88 para cima 20% e acima de 91 quase nenhum (fenômeno é fenômeno de
+## nascença; uma boa temporada não transforma um bom jogador em candidato à Bola de Ouro).
+static func bump_potential(rng: RandomNumberGenerator, pot: int, gain: int) -> int:
+	for _i in gain:
+		var ch := 1.0 if pot < 80 else (0.7 if pot < 84 else (0.4 if pot < 88 else (0.2 if pot < 91 else 0.08)))
+		if rng.randf() < ch:
+			pot += 1
+	return mini(94, pot)
+
+
+## Depois do auge o teto é o que ele já é: veterano não tem "potencial" acima do overall (senão
+## a tela mostra um trintão em queda com 8 pontos para crescer). Perto do auge, no máximo 2.
+static func _settle_potential(p: Player, age: int) -> void:
+	var dstart := int(CURVES[p.dev_curve][1]) + (3 if p.position == Pos.GK else 0)
+	if age >= dstart:
+		p.potential = p.overall
+	elif age >= 28:
+		p.potential = clampi(p.potential, p.overall, p.overall + 2)
+
+
+## Florescimento tardio (o caso Vardy): depois dos 24, quem joga muito e bem pode ainda subir de
+## patamar. Raro; mais provável na curva tardia, com cabeça forte e titular absoluto.
+static func _late_turns(world: GameWorld, p: Player, age: int, share: float, out: Dictionary) -> void:
+	if age > 29 or p.club_id < 0 or share < 0.45 or p.avg_rating() < 6.95:
+		return
+	var rng := world.rng
+	var ch := 0.004
+	if p.dev_curve == Player.CURVE_TARDIO:
+		ch = 0.035
+	elif p.dev_curve == Player.CURVE_LONGEVO:
+		ch = 0.012
+	if p.hid("det") >= 15:
+		ch *= 1.6
+	if p.avg_rating() >= 7.3:
+		ch *= 1.8
+	if rng.randf() < ch:
+		var gain := rng.randi_range(3, 7)
+		p.potential = mini(92, maxi(p.potential, p.overall) + gain)
+		var before := p.overall
+		apply_growth(world, p, rng.randf_range(2.0, 4.5))
+		if p.overall > before:
+			out["late"].append(p)
+	elif age <= 26:
+		_derail(world, p, age, share, out)
+
+
+## Fase da carreira: ninguém é igual todo ano, e a fase tem memória. Cada temporada mexe no
+## momento do jogador (p.arc, -1 a 1) com o que aconteceu de verdade: minutos, notas, cabeça,
+## dedicação e adaptação ao clube, mais um tanto de acaso. Metade do momento do ano anterior
+## continua: quem engrenou tende a seguir subindo, quem perdeu espaço tende a afundar, e os dois
+## podem virar. O overall anda na direção do momento; quanto mais jovem, maior o passo.
+## Os saltos e quedas grandes entram em out["rise"] / out["fall"] (notícias e relatórios).
+const ARC_BIAS := 0.1
+const ARC_STEP := [[19, 4.0], [22, 3.5], [26, 3.0], [29, 2.4], [32, 2.0], [99, 1.6]]
+
+
+static func _career_arc(world: GameWorld, p: Player, age: int, share: float, out: Dictionary, team_avg: float = 6.75) -> void:
+	if p.retiring:
+		return
+	var rng := world.rng
+	var c := 0.0
+	# Minutos: jogar é o que faz alguém crescer; banco eterno atrofia.
+	if share >= 0.6:
+		c += 0.18
+	elif share >= 0.35:
+		c += 0.06
+	elif share < 0.15 and age >= 20:
+		c -= 0.2
+	elif share < 0.3:
+		c -= 0.07
+	# Notas, só com minutos suficientes para contarem: vale se destacar no próprio time (no time
+	# que atropela todo mundo, nota alta é o normal); o nível do time pesa pouco.
+	if share >= 0.2:
+		var r := p.avg_rating()
+		c += clampf((r - team_avg) * 0.5, -0.25, 0.28) + clampf((team_avg - 6.75) * 0.12, -0.06, 0.06)
+	# Cabeça e dedicação.
+	if p.morale < 35.0:
+		c -= 0.12
+	elif p.morale > 75.0:
+		c += 0.05
+	c += (p.hid("pro") - 10) * 0.012
+	c += (p.trait_mult("dev_mult") - 1.0) * 0.8
+	# Lesão longa no fim da temporada atrapalha a próxima.
+	if p.injury_weeks >= 8:
+		c -= 0.12
+	# Chegou neste ano e não se firmou: adaptação ruim.
+	if p.club_id >= 0 and p.joined_year == world.year and share < 0.35:
+		c -= 0.1
+	if p.club_id < 0:
+		c -= 0.15 # sem clube, sem ritmo
+	# Centro da fase: o titular comum (joga, nota na média do time) fica perto de zero; sem isso
+	# o mundo inteiro subia um pouco por ano (medido com tools/ratings_report.gd -- --years=4).
+	c -= ARC_BIAS
+	var arc := clampf(p.arc * 0.5 + c + rng.randfn(0.0, 0.32), -1.0, 1.0)
+	p.arc = arc
+	var step := 1.6
+	for s in ARC_STEP:
+		if age <= int(s[0]):
+			step = float(s[1])
+			break
+	var delta := arc * step
+	# Fase boa depois dos 29 segura o nível, não sobe; e quanto mais alto o overall, menor o
+	# salto (quem já é 88 não vira 90 por um bom ano). Sem isso a elite inflava a cada temporada.
+	if delta > 0.0:
+		delta *= clampf(1.0 - (p.ovr_f - 74.0) * 0.07, 0.15, 1.0) * (1.0 if age <= 29 else 0.0)
+	var before := p.ovr_f
+	if delta >= 0.5:
+		p.potential = mini(94, maxi(p.potential, int(ceil(p.ovr_f + delta)) + 1))
+		apply_growth(world, p, delta)
+		p.dev_acc = 0.0
+	elif delta <= -0.5:
+		var target := p.ovr_f + delta
+		var guard := 0
+		while p.ovr_f > target and guard < 90:
+			apply_decline(rng, p)
+			guard += 1
+		# Jovem que desandou perde também um pouco do teto.
+		if age <= 23:
+			p.potential = maxi(p.overall, p.potential - int(round(-delta * 0.5)))
+	var moved := p.ovr_f - before
+	if moved >= 3.0 and p.club_id >= 0:
+		out["rise"].append(p)
+	elif moved <= -3.0 and p.club_id >= 0:
+		out["fall"].append(p)
+
+
+## Descarrilhou depois de chegar lá (o caso Sancho): jovem que já era bom perde espaço e rumo.
+## Nada roteirizado: sem minutos, cabeça ruim, pouca dedicação e clube novo onde não se encaixou
+## aumentam a chance; mesmo assim é incomum e às vezes ele volta.
+static func _derail(world: GameWorld, p: Player, age: int, share: float, out: Dictionary) -> void:
+	if age > 26 or p.overall < 76 or p.club_id < 0:
+		return
+	var rng := world.rng
+	var ch := 0.0
+	if share < 0.2:
+		ch += 0.07
+	if p.morale < 40.0:
+		ch += 0.05
+	if p.hid("pro") <= 6:
+		ch += 0.05
+	if p.trait_mult("dev_mult") <= 0.95:
+		ch += 0.03
+	if p.joined_year == world.year and share < 0.35:
+		ch += 0.06 # contratação cara que não se adaptou
+	if ch <= 0.0 or rng.randf() >= ch:
+		return
+	var drops := rng.randi_range(2, 5)
+	for i in drops:
+		apply_decline(rng, p)
+	p.recompute_overall()
+	p.potential = maxi(p.overall + 1, p.potential - rng.randi_range(3, 7))
+	out["derail"].append(p)
 
 
 # ---------------------------------------------------------------------------

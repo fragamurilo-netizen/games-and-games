@@ -72,7 +72,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "TFC"
@@ -98,7 +98,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "ASP"
@@ -172,7 +172,13 @@
 			"stadium": "Stade Amadou Barry",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "GFC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -193,7 +199,13 @@
 			"stadium": "Stade Caroline Faye",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ship",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -214,7 +226,14 @@
 			"stadium": "Stade Mawade Wade",
 			"capacity": 8000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "L",
+				"sc": "#E30613",
+				"crown": 1
+			},
 			"rivals": []
 		},
 		{
@@ -235,7 +254,13 @@
 			"stadium": "Stade Ely Manel Fall",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tree",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -256,7 +281,13 @@
 			"stadium": "Stade Ngalandou Diouf",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "AJEL",
+				"text": "AJEL RUFISQUE"
+			},
 			"rivals": []
 		},
 		{
@@ -277,7 +308,13 @@
 			"stadium": "Stade Lat-Dior",
 			"capacity": 8000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -298,7 +335,12 @@
 			"stadium": "Stade Iba Mar Diop",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "heart",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -319,7 +361,14 @@
 			"stadium": "Stade Iba Mar Diop",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFD100",
+				"chief_text": "HLM",
+				"cc": "#FFD100"
+			},
 			"rivals": []
 		}
 	]

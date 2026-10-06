@@ -45,7 +45,10 @@ const S_DRIBBLES := 15
 const S_SAVES := 16
 const S_PASS_PCT := 17 # soma das % de passes certos por jogo (média = / jogos)
 const S_XG := 18 # xG × 100
-const S_COUNT := 19
+const S_AERIAL := 19 # duelos aéreos ganhos
+const S_FOULS := 20 # faltas cometidas
+const S_CONCEDED := 21 # gols sofridos com ele em campo (goleiro)
+const S_COUNT := 22
 
 # --- Estatísticas de copa (PackedInt32Array por copa; as de liga ficam em `stats`) ---
 const C_APPS := 0
@@ -63,14 +66,19 @@ var nickname: String = ""
 var known_as: String = ""
 var birth_year: int = 2000
 var nationality: String = ""
+## País natal, cidadanias, residência e seleção são fatos separados; nunca derivados do rosto.
+var origin: Dictionary = {}
 var eth: int = 1 # etnia (índice em nations.json → ethnicities), usada pelo rosto
 var height: int = 178
 var weight: int = 75
+## Altura final (cm): o garoto ainda cresce até ela (BodyGrowth). 0 = não definida (saves antigos).
+var adult_h: int = 0
 var foot: int = FOOT_RIGHT
 var position: int = Pos.CM
 var secondary: Array = []
 var shirt: int = 0
 var hometown: String = ""
+var langs: Dictionary = {} # idiomas {código: fluência 0..100} (Languages)
 var face_seed: int = 0
 ## Aparência fixada pelo editor: {hs penteado, hc cor do cabelo, bd barba, sk pele, ey olhos, photo arquivo}.
 var look: Dictionary = {}
@@ -94,6 +102,13 @@ var signature: String = ""
 ## Time de coração (HeartClubs): -2 não sorteado, -1 nenhum, >= 0 clube. Escondido até ser revelado.
 var heart: int = -2
 var heart_known: bool = false
+## Relações (Relations): laços com outros jogadores {pid: [tipo, valor -100..100, desde]},
+## relação com técnicos {id do técnico (-2 = o usuário): valor} e o ídolo (pid, -1 = nenhum).
+var bonds: Dictionary = {}
+var coach_rel: Dictionary = {}
+var idol: int = -1
+## Lesões recentes [[ano, turno, parte do corpo, semanas]] (InjuryModel: recidiva e histórico).
+var inj_log: Array = []
 
 # Contrato e status
 var club_id: int = -1
@@ -118,6 +133,8 @@ var recent_ratings: Array = [] # últimas 5 notas
 var injury_weeks: int = 0
 var injury_name: String = ""
 var suspension: int = 0
+## A serviço da seleção (data FIFA sem pausa no calendário do clube): fora dos jogos do clube.
+var intl_duty: bool = false
 var yellow_acc: int = 0
 var retiring: bool = false
 var unhappy_weeks: int = 0
@@ -126,6 +143,9 @@ var unhappy_weeks: int = 0
 var ovr_f: float = 50.0
 var overall: int = 50
 var dev_acc: float = 0.0
+## Fase da carreira (-1 a 1): o que vem acontecendo nas últimas temporadas (ver
+## PlayerDevelopment._career_arc). Tem memória: fase boa tende a continuar, ruim também.
+var arc: float = 0.0
 var minutes_season: int = 0
 ## Overall no início da temporada (para medir evolução/piora no ano).
 var ovr_start: int = -1
@@ -133,14 +153,44 @@ var ovr_start: int = -1
 # Estatísticas e memória
 var stats: PackedInt32Array = PackedInt32Array() # liga (temporada)
 var cup_stats: Dictionary = {} # copa -> PackedInt32Array (temporada)
-var history: Array = [] # [{y, c (club id), cn (nome), a, g, as, r}]
-var spells: Array = [] # passagens por clube [{c, cn, from, to, a, g, as}]
+var history: Array: # [{y, c (club id), cn (nome), a, g, as, r}]
+	get:
+		if _history_raw != null:
+			_history = SaveCodec.unpack_rows(_raw_out(_history_raw))
+			_history_raw = null
+		return _history
+	set(v):
+		_history = v
+		_history_raw = null
+var _history: Array = []
+var _history_raw: Variant = null # compactado do save; só abre quando alguém lê
+var spells: Array: # passagens por clube [{c, cn, from, to, a, g, as}]
+	get:
+		if _spells_raw != null:
+			_spells = SaveCodec.unpack_rows(_raw_out(_spells_raw))
+			_spells_raw = null
+		return _spells
+	set(v):
+		_spells = v
+		_spells_raw = null
+var _spells: Array = []
+var _spells_raw: Variant = null # compactado do save; só abre quando alguém lê
 var career_apps: int = 0
 var career_goals: int = 0
 var career_assists: int = 0
 var titles: int = 0
 ## Títulos com o clube ou a seleção: [{y, k (chave do título: "L:BRA1", "C:LIB", "N:WC"...), c (clube, -1 seleção)}]
-var trophies: Array = []
+var trophies: Array:
+	get:
+		if _trophies_raw != null:
+			_trophies = SaveCodec.unpack_rows(_raw_out(_trophies_raw))
+			_trophies_raw = null
+		return _trophies
+	set(v):
+		_trophies = v
+		_trophies_raw = null
+var _trophies: Array = []
+var _trophies_raw: Variant = null # compactado do save; só abre quando alguém lê
 ## Prêmios individuais: [{y, k (ver AwardManager.award_name), l (liga ou copa)}]
 var awards: Array = []
 ## Mudanças de personalidade ao longo da carreira: [{y, t (traço), add (bool), why}]
@@ -300,7 +350,7 @@ func is_injured() -> bool:
 
 
 func is_available() -> bool:
-	return injury_weeks <= 0 and suspension <= 0
+	return injury_weeks <= 0 and suspension <= 0 and not intl_duty
 
 
 func form() -> float:
@@ -341,6 +391,27 @@ func xg() -> float:
 	return stats[S_XG] / 100.0
 
 
+## Gols por finalização, em % (0 sem finalizações).
+func conversion() -> float:
+	return 100.0 * stats[S_GOALS] / stats[S_SHOTS] if stats[S_SHOTS] > 0 else 0.0
+
+
+## % das finalizações no alvo que o goleiro defendeu (0 sem chutes contra).
+func save_pct() -> float:
+	var faced := stats[S_SAVES] + stats[S_CONCEDED]
+	return 100.0 * stats[S_SAVES] / faced if faced > 0 else 0.0
+
+
+## Totais da carreira somando as temporadas arquivadas e a atual (liga):
+## {mo: craque do jogo, cs: jogos sem sofrer gol}.
+func career_extra() -> Dictionary:
+	var t := {"mo": stats[S_MOTM], "cs": stats[S_CLEAN]}
+	for h in history:
+		for k in t:
+			t[k] = int(t[k]) + int((h as Dictionary).get(k, 0))
+	return t
+
+
 ## Por 90 minutos (0 sem minutos).
 func per90(i: int) -> float:
 	return float(stats[i]) * 90.0 / stats[S_MINUTES] if stats[S_MINUTES] > 0 else 0.0
@@ -360,6 +431,22 @@ func season_delta() -> int:
 
 ## Prêmios de um ano (chaves).
 ## Registra um título (conta e guarda qual foi).
+func club_tenure(year: int) -> String:
+	if club_id < 0:
+		return "Sem clube"
+	var since := joined_year
+	# The latest open spell distinguishes a return and a loan from ownership.
+	for i in range(spells.size() - 1, -1, -1):
+		var spell: Dictionary = spells[i]
+		if int(spell.get("c", -1)) == club_id and int(spell.get("to", 0)) == 0:
+			since = int(spell.get("from", since))
+			break
+	if since <= 0 or since > year:
+		return "Chegada ao clube não registrada"
+	var seasons := year - since + 1
+	return "Desde %d — %s" % [since, "1ª temporada no clube" if seasons == 1 else "%d temporadas no clube" % seasons]
+
+
 func win_title(year: int, key: String, club_id: int) -> void:
 	titles += 1
 	trophies.append({"y": year, "k": key, "c": club_id})
@@ -425,93 +512,8 @@ static func potential_label(p: int) -> String:
 
 ## Perfil de jogo em uma palavra, derivado dos atributos (memorável: "Pivô", "Velocista"...).
 func playstyle() -> String:
-	# Sempre relativo ao próprio overall: o rótulo descreve o *perfil*, não o nível.
-	var a := attrs
-	var o := float(overall)
-	var inverted := (position == Pos.RW and foot == FOOT_LEFT) or (position == Pos.LW and foot == FOOT_RIGHT)
-	match Pos.group(position):
-		Pos.G_GK:
-			if a[Attr.PAS] >= o - 4 and a[Attr.TEC] >= o - 12:
-				return "Goleiro-líbero"
-			if a[Attr.REF] >= o + 4:
-				return "Goleiro de reflexo"
-			if a[Attr.CAB] >= o - 20 and height >= 192:
-				return "Dono da área"
-			if a[Attr.POS] >= o + 3:
-				return "Bem colocado"
-			return "Paredão"
-		Pos.G_DEF:
-			if position == Pos.RB or position == Pos.LB:
-				if a[Attr.PAS] >= o + 2 and a[Attr.VIS] >= o - 6:
-					return "Lateral construtor"
-				if a[Attr.CRU] >= a[Attr.MAR] + 6 and a[Attr.DRI] >= o - 4:
-					return "Ala ofensivo"
-				if a[Attr.ACE] >= o + 8 or a[Attr.VEL] >= o + 8:
-					return "Lateral veloz"
-				return "Lateral marcador"
-			if a[Attr.PAS] >= o - 2 and a[Attr.VIS] >= o - 10:
-				return "Zagueiro construtor"
-			if a[Attr.INT] >= o + 4 and a[Attr.POS] >= o + 2 and a[Attr.VEL] >= o - 6:
-				return "Líbero"
-			if a[Attr.CAB] >= o + 6 and a[Attr.FOR] >= o + 4:
-				return "Xerife"
-			if a[Attr.DES] >= o + 6:
-				return "Desarmador"
-			if a[Attr.VEL] >= o + 2:
-				return "Zagueiro rápido"
-			return "Zagueiro clássico"
-		Pos.G_MID:
-			if position == Pos.DM:
-				if a[Attr.PAS] >= o + 3 and a[Attr.VIS] >= o + 2:
-					return "Regista"
-				if a[Attr.DES] >= o + 4 and a[Attr.MAR] >= o + 2:
-					return "Cão de guarda"
-				return "Primeiro volante"
-			if position == Pos.AM:
-				if a[Attr.VIS] >= a[Attr.FIN] + 3 and a[Attr.PAS] >= o:
-					return "Camisa 10"
-				if a[Attr.DRI] >= o + 5:
-					return "Meia driblador"
-				if a[Attr.CHL] >= o + 5:
-					return "Meia chutador"
-				return "Meia-atacante"
-			if position == Pos.RM or position == Pos.LM:
-				if a[Attr.CRU] >= a[Attr.TEC] + 3:
-					return "Cruzador"
-				if a[Attr.RES] >= o + 6 and a[Attr.DES] >= o - 8:
-					return "Ala incansável"
-				return "Meia driblador"
-			if a[Attr.RES] >= o + 6 and a[Attr.DES] >= o - 6:
-				return "Box-to-box"
-			if a[Attr.CHL] >= o + 4 or a[Attr.FIN] >= o - 2:
-				return "Meia chegador"
-			if a[Attr.DRI] >= o + 4 and a[Attr.ACE] >= o:
-				return "Condutor"
-			return "Armador" if a[Attr.VIS] >= o + 2 else "Meio-campista"
-		_:
-			if position == Pos.ST:
-				if a[Attr.CAB] >= o + 5 and a[Attr.FOR] >= o + 3:
-					return "Pivô"
-				if a[Attr.PAS] >= o and a[Attr.VIS] >= o - 2 and a[Attr.DRI] >= o - 2:
-					return "Falso 9"
-				if a[Attr.ACE] >= o + 8 or a[Attr.VEL] >= o + 8:
-					return "Velocista"
-				if a[Attr.FIN] >= o + 6 and a[Attr.FRI] >= o:
-					return "Matador"
-				if a[Attr.POS] >= o + 5:
-					return "Homem de área"
-				return "Atacante técnico"
-			if inverted and (a[Attr.FIN] >= o or a[Attr.CHL] >= o + 2):
-				return "Ponta invertido"
-			if a[Attr.ACE] >= o + 8 or a[Attr.VEL] >= o + 8:
-				return "Ponta veloz"
-			if a[Attr.DRI] >= o + 5:
-				return "Driblador"
-			if a[Attr.CRU] >= o + 3 and a[Attr.PAS] >= o - 4:
-				return "Ponta garçom"
-			if a[Attr.FIN] >= o + 2:
-				return "Ponta finalizador"
-			return "Ponta"
+	# Sempre relativo ao próprio overall: o rótulo descreve o *perfil*, não o nível (PlayStyle).
+	return PlayStyle.of(self)
 
 
 ## Assinaturas (o que faz o jogador ser lembrado): nome para a interface.
@@ -564,20 +566,84 @@ func specialties() -> Array:
 # ---------------------------------------------------------------------------
 
 func to_dict() -> Dictionary:
-	return {
+	# O save já precisa das listas compactadas: elas voltam fechadas para a memória também (as
+	# passagens abrem a cada jogo para somar os números e ficavam abertas até o fim do jogo).
+	compact()
+	var d := {
 		"id": id, "fn": first_name, "ln": last_name, "nn": nickname, "ka": known_as,
-		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ft": foot, "pos": position,
-		"sec": secondary, "sh": shirt, "ht": hometown, "fs": face_seed, "lk": look, "trn": train,
+		"by": birth_year, "nat": nationality, "eth": eth, "h": height, "wt": weight, "ah": adult_h, "ft": foot, "pos": position,
+		"sec": secondary, "sh": shirt, "ht": hometown, "lng": langs, "origin": origin, "fs": face_seed, "lk": look, "trn": train,
 		"at": attrs, "pot": potential, "dc": dev_curve, "cons": consistency, "inj_p": injury_prone,
-		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "sg": signature,
+		"tr": traits, "hid": hidden, "sn": scout_noise, "hc": heart, "hk": heart_known, "rlb": bonds, "rlc": coach_rel, "idl": idol, "ilg": inj_log, "sg": signature,
 		"club": club_id, "wage": wage, "ce": contract_end, "st": squad_status, "tl": transfer_listed,
 		"ask": asking_price, "jy": joined_year, "val": value, "rc": release_clause, "cl": clauses, "loan": loan,
 		"cond": condition, "mor": morale, "rr": recent_ratings, "iw": injury_weeks, "in": injury_name,
-		"sus": suspension, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
-		"acc": dev_acc, "min": minutes_season, "o0": ovr_start, "pl": persona_log,
-		"stats": stats, "cs": cup_stats, "hist": history, "spells": spells,
-		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": trophies,
+		"sus": suspension, "nd": intl_duty, "ya": yellow_acc, "ret": retiring, "uw": unhappy_weeks,
+		"acc": dev_acc, "arc": snappedf(arc, 0.001), "min": minutes_season, "o0": ovr_start, "pl": persona_log,
+		"stats": stats, "cs": cup_stats, "hist": _packed(_raw_out(_history_raw), _history), "spells": _packed(_raw_out(_spells_raw), _spells),
+		"ca": career_apps, "cg": career_goals, "cas": career_assists, "tt": titles, "aw": awards, "tro": _packed(_raw_out(_trophies_raw), _trophies),
 	}
+	# Campos vazios ou no padrão ficam de fora (from_dict usa o mesmo padrão): save menor e mais rápido
+	for k in d.keys():
+		var v: Variant = d[k]
+		match typeof(v):
+			TYPE_ARRAY, TYPE_DICTIONARY, TYPE_STRING:
+				if v.is_empty():
+					d.erase(k)
+			TYPE_BOOL:
+				if not v:
+					d.erase(k)
+			TYPE_INT, TYPE_FLOAT:
+				if v == 0 and k in ZERO_DEFAULT:
+					d.erase(k)
+	return d
+
+
+## Acrescenta linhas ao histórico (fica com as `keep` últimas) sem abrir o compactado.
+func append_history(rows: Array, keep: int) -> void:
+	if _history_raw != null:
+		var packed: Variant = SaveCodec.append_rows(_raw_out(_history_raw), rows, keep)
+		if packed != null:
+			_history_raw = _raw_in(packed)
+			return
+	var h := history
+	h.append_array(rows)
+	if h.size() > keep:
+		history = h.slice(h.size() - keep)
+
+
+## Compacta o histórico na memória (mesmos dados; abre de novo quando alguém lê). Usado depois de
+## gerar o mundo: ~27 mil jogadores com décadas de histórico em dicionários pesam ~180 MB.
+func compact() -> void:
+	if _history_raw == null and _history.size() >= 2:
+		_history_raw = _raw_in(SaveCodec.pack_rows(_history))
+		_history = []
+	if _spells_raw == null and _spells.size() >= 2:
+		_spells_raw = _raw_in(SaveCodec.pack_rows(_spells))
+		_spells = []
+	if _trophies_raw == null and _trophies.size() >= 2:
+		_trophies_raw = _raw_in(SaveCodec.pack_rows(_trophies))
+		_trophies = []
+
+
+## Na memória, a lista compactada (dicionário de colunas do SaveCodec) fica serializada num
+## PackedByteArray: um bloco só por lista em vez de dezenas de arrays e textos por jogador
+## (~150 MB a menos no mundo inteiro). No save continua o dicionário de sempre.
+static func _raw_in(v: Variant) -> Variant:
+	return var_to_bytes(v) if v is Dictionary else v
+
+
+static func _raw_out(v: Variant) -> Variant:
+	return bytes_to_var(v) if v is PackedByteArray else v
+
+
+## Lista ainda fechada desde o load vai para o save do jeito que veio (sem abrir e compactar de novo).
+static func _packed(raw: Variant, rows: Array) -> Variant:
+	return raw if raw != null else SaveCodec.pack_rows(rows)
+
+
+## Campos numéricos cujo padrão no from_dict é zero.
+const ZERO_DEFAULT: Array[String] = ["sh", "ask", "rc", "iw", "sus", "ya", "uw", "min", "acc", "arc", "sn", "val", "ca", "cg", "cas", "tt", "wage", "ce", "jy"]
 
 
 static func from_dict(d: Dictionary) -> Player:
@@ -589,14 +655,17 @@ static func from_dict(d: Dictionary) -> Player:
 	p.known_as = d.get("ka", "")
 	p.birth_year = int(d.get("by", 2000))
 	p.nationality = d.get("nat", "")
+	p.origin = d.get("origin", {}).duplicate(true)
 	p.eth = int(d.get("eth", 1))
 	p.height = int(d.get("h", 178))
 	p.foot = int(d.get("ft", FOOT_RIGHT))
 	p.position = int(d.get("pos", Pos.CM))
 	p.weight = int(d.get("wt", Physique.default_weight(p.height, p.position)))
+	p.adult_h = int(d.get("ah", 0))
 	p.secondary = Array(d.get("sec", []))
 	p.shirt = int(d.get("sh", 0))
 	p.hometown = d.get("ht", "")
+	p.langs = d.get("lng", {})
 	p.face_seed = int(d.get("fs", p.id))
 	p.look = d.get("lk", {})
 	p.train = d.get("trn", {})
@@ -613,6 +682,10 @@ static func from_dict(d: Dictionary) -> Player:
 	p.hidden = d.get("hid", {})
 	p.scout_noise = int(d.get("sn", 0))
 	p.heart = int(d.get("hc", -2))
+	p.bonds = d.get("rlb", {})
+	p.coach_rel = d.get("rlc", {})
+	p.idol = int(d.get("idl", -1))
+	p.inj_log = d.get("ilg", [])
 	p.signature = String(d.get("sg", ""))
 	p.heart_known = bool(d.get("hk", false))
 	p.club_id = int(d.get("club", -1))
@@ -632,10 +705,12 @@ static func from_dict(d: Dictionary) -> Player:
 	p.injury_weeks = int(d.get("iw", 0))
 	p.injury_name = d.get("in", "")
 	p.suspension = int(d.get("sus", 0))
+	p.intl_duty = bool(d.get("nd", false))
 	p.yellow_acc = int(d.get("ya", 0))
 	p.retiring = bool(d.get("ret", false))
 	p.unhappy_weeks = int(d.get("uw", 0))
 	p.dev_acc = float(d.get("acc", 0.0))
+	p.arc = float(d.get("arc", 0.0))
 	p.minutes_season = int(d.get("min", 0))
 	var st: Variant = d.get("stats", null)
 	if st is PackedInt32Array and st.size() == S_COUNT:
@@ -647,14 +722,14 @@ static func from_dict(d: Dictionary) -> Player:
 	for k in cs:
 		if cs[k] is PackedInt32Array and cs[k].size() == C_COUNT:
 			p.cup_stats[k] = cs[k]
-	p.history = Array(d.get("hist", []))
-	p.spells = Array(d.get("spells", []))
+	p._history_raw = _raw_in(d.get("hist", null))
+	p._spells_raw = _raw_in(d.get("spells", null))
 	p.career_apps = int(d.get("ca", 0))
 	p.career_goals = int(d.get("cg", 0))
 	p.career_assists = int(d.get("cas", 0))
 	p.titles = int(d.get("tt", 0))
 	p.awards = Array(d.get("aw", []))
-	p.trophies = Array(d.get("tro", []))
+	p._trophies_raw = _raw_in(d.get("tro", null))
 	p.persona_log = Array(d.get("pl", []))
 	p.recompute_overall()
 	p.ovr_start = int(d.get("o0", p.overall))

@@ -12,11 +12,12 @@ config_version=5
 
 config/name="Mais Uma Rodada"
 config/description="Simulador de gestão de futebol. Só mais uma rodada."
-config/version="0.3.3"
+config/version="1.0.0"
 run/main_scene="res://scenes/main.tscn"
 config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "GL Compatibility")
 run/low_processor_mode=true
+run/low_processor_mode_sleep_usec=12000
 boot_splash/bg_color=Color(0.039216, 0.043137, 0.05098, 1)
 boot_splash/stretch_mode=0
 boot_splash/image="res://assets/brand/icon_foreground.png"
@@ -36,13 +37,13 @@ gdscript/warnings/narrowing_conversion=0
 
 [display]
 
-window/size/viewport_width=720
-window/size/viewport_height=1280
+window/size/viewport_width=600
+window/size/viewport_height=1066
 window/size/window_width_override=450
 window/size/window_height_override=900
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/handheld/orientation=6
 
 [editor_plugins]
 

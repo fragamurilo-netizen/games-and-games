@@ -1,5 +1,5 @@
 {
-	"_doc": "Narração procedural. {p} jogador principal, {p2} secundário (assistente, vítima, quem sai), {gk} goleiro, {team}/{opp} times, {TEAM} em maiúsculas, {home}/{away}, {hs}/{as} placar, {min} minuto, {stadium} estádio, {culprit} autor do erro, {f} formação, {st} estilo, {line} quem salvou em cima da linha, {txt} texto pronto (outros jogos). Categorias pundit_* são falas do comentarista e reporter_* do repórter de campo (a tela põe o rótulo). weather_* e stadium_* abrem a transmissão conforme o clima e o tipo de estádio.",
+	"_doc": "Narração procedural. {p} jogador principal, {p2} secundário (assistente, vítima, quem sai), {gk} goleiro, {team}/{opp} times, {TEAM} em maiúsculas, {home}/{away}, {hs}/{as} placar, {min} minuto, {stadium} estádio, {culprit} autor do erro, {f} formação, {st} estilo, {line} quem salvou em cima da linha, {txt} texto pronto (outros jogos). Categorias pundit_* são falas do comentarista e reporter_* do repórter de campo (a tela põe o rótulo). weather_* e stadium_* abrem a transmissão conforme o clima e o tipo de estádio. fin_* descrevem como o gol saiu (cavadinha, voleio, rebote...); save_/miss_/post_/block_<variação> idem para chances; pen_how_* como o pênalti foi cometido ({p} sofreu, {p2} cometeu); ctx_* são frases de contexto (quem marcou, placar, momento); ft_* fecham o jogo com {team} = vencedor; second_half_close/rout usam {team} = quem vence. radio_* só existem em português (narração de rádio): radio_clock* é o \"tempo e placar\" ({team} = quem vence), radio_tension sai antes da finalização, radio_goal_score repete o placar depois do gol, radio_talk_open abre a fala da palestra. Em inglês e espanhol a narração usa só as frases que têm tradução.",
 	"kickoff": [
 		"Rola a bola! Começa {home} x {away}.",
 		"Apita o árbitro e a bola rola no {stadium}!",
@@ -10,7 +10,13 @@
 		"Primeiro toque na bola: está valendo {home} x {away}!",
 		"Rolou! Noventa minutos pela frente no {stadium}.",
 		"O {home} dá a saída e o jogo começa!",
-		"Emoção no ar: começa {home} x {away}!"
+		"Emoção no ar: começa {home} x {away}!",
+		"Rola a bola no {stadium}! {home} e {away} começam a escrever essa história.",
+		"Apito inicial! Noventa minutos pela frente entre {home} e {away}.",
+		"Tudo pronto, bola no centro... e começa o jogo!",
+		"O árbitro confere o relógio, autoriza, e está valendo: {home} x {away}!",
+		"Bola rolando no {stadium}! Começa {home} contra {away}, e a gente acompanha lance a lance.",
+		"Autorizou o árbitro, saiu a bola! {home} e {away} já estão jogando."
 	],
 	"kickoff_derby": [
 		"É CLÁSSICO! Rola a bola para {home} x {away}!",
@@ -18,7 +24,9 @@
 		"Rivalidade à flor da pele. Começa {home} x {away}!",
 		"Não é um jogo qualquer: é o clássico! Bola rolando no {stadium}.",
 		"A cidade parou: começa {home} x {away}!",
-		"Clássico é clássico e vice-versa. Rola a bola!"
+		"Clássico é clássico e vice-versa. Rola a bola!",
+		"Começa o clássico! Aqui ninguém quer saber de tabela, é jogo de honra.",
+		"Bola rolando no clássico. Cidade dividida, coração na boca."
 	],
 	"second_half": [
 		"Bola rolando para o segundo tempo!",
@@ -28,7 +36,12 @@
 		"Os times voltam do vestiário e a bola volta a rolar.",
 		"Começa a etapa final no {stadium}.",
 		"Segundo tempo valendo! O {home} ataca agora para o outro lado.",
-		"Apito do árbitro: segundo tempo em andamento."
+		"Apito do árbitro: segundo tempo em andamento.",
+		"De volta para a etapa final! Quarenta e cinco minutos para decidir tudo.",
+		"Rola a bola para o segundo tempo no {stadium}.",
+		"Recomeça a partida. Vamos ver quem voltou melhor do vestiário.",
+		"Rola a bola para o segundo tempo no {stadium}!",
+		"Estão de volta {home} e {away}. Mais quarenta e cinco minutos pela frente."
 	],
 	"halftime": [
 		"Fim do primeiro tempo: {home} {hs} x {as} {away}.",
@@ -37,7 +50,9 @@
 		"Termina a primeira etapa: {home} {hs} x {as} {away}.",
 		"Pausa para o descanso no {stadium}. {home} {hs} x {as} {away}.",
 		"Fim do primeiro tempo. Os times descem para o vestiário: {home} {hs} x {as} {away}.",
-		"O árbitro encerra os primeiros 45 minutos: {home} {hs} x {as} {away}."
+		"O árbitro encerra os primeiros 45 minutos: {home} {hs} x {as} {away}.",
+		"Fim de primeiro tempo no {stadium}. Placar: {home} {hs}, {away} {as}. Os times descem pro vestiário.",
+		"Termina a primeira etapa. {home} {hs}, {away} {as}. Daqui a pouco tem mais."
 	],
 	"fulltime": [
 		"Fim de jogo! {home} {hs} x {as} {away}.",
@@ -46,7 +61,9 @@
 		"Três apitos! Acabou no {stadium}: {home} {hs} x {as} {away}.",
 		"Termina a partida: {home} {hs} x {as} {away}.",
 		"Fim de papo! {home} {hs} x {as} {away}.",
-		"Está encerrado o jogo no {stadium}. Placar final: {home} {hs} x {as} {away}."
+		"Está encerrado o jogo no {stadium}. Placar final: {home} {hs} x {as} {away}.",
+		"Terminou! Fim de jogo no {stadium}: {home} {hs}, {away} {as}.",
+		"Apitou o árbitro, acabou a partida. {home} {hs} x {as} {away}."
 	],
 	"possession": [
 		"{team} troca passes no meio-campo.",
@@ -68,7 +85,17 @@
 		"{team} tenta furar o bloqueio pelo meio.",
 		"{p} para, pensa e toca para trás.",
 		"{team} busca espaço pelos lados.",
-		"{p} conduz pela faixa central."
+		"{p} conduz pela faixa central.",
+		"Domina {p}, ajeita e toca de lado.",
+		"Bola com {p} na intermediária, sem pressa.",
+		"O {team} troca passes no campo de defesa, esperando o espaço.",
+		"{p} recebe de costas, gira e devolve.",
+		"Rola a bola no meio-campo, posse do {team}.",
+		"{p} conduz, levanta a cabeça, procura alguém livre.",
+		"Toca o {team}: um, dois, três passes, e o {opp} só acompanhando.",
+		"{p} cadencia o jogo e pede calma aos companheiros.",
+		"Lá vai {p} pelo meio, carregando a bola.",
+		"Bola longa do {team}... a zaga do {opp} afasta."
 	],
 	"build_through": [
 		"{p2} enfia a bola para {p}...",
@@ -77,7 +104,9 @@
 		"Que passe de {p2}! {p} sai na cara do gol...",
 		"{p2} rasga a defesa com um passe para {p}...",
 		"Enfiada de {p2}! {p} entra na área...",
-		"{p2} vê a movimentação de {p} e lança..."
+		"{p2} vê a movimentação de {p} e lança...",
+		"{p2} de cabeça erguida, enfiou pra {p}...",
+		"Passe de {p2} rasgando a defesa, lá vai {p}..."
 	],
 	"build_through_solo": [
 		"{p} recebe em profundidade...",
@@ -85,7 +114,8 @@
 		"{p} aparece livre na área...",
 		"{p} escapa da marcação e parte sozinho...",
 		"{p} se infiltra entre os zagueiros...",
-		"Bola nas costas da defesa, {p} chega primeiro..."
+		"Bola nas costas da defesa, {p} chega primeiro...",
+		"{p} recebe nas costas da zaga, vai sozinho..."
 	],
 	"build_cross": [
 		"{p2} vai à linha de fundo e cruza...",
@@ -95,7 +125,9 @@
 		"{p2} cruza de primeira para {p}...",
 		"Cruzamento na medida de {p2}...",
 		"{p2} levanta com efeito, {p} ataca a bola...",
-		"Bola na segunda trave! {p2} achou {p}..."
+		"Bola na segunda trave! {p2} achou {p}...",
+		"{p2} pela ponta, foi à linha de fundo, levantou na área...",
+		"Vem o cruzamento de {p2}... {p} na área..."
 	],
 	"build_cross_solo": [
 		"Cruzamento na área...",
@@ -110,7 +142,9 @@
 		"{p} tenta o chute colocado da entrada da área...",
 		"{p} solta o pé da intermediária...",
 		"Chute de fora da área de {p}...",
-		"{p} bate de chapa, de longe..."
+		"{p} bate de chapa, de longe...",
+		"{p} ajeita de longe, olha o chute...",
+		"Vai arriscar de fora da área, {p}..."
 	],
 	"build_dribble": [
 		"{p} parte para cima da marcação...",
@@ -119,7 +153,9 @@
 		"Jogada individual de {p}, que invade a área...",
 		"{p} deixa o marcador para trás e invade a área...",
 		"{p} corta para dentro e prepara o chute...",
-		"{p} pedala, passa e entra na área..."
+		"{p} pedala, passa e entra na área...",
+		"{p} pra cima, passou por um, passou por dois...",
+		"Gingou, cortou pra dentro, {p}..."
 	],
 	"build_counter": [
 		"Contra-ataque perigoso do {team}!",
@@ -128,7 +164,9 @@
 		"Três contra dois no contra-ataque do {team}!",
 		"Contragolpe fulminante! {p} vai em velocidade...",
 		"{p2} rouba e lança {p} no contra-ataque...",
-		"O {team} sai rápido: {p} tem campo pela frente..."
+		"O {team} sai rápido: {p} tem campo pela frente...",
+		"Puxa o contra-ataque o {team}! {p2} conduz, olha pra {p}...",
+		"Roubou e saiu rápido! {p2} pela meia, {p} pede a bola..."
 	],
 	"build_scramble": [
 		"Bate e rebate na área...",
@@ -145,7 +183,9 @@
 		"Bola na área no escanteio, {p} vai nela...",
 		"{p2} cobra fechado, {p} desvia...",
 		"Escanteio curto, cruzamento de {p2} para {p}...",
-		"Cobrança na primeira trave, {p} se antecipa..."
+		"Cobrança na primeira trave, {p} se antecipa...",
+		"{p2} na cobrança do escanteio, bola na área...",
+		"Escanteio cobrado por {p2}, sobe {p}..."
 	],
 	"build_freekick": [
 		"{p} vai para a cobrança da falta...",
@@ -184,7 +224,23 @@
 		"GOOOOL! {p} finaliza e o {team} comemora!",
 		"{p} deslocou o goleiro! É GOL do {team}!",
 		"Lá dentro! {p} marca: {home} {hs} x {as} {away}!",
-		"Olha o gol! {p} não desperdiça!"
+		"Olha o gol! {p} não desperdiça!",
+		"GOOOOOL! É DO {TEAM}! {p} manda para o fundo da rede!",
+		"Lá dentro! {p} não quis nem saber!",
+		"Balançou o barbante! Gol de {p}!",
+		"GOL! {p} estufa a rede e sai pro abraço!",
+		"Olha o gol! {p} faz para o {team}!",
+		"Sem chance para {gk}! GOL do {team}, {p}!",
+		"Ééééé do {team}! {p} coloca a bola onde a coruja dorme!",
+		"GOL! O {stadium} explode com {p}!",
+		"GOOOOOOOOL! É DO {TEAM}! {p}, lá no fundo da rede!",
+		"Tá lá dentro! Gol do {team}! {p} bateu e correu pro abraço!",
+		"Olha o gol... GOOOOL! {p}! Bola no barbante!",
+		"Bateu... É GOL! {p} estufa a rede no {stadium}!",
+		"GOL! GOL! GOL DO {TEAM}! Quem fez foi ele, {p}!",
+		"Entrou! {p} manda pra dentro e o {team} comemora!",
+		"GOOOL! Não teve jeito pro {gk}! {p} marca!",
+		"É rede! {p} empurra pro gol e a torcida do {team} explode!"
 	],
 	"goal_header": [
 		"GOOOOL DE CABEÇA! {p} subiu mais que todo mundo!",
@@ -193,7 +249,12 @@
 		"GOL DE CABEÇA! {p} testa no ângulo!",
 		"Cabeçada fulminante de {p}! É GOL!",
 		"{p} subiu no terceiro andar e cabeceou para o gol!",
-		"De cabeça, no contrapé do goleiro! GOL de {p}!"
+		"De cabeça, no contrapé do goleiro! GOL de {p}!",
+		"Testaço! {p} sobe mais que todo mundo e manda para as redes!",
+		"De cabeça! {p} cabeceou firme, no contrapé de {gk}!",
+		"Ganhou pelo alto! {p} marca de cabeça!",
+		"Subiu mais alto que todo mundo! Cabeçada de {p}, gol do {team}!",
+		"Testou pro gol! {p} de cabeça, sem chance pro {gk}!"
 	],
 	"goal_golaco": [
 		"QUE GOLAÇO! {p} acerta um chute espetacular!",
@@ -203,7 +264,12 @@
 		"Olha o que ele fez! GOLAÇO de {p}!",
 		"Gol de placa! {p} acertou o ângulo!",
 		"Que bomba! A bola entrou rasgando: GOLAÇO de {p}!",
-		"Esse vai passar muitas vezes na TV: golaço de {p}!"
+		"Esse vai passar muitas vezes na TV: golaço de {p}!",
+		"QUE PINTURA! {p} faz um gol para emoldurar!",
+		"Golaço! Pode guardar o vídeo, {p} fez um gol de placa!",
+		"Isso é arte! {p} faz um dos gols do ano!",
+		"Golaço, golaço! {p} manda onde o {gk} não alcança!",
+		"Que pintura! {p} acerta um chute pra guardar na memória!"
 	],
 	"goal_penalty": [
 		"{p} bate firme e converte! GOL!",
@@ -211,7 +277,9 @@
 		"Sem chances para o goleiro: pênalti convertido por {p}!",
 		"Bola de um lado, goleiro do outro: GOL de {p}!",
 		"{p} bate com categoria e converte o pênalti!",
-		"Cavadinha! {p} marca de pênalti com muita frieza!"
+		"Cavadinha! {p} marca de pênalti com muita frieza!",
+		"Bateu, deslocou o goleiro, é gol! {p} converte!",
+		"Correu, bateu e marcou! {p} não treme na marca da cal!"
 	],
 	"goal_own": [
 		"GOL CONTRA! {p} desvia para o próprio gol!",
@@ -228,7 +296,11 @@
 		"NO APAGAR DAS LUZES! {p} marca para o {team}!",
 		"Aos {min}, {p} explode o {stadium}!",
 		"Quando ninguém esperava mais: GOL de {p}!",
-		"Gol no fim! {p} marca aos {min}!"
+		"Gol no fim! {p} marca aos {min}!",
+		"No finalzinho! {p} marca e o {stadium} vai abaixo!",
+		"Aos {min}! {p} decide quando o jogo parecia acabado!",
+		"No finzinho! Aos {min}, {p}! Quem ainda estava sentado levantou agora!",
+		"Já nos acréscimos da paciência... GOL! {p}, aos {min}!"
 	],
 	"goal_equalizer": [
 		"EMPATE! {p} deixa tudo igual!",
@@ -237,7 +309,11 @@
 		"Deixou tudo igual! {p} empata: {hs} x {as}!",
 		"O {team} busca o empate com {p}!",
 		"Placar zerado de novo... quer dizer, igualado! {p} empata!",
-		"O empate chega com {p}! Jogo recomeça do zero!"
+		"O empate chega com {p}! Jogo recomeça do zero!",
+		"Empatou! {p} deixa tudo igual: {home} {hs} x {as} {away}!",
+		"Está tudo igual de novo! {p} empata para o {team}!",
+		"Tudo igual! {p} deixa o placar como começou!",
+		"EMPATA O {TEAM}! {p} recoloca o time no jogo!"
 	],
 	"goal_virada": [
 		"VIRADA! {p} coloca o {team} na frente!",
@@ -245,14 +321,20 @@
 		"Que reação! VIRADA com gol de {p}!",
 		"Virou! Virou! {p} completa a virada do {team}!",
 		"Quem diria! O {team} vira com gol de {p}!",
-		"VIRADA ESPETACULAR! {p} marca e o {team} passa à frente!"
+		"VIRADA ESPETACULAR! {p} marca e o {team} passa à frente!",
+		"VIROU! O {team} estava atrás e agora está na frente! {p}!",
+		"Que reação! {p} completa a virada do {team}!",
+		"VIROU! O {team} vira o jogo com {p}!"
 	],
 	"goal_winner": [
 		"{p} desempata no fim! O {team} está na frente!",
 		"Gol que pode valer a vitória: {p}!",
 		"{p} coloca o {team} em vantagem na reta final!",
 		"Pode ser o gol da vitória: {p} marca para o {team}!",
-		"{p} desempata e o {team} fica perto dos três pontos!"
+		"{p} desempata e o {team} fica perto dos três pontos!",
+		"{p} marca o que pode ser o gol da vitória do {team}!",
+		"Desempata o {team}! {p} manda pro fundo do gol!",
+		"{TEAM} NA FRENTE! {p} desempata a partida!"
 	],
 	"goal_hattrick": [
 		"É HAT-TRICK! Terceiro gol de {p}!",
@@ -288,7 +370,16 @@
 		"{gk} fecha o ângulo e salva o {opp}!",
 		"{gk} defende com o pé!",
 		"Que defesa de {gk}! Evitou o gol!",
-		"{gk} cai bem no canto e segura."
+		"{gk} cai bem no canto e segura.",
+		"{gk} fecha o ângulo e defende!",
+		"Seguro, {gk}! Encaixa sem dar rebote.",
+		"{gk} vai buscar no canto!",
+		"Firme, {gk} espalma e afasta o perigo.",
+		"Boa defesa de {gk}, que estava bem colocado.",
+		"Bateu... pegou o {gk}! Firme no lance.",
+		"Chutou e o {gk} encaixa. Sem rebote.",
+		"Lá vai a bomba... espalma o {gk}!",
+		"{gk} voa no canto e manda pra escanteio!"
 	],
 	"miss": [
 		"{p} chuta para fora.",
@@ -301,7 +392,16 @@
 		"{p} finaliza sem direção.",
 		"A bola sobe demais no chute de {p}.",
 		"{p} tenta a colocada, mas manda para fora.",
-		"Faltou pontaria para {p}."
+		"Faltou pontaria para {p}.",
+		"{p} bate cruzado e a bola passa rente à trave.",
+		"Chute de {p} sem direção. Tiro de meta.",
+		"{p} pega mal na bola, que sai longe do gol.",
+		"Finalização de {p} por cima do travessão.",
+		"{p} tenta colocar, mas erra o alvo.",
+		"Bateu... pra fora! Passou perto do poste.",
+		"Ajeitou, chutou... e a bola vai pela linha de fundo.",
+		"{p} arrisca de longe, a bola sobe e vai pra arquibancada.",
+		"Tentou colocar, mas a bola sai rente ao poste."
 	],
 	"post": [
 		"NA TRAVE! {p} quase marca!",
@@ -310,7 +410,11 @@
 		"No poste! A bola bate e volta!",
 		"{p} acerta a trave e o {team} lamenta!",
 		"Travessão! Que susto para o {opp}!",
-		"A trave salva o {opp}! Chute de {p}!"
+		"A trave salva o {opp}! Chute de {p}!",
+		"No poste! {p} acerta a trave e a bola volta para o campo!",
+		"Trave! A bola ainda treme depois do chute de {p}!",
+		"Bateu... NA TRAVE! O poste ainda está tremendo!",
+		"Ô, na trave! O {team} esteve a centímetros do gol!"
 	],
 	"block": [
 		"A zaga bloqueia o chute de {p}.",
@@ -319,7 +423,10 @@
 		"{p} chuta, a bola explode na zaga.",
 		"Bloqueio providencial da defesa do {opp}.",
 		"O zagueiro se atira e trava o chute de {p}.",
-		"Chute de {p} bate na perna do defensor e desvia."
+		"Chute de {p} bate na perna do defensor e desvia.",
+		"Travado! A zaga se atira na frente do chute de {p}.",
+		"{p} finaliza e a bola explode no defensor.",
+		"Bloqueio providencial! A defesa do {opp} fecha o caminho."
 	],
 	"foul": [
 		"Falta de {p} em {p2}.",
@@ -331,7 +438,14 @@
 		"O árbitro marca falta de {p} em {p2}.",
 		"Entrada forte de {p}, {p2} vai ao chão.",
 		"{p} trava {p2} com o corpo. Falta.",
-		"Falta de {p} para parar o contra-ataque."
+		"Falta de {p} para parar o contra-ataque.",
+		"Falta de {p} em {p2}. O jogo para.",
+		"{p} chega atrasado e derruba {p2}.",
+		"Entrada dura de {p} em {p2}. O árbitro marca.",
+		"{p2} é puxado por {p}. Falta.",
+		"Carrinho de {p} leva {p2} junto. Falta marcada.",
+		"Falta! {p} chegou atrasado em {p2}, e o juiz apita.",
+		"Parou o jogo: {p} segurou {p2} pela camisa."
 	],
 	"foul_danger": [
 		"Falta perigosa de {p} em {p2}, perto da área!",
@@ -347,7 +461,12 @@
 		"O árbitro mostra o amarelo para {p}.",
 		"{p} recebe o cartão amarelo.",
 		"Amarelo merecido para {p}.",
-		"{p} está pendurado agora: cartão amarelo."
+		"{p} está pendurado agora: cartão amarelo.",
+		"Amarelo para {p}. Já está pendurado no jogo.",
+		"O árbitro não perdoa: cartão amarelo para {p}.",
+		"{p} reclama, mas leva o amarelo.",
+		"Amarelo para {p}. O juiz não perdoou.",
+		"Mostrou o cartão: amarelo pra {p}, que reclamou muito."
 	],
 	"red": [
 		"EXPULSO! {p} recebe o vermelho direto!",
@@ -391,7 +510,11 @@
 		"O assistente levanta a bandeira: {p} em impedimento.",
 		"Impedimento marcado. {p} estava à frente da linha.",
 		"{p} parte em posição irregular. Tiro livre para o {opp}.",
-		"Linha de impedimento bem feita pela defesa do {opp}. {p} impedido."
+		"Linha de impedimento bem feita pela defesa do {opp}. {p} impedido.",
+		"Bandeira levantada: {p} estava adiantado.",
+		"Impedimento de {p}. Saiu cedo demais.",
+		"Bandeira levantada, impedimento de {p}.",
+		"Estava adiantado o {p}. O assistente marca."
 	],
 	"corner": [
 		"Escanteio para o {team}.",
@@ -401,7 +524,12 @@
 		"A zaga desvia e cede o escanteio ao {team}.",
 		"Mais um escanteio para o {team}.",
 		"Escanteio para o {team}. Zagueiros sobem para a área.",
-		"A bola sai pela linha de fundo: escanteio."
+		"A bola sai pela linha de fundo: escanteio.",
+		"Escanteio para o {team}. {p} vai para a bola.",
+		"A bola desvia e sai: escanteio para o {team}.",
+		"Mais um escanteio. O {team} empurra o {opp} para trás.",
+		"Escanteio! A bola desviou na zaga e o {team} vai cobrar.",
+		"Bandeira de escanteio, {p} se apresenta pra cobrança."
 	],
 	"freekick": [
 		"Falta para o {team} em boa posição.",
@@ -428,7 +556,11 @@
 		"O técnico do {team} mexe: {p} no lugar de {p2}.",
 		"{p} aquece e entra: {p2} deixa o campo.",
 		"Troca no {team}: {p2} sai aplaudido e {p} entra.",
-		"{p} entra com a missão de mudar o jogo. Sai {p2}."
+		"{p} entra com a missão de mudar o jogo. Sai {p2}.",
+		"Mexida no {team}: entra {p}, sai {p2}.",
+		"{p} vai para o jogo no lugar de {p2}.",
+		"Mexe o técnico do {team}: sai {p2}, entra {p}. Placa levantada.",
+		"Alteração no {team}: {p2} deixa o campo, {p} entra no jogo."
 	],
 	"tactic_attack": [
 		"O {team} se lança ao ataque!",
@@ -443,6 +575,42 @@
 		"O {team} fecha as linhas e se defende.",
 		"O {team} agora joga no contra-ataque, bem fechado."
 	],
+	"tactic_press_up": [
+		"O {team} adianta a marcação: agora pressiona a saída de bola.",
+		"Pressão alta do {team}! O time sobe para roubar a bola lá na frente.",
+		"O técnico do {team} manda o time apertar a saída adversária."
+	],
+	"tactic_press_down": [
+		"O {team} para de pressionar lá na frente e espera no próprio campo.",
+		"O {team} tira o pé da pressão para poupar fôlego.",
+		"Marcação mais recuada no {team}: agora espera o adversário."
+	],
+	"tactic_line_high": [
+		"O {team} adianta a linha defensiva e encurta o campo.",
+		"Linha alta no {team}: a zaga sobe até o meio."
+	],
+	"tactic_line_low": [
+		"O {team} recua a linha de defesa para não dar espaço nas costas.",
+		"A zaga do {team} dá dois passos atrás: linha mais baixa.",
+		"O técnico do {team} pede a linha mais perto da área."
+	],
+	"tactic_width_open": [
+		"O {team} abre o campo: pontas colados na linha lateral.",
+		"Amplitude no {team}: a bola agora roda pelos lados."
+	],
+	"tactic_width_closed": [
+		"O {team} fecha o time por dentro e congestiona o meio.",
+		"O {team} fica mais compacto, com todo mundo por dentro."
+	],
+	"tactic_intensity": [
+		"O {team} muda o ritmo das divididas.",
+		"Ajuste de intensidade no {team}."
+	],
+	"tactic_instr": [
+		"{p} recebe instruções da beira do campo.",
+		"O técnico chama {p} e muda a função dele.",
+		"{p} ouve o técnico e ajusta o posicionamento."
+	],
 	"tactic_other": [
 		"O {team} muda a forma de jogar.",
 		"Ajuste tático no {team}.",
@@ -453,7 +621,8 @@
 		"O quarto árbitro indica {n} minutos de acréscimo.",
 		"A placa sobe: {n} minutos de acréscimo.",
 		"Serão jogados mais {n} minutos.",
-		"Acréscimo de {n} minutos no {stadium}."
+		"Acréscimo de {n} minutos no {stadium}.",
+		"Levantou a placa: mais {n} minutos."
 	],
 	"halftime_et": [
 		"Fim do tempo normal: {home} {hs} x {as} {away}. Vai ter prorrogação!",
@@ -506,7 +675,11 @@
 		"Lençol de {p} em {p2}! A torcida aplaude.",
 		"{p} dá o toque de calcanhar e escapa de {p2}.",
 		"Meia-lua de {p} sobre {p2}! Que categoria!",
-		"{p} arranca e deixa {p2} para trás na velocidade."
+		"{p} arranca e deixa {p2} para trás na velocidade.",
+		"{p} dá um chapéu em {p2}! A torcida vibra!",
+		"Caneta! {p} passa a bola entre as pernas de {p2}!",
+		"{p} pedala, pedala e deixa {p2} para trás.",
+		"Elástico de {p}! {p2} ficou olhando."
 	],
 	"tackle": [
 		"{p} chega firme e desarma {p2}.",
@@ -518,7 +691,10 @@
 		"{p} lê a jogada e intercepta o passe para {p2}.",
 		"{p} ganha a dividida de {p2} no corpo.",
 		"Carrinho na bola de {p}! Tirou de {p2}.",
-		"{p} rouba a bola de {p2} e sai jogando."
+		"{p} rouba a bola de {p2} e sai jogando.",
+		"{p} chega no tempo certo e desarma {p2}.",
+		"Que carrinho limpo de {p}! Tirou a bola de {p2}.",
+		"{p} rouba a bola de {p2} com categoria."
 	],
 	"keeper": [
 		"{p} sai do gol e fica com a bola.",
@@ -645,28 +821,41 @@
 		"Virada de jogo de {p}, a bola atravessa o campo.",
 		"{p} muda o lado da jogada e acha o companheiro livre.",
 		"Belo lançamento de {p} de um lado para o outro.",
-		"{team} vira o jogo e procura o corredor vazio."
+		"{team} vira o jogo e procura o corredor vazio.",
+		"{p} vira o jogo para {p2}, do outro lado.",
+		"Inversão de {p}: a bola cai nos pés de {p2}.",
+		"{p} cruza o campo com um passe de 40 metros."
 	],
 	"poss_long": [
 		"{p} dá o chutão para frente.",
 		"Ligação direta do {team}: {p} lança para o ataque.",
 		"{p} lança longo, a zaga afasta.",
 		"{team} aposta na bola longa em busca do centroavante.",
-		"Bola esticada por {p} para a disputa no alto."
+		"Bola esticada por {p} para a disputa no alto.",
+		"{p} lança nas costas da zaga, a bola fica com o goleiro.",
+		"Bola longa de {p}, disputa no alto com vantagem da zaga."
 	],
 	"poss_press": [
 		"O {opp} marca em cima e o {team} sofre para sair jogando.",
 		"Pressão alta! {p} se livra no aperto.",
 		"{p} é cercado por três, mas consegue tocar.",
 		"O {team} sai jogando sob muita pressão.",
-		"Marcação sufocante do {opp} na saída de bola."
+		"Marcação sufocante do {opp} na saída de bola.",
+		"{p} perde no aperto, mas recupera.",
+		"O {opp} sobe a marcação, {p} dá o chutão.",
+		"Linha alta do {opp}: {p} não tem para onde tocar.",
+		"Marca alto o {team}, não deixa o {opp} respirar.",
+		"Pressão na saída de bola, e o {opp} se enrola atrás."
 	],
 	"poss_build": [
 		"{team} sai jogando desde o goleiro.",
 		"{p} recua para o goleiro e o {team} reinicia a jogada.",
 		"Saída de três do {team}, com {p} entre os zagueiros.",
 		"{p} desce para buscar a bola e organiza a saída.",
-		"{team} constrói com calma desde a defesa."
+		"{team} constrói com calma desde a defesa.",
+		"O goleiro toca curto, {p} recebe e gira.",
+		"{p} baixa entre os zagueiros para iniciar.",
+		"Saída limpa do {team}, a bola chega a {p}."
 	],
 	"poss_throw": [
 		"Lateral para o {team}.",
@@ -684,13 +873,17 @@
 		"{p} recua a bola para a zaga.",
 		"{team} volta a bola e recomeça a jogada.",
 		"Sem espaço, {p} toca para trás.",
-		"{team} troca passes entre os zagueiros."
+		"{team} troca passes entre os zagueiros.",
+		"{p} volta para o goleiro, o {opp} pressiona.",
+		"{p} recua, o {team} recomeça tudo.",
+		"Sem opção, {p} devolve para trás."
 	],
 	"goal_counter": [
 		"GOL DE CONTRA-ATAQUE! {p} fecha a jogada em velocidade!",
 		"Contragolpe mortal! {p} finaliza e marca!",
 		"Saiu em velocidade e terminou na rede: GOL de {p}!",
-		"Três toques e gol! {p} conclui o contra-ataque!"
+		"Três toques e gol! {p} conclui o contra-ataque!",
+		"Saiu em velocidade, três passes e gol! {p} finaliza o contra-ataque!"
 	],
 	"goal_freekick": [
 		"GOL DE FALTA! {p} coloca a bola no ângulo!",
@@ -714,14 +907,23 @@
 		"Defesa de outro mundo! {gk} tira o gol certo de {p}!",
 		"Como {gk} pegou essa?! Que milagre!",
 		"{gk} fica grande e evita o gol feito!",
-		"Monstro! {gk} para {p} cara a cara!"
+		"Monstro! {gk} para {p} cara a cara!",
+		"MILAGRE de {gk}! Não sei como essa bola não entrou!",
+		"Que defesa! {gk} salva o {opp} de forma inacreditável!",
+		"Era gol! Era gol! Mas o {gk} não deixou!",
+		"Na cara do gol... e o {gk} fecha o ângulo! Que defesa!"
 	],
 	"miss_big": [
 		"INACREDITÁVEL! {p} perde um gol feito!",
 		"Como ele perdeu isso?! {p} sozinho manda para fora!",
 		"Não acredito! {p} desperdiça a chance mais clara do jogo!",
 		"{p} tinha o gol aberto e errou! A torcida põe a mão na cabeça!",
-		"Que chance perdida! {p} chuta para fora de frente para o gol!"
+		"Que chance perdida! {p} chuta para fora de frente para o gol!",
+		"Inacreditável! {p} perde um gol feito!",
+		"Como assim?! {p}, sozinho, manda para fora!",
+		"Não pode perder! {p} desperdiça a chance mais clara do jogo!",
+		"Ah, não! {p} perdeu, sozinho, na frente do gol!",
+		"A bola estava pedindo pra entrar e {p} mandou pra fora!"
 	],
 	"weather_sun": [
 		"Sol forte e céu azul no {stadium}.",
@@ -902,5 +1104,501 @@
 		"Repórter: o auxiliar do {team} passou orientações para os laterais.",
 		"O técnico do {team} chamou o capitão para conversar na beira do campo.",
 		"Repórter: mudança no {team} foi pedida pelos próprios jogadores, segundo o banco."
+	],
+	"cramp": [
+		"{p} sente câimbra e pede atendimento. Vai jogar no sacrifício.",
+		"Câimbra em {p}! O corpo não aguenta mais.",
+		"{p} cai com câimbra: o banco já se mexe.",
+		"Perna travada: {p} está com câimbra."
+	],
+	"poss_tabela": [
+		"{p} tabela com {p2} e ganha o espaço.",
+		"Tabelinha entre {p} e {p2}! Bonito de ver.",
+		"{p} toca, {p2} devolve de primeira.",
+		"{p2} e {p} trocam passes curtos na intermediária.",
+		"Um-dois rápido entre {p} e {p2}.",
+		"{p} aciona {p2} e pede de volta.",
+		"{p} e {p2} se entendem bem nessa tabela.",
+		"Triangulação do {team}: {p}, {p2} e a bola girando.",
+		"{p} arrasta a marcação e deixa com {p2}.",
+		"Toque de primeira de {p2} para {p}."
+	],
+	"poss_wing": [
+		"{p} abre com {p2} na ponta.",
+		"{p2} recebe aberto pelo lado e encara a marcação.",
+		"A bola chega a {p2}, colado na linha lateral.",
+		"{p} procura {p2} no corredor.",
+		"{team} leva o jogo pelo lado com {p2}.",
+		"{p2} avança pela beirada, o lateral acompanha.",
+		"{p} espeta a bola para {p2} correr.",
+		"{p2} recebe do {p} e segura a bola esperando apoio.",
+		"Passe longo de {p} para {p2}, aberto.",
+		"O {team} insiste pelo lado de {p2}.",
+		"Abre o jogo pelo lado, {p2} recebe colado na lateral.",
+		"{p2} pelo corredor, encara o marcador..."
+	],
+	"poss_carry": [
+		"{p} conduz a bola pelo meio.",
+		"{p} carrega e ganha metros.",
+		"{p} avança com a bola dominada, ninguém chega.",
+		"Arrancada de {p} até a intermediária.",
+		"{p} puxa o contra-ataque, mas o {opp} recompõe.",
+		"{p} leva a bola, olha, e espera o companheiro.",
+		"{p} passa por um e continua conduzindo.",
+		"{p} dá um tapa para frente e acelera.",
+		"{p} gira sobre a marcação e sai jogando.",
+		"{p} conduz com personalidade."
+	],
+	"poss_hold": [
+		"{p} segura a bola de costas e espera a subida.",
+		"{p} protege a bola com o corpo.",
+		"{p} prende a bola na frente, o time sobe junto.",
+		"{p} aguenta a pancada e mantém a posse.",
+		"{p} cadencia o jogo.",
+		"{p} pisa na bola e pensa a jogada.",
+		"{p} esconde a bola do marcador.",
+		"{p} faz o pivô e devolve."
+	],
+	"poss_patience": [
+		"{team} troca passes com paciência.",
+		"O {team} roda a bola procurando espaço.",
+		"Posse longa do {team}, o {opp} fechadinho.",
+		"{team} gira a bola de um lado para o outro.",
+		"O {opp} espera, o {team} toca de lado.",
+		"{team} não tem pressa, mantém a bola.",
+		"O {team} busca a brecha na defesa do {opp}.",
+		"Muitos toques do {team}, mas pouca profundidade."
+	],
+	"poss_intercept": [
+		"{d} lê a jogada e intercepta o passe de {p}.",
+		"Passe de {p} interceptado por {d}.",
+		"{d} antecipa e rouba a bola.",
+		"{p} tenta o passe, {d} corta no meio do caminho.",
+		"{d} estica a perna e corta a trama do {team}.",
+		"Bola roubada por {d}, que já sai jogando.",
+		"{d} chega antes de {p2} e fica com a bola.",
+		"Boa leitura de {d}: o passe de {p} não passou.",
+		"Interceptou {p}! Cortou o passe e recuperou a bola."
+	],
+	"poss_cross_cut": [
+		"{p} cruza, {d} afasta de cabeça.",
+		"Cruzamento de {p} cortado por {d}.",
+		"{p} levanta na área, {d} tira.",
+		"{d} sobe mais alto e manda para longe.",
+		"{p} tenta o cruzamento, a bola bate em {d}.",
+		"Cruzamento fechado demais de {p}, {d} fica com ela.",
+		"{d} afasta o perigo depois do cruzamento de {p}.",
+		"{p} cruza rasteiro, {d} corta de carrinho."
+	],
+	"poss_read_dom": [
+		"O {team} gosta mais do jogo neste momento.",
+		"Domínio do {team}: o {opp} só se defende.",
+		"O {team} empurra o {opp} para o próprio campo.",
+		"Quem manda na partida agora é o {team}.",
+		"O {opp} não consegue passar do meio-campo.",
+		"O {team} tem a bola e o controle."
+	],
+	"poss_read_even": [
+		"Jogo equilibrado, ninguém se impõe.",
+		"Partida muito estudada até aqui.",
+		"Poucas chances, muita disputa no meio.",
+		"Jogo travado: as duas defesas estão bem.",
+		"Os dois times se respeitam.",
+		"Meio-campo congestionado, a bola não chega às áreas."
+	],
+	"poss_read_danger": [
+		"O {team} é mais perigoso: o gol parece questão de tempo.",
+		"O {opp} está sofrendo, o {team} chega com frequência.",
+		"O {team} cria mais e ameaça o tempo todo.",
+		"Se alguém vai marcar, parece que é o {team}."
+	],
+	"poss_read_tense": [
+		"Tensão no ar: o empate segura os dois times.",
+		"Ninguém quer arriscar e perder o ponto.",
+		"Jogo nervoso na reta final.",
+		"Cada bola agora vale ouro.",
+		"O relógio corre e o placar não sai do lugar."
+	],
+	"poss_read_rough": [
+		"Jogo pegado, muitas faltas.",
+		"O árbitro tem trabalho: partida muito faltosa.",
+		"Muita pancada e pouca bola.",
+		"Jogo truncado, cheio de interrupções.",
+		"Os ânimos estão exaltados em campo."
+	],
+	"kickoff_big": [
+		"Começa o jogo grande! {home} e {away} sabem o tamanho do que está em jogo.",
+		"Rola a bola numa noite que vale muito. Não tem espaço para erro.",
+		"É decisão! Apita o árbitro e começa {home} x {away}.",
+		"Jogo que vale temporada. A bola já rola no {stadium}.",
+		"Tensão no ar, arquibancada fervendo. Começa o duelo decisivo!"
+	],
+	"second_half_level": [
+		"Tudo igual no placar, tudo aberto para o segundo tempo.",
+		"Empate até aqui: quem arriscar primeiro pode levar.",
+		"Placar zerado de vantagem. O jogo recomeça do zero, praticamente.",
+		"Nada decidido. Segundo tempo promete."
+	],
+	"second_half_close": [
+		"O {team} volta com a vantagem mínima. O {opp} precisa correr atrás.",
+		"Um gol separa os dois. O {opp} tem 45 minutos para buscar.",
+		"O {team} leva a frente no placar, mas nada está garantido.",
+		"Vantagem magra do {team}. Vai administrar ou buscar o segundo?"
+	],
+	"second_half_rout": [
+		"O {team} volta com o jogo nas mãos. O {opp} precisa de um milagre.",
+		"Vantagem confortável do {team}. Resta ao {opp} buscar a honra.",
+		"O {team} pode até tirar o pé. O estrago já está feito."
+	],
+	"build_solo": [
+		"{p} recebe ainda no campo de defesa e sai em disparada...",
+		"Olha a arrancada de {p}! Passa por um, passa por dois...",
+		"{p} pega a bola no meio-campo e ninguém consegue parar...",
+		"Lá vai {p}, carregando a bola por metade do campo...",
+		"{p} arranca do próprio campo, deixando marcadores pelo caminho..."
+	],
+	"fin_chip": [
+		"{gk} sai do gol e {p} dá uma cavadinha por cima!",
+		"Com toda a calma do mundo, {p} encobre {gk}!",
+		"{p} vê {gk} adiantado e pica a bola por cima dele!",
+		"Toque sutil de {p}, a bola sobe e cai lá dentro!"
+	],
+	"fin_round_gk": [
+		"{p} dribla {gk} e toca para o gol vazio!",
+		"Cara a cara com {gk}, {p} corta para o lado e entra com bola e tudo!",
+		"{gk} sai nos pés, {p} dá o drible e só empurra!",
+		"{p} tira o goleiro da jogada com um drible seco!"
+	],
+	"fin_rebound": [
+		"{gk} defende o primeiro chute, mas {p} pega o rebote!",
+		"Espalmou para o meio da área... e {p} estava lá!",
+		"No rebote! {p} foi o mais esperto e não perdoou!",
+		"{gk} ainda faz uma defesa, mas no rebote {p} não erra!"
+	],
+	"fin_near": [
+		"{p} bate no canto de {gk}, que não esperava!",
+		"Rasteiro, no cantinho! {p} surpreende {gk}!",
+		"{p} finaliza entre as pernas de {gk}!",
+		"Chute seco no primeiro poste. {gk} só olhou!"
+	],
+	"fin_diving": [
+		"Peixinho! {p} se atira na bola e testa para o gol!",
+		"{p} mergulha de cabeça no cruzamento!",
+		"Cabeçada em peixinho de {p}, na altura da grama!",
+		"{p} voa na bola e cabeceia no canto!"
+	],
+	"fin_volley": [
+		"De primeira! {p} pega de voleio!",
+		"A bola vem do alto e {p} emenda um sem-pulo!",
+		"{p} acerta um voleio espetacular!",
+		"Sem deixar cair, {p} bate de voleio no ângulo!"
+	],
+	"fin_flick": [
+		"{p} dá um desvio sutil no primeiro pau!",
+		"Toque de cabeça de {p} só para mudar a direção!",
+		"{p} raspa de cabeça e a bola morre no canto!"
+	],
+	"fin_bicycle": [
+		"DE BICICLETA! {p} se joga no ar e acerta uma bicicleta!",
+		"Não acredito! Bicicleta de {p}!",
+		"{p} de costas para o gol, joga o corpo para trás... BICICLETA!"
+	],
+	"fin_screamer": [
+		"Que pancada! {p} solta uma bomba de fora da área!",
+		"{p} arrisca de longe e a bola vai no ângulo!",
+		"Chutaço de {p}! {gk} nem se mexeu!",
+		"De muito longe! A bola de {p} entra rasgando!"
+	],
+	"fin_curler": [
+		"{p} bate colocado, com curva, no cantinho!",
+		"Chute de chapa de {p}, a bola faz a curva e entra!",
+		"{p} enrola a bola, que passa longe do alcance de {gk}!"
+	],
+	"fin_deflected": [
+		"O chute de {p} desvia na zaga e engana {gk}!",
+		"Bateu no defensor e mudou de direção! {gk} estava no outro canto!",
+		"Desvio fatal! A finalização de {p} tira {gk} da jogada!"
+	],
+	"fin_solo": [
+		"Carregou a bola por 50 metros e ainda teve fôlego para finalizar!",
+		"Deixou a defesa inteira para trás e bateu na saída de {gk}!",
+		"Uma arrancada de craque, do campo de defesa até a rede!"
+	],
+	"fin_cut_inside": [
+		"{p} corta para dentro e bate no canto!",
+		"Puxou para a perna boa e chutou: a especialidade de {p}!",
+		"{p} vem da ponta, traz para o meio e solta o pé!"
+	],
+	"fin_square": [
+		"{p2} rola para o lado e {p} só empurra para o gol vazio!",
+		"Generosidade! {p2} podia chutar, mas dá para {p} completar!",
+		"Dois contra o goleiro: {p2} toca e {p} não erra!"
+	],
+	"fin_tap_in": [
+		"{p} estava na pequena área e só empurrou!",
+		"Na cara do gol, {p} escora para dentro!",
+		"Bateu, rebateu, e {p} completou!"
+	],
+	"fin_top_corner": [
+		"{p} cobra com perfeição, no ângulo de {gk}!",
+		"Por cima da barreira, onde a coruja dorme!",
+		"Que cobrança de {p}! A bola passa a barreira e morre na gaveta!"
+	],
+	"fin_under_wall": [
+		"A barreira pula e {p} bate por baixo!",
+		"Esperteza de {p}: cobrança rasteira, por baixo da barreira!",
+		"Pulou a barreira, e a bola passou por baixo!"
+	],
+	"fin_power": [
+		"{p} enche o pé na cobrança e a bola entra com força!",
+		"Cobrança forte, no meio do gol, e {gk} não segura!",
+		"Pancada na falta! A bola passa rasgando pela barreira!"
+	],
+	"save_reflex": [
+		"Reflexo! {gk} defende à queima-roupa!",
+		"{gk} reage na hora e tira com o pé!",
+		"Que reflexo de {gk}! A bola ia entrar!",
+		"{gk} defende no susto, de reflexo!"
+	],
+	"save_punch": [
+		"{gk} sai do gol e soca a bola para longe!",
+		"Soco de {gk}! Afasta o perigo da área.",
+		"{gk} vai no meio da confusão e dá um soco na bola."
+	],
+	"save_fingertip": [
+		"Ponta dos dedos! {gk} manda para escanteio!",
+		"{gk} voa e toca na bola, que desvia por cima do travessão!",
+		"Com a ponta da luva, {gk} evita o gol!",
+		"Que voo de {gk}! Tirou da gaveta!"
+	],
+	"save_one_on_one": [
+		"{p} fica cara a cara, mas {gk} sai nos pés e fecha tudo!",
+		"{gk} sai do gol na hora certa e abafa {p}!",
+		"Mano a mano, e deu {gk}! Fechou o ângulo de {p}!",
+		"{gk} cresce na frente de {p} e defende!"
+	],
+	"save_double": [
+		"Defesa dupla! {gk} defende o chute e ainda o rebote!",
+		"Duas vezes {gk}! Não passa nada!",
+		"{gk} espalma, a bola volta, e ele defende de novo!",
+		"Que sequência de {gk}: defesa e mais uma defesa no rebote!"
+	],
+	"miss_wall": [
+		"A cobrança de {p} explode na barreira.",
+		"{p} bate a falta direto na barreira.",
+		"A barreira sobe junto e trava a cobrança de {p}."
+	],
+	"miss_header_over": [
+		"{p} sobe, mas cabeceia por cima do gol.",
+		"Cabeçada de {p} sem direção, por cima.",
+		"{p} testa e a bola passa sobre o travessão."
+	],
+	"miss_sky": [
+		"Isolou! {p} manda a bola para a arquibancada!",
+		"{p} pega embaixo e a bola vai parar na lua!",
+		"Chutou para o espaço! Que desperdício de {p}!"
+	],
+	"miss_fresh_air": [
+		"Furou! {p} erra a bola na hora do chute!",
+		"{p} vai chutar e pega só o ar! Que vexame!",
+		"A bola quica na hora errada e {p} fura feio."
+	],
+	"post_bar": [
+		"NO TRAVESSÃO! O chute de {p} explode no travessão!",
+		"Travessão! {gk} só olhou, a bola bateu no alto e voltou!",
+		"Carimbou o travessão! Por centímetros!"
+	],
+	"post_inside_out": [
+		"Bateu na trave, correu em cima da linha e saiu! Inacreditável!",
+		"Beijou as duas traves e não entrou! Como?!",
+		"A bola de {p} passeia pela linha e não entra!"
+	],
+	"block_last_ditch": [
+		"Carrinho salvador! A zaga do {opp} chega no último segundo!",
+		"Que corte! A zaga se joga e trava {p} na hora do chute.",
+		"Salvou no carrinho! {p} já ia soltar a bomba."
+	],
+	"var_off_goal": [
+		"{p} bate e a bola entra! A torcida já comemora... mas o árbitro corre para o monitor!",
+		"Balançou a rede! {p} sai para o abraço, mas o VAR chama o árbitro...",
+		"É gol de {p}! Espera... o árbitro coloca a mão no ouvido. VAR!",
+		"{p} marca, o {stadium} explode, mas tem revisão do VAR..."
+	],
+	"var_off_reason": [
+		"Gol anulado! O VAR pegou falta no começo da jogada.",
+		"Não vale! Toque de mão antes da finalização, confirma o VAR.",
+		"Anulado! O VAR mostra impedimento milimétrico na origem do lance.",
+		"O árbitro revê no monitor e volta atrás: falta no goleiro. Gol anulado.",
+		"Linhas traçadas, impedimento por um ombro. Não vale o gol."
+	],
+	"pen_how_dribble": [
+		"{p} entra driblando na área, passa por um e é derrubado por {p2}!",
+		"Que arrancada de {p}! Invade a área e {p2} derruba!",
+		"{p} dá o corte em {p2} dentro da área e vai ao chão!"
+	],
+	"pen_how_trip": [
+		"{p2} calça {p} dentro da área!",
+		"{p} é tocado por {p2} na hora do chute e cai!",
+		"Rasteira de {p2} em {p} na área!"
+	],
+	"pen_how_pull": [
+		"{p2} puxa a camisa de {p} na área!",
+		"Agarrão de {p2} em {p}! Dentro da área!",
+		"{p} é segurado por {p2} na hora de cabecear!"
+	],
+	"pen_how_hand": [
+		"A bola bate no braço de {p2} dentro da área!",
+		"Mão na bola de {p2}! O braço estava aberto!",
+		"{p} cruza e a bola explode no braço de {p2}!"
+	],
+	"pen_how_late": [
+		"{p2} chega atrasado, dá o carrinho e leva {p}!",
+		"Entrada desastrada de {p2} em {p} dentro da área!",
+		"{p2} tenta o bote e acerta só {p}!"
+	],
+	"ctx_redemption": [
+		"Ele tinha perdido uma chance clara antes. Agora se redimiu!",
+		"{p} deve ter pensado naquele gol perdido. Desta vez não errou!",
+		"Da frustração à glória: {p} se redime!",
+		"Errou uma, acertou a que importava. {p} pede desculpas com gol!"
+	],
+	"ctx_supersub": [
+		"Estrela do banco! {p} entrou e já deixou o dele!",
+		"Mexida certeira do técnico: {p} saiu do banco para marcar!",
+		"{p} entrou com fome de bola e já balançou a rede!"
+	],
+	"ctx_young": [
+		"O garoto {p} mostra que não tem medo do palco!",
+		"Menino da base! {p} marca e a torcida canta o nome dele!",
+		"Tão jovem e já decidindo. Guarde esse nome: {p}."
+	],
+	"ctx_veteran": [
+		"A experiência fala mais alto! O veterano {p} mostra que ainda tem lenha.",
+		"{p} já viu de tudo no futebol, e continua fazendo gol.",
+		"Quem disse que ele está velho? {p} responde em campo!"
+	],
+	"ctx_defender": [
+		"Olha o zagueiro fazendo gol! {p} vai ao ataque e resolve!",
+		"Gol de defensor! {p} deixa a área dele para marcar na do adversário.",
+		"{p} não é de fazer gol, mas hoje fez!"
+	],
+	"ctx_first_season": [
+		"É o primeiro gol de {p} na temporada! Que desabafo!",
+		"Acabou o jejum! {p} finalmente desencanta na temporada."
+	],
+	"ctx_early": [
+		"Gol logo no começo! O {opp} nem se ajeitou em campo.",
+		"Mal começou e o {team} já está na frente!",
+		"Que início avassalador do {team}!"
+	],
+	"ctx_pull_back": [
+		"O {team} diminui! O jogo ganha vida de novo!",
+		"Descontou! O {opp} não pode dormir tranquilo.",
+		"Um gol de diferença agora. Vem pressão aí!"
+	],
+	"ctx_two_up": [
+		"Dois de vantagem! O {team} começa a encaminhar a vitória.",
+		"O {team} abre dois gols e respira no jogo.",
+		"Segundo gol de frente. O {opp} sente o golpe."
+	],
+	"ctx_against_run": [
+		"Contra a corrente do jogo! O {opp} criava mais, mas quem marca é o {team}!",
+		"Futebol não tem lógica: o {team} pouco criou e mesmo assim marcou.",
+		"Eficiência pura do {team}. O {opp} domina, mas não converte."
+	],
+	"ctx_derby": [
+		"Gol em clássico vale o dobro! A torcida do {team} vai lembrar desse dia.",
+		"É gol no clássico! Tem gente que vai tirar sarro do vizinho a semana inteira.",
+		"Gol em clássico fica na história, e {p} acaba de escrever o seu nome."
+	],
+	"ctx_away_silence": [
+		"Silêncio no {stadium}! Só se ouve a torcida visitante.",
+		"A casa ficou muda. O {team} cala o {stadium}!",
+		"O setor visitante é a única festa no estádio agora."
+	],
+	"ctx_keeper_wall": [
+		"{gk} está pegando tudo hoje! Virou um paredão!",
+		"Mais uma de {gk}! O {opp} tem um muro debaixo das traves.",
+		"Noite inspirada de {gk}. O {team} não consegue passar por ele."
+	],
+	"ctx_miss_late": [
+		"Era a chance do empate! E foi desperdiçada no fim!",
+		"O tempo está acabando e o {team} perde uma chance dessas...",
+		"A torcida põe as mãos na cabeça. Era o gol de empate!"
+	],
+	"ctx_miss_again": [
+		"De novo {p}! Mais uma chance clara desperdiçada.",
+		"Não é a noite de {p}. Segunda chance feita que vai para fora.",
+		"{p} está com o pé torto hoje. Perdeu outra!"
+	],
+	"ft_win": [
+		"Vitória do {team}! Três pontos que ficam no bolso.",
+		"O {team} sai de campo com a vitória. Missão cumprida.",
+		"Fim de papo, vence o {team}."
+	],
+	"ft_away_win": [
+		"O {team} vai lá e vence fora de casa! Resultado de gente grande.",
+		"Vitória do visitante! O {team} cala a torcida adversária.",
+		"Quem manda aqui hoje é o {team}. Vitória longe de casa!"
+	],
+	"ft_rout": [
+		"Goleada do {team}! Noite para esquecer para o {opp}.",
+		"Atropelo! O {team} passa por cima do {opp}.",
+		"Placar elástico: o {team} dá um show hoje."
+	],
+	"ft_comeback": [
+		"Que virada! O {team} estava atrás e sai com a vitória!",
+		"Reação histórica do {team}! Virou e venceu!",
+		"O {team} não desistiu e buscou a vitória de virada!"
+	],
+	"ft_draw": [
+		"Empate. Cada um leva um ponto para casa.",
+		"Ficou tudo igual. Jogo movimentado, mas ninguém venceu.",
+		"Empate com gols. Os dois tiveram chances de vencer."
+	],
+	"ft_nil": [
+		"Zero a zero. Jogo truncado, poucas chances claras.",
+		"Placar em branco. As defesas levaram a melhor hoje.",
+		"Ninguém conseguiu furar o bloqueio. Termina sem gols."
+	],
+	"radio_clock": [
+		"Tempo e placar: {min}, {home} {hs}, {away} {as}.",
+		"Relógio marca {min}. No placar, {home} {hs}, {away} {as}.",
+		"{min} de jogo no {stadium}. {home} {hs} x {as} {away}.",
+		"Passando dos {min}: {home} {hs}, {away} {as}."
+	],
+	"radio_clock_level": [
+		"Tempo e placar: {min}, tudo igual. {home} {hs}, {away} {as}.",
+		"{min} e o placar não saiu do lugar: {home} {hs}, {away} {as}.",
+		"Relógio em {min}, e ninguém desempata: {home} {hs} x {as} {away}."
+	],
+	"radio_clock_lead": [
+		"Tempo e placar: {min}, o {team} na frente. {home} {hs}, {away} {as}.",
+		"{min} no relógio, e o {team} vai vencendo: {home} {hs} x {as} {away}.",
+		"Atualizando: {min}, {home} {hs}, {away} {as}. Vantagem do {team}."
+	],
+	"radio_tension": [
+		"Olha o perigo...",
+		"Preparou...",
+		"Ajeitou pra bater...",
+		"Atenção, {gk}...",
+		"Pode ser agora...",
+		"Vai bater..."
+	],
+	"radio_goal_score": [
+		"No placar do {stadium}: {home} {hs}, {away} {as}.",
+		"Placar agora: {home} {hs} x {as} {away}.",
+		"Atualiza o placar: {home} {hs}, {away} {as}."
+	],
+	"radio_talk_open": [
+		"Do vestiário do {team}, o recado do técnico:",
+		"Informação do vestiário do {team}. O técnico reuniu o grupo e disse:",
+		"Porta do vestiário do {team} entreaberta, e dá pra ouvir o técnico:"
+	],
+	"radio_tension_air": [
+		"Olha o perigo...",
+		"Atenção, {gk}...",
+		"Pode ser agora...",
+		"Tem gente do {team} chegando na área..."
 	]
 }

@@ -11,7 +11,7 @@
 			"city": "Lisboa",
 			"founded": 1904,
 			"league": "POR1",
-			"rep": 86,
+			"rep": 87,
 			"arch": "vendedor",
 			"colors": [
 				"#E30613",
@@ -43,7 +43,7 @@
 			"city": "Lisboa",
 			"founded": 1906,
 			"league": "POR1",
-			"rep": 87,
+			"rep": 85,
 			"arch": "formador",
 			"colors": [
 				"#008057",
@@ -73,7 +73,7 @@
 			"city": "Porto",
 			"founded": 1893,
 			"league": "POR1",
-			"rep": 85,
+			"rep": 86,
 			"arch": "vendedor",
 			"colors": [
 				"#1D5BBF",
@@ -83,15 +83,16 @@
 			"capacity": 50000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "shield",
-				"field": "quarters",
+				"shape": "round",
+				"field": "plain",
 				"symbol": "letter",
 				"initials": "FCP",
 				"c1": "#1D5BBF",
 				"c2": "#FFFFFF",
-				"sc": "#FFD100",
+				"sc": "#FFFFFF",
 				"crown": 1,
-				"c3": "#FFD100"
+				"c3": "#FFD100",
+				"border": "gold"
 			},
 			"rivals": [
 				"POR_ENC",

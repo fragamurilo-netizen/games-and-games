@@ -9,7 +9,6 @@ var _tab := "squad"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Relações"
 
 
@@ -28,17 +27,13 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	max_content_width = 1700
+	# Painel das relações: como está cada frente (vestiário, diretoria, torcida, imprensa) e as abas.
+	c.add_child(_gauges(w))
 	var pend := pending_card(w, func(): refresh(), false)
 	if pend != null:
 		c.add_child(pend)
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in TABS:
-		var key: String = t[0]
-		row.add_child(UIKit.chip(t[1], key == _tab, g, func():
-			_tab = key
-			refresh()))
-	c.add_child(row)
+	var start := c.get_child_count()
 	var cb := func(): refresh()
 	match _tab:
 		"squad":
@@ -53,6 +48,38 @@ func refresh() -> void:
 			_press(w, c, cb)
 		"coaches":
 			_coaches(w, c, cb)
+	columnize(c, start)
+
+
+func _gauges(w: GameWorld) -> Control:
+	var club := w.user_club()
+	var squad := w.squad(club)
+	var sum := 0.0
+	for p: Player in squad:
+		sum += People.trust_of(w, p)
+	var trust := sum / maxf(1.0, squad.size())
+	var rel := float(People.president(w, club.id).get("rel", 50.0))
+	var sup := People.fan_support(w)
+	var heat := PressRoom.heat(w)
+	var vals := {
+		"squad": [People.trust_label(trust), trust, _trust_color(trust)],
+		"board": [People.rel_label(rel), rel, UIColors.morale_color(rel)],
+		"fans": [People.support_label(sup), sup, UIColors.morale_color(sup)],
+		"press": [PressRoom.heat_label(heat), 100.0 - heat, UIColors.RED if heat >= PressRoom.HOT else (UIColors.ACCENT if heat >= 50.0 else UIColors.GREEN)],
+	}
+	# Uma faixa de números com as quatro frentes e, embaixo, abas comuns (não um cartão por métrica).
+	var v := UIKit.vbox(UITokens.S2)
+	var items: Array = []
+	for key in ["squad", "board", "fans", "press"]:
+		var d: Array = vals[key]
+		var name: String = {"squad": "Vestiário", "board": "Diretoria", "fans": "Torcida", "press": "Imprensa"}[key]
+		items.append([name, String(d[0]), d[2]])
+	v.add_child(StatStrip.make(items))
+	v.add_child(UIKit.scroll_tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()
+		scroll_to_top()))
+	return v
 
 
 static func _trust_color(t: float) -> Color:
@@ -80,7 +107,7 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 	if reqs.is_empty() and offer.is_empty() and not always:
 		return null
 	var card := UIKit.card("CardHighlight" if not reqs.is_empty() or not offer.is_empty() else "Card", 8)
-	card.add_child(UIKit.section("Bastidores"))
+	card.add_child(UIKit.section_header("Bastidores"))
 	if not offer.is_empty():
 		var oc := w.club(int(offer["c"]))
 		var row := UIKit.hbox(12)
@@ -109,7 +136,6 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 		brow.add_child(dec)
 		card.add_child(brow)
 	for q in reqs:
-		var row := UIKit.hbox(12)
 		var text := ""
 		var icon := "info"
 		var kind := String(q["k"])
@@ -127,14 +153,9 @@ static func pending_card(w: GameWorld, on_done: Callable, always: bool) -> Contr
 			"press":
 				text = "Imprensa na zona mista: fale sobre o jogo" if q.get("post", false) else "Coletiva de imprensa antes do próximo jogo"
 				icon = "news"
-		row.add_child(UIKit.icon_rect(icon, 30, UIColors.ACCENT))
-		var l := UIKit.label(text, "", true)
-		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(l)
-		row.add_child(UIKit.label("›", "H2"))
-		card.add_child(UIKit.tap_row(row, func(): TalkDialog.open(kind, target, on_done), "Card"))
+		card.add_child(UIKit.menu_row(icon, text, "", func(): TalkDialog.open(kind, target, on_done), UIKit.pill("AGORA", UIColors.ORANGE, 14)))
 	if always:
-		var b := UIKit.button("Vestiário, diretoria, torcida e imprensa", "GhostButton", func(): UIManager.push("relations"), "heart")
+		var b := UIKit.button("Abrir bastidores", "GhostButton", func(): UIManager.push("relations"), "heart")
 		card.add_child(b)
 	return UIKit.card_panel(card)
 
@@ -261,7 +282,7 @@ func _staff(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		row.add_child(UIKit.icon_rect(String(info["icon"]), 36, UIColors.ACCENT))
 		var col := UIKit.vbox(2)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(info["name"]).to_upper(), "Caps"))
+		col.add_child(UIKit.label(String(info["name"]), "Caps"))
 		col.add_child(UIKit.label(String(s.get("n", "Vago")), "H3", true))
 		if not s.is_empty():
 			col.add_child(UIKit.label("%d anos · %s/mês · sintonia %s" % [w.year - int(s["by"]), Fmt.money(int(s["w"])), People.rel_label(float(s.get("rel", 50.0))).to_lower()], "Small", true))
@@ -271,7 +292,6 @@ func _staff(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 		stars.stars = clampf(float(s.get("sk", 0.0)) / 20.0, 0.5, 5.0)
 		row.add_child(stars)
 		card.add_child(row)
-		card.add_child(UIKit.label(String(info["desc"]), "Small", true))
 		var brow := UIKit.hbox(10)
 		var idx := i
 		var talk := UIKit.button("Pedir relatório", "GhostButton", func(): TalkDialog.open("staff", idx, cb), "list")
@@ -290,7 +310,7 @@ static func _candidates(w: GameWorld, role: String, cb: Callable) -> void:
 	v.add_child(UIKit.label("Candidatos: %s" % String(People.STAFF_ROLES[role]["name"]).to_lower(), "Title", true))
 	var sev := People.staff_severance(w, role)
 	if sev > 0:
-		v.add_child(UIKit.label("Rescisão do atual: %s (três salários)." % Fmt.money(sev), "Small", true))
+		v.add_child(UIKit.label("Rescisão: %s" % Fmt.money(sev), "Small", true))
 	for cand: Dictionary in People.candidates(w, role):
 		var row := UIKit.hbox(12)
 		var col := UIKit.vbox(2)
@@ -332,7 +352,6 @@ func _board(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	var tags := UIKit.flow(8)
 	tags.add_child(UIKit.pill(String(st["name"]).to_upper(), UIColors.ACCENT, 16))
 	card.add_child(tags)
-	card.add_child(UIKit.label(String(st["desc"]), "Small", true))
 	var rel := float(pr.get("rel", 50.0))
 	var rr := UIKit.hbox(10)
 	rr.add_child(UIKit.label("Relação pessoal", "Muted"))
@@ -350,9 +369,11 @@ func _board(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	card.add_child(UIKit.kv("Meta da temporada", String(SeasonManager.goal_of(w, club.id)[0])))
 	var grace := int(People.data(w).get("grace", -1))
 	if grace >= w.current_turn():
-		card.add_child(UIKit.colored("Prazo dado pelo presidente: mais %d jogo(s) sem risco de demissão." % (grace - w.current_turn()), UIColors.GREEN, "Small", true))
+		card.add_child(UIKit.colored(("Prazo: %d jogo" if (grace - w.current_turn()) == 1 else "Prazo: %d jogos") % (grace - w.current_turn()), UIColors.GREEN, "Small", true))
 	elif conf < BoardManager.ULTIMATUM:
-		card.add_child(UIKit.colored("Ultimato: sem reação, a diretoria pode trocar o técnico a qualquer momento.", UIColors.RED, "Small", true))
+		var ult := UIKit.pill("ULTIMATO", UIColors.RED, 14)
+		ult.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.add_child(ult)
 	card.add_child(UIKit.button("Pedir uma reunião", "PrimaryButton", func(): TalkDialog.open("board", -1, cb), "shield"))
 	c.add_child(UIKit.card_panel(card))
 	# Metas da temporada com a situação de cada uma
@@ -537,7 +558,6 @@ func _coaches(w: GameWorld, c: VBoxContainer, cb: Callable) -> void:
 	stars.star_size = 22.0
 	stars.stars = clampf(rep / 20.0, 0.5, 5.0)
 	me.add_child(stars)
-	me.add_child(UIKit.label("Sua reputação decide quem te procura quando um clube troca de técnico.", "Small", true))
 	me.add_child(UIKit.button("Dança das cadeiras", "", func(): UIManager.push("coach_moves"), "swap"))
 	c.add_child(UIKit.card_panel(me))
 	var club := w.user_club()

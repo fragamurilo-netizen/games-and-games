@@ -14,7 +14,6 @@ var _all := false
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Numeração"
 
 
@@ -36,7 +35,8 @@ func refresh() -> void:
 		top = maxi(top, p.shirt)
 	c.add_child(_head(w, club))
 	# Jogadores
-	c.add_child(UIKit.section("Jogadores"))
+	max_content_width = 1700
+	c.add_child(UIKit.section_header("Jogadores"))
 	var flow := UIKit.flow(8)
 	for p: Player in squad:
 		var inner := UIKit.hbox(6)
@@ -52,10 +52,10 @@ func refresh() -> void:
 	c.add_child(flow)
 	# Camisas
 	var last := 99 if _all else maxi(40, top + 5)
-	c.add_child(UIKit.section("Camisas 1–%d" % last))
+	c.add_child(UIKit.section_header("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
-	grid.columns = 5
-	grid.add_theme_constant_override(&"h_separation", 8)
+	grid.columns = 10 if UILayout.is_wide() else 5
+	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):
 		grid.add_child(_cell(club, n, owners.get(n, null)))
@@ -71,16 +71,15 @@ func _head(w: GameWorld, club: Club) -> Control:
 	var p := w.player(_sel) if _sel >= 0 else null
 	if p == null or p.club_id != club.id:
 		_sel = -1
-		card.add_child(UIKit.label("Toque num jogador e depois na camisa nova.", "H3", true))
-		card.add_child(UIKit.label("Se o número tiver dono, os dois trocam.", "Muted", true))
-		return UIKit.card_panel(card)
+		# Sem jogador escolhido, nada de cartão com instrução: a lista abaixo já é o convite.
+		card.free()
+		return Control.new()
 	var row := UIKit.hbox(12)
 	row.add_child(UIKit.portrait(p, club, w.year, 72))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_child(UIKit.label(p.display_name(), "Title", true))
 	col.add_child(UIKit.label("%s · hoje com a %d" % [Pos.name_of(p.position), p.shirt], "Small", true))
-	col.add_child(UIKit.colored("Escolha a camisa nova abaixo.", UIColors.ACCENT, "Small", true))
 	row.add_child(col)
 	row.add_child(UIKit.button("Cancelar", "GhostButton", func():
 		_sel = -1
@@ -89,15 +88,17 @@ func _head(w: GameWorld, club: Club) -> Control:
 	return UIKit.card_panel(card)
 
 
-## Camisa: a miniatura no uniforme do clube, com o número e o dono embaixo.
+## Camisa vista de costas (como no vestiário): número grande e o nome do dono em cima.
 func _cell(club: Club, n: int, owner: Player) -> Control:
 	var col := UIKit.vbox(0)
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	var kit := KitView.new()
 	kit.kit = club.kit_for(owner) if owner != null else club.kit_home
+	kit.back = true
+	kit.back_name = owner.short_name() if owner != null else ""
 	kit.number = n
 	kit.crest = club.crest
-	kit.custom_minimum_size = Vector2(96, 78)
+	kit.custom_minimum_size = Vector2(96, 100)
 	kit.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owner == null:
 		kit.modulate = Color(1, 1, 1, 0.38)

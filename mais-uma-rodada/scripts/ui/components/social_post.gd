@@ -259,7 +259,7 @@ static func kit_stage(w: GameWorld, c: Club, m: Dictionary, year: int) -> Contro
 
 static func _score(w: GameWorld, m: Dictionary) -> Control:
 	var v := UIKit.vbox(6)
-	var comp := UIKit.label(FootballMemory.comp_name(w, String(m.get("comp", ""))).to_upper(), "Caps")
+	var comp := UIKit.label(FootballMemory.comp_name(w, String(m.get("comp", ""))), "Caps")
 	comp.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(comp)
 	var row := UIKit.hbox(14)
@@ -342,7 +342,6 @@ static func show_launch(w: GameWorld) -> void:
 	var t := UIKit.vbox(0)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.add_child(UIKit.label("Uniformes %d apresentados" % w.year, "Title", true))
-	t.add_child(UIKit.label("O post oficial já está nas redes. Veja como a torcida recebeu.", "Small", true))
 	head.add_child(t)
 	v.add_child(head)
 	var scroll := ScrollContainer.new()

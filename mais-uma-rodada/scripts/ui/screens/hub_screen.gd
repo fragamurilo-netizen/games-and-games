@@ -4,6 +4,10 @@ extends BaseScreen
 const HOOK_ICONS := {"derby": "bolt", "table": "table", "streak": "up", "player": "shirt", "market": "swap", "contract": "clock", "season": "trophy"}
 
 
+## Aba da tela inicial: resumo do dia, a temporada e o que acontece em volta do clube.
+static var _tab := "today"
+
+
 func _init() -> void:
 	nav_tab = "hub"
 
@@ -22,6 +26,10 @@ func on_show() -> void:
 		Tutorial.maybe_show()
 		if not tutorial_now and KitDesign.launch_pending(world()):
 			_kit_launch_prompt(world())
+	# Conquistas de contador de saves antigos e avisos pendentes.
+	Achievements.check_counters(world())
+	# Reforço importante fechado fora da negociação (eventos, propostas): apresentação animada.
+	SigningCeremony.play_pending(world())
 
 
 func refresh() -> void:
@@ -40,42 +48,111 @@ func refresh() -> void:
 		c.add_child(_jobs_card(w, jobs))
 		return
 	var preseason := PreseasonManager.is_active(w)
+	# Início com ritmo editorial (DESIGN.md › Editorial): a data como manchete, o jogo como o
+	# acontecimento principal, o que pede decisão e, depois, o mundo do futebol. Em tela larga,
+	# a coluna da direita traz a temporada (tabela e próximos jogos).
+	max_content_width = 1500.0
+	screen_subtitle = ""
+	var left: VBoxContainer = c
+	var right: VBoxContainer = c
+	if content_width() >= 1050.0:
+		var split := UIKit.hbox(UITokens.S8)
+		left = UIKit.vbox(UITokens.S4)
+		right = UIKit.vbox(UITokens.S4)
+		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		left.size_flags_stretch_ratio = 1.3
+		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		split.add_child(left)
+		split.add_child(right)
+		c.add_child(split)
+	left.add_child(_date_line(w, club))
 	if Store.locked(w):
-		c.add_child(_paywall_card(w))
+		left.add_child(_paywall_card(w))
 	elif preseason:
-		c.add_child(_preseason_card(w))
+		left.add_child(_preseason_card(w))
 	if Store.locked(w):
 		pass
 	elif w.season.finished:
-		c.add_child(_season_over_card(w))
+		left.add_child(_season_over_card(w))
 	else:
-		c.add_child(_next_match_card(w, club))
-	var decisions := _decisions_card(w)
-	if decisions != null:
-		c.add_child(decisions)
-	c.add_child(_inbox_card(w))
-	c.add_child(RelationsScreen.pending_card(w, func(): refresh(), true))
-	c.add_child(_status_card(w, club))
-	var alerts := _alerts_card(w, club)
-	if alerts != null:
-		c.add_child(alerts)
+		left.add_child(_next_match_card(w, club))
+	var attention := _attention(w, club)
+	if attention != null:
+		left.add_child(attention)
+	var backstage: Control = RelationsScreen.pending_card(w, func(): refresh(), false)
+	if backstage != null:
+		left.add_child(backstage)
+	var news := _news_card(w)
+	if right == c:
+		left.add_child(news)
 	if not preseason:
-		c.add_child(_mini_table_card(w, club))
-		var stars := _highlights_card(w, club)
-		if stars != null:
-			c.add_child(stars)
-	var upcoming := _upcoming_card(w, club)
-	if upcoming != null:
-		c.add_child(upcoming)
-	var cups := _cups_card(w, club)
-	if cups != null:
-		c.add_child(cups)
-	c.add_child(_shortcuts_card(w))
-	c.add_child(_news_card(w))
-	var social := _social_card(w)
-	if social != null:
-		c.add_child(social)
-	c.add_child(_form_card(w, club))
+		right.add_child(_mini_table_card(w, club))
+	for extra in [_upcoming_card(w, club), _cups_card(w, club)]:
+		if extra != null:
+			right.add_child(extra)
+	if right != c:
+		left.add_child(news)
+
+
+## Data do dia como manchete e, embaixo, onde o clube está e o que a diretoria espera.
+func _date_line(w: GameWorld, club: Club) -> Control:
+	var v := UIKit.vbox(0)
+	var slot := clampi(w.season.day, 0, maxi(0, w.season.total_days() - 1))
+	var date := w.season.long_date_label(slot)
+	# Em coluna estreita (celular deitado) a data quebra em duas linhas em vez de cortar.
+	v.add_child(UIKit.label(date if date != "" else "Temporada %d" % w.year, "Title", true))
+	var league := w.league_of(club.id)
+	var where := w.league_name(club.league_id)
+	if league != null and int(league.table[club.id]["pl"]) > 0:
+		where = "%dº no %s, %d pontos" % [CompetitionManager.position_of(league, club.id), w.league_name(club.league_id), int(league.table[club.id]["pts"])]
+	var sub := UIKit.label(where, "Muted", true)
+	v.add_child(sub)
+	var goal: Array = SeasonManager.goal_of(w, club.id)
+	if not goal.is_empty():
+		v.add_child(UIKit.label("Meta da diretoria: %s" % String(goal[0]).to_lower(), "Muted", true))
+	return v
+
+
+## Tudo o que pede uma decisão agora, numa lista só: eventos com prazo, propostas, lesões,
+## suspensões, contratos, folha, diretoria e mensagens não lidas. Cada linha leva ao lugar certo.
+func _attention(w: GameWorld, club: Club) -> Control:
+	var rows: Array = []
+	for ev in EventManager.pending(w):
+		var d := EventManager.describe(w, ev)
+		var left := maxi(1, int(ev["exp"]) - w.current_turn())
+		var e: Dictionary = ev
+		rows.append([EventDialog.color_of(ev), String(d["title"]), "Responder em até %d jogo(s)" % left, func(): EventDialog.open(e, func(): refresh())])
+	var old := _alerts_items(w, club)
+	for it in old:
+		rows.append([it[1], String(it[2]), "", it[3]])
+	var unread := InboxManager.unread_count(w)
+	if unread > 0:
+		rows.append([UIColors.MUTED, Fmt.plural(unread, "mensagem não lida", "mensagens não lidas"), "", func(): UIManager.push("inbox")])
+	if rows.is_empty():
+		return null
+	var out := UIKit.vbox(UITokens.S2)
+	out.add_child(UIKit.section_header("Precisa da sua atenção"))
+	var v := UIKit.card("Card", 0)
+	for r in rows:
+		var h := UIKit.hbox(14)
+		var mark := ColorRect.new()
+		mark.color = r[0]
+		mark.custom_minimum_size = Vector2(4, 36)
+		mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		h.add_child(mark)
+		var col := UIKit.vbox(0)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		col.add_child(UIKit.label(String(r[1]), "", true))
+		if String(r[2]) != "":
+			col.add_child(UIKit.label(String(r[2]), "Muted"))
+		h.add_child(col)
+		h.add_child(UIKit.icon_rect("forward", 20, UIColors.DIM))
+		var row := UIKit.tap_row(h, r[3])
+		row.custom_minimum_size.y = UITokens.H_ROW
+		v.add_child(row)
+	out.add_child(UIKit.card_panel(v))
+	return out
 
 
 ## Bloco de um time na próxima partida: escudo, nome, posição (na liga ou no grupo da copa) e forma.
@@ -83,11 +160,12 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 	var v := UIKit.vbox(6)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	var cr := UIKit.crest(cl, 104)
+	var cr := UIKit.crest(cl, 88 if UILayout.is_short() else 112)
 	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(cr)
 	var n := UIKit.label(cl.short_name, "H2")
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	n.tooltip_text = cl.name
 	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	v.add_child(n)
 	var text := ""
@@ -104,8 +182,8 @@ func _team_block(w: GameWorld, cl: Club, f: Fixture) -> VBoxContainer:
 		var cup: Cup = w.season.cups.get(f.comp, null)
 		var g: Dictionary = cup.group_of(cl.id) if cup != null else {}
 		if f.stage == Fixture.STAGE_GROUP and not g.is_empty():
-			var order := CompetitionManager.sort_table(g["clubs"], g["table"])
-			text = "%dº no grupo %s" % [order.find(cl.id) + 1, g["n"]]
+			var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
+			text = "%dº na fase de liga" % [order.find(cl.id) + 1] if cup.league_phase else "%dº no grupo %s" % [order.find(cl.id) + 1, g["n"]]
 		else:
 			text = "%s · %s" % [DatabaseManager.nation_name(cl.nation), w.league_short(cl.league_id)]
 	var sub := UIKit.label(text, "Small")
@@ -126,64 +204,116 @@ func _next_match_card(w: GameWorld, club: Club) -> Control:
 		card.add_child(UIKit.section("Temporada"))
 		card.add_child(UIKit.label("Seu time não joga mais nesta temporada.", "Title", true))
 		card.add_child(UIKit.label("Outras ligas e copas ainda estão em andamento.", "Muted", true))
-		var adv := UIKit.button("AVANÇAR ATÉ O FIM DA TEMPORADA", "PrimaryButton", func():
-			GameManager.advance_to_end()
-			refresh(), "fast")
+		var adv := UIKit.button("Avançar até o fim da temporada", "PrimaryButton", func():
+			GameManager.advance_to_end_async(func() -> void:
+				if is_inside_tree():
+					refresh()), "fast")
 		adv.custom_minimum_size.y = 104
 		card.add_child(adv)
 		return UIKit.card_panel(card)
 	var derby := MatchEngine.is_derby(w, f.home, f.away)
-	var head := UIKit.section("Próxima partida · %s · %s" % [CompText.fixture_title(w, f), w.season.date_label(f.slot)])
-	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var head_row := UIKit.hbox(10)
-	head_row.add_child(UIKit.comp_logo(f.comp, 30))
-	head_row.add_child(head)
-	card.add_child(head_row)
-	card.add_child(UIKit.comp_stripe(f.comp, 4))
+	# Dia de jogo como objeto do jogo: faixa da competição (cores da transmissão), os dois
+	# clubes com escudo grande sobre as cores deles, e a ação de jogar.
+	var hero := MatchHero.wrap(w, f.comp, w.club(f.home), w.club(f.away))
+	var band: HBoxContainer = hero[1]
+	var st := ScoreboardTheme.for_competition(w, f.comp)
+	band.add_child(UIKit.comp_logo(f.comp, 36))
+	var bt := UIKit.vbox(-2)
+	bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var ct := UIKit.label(CompText.fixture_title(w, f), "H3")
+	ct.add_theme_color_override(&"font_color", st["caps"])
+	ct.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	bt.add_child(ct)
+	var dl := UIKit.label(w.season.date_label(f.slot), "Small")
+	dl.add_theme_color_override(&"font_color", Color(st["text"], 0.8))
+	bt.add_child(dl)
+	band.add_child(bt)
+	var where := "Neutro" if f.neutral else ("Em casa" if f.home == club.id else "Fora")
+	var wl := UIKit.label(where, "Caps")
+	wl.add_theme_color_override(&"font_color", Color(st["text"], 0.9))
+	wl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	band.add_child(wl)
+	var body: VBoxContainer = hero[2]
 	var row := UIKit.hbox(6)
-	row.add_child(_team_block(w, w.club(f.home), f))
-	var mid := UIKit.vbox(2)
-	mid.alignment = BoxContainer.ALIGNMENT_CENTER
-	var vs := UIKit.label("x", "Big")
-	vs.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(_club_tap(w, _team_block(w, w.club(f.home), f), f.home))
+	var vs := UIKit.label("×", "Title")
+	vs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	vs.add_theme_color_override(&"font_color", UIColors.DIM)
-	mid.add_child(vs)
-	var where := UIKit.label("NEUTRO" if f.neutral else ("EM CASA" if f.home == club.id else "FORA"), "Caps")
-	where.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	where.add_theme_color_override(&"font_color", UIColors.MUTED if f.neutral else (UIColors.GREEN if f.home == club.id else UIColors.ORANGE))
-	mid.add_child(where)
-	row.add_child(mid)
-	row.add_child(_team_block(w, w.club(f.away), f))
-	card.add_child(row)
-	var stadium := UIKit.label(("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city]), "Small")
-	stadium.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	card.add_child(stadium)
+	row.add_child(vs)
+	row.add_child(_club_tap(w, _team_block(w, w.club(f.away), f), f.away))
+	body.add_child(row)
+	var venue := UIKit.label("Campo neutro" if f.neutral else "%s · %s" % [w.club(f.home).stadium, w.club(f.home).city], "Muted")
+	venue.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(venue)
 	if derby:
-		var d := UIKit.label("CLÁSSICO", "H2")
+		var d := UIKit.label("Clássico", "H2")
 		d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		d.add_theme_color_override(&"font_color", UIColors.RED)
-		card.add_child(d)
+		body.add_child(d)
 	for hk in StoryHooks.for_next_match(w):
 		if hk["kind"] == "derby":
 			continue
 		var line := UIKit.hbox(10)
-		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 26, _hook_color(String(hk["kind"]))))
-		var t := UIKit.label(hk["text"], "", true)
-		line.add_child(t)
-		card.add_child(line)
-	var play := UIKit.button("JOGAR", "PrimaryButton", func(): UIManager.push("prematch"), "play")
-	play.custom_minimum_size.y = 112
-	card.add_child(play)
-	var sub := UIKit.hbox(10)
-	var lineup := UIKit.button("Escalação e tática", "GhostButton", func(): UIManager.push("prematch", {"edit": true}), "tactics")
-	lineup.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	sub.add_child(lineup)
+		line.add_child(UIKit.icon_rect(HOOK_ICONS.get(hk["kind"], "info"), 24, _hook_color(String(hk["kind"]))))
+		line.add_child(UIKit.label(hk["text"], "", true))
+		body.add_child(line)
+	var act := UIKit.hbox(10)
+	var play := UIKit.button("Jogar", "PrimaryButton", func(): UIManager.push("prematch"), "whistle")
+	play.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	play.custom_minimum_size.y = 92
+	act.add_child(play)
 	var quick := UIKit.button("Simular", "GhostButton", func(): SimDialog.open(func(): refresh()), "fast")
 	quick.tooltip_text = "Joga um ou vários jogos sem assistir"
-	sub.add_child(quick)
-	card.add_child(sub)
-	return UIKit.card_panel(card)
+	quick.custom_minimum_size.y = 92
+	act.add_child(quick)
+	body.add_child(act)
+	return hero[0]
+
+
+## Uma linha de time no bloco do jogo: escudo, nome, campanha e forma recente.
+func _team_line(w: GameWorld, cl: Club, f: Fixture, mine: bool) -> Control:
+	var h := UIKit.hbox(14)
+	h.add_child(UIKit.crest(cl, 52))
+	var n := UIKit.label(cl.short_name, "H2")
+	n.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if not mine:
+		n.add_theme_color_override(&"font_color", UIColors.TEXT)
+	h.add_child(n)
+	var text := ""
+	var form := cl.recent_form(5)
+	if f.is_league():
+		var league := w.league(f.comp)
+		var row: Dictionary = league.table.get(cl.id, {})
+		if not row.is_empty() and int(row["pl"]) > 0:
+			text = "%dº · %d pts" % [CompetitionManager.position_of(league, cl.id), int(row["pts"])]
+			form = row["form"]
+	else:
+		text = w.league_short(cl.league_id)
+	var sub := UIKit.label(text, "Muted")
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	h.add_child(sub)
+	var fd := FormDots.new()
+	fd.dot = 16
+	fd.form = form
+	fd.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(fd)
+	h.custom_minimum_size.y = 64
+	return h
+
+
+## Toque no time abre a ficha dele (o seu clube vai para a aba Clube).
+func _club_tap(w: GameWorld, inner: Control, cid: int) -> Control:
+	var expand := inner.size_flags_horizontal
+	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := UIKit.tap_row(inner, func():
+		if w.is_user_club(cid):
+			UIManager.goto("club")
+		else:
+			UIManager.push("club", {"id": cid}), "")
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return row
 
 
 func _instant() -> void:
@@ -191,10 +321,9 @@ func _instant() -> void:
 	var msgs := ClubAI.validate_user_sheet(w, w.user_club())
 	for m in msgs:
 		UIManager.toast(m)
-	var report := GameManager.play_instant()
-	if report.is_empty():
-		return
-	UIManager.push("results", {"report": report})
+	GameManager.play_instant_async(func(report: Dictionary) -> void:
+		if not report.is_empty():
+			UIManager.push("results", {"report": report}))
 
 
 ## Temporada de demonstração encerrada: o convite para seguir com a Carreira Completa.
@@ -202,7 +331,7 @@ func _paywall_card(w: GameWorld) -> Control:
 	var card := UIKit.card("CardHighlight", 12)
 	card.add_child(UIKit.section("Temporada %d" % w.year))
 	card.add_child(UIKit.label("Mais uma temporada?", "Title", true))
-	card.add_child(UIKit.label("A primeira temporada é grátis. Com a Carreira Completa você segue com o %s por quantos anos quiser, pagando uma vez só." % w.user_club().short_name, "Muted", true))
+	card.add_child(UIKit.label("Siga com o %s por quantos anos quiser." % w.user_club().short_name, "Muted", true))
 	var b := UIKit.button("CONTINUAR A CARREIRA · %s" % Store.price(), "PrimaryButton", func(): UIManager.push("paywall"), "star")
 	b.custom_minimum_size.y = 104
 	card.add_child(b)
@@ -224,7 +353,7 @@ func _decisions_card(w: GameWorld) -> Control:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_child(UIKit.label(String(d["title"]), "H3", true))
 		var left := maxi(1, int(ev["exp"]) - w.current_turn())
-		col.add_child(UIKit.label("Responda em até %d jogo(s)" % left, "Small"))
+		col.add_child(UIKit.label(("Responda em até %d jogo" if left == 1 else "Responda em até %d jogos") % left, "Small"))
 		row.add_child(col)
 		row.add_child(UIKit.label("›", "H2"))
 		var e: Dictionary = ev
@@ -245,17 +374,20 @@ func _shortcuts_card(w: GameWorld) -> Control:
 		["tactics", "Treino", TrainingManager.focus_of(w.user_club())["name"], func(): UIManager.push("training")],
 		["up", "Base", "%d garotos%s" % [w.academy.size(), (" · %dº" % yl_pos) if yl_pos > 0 and YouthManager.has_league(w) and int(w.youth_league["table"][w.user_club_id]["pl"]) > 0 else ""], func(): UIManager.push("academy")],
 		["money", "Finanças", Fmt.money(w.user_club().balance), func(): UIManager.goto("club")],
-		["trophy", "História", "Campeões e prêmios", func(): UIManager.push("history")],
-		["shield", "Seleções", "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())], func(): UIManager.push("national")],
+		["book", "História", "Campeões e prêmios", func(): UIManager.push("history")],
+		["globe", "Seleções", _nt_line(w), func(): UIManager.push("national")],
 		["gear", "Editor", "Escudos, fotos, nomes", func(): UIManager.push("editor")],
-		["mail", "Mensagens", "%d não lida(s)" % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
-		["news", "Notícias", "%d nova(s)" % w.unread_news_count(), func(): UIManager.push("news")],
+		["mail", "Mensagens", ("%d não lida" if InboxManager.unread_count(w) == 1 else "%d não lidas") % InboxManager.unread_count(w), func(): UIManager.push("inbox")],
+		["news", "Notícias", ("%d nova" if w.unread_news_count() == 1 else "%d novas") % w.unread_news_count(), func(): UIManager.push("news")],
 		["chat", "Redes", SocialFeed.count(SocialFeed.followers(w.user_club(), w)) + " seguidores", func(): UIManager.push("social")],
+		["trophy", "Conquistas", "%d de %d" % [Achievements.unlocked(w).size(), Achievements.CATALOG.size()], func(): UIManager.push("achievements")],
 	]
 	for it in items:
 		var v := UIKit.vbox(4)
 		v.alignment = BoxContainer.ALIGNMENT_CENTER
-		var ic := UIKit.icon_rect(String(it[0]), 40, UIColors.ACCENT)
+		var ic := PanelContainer.new()
+		ic.theme_type_variation = "IconTile"
+		ic.add_child(UIKit.icon_rect(String(it[0]), 32, UIColors.ACCENT))
 		ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(ic)
 		var t := UIKit.label(String(it[1]), "H3")
@@ -279,8 +411,12 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 	card.add_child(UIKit.section("Sem clube"))
 	var fired: Dictionary = w.stats.get("fired", {})
 	var old := w.club(int(fired.get("from", -1)))
-	card.add_child(UIKit.label("A diretoria do %s decidiu trocar o comando técnico." % (old.short_name if old != null else "clube"), "Title", true))
-	card.add_child(UIKit.label("Alguns clubes querem conversar. Escolha onde recomeçar — a carreira, os números e a história continuam com você.", "Muted", true))
+	var oname := old.short_name if old != null else "clube"
+	if bool(fired.get("res", false)):
+		card.add_child(UIKit.label("Você entregou o cargo no %s." % oname, "Title", true))
+	else:
+		card.add_child(UIKit.label("A diretoria do %s decidiu trocar o comando técnico." % oname, "Title", true))
+	card.add_child(UIKit.label("Alguns clubes querem conversar. Também dá para mandar currículo para quem está com vaga aberta.", "Muted", true))
 	for cid in jobs:
 		var cl := w.club(int(cid))
 		if cl == null:
@@ -296,10 +432,11 @@ func _jobs_card(w: GameWorld, jobs: Array) -> Control:
 		var ccid: int = int(cid)
 		card.add_child(UIKit.tap_row(row, func():
 			UIManager.confirm("Assumir o %s?" % cl.short_name, "Você será o novo treinador do clube a partir de agora.", "Assumir", func():
-				BoardManager.take_job(w, ccid)
+				JobMarket.accept(w, ccid)
 				GameManager.save_now()
-				AudioManager.play("sign")
+				Sfx.play("sign")
 				UIManager.goto("hub")), "Card"))
+	card.add_child(UIKit.button("Vagas abertas e entrevistas", "GhostButton", func(): UIManager.push("jobs"), "search"))
 	return UIKit.card_panel(card)
 
 
@@ -310,7 +447,7 @@ func _season_over_card(w: GameWorld) -> Control:
 	var pos := CompetitionManager.position_of(league, w.user_club_id)
 	var t := UIKit.label("Temporada %d encerrada: %dº lugar" % [w.year, pos], "Title", true)
 	card.add_child(t)
-	var b := UIKit.button("VER RESUMO DA TEMPORADA", "PrimaryButton", func(): UIManager.push("season_end"), "trophy")
+	var b := UIKit.button("Ver resumo da temporada", "PrimaryButton", func(): UIManager.push("season_end"))
 	b.custom_minimum_size.y = 104
 	card.add_child(b)
 	return UIKit.card_panel(card)
@@ -380,13 +517,13 @@ func _cups_card(w: GameWorld, club: Club) -> Control:
 			for t in cup.ties:
 				if int(t["a"]) == club.id or int(t["b"]) == club.id:
 					r = maxi(r, int(t["r"]))
-			status = cup.round_names[r] if r >= 0 else "Fase de grupos"
+			status = cup.round_names[r] if r >= 0 else ("Fase de liga" if cup.league_phase else "Fase de grupos")
 			color = UIColors.GREEN
 		else:
 			var g := cup.group_of(club.id)
 			if not g.is_empty():
-				var order := CompetitionManager.sort_table(g["clubs"], g["table"])
-				status = "%dº no grupo %s · %d pts" % [order.find(club.id) + 1, g["n"], int(g["table"][club.id]["pts"])]
+				var order := LeaguePhase.sorted_ids(cup) if cup.league_phase else CompetitionManager.sort_table(g["clubs"], g["table"])
+				status = "%dº · %d pts" % [order.find(club.id) + 1, int(g["table"][club.id]["pts"])] if cup.league_phase else "%dº no grupo %s · %d pts" % [order.find(club.id) + 1, g["n"], int(g["table"][club.id]["pts"])]
 			else:
 				status = "Classificado"
 		if status != "CAMPEÃO" and status != "Eliminado" and cup.byes.has(club.id) and cup.round_names.size() > 1:
@@ -423,40 +560,53 @@ static func _team_morale(w: GameWorld, club: Club) -> float:
 	return s / maxf(1.0, n)
 
 
-func _alerts_card(w: GameWorld, club: Club) -> Control:
-	var items: Array = []
-	if SponsorManager.is_preseason(w):
-		if not KitDesign.launched(w):
-			items.append(["shirt", UIColors.ACCENT, "Pré-temporada: apresente os uniformes de %d antes do primeiro jogo" % w.year, func(): UIManager.push("kit", {"launch": true})])
-	var offers := TransferManager.pending_offers(w)
-	if not offers.is_empty():
-		items.append(["swap", UIColors.ACCENT, "%d proposta(s) pelo seu elenco" % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
-	if w.transfer_window_open():
-		items.append(["swap", UIColors.GREEN, "Janela de transferências aberta até %s" % w.season.date_label(w.window_end_day(), false), func(): UIManager.goto("market")])
-	var injured: Array = []
-	var suspended: Array = []
-	var expiring := 0
+## Atalho de seleções: a que o usuário comanda (com a posição no ranking) ou a do país do clube.
+static func _nt_line(w: GameWorld) -> String:
+	var code := NationalCoach.nation(w)
+	if code != "":
+		return "Técnico: %s · %dº" % [DatabaseManager.nation_name(code), NationalTeamManager.rank_of(w, code)]
+	if not NationalCoach.offers(w).is_empty():
+		return ("%d convite de seleção" if NationalCoach.offers(w).size() == 1 else "%d convites de seleção") % NationalCoach.offers(w).size()
+	return "%s · %dº" % [DatabaseManager.nation_name(w.user_nation()), NationalTeamManager.rank_of(w, w.user_nation())]
+
+
+## Data FIFA chegando (ou em andamento): datas, convocados do elenco e a lista do técnico de seleção.
+func _fifa_alert(w: GameWorld, club: Club) -> Array:
+	var active := NationalTeamManager.active_window(w)
+	if not active.is_empty():
+		var away := 0
+		for p in w.squad(club):
+			if p.intl_duty:
+				away += 1
+		return ["globe", UIColors.ACCENT, ("Data FIFA até %s: %d jogador a serviço da seleção" if away == 1 else "Data FIFA até %s: %d jogadores a serviço da seleção") % [NationalTeamManager.day_label(w, int(active["to"])), away],
+			func(): UIManager.push("national")]
+	var nxt := NationalTeamManager.next_window(w)
+	if nxt.is_empty() or w.season == null:
+		return []
+	# Só avisa nas duas semanas anteriores (o anúncio das listas sai uma semana antes).
+	var today := int(w.season.calendar[mini(w.season.day, w.season.calendar.size() - 1)]["d"])
+	if int(nxt["from"]) - today > 16:
+		return []
+	var code := NationalCoach.nation(w)
+	if code != "" and not NationalTeamManager.data(w).has("next"):
+		return ["globe", UIColors.ACCENT, "%s: monte a lista para a data FIFA de %s" % [DatabaseManager.nation_name(code), NationalTeamManager.window_label(w, nxt)],
+			func(): UIManager.push("national", {"tab": "squad", "nation": code})]
+	var d := NationalTeamManager.data(w)
+	var nats: Array = []
 	for p in w.squad(club):
-		if p.injury_weeks > 0:
-			injured.append("%s (%d sem.)" % [p.display_name(), p.injury_weeks])
-		if p.suspension > 0:
-			suspended.append(p.display_name())
-		if p.contract_end <= w.year:
-			expiring += 1
-	if not injured.is_empty():
-		items.append(["cross", UIColors.RED, "Lesionados: " + ", ".join(injured.slice(0, 3)) + (" e mais %d" % (injured.size() - 3) if injured.size() > 3 else ""), func(): UIManager.goto("squad")])
-	if not suspended.is_empty():
-		items.append(["card", UIColors.ORANGE, "Suspenso(s) no próximo jogo: " + ", ".join(suspended), func(): UIManager.goto("squad")])
-	if expiring > 0 and w.season.day >= 14:
-		items.append(["clock", UIColors.ORANGE, "%d contrato(s) terminam no fim da temporada — renove quem você quer manter" % expiring, func(): UIManager.goto("squad", {"sort": "contract"})])
-	var rules := DatabaseManager.squad_rules()
-	if club.player_ids.size() < int(rules["min_players"]):
-		items.append(["shirt", UIColors.RED, "Elenco curto: só %d jogadores" % club.player_ids.size(), func(): UIManager.goto("market")])
-	var bill := FinanceManager.wage_bill(w, club)
-	if bill > club.wage_budget:
-		items.append(["money", UIColors.RED, "Folha salarial acima do limite da diretoria", func(): UIManager.goto("club")])
-	if club.board_confidence < BoardManager.ULTIMATUM:
-		items.append(["info", UIColors.RED, "Ultimato da diretoria: sem reação, o cargo pode cair a qualquer momento", func(): UIManager.push("relations", {"tab": "board"})])
+		if not nats.has(p.nationality):
+			nats.append(p.nationality)
+	var src := NationalTeamManager.expected_lists(w, nats)
+	var n := 0
+	for p in w.squad(club):
+		if (src.get(p.nationality, []) as Array).has(p.id):
+			n += 1
+	return ["globe", UIColors.ACCENT, "Data FIFA de %s: %d %s do elenco" % [NationalTeamManager.window_label(w, nxt), n, ("convocado" if n == 1 else "convocados") if d.has("next") else ("provável convocado" if n == 1 else "prováveis convocados")],
+		func(): UIManager.push("national")]
+
+
+func _alerts_card(w: GameWorld, club: Club) -> Control:
+	var items := _alerts_items(w, club)
 	if items.is_empty():
 		return null
 	var card := UIKit.card("Card", 8)
@@ -470,6 +620,46 @@ func _alerts_card(w: GameWorld, club: Club) -> Control:
 	return UIKit.card_panel(card)
 
 
+func _alerts_items(w: GameWorld, club: Club) -> Array:
+	var items: Array = []
+	if SponsorManager.is_preseason(w):
+		if not KitDesign.launched(w):
+			items.append(["shirt", UIColors.ACCENT, "Apresente os uniformes de %d" % w.year, func(): UIManager.push("kit", {"launch": true})])
+	var offers := TransferManager.pending_offers(w)
+	if not offers.is_empty():
+		items.append(["swap", UIColors.ACCENT, ("%d proposta pelo seu elenco" if offers.size() == 1 else "%d propostas pelo seu elenco") % offers.size(), func(): UIManager.goto("market", {"tab": "offers"})])
+	if w.transfer_window_open():
+		items.append(["swap", UIColors.GREEN, "Janela de transferências aberta até %s" % w.season.date_label(w.window_end_day(), false), func(): UIManager.goto("market")])
+	var fifa := _fifa_alert(w, club)
+	if not fifa.is_empty():
+		items.append(fifa)
+	var injured: Array = []
+	var suspended: Array = []
+	var expiring := 0
+	for p in w.squad(club):
+		if p.injury_weeks > 0:
+			injured.append("%s (%d sem.)" % [p.display_name(), p.injury_weeks])
+		if p.suspension > 0:
+			suspended.append(p.display_name())
+		if p.contract_end <= w.year:
+			expiring += 1
+	if not injured.is_empty():
+		items.append(["cross", UIColors.RED, "Lesionados: " + ", ".join(injured.slice(0, 3)) + (" e mais %d" % (injured.size() - 3) if injured.size() > 3 else ""), func(): UIManager.goto("squad")])
+	if not suspended.is_empty():
+		items.append(["card", UIColors.ORANGE, ("Suspenso no próximo jogo: " if suspended.size() == 1 else "Suspensos no próximo jogo: ") + ", ".join(suspended), func(): UIManager.goto("squad")])
+	if expiring > 0 and w.season.day >= 14:
+		items.append(["clock", UIColors.ORANGE, ("%d contrato termina no fim da temporada" if expiring == 1 else "%d contratos terminam no fim da temporada") % expiring, func(): UIManager.goto("squad", {"sort": "contract"})])
+	var rules := DatabaseManager.squad_rules()
+	if club.player_ids.size() < int(rules["min_players"]):
+		items.append(["shirt", UIColors.RED, "Elenco curto: só %d jogadores" % club.player_ids.size(), func(): UIManager.goto("market")])
+	var bill := FinanceManager.wage_bill(w, club)
+	if bill > club.wage_budget:
+		items.append(["money", UIColors.RED, "Folha salarial acima do limite da diretoria", func(): UIManager.goto("club")])
+	if club.board_confidence < BoardManager.ULTIMATUM:
+		items.append(["info", UIColors.RED, "Ultimato da diretoria", func(): UIManager.push("relations", {"tab": "board"})])
+	return items
+
+
 ## Caixa de entrada: as mensagens novas mais recentes (ou um atalho quando está tudo lido).
 func _inbox_card(w: GameWorld) -> Control:
 	var unread := InboxManager.unread_count(w)
@@ -480,7 +670,7 @@ func _inbox_card(w: GameWorld) -> Control:
 	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(sec)
 	if unread > 0:
-		head.add_child(UIKit.colored("%d não lida(s)" % unread, UIColors.ACCENT, "Small"))
+		head.add_child(UIKit.colored(("%d não lida" if unread == 1 else "%d não lidas") % unread, UIColors.ACCENT, "Small"))
 	card.add_child(head)
 	var items: Array = w.inbox.duplicate()
 	items.reverse()
@@ -494,33 +684,41 @@ func _inbox_card(w: GameWorld) -> Control:
 		card.add_child(InboxScreen.row(w, m, func(): refresh()))
 		shown += 1
 	if shown == 0:
-		card.add_child(UIKit.label("Nenhuma mensagem nova." if unread == 0 else "As mensagens novas pedem resposta: veja os cartões acima.", "Muted", true))
+		card.add_child(UIKit.label("Nenhuma mensagem nova." if unread == 0 else "Respostas pendentes acima.", "Muted", true))
 	card.add_child(UIKit.button("Abrir caixa de entrada", "GhostButton", func(): UIManager.push("inbox"), "mail"))
 	return UIKit.card_panel(card)
 
 
+## Mundo do futebol: uma manchete com foto e, embaixo, as outras notícias como lista editorial.
 func _news_card(w: GameWorld) -> Control:
-	var card := UIKit.card("Card", 10)
-	var head := UIKit.hbox(8)
-	var sec := UIKit.section("Notícias")
-	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(sec)
-	var unread := w.unread_news_count()
-	if unread > 0:
-		head.add_child(UIKit.colored("%d nova(s)" % unread, UIColors.ACCENT, "Small"))
-	card.add_child(head)
-	var items: Array = w.news.duplicate()
-	items.reverse()
-	var shown := 0
-	for n: NewsEvent in items:
-		if shown >= 4:
+	var out := UIKit.vbox(UITokens.S2)
+	out.add_child(UIKit.section_header("Mundo do futebol", "Todas as notícias", func(): UIManager.push("news")))
+	# O que importa primeiro: notícias do seu país e as grandes; o mundo completa se faltar.
+	var picked: Array = []
+	var rest: Array = []
+	for i in range(w.news.size() - 1, maxi(-1, w.news.size() - 60), -1):
+		var n: NewsEvent = w.news[i]
+		if picked.size() >= 5:
 			break
-		card.add_child(NewsRow.make(w, n, true))
-		shown += 1
-	if shown == 0:
-		card.add_child(UIKit.label("Nada por aqui ainda.", "Muted"))
-	card.add_child(UIKit.button("Ver todas as notícias", "GhostButton", func(): UIManager.push("news"), "news"))
-	return UIKit.card_panel(card)
+		if n.importance >= NewsEvent.IMP_HIGH or (n.importance >= NewsEvent.IMP_NORMAL and not NewsRow.is_foreign(w, n)):
+			picked.append(n)
+		elif rest.size() < 5:
+			rest.append(n)
+	while picked.size() < 5 and not rest.is_empty():
+		picked.append(rest.pop_front())
+	if picked.is_empty():
+		out.add_child(UIKit.state_block("empty", "Nenhuma notícia ainda.", "O noticiário começa com a primeira rodada."))
+		return out
+	# Manchete: a mais importante das escolhidas; o resto na ordem do mais recente.
+	var lead: NewsEvent = picked[0]
+	for n: NewsEvent in picked:
+		if n.importance > lead.importance:
+			lead = n
+	picked.erase(lead)
+	out.add_child(NewsRow.feature(w, lead, 300, true))
+	for n: NewsEvent in picked:
+		out.add_child(NewsRow.make(w, n, true))
+	return out
 
 
 ## O post mais recente sobre o seu clube nas redes.
@@ -560,20 +758,27 @@ func _form_card(w: GameWorld, club: Club) -> Control:
 		var mine := f.hg if f.home == club.id else f.ag
 		var theirs := f.ag if f.home == club.id else f.hg
 		row.add_child(UIKit.label("%d x %d" % [mine, theirs], "Stat"))
-		card.add_child(row)
+		card.add_child(_club_tap(w, row, opp.id))
 	return UIKit.card_panel(card)
 
 
 ## Pré-temporada em andamento: atalho com os passos que faltam.
 func _preseason_card(w: GameWorld) -> Control:
-	var card := UIKit.card("CardHighlight", 10)
+	var card := UIKit.card("Card", 10)
 	card.add_child(UIKit.section("Pré-temporada %d" % w.year))
-	card.add_child(UIKit.label("Prepare o time antes da estreia", "Title", true))
+	card.add_child(UIKit.label("Antes da estreia", "H2", true))
 	var steps := PreseasonManager.steps(w)
-	var names := ["Raio-x e planejamento do elenco", "Intertemporada (físico, tático, excursão ou base)", "Três amistosos de preparação"]
+	var names := ["Raio-x e planejamento do elenco", "Intertemporada", "Três amistosos de preparação"]
 	for i in 3:
-		var row := UIKit.hbox(10)
-		row.add_child(UIKit.icon_rect("check" if steps[i] else "clock", 26, UIColors.GREEN if steps[i] else UIColors.MUTED))
+		var row := UIKit.hbox(12)
+		if steps[i]:
+			row.add_child(UIKit.icon_rect("check", 24, UIColors.GREEN))
+		else:
+			var n := UIKit.label(str(i + 1), "Stat")
+			n.custom_minimum_size.x = 24
+			n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			n.add_theme_color_override(&"font_color", UIColors.DIM)
+			row.add_child(n)
 		var l := UIKit.label(names[i], "" if not steps[i] else "Muted", true)
 		row.add_child(l)
 		card.add_child(row)
@@ -583,8 +788,8 @@ func _preseason_card(w: GameWorld) -> Control:
 		krow.add_child(UIKit.icon_rect("check" if kit_done else "shirt", 26, UIColors.GREEN if kit_done else UIColors.ACCENT))
 		krow.add_child(UIKit.label("Uniformes da temporada", "Muted" if kit_done else "", true))
 		card.add_child(krow if kit_done else UIKit.tap_row(krow, func(): UIManager.push("kit", {"launch": true})))
-	var b := UIKit.button("ABRIR PRÉ-TEMPORADA", "PrimaryButton", func(): UIManager.push("preseason"), "tactics")
-	b.custom_minimum_size.y = 96
+	var b := UIKit.button("Abrir pré-temporada", "PrimaryButton", func(): UIManager.push("preseason"))
+	b.custom_minimum_size.y = 84
 	card.add_child(b)
 	return UIKit.card_panel(card)
 
@@ -597,10 +802,16 @@ func _mini_table_card(w: GameWorld, club: Club) -> Control:
 	var from := clampi(me - 2, 0, maxi(0, ids.size() - 5))
 	var card := UIKit.card("Card", 4)
 	var head := UIKit.hbox(8)
-	var sec := UIKit.section(league.name)
+	var sec := UIKit.label(league.name, "Section")
 	sec.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sec.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	head.add_child(sec)
-	head.add_child(UIKit.label("J    SG    PTS", "Small"))
+	for t in ["J", "SG", "Pts"]:
+		var hl := UIKit.label(t, "Caps")
+		hl.custom_minimum_size.x = 52
+		hl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		hl.size_flags_vertical = Control.SIZE_SHRINK_END
+		head.add_child(hl)
 	card.add_child(head)
 	for i in range(from, mini(from + 5, ids.size())):
 		var cl := w.club(int(ids[i]))
@@ -620,8 +831,12 @@ func _mini_table_card(w: GameWorld, club: Club) -> Control:
 		if cl.id == club.id:
 			n.add_theme_color_override(&"font_color", UIColors.ACCENT)
 		row.add_child(n)
-		var nums := UIKit.label("%2d   %s   %3d" % [int(r["pl"]), Fmt.signed(int(r["gf"]) - int(r["ga"])), int(r["pts"])], "Mono")
-		row.add_child(nums)
+		for val in [str(int(r["pl"])), Fmt.signed(int(r["gf"]) - int(r["ga"])), str(int(r["pts"]))]:
+			var nl2 := UIKit.label(val)
+			nl2.custom_minimum_size.x = 52
+			nl2.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			nl2.add_theme_font_override(&"font", DataTable.tabular_font())
+			row.add_child(nl2)
 		card.add_child(UIKit.tap_row(row, func(): UIManager.goto("table"), "CardFlat" if cl.id == club.id else "RowPanel"))
 	return UIKit.card_panel(card)
 
@@ -668,7 +883,7 @@ func _highlights_card(w: GameWorld, club: Club) -> Control:
 		row.add_child(UIKit.portrait(p, club, w.year, 56))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(it[1]).to_upper(), "Caps"))
+		col.add_child(UIKit.label(String(it[1]), "Caps"))
 		var nl := UIKit.label(p.display_name(), "H3")
 		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		col.add_child(nl)
@@ -716,7 +931,7 @@ func _upcoming_card(w: GameWorld, club: Club) -> Control:
 		var league := w.league_of(opp.id)
 		if league != null and league.id == club.league_id and int(league.table[opp.id]["pl"]) > 0:
 			row.add_child(UIKit.label("%dº" % CompetitionManager.position_of(league, opp.id), "H3"))
-		card.add_child(row)
+		card.add_child(_club_tap(w, row, opp.id))
 	return UIKit.card_panel(card)
 
 
@@ -732,7 +947,7 @@ func _kit_launch_prompt(w: GameWorld) -> void:
 	head.add_child(UIKit.icon_rect("shirt", 56, UIColors.ACCENT))
 	head.add_child(UIKit.label("Uniformes %d" % w.year, "Title", true))
 	v.add_child(head)
-	v.add_child(UIKit.label("Pré-temporada é época de lançamento. %s mandou três coleções para a nova temporada. Escolha uma, desenhe do seu jeito ou mantenha os uniformes atuais." % brand, "", true))
+	v.add_child(UIKit.label("%s mandou três coleções para a nova temporada." % brand, "", true))
 	var row := UIKit.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	for k in [club.kit_home, club.kit_away, club.third_kit()]:

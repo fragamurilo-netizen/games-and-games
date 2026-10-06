@@ -9,6 +9,9 @@ const MAJOR_COEF := 70
 
 ## Tempo acumulado (µs) por etapa do processamento das datas — medição de desempenho (simulador).
 static var timings: Dictionary = {}
+## Andamento (0-100) do trabalho pesado em curso, para a barra do aviso "processando". Só inteiros:
+## a thread de trabalho escreve e a tela lê.
+static var progress := 0
 
 
 static func _time(key: String, t0: int) -> int:
@@ -26,6 +29,7 @@ static func setup_first_season(world: GameWorld) -> void:
 	NationalTeamManager.start_season(world)
 	for c in world.clubs:
 		c.reset_season_state()
+		FinanceManager.market_wages(world, c, true)
 		FinanceManager.set_budgets(world, c)
 	for p: Player in world.players.values():
 		p.ovr_start = p.overall
@@ -50,6 +54,10 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var slots: Array = cc["slots"]
 	var brk := int(cc.get("winter_break_after", -1))
 	var first_w := true
+	# Datas FIFA: marcadas no fim de semana que as antecede; com "fifa_pause" as ligas param na semana seguinte.
+	var fifa: Array = NationalTeamManager.fifa_dates_for(kind)
+	var fifa_pause := bool(cc.get("fifa_pause", false))
+	var wk := 0
 	for i in slots.size():
 		var t: String = slots[i]
 		if t == "_":
@@ -57,18 +65,24 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 			continue
 		if t == "W~":
 			out.append({"t": "W", "d": sat + 3, "mid": true})
+			wk += 1
 			continue
 		if t.ends_with("@"):
 			if not first_w:
 				sat += 7
 			first_w = false
-			out.append({"t": t.trim_suffix("@"), "d": sat})
+			out.append({"t": t.trim_suffix("@"), "d": sat, "we": true})
 			continue
 		if t == "W":
 			if not first_w:
 				sat += 7
 			first_w = false
 			out.append({"t": t, "d": sat})
+			if fifa.has(wk):
+				out[out.size() - 1]["fifa"] = true
+				if fifa_pause:
+					sat += 7
+			wk += 1
 		elif t == "U0":
 			out.append({"t": t, "d": sat - 10}) # quarta-feira, dez dias antes da estreia
 		elif t == "U1":
@@ -85,7 +99,7 @@ static func build_calendar(year: int, kind: String = "") -> Array:
 	var ret := int(cc.get("retire_announce", -1))
 	if ret >= 0 and ret < out.size():
 		out[ret]["ret"] = true
-	return out
+	return LeaguePhase.extend_calendar(out)
 
 
 ## Modelo de calendário da carreira: fixado no início pela liga do usuário (world.stats["cal"]);
@@ -276,7 +290,7 @@ static func goal_of(world: GameWorld, club_id: int) -> Array:
 ## Prepara a data atual: contexto e sementes de todos os jogos. A partida do usuário volta viva
 ## (MatchSimulation detalhada); as demais ficam na fila do modo rápido (run_entry).
 ## Retorna {"day", "entries": [{f, seed, ctx, sim}], "user": entrada do usuário ou {}, "notes"}.
-static func begin_matchday(world: GameWorld) -> Dictionary:
+static func begin_matchday(world: GameWorld, with_detail: bool = true) -> Dictionary:
 	var md := {"day": world.season.day, "entries": [], "user": {}, "notes": []}
 	for f: Fixture in world.season.fixtures_at(world.season.day):
 		if not f.played and (world.is_user_club(f.home) or world.is_user_club(f.away)):
@@ -294,7 +308,9 @@ static func begin_matchday(world: GameWorld) -> Dictionary:
 			var hs := _sheet_for(world, home, away, true, md)
 			var as_ := _sheet_for(world, away, home, false, md)
 			var sim := MatchSimulation.new()
-			sim.setup(world, home, away, hs, as_, entry["ctx"], entry["seed"], true)
+			# Instant/batch simulation keeps the same match model and tactical analysis,
+			# but does not allocate commentary and pitch-animation events nobody sees.
+			sim.setup(world, home, away, hs, as_, entry["ctx"], entry["seed"], with_detail)
 			entry["sim"] = sim
 			md["user"] = entry
 		md["entries"].append(entry)
@@ -309,6 +325,74 @@ static func _sheet_for(world: GameWorld, club: Club, opp: Club, home: bool, md: 
 
 
 ## Roda uma entrada ainda não simulada: modo rápido para IA × IA; minuto a minuto para o usuário.
+## Jogos da IA em paralelo (vários núcleos). false = um por um, como antes (comparação em testes).
+static var parallel := true  # igual ao sequencial: tests "simulação paralela = sequencial"
+## Abaixo disso não compensa abrir threads.
+const PARALLEL_MIN := 12
+
+
+## Joga todas as partidas ainda sem resultado da data. As escalações da IA são montadas uma a
+## uma, na mesma ordem de sempre (mexem nos clubes e em caches do mundo); só as partidas rápidas,
+## que leem o mundo e sorteiam com a semente do próprio jogo, rodam em paralelo. O resultado é
+## idêntico ao de rodar em sequência (conferido em tests: "simulação paralela").
+static func run_entries(world: GameWorld, entries: Array) -> void:
+	Geo.prepare(world) # distâncias prontas antes das threads dos jogos
+	var quick: Array = []
+	for e in entries:
+		if not e["res"].is_empty():
+			continue
+		if e["sim"] != null:
+			run_entry(world, e)
+			continue
+		quick.append(e)
+	var cores := mini(4, OS.get_processor_count() - 1)
+	if not parallel or quick.size() < PARALLEL_MIN or cores < 2:
+		for e in quick:
+			run_entry(world, e)
+		return
+	var mark := Time.get_ticks_usec()
+	for e in quick:
+		var f: Fixture = e["f"]
+		var home := world.club(f.home)
+		var away := world.club(f.away)
+		var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
+		var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+		e["_hs"] = hs
+		e["_as"] = as_
+		# Caches preguiçosos preenchidos aqui, na thread atual: nas threads só há leitura.
+		QuickMatch._tactics(hs)
+		QuickMatch._tactics(as_)
+		Referees.factors(world, Array(e["ctx"].get("ref", [])))
+		LeagueCulture.for_match(world, String(e["ctx"].get("competition", "")), home)
+		# Perfil tático do rival (cache estático _pcache e o "_v" dentro do perfil) e o estudo
+		# do técnico (People.ensure): gravam na primeira chamada, então saem daqui já prontos.
+		TacticalScout.vulnerability(world, home)
+		TacticalScout.vulnerability(world, away)
+		TacticalScout.study(world, home)
+		TacticalScout.study(world, away)
+	mark = _time("ai_escalacao", mark)
+	var threads: Array[Thread] = []
+	for t in cores:
+		var th := Thread.new()
+		th.start(_play_slice.bind(world, quick, t, cores))
+		threads.append(th)
+	for th in threads:
+		th.wait_to_finish()
+	for e in quick:
+		e.erase("_hs")
+		e.erase("_as")
+	_time("ai_partida", mark)
+
+
+static func _play_slice(world: GameWorld, quick: Array, first: int, step: int) -> void:
+	var i := first
+	while i < quick.size():
+		var e: Dictionary = quick[i]
+		var f: Fixture = e["f"]
+		e["res"] = QuickMatch.play(world, world.club(f.home), world.club(f.away), e["_hs"], e["_as"], e["ctx"], e["seed"])
+		i += step
+
+
 static func run_entry(world: GameWorld, entry: Dictionary) -> void:
 	if not entry["res"].is_empty():
 		return
@@ -321,9 +405,12 @@ static func run_entry(world: GameWorld, entry: Dictionary) -> void:
 	var f: Fixture = entry["f"]
 	var home := world.club(f.home)
 	var away := world.club(f.away)
+	var mark := Time.get_ticks_usec()
 	var hs := ClubAI.prepare_ai_sheet(world, home, away, true)
 	var as_ := ClubAI.prepare_ai_sheet(world, away, home, false)
+	mark = _time("ai_escalacao",mark)
 	entry["res"] = QuickMatch.play(world, home, away, hs, as_, entry["ctx"], entry["seed"])
+	_time("ai_partida",mark)
 
 
 static func entry_done(entry: Dictionary) -> bool:
@@ -333,8 +420,7 @@ static func entry_done(entry: Dictionary) -> bool:
 ## Aplica tudo o que aconteceu na data e avança o calendário. Retorna um relatório para a UI.
 static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var tt := Time.get_ticks_usec()
-	for e in md["entries"]:
-		run_entry(world, e)
+	run_entries(world, md["entries"])
 	# Raio-X tático do jogo do usuário (o minuto a minuto registrou corredores e contexto)
 	var ue: Dictionary = md.get("user", {})
 	if not ue.is_empty() and ue.get("sim", null) != null:
@@ -348,6 +434,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	var s := world.season
 	var slot := s.day
 	var weekend := s.is_weekend(slot)
+	var state_weekend := not weekend and s.is_state_weekend(slot)
 	var report := {"day": slot, "user": {}, "transfers": [], "retiring": [], "window_opened": false, "window_closed": false, "cups": []}
 	var user_pos_before := 0
 	if world.has_user():
@@ -356,12 +443,14 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 			user_pos_before = CompetitionManager.position_of(ul, world.user_club_id)
 	var was_open := world.transfer_window_open()
 	# Lesões antigas avançam uma semana (a cada fim de semana) antes de registrar as novas.
-	if weekend:
+	if weekend or state_weekend:
 		for p: Player in world.players.values():
 			if p.injury_weeks > 0:
 				p.injury_weeks -= 1
 				if p.injury_weeks == 0:
 					p.injury_name = ""
+					if not p.inj_log.is_empty():
+						InjuryModel.on_return(p, int(p.inj_log[p.inj_log.size() - 1][3])) # volta sem ritmo
 	var played := {}
 	var newly_suspended := {}
 	var clubs_played := {}
@@ -373,11 +462,17 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		clubs_played[f.away] = true
 		if not f.neutral:
 			var home := world.club(f.home)
-			var price := FinanceManager.ticket_price(home) * (1.4 if not f.is_league() else 1.0)
+			var price := FinanceManager.ticket_price(home) * FinanceManager.matchday_yield(home) * (1.4 if not f.is_league() else 1.0)
 			home.add_ledger("bilheteria", int(int(res["att"]) * price))
-	WeeklyAwards.after_matchday(world, md, slot)
-	FootballMemory.after_matchday(world, md["entries"])
 	tt = _time("aplicar", tt)
+	WeeklyAwards.after_matchday(world, md, slot)
+	tt = _time("aplicar_premios", tt)
+	ClubEvents.after_matchday(world, slot)
+	tt = _time("aplicar_eventos", tt)
+	NextGen.after_matchday(world, slot)
+	tt = _time("aplicar_nextgen", tt)
+	FootballMemory.after_matchday(world, md["entries"])
+	tt = _time("aplicar_memoria", tt)
 	# Suspensões cumpridas por quem ficou de fora de um jogo do seu clube
 	var sus := world.suspended()
 	for pid in sus.keys():
@@ -402,7 +497,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		var rec: float = (16.0 + p.attrs[Attr.RES] * 0.08 + fac * 0.04 - maxf(0.0, p.age(world.year) - 30.0) * 0.8) * dayf
 		rec *= 1.0 + (p.hid("pro") - 10) * 0.012 # quem se cuida (sono, alimentação) volta antes
 		if p.club_id == world.user_club_id and p.club_id >= 0:
-			rec *= TrainingManager.recovery_mult(world, p.club_id)
+			rec *= TrainingManager.recovery_mult(world, p.club_id, p)
 		p.condition = minf(100.0, p.condition + rec)
 		if p.condition >= 100.0:
 			rec_set.erase(pid)
@@ -410,27 +505,45 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	if weekend:
 		# Evolução, finanças e mercado andam por semana.
 		var notable := PlayerDevelopment.weekly_tick(world, played, clubs_played)
+		BodyGrowth.weekly(world)
+		tt = _time("evolucao", tt)
+		ClubScoutNet.weekly(world, md["entries"]) # olheiros dos clubes da IA assistem aos jogos
+		tt = _time("olheiros", tt)
 		for p in notable:
 			if p.age(world.year) <= 21:
 				NewsManager.on_explosion(world, p)
 		tt = _time("evolucao", tt)
 		for c: Club in world.clubs:
 			FinanceManager.process_week(world, c)
-			c.fan_mood = clampf(c.fan_mood + (60.0 - c.fan_mood) * 0.03, 0.0, 100.0)
+			# O clima volta devagar para o patamar do momento (títulos, finais perdidas, jejum).
+			c.fan_mood = clampf(c.fan_mood + (Aftermath.mood_target(world, c) - c.fan_mood) * 0.03, 0.0, 100.0)
+			# Amigos no time titular se entendem; desafetos atrapalham.
+			c.cohesion = clampf(c.cohesion + Relations.cohesion_push(world, c) + Languages.cohesion_push(world, c), 20.0, 100.0)
+			TicketOffice.weekly_mood(c) # a torcida sente o preço do ingresso
+		Aftermath.weekly(world)
 		WorldEvents.weekly(world)
 		tt = _time("financas", tt)
 		TrainingManager.weekly(world)
+		InjuryModel.training_week(world) # lesões de treino em todos os clubes
 		YouthManager.weekly(world)
 		HeartClubs.weekly(world)
 		report["youth"] = YouthManager.play_slot(world, slot)
 		report["transfers"] = TransferManager.process_matchday(world)
 		tt = _time("mercado", tt)
+		WorldPulse.weekly(world) # histórias do mundo, rumores, giro e recordes
+		tt = _time("mundo", tt)
 		report["intl"] = NationalTeamManager.after_weekend(world, _weekend_index(s, slot))
 		tt = _time("selecoes", tt)
 		if _weekend_index(s, slot) % 4 == 3:
 			for p: Player in world.players.values():
 				Valuation.update_value(p, world.year)
+			Languages.monthly(world) # cada um aprende um pouco da língua do clube
 		tt = _time("valores", tt)
+	elif state_weekend:
+		# Janeiro a março do calendário de ano civil: os fins de semana são dos estaduais, mas é
+		# justamente quando a janela principal da América do Sul está aberta.
+		report["transfers"] = TransferManager.process_matchday(world)
+		tt = _time("mercado", tt)
 	# Veteranos anunciam aposentadoria
 	if s.is_retire_slot(slot):
 		var ann := PlayerDevelopment.announce_retirements(world)
@@ -453,7 +566,12 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	Rivalry.on_cup_events(world, cup_events)
 	# Notícias da data e pressão sobre os técnicos
 	NewsManager.after_matchday(world, md["entries"])
+	WorldPulse.after_matchday(world, md["entries"])
+	Achievements.after_matchday(world, md["entries"])
 	People.after_matchday(world, md["entries"])
+	Relations.after_matchday(world, md["entries"]) # goleada esquenta o vestiário; vitória grande une
+	tt = _time("relacoes", tt)
+	CoachStories.after_matchday(world, md["entries"])
 	AwardVoting.maybe_announce(world)
 	PressRoom.after_matchday(world)
 	tt = _time("copas_noticias", tt)
@@ -461,6 +579,7 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 	s.day += 1
 	if s.day >= s.calendar.size():
 		s.finished = true
+	NationalTeamManager.after_day(world) # fim da data FIFA: convocados voltam aos clubes
 	var now_open := world.transfer_window_open()
 	if now_open and not was_open:
 		report["window_opened"] = true
@@ -480,9 +599,13 @@ static func finish_matchday(world: GameWorld, md: Dictionary) -> Dictionary:
 		var league := world.league_of(world.user_club_id)
 		report["user"] = {"fixture": f, "result": f.result_for(world.user_club_id), "pos_before": user_pos_before,
 			"pos_after": CompetitionManager.position_of(league, world.user_club_id) if league != null else 0}
-		report["events"] = EventManager.after_user_turn(world, String(report["user"]["result"]))
-		report["talks"] = People.after_user_turn(world, md["user"], String(report["user"]["result"]))
-		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], String(report["user"]["result"])))
+		# No mata-mata decidido, o clima depois do jogo segue o confronto (agregado, pênaltis, taça).
+		var mood := TieStakes.effective_result(world, f, world.user_club_id)
+		report["events"] = EventManager.after_user_turn(world, mood)
+		report["talks"] = People.after_user_turn(world, md["user"], mood)
+		report["feats"] = ManagerFeats.on_user_match(world, md["user"], String(report["user"]["result"]))
+		CoachStories.after_user_match(world, md["user"], mood)
+		report["talks"].append_array(PressRoom.after_user_game(world, md["user"], mood))
 		InboxManager.after_user_turn(world, report, md["user"])
 	return report
 
@@ -525,22 +648,32 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			league.table[f.away]["yc"] += int(yc[1])
 			league.table[f.away]["rc"] += int(rc[1])
 	elif world.league(f.comp) == null:
-		CupManager.apply_result(world, f) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
+		CupManager.apply_result(world, f, res) # (playoffs de liga: o confronto é resolvido em LeagueFormat)
 	FootballMemory.on_match(world, f)
 	Referees.record(world, res)
 	var derby := bool(res.get("derby", false))
+	# Peso do jogo para o crescimento dos jovens (final, mata-mata decisivo, clássico).
+	var big_f := maxf(float(res.get("importance", 0.3)), 0.65 if derby else 0.0)
 	var big := derby or float(res.get("importance", 0.3)) >= 0.7
 	var yellow_limit := int(DatabaseManager.squad_rules()["yellow_limit"])
 	var score: Array = [f.hg, f.ag]
 	var detail: Dictionary = MatchStats.build(world, f, res) if is_league else {}
+	if is_league:
+		LeagueStats.record(world.league(f.comp), f, res, detail)
+	TacticalScout.record(world, f, res, world.club(f.home).sheet, world.club(f.away).sheet)
+	var stakes := TieStakes.of(world, f) # mata-mata decidido: vale o agregado e a taça
+	Aftermath.on_match(world, f, stakes, derby) # final, queda para o rival e goleada em clássico ficam marcadas
 	for side in 2:
 		var club := world.club(f.home if side == 0 else f.away)
 		var result := f.result_for(club.id)
 		club.push_result(result)
+		var opp_c := world.club(f.away if side == 0 else f.home)
+		club.record_match(int(score[side]), int(score[1 - side]), opp_c.short_name if opp_c != null else "", world.year)
 		if result == "V" and world.is_user_club(club.id):
 			SponsorManager.on_win(world, club)
 		club.cohesion = minf(92.0, club.cohesion + 1.2)
 		TacticsManager.after_match(club, club.sheet, String(club.training.get("focus", "")) == "tatico")
+		TeamEvolution.after_match(world, club, world.club(f.away if side == 0 else f.home), result, side == 0)
 		# Torcida
 		var patience := float(club.arch().get("fan_patience", 50))
 		var swing := 1.0 + (50.0 - patience) / 100.0
@@ -549,6 +682,11 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			dm *= 1.25
 		if big:
 			dm *= 1.8
+		if not stakes.is_empty():
+			# A torcida mede pelo confronto: cair (ainda mais numa final, ainda mais para o rival)
+			# pesa muito mais que o placar do dia.
+			var tw := float(stakes["weight"]) * (1.4 if derby else 1.0)
+			dm = (14.0 * tw) if int(stakes["w"]) == club.id else (-16.0 * tw * swing)
 		club.fan_mood = clampf(club.fan_mood + dm, 0.0, 100.0)
 		# Técnico do usuário
 		if world.is_user_club(club.id):
@@ -556,7 +694,9 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			var key := "w" if result == "V" else ("d" if result == "E" else "l")
 			world.manager_stats[key] = int(world.manager_stats.get(key, 0)) + 1
 			CoachIdentity.on_match(world, club)
-			BoardManager.after_match(world, club, result, derby)
+			BoardManager.after_match(world, club, result if stakes.is_empty() else ("V" if int(stakes["w"]) == club.id else "D"), derby)
+			if not stakes.is_empty():
+				BoardManager.after_tie(world, club, int(stakes["w"]) == club.id, float(stakes["weight"]), derby)
 		var conceded: int = score[1 - side]
 		for ln in res["lines"][side]:
 			var p: Player = ln[QuickMatch.L_P]
@@ -568,6 +708,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 			var red: bool = ln[QuickMatch.L_RED]
 			var inj: int = ln[QuickMatch.L_INJ]
 			played[p.id] = int(played.get(p.id, 0)) + mins
+			if mins >= 30 and big_f >= PlayerDevelopment.BIG_GAME:
+				PlayerDevelopment.big_games[p.id] = maxf(big_f, float(PlayerDevelopment.big_games.get(p.id, 0.0)))
 			p.minutes_season += mins
 			if is_league:
 				p.stats[Player.S_APPS] += 1
@@ -585,6 +727,8 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 					p.stats[Player.S_MOTM] += 1
 				if conceded == 0 and mins >= 60 and ln[QuickMatch.L_DEFN]:
 					p.stats[Player.S_CLEAN] += 1
+				if int(ln[QuickMatch.L_POS]) == Pos.GK and int(ln[QuickMatch.L_START]) == 0:
+					p.stats[Player.S_CONCEDED] += conceded
 				var ds: Array = detail.get(p.id, [])
 				if ds.size() == MatchStats.N:
 					for k in MatchStats.N:
@@ -615,8 +759,11 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 					world.mark_suspended(p)
 			# Lesão
 			if inj > 0:
+				# O lance vira lesão de verdade pelo jogador: idade, cansaço, posição, recidiva, peso.
+				var im := InjuryModel.make(world, p, inj, p.condition)
+				inj = int(im["weeks"])
 				p.injury_weeks = maxi(p.injury_weeks, inj)
-				p.injury_name = InjuryTable.name_for(inj, p.id + world.season.day)
+				p.injury_name = String(im["name"])
 				PlayerCareer.on_injury(world, p, inj, p.injury_name)
 				PlayerDevelopment.injury_setback(world.rng, p, inj, p.age(world.year))
 				NewsManager.on_injury(world, p)
@@ -630,6 +777,10 @@ static func _apply_match(world: GameWorld, f: Fixture, res: Dictionary, played: 
 				dmor -= 2.0
 			if big:
 				dmor *= 1.5
+			if not stakes.is_empty():
+				# Mata-mata: o vestiário mede pelo confronto (vencer a volta e cair não anima ninguém).
+				var wt := float(stakes["weight"])
+				dmor = (4.0 + 6.0 * wt) if int(stakes["w"]) == club.id else -(4.0 + 8.0 * wt)
 			p.morale = clampf(p.morale + dmor * vol, 0.0, 100.0)
 
 
@@ -650,9 +801,7 @@ static func play_matchday_instant(world: GameWorld) -> Dictionary:
 	var tt := Time.get_ticks_usec()
 	var md := begin_matchday(world)
 	_time("preparar", tt)
-	for e in md["entries"]:
-		run_entry(world, e)
-	return finish_matchday(world, md)
+	return finish_matchday(world, md) # finish_matchday joga as partidas (em paralelo)
 
 
 ## O usuário joga na data atual?
@@ -692,6 +841,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var summary := {"year": world.year, "leagues": [], "cups": [], "user": {}, "retired": [], "youth": [], "left": []}
 	var user_nation := world.user_nation()
 	var rep0 := world.user_club().reputation if world.has_user() else 0.0
+	var tt := Time.get_ticks_usec()
+	progress = 1
 	var fans0 := world.user_club().fan_base if world.has_user() else 0
 	# O tempo esfria as rivalidades (o título decidido agora ainda esquenta, logo abaixo)
 	Rivalry.season_close(world)
@@ -699,6 +850,9 @@ static func end_season(world: GameWorld) -> Dictionary:
 	world.stats["qualified"] = CupManager.compute_qualified(world)
 	# Ranking mundial de clubes: arquiva a temporada antes que tabelas e copas sejam desfeitas
 	ClubRanking.close_season(world)
+	LeagueReputation.season_close(world) # coeficiente das ligas pelo que os clubes fizeram nas copas
+	tt = _time("es_ranking", tt)
+	progress = 5
 	ClubRanking.season_news(world)
 	var moves := {} # club_id -> nova liga
 	var hist_leagues := {}
@@ -714,6 +868,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var lower := DatabaseManager.league_at(league.nation, league.tier + 1)
 		var promoted: Array = LeagueFormat.promoted(league, ids, up, world) if up > 0 and upper != "" else []
 		var relegated: Array = ids.slice(teams - down) if down > 0 and lower != "" else []
+		if LeagueFormat.uses_promedios(league) and lower != "":
+			relegated = LeagueFormat.promedio_relegated(world, league, ids, down)
 		# Repescagem: o clube da elite que perdeu cai junto (o vencedor de baixo sobe em promoted)
 		var bar_down := LeagueFormat.barrage_relegated(league)
 		if bar_down >= 0 and lower != "" and not relegated.has(bar_down):
@@ -734,7 +890,10 @@ static func end_season(world: GameWorld) -> Dictionary:
 			_update_reputation(c, cfg, i + 1, teams, promoted.has(c.id), relegated.has(c.id))
 		var champ := world.club(LeagueFormat.champion(league, ids))
 		Rivalry.on_league_end(world, league, champ.id, LeagueFormat.runner_up(league, ids))
+		Aftermath.on_league_end(world, league, ids, champ, LeagueFormat.runner_up(league, ids), promoted, relegated)
 		champ.add_title("L:" + id)
+		# Título de liga forte vale mais reputação (Premier ≫ liga média ≫ divisão de baixo).
+		champ.reputation = clampf(champ.reputation + Reputation.title_rep_gain("L:" + id), 5.0, 99.0)
 		for pid in champ.player_ids:
 			var p := world.player(pid)
 			if p != null and p.stats[Player.S_APPS] >= 5:
@@ -766,6 +925,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 			for cid in relegated:
 				NewsManager.post(world, "rebaixamento", {"club": world.club(cid).short_name, "division": world.league_name(lower), "pos": ids.find(cid) + 1},
 					cid, -1, NewsEvent.IMP_HEADLINE if world.is_user_club(cid) else NewsEvent.IMP_NORMAL)
+	tt = _time("es_ligas", tt)
+	progress = 10
 	# Prêmios da liga e das copas (os técnicos da liga votam no craque e no treinador; os prêmios
 	# mundiais saem depois do torneio de seleções do verão, que pesa na votação)
 	var weekly := WeeklyAwards.season_close(world)
@@ -806,21 +967,28 @@ static func end_season(world: GameWorld) -> Dictionary:
 		NewsManager.post_raw(world, "%s é o treinador da temporada na %s" % [String(uco["n"]), world.league_name(world.user_league_id())],
 			"Os colegas de profissão escolheram o trabalho no %s (%s)." % [String(uco["cn"]), String(uco["v"])],
 			int(uco["c"]), -1, NewsEvent.IMP_HIGH if bool(uco.get("user", false)) else NewsEvent.IMP_NORMAL, "premio")
+	tt = _time("es_premios_liga", tt)
+	progress = 20
 	# Copas
 	var hist_cups := {}
+	var cup_top := CupManager.scorers_all(world, 1)
 	for cid in s.cups:
 		var cup: Cup = s.cups[cid]
-		var top := CupManager.scorers(world, cid, 1)
+		var top: Array = cup_top.get(cid, [])
 		var scorer := {}
 		if not top.is_empty():
 			var sp: Player = top[0]
 			scorer = {"id": sp.id, "name": sp.display_name(), "club": world.club(sp.club_id).short_name if sp.club_id >= 0 else "", "goals": sp.cup_stats[cid][Player.C_GOALS]}
 		summary["cups"].append({"id": cid, "name": cup.name, "champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer})
 		hist_cups[cid] = {"champion": cup.champion, "runner_up": cup.runner_up, "scorer": scorer, "mvp": extra["cups"].get(cid, {})}
+	tt = _time("es_copas", tt)
+	progress = 25
 	# Patrocínio: momento comercial de cada clube e cláusulas dos contratos do usuário
 	summary["sponsor"] = SponsorManager.season_close(world, moves)
 	# Seleções: torneios de verão (Copa do Mundo, Eurocopa, Copa América...)
 	summary["intl"] = NationalTeamManager.play_summer(world)
+	tt = _time("es_verao", tt)
+	progress = 35
 	# Prêmios mundiais: júri de jornalistas de cada país, com a temporada e o verão na conta
 	var bo_rank := AwardVoting.ballon_vote(world, summary["intl"], 10)
 	var ballon: Dictionary = bo_rank[0] if not bo_rank.is_empty() else {}
@@ -829,8 +997,13 @@ static func end_season(world: GameWorld) -> Dictionary:
 	extra["world_young"] = wy_rank[0] if not wy_rank.is_empty() else {}
 	extra["gk_world"] = gk_rank[0] if not gk_rank.is_empty() else {}
 	extra["boot"] = AwardManager.golden_boot(world)
+	extra["muller"] = AwardManager.muller(world)
+	extra["rei_america"] = AwardManager.continental(world, "CONMEBOL", true)
+	extra["caf_poty"] = AwardManager.continental(world, "CAF", false)
+	extra["afc_poty"] = AwardManager.continental(world, "AFC", false)
 	extra["world_xi"] = AwardVoting.world_xi(world, summary["intl"])
-	AwardManager.credit(world, {}, ballon, {"world_young": extra["world_young"], "boot": extra["boot"], "gk_world": extra["gk_world"], "world_xi": extra["world_xi"]})
+	AwardManager.credit(world, {}, ballon, {"world_young": extra["world_young"], "boot": extra["boot"], "gk_world": extra["gk_world"], "world_xi": extra["world_xi"],
+		"muller": extra["muller"], "rei_america": extra["rei_america"], "caf_poty": extra["caf_poty"], "afc_poty": extra["afc_poty"]})
 	var wcoach := AwardVoting.world_coach_vote(world, coaches)
 	if bool(wcoach.get("user", false)):
 		var ma: Array = world.manager_stats.get("awards", [])
@@ -858,6 +1031,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 		NewsManager.post_raw(world, "%s é eleito o treinador do ano" % String(wcoach["n"]),
 			"O júri mundial premiou o trabalho no %s (%s)." % [String(wcoach["cn"]), String(wcoach.get("v", ""))],
 			int(wcoach["c"]), -1, NewsEvent.IMP_HEADLINE if bool(wcoach.get("user", false)) else NewsEvent.IMP_NORMAL, "premio")
+	tt = _time("es_premios_mundo", tt)
+	progress = 45
 	var ledger := AwardVoting.season_ledger(world, awards, extra, coaches, bo_rank, wy_rank, gk_rank, wcoach, weekly["months"])
 	# Resumo do usuário
 	if world.has_user():
@@ -893,9 +1068,19 @@ static func end_season(world: GameWorld) -> Dictionary:
 		summary["user"]["board"] = u.board_confidence
 		var user_scorer: Dictionary = hist_leagues.get(league.id, {}).get("scorer", {})
 		summary["review"] = SeasonReview.build(world, summary["user"], league, rep0, fans0, user_scorer)
+	tt = _time("es_usuario", tt)
+	progress = 50
 	PressRoom.on_season_end(world, summary)
 	CoachCareer.on_titles(world, hist_leagues, hist_cups) # títulos na carreira de quem está no banco
+	CoachStories.season_awards(world, hist_leagues, wcoach)
 	People.on_season_end(world, summary)
+	CoachStories.on_season_end(world, moves, hist_leagues, hist_cups) # arcos, despedidas e o mercado de técnicos
+	if world.has_user():
+		summary["user"]["prestige"] = ManagerFeats.on_season_end(world, summary["user"])
+	tt = _time("es_pessoas", tt)
+	progress = 55
+	ClubRecords.snapshot_season(world) # melhor 11 do ano e de sempre, em todos os clubes
+	Relations.season_close(world, Relations.champions(world)) # laços do ano, técnicos favoritos e ídolos
 	# Elenco do usuário guardado como estava (camisas, jogos, gols) para "Elencos anteriores"
 	var uc := world.user_club()
 	if uc != null:
@@ -909,21 +1094,23 @@ static func end_season(world: GameWorld) -> Dictionary:
 			var ks: Array = uc.squad_archive.keys()
 			ks.sort()
 			uc.squad_archive.erase(ks[0])
+	tt = _time("es_recordes", tt)
+	progress = 58
 	# Arquivo individual da temporada
 	# (uma linha por clube: quem trocou no meio do ano tem os números de cada um; lesões graves anotadas)
 	for p: Player in world.players.values():
 		var rows := PlayerCareer.season_rows(world, p)
 		if not rows.is_empty():
-			p.history.append_array(rows)
-			if p.history.size() > 30:
-				p.history = p.history.slice(p.history.size() - 30)
+			p.append_history(rows, 30)
 	PlayerCareer.clear_season(world)
 	var yl_sum: Dictionary = summary.get("youth_league", {})
 	world.history.append({"y": world.year, "leagues": hist_leagues, "cups": hist_cups, "user": summary["user"], "ballon": ballon,
 		"club": world.user_club_id, "yl": yl_sum, "wy": extra["world_young"], "boot": extra["boot"], "cp": extra["club"],
 		"arch": SeasonArchive.snapshot_leagues(world), "sq": SeasonArchive.snapshot_squad(world),
 		"bo": bo_rank, "months": weekly["months"], "tw": summary["totw_most"], "gkw": extra["gk_world"], "wxi": extra["world_xi"],
-		"wco": wcoach, "aw": ledger})
+		"wco": wcoach, "aw": ledger, "mul": extra["muller"], "ra": extra["rei_america"], "caf": extra["caf_poty"], "afc": extra["afc_poty"]})
+	tt = _time("es_arquivo", tt)
+	progress = 62
 	# Evolução do elenco do usuário no ano (quem subiu e quem caiu)
 	if world.has_user():
 		summary["evolution"] = PlayerDevelopment.squad_evolution(world, world.user_club_id)
@@ -942,6 +1129,18 @@ static func end_season(world: GameWorld) -> Dictionary:
 	var review_y := PlayerDevelopment.yearly_review(world)
 	for p in review_y["explosions"]:
 		NewsManager.on_explosion(world, p)
+	for p: Player in review_y["late"]:
+		var lc := world.club(p.club_id)
+		NewsManager.post_raw(world, "%s floresce aos %d anos" % [p.display_name(), p.age(world.year)],
+			"Tratado por anos como jogador comum, %s viveu a melhor temporada da carreira no %s e subiu de patamar. Os grandes já perguntam o preço." % [p.display_name(), lc.short_name if lc != null else "clube"],
+			p.club_id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(p.club_id) else NewsEvent.IMP_NORMAL, "jogador")
+	for p: Player in review_y["derail"]:
+		var dc := world.club(p.club_id)
+		NewsManager.post_raw(world, "O que houve com %s?" % p.display_name(),
+			"Há pouco tempo apontado como futuro craque, %s perdeu espaço e rendimento no %s. A imprensa fala em falta de foco; o jogador diz que só precisa de sequência." % [p.display_name(), dc.short_name if dc != null else "clube"],
+			p.club_id, p.id, NewsEvent.IMP_HIGH if world.is_user_club(p.club_id) else NewsEvent.IMP_NORMAL, "jogador")
+	tt = _time("es_evolucao", tt)
+	progress = 68
 	# Aposentadorias
 	var retired := PlayerDevelopment.process_retirements(world)
 	world.stat_add("retirements", retired.size())
@@ -956,8 +1155,11 @@ static func end_season(world: GameWorld) -> Dictionary:
 	for p in left:
 		summary["left"].append(p.display_name())
 		NewsManager.post(world, "contrato_fim", {"player": p.display_name(), "club": world.user_club().short_name, "apps": p.career_apps}, world.user_club_id, p.id, NewsEvent.IMP_HIGH)
+	tt = _time("es_contratos", tt)
+	progress = 72
 	# DNA dos clubes reage à temporada (antes da troca de divisões)
 	ClubDNA.season_end(world, moves)
+	TeamEvolution.season_end(world)
 	# Investimentos em estrutura/base e depreciação
 	FinanceManager.yearly_investments(world)
 	# Mudança de divisões
@@ -965,9 +1167,12 @@ static func end_season(world: GameWorld) -> Dictionary:
 		var c := world.club(cid)
 		c.league_id = moves[cid]
 		c.tier = int(DatabaseManager.league_cfg(c.league_id).get("tier", 1))
+	tt = _time("es_dna", tt)
+	progress = 75
 	# Novo ano
 	world.year += 1
 	world.season_number += 1
+	BodyGrowth.yearly(world) # garotos crescem; quem tem tendência volta das férias acima do peso
 	# Base
 	var youth := PlayerDevelopment.youth_intake(world)
 	var yc := 0
@@ -977,6 +1182,7 @@ static func end_season(world: GameWorld) -> Dictionary:
 	if world.has_user():
 		var turnover := YouthManager.season_turnover(world)
 		summary["youth_left"] = turnover["left"]
+		summary["youth_quit"] = turnover.get("quit", [])
 		summary["youth_changes"] = turnover["changes"]
 		summary["youth_cost"] = turnover["cost"]
 		for ch in turnover["changes"]:
@@ -993,20 +1199,27 @@ static func end_season(world: GameWorld) -> Dictionary:
 			NewsManager.post(world, "base", {"club": world.user_club().short_name, "n": mine.size(), "player": best.display_name(),
 				"pos": Pos.name_of(best.position).to_lower(), "age": best.age(world.year), "potential": Player.potential_label(best.potential_estimate(0.8)).to_lower()},
 				world.user_club_id, best.id, NewsEvent.IMP_HIGH)
+	tt = _time("es_base", tt)
+	progress = 80
 	TransferManager.pay_installments(world)
 	# Agentes livres: mantém o mercado vivo, sem inchar
 	_maintain_free_agents(world)
 	HeartClubs.ensure_all(world) # garotos e livres novos
 	TransferManager.balance_squads(world)
+	tt = _time("es_elencos", tt)
+	progress = 84
 	# Nova temporada
 	world.season = build_season(world)
 	NationalTeamManager.start_season(world)
 	YouthManager.build_league(world)
+	ClubRecords.archive_transfers(world, world.year - 1)
 	world.transfer_log = world.transfer_log.filter(func(t): return t.year >= world.year - 1)
 	world.offers.clear()
 	world.stats.erase("neg")
 	var taxes := FinanceManager.season_taxes(world)
+	Economy.season_fx(world) # o câmbio anda antes dos orçamentos do ano
 	WorldEvents.season_start(world)
+	WorldPulse.season_start(world)
 	for c: Club in world.clubs:
 		c.reset_season_state()
 		if taxes.has(c.id):
@@ -1015,12 +1228,18 @@ static func end_season(world: GameWorld) -> Dictionary:
 		c.cohesion = maxf(35.0, c.cohesion - 8.0)
 		KitDesign.renew_ai(world, c) # uniformes novos na IA; o usuário decide os dele no lançamento
 		SponsorManager.renew_ai(world, c) # patrocínios da IA com marcas do país
+		FinanceManager.market_wages(world, c)
 		FinanceManager.set_budgets(world, c)
 		if not world.is_user_club(c.id):
 			PlayerGenerator.assign_statuses(world, c)
 		_assign_missing_shirts(world, c)
+	FinanceAI.season_open(world) # amortiza dívida, gasta o caixa parado ou entra em austeridade
+	TicketOffice.season_review_ai(world) # IA reajusta o ingresso pelo que o estádio mostrou
+	Aftermath.season_open(world) # cofre aberto depois do vice, cobrança e jejum
 	Valuation.refresh_shift(world)
 	Referees.season_close(world)
+	tt = _time("es_nova_temporada", tt)
+	progress = 88
 	for p: Player in world.players.values():
 		p.reset_season_stats()
 		p.yellow_acc = 0
@@ -1029,9 +1248,14 @@ static func end_season(world: GameWorld) -> Dictionary:
 		p.retiring = false
 		Valuation.update_value(p, world.year)
 	world.reset_indexes()
+	tt = _time("es_reset", tt)
+	progress = 90
 	# Mercado das férias: os outros clubes fazem a maior parte dos negócios antes da bola rolar.
 	MarketAI.offseason(world)
+	tt = _time("es_mercado", tt)
+	progress = 97
 	compute_goals(world)
+	TeamEvolution.season_start(world)
 	SponsorManager.open_preseason(world)
 	BoardObjectives.list(world) # metas da diretoria fixadas no começo do ano
 	if world.has_user():
@@ -1041,6 +1265,8 @@ static func end_season(world: GameWorld) -> Dictionary:
 			if world.season.cups[cid].has_club(world.user_club_id):
 				NewsManager.post(world, CupManager.news_cat(cid, "classificado"), {"club": world.user_club().short_name, "cup": world.season.cups[cid].name}, world.user_club_id, -1, NewsEvent.IMP_HIGH)
 		InboxManager.on_new_season(world)
+	tt = _time("es_fim", tt)
+	progress = 100
 	return summary
 
 
@@ -1053,7 +1279,7 @@ static func _stage_reached(cup: Cup, club_id: int) -> String:
 		if int(t["a"]) == club_id or int(t["b"]) == club_id:
 			best = maxi(best, int(t["r"]))
 	if best < 0:
-		return "Fase de grupos" if not cup.groups.is_empty() else "Primeira fase"
+		return "Fase de liga" if cup.league_phase else ("Fase de grupos" if not cup.groups.is_empty() else "Primeira fase")
 	return cup.round_names[best]
 
 

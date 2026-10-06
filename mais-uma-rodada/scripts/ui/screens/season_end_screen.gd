@@ -5,6 +5,11 @@ extends BaseScreen
 var _summary: Dictionary = {}
 var _overlay: GoalOverlay
 var _celebrated := false
+## Cerimônia de prêmios: fica na raiz (acima de tudo) e sai junto com a tela (voltar do Android).
+var _ceremony_node: Control
+
+
+var _tab := "mine"
 
 
 func _init() -> void:
@@ -13,8 +18,15 @@ func _init() -> void:
 
 
 func on_show() -> void:
+	if _summary.is_empty() and GameManager.season_over():
+		# A virada do ano é a operação mais pesada do jogo: roda numa thread, com o aviso.
+		GameManager.end_season_async(func(summary: Dictionary) -> void:
+			_summary = summary
+			if is_inside_tree() and not is_queued_for_deletion():
+				on_show())
+		return
 	if _summary.is_empty():
-		_summary = GameManager.end_season() if GameManager.season_over() else GameManager.last_summary
+		_summary = GameManager.last_summary
 	refresh()
 	if not _celebrated:
 		_celebrated = true
@@ -44,13 +56,13 @@ func _celebrate() -> void:
 		tag = "RUMO À %s" % w.league_name(club.league_id).to_upper()
 	if title == "":
 		if u.get("relegated", false):
-			AudioManager.play("lose", -4.0)
+			Sfx.play("lose", -4.0)
 		_ceremony.call_deferred()
 		return
 	_overlay = GoalOverlay.new()
 	add_child(_overlay)
-	AudioManager.play("title")
-	AudioManager.vibrate(400)
+	Sfx.play("title")
+	Sfx.vibrate(400)
 	_overlay.play(3, title, club.short_name, tag, "Temporada %d" % int(_summary.get("year", w.year - 1)), club.primary_color(), club.secondary_color(), 1.0)
 	_overlay.finished.connect(_ceremony, CONNECT_ONE_SHOT)
 
@@ -63,6 +75,12 @@ func _ceremony() -> void:
 	var cer := AwardCeremony.new()
 	get_tree().root.add_child(cer)
 	cer.start(world(), items)
+	_ceremony_node = cer
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_ceremony_node) and not _ceremony_node.is_queued_for_deletion():
+		_ceremony_node.queue_free()
 
 
 func refresh() -> void:
@@ -78,42 +96,74 @@ func refresh() -> void:
 		c.add_child(UIKit.label("A temporada ainda não terminou.", "Muted"))
 		_footer(w)
 		return
+	max_content_width = 1700
+	# Duas partes, como a retrospectiva de um jogo de gestão: a sua temporada e o resto do mundo.
 	c.add_child(_user_card(w, year))
+	var mine_cards: Array = []
+	var pr: Dictionary = _summary.get("user", {}).get("prestige", {})
+	if not pr.is_empty():
+		mine_cards.append(_prestige_card(w, pr))
 	var rv: Dictionary = _summary.get("review", {})
 	if not rv.is_empty():
-		c.add_child(_grade_card(rv))
-		c.add_child(_numbers_card(w, rv))
+		mine_cards.append(_grade_card(rv))
+		mine_cards.append(_numbers_card(w, rv))
 		var stars := _stars_card(w, rv)
 		if stars != null:
-			c.add_child(stars)
+			mine_cards.append(stars)
 		var ach := _achievements_card(rv)
 		if ach != null:
-			c.add_child(ach)
-		c.add_child(_career_card(w))
+			mine_cards.append(ach)
+		mine_cards.append(_career_card(w))
+	var mine := _club_card(w)
+	if mine != null:
+		mine_cards.append(mine)
+	var world_cards: Array = []
 	var aw := _awards_card(w)
 	if aw != null:
-		c.add_child(aw)
+		world_cards.append(aw)
 	var ev := _evolution_card(w)
 	if ev != null:
-		c.add_child(ev)
+		world_cards.append(ev)
 	for cu in _summary.get("cups", []):
 		if CupManager.relevant_to_user(w, String(cu["id"])) or w.is_user_club(int(cu.get("champion", -1))):
-			c.add_child(_cup_card(w, cu))
+			world_cards.append(_cup_card(w, cu))
 	for rec in _summary.get("intl", []):
-		c.add_child(_intl_card(w, rec))
+		world_cards.append(_intl_card(w, rec))
 	var nat := w.user_nation()
 	var others: Array = []
 	for d in _summary.get("leagues", []):
 		if String(d["nation"]) == nat:
-			c.add_child(_division_card(w, d))
+			world_cards.append(_division_card(w, d))
 		elif int(d["tier"]) == 1:
 			others.append(d)
 	if not others.is_empty():
-		c.add_child(_world_card(w, others))
-	var mine := _club_card(w)
-	if mine != null:
-		c.add_child(mine)
+		world_cards.append(_world_card(w, others))
+	# Duas abas no lugar de uma rolagem comprida: a sua temporada e o resto do mundo.
+	if mine_cards.is_empty():
+		_tab = "world"
+	c.add_child(UIKit.tabs([["mine", "Sua temporada"], ["world", "Campeões e prêmios"]], _tab, func(key: String):
+		_tab = key
+		refresh()
+		scroll_to_top()))
+	var box := UIKit.vbox(UITokens.S4)
+	c.add_child(box)
+	UIKit.columns(box, mine_cards if _tab == "mine" else world_cards, content_width())
 	_footer(w)
+
+
+func _prestige_card(w: GameWorld, pr: Dictionary) -> Control:
+	var card := UIKit.card("Card", 6)
+	var head := UIKit.hbox(8)
+	head.add_child(UIKit.section("Prestígio da temporada"))
+	head.add_child(UIKit.spacer())
+	head.add_child(UIKit.pill("+%d" % int(pr.get("xp", 0)), UIColors.ACCENT, 18))
+	card.add_child(head)
+	for ln in pr.get("lines", []):
+		card.add_child(UIKit.label(String(ln), "Small", true))
+	if int(pr.get("lv1", 0)) > int(pr.get("lv0", 0)):
+		card.add_child(UIKit.colored("Subiu para o nível %d (%s)!" % [int(pr["lv1"]), ManagerFeats.level_name(int(pr["lv1"]))], UIColors.GREEN, "H3", true))
+	card.add_child(PrestigeCard.level_row(w))
+	return UIKit.card_panel(card)
 
 
 func _user_card(w: GameWorld, year: int) -> Control:
@@ -124,11 +174,13 @@ func _user_card(w: GameWorld, year: int) -> Control:
 		return UIKit.card_panel(card)
 	var fired: bool = u.get("fired", false)
 	var club: Club = w.club(int(w.stats.get("fired", {}).get("from", w.user_club_id))) if fired else w.user_club()
-	var row := UIKit.hbox(14)
-	row.add_child(UIKit.crest(club, 88))
+	var row := UIKit.hbox(18)
+	row.add_child(UIKit.crest(club, 120))
 	var col := UIKit.vbox(2)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label(club.short_name, "Title", true))
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_child(UIKit.eyebrow(tr("Temporada %d") % year))
+	col.add_child(UIKit.label(club.short_name.to_upper(), "Display" if not UILayout.is_wide() else "Display", true))
 	col.add_child(UIKit.label("%dº lugar na %s" % [int(u.get("pos", 0)), String(u.get("league_name", ""))], "H3", true))
 	for cu in u.get("cups", []):
 		col.add_child(UIKit.label("%s: %s" % [cu["name"], cu["stage"]], "Small", true))
@@ -150,7 +202,7 @@ func _user_card(w: GameWorld, year: int) -> Control:
 		var delta := float(u.get("board_delta", 0.0))
 		var conf := float(u.get("board", club.board_confidence))
 		card.add_child(UIKit.kv("Diretoria", "%s (%s)" % [BoardManager.label(conf), "subiu" if delta > 0 else "caiu"], BoardManager.color(conf)))
-	return UIKit.card_panel(card)
+	return HeroBackdrop.attach(UIKit.card_panel(card), club, 0.12)
 
 
 func _division_card(w: GameWorld, d: Dictionary) -> Control:
@@ -319,6 +371,12 @@ func _awards_card(w: GameWorld) -> Control:
 		var champ17 := w.club(int(y17.get("champion", -1)))
 		if champ17 != null:
 			card.add_child(UIKit.kv(String(y17.get("name", "Sub-17")), "%s · seu time %dº" % [champ17.short_name, int(y17.get("user_pos", 0))], UIColors.ACCENT if w.is_user_club(champ17.id) else UIColors.TEXT))
+		# Copas de base: campeão e a campanha do seu clube
+		for e: Dictionary in yl.get("cups", []):
+			var ch: Variant = e.get("champion", -1)
+			var who := DatabaseManager.nation_name(String(ch)) if ch is String else (w.club(int(ch)).short_name if w.club(int(ch)) != null else "?")
+			var mine := String(e.get("user", ""))
+			card.add_child(UIKit.kv(String(e["name"]), who + ((" · " + mine.to_lower()) if mine != "" and mine != "Não classificado" else ""), UIColors.ACCENT if mine == "Campeão" else UIColors.TEXT))
 	return UIKit.card_panel(card)
 
 
@@ -342,9 +400,8 @@ func _evolution_card(w: GameWorld) -> Control:
 			var nl := UIKit.label("%s (%d anos)" % [r["name"], int(r["age"])], "")
 			nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(nl)
-			row.add_child(UIKit.label("%d → %d" % [int(r["from"]), int(r["to"])], "Mono"))
 			var d := int(r["d"])
-			row.add_child(UIKit.colored(("+%d" % d) if d > 0 else str(d), pair[2], "H3"))
+			row.add_child(UIKit.colored("Evoluiu" if d > 0 else "Regrediu", pair[2], "H3"))
 			var pid := int(r["id"])
 			card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid})))
 	if not persona.is_empty():
@@ -395,7 +452,7 @@ func _club_card(w: GameWorld) -> Control:
 	var retired: Array = _summary.get("retired", [])
 	var left: Array = _summary.get("left", [])
 	var youth: Array = _summary.get("youth", [])
-	if retired.is_empty() and left.is_empty() and youth.is_empty() and Array(_summary.get("youth_changes", [])).is_empty():
+	if retired.is_empty() and left.is_empty() and youth.is_empty() and Array(_summary.get("youth_changes", [])).is_empty() and Array(_summary.get("youth_quit", [])).is_empty():
 		return null
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("Seu elenco"))
@@ -408,6 +465,8 @@ func _club_card(w: GameWorld) -> Control:
 	var yleft: Array = _summary.get("youth_left", [])
 	if not yleft.is_empty():
 		card.add_child(UIKit.label("Deixaram a base (idade limite): %s." % ", ".join(PackedStringArray(yleft)), "Small", true))
+	for q in _summary.get("youth_quit", []):
+		card.add_child(UIKit.colored("Desistiu da base · %s" % String(q), UIColors.ORANGE, "Small", true))
 	for ch in _summary.get("youth_changes", []):
 		var txt := "%s %s: %s" % ["▲" if ch["up"] else "▼", ch["name"], ch["why"]]
 		card.add_child(UIKit.colored(txt, UIColors.GREEN if ch["up"] else UIColors.ORANGE, "Small", true))
@@ -511,7 +570,7 @@ func _stars_card(w: GameWorld, rv: Dictionary) -> Control:
 			row.add_child(UIKit.pos_badge(int(st.get("pos", 0))))
 		var col := UIKit.vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(UIKit.label(String(names[k]).to_upper(), "Caps"))
+		col.add_child(UIKit.label(String(names[k]), "Caps"))
 		col.add_child(UIKit.label(String(st["name"]), "H3", true))
 		row.add_child(col)
 		row.add_child(UIKit.colored(String(st["text"]), UIColors.ACCENT, "H3"))
@@ -557,5 +616,5 @@ func _career_card(w: GameWorld) -> Control:
 	card.add_child(row)
 	var games := maxi(1, int(ms.get("games", 0)))
 	card.add_child(UIKit.label("%dV %dE %dD · aproveitamento de %d%% · %d de %d conquistas" % [int(ms.get("w", 0)), int(ms.get("d", 0)), int(ms.get("l", 0)),
-		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), SeasonReview.ACH_ORDER.size()], "Small", true))
+		int(round(100.0 * (int(ms.get("w", 0)) * 3 + int(ms.get("d", 0))) / (games * 3.0))), (w.stats.get("ach", []) as Array).size(), Achievements.CATALOG.size()], "Small", true))
 	return UIKit.card_panel(card)

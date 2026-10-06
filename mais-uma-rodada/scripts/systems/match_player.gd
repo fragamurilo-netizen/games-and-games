@@ -63,6 +63,16 @@ var a_pas_vis: float = 100.0
 var a_tec_vel: float = 100.0
 var a_vel_fin: float = 100.0
 var fit_cache: Dictionary = {}
+# Estilo de jogo (PlayStyle), traço e efeitos no motor (recalculados a cada vaga/instrução)
+var ps: Dictionary = {}
+var ps_trait: Dictionary = {}
+var pick_m: PackedFloat32Array = PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1, 1]) # peso por modo de escolha
+var fx_t: PackedFloat32Array = PackedFloat32Array([0, 0, 0, 0, 0, 0]) # tipos de jogada do time (soma)
+var fx_o: PackedFloat32Array = PackedFloat32Array([0, 0, 0, 0, 0, 0]) # tipos de jogada do rival (soma)
+var fat_f: float = 1.0 # cansaço próprio (estilo/instrução)
+var fx_poss: float = 0.0
+var fx_offside: float = 0.0
+var mk_f: float = 1.0 # marcado individualmente pelo rival (instrução "Marcar o craque")
 # Bases sem o efeito do pé (a vaga muda com substituições e trocas de formação)
 var _b_cru: float = 50.0
 var _b_fin: float = 50.0
@@ -102,15 +112,74 @@ func prepare() -> void:
 	var morale_f := 0.96 + p.morale / 100.0 * 0.08
 	var form_f := clampf(1.0 + (p.form() - 6.5) * 0.012, 0.97, 1.03)
 	base_f = morale_f * form_f * perf * ctx
+	ps = PlayStyle.primary(p)
+	ps_trait = PlayStyle.secondary(p)
+	card_mult *= float(ps.get("fx", {}).get("cards", 1.0))
 
 
-## Pé x lado da vaga: chamado sempre que o jogador assume uma vaga.
+## Pé x lado da vaga: chamado sempre que o jogador assume uma vaga (e depois de a instrução
+## individual mexer nos pesos da vaga).
 func apply_side(slot_pos: int) -> void:
 	var m := Physique.side_mods(p, slot_pos)
 	a_cru = _b_cru + float(m[0])
 	c_fin = _b_fin + float(m[1])
 	c_long = _b_long + float(m[2])
 	a_tec_vel = _b_tv + float(m[3])
+	_apply_style(slot_pos)
+
+
+## Estilo, traço e instrução individual: pesos de escolha por modo, tipos de jogada que o jogador
+## puxa para o time (e tira do rival), cansaço e impedimentos. Fora da função natural o estilo
+## vale metade; a instrução que combina com o estilo rende 50% a mais.
+func _apply_style(slot_pos: int) -> void:
+	pick_m.fill(1.0)
+	fx_t.fill(0.0)
+	fx_o.fill(0.0)
+	fat_f = 1.0
+	fx_poss = 0.0
+	fx_offside = 0.0
+	if ps.is_empty():
+		return
+	var sc := 1.0 if PlayStyle.role_of(slot_pos) == PlayStyle.role_of(p.position) else 0.5
+	_add_fx(ps.get("fx", {}), sc)
+	_add_fx(ps_trait.get("fx", {}), sc)
+	if instr.is_empty() or slot_pos == Pos.GK:
+		return
+	var k := 1.5 if _instr_key() == String(ps.get("ins", "-")) else 1.0
+	_add_fx({"t": instr.get("types", {}), "k": instr.get("pick", {}), "fat": instr.get("fat", 1.0)}, k)
+	var sh := float(instr.get("shoot", 1.0))
+	pick_m[0] *= sh
+	pick_m[2] *= sh
+	fx_offside += float(instr.get("offside", 0.0)) * k
+	w_wide += float(instr.get("wide", 0.0))
+	if not ps.is_empty():
+		card_mult *= float(ps.get("fx", {}).get("cards", 1.0))
+
+
+func _add_fx(fx: Dictionary, sc: float) -> void:
+	if fx.is_empty():
+		return
+	var t: Dictionary = fx.get("t", {})
+	var o: Dictionary = fx.get("o", {})
+	for i in 6:
+		var key: String = MatchSimulation.CH_KEYS[i]
+		fx_t[i] += float(t.get(key, 0.0)) * sc
+		fx_o[i] += float(o.get(key, 0.0)) * sc
+	var km: Dictionary = fx.get("k", {})
+	for mode in km:
+		pick_m[int(mode)] *= 1.0 + (float(km[mode]) - 1.0) * sc
+	fat_f *= 1.0 + (float(fx.get("fat", 1.0)) - 1.0) * sc
+	fx_poss += float(fx.get("poss", 0.0)) * sc
+
+
+## Chave da instrução individual em vigor ("" = padrão da função).
+func _instr_key() -> String:
+	if instr.is_empty():
+		return ""
+	for k in TeamSheet.INSTRUCTIONS:
+		if TeamSheet.INSTRUCTIONS[k] == instr:
+			return k
+	return ""
 
 
 func minutes_played(final_minute: int) -> int:

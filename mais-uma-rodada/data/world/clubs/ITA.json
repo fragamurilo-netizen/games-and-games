@@ -11,7 +11,7 @@
 			"city": "Napoli",
 			"founded": 1926,
 			"league": "ITA1",
-			"rep": 88,
+			"rep": 86,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#12A0D7",
@@ -42,7 +42,7 @@
 			"city": "Milano",
 			"founded": 1908,
 			"league": "ITA1",
-			"rep": 91,
+			"rep": 90,
 			"arch": "gigante_endividado",
 			"colors": [
 				"#0068A8",
@@ -52,14 +52,18 @@
 			"capacity": 75000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "IM",
 				"c1": "#0068A8",
 				"c2": "#111111",
-				"sc": "#FFFFFF",
-				"border": "double"
+				"c3": "#E2B84A",
+				"sc": "#E2B84A",
+				"tc": "#E2B84A",
+				"text": "INTERNAZIONALE",
+				"text2": "MILANO",
+				"border": "gold"
 			},
 			"rivals": [
 				"ITA_MRN",
@@ -75,7 +79,7 @@
 			"city": "Milano",
 			"founded": 1899,
 			"league": "ITA1",
-			"rep": 88,
+			"rep": 89,
 			"arch": "rico_promovido",
 			"colors": [
 				"#FB090B",
@@ -86,11 +90,15 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "oval",
-				"field": "stripes:4",
+				"field": "pale_cross:R",
 				"symbol": "none",
 				"chief_text": "ACM",
 				"cc": "#FFFFFF",
-				"c3": "#111111"
+				"c1": "#FB090B",
+				"c2": "#FFFFFF",
+				"fc": "#111111",
+				"c3": "#FB090B",
+				"border": "thin"
 			},
 			"rivals": [
 				"ITA_MNZ"
@@ -105,7 +113,7 @@
 			"city": "Torino",
 			"founded": 1897,
 			"league": "ITA1",
-			"rep": 90,
+			"rep": 89,
 			"arch": "tradicional_equilibrado",
 			"colors": [
 				"#FFFFFF",
@@ -124,12 +132,10 @@
 				"c2": "#111111",
 				"c3": "#FFD100",
 				"sc": "#FFD100",
-				"stars": 3
+				"stars": 3,
+				"border": "thin"
 			},
-			"rivals": [
-				"ITA_TGR",
-				"ITA_MNZ"
-			]
+			"rivals": ["ITA_TGR", "ITA_MNZ", "ITA_FIR"]
 		},
 		{
 			"key": "ITA_BER",
@@ -150,13 +156,20 @@
 			"capacity": 25000,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "halves",
 				"symbol": "letter",
 				"initials": "A",
-				"sc": "#FFFFFF"
+				"c1": "#1E71B8",
+				"c2": "#111111",
+				"fc": "#111111",
+				"sc": "#FFFFFF",
+				"plate": "none",
+				"text": "ATALANTA",
+				"text2": "BERGAMO",
+				"tc": "#FFFFFF"
 			},
-			"rivals": []
+			"rivals": ["ITA_RGR"]
 		},
 		{
 			"key": "ITA_RGR",
@@ -184,9 +197,7 @@
 				"sc": "#F0BC42",
 				"border": "gold"
 			},
-			"rivals": [
-				"ITA_RBC"
-			]
+			"rivals": ["ITA_RBC", "ITA_NAP", "ITA_BER"]
 		},
 		{
 			"key": "ITA_RBC",
@@ -246,7 +257,7 @@
 				"sc": "#E30613",
 				"border": "thick"
 			},
-			"rivals": []
+			"rivals": ["ITA_TBN", "ITA_BGN"]
 		},
 		{
 			"key": "ITA_BGN",
@@ -268,14 +279,17 @@
 			"kit": "stripes_v",
 			"crest": {
 				"shape": "french",
-				"field": "stripes:3",
-				"symbol": "letter",
-				"initials": "BFC",
+				"field": "pale_cross:L",
+				"symbol": "none",
+				"chief_text": "BFC",
+				"cc": "#FFFFFF",
 				"c1": "#A21C26",
-				"c2": "#1A2F48",
-				"sc": "#FFFFFF"
+				"c2": "#FFFFFF",
+				"fc": "#1A2F48",
+				"c3": "#A21C26",
+				"border": "thin"
 			},
-			"rivals": []
+			"rivals": ["ITA_FIR"]
 		},
 		{
 			"key": "ITA_COM",
@@ -297,10 +311,14 @@
 			"kit": "plain",
 			"crest": {
 				"shape": "shield",
-				"field": "plain",
-				"symbol": "letter",
-				"initials": "C",
-				"sc": "#FFFFFF"
+				"field": "chief",
+				"chief_text": "COMO",
+				"cc": "#FFFFFF",
+				"symbol": "cross_plain",
+				"c1": "#003DA5",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"border": "thin"
 			},
 			"rivals": []
 		},
@@ -405,11 +423,14 @@
 			"crest": {
 				"shape": "shield",
 				"field": "plain",
-				"symbol": "letter",
-				"initials": "HV",
-				"c1": "#1D3F91",
+				"symbol": "stairs",
+				"c1": "#002F6C",
 				"c2": "#FFD100",
-				"sc": "#FFD100"
+				"sc": "#FFD100",
+				"border": "gold",
+				"c3": "#FFD100",
+				"chief_text": "HELLAS",
+				"cc": "#FFD100"
 			},
 			"rivals": []
 		},
@@ -512,11 +533,15 @@
 			"capacity": 21500,
 			"kit": "stripes_v",
 			"crest": {
-				"shape": "round",
-				"field": "stripes:3",
+				"shape": "ring",
+				"field": "stripes:5",
 				"symbol": "letter",
 				"initials": "S",
-				"sc": "#FFFFFF"
+				"c1": "#00A752",
+				"c2": "#111111",
+				"fc": "#111111",
+				"text": "U.S. SASSUOLO",
+				"year": "1920"
 			},
 			"rivals": []
 		},
@@ -698,10 +723,14 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
-				"initials": "EFC"
+				"initials": "E",
+				"c1": "#0057B8",
+				"c2": "#FFFFFF",
+				"text": "EMPOLI F.C.",
+				"year": "1920"
 			}
 		},
 		{

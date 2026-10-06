@@ -11,7 +11,6 @@ var _tab := "moves"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Dança das cadeiras"
 
 
@@ -25,27 +24,20 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
-	c.add_child(_chips(TABS, _tab, func(k: String): _tab = k))
+	max_content_width = 1700
+	c.add_child(UIKit.tabs(TABS, _tab, func(k: String):
+		_tab = k
+		refresh()))
 	if w.has_user():
-		c.add_child(_chips(SCOPES, _scope, func(k: String): _scope = k))
+		c.add_child(UIKit.segment(SCOPES, _scope, func(k: String):
+			_scope = k
+			refresh()))
+	var start := c.get_child_count()
 	if _tab == "free":
 		_free(w, c)
 	else:
 		_moves(w, c)
-
-
-func _chips(opts: Array, cur: String, set_fn: Callable) -> Control:
-	var g := ButtonGroup.new()
-	var row := UIKit.hbox(8)
-	for o in opts:
-		var key: String = o[0]
-		var chip := UIKit.chip(o[1], key == cur, g, func():
-			set_fn.call(key)
-			refresh())
-		UIKit.shrink_button(chip)
-		chip.add_theme_font_size_override(&"font_size", 18)
-		row.add_child(chip)
-	return row
+	columnize(c, start)
 
 
 func _in_scope(w: GameWorld, club: Club) -> bool:
@@ -70,7 +62,7 @@ func _moves(w: GameWorld, c: VBoxContainer) -> void:
 			list.append(e)
 	# Resumo da temporada
 	var this_year := list.filter(func(e): return int(e["y"]) == w.year and String(e["why"]) != "efe")
-	var fired := this_year.filter(func(e): return String(e["why"]) in ["resultados", "temporada"]).size()
+	var fired := this_year.filter(func(e): return String(e["why"]) in ["resultados", "temporada", "ferida"]).size()
 	var per_club := {}
 	for e: Dictionary in this_year:
 		per_club[int(e["c"])] = int(per_club.get(int(e["c"]), 0)) + 1
@@ -89,7 +81,7 @@ func _moves(w: GameWorld, c: VBoxContainer) -> void:
 		card.add_child(UIKit.kv("Quem mais trocou", "%s (%d)" % [w.club(top).short_name, int(per_club[top])]))
 	c.add_child(UIKit.card_panel(card))
 	if list.is_empty():
-		c.add_child(UIKit.label("Nenhuma troca de técnico por aqui ainda.", "Muted"))
+		c.add_child(UIKit.empty_state("swap", "Nenhuma troca de técnico ainda", ""))
 		return
 	var box := UIKit.card("Card", 6)
 	var last_key := ""
@@ -160,7 +152,7 @@ func _free(w: GameWorld, c: VBoxContainer) -> void:
 		if not last.is_empty():
 			info.append("último: %s (%s)" % [String(last.get("cn", "")), CoachCareer.end_text(last).to_lower()] if CoachCareer.end_text(last) != "" else "último: %s" % String(last.get("cn", "")))
 		if int(t["t"]) > 0:
-			info.append("%d título(s)" % int(t["t"]))
+			info.append(("%d título" if int(t["t"]) == 1 else "%d títulos") % int(t["t"]))
 		col.add_child(UIKit.label(" · ".join(info), "Small", true))
 		row.add_child(col)
 		row.add_child(UIKit.label(CoachScreen._stars(float(co.get("sk", 50.0))), "Small"))

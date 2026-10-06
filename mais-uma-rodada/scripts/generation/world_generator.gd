@@ -18,6 +18,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	Valuation.load_scale()
 	Valuation.shift = 0.0
 	var w := GameWorld.new()
+	Economy.ensure(w) # câmbio de partida antes de qualquer conta de receita
 	w.world_seed = seed_value
 	w.world_type = world_type
 	w.rng.seed = seed_value
@@ -27,6 +28,7 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 	for c in w.clubs:
 		Overrides.apply_club(c)
 	var used_names := {}
+	SquadStory.roles.clear()
 	for c in w.clubs:
 		PlayerGenerator.create_squad(w, rng, c, PlayerGenerator.club_level(c), used_names)
 	var n_free := int(w.clubs.size() * float(DatabaseManager.rules().get("free_agents_per_club", 0.5)))
@@ -34,15 +36,36 @@ static func generate(seed_value: int, world_type: String = "padrao") -> GameWorl
 		PlayerGenerator.create_free_agent(w, rng, random_league_level(rng), used_names)
 	PlayerMods.apply(w) # jogadores do Editor geral e de mods (RNG próprio: o sorteio não muda)
 	Valuation.refresh_shift(w)
+	MarketReality.ensure_world(w)
 	w.stats["talent_ref"] = PlayerDevelopment.talent_index(w)
 	w.stats["talent_drift"] = 0.0
 	w.stats["short_names"] = true # nomes dos clubes já vêm curtos dos dados (GameWorld.from_dict)
+	w.stats["kits_real"] = 1 # uniformes reais já vêm dos dados (ClubGenerator.upgrade_kits)
 	PreHistory.build(w)
 	CareerBackfill.build(w)
+	Relations.generate(w) # amizades, rixas, irmãos, mentores e ídolos de um mundo que já existia
+	Languages.init_world(w) # línguas da terra e as aprendidas nas passagens pelo exterior
+	if not SquadStory.keep:
+		SquadStory.roles.clear()
 	HeartClubs.ensure_all(w)
 	SeasonManager.setup_first_season(w)
 	SponsorManager.ensure_all(w) # patrocinadores e fornecedoras da IA, por país
+	LicensedData.apply_sponsors(w) # patrocinadores fixos dos dados/mods (campo "sponsors" do clube)
+	DropIns.apply_world(w) # escudos e camisas soltos nas pastas dos pacotes
+	if world_type == "padrao":
+		WorldEvents.seed_real_situation(w) # donos, SAFs e crises que já existem no começo do jogo
+	LeagueReputation.ensure(w) # coeficientes de partida das ligas
+	compact_all(w)
 	return w
+
+
+## Histórico compactado na memória (o celular agradece), em paralelo: cada jogador é independente.
+static func compact_all(w: GameWorld) -> void:
+	var all: Array = w.players.values()
+	Parallel.map_chunks(all.size(), func(a: int, b: int) -> Array:
+		for i in range(a, b):
+			(all[i] as Player).compact()
+		return [], 400)
 
 
 ## Nível médio de uma liga sorteada pelo número de vagas (para agentes livres).

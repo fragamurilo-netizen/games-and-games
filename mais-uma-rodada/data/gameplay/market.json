@@ -1,7 +1,7 @@
 {
-	"_doc": "Perfis de mercado por país (IA de transferências, scripts/systems/market_ai.gd), inspirados no futebol real. domestic: chance de procurar reforço no próprio país. sources: países onde o clube garimpa com prioridade (as rotas reais de talento). age: faixa de idade preferida (mistura com o arquétipo do clube). premium: ágio que o país paga acima do valor de mercado (vazio = derivado da escala salarial da liga). wage_boost: quanto o país paga de salário acima do normal para convencer. vet_pull: atração extra para jogadores de 29+ (fim de carreira milionário). clause: multa rescisória implícita dos titulares (× valor), como na Espanha e em Portugal. min_signings/max_signings: reforços por janela de meio de ano.",
+	"_doc": "Perfis de mercado por país (IA de transferências, scripts/systems/market_ai.gd), inspirados no futebol real. domestic: chance de procurar reforço no próprio país. sources: países onde o clube garimpa com prioridade (as rotas reais de talento). age: faixa de idade preferida (mistura com o arquétipo do clube). premium: ágio que o país paga acima do valor de mercado (vazio = derivado da escala salarial da liga). wage_boost: quanto o país paga de salário acima do normal para convencer. vet_pull: atração extra para jogadores de 29+ (fim de carreira milionário). clause: multa rescisória implícita dos titulares (× valor), como na Espanha e em Portugal. min_signings/max_signings: reforços por janela de meio de ano. repat: quando procura fora de casa, chance de ir atrás de um jogador do país que joga no exterior (a volta para casa, comum na América do Sul). outside: chance de aceitar um estrangeiro de outra confederação que não está na lista de importações do país (nations.json › imports); quem está na lista entra com a força dela × outside_imports (o maior da lista vale outside_imports). Calibrado com o Transfermarkt: no Brasileirão e na Argentina europeus são 1 a 2% dos elencos; quase todo estrangeiro é sul-americano. Sem outside = sem filtro.",
 	"default": {
-		"domestic": 0.6, "sources": [], "premium": null, "wage_boost": 1.0, "vet_pull": 0.0, "clause": 0.0
+		"domestic": 0.6, "sources": [], "premium": null, "wage_boost": 1.0, "vet_pull": 0.0, "clause": 0.0, "repat": 0.0
 	},
 	"nations": {
 		"ENG": {"domestic": 0.3, "sources": ["BRA", "ARG", "POR", "NED", "FRA", "ESP", "GER", "BEL", "ITA", "URU", "COL", "DEN"], "premium": 1.35},
@@ -22,12 +22,17 @@
 		"SRB": {"domestic": 0.7, "sources": ["CRO", "NGA"], "age": [17, 25]},
 		"CZE": {"domestic": 0.7, "sources": ["AUT", "CRO"], "age": [17, 26]},
 		"UKR": {"domestic": 0.6, "sources": ["BRA", "CRO", "SRB"], "age": [18, 26]},
-		"BRA": {"domestic": 0.6, "sources": ["ARG", "URU", "COL", "PAR", "ECU", "CHI", "POR"], "vet_pull": 0.05},
-		"ARG": {"domestic": 0.65, "sources": ["URU", "PAR", "COL", "CHI"]},
-		"URU": {"domestic": 0.7, "sources": ["ARG", "PAR"]},
-		"COL": {"domestic": 0.7, "sources": ["ECU", "VEN", "ARG"]},
-		"CHI": {"domestic": 0.7, "sources": ["ARG", "URU", "COL"]},
-		"MEX": {"domestic": 0.5, "sources": ["ARG", "COL", "URU", "CHI", "USA", "PAR", "ECU"], "wage_boost": 1.05},
+		"BRA": {"domestic": 0.6, "sources": ["ARG", "URU", "COL", "PAR", "ECU", "CHI", "POR"], "vet_pull": 0.05, "repat": 0.45, "outside": 0.02, "outside_imports": 0.4},
+		"ARG": {"domestic": 0.65, "sources": ["URU", "PAR", "COL", "CHI"], "repat": 0.45, "outside": 0.02, "outside_imports": 0.3},
+		"URU": {"domestic": 0.7, "sources": ["ARG", "PAR"], "repat": 0.4, "outside": 0.02, "outside_imports": 0.3},
+		"COL": {"domestic": 0.7, "sources": ["ECU", "VEN", "ARG"], "repat": 0.4, "outside": 0.02, "outside_imports": 0.3},
+		"CHI": {"domestic": 0.7, "sources": ["ARG", "URU", "COL"], "repat": 0.4, "outside": 0.03, "outside_imports": 0.3},
+		"ECU": {"domestic": 0.7, "sources": ["COL", "ARG", "URU", "VEN"], "repat": 0.4, "outside": 0.02, "outside_imports": 0.3},
+		"PER": {"domestic": 0.65, "sources": ["ARG", "URU", "COL", "VEN"], "repat": 0.4, "outside": 0.02, "outside_imports": 0.3},
+		"PAR": {"domestic": 0.7, "sources": ["ARG", "URU", "BRA"], "repat": 0.45, "outside": 0.02, "outside_imports": 0.3},
+		"BOL": {"domestic": 0.7, "sources": ["ARG", "BRA", "PAR", "URU"], "repat": 0.35, "outside": 0.02, "outside_imports": 0.3},
+		"VEN": {"domestic": 0.75, "sources": ["COL", "ARG"], "repat": 0.35, "outside": 0.02, "outside_imports": 0.3},
+		"MEX": {"domestic": 0.5, "sources": ["ARG", "COL", "URU", "CHI", "USA", "PAR", "ECU"], "wage_boost": 1.05, "repat": 0.25, "outside": 0.08, "outside_imports": 0.6},
 		"USA": {"domestic": 0.4, "sources": ["ARG", "COL", "PAR", "URU", "VEN", "ECU", "MEX", "ENG", "ESP"], "age": [21, 33], "wage_boost": 1.1, "vet_pull": 0.12},
 		"KSA": {"domestic": 0.3, "sources": ["ENG", "ESP", "ITA", "GER", "FRA", "POR", "BRA", "MAR", "EGY"], "age": [27, 34], "premium": 1.3, "wage_boost": 1.6, "vet_pull": 0.3},
 		"QAT": {"domestic": 0.35, "sources": ["ESP", "FRA", "POR", "BRA", "MAR", "TUN"], "age": [27, 34], "premium": 1.2, "wage_boost": 1.5, "vet_pull": 0.25},

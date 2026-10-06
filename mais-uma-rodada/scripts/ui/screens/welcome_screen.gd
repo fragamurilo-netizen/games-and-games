@@ -21,36 +21,48 @@ func refresh() -> void:
 	UIManager.refresh_chrome()
 	var c := content()
 	UIKit.clear(c)
+	StadiumBackdrop.attach(self, UIColors.club_tone(club))
+	max_content_width = 1600.0
 	c.add_child(_hero(w, club))
-	c.add_child(_expectations(w, club))
-	c.add_child(_traits(w, club))
-	c.add_child(_squad(w, club))
+	UIKit.columns(c, [_expectations(w, club), _traits(w, club), _squad(w, club)], content_width())
 	_footer(w)
 
 
+## Apresentação: o escudo grande no centro, sobre o estádio nas cores do clube.
 func _hero(w: GameWorld, club: Club) -> Control:
-	var card := UIKit.card("Card", 10)
-	var row := UIKit.hbox(16)
-	row.add_child(UIKit.crest(club, 140))
-	var col := UIKit.vbox(2)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.add_child(UIKit.label("Bem-vindo ao", "Small"))
-	col.add_child(UIKit.label(club.name, "Title", true))
+	var v := UIKit.vbox(6)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(UIKit.gap(10))
+	var cr := UIKit.crest(club, 180)
+	cr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(cr)
+	var hi := UIKit.eyebrow("Bem-vindo ao")
+	hi.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(hi)
+	var nm := UIKit.label(club.name, "Display", true)
+	nm.uppercase = true
+	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(nm)
 	if club.nickname != "":
-		col.add_child(UIKit.label("\"%s\"" % club.nickname, "Accent"))
+		var nk := UIKit.label("\"%s\"" % club.nickname, "Accent")
+		nk.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		v.add_child(nk)
 	var place := UIKit.hbox(8)
+	place.alignment = BoxContainer.ALIGNMENT_CENTER
 	place.add_child(UIKit.flag(club.nation, 30))
-	place.add_child(UIKit.label("%s · desde %d" % [club.city, club.founded], "Small", true))
-	col.add_child(place)
+	place.add_child(UIKit.label("%s · desde %d" % [club.city, club.founded], "Small"))
+	v.add_child(place)
 	var stars := StarsView.new()
-	stars.star_size = 22.0
+	stars.star_size = 24.0
 	stars.stars = clampf(club.reputation / 20.0, 0.5, 5.0)
-	col.add_child(stars)
-	row.add_child(col)
-	card.add_child(row)
-	card.add_child(UIKit.label("%s, treinador do %s. %s lugares no %s, %s e uma história para honrar." % [
-		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true))
-	return HeroBackdrop.attach(UIKit.card_panel(card), club)
+	stars.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(stars)
+	var intro := UIKit.label("%s, treinador do %s. %s lugares no %s, %s." % [
+		w.manager_name, club.short_name, Fmt.thousands(club.capacity), club.stadium, _fans_text(club)], "", true)
+	intro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(intro)
+	v.add_child(UIKit.gap(6))
+	return v
 
 
 func _fans_text(club: Club) -> String:
@@ -68,15 +80,18 @@ func _expectations(w: GameWorld, club: Club) -> Control:
 	var card := UIKit.card("Card", 8)
 	card.add_child(UIKit.section("O que esperam de você"))
 	var goal := SeasonManager.goal_of(w, club.id)
-	card.add_child(UIKit.kv("Meta da diretoria", String(goal[0])))
+	var gl := UIKit.label(String(goal[0]), "H2", true)
+	gl.add_theme_color_override(&"font_color", UIColors.ACCENT)
+	card.add_child(gl)
+	card.add_child(UIKit.stat_grid([
+		UIKit.stat_tile(Fmt.money(club.transfer_budget), "Verba"),
+		UIKit.stat_tile(Fmt.money(club.wage_budget), "Teto / mês"),
+		UIKit.stat_tile(FinanceManager.health_label(w, club), "Finanças"),
+	], content_width()))
 	var pr := People.president(w, club.id)
 	if not pr.is_empty():
 		var st := People.pres_style(w, club.id)
 		card.add_child(UIKit.kv("Presidente", "%s · %s" % [String(pr.get("n", "")), String(st.get("name", ""))]))
-		card.add_child(UIKit.label(String(st.get("desc", "")), "Small", true))
-	card.add_child(UIKit.kv("Verba para contratações", Fmt.money(club.transfer_budget)))
-	card.add_child(UIKit.kv("Teto salarial", "%s/mês" % Fmt.money(club.wage_budget)))
-	card.add_child(UIKit.kv("Finanças", FinanceManager.health_label(w, club)))
 	var rival := w.club(club.main_rival())
 	if rival != null:
 		var rr := UIKit.hbox(10)
@@ -84,7 +99,7 @@ func _expectations(w: GameWorld, club: Club) -> Control:
 		var rc := UIKit.vbox(0)
 		rc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		rc.add_child(UIKit.label("Maior rival", "Caps"))
-		rc.add_child(UIKit.label("%s — vencer o clássico vale mais que três pontos para a torcida." % rival.name, "Small", true))
+		rc.add_child(UIKit.label(rival.name, "Small", true))
 		rr.add_child(rc)
 		card.add_child(rr)
 	return UIKit.card_panel(card)
@@ -105,8 +120,6 @@ func _traits(w: GameWorld, club: Club) -> Control:
 	if FinanceManager.in_trouble(club):
 		tags.add_child(UIKit.pill("ENDIVIDADO", UIColors.ORANGE, 16))
 	card.add_child(tags)
-	if arch.has("desc"):
-		card.add_child(UIKit.label(String(arch["desc"]), "Small", true))
 	var pol := ClubPolicy.of(club)
 	if not pol.is_empty():
 		card.add_child(UIKit.label("Filosofia: %s" % String(pol.get("name", "")), "H3", true))
@@ -114,7 +127,7 @@ func _traits(w: GameWorld, club: Club) -> Control:
 	card.add_child(UIKit.kv("Categorias de base", "%d/100" % club.youth_level))
 	card.add_child(UIKit.kv("Centro de treinamento", "%d/100" % club.facilities))
 	var patience := float(arch.get("fan_patience", 50))
-	card.add_child(UIKit.label("Torcida %s." % ("exigente: não perdoa sequência ruim" if patience < 40 else ("paciente com trabalho a longo prazo" if patience > 60 else "apaixonada, cobra mas apoia")), "Small", true))
+	card.add_child(UIKit.kv("Torcida", "Exigente" if patience < 40 else ("Paciente" if patience > 60 else "Apaixonada")))
 	return UIKit.card_panel(card)
 
 
@@ -147,23 +160,32 @@ func _squad(w: GameWorld, club: Club) -> Control:
 		var a := p.age(w.year)
 		if a <= 21 and (young == null or p.potential_estimate(0.8) > young.potential_estimate(0.8)):
 			young = p
-		if a >= 31 and (vet == null or p.career_apps > vet.career_apps):
+		# O ídolo da casa fala mais alto que o veterano que acabou de chegar
+		if a >= 31 and (vet == null or _vet_score(w, p) > _vet_score(w, vet)):
 			vet = p
 	if young != null:
 		card.add_child(UIKit.label("A promessa", "Caps"))
-		card.add_child(_player_line(w, club, young, "%d anos · %s" % [young.age(w.year), Player.potential_label(young.potential_estimate(0.8))]))
+		card.add_child(_player_line(w, club, young, "%d anos · %s" % [young.age(w.year), PlayerAssessment.summary(w,young,true)]))
 	if vet != null:
 		card.add_child(UIKit.label("A voz da experiência", "Caps"))
-		card.add_child(_player_line(w, club, vet, "%d anos · %d jogos na carreira" % [vet.age(w.year), vet.career_apps]))
+		var yrs := w.year - vet.joined_year
+		var vnote := ("%d anos · %d jogo na carreira" if vet.career_apps == 1 else "%d anos · %d jogos na carreira") % [vet.age(w.year), vet.career_apps]
+		if yrs >= 5:
+			vnote = "%d anos · %s no clube" % [vet.age(w.year), Fmt.n_of(yrs, "%d temporada", "%d temporadas")]
+		card.add_child(_player_line(w, club, vet, vnote))
 	var needs := TransferManager.squad_needs(w, club)
 	if not needs.is_empty():
 		var weak: Array = []
 		for nd in needs.slice(0, 2):
 			weak.append(FAM_NAMES[int(nd["fam"])])
-		card.add_child(UIKit.colored("Carência: o elenco pede reforço de %s." % " e ".join(PackedStringArray(weak)), UIColors.ORANGE, "Small", true))
+		card.add_child(UIKit.colored("Carência: %s" % " e ".join(PackedStringArray(weak)), UIColors.ORANGE, "Small", true))
 	else:
-		card.add_child(UIKit.colored("Elenco equilibrado: nenhuma posição urgente.", UIColors.GREEN, "Small", true))
+		card.add_child(UIKit.colored("Elenco equilibrado", UIColors.GREEN, "Small", true))
 	return UIKit.card_panel(card)
+
+
+func _vet_score(w: GameWorld, p: Player) -> float:
+	return float(p.career_apps) + (w.year - p.joined_year) * 40.0 + (400.0 if p.has_trait("idolo") else 0.0) + (200.0 if p.has_trait("lider") else 0.0)
 
 
 func _star_note(w: GameWorld, p: Player) -> String:
@@ -185,7 +207,7 @@ func _player_line(w: GameWorld, club: Club, p: Player, note: String) -> Control:
 	col.add_child(nl)
 	col.add_child(UIKit.label(note, "Small", true))
 	row.add_child(col)
-	row.add_child(UIKit.badge(p.overall, 52, 38, 22))
+	row.add_child(UIKit.player_stars(w,p,15))
 	var pid := p.id
 	return UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid}))
 

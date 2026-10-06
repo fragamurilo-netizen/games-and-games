@@ -15,6 +15,8 @@ static func fixture_title(w: GameWorld, f: Fixture) -> String:
 	if cup == null:
 		return CupManager.cup_short(f.comp)
 	if f.stage == Fixture.STAGE_GROUP:
+		if cup.league_phase:
+			return "%s · Fase de liga · %dª rodada" % [cup.short_name, f.round + 1]
 		return "%s · Grupo %s · %dª rodada" % [cup.short_name, cup.group_of(f.home).get("n", "?"), f.round + 1]
 	var stage: String = cup.round_names[f.round] if f.round < cup.round_names.size() else ""
 	if f.neutral:
@@ -29,9 +31,13 @@ static func comp_short(w: GameWorld, comp: String) -> String:
 	return CupManager.cup_short(comp)
 
 
-## Logo desenhado de uma competição (formato do CrestView): o de identity.json, ou um selo gerado
-## com as cores oficiais e as iniciais.
+## Logo desenhado de uma competição (formato do CrestView): o "logo_design" da própria competição
+## nos dados, o de identity.json, ou um selo gerado com as cores oficiais e as iniciais.
+## (Logo em imagem: campo "logo" da competição, ver Overrides.logo_of.)
 static func logo(comp: String) -> Dictionary:
+	var own_cfg: Dictionary = DatabaseManager.league_cfg(comp) if DatabaseManager.has_league(comp) else DatabaseManager.cup_cfg(comp)
+	if own_cfg.get("logo_design", null) is Dictionary and not (own_cfg["logo_design"] as Dictionary).is_empty():
+		return own_cfg["logo_design"]
 	var logos: Dictionary = DatabaseManager.get_data("identity").get("logos", {})
 	if logos.has(comp):
 		return logos[comp]
@@ -106,6 +112,8 @@ static func cup_event_text(w: GameWorld, ev: Dictionary) -> String:
 			return "%s é o campeão %s %s." % [w.club(club).short_name, da, cup_name]
 		"advance":
 			if w.is_user_club(club):
+				if ev.has("direct"):
+					return "Classificado às oitavas da %s." % cup_name if bool(ev["direct"]) else "Seu time vai aos playoffs da %s." % cup_name
 				return "Classificado! Seu time passou da %s %s %s." % [String(ev.get("stage", "")).to_lower(), "no" if da == "do" else "na", cup_name]
 		"out":
 			if w.is_user_club(club):

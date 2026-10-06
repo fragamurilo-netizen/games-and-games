@@ -7,7 +7,6 @@ var _filter := "active"
 
 
 func _init() -> void:
-	show_nav = false
 	screen_title = "Revelados pela base"
 
 
@@ -32,14 +31,9 @@ func refresh() -> void:
 	var list := Graduates.of_club(w, club.id)
 	var retired := Graduates.retired_of(w, club.id)
 	c.add_child(_header(w, club, list, retired))
-	var g := ButtonGroup.new()
-	var row := UIKit.flow(8)
-	for t in [["active", "Em atividade · %d" % list.size()], ["retired", "Aposentados · %d" % retired.size()]]:
-		var key: String = t[0]
-		row.add_child(UIKit.chip(t[1], key == _filter, g, func():
-			_filter = key
-			refresh()))
-	c.add_child(row)
+	c.add_child(UIKit.tabs([["active", tr("Em atividade · %d") % list.size()], ["retired", tr("Aposentados · %d") % retired.size()]], _filter, func(k: String):
+		_filter = k
+		refresh()))
 	if _filter == "active":
 		c.add_child(_active(w, club, list))
 	else:
@@ -79,7 +73,7 @@ func _header(w: GameWorld, club: Club, list: Array, retired: Array) -> Control:
 func _active(w: GameWorld, club: Club, list: Array) -> Control:
 	var card := UIKit.card("Card", 6)
 	if list.is_empty():
-		card.add_child(UIKit.label("Nenhum jogador em atividade saiu da base deste clube.", "Muted", true))
+		card.add_child(UIKit.label("Nenhum jogador em atividade.", "Muted", true))
 		return UIKit.card_panel(card)
 	for p: Player in list.slice(0, 60):
 		var row := UIKit.hbox(10)
@@ -102,7 +96,7 @@ func _active(w: GameWorld, club: Club, list: Array) -> Control:
 		row.add_child(col)
 		if cur != null:
 			row.add_child(UIKit.crest(cur, 34))
-		row.add_child(UIKit.badge(p.overall if w.is_user_club(p.club_id) else PlayerRowView.estimate(w, p, p.overall), 50, 36, 20))
+		row.add_child(UIKit.player_stars(w,p,15))
 		var pid := p.id
 		card.add_child(UIKit.tap_row(row, func(): UIManager.push("player", {"id": pid})))
 	if list.size() > 60:
@@ -113,7 +107,7 @@ func _active(w: GameWorld, club: Club, list: Array) -> Control:
 func _retired(w: GameWorld, retired: Array) -> Control:
 	var card := UIKit.card("Card", 6)
 	if retired.is_empty():
-		card.add_child(UIKit.label("Nenhum aposentado notável formado aqui (ainda).", "Muted", true))
+		card.add_child(UIKit.label("Nenhum aposentado notável.", "Muted", true))
 		return UIKit.card_panel(card)
 	for r in retired.slice(0, 40):
 		var row := UIKit.hbox(10)
@@ -123,6 +117,9 @@ func _retired(w: GameWorld, retired: Array) -> Control:
 		col.add_child(UIKit.label(String(r.get("ka", r.get("name", "—"))), "H3", true))
 		col.add_child(UIKit.label("%d jogos · %d gols · %d títulos" % [int(r.get("apps", 0)), int(r.get("goals", 0)), int(r.get("titles", 0))], "Small"))
 		row.add_child(col)
-		row.add_child(UIKit.badge(int(r.get("ovr", 0)), 50, 36, 20))
 		card.add_child(row)
 	return UIKit.card_panel(card)
+
+
+func color_context() -> Dictionary:
+	return club_context(_club_id)

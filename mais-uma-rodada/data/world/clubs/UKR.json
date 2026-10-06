@@ -51,12 +51,16 @@
 			"capacity": 16800,
 			"kit": "plain",
 			"crest": {
-				"shape": "round",
+				"shape": "shield",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "D",
-				"sc": "#1D5BBF",
-				"border": "thick"
+				"c1": "#FFFFFF",
+				"c2": "#0B4EA2",
+				"sc": "#0B4EA2",
+				"chief_text": "DYNAMO",
+				"cc": "#0B4EA2",
+				"border": "double"
 			},
 			"rivals": [
 				"UKR_HIR"
@@ -82,7 +86,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "P"
@@ -108,7 +112,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "K"
@@ -160,7 +164,7 @@
 			"kit": "plain",
 			"rivals": [],
 			"crest": {
-				"shape": "round",
+				"shape": "ring",
 				"field": "plain",
 				"symbol": "letter",
 				"initials": "O",
@@ -185,7 +189,13 @@
 			"stadium": "Arena Lviv",
 			"capacity": 34900,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#111111",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -206,7 +216,13 @@
 			"stadium": "Ukraina Stadium",
 			"capacity": 28000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -227,7 +243,13 @@
 			"stadium": "Obolon Arena",
 			"capacity": 5100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "O",
+				"text": "OBOLON KYIV"
+			},
 			"rivals": []
 		},
 		{
@@ -248,7 +270,13 @@
 			"stadium": "Avanhard Stadium",
 			"capacity": 4600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "rose",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -269,7 +297,13 @@
 			"stadium": "Cherkasy Arena",
 			"capacity": 10300,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LNZ",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -290,7 +324,13 @@
 			"stadium": "Butovsky Vorskla",
 			"capacity": 24800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "ball",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -311,7 +351,15 @@
 			"stadium": "Chornomorets Stadium",
 			"capacity": 34100,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "anchor",
+				"c2": "#FFFFFF",
+				"fc": "#111111",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -332,7 +380,13 @@
 			"stadium": "Kolos Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#00843D",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -353,7 +407,13 @@
 			"stadium": "Livyi Bereh Arena",
 			"capacity": 1000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "LB",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -374,7 +434,14 @@
 			"stadium": "Inhulets Stadium",
 			"capacity": 1700,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "waves",
+				"sc": "#FFD100",
+				"chief_text": "INHULETS",
+				"cc": "#FFD100"
+			},
 			"rivals": []
 		}
 	]

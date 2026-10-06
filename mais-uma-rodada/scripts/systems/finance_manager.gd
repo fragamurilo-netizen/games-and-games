@@ -24,8 +24,9 @@ const CAT_NAMES := {
 	"investimentos": "Investimentos", "bonus_patrocinio": "Bônus de patrocínio", "aporte": "Aporte do novo dono",
 	"renegociacao": "Dívida renegociada", "saida_dono": "Dívida deixada pelo dono", "impostos": "Impostos",
 	"emprestimo": "Empréstimo bancário", "amortizacao": "Amortização da dívida",
+	"solidariedade": "Solidariedade da FIFA",
 }
-const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "loja", "premiacao", "vendas", "aporte", "renegociacao", "emprestimo"]
+const INCOME_CATS: Array[String] = ["bilheteria", "tv", "patrocinio", "bonus_patrocinio", "loja", "premiacao", "vendas", "solidariedade", "aporte", "renegociacao", "emprestimo"]
 const EXPENSE_CATS: Array[String] = ["salarios", "compras", "manutencao", "juros", "amortizacao", "rescisoes", "luvas", "investimentos", "saida_dono", "impostos"]
 ## Movimentos de dívida e de dono não são lucro nem prejuízo: ficam fora do imposto.
 const NOT_TAXED: Array[String] = ["emprestimo", "amortizacao", "aporte", "renegociacao", "saida_dono"]
@@ -51,7 +52,8 @@ static func wage_bill(world: GameWorld, club: Club) -> int:
 	for pid in club.player_ids:
 		var p: Player = world.players.get(pid, null)
 		if p != null:
-			total += p.wage
+			# Emprestado com salário dividido: o clube que o usa paga só a parte combinada.
+			total += p.wage if p.loan.is_empty() else int(p.wage * float(p.loan.get("ws", 1.0)))
 	return total
 
 
@@ -64,6 +66,8 @@ static func level_of_rep(cfg: Dictionary, rep: float) -> float:
 	var lr: Array = cfg.get("level", [55, 65])
 	var rr: Array = cfg.get("rep", [40, 70])
 	var t := clampf((rep - float(rr[0])) / maxf(1.0, float(rr[1]) - float(rr[0])), -0.3, 1.04)
+	if t < 0.0:
+		t *= 0.4 # abaixo da faixa cai devagar: nem o lanterna de uma liga forte vira time de divisão inferior
 	return float(lr[0]) + (float(lr[1]) - float(lr[0])) * t
 
 
@@ -72,9 +76,30 @@ static func league_mid_level(cfg: Dictionary) -> float:
 	return (float(lr[0]) + float(lr[1])) * 0.5
 
 
-## Receita anual típica de um clube de nível `level` na liga.
+## Receita anual típica de um clube de nível `level` na liga. Economia 2026: × gross da liga (a
+## receita média real) × câmbio da moeda do país.
 static func revenue_target(cfg: Dictionary, level: float) -> float:
-	return float(money()["revenue_per_wage"]) * Valuation.base_wage(level - Valuation.shift) * float(cfg.get("wage", 0.5)) * float(cfg.get("rev", 1.0))
+	return float(money()["revenue_per_wage"]) * Valuation.base_wage(level - Valuation.shift) * float(cfg.get("wage", 0.5)) * float(cfg.get("rev", 1.0)) \
+		* float(cfg.get("gross", 1.0)) * Economy.fx_factor(String(cfg.get("nation", "")))
+
+
+## Quanto a receita bruta de hoje é maior que a do modelo antigo (liga × força comercial × câmbio).
+static func gross_k(club: Club) -> float:
+	return float(club.league_cfg().get("gross", 1.0)) * club.rev_k * Economy.fx_factor(club.nation)
+
+
+## Custo operacional que acompanha a receita real: staff, viagens, estrutura, bônus, direitos de
+## imagem e amortizações. É a parte do excedente (receita real − modelo antigo) que não vira folha
+## nem verba; no Brasil uma fatia menor, porque lá os salários reais são bem mais altos.
+static func opex_extra(club: Club) -> float:
+	var t := club_revenue_target(club)
+	var k := gross_k(club)
+	return (t - t / maxf(0.05, k)) * float(club.league_cfg().get("opex", 0.85))
+
+
+## Receita que sobra para o futebol (folha e mercado): a bruta menos o custo operacional extra.
+static func net_revenue(club: Club) -> float:
+	return float(expected_revenue(club) + club.income_tv - tv_income(club)) - opex_extra(club)
 
 
 ## Receita típica de um clube médio da liga (referência para TV, prêmios e custos).
@@ -139,7 +164,14 @@ static func merch_mood(club: Club) -> float:
 
 static func club_revenue_target(club: Club) -> float:
 	var cfg := club.league_cfg()
-	return revenue_target(cfg, level_of_rep(cfg, club.reputation)) * float(club.arch().get("revenue_mult", 1.0))
+	var t := revenue_target(cfg, level_of_rep(cfg, club.reputation))
+	if club.tier > 1:
+		# A marca segura parte da receita na divisão de baixo (Santos na Série B de 2024 ainda faturou
+		# ~3/4 do que faturava na A): piso de 55% do que a mesma reputação renderia na 1ª divisão.
+		var top := DatabaseManager.league_cfg(Reputation.top_league_of(club.nation))
+		if not top.is_empty():
+			t = maxf(t, revenue_target(top, level_of_rep(top, club.reputation)) * 0.55)
+	return t * float(club.arch().get("revenue_mult", 1.0)) * club.rev_k
 
 
 static func expected_prize(club: Club) -> int:
@@ -148,7 +180,15 @@ static func expected_prize(club: Club) -> int:
 
 
 static func expected_gate(club: Club) -> int:
-	return expected_attendance(club, null, false) * ticket_price(club) * home_games(club.league_id)
+	return int(expected_attendance(club, null, false) * ticket_price(club) * matchday_yield(club) * home_games(club.league_id))
+
+
+## Receita por torcedor além do ingresso: camarotes, hospitalidade, sócio-torcedor e consumo no
+## estádio. Clube grande de liga rica tira bem mais de cada lugar (Real Madrid ≈ € 127 por
+## torcedor no novo Bernabéu, Flamengo ≈ € 24 no Maracanã).
+static func matchday_yield(club: Club) -> float:
+	var rich := clampf(float(club.league_cfg().get("wage", 0.5)), 0.2, 1.4)
+	return 1.0 + clampf((club.reputation - 60.0) / 35.0, 0.0, 1.0) * (0.4 + rich)
 
 
 ## Patrocínio: completa a receita típica do nível do clube (cresce com a reputação) e segue o
@@ -161,8 +201,9 @@ static func sponsor_income(club: Club) -> int:
 
 static func maintenance_cost(club: Club) -> int:
 	var m := money()
-	var base := club_revenue_target(club) * (float(m["maintenance_share"]) + club.facilities * float(m["maintenance_per_facility"]))
-	return int(base + club.capacity * ticket_price(club) * float(m["seat_upkeep"]))
+	var t := club_revenue_target(club)
+	var base := t / maxf(0.05, gross_k(club)) * (float(m["maintenance_share"]) + club.facilities * float(m["maintenance_per_facility"]))
+	return int(base + opex_extra(club) + club.capacity * ticket_price(club) * float(m["seat_upkeep"]))
 
 
 static func ticket_price(club: Club) -> int:
@@ -182,7 +223,15 @@ static func expected_attendance(club: Club, opponent: Club, derby: bool, rng: Ra
 
 
 static func expected_revenue(club: Club) -> int:
-	return tv_income(club) + sponsor_income(club) + expected_prize(club) + expected_gate(club) + merch_income(club)
+	# Mesma conta de sponsor_income, sem refazer TV, prêmios, bilheteria e loja (o mercado da IA
+	# consulta isto dezenas de milhares de vezes por janela).
+	var tv := tv_income(club)
+	var prize := expected_prize(club)
+	var gate := expected_gate(club)
+	var merch := merch_income(club)
+	var target := club_revenue_target(club)
+	var sponsor := int(maxf(target * 0.08, target - tv - prize - gate - merch) * club.commercial)
+	return tv + sponsor + prize + gate + merch
 
 
 ## Lançamentos semanais (datas de liga) — salários, TV, patrocínio, manutenção e juros.
@@ -225,7 +274,10 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 	club.income_sponsor = sponsor_income(club)
 	club.cost_upkeep = maintenance_cost(club)
 	var arch := club.arch()
-	var revenue := float(expected_revenue(club) + club.income_tv - tv_income(club))
+	var gross := float(expected_revenue(club) + club.income_tv - tv_income(club))
+	var extra := opex_extra(club)
+	var revenue := gross - extra # o que sobra para folha e mercado
+	var upkeep := float(club.cost_upkeep) - extra
 	var ratio := float(arch.get("wage_ratio", 0.62))
 	var spend := float(arch.get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
 	if world.is_user_club(club.id):
@@ -235,8 +287,8 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 	# A parcela da dívida sai antes da folha: o que sobra da receita é o que dá para gastar.
 	var service := debt_service(club)
 	# Parcela da dívida e custos operacionais (staff, viagens, base) além do básico saem antes da folha.
-	var free := maxf(revenue * 0.5, revenue - service - maxf(0.0, club.cost_upkeep - revenue * 0.06))
-	var dr := debt_ratio(club, revenue)
+	var free := maxf(revenue * 0.5, revenue - service - maxf(0.0, upkeep - revenue * 0.06))
+	var dr := debt_ratio(club, gross)
 	# Reservas viram poder de fogo salarial (dinheiro parado circula), dívida aperta o cinto.
 	var reserve := minf(maxf(0.0, club.balance) * 0.12, revenue * 0.35)
 	var budget := (free * ratio + reserve) / 12.0
@@ -251,16 +303,48 @@ static func set_budgets(world: GameWorld, club: Club) -> void:
 		budget *= clampf(1.0 - dr * 0.25, 0.75, 0.95)
 	club.wage_budget = int(budget)
 	# Teto por temporada: contratações limitadas a uma fração da receita anual, por mais rico que o clube seja.
-	var cap_mult := 1.4
+	# IA: no máximo ~90% da receita anual em compras (os gigantes de verdade não gastam mais que isso por ano).
+	var cap_mult := 0.9
 	if world.is_user_club(club.id):
 		cap_mult = [2.0, 1.6, 1.3][world.difficulty]
 	var tb := club.balance * spend
 	# Sobra prevista do ano (receita − folha − custos − parcela da dívida) também vira verba, com cautela.
 	if club.balance >= 0:
-		tb += maxf(0.0, revenue - current * 12.0 - club.cost_upkeep - service) * 0.2
+		tb += maxf(0.0, revenue - current * 12.0 - upkeep - service) * 0.2
 	if dr > 1.0:
 		tb *= 0.5
-	club.transfer_budget = int(clampf(tb, 0.0, revenue * cap_mult))
+	var legacy_budget := float(clampf(tb, 0.0, revenue * cap_mult))
+	var market_budget := float(MarketReality.budget_reference(world, club, revenue))
+	# Caixa no vermelho: a verba de mercado some conforme o rombo (zera com 25% da receita anual).
+	if club.balance < 0:
+		market_budget *= clampf(1.0 + float(club.balance) / maxf(1.0, gross * 0.25), 0.0, 1.0)
+	# Mistura sustentabilidade financeira com poder de compra coerente com o valor do elenco.
+	club.transfer_budget = int(clampf(lerpf(legacy_budget, market_budget, 0.60), 0.0, revenue * cap_mult))
+
+
+## Salários de mercado: numa liga rica até o clube pequeno paga bem (a TV da Premier League
+## banca salários altos para jogadores medianos). Quem gasta com a folha bem menos do que a
+## receita permite renegocia os contratos para cima, aos poucos: a folha caminha para ~50% da
+## receita, como nos clubes reais, em vez de o caixa virar uma montanha parada.
+const WAGE_SHARE_MIN := 0.42
+const WAGE_SHARE_TARGET := 0.52
+
+
+static func market_wages(world: GameWorld, club: Club, first: bool = false) -> void:
+	if world.is_user_club(club.id) and not first:
+		return
+	var revenue := net_revenue(club)
+	var bill := float(wage_bill(world, club)) * 12.0
+	if revenue <= 0.0 or bill <= 0.0 or bill >= revenue * WAGE_SHARE_MIN:
+		return
+	# Na geração o salto é maior (os contratos já nascem no patamar da liga); depois, 40% do caminho por ano.
+	var gap := revenue * WAGE_SHARE_TARGET / bill
+	var k := clampf(1.0 + (gap - 1.0) * (0.85 if first else 0.55), 1.0, 3.0 if first else 1.7)
+	for pid in club.player_ids:
+		var p: Player = world.players.get(pid, null)
+		if p == null or not p.loan.is_empty():
+			continue
+		p.wage = Valuation.round_wage(p.wage * k)
 
 
 ## Dívida total (empréstimos + caixa no vermelho) em anos de receita (0 = sem dívida).
@@ -306,10 +390,10 @@ static func refinance(world: GameWorld, club: Club) -> int:
 ## Revisão de meio de temporada (abertura da janela de inverno): a diretoria ajusta a verba
 ## ao que entrou e saiu até aqui — premiações e vendas liberam dinheiro, prejuízo aperta.
 static func mid_season_review(world: GameWorld, club: Club) -> void:
-	var revenue := float(expected_revenue(club))
+	var revenue := net_revenue(club)
 	if club.balance < 0:
 		club.transfer_budget = 0
-		if debt_ratio(club, revenue) > 0.4:
+		if debt_ratio(club) > 0.4:
 			club.wage_budget = int(club.wage_budget * 0.95)
 		return
 	var spend := float(club.arch().get("spend_rate", 0.35)) * ClubDNA.spend_mult(club)
@@ -343,8 +427,10 @@ static func renegotiate_tv(world: GameWorld) -> Array:
 			continue
 		var old := float(deals.get(id, 1.0))
 		var nw := clampf(old * world.rng.randf_range(0.9, 1.2), float(TV_DEAL_RANGE[0]), float(TV_DEAL_RANGE[1]))
-		# Contratos longe do normal tendem a voltar (o mercado se ajusta).
-		nw = snappedf(lerpf(nw, 1.0, 0.15), 0.01)
+		# Contratos longe do normal tendem a voltar ao que a liga vale hoje (força da liga no ranking).
+		var cfg := DatabaseManager.league_cfg(id)
+		var worth := LeagueReputation.trend_factor(String(cfg.get("nation", "")), world)
+		nw = snappedf(clampf(lerpf(nw, worth, 0.25), float(TV_DEAL_RANGE[0]), float(TV_DEAL_RANGE[1])), 0.01)
 		deals[id] = nw
 		out.append({"league": id, "old": old, "new": nw})
 	world.stats["tv_deals"] = deals
@@ -431,7 +517,7 @@ static func yearly_investments(world: GameWorld) -> void:
 			c.youth_level = maxi(5, c.youth_level - 1)
 		if world.is_user_club(c.id):
 			continue
-		var excess := c.balance - int(expected_revenue(c) * 0.8)
+		var excess := c.balance - int(net_revenue(c) * 0.8)
 		if excess <= 0:
 			continue
 		var budget := int(excess * 0.35)

@@ -24,6 +24,12 @@ var rivals: Array = [] # ids de clubes rivais (o primeiro é o maior)
 
 var stadium: String = ""
 var capacity: int = 10000
+## Dados extras do estádio vindos dos dados/mods ou do editor (todos opcionais):
+## {kind: arena|caldeirao|olimpico|acanhado (muda o desenho e o corte do gramado), photo: imagem,
+##  city, built (ano), nick (apelido do estádio)}. Ver LicensedData.
+var venue: Dictionary = {}
+## Nome oficial completo (licenciamento), quando diferente do nome de exibição.
+var official: String = ""
 
 var balance: int = 0
 ## Dívida de longo prazo (empréstimos, bancos, parcelamentos): paga juros e amortização toda semana,
@@ -61,6 +67,10 @@ var sponsors: Dictionary = {}
 ## Momento comercial (0,72..1,35): sobe com campanhas acima do esperado e títulos, cai com fracassos
 ## e rebaixamento. Multiplica a receita de patrocínio e o valor das propostas de patrocinadores.
 var commercial: float = 1.0
+## Força comercial além do que a reputação explica (Economia 2026: âncora na receita real).
+var rev_k: float = 1.0
+## Vida institucional (ClubEvents): dono, SAF, punições, portões fechados, falência, presidente.
+var affairs: Dictionary = {}
 
 var player_ids: Array = []
 var sheet: TeamSheet = null
@@ -73,6 +83,10 @@ var philosophy: String = ""
 ## DNA do clube: filosofia de elenco, mercado, escola tática, paciência, apetite, base, prestígio,
 ## ambição, era e linha do tempo ({} = gerar pelo perfil; ver ClubDNA).
 var dna: Dictionary = {}
+## Diário tático dos últimos jogos (TacticalScout): como jogou, gols por tipo de jogada, xG.
+var tac_log: Array = []
+## Evolução do time (TeamEvolution): trabalho do técnico, fase (confiança) e histórico de força.
+var evo: Dictionary = {}
 
 ## Memória: [{y, l (liga), p (posição), pts, w, dr, l, gf, ga}]
 var history: Array = []
@@ -80,6 +94,10 @@ var history: Array = []
 var titles: Dictionary = {}
 ## Elencos encerrados (clube do usuário): {"ano": [{id, n, pos, sh, a, g, as, r, o}]}
 var squad_archive: Dictionary = {}
+## Principais jogadores de cada temporada (todos os clubes; ver ClubRecords): {"ano": [[id, nome, pos, j, g, a, nota×100, ovr]]}
+var xi_hist: Dictionary = {}
+## Transferências antigas (as que já saíram do world.transfer_log), em Transfer.to_dict()
+var tr_hist: Array = []
 ## Ranking mundial: pontos das últimas temporadas (mais recente no fim) e posição ao fim da anterior.
 var rank_hist: Array = []
 var rank_prev: int = 0
@@ -89,6 +107,10 @@ var streak_wins: int = 0
 var streak_winless: int = 0
 var streak_losses: int = 0
 var results: String = "" # "VEDDV..." resultados recentes (mais recente no fim)
+## Recordes em jogos oficiais desde o início do save: ws/us/cr = maior sequência de vitórias, invicta
+## e sem sofrer gol [n, ano]; bw/bl = maior vitória e maior derrota [gols pró, contra, adversário, ano];
+## csr = sequência atual sem sofrer gol (entre temporadas).
+var marks: Dictionary = {}
 
 # Controle da IA: quando a formação foi escolhida (salvo para o jogo seguir idêntico após carregar)
 var ai_formation_key: int = -1
@@ -188,6 +210,27 @@ func push_result(r: String) -> void:
 			streak_losses += 1
 
 
+## Atualiza os recordes depois de um jogo oficial (push_result já foi chamado).
+func record_match(gf: int, ga: int, opp: String, year: int) -> void:
+	if streak_wins > int((marks.get("ws", [0, 0]) as Array)[0]):
+		marks["ws"] = [streak_wins, year]
+	if streak_unbeaten > int((marks.get("us", [0, 0]) as Array)[0]):
+		marks["us"] = [streak_unbeaten, year]
+	var run := int(marks.get("csr", 0)) + 1 if ga == 0 else 0
+	marks["csr"] = run
+	if run > int((marks.get("cr", [0, 0]) as Array)[0]):
+		marks["cr"] = [run, year]
+	var m := gf - ga
+	if m > 0:
+		var bw: Array = marks.get("bw", [])
+		if bw.is_empty() or m > int(bw[0]) - int(bw[1]) or (m == int(bw[0]) - int(bw[1]) and gf > int(bw[0])):
+			marks["bw"] = [gf, ga, opp, year]
+	elif m < 0:
+		var bl: Array = marks.get("bl", [])
+		if bl.is_empty() or -m > int(bl[1]) - int(bl[0]) or (-m == int(bl[1]) - int(bl[0]) and ga > int(bl[1])):
+			marks["bl"] = [gf, ga, opp, year]
+
+
 func reset_season_state() -> void:
 	ledger = {}
 	streak_unbeaten = 0
@@ -218,8 +261,8 @@ func to_dict() -> Dictionary:
 	return {
 		"id": id, "key": key, "name": name, "short": short_name, "abbr": abbr, "nick": nickname,
 		"city": city, "region": region, "founded": founded, "nat": nation, "lg": league_id, "tier": tier,
-		"cmk": snappedf(commercial, 0.001), "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
-		"rivals": rivals, "stadium": stadium, "cap": capacity,
+		"cmk": snappedf(commercial, 0.001), "rvk": snappedf(rev_k, 0.0001), "af": affairs, "rep": reputation, "fans": fan_base, "mood": fan_mood, "board": board_confidence,
+		"rivals": rivals, "stadium": stadium, "cap": capacity, "ven": venue, "off": official,
 		"bal": balance, "debt": debt, "tb": transfer_budget, "wb": wage_budget, "ledger": ledger,
 		"itv": income_tv, "isp": income_sponsor, "cup": cost_upkeep, "tm": ticket_mult, "trn": training,
 		"youth": youth_level, "fac": facilities, "arch": archetype,
@@ -227,9 +270,11 @@ func to_dict() -> Dictionary:
 		"players": player_ids,
 		"sheet": sheet.to_dict() if sheet != null else {},
 		"coh": cohesion, "ll": last_lineup, "tf": tactic_fam.duplicate(true), "ph": philosophy, "dna": dna.duplicate(true), "afk": ai_formation_key,
+		"tlog": tac_log.duplicate(true), "evo": evo.duplicate(true),
 		"hist": history, "titles": titles,
 		"su": streak_unbeaten, "sw": streak_wins, "swl": streak_winless, "sl": streak_losses, "res": results,
 		"rk": rank_hist, "rkp": rank_prev, "sqa": squad_archive,
+		"xh": xi_hist, "trh": tr_hist, "mk": marks,
 	}
 
 
@@ -254,6 +299,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.rivals = Array(d.get("rivals", []))
 	c.stadium = d.get("stadium", "")
 	c.capacity = int(d.get("cap", 10000))
+	c.venue = Dictionary(d.get("ven", {})).duplicate(true)
+	c.official = String(d.get("off", ""))
 	c.balance = int(d.get("bal", 0))
 	c.debt = int(d.get("debt", 0))
 	c.transfer_budget = int(d.get("tb", 0))
@@ -277,6 +324,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.crest = d.get("crest", {})
 	c.sponsors = d.get("spn", {})
 	c.commercial = float(d.get("cmk", 1.0))
+	c.rev_k = float(d.get("rvk", 1.0))
+	c.affairs = d.get("af", {})
 	c.ai_formation_key = int(d.get("afk", -1))
 	c.player_ids = Array(d.get("players", []))
 	var sd: Dictionary = d.get("sheet", {})
@@ -286,6 +335,8 @@ static func from_dict(d: Dictionary) -> Club:
 	c.tactic_fam = Dictionary(d.get("tf", {})).duplicate(true)
 	c.philosophy = String(d.get("ph", ""))
 	c.dna = Dictionary(d.get("dna", {})).duplicate(true)
+	c.tac_log = Array(d.get("tlog", [])).duplicate(true)
+	c.evo = Dictionary(d.get("evo", {})).duplicate(true)
 	c.history = Array(d.get("hist", []))
 	c.titles = d.get("titles", {})
 	c.streak_unbeaten = int(d.get("su", 0))
@@ -296,4 +347,7 @@ static func from_dict(d: Dictionary) -> Club:
 	c.rank_hist = Array(d.get("rk", []))
 	c.rank_prev = int(d.get("rkp", 0))
 	c.squad_archive = d.get("sqa", {})
+	c.xi_hist = d.get("xh", {})
+	c.tr_hist = Array(d.get("trh", []))
+	c.marks = Dictionary(d.get("mk", {}))
 	return c

@@ -16,6 +16,7 @@ const SCREENS := {
 	"season_end": "res://scenes/screens/season_end.tscn",
 	"load": "res://scenes/screens/load_game.tscn",
 	"news": "res://scenes/screens/news.tscn",
+	"achievements": "res://scenes/screens/achievements.tscn",
 	"social": "res://scenes/screens/social.tscn",
 	"inbox": "res://scenes/screens/inbox.tscn",
 	"settings": "res://scenes/screens/settings.tscn",
@@ -29,6 +30,9 @@ const SCREENS := {
 	"preseason": "res://scenes/screens/preseason.tscn",
 	"relations": "res://scenes/screens/relations.tscn",
 	"numbers": "res://scenes/screens/numbers.tscn",
+	"contracts": "res://scenes/screens/contracts.tscn",
+	"nextgen": "res://scenes/screens/nextgen.tscn",
+	"dressing_room": "res://scenes/screens/dressing_room.tscn",
 	"past_squads": "res://scenes/screens/past_squads.tscn",
 	"paywall": "res://scenes/screens/paywall.tscn",
 	"manager": "res://scenes/screens/manager.tscn",
@@ -37,21 +41,90 @@ const SCREENS := {
 	"compare": "res://scenes/screens/compare.tscn",
 	"coach": "res://scenes/screens/coach.tscn",
 	"coach_moves": "res://scenes/screens/coach_moves.tscn",
+	"jobs": "res://scenes/screens/jobs.tscn",
 	"xray": "res://scenes/screens/xray.tscn",
 	"rivalry": "res://scenes/screens/rivalry.tscn",
+	"reputation": "res://scenes/screens/reputation.tscn",
+	"team_stats": "res://scenes/screens/team_stats.tscn",
+	"league_stats": "res://scenes/screens/league_stats.tscn",
+	"club_records": "res://scenes/screens/club_records.tscn",
+	"tactics": "res://scenes/screens/prematch.tscn",
 }
 ## Telas que avançam a carreira: depois da temporada de demonstração, levam à compra.
 const GATED := ["prematch", "match", "preseason"]
-const TABS := ["hub", "squad", "market", "table", "club"]
+## As cinco áreas da carreira. Cada uma guarda a própria pilha: trocar de área e voltar
+## devolve a tela como o jogador deixou (filtros, busca, rolagem).
+const TABS := ["hub", "squad", "tactics", "market", "club"]
+## Telas que abrem já dentro de uma área quando chamadas por goto().
+const AREA_OF := {"table": "club"}
 
 var main: Node = null # scripts/ui/main.gd
-var stack: Array = [] # BaseScreen
+var area := "hub"
+var stacks: Dictionary = {} # área -> Array[BaseScreen]
+var stack: Array = [] # pilha da área atual (a mesma instância de stacks[area])
 var _modals: Array = []
 var _scene_cache: Dictionary = {}
 
 
 func register_main(m: Node) -> void:
 	main = m
+	if not GameManager.busy_changed.is_connected(_on_busy):
+		GameManager.busy_changed.connect(_on_busy)
+
+
+# ---------------------------------------------------------------------------
+# Tela congelada enquanto uma thread de trabalho mexe no mundo
+# ---------------------------------------------------------------------------
+
+var _frozen: BaseScreen = null
+var _stale := false # pediram para reconstruir a tela durante o trabalho: refaz no fim
+var _busy_modal: Control = null
+
+
+## Durante um trabalho em thread (fechar rodada, simular, fim de temporada, carregar) a tela atual
+## fica oculta e parada: nada dela lê o mundo (girar o aparelho, voltar ao app, animações) enquanto
+## a thread o altera. Reconstruções pedidas nesse meio tempo ficam para o fim.
+func _on_busy(on: bool) -> void:
+	if on:
+		var cur := current()
+		if is_instance_valid(cur) and _frozen != cur:
+			_frozen = cur
+			cur.visible = false
+			cur.process_mode = Node.PROCESS_MODE_DISABLED
+		if GameManager.work_label != "" and main != null and not is_instance_valid(_busy_modal):
+			var b := BusyNote.new()
+			b.text = GameManager.work_label
+			_busy_modal = show_modal(b, false, false)
+		return
+	if is_instance_valid(_busy_modal):
+		_modals.erase(_busy_modal)
+		_busy_modal.queue_free()
+	_busy_modal = null
+	if GameManager.in_batch():
+		return # "Simular": a tela segue congelada entre uma data e outra, até o fim do lote
+	var f := _frozen
+	_frozen = null
+	if is_instance_valid(f) and not f.is_queued_for_deletion():
+		f.process_mode = Node.PROCESS_MODE_INHERIT
+		if f == current():
+			f.visible = true
+			if _stale:
+				_stale = false
+				_apply_chrome(f)
+				f.refresh()
+	_stale = false
+
+
+## Reconstrói a tela atual agora, ou no fim do trabalho em thread se houver um em curso.
+func refresh_current() -> bool:
+	var cur := current()
+	if not is_instance_valid(cur) or cur.is_queued_for_deletion():
+		return false
+	if GameManager.is_busy():
+		_stale = true
+		return false
+	cur.refresh()
+	return true
 
 
 func current() -> BaseScreen:
@@ -70,13 +143,111 @@ func _instance(name: String, params: Dictionary) -> BaseScreen:
 	return node
 
 
-## Troca a pilha inteira pela nova tela (abas, menu).
+## Abre uma tela do zero. Área (Início, Elenco...): recomeça a pilha dela. Fora das áreas
+## (menu, boas-vindas, nova carreira): descarta todas as pilhas.
 func goto(name: String, params: Dictionary = {}) -> void:
 	close_all_modals()
-	for s in stack:
-		s.queue_free()
-	stack.clear()
+	if AREA_OF.has(name) and not stack.is_empty() and GameManager.has_career():
+		push(name, params) # tabela aberta do Início: volta para o Início
+		return
+	if name in TABS or AREA_OF.has(name):
+		var a: String = name if name in TABS else AREA_OF[name]
+		_hide_top()
+		_free_stack(a)
+		_set_area(a)
+		if name != a:
+			stack.append(_instance(a, {}))
+			main.screen_host.add_child(stack[0])
+			stack[0].visible = false
+			_show(_instance(name, params), 56.0)
+		else:
+			_show(_instance(name, params), 0.0)
+		return
+	for a in stacks.keys():
+		_free_stack(a)
+	_set_area("hub")
 	_show(_instance(name, params), 0.0)
+
+
+## Toque na barra de navegação: volta à área como ela estava. Tocar na área atual sobe
+## para a raiz dela (ou para o topo da lista, se já estiver na raiz).
+func switch_area(a: String) -> void:
+	close_all_modals()
+	if a == area:
+		if stack.size() > 1:
+			pop_to_root()
+		elif current() != null:
+			current().scroll_to_top()
+		return
+	_hide_top()
+	_set_area(a)
+	if stack.is_empty():
+		_show(_instance(a, {}), 0.0)
+		return
+	var top := current()
+	top.visible = true
+	top.process_mode = Node.PROCESS_MODE_INHERIT
+	_apply_chrome(top)
+	top.on_show()
+	_restore_scroll(top)
+	_animate_in(top, 0.0)
+
+
+func pop_to_root() -> void:
+	close_all_modals()
+	while stack.size() > 1:
+		var s: BaseScreen = stack.pop_back()
+		s.queue_free()
+	var root := current()
+	root.visible = true
+	_apply_chrome(root)
+	root.on_show()
+	_animate_in(root, -40.0)
+
+
+## A tela reconstrói o conteúdo ao reaparecer; a rolagem volta ao ponto em que o jogador estava.
+func _remember_scroll(s: BaseScreen) -> void:
+	var sc := s.scroll()
+	if sc != null:
+		s.set_meta(&"scroll_y", sc.scroll_vertical)
+
+
+func _restore_scroll(s: BaseScreen) -> void:
+	var y := int(s.get_meta(&"scroll_y", 0))
+	var sc := s.scroll()
+	if y <= 0 or sc == null:
+		return
+	for i in 2:
+		await get_tree().process_frame
+		if not is_instance_valid(sc):
+			return
+	sc.scroll_vertical = y
+
+
+func _set_area(a: String) -> void:
+	area = a
+	if not stacks.has(a):
+		stacks[a] = []
+	stack = stacks[a]
+
+
+func _hide_top() -> void:
+	var cur := current()
+	if cur != null:
+		_remember_scroll(cur)
+		cur.visible = false
+		cur.on_hide()
+		# Telas de outras áreas ficam guardadas, paradas.
+		cur.process_mode = Node.PROCESS_MODE_DISABLED
+
+
+func _free_stack(a: String) -> void:
+	for s in stacks.get(a, []):
+		if s == _frozen:
+			_frozen = null
+		s.queue_free()
+	if stacks.has(a):
+		stacks[a].clear()
 
 
 ## Empilha uma tela (perfil, negociação...). "Voltar" retorna à anterior.
@@ -84,6 +255,7 @@ func push(name: String, params: Dictionary = {}) -> void:
 	close_all_modals()
 	var cur := current()
 	if cur != null:
+		_remember_scroll(cur)
 		cur.visible = false
 		cur.on_hide()
 	_show(_instance(name, params), 56.0)
@@ -100,6 +272,10 @@ func replace(name: String, params: Dictionary = {}) -> void:
 
 
 func back() -> bool:
+	if GameManager.is_busy() or GameManager.in_batch():
+		# No meio de um trabalho em thread nada fecha; no "Simular", "voltar" é o "Parar".
+		SimDialog.request_stop()
+		return true
 	if not _modals.is_empty():
 		close_modal()
 		return true
@@ -109,8 +285,10 @@ func back() -> bool:
 	cur.queue_free()
 	var prev := current()
 	prev.visible = true
+	prev.process_mode = Node.PROCESS_MODE_INHERIT
 	_apply_chrome(prev)
 	prev.on_show()
+	_restore_scroll(prev)
 	_animate_in(prev, -40.0)
 	return true
 
@@ -140,12 +318,15 @@ func _apply_chrome(screen: BaseScreen) -> void:
 	if main == null:
 		return
 	main.apply_chrome(screen, stack.size() > 1)
-	AudioManager.screen_changed(screen.screen_name)
+	Sfx.screen_changed(screen.screen_name)
 
 
 ## Atualiza título/barras da tela atual (quando os dados mudam).
 func refresh_chrome() -> void:
 	var cur := current()
+	if GameManager.is_busy():
+		_stale = true
+		return
 	if cur != null:
 		_apply_chrome(cur)
 
@@ -153,11 +334,13 @@ func refresh_chrome() -> void:
 ## Aplica tema claro/escuro e tamanho da interface das Opções e redesenha tudo.
 func apply_look() -> void:
 	UIColors.set_light(AppSettings.wants_light())
-	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale]
+	get_tree().root.content_scale_factor = AppSettings.UI_SCALES[AppSettings.ui_scale] * UILayout.device_scale()
 	if main != null:
 		main.restyle()
 	var cur := current()
-	if cur != null:
+	if cur != null and GameManager.is_busy():
+		_stale = true
+	elif cur != null:
 		_apply_chrome(cur)
 		cur.refresh()
 	for m in _modals:
@@ -180,12 +363,11 @@ func handle_back() -> void:
 		return
 	if cur.screen_name == "menu":
 		get_tree().quit()
-	elif TABS.has(cur.screen_name) and cur.screen_name != "hub":
-		goto("hub")
+	elif area != "hub" and GameManager.has_career() and cur.screen_name == area:
+		switch_area("hub")
 	elif cur.screen_name == "hub":
 		confirm("Sair para o menu?", "Seu progresso é salvo automaticamente.", "Sair", func():
-			GameManager.close_career()
-			goto("menu"))
+			GameManager.close_career_async(func() -> void: goto("menu")))
 	elif cur.screen_name == "match":
 		toast("A partida está em andamento.")
 
@@ -206,8 +388,15 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var safe: Rect2 = main.safe_margins()
-	holder.add_theme_constant_override(&"margin_left", 0 if as_sheet else 28)
-	holder.add_theme_constant_override(&"margin_right", 0 if as_sheet else 28)
+	# Telas largas (paisagem, tablet): folha e diálogo ficam numa coluna central com largura de
+	# leitura, em vez de atravessar a tela inteira.
+	var side := 0 if as_sheet else 28
+	var vw := layer.get_viewport_rect().size.x
+	var cap := 820.0 if as_sheet else 680.0
+	if vw > cap + 2.0 * side:
+		side = int((vw - cap) / 2.0)
+	holder.add_theme_constant_override(&"margin_left", side)
+	holder.add_theme_constant_override(&"margin_right", side)
 	holder.add_theme_constant_override(&"margin_top", int(safe.position.y) + 60)
 	holder.add_theme_constant_override(&"margin_bottom", 0 if as_sheet else int(safe.size.y) + 60)
 	dim.add_child(holder)
@@ -222,13 +411,26 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 	panel.theme_type_variation = "Sheet" if as_sheet else "Dialog"
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	box.add_child(panel)
+	# Conteúdo com largura mínima fixa (pensada para telas maiores) nunca vaza para os lados.
+	var psb := panel.get_theme_stylebox(&"panel")
+	_clamp_width(content, vw - side * 2.0 - (psb.get_minimum_size().x if psb != null else 0.0), 2)
 	# Conteúdo maior que a tela rola dentro do modal em vez de vazar para fora dela.
 	var reserved := safe.position.y + 60.0 + (safe.size.y if as_sheet else safe.size.y + 60.0)
 	var body := _fit_to_screen(content, layer, panel, reserved)
 	if as_sheet:
 		var inner := MarginContainer.new()
 		inner.add_theme_constant_override(&"margin_bottom", int(safe.size.y))
-		inner.add_child(body)
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override(&"separation", 14)
+		# Alça da folha: o traço no topo que diz "isto desliza e fecha".
+		var grab := ColorRect.new()
+		grab.color = Color(UIColors.TEXT, 0.22)
+		grab.custom_minimum_size = Vector2(64, 6)
+		grab.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		grab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		col.add_child(grab)
+		col.add_child(body)
+		inner.add_child(col)
 		panel.add_child(inner)
 	else:
 		panel.add_child(body)
@@ -253,6 +455,16 @@ func show_modal(content: Control, as_sheet: bool = false, dismissable: bool = tr
 ## Limita a altura do conteúdo do modal ao espaço da tela. Se o conteúdo já é uma rolagem
 ## (listas longas), só limita sua altura; senão, embrulha num ScrollContainer que cresce
 ## junto com o conteúdo até o limite e então passa a rolar.
+func _clamp_width(n: Control, max_w: float, depth: int) -> void:
+	if n.custom_minimum_size.x > max_w:
+		n.custom_minimum_size.x = maxf(0.0, max_w)
+	if depth <= 0:
+		return
+	for ch in n.get_children():
+		if ch is Control:
+			_clamp_width(ch, max_w, depth - 1)
+
+
 func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, reserved: float) -> Control:
 	var max_h := func() -> float:
 		var style := panel.get_theme_stylebox(&"panel")
@@ -265,7 +477,8 @@ func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, res
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	sc.scroll_deadzone = 14
-	sc.follow_focus = true
+	# Não segue o foco: no toque, a folha rolava sob o dedo (main.gd rola no teclado).
+	sc.follow_focus = false
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(content)
 	var fit := func() -> void:
@@ -274,6 +487,50 @@ func _fit_to_screen(content: Control, layer: Control, panel: PanelContainer, res
 	content.minimum_size_changed.connect(fit)
 	sc.ready.connect(fit)
 	return sc
+
+
+## Popover: informação curta presa ao elemento tocado (o que é um atributo, a forma de um
+## jogador, a origem de um número). Não escurece a tela; tocar fora fecha. Um popover novo
+## fecha o anterior (nunca um sobre o outro).
+func popover(content: Control, anchor: Control, width: float = 460.0) -> Control:
+	if not _modals.is_empty() and bool(_modals.back().get_meta(&"popover", false)):
+		close_modal()
+	var layer: Control = main.modal_host
+	var catcher := Control.new()
+	catcher.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	catcher.set_meta(&"popover", true)
+	layer.add_child(catcher)
+	_modals.append(catcher)
+	catcher.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseButton and ev.pressed:
+			if _modals.has(catcher):
+				_modals.erase(catcher)
+				catcher.queue_free())
+	var panel := PanelContainer.new()
+	panel.theme_type_variation = "Popover"
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if content is Label:
+		(content as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	panel.add_child(content)
+	panel.custom_minimum_size.x = width
+	catcher.add_child(panel)
+	var place := func() -> void:
+		if not is_instance_valid(panel) or not is_instance_valid(anchor):
+			return
+		var vr := layer.get_viewport_rect().size
+		var a := anchor.get_global_rect()
+		var sz := panel.get_combined_minimum_size()
+		panel.size = sz
+		var x := clampf(a.position.x, 16.0, vr.x - sz.x - 16.0)
+		var y := a.end.y + 8.0
+		if y + sz.y > vr.y - main.safe_margins().size.y - 16.0:
+			y = a.position.y - sz.y - 8.0
+		panel.position = Vector2(x, maxf(main.safe_margins().position.y + 8.0, y))
+	place.call_deferred()
+	panel.minimum_size_changed.connect(place)
+	return catcher
 
 
 func close_modal() -> void:
@@ -296,24 +553,37 @@ func has_modal() -> bool:
 func dialog(title: String, body: String, buttons: Array) -> void:
 	var v := UIKit.vbox(18)
 	v.custom_minimum_size.x = 560
-	var t := UIKit.label(title, "Title", true)
+	var t := UIKit.label(title, "H2", true)
 	v.add_child(t)
 	if body != "":
-		v.add_child(UIKit.label(body, "", true))
-	var row := UIKit.vbox(10)
+		var bl := UIKit.label(body, "", true)
+		bl.add_theme_color_override(&"font_color", UIColors.MUTED)
+		v.add_child(bl)
+	# Dois botões lado a lado (confirmar e cancelar), com o principal à direita, como nos
+	# diálogos de console; mais de dois, empilhados.
+	var row: BoxContainer = UIKit.vbox(10)
+	if buttons.size() == 2:
+		row = UIKit.hbox(12)
+		buttons = [buttons[1], buttons[0]]
 	for b in buttons:
 		var cb: Callable = b.get("cb", Callable())
 		var btn := UIKit.button(b.get("text", "OK"), b.get("style", ""), func():
 			close_modal()
 			if cb.is_valid():
 				cb.call())
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(btn)
 	v.add_child(row)
 	show_modal(v)
 
 
 func confirm(title: String, body: String, yes_text: String, cb: Callable) -> void:
-	dialog(title, body, [{"text": yes_text, "style": "PrimaryButton", "cb": cb}, {"text": "Cancelar", "style": "GhostButton"}])
+	# Ações que destroem algo (apagar, demitir, vender...) ganham o botão vermelho.
+	var danger := false
+	for word in ["Apagar", "Excluir", "Remover", "Demitir", "Dispensar", "Rescindir", "Sair"]:
+		if yes_text.begins_with(word):
+			danger = true
+	dialog(title, body, [{"text": yes_text, "style": "DangerButton" if danger else "PrimaryButton", "cb": cb}, {"text": "Cancelar", "style": "GhostButton"}])
 
 
 func info(title: String, body: String) -> void:
@@ -331,10 +601,18 @@ func toast(text: String, color: Color = UIColors.TEXT) -> void:
 	var p := PanelContainer.new()
 	p.theme_type_variation = "Toast"
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Faixa de cor à esquerda diz o tipo do aviso (verde bom, vermelho ruim, neutro).
+	var row := UIKit.hbox(14)
+	var bar := ColorRect.new()
+	bar.color = color if color != UIColors.TEXT else UIColors.ACCENT
+	bar.custom_minimum_size = Vector2(5, 0)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(bar)
 	var l := UIKit.label(text, "", true)
 	l.add_theme_color_override(&"font_color", color)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	p.add_child(l)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(l)
+	p.add_child(row)
 	main.toast_host.add_child(p)
 	p.modulate.a = 0.0
 	var tw := p.create_tween()

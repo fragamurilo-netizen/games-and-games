@@ -1,7 +1,7 @@
 @tool
 class_name RatingBadge
 extends Control
-## Selo colorido com o overall (ou qualquer número curto). Cor pela faixa de qualidade.
+## Overall (ou qualquer número curto) na cor da faixa de qualidade.
 
 @export var value: int = 70:
 	set(v):
@@ -26,18 +26,21 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
+## Sem selo: o número (ou a etiqueta) na cor da faixa, alinhado como numa tabela. Um
+## ladrilho colorido em cada linha virava ruído; a cor sozinha já diz a faixa.
 func _draw() -> void:
-	var col := UIColors.ink(color_override) if color_override.a > 0.0 else Fmt.rating_color(value)
-	var r := Rect2(Vector2.ZERO, size)
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(col.r, col.g, col.b, 0.16)
-	box.border_color = col
-	box.set_border_width_all(2)
-	box.set_corner_radius_all(int(minf(size.y * 0.3, 12)))
-	draw_style_box(box, r)
-	var font := get_theme_font(&"font", &"Stat")
 	var txt := text_override if text_override != "" else str(value)
-	var w := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	var asc := font.get_ascent(font_size)
-	var desc := font.get_descent(font_size)
-	draw_string(font, Vector2((size.x - w) * 0.5, (size.y + asc - desc) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
+	var bgs := [UIColors.BG, UIColors.SURFACE, UIColors.SURFACE_2]
+	var fg: Color
+	var fs := font_size
+	var font := get_theme_font(&"font", &"StatBig")
+	if color_override.a > 0.0:
+		fg = UIColors.readable_on(Color(color_override, 1.0), bgs, 4.5)
+		font = get_theme_font(&"font", &"Caps")
+		fs = int(font_size * 0.9)
+	else:
+		fg = UIColors.readable_on(Fmt._rating_color(value), bgs, 3.0)
+	var w := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var asc := font.get_ascent(fs)
+	var desc := font.get_descent(fs)
+	draw_string(font, Vector2((size.x - w) * 0.5, (size.y + asc - desc) * 0.5), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, fg)

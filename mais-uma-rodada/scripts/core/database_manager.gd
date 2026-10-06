@@ -11,6 +11,8 @@ const PATHS := {
 	"continental": "res://data/world/continental.json",
 	"domestic": "res://data/world/domestic.json",
 	"international": "res://data/world/international.json",
+	"national_titles": "res://data/world/national_titles.json",
+	"national_kits": "res://data/world/national_kits.json",
 	"history": "res://data/world/history.json",
 	"foreign_clubs": "res://data/world/foreign_clubs.json",
 	"identity": "res://data/world/identity.json",
@@ -25,6 +27,8 @@ const PATHS := {
 	"news": "res://data/text/news.json",
 }
 const CLUBS_DIR := "res://data/world/clubs/"
+## Uniformes reais dos clubes autorais, por nação (titular, reserva, terceiro, goleiro e alternativos).
+const KITS_DIR := "res://data/world/kits/"
 
 const POS_BY_CODE := {
 	"GK": Pos.GK, "RB": Pos.RB, "CB": Pos.CB, "LB": Pos.LB, "DM": Pos.DM, "CM": Pos.CM,
@@ -46,6 +50,8 @@ static var _league_nations: Array[String] = []
 ## Ficam fora de league_ids/leagues_of_nation (não têm tabela, acesso nem prêmios).
 static var _pool_order: Array[String] = []
 static var _club_data: Dictionary = {} # nação -> Array de dicionários de clube
+static var _kits: Dictionary = {} # nação -> {chave do clube: {h, a, t, g, alt}}
+static var _club_by_key: Dictionary = {} # chave -> dicionário do clube (já normalizado)
 
 
 static func load_all() -> void:
@@ -60,11 +66,16 @@ static func load_all() -> void:
 	_prepare_cups()
 	_loaded = true
 	Overrides.apply_db()
+	DropIns.ensure() # índice das imagens soltas pronto antes das threads de geração
 
 
 ## Relê todos os dados (depois de ligar ou desligar um mod). Só sem carreira aberta.
 static func reload() -> void:
 	_cache.clear()
+	_kits.clear()
+	_club_by_key.clear()
+	Mods.clear_pack_cache()
+	DropIns.rescan()
 	_formations.clear()
 	_formation_order.clear()
 	_loaded = false
@@ -74,9 +85,16 @@ static func reload() -> void:
 static func _load_json(key: String) -> Variant:
 	if _cache.has(key):
 		return _cache[key]
-	var data: Variant = Mods.apply_to(PATHS[key], read_json(PATHS[key]))
+	var data: Variant = read_modded(PATHS[key])
 	_cache[key] = data if data != null else {}
 	return _cache[key]
+
+
+## Um arquivo de dados com os mods ligados aplicados. O arquivo pode existir só num mod
+## (ex.: clubes de um país novo): aí o jogo usa o do mod.
+static func read_modded(path: String) -> Variant:
+	var base: Variant = read_json(path) if FileAccess.file_exists(path) else null
+	return Mods.apply_to(path, base)
 
 
 static func read_json(path: String) -> Variant:
@@ -243,6 +261,30 @@ static func club_data(code: String) -> Array:
 	return _club_data.get(code, [])
 
 
+## Uniformes reais de um clube autoral ({h, a, t, g, alt}), ou {} para clubes gerados.
+## A nação vem da chave ("BRA_RNC" → data/world/kits/BRA.json); cada arquivo é lido uma vez.
+## Uniformes escritos no próprio clube ("kits" no arquivo de clubes) valem por cima do arquivo de
+## uniformes, e os do Editor (Overrides) por cima de tudo.
+static func club_kits(key: String) -> Dictionary:
+	var code := key.get_slice("_", 0)
+	if not _kits.has(code):
+		var d: Variant = read_modded(KITS_DIR + code + ".json")
+		_kits[code] = d.get("kits", {}) if d is Dictionary else {}
+	var out: Dictionary = _kits[code].get(key, {})
+	var ov: Variant = Overrides.club(key).get("kits", {})
+	if ov is Dictionary and not ov.is_empty():
+		out = out.duplicate(true)
+		for w in ov:
+			out[w] = ov[w]
+	return out
+
+
+## Dicionário de um clube dos dados pela chave ({} se não existir).
+static func club_entry(key: String) -> Dictionary:
+	load_all()
+	return _club_by_key.get(key, {})
+
+
 static func _prepare_leagues() -> void:
 	_league_by_id.clear()
 	_league_order.clear()
@@ -267,13 +309,25 @@ static func _prepare_leagues() -> void:
 
 static func _prepare_clubs() -> void:
 	_club_data.clear()
+	_club_by_key.clear()
 	for n in _league_nations:
-		var path := CLUBS_DIR + n + ".json"
-		if not FileAccess.file_exists(path):
-			_club_data[n] = []
-			continue
-		var d: Variant = Mods.apply_to(path, read_json(path))
-		_club_data[n] = d.get("clubs", []) if d is Dictionary else []
+		var d: Variant = read_modded(CLUBS_DIR + n + ".json")
+		var list: Array = d.get("clubs", []) if d is Dictionary else []
+		for cd in list:
+			if cd is Dictionary:
+				LicensedData.normalize_club(cd)
+				_club_by_key[String(cd.get("key", ""))] = cd
+		_club_data[n] = list.filter(func(cd): return cd is Dictionary)
+	# Uniformes reais já lidos aqui (a geração do mundo roda em outra thread).
+	_kits.clear()
+	for n in _league_nations:
+		club_kits(n + "_")
+		for cd in _club_data[n]:
+			if cd.get("kits", null) is Dictionary:
+				var k := String(cd.get("key", ""))
+				var cur: Dictionary = Dictionary(_kits[n].get(k, {})).duplicate(true)
+				cur.merge(cd["kits"], true)
+				_kits[n][k] = cur
 
 
 # ---------------------------------------------------------------------------
@@ -398,9 +452,77 @@ static func _custom_formation(fname: String) -> Dictionary:
 			for k in ["def", "mid", "att", "wide"]:
 				s[k] = float(role[k])
 		slots.append(s)
+	_spread_custom(slots, ov)
 	var f := {"name": fname, "desc": "Variação personalizada do %s." % base, "slots": slots}
 	_custom_cache[fname] = f
 	return f
+
+
+## Distância mínima entre duas vagas no campinho (em fração da largura e do comprimento):
+## abaixo disso a camisa e o nome de uma cobrem os da outra.
+const SLOT_MIN_DX := 0.2
+const SLOT_MIN_DY := 0.11
+const CENTRAL_CODES := ["CB", "DM", "CM", "AM", "ST"]
+
+
+## Arruma as vagas de uma formação personalizada para ninguém ficar em cima de ninguém:
+## 1) posições repetidas (dois PD, três MC...) ficam na mesma linha, espaçadas por igual
+##    (centrais) ou uma por dentro da outra (laterais e pontas);
+## 2) vagas que ainda se encostam são afastadas para os lados (e, se faltar campo, na altura).
+static func _spread_custom(slots: Array, ov: Dictionary) -> void:
+	var codes: Array = Pos.CODES_I18N["en"]
+	var groups := {}
+	for i in range(1, slots.size()):
+		var code: String = codes[int(slots[i]["pos"])]
+		if not groups.has(code):
+			groups[code] = []
+		groups[code].append(i)
+	for code in groups:
+		var idx: Array = groups[code]
+		if idx.size() < 2 or not idx.any(func(i): return ov.has(i)):
+			continue
+		var y := 0.0
+		for i in idx:
+			y += float(slots[i]["y"])
+		y /= idx.size()
+		var n := idx.size()
+		if code in CENTRAL_CODES:
+			idx.sort_custom(func(a, b): return float(slots[a]["x"]) < float(slots[b]["x"]) or (float(slots[a]["x"]) == float(slots[b]["x"]) and a < b))
+			var gap := minf(0.24, 0.72 / (n - 1))
+			for k in n:
+				slots[idx[k]]["x"] = 0.5 + (k - (n - 1) * 0.5) * gap
+				slots[idx[k]]["y"] = y
+		else:
+			# Lateral/ponta repetido: o primeiro fica no corredor, os outros entram em direção ao meio.
+			var edge: float = SIDE_X.get(code, 0.84)
+			var inward := -1.0 if edge > 0.5 else 1.0
+			idx.sort_custom(func(a, b): return absf(float(slots[a]["x"]) - edge) < absf(float(slots[b]["x"]) - edge) or (absf(float(slots[a]["x"]) - edge) == absf(float(slots[b]["x"]) - edge) and a < b))
+			for k in n:
+				slots[idx[k]]["x"] = edge + inward * k * SLOT_MIN_DX
+				slots[idx[k]]["y"] = y
+	for _it in 16:
+		var moved := false
+		for i in range(1, slots.size()):
+			for j in range(i + 1, slots.size()):
+				var a: Dictionary = slots[i]
+				var b: Dictionary = slots[j]
+				var dx := float(b["x"]) - float(a["x"])
+				var dy := float(b["y"]) - float(a["y"])
+				if absf(dx) >= SLOT_MIN_DX - 0.001 or absf(dy) >= SLOT_MIN_DY - 0.001:
+					continue
+				moved = true
+				var sgn := 1.0 if dx > 0.0 or (dx == 0.0 and float(a["x"]) <= 0.5) else -1.0
+				var push := (SLOT_MIN_DX - absf(dx)) * 0.5 + 0.002
+				var ax := clampf(float(a["x"]) - sgn * push, 0.08, 0.92)
+				var bx := clampf(float(b["x"]) + sgn * push, 0.08, 0.92)
+				if absf(bx - ax) < SLOT_MIN_DX - 0.01:
+					# Encostou na lateral: o espaço que falta vem da altura.
+					var sy := 1.0 if dy >= 0.0 else -1.0
+					b["y"] = clampf(float(a["y"]) + sy * SLOT_MIN_DY, 0.12, 0.74)
+				a["x"] = ax
+				b["x"] = bx
+		if not moved:
+			break
 
 
 static func formation_names() -> Array[String]:
