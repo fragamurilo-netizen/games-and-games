@@ -294,7 +294,13 @@
 			"stadium": "Hitachidai Stadium",
 			"capacity": 15100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#111111",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -315,7 +321,13 @@
 			"stadium": "Toyota City Stadium",
 			"capacity": 44000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#F5A12D",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -336,7 +348,13 @@
 			"stadium": "Best Denki Stadium",
 			"capacity": 21500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bee",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -357,7 +375,13 @@
 			"stadium": "Niigata Stadium",
 			"capacity": 42300,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -378,7 +402,12 @@
 			"stadium": "Lemon Gas Stadium",
 			"capacity": 15200,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "waves",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -399,7 +428,14 @@
 			"stadium": "Tokyo Stadium",
 			"capacity": 49000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "V",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -420,7 +456,13 @@
 			"stadium": "Sanga Stadium by Kyocera",
 			"capacity": 21600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -441,7 +483,15 @@
 			"stadium": "NHK Spring Mitsuzawa",
 			"capacity": 15400,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ship",
+				"c1": "#0055A4",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -462,7 +512,13 @@
 			"stadium": "City Light Stadium",
 			"capacity": 15500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "rooster",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -483,7 +539,13 @@
 			"stadium": "IAI Stadium Nihondaira",
 			"capacity": 19600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

@@ -183,7 +183,13 @@
 			"stadium": "Stadion Allmend",
 			"capacity": 16800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCL",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -204,7 +210,13 @@
 			"stadium": "Schützenwiese",
 			"capacity": 8500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -225,7 +237,13 @@
 			"stadium": "Letzigrund",
 			"capacity": 26100,
 			"kit": "halves",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "diag",
+				"symbol": "letter",
+				"initials": "GC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -246,7 +264,15 @@
 			"stadium": "Stade de Tourbillon",
 			"capacity": 14300,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "FCS",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -267,7 +293,13 @@
 			"stadium": "Stade de la Tuilière",
 			"capacity": 12500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "LS",
+				"text": "LAUSANNE-SPORT"
+			},
 			"rivals": []
 		},
 		{
@@ -288,7 +320,13 @@
 			"stadium": "Stade Municipal",
 			"capacity": 6600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "YS",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		}
 	]

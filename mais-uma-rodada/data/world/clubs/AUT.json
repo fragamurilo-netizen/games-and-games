@@ -186,7 +186,13 @@
 			"stadium": "Profertil Arena",
 			"capacity": 4600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "TSV",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -207,7 +213,13 @@
 			"stadium": "Hofmann Personal Stadion",
 			"capacity": 5600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "BW",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -228,7 +240,13 @@
 			"stadium": "Cashpoint Arena",
 			"capacity": 8500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "SCR",
+				"text": "SCR ALTACH"
+			},
 			"rivals": []
 		},
 		{
@@ -249,7 +267,13 @@
 			"stadium": "28 Black Arena",
 			"capacity": 32000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "dragon",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -270,7 +294,13 @@
 			"stadium": "Tivoli Stadion",
 			"capacity": 16000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -291,7 +321,15 @@
 			"stadium": "Stadion Graz-Liebenau",
 			"capacity": 16000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "GAK",
+				"sc": "#FFFFFF",
+				"border": "double",
+				"ribbon": "1902"
+			},
 			"rivals": []
 		}
 	]

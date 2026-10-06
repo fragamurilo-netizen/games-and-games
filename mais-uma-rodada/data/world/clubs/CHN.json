@@ -228,7 +228,13 @@
 			"stadium": "Changchun Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -249,7 +255,13 @@
 			"stadium": "Zhengzhou Hanghai Stadium",
 			"capacity": 29800,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -270,7 +282,12 @@
 			"stadium": "Qingdao Youth Football Stadium",
 			"capacity": 50000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "waves",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -291,7 +308,13 @@
 			"stadium": "Qingdao Youth Football Stadium",
 			"capacity": 50000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "bull",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -312,7 +335,13 @@
 			"stadium": "Meixian Tsang Hin-chi Stadium",
 			"capacity": 20000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -333,7 +362,12 @@
 			"stadium": "Shenzhen Universiade Stadium",
 			"capacity": 60000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "bird",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -354,7 +388,13 @@
 			"stadium": "Dalian Suoyuwan Stadium",
 			"capacity": 63000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -375,7 +415,13 @@
 			"stadium": "Yuxi Plateau Sports Center",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

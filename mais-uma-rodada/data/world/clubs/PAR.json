@@ -292,7 +292,13 @@
 			"stadium": "Estadio Ka'arendy",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "GC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -313,7 +319,13 @@
 			"stadium": "Estadio Ricardo Gregor",
 			"capacity": 3000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "R",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		}
 	]

@@ -345,7 +345,13 @@
 			"stadium": "Parque Capurro",
 			"capacity": 5500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -366,7 +372,13 @@
 			"stadium": "Estadio Domingo Burgueño",
 			"capacity": 22000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "DM",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -387,7 +399,15 @@
 			"stadium": "Parque Federico Omar Saroldi",
 			"capacity": 6000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "RP",
+				"c1": "#FFFFFF",
+				"c2": "#E30613",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -408,7 +428,15 @@
 			"stadium": "Parque Artigas",
 			"capacity": 8000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "J",
+				"c1": "#FFFFFF",
+				"c2": "#111111",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		}
 	]

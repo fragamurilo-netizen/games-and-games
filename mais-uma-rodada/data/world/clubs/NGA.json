@@ -173,7 +173,13 @@
 			"stadium": "New Jos Stadium",
 			"capacity": 40000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "mountain",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -194,7 +200,14 @@
 			"stadium": "Kwara State Stadium",
 			"capacity": 18000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "ball",
+				"sc": "#FFFFFF",
+				"chief_text": "KWARA",
+				"cc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -215,7 +228,13 @@
 			"stadium": "Godswill Akpabio Stadium",
 			"capacity": 30000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "AU",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -236,7 +255,13 @@
 			"stadium": "Aper Aku Stadium",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "stars:3",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -257,7 +282,14 @@
 			"stadium": "Samuel Ogbemudia Stadium",
 			"capacity": 12000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "BI",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -278,7 +310,15 @@
 			"stadium": "Umuahia Township Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "warrior",
+				"c1": "#00843D",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -299,7 +339,16 @@
 			"stadium": "Bako Kontagora Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "NT",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -320,7 +369,13 @@
 			"stadium": "Muhammadu Dikko Stadium",
 			"capacity": 35000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -341,7 +396,13 @@
 			"stadium": "Samson Siasia Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "waves",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -362,7 +423,13 @@
 			"stadium": "Lafia City Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -383,7 +450,13 @@
 			"stadium": "El-Kanemi Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "swords",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -404,7 +477,13 @@
 			"stadium": "Akure Township Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#0055A4",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -425,7 +504,13 @@
 			"stadium": "Dan Anyiam Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "heart",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -446,7 +531,13 @@
 			"stadium": "Mobolaji Johnson Arena",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "modern",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "IC",
+				"sc": "#FFD100"
+			},
 			"rivals": []
 		}
 	]

@@ -182,7 +182,13 @@
 			"stadium": "Stade du 7 Mars",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "crescent",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -203,7 +209,13 @@
 			"stadium": "Stade Chedly Zouiten",
 			"capacity": 18000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "JSO",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -224,7 +236,13 @@
 			"stadium": "Stade Abdelaziz Chtioui",
 			"capacity": 6500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#0055A4",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -245,7 +263,13 @@
 			"stadium": "Stade 15 Octobre",
 			"capacity": 20000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "CAB",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -266,7 +290,13 @@
 			"stadium": "Stade Boujemaa Kmiti",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "OB",
+				"text": "OLYMPIQUE BEJA"
+			},
 			"rivals": []
 		},
 		{
@@ -287,7 +317,13 @@
 			"stadium": "Stade de Métlaoui",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -308,7 +344,13 @@
 			"stadium": "Stade Nejib Khattab",
 			"capacity": 6000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "crescent",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -329,7 +371,13 @@
 			"stadium": "Stade Municipal de Gafsa",
 			"capacity": 7000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "EGS",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -350,7 +398,13 @@
 			"stadium": "Stade Municipal de Soliman",
 			"capacity": 4000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "AS",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -371,7 +425,13 @@
 			"stadium": "Stade Abdessalem Kazouz",
 			"capacity": 7000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

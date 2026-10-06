@@ -285,7 +285,13 @@
 			"stadium": "Estadio José Encarnación Romero",
 			"capacity": 35000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bolt",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -306,7 +312,12 @@
 			"stadium": "Estadio General José Antonio Páez",
 			"capacity": 18000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "caravel",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -327,7 +338,13 @@
 			"stadium": "Estadio Ricardo Tulio Maya",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "waves",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -348,7 +365,13 @@
 			"stadium": "Estadio José Antonio Anzoátegui",
 			"capacity": 37000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "hoops:2",
+				"symbol": "letter",
+				"initials": "DA",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		}
 	]
