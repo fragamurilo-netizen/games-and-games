@@ -186,7 +186,13 @@
 			"stadium": "Gradski stadion",
 			"capacity": 12000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "NP",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -207,7 +213,13 @@
 			"stadium": "SC Mladost",
 			"capacity": 3000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "gear",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -228,7 +240,13 @@
 			"stadium": "Subotica City",
 			"capacity": 13000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "warrior",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -249,7 +267,13 @@
 			"stadium": "Mladost Stadium",
 			"capacity": 8000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "ML",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -270,7 +294,15 @@
 			"stadium": "IMT Arena",
 			"capacity": 2000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "gear",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -291,7 +323,13 @@
 			"stadium": "Omladinski",
 			"capacity": 13900,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "OFK",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -312,7 +350,13 @@
 			"stadium": "Mladost Stadium",
 			"capacity": 10300,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "tower",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -333,7 +377,13 @@
 			"stadium": "Gradski stadion",
 			"capacity": 3000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "J",
+				"text": "JEDINSTVO UB"
+			},
 			"rivals": []
 		},
 		{
@@ -354,7 +404,13 @@
 			"stadium": "Tekstilac Stadium",
 			"capacity": 2000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:3",
+				"symbol": "letter",
+				"initials": "T",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -375,7 +431,13 @@
 			"stadium": "Čika Dača",
 			"capacity": 15100,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "hammers",
+				"sc": "#FFFFFF",
+				"ribbon": "1923"
+			},
 			"rivals": []
 		}
 	]

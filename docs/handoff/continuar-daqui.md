@@ -4,6 +4,8 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
+- **Junção de 06/10 (madrugada): `claude/hopeful-newton-8avbo4`** = o ramo da carreira de técnico/base/idiomas + os quatro ramos que partiram dele em paralelo: escudos (`claude/escudos-caprichados-i5l8y5`), trilha sonora (`claude/project-thread-y3px1u`), retratos estilo FM e nomes por família (`claude/project-thread-fxyjyl`) e uniformes anatômicos (`claude/project-thread-1j6fph`). Seções de cada um abaixo.
+- **Escudos (06/10, fim da noite): `claude/escudos-caprichados-i5l8y5`** = `claude/hopeful-newton-8avbo4` + escudos e logos (213 escudos desenhados, coroas nas copas, escudo novo do Barcelona, logos novos da Premier League e da Championship). APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk`. Detalhes em "Escudos e logos de competição" abaixo.
 - **Trilha sonora (06/10, noite): ramo `claude/project-thread-y3px1u`**, a partir de `claude/hopeful-newton-8avbo4`. Só mexe em áudio, então junta fácil com os outros ramos. APK: `builds/MaisUmaRodada-1.0.0-trilha-sonora-2026-10-06-debug.apk`.
   - **Sons que não paravam:** "Continuar" depois do jogo trocava a tela sem `on_hide` e a torcida seguia nos resultados (agora `match_screen._exit_tree` e `AudioManager.screen_changed` param tudo ao sair da partida); o timer do apito final não derruba mais a torcida da partida seguinte (`_crowd_gen`); canto gravado e apitos param junto; pausar a partida vira murmúrio; voltar de um perfil aberto no meio do jogo retoma a torcida (`crowd_resume`); desligar os efeitos nas Opções corta tudo; app em segundo plano pausa todos os players.
   - **Arquivos novos em `assets/audio/`** (músicas OGG, efeitos WAV/OGG), todos gerados por `tools/audio/gerar_trilha.py` (numpy + scipy + ffmpeg; notas escritas à mão, timbres sintetizados, nada de terceiros). Para mudar um som, edite `tools/audio/musica.py` ou `efeitos.py` e rode `python3 tools/audio/gerar_trilha.py [musica|efeitos|nome]` dentro de `mais-uma-rodada/`. Se um arquivo faltar, o jogo cai na síntese antiga.
@@ -11,7 +13,7 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
   - Efeitos: clique, aba, voltar, interruptor, avisos (bom/ruim/neutro, no toast), assinatura, conquista, vitória, derrota, título, apitos (lance, cartão, intervalo com 2 silvos, fim com 3), "uuuh", trave, explosão da torcida no gol (volume pela torcida de quem marcou), lamento da outra, vaia, aplausos e o ambiente de estádio em loop por baixo dos cantos do `CrowdSynth`.
   - Falta: ouvir no celular e ajustar volumes; os cantos por clube continuam do `CrowdSynth`.
 
-- **Ramo mais novo (06/10, noite): `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
+- **Ramo de 06/10 à noite: `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
 
 ### Mundo vivo, carreira de técnico e base profunda (06/10, ramo `claude/hopeful-newton-8avbo4`)
 
@@ -107,11 +109,21 @@ Feito:
 - **Escudos:** voltou o que se perdeu na junção de 27/09 (`2742294`): placa atrás do monograma em campo listrado (`plate`), filete interno, contorno escuro por fora, `canton`, `field: pale_cross`, `tc`, `hoops:2` com uma faixa só. Saíram o brilho e o degradê (DESIGN.md: sem brilho).
 - Os louros agora ficam por baixo da faixa com o nome (antes as folhas comiam as letras).
 
+- **213 clubes que saíam com escudo sorteado a cada carreira** (Austrália, Áustria, Bélgica, Bolívia, Chile, China, Colômbia, Croácia, Tchéquia, Dinamarca, Equador, Egito, Grécia, Japão, Coreia, Marrocos, Nigéria, Paraguai, Peru, Catar, África do Sul, Escócia, Senegal, Sérvia, Suíça, Tunísia, Emirados, Ucrânia, Uruguai e Venezuela) ganharam escudo fixo inspirado no de verdade (leão do Brisbane, touro do Macarthur, galhada do Ross County, âncora do Chornomorets, farol de La Serena...).
+- **Os 98 escudos de 27/09 voltaram** (os 13 refeitos depois ficaram como estavam). `ClubGenerator.upgrade_crests` agora atualiza, ao carregar, o escudo de clube real que não foi editado: carreiras em andamento recebem os escudos novos; escudo editado no editor (`"edited"`), com imagem de mod ou com override fica como está.
+- Logos: copas do rei, do trono e do emir com coroa; estrela das supercopas dentro do escudo; Coppa Italia e Coupe de France com a faixa da bandeira.
+- Imagens antes/depois em `/mnt/project-files/escudos-caprichados/` (`escudos-antes-depois-destaques.png`, `escudos-novos-213-*.png`, `escudos-27-09-de-volta-*.png`, `logos-antes-depois-*.png`).
+- APK: `builds/MaisUmaRodada-1.0.0-escudos-logos-2026-10-06-debug.apk` (com tudo do ramo das bolinhas até a mesa de negociação).
+- Pedido de 06/10 à noite: **escudo novo do Barcelona** (chapado, fios escuros entre as partes, cruz centrada, borda fina escura `bc`, bola antiga sem brilho; desenho no campo/formato `barca` do `crest_view.gd`) e **logos novos da Premier League** (leão coroado de perfil, `lion_crowned`, roxo sobre branco) **e da Championship** (leão passante dourado, `lion_passant`, escudo azul-marinho). Os dois leões estão no editor de escudos. APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk` (feito depois de juntar `claude/hopeful-newton-8avbo4`).
+
+Estado (06/10, 20:15): tudo commitado e enviado em `claude/escudos-caprichados-i5l8y5`, que agora é `claude/hopeful-newton-8avbo4` + escudos e logos. PR #73 (rascunho) aponta para `claude/hopeful-newton-8avbo4`; não juntar sem o ok do dono. Último APK: `builds/MaisUmaRodada-1.0.0-barcelona-premier-2026-10-06-debug.apk`.
+
 Falta (nesta ordem):
-1. Devolver os escudos de 27/09 que a junção trocou (98 clubes; lista: diferença entre `d3b4bed` e o ramo, menos os 13 refeitos depois: Grêmio, Flamengo, São Paulo, Internacional, Athletico, Barcelona, Liverpool, Chelsea, Tottenham, Man United, Ajax, Dortmund e Gladbach).
-2. Mais capricho nos escudos de monograma genérico (muitos clubes menores só têm letras).
-3. Folha antes/depois em `/mnt/project-files/escudos-caprichados/` e APK de teste em `builds/`.
-4. PR para o dono olhar (perguntar antes de juntar).
+1. Escudos de monograma de clubes menores (Brasil, Portugal, Alemanha...) continuam só com letras; na maioria é assim no clube de verdade, mas dá para caprichar em alguns (estrelas, faixa com o ano, listras, símbolo da cidade). A lista sai com o script de `--keys` do `crest_sheet` sobre os clubes com `"field": "plain"` e `"symbol": "letter"` (246 clubes).
+2. Barcelona SC (Equador) ainda é só "BSC" em escudo amarelo; o dono pediu "o Barcelona" e foi feito o espanhol.
+3. O dono olhar o PR #73 e decidir a junção.
+
+Para seguir: partir deste ramo, desenhar com `tools/crest_sheet.gd` (folhas) e conferir com `tools/design_shots.gd -- --only=hub@1,table@1 --club=<nome>`. Para gerar APK num contêiner novo (sem modelos de exportação): o .tpz do Godot 4.7.2 tem 1,28 GB; basta tirar dele `templates/android_debug.apk`, `android_release.apk` e `version.txt` (por requisição Range no diretório central do zip, ou baixando tudo) para `~/.local/share/godot/export_templates/4.7.2.stable/`, e pôr o uber-apk-signer 1.3.0 em `/opt/apk/signer.jar` (a chave de depuração embutida dá o mesmo certificado, SHA-256 1e08a903…). `builds/*.apk` está no .gitignore: `git add -f`.
 
 Como conferir:
 ```

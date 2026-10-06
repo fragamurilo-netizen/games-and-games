@@ -67,8 +67,8 @@ FLAGS = {
 logos = {}
 
 # ---------------------------------------------------------------------------------------- Ligas
-logos["ENG1"] = L("round", "#3D195B", "lion_head", "#FFFFFF", sym_top="crown", accent="#FFFFFF", ring_c="#00FF85", wordmark="PREMIER LEAGUE")
-logos["ENG2"] = L("round", "#0B1C3F", "lion", "#D4AF37", ring_c="#D4AF37", wordmark="CHAMPIONSHIP")
+logos["ENG1"] = L("round", "#FFFFFF", "lion_crowned", "#37003C", c2="#37003C", ring_c="#37003C", wordmark="PREMIER LEAGUE")
+logos["ENG2"] = L("badge", "#0B1C3F", "lion_passant", "#D4AF37", ring_c="#D4AF37", sym_scale=1.15, wordmark="CHAMPIONSHIP")
 logos["ESP1"] = L("tile", "#FF4B44", "ball_swirl", "#FFFFFF", wordmark="LALIGA")
 logos["ESP2"] = L("tile", "#1B1B1B", "ball_swirl", "#00D0FF", num="2", accent="#00D0FF", wordmark="LALIGA")
 logos["GER1"] = L("tile", "#D20515", "player_kick", "#FFFFFF", wordmark="BUNDESLIGA")
@@ -103,10 +103,10 @@ logos["COL1"] = L("badge", "#003893", "ball", "#FFFFFF", flag=FLAGS["COL"], word
 logos["CHI1"] = L("round", "#0039A6", "star", "#FFFFFF", ring_c="#D52B1E", wordmark="PRIMERA")
 logos["ECU1"] = L("badge", "#034EA2", "mountain", "#FFFFFF", flag=FLAGS["ECU"], wordmark="LIGAPRO")
 logos["PER1"] = L("badge", "#D91023", "ball", "#FFFFFF", flag=["#FFFFFF", "#D91023", "#FFFFFF"], wordmark="LIGA 1")
-logos["PAR1"] = L("round", "#0038A8", "star", "#FFFFFF", ring_c="#D52B1E", wordmark="APF")
+logos["PAR1"] = L("badge", "#0B2A5B", "star", "#FFFFFF", flag=FLAGS["PAR"], wordmark="APF")
 logos["BOL1"] = L("badge", "#007934", "mountain", "#F9E300", flag=FLAGS["BOL"], wordmark="PROFESIONAL")
 logos["VEN1"] = L("tile", "#CF142B", "star", "#FFCC00", wordmark="LIGA FUTVE")
-logos["MEX1"] = L("round", "#0A2240", "eagle", "#C5A572", ring_c="#C5A572", wordmark="LIGA MX")
+logos["MEX1"] = L("round", "#0A2240", "ball", "#FFFFFF", ring_c="#C5A572", wordmark="LIGA MX")
 logos["USA1"] = L("badge", "#001F5B", "stars:3", "#FFFFFF", field="sash", fc="#E03A3E", wordmark="MLS")
 logos["EGY1"] = L("round", "#CE1126", "eagle", GOLD, ring_c="#1B1B1B", wordmark="EPL")
 logos["MAR1"] = L("round", "#C1272D", "star", "#FFFFFF", ring_c="#006233", wordmark="BOTOLA")
@@ -188,8 +188,16 @@ for i, (cid, cfg) in enumerate(dom.items()):
 
 # FA Cup e Copa do Rei com o nome conhecido; Copa do Brasil com o dourado da CBF
 logos["FAC"]["ring_c"] = "#FFFFFF"
+# Copas do rei, do trono e do emir: coroa em cima da taça
+for cid in ("CDR", "KSC", "CDT", "EMC"):
+    logos[cid].update({"sym_top": "crown", "accent": logos[cid]["sc"]})
+# Coppa Italia e Coupe de France: placa com a faixa da bandeira, como a marca de verdade
+logos["CIT"].update({"shape": "tile", "flag": FLAGS["ITA"]})
+logos["CIT"].pop("ring_c", None)
+logos["CDF"].update({"shape": "tile", "flag": FLAGS["FRA"]})
+logos["CDF"].pop("ring_c", None)
 logos["CDB"].update({"sc": GOLD, "ring_c": "#F2C230"})
-logos["CSH"] = L("round", "#1B1B1B", "trophy_plate", SILVER, ring_c="#E4002B", wordmark="COMMUNITY SHIELD")
+logos["CSH"] = L("badge", "#C8102E", "trophy_plate", SILVER, wordmark="COMMUNITY SHIELD")
 logos["USC"] = L("round", "#0B1F4B", "trophy_ears", SILVER, sym_top="star", accent=GOLD, ring_c=GOLD, wordmark="SUPERCOPA")
 logos["REC"] = L("round", "#0A0A0A", "trophy_tall", "#E3B23C", sym_top="star", accent="#E3B23C", ring_c="#E3B23C", wordmark="RECOPA")
 logos["CPC"] = L("round", "#1F3A93", "trophy", GOLD, sym_top="star", accent=GOLD, ring_c=GOLD, wordmark="CAMPEONES CUP")

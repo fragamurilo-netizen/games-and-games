@@ -186,7 +186,13 @@
 			"stadium": "Suncorp Stadium",
 			"capacity": 52500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "lion_head",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -207,7 +213,13 @@
 			"stadium": "HBF Park",
 			"capacity": 20500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "sunrise",
+				"sc": "#F07F13",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -228,7 +240,13 @@
 			"stadium": "McDonald Jones Stadium",
 			"capacity": 33000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "wings",
+				"sc": "#FFFFFF",
+				"text": "NEWCASTLE JETS"
+			},
 			"rivals": []
 		},
 		{
@@ -249,7 +267,13 @@
 			"stadium": "Campbelltown Stadium",
 			"capacity": 17500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "bull",
+				"sc": "#C5A572",
+				"border": "gold"
+			},
 			"rivals": []
 		},
 		{
@@ -270,7 +294,15 @@
 			"stadium": "Sky Stadium",
 			"capacity": 34500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -291,7 +323,15 @@
 			"stadium": "Go Media Stadium",
 			"capacity": 25000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "southern_cross",
+				"c1": "#0D2A5C",
+				"c2": "#FFFFFF",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

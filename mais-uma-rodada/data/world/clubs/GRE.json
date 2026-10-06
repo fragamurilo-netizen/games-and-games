@@ -193,7 +193,12 @@
 			"stadium": "Panthessaliko",
 			"capacity": 22700,
 			"kit": "halves",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "halves",
+				"symbol": "ship",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -245,7 +250,13 @@
 			"stadium": "Peristeri Stadium",
 			"capacity": 9000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "warrior",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -266,7 +277,15 @@
 			"stadium": "Panetolikos Stadium",
 			"capacity": 7300,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#0055A4",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -287,7 +306,13 @@
 			"stadium": "Lamia Municipal",
 			"capacity": 5500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "torch",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -308,7 +333,12 @@
 			"stadium": "Serres Municipal",
 			"capacity": 9500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "halves",
+				"symbol": "lion",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -329,7 +359,13 @@
 			"stadium": "Levadia Municipal",
 			"capacity": 6000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "L",
+				"text": "LEVADIAKOS"
+			},
 			"rivals": []
 		},
 		{
@@ -350,7 +386,15 @@
 			"stadium": "Zirinio",
 			"capacity": 3500,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "owl",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "thick"
+			},
 			"rivals": []
 		}
 	]

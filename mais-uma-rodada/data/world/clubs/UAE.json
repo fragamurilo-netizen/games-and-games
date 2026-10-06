@@ -177,7 +177,13 @@
 			"stadium": "Al-Maktoum Stadium",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "eagle",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -198,7 +204,13 @@
 			"stadium": "Baniyas Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "ring",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "B",
+				"text": "BANIYAS"
+			},
 			"rivals": []
 		},
 		{
@@ -219,7 +231,13 @@
 			"stadium": "Ajman Stadium",
 			"capacity": 10000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "castle",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -240,7 +258,13 @@
 			"stadium": "Saqr bin Mohammad Stadium",
 			"capacity": 9000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "dolphin",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -261,7 +285,13 @@
 			"stadium": "Ittihad Kalba Stadium",
 			"capacity": 6000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tiger",
+				"sc": "#111111",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -282,7 +312,13 @@
 			"stadium": "Fujairah Club Stadium",
 			"capacity": 10600,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "anchor",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -303,7 +339,13 @@
 			"stadium": "Al Bataeh Stadium",
 			"capacity": 7000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "tree",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -324,7 +366,13 @@
 			"stadium": "Al Orooba Stadium",
 			"capacity": 5000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "star",
+				"sc": "#FFD100",
+				"border": "double"
+			},
 			"rivals": []
 		}
 	]

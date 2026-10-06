@@ -5,26 +5,25 @@
 			"logo": true,
 			"shape": "round",
 			"field": "plain",
-			"c1": "#3D195B",
-			"c2": "#FFFFFF",
-			"symbol": "lion_head",
+			"c1": "#FFFFFF",
+			"c2": "#37003C",
+			"symbol": "lion_crowned",
 			"border": "none",
-			"sc": "#FFFFFF",
-			"sym_top": "crown",
-			"accent": "#FFFFFF",
-			"ring_c": "#00FF85",
+			"sc": "#37003C",
+			"ring_c": "#37003C",
 			"wordmark": "PREMIER LEAGUE"
 		},
 		"ENG2": {
 			"logo": true,
-			"shape": "round",
+			"shape": "badge",
 			"field": "plain",
 			"c1": "#0B1C3F",
 			"c2": "#FFFFFF",
-			"symbol": "lion",
+			"symbol": "lion_passant",
 			"border": "none",
 			"sc": "#D4AF37",
 			"ring_c": "#D4AF37",
+			"sym_scale": 1.15,
 			"wordmark": "CHAMPIONSHIP"
 		},
 		"ESP1": {
@@ -507,14 +506,18 @@
 		},
 		"PAR1": {
 			"logo": true,
-			"shape": "round",
+			"shape": "badge",
 			"field": "plain",
-			"c1": "#0038A8",
+			"c1": "#0B2A5B",
 			"c2": "#FFFFFF",
 			"symbol": "star",
 			"border": "none",
 			"sc": "#FFFFFF",
-			"ring_c": "#D52B1E",
+			"flag": [
+				"#D52B1E",
+				"#FFFFFF",
+				"#0038A8"
+			],
 			"wordmark": "APF"
 		},
 		"BOL1": {
@@ -550,9 +553,9 @@
 			"field": "plain",
 			"c1": "#0A2240",
 			"c2": "#FFFFFF",
-			"symbol": "eagle",
+			"symbol": "ball",
 			"border": "none",
-			"sc": "#C5A572",
+			"sc": "#FFFFFF",
 			"ring_c": "#C5A572",
 			"wordmark": "LIGA MX"
 		},
@@ -997,19 +1000,25 @@
 			"border": "none",
 			"sc": "#E2B84A",
 			"ring_c": "#F1BF00",
-			"wordmark": "COPA DEL REY"
+			"wordmark": "COPA DEL REY",
+			"sym_top": "crown",
+			"accent": "#E2B84A"
 		},
 		"CIT": {
 			"logo": true,
-			"shape": "round",
+			"shape": "tile",
 			"field": "plain",
 			"c1": "#0B7A3E",
 			"c2": "#FFFFFF",
 			"symbol": "trophy_lid",
 			"border": "none",
 			"sc": "#E2B84A",
-			"ring_c": "#FFFFFF",
-			"wordmark": "COPPA ITALIA"
+			"wordmark": "COPPA ITALIA",
+			"flag": [
+				"#009246",
+				"#FFFFFF",
+				"#CE2B37"
+			]
 		},
 		"DFB": {
 			"logo": true,
@@ -1025,15 +1034,19 @@
 		},
 		"CDF": {
 			"logo": true,
-			"shape": "round",
+			"shape": "tile",
 			"field": "plain",
 			"c1": "#0055A4",
 			"c2": "#FFFFFF",
 			"symbol": "trophy_tall",
 			"border": "none",
 			"sc": "#E2B84A",
-			"ring_c": "#E2B84A",
-			"wordmark": "COUPE DE FRANCE"
+			"wordmark": "COUPE DE FRANCE",
+			"flag": [
+				"#0055A4",
+				"#FFFFFF",
+				"#EF4135"
+			]
 		},
 		"TDP": {
 			"logo": true,
@@ -1345,7 +1358,9 @@
 			"border": "none",
 			"sc": "#E2B84A",
 			"ring_c": "#E2B84A",
-			"wordmark": "COUPE DU TRÔNE"
+			"wordmark": "COUPE DU TRÔNE",
+			"sym_top": "crown",
+			"accent": "#E2B84A"
 		},
 		"CTN": {
 			"logo": true,
@@ -1405,7 +1420,9 @@
 			"border": "none",
 			"sc": "#E2B84A",
 			"ring_c": "#FFFFFF",
-			"wordmark": "KING'S CUP"
+			"wordmark": "KING'S CUP",
+			"sym_top": "crown",
+			"accent": "#E2B84A"
 		},
 		"EMP": {
 			"logo": true,
@@ -1441,7 +1458,9 @@
 			"border": "none",
 			"sc": "#E2B84A",
 			"ring_c": "#FFFFFF",
-			"wordmark": "EMIR CUP"
+			"wordmark": "EMIR CUP",
+			"sym_top": "crown",
+			"accent": "#E2B84A"
 		},
 		"UPC": {
 			"logo": true,
@@ -1525,14 +1544,13 @@
 		},
 		"CSH": {
 			"logo": true,
-			"shape": "round",
+			"shape": "badge",
 			"field": "plain",
-			"c1": "#1B1B1B",
+			"c1": "#C8102E",
 			"c2": "#FFFFFF",
 			"symbol": "trophy_plate",
 			"border": "none",
 			"sc": "#DDE2E8",
-			"ring_c": "#E4002B",
 			"wordmark": "COMMUNITY SHIELD"
 		},
 		"SES": {

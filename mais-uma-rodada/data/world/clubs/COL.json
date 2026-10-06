@@ -349,7 +349,13 @@
 			"stadium": "Estadio Armando Maestre",
 			"capacity": 11000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "iberian",
+				"field": "halves",
+				"symbol": "letter",
+				"initials": "A",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -370,7 +376,15 @@
 			"stadium": "Estadio Alberto Grisales",
 			"capacity": 14000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "eagle",
+				"c1": "#111111",
+				"c2": "#FFD100",
+				"sc": "#FFD100",
+				"border": "gold"
+			},
 			"rivals": []
 		},
 		{
@@ -391,7 +405,13 @@
 			"stadium": "Estadio Metropolitano de Techo",
 			"capacity": 8000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "castle",
+				"sc": "#FFFFFF",
+				"border": "thick"
+			},
 			"rivals": []
 		},
 		{
@@ -412,7 +432,13 @@
 			"stadium": "Estadio Polideportivo Sur",
 			"capacity": 11000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "sash",
+				"symbol": "letter",
+				"initials": "EFC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -433,7 +459,15 @@
 			"stadium": "Estadio Metropolitano de Techo",
 			"capacity": 8000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "plain",
+				"symbol": "letter",
+				"initials": "E",
+				"sc": "#FFFFFF",
+				"chief_text": "LA EQUIDAD",
+				"cc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -454,7 +488,13 @@
 			"stadium": "Estadio Bello Horizonte",
 			"capacity": 15000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "round",
+				"field": "plain",
+				"symbol": "horse",
+				"sc": "#FFFFFF",
+				"border": "double"
+			},
 			"rivals": []
 		},
 		{
@@ -475,7 +515,13 @@
 			"stadium": "Estadio La Independencia",
 			"capacity": 20000,
 			"kit": "plain",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "checky",
+				"symbol": "letter",
+				"initials": "BC",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		},
 		{
@@ -496,7 +542,13 @@
 			"stadium": "Estadio Sierra Nevada",
 			"capacity": 16000,
 			"kit": "stripes_v",
-			"crest": {},
+			"crest": {
+				"shape": "shield",
+				"field": "stripes:5",
+				"symbol": "letter",
+				"initials": "UM",
+				"sc": "#FFFFFF"
+			},
 			"rivals": []
 		}
 	]
