@@ -110,6 +110,14 @@ Ramo `claude/elencos-realistas-k0e7o1`, feito sobre a linha unificada (`claude/p
 - **Motor.** Motor lance a lance (25 datas): 2,70 gols por jogo, contra 2,65 na base. No modo rápido, temporada inteira: 2,73 contra 2,70.
 - **Ferramenta.** `tools/squad_report.gd` mostra elencos por extenso (papel, anos de casa, passagens) e a distribuição dos papéis: `godot --headless --path . --script res://tools/squad_report.gd -- --clubs=Flamengo,Real Madrid`.
 
+## Passado sem começar emprestado (06/10)
+
+Ramo `claude/historico-inicio-carreira`, feito sobre `claude/bolinhas-narracao-5wp2pg`. Só muda o passado gerado na criação do mundo (`CareerBackfill`), então vale para carreira nova.
+
+- O passado é montado do presente para trás. O empréstimo podia cair no primeiro ano, e 5,6% dos jogadores começavam a carreira emprestados. Também podia vir depois de um clube que não era o dono do passe.
+- Agora cada empréstimo guarda o clube dono (`plan[ano][6]`). O ano antes do empréstimo é sempre no dono, seja na base ou numa contratação. Se o primeiro ano era empréstimo, ele vira a estreia no dono. Empréstimo só a partir dos 18 anos.
+- `tools/squad_report.gd` mostra a parte dos jogadores que começam emprestados (agora 0%) e a dos empréstimos entre duas passagens pelo mesmo clube (99,5%).
+
 ## Pedidos em andamento ou pendentes (pedido de 29/09, 01:35)
 
 A ordem combinada:
