@@ -1005,8 +1005,12 @@ func _look_card(p: Player) -> Control:
 	picks.add_child(_cycler(p, "hc", "Cabelo", FaceGen.HAIR_COLOR_NAMES, int(feats["hair_i"])))
 	top.add_child(picks)
 	card.add_child(top)
-	card.add_child(_cycler(p, "fs", "Rosto", FaceGen.FACE_SHAPES, int(feats["face_shape"])))
-	card.add_child(_cycler(p, "ey", "Olhos", FaceGen.EYE_NAMES, int(feats["eye_i"])))
+	# Linhas na largura do cartão: coluna do rótulo mais larga ("Cor dos olhos")
+	card.add_child(_cycler(p, "fs", "Rosto", FaceGen.FACE_SHAPES, int(feats["face_shape"]), 132))
+	card.add_child(_cycler(p, "es", "Olhos", FaceGen.EYE_SHAPES, int(feats["eye_shape"]), 132))
+	card.add_child(_cycler(p, "ey", "Cor dos olhos", FaceGen.EYE_NAMES, int(feats["eye_i"]), 132))
+	card.add_child(_cycler(p, "ns", "Nariz", FaceGen.NOSE_TYPES, int(feats["nose_type"]), 132))
+	card.add_child(_cycler(p, "mt", "Boca", FaceGen.MOUTH_TYPES, int(feats["mouth_type"]), 132))
 	card.add_child(UIKit.label("Tom de pele", "Small"))
 	var sl := HSlider.new()
 	sl.min_value = FaceGen.SKIN_MIN
@@ -1048,10 +1052,10 @@ func _look_card(p: Player) -> Control:
 
 
 ## "‹ Raspado ›": troca a opção de aparência para a anterior/próxima (a prévia acompanha).
-func _cycler(p: Player, key: String, caption: String, names: Array, current: int) -> Control:
+func _cycler(p: Player, key: String, caption: String, names: Array, current: int, cap_w: int = 96) -> Control:
 	var row := UIKit.hbox(6)
 	var cl := UIKit.label(caption, "Small")
-	cl.custom_minimum_size.x = 96
+	cl.custom_minimum_size.x = cap_w
 	row.add_child(cl)
 	var step := func(d: int):
 		p.look[key] = posmod(current + d, names.size())
