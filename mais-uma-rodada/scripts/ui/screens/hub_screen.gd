@@ -66,6 +66,7 @@ func refresh() -> void:
 		split.add_child(right)
 		c.add_child(split)
 	left.add_child(_date_line(w, club))
+	var ticker := _ticker(w)
 	if Store.locked(w):
 		left.add_child(_paywall_card(w))
 	elif preseason:
@@ -76,6 +77,8 @@ func refresh() -> void:
 		left.add_child(_season_over_card(w))
 	else:
 		left.add_child(_next_match_card(w, club))
+	if ticker != null:
+		left.add_child(ticker)
 	var attention := _attention(w, club)
 	if attention != null:
 		left.add_child(attention)
@@ -690,6 +693,28 @@ func _inbox_card(w: GameWorld) -> Control:
 
 
 ## Mundo do futebol: uma manchete com foto e, embaixo, as outras notícias como lista editorial.
+## "Acontecendo agora": o mundo andando — as notícias recentes que não estão no bloco de notícias
+## (mercado, demissões, resultados de fora, recordes), passando uma por vez.
+func _ticker(w: GameWorld) -> Control:
+	var items: Array = []
+	var cats := {}
+	for i in range(w.news.size() - 1, maxi(-1, w.news.size() - 90), -1):
+		var n: NewsEvent = w.news[i]
+		if n.club_id == w.user_club_id or n.category == "social":
+			continue
+		# Variedade: no máximo três da mesma editoria
+		var sec := NewsRow.section_of(n)
+		if int(cats.get(sec, 0)) >= 3:
+			continue
+		cats[sec] = int(cats.get(sec, 0)) + 1
+		items.append(n)
+		if items.size() >= 12:
+			break
+	if items.size() < 2:
+		return null
+	return LiveTicker.make(w, items)
+
+
 func _news_card(w: GameWorld) -> Control:
 	var out := UIKit.vbox(UITokens.S2)
 	out.add_child(UIKit.section_header("Mundo do futebol", "Todas as notícias", func(): UIManager.push("news")))

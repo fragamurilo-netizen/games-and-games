@@ -2,6 +2,10 @@ extends BaseScreen
 ## Resultados da rodada: seu jogo, os demais placares da divisão, a tabela atualizada e o mercado.
 
 var _report: Dictionary = {}
+## A rodada entra em sequência só na primeira vez que a tela aparece (refresh não repete).
+var _revealed := false
+## Seu time andando na tabela: linha de onde saiu e para onde foi (anima quando aparece na tela).
+var _slide: Dictionary = {}
 
 
 func _init() -> void:
@@ -58,6 +62,78 @@ func refresh() -> void:
 	max_content_width = 1700
 	columnize(c, 0, 2, 1 if f != null else 0)
 	_build_footer()
+	if not _revealed:
+		_revealed = true
+		_reveal(c)
+	set_process(not _slide.is_empty())
+
+
+## Os cartões entram um depois do outro, como a TV voltando dos intervalos: o seu jogo, os
+## feitos, os outros placares, a tabela.
+func _reveal(c: Control) -> void:
+	if AppSettings.reduce_motion:
+		return
+	var cards: Array = []
+	for ch in c.get_children():
+		if ch is HBoxContainer and ch.get_child_count() > 0 and ch.get_child(0) is VBoxContainer:
+			for col in ch.get_children():
+				cards.append_array(col.get_children())
+		else:
+			cards.append(ch)
+	var i := 0
+	for card: Control in cards:
+		card.modulate.a = 0.0
+		var tw := create_tween()
+		tw.tween_interval(0.12 + minf(1.2, i * 0.11))
+		tw.tween_property(card, "modulate:a", 1.0, 0.28)
+		i += 1
+
+
+func _process(_delta: float) -> void:
+	if _slide.is_empty():
+		set_process(false)
+		return
+	var a: Control = _slide["from"]
+	var b: Control = _slide["to"]
+	if not is_instance_valid(a) or not is_instance_valid(b):
+		_slide.clear()
+		return
+	# Só quando a linha nova aparece na tela (a tabela costuma estar mais embaixo)
+	var view := get_viewport_rect()
+	var r := Rect2(b.global_position, b.size)
+	if b.is_visible_in_tree() and b.size.y > 4.0 and view.encloses(r) and b.get_parent().modulate.a > 0.95 and _visible_card(b):
+		_run_slide(a, b)
+		_slide.clear()
+
+
+func _visible_card(n: Control) -> bool:
+	var p := n.get_parent()
+	while p != null and p is Control:
+		if (p as Control).modulate.a < 0.95:
+			return false
+		p = p.get_parent()
+	return true
+
+
+## Uma faixa na cor do clube sai da linha da posição antiga e desliza até a nova.
+func _run_slide(a: Control, b: Control) -> void:
+	var band := Panel.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(UIColors.ACCENT, 0.22)
+	sb.border_color = UIColors.ACCENT
+	sb.border_width_left = 6
+	band.add_theme_stylebox_override(&"panel", sb)
+	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	band.top_level = true
+	add_child(band)
+	band.global_position = a.global_position
+	band.size = a.size
+	var tw := create_tween()
+	tw.tween_interval(0.35)
+	tw.tween_property(band, "global_position", b.global_position, 1.1).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_interval(0.9)
+	tw.tween_property(band, "modulate:a", 0.0, 0.6)
+	tw.tween_callback(band.queue_free)
 
 
 ## Chamada para o Raio-X: o diagnóstico principal do jogo e o botão para abrir.
@@ -235,10 +311,21 @@ func _table_card(w: GameWorld, club: Club, f: Fixture) -> Control:
 		return null
 	var league := w.league_of(club.id)
 	card.add_child(UIKit.section("Classificação · %s" % league.short_name))
+	var user: Dictionary = _report.get("user", {})
+	var pb := int(user.get("pos_before", 0))
+	var pa := int(user.get("pos_after", 0))
+	if f != null and f.is_league() and pb > 0 and pa > 0 and pb != pa:
+		var up := pa < pb
+		card.add_child(UIKit.colored(("▲ Subiu do %dº para o %dº lugar" if up else "▼ Caiu do %dº para o %dº lugar") % [pb, pa], UIColors.GREEN if up else UIColors.RED, "H3"))
 	card.add_child(TableRows.header(true))
 	var ids := CompetitionManager.sorted_ids(league)
+	var rows: Array = []
 	for i in ids.size():
-		card.add_child(TableRows.row(w, league, int(ids[i]), i + 1, true))
+		var rw := TableRows.row(w, league, int(ids[i]), i + 1, true)
+		rows.append(rw)
+		card.add_child(rw)
+	if f != null and f.is_league() and pb > 0 and pa > 0 and pb != pa and pb <= rows.size() and pa <= rows.size():
+		_slide = {"from": rows[pb - 1], "to": rows[pa - 1]}
 	card.add_child(UIKit.gap(6))
 	card.add_child(UIKit.button("Tabela completa e artilharia", "GhostButton", func(): UIManager.goto("table"), "table"))
 	return UIKit.card_panel(card)

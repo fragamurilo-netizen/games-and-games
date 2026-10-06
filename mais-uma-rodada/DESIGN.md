@@ -289,6 +289,12 @@ estado alternável.
   clube entra pelo `ClubGradient`. Sem brilho nem sombra. Uma peça por lugar (embaixo, meio, alto),
   some sozinha e some ao toque; o jogo não para por elas (só a faixa do gol segura a partida).
   Opções › Partidas: desligado, só os gols ou completo.
+- **Acontecendo agora** (`LiveTicker`, no Início): o noticiário do mundo passando sozinho, uma
+  manchete por vez (escudo de quem está na notícia, chapéu da editoria, título em até duas linhas)
+  e uma barra fina na cor do clube marcando a próxima. Tocar abre a matéria. Para fora da tela.
+- **Revelação da rodada** (Resultados): na primeira vez, os cartões entram em sequência (só
+  opacidade, ~0,1 s entre eles) e, se o seu time mudou de posição, uma faixa na cor do clube
+  desliza da linha antiga até a nova quando a tabela aparece. Animações reduzidas: nada disso.
 - **Campo** (`PitchView`): mini camisas, sobrenome, condição discreta. Toque = painel
   rápido, arrastar = trocar, segurar = perfil.
 - **Botão principal**: giz. **Secundário**: `surface-raised`. **Texto**: sem fundo.

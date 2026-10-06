@@ -10927,5 +10927,8 @@
 	"No FM, ligue Preferências › Mostrar IDs únicos: o número do clube aparece no título da página dele.": "En FM, activa Preferencias › Mostrar IDs únicos: el número del club aparece en el título de su página.",
 	"Copie a pasta graphics/logos do Football Manager para Download/logos neste aparelho e toque em Importar de novo.": "Copia la carpeta graphics/logos de Football Manager a Download/logos en este dispositivo y toca Importar de nuevo.",
 	"Até aqui": "Hasta ahora",
-	"Apelido: %s": "Apodo: %s"
+	"Apelido: %s": "Apodo: %s",
+	"Acontecendo agora": "Pasando ahora",
+	"▲ Subiu do %dº para o %dº lugar": "▲ Subió del %dº al %dº lugar",
+	"▼ Caiu do %dº para o %dº lugar": "▼ Bajó del %dº al %dº lugar"
 }
