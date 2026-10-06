@@ -104,6 +104,18 @@ func _build() -> void:
 		ch.queue_free()
 	if columns.is_empty():
 		return
+	# Faixa fina acima do cabeçalho: mostra que há mais colunas para o lado e onde o dedo está.
+	var hint_row := HBoxContainer.new()
+	hint_row.add_theme_constant_override(&"separation", 0)
+	hint_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_row.visible = false
+	add_child(hint_row)
+	var hint_gap := Control.new()
+	hint_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint_row.add_child(hint_gap)
+	var hint := ScrollHint.new()
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hint_row.add_child(hint)
 	var body := HBoxContainer.new()
 	body.add_theme_constant_override(&"separation", 0)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -130,14 +142,23 @@ func _build() -> void:
 	# O nome tem largura mínima fixa; se sobrar espaço além dos números, o nome fica com ele.
 	# Os números nunca empurram a tela para os lados: rolam dentro do próprio bloco.
 	var lead_ref: WeakRef = weakref(lead)
+	var sc_ref: WeakRef = weakref(sc)
 	var fit := func():
 		var cell: Control = lead_ref.get_ref()
 		if cell != null and size.x > 0.0:
 			# O nome cede espaço até lead_min antes de os números começarem a rolar para o lado.
 			cell.custom_minimum_size.x = maxf(minf(lead_width, lead_min), size.x - num_w)
+			hint_gap.custom_minimum_size.x = cell.custom_minimum_size.x
+			var over := num_w > size.x - cell.custom_minimum_size.x + 1.0
+			hint_row.visible = over
+			var s2: ScrollContainer = sc_ref.get_ref()
+			if over and s2 != null and int(state.get("hx", 0)) > 0:
+				(func(): if is_instance_valid(s2): s2.scroll_horizontal = int(state.get("hx", 0))).call_deferred()
 	_layout_fit = fit
 	resized.connect(fit)
 	fit.call_deferred()
+	hint.track(sc, num_w)
+	sc.get_h_scroll_bar().value_changed.connect(func(v: float): state["hx"] = int(v))
 	lead.add_child(_head_cell(columns[0], true))
 	grid.add_child(_head_row())
 	var shown := mini(items.size(), maxi(PAGE, int(state.get("shown", PAGE))))
@@ -288,3 +309,30 @@ func _cell(c: Dictionary, item: Variant, lead: bool) -> Control:
 	if bool(c.get("strong", false)):
 		l.add_theme_font_override(&"font", ThemeDB.get_project_theme().get_font(&"font", &"H3"))
 	return l
+
+
+## Trilho de 3 px com a parte visível das colunas em destaque. Só aparece quando os números
+## não cabem: é o sinal de que dá para passar o dedo para o lado.
+class ScrollHint extends Control:
+	var _sc: ScrollContainer
+	var _total := 0.0
+
+	func _init() -> void:
+		custom_minimum_size.y = 3
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func track(sc: ScrollContainer, total: float) -> void:
+		_sc = sc
+		_total = total
+		sc.get_h_scroll_bar().value_changed.connect(func(_v: float): queue_redraw())
+		sc.resized.connect(queue_redraw)
+
+	func _draw() -> void:
+		if _sc == null or not is_instance_valid(_sc) or _total <= 0.0:
+			return
+		draw_rect(Rect2(0, 0, size.x, size.y), UITokens.HAIRLINE if not UIColors.light else UIColors.LINE)
+		var vis := clampf(_sc.size.x / _total, 0.08, 1.0)
+		var span := maxf(1.0, _total - _sc.size.x)
+		var t := clampf(float(_sc.scroll_horizontal) / span, 0.0, 1.0)
+		var w := size.x * vis
+		draw_rect(Rect2((size.x - w) * t, 0, w, size.y), UIColors.DIM)

@@ -17,6 +17,8 @@ var _xi_pick := "w"
 ## Visão da classificação: geral, casa, fora ou momento (TableRows.VIEW_*).
 var _view := TableRows.VIEW_ALL
 const PROMEDIO_ROWS := 6
+## Ordenação e rolagem lateral da classificação no celular.
+var _stand_state := {}
 ## Cores da competição aberta: pintam o fundo da tela e a faixa do cabeçalho.
 var _tint: Array = []
 
@@ -535,6 +537,10 @@ func _numbers(c: VBoxContainer, w: GameWorld) -> void:
 	var cats := [[Player.S_SHOTS, "Finalizações"], [Player.S_KEY_PASSES, "Passes decisivos"], [Player.S_DRIBBLES, "Dribles certos"],
 		[Player.S_TACKLES, "Desarmes"], [Player.S_INTERCEPTIONS, "Interceptações"], [Player.S_AERIAL, "Duelos aéreos"],
 		[Player.S_SAVES, "Defesas"], [Player.S_CLEAN, "Jogos sem sofrer gol"], [Player.S_MOTM, "Craque do jogo"], [Player.S_XG, "xG"]]
+	# A página completa de números da liga (times, jogadores, seleção): RodadaScore.
+	var lid := _league_id
+	var go := UIKit.menu_row("chart", "Estatísticas completas", "Times, jogadores e seleção da temporada · RodadaScore", func(): UIManager.push("league_stats", {"league": lid}))
+	c.add_child(UIKit.menu_group([go]))
 	var boards: Array = []
 	for cat in cats:
 		var stat: int = cat[0]
@@ -713,7 +719,8 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 	var wide := content_width() >= 900.0
 	# Celular em pé: J, SG e PTS, para o nome do clube caber inteiro.
 	var compact := content_width() < 560.0
-	card.add_child(TableRows.header(compact, _view, wide))
+	if not compact:
+		card.add_child(TableRows.header(compact, _view, wide))
 	var side := _view == TableRows.VIEW_HOME or _view == TableRows.VIEW_AWAY
 	var t: Dictionary = TableRows.side_table(league, _view) if side else league.table
 	var ids: Array = CompetitionManager.sort_table(league.club_ids, t) if side else CompetitionManager.sorted_ids(league)
@@ -727,6 +734,17 @@ func _table(c: VBoxContainer, w: GameWorld, league: League) -> void:
 			starts[acc] = "Grupo do título" if gi == 0 else ("Grupo do rebaixamento" if gi == ng - 1 else "Grupo intermediário")
 			acc += Array(league.phase_groups[gi]).size()
 	var last_zone := -1
+	if compact:
+		# Celular em pé: tabela de dados, o clube preso e o resto passando o dedo para o lado.
+		var lines: Array = []
+		for i in ids.size():
+			var cid2 := int(ids[i])
+			var zpos2 := CompetitionManager.position_of(league, cid2) if side else i + 1
+			lines.append({"id": cid2, "pos": i + 1, "zone": CompetitionManager.zone_color(CompetitionManager.zone_of(league, zpos2)),
+				"move": (int(prev[cid2]) - (i + 1)) if prev.has(cid2) else 0, "row": t[cid2]})
+		var lg2 := league
+		card.add_child(TableRows.standings_table(w, lines, _view, func(cid3: int): _club_sheet(w, lg2, cid3), _stand_state))
+		ids = []
 	for i in ids.size():
 		var cid := int(ids[i])
 		# Casa/fora: a faixa mostra a zona da classificação geral do clube, não a desta visão.
