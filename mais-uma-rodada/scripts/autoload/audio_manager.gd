@@ -1,10 +1,11 @@
 extends Node
-## Sons sintetizados em tempo de execução (nenhum arquivo de áudio no APK) + vibração.
-## Cada som é gerado uma única vez, sob demanda, e reaproveitado.
-## A música de fundo (MusicSynth) é gerada numa thread e guardada em cache no aparelho.
+## Trilha sonora + vibração. Músicas e efeitos vêm de assets/audio/ (compostos e gerados pelo próprio
+## projeto em tools/audio/gerar_trilha.py, sem nada de terceiros). Se um arquivo faltar, o som é
+## sintetizado aqui mesmo (versão antiga) e a música cai no MusicSynth, gerado numa thread.
 
 const RATE := 22050
 const MUSIC_CACHE := "user://music_v2_%d.pcm"
+const SFX_DIR := "res://assets/audio/efeitos/"
 
 var _players: Array[AudioStreamPlayer] = []
 var _cache: Dictionary = {}
@@ -14,6 +15,7 @@ var _music_streams: Dictionary = {} # faixa -> AudioStreamWAV
 var _music_task := -1
 var _music_task_track := -1
 var _music_samples := PackedFloat32Array()
+var _rot_track := 0 # faixa atual da opção "Todas, em sequência"
 var _in_match := false
 var _match_muted := false # mute temporário da tela de partida; não altera as Opções globais
 var _fade: Tween
@@ -33,15 +35,15 @@ var _crowd_boost_t: Array[float] = [0.0, 0.0]
 var _crowd_on := false
 var _crowd_gen := 0 # muda a cada liga/desliga: timers antigos não mexem na torcida nova
 var _crowd_hush := false # partida pausada: a arquibancada vira murmúrio
-var _sfx_names: Array[String] = ["", "", "", ""] # o que cada player de efeitos está tocando
+var _sfx_names: Array[String] = ["", "", "", "", "", "", "", ""] # o que cada player de efeitos está tocando
 ## Efeitos que só fazem sentido dentro da partida: cortados ao sair dela.
-const MATCH_SFX: Array[String] = ["whistle", "whistle_half", "whistle_end", "goal", "goal_big", "goal_roar", "groan", "boo", "applause", "chance", "card"]
+const MATCH_SFX: Array[String] = ["whistle", "whistle_half", "whistle_end", "goal", "goal_big", "goal_roar", "groan", "boo", "applause", "chance", "card", "post"]
 
 
 func _ready() -> void:
 	_ensure_bus(&"Music")
 	_ensure_bus(&"SFX")
-	for i in 4:
+	for i in _sfx_names.size():
 		var p := AudioStreamPlayer.new()
 		p.bus = &"SFX"
 		add_child(p)
@@ -49,6 +51,9 @@ func _ready() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.bus = &"Music"
 	add_child(_music)
+	_music.finished.connect(_on_music_finished)
+	_rot_track = randi() % Soundtrack.FILES.size()
+	_drop_old_music_cache()
 	for i in 2:
 		var cp := AudioStreamPlayer.new()
 		cp.bus = &"SFX"
@@ -87,7 +92,19 @@ func start_music() -> void:
 	if not want:
 		_fade_to(-40.0, func(): _music.stop())
 		return
-	var track := clampi(AppSettings.music_track, 0, MusicSynth.TRACKS.size() - 1)
+	var choice := clampi(AppSettings.music_track, 0, Soundtrack.TRACKS.size() - 1)
+	var rotation := choice == Soundtrack.ROTATION
+	var file := Soundtrack.load_track(_rot_track if rotation else choice)
+	if file != null:
+		if "loop" in file:
+			file.set("loop", not rotation)
+		if _music.stream != file or not _music.playing:
+			_music.stream = file
+			_music.volume_db = -30.0
+			_music.play()
+		_fade_to(0.0)
+		return
+	var track := clampi(choice, 0, MusicSynth.TRACKS.size() - 1)
 	var stream: AudioStreamWAV = _music_streams.get(track)
 	if stream == null:
 		stream = _load_cached(track)
@@ -114,6 +131,23 @@ func screen_changed(screen_name: String) -> void:
 		crowd_stop()
 		_stop_match_sfx()
 	start_music()
+
+
+## "Todas, em sequência": acabou uma faixa, entra a próxima.
+func _on_music_finished() -> void:
+	if AppSettings.music_track == Soundtrack.ROTATION:
+		_rot_track = (_rot_track + 1) % Soundtrack.FILES.size()
+		start_music()
+
+
+## As faixas antigas geradas no aparelho ocupavam uns 4 MB e não são mais usadas.
+func _drop_old_music_cache() -> void:
+	if Soundtrack.load_track(0) == null:
+		return
+	for v in ["user://music_v1_%d.pcm", MUSIC_CACHE]:
+		for i in 3:
+			if FileAccess.file_exists(v % i):
+				DirAccess.remove_absolute(v % i)
 
 
 func _fade_to(db: float, done: Callable = Callable()) -> void:
@@ -181,6 +215,8 @@ func _load_cached(track: int) -> AudioStreamWAV:
 
 ## A faixa já foi gerada (ou está no cache do aparelho)?
 func music_ready(track: int) -> bool:
+	if track == Soundtrack.ROTATION or Soundtrack.load_track(track) != null:
+		return true
 	return _music_streams.has(track) or FileAccess.file_exists(MUSIC_CACHE % track)
 
 
@@ -194,9 +230,16 @@ func play(name: String, volume_db: float = 0.0) -> void:
 	var stream := _stream(name)
 	if stream == null:
 		return
-	var p := _players[_next]
-	_sfx_names[_next] = name
-	_next = (_next + 1) % _players.size()
+	# Um player livre; se todos estiverem ocupados, o mais antigo (um clique não corta o apito final).
+	var idx := _next
+	for k in _players.size():
+		var j := (_next + k) % _players.size()
+		if not _players[j].playing:
+			idx = j
+			break
+	var p := _players[idx]
+	_sfx_names[idx] = name
+	_next = (idx + 1) % _players.size()
 	p.stream = stream
 	p.volume_db = volume_db
 	p.play()
@@ -376,14 +419,18 @@ func crowd_event(kind: String, side: int) -> void:
 		"goal":
 			_push(s, 0.6, 22.0)
 			_push(o, -0.55, 25.0)
-			crowd_clip(s, "gol")
+			if not crowd_clip(s, "gol"):
+				# A explosão da torcida de quem marcou (a visitante, pequena, soa de longe)
+				play("goal_roar", linear_to_db(clampf(_crowd_base[s] * 1.3, 0.12, 1.0)) - 1.0)
+			if _crowd_base[o] > 0.3:
+				play("groan", linear_to_db(clampf(_crowd_base[o], 0.1, 1.0)) - 7.0)
 		"foul", "card":
 			# Falta/cartão do visitante: a casa vaia; da casa: a casa reclama do juiz
 			if s == 1 or kind == "card":
 				play("boo", -9.0 if s == 1 else -13.0)
 			_push(0, 0.15, 3.0)
 		"save":
-			play("applause", -14.0)
+			play("applause", -11.0)
 			_push(s, 0.2, 2.5)
 		"half":
 			_push(0, -0.6, 9999.0)
@@ -470,9 +517,16 @@ func _crowd_tick(delta: float) -> void:
 			_crowd_p[i].stop()
 
 
-func _stream(name: String) -> AudioStreamWAV:
+func _stream(name: String) -> AudioStream:
 	if _cache.has(name):
 		return _cache[name]
+	for ext in ["wav", "ogg"]:
+		var path: String = SFX_DIR + name + "." + ext
+		if ResourceLoader.exists(path):
+			var st: AudioStream = load(path)
+			if st != null:
+				_cache[name] = st
+				return st
 	var samples := PackedFloat32Array()
 	match name:
 		"click":

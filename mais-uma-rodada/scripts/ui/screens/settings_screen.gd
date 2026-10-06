@@ -112,7 +112,7 @@ func refresh() -> void:
 		refresh()))
 	if AppSettings.music:
 		cm.add_child(UIKit.label("Faixa", "Muted"))
-		cm.add_child(_chips(MusicSynth.TRACKS, AppSettings.music_track, func(i: int):
+		cm.add_child(_chips(Soundtrack.TRACKS, AppSettings.music_track, func(i: int):
 			AppSettings.music_track = i
 			AppSettings.save_settings()
 			if not Sfx.music_ready(i):
@@ -246,6 +246,6 @@ func _toggle(text: String, value: bool, cb: Callable) -> CheckButton:
 	# Texto longo quebra: sem isso a coluna do interruptor alargava e espremia a vizinha no tablet
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	t.toggled.connect(func(v: bool):
-		Sfx.click()
+		Sfx.play("toggle_on" if v else "toggle_off", -6.0)
 		cb.call(v))
 	return t

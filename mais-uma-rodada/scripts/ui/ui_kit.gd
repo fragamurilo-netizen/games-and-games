@@ -94,7 +94,7 @@ static func chip(text: String, pressed: bool, group: ButtonGroup, cb: Callable) 
 	press_fx(b, null, 0.94)
 	if cb.is_valid():
 		b.pressed.connect(func():
-			Sfx.click()
+			Sfx.play("tab", -6.0)
 			cb.call())
 	return b
 
@@ -606,7 +606,7 @@ static func tabs(items: Array, selected: String, cb: Callable) -> HBoxContainer:
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var key: String = it[0]
 		b.pressed.connect(func():
-			Sfx.click()
+			Sfx.play("tab", -6.0)
 			cb.call(key))
 		h.add_child(b)
 	return h
@@ -635,7 +635,7 @@ static func segment(items: Array, selected: String, cb: Callable) -> PanelContai
 		b.clip_text = true
 		var key: String = it[0]
 		b.pressed.connect(func():
-			Sfx.click()
+			Sfx.play("tab", -6.0)
 			cb.call(key))
 		h.add_child(b)
 	p.add_child(h)
@@ -746,7 +746,7 @@ static func scroll_tabs(items: Array, selected: String, cb: Callable) -> ScrollC
 		b.custom_minimum_size = Vector2(0, UITokens.H_TAB)
 		var key: String = it[0]
 		b.pressed.connect(func():
-			Sfx.click()
+			Sfx.play("tab", -6.0)
 			cb.call(key))
 		h.add_child(b)
 		if b.button_pressed:

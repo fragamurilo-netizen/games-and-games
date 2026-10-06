@@ -1002,6 +1002,8 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 			Sfx.crowd_event("danger", int(ev["s"]))
 			if t == MatchSimulation.EV_SAVE and int(ev["s"]) == 1:
 				Sfx.crowd_event("save", 0) # defesa do goleiro da casa: aplausos
+			if t == MatchSimulation.EV_POST:
+				Sfx.play("post", -6.0)
 			if t == MatchSimulation.EV_POST or (ev.has("x") and float(ev["x"].get("xg", 0.0)) >= 0.3):
 				Sfx.play("chance", -8.0)
 		"var":
@@ -1012,7 +1014,7 @@ func _on_line_shown(line: Dictionary, ev: Dictionary) -> void:
 	if t == MatchSimulation.EV_FOUL:
 		Sfx.crowd_event("foul", int(ev["s"]))
 	if t == MatchSimulation.EV_HALFTIME:
-		Sfx.play("whistle", -4.0)
+		Sfx.play("whistle_half", -4.0)
 		Sfx.crowd_event("half", 0)
 	elif t == MatchSimulation.EV_FULLTIME:
 		Sfx.play("whistle_end", -3.0)

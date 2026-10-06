@@ -598,6 +598,7 @@ func toast(text: String, color: Color = UIColors.TEXT) -> void:
 	if main == null:
 		print(text)
 		return
+	_toast_sound(color)
 	var p := PanelContainer.new()
 	p.theme_type_variation = "Toast"
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -620,3 +621,20 @@ func toast(text: String, color: Color = UIColors.TEXT) -> void:
 	tw.tween_interval(2.4)
 	tw.tween_property(p, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(p.queue_free)
+
+
+var _toast_sfx_at := -10.0
+
+
+## Aviso com som discreto (bom, ruim ou neutro), no máximo um a cada meio segundo.
+func _toast_sound(color: Color) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now - _toast_sfx_at < 0.5 or GameManager.in_batch():
+		return
+	_toast_sfx_at = now
+	if color == UIColors.GREEN:
+		Sfx.play("notify_good", -10.0)
+	elif color == UIColors.RED:
+		Sfx.play("notify_bad", -10.0)
+	else:
+		Sfx.play("notify", -12.0)
