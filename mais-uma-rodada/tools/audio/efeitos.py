@@ -284,6 +284,43 @@ def post_clang(r):
     return norm(x, 0.5)
 
 
+def stadium_bed(r, dur=24.0):
+    """Ambiente de estádio cheio, em loop: murmúrio de milhares, gritos soltos, apitos e palmas."""
+    tail = 3.0
+    total_d = dur + tail
+    n = int(total_d * SR)
+    out = np.zeros((2, n))
+    for vowel in ("a", "e", "o", "u", "eh"):
+        out += voices(total_d, r, 22, 95, 210, vowel, None, None, onset=0.0, breath=0.2, female=0.35, syll=0.8) * 0.35
+    t = np.arange(n) / SR
+    swell = 0.8 + 0.2 * np.sin(2 * np.pi * t / dur * 3 + 1.0)
+    nz = roar_noise(total_d, r, 180, 2200)
+    out = out / (np.max(np.abs(out)) + 1e-9) + nz / (np.max(np.abs(nz)) + 1e-9) * 0.35
+    out *= swell
+    # gritos isolados
+    for _ in range(int(dur * 0.9)):
+        L = r.uniform(0.25, 0.7)
+        sh = voices(L, r, r.integers(1, 4), 120, 260, r.choice(["eh", "a", "o"]),
+                    lambda tt, L=L: 1.0 + 0.25 * np.sin(np.pi * tt / L), lambda tt, L=L: np.sin(np.pi * np.clip(tt / L, 0, 1)) ** 0.7,
+                    onset=0.03, breath=0.15, female=0.3)
+        place(out, sh * r.uniform(0.25, 0.55), r.uniform(0, dur), pan=0)
+    out += crowd_whistles(total_d, r, int(dur * 0.5), 0.0, dur) * 0.5
+    # palmas de grupos pequenos, de vez em quando
+    for _ in range(3):
+        L = r.uniform(1.5, 3.0)
+        c = claps(L, r, 25, (3.0, 4.5), lambda tt, L=L: np.sin(np.pi * np.clip(tt / L, 0, 1)))
+        place(out, c * 0.15, r.uniform(0, dur - L))
+    out = apply_reverb(out, reverb_ir(r, 1.8, 0.03, 4000), 0.3)
+    # loop: o que passa do fim volta para o começo com cruzamento suave
+    m = int(dur * SR)
+    tn = out.shape[1] - m
+    fade_in = np.linspace(0, 1, tn)
+    head = out[:, :tn] * fade_in + out[:, m:] * (1 - fade_in)
+    out = out[:, :m].copy()
+    out[:, :tn] = head
+    return norm(out, 0.6)
+
+
 def build(rng_seed=7):
     r = np.random.default_rng(rng_seed)
     out = {}
@@ -312,4 +349,5 @@ def build(rng_seed=7):
     out["goal_roar"] = goal_roar(r, 5.5, 1.0)
     out["goal"] = goal_roar(r, 4.0, 0.7)
     out["goal_big"] = goal_roar(r, 6.0, 1.2, horns=True)
+    out["estadio"] = stadium_bed(r)
     return out

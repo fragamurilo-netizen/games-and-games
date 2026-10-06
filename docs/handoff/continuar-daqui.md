@@ -4,6 +4,13 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 
 ## Onde está o jogo
 
+- **Trilha sonora (06/10, noite): ramo `claude/project-thread-y3px1u`**, a partir de `claude/hopeful-newton-8avbo4`. Só mexe em áudio, então junta fácil com os outros ramos. APK: `builds/MaisUmaRodada-1.0.0-trilha-sonora-2026-10-06-debug.apk`.
+  - **Sons que não paravam:** "Continuar" depois do jogo trocava a tela sem `on_hide` e a torcida seguia nos resultados (agora `match_screen._exit_tree` e `AudioManager.screen_changed` param tudo ao sair da partida); o timer do apito final não derruba mais a torcida da partida seguinte (`_crowd_gen`); canto gravado e apitos param junto; pausar a partida vira murmúrio; voltar de um perfil aberto no meio do jogo retoma a torcida (`crowd_resume`); desligar os efeitos nas Opções corta tudo; app em segundo plano pausa todos os players.
+  - **Arquivos novos em `assets/audio/`** (músicas OGG, efeitos WAV/OGG), todos gerados por `tools/audio/gerar_trilha.py` (numpy + scipy + ffmpeg; notas escritas à mão, timbres sintetizados, nada de terceiros). Para mudar um som, edite `tools/audio/musica.py` ou `efeitos.py` e rode `python3 tools/audio/gerar_trilha.py [musica|efeitos|nome]` dentro de `mais-uma-rodada/`. Se um arquivo faltar, o jogo cai na síntese antiga.
+  - Músicas (`scripts/core/soundtrack.gd`): Dia de jogo, Arquibancada, Noite de final, Vestiário, Prancheta e "Todas, em sequência". As três primeiras mantêm o índice salvo de antes.
+  - Efeitos: clique, aba, voltar, interruptor, avisos (bom/ruim/neutro, no toast), assinatura, conquista, vitória, derrota, título, apitos (lance, cartão, intervalo com 2 silvos, fim com 3), "uuuh", trave, explosão da torcida no gol (volume pela torcida de quem marcou), lamento da outra, vaia, aplausos e o ambiente de estádio em loop por baixo dos cantos do `CrowdSynth`.
+  - Falta: ouvir no celular e ajustar volumes; os cantos por clube continuam do `CrowdSynth`.
+
 - **Ramo mais novo (06/10, noite): `claude/hopeful-newton-8avbo4`.** Partiu de `claude/youthful-newton-hey7og`. APK: `builds/MaisUmaRodada-1.0.0-base-idiomas-geografia-2026-10-06-debug.apk` (certificado de depuração de sempre, instala por cima). Três rodadas de pedidos do dono, todas aqui (detalhes na seção "Mundo vivo, carreira de técnico e base profunda" logo abaixo).
 
 ### Mundo vivo, carreira de técnico e base profunda (06/10, ramo `claude/hopeful-newton-8avbo4`)

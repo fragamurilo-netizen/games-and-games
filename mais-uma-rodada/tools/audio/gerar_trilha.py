@@ -21,7 +21,7 @@ OUT_MUSIC = os.path.join(ROOT, "assets", "audio", "musica")
 OUT_SFX = os.path.join(ROOT, "assets", "audio", "efeitos")
 # Efeitos longos (torcida, vinhetas) vão em OGG; os curtos ficam em WAV para tocar sem atraso.
 OGG_SFX = {"achievement", "win", "lose", "title", "chance", "groan", "boo", "applause", "goal_roar", "goal", "goal_big", "post",
-           "whistle_end", "whistle_half"}
+           "whistle_end", "whistle_half", "estadio"}
 
 
 def to_int16(x):
@@ -36,7 +36,7 @@ def write_wav(path, x):
 def write_ogg(path, x, q=4):
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         write_wav(tmp.name, x)
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp.name, "-c:a", "libvorbis", "-q:a", str(q), path], check=True)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", tmp.name, "-c:a", "libvorbis", "-q:a", str(q), "-fflags", "+bitexact", "-flags:a", "+bitexact", path], check=True)
     os.unlink(tmp.name)
 
 

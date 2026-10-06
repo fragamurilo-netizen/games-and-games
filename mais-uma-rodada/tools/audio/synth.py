@@ -440,7 +440,7 @@ def formants(x, vowel, shift=1.0):
 
 
 def voices(dur, rng, count, f0_lo, f0_hi, vowel, pitch=None, env=None, onset=0.25, breath=0.25,
-           female=0.25, stereo=True, jitter=0.03):
+           female=0.25, stereo=True, jitter=0.03, syll=0.0):
     """Muitas vozes juntas (gente gritando ou cantando). `pitch(t)` multiplica a altura de todas."""
     n = int(dur * SR)
     t = np.arange(n) / SR
@@ -455,6 +455,10 @@ def voices(dur, rng, count, f0_lo, f0_hi, vowel, pitch=None, env=None, onset=0.2
         st = rng.uniform(0, onset)
         e = np.clip((t - st) / rng.uniform(0.05, 0.2), 0.0, 1.0) * rng.uniform(0.5, 1.0)
         e *= drift(n, rng, 0.35, 2.0)
+        if syll:
+            # sílabas: a voz liga e desliga 3 a 6 vezes por segundo (conversa, murmúrio)
+            sy = np.abs(lp(rng.standard_normal(n), rng.uniform(3.0, 6.0), 2))
+            e *= (1 - syll) + syll * sy / (np.max(sy) + 1e-9)
         pan = rng.uniform(-0.8, 0.8) if stereo else 0.0
         g = groups["f" if fem else "m"]
         g[0] += src * e * np.sqrt(0.5 * (1 - pan))

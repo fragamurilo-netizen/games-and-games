@@ -24,6 +24,7 @@ var _crowd_p: Array[AudioStreamPlayer] = []
 var _crowd_real: Array = [{}, {}] # perfil das torcidas que têm gravação de verdade
 var _crowd_prof: Array = [{}, {}]
 var _clip_p: AudioStreamPlayer = null
+var _bed_p: AudioStreamPlayer # ambiente do estádio (murmúrio, gritos soltos) por baixo dos cantos
 var _crowd_task: Array[int] = [-1, -1]
 var _crowd_out: Array = [[], []] # resultado da thread: [PackedByteArray]
 var _crowd_cache: Dictionary = {} # chave do perfil -> AudioStreamWAV
@@ -60,6 +61,10 @@ func _ready() -> void:
 		cp.volume_db = -80.0
 		add_child(cp)
 		_crowd_p.append(cp)
+	_bed_p = AudioStreamPlayer.new()
+	_bed_p.bus = &"SFX"
+	_bed_p.volume_db = -80.0
+	add_child(_bed_p)
 	apply_volumes()
 
 
@@ -174,7 +179,7 @@ func _render_async(track: int) -> void:
 
 func _process(delta: float) -> void:
 	_crowd_tick(delta)
-	var crowd_busy := _crowd_on or _crowd_task[0] >= 0 or _crowd_task[1] >= 0 or _crowd_p[0].playing or _crowd_p[1].playing
+	var crowd_busy := _crowd_on or _crowd_task[0] >= 0 or _crowd_task[1] >= 0 or _crowd_p[0].playing or _crowd_p[1].playing or _bed_p.playing
 	if _music_task < 0:
 		if not crowd_busy:
 			set_process(false)
@@ -309,6 +314,7 @@ func _all_players() -> Array[AudioStreamPlayer]:
 	var all: Array[AudioStreamPlayer] = [_music]
 	all.append_array(_players)
 	all.append_array(_crowd_p)
+	all.append(_bed_p)
 	if _clip_p != null:
 		all.append(_clip_p)
 	return all
@@ -346,6 +352,7 @@ func crowd_start(home: Dictionary, away: Dictionary, fill: float, away_share: fl
 	_crowd_hush = false
 	_crowd_gen += 1
 	set_process(true)
+	_bed_start()
 	var profs := [home, away]
 	_crowd_prof = [home, away]
 	var f := clampf(fill, 0.15, 1.0)
@@ -383,6 +390,8 @@ func crowd_stop(now := false) -> void:
 			_crowd_p[i].stop()
 			_crowd_p[i].volume_db = -80.0
 		_crowd_level[i] = _crowd_level[i] if not now else 0.0
+	if now:
+		_bed_p.stop()
 	# O canto/gol gravado não fica soando sozinho depois que a torcida sai.
 	if _clip_p != null and _clip_p.playing:
 		if now:
@@ -403,6 +412,7 @@ func crowd_resume() -> void:
 	for i in 2:
 		if _crowd_p[i].stream != null and not _crowd_p[i].playing:
 			_crowd_play(i, _crowd_p[i].stream)
+	_bed_start()
 	set_process(true)
 
 
@@ -480,7 +490,26 @@ func crowd_clip(side: int, kind: String) -> bool:
 	return true
 
 
+func _bed_start() -> void:
+	if _bed_p.playing:
+		return
+	var st := _stream("estadio")
+	if st == null:
+		return
+	if "loop" in st:
+		st.set("loop", true)
+	_bed_p.stream = st
+	_bed_p.volume_db = -60.0
+	_bed_p.play(randf() * st.get_length() * 0.9)
+
+
 func _crowd_tick(delta: float) -> void:
+	if _bed_p.playing:
+		# O ambiente acompanha o tamanho das duas torcidas (some junto quando elas saem)
+		var lvl := (_crowd_level[0] + _crowd_level[1] * 0.6) * 0.75
+		_bed_p.volume_db = linear_to_db(maxf(0.0005, lvl))
+		if not _crowd_on and lvl <= 0.001:
+			_bed_p.stop()
 	for i in 2:
 		if _crowd_task[i] >= 0 and WorkerThreadPool.is_task_completed(_crowd_task[i]):
 			WorkerThreadPool.wait_for_task_completion(_crowd_task[i])
