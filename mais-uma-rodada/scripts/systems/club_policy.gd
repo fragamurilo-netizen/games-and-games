@@ -115,16 +115,28 @@ static func apply_rule(world: GameWorld, rng: RandomNumberGenerator, club: Club,
 	p.nationality = nation
 	p.origin.clear()
 	var origin := NameGenerator.pick_origin(rng, nation)
+	if parts[0] == "region" and String(origin.get("h", "")) != "":
+		# A região (País Basco) tem bem menos famílias de fora que o país inteiro: metade dos
+		# sorteios com família imigrante vira família da terra (sorteio à parte).
+		var rr := RandomNumberGenerator.new()
+		rr.seed = hash([p.face_seed, "regiao"])
+		if rr.randf() < 0.5:
+			origin = NameGenerator.pick_origin(rr, nation)
 	p.eth = int(origin["eth"])
 	var culture := String(origin["c"])
 	if parts[0] == "region":
 		var cities := region_cities(nation, parts[1])
 		if not cities.is_empty():
 			p.hometown = String(RngUtil.pick(rng, cities))
-		culture = String(of(club).get("culture", culture))
+		# Nome da região só no lugar do nome do país: família de fora mantém o sobrenome dela
+		# ("Iñaki Williams", não "Iker Etxeberria").
+		var local := String(of(club).get("culture", ""))
+		if local != "":
+			culture = NameGenerator.with_local(culture, local)
 	else:
 		p.hometown = PlayerGenerator.pick_hometown(rng, nation, club.city)
 	NationalityManager.ensure(world, p)
+	NationalityManager.add_heritage(p, String(origin.get("h", "")), 0.0)
 	var names := NameGenerator.generate(rng, culture, {"pos": p.position, "height": p.height, "foot": p.foot, "attrs": p.attrs,
 		"region": ClubGenerator.region_of_city(nation, p.hometown)}, used)
 	p.first_name = names["first"]

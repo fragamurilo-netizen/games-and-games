@@ -222,7 +222,7 @@ static func create(world: GameWorld, rng: RandomNumberGenerator, pos: int, targe
 	p.last_name = names["last"]
 	p.nickname = names["nickname"]
 	p.known_as = names["known_as"]
-	NationalityManager.generate(p)
+	NationalityManager.generate(p, String(origin.get("h", "")))
 	return p
 
 

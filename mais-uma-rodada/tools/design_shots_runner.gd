@@ -281,6 +281,14 @@ func _only_pass() -> void:
 				if star == null or p.ovr_f > star.ovr_f:
 					star = p
 			args["id"] = star.id
+		if route == "editor_player":
+			# Editor com o melhor jogador do elenco aberto (cartão de aparência)
+			route = "editor"
+			var best: Player = null
+			for p in w.squad(w.user_club()):
+				if best == null or p.ovr_f > best.ovr_f:
+					best = p
+			args = {"player": best.id}
 		if route == "coach":
 			var u2 := w.user_club()
 			for oc: Club in w.clubs_in_league(u2.league_id):

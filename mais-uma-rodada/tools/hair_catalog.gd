@@ -127,6 +127,7 @@ func _initialize() -> void:
 		l.position = Vector2(6 + k * (px + 6), 6 + r * cell_h + px)
 		l.size = Vector2(px, 20)
 		l.clip_text = true
+		l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.add_theme_font_size_override("font_size", 12)
 		l.add_theme_color_override("font_color", Color("#DDE6F0"))

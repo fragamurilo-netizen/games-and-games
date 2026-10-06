@@ -1,9 +1,12 @@
 extends SceneTree
 ## Cutouts grandes para conferir realismo: cabelos, barbas e camisa com a luz de estúdio.
 ## xvfb-run godot --path . --resolution 1280x660 --script res://tools/cutout_closeup.gd -- --out=/tmp/closeup.png
-## --size=N (lado de cada retrato), --only=a,b (só esses casos), --clean (rostos limpos)
+## --size=N (lado de cada retrato), --only=a,b (só esses casos), --clean (rostos limpos),
+## --classic (busto no círculo em vez do recorte FM), --cutout e --bg=#rrggbb (fundo da tela)
 
 var _out := "user://closeup.png"
+var _cut := false
+var _bgc := Color("#141414")
 var _frames := 0
 
 ## Com --clean: rostos sem barba e com cabelo curto, para julgar só o rosto.
@@ -35,13 +38,19 @@ func _initialize() -> void:
 			_out = a.substr(6)
 		elif a.begins_with("--size="):
 			px = int(a.substr(7))
+		elif a == "--classic":
+			PortraitView.default_framing = PortraitView.FRAME_CLASSIC
+		elif a == "--cutout":
+			_cut = true
+		elif a.begins_with("--bg="):
+			_bgc = Color(a.substr(5))
 		elif a == "--clean":
 			cases = CLEAN
 		elif a.begins_with("--only="):
 			only = Array(a.substr(7).split(",")).map(func(x): return int(x))
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	var bg := ColorRect.new()
-	bg.color = Color("#141414")
+	bg.color = _bgc
 	bg.size = Vector2(6000, 6000)
 	root.add_child(bg)
 	var crest := {"shape": "shield", "symbol": "star", "c1": "#222222", "c2": "#FFFFFF", "border": "thin", "initials": "FC"}
@@ -64,6 +73,7 @@ func _initialize() -> void:
 		pv.bg_color = Color(String(k["c1"])).darkened(0.6)
 		pv.kit = k
 		pv.crest = crest
+		pv.cutout = _cut
 		root.add_child(pv)
 
 

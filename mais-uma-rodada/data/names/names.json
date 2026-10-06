@@ -1,5 +1,5 @@
 {
-	"_doc": "Culturas de nomes. Cada nacionalidade (nations.json) sorteia uma origem com cultura de nome e etnia. main_surname: first (hispânicos: 1º sobrenome é o principal) ou last. family_first: nome de família antes (Coreia, China). famous: nomes completos de craques reais que nunca são gerados.",
+	"_doc": "Culturas de nomes. Cada nacionalidade (nations.json) sorteia uma origem com cultura de nome e etnia. main_surname: first (hispânicos: 1º sobrenome é o principal) ou last. family_first: nome de família antes (Coreia, China). famous: nomes completos de craques reais que nunca são gerados. diaspora_first/first_pull e mixing: nomes de quem tem família de outra origem (ver mixing._doc).",
 	"famous": [
 		"Lionel Messi",
 		"Cristiano Ronaldo",
@@ -769,7 +769,9 @@
 			},
 			"main_surname": "last",
 			"double_last_chance": 0.25,
-			"zipf": 1.45
+			"zipf": 1.45,
+			"diaspora_first": 0.4,
+			"first_pull": 0.6
 		},
 		"pt": {
 			"known_by": {
@@ -978,7 +980,9 @@
 				]
 			},
 			"double_last_chance": 0.3,
-			"zipf": 1.45
+			"zipf": 1.45,
+			"diaspora_first": 0.4,
+			"first_pull": 0.6
 		},
 		"es": {
 			"known_by": {
@@ -1250,7 +1254,9 @@
 					"Josemi"
 				]
 			},
-			"zipf": 1.5
+			"zipf": 1.5,
+			"diaspora_first": 0.4,
+			"first_pull": 0.1
 		},
 		"rio": {
 			"known_by": {
@@ -1552,7 +1558,8 @@
 					"Pájaro"
 				]
 			},
-			"zipf": 1.4
+			"zipf": 1.4,
+			"first_pull": 0.6
 		},
 		"latam": {
 			"known_by": {
@@ -1709,7 +1716,9 @@
 					"Chiqui"
 				]
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"mx": {
 			"known_by": {
@@ -1967,7 +1976,9 @@
 					"Chino"
 				]
 			},
-			"zipf": 1.4
+			"zipf": 1.4,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"en": {
 			"known_by": {
@@ -2048,7 +2059,6 @@
 				"Owen",
 				"Joel",
 				"Marcus",
-				"Tariq",
 				"Morgan",
 				"Robbie",
 				"Ollie",
@@ -2111,7 +2121,6 @@
 				"Lewis",
 				"Harris",
 				"Clarke",
-				"Patel",
 				"Jackson",
 				"Wood",
 				"Turner",
@@ -2151,14 +2160,11 @@
 				"Miller",
 				"Cox",
 				"Richards",
-				"Khan",
 				"Marshall",
 				"Anderson",
 				"Simpson",
 				"Ellis",
 				"Adams",
-				"Singh",
-				"Begum",
 				"Wilkinson",
 				"Foster",
 				"Chapman",
@@ -2167,9 +2173,7 @@
 				"Rogers",
 				"Gray",
 				"Mason",
-				"Ali",
 				"Hunt",
-				"Hussain",
 				"Campbell",
 				"Matthews",
 				"Owen",
@@ -2190,10 +2194,8 @@
 				"Harvey",
 				"Graham",
 				"Pearson",
-				"Ahmed",
 				"Fletcher",
 				"Walsh",
-				"Kaur",
 				"Gibson",
 				"Howard",
 				"Andrews",
@@ -2259,7 +2261,6 @@
 				"Williamson",
 				"Bird",
 				"Gardner",
-				"Shah",
 				"Dean",
 				"Lane",
 				"Cooke",
@@ -2310,7 +2311,8 @@
 					"Macca"
 				]
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.5
 		},
 		"fr": {
 			"known_by": {
@@ -2373,8 +2375,6 @@
 				"Martin",
 				"Aurélien",
 				"Tristan",
-				"Mehdi",
-				"Sofiane",
 				"Yanis",
 				"Rayan",
 				"Adam",
@@ -2543,7 +2543,8 @@
 				"Aubry",
 				"Guyot"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.4
 		},
 		"de": {
 			"known_by": {
@@ -2754,7 +2755,8 @@
 				"Kunz",
 				"Arndt"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.4
 		},
 		"it": {
 			"known_by": {
@@ -2954,7 +2956,8 @@
 				"Pace",
 				"Longhi"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.4
 		},
 		"nl": {
 			"known_by": {
@@ -3009,8 +3012,6 @@
 				"Tygo",
 				"Jayden",
 				"Ryan",
-				"Mohamed",
-				"Youssef",
 				"Sander",
 				"Wesley",
 				"Robin",
@@ -3340,7 +3341,8 @@
 				"Bayram",
 				"Duman"
 			],
-			"zipf": 1.5
+			"zipf": 1.5,
+			"diaspora_first": 0.15
 		},
 		"gr": {
 			"known_by": {
@@ -3762,7 +3764,8 @@
 				"Olatunji",
 				"Oyedele"
 			],
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.45
 		},
 		"waf_fr": {
 			"known_by": {
@@ -3871,7 +3874,8 @@
 				"Kouyaté",
 				"Tall"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.3
 		},
 		"maghreb": {
 			"known_by": {
@@ -3966,7 +3970,8 @@
 				"Mahmoudi",
 				"Bakkali"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.2
 		},
 		"arab": {
 			"known_by": {
@@ -4055,7 +4060,8 @@
 					"Zizo"
 				]
 			},
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.25
 		},
 		"rsa": {
 			"known_by": {
@@ -4180,7 +4186,8 @@
 				"Ngubane",
 				"Sibiya"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.4
 		},
 		"lusoaf": {
 			"known_by": {
@@ -4265,7 +4272,8 @@
 			},
 			"main_surname": "last",
 			"double_last_chance": 0.15,
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.5
 		},
 		"jp": {
 			"known_by": {
@@ -4439,7 +4447,9 @@
 				"Kikuchi",
 				"Kinoshita"
 			],
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.7,
+			"first_pull": 0.25
 		},
 		"kr": {
 			"known_by": {
@@ -4560,7 +4570,9 @@
 				"Gong",
 				"Hyun"
 			],
-			"zipf": 2.8
+			"zipf": 2.8,
+			"diaspora_first": 0.75,
+			"first_pull": 0.25
 		},
 		"cn": {
 			"known_by": {
@@ -4713,7 +4725,9 @@
 				"Qian",
 				"Kong"
 			],
-			"zipf": 2.0
+			"zipf": 2.0,
+			"diaspora_first": 0.75,
+			"first_pull": 0.25
 		},
 		"persian": {
 			"known_by": {
@@ -4813,7 +4827,8 @@
 				"Mirzaei",
 				"Rahmani"
 			],
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.25
 		},
 		"alb": {
 			"known_by": {
@@ -5473,7 +5488,6 @@
 				"Forsberg",
 				"Sjöberg",
 				"Wallin",
-				"Ali",
 				"Engström",
 				"Eklund",
 				"Danielsson",
@@ -5621,9 +5635,7 @@
 				"Mathisen",
 				"Lie",
 				"Amundsen",
-				"Nguyen",
 				"Rasmussen",
-				"Ali",
 				"Lunde",
 				"Solheim",
 				"Berge",
@@ -5644,7 +5656,6 @@
 				"Aas",
 				"Myhre",
 				"Hanssen",
-				"Ahmed",
 				"Haugland",
 				"Thorsen",
 				"Hovland",
@@ -6994,7 +7005,8 @@
 				"first": 0.03,
 				"last": 0.04
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.45
 		},
 		"gh": {
 			"first": [
@@ -7112,7 +7124,8 @@
 				"first": 0.02,
 				"last": 0.03
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.45
 		},
 		"sn": {
 			"first": [
@@ -7220,7 +7233,8 @@
 				"first": 0.02,
 				"last": 0.04
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.25
 		},
 		"ml": {
 			"first": [
@@ -7320,7 +7334,8 @@
 				"first": 0.02,
 				"last": 0.04
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.25
 		},
 		"ci": {
 			"first": [
@@ -7429,7 +7444,8 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.4
 		},
 		"cm": {
 			"first": [
@@ -7531,7 +7547,8 @@
 				"first": 0.02,
 				"last": 0.04
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.45
 		},
 		"cd": {
 			"first": [
@@ -7623,7 +7640,8 @@
 				"first": 0.02,
 				"last": 0.04
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.45
 		},
 		"bf": {
 			"first": [
@@ -7693,7 +7711,8 @@
 				"full": 0.95,
 				"last": 0.05
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.3
 		},
 		"ga": {
 			"first": [
@@ -7765,7 +7784,8 @@
 				"full": 0.95,
 				"last": 0.05
 			},
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.45
 		},
 		"zw": {
 			"first": [
@@ -7833,7 +7853,8 @@
 				"full": 0.95,
 				"last": 0.05
 			},
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.45
 		},
 		"gulf": {
 			"first": [
@@ -7912,7 +7933,8 @@
 				"first": 0.08,
 				"last": 0.06
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.1
 		},
 		"eg": {
 			"first": [
@@ -8030,7 +8052,8 @@
 				"nickname": 0.05,
 				"last": 0.05
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.2
 		},
 		"ma": {
 			"first": [
@@ -8137,7 +8160,8 @@
 				"first": 0.03,
 				"last": 0.04
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.2
 		},
 		"dz": {
 			"first": [
@@ -8233,7 +8257,8 @@
 				"first": 0.02,
 				"last": 0.04
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.2
 		},
 		"tn": {
 			"first": [
@@ -8317,7 +8342,8 @@
 				"first": 0.02,
 				"last": 0.04
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.2
 		},
 		"ao": {
 			"first": [
@@ -8421,7 +8447,8 @@
 				"nickname": 0.14,
 				"last": 0.06
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.5
 		},
 		"cv": {
 			"first": [
@@ -8507,7 +8534,8 @@
 				"nickname": 0.12,
 				"last": 0.1
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.5
 		},
 		"mz": {
 			"first": [
@@ -8584,7 +8612,8 @@
 				"nickname": 0.12,
 				"last": 0.08
 			},
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.5
 		},
 		"gw": {
 			"first": [
@@ -8655,7 +8684,8 @@
 				"nickname": 0.08,
 				"last": 0.08
 			},
-			"zipf": 1.25
+			"zipf": 1.25,
+			"diaspora_first": 0.3
 		},
 		"co": {
 			"first": [
@@ -8828,7 +8858,9 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.4
+			"zipf": 1.4,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"pe": {
 			"first": [
@@ -8982,7 +9014,9 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.4
+			"zipf": 1.4,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"ec": {
 			"first": [
@@ -9112,7 +9146,9 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"ve": {
 			"first": [
@@ -9233,7 +9269,9 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"cl": {
 			"first": [
@@ -9381,7 +9419,8 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.4
+			"zipf": 1.4,
+			"first_pull": 0.6
 		},
 		"py": {
 			"first": [
@@ -9502,7 +9541,8 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"first_pull": 0.6
 		},
 		"bo": {
 			"first": [
@@ -9624,7 +9664,9 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.3,
+			"first_pull": 0.6
 		},
 		"cam": {
 			"first": [
@@ -9746,7 +9788,8 @@
 				"first": 0.03,
 				"last": 0.05
 			},
-			"zipf": 1.35
+			"zipf": 1.35,
+			"first_pull": 0.6
 		},
 		"us": {
 			"first": [
@@ -9786,7 +9829,6 @@
 				"Dylan",
 				"Steven",
 				"Brian",
-				"Jose",
 				"Timothy",
 				"Nathan",
 				"Adam",
@@ -9800,9 +9842,7 @@
 				"Mark",
 				"Stephen",
 				"Jeffrey",
-				"Luis",
 				"Travis",
-				"Juan",
 				"Caleb",
 				"Ethan",
 				"Noah",
@@ -9829,26 +9869,14 @@
 				"Trevor",
 				"Derek",
 				"Marcus",
-				"Malik",
-				"Jalen",
-				"Darius",
 				"Isaiah",
-				"DeAndre",
-				"Terrell",
-				"Tre",
 				"Xavier",
 				"Andre",
 				"Devon",
-				"Jamal",
-				"Cedric",
 				"Miles",
-				"Jaylen",
 				"Elijah",
 				"Josiah",
 				"Gabriel",
-				"Diego",
-				"Carlos",
-				"Mateo",
 				"Adrian",
 				"Julian",
 				"Brendan",
@@ -9875,13 +9903,8 @@
 				"Williams",
 				"Brown",
 				"Jones",
-				"Garcia",
 				"Miller",
 				"Davis",
-				"Rodriguez",
-				"Martinez",
-				"Hernandez",
-				"Lopez",
 				"Wilson",
 				"Anderson",
 				"Thomas",
@@ -9992,15 +10015,10 @@
 				"Fox",
 				"Rose",
 				"Rice",
-				"Moreno",
 				"Schmidt",
-				"Patel",
 				"Ferguson",
 				"Nichols",
-				"Herrera",
-				"Medina",
 				"Ryan",
-				"Fernandez",
 				"Weaver",
 				"Daniels",
 				"Stephens",
@@ -10010,13 +10028,11 @@
 				"Dunn",
 				"Pierce",
 				"Arnold",
-				"Tran",
 				"Spencer",
 				"Peters",
 				"Hawkins",
 				"Grant",
 				"Hansen",
-				"Castro",
 				"Hoffman",
 				"Hart",
 				"Elliott",
@@ -10036,7 +10052,8 @@
 				"last": 0.03,
 				"nickname": 0.01
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.5
 		},
 		"jm": {
 			"first": [
@@ -10152,7 +10169,8 @@
 				"full": 0.97,
 				"last": 0.03
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"diaspora_first": 0.55
 		},
 		"eus": {
 			"known_by": {
@@ -10317,7 +10335,8 @@
 					"Josemi"
 				]
 			},
-			"zipf": 1.3
+			"zipf": 1.3,
+			"first_pull": 0.2
 		},
 		"ie": {
 			"known_by": {
@@ -10920,7 +10939,1921 @@
 				"Al-Ruwaili",
 				"Al-Tamimi"
 			],
-			"zipf": 1.35
+			"zipf": 1.35,
+			"diaspora_first": 0.1
+		},
+		"sas": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Hamza",
+				"Zidane",
+				"Adil",
+				"Arjun",
+				"Rohan",
+				"Imran",
+				"Bilal",
+				"Zain",
+				"Kashif",
+				"Faisal",
+				"Haris",
+				"Usman",
+				"Danish",
+				"Aamir",
+				"Asif",
+				"Tariq",
+				"Nabil",
+				"Rizwan",
+				"Shahid",
+				"Yasir",
+				"Aryan",
+				"Dev",
+				"Rahul",
+				"Vikram",
+				"Kiran",
+				"Amar",
+				"Ravi",
+				"Sanjay",
+				"Nikhil",
+				"Jaskaran",
+				"Harvinder",
+				"Gurjit",
+				"Karan",
+				"Ishaan",
+				"Anish",
+				"Sami",
+				"Rayhan",
+				"Shakil",
+				"Kabir",
+				"Yusuf",
+				"Ibrahim",
+				"Ismail",
+				"Mohammed",
+				"Omar",
+				"Junaid",
+				"Saqib",
+				"Naveed",
+				"Arman",
+				"Sohail",
+				"Kamran"
+			],
+			"last": [
+				"Khan",
+				"Ali",
+				"Hussain",
+				"Ahmed",
+				"Shah",
+				"Iqbal",
+				"Malik",
+				"Choudhury",
+				"Rahman",
+				"Islam",
+				"Uddin",
+				"Miah",
+				"Patel",
+				"Singh",
+				"Sandhu",
+				"Gill",
+				"Dhillon",
+				"Sidhu",
+				"Bains",
+				"Grewal",
+				"Sharma",
+				"Mistry",
+				"Desai",
+				"Mehta",
+				"Kumar",
+				"Chopra",
+				"Batth",
+				"Bhatti",
+				"Akhtar",
+				"Mahmood",
+				"Javed",
+				"Qureshi",
+				"Siddiqui",
+				"Butt",
+				"Chaudhry",
+				"Raja",
+				"Mirza",
+				"Sohal",
+				"Rai",
+				"Hayat"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.15
+		},
+		"horn": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Mohamed",
+				"Abdi",
+				"Abdirahman",
+				"Abdullahi",
+				"Hassan",
+				"Ahmed",
+				"Ali",
+				"Omar",
+				"Yusuf",
+				"Ibrahim",
+				"Mahad",
+				"Liban",
+				"Bashir",
+				"Hamza",
+				"Khalid",
+				"Mustafa",
+				"Abdikarim",
+				"Said",
+				"Idris",
+				"Yonas",
+				"Samuel",
+				"Dawit",
+				"Yohannes",
+				"Biniam",
+				"Filmon",
+				"Robel",
+				"Henok",
+				"Natnael",
+				"Ermias",
+				"Yared",
+				"Abel",
+				"Alexander",
+				"Elias",
+				"Daniel",
+				"Isaac",
+				"Mikael",
+				"Nahom",
+				"Kidus"
+			],
+			"last": [
+				"Abdi",
+				"Ali",
+				"Mohamed",
+				"Hassan",
+				"Farah",
+				"Osman",
+				"Ahmed",
+				"Omar",
+				"Yusuf",
+				"Warsame",
+				"Jama",
+				"Nur",
+				"Aden",
+				"Hussein",
+				"Ibrahim",
+				"Isse",
+				"Elmi",
+				"Duale",
+				"Gedi",
+				"Haile",
+				"Tesfaye",
+				"Tekle",
+				"Gebre",
+				"Gebremedhin",
+				"Kidane",
+				"Berhane",
+				"Mebrahtu",
+				"Asfaw",
+				"Bekele",
+				"Girma",
+				"Mengistu",
+				"Yohannes",
+				"Isak",
+				"Tewolde",
+				"Habte",
+				"Ghebreyesus",
+				"Tsegaye",
+				"Abraha"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.2
+		},
+		"vn": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Minh",
+				"Duc",
+				"Hung",
+				"Tuan",
+				"Quang",
+				"Thanh",
+				"Long",
+				"Huy",
+				"Bao",
+				"Khoa",
+				"Nam",
+				"Phuc",
+				"Vinh",
+				"Dung",
+				"Hai",
+				"Son",
+				"Trung",
+				"Khang",
+				"Hieu",
+				"Thien",
+				"Sokha",
+				"Vanna",
+				"Kham",
+				"Somsak"
+			],
+			"last": [
+				"Nguyen",
+				"Tran",
+				"Le",
+				"Pham",
+				"Hoang",
+				"Phan",
+				"Vu",
+				"Vo",
+				"Dang",
+				"Bui",
+				"Do",
+				"Ho",
+				"Ngo",
+				"Duong",
+				"Ly",
+				"Truong",
+				"Dinh",
+				"Lam",
+				"Huynh",
+				"Mai",
+				"Chau",
+				"Sok",
+				"Chea",
+				"Keo",
+				"Phommasak",
+				"Sisavath"
+			],
+			"zipf": 1.6,
+			"diaspora_first": 0.65
+		},
+		"ph": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Paolo",
+				"Jericho",
+				"Carlo",
+				"Miguel",
+				"Angelo",
+				"Jose",
+				"Mark",
+				"John Paul",
+				"Rafael",
+				"Joshua",
+				"Christian",
+				"Ramon",
+				"Jerome",
+				"Jeffrey",
+				"Ryan",
+				"Neil",
+				"Rey",
+				"Adrian",
+				"Kevin",
+				"Jason",
+				"Carl",
+				"Bryan",
+				"Arnel",
+				"Rodel"
+			],
+			"last": [
+				"Santos",
+				"Reyes",
+				"Cruz",
+				"Bautista",
+				"Ocampo",
+				"Garcia",
+				"Mendoza",
+				"Torres",
+				"Tomas",
+				"Castillo",
+				"Flores",
+				"Villanueva",
+				"Ramos",
+				"Castro",
+				"Rivera",
+				"Aquino",
+				"Navarro",
+				"Salazar",
+				"Mercado",
+				"Dela Cruz",
+				"Del Rosario",
+				"Manalo",
+				"Pangilinan",
+				"Dimaculangan",
+				"Tolentino",
+				"Agbayani",
+				"Soriano",
+				"Panganiban",
+				"Lacson",
+				"Gonzales",
+				"Domingo",
+				"Macapagal",
+				"Magbanua",
+				"Sison"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.6
+		},
+		"pac": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Sione",
+				"Tevita",
+				"Viliami",
+				"Semisi",
+				"Pita",
+				"Ioane",
+				"Tama",
+				"Manu",
+				"Malakai",
+				"Isileli",
+				"Josaia",
+				"Jone",
+				"Waisea",
+				"Apisai",
+				"Taniela",
+				"Siaosi",
+				"Aisea",
+				"Rawiri",
+				"Tane",
+				"Nikau",
+				"Wiremu",
+				"Hemi",
+				"Matiu",
+				"Tipene",
+				"Kauri",
+				"Lui",
+				"Fetu",
+				"Sefo",
+				"Nemani",
+				"Peni"
+			],
+			"last": [
+				"Tuilagi",
+				"Faleolo",
+				"Fifita",
+				"Taufa",
+				"Vainikolo",
+				"Havili",
+				"Tupou",
+				"Lolohea",
+				"Mafi",
+				"Moala",
+				"Fonua",
+				"Naufahu",
+				"Leota",
+				"Faumuina",
+				"Seiuli",
+				"Sopoaga",
+				"Waqa",
+				"Nadolo",
+				"Radradra",
+				"Tamanivalu",
+				"Turaga",
+				"Ngata",
+				"Parata",
+				"Tamihana",
+				"Te Rangi",
+				"Tuiasosopo",
+				"Pulu",
+				"Vaipulu",
+				"Aumua",
+				"Lealaiauloto"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.45
+		},
+		"af": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Ruan",
+				"Stefan",
+				"Pieter",
+				"Johan",
+				"Willem",
+				"Hendrik",
+				"Jacques",
+				"Francois",
+				"Riaan",
+				"Dewald",
+				"Wian",
+				"Jaco",
+				"Andre",
+				"Gerhard",
+				"Schalk",
+				"Deon",
+				"Morne",
+				"Heinrich",
+				"Thinus",
+				"Divan",
+				"Ruben",
+				"Arno",
+				"Christo",
+				"Juan",
+				"Duan",
+				"Kyle",
+				"Keagan",
+				"Jayden",
+				"Kurt",
+				"Brandon",
+				"Ashley",
+				"Bradley",
+				"Grant",
+				"Darren",
+				"Lyle",
+				"Oswin",
+				"Ronwen",
+				"Reeve",
+				"Fagrie",
+				"Ebrahim"
+			],
+			"last": [
+				"van der Merwe",
+				"Botha",
+				"Pretorius",
+				"Nel",
+				"Smit",
+				"du Plessis",
+				"du Toit",
+				"Steyn",
+				"Venter",
+				"Fourie",
+				"Coetzee",
+				"Kruger",
+				"Pienaar",
+				"Jacobs",
+				"van Wyk",
+				"Swanepoel",
+				"Erasmus",
+				"Engelbrecht",
+				"Visser",
+				"de Villiers",
+				"Meyer",
+				"Marais",
+				"Louw",
+				"Joubert",
+				"le Roux",
+				"Strydom",
+				"van Zyl",
+				"Potgieter",
+				"Olivier",
+				"Bezuidenhout",
+				"Hendricks",
+				"Adams",
+				"Petersen",
+				"Williams",
+				"Daniels",
+				"Isaacs",
+				"Abrahams",
+				"Arendse",
+				"Booysen",
+				"Cloete",
+				"Februarie",
+				"September",
+				"Solomons",
+				"Jantjies",
+				"Klaasen",
+				"Lakay"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.5
+		},
+		"afam": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Malik",
+				"Jalen",
+				"DeAndre",
+				"Terrell",
+				"Darius",
+				"Jamal",
+				"Cedric",
+				"Jaylen",
+				"Xavier",
+				"Andre",
+				"Devon",
+				"Isaiah",
+				"Marcus",
+				"Darnell",
+				"Tyrell",
+				"Jermaine",
+				"Demetrius",
+				"Jaden",
+				"Kendall",
+				"Marquis",
+				"Dante",
+				"Lamar",
+				"Rashad",
+				"Khalil",
+				"Trey",
+				"Elijah",
+				"Josiah",
+				"Jalil",
+				"Desmond",
+				"Reggie",
+				"Quincy",
+				"Terrance",
+				"Kobe",
+				"Amari",
+				"Zion",
+				"Jayden",
+				"Tyler",
+				"Brandon",
+				"Jordan",
+				"Cameron"
+			],
+			"last": [
+				"Williams",
+				"Johnson",
+				"Smith",
+				"Jones",
+				"Brown",
+				"Jackson",
+				"Davis",
+				"Harris",
+				"Robinson",
+				"Thomas",
+				"Thompson",
+				"Moore",
+				"Taylor",
+				"White",
+				"Washington",
+				"Jefferson",
+				"Banks",
+				"Coleman",
+				"Freeman",
+				"Glover",
+				"Bryant",
+				"Mitchell",
+				"Carter",
+				"Walker",
+				"Lewis",
+				"Wright",
+				"Turner",
+				"Simmons",
+				"Gaines",
+				"Booker",
+				"Dorsey",
+				"Hairston",
+				"Ellis",
+				"Henderson",
+				"Hayes",
+				"Bell",
+				"Reed",
+				"Howard",
+				"Wallace",
+				"Jenkins",
+				"Gordon",
+				"Mack",
+				"Pruitt",
+				"Mosley",
+				"Pettiford",
+				"Outlaw",
+				"Battle",
+				"Merriweather"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.5
+		},
+		"sur": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Jurriën",
+				"Jeremie",
+				"Quincy",
+				"Ryan",
+				"Georginio",
+				"Virgil",
+				"Clarence",
+				"Edgar",
+				"Patrick",
+				"Romeo",
+				"Jetro",
+				"Royston",
+				"Leroy",
+				"Jordi",
+				"Denzel",
+				"Javairô",
+				"Tyrell",
+				"Lutsharel",
+				"Jairo",
+				"Shurandy",
+				"Jerdy",
+				"Elijah",
+				"Kenneth",
+				"Urby",
+				"Wesley",
+				"Nigel",
+				"Gregory",
+				"Ricardo",
+				"Melayro",
+				"Calvin",
+				"Mitchel",
+				"Ezra",
+				"Delano",
+				"Riechedly",
+				"Kenji"
+			],
+			"last": [
+				"Wijnaldum",
+				"Seedorf",
+				"Kluivert",
+				"Rijkaard",
+				"Bogarde",
+				"Reiziger",
+				"Promes",
+				"Fer",
+				"Bergwijn",
+				"Timber",
+				"Doelwijt",
+				"Esajas",
+				"Leerdam",
+				"Vlijter",
+				"Menzo",
+				"Zeefuik",
+				"Aanholt",
+				"Kanhai",
+				"Pinas",
+				"Emanuelson",
+				"Biswane",
+				"Tuur",
+				"Wijngaarde",
+				"Panka",
+				"Martina",
+				"Felida",
+				"Hooi",
+				"Bacuna",
+				"Kuwas",
+				"Janga",
+				"Gorré",
+				"Antonia",
+				"Dumfries",
+				"Sno",
+				"Breinburg",
+				"Karsdorp",
+				"Fränkel",
+				"Dijks"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.55
+		},
+		"molucca": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Simon",
+				"Giovanni",
+				"Ricky",
+				"Sergio",
+				"Ruben",
+				"Maikel",
+				"Ramon",
+				"Jordi",
+				"Dennis",
+				"Michael",
+				"Kevin",
+				"Stefano",
+				"Marciano",
+				"Yoram",
+				"Elvin",
+				"Denny"
+			],
+			"last": [
+				"Tahamata",
+				"Pattinama",
+				"Latuheru",
+				"Sahetapy",
+				"Pelupessy",
+				"Matulessy",
+				"Wattimena",
+				"Tuhumury",
+				"Ririhena",
+				"Tupamahu",
+				"Manuhutu",
+				"Lokollo",
+				"Siahaya",
+				"Noya",
+				"Leatemia",
+				"Hehanussa",
+				"Soplanit",
+				"Tahapary",
+				"Latupeirissa",
+				"Bronckhorst"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.75
+		},
+		"ssd": {
+			"known_by": {
+				"full": 0.95,
+				"last": 0.05
+			},
+			"main_surname": "last",
+			"first": [
+				"Garang",
+				"Awer",
+				"Deng",
+				"Mayen",
+				"Majok",
+				"Kuol",
+				"Thon",
+				"Akol",
+				"Chol",
+				"Bol",
+				"Mading",
+				"Ajak",
+				"Malual",
+				"Makuach",
+				"Aguek",
+				"Abraham",
+				"Daniel",
+				"Thomas",
+				"Peter",
+				"John",
+				"Joseph",
+				"Samuel",
+				"Emmanuel",
+				"David"
+			],
+			"last": [
+				"Deng",
+				"Mabil",
+				"Kuol",
+				"Garang",
+				"Mayen",
+				"Majok",
+				"Ajak",
+				"Akol",
+				"Bol",
+				"Chol",
+				"Malual",
+				"Thon",
+				"Atem",
+				"Lual",
+				"Manyang",
+				"Makuei",
+				"Dut",
+				"Mading",
+				"Ayuel",
+				"Aguer",
+				"Maker",
+				"Mawien",
+				"Akec",
+				"Nyuon"
+			],
+			"zipf": 1.3,
+			"diaspora_first": 0.35
+		}
+	},
+	"mixing": {
+		"_doc": "Nome coerente com a família. coherent[cultura][etnia] = chance de alguém dessa etnia ter nome todo da cultura do país (falta = 0; cultura fora da lista = sempre). Senão o nome mistura a cultura do país com a da família (heritage[etnia][país ou *]): sobrenome da família e primeiro nome do país com chance diaspora_first (da família) + first_pull (do país) — 'Iñaki Williams', 'Alejandro Balde', 'Lucas Tanaka'. Filho de casal misto (etnia mix) às vezes tem o primeiro nome da família e o sobrenome do país ('Yussuf Poulsen'). homes: países da família de cada cultura (segundo passaporte de quem tem família de fora).",
+		"coherent": {
+			"br": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"pt": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"mix": 1,
+				"afr": 0.75
+			},
+			"es": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"mix": 0.45,
+				"afr": 0.08
+			},
+			"eus": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 0.5,
+				"mix": 0.3,
+				"afr": 0.04
+			},
+			"en": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.7,
+				"afr": 0.4,
+				"pac": 0.35
+			},
+			"sco": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.6,
+				"afr": 0.3
+			},
+			"wal": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.6,
+				"afr": 0.3
+			},
+			"ie": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.5,
+				"afr": 0.15
+			},
+			"us": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.85,
+				"afr": 0.3
+			},
+			"fr": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.5,
+				"afr": 0.6
+			},
+			"nl": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.5,
+				"afr": 0.25,
+				"sea": 0.4
+			},
+			"de": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.35,
+				"afr": 0.1
+			},
+			"it": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.4,
+				"afr": 0.1
+			},
+			"dk": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.35,
+				"afr": 0.08
+			},
+			"se": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.35,
+				"afr": 0.08
+			},
+			"no": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.35,
+				"afr": 0.08
+			},
+			"fi": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 0.35,
+				"afr": 0.08
+			},
+			"is": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"nordic": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"jp": {
+				"eas": 1
+			},
+			"kr": {
+				"eas": 1
+			},
+			"cn": {
+				"eas": 1
+			},
+			"rsa": {
+				"afr": 1,
+				"mix": 0.25
+			},
+			"af": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"mix": 1
+			},
+			"tr": {
+				"med": 1,
+				"eur": 1,
+				"nor": 1,
+				"arb": 1
+			},
+			"jm": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"cv": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"ao": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"lusoaf": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"mz": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"gw": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"waf_en": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"waf_fr": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"ng": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"gh": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"sn": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"ml": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"ci": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"cm": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"cd": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"bf": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"ga": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"zw": {
+				"afr": 1,
+				"mix": 1,
+				"hae": 1
+			},
+			"gulf": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"sa": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"eg": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"ma": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"dz": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"tn": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"maghreb": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"arab": {
+				"arb": 1,
+				"afr": 1,
+				"hae": 1,
+				"sas": 1,
+				"med": 1
+			},
+			"persian": {
+				"arb": 1,
+				"med": 1,
+				"eur": 1
+			},
+			"rio": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"latam": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"mx": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"co": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"pe": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"ec": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"ve": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"cl": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"py": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"bo": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"cam": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1,
+				"lat": 1,
+				"and": 1,
+				"mix": 1,
+				"afr": 1
+			},
+			"gr": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"alb": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"hu": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"ro": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"ge": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"south_slav": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"west_slav": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"east_slav": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"hr": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"rs": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"ba": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"si": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"mk": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"pl": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"cz": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"sk": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"ua": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			},
+			"ru": {
+				"nor": 1,
+				"eur": 1,
+				"med": 1
+			}
+		},
+		"heritage": {
+			"afr": {
+				"*": {
+					"waf_en": 2,
+					"waf_fr": 2,
+					"ng": 1,
+					"gh": 1,
+					"cm": 1,
+					"cd": 1
+				},
+				"ESP": {
+					"waf_en": 3,
+					"gw": 2,
+					"ga": 1,
+					"sn": 1,
+					"ml": 1,
+					"ng": 1
+				},
+				"FRA": {
+					"waf_fr": 3,
+					"sn": 2,
+					"ml": 2,
+					"ci": 1,
+					"cm": 1,
+					"cd": 1
+				},
+				"BEL": {
+					"cd": 4,
+					"cm": 1,
+					"waf_fr": 1,
+					"ng": 1
+				},
+				"SUI": {
+					"cm": 1,
+					"ng": 1,
+					"waf_fr": 1,
+					"cd": 1,
+					"horn": 0.5
+				},
+				"NED": {
+					"sur": 5,
+					"gh": 1,
+					"ng": 1,
+					"cv": 1
+				},
+				"ENG": {
+					"jm": 4,
+					"waf_en": 2,
+					"ng": 2,
+					"gh": 1
+				},
+				"SCO": {
+					"jm": 4,
+					"waf_en": 2,
+					"ng": 2,
+					"gh": 1
+				},
+				"WAL": {
+					"jm": 4,
+					"waf_en": 2,
+					"ng": 2,
+					"gh": 1
+				},
+				"IRL": {
+					"ng": 3,
+					"waf_en": 1,
+					"cd": 1
+				},
+				"GER": {
+					"gh": 2,
+					"ng": 2,
+					"cm": 1,
+					"waf_fr": 1,
+					"cd": 1
+				},
+				"AUT": {
+					"gh": 2,
+					"ng": 2,
+					"cm": 1,
+					"waf_fr": 1,
+					"cd": 1
+				},
+				"ITA": {
+					"ng": 2,
+					"gh": 2,
+					"sn": 1,
+					"ci": 1
+				},
+				"POR": {
+					"ao": 2,
+					"cv": 2,
+					"gw": 2,
+					"mz": 1
+				},
+				"DEN": {
+					"waf_en": 1,
+					"ng": 1,
+					"gh": 1,
+					"waf_fr": 1
+				},
+				"SWE": {
+					"waf_en": 1,
+					"ng": 1,
+					"gh": 1,
+					"waf_fr": 1
+				},
+				"NOR": {
+					"waf_en": 1,
+					"ng": 1,
+					"gh": 1,
+					"waf_fr": 1
+				},
+				"FIN": {
+					"waf_en": 1,
+					"ng": 1,
+					"gh": 1,
+					"waf_fr": 1
+				},
+				"USA": {
+					"afam": 6,
+					"waf_en": 1,
+					"ng": 1,
+					"jm": 0.5
+				},
+				"CAN": {
+					"jm": 2,
+					"waf_en": 1,
+					"waf_fr": 1,
+					"cd": 1,
+					"horn": 0.5
+				},
+				"AUS": {
+					"ssd": 3,
+					"waf_en": 1,
+					"cd": 0.5
+				},
+				"NZL": {
+					"ssd": 1,
+					"waf_en": 1
+				},
+				"JPN": {
+					"us": 1,
+					"waf_en": 1,
+					"ng": 1,
+					"gh": 1
+				},
+				"RSA": {
+					"rsa": 1
+				}
+			},
+			"mix": {
+				"*": {
+					"waf_en": 1,
+					"jm": 1,
+					"waf_fr": 1
+				},
+				"ESP": {
+					"latam": 2,
+					"waf_en": 1,
+					"gw": 1,
+					"ma": 1
+				},
+				"FRA": {
+					"waf_fr": 1,
+					"sn": 1,
+					"dz": 1,
+					"cm": 1
+				},
+				"BEL": {
+					"cd": 2,
+					"ma": 1
+				},
+				"NED": {
+					"sur": 3,
+					"molucca": 1
+				},
+				"ENG": {
+					"jm": 3,
+					"ng": 1,
+					"gh": 1
+				},
+				"SCO": {
+					"jm": 1,
+					"ng": 1
+				},
+				"WAL": {
+					"jm": 1,
+					"ng": 1
+				},
+				"IRL": {
+					"ng": 1,
+					"jm": 1
+				},
+				"GER": {
+					"gh": 1,
+					"ng": 1,
+					"tr": 1,
+					"cm": 1
+				},
+				"AUT": {
+					"ng": 1,
+					"tr": 1,
+					"ph": 0.5
+				},
+				"ITA": {
+					"ng": 1,
+					"gh": 1,
+					"br": 1
+				},
+				"DEN": {
+					"waf_en": 1,
+					"horn": 0.5,
+					"gh": 1
+				},
+				"SWE": {
+					"waf_en": 1,
+					"horn": 1
+				},
+				"NOR": {
+					"waf_en": 1,
+					"horn": 1
+				},
+				"FIN": {
+					"waf_en": 1,
+					"horn": 1
+				},
+				"USA": {
+					"afam": 2,
+					"mx": 1
+				},
+				"CAN": {
+					"jm": 1,
+					"ph": 1
+				},
+				"AUS": {
+					"pac": 1,
+					"waf_en": 1,
+					"ph": 1
+				},
+				"NZL": {
+					"pac": 2
+				},
+				"JPN": {
+					"us": 1,
+					"en": 1,
+					"br": 1,
+					"waf_en": 1
+				},
+				"POR": {
+					"cv": 2,
+					"br": 1
+				},
+				"RSA": {
+					"af": 2,
+					"en": 1
+				}
+			},
+			"arb": {
+				"*": {
+					"maghreb": 2,
+					"arab": 1
+				},
+				"ESP": {
+					"ma": 4,
+					"dz": 1
+				},
+				"FRA": {
+					"dz": 3,
+					"ma": 3,
+					"tn": 2
+				},
+				"BEL": {
+					"ma": 4
+				},
+				"NED": {
+					"ma": 4
+				},
+				"BRA": {
+					"arab": 1
+				},
+				"ARG": {
+					"arab": 1
+				},
+				"CHI": {
+					"arab": 1
+				},
+				"URU": {
+					"arab": 1
+				},
+				"MEX": {
+					"arab": 1
+				},
+				"COL": {
+					"arab": 1
+				}
+			},
+			"sas": {
+				"*": {
+					"sas": 1
+				}
+			},
+			"hae": {
+				"*": {
+					"horn": 1
+				}
+			},
+			"eas": {
+				"*": {
+					"cn": 2,
+					"jp": 1,
+					"kr": 1
+				},
+				"BRA": {
+					"jp": 4,
+					"cn": 1,
+					"kr": 1
+				},
+				"PER": {
+					"jp": 2,
+					"cn": 1
+				},
+				"MEX": {
+					"cn": 1,
+					"jp": 1,
+					"kr": 1
+				},
+				"USA": {
+					"cn": 1,
+					"kr": 1,
+					"jp": 1
+				},
+				"AUS": {
+					"cn": 2,
+					"kr": 1,
+					"jp": 1
+				}
+			},
+			"sea": {
+				"*": {
+					"vn": 1,
+					"ph": 1
+				},
+				"FRA": {
+					"vn": 1
+				},
+				"NED": {
+					"molucca": 1
+				},
+				"USA": {
+					"ph": 2,
+					"vn": 1
+				}
+			},
+			"pac": {
+				"*": {
+					"pac": 1
+				}
+			},
+			"lat": {
+				"*": {
+					"latam": 1
+				},
+				"USA": {
+					"mx": 3,
+					"latam": 1
+				}
+			},
+			"and": {
+				"*": {
+					"pe": 1,
+					"bo": 1
+				}
+			},
+			"nor": {
+				"*": {
+					"en": 1,
+					"de": 1
+				},
+				"RSA": {
+					"af": 3,
+					"en": 1
+				}
+			},
+			"eur": {
+				"*": {
+					"en": 1,
+					"de": 1,
+					"fr": 1,
+					"it": 1
+				},
+				"RSA": {
+					"af": 3,
+					"en": 1
+				}
+			},
+			"med": {
+				"*": {
+					"it": 1,
+					"es": 1,
+					"gr": 1
+				}
+			}
+		},
+		"homes": {
+			"gh": [
+				"GHA"
+			],
+			"ng": [
+				"NGA"
+			],
+			"waf_en": [
+				"NGA",
+				"GHA",
+				"SLE",
+				"LBR",
+				"GAM"
+			],
+			"waf_fr": [
+				"SEN",
+				"MLI",
+				"GUI",
+				"CIV",
+				"CMR",
+				"TOG",
+				"BEN",
+				"BFA"
+			],
+			"sn": [
+				"SEN"
+			],
+			"ml": [
+				"MLI",
+				"GUI"
+			],
+			"ci": [
+				"CIV"
+			],
+			"cm": [
+				"CMR"
+			],
+			"cd": [
+				"COD"
+			],
+			"bf": [
+				"BFA"
+			],
+			"ga": [
+				"GAB",
+				"EQG"
+			],
+			"zw": [
+				"ZIM"
+			],
+			"gw": [
+				"GNB"
+			],
+			"ao": [
+				"ANG"
+			],
+			"cv": [
+				"CPV"
+			],
+			"mz": [
+				"MOZ"
+			],
+			"lusoaf": [
+				"ANG",
+				"CPV",
+				"GNB",
+				"MOZ"
+			],
+			"jm": [
+				"JAM"
+			],
+			"rsa": [
+				"RSA"
+			],
+			"maghreb": [
+				"MAR",
+				"ALG",
+				"TUN"
+			],
+			"ma": [
+				"MAR"
+			],
+			"dz": [
+				"ALG"
+			],
+			"tn": [
+				"TUN"
+			],
+			"arab": [
+				"LBN",
+				"SYR",
+				"IRQ",
+				"PLE",
+				"JOR"
+			],
+			"eg": [
+				"EGY"
+			],
+			"tr": [
+				"TUR"
+			],
+			"persian": [
+				"IRN"
+			],
+			"sas": [
+				"PAK",
+				"IND",
+				"BAN"
+			],
+			"horn": [
+				"SOM",
+				"ETH",
+				"ERI"
+			],
+			"jp": [
+				"JPN"
+			],
+			"kr": [
+				"KOR"
+			],
+			"cn": [
+				"CHN"
+			],
+			"vn": [
+				"VIE"
+			],
+			"ph": [
+				"PHI"
+			],
+			"pac": [
+				"SAM",
+				"TGA",
+				"FIJ"
+			],
+			"latam": [
+				"COL",
+				"ECU",
+				"VEN",
+				"PER",
+				"BOL",
+				"PAR",
+				"DOM",
+				"HON"
+			],
+			"mx": [
+				"MEX"
+			],
+			"br": [
+				"BRA"
+			],
+			"pe": [
+				"PER"
+			],
+			"bo": [
+				"BOL"
+			],
+			"south_slav": [
+				"BIH",
+				"CRO",
+				"SRB"
+			],
+			"west_slav": [
+				"POL",
+				"CZE"
+			],
+			"east_slav": [
+				"UKR",
+				"RUS"
+			],
+			"alb": [
+				"ALB",
+				"KOS",
+				"MKD"
+			],
+			"sur": [
+				"SUR",
+				"CUW"
+			],
+			"molucca": [
+				"IDN"
+			],
+			"ssd": [
+				"SSD"
+			],
+			"us": [
+				"USA"
+			],
+			"en": [
+				"ENG"
+			],
+			"it": [
+				"ITA"
+			],
+			"es": [
+				"ESP"
+			],
+			"fr": [
+				"FRA"
+			],
+			"de": [
+				"GER"
+			],
+			"gr": [
+				"GRE"
+			],
+			"af": [
+				"RSA"
+			]
 		}
 	}
 }
