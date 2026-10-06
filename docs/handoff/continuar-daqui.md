@@ -1,4 +1,4 @@
-# Continuar daqui (atualizado em 05/10/2026)
+# Continuar daqui (atualizado em 06/10/2026)
 
 Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou outra sessão do Claude.
 
@@ -10,6 +10,20 @@ Esta é a nota para quem pegar o jogo depois: uma pessoa, o ChatGPT/Codex ou out
 - Também entraram a repercussão do mata-mata (`claude/repercussao-titulo-qumdw2`) e as palestras e a narração de rádio (`claude/palestras-narracao-1b2sru`). APK com tudo: `builds/MaisUmaRodada-1.0.0-unificada-2026-10-05.apk`.
 - O `main` ainda só tem o commit inicial (o dono pede para perguntar antes de juntar).
 - O código do jogo fica em `mais-uma-rodada/` (Godot 4.7.2). Os APKs ficam em `builds/`: abrir o link do GitHub no celular, logado, e tocar em Download.
+
+### Olheiros, tabelas que rolam de lado e RodadaScore (06/10, ramo `claude/scout-rodadascore-8c516x`)
+
+- Parte de `claude/bolinhas-narracao-5wp2pg`. Outras threads trabalham em paralelo em ramos próprios a partir do mesmo ponto (partida/rostos/negociações, mundo mais real, elencos, escudos); este ramo mexe só em olheiros, tabelas e estatísticas. APK: `builds/MaisUmaRodada-1.0.0-scout-rodadascore-2026-10-06-debug.apk`.
+- **Olheiros refeitos** (`scripts/systems/scouting.gd`, `scripts/ui/components/scout_report_view.gd`, aba Mercado › Olheiros):
+  - Missões que duram rodadas: por perfil (foco Melhor disponível, Pronto para jogar, Jovem promessa ou Oportunidade; setor, origem, idade), uma liga inteira (4 rodadas) ou um jogador (botão "Observar de perto" no relatório; 1 rodada no país, 2 fora). A primeira leva de nomes chega na hora; `Scouting.tick` (chamado em `InboxManager.after_user_turn`) avança cada missão e, no fim, o olheiro manda mensagem na caixa de entrada.
+  - Missões ao mesmo tempo: 1 a 3 (`Scouting.slots`: nível do olheiro ≥ 0,55 e reputação do clube ≥ 70).
+  - Conhecimento 0–100% por jogador (`stats.scouting.know`). Ele encolhe o ruído do potencial (`scout_noise` a partir do original em `n0`) e sobe a confiança da avaliação (`PlayerAssessment.confidence` faz lerp entre a base e o teto do olheiro). Relatórios antigos valem 70%.
+  - Relatório: letra A–D e rótulo (Contratar, Boa opção, Para compor elenco, Não recomendado; `Scouting.verdict`), nível hoje e até onde pode chegar, encaixe no elenco, estilo, pé, pontos fortes e fracos (mais itens quanto mais visto), personalidade a partir de 60% e lesões/regularidade a partir de 80%, números da temporada. A tabela de relatórios tem Recom., Visto e Potencial e filtros Todos/Recomendados/Novos.
+  - `Scouting.send_mission` continua existindo (ferramentas de captura e tour usam).
+- **Tabelas que rolam de lado** (`scripts/ui/kit/data_table.gd`): o nome fica preso e as colunas de números passam com o dedo; um trilho fino acima do cabeçalho mostra que há mais colunas e onde você está; a posição da rolagem fica guardada ao ordenar. `PlayerTable` agora mostra todas as colunas em toda visão (a visão só escolhe as primeiras; `REST` define a ordem do resto) e ganhou Min, RS (nota RodadaScore), Fin, PD, Des, Passe e Cartões. Colunas próprias da tela (mercado: Encaixe e Pede; treino) entram logo depois das da visão, também no celular. A classificação no celular em pé virou `TableRows.standings_table` (J, SG e PTS e, de lado, V, E, D, GP, GC, Últimos 5, Aproveitamento); no tablet segue a linha antiga.
+- **RodadaScore** (`scripts/systems/league_stats.gd`, `scripts/ui/screens/league_stats_screen.gd`, rota `league_stats`): página de estatísticas da liga no estilo WhoScored, com "Powered by RodadaScore". Abas Resumo (melhores notas, times em destaque, a liga em números), Times (Geral/Ataque/Defesa/Disciplina; toque abre pontos fortes, fracos e estilo do time), Jogadores (Geral/Ataque/Defesa/Passe/Goleiros, setor, Regulares, Por 90 min) e Seleção da temporada (4-3-3 pela nota). Entradas: aba Números das Competições ("Estatísticas completas") e menu ☰ › Clube › Estatísticas da liga. Posse, finalizações sofridas e xG contra são somados a cada jogo de liga em `league.table[clube]["ts"]` (`LeagueStats.record`, chamado em `SeasonManager._apply_match`); save antigo cai nas somas dos jogadores e mostra "–" na posse até jogar.
+- **Falta / ideias para seguir:** conferir a folha do relatório e a mensagem de fim de missão num celular de verdade; botão "Pedir relatório" também no perfil do jogador de outro clube (hoje só no relatório e no painel do mercado); os goleiros dominam as melhores notas porque a nota de partida do motor favorece goleiros (assunto do motor, não desta tela); mostrar o RodadaScore também para copas; a classificação em grupos (split) perde os rótulos de grupo no celular.
+- Conferido com `tools/check_scripts.gd` (0 erros) e capturas 390x844 (`--only=league_stats:summary,league_stats:teams,league_stats:players,league_stats:xi,market:scout,table,squad --rounds=18 --lang=pt`). Testes completos não rodados.
 
 ### Bolinhas seguindo a narração (05/10, ramo `claude/bolinhas-narracao-5wp2pg`)
 

@@ -694,7 +694,7 @@ func _scout_tab(c: VBoxContainer, w: GameWorld, club: Club) -> void:
 	_default_brief(list)
 	if _scout_state.is_empty():
 		_scout_state = {"sort": "rec", "desc": true}
-	var t := PlayerTable.make(w, list, "market", _scout_state, func(p: Player): _open_report(p), _scout_cols(w), "", _wide_table())
+	var t := PlayerTable.make(w, list, "market", _scout_state, func(p: Player): _open_report(p), _scout_cols(w), "scout", _wide_table())
 	t.highlight = func(p: Player) -> bool: return _side != null and p.id == _sel
 	c.add_child(t)
 

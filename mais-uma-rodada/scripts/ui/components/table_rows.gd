@@ -175,8 +175,8 @@ static func table_row(w: GameWorld, r: Dictionary, club_id: int, pos: int, compa
 static func standings_table(w: GameWorld, lines: Array, view: String, on_tap: Callable, state: Dictionary) -> DataTable:
 	var t := DataTable.new()
 	t.row_height = UITokens.H_ROW - 8
-	t.lead_width = 250.0
-	t.lead_min = 232.0
+	t.lead_width = 300.0
+	t.lead_min = 290.0
 	t.marker = func(it: Dictionary) -> Color: return it["zone"]
 	t.highlight = func(it: Dictionary) -> bool: return w.is_user_club(int(it["id"]))
 	t.row_pressed.connect(func(it: Variant): on_tap.call(int((it as Dictionary)["id"])))

@@ -55,6 +55,8 @@ static func _view_keys(mode: String, view: String, wide: bool) -> Array:
 			keys = ["contract", "wage", "value"]
 		"selecao":
 			keys = ["ovr", "age"] if wide else ["ovr"]
+		"scout":
+			keys = ["ovr"]
 		"treino":
 			keys = ["ovr", "age", "cond", "morale"] if wide else ["ovr"]
 		"base":
