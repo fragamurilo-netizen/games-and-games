@@ -946,6 +946,29 @@ func _club_sheet(w: GameWorld, league: League, cid: int) -> void:
 				l.add_theme_color_override(&"font_color", UIColors.MUTED)
 			grid.add_child(l)
 	v.add_child(grid)
+	# Rodada a rodada: posição (1º em cima) e pontos comparados com o líder
+	var prog := CompetitionManager.progression(league)
+	if int(prog["n"]) >= 2:
+		var labels: Array = []
+		for i in int(prog["n"]):
+			labels.append(i + 1)
+		var leader: int = CompetitionManager.sorted_ids(league)[0]
+		var pc := StatChart.make(labels, [{"name": "Posição", "values": prog["pos"][cid], "color": UIColors.TEXT}], 170.0)
+		pc.invert = true
+		pc.y_min = 1
+		pc.y_max = league.club_ids.size()
+		pc.value_fmt = "%dº"
+		pc.sel = int(prog["n"]) - 1
+		v.add_child(UIKit.section("Posição rodada a rodada"))
+		v.add_child(pc)
+		var series: Array = [{"name": cl.short_name, "values": prog["pts"][cid], "color": UIColors.TEXT}]
+		if leader != cid:
+			series.append({"name": w.club(leader).short_name, "values": prog["pts"][leader], "color": UIColors.DIM})
+		var ptc := StatChart.make(labels, series, 170.0)
+		ptc.y_min = 0
+		ptc.sel = int(prog["n"]) - 1
+		v.add_child(UIKit.section("Pontos" if leader == cid else "Pontos × líder"))
+		v.add_child(ptc)
 	var pl := int(r["pl"])
 	if pl > 0:
 		var kv := UIKit.flow(8)

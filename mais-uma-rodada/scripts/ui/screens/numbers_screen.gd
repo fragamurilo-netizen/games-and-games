@@ -54,7 +54,8 @@ func refresh() -> void:
 	var last := 99 if _all else maxi(40, top + 5)
 	c.add_child(UIKit.section_header("Camisas 1–%d" % last))
 	var grid := GridContainer.new()
-	grid.columns = 10 if UILayout.is_wide() else 5
+	# Colunas pela largura (célula de 96 + borda): 4 no celular em pé, mais no tablet
+	grid.columns = clampi(int((content_width() + 6.0) / 128.0), 4, 10)
 	grid.add_theme_constant_override(&"h_separation", 6)
 	grid.add_theme_constant_override(&"v_separation", 8)
 	for n in range(1, mini(99, last) + 1):

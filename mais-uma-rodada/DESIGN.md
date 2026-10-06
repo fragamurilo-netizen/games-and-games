@@ -268,15 +268,14 @@ estado alternável.
 - **Linha de dados / DataTable**: sem fundo, `divider` embaixo, altura 84. Cabeçalho
   pequeno que ordena. Coluna do nome fixa. Poucas colunas em retrato, com **visão**
   (Geral · Forma · Temporada · Contrato) que troca as colunas.
-- **Cabeçalho de identidade** (`IdentityBand`): bloco na cor principal do clube com corte
-  diagonal e faixa na segunda cor, só atrás do escudo ou do retrato. O texto fica sobre a
-  superfície neutra.
-  - **Variante ficha do jogador** (`gradient`): como no FM, o jogador recortado (sem moldura)
-    sai de um degradê horizontal na cor principal do clube, mais forte atrás dele e sumindo na
-    superfície antes do texto, na altura do recorte (os ombros encostam na base). Só no
-    cabeçalho do perfil do jogador; o resto segue o bloco chapado.
-- **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão, lados nas
-  cores dos clubes, escudos, ação principal de giz.
+- **Cabeçalho de identidade** (`IdentityBand` → `ClubGradient`): degradê na cor do clube, funda
+  atrás do escudo ou do retrato e sumindo na superfície antes do texto, com uma luz fraca da
+  segunda cor no canto oposto e pontilhado fino (sem degraus). Cor clara demais (branco, amarelo)
+  escurece para o giz continuar legível. **Sem faixas diagonais.** No perfil do jogador o
+  recorte sai do degradê, encostado na base, como no FM.
+- **Bloco de jogo** (`MatchHero`): faixa da competição nas cores da transmissão; o corpo em
+  degradê duplo (mandante nasce na borda esquerda, visitante na direita, escuro no meio onde fica
+  o texto), escudos, ação principal de giz.
 - **Campo** (`PitchView`): mini camisas, sobrenome, condição discreta. Toque = painel
   rápido, arrastar = trocar, segurar = perfil.
 - **Botão principal**: giz. **Secundário**: `surface-raised`. **Texto**: sem fundo.

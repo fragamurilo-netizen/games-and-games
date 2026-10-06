@@ -67,6 +67,16 @@ func _ready() -> void:
 		panel.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if club != null and not clean:
+		# Degradê na cor do clube nascendo à direita (sem as faixas diagonais)
+		var g := ClubGradient.new()
+		g.mode = ClubGradient.RIGHT
+		g.strength = 0.6
+		var cc := ClubGradient.club_colors(club)
+		g.color1 = cc[0]
+		g.color2 = cc[1]
+		g.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		add_child(g)
 	if club != null:
 		_crest = CrestView.new()
 		_crest.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -116,27 +126,7 @@ func _draw() -> void:
 	if clean:
 		_draw_clean(c1, c2)
 		return
-	# Degradê: a cor do clube nasce à direita e some antes da metade.
-	var steps := 24
-	for i in steps:
-		var t := float(i) / steps
-		var x0 := size.x * (0.35 + 0.65 * t)
-		var w := size.x * 0.65 / steps + 1.0
-		var col := c1
-		col.a = 0.02 + 0.2 * t * t
-		draw_rect(Rect2(x0, 0, w, size.y), col)
-	# Faixas diagonais finas na segunda cor, como textura de camisa.
-	var band := c2
-	band.a = 0.05
-	var step := 34.0
-	var x := size.x * 0.45
-	while x < size.x + size.y:
-		draw_colored_polygon(PackedVector2Array([Vector2(x, 0), Vector2(x + 12.0, 0), Vector2(x + 12.0 - size.y, size.y), Vector2(x - size.y, size.y)]), band)
-		x += step
-	# Filete na cor do clube na base do card.
-	var line := c1
-	line.a = 0.85
-	draw_rect(Rect2(0, size.y - 4.0, size.x, 4.0), line)
+	# O degradê é o filho ClubGradient; aqui só o modo limpo desenha.
 
 
 func _full() -> Rect2:

@@ -93,6 +93,34 @@ static func sort_table(club_ids: Array, t: Dictionary) -> Array:
 	return ids
 
 
+## Campanha rodada a rodada, refeita a partir dos resultados (nada a mais no save):
+## {"pos": {clube: [posição após cada rodada jogada]}, "pts": {clube: [pontos]}, "n": rodadas}.
+static func progression(league: League) -> Dictionary:
+	var t := {}
+	for cid in league.club_ids:
+		t[cid] = empty_row()
+	var pos := {}
+	var pts := {}
+	for cid in league.club_ids:
+		pos[cid] = []
+		pts[cid] = []
+	var n := 0
+	for rnd in league.rounds:
+		var any := false
+		for f: Fixture in rnd:
+			if f.played and t.has(f.home) and t.has(f.away):
+				apply_to_table(t, f)
+				any = true
+		if not any:
+			continue
+		n += 1
+		var ids := sort_table(league.club_ids, t)
+		for i in ids.size():
+			pos[ids[i]].append(i + 1)
+			pts[ids[i]].append(int(t[ids[i]]["pts"]))
+	return {"pos": pos, "pts": pts, "n": n}
+
+
 static func position_of(league: League, club_id: int) -> int:
 	return sorted_ids(league).find(club_id) + 1
 

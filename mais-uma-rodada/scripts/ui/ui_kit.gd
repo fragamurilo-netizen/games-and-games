@@ -544,7 +544,8 @@ static func pill(text: String, color: Color, font_size: int = 18) -> PanelContai
 	var l := label(soften(text), "Caps")
 	l.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	l.add_theme_color_override(&"font_color", color)
-	l.add_theme_font_size_override(&"font_size", font_size + 1)
+	# Nunca abaixo da legenda do DESIGN.md (18 px): pílula de 14–16 sumia no celular
+	l.add_theme_font_size_override(&"font_size", maxi(font_size, 17) + 1)
 	p.add_child(l)
 	return p
 
@@ -555,6 +556,12 @@ static func flow(sep: int = 8) -> HFlowContainer:
 	f.add_theme_constant_override(&"h_separation", sep)
 	f.add_theme_constant_override(&"v_separation", sep)
 	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Na linha que quebra, botão (chip de filtro) fica com o texto inteiro e desce para a linha de
+	# baixo; cortado com reticências ("Próx. ...", "Com m") ele sumia no celular.
+	f.child_entered_tree.connect(func(n: Node):
+		if n is Button:
+			(n as Button).clip_text = false
+			(n as Button).text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING)
 	return f
 
 

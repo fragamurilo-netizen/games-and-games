@@ -264,7 +264,6 @@ func _fact(value: String, caption: String, lead: Control = null) -> Control:
 	v.add_child(top)
 	var c := UIKit.label(caption, "Caps")
 	c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	c.add_theme_font_size_override(&"font_size", 13)
 	v.add_child(c)
 	return panel
 
@@ -619,6 +618,49 @@ func _stats(w: GameWorld, p: Player) -> Control:
 	var tot := p.season_totals()
 	if int(tot[0]) > p.stats[Player.S_APPS]:
 		card.add_child(UIKit.label("Com as copas: %d jogos, %d gols e %d assistências." % [int(tot[0]), int(tot[1]), int(tot[2])], "Small", true))
+	var pr := _percentiles(w, p)
+	if pr != null:
+		var box := UIKit.vbox(UITokens.S4)
+		box.add_child(UIKit.card_panel(card))
+		box.add_child(pr)
+		return box
+	return UIKit.card_panel(card)
+
+
+## Percentis na liga: cada número por 90 minutos contra os da mesma função (PlayerPercentiles).
+func _percentiles(w: GameWorld, p: Player) -> Control:
+	var rep := PlayerPercentiles.report(w, p)
+	if rep.is_empty():
+		return null
+	var club := w.club(p.club_id)
+	var card := UIKit.card("Card", UITokens.S1)
+	card.add_child(UIKit.section("Comparado aos %s da liga" % Pos.GROUP_NAMES[Pos.group(p.position)].to_lower()))
+	card.add_child(UIKit.label("Por 90 minutos, entre quem jogou ao menos %d minutos na %s." % [PlayerPercentiles.MIN_MINUTES, w.league_short(club.league_id) if club != null else "liga"], "Small", true))
+	var tf := DataTable.tabular_font()
+	for e: Dictionary in rep:
+		var row := UIKit.hbox(UITokens.S2)
+		var n := UIKit.label(String(e["name"]), "Small")
+		n.custom_minimum_size.x = 190
+		n.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_child(n)
+		var pct := float(e["pct"])
+		var col := PlayerPercentiles.color(pct)
+		var bar := UIKit.bar(pct, 100.0, col, 12)
+		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(bar)
+		var val := UIKit.label(PlayerPercentiles.fmt_value(String(e["k"]), float(e["value"])), "")
+		val.custom_minimum_size.x = 64
+		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		val.add_theme_font_override(&"font", tf)
+		row.add_child(val)
+		var pl := UIKit.colored(str(int(round(pct))), col, "H3")
+		pl.custom_minimum_size.x = 40
+		pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		pl.add_theme_font_override(&"font", tf)
+		row.add_child(pl)
+		card.add_child(row)
+	card.add_child(UIKit.label("O número da direita é o percentil: 90 = melhor que 90% deles.", "Muted", true))
 	return UIKit.card_panel(card)
 
 

@@ -100,8 +100,8 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 			top = p
 	card.add_child(UIKit.section("Folha salarial"))
 	var row := UIKit.hbox(4)
-	row.add_child(UIKit.stat(Fmt.money_month(total), "folha"))
-	row.add_child(UIKit.stat(Fmt.money_month(club.wage_budget), "teto da diretoria"))
+	row.add_child(UIKit.stat(Fmt.money(total), "folha por mês"))
+	row.add_child(UIKit.stat(Fmt.money(club.wage_budget), "teto por mês"))
 	var pct := float(total) / maxf(1.0, club.wage_budget)
 	var col := UIColors.GREEN if pct <= 0.9 else (UIColors.ink(Color("#E8C547")) if pct <= 1.0 else UIColors.RED)
 	row.add_child(UIKit.stat("%d%%" % int(round(pct * 100.0)), "do teto", col))
@@ -110,7 +110,7 @@ func _summary(w: GameWorld, club: Club, squad: Array) -> Control:
 	var row2 := UIKit.hbox(4)
 	row2.add_child(UIKit.stat(str(expiring), "vencem nesta", UIColors.RED if expiring > 0 else UIColors.TEXT))
 	row2.add_child(UIKit.stat(str(next_year), "vencem na próxima", UIColors.ink(Color("#E8C547")) if next_year > 0 else UIColors.TEXT))
-	row2.add_child(UIKit.stat(Fmt.money_month(total / maxi(1, squad.size())), "média"))
+	row2.add_child(UIKit.stat(Fmt.money(total / maxi(1, squad.size())), "média por mês"))
 	card.add_child(row2)
 	if top != null:
 		card.add_child(UIKit.kv("Maior salário", "%s · %s" % [top.short_name(), Fmt.money_month(top.wage)]))

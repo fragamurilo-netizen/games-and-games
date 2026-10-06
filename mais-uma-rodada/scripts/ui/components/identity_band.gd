@@ -23,6 +23,13 @@ static func wrap(club: Club, block_w: float = 200.0, height: float = 200.0, grad
 	box.anti_aliasing = true
 	p.add_theme_stylebox_override(&"panel", box)
 	p.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
+	# Sem faixas diagonais: degradê na cor do clube (ClubGradient), forte à esquerda atrás do
+	# escudo/retrato e sumindo antes do texto.
+	var body0 := UIKit.vbox(10)
+	body0.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(UIKit.margin(body0, 18, 16, 18, 16))
+	ClubGradient.attach(p, club, ClubGradient.LEFT)
+	return [p, body0]
 	var bg := IdentityBand.new()
 	bg.gradient = gradient_
 	bg.block = block_w

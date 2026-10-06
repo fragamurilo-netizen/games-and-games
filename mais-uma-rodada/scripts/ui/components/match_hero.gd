@@ -14,6 +14,8 @@ var right_color := Color(0, 0, 0, 0)
 var left_color2 := Color(0, 0, 0, 0)
 var right_color2 := Color(0, 0, 0, 0)
 var radius := float(UITokens.R_SM)
+## Degradê dos clubes no corpo do cartão (abaixo da faixa da competição).
+var body_bg: ClubGradient = null
 
 
 ## Monta o painel: devolve [painel, caixa da faixa, caixa do corpo]. Os filhos vão nas caixas.
@@ -37,6 +39,19 @@ static func wrap(w: GameWorld, comp: String, home: Club, away: Club) -> Array:
 		bg.right_color = away.primary_color()
 		bg.right_color2 = away.secondary_color()
 	p.add_child(bg)
+	# Corpo: mandante nasce na borda esquerda, visitante na direita, escuro no meio (sem faixas)
+	var g := ClubGradient.new()
+	g.mode = ClubGradient.DUAL
+	g.reach = 0.9
+	g.strength = 0.85
+	var ch := ClubGradient.club_colors(home)
+	var ca := ClubGradient.club_colors(away)
+	g.color1 = ch[0]
+	g.color2 = ch[1]
+	g.away1 = ca[0]
+	g.away2 = ca[1]
+	bg.add_child(g)
+	bg.body_bg = g
 	var v := UIKit.vbox(0)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(v)
@@ -73,18 +88,22 @@ func _draw() -> void:
 	draw_rect(Rect2(inset, inset + band_h + 9.0, w, 3.0), band_accent)
 	# Lados nas cores dos clubes (mandante à esquerda): faixas chapadas com corte diagonal,
 	# como no grafismo de uma transmissão. Cor cheia, sem degradê nem brilho.
-	if left_color.a > 0.0:
-		_slab(top, bottom, left_color, left_color2, false)
-	if right_color.a > 0.0:
-		_slab(top, bottom, right_color, right_color2, true)
+	if body_bg != null:
+		body_bg.position = Vector2(0, top)
+		body_bg.size = Vector2(size.x, maxf(0.0, bottom - top))
+	elif left_color.a > 0.0 or right_color.a > 0.0:
+		if left_color.a > 0.0:
+			_slab(top, bottom, left_color, left_color2, false)
+		if right_color.a > 0.0:
+			_slab(top, bottom, right_color, right_color2, true)
 
 
 func _slab(top: float, bottom: float, c1: Color, c2: Color, right: bool) -> void:
 	var w := size.x
 	var h := bottom - top
-	var a := 22.0
-	var b := 10.0
-	var cut := h * 0.18
+	var a := 12.0
+	var b := 7.0
+	var cut := minf(h * 0.07, 22.0)
 	var outer := w if right else 0.0
 	var dir := -1.0 if right else 1.0
 	var main := PackedVector2Array([
@@ -92,7 +111,7 @@ func _slab(top: float, bottom: float, c1: Color, c2: Color, right: bool) -> void
 		Vector2(outer + dir * a, bottom), Vector2(outer, bottom)])
 	draw_colored_polygon(main, Color(c1, 1.0))
 	if c2.a > 0.0:
-		var x0 := outer + dir * (a + 6.0)
+		var x0 := outer + dir * (a + 4.0)
 		var sec := PackedVector2Array([
 			Vector2(x0 + dir * cut, top), Vector2(x0 + dir * (cut + b), top),
 			Vector2(x0 + dir * b, bottom), Vector2(x0, bottom)])

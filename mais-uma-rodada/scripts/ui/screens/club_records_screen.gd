@@ -71,7 +71,8 @@ func _xi(w: GameWorld, club: Club, c: VBoxContainer) -> void:
 	var title := "Melhor 11 de sempre" if _year == "all" else "Melhor 11 de %s" % _year
 	card.add_child(UIKit.section_header(title))
 	var pitch := UIKit.vbox(10)
-	var chip_w := clampf((content_width() - 240.0) / 4.0, 100.0, 170.0)
+	# Quatro por linha cabem no celular: cartão (36) + campo (16) + espaços (24) + bordas das fichas (4 × 24)
+	var chip_w := clampf((content_width() - 172.0) / 4.0, 78.0, 170.0)
 	for line: Array in [[8, 10, 9], [6, 5, 7], [4, 1, 2, 3], [0]]:
 		var h := HBoxContainer.new()
 		h.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -131,6 +132,9 @@ func _chip(w: GameWorld, club: Club, slot: Array, all_time: bool, cw: float) -> 
 		txt = "%.2f · %d j · %d g" % [float(d["r"]), int(d["a"]), int(d["g"])]
 	var st := UIKit.label(txt, "Small")
 	st.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	st.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	st.custom_minimum_size.x = cw - 4
+	st.tooltip_text = txt
 	v.add_child(st)
 	var pid := int(d["id"])
 	if p == null:
