@@ -3,9 +3,13 @@
 
 Tudo procedural e determinístico (sementes fixas): rode de novo e sai igual.
     python3 tools/portrait_textures/gen.py [nome ...]
-Saída: assets/portrait/*.png (cinza + alfa: tom no cinza, cobertura no alfa). O PortraitView
-desenha cada textura por cima da malha da peça, tingida pela cor da peça já iluminada.
-Precisa de numpy, pillow e pycairo.
+Saída: assets/portrait/*.png em cinza + alfa (tom no cinza, cobertura no alfa).
+
+O tom de cada textura é normalizado para média 0,5: o PortraitView tinge a textura com o dobro
+da cor já iluminada da peça, então na média a peça fica com a cor de antes e os fios clareiam e
+escurecem em volta dela. Todas (menos a íris) emendam sem costura nas bordas, para repetir pela
+cabeça e pelo rosto. Escala: 256 texels por meia largura de rosto (barba 320, pele 256).
+Precisa de numpy, scipy, pillow e pycairo.
 """
 import math
 import os
@@ -14,8 +18,10 @@ import sys
 import cairo
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "portrait")
+TAU = math.tau
 
 
 # ---------------------------------------------------------------------------
@@ -30,10 +36,31 @@ def surface(w, h):
     return s, ctx
 
 
-def fill_bg(ctx, w, h, lum, alpha):
-    ctx.set_source_rgba(lum, lum, lum, alpha)
-    ctx.rectangle(0, 0, w, h)
-    ctx.fill()
+# Deslocamentos em que cada traço é repetido (as 8 vizinhas da textura), e o tamanho dela
+OFFS = [(0, 0)]
+SIZE = [0, 0]
+
+
+def tiled(W, H, draw, bg=None, wrap=True):
+    """Desenha `draw(ctx)` com cada traço repetido nas texturas vizinhas: o que passa de uma borda
+    volta pela oposta, e a textura repete sem costura. Cada traço sai em todas as posições antes
+    do próximo, então a ordem das camadas é a mesma na textura toda."""
+    global OFFS
+    s, ctx = surface(W, H)
+    if bg is not None:
+        ctx.set_source_rgba(bg[0], bg[0], bg[0], bg[1])
+        ctx.paint()
+    SIZE[0], SIZE[1] = W, H
+    OFFS = [(dx, dy) for dy in (-H, 0, H) for dx in (-W, 0, W)] if wrap else [(0, 0)]
+    draw(ctx)
+    OFFS = [(0, 0)]
+    return s
+
+
+def _offsets(xs, ys, pad):
+    W, H = SIZE
+    x0, x1, y0, y1 = min(xs) - pad, max(xs) + pad, min(ys) - pad, max(ys) + pad
+    return [(dx, dy) for dx, dy in OFFS if x1 + dx >= 0 and x0 + dx <= W and y1 + dy >= 0 and y0 + dy <= H]
 
 
 def save(s, name, post=None):
@@ -42,26 +69,32 @@ def save(s, name, post=None):
     # cairo: BGRA pré-multiplicado
     a = buf[..., 3]
     rgb = buf[..., [2, 1, 0]] / np.maximum(a[..., None], 1e-4)
-    rgb = np.clip(rgb, 0.0, 1.0)
-    lum = rgb.mean(axis=2)
+    lum = np.clip(rgb, 0.0, 1.0).mean(axis=2)
     if post is not None:
         lum, a = post(lum, a)
-    # Onde não há cobertura, o tom fica o da vizinhança (sem borda escura nos mipmaps)
-    # Cinza + alfa (LA8): metade do tamanho e da memória de vídeo de um RGBA
+    a = np.clip(a, 0.0, 1.0)
+    # Tom médio (ponderado pela cobertura) em 0,5
+    m = float((lum * a).sum() / max(a.sum(), 1e-4))
+    lum = np.clip(lum - m + 0.5, 0.0, 1.0)
+    # Onde quase não há cobertura, o tom vira o da vizinhança: sem halo claro/escuro nos mipmaps
+    wa = ndimage.gaussian_filter(a, 3.0, mode="wrap")
+    lb = ndimage.gaussian_filter(lum * a, 3.0, mode="wrap") / np.maximum(wa, 1e-4)
+    lum = np.where(a < 0.03, np.where(wa > 1e-3, lb, 0.5), lum)
     out = np.dstack([lum, a])
     img = Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8), "LA")
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, name + ".png")
     img.save(path, optimize=True)
-    print("ok", path, img.size, os.path.getsize(path) // 1024, "KB")
+    print("ok %-16s %s %4d KB  tom médio era %.2f, cobertura média %.2f" % (name, img.size, os.path.getsize(path) // 1024, m, a.mean()))
 
 
 def value_noise(w, h, cells, seed):
-    """Ruído suave (0..1) que se repete na largura (a calota não tem emenda visível nas pontas)."""
+    """Ruído suave (0..1) que repete na largura e na altura."""
     rng = np.random.default_rng(seed)
     cx, cy = cells
-    g = rng.random((cy + 2, cx + 1))
+    g = rng.random((cy, cx))
     g = np.concatenate([g, g[:, :1]], axis=1)
+    g = np.concatenate([g, g[:1, :]], axis=0)
     ys = np.linspace(0, cy, h, endpoint=False)
     xs = np.linspace(0, cx, w, endpoint=False)
     yi = ys.astype(int)
@@ -88,166 +121,37 @@ def fbm(w, h, base, octaves, seed):
     return tot / norm
 
 
-def stroke(ctx, pts, lum, alpha, width):
+def line(ctx, pts, lum, alpha, width):
+    """Traço por `pts` (3 pontos viram uma curva), repetido onde a textura emenda."""
+    offs = _offsets([p[0] for p in pts], [p[1] for p in pts], width + 2)
+    if not offs:
+        return
     ctx.set_source_rgba(lum, lum, lum, alpha)
     ctx.set_line_width(width)
-    ctx.move_to(*pts[0])
-    if len(pts) == 3:
-        ctx.curve_to(pts[1][0], pts[1][1], pts[1][0], pts[1][1], pts[2][0], pts[2][1])
-    else:
-        for p in pts[1:]:
-            ctx.line_to(*p)
+    for dx, dy in offs:
+        ctx.move_to(pts[0][0] + dx, pts[0][1] + dy)
+        if len(pts) == 3:
+            ctx.curve_to(pts[1][0] + dx, pts[1][1] + dy, pts[1][0] + dx, pts[1][1] + dy, pts[2][0] + dx, pts[2][1] + dy)
+        else:
+            for p in pts[1:]:
+                ctx.line_to(p[0] + dx, p[1] + dy)
     ctx.stroke()
 
 
-def clamp(x, a, b):
-    return max(a, min(b, x))
-
-
-# ---------------------------------------------------------------------------
-# Cabelo da calota (u ao longo da cabeça, v da linha do cabelo para fora)
-# ---------------------------------------------------------------------------
-
-def hair_straight(name, wavy, seed):
-    W, H = 1024, 256
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    # Fundo: o vão escuro entre as mechas (mais ralo junto da linha do cabelo)
-    fill_bg(ctx, W, H, 0.3, 0.0)
-    x = -10.0
-    clumps = []
-    while x < W + 10:
-        cw = rng.uniform(9, 26)
-        clumps.append((x + cw * 0.5, cw, clamp(rng.normal(0.62, 0.13), 0.3, 0.95), rng.uniform(-0.06, 0.06), rng.uniform(0, math.tau)))
-        x += cw * rng.uniform(0.55, 0.9)
-    # Camada de baixo: mechas cheias escuras (dão o volume e o vão)
-    for (cx, cw, cl, tilt, ph) in clumps:
-        n = int(cw * 1.6)
-        for i in range(n):
-            x0 = cx + rng.normal(0, cw * 0.32)
-            y0 = rng.uniform(-6, 26) ** 1.0
-            y1 = H + 10 - abs(rng.normal(0, 22))
-            pts = []
-            steps = 12
-            for k in range(steps + 1):
-                t = k / steps
-                y = y0 + (y1 - y0) * t
-                xx = x0 + tilt * (y - y0)
-                if wavy:
-                    xx += 5.5 * math.sin(y / 34.0 + ph) + 2.0 * math.sin(y / 13.0 + ph * 1.7)
-                pts.append((xx, y))
-            lum = clamp(cl * 0.55 + rng.normal(0, 0.05), 0.1, 0.8)
-            stroke(ctx, pts, lum, rng.uniform(0.55, 0.85), rng.uniform(1.4, 2.6))
-    # Fios: o corpo da mecha, mais claros no meio
-    for (cx, cw, cl, tilt, ph) in clumps:
-        n = int(cw * 3.2)
-        for i in range(n):
-            off = rng.normal(0, cw * 0.28)
-            x0 = cx + off
-            y0 = rng.uniform(-4, 40) * rng.uniform(0.2, 1.0)
-            y1 = H + 10 - abs(rng.normal(0, 30))
-            sway = rng.normal(0, 3.0)
-            pts = []
-            steps = 14
-            for k in range(steps + 1):
-                t = k / steps
-                y = y0 + (y1 - y0) * t
-                xx = x0 + tilt * (y - y0) + sway * math.sin(math.pi * t)
-                if wavy:
-                    xx += 5.5 * math.sin(y / 34.0 + ph) + 2.0 * math.sin(y / 13.0 + ph * 1.7)
-                pts.append((xx, y))
-            mid = 1.0 - min(1.0, abs(off) / (cw * 0.6))
-            lum = clamp(cl * (0.8 + 0.35 * mid) + rng.normal(0, 0.06), 0.15, 1.0)
-            stroke(ctx, pts, lum, rng.uniform(0.35, 0.75), rng.uniform(0.6, 1.2))
-    # Reflexos: poucos fios finos bem claros
-    for i in range(int(W * 0.35)):
-        cx, cw, cl, tilt, ph = clumps[rng.integers(len(clumps))]
-        x0 = cx + rng.normal(0, cw * 0.22)
-        y0 = rng.uniform(20, 120)
-        y1 = y0 + rng.uniform(40, 140)
-        pts = []
-        for k in range(9):
-            t = k / 8
-            y = y0 + (y1 - y0) * t
-            xx = x0 + tilt * (y - y0)
-            if wavy:
-                xx += 5.5 * math.sin(y / 34.0 + ph) + 2.0 * math.sin(y / 13.0 + ph * 1.7)
-            pts.append((xx, y))
-        stroke(ctx, pts, rng.uniform(0.9, 1.0), rng.uniform(0.25, 0.6), rng.uniform(0.45, 0.8))
-    # Fios soltos na linha do cabelo (finos, ralos)
-    for i in range(int(W * 0.5)):
-        x0 = rng.uniform(0, W)
-        y0 = rng.uniform(-2, 18)
-        ln = rng.uniform(10, 34)
-        ang = rng.normal(0, 0.18)
-        stroke(ctx, [(x0, y0), (x0 + math.sin(ang) * ln, y0 + ln)], rng.uniform(0.2, 0.55), rng.uniform(0.35, 0.7), rng.uniform(0.5, 0.8))
-
-    def post(lum, a):
-        # O cabelo nasce ralo: na linha do cabelo (v pequeno) a cobertura cai
-        v = np.linspace(0, 1, H)[:, None]
-        a = a * np.clip(0.25 + v * 7.0, 0, 1)
-        return lum, a
-    save(s, name, post)
-
-
-def hair_curl(name, W, H, amp_rng, period_rng, width_rng, len_rng, seed, cap=True):
-    """Cacheado: mechas (cachos) em S, cada uma com vários fios acompanhando a mesma onda; a crista
-    de cada volta pega a luz e o vão entre os cachos fica escuro."""
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    fill_bg(ctx, W, H, 0.2, 0.92)
-    noise = fbm(W, H, (8, 3) if cap else (6, 6), 3, seed + 5)
-    area = W * H
-    placed = 0.0
-    while placed < area * 2.6:
-        cx = rng.uniform(-12, W + 12)
-        y0 = rng.uniform(-40, H - 10)
-        ln = rng.uniform(*len_rng)
-        A = rng.uniform(*amp_rng)
-        P = rng.uniform(*period_rng)
-        cw = rng.uniform(*width_rng)
-        ph = rng.uniform(0, math.tau)
-        tilt = rng.normal(0, 0.12 if cap else 0.3)
-        nz = noise[int(clamp(y0 + ln * 0.5, 0, H - 1)), int(clamp(cx, 0, W - 1))]
-        base = clamp(0.5 + 0.45 * nz + rng.normal(0, 0.08), 0.25, 1.0)
-        placed += ln * cw
-        # sombra embaixo do cacho (separa do vizinho)
-        pts = []
-        for k in range(25):
-            y = y0 + ln * k / 24
-            pts.append((cx + A * math.sin(math.tau * (y - y0) / P + ph) + tilt * (y - y0), y))
-        stroke(ctx, pts, 0.12, 0.55, cw * 1.25)
-        nf = max(4, int(cw * 1.8))
-        for f in range(nf):
-            o = rng.uniform(-0.5, 0.5) * cw
-            fj = rng.normal(0, 0.12)
-            steps = max(10, int(ln / 2.5))
-            prev = None
-            for k in range(steps + 1):
-                y = y0 + ln * k / steps
-                th = math.tau * (y - y0) / P + ph + fj
-                slope = A * math.tau / P * math.cos(th)
-                nx = 1.0 / math.sqrt(1 + slope * slope)
-                x = cx + A * math.sin(th) + tilt * (y - y0) + o * nx
-                pt = (x, y - o * slope * nx * 0.3)
-                if prev is not None:
-                    # Crista da onda (sin ~ ±1) clara; trecho inclinado mais escuro; borda do cacho escura
-                    crest = abs(math.sin(th)) ** 2
-                    edge = 1.0 - (2 * abs(o) / cw) ** 2
-                    lum = clamp(base * (0.45 + 0.45 * crest * edge + 0.15 * edge), 0.05, 1.0)
-                    ctx.set_source_rgba(lum, lum, lum, 0.7)
-                    ctx.set_line_width(rng.uniform(0.7, 1.2))
-                    ctx.move_to(*prev)
-                    ctx.line_to(*pt)
-                    ctx.stroke()
-                prev = pt
-
-    def post(lum, a):
-        if cap:
-            v = np.linspace(0, 1, H)[:, None]
-            a = a * np.clip(0.3 + v * 6.0, 0, 1)
-        return lum, a
-    save(s, name, post)
+def arc(ctx, x, y, r, a0, a1, lum, alpha, width=None):
+    """Arco (traço) ou disco cheio (`width` None), repetido onde a textura emenda."""
+    offs = _offsets([x], [y], r + 2 + (width or 0))
+    if not offs:
+        return
+    ctx.set_source_rgba(lum, lum, lum, alpha)
+    for dx, dy in offs:
+        ctx.new_sub_path()
+        ctx.arc(x + dx, y + dy, r, a0, a1)
+    if width is None:
+        ctx.fill()
+    else:
+        ctx.set_line_width(width)
+        ctx.stroke()
 
 
 def zigzag(ctx, rng, x0, y0, ln, amp, per, ang, lum, alpha, width):
@@ -258,253 +162,323 @@ def zigzag(ctx, rng, x0, y0, ln, amp, per, ang, lum, alpha, width):
         t = ln * k / steps
         o = amp * (1 if k % 2 else -1) * rng.uniform(0.6, 1.0)
         pts.append((x0 + t * ca - o * sa, y0 + t * sa + o * ca))
-    ctx.set_source_rgba(lum, lum, lum, alpha)
-    ctx.set_line_width(width)
-    ctx.move_to(*pts[0])
-    for p in pts[1:]:
-        ctx.line_to(*p)
-    ctx.stroke()
+    line(ctx, pts, lum, alpha, width)
 
 
-def hair_coil(name, W, H, seed, cap=True):
-    """Crespo: massa fosca de molinhas miúdas em zigue-zague, com tufos mais claros e vãos escuros."""
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    fill_bg(ctx, W, H, 0.3, 0.95)
-    big = fbm(W, H, (14, 4) if cap else (9, 9), 3, seed + 3)
-    small = fbm(W, H, (60, 15) if cap else (36, 36), 2, seed + 7)
-    n = int(W * H / 5.5)
-    for i in range(n):
-        x0 = rng.uniform(-6, W + 6)
-        y0 = rng.uniform(-6, H + 6)
-        yi, xi = int(clamp(y0, 0, H - 1)), int(clamp(x0, 0, W - 1))
-        tone = 0.55 * big[yi, xi] + 0.45 * small[yi, xi]
-        r = rng.random()
-        if r < 0.18:
-            lum = clamp(0.75 + 0.4 * tone, 0, 1) # pontinha que pega a luz
-        elif r < 0.55:
-            lum = clamp(0.15 + 0.3 * tone, 0, 1) # fundo do tufo
-        else:
-            lum = clamp(0.3 + 0.6 * tone + rng.normal(0, 0.06), 0, 1)
-        ang = rng.uniform(0, math.tau) if not cap or rng.random() < 0.6 else -math.pi / 2 + rng.normal(0, 0.6)
-        zigzag(ctx, rng, x0, y0, rng.uniform(3.5, 9.0), rng.uniform(0.6, 1.4), rng.uniform(1.6, 2.6), ang, lum, rng.uniform(0.45, 0.85), rng.uniform(0.55, 0.95))
-
-    def post(lum, a):
-        if cap:
-            v = np.linspace(0, 1, H)[:, None]
-            a = a * np.clip(0.35 + v * 5.0, 0, 1)
-        return lum, a
-    save(s, name, post)
+def clamp(x, a, b):
+    return max(a, min(b, x))
 
 
-def hair_buzz(name, seed):
-    """Cabelo raspado / máquina: pelinhos curtos e escuros sobre o couro (fundo transparente)."""
-    W, H = 1024, 256
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    dens = fbm(W, H, (16, 4), 2, seed + 1)
-    n = int(W * H / 3.2)
-    for i in range(n):
-        x0 = rng.uniform(0, W)
-        y0 = rng.uniform(0, H)
-        if rng.random() > 0.7 + 0.3 * dens[int(y0) % H, int(x0) % W]:
-            continue
-        ln = rng.uniform(1.0, 2.8)
-        ang = rng.normal(0, 0.3)
-        stroke(ctx, [(x0, y0), (x0 + math.sin(ang) * ln, y0 + math.cos(ang) * ln)], rng.uniform(0.08, 0.32), rng.uniform(0.3, 0.6), rng.uniform(0.5, 0.85))
-    save(s, name)
-
-
-def hair_long(name, seed):
-    """Cabelo comprido (atrás da cabeça e mechas): fios verticais em mechas, levemente ondulados."""
-    W = H = 512
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    fill_bg(ctx, W, H, 0.3, 0.6)
-    x = -8.0
-    while x < W + 8:
-        cw = rng.uniform(8, 22)
-        cx = x + cw * 0.5
-        cl = clamp(rng.normal(0.6, 0.14), 0.25, 0.95)
-        ph = rng.uniform(0, math.tau)
-        amp = rng.uniform(1.5, 5.0)
-        for i in range(int(cw * 3.5)):
-            off = rng.normal(0, cw * 0.3)
-            y0 = rng.uniform(-30, 120)
-            y1 = rng.uniform(H - 80, H + 30)
-            pts = []
-            for k in range(17):
-                t = k / 16
-                y = y0 + (y1 - y0) * t
-                pts.append((cx + off + amp * math.sin(y / 46.0 + ph), y))
-            mid = 1.0 - min(1.0, abs(off) / (cw * 0.6))
-            lum = clamp(cl * (0.7 + 0.4 * mid) + rng.normal(0, 0.06), 0.1, 1.0)
-            stroke(ctx, pts, lum, rng.uniform(0.35, 0.75), rng.uniform(0.6, 1.3))
-        x += cw * rng.uniform(0.55, 0.9)
-    save(s, name)
+def at(noise, x, y):
+    h, w = noise.shape
+    return noise[int(y) % h, int(x) % w]
 
 
 # ---------------------------------------------------------------------------
-# Barba (mapeada no rosto: x da esquerda para a direita, y de cima para baixo)
+# Cabelo (u ao longo da cabeça, v da linha do cabelo para fora / de cima para baixo)
 # ---------------------------------------------------------------------------
 
-def beard(name, kind, sparse, seed):
-    W = H = 512
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    noise = fbm(W, H, (6, 6), 3, seed + 9)
-    if kind == "stubble":
-        n = int(W * H / (9 if not sparse else 30))
-        for i in range(n):
+def hair_straight(name, wavy, seed, W=1024, H=256):
+    """Liso/ondulado: mechas (faixas com tom próprio) feitas de fios finos ao longo de v, com
+    vão escuro entre elas e alguns fios claros que pegam a luz."""
+    r0 = np.random.default_rng(seed)
+    clumps = []
+    x = 0.0
+    while x < W:
+        cw = r0.uniform(8, 20)
+        clumps.append((x + cw * 0.5, cw, clamp(r0.normal(0.55, 0.15), 0.18, 0.92), r0.uniform(0, TAU), r0.normal(0, 0.05)))
+        x += cw * r0.uniform(0.6, 0.9)
+
+    def path(x0, y0, ln, ph, tilt, sway):
+        pts = []
+        for k in range(13):
+            t = k / 12
+            y = y0 + ln * t
+            xx = x0 + tilt * (y - y0) + sway * math.sin(math.pi * t)
+            if wavy:
+                xx += 4.5 * math.sin(TAU * 3 * y / H + ph) + 1.6 * math.sin(TAU * 8 * y / H + ph * 1.7)
+            pts.append((xx, y))
+        return pts
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed + 1)
+        for (cx, cw, cl, ph, tilt) in clumps:
+            for i in range(int(cw * 1.4)):
+                pts = path(cx + rng.normal(0, cw * 0.3), rng.uniform(0, H), rng.uniform(90, 230), ph, tilt, rng.normal(0, 2))
+                line(ctx, pts, clamp(cl * 0.45 + rng.normal(0, 0.05), 0.03, 0.6), rng.uniform(0.6, 0.9), rng.uniform(1.8, 3.0))
+        for (cx, cw, cl, ph, tilt) in clumps:
+            for i in range(int(cw * 3)):
+                off = rng.normal(0, cw * 0.27)
+                mid = 1.0 - min(1.0, abs(off) / (cw * 0.6))
+                pts = path(cx + off, rng.uniform(0, H), rng.uniform(60, 220), ph, tilt, rng.normal(0, 2.5))
+                line(ctx, pts, clamp(cl * (0.7 + 0.45 * mid) + rng.normal(0, 0.07), 0.08, 1.0), rng.uniform(0.35, 0.75), rng.uniform(0.6, 1.2))
+        for i in range(int(W * 0.3)):
+            cx, cw, cl, ph, tilt = clumps[rng.integers(len(clumps))]
+            pts = path(cx + rng.normal(0, cw * 0.2), rng.uniform(0, H), rng.uniform(30, 110), ph, tilt, 0.0)
+            line(ctx, pts, rng.uniform(0.9, 1.0), rng.uniform(0.25, 0.55), rng.uniform(0.5, 0.9))
+
+    save(tiled(W, H, draw, bg=(0.18, 0.95)), name)
+
+
+def hair_curl(name, W, H, radius, width, seed):
+    """Cacheado: um monte de cachos em C (voltas de raio `radius`, cada uma feita de vários fios
+    paralelos), em todas as direções. A parte de cada volta virada para a luz (alto à esquerda)
+    clareia, o vão por baixo escurece: lê como um tapete de cachos, não como tricô."""
+    noise = fbm(W, H, (max(1, W // 128), max(1, H // 128)), 3, seed + 5)
+    light = (-0.55, -0.83)
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed)
+        placed = 0.0
+        while placed < W * H * 1.6:
+            cx, cy = rng.uniform(0, W), rng.uniform(0, H)
+            R, cw = rng.uniform(*radius), rng.uniform(*width)
+            a0 = rng.uniform(0, TAU)
+            sweep = rng.uniform(3.4, 5.4)
+            sq = rng.uniform(0.65, 1.0)
+            base = clamp(0.45 + 0.5 * at(noise, cx, cy) + rng.normal(0, 0.08), 0.2, 1.0)
+            placed += sweep * R * cw
+            steps = max(10, int(sweep * R / 2.5))
+            # vão escuro por baixo da volta
+            sh = [(cx + 1.5 + math.cos(a0 + sweep * k / steps) * R, cy + 2.0 + math.sin(a0 + sweep * k / steps) * R * sq) for k in range(steps + 1)]
+            line(ctx, sh, 0.05, 0.5, cw * 1.3)
+            for f in range(max(4, int(cw * 1.5))):
+                o = rng.uniform(-0.5, 0.5) * cw
+                wdt = rng.uniform(0.7, 1.15)
+                edge = 1.0 - (2 * abs(o) / cw) ** 2
+                prev = None
+                for k in range(steps + 1):
+                    a = a0 + sweep * k / steps
+                    rr = R + o
+                    pt = (cx + math.cos(a) * rr, cy + math.sin(a) * rr * sq)
+                    if prev is not None:
+                        nl = max(0.0, math.cos(a) * light[0] + math.sin(a) * light[1])
+                        lum = clamp(base * (0.3 + 0.75 * nl * edge + 0.12 * edge), 0.03, 1.0)
+                        line(ctx, [prev, pt], lum, 0.8, wdt)
+                    prev = pt
+        # Frizz: fiapos finos por cima, para os cachos não parecerem argolas de plástico
+        for i in range(int(W * H / 30)):
             x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
-            if rng.random() > 0.5 + 0.5 * noise[int(y0) % H, int(x0) % W]:
-                continue
-            ln = rng.uniform(1.0, 3.2)
-            ang = rng.normal(0, 0.5)
-            stroke(ctx, [(x0, y0), (x0 + math.sin(ang) * ln, y0 + math.cos(ang) * ln)], rng.uniform(0.05, 0.35), rng.uniform(0.4, 0.85), rng.uniform(0.55, 0.95))
-        save(s, name)
-        return
-    if kind == "curly":
-        # Pelos crespos: arquinhos em C e zigue-zagues curtos, em todas as direções
-        n = int(W * H / (12 if not sparse else 45))
-        for i in range(n):
-            x0, y0 = rng.uniform(-4, W + 4), rng.uniform(-4, H + 4)
-            nz = noise[int(clamp(y0, 0, H - 1)), int(clamp(x0, 0, W - 1))]
-            lum = clamp(0.2 + 0.6 * nz + rng.normal(0, 0.14), 0.05, 1.0)
-            if rng.random() < 0.6:
-                r = rng.uniform(1.4, 3.2)
-                a0 = rng.uniform(0, math.tau)
-                ctx.set_source_rgba(lum, lum, lum, rng.uniform(0.5, 0.9))
-                ctx.set_line_width(rng.uniform(0.6, 1.0))
-                ctx.arc(x0, y0, r, a0, a0 + rng.uniform(2.0, 3.8))
-                ctx.stroke()
+            lum = clamp(0.2 + 0.7 * at(noise, x0, y0) + rng.normal(0, 0.15), 0.02, 1.0)
+            zigzag(ctx, rng, x0, y0, rng.uniform(3.0, 7.0), rng.uniform(0.5, 1.1), rng.uniform(1.6, 2.4), rng.uniform(0, TAU), lum, rng.uniform(0.3, 0.6), rng.uniform(0.5, 0.8))
+
+    save(tiled(W, H, draw, bg=(0.1, 0.95)), name)
+
+
+def hair_coil(name, W, H, seed, up, sparse=False):
+    """Crespo: massa fosca de molinhas miúdas em zigue-zague, com tufos mais claros e vãos
+    escuros. `up` puxa as molinhas para cima (calota). `sparse`: só fios soltos sobre fundo
+    transparente, para a borda crespa da silhueta."""
+    big = fbm(W, H, (W // 40, H // 40), 3, seed + 3)
+    small = fbm(W, H, (W // 10, H // 10), 2, seed + 7)
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed)
+        for i in range(int(W * H / (20.0 if sparse else 6.0))):
+            x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+            tone = 0.6 * at(big, x0, y0) + 0.4 * at(small, x0, y0)
+            r = rng.random()
+            if r < 0.16:
+                lum = clamp(0.7 + 0.45 * tone, 0, 1)
+            elif r < 0.5:
+                lum = clamp(0.08 + 0.3 * tone, 0, 1)
             else:
-                zigzag(ctx, rng, x0, y0, rng.uniform(4, 9), rng.uniform(0.8, 1.6), rng.uniform(1.8, 2.8), rng.uniform(0, math.tau), lum, rng.uniform(0.5, 0.9), rng.uniform(0.6, 1.0))
-        save(s, name)
-        return
-    long = kind == "long"
-    n = int(W * H / ((26 if long else 14) if not sparse else (90 if long else 60)))
-    for i in range(n):
-        x0, y0 = rng.uniform(-10, W + 10), rng.uniform(-30, H + 10)
-        nz = noise[int(clamp(y0, 0, H - 1)), int(clamp(x0, 0, W - 1))]
-        ln = rng.uniform(16, 42) if long else rng.uniform(5, 13)
-        ang = rng.normal(0, 0.28 if long else 0.38)
-        bend = rng.normal(0, ln * 0.18)
-        dx, dy = math.sin(ang), math.cos(ang)
-        p1 = (x0 + dx * ln * 0.5 - dy * bend, y0 + dy * ln * 0.5 + dx * bend * 0.3)
-        p2 = (x0 + dx * ln, y0 + dy * ln)
-        r = rng.random()
-        if r < 0.12:
-            lum = rng.uniform(0.85, 1.0) # fio claro (pega a luz)
-        else:
-            lum = clamp(0.25 + 0.55 * nz + rng.normal(0, 0.12), 0.05, 0.9)
-        stroke(ctx, [(x0, y0), p1, p2], lum, rng.uniform(0.55, 0.95) if sparse else rng.uniform(0.35, 0.8), rng.uniform(0.6, 1.15))
-    save(s, name)
+                lum = clamp(0.25 + 0.6 * tone + rng.normal(0, 0.06), 0, 1)
+            ang = -math.pi / 2 + rng.normal(0, 0.7) if (up and rng.random() < 0.5) else rng.uniform(0, TAU)
+            zigzag(ctx, rng, x0, y0, rng.uniform(3.0, 7.5), rng.uniform(0.6, 1.3), rng.uniform(1.6, 2.4), ang, lum, rng.uniform(0.45, 0.85), rng.uniform(0.55, 0.9))
+
+    save(tiled(W, H, draw, bg=None if sparse else (0.2, 0.97)), name)
+
+
+def hair_buzz(name, seed, W=1024, H=256):
+    """Raspado / máquina: pelinhos curtos e escuros sobre o couro (fundo transparente)."""
+    dens = fbm(W, H, (16, 4), 2, seed + 1)
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed)
+        for i in range(int(W * H / 3.0)):
+            x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+            keep = rng.random() < 0.6 + 0.4 * at(dens, x0, y0)
+            ln, ang = rng.uniform(1.2, 3.2), rng.normal(0, 0.35)
+            lum, al, wd = rng.uniform(0.0, 0.35), rng.uniform(0.35, 0.7), rng.uniform(0.6, 1.0)
+            if keep:
+                line(ctx, [(x0, y0), (x0 + math.sin(ang) * ln, y0 - math.cos(ang) * ln)], lum, al, wd)
+
+    save(tiled(W, H, draw), name)
+
+
+def hair_long(name, seed, W=512, H=512):
+    """Cabelo comprido (atrás da cabeça): fios ao longo de v em mechas levemente onduladas."""
+    r0 = np.random.default_rng(seed)
+    clumps = []
+    x = 0.0
+    while x < W:
+        cw = r0.uniform(8, 22)
+        clumps.append((x + cw * 0.5, cw, clamp(r0.normal(0.55, 0.15), 0.2, 0.95), r0.uniform(0, TAU), r0.uniform(1.5, 4.5)))
+        x += cw * r0.uniform(0.55, 0.85)
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed + 1)
+        for (cx, cw, cl, ph, amp) in clumps:
+            for i in range(int(cw * 4)):
+                off = rng.normal(0, cw * 0.3)
+                y0, ln = rng.uniform(0, H), rng.uniform(140, 420)
+                mid = 1.0 - min(1.0, abs(off) / (cw * 0.6))
+                pts = [(cx + off + amp * math.sin(TAU * 2 * (y0 + ln * k / 16) / H + ph), y0 + ln * k / 16) for k in range(17)]
+                dark = i < cw * 1.2
+                lum = clamp(cl * 0.45, 0.03, 0.6) if dark else clamp(cl * (0.7 + 0.4 * mid) + rng.normal(0, 0.06), 0.08, 1.0)
+                line(ctx, pts, lum, rng.uniform(0.6, 0.9) if dark else rng.uniform(0.35, 0.75), rng.uniform(1.8, 3.0) if dark else rng.uniform(0.6, 1.3))
+
+    save(tiled(W, H, draw, bg=(0.18, 0.95)), name)
+
+
+# ---------------------------------------------------------------------------
+# Barba (plana no rosto: x da esquerda para a direita, y de cima para baixo)
+# ---------------------------------------------------------------------------
+
+def beard(name, kind, dense, seed, W=512, H=512):
+    """Pelos de barba sobre fundo transparente: a pele aparece entre eles. `dense` é a camada do
+    miolo da barba; a outra, rala, vai nas bordas e nas falhas."""
+    noise = fbm(W, H, (6, 6), 3, seed + 9)
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed)
+        if kind == "stubble":
+            for i in range(int(W * H / (7 if dense else 22))):
+                x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+                keep = rng.random() < 0.55 + 0.45 * at(noise, x0, y0)
+                ln, ang = rng.uniform(1.2, 3.4), rng.normal(0, 0.5)
+                lum, al, wd = rng.uniform(0.0, 0.3), rng.uniform(0.45, 0.85), rng.uniform(0.6, 1.0)
+                if keep:
+                    line(ctx, [(x0, y0), (x0 + math.sin(ang) * ln, y0 + math.cos(ang) * ln)], lum, al, wd)
+            return
+        if kind == "curly":
+            for i in range(int(W * H / (10 if dense else 34))):
+                x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+                lum = clamp(0.15 + 0.65 * at(noise, x0, y0) + rng.normal(0, 0.14), 0.02, 1.0)
+                if rng.random() < 0.55:
+                    r, a0 = rng.uniform(1.6, 3.6), rng.uniform(0, TAU)
+                    al, wd, span = rng.uniform(0.5, 0.9), rng.uniform(0.7, 1.1), rng.uniform(2.0, 3.8)
+                    arc(ctx, x0, y0, r, a0, a0 + span, lum, al, wd)
+                else:
+                    zigzag(ctx, rng, x0, y0, rng.uniform(4, 10), rng.uniform(0.8, 1.6), rng.uniform(1.8, 2.8), rng.uniform(0, TAU), lum, rng.uniform(0.5, 0.9), rng.uniform(0.7, 1.1))
+            return
+        long = kind == "long"
+        for i in range(int(W * H / ((22 if long else 11) if dense else (80 if long else 46)))):
+            x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+            ln = rng.uniform(18, 50) if long else rng.uniform(5, 14)
+            ang = rng.normal(0, 0.25 if long else 0.4)
+            bend = rng.normal(0, ln * 0.18)
+            dx, dy = math.sin(ang), math.cos(ang)
+            p1 = (x0 + dx * ln * 0.5 - dy * bend, y0 + dy * ln * 0.5 + dx * bend * 0.3)
+            p2 = (x0 + dx * ln, y0 + dy * ln)
+            if rng.random() < 0.12:
+                lum = rng.uniform(0.85, 1.0)
+            else:
+                lum = clamp(0.2 + 0.55 * at(noise, x0, y0) + rng.normal(0, 0.12), 0.02, 0.9)
+            line(ctx, [(x0, y0), p1, p2], lum, rng.uniform(0.35, 0.8) if dense else rng.uniform(0.55, 0.95), rng.uniform(0.7, 1.2))
+
+    save(tiled(W, H, draw), name)
 
 
 # ---------------------------------------------------------------------------
 # Pele e olhos
 # ---------------------------------------------------------------------------
 
-def skin_pores(name, seed):
-    W = H = 512
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
-    for i in range(int(W * H / 26)):
-        x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
-        r = rng.uniform(0.45, 1.25)
-        lum = rng.uniform(0.35, 0.62)
-        ctx.set_source_rgba(lum, lum, lum, rng.uniform(0.25, 0.6))
-        ctx.arc(x0, y0, r, 0, math.tau)
-        ctx.fill()
-    # Linhas finíssimas da pele (micro-relevo)
-    for i in range(int(W * H / 420)):
-        x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
-        ang = rng.uniform(0, math.pi)
-        ln = rng.uniform(4, 12)
-        stroke(ctx, [(x0, y0), (x0 + math.cos(ang) * ln, y0 + math.sin(ang) * ln)], 0.55, rng.uniform(0.08, 0.2), 0.6)
+def skin(name, seed, W=512, H=512):
+    """Pele: manchas suaves, granulado e poros. Vai por cima do rosto com pouca opacidade."""
+    def draw(ctx):
+        rng = np.random.default_rng(seed)
+        for i in range(int(W * H / 30)):
+            x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+            r, lum, al = rng.uniform(0.6, 1.5), rng.uniform(0.15, 0.4), rng.uniform(0.35, 0.8)
+            arc(ctx, x0, y0, r, 0, TAU, lum, al)
+        for i in range(int(W * H / 500)):
+            x0, y0 = rng.uniform(0, W), rng.uniform(0, H)
+            ang, ln, al = rng.uniform(0, math.pi), rng.uniform(4, 12), rng.uniform(0.1, 0.25)
+            line(ctx, [(x0, y0), (x0 + math.cos(ang) * ln, y0 + math.sin(ang) * ln)], 0.3, al, 0.7)
 
     def post(lum, a):
-        mott = fbm(W, H, (5, 5), 4, seed + 2)
+        mott = fbm(W, H, (4, 4), 4, seed + 2)
+        fine = fbm(W, H, (32, 32), 2, seed + 3)
         grain = np.random.default_rng(seed + 4).random((H, W))
-        # Manchas suaves (pele não é uniforme) e granulado fino por baixo dos poros
-        base_a = 0.1 * np.clip((mott - 0.45) * 3.0, 0, 1) + 0.06 * grain
-        base_l = 0.62 + 0.0 * mott
-        out_a = a + base_a * (1 - a)
-        out_l = (lum * a + base_l * base_a * (1 - a)) / np.maximum(out_a, 1e-4)
-        return out_l, out_a
-    save(s, name, post)
+        # Fundo: tom que varia em manchas grandes e em granulado fino (cobertura cheia)
+        base = 0.5 + 0.3 * (mott - 0.5) + 0.3 * (fine - 0.5) + 0.16 * (grain - 0.5)
+        out_l = lum * a + base * (1 - a)
+        return out_l, np.ones_like(a)
+
+    save(tiled(W, H, draw), name, post)
 
 
 def iris(name, seed):
     W = H = 128
-    rng = np.random.default_rng(seed)
-    s, ctx = surface(W, H)
     c = W / 2
     R = W / 2 - 1
-    # Fibras radiais (claras e escuras), mais densas perto da pupila
-    for i in range(900):
-        a = rng.uniform(0, math.tau)
-        r0 = R * rng.uniform(0.36, 0.5)
-        r1 = R * rng.uniform(0.7, 0.98)
-        wob = rng.normal(0, 0.05)
-        pts = []
-        for k in range(7):
-            t = k / 6
-            rr = r0 + (r1 - r0) * t
-            aa = a + wob * math.sin(math.pi * t)
-            pts.append((c + math.cos(aa) * rr, c + math.sin(aa) * rr))
-        light = rng.random() < 0.45
-        stroke(ctx, pts, rng.uniform(0.85, 1.0) if light else rng.uniform(0.25, 0.5), rng.uniform(0.25, 0.6), rng.uniform(0.5, 1.0))
-    # Colarete (anel em zigue-zague em volta da pupila) e criptas escuras
-    ctx.set_source_rgba(1, 1, 1, 0.5)
-    ctx.set_line_width(1.3)
-    for k in range(73):
-        a = k / 72 * math.tau
-        rr = R * (0.52 + 0.04 * math.sin(a * 11 + 1.3) + 0.02 * math.sin(a * 23))
-        p = (c + math.cos(a) * rr, c + math.sin(a) * rr)
-        if k == 0:
-            ctx.move_to(*p)
-        else:
-            ctx.line_to(*p)
-    ctx.stroke()
-    for i in range(26):
-        a = rng.uniform(0, math.tau)
-        rr = R * rng.uniform(0.55, 0.8)
-        ctx.save()
-        ctx.translate(c + math.cos(a) * rr, c + math.sin(a) * rr)
-        ctx.rotate(a)
-        ctx.scale(rng.uniform(2.0, 4.0), rng.uniform(0.8, 1.6))
-        ctx.arc(0, 0, 1, 0, math.tau)
-        ctx.restore()
-        ctx.set_source_rgba(0.12, 0.12, 0.12, rng.uniform(0.25, 0.5))
-        ctx.fill()
+
+    def draw(ctx):
+        rng = np.random.default_rng(seed)
+        for i in range(900):
+            a = rng.uniform(0, TAU)
+            r0, r1, wob = R * rng.uniform(0.36, 0.5), R * rng.uniform(0.7, 0.98), rng.normal(0, 0.05)
+            pts = []
+            for k in range(7):
+                t = k / 6
+                rr = r0 + (r1 - r0) * t
+                aa = a + wob * math.sin(math.pi * t)
+                pts.append((c + math.cos(aa) * rr, c + math.sin(aa) * rr))
+            light = rng.random() < 0.45
+            line(ctx, pts, rng.uniform(0.85, 1.0) if light else rng.uniform(0.25, 0.5), rng.uniform(0.25, 0.6), rng.uniform(0.5, 1.0))
+        # Colarete (anel em zigue-zague em volta da pupila) e criptas escuras
+        ctx.set_source_rgba(1, 1, 1, 0.5)
+        ctx.set_line_width(1.3)
+        for k in range(73):
+            a = k / 72 * TAU
+            rr = R * (0.52 + 0.04 * math.sin(a * 11 + 1.3) + 0.02 * math.sin(a * 23))
+            p = (c + math.cos(a) * rr, c + math.sin(a) * rr)
+            if k:
+                ctx.line_to(*p)
+            else:
+                ctx.move_to(*p)
+        ctx.stroke()
+        for i in range(26):
+            a, rr = rng.uniform(0, TAU), R * rng.uniform(0.55, 0.8)
+            ctx.save()
+            ctx.translate(c + math.cos(a) * rr, c + math.sin(a) * rr)
+            ctx.rotate(a)
+            ctx.scale(rng.uniform(2.0, 4.0), rng.uniform(0.8, 1.6))
+            ctx.arc(0, 0, 1, 0, TAU)
+            ctx.restore()
+            ctx.set_source_rgba(0.12, 0.12, 0.12, rng.uniform(0.25, 0.5))
+            ctx.fill()
 
     def post(lum, a):
         yy, xx = np.mgrid[0:H, 0:W]
         d = np.sqrt((xx - c + 0.5) ** 2 + (yy - c + 0.5) ** 2) / R
-        a = a * np.clip((1.0 - d) * 12, 0, 1)
-        return lum, a
-    save(s, name, post)
+        # Borda do limbo mais escura
+        lum = lum * (1.0 - 0.45 * np.clip((d - 0.8) / 0.2, 0, 1))
+        return lum, a * np.clip((1.0 - d) * 12, 0, 1)
+
+    save(tiled(W, H, draw, wrap=False), name, post)
 
 
 JOBS = {
     "hair_str": lambda: hair_straight("hair_str", False, 11),
     "hair_wavy": lambda: hair_straight("hair_wavy", True, 12),
-    "hair_curl": lambda: hair_curl("hair_curl", 1024, 256, (2.5, 5.0), (12, 20), (6, 12), (50, 150), 13, True),
+    "hair_curl": lambda: hair_curl("hair_curl", 1024, 256, (7, 13), (5, 9), 13),
     "hair_coil": lambda: hair_coil("hair_coil", 1024, 256, 14, True),
     "hair_buzz": lambda: hair_buzz("hair_buzz", 15),
     "hair_long": lambda: hair_long("hair_long", 16),
     "hair_afro": lambda: hair_coil("hair_afro", 512, 512, 17, False),
-    "hair_ringlets": lambda: hair_curl("hair_ringlets", 512, 512, (4.0, 8.0), (18, 30), (10, 18), (60, 180), 18, False),
-    "beard_stubble": lambda: beard("beard_stubble", "stubble", False, 21),
-    "beard_short_a": lambda: beard("beard_short_a", "short", True, 22),
-    "beard_short_b": lambda: beard("beard_short_b", "short", False, 23),
-    "beard_long_a": lambda: beard("beard_long_a", "long", True, 24),
-    "beard_long_b": lambda: beard("beard_long_b", "long", False, 25),
-    "beard_curly_a": lambda: beard("beard_curly_a", "curly", True, 26),
-    "beard_curly_b": lambda: beard("beard_curly_b", "curly", False, 27),
-    "skin_pores": lambda: skin_pores("skin_pores", 31),
+    "hair_fuzz": lambda: hair_coil("hair_fuzz", 1024, 256, 19, False, sparse=True),
+    "hair_ringlets": lambda: hair_curl("hair_ringlets", 512, 512, (11, 20), (7, 12), 18),
+    "beard_stubble": lambda: beard("beard_stubble", "stubble", True, 21),
+    "beard_short_a": lambda: beard("beard_short_a", "short", False, 22),
+    "beard_short_b": lambda: beard("beard_short_b", "short", True, 23),
+    "beard_long_a": lambda: beard("beard_long_a", "long", False, 24),
+    "beard_long_b": lambda: beard("beard_long_b", "long", True, 25),
+    "beard_curly_a": lambda: beard("beard_curly_a", "curly", False, 26),
+    "beard_curly_b": lambda: beard("beard_curly_b", "curly", True, 27),
+    "skin_pores": lambda: skin("skin_pores", 31),
     "iris": lambda: iris("iris", 41),
 }
 
